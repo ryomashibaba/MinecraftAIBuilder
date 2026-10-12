@@ -61,12 +61,15 @@ export function makeB106Scene(design,volume){
  for(const q of volume.junctions){
   push(q.coreLanding.x,q.coreLanding.y,q.coreLanding.z,'CORE_LANDING_TRACE',q.level);
  }
+ const bounds={minX:Math.min(...packed.map(p=>p[0])),maxX:Math.max(...packed.map(p=>p[0])),
+  minY:Math.min(...packed.map(p=>p[1])),maxY:Math.max(...packed.map(p=>p[1])),
+  minZ:Math.min(...packed.map(p=>p[2])),maxZ:Math.max(...packed.map(p=>p[2]))};
  const perLayer=Object.fromEntries(REVIEW_LAYERS.map((kind,i)=>
   [kind,packed.filter(p=>p[3]===i).length]));
  const scene={schema:'minecraftaibuilder-b106-read-only-review-scene-v1',
   id:volume.candidateId,typology:volume.typology,levels:volume.levels,
   facadeProfile:volume.facadeProfile,roofProfile:volume.roofProfile,
-  layerNames:[...REVIEW_LAYERS],primitives:packed,voxelCount,
+  layerNames:[...REVIEW_LAYERS],primitives:packed,bounds,voxelCount,
   stats:{...perLayer,conceptRooms:volume.summary.conceptRooms,
    connectedRooms:design.result.connected,roofCaps:volume.summary.roofCaps,
    allRoofGaps:audit.roofCoverageGaps,interiorPathObstructions:audit.furniturePathViolations,
@@ -87,7 +90,9 @@ export function validateB106Scene(scene){
  scene.BuildPlan.commandCount!==0||scene.BuildPlan.worldCoordinates!==null||
  !Array.isArray(scene.primitives)||scene.primitives.length<1||
  !Array.isArray(scene.layerNames)||JSON.stringify(scene.layerNames)!==JSON.stringify(REVIEW_LAYERS)||
- scene.voxelCount>scene.primitives.length||scene.stats?.physicalFinishedRooms!==0||
+ scene.voxelCount>scene.primitives.length||!scene.bounds||
+ ['minX','maxX','minY','maxY','minZ','maxZ'].some(k=>!Number.isInteger(scene.bounds[k]))||
+ scene.stats?.physicalFinishedRooms!==0||
  scene.stats?.verifiedEducationBlockStates!==0||scene.stats?.visualReviewStatus!=='HUMAN_NOT_REVIEWED'||
  scene.stats?.conceptRooms!==scene.stats?.connectedRooms||
  scene.stats?.allRoofGaps!==0||scene.stats?.interiorPathObstructions!==0||
