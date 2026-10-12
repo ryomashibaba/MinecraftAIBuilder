@@ -12,7 +12,7 @@ permissions:
 jobs:
   offline-tests:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 50
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -48,7 +48,32 @@ jobs:
           path: b107-preview-output/
           if-no-files-found: error
           retention-days: 14
-      - name: B92-B107 regression suite (472 cases)
+      - name: B108 generate repaired exterior and interior review (offline only)
+        run: node source/parallel/b108/main/compile-b108.mjs --write-preview
+      - name: Save B108 corrected 15-building HTML and source fidelity report
+        uses: actions/upload-artifact@v4
+        with:
+          name: B108-Corrected-Architecture-Review
+          path: b108-preview-output/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Install headless Chrome for real browser QA
+        id: chrome
+        uses: browser-actions/setup-chrome@v1
+      - name: Install Playwright browser driver (test-only)
+        run: npm install --no-save --no-package-lock --ignore-scripts playwright-core@1.56.1
+      - name: B108 real Chrome all 15 buildings and mobile screenshot QA
+        env:
+          CHROME_BIN: ${{ steps.chrome.outputs.chrome-path }}
+        run: node scripts/verify-b108-browser.mjs
+      - name: Save B108 real Chrome rendered visual QA screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: B108-Real-Chromium-Visual-Evidence
+          path: b108-browser-output/
+          if-no-files-found: error
+          retention-days: 14
+      - name: B92-B108 regression suite (492 cases)
         working-directory: source
         run: |
           node --experimental-vm-modules --test \
@@ -67,7 +92,8 @@ jobs:
             parallel/b104/main/compile-b104.test.mjs \
             parallel/b105/main/compile-b105.test.mjs \
             parallel/b106/main/compile-b106.test.mjs \
-            parallel/b107/main/compile-b107.test.mjs
+            parallel/b107/main/compile-b107.test.mjs \
+            parallel/b108/main/compile-b108.test.mjs
       - name: B101 strict concept-only safety gate
         run: node scripts/verify-b101-safety.mjs
       - name: B102 spatial 3D concept and fail-closed safety gate
@@ -82,3 +108,5 @@ jobs:
         run: node scripts/verify-b106-safety.mjs
       - name: B107 whole-building polished geometry and construction safety
         run: node scripts/verify-b107-safety.mjs
+      - name: B108 repaired roof/facade source provenance and construction safety
+        run: node scripts/verify-b108-safety.mjs
