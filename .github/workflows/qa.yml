@@ -12,7 +12,7 @@ permissions:
 jobs:
   offline-tests:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -39,7 +39,16 @@ jobs:
           path: b106-preview-output/
           if-no-files-found: error
           retention-days: 14
-      - name: B92-B106 regression suite (442 cases)
+      - name: B107 generate polished roofs, facades and interiors (offline only)
+        run: node source/parallel/b107/main/compile-b107.mjs --write-preview
+      - name: Save B107 fifteen polished buildings 3D preview
+        uses: actions/upload-artifact@v4
+        with:
+          name: B107-Visual-Architecture-Review
+          path: b107-preview-output/
+          if-no-files-found: error
+          retention-days: 14
+      - name: B92-B107 regression suite (472 cases)
         working-directory: source
         run: |
           node --experimental-vm-modules --test \
@@ -57,7 +66,8 @@ jobs:
             parallel/b103/main/compile-b103.test.mjs \
             parallel/b104/main/compile-b104.test.mjs \
             parallel/b105/main/compile-b105.test.mjs \
-            parallel/b106/main/compile-b106.test.mjs
+            parallel/b106/main/compile-b106.test.mjs \
+            parallel/b107/main/compile-b107.test.mjs
       - name: B101 strict concept-only safety gate
         run: node scripts/verify-b101-safety.mjs
       - name: B102 spatial 3D concept and fail-closed safety gate
@@ -70,3 +80,5 @@ jobs:
         run: node scripts/verify-b105-safety.mjs
       - name: B106 offline preview, registry and construction safety gate
         run: node scripts/verify-b106-safety.mjs
+      - name: B107 whole-building polished geometry and construction safety
+        run: node scripts/verify-b107-safety.mjs
