@@ -1,0 +1,25 @@
+/** Additional B101 hard stop. The B100 verifier stays completely unchanged. */
+import assert from 'node:assert/strict';
+import {compileB101,validateB101} from '../source/parallel/b101/main/compile-b101.mjs';
+const a=compileB101(),b=compileB101();
+assert.deepEqual(a,b,'B101 must be deterministic for identical B100 input');
+assert.equal(validateB101(a),true);
+assert.equal(a.targetEdition,'MINECRAFT_EDUCATION');
+assert.equal(a.javaAdapter,'DEFERRED_UNIMPLEMENTED');
+assert.equal(a.readiness,'NOT_PREPARED');
+assert.equal(a.constructionApproved,false);
+assert.equal(a.executionAllowed,false);
+assert.equal(a.worldContacts,0);
+assert.equal(a.BuildPlan.operations.length,0);
+assert.equal(a.BuildPlan.commandCount,0);
+assert.equal(a.BuildPlan.worldCoordinates,null);
+assert.equal(a.gates.length,9);
+assert(a.gates.every(x=>x.status==='BLOCKED'));
+assert.equal(a.totals.unapprovedLegacyRooms,296);
+assert.equal(a.totals.heldLegacyRooms,18);
+assert.equal(a.totals.actualCertifiedExits,0);
+assert.equal(a.totals.realDoors,0);
+assert.equal(a.totals.finishedInteriors,0);
+assert.equal(a.totals.blockCommands,0);
+assert.equal(a.unknownHardExample.preserveUnknownRequirements,true);
+console.log('PASS: B101 deterministic concept; no world actions; no physical certification; all nine gates blocked');
