@@ -14,11 +14,11 @@ const executable=[process.env.CHROME_BIN,'/usr/bin/google-chrome','/usr/bin/goog
 if(!executable)throw Error('B109_CHROME_NOT_FOUND__REAL_BROWSER_QA_REQUIRED');
 const browser=await chromium.launch({headless:true,executablePath:executable,
  args:['--no-sandbox','--disable-dev-shm-usage']});
-const report={schema:'minecraftaibuilder-b108-real-chromium-qa-v1',
+const report={schema:'minecraftaibuilder-b109-real-chromium-qa-v1',
  browserExecutable:path.basename(executable),variants:[],failures:[],shots:[],
  worldContacts:0,constructionApproved:false,
  humanAestheticApproval:false,sourceRef:'B109_OFFLINE_HTML_REVIEW'};
-const dir=path.resolve('b108-browser-output');fs.mkdirSync(dir,{recursive:true});
+const dir=path.resolve('b109-browser-output');fs.mkdirSync(dir,{recursive:true});
 let page;
 try{
  page=await browser.newPage({viewport:{width:1380,height:850},deviceScaleFactor:1});
