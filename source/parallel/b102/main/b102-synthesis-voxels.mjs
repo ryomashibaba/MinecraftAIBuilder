@@ -133,7 +133,7 @@ export function voxelAudit(layout){
  for(const f of layout.floors){
   const vox=new Map(),put=(x,y,z,type,owner)=>{
    const id=x+','+y+','+z,prev=vox.get(id);
-   if(prev&&prev.type!==type)collisions.push({level:f.level,id,prev:prev.type,next:type,owner});
+   if(prev&&(prev.type!==type||prev.owner!==owner))collisions.push({level:f.level,id,prev:prev.type,next:type,owner,previousOwner:prev.owner});
    else if(!prev)vox.set(id,{type,owner});
   };
   for(const p of f.gallery){put(p.x,0,p.z,'FLOOR','GALLERY');
