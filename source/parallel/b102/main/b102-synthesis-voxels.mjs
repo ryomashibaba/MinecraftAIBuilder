@@ -26,7 +26,15 @@ function entrance(r,route){
  const pair=(x,z,dx,dz,x2,z2,side)=>{
   const p=key(x+dx,z+dz),q=key(x2+dx,z2+dz);
   if(!g.has(p)||!g.has(q)||!a.has(p)||!a.has(q))return;
-  bays.push({x,z,side,outside:{x:x+dx,z:z+dz},pairedOutside:{x:x2+dx,z:z2+dz}});
+  // A doorway cut at a corner is not useful: its next interior cell would still be a perimeter wall.
+  // Select the one cell of this paired frontage whose inward neighbour is CLEAR interior.
+  const inner=[{x,z},{x:x2,z:z2}].find(p=>{
+   const a={x:p.x-dx,z:p.z-dz};
+   return a.x>r.x&&a.x<r.x+r.width-1&&a.z>r.z&&a.z<r.z+r.depth-1;
+  });
+  if(!inner)return;
+  bays.push({x:inner.x,z:inner.z,side,outside:{x:inner.x+dx,z:inner.z+dz},
+   pairedOutside:{x:x2+dx,z:z2+dz}});
  };
  for(let x=r.x;x<r.x+r.width-1;x++){
   pair(x,r.z,0,-1,x+1,r.z,'N');
