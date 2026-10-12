@@ -22,6 +22,8 @@ jobs:
         run: node scripts/verify-freeze.mjs
       - name: Education edition construction safety (offline only)
         run: node scripts/verify-safety.mjs
+      - name: B102 room synthesis diagnostics (offline only)
+        run: node source/parallel/b102/main/compile-b102.mjs
       - name: B92-B102 regression suite (319 cases)
         working-directory: source
         run: |
