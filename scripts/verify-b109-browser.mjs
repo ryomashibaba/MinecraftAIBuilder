@@ -6,7 +6,7 @@ import path from 'node:path';
 import assert from 'node:assert/strict';
 import {fileURLToPath} from 'node:url';
 import {chromium} from 'playwright-core';
-const root=path.resolve(process.argv[2]??'b108-preview-output'),
+const root=path.resolve(process.argv[2]??'b109-preview-output'),
  htmlPath=path.join(root,'B109_Cohesive_Architecture_15_Buildings.html');
 if(!fs.existsSync(htmlPath))throw Error('B109_HTML_MISSING');
 const executable=[process.env.CHROME_BIN,'/usr/bin/google-chrome','/usr/bin/google-chrome-stable',
