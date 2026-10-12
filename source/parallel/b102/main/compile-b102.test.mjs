@@ -43,3 +43,7 @@ test('29 mutated gate invalidates safety report',()=>{const r=cp(output());r.gat
 test('30 mutated arbitrary commands invalidate safety report',()=>{const r=cp(output());r.BuildPlan.operations.push({block:'stone'});assert.equal(validateB102(r),false);});
 test('31 tampered totals invalidate the report',()=>{const r=cp(output());r.totals.newConceptualRooms++;assert.equal(validateB102(r),false);});
 test('32 fake physical certification invalidates report',()=>{const r=cp(output());r.cases[0].options[0].actualMinecraftDoorsInstalled=1;assert.equal(validateB102(r),false);});
+
+test('33 even identical voxel type shared by distinct rooms is a collision',()=>{const p=synthesizeRooms(house,B101_SCENARIOS.HOUSE),r=p.floors[0].rooms[0];p.floors[0].rooms.push({...r,id:'DUPLICATE'});assert(voxelAudit(p).conflictCount>0);});
+test('34 valid entrance cut is never at a rectangular room corner',()=>{for(const c of cases){const p=synthesizeRooms(c.options[0],B101_SCENARIOS[c.caseId]);for(const f of p.floors)for(const r of f.rooms){const d=r.conceptualDoorOpening;assert(d);assert(!(d.x===r.x||d.x===r.x+r.width-1)&&(d.side==='N'||d.side==='S')||!(d.z===r.z||d.z===r.z+r.depth-1)&&(d.side==='E'||d.side==='W'));}}});
+test('35 279 newly synthesized clear-area rooms have conceptual 2-block openings',()=>{const r=output();assert.equal(r.totals.requestedRooms,279);assert.equal(r.totals.newConceptualRooms,279);assert.equal(r.totals.conceptual2BlockHighDoorwayVoids,279);assert.equal(r.totals.sectionVoxelCollisions,0);});
