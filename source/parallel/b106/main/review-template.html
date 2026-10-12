@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MinecraftAIBuilder — B106 3D Design Review</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,"Yu Gothic",Meiryo,sans-serif;background:#080e18;color:#e9f2fa}
+*{box-sizing:border-box}body{margin:0}header{padding:18px 24px;border-bottom:1px solid #2a3c50;background:#101927}
+h1{font-size:1.35rem;margin:0 0 6px;letter-spacing:.02em}h2{font-size:1rem;margin:0 0 14px}
+.note{color:#b2c2d7;font-size:.85rem;line-height:1.6}.warn{color:#ffe3a3;font-weight:650}
+.layout{display:grid;grid-template-columns:minmax(265px,325px) minmax(0,1fr);min-height:calc(100vh - 105px)}
+aside{padding:20px;border-right:1px solid #2a3c50;background:#101a29}
+main{padding:12px;min-width:0}.group{margin:0 0 22px}
+label{display:block;margin:10px 0 7px;color:#d1dfed;font-size:.9rem}
+select,input[type=range],button{width:100%;border:1px solid #465f77;background:#192b40;color:#f1f7ff;border-radius:9px;padding:10px;font:inherit}
+button{cursor:pointer}button:hover{background:#284462}button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #78bcfa}
+input[type=range]{padding:6px 0;accent-color:#70cef4}
+.toggle{display:flex;align-items:center;gap:9px;margin:11px 0;font-size:.88rem;color:#d8e7f9}
+.toggle input{width:18px;height:18px;accent-color:#67caef}
+.viewport{width:100%;height:min(75vh,780px);min-height:330px;background:radial-gradient(circle at 45% 35%,#1e324d,#080e18 72%);border:1px solid #334860;border-radius:14px;display:block;touch-action:none;cursor:grab}
+.viewport:active{cursor:grabbing}.stat{font-variant-numeric:tabular-nums;display:grid;grid-template-columns:1fr auto;gap:8px;padding:9px 0;border-bottom:1px solid #2d4158;font-size:.85rem}
+.legend{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;font-size:.82rem;margin-top:12px}.dot{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px}
+.toolbar{display:flex;gap:10px;margin:10px 0}.toolbar button{max-width:170px}
+footer{padding:10px 2px;font-size:.81rem;color:#a6bdd3}
+@media(max-width:750px){.layout{grid-template-columns:1fr}aside{border-right:0;border-bottom:1px solid #2a3c50}.viewport{height:56vh;min-height:270px}}
+</style>
+</head>
+<body>
+<header>
+<h1>MinecraftAIBuilder — B106 建物全体3Dレビュー</h1>
+<div class="note"><span class="warn">概念設計のみ・施工不可。</span> B105の実測ローカルボクセルを描画。階段・家具・屋根・窓は実Minecraftブロックとして認証されていません。</div>
+</header>
+<div class="layout">
+<aside>
+<div class="group">
+<h2>建物を選択</h2>
+<label for="building">用途・形状</label>
+<select id="building"></select>
+<div id="buildingStats"></div>
+</div>
+<div class="group">
+<h2>表示モード</h2>
+<div class="toolbar"><button id="exterior">外観全体</button><button id="interior">内部カット</button></div>
+<label for="floor">表示する最上階：<strong id="floorLabel">全階</strong></label>
+<input id="floor" type="range" min="0" max="0" step="1" value="0">
+<label class="toggle"><input type="checkbox" id="allLevels" checked> 全階を表示</label>
+<label class="toggle"><input type="checkbox" data-layer="FACADE_PANEL_PROXY" checked> 外壁</label>
+<label class="toggle"><input type="checkbox" data-layer="WINDOW_GLAZING_PROXY" checked> 窓</label>
+<label class="toggle"><input type="checkbox" data-layer="ROOF_CAP_PROXY" checked> 屋根</label>
+<label class="toggle"><input type="checkbox" data-layer="EXTERIOR_PORTAL_VOID_PROXY" checked> 出入口候補（空気領域）</label>
+<label class="toggle"><input type="checkbox" data-layer="ROOM_FLOOR_TRACE" checked> 部屋の床（確認用）</label>
+<label class="toggle"><input type="checkbox" data-layer="GALLERY_FLOOR_TRACE" checked> 共用廊下（確認用）</label>
+<label class="toggle"><input type="checkbox" data-layer="CORE_LANDING_TRACE" checked> 階段接合位置（確認用）</label>
+<label class="toggle"><input type="checkbox" data-layer="FURNITURE_PLACEHOLDER" checked> 家具の仮配置</label>
+</div>
+<div class="note">
+マウスドラッグ／指で回転、ホイールで拡大縮小。内部カットでは上階と屋根を非表示にできます。床とコア接合位置はレビュー用の描画であり実施工ボクセルではありません。
+</div>
+</aside>
+<main>
+<canvas id="view" class="viewport" role="img" aria-label="建物全体の3D概念ボクセルをインタラクティブに表示"></canvas>
+<div class="toolbar"><button id="reset">視点をリセット</button></div>
+<div class="legend">
+<span><i class="dot" style="background:#6aa1bc"></i>外壁</span><span><i class="dot" style="background:#73d9f4"></i>窓</span>
+<span><i class="dot" style="background:#b7bbcc"></i>屋根</span><span><i class="dot" style="background:#f5b95a"></i>開口（空気）</span>
+<span><i class="dot" style="background:#61a3ff"></i>居室</span><span><i class="dot" style="background:#61dca6"></i>共用廊下</span>
+<span><i class="dot" style="background:#d99ef5"></i>階段接合</span><span><i class="dot" style="background:#f1c473"></i>家具の仮配置</span>
+</div>
+<footer id="renderInfo"></footer>
+</main>
+</div>
+<script>
+"use strict";
+const payload=__B106_SCENE_PAYLOAD__;
+const scenes=payload.scenes;
+const kindColors={
+ FACADE_PANEL_PROXY:"#79a3b8",WINDOW_GLAZING_PROXY:"#66d5ee",ROOF_CAP_PROXY:"#b8bfce",
+ EXTERIOR_PORTAL_VOID_PROXY:"#f1b351",FURNITURE_PLACEHOLDER:"#f2c279",
+ ROOM_FLOOR_TRACE:"#4485cb",GALLERY_FLOOR_TRACE:"#4bca93",CORE_LANDING_TRACE:"#ca8eea"
+};
+const facadePalettes={house:"#a98565",hotel:"#d4c4aa",apartment:"#9b9fb7",office:"#75acbe",library:"#bbb4a8"};
+const el=id=>document.getElementById(id),canvas=el("view"),ctx=canvas.getContext("2d",{alpha:false});
+const select=el("building"),floor=el("floor"),allLevels=el("allLevels");
+const labelNames={house:"一戸建て",hotel:"ホテル",apartment:"集合住宅",office:"オフィス",library:"図書館"};
+let idx=0,yaw=0.66,pitch=0.61,zoom=1,needsRender=false,lastX=0,lastY=0,isDragging=false;
+for(let i=0;i<scenes.length;i++){
+ const s=scenes[i],opt=document.createElement("option");
+ opt.value=String(i);opt.textContent=(labelNames[s.typology]||s.typology)+" / "+s.id;
+ select.appendChild(opt);
+}
+const options=Object.fromEntries([...document.querySelectorAll("[data-layer]")].map(input=>[input.dataset.layer,input]));
+function requestDraw(){if(needsRender)return;needsRender=true;requestAnimationFrame(()=>{needsRender=false;draw();});}
+function current(){return scenes[idx];}
+function setScene(){
+ const s=current();floor.max=String(s.levels-1);floor.value=String(s.levels-1);
+ el("buildingStats").textContent="";
+ const counts=[
+ ["概念階数",s.levels+"階"],["概念室",s.stats.conceptRooms+"室"],
+ ["屋根キャップ",s.stats.roofCaps+"セル"],["窓候補",s.stats.WINDOW_GLAZING_PROXY+"セル"],
+ ["立面スタイル",s.facadeProfile],["人間による品質レビュー","未実施"]
+ ];
+ for(const pair of counts){
+  const row=document.createElement("div");row.className="stat";
+  const a=document.createElement("span"),b=document.createElement("strong");
+  a.textContent=pair[0];b.textContent=pair[1];row.append(a,b);el("buildingStats").append(row);
+ }
+ updateFloor();requestDraw();
+}
+function updateFloor(){el("floorLabel").textContent=allLevels.checked?"全階":String(Number(floor.value)+1)+"階まで";}
+function cameraView(x,y,z,w,h,scale,cx,cy){
+ const c=Math.cos(yaw),s=Math.sin(yaw),cp=Math.cos(pitch),sp=Math.sin(pitch);
+ const rx=x*c-z*s,rz=x*s+z*c,ry=y*cp-rz*sp,dep=y*sp+rz*cp;
+ return [w/2+(rx-cx)*scale,h/2-(ry-cy)*scale,dep];
+}
+function draw(){
+ const dpr=Math.min(2,window.devicePixelRatio||1),w=Math.max(300,canvas.clientWidth),h=Math.max(260,canvas.clientHeight);
+ if(canvas.width!==Math.round(w*dpr)||canvas.height!==Math.round(h*dpr)){
+  canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);
+ }
+ ctx.setTransform(dpr,0,0,dpr,0,0);ctx.fillStyle="#111c2b";ctx.fillRect(0,0,w,h);
+ const scene=current(),cutoff=allLevels.checked?scene.levels-1:Number(floor.value);
+ const active=[];
+ for(const p of scene.primitives){
+  if(p[4]>cutoff)continue;
+  const kind=scene.layerNames[p[3]];if(!options[kind]?.checked)continue;
+  active.push({p,kind});
+ }
+ const extent=scene.bounds;
+ const center=[(extent.minX+extent.maxX+1)/2,(extent.minY+extent.maxY+1)/2,(extent.minZ+extent.maxZ+1)/2];
+ const diag=Math.max(extent.maxX-extent.minX+1,extent.maxZ-extent.minZ+1,1);
+ const scale=Math.min(w,h)*0.76/Math.max(diag,scene.levels*5)*zoom;
+ const cx=center[0]*Math.cos(yaw)-center[2]*Math.sin(yaw);
+ const rz=center[0]*Math.sin(yaw)+center[2]*Math.cos(yaw);
+ const cy=center[1]*Math.cos(pitch)-rz*Math.sin(pitch);
+ const project=(x,y,z)=>cameraView(x,y,z,w,h,scale,cx,cy);
+ // Depth sort every visible primitive; low-profile review overlays are wafer thin.
+ active.sort((a,b)=>{
+  const depth=p=>{const q=p.p;return (q[0]+q[2])*Math.sin(yaw+0.1)+(q[1]+0.5)*Math.cos(pitch);};
+  return depth(a)-depth(b);
+ });
+ let painted=0;
+ for(const v of active){
+  const p=v.p,thickness=p[3]>=5?0.09:1,baseY=p[1],topY=baseY+thickness;
+  const opacity=v.kind==="EXTERIOR_PORTAL_VOID_PROXY"?0.24:v.kind==="WINDOW_GLAZING_PROXY"?0.8:1;
+  let color=kindColors[v.kind]||"#cccccc";
+  if(v.kind==="FACADE_PANEL_PROXY")color=facadePalettes[scene.typology]||color;
+  const verts=[
+   [p[0],baseY,p[2]],[p[0]+1,baseY,p[2]],[p[0]+1,baseY,p[2]+1],[p[0],baseY,p[2]+1],
+   [p[0],topY,p[2]],[p[0]+1,topY,p[2]],[p[0]+1,topY,p[2]+1],[p[0],topY,p[2]+1]
+  ].map(q=>project(q[0],q[1],q[2]));
+  const faces=[[4,5,6,7],[0,1,5,4],[1,2,6,5],[2,3,7,6],[3,0,4,7]];
+  const visible=faces.filter((f,i)=>i===0||(i===1&&Math.sin(yaw)>0)||(i===3&&Math.sin(yaw)<=0)||
+   (i===2&&Math.cos(yaw)>0)||(i===4&&Math.cos(yaw)<=0));
+  for(const f of visible){
+   ctx.globalAlpha=opacity;ctx.beginPath();ctx.moveTo(verts[f[0]][0],verts[f[0]][1]);
+   for(let j=1;j<f.length;j++)ctx.lineTo(verts[f[j]][0],verts[f[j]][1]);
+   ctx.closePath();ctx.fillStyle=color;ctx.fill();
+   ctx.strokeStyle="rgba(6,15,25,.18)";ctx.lineWidth=.35;ctx.stroke();painted++;
+  }
+ }
+ ctx.globalAlpha=1;
+ el("renderInfo").textContent=scene.id+" ｜ 表示 "+active.length+" / "+scene.primitives.length+" 個のローカル概念セル ｜ "+painted+" 面描画。実Minecraftブロックや物理的完成を示す画像ではありません。";
+}
+select.addEventListener("change",()=>{idx=Number(select.value);setScene();});
+floor.addEventListener("input",()=>{allLevels.checked=false;updateFloor();requestDraw();});
+allLevels.addEventListener("change",()=>{updateFloor();requestDraw();});
+for(const item of Object.values(options))item.addEventListener("change",requestDraw);
+el("exterior").addEventListener("click",()=>{
+ allLevels.checked=true;
+ options.ROOF_CAP_PROXY.checked=true;options.FACADE_PANEL_PROXY.checked=true;
+ options.ROOM_FLOOR_TRACE.checked=false;options.GALLERY_FLOOR_TRACE.checked=false;
+ updateFloor();requestDraw();
+});
+el("interior").addEventListener("click",()=>{
+ allLevels.checked=false;floor.value=String(Math.max(0,current().levels-2));
+ options.ROOF_CAP_PROXY.checked=false;options.ROOM_FLOOR_TRACE.checked=true;
+ options.GALLERY_FLOOR_TRACE.checked=true;updateFloor();requestDraw();
+});
+el("reset").addEventListener("click",()=>{yaw=.66;pitch=.61;zoom=1;requestDraw();});
+canvas.addEventListener("pointerdown",e=>{isDragging=true;lastX=e.clientX;lastY=e.clientY;canvas.setPointerCapture(e.pointerId);});
+canvas.addEventListener("pointermove",e=>{
+ if(!isDragging)return;
+ yaw+=(e.clientX-lastX)*.007;
+ pitch=Math.max(.2,Math.min(1.35,pitch+(e.clientY-lastY)*.005));
+ lastX=e.clientX;lastY=e.clientY;requestDraw();
+});
+canvas.addEventListener("pointerup",()=>{isDragging=false;});
+canvas.addEventListener("pointercancel",()=>{isDragging=false;});
+canvas.addEventListener("wheel",e=>{e.preventDefault();zoom=Math.min(5,Math.max(.3,zoom*Math.exp(-e.deltaY*.001)));requestDraw();},{passive:false});
+window.addEventListener("resize",requestDraw);
+setScene();
+</script>
+</body>
+</html>
