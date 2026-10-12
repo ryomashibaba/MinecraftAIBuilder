@@ -12,7 +12,7 @@ permissions:
 jobs:
   offline-tests:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -30,7 +30,16 @@ jobs:
         run: node source/parallel/b104/main/compile-b104.mjs
       - name: B105 whole building offline envelope and interior diagnostics
         run: node source/parallel/b105/main/compile-b105.mjs
-      - name: B92-B105 regression suite (412 cases)
+      - name: B106 generate offline 3D review of 15 buildings
+        run: node source/parallel/b106/main/compile-b106.mjs --write-preview
+      - name: Save B106 interactive 3D review (offline HTML + data report)
+        uses: actions/upload-artifact@v4
+        with:
+          name: B106-3D-Offline-Review
+          path: b106-preview-output/
+          if-no-files-found: error
+          retention-days: 14
+      - name: B92-B106 regression suite (442 cases)
         working-directory: source
         run: |
           node --experimental-vm-modules --test \
@@ -47,7 +56,8 @@ jobs:
             parallel/b102/main/compile-b102.test.mjs \
             parallel/b103/main/compile-b103.test.mjs \
             parallel/b104/main/compile-b104.test.mjs \
-            parallel/b105/main/compile-b105.test.mjs
+            parallel/b105/main/compile-b105.test.mjs \
+            parallel/b106/main/compile-b106.test.mjs
       - name: B101 strict concept-only safety gate
         run: node scripts/verify-b101-safety.mjs
       - name: B102 spatial 3D concept and fail-closed safety gate
@@ -58,3 +68,5 @@ jobs:
         run: node scripts/verify-b104-safety.mjs
       - name: B105 whole building envelope and interior safety gate
         run: node scripts/verify-b105-safety.mjs
+      - name: B106 offline preview, registry and construction safety gate
+        run: node scripts/verify-b106-safety.mjs
