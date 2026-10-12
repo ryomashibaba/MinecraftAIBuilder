@@ -1,0 +1,22 @@
+/** Strict offline B103 safety gate: no Minecraft execution or world contacts. */
+import assert from 'node:assert/strict';
+import {compileB103,validateB103} from '../source/parallel/b103/main/compile-b103.mjs';
+const r=compileB103();
+assert(validateB103(r));
+assert.equal(r.readiness,'NOT_PREPARED');
+assert.equal(r.constructionApproved,false);
+assert.equal(r.executionAllowed,false);
+assert.equal(r.worldContacts,0);
+assert.deepEqual(r.BuildPlan.operations,[]);
+assert.equal(r.BuildPlan.commandCount,0);
+assert.equal(r.BuildPlan.worldCoordinates,null);
+assert.equal(r.gates.length,9);
+assert(r.gates.every(x=>x.status==='BLOCKED'));
+assert.equal(r.totals.oldUnapprovedRoomCandidates,296);
+assert.equal(r.totals.oldHeldRooms,18);
+assert.equal(r.totals.realBlocksEmitted,0);
+assert.equal(r.totals.certifiedStairs,0);
+assert.equal(r.totals.total3DCollisions,0,'All conceptual global 3D collisions must fail');
+assert.equal(r.totals.doorwayAirViolations,0,'All placed rooms must retain 2-block doorway air');
+assert.equal(r.totals.stairProxyClearanceViolations,0,'All stair proxies must retain clearance');
+console.log('PASS: B103 concept 3D safety, frozen gates, no world commands');
