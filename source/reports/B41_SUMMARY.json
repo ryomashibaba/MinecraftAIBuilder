@@ -1,0 +1,50 @@
+{
+  "schema": "minecraftaibuilder-step8b-b41-summary-v1",
+  "focus": "macro stair architecture, not cosmetic QA",
+  "baseline": {
+    "nominalRouteCount": 44,
+    "uniqueNominalRoutes": 7,
+    "commonNominalRoutes": 3,
+    "withTurningRises": 44,
+    "withReusedApproachCells": 14,
+    "minimumFourConsecutiveRiserSpan": 4,
+    "originalShaftWidth": 3,
+    "originalShaftDepth": 3,
+    "fourStraightRisersFitInsideOriginalShaft": false,
+    "physicalStairRoutesVerified": 0
+  },
+  "alternative": {
+    "reviewProposals": 5,
+    "conceptualGeometryNoClashes": 5,
+    "newDoorReachabilityLoss": 0,
+    "changesPerLevel": {
+      "lowerCorridorCellsRetagged": 1,
+      "upperFloorCellsRestored": 1,
+      "upperFloorCellsOpened": 1
+    },
+    "upperFloorCellCountBeforeAfter": "398/398",
+    "reachableRoomsBeforeAfter": "12/13 -> 12/13",
+    "reachableHallCellsBeforeAfter": "117 -> 115"
+  },
+  "unverified": [
+    "Minecraft Education v26.3 actual stair state mapping and corner voxel/collision shapes",
+    "Real player passage, landing transition and half-step mechanics",
+    "First riser occupies lower corridor cell (11,18); corridor layout and width must be reconsidered",
+    "Floor/support under every riser and changed upper-level cutout (13,18)",
+    "Door materials, wall/rail joints, exact world origin and runtime planner integration",
+    "Any synthetic shape/route remains design-only; no real block placement or world operation"
+  ],
+  "safety": {
+    "notPrepared": true,
+    "constructionApproved": false,
+    "executionAllowed": false,
+    "worldAccess": false,
+    "bridgeContact": false,
+    "legacyModified": false,
+    "frozenEvidenceModified": false,
+    "projectFilesModified": false
+  },
+  "readiness": "NOT_PREPARED",
+  "deployment": "BLOCKED",
+  "constructionCommands": 0
+}

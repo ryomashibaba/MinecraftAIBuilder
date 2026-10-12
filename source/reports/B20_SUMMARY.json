@@ -1,0 +1,98 @@
+{
+  "counts": {
+    "buildings": 5,
+    "floors": 30,
+    "partitionPanels": 5704,
+    "nominalDoors": 314,
+    "stairInterfaces": 25,
+    "candidateUpperFloorCutoutCells": 50,
+    "candidateCutCellsOutsidePredictedPlate": 0,
+    "exactIntegerVolumeAabbs": 0,
+    "nonIntegerVolumeAabbs": 6332
+  },
+  "materials": [
+    {
+      "role": "PARTITION",
+      "minecraftEducationBlockId": null,
+      "blockStates": null,
+      "sourceAllowlistVerified": false,
+      "roleMappingVerified": false,
+      "status": "MATERIAL_UNKNOWN_BLOCKED"
+    },
+    {
+      "role": "DOOR",
+      "minecraftEducationBlockId": null,
+      "blockStates": null,
+      "sourceAllowlistVerified": false,
+      "roleMappingVerified": false,
+      "status": "MATERIAL_UNKNOWN_BLOCKED"
+    },
+    {
+      "role": "STAIR_TREAD",
+      "minecraftEducationBlockId": null,
+      "blockStates": null,
+      "sourceAllowlistVerified": false,
+      "roleMappingVerified": false,
+      "status": "MATERIAL_UNKNOWN_BLOCKED"
+    },
+    {
+      "role": "FLOOR_CUTOUT",
+      "minecraftEducationBlockId": null,
+      "blockStates": null,
+      "sourceAllowlistVerified": false,
+      "roleMappingVerified": false,
+      "status": "MATERIAL_UNKNOWN_BLOCKED"
+    }
+  ],
+  "blockers": [
+    {
+      "id": "SINGLE_SOURCE_ENGINE_PLANNER_HOOK_NOT_IMPLEMENTED",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "SOURCE_FLOOR_PLATES_NOT_SUBTRACTED",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "STAIR_STRUCTURAL_SUPPORT_AND_HEADROOM_UNVERIFIED",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "INTEGER_LATTICE_GEOMETRY_UNRESOLVED",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "MATERIAL_AND_BLOCK_STATES_UNATTESTED",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "WORLD_ANCHOR_AND_SITE_SCAN_MISSING",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "OFFICE02_FOOTPRINT_MISMATCH_NOT_APPLIED",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "RUNNING_WINDOWS_ENGINE_NOT_ATTESTED",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "LEGACY_AND_WORLD_PROTECTION_MUST_REMAIN",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "USER_CONSTRUCTION_APPROVAL_MISSING",
+      "status": "BLOCKED"
+    }
+  ],
+  "next": "Design explicit Minecraft Education integer-block module layout, verify real allowlist and planner hooks in isolated runtime; no construction approval.",
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0,
+    "worldCoordinates": null,
+    "materialIds": []
+  },
+  "deploymentGate": "BLOCKED"
+}

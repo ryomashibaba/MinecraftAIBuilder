@@ -1,0 +1,779 @@
+{
+  "schema": "minecraftaibuilder-step8b-b36-local-section-v1",
+  "kind": "NONEXECUTABLE_STAIR_SECTION_DIAGNOSTIC",
+  "provenance": {
+    "source": "FROZEN_B35_B34_B31_B17_B21",
+    "B21SourceSha256": "2d7b1e3d71f252331dfe35e600411acc3354c43702e5b3db9fd9a5e0533932bc",
+    "shiftedStairGeometry": "TRANSLATED_B21_SCHEMATIC_PATTERN_NOT_REBUILT_ENGINE_STAIRS",
+    "runtimeCalled": false
+  },
+  "building": "apartment/candidate-01",
+  "shift": {
+    "dx": 0,
+    "dz": 1
+  },
+  "levels": [
+    {
+      "level": 2,
+      "options": [
+        {
+          "id": "A_RETAG_ONE_CORRIDOR_CELL",
+          "removedKeys": [
+            "12,20"
+          ],
+          "isolatedCorridorKeys": [
+            "12,21"
+          ],
+          "nominalWallEndpointFlags": 4,
+          "edgeCount": 3,
+          "edges": [
+            {
+              "corridorKey": "11,18",
+              "shaftKey": "12,18",
+              "approachSide": "EAST",
+              "shaftCutoutAdjacent": false,
+              "nominalPartitionBoundaryOnSeam": false,
+              "fromDoorHallCell": false
+            },
+            {
+              "corridorKey": "12,21",
+              "shaftKey": "12,20",
+              "approachSide": "NORTH",
+              "shaftCutoutAdjacent": false,
+              "nominalPartitionBoundaryOnSeam": false,
+              "fromDoorHallCell": false
+            },
+            {
+              "corridorKey": "15,18",
+              "shaftKey": "14,18",
+              "approachSide": "WEST",
+              "shaftCutoutAdjacent": true,
+              "nominalPartitionBoundaryOnSeam": false,
+              "fromDoorHallCell": false
+            }
+          ],
+          "bySide": {
+            "EAST": 1,
+            "WEST": 1,
+            "SOUTH": 0,
+            "NORTH": 1
+          },
+          "cutoutAdjacentEdgeCount": 1,
+          "nonCutoutEdgeCount": 2,
+          "nominalSeamBoundaryMatches": 0,
+          "openingSupport2DNeighbors": [
+            {
+              "openingKey": "14,18",
+              "neighboringNominalFloorCells": 4,
+              "neighboringNonOpeningFloorCells": 3
+            },
+            {
+              "openingKey": "14,19",
+              "neighboringNominalFloorCells": 4,
+              "neighboringNonOpeningFloorCells": 3
+            }
+          ],
+          "faceProof": "SCHEMATIC_2D_ADJACENCY_ONLY",
+          "landingProof": "UNKNOWN_NO_PHYSICAL_LANDING",
+          "wallSupportProof": "UNKNOWN_NO_LOAD_BEARING_DATA",
+          "headroomProof": "UNKNOWN_NO_INSTALLED_CEILING_DATA",
+          "autoApproved": false
+        },
+        {
+          "id": "B_TRIM_UNUSED_TERMINAL",
+          "removedKeys": [
+            "12,20",
+            "12,21"
+          ],
+          "isolatedCorridorKeys": [],
+          "nominalWallEndpointFlags": 5,
+          "edgeCount": 2,
+          "edges": [
+            {
+              "corridorKey": "11,18",
+              "shaftKey": "12,18",
+              "approachSide": "EAST",
+              "shaftCutoutAdjacent": false,
+              "nominalPartitionBoundaryOnSeam": false,
+              "fromDoorHallCell": false
+            },
+            {
+              "corridorKey": "15,18",
+              "shaftKey": "14,18",
+              "approachSide": "WEST",
+              "shaftCutoutAdjacent": true,
+              "nominalPartitionBoundaryOnSeam": false,
+              "fromDoorHallCell": false
+            }
+          ],
+          "bySide": {
+            "EAST": 1,
+            "WEST": 1,
+            "SOUTH": 0,
+            "NORTH": 0
+          },
+          "cutoutAdjacentEdgeCount": 1,
+          "nonCutoutEdgeCount": 1,
+          "nominalSeamBoundaryMatches": 0,
+          "openingSupport2DNeighbors": [
+            {
+              "openingKey": "14,18",
+              "neighboringNominalFloorCells": 4,
+              "neighboringNonOpeningFloorCells": 3
+            },
+            {
+              "openingKey": "14,19",
+              "neighboringNominalFloorCells": 4,
+              "neighboringNonOpeningFloorCells": 3
+            }
+          ],
+          "faceProof": "SCHEMATIC_2D_ADJACENCY_ONLY",
+          "landingProof": "UNKNOWN_NO_PHYSICAL_LANDING",
+          "wallSupportProof": "UNKNOWN_NO_LOAD_BEARING_DATA",
+          "headroomProof": "UNKNOWN_NO_INSTALLED_CEILING_DATA",
+          "autoApproved": false
+        }
+      ],
+      "stepProjection": {
+        "stepCells": 4,
+        "headspaceCells": 8,
+        "stepsOutsideShaft": 0,
+        "projectedHeadspaceOutsideShaft": 0,
+        "projectedCutoutsEqual": true,
+        "lowerFloorWallStepIntersections": 0,
+        "lowerFloorWallHeadspaceIntersections": 0,
+        "verticalProof": "SCHEMATIC_PROJECTION_ONLY",
+        "floorSlabRemovalVerified": false,
+        "headroomPhysicallyVerified": false,
+        "supportsVerified": false
+      },
+      "stairCutoutCellKeys": [
+        "14,18",
+        "14,19"
+      ],
+      "wallJointStatus": "UNKNOWN_NOMINAL_SEGMENT_ONLY",
+      "landingStatus": "UNKNOWN_MUST_DEFINE_ACCESS_AND_LANDING_FOOTPRINT",
+      "floorSupportStatus": "UNKNOWN_NO_PHYSICAL_SUPPORT_DATA"
+    },
+    {
+      "level": 3,
+      "options": [
+        {
+          "id": "A_RETAG_ONE_CORRIDOR_CELL",
+          "removedKeys": [
+            "12,20"
+          ],
+          "isolatedCorridorKeys": [
+            "12,21"
+          ],
+          "nominalWallEndpointFlags": 4,
+          "edgeCount": 3,
+          "edges": [
+            {
+              "corridorKey": "11,18",
+              "shaftKey": "12,18",
+              "approachSide": "EAST",
+              "shaftCutoutAdjacent": false,
+              "nominalPartitionBoundaryOnSeam": false,
+              "fromDoorHallCell": false
+            },
+            {
+              "corridorKey": "12,21",
+              "shaftKey": "12,20",
+              "approachSide": "NORTH",
+              "shaftCutoutAdjacent": false,
+              "nominalPartitionBoundaryOnSeam": false,
+              "fromDoorHallCell": false
+            },
+            {
+              "corridorKey": "15,18",
+              "shaftKey": "14,18",
+              "approachSide": "WEST",
+              "shaftCutoutAdjacent": true,
+              "nominalPartitionBoundaryOnSeam": false,
+              "fromDoorHallCell": false
+            }
+          ],
+          "bySide": {
+            "EAST": 1,
+            "WEST": 1,
+            "SOUTH": 0,
+            "NORTH": 1
+          },
+          "cutoutAdjacentEdgeCount": 1,
+          "nonCutoutEdgeCount": 2,
+          "nominalSeamBoundaryMatches": 0,
+          "openingSupport2DNeighbors": [
+            {
+              "openingKey": "14,18",
+              "neighboringNominalFloorCells": 4,
+              "neighboringNonOpeningFloorCells": 3
+            },
+            {
+              "openingKey": "14,19",
+              "neighboringNominalFloorCells": 4,
+              "neighboringNonOpeningFloorCells": 3
+            }
+          ],
+          "faceProof": "SCHEMATIC_2D_ADJACENCY_ONLY",
+          "landingProof": "UNKNOWN_NO_PHYSICAL_LANDING",
+          "wallSupportProof": "UNKNOWN_NO_LOAD_BEARING_DATA",
+          "headroomProof": "UNKNOWN_NO_INSTALLED_CEILING_DATA",
+          "autoApproved": false
+        },
+        {
+          "id": "B_TRIM_UNUSED_TERMINAL",
+          "removedKeys": [
+            "12,20",
+            "12,21"
+          ],
+          "isolatedCorridorKeys": [],
+          "nominalWallEndpointFlags": 5,
+          "edgeCount": 2,
+          "edges": [
+            {
+              "corridorKey": "11,18",
+              "shaftKey": "12,18",
+              "approachSide": "EAST",
+              "shaftCutoutAdjacent": false,
+              "nominalPartitionBoundaryOnSeam": false,
+              "fromDoorHallCell": false
+            },
+            {
+              "corridorKey": "15,18",
+              "shaftKey": "14,18",
+              "approachSide": "WEST",
+              "shaftCutoutAdjacent": true,
+              "nominalPartitionBoundaryOnSeam": false,
+              "fromDoorHallCell": false
+            }
+          ],
+          "bySide": {
+            "EAST": 1,
+            "WEST": 1,
+            "SOUTH": 0,
+            "NORTH": 0
+          },
+          "cutoutAdjacentEdgeCount": 1,
+          "nonCutoutEdgeCount": 1,
+          "nominalSeamBoundaryMatches": 0,
+          "openingSupport2DNeighbors": [
+            {
+              "openingKey": "14,18",
+              "neighboringNominalFloorCells": 4,
+              "neighboringNonOpeningFloorCells": 3
+            },
+            {
+              "openingKey": "14,19",
+              "neighboringNominalFloorCells": 4,
+              "neighboringNonOpeningFloorCells": 3
+            }
+          ],
+          "faceProof": "SCHEMATIC_2D_ADJACENCY_ONLY",
+          "landingProof": "UNKNOWN_NO_PHYSICAL_LANDING",
+          "wallSupportProof": "UNKNOWN_NO_LOAD_BEARING_DATA",
+          "headroomProof": "UNKNOWN_NO_INSTALLED_CEILING_DATA",
+          "autoApproved": false
+        }
+      ],
+      "stepProjection": {
+        "stepCells": 4,
+        "headspaceCells": 8,
+        "stepsOutsideShaft": 0,
+        "projectedHeadspaceOutsideShaft": 0,
+        "projectedCutoutsEqual": true,
+        "lowerFloorWallStepIntersections": 0,
+        "lowerFloorWallHeadspaceIntersections": 0,
+        "verticalProof": "SCHEMATIC_PROJECTION_ONLY",
+        "floorSlabRemovalVerified": false,
+        "headroomPhysicallyVerified": false,
+        "supportsVerified": false
+      },
+      "stairCutoutCellKeys": [
+        "14,18",
+        "14,19"
+      ],
+      "wallJointStatus": "UNKNOWN_NOMINAL_SEGMENT_ONLY",
+      "landingStatus": "UNKNOWN_MUST_DEFINE_ACCESS_AND_LANDING_FOOTPRINT",
+      "floorSupportStatus": "UNKNOWN_NO_PHYSICAL_SUPPORT_DATA"
+    },
+    {
+      "level": 4,
+      "options": [
+        {
+          "id": "A_RETAG_ONE_CORRIDOR_CELL",
+          "removedKeys": [
+            "12,20"
+          ],
+          "isolatedCorridorKeys": [
+            "12,21"
+          ],
+          "nominalWallEndpointFlags": 4,
+          "edgeCount": 3,
+          "edges": [
+            {
+              "corridorKey": "11,18",
+              "shaftKey": "12,18",
+              "approachSide": "EAST",
+              "shaftCutoutAdjacent": false,
+              "nominalPartitionBoundaryOnSeam": false,
+              "fromDoorHallCell": false
+            },
+            {
+              "corridorKey": "12,21",
+              "shaftKey": "12,20",
+              "approachSide": "NORTH",
+              "shaftCutoutAdjacent": false,
+              "nominalPartitionBoundaryOnSeam": false,
+              "fromDoorHallCell": false
+            },
+            {
+              "corridorKey": "15,18",
+              "shaftKey": "14,18",
+              "approachSide": "WEST",
+              "shaftCutoutAdjacent": true,
+              "nominalPartitionBoundaryOnSeam": false,
+              "fromDoorHallCell": false
+            }
+          ],
+          "bySide": {
+            "EAST": 1,
+            "WEST": 1,
+            "SOUTH": 0,
+            "NORTH": 1
+          },
+          "cutoutAdjacentEdgeCount": 1,
+          "nonCutoutEdgeCount": 2,
+          "nominalSeamBoundaryMatches": 0,
+          "openingSupport2DNeighbors": [
+            {
+              "openingKey": "14,18",
+              "neighboringNominalFloorCells": 4,
+              "neighboringNonOpeningFloorCells": 3
+            },
+            {
+              "openingKey": "14,19",
+              "neighboringNominalFloorCells": 4,
+              "neighboringNonOpeningFloorCells": 3
+            }
+          ],
+          "faceProof": "SCHEMATIC_2D_ADJACENCY_ONLY",
+          "landingProof": "UNKNOWN_NO_PHYSICAL_LANDING",
+          "wallSupportProof": "UNKNOWN_NO_LOAD_BEARING_DATA",
+          "headroomProof": "UNKNOWN_NO_INSTALLED_CEILING_DATA",
+          "autoApproved": false
+        },
+        {
+          "id": "B_TRIM_UNUSED_TERMINAL",
+          "removedKeys": [
+            "12,20",
+            "12,21"
+          ],
+          "isolatedCorridorKeys": [],
+          "nominalWallEndpointFlags": 5,
+          "edgeCount": 2,
+          "edges": [
+            {
+              "corridorKey": "11,18",
+              "shaftKey": "12,18",
+              "approachSide": "EAST",
+              "shaftCutoutAdjacent": false,
+              "nominalPartitionBoundaryOnSeam": false,
+              "fromDoorHallCell": false
+            },
+            {
+              "corridorKey": "15,18",
+              "shaftKey": "14,18",
+              "approachSide": "WEST",
+              "shaftCutoutAdjacent": true,
+              "nominalPartitionBoundaryOnSeam": false,
+              "fromDoorHallCell": false
+            }
+          ],
+          "bySide": {
+            "EAST": 1,
+            "WEST": 1,
+            "SOUTH": 0,
+            "NORTH": 0
+          },
+          "cutoutAdjacentEdgeCount": 1,
+          "nonCutoutEdgeCount": 1,
+          "nominalSeamBoundaryMatches": 0,
+          "openingSupport2DNeighbors": [
+            {
+              "openingKey": "14,18",
+              "neighboringNominalFloorCells": 4,
+              "neighboringNonOpeningFloorCells": 3
+            },
+            {
+              "openingKey": "14,19",
+              "neighboringNominalFloorCells": 4,
+              "neighboringNonOpeningFloorCells": 3
+            }
+          ],
+          "faceProof": "SCHEMATIC_2D_ADJACENCY_ONLY",
+          "landingProof": "UNKNOWN_NO_PHYSICAL_LANDING",
+          "wallSupportProof": "UNKNOWN_NO_LOAD_BEARING_DATA",
+          "headroomProof": "UNKNOWN_NO_INSTALLED_CEILING_DATA",
+          "autoApproved": false
+        }
+      ],
+      "stepProjection": {
+        "stepCells": 4,
+        "headspaceCells": 8,
+        "stepsOutsideShaft": 0,
+        "projectedHeadspaceOutsideShaft": 0,
+        "projectedCutoutsEqual": true,
+        "lowerFloorWallStepIntersections": 0,
+        "lowerFloorWallHeadspaceIntersections": 0,
+        "verticalProof": "SCHEMATIC_PROJECTION_ONLY",
+        "floorSlabRemovalVerified": false,
+        "headroomPhysicallyVerified": false,
+        "supportsVerified": false
+      },
+      "stairCutoutCellKeys": [
+        "14,18",
+        "14,19"
+      ],
+      "wallJointStatus": "UNKNOWN_NOMINAL_SEGMENT_ONLY",
+      "landingStatus": "UNKNOWN_MUST_DEFINE_ACCESS_AND_LANDING_FOOTPRINT",
+      "floorSupportStatus": "UNKNOWN_NO_PHYSICAL_SUPPORT_DATA"
+    },
+    {
+      "level": 5,
+      "options": [
+        {
+          "id": "A_RETAG_ONE_CORRIDOR_CELL",
+          "removedKeys": [
+            "12,20"
+          ],
+          "isolatedCorridorKeys": [
+            "12,21"
+          ],
+          "nominalWallEndpointFlags": 4,
+          "edgeCount": 3,
+          "edges": [
+            {
+              "corridorKey": "11,18",
+              "shaftKey": "12,18",
+              "approachSide": "EAST",
+              "shaftCutoutAdjacent": false,
+              "nominalPartitionBoundaryOnSeam": false,
+              "fromDoorHallCell": false
+            },
+            {
+              "corridorKey": "12,21",
+              "shaftKey": "12,20",
+              "approachSide": "NORTH",
+              "shaftCutoutAdjacent": false,
+              "nominalPartitionBoundaryOnSeam": false,
+              "fromDoorHallCell": false
+            },
+            {
+              "corridorKey": "15,18",
+              "shaftKey": "14,18",
+              "approachSide": "WEST",
+              "shaftCutoutAdjacent": true,
+              "nominalPartitionBoundaryOnSeam": false,
+              "fromDoorHallCell": false
+            }
+          ],
+          "bySide": {
+            "EAST": 1,
+            "WEST": 1,
+            "SOUTH": 0,
+            "NORTH": 1
+          },
+          "cutoutAdjacentEdgeCount": 1,
+          "nonCutoutEdgeCount": 2,
+          "nominalSeamBoundaryMatches": 0,
+          "openingSupport2DNeighbors": [
+            {
+              "openingKey": "14,18",
+              "neighboringNominalFloorCells": 4,
+              "neighboringNonOpeningFloorCells": 3
+            },
+            {
+              "openingKey": "14,19",
+              "neighboringNominalFloorCells": 4,
+              "neighboringNonOpeningFloorCells": 3
+            }
+          ],
+          "faceProof": "SCHEMATIC_2D_ADJACENCY_ONLY",
+          "landingProof": "UNKNOWN_NO_PHYSICAL_LANDING",
+          "wallSupportProof": "UNKNOWN_NO_LOAD_BEARING_DATA",
+          "headroomProof": "UNKNOWN_NO_INSTALLED_CEILING_DATA",
+          "autoApproved": false
+        },
+        {
+          "id": "B_TRIM_UNUSED_TERMINAL",
+          "removedKeys": [
+            "12,20",
+            "12,21"
+          ],
+          "isolatedCorridorKeys": [],
+          "nominalWallEndpointFlags": 5,
+          "edgeCount": 2,
+          "edges": [
+            {
+              "corridorKey": "11,18",
+              "shaftKey": "12,18",
+              "approachSide": "EAST",
+              "shaftCutoutAdjacent": false,
+              "nominalPartitionBoundaryOnSeam": false,
+              "fromDoorHallCell": false
+            },
+            {
+              "corridorKey": "15,18",
+              "shaftKey": "14,18",
+              "approachSide": "WEST",
+              "shaftCutoutAdjacent": true,
+              "nominalPartitionBoundaryOnSeam": false,
+              "fromDoorHallCell": false
+            }
+          ],
+          "bySide": {
+            "EAST": 1,
+            "WEST": 1,
+            "SOUTH": 0,
+            "NORTH": 0
+          },
+          "cutoutAdjacentEdgeCount": 1,
+          "nonCutoutEdgeCount": 1,
+          "nominalSeamBoundaryMatches": 0,
+          "openingSupport2DNeighbors": [
+            {
+              "openingKey": "14,18",
+              "neighboringNominalFloorCells": 4,
+              "neighboringNonOpeningFloorCells": 3
+            },
+            {
+              "openingKey": "14,19",
+              "neighboringNominalFloorCells": 4,
+              "neighboringNonOpeningFloorCells": 3
+            }
+          ],
+          "faceProof": "SCHEMATIC_2D_ADJACENCY_ONLY",
+          "landingProof": "UNKNOWN_NO_PHYSICAL_LANDING",
+          "wallSupportProof": "UNKNOWN_NO_LOAD_BEARING_DATA",
+          "headroomProof": "UNKNOWN_NO_INSTALLED_CEILING_DATA",
+          "autoApproved": false
+        }
+      ],
+      "stepProjection": {
+        "stepCells": 4,
+        "headspaceCells": 8,
+        "stepsOutsideShaft": 0,
+        "projectedHeadspaceOutsideShaft": 0,
+        "projectedCutoutsEqual": true,
+        "lowerFloorWallStepIntersections": 0,
+        "lowerFloorWallHeadspaceIntersections": 0,
+        "verticalProof": "SCHEMATIC_PROJECTION_ONLY",
+        "floorSlabRemovalVerified": false,
+        "headroomPhysicallyVerified": false,
+        "supportsVerified": false
+      },
+      "stairCutoutCellKeys": [
+        "14,18",
+        "14,19"
+      ],
+      "wallJointStatus": "UNKNOWN_NOMINAL_SEGMENT_ONLY",
+      "landingStatus": "UNKNOWN_MUST_DEFINE_ACCESS_AND_LANDING_FOOTPRINT",
+      "floorSupportStatus": "UNKNOWN_NO_PHYSICAL_SUPPORT_DATA"
+    },
+    {
+      "level": 6,
+      "options": [
+        {
+          "id": "A_RETAG_ONE_CORRIDOR_CELL",
+          "removedKeys": [
+            "12,20"
+          ],
+          "isolatedCorridorKeys": [
+            "12,21"
+          ],
+          "nominalWallEndpointFlags": 4,
+          "edgeCount": 3,
+          "edges": [
+            {
+              "corridorKey": "11,18",
+              "shaftKey": "12,18",
+              "approachSide": "EAST",
+              "shaftCutoutAdjacent": false,
+              "nominalPartitionBoundaryOnSeam": false,
+              "fromDoorHallCell": false
+            },
+            {
+              "corridorKey": "12,21",
+              "shaftKey": "12,20",
+              "approachSide": "NORTH",
+              "shaftCutoutAdjacent": false,
+              "nominalPartitionBoundaryOnSeam": false,
+              "fromDoorHallCell": false
+            },
+            {
+              "corridorKey": "15,18",
+              "shaftKey": "14,18",
+              "approachSide": "WEST",
+              "shaftCutoutAdjacent": true,
+              "nominalPartitionBoundaryOnSeam": false,
+              "fromDoorHallCell": false
+            }
+          ],
+          "bySide": {
+            "EAST": 1,
+            "WEST": 1,
+            "SOUTH": 0,
+            "NORTH": 1
+          },
+          "cutoutAdjacentEdgeCount": 1,
+          "nonCutoutEdgeCount": 2,
+          "nominalSeamBoundaryMatches": 0,
+          "openingSupport2DNeighbors": [
+            {
+              "openingKey": "14,18",
+              "neighboringNominalFloorCells": 4,
+              "neighboringNonOpeningFloorCells": 3
+            },
+            {
+              "openingKey": "14,19",
+              "neighboringNominalFloorCells": 4,
+              "neighboringNonOpeningFloorCells": 3
+            }
+          ],
+          "faceProof": "SCHEMATIC_2D_ADJACENCY_ONLY",
+          "landingProof": "UNKNOWN_NO_PHYSICAL_LANDING",
+          "wallSupportProof": "UNKNOWN_NO_LOAD_BEARING_DATA",
+          "headroomProof": "UNKNOWN_NO_INSTALLED_CEILING_DATA",
+          "autoApproved": false
+        },
+        {
+          "id": "B_TRIM_UNUSED_TERMINAL",
+          "removedKeys": [
+            "12,20",
+            "12,21"
+          ],
+          "isolatedCorridorKeys": [],
+          "nominalWallEndpointFlags": 5,
+          "edgeCount": 2,
+          "edges": [
+            {
+              "corridorKey": "11,18",
+              "shaftKey": "12,18",
+              "approachSide": "EAST",
+              "shaftCutoutAdjacent": false,
+              "nominalPartitionBoundaryOnSeam": false,
+              "fromDoorHallCell": false
+            },
+            {
+              "corridorKey": "15,18",
+              "shaftKey": "14,18",
+              "approachSide": "WEST",
+              "shaftCutoutAdjacent": true,
+              "nominalPartitionBoundaryOnSeam": false,
+              "fromDoorHallCell": false
+            }
+          ],
+          "bySide": {
+            "EAST": 1,
+            "WEST": 1,
+            "SOUTH": 0,
+            "NORTH": 0
+          },
+          "cutoutAdjacentEdgeCount": 1,
+          "nonCutoutEdgeCount": 1,
+          "nominalSeamBoundaryMatches": 0,
+          "openingSupport2DNeighbors": [
+            {
+              "openingKey": "14,18",
+              "neighboringNominalFloorCells": 4,
+              "neighboringNonOpeningFloorCells": 3
+            },
+            {
+              "openingKey": "14,19",
+              "neighboringNominalFloorCells": 4,
+              "neighboringNonOpeningFloorCells": 3
+            }
+          ],
+          "faceProof": "SCHEMATIC_2D_ADJACENCY_ONLY",
+          "landingProof": "UNKNOWN_NO_PHYSICAL_LANDING",
+          "wallSupportProof": "UNKNOWN_NO_LOAD_BEARING_DATA",
+          "headroomProof": "UNKNOWN_NO_INSTALLED_CEILING_DATA",
+          "autoApproved": false
+        }
+      ],
+      "stepProjection": {
+        "stepCells": 4,
+        "headspaceCells": 8,
+        "stepsOutsideShaft": 0,
+        "projectedHeadspaceOutsideShaft": 0,
+        "projectedCutoutsEqual": true,
+        "lowerFloorWallStepIntersections": 0,
+        "lowerFloorWallHeadspaceIntersections": 0,
+        "verticalProof": "SCHEMATIC_PROJECTION_ONLY",
+        "floorSlabRemovalVerified": false,
+        "headroomPhysicallyVerified": false,
+        "supportsVerified": false
+      },
+      "stairCutoutCellKeys": [
+        "14,18",
+        "14,19"
+      ],
+      "wallJointStatus": "UNKNOWN_NOMINAL_SEGMENT_ONLY",
+      "landingStatus": "UNKNOWN_MUST_DEFINE_ACCESS_AND_LANDING_FOOTPRINT",
+      "floorSupportStatus": "UNKNOWN_NO_PHYSICAL_SUPPORT_DATA"
+    }
+  ],
+  "totals": {
+    "levels": 5,
+    "doorHallPorts": 65,
+    "optionAFaceEdges": 15,
+    "optionBFaceEdges": 10,
+    "optionACutoutAdjacentFaces": 5,
+    "optionBCutoutAdjacentFaces": 5,
+    "optionANominalSeamWallEdges": 0,
+    "optionBNominalSeamWallEdges": 0,
+    "stairStepsProjected": 20,
+    "headspaceCellsProjected": 40,
+    "physicallyProvenLandings": 0,
+    "physicallyProvenSupports": 0,
+    "verifiedDoorStates": 0,
+    "approvedAlternatives": 0,
+    "emittedOperations": 0
+  },
+  "assessment": {
+    "optionA": "REVIEW_ONLY_PRESERVES_ISOLATED_SOUTH_ACCESS_CANDIDATE",
+    "optionB": "REVIEW_ONLY_REMOVES_SOUTH_ACCESS_CANDIDATE",
+    "comparison": "NEITHER_PROVES_PHYSICAL_LANDING_OR_SUPPORT",
+    "chosenOption": null
+  },
+  "nextIntegrationWork": [
+    "DEFINE_REAL_LANDING_FOOTPRINT",
+    "VALIDATE_REAL_WALL_JOINTS",
+    "VERIFY_FLOOR_SUPPORT_AND_HEADROOM",
+    "MAP_REAL_STAIR_AND_DOOR_BLOCK_STATES",
+    "PROVE_RUNTIME_COORDINATE_AND_MATERIALS"
+  ],
+  "safety": {
+    "notPrepared": true,
+    "constructionApproved": false,
+    "executionAllowed": false,
+    "worldAccess": false,
+    "bridgeContact": false,
+    "existingConstructionModified": false,
+    "legacyModified": false,
+    "frozenEvidenceModified": false
+  },
+  "readiness": "NOT_PREPARED",
+  "deployment": "BLOCKED",
+  "approval": "NONE",
+  "constructionCommands": 0,
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "materialIds": [],
+    "worldCoordinates": null,
+    "commandCount": 0
+  },
+  "reportSha256": "9575a67fa202231d06fdbc2eba247e3c8401ab70067deb4a171e1fbe799a9b9a"
+}

@@ -1,0 +1,904 @@
+{
+  "schema": "minecraftaibuilder-step8b-b38-landing-section-v1",
+  "purpose": "LANDING_FLOOR_HEIGHT_AND_RECTANGLE_COMPATIBILITY_READONLY",
+  "provenance": {
+    "pinnedSourceSha256": {
+      "B37_FILE_SHA256.json": "31aeb78d1a9d34f5ac61fc507610b8bea9e29bf687b77c70cb50c1b6479de08b",
+      "reports/B37_LANDING_ENVELOPE_REPORT.json": "3d99695daab6d31a8789b1aa385fc0f10a79e278a434052198920373acc70b98",
+      "reports/B36_LOCAL_STAIR_SECTION_REPORT.json": "bf58d8200c430908030dbdc72d6149c40023a1bf0f05a87cc881c687373fd842",
+      "reports/B33_RECTANGLE_EMITTER_LEDGER.json": "a8c130190d53bc25489bac27ae007cdb96fa37c980515329d04300f229322c9d",
+      "reports/B21_BLOCKSCALE_REVIEW.json": "2d7b1e3d71f252331dfe35e600411acc3354c43702e5b3db9fd9a5e0533932bc",
+      "reports/B17_INTERIOR_INTEGRATION_IR.json": "e04e8ca2789bd8b65548a10e98e940e9537a562ebbf38a63e456ac9b73fb425d",
+      "reports/B31_FLOOR_DOOR_OVERLAY.json": "6d233d5ad09b8138650f65d46e0cf2d2ab143577d3862696b562a3857545c430"
+    },
+    "runtimePlannerInvoked": false,
+    "windowsProbePerformed": false,
+    "worldContact": false
+  },
+  "building": "apartment/candidate-01",
+  "levels": [
+    {
+      "upperLevel": 2,
+      "nominalUpperFloorY": 4,
+      "lowerLevel": 1,
+      "variants": [
+        {
+          "id": "A_RETAG_ONE_CORRIDOR_CELL",
+          "corridorToStairPort": "15,18|14,18",
+          "candidatePadCells": [
+            {
+              "x": 15,
+              "z": 17
+            },
+            {
+              "x": 16,
+              "z": 17
+            },
+            {
+              "x": 15,
+              "z": 18
+            },
+            {
+              "x": 16,
+              "z": 18
+            }
+          ],
+          "assessment": {
+            "nominalFloorY": 4,
+            "lastTreadBottomY": 3,
+            "lastTreadTopY": 4,
+            "stairTopAlignedToFloor": true,
+            "landingFootprintCells": 4,
+            "landingRetainedNominalFloorCells": 4,
+            "landingCutoutOverlap": 0,
+            "cutoutCellsMarkedOpen": 2,
+            "rectangleCoveragePerLandingCell": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "rectangleCoverageExact": true,
+            "landingHeadspaceProxyIntersections": 0,
+            "lastTreadLocal": {
+              "x": 14,
+              "y": 3,
+              "z": 19
+            },
+            "precedingTreadLocal": {
+              "x": 14,
+              "y": 2,
+              "z": 18
+            },
+            "entryCell": {
+              "x": 15,
+              "z": 18
+            },
+            "entryToLastTreadManhattan": 2,
+            "topTreadOverlapsPad": false,
+            "topTreadInsideCutout": false,
+            "landingCellsEdgeAdjacentToLastTread": [],
+            "directTopTreadToLandingProven": false,
+            "nominalFloorCoveragePass": true,
+            "bottomSupportCertainty": "UNKNOWN_NO_LOAD_PATH",
+            "topTransitionCertainty": "NO_DIRECT_EDGE_CONTACT_REDESIGN_REQUIRED",
+            "installedCeilingHeadroomCertified": false,
+            "installedLandingSupportCertified": false,
+            "physicalStairAccessCertified": false
+          },
+          "constructible": false,
+          "selected": false,
+          "landingSupportVerified": false,
+          "futureDesignInputs": [
+            "STAIR_TOP_TREAD_REORIENTATION_OR_LANDING_TRANSITION",
+            "LANDING_LOAD_PATH",
+            "PHYSICAL_HEADROOM",
+            "WALL_JOINT",
+            "BLOCK_STATES_AND_MATERIALS"
+          ]
+        },
+        {
+          "id": "B_TRIM_UNUSED_TERMINAL",
+          "corridorToStairPort": "15,18|14,18",
+          "candidatePadCells": [
+            {
+              "x": 15,
+              "z": 17
+            },
+            {
+              "x": 16,
+              "z": 17
+            },
+            {
+              "x": 15,
+              "z": 18
+            },
+            {
+              "x": 16,
+              "z": 18
+            }
+          ],
+          "assessment": {
+            "nominalFloorY": 4,
+            "lastTreadBottomY": 3,
+            "lastTreadTopY": 4,
+            "stairTopAlignedToFloor": true,
+            "landingFootprintCells": 4,
+            "landingRetainedNominalFloorCells": 4,
+            "landingCutoutOverlap": 0,
+            "cutoutCellsMarkedOpen": 2,
+            "rectangleCoveragePerLandingCell": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "rectangleCoverageExact": true,
+            "landingHeadspaceProxyIntersections": 0,
+            "lastTreadLocal": {
+              "x": 14,
+              "y": 3,
+              "z": 19
+            },
+            "precedingTreadLocal": {
+              "x": 14,
+              "y": 2,
+              "z": 18
+            },
+            "entryCell": {
+              "x": 15,
+              "z": 18
+            },
+            "entryToLastTreadManhattan": 2,
+            "topTreadOverlapsPad": false,
+            "topTreadInsideCutout": false,
+            "landingCellsEdgeAdjacentToLastTread": [],
+            "directTopTreadToLandingProven": false,
+            "nominalFloorCoveragePass": true,
+            "bottomSupportCertainty": "UNKNOWN_NO_LOAD_PATH",
+            "topTransitionCertainty": "NO_DIRECT_EDGE_CONTACT_REDESIGN_REQUIRED",
+            "installedCeilingHeadroomCertified": false,
+            "installedLandingSupportCertified": false,
+            "physicalStairAccessCertified": false
+          },
+          "constructible": false,
+          "selected": false,
+          "landingSupportVerified": false,
+          "futureDesignInputs": [
+            "STAIR_TOP_TREAD_REORIENTATION_OR_LANDING_TRANSITION",
+            "LANDING_LOAD_PATH",
+            "PHYSICAL_HEADROOM",
+            "WALL_JOINT",
+            "BLOCK_STATES_AND_MATERIALS"
+          ]
+        }
+      ],
+      "upperFloorCutoutCells": [
+        {
+          "x": 14,
+          "z": 17
+        },
+        {
+          "x": 14,
+          "z": 18
+        }
+      ],
+      "nominalRectangleEmitterValidated": true
+    },
+    {
+      "upperLevel": 3,
+      "nominalUpperFloorY": 8,
+      "lowerLevel": 2,
+      "variants": [
+        {
+          "id": "A_RETAG_ONE_CORRIDOR_CELL",
+          "corridorToStairPort": "15,18|14,18",
+          "candidatePadCells": [
+            {
+              "x": 15,
+              "z": 17
+            },
+            {
+              "x": 16,
+              "z": 17
+            },
+            {
+              "x": 15,
+              "z": 18
+            },
+            {
+              "x": 16,
+              "z": 18
+            }
+          ],
+          "assessment": {
+            "nominalFloorY": 8,
+            "lastTreadBottomY": 7,
+            "lastTreadTopY": 8,
+            "stairTopAlignedToFloor": true,
+            "landingFootprintCells": 4,
+            "landingRetainedNominalFloorCells": 4,
+            "landingCutoutOverlap": 0,
+            "cutoutCellsMarkedOpen": 2,
+            "rectangleCoveragePerLandingCell": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "rectangleCoverageExact": true,
+            "landingHeadspaceProxyIntersections": 0,
+            "lastTreadLocal": {
+              "x": 14,
+              "y": 7,
+              "z": 19
+            },
+            "precedingTreadLocal": {
+              "x": 14,
+              "y": 6,
+              "z": 18
+            },
+            "entryCell": {
+              "x": 15,
+              "z": 18
+            },
+            "entryToLastTreadManhattan": 2,
+            "topTreadOverlapsPad": false,
+            "topTreadInsideCutout": false,
+            "landingCellsEdgeAdjacentToLastTread": [],
+            "directTopTreadToLandingProven": false,
+            "nominalFloorCoveragePass": true,
+            "bottomSupportCertainty": "UNKNOWN_NO_LOAD_PATH",
+            "topTransitionCertainty": "NO_DIRECT_EDGE_CONTACT_REDESIGN_REQUIRED",
+            "installedCeilingHeadroomCertified": false,
+            "installedLandingSupportCertified": false,
+            "physicalStairAccessCertified": false
+          },
+          "constructible": false,
+          "selected": false,
+          "landingSupportVerified": false,
+          "futureDesignInputs": [
+            "STAIR_TOP_TREAD_REORIENTATION_OR_LANDING_TRANSITION",
+            "LANDING_LOAD_PATH",
+            "PHYSICAL_HEADROOM",
+            "WALL_JOINT",
+            "BLOCK_STATES_AND_MATERIALS"
+          ]
+        },
+        {
+          "id": "B_TRIM_UNUSED_TERMINAL",
+          "corridorToStairPort": "15,18|14,18",
+          "candidatePadCells": [
+            {
+              "x": 15,
+              "z": 17
+            },
+            {
+              "x": 16,
+              "z": 17
+            },
+            {
+              "x": 15,
+              "z": 18
+            },
+            {
+              "x": 16,
+              "z": 18
+            }
+          ],
+          "assessment": {
+            "nominalFloorY": 8,
+            "lastTreadBottomY": 7,
+            "lastTreadTopY": 8,
+            "stairTopAlignedToFloor": true,
+            "landingFootprintCells": 4,
+            "landingRetainedNominalFloorCells": 4,
+            "landingCutoutOverlap": 0,
+            "cutoutCellsMarkedOpen": 2,
+            "rectangleCoveragePerLandingCell": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "rectangleCoverageExact": true,
+            "landingHeadspaceProxyIntersections": 0,
+            "lastTreadLocal": {
+              "x": 14,
+              "y": 7,
+              "z": 19
+            },
+            "precedingTreadLocal": {
+              "x": 14,
+              "y": 6,
+              "z": 18
+            },
+            "entryCell": {
+              "x": 15,
+              "z": 18
+            },
+            "entryToLastTreadManhattan": 2,
+            "topTreadOverlapsPad": false,
+            "topTreadInsideCutout": false,
+            "landingCellsEdgeAdjacentToLastTread": [],
+            "directTopTreadToLandingProven": false,
+            "nominalFloorCoveragePass": true,
+            "bottomSupportCertainty": "UNKNOWN_NO_LOAD_PATH",
+            "topTransitionCertainty": "NO_DIRECT_EDGE_CONTACT_REDESIGN_REQUIRED",
+            "installedCeilingHeadroomCertified": false,
+            "installedLandingSupportCertified": false,
+            "physicalStairAccessCertified": false
+          },
+          "constructible": false,
+          "selected": false,
+          "landingSupportVerified": false,
+          "futureDesignInputs": [
+            "STAIR_TOP_TREAD_REORIENTATION_OR_LANDING_TRANSITION",
+            "LANDING_LOAD_PATH",
+            "PHYSICAL_HEADROOM",
+            "WALL_JOINT",
+            "BLOCK_STATES_AND_MATERIALS"
+          ]
+        }
+      ],
+      "upperFloorCutoutCells": [
+        {
+          "x": 14,
+          "z": 17
+        },
+        {
+          "x": 14,
+          "z": 18
+        }
+      ],
+      "nominalRectangleEmitterValidated": true
+    },
+    {
+      "upperLevel": 4,
+      "nominalUpperFloorY": 12,
+      "lowerLevel": 3,
+      "variants": [
+        {
+          "id": "A_RETAG_ONE_CORRIDOR_CELL",
+          "corridorToStairPort": "15,18|14,18",
+          "candidatePadCells": [
+            {
+              "x": 15,
+              "z": 17
+            },
+            {
+              "x": 16,
+              "z": 17
+            },
+            {
+              "x": 15,
+              "z": 18
+            },
+            {
+              "x": 16,
+              "z": 18
+            }
+          ],
+          "assessment": {
+            "nominalFloorY": 12,
+            "lastTreadBottomY": 11,
+            "lastTreadTopY": 12,
+            "stairTopAlignedToFloor": true,
+            "landingFootprintCells": 4,
+            "landingRetainedNominalFloorCells": 4,
+            "landingCutoutOverlap": 0,
+            "cutoutCellsMarkedOpen": 2,
+            "rectangleCoveragePerLandingCell": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "rectangleCoverageExact": true,
+            "landingHeadspaceProxyIntersections": 0,
+            "lastTreadLocal": {
+              "x": 14,
+              "y": 11,
+              "z": 19
+            },
+            "precedingTreadLocal": {
+              "x": 14,
+              "y": 10,
+              "z": 18
+            },
+            "entryCell": {
+              "x": 15,
+              "z": 18
+            },
+            "entryToLastTreadManhattan": 2,
+            "topTreadOverlapsPad": false,
+            "topTreadInsideCutout": false,
+            "landingCellsEdgeAdjacentToLastTread": [],
+            "directTopTreadToLandingProven": false,
+            "nominalFloorCoveragePass": true,
+            "bottomSupportCertainty": "UNKNOWN_NO_LOAD_PATH",
+            "topTransitionCertainty": "NO_DIRECT_EDGE_CONTACT_REDESIGN_REQUIRED",
+            "installedCeilingHeadroomCertified": false,
+            "installedLandingSupportCertified": false,
+            "physicalStairAccessCertified": false
+          },
+          "constructible": false,
+          "selected": false,
+          "landingSupportVerified": false,
+          "futureDesignInputs": [
+            "STAIR_TOP_TREAD_REORIENTATION_OR_LANDING_TRANSITION",
+            "LANDING_LOAD_PATH",
+            "PHYSICAL_HEADROOM",
+            "WALL_JOINT",
+            "BLOCK_STATES_AND_MATERIALS"
+          ]
+        },
+        {
+          "id": "B_TRIM_UNUSED_TERMINAL",
+          "corridorToStairPort": "15,18|14,18",
+          "candidatePadCells": [
+            {
+              "x": 15,
+              "z": 17
+            },
+            {
+              "x": 16,
+              "z": 17
+            },
+            {
+              "x": 15,
+              "z": 18
+            },
+            {
+              "x": 16,
+              "z": 18
+            }
+          ],
+          "assessment": {
+            "nominalFloorY": 12,
+            "lastTreadBottomY": 11,
+            "lastTreadTopY": 12,
+            "stairTopAlignedToFloor": true,
+            "landingFootprintCells": 4,
+            "landingRetainedNominalFloorCells": 4,
+            "landingCutoutOverlap": 0,
+            "cutoutCellsMarkedOpen": 2,
+            "rectangleCoveragePerLandingCell": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "rectangleCoverageExact": true,
+            "landingHeadspaceProxyIntersections": 0,
+            "lastTreadLocal": {
+              "x": 14,
+              "y": 11,
+              "z": 19
+            },
+            "precedingTreadLocal": {
+              "x": 14,
+              "y": 10,
+              "z": 18
+            },
+            "entryCell": {
+              "x": 15,
+              "z": 18
+            },
+            "entryToLastTreadManhattan": 2,
+            "topTreadOverlapsPad": false,
+            "topTreadInsideCutout": false,
+            "landingCellsEdgeAdjacentToLastTread": [],
+            "directTopTreadToLandingProven": false,
+            "nominalFloorCoveragePass": true,
+            "bottomSupportCertainty": "UNKNOWN_NO_LOAD_PATH",
+            "topTransitionCertainty": "NO_DIRECT_EDGE_CONTACT_REDESIGN_REQUIRED",
+            "installedCeilingHeadroomCertified": false,
+            "installedLandingSupportCertified": false,
+            "physicalStairAccessCertified": false
+          },
+          "constructible": false,
+          "selected": false,
+          "landingSupportVerified": false,
+          "futureDesignInputs": [
+            "STAIR_TOP_TREAD_REORIENTATION_OR_LANDING_TRANSITION",
+            "LANDING_LOAD_PATH",
+            "PHYSICAL_HEADROOM",
+            "WALL_JOINT",
+            "BLOCK_STATES_AND_MATERIALS"
+          ]
+        }
+      ],
+      "upperFloorCutoutCells": [
+        {
+          "x": 14,
+          "z": 17
+        },
+        {
+          "x": 14,
+          "z": 18
+        }
+      ],
+      "nominalRectangleEmitterValidated": true
+    },
+    {
+      "upperLevel": 5,
+      "nominalUpperFloorY": 16,
+      "lowerLevel": 4,
+      "variants": [
+        {
+          "id": "A_RETAG_ONE_CORRIDOR_CELL",
+          "corridorToStairPort": "15,18|14,18",
+          "candidatePadCells": [
+            {
+              "x": 15,
+              "z": 17
+            },
+            {
+              "x": 16,
+              "z": 17
+            },
+            {
+              "x": 15,
+              "z": 18
+            },
+            {
+              "x": 16,
+              "z": 18
+            }
+          ],
+          "assessment": {
+            "nominalFloorY": 16,
+            "lastTreadBottomY": 15,
+            "lastTreadTopY": 16,
+            "stairTopAlignedToFloor": true,
+            "landingFootprintCells": 4,
+            "landingRetainedNominalFloorCells": 4,
+            "landingCutoutOverlap": 0,
+            "cutoutCellsMarkedOpen": 2,
+            "rectangleCoveragePerLandingCell": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "rectangleCoverageExact": true,
+            "landingHeadspaceProxyIntersections": 0,
+            "lastTreadLocal": {
+              "x": 14,
+              "y": 15,
+              "z": 19
+            },
+            "precedingTreadLocal": {
+              "x": 14,
+              "y": 14,
+              "z": 18
+            },
+            "entryCell": {
+              "x": 15,
+              "z": 18
+            },
+            "entryToLastTreadManhattan": 2,
+            "topTreadOverlapsPad": false,
+            "topTreadInsideCutout": false,
+            "landingCellsEdgeAdjacentToLastTread": [],
+            "directTopTreadToLandingProven": false,
+            "nominalFloorCoveragePass": true,
+            "bottomSupportCertainty": "UNKNOWN_NO_LOAD_PATH",
+            "topTransitionCertainty": "NO_DIRECT_EDGE_CONTACT_REDESIGN_REQUIRED",
+            "installedCeilingHeadroomCertified": false,
+            "installedLandingSupportCertified": false,
+            "physicalStairAccessCertified": false
+          },
+          "constructible": false,
+          "selected": false,
+          "landingSupportVerified": false,
+          "futureDesignInputs": [
+            "STAIR_TOP_TREAD_REORIENTATION_OR_LANDING_TRANSITION",
+            "LANDING_LOAD_PATH",
+            "PHYSICAL_HEADROOM",
+            "WALL_JOINT",
+            "BLOCK_STATES_AND_MATERIALS"
+          ]
+        },
+        {
+          "id": "B_TRIM_UNUSED_TERMINAL",
+          "corridorToStairPort": "15,18|14,18",
+          "candidatePadCells": [
+            {
+              "x": 15,
+              "z": 17
+            },
+            {
+              "x": 16,
+              "z": 17
+            },
+            {
+              "x": 15,
+              "z": 18
+            },
+            {
+              "x": 16,
+              "z": 18
+            }
+          ],
+          "assessment": {
+            "nominalFloorY": 16,
+            "lastTreadBottomY": 15,
+            "lastTreadTopY": 16,
+            "stairTopAlignedToFloor": true,
+            "landingFootprintCells": 4,
+            "landingRetainedNominalFloorCells": 4,
+            "landingCutoutOverlap": 0,
+            "cutoutCellsMarkedOpen": 2,
+            "rectangleCoveragePerLandingCell": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "rectangleCoverageExact": true,
+            "landingHeadspaceProxyIntersections": 0,
+            "lastTreadLocal": {
+              "x": 14,
+              "y": 15,
+              "z": 19
+            },
+            "precedingTreadLocal": {
+              "x": 14,
+              "y": 14,
+              "z": 18
+            },
+            "entryCell": {
+              "x": 15,
+              "z": 18
+            },
+            "entryToLastTreadManhattan": 2,
+            "topTreadOverlapsPad": false,
+            "topTreadInsideCutout": false,
+            "landingCellsEdgeAdjacentToLastTread": [],
+            "directTopTreadToLandingProven": false,
+            "nominalFloorCoveragePass": true,
+            "bottomSupportCertainty": "UNKNOWN_NO_LOAD_PATH",
+            "topTransitionCertainty": "NO_DIRECT_EDGE_CONTACT_REDESIGN_REQUIRED",
+            "installedCeilingHeadroomCertified": false,
+            "installedLandingSupportCertified": false,
+            "physicalStairAccessCertified": false
+          },
+          "constructible": false,
+          "selected": false,
+          "landingSupportVerified": false,
+          "futureDesignInputs": [
+            "STAIR_TOP_TREAD_REORIENTATION_OR_LANDING_TRANSITION",
+            "LANDING_LOAD_PATH",
+            "PHYSICAL_HEADROOM",
+            "WALL_JOINT",
+            "BLOCK_STATES_AND_MATERIALS"
+          ]
+        }
+      ],
+      "upperFloorCutoutCells": [
+        {
+          "x": 14,
+          "z": 17
+        },
+        {
+          "x": 14,
+          "z": 18
+        }
+      ],
+      "nominalRectangleEmitterValidated": true
+    },
+    {
+      "upperLevel": 6,
+      "nominalUpperFloorY": 20,
+      "lowerLevel": 5,
+      "variants": [
+        {
+          "id": "A_RETAG_ONE_CORRIDOR_CELL",
+          "corridorToStairPort": "15,18|14,18",
+          "candidatePadCells": [
+            {
+              "x": 15,
+              "z": 17
+            },
+            {
+              "x": 16,
+              "z": 17
+            },
+            {
+              "x": 15,
+              "z": 18
+            },
+            {
+              "x": 16,
+              "z": 18
+            }
+          ],
+          "assessment": {
+            "nominalFloorY": 20,
+            "lastTreadBottomY": 19,
+            "lastTreadTopY": 20,
+            "stairTopAlignedToFloor": true,
+            "landingFootprintCells": 4,
+            "landingRetainedNominalFloorCells": 4,
+            "landingCutoutOverlap": 0,
+            "cutoutCellsMarkedOpen": 2,
+            "rectangleCoveragePerLandingCell": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "rectangleCoverageExact": true,
+            "landingHeadspaceProxyIntersections": 0,
+            "lastTreadLocal": {
+              "x": 14,
+              "y": 19,
+              "z": 19
+            },
+            "precedingTreadLocal": {
+              "x": 14,
+              "y": 18,
+              "z": 18
+            },
+            "entryCell": {
+              "x": 15,
+              "z": 18
+            },
+            "entryToLastTreadManhattan": 2,
+            "topTreadOverlapsPad": false,
+            "topTreadInsideCutout": false,
+            "landingCellsEdgeAdjacentToLastTread": [],
+            "directTopTreadToLandingProven": false,
+            "nominalFloorCoveragePass": true,
+            "bottomSupportCertainty": "UNKNOWN_NO_LOAD_PATH",
+            "topTransitionCertainty": "NO_DIRECT_EDGE_CONTACT_REDESIGN_REQUIRED",
+            "installedCeilingHeadroomCertified": false,
+            "installedLandingSupportCertified": false,
+            "physicalStairAccessCertified": false
+          },
+          "constructible": false,
+          "selected": false,
+          "landingSupportVerified": false,
+          "futureDesignInputs": [
+            "STAIR_TOP_TREAD_REORIENTATION_OR_LANDING_TRANSITION",
+            "LANDING_LOAD_PATH",
+            "PHYSICAL_HEADROOM",
+            "WALL_JOINT",
+            "BLOCK_STATES_AND_MATERIALS"
+          ]
+        },
+        {
+          "id": "B_TRIM_UNUSED_TERMINAL",
+          "corridorToStairPort": "15,18|14,18",
+          "candidatePadCells": [
+            {
+              "x": 15,
+              "z": 17
+            },
+            {
+              "x": 16,
+              "z": 17
+            },
+            {
+              "x": 15,
+              "z": 18
+            },
+            {
+              "x": 16,
+              "z": 18
+            }
+          ],
+          "assessment": {
+            "nominalFloorY": 20,
+            "lastTreadBottomY": 19,
+            "lastTreadTopY": 20,
+            "stairTopAlignedToFloor": true,
+            "landingFootprintCells": 4,
+            "landingRetainedNominalFloorCells": 4,
+            "landingCutoutOverlap": 0,
+            "cutoutCellsMarkedOpen": 2,
+            "rectangleCoveragePerLandingCell": [
+              1,
+              1,
+              1,
+              1
+            ],
+            "rectangleCoverageExact": true,
+            "landingHeadspaceProxyIntersections": 0,
+            "lastTreadLocal": {
+              "x": 14,
+              "y": 19,
+              "z": 19
+            },
+            "precedingTreadLocal": {
+              "x": 14,
+              "y": 18,
+              "z": 18
+            },
+            "entryCell": {
+              "x": 15,
+              "z": 18
+            },
+            "entryToLastTreadManhattan": 2,
+            "topTreadOverlapsPad": false,
+            "topTreadInsideCutout": false,
+            "landingCellsEdgeAdjacentToLastTread": [],
+            "directTopTreadToLandingProven": false,
+            "nominalFloorCoveragePass": true,
+            "bottomSupportCertainty": "UNKNOWN_NO_LOAD_PATH",
+            "topTransitionCertainty": "NO_DIRECT_EDGE_CONTACT_REDESIGN_REQUIRED",
+            "installedCeilingHeadroomCertified": false,
+            "installedLandingSupportCertified": false,
+            "physicalStairAccessCertified": false
+          },
+          "constructible": false,
+          "selected": false,
+          "landingSupportVerified": false,
+          "futureDesignInputs": [
+            "STAIR_TOP_TREAD_REORIENTATION_OR_LANDING_TRANSITION",
+            "LANDING_LOAD_PATH",
+            "PHYSICAL_HEADROOM",
+            "WALL_JOINT",
+            "BLOCK_STATES_AND_MATERIALS"
+          ]
+        }
+      ],
+      "upperFloorCutoutCells": [
+        {
+          "x": 14,
+          "z": 17
+        },
+        {
+          "x": 14,
+          "z": 18
+        }
+      ],
+      "nominalRectangleEmitterValidated": true
+    }
+  ],
+  "totals": {
+    "upperLevels": 5,
+    "variantComparisons": 10,
+    "nominalPadsWithAll4FloorCells": 10,
+    "candidateEmitterExact": 10,
+    "treadSurfaceYAligned": 10,
+    "lastTreadDirectlyAdjacent": 0,
+    "topTransitionsStillRequireRedesign": 10,
+    "physicalLandingSupportsVerified": 0,
+    "emittedOperations": 0
+  },
+  "approvedVariant": null,
+  "unresolved": [
+    "STAIR_TO_LANDING_DIRECT_EDGE_TRANSITION",
+    "LANDING_PHYSICAL_SUPPORT",
+    "ACTUAL_HEADROOM_AND_UPPER_SLAB",
+    "WALL_JOINT_AND_GUARD",
+    "MATERIALS_AND_BLOCK_STATES",
+    "WORLD_COORDINATES",
+    "ENGINE_RUNTIME",
+    "CONSTRUCTION_APPROVAL"
+  ],
+  "interpretation": "FOUR_RETAINED_2D_CELLS_NOT_A_CERTIFIED_LANDING",
+  "readiness": "NOT_PREPARED",
+  "deployment": "BLOCKED",
+  "safety": {
+    "notPrepared": true,
+    "constructionApproved": false,
+    "executionAllowed": false,
+    "legacyModified": false,
+    "existingWorldModified": false,
+    "frozenEvidenceModified": false,
+    "bridgeContact": false,
+    "worldAccess": false
+  },
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "materialIds": [],
+    "worldCoordinates": null
+  },
+  "constructionCommands": 0,
+  "reportSha256": "b25f6e7dbf9ad486b98a2a5358c9f51b31fe77619da847cc89d37ab30fcc6601"
+}

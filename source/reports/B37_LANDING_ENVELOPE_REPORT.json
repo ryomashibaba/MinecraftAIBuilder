@@ -1,0 +1,726 @@
+{
+  "schema": "minecraftaibuilder-step8b-b37-landing-envelope-v1",
+  "kind": "OFFLINE_READONLY_GEOMETRY_DIAGNOSTIC",
+  "provenance": {
+    "basedOn": "B36_FROZEN_REPORT_B17_B31",
+    "B36ReportSha256": "bf58d8200c430908030dbdc72d6149c40023a1bf0f05a87cc881c687373fd842",
+    "worldConnection": false,
+    "plannerExecuted": false
+  },
+  "building": "apartment/candidate-01",
+  "nominalFootprintsOnly": true,
+  "wallAndSupportEvidence": "UNKNOWN",
+  "landingInterpretation": "CORRIDOR_RESERVATION_1x2_OR_2x2_ONLY_NOT_A_CONSTRUCTIBLE_LANDING",
+  "levels": [
+    {
+      "floor": 2,
+      "variants": [
+        {
+          "id": "A_RETAG_ONE_CORRIDOR_CELL",
+          "ports": [
+            {
+              "edgeId": "11,18|12,18",
+              "corridorKey": "11,18",
+              "shaftKey": "12,18",
+              "approachSide": "EAST",
+              "directlyTouchesCandidateFloorCutout": false,
+              "corridor1x2Available": true,
+              "corridor1x2Cells": [
+                "11,18",
+                "10,18"
+              ],
+              "corridor2x2Available": false,
+              "corridor2x2Alternatives": [],
+              "geometricReviewClass": "POTENTIAL_1X2_ONLY",
+              "landingBlockDimensionsCertified": false,
+              "structuralSupportCertified": false,
+              "wallJointCertified": false,
+              "headroomCertified": false
+            },
+            {
+              "edgeId": "12,21|12,20",
+              "corridorKey": "12,21",
+              "shaftKey": "12,20",
+              "approachSide": "NORTH",
+              "directlyTouchesCandidateFloorCutout": false,
+              "corridor1x2Available": false,
+              "corridor1x2Cells": [],
+              "corridor2x2Available": false,
+              "corridor2x2Alternatives": [],
+              "geometricReviewClass": "INSUFFICIENT_CORRIDOR_FOOTPRINT",
+              "landingBlockDimensionsCertified": false,
+              "structuralSupportCertified": false,
+              "wallJointCertified": false,
+              "headroomCertified": false
+            },
+            {
+              "edgeId": "15,18|14,18",
+              "corridorKey": "15,18",
+              "shaftKey": "14,18",
+              "approachSide": "WEST",
+              "directlyTouchesCandidateFloorCutout": true,
+              "corridor1x2Available": true,
+              "corridor1x2Cells": [
+                "15,18",
+                "16,18"
+              ],
+              "corridor2x2Available": true,
+              "corridor2x2Alternatives": [
+                [
+                  "15,17",
+                  "16,17",
+                  "15,18",
+                  "16,18"
+                ]
+              ],
+              "geometricReviewClass": "POTENTIAL_2X2_NEAR_CUTOUT",
+              "landingBlockDimensionsCertified": false,
+              "structuralSupportCertified": false,
+              "wallJointCertified": false,
+              "headroomCertified": false
+            }
+          ],
+          "nominalCorridor1x2Ports": 2,
+          "nominalCorridor2x2Ports": 1,
+          "nominal2x2CutoutAdjacentPorts": 1,
+          "physicalLandingCertified": false,
+          "selection": "UNSELECTED",
+          "approval": false
+        },
+        {
+          "id": "B_TRIM_UNUSED_TERMINAL",
+          "ports": [
+            {
+              "edgeId": "11,18|12,18",
+              "corridorKey": "11,18",
+              "shaftKey": "12,18",
+              "approachSide": "EAST",
+              "directlyTouchesCandidateFloorCutout": false,
+              "corridor1x2Available": true,
+              "corridor1x2Cells": [
+                "11,18",
+                "10,18"
+              ],
+              "corridor2x2Available": false,
+              "corridor2x2Alternatives": [],
+              "geometricReviewClass": "POTENTIAL_1X2_ONLY",
+              "landingBlockDimensionsCertified": false,
+              "structuralSupportCertified": false,
+              "wallJointCertified": false,
+              "headroomCertified": false
+            },
+            {
+              "edgeId": "15,18|14,18",
+              "corridorKey": "15,18",
+              "shaftKey": "14,18",
+              "approachSide": "WEST",
+              "directlyTouchesCandidateFloorCutout": true,
+              "corridor1x2Available": true,
+              "corridor1x2Cells": [
+                "15,18",
+                "16,18"
+              ],
+              "corridor2x2Available": true,
+              "corridor2x2Alternatives": [
+                [
+                  "15,17",
+                  "16,17",
+                  "15,18",
+                  "16,18"
+                ]
+              ],
+              "geometricReviewClass": "POTENTIAL_2X2_NEAR_CUTOUT",
+              "landingBlockDimensionsCertified": false,
+              "structuralSupportCertified": false,
+              "wallJointCertified": false,
+              "headroomCertified": false
+            }
+          ],
+          "nominalCorridor1x2Ports": 2,
+          "nominalCorridor2x2Ports": 1,
+          "nominal2x2CutoutAdjacentPorts": 1,
+          "physicalLandingCertified": false,
+          "selection": "UNSELECTED",
+          "approval": false
+        }
+      ]
+    },
+    {
+      "floor": 3,
+      "variants": [
+        {
+          "id": "A_RETAG_ONE_CORRIDOR_CELL",
+          "ports": [
+            {
+              "edgeId": "11,18|12,18",
+              "corridorKey": "11,18",
+              "shaftKey": "12,18",
+              "approachSide": "EAST",
+              "directlyTouchesCandidateFloorCutout": false,
+              "corridor1x2Available": true,
+              "corridor1x2Cells": [
+                "11,18",
+                "10,18"
+              ],
+              "corridor2x2Available": false,
+              "corridor2x2Alternatives": [],
+              "geometricReviewClass": "POTENTIAL_1X2_ONLY",
+              "landingBlockDimensionsCertified": false,
+              "structuralSupportCertified": false,
+              "wallJointCertified": false,
+              "headroomCertified": false
+            },
+            {
+              "edgeId": "12,21|12,20",
+              "corridorKey": "12,21",
+              "shaftKey": "12,20",
+              "approachSide": "NORTH",
+              "directlyTouchesCandidateFloorCutout": false,
+              "corridor1x2Available": false,
+              "corridor1x2Cells": [],
+              "corridor2x2Available": false,
+              "corridor2x2Alternatives": [],
+              "geometricReviewClass": "INSUFFICIENT_CORRIDOR_FOOTPRINT",
+              "landingBlockDimensionsCertified": false,
+              "structuralSupportCertified": false,
+              "wallJointCertified": false,
+              "headroomCertified": false
+            },
+            {
+              "edgeId": "15,18|14,18",
+              "corridorKey": "15,18",
+              "shaftKey": "14,18",
+              "approachSide": "WEST",
+              "directlyTouchesCandidateFloorCutout": true,
+              "corridor1x2Available": true,
+              "corridor1x2Cells": [
+                "15,18",
+                "16,18"
+              ],
+              "corridor2x2Available": true,
+              "corridor2x2Alternatives": [
+                [
+                  "15,17",
+                  "16,17",
+                  "15,18",
+                  "16,18"
+                ]
+              ],
+              "geometricReviewClass": "POTENTIAL_2X2_NEAR_CUTOUT",
+              "landingBlockDimensionsCertified": false,
+              "structuralSupportCertified": false,
+              "wallJointCertified": false,
+              "headroomCertified": false
+            }
+          ],
+          "nominalCorridor1x2Ports": 2,
+          "nominalCorridor2x2Ports": 1,
+          "nominal2x2CutoutAdjacentPorts": 1,
+          "physicalLandingCertified": false,
+          "selection": "UNSELECTED",
+          "approval": false
+        },
+        {
+          "id": "B_TRIM_UNUSED_TERMINAL",
+          "ports": [
+            {
+              "edgeId": "11,18|12,18",
+              "corridorKey": "11,18",
+              "shaftKey": "12,18",
+              "approachSide": "EAST",
+              "directlyTouchesCandidateFloorCutout": false,
+              "corridor1x2Available": true,
+              "corridor1x2Cells": [
+                "11,18",
+                "10,18"
+              ],
+              "corridor2x2Available": false,
+              "corridor2x2Alternatives": [],
+              "geometricReviewClass": "POTENTIAL_1X2_ONLY",
+              "landingBlockDimensionsCertified": false,
+              "structuralSupportCertified": false,
+              "wallJointCertified": false,
+              "headroomCertified": false
+            },
+            {
+              "edgeId": "15,18|14,18",
+              "corridorKey": "15,18",
+              "shaftKey": "14,18",
+              "approachSide": "WEST",
+              "directlyTouchesCandidateFloorCutout": true,
+              "corridor1x2Available": true,
+              "corridor1x2Cells": [
+                "15,18",
+                "16,18"
+              ],
+              "corridor2x2Available": true,
+              "corridor2x2Alternatives": [
+                [
+                  "15,17",
+                  "16,17",
+                  "15,18",
+                  "16,18"
+                ]
+              ],
+              "geometricReviewClass": "POTENTIAL_2X2_NEAR_CUTOUT",
+              "landingBlockDimensionsCertified": false,
+              "structuralSupportCertified": false,
+              "wallJointCertified": false,
+              "headroomCertified": false
+            }
+          ],
+          "nominalCorridor1x2Ports": 2,
+          "nominalCorridor2x2Ports": 1,
+          "nominal2x2CutoutAdjacentPorts": 1,
+          "physicalLandingCertified": false,
+          "selection": "UNSELECTED",
+          "approval": false
+        }
+      ]
+    },
+    {
+      "floor": 4,
+      "variants": [
+        {
+          "id": "A_RETAG_ONE_CORRIDOR_CELL",
+          "ports": [
+            {
+              "edgeId": "11,18|12,18",
+              "corridorKey": "11,18",
+              "shaftKey": "12,18",
+              "approachSide": "EAST",
+              "directlyTouchesCandidateFloorCutout": false,
+              "corridor1x2Available": true,
+              "corridor1x2Cells": [
+                "11,18",
+                "10,18"
+              ],
+              "corridor2x2Available": false,
+              "corridor2x2Alternatives": [],
+              "geometricReviewClass": "POTENTIAL_1X2_ONLY",
+              "landingBlockDimensionsCertified": false,
+              "structuralSupportCertified": false,
+              "wallJointCertified": false,
+              "headroomCertified": false
+            },
+            {
+              "edgeId": "12,21|12,20",
+              "corridorKey": "12,21",
+              "shaftKey": "12,20",
+              "approachSide": "NORTH",
+              "directlyTouchesCandidateFloorCutout": false,
+              "corridor1x2Available": false,
+              "corridor1x2Cells": [],
+              "corridor2x2Available": false,
+              "corridor2x2Alternatives": [],
+              "geometricReviewClass": "INSUFFICIENT_CORRIDOR_FOOTPRINT",
+              "landingBlockDimensionsCertified": false,
+              "structuralSupportCertified": false,
+              "wallJointCertified": false,
+              "headroomCertified": false
+            },
+            {
+              "edgeId": "15,18|14,18",
+              "corridorKey": "15,18",
+              "shaftKey": "14,18",
+              "approachSide": "WEST",
+              "directlyTouchesCandidateFloorCutout": true,
+              "corridor1x2Available": true,
+              "corridor1x2Cells": [
+                "15,18",
+                "16,18"
+              ],
+              "corridor2x2Available": true,
+              "corridor2x2Alternatives": [
+                [
+                  "15,17",
+                  "16,17",
+                  "15,18",
+                  "16,18"
+                ]
+              ],
+              "geometricReviewClass": "POTENTIAL_2X2_NEAR_CUTOUT",
+              "landingBlockDimensionsCertified": false,
+              "structuralSupportCertified": false,
+              "wallJointCertified": false,
+              "headroomCertified": false
+            }
+          ],
+          "nominalCorridor1x2Ports": 2,
+          "nominalCorridor2x2Ports": 1,
+          "nominal2x2CutoutAdjacentPorts": 1,
+          "physicalLandingCertified": false,
+          "selection": "UNSELECTED",
+          "approval": false
+        },
+        {
+          "id": "B_TRIM_UNUSED_TERMINAL",
+          "ports": [
+            {
+              "edgeId": "11,18|12,18",
+              "corridorKey": "11,18",
+              "shaftKey": "12,18",
+              "approachSide": "EAST",
+              "directlyTouchesCandidateFloorCutout": false,
+              "corridor1x2Available": true,
+              "corridor1x2Cells": [
+                "11,18",
+                "10,18"
+              ],
+              "corridor2x2Available": false,
+              "corridor2x2Alternatives": [],
+              "geometricReviewClass": "POTENTIAL_1X2_ONLY",
+              "landingBlockDimensionsCertified": false,
+              "structuralSupportCertified": false,
+              "wallJointCertified": false,
+              "headroomCertified": false
+            },
+            {
+              "edgeId": "15,18|14,18",
+              "corridorKey": "15,18",
+              "shaftKey": "14,18",
+              "approachSide": "WEST",
+              "directlyTouchesCandidateFloorCutout": true,
+              "corridor1x2Available": true,
+              "corridor1x2Cells": [
+                "15,18",
+                "16,18"
+              ],
+              "corridor2x2Available": true,
+              "corridor2x2Alternatives": [
+                [
+                  "15,17",
+                  "16,17",
+                  "15,18",
+                  "16,18"
+                ]
+              ],
+              "geometricReviewClass": "POTENTIAL_2X2_NEAR_CUTOUT",
+              "landingBlockDimensionsCertified": false,
+              "structuralSupportCertified": false,
+              "wallJointCertified": false,
+              "headroomCertified": false
+            }
+          ],
+          "nominalCorridor1x2Ports": 2,
+          "nominalCorridor2x2Ports": 1,
+          "nominal2x2CutoutAdjacentPorts": 1,
+          "physicalLandingCertified": false,
+          "selection": "UNSELECTED",
+          "approval": false
+        }
+      ]
+    },
+    {
+      "floor": 5,
+      "variants": [
+        {
+          "id": "A_RETAG_ONE_CORRIDOR_CELL",
+          "ports": [
+            {
+              "edgeId": "11,18|12,18",
+              "corridorKey": "11,18",
+              "shaftKey": "12,18",
+              "approachSide": "EAST",
+              "directlyTouchesCandidateFloorCutout": false,
+              "corridor1x2Available": true,
+              "corridor1x2Cells": [
+                "11,18",
+                "10,18"
+              ],
+              "corridor2x2Available": false,
+              "corridor2x2Alternatives": [],
+              "geometricReviewClass": "POTENTIAL_1X2_ONLY",
+              "landingBlockDimensionsCertified": false,
+              "structuralSupportCertified": false,
+              "wallJointCertified": false,
+              "headroomCertified": false
+            },
+            {
+              "edgeId": "12,21|12,20",
+              "corridorKey": "12,21",
+              "shaftKey": "12,20",
+              "approachSide": "NORTH",
+              "directlyTouchesCandidateFloorCutout": false,
+              "corridor1x2Available": false,
+              "corridor1x2Cells": [],
+              "corridor2x2Available": false,
+              "corridor2x2Alternatives": [],
+              "geometricReviewClass": "INSUFFICIENT_CORRIDOR_FOOTPRINT",
+              "landingBlockDimensionsCertified": false,
+              "structuralSupportCertified": false,
+              "wallJointCertified": false,
+              "headroomCertified": false
+            },
+            {
+              "edgeId": "15,18|14,18",
+              "corridorKey": "15,18",
+              "shaftKey": "14,18",
+              "approachSide": "WEST",
+              "directlyTouchesCandidateFloorCutout": true,
+              "corridor1x2Available": true,
+              "corridor1x2Cells": [
+                "15,18",
+                "16,18"
+              ],
+              "corridor2x2Available": true,
+              "corridor2x2Alternatives": [
+                [
+                  "15,17",
+                  "16,17",
+                  "15,18",
+                  "16,18"
+                ]
+              ],
+              "geometricReviewClass": "POTENTIAL_2X2_NEAR_CUTOUT",
+              "landingBlockDimensionsCertified": false,
+              "structuralSupportCertified": false,
+              "wallJointCertified": false,
+              "headroomCertified": false
+            }
+          ],
+          "nominalCorridor1x2Ports": 2,
+          "nominalCorridor2x2Ports": 1,
+          "nominal2x2CutoutAdjacentPorts": 1,
+          "physicalLandingCertified": false,
+          "selection": "UNSELECTED",
+          "approval": false
+        },
+        {
+          "id": "B_TRIM_UNUSED_TERMINAL",
+          "ports": [
+            {
+              "edgeId": "11,18|12,18",
+              "corridorKey": "11,18",
+              "shaftKey": "12,18",
+              "approachSide": "EAST",
+              "directlyTouchesCandidateFloorCutout": false,
+              "corridor1x2Available": true,
+              "corridor1x2Cells": [
+                "11,18",
+                "10,18"
+              ],
+              "corridor2x2Available": false,
+              "corridor2x2Alternatives": [],
+              "geometricReviewClass": "POTENTIAL_1X2_ONLY",
+              "landingBlockDimensionsCertified": false,
+              "structuralSupportCertified": false,
+              "wallJointCertified": false,
+              "headroomCertified": false
+            },
+            {
+              "edgeId": "15,18|14,18",
+              "corridorKey": "15,18",
+              "shaftKey": "14,18",
+              "approachSide": "WEST",
+              "directlyTouchesCandidateFloorCutout": true,
+              "corridor1x2Available": true,
+              "corridor1x2Cells": [
+                "15,18",
+                "16,18"
+              ],
+              "corridor2x2Available": true,
+              "corridor2x2Alternatives": [
+                [
+                  "15,17",
+                  "16,17",
+                  "15,18",
+                  "16,18"
+                ]
+              ],
+              "geometricReviewClass": "POTENTIAL_2X2_NEAR_CUTOUT",
+              "landingBlockDimensionsCertified": false,
+              "structuralSupportCertified": false,
+              "wallJointCertified": false,
+              "headroomCertified": false
+            }
+          ],
+          "nominalCorridor1x2Ports": 2,
+          "nominalCorridor2x2Ports": 1,
+          "nominal2x2CutoutAdjacentPorts": 1,
+          "physicalLandingCertified": false,
+          "selection": "UNSELECTED",
+          "approval": false
+        }
+      ]
+    },
+    {
+      "floor": 6,
+      "variants": [
+        {
+          "id": "A_RETAG_ONE_CORRIDOR_CELL",
+          "ports": [
+            {
+              "edgeId": "11,18|12,18",
+              "corridorKey": "11,18",
+              "shaftKey": "12,18",
+              "approachSide": "EAST",
+              "directlyTouchesCandidateFloorCutout": false,
+              "corridor1x2Available": true,
+              "corridor1x2Cells": [
+                "11,18",
+                "10,18"
+              ],
+              "corridor2x2Available": false,
+              "corridor2x2Alternatives": [],
+              "geometricReviewClass": "POTENTIAL_1X2_ONLY",
+              "landingBlockDimensionsCertified": false,
+              "structuralSupportCertified": false,
+              "wallJointCertified": false,
+              "headroomCertified": false
+            },
+            {
+              "edgeId": "12,21|12,20",
+              "corridorKey": "12,21",
+              "shaftKey": "12,20",
+              "approachSide": "NORTH",
+              "directlyTouchesCandidateFloorCutout": false,
+              "corridor1x2Available": false,
+              "corridor1x2Cells": [],
+              "corridor2x2Available": false,
+              "corridor2x2Alternatives": [],
+              "geometricReviewClass": "INSUFFICIENT_CORRIDOR_FOOTPRINT",
+              "landingBlockDimensionsCertified": false,
+              "structuralSupportCertified": false,
+              "wallJointCertified": false,
+              "headroomCertified": false
+            },
+            {
+              "edgeId": "15,18|14,18",
+              "corridorKey": "15,18",
+              "shaftKey": "14,18",
+              "approachSide": "WEST",
+              "directlyTouchesCandidateFloorCutout": true,
+              "corridor1x2Available": true,
+              "corridor1x2Cells": [
+                "15,18",
+                "16,18"
+              ],
+              "corridor2x2Available": true,
+              "corridor2x2Alternatives": [
+                [
+                  "15,17",
+                  "16,17",
+                  "15,18",
+                  "16,18"
+                ]
+              ],
+              "geometricReviewClass": "POTENTIAL_2X2_NEAR_CUTOUT",
+              "landingBlockDimensionsCertified": false,
+              "structuralSupportCertified": false,
+              "wallJointCertified": false,
+              "headroomCertified": false
+            }
+          ],
+          "nominalCorridor1x2Ports": 2,
+          "nominalCorridor2x2Ports": 1,
+          "nominal2x2CutoutAdjacentPorts": 1,
+          "physicalLandingCertified": false,
+          "selection": "UNSELECTED",
+          "approval": false
+        },
+        {
+          "id": "B_TRIM_UNUSED_TERMINAL",
+          "ports": [
+            {
+              "edgeId": "11,18|12,18",
+              "corridorKey": "11,18",
+              "shaftKey": "12,18",
+              "approachSide": "EAST",
+              "directlyTouchesCandidateFloorCutout": false,
+              "corridor1x2Available": true,
+              "corridor1x2Cells": [
+                "11,18",
+                "10,18"
+              ],
+              "corridor2x2Available": false,
+              "corridor2x2Alternatives": [],
+              "geometricReviewClass": "POTENTIAL_1X2_ONLY",
+              "landingBlockDimensionsCertified": false,
+              "structuralSupportCertified": false,
+              "wallJointCertified": false,
+              "headroomCertified": false
+            },
+            {
+              "edgeId": "15,18|14,18",
+              "corridorKey": "15,18",
+              "shaftKey": "14,18",
+              "approachSide": "WEST",
+              "directlyTouchesCandidateFloorCutout": true,
+              "corridor1x2Available": true,
+              "corridor1x2Cells": [
+                "15,18",
+                "16,18"
+              ],
+              "corridor2x2Available": true,
+              "corridor2x2Alternatives": [
+                [
+                  "15,17",
+                  "16,17",
+                  "15,18",
+                  "16,18"
+                ]
+              ],
+              "geometricReviewClass": "POTENTIAL_2X2_NEAR_CUTOUT",
+              "landingBlockDimensionsCertified": false,
+              "structuralSupportCertified": false,
+              "wallJointCertified": false,
+              "headroomCertified": false
+            }
+          ],
+          "nominalCorridor1x2Ports": 2,
+          "nominalCorridor2x2Ports": 1,
+          "nominal2x2CutoutAdjacentPorts": 1,
+          "physicalLandingCertified": false,
+          "selection": "UNSELECTED",
+          "approval": false
+        }
+      ]
+    }
+  ],
+  "totals": {
+    "levels": 5,
+    "portCountA": 15,
+    "portCountB": 10,
+    "corridor2x2PortsA": 5,
+    "corridor2x2PortsB": 5,
+    "cutoutAdjacent2x2PortsA": 5,
+    "cutoutAdjacent2x2PortsB": 5,
+    "physicallyValidLandings": 0,
+    "materialVerified": 0,
+    "operationsEmitted": 0
+  },
+  "unresolved": [
+    "LANDING_REAL_DIMENSIONS",
+    "STAIR_ENTRY_VERTICAL_TRANSITION",
+    "SLAB_SUPPORT_AND_ROOF_HEADROOM",
+    "FLOOR_CUTOUT_REAL_EMITTER",
+    "WALL_AND_RAIL_JOINTS",
+    "MATERIAL_AND_DOOR_STATES",
+    "WORLD_COORDINATES",
+    "RUNTIME_ENGINE_IDENTITY",
+    "CONSTRUCTION_APPROVAL"
+  ],
+  "recommendation": "REVIEW_EAST_SIDE_CORRIDOR_2X2_AS_NONEXECUTABLE_CANDIDATE_ONLY",
+  "approvedVariant": null,
+  "safety": {
+    "notPrepared": true,
+    "constructionApproved": false,
+    "executionAllowed": false,
+    "worldAccess": false,
+    "bridgeContact": false,
+    "projectFilesModified": false,
+    "frozenEvidenceModified": false,
+    "legacyModified": false
+  },
+  "readiness": "NOT_PREPARED",
+  "deployment": "BLOCKED",
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "materialIds": [],
+    "worldCoordinates": null
+  },
+  "constructionCommands": 0,
+  "reportSha256": "c64faa42a3b1f9a305763f680f370bb222785113c52ff8fa165698b127f5b6d5"
+}

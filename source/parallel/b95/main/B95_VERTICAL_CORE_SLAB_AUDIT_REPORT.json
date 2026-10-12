@@ -1,0 +1,4237 @@
+{
+  "schema": "minecraftaibuilder-b95-vertical-core-slab-corridor-audit-v1",
+  "kind": "OFFLINE_VOXEL_LEVEL_INTERFLOOR_AND_CORRIDOR_IMPACT_AUDIT_NOT_CONSTRUCTION",
+  "provenance": {
+    "b94": "10ce7847100e69cbb2c321881421d1405541eaf20bfa4fcb7680d7c326ac7489",
+    "b93": "d4081039734728d61c80d619b31d3d88fcd282cfe1a50f05564f35541b5e2035",
+    "officialBlocksSha256": "49ff9c501b1c96b547aa49fda07a53bc19f7d5fe338aff43fe5f65c3eaaf031f"
+  },
+  "totals": {
+    "buildings": 5,
+    "nominalFloors": 30,
+    "originalNominalRooms": 314,
+    "priorUnapprovedCandidates": 296,
+    "heldRooms": 18,
+    "approvedNewRooms": 0,
+    "physicalCoreStairsBuilt": 0,
+    "examinedShaftFootprints": 100,
+    "fullSixFloorCandidateCount": 1,
+    "worldOperations": 0,
+    "worldContacts": 0,
+    "priorProtectedFilesChanged": 0
+  },
+  "replayed": [
+    {
+      "building": "apartment/candidate-01",
+      "operationsSha256": "6c5802481a5d22a2958cd83cb591dc8e4dbe1a1cd25a1d365f6c7f70635a7ddc",
+      "readOnly": true,
+      "verifiedReadOnly": true
+    },
+    {
+      "building": "office/candidate-01",
+      "operationsSha256": "e29a8c11eeb8ce0897995fdbb50de9482d3ec0a6b0767b9ac48bee8397e5249c",
+      "readOnly": true,
+      "verifiedReadOnly": true
+    }
+  ],
+  "verticalAudit": {
+    "selected": {
+      "x": 24,
+      "z": 18,
+      "width": 2,
+      "depth": 2,
+      "localFootprint": [
+        {
+          "x": 24,
+          "z": 18
+        },
+        {
+          "x": 25,
+          "z": 18
+        },
+        {
+          "x": 24,
+          "z": 19
+        },
+        {
+          "x": 25,
+          "z": 19
+        }
+      ],
+      "slices": [
+        {
+          "sectionId": "apartment/candidate-01/L1",
+          "level": 1,
+          "footprintInsideFloorMask": true,
+          "floorMaskMissing": [],
+          "heldRooms": [
+            "F1-R013"
+          ],
+          "otherRooms": [],
+          "protectedSites": [],
+          "productionContacts": [
+            {
+              "site": "24,18",
+              "dy": 0,
+              "level": 1,
+              "role": "floor",
+              "block": "minecraft:basalt",
+              "phase": "floor",
+              "category": "BASE_FLOOR",
+              "structuralReviewRequired": true,
+              "automaticChangeAllowed": false
+            },
+            {
+              "site": "25,18",
+              "dy": 0,
+              "level": 1,
+              "role": "floor",
+              "block": "minecraft:basalt",
+              "phase": "floor",
+              "category": "BASE_FLOOR",
+              "structuralReviewRequired": true,
+              "automaticChangeAllowed": false
+            },
+            {
+              "site": "24,19",
+              "dy": 0,
+              "level": 1,
+              "role": "floor",
+              "block": "minecraft:basalt",
+              "phase": "floor",
+              "category": "BASE_FLOOR",
+              "structuralReviewRequired": true,
+              "automaticChangeAllowed": false
+            },
+            {
+              "site": "25,19",
+              "dy": 0,
+              "level": 1,
+              "role": "floor",
+              "block": "minecraft:basalt",
+              "phase": "floor",
+              "category": "BASE_FLOOR",
+              "structuralReviewRequired": true,
+              "automaticChangeAllowed": false
+            }
+          ],
+          "productionContactCount": 4,
+          "hardGlassContacts": [],
+          "bodyHeadroomOccupied": 0,
+          "baselineCoreCorridorReachable": 48,
+          "afterCoreCorridorReachable": 43,
+          "deletedPhysicalCorridorSites": 3,
+          "outsideCorridorDisconnectedFromCore": 2,
+          "lostOutsideCorridorSites": [
+            "24,20",
+            "26,18"
+          ],
+          "nominalCorridorSitesConverted": [
+            "24,18",
+            "25,18",
+            "24,19"
+          ],
+          "originalCoreUnchanged": true,
+          "operations": []
+        },
+        {
+          "sectionId": "apartment/candidate-01/L2",
+          "level": 2,
+          "footprintInsideFloorMask": true,
+          "floorMaskMissing": [],
+          "heldRooms": [
+            "F2-R013"
+          ],
+          "otherRooms": [],
+          "protectedSites": [],
+          "productionContacts": [
+            {
+              "site": "24,18",
+              "dy": 0,
+              "level": 2,
+              "role": "floor",
+              "block": "minecraft:basalt",
+              "phase": "floor",
+              "category": "BASE_FLOOR",
+              "structuralReviewRequired": true,
+              "automaticChangeAllowed": false
+            },
+            {
+              "site": "25,18",
+              "dy": 0,
+              "level": 2,
+              "role": "floor",
+              "block": "minecraft:basalt",
+              "phase": "floor",
+              "category": "BASE_FLOOR",
+              "structuralReviewRequired": true,
+              "automaticChangeAllowed": false
+            },
+            {
+              "site": "24,19",
+              "dy": 0,
+              "level": 2,
+              "role": "floor",
+              "block": "minecraft:basalt",
+              "phase": "floor",
+              "category": "BASE_FLOOR",
+              "structuralReviewRequired": true,
+              "automaticChangeAllowed": false
+            },
+            {
+              "site": "25,19",
+              "dy": 0,
+              "level": 2,
+              "role": "floor",
+              "block": "minecraft:basalt",
+              "phase": "floor",
+              "category": "BASE_FLOOR",
+              "structuralReviewRequired": true,
+              "automaticChangeAllowed": false
+            }
+          ],
+          "productionContactCount": 4,
+          "hardGlassContacts": [],
+          "bodyHeadroomOccupied": 0,
+          "baselineCoreCorridorReachable": 17,
+          "afterCoreCorridorReachable": 12,
+          "deletedPhysicalCorridorSites": 3,
+          "outsideCorridorDisconnectedFromCore": 2,
+          "lostOutsideCorridorSites": [
+            "24,20",
+            "26,18"
+          ],
+          "nominalCorridorSitesConverted": [
+            "24,18",
+            "25,18",
+            "24,19"
+          ],
+          "originalCoreUnchanged": true,
+          "operations": []
+        },
+        {
+          "sectionId": "apartment/candidate-01/L3",
+          "level": 3,
+          "footprintInsideFloorMask": true,
+          "floorMaskMissing": [],
+          "heldRooms": [
+            "F3-R013"
+          ],
+          "otherRooms": [],
+          "protectedSites": [],
+          "productionContacts": [
+            {
+              "site": "24,18",
+              "dy": 0,
+              "level": 3,
+              "role": "floor",
+              "block": "minecraft:basalt",
+              "phase": "floor",
+              "category": "BASE_FLOOR",
+              "structuralReviewRequired": true,
+              "automaticChangeAllowed": false
+            },
+            {
+              "site": "25,18",
+              "dy": 0,
+              "level": 3,
+              "role": "floor",
+              "block": "minecraft:basalt",
+              "phase": "floor",
+              "category": "BASE_FLOOR",
+              "structuralReviewRequired": true,
+              "automaticChangeAllowed": false
+            },
+            {
+              "site": "24,19",
+              "dy": 0,
+              "level": 3,
+              "role": "floor",
+              "block": "minecraft:basalt",
+              "phase": "floor",
+              "category": "BASE_FLOOR",
+              "structuralReviewRequired": true,
+              "automaticChangeAllowed": false
+            },
+            {
+              "site": "25,19",
+              "dy": 0,
+              "level": 3,
+              "role": "floor",
+              "block": "minecraft:basalt",
+              "phase": "floor",
+              "category": "BASE_FLOOR",
+              "structuralReviewRequired": true,
+              "automaticChangeAllowed": false
+            }
+          ],
+          "productionContactCount": 4,
+          "hardGlassContacts": [],
+          "bodyHeadroomOccupied": 0,
+          "baselineCoreCorridorReachable": 17,
+          "afterCoreCorridorReachable": 12,
+          "deletedPhysicalCorridorSites": 3,
+          "outsideCorridorDisconnectedFromCore": 2,
+          "lostOutsideCorridorSites": [
+            "24,20",
+            "26,18"
+          ],
+          "nominalCorridorSitesConverted": [
+            "24,18",
+            "25,18",
+            "24,19"
+          ],
+          "originalCoreUnchanged": true,
+          "operations": []
+        },
+        {
+          "sectionId": "apartment/candidate-01/L4",
+          "level": 4,
+          "footprintInsideFloorMask": true,
+          "floorMaskMissing": [],
+          "heldRooms": [
+            "F4-R013"
+          ],
+          "otherRooms": [],
+          "protectedSites": [],
+          "productionContacts": [
+            {
+              "site": "24,18",
+              "dy": 0,
+              "level": 4,
+              "role": "floor",
+              "block": "minecraft:basalt",
+              "phase": "floor",
+              "category": "BASE_FLOOR",
+              "structuralReviewRequired": true,
+              "automaticChangeAllowed": false
+            },
+            {
+              "site": "25,18",
+              "dy": 0,
+              "level": 4,
+              "role": "floor",
+              "block": "minecraft:basalt",
+              "phase": "floor",
+              "category": "BASE_FLOOR",
+              "structuralReviewRequired": true,
+              "automaticChangeAllowed": false
+            },
+            {
+              "site": "24,19",
+              "dy": 0,
+              "level": 4,
+              "role": "floor",
+              "block": "minecraft:basalt",
+              "phase": "floor",
+              "category": "BASE_FLOOR",
+              "structuralReviewRequired": true,
+              "automaticChangeAllowed": false
+            },
+            {
+              "site": "25,19",
+              "dy": 0,
+              "level": 4,
+              "role": "floor",
+              "block": "minecraft:basalt",
+              "phase": "floor",
+              "category": "BASE_FLOOR",
+              "structuralReviewRequired": true,
+              "automaticChangeAllowed": false
+            }
+          ],
+          "productionContactCount": 4,
+          "hardGlassContacts": [],
+          "bodyHeadroomOccupied": 0,
+          "baselineCoreCorridorReachable": 17,
+          "afterCoreCorridorReachable": 12,
+          "deletedPhysicalCorridorSites": 3,
+          "outsideCorridorDisconnectedFromCore": 2,
+          "lostOutsideCorridorSites": [
+            "24,20",
+            "26,18"
+          ],
+          "nominalCorridorSitesConverted": [
+            "24,18",
+            "25,18",
+            "24,19"
+          ],
+          "originalCoreUnchanged": true,
+          "operations": []
+        },
+        {
+          "sectionId": "apartment/candidate-01/L5",
+          "level": 5,
+          "footprintInsideFloorMask": true,
+          "floorMaskMissing": [],
+          "heldRooms": [
+            "F5-R013"
+          ],
+          "otherRooms": [],
+          "protectedSites": [],
+          "productionContacts": [
+            {
+              "site": "24,18",
+              "dy": 0,
+              "level": 5,
+              "role": "floor",
+              "block": "minecraft:basalt",
+              "phase": "floor",
+              "category": "BASE_FLOOR",
+              "structuralReviewRequired": true,
+              "automaticChangeAllowed": false
+            },
+            {
+              "site": "25,18",
+              "dy": 0,
+              "level": 5,
+              "role": "floor",
+              "block": "minecraft:basalt",
+              "phase": "floor",
+              "category": "BASE_FLOOR",
+              "structuralReviewRequired": true,
+              "automaticChangeAllowed": false
+            },
+            {
+              "site": "24,19",
+              "dy": 0,
+              "level": 5,
+              "role": "floor",
+              "block": "minecraft:basalt",
+              "phase": "floor",
+              "category": "BASE_FLOOR",
+              "structuralReviewRequired": true,
+              "automaticChangeAllowed": false
+            },
+            {
+              "site": "25,19",
+              "dy": 0,
+              "level": 5,
+              "role": "floor",
+              "block": "minecraft:basalt",
+              "phase": "floor",
+              "category": "BASE_FLOOR",
+              "structuralReviewRequired": true,
+              "automaticChangeAllowed": false
+            }
+          ],
+          "productionContactCount": 4,
+          "hardGlassContacts": [],
+          "bodyHeadroomOccupied": 0,
+          "baselineCoreCorridorReachable": 17,
+          "afterCoreCorridorReachable": 12,
+          "deletedPhysicalCorridorSites": 3,
+          "outsideCorridorDisconnectedFromCore": 2,
+          "lostOutsideCorridorSites": [
+            "24,20",
+            "26,18"
+          ],
+          "nominalCorridorSitesConverted": [
+            "24,18",
+            "25,18",
+            "24,19"
+          ],
+          "originalCoreUnchanged": true,
+          "operations": []
+        },
+        {
+          "sectionId": "apartment/candidate-01/L6",
+          "level": 6,
+          "footprintInsideFloorMask": true,
+          "floorMaskMissing": [],
+          "heldRooms": [
+            "F6-R013"
+          ],
+          "otherRooms": [],
+          "protectedSites": [],
+          "productionContacts": [
+            {
+              "site": "24,18",
+              "dy": 0,
+              "level": 6,
+              "role": "floor",
+              "block": "minecraft:basalt",
+              "phase": "floor",
+              "category": "BASE_FLOOR",
+              "structuralReviewRequired": true,
+              "automaticChangeAllowed": false
+            },
+            {
+              "site": "25,18",
+              "dy": 0,
+              "level": 6,
+              "role": "floor",
+              "block": "minecraft:basalt",
+              "phase": "floor",
+              "category": "BASE_FLOOR",
+              "structuralReviewRequired": true,
+              "automaticChangeAllowed": false
+            },
+            {
+              "site": "24,19",
+              "dy": 0,
+              "level": 6,
+              "role": "floor",
+              "block": "minecraft:basalt",
+              "phase": "floor",
+              "category": "BASE_FLOOR",
+              "structuralReviewRequired": true,
+              "automaticChangeAllowed": false
+            },
+            {
+              "site": "25,19",
+              "dy": 0,
+              "level": 6,
+              "role": "floor",
+              "block": "minecraft:basalt",
+              "phase": "floor",
+              "category": "BASE_FLOOR",
+              "structuralReviewRequired": true,
+              "automaticChangeAllowed": false
+            }
+          ],
+          "productionContactCount": 4,
+          "hardGlassContacts": [],
+          "bodyHeadroomOccupied": 0,
+          "baselineCoreCorridorReachable": 15,
+          "afterCoreCorridorReachable": 10,
+          "deletedPhysicalCorridorSites": 3,
+          "outsideCorridorDisconnectedFromCore": 2,
+          "lostOutsideCorridorSites": [
+            "24,20",
+            "26,18"
+          ],
+          "nominalCorridorSitesConverted": [
+            "24,18",
+            "25,18",
+            "24,19"
+          ],
+          "originalCoreUnchanged": true,
+          "operations": []
+        }
+      ],
+      "interFloorGaps": [
+        {
+          "lowerLevel": 1,
+          "upperLevel": 2,
+          "inspectedBoundaryYOffsets": [
+            4,
+            5
+          ],
+          "productionCutRequests": [
+            {
+              "site": "24,18",
+              "relativeToLowerBase": 5,
+              "role": "floor",
+              "block": "minecraft:basalt",
+              "phase": "floor",
+              "modificationApproved": false
+            },
+            {
+              "site": "25,18",
+              "relativeToLowerBase": 5,
+              "role": "floor",
+              "block": "minecraft:basalt",
+              "phase": "floor",
+              "modificationApproved": false
+            },
+            {
+              "site": "24,19",
+              "relativeToLowerBase": 5,
+              "role": "floor",
+              "block": "minecraft:basalt",
+              "phase": "floor",
+              "modificationApproved": false
+            },
+            {
+              "site": "25,19",
+              "relativeToLowerBase": 5,
+              "role": "floor",
+              "block": "minecraft:basalt",
+              "phase": "floor",
+              "modificationApproved": false
+            }
+          ],
+          "productionCutCount": 4,
+          "clearVerticalPassageDemonstrated": false,
+          "slabCutApproved": false,
+          "loadBearingCapacityVerified": false,
+          "operations": []
+        },
+        {
+          "lowerLevel": 2,
+          "upperLevel": 3,
+          "inspectedBoundaryYOffsets": [
+            4,
+            5
+          ],
+          "productionCutRequests": [
+            {
+              "site": "24,18",
+              "relativeToLowerBase": 5,
+              "role": "floor",
+              "block": "minecraft:basalt",
+              "phase": "floor",
+              "modificationApproved": false
+            },
+            {
+              "site": "25,18",
+              "relativeToLowerBase": 5,
+              "role": "floor",
+              "block": "minecraft:basalt",
+              "phase": "floor",
+              "modificationApproved": false
+            },
+            {
+              "site": "24,19",
+              "relativeToLowerBase": 5,
+              "role": "floor",
+              "block": "minecraft:basalt",
+              "phase": "floor",
+              "modificationApproved": false
+            },
+            {
+              "site": "25,19",
+              "relativeToLowerBase": 5,
+              "role": "floor",
+              "block": "minecraft:basalt",
+              "phase": "floor",
+              "modificationApproved": false
+            }
+          ],
+          "productionCutCount": 4,
+          "clearVerticalPassageDemonstrated": false,
+          "slabCutApproved": false,
+          "loadBearingCapacityVerified": false,
+          "operations": []
+        },
+        {
+          "lowerLevel": 3,
+          "upperLevel": 4,
+          "inspectedBoundaryYOffsets": [
+            4,
+            5
+          ],
+          "productionCutRequests": [
+            {
+              "site": "24,18",
+              "relativeToLowerBase": 5,
+              "role": "floor",
+              "block": "minecraft:basalt",
+              "phase": "floor",
+              "modificationApproved": false
+            },
+            {
+              "site": "25,18",
+              "relativeToLowerBase": 5,
+              "role": "floor",
+              "block": "minecraft:basalt",
+              "phase": "floor",
+              "modificationApproved": false
+            },
+            {
+              "site": "24,19",
+              "relativeToLowerBase": 5,
+              "role": "floor",
+              "block": "minecraft:basalt",
+              "phase": "floor",
+              "modificationApproved": false
+            },
+            {
+              "site": "25,19",
+              "relativeToLowerBase": 5,
+              "role": "floor",
+              "block": "minecraft:basalt",
+              "phase": "floor",
+              "modificationApproved": false
+            }
+          ],
+          "productionCutCount": 4,
+          "clearVerticalPassageDemonstrated": false,
+          "slabCutApproved": false,
+          "loadBearingCapacityVerified": false,
+          "operations": []
+        },
+        {
+          "lowerLevel": 4,
+          "upperLevel": 5,
+          "inspectedBoundaryYOffsets": [
+            4,
+            5
+          ],
+          "productionCutRequests": [
+            {
+              "site": "24,18",
+              "relativeToLowerBase": 5,
+              "role": "floor",
+              "block": "minecraft:basalt",
+              "phase": "floor",
+              "modificationApproved": false
+            },
+            {
+              "site": "25,18",
+              "relativeToLowerBase": 5,
+              "role": "floor",
+              "block": "minecraft:basalt",
+              "phase": "floor",
+              "modificationApproved": false
+            },
+            {
+              "site": "24,19",
+              "relativeToLowerBase": 5,
+              "role": "floor",
+              "block": "minecraft:basalt",
+              "phase": "floor",
+              "modificationApproved": false
+            },
+            {
+              "site": "25,19",
+              "relativeToLowerBase": 5,
+              "role": "floor",
+              "block": "minecraft:basalt",
+              "phase": "floor",
+              "modificationApproved": false
+            }
+          ],
+          "productionCutCount": 4,
+          "clearVerticalPassageDemonstrated": false,
+          "slabCutApproved": false,
+          "loadBearingCapacityVerified": false,
+          "operations": []
+        },
+        {
+          "lowerLevel": 5,
+          "upperLevel": 6,
+          "inspectedBoundaryYOffsets": [
+            4,
+            5
+          ],
+          "productionCutRequests": [
+            {
+              "site": "24,18",
+              "relativeToLowerBase": 5,
+              "role": "floor",
+              "block": "minecraft:basalt",
+              "phase": "floor",
+              "modificationApproved": false
+            },
+            {
+              "site": "25,18",
+              "relativeToLowerBase": 5,
+              "role": "floor",
+              "block": "minecraft:basalt",
+              "phase": "floor",
+              "modificationApproved": false
+            },
+            {
+              "site": "24,19",
+              "relativeToLowerBase": 5,
+              "role": "floor",
+              "block": "minecraft:basalt",
+              "phase": "floor",
+              "modificationApproved": false
+            },
+            {
+              "site": "25,19",
+              "relativeToLowerBase": 5,
+              "role": "floor",
+              "block": "minecraft:basalt",
+              "phase": "floor",
+              "modificationApproved": false
+            }
+          ],
+          "productionCutCount": 4,
+          "clearVerticalPassageDemonstrated": false,
+          "slabCutApproved": false,
+          "loadBearingCapacityVerified": false,
+          "operations": []
+        }
+      ],
+      "roofBoundary": {
+        "aboveTopFloorLocalY": 30,
+        "productionContacts": [
+          {
+            "site": "24,18",
+            "role": "roof",
+            "block": "minecraft:blackstone",
+            "roofModificationApproved": false
+          },
+          {
+            "site": "25,18",
+            "role": "roof",
+            "block": "minecraft:blackstone",
+            "roofModificationApproved": false
+          },
+          {
+            "site": "24,19",
+            "role": "roof",
+            "block": "minecraft:blackstone",
+            "roofModificationApproved": false
+          },
+          {
+            "site": "25,19",
+            "role": "roof",
+            "block": "minecraft:blackstone",
+            "roofModificationApproved": false
+          }
+        ],
+        "roofChangeApproved": false,
+        "weatherproofingAndSupportUnverified": true,
+        "operations": []
+      },
+      "counts": {
+        "allProductionVoxelContacts": 24,
+        "hardGlassContacts": 0,
+        "prior296Reservations": 0,
+        "nonHeldRoomFootprintContacts": 0,
+        "missingFloorOrOriginalCoreContacts": 0,
+        "headroomContacts": 0,
+        "interFloorProductionCutRequests": 20,
+        "roofPenetrationContacts": 4,
+        "physicallyReachableCorridorSitesLostOutsideFootprint": 12,
+        "nominalCorridorCellsRepurposed": 18,
+        "heldRoomsTouched": 6
+      },
+      "affectedHeldRoomIds": [
+        "apartment/candidate-01/L1::F1-R013",
+        "apartment/candidate-01/L2::F2-R013",
+        "apartment/candidate-01/L3::F3-R013",
+        "apartment/candidate-01/L4::F4-R013",
+        "apartment/candidate-01/L5::F5-R013",
+        "apartment/candidate-01/L6::F6-R013"
+      ],
+      "protectedNonHeldRooms": [],
+      "noOriginalBuildingEditsNeeded": false,
+      "needSlabEngineering": true,
+      "existingCorridorSeveranceDetected": true,
+      "designReviewClass": "HOLD_CORRIDOR_DISCONNECTION",
+      "allDesignAndConstructionApprovalsGranted": false,
+      "emergencyEgressCertified": false,
+      "shaftConstructible": false,
+      "requiredApprovals": [
+        "INTERFLOOR_BOUNDARY_CUT_REQUIRES_APPROVAL",
+        "TOP_ROOF_PENETRATION_REQUIRES_APPROVAL",
+        "EXISTING_CORRIDOR_REACHABILITY_REDUCED",
+        "VERTICAL_TRANSPORT_GEOMETRY_NOT_DEFINED",
+        "EGRESS_AND_ACCESSIBILITY_UNVERIFIED"
+      ],
+      "worldCoordinates": null,
+      "operations": []
+    },
+    "trialCount": 100,
+    "trialOutcomes": [
+      {
+        "x": 22,
+        "z": 16,
+        "width": 2,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 66,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 18,
+          "headroomContacts": 36,
+          "interFloorProductionCutRequests": 25,
+          "roofPenetrationContacts": 3,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 0,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 23,
+        "z": 16,
+        "width": 2,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 48,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 6,
+          "headroomContacts": 18,
+          "interFloorProductionCutRequests": 25,
+          "roofPenetrationContacts": 4,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 32,
+          "nominalCorridorCellsRepurposed": 12,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": true,
+        "approved": false
+      },
+      {
+        "x": 24,
+        "z": 16,
+        "width": 2,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 24,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 4,
+          "nonHeldRoomFootprintContacts": 12,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 0,
+          "interFloorProductionCutRequests": 20,
+          "roofPenetrationContacts": 4,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 32,
+          "nominalCorridorCellsRepurposed": 12,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": true,
+        "approved": false
+      },
+      {
+        "x": 25,
+        "z": 16,
+        "width": 2,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 36,
+          "hardGlassContacts": 12,
+          "prior296Reservations": 25,
+          "nonHeldRoomFootprintContacts": 24,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 8,
+          "interFloorProductionCutRequests": 24,
+          "roofPenetrationContacts": 4,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 0,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 26,
+        "z": 16,
+        "width": 2,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 76,
+          "hardGlassContacts": 12,
+          "prior296Reservations": 21,
+          "nonHeldRoomFootprintContacts": 24,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 36,
+          "interFloorProductionCutRequests": 34,
+          "roofPenetrationContacts": 4,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 0,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 22,
+        "z": 17,
+        "width": 2,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 48,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 24,
+          "headroomContacts": 18,
+          "interFloorProductionCutRequests": 25,
+          "roofPenetrationContacts": 4,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 0,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 23,
+        "z": 17,
+        "width": 2,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 24,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 12,
+          "headroomContacts": 0,
+          "interFloorProductionCutRequests": 20,
+          "roofPenetrationContacts": 4,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 50,
+          "nominalCorridorCellsRepurposed": 12,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": true,
+        "approved": false
+      },
+      {
+        "x": 24,
+        "z": 17,
+        "width": 2,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 24,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 6,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 0,
+          "interFloorProductionCutRequests": 20,
+          "roofPenetrationContacts": 4,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 44,
+          "nominalCorridorCellsRepurposed": 18,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": true,
+        "approved": false
+      },
+      {
+        "x": 25,
+        "z": 17,
+        "width": 2,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 24,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 18,
+          "nonHeldRoomFootprintContacts": 12,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 0,
+          "interFloorProductionCutRequests": 20,
+          "roofPenetrationContacts": 4,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 12,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 26,
+        "z": 17,
+        "width": 2,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 72,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 18,
+          "nonHeldRoomFootprintContacts": 12,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 36,
+          "interFloorProductionCutRequests": 30,
+          "roofPenetrationContacts": 4,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 12,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 22,
+        "z": 18,
+        "width": 2,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 24,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 24,
+          "headroomContacts": 0,
+          "interFloorProductionCutRequests": 20,
+          "roofPenetrationContacts": 4,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 0,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 23,
+        "z": 18,
+        "width": 2,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 24,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 12,
+          "headroomContacts": 0,
+          "interFloorProductionCutRequests": 20,
+          "roofPenetrationContacts": 4,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 18,
+          "nominalCorridorCellsRepurposed": 12,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": true,
+        "approved": false
+      },
+      {
+        "x": 24,
+        "z": 18,
+        "width": 2,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 24,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 0,
+          "interFloorProductionCutRequests": 20,
+          "roofPenetrationContacts": 4,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 12,
+          "nominalCorridorCellsRepurposed": 18,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "HOLD_CORRIDOR_DISCONNECTION",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": true,
+        "approved": false
+      },
+      {
+        "x": 25,
+        "z": 18,
+        "width": 2,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 27,
+          "hardGlassContacts": 3,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 2,
+          "interFloorProductionCutRequests": 20,
+          "roofPenetrationContacts": 4,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 12,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 26,
+        "z": 18,
+        "width": 2,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 73,
+          "hardGlassContacts": 3,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 36,
+          "interFloorProductionCutRequests": 30,
+          "roofPenetrationContacts": 4,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 12,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 22,
+        "z": 19,
+        "width": 2,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 24,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 12,
+          "headroomContacts": 0,
+          "interFloorProductionCutRequests": 20,
+          "roofPenetrationContacts": 4,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 0,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 23,
+        "z": 19,
+        "width": 2,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 24,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 6,
+          "headroomContacts": 0,
+          "interFloorProductionCutRequests": 20,
+          "roofPenetrationContacts": 4,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 12,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 24,
+        "z": 19,
+        "width": 2,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 27,
+          "hardGlassContacts": 3,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 2,
+          "interFloorProductionCutRequests": 20,
+          "roofPenetrationContacts": 4,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 12,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 25,
+        "z": 19,
+        "width": 2,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 45,
+          "hardGlassContacts": 21,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 14,
+          "interFloorProductionCutRequests": 24,
+          "roofPenetrationContacts": 4,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 0,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 26,
+        "z": 19,
+        "width": 2,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 86,
+          "hardGlassContacts": 18,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 44,
+          "interFloorProductionCutRequests": 34,
+          "roofPenetrationContacts": 4,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 0,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 22,
+        "z": 20,
+        "width": 2,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 72,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 36,
+          "interFloorProductionCutRequests": 30,
+          "roofPenetrationContacts": 4,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 0,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "HOLD_STRUCTURAL_CUT_OR_HEADROOM",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 23,
+        "z": 20,
+        "width": 2,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 72,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 36,
+          "interFloorProductionCutRequests": 30,
+          "roofPenetrationContacts": 4,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 12,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "HOLD_STRUCTURAL_CUT_OR_HEADROOM",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 24,
+        "z": 20,
+        "width": 2,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 73,
+          "hardGlassContacts": 3,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 36,
+          "interFloorProductionCutRequests": 30,
+          "roofPenetrationContacts": 4,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 12,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 25,
+        "z": 20,
+        "width": 2,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 78,
+          "hardGlassContacts": 18,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 36,
+          "interFloorProductionCutRequests": 34,
+          "roofPenetrationContacts": 4,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 0,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 26,
+        "z": 20,
+        "width": 2,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 99,
+          "hardGlassContacts": 15,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 52,
+          "interFloorProductionCutRequests": 39,
+          "roofPenetrationContacts": 4,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 0,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 22,
+        "z": 16,
+        "width": 2,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 78,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 30,
+          "headroomContacts": 36,
+          "interFloorProductionCutRequests": 35,
+          "roofPenetrationContacts": 5,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 0,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 23,
+        "z": 16,
+        "width": 2,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 60,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 12,
+          "headroomContacts": 18,
+          "interFloorProductionCutRequests": 35,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 44,
+          "nominalCorridorCellsRepurposed": 18,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": true,
+        "approved": false
+      },
+      {
+        "x": 24,
+        "z": 16,
+        "width": 2,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 36,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 4,
+          "nonHeldRoomFootprintContacts": 12,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 0,
+          "interFloorProductionCutRequests": 30,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 38,
+          "nominalCorridorCellsRepurposed": 24,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": true,
+        "approved": false
+      },
+      {
+        "x": 25,
+        "z": 16,
+        "width": 2,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 48,
+          "hardGlassContacts": 12,
+          "prior296Reservations": 25,
+          "nonHeldRoomFootprintContacts": 24,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 8,
+          "interFloorProductionCutRequests": 34,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 12,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 26,
+        "z": 16,
+        "width": 2,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 112,
+          "hardGlassContacts": 12,
+          "prior296Reservations": 21,
+          "nonHeldRoomFootprintContacts": 24,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 54,
+          "interFloorProductionCutRequests": 49,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 12,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 22,
+        "z": 17,
+        "width": 2,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 60,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 36,
+          "headroomContacts": 18,
+          "interFloorProductionCutRequests": 35,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 0,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 23,
+        "z": 17,
+        "width": 2,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 36,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 18,
+          "headroomContacts": 0,
+          "interFloorProductionCutRequests": 30,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 56,
+          "nominalCorridorCellsRepurposed": 18,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": true,
+        "approved": false
+      },
+      {
+        "x": 24,
+        "z": 17,
+        "width": 2,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 36,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 6,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 0,
+          "interFloorProductionCutRequests": 30,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 50,
+          "nominalCorridorCellsRepurposed": 24,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": true,
+        "approved": false
+      },
+      {
+        "x": 25,
+        "z": 17,
+        "width": 2,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 39,
+          "hardGlassContacts": 3,
+          "prior296Reservations": 18,
+          "nonHeldRoomFootprintContacts": 12,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 2,
+          "interFloorProductionCutRequests": 30,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 12,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 26,
+        "z": 17,
+        "width": 2,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 109,
+          "hardGlassContacts": 3,
+          "prior296Reservations": 18,
+          "nonHeldRoomFootprintContacts": 12,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 54,
+          "interFloorProductionCutRequests": 45,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 12,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 22,
+        "z": 18,
+        "width": 2,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 36,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 24,
+          "headroomContacts": 0,
+          "interFloorProductionCutRequests": 30,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 0,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 23,
+        "z": 18,
+        "width": 2,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 36,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 12,
+          "headroomContacts": 0,
+          "interFloorProductionCutRequests": 30,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 12,
+          "nominalCorridorCellsRepurposed": 18,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": true,
+        "approved": false
+      },
+      {
+        "x": 24,
+        "z": 18,
+        "width": 2,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 39,
+          "hardGlassContacts": 3,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 2,
+          "interFloorProductionCutRequests": 30,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 6,
+          "nominalCorridorCellsRepurposed": 24,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": true,
+        "approved": false
+      },
+      {
+        "x": 25,
+        "z": 18,
+        "width": 2,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 57,
+          "hardGlassContacts": 21,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 14,
+          "interFloorProductionCutRequests": 34,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 12,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 26,
+        "z": 18,
+        "width": 2,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 122,
+          "hardGlassContacts": 18,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 62,
+          "interFloorProductionCutRequests": 49,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 12,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 22,
+        "z": 19,
+        "width": 2,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 84,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 12,
+          "headroomContacts": 36,
+          "interFloorProductionCutRequests": 40,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 0,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 23,
+        "z": 19,
+        "width": 2,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 84,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 6,
+          "headroomContacts": 36,
+          "interFloorProductionCutRequests": 40,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 18,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 24,
+        "z": 19,
+        "width": 2,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 85,
+          "hardGlassContacts": 3,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 36,
+          "interFloorProductionCutRequests": 40,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 18,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 25,
+        "z": 19,
+        "width": 2,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 93,
+          "hardGlassContacts": 21,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 38,
+          "interFloorProductionCutRequests": 44,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 0,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 26,
+        "z": 19,
+        "width": 2,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 136,
+          "hardGlassContacts": 18,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 70,
+          "interFloorProductionCutRequests": 54,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 0,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 22,
+        "z": 20,
+        "width": 2,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 72,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 12,
+          "headroomContacts": 36,
+          "interFloorProductionCutRequests": 30,
+          "roofPenetrationContacts": 4,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 0,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 23,
+        "z": 20,
+        "width": 2,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 72,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 12,
+          "headroomContacts": 36,
+          "interFloorProductionCutRequests": 30,
+          "roofPenetrationContacts": 4,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 12,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 24,
+        "z": 20,
+        "width": 2,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 73,
+          "hardGlassContacts": 3,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 12,
+          "headroomContacts": 36,
+          "interFloorProductionCutRequests": 30,
+          "roofPenetrationContacts": 4,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 12,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 25,
+        "z": 20,
+        "width": 2,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 78,
+          "hardGlassContacts": 18,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 12,
+          "headroomContacts": 36,
+          "interFloorProductionCutRequests": 34,
+          "roofPenetrationContacts": 4,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 0,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 26,
+        "z": 20,
+        "width": 2,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 99,
+          "hardGlassContacts": 15,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 12,
+          "headroomContacts": 52,
+          "interFloorProductionCutRequests": 39,
+          "roofPenetrationContacts": 4,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 0,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 22,
+        "z": 16,
+        "width": 3,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 78,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 18,
+          "headroomContacts": 36,
+          "interFloorProductionCutRequests": 35,
+          "roofPenetrationContacts": 5,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 32,
+          "nominalCorridorCellsRepurposed": 12,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": true,
+        "approved": false
+      },
+      {
+        "x": 23,
+        "z": 16,
+        "width": 3,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 60,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 4,
+          "nonHeldRoomFootprintContacts": 12,
+          "missingFloorOrOriginalCoreContacts": 6,
+          "headroomContacts": 18,
+          "interFloorProductionCutRequests": 35,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 32,
+          "nominalCorridorCellsRepurposed": 12,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": true,
+        "approved": false
+      },
+      {
+        "x": 24,
+        "z": 16,
+        "width": 3,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 48,
+          "hardGlassContacts": 12,
+          "prior296Reservations": 25,
+          "nonHeldRoomFootprintContacts": 24,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 8,
+          "interFloorProductionCutRequests": 34,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 32,
+          "nominalCorridorCellsRepurposed": 12,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": true,
+        "approved": false
+      },
+      {
+        "x": 25,
+        "z": 16,
+        "width": 3,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 88,
+          "hardGlassContacts": 12,
+          "prior296Reservations": 25,
+          "nonHeldRoomFootprintContacts": 36,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 36,
+          "interFloorProductionCutRequests": 44,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 0,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 26,
+        "z": 16,
+        "width": 3,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 76,
+          "hardGlassContacts": 12,
+          "prior296Reservations": 21,
+          "nonHeldRoomFootprintContacts": 24,
+          "missingFloorOrOriginalCoreContacts": 12,
+          "headroomContacts": 36,
+          "interFloorProductionCutRequests": 34,
+          "roofPenetrationContacts": 4,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 0,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 22,
+        "z": 17,
+        "width": 3,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 60,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 24,
+          "headroomContacts": 18,
+          "interFloorProductionCutRequests": 35,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 50,
+          "nominalCorridorCellsRepurposed": 12,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": true,
+        "approved": false
+      },
+      {
+        "x": 23,
+        "z": 17,
+        "width": 3,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 36,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 6,
+          "missingFloorOrOriginalCoreContacts": 12,
+          "headroomContacts": 0,
+          "interFloorProductionCutRequests": 30,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 44,
+          "nominalCorridorCellsRepurposed": 18,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": true,
+        "approved": false
+      },
+      {
+        "x": 24,
+        "z": 17,
+        "width": 3,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 36,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 18,
+          "nonHeldRoomFootprintContacts": 12,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 0,
+          "interFloorProductionCutRequests": 30,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 38,
+          "nominalCorridorCellsRepurposed": 24,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": true,
+        "approved": false
+      },
+      {
+        "x": 25,
+        "z": 17,
+        "width": 3,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 84,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 18,
+          "nonHeldRoomFootprintContacts": 18,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 36,
+          "interFloorProductionCutRequests": 40,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 18,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 26,
+        "z": 17,
+        "width": 3,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 72,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 18,
+          "nonHeldRoomFootprintContacts": 12,
+          "missingFloorOrOriginalCoreContacts": 12,
+          "headroomContacts": 36,
+          "interFloorProductionCutRequests": 30,
+          "roofPenetrationContacts": 4,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 12,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 22,
+        "z": 18,
+        "width": 3,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 36,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 24,
+          "headroomContacts": 0,
+          "interFloorProductionCutRequests": 30,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 18,
+          "nominalCorridorCellsRepurposed": 12,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": true,
+        "approved": false
+      },
+      {
+        "x": 23,
+        "z": 18,
+        "width": 3,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 36,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 12,
+          "headroomContacts": 0,
+          "interFloorProductionCutRequests": 30,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 12,
+          "nominalCorridorCellsRepurposed": 18,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": true,
+        "approved": false
+      },
+      {
+        "x": 24,
+        "z": 18,
+        "width": 3,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 39,
+          "hardGlassContacts": 3,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 2,
+          "interFloorProductionCutRequests": 30,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 6,
+          "nominalCorridorCellsRepurposed": 24,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": true,
+        "approved": false
+      },
+      {
+        "x": 25,
+        "z": 18,
+        "width": 3,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 85,
+          "hardGlassContacts": 3,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 36,
+          "interFloorProductionCutRequests": 40,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 18,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 26,
+        "z": 18,
+        "width": 3,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 73,
+          "hardGlassContacts": 3,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 12,
+          "headroomContacts": 36,
+          "interFloorProductionCutRequests": 30,
+          "roofPenetrationContacts": 4,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 12,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 22,
+        "z": 19,
+        "width": 3,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 36,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 12,
+          "headroomContacts": 0,
+          "interFloorProductionCutRequests": 30,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 12,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 23,
+        "z": 19,
+        "width": 3,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 39,
+          "hardGlassContacts": 3,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 6,
+          "headroomContacts": 2,
+          "interFloorProductionCutRequests": 30,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 12,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 24,
+        "z": 19,
+        "width": 3,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 57,
+          "hardGlassContacts": 21,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 14,
+          "interFloorProductionCutRequests": 34,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 12,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 25,
+        "z": 19,
+        "width": 3,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 101,
+          "hardGlassContacts": 21,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 46,
+          "interFloorProductionCutRequests": 44,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 0,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 26,
+        "z": 19,
+        "width": 3,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 86,
+          "hardGlassContacts": 18,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 12,
+          "headroomContacts": 44,
+          "interFloorProductionCutRequests": 34,
+          "roofPenetrationContacts": 4,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 0,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 22,
+        "z": 20,
+        "width": 3,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 108,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 54,
+          "interFloorProductionCutRequests": 45,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 12,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "HOLD_STRUCTURAL_CUT_OR_HEADROOM",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 23,
+        "z": 20,
+        "width": 3,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 109,
+          "hardGlassContacts": 3,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 54,
+          "interFloorProductionCutRequests": 45,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 12,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 24,
+        "z": 20,
+        "width": 3,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 114,
+          "hardGlassContacts": 18,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 54,
+          "interFloorProductionCutRequests": 49,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 12,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 25,
+        "z": 20,
+        "width": 3,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 136,
+          "hardGlassContacts": 18,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 70,
+          "interFloorProductionCutRequests": 54,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 0,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 26,
+        "z": 20,
+        "width": 3,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 99,
+          "hardGlassContacts": 15,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 12,
+          "headroomContacts": 52,
+          "interFloorProductionCutRequests": 39,
+          "roofPenetrationContacts": 4,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 0,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 22,
+        "z": 16,
+        "width": 3,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 96,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 30,
+          "headroomContacts": 36,
+          "interFloorProductionCutRequests": 50,
+          "roofPenetrationContacts": 8,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 44,
+          "nominalCorridorCellsRepurposed": 18,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": true,
+        "approved": false
+      },
+      {
+        "x": 23,
+        "z": 16,
+        "width": 3,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 78,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 4,
+          "nonHeldRoomFootprintContacts": 12,
+          "missingFloorOrOriginalCoreContacts": 12,
+          "headroomContacts": 18,
+          "interFloorProductionCutRequests": 50,
+          "roofPenetrationContacts": 9,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 38,
+          "nominalCorridorCellsRepurposed": 24,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": true,
+        "approved": false
+      },
+      {
+        "x": 24,
+        "z": 16,
+        "width": 3,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 66,
+          "hardGlassContacts": 12,
+          "prior296Reservations": 25,
+          "nonHeldRoomFootprintContacts": 24,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 8,
+          "interFloorProductionCutRequests": 49,
+          "roofPenetrationContacts": 9,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 32,
+          "nominalCorridorCellsRepurposed": 30,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": true,
+        "approved": false
+      },
+      {
+        "x": 25,
+        "z": 16,
+        "width": 3,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 130,
+          "hardGlassContacts": 12,
+          "prior296Reservations": 25,
+          "nonHeldRoomFootprintContacts": 36,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 54,
+          "interFloorProductionCutRequests": 64,
+          "roofPenetrationContacts": 9,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 18,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 26,
+        "z": 16,
+        "width": 3,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 112,
+          "hardGlassContacts": 12,
+          "prior296Reservations": 21,
+          "nonHeldRoomFootprintContacts": 24,
+          "missingFloorOrOriginalCoreContacts": 18,
+          "headroomContacts": 54,
+          "interFloorProductionCutRequests": 49,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 12,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 22,
+        "z": 17,
+        "width": 3,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 78,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 36,
+          "headroomContacts": 18,
+          "interFloorProductionCutRequests": 50,
+          "roofPenetrationContacts": 9,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 56,
+          "nominalCorridorCellsRepurposed": 18,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": true,
+        "approved": false
+      },
+      {
+        "x": 23,
+        "z": 17,
+        "width": 3,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 54,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 6,
+          "missingFloorOrOriginalCoreContacts": 18,
+          "headroomContacts": 0,
+          "interFloorProductionCutRequests": 45,
+          "roofPenetrationContacts": 9,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 50,
+          "nominalCorridorCellsRepurposed": 24,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": true,
+        "approved": false
+      },
+      {
+        "x": 24,
+        "z": 17,
+        "width": 3,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 57,
+          "hardGlassContacts": 3,
+          "prior296Reservations": 18,
+          "nonHeldRoomFootprintContacts": 12,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 2,
+          "interFloorProductionCutRequests": 45,
+          "roofPenetrationContacts": 9,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 44,
+          "nominalCorridorCellsRepurposed": 30,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": true,
+        "approved": false
+      },
+      {
+        "x": 25,
+        "z": 17,
+        "width": 3,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 127,
+          "hardGlassContacts": 3,
+          "prior296Reservations": 18,
+          "nonHeldRoomFootprintContacts": 18,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 54,
+          "interFloorProductionCutRequests": 60,
+          "roofPenetrationContacts": 9,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 18,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 26,
+        "z": 17,
+        "width": 3,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 109,
+          "hardGlassContacts": 3,
+          "prior296Reservations": 18,
+          "nonHeldRoomFootprintContacts": 12,
+          "missingFloorOrOriginalCoreContacts": 18,
+          "headroomContacts": 54,
+          "interFloorProductionCutRequests": 45,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 12,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 22,
+        "z": 18,
+        "width": 3,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 54,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 24,
+          "headroomContacts": 0,
+          "interFloorProductionCutRequests": 45,
+          "roofPenetrationContacts": 9,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 12,
+          "nominalCorridorCellsRepurposed": 18,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": true,
+        "approved": false
+      },
+      {
+        "x": 23,
+        "z": 18,
+        "width": 3,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 57,
+          "hardGlassContacts": 3,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 12,
+          "headroomContacts": 2,
+          "interFloorProductionCutRequests": 45,
+          "roofPenetrationContacts": 9,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 6,
+          "nominalCorridorCellsRepurposed": 24,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": true,
+        "approved": false
+      },
+      {
+        "x": 24,
+        "z": 18,
+        "width": 3,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 75,
+          "hardGlassContacts": 21,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 14,
+          "interFloorProductionCutRequests": 49,
+          "roofPenetrationContacts": 9,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 30,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 25,
+        "z": 18,
+        "width": 3,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 143,
+          "hardGlassContacts": 21,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 64,
+          "interFloorProductionCutRequests": 64,
+          "roofPenetrationContacts": 9,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 18,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 26,
+        "z": 18,
+        "width": 3,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 122,
+          "hardGlassContacts": 18,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 18,
+          "headroomContacts": 62,
+          "interFloorProductionCutRequests": 49,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 12,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 22,
+        "z": 19,
+        "width": 3,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 126,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 12,
+          "headroomContacts": 54,
+          "interFloorProductionCutRequests": 60,
+          "roofPenetrationContacts": 9,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 18,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 23,
+        "z": 19,
+        "width": 3,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 127,
+          "hardGlassContacts": 3,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 6,
+          "headroomContacts": 54,
+          "interFloorProductionCutRequests": 60,
+          "roofPenetrationContacts": 9,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 18,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 24,
+        "z": 19,
+        "width": 3,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 135,
+          "hardGlassContacts": 21,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 56,
+          "interFloorProductionCutRequests": 64,
+          "roofPenetrationContacts": 9,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 18,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 25,
+        "z": 19,
+        "width": 3,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 179,
+          "hardGlassContacts": 21,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 88,
+          "interFloorProductionCutRequests": 74,
+          "roofPenetrationContacts": 9,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 0,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 26,
+        "z": 19,
+        "width": 3,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 136,
+          "hardGlassContacts": 18,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 18,
+          "headroomContacts": 70,
+          "interFloorProductionCutRequests": 54,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 0,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 22,
+        "z": 20,
+        "width": 3,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 108,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 18,
+          "headroomContacts": 54,
+          "interFloorProductionCutRequests": 45,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 12,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 23,
+        "z": 20,
+        "width": 3,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 109,
+          "hardGlassContacts": 3,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 18,
+          "headroomContacts": 54,
+          "interFloorProductionCutRequests": 45,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 12,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 24,
+        "z": 20,
+        "width": 3,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 114,
+          "hardGlassContacts": 18,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 18,
+          "headroomContacts": 54,
+          "interFloorProductionCutRequests": 49,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 12,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 25,
+        "z": 20,
+        "width": 3,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 136,
+          "hardGlassContacts": 18,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 18,
+          "headroomContacts": 70,
+          "interFloorProductionCutRequests": 54,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 0,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 26,
+        "z": 20,
+        "width": 3,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 99,
+          "hardGlassContacts": 15,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 30,
+          "headroomContacts": 52,
+          "interFloorProductionCutRequests": 39,
+          "roofPenetrationContacts": 4,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 0,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      }
+    ],
+    "topScoringConcepts": [
+      {
+        "x": 24,
+        "z": 18,
+        "width": 2,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 24,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 0,
+          "interFloorProductionCutRequests": 20,
+          "roofPenetrationContacts": 4,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 12,
+          "nominalCorridorCellsRepurposed": 18,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "HOLD_CORRIDOR_DISCONNECTION",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": true,
+        "approved": false
+      },
+      {
+        "x": 22,
+        "z": 20,
+        "width": 2,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 72,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 36,
+          "interFloorProductionCutRequests": 30,
+          "roofPenetrationContacts": 4,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 0,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "HOLD_STRUCTURAL_CUT_OR_HEADROOM",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 23,
+        "z": 20,
+        "width": 2,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 72,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 36,
+          "interFloorProductionCutRequests": 30,
+          "roofPenetrationContacts": 4,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 12,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "HOLD_STRUCTURAL_CUT_OR_HEADROOM",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 22,
+        "z": 20,
+        "width": 3,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 108,
+          "hardGlassContacts": 0,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 54,
+          "interFloorProductionCutRequests": 45,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 12,
+          "heldRoomsTouched": 0
+        },
+        "reviewClass": "HOLD_STRUCTURAL_CUT_OR_HEADROOM",
+        "impactedHeldRooms": [],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 24,
+        "z": 19,
+        "width": 2,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 27,
+          "hardGlassContacts": 3,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 2,
+          "interFloorProductionCutRequests": 20,
+          "roofPenetrationContacts": 4,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 12,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 25,
+        "z": 18,
+        "width": 2,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 27,
+          "hardGlassContacts": 3,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 2,
+          "interFloorProductionCutRequests": 20,
+          "roofPenetrationContacts": 4,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 0,
+          "nominalCorridorCellsRepurposed": 12,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": false,
+        "approved": false
+      },
+      {
+        "x": 24,
+        "z": 18,
+        "width": 2,
+        "depth": 3,
+        "counts": {
+          "allProductionVoxelContacts": 39,
+          "hardGlassContacts": 3,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 2,
+          "interFloorProductionCutRequests": 30,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 6,
+          "nominalCorridorCellsRepurposed": 24,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": true,
+        "approved": false
+      },
+      {
+        "x": 24,
+        "z": 18,
+        "width": 3,
+        "depth": 2,
+        "counts": {
+          "allProductionVoxelContacts": 39,
+          "hardGlassContacts": 3,
+          "prior296Reservations": 0,
+          "nonHeldRoomFootprintContacts": 0,
+          "missingFloorOrOriginalCoreContacts": 0,
+          "headroomContacts": 2,
+          "interFloorProductionCutRequests": 30,
+          "roofPenetrationContacts": 6,
+          "physicallyReachableCorridorSitesLostOutsideFootprint": 6,
+          "nominalCorridorCellsRepurposed": 24,
+          "heldRoomsTouched": 6
+        },
+        "reviewClass": "REJECT_PROTECTED_GEOMETRY",
+        "impactedHeldRooms": [
+          "apartment/candidate-01/L1::F1-R013",
+          "apartment/candidate-01/L2::F2-R013",
+          "apartment/candidate-01/L3::F3-R013",
+          "apartment/candidate-01/L4::F4-R013",
+          "apartment/candidate-01/L5::F5-R013",
+          "apartment/candidate-01/L6::F6-R013"
+        ],
+        "neededSlabReview": true,
+        "corridorDisconnected": true,
+        "approved": false
+      }
+    ],
+    "verifiedNewCoreStairs": 0,
+    "constructionApproved": false,
+    "operations": []
+  },
+  "shaftBypassFloors": [
+    {
+      "sectionId": "apartment/candidate-01/L1",
+      "disconnectedNominalCorridorSites": [
+        "24,20",
+        "26,18"
+      ],
+      "localBypasses": [
+        {
+          "from": "24,20",
+          "resolved": true,
+          "path": [
+            "24,20",
+            "23,20",
+            "22,20",
+            "21,20",
+            "20,20",
+            "20,19",
+            "20,18"
+          ],
+          "newCorridorSites": [
+            "23,20",
+            "22,20",
+            "21,20",
+            "20,20",
+            "20,19"
+          ],
+          "convertedHeldRooms": [],
+          "withinConceptBudget": true,
+          "physicalTwoHighAirOnly": true,
+          "compromisesPrior296": false,
+          "routeDoesNotCertifyEmergencyEgress": true,
+          "requiresNewWallsAndLegalAccessReview": true,
+          "approved": false
+        },
+        {
+          "from": "26,18",
+          "resolved": true,
+          "path": [
+            "26,18",
+            "26,19",
+            "26,20",
+            "25,20",
+            "24,20",
+            "23,20",
+            "22,20",
+            "21,20",
+            "20,20",
+            "20,19",
+            "20,18"
+          ],
+          "newCorridorSites": [
+            "26,19",
+            "26,20",
+            "25,20",
+            "23,20",
+            "22,20",
+            "21,20",
+            "20,20",
+            "20,19"
+          ],
+          "convertedHeldRooms": [
+            "F1-R013"
+          ],
+          "withinConceptBudget": true,
+          "physicalTwoHighAirOnly": true,
+          "compromisesPrior296": false,
+          "routeDoesNotCertifyEmergencyEgress": true,
+          "requiresNewWallsAndLegalAccessReview": true,
+          "approved": false
+        }
+      ],
+      "reachableProposals": 2,
+      "conceptBudgetProposals": 2,
+      "unresolved": 0,
+      "allFullyApproved": false,
+      "operations": [],
+      "worldCoordinates": null
+    },
+    {
+      "sectionId": "apartment/candidate-01/L2",
+      "disconnectedNominalCorridorSites": [
+        "24,20",
+        "26,18"
+      ],
+      "localBypasses": [
+        {
+          "from": "24,20",
+          "resolved": false,
+          "reason": "NO_PROTECTED_FREE_PHYSICAL_CONNECTION",
+          "path": [],
+          "approved": false
+        },
+        {
+          "from": "26,18",
+          "resolved": false,
+          "reason": "NO_PROTECTED_FREE_PHYSICAL_CONNECTION",
+          "path": [],
+          "approved": false
+        }
+      ],
+      "reachableProposals": 0,
+      "conceptBudgetProposals": 0,
+      "unresolved": 2,
+      "allFullyApproved": false,
+      "operations": [],
+      "worldCoordinates": null
+    },
+    {
+      "sectionId": "apartment/candidate-01/L3",
+      "disconnectedNominalCorridorSites": [
+        "24,20",
+        "26,18"
+      ],
+      "localBypasses": [
+        {
+          "from": "24,20",
+          "resolved": false,
+          "reason": "NO_PROTECTED_FREE_PHYSICAL_CONNECTION",
+          "path": [],
+          "approved": false
+        },
+        {
+          "from": "26,18",
+          "resolved": false,
+          "reason": "NO_PROTECTED_FREE_PHYSICAL_CONNECTION",
+          "path": [],
+          "approved": false
+        }
+      ],
+      "reachableProposals": 0,
+      "conceptBudgetProposals": 0,
+      "unresolved": 2,
+      "allFullyApproved": false,
+      "operations": [],
+      "worldCoordinates": null
+    },
+    {
+      "sectionId": "apartment/candidate-01/L4",
+      "disconnectedNominalCorridorSites": [
+        "24,20",
+        "26,18"
+      ],
+      "localBypasses": [
+        {
+          "from": "24,20",
+          "resolved": false,
+          "reason": "NO_PROTECTED_FREE_PHYSICAL_CONNECTION",
+          "path": [],
+          "approved": false
+        },
+        {
+          "from": "26,18",
+          "resolved": false,
+          "reason": "NO_PROTECTED_FREE_PHYSICAL_CONNECTION",
+          "path": [],
+          "approved": false
+        }
+      ],
+      "reachableProposals": 0,
+      "conceptBudgetProposals": 0,
+      "unresolved": 2,
+      "allFullyApproved": false,
+      "operations": [],
+      "worldCoordinates": null
+    },
+    {
+      "sectionId": "apartment/candidate-01/L5",
+      "disconnectedNominalCorridorSites": [
+        "24,20",
+        "26,18"
+      ],
+      "localBypasses": [
+        {
+          "from": "24,20",
+          "resolved": false,
+          "reason": "NO_PROTECTED_FREE_PHYSICAL_CONNECTION",
+          "path": [],
+          "approved": false
+        },
+        {
+          "from": "26,18",
+          "resolved": false,
+          "reason": "NO_PROTECTED_FREE_PHYSICAL_CONNECTION",
+          "path": [],
+          "approved": false
+        }
+      ],
+      "reachableProposals": 0,
+      "conceptBudgetProposals": 0,
+      "unresolved": 2,
+      "allFullyApproved": false,
+      "operations": [],
+      "worldCoordinates": null
+    },
+    {
+      "sectionId": "apartment/candidate-01/L6",
+      "disconnectedNominalCorridorSites": [
+        "24,20",
+        "26,18"
+      ],
+      "localBypasses": [
+        {
+          "from": "24,20",
+          "resolved": false,
+          "reason": "NO_PROTECTED_FREE_PHYSICAL_CONNECTION",
+          "path": [],
+          "approved": false
+        },
+        {
+          "from": "26,18",
+          "resolved": false,
+          "reason": "NO_PROTECTED_FREE_PHYSICAL_CONNECTION",
+          "path": [],
+          "approved": false
+        }
+      ],
+      "reachableProposals": 0,
+      "conceptBudgetProposals": 0,
+      "unresolved": 2,
+      "allFullyApproved": false,
+      "operations": [],
+      "worldCoordinates": null
+    }
+  ],
+  "remediationPatterns": [
+    {
+      "pattern": "apartment:R006",
+      "buildingId": "apartment/candidate-01",
+      "roomIds": [
+        "apartment/candidate-01/L2::F2-R006",
+        "apartment/candidate-01/L3::F3-R006",
+        "apartment/candidate-01/L4::F4-R006",
+        "apartment/candidate-01/L5::F5-R006"
+      ],
+      "areas": [
+        20,
+        20,
+        20,
+        20
+      ],
+      "routeLengths": [
+        49,
+        49,
+        49,
+        49
+      ],
+      "routeProductionContacts": [
+        5,
+        5,
+        5,
+        5
+      ],
+      "withinConceptQualityBudget": 0,
+      "roomCount": 4,
+      "geometryLocalOptionsNeedApproval": true,
+      "routeLengthMin": 49,
+      "routeLengthMax": 49,
+      "direction": "LONG_DETOUR_AND_FLOOR_OR_DOOR_CONTACTS_REQUIRE_FULL_FLOOR_REDESIGN",
+      "allowedProductionEdits": 0,
+      "approvedRooms": 0
+    },
+    {
+      "pattern": "apartment:R012",
+      "buildingId": "apartment/candidate-01",
+      "roomIds": [
+        "apartment/candidate-01/L2::F2-R012",
+        "apartment/candidate-01/L3::F3-R012",
+        "apartment/candidate-01/L4::F4-R012",
+        "apartment/candidate-01/L5::F5-R012"
+      ],
+      "areas": [
+        9,
+        9,
+        9,
+        9
+      ],
+      "routeLengths": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "routeProductionContacts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "withinConceptQualityBudget": 4,
+      "roomCount": 4,
+      "geometryLocalOptionsNeedApproval": true,
+      "routeLengthMin": 2,
+      "routeLengthMax": 2,
+      "direction": "NO_VALID_LOCAL_ROOM_DOOR_EDGE; NEW_ROOM_GRID_OR_COMMON_ZONE_REQUIRED",
+      "allowedProductionEdits": 0,
+      "approvedRooms": 0
+    },
+    {
+      "pattern": "apartment:R013",
+      "buildingId": "apartment/candidate-01",
+      "roomIds": [
+        "apartment/candidate-01/L1::F1-R013",
+        "apartment/candidate-01/L2::F2-R013",
+        "apartment/candidate-01/L3::F3-R013",
+        "apartment/candidate-01/L4::F4-R013",
+        "apartment/candidate-01/L5::F5-R013",
+        "apartment/candidate-01/L6::F6-R013"
+      ],
+      "areas": [
+        9,
+        9,
+        9,
+        9,
+        9,
+        9
+      ],
+      "routeLengths": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "routeProductionContacts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "withinConceptQualityBudget": 6,
+      "roomCount": 6,
+      "geometryLocalOptionsNeedApproval": true,
+      "routeLengthMin": 2,
+      "routeLengthMax": 2,
+      "direction": "SHAFT_2X2_INTRUDES_INTO_NOMINAL_CORRIDOR_AND_HELD_ROOM; SLAB_AND_EGRESS_HOLD",
+      "allowedProductionEdits": 0,
+      "approvedRooms": 0
+    },
+    {
+      "pattern": "office:R004",
+      "buildingId": "office/candidate-01",
+      "roomIds": [
+        "office/candidate-01/L3::F3-R004",
+        "office/candidate-01/L4::F4-R004",
+        "office/candidate-01/L5::F5-R004",
+        "office/candidate-01/L6::F6-R004"
+      ],
+      "areas": [
+        16,
+        16,
+        16,
+        16
+      ],
+      "routeLengths": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "routeProductionContacts": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "withinConceptQualityBudget": 4,
+      "roomCount": 4,
+      "geometryLocalOptionsNeedApproval": true,
+      "routeLengthMin": 2,
+      "routeLengthMax": 2,
+      "direction": "FLOOR_SPECIFIC_DOOR_FRAME_AND_VERTICAL_COMPOSITION_REVIEW_REQUIRED",
+      "allowedProductionEdits": 0,
+      "approvedRooms": 0
+    }
+  ],
+  "limitations": [
+    "B94_SHAFT_AIR_IS_NOT_SLAB_HOLE_OR_CONSTRUCTIBLE_STAIRS",
+    "SHAFT_2X2_IS_A_VOLUME_DIAGNOSTIC_NOT_A_STAIR_DESIGN",
+    "NOMINAL_CORRIDOR_REMOVED_MAY_DISCONNECT_EXISTING_ACCESS",
+    "STRUCTURAL_LOADS_AND_INTERFLOOR_SUPPORT_NOT_CHECKED",
+    "PINNED_REAL_PRODUCTION_IS_ONLY_APARTMENT_AND_OFFICE01_OTHER_BUILDINGS_ARE_NOMINAL",
+    "REAL_DOOR_SWINGS_STAIRS_LIFTS_OLD_OPENINGS_AND_EGRESS_NOT_CERTIFIED",
+    "PREVIOUS_296_ARE_UNAPPROVED_DESIGN_PROPOSALS"
+  ],
+  "readiness": "NOT_PREPARED",
+  "executionAllowed": false,
+  "constructionApproved": false,
+  "worldContacts": 0,
+  "gates": [
+    {
+      "id": "M4-01",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-02",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-03",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-04",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-05",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-06",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-07",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-08",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-09",
+      "status": "BLOCKED"
+    }
+  ],
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0,
+    "worldCoordinates": null
+  },
+  "reportSha256": "8bbd7f4414c12509586b06aad5b924547ba3db82521901a113d9c50e66353cb9"
+}

@@ -1,0 +1,67 @@
+{
+    "schema":  "minecraftaibuilder-step8b-b4-probe-v1",
+    "collectedAt":  "2026-10-10T19:21:44.9408200+09:00",
+    "intent":  "LOCAL_READ_ONLY_NO_API_CALLS",
+    "projectIdentity":  {
+                            "packageName":  "minecraft-ai-builder",
+                            "present":  true,
+                            "rootMarkerPresent":  true
+                        },
+    "sourceChecks":  [
+                         {
+                             "key":  "package.json",
+                             "status":  "OK",
+                             "sha256":  "62a347f0ea0075ae7fd9ec91789732e0a2bbd42e2c7b91b6bc397cf4d3c1f274"
+                         },
+                         {
+                             "key":  "bridge/src/server-step7j.js",
+                             "status":  "OK",
+                             "sha256":  "cdc15d326ec506ff54637582ba3b4a157001c7bb6db2a36e5cebd719d28cdc50"
+                         },
+                         {
+                             "key":  "bridge/src/server-step7o.js",
+                             "status":  "OK",
+                             "sha256":  "35a01aa28c1cdcffc29d4f2398ce195067a9b892218e9eff666ad10bf61e2926"
+                         },
+                         {
+                             "key":  "bridge/src/general-building.js",
+                             "status":  "OK",
+                             "sha256":  "ca1531453d9cb90b5b75b99c0e1d47e22b8e38d244b5adb14da2deda5ef65828"
+                         },
+                         {
+                             "key":  "engine/src/general-building-planner.js",
+                             "status":  "OK",
+                             "sha256":  "23be6e8b03827698fb890661f6fd0957a76ac4718f3347531121c8a7dc0450c8"
+                         },
+                         {
+                             "key":  "engine/src/building-grammar.js",
+                             "status":  "OK",
+                             "sha256":  "71c0e2bda3e7a044285d681b38d9d4373e3c0aa417808a2f54c652d05ff47d1a"
+                         },
+                         {
+                             "key":  "engine/src/build-anchor.js",
+                             "status":  "OK",
+                             "sha256":  "23bea262e90012fc6bfdd9f1407e1f7cb514f87862ad1c60b0431792f8ef056f"
+                         },
+                         {
+                             "key":  "scripts/start-dedicated-canary.js",
+                             "status":  "OK",
+                             "sha256":  "3faa54e0b534437ac5e17707fb50d32c790c6545b5b365c55388ce7f9f8c77b6"
+                         }
+                     ],
+    "processDiscovery":  {
+                             "status":  "OK",
+                             "nodeProcessCount":  4,
+                             "candidates":  [
+
+                                            ]
+                         },
+    "safety":  {
+                   "notPrepared":  true,
+                   "executionAllowed":  false,
+                   "constructionApproved":  false,
+                   "worldAccess":  false,
+                   "bridgeContact":  false,
+                   "projectFilesModified":  false
+               }
+}

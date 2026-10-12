@@ -1,0 +1,37 @@
+name: Education-first offline QA
+
+on:
+  push:
+    branches: [main, 'feature/**', 'migration/**']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Frozen B100 files must remain unchanged
+        run: node scripts/verify-freeze.mjs
+      - name: Education edition construction safety (offline only)
+        run: node scripts/verify-safety.mjs
+      - name: B92-B100 regression suite (251 cases)
+        working-directory: source
+        run: |
+          node --experimental-vm-modules --test \
+            parallel/b92/main/compile-b92.test.mjs \
+            parallel/b93/main/compile-b93.test.mjs \
+            parallel/b94/main/compile-b94.test.mjs \
+            parallel/b95/main/compile-b95.test.mjs \
+            parallel/b96/main/compile-b96.test.mjs \
+            parallel/b97/main/compile-b97.test.mjs \
+            parallel/b98/main/compile-b98.test.mjs \
+            parallel/b99/main/compile-b99.test.mjs \
+            parallel/b100/main/compile-b100.test.mjs

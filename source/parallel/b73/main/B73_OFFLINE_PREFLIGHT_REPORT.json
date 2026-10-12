@@ -1,0 +1,118 @@
+{
+  "schema": "minecraftaibuilder-b73-offline-planner-preflight-v1",
+  "intent": "VERIFY_PINNED_IMPORT_GRAPH_AND_RUNTIME_ASSETS; EVENTUAL_VM_ONLY_PLAN_GENERATION",
+  "provenance": {
+    "b72": "80e8b26474488d5bbea6d41a6db0fcd061bb7658ea3fda385b7b2df7a96af4cd",
+    "dependencyManifestSha256": "2a0c0d2026b47afcb7e13713f703ec64af3103b0e29cd6947ac127feba0a1e06",
+    "sourceEvidenceSha256": "61c4a94c32c5d2ee3ef4cd697218bdb515f30e71dcf3c653d177b0f809da1a4c"
+  },
+  "staticAnalysis": {
+    "pinnedSourceCount": 30,
+    "pinnedSourcesMismatch": 0,
+    "staticESMClosureMissing": [],
+    "runtimeAssets": [
+      {
+        "path": "catalog/education.json",
+        "available": false
+      },
+      {
+        "path": "catalog/semantic.json",
+        "available": false
+      },
+      {
+        "path": "catalog/semantic-overrides.json",
+        "available": false
+      },
+      {
+        "path": "catalog/sources/manifest.json",
+        "available": false
+      },
+      {
+        "path": "catalog/sources/IntrinsicBlockStatesList.md",
+        "available": false
+      },
+      {
+        "path": "catalog/sources/BlockStateAndTraitListings.md",
+        "available": false
+      }
+    ],
+    "missingRuntimeAssets": [
+      "catalog/education.json",
+      "catalog/semantic.json",
+      "catalog/semantic-overrides.json",
+      "catalog/sources/manifest.json",
+      "catalog/sources/IntrinsicBlockStatesList.md",
+      "catalog/sources/BlockStateAndTraitListings.md"
+    ],
+    "note": "Six catalog files are required for runtime imports; lexical closure alone is insufficient."
+  },
+  "runtimeStatus": "BLOCKED_MISSING_CATALOG_RUNTIME_ASSETS",
+  "plans": [],
+  "summary": {
+    "additionalDependencyFiles": 25,
+    "originalProductionSourceFiles": 5,
+    "totalPinnedJsAndJsonFiles": 30,
+    "missingRuntimeAssetFiles": 6,
+    "plannerExecutedOffline": false,
+    "checkedProductionBuildings": 0,
+    "realMinecraftExecutions": 0,
+    "productionFileMutations": 0
+  },
+  "unresolved": [
+    "REQUIRES_6_CATALOG_ASSETS",
+    "FACADE_VS_INTERIOR_CONFLICT_UNVERIFIED",
+    "REAL_PHYSICAL_DOORS_AND_STAIRS_NOT_MAPPED",
+    "B70_18_OUTSIDE_MASK_HELD",
+    "B42_60_UPPER_DOORS_HELD"
+  ],
+  "readiness": "NOT_PREPARED",
+  "executionAllowed": false,
+  "constructionApproved": false,
+  "worldContacts": 0,
+  "gates": [
+    {
+      "id": "M4-01",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-02",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-03",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-04",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-05",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-06",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-07",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-08",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-09",
+      "status": "BLOCKED"
+    }
+  ],
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0,
+    "worldCoordinates": null,
+    "materialIds": []
+  },
+  "reportSha256": "3fc80a18dae840fe303e2ff90e7392f6871f09620d427239ca02e992a237d6ec"
+}

@@ -1,0 +1,20 @@
+# Only code and pinned testing evidence belong in the repository.
+node_modules/
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.zip
+*.tap
+*.log
+.DS_Store
+__pycache__/
+*.pyc
+MIGRATION_WORKTREE/
+.migration_tmp/
+reports/generated/
+artifacts/
+coverage/

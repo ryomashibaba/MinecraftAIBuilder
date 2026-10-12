@@ -1,0 +1,33 @@
+{
+  "schema": "minecraftaibuilder-step8b-b37-summary-v1",
+  "building": "apartment/candidate-01",
+  "levels": 5,
+  "nominalCorridorToStairPorts": {
+    "A": 15,
+    "B": 10
+  },
+  "nominal2x2Footprints": {
+    "A": 5,
+    "B": 5
+  },
+  "cutoutAdjacent2x2": {
+    "A": 5,
+    "B": 5
+  },
+  "eastSideCandidateCells": [
+    "15,17",
+    "16,17",
+    "15,18",
+    "16,18"
+  ],
+  "onlyNominal2D": true,
+  "physicallyCertifiedLandings": 0,
+  "selectedOption": null,
+  "constructionApproval": false,
+  "readiness": "NOT_PREPARED",
+  "deployment": "BLOCKED",
+  "buildOperations": 0,
+  "newTestsPassed": 32,
+  "relatedRegressionPassed": 62,
+  "next": "NOMINAL_STAIR_HEIGHT_VS_LANDING_PAD_FLOOR_SUPPORT_CHECK"
+}

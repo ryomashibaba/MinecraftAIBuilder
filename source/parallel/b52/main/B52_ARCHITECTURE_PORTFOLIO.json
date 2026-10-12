@@ -1,0 +1,1641 @@
+{
+  "schema": "minecraftaibuilder-b52-offline-architecture-portfolio-v1",
+  "kind": "CROSS_BUILDING_LOCAL_DESIGN_OPTION_REVIEW_ONLY",
+  "provenance": {
+    "b51ReportSha256": "6b2ba25f400f5eb8cd3a56dc113bfe744556d3adbf59ee8dd371fdc8da27f63c",
+    "b50ReportSha256": "544f0af8c759a285df5dbfaa300f1518a1f42d64bd2f833007390b4144db9c7d",
+    "pinnedPlannerCallsiteSha256": "23be6e8b03827698fb890661f6fd0957a76ac4718f3347531121c8a7dc0450c8",
+    "productionFacadeSourceAvailable": false,
+    "productionParity": "UNVERIFIED"
+  },
+  "decisionPolicy": {
+    "profiles": [
+      {
+        "id": "MINIMIZE_FACADE_GRAPHICS_CONFLICT",
+        "label": "入口と外壁表示の衝突を優先して抑える"
+      },
+      {
+        "id": "CENTERLINE_COMPOSITION",
+        "label": "建物中心に近い配置を優先する"
+      },
+      {
+        "id": "SETBACK_WITH_OFFSET_COMPOSITION",
+        "label": "屋上余白を保ちながらシルエットの非対称性も比較する"
+      }
+    ],
+    "selection": "TRANSPARENT_LEXICOGRAPHIC_LOCAL_PREVIEW_NOT_QUALITY_CERTIFICATION",
+    "entryMetrics": "VISUAL_GRAPHIC_OVERLAP_LOCAL_CENTRE_AND_FLOOR_FOOTPRINT_ONLY",
+    "roofMetrics": "LOCAL_ROOF_MASK_BUFFER_AND_LOWER_FLOOR_PROJECTION_ONLY",
+    "ties": "DETERMINISTIC_LOCAL_POSITION",
+    "approval": "NONE"
+  },
+  "buildings": [
+    {
+      "id": "hotel/candidate-01",
+      "program": "hotel",
+      "evidence": {
+        "b51BuildingSha256": "285edd64f46dd73cc9634c7a5c65e521c5e24de3b386ebc4dddaaa6730120eac",
+        "b48BuildingSha256": "3670e543b178c6cb69e822af81655474d485b4d10ef17f4eca8efa83b67734c5",
+        "b49BuildingSha256": "9b411fc3d1665456c2d78c512d2e38a026e996fb897efa9f1b449a02b08439b4"
+      },
+      "optionsExamined": {
+        "entry": 20,
+        "roof2D": 396
+      },
+      "paretoSummary": {
+        "entryNonDominatedCount": 1,
+        "roofNonDominatedCount": 4,
+        "topFiveEntries": [
+          {
+            "start": 11,
+            "endInclusive": 15,
+            "nominalWidth": 5,
+            "inwardFullWidthBands": 4,
+            "facadeGraphicOverlaps": 2,
+            "facadeCenterOffsetTwice": 1,
+            "physicalPassageVerified": false,
+            "approved": false
+          }
+        ],
+        "topFiveRoofs": [
+          {
+            "x": 10,
+            "z": 8,
+            "width": 5,
+            "depth": 3,
+            "roofEdgeBufferRadius": 2,
+            "localFootprintCells": 15,
+            "immediatelyLowerFloorProjectionCells": 15,
+            "centerDistanceSquared": 0.5,
+            "sourcePlannerPlacement": false,
+            "verifiedPhysicalSupport": false,
+            "approved": false
+          },
+          {
+            "x": 10,
+            "z": 9,
+            "width": 5,
+            "depth": 3,
+            "roofEdgeBufferRadius": 2,
+            "localFootprintCells": 15,
+            "immediatelyLowerFloorProjectionCells": 15,
+            "centerDistanceSquared": 0.5,
+            "sourcePlannerPlacement": false,
+            "verifiedPhysicalSupport": false,
+            "approved": false
+          },
+          {
+            "x": 11,
+            "z": 8,
+            "width": 5,
+            "depth": 3,
+            "roofEdgeBufferRadius": 2,
+            "localFootprintCells": 15,
+            "immediatelyLowerFloorProjectionCells": 15,
+            "centerDistanceSquared": 0.5,
+            "sourcePlannerPlacement": false,
+            "verifiedPhysicalSupport": false,
+            "approved": false
+          },
+          {
+            "x": 11,
+            "z": 9,
+            "width": 5,
+            "depth": 3,
+            "roofEdgeBufferRadius": 2,
+            "localFootprintCells": 15,
+            "immediatelyLowerFloorProjectionCells": 15,
+            "centerDistanceSquared": 0.5,
+            "sourcePlannerPlacement": false,
+            "verifiedPhysicalSupport": false,
+            "approved": false
+          }
+        ]
+      },
+      "facadeTransitionReview": {
+        "graphicTransitionCount": 420,
+        "unchangedGraphicPairs": 40,
+        "changesPerFace": {
+          "N": 120,
+          "S": 120,
+          "E": 90,
+          "W": 90
+        },
+        "topTenPreviewHotspots": [
+          {
+            "localColumn": "E/26/1",
+            "graphicChanges": 5,
+            "physicalFacadeProblemVerified": false
+          },
+          {
+            "localColumn": "E/26/10",
+            "graphicChanges": 5,
+            "physicalFacadeProblemVerified": false
+          },
+          {
+            "localColumn": "E/26/11",
+            "graphicChanges": 5,
+            "physicalFacadeProblemVerified": false
+          },
+          {
+            "localColumn": "E/26/12",
+            "graphicChanges": 5,
+            "physicalFacadeProblemVerified": false
+          },
+          {
+            "localColumn": "E/26/13",
+            "graphicChanges": 5,
+            "physicalFacadeProblemVerified": false
+          },
+          {
+            "localColumn": "E/26/14",
+            "graphicChanges": 5,
+            "physicalFacadeProblemVerified": false
+          },
+          {
+            "localColumn": "E/26/15",
+            "graphicChanges": 5,
+            "physicalFacadeProblemVerified": false
+          },
+          {
+            "localColumn": "E/26/16",
+            "graphicChanges": 5,
+            "physicalFacadeProblemVerified": false
+          },
+          {
+            "localColumn": "E/26/17",
+            "graphicChanges": 5,
+            "physicalFacadeProblemVerified": false
+          },
+          {
+            "localColumn": "E/26/18",
+            "graphicChanges": 5,
+            "physicalFacadeProblemVerified": false
+          }
+        ],
+        "sourceWallColumns": 92,
+        "notActualWindowOrFacadeGeometry": true
+      },
+      "variants": [
+        {
+          "profile": "MINIMIZE_FACADE_GRAPHICS_CONFLICT",
+          "localPreviewOnly": true,
+          "entry": {
+            "start": 11,
+            "endInclusive": 15,
+            "nominalWidth": 5,
+            "inwardFullWidthBands": 4,
+            "facadeGraphicOverlaps": 2,
+            "facadeCenterOffsetTwice": 1,
+            "physicalPassageVerified": false,
+            "approved": false
+          },
+          "roof": {
+            "x": 10,
+            "z": 8,
+            "width": 5,
+            "depth": 3,
+            "roofEdgeBufferRadius": 2,
+            "localFootprintCells": 15,
+            "immediatelyLowerFloorProjectionCells": 15,
+            "centerDistanceSquared": 0.5,
+            "sourcePlannerPlacement": false,
+            "verifiedPhysicalSupport": false,
+            "approved": false
+          },
+          "reviewFlags": [
+            "ENTRANCE_OVERLAPS_VISUAL_FACADE_MARKERS"
+          ],
+          "doorInstalled": false,
+          "roofModuleInstalled": false,
+          "physicalSafetyVerified": false,
+          "productionPlannerParityVerified": false,
+          "approved": false,
+          "sameLocalPositionsAs": null
+        },
+        {
+          "profile": "CENTERLINE_COMPOSITION",
+          "localPreviewOnly": true,
+          "entry": {
+            "start": 11,
+            "endInclusive": 15,
+            "nominalWidth": 5,
+            "inwardFullWidthBands": 4,
+            "facadeGraphicOverlaps": 2,
+            "facadeCenterOffsetTwice": 1,
+            "physicalPassageVerified": false,
+            "approved": false
+          },
+          "roof": {
+            "x": 10,
+            "z": 8,
+            "width": 5,
+            "depth": 3,
+            "roofEdgeBufferRadius": 2,
+            "localFootprintCells": 15,
+            "immediatelyLowerFloorProjectionCells": 15,
+            "centerDistanceSquared": 0.5,
+            "sourcePlannerPlacement": false,
+            "verifiedPhysicalSupport": false,
+            "approved": false
+          },
+          "reviewFlags": [
+            "ENTRANCE_OVERLAPS_VISUAL_FACADE_MARKERS"
+          ],
+          "doorInstalled": false,
+          "roofModuleInstalled": false,
+          "physicalSafetyVerified": false,
+          "productionPlannerParityVerified": false,
+          "approved": false,
+          "sameLocalPositionsAs": "MINIMIZE_FACADE_GRAPHICS_CONFLICT"
+        },
+        {
+          "profile": "SETBACK_WITH_OFFSET_COMPOSITION",
+          "localPreviewOnly": true,
+          "entry": {
+            "start": 1,
+            "endInclusive": 5,
+            "nominalWidth": 5,
+            "inwardFullWidthBands": 4,
+            "facadeGraphicOverlaps": 2,
+            "facadeCenterOffsetTwice": 19,
+            "physicalPassageVerified": false,
+            "approved": false
+          },
+          "roof": {
+            "x": 2,
+            "z": 2,
+            "width": 5,
+            "depth": 3,
+            "roofEdgeBufferRadius": 2,
+            "localFootprintCells": 15,
+            "immediatelyLowerFloorProjectionCells": 15,
+            "centerDistanceSquared": 114.5,
+            "sourcePlannerPlacement": false,
+            "verifiedPhysicalSupport": false,
+            "approved": false
+          },
+          "reviewFlags": [
+            "ENTRANCE_OVERLAPS_VISUAL_FACADE_MARKERS"
+          ],
+          "doorInstalled": false,
+          "roofModuleInstalled": false,
+          "physicalSafetyVerified": false,
+          "productionPlannerParityVerified": false,
+          "approved": false,
+          "sameLocalPositionsAs": null
+        }
+      ],
+      "distinctPreviewPairs": 2,
+      "designOnly": true,
+      "approved": false,
+      "structuralSafetyVerified": false,
+      "unverified": [
+        "PHYSICAL_DOOR_BLOCK_AND_CLEARANCE",
+        "INTERIOR_EGRESS_AND_OBSTACLES",
+        "STRUCTURAL_ROOF_SUPPORT_AND_LOADS",
+        "PRODUCTION_COMPOSEFACADE",
+        "PRODUCTION_MATERIALS_AND_STYLES",
+        "WALL_FACADE_ACTUAL_MODULE_EMISSIONS",
+        "PRODUCTION_PLAN_SELECTION",
+        "INTERIOR_AND_EXTERNAL_MOVEMENT_CLEARANCE"
+      ]
+    },
+    {
+      "id": "apartment/candidate-01",
+      "program": "apartment",
+      "evidence": {
+        "b51BuildingSha256": "f5dea40fffd355a5d6c1ed1c304785da7f898a87c475cc2c2011646f3d015276",
+        "b48BuildingSha256": "7791b34fe3518c48fd48adcc98a3e59c1dd15e7c51828eb331cbd6f22893f315",
+        "b49BuildingSha256": "56c88fe32aca24eb22c9d6ac716755fa63e7cc68e4cd5129c14852585a87d160"
+      },
+      "optionsExamined": {
+        "entry": 25,
+        "roof2D": 240
+      },
+      "paretoSummary": {
+        "entryNonDominatedCount": 1,
+        "roofNonDominatedCount": 8,
+        "topFiveEntries": [
+          {
+            "start": 13,
+            "endInclusive": 14,
+            "nominalWidth": 2,
+            "inwardFullWidthBands": 4,
+            "facadeGraphicOverlaps": 0,
+            "facadeCenterOffsetTwice": 0,
+            "physicalPassageVerified": false,
+            "approved": false
+          }
+        ],
+        "topFiveRoofs": [
+          {
+            "x": 12,
+            "z": 1,
+            "width": 3,
+            "depth": 3,
+            "roofEdgeBufferRadius": 1,
+            "localFootprintCells": 9,
+            "immediatelyLowerFloorProjectionCells": 9,
+            "centerDistanceSquared": 72.5,
+            "sourcePlannerPlacement": false,
+            "verifiedPhysicalSupport": false,
+            "approved": false
+          },
+          {
+            "x": 12,
+            "z": 18,
+            "width": 3,
+            "depth": 3,
+            "roofEdgeBufferRadius": 1,
+            "localFootprintCells": 9,
+            "immediatelyLowerFloorProjectionCells": 9,
+            "centerDistanceSquared": 72.5,
+            "sourcePlannerPlacement": false,
+            "verifiedPhysicalSupport": false,
+            "approved": false
+          },
+          {
+            "x": 13,
+            "z": 1,
+            "width": 3,
+            "depth": 3,
+            "roofEdgeBufferRadius": 1,
+            "localFootprintCells": 9,
+            "immediatelyLowerFloorProjectionCells": 9,
+            "centerDistanceSquared": 72.5,
+            "sourcePlannerPlacement": false,
+            "verifiedPhysicalSupport": false,
+            "approved": false
+          },
+          {
+            "x": 13,
+            "z": 18,
+            "width": 3,
+            "depth": 3,
+            "roofEdgeBufferRadius": 1,
+            "localFootprintCells": 9,
+            "immediatelyLowerFloorProjectionCells": 9,
+            "centerDistanceSquared": 72.5,
+            "sourcePlannerPlacement": false,
+            "verifiedPhysicalSupport": false,
+            "approved": false
+          },
+          {
+            "x": 12,
+            "z": 2,
+            "width": 3,
+            "depth": 3,
+            "roofEdgeBufferRadius": 0,
+            "localFootprintCells": 9,
+            "immediatelyLowerFloorProjectionCells": 9,
+            "centerDistanceSquared": 56.5,
+            "sourcePlannerPlacement": false,
+            "verifiedPhysicalSupport": false,
+            "approved": false
+          }
+        ]
+      },
+      "facadeTransitionReview": {
+        "graphicTransitionCount": 480,
+        "unchangedGraphicPairs": 320,
+        "changesPerFace": {
+          "N": 140,
+          "S": 140,
+          "E": 100,
+          "W": 100
+        },
+        "topTenPreviewHotspots": [
+          {
+            "localColumn": "E/28/1",
+            "graphicChanges": 5,
+            "physicalFacadeProblemVerified": false
+          },
+          {
+            "localColumn": "E/28/10",
+            "graphicChanges": 5,
+            "physicalFacadeProblemVerified": false
+          },
+          {
+            "localColumn": "E/28/12",
+            "graphicChanges": 5,
+            "physicalFacadeProblemVerified": false
+          },
+          {
+            "localColumn": "E/28/13",
+            "graphicChanges": 5,
+            "physicalFacadeProblemVerified": false
+          },
+          {
+            "localColumn": "E/28/15",
+            "graphicChanges": 5,
+            "physicalFacadeProblemVerified": false
+          },
+          {
+            "localColumn": "E/28/16",
+            "graphicChanges": 5,
+            "physicalFacadeProblemVerified": false
+          },
+          {
+            "localColumn": "E/28/18",
+            "graphicChanges": 5,
+            "physicalFacadeProblemVerified": false
+          },
+          {
+            "localColumn": "E/28/19",
+            "graphicChanges": 5,
+            "physicalFacadeProblemVerified": false
+          },
+          {
+            "localColumn": "E/28/3",
+            "graphicChanges": 5,
+            "physicalFacadeProblemVerified": false
+          },
+          {
+            "localColumn": "E/28/4",
+            "graphicChanges": 5,
+            "physicalFacadeProblemVerified": false
+          }
+        ],
+        "sourceWallColumns": 160,
+        "notActualWindowOrFacadeGeometry": true
+      },
+      "variants": [
+        {
+          "profile": "MINIMIZE_FACADE_GRAPHICS_CONFLICT",
+          "localPreviewOnly": true,
+          "entry": {
+            "start": 13,
+            "endInclusive": 14,
+            "nominalWidth": 2,
+            "inwardFullWidthBands": 4,
+            "facadeGraphicOverlaps": 0,
+            "facadeCenterOffsetTwice": 0,
+            "physicalPassageVerified": false,
+            "approved": false
+          },
+          "roof": {
+            "x": 12,
+            "z": 1,
+            "width": 3,
+            "depth": 3,
+            "roofEdgeBufferRadius": 1,
+            "localFootprintCells": 9,
+            "immediatelyLowerFloorProjectionCells": 9,
+            "centerDistanceSquared": 72.5,
+            "sourcePlannerPlacement": false,
+            "verifiedPhysicalSupport": false,
+            "approved": false
+          },
+          "reviewFlags": [
+            "ROOF_TWO_CELL_BUFFER_UNAVAILABLE_FOR_SELECTION"
+          ],
+          "doorInstalled": false,
+          "roofModuleInstalled": false,
+          "physicalSafetyVerified": false,
+          "productionPlannerParityVerified": false,
+          "approved": false,
+          "sameLocalPositionsAs": null
+        },
+        {
+          "profile": "CENTERLINE_COMPOSITION",
+          "localPreviewOnly": true,
+          "entry": {
+            "start": 13,
+            "endInclusive": 14,
+            "nominalWidth": 2,
+            "inwardFullWidthBands": 4,
+            "facadeGraphicOverlaps": 0,
+            "facadeCenterOffsetTwice": 0,
+            "physicalPassageVerified": false,
+            "approved": false
+          },
+          "roof": {
+            "x": 12,
+            "z": 2,
+            "width": 3,
+            "depth": 3,
+            "roofEdgeBufferRadius": 0,
+            "localFootprintCells": 9,
+            "immediatelyLowerFloorProjectionCells": 9,
+            "centerDistanceSquared": 56.5,
+            "sourcePlannerPlacement": false,
+            "verifiedPhysicalSupport": false,
+            "approved": false
+          },
+          "reviewFlags": [
+            "ROOF_TWO_CELL_BUFFER_UNAVAILABLE_FOR_SELECTION"
+          ],
+          "doorInstalled": false,
+          "roofModuleInstalled": false,
+          "physicalSafetyVerified": false,
+          "productionPlannerParityVerified": false,
+          "approved": false,
+          "sameLocalPositionsAs": null
+        },
+        {
+          "profile": "SETBACK_WITH_OFFSET_COMPOSITION",
+          "localPreviewOnly": true,
+          "entry": {
+            "start": 1,
+            "endInclusive": 2,
+            "nominalWidth": 2,
+            "inwardFullWidthBands": 4,
+            "facadeGraphicOverlaps": 0,
+            "facadeCenterOffsetTwice": 24,
+            "physicalPassageVerified": false,
+            "approved": false
+          },
+          "roof": {
+            "x": 1,
+            "z": 1,
+            "width": 3,
+            "depth": 3,
+            "roofEdgeBufferRadius": 1,
+            "localFootprintCells": 9,
+            "immediatelyLowerFloorProjectionCells": 9,
+            "centerDistanceSquared": 204.5,
+            "sourcePlannerPlacement": false,
+            "verifiedPhysicalSupport": false,
+            "approved": false
+          },
+          "reviewFlags": [
+            "ROOF_TWO_CELL_BUFFER_UNAVAILABLE_FOR_SELECTION"
+          ],
+          "doorInstalled": false,
+          "roofModuleInstalled": false,
+          "physicalSafetyVerified": false,
+          "productionPlannerParityVerified": false,
+          "approved": false,
+          "sameLocalPositionsAs": null
+        }
+      ],
+      "distinctPreviewPairs": 3,
+      "designOnly": true,
+      "approved": false,
+      "structuralSafetyVerified": false,
+      "unverified": [
+        "PHYSICAL_DOOR_BLOCK_AND_CLEARANCE",
+        "INTERIOR_EGRESS_AND_OBSTACLES",
+        "STRUCTURAL_ROOF_SUPPORT_AND_LOADS",
+        "PRODUCTION_COMPOSEFACADE",
+        "PRODUCTION_MATERIALS_AND_STYLES",
+        "WALL_FACADE_ACTUAL_MODULE_EMISSIONS",
+        "PRODUCTION_PLAN_SELECTION",
+        "INTERIOR_AND_EXTERNAL_MOVEMENT_CLEARANCE"
+      ]
+    },
+    {
+      "id": "office/candidate-01",
+      "program": "office",
+      "evidence": {
+        "b51BuildingSha256": "ca60f78cd31b28f7612b905901051bec125a0bc6fe71f91798be0ca3becd9dc2",
+        "b48BuildingSha256": "92176f9722b01786088a9d555245e215f9df26324f201cb473d82b3e5473b439",
+        "b49BuildingSha256": "0bc92c7d7e24f23709a903ebaabee537605147dd8e7b9782adea524dbbe72e24"
+      },
+      "optionsExamined": {
+        "entry": 19,
+        "roof2D": 300
+      },
+      "paretoSummary": {
+        "entryNonDominatedCount": 1,
+        "roofNonDominatedCount": 2,
+        "topFiveEntries": [
+          {
+            "start": 10,
+            "endInclusive": 13,
+            "nominalWidth": 4,
+            "inwardFullWidthBands": 4,
+            "facadeGraphicOverlaps": 2,
+            "facadeCenterOffsetTwice": 0,
+            "physicalPassageVerified": false,
+            "approved": false
+          }
+        ],
+        "topFiveRoofs": [
+          {
+            "x": 10,
+            "z": 9,
+            "width": 3,
+            "depth": 3,
+            "roofEdgeBufferRadius": 2,
+            "localFootprintCells": 9,
+            "immediatelyLowerFloorProjectionCells": 9,
+            "centerDistanceSquared": 0.25,
+            "sourcePlannerPlacement": false,
+            "verifiedPhysicalSupport": false,
+            "approved": false
+          },
+          {
+            "x": 11,
+            "z": 9,
+            "width": 3,
+            "depth": 3,
+            "roofEdgeBufferRadius": 2,
+            "localFootprintCells": 9,
+            "immediatelyLowerFloorProjectionCells": 9,
+            "centerDistanceSquared": 0.25,
+            "sourcePlannerPlacement": false,
+            "verifiedPhysicalSupport": false,
+            "approved": false
+          }
+        ]
+      },
+      "facadeTransitionReview": {
+        "graphicTransitionCount": 290,
+        "unchangedGraphicPairs": 32,
+        "changesPerFace": {
+          "N": 82,
+          "S": 82,
+          "E": 63,
+          "W": 63
+        },
+        "topTenPreviewHotspots": [
+          {
+            "localColumn": "E/23/10",
+            "graphicChanges": 3,
+            "physicalFacadeProblemVerified": false
+          },
+          {
+            "localColumn": "E/23/11",
+            "graphicChanges": 3,
+            "physicalFacadeProblemVerified": false
+          },
+          {
+            "localColumn": "E/23/12",
+            "graphicChanges": 3,
+            "physicalFacadeProblemVerified": false
+          },
+          {
+            "localColumn": "E/23/13",
+            "graphicChanges": 3,
+            "physicalFacadeProblemVerified": false
+          },
+          {
+            "localColumn": "E/23/14",
+            "graphicChanges": 3,
+            "physicalFacadeProblemVerified": false
+          },
+          {
+            "localColumn": "E/23/15",
+            "graphicChanges": 3,
+            "physicalFacadeProblemVerified": false
+          },
+          {
+            "localColumn": "E/23/16",
+            "graphicChanges": 3,
+            "physicalFacadeProblemVerified": false
+          },
+          {
+            "localColumn": "E/23/17",
+            "graphicChanges": 3,
+            "physicalFacadeProblemVerified": false
+          },
+          {
+            "localColumn": "E/23/3",
+            "graphicChanges": 3,
+            "physicalFacadeProblemVerified": false
+          },
+          {
+            "localColumn": "E/23/4",
+            "graphicChanges": 3,
+            "physicalFacadeProblemVerified": false
+          }
+        ],
+        "sourceWallColumns": 166,
+        "notActualWindowOrFacadeGeometry": true
+      },
+      "variants": [
+        {
+          "profile": "MINIMIZE_FACADE_GRAPHICS_CONFLICT",
+          "localPreviewOnly": true,
+          "entry": {
+            "start": 10,
+            "endInclusive": 13,
+            "nominalWidth": 4,
+            "inwardFullWidthBands": 4,
+            "facadeGraphicOverlaps": 2,
+            "facadeCenterOffsetTwice": 0,
+            "physicalPassageVerified": false,
+            "approved": false
+          },
+          "roof": {
+            "x": 10,
+            "z": 9,
+            "width": 3,
+            "depth": 3,
+            "roofEdgeBufferRadius": 2,
+            "localFootprintCells": 9,
+            "immediatelyLowerFloorProjectionCells": 9,
+            "centerDistanceSquared": 0.25,
+            "sourcePlannerPlacement": false,
+            "verifiedPhysicalSupport": false,
+            "approved": false
+          },
+          "reviewFlags": [
+            "ENTRANCE_OVERLAPS_VISUAL_FACADE_MARKERS"
+          ],
+          "doorInstalled": false,
+          "roofModuleInstalled": false,
+          "physicalSafetyVerified": false,
+          "productionPlannerParityVerified": false,
+          "approved": false,
+          "sameLocalPositionsAs": null
+        },
+        {
+          "profile": "CENTERLINE_COMPOSITION",
+          "localPreviewOnly": true,
+          "entry": {
+            "start": 10,
+            "endInclusive": 13,
+            "nominalWidth": 4,
+            "inwardFullWidthBands": 4,
+            "facadeGraphicOverlaps": 2,
+            "facadeCenterOffsetTwice": 0,
+            "physicalPassageVerified": false,
+            "approved": false
+          },
+          "roof": {
+            "x": 10,
+            "z": 9,
+            "width": 3,
+            "depth": 3,
+            "roofEdgeBufferRadius": 2,
+            "localFootprintCells": 9,
+            "immediatelyLowerFloorProjectionCells": 9,
+            "centerDistanceSquared": 0.25,
+            "sourcePlannerPlacement": false,
+            "verifiedPhysicalSupport": false,
+            "approved": false
+          },
+          "reviewFlags": [
+            "ENTRANCE_OVERLAPS_VISUAL_FACADE_MARKERS"
+          ],
+          "doorInstalled": false,
+          "roofModuleInstalled": false,
+          "physicalSafetyVerified": false,
+          "productionPlannerParityVerified": false,
+          "approved": false,
+          "sameLocalPositionsAs": "MINIMIZE_FACADE_GRAPHICS_CONFLICT"
+        },
+        {
+          "profile": "SETBACK_WITH_OFFSET_COMPOSITION",
+          "localPreviewOnly": true,
+          "entry": {
+            "start": 17,
+            "endInclusive": 20,
+            "nominalWidth": 4,
+            "inwardFullWidthBands": 4,
+            "facadeGraphicOverlaps": 2,
+            "facadeCenterOffsetTwice": 14,
+            "physicalPassageVerified": false,
+            "approved": false
+          },
+          "roof": {
+            "x": 3,
+            "z": 4,
+            "width": 3,
+            "depth": 3,
+            "roofEdgeBufferRadius": 2,
+            "localFootprintCells": 9,
+            "immediatelyLowerFloorProjectionCells": 9,
+            "centerDistanceSquared": 81.25,
+            "sourcePlannerPlacement": false,
+            "verifiedPhysicalSupport": false,
+            "approved": false
+          },
+          "reviewFlags": [
+            "ENTRANCE_OVERLAPS_VISUAL_FACADE_MARKERS"
+          ],
+          "doorInstalled": false,
+          "roofModuleInstalled": false,
+          "physicalSafetyVerified": false,
+          "productionPlannerParityVerified": false,
+          "approved": false,
+          "sameLocalPositionsAs": null
+        }
+      ],
+      "distinctPreviewPairs": 2,
+      "designOnly": true,
+      "approved": false,
+      "structuralSafetyVerified": false,
+      "unverified": [
+        "PHYSICAL_DOOR_BLOCK_AND_CLEARANCE",
+        "INTERIOR_EGRESS_AND_OBSTACLES",
+        "STRUCTURAL_ROOF_SUPPORT_AND_LOADS",
+        "PRODUCTION_COMPOSEFACADE",
+        "PRODUCTION_MATERIALS_AND_STYLES",
+        "WALL_FACADE_ACTUAL_MODULE_EMISSIONS",
+        "PRODUCTION_PLAN_SELECTION",
+        "INTERIOR_AND_EXTERNAL_MOVEMENT_CLEARANCE"
+      ]
+    },
+    {
+      "id": "office/candidate-02",
+      "program": "office",
+      "evidence": {
+        "b51BuildingSha256": "9c05328c501628260b9620afcca7cbe8c99b111e55ae94062347109cd231ce7e",
+        "b48BuildingSha256": "6b9ebf2b5d7ef62eef7b639fd69513b263ff4509bc6ba234ff6709f8ac139e74",
+        "b49BuildingSha256": "42b18235f0d22dc77a848883b15674ebfa7b2849528c700178eb4d24aa3577d9"
+      },
+      "optionsExamined": {
+        "entry": 8,
+        "roof2D": 132
+      },
+      "paretoSummary": {
+        "entryNonDominatedCount": 2,
+        "roofNonDominatedCount": 2,
+        "topFiveEntries": [
+          {
+            "start": 4,
+            "endInclusive": 7,
+            "nominalWidth": 4,
+            "inwardFullWidthBands": 4,
+            "facadeGraphicOverlaps": 1,
+            "facadeCenterOffsetTwice": 1,
+            "physicalPassageVerified": false,
+            "approved": false
+          },
+          {
+            "start": 5,
+            "endInclusive": 8,
+            "nominalWidth": 4,
+            "inwardFullWidthBands": 4,
+            "facadeGraphicOverlaps": 1,
+            "facadeCenterOffsetTwice": 1,
+            "physicalPassageVerified": false,
+            "approved": false
+          }
+        ],
+        "topFiveRoofs": [
+          {
+            "x": 5,
+            "z": 5,
+            "width": 3,
+            "depth": 3,
+            "roofEdgeBufferRadius": 2,
+            "localFootprintCells": 9,
+            "immediatelyLowerFloorProjectionCells": 9,
+            "centerDistanceSquared": 0.25,
+            "sourcePlannerPlacement": false,
+            "verifiedPhysicalSupport": false,
+            "approved": false
+          },
+          {
+            "x": 5,
+            "z": 6,
+            "width": 3,
+            "depth": 3,
+            "roofEdgeBufferRadius": 2,
+            "localFootprintCells": 9,
+            "immediatelyLowerFloorProjectionCells": 9,
+            "centerDistanceSquared": 0.25,
+            "sourcePlannerPlacement": false,
+            "verifiedPhysicalSupport": false,
+            "approved": false
+          }
+        ]
+      },
+      "facadeTransitionReview": {
+        "graphicTransitionCount": 217,
+        "unchangedGraphicPairs": 179,
+        "changesPerFace": {
+          "N": 59,
+          "S": 59,
+          "E": 47,
+          "W": 52
+        },
+        "topTenPreviewHotspots": [
+          {
+            "localColumn": "E/13/1",
+            "graphicChanges": 5,
+            "physicalFacadeProblemVerified": false
+          },
+          {
+            "localColumn": "E/13/3",
+            "graphicChanges": 5,
+            "physicalFacadeProblemVerified": false
+          },
+          {
+            "localColumn": "E/13/4",
+            "graphicChanges": 5,
+            "physicalFacadeProblemVerified": false
+          },
+          {
+            "localColumn": "N/0/1",
+            "graphicChanges": 5,
+            "physicalFacadeProblemVerified": false
+          },
+          {
+            "localColumn": "N/0/10",
+            "graphicChanges": 5,
+            "physicalFacadeProblemVerified": false
+          },
+          {
+            "localColumn": "N/0/3",
+            "graphicChanges": 5,
+            "physicalFacadeProblemVerified": false
+          },
+          {
+            "localColumn": "N/0/4",
+            "graphicChanges": 5,
+            "physicalFacadeProblemVerified": false
+          },
+          {
+            "localColumn": "N/0/6",
+            "graphicChanges": 5,
+            "physicalFacadeProblemVerified": false
+          },
+          {
+            "localColumn": "N/0/7",
+            "graphicChanges": 5,
+            "physicalFacadeProblemVerified": false
+          },
+          {
+            "localColumn": "N/0/9",
+            "graphicChanges": 5,
+            "physicalFacadeProblemVerified": false
+          }
+        ],
+        "sourceWallColumns": 98,
+        "notActualWindowOrFacadeGeometry": true
+      },
+      "variants": [
+        {
+          "profile": "MINIMIZE_FACADE_GRAPHICS_CONFLICT",
+          "localPreviewOnly": true,
+          "entry": {
+            "start": 4,
+            "endInclusive": 7,
+            "nominalWidth": 4,
+            "inwardFullWidthBands": 4,
+            "facadeGraphicOverlaps": 1,
+            "facadeCenterOffsetTwice": 1,
+            "physicalPassageVerified": false,
+            "approved": false
+          },
+          "roof": {
+            "x": 5,
+            "z": 5,
+            "width": 3,
+            "depth": 3,
+            "roofEdgeBufferRadius": 2,
+            "localFootprintCells": 9,
+            "immediatelyLowerFloorProjectionCells": 9,
+            "centerDistanceSquared": 0.25,
+            "sourcePlannerPlacement": false,
+            "verifiedPhysicalSupport": false,
+            "approved": false
+          },
+          "reviewFlags": [
+            "ENTRANCE_OVERLAPS_VISUAL_FACADE_MARKERS"
+          ],
+          "doorInstalled": false,
+          "roofModuleInstalled": false,
+          "physicalSafetyVerified": false,
+          "productionPlannerParityVerified": false,
+          "approved": false,
+          "sameLocalPositionsAs": null
+        },
+        {
+          "profile": "CENTERLINE_COMPOSITION",
+          "localPreviewOnly": true,
+          "entry": {
+            "start": 4,
+            "endInclusive": 7,
+            "nominalWidth": 4,
+            "inwardFullWidthBands": 4,
+            "facadeGraphicOverlaps": 1,
+            "facadeCenterOffsetTwice": 1,
+            "physicalPassageVerified": false,
+            "approved": false
+          },
+          "roof": {
+            "x": 5,
+            "z": 5,
+            "width": 3,
+            "depth": 3,
+            "roofEdgeBufferRadius": 2,
+            "localFootprintCells": 9,
+            "immediatelyLowerFloorProjectionCells": 9,
+            "centerDistanceSquared": 0.25,
+            "sourcePlannerPlacement": false,
+            "verifiedPhysicalSupport": false,
+            "approved": false
+          },
+          "reviewFlags": [
+            "ENTRANCE_OVERLAPS_VISUAL_FACADE_MARKERS"
+          ],
+          "doorInstalled": false,
+          "roofModuleInstalled": false,
+          "physicalSafetyVerified": false,
+          "productionPlannerParityVerified": false,
+          "approved": false,
+          "sameLocalPositionsAs": "MINIMIZE_FACADE_GRAPHICS_CONFLICT"
+        },
+        {
+          "profile": "SETBACK_WITH_OFFSET_COMPOSITION",
+          "localPreviewOnly": true,
+          "entry": {
+            "start": 1,
+            "endInclusive": 4,
+            "nominalWidth": 4,
+            "inwardFullWidthBands": 4,
+            "facadeGraphicOverlaps": 1,
+            "facadeCenterOffsetTwice": 7,
+            "physicalPassageVerified": false,
+            "approved": false
+          },
+          "roof": {
+            "x": 2,
+            "z": 2,
+            "width": 3,
+            "depth": 3,
+            "roofEdgeBufferRadius": 2,
+            "localFootprintCells": 9,
+            "immediatelyLowerFloorProjectionCells": 9,
+            "centerDistanceSquared": 21.25,
+            "sourcePlannerPlacement": false,
+            "verifiedPhysicalSupport": false,
+            "approved": false
+          },
+          "reviewFlags": [
+            "ENTRANCE_OVERLAPS_VISUAL_FACADE_MARKERS"
+          ],
+          "doorInstalled": false,
+          "roofModuleInstalled": false,
+          "physicalSafetyVerified": false,
+          "productionPlannerParityVerified": false,
+          "approved": false,
+          "sameLocalPositionsAs": null
+        }
+      ],
+      "distinctPreviewPairs": 2,
+      "designOnly": true,
+      "approved": false,
+      "structuralSafetyVerified": false,
+      "unverified": [
+        "PHYSICAL_DOOR_BLOCK_AND_CLEARANCE",
+        "INTERIOR_EGRESS_AND_OBSTACLES",
+        "STRUCTURAL_ROOF_SUPPORT_AND_LOADS",
+        "PRODUCTION_COMPOSEFACADE",
+        "PRODUCTION_MATERIALS_AND_STYLES",
+        "WALL_FACADE_ACTUAL_MODULE_EMISSIONS",
+        "PRODUCTION_PLAN_SELECTION",
+        "INTERIOR_AND_EXTERNAL_MOVEMENT_CLEARANCE"
+      ]
+    },
+    {
+      "id": "office/candidate-03",
+      "program": "office",
+      "evidence": {
+        "b51BuildingSha256": "7505e1b7ee2746449adbde96ad2d9322f8c1982754e51a61a2642b9e0fd9d391",
+        "b48BuildingSha256": "0160d54327ae7c0bcf2c81077a462a7b58bde22701d89bf7a0ee3a67a332414a",
+        "b49BuildingSha256": "4474dc4f2d964c6b57f45b1784f71d07ed0f683f635da40ae495a968dd6ad1e0"
+      },
+      "optionsExamined": {
+        "entry": 19,
+        "roof2D": 396
+      },
+      "paretoSummary": {
+        "entryNonDominatedCount": 1,
+        "roofNonDominatedCount": 4,
+        "topFiveEntries": [
+          {
+            "start": 10,
+            "endInclusive": 13,
+            "nominalWidth": 4,
+            "inwardFullWidthBands": 4,
+            "facadeGraphicOverlaps": 2,
+            "facadeCenterOffsetTwice": 0,
+            "physicalPassageVerified": false,
+            "approved": false
+          }
+        ],
+        "topFiveRoofs": [
+          {
+            "x": 10,
+            "z": 8,
+            "width": 3,
+            "depth": 3,
+            "roofEdgeBufferRadius": 2,
+            "localFootprintCells": 9,
+            "immediatelyLowerFloorProjectionCells": 9,
+            "centerDistanceSquared": 0.5,
+            "sourcePlannerPlacement": false,
+            "verifiedPhysicalSupport": false,
+            "approved": false
+          },
+          {
+            "x": 10,
+            "z": 9,
+            "width": 3,
+            "depth": 3,
+            "roofEdgeBufferRadius": 2,
+            "localFootprintCells": 9,
+            "immediatelyLowerFloorProjectionCells": 9,
+            "centerDistanceSquared": 0.5,
+            "sourcePlannerPlacement": false,
+            "verifiedPhysicalSupport": false,
+            "approved": false
+          },
+          {
+            "x": 11,
+            "z": 8,
+            "width": 3,
+            "depth": 3,
+            "roofEdgeBufferRadius": 2,
+            "localFootprintCells": 9,
+            "immediatelyLowerFloorProjectionCells": 9,
+            "centerDistanceSquared": 0.5,
+            "sourcePlannerPlacement": false,
+            "verifiedPhysicalSupport": false,
+            "approved": false
+          },
+          {
+            "x": 11,
+            "z": 9,
+            "width": 3,
+            "depth": 3,
+            "roofEdgeBufferRadius": 2,
+            "localFootprintCells": 9,
+            "immediatelyLowerFloorProjectionCells": 9,
+            "centerDistanceSquared": 0.5,
+            "sourcePlannerPlacement": false,
+            "verifiedPhysicalSupport": false,
+            "approved": false
+          }
+        ]
+      },
+      "facadeTransitionReview": {
+        "graphicTransitionCount": 400,
+        "unchangedGraphicPairs": 40,
+        "changesPerFace": {
+          "N": 110,
+          "S": 110,
+          "E": 90,
+          "W": 90
+        },
+        "topTenPreviewHotspots": [
+          {
+            "localColumn": "E/24/1",
+            "graphicChanges": 5,
+            "physicalFacadeProblemVerified": false
+          },
+          {
+            "localColumn": "E/24/10",
+            "graphicChanges": 5,
+            "physicalFacadeProblemVerified": false
+          },
+          {
+            "localColumn": "E/24/11",
+            "graphicChanges": 5,
+            "physicalFacadeProblemVerified": false
+          },
+          {
+            "localColumn": "E/24/12",
+            "graphicChanges": 5,
+            "physicalFacadeProblemVerified": false
+          },
+          {
+            "localColumn": "E/24/13",
+            "graphicChanges": 5,
+            "physicalFacadeProblemVerified": false
+          },
+          {
+            "localColumn": "E/24/14",
+            "graphicChanges": 5,
+            "physicalFacadeProblemVerified": false
+          },
+          {
+            "localColumn": "E/24/15",
+            "graphicChanges": 5,
+            "physicalFacadeProblemVerified": false
+          },
+          {
+            "localColumn": "E/24/16",
+            "graphicChanges": 5,
+            "physicalFacadeProblemVerified": false
+          },
+          {
+            "localColumn": "E/24/17",
+            "graphicChanges": 5,
+            "physicalFacadeProblemVerified": false
+          },
+          {
+            "localColumn": "E/24/18",
+            "graphicChanges": 5,
+            "physicalFacadeProblemVerified": false
+          }
+        ],
+        "sourceWallColumns": 88,
+        "notActualWindowOrFacadeGeometry": true
+      },
+      "variants": [
+        {
+          "profile": "MINIMIZE_FACADE_GRAPHICS_CONFLICT",
+          "localPreviewOnly": true,
+          "entry": {
+            "start": 10,
+            "endInclusive": 13,
+            "nominalWidth": 4,
+            "inwardFullWidthBands": 4,
+            "facadeGraphicOverlaps": 2,
+            "facadeCenterOffsetTwice": 0,
+            "physicalPassageVerified": false,
+            "approved": false
+          },
+          "roof": {
+            "x": 10,
+            "z": 8,
+            "width": 3,
+            "depth": 3,
+            "roofEdgeBufferRadius": 2,
+            "localFootprintCells": 9,
+            "immediatelyLowerFloorProjectionCells": 9,
+            "centerDistanceSquared": 0.5,
+            "sourcePlannerPlacement": false,
+            "verifiedPhysicalSupport": false,
+            "approved": false
+          },
+          "reviewFlags": [
+            "ENTRANCE_OVERLAPS_VISUAL_FACADE_MARKERS"
+          ],
+          "doorInstalled": false,
+          "roofModuleInstalled": false,
+          "physicalSafetyVerified": false,
+          "productionPlannerParityVerified": false,
+          "approved": false,
+          "sameLocalPositionsAs": null
+        },
+        {
+          "profile": "CENTERLINE_COMPOSITION",
+          "localPreviewOnly": true,
+          "entry": {
+            "start": 10,
+            "endInclusive": 13,
+            "nominalWidth": 4,
+            "inwardFullWidthBands": 4,
+            "facadeGraphicOverlaps": 2,
+            "facadeCenterOffsetTwice": 0,
+            "physicalPassageVerified": false,
+            "approved": false
+          },
+          "roof": {
+            "x": 10,
+            "z": 8,
+            "width": 3,
+            "depth": 3,
+            "roofEdgeBufferRadius": 2,
+            "localFootprintCells": 9,
+            "immediatelyLowerFloorProjectionCells": 9,
+            "centerDistanceSquared": 0.5,
+            "sourcePlannerPlacement": false,
+            "verifiedPhysicalSupport": false,
+            "approved": false
+          },
+          "reviewFlags": [
+            "ENTRANCE_OVERLAPS_VISUAL_FACADE_MARKERS"
+          ],
+          "doorInstalled": false,
+          "roofModuleInstalled": false,
+          "physicalSafetyVerified": false,
+          "productionPlannerParityVerified": false,
+          "approved": false,
+          "sameLocalPositionsAs": "MINIMIZE_FACADE_GRAPHICS_CONFLICT"
+        },
+        {
+          "profile": "SETBACK_WITH_OFFSET_COMPOSITION",
+          "localPreviewOnly": true,
+          "entry": {
+            "start": 1,
+            "endInclusive": 4,
+            "nominalWidth": 4,
+            "inwardFullWidthBands": 4,
+            "facadeGraphicOverlaps": 2,
+            "facadeCenterOffsetTwice": 18,
+            "physicalPassageVerified": false,
+            "approved": false
+          },
+          "roof": {
+            "x": 2,
+            "z": 2,
+            "width": 3,
+            "depth": 3,
+            "roofEdgeBufferRadius": 2,
+            "localFootprintCells": 9,
+            "immediatelyLowerFloorProjectionCells": 9,
+            "centerDistanceSquared": 114.5,
+            "sourcePlannerPlacement": false,
+            "verifiedPhysicalSupport": false,
+            "approved": false
+          },
+          "reviewFlags": [
+            "ENTRANCE_OVERLAPS_VISUAL_FACADE_MARKERS"
+          ],
+          "doorInstalled": false,
+          "roofModuleInstalled": false,
+          "physicalSafetyVerified": false,
+          "productionPlannerParityVerified": false,
+          "approved": false,
+          "sameLocalPositionsAs": null
+        }
+      ],
+      "distinctPreviewPairs": 2,
+      "designOnly": true,
+      "approved": false,
+      "structuralSafetyVerified": false,
+      "unverified": [
+        "PHYSICAL_DOOR_BLOCK_AND_CLEARANCE",
+        "INTERIOR_EGRESS_AND_OBSTACLES",
+        "STRUCTURAL_ROOF_SUPPORT_AND_LOADS",
+        "PRODUCTION_COMPOSEFACADE",
+        "PRODUCTION_MATERIALS_AND_STYLES",
+        "WALL_FACADE_ACTUAL_MODULE_EMISSIONS",
+        "PRODUCTION_PLAN_SELECTION",
+        "INTERIOR_AND_EXTERNAL_MOVEMENT_CLEARANCE"
+      ]
+    }
+  ],
+  "portfolio": [
+    {
+      "profile": "MINIMIZE_FACADE_GRAPHICS_CONFLICT",
+      "label": "入口と外壁表示の衝突を優先して抑える",
+      "buildingsReviewed": 5,
+      "totalEntryGraphicOverlaps": 7,
+      "entriesWithZeroGraphicOverlap": 1,
+      "roofsWithTwoCellLocalBuffer": 4,
+      "reviewedIssueFlags": 5,
+      "localSelections": [
+        {
+          "id": "hotel/candidate-01",
+          "entryStart": 11,
+          "roofLocalX": 10,
+          "roofLocalZ": 8,
+          "entryGraphicOverlap": 2,
+          "roofBufferRadius": 2,
+          "issueCount": 1,
+          "approved": false
+        },
+        {
+          "id": "apartment/candidate-01",
+          "entryStart": 13,
+          "roofLocalX": 12,
+          "roofLocalZ": 1,
+          "entryGraphicOverlap": 0,
+          "roofBufferRadius": 1,
+          "issueCount": 1,
+          "approved": false
+        },
+        {
+          "id": "office/candidate-01",
+          "entryStart": 10,
+          "roofLocalX": 10,
+          "roofLocalZ": 9,
+          "entryGraphicOverlap": 2,
+          "roofBufferRadius": 2,
+          "issueCount": 1,
+          "approved": false
+        },
+        {
+          "id": "office/candidate-02",
+          "entryStart": 4,
+          "roofLocalX": 5,
+          "roofLocalZ": 5,
+          "entryGraphicOverlap": 1,
+          "roofBufferRadius": 2,
+          "issueCount": 1,
+          "approved": false
+        },
+        {
+          "id": "office/candidate-03",
+          "entryStart": 10,
+          "roofLocalX": 10,
+          "roofLocalZ": 8,
+          "entryGraphicOverlap": 2,
+          "roofBufferRadius": 2,
+          "issueCount": 1,
+          "approved": false
+        }
+      ],
+      "globalOptimalityNotClaimed": true,
+      "approved": false
+    },
+    {
+      "profile": "CENTERLINE_COMPOSITION",
+      "label": "建物中心に近い配置を優先する",
+      "buildingsReviewed": 5,
+      "totalEntryGraphicOverlaps": 7,
+      "entriesWithZeroGraphicOverlap": 1,
+      "roofsWithTwoCellLocalBuffer": 4,
+      "reviewedIssueFlags": 5,
+      "localSelections": [
+        {
+          "id": "hotel/candidate-01",
+          "entryStart": 11,
+          "roofLocalX": 10,
+          "roofLocalZ": 8,
+          "entryGraphicOverlap": 2,
+          "roofBufferRadius": 2,
+          "issueCount": 1,
+          "approved": false
+        },
+        {
+          "id": "apartment/candidate-01",
+          "entryStart": 13,
+          "roofLocalX": 12,
+          "roofLocalZ": 2,
+          "entryGraphicOverlap": 0,
+          "roofBufferRadius": 0,
+          "issueCount": 1,
+          "approved": false
+        },
+        {
+          "id": "office/candidate-01",
+          "entryStart": 10,
+          "roofLocalX": 10,
+          "roofLocalZ": 9,
+          "entryGraphicOverlap": 2,
+          "roofBufferRadius": 2,
+          "issueCount": 1,
+          "approved": false
+        },
+        {
+          "id": "office/candidate-02",
+          "entryStart": 4,
+          "roofLocalX": 5,
+          "roofLocalZ": 5,
+          "entryGraphicOverlap": 1,
+          "roofBufferRadius": 2,
+          "issueCount": 1,
+          "approved": false
+        },
+        {
+          "id": "office/candidate-03",
+          "entryStart": 10,
+          "roofLocalX": 10,
+          "roofLocalZ": 8,
+          "entryGraphicOverlap": 2,
+          "roofBufferRadius": 2,
+          "issueCount": 1,
+          "approved": false
+        }
+      ],
+      "globalOptimalityNotClaimed": true,
+      "approved": false
+    },
+    {
+      "profile": "SETBACK_WITH_OFFSET_COMPOSITION",
+      "label": "屋上余白を保ちながらシルエットの非対称性も比較する",
+      "buildingsReviewed": 5,
+      "totalEntryGraphicOverlaps": 7,
+      "entriesWithZeroGraphicOverlap": 1,
+      "roofsWithTwoCellLocalBuffer": 4,
+      "reviewedIssueFlags": 5,
+      "localSelections": [
+        {
+          "id": "hotel/candidate-01",
+          "entryStart": 1,
+          "roofLocalX": 2,
+          "roofLocalZ": 2,
+          "entryGraphicOverlap": 2,
+          "roofBufferRadius": 2,
+          "issueCount": 1,
+          "approved": false
+        },
+        {
+          "id": "apartment/candidate-01",
+          "entryStart": 1,
+          "roofLocalX": 1,
+          "roofLocalZ": 1,
+          "entryGraphicOverlap": 0,
+          "roofBufferRadius": 1,
+          "issueCount": 1,
+          "approved": false
+        },
+        {
+          "id": "office/candidate-01",
+          "entryStart": 17,
+          "roofLocalX": 3,
+          "roofLocalZ": 4,
+          "entryGraphicOverlap": 2,
+          "roofBufferRadius": 2,
+          "issueCount": 1,
+          "approved": false
+        },
+        {
+          "id": "office/candidate-02",
+          "entryStart": 1,
+          "roofLocalX": 2,
+          "roofLocalZ": 2,
+          "entryGraphicOverlap": 1,
+          "roofBufferRadius": 2,
+          "issueCount": 1,
+          "approved": false
+        },
+        {
+          "id": "office/candidate-03",
+          "entryStart": 1,
+          "roofLocalX": 2,
+          "roofLocalZ": 2,
+          "entryGraphicOverlap": 2,
+          "roofBufferRadius": 2,
+          "issueCount": 1,
+          "approved": false
+        }
+      ],
+      "globalOptimalityNotClaimed": true,
+      "approved": false
+    }
+  ],
+  "totals": {
+    "buildings": 5,
+    "levels": 30,
+    "facadeVisualEdges": 3022,
+    "entranceCandidates": 91,
+    "rooftop2DCandidates": 1464,
+    "designVariants": 15,
+    "distinctPreviewPairs": 11,
+    "facadeGraphicTransitions": 1807,
+    "physicalConstructionOperations": 0,
+    "scans": 0,
+    "plannerRuntimeCalls": 0
+  },
+  "limitations": [
+    "NO_ACTUAL_FACADE_MODULE_COMPOSITION",
+    "NO_DOOR_OR_STAIR_CLEARANCE",
+    "NO_STRUCTURAL_LOAD_OR_ROOF_ACCESS",
+    "NO_MATERIALS_OR_BLOCK_STATES",
+    "NO_WORLD_POSITION_OR_MINECRAFT_CONNECTION"
+  ],
+  "readiness": "NOT_PREPARED",
+  "deployment": "BLOCKED",
+  "constructionApproved": false,
+  "executionAllowed": false,
+  "worldCoordinates": null,
+  "materialIds": [],
+  "engineCalls": 0,
+  "minecraftCommands": 0,
+  "scans": 0,
+  "buildOperations": 0,
+  "blockers": {
+    "unresolvedLegacyDoorHints": 118,
+    "uncutStairCells": 50,
+    "stairsWithoutPhysicalState": 25,
+    "ordinaryDoorBlocksWithoutExactState": 314,
+    "unapprovedAppearanceConcepts": 5,
+    "apartmentFullVerticalCirculation": "CONDITIONAL_VIRTUAL_GRAPH_ONLY",
+    "otherBuildingCirculation": "NOT_VALIDATED",
+    "supportHeadroomCollision": "UNKNOWN",
+    "M4Gates": [
+      {
+        "id": "M4-01",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-02",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-03",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-04",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-05",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-06",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-07",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-08",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-09",
+        "status": "BLOCKED"
+      }
+    ],
+    "unresolvedExteriorAccess": true,
+    "stagePhysicalSupport": false,
+    "unprovenPlannerCompatibility": true,
+    "actualMinecraftStairBlockState": null
+  },
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0,
+    "worldCoordinates": null,
+    "materialIds": []
+  },
+  "reportSha256": "d973eb61932bb53ca615883b277109c0a55a50f8b6bae7ba44256e0f7b2d1074"
+}

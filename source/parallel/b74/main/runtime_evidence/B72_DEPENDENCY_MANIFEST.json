@@ -1,0 +1,409 @@
+{
+  "schema": "minecraftaibuilder-b72-additive-source-dependency-v1",
+  "intent": "ADDITIONAL_DEPENDENCIES_ONLY_NO_RECOLLECT_PINNED_FIVE",
+  "project": "minecraft-ai-builder",
+  "rootPinsVerified": 5,
+  "files": [
+    {
+      "path": "engine/src/block-catalog.js",
+      "sha256": "923c95a45c1c40d3444ffb7f567c797e1e45723c8c332d2ad68f459c360803eb",
+      "size": 13745
+    },
+    {
+      "path": "engine/src/block-states.js",
+      "sha256": "7bee6028673be26058e7a54e30c904cf568c66a379acd066c12a0c8f38edcf78",
+      "size": 2794
+    },
+    {
+      "path": "engine/src/build-anchor.js",
+      "sha256": "23bea262e90012fc6bfdd9f1407e1f7cb514f87862ad1c60b0431792f8ef056f",
+      "size": 3651
+    },
+    {
+      "path": "engine/src/command-placement-compatibility.js",
+      "sha256": "046b939f8ddad7ebec1bc5833dda1c7094e8315fc5cf78a7a44ea572ba044e4b",
+      "size": 2878
+    },
+    {
+      "path": "engine/src/geometry-quality.js",
+      "sha256": "a0d1dfbfc4908e9ba9fb91f64b32cf3858a4af43d91245d511469a6689b1eccf",
+      "size": 3611
+    },
+    {
+      "path": "engine/src/material-candidate-resolver.js",
+      "sha256": "ddd6c9e6ff7908dc9bc1af63ac358de5b3dc387e43b7d79ef39f2029203711db",
+      "size": 12050
+    },
+    {
+      "path": "engine/src/material-consumer-contract.js",
+      "sha256": "6cc55a02375de95b494e8213d9f2b1ffac419ff7be7c3ba25b0ce6f7884e1c5b",
+      "size": 2120
+    },
+    {
+      "path": "engine/src/material-grammar-adapter.js",
+      "sha256": "dbcb8872e08fd0084dd29bb75452eebad2f1162d25973b4699f0f17e959d8760",
+      "size": 12885
+    },
+    {
+      "path": "engine/src/material-grammar-requirements.js",
+      "sha256": "f3c314f38a3078d6634a827850ec63e70e0ec89a158ecfff9298ddeed705a270",
+      "size": 1751
+    },
+    {
+      "path": "engine/src/material-intelligence.js",
+      "sha256": "97745a0319da7e95026ef0cde85c6044046ab9b9f6182b38f9825f563971edbe",
+      "size": 58409
+    },
+    {
+      "path": "engine/src/material-metrics.js",
+      "sha256": "6e62210a33ca748c8b59e95d582e78f7b5406f83f0a927682da237602b1623b3",
+      "size": 1477
+    },
+    {
+      "path": "engine/src/material-palette-set-composer.js",
+      "sha256": "588f7415876cf223a6356b258ecd857018a98725cbda03ff4faf4fece518b9ef",
+      "size": 14693
+    },
+    {
+      "path": "engine/src/material-production-binding.js",
+      "sha256": "bafc749bb9a20035dd49e80e85a054a79910b8be47ef3d46a722ee3a3975bd2d",
+      "size": 6131
+    },
+    {
+      "path": "engine/src/material-shadow.js",
+      "sha256": "88ff2f622b583ec098310879b79ce06b8b34462e2c14952662b147f077fb376f",
+      "size": 14298
+    },
+    {
+      "path": "engine/src/palette-composer.js",
+      "sha256": "82788ccd3674abfb36cb46afba0f3eccca66dffc7755e574c2164312abae5e49",
+      "size": 7370
+    },
+    {
+      "path": "engine/src/safety.js",
+      "sha256": "ef4f71ec968b46ce937d6b279f9cb5b9b7aecde7fd917a960e1716b72795e9fc",
+      "size": 2731
+    },
+    {
+      "path": "engine/src/shape-support.js",
+      "sha256": "a1d055c58dabfd1792cea2649539bb024266356042defe8b3b7fcbfab765732e",
+      "size": 1178
+    },
+    {
+      "path": "engine/src/target-runtime-compatibility.js",
+      "sha256": "b2a662b2ed814be8f11ffd846c3cc4c87c18875ebed216963241a45292937630",
+      "size": 11151
+    },
+    {
+      "path": "modules/walls/building-envelope.js",
+      "sha256": "c63037c51937b0e5ec03b17274452bf1771fe47f8fe01dcececda6a8508766a0",
+      "size": 1969
+    },
+    {
+      "path": "palettes/modern_office.json",
+      "sha256": "49a7b41a75603cf7287fc88809b4bef704a99ce541ee122d63429036dd6a07b5",
+      "size": 345
+    },
+    {
+      "path": "styles/industrial.json",
+      "sha256": "65a2432c95de5d73ab85d55e64dfd1248b0ebb1fe372e14d40dda2c998246b28",
+      "size": 196
+    },
+    {
+      "path": "styles/minimal.json",
+      "sha256": "fdfc426ede8332630aac9c431ff91a8515a308d6f822e134b37522bb299b2b18",
+      "size": 184
+    },
+    {
+      "path": "styles/modern.json",
+      "sha256": "e37996709275fa46eb52f006b2f982c16938ca6506e227a477dc921951c22ac7",
+      "size": 196
+    },
+    {
+      "path": "styles/premium.json",
+      "sha256": "a2e60f74908b9e1ef0265e8b487ba564034b8b8a2be7052c969d82bdf78d3b9d",
+      "size": 184
+    },
+    {
+      "path": "styles/traditional.json",
+      "sha256": "a2e60f74908b9e1ef0265e8b487ba564034b8b8a2be7052c969d82bdf78d3b9d",
+      "size": 184
+    }
+  ],
+  "missing": [],
+  "graphEdges": [
+    [
+      "engine/src/architectural-quality.js",
+      "engine/src/building-grammar.js"
+    ],
+    [
+      "engine/src/architectural-quality.js",
+      "modules/architectural-library.js"
+    ],
+    [
+      "engine/src/block-states.js",
+      "engine/src/block-catalog.js"
+    ],
+    [
+      "engine/src/building-grammar.js",
+      "engine/src/palette-composer.js"
+    ],
+    [
+      "engine/src/building-grammar.js",
+      "palettes/modern_office.json"
+    ],
+    [
+      "engine/src/building-grammar.js",
+      "styles/industrial.json"
+    ],
+    [
+      "engine/src/building-grammar.js",
+      "styles/minimal.json"
+    ],
+    [
+      "engine/src/building-grammar.js",
+      "styles/modern.json"
+    ],
+    [
+      "engine/src/building-grammar.js",
+      "styles/premium.json"
+    ],
+    [
+      "engine/src/building-grammar.js",
+      "styles/traditional.json"
+    ],
+    [
+      "engine/src/building-grammar.js",
+      "styles/urban_japanese.json"
+    ],
+    [
+      "engine/src/command-placement-compatibility.js",
+      "engine/src/material-intelligence.js"
+    ],
+    [
+      "engine/src/general-building-planner.js",
+      "engine/src/architectural-quality.js"
+    ],
+    [
+      "engine/src/general-building-planner.js",
+      "engine/src/block-states.js"
+    ],
+    [
+      "engine/src/general-building-planner.js",
+      "engine/src/build-anchor.js"
+    ],
+    [
+      "engine/src/general-building-planner.js",
+      "engine/src/building-grammar.js"
+    ],
+    [
+      "engine/src/general-building-planner.js",
+      "engine/src/geometry-quality.js"
+    ],
+    [
+      "engine/src/general-building-planner.js",
+      "engine/src/material-metrics.js"
+    ],
+    [
+      "engine/src/general-building-planner.js",
+      "engine/src/material-production-binding.js"
+    ],
+    [
+      "engine/src/general-building-planner.js",
+      "engine/src/safety.js"
+    ],
+    [
+      "engine/src/general-building-planner.js",
+      "engine/src/shape-support.js"
+    ],
+    [
+      "engine/src/general-building-planner.js",
+      "modules/architectural-library.js"
+    ],
+    [
+      "engine/src/general-building-planner.js",
+      "modules/walls/building-envelope.js"
+    ],
+    [
+      "engine/src/geometry-quality.js",
+      "engine/src/block-catalog.js"
+    ],
+    [
+      "engine/src/geometry-quality.js",
+      "modules/architectural-library.js"
+    ],
+    [
+      "engine/src/material-candidate-resolver.js",
+      "engine/src/block-catalog.js"
+    ],
+    [
+      "engine/src/material-candidate-resolver.js",
+      "engine/src/command-placement-compatibility.js"
+    ],
+    [
+      "engine/src/material-candidate-resolver.js",
+      "engine/src/material-intelligence.js"
+    ],
+    [
+      "engine/src/material-candidate-resolver.js",
+      "engine/src/palette-composer.js"
+    ],
+    [
+      "engine/src/material-candidate-resolver.js",
+      "engine/src/target-runtime-compatibility.js"
+    ],
+    [
+      "engine/src/material-consumer-contract.js",
+      "engine/src/material-candidate-resolver.js"
+    ],
+    [
+      "engine/src/material-consumer-contract.js",
+      "engine/src/material-intelligence.js"
+    ],
+    [
+      "engine/src/material-grammar-adapter.js",
+      "engine/src/block-catalog.js"
+    ],
+    [
+      "engine/src/material-grammar-adapter.js",
+      "engine/src/material-candidate-resolver.js"
+    ],
+    [
+      "engine/src/material-grammar-adapter.js",
+      "engine/src/material-intelligence.js"
+    ],
+    [
+      "engine/src/material-grammar-requirements.js",
+      "engine/src/block-catalog.js"
+    ],
+    [
+      "engine/src/material-grammar-requirements.js",
+      "engine/src/material-consumer-contract.js"
+    ],
+    [
+      "engine/src/material-grammar-requirements.js",
+      "engine/src/material-intelligence.js"
+    ],
+    [
+      "engine/src/material-grammar-requirements.js",
+      "modules/architectural-library.js"
+    ],
+    [
+      "engine/src/material-intelligence.js",
+      "engine/src/block-catalog.js"
+    ],
+    [
+      "engine/src/material-intelligence.js",
+      "engine/src/block-states.js"
+    ],
+    [
+      "engine/src/material-intelligence.js",
+      "engine/src/build-anchor.js"
+    ],
+    [
+      "engine/src/material-intelligence.js",
+      "engine/src/palette-composer.js"
+    ],
+    [
+      "engine/src/material-metrics.js",
+      "engine/src/block-catalog.js"
+    ],
+    [
+      "engine/src/material-metrics.js",
+      "engine/src/geometry-quality.js"
+    ],
+    [
+      "engine/src/material-palette-set-composer.js",
+      "engine/src/material-candidate-resolver.js"
+    ],
+    [
+      "engine/src/material-palette-set-composer.js",
+      "engine/src/palette-composer.js"
+    ],
+    [
+      "engine/src/material-production-binding.js",
+      "engine/src/build-anchor.js"
+    ],
+    [
+      "engine/src/material-production-binding.js",
+      "engine/src/material-metrics.js"
+    ],
+    [
+      "engine/src/material-production-binding.js",
+      "engine/src/material-shadow.js"
+    ],
+    [
+      "engine/src/material-production-binding.js",
+      "engine/src/safety.js"
+    ],
+    [
+      "engine/src/material-shadow.js",
+      "engine/src/block-catalog.js"
+    ],
+    [
+      "engine/src/material-shadow.js",
+      "engine/src/material-candidate-resolver.js"
+    ],
+    [
+      "engine/src/material-shadow.js",
+      "engine/src/material-grammar-adapter.js"
+    ],
+    [
+      "engine/src/material-shadow.js",
+      "engine/src/material-grammar-requirements.js"
+    ],
+    [
+      "engine/src/material-shadow.js",
+      "engine/src/material-palette-set-composer.js"
+    ],
+    [
+      "engine/src/material-shadow.js",
+      "engine/src/safety.js"
+    ],
+    [
+      "engine/src/palette-composer.js",
+      "engine/src/block-catalog.js"
+    ],
+    [
+      "engine/src/palette-composer.js",
+      "engine/src/block-states.js"
+    ],
+    [
+      "engine/src/safety.js",
+      "engine/src/block-catalog.js"
+    ],
+    [
+      "engine/src/shape-support.js",
+      "engine/src/block-catalog.js"
+    ],
+    [
+      "engine/src/shape-support.js",
+      "engine/src/geometry-quality.js"
+    ],
+    [
+      "engine/src/target-runtime-compatibility.js",
+      "engine/src/block-catalog.js"
+    ],
+    [
+      "engine/src/target-runtime-compatibility.js",
+      "engine/src/command-placement-compatibility.js"
+    ],
+    [
+      "engine/src/target-runtime-compatibility.js",
+      "engine/src/material-intelligence.js"
+    ]
+  ],
+  "limitations": [
+    "LEXICAL_IMPORT_GRAPH_NOT_FULL_RUNTIME_DEPENDENCY_GRAPH",
+    "DYNAMIC_IMPORTS_MAY_BE_MISSED",
+    "SOURCE_CODE_MUST_BE_REVIEWED_BEFORE_UPLOAD"
+  ],
+  "safety": {
+    "sourceExecuted": false,
+    "sourceImported": false,
+    "projectFilesModified": false,
+    "network": false,
+    "minecraftAccess": false,
+    "constructionCommands": 0
+  }
+}

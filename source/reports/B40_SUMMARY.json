@@ -1,0 +1,64 @@
+{
+  "schema": "minecraftaibuilder-step8b-b40-summary-v1",
+  "building": "apartment/candidate-01",
+  "totals": {
+    "levels": 5,
+    "reviewVariants": 10,
+    "nominalRouteInstances": 44,
+    "uniqueLocalRouteSignatures": 7,
+    "commonSignatureCountAcrossAllVariants": 3,
+    "provisionalGeometryRejections": 0,
+    "provisionalViolationConditions": 0,
+    "nominalPassedPhysicalUncertified": 44,
+    "newFloorCellsAcrossLevels": 5,
+    "removedFloorCellsAcrossLevels": 5,
+    "physicalRoutesVerified": 0,
+    "constructionOperations": 0
+  },
+  "floorRectangles": [
+    {
+      "upperLevel": 2,
+      "before": 6,
+      "after": 7,
+      "exact": true
+    },
+    {
+      "upperLevel": 3,
+      "before": 6,
+      "after": 7,
+      "exact": true
+    },
+    {
+      "upperLevel": 4,
+      "before": 6,
+      "after": 7,
+      "exact": true
+    },
+    {
+      "upperLevel": 5,
+      "before": 6,
+      "after": 7,
+      "exact": true
+    },
+    {
+      "upperLevel": 6,
+      "before": 6,
+      "after": 7,
+      "exact": true
+    }
+  ],
+  "safety": {
+    "notPrepared": true,
+    "constructionApproved": false,
+    "executionAllowed": false,
+    "worldAccess": false,
+    "bridgeContact": false,
+    "legacyModified": false,
+    "frozenEvidenceModified": false
+  },
+  "readiness": "NOT_PREPARED",
+  "deployment": "BLOCKED",
+  "approvedVariant": null,
+  "buildOperations": 0,
+  "next": "B41_STAIR_ACTUAL_SHAPE_AND_SUPPORT_ENGINE_SANDBOX_NO_WORLD"
+}

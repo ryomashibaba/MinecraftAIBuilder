@@ -1,0 +1,1 @@
+B43_PACKAGE_PASS {"frozenB42Files":678,"b43ManifestFiles":690,"newTests":34,"relatedTests":105,"nominalAccess":"77/78","wallConflicts":20,"constructionOperations":0,"engineCalls":0}

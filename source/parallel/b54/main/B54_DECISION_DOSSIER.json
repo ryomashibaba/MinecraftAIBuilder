@@ -1,0 +1,1463 @@
+{
+  "schema": "minecraftaibuilder-b54-evidence-review-v1",
+  "kind": "OFFLINE_BUILDING_DESIGN_DECISION_DOSSIER",
+  "sourcePreflight": {
+    "status": "PRODUCTION_FACADE_IMPLEMENTATION_NOT_SUPPLIED",
+    "missingRequiredOriginals": [
+      "composeFacade implementation",
+      "architectural-quality.js",
+      "architectural-library.js"
+    ],
+    "requiredNextEvidence": [
+      "HASHED_ORIGINAL_SOURCE_FILES",
+      "PRODUCTION_QUALITY_SETTINGS",
+      "REFERENCE_GENERATION_CASES"
+    ],
+    "staticPlannerCallsiteOnly": true,
+    "productionFacadeParity": "UNVERIFIED",
+    "actualFacadeQuality": "UNKNOWN"
+  },
+  "provenance": {
+    "b53ReportSha256": "fd40c23fb0c18368dd619a2631905b063042b6558a3229b6cc202eb252c5c95d",
+    "b52ReportSha256": "d973eb61932bb53ca615883b277109c0a55a50f8b6bae7ba44256e0f7b2d1074"
+  },
+  "methodology": {
+    "axes": [
+      "ENTRY_VISUAL_OVERLAP",
+      "ENTRY_INWARD_LOCAL_FLOOR_BANDS",
+      "ENTRY_CENTER_OFFSET",
+      "ROOF_LOCAL_EDGE_BUFFER",
+      "LOWER_FLOOR_2D_PROJECTION",
+      "ROOF_LOCAL_CENTER_DISTANCE"
+    ],
+    "ranking": "PARETO_COMPARISON_ONLY_NO_AGGREGATE_QUALITY_SCORE",
+    "graphicOverlay": "VISUAL_ONLY_NEVER_APPLY_TO_GEOMETRY",
+    "comparisonConfidence": "ONLY_LOCAL_GEOMETRY_AND_DISPLAY_METRICS_VERIFIED",
+    "autoApproval": false
+  },
+  "buildings": [
+    {
+      "id": "hotel/candidate-01",
+      "program": "hotel",
+      "provenance": {
+        "b53BuildingSha256": "6adb20b1825e72d33b1dfa9f3aecdfe7da52c960434b940db18470e744809a9b",
+        "b52BuildingSha256": "804fb13a0eea4cdde13ae4120c31c674397d2c806484e12d4d6fc2661a096c2c"
+      },
+      "graphic": {
+        "byFace": {
+          "N": {
+            "visualUnits": 156,
+            "originalRoleCounts": {
+              "WINDOW_VISUAL_ONLY": 72,
+              "FIN_GRAPHIC_ONLY": 18,
+              "UNASSIGNED_FACADE_EDGE": 66
+            },
+            "previewRoleCounts": {
+              "WINDOW_VISUAL_ONLY": 72,
+              "FIN_GRAPHIC_ONLY": 6,
+              "UNASSIGNED_FACADE_EDGE": 78
+            },
+            "originalTransitions": 120,
+            "previewTransitions": 24,
+            "changedMarkers": 48,
+            "threeFloorGraphicUniformRunsOriginal": 8,
+            "threeFloorGraphicUniformRunsPreview": 80
+          },
+          "S": {
+            "visualUnits": 156,
+            "originalRoleCounts": {
+              "WINDOW_VISUAL_ONLY": 72,
+              "FIN_GRAPHIC_ONLY": 18,
+              "UNASSIGNED_FACADE_EDGE": 66
+            },
+            "previewRoleCounts": {
+              "WINDOW_VISUAL_ONLY": 72,
+              "FIN_GRAPHIC_ONLY": 6,
+              "UNASSIGNED_FACADE_EDGE": 78
+            },
+            "originalTransitions": 120,
+            "previewTransitions": 24,
+            "changedMarkers": 48,
+            "threeFloorGraphicUniformRunsOriginal": 8,
+            "threeFloorGraphicUniformRunsPreview": 80
+          },
+          "E": {
+            "visualUnits": 120,
+            "originalRoleCounts": {
+              "WINDOW_VISUAL_ONLY": 54,
+              "FIN_GRAPHIC_ONLY": 12,
+              "UNASSIGNED_FACADE_EDGE": 54
+            },
+            "previewRoleCounts": {
+              "WINDOW_VISUAL_ONLY": 54,
+              "FIN_GRAPHIC_ONLY": 4,
+              "UNASSIGNED_FACADE_EDGE": 62
+            },
+            "originalTransitions": 90,
+            "previewTransitions": 18,
+            "changedMarkers": 36,
+            "threeFloorGraphicUniformRunsOriginal": 8,
+            "threeFloorGraphicUniformRunsPreview": 62
+          },
+          "W": {
+            "visualUnits": 120,
+            "originalRoleCounts": {
+              "WINDOW_VISUAL_ONLY": 54,
+              "FIN_GRAPHIC_ONLY": 12,
+              "UNASSIGNED_FACADE_EDGE": 54
+            },
+            "previewRoleCounts": {
+              "WINDOW_VISUAL_ONLY": 54,
+              "FIN_GRAPHIC_ONLY": 4,
+              "UNASSIGNED_FACADE_EDGE": 62
+            },
+            "originalTransitions": 90,
+            "previewTransitions": 18,
+            "changedMarkers": 36,
+            "threeFloorGraphicUniformRunsOriginal": 8,
+            "threeFloorGraphicUniformRunsPreview": 62
+          }
+        },
+        "totals": {
+          "visualUnits": 552,
+          "originalTransitions": 420,
+          "previewTransitions": 84,
+          "changedMarkers": 168,
+          "threeFloorUniformBefore": 32,
+          "threeFloorUniformPreview": 284
+        },
+        "hotspotsTopEight": [
+          {
+            "face": "N",
+            "localFixed": 0,
+            "localT": 1,
+            "originalTransitions": 5,
+            "changedGraphicMarkers": 2,
+            "verifiedPhysicalDefect": false
+          },
+          {
+            "face": "N",
+            "localFixed": 0,
+            "localT": 2,
+            "originalTransitions": 5,
+            "changedGraphicMarkers": 2,
+            "verifiedPhysicalDefect": false
+          },
+          {
+            "face": "N",
+            "localFixed": 0,
+            "localT": 3,
+            "originalTransitions": 5,
+            "changedGraphicMarkers": 2,
+            "verifiedPhysicalDefect": false
+          },
+          {
+            "face": "N",
+            "localFixed": 0,
+            "localT": 4,
+            "originalTransitions": 5,
+            "changedGraphicMarkers": 2,
+            "verifiedPhysicalDefect": false
+          },
+          {
+            "face": "N",
+            "localFixed": 0,
+            "localT": 5,
+            "originalTransitions": 5,
+            "changedGraphicMarkers": 2,
+            "verifiedPhysicalDefect": false
+          },
+          {
+            "face": "N",
+            "localFixed": 0,
+            "localT": 6,
+            "originalTransitions": 5,
+            "changedGraphicMarkers": 2,
+            "verifiedPhysicalDefect": false
+          },
+          {
+            "face": "N",
+            "localFixed": 0,
+            "localT": 7,
+            "originalTransitions": 5,
+            "changedGraphicMarkers": 2,
+            "verifiedPhysicalDefect": false
+          },
+          {
+            "face": "N",
+            "localFixed": 0,
+            "localT": 8,
+            "originalTransitions": 5,
+            "changedGraphicMarkers": 2,
+            "verifiedPhysicalDefect": false
+          }
+        ],
+        "assessment": "DISPLAY_RHYTHM_ONLY_NOT_REAL_FACADE_OR_AESTHETIC_QUALITY"
+      },
+      "variants": [
+        {
+          "entry": {
+            "start": 11,
+            "endInclusive": 15,
+            "facadeGraphicOverlaps": 2,
+            "inwardFullWidthBands": 4,
+            "facadeCenterOffsetTwice": 1
+          },
+          "rooftop": {
+            "localX": 10,
+            "localZ": 8,
+            "width": 5,
+            "depth": 3,
+            "bufferRadius": 2,
+            "lowerFloorProjectionCells": 15,
+            "totalFootprintCells": 15,
+            "centerDistanceSquared": 0.5
+          },
+          "profile": "MINIMIZE_FACADE_GRAPHICS_CONFLICT",
+          "duplicateOf": null,
+          "reviewReasons": [
+            "ENTRY_CONFLICT_WITH_DISPLAY_MARKERS"
+          ],
+          "designReviewStatus": "UNAPPROVED_REVIEW_ONLY",
+          "actualDoorOrModuleInstalled": false,
+          "physicalClearanceVerified": false,
+          "realFacadeVerified": false,
+          "productionParity": "UNVERIFIED",
+          "approved": false,
+          "dominatedByProfiles": []
+        },
+        {
+          "entry": {
+            "start": 11,
+            "endInclusive": 15,
+            "facadeGraphicOverlaps": 2,
+            "inwardFullWidthBands": 4,
+            "facadeCenterOffsetTwice": 1
+          },
+          "rooftop": {
+            "localX": 10,
+            "localZ": 8,
+            "width": 5,
+            "depth": 3,
+            "bufferRadius": 2,
+            "lowerFloorProjectionCells": 15,
+            "totalFootprintCells": 15,
+            "centerDistanceSquared": 0.5
+          },
+          "profile": "CENTERLINE_COMPOSITION",
+          "duplicateOf": "MINIMIZE_FACADE_GRAPHICS_CONFLICT",
+          "reviewReasons": [
+            "ENTRY_CONFLICT_WITH_DISPLAY_MARKERS",
+            "SAME_LOCAL_PLACEMENT_AS_ANOTHER_PROFILE"
+          ],
+          "designReviewStatus": "UNAPPROVED_REVIEW_ONLY",
+          "actualDoorOrModuleInstalled": false,
+          "physicalClearanceVerified": false,
+          "realFacadeVerified": false,
+          "productionParity": "UNVERIFIED",
+          "approved": false,
+          "dominatedByProfiles": []
+        },
+        {
+          "entry": {
+            "start": 1,
+            "endInclusive": 5,
+            "facadeGraphicOverlaps": 2,
+            "inwardFullWidthBands": 4,
+            "facadeCenterOffsetTwice": 19
+          },
+          "rooftop": {
+            "localX": 2,
+            "localZ": 2,
+            "width": 5,
+            "depth": 3,
+            "bufferRadius": 2,
+            "lowerFloorProjectionCells": 15,
+            "totalFootprintCells": 15,
+            "centerDistanceSquared": 114.5
+          },
+          "profile": "SETBACK_WITH_OFFSET_COMPOSITION",
+          "duplicateOf": null,
+          "reviewReasons": [
+            "ENTRY_CONFLICT_WITH_DISPLAY_MARKERS"
+          ],
+          "designReviewStatus": "UNAPPROVED_REVIEW_ONLY",
+          "actualDoorOrModuleInstalled": false,
+          "physicalClearanceVerified": false,
+          "realFacadeVerified": false,
+          "productionParity": "UNVERIFIED",
+          "approved": false,
+          "dominatedByProfiles": [
+            "MINIMIZE_FACADE_GRAPHICS_CONFLICT",
+            "CENTERLINE_COMPOSITION"
+          ]
+        }
+      ],
+      "distinctLocalPlacementPairs": 2,
+      "priorities": [
+        "REVIEW_ENTRANCE_GRAPHIC_OVERLAPS",
+        "COMPARE_FACADE_DISPLAY_REPETITION_AND_AESTHETIC_VARIETY",
+        "CONSIDER_MORE_DISTINCT_LOCAL_DESIGN_ALTERNATIVES",
+        "OBTAIN_HASHED_PRODUCTION_FACADE_SOURCES_BEFORE_PARITY_CLAIMS"
+      ],
+      "decision": "HOLD_FOR_DESIGN_REVIEW",
+      "physicalQuality": "UNVERIFIED",
+      "approved": false
+    },
+    {
+      "id": "apartment/candidate-01",
+      "program": "apartment",
+      "provenance": {
+        "b53BuildingSha256": "cd1048d9663b463c9ba1873c1ee3236af50816b76aec0bf9f1b6aaabb1fe73dd",
+        "b52BuildingSha256": "bbd6f6a5af4cf5ad2eebae3f928a488cec6f06c83567c0320a3d26bbf3d05b84"
+      },
+      "graphic": {
+        "byFace": {
+          "N": {
+            "visualUnits": 276,
+            "originalRoleCounts": {
+              "WINDOW_VISUAL_ONLY": 84,
+              "FIN_GRAPHIC_ONLY": 33,
+              "UNASSIGNED_FACADE_EDGE": 159
+            },
+            "previewRoleCounts": {
+              "WINDOW_VISUAL_ONLY": 80,
+              "FIN_GRAPHIC_ONLY": 35,
+              "UNASSIGNED_FACADE_EDGE": 161
+            },
+            "originalTransitions": 140,
+            "previewTransitions": 28,
+            "changedMarkers": 56,
+            "threeFloorGraphicUniformRunsOriginal": 72,
+            "threeFloorGraphicUniformRunsPreview": 156
+          },
+          "S": {
+            "visualUnits": 276,
+            "originalRoleCounts": {
+              "WINDOW_VISUAL_ONLY": 84,
+              "FIN_GRAPHIC_ONLY": 33,
+              "UNASSIGNED_FACADE_EDGE": 159
+            },
+            "previewRoleCounts": {
+              "WINDOW_VISUAL_ONLY": 80,
+              "FIN_GRAPHIC_ONLY": 35,
+              "UNASSIGNED_FACADE_EDGE": 161
+            },
+            "originalTransitions": 140,
+            "previewTransitions": 28,
+            "changedMarkers": 56,
+            "threeFloorGraphicUniformRunsOriginal": 72,
+            "threeFloorGraphicUniformRunsPreview": 156
+          },
+          "E": {
+            "visualUnits": 204,
+            "originalRoleCounts": {
+              "WINDOW_VISUAL_ONLY": 60,
+              "FIN_GRAPHIC_ONLY": 27,
+              "UNASSIGNED_FACADE_EDGE": 117
+            },
+            "previewRoleCounts": {
+              "WINDOW_VISUAL_ONLY": 56,
+              "FIN_GRAPHIC_ONLY": 29,
+              "UNASSIGNED_FACADE_EDGE": 119
+            },
+            "originalTransitions": 100,
+            "previewTransitions": 20,
+            "changedMarkers": 40,
+            "threeFloorGraphicUniformRunsOriginal": 56,
+            "threeFloorGraphicUniformRunsPreview": 116
+          },
+          "W": {
+            "visualUnits": 204,
+            "originalRoleCounts": {
+              "WINDOW_VISUAL_ONLY": 60,
+              "FIN_GRAPHIC_ONLY": 27,
+              "UNASSIGNED_FACADE_EDGE": 117
+            },
+            "previewRoleCounts": {
+              "WINDOW_VISUAL_ONLY": 56,
+              "FIN_GRAPHIC_ONLY": 29,
+              "UNASSIGNED_FACADE_EDGE": 119
+            },
+            "originalTransitions": 100,
+            "previewTransitions": 20,
+            "changedMarkers": 40,
+            "threeFloorGraphicUniformRunsOriginal": 56,
+            "threeFloorGraphicUniformRunsPreview": 116
+          }
+        },
+        "totals": {
+          "visualUnits": 960,
+          "originalTransitions": 480,
+          "previewTransitions": 96,
+          "changedMarkers": 192,
+          "threeFloorUniformBefore": 256,
+          "threeFloorUniformPreview": 544
+        },
+        "hotspotsTopEight": [
+          {
+            "face": "N",
+            "localFixed": 0,
+            "localT": 1,
+            "originalTransitions": 5,
+            "changedGraphicMarkers": 2,
+            "verifiedPhysicalDefect": false
+          },
+          {
+            "face": "N",
+            "localFixed": 0,
+            "localT": 3,
+            "originalTransitions": 5,
+            "changedGraphicMarkers": 2,
+            "verifiedPhysicalDefect": false
+          },
+          {
+            "face": "N",
+            "localFixed": 0,
+            "localT": 4,
+            "originalTransitions": 5,
+            "changedGraphicMarkers": 2,
+            "verifiedPhysicalDefect": false
+          },
+          {
+            "face": "N",
+            "localFixed": 0,
+            "localT": 6,
+            "originalTransitions": 5,
+            "changedGraphicMarkers": 2,
+            "verifiedPhysicalDefect": false
+          },
+          {
+            "face": "N",
+            "localFixed": 0,
+            "localT": 7,
+            "originalTransitions": 5,
+            "changedGraphicMarkers": 2,
+            "verifiedPhysicalDefect": false
+          },
+          {
+            "face": "N",
+            "localFixed": 0,
+            "localT": 9,
+            "originalTransitions": 5,
+            "changedGraphicMarkers": 2,
+            "verifiedPhysicalDefect": false
+          },
+          {
+            "face": "N",
+            "localFixed": 0,
+            "localT": 10,
+            "originalTransitions": 5,
+            "changedGraphicMarkers": 2,
+            "verifiedPhysicalDefect": false
+          },
+          {
+            "face": "N",
+            "localFixed": 0,
+            "localT": 12,
+            "originalTransitions": 5,
+            "changedGraphicMarkers": 2,
+            "verifiedPhysicalDefect": false
+          }
+        ],
+        "assessment": "DISPLAY_RHYTHM_ONLY_NOT_REAL_FACADE_OR_AESTHETIC_QUALITY"
+      },
+      "variants": [
+        {
+          "entry": {
+            "start": 13,
+            "endInclusive": 14,
+            "facadeGraphicOverlaps": 0,
+            "inwardFullWidthBands": 4,
+            "facadeCenterOffsetTwice": 0
+          },
+          "rooftop": {
+            "localX": 12,
+            "localZ": 1,
+            "width": 3,
+            "depth": 3,
+            "bufferRadius": 1,
+            "lowerFloorProjectionCells": 9,
+            "totalFootprintCells": 9,
+            "centerDistanceSquared": 72.5
+          },
+          "profile": "MINIMIZE_FACADE_GRAPHICS_CONFLICT",
+          "duplicateOf": null,
+          "reviewReasons": [
+            "ROOF_LOCAL_BUFFER_BELOW_TWO"
+          ],
+          "designReviewStatus": "UNAPPROVED_REVIEW_ONLY",
+          "actualDoorOrModuleInstalled": false,
+          "physicalClearanceVerified": false,
+          "realFacadeVerified": false,
+          "productionParity": "UNVERIFIED",
+          "approved": false,
+          "dominatedByProfiles": []
+        },
+        {
+          "entry": {
+            "start": 13,
+            "endInclusive": 14,
+            "facadeGraphicOverlaps": 0,
+            "inwardFullWidthBands": 4,
+            "facadeCenterOffsetTwice": 0
+          },
+          "rooftop": {
+            "localX": 12,
+            "localZ": 2,
+            "width": 3,
+            "depth": 3,
+            "bufferRadius": 0,
+            "lowerFloorProjectionCells": 9,
+            "totalFootprintCells": 9,
+            "centerDistanceSquared": 56.5
+          },
+          "profile": "CENTERLINE_COMPOSITION",
+          "duplicateOf": null,
+          "reviewReasons": [
+            "ROOF_LOCAL_BUFFER_BELOW_TWO"
+          ],
+          "designReviewStatus": "UNAPPROVED_REVIEW_ONLY",
+          "actualDoorOrModuleInstalled": false,
+          "physicalClearanceVerified": false,
+          "realFacadeVerified": false,
+          "productionParity": "UNVERIFIED",
+          "approved": false,
+          "dominatedByProfiles": []
+        },
+        {
+          "entry": {
+            "start": 1,
+            "endInclusive": 2,
+            "facadeGraphicOverlaps": 0,
+            "inwardFullWidthBands": 4,
+            "facadeCenterOffsetTwice": 24
+          },
+          "rooftop": {
+            "localX": 1,
+            "localZ": 1,
+            "width": 3,
+            "depth": 3,
+            "bufferRadius": 1,
+            "lowerFloorProjectionCells": 9,
+            "totalFootprintCells": 9,
+            "centerDistanceSquared": 204.5
+          },
+          "profile": "SETBACK_WITH_OFFSET_COMPOSITION",
+          "duplicateOf": null,
+          "reviewReasons": [
+            "ROOF_LOCAL_BUFFER_BELOW_TWO"
+          ],
+          "designReviewStatus": "UNAPPROVED_REVIEW_ONLY",
+          "actualDoorOrModuleInstalled": false,
+          "physicalClearanceVerified": false,
+          "realFacadeVerified": false,
+          "productionParity": "UNVERIFIED",
+          "approved": false,
+          "dominatedByProfiles": [
+            "MINIMIZE_FACADE_GRAPHICS_CONFLICT"
+          ]
+        }
+      ],
+      "distinctLocalPlacementPairs": 3,
+      "priorities": [
+        "REVIEW_ROOF_LOCAL_SETBACK",
+        "COMPARE_FACADE_DISPLAY_REPETITION_AND_AESTHETIC_VARIETY",
+        "OBTAIN_HASHED_PRODUCTION_FACADE_SOURCES_BEFORE_PARITY_CLAIMS"
+      ],
+      "decision": "HOLD_FOR_DESIGN_REVIEW",
+      "physicalQuality": "UNVERIFIED",
+      "approved": false
+    },
+    {
+      "id": "office/candidate-01",
+      "program": "office",
+      "provenance": {
+        "b53BuildingSha256": "e4b750d58eb2a1e85ce17c47bb88eca3ce7871b431bd2aa5b1f6fa17248fcd65",
+        "b52BuildingSha256": "c8b4d03c5933ab00360aecd841c197cc1d02ac01e5832d1f7f9360df8438362a"
+      },
+      "graphic": {
+        "byFace": {
+          "N": {
+            "visualUnits": 136,
+            "originalRoleCounts": {
+              "WINDOW_VISUAL_ONLY": 62,
+              "FIN_GRAPHIC_ONLY": 19,
+              "UNASSIGNED_FACADE_EDGE": 55
+            },
+            "previewRoleCounts": {
+              "WINDOW_VISUAL_ONLY": 62,
+              "FIN_GRAPHIC_ONLY": 19,
+              "UNASSIGNED_FACADE_EDGE": 55
+            },
+            "originalTransitions": 82,
+            "previewTransitions": 42,
+            "changedMarkers": 20,
+            "threeFloorGraphicUniformRunsOriginal": 4,
+            "threeFloorGraphicUniformRunsPreview": 24
+          },
+          "S": {
+            "visualUnits": 136,
+            "originalRoleCounts": {
+              "WINDOW_VISUAL_ONLY": 62,
+              "FIN_GRAPHIC_ONLY": 19,
+              "UNASSIGNED_FACADE_EDGE": 55
+            },
+            "previewRoleCounts": {
+              "WINDOW_VISUAL_ONLY": 62,
+              "FIN_GRAPHIC_ONLY": 19,
+              "UNASSIGNED_FACADE_EDGE": 55
+            },
+            "originalTransitions": 82,
+            "previewTransitions": 42,
+            "changedMarkers": 20,
+            "threeFloorGraphicUniformRunsOriginal": 4,
+            "threeFloorGraphicUniformRunsPreview": 24
+          },
+          "E": {
+            "visualUnits": 108,
+            "originalRoleCounts": {
+              "WINDOW_VISUAL_ONLY": 48,
+              "FIN_GRAPHIC_ONLY": 16,
+              "UNASSIGNED_FACADE_EDGE": 44
+            },
+            "previewRoleCounts": {
+              "WINDOW_VISUAL_ONLY": 47,
+              "FIN_GRAPHIC_ONLY": 17,
+              "UNASSIGNED_FACADE_EDGE": 44
+            },
+            "originalTransitions": 63,
+            "previewTransitions": 33,
+            "changedMarkers": 15,
+            "threeFloorGraphicUniformRunsOriginal": 4,
+            "threeFloorGraphicUniformRunsPreview": 19
+          },
+          "W": {
+            "visualUnits": 108,
+            "originalRoleCounts": {
+              "WINDOW_VISUAL_ONLY": 48,
+              "FIN_GRAPHIC_ONLY": 16,
+              "UNASSIGNED_FACADE_EDGE": 44
+            },
+            "previewRoleCounts": {
+              "WINDOW_VISUAL_ONLY": 47,
+              "FIN_GRAPHIC_ONLY": 17,
+              "UNASSIGNED_FACADE_EDGE": 44
+            },
+            "originalTransitions": 63,
+            "previewTransitions": 33,
+            "changedMarkers": 15,
+            "threeFloorGraphicUniformRunsOriginal": 4,
+            "threeFloorGraphicUniformRunsPreview": 19
+          }
+        },
+        "totals": {
+          "visualUnits": 488,
+          "originalTransitions": 290,
+          "previewTransitions": 150,
+          "changedMarkers": 70,
+          "threeFloorUniformBefore": 16,
+          "threeFloorUniformPreview": 86
+        },
+        "hotspotsTopEight": [
+          {
+            "face": "N",
+            "localFixed": 2,
+            "localT": 2,
+            "originalTransitions": 3,
+            "changedGraphicMarkers": 1,
+            "verifiedPhysicalDefect": false
+          },
+          {
+            "face": "N",
+            "localFixed": 2,
+            "localT": 3,
+            "originalTransitions": 3,
+            "changedGraphicMarkers": 1,
+            "verifiedPhysicalDefect": false
+          },
+          {
+            "face": "N",
+            "localFixed": 2,
+            "localT": 4,
+            "originalTransitions": 3,
+            "changedGraphicMarkers": 1,
+            "verifiedPhysicalDefect": false
+          },
+          {
+            "face": "N",
+            "localFixed": 2,
+            "localT": 5,
+            "originalTransitions": 3,
+            "changedGraphicMarkers": 1,
+            "verifiedPhysicalDefect": false
+          },
+          {
+            "face": "N",
+            "localFixed": 2,
+            "localT": 6,
+            "originalTransitions": 3,
+            "changedGraphicMarkers": 1,
+            "verifiedPhysicalDefect": false
+          },
+          {
+            "face": "N",
+            "localFixed": 2,
+            "localT": 7,
+            "originalTransitions": 3,
+            "changedGraphicMarkers": 1,
+            "verifiedPhysicalDefect": false
+          },
+          {
+            "face": "N",
+            "localFixed": 2,
+            "localT": 8,
+            "originalTransitions": 3,
+            "changedGraphicMarkers": 1,
+            "verifiedPhysicalDefect": false
+          },
+          {
+            "face": "N",
+            "localFixed": 2,
+            "localT": 9,
+            "originalTransitions": 3,
+            "changedGraphicMarkers": 1,
+            "verifiedPhysicalDefect": false
+          }
+        ],
+        "assessment": "DISPLAY_RHYTHM_ONLY_NOT_REAL_FACADE_OR_AESTHETIC_QUALITY"
+      },
+      "variants": [
+        {
+          "entry": {
+            "start": 10,
+            "endInclusive": 13,
+            "facadeGraphicOverlaps": 2,
+            "inwardFullWidthBands": 4,
+            "facadeCenterOffsetTwice": 0
+          },
+          "rooftop": {
+            "localX": 10,
+            "localZ": 9,
+            "width": 3,
+            "depth": 3,
+            "bufferRadius": 2,
+            "lowerFloorProjectionCells": 9,
+            "totalFootprintCells": 9,
+            "centerDistanceSquared": 0.25
+          },
+          "profile": "MINIMIZE_FACADE_GRAPHICS_CONFLICT",
+          "duplicateOf": null,
+          "reviewReasons": [
+            "ENTRY_CONFLICT_WITH_DISPLAY_MARKERS"
+          ],
+          "designReviewStatus": "UNAPPROVED_REVIEW_ONLY",
+          "actualDoorOrModuleInstalled": false,
+          "physicalClearanceVerified": false,
+          "realFacadeVerified": false,
+          "productionParity": "UNVERIFIED",
+          "approved": false,
+          "dominatedByProfiles": []
+        },
+        {
+          "entry": {
+            "start": 10,
+            "endInclusive": 13,
+            "facadeGraphicOverlaps": 2,
+            "inwardFullWidthBands": 4,
+            "facadeCenterOffsetTwice": 0
+          },
+          "rooftop": {
+            "localX": 10,
+            "localZ": 9,
+            "width": 3,
+            "depth": 3,
+            "bufferRadius": 2,
+            "lowerFloorProjectionCells": 9,
+            "totalFootprintCells": 9,
+            "centerDistanceSquared": 0.25
+          },
+          "profile": "CENTERLINE_COMPOSITION",
+          "duplicateOf": "MINIMIZE_FACADE_GRAPHICS_CONFLICT",
+          "reviewReasons": [
+            "ENTRY_CONFLICT_WITH_DISPLAY_MARKERS",
+            "SAME_LOCAL_PLACEMENT_AS_ANOTHER_PROFILE"
+          ],
+          "designReviewStatus": "UNAPPROVED_REVIEW_ONLY",
+          "actualDoorOrModuleInstalled": false,
+          "physicalClearanceVerified": false,
+          "realFacadeVerified": false,
+          "productionParity": "UNVERIFIED",
+          "approved": false,
+          "dominatedByProfiles": []
+        },
+        {
+          "entry": {
+            "start": 17,
+            "endInclusive": 20,
+            "facadeGraphicOverlaps": 2,
+            "inwardFullWidthBands": 4,
+            "facadeCenterOffsetTwice": 14
+          },
+          "rooftop": {
+            "localX": 3,
+            "localZ": 4,
+            "width": 3,
+            "depth": 3,
+            "bufferRadius": 2,
+            "lowerFloorProjectionCells": 9,
+            "totalFootprintCells": 9,
+            "centerDistanceSquared": 81.25
+          },
+          "profile": "SETBACK_WITH_OFFSET_COMPOSITION",
+          "duplicateOf": null,
+          "reviewReasons": [
+            "ENTRY_CONFLICT_WITH_DISPLAY_MARKERS"
+          ],
+          "designReviewStatus": "UNAPPROVED_REVIEW_ONLY",
+          "actualDoorOrModuleInstalled": false,
+          "physicalClearanceVerified": false,
+          "realFacadeVerified": false,
+          "productionParity": "UNVERIFIED",
+          "approved": false,
+          "dominatedByProfiles": [
+            "MINIMIZE_FACADE_GRAPHICS_CONFLICT",
+            "CENTERLINE_COMPOSITION"
+          ]
+        }
+      ],
+      "distinctLocalPlacementPairs": 2,
+      "priorities": [
+        "REVIEW_ENTRANCE_GRAPHIC_OVERLAPS",
+        "COMPARE_FACADE_DISPLAY_REPETITION_AND_AESTHETIC_VARIETY",
+        "CONSIDER_MORE_DISTINCT_LOCAL_DESIGN_ALTERNATIVES",
+        "OBTAIN_HASHED_PRODUCTION_FACADE_SOURCES_BEFORE_PARITY_CLAIMS"
+      ],
+      "decision": "HOLD_FOR_DESIGN_REVIEW",
+      "physicalQuality": "UNVERIFIED",
+      "approved": false
+    },
+    {
+      "id": "office/candidate-02",
+      "program": "office",
+      "provenance": {
+        "b53BuildingSha256": "993235f2c83360af7f15295a022f60c75ae7421412e788349f83b2116d778af9",
+        "b52BuildingSha256": "bfe63c2cae7602b8a8cd0d6a79aec0b90ab9000d41edadc59efc4c4eaeee47d4"
+      },
+      "graphic": {
+        "byFace": {
+          "N": {
+            "visualUnits": 133,
+            "originalRoleCounts": {
+              "WINDOW_VISUAL_ONLY": 36,
+              "FIN_GRAPHIC_ONLY": 5,
+              "UNASSIGNED_FACADE_EDGE": 92
+            },
+            "previewRoleCounts": {
+              "WINDOW_VISUAL_ONLY": 34,
+              "FIN_GRAPHIC_ONLY": 1,
+              "UNASSIGNED_FACADE_EDGE": 98
+            },
+            "originalTransitions": 59,
+            "previewTransitions": 7,
+            "changedMarkers": 26,
+            "threeFloorGraphicUniformRunsOriginal": 39,
+            "threeFloorGraphicUniformRunsPreview": 78
+          },
+          "S": {
+            "visualUnits": 133,
+            "originalRoleCounts": {
+              "WINDOW_VISUAL_ONLY": 36,
+              "FIN_GRAPHIC_ONLY": 5,
+              "UNASSIGNED_FACADE_EDGE": 92
+            },
+            "previewRoleCounts": {
+              "WINDOW_VISUAL_ONLY": 34,
+              "FIN_GRAPHIC_ONLY": 1,
+              "UNASSIGNED_FACADE_EDGE": 98
+            },
+            "originalTransitions": 59,
+            "previewTransitions": 7,
+            "changedMarkers": 26,
+            "threeFloorGraphicUniformRunsOriginal": 37,
+            "threeFloorGraphicUniformRunsPreview": 76
+          },
+          "E": {
+            "visualUnits": 114,
+            "originalRoleCounts": {
+              "WINDOW_VISUAL_ONLY": 31,
+              "FIN_GRAPHIC_ONLY": 6,
+              "UNASSIGNED_FACADE_EDGE": 77
+            },
+            "previewRoleCounts": {
+              "WINDOW_VISUAL_ONLY": 29,
+              "FIN_GRAPHIC_ONLY": 2,
+              "UNASSIGNED_FACADE_EDGE": 83
+            },
+            "originalTransitions": 47,
+            "previewTransitions": 3,
+            "changedMarkers": 22,
+            "threeFloorGraphicUniformRunsOriginal": 30,
+            "threeFloorGraphicUniformRunsPreview": 63
+          },
+          "W": {
+            "visualUnits": 114,
+            "originalRoleCounts": {
+              "WINDOW_VISUAL_ONLY": 31,
+              "FIN_GRAPHIC_ONLY": 6,
+              "UNASSIGNED_FACADE_EDGE": 77
+            },
+            "previewRoleCounts": {
+              "WINDOW_VISUAL_ONLY": 29,
+              "FIN_GRAPHIC_ONLY": 2,
+              "UNASSIGNED_FACADE_EDGE": 83
+            },
+            "originalTransitions": 52,
+            "previewTransitions": 8,
+            "changedMarkers": 22,
+            "threeFloorGraphicUniformRunsOriginal": 33,
+            "threeFloorGraphicUniformRunsPreview": 66
+          }
+        },
+        "totals": {
+          "visualUnits": 494,
+          "originalTransitions": 217,
+          "previewTransitions": 25,
+          "changedMarkers": 96,
+          "threeFloorUniformBefore": 139,
+          "threeFloorUniformPreview": 283
+        },
+        "hotspotsTopEight": [
+          {
+            "face": "N",
+            "localFixed": 0,
+            "localT": 1,
+            "originalTransitions": 5,
+            "changedGraphicMarkers": 2,
+            "verifiedPhysicalDefect": false
+          },
+          {
+            "face": "N",
+            "localFixed": 0,
+            "localT": 3,
+            "originalTransitions": 5,
+            "changedGraphicMarkers": 2,
+            "verifiedPhysicalDefect": false
+          },
+          {
+            "face": "N",
+            "localFixed": 0,
+            "localT": 4,
+            "originalTransitions": 5,
+            "changedGraphicMarkers": 2,
+            "verifiedPhysicalDefect": false
+          },
+          {
+            "face": "N",
+            "localFixed": 0,
+            "localT": 6,
+            "originalTransitions": 5,
+            "changedGraphicMarkers": 2,
+            "verifiedPhysicalDefect": false
+          },
+          {
+            "face": "N",
+            "localFixed": 0,
+            "localT": 7,
+            "originalTransitions": 5,
+            "changedGraphicMarkers": 2,
+            "verifiedPhysicalDefect": false
+          },
+          {
+            "face": "N",
+            "localFixed": 0,
+            "localT": 9,
+            "originalTransitions": 5,
+            "changedGraphicMarkers": 2,
+            "verifiedPhysicalDefect": false
+          },
+          {
+            "face": "N",
+            "localFixed": 0,
+            "localT": 10,
+            "originalTransitions": 5,
+            "changedGraphicMarkers": 2,
+            "verifiedPhysicalDefect": false
+          },
+          {
+            "face": "S",
+            "localFixed": 14,
+            "localT": 1,
+            "originalTransitions": 5,
+            "changedGraphicMarkers": 2,
+            "verifiedPhysicalDefect": false
+          }
+        ],
+        "assessment": "DISPLAY_RHYTHM_ONLY_NOT_REAL_FACADE_OR_AESTHETIC_QUALITY"
+      },
+      "variants": [
+        {
+          "entry": {
+            "start": 4,
+            "endInclusive": 7,
+            "facadeGraphicOverlaps": 1,
+            "inwardFullWidthBands": 4,
+            "facadeCenterOffsetTwice": 1
+          },
+          "rooftop": {
+            "localX": 5,
+            "localZ": 5,
+            "width": 3,
+            "depth": 3,
+            "bufferRadius": 2,
+            "lowerFloorProjectionCells": 9,
+            "totalFootprintCells": 9,
+            "centerDistanceSquared": 0.25
+          },
+          "profile": "MINIMIZE_FACADE_GRAPHICS_CONFLICT",
+          "duplicateOf": null,
+          "reviewReasons": [
+            "ENTRY_CONFLICT_WITH_DISPLAY_MARKERS"
+          ],
+          "designReviewStatus": "UNAPPROVED_REVIEW_ONLY",
+          "actualDoorOrModuleInstalled": false,
+          "physicalClearanceVerified": false,
+          "realFacadeVerified": false,
+          "productionParity": "UNVERIFIED",
+          "approved": false,
+          "dominatedByProfiles": []
+        },
+        {
+          "entry": {
+            "start": 4,
+            "endInclusive": 7,
+            "facadeGraphicOverlaps": 1,
+            "inwardFullWidthBands": 4,
+            "facadeCenterOffsetTwice": 1
+          },
+          "rooftop": {
+            "localX": 5,
+            "localZ": 5,
+            "width": 3,
+            "depth": 3,
+            "bufferRadius": 2,
+            "lowerFloorProjectionCells": 9,
+            "totalFootprintCells": 9,
+            "centerDistanceSquared": 0.25
+          },
+          "profile": "CENTERLINE_COMPOSITION",
+          "duplicateOf": "MINIMIZE_FACADE_GRAPHICS_CONFLICT",
+          "reviewReasons": [
+            "ENTRY_CONFLICT_WITH_DISPLAY_MARKERS",
+            "SAME_LOCAL_PLACEMENT_AS_ANOTHER_PROFILE"
+          ],
+          "designReviewStatus": "UNAPPROVED_REVIEW_ONLY",
+          "actualDoorOrModuleInstalled": false,
+          "physicalClearanceVerified": false,
+          "realFacadeVerified": false,
+          "productionParity": "UNVERIFIED",
+          "approved": false,
+          "dominatedByProfiles": []
+        },
+        {
+          "entry": {
+            "start": 1,
+            "endInclusive": 4,
+            "facadeGraphicOverlaps": 1,
+            "inwardFullWidthBands": 4,
+            "facadeCenterOffsetTwice": 7
+          },
+          "rooftop": {
+            "localX": 2,
+            "localZ": 2,
+            "width": 3,
+            "depth": 3,
+            "bufferRadius": 2,
+            "lowerFloorProjectionCells": 9,
+            "totalFootprintCells": 9,
+            "centerDistanceSquared": 21.25
+          },
+          "profile": "SETBACK_WITH_OFFSET_COMPOSITION",
+          "duplicateOf": null,
+          "reviewReasons": [
+            "ENTRY_CONFLICT_WITH_DISPLAY_MARKERS"
+          ],
+          "designReviewStatus": "UNAPPROVED_REVIEW_ONLY",
+          "actualDoorOrModuleInstalled": false,
+          "physicalClearanceVerified": false,
+          "realFacadeVerified": false,
+          "productionParity": "UNVERIFIED",
+          "approved": false,
+          "dominatedByProfiles": [
+            "MINIMIZE_FACADE_GRAPHICS_CONFLICT",
+            "CENTERLINE_COMPOSITION"
+          ]
+        }
+      ],
+      "distinctLocalPlacementPairs": 2,
+      "priorities": [
+        "REVIEW_ENTRANCE_GRAPHIC_OVERLAPS",
+        "COMPARE_FACADE_DISPLAY_REPETITION_AND_AESTHETIC_VARIETY",
+        "CONSIDER_MORE_DISTINCT_LOCAL_DESIGN_ALTERNATIVES",
+        "OBTAIN_HASHED_PRODUCTION_FACADE_SOURCES_BEFORE_PARITY_CLAIMS"
+      ],
+      "decision": "HOLD_FOR_DESIGN_REVIEW",
+      "physicalQuality": "UNVERIFIED",
+      "approved": false
+    },
+    {
+      "id": "office/candidate-03",
+      "program": "office",
+      "provenance": {
+        "b53BuildingSha256": "9c065203908710219ab7c97c597f4a1291ba8dad893e062b269c7cb61f50b879",
+        "b52BuildingSha256": "040c1158f0b8e4889657c5a901a2ced9e421566a11ef82fe8543f14b97fc0fe7"
+      },
+      "graphic": {
+        "byFace": {
+          "N": {
+            "visualUnits": 144,
+            "originalRoleCounts": {
+              "WINDOW_VISUAL_ONLY": 66,
+              "FIN_GRAPHIC_ONLY": 15,
+              "UNASSIGNED_FACADE_EDGE": 63
+            },
+            "previewRoleCounts": {
+              "WINDOW_VISUAL_ONLY": 66,
+              "FIN_GRAPHIC_ONLY": 5,
+              "UNASSIGNED_FACADE_EDGE": 73
+            },
+            "originalTransitions": 110,
+            "previewTransitions": 22,
+            "changedMarkers": 44,
+            "threeFloorGraphicUniformRunsOriginal": 8,
+            "threeFloorGraphicUniformRunsPreview": 74
+          },
+          "S": {
+            "visualUnits": 144,
+            "originalRoleCounts": {
+              "WINDOW_VISUAL_ONLY": 66,
+              "FIN_GRAPHIC_ONLY": 15,
+              "UNASSIGNED_FACADE_EDGE": 63
+            },
+            "previewRoleCounts": {
+              "WINDOW_VISUAL_ONLY": 66,
+              "FIN_GRAPHIC_ONLY": 5,
+              "UNASSIGNED_FACADE_EDGE": 73
+            },
+            "originalTransitions": 110,
+            "previewTransitions": 22,
+            "changedMarkers": 44,
+            "threeFloorGraphicUniformRunsOriginal": 8,
+            "threeFloorGraphicUniformRunsPreview": 74
+          },
+          "E": {
+            "visualUnits": 120,
+            "originalRoleCounts": {
+              "WINDOW_VISUAL_ONLY": 54,
+              "FIN_GRAPHIC_ONLY": 12,
+              "UNASSIGNED_FACADE_EDGE": 54
+            },
+            "previewRoleCounts": {
+              "WINDOW_VISUAL_ONLY": 54,
+              "FIN_GRAPHIC_ONLY": 4,
+              "UNASSIGNED_FACADE_EDGE": 62
+            },
+            "originalTransitions": 90,
+            "previewTransitions": 18,
+            "changedMarkers": 36,
+            "threeFloorGraphicUniformRunsOriginal": 8,
+            "threeFloorGraphicUniformRunsPreview": 62
+          },
+          "W": {
+            "visualUnits": 120,
+            "originalRoleCounts": {
+              "WINDOW_VISUAL_ONLY": 54,
+              "FIN_GRAPHIC_ONLY": 12,
+              "UNASSIGNED_FACADE_EDGE": 54
+            },
+            "previewRoleCounts": {
+              "WINDOW_VISUAL_ONLY": 54,
+              "FIN_GRAPHIC_ONLY": 4,
+              "UNASSIGNED_FACADE_EDGE": 62
+            },
+            "originalTransitions": 90,
+            "previewTransitions": 18,
+            "changedMarkers": 36,
+            "threeFloorGraphicUniformRunsOriginal": 8,
+            "threeFloorGraphicUniformRunsPreview": 62
+          }
+        },
+        "totals": {
+          "visualUnits": 528,
+          "originalTransitions": 400,
+          "previewTransitions": 80,
+          "changedMarkers": 160,
+          "threeFloorUniformBefore": 32,
+          "threeFloorUniformPreview": 272
+        },
+        "hotspotsTopEight": [
+          {
+            "face": "N",
+            "localFixed": 0,
+            "localT": 1,
+            "originalTransitions": 5,
+            "changedGraphicMarkers": 2,
+            "verifiedPhysicalDefect": false
+          },
+          {
+            "face": "N",
+            "localFixed": 0,
+            "localT": 2,
+            "originalTransitions": 5,
+            "changedGraphicMarkers": 2,
+            "verifiedPhysicalDefect": false
+          },
+          {
+            "face": "N",
+            "localFixed": 0,
+            "localT": 3,
+            "originalTransitions": 5,
+            "changedGraphicMarkers": 2,
+            "verifiedPhysicalDefect": false
+          },
+          {
+            "face": "N",
+            "localFixed": 0,
+            "localT": 4,
+            "originalTransitions": 5,
+            "changedGraphicMarkers": 2,
+            "verifiedPhysicalDefect": false
+          },
+          {
+            "face": "N",
+            "localFixed": 0,
+            "localT": 5,
+            "originalTransitions": 5,
+            "changedGraphicMarkers": 2,
+            "verifiedPhysicalDefect": false
+          },
+          {
+            "face": "N",
+            "localFixed": 0,
+            "localT": 6,
+            "originalTransitions": 5,
+            "changedGraphicMarkers": 2,
+            "verifiedPhysicalDefect": false
+          },
+          {
+            "face": "N",
+            "localFixed": 0,
+            "localT": 7,
+            "originalTransitions": 5,
+            "changedGraphicMarkers": 2,
+            "verifiedPhysicalDefect": false
+          },
+          {
+            "face": "N",
+            "localFixed": 0,
+            "localT": 8,
+            "originalTransitions": 5,
+            "changedGraphicMarkers": 2,
+            "verifiedPhysicalDefect": false
+          }
+        ],
+        "assessment": "DISPLAY_RHYTHM_ONLY_NOT_REAL_FACADE_OR_AESTHETIC_QUALITY"
+      },
+      "variants": [
+        {
+          "entry": {
+            "start": 10,
+            "endInclusive": 13,
+            "facadeGraphicOverlaps": 2,
+            "inwardFullWidthBands": 4,
+            "facadeCenterOffsetTwice": 0
+          },
+          "rooftop": {
+            "localX": 10,
+            "localZ": 8,
+            "width": 3,
+            "depth": 3,
+            "bufferRadius": 2,
+            "lowerFloorProjectionCells": 9,
+            "totalFootprintCells": 9,
+            "centerDistanceSquared": 0.5
+          },
+          "profile": "MINIMIZE_FACADE_GRAPHICS_CONFLICT",
+          "duplicateOf": null,
+          "reviewReasons": [
+            "ENTRY_CONFLICT_WITH_DISPLAY_MARKERS"
+          ],
+          "designReviewStatus": "UNAPPROVED_REVIEW_ONLY",
+          "actualDoorOrModuleInstalled": false,
+          "physicalClearanceVerified": false,
+          "realFacadeVerified": false,
+          "productionParity": "UNVERIFIED",
+          "approved": false,
+          "dominatedByProfiles": []
+        },
+        {
+          "entry": {
+            "start": 10,
+            "endInclusive": 13,
+            "facadeGraphicOverlaps": 2,
+            "inwardFullWidthBands": 4,
+            "facadeCenterOffsetTwice": 0
+          },
+          "rooftop": {
+            "localX": 10,
+            "localZ": 8,
+            "width": 3,
+            "depth": 3,
+            "bufferRadius": 2,
+            "lowerFloorProjectionCells": 9,
+            "totalFootprintCells": 9,
+            "centerDistanceSquared": 0.5
+          },
+          "profile": "CENTERLINE_COMPOSITION",
+          "duplicateOf": "MINIMIZE_FACADE_GRAPHICS_CONFLICT",
+          "reviewReasons": [
+            "ENTRY_CONFLICT_WITH_DISPLAY_MARKERS",
+            "SAME_LOCAL_PLACEMENT_AS_ANOTHER_PROFILE"
+          ],
+          "designReviewStatus": "UNAPPROVED_REVIEW_ONLY",
+          "actualDoorOrModuleInstalled": false,
+          "physicalClearanceVerified": false,
+          "realFacadeVerified": false,
+          "productionParity": "UNVERIFIED",
+          "approved": false,
+          "dominatedByProfiles": []
+        },
+        {
+          "entry": {
+            "start": 1,
+            "endInclusive": 4,
+            "facadeGraphicOverlaps": 2,
+            "inwardFullWidthBands": 4,
+            "facadeCenterOffsetTwice": 18
+          },
+          "rooftop": {
+            "localX": 2,
+            "localZ": 2,
+            "width": 3,
+            "depth": 3,
+            "bufferRadius": 2,
+            "lowerFloorProjectionCells": 9,
+            "totalFootprintCells": 9,
+            "centerDistanceSquared": 114.5
+          },
+          "profile": "SETBACK_WITH_OFFSET_COMPOSITION",
+          "duplicateOf": null,
+          "reviewReasons": [
+            "ENTRY_CONFLICT_WITH_DISPLAY_MARKERS"
+          ],
+          "designReviewStatus": "UNAPPROVED_REVIEW_ONLY",
+          "actualDoorOrModuleInstalled": false,
+          "physicalClearanceVerified": false,
+          "realFacadeVerified": false,
+          "productionParity": "UNVERIFIED",
+          "approved": false,
+          "dominatedByProfiles": [
+            "MINIMIZE_FACADE_GRAPHICS_CONFLICT",
+            "CENTERLINE_COMPOSITION"
+          ]
+        }
+      ],
+      "distinctLocalPlacementPairs": 2,
+      "priorities": [
+        "REVIEW_ENTRANCE_GRAPHIC_OVERLAPS",
+        "COMPARE_FACADE_DISPLAY_REPETITION_AND_AESTHETIC_VARIETY",
+        "CONSIDER_MORE_DISTINCT_LOCAL_DESIGN_ALTERNATIVES",
+        "OBTAIN_HASHED_PRODUCTION_FACADE_SOURCES_BEFORE_PARITY_CLAIMS"
+      ],
+      "decision": "HOLD_FOR_DESIGN_REVIEW",
+      "physicalQuality": "UNVERIFIED",
+      "approved": false
+    }
+  ],
+  "totals": {
+    "buildings": 5,
+    "levels": 30,
+    "designProfiles": 15,
+    "distinctLocalPlacementPairs": 11,
+    "facadeVisualUnits": 3022,
+    "graphicTransitionsBefore": 1807,
+    "graphicTransitionsPreview": 435,
+    "suggestedDisplayChanges": 686,
+    "entryVisualOverlapProfiles": 12,
+    "roofLowBufferProfiles": 3,
+    "duplicatePlacementProfiles": 4,
+    "physicalConstructionOperations": 0,
+    "scans": 0,
+    "plannerRuntimeCalls": 0
+  },
+  "readiness": "NOT_PREPARED",
+  "deployment": "BLOCKED",
+  "constructionApproved": false,
+  "executionAllowed": false,
+  "worldCoordinates": null,
+  "materialIds": [],
+  "engineCalls": 0,
+  "minecraftCommands": 0,
+  "scans": 0,
+  "buildOperations": 0,
+  "blockers": {
+    "unresolvedLegacyDoorHints": 118,
+    "uncutStairCells": 50,
+    "stairsWithoutPhysicalState": 25,
+    "ordinaryDoorBlocksWithoutExactState": 314,
+    "unapprovedAppearanceConcepts": 5,
+    "apartmentFullVerticalCirculation": "CONDITIONAL_VIRTUAL_GRAPH_ONLY",
+    "otherBuildingCirculation": "NOT_VALIDATED",
+    "supportHeadroomCollision": "UNKNOWN",
+    "M4Gates": [
+      {
+        "id": "M4-01",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-02",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-03",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-04",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-05",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-06",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-07",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-08",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-09",
+        "status": "BLOCKED"
+      }
+    ],
+    "unresolvedExteriorAccess": true,
+    "stagePhysicalSupport": false,
+    "unprovenPlannerCompatibility": true,
+    "actualMinecraftStairBlockState": null
+  },
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0,
+    "worldCoordinates": null,
+    "materialIds": []
+  },
+  "reportSha256": "abe53cdae0217cbb1f7ec3a9a940defc6879affc5ba514f1cce831d13c889090"
+}

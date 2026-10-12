@@ -1,0 +1,3950 @@
+{
+  "schema": "minecraftaibuilder-b90-program-zoning-intervention-frontier-v1",
+  "kind": "OFFLINE_FULL_FLOOR_PROGRAM_OPTIONS_NOT_CONSTRUCTION",
+  "provenance": {
+    "b89": "0c32dd7daa23f40d6d017f5222fbea3e9eeba5ca459bacdd696730530fca49d6",
+    "b88": "d0940e41d118d0dbaac911b817c2f4a404ac4ad08ab8b5dbbf3da8d92cc73772",
+    "officialBlocksSha256": "49ff9c501b1c96b547aa49fda07a53bc19f7d5fe338aff43fe5f65c3eaaf031f"
+  },
+  "totals": {
+    "referenceBuildings": 5,
+    "referenceFloors": 30,
+    "reviewedHeldFloors": 10,
+    "originalRooms": 314,
+    "previousUnapprovedCandidates": 296,
+    "previousHeldRooms": 18,
+    "unresolvedIndependentRooms": 18,
+    "newlyApprovedRooms": 0,
+    "strictlyRecoveredRooms": 0,
+    "reviewOnlyFrontiers": 34,
+    "heldNominalArea": 234,
+    "frontierRoomsWithoutStructuralOrGlass": 9,
+    "noProductionContactButStillUnapprovedRooms": 5,
+    "frameAndNominalHallLocallyClearRooms": 4,
+    "floorsWithPinnedBasaltAtDoor": 4,
+    "patterns": 4,
+    "constructionCommands": 0,
+    "worldContacts": 0,
+    "productionEdits": 0,
+    "priorProposalEdits": 0
+  },
+  "replayed": [
+    {
+      "building": "apartment/candidate-01",
+      "operationsSha256": "6c5802481a5d22a2958cd83cb591dc8e4dbe1a1cd25a1d365f6c7f70635a7ddc",
+      "readOnly": true
+    },
+    {
+      "building": "office/candidate-01",
+      "operationsSha256": "e29a8c11eeb8ce0897995fdbb50de9482d3ec0a6b0767b9ac48bee8397e5249c",
+      "readOnly": true
+    }
+  ],
+  "rooms": [
+    {
+      "sectionId": "apartment/candidate-01/L1",
+      "roomId": "F1-R013",
+      "portId": "apartment/candidate-01/L1/D013",
+      "pattern": "apartment/candidate-01/013",
+      "originalRoom": {
+        "x": 25,
+        "z": 19,
+        "width": 3,
+        "depth": 3
+      },
+      "roomArea": 9,
+      "doorFrontiers": {
+        "scannedValidFrontiers": 2,
+        "frontiers": [
+          {
+            "roomCell": {
+              "x": 25,
+              "z": 20
+            },
+            "hallCell": {
+              "x": 24,
+              "z": 20
+            },
+            "normal": {
+              "x": -1,
+              "z": 0
+            },
+            "atOriginalPort": false,
+            "namedCorridor": true,
+            "componentCoreAdjacent": true,
+            "componentId": 0,
+            "originalRoomArea": 9,
+            "retainedAreaRatio": 1,
+            "openingProductionContacts": [],
+            "modificationBudget": {
+              "structural": 0,
+              "glazing": 0,
+              "other": 0,
+              "secondary": 0,
+              "total": 0
+            },
+            "jambConditions": [
+              {
+                "existingWallCount": 3,
+                "allExistingWallsOpaque": true,
+                "mixedExistingRoles": false
+              },
+              {
+                "existingWallCount": 0,
+                "allExistingWallsOpaque": true,
+                "mixedExistingRoles": false
+              }
+            ],
+            "edgeFrameValidated": true,
+            "hallPhysicallyClear": true,
+            "innerSwingAdjacentClear": true,
+            "innerCell": {
+              "x": 26,
+              "z": 20
+            },
+            "roomCore": [
+              "25,19",
+              "26,19",
+              "25,20",
+              "26,20"
+            ],
+            "nominalInteriorPath": [
+              "25,20"
+            ],
+            "architecturalAccess": "NOT_CERTIFIED",
+            "productionModificationApproved": false,
+            "status": "HOLD_DOOR_FRAME_AND_GLOBAL_ACCESS_UNVERIFIED",
+            "executionAllowed": false,
+            "operations": [],
+            "worldCoordinates": null
+          },
+          {
+            "roomCell": {
+              "x": 26,
+              "z": 19
+            },
+            "hallCell": {
+              "x": 26,
+              "z": 18
+            },
+            "normal": {
+              "x": 0,
+              "z": -1
+            },
+            "atOriginalPort": false,
+            "namedCorridor": true,
+            "componentCoreAdjacent": true,
+            "componentId": 0,
+            "originalRoomArea": 9,
+            "retainedAreaRatio": 1,
+            "openingProductionContacts": [],
+            "modificationBudget": {
+              "structural": 0,
+              "glazing": 0,
+              "other": 0,
+              "secondary": 0,
+              "total": 0
+            },
+            "jambConditions": [
+              {
+                "existingWallCount": 0,
+                "allExistingWallsOpaque": true,
+                "mixedExistingRoles": false
+              },
+              {
+                "existingWallCount": 3,
+                "allExistingWallsOpaque": true,
+                "mixedExistingRoles": false
+              }
+            ],
+            "edgeFrameValidated": true,
+            "hallPhysicallyClear": true,
+            "innerSwingAdjacentClear": true,
+            "innerCell": {
+              "x": 26,
+              "z": 20
+            },
+            "roomCore": [
+              "25,19",
+              "26,19",
+              "25,20",
+              "26,20"
+            ],
+            "nominalInteriorPath": [
+              "26,19"
+            ],
+            "architecturalAccess": "NOT_CERTIFIED",
+            "productionModificationApproved": false,
+            "status": "HOLD_DOOR_FRAME_AND_GLOBAL_ACCESS_UNVERIFIED",
+            "executionAllowed": false,
+            "operations": [],
+            "worldCoordinates": null
+          }
+        ],
+        "rejections": {
+          "outsideOrOtherRoom": 2,
+          "verticalOrFrozen": 0,
+          "innerNotClear": 0,
+          "noInteriorCore": 0,
+          "unanchoredHall": 0,
+          "structuralOrGlass": 0,
+          "secondaryOrOther": 0,
+          "clearDoorFrontier": 2
+        },
+        "strictLocalGeometryOnly": true,
+        "partialAirSlotWithoutCompleteDoorGeometry": 2,
+        "fullyFrameValidated": 2,
+        "noPrimaryOrGlazingChange": true
+      },
+      "programOptions": [
+        {
+          "id": "PRESERVE_INDEPENDENT_ROOM",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 0,
+          "accessibleAreaClaimed": 0,
+          "scope": "ORIGINAL_DESIGN_HELD",
+          "status": "HOLD_ACCESS_UNPROVEN",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        },
+        {
+          "id": "CONVERT_TO_NONOCCUPIABLE_LAYOUT_BUFFER",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 9,
+          "accessibleAreaClaimed": 0,
+          "scope": "PROGRAM_ZONING_REVIEW_ONLY",
+          "status": "HOLD_PROGRAM_REDUCTION_AND_PHYSICAL_ACCESS",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        },
+        {
+          "id": "FULL_FLOOR_CORE_CIRCULATION_REDESIGN",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 0,
+          "accessibleAreaClaimed": 0,
+          "scope": "WHOLE_FLOOR_ARCHITECTURAL_REDESIGN",
+          "status": "HOLD_FLOOR_GRAPH_AND_DOOR_GEOMETRY",
+          "coreConnected": true,
+          "sectionId": "apartment/candidate-01/L1",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        }
+      ],
+      "independentlyAccessible": false,
+      "originalPrivateRoomRemainsHeld": true,
+      "productionMaterialEditsAuthorized": 0,
+      "globalEgress": "UNVERIFIED",
+      "approval": "REVIEW_ONLY",
+      "executionAllowed": false,
+      "operations": [],
+      "worldCoordinates": null
+    },
+    {
+      "sectionId": "apartment/candidate-01/L2",
+      "roomId": "F2-R006",
+      "portId": "apartment/candidate-01/L2/D006",
+      "pattern": "apartment/candidate-01/006",
+      "originalRoom": {
+        "x": 1,
+        "z": 7,
+        "width": 4,
+        "depth": 5
+      },
+      "roomArea": 20,
+      "doorFrontiers": {
+        "scannedValidFrontiers": 6,
+        "frontiers": [
+          {
+            "roomCell": {
+              "x": 2,
+              "z": 11
+            },
+            "hallCell": {
+              "x": 2,
+              "z": 12
+            },
+            "normal": {
+              "x": 0,
+              "z": 1
+            },
+            "atOriginalPort": false,
+            "namedCorridor": true,
+            "componentCoreAdjacent": true,
+            "componentId": 0,
+            "originalRoomArea": 20,
+            "retainedAreaRatio": 1,
+            "openingProductionContacts": [
+              {
+                "x": 2,
+                "y": 6,
+                "z": 11,
+                "role": "floor",
+                "block": "minecraft:basalt",
+                "phase": "balcony",
+                "operationIndex": 114,
+                "category": "OTHER_PINNED_BLOCK_HOLD"
+              },
+              {
+                "x": 2,
+                "y": 6,
+                "z": 12,
+                "role": "floor",
+                "block": "minecraft:basalt",
+                "phase": "balcony",
+                "operationIndex": 114,
+                "category": "OTHER_PINNED_BLOCK_HOLD"
+              }
+            ],
+            "modificationBudget": {
+              "structural": 0,
+              "glazing": 0,
+              "other": 2,
+              "secondary": 0,
+              "total": 2
+            },
+            "jambConditions": [
+              {
+                "existingWallCount": 2,
+                "allExistingWallsOpaque": false,
+                "mixedExistingRoles": false
+              },
+              {
+                "existingWallCount": 3,
+                "allExistingWallsOpaque": false,
+                "mixedExistingRoles": true
+              }
+            ],
+            "edgeFrameValidated": false,
+            "hallPhysicallyClear": false,
+            "innerSwingAdjacentClear": false,
+            "innerCell": {
+              "x": 2,
+              "z": 10
+            },
+            "roomCore": [
+              "2,8",
+              "3,8",
+              "2,9",
+              "3,9"
+            ],
+            "nominalInteriorPath": [
+              "2,10",
+              "2,9"
+            ],
+            "architecturalAccess": "NOT_CERTIFIED",
+            "productionModificationApproved": false,
+            "status": "HOLD_CONDITIONAL_PRODUCTION_CHANGE",
+            "executionAllowed": false,
+            "operations": [],
+            "worldCoordinates": null
+          },
+          {
+            "roomCell": {
+              "x": 3,
+              "z": 11
+            },
+            "hallCell": {
+              "x": 3,
+              "z": 12
+            },
+            "normal": {
+              "x": 0,
+              "z": 1
+            },
+            "atOriginalPort": false,
+            "namedCorridor": true,
+            "componentCoreAdjacent": true,
+            "componentId": 0,
+            "originalRoomArea": 20,
+            "retainedAreaRatio": 1,
+            "openingProductionContacts": [
+              {
+                "x": 3,
+                "y": 7,
+                "z": 11,
+                "role": "glass",
+                "block": "minecraft:black_stained_glass_pane",
+                "phase": "glazing",
+                "operationIndex": 139,
+                "category": "GLAZING_HOLD"
+              }
+            ],
+            "modificationBudget": {
+              "structural": 0,
+              "glazing": 1,
+              "other": 0,
+              "secondary": 0,
+              "total": 1
+            },
+            "jambConditions": [
+              {
+                "existingWallCount": 1,
+                "allExistingWallsOpaque": false,
+                "mixedExistingRoles": false
+              },
+              {
+                "existingWallCount": 1,
+                "allExistingWallsOpaque": false,
+                "mixedExistingRoles": false
+              }
+            ],
+            "edgeFrameValidated": false,
+            "hallPhysicallyClear": true,
+            "innerSwingAdjacentClear": false,
+            "innerCell": {
+              "x": 3,
+              "z": 10
+            },
+            "roomCore": [
+              "2,8",
+              "3,8",
+              "2,9",
+              "3,9"
+            ],
+            "nominalInteriorPath": [
+              "3,10",
+              "3,9"
+            ],
+            "architecturalAccess": "NOT_CERTIFIED",
+            "productionModificationApproved": false,
+            "status": "HOLD_CONDITIONAL_PRODUCTION_CHANGE",
+            "executionAllowed": false,
+            "operations": [],
+            "worldCoordinates": null
+          },
+          {
+            "roomCell": {
+              "x": 3,
+              "z": 7
+            },
+            "hallCell": {
+              "x": 3,
+              "z": 6
+            },
+            "normal": {
+              "x": 0,
+              "z": -1
+            },
+            "atOriginalPort": false,
+            "namedCorridor": true,
+            "componentCoreAdjacent": true,
+            "componentId": 0,
+            "originalRoomArea": 20,
+            "retainedAreaRatio": 1,
+            "openingProductionContacts": [
+              {
+                "x": 3,
+                "y": 7,
+                "z": 6,
+                "role": "glass",
+                "block": "minecraft:black_stained_glass_pane",
+                "phase": "glazing",
+                "operationIndex": 136,
+                "category": "GLAZING_HOLD"
+              }
+            ],
+            "modificationBudget": {
+              "structural": 0,
+              "glazing": 1,
+              "other": 0,
+              "secondary": 0,
+              "total": 1
+            },
+            "jambConditions": [
+              {
+                "existingWallCount": 0,
+                "allExistingWallsOpaque": true,
+                "mixedExistingRoles": false
+              },
+              {
+                "existingWallCount": 3,
+                "allExistingWallsOpaque": true,
+                "mixedExistingRoles": false
+              }
+            ],
+            "edgeFrameValidated": true,
+            "hallPhysicallyClear": false,
+            "innerSwingAdjacentClear": true,
+            "innerCell": {
+              "x": 3,
+              "z": 8
+            },
+            "roomCore": [
+              "2,8",
+              "3,8",
+              "2,9",
+              "3,9"
+            ],
+            "nominalInteriorPath": [
+              "3,7",
+              "3,8"
+            ],
+            "architecturalAccess": "NOT_CERTIFIED",
+            "productionModificationApproved": false,
+            "status": "HOLD_CONDITIONAL_PRODUCTION_CHANGE",
+            "executionAllowed": false,
+            "operations": [],
+            "worldCoordinates": null
+          },
+          {
+            "roomCell": {
+              "x": 1,
+              "z": 9
+            },
+            "hallCell": {
+              "x": 0,
+              "z": 9
+            },
+            "normal": {
+              "x": -1,
+              "z": 0
+            },
+            "atOriginalPort": true,
+            "namedCorridor": true,
+            "componentCoreAdjacent": true,
+            "componentId": 0,
+            "originalRoomArea": 20,
+            "retainedAreaRatio": 1,
+            "openingProductionContacts": [
+              {
+                "x": 0,
+                "y": 6,
+                "z": 9,
+                "role": "primaryWall",
+                "block": "minecraft:light_gray_concrete",
+                "phase": "solid_wall",
+                "operationIndex": 102,
+                "category": "STRUCTURAL_HOLD"
+              },
+              {
+                "x": 0,
+                "y": 7,
+                "z": 9,
+                "role": "primaryWall",
+                "block": "minecraft:light_gray_concrete",
+                "phase": "solid_wall",
+                "operationIndex": 102,
+                "category": "STRUCTURAL_HOLD"
+              }
+            ],
+            "modificationBudget": {
+              "structural": 2,
+              "glazing": 0,
+              "other": 0,
+              "secondary": 0,
+              "total": 2
+            },
+            "jambConditions": [
+              {
+                "existingWallCount": 0,
+                "allExistingWallsOpaque": true,
+                "mixedExistingRoles": false
+              },
+              {
+                "existingWallCount": 0,
+                "allExistingWallsOpaque": true,
+                "mixedExistingRoles": false
+              }
+            ],
+            "edgeFrameValidated": true,
+            "hallPhysicallyClear": false,
+            "innerSwingAdjacentClear": true,
+            "innerCell": {
+              "x": 2,
+              "z": 9
+            },
+            "roomCore": [
+              "2,8",
+              "3,8",
+              "2,9",
+              "3,9"
+            ],
+            "nominalInteriorPath": [
+              "1,9",
+              "2,9"
+            ],
+            "architecturalAccess": "NOT_CERTIFIED",
+            "productionModificationApproved": false,
+            "status": "HOLD_CONDITIONAL_PRODUCTION_CHANGE",
+            "executionAllowed": false,
+            "operations": [],
+            "worldCoordinates": null
+          },
+          {
+            "roomCell": {
+              "x": 1,
+              "z": 10
+            },
+            "hallCell": {
+              "x": 0,
+              "z": 10
+            },
+            "normal": {
+              "x": -1,
+              "z": 0
+            },
+            "atOriginalPort": false,
+            "namedCorridor": true,
+            "componentCoreAdjacent": true,
+            "componentId": 0,
+            "originalRoomArea": 20,
+            "retainedAreaRatio": 1,
+            "openingProductionContacts": [
+              {
+                "x": 0,
+                "y": 6,
+                "z": 10,
+                "role": "primaryWall",
+                "block": "minecraft:light_gray_concrete",
+                "phase": "solid_wall",
+                "operationIndex": 102,
+                "category": "STRUCTURAL_HOLD"
+              },
+              {
+                "x": 0,
+                "y": 7,
+                "z": 10,
+                "role": "primaryWall",
+                "block": "minecraft:light_gray_concrete",
+                "phase": "solid_wall",
+                "operationIndex": 102,
+                "category": "STRUCTURAL_HOLD"
+              }
+            ],
+            "modificationBudget": {
+              "structural": 2,
+              "glazing": 0,
+              "other": 0,
+              "secondary": 0,
+              "total": 2
+            },
+            "jambConditions": [
+              {
+                "existingWallCount": 3,
+                "allExistingWallsOpaque": false,
+                "mixedExistingRoles": true
+              },
+              {
+                "existingWallCount": 0,
+                "allExistingWallsOpaque": true,
+                "mixedExistingRoles": false
+              }
+            ],
+            "edgeFrameValidated": false,
+            "hallPhysicallyClear": false,
+            "innerSwingAdjacentClear": true,
+            "innerCell": {
+              "x": 2,
+              "z": 10
+            },
+            "roomCore": [
+              "2,8",
+              "3,8",
+              "2,9",
+              "3,9"
+            ],
+            "nominalInteriorPath": [
+              "1,10",
+              "2,10",
+              "2,9"
+            ],
+            "architecturalAccess": "NOT_CERTIFIED",
+            "productionModificationApproved": false,
+            "status": "HOLD_CONDITIONAL_PRODUCTION_CHANGE",
+            "executionAllowed": false,
+            "operations": [],
+            "worldCoordinates": null
+          }
+        ],
+        "rejections": {
+          "outsideOrOtherRoom": 3,
+          "verticalOrFrozen": 1,
+          "innerNotClear": 0,
+          "noInteriorCore": 0,
+          "unanchoredHall": 0,
+          "structuralOrGlass": 5,
+          "secondaryOrOther": 1,
+          "clearDoorFrontier": 0
+        },
+        "strictLocalGeometryOnly": false,
+        "partialAirSlotWithoutCompleteDoorGeometry": 0,
+        "fullyFrameValidated": 0,
+        "noPrimaryOrGlazingChange": true
+      },
+      "programOptions": [
+        {
+          "id": "PRESERVE_INDEPENDENT_ROOM",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 0,
+          "accessibleAreaClaimed": 0,
+          "scope": "ORIGINAL_DESIGN_HELD",
+          "status": "HOLD_ACCESS_UNPROVEN",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        },
+        {
+          "id": "CONVERT_TO_NONOCCUPIABLE_LAYOUT_BUFFER",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 20,
+          "accessibleAreaClaimed": 0,
+          "scope": "PROGRAM_ZONING_REVIEW_ONLY",
+          "status": "HOLD_PROGRAM_REDUCTION_AND_PHYSICAL_ACCESS",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        },
+        {
+          "id": "FULL_FLOOR_CORE_CIRCULATION_REDESIGN",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 0,
+          "accessibleAreaClaimed": 0,
+          "scope": "WHOLE_FLOOR_ARCHITECTURAL_REDESIGN",
+          "status": "HOLD_FLOOR_GRAPH_AND_DOOR_GEOMETRY",
+          "coreConnected": true,
+          "sectionId": "apartment/candidate-01/L2",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        }
+      ],
+      "independentlyAccessible": false,
+      "originalPrivateRoomRemainsHeld": true,
+      "productionMaterialEditsAuthorized": 0,
+      "globalEgress": "UNVERIFIED",
+      "approval": "REVIEW_ONLY",
+      "executionAllowed": false,
+      "operations": [],
+      "worldCoordinates": null
+    },
+    {
+      "sectionId": "apartment/candidate-01/L2",
+      "roomId": "F2-R012",
+      "portId": "apartment/candidate-01/L2/D012",
+      "pattern": "apartment/candidate-01/012",
+      "originalRoom": {
+        "x": 15,
+        "z": 19,
+        "width": 3,
+        "depth": 3
+      },
+      "roomArea": 9,
+      "doorFrontiers": {
+        "scannedValidFrontiers": 0,
+        "frontiers": [],
+        "rejections": {
+          "outsideOrOtherRoom": 1,
+          "verticalOrFrozen": 0,
+          "innerNotClear": 3,
+          "noInteriorCore": 0,
+          "unanchoredHall": 0,
+          "structuralOrGlass": 0,
+          "secondaryOrOther": 0,
+          "clearDoorFrontier": 0
+        },
+        "strictLocalGeometryOnly": false,
+        "partialAirSlotWithoutCompleteDoorGeometry": 0,
+        "fullyFrameValidated": 0,
+        "noPrimaryOrGlazingChange": false
+      },
+      "programOptions": [
+        {
+          "id": "PRESERVE_INDEPENDENT_ROOM",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 0,
+          "accessibleAreaClaimed": 0,
+          "scope": "ORIGINAL_DESIGN_HELD",
+          "status": "HOLD_ACCESS_UNPROVEN",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        },
+        {
+          "id": "CONVERT_TO_NONOCCUPIABLE_LAYOUT_BUFFER",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 9,
+          "accessibleAreaClaimed": 0,
+          "scope": "PROGRAM_ZONING_REVIEW_ONLY",
+          "status": "HOLD_PROGRAM_REDUCTION_AND_PHYSICAL_ACCESS",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        },
+        {
+          "id": "FULL_FLOOR_CORE_CIRCULATION_REDESIGN",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 0,
+          "accessibleAreaClaimed": 0,
+          "scope": "WHOLE_FLOOR_ARCHITECTURAL_REDESIGN",
+          "status": "HOLD_FLOOR_GRAPH_AND_DOOR_GEOMETRY",
+          "coreConnected": false,
+          "sectionId": "apartment/candidate-01/L2",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        }
+      ],
+      "independentlyAccessible": false,
+      "originalPrivateRoomRemainsHeld": true,
+      "productionMaterialEditsAuthorized": 0,
+      "globalEgress": "UNVERIFIED",
+      "approval": "REVIEW_ONLY",
+      "executionAllowed": false,
+      "operations": [],
+      "worldCoordinates": null
+    },
+    {
+      "sectionId": "apartment/candidate-01/L2",
+      "roomId": "F2-R013",
+      "portId": "apartment/candidate-01/L2/D013",
+      "pattern": "apartment/candidate-01/013",
+      "originalRoom": {
+        "x": 25,
+        "z": 19,
+        "width": 3,
+        "depth": 3
+      },
+      "roomArea": 9,
+      "doorFrontiers": {
+        "scannedValidFrontiers": 0,
+        "frontiers": [],
+        "rejections": {
+          "outsideOrOtherRoom": 2,
+          "verticalOrFrozen": 0,
+          "innerNotClear": 2,
+          "noInteriorCore": 0,
+          "unanchoredHall": 0,
+          "structuralOrGlass": 0,
+          "secondaryOrOther": 0,
+          "clearDoorFrontier": 0
+        },
+        "strictLocalGeometryOnly": false,
+        "partialAirSlotWithoutCompleteDoorGeometry": 0,
+        "fullyFrameValidated": 0,
+        "noPrimaryOrGlazingChange": false
+      },
+      "programOptions": [
+        {
+          "id": "PRESERVE_INDEPENDENT_ROOM",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 0,
+          "accessibleAreaClaimed": 0,
+          "scope": "ORIGINAL_DESIGN_HELD",
+          "status": "HOLD_ACCESS_UNPROVEN",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        },
+        {
+          "id": "CONVERT_TO_NONOCCUPIABLE_LAYOUT_BUFFER",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 9,
+          "accessibleAreaClaimed": 0,
+          "scope": "PROGRAM_ZONING_REVIEW_ONLY",
+          "status": "HOLD_PROGRAM_REDUCTION_AND_PHYSICAL_ACCESS",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        },
+        {
+          "id": "FULL_FLOOR_CORE_CIRCULATION_REDESIGN",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 0,
+          "accessibleAreaClaimed": 0,
+          "scope": "WHOLE_FLOOR_ARCHITECTURAL_REDESIGN",
+          "status": "HOLD_FLOOR_GRAPH_AND_DOOR_GEOMETRY",
+          "coreConnected": false,
+          "sectionId": "apartment/candidate-01/L2",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        }
+      ],
+      "independentlyAccessible": false,
+      "originalPrivateRoomRemainsHeld": true,
+      "productionMaterialEditsAuthorized": 0,
+      "globalEgress": "UNVERIFIED",
+      "approval": "REVIEW_ONLY",
+      "executionAllowed": false,
+      "operations": [],
+      "worldCoordinates": null
+    },
+    {
+      "sectionId": "apartment/candidate-01/L3",
+      "roomId": "F3-R006",
+      "portId": "apartment/candidate-01/L3/D006",
+      "pattern": "apartment/candidate-01/006",
+      "originalRoom": {
+        "x": 1,
+        "z": 7,
+        "width": 4,
+        "depth": 5
+      },
+      "roomArea": 20,
+      "doorFrontiers": {
+        "scannedValidFrontiers": 6,
+        "frontiers": [
+          {
+            "roomCell": {
+              "x": 2,
+              "z": 11
+            },
+            "hallCell": {
+              "x": 2,
+              "z": 12
+            },
+            "normal": {
+              "x": 0,
+              "z": 1
+            },
+            "atOriginalPort": false,
+            "namedCorridor": true,
+            "componentCoreAdjacent": true,
+            "componentId": 0,
+            "originalRoomArea": 20,
+            "retainedAreaRatio": 1,
+            "openingProductionContacts": [
+              {
+                "x": 2,
+                "y": 11,
+                "z": 11,
+                "role": "floor",
+                "block": "minecraft:basalt",
+                "phase": "balcony",
+                "operationIndex": 256,
+                "category": "OTHER_PINNED_BLOCK_HOLD"
+              },
+              {
+                "x": 2,
+                "y": 11,
+                "z": 12,
+                "role": "floor",
+                "block": "minecraft:basalt",
+                "phase": "balcony",
+                "operationIndex": 256,
+                "category": "OTHER_PINNED_BLOCK_HOLD"
+              }
+            ],
+            "modificationBudget": {
+              "structural": 0,
+              "glazing": 0,
+              "other": 2,
+              "secondary": 0,
+              "total": 2
+            },
+            "jambConditions": [
+              {
+                "existingWallCount": 2,
+                "allExistingWallsOpaque": false,
+                "mixedExistingRoles": false
+              },
+              {
+                "existingWallCount": 3,
+                "allExistingWallsOpaque": false,
+                "mixedExistingRoles": true
+              }
+            ],
+            "edgeFrameValidated": false,
+            "hallPhysicallyClear": false,
+            "innerSwingAdjacentClear": false,
+            "innerCell": {
+              "x": 2,
+              "z": 10
+            },
+            "roomCore": [
+              "2,8",
+              "3,8",
+              "2,9",
+              "3,9"
+            ],
+            "nominalInteriorPath": [
+              "2,10",
+              "2,9"
+            ],
+            "architecturalAccess": "NOT_CERTIFIED",
+            "productionModificationApproved": false,
+            "status": "HOLD_CONDITIONAL_PRODUCTION_CHANGE",
+            "executionAllowed": false,
+            "operations": [],
+            "worldCoordinates": null
+          },
+          {
+            "roomCell": {
+              "x": 3,
+              "z": 11
+            },
+            "hallCell": {
+              "x": 3,
+              "z": 12
+            },
+            "normal": {
+              "x": 0,
+              "z": 1
+            },
+            "atOriginalPort": false,
+            "namedCorridor": true,
+            "componentCoreAdjacent": true,
+            "componentId": 0,
+            "originalRoomArea": 20,
+            "retainedAreaRatio": 1,
+            "openingProductionContacts": [
+              {
+                "x": 3,
+                "y": 12,
+                "z": 11,
+                "role": "glass",
+                "block": "minecraft:black_stained_glass_pane",
+                "phase": "glazing",
+                "operationIndex": 281,
+                "category": "GLAZING_HOLD"
+              }
+            ],
+            "modificationBudget": {
+              "structural": 0,
+              "glazing": 1,
+              "other": 0,
+              "secondary": 0,
+              "total": 1
+            },
+            "jambConditions": [
+              {
+                "existingWallCount": 1,
+                "allExistingWallsOpaque": false,
+                "mixedExistingRoles": false
+              },
+              {
+                "existingWallCount": 1,
+                "allExistingWallsOpaque": false,
+                "mixedExistingRoles": false
+              }
+            ],
+            "edgeFrameValidated": false,
+            "hallPhysicallyClear": true,
+            "innerSwingAdjacentClear": false,
+            "innerCell": {
+              "x": 3,
+              "z": 10
+            },
+            "roomCore": [
+              "2,8",
+              "3,8",
+              "2,9",
+              "3,9"
+            ],
+            "nominalInteriorPath": [
+              "3,10",
+              "3,9"
+            ],
+            "architecturalAccess": "NOT_CERTIFIED",
+            "productionModificationApproved": false,
+            "status": "HOLD_CONDITIONAL_PRODUCTION_CHANGE",
+            "executionAllowed": false,
+            "operations": [],
+            "worldCoordinates": null
+          },
+          {
+            "roomCell": {
+              "x": 3,
+              "z": 7
+            },
+            "hallCell": {
+              "x": 3,
+              "z": 6
+            },
+            "normal": {
+              "x": 0,
+              "z": -1
+            },
+            "atOriginalPort": false,
+            "namedCorridor": true,
+            "componentCoreAdjacent": true,
+            "componentId": 0,
+            "originalRoomArea": 20,
+            "retainedAreaRatio": 1,
+            "openingProductionContacts": [
+              {
+                "x": 3,
+                "y": 12,
+                "z": 6,
+                "role": "glass",
+                "block": "minecraft:black_stained_glass_pane",
+                "phase": "glazing",
+                "operationIndex": 278,
+                "category": "GLAZING_HOLD"
+              }
+            ],
+            "modificationBudget": {
+              "structural": 0,
+              "glazing": 1,
+              "other": 0,
+              "secondary": 0,
+              "total": 1
+            },
+            "jambConditions": [
+              {
+                "existingWallCount": 0,
+                "allExistingWallsOpaque": true,
+                "mixedExistingRoles": false
+              },
+              {
+                "existingWallCount": 3,
+                "allExistingWallsOpaque": true,
+                "mixedExistingRoles": false
+              }
+            ],
+            "edgeFrameValidated": true,
+            "hallPhysicallyClear": false,
+            "innerSwingAdjacentClear": true,
+            "innerCell": {
+              "x": 3,
+              "z": 8
+            },
+            "roomCore": [
+              "2,8",
+              "3,8",
+              "2,9",
+              "3,9"
+            ],
+            "nominalInteriorPath": [
+              "3,7",
+              "3,8"
+            ],
+            "architecturalAccess": "NOT_CERTIFIED",
+            "productionModificationApproved": false,
+            "status": "HOLD_CONDITIONAL_PRODUCTION_CHANGE",
+            "executionAllowed": false,
+            "operations": [],
+            "worldCoordinates": null
+          },
+          {
+            "roomCell": {
+              "x": 1,
+              "z": 9
+            },
+            "hallCell": {
+              "x": 0,
+              "z": 9
+            },
+            "normal": {
+              "x": -1,
+              "z": 0
+            },
+            "atOriginalPort": true,
+            "namedCorridor": true,
+            "componentCoreAdjacent": true,
+            "componentId": 0,
+            "originalRoomArea": 20,
+            "retainedAreaRatio": 1,
+            "openingProductionContacts": [
+              {
+                "x": 0,
+                "y": 11,
+                "z": 9,
+                "role": "primaryWall",
+                "block": "minecraft:light_gray_concrete",
+                "phase": "solid_wall",
+                "operationIndex": 244,
+                "category": "STRUCTURAL_HOLD"
+              },
+              {
+                "x": 0,
+                "y": 12,
+                "z": 9,
+                "role": "primaryWall",
+                "block": "minecraft:light_gray_concrete",
+                "phase": "solid_wall",
+                "operationIndex": 244,
+                "category": "STRUCTURAL_HOLD"
+              }
+            ],
+            "modificationBudget": {
+              "structural": 2,
+              "glazing": 0,
+              "other": 0,
+              "secondary": 0,
+              "total": 2
+            },
+            "jambConditions": [
+              {
+                "existingWallCount": 0,
+                "allExistingWallsOpaque": true,
+                "mixedExistingRoles": false
+              },
+              {
+                "existingWallCount": 0,
+                "allExistingWallsOpaque": true,
+                "mixedExistingRoles": false
+              }
+            ],
+            "edgeFrameValidated": true,
+            "hallPhysicallyClear": false,
+            "innerSwingAdjacentClear": true,
+            "innerCell": {
+              "x": 2,
+              "z": 9
+            },
+            "roomCore": [
+              "2,8",
+              "3,8",
+              "2,9",
+              "3,9"
+            ],
+            "nominalInteriorPath": [
+              "1,9",
+              "2,9"
+            ],
+            "architecturalAccess": "NOT_CERTIFIED",
+            "productionModificationApproved": false,
+            "status": "HOLD_CONDITIONAL_PRODUCTION_CHANGE",
+            "executionAllowed": false,
+            "operations": [],
+            "worldCoordinates": null
+          },
+          {
+            "roomCell": {
+              "x": 1,
+              "z": 10
+            },
+            "hallCell": {
+              "x": 0,
+              "z": 10
+            },
+            "normal": {
+              "x": -1,
+              "z": 0
+            },
+            "atOriginalPort": false,
+            "namedCorridor": true,
+            "componentCoreAdjacent": true,
+            "componentId": 0,
+            "originalRoomArea": 20,
+            "retainedAreaRatio": 1,
+            "openingProductionContacts": [
+              {
+                "x": 0,
+                "y": 11,
+                "z": 10,
+                "role": "primaryWall",
+                "block": "minecraft:light_gray_concrete",
+                "phase": "solid_wall",
+                "operationIndex": 244,
+                "category": "STRUCTURAL_HOLD"
+              },
+              {
+                "x": 0,
+                "y": 12,
+                "z": 10,
+                "role": "primaryWall",
+                "block": "minecraft:light_gray_concrete",
+                "phase": "solid_wall",
+                "operationIndex": 244,
+                "category": "STRUCTURAL_HOLD"
+              }
+            ],
+            "modificationBudget": {
+              "structural": 2,
+              "glazing": 0,
+              "other": 0,
+              "secondary": 0,
+              "total": 2
+            },
+            "jambConditions": [
+              {
+                "existingWallCount": 3,
+                "allExistingWallsOpaque": false,
+                "mixedExistingRoles": true
+              },
+              {
+                "existingWallCount": 0,
+                "allExistingWallsOpaque": true,
+                "mixedExistingRoles": false
+              }
+            ],
+            "edgeFrameValidated": false,
+            "hallPhysicallyClear": false,
+            "innerSwingAdjacentClear": true,
+            "innerCell": {
+              "x": 2,
+              "z": 10
+            },
+            "roomCore": [
+              "2,8",
+              "3,8",
+              "2,9",
+              "3,9"
+            ],
+            "nominalInteriorPath": [
+              "1,10",
+              "2,10",
+              "2,9"
+            ],
+            "architecturalAccess": "NOT_CERTIFIED",
+            "productionModificationApproved": false,
+            "status": "HOLD_CONDITIONAL_PRODUCTION_CHANGE",
+            "executionAllowed": false,
+            "operations": [],
+            "worldCoordinates": null
+          }
+        ],
+        "rejections": {
+          "outsideOrOtherRoom": 3,
+          "verticalOrFrozen": 1,
+          "innerNotClear": 0,
+          "noInteriorCore": 0,
+          "unanchoredHall": 0,
+          "structuralOrGlass": 5,
+          "secondaryOrOther": 1,
+          "clearDoorFrontier": 0
+        },
+        "strictLocalGeometryOnly": false,
+        "partialAirSlotWithoutCompleteDoorGeometry": 0,
+        "fullyFrameValidated": 0,
+        "noPrimaryOrGlazingChange": true
+      },
+      "programOptions": [
+        {
+          "id": "PRESERVE_INDEPENDENT_ROOM",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 0,
+          "accessibleAreaClaimed": 0,
+          "scope": "ORIGINAL_DESIGN_HELD",
+          "status": "HOLD_ACCESS_UNPROVEN",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        },
+        {
+          "id": "CONVERT_TO_NONOCCUPIABLE_LAYOUT_BUFFER",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 20,
+          "accessibleAreaClaimed": 0,
+          "scope": "PROGRAM_ZONING_REVIEW_ONLY",
+          "status": "HOLD_PROGRAM_REDUCTION_AND_PHYSICAL_ACCESS",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        },
+        {
+          "id": "FULL_FLOOR_CORE_CIRCULATION_REDESIGN",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 0,
+          "accessibleAreaClaimed": 0,
+          "scope": "WHOLE_FLOOR_ARCHITECTURAL_REDESIGN",
+          "status": "HOLD_FLOOR_GRAPH_AND_DOOR_GEOMETRY",
+          "coreConnected": true,
+          "sectionId": "apartment/candidate-01/L3",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        }
+      ],
+      "independentlyAccessible": false,
+      "originalPrivateRoomRemainsHeld": true,
+      "productionMaterialEditsAuthorized": 0,
+      "globalEgress": "UNVERIFIED",
+      "approval": "REVIEW_ONLY",
+      "executionAllowed": false,
+      "operations": [],
+      "worldCoordinates": null
+    },
+    {
+      "sectionId": "apartment/candidate-01/L3",
+      "roomId": "F3-R012",
+      "portId": "apartment/candidate-01/L3/D012",
+      "pattern": "apartment/candidate-01/012",
+      "originalRoom": {
+        "x": 15,
+        "z": 19,
+        "width": 3,
+        "depth": 3
+      },
+      "roomArea": 9,
+      "doorFrontiers": {
+        "scannedValidFrontiers": 0,
+        "frontiers": [],
+        "rejections": {
+          "outsideOrOtherRoom": 1,
+          "verticalOrFrozen": 0,
+          "innerNotClear": 3,
+          "noInteriorCore": 0,
+          "unanchoredHall": 0,
+          "structuralOrGlass": 0,
+          "secondaryOrOther": 0,
+          "clearDoorFrontier": 0
+        },
+        "strictLocalGeometryOnly": false,
+        "partialAirSlotWithoutCompleteDoorGeometry": 0,
+        "fullyFrameValidated": 0,
+        "noPrimaryOrGlazingChange": false
+      },
+      "programOptions": [
+        {
+          "id": "PRESERVE_INDEPENDENT_ROOM",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 0,
+          "accessibleAreaClaimed": 0,
+          "scope": "ORIGINAL_DESIGN_HELD",
+          "status": "HOLD_ACCESS_UNPROVEN",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        },
+        {
+          "id": "CONVERT_TO_NONOCCUPIABLE_LAYOUT_BUFFER",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 9,
+          "accessibleAreaClaimed": 0,
+          "scope": "PROGRAM_ZONING_REVIEW_ONLY",
+          "status": "HOLD_PROGRAM_REDUCTION_AND_PHYSICAL_ACCESS",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        },
+        {
+          "id": "FULL_FLOOR_CORE_CIRCULATION_REDESIGN",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 0,
+          "accessibleAreaClaimed": 0,
+          "scope": "WHOLE_FLOOR_ARCHITECTURAL_REDESIGN",
+          "status": "HOLD_FLOOR_GRAPH_AND_DOOR_GEOMETRY",
+          "coreConnected": false,
+          "sectionId": "apartment/candidate-01/L3",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        }
+      ],
+      "independentlyAccessible": false,
+      "originalPrivateRoomRemainsHeld": true,
+      "productionMaterialEditsAuthorized": 0,
+      "globalEgress": "UNVERIFIED",
+      "approval": "REVIEW_ONLY",
+      "executionAllowed": false,
+      "operations": [],
+      "worldCoordinates": null
+    },
+    {
+      "sectionId": "apartment/candidate-01/L3",
+      "roomId": "F3-R013",
+      "portId": "apartment/candidate-01/L3/D013",
+      "pattern": "apartment/candidate-01/013",
+      "originalRoom": {
+        "x": 25,
+        "z": 19,
+        "width": 3,
+        "depth": 3
+      },
+      "roomArea": 9,
+      "doorFrontiers": {
+        "scannedValidFrontiers": 0,
+        "frontiers": [],
+        "rejections": {
+          "outsideOrOtherRoom": 2,
+          "verticalOrFrozen": 0,
+          "innerNotClear": 2,
+          "noInteriorCore": 0,
+          "unanchoredHall": 0,
+          "structuralOrGlass": 0,
+          "secondaryOrOther": 0,
+          "clearDoorFrontier": 0
+        },
+        "strictLocalGeometryOnly": false,
+        "partialAirSlotWithoutCompleteDoorGeometry": 0,
+        "fullyFrameValidated": 0,
+        "noPrimaryOrGlazingChange": false
+      },
+      "programOptions": [
+        {
+          "id": "PRESERVE_INDEPENDENT_ROOM",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 0,
+          "accessibleAreaClaimed": 0,
+          "scope": "ORIGINAL_DESIGN_HELD",
+          "status": "HOLD_ACCESS_UNPROVEN",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        },
+        {
+          "id": "CONVERT_TO_NONOCCUPIABLE_LAYOUT_BUFFER",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 9,
+          "accessibleAreaClaimed": 0,
+          "scope": "PROGRAM_ZONING_REVIEW_ONLY",
+          "status": "HOLD_PROGRAM_REDUCTION_AND_PHYSICAL_ACCESS",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        },
+        {
+          "id": "FULL_FLOOR_CORE_CIRCULATION_REDESIGN",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 0,
+          "accessibleAreaClaimed": 0,
+          "scope": "WHOLE_FLOOR_ARCHITECTURAL_REDESIGN",
+          "status": "HOLD_FLOOR_GRAPH_AND_DOOR_GEOMETRY",
+          "coreConnected": false,
+          "sectionId": "apartment/candidate-01/L3",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        }
+      ],
+      "independentlyAccessible": false,
+      "originalPrivateRoomRemainsHeld": true,
+      "productionMaterialEditsAuthorized": 0,
+      "globalEgress": "UNVERIFIED",
+      "approval": "REVIEW_ONLY",
+      "executionAllowed": false,
+      "operations": [],
+      "worldCoordinates": null
+    },
+    {
+      "sectionId": "apartment/candidate-01/L4",
+      "roomId": "F4-R006",
+      "portId": "apartment/candidate-01/L4/D006",
+      "pattern": "apartment/candidate-01/006",
+      "originalRoom": {
+        "x": 1,
+        "z": 7,
+        "width": 4,
+        "depth": 5
+      },
+      "roomArea": 20,
+      "doorFrontiers": {
+        "scannedValidFrontiers": 6,
+        "frontiers": [
+          {
+            "roomCell": {
+              "x": 2,
+              "z": 11
+            },
+            "hallCell": {
+              "x": 2,
+              "z": 12
+            },
+            "normal": {
+              "x": 0,
+              "z": 1
+            },
+            "atOriginalPort": false,
+            "namedCorridor": true,
+            "componentCoreAdjacent": true,
+            "componentId": 0,
+            "originalRoomArea": 20,
+            "retainedAreaRatio": 1,
+            "openingProductionContacts": [
+              {
+                "x": 2,
+                "y": 16,
+                "z": 11,
+                "role": "floor",
+                "block": "minecraft:basalt",
+                "phase": "balcony",
+                "operationIndex": 398,
+                "category": "OTHER_PINNED_BLOCK_HOLD"
+              },
+              {
+                "x": 2,
+                "y": 16,
+                "z": 12,
+                "role": "floor",
+                "block": "minecraft:basalt",
+                "phase": "balcony",
+                "operationIndex": 398,
+                "category": "OTHER_PINNED_BLOCK_HOLD"
+              }
+            ],
+            "modificationBudget": {
+              "structural": 0,
+              "glazing": 0,
+              "other": 2,
+              "secondary": 0,
+              "total": 2
+            },
+            "jambConditions": [
+              {
+                "existingWallCount": 2,
+                "allExistingWallsOpaque": false,
+                "mixedExistingRoles": false
+              },
+              {
+                "existingWallCount": 3,
+                "allExistingWallsOpaque": false,
+                "mixedExistingRoles": true
+              }
+            ],
+            "edgeFrameValidated": false,
+            "hallPhysicallyClear": false,
+            "innerSwingAdjacentClear": false,
+            "innerCell": {
+              "x": 2,
+              "z": 10
+            },
+            "roomCore": [
+              "2,8",
+              "3,8",
+              "2,9",
+              "3,9"
+            ],
+            "nominalInteriorPath": [
+              "2,10",
+              "2,9"
+            ],
+            "architecturalAccess": "NOT_CERTIFIED",
+            "productionModificationApproved": false,
+            "status": "HOLD_CONDITIONAL_PRODUCTION_CHANGE",
+            "executionAllowed": false,
+            "operations": [],
+            "worldCoordinates": null
+          },
+          {
+            "roomCell": {
+              "x": 3,
+              "z": 11
+            },
+            "hallCell": {
+              "x": 3,
+              "z": 12
+            },
+            "normal": {
+              "x": 0,
+              "z": 1
+            },
+            "atOriginalPort": false,
+            "namedCorridor": true,
+            "componentCoreAdjacent": true,
+            "componentId": 0,
+            "originalRoomArea": 20,
+            "retainedAreaRatio": 1,
+            "openingProductionContacts": [
+              {
+                "x": 3,
+                "y": 17,
+                "z": 11,
+                "role": "glass",
+                "block": "minecraft:black_stained_glass_pane",
+                "phase": "glazing",
+                "operationIndex": 423,
+                "category": "GLAZING_HOLD"
+              }
+            ],
+            "modificationBudget": {
+              "structural": 0,
+              "glazing": 1,
+              "other": 0,
+              "secondary": 0,
+              "total": 1
+            },
+            "jambConditions": [
+              {
+                "existingWallCount": 1,
+                "allExistingWallsOpaque": false,
+                "mixedExistingRoles": false
+              },
+              {
+                "existingWallCount": 1,
+                "allExistingWallsOpaque": false,
+                "mixedExistingRoles": false
+              }
+            ],
+            "edgeFrameValidated": false,
+            "hallPhysicallyClear": true,
+            "innerSwingAdjacentClear": false,
+            "innerCell": {
+              "x": 3,
+              "z": 10
+            },
+            "roomCore": [
+              "2,8",
+              "3,8",
+              "2,9",
+              "3,9"
+            ],
+            "nominalInteriorPath": [
+              "3,10",
+              "3,9"
+            ],
+            "architecturalAccess": "NOT_CERTIFIED",
+            "productionModificationApproved": false,
+            "status": "HOLD_CONDITIONAL_PRODUCTION_CHANGE",
+            "executionAllowed": false,
+            "operations": [],
+            "worldCoordinates": null
+          },
+          {
+            "roomCell": {
+              "x": 3,
+              "z": 7
+            },
+            "hallCell": {
+              "x": 3,
+              "z": 6
+            },
+            "normal": {
+              "x": 0,
+              "z": -1
+            },
+            "atOriginalPort": false,
+            "namedCorridor": true,
+            "componentCoreAdjacent": true,
+            "componentId": 0,
+            "originalRoomArea": 20,
+            "retainedAreaRatio": 1,
+            "openingProductionContacts": [
+              {
+                "x": 3,
+                "y": 17,
+                "z": 6,
+                "role": "glass",
+                "block": "minecraft:black_stained_glass_pane",
+                "phase": "glazing",
+                "operationIndex": 420,
+                "category": "GLAZING_HOLD"
+              }
+            ],
+            "modificationBudget": {
+              "structural": 0,
+              "glazing": 1,
+              "other": 0,
+              "secondary": 0,
+              "total": 1
+            },
+            "jambConditions": [
+              {
+                "existingWallCount": 0,
+                "allExistingWallsOpaque": true,
+                "mixedExistingRoles": false
+              },
+              {
+                "existingWallCount": 3,
+                "allExistingWallsOpaque": true,
+                "mixedExistingRoles": false
+              }
+            ],
+            "edgeFrameValidated": true,
+            "hallPhysicallyClear": false,
+            "innerSwingAdjacentClear": true,
+            "innerCell": {
+              "x": 3,
+              "z": 8
+            },
+            "roomCore": [
+              "2,8",
+              "3,8",
+              "2,9",
+              "3,9"
+            ],
+            "nominalInteriorPath": [
+              "3,7",
+              "3,8"
+            ],
+            "architecturalAccess": "NOT_CERTIFIED",
+            "productionModificationApproved": false,
+            "status": "HOLD_CONDITIONAL_PRODUCTION_CHANGE",
+            "executionAllowed": false,
+            "operations": [],
+            "worldCoordinates": null
+          },
+          {
+            "roomCell": {
+              "x": 1,
+              "z": 9
+            },
+            "hallCell": {
+              "x": 0,
+              "z": 9
+            },
+            "normal": {
+              "x": -1,
+              "z": 0
+            },
+            "atOriginalPort": true,
+            "namedCorridor": true,
+            "componentCoreAdjacent": true,
+            "componentId": 0,
+            "originalRoomArea": 20,
+            "retainedAreaRatio": 1,
+            "openingProductionContacts": [
+              {
+                "x": 0,
+                "y": 16,
+                "z": 9,
+                "role": "primaryWall",
+                "block": "minecraft:light_gray_concrete",
+                "phase": "solid_wall",
+                "operationIndex": 386,
+                "category": "STRUCTURAL_HOLD"
+              },
+              {
+                "x": 0,
+                "y": 17,
+                "z": 9,
+                "role": "primaryWall",
+                "block": "minecraft:light_gray_concrete",
+                "phase": "solid_wall",
+                "operationIndex": 386,
+                "category": "STRUCTURAL_HOLD"
+              }
+            ],
+            "modificationBudget": {
+              "structural": 2,
+              "glazing": 0,
+              "other": 0,
+              "secondary": 0,
+              "total": 2
+            },
+            "jambConditions": [
+              {
+                "existingWallCount": 0,
+                "allExistingWallsOpaque": true,
+                "mixedExistingRoles": false
+              },
+              {
+                "existingWallCount": 0,
+                "allExistingWallsOpaque": true,
+                "mixedExistingRoles": false
+              }
+            ],
+            "edgeFrameValidated": true,
+            "hallPhysicallyClear": false,
+            "innerSwingAdjacentClear": true,
+            "innerCell": {
+              "x": 2,
+              "z": 9
+            },
+            "roomCore": [
+              "2,8",
+              "3,8",
+              "2,9",
+              "3,9"
+            ],
+            "nominalInteriorPath": [
+              "1,9",
+              "2,9"
+            ],
+            "architecturalAccess": "NOT_CERTIFIED",
+            "productionModificationApproved": false,
+            "status": "HOLD_CONDITIONAL_PRODUCTION_CHANGE",
+            "executionAllowed": false,
+            "operations": [],
+            "worldCoordinates": null
+          },
+          {
+            "roomCell": {
+              "x": 1,
+              "z": 10
+            },
+            "hallCell": {
+              "x": 0,
+              "z": 10
+            },
+            "normal": {
+              "x": -1,
+              "z": 0
+            },
+            "atOriginalPort": false,
+            "namedCorridor": true,
+            "componentCoreAdjacent": true,
+            "componentId": 0,
+            "originalRoomArea": 20,
+            "retainedAreaRatio": 1,
+            "openingProductionContacts": [
+              {
+                "x": 0,
+                "y": 16,
+                "z": 10,
+                "role": "primaryWall",
+                "block": "minecraft:light_gray_concrete",
+                "phase": "solid_wall",
+                "operationIndex": 386,
+                "category": "STRUCTURAL_HOLD"
+              },
+              {
+                "x": 0,
+                "y": 17,
+                "z": 10,
+                "role": "primaryWall",
+                "block": "minecraft:light_gray_concrete",
+                "phase": "solid_wall",
+                "operationIndex": 386,
+                "category": "STRUCTURAL_HOLD"
+              }
+            ],
+            "modificationBudget": {
+              "structural": 2,
+              "glazing": 0,
+              "other": 0,
+              "secondary": 0,
+              "total": 2
+            },
+            "jambConditions": [
+              {
+                "existingWallCount": 3,
+                "allExistingWallsOpaque": false,
+                "mixedExistingRoles": true
+              },
+              {
+                "existingWallCount": 0,
+                "allExistingWallsOpaque": true,
+                "mixedExistingRoles": false
+              }
+            ],
+            "edgeFrameValidated": false,
+            "hallPhysicallyClear": false,
+            "innerSwingAdjacentClear": true,
+            "innerCell": {
+              "x": 2,
+              "z": 10
+            },
+            "roomCore": [
+              "2,8",
+              "3,8",
+              "2,9",
+              "3,9"
+            ],
+            "nominalInteriorPath": [
+              "1,10",
+              "2,10",
+              "2,9"
+            ],
+            "architecturalAccess": "NOT_CERTIFIED",
+            "productionModificationApproved": false,
+            "status": "HOLD_CONDITIONAL_PRODUCTION_CHANGE",
+            "executionAllowed": false,
+            "operations": [],
+            "worldCoordinates": null
+          }
+        ],
+        "rejections": {
+          "outsideOrOtherRoom": 3,
+          "verticalOrFrozen": 1,
+          "innerNotClear": 0,
+          "noInteriorCore": 0,
+          "unanchoredHall": 0,
+          "structuralOrGlass": 5,
+          "secondaryOrOther": 1,
+          "clearDoorFrontier": 0
+        },
+        "strictLocalGeometryOnly": false,
+        "partialAirSlotWithoutCompleteDoorGeometry": 0,
+        "fullyFrameValidated": 0,
+        "noPrimaryOrGlazingChange": true
+      },
+      "programOptions": [
+        {
+          "id": "PRESERVE_INDEPENDENT_ROOM",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 0,
+          "accessibleAreaClaimed": 0,
+          "scope": "ORIGINAL_DESIGN_HELD",
+          "status": "HOLD_ACCESS_UNPROVEN",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        },
+        {
+          "id": "CONVERT_TO_NONOCCUPIABLE_LAYOUT_BUFFER",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 20,
+          "accessibleAreaClaimed": 0,
+          "scope": "PROGRAM_ZONING_REVIEW_ONLY",
+          "status": "HOLD_PROGRAM_REDUCTION_AND_PHYSICAL_ACCESS",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        },
+        {
+          "id": "FULL_FLOOR_CORE_CIRCULATION_REDESIGN",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 0,
+          "accessibleAreaClaimed": 0,
+          "scope": "WHOLE_FLOOR_ARCHITECTURAL_REDESIGN",
+          "status": "HOLD_FLOOR_GRAPH_AND_DOOR_GEOMETRY",
+          "coreConnected": true,
+          "sectionId": "apartment/candidate-01/L4",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        }
+      ],
+      "independentlyAccessible": false,
+      "originalPrivateRoomRemainsHeld": true,
+      "productionMaterialEditsAuthorized": 0,
+      "globalEgress": "UNVERIFIED",
+      "approval": "REVIEW_ONLY",
+      "executionAllowed": false,
+      "operations": [],
+      "worldCoordinates": null
+    },
+    {
+      "sectionId": "apartment/candidate-01/L4",
+      "roomId": "F4-R012",
+      "portId": "apartment/candidate-01/L4/D012",
+      "pattern": "apartment/candidate-01/012",
+      "originalRoom": {
+        "x": 15,
+        "z": 19,
+        "width": 3,
+        "depth": 3
+      },
+      "roomArea": 9,
+      "doorFrontiers": {
+        "scannedValidFrontiers": 0,
+        "frontiers": [],
+        "rejections": {
+          "outsideOrOtherRoom": 1,
+          "verticalOrFrozen": 0,
+          "innerNotClear": 3,
+          "noInteriorCore": 0,
+          "unanchoredHall": 0,
+          "structuralOrGlass": 0,
+          "secondaryOrOther": 0,
+          "clearDoorFrontier": 0
+        },
+        "strictLocalGeometryOnly": false,
+        "partialAirSlotWithoutCompleteDoorGeometry": 0,
+        "fullyFrameValidated": 0,
+        "noPrimaryOrGlazingChange": false
+      },
+      "programOptions": [
+        {
+          "id": "PRESERVE_INDEPENDENT_ROOM",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 0,
+          "accessibleAreaClaimed": 0,
+          "scope": "ORIGINAL_DESIGN_HELD",
+          "status": "HOLD_ACCESS_UNPROVEN",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        },
+        {
+          "id": "CONVERT_TO_NONOCCUPIABLE_LAYOUT_BUFFER",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 9,
+          "accessibleAreaClaimed": 0,
+          "scope": "PROGRAM_ZONING_REVIEW_ONLY",
+          "status": "HOLD_PROGRAM_REDUCTION_AND_PHYSICAL_ACCESS",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        },
+        {
+          "id": "FULL_FLOOR_CORE_CIRCULATION_REDESIGN",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 0,
+          "accessibleAreaClaimed": 0,
+          "scope": "WHOLE_FLOOR_ARCHITECTURAL_REDESIGN",
+          "status": "HOLD_FLOOR_GRAPH_AND_DOOR_GEOMETRY",
+          "coreConnected": false,
+          "sectionId": "apartment/candidate-01/L4",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        }
+      ],
+      "independentlyAccessible": false,
+      "originalPrivateRoomRemainsHeld": true,
+      "productionMaterialEditsAuthorized": 0,
+      "globalEgress": "UNVERIFIED",
+      "approval": "REVIEW_ONLY",
+      "executionAllowed": false,
+      "operations": [],
+      "worldCoordinates": null
+    },
+    {
+      "sectionId": "apartment/candidate-01/L4",
+      "roomId": "F4-R013",
+      "portId": "apartment/candidate-01/L4/D013",
+      "pattern": "apartment/candidate-01/013",
+      "originalRoom": {
+        "x": 25,
+        "z": 19,
+        "width": 3,
+        "depth": 3
+      },
+      "roomArea": 9,
+      "doorFrontiers": {
+        "scannedValidFrontiers": 0,
+        "frontiers": [],
+        "rejections": {
+          "outsideOrOtherRoom": 2,
+          "verticalOrFrozen": 0,
+          "innerNotClear": 2,
+          "noInteriorCore": 0,
+          "unanchoredHall": 0,
+          "structuralOrGlass": 0,
+          "secondaryOrOther": 0,
+          "clearDoorFrontier": 0
+        },
+        "strictLocalGeometryOnly": false,
+        "partialAirSlotWithoutCompleteDoorGeometry": 0,
+        "fullyFrameValidated": 0,
+        "noPrimaryOrGlazingChange": false
+      },
+      "programOptions": [
+        {
+          "id": "PRESERVE_INDEPENDENT_ROOM",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 0,
+          "accessibleAreaClaimed": 0,
+          "scope": "ORIGINAL_DESIGN_HELD",
+          "status": "HOLD_ACCESS_UNPROVEN",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        },
+        {
+          "id": "CONVERT_TO_NONOCCUPIABLE_LAYOUT_BUFFER",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 9,
+          "accessibleAreaClaimed": 0,
+          "scope": "PROGRAM_ZONING_REVIEW_ONLY",
+          "status": "HOLD_PROGRAM_REDUCTION_AND_PHYSICAL_ACCESS",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        },
+        {
+          "id": "FULL_FLOOR_CORE_CIRCULATION_REDESIGN",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 0,
+          "accessibleAreaClaimed": 0,
+          "scope": "WHOLE_FLOOR_ARCHITECTURAL_REDESIGN",
+          "status": "HOLD_FLOOR_GRAPH_AND_DOOR_GEOMETRY",
+          "coreConnected": false,
+          "sectionId": "apartment/candidate-01/L4",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        }
+      ],
+      "independentlyAccessible": false,
+      "originalPrivateRoomRemainsHeld": true,
+      "productionMaterialEditsAuthorized": 0,
+      "globalEgress": "UNVERIFIED",
+      "approval": "REVIEW_ONLY",
+      "executionAllowed": false,
+      "operations": [],
+      "worldCoordinates": null
+    },
+    {
+      "sectionId": "apartment/candidate-01/L5",
+      "roomId": "F5-R006",
+      "portId": "apartment/candidate-01/L5/D006",
+      "pattern": "apartment/candidate-01/006",
+      "originalRoom": {
+        "x": 1,
+        "z": 7,
+        "width": 4,
+        "depth": 5
+      },
+      "roomArea": 20,
+      "doorFrontiers": {
+        "scannedValidFrontiers": 6,
+        "frontiers": [
+          {
+            "roomCell": {
+              "x": 2,
+              "z": 11
+            },
+            "hallCell": {
+              "x": 2,
+              "z": 12
+            },
+            "normal": {
+              "x": 0,
+              "z": 1
+            },
+            "atOriginalPort": false,
+            "namedCorridor": true,
+            "componentCoreAdjacent": true,
+            "componentId": 0,
+            "originalRoomArea": 20,
+            "retainedAreaRatio": 1,
+            "openingProductionContacts": [
+              {
+                "x": 2,
+                "y": 21,
+                "z": 11,
+                "role": "floor",
+                "block": "minecraft:basalt",
+                "phase": "balcony",
+                "operationIndex": 540,
+                "category": "OTHER_PINNED_BLOCK_HOLD"
+              },
+              {
+                "x": 2,
+                "y": 21,
+                "z": 12,
+                "role": "floor",
+                "block": "minecraft:basalt",
+                "phase": "balcony",
+                "operationIndex": 540,
+                "category": "OTHER_PINNED_BLOCK_HOLD"
+              }
+            ],
+            "modificationBudget": {
+              "structural": 0,
+              "glazing": 0,
+              "other": 2,
+              "secondary": 0,
+              "total": 2
+            },
+            "jambConditions": [
+              {
+                "existingWallCount": 2,
+                "allExistingWallsOpaque": false,
+                "mixedExistingRoles": false
+              },
+              {
+                "existingWallCount": 3,
+                "allExistingWallsOpaque": false,
+                "mixedExistingRoles": true
+              }
+            ],
+            "edgeFrameValidated": false,
+            "hallPhysicallyClear": false,
+            "innerSwingAdjacentClear": false,
+            "innerCell": {
+              "x": 2,
+              "z": 10
+            },
+            "roomCore": [
+              "2,8",
+              "3,8",
+              "2,9",
+              "3,9"
+            ],
+            "nominalInteriorPath": [
+              "2,10",
+              "2,9"
+            ],
+            "architecturalAccess": "NOT_CERTIFIED",
+            "productionModificationApproved": false,
+            "status": "HOLD_CONDITIONAL_PRODUCTION_CHANGE",
+            "executionAllowed": false,
+            "operations": [],
+            "worldCoordinates": null
+          },
+          {
+            "roomCell": {
+              "x": 3,
+              "z": 11
+            },
+            "hallCell": {
+              "x": 3,
+              "z": 12
+            },
+            "normal": {
+              "x": 0,
+              "z": 1
+            },
+            "atOriginalPort": false,
+            "namedCorridor": true,
+            "componentCoreAdjacent": true,
+            "componentId": 0,
+            "originalRoomArea": 20,
+            "retainedAreaRatio": 1,
+            "openingProductionContacts": [
+              {
+                "x": 3,
+                "y": 22,
+                "z": 11,
+                "role": "glass",
+                "block": "minecraft:black_stained_glass_pane",
+                "phase": "glazing",
+                "operationIndex": 565,
+                "category": "GLAZING_HOLD"
+              }
+            ],
+            "modificationBudget": {
+              "structural": 0,
+              "glazing": 1,
+              "other": 0,
+              "secondary": 0,
+              "total": 1
+            },
+            "jambConditions": [
+              {
+                "existingWallCount": 1,
+                "allExistingWallsOpaque": false,
+                "mixedExistingRoles": false
+              },
+              {
+                "existingWallCount": 1,
+                "allExistingWallsOpaque": false,
+                "mixedExistingRoles": false
+              }
+            ],
+            "edgeFrameValidated": false,
+            "hallPhysicallyClear": true,
+            "innerSwingAdjacentClear": false,
+            "innerCell": {
+              "x": 3,
+              "z": 10
+            },
+            "roomCore": [
+              "2,8",
+              "3,8",
+              "2,9",
+              "3,9"
+            ],
+            "nominalInteriorPath": [
+              "3,10",
+              "3,9"
+            ],
+            "architecturalAccess": "NOT_CERTIFIED",
+            "productionModificationApproved": false,
+            "status": "HOLD_CONDITIONAL_PRODUCTION_CHANGE",
+            "executionAllowed": false,
+            "operations": [],
+            "worldCoordinates": null
+          },
+          {
+            "roomCell": {
+              "x": 3,
+              "z": 7
+            },
+            "hallCell": {
+              "x": 3,
+              "z": 6
+            },
+            "normal": {
+              "x": 0,
+              "z": -1
+            },
+            "atOriginalPort": false,
+            "namedCorridor": true,
+            "componentCoreAdjacent": true,
+            "componentId": 0,
+            "originalRoomArea": 20,
+            "retainedAreaRatio": 1,
+            "openingProductionContacts": [
+              {
+                "x": 3,
+                "y": 22,
+                "z": 6,
+                "role": "glass",
+                "block": "minecraft:black_stained_glass_pane",
+                "phase": "glazing",
+                "operationIndex": 562,
+                "category": "GLAZING_HOLD"
+              }
+            ],
+            "modificationBudget": {
+              "structural": 0,
+              "glazing": 1,
+              "other": 0,
+              "secondary": 0,
+              "total": 1
+            },
+            "jambConditions": [
+              {
+                "existingWallCount": 0,
+                "allExistingWallsOpaque": true,
+                "mixedExistingRoles": false
+              },
+              {
+                "existingWallCount": 3,
+                "allExistingWallsOpaque": true,
+                "mixedExistingRoles": false
+              }
+            ],
+            "edgeFrameValidated": true,
+            "hallPhysicallyClear": false,
+            "innerSwingAdjacentClear": true,
+            "innerCell": {
+              "x": 3,
+              "z": 8
+            },
+            "roomCore": [
+              "2,8",
+              "3,8",
+              "2,9",
+              "3,9"
+            ],
+            "nominalInteriorPath": [
+              "3,7",
+              "3,8"
+            ],
+            "architecturalAccess": "NOT_CERTIFIED",
+            "productionModificationApproved": false,
+            "status": "HOLD_CONDITIONAL_PRODUCTION_CHANGE",
+            "executionAllowed": false,
+            "operations": [],
+            "worldCoordinates": null
+          },
+          {
+            "roomCell": {
+              "x": 1,
+              "z": 9
+            },
+            "hallCell": {
+              "x": 0,
+              "z": 9
+            },
+            "normal": {
+              "x": -1,
+              "z": 0
+            },
+            "atOriginalPort": true,
+            "namedCorridor": true,
+            "componentCoreAdjacent": true,
+            "componentId": 0,
+            "originalRoomArea": 20,
+            "retainedAreaRatio": 1,
+            "openingProductionContacts": [
+              {
+                "x": 0,
+                "y": 21,
+                "z": 9,
+                "role": "primaryWall",
+                "block": "minecraft:light_gray_concrete",
+                "phase": "solid_wall",
+                "operationIndex": 528,
+                "category": "STRUCTURAL_HOLD"
+              },
+              {
+                "x": 0,
+                "y": 22,
+                "z": 9,
+                "role": "primaryWall",
+                "block": "minecraft:light_gray_concrete",
+                "phase": "solid_wall",
+                "operationIndex": 528,
+                "category": "STRUCTURAL_HOLD"
+              }
+            ],
+            "modificationBudget": {
+              "structural": 2,
+              "glazing": 0,
+              "other": 0,
+              "secondary": 0,
+              "total": 2
+            },
+            "jambConditions": [
+              {
+                "existingWallCount": 0,
+                "allExistingWallsOpaque": true,
+                "mixedExistingRoles": false
+              },
+              {
+                "existingWallCount": 0,
+                "allExistingWallsOpaque": true,
+                "mixedExistingRoles": false
+              }
+            ],
+            "edgeFrameValidated": true,
+            "hallPhysicallyClear": false,
+            "innerSwingAdjacentClear": true,
+            "innerCell": {
+              "x": 2,
+              "z": 9
+            },
+            "roomCore": [
+              "2,8",
+              "3,8",
+              "2,9",
+              "3,9"
+            ],
+            "nominalInteriorPath": [
+              "1,9",
+              "2,9"
+            ],
+            "architecturalAccess": "NOT_CERTIFIED",
+            "productionModificationApproved": false,
+            "status": "HOLD_CONDITIONAL_PRODUCTION_CHANGE",
+            "executionAllowed": false,
+            "operations": [],
+            "worldCoordinates": null
+          },
+          {
+            "roomCell": {
+              "x": 1,
+              "z": 10
+            },
+            "hallCell": {
+              "x": 0,
+              "z": 10
+            },
+            "normal": {
+              "x": -1,
+              "z": 0
+            },
+            "atOriginalPort": false,
+            "namedCorridor": true,
+            "componentCoreAdjacent": true,
+            "componentId": 0,
+            "originalRoomArea": 20,
+            "retainedAreaRatio": 1,
+            "openingProductionContacts": [
+              {
+                "x": 0,
+                "y": 21,
+                "z": 10,
+                "role": "primaryWall",
+                "block": "minecraft:light_gray_concrete",
+                "phase": "solid_wall",
+                "operationIndex": 528,
+                "category": "STRUCTURAL_HOLD"
+              },
+              {
+                "x": 0,
+                "y": 22,
+                "z": 10,
+                "role": "primaryWall",
+                "block": "minecraft:light_gray_concrete",
+                "phase": "solid_wall",
+                "operationIndex": 528,
+                "category": "STRUCTURAL_HOLD"
+              }
+            ],
+            "modificationBudget": {
+              "structural": 2,
+              "glazing": 0,
+              "other": 0,
+              "secondary": 0,
+              "total": 2
+            },
+            "jambConditions": [
+              {
+                "existingWallCount": 3,
+                "allExistingWallsOpaque": false,
+                "mixedExistingRoles": true
+              },
+              {
+                "existingWallCount": 0,
+                "allExistingWallsOpaque": true,
+                "mixedExistingRoles": false
+              }
+            ],
+            "edgeFrameValidated": false,
+            "hallPhysicallyClear": false,
+            "innerSwingAdjacentClear": true,
+            "innerCell": {
+              "x": 2,
+              "z": 10
+            },
+            "roomCore": [
+              "2,8",
+              "3,8",
+              "2,9",
+              "3,9"
+            ],
+            "nominalInteriorPath": [
+              "1,10",
+              "2,10",
+              "2,9"
+            ],
+            "architecturalAccess": "NOT_CERTIFIED",
+            "productionModificationApproved": false,
+            "status": "HOLD_CONDITIONAL_PRODUCTION_CHANGE",
+            "executionAllowed": false,
+            "operations": [],
+            "worldCoordinates": null
+          }
+        ],
+        "rejections": {
+          "outsideOrOtherRoom": 3,
+          "verticalOrFrozen": 1,
+          "innerNotClear": 0,
+          "noInteriorCore": 0,
+          "unanchoredHall": 0,
+          "structuralOrGlass": 5,
+          "secondaryOrOther": 1,
+          "clearDoorFrontier": 0
+        },
+        "strictLocalGeometryOnly": false,
+        "partialAirSlotWithoutCompleteDoorGeometry": 0,
+        "fullyFrameValidated": 0,
+        "noPrimaryOrGlazingChange": true
+      },
+      "programOptions": [
+        {
+          "id": "PRESERVE_INDEPENDENT_ROOM",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 0,
+          "accessibleAreaClaimed": 0,
+          "scope": "ORIGINAL_DESIGN_HELD",
+          "status": "HOLD_ACCESS_UNPROVEN",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        },
+        {
+          "id": "CONVERT_TO_NONOCCUPIABLE_LAYOUT_BUFFER",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 20,
+          "accessibleAreaClaimed": 0,
+          "scope": "PROGRAM_ZONING_REVIEW_ONLY",
+          "status": "HOLD_PROGRAM_REDUCTION_AND_PHYSICAL_ACCESS",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        },
+        {
+          "id": "FULL_FLOOR_CORE_CIRCULATION_REDESIGN",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 0,
+          "accessibleAreaClaimed": 0,
+          "scope": "WHOLE_FLOOR_ARCHITECTURAL_REDESIGN",
+          "status": "HOLD_FLOOR_GRAPH_AND_DOOR_GEOMETRY",
+          "coreConnected": true,
+          "sectionId": "apartment/candidate-01/L5",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        }
+      ],
+      "independentlyAccessible": false,
+      "originalPrivateRoomRemainsHeld": true,
+      "productionMaterialEditsAuthorized": 0,
+      "globalEgress": "UNVERIFIED",
+      "approval": "REVIEW_ONLY",
+      "executionAllowed": false,
+      "operations": [],
+      "worldCoordinates": null
+    },
+    {
+      "sectionId": "apartment/candidate-01/L5",
+      "roomId": "F5-R012",
+      "portId": "apartment/candidate-01/L5/D012",
+      "pattern": "apartment/candidate-01/012",
+      "originalRoom": {
+        "x": 15,
+        "z": 19,
+        "width": 3,
+        "depth": 3
+      },
+      "roomArea": 9,
+      "doorFrontiers": {
+        "scannedValidFrontiers": 0,
+        "frontiers": [],
+        "rejections": {
+          "outsideOrOtherRoom": 1,
+          "verticalOrFrozen": 0,
+          "innerNotClear": 3,
+          "noInteriorCore": 0,
+          "unanchoredHall": 0,
+          "structuralOrGlass": 0,
+          "secondaryOrOther": 0,
+          "clearDoorFrontier": 0
+        },
+        "strictLocalGeometryOnly": false,
+        "partialAirSlotWithoutCompleteDoorGeometry": 0,
+        "fullyFrameValidated": 0,
+        "noPrimaryOrGlazingChange": false
+      },
+      "programOptions": [
+        {
+          "id": "PRESERVE_INDEPENDENT_ROOM",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 0,
+          "accessibleAreaClaimed": 0,
+          "scope": "ORIGINAL_DESIGN_HELD",
+          "status": "HOLD_ACCESS_UNPROVEN",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        },
+        {
+          "id": "CONVERT_TO_NONOCCUPIABLE_LAYOUT_BUFFER",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 9,
+          "accessibleAreaClaimed": 0,
+          "scope": "PROGRAM_ZONING_REVIEW_ONLY",
+          "status": "HOLD_PROGRAM_REDUCTION_AND_PHYSICAL_ACCESS",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        },
+        {
+          "id": "FULL_FLOOR_CORE_CIRCULATION_REDESIGN",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 0,
+          "accessibleAreaClaimed": 0,
+          "scope": "WHOLE_FLOOR_ARCHITECTURAL_REDESIGN",
+          "status": "HOLD_FLOOR_GRAPH_AND_DOOR_GEOMETRY",
+          "coreConnected": false,
+          "sectionId": "apartment/candidate-01/L5",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        }
+      ],
+      "independentlyAccessible": false,
+      "originalPrivateRoomRemainsHeld": true,
+      "productionMaterialEditsAuthorized": 0,
+      "globalEgress": "UNVERIFIED",
+      "approval": "REVIEW_ONLY",
+      "executionAllowed": false,
+      "operations": [],
+      "worldCoordinates": null
+    },
+    {
+      "sectionId": "apartment/candidate-01/L5",
+      "roomId": "F5-R013",
+      "portId": "apartment/candidate-01/L5/D013",
+      "pattern": "apartment/candidate-01/013",
+      "originalRoom": {
+        "x": 25,
+        "z": 19,
+        "width": 3,
+        "depth": 3
+      },
+      "roomArea": 9,
+      "doorFrontiers": {
+        "scannedValidFrontiers": 0,
+        "frontiers": [],
+        "rejections": {
+          "outsideOrOtherRoom": 2,
+          "verticalOrFrozen": 0,
+          "innerNotClear": 2,
+          "noInteriorCore": 0,
+          "unanchoredHall": 0,
+          "structuralOrGlass": 0,
+          "secondaryOrOther": 0,
+          "clearDoorFrontier": 0
+        },
+        "strictLocalGeometryOnly": false,
+        "partialAirSlotWithoutCompleteDoorGeometry": 0,
+        "fullyFrameValidated": 0,
+        "noPrimaryOrGlazingChange": false
+      },
+      "programOptions": [
+        {
+          "id": "PRESERVE_INDEPENDENT_ROOM",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 0,
+          "accessibleAreaClaimed": 0,
+          "scope": "ORIGINAL_DESIGN_HELD",
+          "status": "HOLD_ACCESS_UNPROVEN",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        },
+        {
+          "id": "CONVERT_TO_NONOCCUPIABLE_LAYOUT_BUFFER",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 9,
+          "accessibleAreaClaimed": 0,
+          "scope": "PROGRAM_ZONING_REVIEW_ONLY",
+          "status": "HOLD_PROGRAM_REDUCTION_AND_PHYSICAL_ACCESS",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        },
+        {
+          "id": "FULL_FLOOR_CORE_CIRCULATION_REDESIGN",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 0,
+          "accessibleAreaClaimed": 0,
+          "scope": "WHOLE_FLOOR_ARCHITECTURAL_REDESIGN",
+          "status": "HOLD_FLOOR_GRAPH_AND_DOOR_GEOMETRY",
+          "coreConnected": false,
+          "sectionId": "apartment/candidate-01/L5",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        }
+      ],
+      "independentlyAccessible": false,
+      "originalPrivateRoomRemainsHeld": true,
+      "productionMaterialEditsAuthorized": 0,
+      "globalEgress": "UNVERIFIED",
+      "approval": "REVIEW_ONLY",
+      "executionAllowed": false,
+      "operations": [],
+      "worldCoordinates": null
+    },
+    {
+      "sectionId": "apartment/candidate-01/L6",
+      "roomId": "F6-R013",
+      "portId": "apartment/candidate-01/L6/D013",
+      "pattern": "apartment/candidate-01/013",
+      "originalRoom": {
+        "x": 25,
+        "z": 19,
+        "width": 3,
+        "depth": 3
+      },
+      "roomArea": 9,
+      "doorFrontiers": {
+        "scannedValidFrontiers": 0,
+        "frontiers": [],
+        "rejections": {
+          "outsideOrOtherRoom": 2,
+          "verticalOrFrozen": 0,
+          "innerNotClear": 2,
+          "noInteriorCore": 0,
+          "unanchoredHall": 0,
+          "structuralOrGlass": 0,
+          "secondaryOrOther": 0,
+          "clearDoorFrontier": 0
+        },
+        "strictLocalGeometryOnly": false,
+        "partialAirSlotWithoutCompleteDoorGeometry": 0,
+        "fullyFrameValidated": 0,
+        "noPrimaryOrGlazingChange": false
+      },
+      "programOptions": [
+        {
+          "id": "PRESERVE_INDEPENDENT_ROOM",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 0,
+          "accessibleAreaClaimed": 0,
+          "scope": "ORIGINAL_DESIGN_HELD",
+          "status": "HOLD_ACCESS_UNPROVEN",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        },
+        {
+          "id": "CONVERT_TO_NONOCCUPIABLE_LAYOUT_BUFFER",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 9,
+          "accessibleAreaClaimed": 0,
+          "scope": "PROGRAM_ZONING_REVIEW_ONLY",
+          "status": "HOLD_PROGRAM_REDUCTION_AND_PHYSICAL_ACCESS",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        },
+        {
+          "id": "FULL_FLOOR_CORE_CIRCULATION_REDESIGN",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 0,
+          "accessibleAreaClaimed": 0,
+          "scope": "WHOLE_FLOOR_ARCHITECTURAL_REDESIGN",
+          "status": "HOLD_FLOOR_GRAPH_AND_DOOR_GEOMETRY",
+          "coreConnected": false,
+          "sectionId": "apartment/candidate-01/L6",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        }
+      ],
+      "independentlyAccessible": false,
+      "originalPrivateRoomRemainsHeld": true,
+      "productionMaterialEditsAuthorized": 0,
+      "globalEgress": "UNVERIFIED",
+      "approval": "REVIEW_ONLY",
+      "executionAllowed": false,
+      "operations": [],
+      "worldCoordinates": null
+    },
+    {
+      "sectionId": "office/candidate-01/L3",
+      "roomId": "F3-R004",
+      "portId": "office/candidate-01/L3/D004",
+      "pattern": "office/candidate-01/004",
+      "originalRoom": {
+        "x": 19,
+        "z": 2,
+        "width": 4,
+        "depth": 4
+      },
+      "roomArea": 16,
+      "doorFrontiers": {
+        "scannedValidFrontiers": 2,
+        "frontiers": [
+          {
+            "roomCell": {
+              "x": 19,
+              "z": 4
+            },
+            "hallCell": {
+              "x": 18,
+              "z": 4
+            },
+            "normal": {
+              "x": -1,
+              "z": 0
+            },
+            "atOriginalPort": false,
+            "namedCorridor": true,
+            "componentCoreAdjacent": true,
+            "componentId": 0,
+            "originalRoomArea": 16,
+            "retainedAreaRatio": 1,
+            "openingProductionContacts": [],
+            "modificationBudget": {
+              "structural": 0,
+              "glazing": 0,
+              "other": 0,
+              "secondary": 0,
+              "total": 0
+            },
+            "jambConditions": [
+              {
+                "existingWallCount": 0,
+                "allExistingWallsOpaque": true,
+                "mixedExistingRoles": false
+              },
+              {
+                "existingWallCount": 3,
+                "allExistingWallsOpaque": false,
+                "mixedExistingRoles": false
+              }
+            ],
+            "edgeFrameValidated": false,
+            "hallPhysicallyClear": true,
+            "innerSwingAdjacentClear": true,
+            "innerCell": {
+              "x": 20,
+              "z": 4
+            },
+            "roomCore": [
+              "19,4",
+              "20,4",
+              "19,5",
+              "20,5"
+            ],
+            "nominalInteriorPath": [
+              "19,4"
+            ],
+            "architecturalAccess": "NOT_CERTIFIED",
+            "productionModificationApproved": false,
+            "status": "HOLD_DOOR_FRAME_AND_GLOBAL_ACCESS_UNVERIFIED",
+            "executionAllowed": false,
+            "operations": [],
+            "worldCoordinates": null
+          },
+          {
+            "roomCell": {
+              "x": 20,
+              "z": 5
+            },
+            "hallCell": {
+              "x": 20,
+              "z": 6
+            },
+            "normal": {
+              "x": 0,
+              "z": 1
+            },
+            "atOriginalPort": false,
+            "namedCorridor": true,
+            "componentCoreAdjacent": true,
+            "componentId": 0,
+            "originalRoomArea": 16,
+            "retainedAreaRatio": 1,
+            "openingProductionContacts": [],
+            "modificationBudget": {
+              "structural": 0,
+              "glazing": 0,
+              "other": 0,
+              "secondary": 0,
+              "total": 0
+            },
+            "jambConditions": [
+              {
+                "existingWallCount": 0,
+                "allExistingWallsOpaque": true,
+                "mixedExistingRoles": false
+              },
+              {
+                "existingWallCount": 0,
+                "allExistingWallsOpaque": true,
+                "mixedExistingRoles": false
+              }
+            ],
+            "edgeFrameValidated": true,
+            "hallPhysicallyClear": true,
+            "innerSwingAdjacentClear": true,
+            "innerCell": {
+              "x": 20,
+              "z": 4
+            },
+            "roomCore": [
+              "19,4",
+              "20,4",
+              "19,5",
+              "20,5"
+            ],
+            "nominalInteriorPath": [
+              "20,5"
+            ],
+            "architecturalAccess": "NOT_CERTIFIED",
+            "productionModificationApproved": false,
+            "status": "HOLD_DOOR_FRAME_AND_GLOBAL_ACCESS_UNVERIFIED",
+            "executionAllowed": false,
+            "operations": [],
+            "worldCoordinates": null
+          }
+        ],
+        "rejections": {
+          "outsideOrOtherRoom": 4,
+          "verticalOrFrozen": 0,
+          "innerNotClear": 2,
+          "noInteriorCore": 0,
+          "unanchoredHall": 0,
+          "structuralOrGlass": 0,
+          "secondaryOrOther": 0,
+          "clearDoorFrontier": 2
+        },
+        "strictLocalGeometryOnly": true,
+        "partialAirSlotWithoutCompleteDoorGeometry": 2,
+        "fullyFrameValidated": 1,
+        "noPrimaryOrGlazingChange": true
+      },
+      "programOptions": [
+        {
+          "id": "PRESERVE_INDEPENDENT_ROOM",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 0,
+          "accessibleAreaClaimed": 0,
+          "scope": "ORIGINAL_DESIGN_HELD",
+          "status": "HOLD_ACCESS_UNPROVEN",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        },
+        {
+          "id": "CONVERT_TO_NONOCCUPIABLE_LAYOUT_BUFFER",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 16,
+          "accessibleAreaClaimed": 0,
+          "scope": "PROGRAM_ZONING_REVIEW_ONLY",
+          "status": "HOLD_PROGRAM_REDUCTION_AND_PHYSICAL_ACCESS",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        },
+        {
+          "id": "FULL_FLOOR_CORE_CIRCULATION_REDESIGN",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 0,
+          "accessibleAreaClaimed": 0,
+          "scope": "WHOLE_FLOOR_ARCHITECTURAL_REDESIGN",
+          "status": "HOLD_FLOOR_GRAPH_AND_DOOR_GEOMETRY",
+          "coreConnected": true,
+          "sectionId": "office/candidate-01/L3",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        }
+      ],
+      "independentlyAccessible": false,
+      "originalPrivateRoomRemainsHeld": true,
+      "productionMaterialEditsAuthorized": 0,
+      "globalEgress": "UNVERIFIED",
+      "approval": "REVIEW_ONLY",
+      "executionAllowed": false,
+      "operations": [],
+      "worldCoordinates": null
+    },
+    {
+      "sectionId": "office/candidate-01/L4",
+      "roomId": "F4-R004",
+      "portId": "office/candidate-01/L4/D004",
+      "pattern": "office/candidate-01/004",
+      "originalRoom": {
+        "x": 19,
+        "z": 2,
+        "width": 4,
+        "depth": 4
+      },
+      "roomArea": 16,
+      "doorFrontiers": {
+        "scannedValidFrontiers": 2,
+        "frontiers": [
+          {
+            "roomCell": {
+              "x": 19,
+              "z": 4
+            },
+            "hallCell": {
+              "x": 18,
+              "z": 4
+            },
+            "normal": {
+              "x": -1,
+              "z": 0
+            },
+            "atOriginalPort": false,
+            "namedCorridor": true,
+            "componentCoreAdjacent": true,
+            "componentId": 0,
+            "originalRoomArea": 16,
+            "retainedAreaRatio": 1,
+            "openingProductionContacts": [],
+            "modificationBudget": {
+              "structural": 0,
+              "glazing": 0,
+              "other": 0,
+              "secondary": 0,
+              "total": 0
+            },
+            "jambConditions": [
+              {
+                "existingWallCount": 0,
+                "allExistingWallsOpaque": true,
+                "mixedExistingRoles": false
+              },
+              {
+                "existingWallCount": 3,
+                "allExistingWallsOpaque": false,
+                "mixedExistingRoles": false
+              }
+            ],
+            "edgeFrameValidated": false,
+            "hallPhysicallyClear": true,
+            "innerSwingAdjacentClear": true,
+            "innerCell": {
+              "x": 20,
+              "z": 4
+            },
+            "roomCore": [
+              "19,4",
+              "20,4",
+              "19,5",
+              "20,5"
+            ],
+            "nominalInteriorPath": [
+              "19,4"
+            ],
+            "architecturalAccess": "NOT_CERTIFIED",
+            "productionModificationApproved": false,
+            "status": "HOLD_DOOR_FRAME_AND_GLOBAL_ACCESS_UNVERIFIED",
+            "executionAllowed": false,
+            "operations": [],
+            "worldCoordinates": null
+          },
+          {
+            "roomCell": {
+              "x": 20,
+              "z": 5
+            },
+            "hallCell": {
+              "x": 20,
+              "z": 6
+            },
+            "normal": {
+              "x": 0,
+              "z": 1
+            },
+            "atOriginalPort": false,
+            "namedCorridor": true,
+            "componentCoreAdjacent": true,
+            "componentId": 0,
+            "originalRoomArea": 16,
+            "retainedAreaRatio": 1,
+            "openingProductionContacts": [],
+            "modificationBudget": {
+              "structural": 0,
+              "glazing": 0,
+              "other": 0,
+              "secondary": 0,
+              "total": 0
+            },
+            "jambConditions": [
+              {
+                "existingWallCount": 0,
+                "allExistingWallsOpaque": true,
+                "mixedExistingRoles": false
+              },
+              {
+                "existingWallCount": 0,
+                "allExistingWallsOpaque": true,
+                "mixedExistingRoles": false
+              }
+            ],
+            "edgeFrameValidated": true,
+            "hallPhysicallyClear": true,
+            "innerSwingAdjacentClear": true,
+            "innerCell": {
+              "x": 20,
+              "z": 4
+            },
+            "roomCore": [
+              "19,4",
+              "20,4",
+              "19,5",
+              "20,5"
+            ],
+            "nominalInteriorPath": [
+              "20,5"
+            ],
+            "architecturalAccess": "NOT_CERTIFIED",
+            "productionModificationApproved": false,
+            "status": "HOLD_DOOR_FRAME_AND_GLOBAL_ACCESS_UNVERIFIED",
+            "executionAllowed": false,
+            "operations": [],
+            "worldCoordinates": null
+          }
+        ],
+        "rejections": {
+          "outsideOrOtherRoom": 4,
+          "verticalOrFrozen": 0,
+          "innerNotClear": 2,
+          "noInteriorCore": 0,
+          "unanchoredHall": 0,
+          "structuralOrGlass": 0,
+          "secondaryOrOther": 0,
+          "clearDoorFrontier": 2
+        },
+        "strictLocalGeometryOnly": true,
+        "partialAirSlotWithoutCompleteDoorGeometry": 2,
+        "fullyFrameValidated": 1,
+        "noPrimaryOrGlazingChange": true
+      },
+      "programOptions": [
+        {
+          "id": "PRESERVE_INDEPENDENT_ROOM",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 0,
+          "accessibleAreaClaimed": 0,
+          "scope": "ORIGINAL_DESIGN_HELD",
+          "status": "HOLD_ACCESS_UNPROVEN",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        },
+        {
+          "id": "CONVERT_TO_NONOCCUPIABLE_LAYOUT_BUFFER",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 16,
+          "accessibleAreaClaimed": 0,
+          "scope": "PROGRAM_ZONING_REVIEW_ONLY",
+          "status": "HOLD_PROGRAM_REDUCTION_AND_PHYSICAL_ACCESS",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        },
+        {
+          "id": "FULL_FLOOR_CORE_CIRCULATION_REDESIGN",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 0,
+          "accessibleAreaClaimed": 0,
+          "scope": "WHOLE_FLOOR_ARCHITECTURAL_REDESIGN",
+          "status": "HOLD_FLOOR_GRAPH_AND_DOOR_GEOMETRY",
+          "coreConnected": true,
+          "sectionId": "office/candidate-01/L4",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        }
+      ],
+      "independentlyAccessible": false,
+      "originalPrivateRoomRemainsHeld": true,
+      "productionMaterialEditsAuthorized": 0,
+      "globalEgress": "UNVERIFIED",
+      "approval": "REVIEW_ONLY",
+      "executionAllowed": false,
+      "operations": [],
+      "worldCoordinates": null
+    },
+    {
+      "sectionId": "office/candidate-01/L5",
+      "roomId": "F5-R004",
+      "portId": "office/candidate-01/L5/D004",
+      "pattern": "office/candidate-01/004",
+      "originalRoom": {
+        "x": 19,
+        "z": 2,
+        "width": 4,
+        "depth": 4
+      },
+      "roomArea": 16,
+      "doorFrontiers": {
+        "scannedValidFrontiers": 2,
+        "frontiers": [
+          {
+            "roomCell": {
+              "x": 19,
+              "z": 4
+            },
+            "hallCell": {
+              "x": 18,
+              "z": 4
+            },
+            "normal": {
+              "x": -1,
+              "z": 0
+            },
+            "atOriginalPort": false,
+            "namedCorridor": true,
+            "componentCoreAdjacent": true,
+            "componentId": 0,
+            "originalRoomArea": 16,
+            "retainedAreaRatio": 1,
+            "openingProductionContacts": [],
+            "modificationBudget": {
+              "structural": 0,
+              "glazing": 0,
+              "other": 0,
+              "secondary": 0,
+              "total": 0
+            },
+            "jambConditions": [
+              {
+                "existingWallCount": 0,
+                "allExistingWallsOpaque": true,
+                "mixedExistingRoles": false
+              },
+              {
+                "existingWallCount": 3,
+                "allExistingWallsOpaque": false,
+                "mixedExistingRoles": false
+              }
+            ],
+            "edgeFrameValidated": false,
+            "hallPhysicallyClear": true,
+            "innerSwingAdjacentClear": true,
+            "innerCell": {
+              "x": 20,
+              "z": 4
+            },
+            "roomCore": [
+              "19,4",
+              "20,4",
+              "19,5",
+              "20,5"
+            ],
+            "nominalInteriorPath": [
+              "19,4"
+            ],
+            "architecturalAccess": "NOT_CERTIFIED",
+            "productionModificationApproved": false,
+            "status": "HOLD_DOOR_FRAME_AND_GLOBAL_ACCESS_UNVERIFIED",
+            "executionAllowed": false,
+            "operations": [],
+            "worldCoordinates": null
+          },
+          {
+            "roomCell": {
+              "x": 20,
+              "z": 5
+            },
+            "hallCell": {
+              "x": 20,
+              "z": 6
+            },
+            "normal": {
+              "x": 0,
+              "z": 1
+            },
+            "atOriginalPort": false,
+            "namedCorridor": true,
+            "componentCoreAdjacent": true,
+            "componentId": 0,
+            "originalRoomArea": 16,
+            "retainedAreaRatio": 1,
+            "openingProductionContacts": [],
+            "modificationBudget": {
+              "structural": 0,
+              "glazing": 0,
+              "other": 0,
+              "secondary": 0,
+              "total": 0
+            },
+            "jambConditions": [
+              {
+                "existingWallCount": 0,
+                "allExistingWallsOpaque": true,
+                "mixedExistingRoles": false
+              },
+              {
+                "existingWallCount": 0,
+                "allExistingWallsOpaque": true,
+                "mixedExistingRoles": false
+              }
+            ],
+            "edgeFrameValidated": true,
+            "hallPhysicallyClear": true,
+            "innerSwingAdjacentClear": true,
+            "innerCell": {
+              "x": 20,
+              "z": 4
+            },
+            "roomCore": [
+              "19,4",
+              "20,4",
+              "19,5",
+              "20,5"
+            ],
+            "nominalInteriorPath": [
+              "20,5"
+            ],
+            "architecturalAccess": "NOT_CERTIFIED",
+            "productionModificationApproved": false,
+            "status": "HOLD_DOOR_FRAME_AND_GLOBAL_ACCESS_UNVERIFIED",
+            "executionAllowed": false,
+            "operations": [],
+            "worldCoordinates": null
+          }
+        ],
+        "rejections": {
+          "outsideOrOtherRoom": 4,
+          "verticalOrFrozen": 0,
+          "innerNotClear": 2,
+          "noInteriorCore": 0,
+          "unanchoredHall": 0,
+          "structuralOrGlass": 0,
+          "secondaryOrOther": 0,
+          "clearDoorFrontier": 2
+        },
+        "strictLocalGeometryOnly": true,
+        "partialAirSlotWithoutCompleteDoorGeometry": 2,
+        "fullyFrameValidated": 1,
+        "noPrimaryOrGlazingChange": true
+      },
+      "programOptions": [
+        {
+          "id": "PRESERVE_INDEPENDENT_ROOM",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 0,
+          "accessibleAreaClaimed": 0,
+          "scope": "ORIGINAL_DESIGN_HELD",
+          "status": "HOLD_ACCESS_UNPROVEN",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        },
+        {
+          "id": "CONVERT_TO_NONOCCUPIABLE_LAYOUT_BUFFER",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 16,
+          "accessibleAreaClaimed": 0,
+          "scope": "PROGRAM_ZONING_REVIEW_ONLY",
+          "status": "HOLD_PROGRAM_REDUCTION_AND_PHYSICAL_ACCESS",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        },
+        {
+          "id": "FULL_FLOOR_CORE_CIRCULATION_REDESIGN",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 0,
+          "accessibleAreaClaimed": 0,
+          "scope": "WHOLE_FLOOR_ARCHITECTURAL_REDESIGN",
+          "status": "HOLD_FLOOR_GRAPH_AND_DOOR_GEOMETRY",
+          "coreConnected": true,
+          "sectionId": "office/candidate-01/L5",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        }
+      ],
+      "independentlyAccessible": false,
+      "originalPrivateRoomRemainsHeld": true,
+      "productionMaterialEditsAuthorized": 0,
+      "globalEgress": "UNVERIFIED",
+      "approval": "REVIEW_ONLY",
+      "executionAllowed": false,
+      "operations": [],
+      "worldCoordinates": null
+    },
+    {
+      "sectionId": "office/candidate-01/L6",
+      "roomId": "F6-R004",
+      "portId": "office/candidate-01/L6/D004",
+      "pattern": "office/candidate-01/004",
+      "originalRoom": {
+        "x": 19,
+        "z": 2,
+        "width": 4,
+        "depth": 4
+      },
+      "roomArea": 16,
+      "doorFrontiers": {
+        "scannedValidFrontiers": 2,
+        "frontiers": [
+          {
+            "roomCell": {
+              "x": 19,
+              "z": 4
+            },
+            "hallCell": {
+              "x": 18,
+              "z": 4
+            },
+            "normal": {
+              "x": -1,
+              "z": 0
+            },
+            "atOriginalPort": false,
+            "namedCorridor": true,
+            "componentCoreAdjacent": true,
+            "componentId": 0,
+            "originalRoomArea": 16,
+            "retainedAreaRatio": 1,
+            "openingProductionContacts": [],
+            "modificationBudget": {
+              "structural": 0,
+              "glazing": 0,
+              "other": 0,
+              "secondary": 0,
+              "total": 0
+            },
+            "jambConditions": [
+              {
+                "existingWallCount": 0,
+                "allExistingWallsOpaque": true,
+                "mixedExistingRoles": false
+              },
+              {
+                "existingWallCount": 3,
+                "allExistingWallsOpaque": false,
+                "mixedExistingRoles": false
+              }
+            ],
+            "edgeFrameValidated": false,
+            "hallPhysicallyClear": true,
+            "innerSwingAdjacentClear": true,
+            "innerCell": {
+              "x": 20,
+              "z": 4
+            },
+            "roomCore": [
+              "19,4",
+              "20,4",
+              "19,5",
+              "20,5"
+            ],
+            "nominalInteriorPath": [
+              "19,4"
+            ],
+            "architecturalAccess": "NOT_CERTIFIED",
+            "productionModificationApproved": false,
+            "status": "HOLD_DOOR_FRAME_AND_GLOBAL_ACCESS_UNVERIFIED",
+            "executionAllowed": false,
+            "operations": [],
+            "worldCoordinates": null
+          },
+          {
+            "roomCell": {
+              "x": 20,
+              "z": 5
+            },
+            "hallCell": {
+              "x": 20,
+              "z": 6
+            },
+            "normal": {
+              "x": 0,
+              "z": 1
+            },
+            "atOriginalPort": false,
+            "namedCorridor": true,
+            "componentCoreAdjacent": true,
+            "componentId": 0,
+            "originalRoomArea": 16,
+            "retainedAreaRatio": 1,
+            "openingProductionContacts": [],
+            "modificationBudget": {
+              "structural": 0,
+              "glazing": 0,
+              "other": 0,
+              "secondary": 0,
+              "total": 0
+            },
+            "jambConditions": [
+              {
+                "existingWallCount": 3,
+                "allExistingWallsOpaque": false,
+                "mixedExistingRoles": false
+              },
+              {
+                "existingWallCount": 0,
+                "allExistingWallsOpaque": true,
+                "mixedExistingRoles": false
+              }
+            ],
+            "edgeFrameValidated": false,
+            "hallPhysicallyClear": true,
+            "innerSwingAdjacentClear": true,
+            "innerCell": {
+              "x": 20,
+              "z": 4
+            },
+            "roomCore": [
+              "19,4",
+              "20,4",
+              "19,5",
+              "20,5"
+            ],
+            "nominalInteriorPath": [
+              "20,5"
+            ],
+            "architecturalAccess": "NOT_CERTIFIED",
+            "productionModificationApproved": false,
+            "status": "HOLD_DOOR_FRAME_AND_GLOBAL_ACCESS_UNVERIFIED",
+            "executionAllowed": false,
+            "operations": [],
+            "worldCoordinates": null
+          }
+        ],
+        "rejections": {
+          "outsideOrOtherRoom": 4,
+          "verticalOrFrozen": 0,
+          "innerNotClear": 2,
+          "noInteriorCore": 0,
+          "unanchoredHall": 0,
+          "structuralOrGlass": 0,
+          "secondaryOrOther": 0,
+          "clearDoorFrontier": 2
+        },
+        "strictLocalGeometryOnly": false,
+        "partialAirSlotWithoutCompleteDoorGeometry": 2,
+        "fullyFrameValidated": 0,
+        "noPrimaryOrGlazingChange": true
+      },
+      "programOptions": [
+        {
+          "id": "PRESERVE_INDEPENDENT_ROOM",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 0,
+          "accessibleAreaClaimed": 0,
+          "scope": "ORIGINAL_DESIGN_HELD",
+          "status": "HOLD_ACCESS_UNPROVEN",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        },
+        {
+          "id": "CONVERT_TO_NONOCCUPIABLE_LAYOUT_BUFFER",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 16,
+          "accessibleAreaClaimed": 0,
+          "scope": "PROGRAM_ZONING_REVIEW_ONLY",
+          "status": "HOLD_PROGRAM_REDUCTION_AND_PHYSICAL_ACCESS",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        },
+        {
+          "id": "FULL_FLOOR_CORE_CIRCULATION_REDESIGN",
+          "independentRoomsRetained": 0,
+          "roomAreaReassigned": 0,
+          "accessibleAreaClaimed": 0,
+          "scope": "WHOLE_FLOOR_ARCHITECTURAL_REDESIGN",
+          "status": "HOLD_FLOOR_GRAPH_AND_DOOR_GEOMETRY",
+          "coreConnected": true,
+          "sectionId": "office/candidate-01/L6",
+          "approval": "REVIEW_ONLY",
+          "executionAllowed": false,
+          "operations": []
+        }
+      ],
+      "independentlyAccessible": false,
+      "originalPrivateRoomRemainsHeld": true,
+      "productionMaterialEditsAuthorized": 0,
+      "globalEgress": "UNVERIFIED",
+      "approval": "REVIEW_ONLY",
+      "executionAllowed": false,
+      "operations": [],
+      "worldCoordinates": null
+    }
+  ],
+  "floors": [
+    {
+      "sectionId": "apartment/candidate-01/L1",
+      "roomCount": 13,
+      "heldRoomCount": 1,
+      "heldNominalArea": 9,
+      "nominalCoreAdjacentComponents": 3,
+      "optionalCommonProgramAreaNotCertified": 0,
+      "roomProgramChanged": false,
+      "productionChanged": false,
+      "previousCandidatesUntouched": true,
+      "operations": []
+    },
+    {
+      "sectionId": "apartment/candidate-01/L2",
+      "roomCount": 13,
+      "heldRoomCount": 3,
+      "heldNominalArea": 38,
+      "nominalCoreAdjacentComponents": 3,
+      "optionalCommonProgramAreaNotCertified": 0,
+      "roomProgramChanged": false,
+      "productionChanged": false,
+      "previousCandidatesUntouched": true,
+      "operations": []
+    },
+    {
+      "sectionId": "apartment/candidate-01/L3",
+      "roomCount": 13,
+      "heldRoomCount": 3,
+      "heldNominalArea": 38,
+      "nominalCoreAdjacentComponents": 3,
+      "optionalCommonProgramAreaNotCertified": 0,
+      "roomProgramChanged": false,
+      "productionChanged": false,
+      "previousCandidatesUntouched": true,
+      "operations": []
+    },
+    {
+      "sectionId": "apartment/candidate-01/L4",
+      "roomCount": 13,
+      "heldRoomCount": 3,
+      "heldNominalArea": 38,
+      "nominalCoreAdjacentComponents": 3,
+      "optionalCommonProgramAreaNotCertified": 0,
+      "roomProgramChanged": false,
+      "productionChanged": false,
+      "previousCandidatesUntouched": true,
+      "operations": []
+    },
+    {
+      "sectionId": "apartment/candidate-01/L5",
+      "roomCount": 13,
+      "heldRoomCount": 3,
+      "heldNominalArea": 38,
+      "nominalCoreAdjacentComponents": 3,
+      "optionalCommonProgramAreaNotCertified": 0,
+      "roomProgramChanged": false,
+      "productionChanged": false,
+      "previousCandidatesUntouched": true,
+      "operations": []
+    },
+    {
+      "sectionId": "apartment/candidate-01/L6",
+      "roomCount": 13,
+      "heldRoomCount": 1,
+      "heldNominalArea": 9,
+      "nominalCoreAdjacentComponents": 3,
+      "optionalCommonProgramAreaNotCertified": 0,
+      "roomProgramChanged": false,
+      "productionChanged": false,
+      "previousCandidatesUntouched": true,
+      "operations": []
+    },
+    {
+      "sectionId": "office/candidate-01/L3",
+      "roomCount": 11,
+      "heldRoomCount": 1,
+      "heldNominalArea": 16,
+      "nominalCoreAdjacentComponents": 1,
+      "optionalCommonProgramAreaNotCertified": 0,
+      "roomProgramChanged": false,
+      "productionChanged": false,
+      "previousCandidatesUntouched": true,
+      "operations": []
+    },
+    {
+      "sectionId": "office/candidate-01/L4",
+      "roomCount": 11,
+      "heldRoomCount": 1,
+      "heldNominalArea": 16,
+      "nominalCoreAdjacentComponents": 1,
+      "optionalCommonProgramAreaNotCertified": 0,
+      "roomProgramChanged": false,
+      "productionChanged": false,
+      "previousCandidatesUntouched": true,
+      "operations": []
+    },
+    {
+      "sectionId": "office/candidate-01/L5",
+      "roomCount": 11,
+      "heldRoomCount": 1,
+      "heldNominalArea": 16,
+      "nominalCoreAdjacentComponents": 1,
+      "optionalCommonProgramAreaNotCertified": 0,
+      "roomProgramChanged": false,
+      "productionChanged": false,
+      "previousCandidatesUntouched": true,
+      "operations": []
+    },
+    {
+      "sectionId": "office/candidate-01/L6",
+      "roomCount": 11,
+      "heldRoomCount": 1,
+      "heldNominalArea": 16,
+      "nominalCoreAdjacentComponents": 1,
+      "optionalCommonProgramAreaNotCertified": 0,
+      "roomProgramChanged": false,
+      "productionChanged": false,
+      "previousCandidatesUntouched": true,
+      "operations": []
+    }
+  ],
+  "patterns": [
+    {
+      "pattern": "apartment/candidate-01/006",
+      "count": 4,
+      "localFrontierFloors": 4,
+      "softCompatibleFloors": 4,
+      "commonZeroStructuralChange": true,
+      "perFloorMinimumKnownOpeningBudget": [
+        {
+          "structural": 0,
+          "glazing": 0,
+          "other": 2,
+          "secondary": 0,
+          "total": 2
+        },
+        {
+          "structural": 0,
+          "glazing": 0,
+          "other": 2,
+          "secondary": 0,
+          "total": 2
+        },
+        {
+          "structural": 0,
+          "glazing": 0,
+          "other": 2,
+          "secondary": 0,
+          "total": 2
+        },
+        {
+          "structural": 0,
+          "glazing": 0,
+          "other": 2,
+          "secondary": 0,
+          "total": 2
+        }
+      ],
+      "allFloorsNeedArchitectureReview": true,
+      "approval": "REVIEW_ONLY",
+      "executionAllowed": false
+    },
+    {
+      "pattern": "apartment/candidate-01/012",
+      "count": 4,
+      "localFrontierFloors": 0,
+      "softCompatibleFloors": 0,
+      "commonZeroStructuralChange": false,
+      "perFloorMinimumKnownOpeningBudget": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "allFloorsNeedArchitectureReview": true,
+      "approval": "REVIEW_ONLY",
+      "executionAllowed": false
+    },
+    {
+      "pattern": "apartment/candidate-01/013",
+      "count": 6,
+      "localFrontierFloors": 1,
+      "softCompatibleFloors": 1,
+      "commonZeroStructuralChange": false,
+      "perFloorMinimumKnownOpeningBudget": [
+        {
+          "structural": 0,
+          "glazing": 0,
+          "other": 0,
+          "secondary": 0,
+          "total": 0
+        },
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "allFloorsNeedArchitectureReview": true,
+      "approval": "REVIEW_ONLY",
+      "executionAllowed": false
+    },
+    {
+      "pattern": "office/candidate-01/004",
+      "count": 4,
+      "localFrontierFloors": 4,
+      "softCompatibleFloors": 4,
+      "commonZeroStructuralChange": true,
+      "perFloorMinimumKnownOpeningBudget": [
+        {
+          "structural": 0,
+          "glazing": 0,
+          "other": 0,
+          "secondary": 0,
+          "total": 0
+        },
+        {
+          "structural": 0,
+          "glazing": 0,
+          "other": 0,
+          "secondary": 0,
+          "total": 0
+        },
+        {
+          "structural": 0,
+          "glazing": 0,
+          "other": 0,
+          "secondary": 0,
+          "total": 0
+        },
+        {
+          "structural": 0,
+          "glazing": 0,
+          "other": 0,
+          "secondary": 0,
+          "total": 0
+        }
+      ],
+      "allFloorsNeedArchitectureReview": true,
+      "approval": "REVIEW_ONLY",
+      "executionAllowed": false
+    }
+  ],
+  "interpretation": [
+    "NO_HELD_ROOM_BECOMES_AN_APPROVED_INDEPENDENT_ROOM",
+    "PROGRAM_BUFFER_ALTERNATIVE_REDUCES_ROOM_COUNT_AND_IS_UNAPPROVED",
+    "DOOR_FRONTIER_IS_NOT_CONSTRUCTION_GEOMETRY_OR_CERTIFIED_EXIT",
+    "ALL_BEDROCK_DOOR_HINGES_AND_SWINGS_UNVERIFIED",
+    "PINNED_PRODUCTION_AND_PREVIOUS_296_PROPOSALS_UNMODIFIED",
+    "NOMINAL_CORRIDOR_CORE_ADJACENCY_NOT_A_PHYSICAL_EXIT",
+    "BUILDING_FACADE_WINDOW_AND_STRUCTURAL_CHANGES_REQUIRE_APPROVAL"
+  ],
+  "readiness": "NOT_PREPARED",
+  "approval": "REVIEW_ONLY",
+  "executionAllowed": false,
+  "constructionApproved": false,
+  "worldContacts": 0,
+  "gates": [
+    {
+      "id": "M4-01",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-02",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-03",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-04",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-05",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-06",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-07",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-08",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-09",
+      "status": "BLOCKED"
+    }
+  ],
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0,
+    "worldCoordinates": null,
+    "materialIds": []
+  },
+  "reportSha256": "7f025cefd5d865b5854511cc23cb7dd53ea081b283c4c60eb9d313cc3017b670"
+}

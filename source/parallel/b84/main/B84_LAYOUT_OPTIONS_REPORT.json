@@ -1,0 +1,3210 @@
+{
+  "schema": "minecraftaibuilder-b84-local-room-corridor-relayout-options-v1",
+  "kind": "READONLY_LAYOUT_PROPOSALS_NOT_DOOR_APPROVAL",
+  "provenance": {
+    "b83": "b0c9593d5f701c213fbe5b394c496759d19fde6eeedfe7331ca54b8d6db8ff04",
+    "b82": "4ca15ad2a95f87fdade3149ffaacbcc9ffa6214b135cb5998e8fc3b7f235af2d",
+    "b81": "fbd95e05da2ffd798d8282a911a1fbabc0044aaf3b5cb43b26d0db5b93312810",
+    "officialBlocksSha256": "49ff9c501b1c96b547aa49fda07a53bc19f7d5fe338aff43fe5f65c3eaaf031f"
+  },
+  "productionReplays": [
+    {
+      "building": "apartment/candidate-01",
+      "operationsSha256": "6c5802481a5d22a2958cd83cb591dc8e4dbe1a1cd25a1d365f6c7f70635a7ddc"
+    },
+    {
+      "building": "hotel/candidate-01",
+      "operationsSha256": "d636905626841bc9d50c0bc878bda5d437dc3b0f877a44645f9d05829842bb88"
+    },
+    {
+      "building": "office/candidate-01",
+      "operationsSha256": "e29a8c11eeb8ce0897995fdbb50de9482d3ec0a6b0767b9ac48bee8397e5249c"
+    },
+    {
+      "building": "office/candidate-02",
+      "operationsSha256": "d1d9b98c94b5870ea34654e063ef62589f2e23d1dbcf0234c1d8c54de5318f53"
+    },
+    {
+      "building": "office/candidate-03",
+      "operationsSha256": "f34ea4cd97b770ef293ade5a7205e8d5cdb2244846d26326ab9294182eb932af"
+    }
+  ],
+  "totals": {
+    "buildings": 5,
+    "sections": 30,
+    "rooms": 314,
+    "immutableEarlierCandidates": 275,
+    "examinedHeld": 39,
+    "layoutChangeAlternatives": 12,
+    "stillHeldWithoutLayoutAlternative": 27,
+    "commonTemplateCount": 8,
+    "namedCorridorLinksProposed": 12,
+    "roomsNeedingResize": 4,
+    "corridorCellReclassifications": 5,
+    "previousDoorChangesApproved": 0,
+    "physicalBlocksPlaced": 0,
+    "productionModifications": 0,
+    "constructionCommands": 0,
+    "worldContacts": 0
+  },
+  "templateValidation": [
+    {
+      "templateId": "apartment/candidate-01|R003",
+      "members": 4,
+      "localRelayoutAlternatives": 0,
+      "stillBlocked": 4,
+      "crossFloorValidationRequired": true,
+      "noSourceMutation": true
+    },
+    {
+      "templateId": "apartment/candidate-01|R006",
+      "members": 4,
+      "localRelayoutAlternatives": 0,
+      "stillBlocked": 4,
+      "crossFloorValidationRequired": true,
+      "noSourceMutation": true
+    },
+    {
+      "templateId": "apartment/candidate-01|R012",
+      "members": 4,
+      "localRelayoutAlternatives": 0,
+      "stillBlocked": 4,
+      "crossFloorValidationRequired": true,
+      "noSourceMutation": true
+    },
+    {
+      "templateId": "apartment/candidate-01|R013",
+      "members": 5,
+      "localRelayoutAlternatives": 0,
+      "stillBlocked": 5,
+      "crossFloorValidationRequired": true,
+      "noSourceMutation": true
+    },
+    {
+      "templateId": "apartment/candidate-01|R001",
+      "members": 1,
+      "localRelayoutAlternatives": 1,
+      "stillBlocked": 0,
+      "crossFloorValidationRequired": true,
+      "noSourceMutation": true
+    },
+    {
+      "templateId": "hotel/candidate-01|R004",
+      "members": 1,
+      "localRelayoutAlternatives": 1,
+      "stillBlocked": 0,
+      "crossFloorValidationRequired": true,
+      "noSourceMutation": true
+    },
+    {
+      "templateId": "hotel/candidate-01|R008",
+      "members": 1,
+      "localRelayoutAlternatives": 0,
+      "stillBlocked": 1,
+      "crossFloorValidationRequired": true,
+      "noSourceMutation": true
+    },
+    {
+      "templateId": "office/candidate-01|R004",
+      "members": 4,
+      "localRelayoutAlternatives": 0,
+      "stillBlocked": 4,
+      "crossFloorValidationRequired": true,
+      "noSourceMutation": true
+    }
+  ],
+  "sections": [
+    {
+      "id": "apartment/candidate-01/L1",
+      "level": 1,
+      "rooms": [
+        {
+          "portId": "apartment/candidate-01/L1/D001",
+          "roomId": "F1-R001",
+          "candidatesInvestigated": {
+            "variants": 5,
+            "edges": 42,
+            "clearDoorAndFrame": 20,
+            "roomCoreAndRoute": 20,
+            "linkedToExistingNamedCorridor": 20
+          },
+          "rejections": {
+            "DOOR_CLEARANCE_OVER_PRODUCTION": 16,
+            "FRAME_PRODUCTION_OR_PRIOR_ASSEMBLY": 6
+          },
+          "best": {
+            "portId": "apartment/candidate-01/L1/D001",
+            "roomId": "F1-R001",
+            "originalRoomRect": {
+              "x": 1,
+              "z": 1,
+              "width": 4,
+              "depth": 5
+            },
+            "newRoomRect": {
+              "x": 1,
+              "z": 1,
+              "width": 4,
+              "depth": 5
+            },
+            "changeType": "UNCHANGED_ROOM",
+            "removedFromRoom": [],
+            "doorRoomCell": {
+              "x": 2,
+              "z": 5
+            },
+            "doorHallCell": {
+              "x": 2,
+              "z": 6
+            },
+            "normal": {
+              "dx": 0,
+              "dz": 1
+            },
+            "doorMoved": true,
+            "local3DVoxels": [
+              {
+                "x": 2,
+                "z": 5,
+                "y": 1,
+                "role": "DOOR_VOID"
+              },
+              {
+                "x": 2,
+                "z": 5,
+                "y": 2,
+                "role": "DOOR_VOID"
+              },
+              {
+                "x": 3,
+                "z": 5,
+                "y": 1,
+                "role": "JAMB_LEFT"
+              },
+              {
+                "x": 3,
+                "z": 5,
+                "y": 2,
+                "role": "JAMB_LEFT"
+              },
+              {
+                "x": 3,
+                "z": 5,
+                "y": 3,
+                "role": "JAMB_LEFT"
+              },
+              {
+                "x": 1,
+                "z": 5,
+                "y": 1,
+                "role": "JAMB_RIGHT"
+              },
+              {
+                "x": 1,
+                "z": 5,
+                "y": 2,
+                "role": "JAMB_RIGHT"
+              },
+              {
+                "x": 1,
+                "z": 5,
+                "y": 3,
+                "role": "JAMB_RIGHT"
+              },
+              {
+                "x": 2,
+                "z": 5,
+                "y": 3,
+                "role": "LINTEL"
+              }
+            ],
+            "localSwingAirReservation": [
+              {
+                "x": 2,
+                "y": 1,
+                "z": 4,
+                "role": "SWING_RESERVED_AIR"
+              },
+              {
+                "x": 2,
+                "y": 2,
+                "z": 4,
+                "role": "SWING_RESERVED_AIR"
+              },
+              {
+                "x": 3,
+                "y": 1,
+                "z": 4,
+                "role": "SWING_RESERVED_AIR"
+              },
+              {
+                "x": 3,
+                "y": 2,
+                "z": 4,
+                "role": "SWING_RESERVED_AIR"
+              }
+            ],
+            "protectedRoomCore": [
+              "2,2",
+              "3,2",
+              "2,3",
+              "3,3"
+            ],
+            "protectedRoute": [
+              "2,5",
+              "2,4",
+              "2,3"
+            ],
+            "proposedCorridorAirCells": [
+              {
+                "x": 2,
+                "z": 6
+              }
+            ],
+            "proposedNewCorridorCells": [],
+            "verifiedNamedCorridorTarget": {
+              "x": 2,
+              "z": 6
+            },
+            "requiredRoomAreaChange": 0,
+            "requiredCorridorReclassification": 0,
+            "immutableEnvelopeModified": false,
+            "existingTypedAssemblyModified": false,
+            "existingSourceDoorModified": false,
+            "doorHinge": null,
+            "doorStateCalibration": "UNVERIFIED",
+            "doorClosure": "UNAPPROVED",
+            "placementAllowed": false,
+            "worldCoordinates": null,
+            "operations": []
+          },
+          "eligibleCount": 20,
+          "status": "LOCAL_RELAYOUT_REVIEW_ONLY",
+          "worldCoordinates": null,
+          "operations": [],
+          "autoApply": false,
+          "templateId": null
+        },
+        {
+          "portId": "apartment/candidate-01/L1/D002",
+          "roomId": "F1-R002",
+          "candidatesInvestigated": {
+            "variants": 5,
+            "edges": 42,
+            "clearDoorAndFrame": 8,
+            "roomCoreAndRoute": 7,
+            "linkedToExistingNamedCorridor": 7
+          },
+          "rejections": {
+            "DOOR_CLEARANCE_OVER_PRODUCTION": 10,
+            "FRAME_PRODUCTION_OR_PRIOR_ASSEMBLY": 24,
+            "NO_RETAINED_2X2_ROOM_CORE_AND_ROUTE": 1
+          },
+          "best": {
+            "portId": "apartment/candidate-01/L1/D002",
+            "roomId": "F1-R002",
+            "originalRoomRect": {
+              "x": 7,
+              "z": 1,
+              "width": 5,
+              "depth": 4
+            },
+            "newRoomRect": {
+              "x": 7,
+              "z": 1,
+              "width": 5,
+              "depth": 4
+            },
+            "changeType": "UNCHANGED_ROOM",
+            "removedFromRoom": [],
+            "doorRoomCell": {
+              "x": 7,
+              "z": 2
+            },
+            "doorHallCell": {
+              "x": 6,
+              "z": 2
+            },
+            "normal": {
+              "dx": -1,
+              "dz": 0
+            },
+            "doorMoved": true,
+            "local3DVoxels": [
+              {
+                "x": 7,
+                "z": 2,
+                "y": 1,
+                "role": "DOOR_VOID"
+              },
+              {
+                "x": 7,
+                "z": 2,
+                "y": 2,
+                "role": "DOOR_VOID"
+              },
+              {
+                "x": 7,
+                "z": 3,
+                "y": 1,
+                "role": "JAMB_LEFT"
+              },
+              {
+                "x": 7,
+                "z": 3,
+                "y": 2,
+                "role": "JAMB_LEFT"
+              },
+              {
+                "x": 7,
+                "z": 3,
+                "y": 3,
+                "role": "JAMB_LEFT"
+              },
+              {
+                "x": 7,
+                "z": 1,
+                "y": 1,
+                "role": "JAMB_RIGHT"
+              },
+              {
+                "x": 7,
+                "z": 1,
+                "y": 2,
+                "role": "JAMB_RIGHT"
+              },
+              {
+                "x": 7,
+                "z": 1,
+                "y": 3,
+                "role": "JAMB_RIGHT"
+              },
+              {
+                "x": 7,
+                "z": 2,
+                "y": 3,
+                "role": "LINTEL"
+              }
+            ],
+            "localSwingAirReservation": [
+              {
+                "x": 8,
+                "y": 1,
+                "z": 2,
+                "role": "SWING_RESERVED_AIR"
+              },
+              {
+                "x": 8,
+                "y": 2,
+                "z": 2,
+                "role": "SWING_RESERVED_AIR"
+              },
+              {
+                "x": 8,
+                "y": 1,
+                "z": 3,
+                "role": "SWING_RESERVED_AIR"
+              },
+              {
+                "x": 8,
+                "y": 2,
+                "z": 3,
+                "role": "SWING_RESERVED_AIR"
+              }
+            ],
+            "protectedRoomCore": [
+              "8,2",
+              "9,2",
+              "8,3",
+              "9,3"
+            ],
+            "protectedRoute": [
+              "7,2",
+              "8,2"
+            ],
+            "proposedCorridorAirCells": [
+              {
+                "x": 6,
+                "z": 2
+              }
+            ],
+            "proposedNewCorridorCells": [],
+            "verifiedNamedCorridorTarget": {
+              "x": 6,
+              "z": 2
+            },
+            "requiredRoomAreaChange": 0,
+            "requiredCorridorReclassification": 0,
+            "immutableEnvelopeModified": false,
+            "existingTypedAssemblyModified": false,
+            "existingSourceDoorModified": false,
+            "doorHinge": null,
+            "doorStateCalibration": "UNVERIFIED",
+            "doorClosure": "UNAPPROVED",
+            "placementAllowed": false,
+            "worldCoordinates": null,
+            "operations": []
+          },
+          "eligibleCount": 7,
+          "status": "LOCAL_RELAYOUT_REVIEW_ONLY",
+          "worldCoordinates": null,
+          "operations": [],
+          "autoApply": false,
+          "templateId": null
+        },
+        {
+          "portId": "apartment/candidate-01/L1/D012",
+          "roomId": "F1-R012",
+          "candidatesInvestigated": {
+            "variants": 1,
+            "edges": 4,
+            "clearDoorAndFrame": 1,
+            "roomCoreAndRoute": 0,
+            "linkedToExistingNamedCorridor": 0
+          },
+          "rejections": {
+            "NO_RETAINED_2X2_ROOM_CORE_AND_ROUTE": 1,
+            "FRAME_PRODUCTION_OR_PRIOR_ASSEMBLY": 3
+          },
+          "best": null,
+          "eligibleCount": 0,
+          "status": "HOLD_NEEDS_DEEPER_TOPOLOGY_OR_PRODUCTION_EDIT",
+          "worldCoordinates": null,
+          "operations": [],
+          "autoApply": false,
+          "templateId": null
+        },
+        {
+          "portId": "apartment/candidate-01/L1/D013",
+          "roomId": "F1-R013",
+          "candidatesInvestigated": {
+            "variants": 1,
+            "edges": 4,
+            "clearDoorAndFrame": 0,
+            "roomCoreAndRoute": 0,
+            "linkedToExistingNamedCorridor": 0
+          },
+          "rejections": {
+            "FRAME_PRODUCTION_OR_PRIOR_ASSEMBLY": 4
+          },
+          "best": null,
+          "eligibleCount": 0,
+          "status": "HOLD_NEEDS_DEEPER_TOPOLOGY_OR_PRODUCTION_EDIT",
+          "worldCoordinates": null,
+          "operations": [],
+          "autoApply": false,
+          "templateId": null
+        }
+      ],
+      "reviewOnlyRelayoutCandidates": 2,
+      "previouslyImmutableCandidateCount": 9,
+      "operations": [],
+      "worldCoordinates": null,
+      "emitAllowed": false
+    },
+    {
+      "id": "apartment/candidate-01/L2",
+      "level": 2,
+      "rooms": [
+        {
+          "portId": "apartment/candidate-01/L2/D001",
+          "roomId": "F2-R001",
+          "candidatesInvestigated": {
+            "variants": 5,
+            "edges": 42,
+            "clearDoorAndFrame": 15,
+            "roomCoreAndRoute": 15,
+            "linkedToExistingNamedCorridor": 14
+          },
+          "rejections": {
+            "FRAME_PRODUCTION_OR_PRIOR_ASSEMBLY": 23,
+            "DOOR_CLEARANCE_OVER_PRODUCTION": 3,
+            "NO_UNOBSTRUCTED_CORRIDOR_LINK": 1,
+            "NO_ROOM_SIDE_SWING": 1
+          },
+          "best": {
+            "portId": "apartment/candidate-01/L2/D001",
+            "roomId": "F2-R001",
+            "originalRoomRect": {
+              "x": 1,
+              "z": 1,
+              "width": 4,
+              "depth": 5
+            },
+            "newRoomRect": {
+              "x": 1,
+              "z": 1,
+              "width": 4,
+              "depth": 5
+            },
+            "changeType": "UNCHANGED_ROOM",
+            "removedFromRoom": [],
+            "doorRoomCell": {
+              "x": 2,
+              "z": 5
+            },
+            "doorHallCell": {
+              "x": 2,
+              "z": 6
+            },
+            "normal": {
+              "dx": 0,
+              "dz": 1
+            },
+            "doorMoved": true,
+            "local3DVoxels": [
+              {
+                "x": 2,
+                "z": 5,
+                "y": 6,
+                "role": "DOOR_VOID"
+              },
+              {
+                "x": 2,
+                "z": 5,
+                "y": 7,
+                "role": "DOOR_VOID"
+              },
+              {
+                "x": 3,
+                "z": 5,
+                "y": 6,
+                "role": "JAMB_LEFT"
+              },
+              {
+                "x": 3,
+                "z": 5,
+                "y": 7,
+                "role": "JAMB_LEFT"
+              },
+              {
+                "x": 3,
+                "z": 5,
+                "y": 8,
+                "role": "JAMB_LEFT"
+              },
+              {
+                "x": 1,
+                "z": 5,
+                "y": 6,
+                "role": "JAMB_RIGHT"
+              },
+              {
+                "x": 1,
+                "z": 5,
+                "y": 7,
+                "role": "JAMB_RIGHT"
+              },
+              {
+                "x": 1,
+                "z": 5,
+                "y": 8,
+                "role": "JAMB_RIGHT"
+              },
+              {
+                "x": 2,
+                "z": 5,
+                "y": 8,
+                "role": "LINTEL"
+              }
+            ],
+            "localSwingAirReservation": [
+              {
+                "x": 2,
+                "y": 6,
+                "z": 4,
+                "role": "SWING_RESERVED_AIR"
+              },
+              {
+                "x": 2,
+                "y": 7,
+                "z": 4,
+                "role": "SWING_RESERVED_AIR"
+              },
+              {
+                "x": 3,
+                "y": 6,
+                "z": 4,
+                "role": "SWING_RESERVED_AIR"
+              },
+              {
+                "x": 3,
+                "y": 7,
+                "z": 4,
+                "role": "SWING_RESERVED_AIR"
+              }
+            ],
+            "protectedRoomCore": [
+              "2,3",
+              "3,3",
+              "2,4",
+              "3,4"
+            ],
+            "protectedRoute": [
+              "2,5",
+              "2,4"
+            ],
+            "proposedCorridorAirCells": [
+              {
+                "x": 2,
+                "z": 6
+              }
+            ],
+            "proposedNewCorridorCells": [],
+            "verifiedNamedCorridorTarget": {
+              "x": 2,
+              "z": 6
+            },
+            "requiredRoomAreaChange": 0,
+            "requiredCorridorReclassification": 0,
+            "immutableEnvelopeModified": false,
+            "existingTypedAssemblyModified": false,
+            "existingSourceDoorModified": false,
+            "doorHinge": null,
+            "doorStateCalibration": "UNVERIFIED",
+            "doorClosure": "UNAPPROVED",
+            "placementAllowed": false,
+            "worldCoordinates": null,
+            "operations": []
+          },
+          "eligibleCount": 14,
+          "status": "LOCAL_RELAYOUT_REVIEW_ONLY",
+          "worldCoordinates": null,
+          "operations": [],
+          "autoApply": false,
+          "templateId": null
+        },
+        {
+          "portId": "apartment/candidate-01/L2/D002",
+          "roomId": "F2-R002",
+          "candidatesInvestigated": {
+            "variants": 5,
+            "edges": 42,
+            "clearDoorAndFrame": 3,
+            "roomCoreAndRoute": 1,
+            "linkedToExistingNamedCorridor": 1
+          },
+          "rejections": {
+            "FRAME_PRODUCTION_OR_PRIOR_ASSEMBLY": 32,
+            "DOOR_CLEARANCE_OVER_PRODUCTION": 7,
+            "NO_RETAINED_2X2_ROOM_CORE_AND_ROUTE": 2
+          },
+          "best": {
+            "portId": "apartment/candidate-01/L2/D002",
+            "roomId": "F2-R002",
+            "originalRoomRect": {
+              "x": 7,
+              "z": 1,
+              "width": 5,
+              "depth": 4
+            },
+            "newRoomRect": {
+              "x": 8,
+              "z": 1,
+              "width": 4,
+              "depth": 4
+            },
+            "changeType": "RETRACT_WEST_ONE",
+            "removedFromRoom": [
+              {
+                "x": 7,
+                "z": 1
+              },
+              {
+                "x": 7,
+                "z": 2
+              },
+              {
+                "x": 7,
+                "z": 3
+              },
+              {
+                "x": 7,
+                "z": 4
+              }
+            ],
+            "doorRoomCell": {
+              "x": 8,
+              "z": 2
+            },
+            "doorHallCell": {
+              "x": 7,
+              "z": 2
+            },
+            "normal": {
+              "dx": -1,
+              "dz": 0
+            },
+            "doorMoved": true,
+            "local3DVoxels": [
+              {
+                "x": 8,
+                "z": 2,
+                "y": 6,
+                "role": "DOOR_VOID"
+              },
+              {
+                "x": 8,
+                "z": 2,
+                "y": 7,
+                "role": "DOOR_VOID"
+              },
+              {
+                "x": 8,
+                "z": 3,
+                "y": 6,
+                "role": "JAMB_LEFT"
+              },
+              {
+                "x": 8,
+                "z": 3,
+                "y": 7,
+                "role": "JAMB_LEFT"
+              },
+              {
+                "x": 8,
+                "z": 3,
+                "y": 8,
+                "role": "JAMB_LEFT"
+              },
+              {
+                "x": 8,
+                "z": 1,
+                "y": 6,
+                "role": "JAMB_RIGHT"
+              },
+              {
+                "x": 8,
+                "z": 1,
+                "y": 7,
+                "role": "JAMB_RIGHT"
+              },
+              {
+                "x": 8,
+                "z": 1,
+                "y": 8,
+                "role": "JAMB_RIGHT"
+              },
+              {
+                "x": 8,
+                "z": 2,
+                "y": 8,
+                "role": "LINTEL"
+              }
+            ],
+            "localSwingAirReservation": [
+              {
+                "x": 9,
+                "y": 6,
+                "z": 2,
+                "role": "SWING_RESERVED_AIR"
+              },
+              {
+                "x": 9,
+                "y": 7,
+                "z": 2,
+                "role": "SWING_RESERVED_AIR"
+              },
+              {
+                "x": 9,
+                "y": 6,
+                "z": 3,
+                "role": "SWING_RESERVED_AIR"
+              },
+              {
+                "x": 9,
+                "y": 7,
+                "z": 3,
+                "role": "SWING_RESERVED_AIR"
+              }
+            ],
+            "protectedRoomCore": [
+              "9,2",
+              "10,2",
+              "9,3",
+              "10,3"
+            ],
+            "protectedRoute": [
+              "8,2",
+              "9,2"
+            ],
+            "proposedCorridorAirCells": [
+              {
+                "x": 7,
+                "z": 2
+              },
+              {
+                "x": 6,
+                "z": 2
+              }
+            ],
+            "proposedNewCorridorCells": [
+              {
+                "x": 7,
+                "z": 2
+              }
+            ],
+            "verifiedNamedCorridorTarget": {
+              "x": 6,
+              "z": 2
+            },
+            "requiredRoomAreaChange": 4,
+            "requiredCorridorReclassification": 1,
+            "immutableEnvelopeModified": false,
+            "existingTypedAssemblyModified": false,
+            "existingSourceDoorModified": false,
+            "doorHinge": null,
+            "doorStateCalibration": "UNVERIFIED",
+            "doorClosure": "UNAPPROVED",
+            "placementAllowed": false,
+            "worldCoordinates": null,
+            "operations": []
+          },
+          "eligibleCount": 1,
+          "status": "LOCAL_RELAYOUT_REVIEW_ONLY",
+          "worldCoordinates": null,
+          "operations": [],
+          "autoApply": false,
+          "templateId": null
+        },
+        {
+          "portId": "apartment/candidate-01/L2/D003",
+          "roomId": "F2-R003",
+          "candidatesInvestigated": {
+            "variants": 5,
+            "edges": 42,
+            "clearDoorAndFrame": 3,
+            "roomCoreAndRoute": 0,
+            "linkedToExistingNamedCorridor": 0
+          },
+          "rejections": {
+            "DOOR_CLEARANCE_OVER_PRODUCTION": 8,
+            "FRAME_PRODUCTION_OR_PRIOR_ASSEMBLY": 31,
+            "NO_RETAINED_2X2_ROOM_CORE_AND_ROUTE": 3
+          },
+          "best": null,
+          "eligibleCount": 0,
+          "status": "HOLD_NEEDS_DEEPER_TOPOLOGY_OR_PRODUCTION_EDIT",
+          "worldCoordinates": null,
+          "operations": [],
+          "autoApply": false,
+          "templateId": "apartment/candidate-01|R003"
+        },
+        {
+          "portId": "apartment/candidate-01/L2/D006",
+          "roomId": "F2-R006",
+          "candidatesInvestigated": {
+            "variants": 5,
+            "edges": 42,
+            "clearDoorAndFrame": 3,
+            "roomCoreAndRoute": 1,
+            "linkedToExistingNamedCorridor": 0
+          },
+          "rejections": {
+            "FRAME_PRODUCTION_OR_PRIOR_ASSEMBLY": 32,
+            "DOOR_CLEARANCE_OVER_PRODUCTION": 7,
+            "NO_RETAINED_2X2_ROOM_CORE_AND_ROUTE": 2,
+            "NO_UNOBSTRUCTED_CORRIDOR_LINK": 1
+          },
+          "best": null,
+          "eligibleCount": 0,
+          "status": "HOLD_NEEDS_DEEPER_TOPOLOGY_OR_PRODUCTION_EDIT",
+          "worldCoordinates": null,
+          "operations": [],
+          "autoApply": false,
+          "templateId": "apartment/candidate-01|R006"
+        },
+        {
+          "portId": "apartment/candidate-01/L2/D012",
+          "roomId": "F2-R012",
+          "candidatesInvestigated": {
+            "variants": 1,
+            "edges": 4,
+            "clearDoorAndFrame": 0,
+            "roomCoreAndRoute": 0,
+            "linkedToExistingNamedCorridor": 0
+          },
+          "rejections": {
+            "FRAME_PRODUCTION_OR_PRIOR_ASSEMBLY": 4
+          },
+          "best": null,
+          "eligibleCount": 0,
+          "status": "HOLD_NEEDS_DEEPER_TOPOLOGY_OR_PRODUCTION_EDIT",
+          "worldCoordinates": null,
+          "operations": [],
+          "autoApply": false,
+          "templateId": "apartment/candidate-01|R012"
+        },
+        {
+          "portId": "apartment/candidate-01/L2/D013",
+          "roomId": "F2-R013",
+          "candidatesInvestigated": {
+            "variants": 1,
+            "edges": 4,
+            "clearDoorAndFrame": 0,
+            "roomCoreAndRoute": 0,
+            "linkedToExistingNamedCorridor": 0
+          },
+          "rejections": {
+            "FRAME_PRODUCTION_OR_PRIOR_ASSEMBLY": 4
+          },
+          "best": null,
+          "eligibleCount": 0,
+          "status": "HOLD_NEEDS_DEEPER_TOPOLOGY_OR_PRODUCTION_EDIT",
+          "worldCoordinates": null,
+          "operations": [],
+          "autoApply": false,
+          "templateId": "apartment/candidate-01|R013"
+        }
+      ],
+      "reviewOnlyRelayoutCandidates": 2,
+      "previouslyImmutableCandidateCount": 7,
+      "operations": [],
+      "worldCoordinates": null,
+      "emitAllowed": false
+    },
+    {
+      "id": "apartment/candidate-01/L3",
+      "level": 3,
+      "rooms": [
+        {
+          "portId": "apartment/candidate-01/L3/D001",
+          "roomId": "F3-R001",
+          "candidatesInvestigated": {
+            "variants": 5,
+            "edges": 42,
+            "clearDoorAndFrame": 15,
+            "roomCoreAndRoute": 15,
+            "linkedToExistingNamedCorridor": 14
+          },
+          "rejections": {
+            "FRAME_PRODUCTION_OR_PRIOR_ASSEMBLY": 23,
+            "DOOR_CLEARANCE_OVER_PRODUCTION": 3,
+            "NO_UNOBSTRUCTED_CORRIDOR_LINK": 1,
+            "NO_ROOM_SIDE_SWING": 1
+          },
+          "best": {
+            "portId": "apartment/candidate-01/L3/D001",
+            "roomId": "F3-R001",
+            "originalRoomRect": {
+              "x": 1,
+              "z": 1,
+              "width": 4,
+              "depth": 5
+            },
+            "newRoomRect": {
+              "x": 1,
+              "z": 1,
+              "width": 4,
+              "depth": 5
+            },
+            "changeType": "UNCHANGED_ROOM",
+            "removedFromRoom": [],
+            "doorRoomCell": {
+              "x": 2,
+              "z": 5
+            },
+            "doorHallCell": {
+              "x": 2,
+              "z": 6
+            },
+            "normal": {
+              "dx": 0,
+              "dz": 1
+            },
+            "doorMoved": true,
+            "local3DVoxels": [
+              {
+                "x": 2,
+                "z": 5,
+                "y": 11,
+                "role": "DOOR_VOID"
+              },
+              {
+                "x": 2,
+                "z": 5,
+                "y": 12,
+                "role": "DOOR_VOID"
+              },
+              {
+                "x": 3,
+                "z": 5,
+                "y": 11,
+                "role": "JAMB_LEFT"
+              },
+              {
+                "x": 3,
+                "z": 5,
+                "y": 12,
+                "role": "JAMB_LEFT"
+              },
+              {
+                "x": 3,
+                "z": 5,
+                "y": 13,
+                "role": "JAMB_LEFT"
+              },
+              {
+                "x": 1,
+                "z": 5,
+                "y": 11,
+                "role": "JAMB_RIGHT"
+              },
+              {
+                "x": 1,
+                "z": 5,
+                "y": 12,
+                "role": "JAMB_RIGHT"
+              },
+              {
+                "x": 1,
+                "z": 5,
+                "y": 13,
+                "role": "JAMB_RIGHT"
+              },
+              {
+                "x": 2,
+                "z": 5,
+                "y": 13,
+                "role": "LINTEL"
+              }
+            ],
+            "localSwingAirReservation": [
+              {
+                "x": 2,
+                "y": 11,
+                "z": 4,
+                "role": "SWING_RESERVED_AIR"
+              },
+              {
+                "x": 2,
+                "y": 12,
+                "z": 4,
+                "role": "SWING_RESERVED_AIR"
+              },
+              {
+                "x": 3,
+                "y": 11,
+                "z": 4,
+                "role": "SWING_RESERVED_AIR"
+              },
+              {
+                "x": 3,
+                "y": 12,
+                "z": 4,
+                "role": "SWING_RESERVED_AIR"
+              }
+            ],
+            "protectedRoomCore": [
+              "2,3",
+              "3,3",
+              "2,4",
+              "3,4"
+            ],
+            "protectedRoute": [
+              "2,5",
+              "2,4"
+            ],
+            "proposedCorridorAirCells": [
+              {
+                "x": 2,
+                "z": 6
+              }
+            ],
+            "proposedNewCorridorCells": [],
+            "verifiedNamedCorridorTarget": {
+              "x": 2,
+              "z": 6
+            },
+            "requiredRoomAreaChange": 0,
+            "requiredCorridorReclassification": 0,
+            "immutableEnvelopeModified": false,
+            "existingTypedAssemblyModified": false,
+            "existingSourceDoorModified": false,
+            "doorHinge": null,
+            "doorStateCalibration": "UNVERIFIED",
+            "doorClosure": "UNAPPROVED",
+            "placementAllowed": false,
+            "worldCoordinates": null,
+            "operations": []
+          },
+          "eligibleCount": 14,
+          "status": "LOCAL_RELAYOUT_REVIEW_ONLY",
+          "worldCoordinates": null,
+          "operations": [],
+          "autoApply": false,
+          "templateId": null
+        },
+        {
+          "portId": "apartment/candidate-01/L3/D002",
+          "roomId": "F3-R002",
+          "candidatesInvestigated": {
+            "variants": 5,
+            "edges": 42,
+            "clearDoorAndFrame": 3,
+            "roomCoreAndRoute": 1,
+            "linkedToExistingNamedCorridor": 1
+          },
+          "rejections": {
+            "FRAME_PRODUCTION_OR_PRIOR_ASSEMBLY": 32,
+            "DOOR_CLEARANCE_OVER_PRODUCTION": 7,
+            "NO_RETAINED_2X2_ROOM_CORE_AND_ROUTE": 2
+          },
+          "best": {
+            "portId": "apartment/candidate-01/L3/D002",
+            "roomId": "F3-R002",
+            "originalRoomRect": {
+              "x": 7,
+              "z": 1,
+              "width": 5,
+              "depth": 4
+            },
+            "newRoomRect": {
+              "x": 8,
+              "z": 1,
+              "width": 4,
+              "depth": 4
+            },
+            "changeType": "RETRACT_WEST_ONE",
+            "removedFromRoom": [
+              {
+                "x": 7,
+                "z": 1
+              },
+              {
+                "x": 7,
+                "z": 2
+              },
+              {
+                "x": 7,
+                "z": 3
+              },
+              {
+                "x": 7,
+                "z": 4
+              }
+            ],
+            "doorRoomCell": {
+              "x": 8,
+              "z": 2
+            },
+            "doorHallCell": {
+              "x": 7,
+              "z": 2
+            },
+            "normal": {
+              "dx": -1,
+              "dz": 0
+            },
+            "doorMoved": true,
+            "local3DVoxels": [
+              {
+                "x": 8,
+                "z": 2,
+                "y": 11,
+                "role": "DOOR_VOID"
+              },
+              {
+                "x": 8,
+                "z": 2,
+                "y": 12,
+                "role": "DOOR_VOID"
+              },
+              {
+                "x": 8,
+                "z": 3,
+                "y": 11,
+                "role": "JAMB_LEFT"
+              },
+              {
+                "x": 8,
+                "z": 3,
+                "y": 12,
+                "role": "JAMB_LEFT"
+              },
+              {
+                "x": 8,
+                "z": 3,
+                "y": 13,
+                "role": "JAMB_LEFT"
+              },
+              {
+                "x": 8,
+                "z": 1,
+                "y": 11,
+                "role": "JAMB_RIGHT"
+              },
+              {
+                "x": 8,
+                "z": 1,
+                "y": 12,
+                "role": "JAMB_RIGHT"
+              },
+              {
+                "x": 8,
+                "z": 1,
+                "y": 13,
+                "role": "JAMB_RIGHT"
+              },
+              {
+                "x": 8,
+                "z": 2,
+                "y": 13,
+                "role": "LINTEL"
+              }
+            ],
+            "localSwingAirReservation": [
+              {
+                "x": 9,
+                "y": 11,
+                "z": 2,
+                "role": "SWING_RESERVED_AIR"
+              },
+              {
+                "x": 9,
+                "y": 12,
+                "z": 2,
+                "role": "SWING_RESERVED_AIR"
+              },
+              {
+                "x": 9,
+                "y": 11,
+                "z": 3,
+                "role": "SWING_RESERVED_AIR"
+              },
+              {
+                "x": 9,
+                "y": 12,
+                "z": 3,
+                "role": "SWING_RESERVED_AIR"
+              }
+            ],
+            "protectedRoomCore": [
+              "9,2",
+              "10,2",
+              "9,3",
+              "10,3"
+            ],
+            "protectedRoute": [
+              "8,2",
+              "9,2"
+            ],
+            "proposedCorridorAirCells": [
+              {
+                "x": 7,
+                "z": 2
+              },
+              {
+                "x": 6,
+                "z": 2
+              }
+            ],
+            "proposedNewCorridorCells": [
+              {
+                "x": 7,
+                "z": 2
+              }
+            ],
+            "verifiedNamedCorridorTarget": {
+              "x": 6,
+              "z": 2
+            },
+            "requiredRoomAreaChange": 4,
+            "requiredCorridorReclassification": 1,
+            "immutableEnvelopeModified": false,
+            "existingTypedAssemblyModified": false,
+            "existingSourceDoorModified": false,
+            "doorHinge": null,
+            "doorStateCalibration": "UNVERIFIED",
+            "doorClosure": "UNAPPROVED",
+            "placementAllowed": false,
+            "worldCoordinates": null,
+            "operations": []
+          },
+          "eligibleCount": 1,
+          "status": "LOCAL_RELAYOUT_REVIEW_ONLY",
+          "worldCoordinates": null,
+          "operations": [],
+          "autoApply": false,
+          "templateId": null
+        },
+        {
+          "portId": "apartment/candidate-01/L3/D003",
+          "roomId": "F3-R003",
+          "candidatesInvestigated": {
+            "variants": 5,
+            "edges": 42,
+            "clearDoorAndFrame": 3,
+            "roomCoreAndRoute": 0,
+            "linkedToExistingNamedCorridor": 0
+          },
+          "rejections": {
+            "DOOR_CLEARANCE_OVER_PRODUCTION": 8,
+            "FRAME_PRODUCTION_OR_PRIOR_ASSEMBLY": 31,
+            "NO_RETAINED_2X2_ROOM_CORE_AND_ROUTE": 3
+          },
+          "best": null,
+          "eligibleCount": 0,
+          "status": "HOLD_NEEDS_DEEPER_TOPOLOGY_OR_PRODUCTION_EDIT",
+          "worldCoordinates": null,
+          "operations": [],
+          "autoApply": false,
+          "templateId": "apartment/candidate-01|R003"
+        },
+        {
+          "portId": "apartment/candidate-01/L3/D006",
+          "roomId": "F3-R006",
+          "candidatesInvestigated": {
+            "variants": 5,
+            "edges": 42,
+            "clearDoorAndFrame": 3,
+            "roomCoreAndRoute": 1,
+            "linkedToExistingNamedCorridor": 0
+          },
+          "rejections": {
+            "FRAME_PRODUCTION_OR_PRIOR_ASSEMBLY": 32,
+            "DOOR_CLEARANCE_OVER_PRODUCTION": 7,
+            "NO_RETAINED_2X2_ROOM_CORE_AND_ROUTE": 2,
+            "NO_UNOBSTRUCTED_CORRIDOR_LINK": 1
+          },
+          "best": null,
+          "eligibleCount": 0,
+          "status": "HOLD_NEEDS_DEEPER_TOPOLOGY_OR_PRODUCTION_EDIT",
+          "worldCoordinates": null,
+          "operations": [],
+          "autoApply": false,
+          "templateId": "apartment/candidate-01|R006"
+        },
+        {
+          "portId": "apartment/candidate-01/L3/D012",
+          "roomId": "F3-R012",
+          "candidatesInvestigated": {
+            "variants": 1,
+            "edges": 4,
+            "clearDoorAndFrame": 0,
+            "roomCoreAndRoute": 0,
+            "linkedToExistingNamedCorridor": 0
+          },
+          "rejections": {
+            "FRAME_PRODUCTION_OR_PRIOR_ASSEMBLY": 4
+          },
+          "best": null,
+          "eligibleCount": 0,
+          "status": "HOLD_NEEDS_DEEPER_TOPOLOGY_OR_PRODUCTION_EDIT",
+          "worldCoordinates": null,
+          "operations": [],
+          "autoApply": false,
+          "templateId": "apartment/candidate-01|R012"
+        },
+        {
+          "portId": "apartment/candidate-01/L3/D013",
+          "roomId": "F3-R013",
+          "candidatesInvestigated": {
+            "variants": 1,
+            "edges": 4,
+            "clearDoorAndFrame": 0,
+            "roomCoreAndRoute": 0,
+            "linkedToExistingNamedCorridor": 0
+          },
+          "rejections": {
+            "FRAME_PRODUCTION_OR_PRIOR_ASSEMBLY": 4
+          },
+          "best": null,
+          "eligibleCount": 0,
+          "status": "HOLD_NEEDS_DEEPER_TOPOLOGY_OR_PRODUCTION_EDIT",
+          "worldCoordinates": null,
+          "operations": [],
+          "autoApply": false,
+          "templateId": "apartment/candidate-01|R013"
+        }
+      ],
+      "reviewOnlyRelayoutCandidates": 2,
+      "previouslyImmutableCandidateCount": 7,
+      "operations": [],
+      "worldCoordinates": null,
+      "emitAllowed": false
+    },
+    {
+      "id": "apartment/candidate-01/L4",
+      "level": 4,
+      "rooms": [
+        {
+          "portId": "apartment/candidate-01/L4/D001",
+          "roomId": "F4-R001",
+          "candidatesInvestigated": {
+            "variants": 5,
+            "edges": 42,
+            "clearDoorAndFrame": 15,
+            "roomCoreAndRoute": 15,
+            "linkedToExistingNamedCorridor": 14
+          },
+          "rejections": {
+            "FRAME_PRODUCTION_OR_PRIOR_ASSEMBLY": 23,
+            "DOOR_CLEARANCE_OVER_PRODUCTION": 3,
+            "NO_UNOBSTRUCTED_CORRIDOR_LINK": 1,
+            "NO_ROOM_SIDE_SWING": 1
+          },
+          "best": {
+            "portId": "apartment/candidate-01/L4/D001",
+            "roomId": "F4-R001",
+            "originalRoomRect": {
+              "x": 1,
+              "z": 1,
+              "width": 4,
+              "depth": 5
+            },
+            "newRoomRect": {
+              "x": 1,
+              "z": 1,
+              "width": 4,
+              "depth": 5
+            },
+            "changeType": "UNCHANGED_ROOM",
+            "removedFromRoom": [],
+            "doorRoomCell": {
+              "x": 2,
+              "z": 5
+            },
+            "doorHallCell": {
+              "x": 2,
+              "z": 6
+            },
+            "normal": {
+              "dx": 0,
+              "dz": 1
+            },
+            "doorMoved": true,
+            "local3DVoxels": [
+              {
+                "x": 2,
+                "z": 5,
+                "y": 16,
+                "role": "DOOR_VOID"
+              },
+              {
+                "x": 2,
+                "z": 5,
+                "y": 17,
+                "role": "DOOR_VOID"
+              },
+              {
+                "x": 3,
+                "z": 5,
+                "y": 16,
+                "role": "JAMB_LEFT"
+              },
+              {
+                "x": 3,
+                "z": 5,
+                "y": 17,
+                "role": "JAMB_LEFT"
+              },
+              {
+                "x": 3,
+                "z": 5,
+                "y": 18,
+                "role": "JAMB_LEFT"
+              },
+              {
+                "x": 1,
+                "z": 5,
+                "y": 16,
+                "role": "JAMB_RIGHT"
+              },
+              {
+                "x": 1,
+                "z": 5,
+                "y": 17,
+                "role": "JAMB_RIGHT"
+              },
+              {
+                "x": 1,
+                "z": 5,
+                "y": 18,
+                "role": "JAMB_RIGHT"
+              },
+              {
+                "x": 2,
+                "z": 5,
+                "y": 18,
+                "role": "LINTEL"
+              }
+            ],
+            "localSwingAirReservation": [
+              {
+                "x": 2,
+                "y": 16,
+                "z": 4,
+                "role": "SWING_RESERVED_AIR"
+              },
+              {
+                "x": 2,
+                "y": 17,
+                "z": 4,
+                "role": "SWING_RESERVED_AIR"
+              },
+              {
+                "x": 3,
+                "y": 16,
+                "z": 4,
+                "role": "SWING_RESERVED_AIR"
+              },
+              {
+                "x": 3,
+                "y": 17,
+                "z": 4,
+                "role": "SWING_RESERVED_AIR"
+              }
+            ],
+            "protectedRoomCore": [
+              "2,3",
+              "3,3",
+              "2,4",
+              "3,4"
+            ],
+            "protectedRoute": [
+              "2,5",
+              "2,4"
+            ],
+            "proposedCorridorAirCells": [
+              {
+                "x": 2,
+                "z": 6
+              }
+            ],
+            "proposedNewCorridorCells": [],
+            "verifiedNamedCorridorTarget": {
+              "x": 2,
+              "z": 6
+            },
+            "requiredRoomAreaChange": 0,
+            "requiredCorridorReclassification": 0,
+            "immutableEnvelopeModified": false,
+            "existingTypedAssemblyModified": false,
+            "existingSourceDoorModified": false,
+            "doorHinge": null,
+            "doorStateCalibration": "UNVERIFIED",
+            "doorClosure": "UNAPPROVED",
+            "placementAllowed": false,
+            "worldCoordinates": null,
+            "operations": []
+          },
+          "eligibleCount": 14,
+          "status": "LOCAL_RELAYOUT_REVIEW_ONLY",
+          "worldCoordinates": null,
+          "operations": [],
+          "autoApply": false,
+          "templateId": null
+        },
+        {
+          "portId": "apartment/candidate-01/L4/D002",
+          "roomId": "F4-R002",
+          "candidatesInvestigated": {
+            "variants": 5,
+            "edges": 42,
+            "clearDoorAndFrame": 3,
+            "roomCoreAndRoute": 1,
+            "linkedToExistingNamedCorridor": 1
+          },
+          "rejections": {
+            "FRAME_PRODUCTION_OR_PRIOR_ASSEMBLY": 32,
+            "DOOR_CLEARANCE_OVER_PRODUCTION": 7,
+            "NO_RETAINED_2X2_ROOM_CORE_AND_ROUTE": 2
+          },
+          "best": {
+            "portId": "apartment/candidate-01/L4/D002",
+            "roomId": "F4-R002",
+            "originalRoomRect": {
+              "x": 7,
+              "z": 1,
+              "width": 5,
+              "depth": 4
+            },
+            "newRoomRect": {
+              "x": 8,
+              "z": 1,
+              "width": 4,
+              "depth": 4
+            },
+            "changeType": "RETRACT_WEST_ONE",
+            "removedFromRoom": [
+              {
+                "x": 7,
+                "z": 1
+              },
+              {
+                "x": 7,
+                "z": 2
+              },
+              {
+                "x": 7,
+                "z": 3
+              },
+              {
+                "x": 7,
+                "z": 4
+              }
+            ],
+            "doorRoomCell": {
+              "x": 8,
+              "z": 2
+            },
+            "doorHallCell": {
+              "x": 7,
+              "z": 2
+            },
+            "normal": {
+              "dx": -1,
+              "dz": 0
+            },
+            "doorMoved": true,
+            "local3DVoxels": [
+              {
+                "x": 8,
+                "z": 2,
+                "y": 16,
+                "role": "DOOR_VOID"
+              },
+              {
+                "x": 8,
+                "z": 2,
+                "y": 17,
+                "role": "DOOR_VOID"
+              },
+              {
+                "x": 8,
+                "z": 3,
+                "y": 16,
+                "role": "JAMB_LEFT"
+              },
+              {
+                "x": 8,
+                "z": 3,
+                "y": 17,
+                "role": "JAMB_LEFT"
+              },
+              {
+                "x": 8,
+                "z": 3,
+                "y": 18,
+                "role": "JAMB_LEFT"
+              },
+              {
+                "x": 8,
+                "z": 1,
+                "y": 16,
+                "role": "JAMB_RIGHT"
+              },
+              {
+                "x": 8,
+                "z": 1,
+                "y": 17,
+                "role": "JAMB_RIGHT"
+              },
+              {
+                "x": 8,
+                "z": 1,
+                "y": 18,
+                "role": "JAMB_RIGHT"
+              },
+              {
+                "x": 8,
+                "z": 2,
+                "y": 18,
+                "role": "LINTEL"
+              }
+            ],
+            "localSwingAirReservation": [
+              {
+                "x": 9,
+                "y": 16,
+                "z": 2,
+                "role": "SWING_RESERVED_AIR"
+              },
+              {
+                "x": 9,
+                "y": 17,
+                "z": 2,
+                "role": "SWING_RESERVED_AIR"
+              },
+              {
+                "x": 9,
+                "y": 16,
+                "z": 3,
+                "role": "SWING_RESERVED_AIR"
+              },
+              {
+                "x": 9,
+                "y": 17,
+                "z": 3,
+                "role": "SWING_RESERVED_AIR"
+              }
+            ],
+            "protectedRoomCore": [
+              "9,2",
+              "10,2",
+              "9,3",
+              "10,3"
+            ],
+            "protectedRoute": [
+              "8,2",
+              "9,2"
+            ],
+            "proposedCorridorAirCells": [
+              {
+                "x": 7,
+                "z": 2
+              },
+              {
+                "x": 6,
+                "z": 2
+              }
+            ],
+            "proposedNewCorridorCells": [
+              {
+                "x": 7,
+                "z": 2
+              }
+            ],
+            "verifiedNamedCorridorTarget": {
+              "x": 6,
+              "z": 2
+            },
+            "requiredRoomAreaChange": 4,
+            "requiredCorridorReclassification": 1,
+            "immutableEnvelopeModified": false,
+            "existingTypedAssemblyModified": false,
+            "existingSourceDoorModified": false,
+            "doorHinge": null,
+            "doorStateCalibration": "UNVERIFIED",
+            "doorClosure": "UNAPPROVED",
+            "placementAllowed": false,
+            "worldCoordinates": null,
+            "operations": []
+          },
+          "eligibleCount": 1,
+          "status": "LOCAL_RELAYOUT_REVIEW_ONLY",
+          "worldCoordinates": null,
+          "operations": [],
+          "autoApply": false,
+          "templateId": null
+        },
+        {
+          "portId": "apartment/candidate-01/L4/D003",
+          "roomId": "F4-R003",
+          "candidatesInvestigated": {
+            "variants": 5,
+            "edges": 42,
+            "clearDoorAndFrame": 3,
+            "roomCoreAndRoute": 0,
+            "linkedToExistingNamedCorridor": 0
+          },
+          "rejections": {
+            "DOOR_CLEARANCE_OVER_PRODUCTION": 8,
+            "FRAME_PRODUCTION_OR_PRIOR_ASSEMBLY": 31,
+            "NO_RETAINED_2X2_ROOM_CORE_AND_ROUTE": 3
+          },
+          "best": null,
+          "eligibleCount": 0,
+          "status": "HOLD_NEEDS_DEEPER_TOPOLOGY_OR_PRODUCTION_EDIT",
+          "worldCoordinates": null,
+          "operations": [],
+          "autoApply": false,
+          "templateId": "apartment/candidate-01|R003"
+        },
+        {
+          "portId": "apartment/candidate-01/L4/D006",
+          "roomId": "F4-R006",
+          "candidatesInvestigated": {
+            "variants": 5,
+            "edges": 42,
+            "clearDoorAndFrame": 3,
+            "roomCoreAndRoute": 1,
+            "linkedToExistingNamedCorridor": 0
+          },
+          "rejections": {
+            "FRAME_PRODUCTION_OR_PRIOR_ASSEMBLY": 32,
+            "DOOR_CLEARANCE_OVER_PRODUCTION": 7,
+            "NO_RETAINED_2X2_ROOM_CORE_AND_ROUTE": 2,
+            "NO_UNOBSTRUCTED_CORRIDOR_LINK": 1
+          },
+          "best": null,
+          "eligibleCount": 0,
+          "status": "HOLD_NEEDS_DEEPER_TOPOLOGY_OR_PRODUCTION_EDIT",
+          "worldCoordinates": null,
+          "operations": [],
+          "autoApply": false,
+          "templateId": "apartment/candidate-01|R006"
+        },
+        {
+          "portId": "apartment/candidate-01/L4/D012",
+          "roomId": "F4-R012",
+          "candidatesInvestigated": {
+            "variants": 1,
+            "edges": 4,
+            "clearDoorAndFrame": 0,
+            "roomCoreAndRoute": 0,
+            "linkedToExistingNamedCorridor": 0
+          },
+          "rejections": {
+            "FRAME_PRODUCTION_OR_PRIOR_ASSEMBLY": 4
+          },
+          "best": null,
+          "eligibleCount": 0,
+          "status": "HOLD_NEEDS_DEEPER_TOPOLOGY_OR_PRODUCTION_EDIT",
+          "worldCoordinates": null,
+          "operations": [],
+          "autoApply": false,
+          "templateId": "apartment/candidate-01|R012"
+        },
+        {
+          "portId": "apartment/candidate-01/L4/D013",
+          "roomId": "F4-R013",
+          "candidatesInvestigated": {
+            "variants": 1,
+            "edges": 4,
+            "clearDoorAndFrame": 0,
+            "roomCoreAndRoute": 0,
+            "linkedToExistingNamedCorridor": 0
+          },
+          "rejections": {
+            "FRAME_PRODUCTION_OR_PRIOR_ASSEMBLY": 4
+          },
+          "best": null,
+          "eligibleCount": 0,
+          "status": "HOLD_NEEDS_DEEPER_TOPOLOGY_OR_PRODUCTION_EDIT",
+          "worldCoordinates": null,
+          "operations": [],
+          "autoApply": false,
+          "templateId": "apartment/candidate-01|R013"
+        }
+      ],
+      "reviewOnlyRelayoutCandidates": 2,
+      "previouslyImmutableCandidateCount": 7,
+      "operations": [],
+      "worldCoordinates": null,
+      "emitAllowed": false
+    },
+    {
+      "id": "apartment/candidate-01/L5",
+      "level": 5,
+      "rooms": [
+        {
+          "portId": "apartment/candidate-01/L5/D001",
+          "roomId": "F5-R001",
+          "candidatesInvestigated": {
+            "variants": 5,
+            "edges": 42,
+            "clearDoorAndFrame": 15,
+            "roomCoreAndRoute": 15,
+            "linkedToExistingNamedCorridor": 14
+          },
+          "rejections": {
+            "FRAME_PRODUCTION_OR_PRIOR_ASSEMBLY": 23,
+            "DOOR_CLEARANCE_OVER_PRODUCTION": 3,
+            "NO_UNOBSTRUCTED_CORRIDOR_LINK": 1,
+            "NO_ROOM_SIDE_SWING": 1
+          },
+          "best": {
+            "portId": "apartment/candidate-01/L5/D001",
+            "roomId": "F5-R001",
+            "originalRoomRect": {
+              "x": 1,
+              "z": 1,
+              "width": 4,
+              "depth": 5
+            },
+            "newRoomRect": {
+              "x": 1,
+              "z": 1,
+              "width": 4,
+              "depth": 5
+            },
+            "changeType": "UNCHANGED_ROOM",
+            "removedFromRoom": [],
+            "doorRoomCell": {
+              "x": 2,
+              "z": 5
+            },
+            "doorHallCell": {
+              "x": 2,
+              "z": 6
+            },
+            "normal": {
+              "dx": 0,
+              "dz": 1
+            },
+            "doorMoved": true,
+            "local3DVoxels": [
+              {
+                "x": 2,
+                "z": 5,
+                "y": 21,
+                "role": "DOOR_VOID"
+              },
+              {
+                "x": 2,
+                "z": 5,
+                "y": 22,
+                "role": "DOOR_VOID"
+              },
+              {
+                "x": 3,
+                "z": 5,
+                "y": 21,
+                "role": "JAMB_LEFT"
+              },
+              {
+                "x": 3,
+                "z": 5,
+                "y": 22,
+                "role": "JAMB_LEFT"
+              },
+              {
+                "x": 3,
+                "z": 5,
+                "y": 23,
+                "role": "JAMB_LEFT"
+              },
+              {
+                "x": 1,
+                "z": 5,
+                "y": 21,
+                "role": "JAMB_RIGHT"
+              },
+              {
+                "x": 1,
+                "z": 5,
+                "y": 22,
+                "role": "JAMB_RIGHT"
+              },
+              {
+                "x": 1,
+                "z": 5,
+                "y": 23,
+                "role": "JAMB_RIGHT"
+              },
+              {
+                "x": 2,
+                "z": 5,
+                "y": 23,
+                "role": "LINTEL"
+              }
+            ],
+            "localSwingAirReservation": [
+              {
+                "x": 2,
+                "y": 21,
+                "z": 4,
+                "role": "SWING_RESERVED_AIR"
+              },
+              {
+                "x": 2,
+                "y": 22,
+                "z": 4,
+                "role": "SWING_RESERVED_AIR"
+              },
+              {
+                "x": 3,
+                "y": 21,
+                "z": 4,
+                "role": "SWING_RESERVED_AIR"
+              },
+              {
+                "x": 3,
+                "y": 22,
+                "z": 4,
+                "role": "SWING_RESERVED_AIR"
+              }
+            ],
+            "protectedRoomCore": [
+              "2,3",
+              "3,3",
+              "2,4",
+              "3,4"
+            ],
+            "protectedRoute": [
+              "2,5",
+              "2,4"
+            ],
+            "proposedCorridorAirCells": [
+              {
+                "x": 2,
+                "z": 6
+              }
+            ],
+            "proposedNewCorridorCells": [],
+            "verifiedNamedCorridorTarget": {
+              "x": 2,
+              "z": 6
+            },
+            "requiredRoomAreaChange": 0,
+            "requiredCorridorReclassification": 0,
+            "immutableEnvelopeModified": false,
+            "existingTypedAssemblyModified": false,
+            "existingSourceDoorModified": false,
+            "doorHinge": null,
+            "doorStateCalibration": "UNVERIFIED",
+            "doorClosure": "UNAPPROVED",
+            "placementAllowed": false,
+            "worldCoordinates": null,
+            "operations": []
+          },
+          "eligibleCount": 14,
+          "status": "LOCAL_RELAYOUT_REVIEW_ONLY",
+          "worldCoordinates": null,
+          "operations": [],
+          "autoApply": false,
+          "templateId": null
+        },
+        {
+          "portId": "apartment/candidate-01/L5/D002",
+          "roomId": "F5-R002",
+          "candidatesInvestigated": {
+            "variants": 5,
+            "edges": 42,
+            "clearDoorAndFrame": 3,
+            "roomCoreAndRoute": 1,
+            "linkedToExistingNamedCorridor": 1
+          },
+          "rejections": {
+            "FRAME_PRODUCTION_OR_PRIOR_ASSEMBLY": 32,
+            "DOOR_CLEARANCE_OVER_PRODUCTION": 7,
+            "NO_RETAINED_2X2_ROOM_CORE_AND_ROUTE": 2
+          },
+          "best": {
+            "portId": "apartment/candidate-01/L5/D002",
+            "roomId": "F5-R002",
+            "originalRoomRect": {
+              "x": 7,
+              "z": 1,
+              "width": 5,
+              "depth": 4
+            },
+            "newRoomRect": {
+              "x": 8,
+              "z": 1,
+              "width": 4,
+              "depth": 4
+            },
+            "changeType": "RETRACT_WEST_ONE",
+            "removedFromRoom": [
+              {
+                "x": 7,
+                "z": 1
+              },
+              {
+                "x": 7,
+                "z": 2
+              },
+              {
+                "x": 7,
+                "z": 3
+              },
+              {
+                "x": 7,
+                "z": 4
+              }
+            ],
+            "doorRoomCell": {
+              "x": 8,
+              "z": 2
+            },
+            "doorHallCell": {
+              "x": 7,
+              "z": 2
+            },
+            "normal": {
+              "dx": -1,
+              "dz": 0
+            },
+            "doorMoved": true,
+            "local3DVoxels": [
+              {
+                "x": 8,
+                "z": 2,
+                "y": 21,
+                "role": "DOOR_VOID"
+              },
+              {
+                "x": 8,
+                "z": 2,
+                "y": 22,
+                "role": "DOOR_VOID"
+              },
+              {
+                "x": 8,
+                "z": 3,
+                "y": 21,
+                "role": "JAMB_LEFT"
+              },
+              {
+                "x": 8,
+                "z": 3,
+                "y": 22,
+                "role": "JAMB_LEFT"
+              },
+              {
+                "x": 8,
+                "z": 3,
+                "y": 23,
+                "role": "JAMB_LEFT"
+              },
+              {
+                "x": 8,
+                "z": 1,
+                "y": 21,
+                "role": "JAMB_RIGHT"
+              },
+              {
+                "x": 8,
+                "z": 1,
+                "y": 22,
+                "role": "JAMB_RIGHT"
+              },
+              {
+                "x": 8,
+                "z": 1,
+                "y": 23,
+                "role": "JAMB_RIGHT"
+              },
+              {
+                "x": 8,
+                "z": 2,
+                "y": 23,
+                "role": "LINTEL"
+              }
+            ],
+            "localSwingAirReservation": [
+              {
+                "x": 9,
+                "y": 21,
+                "z": 2,
+                "role": "SWING_RESERVED_AIR"
+              },
+              {
+                "x": 9,
+                "y": 22,
+                "z": 2,
+                "role": "SWING_RESERVED_AIR"
+              },
+              {
+                "x": 9,
+                "y": 21,
+                "z": 3,
+                "role": "SWING_RESERVED_AIR"
+              },
+              {
+                "x": 9,
+                "y": 22,
+                "z": 3,
+                "role": "SWING_RESERVED_AIR"
+              }
+            ],
+            "protectedRoomCore": [
+              "9,2",
+              "10,2",
+              "9,3",
+              "10,3"
+            ],
+            "protectedRoute": [
+              "8,2",
+              "9,2"
+            ],
+            "proposedCorridorAirCells": [
+              {
+                "x": 7,
+                "z": 2
+              },
+              {
+                "x": 6,
+                "z": 2
+              }
+            ],
+            "proposedNewCorridorCells": [
+              {
+                "x": 7,
+                "z": 2
+              }
+            ],
+            "verifiedNamedCorridorTarget": {
+              "x": 6,
+              "z": 2
+            },
+            "requiredRoomAreaChange": 4,
+            "requiredCorridorReclassification": 1,
+            "immutableEnvelopeModified": false,
+            "existingTypedAssemblyModified": false,
+            "existingSourceDoorModified": false,
+            "doorHinge": null,
+            "doorStateCalibration": "UNVERIFIED",
+            "doorClosure": "UNAPPROVED",
+            "placementAllowed": false,
+            "worldCoordinates": null,
+            "operations": []
+          },
+          "eligibleCount": 1,
+          "status": "LOCAL_RELAYOUT_REVIEW_ONLY",
+          "worldCoordinates": null,
+          "operations": [],
+          "autoApply": false,
+          "templateId": null
+        },
+        {
+          "portId": "apartment/candidate-01/L5/D003",
+          "roomId": "F5-R003",
+          "candidatesInvestigated": {
+            "variants": 5,
+            "edges": 42,
+            "clearDoorAndFrame": 3,
+            "roomCoreAndRoute": 0,
+            "linkedToExistingNamedCorridor": 0
+          },
+          "rejections": {
+            "DOOR_CLEARANCE_OVER_PRODUCTION": 8,
+            "FRAME_PRODUCTION_OR_PRIOR_ASSEMBLY": 31,
+            "NO_RETAINED_2X2_ROOM_CORE_AND_ROUTE": 3
+          },
+          "best": null,
+          "eligibleCount": 0,
+          "status": "HOLD_NEEDS_DEEPER_TOPOLOGY_OR_PRODUCTION_EDIT",
+          "worldCoordinates": null,
+          "operations": [],
+          "autoApply": false,
+          "templateId": "apartment/candidate-01|R003"
+        },
+        {
+          "portId": "apartment/candidate-01/L5/D006",
+          "roomId": "F5-R006",
+          "candidatesInvestigated": {
+            "variants": 5,
+            "edges": 42,
+            "clearDoorAndFrame": 3,
+            "roomCoreAndRoute": 1,
+            "linkedToExistingNamedCorridor": 0
+          },
+          "rejections": {
+            "FRAME_PRODUCTION_OR_PRIOR_ASSEMBLY": 32,
+            "DOOR_CLEARANCE_OVER_PRODUCTION": 7,
+            "NO_RETAINED_2X2_ROOM_CORE_AND_ROUTE": 2,
+            "NO_UNOBSTRUCTED_CORRIDOR_LINK": 1
+          },
+          "best": null,
+          "eligibleCount": 0,
+          "status": "HOLD_NEEDS_DEEPER_TOPOLOGY_OR_PRODUCTION_EDIT",
+          "worldCoordinates": null,
+          "operations": [],
+          "autoApply": false,
+          "templateId": "apartment/candidate-01|R006"
+        },
+        {
+          "portId": "apartment/candidate-01/L5/D012",
+          "roomId": "F5-R012",
+          "candidatesInvestigated": {
+            "variants": 1,
+            "edges": 4,
+            "clearDoorAndFrame": 0,
+            "roomCoreAndRoute": 0,
+            "linkedToExistingNamedCorridor": 0
+          },
+          "rejections": {
+            "FRAME_PRODUCTION_OR_PRIOR_ASSEMBLY": 4
+          },
+          "best": null,
+          "eligibleCount": 0,
+          "status": "HOLD_NEEDS_DEEPER_TOPOLOGY_OR_PRODUCTION_EDIT",
+          "worldCoordinates": null,
+          "operations": [],
+          "autoApply": false,
+          "templateId": "apartment/candidate-01|R012"
+        },
+        {
+          "portId": "apartment/candidate-01/L5/D013",
+          "roomId": "F5-R013",
+          "candidatesInvestigated": {
+            "variants": 1,
+            "edges": 4,
+            "clearDoorAndFrame": 0,
+            "roomCoreAndRoute": 0,
+            "linkedToExistingNamedCorridor": 0
+          },
+          "rejections": {
+            "FRAME_PRODUCTION_OR_PRIOR_ASSEMBLY": 4
+          },
+          "best": null,
+          "eligibleCount": 0,
+          "status": "HOLD_NEEDS_DEEPER_TOPOLOGY_OR_PRODUCTION_EDIT",
+          "worldCoordinates": null,
+          "operations": [],
+          "autoApply": false,
+          "templateId": "apartment/candidate-01|R013"
+        }
+      ],
+      "reviewOnlyRelayoutCandidates": 2,
+      "previouslyImmutableCandidateCount": 7,
+      "operations": [],
+      "worldCoordinates": null,
+      "emitAllowed": false
+    },
+    {
+      "id": "apartment/candidate-01/L6",
+      "level": 6,
+      "rooms": [
+        {
+          "portId": "apartment/candidate-01/L6/D001",
+          "roomId": "F6-R001",
+          "candidatesInvestigated": {
+            "variants": 5,
+            "edges": 42,
+            "clearDoorAndFrame": 9,
+            "roomCoreAndRoute": 6,
+            "linkedToExistingNamedCorridor": 6
+          },
+          "rejections": {
+            "FRAME_PRODUCTION_OR_PRIOR_ASSEMBLY": 29,
+            "NO_ROOM_SIDE_SWING": 4,
+            "NO_RETAINED_2X2_ROOM_CORE_AND_ROUTE": 3
+          },
+          "best": {
+            "portId": "apartment/candidate-01/L6/D001",
+            "roomId": "F6-R001",
+            "originalRoomRect": {
+              "x": 1,
+              "z": 1,
+              "width": 4,
+              "depth": 5
+            },
+            "newRoomRect": {
+              "x": 1,
+              "z": 1,
+              "width": 4,
+              "depth": 5
+            },
+            "changeType": "UNCHANGED_ROOM",
+            "removedFromRoom": [],
+            "doorRoomCell": {
+              "x": 2,
+              "z": 5
+            },
+            "doorHallCell": {
+              "x": 2,
+              "z": 6
+            },
+            "normal": {
+              "dx": 0,
+              "dz": 1
+            },
+            "doorMoved": true,
+            "local3DVoxels": [
+              {
+                "x": 2,
+                "z": 5,
+                "y": 26,
+                "role": "DOOR_VOID"
+              },
+              {
+                "x": 2,
+                "z": 5,
+                "y": 27,
+                "role": "DOOR_VOID"
+              },
+              {
+                "x": 3,
+                "z": 5,
+                "y": 26,
+                "role": "JAMB_LEFT"
+              },
+              {
+                "x": 3,
+                "z": 5,
+                "y": 27,
+                "role": "JAMB_LEFT"
+              },
+              {
+                "x": 3,
+                "z": 5,
+                "y": 28,
+                "role": "JAMB_LEFT"
+              },
+              {
+                "x": 1,
+                "z": 5,
+                "y": 26,
+                "role": "JAMB_RIGHT"
+              },
+              {
+                "x": 1,
+                "z": 5,
+                "y": 27,
+                "role": "JAMB_RIGHT"
+              },
+              {
+                "x": 1,
+                "z": 5,
+                "y": 28,
+                "role": "JAMB_RIGHT"
+              },
+              {
+                "x": 2,
+                "z": 5,
+                "y": 28,
+                "role": "LINTEL"
+              }
+            ],
+            "localSwingAirReservation": [
+              {
+                "x": 2,
+                "y": 26,
+                "z": 4,
+                "role": "SWING_RESERVED_AIR"
+              },
+              {
+                "x": 2,
+                "y": 27,
+                "z": 4,
+                "role": "SWING_RESERVED_AIR"
+              },
+              {
+                "x": 3,
+                "y": 26,
+                "z": 4,
+                "role": "SWING_RESERVED_AIR"
+              },
+              {
+                "x": 3,
+                "y": 27,
+                "z": 4,
+                "role": "SWING_RESERVED_AIR"
+              }
+            ],
+            "protectedRoomCore": [
+              "3,3",
+              "4,3",
+              "3,4",
+              "4,4"
+            ],
+            "protectedRoute": [
+              "2,5",
+              "2,4",
+              "3,4"
+            ],
+            "proposedCorridorAirCells": [
+              {
+                "x": 2,
+                "z": 6
+              }
+            ],
+            "proposedNewCorridorCells": [],
+            "verifiedNamedCorridorTarget": {
+              "x": 2,
+              "z": 6
+            },
+            "requiredRoomAreaChange": 0,
+            "requiredCorridorReclassification": 0,
+            "immutableEnvelopeModified": false,
+            "existingTypedAssemblyModified": false,
+            "existingSourceDoorModified": false,
+            "doorHinge": null,
+            "doorStateCalibration": "UNVERIFIED",
+            "doorClosure": "UNAPPROVED",
+            "placementAllowed": false,
+            "worldCoordinates": null,
+            "operations": []
+          },
+          "eligibleCount": 6,
+          "status": "LOCAL_RELAYOUT_REVIEW_ONLY",
+          "worldCoordinates": null,
+          "operations": [],
+          "autoApply": false,
+          "templateId": "apartment/candidate-01|R001"
+        },
+        {
+          "portId": "apartment/candidate-01/L6/D005",
+          "roomId": "F6-R005",
+          "candidatesInvestigated": {
+            "variants": 3,
+            "edges": 20,
+            "clearDoorAndFrame": 2,
+            "roomCoreAndRoute": 0,
+            "linkedToExistingNamedCorridor": 0
+          },
+          "rejections": {
+            "FRAME_PRODUCTION_OR_PRIOR_ASSEMBLY": 18,
+            "NO_RETAINED_2X2_ROOM_CORE_AND_ROUTE": 2
+          },
+          "best": null,
+          "eligibleCount": 0,
+          "status": "HOLD_NEEDS_DEEPER_TOPOLOGY_OR_PRODUCTION_EDIT",
+          "worldCoordinates": null,
+          "operations": [],
+          "autoApply": false,
+          "templateId": null
+        },
+        {
+          "portId": "apartment/candidate-01/L6/D012",
+          "roomId": "F6-R012",
+          "candidatesInvestigated": {
+            "variants": 1,
+            "edges": 4,
+            "clearDoorAndFrame": 1,
+            "roomCoreAndRoute": 0,
+            "linkedToExistingNamedCorridor": 0
+          },
+          "rejections": {
+            "NO_RETAINED_2X2_ROOM_CORE_AND_ROUTE": 1,
+            "FRAME_PRODUCTION_OR_PRIOR_ASSEMBLY": 3
+          },
+          "best": null,
+          "eligibleCount": 0,
+          "status": "HOLD_NEEDS_DEEPER_TOPOLOGY_OR_PRODUCTION_EDIT",
+          "worldCoordinates": null,
+          "operations": [],
+          "autoApply": false,
+          "templateId": null
+        },
+        {
+          "portId": "apartment/candidate-01/L6/D013",
+          "roomId": "F6-R013",
+          "candidatesInvestigated": {
+            "variants": 1,
+            "edges": 4,
+            "clearDoorAndFrame": 0,
+            "roomCoreAndRoute": 0,
+            "linkedToExistingNamedCorridor": 0
+          },
+          "rejections": {
+            "FRAME_PRODUCTION_OR_PRIOR_ASSEMBLY": 4
+          },
+          "best": null,
+          "eligibleCount": 0,
+          "status": "HOLD_NEEDS_DEEPER_TOPOLOGY_OR_PRODUCTION_EDIT",
+          "worldCoordinates": null,
+          "operations": [],
+          "autoApply": false,
+          "templateId": "apartment/candidate-01|R013"
+        }
+      ],
+      "reviewOnlyRelayoutCandidates": 1,
+      "previouslyImmutableCandidateCount": 9,
+      "operations": [],
+      "worldCoordinates": null,
+      "emitAllowed": false
+    },
+    {
+      "id": "hotel/candidate-01/L1",
+      "level": 1,
+      "rooms": [
+        {
+          "portId": "hotel/candidate-01/L1/D001",
+          "roomId": "F1-R001",
+          "candidatesInvestigated": {
+            "variants": 5,
+            "edges": 42,
+            "clearDoorAndFrame": 3,
+            "roomCoreAndRoute": 0,
+            "linkedToExistingNamedCorridor": 0
+          },
+          "rejections": {
+            "FRAME_PRODUCTION_OR_PRIOR_ASSEMBLY": 38,
+            "NO_RETAINED_2X2_ROOM_CORE_AND_ROUTE": 3,
+            "NO_ROOM_SIDE_SWING": 1
+          },
+          "best": null,
+          "eligibleCount": 0,
+          "status": "HOLD_NEEDS_DEEPER_TOPOLOGY_OR_PRODUCTION_EDIT",
+          "worldCoordinates": null,
+          "operations": [],
+          "autoApply": false,
+          "templateId": null
+        },
+        {
+          "portId": "hotel/candidate-01/L1/D004",
+          "roomId": "F1-R004",
+          "candidatesInvestigated": {
+            "variants": 5,
+            "edges": 42,
+            "clearDoorAndFrame": 10,
+            "roomCoreAndRoute": 4,
+            "linkedToExistingNamedCorridor": 4
+          },
+          "rejections": {
+            "FRAME_PRODUCTION_OR_PRIOR_ASSEMBLY": 29,
+            "NO_RETAINED_2X2_ROOM_CORE_AND_ROUTE": 6,
+            "NO_ROOM_SIDE_SWING": 3
+          },
+          "best": {
+            "portId": "hotel/candidate-01/L1/D004",
+            "roomId": "F1-R004",
+            "originalRoomRect": {
+              "x": 1,
+              "z": 7,
+              "width": 4,
+              "depth": 5
+            },
+            "newRoomRect": {
+              "x": 1,
+              "z": 7,
+              "width": 4,
+              "depth": 5
+            },
+            "changeType": "UNCHANGED_ROOM",
+            "removedFromRoom": [],
+            "doorRoomCell": {
+              "x": 4,
+              "z": 10
+            },
+            "doorHallCell": {
+              "x": 5,
+              "z": 10
+            },
+            "normal": {
+              "dx": 1,
+              "dz": 0
+            },
+            "doorMoved": true,
+            "local3DVoxels": [
+              {
+                "x": 4,
+                "z": 10,
+                "y": 1,
+                "role": "DOOR_VOID"
+              },
+              {
+                "x": 4,
+                "z": 10,
+                "y": 2,
+                "role": "DOOR_VOID"
+              },
+              {
+                "x": 4,
+                "z": 9,
+                "y": 1,
+                "role": "JAMB_LEFT"
+              },
+              {
+                "x": 4,
+                "z": 9,
+                "y": 2,
+                "role": "JAMB_LEFT"
+              },
+              {
+                "x": 4,
+                "z": 9,
+                "y": 3,
+                "role": "JAMB_LEFT"
+              },
+              {
+                "x": 4,
+                "z": 11,
+                "y": 1,
+                "role": "JAMB_RIGHT"
+              },
+              {
+                "x": 4,
+                "z": 11,
+                "y": 2,
+                "role": "JAMB_RIGHT"
+              },
+              {
+                "x": 4,
+                "z": 11,
+                "y": 3,
+                "role": "JAMB_RIGHT"
+              },
+              {
+                "x": 4,
+                "z": 10,
+                "y": 3,
+                "role": "LINTEL"
+              }
+            ],
+            "localSwingAirReservation": [
+              {
+                "x": 3,
+                "y": 1,
+                "z": 10,
+                "role": "SWING_RESERVED_AIR"
+              },
+              {
+                "x": 3,
+                "y": 2,
+                "z": 10,
+                "role": "SWING_RESERVED_AIR"
+              },
+              {
+                "x": 3,
+                "y": 1,
+                "z": 9,
+                "role": "SWING_RESERVED_AIR"
+              },
+              {
+                "x": 3,
+                "y": 2,
+                "z": 9,
+                "role": "SWING_RESERVED_AIR"
+              }
+            ],
+            "protectedRoomCore": [
+              "3,7",
+              "4,7",
+              "3,8",
+              "4,8"
+            ],
+            "protectedRoute": [
+              "4,10",
+              "3,10",
+              "3,9",
+              "3,8"
+            ],
+            "proposedCorridorAirCells": [
+              {
+                "x": 5,
+                "z": 10
+              },
+              {
+                "x": 6,
+                "z": 10
+              }
+            ],
+            "proposedNewCorridorCells": [
+              {
+                "x": 5,
+                "z": 10
+              }
+            ],
+            "verifiedNamedCorridorTarget": {
+              "x": 6,
+              "z": 10
+            },
+            "requiredRoomAreaChange": 0,
+            "requiredCorridorReclassification": 1,
+            "immutableEnvelopeModified": false,
+            "existingTypedAssemblyModified": false,
+            "existingSourceDoorModified": false,
+            "doorHinge": null,
+            "doorStateCalibration": "UNVERIFIED",
+            "doorClosure": "UNAPPROVED",
+            "placementAllowed": false,
+            "worldCoordinates": null,
+            "operations": []
+          },
+          "eligibleCount": 4,
+          "status": "LOCAL_RELAYOUT_REVIEW_ONLY",
+          "worldCoordinates": null,
+          "operations": [],
+          "autoApply": false,
+          "templateId": "hotel/candidate-01|R004"
+        },
+        {
+          "portId": "hotel/candidate-01/L1/D008",
+          "roomId": "F1-R008",
+          "candidatesInvestigated": {
+            "variants": 5,
+            "edges": 42,
+            "clearDoorAndFrame": 7,
+            "roomCoreAndRoute": 0,
+            "linkedToExistingNamedCorridor": 0
+          },
+          "rejections": {
+            "FRAME_PRODUCTION_OR_PRIOR_ASSEMBLY": 33,
+            "NO_RETAINED_2X2_ROOM_CORE_AND_ROUTE": 7,
+            "NO_ROOM_SIDE_SWING": 2
+          },
+          "best": null,
+          "eligibleCount": 0,
+          "status": "HOLD_NEEDS_DEEPER_TOPOLOGY_OR_PRODUCTION_EDIT",
+          "worldCoordinates": null,
+          "operations": [],
+          "autoApply": false,
+          "templateId": "hotel/candidate-01|R008"
+        }
+      ],
+      "reviewOnlyRelayoutCandidates": 1,
+      "previouslyImmutableCandidateCount": 8,
+      "operations": [],
+      "worldCoordinates": null,
+      "emitAllowed": false
+    },
+    {
+      "id": "hotel/candidate-01/L2",
+      "level": 2,
+      "rooms": [],
+      "reviewOnlyRelayoutCandidates": 0,
+      "previouslyImmutableCandidateCount": 11,
+      "operations": [],
+      "worldCoordinates": null,
+      "emitAllowed": false
+    },
+    {
+      "id": "hotel/candidate-01/L3",
+      "level": 3,
+      "rooms": [],
+      "reviewOnlyRelayoutCandidates": 0,
+      "previouslyImmutableCandidateCount": 11,
+      "operations": [],
+      "worldCoordinates": null,
+      "emitAllowed": false
+    },
+    {
+      "id": "hotel/candidate-01/L4",
+      "level": 4,
+      "rooms": [],
+      "reviewOnlyRelayoutCandidates": 0,
+      "previouslyImmutableCandidateCount": 11,
+      "operations": [],
+      "worldCoordinates": null,
+      "emitAllowed": false
+    },
+    {
+      "id": "hotel/candidate-01/L5",
+      "level": 5,
+      "rooms": [],
+      "reviewOnlyRelayoutCandidates": 0,
+      "previouslyImmutableCandidateCount": 11,
+      "operations": [],
+      "worldCoordinates": null,
+      "emitAllowed": false
+    },
+    {
+      "id": "hotel/candidate-01/L6",
+      "level": 6,
+      "rooms": [],
+      "reviewOnlyRelayoutCandidates": 0,
+      "previouslyImmutableCandidateCount": 11,
+      "operations": [],
+      "worldCoordinates": null,
+      "emitAllowed": false
+    },
+    {
+      "id": "office/candidate-01/L1",
+      "level": 1,
+      "rooms": [],
+      "reviewOnlyRelayoutCandidates": 0,
+      "previouslyImmutableCandidateCount": 11,
+      "operations": [],
+      "worldCoordinates": null,
+      "emitAllowed": false
+    },
+    {
+      "id": "office/candidate-01/L2",
+      "level": 2,
+      "rooms": [],
+      "reviewOnlyRelayoutCandidates": 0,
+      "previouslyImmutableCandidateCount": 11,
+      "operations": [],
+      "worldCoordinates": null,
+      "emitAllowed": false
+    },
+    {
+      "id": "office/candidate-01/L3",
+      "level": 3,
+      "rooms": [
+        {
+          "portId": "office/candidate-01/L3/D004",
+          "roomId": "F3-R004",
+          "candidatesInvestigated": {
+            "variants": 5,
+            "edges": 32,
+            "clearDoorAndFrame": 3,
+            "roomCoreAndRoute": 0,
+            "linkedToExistingNamedCorridor": 0
+          },
+          "rejections": {
+            "FRAME_PRODUCTION_OR_PRIOR_ASSEMBLY": 29,
+            "NO_RETAINED_2X2_ROOM_CORE_AND_ROUTE": 3
+          },
+          "best": null,
+          "eligibleCount": 0,
+          "status": "HOLD_NEEDS_DEEPER_TOPOLOGY_OR_PRODUCTION_EDIT",
+          "worldCoordinates": null,
+          "operations": [],
+          "autoApply": false,
+          "templateId": "office/candidate-01|R004"
+        }
+      ],
+      "reviewOnlyRelayoutCandidates": 0,
+      "previouslyImmutableCandidateCount": 10,
+      "operations": [],
+      "worldCoordinates": null,
+      "emitAllowed": false
+    },
+    {
+      "id": "office/candidate-01/L4",
+      "level": 4,
+      "rooms": [
+        {
+          "portId": "office/candidate-01/L4/D004",
+          "roomId": "F4-R004",
+          "candidatesInvestigated": {
+            "variants": 5,
+            "edges": 32,
+            "clearDoorAndFrame": 3,
+            "roomCoreAndRoute": 0,
+            "linkedToExistingNamedCorridor": 0
+          },
+          "rejections": {
+            "FRAME_PRODUCTION_OR_PRIOR_ASSEMBLY": 29,
+            "NO_RETAINED_2X2_ROOM_CORE_AND_ROUTE": 3
+          },
+          "best": null,
+          "eligibleCount": 0,
+          "status": "HOLD_NEEDS_DEEPER_TOPOLOGY_OR_PRODUCTION_EDIT",
+          "worldCoordinates": null,
+          "operations": [],
+          "autoApply": false,
+          "templateId": "office/candidate-01|R004"
+        }
+      ],
+      "reviewOnlyRelayoutCandidates": 0,
+      "previouslyImmutableCandidateCount": 10,
+      "operations": [],
+      "worldCoordinates": null,
+      "emitAllowed": false
+    },
+    {
+      "id": "office/candidate-01/L5",
+      "level": 5,
+      "rooms": [
+        {
+          "portId": "office/candidate-01/L5/D004",
+          "roomId": "F5-R004",
+          "candidatesInvestigated": {
+            "variants": 5,
+            "edges": 32,
+            "clearDoorAndFrame": 3,
+            "roomCoreAndRoute": 0,
+            "linkedToExistingNamedCorridor": 0
+          },
+          "rejections": {
+            "FRAME_PRODUCTION_OR_PRIOR_ASSEMBLY": 29,
+            "NO_RETAINED_2X2_ROOM_CORE_AND_ROUTE": 3
+          },
+          "best": null,
+          "eligibleCount": 0,
+          "status": "HOLD_NEEDS_DEEPER_TOPOLOGY_OR_PRODUCTION_EDIT",
+          "worldCoordinates": null,
+          "operations": [],
+          "autoApply": false,
+          "templateId": "office/candidate-01|R004"
+        }
+      ],
+      "reviewOnlyRelayoutCandidates": 0,
+      "previouslyImmutableCandidateCount": 10,
+      "operations": [],
+      "worldCoordinates": null,
+      "emitAllowed": false
+    },
+    {
+      "id": "office/candidate-01/L6",
+      "level": 6,
+      "rooms": [
+        {
+          "portId": "office/candidate-01/L6/D004",
+          "roomId": "F6-R004",
+          "candidatesInvestigated": {
+            "variants": 5,
+            "edges": 32,
+            "clearDoorAndFrame": 0,
+            "roomCoreAndRoute": 0,
+            "linkedToExistingNamedCorridor": 0
+          },
+          "rejections": {
+            "FRAME_PRODUCTION_OR_PRIOR_ASSEMBLY": 29,
+            "NO_ROOM_SIDE_SWING": 3
+          },
+          "best": null,
+          "eligibleCount": 0,
+          "status": "HOLD_NEEDS_DEEPER_TOPOLOGY_OR_PRODUCTION_EDIT",
+          "worldCoordinates": null,
+          "operations": [],
+          "autoApply": false,
+          "templateId": "office/candidate-01|R004"
+        }
+      ],
+      "reviewOnlyRelayoutCandidates": 0,
+      "previouslyImmutableCandidateCount": 10,
+      "operations": [],
+      "worldCoordinates": null,
+      "emitAllowed": false
+    },
+    {
+      "id": "office/candidate-02/L1",
+      "level": 1,
+      "rooms": [],
+      "reviewOnlyRelayoutCandidates": 0,
+      "previouslyImmutableCandidateCount": 7,
+      "operations": [],
+      "worldCoordinates": null,
+      "emitAllowed": false
+    },
+    {
+      "id": "office/candidate-02/L2",
+      "level": 2,
+      "rooms": [],
+      "reviewOnlyRelayoutCandidates": 0,
+      "previouslyImmutableCandidateCount": 7,
+      "operations": [],
+      "worldCoordinates": null,
+      "emitAllowed": false
+    },
+    {
+      "id": "office/candidate-02/L3",
+      "level": 3,
+      "rooms": [],
+      "reviewOnlyRelayoutCandidates": 0,
+      "previouslyImmutableCandidateCount": 7,
+      "operations": [],
+      "worldCoordinates": null,
+      "emitAllowed": false
+    },
+    {
+      "id": "office/candidate-02/L4",
+      "level": 4,
+      "rooms": [],
+      "reviewOnlyRelayoutCandidates": 0,
+      "previouslyImmutableCandidateCount": 7,
+      "operations": [],
+      "worldCoordinates": null,
+      "emitAllowed": false
+    },
+    {
+      "id": "office/candidate-02/L5",
+      "level": 5,
+      "rooms": [],
+      "reviewOnlyRelayoutCandidates": 0,
+      "previouslyImmutableCandidateCount": 7,
+      "operations": [],
+      "worldCoordinates": null,
+      "emitAllowed": false
+    },
+    {
+      "id": "office/candidate-02/L6",
+      "level": 6,
+      "rooms": [],
+      "reviewOnlyRelayoutCandidates": 0,
+      "previouslyImmutableCandidateCount": 3,
+      "operations": [],
+      "worldCoordinates": null,
+      "emitAllowed": false
+    },
+    {
+      "id": "office/candidate-03/L1",
+      "level": 1,
+      "rooms": [],
+      "reviewOnlyRelayoutCandidates": 0,
+      "previouslyImmutableCandidateCount": 11,
+      "operations": [],
+      "worldCoordinates": null,
+      "emitAllowed": false
+    },
+    {
+      "id": "office/candidate-03/L2",
+      "level": 2,
+      "rooms": [],
+      "reviewOnlyRelayoutCandidates": 0,
+      "previouslyImmutableCandidateCount": 11,
+      "operations": [],
+      "worldCoordinates": null,
+      "emitAllowed": false
+    },
+    {
+      "id": "office/candidate-03/L3",
+      "level": 3,
+      "rooms": [],
+      "reviewOnlyRelayoutCandidates": 0,
+      "previouslyImmutableCandidateCount": 11,
+      "operations": [],
+      "worldCoordinates": null,
+      "emitAllowed": false
+    },
+    {
+      "id": "office/candidate-03/L4",
+      "level": 4,
+      "rooms": [],
+      "reviewOnlyRelayoutCandidates": 0,
+      "previouslyImmutableCandidateCount": 11,
+      "operations": [],
+      "worldCoordinates": null,
+      "emitAllowed": false
+    },
+    {
+      "id": "office/candidate-03/L5",
+      "level": 5,
+      "rooms": [],
+      "reviewOnlyRelayoutCandidates": 0,
+      "previouslyImmutableCandidateCount": 11,
+      "operations": [],
+      "worldCoordinates": null,
+      "emitAllowed": false
+    },
+    {
+      "id": "office/candidate-03/L6",
+      "level": 6,
+      "rooms": [],
+      "reviewOnlyRelayoutCandidates": 0,
+      "previouslyImmutableCandidateCount": 11,
+      "operations": [],
+      "worldCoordinates": null,
+      "emitAllowed": false
+    }
+  ],
+  "importantLimits": [
+    "ROOM_RECT_RETRACTION_AND_CORRIDOR_RECLASSIFICATION_NOT_APPROVED",
+    "EXISTING_IMMUTABLE_275_DOOR_CANDIDATES_UNCHANGED",
+    "NAMED_CORRIDOR_TARGET_DOES_NOT_PROVE_EXTERNAL_EXIT",
+    "HINGE_AND_BEDROCK_DOOR_STATE_UNVERIFIED",
+    "CORRIDOR_WIDTH_AND_GLOBAL_EGRESS_UNVERIFIED",
+    "25_STAIRS_240_SLAB_CUTS_18_OFF_MASK_RESERVATIONS_HOLD"
+  ],
+  "approval": "PROPOSED_ONLY",
+  "readiness": "NOT_PREPARED",
+  "constructionApproved": false,
+  "executionAllowed": false,
+  "worldContacts": 0,
+  "gates": [
+    {
+      "id": "M4-01",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-02",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-03",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-04",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-05",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-06",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-07",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-08",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-09",
+      "status": "BLOCKED"
+    }
+  ],
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0,
+    "worldCoordinates": null,
+    "materialIds": []
+  },
+  "reportSha256": "f8e3278c8594897cbbfe56532f66d61142dfc0ee89c98b96b0d4b7e424b96a4c"
+}

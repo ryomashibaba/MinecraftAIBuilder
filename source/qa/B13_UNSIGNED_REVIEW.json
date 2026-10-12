@@ -1,0 +1,14 @@
+{
+  "schema": "minecraftaibuilder-b13-unsigned-review-v1",
+  "b13ReportSha256": "1fbba7ecba2b4b7ed7721e55299e2436255f97836c0e5b663e27e4ac2a70f21e",
+  "selectedAlternative": "REBASE_AND_TRIM_REVIEW",
+  "selectedFloor": 6,
+  "approved": false,
+  "constructionApproved": false,
+  "executionAllowed": false,
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "commandCount": 0,
+    "operations": []
+  }
+}

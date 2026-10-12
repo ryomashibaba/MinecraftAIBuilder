@@ -1,0 +1,1011 @@
+{
+  "schema": "minecraftaibuilder-b63-hypothetical-wall-width-review-v1",
+  "kind": "FROZEN_MODEL_ONLY_NO_PHYSICAL_VALIDATION",
+  "provenance": {
+    "b62Sha256": "76f52614ff864757cd6b75cada6b86ae424ff9c047b4cf9d97c1f14afa97f974",
+    "b18Sha256": "60a52e7267393dee22c7b5ddc09d1a48630e5aff2ae92c8de1dfa631459806c3",
+    "b17Sha256": "acdb7a316a036789a77c8fe063a4a186379e9abe87b85454e27bc2d44e92bc9d"
+  },
+  "scope": {
+    "building": "apartment/candidate-01",
+    "level": 1,
+    "sourceWallPanels": 212,
+    "sourceDoorVoids": 13,
+    "hypotheticalWallThickness": 0.125,
+    "hypotheticalPedestrianHeight": 2,
+    "modelSpace": "LOCAL_NOMINAL_NOT_WORLD",
+    "sourceEngineRuntimeVerified": false,
+    "physicalMaterialsVerified": false
+  },
+  "alternatives": [
+    {
+      "id": "B61_UNCONSTRAINED",
+      "cellCount": 3,
+      "nominalBoundaryCrossingsB62": [],
+      "wallModelProfiles": [
+        {
+          "hypotheticalCenteredWidth": 0.5,
+          "modelWallCollisions": [],
+          "modelWallCollisionCellCount": 0,
+          "nominalElevatorOverlapCells": [
+            {
+              "x": 21,
+              "z": 18
+            },
+            {
+              "x": 22,
+              "z": 18
+            },
+            {
+              "x": 23,
+              "z": 18
+            }
+          ],
+          "nominalStairOverlapCells": [],
+          "compatibleWithB18ModelWallsOnly": true,
+          "realCorridorWidthVerified": false,
+          "realClearanceVerified": false
+        },
+        {
+          "hypotheticalCenteredWidth": 0.75,
+          "modelWallCollisions": [],
+          "modelWallCollisionCellCount": 0,
+          "nominalElevatorOverlapCells": [
+            {
+              "x": 21,
+              "z": 18
+            },
+            {
+              "x": 22,
+              "z": 18
+            },
+            {
+              "x": 23,
+              "z": 18
+            }
+          ],
+          "nominalStairOverlapCells": [],
+          "compatibleWithB18ModelWallsOnly": true,
+          "realCorridorWidthVerified": false,
+          "realClearanceVerified": false
+        },
+        {
+          "hypotheticalCenteredWidth": 1,
+          "modelWallCollisions": [],
+          "modelWallCollisionCellCount": 0,
+          "nominalElevatorOverlapCells": [
+            {
+              "x": 21,
+              "z": 18
+            },
+            {
+              "x": 22,
+              "z": 18
+            },
+            {
+              "x": 23,
+              "z": 18
+            }
+          ],
+          "nominalStairOverlapCells": [],
+          "compatibleWithB18ModelWallsOnly": true,
+          "realCorridorWidthVerified": false,
+          "realClearanceVerified": false
+        },
+        {
+          "hypotheticalCenteredWidth": 1.25,
+          "modelWallCollisions": [],
+          "modelWallCollisionCellCount": 0,
+          "nominalElevatorOverlapCells": [
+            {
+              "x": 21,
+              "z": 18
+            },
+            {
+              "x": 22,
+              "z": 18
+            },
+            {
+              "x": 23,
+              "z": 18
+            }
+          ],
+          "nominalStairOverlapCells": [],
+          "compatibleWithB18ModelWallsOnly": true,
+          "realCorridorWidthVerified": false,
+          "realClearanceVerified": false
+        }
+      ],
+      "perCellReview": [
+        {
+          "cell": {
+            "x": 21,
+            "z": 18
+          },
+          "nearestModelWallIds": [
+            {
+              "wallId": "apartment/candidate-01/L1/W0064",
+              "role": "PARTITION",
+              "roomIds": [
+                "F1-R012"
+              ],
+              "distance": 3.473673
+            },
+            {
+              "wallId": "apartment/candidate-01/L1/W0105",
+              "role": "RIGHT_JAMB",
+              "roomIds": [
+                "F1-R009"
+              ],
+              "distance": 3.473673
+            },
+            {
+              "wallId": "apartment/candidate-01/L1/W0106",
+              "role": "PARTITION",
+              "roomIds": [
+                "F1-R013"
+              ],
+              "distance": 3.473673
+            },
+            {
+              "wallId": "apartment/candidate-01/L1/W0063",
+              "role": "RIGHT_JAMB",
+              "roomIds": [
+                "F1-R012"
+              ],
+              "distance": 3.527238
+            }
+          ],
+          "nominalAdjacentRoomIds": [],
+          "nominalRoomOccupancyKnown": false,
+          "centerToModelWallDistance": 3.473673
+        },
+        {
+          "cell": {
+            "x": 22,
+            "z": 18
+          },
+          "nearestModelWallIds": [
+            {
+              "wallId": "apartment/candidate-01/L1/W0105",
+              "role": "RIGHT_JAMB",
+              "roomIds": [
+                "F1-R009"
+              ],
+              "distance": 2.488254
+            },
+            {
+              "wallId": "apartment/candidate-01/L1/W0106",
+              "role": "PARTITION",
+              "roomIds": [
+                "F1-R013"
+              ],
+              "distance": 2.488254
+            },
+            {
+              "wallId": "apartment/candidate-01/L1/W0119",
+              "role": "PARTITION",
+              "roomIds": [
+                "F1-R009"
+              ],
+              "distance": 2.537993
+            },
+            {
+              "wallId": "apartment/candidate-01/L1/W0120",
+              "role": "PARTITION",
+              "roomIds": [
+                "F1-R013"
+              ],
+              "distance": 2.537993
+            }
+          ],
+          "nominalAdjacentRoomIds": [],
+          "nominalRoomOccupancyKnown": false,
+          "centerToModelWallDistance": 2.488254
+        },
+        {
+          "cell": {
+            "x": 23,
+            "z": 18
+          },
+          "nearestModelWallIds": [
+            {
+              "wallId": "apartment/candidate-01/L1/W0105",
+              "role": "RIGHT_JAMB",
+              "roomIds": [
+                "F1-R009"
+              ],
+              "distance": 1.521974
+            },
+            {
+              "wallId": "apartment/candidate-01/L1/W0106",
+              "role": "PARTITION",
+              "roomIds": [
+                "F1-R013"
+              ],
+              "distance": 1.521974
+            },
+            {
+              "wallId": "apartment/candidate-01/L1/W0119",
+              "role": "PARTITION",
+              "roomIds": [
+                "F1-R009"
+              ],
+              "distance": 1.5625
+            },
+            {
+              "wallId": "apartment/candidate-01/L1/W0120",
+              "role": "PARTITION",
+              "roomIds": [
+                "F1-R013"
+              ],
+              "distance": 1.5625
+            }
+          ],
+          "nominalAdjacentRoomIds": [],
+          "nominalRoomOccupancyKnown": false,
+          "centerToModelWallDistance": 1.521974
+        }
+      ],
+      "roomFootprintCellOwnerMapping": "ABSENT_IN_FROZEN_INPUTS",
+      "roomOccupancy": "UNKNOWN",
+      "physicalWallThicknessVerified": false,
+      "actualRoomLayoutVerified": false,
+      "realDoorBlockStatesVerified": false,
+      "realStairClearanceVerified": false,
+      "realElevatorClearanceVerified": false,
+      "actualPassageWidthVerified": false,
+      "emittable": false,
+      "approved": false
+    },
+    {
+      "id": "AVOID_ELEVATOR",
+      "cellCount": 4,
+      "nominalBoundaryCrossingsB62": [],
+      "wallModelProfiles": [
+        {
+          "hypotheticalCenteredWidth": 0.5,
+          "modelWallCollisions": [],
+          "modelWallCollisionCellCount": 0,
+          "nominalElevatorOverlapCells": [],
+          "nominalStairOverlapCells": [
+            {
+              "x": 14,
+              "z": 18
+            },
+            {
+              "x": 13,
+              "z": 18
+            },
+            {
+              "x": 12,
+              "z": 18
+            }
+          ],
+          "compatibleWithB18ModelWallsOnly": true,
+          "realCorridorWidthVerified": false,
+          "realClearanceVerified": false
+        },
+        {
+          "hypotheticalCenteredWidth": 0.75,
+          "modelWallCollisions": [],
+          "modelWallCollisionCellCount": 0,
+          "nominalElevatorOverlapCells": [],
+          "nominalStairOverlapCells": [
+            {
+              "x": 14,
+              "z": 18
+            },
+            {
+              "x": 13,
+              "z": 18
+            },
+            {
+              "x": 12,
+              "z": 18
+            }
+          ],
+          "compatibleWithB18ModelWallsOnly": true,
+          "realCorridorWidthVerified": false,
+          "realClearanceVerified": false
+        },
+        {
+          "hypotheticalCenteredWidth": 1,
+          "modelWallCollisions": [
+            {
+              "cell": {
+                "x": 11,
+                "z": 18
+              },
+              "hits": [
+                {
+                  "wallId": "apartment/candidate-01/L1/W0033",
+                  "role": "PARTITION",
+                  "roomIds": [
+                    "F1-R011"
+                  ]
+                }
+              ]
+            }
+          ],
+          "modelWallCollisionCellCount": 1,
+          "nominalElevatorOverlapCells": [],
+          "nominalStairOverlapCells": [
+            {
+              "x": 14,
+              "z": 18
+            },
+            {
+              "x": 13,
+              "z": 18
+            },
+            {
+              "x": 12,
+              "z": 18
+            }
+          ],
+          "compatibleWithB18ModelWallsOnly": false,
+          "realCorridorWidthVerified": false,
+          "realClearanceVerified": false
+        },
+        {
+          "hypotheticalCenteredWidth": 1.25,
+          "modelWallCollisions": [
+            {
+              "cell": {
+                "x": 14,
+                "z": 18
+              },
+              "hits": [
+                {
+                  "wallId": "apartment/candidate-01/L1/W0049",
+                  "role": "PARTITION",
+                  "roomIds": [
+                    "F1-R012"
+                  ]
+                },
+                {
+                  "wallId": "apartment/candidate-01/L1/W0054",
+                  "role": "PARTITION",
+                  "roomIds": [
+                    "F1-R012"
+                  ]
+                }
+              ]
+            },
+            {
+              "cell": {
+                "x": 12,
+                "z": 18
+              },
+              "hits": [
+                {
+                  "wallId": "apartment/candidate-01/L1/W0033",
+                  "role": "PARTITION",
+                  "roomIds": [
+                    "F1-R011"
+                  ]
+                },
+                {
+                  "wallId": "apartment/candidate-01/L1/W0034",
+                  "role": "PARTITION",
+                  "roomIds": [
+                    "F1-R011"
+                  ]
+                }
+              ]
+            },
+            {
+              "cell": {
+                "x": 11,
+                "z": 18
+              },
+              "hits": [
+                {
+                  "wallId": "apartment/candidate-01/L1/W0028",
+                  "role": "PARTITION",
+                  "roomIds": [
+                    "F1-R011"
+                  ]
+                },
+                {
+                  "wallId": "apartment/candidate-01/L1/W0033",
+                  "role": "PARTITION",
+                  "roomIds": [
+                    "F1-R011"
+                  ]
+                },
+                {
+                  "wallId": "apartment/candidate-01/L1/W0034",
+                  "role": "PARTITION",
+                  "roomIds": [
+                    "F1-R011"
+                  ]
+                }
+              ]
+            }
+          ],
+          "modelWallCollisionCellCount": 3,
+          "nominalElevatorOverlapCells": [],
+          "nominalStairOverlapCells": [
+            {
+              "x": 14,
+              "z": 18
+            },
+            {
+              "x": 13,
+              "z": 18
+            },
+            {
+              "x": 12,
+              "z": 18
+            },
+            {
+              "x": 11,
+              "z": 18
+            }
+          ],
+          "compatibleWithB18ModelWallsOnly": false,
+          "realCorridorWidthVerified": false,
+          "realClearanceVerified": false
+        }
+      ],
+      "perCellReview": [
+        {
+          "cell": {
+            "x": 14,
+            "z": 18
+          },
+          "nearestModelWallIds": [
+            {
+              "wallId": "apartment/candidate-01/L1/W0049",
+              "role": "PARTITION",
+              "roomIds": [
+                "F1-R012"
+              ],
+              "distance": 0.664384
+            },
+            {
+              "wallId": "apartment/candidate-01/L1/W0054",
+              "role": "PARTITION",
+              "roomIds": [
+                "F1-R012"
+              ],
+              "distance": 0.664384
+            },
+            {
+              "wallId": "apartment/candidate-01/L1/W0050",
+              "role": "PARTITION",
+              "roomIds": [
+                "F1-R012"
+              ],
+              "distance": 1.5625
+            },
+            {
+              "wallId": "apartment/candidate-01/L1/W0058",
+              "role": "PARTITION",
+              "roomIds": [
+                "F1-R012"
+              ],
+              "distance": 1.5625
+            }
+          ],
+          "nominalAdjacentRoomIds": [
+            "F1-R012"
+          ],
+          "nominalRoomOccupancyKnown": false,
+          "centerToModelWallDistance": 0.664384
+        },
+        {
+          "cell": {
+            "x": 13,
+            "z": 18
+          },
+          "nearestModelWallIds": [
+            {
+              "wallId": "apartment/candidate-01/L1/W0034",
+              "role": "PARTITION",
+              "roomIds": [
+                "F1-R011"
+              ],
+              "distance": 1.521974
+            },
+            {
+              "wallId": "apartment/candidate-01/L1/W0049",
+              "role": "PARTITION",
+              "roomIds": [
+                "F1-R012"
+              ],
+              "distance": 1.521974
+            },
+            {
+              "wallId": "apartment/candidate-01/L1/W0033",
+              "role": "PARTITION",
+              "roomIds": [
+                "F1-R011"
+              ],
+              "distance": 1.5625
+            },
+            {
+              "wallId": "apartment/candidate-01/L1/W0054",
+              "role": "PARTITION",
+              "roomIds": [
+                "F1-R012"
+              ],
+              "distance": 1.5625
+            }
+          ],
+          "nominalAdjacentRoomIds": [],
+          "nominalRoomOccupancyKnown": false,
+          "centerToModelWallDistance": 1.521974
+        },
+        {
+          "cell": {
+            "x": 12,
+            "z": 18
+          },
+          "nearestModelWallIds": [
+            {
+              "wallId": "apartment/candidate-01/L1/W0033",
+              "role": "PARTITION",
+              "roomIds": [
+                "F1-R011"
+              ],
+              "distance": 0.664384
+            },
+            {
+              "wallId": "apartment/candidate-01/L1/W0034",
+              "role": "PARTITION",
+              "roomIds": [
+                "F1-R011"
+              ],
+              "distance": 0.664384
+            },
+            {
+              "wallId": "apartment/candidate-01/L1/W0028",
+              "role": "PARTITION",
+              "roomIds": [
+                "F1-R011"
+              ],
+              "distance": 1.5625
+            },
+            {
+              "wallId": "apartment/candidate-01/L1/W0036",
+              "role": "PARTITION",
+              "roomIds": [
+                "F1-R011"
+              ],
+              "distance": 1.5625
+            }
+          ],
+          "nominalAdjacentRoomIds": [
+            "F1-R011"
+          ],
+          "nominalRoomOccupancyKnown": false,
+          "centerToModelWallDistance": 0.664384
+        },
+        {
+          "cell": {
+            "x": 11,
+            "z": 18
+          },
+          "nearestModelWallIds": [
+            {
+              "wallId": "apartment/candidate-01/L1/W0033",
+              "role": "PARTITION",
+              "roomIds": [
+                "F1-R011"
+              ],
+              "distance": 0.4375
+            },
+            {
+              "wallId": "apartment/candidate-01/L1/W0028",
+              "role": "PARTITION",
+              "roomIds": [
+                "F1-R011"
+              ],
+              "distance": 0.664384
+            },
+            {
+              "wallId": "apartment/candidate-01/L1/W0034",
+              "role": "PARTITION",
+              "roomIds": [
+                "F1-R011"
+              ],
+              "distance": 0.664384
+            },
+            {
+              "wallId": "apartment/candidate-01/L1/W0036",
+              "role": "PARTITION",
+              "roomIds": [
+                "F1-R011"
+              ],
+              "distance": 1.5625
+            }
+          ],
+          "nominalAdjacentRoomIds": [
+            "F1-R011"
+          ],
+          "nominalRoomOccupancyKnown": false,
+          "centerToModelWallDistance": 0.4375
+        }
+      ],
+      "roomFootprintCellOwnerMapping": "ABSENT_IN_FROZEN_INPUTS",
+      "roomOccupancy": "UNKNOWN",
+      "physicalWallThicknessVerified": false,
+      "actualRoomLayoutVerified": false,
+      "realDoorBlockStatesVerified": false,
+      "realStairClearanceVerified": false,
+      "realElevatorClearanceVerified": false,
+      "actualPassageWidthVerified": false,
+      "emittable": false,
+      "approved": false
+    },
+    {
+      "id": "AVOID_ELEVATOR_AND_STAIR",
+      "cellCount": 5,
+      "nominalBoundaryCrossingsB62": [],
+      "wallModelProfiles": [
+        {
+          "hypotheticalCenteredWidth": 0.5,
+          "modelWallCollisions": [],
+          "modelWallCollisionCellCount": 0,
+          "nominalElevatorOverlapCells": [],
+          "nominalStairOverlapCells": [],
+          "compatibleWithB18ModelWallsOnly": true,
+          "realCorridorWidthVerified": false,
+          "realClearanceVerified": false
+        },
+        {
+          "hypotheticalCenteredWidth": 0.75,
+          "modelWallCollisions": [],
+          "modelWallCollisionCellCount": 0,
+          "nominalElevatorOverlapCells": [],
+          "nominalStairOverlapCells": [],
+          "compatibleWithB18ModelWallsOnly": true,
+          "realCorridorWidthVerified": false,
+          "realClearanceVerified": false
+        },
+        {
+          "hypotheticalCenteredWidth": 1,
+          "modelWallCollisions": [],
+          "modelWallCollisionCellCount": 0,
+          "nominalElevatorOverlapCells": [],
+          "nominalStairOverlapCells": [],
+          "compatibleWithB18ModelWallsOnly": true,
+          "realCorridorWidthVerified": false,
+          "realClearanceVerified": false
+        },
+        {
+          "hypotheticalCenteredWidth": 1.25,
+          "modelWallCollisions": [],
+          "modelWallCollisionCellCount": 0,
+          "nominalElevatorOverlapCells": [
+            {
+              "x": 20,
+              "z": 20
+            },
+            {
+              "x": 21,
+              "z": 20
+            },
+            {
+              "x": 22,
+              "z": 20
+            },
+            {
+              "x": 23,
+              "z": 20
+            }
+          ],
+          "nominalStairOverlapCells": [],
+          "compatibleWithB18ModelWallsOnly": true,
+          "realCorridorWidthVerified": false,
+          "realClearanceVerified": false
+        }
+      ],
+      "perCellReview": [
+        {
+          "cell": {
+            "x": 19,
+            "z": 20
+          },
+          "nearestModelWallIds": [
+            {
+              "wallId": "apartment/candidate-01/L1/W0066",
+              "role": "PARTITION",
+              "roomIds": [
+                "F1-R012"
+              ],
+              "distance": 1.4375
+            },
+            {
+              "wallId": "apartment/candidate-01/L1/W0064",
+              "role": "PARTITION",
+              "roomIds": [
+                "F1-R012"
+              ],
+              "distance": 1.521974
+            },
+            {
+              "wallId": "apartment/candidate-01/L1/W0068",
+              "role": "PARTITION",
+              "roomIds": [
+                "F1-R012"
+              ],
+              "distance": 1.521974
+            },
+            {
+              "wallId": "apartment/candidate-01/L1/W0063",
+              "role": "RIGHT_JAMB",
+              "roomIds": [
+                "F1-R012"
+              ],
+              "distance": 2.077596
+            }
+          ],
+          "nominalAdjacentRoomIds": [
+            "F1-R012"
+          ],
+          "nominalRoomOccupancyKnown": false,
+          "centerToModelWallDistance": 1.4375
+        },
+        {
+          "cell": {
+            "x": 20,
+            "z": 20
+          },
+          "nearestModelWallIds": [
+            {
+              "wallId": "apartment/candidate-01/L1/W0066",
+              "role": "PARTITION",
+              "roomIds": [
+                "F1-R012"
+              ],
+              "distance": 2.4375
+            },
+            {
+              "wallId": "apartment/candidate-01/L1/W0064",
+              "role": "PARTITION",
+              "roomIds": [
+                "F1-R012"
+              ],
+              "distance": 2.488254
+            },
+            {
+              "wallId": "apartment/candidate-01/L1/W0068",
+              "role": "PARTITION",
+              "roomIds": [
+                "F1-R012"
+              ],
+              "distance": 2.488254
+            },
+            {
+              "wallId": "apartment/candidate-01/L1/W0063",
+              "role": "RIGHT_JAMB",
+              "roomIds": [
+                "F1-R012"
+              ],
+              "distance": 2.883818
+            }
+          ],
+          "nominalAdjacentRoomIds": [],
+          "nominalRoomOccupancyKnown": false,
+          "centerToModelWallDistance": 2.4375
+        },
+        {
+          "cell": {
+            "x": 21,
+            "z": 20
+          },
+          "nearestModelWallIds": [
+            {
+              "wallId": "apartment/candidate-01/L1/W0066",
+              "role": "PARTITION",
+              "roomIds": [
+                "F1-R012"
+              ],
+              "distance": 3.4375
+            },
+            {
+              "wallId": "apartment/candidate-01/L1/W0108",
+              "role": "PARTITION",
+              "roomIds": [
+                "F1-R013"
+              ],
+              "distance": 3.4375
+            },
+            {
+              "wallId": "apartment/candidate-01/L1/W0064",
+              "role": "PARTITION",
+              "roomIds": [
+                "F1-R012"
+              ],
+              "distance": 3.473673
+            },
+            {
+              "wallId": "apartment/candidate-01/L1/W0068",
+              "role": "PARTITION",
+              "roomIds": [
+                "F1-R012"
+              ],
+              "distance": 3.473673
+            }
+          ],
+          "nominalAdjacentRoomIds": [],
+          "nominalRoomOccupancyKnown": false,
+          "centerToModelWallDistance": 3.4375
+        },
+        {
+          "cell": {
+            "x": 22,
+            "z": 20
+          },
+          "nearestModelWallIds": [
+            {
+              "wallId": "apartment/candidate-01/L1/W0108",
+              "role": "PARTITION",
+              "roomIds": [
+                "F1-R013"
+              ],
+              "distance": 2.4375
+            },
+            {
+              "wallId": "apartment/candidate-01/L1/W0106",
+              "role": "PARTITION",
+              "roomIds": [
+                "F1-R013"
+              ],
+              "distance": 2.488254
+            },
+            {
+              "wallId": "apartment/candidate-01/L1/W0109",
+              "role": "LEFT_JAMB",
+              "roomIds": [
+                "F1-R013"
+              ],
+              "distance": 2.488254
+            },
+            {
+              "wallId": "apartment/candidate-01/L1/W0120",
+              "role": "PARTITION",
+              "roomIds": [
+                "F1-R013"
+              ],
+              "distance": 2.883818
+            }
+          ],
+          "nominalAdjacentRoomIds": [],
+          "nominalRoomOccupancyKnown": false,
+          "centerToModelWallDistance": 2.4375
+        },
+        {
+          "cell": {
+            "x": 23,
+            "z": 20
+          },
+          "nearestModelWallIds": [
+            {
+              "wallId": "apartment/candidate-01/L1/W0108",
+              "role": "PARTITION",
+              "roomIds": [
+                "F1-R013"
+              ],
+              "distance": 1.4375
+            },
+            {
+              "wallId": "apartment/candidate-01/L1/W0106",
+              "role": "PARTITION",
+              "roomIds": [
+                "F1-R013"
+              ],
+              "distance": 1.521974
+            },
+            {
+              "wallId": "apartment/candidate-01/L1/W0109",
+              "role": "LEFT_JAMB",
+              "roomIds": [
+                "F1-R013"
+              ],
+              "distance": 1.521974
+            },
+            {
+              "wallId": "apartment/candidate-01/L1/W0120",
+              "role": "PARTITION",
+              "roomIds": [
+                "F1-R013"
+              ],
+              "distance": 2.077596
+            }
+          ],
+          "nominalAdjacentRoomIds": [
+            "F1-R013"
+          ],
+          "nominalRoomOccupancyKnown": false,
+          "centerToModelWallDistance": 1.4375
+        }
+      ],
+      "roomFootprintCellOwnerMapping": "ABSENT_IN_FROZEN_INPUTS",
+      "roomOccupancy": "UNKNOWN",
+      "physicalWallThicknessVerified": false,
+      "actualRoomLayoutVerified": false,
+      "realDoorBlockStatesVerified": false,
+      "realStairClearanceVerified": false,
+      "realElevatorClearanceVerified": false,
+      "actualPassageWidthVerified": false,
+      "emittable": false,
+      "approved": false
+    }
+  ],
+  "findings": {
+    "fiveCellNominalReservationsAvoided": true,
+    "fiveCellNominalRoomOccupancyVerified": false,
+    "previousUnresolvedB42UpperDoors": 60,
+    "fiveCellNearElevatorReservationCells": 3,
+    "b43CorridorAndPartitionChangesUnapproved": true,
+    "liveEngineSourceAvailable": false
+  },
+  "blockers": [
+    "ROOM_FOOTPRINT_CELL_OWNERS_MISSING",
+    "WALL_0_125_IS_HYPOTHETICAL_NOT_MINECRAFT_THICKNESS",
+    "DOOR_STAIRS_AND_LIFT_PHYSICAL_CLEARANCES_UNVERIFIED",
+    "B43_CHANGES_NOT_APPROVED",
+    "B42_UPPER_60_DOORS_NOT_PHYSICALLY_VALIDATED",
+    "PRODUCTION_ENGINE_SOURCE_UNAVAILABLE"
+  ],
+  "readiness": "NOT_PREPARED",
+  "deployment": "BLOCKED",
+  "executionAllowed": false,
+  "constructionApproved": false,
+  "productionFacadeParity": "UNVERIFIED",
+  "physicalQuality": "UNKNOWN",
+  "worldContacts": 0,
+  "scans": 0,
+  "engineCalls": 0,
+  "gates": [
+    {
+      "id": "M4-01",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-02",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-03",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-04",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-05",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-06",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-07",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-08",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-09",
+      "status": "BLOCKED"
+    }
+  ],
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0,
+    "worldCoordinates": null,
+    "materialIds": []
+  },
+  "reportSha256": "e6417e22b650744792fc857dd3f7e289fee07f4e86737b5b47120a75b50d0126"
+}

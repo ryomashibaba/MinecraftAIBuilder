@@ -1,0 +1,138 @@
+{
+  "schema": "minecraftaibuilder-b67-source-collection-readiness-v1",
+  "purpose": "UNBLOCK_PRODUCTION_SOURCE_DEPENDENCY_WITH_ONE_CLICK_READONLY_EXPORT",
+  "provenance": {
+    "b66ReportSha256": "d7b2a313c79a29365f50fdaedfc6bf60bcb332209ae89f9e9f1fde7bca7179e6",
+    "b56ReportSha256": "258d80ae2222910b40e4c63ac3f13e2c7f08c73639c0385a26725ddff114354e"
+  },
+  "originalSourceState": {
+    "required": 5,
+    "available": 0,
+    "pinnedFiles": [
+      {
+        "relativePath": "engine/src/general-building-planner.js",
+        "expectedSha256": "23be6e8b03827698fb890661f6fd0957a76ac4718f3347531121c8a7dc0450c8",
+        "status": "NOT_PRESENT_IN_HANDOFF"
+      },
+      {
+        "relativePath": "engine/src/building-grammar.js",
+        "expectedSha256": "71c0e2bda3e7a044285d681b38d9d4373e3c0aa417808a2f54c652d05ff47d1a",
+        "status": "NOT_PRESENT_IN_HANDOFF"
+      },
+      {
+        "relativePath": "engine/src/architectural-quality.js",
+        "expectedSha256": "5cadf22d51867a18fd35f6e9ec2e1318732eca2f2e666d2cfc4b2b32cbede530",
+        "status": "NOT_PRESENT_IN_HANDOFF"
+      },
+      {
+        "relativePath": "modules/architectural-library.js",
+        "expectedSha256": "19fa126051a687bfb5c5f6bdf199a6d42aa70b475d908dd38a99e9f354532eee",
+        "status": "NOT_PRESENT_IN_HANDOFF"
+      },
+      {
+        "relativePath": "styles/urban_japanese.json",
+        "expectedSha256": "cefb23009e7a96f8d5900e44242c5fa426646be64c5391048f52e29506f1ceec",
+        "status": "NOT_PRESENT_IN_HANDOFF"
+      }
+    ],
+    "productionFacadeParity": "UNVERIFIED",
+    "engineExecuted": false
+  },
+  "createdTool": {
+    "id": "B67_STANDALONE_NODE_READONLY_COLLECTOR",
+    "requiredRuntime": "Node.js >=20",
+    "windowsLauncher": "RUN_B67_READONLY.cmd",
+    "entryPoint": "collect-b67.mjs",
+    "fileReadScope": "FIVE_EXACT_PINNED_PROJECT_FILES_PLUS_PACKAGE_JSON",
+    "output": "B55_CAPTURE_SUMMARY_COMPATIBLE_ZIP",
+    "status": "TESTED_WITH_SYNTHETIC_FIXTURES_ON_NON_WINDOWS",
+    "windowsRealDeviceTest": "NOT_RUN",
+    "realProductionSourceCollection": "NOT_RUN",
+    "sourceModification": false,
+    "sourceExecution": false,
+    "downloadsOnlyForDirectCli": true,
+    "gameAccess": false,
+    "network": false,
+    "worldScan": false
+  },
+  "gateBeforePhysicalImplementation": [
+    "RECEIVE_GENUINE_B67_SOURCE_ZIP",
+    "VERIFY_FIVE_SHA256_HASHES_AND_CAPTURE_METADATA_WITH_B56",
+    "REVIEW_SOURCE_CONTENTS_FOR_SECRETS",
+    "REVIEW_ENGINE_COMPOSITION_API_CONTRACT",
+    "RECONCILE_REAL_BLOCK_STATES_MATERIAL_AND_PHYSICAL_CLEARANCE",
+    "RUN_TESTS_OFFLINE_FIRST",
+    "KEEP_CONSTRUCTION_BLOCKED_UNTIL_EXPLICIT_APPROVAL"
+  ],
+  "scope": {
+    "buildings": 5,
+    "floors": 30,
+    "conceptRooms": 314,
+    "virtualWallPanels": 5704,
+    "virtualDoorVoids": 314,
+    "verticalReservations": 25,
+    "realBlocksGenerated": 0
+  },
+  "unresolved": [
+    "NO_ORIGINAL_PRODUCTION_ENGINE_FILES",
+    "NO_REAL_WORLD_BLOCK_GEOMETRY",
+    "NO_REAL_DOOR_BLOCK_STATES",
+    "NO_REAL_STAIR_SUPPORT",
+    "B42_60_UPPER_DOORS_UNVERIFIED",
+    "B62_B64_CONNECTOR_NOT_APPROVED"
+  ],
+  "readiness": "NOT_PREPARED",
+  "constructionApproved": false,
+  "executionAllowed": false,
+  "sourceImported": false,
+  "sourceExecuted": false,
+  "engineCalls": 0,
+  "worldContacts": 0,
+  "scans": 0,
+  "M4Gates": [
+    {
+      "id": "M4-01",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-02",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-03",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-04",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-05",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-06",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-07",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-08",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-09",
+      "status": "BLOCKED"
+    }
+  ],
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0,
+    "worldCoordinates": null,
+    "materialIds": []
+  },
+  "reportSha256": "0269c450dc466dadffeabfbd6de73d445c3c725cac063d67bde56a288997a0fc"
+}

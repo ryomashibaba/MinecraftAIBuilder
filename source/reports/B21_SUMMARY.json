@@ -1,0 +1,42 @@
+{
+  "schema": "minecraftaibuilder-step8b-b21-blockscale-review-v1",
+  "counts": {
+    "buildings": 5,
+    "floors": 30,
+    "wallColumns": 5704,
+    "doorOpenings": 314,
+    "stairInterfaces": 25,
+    "stairUnitCells": 105,
+    "upperSlabCutoutReviewCells": 50,
+    "wallReservationHits": 0,
+    "wallOutsidePredictedFootprint": 0,
+    "doorVoidOccupiedByOtherWalls": 236,
+    "doorPortsWithGridCollision": 118,
+    "alternativeWallPositionIsProtected": 104,
+    "alternativeWallPositionIsOther": 14,
+    "stairAndPartitionGridIntersections": 0,
+    "upperSlabHeadspaceNotCut": 0
+  },
+  "issues": {
+    "office02FootprintDifferenceCells": 123,
+    "office02CorridorOutsideCells": 18,
+    "office02FixApplied": false,
+    "materialsUnknown": true,
+    "worldAnchorUnknown": true,
+    "floorCutoutsNotApplied": true,
+    "structuralSupportNotVerified": true,
+    "candidateDoorPortsWithGridCollision": 118,
+    "doorHingesNotVerified": true,
+    "realRuntimeNotVerified": true
+  },
+  "engineeringStatus": "REVIEW_CANDIDATES_ONLY",
+  "engineIntegrated": false,
+  "deploymentGate": "BLOCKED",
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0,
+    "worldCoordinates": null,
+    "materialIds": []
+  }
+}

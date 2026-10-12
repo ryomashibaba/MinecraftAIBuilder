@@ -1,0 +1,62 @@
+{
+  "schema": "minecraftaibuilder-step8b-b31-inert-floor-door-contract-v1",
+  "kind": "CANDIDATE_MASK_AND_DOOR_STATE_REVIEW_ONLY_NOT_ENGINE_INPUT",
+  "sourceEvidence": {
+    "b29AssemblySha256": "f3c3f5d0d29e80195c464444130fd83aa0bb32d608a0b7e0916e0d26cc7ca0c7",
+    "b7Sha256": "4be87b0acfc3641f26a9b71ff329c2386f9e2c8e3461f4d8d70633faf31dcbe8",
+    "b30ReportSha256": "e38414e3d306ae1edc63d5da9fbf6bf28c78af871bfd81dad1466b1d89119a96",
+    "archivedBlockStateTokens": "SEEN_IN_2026_10_10_SOURCE_NOT_VERIFIED_ON_DOOR",
+    "runningEngineIdentityProven": false,
+    "liveMinecraftAcceptanceProven": false
+  },
+  "totals": {
+    "buildings": 5,
+    "floors": 30,
+    "originalFloorCells": 12778,
+    "proposedCutoutCells": 50,
+    "proposedRetainedFloorCells": 12728,
+    "doorPorts": 314,
+    "doorsWithBlockId": 0,
+    "doorsWithResolvedFacing": 0,
+    "doorsWithResolvedHinge": 0,
+    "committedFloorCuts": 0,
+    "engineCalls": 0,
+    "operationsEmitted": 0
+  },
+  "office02": {
+    "outlineMismatchCells": 123,
+    "corridorOutsideCells": 18,
+    "originalApplied": false
+  },
+  "blockers": [
+    "M4-01",
+    "M4-02",
+    "M4-03",
+    "M4-04",
+    "M4-05",
+    "M4-06",
+    "M4-07",
+    "M4-08",
+    "M4-09"
+  ],
+  "readiness": "NOT_PREPARED",
+  "deployment": "BLOCKED",
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0,
+    "materialIds": [],
+    "worldCoordinates": null
+  },
+  "safety": {
+    "constructionApproved": false,
+    "executionAllowed": false,
+    "worldAccess": false,
+    "bridgeContact": false,
+    "actualFloorCuts": 0,
+    "projectFilesModified": false,
+    "legacyModified": false,
+    "archivedEvidenceModified": false
+  },
+  "reportSha256": "dea8dcb92e4bc635ecbb050e20f1ccb76d8c3a4ac9c1ff5fc3411b521e95c2b6"
+}

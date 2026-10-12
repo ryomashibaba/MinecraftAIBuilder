@@ -1,0 +1,1129 @@
+{
+  "schema": "minecraftaibuilder-step8b-b30-engine-boundary-v1",
+  "kind": "INERT_ENGINE_BOUNDARY_OBSERVATION_NOT_A_BUILDPLAN",
+  "sourceEvidence": {
+    "b29AssemblySha256": "f3c3f5d0d29e80195c464444130fd83aa0bb32d608a0b7e0916e0d26cc7ca0c7",
+    "b7FrozenReportSha256": "4be87b0acfc3641f26a9b71ff329c2386f9e2c8e3461f4d8d70633faf31dcbe8",
+    "b17FrozenReportSha256": "acdb7a316a036789a77c8fe063a4a186379e9abe87b85454e27bc2d44e92bc9d",
+    "snapshotInspection": {
+      "status": "NOT_RECHECKED_IN_THIS_RUN",
+      "runtimeIdentityAttested": false
+    },
+    "engineRuntimeAttested": false,
+    "engineModuleImported": false,
+    "plannerInvoked": false
+  },
+  "engineAPI": {
+    "compositionNormalization": "createComposition(input)",
+    "operationSynthesis": "GeneralBuildingPlanner.fromComposition(composition, options)",
+    "finalSafety": "validateBuildPlan(plan)",
+    "floorPlateEmitter": "plate(mask, base, \"floor\", \"floor\")",
+    "interiorEmitterWired": false,
+    "doorStatesResolved": false,
+    "stairSlabCutoutsImplemented": false,
+    "plannerCallAuthorized": false
+  },
+  "buildings": [
+    {
+      "id": "hotel/candidate-01",
+      "plannerBoundary": {
+        "normalizedInputFieldObservations": {
+          "program": "hotel",
+          "width": 26,
+          "depth": 20,
+          "floors": 6,
+          "floorHeight": 5,
+          "style": "modern",
+          "massing": "slab",
+          "seed": 0,
+          "orientation": "north"
+        },
+        "isExecutablePlannerInput": false,
+        "notPassedToCreateComposition": true,
+        "incompatibleWithLiveMaterialPipeline": true
+      },
+      "floors": [
+        {
+          "id": "hotel/candidate-01/L1",
+          "level": 1,
+          "floorEmitterContract": "FULL_SOURCE_FOOTPRINT_PLATE",
+          "plannedPartitionPanels": 194,
+          "doorPorts": 11,
+          "allPhysicalDoorStatesUnverified": true,
+          "materialMapping": null,
+          "interiorPartitionEmitterWired": false,
+          "engineFloorMutationAllowed": false
+        },
+        {
+          "id": "hotel/candidate-01/L2",
+          "level": 2,
+          "floorEmitterContract": "FULL_SOURCE_FOOTPRINT_PLATE",
+          "plannedPartitionPanels": 194,
+          "doorPorts": 11,
+          "allPhysicalDoorStatesUnverified": true,
+          "materialMapping": null,
+          "interiorPartitionEmitterWired": false,
+          "engineFloorMutationAllowed": false
+        },
+        {
+          "id": "hotel/candidate-01/L3",
+          "level": 3,
+          "floorEmitterContract": "FULL_SOURCE_FOOTPRINT_PLATE",
+          "plannedPartitionPanels": 194,
+          "doorPorts": 11,
+          "allPhysicalDoorStatesUnverified": true,
+          "materialMapping": null,
+          "interiorPartitionEmitterWired": false,
+          "engineFloorMutationAllowed": false
+        },
+        {
+          "id": "hotel/candidate-01/L4",
+          "level": 4,
+          "floorEmitterContract": "FULL_SOURCE_FOOTPRINT_PLATE",
+          "plannedPartitionPanels": 194,
+          "doorPorts": 11,
+          "allPhysicalDoorStatesUnverified": true,
+          "materialMapping": null,
+          "interiorPartitionEmitterWired": false,
+          "engineFloorMutationAllowed": false
+        },
+        {
+          "id": "hotel/candidate-01/L5",
+          "level": 5,
+          "floorEmitterContract": "FULL_SOURCE_FOOTPRINT_PLATE",
+          "plannedPartitionPanels": 194,
+          "doorPorts": 11,
+          "allPhysicalDoorStatesUnverified": true,
+          "materialMapping": null,
+          "interiorPartitionEmitterWired": false,
+          "engineFloorMutationAllowed": false
+        },
+        {
+          "id": "hotel/candidate-01/L6",
+          "level": 6,
+          "floorEmitterContract": "FULL_SOURCE_FOOTPRINT_PLATE",
+          "plannedPartitionPanels": 194,
+          "doorPorts": 11,
+          "allPhysicalDoorStatesUnverified": true,
+          "materialMapping": null,
+          "interiorPartitionEmitterWired": false,
+          "engineFloorMutationAllowed": false
+        }
+      ],
+      "stairFloorPlateDiagnostics": [
+        {
+          "id": "hotel/candidate-01/V1",
+          "upperFloorId": "hotel/candidate-01/L2",
+          "candidateCount": 2,
+          "predictedFloorPlateOverlapCells": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "previewFloorCutoutRequired": true,
+          "floorPlateCutoutImplemented": false,
+          "materialState": null,
+          "support": "UNVERIFIED",
+          "headroom": "UNVERIFIED",
+          "permittedAction": "DIAGNOSTIC_ONLY_NO_FLOOR_MODIFICATION"
+        },
+        {
+          "id": "hotel/candidate-01/V2",
+          "upperFloorId": "hotel/candidate-01/L3",
+          "candidateCount": 2,
+          "predictedFloorPlateOverlapCells": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "previewFloorCutoutRequired": true,
+          "floorPlateCutoutImplemented": false,
+          "materialState": null,
+          "support": "UNVERIFIED",
+          "headroom": "UNVERIFIED",
+          "permittedAction": "DIAGNOSTIC_ONLY_NO_FLOOR_MODIFICATION"
+        },
+        {
+          "id": "hotel/candidate-01/V3",
+          "upperFloorId": "hotel/candidate-01/L4",
+          "candidateCount": 2,
+          "predictedFloorPlateOverlapCells": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "previewFloorCutoutRequired": true,
+          "floorPlateCutoutImplemented": false,
+          "materialState": null,
+          "support": "UNVERIFIED",
+          "headroom": "UNVERIFIED",
+          "permittedAction": "DIAGNOSTIC_ONLY_NO_FLOOR_MODIFICATION"
+        },
+        {
+          "id": "hotel/candidate-01/V4",
+          "upperFloorId": "hotel/candidate-01/L5",
+          "candidateCount": 2,
+          "predictedFloorPlateOverlapCells": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "previewFloorCutoutRequired": true,
+          "floorPlateCutoutImplemented": false,
+          "materialState": null,
+          "support": "UNVERIFIED",
+          "headroom": "UNVERIFIED",
+          "permittedAction": "DIAGNOSTIC_ONLY_NO_FLOOR_MODIFICATION"
+        },
+        {
+          "id": "hotel/candidate-01/V5",
+          "upperFloorId": "hotel/candidate-01/L6",
+          "candidateCount": 2,
+          "predictedFloorPlateOverlapCells": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "previewFloorCutoutRequired": true,
+          "floorPlateCutoutImplemented": false,
+          "materialState": null,
+          "support": "UNVERIFIED",
+          "headroom": "UNVERIFIED",
+          "permittedAction": "DIAGNOSTIC_ONLY_NO_FLOOR_MODIFICATION"
+        }
+      ],
+      "totals": {
+        "wallIntents": 1164,
+        "doorIntents": 66,
+        "stairLinks": 5,
+        "predictedFloorPlateOverlaps": 10
+      },
+      "engineCallCount": 0,
+      "blocksGenerated": 0,
+      "executed": false
+    },
+    {
+      "id": "apartment/candidate-01",
+      "plannerBoundary": {
+        "normalizedInputFieldObservations": {
+          "program": "apartment",
+          "width": 28,
+          "depth": 22,
+          "floors": 6,
+          "floorHeight": 4,
+          "style": "modern",
+          "massing": "courtyard",
+          "seed": 0,
+          "orientation": "south"
+        },
+        "isExecutablePlannerInput": false,
+        "notPassedToCreateComposition": true,
+        "incompatibleWithLiveMaterialPipeline": true
+      },
+      "floors": [
+        {
+          "id": "apartment/candidate-01/L1",
+          "level": 1,
+          "floorEmitterContract": "FULL_SOURCE_FOOTPRINT_PLATE",
+          "plannedPartitionPanels": 212,
+          "doorPorts": 13,
+          "allPhysicalDoorStatesUnverified": true,
+          "materialMapping": null,
+          "interiorPartitionEmitterWired": false,
+          "engineFloorMutationAllowed": false
+        },
+        {
+          "id": "apartment/candidate-01/L2",
+          "level": 2,
+          "floorEmitterContract": "FULL_SOURCE_FOOTPRINT_PLATE",
+          "plannedPartitionPanels": 212,
+          "doorPorts": 13,
+          "allPhysicalDoorStatesUnverified": true,
+          "materialMapping": null,
+          "interiorPartitionEmitterWired": false,
+          "engineFloorMutationAllowed": false
+        },
+        {
+          "id": "apartment/candidate-01/L3",
+          "level": 3,
+          "floorEmitterContract": "FULL_SOURCE_FOOTPRINT_PLATE",
+          "plannedPartitionPanels": 212,
+          "doorPorts": 13,
+          "allPhysicalDoorStatesUnverified": true,
+          "materialMapping": null,
+          "interiorPartitionEmitterWired": false,
+          "engineFloorMutationAllowed": false
+        },
+        {
+          "id": "apartment/candidate-01/L4",
+          "level": 4,
+          "floorEmitterContract": "FULL_SOURCE_FOOTPRINT_PLATE",
+          "plannedPartitionPanels": 212,
+          "doorPorts": 13,
+          "allPhysicalDoorStatesUnverified": true,
+          "materialMapping": null,
+          "interiorPartitionEmitterWired": false,
+          "engineFloorMutationAllowed": false
+        },
+        {
+          "id": "apartment/candidate-01/L5",
+          "level": 5,
+          "floorEmitterContract": "FULL_SOURCE_FOOTPRINT_PLATE",
+          "plannedPartitionPanels": 212,
+          "doorPorts": 13,
+          "allPhysicalDoorStatesUnverified": true,
+          "materialMapping": null,
+          "interiorPartitionEmitterWired": false,
+          "engineFloorMutationAllowed": false
+        },
+        {
+          "id": "apartment/candidate-01/L6",
+          "level": 6,
+          "floorEmitterContract": "FULL_SOURCE_FOOTPRINT_PLATE",
+          "plannedPartitionPanels": 212,
+          "doorPorts": 13,
+          "allPhysicalDoorStatesUnverified": true,
+          "materialMapping": null,
+          "interiorPartitionEmitterWired": false,
+          "engineFloorMutationAllowed": false
+        }
+      ],
+      "stairFloorPlateDiagnostics": [
+        {
+          "id": "apartment/candidate-01/V1",
+          "upperFloorId": "apartment/candidate-01/L2",
+          "candidateCount": 2,
+          "predictedFloorPlateOverlapCells": [
+            {
+              "x": 14,
+              "z": 17
+            },
+            {
+              "x": 14,
+              "z": 18
+            }
+          ],
+          "previewFloorCutoutRequired": true,
+          "floorPlateCutoutImplemented": false,
+          "materialState": null,
+          "support": "UNVERIFIED",
+          "headroom": "UNVERIFIED",
+          "permittedAction": "DIAGNOSTIC_ONLY_NO_FLOOR_MODIFICATION"
+        },
+        {
+          "id": "apartment/candidate-01/V2",
+          "upperFloorId": "apartment/candidate-01/L3",
+          "candidateCount": 2,
+          "predictedFloorPlateOverlapCells": [
+            {
+              "x": 14,
+              "z": 17
+            },
+            {
+              "x": 14,
+              "z": 18
+            }
+          ],
+          "previewFloorCutoutRequired": true,
+          "floorPlateCutoutImplemented": false,
+          "materialState": null,
+          "support": "UNVERIFIED",
+          "headroom": "UNVERIFIED",
+          "permittedAction": "DIAGNOSTIC_ONLY_NO_FLOOR_MODIFICATION"
+        },
+        {
+          "id": "apartment/candidate-01/V3",
+          "upperFloorId": "apartment/candidate-01/L4",
+          "candidateCount": 2,
+          "predictedFloorPlateOverlapCells": [
+            {
+              "x": 14,
+              "z": 17
+            },
+            {
+              "x": 14,
+              "z": 18
+            }
+          ],
+          "previewFloorCutoutRequired": true,
+          "floorPlateCutoutImplemented": false,
+          "materialState": null,
+          "support": "UNVERIFIED",
+          "headroom": "UNVERIFIED",
+          "permittedAction": "DIAGNOSTIC_ONLY_NO_FLOOR_MODIFICATION"
+        },
+        {
+          "id": "apartment/candidate-01/V4",
+          "upperFloorId": "apartment/candidate-01/L5",
+          "candidateCount": 2,
+          "predictedFloorPlateOverlapCells": [
+            {
+              "x": 14,
+              "z": 17
+            },
+            {
+              "x": 14,
+              "z": 18
+            }
+          ],
+          "previewFloorCutoutRequired": true,
+          "floorPlateCutoutImplemented": false,
+          "materialState": null,
+          "support": "UNVERIFIED",
+          "headroom": "UNVERIFIED",
+          "permittedAction": "DIAGNOSTIC_ONLY_NO_FLOOR_MODIFICATION"
+        },
+        {
+          "id": "apartment/candidate-01/V5",
+          "upperFloorId": "apartment/candidate-01/L6",
+          "candidateCount": 2,
+          "predictedFloorPlateOverlapCells": [
+            {
+              "x": 14,
+              "z": 17
+            },
+            {
+              "x": 14,
+              "z": 18
+            }
+          ],
+          "previewFloorCutoutRequired": true,
+          "floorPlateCutoutImplemented": false,
+          "materialState": null,
+          "support": "UNVERIFIED",
+          "headroom": "UNVERIFIED",
+          "permittedAction": "DIAGNOSTIC_ONLY_NO_FLOOR_MODIFICATION"
+        }
+      ],
+      "totals": {
+        "wallIntents": 1272,
+        "doorIntents": 78,
+        "stairLinks": 5,
+        "predictedFloorPlateOverlaps": 10
+      },
+      "engineCallCount": 0,
+      "blocksGenerated": 0,
+      "executed": false
+    },
+    {
+      "id": "office/candidate-01",
+      "plannerBoundary": {
+        "normalizedInputFieldObservations": {
+          "program": "office",
+          "width": 24,
+          "depth": 20,
+          "floors": 6,
+          "floorHeight": 4,
+          "style": "urban_japanese",
+          "massing": "tower_on_podium",
+          "seed": 0,
+          "orientation": "south"
+        },
+        "isExecutablePlannerInput": false,
+        "notPassedToCreateComposition": true,
+        "incompatibleWithLiveMaterialPipeline": true
+      },
+      "floors": [
+        {
+          "id": "office/candidate-01/L1",
+          "level": 1,
+          "floorEmitterContract": "FULL_SOURCE_FOOTPRINT_PLATE",
+          "plannedPartitionPanels": 214,
+          "doorPorts": 11,
+          "allPhysicalDoorStatesUnverified": true,
+          "materialMapping": null,
+          "interiorPartitionEmitterWired": false,
+          "engineFloorMutationAllowed": false
+        },
+        {
+          "id": "office/candidate-01/L2",
+          "level": 2,
+          "floorEmitterContract": "FULL_SOURCE_FOOTPRINT_PLATE",
+          "plannedPartitionPanels": 216,
+          "doorPorts": 11,
+          "allPhysicalDoorStatesUnverified": true,
+          "materialMapping": null,
+          "interiorPartitionEmitterWired": false,
+          "engineFloorMutationAllowed": false
+        },
+        {
+          "id": "office/candidate-01/L3",
+          "level": 3,
+          "floorEmitterContract": "FULL_SOURCE_FOOTPRINT_PLATE",
+          "plannedPartitionPanels": 202,
+          "doorPorts": 11,
+          "allPhysicalDoorStatesUnverified": true,
+          "materialMapping": null,
+          "interiorPartitionEmitterWired": false,
+          "engineFloorMutationAllowed": false
+        },
+        {
+          "id": "office/candidate-01/L4",
+          "level": 4,
+          "floorEmitterContract": "FULL_SOURCE_FOOTPRINT_PLATE",
+          "plannedPartitionPanels": 202,
+          "doorPorts": 11,
+          "allPhysicalDoorStatesUnverified": true,
+          "materialMapping": null,
+          "interiorPartitionEmitterWired": false,
+          "engineFloorMutationAllowed": false
+        },
+        {
+          "id": "office/candidate-01/L5",
+          "level": 5,
+          "floorEmitterContract": "FULL_SOURCE_FOOTPRINT_PLATE",
+          "plannedPartitionPanels": 202,
+          "doorPorts": 11,
+          "allPhysicalDoorStatesUnverified": true,
+          "materialMapping": null,
+          "interiorPartitionEmitterWired": false,
+          "engineFloorMutationAllowed": false
+        },
+        {
+          "id": "office/candidate-01/L6",
+          "level": 6,
+          "floorEmitterContract": "FULL_SOURCE_FOOTPRINT_PLATE",
+          "plannedPartitionPanels": 202,
+          "doorPorts": 11,
+          "allPhysicalDoorStatesUnverified": true,
+          "materialMapping": null,
+          "interiorPartitionEmitterWired": false,
+          "engineFloorMutationAllowed": false
+        }
+      ],
+      "stairFloorPlateDiagnostics": [
+        {
+          "id": "office/candidate-01/V1",
+          "upperFloorId": "office/candidate-01/L2",
+          "candidateCount": 2,
+          "predictedFloorPlateOverlapCells": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "previewFloorCutoutRequired": true,
+          "floorPlateCutoutImplemented": false,
+          "materialState": null,
+          "support": "UNVERIFIED",
+          "headroom": "UNVERIFIED",
+          "permittedAction": "DIAGNOSTIC_ONLY_NO_FLOOR_MODIFICATION"
+        },
+        {
+          "id": "office/candidate-01/V2",
+          "upperFloorId": "office/candidate-01/L3",
+          "candidateCount": 2,
+          "predictedFloorPlateOverlapCells": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "previewFloorCutoutRequired": true,
+          "floorPlateCutoutImplemented": false,
+          "materialState": null,
+          "support": "UNVERIFIED",
+          "headroom": "UNVERIFIED",
+          "permittedAction": "DIAGNOSTIC_ONLY_NO_FLOOR_MODIFICATION"
+        },
+        {
+          "id": "office/candidate-01/V3",
+          "upperFloorId": "office/candidate-01/L4",
+          "candidateCount": 2,
+          "predictedFloorPlateOverlapCells": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "previewFloorCutoutRequired": true,
+          "floorPlateCutoutImplemented": false,
+          "materialState": null,
+          "support": "UNVERIFIED",
+          "headroom": "UNVERIFIED",
+          "permittedAction": "DIAGNOSTIC_ONLY_NO_FLOOR_MODIFICATION"
+        },
+        {
+          "id": "office/candidate-01/V4",
+          "upperFloorId": "office/candidate-01/L5",
+          "candidateCount": 2,
+          "predictedFloorPlateOverlapCells": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "previewFloorCutoutRequired": true,
+          "floorPlateCutoutImplemented": false,
+          "materialState": null,
+          "support": "UNVERIFIED",
+          "headroom": "UNVERIFIED",
+          "permittedAction": "DIAGNOSTIC_ONLY_NO_FLOOR_MODIFICATION"
+        },
+        {
+          "id": "office/candidate-01/V5",
+          "upperFloorId": "office/candidate-01/L6",
+          "candidateCount": 2,
+          "predictedFloorPlateOverlapCells": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "previewFloorCutoutRequired": true,
+          "floorPlateCutoutImplemented": false,
+          "materialState": null,
+          "support": "UNVERIFIED",
+          "headroom": "UNVERIFIED",
+          "permittedAction": "DIAGNOSTIC_ONLY_NO_FLOOR_MODIFICATION"
+        }
+      ],
+      "totals": {
+        "wallIntents": 1238,
+        "doorIntents": 66,
+        "stairLinks": 5,
+        "predictedFloorPlateOverlaps": 10
+      },
+      "engineCallCount": 0,
+      "blocksGenerated": 0,
+      "executed": false
+    },
+    {
+      "id": "office/candidate-02",
+      "plannerBoundary": {
+        "normalizedInputFieldObservations": {
+          "program": "office",
+          "width": 24,
+          "depth": 20,
+          "floors": 6,
+          "floorHeight": 4,
+          "style": "urban_japanese",
+          "massing": "asymmetric_block",
+          "seed": 0,
+          "orientation": "south"
+        },
+        "isExecutablePlannerInput": false,
+        "notPassedToCreateComposition": true,
+        "incompatibleWithLiveMaterialPipeline": true
+      },
+      "floors": [
+        {
+          "id": "office/candidate-02/L1",
+          "level": 1,
+          "floorEmitterContract": "FULL_SOURCE_FOOTPRINT_PLATE",
+          "plannedPartitionPanels": 136,
+          "doorPorts": 7,
+          "allPhysicalDoorStatesUnverified": true,
+          "materialMapping": null,
+          "interiorPartitionEmitterWired": false,
+          "engineFloorMutationAllowed": false
+        },
+        {
+          "id": "office/candidate-02/L2",
+          "level": 2,
+          "floorEmitterContract": "FULL_SOURCE_FOOTPRINT_PLATE",
+          "plannedPartitionPanels": 136,
+          "doorPorts": 7,
+          "allPhysicalDoorStatesUnverified": true,
+          "materialMapping": null,
+          "interiorPartitionEmitterWired": false,
+          "engineFloorMutationAllowed": false
+        },
+        {
+          "id": "office/candidate-02/L3",
+          "level": 3,
+          "floorEmitterContract": "FULL_SOURCE_FOOTPRINT_PLATE",
+          "plannedPartitionPanels": 136,
+          "doorPorts": 7,
+          "allPhysicalDoorStatesUnverified": true,
+          "materialMapping": null,
+          "interiorPartitionEmitterWired": false,
+          "engineFloorMutationAllowed": false
+        },
+        {
+          "id": "office/candidate-02/L4",
+          "level": 4,
+          "floorEmitterContract": "FULL_SOURCE_FOOTPRINT_PLATE",
+          "plannedPartitionPanels": 136,
+          "doorPorts": 7,
+          "allPhysicalDoorStatesUnverified": true,
+          "materialMapping": null,
+          "interiorPartitionEmitterWired": false,
+          "engineFloorMutationAllowed": false
+        },
+        {
+          "id": "office/candidate-02/L5",
+          "level": 5,
+          "floorEmitterContract": "FULL_SOURCE_FOOTPRINT_PLATE",
+          "plannedPartitionPanels": 136,
+          "doorPorts": 7,
+          "allPhysicalDoorStatesUnverified": true,
+          "materialMapping": null,
+          "interiorPartitionEmitterWired": false,
+          "engineFloorMutationAllowed": false
+        },
+        {
+          "id": "office/candidate-02/L6",
+          "level": 6,
+          "floorEmitterContract": "FULL_SOURCE_FOOTPRINT_PLATE",
+          "plannedPartitionPanels": 56,
+          "doorPorts": 3,
+          "allPhysicalDoorStatesUnverified": true,
+          "materialMapping": null,
+          "interiorPartitionEmitterWired": false,
+          "engineFloorMutationAllowed": false
+        }
+      ],
+      "stairFloorPlateDiagnostics": [
+        {
+          "id": "office/candidate-02/V1",
+          "upperFloorId": "office/candidate-02/L2",
+          "candidateCount": 2,
+          "predictedFloorPlateOverlapCells": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "previewFloorCutoutRequired": true,
+          "floorPlateCutoutImplemented": false,
+          "materialState": null,
+          "support": "UNVERIFIED",
+          "headroom": "UNVERIFIED",
+          "permittedAction": "DIAGNOSTIC_ONLY_NO_FLOOR_MODIFICATION"
+        },
+        {
+          "id": "office/candidate-02/V2",
+          "upperFloorId": "office/candidate-02/L3",
+          "candidateCount": 2,
+          "predictedFloorPlateOverlapCells": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "previewFloorCutoutRequired": true,
+          "floorPlateCutoutImplemented": false,
+          "materialState": null,
+          "support": "UNVERIFIED",
+          "headroom": "UNVERIFIED",
+          "permittedAction": "DIAGNOSTIC_ONLY_NO_FLOOR_MODIFICATION"
+        },
+        {
+          "id": "office/candidate-02/V3",
+          "upperFloorId": "office/candidate-02/L4",
+          "candidateCount": 2,
+          "predictedFloorPlateOverlapCells": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "previewFloorCutoutRequired": true,
+          "floorPlateCutoutImplemented": false,
+          "materialState": null,
+          "support": "UNVERIFIED",
+          "headroom": "UNVERIFIED",
+          "permittedAction": "DIAGNOSTIC_ONLY_NO_FLOOR_MODIFICATION"
+        },
+        {
+          "id": "office/candidate-02/V4",
+          "upperFloorId": "office/candidate-02/L5",
+          "candidateCount": 2,
+          "predictedFloorPlateOverlapCells": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "previewFloorCutoutRequired": true,
+          "floorPlateCutoutImplemented": false,
+          "materialState": null,
+          "support": "UNVERIFIED",
+          "headroom": "UNVERIFIED",
+          "permittedAction": "DIAGNOSTIC_ONLY_NO_FLOOR_MODIFICATION"
+        },
+        {
+          "id": "office/candidate-02/V5",
+          "upperFloorId": "office/candidate-02/L6",
+          "candidateCount": 2,
+          "predictedFloorPlateOverlapCells": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "previewFloorCutoutRequired": true,
+          "floorPlateCutoutImplemented": false,
+          "materialState": null,
+          "support": "UNVERIFIED",
+          "headroom": "UNVERIFIED",
+          "permittedAction": "DIAGNOSTIC_ONLY_NO_FLOOR_MODIFICATION"
+        }
+      ],
+      "totals": {
+        "wallIntents": 736,
+        "doorIntents": 38,
+        "stairLinks": 5,
+        "predictedFloorPlateOverlaps": 10
+      },
+      "engineCallCount": 0,
+      "blocksGenerated": 0,
+      "executed": false
+    },
+    {
+      "id": "office/candidate-03",
+      "plannerBoundary": {
+        "normalizedInputFieldObservations": {
+          "program": "office",
+          "width": 24,
+          "depth": 20,
+          "floors": 6,
+          "floorHeight": 4,
+          "style": "urban_japanese",
+          "massing": "slab",
+          "seed": 0,
+          "orientation": "south"
+        },
+        "isExecutablePlannerInput": false,
+        "notPassedToCreateComposition": true,
+        "incompatibleWithLiveMaterialPipeline": true
+      },
+      "floors": [
+        {
+          "id": "office/candidate-03/L1",
+          "level": 1,
+          "floorEmitterContract": "FULL_SOURCE_FOOTPRINT_PLATE",
+          "plannedPartitionPanels": 214,
+          "doorPorts": 11,
+          "allPhysicalDoorStatesUnverified": true,
+          "materialMapping": null,
+          "interiorPartitionEmitterWired": false,
+          "engineFloorMutationAllowed": false
+        },
+        {
+          "id": "office/candidate-03/L2",
+          "level": 2,
+          "floorEmitterContract": "FULL_SOURCE_FOOTPRINT_PLATE",
+          "plannedPartitionPanels": 216,
+          "doorPorts": 11,
+          "allPhysicalDoorStatesUnverified": true,
+          "materialMapping": null,
+          "interiorPartitionEmitterWired": false,
+          "engineFloorMutationAllowed": false
+        },
+        {
+          "id": "office/candidate-03/L3",
+          "level": 3,
+          "floorEmitterContract": "FULL_SOURCE_FOOTPRINT_PLATE",
+          "plannedPartitionPanels": 216,
+          "doorPorts": 11,
+          "allPhysicalDoorStatesUnverified": true,
+          "materialMapping": null,
+          "interiorPartitionEmitterWired": false,
+          "engineFloorMutationAllowed": false
+        },
+        {
+          "id": "office/candidate-03/L4",
+          "level": 4,
+          "floorEmitterContract": "FULL_SOURCE_FOOTPRINT_PLATE",
+          "plannedPartitionPanels": 216,
+          "doorPorts": 11,
+          "allPhysicalDoorStatesUnverified": true,
+          "materialMapping": null,
+          "interiorPartitionEmitterWired": false,
+          "engineFloorMutationAllowed": false
+        },
+        {
+          "id": "office/candidate-03/L5",
+          "level": 5,
+          "floorEmitterContract": "FULL_SOURCE_FOOTPRINT_PLATE",
+          "plannedPartitionPanels": 216,
+          "doorPorts": 11,
+          "allPhysicalDoorStatesUnverified": true,
+          "materialMapping": null,
+          "interiorPartitionEmitterWired": false,
+          "engineFloorMutationAllowed": false
+        },
+        {
+          "id": "office/candidate-03/L6",
+          "level": 6,
+          "floorEmitterContract": "FULL_SOURCE_FOOTPRINT_PLATE",
+          "plannedPartitionPanels": 216,
+          "doorPorts": 11,
+          "allPhysicalDoorStatesUnverified": true,
+          "materialMapping": null,
+          "interiorPartitionEmitterWired": false,
+          "engineFloorMutationAllowed": false
+        }
+      ],
+      "stairFloorPlateDiagnostics": [
+        {
+          "id": "office/candidate-03/V1",
+          "upperFloorId": "office/candidate-03/L2",
+          "candidateCount": 2,
+          "predictedFloorPlateOverlapCells": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "previewFloorCutoutRequired": true,
+          "floorPlateCutoutImplemented": false,
+          "materialState": null,
+          "support": "UNVERIFIED",
+          "headroom": "UNVERIFIED",
+          "permittedAction": "DIAGNOSTIC_ONLY_NO_FLOOR_MODIFICATION"
+        },
+        {
+          "id": "office/candidate-03/V2",
+          "upperFloorId": "office/candidate-03/L3",
+          "candidateCount": 2,
+          "predictedFloorPlateOverlapCells": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "previewFloorCutoutRequired": true,
+          "floorPlateCutoutImplemented": false,
+          "materialState": null,
+          "support": "UNVERIFIED",
+          "headroom": "UNVERIFIED",
+          "permittedAction": "DIAGNOSTIC_ONLY_NO_FLOOR_MODIFICATION"
+        },
+        {
+          "id": "office/candidate-03/V3",
+          "upperFloorId": "office/candidate-03/L4",
+          "candidateCount": 2,
+          "predictedFloorPlateOverlapCells": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "previewFloorCutoutRequired": true,
+          "floorPlateCutoutImplemented": false,
+          "materialState": null,
+          "support": "UNVERIFIED",
+          "headroom": "UNVERIFIED",
+          "permittedAction": "DIAGNOSTIC_ONLY_NO_FLOOR_MODIFICATION"
+        },
+        {
+          "id": "office/candidate-03/V4",
+          "upperFloorId": "office/candidate-03/L5",
+          "candidateCount": 2,
+          "predictedFloorPlateOverlapCells": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "previewFloorCutoutRequired": true,
+          "floorPlateCutoutImplemented": false,
+          "materialState": null,
+          "support": "UNVERIFIED",
+          "headroom": "UNVERIFIED",
+          "permittedAction": "DIAGNOSTIC_ONLY_NO_FLOOR_MODIFICATION"
+        },
+        {
+          "id": "office/candidate-03/V5",
+          "upperFloorId": "office/candidate-03/L6",
+          "candidateCount": 2,
+          "predictedFloorPlateOverlapCells": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "previewFloorCutoutRequired": true,
+          "floorPlateCutoutImplemented": false,
+          "materialState": null,
+          "support": "UNVERIFIED",
+          "headroom": "UNVERIFIED",
+          "permittedAction": "DIAGNOSTIC_ONLY_NO_FLOOR_MODIFICATION"
+        }
+      ],
+      "totals": {
+        "wallIntents": 1294,
+        "doorIntents": 66,
+        "stairLinks": 5,
+        "predictedFloorPlateOverlaps": 10
+      },
+      "engineCallCount": 0,
+      "blocksGenerated": 0,
+      "executed": false
+    }
+  ],
+  "totals": {
+    "buildings": 5,
+    "floors": 30,
+    "wallPanelIntents": 5704,
+    "doorPorts": 314,
+    "stairLinks": 25,
+    "slabCutoutCandidateCells": 50,
+    "mappedMaterialRoles": 0,
+    "verifiedPhysicalDoors": 0,
+    "actualFloorCutouts": 0,
+    "engineCalls": 0,
+    "operationsEmitted": 0
+  },
+  "materialRoles": [
+    {
+      "role": "PARTITION_WALL",
+      "blockId": null,
+      "acceptedInLiveWorld": false,
+      "binding": "BLOCKED"
+    },
+    {
+      "role": "ROOM_DOOR",
+      "blockId": null,
+      "acceptedInLiveWorld": false,
+      "binding": "BLOCKED"
+    },
+    {
+      "role": "STAIR_RUN",
+      "blockId": null,
+      "acceptedInLiveWorld": false,
+      "binding": "BLOCKED"
+    },
+    {
+      "role": "FLOOR_CUTOUT",
+      "blockId": null,
+      "acceptedInLiveWorld": false,
+      "binding": "BLOCKED"
+    },
+    {
+      "role": "JUNCTION",
+      "blockId": null,
+      "acceptedInLiveWorld": false,
+      "binding": "BLOCKED"
+    }
+  ],
+  "office02": {
+    "originalMismatchCells": 123,
+    "originalCorridorOutsideCells": 18,
+    "alternativesCount": 4,
+    "candidateApplied": false
+  },
+  "blockerIds": [
+    "M4-01",
+    "M4-02",
+    "M4-03",
+    "M4-04",
+    "M4-05",
+    "M4-06",
+    "M4-07",
+    "M4-08",
+    "M4-09"
+  ],
+  "unresolvedCount": 9,
+  "readiness": "NOT_PREPARED",
+  "deployment": "BLOCKED",
+  "safety": {
+    "constructionApproved": false,
+    "executionAllowed": false,
+    "worldAccess": false,
+    "bridgeContact": false,
+    "engineImported": false,
+    "engineCalled": false,
+    "projectFilesModified": false,
+    "legacyModified": false,
+    "archivedEvidenceModified": false,
+    "buildOperations": 0
+  },
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0,
+    "worldCoordinates": null,
+    "materialIds": []
+  },
+  "physicalValidated": false,
+  "reportSha256": "e38414e3d306ae1edc63d5da9fbf6bf28c78af871bfd81dad1466b1d89119a96"
+}

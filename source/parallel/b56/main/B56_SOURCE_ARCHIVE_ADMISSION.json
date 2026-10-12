@@ -1,0 +1,136 @@
+{
+  "schema": "minecraftaibuilder-b56-bounded-archive-source-admission-v1",
+  "purpose": "DIRECT_ZIP_EVIDENCE_VALIDATION_WITHOUT_EXTRACTION_OR_ENGINE_EXECUTION",
+  "baseline": {
+    "b55ReportSha256": "43a9bb57a522374cca12e4892f99e9cfc12745786de95f3d65e2ac5498df0069",
+    "b54ReportSha256": "abe53cdae0217cbb1f7ec3a9a940defc6879affc5ba514f1cce831d13c889090"
+  },
+  "archive": {
+    "status": "NOT_SUPPLIED",
+    "sourceFilesFound": 0,
+    "metadata": "ABSENT"
+  },
+  "requiredSourceFiles": [
+    {
+      "key": "engine/src/general-building-planner.js",
+      "hashStatus": "MISSING",
+      "requirement": "PLANNER_DEPENDENCY",
+      "staticReviewReady": false,
+      "sourceExecuted": false
+    },
+    {
+      "key": "engine/src/building-grammar.js",
+      "hashStatus": "MISSING",
+      "requirement": "PLANNER_DEPENDENCY",
+      "staticReviewReady": false,
+      "sourceExecuted": false
+    },
+    {
+      "key": "engine/src/architectural-quality.js",
+      "hashStatus": "MISSING",
+      "requirement": "PRODUCTION_FACADE_IMPLEMENTATION",
+      "staticReviewReady": false,
+      "sourceExecuted": false
+    },
+    {
+      "key": "modules/architectural-library.js",
+      "hashStatus": "MISSING",
+      "requirement": "ARCHITECTURE_MODULE_DEFINITIONS",
+      "staticReviewReady": false,
+      "sourceExecuted": false
+    },
+    {
+      "key": "styles/urban_japanese.json",
+      "hashStatus": "MISSING",
+      "requirement": "STYLE_PARAMETERS",
+      "staticReviewReady": false,
+      "sourceExecuted": false
+    }
+  ],
+  "counts": {
+    "requiredFiles": 5,
+    "found": 0,
+    "pinned": 0,
+    "versionMismatch": 0
+  },
+  "staticContractReview": {
+    "readiness": "WAITING_FOR_VERIFIED_SOURCE_BYTES",
+    "eligibleSourceFiles": [],
+    "sourceCodeParsed": false,
+    "executionSafeReviewOnly": true,
+    "productionComposeFacadeParity": "UNVERIFIED",
+    "materialAndQualityParity": "UNVERIFIED",
+    "canonicalOutputParity": "UNVERIFIED"
+  },
+  "dependency": {
+    "sourceEvidence": "WAITING_FOR_VERIFIED_SOURCE_BYTES",
+    "canonicalReferenceOutputs": "MISSING",
+    "runningEngineIdentity": "UNVERIFIED",
+    "physicalBlockStateValidation": "NOT_ATTEMPTED",
+    "nextStep": "SUPPLY_B55_READONLY_SOURCE_EVIDENCE_ZIP"
+  },
+  "safety": {
+    "readiness": "NOT_PREPARED",
+    "constructionApproval": "HOLD",
+    "executionAllowed": false,
+    "worldContact": false,
+    "bridgeContact": false,
+    "scans": 0,
+    "commands": 0,
+    "sourceImports": 0,
+    "sourceExecution": 0,
+    "actualBuildOperations": 0,
+    "BuildPlan": {
+      "status": "NOT_PREPARED",
+      "operations": [],
+      "commandCount": 0
+    }
+  },
+  "blockers": {
+    "M4Gates": [
+      {
+        "id": "M4-01",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-02",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-03",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-04",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-05",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-06",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-07",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-08",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-09",
+        "status": "BLOCKED"
+      }
+    ]
+  },
+  "productionParity": "UNVERIFIED",
+  "physicalQuality": "UNKNOWN",
+  "plannerExecuted": false,
+  "archiveExtracted": false,
+  "existingConstructionModified": false,
+  "priorEvidenceFrozen": true,
+  "reportSha256": "258d80ae2222910b40e4c63ac3f13e2c7f08c73639c0385a26725ddff114354e"
+}

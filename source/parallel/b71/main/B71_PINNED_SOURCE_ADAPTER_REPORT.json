@@ -1,0 +1,927 @@
+{
+  "schema": "minecraftaibuilder-b71-pinned-production-static-adapter-v1",
+  "intent": "REUSABLE_NONEXECUTABLE_PRODUCTION_SEAM_PREPARATION",
+  "provenance": {
+    "b65": "49033ca417fbbaadb439ac7cae1f2dd0d037be6a88e1770b228a9d085716973e",
+    "b66": "d7b2a313c79a29365f50fdaedfc6bf60bcb332209ae89f9e9f1fde7bca7179e6",
+    "b69": "bb6ee9b57d04bb3a44dff4d0a42d8fad99132f2eed38d000bf144d7865876f6d",
+    "b70": "0a9f7d8cbd87bf7224a8fe717921615fa377a58e4f8424c2cd7e05ba33d2e382",
+    "evidenceZipSha256": "2bb665badb3519af829ca842ac6ac4cf3893407ff366c341473716eb8a012168"
+  },
+  "productionContract": {
+    "archiveSha256": "2bb665badb3519af829ca842ac6ac4cf3893407ff366c341473716eb8a012168",
+    "filesPinned": 5,
+    "sourceExecuted": false,
+    "detectedPlanner": "GeneralBuildingPlanner.fromComposition / createBuildingPlan",
+    "recognizedRecord": "fill {role,block,from,to,phase}",
+    "insertionPoint": "AFTER_FACADE_AND_FLOOR_GENERATION_BEFORE_VALIDATE_BUILD_PLAN",
+    "materialRoles": [
+      "primaryWall",
+      "floor",
+      "air"
+    ],
+    "supportedFacadeModules": "WINDOWS_ENTRANCES_FACADE_ONLY",
+    "interiorDoorModule": "NOT_PRESENT_IN_PINNED_LIBRARY",
+    "physicalStairModule": "NOT_PRESENT_IN_PINNED_LIBRARY",
+    "runtimeParity": "UNVERIFIED"
+  },
+  "adapterAPI": {
+    "stagingFunction": "stageSectionRecipe",
+    "inputs": [
+      "B65.sections",
+      "B69.sections",
+      "B70.sections"
+    ],
+    "output": "MATERIAL_ROLE_CANDIDATE_REFS_NON_EXECUTABLE",
+    "runtimeInsertion": "GeneralBuildingPlanner.fromComposition before validateBuildPlan (NOT PATCHED)",
+    "placementAuthority": "NONE",
+    "previewOnly": true
+  },
+  "summary": {
+    "sourceFilesPinned": 5,
+    "sourceFilesVersionDrift": 0,
+    "sections": 30,
+    "nominalWallRefs": 5704,
+    "nominalDoorVoidReservations": 314,
+    "floorRunRefs": 4402,
+    "heldOutsideMask": 18,
+    "nominalPitchOnlyMatch": 6,
+    "blockedFloorPitchMismatch": 24,
+    "realDoorBlocks": 0,
+    "realStairBlocks": 0,
+    "realFloorBlocks": 0,
+    "engineCalls": 0,
+    "constructionCommands": 0
+  },
+  "sections": [
+    {
+      "id": "hotel/candidate-01/L1",
+      "program": "hotel",
+      "level": 1,
+      "sourceDimensions": {
+        "width": 26,
+        "depth": 20
+      },
+      "nominalPitch": 5,
+      "productionDefaultFloorPitch": 5,
+      "floorHeightParity": "NOMINAL_PITCH_MATCH_ONLY",
+      "stageDigest": "695010331f56a86f04ab68bfed4a006a7f2be019dfe623d58ea795213f21ff91",
+      "sourceWallBoundaryIds": 194,
+      "stagedDoorClearanceReservations": 11,
+      "referencedFloorRuns": 226,
+      "outOfMaskReservationsHeld": 0,
+      "exteriorEnvelopeAgreement": "UNVERIFIED",
+      "orientationAgreement": "UNVERIFIED",
+      "physicalModuleAvailable": false,
+      "productionEmissionAllowed": false,
+      "blockerCodes": [
+        "EXTERIOR_FOOTPRINT_PARITY_UNVERIFIED",
+        "WORLD_TRANSFORM_AND_PALETTE_UNVERIFIED",
+        "DOOR_HINGE_AND_STAIRS_MODULES_MISSING"
+      ]
+    },
+    {
+      "id": "hotel/candidate-01/L2",
+      "program": "hotel",
+      "level": 2,
+      "sourceDimensions": {
+        "width": 26,
+        "depth": 20
+      },
+      "nominalPitch": 5,
+      "productionDefaultFloorPitch": 5,
+      "floorHeightParity": "NOMINAL_PITCH_MATCH_ONLY",
+      "stageDigest": "738a08feac1d33f853033016b9c2ef3a9c8f427ebc4b05401ddd16e9be832ce7",
+      "sourceWallBoundaryIds": 194,
+      "stagedDoorClearanceReservations": 11,
+      "referencedFloorRuns": 226,
+      "outOfMaskReservationsHeld": 0,
+      "exteriorEnvelopeAgreement": "UNVERIFIED",
+      "orientationAgreement": "UNVERIFIED",
+      "physicalModuleAvailable": false,
+      "productionEmissionAllowed": false,
+      "blockerCodes": [
+        "EXTERIOR_FOOTPRINT_PARITY_UNVERIFIED",
+        "WORLD_TRANSFORM_AND_PALETTE_UNVERIFIED",
+        "DOOR_HINGE_AND_STAIRS_MODULES_MISSING"
+      ]
+    },
+    {
+      "id": "hotel/candidate-01/L3",
+      "program": "hotel",
+      "level": 3,
+      "sourceDimensions": {
+        "width": 26,
+        "depth": 20
+      },
+      "nominalPitch": 5,
+      "productionDefaultFloorPitch": 5,
+      "floorHeightParity": "NOMINAL_PITCH_MATCH_ONLY",
+      "stageDigest": "267c6d44495b5bd38ded6d70bd02673d170a2af5e7a06b1d682b844be6d7b878",
+      "sourceWallBoundaryIds": 194,
+      "stagedDoorClearanceReservations": 11,
+      "referencedFloorRuns": 226,
+      "outOfMaskReservationsHeld": 0,
+      "exteriorEnvelopeAgreement": "UNVERIFIED",
+      "orientationAgreement": "UNVERIFIED",
+      "physicalModuleAvailable": false,
+      "productionEmissionAllowed": false,
+      "blockerCodes": [
+        "EXTERIOR_FOOTPRINT_PARITY_UNVERIFIED",
+        "WORLD_TRANSFORM_AND_PALETTE_UNVERIFIED",
+        "DOOR_HINGE_AND_STAIRS_MODULES_MISSING"
+      ]
+    },
+    {
+      "id": "hotel/candidate-01/L4",
+      "program": "hotel",
+      "level": 4,
+      "sourceDimensions": {
+        "width": 26,
+        "depth": 20
+      },
+      "nominalPitch": 5,
+      "productionDefaultFloorPitch": 5,
+      "floorHeightParity": "NOMINAL_PITCH_MATCH_ONLY",
+      "stageDigest": "7ac79bc966114527b44828fc7b728d3ac763502de55fbf09d29f58a9ecc9ba7c",
+      "sourceWallBoundaryIds": 194,
+      "stagedDoorClearanceReservations": 11,
+      "referencedFloorRuns": 226,
+      "outOfMaskReservationsHeld": 0,
+      "exteriorEnvelopeAgreement": "UNVERIFIED",
+      "orientationAgreement": "UNVERIFIED",
+      "physicalModuleAvailable": false,
+      "productionEmissionAllowed": false,
+      "blockerCodes": [
+        "EXTERIOR_FOOTPRINT_PARITY_UNVERIFIED",
+        "WORLD_TRANSFORM_AND_PALETTE_UNVERIFIED",
+        "DOOR_HINGE_AND_STAIRS_MODULES_MISSING"
+      ]
+    },
+    {
+      "id": "hotel/candidate-01/L5",
+      "program": "hotel",
+      "level": 5,
+      "sourceDimensions": {
+        "width": 26,
+        "depth": 20
+      },
+      "nominalPitch": 5,
+      "productionDefaultFloorPitch": 5,
+      "floorHeightParity": "NOMINAL_PITCH_MATCH_ONLY",
+      "stageDigest": "2c447cf08f5a597fdfddd8bf64f5426058587b85497f16d23c7ed9a2bbd66334",
+      "sourceWallBoundaryIds": 194,
+      "stagedDoorClearanceReservations": 11,
+      "referencedFloorRuns": 226,
+      "outOfMaskReservationsHeld": 0,
+      "exteriorEnvelopeAgreement": "UNVERIFIED",
+      "orientationAgreement": "UNVERIFIED",
+      "physicalModuleAvailable": false,
+      "productionEmissionAllowed": false,
+      "blockerCodes": [
+        "EXTERIOR_FOOTPRINT_PARITY_UNVERIFIED",
+        "WORLD_TRANSFORM_AND_PALETTE_UNVERIFIED",
+        "DOOR_HINGE_AND_STAIRS_MODULES_MISSING"
+      ]
+    },
+    {
+      "id": "hotel/candidate-01/L6",
+      "program": "hotel",
+      "level": 6,
+      "sourceDimensions": {
+        "width": 26,
+        "depth": 20
+      },
+      "nominalPitch": 5,
+      "productionDefaultFloorPitch": 5,
+      "floorHeightParity": "NOMINAL_PITCH_MATCH_ONLY",
+      "stageDigest": "dbfa1cdecec488ae3a1cd5346d27bc4937bde0cf36410ebeacf0426b8f28c024",
+      "sourceWallBoundaryIds": 194,
+      "stagedDoorClearanceReservations": 11,
+      "referencedFloorRuns": 226,
+      "outOfMaskReservationsHeld": 0,
+      "exteriorEnvelopeAgreement": "UNVERIFIED",
+      "orientationAgreement": "UNVERIFIED",
+      "physicalModuleAvailable": false,
+      "productionEmissionAllowed": false,
+      "blockerCodes": [
+        "EXTERIOR_FOOTPRINT_PARITY_UNVERIFIED",
+        "WORLD_TRANSFORM_AND_PALETTE_UNVERIFIED",
+        "DOOR_HINGE_AND_STAIRS_MODULES_MISSING"
+      ]
+    },
+    {
+      "id": "apartment/candidate-01/L1",
+      "program": "apartment",
+      "level": 1,
+      "sourceDimensions": {
+        "width": 28,
+        "depth": 22
+      },
+      "nominalPitch": 5,
+      "productionDefaultFloorPitch": 4,
+      "floorHeightParity": "BLOCKED_INCOMPATIBLE_FLOOR_PITCH",
+      "stageDigest": "9643108d7928a089897e279fef69cb5810fcc24d059a43e15cb85a02ac05f6ea",
+      "sourceWallBoundaryIds": 212,
+      "stagedDoorClearanceReservations": 13,
+      "referencedFloorRuns": 148,
+      "outOfMaskReservationsHeld": 0,
+      "exteriorEnvelopeAgreement": "UNVERIFIED",
+      "orientationAgreement": "UNVERIFIED",
+      "physicalModuleAvailable": false,
+      "productionEmissionAllowed": false,
+      "blockerCodes": [
+        "NOMINAL_FLOOR_PITCH_MISMATCH",
+        "EXTERIOR_FOOTPRINT_PARITY_UNVERIFIED",
+        "WORLD_TRANSFORM_AND_PALETTE_UNVERIFIED",
+        "DOOR_HINGE_AND_STAIRS_MODULES_MISSING"
+      ]
+    },
+    {
+      "id": "apartment/candidate-01/L2",
+      "program": "apartment",
+      "level": 2,
+      "sourceDimensions": {
+        "width": 28,
+        "depth": 22
+      },
+      "nominalPitch": 5,
+      "productionDefaultFloorPitch": 4,
+      "floorHeightParity": "BLOCKED_INCOMPATIBLE_FLOOR_PITCH",
+      "stageDigest": "717de0ae256a9bb9077242359b0588febec1f80ff8effc4f7c32800a86f58b19",
+      "sourceWallBoundaryIds": 212,
+      "stagedDoorClearanceReservations": 13,
+      "referencedFloorRuns": 148,
+      "outOfMaskReservationsHeld": 0,
+      "exteriorEnvelopeAgreement": "UNVERIFIED",
+      "orientationAgreement": "UNVERIFIED",
+      "physicalModuleAvailable": false,
+      "productionEmissionAllowed": false,
+      "blockerCodes": [
+        "NOMINAL_FLOOR_PITCH_MISMATCH",
+        "EXTERIOR_FOOTPRINT_PARITY_UNVERIFIED",
+        "WORLD_TRANSFORM_AND_PALETTE_UNVERIFIED",
+        "DOOR_HINGE_AND_STAIRS_MODULES_MISSING"
+      ]
+    },
+    {
+      "id": "apartment/candidate-01/L3",
+      "program": "apartment",
+      "level": 3,
+      "sourceDimensions": {
+        "width": 28,
+        "depth": 22
+      },
+      "nominalPitch": 5,
+      "productionDefaultFloorPitch": 4,
+      "floorHeightParity": "BLOCKED_INCOMPATIBLE_FLOOR_PITCH",
+      "stageDigest": "6c53d0ee397d89fd5924b6d4caf85640f2f177c39117d081587d727c8e4b8b36",
+      "sourceWallBoundaryIds": 212,
+      "stagedDoorClearanceReservations": 13,
+      "referencedFloorRuns": 148,
+      "outOfMaskReservationsHeld": 0,
+      "exteriorEnvelopeAgreement": "UNVERIFIED",
+      "orientationAgreement": "UNVERIFIED",
+      "physicalModuleAvailable": false,
+      "productionEmissionAllowed": false,
+      "blockerCodes": [
+        "NOMINAL_FLOOR_PITCH_MISMATCH",
+        "EXTERIOR_FOOTPRINT_PARITY_UNVERIFIED",
+        "WORLD_TRANSFORM_AND_PALETTE_UNVERIFIED",
+        "DOOR_HINGE_AND_STAIRS_MODULES_MISSING"
+      ]
+    },
+    {
+      "id": "apartment/candidate-01/L4",
+      "program": "apartment",
+      "level": 4,
+      "sourceDimensions": {
+        "width": 28,
+        "depth": 22
+      },
+      "nominalPitch": 5,
+      "productionDefaultFloorPitch": 4,
+      "floorHeightParity": "BLOCKED_INCOMPATIBLE_FLOOR_PITCH",
+      "stageDigest": "f2170847f9b9ec91cb8f096c5ae76ad00da7523f78be11f82a68107415b04b8f",
+      "sourceWallBoundaryIds": 212,
+      "stagedDoorClearanceReservations": 13,
+      "referencedFloorRuns": 148,
+      "outOfMaskReservationsHeld": 0,
+      "exteriorEnvelopeAgreement": "UNVERIFIED",
+      "orientationAgreement": "UNVERIFIED",
+      "physicalModuleAvailable": false,
+      "productionEmissionAllowed": false,
+      "blockerCodes": [
+        "NOMINAL_FLOOR_PITCH_MISMATCH",
+        "EXTERIOR_FOOTPRINT_PARITY_UNVERIFIED",
+        "WORLD_TRANSFORM_AND_PALETTE_UNVERIFIED",
+        "DOOR_HINGE_AND_STAIRS_MODULES_MISSING"
+      ]
+    },
+    {
+      "id": "apartment/candidate-01/L5",
+      "program": "apartment",
+      "level": 5,
+      "sourceDimensions": {
+        "width": 28,
+        "depth": 22
+      },
+      "nominalPitch": 5,
+      "productionDefaultFloorPitch": 4,
+      "floorHeightParity": "BLOCKED_INCOMPATIBLE_FLOOR_PITCH",
+      "stageDigest": "e54a9cd7103d44b04e2ad96b3a5d5e5900f08da7067a36f36f44e744439d51e1",
+      "sourceWallBoundaryIds": 212,
+      "stagedDoorClearanceReservations": 13,
+      "referencedFloorRuns": 148,
+      "outOfMaskReservationsHeld": 0,
+      "exteriorEnvelopeAgreement": "UNVERIFIED",
+      "orientationAgreement": "UNVERIFIED",
+      "physicalModuleAvailable": false,
+      "productionEmissionAllowed": false,
+      "blockerCodes": [
+        "NOMINAL_FLOOR_PITCH_MISMATCH",
+        "EXTERIOR_FOOTPRINT_PARITY_UNVERIFIED",
+        "WORLD_TRANSFORM_AND_PALETTE_UNVERIFIED",
+        "DOOR_HINGE_AND_STAIRS_MODULES_MISSING"
+      ]
+    },
+    {
+      "id": "apartment/candidate-01/L6",
+      "program": "apartment",
+      "level": 6,
+      "sourceDimensions": {
+        "width": 28,
+        "depth": 22
+      },
+      "nominalPitch": 5,
+      "productionDefaultFloorPitch": 4,
+      "floorHeightParity": "BLOCKED_INCOMPATIBLE_FLOOR_PITCH",
+      "stageDigest": "7a3a8963a9e1ca41cfa2d215df008aab2062d927548b8288d6f01a881c4717c8",
+      "sourceWallBoundaryIds": 212,
+      "stagedDoorClearanceReservations": 13,
+      "referencedFloorRuns": 148,
+      "outOfMaskReservationsHeld": 0,
+      "exteriorEnvelopeAgreement": "UNVERIFIED",
+      "orientationAgreement": "UNVERIFIED",
+      "physicalModuleAvailable": false,
+      "productionEmissionAllowed": false,
+      "blockerCodes": [
+        "NOMINAL_FLOOR_PITCH_MISMATCH",
+        "EXTERIOR_FOOTPRINT_PARITY_UNVERIFIED",
+        "WORLD_TRANSFORM_AND_PALETTE_UNVERIFIED",
+        "DOOR_HINGE_AND_STAIRS_MODULES_MISSING"
+      ]
+    },
+    {
+      "id": "office/candidate-01/L1",
+      "program": "office",
+      "level": 1,
+      "sourceDimensions": {
+        "width": 24,
+        "depth": 20
+      },
+      "nominalPitch": 5,
+      "productionDefaultFloorPitch": 4,
+      "floorHeightParity": "BLOCKED_INCOMPATIBLE_FLOOR_PITCH",
+      "stageDigest": "4f4cb1fd1499445a97b6df6f25131fb39a865c1012da4c70bc3460f36be5445e",
+      "sourceWallBoundaryIds": 214,
+      "stagedDoorClearanceReservations": 11,
+      "referencedFloorRuns": 137,
+      "outOfMaskReservationsHeld": 0,
+      "exteriorEnvelopeAgreement": "UNVERIFIED",
+      "orientationAgreement": "UNVERIFIED",
+      "physicalModuleAvailable": false,
+      "productionEmissionAllowed": false,
+      "blockerCodes": [
+        "NOMINAL_FLOOR_PITCH_MISMATCH",
+        "EXTERIOR_FOOTPRINT_PARITY_UNVERIFIED",
+        "WORLD_TRANSFORM_AND_PALETTE_UNVERIFIED",
+        "DOOR_HINGE_AND_STAIRS_MODULES_MISSING"
+      ]
+    },
+    {
+      "id": "office/candidate-01/L2",
+      "program": "office",
+      "level": 2,
+      "sourceDimensions": {
+        "width": 24,
+        "depth": 20
+      },
+      "nominalPitch": 5,
+      "productionDefaultFloorPitch": 4,
+      "floorHeightParity": "BLOCKED_INCOMPATIBLE_FLOOR_PITCH",
+      "stageDigest": "9b5d9dc1881a01574ae630aa235e719f80c90fd3c62a0d9d90f0deb0053c1d78",
+      "sourceWallBoundaryIds": 216,
+      "stagedDoorClearanceReservations": 11,
+      "referencedFloorRuns": 137,
+      "outOfMaskReservationsHeld": 0,
+      "exteriorEnvelopeAgreement": "UNVERIFIED",
+      "orientationAgreement": "UNVERIFIED",
+      "physicalModuleAvailable": false,
+      "productionEmissionAllowed": false,
+      "blockerCodes": [
+        "NOMINAL_FLOOR_PITCH_MISMATCH",
+        "EXTERIOR_FOOTPRINT_PARITY_UNVERIFIED",
+        "WORLD_TRANSFORM_AND_PALETTE_UNVERIFIED",
+        "DOOR_HINGE_AND_STAIRS_MODULES_MISSING"
+      ]
+    },
+    {
+      "id": "office/candidate-01/L3",
+      "program": "office",
+      "level": 3,
+      "sourceDimensions": {
+        "width": 24,
+        "depth": 20
+      },
+      "nominalPitch": 5,
+      "productionDefaultFloorPitch": 4,
+      "floorHeightParity": "BLOCKED_INCOMPATIBLE_FLOOR_PITCH",
+      "stageDigest": "f10805684ebdc5dfd361b118c96e91a84af3f649254d278d2c382aa04a97c09b",
+      "sourceWallBoundaryIds": 202,
+      "stagedDoorClearanceReservations": 11,
+      "referencedFloorRuns": 106,
+      "outOfMaskReservationsHeld": 0,
+      "exteriorEnvelopeAgreement": "UNVERIFIED",
+      "orientationAgreement": "UNVERIFIED",
+      "physicalModuleAvailable": false,
+      "productionEmissionAllowed": false,
+      "blockerCodes": [
+        "NOMINAL_FLOOR_PITCH_MISMATCH",
+        "EXTERIOR_FOOTPRINT_PARITY_UNVERIFIED",
+        "WORLD_TRANSFORM_AND_PALETTE_UNVERIFIED",
+        "DOOR_HINGE_AND_STAIRS_MODULES_MISSING"
+      ]
+    },
+    {
+      "id": "office/candidate-01/L4",
+      "program": "office",
+      "level": 4,
+      "sourceDimensions": {
+        "width": 24,
+        "depth": 20
+      },
+      "nominalPitch": 5,
+      "productionDefaultFloorPitch": 4,
+      "floorHeightParity": "BLOCKED_INCOMPATIBLE_FLOOR_PITCH",
+      "stageDigest": "1d9c27f5489051ad74ab17640a43f90d94c7764db2db77860974cf309a392843",
+      "sourceWallBoundaryIds": 202,
+      "stagedDoorClearanceReservations": 11,
+      "referencedFloorRuns": 106,
+      "outOfMaskReservationsHeld": 0,
+      "exteriorEnvelopeAgreement": "UNVERIFIED",
+      "orientationAgreement": "UNVERIFIED",
+      "physicalModuleAvailable": false,
+      "productionEmissionAllowed": false,
+      "blockerCodes": [
+        "NOMINAL_FLOOR_PITCH_MISMATCH",
+        "EXTERIOR_FOOTPRINT_PARITY_UNVERIFIED",
+        "WORLD_TRANSFORM_AND_PALETTE_UNVERIFIED",
+        "DOOR_HINGE_AND_STAIRS_MODULES_MISSING"
+      ]
+    },
+    {
+      "id": "office/candidate-01/L5",
+      "program": "office",
+      "level": 5,
+      "sourceDimensions": {
+        "width": 24,
+        "depth": 20
+      },
+      "nominalPitch": 5,
+      "productionDefaultFloorPitch": 4,
+      "floorHeightParity": "BLOCKED_INCOMPATIBLE_FLOOR_PITCH",
+      "stageDigest": "8e2e09d5ac310804f764165db92667989eb408b6c8c43474fb1ea979471959d6",
+      "sourceWallBoundaryIds": 202,
+      "stagedDoorClearanceReservations": 11,
+      "referencedFloorRuns": 106,
+      "outOfMaskReservationsHeld": 0,
+      "exteriorEnvelopeAgreement": "UNVERIFIED",
+      "orientationAgreement": "UNVERIFIED",
+      "physicalModuleAvailable": false,
+      "productionEmissionAllowed": false,
+      "blockerCodes": [
+        "NOMINAL_FLOOR_PITCH_MISMATCH",
+        "EXTERIOR_FOOTPRINT_PARITY_UNVERIFIED",
+        "WORLD_TRANSFORM_AND_PALETTE_UNVERIFIED",
+        "DOOR_HINGE_AND_STAIRS_MODULES_MISSING"
+      ]
+    },
+    {
+      "id": "office/candidate-01/L6",
+      "program": "office",
+      "level": 6,
+      "sourceDimensions": {
+        "width": 24,
+        "depth": 20
+      },
+      "nominalPitch": 5,
+      "productionDefaultFloorPitch": 4,
+      "floorHeightParity": "BLOCKED_INCOMPATIBLE_FLOOR_PITCH",
+      "stageDigest": "6d184a4e92d562dd8e343fb2b35e659b531df4a1c243240bb1a2af27260aff52",
+      "sourceWallBoundaryIds": 202,
+      "stagedDoorClearanceReservations": 11,
+      "referencedFloorRuns": 106,
+      "outOfMaskReservationsHeld": 0,
+      "exteriorEnvelopeAgreement": "UNVERIFIED",
+      "orientationAgreement": "UNVERIFIED",
+      "physicalModuleAvailable": false,
+      "productionEmissionAllowed": false,
+      "blockerCodes": [
+        "NOMINAL_FLOOR_PITCH_MISMATCH",
+        "EXTERIOR_FOOTPRINT_PARITY_UNVERIFIED",
+        "WORLD_TRANSFORM_AND_PALETTE_UNVERIFIED",
+        "DOOR_HINGE_AND_STAIRS_MODULES_MISSING"
+      ]
+    },
+    {
+      "id": "office/candidate-02/L1",
+      "program": "office",
+      "level": 1,
+      "sourceDimensions": {
+        "width": 24,
+        "depth": 20
+      },
+      "nominalPitch": 5,
+      "productionDefaultFloorPitch": 4,
+      "floorHeightParity": "BLOCKED_INCOMPATIBLE_FLOOR_PITCH",
+      "stageDigest": "1c139f7240fd06ef8dc6baa25579071eaf0e8bc04469b700ef75052217c27481",
+      "sourceWallBoundaryIds": 136,
+      "stagedDoorClearanceReservations": 7,
+      "referencedFloorRuns": 112,
+      "outOfMaskReservationsHeld": 3,
+      "exteriorEnvelopeAgreement": "UNVERIFIED",
+      "orientationAgreement": "UNVERIFIED",
+      "physicalModuleAvailable": false,
+      "productionEmissionAllowed": false,
+      "blockerCodes": [
+        "NOMINAL_FLOOR_PITCH_MISMATCH",
+        "EXTERIOR_FOOTPRINT_PARITY_UNVERIFIED",
+        "WORLD_TRANSFORM_AND_PALETTE_UNVERIFIED",
+        "DOOR_HINGE_AND_STAIRS_MODULES_MISSING"
+      ]
+    },
+    {
+      "id": "office/candidate-02/L2",
+      "program": "office",
+      "level": 2,
+      "sourceDimensions": {
+        "width": 24,
+        "depth": 20
+      },
+      "nominalPitch": 5,
+      "productionDefaultFloorPitch": 4,
+      "floorHeightParity": "BLOCKED_INCOMPATIBLE_FLOOR_PITCH",
+      "stageDigest": "d4004f95399f1407de14bafbbcf717a06f57ae92e4f6dd8b067ff664ce46f769",
+      "sourceWallBoundaryIds": 136,
+      "stagedDoorClearanceReservations": 7,
+      "referencedFloorRuns": 114,
+      "outOfMaskReservationsHeld": 3,
+      "exteriorEnvelopeAgreement": "UNVERIFIED",
+      "orientationAgreement": "UNVERIFIED",
+      "physicalModuleAvailable": false,
+      "productionEmissionAllowed": false,
+      "blockerCodes": [
+        "NOMINAL_FLOOR_PITCH_MISMATCH",
+        "EXTERIOR_FOOTPRINT_PARITY_UNVERIFIED",
+        "WORLD_TRANSFORM_AND_PALETTE_UNVERIFIED",
+        "DOOR_HINGE_AND_STAIRS_MODULES_MISSING"
+      ]
+    },
+    {
+      "id": "office/candidate-02/L3",
+      "program": "office",
+      "level": 3,
+      "sourceDimensions": {
+        "width": 24,
+        "depth": 20
+      },
+      "nominalPitch": 5,
+      "productionDefaultFloorPitch": 4,
+      "floorHeightParity": "BLOCKED_INCOMPATIBLE_FLOOR_PITCH",
+      "stageDigest": "1dfab67d04cd4d250e2cdda908423cc62dcbba54215ab1b80b701aec07217326",
+      "sourceWallBoundaryIds": 136,
+      "stagedDoorClearanceReservations": 7,
+      "referencedFloorRuns": 114,
+      "outOfMaskReservationsHeld": 3,
+      "exteriorEnvelopeAgreement": "UNVERIFIED",
+      "orientationAgreement": "UNVERIFIED",
+      "physicalModuleAvailable": false,
+      "productionEmissionAllowed": false,
+      "blockerCodes": [
+        "NOMINAL_FLOOR_PITCH_MISMATCH",
+        "EXTERIOR_FOOTPRINT_PARITY_UNVERIFIED",
+        "WORLD_TRANSFORM_AND_PALETTE_UNVERIFIED",
+        "DOOR_HINGE_AND_STAIRS_MODULES_MISSING"
+      ]
+    },
+    {
+      "id": "office/candidate-02/L4",
+      "program": "office",
+      "level": 4,
+      "sourceDimensions": {
+        "width": 24,
+        "depth": 20
+      },
+      "nominalPitch": 5,
+      "productionDefaultFloorPitch": 4,
+      "floorHeightParity": "BLOCKED_INCOMPATIBLE_FLOOR_PITCH",
+      "stageDigest": "e7d1d02b025915e054a93da9ef266d1afb598e6c3365ddb7db926984669789f3",
+      "sourceWallBoundaryIds": 136,
+      "stagedDoorClearanceReservations": 7,
+      "referencedFloorRuns": 114,
+      "outOfMaskReservationsHeld": 3,
+      "exteriorEnvelopeAgreement": "UNVERIFIED",
+      "orientationAgreement": "UNVERIFIED",
+      "physicalModuleAvailable": false,
+      "productionEmissionAllowed": false,
+      "blockerCodes": [
+        "NOMINAL_FLOOR_PITCH_MISMATCH",
+        "EXTERIOR_FOOTPRINT_PARITY_UNVERIFIED",
+        "WORLD_TRANSFORM_AND_PALETTE_UNVERIFIED",
+        "DOOR_HINGE_AND_STAIRS_MODULES_MISSING"
+      ]
+    },
+    {
+      "id": "office/candidate-02/L5",
+      "program": "office",
+      "level": 5,
+      "sourceDimensions": {
+        "width": 24,
+        "depth": 20
+      },
+      "nominalPitch": 5,
+      "productionDefaultFloorPitch": 4,
+      "floorHeightParity": "BLOCKED_INCOMPATIBLE_FLOOR_PITCH",
+      "stageDigest": "8913bcbf3d7586ae0766cc9bae3f8d95854ff94c2b301a05378d5f98c413bdfe",
+      "sourceWallBoundaryIds": 136,
+      "stagedDoorClearanceReservations": 7,
+      "referencedFloorRuns": 114,
+      "outOfMaskReservationsHeld": 3,
+      "exteriorEnvelopeAgreement": "UNVERIFIED",
+      "orientationAgreement": "UNVERIFIED",
+      "physicalModuleAvailable": false,
+      "productionEmissionAllowed": false,
+      "blockerCodes": [
+        "NOMINAL_FLOOR_PITCH_MISMATCH",
+        "EXTERIOR_FOOTPRINT_PARITY_UNVERIFIED",
+        "WORLD_TRANSFORM_AND_PALETTE_UNVERIFIED",
+        "DOOR_HINGE_AND_STAIRS_MODULES_MISSING"
+      ]
+    },
+    {
+      "id": "office/candidate-02/L6",
+      "program": "office",
+      "level": 6,
+      "sourceDimensions": {
+        "width": 24,
+        "depth": 20
+      },
+      "nominalPitch": 5,
+      "productionDefaultFloorPitch": 4,
+      "floorHeightParity": "BLOCKED_INCOMPATIBLE_FLOOR_PITCH",
+      "stageDigest": "e0684f276c82fb0e19d558102e8582bf4f129ccf3408dc339c0fcac2d5846ef8",
+      "sourceWallBoundaryIds": 56,
+      "stagedDoorClearanceReservations": 3,
+      "referencedFloorRuns": 70,
+      "outOfMaskReservationsHeld": 3,
+      "exteriorEnvelopeAgreement": "UNVERIFIED",
+      "orientationAgreement": "UNVERIFIED",
+      "physicalModuleAvailable": false,
+      "productionEmissionAllowed": false,
+      "blockerCodes": [
+        "NOMINAL_FLOOR_PITCH_MISMATCH",
+        "EXTERIOR_FOOTPRINT_PARITY_UNVERIFIED",
+        "WORLD_TRANSFORM_AND_PALETTE_UNVERIFIED",
+        "DOOR_HINGE_AND_STAIRS_MODULES_MISSING"
+      ]
+    },
+    {
+      "id": "office/candidate-03/L1",
+      "program": "office",
+      "level": 1,
+      "sourceDimensions": {
+        "width": 24,
+        "depth": 20
+      },
+      "nominalPitch": 5,
+      "productionDefaultFloorPitch": 4,
+      "floorHeightParity": "BLOCKED_INCOMPATIBLE_FLOOR_PITCH",
+      "stageDigest": "7aaf7edf1f4f3bf7e11a3521ee4f76bd7f4e5417c7f487c2da6d660294b9d943",
+      "sourceWallBoundaryIds": 214,
+      "stagedDoorClearanceReservations": 11,
+      "referencedFloorRuns": 137,
+      "outOfMaskReservationsHeld": 0,
+      "exteriorEnvelopeAgreement": "UNVERIFIED",
+      "orientationAgreement": "UNVERIFIED",
+      "physicalModuleAvailable": false,
+      "productionEmissionAllowed": false,
+      "blockerCodes": [
+        "NOMINAL_FLOOR_PITCH_MISMATCH",
+        "EXTERIOR_FOOTPRINT_PARITY_UNVERIFIED",
+        "WORLD_TRANSFORM_AND_PALETTE_UNVERIFIED",
+        "DOOR_HINGE_AND_STAIRS_MODULES_MISSING"
+      ]
+    },
+    {
+      "id": "office/candidate-03/L2",
+      "program": "office",
+      "level": 2,
+      "sourceDimensions": {
+        "width": 24,
+        "depth": 20
+      },
+      "nominalPitch": 5,
+      "productionDefaultFloorPitch": 4,
+      "floorHeightParity": "BLOCKED_INCOMPATIBLE_FLOOR_PITCH",
+      "stageDigest": "bd1ddbeb6fa909a7cdebc0131bb7af6af455257ee075e1b0e237ae2dd5395458",
+      "sourceWallBoundaryIds": 216,
+      "stagedDoorClearanceReservations": 11,
+      "referencedFloorRuns": 137,
+      "outOfMaskReservationsHeld": 0,
+      "exteriorEnvelopeAgreement": "UNVERIFIED",
+      "orientationAgreement": "UNVERIFIED",
+      "physicalModuleAvailable": false,
+      "productionEmissionAllowed": false,
+      "blockerCodes": [
+        "NOMINAL_FLOOR_PITCH_MISMATCH",
+        "EXTERIOR_FOOTPRINT_PARITY_UNVERIFIED",
+        "WORLD_TRANSFORM_AND_PALETTE_UNVERIFIED",
+        "DOOR_HINGE_AND_STAIRS_MODULES_MISSING"
+      ]
+    },
+    {
+      "id": "office/candidate-03/L3",
+      "program": "office",
+      "level": 3,
+      "sourceDimensions": {
+        "width": 24,
+        "depth": 20
+      },
+      "nominalPitch": 5,
+      "productionDefaultFloorPitch": 4,
+      "floorHeightParity": "BLOCKED_INCOMPATIBLE_FLOOR_PITCH",
+      "stageDigest": "f6f13d6282811dadc2ffc44ab73e9c86921f19bcb4b04a7026ad77f2b423c42b",
+      "sourceWallBoundaryIds": 216,
+      "stagedDoorClearanceReservations": 11,
+      "referencedFloorRuns": 137,
+      "outOfMaskReservationsHeld": 0,
+      "exteriorEnvelopeAgreement": "UNVERIFIED",
+      "orientationAgreement": "UNVERIFIED",
+      "physicalModuleAvailable": false,
+      "productionEmissionAllowed": false,
+      "blockerCodes": [
+        "NOMINAL_FLOOR_PITCH_MISMATCH",
+        "EXTERIOR_FOOTPRINT_PARITY_UNVERIFIED",
+        "WORLD_TRANSFORM_AND_PALETTE_UNVERIFIED",
+        "DOOR_HINGE_AND_STAIRS_MODULES_MISSING"
+      ]
+    },
+    {
+      "id": "office/candidate-03/L4",
+      "program": "office",
+      "level": 4,
+      "sourceDimensions": {
+        "width": 24,
+        "depth": 20
+      },
+      "nominalPitch": 5,
+      "productionDefaultFloorPitch": 4,
+      "floorHeightParity": "BLOCKED_INCOMPATIBLE_FLOOR_PITCH",
+      "stageDigest": "2fdf9d06bba873253d7dbe747c64490dfb9283b0c3e4ce0a2036fb5694e5406f",
+      "sourceWallBoundaryIds": 216,
+      "stagedDoorClearanceReservations": 11,
+      "referencedFloorRuns": 137,
+      "outOfMaskReservationsHeld": 0,
+      "exteriorEnvelopeAgreement": "UNVERIFIED",
+      "orientationAgreement": "UNVERIFIED",
+      "physicalModuleAvailable": false,
+      "productionEmissionAllowed": false,
+      "blockerCodes": [
+        "NOMINAL_FLOOR_PITCH_MISMATCH",
+        "EXTERIOR_FOOTPRINT_PARITY_UNVERIFIED",
+        "WORLD_TRANSFORM_AND_PALETTE_UNVERIFIED",
+        "DOOR_HINGE_AND_STAIRS_MODULES_MISSING"
+      ]
+    },
+    {
+      "id": "office/candidate-03/L5",
+      "program": "office",
+      "level": 5,
+      "sourceDimensions": {
+        "width": 24,
+        "depth": 20
+      },
+      "nominalPitch": 5,
+      "productionDefaultFloorPitch": 4,
+      "floorHeightParity": "BLOCKED_INCOMPATIBLE_FLOOR_PITCH",
+      "stageDigest": "f1093199a9b3a2c50efb4b7a68bc5358a95688dd37930d9edd5d8568edd66317",
+      "sourceWallBoundaryIds": 216,
+      "stagedDoorClearanceReservations": 11,
+      "referencedFloorRuns": 137,
+      "outOfMaskReservationsHeld": 0,
+      "exteriorEnvelopeAgreement": "UNVERIFIED",
+      "orientationAgreement": "UNVERIFIED",
+      "physicalModuleAvailable": false,
+      "productionEmissionAllowed": false,
+      "blockerCodes": [
+        "NOMINAL_FLOOR_PITCH_MISMATCH",
+        "EXTERIOR_FOOTPRINT_PARITY_UNVERIFIED",
+        "WORLD_TRANSFORM_AND_PALETTE_UNVERIFIED",
+        "DOOR_HINGE_AND_STAIRS_MODULES_MISSING"
+      ]
+    },
+    {
+      "id": "office/candidate-03/L6",
+      "program": "office",
+      "level": 6,
+      "sourceDimensions": {
+        "width": 24,
+        "depth": 20
+      },
+      "nominalPitch": 5,
+      "productionDefaultFloorPitch": 4,
+      "floorHeightParity": "BLOCKED_INCOMPATIBLE_FLOOR_PITCH",
+      "stageDigest": "b2c03e521a5f1a2b54cf918be413a0cbbfa0a92c96b578f3cc506702d28da4f4",
+      "sourceWallBoundaryIds": 216,
+      "stagedDoorClearanceReservations": 11,
+      "referencedFloorRuns": 137,
+      "outOfMaskReservationsHeld": 0,
+      "exteriorEnvelopeAgreement": "UNVERIFIED",
+      "orientationAgreement": "UNVERIFIED",
+      "physicalModuleAvailable": false,
+      "productionEmissionAllowed": false,
+      "blockerCodes": [
+        "NOMINAL_FLOOR_PITCH_MISMATCH",
+        "EXTERIOR_FOOTPRINT_PARITY_UNVERIFIED",
+        "WORLD_TRANSFORM_AND_PALETTE_UNVERIFIED",
+        "DOOR_HINGE_AND_STAIRS_MODULES_MISSING"
+      ]
+    }
+  ],
+  "unresolved": [
+    "PRODUCTION_REPOSITORY_AND_DEPENDENCIES_NOT_PRESENT",
+    "LIVE_RUNTIME_PARITY_UNVERIFIED",
+    "24_FLOORS_NOMINAL_PITCH_MISMATCH",
+    "REAL_EXTERIOR_FOOTPRINT_ORIENTATION_UNMAPPED",
+    "EXTERIOR_FACADE_VS_INTERIOR_CONFLICT_UNTESTED",
+    "REAL_DOORS_HINGES_AND_STAIR_MODULES_ABSENT",
+    "B70_OFF_MASK_CORRIDOR_RESERVATIONS_18_HELD",
+    "B42_UPPER_60_DOORS_UNVERIFIED",
+    "B62_B64_ALTERNATIVE_NOT_APPROVED",
+    "M4_9_GATES_BLOCKED"
+  ],
+  "readiness": "NOT_PREPARED",
+  "deployment": "BLOCKED",
+  "executionAllowed": false,
+  "constructionApproved": false,
+  "gates": [
+    {
+      "id": "M4-01",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-02",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-03",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-04",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-05",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-06",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-07",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-08",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-09",
+      "status": "BLOCKED"
+    }
+  ],
+  "engineCalls": 0,
+  "worldContacts": 0,
+  "scans": 0,
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0,
+    "worldCoordinates": null,
+    "materialIds": []
+  },
+  "reportSha256": "f9c79bec9ed0a5b40da701ab38caf6b7418d8f15e23cbf9404fad2c453dd8566"
+}

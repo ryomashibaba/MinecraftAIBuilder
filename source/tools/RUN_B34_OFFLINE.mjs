@@ -1,0 +1,12 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {verifyB33CheckpointB34,buildShaftReviewB34,validateShaftReviewB34} from '../runner/step8b-shaft-access-b34.mjs';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const dest=path.join(root,'reports/B34_SHAFT_ACCESS_REPORT.json');
+if(fs.existsSync(dest))throw Error('B34_REFUSE_OVERWRITE');
+verifyB33CheckpointB34(root);
+const result=buildShaftReviewB34(root);
+validateShaftReviewB34(result,root);
+fs.writeFileSync(dest,JSON.stringify(result,null,2)+'\n',{flag:'wx'});
+console.log('B34_REPORT_OK',JSON.stringify(result.totals));

@@ -1,0 +1,1452 @@
+{
+  "schema": "minecraftaibuilder-step8b-b42-stair-macro-module-v1",
+  "purpose": "ONE_PASS_INERT_COMPOSITE_FLOOR_CORRIDOR_STAIR_CONTRACT",
+  "provenance": {
+    "frozenB41ManifestSha256": "e60d53ddf636e9ac88b182e78c524ab54420c6e54c1f9f3b8b7f06eaabf5b3fd",
+    "b41ReportSha256": "d5b57c9cd19cc5f294c6129815de3da54435e61d332b9abe0dc7715da8189e46",
+    "inheritedInputsPinned": true,
+    "plannerDevCopyGuarded": true,
+    "engineInvoked": false,
+    "bridgeContact": false,
+    "worldAccess": false
+  },
+  "building": "apartment/candidate-01",
+  "interface": {
+    "name": "stairMacroCandidate",
+    "mode": "NO_EXECUTION",
+    "coordinateFrame": "LOCAL_ONLY",
+    "consumes": [
+      "B17_DESIGN_IR",
+      "B21_SYMBOLIC_WALL_GRID",
+      "B31_FLOOR_OVERLAY",
+      "B41_STRAIGHT_REDESIGN"
+    ],
+    "produces": [
+      "REVIEW_FLOOR_MASK",
+      "REVIEW_CORRIDOR_RETAG",
+      "REVIEW_STAIR_VOLUME",
+      "MISSING_CAPABILITY_GATES"
+    ],
+    "outputCompatibleWithRuntimePlanner": false,
+    "requiresExplicitFutureImplementation": true
+  },
+  "transitions": [
+    {
+      "transition": "L1_L2",
+      "localYFrom": 0,
+      "localYTo": 4,
+      "spatialFrame": "LOCAL_XZ_Y_NOT_WORLD",
+      "corridor": {
+        "reclassifyAsStair": [
+          {
+            "x": 11,
+            "z": 18
+          }
+        ],
+        "lead": {
+          "x": 10,
+          "z": 18
+        },
+        "upperLanding": {
+          "x": 15,
+          "z": 18
+        },
+        "baselineReachableCells": 117,
+        "reviewReachableCells": 115,
+        "baselineReachableDoors": 12,
+        "reviewReachableDoors": 12,
+        "totalDoors": 13,
+        "unreachedDoorIDs": [
+          "apartment/candidate-01/L1/D012"
+        ],
+        "upperLandingReachableDoors": 1,
+        "upperLandingUnreachedDoorIDs": [
+          "apartment/candidate-01/L2/D001",
+          "apartment/candidate-01/L2/D002",
+          "apartment/candidate-01/L2/D003",
+          "apartment/candidate-01/L2/D004",
+          "apartment/candidate-01/L2/D005",
+          "apartment/candidate-01/L2/D006",
+          "apartment/candidate-01/L2/D007",
+          "apartment/candidate-01/L2/D008",
+          "apartment/candidate-01/L2/D009",
+          "apartment/candidate-01/L2/D010",
+          "apartment/candidate-01/L2/D011",
+          "apartment/candidate-01/L2/D013"
+        ],
+        "potentialUpperCorridorConnector": {
+          "exists": true,
+          "route": [
+            {
+              "x": 15,
+              "z": 18
+            },
+            {
+              "x": 15,
+              "z": 19
+            },
+            {
+              "x": 15,
+              "z": 20
+            },
+            {
+              "x": 14,
+              "z": 20
+            },
+            {
+              "x": 13,
+              "z": 20
+            },
+            {
+              "x": 12,
+              "z": 20
+            },
+            {
+              "x": 11,
+              "z": 20
+            },
+            {
+              "x": 10,
+              "z": 20
+            },
+            {
+              "x": 10,
+              "z": 19
+            },
+            {
+              "x": 10,
+              "z": 18
+            }
+          ],
+          "newCorridorCandidateCells": [
+            {
+              "x": 15,
+              "z": 19
+            },
+            {
+              "x": 15,
+              "z": 20
+            },
+            {
+              "x": 14,
+              "z": 20
+            },
+            {
+              "x": 13,
+              "z": 20
+            },
+            {
+              "x": 11,
+              "z": 20
+            },
+            {
+              "x": 10,
+              "z": 20
+            },
+            {
+              "x": 10,
+              "z": 19
+            }
+          ],
+          "conceptualWallOverlayCells": [
+            {
+              "x": 15,
+              "z": 19
+            },
+            {
+              "x": 14,
+              "z": 20
+            },
+            {
+              "x": 11,
+              "z": 20
+            },
+            {
+              "x": 10,
+              "z": 19
+            }
+          ],
+          "reviewedRouteLength": 9,
+          "roomReservationClearanceVerified": false,
+          "physicalWallPassageVerified": false,
+          "realCorridorWidthVerified": false,
+          "adopted": false,
+          "status": "SHORT_GEOMETRIC_CONNECTOR_WITH_UNVERIFIED_ROOM_WALL_CONFLICTS"
+        }
+      },
+      "floorMask": {
+        "sourceFloorDigest": "032a2829f48c27f5652aa31e60dd430b8f54e4b1c07fa2da616fcf8855392e86",
+        "beforeFloorDigest": "b06b3c3231943ba06000d3f1b070587c8496d6803540eee2ccc3dab23b07b2b0",
+        "candidateFloorDigest": "79de303ec109fc5b8529dc03461b14d52aacd75cb0271e83a175ee8c157ff856",
+        "width": 28,
+        "depth": 22,
+        "sourceOccupiedCells": 398,
+        "candidateOccupiedCells": 398,
+        "beforeRectangles": 6,
+        "candidateRectangles": 7,
+        "candidateFloorRows": [
+          "############################",
+          "############################",
+          "############################",
+          "############################",
+          "############################",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "############################",
+          "#############..#############",
+          "############################",
+          "############################",
+          "############################"
+        ],
+        "exactRectangleCoverage": true,
+        "changedCells": [
+          {
+            "x": 14,
+            "z": 17,
+            "was": ".",
+            "now": "#"
+          },
+          {
+            "x": 13,
+            "z": 18,
+            "was": "#",
+            "now": "."
+          }
+        ],
+        "immutableFoundationEnvelope": true,
+        "immutableRoofEnvelope": true,
+        "immutableExteriorEnvelope": true,
+        "structuralSupportVerified": false
+      },
+      "stair": {
+        "riserLocalCells": [
+          {
+            "x": 11,
+            "y": 0,
+            "z": 18
+          },
+          {
+            "x": 12,
+            "y": 1,
+            "z": 18
+          },
+          {
+            "x": 13,
+            "y": 2,
+            "z": 18
+          },
+          {
+            "x": 14,
+            "y": 3,
+            "z": 18
+          }
+        ],
+        "nominalRiserCount": 4,
+        "symbolicSupportCells": [
+          {
+            "x": 11,
+            "y": -1,
+            "z": 18
+          },
+          {
+            "x": 12,
+            "y": 0,
+            "z": 18
+          },
+          {
+            "x": 13,
+            "y": 1,
+            "z": 18
+          },
+          {
+            "x": 14,
+            "y": 2,
+            "z": 18
+          }
+        ],
+        "supportExistenceVerified": false,
+        "headroomPhysicalVerified": false,
+        "actualStairBlockState": null,
+        "actualFacingState": null,
+        "actualHalfState": null,
+        "collisionVerified": false
+      },
+      "wall": {
+        "symbolicRiserAndHeadspaceClashes": 0,
+        "installedJunctionVerified": false
+      },
+      "dependencyGates": [
+        "FLOOR_CUTOUT_NOT_IN_ENGINE",
+        "CORRIDOR_RETAG_NOT_IN_ENGINE",
+        "REAL_STAIR_STATE_UNKNOWN",
+        "TREAD_SUPPORT_UNPROVEN",
+        "PHYSICAL_HEADROOM_UNPROVEN",
+        "DOOR_PATH_NOT_FULLY_CONNECTED",
+        "UPPER_LANDING_DISCONNECTED_FROM_MAIN_HALL"
+      ],
+      "effect": "DESIGN_REVIEW_ONLY_NOT_APPLIED",
+      "verifiedLive": false
+    },
+    {
+      "transition": "L2_L3",
+      "localYFrom": 4,
+      "localYTo": 8,
+      "spatialFrame": "LOCAL_XZ_Y_NOT_WORLD",
+      "corridor": {
+        "reclassifyAsStair": [
+          {
+            "x": 11,
+            "z": 18
+          }
+        ],
+        "lead": {
+          "x": 10,
+          "z": 18
+        },
+        "upperLanding": {
+          "x": 15,
+          "z": 18
+        },
+        "baselineReachableCells": 117,
+        "reviewReachableCells": 115,
+        "baselineReachableDoors": 12,
+        "reviewReachableDoors": 12,
+        "totalDoors": 13,
+        "unreachedDoorIDs": [
+          "apartment/candidate-01/L2/D012"
+        ],
+        "upperLandingReachableDoors": 1,
+        "upperLandingUnreachedDoorIDs": [
+          "apartment/candidate-01/L3/D001",
+          "apartment/candidate-01/L3/D002",
+          "apartment/candidate-01/L3/D003",
+          "apartment/candidate-01/L3/D004",
+          "apartment/candidate-01/L3/D005",
+          "apartment/candidate-01/L3/D006",
+          "apartment/candidate-01/L3/D007",
+          "apartment/candidate-01/L3/D008",
+          "apartment/candidate-01/L3/D009",
+          "apartment/candidate-01/L3/D010",
+          "apartment/candidate-01/L3/D011",
+          "apartment/candidate-01/L3/D013"
+        ],
+        "potentialUpperCorridorConnector": {
+          "exists": true,
+          "route": [
+            {
+              "x": 15,
+              "z": 18
+            },
+            {
+              "x": 15,
+              "z": 19
+            },
+            {
+              "x": 15,
+              "z": 20
+            },
+            {
+              "x": 14,
+              "z": 20
+            },
+            {
+              "x": 13,
+              "z": 20
+            },
+            {
+              "x": 12,
+              "z": 20
+            },
+            {
+              "x": 11,
+              "z": 20
+            },
+            {
+              "x": 10,
+              "z": 20
+            },
+            {
+              "x": 10,
+              "z": 19
+            },
+            {
+              "x": 10,
+              "z": 18
+            }
+          ],
+          "newCorridorCandidateCells": [
+            {
+              "x": 15,
+              "z": 19
+            },
+            {
+              "x": 15,
+              "z": 20
+            },
+            {
+              "x": 14,
+              "z": 20
+            },
+            {
+              "x": 13,
+              "z": 20
+            },
+            {
+              "x": 11,
+              "z": 20
+            },
+            {
+              "x": 10,
+              "z": 20
+            },
+            {
+              "x": 10,
+              "z": 19
+            }
+          ],
+          "conceptualWallOverlayCells": [
+            {
+              "x": 15,
+              "z": 19
+            },
+            {
+              "x": 14,
+              "z": 20
+            },
+            {
+              "x": 11,
+              "z": 20
+            },
+            {
+              "x": 10,
+              "z": 19
+            }
+          ],
+          "reviewedRouteLength": 9,
+          "roomReservationClearanceVerified": false,
+          "physicalWallPassageVerified": false,
+          "realCorridorWidthVerified": false,
+          "adopted": false,
+          "status": "SHORT_GEOMETRIC_CONNECTOR_WITH_UNVERIFIED_ROOM_WALL_CONFLICTS"
+        }
+      },
+      "floorMask": {
+        "sourceFloorDigest": "032a2829f48c27f5652aa31e60dd430b8f54e4b1c07fa2da616fcf8855392e86",
+        "beforeFloorDigest": "b06b3c3231943ba06000d3f1b070587c8496d6803540eee2ccc3dab23b07b2b0",
+        "candidateFloorDigest": "79de303ec109fc5b8529dc03461b14d52aacd75cb0271e83a175ee8c157ff856",
+        "width": 28,
+        "depth": 22,
+        "sourceOccupiedCells": 398,
+        "candidateOccupiedCells": 398,
+        "beforeRectangles": 6,
+        "candidateRectangles": 7,
+        "candidateFloorRows": [
+          "############################",
+          "############################",
+          "############################",
+          "############################",
+          "############################",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "############################",
+          "#############..#############",
+          "############################",
+          "############################",
+          "############################"
+        ],
+        "exactRectangleCoverage": true,
+        "changedCells": [
+          {
+            "x": 14,
+            "z": 17,
+            "was": ".",
+            "now": "#"
+          },
+          {
+            "x": 13,
+            "z": 18,
+            "was": "#",
+            "now": "."
+          }
+        ],
+        "immutableFoundationEnvelope": true,
+        "immutableRoofEnvelope": true,
+        "immutableExteriorEnvelope": true,
+        "structuralSupportVerified": false
+      },
+      "stair": {
+        "riserLocalCells": [
+          {
+            "x": 11,
+            "y": 4,
+            "z": 18
+          },
+          {
+            "x": 12,
+            "y": 5,
+            "z": 18
+          },
+          {
+            "x": 13,
+            "y": 6,
+            "z": 18
+          },
+          {
+            "x": 14,
+            "y": 7,
+            "z": 18
+          }
+        ],
+        "nominalRiserCount": 4,
+        "symbolicSupportCells": [
+          {
+            "x": 11,
+            "y": 3,
+            "z": 18
+          },
+          {
+            "x": 12,
+            "y": 4,
+            "z": 18
+          },
+          {
+            "x": 13,
+            "y": 5,
+            "z": 18
+          },
+          {
+            "x": 14,
+            "y": 6,
+            "z": 18
+          }
+        ],
+        "supportExistenceVerified": false,
+        "headroomPhysicalVerified": false,
+        "actualStairBlockState": null,
+        "actualFacingState": null,
+        "actualHalfState": null,
+        "collisionVerified": false
+      },
+      "wall": {
+        "symbolicRiserAndHeadspaceClashes": 0,
+        "installedJunctionVerified": false
+      },
+      "dependencyGates": [
+        "FLOOR_CUTOUT_NOT_IN_ENGINE",
+        "CORRIDOR_RETAG_NOT_IN_ENGINE",
+        "REAL_STAIR_STATE_UNKNOWN",
+        "TREAD_SUPPORT_UNPROVEN",
+        "PHYSICAL_HEADROOM_UNPROVEN",
+        "DOOR_PATH_NOT_FULLY_CONNECTED",
+        "UPPER_LANDING_DISCONNECTED_FROM_MAIN_HALL"
+      ],
+      "effect": "DESIGN_REVIEW_ONLY_NOT_APPLIED",
+      "verifiedLive": false
+    },
+    {
+      "transition": "L3_L4",
+      "localYFrom": 8,
+      "localYTo": 12,
+      "spatialFrame": "LOCAL_XZ_Y_NOT_WORLD",
+      "corridor": {
+        "reclassifyAsStair": [
+          {
+            "x": 11,
+            "z": 18
+          }
+        ],
+        "lead": {
+          "x": 10,
+          "z": 18
+        },
+        "upperLanding": {
+          "x": 15,
+          "z": 18
+        },
+        "baselineReachableCells": 117,
+        "reviewReachableCells": 115,
+        "baselineReachableDoors": 12,
+        "reviewReachableDoors": 12,
+        "totalDoors": 13,
+        "unreachedDoorIDs": [
+          "apartment/candidate-01/L3/D012"
+        ],
+        "upperLandingReachableDoors": 1,
+        "upperLandingUnreachedDoorIDs": [
+          "apartment/candidate-01/L4/D001",
+          "apartment/candidate-01/L4/D002",
+          "apartment/candidate-01/L4/D003",
+          "apartment/candidate-01/L4/D004",
+          "apartment/candidate-01/L4/D005",
+          "apartment/candidate-01/L4/D006",
+          "apartment/candidate-01/L4/D007",
+          "apartment/candidate-01/L4/D008",
+          "apartment/candidate-01/L4/D009",
+          "apartment/candidate-01/L4/D010",
+          "apartment/candidate-01/L4/D011",
+          "apartment/candidate-01/L4/D013"
+        ],
+        "potentialUpperCorridorConnector": {
+          "exists": true,
+          "route": [
+            {
+              "x": 15,
+              "z": 18
+            },
+            {
+              "x": 15,
+              "z": 19
+            },
+            {
+              "x": 15,
+              "z": 20
+            },
+            {
+              "x": 14,
+              "z": 20
+            },
+            {
+              "x": 13,
+              "z": 20
+            },
+            {
+              "x": 12,
+              "z": 20
+            },
+            {
+              "x": 11,
+              "z": 20
+            },
+            {
+              "x": 10,
+              "z": 20
+            },
+            {
+              "x": 10,
+              "z": 19
+            },
+            {
+              "x": 10,
+              "z": 18
+            }
+          ],
+          "newCorridorCandidateCells": [
+            {
+              "x": 15,
+              "z": 19
+            },
+            {
+              "x": 15,
+              "z": 20
+            },
+            {
+              "x": 14,
+              "z": 20
+            },
+            {
+              "x": 13,
+              "z": 20
+            },
+            {
+              "x": 11,
+              "z": 20
+            },
+            {
+              "x": 10,
+              "z": 20
+            },
+            {
+              "x": 10,
+              "z": 19
+            }
+          ],
+          "conceptualWallOverlayCells": [
+            {
+              "x": 15,
+              "z": 19
+            },
+            {
+              "x": 14,
+              "z": 20
+            },
+            {
+              "x": 11,
+              "z": 20
+            },
+            {
+              "x": 10,
+              "z": 19
+            }
+          ],
+          "reviewedRouteLength": 9,
+          "roomReservationClearanceVerified": false,
+          "physicalWallPassageVerified": false,
+          "realCorridorWidthVerified": false,
+          "adopted": false,
+          "status": "SHORT_GEOMETRIC_CONNECTOR_WITH_UNVERIFIED_ROOM_WALL_CONFLICTS"
+        }
+      },
+      "floorMask": {
+        "sourceFloorDigest": "032a2829f48c27f5652aa31e60dd430b8f54e4b1c07fa2da616fcf8855392e86",
+        "beforeFloorDigest": "b06b3c3231943ba06000d3f1b070587c8496d6803540eee2ccc3dab23b07b2b0",
+        "candidateFloorDigest": "79de303ec109fc5b8529dc03461b14d52aacd75cb0271e83a175ee8c157ff856",
+        "width": 28,
+        "depth": 22,
+        "sourceOccupiedCells": 398,
+        "candidateOccupiedCells": 398,
+        "beforeRectangles": 6,
+        "candidateRectangles": 7,
+        "candidateFloorRows": [
+          "############################",
+          "############################",
+          "############################",
+          "############################",
+          "############################",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "############################",
+          "#############..#############",
+          "############################",
+          "############################",
+          "############################"
+        ],
+        "exactRectangleCoverage": true,
+        "changedCells": [
+          {
+            "x": 14,
+            "z": 17,
+            "was": ".",
+            "now": "#"
+          },
+          {
+            "x": 13,
+            "z": 18,
+            "was": "#",
+            "now": "."
+          }
+        ],
+        "immutableFoundationEnvelope": true,
+        "immutableRoofEnvelope": true,
+        "immutableExteriorEnvelope": true,
+        "structuralSupportVerified": false
+      },
+      "stair": {
+        "riserLocalCells": [
+          {
+            "x": 11,
+            "y": 8,
+            "z": 18
+          },
+          {
+            "x": 12,
+            "y": 9,
+            "z": 18
+          },
+          {
+            "x": 13,
+            "y": 10,
+            "z": 18
+          },
+          {
+            "x": 14,
+            "y": 11,
+            "z": 18
+          }
+        ],
+        "nominalRiserCount": 4,
+        "symbolicSupportCells": [
+          {
+            "x": 11,
+            "y": 7,
+            "z": 18
+          },
+          {
+            "x": 12,
+            "y": 8,
+            "z": 18
+          },
+          {
+            "x": 13,
+            "y": 9,
+            "z": 18
+          },
+          {
+            "x": 14,
+            "y": 10,
+            "z": 18
+          }
+        ],
+        "supportExistenceVerified": false,
+        "headroomPhysicalVerified": false,
+        "actualStairBlockState": null,
+        "actualFacingState": null,
+        "actualHalfState": null,
+        "collisionVerified": false
+      },
+      "wall": {
+        "symbolicRiserAndHeadspaceClashes": 0,
+        "installedJunctionVerified": false
+      },
+      "dependencyGates": [
+        "FLOOR_CUTOUT_NOT_IN_ENGINE",
+        "CORRIDOR_RETAG_NOT_IN_ENGINE",
+        "REAL_STAIR_STATE_UNKNOWN",
+        "TREAD_SUPPORT_UNPROVEN",
+        "PHYSICAL_HEADROOM_UNPROVEN",
+        "DOOR_PATH_NOT_FULLY_CONNECTED",
+        "UPPER_LANDING_DISCONNECTED_FROM_MAIN_HALL"
+      ],
+      "effect": "DESIGN_REVIEW_ONLY_NOT_APPLIED",
+      "verifiedLive": false
+    },
+    {
+      "transition": "L4_L5",
+      "localYFrom": 12,
+      "localYTo": 16,
+      "spatialFrame": "LOCAL_XZ_Y_NOT_WORLD",
+      "corridor": {
+        "reclassifyAsStair": [
+          {
+            "x": 11,
+            "z": 18
+          }
+        ],
+        "lead": {
+          "x": 10,
+          "z": 18
+        },
+        "upperLanding": {
+          "x": 15,
+          "z": 18
+        },
+        "baselineReachableCells": 117,
+        "reviewReachableCells": 115,
+        "baselineReachableDoors": 12,
+        "reviewReachableDoors": 12,
+        "totalDoors": 13,
+        "unreachedDoorIDs": [
+          "apartment/candidate-01/L4/D012"
+        ],
+        "upperLandingReachableDoors": 1,
+        "upperLandingUnreachedDoorIDs": [
+          "apartment/candidate-01/L5/D001",
+          "apartment/candidate-01/L5/D002",
+          "apartment/candidate-01/L5/D003",
+          "apartment/candidate-01/L5/D004",
+          "apartment/candidate-01/L5/D005",
+          "apartment/candidate-01/L5/D006",
+          "apartment/candidate-01/L5/D007",
+          "apartment/candidate-01/L5/D008",
+          "apartment/candidate-01/L5/D009",
+          "apartment/candidate-01/L5/D010",
+          "apartment/candidate-01/L5/D011",
+          "apartment/candidate-01/L5/D013"
+        ],
+        "potentialUpperCorridorConnector": {
+          "exists": true,
+          "route": [
+            {
+              "x": 15,
+              "z": 18
+            },
+            {
+              "x": 15,
+              "z": 19
+            },
+            {
+              "x": 15,
+              "z": 20
+            },
+            {
+              "x": 14,
+              "z": 20
+            },
+            {
+              "x": 13,
+              "z": 20
+            },
+            {
+              "x": 12,
+              "z": 20
+            },
+            {
+              "x": 11,
+              "z": 20
+            },
+            {
+              "x": 10,
+              "z": 20
+            },
+            {
+              "x": 10,
+              "z": 19
+            },
+            {
+              "x": 10,
+              "z": 18
+            }
+          ],
+          "newCorridorCandidateCells": [
+            {
+              "x": 15,
+              "z": 19
+            },
+            {
+              "x": 15,
+              "z": 20
+            },
+            {
+              "x": 14,
+              "z": 20
+            },
+            {
+              "x": 13,
+              "z": 20
+            },
+            {
+              "x": 11,
+              "z": 20
+            },
+            {
+              "x": 10,
+              "z": 20
+            },
+            {
+              "x": 10,
+              "z": 19
+            }
+          ],
+          "conceptualWallOverlayCells": [
+            {
+              "x": 15,
+              "z": 19
+            },
+            {
+              "x": 14,
+              "z": 20
+            },
+            {
+              "x": 11,
+              "z": 20
+            },
+            {
+              "x": 10,
+              "z": 19
+            }
+          ],
+          "reviewedRouteLength": 9,
+          "roomReservationClearanceVerified": false,
+          "physicalWallPassageVerified": false,
+          "realCorridorWidthVerified": false,
+          "adopted": false,
+          "status": "SHORT_GEOMETRIC_CONNECTOR_WITH_UNVERIFIED_ROOM_WALL_CONFLICTS"
+        }
+      },
+      "floorMask": {
+        "sourceFloorDigest": "032a2829f48c27f5652aa31e60dd430b8f54e4b1c07fa2da616fcf8855392e86",
+        "beforeFloorDigest": "b06b3c3231943ba06000d3f1b070587c8496d6803540eee2ccc3dab23b07b2b0",
+        "candidateFloorDigest": "79de303ec109fc5b8529dc03461b14d52aacd75cb0271e83a175ee8c157ff856",
+        "width": 28,
+        "depth": 22,
+        "sourceOccupiedCells": 398,
+        "candidateOccupiedCells": 398,
+        "beforeRectangles": 6,
+        "candidateRectangles": 7,
+        "candidateFloorRows": [
+          "############################",
+          "############################",
+          "############################",
+          "############################",
+          "############################",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "############################",
+          "#############..#############",
+          "############################",
+          "############################",
+          "############################"
+        ],
+        "exactRectangleCoverage": true,
+        "changedCells": [
+          {
+            "x": 14,
+            "z": 17,
+            "was": ".",
+            "now": "#"
+          },
+          {
+            "x": 13,
+            "z": 18,
+            "was": "#",
+            "now": "."
+          }
+        ],
+        "immutableFoundationEnvelope": true,
+        "immutableRoofEnvelope": true,
+        "immutableExteriorEnvelope": true,
+        "structuralSupportVerified": false
+      },
+      "stair": {
+        "riserLocalCells": [
+          {
+            "x": 11,
+            "y": 12,
+            "z": 18
+          },
+          {
+            "x": 12,
+            "y": 13,
+            "z": 18
+          },
+          {
+            "x": 13,
+            "y": 14,
+            "z": 18
+          },
+          {
+            "x": 14,
+            "y": 15,
+            "z": 18
+          }
+        ],
+        "nominalRiserCount": 4,
+        "symbolicSupportCells": [
+          {
+            "x": 11,
+            "y": 11,
+            "z": 18
+          },
+          {
+            "x": 12,
+            "y": 12,
+            "z": 18
+          },
+          {
+            "x": 13,
+            "y": 13,
+            "z": 18
+          },
+          {
+            "x": 14,
+            "y": 14,
+            "z": 18
+          }
+        ],
+        "supportExistenceVerified": false,
+        "headroomPhysicalVerified": false,
+        "actualStairBlockState": null,
+        "actualFacingState": null,
+        "actualHalfState": null,
+        "collisionVerified": false
+      },
+      "wall": {
+        "symbolicRiserAndHeadspaceClashes": 0,
+        "installedJunctionVerified": false
+      },
+      "dependencyGates": [
+        "FLOOR_CUTOUT_NOT_IN_ENGINE",
+        "CORRIDOR_RETAG_NOT_IN_ENGINE",
+        "REAL_STAIR_STATE_UNKNOWN",
+        "TREAD_SUPPORT_UNPROVEN",
+        "PHYSICAL_HEADROOM_UNPROVEN",
+        "DOOR_PATH_NOT_FULLY_CONNECTED",
+        "UPPER_LANDING_DISCONNECTED_FROM_MAIN_HALL"
+      ],
+      "effect": "DESIGN_REVIEW_ONLY_NOT_APPLIED",
+      "verifiedLive": false
+    },
+    {
+      "transition": "L5_L6",
+      "localYFrom": 16,
+      "localYTo": 20,
+      "spatialFrame": "LOCAL_XZ_Y_NOT_WORLD",
+      "corridor": {
+        "reclassifyAsStair": [
+          {
+            "x": 11,
+            "z": 18
+          }
+        ],
+        "lead": {
+          "x": 10,
+          "z": 18
+        },
+        "upperLanding": {
+          "x": 15,
+          "z": 18
+        },
+        "baselineReachableCells": 117,
+        "reviewReachableCells": 115,
+        "baselineReachableDoors": 12,
+        "reviewReachableDoors": 12,
+        "totalDoors": 13,
+        "unreachedDoorIDs": [
+          "apartment/candidate-01/L5/D012"
+        ],
+        "upperLandingReachableDoors": 1,
+        "upperLandingUnreachedDoorIDs": [
+          "apartment/candidate-01/L6/D001",
+          "apartment/candidate-01/L6/D002",
+          "apartment/candidate-01/L6/D003",
+          "apartment/candidate-01/L6/D004",
+          "apartment/candidate-01/L6/D005",
+          "apartment/candidate-01/L6/D006",
+          "apartment/candidate-01/L6/D007",
+          "apartment/candidate-01/L6/D008",
+          "apartment/candidate-01/L6/D009",
+          "apartment/candidate-01/L6/D010",
+          "apartment/candidate-01/L6/D011",
+          "apartment/candidate-01/L6/D013"
+        ],
+        "potentialUpperCorridorConnector": {
+          "exists": true,
+          "route": [
+            {
+              "x": 15,
+              "z": 18
+            },
+            {
+              "x": 15,
+              "z": 19
+            },
+            {
+              "x": 15,
+              "z": 20
+            },
+            {
+              "x": 14,
+              "z": 20
+            },
+            {
+              "x": 13,
+              "z": 20
+            },
+            {
+              "x": 12,
+              "z": 20
+            },
+            {
+              "x": 11,
+              "z": 20
+            },
+            {
+              "x": 10,
+              "z": 20
+            },
+            {
+              "x": 10,
+              "z": 19
+            },
+            {
+              "x": 10,
+              "z": 18
+            }
+          ],
+          "newCorridorCandidateCells": [
+            {
+              "x": 15,
+              "z": 19
+            },
+            {
+              "x": 15,
+              "z": 20
+            },
+            {
+              "x": 14,
+              "z": 20
+            },
+            {
+              "x": 13,
+              "z": 20
+            },
+            {
+              "x": 11,
+              "z": 20
+            },
+            {
+              "x": 10,
+              "z": 20
+            },
+            {
+              "x": 10,
+              "z": 19
+            }
+          ],
+          "conceptualWallOverlayCells": [
+            {
+              "x": 15,
+              "z": 19
+            },
+            {
+              "x": 14,
+              "z": 20
+            },
+            {
+              "x": 11,
+              "z": 20
+            },
+            {
+              "x": 10,
+              "z": 19
+            }
+          ],
+          "reviewedRouteLength": 9,
+          "roomReservationClearanceVerified": false,
+          "physicalWallPassageVerified": false,
+          "realCorridorWidthVerified": false,
+          "adopted": false,
+          "status": "SHORT_GEOMETRIC_CONNECTOR_WITH_UNVERIFIED_ROOM_WALL_CONFLICTS"
+        }
+      },
+      "floorMask": {
+        "sourceFloorDigest": "032a2829f48c27f5652aa31e60dd430b8f54e4b1c07fa2da616fcf8855392e86",
+        "beforeFloorDigest": "b06b3c3231943ba06000d3f1b070587c8496d6803540eee2ccc3dab23b07b2b0",
+        "candidateFloorDigest": "79de303ec109fc5b8529dc03461b14d52aacd75cb0271e83a175ee8c157ff856",
+        "width": 28,
+        "depth": 22,
+        "sourceOccupiedCells": 398,
+        "candidateOccupiedCells": 398,
+        "beforeRectangles": 6,
+        "candidateRectangles": 7,
+        "candidateFloorRows": [
+          "############################",
+          "############################",
+          "############################",
+          "############################",
+          "############################",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "#####..................#####",
+          "############################",
+          "#############..#############",
+          "############################",
+          "############################",
+          "############################"
+        ],
+        "exactRectangleCoverage": true,
+        "changedCells": [
+          {
+            "x": 14,
+            "z": 17,
+            "was": ".",
+            "now": "#"
+          },
+          {
+            "x": 13,
+            "z": 18,
+            "was": "#",
+            "now": "."
+          }
+        ],
+        "immutableFoundationEnvelope": true,
+        "immutableRoofEnvelope": true,
+        "immutableExteriorEnvelope": true,
+        "structuralSupportVerified": false
+      },
+      "stair": {
+        "riserLocalCells": [
+          {
+            "x": 11,
+            "y": 16,
+            "z": 18
+          },
+          {
+            "x": 12,
+            "y": 17,
+            "z": 18
+          },
+          {
+            "x": 13,
+            "y": 18,
+            "z": 18
+          },
+          {
+            "x": 14,
+            "y": 19,
+            "z": 18
+          }
+        ],
+        "nominalRiserCount": 4,
+        "symbolicSupportCells": [
+          {
+            "x": 11,
+            "y": 15,
+            "z": 18
+          },
+          {
+            "x": 12,
+            "y": 16,
+            "z": 18
+          },
+          {
+            "x": 13,
+            "y": 17,
+            "z": 18
+          },
+          {
+            "x": 14,
+            "y": 18,
+            "z": 18
+          }
+        ],
+        "supportExistenceVerified": false,
+        "headroomPhysicalVerified": false,
+        "actualStairBlockState": null,
+        "actualFacingState": null,
+        "actualHalfState": null,
+        "collisionVerified": false
+      },
+      "wall": {
+        "symbolicRiserAndHeadspaceClashes": 0,
+        "installedJunctionVerified": false
+      },
+      "dependencyGates": [
+        "FLOOR_CUTOUT_NOT_IN_ENGINE",
+        "CORRIDOR_RETAG_NOT_IN_ENGINE",
+        "REAL_STAIR_STATE_UNKNOWN",
+        "TREAD_SUPPORT_UNPROVEN",
+        "PHYSICAL_HEADROOM_UNPROVEN",
+        "DOOR_PATH_NOT_FULLY_CONNECTED",
+        "UPPER_LANDING_DISCONNECTED_FROM_MAIN_HALL"
+      ],
+      "effect": "DESIGN_REVIEW_ONLY_NOT_APPLIED",
+      "verifiedLive": false
+    }
+  ],
+  "unresolved": [
+    "Real Education v26.3 stair block direction/half states and player collision shape",
+    "Stair support beneath every symbolic tread, floor beam/support and landing edge load path",
+    "Corridor narrowing/reclassification and its interaction with wall/door adjacency",
+    "Upper landing only reaches 1/13 doors; connector candidate crosses unverified walls/rooms",
+    "One pre-existing conceptually disconnected door per lower floor and upper-floor access",
+    "Engine floor seam remains throwing-only, and no wall/door/stair emitter has been integrated",
+    "Materials, world anchors, runtime identity, and safe construction authorization"
+  ],
+  "totals": {
+    "buildings": 1,
+    "transitions": 5,
+    "symbolicRisers": 20,
+    "reviewFloorRestorations": 5,
+    "reviewFloorOpenings": 5,
+    "corridorCellsRetagged": 5,
+    "baselineDoorReachable": 60,
+    "reviewDoorReachable": 60,
+    "upperLandingDoorReachable": 5,
+    "potentialUpperConnectorNewCorridorCells": 35,
+    "potentialUpperConnectorWallOverlayCells": 20,
+    "floorCellsBefore": 1990,
+    "floorCellsAfter": 1990,
+    "physicalSupportVerified": 0,
+    "physicalPassageVerified": 0,
+    "certifiedStairStateBindings": 0,
+    "engineCalls": 0,
+    "buildOperations": 0
+  },
+  "blockers": [
+    {
+      "id": "M4-01",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-02",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-03",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-04",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-05",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-06",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-07",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-08",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-09",
+      "status": "BLOCKED"
+    }
+  ],
+  "readiness": "NOT_PREPARED",
+  "deployment": "BLOCKED",
+  "approvedVariant": null,
+  "safety": {
+    "notPrepared": true,
+    "constructionApproved": false,
+    "executionAllowed": false,
+    "worldAccess": false,
+    "bridgeContact": false,
+    "legacyModified": false,
+    "frozenEvidenceModified": false,
+    "projectFilesModified": false
+  },
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "materialIds": [],
+    "worldCoordinates": null
+  },
+  "reportSha256": "ee52200cab0ccd0a5b4a9e4d97d298fe84d41d9f0a98e92678561c90f393f5bb"
+}

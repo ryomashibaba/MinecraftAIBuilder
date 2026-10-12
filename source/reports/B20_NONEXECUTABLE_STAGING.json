@@ -1,0 +1,953 @@
+{
+  "schema": "minecraftaibuilder-step8b-b20-m3-staging-v1",
+  "purpose": "MODEL_ONLY_APERTURE_AND_QUANTIZATION_FEASIBILITY",
+  "source": {
+    "b17BytesPinned": true,
+    "b18ReportSha256": "60a52e7267393dee22c7b5ddc09d1a48630e5aff2ae92c8de1dfa631459806c3",
+    "b19ReportSha256": "b9fda337336819ab566e506c72fe3488f3dc24bf5872346e892f01bf8085a269",
+    "priorSourceVerification": "PINNED_DISK_SOURCE_MATCH",
+    "sourceSnapshotCurrentRun": "NOT_RECHECKED"
+  },
+  "counts": {
+    "buildings": 5,
+    "floors": 30,
+    "partitionPanels": 5704,
+    "nominalDoors": 314,
+    "stairInterfaces": 25,
+    "candidateUpperFloorCutoutCells": 50,
+    "candidateCutCellsOutsidePredictedPlate": 0,
+    "exactIntegerVolumeAabbs": 0,
+    "nonIntegerVolumeAabbs": 6332
+  },
+  "projects": [
+    {
+      "id": "hotel/candidate-01",
+      "orientation": "north",
+      "cutouts": [
+        {
+          "id": "hotel/candidate-01/V1",
+          "lowerFloorId": "hotel/candidate-01/L1",
+          "upperFloorId": "hotel/candidate-01/L2",
+          "upperSourceFloorPlateY": 5,
+          "openingCandidates": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "sourcePlateCellsPotentiallyAffected": 2,
+          "candidateOutsideSourceFloorPlate": [],
+          "cutoutMode": "CELL_MASK_REVIEW_ONLY_NO_SUBTRACTION",
+          "nominalHeadroomOnly": true,
+          "clearancePhysicallyTested": false,
+          "loadBearingChecked": false,
+          "cutoutActuallyApplied": false,
+          "roofAndFacadeInteractionVerified": false,
+          "sourceEngineFloorPlate": "plate(masks[f], base, \"floor\", \"floor\")",
+          "instructions": [],
+          "blockIds": [],
+          "worldCoordinates": null
+        },
+        {
+          "id": "hotel/candidate-01/V2",
+          "lowerFloorId": "hotel/candidate-01/L2",
+          "upperFloorId": "hotel/candidate-01/L3",
+          "upperSourceFloorPlateY": 10,
+          "openingCandidates": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "sourcePlateCellsPotentiallyAffected": 2,
+          "candidateOutsideSourceFloorPlate": [],
+          "cutoutMode": "CELL_MASK_REVIEW_ONLY_NO_SUBTRACTION",
+          "nominalHeadroomOnly": true,
+          "clearancePhysicallyTested": false,
+          "loadBearingChecked": false,
+          "cutoutActuallyApplied": false,
+          "roofAndFacadeInteractionVerified": false,
+          "sourceEngineFloorPlate": "plate(masks[f], base, \"floor\", \"floor\")",
+          "instructions": [],
+          "blockIds": [],
+          "worldCoordinates": null
+        },
+        {
+          "id": "hotel/candidate-01/V3",
+          "lowerFloorId": "hotel/candidate-01/L3",
+          "upperFloorId": "hotel/candidate-01/L4",
+          "upperSourceFloorPlateY": 15,
+          "openingCandidates": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "sourcePlateCellsPotentiallyAffected": 2,
+          "candidateOutsideSourceFloorPlate": [],
+          "cutoutMode": "CELL_MASK_REVIEW_ONLY_NO_SUBTRACTION",
+          "nominalHeadroomOnly": true,
+          "clearancePhysicallyTested": false,
+          "loadBearingChecked": false,
+          "cutoutActuallyApplied": false,
+          "roofAndFacadeInteractionVerified": false,
+          "sourceEngineFloorPlate": "plate(masks[f], base, \"floor\", \"floor\")",
+          "instructions": [],
+          "blockIds": [],
+          "worldCoordinates": null
+        },
+        {
+          "id": "hotel/candidate-01/V4",
+          "lowerFloorId": "hotel/candidate-01/L4",
+          "upperFloorId": "hotel/candidate-01/L5",
+          "upperSourceFloorPlateY": 20,
+          "openingCandidates": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "sourcePlateCellsPotentiallyAffected": 2,
+          "candidateOutsideSourceFloorPlate": [],
+          "cutoutMode": "CELL_MASK_REVIEW_ONLY_NO_SUBTRACTION",
+          "nominalHeadroomOnly": true,
+          "clearancePhysicallyTested": false,
+          "loadBearingChecked": false,
+          "cutoutActuallyApplied": false,
+          "roofAndFacadeInteractionVerified": false,
+          "sourceEngineFloorPlate": "plate(masks[f], base, \"floor\", \"floor\")",
+          "instructions": [],
+          "blockIds": [],
+          "worldCoordinates": null
+        },
+        {
+          "id": "hotel/candidate-01/V5",
+          "lowerFloorId": "hotel/candidate-01/L5",
+          "upperFloorId": "hotel/candidate-01/L6",
+          "upperSourceFloorPlateY": 25,
+          "openingCandidates": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "sourcePlateCellsPotentiallyAffected": 2,
+          "candidateOutsideSourceFloorPlate": [],
+          "cutoutMode": "CELL_MASK_REVIEW_ONLY_NO_SUBTRACTION",
+          "nominalHeadroomOnly": true,
+          "clearancePhysicallyTested": false,
+          "loadBearingChecked": false,
+          "cutoutActuallyApplied": false,
+          "roofAndFacadeInteractionVerified": false,
+          "sourceEngineFloorPlate": "plate(masks[f], base, \"floor\", \"floor\")",
+          "instructions": [],
+          "blockIds": [],
+          "worldCoordinates": null
+        }
+      ],
+      "stageOnly": true,
+      "quantization": {
+        "exactIntegerBoundaryVolumes": 0,
+        "requiresExplicitRedesignVolumes": 1296,
+        "nonIntegerExample": {
+          "panelId": "hotel/candidate-01/L1/W0001",
+          "role": "PARTITION",
+          "nonIntegerAxes": [
+            "x",
+            "y"
+          ]
+        },
+        "policy": "EXACT_INTEGER_ENDPOINTS_ONLY; NO FLOOR/CEIL/ROUND EMISSION",
+        "doorAndWallDiscretization": "UNRESOLVED",
+        "stairShapeBlockMapping": "UNRESOLVED"
+      },
+      "localToWorldAnchor": "UNKNOWN",
+      "sourcePredictedFootprintOnly": true
+    },
+    {
+      "id": "apartment/candidate-01",
+      "orientation": "south",
+      "cutouts": [
+        {
+          "id": "apartment/candidate-01/V1",
+          "lowerFloorId": "apartment/candidate-01/L1",
+          "upperFloorId": "apartment/candidate-01/L2",
+          "upperSourceFloorPlateY": 4,
+          "openingCandidates": [
+            {
+              "x": 14,
+              "z": 17
+            },
+            {
+              "x": 14,
+              "z": 18
+            }
+          ],
+          "sourcePlateCellsPotentiallyAffected": 2,
+          "candidateOutsideSourceFloorPlate": [],
+          "cutoutMode": "CELL_MASK_REVIEW_ONLY_NO_SUBTRACTION",
+          "nominalHeadroomOnly": true,
+          "clearancePhysicallyTested": false,
+          "loadBearingChecked": false,
+          "cutoutActuallyApplied": false,
+          "roofAndFacadeInteractionVerified": false,
+          "sourceEngineFloorPlate": "plate(masks[f], base, \"floor\", \"floor\")",
+          "instructions": [],
+          "blockIds": [],
+          "worldCoordinates": null
+        },
+        {
+          "id": "apartment/candidate-01/V2",
+          "lowerFloorId": "apartment/candidate-01/L2",
+          "upperFloorId": "apartment/candidate-01/L3",
+          "upperSourceFloorPlateY": 8,
+          "openingCandidates": [
+            {
+              "x": 14,
+              "z": 17
+            },
+            {
+              "x": 14,
+              "z": 18
+            }
+          ],
+          "sourcePlateCellsPotentiallyAffected": 2,
+          "candidateOutsideSourceFloorPlate": [],
+          "cutoutMode": "CELL_MASK_REVIEW_ONLY_NO_SUBTRACTION",
+          "nominalHeadroomOnly": true,
+          "clearancePhysicallyTested": false,
+          "loadBearingChecked": false,
+          "cutoutActuallyApplied": false,
+          "roofAndFacadeInteractionVerified": false,
+          "sourceEngineFloorPlate": "plate(masks[f], base, \"floor\", \"floor\")",
+          "instructions": [],
+          "blockIds": [],
+          "worldCoordinates": null
+        },
+        {
+          "id": "apartment/candidate-01/V3",
+          "lowerFloorId": "apartment/candidate-01/L3",
+          "upperFloorId": "apartment/candidate-01/L4",
+          "upperSourceFloorPlateY": 12,
+          "openingCandidates": [
+            {
+              "x": 14,
+              "z": 17
+            },
+            {
+              "x": 14,
+              "z": 18
+            }
+          ],
+          "sourcePlateCellsPotentiallyAffected": 2,
+          "candidateOutsideSourceFloorPlate": [],
+          "cutoutMode": "CELL_MASK_REVIEW_ONLY_NO_SUBTRACTION",
+          "nominalHeadroomOnly": true,
+          "clearancePhysicallyTested": false,
+          "loadBearingChecked": false,
+          "cutoutActuallyApplied": false,
+          "roofAndFacadeInteractionVerified": false,
+          "sourceEngineFloorPlate": "plate(masks[f], base, \"floor\", \"floor\")",
+          "instructions": [],
+          "blockIds": [],
+          "worldCoordinates": null
+        },
+        {
+          "id": "apartment/candidate-01/V4",
+          "lowerFloorId": "apartment/candidate-01/L4",
+          "upperFloorId": "apartment/candidate-01/L5",
+          "upperSourceFloorPlateY": 16,
+          "openingCandidates": [
+            {
+              "x": 14,
+              "z": 17
+            },
+            {
+              "x": 14,
+              "z": 18
+            }
+          ],
+          "sourcePlateCellsPotentiallyAffected": 2,
+          "candidateOutsideSourceFloorPlate": [],
+          "cutoutMode": "CELL_MASK_REVIEW_ONLY_NO_SUBTRACTION",
+          "nominalHeadroomOnly": true,
+          "clearancePhysicallyTested": false,
+          "loadBearingChecked": false,
+          "cutoutActuallyApplied": false,
+          "roofAndFacadeInteractionVerified": false,
+          "sourceEngineFloorPlate": "plate(masks[f], base, \"floor\", \"floor\")",
+          "instructions": [],
+          "blockIds": [],
+          "worldCoordinates": null
+        },
+        {
+          "id": "apartment/candidate-01/V5",
+          "lowerFloorId": "apartment/candidate-01/L5",
+          "upperFloorId": "apartment/candidate-01/L6",
+          "upperSourceFloorPlateY": 20,
+          "openingCandidates": [
+            {
+              "x": 14,
+              "z": 17
+            },
+            {
+              "x": 14,
+              "z": 18
+            }
+          ],
+          "sourcePlateCellsPotentiallyAffected": 2,
+          "candidateOutsideSourceFloorPlate": [],
+          "cutoutMode": "CELL_MASK_REVIEW_ONLY_NO_SUBTRACTION",
+          "nominalHeadroomOnly": true,
+          "clearancePhysicallyTested": false,
+          "loadBearingChecked": false,
+          "cutoutActuallyApplied": false,
+          "roofAndFacadeInteractionVerified": false,
+          "sourceEngineFloorPlate": "plate(masks[f], base, \"floor\", \"floor\")",
+          "instructions": [],
+          "blockIds": [],
+          "worldCoordinates": null
+        }
+      ],
+      "stageOnly": true,
+      "quantization": {
+        "exactIntegerBoundaryVolumes": 0,
+        "requiresExplicitRedesignVolumes": 1428,
+        "nonIntegerExample": {
+          "panelId": "apartment/candidate-01/L1/W0001",
+          "role": "PARTITION",
+          "nonIntegerAxes": [
+            "x",
+            "y"
+          ]
+        },
+        "policy": "EXACT_INTEGER_ENDPOINTS_ONLY; NO FLOOR/CEIL/ROUND EMISSION",
+        "doorAndWallDiscretization": "UNRESOLVED",
+        "stairShapeBlockMapping": "UNRESOLVED"
+      },
+      "localToWorldAnchor": "UNKNOWN",
+      "sourcePredictedFootprintOnly": true
+    },
+    {
+      "id": "office/candidate-01",
+      "orientation": "south",
+      "cutouts": [
+        {
+          "id": "office/candidate-01/V1",
+          "lowerFloorId": "office/candidate-01/L1",
+          "upperFloorId": "office/candidate-01/L2",
+          "upperSourceFloorPlateY": 4,
+          "openingCandidates": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "sourcePlateCellsPotentiallyAffected": 2,
+          "candidateOutsideSourceFloorPlate": [],
+          "cutoutMode": "CELL_MASK_REVIEW_ONLY_NO_SUBTRACTION",
+          "nominalHeadroomOnly": true,
+          "clearancePhysicallyTested": false,
+          "loadBearingChecked": false,
+          "cutoutActuallyApplied": false,
+          "roofAndFacadeInteractionVerified": false,
+          "sourceEngineFloorPlate": "plate(masks[f], base, \"floor\", \"floor\")",
+          "instructions": [],
+          "blockIds": [],
+          "worldCoordinates": null
+        },
+        {
+          "id": "office/candidate-01/V2",
+          "lowerFloorId": "office/candidate-01/L2",
+          "upperFloorId": "office/candidate-01/L3",
+          "upperSourceFloorPlateY": 8,
+          "openingCandidates": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "sourcePlateCellsPotentiallyAffected": 2,
+          "candidateOutsideSourceFloorPlate": [],
+          "cutoutMode": "CELL_MASK_REVIEW_ONLY_NO_SUBTRACTION",
+          "nominalHeadroomOnly": true,
+          "clearancePhysicallyTested": false,
+          "loadBearingChecked": false,
+          "cutoutActuallyApplied": false,
+          "roofAndFacadeInteractionVerified": false,
+          "sourceEngineFloorPlate": "plate(masks[f], base, \"floor\", \"floor\")",
+          "instructions": [],
+          "blockIds": [],
+          "worldCoordinates": null
+        },
+        {
+          "id": "office/candidate-01/V3",
+          "lowerFloorId": "office/candidate-01/L3",
+          "upperFloorId": "office/candidate-01/L4",
+          "upperSourceFloorPlateY": 12,
+          "openingCandidates": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "sourcePlateCellsPotentiallyAffected": 2,
+          "candidateOutsideSourceFloorPlate": [],
+          "cutoutMode": "CELL_MASK_REVIEW_ONLY_NO_SUBTRACTION",
+          "nominalHeadroomOnly": true,
+          "clearancePhysicallyTested": false,
+          "loadBearingChecked": false,
+          "cutoutActuallyApplied": false,
+          "roofAndFacadeInteractionVerified": false,
+          "sourceEngineFloorPlate": "plate(masks[f], base, \"floor\", \"floor\")",
+          "instructions": [],
+          "blockIds": [],
+          "worldCoordinates": null
+        },
+        {
+          "id": "office/candidate-01/V4",
+          "lowerFloorId": "office/candidate-01/L4",
+          "upperFloorId": "office/candidate-01/L5",
+          "upperSourceFloorPlateY": 16,
+          "openingCandidates": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "sourcePlateCellsPotentiallyAffected": 2,
+          "candidateOutsideSourceFloorPlate": [],
+          "cutoutMode": "CELL_MASK_REVIEW_ONLY_NO_SUBTRACTION",
+          "nominalHeadroomOnly": true,
+          "clearancePhysicallyTested": false,
+          "loadBearingChecked": false,
+          "cutoutActuallyApplied": false,
+          "roofAndFacadeInteractionVerified": false,
+          "sourceEngineFloorPlate": "plate(masks[f], base, \"floor\", \"floor\")",
+          "instructions": [],
+          "blockIds": [],
+          "worldCoordinates": null
+        },
+        {
+          "id": "office/candidate-01/V5",
+          "lowerFloorId": "office/candidate-01/L5",
+          "upperFloorId": "office/candidate-01/L6",
+          "upperSourceFloorPlateY": 20,
+          "openingCandidates": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "sourcePlateCellsPotentiallyAffected": 2,
+          "candidateOutsideSourceFloorPlate": [],
+          "cutoutMode": "CELL_MASK_REVIEW_ONLY_NO_SUBTRACTION",
+          "nominalHeadroomOnly": true,
+          "clearancePhysicallyTested": false,
+          "loadBearingChecked": false,
+          "cutoutActuallyApplied": false,
+          "roofAndFacadeInteractionVerified": false,
+          "sourceEngineFloorPlate": "plate(masks[f], base, \"floor\", \"floor\")",
+          "instructions": [],
+          "blockIds": [],
+          "worldCoordinates": null
+        }
+      ],
+      "stageOnly": true,
+      "quantization": {
+        "exactIntegerBoundaryVolumes": 0,
+        "requiresExplicitRedesignVolumes": 1370,
+        "nonIntegerExample": {
+          "panelId": "office/candidate-01/L1/W0001",
+          "role": "PARTITION",
+          "nonIntegerAxes": [
+            "x",
+            "y"
+          ]
+        },
+        "policy": "EXACT_INTEGER_ENDPOINTS_ONLY; NO FLOOR/CEIL/ROUND EMISSION",
+        "doorAndWallDiscretization": "UNRESOLVED",
+        "stairShapeBlockMapping": "UNRESOLVED"
+      },
+      "localToWorldAnchor": "UNKNOWN",
+      "sourcePredictedFootprintOnly": true
+    },
+    {
+      "id": "office/candidate-02",
+      "orientation": "south",
+      "cutouts": [
+        {
+          "id": "office/candidate-02/V1",
+          "lowerFloorId": "office/candidate-02/L1",
+          "upperFloorId": "office/candidate-02/L2",
+          "upperSourceFloorPlateY": 4,
+          "openingCandidates": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "sourcePlateCellsPotentiallyAffected": 2,
+          "candidateOutsideSourceFloorPlate": [],
+          "cutoutMode": "CELL_MASK_REVIEW_ONLY_NO_SUBTRACTION",
+          "nominalHeadroomOnly": true,
+          "clearancePhysicallyTested": false,
+          "loadBearingChecked": false,
+          "cutoutActuallyApplied": false,
+          "roofAndFacadeInteractionVerified": false,
+          "sourceEngineFloorPlate": "plate(masks[f], base, \"floor\", \"floor\")",
+          "instructions": [],
+          "blockIds": [],
+          "worldCoordinates": null
+        },
+        {
+          "id": "office/candidate-02/V2",
+          "lowerFloorId": "office/candidate-02/L2",
+          "upperFloorId": "office/candidate-02/L3",
+          "upperSourceFloorPlateY": 8,
+          "openingCandidates": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "sourcePlateCellsPotentiallyAffected": 2,
+          "candidateOutsideSourceFloorPlate": [],
+          "cutoutMode": "CELL_MASK_REVIEW_ONLY_NO_SUBTRACTION",
+          "nominalHeadroomOnly": true,
+          "clearancePhysicallyTested": false,
+          "loadBearingChecked": false,
+          "cutoutActuallyApplied": false,
+          "roofAndFacadeInteractionVerified": false,
+          "sourceEngineFloorPlate": "plate(masks[f], base, \"floor\", \"floor\")",
+          "instructions": [],
+          "blockIds": [],
+          "worldCoordinates": null
+        },
+        {
+          "id": "office/candidate-02/V3",
+          "lowerFloorId": "office/candidate-02/L3",
+          "upperFloorId": "office/candidate-02/L4",
+          "upperSourceFloorPlateY": 12,
+          "openingCandidates": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "sourcePlateCellsPotentiallyAffected": 2,
+          "candidateOutsideSourceFloorPlate": [],
+          "cutoutMode": "CELL_MASK_REVIEW_ONLY_NO_SUBTRACTION",
+          "nominalHeadroomOnly": true,
+          "clearancePhysicallyTested": false,
+          "loadBearingChecked": false,
+          "cutoutActuallyApplied": false,
+          "roofAndFacadeInteractionVerified": false,
+          "sourceEngineFloorPlate": "plate(masks[f], base, \"floor\", \"floor\")",
+          "instructions": [],
+          "blockIds": [],
+          "worldCoordinates": null
+        },
+        {
+          "id": "office/candidate-02/V4",
+          "lowerFloorId": "office/candidate-02/L4",
+          "upperFloorId": "office/candidate-02/L5",
+          "upperSourceFloorPlateY": 16,
+          "openingCandidates": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "sourcePlateCellsPotentiallyAffected": 2,
+          "candidateOutsideSourceFloorPlate": [],
+          "cutoutMode": "CELL_MASK_REVIEW_ONLY_NO_SUBTRACTION",
+          "nominalHeadroomOnly": true,
+          "clearancePhysicallyTested": false,
+          "loadBearingChecked": false,
+          "cutoutActuallyApplied": false,
+          "roofAndFacadeInteractionVerified": false,
+          "sourceEngineFloorPlate": "plate(masks[f], base, \"floor\", \"floor\")",
+          "instructions": [],
+          "blockIds": [],
+          "worldCoordinates": null
+        },
+        {
+          "id": "office/candidate-02/V5",
+          "lowerFloorId": "office/candidate-02/L5",
+          "upperFloorId": "office/candidate-02/L6",
+          "upperSourceFloorPlateY": 20,
+          "openingCandidates": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "sourcePlateCellsPotentiallyAffected": 2,
+          "candidateOutsideSourceFloorPlate": [],
+          "cutoutMode": "CELL_MASK_REVIEW_ONLY_NO_SUBTRACTION",
+          "nominalHeadroomOnly": true,
+          "clearancePhysicallyTested": false,
+          "loadBearingChecked": false,
+          "cutoutActuallyApplied": false,
+          "roofAndFacadeInteractionVerified": false,
+          "sourceEngineFloorPlate": "plate(masks[f], base, \"floor\", \"floor\")",
+          "instructions": [],
+          "blockIds": [],
+          "worldCoordinates": null
+        }
+      ],
+      "stageOnly": true,
+      "quantization": {
+        "exactIntegerBoundaryVolumes": 0,
+        "requiresExplicitRedesignVolumes": 812,
+        "nonIntegerExample": {
+          "panelId": "office/candidate-02/L1/W0001",
+          "role": "PARTITION",
+          "nonIntegerAxes": [
+            "x",
+            "y"
+          ]
+        },
+        "policy": "EXACT_INTEGER_ENDPOINTS_ONLY; NO FLOOR/CEIL/ROUND EMISSION",
+        "doorAndWallDiscretization": "UNRESOLVED",
+        "stairShapeBlockMapping": "UNRESOLVED"
+      },
+      "localToWorldAnchor": "UNKNOWN",
+      "sourcePredictedFootprintOnly": true
+    },
+    {
+      "id": "office/candidate-03",
+      "orientation": "south",
+      "cutouts": [
+        {
+          "id": "office/candidate-03/V1",
+          "lowerFloorId": "office/candidate-03/L1",
+          "upperFloorId": "office/candidate-03/L2",
+          "upperSourceFloorPlateY": 4,
+          "openingCandidates": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "sourcePlateCellsPotentiallyAffected": 2,
+          "candidateOutsideSourceFloorPlate": [],
+          "cutoutMode": "CELL_MASK_REVIEW_ONLY_NO_SUBTRACTION",
+          "nominalHeadroomOnly": true,
+          "clearancePhysicallyTested": false,
+          "loadBearingChecked": false,
+          "cutoutActuallyApplied": false,
+          "roofAndFacadeInteractionVerified": false,
+          "sourceEngineFloorPlate": "plate(masks[f], base, \"floor\", \"floor\")",
+          "instructions": [],
+          "blockIds": [],
+          "worldCoordinates": null
+        },
+        {
+          "id": "office/candidate-03/V2",
+          "lowerFloorId": "office/candidate-03/L2",
+          "upperFloorId": "office/candidate-03/L3",
+          "upperSourceFloorPlateY": 8,
+          "openingCandidates": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "sourcePlateCellsPotentiallyAffected": 2,
+          "candidateOutsideSourceFloorPlate": [],
+          "cutoutMode": "CELL_MASK_REVIEW_ONLY_NO_SUBTRACTION",
+          "nominalHeadroomOnly": true,
+          "clearancePhysicallyTested": false,
+          "loadBearingChecked": false,
+          "cutoutActuallyApplied": false,
+          "roofAndFacadeInteractionVerified": false,
+          "sourceEngineFloorPlate": "plate(masks[f], base, \"floor\", \"floor\")",
+          "instructions": [],
+          "blockIds": [],
+          "worldCoordinates": null
+        },
+        {
+          "id": "office/candidate-03/V3",
+          "lowerFloorId": "office/candidate-03/L3",
+          "upperFloorId": "office/candidate-03/L4",
+          "upperSourceFloorPlateY": 12,
+          "openingCandidates": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "sourcePlateCellsPotentiallyAffected": 2,
+          "candidateOutsideSourceFloorPlate": [],
+          "cutoutMode": "CELL_MASK_REVIEW_ONLY_NO_SUBTRACTION",
+          "nominalHeadroomOnly": true,
+          "clearancePhysicallyTested": false,
+          "loadBearingChecked": false,
+          "cutoutActuallyApplied": false,
+          "roofAndFacadeInteractionVerified": false,
+          "sourceEngineFloorPlate": "plate(masks[f], base, \"floor\", \"floor\")",
+          "instructions": [],
+          "blockIds": [],
+          "worldCoordinates": null
+        },
+        {
+          "id": "office/candidate-03/V4",
+          "lowerFloorId": "office/candidate-03/L4",
+          "upperFloorId": "office/candidate-03/L5",
+          "upperSourceFloorPlateY": 16,
+          "openingCandidates": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "sourcePlateCellsPotentiallyAffected": 2,
+          "candidateOutsideSourceFloorPlate": [],
+          "cutoutMode": "CELL_MASK_REVIEW_ONLY_NO_SUBTRACTION",
+          "nominalHeadroomOnly": true,
+          "clearancePhysicallyTested": false,
+          "loadBearingChecked": false,
+          "cutoutActuallyApplied": false,
+          "roofAndFacadeInteractionVerified": false,
+          "sourceEngineFloorPlate": "plate(masks[f], base, \"floor\", \"floor\")",
+          "instructions": [],
+          "blockIds": [],
+          "worldCoordinates": null
+        },
+        {
+          "id": "office/candidate-03/V5",
+          "lowerFloorId": "office/candidate-03/L5",
+          "upperFloorId": "office/candidate-03/L6",
+          "upperSourceFloorPlateY": 20,
+          "openingCandidates": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "sourcePlateCellsPotentiallyAffected": 2,
+          "candidateOutsideSourceFloorPlate": [],
+          "cutoutMode": "CELL_MASK_REVIEW_ONLY_NO_SUBTRACTION",
+          "nominalHeadroomOnly": true,
+          "clearancePhysicallyTested": false,
+          "loadBearingChecked": false,
+          "cutoutActuallyApplied": false,
+          "roofAndFacadeInteractionVerified": false,
+          "sourceEngineFloorPlate": "plate(masks[f], base, \"floor\", \"floor\")",
+          "instructions": [],
+          "blockIds": [],
+          "worldCoordinates": null
+        }
+      ],
+      "stageOnly": true,
+      "quantization": {
+        "exactIntegerBoundaryVolumes": 0,
+        "requiresExplicitRedesignVolumes": 1426,
+        "nonIntegerExample": {
+          "panelId": "office/candidate-03/L1/W0001",
+          "role": "PARTITION",
+          "nonIntegerAxes": [
+            "x",
+            "y"
+          ]
+        },
+        "policy": "EXACT_INTEGER_ENDPOINTS_ONLY; NO FLOOR/CEIL/ROUND EMISSION",
+        "doorAndWallDiscretization": "UNRESOLVED",
+        "stairShapeBlockMapping": "UNRESOLVED"
+      },
+      "localToWorldAnchor": "UNKNOWN",
+      "sourcePredictedFootprintOnly": true
+    }
+  ],
+  "materials": [
+    {
+      "role": "PARTITION",
+      "minecraftEducationBlockId": null,
+      "blockStates": null,
+      "sourceAllowlistVerified": false,
+      "roleMappingVerified": false,
+      "status": "MATERIAL_UNKNOWN_BLOCKED"
+    },
+    {
+      "role": "DOOR",
+      "minecraftEducationBlockId": null,
+      "blockStates": null,
+      "sourceAllowlistVerified": false,
+      "roleMappingVerified": false,
+      "status": "MATERIAL_UNKNOWN_BLOCKED"
+    },
+    {
+      "role": "STAIR_TREAD",
+      "minecraftEducationBlockId": null,
+      "blockStates": null,
+      "sourceAllowlistVerified": false,
+      "roleMappingVerified": false,
+      "status": "MATERIAL_UNKNOWN_BLOCKED"
+    },
+    {
+      "role": "FLOOR_CUTOUT",
+      "minecraftEducationBlockId": null,
+      "blockStates": null,
+      "sourceAllowlistVerified": false,
+      "roleMappingVerified": false,
+      "status": "MATERIAL_UNKNOWN_BLOCKED"
+    }
+  ],
+  "blockers": [
+    {
+      "id": "SINGLE_SOURCE_ENGINE_PLANNER_HOOK_NOT_IMPLEMENTED",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "SOURCE_FLOOR_PLATES_NOT_SUBTRACTED",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "STAIR_STRUCTURAL_SUPPORT_AND_HEADROOM_UNVERIFIED",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "INTEGER_LATTICE_GEOMETRY_UNRESOLVED",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "MATERIAL_AND_BLOCK_STATES_UNATTESTED",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "WORLD_ANCHOR_AND_SITE_SCAN_MISSING",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "OFFICE02_FOOTPRINT_MISMATCH_NOT_APPLIED",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "RUNNING_WINDOWS_ENGINE_NOT_ATTESTED",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "LEGACY_AND_WORLD_PROTECTION_MUST_REMAIN",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "USER_CONSTRUCTION_APPROVAL_MISSING",
+      "status": "BLOCKED"
+    }
+  ],
+  "modelContract": {
+    "sourceFloorSlabThickness": "ONE_ENGINE_BLOCK_AT_NOMINAL_BASE",
+    "physicalSlabCutouts": false,
+    "physicalStairConstruction": false,
+    "actualHeadroomChecked": false,
+    "quantizationAllowed": false,
+    "materialReady": false,
+    "untrustedSourceExecution": false,
+    "engineCodeExecuted": false,
+    "emittedWorldOperations": 0,
+    "executableSchemaProduced": false
+  },
+  "M3Stage": "MODEL_ONLY_NO_ENGINE_HOOK",
+  "approval": "NOT_REQUESTED",
+  "deploymentGate": "BLOCKED",
+  "safety": {
+    "notPrepared": true,
+    "constructionApproved": false,
+    "executionAllowed": false,
+    "legacyModified": false,
+    "frozenEvidenceModified": false,
+    "existingWorldModified": false,
+    "bridgeContact": false,
+    "networkAccess": false
+  },
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0,
+    "worldCoordinates": null,
+    "materialIds": []
+  },
+  "reportSha256": "6b10e52318bfd99164a98e9df710c85346f0ffe90ca361875eba4e5f01805c3d"
+}

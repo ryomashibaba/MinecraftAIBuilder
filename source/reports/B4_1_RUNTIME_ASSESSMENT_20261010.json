@@ -1,0 +1,90 @@
+{
+  "schema": "minecraftaibuilder-step8b-b4-runtime-evidence-v1",
+  "collectedAt": "2026-10-10T19:21:44.9408200+09:00",
+  "status": "READ_ONLY_EVIDENCE_EVALUATED_NOT_RUNTIME_ATTESTED",
+  "runtimeIdentity": "NOT_PROVEN",
+  "executionCompatibility": "UNKNOWN",
+  "sourceAlignment": "CRITICAL_FILES_MATCH_CAPTURED_SOURCE",
+  "processState": "RUNNING_PROJECT_IDENTITY_UNRESOLVED",
+  "criticalChecks": [
+    {
+      "key": "package.json",
+      "status": "OK",
+      "comparison": "MATCH"
+    },
+    {
+      "key": "bridge/src/server-step7j.js",
+      "status": "OK",
+      "comparison": "MATCH"
+    },
+    {
+      "key": "bridge/src/server-step7o.js",
+      "status": "OK",
+      "comparison": "MATCH"
+    },
+    {
+      "key": "bridge/src/general-building.js",
+      "status": "OK",
+      "comparison": "MATCH"
+    },
+    {
+      "key": "engine/src/general-building-planner.js",
+      "status": "OK",
+      "comparison": "MATCH"
+    },
+    {
+      "key": "engine/src/building-grammar.js",
+      "status": "OK",
+      "comparison": "MATCH"
+    },
+    {
+      "key": "engine/src/build-anchor.js",
+      "status": "OK",
+      "comparison": "MATCH"
+    },
+    {
+      "key": "scripts/start-dedicated-canary.js",
+      "status": "OK",
+      "comparison": "MATCH"
+    }
+  ],
+  "processSignals": [],
+  "staticAPI": {
+    "bridgeEntrypoint": "PACKAGE_SCRIPT_TARGET_IDENTIFIED",
+    "routeSource": {
+      "planBuilding": "SOURCE_PRESENT_PROHIBITED_TO_CALL",
+      "buildBuilding": "SOURCE_PRESENT_PROHIBITED_TO_CALL"
+    },
+    "plannerEntrypoint": "STATIC_EXPORT_PRESENT_PROHIBITED_TO_INVOKE",
+    "note": "Static text signatures only; no routes called, modules imported, execution semantics or runtime identity proved"
+  },
+  "snapshotManifestSha256": "34ef239cd1d6e59c7d36fb070bd305e7572d944dee949c0648312ec94090534c",
+  "sourceFilesVerified": 249,
+  "limitations": [
+    "Source hashes match disk bytes only, not modules cached in a running Node.js process",
+    "CIM command line filtering is heuristic; matching text is not secure evidence of process cwd or loaded files",
+    "No network/Bridge/Minecraft connection or API invoked",
+    "No real-world anchor/material states/voxel plan execution or world permissions verified"
+  ],
+  "nextGate": "REQUIRES_SEPARATE_RUNTIME_ATTESTATION_AND_EXPLICIT_CONSTRUCTION_APPROVAL",
+  "deploymentGate": "BLOCKED",
+  "worldAnchor": null,
+  "worldCoordinates": null,
+  "blockStates": [],
+  "materialBlockIds": [],
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0
+  },
+  "safety": {
+    "notPrepared": true,
+    "constructionApproved": false,
+    "executionAllowed": false,
+    "noWorldMutation": true,
+    "noBridge": true,
+    "noScan": true,
+    "noPackGeneration": true
+  },
+  "reportSha256": "2285a5b7a8375a5b7177ae73f83fccad447e3fff12944c87f3cf7b8224162a23"
+}

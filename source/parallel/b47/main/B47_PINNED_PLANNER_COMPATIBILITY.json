@@ -1,0 +1,1957 @@
+{
+  "schema": "minecraftaibuilder-b47-pinned-planner-envelope-compatibility-v1",
+  "kind": "OFFLINE_REFERENCE_RULE_COMPARISON_NOT_EXECUTION",
+  "provenance": {
+    "b46ReportSha256": "acba518bd74ed91ed5f6f4e02129709fc422fb452398ba7bfa1588cab2db6db2",
+    "b45ReportSha256": "5a8a889f4182f0384bb8e6046aa917fa67bba91d23d767d697a84d7682efa4a7",
+    "pinnedReference": {
+      "plannerSha256": "23be6e8b03827698fb890661f6fd0957a76ac4718f3347531121c8a7dc0450c8",
+      "envelopeSha256": "c63037c51937b0e5ec03b17274452bf1771fe47f8fe01dcececda6a8508766a0",
+      "grammarSha256": "71c0e2bda3e7a044285d681b38d9d4373e3c0aa417808a2f54c652d05ff47d1a"
+    }
+  },
+  "buildings": [
+    {
+      "id": "hotel/candidate-01",
+      "program": "hotel",
+      "site": {
+        "width": 26,
+        "depth": 20,
+        "floors": 6,
+        "floorHeight": 5
+      },
+      "referenceMassing": {
+        "name": "slab",
+        "seed": 0,
+        "variation": {
+          "wing": 5,
+          "setback": 1,
+          "heightDrop": 1
+        },
+        "usesDefaultSelection": false,
+        "requiresExplicitMassing": true,
+        "compatibleUnderSourcedGrammar": true,
+        "masses": [
+          {
+            "x": 0,
+            "z": 0,
+            "width": 26,
+            "depth": 20,
+            "start": 0,
+            "end": 6
+          }
+        ],
+        "provenance": "REFERENCE_RULE_PORT_NOT_EXECUTED_GENERAL_BUILDING_PLANNER",
+        "otherCompatibleRules": [
+          {
+            "name": "slab",
+            "hasDefaultSeed": false
+          }
+        ]
+      },
+      "footprintReplay": {
+        "exact": true,
+        "missing": 0,
+        "extra": 0,
+        "levels": 6
+      },
+      "facadeEdgeIntentExact": true,
+      "roofProjectionExact": true,
+      "plateRectangleCoverageExact": true,
+      "plateRectangleDecompositionExact": true,
+      "plateRectangleDecompositionDifferences": [],
+      "certifiedMaterialStates": false,
+      "plannerInvocationPerformed": false,
+      "stairDoorAndSupportValidated": false,
+      "conditionalPhasePreview": [
+        {
+          "phase": "FOUNDATION_GEOMETRY_ONLY",
+          "level": 1,
+          "y": -1,
+          "rectangles": [
+            {
+              "x": 0,
+              "z": 0,
+              "width": 26,
+              "depth": 20
+            }
+          ],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FLOOR_SURFACE_ONLY",
+          "level": 1,
+          "y": 0,
+          "rectangles": [
+            {
+              "x": 0,
+              "z": 0,
+              "width": 26,
+              "depth": 20
+            }
+          ],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FACADE_EDGE_INTENT_ONLY",
+          "level": 1,
+          "fromY": 0,
+          "toY": 4,
+          "edgeRuns": 4,
+          "edgeUnits": 92,
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "ROOF_SURFACE_ONLY",
+          "level": 1,
+          "y": 5,
+          "rectangles": [],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FLOOR_SURFACE_ONLY",
+          "level": 2,
+          "y": 5,
+          "rectangles": [
+            {
+              "x": 0,
+              "z": 0,
+              "width": 26,
+              "depth": 20
+            }
+          ],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FACADE_EDGE_INTENT_ONLY",
+          "level": 2,
+          "fromY": 5,
+          "toY": 9,
+          "edgeRuns": 4,
+          "edgeUnits": 92,
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "ROOF_SURFACE_ONLY",
+          "level": 2,
+          "y": 10,
+          "rectangles": [],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FLOOR_SURFACE_ONLY",
+          "level": 3,
+          "y": 10,
+          "rectangles": [
+            {
+              "x": 0,
+              "z": 0,
+              "width": 26,
+              "depth": 20
+            }
+          ],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FACADE_EDGE_INTENT_ONLY",
+          "level": 3,
+          "fromY": 10,
+          "toY": 14,
+          "edgeRuns": 4,
+          "edgeUnits": 92,
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "ROOF_SURFACE_ONLY",
+          "level": 3,
+          "y": 15,
+          "rectangles": [],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FLOOR_SURFACE_ONLY",
+          "level": 4,
+          "y": 15,
+          "rectangles": [
+            {
+              "x": 0,
+              "z": 0,
+              "width": 26,
+              "depth": 20
+            }
+          ],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FACADE_EDGE_INTENT_ONLY",
+          "level": 4,
+          "fromY": 15,
+          "toY": 19,
+          "edgeRuns": 4,
+          "edgeUnits": 92,
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "ROOF_SURFACE_ONLY",
+          "level": 4,
+          "y": 20,
+          "rectangles": [],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FLOOR_SURFACE_ONLY",
+          "level": 5,
+          "y": 20,
+          "rectangles": [
+            {
+              "x": 0,
+              "z": 0,
+              "width": 26,
+              "depth": 20
+            }
+          ],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FACADE_EDGE_INTENT_ONLY",
+          "level": 5,
+          "fromY": 20,
+          "toY": 24,
+          "edgeRuns": 4,
+          "edgeUnits": 92,
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "ROOF_SURFACE_ONLY",
+          "level": 5,
+          "y": 25,
+          "rectangles": [],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FLOOR_SURFACE_ONLY",
+          "level": 6,
+          "y": 25,
+          "rectangles": [
+            {
+              "x": 0,
+              "z": 0,
+              "width": 26,
+              "depth": 20
+            }
+          ],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FACADE_EDGE_INTENT_ONLY",
+          "level": 6,
+          "fromY": 25,
+          "toY": 29,
+          "edgeRuns": 4,
+          "edgeUnits": 92,
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "ROOF_SURFACE_ONLY",
+          "level": 6,
+          "y": 30,
+          "rectangles": [
+            {
+              "x": 0,
+              "z": 0,
+              "width": 26,
+              "depth": 20
+            }
+          ],
+          "blocks": null,
+          "approved": false
+        }
+      ]
+    },
+    {
+      "id": "apartment/candidate-01",
+      "program": "apartment",
+      "site": {
+        "width": 28,
+        "depth": 22,
+        "floors": 6,
+        "floorHeight": 4
+      },
+      "referenceMassing": {
+        "name": "courtyard",
+        "seed": 0,
+        "variation": {
+          "wing": 5,
+          "setback": 1,
+          "heightDrop": 1
+        },
+        "usesDefaultSelection": false,
+        "requiresExplicitMassing": true,
+        "compatibleUnderSourcedGrammar": true,
+        "masses": [
+          {
+            "x": 0,
+            "z": 17,
+            "width": 28,
+            "depth": 5,
+            "start": 0,
+            "end": 6
+          },
+          {
+            "x": 0,
+            "z": 0,
+            "width": 5,
+            "depth": 17,
+            "start": 0,
+            "end": 6
+          },
+          {
+            "x": 23,
+            "z": 0,
+            "width": 5,
+            "depth": 17,
+            "start": 0,
+            "end": 6
+          },
+          {
+            "x": 5,
+            "z": 0,
+            "width": 18,
+            "depth": 5,
+            "start": 0,
+            "end": 6
+          }
+        ],
+        "provenance": "REFERENCE_RULE_PORT_NOT_EXECUTED_GENERAL_BUILDING_PLANNER",
+        "otherCompatibleRules": [
+          {
+            "name": "courtyard",
+            "hasDefaultSeed": false
+          }
+        ]
+      },
+      "footprintReplay": {
+        "exact": true,
+        "missing": 0,
+        "extra": 0,
+        "levels": 6
+      },
+      "facadeEdgeIntentExact": true,
+      "roofProjectionExact": true,
+      "plateRectangleCoverageExact": true,
+      "plateRectangleDecompositionExact": false,
+      "plateRectangleDecompositionDifferences": [
+        {
+          "level": 6,
+          "kind": "ROOF",
+          "referenceRects": [
+            {
+              "x": 0,
+              "z": 0,
+              "width": 28,
+              "depth": 5
+            },
+            {
+              "x": 0,
+              "z": 5,
+              "width": 5,
+              "depth": 12
+            },
+            {
+              "x": 23,
+              "z": 5,
+              "width": 5,
+              "depth": 12
+            },
+            {
+              "x": 0,
+              "z": 17,
+              "width": 28,
+              "depth": 5
+            }
+          ],
+          "b46Rects": [
+            {
+              "x": 0,
+              "z": 0,
+              "width": 28,
+              "depth": 5
+            },
+            {
+              "x": 0,
+              "z": 5,
+              "width": 5,
+              "depth": 17
+            },
+            {
+              "x": 23,
+              "z": 5,
+              "width": 5,
+              "depth": 17
+            },
+            {
+              "x": 5,
+              "z": 17,
+              "width": 18,
+              "depth": 5
+            }
+          ],
+          "coverageExact": true,
+          "issue": "RECTANGLE_GROUPING_ONLY"
+        }
+      ],
+      "certifiedMaterialStates": false,
+      "plannerInvocationPerformed": false,
+      "stairDoorAndSupportValidated": false,
+      "conditionalPhasePreview": [
+        {
+          "phase": "FOUNDATION_GEOMETRY_ONLY",
+          "level": 1,
+          "y": -1,
+          "rectangles": [
+            {
+              "x": 0,
+              "z": 0,
+              "width": 28,
+              "depth": 5
+            },
+            {
+              "x": 0,
+              "z": 5,
+              "width": 5,
+              "depth": 12
+            },
+            {
+              "x": 23,
+              "z": 5,
+              "width": 5,
+              "depth": 12
+            },
+            {
+              "x": 0,
+              "z": 17,
+              "width": 28,
+              "depth": 5
+            }
+          ],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FLOOR_SURFACE_ONLY",
+          "level": 1,
+          "y": 0,
+          "rectangles": [
+            {
+              "x": 0,
+              "z": 0,
+              "width": 28,
+              "depth": 5
+            },
+            {
+              "x": 0,
+              "z": 5,
+              "width": 5,
+              "depth": 12
+            },
+            {
+              "x": 23,
+              "z": 5,
+              "width": 5,
+              "depth": 12
+            },
+            {
+              "x": 0,
+              "z": 17,
+              "width": 28,
+              "depth": 5
+            }
+          ],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FACADE_EDGE_INTENT_ONLY",
+          "level": 1,
+          "fromY": 0,
+          "toY": 3,
+          "edgeRuns": 8,
+          "edgeUnits": 160,
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "ROOF_SURFACE_ONLY",
+          "level": 1,
+          "y": 4,
+          "rectangles": [],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FLOOR_SURFACE_ONLY",
+          "level": 2,
+          "y": 4,
+          "rectangles": [
+            {
+              "x": 0,
+              "z": 0,
+              "width": 28,
+              "depth": 5
+            },
+            {
+              "x": 0,
+              "z": 5,
+              "width": 5,
+              "depth": 12
+            },
+            {
+              "x": 23,
+              "z": 5,
+              "width": 5,
+              "depth": 12
+            },
+            {
+              "x": 0,
+              "z": 17,
+              "width": 28,
+              "depth": 5
+            }
+          ],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FACADE_EDGE_INTENT_ONLY",
+          "level": 2,
+          "fromY": 4,
+          "toY": 7,
+          "edgeRuns": 8,
+          "edgeUnits": 160,
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "ROOF_SURFACE_ONLY",
+          "level": 2,
+          "y": 8,
+          "rectangles": [],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FLOOR_SURFACE_ONLY",
+          "level": 3,
+          "y": 8,
+          "rectangles": [
+            {
+              "x": 0,
+              "z": 0,
+              "width": 28,
+              "depth": 5
+            },
+            {
+              "x": 0,
+              "z": 5,
+              "width": 5,
+              "depth": 12
+            },
+            {
+              "x": 23,
+              "z": 5,
+              "width": 5,
+              "depth": 12
+            },
+            {
+              "x": 0,
+              "z": 17,
+              "width": 28,
+              "depth": 5
+            }
+          ],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FACADE_EDGE_INTENT_ONLY",
+          "level": 3,
+          "fromY": 8,
+          "toY": 11,
+          "edgeRuns": 8,
+          "edgeUnits": 160,
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "ROOF_SURFACE_ONLY",
+          "level": 3,
+          "y": 12,
+          "rectangles": [],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FLOOR_SURFACE_ONLY",
+          "level": 4,
+          "y": 12,
+          "rectangles": [
+            {
+              "x": 0,
+              "z": 0,
+              "width": 28,
+              "depth": 5
+            },
+            {
+              "x": 0,
+              "z": 5,
+              "width": 5,
+              "depth": 12
+            },
+            {
+              "x": 23,
+              "z": 5,
+              "width": 5,
+              "depth": 12
+            },
+            {
+              "x": 0,
+              "z": 17,
+              "width": 28,
+              "depth": 5
+            }
+          ],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FACADE_EDGE_INTENT_ONLY",
+          "level": 4,
+          "fromY": 12,
+          "toY": 15,
+          "edgeRuns": 8,
+          "edgeUnits": 160,
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "ROOF_SURFACE_ONLY",
+          "level": 4,
+          "y": 16,
+          "rectangles": [],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FLOOR_SURFACE_ONLY",
+          "level": 5,
+          "y": 16,
+          "rectangles": [
+            {
+              "x": 0,
+              "z": 0,
+              "width": 28,
+              "depth": 5
+            },
+            {
+              "x": 0,
+              "z": 5,
+              "width": 5,
+              "depth": 12
+            },
+            {
+              "x": 23,
+              "z": 5,
+              "width": 5,
+              "depth": 12
+            },
+            {
+              "x": 0,
+              "z": 17,
+              "width": 28,
+              "depth": 5
+            }
+          ],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FACADE_EDGE_INTENT_ONLY",
+          "level": 5,
+          "fromY": 16,
+          "toY": 19,
+          "edgeRuns": 8,
+          "edgeUnits": 160,
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "ROOF_SURFACE_ONLY",
+          "level": 5,
+          "y": 20,
+          "rectangles": [],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FLOOR_SURFACE_ONLY",
+          "level": 6,
+          "y": 20,
+          "rectangles": [
+            {
+              "x": 0,
+              "z": 0,
+              "width": 28,
+              "depth": 5
+            },
+            {
+              "x": 0,
+              "z": 5,
+              "width": 5,
+              "depth": 12
+            },
+            {
+              "x": 23,
+              "z": 5,
+              "width": 5,
+              "depth": 12
+            },
+            {
+              "x": 0,
+              "z": 17,
+              "width": 28,
+              "depth": 5
+            }
+          ],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FACADE_EDGE_INTENT_ONLY",
+          "level": 6,
+          "fromY": 20,
+          "toY": 23,
+          "edgeRuns": 8,
+          "edgeUnits": 160,
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "ROOF_SURFACE_ONLY",
+          "level": 6,
+          "y": 24,
+          "rectangles": [
+            {
+              "x": 0,
+              "z": 0,
+              "width": 28,
+              "depth": 5
+            },
+            {
+              "x": 0,
+              "z": 5,
+              "width": 5,
+              "depth": 12
+            },
+            {
+              "x": 23,
+              "z": 5,
+              "width": 5,
+              "depth": 12
+            },
+            {
+              "x": 0,
+              "z": 17,
+              "width": 28,
+              "depth": 5
+            }
+          ],
+          "blocks": null,
+          "approved": false
+        }
+      ]
+    },
+    {
+      "id": "office/candidate-01",
+      "program": "office",
+      "site": {
+        "width": 24,
+        "depth": 20,
+        "floors": 6,
+        "floorHeight": 4
+      },
+      "referenceMassing": {
+        "name": "tower_on_podium",
+        "seed": 0,
+        "variation": {
+          "wing": 5,
+          "setback": 1,
+          "heightDrop": 1
+        },
+        "usesDefaultSelection": false,
+        "requiresExplicitMassing": true,
+        "compatibleUnderSourcedGrammar": true,
+        "masses": [
+          {
+            "x": 0,
+            "z": 0,
+            "width": 24,
+            "depth": 20,
+            "start": 0,
+            "end": 2
+          },
+          {
+            "x": 1,
+            "z": 2,
+            "width": 22,
+            "depth": 17,
+            "start": 2,
+            "end": 6
+          }
+        ],
+        "provenance": "REFERENCE_RULE_PORT_NOT_EXECUTED_GENERAL_BUILDING_PLANNER",
+        "otherCompatibleRules": [
+          {
+            "name": "tower_on_podium",
+            "hasDefaultSeed": false
+          }
+        ]
+      },
+      "footprintReplay": {
+        "exact": true,
+        "missing": 0,
+        "extra": 0,
+        "levels": 6
+      },
+      "facadeEdgeIntentExact": true,
+      "roofProjectionExact": true,
+      "plateRectangleCoverageExact": true,
+      "plateRectangleDecompositionExact": false,
+      "plateRectangleDecompositionDifferences": [
+        {
+          "level": 2,
+          "kind": "ROOF",
+          "referenceRects": [
+            {
+              "x": 0,
+              "z": 0,
+              "width": 24,
+              "depth": 2
+            },
+            {
+              "x": 0,
+              "z": 2,
+              "width": 1,
+              "depth": 17
+            },
+            {
+              "x": 23,
+              "z": 2,
+              "width": 1,
+              "depth": 17
+            },
+            {
+              "x": 0,
+              "z": 19,
+              "width": 24,
+              "depth": 1
+            }
+          ],
+          "b46Rects": [
+            {
+              "x": 0,
+              "z": 0,
+              "width": 24,
+              "depth": 2
+            },
+            {
+              "x": 0,
+              "z": 2,
+              "width": 1,
+              "depth": 18
+            },
+            {
+              "x": 23,
+              "z": 2,
+              "width": 1,
+              "depth": 18
+            },
+            {
+              "x": 1,
+              "z": 19,
+              "width": 22,
+              "depth": 1
+            }
+          ],
+          "coverageExact": true,
+          "issue": "RECTANGLE_GROUPING_ONLY"
+        }
+      ],
+      "certifiedMaterialStates": false,
+      "plannerInvocationPerformed": false,
+      "stairDoorAndSupportValidated": false,
+      "conditionalPhasePreview": [
+        {
+          "phase": "FOUNDATION_GEOMETRY_ONLY",
+          "level": 1,
+          "y": -1,
+          "rectangles": [
+            {
+              "x": 0,
+              "z": 0,
+              "width": 24,
+              "depth": 20
+            }
+          ],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FLOOR_SURFACE_ONLY",
+          "level": 1,
+          "y": 0,
+          "rectangles": [
+            {
+              "x": 0,
+              "z": 0,
+              "width": 24,
+              "depth": 20
+            }
+          ],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FACADE_EDGE_INTENT_ONLY",
+          "level": 1,
+          "fromY": 0,
+          "toY": 3,
+          "edgeRuns": 4,
+          "edgeUnits": 88,
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "ROOF_SURFACE_ONLY",
+          "level": 1,
+          "y": 4,
+          "rectangles": [],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FLOOR_SURFACE_ONLY",
+          "level": 2,
+          "y": 4,
+          "rectangles": [
+            {
+              "x": 0,
+              "z": 0,
+              "width": 24,
+              "depth": 20
+            }
+          ],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FACADE_EDGE_INTENT_ONLY",
+          "level": 2,
+          "fromY": 4,
+          "toY": 7,
+          "edgeRuns": 4,
+          "edgeUnits": 88,
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "ROOF_SURFACE_ONLY",
+          "level": 2,
+          "y": 8,
+          "rectangles": [
+            {
+              "x": 0,
+              "z": 0,
+              "width": 24,
+              "depth": 2
+            },
+            {
+              "x": 0,
+              "z": 2,
+              "width": 1,
+              "depth": 17
+            },
+            {
+              "x": 23,
+              "z": 2,
+              "width": 1,
+              "depth": 17
+            },
+            {
+              "x": 0,
+              "z": 19,
+              "width": 24,
+              "depth": 1
+            }
+          ],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FLOOR_SURFACE_ONLY",
+          "level": 3,
+          "y": 8,
+          "rectangles": [
+            {
+              "x": 1,
+              "z": 2,
+              "width": 22,
+              "depth": 17
+            }
+          ],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FACADE_EDGE_INTENT_ONLY",
+          "level": 3,
+          "fromY": 8,
+          "toY": 11,
+          "edgeRuns": 4,
+          "edgeUnits": 78,
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "ROOF_SURFACE_ONLY",
+          "level": 3,
+          "y": 12,
+          "rectangles": [],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FLOOR_SURFACE_ONLY",
+          "level": 4,
+          "y": 12,
+          "rectangles": [
+            {
+              "x": 1,
+              "z": 2,
+              "width": 22,
+              "depth": 17
+            }
+          ],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FACADE_EDGE_INTENT_ONLY",
+          "level": 4,
+          "fromY": 12,
+          "toY": 15,
+          "edgeRuns": 4,
+          "edgeUnits": 78,
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "ROOF_SURFACE_ONLY",
+          "level": 4,
+          "y": 16,
+          "rectangles": [],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FLOOR_SURFACE_ONLY",
+          "level": 5,
+          "y": 16,
+          "rectangles": [
+            {
+              "x": 1,
+              "z": 2,
+              "width": 22,
+              "depth": 17
+            }
+          ],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FACADE_EDGE_INTENT_ONLY",
+          "level": 5,
+          "fromY": 16,
+          "toY": 19,
+          "edgeRuns": 4,
+          "edgeUnits": 78,
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "ROOF_SURFACE_ONLY",
+          "level": 5,
+          "y": 20,
+          "rectangles": [],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FLOOR_SURFACE_ONLY",
+          "level": 6,
+          "y": 20,
+          "rectangles": [
+            {
+              "x": 1,
+              "z": 2,
+              "width": 22,
+              "depth": 17
+            }
+          ],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FACADE_EDGE_INTENT_ONLY",
+          "level": 6,
+          "fromY": 20,
+          "toY": 23,
+          "edgeRuns": 4,
+          "edgeUnits": 78,
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "ROOF_SURFACE_ONLY",
+          "level": 6,
+          "y": 24,
+          "rectangles": [
+            {
+              "x": 1,
+              "z": 2,
+              "width": 22,
+              "depth": 17
+            }
+          ],
+          "blocks": null,
+          "approved": false
+        }
+      ]
+    },
+    {
+      "id": "office/candidate-02",
+      "program": "office",
+      "site": {
+        "width": 24,
+        "depth": 20,
+        "floors": 6,
+        "floorHeight": 4
+      },
+      "referenceMassing": {
+        "name": "asymmetric_block",
+        "seed": 5,
+        "variation": {
+          "wing": 6,
+          "setback": 2,
+          "heightDrop": 1
+        },
+        "usesDefaultSelection": false,
+        "requiresExplicitMassing": true,
+        "compatibleUnderSourcedGrammar": true,
+        "masses": [
+          {
+            "x": 0,
+            "z": 0,
+            "width": 13,
+            "depth": 14,
+            "start": 0,
+            "end": 6
+          },
+          {
+            "x": 11,
+            "z": 6,
+            "width": 13,
+            "depth": 14,
+            "start": 0,
+            "end": 5
+          }
+        ],
+        "provenance": "REFERENCE_RULE_PORT_NOT_EXECUTED_GENERAL_BUILDING_PLANNER",
+        "otherCompatibleRules": [
+          {
+            "name": "asymmetric_block",
+            "hasDefaultSeed": false
+          }
+        ]
+      },
+      "footprintReplay": {
+        "exact": true,
+        "missing": 0,
+        "extra": 0,
+        "levels": 6
+      },
+      "facadeEdgeIntentExact": true,
+      "roofProjectionExact": true,
+      "plateRectangleCoverageExact": true,
+      "plateRectangleDecompositionExact": false,
+      "plateRectangleDecompositionDifferences": [
+        {
+          "level": 5,
+          "kind": "ROOF",
+          "referenceRects": [
+            {
+              "x": 13,
+              "z": 6,
+              "width": 11,
+              "depth": 8
+            },
+            {
+              "x": 11,
+              "z": 14,
+              "width": 13,
+              "depth": 6
+            }
+          ],
+          "b46Rects": [
+            {
+              "x": 13,
+              "z": 6,
+              "width": 11,
+              "depth": 14
+            },
+            {
+              "x": 11,
+              "z": 14,
+              "width": 2,
+              "depth": 6
+            }
+          ],
+          "coverageExact": true,
+          "issue": "RECTANGLE_GROUPING_ONLY"
+        }
+      ],
+      "certifiedMaterialStates": false,
+      "plannerInvocationPerformed": false,
+      "stairDoorAndSupportValidated": false,
+      "conditionalPhasePreview": [
+        {
+          "phase": "FOUNDATION_GEOMETRY_ONLY",
+          "level": 1,
+          "y": -1,
+          "rectangles": [
+            {
+              "x": 0,
+              "z": 0,
+              "width": 13,
+              "depth": 6
+            },
+            {
+              "x": 0,
+              "z": 6,
+              "width": 24,
+              "depth": 8
+            },
+            {
+              "x": 11,
+              "z": 14,
+              "width": 13,
+              "depth": 6
+            }
+          ],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FLOOR_SURFACE_ONLY",
+          "level": 1,
+          "y": 0,
+          "rectangles": [
+            {
+              "x": 0,
+              "z": 0,
+              "width": 13,
+              "depth": 6
+            },
+            {
+              "x": 0,
+              "z": 6,
+              "width": 24,
+              "depth": 8
+            },
+            {
+              "x": 11,
+              "z": 14,
+              "width": 13,
+              "depth": 6
+            }
+          ],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FACADE_EDGE_INTENT_ONLY",
+          "level": 1,
+          "fromY": 0,
+          "toY": 3,
+          "edgeRuns": 8,
+          "edgeUnits": 88,
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "ROOF_SURFACE_ONLY",
+          "level": 1,
+          "y": 4,
+          "rectangles": [],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FLOOR_SURFACE_ONLY",
+          "level": 2,
+          "y": 4,
+          "rectangles": [
+            {
+              "x": 0,
+              "z": 0,
+              "width": 13,
+              "depth": 6
+            },
+            {
+              "x": 0,
+              "z": 6,
+              "width": 24,
+              "depth": 8
+            },
+            {
+              "x": 11,
+              "z": 14,
+              "width": 13,
+              "depth": 6
+            }
+          ],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FACADE_EDGE_INTENT_ONLY",
+          "level": 2,
+          "fromY": 4,
+          "toY": 7,
+          "edgeRuns": 8,
+          "edgeUnits": 88,
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "ROOF_SURFACE_ONLY",
+          "level": 2,
+          "y": 8,
+          "rectangles": [],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FLOOR_SURFACE_ONLY",
+          "level": 3,
+          "y": 8,
+          "rectangles": [
+            {
+              "x": 0,
+              "z": 0,
+              "width": 13,
+              "depth": 6
+            },
+            {
+              "x": 0,
+              "z": 6,
+              "width": 24,
+              "depth": 8
+            },
+            {
+              "x": 11,
+              "z": 14,
+              "width": 13,
+              "depth": 6
+            }
+          ],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FACADE_EDGE_INTENT_ONLY",
+          "level": 3,
+          "fromY": 8,
+          "toY": 11,
+          "edgeRuns": 8,
+          "edgeUnits": 88,
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "ROOF_SURFACE_ONLY",
+          "level": 3,
+          "y": 12,
+          "rectangles": [],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FLOOR_SURFACE_ONLY",
+          "level": 4,
+          "y": 12,
+          "rectangles": [
+            {
+              "x": 0,
+              "z": 0,
+              "width": 13,
+              "depth": 6
+            },
+            {
+              "x": 0,
+              "z": 6,
+              "width": 24,
+              "depth": 8
+            },
+            {
+              "x": 11,
+              "z": 14,
+              "width": 13,
+              "depth": 6
+            }
+          ],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FACADE_EDGE_INTENT_ONLY",
+          "level": 4,
+          "fromY": 12,
+          "toY": 15,
+          "edgeRuns": 8,
+          "edgeUnits": 88,
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "ROOF_SURFACE_ONLY",
+          "level": 4,
+          "y": 16,
+          "rectangles": [],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FLOOR_SURFACE_ONLY",
+          "level": 5,
+          "y": 16,
+          "rectangles": [
+            {
+              "x": 0,
+              "z": 0,
+              "width": 13,
+              "depth": 6
+            },
+            {
+              "x": 0,
+              "z": 6,
+              "width": 24,
+              "depth": 8
+            },
+            {
+              "x": 11,
+              "z": 14,
+              "width": 13,
+              "depth": 6
+            }
+          ],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FACADE_EDGE_INTENT_ONLY",
+          "level": 5,
+          "fromY": 16,
+          "toY": 19,
+          "edgeRuns": 8,
+          "edgeUnits": 88,
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "ROOF_SURFACE_ONLY",
+          "level": 5,
+          "y": 20,
+          "rectangles": [
+            {
+              "x": 13,
+              "z": 6,
+              "width": 11,
+              "depth": 8
+            },
+            {
+              "x": 11,
+              "z": 14,
+              "width": 13,
+              "depth": 6
+            }
+          ],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FLOOR_SURFACE_ONLY",
+          "level": 6,
+          "y": 20,
+          "rectangles": [
+            {
+              "x": 0,
+              "z": 0,
+              "width": 13,
+              "depth": 14
+            }
+          ],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FACADE_EDGE_INTENT_ONLY",
+          "level": 6,
+          "fromY": 20,
+          "toY": 23,
+          "edgeRuns": 4,
+          "edgeUnits": 54,
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "ROOF_SURFACE_ONLY",
+          "level": 6,
+          "y": 24,
+          "rectangles": [
+            {
+              "x": 0,
+              "z": 0,
+              "width": 13,
+              "depth": 14
+            }
+          ],
+          "blocks": null,
+          "approved": false
+        }
+      ]
+    },
+    {
+      "id": "office/candidate-03",
+      "program": "office",
+      "site": {
+        "width": 24,
+        "depth": 20,
+        "floors": 6,
+        "floorHeight": 4
+      },
+      "referenceMassing": {
+        "name": "slab",
+        "seed": 0,
+        "variation": {
+          "wing": 5,
+          "setback": 1,
+          "heightDrop": 1
+        },
+        "usesDefaultSelection": true,
+        "requiresExplicitMassing": false,
+        "compatibleUnderSourcedGrammar": true,
+        "masses": [
+          {
+            "x": 0,
+            "z": 0,
+            "width": 24,
+            "depth": 20,
+            "start": 0,
+            "end": 6
+          }
+        ],
+        "provenance": "REFERENCE_RULE_PORT_NOT_EXECUTED_GENERAL_BUILDING_PLANNER",
+        "otherCompatibleRules": [
+          {
+            "name": "slab",
+            "hasDefaultSeed": true
+          }
+        ]
+      },
+      "footprintReplay": {
+        "exact": true,
+        "missing": 0,
+        "extra": 0,
+        "levels": 6
+      },
+      "facadeEdgeIntentExact": true,
+      "roofProjectionExact": true,
+      "plateRectangleCoverageExact": true,
+      "plateRectangleDecompositionExact": true,
+      "plateRectangleDecompositionDifferences": [],
+      "certifiedMaterialStates": false,
+      "plannerInvocationPerformed": false,
+      "stairDoorAndSupportValidated": false,
+      "conditionalPhasePreview": [
+        {
+          "phase": "FOUNDATION_GEOMETRY_ONLY",
+          "level": 1,
+          "y": -1,
+          "rectangles": [
+            {
+              "x": 0,
+              "z": 0,
+              "width": 24,
+              "depth": 20
+            }
+          ],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FLOOR_SURFACE_ONLY",
+          "level": 1,
+          "y": 0,
+          "rectangles": [
+            {
+              "x": 0,
+              "z": 0,
+              "width": 24,
+              "depth": 20
+            }
+          ],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FACADE_EDGE_INTENT_ONLY",
+          "level": 1,
+          "fromY": 0,
+          "toY": 3,
+          "edgeRuns": 4,
+          "edgeUnits": 88,
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "ROOF_SURFACE_ONLY",
+          "level": 1,
+          "y": 4,
+          "rectangles": [],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FLOOR_SURFACE_ONLY",
+          "level": 2,
+          "y": 4,
+          "rectangles": [
+            {
+              "x": 0,
+              "z": 0,
+              "width": 24,
+              "depth": 20
+            }
+          ],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FACADE_EDGE_INTENT_ONLY",
+          "level": 2,
+          "fromY": 4,
+          "toY": 7,
+          "edgeRuns": 4,
+          "edgeUnits": 88,
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "ROOF_SURFACE_ONLY",
+          "level": 2,
+          "y": 8,
+          "rectangles": [],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FLOOR_SURFACE_ONLY",
+          "level": 3,
+          "y": 8,
+          "rectangles": [
+            {
+              "x": 0,
+              "z": 0,
+              "width": 24,
+              "depth": 20
+            }
+          ],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FACADE_EDGE_INTENT_ONLY",
+          "level": 3,
+          "fromY": 8,
+          "toY": 11,
+          "edgeRuns": 4,
+          "edgeUnits": 88,
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "ROOF_SURFACE_ONLY",
+          "level": 3,
+          "y": 12,
+          "rectangles": [],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FLOOR_SURFACE_ONLY",
+          "level": 4,
+          "y": 12,
+          "rectangles": [
+            {
+              "x": 0,
+              "z": 0,
+              "width": 24,
+              "depth": 20
+            }
+          ],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FACADE_EDGE_INTENT_ONLY",
+          "level": 4,
+          "fromY": 12,
+          "toY": 15,
+          "edgeRuns": 4,
+          "edgeUnits": 88,
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "ROOF_SURFACE_ONLY",
+          "level": 4,
+          "y": 16,
+          "rectangles": [],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FLOOR_SURFACE_ONLY",
+          "level": 5,
+          "y": 16,
+          "rectangles": [
+            {
+              "x": 0,
+              "z": 0,
+              "width": 24,
+              "depth": 20
+            }
+          ],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FACADE_EDGE_INTENT_ONLY",
+          "level": 5,
+          "fromY": 16,
+          "toY": 19,
+          "edgeRuns": 4,
+          "edgeUnits": 88,
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "ROOF_SURFACE_ONLY",
+          "level": 5,
+          "y": 20,
+          "rectangles": [],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FLOOR_SURFACE_ONLY",
+          "level": 6,
+          "y": 20,
+          "rectangles": [
+            {
+              "x": 0,
+              "z": 0,
+              "width": 24,
+              "depth": 20
+            }
+          ],
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "FACADE_EDGE_INTENT_ONLY",
+          "level": 6,
+          "fromY": 20,
+          "toY": 23,
+          "edgeRuns": 4,
+          "edgeUnits": 88,
+          "blocks": null,
+          "approved": false
+        },
+        {
+          "phase": "ROOF_SURFACE_ONLY",
+          "level": 6,
+          "y": 24,
+          "rectangles": [
+            {
+              "x": 0,
+              "z": 0,
+              "width": 24,
+              "depth": 20
+            }
+          ],
+          "blocks": null,
+          "approved": false
+        }
+      ]
+    }
+  ],
+  "phaseIndex": [
+    {
+      "buildingId": "hotel/candidate-01",
+      "phaseCount": 19,
+      "sourceEnvelopeMatched": true
+    },
+    {
+      "buildingId": "apartment/candidate-01",
+      "phaseCount": 19,
+      "sourceEnvelopeMatched": true
+    },
+    {
+      "buildingId": "office/candidate-01",
+      "phaseCount": 19,
+      "sourceEnvelopeMatched": true
+    },
+    {
+      "buildingId": "office/candidate-02",
+      "phaseCount": 19,
+      "sourceEnvelopeMatched": true
+    },
+    {
+      "buildingId": "office/candidate-03",
+      "phaseCount": 19,
+      "sourceEnvelopeMatched": true
+    }
+  ],
+  "totals": {
+    "buildings": 5,
+    "floors": 30,
+    "referenceEnvelopeExactLevels": 30,
+    "matchingDefaultSelection": 1,
+    "requiringExplicitMassingSelection": 4,
+    "conditionalPhases": 95,
+    "equivalentCoverageDifferentRectangleDecompositions": 3,
+    "worldOperations": 0,
+    "engineCalls": 0
+  },
+  "comparisonScope": {
+    "verified": "SOURCED_MASSING_FORMULAS_AND_FOOTPRINT_EDGES_RECTANGLE_ROOF_GEOMETRY",
+    "excluded": [
+      "GENERAL_BUILDING_PLANNER_RUNTIME",
+      "MATERIAL_PALETTE",
+      "FACADE_MODULE_EMISSION",
+      "ROTATED_WORLD_FRAME",
+      "ENTRANCE_PLACEMENT",
+      "STAIR_AND_DOOR_BLOCK_STATES",
+      "STRENGTH_AND_HEADROOM",
+      "PRODUCTION_PLAN_VALIDATION"
+    ],
+    "productionMassingMapping": "NOT_PROVEN_PROFILES_ARE_CANDIDATES_ONLY"
+  },
+  "blockers": {
+    "unresolvedLegacyDoorHints": 118,
+    "uncutStairCells": 50,
+    "stairsWithoutPhysicalState": 25,
+    "ordinaryDoorBlocksWithoutExactState": 314,
+    "unapprovedAppearanceConcepts": 5,
+    "apartmentFullVerticalCirculation": "CONDITIONAL_VIRTUAL_GRAPH_ONLY",
+    "otherBuildingCirculation": "NOT_VALIDATED",
+    "supportHeadroomCollision": "UNKNOWN",
+    "M4Gates": [
+      {
+        "id": "M4-01",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-02",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-03",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-04",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-05",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-06",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-07",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-08",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-09",
+        "status": "BLOCKED"
+      }
+    ],
+    "unresolvedExteriorAccess": true,
+    "stagePhysicalSupport": false,
+    "unprovenPlannerCompatibility": true,
+    "actualMinecraftStairBlockState": null
+  },
+  "readiness": "NOT_PREPARED",
+  "deployment": "BLOCKED",
+  "constructionApproved": false,
+  "executionAllowed": false,
+  "worldCoordinates": null,
+  "materialIds": [],
+  "engineCalls": 0,
+  "buildOperations": 0,
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0,
+    "worldCoordinates": null,
+    "materialIds": []
+  },
+  "reportSha256": "2833c0044c28a96c82496f57dca1f9a07545731754a11486563c283daf941fa6"
+}

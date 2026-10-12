@@ -1,0 +1,36 @@
+{
+  "schema": "minecraftaibuilder-step8b-b23-m3e-relocation-review-v1",
+  "counts": {
+    "buildings": 5,
+    "floors": 30,
+    "doors": 314,
+    "baselineConflictedPorts": 118,
+    "baselineOverlapVoxelHits": 236,
+    "candidateRelocations": 118,
+    "remainingConflictedPorts": 0,
+    "remainingOverlapVoxelHits": 0,
+    "executedOperations": 0,
+    "physicalRepairs": 0
+  },
+  "interpretation": {
+    "gridOverlap": "MODELED_ONLY",
+    "roomToHallAccess": "NOMINAL_2D_CONNECTED_TO_STAIR_RESERVATION",
+    "partitionSupport": "UNVERIFIED",
+    "roomPrivacy": "UNVERIFIED",
+    "clearanceBeyondTwoNominalCells": "UNVERIFIED",
+    "floorStairCutouts": "UNAPPLIED",
+    "office02ExteriorAndCorridorMismatch": "UNRESOLVED",
+    "realEnginePlannerIntegration": "NOT_PERFORMED",
+    "worldAnchor": "UNKNOWN",
+    "materials": "UNKNOWN"
+  },
+  "engineeringStatus": "REVIEW_ONLY_ENGINEERING_NOT_COMPLETE",
+  "deploymentGate": "BLOCKED",
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0,
+    "worldCoordinates": null,
+    "materialIds": []
+  }
+}

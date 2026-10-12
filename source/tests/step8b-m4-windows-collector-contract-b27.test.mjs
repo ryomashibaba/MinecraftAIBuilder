@@ -1,0 +1,16 @@
+import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import path from 'node:path';import {fileURLToPath} from 'node:url';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const file=fs.readFileSync(path.join(root,'tools/COLLECT_B27_M4_WINDOWS_READONLY.ps1'),'utf8');
+const allowKeys=JSON.parse(fs.readFileSync(path.join(root,'reports/B26_M4_READONLY_PREFLIGHT.json'),'utf8')).source.sourceHashes;
+test('collector B27.01 declares PowerShell 5.1 minimum',()=>assert.match(file,/^#requires -version 5\.1/));
+test('collector B27.02 schema explicit',()=>assert.match(file,/schema='minecraftaibuilder-step8b-b27-m4-readonly-probe-v1'/));
+test('collector B27.03 project marker and package checked',()=>{assert.match(file,/step7r-qa\.js/);assert.match(file,/minecraft-ai-builder/);});
+test('collector B27.04 writes only exclusive new file',()=>assert.match(file,/FileMode\]::CreateNew/));
+test('collector B27.05 output only Downloads',()=>assert.match(file,/B27_OUTPUT_MUST_BE_DOWNLOADS/));
+test('collector B27.06 reparse links refused',()=>assert.match(file,/B27_SOURCE_REPARSE_BLOCKED/));
+test('collector B27.07 hashes exactly nine expected files',()=>{for(const key of Object.keys(allowKeys)) assert.ok(file.includes(key),key);const src=file.match(/\$keys=@\(([\s\S]*?)\n\)/)[1];assert.equal((src.match(/'[^'\n]*'/g)||[]).length,9);});
+test('collector B27.08 no gameplay/HTTP/placement commands',()=>{let statements=file.split('\n').filter(x=>!/^(\s*#|\s*<|\s*\*)/.test(x)).join('\n');for(const bad of [/\bInvoke-WebRequest\b/i,/\bInvoke-RestMethod\b/i,/\bInvoke-Expression\b/i,/\bStart-Process\b/i,/\bSet-Content\b/i,/\bSetBlock\s*\(/i,/\bfill\s+~-?\d/i]) assert.doesNotMatch(statements,bad);});
+test('collector B27.09 only aggregate counts exported',()=>{assert.match(file,/nodeProcessCount/);assert.match(file,/rootPathHintCount/);assert.match(file,/entrypointHintCount/);assert.match(file,/listenerPortCount8000/);assert.match(file,/listenerPortCount8765/);assert.doesNotMatch(file,/commandLine\s*=\s*\$line/i);});
+test('collector B27.10 process hints never prove loaded runtime',()=>assert.match(file,/NOT loaded-runtime attestation/));
+test('collector B27.11 preserves NOT PREPARED and zero ops',()=>{assert.match(file,/notPrepared=\$true/);assert.match(file,/constructionApproved=\$false/);assert.match(file,/buildOperations=0/);});
+test('collector B27.12 file state checked before and after hashing',()=>{assert.match(file,/\$beforeLength/);assert.match(file,/\$after\.Length/);});

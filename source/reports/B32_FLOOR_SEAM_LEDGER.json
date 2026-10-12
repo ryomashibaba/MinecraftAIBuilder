@@ -1,0 +1,919 @@
+{
+  "schema": "minecraftaibuilder-step8b-b32-floor-seam-v1",
+  "kind": "NON_EXECUTING_SOURCE_SEAM_AND_BOOLEAN_MASK_PROOF_NOT_BUILDPLAN",
+  "provenances": {
+    "b31Sha256": "dea8dcb92e4bc635ecbb050e20f1ccb76d8c3a4ac9c1ff5fc3411b521e95c2b6",
+    "archivedPlannerSha256": "23be6e8b03827698fb890661f6fd0957a76ac4718f3347531121c8a7dc0450c8",
+    "inertDevCopySha256": "cec1710da165369d1a34230a620df02a950b74904eb7e07254ae2a75513a35f8",
+    "engineRuntimeAttested": false,
+    "liveWorldAttested": false
+  },
+  "seam": {
+    "oldExpression": "plate(mask, base, \"floor\", \"floor\");",
+    "newExpression": "plate(b32FloorMaskSelector(mask, f), base, \"floor\", \"floor\");",
+    "guardedDevCopy": true,
+    "plannerNotImported": true,
+    "plannerNotInvoked": true,
+    "selectorNotBoundToEngine": true,
+    "candidateOnly": true
+  },
+  "buildings": [
+    {
+      "id": "hotel/candidate-01",
+      "floors": [
+        {
+          "id": "hotel/candidate-01/L1",
+          "level": 1,
+          "sourceFloorCellCount": 520,
+          "selectedFloorCellCount": 520,
+          "cutoutCandidateCells": [],
+          "nearOuterWallCutoutCandidates": [],
+          "originalFloorMaskSha256": "0d641ee191bdead6d236b2da7307f58c5935133b2ff425ae5a23ada7da6f3745",
+          "candidateFloorMaskSha256": "0d641ee191bdead6d236b2da7307f58c5935133b2ff425ae5a23ada7da6f3745",
+          "untouchedFoundationMaskSha256": "0d641ee191bdead6d236b2da7307f58c5935133b2ff425ae5a23ada7da6f3745",
+          "untouchedExteriorOutlineSha256": "0d641ee191bdead6d236b2da7307f58c5935133b2ff425ae5a23ada7da6f3745",
+          "untouchedEnvelopePerimeterEdges": 92,
+          "untouchedExposedRoofCells": 0,
+          "untouchedExposedRoofSha256": "c4ad05445331a6feec8e8cbb4d1de8e31d61129ab6ba10655313197da2111c1a",
+          "unchangedStructuralEnvelopeInput": true,
+          "physicalSupportValidated": false,
+          "doorPorts": 11,
+          "physicalDoorStatesValidated": 0
+        },
+        {
+          "id": "hotel/candidate-01/L2",
+          "level": 2,
+          "sourceFloorCellCount": 520,
+          "selectedFloorCellCount": 518,
+          "cutoutCandidateCells": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "nearOuterWallCutoutCandidates": [],
+          "originalFloorMaskSha256": "0d641ee191bdead6d236b2da7307f58c5935133b2ff425ae5a23ada7da6f3745",
+          "candidateFloorMaskSha256": "6a80a4fda9dc57a5b76b9f2924a9d4d32810659268a12e70e0a7874aac490db4",
+          "untouchedFoundationMaskSha256": null,
+          "untouchedExteriorOutlineSha256": "0d641ee191bdead6d236b2da7307f58c5935133b2ff425ae5a23ada7da6f3745",
+          "untouchedEnvelopePerimeterEdges": 92,
+          "untouchedExposedRoofCells": 0,
+          "untouchedExposedRoofSha256": "c4ad05445331a6feec8e8cbb4d1de8e31d61129ab6ba10655313197da2111c1a",
+          "unchangedStructuralEnvelopeInput": true,
+          "physicalSupportValidated": false,
+          "doorPorts": 11,
+          "physicalDoorStatesValidated": 0
+        },
+        {
+          "id": "hotel/candidate-01/L3",
+          "level": 3,
+          "sourceFloorCellCount": 520,
+          "selectedFloorCellCount": 518,
+          "cutoutCandidateCells": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "nearOuterWallCutoutCandidates": [],
+          "originalFloorMaskSha256": "0d641ee191bdead6d236b2da7307f58c5935133b2ff425ae5a23ada7da6f3745",
+          "candidateFloorMaskSha256": "6a80a4fda9dc57a5b76b9f2924a9d4d32810659268a12e70e0a7874aac490db4",
+          "untouchedFoundationMaskSha256": null,
+          "untouchedExteriorOutlineSha256": "0d641ee191bdead6d236b2da7307f58c5935133b2ff425ae5a23ada7da6f3745",
+          "untouchedEnvelopePerimeterEdges": 92,
+          "untouchedExposedRoofCells": 0,
+          "untouchedExposedRoofSha256": "c4ad05445331a6feec8e8cbb4d1de8e31d61129ab6ba10655313197da2111c1a",
+          "unchangedStructuralEnvelopeInput": true,
+          "physicalSupportValidated": false,
+          "doorPorts": 11,
+          "physicalDoorStatesValidated": 0
+        },
+        {
+          "id": "hotel/candidate-01/L4",
+          "level": 4,
+          "sourceFloorCellCount": 520,
+          "selectedFloorCellCount": 518,
+          "cutoutCandidateCells": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "nearOuterWallCutoutCandidates": [],
+          "originalFloorMaskSha256": "0d641ee191bdead6d236b2da7307f58c5935133b2ff425ae5a23ada7da6f3745",
+          "candidateFloorMaskSha256": "6a80a4fda9dc57a5b76b9f2924a9d4d32810659268a12e70e0a7874aac490db4",
+          "untouchedFoundationMaskSha256": null,
+          "untouchedExteriorOutlineSha256": "0d641ee191bdead6d236b2da7307f58c5935133b2ff425ae5a23ada7da6f3745",
+          "untouchedEnvelopePerimeterEdges": 92,
+          "untouchedExposedRoofCells": 0,
+          "untouchedExposedRoofSha256": "c4ad05445331a6feec8e8cbb4d1de8e31d61129ab6ba10655313197da2111c1a",
+          "unchangedStructuralEnvelopeInput": true,
+          "physicalSupportValidated": false,
+          "doorPorts": 11,
+          "physicalDoorStatesValidated": 0
+        },
+        {
+          "id": "hotel/candidate-01/L5",
+          "level": 5,
+          "sourceFloorCellCount": 520,
+          "selectedFloorCellCount": 518,
+          "cutoutCandidateCells": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "nearOuterWallCutoutCandidates": [],
+          "originalFloorMaskSha256": "0d641ee191bdead6d236b2da7307f58c5935133b2ff425ae5a23ada7da6f3745",
+          "candidateFloorMaskSha256": "6a80a4fda9dc57a5b76b9f2924a9d4d32810659268a12e70e0a7874aac490db4",
+          "untouchedFoundationMaskSha256": null,
+          "untouchedExteriorOutlineSha256": "0d641ee191bdead6d236b2da7307f58c5935133b2ff425ae5a23ada7da6f3745",
+          "untouchedEnvelopePerimeterEdges": 92,
+          "untouchedExposedRoofCells": 0,
+          "untouchedExposedRoofSha256": "c4ad05445331a6feec8e8cbb4d1de8e31d61129ab6ba10655313197da2111c1a",
+          "unchangedStructuralEnvelopeInput": true,
+          "physicalSupportValidated": false,
+          "doorPorts": 11,
+          "physicalDoorStatesValidated": 0
+        },
+        {
+          "id": "hotel/candidate-01/L6",
+          "level": 6,
+          "sourceFloorCellCount": 520,
+          "selectedFloorCellCount": 518,
+          "cutoutCandidateCells": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "nearOuterWallCutoutCandidates": [],
+          "originalFloorMaskSha256": "0d641ee191bdead6d236b2da7307f58c5935133b2ff425ae5a23ada7da6f3745",
+          "candidateFloorMaskSha256": "6a80a4fda9dc57a5b76b9f2924a9d4d32810659268a12e70e0a7874aac490db4",
+          "untouchedFoundationMaskSha256": null,
+          "untouchedExteriorOutlineSha256": "0d641ee191bdead6d236b2da7307f58c5935133b2ff425ae5a23ada7da6f3745",
+          "untouchedEnvelopePerimeterEdges": 92,
+          "untouchedExposedRoofCells": 520,
+          "untouchedExposedRoofSha256": "0d641ee191bdead6d236b2da7307f58c5935133b2ff425ae5a23ada7da6f3745",
+          "unchangedStructuralEnvelopeInput": true,
+          "physicalSupportValidated": false,
+          "doorPorts": 11,
+          "physicalDoorStatesValidated": 0
+        }
+      ]
+    },
+    {
+      "id": "apartment/candidate-01",
+      "floors": [
+        {
+          "id": "apartment/candidate-01/L1",
+          "level": 1,
+          "sourceFloorCellCount": 400,
+          "selectedFloorCellCount": 400,
+          "cutoutCandidateCells": [],
+          "nearOuterWallCutoutCandidates": [],
+          "originalFloorMaskSha256": "73875ae308a18e7e7babaa38096cbdef7193e708a668f7b7043d0eef6041e149",
+          "candidateFloorMaskSha256": "73875ae308a18e7e7babaa38096cbdef7193e708a668f7b7043d0eef6041e149",
+          "untouchedFoundationMaskSha256": "73875ae308a18e7e7babaa38096cbdef7193e708a668f7b7043d0eef6041e149",
+          "untouchedExteriorOutlineSha256": "73875ae308a18e7e7babaa38096cbdef7193e708a668f7b7043d0eef6041e149",
+          "untouchedEnvelopePerimeterEdges": 160,
+          "untouchedExposedRoofCells": 0,
+          "untouchedExposedRoofSha256": "b7a132225d08cc2fceb3cbad4960c814ca57febc68052ebe0681a439de7d16d0",
+          "unchangedStructuralEnvelopeInput": true,
+          "physicalSupportValidated": false,
+          "doorPorts": 13,
+          "physicalDoorStatesValidated": 0
+        },
+        {
+          "id": "apartment/candidate-01/L2",
+          "level": 2,
+          "sourceFloorCellCount": 400,
+          "selectedFloorCellCount": 398,
+          "cutoutCandidateCells": [
+            {
+              "x": 14,
+              "z": 17
+            },
+            {
+              "x": 14,
+              "z": 18
+            }
+          ],
+          "nearOuterWallCutoutCandidates": [
+            {
+              "x": 14,
+              "z": 17
+            }
+          ],
+          "originalFloorMaskSha256": "73875ae308a18e7e7babaa38096cbdef7193e708a668f7b7043d0eef6041e149",
+          "candidateFloorMaskSha256": "0029054f7a58ba07166d0e610521568213d45f7243fc14fe9c242eb932212055",
+          "untouchedFoundationMaskSha256": null,
+          "untouchedExteriorOutlineSha256": "73875ae308a18e7e7babaa38096cbdef7193e708a668f7b7043d0eef6041e149",
+          "untouchedEnvelopePerimeterEdges": 160,
+          "untouchedExposedRoofCells": 0,
+          "untouchedExposedRoofSha256": "b7a132225d08cc2fceb3cbad4960c814ca57febc68052ebe0681a439de7d16d0",
+          "unchangedStructuralEnvelopeInput": true,
+          "physicalSupportValidated": false,
+          "doorPorts": 13,
+          "physicalDoorStatesValidated": 0
+        },
+        {
+          "id": "apartment/candidate-01/L3",
+          "level": 3,
+          "sourceFloorCellCount": 400,
+          "selectedFloorCellCount": 398,
+          "cutoutCandidateCells": [
+            {
+              "x": 14,
+              "z": 17
+            },
+            {
+              "x": 14,
+              "z": 18
+            }
+          ],
+          "nearOuterWallCutoutCandidates": [
+            {
+              "x": 14,
+              "z": 17
+            }
+          ],
+          "originalFloorMaskSha256": "73875ae308a18e7e7babaa38096cbdef7193e708a668f7b7043d0eef6041e149",
+          "candidateFloorMaskSha256": "0029054f7a58ba07166d0e610521568213d45f7243fc14fe9c242eb932212055",
+          "untouchedFoundationMaskSha256": null,
+          "untouchedExteriorOutlineSha256": "73875ae308a18e7e7babaa38096cbdef7193e708a668f7b7043d0eef6041e149",
+          "untouchedEnvelopePerimeterEdges": 160,
+          "untouchedExposedRoofCells": 0,
+          "untouchedExposedRoofSha256": "b7a132225d08cc2fceb3cbad4960c814ca57febc68052ebe0681a439de7d16d0",
+          "unchangedStructuralEnvelopeInput": true,
+          "physicalSupportValidated": false,
+          "doorPorts": 13,
+          "physicalDoorStatesValidated": 0
+        },
+        {
+          "id": "apartment/candidate-01/L4",
+          "level": 4,
+          "sourceFloorCellCount": 400,
+          "selectedFloorCellCount": 398,
+          "cutoutCandidateCells": [
+            {
+              "x": 14,
+              "z": 17
+            },
+            {
+              "x": 14,
+              "z": 18
+            }
+          ],
+          "nearOuterWallCutoutCandidates": [
+            {
+              "x": 14,
+              "z": 17
+            }
+          ],
+          "originalFloorMaskSha256": "73875ae308a18e7e7babaa38096cbdef7193e708a668f7b7043d0eef6041e149",
+          "candidateFloorMaskSha256": "0029054f7a58ba07166d0e610521568213d45f7243fc14fe9c242eb932212055",
+          "untouchedFoundationMaskSha256": null,
+          "untouchedExteriorOutlineSha256": "73875ae308a18e7e7babaa38096cbdef7193e708a668f7b7043d0eef6041e149",
+          "untouchedEnvelopePerimeterEdges": 160,
+          "untouchedExposedRoofCells": 0,
+          "untouchedExposedRoofSha256": "b7a132225d08cc2fceb3cbad4960c814ca57febc68052ebe0681a439de7d16d0",
+          "unchangedStructuralEnvelopeInput": true,
+          "physicalSupportValidated": false,
+          "doorPorts": 13,
+          "physicalDoorStatesValidated": 0
+        },
+        {
+          "id": "apartment/candidate-01/L5",
+          "level": 5,
+          "sourceFloorCellCount": 400,
+          "selectedFloorCellCount": 398,
+          "cutoutCandidateCells": [
+            {
+              "x": 14,
+              "z": 17
+            },
+            {
+              "x": 14,
+              "z": 18
+            }
+          ],
+          "nearOuterWallCutoutCandidates": [
+            {
+              "x": 14,
+              "z": 17
+            }
+          ],
+          "originalFloorMaskSha256": "73875ae308a18e7e7babaa38096cbdef7193e708a668f7b7043d0eef6041e149",
+          "candidateFloorMaskSha256": "0029054f7a58ba07166d0e610521568213d45f7243fc14fe9c242eb932212055",
+          "untouchedFoundationMaskSha256": null,
+          "untouchedExteriorOutlineSha256": "73875ae308a18e7e7babaa38096cbdef7193e708a668f7b7043d0eef6041e149",
+          "untouchedEnvelopePerimeterEdges": 160,
+          "untouchedExposedRoofCells": 0,
+          "untouchedExposedRoofSha256": "b7a132225d08cc2fceb3cbad4960c814ca57febc68052ebe0681a439de7d16d0",
+          "unchangedStructuralEnvelopeInput": true,
+          "physicalSupportValidated": false,
+          "doorPorts": 13,
+          "physicalDoorStatesValidated": 0
+        },
+        {
+          "id": "apartment/candidate-01/L6",
+          "level": 6,
+          "sourceFloorCellCount": 400,
+          "selectedFloorCellCount": 398,
+          "cutoutCandidateCells": [
+            {
+              "x": 14,
+              "z": 17
+            },
+            {
+              "x": 14,
+              "z": 18
+            }
+          ],
+          "nearOuterWallCutoutCandidates": [
+            {
+              "x": 14,
+              "z": 17
+            }
+          ],
+          "originalFloorMaskSha256": "73875ae308a18e7e7babaa38096cbdef7193e708a668f7b7043d0eef6041e149",
+          "candidateFloorMaskSha256": "0029054f7a58ba07166d0e610521568213d45f7243fc14fe9c242eb932212055",
+          "untouchedFoundationMaskSha256": null,
+          "untouchedExteriorOutlineSha256": "73875ae308a18e7e7babaa38096cbdef7193e708a668f7b7043d0eef6041e149",
+          "untouchedEnvelopePerimeterEdges": 160,
+          "untouchedExposedRoofCells": 400,
+          "untouchedExposedRoofSha256": "73875ae308a18e7e7babaa38096cbdef7193e708a668f7b7043d0eef6041e149",
+          "unchangedStructuralEnvelopeInput": true,
+          "physicalSupportValidated": false,
+          "doorPorts": 13,
+          "physicalDoorStatesValidated": 0
+        }
+      ]
+    },
+    {
+      "id": "office/candidate-01",
+      "floors": [
+        {
+          "id": "office/candidate-01/L1",
+          "level": 1,
+          "sourceFloorCellCount": 480,
+          "selectedFloorCellCount": 480,
+          "cutoutCandidateCells": [],
+          "nearOuterWallCutoutCandidates": [],
+          "originalFloorMaskSha256": "c507e278e09f4ed0ce107da26ccfb5c4398db6c17696c42271afdc42c87f5075",
+          "candidateFloorMaskSha256": "c507e278e09f4ed0ce107da26ccfb5c4398db6c17696c42271afdc42c87f5075",
+          "untouchedFoundationMaskSha256": "c507e278e09f4ed0ce107da26ccfb5c4398db6c17696c42271afdc42c87f5075",
+          "untouchedExteriorOutlineSha256": "c507e278e09f4ed0ce107da26ccfb5c4398db6c17696c42271afdc42c87f5075",
+          "untouchedEnvelopePerimeterEdges": 88,
+          "untouchedExposedRoofCells": 0,
+          "untouchedExposedRoofSha256": "4af1fbf8ca3f1a9c8992a087ef8875b64e6e435e1abb9c055dddda6e7a92ce37",
+          "unchangedStructuralEnvelopeInput": true,
+          "physicalSupportValidated": false,
+          "doorPorts": 11,
+          "physicalDoorStatesValidated": 0
+        },
+        {
+          "id": "office/candidate-01/L2",
+          "level": 2,
+          "sourceFloorCellCount": 480,
+          "selectedFloorCellCount": 478,
+          "cutoutCandidateCells": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "nearOuterWallCutoutCandidates": [],
+          "originalFloorMaskSha256": "c507e278e09f4ed0ce107da26ccfb5c4398db6c17696c42271afdc42c87f5075",
+          "candidateFloorMaskSha256": "8764ffd8a4f4941a0a7518035c9c266a9cda034e283d0528b5640047ca9e14ae",
+          "untouchedFoundationMaskSha256": null,
+          "untouchedExteriorOutlineSha256": "c507e278e09f4ed0ce107da26ccfb5c4398db6c17696c42271afdc42c87f5075",
+          "untouchedEnvelopePerimeterEdges": 88,
+          "untouchedExposedRoofCells": 106,
+          "untouchedExposedRoofSha256": "ddf8ed00d4651710a2063ca2ed0da501f023c8660c3b7e51e3a1917c90e9f0d5",
+          "unchangedStructuralEnvelopeInput": true,
+          "physicalSupportValidated": false,
+          "doorPorts": 11,
+          "physicalDoorStatesValidated": 0
+        },
+        {
+          "id": "office/candidate-01/L3",
+          "level": 3,
+          "sourceFloorCellCount": 374,
+          "selectedFloorCellCount": 372,
+          "cutoutCandidateCells": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "nearOuterWallCutoutCandidates": [],
+          "originalFloorMaskSha256": "e40287375772b1d8896e05ded9d9a1aaa76983e3c18dee6f99cf6d4710fd84b9",
+          "candidateFloorMaskSha256": "b25a96c4567594820ff7bc91b8b40dc006d5995a72d0dba28c0dfb4d01adacaa",
+          "untouchedFoundationMaskSha256": null,
+          "untouchedExteriorOutlineSha256": "e40287375772b1d8896e05ded9d9a1aaa76983e3c18dee6f99cf6d4710fd84b9",
+          "untouchedEnvelopePerimeterEdges": 78,
+          "untouchedExposedRoofCells": 0,
+          "untouchedExposedRoofSha256": "4af1fbf8ca3f1a9c8992a087ef8875b64e6e435e1abb9c055dddda6e7a92ce37",
+          "unchangedStructuralEnvelopeInput": true,
+          "physicalSupportValidated": false,
+          "doorPorts": 11,
+          "physicalDoorStatesValidated": 0
+        },
+        {
+          "id": "office/candidate-01/L4",
+          "level": 4,
+          "sourceFloorCellCount": 374,
+          "selectedFloorCellCount": 372,
+          "cutoutCandidateCells": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "nearOuterWallCutoutCandidates": [],
+          "originalFloorMaskSha256": "e40287375772b1d8896e05ded9d9a1aaa76983e3c18dee6f99cf6d4710fd84b9",
+          "candidateFloorMaskSha256": "b25a96c4567594820ff7bc91b8b40dc006d5995a72d0dba28c0dfb4d01adacaa",
+          "untouchedFoundationMaskSha256": null,
+          "untouchedExteriorOutlineSha256": "e40287375772b1d8896e05ded9d9a1aaa76983e3c18dee6f99cf6d4710fd84b9",
+          "untouchedEnvelopePerimeterEdges": 78,
+          "untouchedExposedRoofCells": 0,
+          "untouchedExposedRoofSha256": "4af1fbf8ca3f1a9c8992a087ef8875b64e6e435e1abb9c055dddda6e7a92ce37",
+          "unchangedStructuralEnvelopeInput": true,
+          "physicalSupportValidated": false,
+          "doorPorts": 11,
+          "physicalDoorStatesValidated": 0
+        },
+        {
+          "id": "office/candidate-01/L5",
+          "level": 5,
+          "sourceFloorCellCount": 374,
+          "selectedFloorCellCount": 372,
+          "cutoutCandidateCells": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "nearOuterWallCutoutCandidates": [],
+          "originalFloorMaskSha256": "e40287375772b1d8896e05ded9d9a1aaa76983e3c18dee6f99cf6d4710fd84b9",
+          "candidateFloorMaskSha256": "b25a96c4567594820ff7bc91b8b40dc006d5995a72d0dba28c0dfb4d01adacaa",
+          "untouchedFoundationMaskSha256": null,
+          "untouchedExteriorOutlineSha256": "e40287375772b1d8896e05ded9d9a1aaa76983e3c18dee6f99cf6d4710fd84b9",
+          "untouchedEnvelopePerimeterEdges": 78,
+          "untouchedExposedRoofCells": 0,
+          "untouchedExposedRoofSha256": "4af1fbf8ca3f1a9c8992a087ef8875b64e6e435e1abb9c055dddda6e7a92ce37",
+          "unchangedStructuralEnvelopeInput": true,
+          "physicalSupportValidated": false,
+          "doorPorts": 11,
+          "physicalDoorStatesValidated": 0
+        },
+        {
+          "id": "office/candidate-01/L6",
+          "level": 6,
+          "sourceFloorCellCount": 374,
+          "selectedFloorCellCount": 372,
+          "cutoutCandidateCells": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "nearOuterWallCutoutCandidates": [],
+          "originalFloorMaskSha256": "e40287375772b1d8896e05ded9d9a1aaa76983e3c18dee6f99cf6d4710fd84b9",
+          "candidateFloorMaskSha256": "b25a96c4567594820ff7bc91b8b40dc006d5995a72d0dba28c0dfb4d01adacaa",
+          "untouchedFoundationMaskSha256": null,
+          "untouchedExteriorOutlineSha256": "e40287375772b1d8896e05ded9d9a1aaa76983e3c18dee6f99cf6d4710fd84b9",
+          "untouchedEnvelopePerimeterEdges": 78,
+          "untouchedExposedRoofCells": 374,
+          "untouchedExposedRoofSha256": "e40287375772b1d8896e05ded9d9a1aaa76983e3c18dee6f99cf6d4710fd84b9",
+          "unchangedStructuralEnvelopeInput": true,
+          "physicalSupportValidated": false,
+          "doorPorts": 11,
+          "physicalDoorStatesValidated": 0
+        }
+      ]
+    },
+    {
+      "id": "office/candidate-02",
+      "floors": [
+        {
+          "id": "office/candidate-02/L1",
+          "level": 1,
+          "sourceFloorCellCount": 348,
+          "selectedFloorCellCount": 348,
+          "cutoutCandidateCells": [],
+          "nearOuterWallCutoutCandidates": [],
+          "originalFloorMaskSha256": "cd02cca4f0513caae4a906465e8095260c29e1b19ef8ee71647aa591efa62f87",
+          "candidateFloorMaskSha256": "cd02cca4f0513caae4a906465e8095260c29e1b19ef8ee71647aa591efa62f87",
+          "untouchedFoundationMaskSha256": "cd02cca4f0513caae4a906465e8095260c29e1b19ef8ee71647aa591efa62f87",
+          "untouchedExteriorOutlineSha256": "cd02cca4f0513caae4a906465e8095260c29e1b19ef8ee71647aa591efa62f87",
+          "untouchedEnvelopePerimeterEdges": 88,
+          "untouchedExposedRoofCells": 0,
+          "untouchedExposedRoofSha256": "4af1fbf8ca3f1a9c8992a087ef8875b64e6e435e1abb9c055dddda6e7a92ce37",
+          "unchangedStructuralEnvelopeInput": true,
+          "physicalSupportValidated": false,
+          "doorPorts": 7,
+          "physicalDoorStatesValidated": 0
+        },
+        {
+          "id": "office/candidate-02/L2",
+          "level": 2,
+          "sourceFloorCellCount": 348,
+          "selectedFloorCellCount": 346,
+          "cutoutCandidateCells": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "nearOuterWallCutoutCandidates": [],
+          "originalFloorMaskSha256": "cd02cca4f0513caae4a906465e8095260c29e1b19ef8ee71647aa591efa62f87",
+          "candidateFloorMaskSha256": "4a6fb0c1406fa314cddb537a7d3037cefd41cb386d04a9bcea67020e62c2aeb7",
+          "untouchedFoundationMaskSha256": null,
+          "untouchedExteriorOutlineSha256": "cd02cca4f0513caae4a906465e8095260c29e1b19ef8ee71647aa591efa62f87",
+          "untouchedEnvelopePerimeterEdges": 88,
+          "untouchedExposedRoofCells": 0,
+          "untouchedExposedRoofSha256": "4af1fbf8ca3f1a9c8992a087ef8875b64e6e435e1abb9c055dddda6e7a92ce37",
+          "unchangedStructuralEnvelopeInput": true,
+          "physicalSupportValidated": false,
+          "doorPorts": 7,
+          "physicalDoorStatesValidated": 0
+        },
+        {
+          "id": "office/candidate-02/L3",
+          "level": 3,
+          "sourceFloorCellCount": 348,
+          "selectedFloorCellCount": 346,
+          "cutoutCandidateCells": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "nearOuterWallCutoutCandidates": [],
+          "originalFloorMaskSha256": "cd02cca4f0513caae4a906465e8095260c29e1b19ef8ee71647aa591efa62f87",
+          "candidateFloorMaskSha256": "4a6fb0c1406fa314cddb537a7d3037cefd41cb386d04a9bcea67020e62c2aeb7",
+          "untouchedFoundationMaskSha256": null,
+          "untouchedExteriorOutlineSha256": "cd02cca4f0513caae4a906465e8095260c29e1b19ef8ee71647aa591efa62f87",
+          "untouchedEnvelopePerimeterEdges": 88,
+          "untouchedExposedRoofCells": 0,
+          "untouchedExposedRoofSha256": "4af1fbf8ca3f1a9c8992a087ef8875b64e6e435e1abb9c055dddda6e7a92ce37",
+          "unchangedStructuralEnvelopeInput": true,
+          "physicalSupportValidated": false,
+          "doorPorts": 7,
+          "physicalDoorStatesValidated": 0
+        },
+        {
+          "id": "office/candidate-02/L4",
+          "level": 4,
+          "sourceFloorCellCount": 348,
+          "selectedFloorCellCount": 346,
+          "cutoutCandidateCells": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "nearOuterWallCutoutCandidates": [],
+          "originalFloorMaskSha256": "cd02cca4f0513caae4a906465e8095260c29e1b19ef8ee71647aa591efa62f87",
+          "candidateFloorMaskSha256": "4a6fb0c1406fa314cddb537a7d3037cefd41cb386d04a9bcea67020e62c2aeb7",
+          "untouchedFoundationMaskSha256": null,
+          "untouchedExteriorOutlineSha256": "cd02cca4f0513caae4a906465e8095260c29e1b19ef8ee71647aa591efa62f87",
+          "untouchedEnvelopePerimeterEdges": 88,
+          "untouchedExposedRoofCells": 0,
+          "untouchedExposedRoofSha256": "4af1fbf8ca3f1a9c8992a087ef8875b64e6e435e1abb9c055dddda6e7a92ce37",
+          "unchangedStructuralEnvelopeInput": true,
+          "physicalSupportValidated": false,
+          "doorPorts": 7,
+          "physicalDoorStatesValidated": 0
+        },
+        {
+          "id": "office/candidate-02/L5",
+          "level": 5,
+          "sourceFloorCellCount": 348,
+          "selectedFloorCellCount": 346,
+          "cutoutCandidateCells": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "nearOuterWallCutoutCandidates": [],
+          "originalFloorMaskSha256": "cd02cca4f0513caae4a906465e8095260c29e1b19ef8ee71647aa591efa62f87",
+          "candidateFloorMaskSha256": "4a6fb0c1406fa314cddb537a7d3037cefd41cb386d04a9bcea67020e62c2aeb7",
+          "untouchedFoundationMaskSha256": null,
+          "untouchedExteriorOutlineSha256": "cd02cca4f0513caae4a906465e8095260c29e1b19ef8ee71647aa591efa62f87",
+          "untouchedEnvelopePerimeterEdges": 88,
+          "untouchedExposedRoofCells": 166,
+          "untouchedExposedRoofSha256": "3adb6cfe8dd723a007141de25d030a877acf8188215ff2605e5e5d04a5937067",
+          "unchangedStructuralEnvelopeInput": true,
+          "physicalSupportValidated": false,
+          "doorPorts": 7,
+          "physicalDoorStatesValidated": 0
+        },
+        {
+          "id": "office/candidate-02/L6",
+          "level": 6,
+          "sourceFloorCellCount": 182,
+          "selectedFloorCellCount": 180,
+          "cutoutCandidateCells": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "nearOuterWallCutoutCandidates": [],
+          "originalFloorMaskSha256": "9f5dd2ae5646ce1dbddffa9f7b9a8a622e6e56b6f41eb8c29e2d7ddbb44a5475",
+          "candidateFloorMaskSha256": "2014fbb519d6830cd64c26f0ba8c4e7d556f7e0873c74eb9bd8ef0a7944f0b04",
+          "untouchedFoundationMaskSha256": null,
+          "untouchedExteriorOutlineSha256": "9f5dd2ae5646ce1dbddffa9f7b9a8a622e6e56b6f41eb8c29e2d7ddbb44a5475",
+          "untouchedEnvelopePerimeterEdges": 54,
+          "untouchedExposedRoofCells": 182,
+          "untouchedExposedRoofSha256": "9f5dd2ae5646ce1dbddffa9f7b9a8a622e6e56b6f41eb8c29e2d7ddbb44a5475",
+          "unchangedStructuralEnvelopeInput": true,
+          "physicalSupportValidated": false,
+          "doorPorts": 3,
+          "physicalDoorStatesValidated": 0
+        }
+      ]
+    },
+    {
+      "id": "office/candidate-03",
+      "floors": [
+        {
+          "id": "office/candidate-03/L1",
+          "level": 1,
+          "sourceFloorCellCount": 480,
+          "selectedFloorCellCount": 480,
+          "cutoutCandidateCells": [],
+          "nearOuterWallCutoutCandidates": [],
+          "originalFloorMaskSha256": "c507e278e09f4ed0ce107da26ccfb5c4398db6c17696c42271afdc42c87f5075",
+          "candidateFloorMaskSha256": "c507e278e09f4ed0ce107da26ccfb5c4398db6c17696c42271afdc42c87f5075",
+          "untouchedFoundationMaskSha256": "c507e278e09f4ed0ce107da26ccfb5c4398db6c17696c42271afdc42c87f5075",
+          "untouchedExteriorOutlineSha256": "c507e278e09f4ed0ce107da26ccfb5c4398db6c17696c42271afdc42c87f5075",
+          "untouchedEnvelopePerimeterEdges": 88,
+          "untouchedExposedRoofCells": 0,
+          "untouchedExposedRoofSha256": "4af1fbf8ca3f1a9c8992a087ef8875b64e6e435e1abb9c055dddda6e7a92ce37",
+          "unchangedStructuralEnvelopeInput": true,
+          "physicalSupportValidated": false,
+          "doorPorts": 11,
+          "physicalDoorStatesValidated": 0
+        },
+        {
+          "id": "office/candidate-03/L2",
+          "level": 2,
+          "sourceFloorCellCount": 480,
+          "selectedFloorCellCount": 478,
+          "cutoutCandidateCells": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "nearOuterWallCutoutCandidates": [],
+          "originalFloorMaskSha256": "c507e278e09f4ed0ce107da26ccfb5c4398db6c17696c42271afdc42c87f5075",
+          "candidateFloorMaskSha256": "8764ffd8a4f4941a0a7518035c9c266a9cda034e283d0528b5640047ca9e14ae",
+          "untouchedFoundationMaskSha256": null,
+          "untouchedExteriorOutlineSha256": "c507e278e09f4ed0ce107da26ccfb5c4398db6c17696c42271afdc42c87f5075",
+          "untouchedEnvelopePerimeterEdges": 88,
+          "untouchedExposedRoofCells": 0,
+          "untouchedExposedRoofSha256": "4af1fbf8ca3f1a9c8992a087ef8875b64e6e435e1abb9c055dddda6e7a92ce37",
+          "unchangedStructuralEnvelopeInput": true,
+          "physicalSupportValidated": false,
+          "doorPorts": 11,
+          "physicalDoorStatesValidated": 0
+        },
+        {
+          "id": "office/candidate-03/L3",
+          "level": 3,
+          "sourceFloorCellCount": 480,
+          "selectedFloorCellCount": 478,
+          "cutoutCandidateCells": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "nearOuterWallCutoutCandidates": [],
+          "originalFloorMaskSha256": "c507e278e09f4ed0ce107da26ccfb5c4398db6c17696c42271afdc42c87f5075",
+          "candidateFloorMaskSha256": "8764ffd8a4f4941a0a7518035c9c266a9cda034e283d0528b5640047ca9e14ae",
+          "untouchedFoundationMaskSha256": null,
+          "untouchedExteriorOutlineSha256": "c507e278e09f4ed0ce107da26ccfb5c4398db6c17696c42271afdc42c87f5075",
+          "untouchedEnvelopePerimeterEdges": 88,
+          "untouchedExposedRoofCells": 0,
+          "untouchedExposedRoofSha256": "4af1fbf8ca3f1a9c8992a087ef8875b64e6e435e1abb9c055dddda6e7a92ce37",
+          "unchangedStructuralEnvelopeInput": true,
+          "physicalSupportValidated": false,
+          "doorPorts": 11,
+          "physicalDoorStatesValidated": 0
+        },
+        {
+          "id": "office/candidate-03/L4",
+          "level": 4,
+          "sourceFloorCellCount": 480,
+          "selectedFloorCellCount": 478,
+          "cutoutCandidateCells": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "nearOuterWallCutoutCandidates": [],
+          "originalFloorMaskSha256": "c507e278e09f4ed0ce107da26ccfb5c4398db6c17696c42271afdc42c87f5075",
+          "candidateFloorMaskSha256": "8764ffd8a4f4941a0a7518035c9c266a9cda034e283d0528b5640047ca9e14ae",
+          "untouchedFoundationMaskSha256": null,
+          "untouchedExteriorOutlineSha256": "c507e278e09f4ed0ce107da26ccfb5c4398db6c17696c42271afdc42c87f5075",
+          "untouchedEnvelopePerimeterEdges": 88,
+          "untouchedExposedRoofCells": 0,
+          "untouchedExposedRoofSha256": "4af1fbf8ca3f1a9c8992a087ef8875b64e6e435e1abb9c055dddda6e7a92ce37",
+          "unchangedStructuralEnvelopeInput": true,
+          "physicalSupportValidated": false,
+          "doorPorts": 11,
+          "physicalDoorStatesValidated": 0
+        },
+        {
+          "id": "office/candidate-03/L5",
+          "level": 5,
+          "sourceFloorCellCount": 480,
+          "selectedFloorCellCount": 478,
+          "cutoutCandidateCells": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "nearOuterWallCutoutCandidates": [],
+          "originalFloorMaskSha256": "c507e278e09f4ed0ce107da26ccfb5c4398db6c17696c42271afdc42c87f5075",
+          "candidateFloorMaskSha256": "8764ffd8a4f4941a0a7518035c9c266a9cda034e283d0528b5640047ca9e14ae",
+          "untouchedFoundationMaskSha256": null,
+          "untouchedExteriorOutlineSha256": "c507e278e09f4ed0ce107da26ccfb5c4398db6c17696c42271afdc42c87f5075",
+          "untouchedEnvelopePerimeterEdges": 88,
+          "untouchedExposedRoofCells": 0,
+          "untouchedExposedRoofSha256": "4af1fbf8ca3f1a9c8992a087ef8875b64e6e435e1abb9c055dddda6e7a92ce37",
+          "unchangedStructuralEnvelopeInput": true,
+          "physicalSupportValidated": false,
+          "doorPorts": 11,
+          "physicalDoorStatesValidated": 0
+        },
+        {
+          "id": "office/candidate-03/L6",
+          "level": 6,
+          "sourceFloorCellCount": 480,
+          "selectedFloorCellCount": 478,
+          "cutoutCandidateCells": [
+            {
+              "x": 11,
+              "z": 10
+            },
+            {
+              "x": 11,
+              "z": 11
+            }
+          ],
+          "nearOuterWallCutoutCandidates": [],
+          "originalFloorMaskSha256": "c507e278e09f4ed0ce107da26ccfb5c4398db6c17696c42271afdc42c87f5075",
+          "candidateFloorMaskSha256": "8764ffd8a4f4941a0a7518035c9c266a9cda034e283d0528b5640047ca9e14ae",
+          "untouchedFoundationMaskSha256": null,
+          "untouchedExteriorOutlineSha256": "c507e278e09f4ed0ce107da26ccfb5c4398db6c17696c42271afdc42c87f5075",
+          "untouchedEnvelopePerimeterEdges": 88,
+          "untouchedExposedRoofCells": 480,
+          "untouchedExposedRoofSha256": "c507e278e09f4ed0ce107da26ccfb5c4398db6c17696c42271afdc42c87f5075",
+          "unchangedStructuralEnvelopeInput": true,
+          "physicalSupportValidated": false,
+          "doorPorts": 11,
+          "physicalDoorStatesValidated": 0
+        }
+      ]
+    }
+  ],
+  "totals": {
+    "buildings": 5,
+    "floors": 30,
+    "sourceFloorCells": 12778,
+    "selectedFloorCells": 12728,
+    "candidateCutoutCells": 50,
+    "nearOuterWallCandidates": 5,
+    "doors": 314,
+    "foundationInputsChanged": 0,
+    "roofInputsChanged": 0,
+    "exteriorInputsChanged": 0,
+    "parapetEnvelopeInputsChanged": 0,
+    "physicalDoorsValidated": 0,
+    "physicalStairSupportsValidated": 0,
+    "engineCalls": 0,
+    "operationsEmitted": 0
+  },
+  "blockers": [
+    "M4-01",
+    "M4-02",
+    "M4-03",
+    "M4-04",
+    "M4-05",
+    "M4-06",
+    "M4-07",
+    "M4-08",
+    "M4-09"
+  ],
+  "additionalReviewGates": [
+    "EDGE_ADJACENT_FLOOR_CUTOUT_SUPPORT_UNVERIFIED",
+    "EXPOSED_ROOF_VS_INTERIOR_STAIR_HEADROOM_UNVERIFIED"
+  ],
+  "readiness": "NOT_PREPARED",
+  "deployment": "BLOCKED",
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0,
+    "materialIds": [],
+    "worldCoordinates": null
+  },
+  "safety": {
+    "constructionApproved": false,
+    "executionAllowed": false,
+    "worldAccess": false,
+    "bridgeContact": false,
+    "archivedSourceModified": false,
+    "legacyModified": false,
+    "engineCalled": false,
+    "buildOperations": 0
+  },
+  "reportSha256": "ed429d13d2d78026569787d9bcf29bf8de330ebac20ba05b4c78e564d82d3602"
+}

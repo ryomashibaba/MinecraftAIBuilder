@@ -1,0 +1,1522 @@
+{
+  "schema": "minecraftaibuilder-step8b-b34-cross-floor-access-v1",
+  "kind": "NONEXECUTABLE_LAYOUT_REVIEW",
+  "provenance": {
+    "source": "PINNED_B33_B17_B31_B16",
+    "roomVolumeReservationsVerified": false,
+    "actualEngineCalled": false,
+    "bridgeCalled": false
+  },
+  "building": "apartment/candidate-01",
+  "reviews": [
+    {
+      "offset": {
+        "dx": 0,
+        "dz": 1
+      },
+      "floors": [
+        {
+          "level": 2,
+          "offset": {
+            "dx": 0,
+            "dz": 1
+          },
+          "shaftCells": 9,
+          "shiftedOpeningCells": 2,
+          "originalFloorCells": 400,
+          "candidateFloorCells": 398,
+          "candidateRectangleCount": 7,
+          "shiftedOpeningBoundaryAdjacentCells": 0,
+          "shiftedOpeningCellsLocal": [
+            {
+              "x": 14,
+              "z": 18
+            },
+            {
+              "x": 14,
+              "z": 19
+            }
+          ],
+          "collisions": {
+            "corridorCellsDisplaced": 1,
+            "displacedCorridorCellKeys": [
+              "12,20"
+            ],
+            "existingDoorHallCellsOverlapped": 0,
+            "doorPortsWithoutNominalStairPath": 0,
+            "corridorComponentsAfter": 3,
+            "componentsAdjacentToShiftedShaft": 3,
+            "allDoorPortsKeepNominalPath": true,
+            "elevatorReservedCells": 0,
+            "doorRoomEndpoints": 0,
+            "nominalWallEndpointCells": 4
+          },
+          "roomInteriorCellCollisionStatus": "UNKNOWN_NO_VALIDATED_ROOM_VOLUME_MASK",
+          "physicalStairAccessVerified": false,
+          "physicalWallJoinVerified": false,
+          "physicalHeadroomVerified": false,
+          "physicalSupportVerified": false
+        },
+        {
+          "level": 3,
+          "offset": {
+            "dx": 0,
+            "dz": 1
+          },
+          "shaftCells": 9,
+          "shiftedOpeningCells": 2,
+          "originalFloorCells": 400,
+          "candidateFloorCells": 398,
+          "candidateRectangleCount": 7,
+          "shiftedOpeningBoundaryAdjacentCells": 0,
+          "shiftedOpeningCellsLocal": [
+            {
+              "x": 14,
+              "z": 18
+            },
+            {
+              "x": 14,
+              "z": 19
+            }
+          ],
+          "collisions": {
+            "corridorCellsDisplaced": 1,
+            "displacedCorridorCellKeys": [
+              "12,20"
+            ],
+            "existingDoorHallCellsOverlapped": 0,
+            "doorPortsWithoutNominalStairPath": 0,
+            "corridorComponentsAfter": 3,
+            "componentsAdjacentToShiftedShaft": 3,
+            "allDoorPortsKeepNominalPath": true,
+            "elevatorReservedCells": 0,
+            "doorRoomEndpoints": 0,
+            "nominalWallEndpointCells": 4
+          },
+          "roomInteriorCellCollisionStatus": "UNKNOWN_NO_VALIDATED_ROOM_VOLUME_MASK",
+          "physicalStairAccessVerified": false,
+          "physicalWallJoinVerified": false,
+          "physicalHeadroomVerified": false,
+          "physicalSupportVerified": false
+        },
+        {
+          "level": 4,
+          "offset": {
+            "dx": 0,
+            "dz": 1
+          },
+          "shaftCells": 9,
+          "shiftedOpeningCells": 2,
+          "originalFloorCells": 400,
+          "candidateFloorCells": 398,
+          "candidateRectangleCount": 7,
+          "shiftedOpeningBoundaryAdjacentCells": 0,
+          "shiftedOpeningCellsLocal": [
+            {
+              "x": 14,
+              "z": 18
+            },
+            {
+              "x": 14,
+              "z": 19
+            }
+          ],
+          "collisions": {
+            "corridorCellsDisplaced": 1,
+            "displacedCorridorCellKeys": [
+              "12,20"
+            ],
+            "existingDoorHallCellsOverlapped": 0,
+            "doorPortsWithoutNominalStairPath": 0,
+            "corridorComponentsAfter": 3,
+            "componentsAdjacentToShiftedShaft": 3,
+            "allDoorPortsKeepNominalPath": true,
+            "elevatorReservedCells": 0,
+            "doorRoomEndpoints": 0,
+            "nominalWallEndpointCells": 4
+          },
+          "roomInteriorCellCollisionStatus": "UNKNOWN_NO_VALIDATED_ROOM_VOLUME_MASK",
+          "physicalStairAccessVerified": false,
+          "physicalWallJoinVerified": false,
+          "physicalHeadroomVerified": false,
+          "physicalSupportVerified": false
+        },
+        {
+          "level": 5,
+          "offset": {
+            "dx": 0,
+            "dz": 1
+          },
+          "shaftCells": 9,
+          "shiftedOpeningCells": 2,
+          "originalFloorCells": 400,
+          "candidateFloorCells": 398,
+          "candidateRectangleCount": 7,
+          "shiftedOpeningBoundaryAdjacentCells": 0,
+          "shiftedOpeningCellsLocal": [
+            {
+              "x": 14,
+              "z": 18
+            },
+            {
+              "x": 14,
+              "z": 19
+            }
+          ],
+          "collisions": {
+            "corridorCellsDisplaced": 1,
+            "displacedCorridorCellKeys": [
+              "12,20"
+            ],
+            "existingDoorHallCellsOverlapped": 0,
+            "doorPortsWithoutNominalStairPath": 0,
+            "corridorComponentsAfter": 3,
+            "componentsAdjacentToShiftedShaft": 3,
+            "allDoorPortsKeepNominalPath": true,
+            "elevatorReservedCells": 0,
+            "doorRoomEndpoints": 0,
+            "nominalWallEndpointCells": 4
+          },
+          "roomInteriorCellCollisionStatus": "UNKNOWN_NO_VALIDATED_ROOM_VOLUME_MASK",
+          "physicalStairAccessVerified": false,
+          "physicalWallJoinVerified": false,
+          "physicalHeadroomVerified": false,
+          "physicalSupportVerified": false
+        },
+        {
+          "level": 6,
+          "offset": {
+            "dx": 0,
+            "dz": 1
+          },
+          "shaftCells": 9,
+          "shiftedOpeningCells": 2,
+          "originalFloorCells": 400,
+          "candidateFloorCells": 398,
+          "candidateRectangleCount": 7,
+          "shiftedOpeningBoundaryAdjacentCells": 0,
+          "shiftedOpeningCellsLocal": [
+            {
+              "x": 14,
+              "z": 18
+            },
+            {
+              "x": 14,
+              "z": 19
+            }
+          ],
+          "collisions": {
+            "corridorCellsDisplaced": 1,
+            "displacedCorridorCellKeys": [
+              "12,20"
+            ],
+            "existingDoorHallCellsOverlapped": 0,
+            "doorPortsWithoutNominalStairPath": 0,
+            "corridorComponentsAfter": 3,
+            "componentsAdjacentToShiftedShaft": 3,
+            "allDoorPortsKeepNominalPath": true,
+            "elevatorReservedCells": 0,
+            "doorRoomEndpoints": 0,
+            "nominalWallEndpointCells": 4
+          },
+          "roomInteriorCellCollisionStatus": "UNKNOWN_NO_VALIDATED_ROOM_VOLUME_MASK",
+          "physicalStairAccessVerified": false,
+          "physicalWallJoinVerified": false,
+          "physicalHeadroomVerified": false,
+          "physicalSupportVerified": false
+        }
+      ],
+      "totals": {
+        "corridorCellsDisplaced": 5,
+        "doorPortsWithoutNominalStairPath": 0,
+        "doorHallCellsOverlapped": 0,
+        "elevatorReservedCells": 0,
+        "doorRoomEndpoints": 0,
+        "nominalWallEndpointCells": 20,
+        "boundaryAdjacentOpeningCells": 0,
+        "physicalStairLinksProven": 0,
+        "completeRoomVolumeValidated": false
+      },
+      "nonDestructiveCorridorLayout": false,
+      "nominalDoorToShaftConnectivityPreserved": true,
+      "verdict": "BLOCKED_REQUIRES_LAYOUT_REDESIGN",
+      "approved": false,
+      "autoSelected": false,
+      "applied": false
+    },
+    {
+      "offset": {
+        "dx": -1,
+        "dz": 1
+      },
+      "floors": [
+        {
+          "level": 2,
+          "offset": {
+            "dx": -1,
+            "dz": 1
+          },
+          "shaftCells": 9,
+          "shiftedOpeningCells": 2,
+          "originalFloorCells": 400,
+          "candidateFloorCells": 398,
+          "candidateRectangleCount": 7,
+          "shiftedOpeningBoundaryAdjacentCells": 0,
+          "shiftedOpeningCellsLocal": [
+            {
+              "x": 13,
+              "z": 18
+            },
+            {
+              "x": 13,
+              "z": 19
+            }
+          ],
+          "collisions": {
+            "corridorCellsDisplaced": 2,
+            "displacedCorridorCellKeys": [
+              "11,18",
+              "12,20"
+            ],
+            "existingDoorHallCellsOverlapped": 0,
+            "doorPortsWithoutNominalStairPath": 1,
+            "corridorComponentsAfter": 4,
+            "componentsAdjacentToShiftedShaft": 3,
+            "allDoorPortsKeepNominalPath": false,
+            "elevatorReservedCells": 0,
+            "doorRoomEndpoints": 0,
+            "nominalWallEndpointCells": 5
+          },
+          "roomInteriorCellCollisionStatus": "UNKNOWN_NO_VALIDATED_ROOM_VOLUME_MASK",
+          "physicalStairAccessVerified": false,
+          "physicalWallJoinVerified": false,
+          "physicalHeadroomVerified": false,
+          "physicalSupportVerified": false
+        },
+        {
+          "level": 3,
+          "offset": {
+            "dx": -1,
+            "dz": 1
+          },
+          "shaftCells": 9,
+          "shiftedOpeningCells": 2,
+          "originalFloorCells": 400,
+          "candidateFloorCells": 398,
+          "candidateRectangleCount": 7,
+          "shiftedOpeningBoundaryAdjacentCells": 0,
+          "shiftedOpeningCellsLocal": [
+            {
+              "x": 13,
+              "z": 18
+            },
+            {
+              "x": 13,
+              "z": 19
+            }
+          ],
+          "collisions": {
+            "corridorCellsDisplaced": 2,
+            "displacedCorridorCellKeys": [
+              "11,18",
+              "12,20"
+            ],
+            "existingDoorHallCellsOverlapped": 0,
+            "doorPortsWithoutNominalStairPath": 1,
+            "corridorComponentsAfter": 4,
+            "componentsAdjacentToShiftedShaft": 3,
+            "allDoorPortsKeepNominalPath": false,
+            "elevatorReservedCells": 0,
+            "doorRoomEndpoints": 0,
+            "nominalWallEndpointCells": 5
+          },
+          "roomInteriorCellCollisionStatus": "UNKNOWN_NO_VALIDATED_ROOM_VOLUME_MASK",
+          "physicalStairAccessVerified": false,
+          "physicalWallJoinVerified": false,
+          "physicalHeadroomVerified": false,
+          "physicalSupportVerified": false
+        },
+        {
+          "level": 4,
+          "offset": {
+            "dx": -1,
+            "dz": 1
+          },
+          "shaftCells": 9,
+          "shiftedOpeningCells": 2,
+          "originalFloorCells": 400,
+          "candidateFloorCells": 398,
+          "candidateRectangleCount": 7,
+          "shiftedOpeningBoundaryAdjacentCells": 0,
+          "shiftedOpeningCellsLocal": [
+            {
+              "x": 13,
+              "z": 18
+            },
+            {
+              "x": 13,
+              "z": 19
+            }
+          ],
+          "collisions": {
+            "corridorCellsDisplaced": 2,
+            "displacedCorridorCellKeys": [
+              "11,18",
+              "12,20"
+            ],
+            "existingDoorHallCellsOverlapped": 0,
+            "doorPortsWithoutNominalStairPath": 1,
+            "corridorComponentsAfter": 4,
+            "componentsAdjacentToShiftedShaft": 3,
+            "allDoorPortsKeepNominalPath": false,
+            "elevatorReservedCells": 0,
+            "doorRoomEndpoints": 0,
+            "nominalWallEndpointCells": 5
+          },
+          "roomInteriorCellCollisionStatus": "UNKNOWN_NO_VALIDATED_ROOM_VOLUME_MASK",
+          "physicalStairAccessVerified": false,
+          "physicalWallJoinVerified": false,
+          "physicalHeadroomVerified": false,
+          "physicalSupportVerified": false
+        },
+        {
+          "level": 5,
+          "offset": {
+            "dx": -1,
+            "dz": 1
+          },
+          "shaftCells": 9,
+          "shiftedOpeningCells": 2,
+          "originalFloorCells": 400,
+          "candidateFloorCells": 398,
+          "candidateRectangleCount": 7,
+          "shiftedOpeningBoundaryAdjacentCells": 0,
+          "shiftedOpeningCellsLocal": [
+            {
+              "x": 13,
+              "z": 18
+            },
+            {
+              "x": 13,
+              "z": 19
+            }
+          ],
+          "collisions": {
+            "corridorCellsDisplaced": 2,
+            "displacedCorridorCellKeys": [
+              "11,18",
+              "12,20"
+            ],
+            "existingDoorHallCellsOverlapped": 0,
+            "doorPortsWithoutNominalStairPath": 1,
+            "corridorComponentsAfter": 4,
+            "componentsAdjacentToShiftedShaft": 3,
+            "allDoorPortsKeepNominalPath": false,
+            "elevatorReservedCells": 0,
+            "doorRoomEndpoints": 0,
+            "nominalWallEndpointCells": 5
+          },
+          "roomInteriorCellCollisionStatus": "UNKNOWN_NO_VALIDATED_ROOM_VOLUME_MASK",
+          "physicalStairAccessVerified": false,
+          "physicalWallJoinVerified": false,
+          "physicalHeadroomVerified": false,
+          "physicalSupportVerified": false
+        },
+        {
+          "level": 6,
+          "offset": {
+            "dx": -1,
+            "dz": 1
+          },
+          "shaftCells": 9,
+          "shiftedOpeningCells": 2,
+          "originalFloorCells": 400,
+          "candidateFloorCells": 398,
+          "candidateRectangleCount": 7,
+          "shiftedOpeningBoundaryAdjacentCells": 0,
+          "shiftedOpeningCellsLocal": [
+            {
+              "x": 13,
+              "z": 18
+            },
+            {
+              "x": 13,
+              "z": 19
+            }
+          ],
+          "collisions": {
+            "corridorCellsDisplaced": 2,
+            "displacedCorridorCellKeys": [
+              "11,18",
+              "12,20"
+            ],
+            "existingDoorHallCellsOverlapped": 0,
+            "doorPortsWithoutNominalStairPath": 1,
+            "corridorComponentsAfter": 4,
+            "componentsAdjacentToShiftedShaft": 3,
+            "allDoorPortsKeepNominalPath": false,
+            "elevatorReservedCells": 0,
+            "doorRoomEndpoints": 0,
+            "nominalWallEndpointCells": 5
+          },
+          "roomInteriorCellCollisionStatus": "UNKNOWN_NO_VALIDATED_ROOM_VOLUME_MASK",
+          "physicalStairAccessVerified": false,
+          "physicalWallJoinVerified": false,
+          "physicalHeadroomVerified": false,
+          "physicalSupportVerified": false
+        }
+      ],
+      "totals": {
+        "corridorCellsDisplaced": 10,
+        "doorPortsWithoutNominalStairPath": 5,
+        "doorHallCellsOverlapped": 0,
+        "elevatorReservedCells": 0,
+        "doorRoomEndpoints": 0,
+        "nominalWallEndpointCells": 25,
+        "boundaryAdjacentOpeningCells": 0,
+        "physicalStairLinksProven": 0,
+        "completeRoomVolumeValidated": false
+      },
+      "nonDestructiveCorridorLayout": false,
+      "nominalDoorToShaftConnectivityPreserved": false,
+      "verdict": "BLOCKED_REQUIRES_LAYOUT_REDESIGN",
+      "approved": false,
+      "autoSelected": false,
+      "applied": false
+    },
+    {
+      "offset": {
+        "dx": 0,
+        "dz": 2
+      },
+      "floors": [
+        {
+          "level": 2,
+          "offset": {
+            "dx": 0,
+            "dz": 2
+          },
+          "shaftCells": 9,
+          "shiftedOpeningCells": 2,
+          "originalFloorCells": 400,
+          "candidateFloorCells": 398,
+          "candidateRectangleCount": 7,
+          "shiftedOpeningBoundaryAdjacentCells": 0,
+          "shiftedOpeningCellsLocal": [
+            {
+              "x": 14,
+              "z": 19
+            },
+            {
+              "x": 14,
+              "z": 20
+            }
+          ],
+          "collisions": {
+            "corridorCellsDisplaced": 2,
+            "displacedCorridorCellKeys": [
+              "12,20",
+              "12,21"
+            ],
+            "existingDoorHallCellsOverlapped": 0,
+            "doorPortsWithoutNominalStairPath": 13,
+            "corridorComponentsAfter": 2,
+            "componentsAdjacentToShiftedShaft": 0,
+            "allDoorPortsKeepNominalPath": false,
+            "elevatorReservedCells": 0,
+            "doorRoomEndpoints": 0,
+            "nominalWallEndpointCells": 6
+          },
+          "roomInteriorCellCollisionStatus": "UNKNOWN_NO_VALIDATED_ROOM_VOLUME_MASK",
+          "physicalStairAccessVerified": false,
+          "physicalWallJoinVerified": false,
+          "physicalHeadroomVerified": false,
+          "physicalSupportVerified": false
+        },
+        {
+          "level": 3,
+          "offset": {
+            "dx": 0,
+            "dz": 2
+          },
+          "shaftCells": 9,
+          "shiftedOpeningCells": 2,
+          "originalFloorCells": 400,
+          "candidateFloorCells": 398,
+          "candidateRectangleCount": 7,
+          "shiftedOpeningBoundaryAdjacentCells": 0,
+          "shiftedOpeningCellsLocal": [
+            {
+              "x": 14,
+              "z": 19
+            },
+            {
+              "x": 14,
+              "z": 20
+            }
+          ],
+          "collisions": {
+            "corridorCellsDisplaced": 2,
+            "displacedCorridorCellKeys": [
+              "12,20",
+              "12,21"
+            ],
+            "existingDoorHallCellsOverlapped": 0,
+            "doorPortsWithoutNominalStairPath": 13,
+            "corridorComponentsAfter": 2,
+            "componentsAdjacentToShiftedShaft": 0,
+            "allDoorPortsKeepNominalPath": false,
+            "elevatorReservedCells": 0,
+            "doorRoomEndpoints": 0,
+            "nominalWallEndpointCells": 6
+          },
+          "roomInteriorCellCollisionStatus": "UNKNOWN_NO_VALIDATED_ROOM_VOLUME_MASK",
+          "physicalStairAccessVerified": false,
+          "physicalWallJoinVerified": false,
+          "physicalHeadroomVerified": false,
+          "physicalSupportVerified": false
+        },
+        {
+          "level": 4,
+          "offset": {
+            "dx": 0,
+            "dz": 2
+          },
+          "shaftCells": 9,
+          "shiftedOpeningCells": 2,
+          "originalFloorCells": 400,
+          "candidateFloorCells": 398,
+          "candidateRectangleCount": 7,
+          "shiftedOpeningBoundaryAdjacentCells": 0,
+          "shiftedOpeningCellsLocal": [
+            {
+              "x": 14,
+              "z": 19
+            },
+            {
+              "x": 14,
+              "z": 20
+            }
+          ],
+          "collisions": {
+            "corridorCellsDisplaced": 2,
+            "displacedCorridorCellKeys": [
+              "12,20",
+              "12,21"
+            ],
+            "existingDoorHallCellsOverlapped": 0,
+            "doorPortsWithoutNominalStairPath": 13,
+            "corridorComponentsAfter": 2,
+            "componentsAdjacentToShiftedShaft": 0,
+            "allDoorPortsKeepNominalPath": false,
+            "elevatorReservedCells": 0,
+            "doorRoomEndpoints": 0,
+            "nominalWallEndpointCells": 6
+          },
+          "roomInteriorCellCollisionStatus": "UNKNOWN_NO_VALIDATED_ROOM_VOLUME_MASK",
+          "physicalStairAccessVerified": false,
+          "physicalWallJoinVerified": false,
+          "physicalHeadroomVerified": false,
+          "physicalSupportVerified": false
+        },
+        {
+          "level": 5,
+          "offset": {
+            "dx": 0,
+            "dz": 2
+          },
+          "shaftCells": 9,
+          "shiftedOpeningCells": 2,
+          "originalFloorCells": 400,
+          "candidateFloorCells": 398,
+          "candidateRectangleCount": 7,
+          "shiftedOpeningBoundaryAdjacentCells": 0,
+          "shiftedOpeningCellsLocal": [
+            {
+              "x": 14,
+              "z": 19
+            },
+            {
+              "x": 14,
+              "z": 20
+            }
+          ],
+          "collisions": {
+            "corridorCellsDisplaced": 2,
+            "displacedCorridorCellKeys": [
+              "12,20",
+              "12,21"
+            ],
+            "existingDoorHallCellsOverlapped": 0,
+            "doorPortsWithoutNominalStairPath": 13,
+            "corridorComponentsAfter": 2,
+            "componentsAdjacentToShiftedShaft": 0,
+            "allDoorPortsKeepNominalPath": false,
+            "elevatorReservedCells": 0,
+            "doorRoomEndpoints": 0,
+            "nominalWallEndpointCells": 6
+          },
+          "roomInteriorCellCollisionStatus": "UNKNOWN_NO_VALIDATED_ROOM_VOLUME_MASK",
+          "physicalStairAccessVerified": false,
+          "physicalWallJoinVerified": false,
+          "physicalHeadroomVerified": false,
+          "physicalSupportVerified": false
+        },
+        {
+          "level": 6,
+          "offset": {
+            "dx": 0,
+            "dz": 2
+          },
+          "shaftCells": 9,
+          "shiftedOpeningCells": 2,
+          "originalFloorCells": 400,
+          "candidateFloorCells": 398,
+          "candidateRectangleCount": 7,
+          "shiftedOpeningBoundaryAdjacentCells": 0,
+          "shiftedOpeningCellsLocal": [
+            {
+              "x": 14,
+              "z": 19
+            },
+            {
+              "x": 14,
+              "z": 20
+            }
+          ],
+          "collisions": {
+            "corridorCellsDisplaced": 2,
+            "displacedCorridorCellKeys": [
+              "12,20",
+              "12,21"
+            ],
+            "existingDoorHallCellsOverlapped": 0,
+            "doorPortsWithoutNominalStairPath": 13,
+            "corridorComponentsAfter": 2,
+            "componentsAdjacentToShiftedShaft": 0,
+            "allDoorPortsKeepNominalPath": false,
+            "elevatorReservedCells": 0,
+            "doorRoomEndpoints": 0,
+            "nominalWallEndpointCells": 6
+          },
+          "roomInteriorCellCollisionStatus": "UNKNOWN_NO_VALIDATED_ROOM_VOLUME_MASK",
+          "physicalStairAccessVerified": false,
+          "physicalWallJoinVerified": false,
+          "physicalHeadroomVerified": false,
+          "physicalSupportVerified": false
+        }
+      ],
+      "totals": {
+        "corridorCellsDisplaced": 10,
+        "doorPortsWithoutNominalStairPath": 65,
+        "doorHallCellsOverlapped": 0,
+        "elevatorReservedCells": 0,
+        "doorRoomEndpoints": 0,
+        "nominalWallEndpointCells": 30,
+        "boundaryAdjacentOpeningCells": 0,
+        "physicalStairLinksProven": 0,
+        "completeRoomVolumeValidated": false
+      },
+      "nonDestructiveCorridorLayout": false,
+      "nominalDoorToShaftConnectivityPreserved": false,
+      "verdict": "BLOCKED_REQUIRES_LAYOUT_REDESIGN",
+      "approved": false,
+      "autoSelected": false,
+      "applied": false
+    },
+    {
+      "offset": {
+        "dx": 1,
+        "dz": 1
+      },
+      "floors": [
+        {
+          "level": 2,
+          "offset": {
+            "dx": 1,
+            "dz": 1
+          },
+          "shaftCells": 9,
+          "shiftedOpeningCells": 2,
+          "originalFloorCells": 400,
+          "candidateFloorCells": 398,
+          "candidateRectangleCount": 7,
+          "shiftedOpeningBoundaryAdjacentCells": 0,
+          "shiftedOpeningCellsLocal": [
+            {
+              "x": 15,
+              "z": 18
+            },
+            {
+              "x": 15,
+              "z": 19
+            }
+          ],
+          "collisions": {
+            "corridorCellsDisplaced": 1,
+            "displacedCorridorCellKeys": [
+              "15,18"
+            ],
+            "existingDoorHallCellsOverlapped": 0,
+            "doorPortsWithoutNominalStairPath": 12,
+            "corridorComponentsAfter": 3,
+            "componentsAdjacentToShiftedShaft": 2,
+            "allDoorPortsKeepNominalPath": false,
+            "elevatorReservedCells": 0,
+            "doorRoomEndpoints": 0,
+            "nominalWallEndpointCells": 5
+          },
+          "roomInteriorCellCollisionStatus": "UNKNOWN_NO_VALIDATED_ROOM_VOLUME_MASK",
+          "physicalStairAccessVerified": false,
+          "physicalWallJoinVerified": false,
+          "physicalHeadroomVerified": false,
+          "physicalSupportVerified": false
+        },
+        {
+          "level": 3,
+          "offset": {
+            "dx": 1,
+            "dz": 1
+          },
+          "shaftCells": 9,
+          "shiftedOpeningCells": 2,
+          "originalFloorCells": 400,
+          "candidateFloorCells": 398,
+          "candidateRectangleCount": 7,
+          "shiftedOpeningBoundaryAdjacentCells": 0,
+          "shiftedOpeningCellsLocal": [
+            {
+              "x": 15,
+              "z": 18
+            },
+            {
+              "x": 15,
+              "z": 19
+            }
+          ],
+          "collisions": {
+            "corridorCellsDisplaced": 1,
+            "displacedCorridorCellKeys": [
+              "15,18"
+            ],
+            "existingDoorHallCellsOverlapped": 0,
+            "doorPortsWithoutNominalStairPath": 12,
+            "corridorComponentsAfter": 3,
+            "componentsAdjacentToShiftedShaft": 2,
+            "allDoorPortsKeepNominalPath": false,
+            "elevatorReservedCells": 0,
+            "doorRoomEndpoints": 0,
+            "nominalWallEndpointCells": 5
+          },
+          "roomInteriorCellCollisionStatus": "UNKNOWN_NO_VALIDATED_ROOM_VOLUME_MASK",
+          "physicalStairAccessVerified": false,
+          "physicalWallJoinVerified": false,
+          "physicalHeadroomVerified": false,
+          "physicalSupportVerified": false
+        },
+        {
+          "level": 4,
+          "offset": {
+            "dx": 1,
+            "dz": 1
+          },
+          "shaftCells": 9,
+          "shiftedOpeningCells": 2,
+          "originalFloorCells": 400,
+          "candidateFloorCells": 398,
+          "candidateRectangleCount": 7,
+          "shiftedOpeningBoundaryAdjacentCells": 0,
+          "shiftedOpeningCellsLocal": [
+            {
+              "x": 15,
+              "z": 18
+            },
+            {
+              "x": 15,
+              "z": 19
+            }
+          ],
+          "collisions": {
+            "corridorCellsDisplaced": 1,
+            "displacedCorridorCellKeys": [
+              "15,18"
+            ],
+            "existingDoorHallCellsOverlapped": 0,
+            "doorPortsWithoutNominalStairPath": 12,
+            "corridorComponentsAfter": 3,
+            "componentsAdjacentToShiftedShaft": 2,
+            "allDoorPortsKeepNominalPath": false,
+            "elevatorReservedCells": 0,
+            "doorRoomEndpoints": 0,
+            "nominalWallEndpointCells": 5
+          },
+          "roomInteriorCellCollisionStatus": "UNKNOWN_NO_VALIDATED_ROOM_VOLUME_MASK",
+          "physicalStairAccessVerified": false,
+          "physicalWallJoinVerified": false,
+          "physicalHeadroomVerified": false,
+          "physicalSupportVerified": false
+        },
+        {
+          "level": 5,
+          "offset": {
+            "dx": 1,
+            "dz": 1
+          },
+          "shaftCells": 9,
+          "shiftedOpeningCells": 2,
+          "originalFloorCells": 400,
+          "candidateFloorCells": 398,
+          "candidateRectangleCount": 7,
+          "shiftedOpeningBoundaryAdjacentCells": 0,
+          "shiftedOpeningCellsLocal": [
+            {
+              "x": 15,
+              "z": 18
+            },
+            {
+              "x": 15,
+              "z": 19
+            }
+          ],
+          "collisions": {
+            "corridorCellsDisplaced": 1,
+            "displacedCorridorCellKeys": [
+              "15,18"
+            ],
+            "existingDoorHallCellsOverlapped": 0,
+            "doorPortsWithoutNominalStairPath": 12,
+            "corridorComponentsAfter": 3,
+            "componentsAdjacentToShiftedShaft": 2,
+            "allDoorPortsKeepNominalPath": false,
+            "elevatorReservedCells": 0,
+            "doorRoomEndpoints": 0,
+            "nominalWallEndpointCells": 5
+          },
+          "roomInteriorCellCollisionStatus": "UNKNOWN_NO_VALIDATED_ROOM_VOLUME_MASK",
+          "physicalStairAccessVerified": false,
+          "physicalWallJoinVerified": false,
+          "physicalHeadroomVerified": false,
+          "physicalSupportVerified": false
+        },
+        {
+          "level": 6,
+          "offset": {
+            "dx": 1,
+            "dz": 1
+          },
+          "shaftCells": 9,
+          "shiftedOpeningCells": 2,
+          "originalFloorCells": 400,
+          "candidateFloorCells": 398,
+          "candidateRectangleCount": 7,
+          "shiftedOpeningBoundaryAdjacentCells": 0,
+          "shiftedOpeningCellsLocal": [
+            {
+              "x": 15,
+              "z": 18
+            },
+            {
+              "x": 15,
+              "z": 19
+            }
+          ],
+          "collisions": {
+            "corridorCellsDisplaced": 1,
+            "displacedCorridorCellKeys": [
+              "15,18"
+            ],
+            "existingDoorHallCellsOverlapped": 0,
+            "doorPortsWithoutNominalStairPath": 12,
+            "corridorComponentsAfter": 3,
+            "componentsAdjacentToShiftedShaft": 2,
+            "allDoorPortsKeepNominalPath": false,
+            "elevatorReservedCells": 0,
+            "doorRoomEndpoints": 0,
+            "nominalWallEndpointCells": 5
+          },
+          "roomInteriorCellCollisionStatus": "UNKNOWN_NO_VALIDATED_ROOM_VOLUME_MASK",
+          "physicalStairAccessVerified": false,
+          "physicalWallJoinVerified": false,
+          "physicalHeadroomVerified": false,
+          "physicalSupportVerified": false
+        }
+      ],
+      "totals": {
+        "corridorCellsDisplaced": 5,
+        "doorPortsWithoutNominalStairPath": 60,
+        "doorHallCellsOverlapped": 0,
+        "elevatorReservedCells": 0,
+        "doorRoomEndpoints": 0,
+        "nominalWallEndpointCells": 25,
+        "boundaryAdjacentOpeningCells": 0,
+        "physicalStairLinksProven": 0,
+        "completeRoomVolumeValidated": false
+      },
+      "nonDestructiveCorridorLayout": false,
+      "nominalDoorToShaftConnectivityPreserved": false,
+      "verdict": "BLOCKED_REQUIRES_LAYOUT_REDESIGN",
+      "approved": false,
+      "autoSelected": false,
+      "applied": false
+    },
+    {
+      "offset": {
+        "dx": -1,
+        "dz": 0
+      },
+      "floors": [
+        {
+          "level": 2,
+          "offset": {
+            "dx": -1,
+            "dz": 0
+          },
+          "shaftCells": 9,
+          "shiftedOpeningCells": 2,
+          "originalFloorCells": 400,
+          "candidateFloorCells": 398,
+          "candidateRectangleCount": 6,
+          "shiftedOpeningBoundaryAdjacentCells": 1,
+          "shiftedOpeningCellsLocal": [
+            {
+              "x": 13,
+              "z": 17
+            },
+            {
+              "x": 13,
+              "z": 18
+            }
+          ],
+          "collisions": {
+            "corridorCellsDisplaced": 2,
+            "displacedCorridorCellKeys": [
+              "11,17",
+              "11,18"
+            ],
+            "existingDoorHallCellsOverlapped": 0,
+            "doorPortsWithoutNominalStairPath": 1,
+            "corridorComponentsAfter": 3,
+            "componentsAdjacentToShiftedShaft": 2,
+            "allDoorPortsKeepNominalPath": false,
+            "elevatorReservedCells": 0,
+            "doorRoomEndpoints": 0,
+            "nominalWallEndpointCells": 3
+          },
+          "roomInteriorCellCollisionStatus": "UNKNOWN_NO_VALIDATED_ROOM_VOLUME_MASK",
+          "physicalStairAccessVerified": false,
+          "physicalWallJoinVerified": false,
+          "physicalHeadroomVerified": false,
+          "physicalSupportVerified": false
+        },
+        {
+          "level": 3,
+          "offset": {
+            "dx": -1,
+            "dz": 0
+          },
+          "shaftCells": 9,
+          "shiftedOpeningCells": 2,
+          "originalFloorCells": 400,
+          "candidateFloorCells": 398,
+          "candidateRectangleCount": 6,
+          "shiftedOpeningBoundaryAdjacentCells": 1,
+          "shiftedOpeningCellsLocal": [
+            {
+              "x": 13,
+              "z": 17
+            },
+            {
+              "x": 13,
+              "z": 18
+            }
+          ],
+          "collisions": {
+            "corridorCellsDisplaced": 2,
+            "displacedCorridorCellKeys": [
+              "11,17",
+              "11,18"
+            ],
+            "existingDoorHallCellsOverlapped": 0,
+            "doorPortsWithoutNominalStairPath": 1,
+            "corridorComponentsAfter": 3,
+            "componentsAdjacentToShiftedShaft": 2,
+            "allDoorPortsKeepNominalPath": false,
+            "elevatorReservedCells": 0,
+            "doorRoomEndpoints": 0,
+            "nominalWallEndpointCells": 3
+          },
+          "roomInteriorCellCollisionStatus": "UNKNOWN_NO_VALIDATED_ROOM_VOLUME_MASK",
+          "physicalStairAccessVerified": false,
+          "physicalWallJoinVerified": false,
+          "physicalHeadroomVerified": false,
+          "physicalSupportVerified": false
+        },
+        {
+          "level": 4,
+          "offset": {
+            "dx": -1,
+            "dz": 0
+          },
+          "shaftCells": 9,
+          "shiftedOpeningCells": 2,
+          "originalFloorCells": 400,
+          "candidateFloorCells": 398,
+          "candidateRectangleCount": 6,
+          "shiftedOpeningBoundaryAdjacentCells": 1,
+          "shiftedOpeningCellsLocal": [
+            {
+              "x": 13,
+              "z": 17
+            },
+            {
+              "x": 13,
+              "z": 18
+            }
+          ],
+          "collisions": {
+            "corridorCellsDisplaced": 2,
+            "displacedCorridorCellKeys": [
+              "11,17",
+              "11,18"
+            ],
+            "existingDoorHallCellsOverlapped": 0,
+            "doorPortsWithoutNominalStairPath": 1,
+            "corridorComponentsAfter": 3,
+            "componentsAdjacentToShiftedShaft": 2,
+            "allDoorPortsKeepNominalPath": false,
+            "elevatorReservedCells": 0,
+            "doorRoomEndpoints": 0,
+            "nominalWallEndpointCells": 3
+          },
+          "roomInteriorCellCollisionStatus": "UNKNOWN_NO_VALIDATED_ROOM_VOLUME_MASK",
+          "physicalStairAccessVerified": false,
+          "physicalWallJoinVerified": false,
+          "physicalHeadroomVerified": false,
+          "physicalSupportVerified": false
+        },
+        {
+          "level": 5,
+          "offset": {
+            "dx": -1,
+            "dz": 0
+          },
+          "shaftCells": 9,
+          "shiftedOpeningCells": 2,
+          "originalFloorCells": 400,
+          "candidateFloorCells": 398,
+          "candidateRectangleCount": 6,
+          "shiftedOpeningBoundaryAdjacentCells": 1,
+          "shiftedOpeningCellsLocal": [
+            {
+              "x": 13,
+              "z": 17
+            },
+            {
+              "x": 13,
+              "z": 18
+            }
+          ],
+          "collisions": {
+            "corridorCellsDisplaced": 2,
+            "displacedCorridorCellKeys": [
+              "11,17",
+              "11,18"
+            ],
+            "existingDoorHallCellsOverlapped": 0,
+            "doorPortsWithoutNominalStairPath": 1,
+            "corridorComponentsAfter": 3,
+            "componentsAdjacentToShiftedShaft": 2,
+            "allDoorPortsKeepNominalPath": false,
+            "elevatorReservedCells": 0,
+            "doorRoomEndpoints": 0,
+            "nominalWallEndpointCells": 3
+          },
+          "roomInteriorCellCollisionStatus": "UNKNOWN_NO_VALIDATED_ROOM_VOLUME_MASK",
+          "physicalStairAccessVerified": false,
+          "physicalWallJoinVerified": false,
+          "physicalHeadroomVerified": false,
+          "physicalSupportVerified": false
+        },
+        {
+          "level": 6,
+          "offset": {
+            "dx": -1,
+            "dz": 0
+          },
+          "shaftCells": 9,
+          "shiftedOpeningCells": 2,
+          "originalFloorCells": 400,
+          "candidateFloorCells": 398,
+          "candidateRectangleCount": 6,
+          "shiftedOpeningBoundaryAdjacentCells": 1,
+          "shiftedOpeningCellsLocal": [
+            {
+              "x": 13,
+              "z": 17
+            },
+            {
+              "x": 13,
+              "z": 18
+            }
+          ],
+          "collisions": {
+            "corridorCellsDisplaced": 2,
+            "displacedCorridorCellKeys": [
+              "11,17",
+              "11,18"
+            ],
+            "existingDoorHallCellsOverlapped": 0,
+            "doorPortsWithoutNominalStairPath": 1,
+            "corridorComponentsAfter": 3,
+            "componentsAdjacentToShiftedShaft": 2,
+            "allDoorPortsKeepNominalPath": false,
+            "elevatorReservedCells": 0,
+            "doorRoomEndpoints": 0,
+            "nominalWallEndpointCells": 3
+          },
+          "roomInteriorCellCollisionStatus": "UNKNOWN_NO_VALIDATED_ROOM_VOLUME_MASK",
+          "physicalStairAccessVerified": false,
+          "physicalWallJoinVerified": false,
+          "physicalHeadroomVerified": false,
+          "physicalSupportVerified": false
+        }
+      ],
+      "totals": {
+        "corridorCellsDisplaced": 10,
+        "doorPortsWithoutNominalStairPath": 5,
+        "doorHallCellsOverlapped": 0,
+        "elevatorReservedCells": 0,
+        "doorRoomEndpoints": 0,
+        "nominalWallEndpointCells": 15,
+        "boundaryAdjacentOpeningCells": 5,
+        "physicalStairLinksProven": 0,
+        "completeRoomVolumeValidated": false
+      },
+      "nonDestructiveCorridorLayout": false,
+      "nominalDoorToShaftConnectivityPreserved": false,
+      "verdict": "BLOCKED_REQUIRES_LAYOUT_REDESIGN",
+      "approved": false,
+      "autoSelected": false,
+      "applied": false
+    },
+    {
+      "offset": {
+        "dx": 1,
+        "dz": 0
+      },
+      "floors": [
+        {
+          "level": 2,
+          "offset": {
+            "dx": 1,
+            "dz": 0
+          },
+          "shaftCells": 9,
+          "shiftedOpeningCells": 2,
+          "originalFloorCells": 400,
+          "candidateFloorCells": 398,
+          "candidateRectangleCount": 6,
+          "shiftedOpeningBoundaryAdjacentCells": 1,
+          "shiftedOpeningCellsLocal": [
+            {
+              "x": 15,
+              "z": 17
+            },
+            {
+              "x": 15,
+              "z": 18
+            }
+          ],
+          "collisions": {
+            "corridorCellsDisplaced": 2,
+            "displacedCorridorCellKeys": [
+              "15,17",
+              "15,18"
+            ],
+            "existingDoorHallCellsOverlapped": 0,
+            "doorPortsWithoutNominalStairPath": 12,
+            "corridorComponentsAfter": 3,
+            "componentsAdjacentToShiftedShaft": 1,
+            "allDoorPortsKeepNominalPath": false,
+            "elevatorReservedCells": 0,
+            "doorRoomEndpoints": 0,
+            "nominalWallEndpointCells": 3
+          },
+          "roomInteriorCellCollisionStatus": "UNKNOWN_NO_VALIDATED_ROOM_VOLUME_MASK",
+          "physicalStairAccessVerified": false,
+          "physicalWallJoinVerified": false,
+          "physicalHeadroomVerified": false,
+          "physicalSupportVerified": false
+        },
+        {
+          "level": 3,
+          "offset": {
+            "dx": 1,
+            "dz": 0
+          },
+          "shaftCells": 9,
+          "shiftedOpeningCells": 2,
+          "originalFloorCells": 400,
+          "candidateFloorCells": 398,
+          "candidateRectangleCount": 6,
+          "shiftedOpeningBoundaryAdjacentCells": 1,
+          "shiftedOpeningCellsLocal": [
+            {
+              "x": 15,
+              "z": 17
+            },
+            {
+              "x": 15,
+              "z": 18
+            }
+          ],
+          "collisions": {
+            "corridorCellsDisplaced": 2,
+            "displacedCorridorCellKeys": [
+              "15,17",
+              "15,18"
+            ],
+            "existingDoorHallCellsOverlapped": 0,
+            "doorPortsWithoutNominalStairPath": 12,
+            "corridorComponentsAfter": 3,
+            "componentsAdjacentToShiftedShaft": 1,
+            "allDoorPortsKeepNominalPath": false,
+            "elevatorReservedCells": 0,
+            "doorRoomEndpoints": 0,
+            "nominalWallEndpointCells": 3
+          },
+          "roomInteriorCellCollisionStatus": "UNKNOWN_NO_VALIDATED_ROOM_VOLUME_MASK",
+          "physicalStairAccessVerified": false,
+          "physicalWallJoinVerified": false,
+          "physicalHeadroomVerified": false,
+          "physicalSupportVerified": false
+        },
+        {
+          "level": 4,
+          "offset": {
+            "dx": 1,
+            "dz": 0
+          },
+          "shaftCells": 9,
+          "shiftedOpeningCells": 2,
+          "originalFloorCells": 400,
+          "candidateFloorCells": 398,
+          "candidateRectangleCount": 6,
+          "shiftedOpeningBoundaryAdjacentCells": 1,
+          "shiftedOpeningCellsLocal": [
+            {
+              "x": 15,
+              "z": 17
+            },
+            {
+              "x": 15,
+              "z": 18
+            }
+          ],
+          "collisions": {
+            "corridorCellsDisplaced": 2,
+            "displacedCorridorCellKeys": [
+              "15,17",
+              "15,18"
+            ],
+            "existingDoorHallCellsOverlapped": 0,
+            "doorPortsWithoutNominalStairPath": 12,
+            "corridorComponentsAfter": 3,
+            "componentsAdjacentToShiftedShaft": 1,
+            "allDoorPortsKeepNominalPath": false,
+            "elevatorReservedCells": 0,
+            "doorRoomEndpoints": 0,
+            "nominalWallEndpointCells": 3
+          },
+          "roomInteriorCellCollisionStatus": "UNKNOWN_NO_VALIDATED_ROOM_VOLUME_MASK",
+          "physicalStairAccessVerified": false,
+          "physicalWallJoinVerified": false,
+          "physicalHeadroomVerified": false,
+          "physicalSupportVerified": false
+        },
+        {
+          "level": 5,
+          "offset": {
+            "dx": 1,
+            "dz": 0
+          },
+          "shaftCells": 9,
+          "shiftedOpeningCells": 2,
+          "originalFloorCells": 400,
+          "candidateFloorCells": 398,
+          "candidateRectangleCount": 6,
+          "shiftedOpeningBoundaryAdjacentCells": 1,
+          "shiftedOpeningCellsLocal": [
+            {
+              "x": 15,
+              "z": 17
+            },
+            {
+              "x": 15,
+              "z": 18
+            }
+          ],
+          "collisions": {
+            "corridorCellsDisplaced": 2,
+            "displacedCorridorCellKeys": [
+              "15,17",
+              "15,18"
+            ],
+            "existingDoorHallCellsOverlapped": 0,
+            "doorPortsWithoutNominalStairPath": 12,
+            "corridorComponentsAfter": 3,
+            "componentsAdjacentToShiftedShaft": 1,
+            "allDoorPortsKeepNominalPath": false,
+            "elevatorReservedCells": 0,
+            "doorRoomEndpoints": 0,
+            "nominalWallEndpointCells": 3
+          },
+          "roomInteriorCellCollisionStatus": "UNKNOWN_NO_VALIDATED_ROOM_VOLUME_MASK",
+          "physicalStairAccessVerified": false,
+          "physicalWallJoinVerified": false,
+          "physicalHeadroomVerified": false,
+          "physicalSupportVerified": false
+        },
+        {
+          "level": 6,
+          "offset": {
+            "dx": 1,
+            "dz": 0
+          },
+          "shaftCells": 9,
+          "shiftedOpeningCells": 2,
+          "originalFloorCells": 400,
+          "candidateFloorCells": 398,
+          "candidateRectangleCount": 6,
+          "shiftedOpeningBoundaryAdjacentCells": 1,
+          "shiftedOpeningCellsLocal": [
+            {
+              "x": 15,
+              "z": 17
+            },
+            {
+              "x": 15,
+              "z": 18
+            }
+          ],
+          "collisions": {
+            "corridorCellsDisplaced": 2,
+            "displacedCorridorCellKeys": [
+              "15,17",
+              "15,18"
+            ],
+            "existingDoorHallCellsOverlapped": 0,
+            "doorPortsWithoutNominalStairPath": 12,
+            "corridorComponentsAfter": 3,
+            "componentsAdjacentToShiftedShaft": 1,
+            "allDoorPortsKeepNominalPath": false,
+            "elevatorReservedCells": 0,
+            "doorRoomEndpoints": 0,
+            "nominalWallEndpointCells": 3
+          },
+          "roomInteriorCellCollisionStatus": "UNKNOWN_NO_VALIDATED_ROOM_VOLUME_MASK",
+          "physicalStairAccessVerified": false,
+          "physicalWallJoinVerified": false,
+          "physicalHeadroomVerified": false,
+          "physicalSupportVerified": false
+        }
+      ],
+      "totals": {
+        "corridorCellsDisplaced": 10,
+        "doorPortsWithoutNominalStairPath": 60,
+        "doorHallCellsOverlapped": 0,
+        "elevatorReservedCells": 0,
+        "doorRoomEndpoints": 0,
+        "nominalWallEndpointCells": 15,
+        "boundaryAdjacentOpeningCells": 5,
+        "physicalStairLinksProven": 0,
+        "completeRoomVolumeValidated": false
+      },
+      "nonDestructiveCorridorLayout": false,
+      "nominalDoorToShaftConnectivityPreserved": false,
+      "verdict": "BLOCKED_REQUIRES_LAYOUT_REDESIGN",
+      "approved": false,
+      "autoSelected": false,
+      "applied": false
+    }
+  ],
+  "totals": {
+    "proposals": 6,
+    "levelsReviewed": 30,
+    "zeroVoidBoundaryCandidates": 4,
+    "optionsPreservingNominalDoorPaths": 1,
+    "optionsWithoutCorridorDisplacement": 0,
+    "proposalCorridorDisplacedCells": 50,
+    "proposalDoorPathsLost": 195,
+    "approvedProposals": 0,
+    "operationsEmitted": 0
+  },
+  "limitations": [
+    "STAIR_SHIFT_INTERSECTS_EXISTING_CORRIDOR",
+    "ROOM_INTERIOR_VOLUME_NOT_PROVEN",
+    "DOOR_STATES_UNVERIFIED",
+    "FLOOR_SUPPORT_AND_HEADROOM_NOT_VERIFIED",
+    "WALL_ENDPOINT_INTERSECTION_NOT_PHYSICAL_COLLISION",
+    "NO_REDESIGNED_CORRIDOR_OR_SHAFT_ACCESS",
+    "NO_LIVE_ENGINE_OR_MINECRAFT_VALIDATION"
+  ],
+  "blockers": [
+    {
+      "id": "M4-01",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-02",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-03",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-04",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-05",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-06",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-07",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-08",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-09",
+      "status": "BLOCKED"
+    }
+  ],
+  "readiness": "NOT_PREPARED",
+  "deployment": "BLOCKED",
+  "application": "REVIEW_ONLY_NOT_APPLIED",
+  "safety": {
+    "constructionApproved": false,
+    "executionAllowed": false,
+    "notPrepared": true,
+    "projectFilesModified": false,
+    "existingWorldModified": false,
+    "legacyModified": false,
+    "frozenEvidenceModified": false,
+    "bridgeContact": false
+  },
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0,
+    "materialIds": [],
+    "worldCoordinates": null
+  },
+  "reportSha256": "9e47fcb754b50f311505186c592be6466d188d16f6e2f8fee0db51bc7fea3c79"
+}

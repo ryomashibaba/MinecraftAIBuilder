@@ -1,0 +1,18 @@
+{
+  "schema": "minecraftaibuilder-step8b-b20-source-reattest-v1",
+  "captureZipSha256": "62d1de7d0148d514fded1544c254a9beab4299018dc054aff353557df0809a1f",
+  "files": {
+    "engine/src/general-building-planner.js": "23be6e8b03827698fb890661f6fd0957a76ac4718f3347531121c8a7dc0450c8",
+    "engine/src/building-grammar.js": "71c0e2bda3e7a044285d681b38d9d4373e3c0aa417808a2f54c652d05ff47d1a",
+    "engine/src/architectural-quality.js": "5cadf22d51867a18fd35f6e9ec2e1318732eca2f2e666d2cfc4b2b32cbede530",
+    "modules/architectural-library.js": "19fa126051a687bfb5c5f6bdf199a6d42aa70b475d908dd38a99e9f354532eee",
+    "styles/urban_japanese.json": "cefb23009e7a96f8d5900e44242c5fa426646be64c5391048f52e29506f1ceec",
+    "engine/src/safety.js": "ef4f71ec968b46ce937d6b279f9cb5b9b7aecde7fd917a960e1716b72795e9fc",
+    "engine/src/build-anchor.js": "23bea262e90012fc6bfdd9f1407e1f7cb514f87862ad1c60b0431792f8ef056f"
+  },
+  "readOnlyVerification": "7_OF_7_PINNED_HASH_MATCH",
+  "runningProcessAttested": false,
+  "engineExecuted": false,
+  "bridgeContact": false,
+  "operations": 0
+}

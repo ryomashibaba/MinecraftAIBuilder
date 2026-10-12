@@ -1,0 +1,12 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {verifyB34FrozenB35,buildCorridorReviewB35,validateCorridorReviewB35} from '../runner/step8b-corridor-repair-b35.mjs';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const target=path.join(root,'reports/B35_CORRIDOR_REDESIGN_REPORT.json');
+if(fs.existsSync(target))throw Error('B35_REFUSE_OVERWRITE');
+verifyB34FrozenB35(root);
+const report=buildCorridorReviewB35(root);
+validateCorridorReviewB35(report,root);
+fs.writeFileSync(target,JSON.stringify(report,null,2)+'\n',{flag:'wx'});
+console.log('B35_REPORT_CREATED',JSON.stringify(report.totals));

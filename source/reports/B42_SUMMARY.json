@@ -1,0 +1,39 @@
+{
+  "schema": "minecraftaibuilder-step8b-b42-summary-v1",
+  "scope": "inert stair macro multi-system geometry gate",
+  "building": "apartment/candidate-01",
+  "totals": {
+    "buildings": 1,
+    "transitions": 5,
+    "symbolicRisers": 20,
+    "reviewFloorRestorations": 5,
+    "reviewFloorOpenings": 5,
+    "corridorCellsRetagged": 5,
+    "baselineDoorReachable": 60,
+    "reviewDoorReachable": 60,
+    "upperLandingDoorReachable": 5,
+    "potentialUpperConnectorNewCorridorCells": 35,
+    "potentialUpperConnectorWallOverlayCells": 20,
+    "floorCellsBefore": 1990,
+    "floorCellsAfter": 1990,
+    "physicalSupportVerified": 0,
+    "physicalPassageVerified": 0,
+    "certifiedStairStateBindings": 0,
+    "engineCalls": 0,
+    "buildOperations": 0
+  },
+  "criticalNewFinding": "Upper landing corridor reaches only one of 13 door interface reservations per upper level",
+  "geometricUpperConnector": "Seven non-corridor cells plus four symbolic wall overlays per level, not approved",
+  "regression": {
+    "newTests": 32,
+    "relatedTests": 112,
+    "failed": 0,
+    "skipped": 0
+  },
+  "sourceVerification": "B41 pinned hashes and B42 package manifest",
+  "windowsExecution": "NOT_PERFORMED",
+  "minecraftConstruction": "NOT_PERFORMED",
+  "readiness": "NOT_PREPARED",
+  "deployment": "BLOCKED",
+  "constructionOperations": 0
+}

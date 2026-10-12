@@ -1,0 +1,504 @@
+{
+  "schema": "minecraftaibuilder-step8b-b41-stair-redesign-v1",
+  "intent": "OFFLINE_NONEXECUTABLE_STAIRS_AND_EXPANDED_SHAFT_COMPARISON",
+  "provenance": {
+    "pins": {
+      "B40_FILE_SHA256.json": "d9257973ee3591c2404145021ca689fba17e7eee20c01c100c81ef812004ed6c",
+      "reports/B40_CROSSLEVEL_STAIR_AUDIT.json": "9bbfcdfa9aba64c3c43ccbf25616e464bfb029dbb04316e77b13fd874c549b25",
+      "reports/B17_INTERIOR_INTEGRATION_IR.json": "e04e8ca2789bd8b65548a10e98e940e9537a562ebbf38a63e456ac9b73fb425d",
+      "reports/B21_BLOCKSCALE_REVIEW.json": "2d7b1e3d71f252331dfe35e600411acc3354c43702e5b3db9fd9a5e0533932bc",
+      "reports/B31_FLOOR_DOOR_OVERLAY.json": "6d233d5ad09b8138650f65d46e0cf2d2ab143577d3862696b562a3857545c430"
+    },
+    "engineInvoked": false,
+    "worldAccess": false,
+    "bridgeContact": false,
+    "referenceDocs": [
+      "https://learn.microsoft.com/en-us/minecraft/creator/documents/voxelshapes?view=minecraft-bedrock-stable",
+      "https://learn.microsoft.com/en-us/minecraft/creator/reference/content/blockreference/examples/auxvaluetoblockstatemap?view=minecraft-bedrock-stable"
+    ]
+  },
+  "shapeContract": {
+    "example": "TWO_BOX_CULLING_PROXY_NOT_COLLISION_SHAPE",
+    "stairStateHints": [
+      "weirdo_direction",
+      "upside_down_bit"
+    ],
+    "stateValueMapCertified": false,
+    "engineBlockCatalogCertified": false,
+    "exactCollisionAndWalkabilityCertified": false
+  },
+  "baseline": {
+    "nominalRouteCount": 44,
+    "uniqueNominalRoutes": 7,
+    "commonNominalRoutes": 3,
+    "withTurningRises": 44,
+    "withReusedApproachCells": 14,
+    "minimumFourConsecutiveRiserSpan": 4,
+    "originalShaftWidth": 3,
+    "originalShaftDepth": 3,
+    "fourStraightRisersFitInsideOriginalShaft": false,
+    "physicalStairRoutesVerified": 0
+  },
+  "commonRouteExamples": [
+    {
+      "signature": "12,18|12,19|13,19|14,19|14,18|15,18",
+      "planarTurns": 3,
+      "risingTurns": 2,
+      "shapeReviewStatus": "TURNING_RISE_NEEDS_EXPLICIT_LANDING_OR_COLLISION_PROOF"
+    },
+    {
+      "signature": "12,18|13,18|13,19|14,19|14,18|15,18",
+      "planarTurns": 4,
+      "risingTurns": 3,
+      "shapeReviewStatus": "TURNING_RISE_NEEDS_EXPLICIT_LANDING_OR_COLLISION_PROOF"
+    },
+    {
+      "signature": "14,18|13,18|13,19|14,19|14,18|15,18",
+      "planarTurns": 4,
+      "risingTurns": 3,
+      "shapeReviewStatus": "REVISITS_PLANAR_CELL_VERTICAL_CLEARANCE_UNVERIFIED"
+    }
+  ],
+  "expandedStraightRun": [
+    {
+      "fromLevel": 1,
+      "toLevel": 2,
+      "corridorLeadIn": {
+        "x": 10,
+        "z": 18
+      },
+      "lowerCorridorReallocated": [
+        {
+          "x": 11,
+          "z": 18
+        }
+      ],
+      "straightTreads": [
+        {
+          "x": 11,
+          "y": 0,
+          "z": 18
+        },
+        {
+          "x": 12,
+          "y": 1,
+          "z": 18
+        },
+        {
+          "x": 13,
+          "y": 2,
+          "z": 18
+        },
+        {
+          "x": 14,
+          "y": 3,
+          "z": 18
+        }
+      ],
+      "upperLanding": {
+        "x": 15,
+        "z": 18
+      },
+      "proposedUpperFloorChanges": {
+        "restore": [
+          {
+            "x": 14,
+            "z": 17
+          }
+        ],
+        "open": [
+          {
+            "x": 13,
+            "z": 18
+          }
+        ]
+      },
+      "originalFloorCells": 398,
+      "proposedFloorCells": 398,
+      "originalFloorRectangles": 6,
+      "proposedFloorRectangles": 7,
+      "exactFloorMask": true,
+      "nominalConceptWallClashes": 0,
+      "nominalFloorHeadspaceClashes": 0,
+      "upperDoorEvReservationClashes": 0,
+      "baselineCorridorReachableCells": 117,
+      "alternateCorridorReachableCells": 115,
+      "baselineDoorReachableCount": 12,
+      "alternateDoorReachableCount": 12,
+      "totalDoorCount": 13,
+      "stairFootprintExpandsOriginalShaft": true,
+      "materialStatesVerified": false,
+      "installedStairSupportVerified": false,
+      "actualWalkabilityVerified": false,
+      "shapeReviewOnly": true,
+      "autoAdopted": false
+    },
+    {
+      "fromLevel": 2,
+      "toLevel": 3,
+      "corridorLeadIn": {
+        "x": 10,
+        "z": 18
+      },
+      "lowerCorridorReallocated": [
+        {
+          "x": 11,
+          "z": 18
+        }
+      ],
+      "straightTreads": [
+        {
+          "x": 11,
+          "y": 4,
+          "z": 18
+        },
+        {
+          "x": 12,
+          "y": 5,
+          "z": 18
+        },
+        {
+          "x": 13,
+          "y": 6,
+          "z": 18
+        },
+        {
+          "x": 14,
+          "y": 7,
+          "z": 18
+        }
+      ],
+      "upperLanding": {
+        "x": 15,
+        "z": 18
+      },
+      "proposedUpperFloorChanges": {
+        "restore": [
+          {
+            "x": 14,
+            "z": 17
+          }
+        ],
+        "open": [
+          {
+            "x": 13,
+            "z": 18
+          }
+        ]
+      },
+      "originalFloorCells": 398,
+      "proposedFloorCells": 398,
+      "originalFloorRectangles": 6,
+      "proposedFloorRectangles": 7,
+      "exactFloorMask": true,
+      "nominalConceptWallClashes": 0,
+      "nominalFloorHeadspaceClashes": 0,
+      "upperDoorEvReservationClashes": 0,
+      "baselineCorridorReachableCells": 117,
+      "alternateCorridorReachableCells": 115,
+      "baselineDoorReachableCount": 12,
+      "alternateDoorReachableCount": 12,
+      "totalDoorCount": 13,
+      "stairFootprintExpandsOriginalShaft": true,
+      "materialStatesVerified": false,
+      "installedStairSupportVerified": false,
+      "actualWalkabilityVerified": false,
+      "shapeReviewOnly": true,
+      "autoAdopted": false
+    },
+    {
+      "fromLevel": 3,
+      "toLevel": 4,
+      "corridorLeadIn": {
+        "x": 10,
+        "z": 18
+      },
+      "lowerCorridorReallocated": [
+        {
+          "x": 11,
+          "z": 18
+        }
+      ],
+      "straightTreads": [
+        {
+          "x": 11,
+          "y": 8,
+          "z": 18
+        },
+        {
+          "x": 12,
+          "y": 9,
+          "z": 18
+        },
+        {
+          "x": 13,
+          "y": 10,
+          "z": 18
+        },
+        {
+          "x": 14,
+          "y": 11,
+          "z": 18
+        }
+      ],
+      "upperLanding": {
+        "x": 15,
+        "z": 18
+      },
+      "proposedUpperFloorChanges": {
+        "restore": [
+          {
+            "x": 14,
+            "z": 17
+          }
+        ],
+        "open": [
+          {
+            "x": 13,
+            "z": 18
+          }
+        ]
+      },
+      "originalFloorCells": 398,
+      "proposedFloorCells": 398,
+      "originalFloorRectangles": 6,
+      "proposedFloorRectangles": 7,
+      "exactFloorMask": true,
+      "nominalConceptWallClashes": 0,
+      "nominalFloorHeadspaceClashes": 0,
+      "upperDoorEvReservationClashes": 0,
+      "baselineCorridorReachableCells": 117,
+      "alternateCorridorReachableCells": 115,
+      "baselineDoorReachableCount": 12,
+      "alternateDoorReachableCount": 12,
+      "totalDoorCount": 13,
+      "stairFootprintExpandsOriginalShaft": true,
+      "materialStatesVerified": false,
+      "installedStairSupportVerified": false,
+      "actualWalkabilityVerified": false,
+      "shapeReviewOnly": true,
+      "autoAdopted": false
+    },
+    {
+      "fromLevel": 4,
+      "toLevel": 5,
+      "corridorLeadIn": {
+        "x": 10,
+        "z": 18
+      },
+      "lowerCorridorReallocated": [
+        {
+          "x": 11,
+          "z": 18
+        }
+      ],
+      "straightTreads": [
+        {
+          "x": 11,
+          "y": 12,
+          "z": 18
+        },
+        {
+          "x": 12,
+          "y": 13,
+          "z": 18
+        },
+        {
+          "x": 13,
+          "y": 14,
+          "z": 18
+        },
+        {
+          "x": 14,
+          "y": 15,
+          "z": 18
+        }
+      ],
+      "upperLanding": {
+        "x": 15,
+        "z": 18
+      },
+      "proposedUpperFloorChanges": {
+        "restore": [
+          {
+            "x": 14,
+            "z": 17
+          }
+        ],
+        "open": [
+          {
+            "x": 13,
+            "z": 18
+          }
+        ]
+      },
+      "originalFloorCells": 398,
+      "proposedFloorCells": 398,
+      "originalFloorRectangles": 6,
+      "proposedFloorRectangles": 7,
+      "exactFloorMask": true,
+      "nominalConceptWallClashes": 0,
+      "nominalFloorHeadspaceClashes": 0,
+      "upperDoorEvReservationClashes": 0,
+      "baselineCorridorReachableCells": 117,
+      "alternateCorridorReachableCells": 115,
+      "baselineDoorReachableCount": 12,
+      "alternateDoorReachableCount": 12,
+      "totalDoorCount": 13,
+      "stairFootprintExpandsOriginalShaft": true,
+      "materialStatesVerified": false,
+      "installedStairSupportVerified": false,
+      "actualWalkabilityVerified": false,
+      "shapeReviewOnly": true,
+      "autoAdopted": false
+    },
+    {
+      "fromLevel": 5,
+      "toLevel": 6,
+      "corridorLeadIn": {
+        "x": 10,
+        "z": 18
+      },
+      "lowerCorridorReallocated": [
+        {
+          "x": 11,
+          "z": 18
+        }
+      ],
+      "straightTreads": [
+        {
+          "x": 11,
+          "y": 16,
+          "z": 18
+        },
+        {
+          "x": 12,
+          "y": 17,
+          "z": 18
+        },
+        {
+          "x": 13,
+          "y": 18,
+          "z": 18
+        },
+        {
+          "x": 14,
+          "y": 19,
+          "z": 18
+        }
+      ],
+      "upperLanding": {
+        "x": 15,
+        "z": 18
+      },
+      "proposedUpperFloorChanges": {
+        "restore": [
+          {
+            "x": 14,
+            "z": 17
+          }
+        ],
+        "open": [
+          {
+            "x": 13,
+            "z": 18
+          }
+        ]
+      },
+      "originalFloorCells": 398,
+      "proposedFloorCells": 398,
+      "originalFloorRectangles": 6,
+      "proposedFloorRectangles": 7,
+      "exactFloorMask": true,
+      "nominalConceptWallClashes": 0,
+      "nominalFloorHeadspaceClashes": 0,
+      "upperDoorEvReservationClashes": 0,
+      "baselineCorridorReachableCells": 117,
+      "alternateCorridorReachableCells": 115,
+      "baselineDoorReachableCount": 12,
+      "alternateDoorReachableCount": 12,
+      "totalDoorCount": 13,
+      "stairFootprintExpandsOriginalShaft": true,
+      "materialStatesVerified": false,
+      "installedStairSupportVerified": false,
+      "actualWalkabilityVerified": false,
+      "shapeReviewOnly": true,
+      "autoAdopted": false
+    }
+  ],
+  "alternativeDesignDecision": "PREFER_REVIEW_OF_STRAIGHT_SHAFT_EXPANSION_OVER_UNVERIFIED_TURNING_RISE",
+  "unverified": [
+    "Minecraft Education v26.3 actual stair state mapping and corner voxel/collision shapes",
+    "Real player passage, landing transition and half-step mechanics",
+    "First riser occupies lower corridor cell (11,18); corridor layout and width must be reconsidered",
+    "Floor/support under every riser and changed upper-level cutout (13,18)",
+    "Door materials, wall/rail joints, exact world origin and runtime planner integration",
+    "Any synthetic shape/route remains design-only; no real block placement or world operation"
+  ],
+  "totals": {
+    "straightProposals": 5,
+    "proposalsWithNoConceptualClashes": 5,
+    "proposalsWithNewDoorReachabilityLoss": 0,
+    "physicalRoutesVerified": 0,
+    "buildOperations": 0
+  },
+  "blockers": [
+    {
+      "id": "M4-01",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-02",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-03",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-04",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-05",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-06",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-07",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-08",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-09",
+      "status": "BLOCKED"
+    }
+  ],
+  "readiness": "NOT_PREPARED",
+  "deployment": "BLOCKED",
+  "approvedVariant": null,
+  "safety": {
+    "notPrepared": true,
+    "constructionApproved": false,
+    "executionAllowed": false,
+    "worldAccess": false,
+    "bridgeContact": false,
+    "legacyModified": false,
+    "frozenEvidenceModified": false,
+    "projectFilesModified": false
+  },
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "materialIds": [],
+    "worldCoordinates": null
+  },
+  "constructionCommands": 0,
+  "reportSha256": "7149469d863362188cbc26d4328c05b2e568c4a49ec2fd71cacb704e093c3878"
+}

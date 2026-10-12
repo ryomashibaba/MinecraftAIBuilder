@@ -1,0 +1,99 @@
+{
+  "schema": "minecraftaibuilder-step8b-compatibility-envelope-v1",
+  "status": "OFFLINE_COMPATIBILITY_REVIEW_ONLY_NOT_PREPARED",
+  "compatibility": "UNKNOWN",
+  "sourceReviewSha256": "818f41928cd332ceb4c6dc92f88e91132f6112496bb4ebd57c021d3bb9c2c385",
+  "snapshotAuditStatus": "WINDOWS_SOURCE_NOT_PROVIDED",
+  "blockers": [
+    "Current installed Windows building-engine behavior and API have not been verified",
+    "No confirmed mapping from conceptual coordinates to world origin / transform",
+    "No verified Education block IDs / states / version-skew reconciliation",
+    "Room, facade, door, stair, elevator, support and world state remain unverified"
+  ],
+  "coordinateContract": {
+    "localX": "east",
+    "localZ": "south",
+    "localY": "up",
+    "floorIndex": "0-based internal / 1-based display",
+    "worldAnchor": null,
+    "worldAxisMappingVerified": false,
+    "dimensionUnit": "conceptual blocks, NOT verified Minecraft blocks"
+  },
+  "engineAPI": {
+    "entrypoint": "UNKNOWN",
+    "createBuildingPlan": "NOT_VERIFIED",
+    "plannerVersion": "UNKNOWN"
+  },
+  "readiness": {
+    "constructionApproved": false,
+    "executionAllowed": false,
+    "worldIdentityProven": false,
+    "scanAndBridgeSameSessionProven": false,
+    "siteSafetyProven": false,
+    "verifiedInstalledEngine": false
+  },
+  "designs": [
+    {
+      "id": "candidate-01",
+      "conceptSha256": "158346ef0201ad759694c6b7b80b980f5f68e0a4d3f9c6432f31c60f9c4626af",
+      "reviewStatus": "REVIEW_REQUIRED",
+      "intent": {
+        "buildingType": "hotel",
+        "massing": "slab",
+        "dimensions": {
+          "width": 26,
+          "depth": 20
+        },
+        "floorCount": 6,
+        "floorHeight": 5,
+        "orientation": "north"
+      },
+      "compatibility": "UNKNOWN",
+      "worldAnchor": null,
+      "verifiedWorldCoordinates": false,
+      "materials": {
+        "status": "UNKNOWN",
+        "blockIds": [],
+        "blockStates": []
+      },
+      "doorStairElevatorSupportVerified": false,
+      "BuildPlan": {
+        "status": "NOT_PREPARED",
+        "operations": [],
+        "commandCount": 0
+      },
+      "safety": {
+        "constructionApproved": false,
+        "executionAllowed": false,
+        "notPrepared": true,
+        "worldIdentityProven": false,
+        "bridgeSessionVerified": false,
+        "siteSafetyProven": false,
+        "scanAndBridgeSameSessionProven": false,
+        "noWorldMutation": true,
+        "noBridge": true,
+        "noScan": true,
+        "noPackGeneration": true
+      }
+    }
+  ],
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0
+  },
+  "safety": {
+    "constructionApproved": false,
+    "executionAllowed": false,
+    "notPrepared": true,
+    "worldIdentityProven": false,
+    "bridgeSessionVerified": false,
+    "siteSafetyProven": false,
+    "scanAndBridgeSameSessionProven": false,
+    "noBridge": true,
+    "noScan": true,
+    "noWorldMutation": true,
+    "noPackGeneration": true
+  },
+  "envelopeSha256": "b445755c9f73c87344dc2d97ea84c7f097ca2e1e7e8975a3d5a39d0e7b9fb932"
+}

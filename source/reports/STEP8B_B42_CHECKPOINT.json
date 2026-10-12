@@ -1,0 +1,33 @@
+{
+  "schema": "minecraftaibuilder-step8b-b42-checkpoint-v1",
+  "stage": "B4.2 collector and assessor implemented offline",
+  "dateJST": "2026-10-10",
+  "inputB4WindowsEvidenceSha256": "ad52851136bb0125d7901ed35d8ee40937eeb4e82d5668bb22158900d5320253",
+  "baselineSnapshotZipSha256": "62d1de7d0148d514fded1544c254a9beab4299018dc054aff353557df0809a1f",
+  "sourceAlignmentAtB41": "8_OF_8_MATCH",
+  "nodeProcessCountAtB41": 4,
+  "entrypointMatchesAtB41": 0,
+  "b42WindowsCapture": "NOT_RUN",
+  "testResults": {
+    "pass": 67,
+    "fail": 0,
+    "skip": 0,
+    "b42New": 14,
+    "prior": 53
+  },
+  "runtimeIdentity": "NOT_PROVEN",
+  "executionCompatibility": "UNKNOWN",
+  "deploymentGate": "BLOCKED",
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0
+  },
+  "noWorldMutationByThisStep": true,
+  "existingBuildsUnchanged": true,
+  "filesNotIncluded": [
+    "full Windows source snapshot ZIP",
+    "B4 integrated handoff archive",
+    "original B4 Windows capture JSON"
+  ]
+}

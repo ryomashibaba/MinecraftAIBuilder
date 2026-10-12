@@ -1,0 +1,61 @@
+{
+  "counts": {
+    "buildings": 5,
+    "floors": 30,
+    "wallEdges": 5704,
+    "doorPorts": 314,
+    "nominalVerticalLinks": 25,
+    "reviewTrimCells": 18,
+    "sourceCorridorOutside": 18
+  },
+  "capabilities": {
+    "externalEnvelope": "EMITTER_IDENTIFIED_IN_PINNED_SOURCE",
+    "interiorPartition": "NOT_IMPLEMENTED_IN_INSPECTED_PLANNER",
+    "roomDoor": "NOT_IMPLEMENTED_IN_INSPECTED_PLANNER",
+    "stairAssembly": "NOT_IMPLEMENTED_IN_INSPECTED_PLANNER",
+    "elevator": "NOT_IMPLEMENTED_IN_INSPECTED_PLANNER",
+    "importIntoEngine": "NOT_WIRED",
+    "engineRun": "NOT_EXECUTED",
+    "runtimeIdentity": "NOT_VERIFIED"
+  },
+  "blockers": [
+    "INTERIOR_EMITTERS",
+    "WALL_DOOR_STAIR_PHYSICAL_CONTRACT",
+    "OFFICE02_GEOMETRY",
+    "MATERIAL_EDUCATION_RUNTIME",
+    "WORLD_ANCHOR_SCAN",
+    "RUNNING_ENGINE_IDENTITY",
+    "CONSTRUCTION_SAFETY_CANARY",
+    "USER_APPROVAL"
+  ],
+  "milestones": [
+    {
+      "id": "M1",
+      "state": "COMPLETE_OFFLINE"
+    },
+    {
+      "id": "M2",
+      "state": "NOT_STARTED"
+    },
+    {
+      "id": "M3",
+      "state": "NOT_STARTED"
+    },
+    {
+      "id": "M4",
+      "state": "NOT_STARTED"
+    },
+    {
+      "id": "M5",
+      "state": "BLOCKED_BY_USER_APPROVAL"
+    }
+  ],
+  "gate": "BLOCKED",
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0,
+    "worldCoordinates": null,
+    "materialIds": []
+  }
+}

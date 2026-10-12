@@ -1,0 +1,79 @@
+{
+  "counts": {
+    "buildings": 5,
+    "floors": 30,
+    "partitionPanels": 5704,
+    "doorVoids": 314,
+    "hypotheticalStairRoutes": 25,
+    "nominalStairRoutesFound": 25,
+    "blockedDoorVoids": 0,
+    "nominalStairRoutesWithModelContact": 0
+  },
+  "modelParameters": {
+    "wallThickness": 0.125,
+    "doorWidth": 0.8,
+    "doorClearHeight": 2.2,
+    "stairTreadThickness": 0.25,
+    "stairLateralInset": 0.1,
+    "nominalHeadroom": 2
+  },
+  "blockers": [
+    {
+      "id": "INTERIOR_EMITTERS",
+      "state": "OPEN"
+    },
+    {
+      "id": "WALL_DOOR_STAIR_PHYSICAL_CONTRACT",
+      "state": "OPEN"
+    },
+    {
+      "id": "OFFICE02_GEOMETRY",
+      "state": "OPEN"
+    },
+    {
+      "id": "MATERIAL_EDUCATION_RUNTIME",
+      "state": "OPEN"
+    },
+    {
+      "id": "WORLD_ANCHOR_SCAN",
+      "state": "OPEN"
+    },
+    {
+      "id": "RUNNING_ENGINE_IDENTITY",
+      "state": "OPEN"
+    },
+    {
+      "id": "CONSTRUCTION_SAFETY_CANARY",
+      "state": "OPEN"
+    },
+    {
+      "id": "USER_APPROVAL",
+      "state": "OPEN"
+    },
+    {
+      "id": "M2_GEOMETRY_NOT_RUNTIME_VALIDATED",
+      "state": "OPEN"
+    },
+    {
+      "id": "FLOOR_SLAB_AND_HEADROOM",
+      "state": "OPEN"
+    },
+    {
+      "id": "WALL_MATERIAL_DOOR_HINGE",
+      "state": "OPEN"
+    }
+  ],
+  "observedKnownIssues": {
+    "office02EnvelopeDifferenceCells": 123,
+    "office02UnappliedCorridorCells": 18
+  },
+  "engineIntegrated": false,
+  "deploymentGate": "BLOCKED",
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0,
+    "worldCoordinates": null,
+    "materialIds": []
+  }
+}

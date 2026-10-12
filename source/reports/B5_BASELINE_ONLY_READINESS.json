@@ -1,0 +1,127 @@
+{
+  "schema": "minecraftaibuilder-step8b-b5-nonexecution-readiness-v1",
+  "status": "REVIEW_ONLY_NOT_PREPARED",
+  "sourceFilesVerified": 249,
+  "staticGeometryCases": 288,
+  "programs": [
+    {
+      "program": "hotel",
+      "candidateCount": 1,
+      "staticCellsCompared": true,
+      "previewGeometryStatus": "CONCEPT_SOURCE_FOOTPRINT_AGREEMENT",
+      "mismatchedCandidates": [],
+      "previewOnly": true,
+      "realPlannerAndWorldUnverified": true
+    },
+    {
+      "program": "apartment",
+      "candidateCount": 1,
+      "staticCellsCompared": true,
+      "previewGeometryStatus": "CONCEPT_SOURCE_FOOTPRINT_AGREEMENT",
+      "mismatchedCandidates": [],
+      "previewOnly": true,
+      "realPlannerAndWorldUnverified": true
+    },
+    {
+      "program": "office",
+      "candidateCount": 3,
+      "staticCellsCompared": true,
+      "previewGeometryStatus": "CONCEPT_SOURCE_DISAGREEMENT",
+      "mismatchedCandidates": [
+        {
+          "id": "candidate-02",
+          "massing": "asymmetric_block",
+          "orientation": "south",
+          "addedCellsByFloor": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "removedCellsByFloor": [
+            22,
+            22,
+            22,
+            22,
+            22,
+            13
+          ]
+        }
+      ],
+      "previewOnly": true,
+      "realPlannerAndWorldUnverified": true
+    }
+  ],
+  "staticAPISignals": {
+    "planBuilding": "SOURCE_PRESENT_DO_NOT_CALL",
+    "buildBuilding": "SOURCE_PRESENT_DO_NOT_CALL",
+    "createBuildingPlan": "SOURCE_PRESENT_DO_NOT_INVOKE"
+  },
+  "runtimeEvidenceLevel": "BASELINE_ONLY",
+  "gates": [
+    {
+      "gate": "STATIC_SOURCE_PIN",
+      "state": "EVIDENCED_AT_B4_1_ONLY",
+      "requirement": "Source pin does not prove loaded code"
+    },
+    {
+      "gate": "RUNTIME_IDENTITY_AND_VERSION",
+      "state": "BLOCKED",
+      "requirement": "Live process and loaded code not independently attested"
+    },
+    {
+      "gate": "PLANNER_VOXEL_LAYER_EQUIVALENCE",
+      "state": "BLOCKED",
+      "requirement": "Real planner/voxel payload not safely established"
+    },
+    {
+      "gate": "WORLD_AND_COORDINATE_BINDING",
+      "state": "BLOCKED",
+      "requirement": "World, anchor, facing, terrain unbound"
+    },
+    {
+      "gate": "EDUCATION_MATERIAL_STATES",
+      "state": "BLOCKED",
+      "requirement": "Validated in-world block identifiers/states absent"
+    },
+    {
+      "gate": "SITE_PERMISSION_AND_CLEARANCE",
+      "state": "BLOCKED",
+      "requirement": "No scan/site clearance approval"
+    },
+    {
+      "gate": "STRUCTURE_DOORS_ACCESSIBILITY",
+      "state": "BLOCKED",
+      "requirement": "Stairs, lifts, exits and structure not verified"
+    },
+    {
+      "gate": "EXPLICIT_USER_APPROVAL",
+      "state": "BLOCKED",
+      "requirement": "Construction not authorized"
+    }
+  ],
+  "worldAnchor": null,
+  "worldCoordinates": null,
+  "materialBlockIds": [],
+  "blockStates": [],
+  "runtimeIdentity": "NOT_PROVEN",
+  "executionCompatibility": "UNKNOWN",
+  "deploymentGate": "BLOCKED",
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0
+  },
+  "safety": {
+    "constructionApproved": false,
+    "executionAllowed": false,
+    "noWorldMutation": true,
+    "noBridge": true,
+    "noScan": true,
+    "noPackGeneration": true
+  },
+  "nextAction": "Collect a SINGLE B4.2 Windows read-only JSON if desired. Review results offline; NEVER implicitly authorize construction.",
+  "reportSha256": "bfe1ffba47db06dd9a2c49b5046deb4729b5bc080aedc3e275809d221cc83b95"
+}

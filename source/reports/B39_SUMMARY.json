@@ -1,0 +1,39 @@
+{
+  "schema": "minecraftaibuilder-step8b-b39-summary-v1",
+  "building": "apartment/candidate-01",
+  "levels": 5,
+  "reviewVariants": 10,
+  "existingFloorOpeningViableVariants": 0,
+  "proposedFloorOpeningNominalVariants": 10,
+  "proposedFloorOpeningNominalPaths": 44,
+  "currentUpperOpenings": [
+    {
+      "x": 14,
+      "z": 17
+    },
+    {
+      "x": 14,
+      "z": 18
+    }
+  ],
+  "unapprovedUpperOpenings": [
+    {
+      "x": 14,
+      "z": 18
+    },
+    {
+      "x": 14,
+      "z": 19
+    }
+  ],
+  "hypotheticalChangedFloorCellsPerUpperLevel": 2,
+  "unmodifiedFrozenFiles": 635,
+  "installedHeadroomOrSupportCertified": 0,
+  "readiness": "NOT_PREPARED",
+  "deployment": "BLOCKED",
+  "constructionApproved": false,
+  "approvedVariant": null,
+  "buildOperations": 0,
+  "windowsActions": 0,
+  "next": "B40_NONEXECUTABLE_OPENING_JUNCTION_AND_CORNER_STAIRS_REVIEW"
+}

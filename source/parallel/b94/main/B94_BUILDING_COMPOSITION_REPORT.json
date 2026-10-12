@@ -1,0 +1,4197 @@
+{
+  "schema": "minecraftaibuilder-b94-offline-building-envelope-core-programme-options-v1",
+  "kind": "NON_EXECUTABLE_BUILDING_COMPOSITION_DESIGN_BRANCHES_NOT_CONSTRUCTION_APPROVAL",
+  "provenance": {
+    "b93": "d4081039734728d61c80d619b31d3d88fcd282cfe1a50f05564f35541b5e2035",
+    "b92": "6d863841350358009ee3c9bbd2b99a8d73aa83cee58cbb8a0666853b849a4597",
+    "officialBlocksSha256": "49ff9c501b1c96b547aa49fda07a53bc19f7d5fe338aff43fe5f65c3eaaf031f"
+  },
+  "totals": {
+    "referenceBuildings": 5,
+    "referenceFloors": 30,
+    "originalNominalRooms": 314,
+    "priorUnapprovedCandidates": 296,
+    "heldIndependentRooms": 18,
+    "newApprovedRooms": 0,
+    "totalBuildingAlternatives": 20,
+    "productionBackedBuildings": 2,
+    "verticallyAlignedNewShaftSites": 21,
+    "baselineFilesModified": 0,
+    "productionChangesApplied": 0,
+    "worldOperations": 0,
+    "worldContacts": 0
+  },
+  "replayed": [
+    {
+      "building": "apartment/candidate-01",
+      "operationsSha256": "6c5802481a5d22a2958cd83cb591dc8e4dbe1a1cd25a1d365f6c7f70635a7ddc",
+      "readOnly": true,
+      "verifiedReadOnly": true
+    },
+    {
+      "building": "office/candidate-01",
+      "operationsSha256": "e29a8c11eeb8ce0897995fdbb50de9482d3ec0a6b0767b9ac48bee8397e5249c",
+      "readOnly": true,
+      "verifiedReadOnly": true
+    }
+  ],
+  "buildings": [
+    {
+      "buildingId": "apartment/candidate-01",
+      "reference": {
+        "floors": [
+          {
+            "level": 1,
+            "inside": 400,
+            "width": 28,
+            "depth": 22,
+            "rooms": 13,
+            "nominalRoomArea": 213,
+            "corridorCells": 136,
+            "stairs": 9,
+            "elevators": 9
+          },
+          {
+            "level": 2,
+            "inside": 400,
+            "width": 28,
+            "depth": 22,
+            "rooms": 13,
+            "nominalRoomArea": 213,
+            "corridorCells": 134,
+            "stairs": 9,
+            "elevators": 9
+          },
+          {
+            "level": 3,
+            "inside": 400,
+            "width": 28,
+            "depth": 22,
+            "rooms": 13,
+            "nominalRoomArea": 213,
+            "corridorCells": 134,
+            "stairs": 9,
+            "elevators": 9
+          },
+          {
+            "level": 4,
+            "inside": 400,
+            "width": 28,
+            "depth": 22,
+            "rooms": 13,
+            "nominalRoomArea": 213,
+            "corridorCells": 134,
+            "stairs": 9,
+            "elevators": 9
+          },
+          {
+            "level": 5,
+            "inside": 400,
+            "width": 28,
+            "depth": 22,
+            "rooms": 13,
+            "nominalRoomArea": 213,
+            "corridorCells": 134,
+            "stairs": 9,
+            "elevators": 9
+          },
+          {
+            "level": 6,
+            "inside": 400,
+            "width": 28,
+            "depth": 22,
+            "rooms": 13,
+            "nominalRoomArea": 213,
+            "corridorCells": 134,
+            "stairs": 9,
+            "elevators": 9
+          }
+        ],
+        "distinctMaskShapes": 1,
+        "fullVerticalCoreSiteIntersection": true,
+        "originalNominalRoomCount": 78,
+        "originalNominalRoomArea": 1278
+      },
+      "affectedFloors": [
+        "apartment/candidate-01/L1",
+        "apartment/candidate-01/L2",
+        "apartment/candidate-01/L3",
+        "apartment/candidate-01/L4",
+        "apartment/candidate-01/L5",
+        "apartment/candidate-01/L6"
+      ],
+      "affectedHeldRooms": 14,
+      "heldProgrammeArea": 170,
+      "repeatRoomPatternsReviewed": 14,
+      "verticalCoreSearch": {
+        "checked": 567,
+        "forbidden": 561,
+        "production": 5,
+        "noCorridor": 0,
+        "strictEmptyFootprints": 1,
+        "top": [
+          {
+            "x": 24,
+            "z": 18,
+            "width": 2,
+            "depth": 2,
+            "sections": [
+              {
+                "sectionId": "apartment/candidate-01/L1",
+                "level": 1,
+                "insideFootprint": true,
+                "protectedSiteCount": 0,
+                "hardGlassCount": 0,
+                "productionOccupiedVoxelCount": 0,
+                "nonHeldRoomContacts": [],
+                "heldRoomContacts": [
+                  "F1-R013"
+                ],
+                "intersectsExistingVerticalCore": false,
+                "nextToNamedCorridor": true,
+                "nextToPhysicalTwoHighCorridor": true,
+                "localSites": [
+                  {
+                    "x": 24,
+                    "z": 18
+                  },
+                  {
+                    "x": 25,
+                    "z": 18
+                  },
+                  {
+                    "x": 24,
+                    "z": 19
+                  },
+                  {
+                    "x": 25,
+                    "z": 19
+                  }
+                ]
+              },
+              {
+                "sectionId": "apartment/candidate-01/L2",
+                "level": 2,
+                "insideFootprint": true,
+                "protectedSiteCount": 0,
+                "hardGlassCount": 0,
+                "productionOccupiedVoxelCount": 0,
+                "nonHeldRoomContacts": [],
+                "heldRoomContacts": [
+                  "F2-R013"
+                ],
+                "intersectsExistingVerticalCore": false,
+                "nextToNamedCorridor": true,
+                "nextToPhysicalTwoHighCorridor": true,
+                "localSites": [
+                  {
+                    "x": 24,
+                    "z": 18
+                  },
+                  {
+                    "x": 25,
+                    "z": 18
+                  },
+                  {
+                    "x": 24,
+                    "z": 19
+                  },
+                  {
+                    "x": 25,
+                    "z": 19
+                  }
+                ]
+              },
+              {
+                "sectionId": "apartment/candidate-01/L3",
+                "level": 3,
+                "insideFootprint": true,
+                "protectedSiteCount": 0,
+                "hardGlassCount": 0,
+                "productionOccupiedVoxelCount": 0,
+                "nonHeldRoomContacts": [],
+                "heldRoomContacts": [
+                  "F3-R013"
+                ],
+                "intersectsExistingVerticalCore": false,
+                "nextToNamedCorridor": true,
+                "nextToPhysicalTwoHighCorridor": true,
+                "localSites": [
+                  {
+                    "x": 24,
+                    "z": 18
+                  },
+                  {
+                    "x": 25,
+                    "z": 18
+                  },
+                  {
+                    "x": 24,
+                    "z": 19
+                  },
+                  {
+                    "x": 25,
+                    "z": 19
+                  }
+                ]
+              },
+              {
+                "sectionId": "apartment/candidate-01/L4",
+                "level": 4,
+                "insideFootprint": true,
+                "protectedSiteCount": 0,
+                "hardGlassCount": 0,
+                "productionOccupiedVoxelCount": 0,
+                "nonHeldRoomContacts": [],
+                "heldRoomContacts": [
+                  "F4-R013"
+                ],
+                "intersectsExistingVerticalCore": false,
+                "nextToNamedCorridor": true,
+                "nextToPhysicalTwoHighCorridor": true,
+                "localSites": [
+                  {
+                    "x": 24,
+                    "z": 18
+                  },
+                  {
+                    "x": 25,
+                    "z": 18
+                  },
+                  {
+                    "x": 24,
+                    "z": 19
+                  },
+                  {
+                    "x": 25,
+                    "z": 19
+                  }
+                ]
+              },
+              {
+                "sectionId": "apartment/candidate-01/L5",
+                "level": 5,
+                "insideFootprint": true,
+                "protectedSiteCount": 0,
+                "hardGlassCount": 0,
+                "productionOccupiedVoxelCount": 0,
+                "nonHeldRoomContacts": [],
+                "heldRoomContacts": [
+                  "F5-R013"
+                ],
+                "intersectsExistingVerticalCore": false,
+                "nextToNamedCorridor": true,
+                "nextToPhysicalTwoHighCorridor": true,
+                "localSites": [
+                  {
+                    "x": 24,
+                    "z": 18
+                  },
+                  {
+                    "x": 25,
+                    "z": 18
+                  },
+                  {
+                    "x": 24,
+                    "z": 19
+                  },
+                  {
+                    "x": 25,
+                    "z": 19
+                  }
+                ]
+              },
+              {
+                "sectionId": "apartment/candidate-01/L6",
+                "level": 6,
+                "insideFootprint": true,
+                "protectedSiteCount": 0,
+                "hardGlassCount": 0,
+                "productionOccupiedVoxelCount": 0,
+                "nonHeldRoomContacts": [],
+                "heldRoomContacts": [
+                  "F6-R013"
+                ],
+                "intersectsExistingVerticalCore": false,
+                "nextToNamedCorridor": true,
+                "nextToPhysicalTwoHighCorridor": true,
+                "localSites": [
+                  {
+                    "x": 24,
+                    "z": 18
+                  },
+                  {
+                    "x": 25,
+                    "z": 18
+                  },
+                  {
+                    "x": 24,
+                    "z": 19
+                  },
+                  {
+                    "x": 25,
+                    "z": 19
+                  }
+                ]
+              }
+            ],
+            "localColumnSites": [
+              {
+                "x": 24,
+                "z": 18
+              },
+              {
+                "x": 25,
+                "z": 18
+              },
+              {
+                "x": 24,
+                "z": 19
+              },
+              {
+                "x": 25,
+                "z": 19
+              }
+            ],
+            "footprintAndProtectionClean": true,
+            "productionVoxelContacts": 0,
+            "hardGlassSites": 0,
+            "otherRoomContacts": 0,
+            "retiredHeldRoomIds": [
+              "apartment/candidate-01/L1::F1-R013",
+              "apartment/candidate-01/L2::F2-R013",
+              "apartment/candidate-01/L3::F3-R013",
+              "apartment/candidate-01/L4::F4-R013",
+              "apartment/candidate-01/L5::F5-R013",
+              "apartment/candidate-01/L6::F6-R013"
+            ],
+            "floorsAdjacentToNominalCorridor": 6,
+            "floorsAdjacentToTwoHighAirCorridor": 6,
+            "floorsRequired": 6,
+            "strictCandidateSiteClear": true,
+            "physicalShaftConstructible": false,
+            "requiredApprovals": [
+              "NEW_CORE_SHAFT_STRUCTURAL_REDESIGN",
+              "INTER_FLOOR_SLAB_CUTS_AND_ROOF",
+              "STAIR_LIFT_GEOMETRY_AND_CLEARANCE",
+              "EGRESS_ROUTE_AND_DOOR_SWING"
+            ],
+            "constructionApproved": false,
+            "blockOperations": [],
+            "worldCoordinates": null
+          }
+        ],
+        "candidateConstructionApprovals": 0,
+        "unapprovedAll": true
+      },
+      "alternatives": [
+        {
+          "originalNominalRooms": 78,
+          "verifiedUsableRoomsAdded": 0,
+          "protectedPriorRoomChanges": 0,
+          "originalEnvelopeMutations": 0,
+          "oldCoreMutations": 0,
+          "liveConstructionOperations": [],
+          "constructionApproved": false,
+          "id": "KEEP_ORIGINAL_ENVELOPE_AND_UNRESOLVED_ROOMS",
+          "claimedIndependentRoomCount": 78,
+          "heldIndependentRoomCount": 14,
+          "unapprovedIndependentRoomCount": 78,
+          "nominalServiceReallocationArea": 0,
+          "qualityStatus": "REFERENCE_HOLD",
+          "requiresBuildingPlanApproval": false
+        },
+        {
+          "originalNominalRooms": 78,
+          "verifiedUsableRoomsAdded": 0,
+          "protectedPriorRoomChanges": 0,
+          "originalEnvelopeMutations": 0,
+          "oldCoreMutations": 0,
+          "liveConstructionOperations": [],
+          "constructionApproved": false,
+          "id": "REPURPOSE_HELD_AS_COMMON_SERVICE",
+          "claimedIndependentRoomCount": 64,
+          "heldIndependentRoomCount": 0,
+          "nominalServiceReallocationArea": 170,
+          "qualityStatus": "CONDITIONAL_PROGRAMME_REDUCTION",
+          "shortConceptConnections": 10,
+          "requiresBuildingPlanApproval": true,
+          "limitations": [
+            "NOT_A_LIVE_CONNECTED_SERVICE_AREA",
+            "ALL_296_OTHER_ROOMS_STILL_UNAPPROVED"
+          ]
+        },
+        {
+          "originalNominalRooms": 78,
+          "verifiedUsableRoomsAdded": 0,
+          "protectedPriorRoomChanges": 0,
+          "originalEnvelopeMutations": 0,
+          "oldCoreMutations": 0,
+          "liveConstructionOperations": [],
+          "constructionApproved": false,
+          "id": "INSERT_NEW_ALIGNED_VERTICAL_CORE",
+          "claimedIndependentRoomCount": null,
+          "heldIndependentRoomCount": 14,
+          "nominalServiceReallocationArea": 0,
+          "proposedSites": [
+            {
+              "x": 24,
+              "z": 18,
+              "width": 2,
+              "depth": 2,
+              "sections": [
+                {
+                  "sectionId": "apartment/candidate-01/L1",
+                  "level": 1,
+                  "insideFootprint": true,
+                  "protectedSiteCount": 0,
+                  "hardGlassCount": 0,
+                  "productionOccupiedVoxelCount": 0,
+                  "nonHeldRoomContacts": [],
+                  "heldRoomContacts": [
+                    "F1-R013"
+                  ],
+                  "intersectsExistingVerticalCore": false,
+                  "nextToNamedCorridor": true,
+                  "nextToPhysicalTwoHighCorridor": true,
+                  "localSites": [
+                    {
+                      "x": 24,
+                      "z": 18
+                    },
+                    {
+                      "x": 25,
+                      "z": 18
+                    },
+                    {
+                      "x": 24,
+                      "z": 19
+                    },
+                    {
+                      "x": 25,
+                      "z": 19
+                    }
+                  ]
+                },
+                {
+                  "sectionId": "apartment/candidate-01/L2",
+                  "level": 2,
+                  "insideFootprint": true,
+                  "protectedSiteCount": 0,
+                  "hardGlassCount": 0,
+                  "productionOccupiedVoxelCount": 0,
+                  "nonHeldRoomContacts": [],
+                  "heldRoomContacts": [
+                    "F2-R013"
+                  ],
+                  "intersectsExistingVerticalCore": false,
+                  "nextToNamedCorridor": true,
+                  "nextToPhysicalTwoHighCorridor": true,
+                  "localSites": [
+                    {
+                      "x": 24,
+                      "z": 18
+                    },
+                    {
+                      "x": 25,
+                      "z": 18
+                    },
+                    {
+                      "x": 24,
+                      "z": 19
+                    },
+                    {
+                      "x": 25,
+                      "z": 19
+                    }
+                  ]
+                },
+                {
+                  "sectionId": "apartment/candidate-01/L3",
+                  "level": 3,
+                  "insideFootprint": true,
+                  "protectedSiteCount": 0,
+                  "hardGlassCount": 0,
+                  "productionOccupiedVoxelCount": 0,
+                  "nonHeldRoomContacts": [],
+                  "heldRoomContacts": [
+                    "F3-R013"
+                  ],
+                  "intersectsExistingVerticalCore": false,
+                  "nextToNamedCorridor": true,
+                  "nextToPhysicalTwoHighCorridor": true,
+                  "localSites": [
+                    {
+                      "x": 24,
+                      "z": 18
+                    },
+                    {
+                      "x": 25,
+                      "z": 18
+                    },
+                    {
+                      "x": 24,
+                      "z": 19
+                    },
+                    {
+                      "x": 25,
+                      "z": 19
+                    }
+                  ]
+                },
+                {
+                  "sectionId": "apartment/candidate-01/L4",
+                  "level": 4,
+                  "insideFootprint": true,
+                  "protectedSiteCount": 0,
+                  "hardGlassCount": 0,
+                  "productionOccupiedVoxelCount": 0,
+                  "nonHeldRoomContacts": [],
+                  "heldRoomContacts": [
+                    "F4-R013"
+                  ],
+                  "intersectsExistingVerticalCore": false,
+                  "nextToNamedCorridor": true,
+                  "nextToPhysicalTwoHighCorridor": true,
+                  "localSites": [
+                    {
+                      "x": 24,
+                      "z": 18
+                    },
+                    {
+                      "x": 25,
+                      "z": 18
+                    },
+                    {
+                      "x": 24,
+                      "z": 19
+                    },
+                    {
+                      "x": 25,
+                      "z": 19
+                    }
+                  ]
+                },
+                {
+                  "sectionId": "apartment/candidate-01/L5",
+                  "level": 5,
+                  "insideFootprint": true,
+                  "protectedSiteCount": 0,
+                  "hardGlassCount": 0,
+                  "productionOccupiedVoxelCount": 0,
+                  "nonHeldRoomContacts": [],
+                  "heldRoomContacts": [
+                    "F5-R013"
+                  ],
+                  "intersectsExistingVerticalCore": false,
+                  "nextToNamedCorridor": true,
+                  "nextToPhysicalTwoHighCorridor": true,
+                  "localSites": [
+                    {
+                      "x": 24,
+                      "z": 18
+                    },
+                    {
+                      "x": 25,
+                      "z": 18
+                    },
+                    {
+                      "x": 24,
+                      "z": 19
+                    },
+                    {
+                      "x": 25,
+                      "z": 19
+                    }
+                  ]
+                },
+                {
+                  "sectionId": "apartment/candidate-01/L6",
+                  "level": 6,
+                  "insideFootprint": true,
+                  "protectedSiteCount": 0,
+                  "hardGlassCount": 0,
+                  "productionOccupiedVoxelCount": 0,
+                  "nonHeldRoomContacts": [],
+                  "heldRoomContacts": [
+                    "F6-R013"
+                  ],
+                  "intersectsExistingVerticalCore": false,
+                  "nextToNamedCorridor": true,
+                  "nextToPhysicalTwoHighCorridor": true,
+                  "localSites": [
+                    {
+                      "x": 24,
+                      "z": 18
+                    },
+                    {
+                      "x": 25,
+                      "z": 18
+                    },
+                    {
+                      "x": 24,
+                      "z": 19
+                    },
+                    {
+                      "x": 25,
+                      "z": 19
+                    }
+                  ]
+                }
+              ],
+              "localColumnSites": [
+                {
+                  "x": 24,
+                  "z": 18
+                },
+                {
+                  "x": 25,
+                  "z": 18
+                },
+                {
+                  "x": 24,
+                  "z": 19
+                },
+                {
+                  "x": 25,
+                  "z": 19
+                }
+              ],
+              "footprintAndProtectionClean": true,
+              "productionVoxelContacts": 0,
+              "hardGlassSites": 0,
+              "otherRoomContacts": 0,
+              "retiredHeldRoomIds": [
+                "apartment/candidate-01/L1::F1-R013",
+                "apartment/candidate-01/L2::F2-R013",
+                "apartment/candidate-01/L3::F3-R013",
+                "apartment/candidate-01/L4::F4-R013",
+                "apartment/candidate-01/L5::F5-R013",
+                "apartment/candidate-01/L6::F6-R013"
+              ],
+              "floorsAdjacentToNominalCorridor": 6,
+              "floorsAdjacentToTwoHighAirCorridor": 6,
+              "floorsRequired": 6,
+              "strictCandidateSiteClear": true,
+              "physicalShaftConstructible": false,
+              "requiredApprovals": [
+                "NEW_CORE_SHAFT_STRUCTURAL_REDESIGN",
+                "INTER_FLOOR_SLAB_CUTS_AND_ROOF",
+                "STAIR_LIFT_GEOMETRY_AND_CLEARANCE",
+                "EGRESS_ROUTE_AND_DOOR_SWING"
+              ],
+              "constructionApproved": false,
+              "blockOperations": [],
+              "worldCoordinates": null
+            }
+          ],
+          "qualityStatus": "SHAFT_FOOTPRINT_ONLY_NOT_ACCESS_OR_SLAB_CERTIFIED",
+          "requiresBuildingPlanApproval": true,
+          "requiresSlabCuts": true,
+          "shaftConstructionApproved": false
+        },
+        {
+          "originalNominalRooms": 78,
+          "verifiedUsableRoomsAdded": 0,
+          "protectedPriorRoomChanges": 0,
+          "originalEnvelopeMutations": 0,
+          "oldCoreMutations": 0,
+          "liveConstructionOperations": [],
+          "constructionApproved": false,
+          "id": "RESET_FLOOR_PROGRAMME_AND_CORE_AS_NEW_BUILDING_BRANCH",
+          "claimedIndependentRoomCount": null,
+          "heldIndependentRoomCount": 14,
+          "nominalServiceReallocationArea": 170,
+          "qualityStatus": "NEW_BUILDING_DESIGN_REQUIRED",
+          "requiresBuildingPlanApproval": true,
+          "newArchitecturalDecision": "REGENERATE_ROOM_GRID_WITH_CORE_RESERVED_BEFORE_WINDOW_AND_WALL_PLACEMENT",
+          "replanFloorCount": 6,
+          "estimatedOriginalNominalAreaToReview": 1278,
+          "preservesExistingEnvelopeAndRoomsAs_PRODUCTION_REFERENCE_ONLY": true
+        }
+      ],
+      "selectedForConstruction": null,
+      "readOnly": true
+    },
+    {
+      "buildingId": "hotel/candidate-01",
+      "reference": {
+        "floors": [
+          {
+            "level": 1,
+            "inside": 520,
+            "width": 26,
+            "depth": 20,
+            "rooms": 11,
+            "nominalRoomArea": 210,
+            "corridorCells": 184,
+            "stairs": 12,
+            "elevators": 9
+          },
+          {
+            "level": 2,
+            "inside": 520,
+            "width": 26,
+            "depth": 20,
+            "rooms": 11,
+            "nominalRoomArea": 210,
+            "corridorCells": 184,
+            "stairs": 12,
+            "elevators": 9
+          },
+          {
+            "level": 3,
+            "inside": 520,
+            "width": 26,
+            "depth": 20,
+            "rooms": 11,
+            "nominalRoomArea": 210,
+            "corridorCells": 184,
+            "stairs": 12,
+            "elevators": 9
+          },
+          {
+            "level": 4,
+            "inside": 520,
+            "width": 26,
+            "depth": 20,
+            "rooms": 11,
+            "nominalRoomArea": 210,
+            "corridorCells": 184,
+            "stairs": 12,
+            "elevators": 9
+          },
+          {
+            "level": 5,
+            "inside": 520,
+            "width": 26,
+            "depth": 20,
+            "rooms": 11,
+            "nominalRoomArea": 210,
+            "corridorCells": 184,
+            "stairs": 12,
+            "elevators": 9
+          },
+          {
+            "level": 6,
+            "inside": 520,
+            "width": 26,
+            "depth": 20,
+            "rooms": 11,
+            "nominalRoomArea": 210,
+            "corridorCells": 184,
+            "stairs": 12,
+            "elevators": 9
+          }
+        ],
+        "distinctMaskShapes": 1,
+        "fullVerticalCoreSiteIntersection": true,
+        "originalNominalRoomCount": 66,
+        "originalNominalRoomArea": 1260
+      },
+      "affectedFloors": [],
+      "affectedHeldRooms": 0,
+      "heldProgrammeArea": 0,
+      "repeatRoomPatternsReviewed": 0,
+      "verticalCoreSearch": null,
+      "alternatives": [
+        {
+          "originalNominalRooms": 66,
+          "verifiedUsableRoomsAdded": 0,
+          "protectedPriorRoomChanges": 0,
+          "originalEnvelopeMutations": 0,
+          "oldCoreMutations": 0,
+          "liveConstructionOperations": [],
+          "constructionApproved": false,
+          "id": "KEEP_ORIGINAL_ENVELOPE_AND_UNRESOLVED_ROOMS",
+          "claimedIndependentRoomCount": 66,
+          "heldIndependentRoomCount": 0,
+          "unapprovedIndependentRoomCount": 66,
+          "nominalServiceReallocationArea": 0,
+          "qualityStatus": "REFERENCE_HOLD",
+          "requiresBuildingPlanApproval": false
+        },
+        {
+          "originalNominalRooms": 66,
+          "verifiedUsableRoomsAdded": 0,
+          "protectedPriorRoomChanges": 0,
+          "originalEnvelopeMutations": 0,
+          "oldCoreMutations": 0,
+          "liveConstructionOperations": [],
+          "constructionApproved": false,
+          "id": "REPURPOSE_HELD_AS_COMMON_SERVICE",
+          "claimedIndependentRoomCount": 66,
+          "heldIndependentRoomCount": 0,
+          "nominalServiceReallocationArea": 0,
+          "qualityStatus": "CONDITIONAL_PROGRAMME_REDUCTION",
+          "shortConceptConnections": 0,
+          "requiresBuildingPlanApproval": true,
+          "limitations": [
+            "NOT_A_LIVE_CONNECTED_SERVICE_AREA",
+            "ALL_296_OTHER_ROOMS_STILL_UNAPPROVED"
+          ]
+        },
+        {
+          "originalNominalRooms": 66,
+          "verifiedUsableRoomsAdded": 0,
+          "protectedPriorRoomChanges": 0,
+          "originalEnvelopeMutations": 0,
+          "oldCoreMutations": 0,
+          "liveConstructionOperations": [],
+          "constructionApproved": false,
+          "id": "INSERT_NEW_ALIGNED_VERTICAL_CORE",
+          "claimedIndependentRoomCount": null,
+          "heldIndependentRoomCount": 0,
+          "nominalServiceReallocationArea": 0,
+          "proposedSites": [],
+          "qualityStatus": "HOLD_NO_CLEAR_2X2_SHAFT",
+          "requiresBuildingPlanApproval": true,
+          "requiresSlabCuts": true,
+          "shaftConstructionApproved": false
+        },
+        {
+          "originalNominalRooms": 66,
+          "verifiedUsableRoomsAdded": 0,
+          "protectedPriorRoomChanges": 0,
+          "originalEnvelopeMutations": 0,
+          "oldCoreMutations": 0,
+          "liveConstructionOperations": [],
+          "constructionApproved": false,
+          "id": "RESET_FLOOR_PROGRAMME_AND_CORE_AS_NEW_BUILDING_BRANCH",
+          "claimedIndependentRoomCount": null,
+          "heldIndependentRoomCount": 0,
+          "nominalServiceReallocationArea": 0,
+          "qualityStatus": "NEW_BUILDING_DESIGN_REQUIRED",
+          "requiresBuildingPlanApproval": true,
+          "newArchitecturalDecision": "REGENERATE_ROOM_GRID_WITH_CORE_RESERVED_BEFORE_WINDOW_AND_WALL_PLACEMENT",
+          "replanFloorCount": 6,
+          "estimatedOriginalNominalAreaToReview": 1260,
+          "preservesExistingEnvelopeAndRoomsAs_PRODUCTION_REFERENCE_ONLY": true
+        }
+      ],
+      "selectedForConstruction": null,
+      "readOnly": true
+    },
+    {
+      "buildingId": "office/candidate-01",
+      "reference": {
+        "floors": [
+          {
+            "level": 1,
+            "inside": 480,
+            "width": 24,
+            "depth": 20,
+            "rooms": 11,
+            "nominalRoomArea": 260,
+            "corridorCells": 165,
+            "stairs": 9,
+            "elevators": 9
+          },
+          {
+            "level": 2,
+            "inside": 480,
+            "width": 24,
+            "depth": 20,
+            "rooms": 11,
+            "nominalRoomArea": 265,
+            "corridorCells": 159,
+            "stairs": 9,
+            "elevators": 9
+          },
+          {
+            "level": 3,
+            "inside": 374,
+            "width": 24,
+            "depth": 20,
+            "rooms": 11,
+            "nominalRoomArea": 231,
+            "corridorCells": 107,
+            "stairs": 9,
+            "elevators": 9
+          },
+          {
+            "level": 4,
+            "inside": 374,
+            "width": 24,
+            "depth": 20,
+            "rooms": 11,
+            "nominalRoomArea": 231,
+            "corridorCells": 107,
+            "stairs": 9,
+            "elevators": 9
+          },
+          {
+            "level": 5,
+            "inside": 374,
+            "width": 24,
+            "depth": 20,
+            "rooms": 11,
+            "nominalRoomArea": 231,
+            "corridorCells": 107,
+            "stairs": 9,
+            "elevators": 9
+          },
+          {
+            "level": 6,
+            "inside": 374,
+            "width": 24,
+            "depth": 20,
+            "rooms": 11,
+            "nominalRoomArea": 231,
+            "corridorCells": 107,
+            "stairs": 9,
+            "elevators": 9
+          }
+        ],
+        "distinctMaskShapes": 2,
+        "fullVerticalCoreSiteIntersection": true,
+        "originalNominalRoomCount": 66,
+        "originalNominalRoomArea": 1449
+      },
+      "affectedFloors": [
+        "office/candidate-01/L3",
+        "office/candidate-01/L4",
+        "office/candidate-01/L5",
+        "office/candidate-01/L6"
+      ],
+      "affectedHeldRooms": 4,
+      "heldProgrammeArea": 64,
+      "repeatRoomPatternsReviewed": 4,
+      "verticalCoreSearch": {
+        "checked": 437,
+        "forbidden": 417,
+        "production": 0,
+        "noCorridor": 0,
+        "strictEmptyFootprints": 20,
+        "top": [
+          {
+            "x": 10,
+            "z": 6,
+            "width": 2,
+            "depth": 2,
+            "sections": [
+              {
+                "sectionId": "office/candidate-01/L1",
+                "level": 1,
+                "insideFootprint": true,
+                "protectedSiteCount": 0,
+                "hardGlassCount": 0,
+                "productionOccupiedVoxelCount": 0,
+                "nonHeldRoomContacts": [],
+                "heldRoomContacts": [],
+                "intersectsExistingVerticalCore": false,
+                "nextToNamedCorridor": true,
+                "nextToPhysicalTwoHighCorridor": true,
+                "localSites": [
+                  {
+                    "x": 10,
+                    "z": 6
+                  },
+                  {
+                    "x": 11,
+                    "z": 6
+                  },
+                  {
+                    "x": 10,
+                    "z": 7
+                  },
+                  {
+                    "x": 11,
+                    "z": 7
+                  }
+                ]
+              },
+              {
+                "sectionId": "office/candidate-01/L2",
+                "level": 2,
+                "insideFootprint": true,
+                "protectedSiteCount": 0,
+                "hardGlassCount": 0,
+                "productionOccupiedVoxelCount": 0,
+                "nonHeldRoomContacts": [],
+                "heldRoomContacts": [],
+                "intersectsExistingVerticalCore": false,
+                "nextToNamedCorridor": true,
+                "nextToPhysicalTwoHighCorridor": true,
+                "localSites": [
+                  {
+                    "x": 10,
+                    "z": 6
+                  },
+                  {
+                    "x": 11,
+                    "z": 6
+                  },
+                  {
+                    "x": 10,
+                    "z": 7
+                  },
+                  {
+                    "x": 11,
+                    "z": 7
+                  }
+                ]
+              },
+              {
+                "sectionId": "office/candidate-01/L3",
+                "level": 3,
+                "insideFootprint": true,
+                "protectedSiteCount": 0,
+                "hardGlassCount": 0,
+                "productionOccupiedVoxelCount": 0,
+                "nonHeldRoomContacts": [],
+                "heldRoomContacts": [],
+                "intersectsExistingVerticalCore": false,
+                "nextToNamedCorridor": true,
+                "nextToPhysicalTwoHighCorridor": true,
+                "localSites": [
+                  {
+                    "x": 10,
+                    "z": 6
+                  },
+                  {
+                    "x": 11,
+                    "z": 6
+                  },
+                  {
+                    "x": 10,
+                    "z": 7
+                  },
+                  {
+                    "x": 11,
+                    "z": 7
+                  }
+                ]
+              },
+              {
+                "sectionId": "office/candidate-01/L4",
+                "level": 4,
+                "insideFootprint": true,
+                "protectedSiteCount": 0,
+                "hardGlassCount": 0,
+                "productionOccupiedVoxelCount": 0,
+                "nonHeldRoomContacts": [],
+                "heldRoomContacts": [],
+                "intersectsExistingVerticalCore": false,
+                "nextToNamedCorridor": true,
+                "nextToPhysicalTwoHighCorridor": true,
+                "localSites": [
+                  {
+                    "x": 10,
+                    "z": 6
+                  },
+                  {
+                    "x": 11,
+                    "z": 6
+                  },
+                  {
+                    "x": 10,
+                    "z": 7
+                  },
+                  {
+                    "x": 11,
+                    "z": 7
+                  }
+                ]
+              },
+              {
+                "sectionId": "office/candidate-01/L5",
+                "level": 5,
+                "insideFootprint": true,
+                "protectedSiteCount": 0,
+                "hardGlassCount": 0,
+                "productionOccupiedVoxelCount": 0,
+                "nonHeldRoomContacts": [],
+                "heldRoomContacts": [],
+                "intersectsExistingVerticalCore": false,
+                "nextToNamedCorridor": true,
+                "nextToPhysicalTwoHighCorridor": true,
+                "localSites": [
+                  {
+                    "x": 10,
+                    "z": 6
+                  },
+                  {
+                    "x": 11,
+                    "z": 6
+                  },
+                  {
+                    "x": 10,
+                    "z": 7
+                  },
+                  {
+                    "x": 11,
+                    "z": 7
+                  }
+                ]
+              },
+              {
+                "sectionId": "office/candidate-01/L6",
+                "level": 6,
+                "insideFootprint": true,
+                "protectedSiteCount": 0,
+                "hardGlassCount": 0,
+                "productionOccupiedVoxelCount": 0,
+                "nonHeldRoomContacts": [],
+                "heldRoomContacts": [],
+                "intersectsExistingVerticalCore": false,
+                "nextToNamedCorridor": true,
+                "nextToPhysicalTwoHighCorridor": true,
+                "localSites": [
+                  {
+                    "x": 10,
+                    "z": 6
+                  },
+                  {
+                    "x": 11,
+                    "z": 6
+                  },
+                  {
+                    "x": 10,
+                    "z": 7
+                  },
+                  {
+                    "x": 11,
+                    "z": 7
+                  }
+                ]
+              }
+            ],
+            "localColumnSites": [
+              {
+                "x": 10,
+                "z": 6
+              },
+              {
+                "x": 11,
+                "z": 6
+              },
+              {
+                "x": 10,
+                "z": 7
+              },
+              {
+                "x": 11,
+                "z": 7
+              }
+            ],
+            "footprintAndProtectionClean": true,
+            "productionVoxelContacts": 0,
+            "hardGlassSites": 0,
+            "otherRoomContacts": 0,
+            "retiredHeldRoomIds": [],
+            "floorsAdjacentToNominalCorridor": 6,
+            "floorsAdjacentToTwoHighAirCorridor": 6,
+            "floorsRequired": 6,
+            "strictCandidateSiteClear": true,
+            "physicalShaftConstructible": false,
+            "requiredApprovals": [
+              "NEW_CORE_SHAFT_STRUCTURAL_REDESIGN",
+              "INTER_FLOOR_SLAB_CUTS_AND_ROOF",
+              "STAIR_LIFT_GEOMETRY_AND_CLEARANCE",
+              "EGRESS_ROUTE_AND_DOOR_SWING"
+            ],
+            "constructionApproved": false,
+            "blockOperations": [],
+            "worldCoordinates": null
+          },
+          {
+            "x": 10,
+            "z": 7,
+            "width": 2,
+            "depth": 2,
+            "sections": [
+              {
+                "sectionId": "office/candidate-01/L1",
+                "level": 1,
+                "insideFootprint": true,
+                "protectedSiteCount": 0,
+                "hardGlassCount": 0,
+                "productionOccupiedVoxelCount": 0,
+                "nonHeldRoomContacts": [],
+                "heldRoomContacts": [],
+                "intersectsExistingVerticalCore": false,
+                "nextToNamedCorridor": true,
+                "nextToPhysicalTwoHighCorridor": true,
+                "localSites": [
+                  {
+                    "x": 10,
+                    "z": 7
+                  },
+                  {
+                    "x": 11,
+                    "z": 7
+                  },
+                  {
+                    "x": 10,
+                    "z": 8
+                  },
+                  {
+                    "x": 11,
+                    "z": 8
+                  }
+                ]
+              },
+              {
+                "sectionId": "office/candidate-01/L2",
+                "level": 2,
+                "insideFootprint": true,
+                "protectedSiteCount": 0,
+                "hardGlassCount": 0,
+                "productionOccupiedVoxelCount": 0,
+                "nonHeldRoomContacts": [],
+                "heldRoomContacts": [],
+                "intersectsExistingVerticalCore": false,
+                "nextToNamedCorridor": true,
+                "nextToPhysicalTwoHighCorridor": true,
+                "localSites": [
+                  {
+                    "x": 10,
+                    "z": 7
+                  },
+                  {
+                    "x": 11,
+                    "z": 7
+                  },
+                  {
+                    "x": 10,
+                    "z": 8
+                  },
+                  {
+                    "x": 11,
+                    "z": 8
+                  }
+                ]
+              },
+              {
+                "sectionId": "office/candidate-01/L3",
+                "level": 3,
+                "insideFootprint": true,
+                "protectedSiteCount": 0,
+                "hardGlassCount": 0,
+                "productionOccupiedVoxelCount": 0,
+                "nonHeldRoomContacts": [],
+                "heldRoomContacts": [],
+                "intersectsExistingVerticalCore": false,
+                "nextToNamedCorridor": true,
+                "nextToPhysicalTwoHighCorridor": true,
+                "localSites": [
+                  {
+                    "x": 10,
+                    "z": 7
+                  },
+                  {
+                    "x": 11,
+                    "z": 7
+                  },
+                  {
+                    "x": 10,
+                    "z": 8
+                  },
+                  {
+                    "x": 11,
+                    "z": 8
+                  }
+                ]
+              },
+              {
+                "sectionId": "office/candidate-01/L4",
+                "level": 4,
+                "insideFootprint": true,
+                "protectedSiteCount": 0,
+                "hardGlassCount": 0,
+                "productionOccupiedVoxelCount": 0,
+                "nonHeldRoomContacts": [],
+                "heldRoomContacts": [],
+                "intersectsExistingVerticalCore": false,
+                "nextToNamedCorridor": true,
+                "nextToPhysicalTwoHighCorridor": true,
+                "localSites": [
+                  {
+                    "x": 10,
+                    "z": 7
+                  },
+                  {
+                    "x": 11,
+                    "z": 7
+                  },
+                  {
+                    "x": 10,
+                    "z": 8
+                  },
+                  {
+                    "x": 11,
+                    "z": 8
+                  }
+                ]
+              },
+              {
+                "sectionId": "office/candidate-01/L5",
+                "level": 5,
+                "insideFootprint": true,
+                "protectedSiteCount": 0,
+                "hardGlassCount": 0,
+                "productionOccupiedVoxelCount": 0,
+                "nonHeldRoomContacts": [],
+                "heldRoomContacts": [],
+                "intersectsExistingVerticalCore": false,
+                "nextToNamedCorridor": true,
+                "nextToPhysicalTwoHighCorridor": true,
+                "localSites": [
+                  {
+                    "x": 10,
+                    "z": 7
+                  },
+                  {
+                    "x": 11,
+                    "z": 7
+                  },
+                  {
+                    "x": 10,
+                    "z": 8
+                  },
+                  {
+                    "x": 11,
+                    "z": 8
+                  }
+                ]
+              },
+              {
+                "sectionId": "office/candidate-01/L6",
+                "level": 6,
+                "insideFootprint": true,
+                "protectedSiteCount": 0,
+                "hardGlassCount": 0,
+                "productionOccupiedVoxelCount": 0,
+                "nonHeldRoomContacts": [],
+                "heldRoomContacts": [],
+                "intersectsExistingVerticalCore": false,
+                "nextToNamedCorridor": true,
+                "nextToPhysicalTwoHighCorridor": true,
+                "localSites": [
+                  {
+                    "x": 10,
+                    "z": 7
+                  },
+                  {
+                    "x": 11,
+                    "z": 7
+                  },
+                  {
+                    "x": 10,
+                    "z": 8
+                  },
+                  {
+                    "x": 11,
+                    "z": 8
+                  }
+                ]
+              }
+            ],
+            "localColumnSites": [
+              {
+                "x": 10,
+                "z": 7
+              },
+              {
+                "x": 11,
+                "z": 7
+              },
+              {
+                "x": 10,
+                "z": 8
+              },
+              {
+                "x": 11,
+                "z": 8
+              }
+            ],
+            "footprintAndProtectionClean": true,
+            "productionVoxelContacts": 0,
+            "hardGlassSites": 0,
+            "otherRoomContacts": 0,
+            "retiredHeldRoomIds": [],
+            "floorsAdjacentToNominalCorridor": 6,
+            "floorsAdjacentToTwoHighAirCorridor": 6,
+            "floorsRequired": 6,
+            "strictCandidateSiteClear": true,
+            "physicalShaftConstructible": false,
+            "requiredApprovals": [
+              "NEW_CORE_SHAFT_STRUCTURAL_REDESIGN",
+              "INTER_FLOOR_SLAB_CUTS_AND_ROOF",
+              "STAIR_LIFT_GEOMETRY_AND_CLEARANCE",
+              "EGRESS_ROUTE_AND_DOOR_SWING"
+            ],
+            "constructionApproved": false,
+            "blockOperations": [],
+            "worldCoordinates": null
+          },
+          {
+            "x": 11,
+            "z": 6,
+            "width": 2,
+            "depth": 2,
+            "sections": [
+              {
+                "sectionId": "office/candidate-01/L1",
+                "level": 1,
+                "insideFootprint": true,
+                "protectedSiteCount": 0,
+                "hardGlassCount": 0,
+                "productionOccupiedVoxelCount": 0,
+                "nonHeldRoomContacts": [],
+                "heldRoomContacts": [],
+                "intersectsExistingVerticalCore": false,
+                "nextToNamedCorridor": true,
+                "nextToPhysicalTwoHighCorridor": true,
+                "localSites": [
+                  {
+                    "x": 11,
+                    "z": 6
+                  },
+                  {
+                    "x": 12,
+                    "z": 6
+                  },
+                  {
+                    "x": 11,
+                    "z": 7
+                  },
+                  {
+                    "x": 12,
+                    "z": 7
+                  }
+                ]
+              },
+              {
+                "sectionId": "office/candidate-01/L2",
+                "level": 2,
+                "insideFootprint": true,
+                "protectedSiteCount": 0,
+                "hardGlassCount": 0,
+                "productionOccupiedVoxelCount": 0,
+                "nonHeldRoomContacts": [],
+                "heldRoomContacts": [],
+                "intersectsExistingVerticalCore": false,
+                "nextToNamedCorridor": true,
+                "nextToPhysicalTwoHighCorridor": true,
+                "localSites": [
+                  {
+                    "x": 11,
+                    "z": 6
+                  },
+                  {
+                    "x": 12,
+                    "z": 6
+                  },
+                  {
+                    "x": 11,
+                    "z": 7
+                  },
+                  {
+                    "x": 12,
+                    "z": 7
+                  }
+                ]
+              },
+              {
+                "sectionId": "office/candidate-01/L3",
+                "level": 3,
+                "insideFootprint": true,
+                "protectedSiteCount": 0,
+                "hardGlassCount": 0,
+                "productionOccupiedVoxelCount": 0,
+                "nonHeldRoomContacts": [],
+                "heldRoomContacts": [],
+                "intersectsExistingVerticalCore": false,
+                "nextToNamedCorridor": true,
+                "nextToPhysicalTwoHighCorridor": true,
+                "localSites": [
+                  {
+                    "x": 11,
+                    "z": 6
+                  },
+                  {
+                    "x": 12,
+                    "z": 6
+                  },
+                  {
+                    "x": 11,
+                    "z": 7
+                  },
+                  {
+                    "x": 12,
+                    "z": 7
+                  }
+                ]
+              },
+              {
+                "sectionId": "office/candidate-01/L4",
+                "level": 4,
+                "insideFootprint": true,
+                "protectedSiteCount": 0,
+                "hardGlassCount": 0,
+                "productionOccupiedVoxelCount": 0,
+                "nonHeldRoomContacts": [],
+                "heldRoomContacts": [],
+                "intersectsExistingVerticalCore": false,
+                "nextToNamedCorridor": true,
+                "nextToPhysicalTwoHighCorridor": true,
+                "localSites": [
+                  {
+                    "x": 11,
+                    "z": 6
+                  },
+                  {
+                    "x": 12,
+                    "z": 6
+                  },
+                  {
+                    "x": 11,
+                    "z": 7
+                  },
+                  {
+                    "x": 12,
+                    "z": 7
+                  }
+                ]
+              },
+              {
+                "sectionId": "office/candidate-01/L5",
+                "level": 5,
+                "insideFootprint": true,
+                "protectedSiteCount": 0,
+                "hardGlassCount": 0,
+                "productionOccupiedVoxelCount": 0,
+                "nonHeldRoomContacts": [],
+                "heldRoomContacts": [],
+                "intersectsExistingVerticalCore": false,
+                "nextToNamedCorridor": true,
+                "nextToPhysicalTwoHighCorridor": true,
+                "localSites": [
+                  {
+                    "x": 11,
+                    "z": 6
+                  },
+                  {
+                    "x": 12,
+                    "z": 6
+                  },
+                  {
+                    "x": 11,
+                    "z": 7
+                  },
+                  {
+                    "x": 12,
+                    "z": 7
+                  }
+                ]
+              },
+              {
+                "sectionId": "office/candidate-01/L6",
+                "level": 6,
+                "insideFootprint": true,
+                "protectedSiteCount": 0,
+                "hardGlassCount": 0,
+                "productionOccupiedVoxelCount": 0,
+                "nonHeldRoomContacts": [],
+                "heldRoomContacts": [],
+                "intersectsExistingVerticalCore": false,
+                "nextToNamedCorridor": true,
+                "nextToPhysicalTwoHighCorridor": true,
+                "localSites": [
+                  {
+                    "x": 11,
+                    "z": 6
+                  },
+                  {
+                    "x": 12,
+                    "z": 6
+                  },
+                  {
+                    "x": 11,
+                    "z": 7
+                  },
+                  {
+                    "x": 12,
+                    "z": 7
+                  }
+                ]
+              }
+            ],
+            "localColumnSites": [
+              {
+                "x": 11,
+                "z": 6
+              },
+              {
+                "x": 12,
+                "z": 6
+              },
+              {
+                "x": 11,
+                "z": 7
+              },
+              {
+                "x": 12,
+                "z": 7
+              }
+            ],
+            "footprintAndProtectionClean": true,
+            "productionVoxelContacts": 0,
+            "hardGlassSites": 0,
+            "otherRoomContacts": 0,
+            "retiredHeldRoomIds": [],
+            "floorsAdjacentToNominalCorridor": 6,
+            "floorsAdjacentToTwoHighAirCorridor": 6,
+            "floorsRequired": 6,
+            "strictCandidateSiteClear": true,
+            "physicalShaftConstructible": false,
+            "requiredApprovals": [
+              "NEW_CORE_SHAFT_STRUCTURAL_REDESIGN",
+              "INTER_FLOOR_SLAB_CUTS_AND_ROOF",
+              "STAIR_LIFT_GEOMETRY_AND_CLEARANCE",
+              "EGRESS_ROUTE_AND_DOOR_SWING"
+            ],
+            "constructionApproved": false,
+            "blockOperations": [],
+            "worldCoordinates": null
+          },
+          {
+            "x": 11,
+            "z": 7,
+            "width": 2,
+            "depth": 2,
+            "sections": [
+              {
+                "sectionId": "office/candidate-01/L1",
+                "level": 1,
+                "insideFootprint": true,
+                "protectedSiteCount": 0,
+                "hardGlassCount": 0,
+                "productionOccupiedVoxelCount": 0,
+                "nonHeldRoomContacts": [],
+                "heldRoomContacts": [],
+                "intersectsExistingVerticalCore": false,
+                "nextToNamedCorridor": true,
+                "nextToPhysicalTwoHighCorridor": true,
+                "localSites": [
+                  {
+                    "x": 11,
+                    "z": 7
+                  },
+                  {
+                    "x": 12,
+                    "z": 7
+                  },
+                  {
+                    "x": 11,
+                    "z": 8
+                  },
+                  {
+                    "x": 12,
+                    "z": 8
+                  }
+                ]
+              },
+              {
+                "sectionId": "office/candidate-01/L2",
+                "level": 2,
+                "insideFootprint": true,
+                "protectedSiteCount": 0,
+                "hardGlassCount": 0,
+                "productionOccupiedVoxelCount": 0,
+                "nonHeldRoomContacts": [],
+                "heldRoomContacts": [],
+                "intersectsExistingVerticalCore": false,
+                "nextToNamedCorridor": true,
+                "nextToPhysicalTwoHighCorridor": true,
+                "localSites": [
+                  {
+                    "x": 11,
+                    "z": 7
+                  },
+                  {
+                    "x": 12,
+                    "z": 7
+                  },
+                  {
+                    "x": 11,
+                    "z": 8
+                  },
+                  {
+                    "x": 12,
+                    "z": 8
+                  }
+                ]
+              },
+              {
+                "sectionId": "office/candidate-01/L3",
+                "level": 3,
+                "insideFootprint": true,
+                "protectedSiteCount": 0,
+                "hardGlassCount": 0,
+                "productionOccupiedVoxelCount": 0,
+                "nonHeldRoomContacts": [],
+                "heldRoomContacts": [],
+                "intersectsExistingVerticalCore": false,
+                "nextToNamedCorridor": true,
+                "nextToPhysicalTwoHighCorridor": true,
+                "localSites": [
+                  {
+                    "x": 11,
+                    "z": 7
+                  },
+                  {
+                    "x": 12,
+                    "z": 7
+                  },
+                  {
+                    "x": 11,
+                    "z": 8
+                  },
+                  {
+                    "x": 12,
+                    "z": 8
+                  }
+                ]
+              },
+              {
+                "sectionId": "office/candidate-01/L4",
+                "level": 4,
+                "insideFootprint": true,
+                "protectedSiteCount": 0,
+                "hardGlassCount": 0,
+                "productionOccupiedVoxelCount": 0,
+                "nonHeldRoomContacts": [],
+                "heldRoomContacts": [],
+                "intersectsExistingVerticalCore": false,
+                "nextToNamedCorridor": true,
+                "nextToPhysicalTwoHighCorridor": true,
+                "localSites": [
+                  {
+                    "x": 11,
+                    "z": 7
+                  },
+                  {
+                    "x": 12,
+                    "z": 7
+                  },
+                  {
+                    "x": 11,
+                    "z": 8
+                  },
+                  {
+                    "x": 12,
+                    "z": 8
+                  }
+                ]
+              },
+              {
+                "sectionId": "office/candidate-01/L5",
+                "level": 5,
+                "insideFootprint": true,
+                "protectedSiteCount": 0,
+                "hardGlassCount": 0,
+                "productionOccupiedVoxelCount": 0,
+                "nonHeldRoomContacts": [],
+                "heldRoomContacts": [],
+                "intersectsExistingVerticalCore": false,
+                "nextToNamedCorridor": true,
+                "nextToPhysicalTwoHighCorridor": true,
+                "localSites": [
+                  {
+                    "x": 11,
+                    "z": 7
+                  },
+                  {
+                    "x": 12,
+                    "z": 7
+                  },
+                  {
+                    "x": 11,
+                    "z": 8
+                  },
+                  {
+                    "x": 12,
+                    "z": 8
+                  }
+                ]
+              },
+              {
+                "sectionId": "office/candidate-01/L6",
+                "level": 6,
+                "insideFootprint": true,
+                "protectedSiteCount": 0,
+                "hardGlassCount": 0,
+                "productionOccupiedVoxelCount": 0,
+                "nonHeldRoomContacts": [],
+                "heldRoomContacts": [],
+                "intersectsExistingVerticalCore": false,
+                "nextToNamedCorridor": true,
+                "nextToPhysicalTwoHighCorridor": true,
+                "localSites": [
+                  {
+                    "x": 11,
+                    "z": 7
+                  },
+                  {
+                    "x": 12,
+                    "z": 7
+                  },
+                  {
+                    "x": 11,
+                    "z": 8
+                  },
+                  {
+                    "x": 12,
+                    "z": 8
+                  }
+                ]
+              }
+            ],
+            "localColumnSites": [
+              {
+                "x": 11,
+                "z": 7
+              },
+              {
+                "x": 12,
+                "z": 7
+              },
+              {
+                "x": 11,
+                "z": 8
+              },
+              {
+                "x": 12,
+                "z": 8
+              }
+            ],
+            "footprintAndProtectionClean": true,
+            "productionVoxelContacts": 0,
+            "hardGlassSites": 0,
+            "otherRoomContacts": 0,
+            "retiredHeldRoomIds": [],
+            "floorsAdjacentToNominalCorridor": 6,
+            "floorsAdjacentToTwoHighAirCorridor": 6,
+            "floorsRequired": 6,
+            "strictCandidateSiteClear": true,
+            "physicalShaftConstructible": false,
+            "requiredApprovals": [
+              "NEW_CORE_SHAFT_STRUCTURAL_REDESIGN",
+              "INTER_FLOOR_SLAB_CUTS_AND_ROOF",
+              "STAIR_LIFT_GEOMETRY_AND_CLEARANCE",
+              "EGRESS_ROUTE_AND_DOOR_SWING"
+            ],
+            "constructionApproved": false,
+            "blockOperations": [],
+            "worldCoordinates": null
+          },
+          {
+            "x": 12,
+            "z": 12,
+            "width": 2,
+            "depth": 2,
+            "sections": [
+              {
+                "sectionId": "office/candidate-01/L1",
+                "level": 1,
+                "insideFootprint": true,
+                "protectedSiteCount": 0,
+                "hardGlassCount": 0,
+                "productionOccupiedVoxelCount": 0,
+                "nonHeldRoomContacts": [],
+                "heldRoomContacts": [],
+                "intersectsExistingVerticalCore": false,
+                "nextToNamedCorridor": true,
+                "nextToPhysicalTwoHighCorridor": true,
+                "localSites": [
+                  {
+                    "x": 12,
+                    "z": 12
+                  },
+                  {
+                    "x": 13,
+                    "z": 12
+                  },
+                  {
+                    "x": 12,
+                    "z": 13
+                  },
+                  {
+                    "x": 13,
+                    "z": 13
+                  }
+                ]
+              },
+              {
+                "sectionId": "office/candidate-01/L2",
+                "level": 2,
+                "insideFootprint": true,
+                "protectedSiteCount": 0,
+                "hardGlassCount": 0,
+                "productionOccupiedVoxelCount": 0,
+                "nonHeldRoomContacts": [],
+                "heldRoomContacts": [],
+                "intersectsExistingVerticalCore": false,
+                "nextToNamedCorridor": true,
+                "nextToPhysicalTwoHighCorridor": true,
+                "localSites": [
+                  {
+                    "x": 12,
+                    "z": 12
+                  },
+                  {
+                    "x": 13,
+                    "z": 12
+                  },
+                  {
+                    "x": 12,
+                    "z": 13
+                  },
+                  {
+                    "x": 13,
+                    "z": 13
+                  }
+                ]
+              },
+              {
+                "sectionId": "office/candidate-01/L3",
+                "level": 3,
+                "insideFootprint": true,
+                "protectedSiteCount": 0,
+                "hardGlassCount": 0,
+                "productionOccupiedVoxelCount": 0,
+                "nonHeldRoomContacts": [],
+                "heldRoomContacts": [],
+                "intersectsExistingVerticalCore": false,
+                "nextToNamedCorridor": true,
+                "nextToPhysicalTwoHighCorridor": true,
+                "localSites": [
+                  {
+                    "x": 12,
+                    "z": 12
+                  },
+                  {
+                    "x": 13,
+                    "z": 12
+                  },
+                  {
+                    "x": 12,
+                    "z": 13
+                  },
+                  {
+                    "x": 13,
+                    "z": 13
+                  }
+                ]
+              },
+              {
+                "sectionId": "office/candidate-01/L4",
+                "level": 4,
+                "insideFootprint": true,
+                "protectedSiteCount": 0,
+                "hardGlassCount": 0,
+                "productionOccupiedVoxelCount": 0,
+                "nonHeldRoomContacts": [],
+                "heldRoomContacts": [],
+                "intersectsExistingVerticalCore": false,
+                "nextToNamedCorridor": true,
+                "nextToPhysicalTwoHighCorridor": true,
+                "localSites": [
+                  {
+                    "x": 12,
+                    "z": 12
+                  },
+                  {
+                    "x": 13,
+                    "z": 12
+                  },
+                  {
+                    "x": 12,
+                    "z": 13
+                  },
+                  {
+                    "x": 13,
+                    "z": 13
+                  }
+                ]
+              },
+              {
+                "sectionId": "office/candidate-01/L5",
+                "level": 5,
+                "insideFootprint": true,
+                "protectedSiteCount": 0,
+                "hardGlassCount": 0,
+                "productionOccupiedVoxelCount": 0,
+                "nonHeldRoomContacts": [],
+                "heldRoomContacts": [],
+                "intersectsExistingVerticalCore": false,
+                "nextToNamedCorridor": true,
+                "nextToPhysicalTwoHighCorridor": true,
+                "localSites": [
+                  {
+                    "x": 12,
+                    "z": 12
+                  },
+                  {
+                    "x": 13,
+                    "z": 12
+                  },
+                  {
+                    "x": 12,
+                    "z": 13
+                  },
+                  {
+                    "x": 13,
+                    "z": 13
+                  }
+                ]
+              },
+              {
+                "sectionId": "office/candidate-01/L6",
+                "level": 6,
+                "insideFootprint": true,
+                "protectedSiteCount": 0,
+                "hardGlassCount": 0,
+                "productionOccupiedVoxelCount": 0,
+                "nonHeldRoomContacts": [],
+                "heldRoomContacts": [],
+                "intersectsExistingVerticalCore": false,
+                "nextToNamedCorridor": true,
+                "nextToPhysicalTwoHighCorridor": true,
+                "localSites": [
+                  {
+                    "x": 12,
+                    "z": 12
+                  },
+                  {
+                    "x": 13,
+                    "z": 12
+                  },
+                  {
+                    "x": 12,
+                    "z": 13
+                  },
+                  {
+                    "x": 13,
+                    "z": 13
+                  }
+                ]
+              }
+            ],
+            "localColumnSites": [
+              {
+                "x": 12,
+                "z": 12
+              },
+              {
+                "x": 13,
+                "z": 12
+              },
+              {
+                "x": 12,
+                "z": 13
+              },
+              {
+                "x": 13,
+                "z": 13
+              }
+            ],
+            "footprintAndProtectionClean": true,
+            "productionVoxelContacts": 0,
+            "hardGlassSites": 0,
+            "otherRoomContacts": 0,
+            "retiredHeldRoomIds": [],
+            "floorsAdjacentToNominalCorridor": 6,
+            "floorsAdjacentToTwoHighAirCorridor": 6,
+            "floorsRequired": 6,
+            "strictCandidateSiteClear": true,
+            "physicalShaftConstructible": false,
+            "requiredApprovals": [
+              "NEW_CORE_SHAFT_STRUCTURAL_REDESIGN",
+              "INTER_FLOOR_SLAB_CUTS_AND_ROOF",
+              "STAIR_LIFT_GEOMETRY_AND_CLEARANCE",
+              "EGRESS_ROUTE_AND_DOOR_SWING"
+            ],
+            "constructionApproved": false,
+            "blockOperations": [],
+            "worldCoordinates": null
+          },
+          {
+            "x": 12,
+            "z": 13,
+            "width": 2,
+            "depth": 2,
+            "sections": [
+              {
+                "sectionId": "office/candidate-01/L1",
+                "level": 1,
+                "insideFootprint": true,
+                "protectedSiteCount": 0,
+                "hardGlassCount": 0,
+                "productionOccupiedVoxelCount": 0,
+                "nonHeldRoomContacts": [],
+                "heldRoomContacts": [],
+                "intersectsExistingVerticalCore": false,
+                "nextToNamedCorridor": true,
+                "nextToPhysicalTwoHighCorridor": true,
+                "localSites": [
+                  {
+                    "x": 12,
+                    "z": 13
+                  },
+                  {
+                    "x": 13,
+                    "z": 13
+                  },
+                  {
+                    "x": 12,
+                    "z": 14
+                  },
+                  {
+                    "x": 13,
+                    "z": 14
+                  }
+                ]
+              },
+              {
+                "sectionId": "office/candidate-01/L2",
+                "level": 2,
+                "insideFootprint": true,
+                "protectedSiteCount": 0,
+                "hardGlassCount": 0,
+                "productionOccupiedVoxelCount": 0,
+                "nonHeldRoomContacts": [],
+                "heldRoomContacts": [],
+                "intersectsExistingVerticalCore": false,
+                "nextToNamedCorridor": true,
+                "nextToPhysicalTwoHighCorridor": true,
+                "localSites": [
+                  {
+                    "x": 12,
+                    "z": 13
+                  },
+                  {
+                    "x": 13,
+                    "z": 13
+                  },
+                  {
+                    "x": 12,
+                    "z": 14
+                  },
+                  {
+                    "x": 13,
+                    "z": 14
+                  }
+                ]
+              },
+              {
+                "sectionId": "office/candidate-01/L3",
+                "level": 3,
+                "insideFootprint": true,
+                "protectedSiteCount": 0,
+                "hardGlassCount": 0,
+                "productionOccupiedVoxelCount": 0,
+                "nonHeldRoomContacts": [],
+                "heldRoomContacts": [],
+                "intersectsExistingVerticalCore": false,
+                "nextToNamedCorridor": true,
+                "nextToPhysicalTwoHighCorridor": true,
+                "localSites": [
+                  {
+                    "x": 12,
+                    "z": 13
+                  },
+                  {
+                    "x": 13,
+                    "z": 13
+                  },
+                  {
+                    "x": 12,
+                    "z": 14
+                  },
+                  {
+                    "x": 13,
+                    "z": 14
+                  }
+                ]
+              },
+              {
+                "sectionId": "office/candidate-01/L4",
+                "level": 4,
+                "insideFootprint": true,
+                "protectedSiteCount": 0,
+                "hardGlassCount": 0,
+                "productionOccupiedVoxelCount": 0,
+                "nonHeldRoomContacts": [],
+                "heldRoomContacts": [],
+                "intersectsExistingVerticalCore": false,
+                "nextToNamedCorridor": true,
+                "nextToPhysicalTwoHighCorridor": true,
+                "localSites": [
+                  {
+                    "x": 12,
+                    "z": 13
+                  },
+                  {
+                    "x": 13,
+                    "z": 13
+                  },
+                  {
+                    "x": 12,
+                    "z": 14
+                  },
+                  {
+                    "x": 13,
+                    "z": 14
+                  }
+                ]
+              },
+              {
+                "sectionId": "office/candidate-01/L5",
+                "level": 5,
+                "insideFootprint": true,
+                "protectedSiteCount": 0,
+                "hardGlassCount": 0,
+                "productionOccupiedVoxelCount": 0,
+                "nonHeldRoomContacts": [],
+                "heldRoomContacts": [],
+                "intersectsExistingVerticalCore": false,
+                "nextToNamedCorridor": true,
+                "nextToPhysicalTwoHighCorridor": true,
+                "localSites": [
+                  {
+                    "x": 12,
+                    "z": 13
+                  },
+                  {
+                    "x": 13,
+                    "z": 13
+                  },
+                  {
+                    "x": 12,
+                    "z": 14
+                  },
+                  {
+                    "x": 13,
+                    "z": 14
+                  }
+                ]
+              },
+              {
+                "sectionId": "office/candidate-01/L6",
+                "level": 6,
+                "insideFootprint": true,
+                "protectedSiteCount": 0,
+                "hardGlassCount": 0,
+                "productionOccupiedVoxelCount": 0,
+                "nonHeldRoomContacts": [],
+                "heldRoomContacts": [],
+                "intersectsExistingVerticalCore": false,
+                "nextToNamedCorridor": true,
+                "nextToPhysicalTwoHighCorridor": true,
+                "localSites": [
+                  {
+                    "x": 12,
+                    "z": 13
+                  },
+                  {
+                    "x": 13,
+                    "z": 13
+                  },
+                  {
+                    "x": 12,
+                    "z": 14
+                  },
+                  {
+                    "x": 13,
+                    "z": 14
+                  }
+                ]
+              }
+            ],
+            "localColumnSites": [
+              {
+                "x": 12,
+                "z": 13
+              },
+              {
+                "x": 13,
+                "z": 13
+              },
+              {
+                "x": 12,
+                "z": 14
+              },
+              {
+                "x": 13,
+                "z": 14
+              }
+            ],
+            "footprintAndProtectionClean": true,
+            "productionVoxelContacts": 0,
+            "hardGlassSites": 0,
+            "otherRoomContacts": 0,
+            "retiredHeldRoomIds": [],
+            "floorsAdjacentToNominalCorridor": 6,
+            "floorsAdjacentToTwoHighAirCorridor": 6,
+            "floorsRequired": 6,
+            "strictCandidateSiteClear": true,
+            "physicalShaftConstructible": false,
+            "requiredApprovals": [
+              "NEW_CORE_SHAFT_STRUCTURAL_REDESIGN",
+              "INTER_FLOOR_SLAB_CUTS_AND_ROOF",
+              "STAIR_LIFT_GEOMETRY_AND_CLEARANCE",
+              "EGRESS_ROUTE_AND_DOOR_SWING"
+            ],
+            "constructionApproved": false,
+            "blockOperations": [],
+            "worldCoordinates": null
+          }
+        ],
+        "candidateConstructionApprovals": 0,
+        "unapprovedAll": true
+      },
+      "alternatives": [
+        {
+          "originalNominalRooms": 66,
+          "verifiedUsableRoomsAdded": 0,
+          "protectedPriorRoomChanges": 0,
+          "originalEnvelopeMutations": 0,
+          "oldCoreMutations": 0,
+          "liveConstructionOperations": [],
+          "constructionApproved": false,
+          "id": "KEEP_ORIGINAL_ENVELOPE_AND_UNRESOLVED_ROOMS",
+          "claimedIndependentRoomCount": 66,
+          "heldIndependentRoomCount": 4,
+          "unapprovedIndependentRoomCount": 66,
+          "nominalServiceReallocationArea": 0,
+          "qualityStatus": "REFERENCE_HOLD",
+          "requiresBuildingPlanApproval": false
+        },
+        {
+          "originalNominalRooms": 66,
+          "verifiedUsableRoomsAdded": 0,
+          "protectedPriorRoomChanges": 0,
+          "originalEnvelopeMutations": 0,
+          "oldCoreMutations": 0,
+          "liveConstructionOperations": [],
+          "constructionApproved": false,
+          "id": "REPURPOSE_HELD_AS_COMMON_SERVICE",
+          "claimedIndependentRoomCount": 62,
+          "heldIndependentRoomCount": 0,
+          "nominalServiceReallocationArea": 64,
+          "qualityStatus": "CONDITIONAL_PROGRAMME_REDUCTION",
+          "shortConceptConnections": 4,
+          "requiresBuildingPlanApproval": true,
+          "limitations": [
+            "NOT_A_LIVE_CONNECTED_SERVICE_AREA",
+            "ALL_296_OTHER_ROOMS_STILL_UNAPPROVED"
+          ]
+        },
+        {
+          "originalNominalRooms": 66,
+          "verifiedUsableRoomsAdded": 0,
+          "protectedPriorRoomChanges": 0,
+          "originalEnvelopeMutations": 0,
+          "oldCoreMutations": 0,
+          "liveConstructionOperations": [],
+          "constructionApproved": false,
+          "id": "INSERT_NEW_ALIGNED_VERTICAL_CORE",
+          "claimedIndependentRoomCount": null,
+          "heldIndependentRoomCount": 4,
+          "nominalServiceReallocationArea": 0,
+          "proposedSites": [
+            {
+              "x": 10,
+              "z": 6,
+              "width": 2,
+              "depth": 2,
+              "sections": [
+                {
+                  "sectionId": "office/candidate-01/L1",
+                  "level": 1,
+                  "insideFootprint": true,
+                  "protectedSiteCount": 0,
+                  "hardGlassCount": 0,
+                  "productionOccupiedVoxelCount": 0,
+                  "nonHeldRoomContacts": [],
+                  "heldRoomContacts": [],
+                  "intersectsExistingVerticalCore": false,
+                  "nextToNamedCorridor": true,
+                  "nextToPhysicalTwoHighCorridor": true,
+                  "localSites": [
+                    {
+                      "x": 10,
+                      "z": 6
+                    },
+                    {
+                      "x": 11,
+                      "z": 6
+                    },
+                    {
+                      "x": 10,
+                      "z": 7
+                    },
+                    {
+                      "x": 11,
+                      "z": 7
+                    }
+                  ]
+                },
+                {
+                  "sectionId": "office/candidate-01/L2",
+                  "level": 2,
+                  "insideFootprint": true,
+                  "protectedSiteCount": 0,
+                  "hardGlassCount": 0,
+                  "productionOccupiedVoxelCount": 0,
+                  "nonHeldRoomContacts": [],
+                  "heldRoomContacts": [],
+                  "intersectsExistingVerticalCore": false,
+                  "nextToNamedCorridor": true,
+                  "nextToPhysicalTwoHighCorridor": true,
+                  "localSites": [
+                    {
+                      "x": 10,
+                      "z": 6
+                    },
+                    {
+                      "x": 11,
+                      "z": 6
+                    },
+                    {
+                      "x": 10,
+                      "z": 7
+                    },
+                    {
+                      "x": 11,
+                      "z": 7
+                    }
+                  ]
+                },
+                {
+                  "sectionId": "office/candidate-01/L3",
+                  "level": 3,
+                  "insideFootprint": true,
+                  "protectedSiteCount": 0,
+                  "hardGlassCount": 0,
+                  "productionOccupiedVoxelCount": 0,
+                  "nonHeldRoomContacts": [],
+                  "heldRoomContacts": [],
+                  "intersectsExistingVerticalCore": false,
+                  "nextToNamedCorridor": true,
+                  "nextToPhysicalTwoHighCorridor": true,
+                  "localSites": [
+                    {
+                      "x": 10,
+                      "z": 6
+                    },
+                    {
+                      "x": 11,
+                      "z": 6
+                    },
+                    {
+                      "x": 10,
+                      "z": 7
+                    },
+                    {
+                      "x": 11,
+                      "z": 7
+                    }
+                  ]
+                },
+                {
+                  "sectionId": "office/candidate-01/L4",
+                  "level": 4,
+                  "insideFootprint": true,
+                  "protectedSiteCount": 0,
+                  "hardGlassCount": 0,
+                  "productionOccupiedVoxelCount": 0,
+                  "nonHeldRoomContacts": [],
+                  "heldRoomContacts": [],
+                  "intersectsExistingVerticalCore": false,
+                  "nextToNamedCorridor": true,
+                  "nextToPhysicalTwoHighCorridor": true,
+                  "localSites": [
+                    {
+                      "x": 10,
+                      "z": 6
+                    },
+                    {
+                      "x": 11,
+                      "z": 6
+                    },
+                    {
+                      "x": 10,
+                      "z": 7
+                    },
+                    {
+                      "x": 11,
+                      "z": 7
+                    }
+                  ]
+                },
+                {
+                  "sectionId": "office/candidate-01/L5",
+                  "level": 5,
+                  "insideFootprint": true,
+                  "protectedSiteCount": 0,
+                  "hardGlassCount": 0,
+                  "productionOccupiedVoxelCount": 0,
+                  "nonHeldRoomContacts": [],
+                  "heldRoomContacts": [],
+                  "intersectsExistingVerticalCore": false,
+                  "nextToNamedCorridor": true,
+                  "nextToPhysicalTwoHighCorridor": true,
+                  "localSites": [
+                    {
+                      "x": 10,
+                      "z": 6
+                    },
+                    {
+                      "x": 11,
+                      "z": 6
+                    },
+                    {
+                      "x": 10,
+                      "z": 7
+                    },
+                    {
+                      "x": 11,
+                      "z": 7
+                    }
+                  ]
+                },
+                {
+                  "sectionId": "office/candidate-01/L6",
+                  "level": 6,
+                  "insideFootprint": true,
+                  "protectedSiteCount": 0,
+                  "hardGlassCount": 0,
+                  "productionOccupiedVoxelCount": 0,
+                  "nonHeldRoomContacts": [],
+                  "heldRoomContacts": [],
+                  "intersectsExistingVerticalCore": false,
+                  "nextToNamedCorridor": true,
+                  "nextToPhysicalTwoHighCorridor": true,
+                  "localSites": [
+                    {
+                      "x": 10,
+                      "z": 6
+                    },
+                    {
+                      "x": 11,
+                      "z": 6
+                    },
+                    {
+                      "x": 10,
+                      "z": 7
+                    },
+                    {
+                      "x": 11,
+                      "z": 7
+                    }
+                  ]
+                }
+              ],
+              "localColumnSites": [
+                {
+                  "x": 10,
+                  "z": 6
+                },
+                {
+                  "x": 11,
+                  "z": 6
+                },
+                {
+                  "x": 10,
+                  "z": 7
+                },
+                {
+                  "x": 11,
+                  "z": 7
+                }
+              ],
+              "footprintAndProtectionClean": true,
+              "productionVoxelContacts": 0,
+              "hardGlassSites": 0,
+              "otherRoomContacts": 0,
+              "retiredHeldRoomIds": [],
+              "floorsAdjacentToNominalCorridor": 6,
+              "floorsAdjacentToTwoHighAirCorridor": 6,
+              "floorsRequired": 6,
+              "strictCandidateSiteClear": true,
+              "physicalShaftConstructible": false,
+              "requiredApprovals": [
+                "NEW_CORE_SHAFT_STRUCTURAL_REDESIGN",
+                "INTER_FLOOR_SLAB_CUTS_AND_ROOF",
+                "STAIR_LIFT_GEOMETRY_AND_CLEARANCE",
+                "EGRESS_ROUTE_AND_DOOR_SWING"
+              ],
+              "constructionApproved": false,
+              "blockOperations": [],
+              "worldCoordinates": null
+            },
+            {
+              "x": 10,
+              "z": 7,
+              "width": 2,
+              "depth": 2,
+              "sections": [
+                {
+                  "sectionId": "office/candidate-01/L1",
+                  "level": 1,
+                  "insideFootprint": true,
+                  "protectedSiteCount": 0,
+                  "hardGlassCount": 0,
+                  "productionOccupiedVoxelCount": 0,
+                  "nonHeldRoomContacts": [],
+                  "heldRoomContacts": [],
+                  "intersectsExistingVerticalCore": false,
+                  "nextToNamedCorridor": true,
+                  "nextToPhysicalTwoHighCorridor": true,
+                  "localSites": [
+                    {
+                      "x": 10,
+                      "z": 7
+                    },
+                    {
+                      "x": 11,
+                      "z": 7
+                    },
+                    {
+                      "x": 10,
+                      "z": 8
+                    },
+                    {
+                      "x": 11,
+                      "z": 8
+                    }
+                  ]
+                },
+                {
+                  "sectionId": "office/candidate-01/L2",
+                  "level": 2,
+                  "insideFootprint": true,
+                  "protectedSiteCount": 0,
+                  "hardGlassCount": 0,
+                  "productionOccupiedVoxelCount": 0,
+                  "nonHeldRoomContacts": [],
+                  "heldRoomContacts": [],
+                  "intersectsExistingVerticalCore": false,
+                  "nextToNamedCorridor": true,
+                  "nextToPhysicalTwoHighCorridor": true,
+                  "localSites": [
+                    {
+                      "x": 10,
+                      "z": 7
+                    },
+                    {
+                      "x": 11,
+                      "z": 7
+                    },
+                    {
+                      "x": 10,
+                      "z": 8
+                    },
+                    {
+                      "x": 11,
+                      "z": 8
+                    }
+                  ]
+                },
+                {
+                  "sectionId": "office/candidate-01/L3",
+                  "level": 3,
+                  "insideFootprint": true,
+                  "protectedSiteCount": 0,
+                  "hardGlassCount": 0,
+                  "productionOccupiedVoxelCount": 0,
+                  "nonHeldRoomContacts": [],
+                  "heldRoomContacts": [],
+                  "intersectsExistingVerticalCore": false,
+                  "nextToNamedCorridor": true,
+                  "nextToPhysicalTwoHighCorridor": true,
+                  "localSites": [
+                    {
+                      "x": 10,
+                      "z": 7
+                    },
+                    {
+                      "x": 11,
+                      "z": 7
+                    },
+                    {
+                      "x": 10,
+                      "z": 8
+                    },
+                    {
+                      "x": 11,
+                      "z": 8
+                    }
+                  ]
+                },
+                {
+                  "sectionId": "office/candidate-01/L4",
+                  "level": 4,
+                  "insideFootprint": true,
+                  "protectedSiteCount": 0,
+                  "hardGlassCount": 0,
+                  "productionOccupiedVoxelCount": 0,
+                  "nonHeldRoomContacts": [],
+                  "heldRoomContacts": [],
+                  "intersectsExistingVerticalCore": false,
+                  "nextToNamedCorridor": true,
+                  "nextToPhysicalTwoHighCorridor": true,
+                  "localSites": [
+                    {
+                      "x": 10,
+                      "z": 7
+                    },
+                    {
+                      "x": 11,
+                      "z": 7
+                    },
+                    {
+                      "x": 10,
+                      "z": 8
+                    },
+                    {
+                      "x": 11,
+                      "z": 8
+                    }
+                  ]
+                },
+                {
+                  "sectionId": "office/candidate-01/L5",
+                  "level": 5,
+                  "insideFootprint": true,
+                  "protectedSiteCount": 0,
+                  "hardGlassCount": 0,
+                  "productionOccupiedVoxelCount": 0,
+                  "nonHeldRoomContacts": [],
+                  "heldRoomContacts": [],
+                  "intersectsExistingVerticalCore": false,
+                  "nextToNamedCorridor": true,
+                  "nextToPhysicalTwoHighCorridor": true,
+                  "localSites": [
+                    {
+                      "x": 10,
+                      "z": 7
+                    },
+                    {
+                      "x": 11,
+                      "z": 7
+                    },
+                    {
+                      "x": 10,
+                      "z": 8
+                    },
+                    {
+                      "x": 11,
+                      "z": 8
+                    }
+                  ]
+                },
+                {
+                  "sectionId": "office/candidate-01/L6",
+                  "level": 6,
+                  "insideFootprint": true,
+                  "protectedSiteCount": 0,
+                  "hardGlassCount": 0,
+                  "productionOccupiedVoxelCount": 0,
+                  "nonHeldRoomContacts": [],
+                  "heldRoomContacts": [],
+                  "intersectsExistingVerticalCore": false,
+                  "nextToNamedCorridor": true,
+                  "nextToPhysicalTwoHighCorridor": true,
+                  "localSites": [
+                    {
+                      "x": 10,
+                      "z": 7
+                    },
+                    {
+                      "x": 11,
+                      "z": 7
+                    },
+                    {
+                      "x": 10,
+                      "z": 8
+                    },
+                    {
+                      "x": 11,
+                      "z": 8
+                    }
+                  ]
+                }
+              ],
+              "localColumnSites": [
+                {
+                  "x": 10,
+                  "z": 7
+                },
+                {
+                  "x": 11,
+                  "z": 7
+                },
+                {
+                  "x": 10,
+                  "z": 8
+                },
+                {
+                  "x": 11,
+                  "z": 8
+                }
+              ],
+              "footprintAndProtectionClean": true,
+              "productionVoxelContacts": 0,
+              "hardGlassSites": 0,
+              "otherRoomContacts": 0,
+              "retiredHeldRoomIds": [],
+              "floorsAdjacentToNominalCorridor": 6,
+              "floorsAdjacentToTwoHighAirCorridor": 6,
+              "floorsRequired": 6,
+              "strictCandidateSiteClear": true,
+              "physicalShaftConstructible": false,
+              "requiredApprovals": [
+                "NEW_CORE_SHAFT_STRUCTURAL_REDESIGN",
+                "INTER_FLOOR_SLAB_CUTS_AND_ROOF",
+                "STAIR_LIFT_GEOMETRY_AND_CLEARANCE",
+                "EGRESS_ROUTE_AND_DOOR_SWING"
+              ],
+              "constructionApproved": false,
+              "blockOperations": [],
+              "worldCoordinates": null
+            },
+            {
+              "x": 11,
+              "z": 6,
+              "width": 2,
+              "depth": 2,
+              "sections": [
+                {
+                  "sectionId": "office/candidate-01/L1",
+                  "level": 1,
+                  "insideFootprint": true,
+                  "protectedSiteCount": 0,
+                  "hardGlassCount": 0,
+                  "productionOccupiedVoxelCount": 0,
+                  "nonHeldRoomContacts": [],
+                  "heldRoomContacts": [],
+                  "intersectsExistingVerticalCore": false,
+                  "nextToNamedCorridor": true,
+                  "nextToPhysicalTwoHighCorridor": true,
+                  "localSites": [
+                    {
+                      "x": 11,
+                      "z": 6
+                    },
+                    {
+                      "x": 12,
+                      "z": 6
+                    },
+                    {
+                      "x": 11,
+                      "z": 7
+                    },
+                    {
+                      "x": 12,
+                      "z": 7
+                    }
+                  ]
+                },
+                {
+                  "sectionId": "office/candidate-01/L2",
+                  "level": 2,
+                  "insideFootprint": true,
+                  "protectedSiteCount": 0,
+                  "hardGlassCount": 0,
+                  "productionOccupiedVoxelCount": 0,
+                  "nonHeldRoomContacts": [],
+                  "heldRoomContacts": [],
+                  "intersectsExistingVerticalCore": false,
+                  "nextToNamedCorridor": true,
+                  "nextToPhysicalTwoHighCorridor": true,
+                  "localSites": [
+                    {
+                      "x": 11,
+                      "z": 6
+                    },
+                    {
+                      "x": 12,
+                      "z": 6
+                    },
+                    {
+                      "x": 11,
+                      "z": 7
+                    },
+                    {
+                      "x": 12,
+                      "z": 7
+                    }
+                  ]
+                },
+                {
+                  "sectionId": "office/candidate-01/L3",
+                  "level": 3,
+                  "insideFootprint": true,
+                  "protectedSiteCount": 0,
+                  "hardGlassCount": 0,
+                  "productionOccupiedVoxelCount": 0,
+                  "nonHeldRoomContacts": [],
+                  "heldRoomContacts": [],
+                  "intersectsExistingVerticalCore": false,
+                  "nextToNamedCorridor": true,
+                  "nextToPhysicalTwoHighCorridor": true,
+                  "localSites": [
+                    {
+                      "x": 11,
+                      "z": 6
+                    },
+                    {
+                      "x": 12,
+                      "z": 6
+                    },
+                    {
+                      "x": 11,
+                      "z": 7
+                    },
+                    {
+                      "x": 12,
+                      "z": 7
+                    }
+                  ]
+                },
+                {
+                  "sectionId": "office/candidate-01/L4",
+                  "level": 4,
+                  "insideFootprint": true,
+                  "protectedSiteCount": 0,
+                  "hardGlassCount": 0,
+                  "productionOccupiedVoxelCount": 0,
+                  "nonHeldRoomContacts": [],
+                  "heldRoomContacts": [],
+                  "intersectsExistingVerticalCore": false,
+                  "nextToNamedCorridor": true,
+                  "nextToPhysicalTwoHighCorridor": true,
+                  "localSites": [
+                    {
+                      "x": 11,
+                      "z": 6
+                    },
+                    {
+                      "x": 12,
+                      "z": 6
+                    },
+                    {
+                      "x": 11,
+                      "z": 7
+                    },
+                    {
+                      "x": 12,
+                      "z": 7
+                    }
+                  ]
+                },
+                {
+                  "sectionId": "office/candidate-01/L5",
+                  "level": 5,
+                  "insideFootprint": true,
+                  "protectedSiteCount": 0,
+                  "hardGlassCount": 0,
+                  "productionOccupiedVoxelCount": 0,
+                  "nonHeldRoomContacts": [],
+                  "heldRoomContacts": [],
+                  "intersectsExistingVerticalCore": false,
+                  "nextToNamedCorridor": true,
+                  "nextToPhysicalTwoHighCorridor": true,
+                  "localSites": [
+                    {
+                      "x": 11,
+                      "z": 6
+                    },
+                    {
+                      "x": 12,
+                      "z": 6
+                    },
+                    {
+                      "x": 11,
+                      "z": 7
+                    },
+                    {
+                      "x": 12,
+                      "z": 7
+                    }
+                  ]
+                },
+                {
+                  "sectionId": "office/candidate-01/L6",
+                  "level": 6,
+                  "insideFootprint": true,
+                  "protectedSiteCount": 0,
+                  "hardGlassCount": 0,
+                  "productionOccupiedVoxelCount": 0,
+                  "nonHeldRoomContacts": [],
+                  "heldRoomContacts": [],
+                  "intersectsExistingVerticalCore": false,
+                  "nextToNamedCorridor": true,
+                  "nextToPhysicalTwoHighCorridor": true,
+                  "localSites": [
+                    {
+                      "x": 11,
+                      "z": 6
+                    },
+                    {
+                      "x": 12,
+                      "z": 6
+                    },
+                    {
+                      "x": 11,
+                      "z": 7
+                    },
+                    {
+                      "x": 12,
+                      "z": 7
+                    }
+                  ]
+                }
+              ],
+              "localColumnSites": [
+                {
+                  "x": 11,
+                  "z": 6
+                },
+                {
+                  "x": 12,
+                  "z": 6
+                },
+                {
+                  "x": 11,
+                  "z": 7
+                },
+                {
+                  "x": 12,
+                  "z": 7
+                }
+              ],
+              "footprintAndProtectionClean": true,
+              "productionVoxelContacts": 0,
+              "hardGlassSites": 0,
+              "otherRoomContacts": 0,
+              "retiredHeldRoomIds": [],
+              "floorsAdjacentToNominalCorridor": 6,
+              "floorsAdjacentToTwoHighAirCorridor": 6,
+              "floorsRequired": 6,
+              "strictCandidateSiteClear": true,
+              "physicalShaftConstructible": false,
+              "requiredApprovals": [
+                "NEW_CORE_SHAFT_STRUCTURAL_REDESIGN",
+                "INTER_FLOOR_SLAB_CUTS_AND_ROOF",
+                "STAIR_LIFT_GEOMETRY_AND_CLEARANCE",
+                "EGRESS_ROUTE_AND_DOOR_SWING"
+              ],
+              "constructionApproved": false,
+              "blockOperations": [],
+              "worldCoordinates": null
+            },
+            {
+              "x": 11,
+              "z": 7,
+              "width": 2,
+              "depth": 2,
+              "sections": [
+                {
+                  "sectionId": "office/candidate-01/L1",
+                  "level": 1,
+                  "insideFootprint": true,
+                  "protectedSiteCount": 0,
+                  "hardGlassCount": 0,
+                  "productionOccupiedVoxelCount": 0,
+                  "nonHeldRoomContacts": [],
+                  "heldRoomContacts": [],
+                  "intersectsExistingVerticalCore": false,
+                  "nextToNamedCorridor": true,
+                  "nextToPhysicalTwoHighCorridor": true,
+                  "localSites": [
+                    {
+                      "x": 11,
+                      "z": 7
+                    },
+                    {
+                      "x": 12,
+                      "z": 7
+                    },
+                    {
+                      "x": 11,
+                      "z": 8
+                    },
+                    {
+                      "x": 12,
+                      "z": 8
+                    }
+                  ]
+                },
+                {
+                  "sectionId": "office/candidate-01/L2",
+                  "level": 2,
+                  "insideFootprint": true,
+                  "protectedSiteCount": 0,
+                  "hardGlassCount": 0,
+                  "productionOccupiedVoxelCount": 0,
+                  "nonHeldRoomContacts": [],
+                  "heldRoomContacts": [],
+                  "intersectsExistingVerticalCore": false,
+                  "nextToNamedCorridor": true,
+                  "nextToPhysicalTwoHighCorridor": true,
+                  "localSites": [
+                    {
+                      "x": 11,
+                      "z": 7
+                    },
+                    {
+                      "x": 12,
+                      "z": 7
+                    },
+                    {
+                      "x": 11,
+                      "z": 8
+                    },
+                    {
+                      "x": 12,
+                      "z": 8
+                    }
+                  ]
+                },
+                {
+                  "sectionId": "office/candidate-01/L3",
+                  "level": 3,
+                  "insideFootprint": true,
+                  "protectedSiteCount": 0,
+                  "hardGlassCount": 0,
+                  "productionOccupiedVoxelCount": 0,
+                  "nonHeldRoomContacts": [],
+                  "heldRoomContacts": [],
+                  "intersectsExistingVerticalCore": false,
+                  "nextToNamedCorridor": true,
+                  "nextToPhysicalTwoHighCorridor": true,
+                  "localSites": [
+                    {
+                      "x": 11,
+                      "z": 7
+                    },
+                    {
+                      "x": 12,
+                      "z": 7
+                    },
+                    {
+                      "x": 11,
+                      "z": 8
+                    },
+                    {
+                      "x": 12,
+                      "z": 8
+                    }
+                  ]
+                },
+                {
+                  "sectionId": "office/candidate-01/L4",
+                  "level": 4,
+                  "insideFootprint": true,
+                  "protectedSiteCount": 0,
+                  "hardGlassCount": 0,
+                  "productionOccupiedVoxelCount": 0,
+                  "nonHeldRoomContacts": [],
+                  "heldRoomContacts": [],
+                  "intersectsExistingVerticalCore": false,
+                  "nextToNamedCorridor": true,
+                  "nextToPhysicalTwoHighCorridor": true,
+                  "localSites": [
+                    {
+                      "x": 11,
+                      "z": 7
+                    },
+                    {
+                      "x": 12,
+                      "z": 7
+                    },
+                    {
+                      "x": 11,
+                      "z": 8
+                    },
+                    {
+                      "x": 12,
+                      "z": 8
+                    }
+                  ]
+                },
+                {
+                  "sectionId": "office/candidate-01/L5",
+                  "level": 5,
+                  "insideFootprint": true,
+                  "protectedSiteCount": 0,
+                  "hardGlassCount": 0,
+                  "productionOccupiedVoxelCount": 0,
+                  "nonHeldRoomContacts": [],
+                  "heldRoomContacts": [],
+                  "intersectsExistingVerticalCore": false,
+                  "nextToNamedCorridor": true,
+                  "nextToPhysicalTwoHighCorridor": true,
+                  "localSites": [
+                    {
+                      "x": 11,
+                      "z": 7
+                    },
+                    {
+                      "x": 12,
+                      "z": 7
+                    },
+                    {
+                      "x": 11,
+                      "z": 8
+                    },
+                    {
+                      "x": 12,
+                      "z": 8
+                    }
+                  ]
+                },
+                {
+                  "sectionId": "office/candidate-01/L6",
+                  "level": 6,
+                  "insideFootprint": true,
+                  "protectedSiteCount": 0,
+                  "hardGlassCount": 0,
+                  "productionOccupiedVoxelCount": 0,
+                  "nonHeldRoomContacts": [],
+                  "heldRoomContacts": [],
+                  "intersectsExistingVerticalCore": false,
+                  "nextToNamedCorridor": true,
+                  "nextToPhysicalTwoHighCorridor": true,
+                  "localSites": [
+                    {
+                      "x": 11,
+                      "z": 7
+                    },
+                    {
+                      "x": 12,
+                      "z": 7
+                    },
+                    {
+                      "x": 11,
+                      "z": 8
+                    },
+                    {
+                      "x": 12,
+                      "z": 8
+                    }
+                  ]
+                }
+              ],
+              "localColumnSites": [
+                {
+                  "x": 11,
+                  "z": 7
+                },
+                {
+                  "x": 12,
+                  "z": 7
+                },
+                {
+                  "x": 11,
+                  "z": 8
+                },
+                {
+                  "x": 12,
+                  "z": 8
+                }
+              ],
+              "footprintAndProtectionClean": true,
+              "productionVoxelContacts": 0,
+              "hardGlassSites": 0,
+              "otherRoomContacts": 0,
+              "retiredHeldRoomIds": [],
+              "floorsAdjacentToNominalCorridor": 6,
+              "floorsAdjacentToTwoHighAirCorridor": 6,
+              "floorsRequired": 6,
+              "strictCandidateSiteClear": true,
+              "physicalShaftConstructible": false,
+              "requiredApprovals": [
+                "NEW_CORE_SHAFT_STRUCTURAL_REDESIGN",
+                "INTER_FLOOR_SLAB_CUTS_AND_ROOF",
+                "STAIR_LIFT_GEOMETRY_AND_CLEARANCE",
+                "EGRESS_ROUTE_AND_DOOR_SWING"
+              ],
+              "constructionApproved": false,
+              "blockOperations": [],
+              "worldCoordinates": null
+            },
+            {
+              "x": 12,
+              "z": 12,
+              "width": 2,
+              "depth": 2,
+              "sections": [
+                {
+                  "sectionId": "office/candidate-01/L1",
+                  "level": 1,
+                  "insideFootprint": true,
+                  "protectedSiteCount": 0,
+                  "hardGlassCount": 0,
+                  "productionOccupiedVoxelCount": 0,
+                  "nonHeldRoomContacts": [],
+                  "heldRoomContacts": [],
+                  "intersectsExistingVerticalCore": false,
+                  "nextToNamedCorridor": true,
+                  "nextToPhysicalTwoHighCorridor": true,
+                  "localSites": [
+                    {
+                      "x": 12,
+                      "z": 12
+                    },
+                    {
+                      "x": 13,
+                      "z": 12
+                    },
+                    {
+                      "x": 12,
+                      "z": 13
+                    },
+                    {
+                      "x": 13,
+                      "z": 13
+                    }
+                  ]
+                },
+                {
+                  "sectionId": "office/candidate-01/L2",
+                  "level": 2,
+                  "insideFootprint": true,
+                  "protectedSiteCount": 0,
+                  "hardGlassCount": 0,
+                  "productionOccupiedVoxelCount": 0,
+                  "nonHeldRoomContacts": [],
+                  "heldRoomContacts": [],
+                  "intersectsExistingVerticalCore": false,
+                  "nextToNamedCorridor": true,
+                  "nextToPhysicalTwoHighCorridor": true,
+                  "localSites": [
+                    {
+                      "x": 12,
+                      "z": 12
+                    },
+                    {
+                      "x": 13,
+                      "z": 12
+                    },
+                    {
+                      "x": 12,
+                      "z": 13
+                    },
+                    {
+                      "x": 13,
+                      "z": 13
+                    }
+                  ]
+                },
+                {
+                  "sectionId": "office/candidate-01/L3",
+                  "level": 3,
+                  "insideFootprint": true,
+                  "protectedSiteCount": 0,
+                  "hardGlassCount": 0,
+                  "productionOccupiedVoxelCount": 0,
+                  "nonHeldRoomContacts": [],
+                  "heldRoomContacts": [],
+                  "intersectsExistingVerticalCore": false,
+                  "nextToNamedCorridor": true,
+                  "nextToPhysicalTwoHighCorridor": true,
+                  "localSites": [
+                    {
+                      "x": 12,
+                      "z": 12
+                    },
+                    {
+                      "x": 13,
+                      "z": 12
+                    },
+                    {
+                      "x": 12,
+                      "z": 13
+                    },
+                    {
+                      "x": 13,
+                      "z": 13
+                    }
+                  ]
+                },
+                {
+                  "sectionId": "office/candidate-01/L4",
+                  "level": 4,
+                  "insideFootprint": true,
+                  "protectedSiteCount": 0,
+                  "hardGlassCount": 0,
+                  "productionOccupiedVoxelCount": 0,
+                  "nonHeldRoomContacts": [],
+                  "heldRoomContacts": [],
+                  "intersectsExistingVerticalCore": false,
+                  "nextToNamedCorridor": true,
+                  "nextToPhysicalTwoHighCorridor": true,
+                  "localSites": [
+                    {
+                      "x": 12,
+                      "z": 12
+                    },
+                    {
+                      "x": 13,
+                      "z": 12
+                    },
+                    {
+                      "x": 12,
+                      "z": 13
+                    },
+                    {
+                      "x": 13,
+                      "z": 13
+                    }
+                  ]
+                },
+                {
+                  "sectionId": "office/candidate-01/L5",
+                  "level": 5,
+                  "insideFootprint": true,
+                  "protectedSiteCount": 0,
+                  "hardGlassCount": 0,
+                  "productionOccupiedVoxelCount": 0,
+                  "nonHeldRoomContacts": [],
+                  "heldRoomContacts": [],
+                  "intersectsExistingVerticalCore": false,
+                  "nextToNamedCorridor": true,
+                  "nextToPhysicalTwoHighCorridor": true,
+                  "localSites": [
+                    {
+                      "x": 12,
+                      "z": 12
+                    },
+                    {
+                      "x": 13,
+                      "z": 12
+                    },
+                    {
+                      "x": 12,
+                      "z": 13
+                    },
+                    {
+                      "x": 13,
+                      "z": 13
+                    }
+                  ]
+                },
+                {
+                  "sectionId": "office/candidate-01/L6",
+                  "level": 6,
+                  "insideFootprint": true,
+                  "protectedSiteCount": 0,
+                  "hardGlassCount": 0,
+                  "productionOccupiedVoxelCount": 0,
+                  "nonHeldRoomContacts": [],
+                  "heldRoomContacts": [],
+                  "intersectsExistingVerticalCore": false,
+                  "nextToNamedCorridor": true,
+                  "nextToPhysicalTwoHighCorridor": true,
+                  "localSites": [
+                    {
+                      "x": 12,
+                      "z": 12
+                    },
+                    {
+                      "x": 13,
+                      "z": 12
+                    },
+                    {
+                      "x": 12,
+                      "z": 13
+                    },
+                    {
+                      "x": 13,
+                      "z": 13
+                    }
+                  ]
+                }
+              ],
+              "localColumnSites": [
+                {
+                  "x": 12,
+                  "z": 12
+                },
+                {
+                  "x": 13,
+                  "z": 12
+                },
+                {
+                  "x": 12,
+                  "z": 13
+                },
+                {
+                  "x": 13,
+                  "z": 13
+                }
+              ],
+              "footprintAndProtectionClean": true,
+              "productionVoxelContacts": 0,
+              "hardGlassSites": 0,
+              "otherRoomContacts": 0,
+              "retiredHeldRoomIds": [],
+              "floorsAdjacentToNominalCorridor": 6,
+              "floorsAdjacentToTwoHighAirCorridor": 6,
+              "floorsRequired": 6,
+              "strictCandidateSiteClear": true,
+              "physicalShaftConstructible": false,
+              "requiredApprovals": [
+                "NEW_CORE_SHAFT_STRUCTURAL_REDESIGN",
+                "INTER_FLOOR_SLAB_CUTS_AND_ROOF",
+                "STAIR_LIFT_GEOMETRY_AND_CLEARANCE",
+                "EGRESS_ROUTE_AND_DOOR_SWING"
+              ],
+              "constructionApproved": false,
+              "blockOperations": [],
+              "worldCoordinates": null
+            },
+            {
+              "x": 12,
+              "z": 13,
+              "width": 2,
+              "depth": 2,
+              "sections": [
+                {
+                  "sectionId": "office/candidate-01/L1",
+                  "level": 1,
+                  "insideFootprint": true,
+                  "protectedSiteCount": 0,
+                  "hardGlassCount": 0,
+                  "productionOccupiedVoxelCount": 0,
+                  "nonHeldRoomContacts": [],
+                  "heldRoomContacts": [],
+                  "intersectsExistingVerticalCore": false,
+                  "nextToNamedCorridor": true,
+                  "nextToPhysicalTwoHighCorridor": true,
+                  "localSites": [
+                    {
+                      "x": 12,
+                      "z": 13
+                    },
+                    {
+                      "x": 13,
+                      "z": 13
+                    },
+                    {
+                      "x": 12,
+                      "z": 14
+                    },
+                    {
+                      "x": 13,
+                      "z": 14
+                    }
+                  ]
+                },
+                {
+                  "sectionId": "office/candidate-01/L2",
+                  "level": 2,
+                  "insideFootprint": true,
+                  "protectedSiteCount": 0,
+                  "hardGlassCount": 0,
+                  "productionOccupiedVoxelCount": 0,
+                  "nonHeldRoomContacts": [],
+                  "heldRoomContacts": [],
+                  "intersectsExistingVerticalCore": false,
+                  "nextToNamedCorridor": true,
+                  "nextToPhysicalTwoHighCorridor": true,
+                  "localSites": [
+                    {
+                      "x": 12,
+                      "z": 13
+                    },
+                    {
+                      "x": 13,
+                      "z": 13
+                    },
+                    {
+                      "x": 12,
+                      "z": 14
+                    },
+                    {
+                      "x": 13,
+                      "z": 14
+                    }
+                  ]
+                },
+                {
+                  "sectionId": "office/candidate-01/L3",
+                  "level": 3,
+                  "insideFootprint": true,
+                  "protectedSiteCount": 0,
+                  "hardGlassCount": 0,
+                  "productionOccupiedVoxelCount": 0,
+                  "nonHeldRoomContacts": [],
+                  "heldRoomContacts": [],
+                  "intersectsExistingVerticalCore": false,
+                  "nextToNamedCorridor": true,
+                  "nextToPhysicalTwoHighCorridor": true,
+                  "localSites": [
+                    {
+                      "x": 12,
+                      "z": 13
+                    },
+                    {
+                      "x": 13,
+                      "z": 13
+                    },
+                    {
+                      "x": 12,
+                      "z": 14
+                    },
+                    {
+                      "x": 13,
+                      "z": 14
+                    }
+                  ]
+                },
+                {
+                  "sectionId": "office/candidate-01/L4",
+                  "level": 4,
+                  "insideFootprint": true,
+                  "protectedSiteCount": 0,
+                  "hardGlassCount": 0,
+                  "productionOccupiedVoxelCount": 0,
+                  "nonHeldRoomContacts": [],
+                  "heldRoomContacts": [],
+                  "intersectsExistingVerticalCore": false,
+                  "nextToNamedCorridor": true,
+                  "nextToPhysicalTwoHighCorridor": true,
+                  "localSites": [
+                    {
+                      "x": 12,
+                      "z": 13
+                    },
+                    {
+                      "x": 13,
+                      "z": 13
+                    },
+                    {
+                      "x": 12,
+                      "z": 14
+                    },
+                    {
+                      "x": 13,
+                      "z": 14
+                    }
+                  ]
+                },
+                {
+                  "sectionId": "office/candidate-01/L5",
+                  "level": 5,
+                  "insideFootprint": true,
+                  "protectedSiteCount": 0,
+                  "hardGlassCount": 0,
+                  "productionOccupiedVoxelCount": 0,
+                  "nonHeldRoomContacts": [],
+                  "heldRoomContacts": [],
+                  "intersectsExistingVerticalCore": false,
+                  "nextToNamedCorridor": true,
+                  "nextToPhysicalTwoHighCorridor": true,
+                  "localSites": [
+                    {
+                      "x": 12,
+                      "z": 13
+                    },
+                    {
+                      "x": 13,
+                      "z": 13
+                    },
+                    {
+                      "x": 12,
+                      "z": 14
+                    },
+                    {
+                      "x": 13,
+                      "z": 14
+                    }
+                  ]
+                },
+                {
+                  "sectionId": "office/candidate-01/L6",
+                  "level": 6,
+                  "insideFootprint": true,
+                  "protectedSiteCount": 0,
+                  "hardGlassCount": 0,
+                  "productionOccupiedVoxelCount": 0,
+                  "nonHeldRoomContacts": [],
+                  "heldRoomContacts": [],
+                  "intersectsExistingVerticalCore": false,
+                  "nextToNamedCorridor": true,
+                  "nextToPhysicalTwoHighCorridor": true,
+                  "localSites": [
+                    {
+                      "x": 12,
+                      "z": 13
+                    },
+                    {
+                      "x": 13,
+                      "z": 13
+                    },
+                    {
+                      "x": 12,
+                      "z": 14
+                    },
+                    {
+                      "x": 13,
+                      "z": 14
+                    }
+                  ]
+                }
+              ],
+              "localColumnSites": [
+                {
+                  "x": 12,
+                  "z": 13
+                },
+                {
+                  "x": 13,
+                  "z": 13
+                },
+                {
+                  "x": 12,
+                  "z": 14
+                },
+                {
+                  "x": 13,
+                  "z": 14
+                }
+              ],
+              "footprintAndProtectionClean": true,
+              "productionVoxelContacts": 0,
+              "hardGlassSites": 0,
+              "otherRoomContacts": 0,
+              "retiredHeldRoomIds": [],
+              "floorsAdjacentToNominalCorridor": 6,
+              "floorsAdjacentToTwoHighAirCorridor": 6,
+              "floorsRequired": 6,
+              "strictCandidateSiteClear": true,
+              "physicalShaftConstructible": false,
+              "requiredApprovals": [
+                "NEW_CORE_SHAFT_STRUCTURAL_REDESIGN",
+                "INTER_FLOOR_SLAB_CUTS_AND_ROOF",
+                "STAIR_LIFT_GEOMETRY_AND_CLEARANCE",
+                "EGRESS_ROUTE_AND_DOOR_SWING"
+              ],
+              "constructionApproved": false,
+              "blockOperations": [],
+              "worldCoordinates": null
+            }
+          ],
+          "qualityStatus": "SHAFT_FOOTPRINT_ONLY_NOT_ACCESS_OR_SLAB_CERTIFIED",
+          "requiresBuildingPlanApproval": true,
+          "requiresSlabCuts": true,
+          "shaftConstructionApproved": false
+        },
+        {
+          "originalNominalRooms": 66,
+          "verifiedUsableRoomsAdded": 0,
+          "protectedPriorRoomChanges": 0,
+          "originalEnvelopeMutations": 0,
+          "oldCoreMutations": 0,
+          "liveConstructionOperations": [],
+          "constructionApproved": false,
+          "id": "RESET_FLOOR_PROGRAMME_AND_CORE_AS_NEW_BUILDING_BRANCH",
+          "claimedIndependentRoomCount": null,
+          "heldIndependentRoomCount": 4,
+          "nominalServiceReallocationArea": 64,
+          "qualityStatus": "NEW_BUILDING_DESIGN_REQUIRED",
+          "requiresBuildingPlanApproval": true,
+          "newArchitecturalDecision": "REGENERATE_ROOM_GRID_WITH_CORE_RESERVED_BEFORE_WINDOW_AND_WALL_PLACEMENT",
+          "replanFloorCount": 6,
+          "estimatedOriginalNominalAreaToReview": 1449,
+          "preservesExistingEnvelopeAndRoomsAs_PRODUCTION_REFERENCE_ONLY": true
+        }
+      ],
+      "selectedForConstruction": null,
+      "readOnly": true
+    },
+    {
+      "buildingId": "office/candidate-02",
+      "reference": {
+        "floors": [
+          {
+            "level": 1,
+            "inside": 348,
+            "width": 24,
+            "depth": 20,
+            "rooms": 7,
+            "nominalRoomArea": 165,
+            "corridorCells": 131,
+            "stairs": 9,
+            "elevators": 9
+          },
+          {
+            "level": 2,
+            "inside": 348,
+            "width": 24,
+            "depth": 20,
+            "rooms": 7,
+            "nominalRoomArea": 165,
+            "corridorCells": 126,
+            "stairs": 9,
+            "elevators": 9
+          },
+          {
+            "level": 3,
+            "inside": 348,
+            "width": 24,
+            "depth": 20,
+            "rooms": 7,
+            "nominalRoomArea": 165,
+            "corridorCells": 126,
+            "stairs": 9,
+            "elevators": 9
+          },
+          {
+            "level": 4,
+            "inside": 348,
+            "width": 24,
+            "depth": 20,
+            "rooms": 7,
+            "nominalRoomArea": 165,
+            "corridorCells": 126,
+            "stairs": 9,
+            "elevators": 9
+          },
+          {
+            "level": 5,
+            "inside": 348,
+            "width": 24,
+            "depth": 20,
+            "rooms": 7,
+            "nominalRoomArea": 165,
+            "corridorCells": 126,
+            "stairs": 9,
+            "elevators": 9
+          },
+          {
+            "level": 6,
+            "inside": 182,
+            "width": 24,
+            "depth": 20,
+            "rooms": 3,
+            "nominalRoomArea": 65,
+            "corridorCells": 75,
+            "stairs": 9,
+            "elevators": 9
+          }
+        ],
+        "distinctMaskShapes": 2,
+        "fullVerticalCoreSiteIntersection": true,
+        "originalNominalRoomCount": 38,
+        "originalNominalRoomArea": 890
+      },
+      "affectedFloors": [],
+      "affectedHeldRooms": 0,
+      "heldProgrammeArea": 0,
+      "repeatRoomPatternsReviewed": 0,
+      "verticalCoreSearch": null,
+      "alternatives": [
+        {
+          "originalNominalRooms": 38,
+          "verifiedUsableRoomsAdded": 0,
+          "protectedPriorRoomChanges": 0,
+          "originalEnvelopeMutations": 0,
+          "oldCoreMutations": 0,
+          "liveConstructionOperations": [],
+          "constructionApproved": false,
+          "id": "KEEP_ORIGINAL_ENVELOPE_AND_UNRESOLVED_ROOMS",
+          "claimedIndependentRoomCount": 38,
+          "heldIndependentRoomCount": 0,
+          "unapprovedIndependentRoomCount": 38,
+          "nominalServiceReallocationArea": 0,
+          "qualityStatus": "REFERENCE_HOLD",
+          "requiresBuildingPlanApproval": false
+        },
+        {
+          "originalNominalRooms": 38,
+          "verifiedUsableRoomsAdded": 0,
+          "protectedPriorRoomChanges": 0,
+          "originalEnvelopeMutations": 0,
+          "oldCoreMutations": 0,
+          "liveConstructionOperations": [],
+          "constructionApproved": false,
+          "id": "REPURPOSE_HELD_AS_COMMON_SERVICE",
+          "claimedIndependentRoomCount": 38,
+          "heldIndependentRoomCount": 0,
+          "nominalServiceReallocationArea": 0,
+          "qualityStatus": "CONDITIONAL_PROGRAMME_REDUCTION",
+          "shortConceptConnections": 0,
+          "requiresBuildingPlanApproval": true,
+          "limitations": [
+            "NOT_A_LIVE_CONNECTED_SERVICE_AREA",
+            "ALL_296_OTHER_ROOMS_STILL_UNAPPROVED"
+          ]
+        },
+        {
+          "originalNominalRooms": 38,
+          "verifiedUsableRoomsAdded": 0,
+          "protectedPriorRoomChanges": 0,
+          "originalEnvelopeMutations": 0,
+          "oldCoreMutations": 0,
+          "liveConstructionOperations": [],
+          "constructionApproved": false,
+          "id": "INSERT_NEW_ALIGNED_VERTICAL_CORE",
+          "claimedIndependentRoomCount": null,
+          "heldIndependentRoomCount": 0,
+          "nominalServiceReallocationArea": 0,
+          "proposedSites": [],
+          "qualityStatus": "HOLD_NO_CLEAR_2X2_SHAFT",
+          "requiresBuildingPlanApproval": true,
+          "requiresSlabCuts": true,
+          "shaftConstructionApproved": false
+        },
+        {
+          "originalNominalRooms": 38,
+          "verifiedUsableRoomsAdded": 0,
+          "protectedPriorRoomChanges": 0,
+          "originalEnvelopeMutations": 0,
+          "oldCoreMutations": 0,
+          "liveConstructionOperations": [],
+          "constructionApproved": false,
+          "id": "RESET_FLOOR_PROGRAMME_AND_CORE_AS_NEW_BUILDING_BRANCH",
+          "claimedIndependentRoomCount": null,
+          "heldIndependentRoomCount": 0,
+          "nominalServiceReallocationArea": 0,
+          "qualityStatus": "NEW_BUILDING_DESIGN_REQUIRED",
+          "requiresBuildingPlanApproval": true,
+          "newArchitecturalDecision": "REGENERATE_ROOM_GRID_WITH_CORE_RESERVED_BEFORE_WINDOW_AND_WALL_PLACEMENT",
+          "replanFloorCount": 6,
+          "estimatedOriginalNominalAreaToReview": 890,
+          "preservesExistingEnvelopeAndRoomsAs_PRODUCTION_REFERENCE_ONLY": true
+        }
+      ],
+      "selectedForConstruction": null,
+      "readOnly": true
+    },
+    {
+      "buildingId": "office/candidate-03",
+      "reference": {
+        "floors": [
+          {
+            "level": 1,
+            "inside": 480,
+            "width": 24,
+            "depth": 20,
+            "rooms": 11,
+            "nominalRoomArea": 260,
+            "corridorCells": 165,
+            "stairs": 9,
+            "elevators": 9
+          },
+          {
+            "level": 2,
+            "inside": 480,
+            "width": 24,
+            "depth": 20,
+            "rooms": 11,
+            "nominalRoomArea": 265,
+            "corridorCells": 159,
+            "stairs": 9,
+            "elevators": 9
+          },
+          {
+            "level": 3,
+            "inside": 480,
+            "width": 24,
+            "depth": 20,
+            "rooms": 11,
+            "nominalRoomArea": 265,
+            "corridorCells": 159,
+            "stairs": 9,
+            "elevators": 9
+          },
+          {
+            "level": 4,
+            "inside": 480,
+            "width": 24,
+            "depth": 20,
+            "rooms": 11,
+            "nominalRoomArea": 265,
+            "corridorCells": 159,
+            "stairs": 9,
+            "elevators": 9
+          },
+          {
+            "level": 5,
+            "inside": 480,
+            "width": 24,
+            "depth": 20,
+            "rooms": 11,
+            "nominalRoomArea": 265,
+            "corridorCells": 159,
+            "stairs": 9,
+            "elevators": 9
+          },
+          {
+            "level": 6,
+            "inside": 480,
+            "width": 24,
+            "depth": 20,
+            "rooms": 11,
+            "nominalRoomArea": 265,
+            "corridorCells": 159,
+            "stairs": 9,
+            "elevators": 9
+          }
+        ],
+        "distinctMaskShapes": 1,
+        "fullVerticalCoreSiteIntersection": true,
+        "originalNominalRoomCount": 66,
+        "originalNominalRoomArea": 1585
+      },
+      "affectedFloors": [],
+      "affectedHeldRooms": 0,
+      "heldProgrammeArea": 0,
+      "repeatRoomPatternsReviewed": 0,
+      "verticalCoreSearch": null,
+      "alternatives": [
+        {
+          "originalNominalRooms": 66,
+          "verifiedUsableRoomsAdded": 0,
+          "protectedPriorRoomChanges": 0,
+          "originalEnvelopeMutations": 0,
+          "oldCoreMutations": 0,
+          "liveConstructionOperations": [],
+          "constructionApproved": false,
+          "id": "KEEP_ORIGINAL_ENVELOPE_AND_UNRESOLVED_ROOMS",
+          "claimedIndependentRoomCount": 66,
+          "heldIndependentRoomCount": 0,
+          "unapprovedIndependentRoomCount": 66,
+          "nominalServiceReallocationArea": 0,
+          "qualityStatus": "REFERENCE_HOLD",
+          "requiresBuildingPlanApproval": false
+        },
+        {
+          "originalNominalRooms": 66,
+          "verifiedUsableRoomsAdded": 0,
+          "protectedPriorRoomChanges": 0,
+          "originalEnvelopeMutations": 0,
+          "oldCoreMutations": 0,
+          "liveConstructionOperations": [],
+          "constructionApproved": false,
+          "id": "REPURPOSE_HELD_AS_COMMON_SERVICE",
+          "claimedIndependentRoomCount": 66,
+          "heldIndependentRoomCount": 0,
+          "nominalServiceReallocationArea": 0,
+          "qualityStatus": "CONDITIONAL_PROGRAMME_REDUCTION",
+          "shortConceptConnections": 0,
+          "requiresBuildingPlanApproval": true,
+          "limitations": [
+            "NOT_A_LIVE_CONNECTED_SERVICE_AREA",
+            "ALL_296_OTHER_ROOMS_STILL_UNAPPROVED"
+          ]
+        },
+        {
+          "originalNominalRooms": 66,
+          "verifiedUsableRoomsAdded": 0,
+          "protectedPriorRoomChanges": 0,
+          "originalEnvelopeMutations": 0,
+          "oldCoreMutations": 0,
+          "liveConstructionOperations": [],
+          "constructionApproved": false,
+          "id": "INSERT_NEW_ALIGNED_VERTICAL_CORE",
+          "claimedIndependentRoomCount": null,
+          "heldIndependentRoomCount": 0,
+          "nominalServiceReallocationArea": 0,
+          "proposedSites": [],
+          "qualityStatus": "HOLD_NO_CLEAR_2X2_SHAFT",
+          "requiresBuildingPlanApproval": true,
+          "requiresSlabCuts": true,
+          "shaftConstructionApproved": false
+        },
+        {
+          "originalNominalRooms": 66,
+          "verifiedUsableRoomsAdded": 0,
+          "protectedPriorRoomChanges": 0,
+          "originalEnvelopeMutations": 0,
+          "oldCoreMutations": 0,
+          "liveConstructionOperations": [],
+          "constructionApproved": false,
+          "id": "RESET_FLOOR_PROGRAMME_AND_CORE_AS_NEW_BUILDING_BRANCH",
+          "claimedIndependentRoomCount": null,
+          "heldIndependentRoomCount": 0,
+          "nominalServiceReallocationArea": 0,
+          "qualityStatus": "NEW_BUILDING_DESIGN_REQUIRED",
+          "requiresBuildingPlanApproval": true,
+          "newArchitecturalDecision": "REGENERATE_ROOM_GRID_WITH_CORE_RESERVED_BEFORE_WINDOW_AND_WALL_PLACEMENT",
+          "replanFloorCount": 6,
+          "estimatedOriginalNominalAreaToReview": 1585,
+          "preservesExistingEnvelopeAndRoomsAs_PRODUCTION_REFERENCE_ONLY": true
+        }
+      ],
+      "selectedForConstruction": null,
+      "readOnly": true
+    }
+  ],
+  "limitations": [
+    "CORE_2X2_COLUMN_AIR_DOES_NOT_VERIFY_SLAB_CUT_OR_STAIR_LIFT_BUILDABILITY",
+    "ONLY_TWO_BUILDINGS_HAVE_PINNED_FULL_PRODUCTION_REPLAY_OTHER_THREE_REMAIN_NOMINAL_DESIGN_REFERENCE",
+    "NEW_BUILDING_BRANCH_REQUIRES_SEPARATE_APPROVAL_FOR_EXTERNAL_ENVELOPE_AND_PROGRAMME",
+    "PREVIOUS_296_PROPOSALS_NOT_CONSTRUCTED_AND_NOT_APPROVED",
+    "DOORS_STAIRS_EGRESS_GLAZING_AND_ROOM_USE_NOT_CERTIFIED"
+  ],
+  "readiness": "NOT_PREPARED",
+  "executionAllowed": false,
+  "constructionApproved": false,
+  "worldContacts": 0,
+  "gates": [
+    {
+      "id": "M4-01",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-02",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-03",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-04",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-05",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-06",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-07",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-08",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-09",
+      "status": "BLOCKED"
+    }
+  ],
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0,
+    "worldCoordinates": null
+  },
+  "reportSha256": "10ce7847100e69cbb2c321881421d1405541eaf20bfa4fcb7680d7c326ac7489"
+}

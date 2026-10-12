@@ -1,0 +1,207 @@
+{
+  "schema": "minecraftaibuilder-b55-production-parity-intake-v1",
+  "purpose": "OFFLINE_PRODUCTION_SOURCE_ADMISSION_AND_GAP_GATE",
+  "baseline": {
+    "b54ReportSha256": "abe53cdae0217cbb1f7ec3a9a940defc6879affc5ba514f1cce831d13c889090",
+    "buildings": 5,
+    "levels": 30,
+    "facadeVisualUnits": 3022,
+    "designAlternatives": 15
+  },
+  "intake": {
+    "schema": "minecraftaibuilder-b55-readonly-source-intake-v1",
+    "sourceSetSha256": "d22ed4814638850723e9eb26cb9b3e846d0e5c9f07bad910fc5125f9a7d044dc",
+    "files": [
+      {
+        "key": "engine/src/general-building-planner.js",
+        "expectedSha256": "23be6e8b03827698fb890661f6fd0957a76ac4718f3347531121c8a7dc0450c8",
+        "status": "MISSING"
+      },
+      {
+        "key": "engine/src/building-grammar.js",
+        "expectedSha256": "71c0e2bda3e7a044285d681b38d9d4373e3c0aa417808a2f54c652d05ff47d1a",
+        "status": "MISSING"
+      },
+      {
+        "key": "engine/src/architectural-quality.js",
+        "expectedSha256": "5cadf22d51867a18fd35f6e9ec2e1318732eca2f2e666d2cfc4b2b32cbede530",
+        "status": "MISSING"
+      },
+      {
+        "key": "modules/architectural-library.js",
+        "expectedSha256": "19fa126051a687bfb5c5f6bdf199a6d42aa70b475d908dd38a99e9f354532eee",
+        "status": "MISSING"
+      },
+      {
+        "key": "styles/urban_japanese.json",
+        "expectedSha256": "cefb23009e7a96f8d5900e44242c5fa426646be64c5391048f52e29506f1ceec",
+        "status": "MISSING"
+      }
+    ],
+    "counts": {
+      "MISSING": 5,
+      "PINNED_MATCH": 0,
+      "VERSION_MISMATCH": 0,
+      "UNSAFE_LINK": 0,
+      "UNSAFE_NONFILE": 0,
+      "OVERSIZE": 0,
+      "CHANGED_DURING_READ": 0
+    },
+    "snapshotStatus": "INCOMPLETE_SOURCE_EVIDENCE",
+    "plannerExecuted": false,
+    "sourceModulesImported": false,
+    "actualFacadeEmitted": false,
+    "sourceByteContentsIncluded": false,
+    "runtimeIdentity": "UNVERIFIED",
+    "productionFacadeParity": "UNVERIFIED",
+    "constructionApproved": false
+  },
+  "gapMatrix": [
+    {
+      "id": "FACADE_GENERATION_SOURCE",
+      "need": "EXACT_SOURCE_BYTES",
+      "files": [
+        "engine/src/architectural-quality.js"
+      ],
+      "status": "MISSING_OR_UNSAFE_HOLD",
+      "allowsRuntimeExecution": false,
+      "closesProductionParity": false
+    },
+    {
+      "id": "MATERIAL_AND_MODULE_REGISTRY",
+      "need": "EXACT_SOURCE_BYTES",
+      "files": [
+        "modules/architectural-library.js"
+      ],
+      "status": "MISSING_OR_UNSAFE_HOLD",
+      "allowsRuntimeExecution": false,
+      "closesProductionParity": false
+    },
+    {
+      "id": "STYLE_AND_QUALITY_SETTINGS",
+      "need": "EXACT_SOURCE_BYTES",
+      "files": [
+        "styles/urban_japanese.json",
+        "engine/src/architectural-quality.js"
+      ],
+      "status": "MISSING_OR_UNSAFE_HOLD",
+      "allowsRuntimeExecution": false,
+      "closesProductionParity": false
+    },
+    {
+      "id": "REFERENCE_PLANNER_AND_GRAMMAR",
+      "need": "EXACT_SOURCE_BYTES",
+      "files": [
+        "engine/src/general-building-planner.js",
+        "engine/src/building-grammar.js"
+      ],
+      "status": "MISSING_OR_UNSAFE_HOLD",
+      "allowsRuntimeExecution": false,
+      "closesProductionParity": false
+    },
+    {
+      "id": "CANONICAL_OUTPUT_CASES",
+      "need": "READONLY_REFERENCE_OUTPUT_HASHES_AND_INPUT_PROVENANCE",
+      "files": [],
+      "status": "NOT_VERIFIED_HOLD",
+      "allowsRuntimeExecution": false,
+      "closesProductionParity": false
+    },
+    {
+      "id": "RUNNING_ENGINE_IDENTITY",
+      "need": "RUNTIME_ATTESTATION_NOT_AVAILABLE",
+      "files": [],
+      "status": "NOT_VERIFIED_HOLD",
+      "allowsRuntimeExecution": false,
+      "closesProductionParity": false
+    },
+    {
+      "id": "PHYSICAL_MODULE_VALIDATION",
+      "need": "ACTUAL_GAME_VALIDATION_PROHIBITED",
+      "files": [],
+      "status": "NOT_VERIFIED_HOLD",
+      "allowsRuntimeExecution": false,
+      "closesProductionParity": false
+    },
+    {
+      "id": "CONSTRUCTION_APPROVAL",
+      "need": "EXPLICIT_APPROVAL_NOT_GRANTED",
+      "files": [],
+      "status": "NOT_VERIFIED_HOLD",
+      "allowsRuntimeExecution": false,
+      "closesProductionParity": false
+    }
+  ],
+  "counts": {
+    "evidenceTracks": 8,
+    "sourceTracksPinned": 0,
+    "sourceTracksUnresolved": 4,
+    "otherTracksNotVerified": 4
+  },
+  "nextAction": "OBTAIN_READONLY_PINNED_SOURCES_OR_RECORD_VERSION_DRIFT",
+  "productionFacadeParity": "UNVERIFIED",
+  "physicalQuality": "UNKNOWN",
+  "decision": "HOLD",
+  "safety": {
+    "readiness": "NOT_PREPARED",
+    "deployment": "BLOCKED",
+    "executionAllowed": false,
+    "constructionApproved": false,
+    "actualModulesEmitted": 0,
+    "worldContact": false,
+    "bridgeContact": false,
+    "scans": 0,
+    "minecraftCommands": 0,
+    "materialIds": [],
+    "worldCoordinates": null,
+    "BuildPlan": {
+      "status": "NOT_PREPARED",
+      "operations": [],
+      "commandCount": 0
+    }
+  },
+  "blockers": {
+    "M4Gates": [
+      {
+        "id": "M4-01",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-02",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-03",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-04",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-05",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-06",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-07",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-08",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-09",
+        "status": "BLOCKED"
+      }
+    ]
+  },
+  "unchangedDesignReview": true,
+  "actualConstructionOperations": 0,
+  "engineCalls": 0,
+  "reportSha256": "43a9bb57a522374cca12e4892f99e9cfc12745786de95f3d65e2ac5498df0069"
+}

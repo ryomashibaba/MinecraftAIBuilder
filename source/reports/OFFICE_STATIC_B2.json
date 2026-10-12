@@ -1,0 +1,165 @@
+{
+  "schema": "minecraftaibuilder-step8b-windows-source-b2-v1",
+  "reviewMode": "READ_ONLY_STATIC_SOURCE_COMPARISON",
+  "status": "STATIC_SOURCE_REVIEW_COMPLETE_ADAPTER_NEEDED",
+  "compatibility": "ADAPTER_NEEDED",
+  "audit": {
+    "status": "SOURCE_INVENTORY_CHECKED_MAPPING_UNKNOWN",
+    "filesVerified": 249,
+    "sourceManifestSha256": "34ef239cd1d6e59c7d36fb070bd305e7572d944dee949c0648312ec94090534c",
+    "packageVersionObserved": "0.1.0",
+    "snapshotCreatedAtLocal": "2026-10-10T18:27:57.7665354+09:00"
+  },
+  "sourceAlignment": "SNAPSHOT_CONTENT_VERIFIED_BUT_ACTIVE_RUNTIME_NOT_PROVEN",
+  "criticalSourceSignaturesPinned": true,
+  "staticAPI": "createBuildingPlan + /plan/building SOURCE-PRESENT; NOT INVOKED",
+  "materials": "UNVERIFIED_MINECRAFT_EDUCATION_PALETTE_AND_BLOCK_STATES",
+  "coordinateSystem": "ORIENTATION_AND_WORLD_ANCHOR_ADAPTER_REQUIRED",
+  "candidates": [
+    {
+      "candidateId": "candidate-01",
+      "index": 0,
+      "program": "office",
+      "massing": "tower_on_podium",
+      "style": "urban_japanese",
+      "orientation": "south",
+      "sourcePredictedLocalGeometry": "LOCAL_RECTANGLES_MATCH_SOURCE_PINNED_PREDICTION",
+      "conceptToEngineParameters": "PARAMETER_FIELDS_MATCH_SOURCE_STATIC_SCHEMA",
+      "geometryDiff": "NONE_LOCAL",
+      "localVariation": {
+        "conceptSeed": 0,
+        "sourcePinnedEngineSeed": 0,
+        "conceptWing": 5,
+        "sourcePinnedEngineWing": 6,
+        "seedPolicy": "Step8A.5 seed=0; source-pinned prediction only"
+      },
+      "status": "ADAPTER_NEEDED",
+      "issues": [
+        "ORIENTATION_ROTATION_REQUIRED",
+        "WORLD_ANCHOR_UNVERIFIED",
+        "EDUCATION_BLOCK_STATES_UNVERIFIED",
+        "INTERIOR_AND_STRUCTURE_UNVERIFIED"
+      ],
+      "geometryPredictionLimit": "Independent source-pinned formula; NOT production planner output, voxel QA, or proof of installed runtime",
+      "BuildPlan": {
+        "status": "NOT_PREPARED",
+        "operations": [],
+        "commandCount": 0
+      },
+      "safety": {
+        "constructionApproved": false,
+        "executionAllowed": false,
+        "notPrepared": true,
+        "noWorldMutation": true,
+        "noBridge": true,
+        "noScan": true,
+        "noPackGeneration": true
+      }
+    },
+    {
+      "candidateId": "candidate-02",
+      "index": 1,
+      "program": "office",
+      "massing": "asymmetric_block",
+      "style": "urban_japanese",
+      "orientation": "south",
+      "sourcePredictedLocalGeometry": "LOCAL_RECTANGLES_DIFFER_FROM_SOURCE_PINNED_PREDICTION",
+      "conceptToEngineParameters": "PARAMETER_FIELDS_MATCH_SOURCE_STATIC_SCHEMA",
+      "geometryDiff": "LOCAL_RECTANGLE_ADAPTER_REQUIRED",
+      "localVariation": {
+        "conceptSeed": 0,
+        "sourcePinnedEngineSeed": 0,
+        "conceptWing": 5,
+        "sourcePinnedEngineWing": 6,
+        "seedPolicy": "Step8A.5 seed=0; source-pinned prediction only"
+      },
+      "status": "ADAPTER_NEEDED",
+      "issues": [
+        "GEOMETRY_ADAPTER_NEEDED",
+        "ORIENTATION_ROTATION_REQUIRED",
+        "WORLD_ANCHOR_UNVERIFIED",
+        "EDUCATION_BLOCK_STATES_UNVERIFIED",
+        "INTERIOR_AND_STRUCTURE_UNVERIFIED"
+      ],
+      "geometryPredictionLimit": "Independent source-pinned formula; NOT production planner output, voxel QA, or proof of installed runtime",
+      "BuildPlan": {
+        "status": "NOT_PREPARED",
+        "operations": [],
+        "commandCount": 0
+      },
+      "safety": {
+        "constructionApproved": false,
+        "executionAllowed": false,
+        "notPrepared": true,
+        "noWorldMutation": true,
+        "noBridge": true,
+        "noScan": true,
+        "noPackGeneration": true
+      }
+    },
+    {
+      "candidateId": "candidate-03",
+      "index": 2,
+      "program": "office",
+      "massing": "slab",
+      "style": "urban_japanese",
+      "orientation": "south",
+      "sourcePredictedLocalGeometry": "LOCAL_RECTANGLES_MATCH_SOURCE_PINNED_PREDICTION",
+      "conceptToEngineParameters": "PARAMETER_FIELDS_MATCH_SOURCE_STATIC_SCHEMA",
+      "geometryDiff": "NONE_LOCAL",
+      "localVariation": {
+        "conceptSeed": 0,
+        "sourcePinnedEngineSeed": 0,
+        "conceptWing": 5,
+        "sourcePinnedEngineWing": 6,
+        "seedPolicy": "Step8A.5 seed=0; source-pinned prediction only"
+      },
+      "status": "ADAPTER_NEEDED",
+      "issues": [
+        "ORIENTATION_ROTATION_REQUIRED",
+        "WORLD_ANCHOR_UNVERIFIED",
+        "EDUCATION_BLOCK_STATES_UNVERIFIED",
+        "INTERIOR_AND_STRUCTURE_UNVERIFIED"
+      ],
+      "geometryPredictionLimit": "Independent source-pinned formula; NOT production planner output, voxel QA, or proof of installed runtime",
+      "BuildPlan": {
+        "status": "NOT_PREPARED",
+        "operations": [],
+        "commandCount": 0
+      },
+      "safety": {
+        "constructionApproved": false,
+        "executionAllowed": false,
+        "notPrepared": true,
+        "noWorldMutation": true,
+        "noBridge": true,
+        "noScan": true,
+        "noPackGeneration": true
+      }
+    }
+  ],
+  "findings": [],
+  "pending": [
+    "Runtime/Bridge running-binary identity not established",
+    "No nonexecuting real-engine behavioral QA",
+    "No verified mapping to Minecraft Education block IDs/states",
+    "No approved site scan/world anchor/Bridge session",
+    "No interior, door, stair or elevator implementation evidence"
+  ],
+  "releaseGate": "BLOCKED_UNTIL_SEPARATE_APPROVAL_AND_EVIDENCE",
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0
+  },
+  "safety": {
+    "constructionApproved": false,
+    "executionAllowed": false,
+    "notPrepared": true,
+    "noWorldMutation": true,
+    "noBridge": true,
+    "noScan": true,
+    "noPackGeneration": true
+  },
+  "reportSha256": "ea0876ff97c829e9e13ae6d0ddcfe1073bb3ac8133a305e1052e6044324b6422"
+}

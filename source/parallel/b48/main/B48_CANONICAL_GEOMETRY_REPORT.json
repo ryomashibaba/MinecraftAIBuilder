@@ -1,0 +1,1930 @@
+{
+  "schema": "minecraftaibuilder-b48-hermetic-geometry-normalization-v1",
+  "kind": "NONEXECUTING_COMPOSITION_SELECTION_AND_CANONICAL_PLATES",
+  "provenance": {
+    "b47ReportSha256": "2833c0044c28a96c82496f57dca1f9a07545731754a11486563c283daf941fa6",
+    "b46ReportSha256": "acba518bd74ed91ed5f6f4e02129709fc422fb452398ba7bfa1588cab2db6db2",
+    "pinnedReference": {
+      "plannerSha256": "23be6e8b03827698fb890661f6fd0957a76ac4718f3347531121c8a7dc0450c8",
+      "envelopeSha256": "c63037c51937b0e5ec03b17274452bf1771fe47f8fe01dcececda6a8508766a0",
+      "grammarSha256": "71c0e2bda3e7a044285d681b38d9d4373e3c0aa417808a2f54c652d05ff47d1a"
+    }
+  },
+  "buildings": [
+    {
+      "id": "hotel/candidate-01",
+      "program": "hotel",
+      "selection": {
+        "program": "hotel",
+        "site": {
+          "width": 26,
+          "depth": 20,
+          "floors": 6,
+          "floorHeight": 5
+        },
+        "seed": 0,
+        "preferredMassing": "stepped",
+        "selectedMassing": "slab",
+        "requiresExplicitMassing": true,
+        "variation": {
+          "wing": 5,
+          "setback": 1,
+          "heightDrop": 1,
+          "bayShift": 0
+        },
+        "masses": [
+          {
+            "x": 0,
+            "z": 0,
+            "width": 26,
+            "depth": 20,
+            "start": 0,
+            "end": 6
+          }
+        ],
+        "assumptions": {
+          "styleArchitectureProportion": 0,
+          "styleConfigurationNotPinned": true,
+          "paletteAndFacadeCompositionNotExecuted": true
+        }
+      },
+      "localOnly": true,
+      "canonicalization": {
+        "changedRectangleGroups": 0,
+        "sameCellFootprints": true,
+        "sameRoofCellProjections": true,
+        "sameFacadeEdgeUnits": true
+      },
+      "unresolved": {
+        "styleConfigNotPinned": true,
+        "realCreateCompositionNotExecuted": true,
+        "entranceBiasNotEvaluated": true,
+        "materialAndBlockStatesUnknown": true,
+        "physicalStairsDoorsSupportUnknown": true
+      },
+      "entranceSurfaceCandidate": {
+        "axis": "x",
+        "sign": -1,
+        "fixed": 0,
+        "runStart": 0,
+        "runEnd": 25,
+        "nominalOpeningWidth": 5,
+        "allowedStartMin": 1,
+        "allowedStartMax": 20,
+        "entranceBiasResolved": false,
+        "doorOrOpeningCreated": false
+      },
+      "levels": [
+        {
+          "level": 1,
+          "canonical": {
+            "floorRectangles": [
+              {
+                "x": 0,
+                "z": 0,
+                "width": 26,
+                "depth": 20
+              }
+            ],
+            "roofRectangles": []
+          },
+          "original": {
+            "floorRectanglesSha256": "17f6864325072c55ca4189a55355656ba918189a62955e71d4b93fdf15713a34",
+            "roofRectanglesSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "geometry": {
+            "floorCells": 520,
+            "roofCells": 0,
+            "facadeEdgeUnits": 92,
+            "exposedRoofBoundaryUnits": 0
+          },
+          "normalizedRectangleGroups": 0,
+          "unplacedRoofBoundaryCandidates": [],
+          "permissions": {
+            "designOnly": true,
+            "approved": false,
+            "buildOperations": 0
+          }
+        },
+        {
+          "level": 2,
+          "canonical": {
+            "floorRectangles": [
+              {
+                "x": 0,
+                "z": 0,
+                "width": 26,
+                "depth": 20
+              }
+            ],
+            "roofRectangles": []
+          },
+          "original": {
+            "floorRectanglesSha256": "17f6864325072c55ca4189a55355656ba918189a62955e71d4b93fdf15713a34",
+            "roofRectanglesSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "geometry": {
+            "floorCells": 520,
+            "roofCells": 0,
+            "facadeEdgeUnits": 92,
+            "exposedRoofBoundaryUnits": 0
+          },
+          "normalizedRectangleGroups": 0,
+          "unplacedRoofBoundaryCandidates": [],
+          "permissions": {
+            "designOnly": true,
+            "approved": false,
+            "buildOperations": 0
+          }
+        },
+        {
+          "level": 3,
+          "canonical": {
+            "floorRectangles": [
+              {
+                "x": 0,
+                "z": 0,
+                "width": 26,
+                "depth": 20
+              }
+            ],
+            "roofRectangles": []
+          },
+          "original": {
+            "floorRectanglesSha256": "17f6864325072c55ca4189a55355656ba918189a62955e71d4b93fdf15713a34",
+            "roofRectanglesSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "geometry": {
+            "floorCells": 520,
+            "roofCells": 0,
+            "facadeEdgeUnits": 92,
+            "exposedRoofBoundaryUnits": 0
+          },
+          "normalizedRectangleGroups": 0,
+          "unplacedRoofBoundaryCandidates": [],
+          "permissions": {
+            "designOnly": true,
+            "approved": false,
+            "buildOperations": 0
+          }
+        },
+        {
+          "level": 4,
+          "canonical": {
+            "floorRectangles": [
+              {
+                "x": 0,
+                "z": 0,
+                "width": 26,
+                "depth": 20
+              }
+            ],
+            "roofRectangles": []
+          },
+          "original": {
+            "floorRectanglesSha256": "17f6864325072c55ca4189a55355656ba918189a62955e71d4b93fdf15713a34",
+            "roofRectanglesSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "geometry": {
+            "floorCells": 520,
+            "roofCells": 0,
+            "facadeEdgeUnits": 92,
+            "exposedRoofBoundaryUnits": 0
+          },
+          "normalizedRectangleGroups": 0,
+          "unplacedRoofBoundaryCandidates": [],
+          "permissions": {
+            "designOnly": true,
+            "approved": false,
+            "buildOperations": 0
+          }
+        },
+        {
+          "level": 5,
+          "canonical": {
+            "floorRectangles": [
+              {
+                "x": 0,
+                "z": 0,
+                "width": 26,
+                "depth": 20
+              }
+            ],
+            "roofRectangles": []
+          },
+          "original": {
+            "floorRectanglesSha256": "17f6864325072c55ca4189a55355656ba918189a62955e71d4b93fdf15713a34",
+            "roofRectanglesSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "geometry": {
+            "floorCells": 520,
+            "roofCells": 0,
+            "facadeEdgeUnits": 92,
+            "exposedRoofBoundaryUnits": 0
+          },
+          "normalizedRectangleGroups": 0,
+          "unplacedRoofBoundaryCandidates": [],
+          "permissions": {
+            "designOnly": true,
+            "approved": false,
+            "buildOperations": 0
+          }
+        },
+        {
+          "level": 6,
+          "canonical": {
+            "floorRectangles": [
+              {
+                "x": 0,
+                "z": 0,
+                "width": 26,
+                "depth": 20
+              }
+            ],
+            "roofRectangles": [
+              {
+                "x": 0,
+                "z": 0,
+                "width": 26,
+                "depth": 20
+              }
+            ]
+          },
+          "original": {
+            "floorRectanglesSha256": "17f6864325072c55ca4189a55355656ba918189a62955e71d4b93fdf15713a34",
+            "roofRectanglesSha256": "17f6864325072c55ca4189a55355656ba918189a62955e71d4b93fdf15713a34"
+          },
+          "geometry": {
+            "floorCells": 520,
+            "roofCells": 520,
+            "facadeEdgeUnits": 92,
+            "exposedRoofBoundaryUnits": 92
+          },
+          "normalizedRectangleGroups": 0,
+          "unplacedRoofBoundaryCandidates": [
+            {
+              "axis": "x",
+              "sign": -1,
+              "fixed": 0,
+              "start": 0,
+              "end": 25,
+              "kind": "UNAPPROVED_ROOF_BOUNDARY"
+            },
+            {
+              "axis": "x",
+              "sign": 1,
+              "fixed": 19,
+              "start": 0,
+              "end": 25,
+              "kind": "UNAPPROVED_ROOF_BOUNDARY"
+            },
+            {
+              "axis": "z",
+              "sign": -1,
+              "fixed": 0,
+              "start": 0,
+              "end": 19,
+              "kind": "UNAPPROVED_ROOF_BOUNDARY"
+            },
+            {
+              "axis": "z",
+              "sign": 1,
+              "fixed": 25,
+              "start": 0,
+              "end": 19,
+              "kind": "UNAPPROVED_ROOF_BOUNDARY"
+            }
+          ],
+          "permissions": {
+            "designOnly": true,
+            "approved": false,
+            "buildOperations": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "apartment/candidate-01",
+      "program": "apartment",
+      "selection": {
+        "program": "apartment",
+        "site": {
+          "width": 28,
+          "depth": 22,
+          "floors": 6,
+          "floorHeight": 4
+        },
+        "seed": 0,
+        "preferredMassing": "L_shape",
+        "selectedMassing": "courtyard",
+        "requiresExplicitMassing": true,
+        "variation": {
+          "wing": 5,
+          "setback": 1,
+          "heightDrop": 1,
+          "bayShift": 0
+        },
+        "masses": [
+          {
+            "x": 0,
+            "z": 17,
+            "width": 28,
+            "depth": 5,
+            "start": 0,
+            "end": 6
+          },
+          {
+            "x": 0,
+            "z": 0,
+            "width": 5,
+            "depth": 17,
+            "start": 0,
+            "end": 6
+          },
+          {
+            "x": 23,
+            "z": 0,
+            "width": 5,
+            "depth": 17,
+            "start": 0,
+            "end": 6
+          },
+          {
+            "x": 5,
+            "z": 0,
+            "width": 18,
+            "depth": 5,
+            "start": 0,
+            "end": 6
+          }
+        ],
+        "assumptions": {
+          "styleArchitectureProportion": 0,
+          "styleConfigurationNotPinned": true,
+          "paletteAndFacadeCompositionNotExecuted": true
+        }
+      },
+      "localOnly": true,
+      "canonicalization": {
+        "changedRectangleGroups": 1,
+        "sameCellFootprints": true,
+        "sameRoofCellProjections": true,
+        "sameFacadeEdgeUnits": true
+      },
+      "unresolved": {
+        "styleConfigNotPinned": true,
+        "realCreateCompositionNotExecuted": true,
+        "entranceBiasNotEvaluated": true,
+        "materialAndBlockStatesUnknown": true,
+        "physicalStairsDoorsSupportUnknown": true
+      },
+      "entranceSurfaceCandidate": {
+        "axis": "x",
+        "sign": -1,
+        "fixed": 0,
+        "runStart": 0,
+        "runEnd": 27,
+        "nominalOpeningWidth": 2,
+        "allowedStartMin": 1,
+        "allowedStartMax": 25,
+        "entranceBiasResolved": false,
+        "doorOrOpeningCreated": false
+      },
+      "levels": [
+        {
+          "level": 1,
+          "canonical": {
+            "floorRectangles": [
+              {
+                "x": 0,
+                "z": 0,
+                "width": 28,
+                "depth": 5
+              },
+              {
+                "x": 0,
+                "z": 5,
+                "width": 5,
+                "depth": 12
+              },
+              {
+                "x": 23,
+                "z": 5,
+                "width": 5,
+                "depth": 12
+              },
+              {
+                "x": 0,
+                "z": 17,
+                "width": 28,
+                "depth": 5
+              }
+            ],
+            "roofRectangles": []
+          },
+          "original": {
+            "floorRectanglesSha256": "e796483fc13afa64a5164c375af52861db01ae6fd49872f82c688c64575c4a40",
+            "roofRectanglesSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "geometry": {
+            "floorCells": 400,
+            "roofCells": 0,
+            "facadeEdgeUnits": 160,
+            "exposedRoofBoundaryUnits": 0
+          },
+          "normalizedRectangleGroups": 0,
+          "unplacedRoofBoundaryCandidates": [],
+          "permissions": {
+            "designOnly": true,
+            "approved": false,
+            "buildOperations": 0
+          }
+        },
+        {
+          "level": 2,
+          "canonical": {
+            "floorRectangles": [
+              {
+                "x": 0,
+                "z": 0,
+                "width": 28,
+                "depth": 5
+              },
+              {
+                "x": 0,
+                "z": 5,
+                "width": 5,
+                "depth": 12
+              },
+              {
+                "x": 23,
+                "z": 5,
+                "width": 5,
+                "depth": 12
+              },
+              {
+                "x": 0,
+                "z": 17,
+                "width": 28,
+                "depth": 5
+              }
+            ],
+            "roofRectangles": []
+          },
+          "original": {
+            "floorRectanglesSha256": "e796483fc13afa64a5164c375af52861db01ae6fd49872f82c688c64575c4a40",
+            "roofRectanglesSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "geometry": {
+            "floorCells": 400,
+            "roofCells": 0,
+            "facadeEdgeUnits": 160,
+            "exposedRoofBoundaryUnits": 0
+          },
+          "normalizedRectangleGroups": 0,
+          "unplacedRoofBoundaryCandidates": [],
+          "permissions": {
+            "designOnly": true,
+            "approved": false,
+            "buildOperations": 0
+          }
+        },
+        {
+          "level": 3,
+          "canonical": {
+            "floorRectangles": [
+              {
+                "x": 0,
+                "z": 0,
+                "width": 28,
+                "depth": 5
+              },
+              {
+                "x": 0,
+                "z": 5,
+                "width": 5,
+                "depth": 12
+              },
+              {
+                "x": 23,
+                "z": 5,
+                "width": 5,
+                "depth": 12
+              },
+              {
+                "x": 0,
+                "z": 17,
+                "width": 28,
+                "depth": 5
+              }
+            ],
+            "roofRectangles": []
+          },
+          "original": {
+            "floorRectanglesSha256": "e796483fc13afa64a5164c375af52861db01ae6fd49872f82c688c64575c4a40",
+            "roofRectanglesSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "geometry": {
+            "floorCells": 400,
+            "roofCells": 0,
+            "facadeEdgeUnits": 160,
+            "exposedRoofBoundaryUnits": 0
+          },
+          "normalizedRectangleGroups": 0,
+          "unplacedRoofBoundaryCandidates": [],
+          "permissions": {
+            "designOnly": true,
+            "approved": false,
+            "buildOperations": 0
+          }
+        },
+        {
+          "level": 4,
+          "canonical": {
+            "floorRectangles": [
+              {
+                "x": 0,
+                "z": 0,
+                "width": 28,
+                "depth": 5
+              },
+              {
+                "x": 0,
+                "z": 5,
+                "width": 5,
+                "depth": 12
+              },
+              {
+                "x": 23,
+                "z": 5,
+                "width": 5,
+                "depth": 12
+              },
+              {
+                "x": 0,
+                "z": 17,
+                "width": 28,
+                "depth": 5
+              }
+            ],
+            "roofRectangles": []
+          },
+          "original": {
+            "floorRectanglesSha256": "e796483fc13afa64a5164c375af52861db01ae6fd49872f82c688c64575c4a40",
+            "roofRectanglesSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "geometry": {
+            "floorCells": 400,
+            "roofCells": 0,
+            "facadeEdgeUnits": 160,
+            "exposedRoofBoundaryUnits": 0
+          },
+          "normalizedRectangleGroups": 0,
+          "unplacedRoofBoundaryCandidates": [],
+          "permissions": {
+            "designOnly": true,
+            "approved": false,
+            "buildOperations": 0
+          }
+        },
+        {
+          "level": 5,
+          "canonical": {
+            "floorRectangles": [
+              {
+                "x": 0,
+                "z": 0,
+                "width": 28,
+                "depth": 5
+              },
+              {
+                "x": 0,
+                "z": 5,
+                "width": 5,
+                "depth": 12
+              },
+              {
+                "x": 23,
+                "z": 5,
+                "width": 5,
+                "depth": 12
+              },
+              {
+                "x": 0,
+                "z": 17,
+                "width": 28,
+                "depth": 5
+              }
+            ],
+            "roofRectangles": []
+          },
+          "original": {
+            "floorRectanglesSha256": "e796483fc13afa64a5164c375af52861db01ae6fd49872f82c688c64575c4a40",
+            "roofRectanglesSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "geometry": {
+            "floorCells": 400,
+            "roofCells": 0,
+            "facadeEdgeUnits": 160,
+            "exposedRoofBoundaryUnits": 0
+          },
+          "normalizedRectangleGroups": 0,
+          "unplacedRoofBoundaryCandidates": [],
+          "permissions": {
+            "designOnly": true,
+            "approved": false,
+            "buildOperations": 0
+          }
+        },
+        {
+          "level": 6,
+          "canonical": {
+            "floorRectangles": [
+              {
+                "x": 0,
+                "z": 0,
+                "width": 28,
+                "depth": 5
+              },
+              {
+                "x": 0,
+                "z": 5,
+                "width": 5,
+                "depth": 12
+              },
+              {
+                "x": 23,
+                "z": 5,
+                "width": 5,
+                "depth": 12
+              },
+              {
+                "x": 0,
+                "z": 17,
+                "width": 28,
+                "depth": 5
+              }
+            ],
+            "roofRectangles": [
+              {
+                "x": 0,
+                "z": 0,
+                "width": 28,
+                "depth": 5
+              },
+              {
+                "x": 0,
+                "z": 5,
+                "width": 5,
+                "depth": 12
+              },
+              {
+                "x": 23,
+                "z": 5,
+                "width": 5,
+                "depth": 12
+              },
+              {
+                "x": 0,
+                "z": 17,
+                "width": 28,
+                "depth": 5
+              }
+            ]
+          },
+          "original": {
+            "floorRectanglesSha256": "e796483fc13afa64a5164c375af52861db01ae6fd49872f82c688c64575c4a40",
+            "roofRectanglesSha256": "ca158cf9a1d857a054a4f48a6d7fcff8283f6800df32c32c11113dc62b62997a"
+          },
+          "geometry": {
+            "floorCells": 400,
+            "roofCells": 400,
+            "facadeEdgeUnits": 160,
+            "exposedRoofBoundaryUnits": 160
+          },
+          "normalizedRectangleGroups": 1,
+          "unplacedRoofBoundaryCandidates": [
+            {
+              "axis": "x",
+              "sign": -1,
+              "fixed": 0,
+              "start": 0,
+              "end": 27,
+              "kind": "UNAPPROVED_ROOF_BOUNDARY"
+            },
+            {
+              "axis": "x",
+              "sign": -1,
+              "fixed": 17,
+              "start": 5,
+              "end": 22,
+              "kind": "UNAPPROVED_ROOF_BOUNDARY"
+            },
+            {
+              "axis": "x",
+              "sign": 1,
+              "fixed": 4,
+              "start": 5,
+              "end": 22,
+              "kind": "UNAPPROVED_ROOF_BOUNDARY"
+            },
+            {
+              "axis": "x",
+              "sign": 1,
+              "fixed": 21,
+              "start": 0,
+              "end": 27,
+              "kind": "UNAPPROVED_ROOF_BOUNDARY"
+            },
+            {
+              "axis": "z",
+              "sign": -1,
+              "fixed": 0,
+              "start": 0,
+              "end": 21,
+              "kind": "UNAPPROVED_ROOF_BOUNDARY"
+            },
+            {
+              "axis": "z",
+              "sign": -1,
+              "fixed": 23,
+              "start": 5,
+              "end": 16,
+              "kind": "UNAPPROVED_ROOF_BOUNDARY"
+            },
+            {
+              "axis": "z",
+              "sign": 1,
+              "fixed": 4,
+              "start": 5,
+              "end": 16,
+              "kind": "UNAPPROVED_ROOF_BOUNDARY"
+            },
+            {
+              "axis": "z",
+              "sign": 1,
+              "fixed": 27,
+              "start": 0,
+              "end": 21,
+              "kind": "UNAPPROVED_ROOF_BOUNDARY"
+            }
+          ],
+          "permissions": {
+            "designOnly": true,
+            "approved": false,
+            "buildOperations": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "office/candidate-01",
+      "program": "office",
+      "selection": {
+        "program": "office",
+        "site": {
+          "width": 24,
+          "depth": 20,
+          "floors": 6,
+          "floorHeight": 4
+        },
+        "seed": 0,
+        "preferredMassing": "slab",
+        "selectedMassing": "tower_on_podium",
+        "requiresExplicitMassing": true,
+        "variation": {
+          "wing": 5,
+          "setback": 1,
+          "heightDrop": 1,
+          "bayShift": 0
+        },
+        "masses": [
+          {
+            "x": 0,
+            "z": 0,
+            "width": 24,
+            "depth": 20,
+            "start": 0,
+            "end": 2
+          },
+          {
+            "x": 1,
+            "z": 2,
+            "width": 22,
+            "depth": 17,
+            "start": 2,
+            "end": 6
+          }
+        ],
+        "assumptions": {
+          "styleArchitectureProportion": 0,
+          "styleConfigurationNotPinned": true,
+          "paletteAndFacadeCompositionNotExecuted": true
+        }
+      },
+      "localOnly": true,
+      "canonicalization": {
+        "changedRectangleGroups": 1,
+        "sameCellFootprints": true,
+        "sameRoofCellProjections": true,
+        "sameFacadeEdgeUnits": true
+      },
+      "unresolved": {
+        "styleConfigNotPinned": true,
+        "realCreateCompositionNotExecuted": true,
+        "entranceBiasNotEvaluated": true,
+        "materialAndBlockStatesUnknown": true,
+        "physicalStairsDoorsSupportUnknown": true
+      },
+      "entranceSurfaceCandidate": {
+        "axis": "x",
+        "sign": -1,
+        "fixed": 0,
+        "runStart": 0,
+        "runEnd": 23,
+        "nominalOpeningWidth": 4,
+        "allowedStartMin": 1,
+        "allowedStartMax": 19,
+        "entranceBiasResolved": false,
+        "doorOrOpeningCreated": false
+      },
+      "levels": [
+        {
+          "level": 1,
+          "canonical": {
+            "floorRectangles": [
+              {
+                "x": 0,
+                "z": 0,
+                "width": 24,
+                "depth": 20
+              }
+            ],
+            "roofRectangles": []
+          },
+          "original": {
+            "floorRectanglesSha256": "c5e1c0d85cf6cfd3831c9ce8f74b64df136fe5539125d61a61a61cf098be3aa8",
+            "roofRectanglesSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "geometry": {
+            "floorCells": 480,
+            "roofCells": 0,
+            "facadeEdgeUnits": 88,
+            "exposedRoofBoundaryUnits": 0
+          },
+          "normalizedRectangleGroups": 0,
+          "unplacedRoofBoundaryCandidates": [],
+          "permissions": {
+            "designOnly": true,
+            "approved": false,
+            "buildOperations": 0
+          }
+        },
+        {
+          "level": 2,
+          "canonical": {
+            "floorRectangles": [
+              {
+                "x": 0,
+                "z": 0,
+                "width": 24,
+                "depth": 20
+              }
+            ],
+            "roofRectangles": [
+              {
+                "x": 0,
+                "z": 0,
+                "width": 24,
+                "depth": 2
+              },
+              {
+                "x": 0,
+                "z": 2,
+                "width": 1,
+                "depth": 17
+              },
+              {
+                "x": 23,
+                "z": 2,
+                "width": 1,
+                "depth": 17
+              },
+              {
+                "x": 0,
+                "z": 19,
+                "width": 24,
+                "depth": 1
+              }
+            ]
+          },
+          "original": {
+            "floorRectanglesSha256": "c5e1c0d85cf6cfd3831c9ce8f74b64df136fe5539125d61a61a61cf098be3aa8",
+            "roofRectanglesSha256": "49babe239082683241cb8632b37db388ecd72be3cf5ff679ac07e03852e7dd8c"
+          },
+          "geometry": {
+            "floorCells": 480,
+            "roofCells": 106,
+            "facadeEdgeUnits": 88,
+            "exposedRoofBoundaryUnits": 88
+          },
+          "normalizedRectangleGroups": 1,
+          "unplacedRoofBoundaryCandidates": [
+            {
+              "axis": "x",
+              "sign": -1,
+              "fixed": 0,
+              "start": 0,
+              "end": 23,
+              "kind": "UNAPPROVED_ROOF_BOUNDARY"
+            },
+            {
+              "axis": "x",
+              "sign": 1,
+              "fixed": 19,
+              "start": 0,
+              "end": 23,
+              "kind": "UNAPPROVED_ROOF_BOUNDARY"
+            },
+            {
+              "axis": "z",
+              "sign": -1,
+              "fixed": 0,
+              "start": 0,
+              "end": 19,
+              "kind": "UNAPPROVED_ROOF_BOUNDARY"
+            },
+            {
+              "axis": "z",
+              "sign": 1,
+              "fixed": 23,
+              "start": 0,
+              "end": 19,
+              "kind": "UNAPPROVED_ROOF_BOUNDARY"
+            }
+          ],
+          "permissions": {
+            "designOnly": true,
+            "approved": false,
+            "buildOperations": 0
+          }
+        },
+        {
+          "level": 3,
+          "canonical": {
+            "floorRectangles": [
+              {
+                "x": 1,
+                "z": 2,
+                "width": 22,
+                "depth": 17
+              }
+            ],
+            "roofRectangles": []
+          },
+          "original": {
+            "floorRectanglesSha256": "151a236814a81b36e48fb2d9e0644a0fc136eba2ba2b0a25ab20ba7e6c9fa69b",
+            "roofRectanglesSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "geometry": {
+            "floorCells": 374,
+            "roofCells": 0,
+            "facadeEdgeUnits": 78,
+            "exposedRoofBoundaryUnits": 0
+          },
+          "normalizedRectangleGroups": 0,
+          "unplacedRoofBoundaryCandidates": [],
+          "permissions": {
+            "designOnly": true,
+            "approved": false,
+            "buildOperations": 0
+          }
+        },
+        {
+          "level": 4,
+          "canonical": {
+            "floorRectangles": [
+              {
+                "x": 1,
+                "z": 2,
+                "width": 22,
+                "depth": 17
+              }
+            ],
+            "roofRectangles": []
+          },
+          "original": {
+            "floorRectanglesSha256": "151a236814a81b36e48fb2d9e0644a0fc136eba2ba2b0a25ab20ba7e6c9fa69b",
+            "roofRectanglesSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "geometry": {
+            "floorCells": 374,
+            "roofCells": 0,
+            "facadeEdgeUnits": 78,
+            "exposedRoofBoundaryUnits": 0
+          },
+          "normalizedRectangleGroups": 0,
+          "unplacedRoofBoundaryCandidates": [],
+          "permissions": {
+            "designOnly": true,
+            "approved": false,
+            "buildOperations": 0
+          }
+        },
+        {
+          "level": 5,
+          "canonical": {
+            "floorRectangles": [
+              {
+                "x": 1,
+                "z": 2,
+                "width": 22,
+                "depth": 17
+              }
+            ],
+            "roofRectangles": []
+          },
+          "original": {
+            "floorRectanglesSha256": "151a236814a81b36e48fb2d9e0644a0fc136eba2ba2b0a25ab20ba7e6c9fa69b",
+            "roofRectanglesSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "geometry": {
+            "floorCells": 374,
+            "roofCells": 0,
+            "facadeEdgeUnits": 78,
+            "exposedRoofBoundaryUnits": 0
+          },
+          "normalizedRectangleGroups": 0,
+          "unplacedRoofBoundaryCandidates": [],
+          "permissions": {
+            "designOnly": true,
+            "approved": false,
+            "buildOperations": 0
+          }
+        },
+        {
+          "level": 6,
+          "canonical": {
+            "floorRectangles": [
+              {
+                "x": 1,
+                "z": 2,
+                "width": 22,
+                "depth": 17
+              }
+            ],
+            "roofRectangles": [
+              {
+                "x": 1,
+                "z": 2,
+                "width": 22,
+                "depth": 17
+              }
+            ]
+          },
+          "original": {
+            "floorRectanglesSha256": "151a236814a81b36e48fb2d9e0644a0fc136eba2ba2b0a25ab20ba7e6c9fa69b",
+            "roofRectanglesSha256": "151a236814a81b36e48fb2d9e0644a0fc136eba2ba2b0a25ab20ba7e6c9fa69b"
+          },
+          "geometry": {
+            "floorCells": 374,
+            "roofCells": 374,
+            "facadeEdgeUnits": 78,
+            "exposedRoofBoundaryUnits": 78
+          },
+          "normalizedRectangleGroups": 0,
+          "unplacedRoofBoundaryCandidates": [
+            {
+              "axis": "x",
+              "sign": -1,
+              "fixed": 2,
+              "start": 1,
+              "end": 22,
+              "kind": "UNAPPROVED_ROOF_BOUNDARY"
+            },
+            {
+              "axis": "x",
+              "sign": 1,
+              "fixed": 18,
+              "start": 1,
+              "end": 22,
+              "kind": "UNAPPROVED_ROOF_BOUNDARY"
+            },
+            {
+              "axis": "z",
+              "sign": -1,
+              "fixed": 1,
+              "start": 2,
+              "end": 18,
+              "kind": "UNAPPROVED_ROOF_BOUNDARY"
+            },
+            {
+              "axis": "z",
+              "sign": 1,
+              "fixed": 22,
+              "start": 2,
+              "end": 18,
+              "kind": "UNAPPROVED_ROOF_BOUNDARY"
+            }
+          ],
+          "permissions": {
+            "designOnly": true,
+            "approved": false,
+            "buildOperations": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "office/candidate-02",
+      "program": "office",
+      "selection": {
+        "program": "office",
+        "site": {
+          "width": 24,
+          "depth": 20,
+          "floors": 6,
+          "floorHeight": 4
+        },
+        "seed": 5,
+        "preferredMassing": "tower_on_podium",
+        "selectedMassing": "asymmetric_block",
+        "requiresExplicitMassing": true,
+        "variation": {
+          "wing": 6,
+          "setback": 2,
+          "heightDrop": 1,
+          "bayShift": 2
+        },
+        "masses": [
+          {
+            "x": 0,
+            "z": 0,
+            "width": 13,
+            "depth": 14,
+            "start": 0,
+            "end": 6
+          },
+          {
+            "x": 11,
+            "z": 6,
+            "width": 13,
+            "depth": 14,
+            "start": 0,
+            "end": 5
+          }
+        ],
+        "assumptions": {
+          "styleArchitectureProportion": 0,
+          "styleConfigurationNotPinned": true,
+          "paletteAndFacadeCompositionNotExecuted": true
+        }
+      },
+      "localOnly": true,
+      "canonicalization": {
+        "changedRectangleGroups": 1,
+        "sameCellFootprints": true,
+        "sameRoofCellProjections": true,
+        "sameFacadeEdgeUnits": true
+      },
+      "unresolved": {
+        "styleConfigNotPinned": true,
+        "realCreateCompositionNotExecuted": true,
+        "entranceBiasNotEvaluated": true,
+        "materialAndBlockStatesUnknown": true,
+        "physicalStairsDoorsSupportUnknown": true
+      },
+      "entranceSurfaceCandidate": {
+        "axis": "x",
+        "sign": -1,
+        "fixed": 0,
+        "runStart": 0,
+        "runEnd": 12,
+        "nominalOpeningWidth": 4,
+        "allowedStartMin": 1,
+        "allowedStartMax": 8,
+        "entranceBiasResolved": false,
+        "doorOrOpeningCreated": false
+      },
+      "levels": [
+        {
+          "level": 1,
+          "canonical": {
+            "floorRectangles": [
+              {
+                "x": 0,
+                "z": 0,
+                "width": 13,
+                "depth": 6
+              },
+              {
+                "x": 0,
+                "z": 6,
+                "width": 24,
+                "depth": 8
+              },
+              {
+                "x": 11,
+                "z": 14,
+                "width": 13,
+                "depth": 6
+              }
+            ],
+            "roofRectangles": []
+          },
+          "original": {
+            "floorRectanglesSha256": "debd8e1397ed5871fb6e9a784a786c69e9892b17608dbd65432bf0c380ea7a61",
+            "roofRectanglesSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "geometry": {
+            "floorCells": 348,
+            "roofCells": 0,
+            "facadeEdgeUnits": 88,
+            "exposedRoofBoundaryUnits": 0
+          },
+          "normalizedRectangleGroups": 0,
+          "unplacedRoofBoundaryCandidates": [],
+          "permissions": {
+            "designOnly": true,
+            "approved": false,
+            "buildOperations": 0
+          }
+        },
+        {
+          "level": 2,
+          "canonical": {
+            "floorRectangles": [
+              {
+                "x": 0,
+                "z": 0,
+                "width": 13,
+                "depth": 6
+              },
+              {
+                "x": 0,
+                "z": 6,
+                "width": 24,
+                "depth": 8
+              },
+              {
+                "x": 11,
+                "z": 14,
+                "width": 13,
+                "depth": 6
+              }
+            ],
+            "roofRectangles": []
+          },
+          "original": {
+            "floorRectanglesSha256": "debd8e1397ed5871fb6e9a784a786c69e9892b17608dbd65432bf0c380ea7a61",
+            "roofRectanglesSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "geometry": {
+            "floorCells": 348,
+            "roofCells": 0,
+            "facadeEdgeUnits": 88,
+            "exposedRoofBoundaryUnits": 0
+          },
+          "normalizedRectangleGroups": 0,
+          "unplacedRoofBoundaryCandidates": [],
+          "permissions": {
+            "designOnly": true,
+            "approved": false,
+            "buildOperations": 0
+          }
+        },
+        {
+          "level": 3,
+          "canonical": {
+            "floorRectangles": [
+              {
+                "x": 0,
+                "z": 0,
+                "width": 13,
+                "depth": 6
+              },
+              {
+                "x": 0,
+                "z": 6,
+                "width": 24,
+                "depth": 8
+              },
+              {
+                "x": 11,
+                "z": 14,
+                "width": 13,
+                "depth": 6
+              }
+            ],
+            "roofRectangles": []
+          },
+          "original": {
+            "floorRectanglesSha256": "debd8e1397ed5871fb6e9a784a786c69e9892b17608dbd65432bf0c380ea7a61",
+            "roofRectanglesSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "geometry": {
+            "floorCells": 348,
+            "roofCells": 0,
+            "facadeEdgeUnits": 88,
+            "exposedRoofBoundaryUnits": 0
+          },
+          "normalizedRectangleGroups": 0,
+          "unplacedRoofBoundaryCandidates": [],
+          "permissions": {
+            "designOnly": true,
+            "approved": false,
+            "buildOperations": 0
+          }
+        },
+        {
+          "level": 4,
+          "canonical": {
+            "floorRectangles": [
+              {
+                "x": 0,
+                "z": 0,
+                "width": 13,
+                "depth": 6
+              },
+              {
+                "x": 0,
+                "z": 6,
+                "width": 24,
+                "depth": 8
+              },
+              {
+                "x": 11,
+                "z": 14,
+                "width": 13,
+                "depth": 6
+              }
+            ],
+            "roofRectangles": []
+          },
+          "original": {
+            "floorRectanglesSha256": "debd8e1397ed5871fb6e9a784a786c69e9892b17608dbd65432bf0c380ea7a61",
+            "roofRectanglesSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "geometry": {
+            "floorCells": 348,
+            "roofCells": 0,
+            "facadeEdgeUnits": 88,
+            "exposedRoofBoundaryUnits": 0
+          },
+          "normalizedRectangleGroups": 0,
+          "unplacedRoofBoundaryCandidates": [],
+          "permissions": {
+            "designOnly": true,
+            "approved": false,
+            "buildOperations": 0
+          }
+        },
+        {
+          "level": 5,
+          "canonical": {
+            "floorRectangles": [
+              {
+                "x": 0,
+                "z": 0,
+                "width": 13,
+                "depth": 6
+              },
+              {
+                "x": 0,
+                "z": 6,
+                "width": 24,
+                "depth": 8
+              },
+              {
+                "x": 11,
+                "z": 14,
+                "width": 13,
+                "depth": 6
+              }
+            ],
+            "roofRectangles": [
+              {
+                "x": 13,
+                "z": 6,
+                "width": 11,
+                "depth": 8
+              },
+              {
+                "x": 11,
+                "z": 14,
+                "width": 13,
+                "depth": 6
+              }
+            ]
+          },
+          "original": {
+            "floorRectanglesSha256": "debd8e1397ed5871fb6e9a784a786c69e9892b17608dbd65432bf0c380ea7a61",
+            "roofRectanglesSha256": "b0bc63f07dee8635a9a2eb95f76dadcbd356de16658fae1b360713cd957a3644"
+          },
+          "geometry": {
+            "floorCells": 348,
+            "roofCells": 166,
+            "facadeEdgeUnits": 88,
+            "exposedRoofBoundaryUnits": 44
+          },
+          "normalizedRectangleGroups": 1,
+          "unplacedRoofBoundaryCandidates": [
+            {
+              "axis": "x",
+              "sign": -1,
+              "fixed": 6,
+              "start": 13,
+              "end": 23,
+              "kind": "UNAPPROVED_ROOF_BOUNDARY"
+            },
+            {
+              "axis": "x",
+              "sign": 1,
+              "fixed": 19,
+              "start": 11,
+              "end": 23,
+              "kind": "UNAPPROVED_ROOF_BOUNDARY"
+            },
+            {
+              "axis": "z",
+              "sign": -1,
+              "fixed": 11,
+              "start": 14,
+              "end": 19,
+              "kind": "UNAPPROVED_ROOF_BOUNDARY"
+            },
+            {
+              "axis": "z",
+              "sign": 1,
+              "fixed": 23,
+              "start": 6,
+              "end": 19,
+              "kind": "UNAPPROVED_ROOF_BOUNDARY"
+            }
+          ],
+          "permissions": {
+            "designOnly": true,
+            "approved": false,
+            "buildOperations": 0
+          }
+        },
+        {
+          "level": 6,
+          "canonical": {
+            "floorRectangles": [
+              {
+                "x": 0,
+                "z": 0,
+                "width": 13,
+                "depth": 14
+              }
+            ],
+            "roofRectangles": [
+              {
+                "x": 0,
+                "z": 0,
+                "width": 13,
+                "depth": 14
+              }
+            ]
+          },
+          "original": {
+            "floorRectanglesSha256": "ff333ce320d2120ed94a494a86fb45136cc6eca63f9b609c2465969fa3b55336",
+            "roofRectanglesSha256": "ff333ce320d2120ed94a494a86fb45136cc6eca63f9b609c2465969fa3b55336"
+          },
+          "geometry": {
+            "floorCells": 182,
+            "roofCells": 182,
+            "facadeEdgeUnits": 54,
+            "exposedRoofBoundaryUnits": 54
+          },
+          "normalizedRectangleGroups": 0,
+          "unplacedRoofBoundaryCandidates": [
+            {
+              "axis": "x",
+              "sign": -1,
+              "fixed": 0,
+              "start": 0,
+              "end": 12,
+              "kind": "UNAPPROVED_ROOF_BOUNDARY"
+            },
+            {
+              "axis": "x",
+              "sign": 1,
+              "fixed": 13,
+              "start": 0,
+              "end": 12,
+              "kind": "UNAPPROVED_ROOF_BOUNDARY"
+            },
+            {
+              "axis": "z",
+              "sign": -1,
+              "fixed": 0,
+              "start": 0,
+              "end": 13,
+              "kind": "UNAPPROVED_ROOF_BOUNDARY"
+            },
+            {
+              "axis": "z",
+              "sign": 1,
+              "fixed": 12,
+              "start": 0,
+              "end": 13,
+              "kind": "UNAPPROVED_ROOF_BOUNDARY"
+            }
+          ],
+          "permissions": {
+            "designOnly": true,
+            "approved": false,
+            "buildOperations": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "office/candidate-03",
+      "program": "office",
+      "selection": {
+        "program": "office",
+        "site": {
+          "width": 24,
+          "depth": 20,
+          "floors": 6,
+          "floorHeight": 4
+        },
+        "seed": 0,
+        "preferredMassing": "slab",
+        "selectedMassing": "slab",
+        "requiresExplicitMassing": false,
+        "variation": {
+          "wing": 5,
+          "setback": 1,
+          "heightDrop": 1,
+          "bayShift": 0
+        },
+        "masses": [
+          {
+            "x": 0,
+            "z": 0,
+            "width": 24,
+            "depth": 20,
+            "start": 0,
+            "end": 6
+          }
+        ],
+        "assumptions": {
+          "styleArchitectureProportion": 0,
+          "styleConfigurationNotPinned": true,
+          "paletteAndFacadeCompositionNotExecuted": true
+        }
+      },
+      "localOnly": true,
+      "canonicalization": {
+        "changedRectangleGroups": 0,
+        "sameCellFootprints": true,
+        "sameRoofCellProjections": true,
+        "sameFacadeEdgeUnits": true
+      },
+      "unresolved": {
+        "styleConfigNotPinned": true,
+        "realCreateCompositionNotExecuted": true,
+        "entranceBiasNotEvaluated": true,
+        "materialAndBlockStatesUnknown": true,
+        "physicalStairsDoorsSupportUnknown": true
+      },
+      "entranceSurfaceCandidate": {
+        "axis": "x",
+        "sign": -1,
+        "fixed": 0,
+        "runStart": 0,
+        "runEnd": 23,
+        "nominalOpeningWidth": 4,
+        "allowedStartMin": 1,
+        "allowedStartMax": 19,
+        "entranceBiasResolved": false,
+        "doorOrOpeningCreated": false
+      },
+      "levels": [
+        {
+          "level": 1,
+          "canonical": {
+            "floorRectangles": [
+              {
+                "x": 0,
+                "z": 0,
+                "width": 24,
+                "depth": 20
+              }
+            ],
+            "roofRectangles": []
+          },
+          "original": {
+            "floorRectanglesSha256": "c5e1c0d85cf6cfd3831c9ce8f74b64df136fe5539125d61a61a61cf098be3aa8",
+            "roofRectanglesSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "geometry": {
+            "floorCells": 480,
+            "roofCells": 0,
+            "facadeEdgeUnits": 88,
+            "exposedRoofBoundaryUnits": 0
+          },
+          "normalizedRectangleGroups": 0,
+          "unplacedRoofBoundaryCandidates": [],
+          "permissions": {
+            "designOnly": true,
+            "approved": false,
+            "buildOperations": 0
+          }
+        },
+        {
+          "level": 2,
+          "canonical": {
+            "floorRectangles": [
+              {
+                "x": 0,
+                "z": 0,
+                "width": 24,
+                "depth": 20
+              }
+            ],
+            "roofRectangles": []
+          },
+          "original": {
+            "floorRectanglesSha256": "c5e1c0d85cf6cfd3831c9ce8f74b64df136fe5539125d61a61a61cf098be3aa8",
+            "roofRectanglesSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "geometry": {
+            "floorCells": 480,
+            "roofCells": 0,
+            "facadeEdgeUnits": 88,
+            "exposedRoofBoundaryUnits": 0
+          },
+          "normalizedRectangleGroups": 0,
+          "unplacedRoofBoundaryCandidates": [],
+          "permissions": {
+            "designOnly": true,
+            "approved": false,
+            "buildOperations": 0
+          }
+        },
+        {
+          "level": 3,
+          "canonical": {
+            "floorRectangles": [
+              {
+                "x": 0,
+                "z": 0,
+                "width": 24,
+                "depth": 20
+              }
+            ],
+            "roofRectangles": []
+          },
+          "original": {
+            "floorRectanglesSha256": "c5e1c0d85cf6cfd3831c9ce8f74b64df136fe5539125d61a61a61cf098be3aa8",
+            "roofRectanglesSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "geometry": {
+            "floorCells": 480,
+            "roofCells": 0,
+            "facadeEdgeUnits": 88,
+            "exposedRoofBoundaryUnits": 0
+          },
+          "normalizedRectangleGroups": 0,
+          "unplacedRoofBoundaryCandidates": [],
+          "permissions": {
+            "designOnly": true,
+            "approved": false,
+            "buildOperations": 0
+          }
+        },
+        {
+          "level": 4,
+          "canonical": {
+            "floorRectangles": [
+              {
+                "x": 0,
+                "z": 0,
+                "width": 24,
+                "depth": 20
+              }
+            ],
+            "roofRectangles": []
+          },
+          "original": {
+            "floorRectanglesSha256": "c5e1c0d85cf6cfd3831c9ce8f74b64df136fe5539125d61a61a61cf098be3aa8",
+            "roofRectanglesSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "geometry": {
+            "floorCells": 480,
+            "roofCells": 0,
+            "facadeEdgeUnits": 88,
+            "exposedRoofBoundaryUnits": 0
+          },
+          "normalizedRectangleGroups": 0,
+          "unplacedRoofBoundaryCandidates": [],
+          "permissions": {
+            "designOnly": true,
+            "approved": false,
+            "buildOperations": 0
+          }
+        },
+        {
+          "level": 5,
+          "canonical": {
+            "floorRectangles": [
+              {
+                "x": 0,
+                "z": 0,
+                "width": 24,
+                "depth": 20
+              }
+            ],
+            "roofRectangles": []
+          },
+          "original": {
+            "floorRectanglesSha256": "c5e1c0d85cf6cfd3831c9ce8f74b64df136fe5539125d61a61a61cf098be3aa8",
+            "roofRectanglesSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "geometry": {
+            "floorCells": 480,
+            "roofCells": 0,
+            "facadeEdgeUnits": 88,
+            "exposedRoofBoundaryUnits": 0
+          },
+          "normalizedRectangleGroups": 0,
+          "unplacedRoofBoundaryCandidates": [],
+          "permissions": {
+            "designOnly": true,
+            "approved": false,
+            "buildOperations": 0
+          }
+        },
+        {
+          "level": 6,
+          "canonical": {
+            "floorRectangles": [
+              {
+                "x": 0,
+                "z": 0,
+                "width": 24,
+                "depth": 20
+              }
+            ],
+            "roofRectangles": [
+              {
+                "x": 0,
+                "z": 0,
+                "width": 24,
+                "depth": 20
+              }
+            ]
+          },
+          "original": {
+            "floorRectanglesSha256": "c5e1c0d85cf6cfd3831c9ce8f74b64df136fe5539125d61a61a61cf098be3aa8",
+            "roofRectanglesSha256": "c5e1c0d85cf6cfd3831c9ce8f74b64df136fe5539125d61a61a61cf098be3aa8"
+          },
+          "geometry": {
+            "floorCells": 480,
+            "roofCells": 480,
+            "facadeEdgeUnits": 88,
+            "exposedRoofBoundaryUnits": 88
+          },
+          "normalizedRectangleGroups": 0,
+          "unplacedRoofBoundaryCandidates": [
+            {
+              "axis": "x",
+              "sign": -1,
+              "fixed": 0,
+              "start": 0,
+              "end": 23,
+              "kind": "UNAPPROVED_ROOF_BOUNDARY"
+            },
+            {
+              "axis": "x",
+              "sign": 1,
+              "fixed": 19,
+              "start": 0,
+              "end": 23,
+              "kind": "UNAPPROVED_ROOF_BOUNDARY"
+            },
+            {
+              "axis": "z",
+              "sign": -1,
+              "fixed": 0,
+              "start": 0,
+              "end": 19,
+              "kind": "UNAPPROVED_ROOF_BOUNDARY"
+            },
+            {
+              "axis": "z",
+              "sign": 1,
+              "fixed": 23,
+              "start": 0,
+              "end": 19,
+              "kind": "UNAPPROVED_ROOF_BOUNDARY"
+            }
+          ],
+          "permissions": {
+            "designOnly": true,
+            "approved": false,
+            "buildOperations": 0
+          }
+        }
+      ]
+    }
+  ],
+  "totals": {
+    "buildings": 5,
+    "levels": 30,
+    "floorCells": 12778,
+    "roofCells": 2228,
+    "facadeEdgeUnits": 3022,
+    "roofBoundaryCandidateUnits": 604,
+    "canonicalRectangleGroupsChanged": 3,
+    "sourcePlannerInvocations": 0,
+    "worldOperations": 0
+  },
+  "scope": {
+    "verified": "SOURCE_DERIVED_SELECTION_UNDER_STYLE_PROPORTION_ZERO_AND_OFFLINE_CANONICAL_ENVELOPES",
+    "cannotClaim": [
+      "REAL_CREATECOMPOSITION_OR_GENERALBUILDINGPLANNER_EXECUTED",
+      "ACTUAL_MATERIAL_PALETTE",
+      "ACTUAL_ROOF_PARAPET_BLOCKS",
+      "ACTUAL_DOOR_POSITION",
+      "ENTRANCE_QUALITY_BIAS",
+      "COMPLETE_FACADE",
+      "ROTATED_WORLD_PLACEMENT",
+      "REAL_STAIR_AND_SUPPORT"
+    ],
+    "transitionToDeployment": "FORBIDDEN"
+  },
+  "blockers": {
+    "unresolvedLegacyDoorHints": 118,
+    "uncutStairCells": 50,
+    "stairsWithoutPhysicalState": 25,
+    "ordinaryDoorBlocksWithoutExactState": 314,
+    "unapprovedAppearanceConcepts": 5,
+    "apartmentFullVerticalCirculation": "CONDITIONAL_VIRTUAL_GRAPH_ONLY",
+    "otherBuildingCirculation": "NOT_VALIDATED",
+    "supportHeadroomCollision": "UNKNOWN",
+    "M4Gates": [
+      {
+        "id": "M4-01",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-02",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-03",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-04",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-05",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-06",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-07",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-08",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-09",
+        "status": "BLOCKED"
+      }
+    ],
+    "unresolvedExteriorAccess": true,
+    "stagePhysicalSupport": false,
+    "unprovenPlannerCompatibility": true,
+    "actualMinecraftStairBlockState": null
+  },
+  "readiness": "NOT_PREPARED",
+  "deployment": "BLOCKED",
+  "constructionApproved": false,
+  "executionAllowed": false,
+  "worldCoordinates": null,
+  "materialIds": [],
+  "engineCalls": 0,
+  "buildOperations": 0,
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0,
+    "worldCoordinates": null,
+    "materialIds": []
+  },
+  "reportSha256": "0d12e4767866ee0688441001d2fadd7817820f00b884a971f96c7452046b55aa"
+}

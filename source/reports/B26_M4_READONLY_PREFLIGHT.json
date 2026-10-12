@@ -1,0 +1,229 @@
+{
+  "schema": "minecraftaibuilder-step8b-b26-m4-offline-gate-v1",
+  "kind": "STATIC_EVIDENCE_ANALYSIS_NOT_RUNTIME_PROOF",
+  "source": {
+    "b25ReportHash": "b62f0437b004b9d6ad32bc41ef217a733dc952e0a3458349d203391b81b3085d",
+    "windowsSnapshotSha256": "62d1de7d0148d514fded1544c254a9beab4299018dc054aff353557df0809a1f",
+    "windowsEvidenceDate": "2026-10-10",
+    "educationVersion": "v26.3",
+    "sourceHashes": {
+      "engine/src/general-building-planner.js": "23be6e8b03827698fb890661f6fd0957a76ac4718f3347531121c8a7dc0450c8",
+      "engine/src/build-anchor.js": "23bea262e90012fc6bfdd9f1407e1f7cb514f87862ad1c60b0431792f8ef056f",
+      "engine/src/block-states.js": "7bee6028673be26058e7a54e30c904cf568c66a379acd066c12a0c8f38edcf78",
+      "engine/src/block-catalog.js": "923c95a45c1c40d3444ffb7f567c797e1e45723c8c332d2ad68f459c360803eb",
+      "engine/src/safety.js": "ef4f71ec968b46ce937d6b279f9cb5b9b7aecde7fd917a960e1716b72795e9fc",
+      "bridge/src/general-building.js": "ca1531453d9cb90b5b75b99c0e1d47e22b8e38d244b5adb14da2deda5ef65828",
+      "catalog/education.json": "842de2f91b0c84c9bd601fbeae9f04e6edf6a1b97b688635163a7c7816bd3a5f",
+      "catalog/semantic.json": "fca2ba78056d286862e3b0c48f2226c673bc3596c1b7d434f9b4ee30273cc6de",
+      "modules/architectural-library.js": "19fa126051a687bfb5c5f6bdf199a6d42aa70b475d908dd38a99e9f354532eee"
+    },
+    "sourceHashesVerifiedAtCreation": true,
+    "liveRuntimeVerified": false
+  },
+  "archivedProfile": {
+    "records": 966,
+    "verifiedAtCapture": 827,
+    "unsupportedAtCapture": 139,
+    "statusMeaning": "ARCHIVED_2026_10_10_NOT_CURRENT_RUNTIME",
+    "materials": [
+      {
+        "category": "planks",
+        "archivedRecordCount": 12,
+        "archivedVerifiedRecords": 11,
+        "archivedUnsupportedRecords": 1,
+        "evidenceLevel": "HISTORICAL_PROFILE_ONLY_NOT_LIVE_ATTESTATION",
+        "proposedMaterial": null,
+        "constructionCompatible": false
+      },
+      {
+        "category": "stairs",
+        "archivedRecordCount": 272,
+        "archivedVerifiedRecords": 208,
+        "archivedUnsupportedRecords": 64,
+        "evidenceLevel": "HISTORICAL_PROFILE_ONLY_NOT_LIVE_ATTESTATION",
+        "proposedMaterial": null,
+        "constructionCompatible": false
+      },
+      {
+        "category": "slab",
+        "archivedRecordCount": 134,
+        "archivedVerifiedRecords": 102,
+        "archivedUnsupportedRecords": 32,
+        "evidenceLevel": "HISTORICAL_PROFILE_ONLY_NOT_LIVE_ATTESTATION",
+        "proposedMaterial": null,
+        "constructionCompatible": false
+      },
+      {
+        "category": "door",
+        "archivedRecordCount": 0,
+        "archivedVerifiedRecords": 0,
+        "archivedUnsupportedRecords": 0,
+        "evidenceLevel": "HISTORICAL_PROFILE_ONLY_NOT_LIVE_ATTESTATION",
+        "proposedMaterial": null,
+        "constructionCompatible": false
+      },
+      {
+        "category": "trapdoor",
+        "archivedRecordCount": 128,
+        "archivedVerifiedRecords": 128,
+        "archivedUnsupportedRecords": 0,
+        "evidenceLevel": "HISTORICAL_PROFILE_ONLY_NOT_LIVE_ATTESTATION",
+        "proposedMaterial": null,
+        "constructionCompatible": false
+      }
+    ]
+  },
+  "interior": {
+    "buildings": 5,
+    "floors": 30,
+    "wallPanels": 5704,
+    "sharedWallVoxels": 3990,
+    "materialVerifiedSharedWalls": 0,
+    "doorPorts": 314,
+    "nominalRelocations": 118,
+    "historicalExactDoorVerificationRecords": 0,
+    "lowerAndUpperDoorStatesVerified": 0,
+    "doorPositionsWorldMapped": 0,
+    "stairLinks": 25,
+    "cutoutCandidateCells": 50,
+    "actualCutouts": 0,
+    "stairSupportVerified": 0,
+    "office02ExteriorDelta": 123,
+    "office02CorridorDelta": 18
+  },
+  "symbolicRotations": [
+    {
+      "facing": "north",
+      "transformedLocalUnitX": {
+        "x": 1,
+        "y": 0,
+        "z": 0
+      },
+      "transformedLocalUnitZ": {
+        "x": 0,
+        "y": 0,
+        "z": -1
+      },
+      "coordinateSystem": "SYMBOLIC_ORIENTATION_ONLY_NO_ANCHOR",
+      "worldPosition": null
+    },
+    {
+      "facing": "east",
+      "transformedLocalUnitX": {
+        "x": 0,
+        "y": 0,
+        "z": 1
+      },
+      "transformedLocalUnitZ": {
+        "x": 1,
+        "y": 0,
+        "z": 0
+      },
+      "coordinateSystem": "SYMBOLIC_ORIENTATION_ONLY_NO_ANCHOR",
+      "worldPosition": null
+    },
+    {
+      "facing": "south",
+      "transformedLocalUnitX": {
+        "x": -1,
+        "y": 0,
+        "z": 0
+      },
+      "transformedLocalUnitZ": {
+        "x": 0,
+        "y": 0,
+        "z": 1
+      },
+      "coordinateSystem": "SYMBOLIC_ORIENTATION_ONLY_NO_ANCHOR",
+      "worldPosition": null
+    },
+    {
+      "facing": "west",
+      "transformedLocalUnitX": {
+        "x": 0,
+        "y": 0,
+        "z": -1
+      },
+      "transformedLocalUnitZ": {
+        "x": -1,
+        "y": 0,
+        "z": 0
+      },
+      "coordinateSystem": "SYMBOLIC_ORIENTATION_ONLY_NO_ANCHOR",
+      "worldPosition": null
+    }
+  ],
+  "blockers": [
+    {
+      "id": "M4-01",
+      "reason": "LIVE_ENGINE_IDENTITY_UNATTESTED",
+      "confirmed": false
+    },
+    {
+      "id": "M4-02",
+      "reason": "MATERIALS_NOT_BOUND_TO_INTERIOR_ROLES",
+      "confirmed": false
+    },
+    {
+      "id": "M4-03",
+      "reason": "SHARED_WALL_MATERIAL_AND_JOINTS_UNKNOWN",
+      "confirmed": false
+    },
+    {
+      "id": "M4-04",
+      "reason": "DOOR_LOWER_UPPER_HINGE_AND_FACING_UNKNOWN",
+      "confirmed": false
+    },
+    {
+      "id": "M4-05",
+      "reason": "NO_HISTORIC_EXACT_DOOR_STATE_VERIFICATION",
+      "confirmed": false
+    },
+    {
+      "id": "M4-06",
+      "reason": "STAIR_SLAB_SUPPORT_AND_HEADROOM_UNPROVEN",
+      "confirmed": false
+    },
+    {
+      "id": "M4-07",
+      "reason": "WORLD_ANCHOR_AND_SITE_SAFETY_NOT_ATTESTED",
+      "confirmed": false
+    },
+    {
+      "id": "M4-08",
+      "reason": "OFFICE02_EXTERIOR_AND_CORRIDOR_DIFF_UNRESOLVED",
+      "confirmed": false
+    },
+    {
+      "id": "M4-09",
+      "reason": "NO_EXPLICIT_CONSTRUCTION_APPROVAL",
+      "confirmed": false
+    }
+  ],
+  "allBlockersOpen": true,
+  "nextWindowsReadOnlyInputs": [
+    "LOCAL_SOURCE_FINGERPRINTS",
+    "PROFILE_VERSION_AND_RECORD_COUNTS",
+    "NODE_PROCESS_METADATA"
+  ],
+  "caution": "BLOCK_STATES_IN_SOURCE_DO_NOT_PROVE_GAME_ACCEPTANCE. NO_WORLD_OPERATIONS.",
+  "gate": {
+    "deployment": "BLOCKED",
+    "readiness": "NOT_PREPARED",
+    "constructionApproved": false,
+    "worldAccess": false,
+    "bridgeContact": false,
+    "commandsEmitted": 0,
+    "physicalChanges": 0,
+    "emitBuildPlanAllowed": false,
+    "runtimeProven": false
+  },
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0,
+    "worldCoordinates": null,
+    "materialIds": []
+  },
+  "reportSha256": "2173f804b341e475b34ff97087764027bae1a60043e7a1a1011aa797727fc905"
+}

@@ -1,0 +1,452 @@
+{
+  "schema": "minecraftaibuilder-b74-production-planner-offline-v1",
+  "status": "OFFLINE_PLANNER_GENERATED_5_BLOCKED_FROM_CONSTRUCTION",
+  "source": {
+    "pinnedModules": 30,
+    "staticESMClosureMissing": [],
+    "catalogSixVerified": true,
+    "blockListState": "PINNED_OFFICIAL",
+    "pinnedBlocksSha256": "49ff9c501b1c96b547aa49fda07a53bc19f7d5fe338aff43fe5f65c3eaaf031f"
+  },
+  "results": [
+    {
+      "id": "apartment/candidate-01",
+      "plannerActuallyCalled": true,
+      "operationsExaminedOnly": 449,
+      "boundsLocal": {
+        "from": {
+          "x": 0,
+          "y": -1,
+          "z": 0
+        },
+        "to": {
+          "x": 27,
+          "y": 31,
+          "z": 21
+        }
+      },
+      "geometry": {
+        "buildingId": "apartment/candidate-01",
+        "productionOutputInspected": true,
+        "floorHeightCandidateMatch": true,
+        "matchedCells": 1350,
+        "missingNominalCells": 1050,
+        "extraProductionCells": 0,
+        "footprintParity": "BLOCKED_FOOTPRINT_DISAGREEMENT",
+        "sampleConflicts": {
+          "outsideProduction": [
+            {
+              "floor": 1,
+              "x": 23,
+              "z": 5
+            },
+            {
+              "floor": 1,
+              "x": 24,
+              "z": 5
+            },
+            {
+              "floor": 1,
+              "x": 25,
+              "z": 5
+            },
+            {
+              "floor": 1,
+              "x": 26,
+              "z": 5
+            },
+            {
+              "floor": 1,
+              "x": 27,
+              "z": 5
+            },
+            {
+              "floor": 1,
+              "x": 23,
+              "z": 6
+            },
+            {
+              "floor": 1,
+              "x": 24,
+              "z": 6
+            },
+            {
+              "floor": 1,
+              "x": 25,
+              "z": 6
+            }
+          ],
+          "outsideNominal": []
+        },
+        "orientation": "north",
+        "orientationTransformChecked": false,
+        "roleMaterialsChecked": false,
+        "doorAndStairStatesChecked": false,
+        "externalWallConflictChecked": false,
+        "emissionAllowed": false,
+        "constructionApproved": false,
+        "BuildPlan": {
+          "status": "NOT_PREPARED",
+          "operations": [],
+          "commandCount": 0
+        }
+      }
+    },
+    {
+      "id": "hotel/candidate-01",
+      "plannerActuallyCalled": true,
+      "operationsExaminedOnly": 458,
+      "boundsLocal": {
+        "from": {
+          "x": 0,
+          "y": -1,
+          "z": 0
+        },
+        "to": {
+          "x": 25,
+          "y": 32,
+          "z": 19
+        }
+      },
+      "geometry": {
+        "buildingId": "hotel/candidate-01",
+        "productionOutputInspected": true,
+        "floorHeightCandidateMatch": true,
+        "matchedCells": 2608,
+        "missingNominalCells": 512,
+        "extraProductionCells": 0,
+        "footprintParity": "BLOCKED_FOOTPRINT_DISAGREEMENT",
+        "sampleConflicts": {
+          "outsideProduction": [
+            {
+              "floor": 3,
+              "x": 0,
+              "z": 0
+            },
+            {
+              "floor": 3,
+              "x": 1,
+              "z": 0
+            },
+            {
+              "floor": 3,
+              "x": 2,
+              "z": 0
+            },
+            {
+              "floor": 3,
+              "x": 3,
+              "z": 0
+            },
+            {
+              "floor": 3,
+              "x": 4,
+              "z": 0
+            },
+            {
+              "floor": 3,
+              "x": 5,
+              "z": 0
+            },
+            {
+              "floor": 3,
+              "x": 6,
+              "z": 0
+            },
+            {
+              "floor": 3,
+              "x": 7,
+              "z": 0
+            }
+          ],
+          "outsideNominal": []
+        },
+        "orientation": "north",
+        "orientationTransformChecked": false,
+        "roleMaterialsChecked": false,
+        "doorAndStairStatesChecked": false,
+        "externalWallConflictChecked": false,
+        "emissionAllowed": false,
+        "constructionApproved": false,
+        "BuildPlan": {
+          "status": "NOT_PREPARED",
+          "operations": [],
+          "commandCount": 0
+        }
+      }
+    },
+    {
+      "id": "office/candidate-01",
+      "plannerActuallyCalled": true,
+      "operationsExaminedOnly": 548,
+      "boundsLocal": {
+        "from": {
+          "x": 0,
+          "y": -1,
+          "z": 0
+        },
+        "to": {
+          "x": 23,
+          "y": 32,
+          "z": 19
+        }
+      },
+      "geometry": {
+        "buildingId": "office/candidate-01",
+        "productionOutputInspected": true,
+        "floorHeightCandidateMatch": true,
+        "matchedCells": 2456,
+        "missingNominalCells": 0,
+        "extraProductionCells": 424,
+        "footprintParity": "BLOCKED_FOOTPRINT_DISAGREEMENT",
+        "sampleConflicts": {
+          "outsideProduction": [],
+          "outsideNominal": [
+            {
+              "floor": 3,
+              "x": 0,
+              "z": 0
+            },
+            {
+              "floor": 3,
+              "x": 1,
+              "z": 0
+            },
+            {
+              "floor": 3,
+              "x": 2,
+              "z": 0
+            },
+            {
+              "floor": 3,
+              "x": 3,
+              "z": 0
+            },
+            {
+              "floor": 3,
+              "x": 4,
+              "z": 0
+            },
+            {
+              "floor": 3,
+              "x": 5,
+              "z": 0
+            },
+            {
+              "floor": 3,
+              "x": 6,
+              "z": 0
+            },
+            {
+              "floor": 3,
+              "x": 7,
+              "z": 0
+            }
+          ]
+        },
+        "orientation": "north",
+        "orientationTransformChecked": false,
+        "roleMaterialsChecked": false,
+        "doorAndStairStatesChecked": false,
+        "externalWallConflictChecked": false,
+        "emissionAllowed": false,
+        "constructionApproved": false,
+        "BuildPlan": {
+          "status": "NOT_PREPARED",
+          "operations": [],
+          "commandCount": 0
+        }
+      }
+    },
+    {
+      "id": "office/candidate-02",
+      "plannerActuallyCalled": true,
+      "operationsExaminedOnly": 548,
+      "boundsLocal": {
+        "from": {
+          "x": 0,
+          "y": -1,
+          "z": 0
+        },
+        "to": {
+          "x": 23,
+          "y": 32,
+          "z": 19
+        }
+      },
+      "geometry": {
+        "buildingId": "office/candidate-02",
+        "productionOutputInspected": true,
+        "floorHeightCandidateMatch": true,
+        "matchedCells": 1922,
+        "missingNominalCells": 0,
+        "extraProductionCells": 958,
+        "footprintParity": "BLOCKED_FOOTPRINT_DISAGREEMENT",
+        "sampleConflicts": {
+          "outsideProduction": [],
+          "outsideNominal": [
+            {
+              "floor": 1,
+              "x": 13,
+              "z": 0
+            },
+            {
+              "floor": 1,
+              "x": 14,
+              "z": 0
+            },
+            {
+              "floor": 1,
+              "x": 15,
+              "z": 0
+            },
+            {
+              "floor": 1,
+              "x": 16,
+              "z": 0
+            },
+            {
+              "floor": 1,
+              "x": 17,
+              "z": 0
+            },
+            {
+              "floor": 1,
+              "x": 18,
+              "z": 0
+            },
+            {
+              "floor": 1,
+              "x": 19,
+              "z": 0
+            },
+            {
+              "floor": 1,
+              "x": 20,
+              "z": 0
+            }
+          ]
+        },
+        "orientation": "north",
+        "orientationTransformChecked": false,
+        "roleMaterialsChecked": false,
+        "doorAndStairStatesChecked": false,
+        "externalWallConflictChecked": false,
+        "emissionAllowed": false,
+        "constructionApproved": false,
+        "BuildPlan": {
+          "status": "NOT_PREPARED",
+          "operations": [],
+          "commandCount": 0
+        }
+      }
+    },
+    {
+      "id": "office/candidate-03",
+      "plannerActuallyCalled": true,
+      "operationsExaminedOnly": 548,
+      "boundsLocal": {
+        "from": {
+          "x": 0,
+          "y": -1,
+          "z": 0
+        },
+        "to": {
+          "x": 23,
+          "y": 32,
+          "z": 19
+        }
+      },
+      "geometry": {
+        "buildingId": "office/candidate-03",
+        "productionOutputInspected": true,
+        "floorHeightCandidateMatch": true,
+        "matchedCells": 2880,
+        "missingNominalCells": 0,
+        "extraProductionCells": 0,
+        "footprintParity": "FOOTPRINT_CELLS_MATCH_NOT_FULL_RUNTIME_PARITY",
+        "sampleConflicts": {
+          "outsideProduction": [],
+          "outsideNominal": []
+        },
+        "orientation": "north",
+        "orientationTransformChecked": false,
+        "roleMaterialsChecked": false,
+        "doorAndStairStatesChecked": false,
+        "externalWallConflictChecked": false,
+        "emissionAllowed": false,
+        "constructionApproved": false,
+        "BuildPlan": {
+          "status": "NOT_PREPARED",
+          "operations": [],
+          "commandCount": 0
+        }
+      }
+    }
+  ],
+  "summary": {
+    "productionPlannerBuildingsRun": 5,
+    "fullFootprintParityBuildings": 1,
+    "footprintCellsMatchAcrossAll": false,
+    "worldCommands": 0,
+    "worldConnections": 0,
+    "physicalDoorsBuilt": 0,
+    "physicalStairsBuilt": 0
+  },
+  "stillBlocked": [
+    "NO_WORLD_TRANSFORM_CALIBRATION",
+    "NO_FACADE_INTERIOR_COLLISION_APPROVAL",
+    "NO_DOOR_STAIR_BLOCK_STATES",
+    "B70_18_OUTSIDE_FLOOR_MASK_HELD",
+    "B42_60_UPPER_DOORS_HELD"
+  ],
+  "readiness": "NOT_PREPARED",
+  "executionAllowed": false,
+  "constructionApproved": false,
+  "gates": [
+    {
+      "id": "M4-01",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-02",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-03",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-04",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-05",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-06",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-07",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-08",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-09",
+      "status": "BLOCKED"
+    }
+  ],
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0,
+    "worldCoordinates": null,
+    "materialIds": []
+  },
+  "reportSha256": "584eb7cd83442787ca2b9c6323c409bac5abfb081c469a71f092be451f4002f5"
+}

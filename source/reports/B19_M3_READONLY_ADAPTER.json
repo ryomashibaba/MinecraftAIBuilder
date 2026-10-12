@@ -1,0 +1,715 @@
+{
+  "schema": "minecraftaibuilder-step8b-b19-m3-readonly-adapter-v1",
+  "purpose": "FROZEN_SOURCE_PLANNER_CONTRACT_COMPARISON_ONLY",
+  "provenance": {
+    "b18ReportSha256": "60a52e7267393dee22c7b5ddc09d1a48630e5aff2ae92c8de1dfa631459806c3",
+    "b17ReportSha256": "acdb7a316a036789a77c8fe063a4a186379e9abe87b85454e27bc2d44e92bc9d",
+    "b7ReportSha256": "4be87b0acfc3641f26a9b71ff329c2386f9e2c8e3461f4d8d70633faf31dcbe8",
+    "pinnedSourceSha256": {
+      "engine/src/general-building-planner.js": "23be6e8b03827698fb890661f6fd0957a76ac4718f3347531121c8a7dc0450c8",
+      "engine/src/building-grammar.js": "71c0e2bda3e7a044285d681b38d9d4373e3c0aa417808a2f54c652d05ff47d1a",
+      "engine/src/architectural-quality.js": "5cadf22d51867a18fd35f6e9ec2e1318732eca2f2e666d2cfc4b2b32cbede530",
+      "modules/architectural-library.js": "19fa126051a687bfb5c5f6bdf199a6d42aa70b475d908dd38a99e9f354532eee",
+      "styles/urban_japanese.json": "cefb23009e7a96f8d5900e44242c5fa426646be64c5391048f52e29506f1ceec",
+      "engine/src/safety.js": "ef4f71ec968b46ce937d6b279f9cb5b9b7aecde7fd917a960e1716b72795e9fc",
+      "engine/src/build-anchor.js": "23bea262e90012fc6bfdd9f1407e1f7cb514f87862ad1c60b0431792f8ef056f"
+    },
+    "sourceVerification": "PINNED_DISK_SOURCE_MATCH"
+  },
+  "engineContract": {
+    "plannerEntryPoints": [
+      "GeneralBuildingPlanner.create",
+      "GeneralBuildingPlanner.fromComposition"
+    ],
+    "normalizedInput": "createComposition",
+    "orientationConvention": "rotatePlanPoint CELL_INDEX_ONLY",
+    "validation": "validateBuildPlan AFTER operation generation, NOT APPLIED TO FLOAT_GEOMETRY",
+    "frozenSafetyLimits": {
+      "maxAxis": 64,
+      "maxVolume": 32768,
+      "maxRelativeOffset": 128,
+      "maxOperations": 3000,
+      "maxEstimatedBlockWrites": 500000
+    },
+    "actualBuildPlanValidation": "NOT_RUN",
+    "blockQuantization": "NOT_DEFINED",
+    "actualMaterialMapping": "NOT_DEFINED"
+  },
+  "buildings": [
+    {
+      "id": "hotel/candidate-01",
+      "normalizedPlannerInputReview": {
+        "buildingType": "hotel",
+        "width": 26,
+        "depth": 20,
+        "floors": 6,
+        "floorHeight": 5,
+        "style": "modern",
+        "seed": 0,
+        "massing": "slab",
+        "orientation": "north",
+        "readOnly": true,
+        "executed": false
+      },
+      "orientation": "north",
+      "floors": [
+        {
+          "floorId": "hotel/candidate-01/L1",
+          "modeledPartitionPanels": 194,
+          "modelSolidVolumes": 216,
+          "nominalDoors": 11,
+          "doorsWithBothEndsInSourceEnvelope": 11,
+          "nominalDoorEndpointsOutsideSource": 0,
+          "panelsWithSiteOverhang": 0,
+          "rotatedLocalAabbCount": 216,
+          "geometryConversion": "CONTINUOUS_MODEL_ONLY_NO_BLOCK_QUANTIZATION",
+          "engineMaskStatus": "STATIC_SOURCE_PREDICTED_NOT_PLANNER_EXECUTED",
+          "actualFloorSlabOpening": "UNKNOWN",
+          "actualPartitionMaterials": "UNKNOWN",
+          "actualDoorBlocks": "UNKNOWN"
+        },
+        {
+          "floorId": "hotel/candidate-01/L2",
+          "modeledPartitionPanels": 194,
+          "modelSolidVolumes": 216,
+          "nominalDoors": 11,
+          "doorsWithBothEndsInSourceEnvelope": 11,
+          "nominalDoorEndpointsOutsideSource": 0,
+          "panelsWithSiteOverhang": 0,
+          "rotatedLocalAabbCount": 216,
+          "geometryConversion": "CONTINUOUS_MODEL_ONLY_NO_BLOCK_QUANTIZATION",
+          "engineMaskStatus": "STATIC_SOURCE_PREDICTED_NOT_PLANNER_EXECUTED",
+          "actualFloorSlabOpening": "UNKNOWN",
+          "actualPartitionMaterials": "UNKNOWN",
+          "actualDoorBlocks": "UNKNOWN"
+        },
+        {
+          "floorId": "hotel/candidate-01/L3",
+          "modeledPartitionPanels": 194,
+          "modelSolidVolumes": 216,
+          "nominalDoors": 11,
+          "doorsWithBothEndsInSourceEnvelope": 11,
+          "nominalDoorEndpointsOutsideSource": 0,
+          "panelsWithSiteOverhang": 0,
+          "rotatedLocalAabbCount": 216,
+          "geometryConversion": "CONTINUOUS_MODEL_ONLY_NO_BLOCK_QUANTIZATION",
+          "engineMaskStatus": "STATIC_SOURCE_PREDICTED_NOT_PLANNER_EXECUTED",
+          "actualFloorSlabOpening": "UNKNOWN",
+          "actualPartitionMaterials": "UNKNOWN",
+          "actualDoorBlocks": "UNKNOWN"
+        },
+        {
+          "floorId": "hotel/candidate-01/L4",
+          "modeledPartitionPanels": 194,
+          "modelSolidVolumes": 216,
+          "nominalDoors": 11,
+          "doorsWithBothEndsInSourceEnvelope": 11,
+          "nominalDoorEndpointsOutsideSource": 0,
+          "panelsWithSiteOverhang": 0,
+          "rotatedLocalAabbCount": 216,
+          "geometryConversion": "CONTINUOUS_MODEL_ONLY_NO_BLOCK_QUANTIZATION",
+          "engineMaskStatus": "STATIC_SOURCE_PREDICTED_NOT_PLANNER_EXECUTED",
+          "actualFloorSlabOpening": "UNKNOWN",
+          "actualPartitionMaterials": "UNKNOWN",
+          "actualDoorBlocks": "UNKNOWN"
+        },
+        {
+          "floorId": "hotel/candidate-01/L5",
+          "modeledPartitionPanels": 194,
+          "modelSolidVolumes": 216,
+          "nominalDoors": 11,
+          "doorsWithBothEndsInSourceEnvelope": 11,
+          "nominalDoorEndpointsOutsideSource": 0,
+          "panelsWithSiteOverhang": 0,
+          "rotatedLocalAabbCount": 216,
+          "geometryConversion": "CONTINUOUS_MODEL_ONLY_NO_BLOCK_QUANTIZATION",
+          "engineMaskStatus": "STATIC_SOURCE_PREDICTED_NOT_PLANNER_EXECUTED",
+          "actualFloorSlabOpening": "UNKNOWN",
+          "actualPartitionMaterials": "UNKNOWN",
+          "actualDoorBlocks": "UNKNOWN"
+        },
+        {
+          "floorId": "hotel/candidate-01/L6",
+          "modeledPartitionPanels": 194,
+          "modelSolidVolumes": 216,
+          "nominalDoors": 11,
+          "doorsWithBothEndsInSourceEnvelope": 11,
+          "nominalDoorEndpointsOutsideSource": 0,
+          "panelsWithSiteOverhang": 0,
+          "rotatedLocalAabbCount": 216,
+          "geometryConversion": "CONTINUOUS_MODEL_ONLY_NO_BLOCK_QUANTIZATION",
+          "engineMaskStatus": "STATIC_SOURCE_PREDICTED_NOT_PLANNER_EXECUTED",
+          "actualFloorSlabOpening": "UNKNOWN",
+          "actualPartitionMaterials": "UNKNOWN",
+          "actualDoorBlocks": "UNKNOWN"
+        }
+      ],
+      "aggregate": {
+        "panels": 1164,
+        "doors": 66,
+        "doorEndpointsOutside": 0,
+        "overhangVolumeSegments": 0,
+        "stairInterfaces": 5,
+        "stairSlabCutoutsMissing": 5
+      },
+      "engineCandidateStatus": "READ_ONLY_NORMALIZED_INPUT_AND_MASK_COMPARISON",
+      "interiorEmitterPresentInPlanner": "NOT_ESTABLISHED"
+    },
+    {
+      "id": "apartment/candidate-01",
+      "normalizedPlannerInputReview": {
+        "buildingType": "apartment",
+        "width": 28,
+        "depth": 22,
+        "floors": 6,
+        "floorHeight": 4,
+        "style": "modern",
+        "seed": 0,
+        "massing": "courtyard",
+        "orientation": "south",
+        "readOnly": true,
+        "executed": false
+      },
+      "orientation": "south",
+      "floors": [
+        {
+          "floorId": "apartment/candidate-01/L1",
+          "modeledPartitionPanels": 212,
+          "modelSolidVolumes": 238,
+          "nominalDoors": 13,
+          "doorsWithBothEndsInSourceEnvelope": 13,
+          "nominalDoorEndpointsOutsideSource": 0,
+          "panelsWithSiteOverhang": 0,
+          "rotatedLocalAabbCount": 238,
+          "geometryConversion": "CONTINUOUS_MODEL_ONLY_NO_BLOCK_QUANTIZATION",
+          "engineMaskStatus": "STATIC_SOURCE_PREDICTED_NOT_PLANNER_EXECUTED",
+          "actualFloorSlabOpening": "UNKNOWN",
+          "actualPartitionMaterials": "UNKNOWN",
+          "actualDoorBlocks": "UNKNOWN"
+        },
+        {
+          "floorId": "apartment/candidate-01/L2",
+          "modeledPartitionPanels": 212,
+          "modelSolidVolumes": 238,
+          "nominalDoors": 13,
+          "doorsWithBothEndsInSourceEnvelope": 13,
+          "nominalDoorEndpointsOutsideSource": 0,
+          "panelsWithSiteOverhang": 0,
+          "rotatedLocalAabbCount": 238,
+          "geometryConversion": "CONTINUOUS_MODEL_ONLY_NO_BLOCK_QUANTIZATION",
+          "engineMaskStatus": "STATIC_SOURCE_PREDICTED_NOT_PLANNER_EXECUTED",
+          "actualFloorSlabOpening": "UNKNOWN",
+          "actualPartitionMaterials": "UNKNOWN",
+          "actualDoorBlocks": "UNKNOWN"
+        },
+        {
+          "floorId": "apartment/candidate-01/L3",
+          "modeledPartitionPanels": 212,
+          "modelSolidVolumes": 238,
+          "nominalDoors": 13,
+          "doorsWithBothEndsInSourceEnvelope": 13,
+          "nominalDoorEndpointsOutsideSource": 0,
+          "panelsWithSiteOverhang": 0,
+          "rotatedLocalAabbCount": 238,
+          "geometryConversion": "CONTINUOUS_MODEL_ONLY_NO_BLOCK_QUANTIZATION",
+          "engineMaskStatus": "STATIC_SOURCE_PREDICTED_NOT_PLANNER_EXECUTED",
+          "actualFloorSlabOpening": "UNKNOWN",
+          "actualPartitionMaterials": "UNKNOWN",
+          "actualDoorBlocks": "UNKNOWN"
+        },
+        {
+          "floorId": "apartment/candidate-01/L4",
+          "modeledPartitionPanels": 212,
+          "modelSolidVolumes": 238,
+          "nominalDoors": 13,
+          "doorsWithBothEndsInSourceEnvelope": 13,
+          "nominalDoorEndpointsOutsideSource": 0,
+          "panelsWithSiteOverhang": 0,
+          "rotatedLocalAabbCount": 238,
+          "geometryConversion": "CONTINUOUS_MODEL_ONLY_NO_BLOCK_QUANTIZATION",
+          "engineMaskStatus": "STATIC_SOURCE_PREDICTED_NOT_PLANNER_EXECUTED",
+          "actualFloorSlabOpening": "UNKNOWN",
+          "actualPartitionMaterials": "UNKNOWN",
+          "actualDoorBlocks": "UNKNOWN"
+        },
+        {
+          "floorId": "apartment/candidate-01/L5",
+          "modeledPartitionPanels": 212,
+          "modelSolidVolumes": 238,
+          "nominalDoors": 13,
+          "doorsWithBothEndsInSourceEnvelope": 13,
+          "nominalDoorEndpointsOutsideSource": 0,
+          "panelsWithSiteOverhang": 0,
+          "rotatedLocalAabbCount": 238,
+          "geometryConversion": "CONTINUOUS_MODEL_ONLY_NO_BLOCK_QUANTIZATION",
+          "engineMaskStatus": "STATIC_SOURCE_PREDICTED_NOT_PLANNER_EXECUTED",
+          "actualFloorSlabOpening": "UNKNOWN",
+          "actualPartitionMaterials": "UNKNOWN",
+          "actualDoorBlocks": "UNKNOWN"
+        },
+        {
+          "floorId": "apartment/candidate-01/L6",
+          "modeledPartitionPanels": 212,
+          "modelSolidVolumes": 238,
+          "nominalDoors": 13,
+          "doorsWithBothEndsInSourceEnvelope": 13,
+          "nominalDoorEndpointsOutsideSource": 0,
+          "panelsWithSiteOverhang": 0,
+          "rotatedLocalAabbCount": 238,
+          "geometryConversion": "CONTINUOUS_MODEL_ONLY_NO_BLOCK_QUANTIZATION",
+          "engineMaskStatus": "STATIC_SOURCE_PREDICTED_NOT_PLANNER_EXECUTED",
+          "actualFloorSlabOpening": "UNKNOWN",
+          "actualPartitionMaterials": "UNKNOWN",
+          "actualDoorBlocks": "UNKNOWN"
+        }
+      ],
+      "aggregate": {
+        "panels": 1272,
+        "doors": 78,
+        "doorEndpointsOutside": 0,
+        "overhangVolumeSegments": 0,
+        "stairInterfaces": 5,
+        "stairSlabCutoutsMissing": 5
+      },
+      "engineCandidateStatus": "READ_ONLY_NORMALIZED_INPUT_AND_MASK_COMPARISON",
+      "interiorEmitterPresentInPlanner": "NOT_ESTABLISHED"
+    },
+    {
+      "id": "office/candidate-01",
+      "normalizedPlannerInputReview": {
+        "buildingType": "office",
+        "width": 24,
+        "depth": 20,
+        "floors": 6,
+        "floorHeight": 4,
+        "style": "urban_japanese",
+        "seed": 0,
+        "massing": "tower_on_podium",
+        "orientation": "south",
+        "readOnly": true,
+        "executed": false
+      },
+      "orientation": "south",
+      "floors": [
+        {
+          "floorId": "office/candidate-01/L1",
+          "modeledPartitionPanels": 214,
+          "modelSolidVolumes": 236,
+          "nominalDoors": 11,
+          "doorsWithBothEndsInSourceEnvelope": 11,
+          "nominalDoorEndpointsOutsideSource": 0,
+          "panelsWithSiteOverhang": 0,
+          "rotatedLocalAabbCount": 236,
+          "geometryConversion": "CONTINUOUS_MODEL_ONLY_NO_BLOCK_QUANTIZATION",
+          "engineMaskStatus": "STATIC_SOURCE_PREDICTED_NOT_PLANNER_EXECUTED",
+          "actualFloorSlabOpening": "UNKNOWN",
+          "actualPartitionMaterials": "UNKNOWN",
+          "actualDoorBlocks": "UNKNOWN"
+        },
+        {
+          "floorId": "office/candidate-01/L2",
+          "modeledPartitionPanels": 216,
+          "modelSolidVolumes": 238,
+          "nominalDoors": 11,
+          "doorsWithBothEndsInSourceEnvelope": 11,
+          "nominalDoorEndpointsOutsideSource": 0,
+          "panelsWithSiteOverhang": 0,
+          "rotatedLocalAabbCount": 238,
+          "geometryConversion": "CONTINUOUS_MODEL_ONLY_NO_BLOCK_QUANTIZATION",
+          "engineMaskStatus": "STATIC_SOURCE_PREDICTED_NOT_PLANNER_EXECUTED",
+          "actualFloorSlabOpening": "UNKNOWN",
+          "actualPartitionMaterials": "UNKNOWN",
+          "actualDoorBlocks": "UNKNOWN"
+        },
+        {
+          "floorId": "office/candidate-01/L3",
+          "modeledPartitionPanels": 202,
+          "modelSolidVolumes": 224,
+          "nominalDoors": 11,
+          "doorsWithBothEndsInSourceEnvelope": 11,
+          "nominalDoorEndpointsOutsideSource": 0,
+          "panelsWithSiteOverhang": 0,
+          "rotatedLocalAabbCount": 224,
+          "geometryConversion": "CONTINUOUS_MODEL_ONLY_NO_BLOCK_QUANTIZATION",
+          "engineMaskStatus": "STATIC_SOURCE_PREDICTED_NOT_PLANNER_EXECUTED",
+          "actualFloorSlabOpening": "UNKNOWN",
+          "actualPartitionMaterials": "UNKNOWN",
+          "actualDoorBlocks": "UNKNOWN"
+        },
+        {
+          "floorId": "office/candidate-01/L4",
+          "modeledPartitionPanels": 202,
+          "modelSolidVolumes": 224,
+          "nominalDoors": 11,
+          "doorsWithBothEndsInSourceEnvelope": 11,
+          "nominalDoorEndpointsOutsideSource": 0,
+          "panelsWithSiteOverhang": 0,
+          "rotatedLocalAabbCount": 224,
+          "geometryConversion": "CONTINUOUS_MODEL_ONLY_NO_BLOCK_QUANTIZATION",
+          "engineMaskStatus": "STATIC_SOURCE_PREDICTED_NOT_PLANNER_EXECUTED",
+          "actualFloorSlabOpening": "UNKNOWN",
+          "actualPartitionMaterials": "UNKNOWN",
+          "actualDoorBlocks": "UNKNOWN"
+        },
+        {
+          "floorId": "office/candidate-01/L5",
+          "modeledPartitionPanels": 202,
+          "modelSolidVolumes": 224,
+          "nominalDoors": 11,
+          "doorsWithBothEndsInSourceEnvelope": 11,
+          "nominalDoorEndpointsOutsideSource": 0,
+          "panelsWithSiteOverhang": 0,
+          "rotatedLocalAabbCount": 224,
+          "geometryConversion": "CONTINUOUS_MODEL_ONLY_NO_BLOCK_QUANTIZATION",
+          "engineMaskStatus": "STATIC_SOURCE_PREDICTED_NOT_PLANNER_EXECUTED",
+          "actualFloorSlabOpening": "UNKNOWN",
+          "actualPartitionMaterials": "UNKNOWN",
+          "actualDoorBlocks": "UNKNOWN"
+        },
+        {
+          "floorId": "office/candidate-01/L6",
+          "modeledPartitionPanels": 202,
+          "modelSolidVolumes": 224,
+          "nominalDoors": 11,
+          "doorsWithBothEndsInSourceEnvelope": 11,
+          "nominalDoorEndpointsOutsideSource": 0,
+          "panelsWithSiteOverhang": 0,
+          "rotatedLocalAabbCount": 224,
+          "geometryConversion": "CONTINUOUS_MODEL_ONLY_NO_BLOCK_QUANTIZATION",
+          "engineMaskStatus": "STATIC_SOURCE_PREDICTED_NOT_PLANNER_EXECUTED",
+          "actualFloorSlabOpening": "UNKNOWN",
+          "actualPartitionMaterials": "UNKNOWN",
+          "actualDoorBlocks": "UNKNOWN"
+        }
+      ],
+      "aggregate": {
+        "panels": 1238,
+        "doors": 66,
+        "doorEndpointsOutside": 0,
+        "overhangVolumeSegments": 0,
+        "stairInterfaces": 5,
+        "stairSlabCutoutsMissing": 5
+      },
+      "engineCandidateStatus": "READ_ONLY_NORMALIZED_INPUT_AND_MASK_COMPARISON",
+      "interiorEmitterPresentInPlanner": "NOT_ESTABLISHED"
+    },
+    {
+      "id": "office/candidate-02",
+      "normalizedPlannerInputReview": {
+        "buildingType": "office",
+        "width": 24,
+        "depth": 20,
+        "floors": 6,
+        "floorHeight": 4,
+        "style": "urban_japanese",
+        "seed": 0,
+        "massing": "asymmetric_block",
+        "orientation": "south",
+        "readOnly": true,
+        "executed": false
+      },
+      "orientation": "south",
+      "floors": [
+        {
+          "floorId": "office/candidate-02/L1",
+          "modeledPartitionPanels": 136,
+          "modelSolidVolumes": 150,
+          "nominalDoors": 7,
+          "doorsWithBothEndsInSourceEnvelope": 7,
+          "nominalDoorEndpointsOutsideSource": 0,
+          "panelsWithSiteOverhang": 0,
+          "rotatedLocalAabbCount": 150,
+          "geometryConversion": "CONTINUOUS_MODEL_ONLY_NO_BLOCK_QUANTIZATION",
+          "engineMaskStatus": "STATIC_SOURCE_PREDICTED_NOT_PLANNER_EXECUTED",
+          "actualFloorSlabOpening": "UNKNOWN",
+          "actualPartitionMaterials": "UNKNOWN",
+          "actualDoorBlocks": "UNKNOWN"
+        },
+        {
+          "floorId": "office/candidate-02/L2",
+          "modeledPartitionPanels": 136,
+          "modelSolidVolumes": 150,
+          "nominalDoors": 7,
+          "doorsWithBothEndsInSourceEnvelope": 7,
+          "nominalDoorEndpointsOutsideSource": 0,
+          "panelsWithSiteOverhang": 0,
+          "rotatedLocalAabbCount": 150,
+          "geometryConversion": "CONTINUOUS_MODEL_ONLY_NO_BLOCK_QUANTIZATION",
+          "engineMaskStatus": "STATIC_SOURCE_PREDICTED_NOT_PLANNER_EXECUTED",
+          "actualFloorSlabOpening": "UNKNOWN",
+          "actualPartitionMaterials": "UNKNOWN",
+          "actualDoorBlocks": "UNKNOWN"
+        },
+        {
+          "floorId": "office/candidate-02/L3",
+          "modeledPartitionPanels": 136,
+          "modelSolidVolumes": 150,
+          "nominalDoors": 7,
+          "doorsWithBothEndsInSourceEnvelope": 7,
+          "nominalDoorEndpointsOutsideSource": 0,
+          "panelsWithSiteOverhang": 0,
+          "rotatedLocalAabbCount": 150,
+          "geometryConversion": "CONTINUOUS_MODEL_ONLY_NO_BLOCK_QUANTIZATION",
+          "engineMaskStatus": "STATIC_SOURCE_PREDICTED_NOT_PLANNER_EXECUTED",
+          "actualFloorSlabOpening": "UNKNOWN",
+          "actualPartitionMaterials": "UNKNOWN",
+          "actualDoorBlocks": "UNKNOWN"
+        },
+        {
+          "floorId": "office/candidate-02/L4",
+          "modeledPartitionPanels": 136,
+          "modelSolidVolumes": 150,
+          "nominalDoors": 7,
+          "doorsWithBothEndsInSourceEnvelope": 7,
+          "nominalDoorEndpointsOutsideSource": 0,
+          "panelsWithSiteOverhang": 0,
+          "rotatedLocalAabbCount": 150,
+          "geometryConversion": "CONTINUOUS_MODEL_ONLY_NO_BLOCK_QUANTIZATION",
+          "engineMaskStatus": "STATIC_SOURCE_PREDICTED_NOT_PLANNER_EXECUTED",
+          "actualFloorSlabOpening": "UNKNOWN",
+          "actualPartitionMaterials": "UNKNOWN",
+          "actualDoorBlocks": "UNKNOWN"
+        },
+        {
+          "floorId": "office/candidate-02/L5",
+          "modeledPartitionPanels": 136,
+          "modelSolidVolumes": 150,
+          "nominalDoors": 7,
+          "doorsWithBothEndsInSourceEnvelope": 7,
+          "nominalDoorEndpointsOutsideSource": 0,
+          "panelsWithSiteOverhang": 0,
+          "rotatedLocalAabbCount": 150,
+          "geometryConversion": "CONTINUOUS_MODEL_ONLY_NO_BLOCK_QUANTIZATION",
+          "engineMaskStatus": "STATIC_SOURCE_PREDICTED_NOT_PLANNER_EXECUTED",
+          "actualFloorSlabOpening": "UNKNOWN",
+          "actualPartitionMaterials": "UNKNOWN",
+          "actualDoorBlocks": "UNKNOWN"
+        },
+        {
+          "floorId": "office/candidate-02/L6",
+          "modeledPartitionPanels": 56,
+          "modelSolidVolumes": 62,
+          "nominalDoors": 3,
+          "doorsWithBothEndsInSourceEnvelope": 3,
+          "nominalDoorEndpointsOutsideSource": 0,
+          "panelsWithSiteOverhang": 0,
+          "rotatedLocalAabbCount": 62,
+          "geometryConversion": "CONTINUOUS_MODEL_ONLY_NO_BLOCK_QUANTIZATION",
+          "engineMaskStatus": "STATIC_SOURCE_PREDICTED_NOT_PLANNER_EXECUTED",
+          "actualFloorSlabOpening": "UNKNOWN",
+          "actualPartitionMaterials": "UNKNOWN",
+          "actualDoorBlocks": "UNKNOWN"
+        }
+      ],
+      "aggregate": {
+        "panels": 736,
+        "doors": 38,
+        "doorEndpointsOutside": 0,
+        "overhangVolumeSegments": 0,
+        "stairInterfaces": 5,
+        "stairSlabCutoutsMissing": 5
+      },
+      "engineCandidateStatus": "READ_ONLY_NORMALIZED_INPUT_AND_MASK_COMPARISON",
+      "interiorEmitterPresentInPlanner": "NOT_ESTABLISHED"
+    },
+    {
+      "id": "office/candidate-03",
+      "normalizedPlannerInputReview": {
+        "buildingType": "office",
+        "width": 24,
+        "depth": 20,
+        "floors": 6,
+        "floorHeight": 4,
+        "style": "urban_japanese",
+        "seed": 0,
+        "massing": "slab",
+        "orientation": "south",
+        "readOnly": true,
+        "executed": false
+      },
+      "orientation": "south",
+      "floors": [
+        {
+          "floorId": "office/candidate-03/L1",
+          "modeledPartitionPanels": 214,
+          "modelSolidVolumes": 236,
+          "nominalDoors": 11,
+          "doorsWithBothEndsInSourceEnvelope": 11,
+          "nominalDoorEndpointsOutsideSource": 0,
+          "panelsWithSiteOverhang": 0,
+          "rotatedLocalAabbCount": 236,
+          "geometryConversion": "CONTINUOUS_MODEL_ONLY_NO_BLOCK_QUANTIZATION",
+          "engineMaskStatus": "STATIC_SOURCE_PREDICTED_NOT_PLANNER_EXECUTED",
+          "actualFloorSlabOpening": "UNKNOWN",
+          "actualPartitionMaterials": "UNKNOWN",
+          "actualDoorBlocks": "UNKNOWN"
+        },
+        {
+          "floorId": "office/candidate-03/L2",
+          "modeledPartitionPanels": 216,
+          "modelSolidVolumes": 238,
+          "nominalDoors": 11,
+          "doorsWithBothEndsInSourceEnvelope": 11,
+          "nominalDoorEndpointsOutsideSource": 0,
+          "panelsWithSiteOverhang": 0,
+          "rotatedLocalAabbCount": 238,
+          "geometryConversion": "CONTINUOUS_MODEL_ONLY_NO_BLOCK_QUANTIZATION",
+          "engineMaskStatus": "STATIC_SOURCE_PREDICTED_NOT_PLANNER_EXECUTED",
+          "actualFloorSlabOpening": "UNKNOWN",
+          "actualPartitionMaterials": "UNKNOWN",
+          "actualDoorBlocks": "UNKNOWN"
+        },
+        {
+          "floorId": "office/candidate-03/L3",
+          "modeledPartitionPanels": 216,
+          "modelSolidVolumes": 238,
+          "nominalDoors": 11,
+          "doorsWithBothEndsInSourceEnvelope": 11,
+          "nominalDoorEndpointsOutsideSource": 0,
+          "panelsWithSiteOverhang": 0,
+          "rotatedLocalAabbCount": 238,
+          "geometryConversion": "CONTINUOUS_MODEL_ONLY_NO_BLOCK_QUANTIZATION",
+          "engineMaskStatus": "STATIC_SOURCE_PREDICTED_NOT_PLANNER_EXECUTED",
+          "actualFloorSlabOpening": "UNKNOWN",
+          "actualPartitionMaterials": "UNKNOWN",
+          "actualDoorBlocks": "UNKNOWN"
+        },
+        {
+          "floorId": "office/candidate-03/L4",
+          "modeledPartitionPanels": 216,
+          "modelSolidVolumes": 238,
+          "nominalDoors": 11,
+          "doorsWithBothEndsInSourceEnvelope": 11,
+          "nominalDoorEndpointsOutsideSource": 0,
+          "panelsWithSiteOverhang": 0,
+          "rotatedLocalAabbCount": 238,
+          "geometryConversion": "CONTINUOUS_MODEL_ONLY_NO_BLOCK_QUANTIZATION",
+          "engineMaskStatus": "STATIC_SOURCE_PREDICTED_NOT_PLANNER_EXECUTED",
+          "actualFloorSlabOpening": "UNKNOWN",
+          "actualPartitionMaterials": "UNKNOWN",
+          "actualDoorBlocks": "UNKNOWN"
+        },
+        {
+          "floorId": "office/candidate-03/L5",
+          "modeledPartitionPanels": 216,
+          "modelSolidVolumes": 238,
+          "nominalDoors": 11,
+          "doorsWithBothEndsInSourceEnvelope": 11,
+          "nominalDoorEndpointsOutsideSource": 0,
+          "panelsWithSiteOverhang": 0,
+          "rotatedLocalAabbCount": 238,
+          "geometryConversion": "CONTINUOUS_MODEL_ONLY_NO_BLOCK_QUANTIZATION",
+          "engineMaskStatus": "STATIC_SOURCE_PREDICTED_NOT_PLANNER_EXECUTED",
+          "actualFloorSlabOpening": "UNKNOWN",
+          "actualPartitionMaterials": "UNKNOWN",
+          "actualDoorBlocks": "UNKNOWN"
+        },
+        {
+          "floorId": "office/candidate-03/L6",
+          "modeledPartitionPanels": 216,
+          "modelSolidVolumes": 238,
+          "nominalDoors": 11,
+          "doorsWithBothEndsInSourceEnvelope": 11,
+          "nominalDoorEndpointsOutsideSource": 0,
+          "panelsWithSiteOverhang": 0,
+          "rotatedLocalAabbCount": 238,
+          "geometryConversion": "CONTINUOUS_MODEL_ONLY_NO_BLOCK_QUANTIZATION",
+          "engineMaskStatus": "STATIC_SOURCE_PREDICTED_NOT_PLANNER_EXECUTED",
+          "actualFloorSlabOpening": "UNKNOWN",
+          "actualPartitionMaterials": "UNKNOWN",
+          "actualDoorBlocks": "UNKNOWN"
+        }
+      ],
+      "aggregate": {
+        "panels": 1294,
+        "doors": 66,
+        "doorEndpointsOutside": 0,
+        "overhangVolumeSegments": 0,
+        "stairInterfaces": 5,
+        "stairSlabCutoutsMissing": 5
+      },
+      "engineCandidateStatus": "READ_ONLY_NORMALIZED_INPUT_AND_MASK_COMPARISON",
+      "interiorEmitterPresentInPlanner": "NOT_ESTABLISHED"
+    }
+  ],
+  "counts": {
+    "buildings": 5,
+    "floors": 30,
+    "candidatePartitionPanels": 5704,
+    "candidateDoorVoids": 314,
+    "candidateStairInterfaces": 25,
+    "stairInterfacesMissingSlabCutout": 25,
+    "nominalDoorEndpointsOutsideEngineFootprint": 0
+  },
+  "blockers": [
+    {
+      "id": "NO_ENGINE_INTEGRATION_HOOK",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "CONTINUOUS_TO_BLOCK_QUANTIZATION_NOT_SPECIFIED",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "EDUCATION_MATERIAL_ALLOWLIST_NOT_ATTESTED",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "DOOR_BLOCK_AND_ORIENTATION_NOT_VERIFIED",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "FLOOR_SLAB_STAIR_CUTOUT_NOT_DESIGNED",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "STAIR_HEADROOM_AND_LANDING_NOT_VERIFIED",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "RUNNING_WINDOWS_ENGINE_NOT_ATTESTED",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "WORLD_ANCHOR_AND_SITE_SCAN_NOT_VERIFIED",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "OFFICE02_FOOTPRINT_AND_CORRIDOR_REVIEW_ONLY",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "USER_CONSTRUCTION_APPROVAL_MISSING",
+      "status": "BLOCKED"
+    }
+  ],
+  "unresolvedKnownIssues": {
+    "office02SourceVsConceptCells": 123,
+    "office02NominalCorridorOutsideCells": 18
+  },
+  "sourceSnapshotReadOnly": true,
+  "realPlannerCalled": false,
+  "engineCodeModified": false,
+  "runTimeCompatibilityVerified": false,
+  "outputExecutable": false,
+  "developmentMilestone": "M3_DRY_RUN_ADAPTER_PARTIAL_COMPLETE",
+  "deploymentGate": "BLOCKED",
+  "safety": {
+    "notPrepared": true,
+    "constructionApproved": false,
+    "executionAllowed": false,
+    "bridgeContact": false,
+    "networkAccess": false,
+    "frozenEvidenceModified": false,
+    "existingWorldModified": false,
+    "legacyModified": false
+  },
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0,
+    "worldCoordinates": null,
+    "materialIds": []
+  },
+  "reportSha256": "b9fda337336819ab566e506c72fe3488f3dc24bf5872346e892f01bf8085a269"
+}

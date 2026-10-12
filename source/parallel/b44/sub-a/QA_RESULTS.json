@@ -1,0 +1,15 @@
+{
+  "schema": "minecraftaibuilder-b44-sub-a-qa-v1",
+  "scope": "static offline diff-only suite; no construction",
+  "command": "B44A_SOURCE_ROOT=/path/to/B43/source node --test changes/source/parallel/b44/sub-a/circulation-b44a.test.mjs",
+  "testSummary": {"passed": 16, "failed": 0, "skipped": 0},
+  "baselineVerification": "B43_PACKAGE_PASS",
+  "baselineCheckBeforeAndAfter": true,
+  "frozenB42FileCount": 678,
+  "b43ManifestFileCount": 690,
+  "reportSha256": "1db27b0db4baa3f61524e0eeef956f8df2693a2e47f81d11c83d63d259507726",
+  "constructionOperations": 0,
+  "engineCalls": 0,
+  "M4GatesBlocked": 9,
+  "readiness": "NOT_PREPARED"
+}

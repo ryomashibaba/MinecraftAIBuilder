@@ -1,0 +1,13 @@
+{
+  "schema": "minecraftaibuilder-b16-browser-smoke-v1",
+  "status": "PASS",
+  "buildings": 5,
+  "levels": 6,
+  "selected": "office/candidate-02",
+  "selectedLevel": 6,
+  "selectedMode": "TRIM_REVIEW",
+  "JSExceptions": [],
+  "externalRequests": [],
+  "reviewExport": "B16_BROWSER_UNSIGNED_REVIEW.json",
+  "operations": []
+}

@@ -1,0 +1,47 @@
+import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import path from 'node:path';import {fileURLToPath} from 'node:url';
+import {safe} from '../../b79/main/compile-b79.mjs';
+import {validateB97} from './compile-b97.mjs';
+import {corridorBands,twoWideReachable,safeCoreToStairLink,buildGalleryCoDesign,verifyGalleryFloor,rect} from './b97-gallery-network.mjs';
+const here=path.dirname(fileURLToPath(import.meta.url)),root=path.resolve(here,'../../..');
+const get=p=>JSON.parse(fs.readFileSync(path.join(root,p),'utf8'));
+const report=get('parallel/b97/main/B97_CONNECTED_GALLERY_REPORT.json');
+const parent=get('parallel/b96/main/B96_CORE_FIRST_BUILDINGS_REPORT.json');
+const shape=get('parallel/b66/main/B66_LOCAL_3D_ASSEMBLY.json');
+const buildings=report.buildings;const flat=buildings.flatMap(b=>b.options);const floorList=flat.flatMap(o=>o.sections);
+const byName=id=>buildings.find(b=>b.buildingId===id);
+const pickFloor=(building='hotel/candidate-01')=>byName(building).options[0].sections[0];
+const point=p=>`${p.x},${p.z}`;
+const synthetic=()=>({id:'test/L1',level:1,floorMaskRows:Array(14).fill('11111111111111'),
+ conceptRooms:[{id:'r1',x:1,z:1,width:4,depth:4},{id:'r2',x:7,z:1,width:4,depth:4}],
+ conceptReservations:{stairs:[{x:6,z:11},{x:7,z:11},{x:6,z:12},{x:7,z:12}],elevators:[],corridors:[]}});
+test('B97 integrity hash, frozen safety gates and no world commands',()=>{safe(report,'minecraftaibuilder-b97-independent-building-two-wide-connected-room-gallery-v1');assert.ok(validateB97(report));assert.deepEqual(report.BuildPlan.operations,[]);assert.equal(report.BuildPlan.worldCoordinates,null)});
+test('B96 report provenance matches pinned digest and official catalogue chain',()=>{assert.equal(report.provenance.b96,parent.reportSha256);assert.equal(report.provenance.b95,parent.provenance.b95);assert.equal(report.provenance.officialBlocksSha256,parent.provenance.officialBlocksSha256)});
+test('all five buildings plus 30 baseline floors remain unchanged',()=>{assert.equal(buildings.length,5);assert.equal(buildings.reduce((n,b)=>n+b.reference.nominalRooms,0),314);assert.equal(buildings.reduce((n,b)=>n+b.reference.floorCount,0),30)});
+test('B97 is not production: original 296, 18 held and zero approved',()=>{assert.equal(report.totals.priorUnapprovedCandidates,296);assert.equal(report.totals.heldIndependentRooms,18);assert.equal(report.totals.approvedIndependentRooms,0);assert.equal(report.totals.productionEdits,0)});
+test('54 independent branching concepts and 324 virtual floors represented',()=>{assert.equal(flat.length,54);assert.equal(floorList.length,324);assert.equal(report.totals.evaluatedVirtualFloorDesigns,324)});
+test('three corridor network orientations per original B96 alternative',()=>{for(const b of buildings){assert.equal(b.options.length,3*b.sourceB96Options);for(const axis of ['H','V','HV'])assert.equal(b.options.filter(o=>o.methodology===axis).length,b.sourceB96Options);}});
+test('each virtual floor has a connected 2x2 anchor network',()=>{assert.ok(floorList.every(verifyGalleryFloor));});
+test('no connected public hallway claims a reserved stair or elevator cell',()=>{for(const f of floorList){const blocked=new Set([...f.virtualReference.stairs,...f.virtualReference.elevators].map(point));assert.ok(f.gallerySites.every(p=>!blocked.has(point(p))));}});
+test('legacy B96 has 108 unique reserved stair overlaps, repaired in B97 isolated path',()=>{assert.equal(report.totals.uniqueB96StairReservationOverlapCells,108);assert.ok(report.totals.repeatedSourceB96StairOverlapsAcrossOptions>108);assert.ok(floorList.some(f=>f.correctedB96StairOverlapCells>0));});
+test('no door is marked physically tested by superficial gallery frontage',()=>{assert.equal(report.methodology.distinguishesTwoCellHallFrontageFromPhysicalDoor,true);assert.equal(report.totals.designsConnectingEveryRoomAtLeastTwoHallCells,0);assert.ok(flat.every(o=>o.quality.doorHingesFramesAndFireEgressVerified===false));});
+test('individual allocated rooms retain minimum 75% area',()=>{for(const f of floorList)for(const r of f.rooms.filter(x=>x.room))assert.ok(r.retentionRatio>=.75)});
+test('room sites never intersect galleries, shafts, stairs or other rooms',()=>{for(const f of floorList){const occupied=new Set([...f.gallerySites.map(point),...rect(f.core).map(point),...f.virtualReference.stairs.map(point),...f.virtualReference.elevators.map(point)]);
+ for(const r of f.rooms.filter(x=>x.room))for(const p of rect(r.room)){const id=point(p);assert.ok(!occupied.has(id),`${f.sectionId} ${r.roomId} ${id}`);occupied.add(id);}}});
+test('gallery frontages are actual room-facing connected hallway cells',()=>{for(const f of floorList)for(const r of f.rooms.filter(x=>x.frontage)){const door=r.frontage;assert.ok(rect(r.room).some(p=>point(p)===point(door.roomCell)));assert.ok(f.gallerySites.some(p=>point(p)===point(door.hallCell)));assert.equal(Math.abs(door.roomCell.x-door.hallCell.x)+Math.abs(door.roomCell.z-door.hallCell.z),1);}});
+test('five best conceptual variants improve connected room access, but not all rooms',()=>{const goals={'hotel/candidate-01':42,'apartment/candidate-01':6,'office/candidate-01':47,'office/candidate-02':31,'office/candidate-03':60};for(const b of buildings){const s=b.options[0].summary;assert.ok(s.connectedTwoCellDoorwayFrontageRooms>=goals[b.buildingId]);assert.ok(s.connectedTwoCellDoorwayFrontageRooms<s.nominalRooms)}});
+test('hotel best keeps 66 rooms and all nominal area',()=>{const r=byName('hotel/candidate-01').options[0].summary;assert.equal(r.allocatedRooms,66);assert.equal(r.retentionRatio,1);});
+test('office02 best keeps 38 rooms and 31 two-cell gallery door bays',()=>{const r=byName('office/candidate-02').options[0].summary;assert.equal(r.allocatedRooms,38);assert.equal(r.connectedTwoCellDoorwayFrontageRooms,31)});
+test('office03 best keeps 66 rooms and 60 connected two-cell fronts',()=>{const r=byName('office/candidate-03').options[0].summary;assert.equal(r.allocatedRooms,66);assert.equal(r.connectedTwoCellDoorwayFrontageRooms,60)});
+test('office01 best reports all four unallocated bedrooms instead of miscounting',()=>{const r=byName('office/candidate-01').options[0].summary;assert.equal(r.allocatedRooms,62);assert.equal(r.unallocatedRooms,4)});
+test('apartment 78 rooms preserved but remaining access gap explicitly remains',()=>{const r=byName('apartment/candidate-01').options[0].summary;assert.equal(r.allocatedRooms,78);assert.equal(r.connectedTwoCellDoorwayFrontageRooms,6)});
+test('daylight risk is a mask-perimeter proxy, not an actual glazing audit',()=>{assert.equal(report.methodology.daylightProxyIsNotWindowAudit,true);assert.ok(flat.every(o=>o.quality.windowOpeningsVerified===false));});
+test('B97 model records quality rejects and 29 interim-quality gating passes without approvals',()=>{assert.equal(report.totals.designsWithInterimCountAndDaylightProxyGates,29);assert.equal(report.constructionApproved,false);assert.ok(flat.every(o=>o.deploymentApproved===false&&o.branchStatus==='UNAPPROVED_NEW_BUILDING_BRANCH_ONLY'));});
+test('synthetic two-width stair route finds a legal connection',()=>{const s=synthetic();const p=safeCoreToStairLink(s,{x:6,z:2,width:3,depth:3});assert.ok(p.connected);const stair=new Set(s.conceptReservations.stairs.map(point));assert.ok(p.sites.every(q=>!stair.has(point(q))))});
+test('synthetic impossible floor returns a failure rather than a fake connection',()=>{const s=synthetic();s.floorMaskRows=s.floorMaskRows.map((r,z)=>z===6?'00000000000000':r);const p=safeCoreToStairLink(s,{x:6,z:2,width:3,depth:3});assert.equal(p.connected,false)});
+test('synthetic 2wide squares cannot walk diagonally across disjoint parts',()=>{const cells=new Set([...['1,1','1,2','2,1','2,2'],...['4,4','4,5','5,4','5,5']]);const g=twoWideReachable(cells,cells);assert.equal(g.components.length,2);});
+test('derived corridor bands respect former room separators',()=>{const s=shape.sections.find(x=>x.id==='hotel/candidate-01/L1');const found=corridorBands(s,'H',{maximum:3});assert.ok(found.length>=2);assert.ok(found.every(x=>x.width===2));});
+test('target floor layout directly verifiable with original source',()=>{const f=pickFloor();const section=shape.sections.find(q=>q.id===f.sectionId);const old=parent.buildings.find(q=>q.buildingId==='hotel/candidate-01').options.find(o=>o.id===byName('hotel/candidate-01').options[0].parentB96OptionId).floors[0];
+ const rebuilt=buildGalleryCoDesign(section,old,byName('hotel/candidate-01').options[0].profileSettings);assert.equal(rebuilt.gallerySites.length,f.gallerySites.length);assert.deepEqual(rebuilt.stats,f.stats);});
+test('tampered gates/build operations/prod changes get rejected',()=>{for(const mutate of [(x)=>x.gates[0].status='PASS',(x)=>x.BuildPlan.operations.push({type:'setBlock'}),(x)=>x.totals.productionEdits=3,(x)=>x.constructionApproved=true]){
+ const clone=structuredClone(report);mutate(clone);assert.equal(validateB97(clone),false);}});
+test('tampered two-wide corridor and room overlap is independently rejected',()=>{const f=structuredClone(pickFloor());f.gallerySites[0]=f.virtualReference.stairs[0];assert.equal(verifyGalleryFloor(f),false);const g=structuredClone(pickFloor());g.rooms[0].room={...g.core};assert.equal(verifyGalleryFloor(g),false)});

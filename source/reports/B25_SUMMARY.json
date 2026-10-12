@@ -1,0 +1,76 @@
+{
+  "schema": "minecraftaibuilder-step8b-b25-m3g-compiler-v1",
+  "kind": "READ_ONLY_LOCAL_SCHEMATIC_COMPILER_NOT_EXECUTABLE",
+  "frozenEvidence": {
+    "manifestSha256": "07bdc21dc7c364062cc948f4aa31cdb7b9e7476a64ca668a299593fd20595952",
+    "b24ReportSha256": "4cee477fa2a0f02b372066579cf0751c644fa782556c9f9a0fce6130cca881db"
+  },
+  "contracts": {
+    "canonicalOwnerSelection": "LEXICOGRAPHIC_MIN_PANEL_ID_FOR_LEDGER_ONLY",
+    "equivalentGeometryClaim": "ONE_OWNER_LABEL_PER_OCCUPIED_VOXEL_WITH_ORIGINAL_CLAIMS_RETAINED",
+    "sharedMaterialState": "UNKNOWN",
+    "junctionStructuralValidity": "UNVERIFIED",
+    "doorLocalOpening": "NOMINAL_ONE_WIDE_TWO_TALL_NO_ENGINE_STATE",
+    "doorUpperLowerHalf": "UNKNOWN",
+    "doorHinge": "UNKNOWN",
+    "doorFacing": "UNKNOWN",
+    "doorJamb": "UNKNOWN",
+    "floorSlab": "CUTOUT_CANDIDATES_ONLY_NO_PHYSICAL_MODIFICATION",
+    "stairSupport": "UNKNOWN",
+    "stairActualWalkability": "UNVERIFIED",
+    "worldAnchor": "UNKNOWN",
+    "educationMaterialAllowlist": "UNKNOWN",
+    "plannerRuntime": "NOT_ATTESTED",
+    "sourceOffice02ExteriorDeltaCells": 123,
+    "sourceOffice02CorridorDeltaCells": 18
+  },
+  "counts": {
+    "buildings": 5,
+    "floors": 30,
+    "wallPanels": 5704,
+    "doorPorts": 314,
+    "doorMoveCandidates": 118,
+    "uniqueWallVoxels": 13658,
+    "provisionalCanonicalOwners": 13658,
+    "sharedWallVoxels": 3990,
+    "excessClaims": 3990,
+    "unresolvedMaterialJunctions": 3990,
+    "stairLinks": 25,
+    "stairCutoutCandidateCells": 50,
+    "physicalChanges": 0,
+    "emittedOperations": 0
+  },
+  "topology": {
+    "SAME_ROOM_SCOPE": 3990,
+    "SHARED_ROOM_SCOPE": 0,
+    "DISJOINT_ROOM_SCOPE": 0
+  },
+  "gate": {
+    "materialProven": false,
+    "interiorJoinProven": false,
+    "stairSlabAndSupportProven": false,
+    "physicalDoorStatesProven": false,
+    "readyForConstruction": false,
+    "reason": "UNVERIFIED_RUNTIME_AND_PHYSICAL_CONTRACTS"
+  },
+  "safety": {
+    "notPrepared": true,
+    "constructionApproved": false,
+    "executionAllowed": false,
+    "worldAccess": false,
+    "bridgeContact": false,
+    "legacyModified": false,
+    "originalFilesModified": false,
+    "executableEmitterConnected": false,
+    "physicalChanges": 0
+  },
+  "deploymentGate": "BLOCKED",
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0,
+    "worldCoordinates": null,
+    "materialIds": []
+  },
+  "reportSha256": "b62f0437b004b9d6ad32bc41ef217a733dc952e0a3458349d203391b81b3085d"
+}

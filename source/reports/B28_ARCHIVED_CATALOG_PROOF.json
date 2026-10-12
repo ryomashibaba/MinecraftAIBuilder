@@ -1,0 +1,14 @@
+{
+  "schema": "minecraftaibuilder-b28-archived-catalog-proof-v1",
+  "sourceSnapshotHash": "62d1de7d0148d514fded1544c254a9beab4299018dc054aff353557df0809a1f",
+  "catalogSha256": "842de2f91b0c84c9bd601fbeae9f04e6edf6a1b97b688635163a7c7816bd3a5f",
+  "educationVersion": "v26.3",
+  "recordCount": 966,
+  "statusCounts": {
+    "verified": 827,
+    "unsupported": 139
+  },
+  "exactOrdinaryDoorRecords": 0,
+  "meaning": "ARCHIVED_SNAPSHOT_BYTE_IDENTITY_ONLY_NOT_CURRENT_GAME_ACCEPTANCE",
+  "containsRawRecords": false
+}

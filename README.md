@@ -1,20 +1,28 @@
 # MinecraftAIBuilder
 
-**Private development repository — B100 migration in progress.**
+**Minecraft Education Edition first · Java Edition later · private source repository**
 
-Goal: build high-quality, structurally diverse Minecraft buildings from Japanese-language briefs, with complete interiors and safe construction. **Minecraft Education Edition is the first production target; Java Edition is deferred.**
+## Development baseline
+- B100: universal architectural concept IR, 5 purposes × 3 designs, **not Minecraft world-ready**.
+- Existing 296 room candidates remain unapproved; 18 held rooms remain held.
+- `readiness=NOT_PREPARED`; all 9 construction gates remain `BLOCKED`; no world connection or commands authorized.
+- Full original B100 archive is preserved separately, not re-committed into the everyday Git history.
 
-## Current state
+## Offline QA
 
-- B100 frozen source is being prepared for initial import; this repository does **not** yet contain the full B100 implementation.
-- No Minecraft world operations are authorized. Construction remains `NOT_PREPARED`; all nine construction gates remain `BLOCKED`.
-- Legacy 296 room candidates and 18 held rooms are unapproved and must not be modified or promoted.
-- B100 complete original ZIP remains the external restore point.
+Run from repository root:
 
-## Next
+```bash
+node scripts/verify-freeze.mjs
+node scripts/verify-safety.mjs
+cd source
+node --experimental-vm-modules --test parallel/b{92,93,94,95,96,97,98,99,100}/main/compile-b*.test.mjs
+```
 
-1. Import the sanitized B100 source snapshot using the verified migration kit.
-2. Run 251 offline tests in GitHub Actions.
-3. Continue B101 work using branches and pull requests. ZIP archives are reserved for milestone backups.
+On Windows, use GitHub Actions for the portable exact test invocation in `.github/workflows/qa.yml`.
 
-**Do not treat a CI pass as construction permission.**
+## Development workflow
+
+Use `feature/b101-*` branches; make pull requests; preserve B100 frozen code and pinned reports. Use the CI status and factual 3D review, not test counts alone, to judge readiness. Never push credentials or historical evidence ZIPs. The verified initial import contains a selected B100 source/fixture snapshot; excluded files remain in the original archive and are listed in `docs/B100_IMPORT_EXCLUSIONS.json`.
+
+**CI PASS is not construction approval.** Minecraft live operations require a separate explicit authorization.

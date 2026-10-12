@@ -1,0 +1,44 @@
+{
+  "schema": "minecraftaibuilder-step8b-b43-evidence-delta-v1",
+  "snapshotManifestSha256": "34ef239cd1d6e59c7d36fb070bd305e7572d944dee949c0648312ec94090534c",
+  "status": "EVIDENCE_CORRELATION_ONLY_NO_RUNTIME_ATTESTATION",
+  "baseline": {
+    "collectedAt": "2026-10-10T19:21:44.9408200+09:00",
+    "sourceAlignment": "CRITICAL_FILES_MATCH_CAPTURED_SOURCE",
+    "nodeProcessCount": 4,
+    "criticalMatches": 8
+  },
+  "current": {
+    "status": "NOT_COLLECTED"
+  },
+  "comparison": {
+    "sourceState": "AWAITING_WINDOWS_B42_CAPTURE",
+    "criticalComparisonTransitions": [],
+    "processState": "AWAITING_WINDOWS_B42_CAPTURE",
+    "processCountDelta": null,
+    "runtimeEvidenceLevel": "BASELINE_ONLY"
+  },
+  "runtimeIdentity": "NOT_PROVEN",
+  "executionCompatibility": "UNKNOWN",
+  "deploymentGate": "BLOCKED",
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0
+  },
+  "safety": {
+    "constructionApproved": false,
+    "executionAllowed": false,
+    "noWorldMutation": true,
+    "noBridge": true,
+    "noScan": true,
+    "noPackGeneration": true
+  },
+  "constraints": [
+    "Offline source bytes and process metadata only",
+    "No loaded-module attestation or proof of process identity",
+    "No network, API, Minecraft, world or materials verification",
+    "A command-line match or port PID cannot authorize construction"
+  ],
+  "reportSha256": "7f5137f56e7299122a6a0b3184e99e23c4a28f780f534288bb8892c92df4f9ee"
+}

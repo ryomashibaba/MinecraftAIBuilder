@@ -1,0 +1,25 @@
+{
+  "schema": "minecraftaibuilder-step8b-b36-summary-v1",
+  "building": "apartment/candidate-01",
+  "layers": 5,
+  "schematicCorridorToStairInterfaceEdges": {
+    "A": 15,
+    "B": 10
+  },
+  "directlyAdjacentToUpperFloorCutout": {
+    "A": 5,
+    "B": 5
+  },
+  "projectedSteps": 20,
+  "projectedHeadspaceCells": 40,
+  "projectedLowerFloorWallCollisionCount": 0,
+  "interpretation": "2D and nominal 3D projection only; no floor support, material, or physical landing certified",
+  "physicallyValidatedLandings": 0,
+  "physicalSupportsCertified": 0,
+  "recommendedForConstruction": null,
+  "approval": false,
+  "readiness": "NOT_PREPARED",
+  "deployment": "BLOCKED",
+  "constructionCommands": 0,
+  "nextPriority": "Define real landing/clearance and physical floor support before any engine runtime integration"
+}

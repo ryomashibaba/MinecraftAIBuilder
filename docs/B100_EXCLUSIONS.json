@@ -1,0 +1,1126 @@
+[
+  {
+    "path": "source/parallel/b100/main/B100_UNIVERSAL_DESIGN_REVIEW.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/parallel/b44/sub-b/qa/B33_B43_RELATED_TESTS.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/parallel/b44/sub-b/qa/B44_SUBB_DIFF_TESTS.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/parallel/b44/sub-c/qa/focused-regression-output.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/parallel/b44/sub-c/qa/sub-c-test-output.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/parallel/b45/main/B45_PREVIEW_apartment_candidate-01.obj",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/parallel/b45/main/B45_PREVIEW_hotel_candidate-01.obj",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/parallel/b45/main/B45_PREVIEW_office_candidate-01.obj",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/parallel/b45/main/B45_PREVIEW_office_candidate-02.obj",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/parallel/b45/main/B45_PREVIEW_office_candidate-03.obj",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/parallel/b45/main/B45_VISUAL_ONLY.mtl",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/parallel/b46/main/B46_PREVIEW_apartment_candidate-01.obj",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/parallel/b46/main/B46_PREVIEW_hotel_candidate-01.obj",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/parallel/b46/main/B46_PREVIEW_office_candidate-01.obj",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/parallel/b46/main/B46_PREVIEW_office_candidate-02.obj",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/parallel/b46/main/B46_PREVIEW_office_candidate-03.obj",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/parallel/b46/main/B46_VISUAL_ONLY.mtl",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/parallel/b53/main/B53_VISUAL_REVIEW.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/parallel/b54/main/B54_DECISION_DOSSIER.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/parallel/b57/main/B57_OFFLINE_3D_REVIEW.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/parallel/b62/main/B62_OFFLINE_CONFLICT_REVIEW.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/parallel/b64/main/B64_CONCEPT_ROOM_ATLAS.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/parallel/b66/main/B66_INTERIOR_3D_REVIEW.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/parallel/b75/main/B75_ALIGNMENT_REVIEW.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/parallel/b76/main/B76_OFFLINE_REVIEW.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/parallel/b77/main/B77_OFFLINE_REVIEW.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/parallel/b78/main/B78_GLOBAL_GRID_REVIEW.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/parallel/b79/main/B79_DOOR_REVIEW.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/parallel/b80/main/B80_ASSEMBLY_REVIEW.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/parallel/b84/main/B84_LAYOUT_REVIEW.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/parallel/b85/main/B85_FLOOR_REVIEW.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/parallel/b86/main/B86_JOINT_FLOOR_REVIEW.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/parallel/b87/main/B87_REVIEW.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/parallel/b88/main/B88_OFFLINE_CORRIDOR_REVIEW.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/parallel/b89/main/B89_FLOOR_ZONING_REVIEW.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/parallel/b90/main/B90_PROGRAM_ZONING_REVIEW.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/parallel/b91/main/B91_FLOOR_BRANCHES_REVIEW.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/parallel/b92/main/B92_FLOOR_RETILE_REVIEW.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/parallel/b93/main/B93_PROGRAMME_BRANCH_REVIEW.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/parallel/b94/main/B94_BUILDING_COMPOSITION_REVIEW.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/parallel/b95/main/B95_VERTICAL_CORE_REVIEW.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/parallel/b96/main/B96_CORE_FIRST_REVIEW.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/parallel/b97/main/B97_CONNECTED_GALLERY_REVIEW.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/parallel/b98/main/B98_ARCHITECTURAL_REVIEW.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/parallel/b99/main/B99_ARCHITECTURE_REVIEW.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/previews/APARTMENT_STATIC_B3.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/previews/B10_3D_STATIC_REVIEW.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/previews/B11_LOCAL_REVIEW.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/previews/B12_SPATIAL_REVIEW.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/previews/B13_MODULE_CONTRACT_REVIEW.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/previews/B14_INPUT_REVIEW.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/previews/B15_VIRTUAL_REVIEW.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/previews/B16_CONNECTIVITY_REVIEW.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/previews/B6_REVIEW_DASHBOARD.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/previews/B7_DUAL_LAYER_REVIEW.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/previews/B8_CANDIDATE_REVIEW.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/previews/B9_REVIEW.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/previews/HOTEL_STATIC_B3.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/previews/OFFICE_STATIC_B3.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B10_STEP8A_65_PASS.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B10_STEP8A_DETAIL_15_PASS.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B10_STEP8B_190_PASS.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B11_BROWSER_SMOKE.png",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B11_STEP8A_CORE.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B11_STEP8A_CORE_EXITCODE",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B11_STEP8A_DETAIL.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B11_STEP8A_DETAIL_EXITCODE",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B11_STEP8B_ALL.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B11_STEP8B_EXITCODE",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B12_BROWSER_SMOKE.png",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B12_NEW_TESTS.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B12_STEP8A_ARCHITECTURE.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B12_STEP8A_CORE.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B12_STEP8A_DESIGN.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B12_STEP8A_DETAIL.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B12_STEP8A_DETAIL_HEAVY.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B12_STEP8A_OPTIMIZE.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B12_STEP8A_PHYSICAL.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B12_STEP8A_REVIEW.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B12_STEP8B_INTERRUPTED.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B12_STEP8B_SHARD_A.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B12_STEP8B_SHARD_B.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B13_BROWSER_SMOKE.png",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B13_step8a-architecture.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B13_step8a-design.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B13_step8a-detail.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B13_step8a-optimize.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B13_step8a-physical.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B13_step8a-review.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B13_step8b-candidate-review-b8.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B13_step8b-compatibility.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B13_step8b-diversity-b9.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B13_step8b-evidence-b43.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B13_step8b-geometry-b3.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B13_step8b-guardrails-b44.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B13_step8b-interior-contract-b10.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B13_step8b-interior-repair-b11.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B13_step8b-module-contract-b13.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B13_step8b-readiness-b5.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B13_step8b-review-b7.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B13_step8b-runtime-b4.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B13_step8b-runtime-b42.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B13_step8b-spatial-b12.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B13_step8b-static-planner-b6.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B13_step8b-windows-b2.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B14_BROWSER_SMOKE.png",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B14_NEW_TESTS.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B14_step8a-architecture.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B14_step8a-design.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B14_step8a-detail.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B14_step8a-optimize.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B14_step8a-physical.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B14_step8a-review.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B14_step8b-candidate-review-b8.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B14_step8b-compatibility.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B14_step8b-diversity-b9.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B14_step8b-evidence-b43.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B14_step8b-geometry-b3.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B14_step8b-guardrails-b44.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B14_step8b-interior-contract-b10.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B14_step8b-interior-repair-b11.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B14_step8b-module-contract-b13.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B14_step8b-readiness-b5.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B14_step8b-review-b7.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B14_step8b-runtime-b4.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B14_step8b-runtime-b42.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B14_step8b-spatial-b12.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B14_step8b-static-planner-b6.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B14_step8b-windows-b2.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B15_B14_RECHECK.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B15_BROWSER_SMOKE.png",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B15_NEW_TESTS.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B15_step8a-architecture.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B15_step8a-design.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B15_step8a-detail.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B15_step8a-optimize.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B15_step8a-physical.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B15_step8a-review.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B15_step8b-candidate-review-b8.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B15_step8b-compatibility.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B15_step8b-diversity-b9.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B15_step8b-evidence-b43.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B15_step8b-geometry-b3.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B15_step8b-guardrails-b44.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B15_step8b-interior-contract-b10.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B15_step8b-interior-repair-b11.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B15_step8b-module-contract-b13.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B15_step8b-readiness-b5.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B15_step8b-review-b7.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B15_step8b-runtime-b4.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B15_step8b-runtime-b42.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B15_step8b-spatial-b12.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B15_step8b-static-planner-b6.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B15_step8b-windows-b2.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B16_BROWSER_SMOKE.png",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B16_NEW_TESTS.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B16_regression_step8a-architecture.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B16_regression_step8a-design.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B16_regression_step8a-detail.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B16_regression_step8a-optimize.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B16_regression_step8a-physical.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B16_regression_step8a-review.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B16_regression_step8b-candidate-review-b8.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B16_regression_step8b-compatibility.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B16_regression_step8b-diversity-b9.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B16_regression_step8b-evidence-b43.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B16_regression_step8b-geometry-b3.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B16_regression_step8b-guardrails-b44.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B16_regression_step8b-interior-contract-b10.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B16_regression_step8b-interior-modules-b14.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B16_regression_step8b-interior-repair-b11.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B16_regression_step8b-module-contract-b13.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B16_regression_step8b-readiness-b5.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B16_regression_step8b-review-b7.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B16_regression_step8b-runtime-b4.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B16_regression_step8b-runtime-b42.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B16_regression_step8b-spatial-b12.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B16_regression_step8b-static-planner-b6.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B16_regression_step8b-virtual-volume-b15.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B16_regression_step8b-windows-b2.test.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B17_B14_RELEVANT_REGRESSION.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B17_B16_FOCUSED_REGRESSION.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B17_NEW_TESTS.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B18_NEW_TESTS.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B19_M2_REGRESSION.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B19_M3_NEW_TESTS.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B20_B18_B19_REGRESSION.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B20_NEW_TESTS.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B21_B18_B20_REGRESSION.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B21_NEW_TESTS.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B22_NEW_TESTS.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B22_REGRESSION_B20.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B22_REGRESSION_B21.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B23_NEW_TESTS.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B23_REGRESSION_B21.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B23_REGRESSION_B22.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B24_M3F_B21_REGRESSION_44.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B24_M3F_B22_B23_REGRESSION_64.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B24_M3F_NEW_35.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B25_NEW_TESTS.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B25_REGRESSION_b21.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B25_REGRESSION_b22_TIMED_OUT.incomplete.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B25_REGRESSION_b22_focused.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B25_REGRESSION_b23_focused.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B25_REGRESSION_b24.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B26_ASSESSMENT_TESTS.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B26_B25_FROZEN_VERIFICATION.log",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B26_B25_TARGETED_REGRESSION.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B26_NEW_TESTS.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B27_B25_REGRESSION_48_PASS.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B27_B26_TARGETED_REGRESSION_58_PASS.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B27_COLLECTOR_CONTRACT_12_PASS.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B27_NEW_GATE_32_PASS.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B28_B26_B27_TARGETED_102_PASS.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B28_NEW_28_PASS.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B29_NEW_TESTS.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B29_REGRESSION_step8b-m4-evidence-gate-b27.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B29_REGRESSION_step8b-m4-real-evidence-b28.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B29_REGRESSION_step8b-m4-static-gate-b26.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B29_REGRESSION_step8b-m4-windows-assessment-b26.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B30_NEW_TESTS.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B30_REGRESSION_step8b-m4-assembly-b29.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B30_REGRESSION_step8b-m4-evidence-gate-b27.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B30_REGRESSION_step8b-m4-real-evidence-b28.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B30_REGRESSION_step8b-m4-static-gate-b26.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B30_REGRESSION_step8b-m4-windows-assessment-b26.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B31_B29_B30_RELATED_REGRESSION.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B31_NEW_TESTS.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B32_B29_B31_REGRESSION.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B32_NEW_TESTS.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B33_B31_B32_REGRESSION.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B33_NEW_TESTS.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B34_B31_B32_REGRESSION.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B34_B33_REGRESSION.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B34_NEW_TESTS.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B35_B33_REGRESSION.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B35_B34_REGRESSION.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B35_NEW_TESTS.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B36_B34_B35_REGRESSION.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B36_NEW_TESTS.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B37_B35_B36_REGRESSION.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B37_NEW_TESTS.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B38_NEW_TESTS.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B38_RELATED_REGRESSION.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B39_B35_B38_REGRESSION.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B39_NEW_TESTS.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B40_NEW_TESTS.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B40_RELATED_REGRESSION.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B41_NEW_TESTS.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B41_RELATED_REGRESSION.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B42_DIFFERENTIAL_QA.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B42_NEW_TESTS.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B42_RELATED_REGRESSION.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B43_NEW_TESTS.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B43_RELATED_REGRESSION.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B45_FULL_OFFLINE_QA_173.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B45_NEW_26_QA.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B61_BASELINE_B62.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B62_NEW_TESTS.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B6_FULL_OFFLINE_QA_190.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B7_STEP8B_DIFFERENTIAL_QA.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B8_STEP8A_PART1.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B8_STEP8A_PART2.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B8_STEP8B_QA.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B9_STEP8A_RELEVANT_65_QA.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/qa/B9_STEP8B_FULL_QA.tap",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/samples/apartment/DETAIL_COORDINATES.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/samples/apartment/FLOOR_PLANS.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/samples/apartment/OPTIMIZATION_REVIEW.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/samples/apartment/PHYSICAL_REVIEW.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/samples/apartment/VIEWER.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/samples/hotel/DETAIL_COORDINATES.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/samples/hotel/FLOOR_PLANS.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/samples/hotel/OPTIMIZATION_REVIEW.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/samples/hotel/PHYSICAL_REVIEW.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/samples/hotel/VIEWER.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/samples/office/DETAIL_COORDINATES.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/samples/office/FLOOR_PLANS.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/samples/office/OPTIMIZATION_REVIEW.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/samples/office/PHYSICAL_REVIEW.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  },
+  {
+    "path": "source/samples/office/VIEWER.html",
+    "reason": "generated_visual_or_log_or_binary_archive"
+  }
+]

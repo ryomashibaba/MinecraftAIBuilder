@@ -1,0 +1,37 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import fs from 'node:fs';import path from 'node:path';import {fileURLToPath} from 'node:url';
+import {safe,key} from '../../b79/main/compile-b79.mjs';
+import {candidateCoreSites,routeTwoWide,tileFloorAfterCore,buildCoreFirstBranch,verifyBranch} from './b96-core-first-layout.mjs';
+import {validateB96} from './compile-b96.mjs';
+const here=path.dirname(fileURLToPath(import.meta.url)),root=path.resolve(here,'../../..');
+const report=JSON.parse(fs.readFileSync(path.join(here,'B96_CORE_FIRST_BUILDINGS_REPORT.json')));
+const B95=JSON.parse(fs.readFileSync(path.join(root,'parallel/b95/main/B95_VERTICAL_CORE_SLAB_AUDIT_REPORT.json')));
+const b=report.buildings;const ap=b.find(q=>q.buildingId==='apartment/candidate-01'),office=b.find(q=>q.buildingId==='office/candidate-01');
+function section(level=1){return {id:`test/L${level}`,level,floorMaskRows:Array(12).fill('111111111111'),heldRoomIds:['held'],
+ conceptRooms:[{id:'held',x:7,z:1,width:3,depth:3},{id:'stable',x:2,z:1,width:3,depth:3}],
+ conceptReservations:{stairs:Array.from({length:9},(_,i)=>({x:1+i%3,z:7+Math.floor(i/3)})),elevators:[],corridors:Array.from({length:10},(_,i)=>({x:i+1,z:6}))}};}
+test('B96 complete report digest, safety gates and empty construction',()=>{safe(report,'minecraftaibuilder-b96-core-first-independent-whole-building-redesign-v1');assert.equal(validateB96(report),true);assert.deepEqual(report.BuildPlan.operations,[])});
+test('B95 read-only provenance remains exact',()=>{assert.equal(report.provenance.b95,B95.reportSha256);assert.equal(report.replayed.length,2)});
+test('314 original rooms, 18 held and all earlier 296 unapproved',()=>{assert.equal(report.totals.originalNominalRooms,314);assert.equal(report.totals.heldIndependentRooms,18);assert.equal(report.totals.priorUnapprovedCandidates,296);assert.equal(report.totals.approvedNewRooms,0)});
+test('All five buildings and 30 original floors covered',()=>{assert.equal(b.length,5);assert.equal(b.reduce((n,x)=>n+x.reference.floorCount,0),30);assert.equal(b.reduce((n,x)=>n+x.reference.nominalRooms,0),314)});
+test('Architecture choices are independent new branches not baseline patches',()=>{assert.ok(b.every(x=>x.constructionSelected===null&&x.options.every(o=>o.baselineOverlay.mustNeverApplyThisBranchAsPatch&&o.summary.existingProductionRetainedUnmodified)))});
+test('Virtual shafts reserve at least 3x3 and 5 inter-floor holes in six-level concept',()=>{assert.ok(b.every(x=>x.options.every(o=>o.core.width>=3&&o.core.depth>=3&&o.tiers.virtualSlabOpeningsBetweenLevels===o.core.width*o.core.depth*(x.reference.floorCount-1))))});
+test('No roof penetration automatically licensed',()=>{assert.ok(b.every(x=>x.options.every(o=>o.tiers.virtualRoofKeptClosed&&o.tiers.actualStairsGeometrySpecified===false&&!o.summary.structuralSlabCutApproved)))});
+test('Two-wide virtual floor route to original nominal stair',()=>{assert.ok(b.every(x=>x.options.every(o=>o.floors.every(f=>f.route.connectedToExistingStair&&f.route.widthGuaranteed===2))))});
+test('All 18 generated building options pass geometry verification',()=>{assert.equal(report.totals.exploredIndependentBuildingBranches,18);assert.ok(b.every(x=>x.options.every(verifyBranch)))});
+test('Virtual design options on 108 floors, not 108 existing constructed floors',()=>{assert.equal(report.totals.exploredVirtualFloorLayouts,108);assert.equal(report.totals.floors,30)});
+test('Room area retention is at least 75% for every actually allocated room',()=>{for(const x of b)for(const o of x.options)for(const f of o.floors)for(const r of f.rooms.filter(z=>z.room))assert.ok(r.originalAreaRetainedRatio>=.75)});
+test('Rooms never overlap new core or 2wide route',()=>{const k=p=>`${p.x},${p.z}`;for(const x of b)for(const o of x.options)for(const f of o.floors){const blocked=new Set(f.route.sites.map(k));for(let dz=0;dz<f.core.depth;dz++)for(let dx=0;dx<f.core.width;dx++)blocked.add(k({x:f.core.x+dx,z:f.core.z+dz}));for(const r of f.rooms.filter(z=>z.room))for(let dz=0;dz<r.room.depth;dz++)for(let dx=0;dx<r.room.width;dx++){const p=k({x:r.room.x+dx,z:r.room.z+dz});assert.ok(!blocked.has(p),p);blocked.add(p);}}});
+test('Legacy named corridor adjacency is not passed off as a verified new width 2 door',()=>{const q=b[0].options[0].summary;assert.equal(q.adjacentToUnverifiedLegacyCorridor,66);assert.equal(q.roomDoorwayAdjacencyChecksPassed,0)});
+test('R013 targeted redesign may lose 6 independent rooms, must never silently count them as completed',()=>{const q=ap.options.find(o=>o.siteSelection.focusPattern==='R013');assert.ok(q);assert.equal(q.summary.unallocatedRooms,6);assert.equal(q.summary.allocatedRooms,72);assert.equal(q.summary.constructionApproved,false)});
+test('R006 targeted core plan cannot claim nominal room conservation',()=>{const q=ap.options.find(o=>o.siteSelection.focusPattern==='R006');assert.ok(q);assert.equal(q.summary.allocatedRooms,72);assert.equal(q.summary.nominalRooms,78)});
+test('R012 alternative is a review branch even when all room areas conserved',()=>{const q=ap.options.find(o=>o.siteSelection.focusPattern==='R012');assert.ok(q);assert.equal(q.summary.allocatedRooms,78);assert.equal(q.summary.accessibleEgressCertified,false)});
+test('Office R004 targeted core can displace room and remains a separate decision',()=>{const q=office.options.find(o=>o.siteSelection.focusPattern==='R004');assert.ok(q);assert.ok(q.summary.unallocatedRooms>0);assert.equal(q.baselineOverlay.mustNeverApplyThisBranchAsPatch,true)});
+test('Changes overlapping previous 296 conceptual reservations are quantified, never applied',()=>{const q=ap.options.find(o=>o.siteSelection.focusPattern==='R006');assert.ok(q.baselineOverlay.baselinePreviouslyProtectedSiteContacts>0);assert.equal(q.baselineOverlay.sourceProductionEdited,false)});
+test('Synthetic core enumeration respects floor-mask holes',()=>{const s=section();s.floorMaskRows[0]='000000000000';assert.ok(candidateCoreSites([s],{maximum:4}).every(p=>p.z>=1))});
+test('Synthetic 2-wide corridor joins old stair in empty nominal room grid',()=>{const s=section();const c=routeTwoWide(s,{x:7,z:7,width:3,depth:3});assert.equal(c.connectedToExistingStair,true);assert.equal(c.widthGuaranteed,2);assert.ok(c.anchorPath.length>0)});
+test('Unreachable core reports failure, never marks as connected',()=>{const s=section();s.conceptReservations.elevators=Array.from({length:12},(_,i)=>({x:5,z:i}));const c=routeTwoWide(s,{x:7,z:7,width:3,depth:3});assert.equal(c.connectedToExistingStair,false);assert.equal(c.widthGuaranteed,0)});
+test('Synthetic virtual retiling respects 75% minimum and never emits operations',()=>{const s=section();const q=buildCoreFirstBranch([s],{x:6,z:6,width:3,depth:3});assert.equal(verifyBranch(q),true);assert.equal(q.summary.operations.length,0)});
+test('Tampering with blocked gates fails validation',()=>{const q=structuredClone(report);q.gates[0].status='PASS';assert.equal(validateB96(q),false)});
+test('Tampering with BuildPlan rejected',()=>{const q=structuredClone(report);q.BuildPlan.operations.push({type:'fill'});assert.equal(validateB96(q),false)});
+test('Production changes or approval cannot be self-certified',()=>{const q=structuredClone(report);q.totals.productionFilesChanged=1;assert.equal(validateB96(q),false);const r=structuredClone(report);r.constructionApproved=true;assert.equal(validateB96(r),false)});

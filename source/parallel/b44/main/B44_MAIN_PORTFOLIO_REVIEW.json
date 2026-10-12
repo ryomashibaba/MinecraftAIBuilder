@@ -1,0 +1,194 @@
+{
+  "schema": "minecraftaibuilder-b44-main-parallel-review-v1",
+  "kind": "MERGED_NONEXECUTING_OFFLINE_PORTFOLIO",
+  "provenance": {
+    "subA": {
+      "schema": "minecraftaibuilder-b44-sub-a-circulation-v1",
+      "digest": "1db27b0db4baa3f61524e0eeef956f8df2693a2e47f81d11c83d63d259507726"
+    },
+    "subB": {
+      "schema": "minecraftaibuilder-b44-subb-structure-review-v1",
+      "digest": "38fd0470e76f45d7ef485d0b200ad331f46a828cf34819a804aa357c632bc4c5"
+    },
+    "subC": {
+      "schema": "minecraftaibuilder-b44c-offline-m4-preflight-v1",
+      "digest": "15f4de5359cf2246bab696f0c775e5af3710c3ed487d8cc177a8772351ee709b"
+    }
+  },
+  "portfolio": [
+    {
+      "buildingId": "hotel/candidate-01",
+      "levelCount": 6,
+      "sourceFloorCells": 3120,
+      "hypotheticalCutoutCells": 10,
+      "nominalDoorPorts": 66,
+      "nominalStairInterfaces": 5,
+      "physicalStructureVerified": false,
+      "facadeMaterial": "UNKNOWN",
+      "roofMaterial": "UNKNOWN",
+      "circulationCoverage": "NOT_YET_EVALUATED_BY_SUB_A"
+    },
+    {
+      "buildingId": "apartment/candidate-01",
+      "levelCount": 6,
+      "sourceFloorCells": 2400,
+      "hypotheticalCutoutCells": 10,
+      "nominalDoorPorts": 78,
+      "nominalStairInterfaces": 5,
+      "physicalStructureVerified": false,
+      "facadeMaterial": "UNKNOWN",
+      "roofMaterial": "UNKNOWN",
+      "circulationCoverage": "HYPOTHETICAL_SIX_LEVEL_REVIEW"
+    },
+    {
+      "buildingId": "office/candidate-01",
+      "levelCount": 6,
+      "sourceFloorCells": 2456,
+      "hypotheticalCutoutCells": 10,
+      "nominalDoorPorts": 66,
+      "nominalStairInterfaces": 5,
+      "physicalStructureVerified": false,
+      "facadeMaterial": "UNKNOWN",
+      "roofMaterial": "UNKNOWN",
+      "circulationCoverage": "NOT_YET_EVALUATED_BY_SUB_A"
+    },
+    {
+      "buildingId": "office/candidate-02",
+      "levelCount": 6,
+      "sourceFloorCells": 1922,
+      "hypotheticalCutoutCells": 10,
+      "nominalDoorPorts": 38,
+      "nominalStairInterfaces": 5,
+      "physicalStructureVerified": false,
+      "facadeMaterial": "UNKNOWN",
+      "roofMaterial": "UNKNOWN",
+      "circulationCoverage": "NOT_YET_EVALUATED_BY_SUB_A"
+    },
+    {
+      "buildingId": "office/candidate-03",
+      "levelCount": 6,
+      "sourceFloorCells": 2880,
+      "hypotheticalCutoutCells": 10,
+      "nominalDoorPorts": 66,
+      "nominalStairInterfaces": 5,
+      "physicalStructureVerified": false,
+      "facadeMaterial": "UNKNOWN",
+      "roofMaterial": "UNKNOWN",
+      "circulationCoverage": "NOT_YET_EVALUATED_BY_SUB_A"
+    }
+  ],
+  "aggregate": {
+    "buildings": 5,
+    "floors": 30,
+    "sourceFloorCells": 12778,
+    "hypotheticalCutoutCells": 50,
+    "nominalDoorPorts": 314,
+    "nominalStairInterfaces": 25,
+    "knownCrossGenerationDoorHintsRequiringReview": 118
+  },
+  "apartmentCirculation": {
+    "building": "apartment/candidate-01",
+    "variants": [
+      {
+        "variantId": "LOCAL_PARTITION_REPLAN",
+        "routeSteps": 56,
+        "newCorridorCandidateCells": 41,
+        "wallCollisionCandidateCells": 24,
+        "conditionalGraphDoorReachability": "78/78",
+        "physicalWalkability": "UNKNOWN",
+        "designAdopted": false
+      },
+      {
+        "variantId": "WALL_CLEAR_PERIMETER_REDISTRIBUTION",
+        "routeSteps": 496,
+        "newCorridorCandidateCells": 30,
+        "wallCollisionCandidateCells": 0,
+        "conditionalGraphDoorReachability": "78/78",
+        "physicalWalkability": "UNKNOWN",
+        "designAdopted": false
+      }
+    ],
+    "originalB43ConditionalGraphAccess": "77/78",
+    "nowUnderHypotheticalReplan": "78/78",
+    "physicalPassableDoors": null,
+    "levelOneFootprintProven": false,
+    "unapprovedWallChanges": true
+  },
+  "crossChecks": {
+    "aPassedOriginReview": true,
+    "bPassedOriginReview": true,
+    "cGatesBlocked": 9,
+    "normalizedInputA": {
+      "schema": "minecraftaibuilder-b44c-nonexecuting-ir-result-v1",
+      "role": "sub-a",
+      "inputSchema": "minecraftaibuilder-b44-main-sub-a-safe-review-v1",
+      "acceptedForOfflineReview": true,
+      "physicalValidity": "UNKNOWN",
+      "runtimeIdentity": "NOT_PROVEN",
+      "readiness": "NOT_PREPARED",
+      "deployment": "BLOCKED",
+      "constructionApproved": false,
+      "executionAllowed": false,
+      "checkedNodes": 38,
+      "engineCalls": 0,
+      "buildOperations": 0,
+      "BuildPlan": {
+        "status": "NOT_PREPARED",
+        "operations": [],
+        "commandCount": 0,
+        "worldCoordinates": null,
+        "materialIds": []
+      },
+      "authorization": "NEVER_FROM_OFFLINE_IR"
+    },
+    "normalizedInputB": {
+      "schema": "minecraftaibuilder-b44c-nonexecuting-ir-result-v1",
+      "role": "sub-b",
+      "inputSchema": "minecraftaibuilder-b44-main-sub-b-safe-review-v1",
+      "acceptedForOfflineReview": true,
+      "physicalValidity": "UNKNOWN",
+      "runtimeIdentity": "NOT_PROVEN",
+      "readiness": "NOT_PREPARED",
+      "deployment": "BLOCKED",
+      "constructionApproved": false,
+      "executionAllowed": false,
+      "checkedNodes": 32,
+      "engineCalls": 0,
+      "buildOperations": 0,
+      "BuildPlan": {
+        "status": "NOT_PREPARED",
+        "operations": [],
+        "commandCount": 0,
+        "worldCoordinates": null,
+        "materialIds": []
+      },
+      "authorization": "NEVER_FROM_OFFLINE_IR"
+    },
+    "rawIRRequiresReviewEnvelope": true,
+    "mainHasRunRealMinecraftTests": false
+  },
+  "outstanding": [
+    "Cross-version door candidate divergence: 118 of 314; no door block authoring",
+    "SubA 78/78 applies only if unapproved virtual wall and corridor revisions succeed",
+    "SubA L1 used an L2-derived candidate floor mask proxy: foundation and support remain unknown",
+    "SubB 5 buildings / 30 floors describe symbolic geometry, not generated Minecraft blocks",
+    "Ordinary doors, stair/slab exact states, collision/headroom/support and runtime identity unknown",
+    "Facade colors, materials, roof styles and outer windows not implemented or certified",
+    "C reviewer required explicit projection for A and B raw IR; no raw direct review success claimed",
+    "All nine M4 construction readiness gates remain BLOCKED"
+  ],
+  "readiness": "NOT_PREPARED",
+  "deployment": "BLOCKED",
+  "constructionApproved": false,
+  "executionAllowed": false,
+  "engineCalls": 0,
+  "buildOperations": 0,
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0,
+    "worldCoordinates": null,
+    "materialIds": []
+  },
+  "reportSha256": "b91b43049134c52f9a4d4a9591db28227ede77d04e4f73918105f45714dd9256"
+}

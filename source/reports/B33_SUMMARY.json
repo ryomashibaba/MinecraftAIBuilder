@@ -1,0 +1,76 @@
+{
+  "schema": "minecraftaibuilder-step8b-b33-pure-rectangle-fixture-v1",
+  "kind": "PINNED_ENVELOPE_SOURCE_PURE_FIXTURE_NOT_BUILDPLAN",
+  "provenance": {
+    "b32ReportSha256": "ed429d13d2d78026569787d9bcf29bf8de330ebac20ba05b4c78e564d82d3602",
+    "archivedEnvelopeSha256": "c63037c51937b0e5ec03b17274452bf1771fe47f8fe01dcececda6a8508766a0",
+    "pinnedRectangleFunction": true,
+    "plannerImported": false,
+    "plannerInvoked": false,
+    "bridgeInvoked": false
+  },
+  "totals": {
+    "buildings": 5,
+    "floors": 30,
+    "originalCells": 12778,
+    "candidateCells": 12728,
+    "candidateHoles": 50,
+    "originalRectangles": 58,
+    "candidateRectangles": 128,
+    "footprintBoundaryAdjacentCutouts": 5,
+    "enclosedVoidAdjacentCutouts": 5,
+    "exteriorAdjacentCutouts": 0,
+    "unapprovedStairStackRelocationOptions": 6,
+    "rectanglesWithOverlap": 0,
+    "lossOfFloorCells": 0,
+    "roofInputChanged": 0,
+    "foundationInputChanged": 0,
+    "exteriorInputChanged": 0,
+    "engineCalls": 0,
+    "operationsEmitted": 0
+  },
+  "interpretation": {
+    "fiveCells": "ADJACENT_TO_ENCLOSED_INTERIOR_VOID_NOT_BOUNDARY_CONNECTED_EXTERIOR_IN_2D_FOOTPRINT",
+    "remainingSupportRisk": "UNRESOLVED",
+    "courtyardBoundaryPhysicalClassification": "UNVERIFIED",
+    "allRelocationOptions": "CONCEPT_ONLY_REQUIRES_STAIR_SHAFT_AND_ACCESS_REDESIGN",
+    "floorsActuallyModified": false
+  },
+  "blockers": [
+    "M4-01",
+    "M4-02",
+    "M4-03",
+    "M4-04",
+    "M4-05",
+    "M4-06",
+    "M4-07",
+    "M4-08",
+    "M4-09"
+  ],
+  "additionalReviewGates": [
+    "EDGE_ADJACENT_FLOOR_CUTOUT_SUPPORT_UNVERIFIED",
+    "EXPOSED_ROOF_VS_INTERIOR_STAIR_HEADROOM_UNVERIFIED",
+    "INNER_COURTYARD_EDGE_SUPPORT_UNVERIFIED",
+    "RELOCATED_STAIR_STACK_ACCESS_UNVERIFIED"
+  ],
+  "readiness": "NOT_PREPARED",
+  "deployment": "BLOCKED",
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0,
+    "materialIds": [],
+    "worldCoordinates": null
+  },
+  "safety": {
+    "constructionApproved": false,
+    "executionAllowed": false,
+    "worldAccess": false,
+    "bridgeContact": false,
+    "legacyModified": false,
+    "archivedEvidenceModified": false,
+    "engineCalled": false,
+    "buildOperations": 0
+  },
+  "reportSha256": "67e384a8708f77c01255ed75ef29c3ad4bf80cd9a934bc0ee599f7a41fdacd75"
+}

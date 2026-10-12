@@ -1,0 +1,989 @@
+{
+  "schema": "minecraftaibuilder-b58-nominal-vertical-core-reconciliation-v1",
+  "kind": "OFFLINE_LOCAL_ONLY_VERTICAL_CORE_OPPORTUNITY_AND_STAIR_SNAPSHOT_RECONCILIATION",
+  "provenance": {
+    "b57ReportSha256": "7156d1716331c4d87db88b9d28fdc2672eee0a0d3295bb0085d2d9e6683bb3c2",
+    "b42ReportSha256": "ee52200cab0ccd0a5b4a9e4d97d298fe84d41d9f0a98e92678561c90f393f5bb"
+  },
+  "buildings": [
+    {
+      "id": "hotel/candidate-01",
+      "site": {
+        "width": 26,
+        "depth": 20,
+        "levels": 6
+      },
+      "commonFloorCells": 520,
+      "sharedCoreSearch": [
+        {
+          "size": 2,
+          "fullySharedOptions": 475,
+          "topThree": [
+            {
+              "x": 9,
+              "z": 9,
+              "size": 2,
+              "nominalSharedCells": 4,
+              "minSiteEdgeSetback": 9,
+              "approved": false
+            },
+            {
+              "x": 10,
+              "z": 9,
+              "size": 2,
+              "nominalSharedCells": 4,
+              "minSiteEdgeSetback": 9,
+              "approved": false
+            },
+            {
+              "x": 11,
+              "z": 9,
+              "size": 2,
+              "nominalSharedCells": 4,
+              "minSiteEdgeSetback": 9,
+              "approved": false
+            }
+          ]
+        },
+        {
+          "size": 3,
+          "fullySharedOptions": 432,
+          "topThree": [
+            {
+              "x": 8,
+              "z": 8,
+              "size": 3,
+              "nominalSharedCells": 9,
+              "minSiteEdgeSetback": 8,
+              "approved": false
+            },
+            {
+              "x": 9,
+              "z": 8,
+              "size": 3,
+              "nominalSharedCells": 9,
+              "minSiteEdgeSetback": 8,
+              "approved": false
+            },
+            {
+              "x": 10,
+              "z": 8,
+              "size": 3,
+              "nominalSharedCells": 9,
+              "minSiteEdgeSetback": 8,
+              "approved": false
+            }
+          ]
+        },
+        {
+          "size": 4,
+          "fullySharedOptions": 391,
+          "topThree": [
+            {
+              "x": 8,
+              "z": 8,
+              "size": 4,
+              "nominalSharedCells": 16,
+              "minSiteEdgeSetback": 8,
+              "approved": false
+            },
+            {
+              "x": 9,
+              "z": 8,
+              "size": 4,
+              "nominalSharedCells": 16,
+              "minSiteEdgeSetback": 8,
+              "approved": false
+            },
+            {
+              "x": 10,
+              "z": 8,
+              "size": 4,
+              "nominalSharedCells": 16,
+              "minSiteEdgeSetback": 8,
+              "approved": false
+            }
+          ]
+        }
+      ],
+      "entranceToCommonCore": [
+        {
+          "profile": "MINIMIZE_FACADE_GRAPHICS_CONFLICT",
+          "entryFrontageCells": 5,
+          "sharedTwoByTwoCoreOptionsReachableOnBareFloor": 475,
+          "closestSharedTwoByTwoCore": {
+            "x": 10,
+            "z": 0,
+            "nominalGroundFootprintSteps": 0,
+            "localSiteSetback": 0,
+            "physicalWalkabilityVerified": false
+          },
+          "partitionWallDoorsStairsAndClearancesVerified": false
+        },
+        {
+          "profile": "CENTERLINE_COMPOSITION",
+          "entryFrontageCells": 5,
+          "sharedTwoByTwoCoreOptionsReachableOnBareFloor": 475,
+          "closestSharedTwoByTwoCore": {
+            "x": 10,
+            "z": 0,
+            "nominalGroundFootprintSteps": 0,
+            "localSiteSetback": 0,
+            "physicalWalkabilityVerified": false
+          },
+          "partitionWallDoorsStairsAndClearancesVerified": false
+        },
+        {
+          "profile": "SETBACK_WITH_OFFSET_COMPOSITION",
+          "entryFrontageCells": 5,
+          "sharedTwoByTwoCoreOptionsReachableOnBareFloor": 475,
+          "closestSharedTwoByTwoCore": {
+            "x": 0,
+            "z": 0,
+            "nominalGroundFootprintSteps": 0,
+            "localSiteSetback": 0,
+            "physicalWalkabilityVerified": false
+          },
+          "partitionWallDoorsStairsAndClearancesVerified": false
+        }
+      ],
+      "corridorAndVerticalPassageVerified": false,
+      "roofAccessVerified": false,
+      "originalFloorCellCounts": [
+        520,
+        520,
+        520,
+        520,
+        520,
+        520
+      ],
+      "candidatePhysicalClearanceVerified": false,
+      "approved": false
+    },
+    {
+      "id": "apartment/candidate-01",
+      "site": {
+        "width": 28,
+        "depth": 22,
+        "levels": 6
+      },
+      "commonFloorCells": 400,
+      "sharedCoreSearch": [
+        {
+          "size": 2,
+          "fullySharedOptions": 320,
+          "topThree": [
+            {
+              "x": 3,
+              "z": 3,
+              "size": 2,
+              "nominalSharedCells": 4,
+              "minSiteEdgeSetback": 3,
+              "approved": false
+            },
+            {
+              "x": 4,
+              "z": 3,
+              "size": 2,
+              "nominalSharedCells": 4,
+              "minSiteEdgeSetback": 3,
+              "approved": false
+            },
+            {
+              "x": 5,
+              "z": 3,
+              "size": 2,
+              "nominalSharedCells": 4,
+              "minSiteEdgeSetback": 3,
+              "approved": false
+            }
+          ]
+        },
+        {
+          "size": 3,
+          "fullySharedOptions": 240,
+          "topThree": [
+            {
+              "x": 2,
+              "z": 2,
+              "size": 3,
+              "nominalSharedCells": 9,
+              "minSiteEdgeSetback": 2,
+              "approved": false
+            },
+            {
+              "x": 3,
+              "z": 2,
+              "size": 3,
+              "nominalSharedCells": 9,
+              "minSiteEdgeSetback": 2,
+              "approved": false
+            },
+            {
+              "x": 4,
+              "z": 2,
+              "size": 3,
+              "nominalSharedCells": 9,
+              "minSiteEdgeSetback": 2,
+              "approved": false
+            }
+          ]
+        },
+        {
+          "size": 4,
+          "fullySharedOptions": 160,
+          "topThree": [
+            {
+              "x": 1,
+              "z": 1,
+              "size": 4,
+              "nominalSharedCells": 16,
+              "minSiteEdgeSetback": 1,
+              "approved": false
+            },
+            {
+              "x": 2,
+              "z": 1,
+              "size": 4,
+              "nominalSharedCells": 16,
+              "minSiteEdgeSetback": 1,
+              "approved": false
+            },
+            {
+              "x": 3,
+              "z": 1,
+              "size": 4,
+              "nominalSharedCells": 16,
+              "minSiteEdgeSetback": 1,
+              "approved": false
+            }
+          ]
+        }
+      ],
+      "entranceToCommonCore": [
+        {
+          "profile": "MINIMIZE_FACADE_GRAPHICS_CONFLICT",
+          "entryFrontageCells": 2,
+          "sharedTwoByTwoCoreOptionsReachableOnBareFloor": 320,
+          "closestSharedTwoByTwoCore": {
+            "x": 12,
+            "z": 0,
+            "nominalGroundFootprintSteps": 0,
+            "localSiteSetback": 0,
+            "physicalWalkabilityVerified": false
+          },
+          "partitionWallDoorsStairsAndClearancesVerified": false
+        },
+        {
+          "profile": "CENTERLINE_COMPOSITION",
+          "entryFrontageCells": 2,
+          "sharedTwoByTwoCoreOptionsReachableOnBareFloor": 320,
+          "closestSharedTwoByTwoCore": {
+            "x": 12,
+            "z": 0,
+            "nominalGroundFootprintSteps": 0,
+            "localSiteSetback": 0,
+            "physicalWalkabilityVerified": false
+          },
+          "partitionWallDoorsStairsAndClearancesVerified": false
+        },
+        {
+          "profile": "SETBACK_WITH_OFFSET_COMPOSITION",
+          "entryFrontageCells": 2,
+          "sharedTwoByTwoCoreOptionsReachableOnBareFloor": 320,
+          "closestSharedTwoByTwoCore": {
+            "x": 0,
+            "z": 0,
+            "nominalGroundFootprintSteps": 0,
+            "localSiteSetback": 0,
+            "physicalWalkabilityVerified": false
+          },
+          "partitionWallDoorsStairsAndClearancesVerified": false
+        }
+      ],
+      "corridorAndVerticalPassageVerified": false,
+      "roofAccessVerified": false,
+      "originalFloorCellCounts": [
+        400,
+        400,
+        400,
+        400,
+        400,
+        400
+      ],
+      "candidatePhysicalClearanceVerified": false,
+      "approved": false
+    },
+    {
+      "id": "office/candidate-01",
+      "site": {
+        "width": 24,
+        "depth": 20,
+        "levels": 6
+      },
+      "commonFloorCells": 374,
+      "sharedCoreSearch": [
+        {
+          "size": 2,
+          "fullySharedOptions": 336,
+          "topThree": [
+            {
+              "x": 9,
+              "z": 9,
+              "size": 2,
+              "nominalSharedCells": 4,
+              "minSiteEdgeSetback": 9,
+              "approved": false
+            },
+            {
+              "x": 10,
+              "z": 9,
+              "size": 2,
+              "nominalSharedCells": 4,
+              "minSiteEdgeSetback": 9,
+              "approved": false
+            },
+            {
+              "x": 11,
+              "z": 9,
+              "size": 2,
+              "nominalSharedCells": 4,
+              "minSiteEdgeSetback": 9,
+              "approved": false
+            }
+          ]
+        },
+        {
+          "size": 3,
+          "fullySharedOptions": 300,
+          "topThree": [
+            {
+              "x": 8,
+              "z": 8,
+              "size": 3,
+              "nominalSharedCells": 9,
+              "minSiteEdgeSetback": 8,
+              "approved": false
+            },
+            {
+              "x": 9,
+              "z": 8,
+              "size": 3,
+              "nominalSharedCells": 9,
+              "minSiteEdgeSetback": 8,
+              "approved": false
+            },
+            {
+              "x": 10,
+              "z": 8,
+              "size": 3,
+              "nominalSharedCells": 9,
+              "minSiteEdgeSetback": 8,
+              "approved": false
+            }
+          ]
+        },
+        {
+          "size": 4,
+          "fullySharedOptions": 266,
+          "topThree": [
+            {
+              "x": 8,
+              "z": 8,
+              "size": 4,
+              "nominalSharedCells": 16,
+              "minSiteEdgeSetback": 8,
+              "approved": false
+            },
+            {
+              "x": 9,
+              "z": 8,
+              "size": 4,
+              "nominalSharedCells": 16,
+              "minSiteEdgeSetback": 8,
+              "approved": false
+            },
+            {
+              "x": 10,
+              "z": 8,
+              "size": 4,
+              "nominalSharedCells": 16,
+              "minSiteEdgeSetback": 8,
+              "approved": false
+            }
+          ]
+        }
+      ],
+      "entranceToCommonCore": [
+        {
+          "profile": "MINIMIZE_FACADE_GRAPHICS_CONFLICT",
+          "entryFrontageCells": 4,
+          "sharedTwoByTwoCoreOptionsReachableOnBareFloor": 336,
+          "closestSharedTwoByTwoCore": {
+            "x": 9,
+            "z": 2,
+            "nominalGroundFootprintSteps": 2,
+            "localSiteSetback": 2,
+            "physicalWalkabilityVerified": false
+          },
+          "partitionWallDoorsStairsAndClearancesVerified": false
+        },
+        {
+          "profile": "CENTERLINE_COMPOSITION",
+          "entryFrontageCells": 4,
+          "sharedTwoByTwoCoreOptionsReachableOnBareFloor": 336,
+          "closestSharedTwoByTwoCore": {
+            "x": 9,
+            "z": 2,
+            "nominalGroundFootprintSteps": 2,
+            "localSiteSetback": 2,
+            "physicalWalkabilityVerified": false
+          },
+          "partitionWallDoorsStairsAndClearancesVerified": false
+        },
+        {
+          "profile": "SETBACK_WITH_OFFSET_COMPOSITION",
+          "entryFrontageCells": 4,
+          "sharedTwoByTwoCoreOptionsReachableOnBareFloor": 336,
+          "closestSharedTwoByTwoCore": {
+            "x": 16,
+            "z": 2,
+            "nominalGroundFootprintSteps": 2,
+            "localSiteSetback": 2,
+            "physicalWalkabilityVerified": false
+          },
+          "partitionWallDoorsStairsAndClearancesVerified": false
+        }
+      ],
+      "corridorAndVerticalPassageVerified": false,
+      "roofAccessVerified": false,
+      "originalFloorCellCounts": [
+        480,
+        480,
+        374,
+        374,
+        374,
+        374
+      ],
+      "candidatePhysicalClearanceVerified": false,
+      "approved": false
+    },
+    {
+      "id": "office/candidate-02",
+      "site": {
+        "width": 24,
+        "depth": 20,
+        "levels": 6
+      },
+      "commonFloorCells": 182,
+      "sharedCoreSearch": [
+        {
+          "size": 2,
+          "fullySharedOptions": 156,
+          "topThree": [
+            {
+              "x": 9,
+              "z": 9,
+              "size": 2,
+              "nominalSharedCells": 4,
+              "minSiteEdgeSetback": 9,
+              "approved": false
+            },
+            {
+              "x": 10,
+              "z": 9,
+              "size": 2,
+              "nominalSharedCells": 4,
+              "minSiteEdgeSetback": 9,
+              "approved": false
+            },
+            {
+              "x": 11,
+              "z": 9,
+              "size": 2,
+              "nominalSharedCells": 4,
+              "minSiteEdgeSetback": 9,
+              "approved": false
+            }
+          ]
+        },
+        {
+          "size": 3,
+          "fullySharedOptions": 132,
+          "topThree": [
+            {
+              "x": 8,
+              "z": 8,
+              "size": 3,
+              "nominalSharedCells": 9,
+              "minSiteEdgeSetback": 8,
+              "approved": false
+            },
+            {
+              "x": 9,
+              "z": 8,
+              "size": 3,
+              "nominalSharedCells": 9,
+              "minSiteEdgeSetback": 8,
+              "approved": false
+            },
+            {
+              "x": 10,
+              "z": 8,
+              "size": 3,
+              "nominalSharedCells": 9,
+              "minSiteEdgeSetback": 8,
+              "approved": false
+            }
+          ]
+        },
+        {
+          "size": 4,
+          "fullySharedOptions": 110,
+          "topThree": [
+            {
+              "x": 8,
+              "z": 8,
+              "size": 4,
+              "nominalSharedCells": 16,
+              "minSiteEdgeSetback": 8,
+              "approved": false
+            },
+            {
+              "x": 9,
+              "z": 8,
+              "size": 4,
+              "nominalSharedCells": 16,
+              "minSiteEdgeSetback": 8,
+              "approved": false
+            },
+            {
+              "x": 7,
+              "z": 7,
+              "size": 4,
+              "nominalSharedCells": 16,
+              "minSiteEdgeSetback": 7,
+              "approved": false
+            }
+          ]
+        }
+      ],
+      "entranceToCommonCore": [
+        {
+          "profile": "MINIMIZE_FACADE_GRAPHICS_CONFLICT",
+          "entryFrontageCells": 4,
+          "sharedTwoByTwoCoreOptionsReachableOnBareFloor": 156,
+          "closestSharedTwoByTwoCore": {
+            "x": 3,
+            "z": 0,
+            "nominalGroundFootprintSteps": 0,
+            "localSiteSetback": 0,
+            "physicalWalkabilityVerified": false
+          },
+          "partitionWallDoorsStairsAndClearancesVerified": false
+        },
+        {
+          "profile": "CENTERLINE_COMPOSITION",
+          "entryFrontageCells": 4,
+          "sharedTwoByTwoCoreOptionsReachableOnBareFloor": 156,
+          "closestSharedTwoByTwoCore": {
+            "x": 3,
+            "z": 0,
+            "nominalGroundFootprintSteps": 0,
+            "localSiteSetback": 0,
+            "physicalWalkabilityVerified": false
+          },
+          "partitionWallDoorsStairsAndClearancesVerified": false
+        },
+        {
+          "profile": "SETBACK_WITH_OFFSET_COMPOSITION",
+          "entryFrontageCells": 4,
+          "sharedTwoByTwoCoreOptionsReachableOnBareFloor": 156,
+          "closestSharedTwoByTwoCore": {
+            "x": 0,
+            "z": 0,
+            "nominalGroundFootprintSteps": 0,
+            "localSiteSetback": 0,
+            "physicalWalkabilityVerified": false
+          },
+          "partitionWallDoorsStairsAndClearancesVerified": false
+        }
+      ],
+      "corridorAndVerticalPassageVerified": false,
+      "roofAccessVerified": false,
+      "originalFloorCellCounts": [
+        348,
+        348,
+        348,
+        348,
+        348,
+        182
+      ],
+      "candidatePhysicalClearanceVerified": false,
+      "approved": false
+    },
+    {
+      "id": "office/candidate-03",
+      "site": {
+        "width": 24,
+        "depth": 20,
+        "levels": 6
+      },
+      "commonFloorCells": 480,
+      "sharedCoreSearch": [
+        {
+          "size": 2,
+          "fullySharedOptions": 437,
+          "topThree": [
+            {
+              "x": 9,
+              "z": 9,
+              "size": 2,
+              "nominalSharedCells": 4,
+              "minSiteEdgeSetback": 9,
+              "approved": false
+            },
+            {
+              "x": 10,
+              "z": 9,
+              "size": 2,
+              "nominalSharedCells": 4,
+              "minSiteEdgeSetback": 9,
+              "approved": false
+            },
+            {
+              "x": 11,
+              "z": 9,
+              "size": 2,
+              "nominalSharedCells": 4,
+              "minSiteEdgeSetback": 9,
+              "approved": false
+            }
+          ]
+        },
+        {
+          "size": 3,
+          "fullySharedOptions": 396,
+          "topThree": [
+            {
+              "x": 8,
+              "z": 8,
+              "size": 3,
+              "nominalSharedCells": 9,
+              "minSiteEdgeSetback": 8,
+              "approved": false
+            },
+            {
+              "x": 9,
+              "z": 8,
+              "size": 3,
+              "nominalSharedCells": 9,
+              "minSiteEdgeSetback": 8,
+              "approved": false
+            },
+            {
+              "x": 10,
+              "z": 8,
+              "size": 3,
+              "nominalSharedCells": 9,
+              "minSiteEdgeSetback": 8,
+              "approved": false
+            }
+          ]
+        },
+        {
+          "size": 4,
+          "fullySharedOptions": 357,
+          "topThree": [
+            {
+              "x": 8,
+              "z": 8,
+              "size": 4,
+              "nominalSharedCells": 16,
+              "minSiteEdgeSetback": 8,
+              "approved": false
+            },
+            {
+              "x": 9,
+              "z": 8,
+              "size": 4,
+              "nominalSharedCells": 16,
+              "minSiteEdgeSetback": 8,
+              "approved": false
+            },
+            {
+              "x": 10,
+              "z": 8,
+              "size": 4,
+              "nominalSharedCells": 16,
+              "minSiteEdgeSetback": 8,
+              "approved": false
+            }
+          ]
+        }
+      ],
+      "entranceToCommonCore": [
+        {
+          "profile": "MINIMIZE_FACADE_GRAPHICS_CONFLICT",
+          "entryFrontageCells": 4,
+          "sharedTwoByTwoCoreOptionsReachableOnBareFloor": 437,
+          "closestSharedTwoByTwoCore": {
+            "x": 9,
+            "z": 0,
+            "nominalGroundFootprintSteps": 0,
+            "localSiteSetback": 0,
+            "physicalWalkabilityVerified": false
+          },
+          "partitionWallDoorsStairsAndClearancesVerified": false
+        },
+        {
+          "profile": "CENTERLINE_COMPOSITION",
+          "entryFrontageCells": 4,
+          "sharedTwoByTwoCoreOptionsReachableOnBareFloor": 437,
+          "closestSharedTwoByTwoCore": {
+            "x": 9,
+            "z": 0,
+            "nominalGroundFootprintSteps": 0,
+            "localSiteSetback": 0,
+            "physicalWalkabilityVerified": false
+          },
+          "partitionWallDoorsStairsAndClearancesVerified": false
+        },
+        {
+          "profile": "SETBACK_WITH_OFFSET_COMPOSITION",
+          "entryFrontageCells": 4,
+          "sharedTwoByTwoCoreOptionsReachableOnBareFloor": 437,
+          "closestSharedTwoByTwoCore": {
+            "x": 0,
+            "z": 0,
+            "nominalGroundFootprintSteps": 0,
+            "localSiteSetback": 0,
+            "physicalWalkabilityVerified": false
+          },
+          "partitionWallDoorsStairsAndClearancesVerified": false
+        }
+      ],
+      "corridorAndVerticalPassageVerified": false,
+      "roofAccessVerified": false,
+      "originalFloorCellCounts": [
+        480,
+        480,
+        480,
+        480,
+        480,
+        480
+      ],
+      "candidatePhysicalClearanceVerified": false,
+      "approved": false
+    }
+  ],
+  "legacyStairAudit": {
+    "transitions": [
+      {
+        "transition": "L1_L2",
+        "canonicalUpperFloorCells": 400,
+        "b42CandidateUpperFloorCells": 398,
+        "cellsPresentInB57MissingFromB42": [
+          {
+            "x": 13,
+            "z": 18
+          },
+          {
+            "x": 14,
+            "z": 18
+          }
+        ],
+        "cellsPresentInB42MissingFromB57": [],
+        "corridorLeadCoveredByB57": true,
+        "upperLandingCoveredByB57": true,
+        "reviewUpperConnectorRouteLength": 10,
+        "upperConnectorRouteOutsideB57Floor": [],
+        "b42SourceInterchangeParity": "DIFFERENT",
+        "realStairGeometryCertified": false
+      },
+      {
+        "transition": "L2_L3",
+        "canonicalUpperFloorCells": 400,
+        "b42CandidateUpperFloorCells": 398,
+        "cellsPresentInB57MissingFromB42": [
+          {
+            "x": 13,
+            "z": 18
+          },
+          {
+            "x": 14,
+            "z": 18
+          }
+        ],
+        "cellsPresentInB42MissingFromB57": [],
+        "corridorLeadCoveredByB57": true,
+        "upperLandingCoveredByB57": true,
+        "reviewUpperConnectorRouteLength": 10,
+        "upperConnectorRouteOutsideB57Floor": [],
+        "b42SourceInterchangeParity": "DIFFERENT",
+        "realStairGeometryCertified": false
+      },
+      {
+        "transition": "L3_L4",
+        "canonicalUpperFloorCells": 400,
+        "b42CandidateUpperFloorCells": 398,
+        "cellsPresentInB57MissingFromB42": [
+          {
+            "x": 13,
+            "z": 18
+          },
+          {
+            "x": 14,
+            "z": 18
+          }
+        ],
+        "cellsPresentInB42MissingFromB57": [],
+        "corridorLeadCoveredByB57": true,
+        "upperLandingCoveredByB57": true,
+        "reviewUpperConnectorRouteLength": 10,
+        "upperConnectorRouteOutsideB57Floor": [],
+        "b42SourceInterchangeParity": "DIFFERENT",
+        "realStairGeometryCertified": false
+      },
+      {
+        "transition": "L4_L5",
+        "canonicalUpperFloorCells": 400,
+        "b42CandidateUpperFloorCells": 398,
+        "cellsPresentInB57MissingFromB42": [
+          {
+            "x": 13,
+            "z": 18
+          },
+          {
+            "x": 14,
+            "z": 18
+          }
+        ],
+        "cellsPresentInB42MissingFromB57": [],
+        "corridorLeadCoveredByB57": true,
+        "upperLandingCoveredByB57": true,
+        "reviewUpperConnectorRouteLength": 10,
+        "upperConnectorRouteOutsideB57Floor": [],
+        "b42SourceInterchangeParity": "DIFFERENT",
+        "realStairGeometryCertified": false
+      },
+      {
+        "transition": "L5_L6",
+        "canonicalUpperFloorCells": 400,
+        "b42CandidateUpperFloorCells": 398,
+        "cellsPresentInB57MissingFromB42": [
+          {
+            "x": 13,
+            "z": 18
+          },
+          {
+            "x": 14,
+            "z": 18
+          }
+        ],
+        "cellsPresentInB42MissingFromB57": [],
+        "corridorLeadCoveredByB57": true,
+        "upperLandingCoveredByB57": true,
+        "reviewUpperConnectorRouteLength": 10,
+        "upperConnectorRouteOutsideB57Floor": [],
+        "b42SourceInterchangeParity": "DIFFERENT",
+        "realStairGeometryCertified": false
+      }
+    ],
+    "totals": {
+      "transitions": 5,
+      "cellsPresentOnlyInB57": 10,
+      "cellsPresentOnlyInB42": 0,
+      "routePointsOutsideCanonical": 0
+    },
+    "safetyInterpretation": "TWO_DIFFERENT_UNAPPROVED_SNAPSHOT_MASKS_NEVER_AUTOMERGE",
+    "physicalStairPassageVerified": false
+  },
+  "totals": {
+    "buildings": 5,
+    "levels": 30,
+    "commonVerticalFootprintCells": 1956,
+    "candidateTwoByTwoSharedCorePositions": 1724,
+    "candidateThreeByThreeSharedCorePositions": 1500,
+    "candidateFourByFourSharedCorePositions": 1284,
+    "entranceToCoreReviews": 15,
+    "b42VsB57DifferentMaskCells": 10,
+    "runtimePlannerCalls": 0,
+    "actualConstructionOperations": 0
+  },
+  "verified": [
+    "SOURCE_HASHES",
+    "LOCAL_FLOOR_RASTER_COVERAGE",
+    "SIX_LEVEL_COMMON_FOOTPRINT",
+    "BARE_FLOOR_2D_CONNECTED_PATH",
+    "B42_REVIEW_MASK_DIFFERENCES"
+  ],
+  "notVerified": [
+    "REAL_STAIR_CONSTRUCTION",
+    "INTERIOR_WALL_OBSTRUCTIONS",
+    "PHYSICAL_EGRESS",
+    "FIRE_SAFETY",
+    "MATERIALS",
+    "LOAD_CAPACITY",
+    "PRODUCTION_FACADE_PARITY",
+    "WORLD_COORDINATES"
+  ],
+  "readiness": "NOT_PREPARED",
+  "deployment": "BLOCKED",
+  "executionAllowed": false,
+  "constructionApproved": false,
+  "productionFacadeParity": "UNVERIFIED",
+  "physicalQuality": "UNKNOWN",
+  "engineCalls": 0,
+  "worldContacts": 0,
+  "minecraftCommands": 0,
+  "scans": 0,
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0,
+    "worldCoordinates": null,
+    "materialIds": []
+  },
+  "blockers": {
+    "M4Gates": [
+      {
+        "id": "M4-01",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-02",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-03",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-04",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-05",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-06",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-07",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-08",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-09",
+        "status": "BLOCKED"
+      }
+    ]
+  },
+  "reportSha256": "ca9f1a3da38c5e77daa78f0f6aec561156f0bc7aa4338f3111c335c14e2319f8"
+}

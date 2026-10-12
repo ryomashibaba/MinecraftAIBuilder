@@ -1,0 +1,333 @@
+{
+  "schema": "minecraftaibuilder-b29-m3-m4-assembly-ir-v1",
+  "kind": "SCHEMATIC_ONLY_NON_EXECUTABLE_ASSEMBLY",
+  "baseline": {
+    "b25ReportSha256": "b62f0437b004b9d6ad32bc41ef217a733dc952e0a3458349d203391b81b3085d",
+    "b26ReportSha256": "2173f804b341e475b34ff97087764027bae1a60043e7a1a1011aa797727fc905",
+    "b28EvidenceSha256": "fe25e9a8335dc0970b26d8738228f02ca47ed6a6ffe6fd0b0bfd94a5285e4fb1",
+    "liveRuntimeAttested": false,
+    "sourceHashesMatched": 9,
+    "exactDoorStateEvidenceRecords": 0
+  },
+  "totals": {
+    "buildings": 5,
+    "floors": 30,
+    "wallPanelIntents": 5704,
+    "doorPorts": 314,
+    "stairInterfaces": 25,
+    "cutoutCandidateCells": 50,
+    "sharedWallVoxelIntents": 3990,
+    "physicalDoorsVerified": 0,
+    "physicalStairsVerified": 0,
+    "engineModulesWired": 0,
+    "commandsEmitted": 0
+  },
+  "office02": {
+    "buildingId": "office/candidate-02",
+    "style": "urban_japanese",
+    "styleProportion": 1,
+    "engineSourceWing": 6,
+    "conceptWing": 5,
+    "corridorTrimProposals": [
+      {
+        "level": 1,
+        "conceptMismatchCells": 22,
+        "corridorTrimCells": [
+          {
+            "x": 18,
+            "z": 5
+          },
+          {
+            "x": 0,
+            "z": 14
+          },
+          {
+            "x": 6,
+            "z": 14
+          }
+        ],
+        "corridorConnectivityComponentsBefore": 1,
+        "corridorConnectivityComponentsAfter": 1,
+        "conceptWalkabilityOnly": true
+      },
+      {
+        "level": 2,
+        "conceptMismatchCells": 22,
+        "corridorTrimCells": [
+          {
+            "x": 18,
+            "z": 5
+          },
+          {
+            "x": 0,
+            "z": 14
+          },
+          {
+            "x": 6,
+            "z": 14
+          }
+        ],
+        "corridorConnectivityComponentsBefore": 1,
+        "corridorConnectivityComponentsAfter": 1,
+        "conceptWalkabilityOnly": true
+      },
+      {
+        "level": 3,
+        "conceptMismatchCells": 22,
+        "corridorTrimCells": [
+          {
+            "x": 18,
+            "z": 5
+          },
+          {
+            "x": 0,
+            "z": 14
+          },
+          {
+            "x": 6,
+            "z": 14
+          }
+        ],
+        "corridorConnectivityComponentsBefore": 1,
+        "corridorConnectivityComponentsAfter": 1,
+        "conceptWalkabilityOnly": true
+      },
+      {
+        "level": 4,
+        "conceptMismatchCells": 22,
+        "corridorTrimCells": [
+          {
+            "x": 18,
+            "z": 5
+          },
+          {
+            "x": 0,
+            "z": 14
+          },
+          {
+            "x": 6,
+            "z": 14
+          }
+        ],
+        "corridorConnectivityComponentsBefore": 1,
+        "corridorConnectivityComponentsAfter": 1,
+        "conceptWalkabilityOnly": true
+      },
+      {
+        "level": 5,
+        "conceptMismatchCells": 22,
+        "corridorTrimCells": [
+          {
+            "x": 18,
+            "z": 5
+          },
+          {
+            "x": 0,
+            "z": 14
+          },
+          {
+            "x": 6,
+            "z": 14
+          }
+        ],
+        "corridorConnectivityComponentsBefore": 1,
+        "corridorConnectivityComponentsAfter": 1,
+        "conceptWalkabilityOnly": true
+      },
+      {
+        "level": 6,
+        "conceptMismatchCells": 13,
+        "corridorTrimCells": [
+          {
+            "x": 0,
+            "z": 14
+          },
+          {
+            "x": 6,
+            "z": 14
+          },
+          {
+            "x": 12,
+            "z": 14
+          }
+        ],
+        "corridorConnectivityComponentsBefore": 1,
+        "corridorConnectivityComponentsAfter": 1,
+        "conceptWalkabilityOnly": true
+      }
+    ],
+    "alternatives": [
+      {
+        "id": "KEEP_FROZEN",
+        "conceptMismatchCells": 123,
+        "corridorOutsideCells": 18,
+        "reviewTrimCells": 0,
+        "conceptReferenceOnly": false,
+        "preservesFrozenSource": true,
+        "autoApplied": false,
+        "approved": false,
+        "physicalValidated": false
+      },
+      {
+        "id": "TRIM_CORRIDOR_REVIEW",
+        "conceptMismatchCells": 123,
+        "corridorOutsideCells": 0,
+        "reviewTrimCells": 18,
+        "conceptReferenceOnly": false,
+        "preservesFrozenSource": true,
+        "autoApplied": false,
+        "approved": false,
+        "physicalValidated": false
+      },
+      {
+        "id": "REBASE_CONCEPT_TO_SOURCE_REVIEW",
+        "conceptMismatchCells": 0,
+        "corridorOutsideCells": 18,
+        "reviewTrimCells": 0,
+        "conceptReferenceOnly": true,
+        "preservesFrozenSource": true,
+        "autoApplied": false,
+        "approved": false,
+        "physicalValidated": false
+      },
+      {
+        "id": "REBASE_AND_TRIM_REVIEW",
+        "conceptMismatchCells": 0,
+        "corridorOutsideCells": 0,
+        "reviewTrimCells": 18,
+        "conceptReferenceOnly": true,
+        "preservesFrozenSource": true,
+        "autoApplied": false,
+        "approved": false,
+        "physicalValidated": false
+      }
+    ],
+    "referenceMismatchRemovalIsNotActualEnvelopeRepair": true,
+    "candidateApproved": false,
+    "sourceModified": false
+  },
+  "materialRoleContract": [
+    {
+      "role": "PARTITION_WALL",
+      "blockId": null,
+      "variant": null,
+      "evidence": "ARCHIVED_CATALOG_FINGERPRINT_ONLY",
+      "liveAcceptance": "UNVERIFIED",
+      "mappedToEngine": false,
+      "placementAuthorized": false
+    },
+    {
+      "role": "ROOM_DOOR",
+      "blockId": null,
+      "variant": null,
+      "evidence": "ARCHIVED_CATALOG_FINGERPRINT_ONLY",
+      "liveAcceptance": "UNVERIFIED",
+      "mappedToEngine": false,
+      "placementAuthorized": false
+    },
+    {
+      "role": "STAIR_RUN",
+      "blockId": null,
+      "variant": null,
+      "evidence": "ARCHIVED_CATALOG_FINGERPRINT_ONLY",
+      "liveAcceptance": "UNVERIFIED",
+      "mappedToEngine": false,
+      "placementAuthorized": false
+    },
+    {
+      "role": "FLOOR_CUTOUT",
+      "blockId": null,
+      "variant": null,
+      "evidence": "ARCHIVED_CATALOG_FINGERPRINT_ONLY",
+      "liveAcceptance": "UNVERIFIED",
+      "mappedToEngine": false,
+      "placementAuthorized": false
+    },
+    {
+      "role": "JUNCTION",
+      "blockId": null,
+      "variant": null,
+      "evidence": "ARCHIVED_CATALOG_FINGERPRINT_ONLY",
+      "liveAcceptance": "UNVERIFIED",
+      "mappedToEngine": false,
+      "placementAuthorized": false
+    }
+  ],
+  "unresolvedGates": [
+    {
+      "id": "M4-01",
+      "reason": "LOADED_ENGINE_IDENTITY",
+      "status": "BLOCKED",
+      "physicalValidation": false
+    },
+    {
+      "id": "M4-02",
+      "reason": "MATERIAL_ROLE_MAPPING",
+      "status": "BLOCKED",
+      "physicalValidation": false
+    },
+    {
+      "id": "M4-03",
+      "reason": "WALL_JUNCTION_MATERIAL_SUPPORT",
+      "status": "BLOCKED",
+      "physicalValidation": false
+    },
+    {
+      "id": "M4-04",
+      "reason": "DOOR_LOWER_UPPER_FACING_HINGE",
+      "status": "BLOCKED",
+      "physicalValidation": false
+    },
+    {
+      "id": "M4-05",
+      "reason": "EXACT_DOOR_BLOCK_STATES",
+      "status": "BLOCKED",
+      "physicalValidation": false
+    },
+    {
+      "id": "M4-06",
+      "reason": "STAIR_SLAB_CUTOUT_SUPPORT_AND_HEADROOM",
+      "status": "BLOCKED",
+      "physicalValidation": false
+    },
+    {
+      "id": "M4-07",
+      "reason": "WORLD_ANCHOR_AND_SITE_SAFETY",
+      "status": "BLOCKED",
+      "physicalValidation": false
+    },
+    {
+      "id": "M4-08",
+      "reason": "OFFICE02_SOURCE_VS_CONCEPT",
+      "status": "BLOCKED",
+      "physicalValidation": false
+    },
+    {
+      "id": "M4-09",
+      "reason": "EXPLICIT_CONSTRUCTION_APPROVAL",
+      "status": "BLOCKED",
+      "physicalValidation": false
+    }
+  ],
+  "readiness": "NOT_PREPARED",
+  "deployment": "BLOCKED",
+  "safety": {
+    "notPrepared": true,
+    "constructionApproved": false,
+    "executionAllowed": false,
+    "projectFilesModified": false,
+    "legacyModified": false,
+    "worldAccess": false,
+    "bridgeContact": false,
+    "engineInvocation": false,
+    "constructionCommands": 0
+  },
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0,
+    "worldCoordinates": null,
+    "materialIds": []
+  },
+  "reportSha256": "f3c3f5d0d29e80195c464444130fd83aa0bb32d608a0b7e0916e0d26cc7ca0c7"
+}

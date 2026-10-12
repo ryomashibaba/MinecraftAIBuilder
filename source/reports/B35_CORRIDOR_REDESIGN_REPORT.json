@@ -1,0 +1,460 @@
+{
+  "schema": "minecraftaibuilder-step8b-b35-corridor-alternatives-v1",
+  "kind": "NONEXECUTABLE_CORRIDOR_REVIEW",
+  "building": "apartment/candidate-01",
+  "shaftOffset": {
+    "dx": 0,
+    "dz": 1
+  },
+  "sourceB34Sha256": "ebab5ff1990deaf6d8ee0cd23ca852d2b4da7853a3b819d7f9845e0f0734a608",
+  "levels": [
+    {
+      "level": 2,
+      "competingCorridorCellKeys": [
+        "12,20"
+      ],
+      "options": [
+        {
+          "id": "A_RETAG_ONE_CORRIDOR_CELL",
+          "purpose": "keep existing end landing",
+          "removedKeys": [
+            "12,20"
+          ],
+          "addedKeys": [],
+          "retainedCorridorCells": 133,
+          "shiftedShaftOverlapKeys": [
+            "12,20"
+          ],
+          "corridorConflictCount": 1,
+          "schematicFootprintAdditionsValid": true,
+          "unverifiedRoomVolumeAddedCells": 0,
+          "roomVolumeClearanceStatus": "NO_NEW_CELLS",
+          "doorHallPorts": 13,
+          "components": 3,
+          "stairAdjacentComponents": 3,
+          "unservedDoorIds": [],
+          "doorPathsPreserved": true,
+          "detachedCorridorCells": [],
+          "isolatedCells": [
+            "12,21"
+          ],
+          "nominalWallEndpointFlags": 4
+        },
+        {
+          "id": "B_TRIM_UNUSED_TERMINAL",
+          "purpose": "remove conflicting cell plus unused single-cell end stub",
+          "removedKeys": [
+            "12,20",
+            "12,21"
+          ],
+          "addedKeys": [],
+          "retainedCorridorCells": 132,
+          "shiftedShaftOverlapKeys": [
+            "12,20"
+          ],
+          "corridorConflictCount": 1,
+          "schematicFootprintAdditionsValid": true,
+          "unverifiedRoomVolumeAddedCells": 0,
+          "roomVolumeClearanceStatus": "NO_NEW_CELLS",
+          "doorHallPorts": 13,
+          "components": 2,
+          "stairAdjacentComponents": 2,
+          "unservedDoorIds": [],
+          "doorPathsPreserved": true,
+          "detachedCorridorCells": [],
+          "isolatedCells": [],
+          "nominalWallEndpointFlags": 5
+        }
+      ],
+      "stairOpeningCellsLocal": [
+        {
+          "x": 14,
+          "z": 18
+        },
+        {
+          "x": 14,
+          "z": 19
+        }
+      ],
+      "physicalDoorStatesVerified": false,
+      "roomVolumeVerified": false,
+      "structuralWallAndSupportVerified": false
+    },
+    {
+      "level": 3,
+      "competingCorridorCellKeys": [
+        "12,20"
+      ],
+      "options": [
+        {
+          "id": "A_RETAG_ONE_CORRIDOR_CELL",
+          "purpose": "keep existing end landing",
+          "removedKeys": [
+            "12,20"
+          ],
+          "addedKeys": [],
+          "retainedCorridorCells": 133,
+          "shiftedShaftOverlapKeys": [
+            "12,20"
+          ],
+          "corridorConflictCount": 1,
+          "schematicFootprintAdditionsValid": true,
+          "unverifiedRoomVolumeAddedCells": 0,
+          "roomVolumeClearanceStatus": "NO_NEW_CELLS",
+          "doorHallPorts": 13,
+          "components": 3,
+          "stairAdjacentComponents": 3,
+          "unservedDoorIds": [],
+          "doorPathsPreserved": true,
+          "detachedCorridorCells": [],
+          "isolatedCells": [
+            "12,21"
+          ],
+          "nominalWallEndpointFlags": 4
+        },
+        {
+          "id": "B_TRIM_UNUSED_TERMINAL",
+          "purpose": "remove conflicting cell plus unused single-cell end stub",
+          "removedKeys": [
+            "12,20",
+            "12,21"
+          ],
+          "addedKeys": [],
+          "retainedCorridorCells": 132,
+          "shiftedShaftOverlapKeys": [
+            "12,20"
+          ],
+          "corridorConflictCount": 1,
+          "schematicFootprintAdditionsValid": true,
+          "unverifiedRoomVolumeAddedCells": 0,
+          "roomVolumeClearanceStatus": "NO_NEW_CELLS",
+          "doorHallPorts": 13,
+          "components": 2,
+          "stairAdjacentComponents": 2,
+          "unservedDoorIds": [],
+          "doorPathsPreserved": true,
+          "detachedCorridorCells": [],
+          "isolatedCells": [],
+          "nominalWallEndpointFlags": 5
+        }
+      ],
+      "stairOpeningCellsLocal": [
+        {
+          "x": 14,
+          "z": 18
+        },
+        {
+          "x": 14,
+          "z": 19
+        }
+      ],
+      "physicalDoorStatesVerified": false,
+      "roomVolumeVerified": false,
+      "structuralWallAndSupportVerified": false
+    },
+    {
+      "level": 4,
+      "competingCorridorCellKeys": [
+        "12,20"
+      ],
+      "options": [
+        {
+          "id": "A_RETAG_ONE_CORRIDOR_CELL",
+          "purpose": "keep existing end landing",
+          "removedKeys": [
+            "12,20"
+          ],
+          "addedKeys": [],
+          "retainedCorridorCells": 133,
+          "shiftedShaftOverlapKeys": [
+            "12,20"
+          ],
+          "corridorConflictCount": 1,
+          "schematicFootprintAdditionsValid": true,
+          "unverifiedRoomVolumeAddedCells": 0,
+          "roomVolumeClearanceStatus": "NO_NEW_CELLS",
+          "doorHallPorts": 13,
+          "components": 3,
+          "stairAdjacentComponents": 3,
+          "unservedDoorIds": [],
+          "doorPathsPreserved": true,
+          "detachedCorridorCells": [],
+          "isolatedCells": [
+            "12,21"
+          ],
+          "nominalWallEndpointFlags": 4
+        },
+        {
+          "id": "B_TRIM_UNUSED_TERMINAL",
+          "purpose": "remove conflicting cell plus unused single-cell end stub",
+          "removedKeys": [
+            "12,20",
+            "12,21"
+          ],
+          "addedKeys": [],
+          "retainedCorridorCells": 132,
+          "shiftedShaftOverlapKeys": [
+            "12,20"
+          ],
+          "corridorConflictCount": 1,
+          "schematicFootprintAdditionsValid": true,
+          "unverifiedRoomVolumeAddedCells": 0,
+          "roomVolumeClearanceStatus": "NO_NEW_CELLS",
+          "doorHallPorts": 13,
+          "components": 2,
+          "stairAdjacentComponents": 2,
+          "unservedDoorIds": [],
+          "doorPathsPreserved": true,
+          "detachedCorridorCells": [],
+          "isolatedCells": [],
+          "nominalWallEndpointFlags": 5
+        }
+      ],
+      "stairOpeningCellsLocal": [
+        {
+          "x": 14,
+          "z": 18
+        },
+        {
+          "x": 14,
+          "z": 19
+        }
+      ],
+      "physicalDoorStatesVerified": false,
+      "roomVolumeVerified": false,
+      "structuralWallAndSupportVerified": false
+    },
+    {
+      "level": 5,
+      "competingCorridorCellKeys": [
+        "12,20"
+      ],
+      "options": [
+        {
+          "id": "A_RETAG_ONE_CORRIDOR_CELL",
+          "purpose": "keep existing end landing",
+          "removedKeys": [
+            "12,20"
+          ],
+          "addedKeys": [],
+          "retainedCorridorCells": 133,
+          "shiftedShaftOverlapKeys": [
+            "12,20"
+          ],
+          "corridorConflictCount": 1,
+          "schematicFootprintAdditionsValid": true,
+          "unverifiedRoomVolumeAddedCells": 0,
+          "roomVolumeClearanceStatus": "NO_NEW_CELLS",
+          "doorHallPorts": 13,
+          "components": 3,
+          "stairAdjacentComponents": 3,
+          "unservedDoorIds": [],
+          "doorPathsPreserved": true,
+          "detachedCorridorCells": [],
+          "isolatedCells": [
+            "12,21"
+          ],
+          "nominalWallEndpointFlags": 4
+        },
+        {
+          "id": "B_TRIM_UNUSED_TERMINAL",
+          "purpose": "remove conflicting cell plus unused single-cell end stub",
+          "removedKeys": [
+            "12,20",
+            "12,21"
+          ],
+          "addedKeys": [],
+          "retainedCorridorCells": 132,
+          "shiftedShaftOverlapKeys": [
+            "12,20"
+          ],
+          "corridorConflictCount": 1,
+          "schematicFootprintAdditionsValid": true,
+          "unverifiedRoomVolumeAddedCells": 0,
+          "roomVolumeClearanceStatus": "NO_NEW_CELLS",
+          "doorHallPorts": 13,
+          "components": 2,
+          "stairAdjacentComponents": 2,
+          "unservedDoorIds": [],
+          "doorPathsPreserved": true,
+          "detachedCorridorCells": [],
+          "isolatedCells": [],
+          "nominalWallEndpointFlags": 5
+        }
+      ],
+      "stairOpeningCellsLocal": [
+        {
+          "x": 14,
+          "z": 18
+        },
+        {
+          "x": 14,
+          "z": 19
+        }
+      ],
+      "physicalDoorStatesVerified": false,
+      "roomVolumeVerified": false,
+      "structuralWallAndSupportVerified": false
+    },
+    {
+      "level": 6,
+      "competingCorridorCellKeys": [
+        "12,20"
+      ],
+      "options": [
+        {
+          "id": "A_RETAG_ONE_CORRIDOR_CELL",
+          "purpose": "keep existing end landing",
+          "removedKeys": [
+            "12,20"
+          ],
+          "addedKeys": [],
+          "retainedCorridorCells": 133,
+          "shiftedShaftOverlapKeys": [
+            "12,20"
+          ],
+          "corridorConflictCount": 1,
+          "schematicFootprintAdditionsValid": true,
+          "unverifiedRoomVolumeAddedCells": 0,
+          "roomVolumeClearanceStatus": "NO_NEW_CELLS",
+          "doorHallPorts": 13,
+          "components": 3,
+          "stairAdjacentComponents": 3,
+          "unservedDoorIds": [],
+          "doorPathsPreserved": true,
+          "detachedCorridorCells": [],
+          "isolatedCells": [
+            "12,21"
+          ],
+          "nominalWallEndpointFlags": 4
+        },
+        {
+          "id": "B_TRIM_UNUSED_TERMINAL",
+          "purpose": "remove conflicting cell plus unused single-cell end stub",
+          "removedKeys": [
+            "12,20",
+            "12,21"
+          ],
+          "addedKeys": [],
+          "retainedCorridorCells": 132,
+          "shiftedShaftOverlapKeys": [
+            "12,20"
+          ],
+          "corridorConflictCount": 1,
+          "schematicFootprintAdditionsValid": true,
+          "unverifiedRoomVolumeAddedCells": 0,
+          "roomVolumeClearanceStatus": "NO_NEW_CELLS",
+          "doorHallPorts": 13,
+          "components": 2,
+          "stairAdjacentComponents": 2,
+          "unservedDoorIds": [],
+          "doorPathsPreserved": true,
+          "detachedCorridorCells": [],
+          "isolatedCells": [],
+          "nominalWallEndpointFlags": 5
+        }
+      ],
+      "stairOpeningCellsLocal": [
+        {
+          "x": 14,
+          "z": 18
+        },
+        {
+          "x": 14,
+          "z": 19
+        }
+      ],
+      "physicalDoorStatesVerified": false,
+      "roomVolumeVerified": false,
+      "structuralWallAndSupportVerified": false
+    }
+  ],
+  "totals": {
+    "levelsReviewed": 5,
+    "originalCorridorConflicts": 5,
+    "originalRoomDoorPorts": 65,
+    "optionARemovedCells": 5,
+    "optionBRemovedCells": 10,
+    "optionBExtraTerminalPrunes": 5,
+    "optionAUnservedDoors": 0,
+    "optionBUnservedDoors": 0,
+    "optionAAddedCells": 0,
+    "optionBAddedCells": 0,
+    "physicalValidationCount": 0,
+    "approvedOptions": 0,
+    "operationsEmitted": 0
+  },
+  "recommendation": "B_TRIM_UNUSED_TERMINAL_REVIEW_FIRST_NOT_APPROVED",
+  "note": "Both 2D options retain all schematic door-to-stair paths. No new corridor cells are introduced. Room volume, wall join, stair landing/support and real navigation remain unverified.",
+  "limits": [
+    "NO_AUTHORITATIVE_ROOM_VOXEL_MASK",
+    "NO_PHYSICAL_DOOR_CLEARANCE",
+    "NO_WALL_JUNCTION_PROOF",
+    "NO_FLOOR_SUPPORT_PROOF",
+    "NO_STAIR_PASSABILITY_PROOF",
+    "NO_LIVE_ENGINE_OR_MINECRAFT_RUN"
+  ],
+  "approval": {
+    "reviewOnly": true,
+    "adopted": false,
+    "automaticallyApplied": false
+  },
+  "blockers": [
+    {
+      "id": "M4-01",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-02",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-03",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-04",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-05",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-06",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-07",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-08",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-09",
+      "status": "BLOCKED"
+    }
+  ],
+  "readiness": "NOT_PREPARED",
+  "deployment": "BLOCKED",
+  "safety": {
+    "constructionApproved": false,
+    "executionAllowed": false,
+    "notPrepared": true,
+    "bridgeContact": false,
+    "existingWorldModified": false,
+    "legacyModified": false,
+    "frozenEvidenceModified": false,
+    "projectFilesModified": false
+  },
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0,
+    "materialIds": [],
+    "worldCoordinates": null
+  },
+  "reportSha256": "316efccaf4958c093112d79d64744e4a86ba4607713b0b512106b423f45dc87f"
+}

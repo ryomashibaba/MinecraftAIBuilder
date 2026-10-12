@@ -1,0 +1,1400 @@
+{
+  "schema": "minecraftaibuilder-b92-joint-room-floor-corridor-retiler-v1",
+  "kind": "CONSTRAINED_OFFLINE_REZONE_REVIEW_NOT_BUILDING_BLUEPRINT",
+  "provenance": {
+    "b91": "65154ea13cd1988c4c1f6b76fe03f62efb2c8e098c08667bd642b18eac9f1c5b",
+    "b90": "7f025cefd5d865b5854511cc23cb7dd53ea081b283c4c60eb9d313cc3017b670",
+    "officialBlocksSha256": "49ff9c501b1c96b547aa49fda07a53bc19f7d5fe338aff43fe5f65c3eaaf031f"
+  },
+  "replayed": [
+    {
+      "building": "apartment/candidate-01",
+      "operationsSha256": "6c5802481a5d22a2958cd83cb591dc8e4dbe1a1cd25a1d365f6c7f70635a7ddc",
+      "readOnly": true
+    },
+    {
+      "building": "office/candidate-01",
+      "operationsSha256": "e29a8c11eeb8ce0897995fdbb50de9482d3ec0a6b0767b9ac48bee8397e5249c",
+      "readOnly": true
+    }
+  ],
+  "totals": {
+    "referenceBuildings": 5,
+    "referenceFloors": 30,
+    "reviewedHeldFloors": 10,
+    "originalRooms": 314,
+    "previousUnapprovedCandidates": 296,
+    "originalHeldRooms": 18,
+    "heldRoomsAfterReview": 18,
+    "newlyApprovedRooms": 0,
+    "retileAlternativesFound": 0,
+    "roomsWithRetileAlternatives": 0,
+    "physicalCoreVerifiedLocalRetiles": 0,
+    "physicalCoreCheckedOriginalLocalDoors": 5,
+    "floorNonoverlapReviews": 0,
+    "prior296ClaimsModified": 0,
+    "productionEdits": 0,
+    "constructionCommands": 0,
+    "worldContacts": 0
+  },
+  "rooms": [
+    {
+      "sectionId": "apartment/candidate-01/L1",
+      "roomId": "F1-R013",
+      "pattern": "apartment/candidate-01/013",
+      "originalRoom": {
+        "id": "F1-R013",
+        "x": 25,
+        "z": 19,
+        "width": 3,
+        "depth": 3
+      },
+      "roomArea": 9,
+      "oldApertures": 2,
+      "existingApertureCoreAudits": [
+        {
+          "roomId": "F1-R013",
+          "considered": true,
+          "door": {
+            "x": 25,
+            "z": 20
+          },
+          "physicalCoreRoute": {
+            "reachable": true,
+            "reason": "NOMINAL_VERTICAL_CORE_NEIGHBOR_TWO_HIGH_AIR",
+            "length": 1,
+            "endpoint": {
+              "x": 24,
+              "z": 19
+            },
+            "visited": 2,
+            "exitCertified": false
+          },
+          "corePathVerified": true,
+          "exitCertified": false,
+          "constructionApproved": false
+        },
+        {
+          "roomId": "F1-R013",
+          "considered": true,
+          "door": {
+            "x": 26,
+            "z": 19
+          },
+          "physicalCoreRoute": {
+            "reachable": true,
+            "reason": "NOMINAL_VERTICAL_CORE_NEIGHBOR_TWO_HIGH_AIR",
+            "length": 2,
+            "endpoint": {
+              "x": 24,
+              "z": 18
+            },
+            "visited": 3,
+            "exitCertified": false
+          },
+          "corePathVerified": true,
+          "exitCertified": false,
+          "constructionApproved": false
+        }
+      ],
+      "retile": {
+        "tested": 48,
+        "rejections": {
+          "area": 44,
+          "mask": 2,
+          "otherRoom": 0,
+          "reservedOrCorridor": 2,
+          "production": 0,
+          "core": 0,
+          "doorOrFrame": 0,
+          "noCorridor": 0,
+          "coreTopology": 0
+        },
+        "passingTotal": 0,
+        "reviewOptions": [],
+        "accepted": 0,
+        "productionEdits": 0
+      },
+      "requiredReview": [
+        "OLD_BOUNDARY_AND_SERVICE_ZONING",
+        "FLOOR_DESIGN",
+        "EXIT_ROUTE",
+        "BEDROCK_DOOR_STATES"
+      ],
+      "retainedAreaClaimed": 0,
+      "independentRoomApproved": false,
+      "constructionApproved": false,
+      "executionAllowed": false,
+      "operations": []
+    },
+    {
+      "sectionId": "apartment/candidate-01/L2",
+      "roomId": "F2-R006",
+      "pattern": "apartment/candidate-01/006",
+      "originalRoom": {
+        "id": "F2-R006",
+        "x": 1,
+        "z": 7,
+        "width": 4,
+        "depth": 5
+      },
+      "roomArea": 20,
+      "oldApertures": 6,
+      "existingApertureCoreAudits": [
+        {
+          "roomId": "F2-R006",
+          "considered": false,
+          "reason": "PRIOR_LOCAL_GEOMETRY_HELD",
+          "corePathVerified": false
+        },
+        {
+          "roomId": "F2-R006",
+          "considered": false,
+          "reason": "PRIOR_LOCAL_GEOMETRY_HELD",
+          "corePathVerified": false
+        },
+        {
+          "roomId": "F2-R006",
+          "considered": false,
+          "reason": "PRIOR_LOCAL_GEOMETRY_HELD",
+          "corePathVerified": false
+        },
+        {
+          "roomId": "F2-R006",
+          "considered": false,
+          "reason": "PRIOR_LOCAL_GEOMETRY_HELD",
+          "corePathVerified": false
+        },
+        {
+          "roomId": "F2-R006",
+          "considered": false,
+          "reason": "PRIOR_LOCAL_GEOMETRY_HELD",
+          "corePathVerified": false
+        },
+        {
+          "roomId": "F2-R006",
+          "considered": false,
+          "reason": "PRIOR_LOCAL_GEOMETRY_HELD",
+          "corePathVerified": false
+        }
+      ],
+      "retile": {
+        "tested": 195,
+        "rejections": {
+          "area": 155,
+          "mask": 16,
+          "otherRoom": 2,
+          "reservedOrCorridor": 18,
+          "production": 0,
+          "core": 0,
+          "doorOrFrame": 4,
+          "noCorridor": 0,
+          "coreTopology": 0
+        },
+        "passingTotal": 0,
+        "reviewOptions": [],
+        "accepted": 0,
+        "productionEdits": 0
+      },
+      "requiredReview": [
+        "OLD_BOUNDARY_AND_SERVICE_ZONING",
+        "FLOOR_DESIGN",
+        "EXIT_ROUTE",
+        "BEDROCK_DOOR_STATES"
+      ],
+      "retainedAreaClaimed": 0,
+      "independentRoomApproved": false,
+      "constructionApproved": false,
+      "executionAllowed": false,
+      "operations": []
+    },
+    {
+      "sectionId": "apartment/candidate-01/L2",
+      "roomId": "F2-R012",
+      "pattern": "apartment/candidate-01/012",
+      "originalRoom": {
+        "id": "F2-R012",
+        "x": 15,
+        "z": 19,
+        "width": 3,
+        "depth": 3
+      },
+      "roomArea": 9,
+      "oldApertures": 0,
+      "existingApertureCoreAudits": [],
+      "retile": {
+        "tested": 48,
+        "rejections": {
+          "area": 44,
+          "mask": 1,
+          "otherRoom": 0,
+          "reservedOrCorridor": 3,
+          "production": 0,
+          "core": 0,
+          "doorOrFrame": 0,
+          "noCorridor": 0,
+          "coreTopology": 0
+        },
+        "passingTotal": 0,
+        "reviewOptions": [],
+        "accepted": 0,
+        "productionEdits": 0
+      },
+      "requiredReview": [
+        "OLD_BOUNDARY_AND_SERVICE_ZONING",
+        "FLOOR_DESIGN",
+        "EXIT_ROUTE",
+        "BEDROCK_DOOR_STATES"
+      ],
+      "retainedAreaClaimed": 0,
+      "independentRoomApproved": false,
+      "constructionApproved": false,
+      "executionAllowed": false,
+      "operations": []
+    },
+    {
+      "sectionId": "apartment/candidate-01/L2",
+      "roomId": "F2-R013",
+      "pattern": "apartment/candidate-01/013",
+      "originalRoom": {
+        "id": "F2-R013",
+        "x": 25,
+        "z": 19,
+        "width": 3,
+        "depth": 3
+      },
+      "roomArea": 9,
+      "oldApertures": 0,
+      "existingApertureCoreAudits": [],
+      "retile": {
+        "tested": 48,
+        "rejections": {
+          "area": 44,
+          "mask": 2,
+          "otherRoom": 0,
+          "reservedOrCorridor": 2,
+          "production": 0,
+          "core": 0,
+          "doorOrFrame": 0,
+          "noCorridor": 0,
+          "coreTopology": 0
+        },
+        "passingTotal": 0,
+        "reviewOptions": [],
+        "accepted": 0,
+        "productionEdits": 0
+      },
+      "requiredReview": [
+        "OLD_BOUNDARY_AND_SERVICE_ZONING",
+        "FLOOR_DESIGN",
+        "EXIT_ROUTE",
+        "BEDROCK_DOOR_STATES"
+      ],
+      "retainedAreaClaimed": 0,
+      "independentRoomApproved": false,
+      "constructionApproved": false,
+      "executionAllowed": false,
+      "operations": []
+    },
+    {
+      "sectionId": "apartment/candidate-01/L3",
+      "roomId": "F3-R006",
+      "pattern": "apartment/candidate-01/006",
+      "originalRoom": {
+        "id": "F3-R006",
+        "x": 1,
+        "z": 7,
+        "width": 4,
+        "depth": 5
+      },
+      "roomArea": 20,
+      "oldApertures": 6,
+      "existingApertureCoreAudits": [
+        {
+          "roomId": "F3-R006",
+          "considered": false,
+          "reason": "PRIOR_LOCAL_GEOMETRY_HELD",
+          "corePathVerified": false
+        },
+        {
+          "roomId": "F3-R006",
+          "considered": false,
+          "reason": "PRIOR_LOCAL_GEOMETRY_HELD",
+          "corePathVerified": false
+        },
+        {
+          "roomId": "F3-R006",
+          "considered": false,
+          "reason": "PRIOR_LOCAL_GEOMETRY_HELD",
+          "corePathVerified": false
+        },
+        {
+          "roomId": "F3-R006",
+          "considered": false,
+          "reason": "PRIOR_LOCAL_GEOMETRY_HELD",
+          "corePathVerified": false
+        },
+        {
+          "roomId": "F3-R006",
+          "considered": false,
+          "reason": "PRIOR_LOCAL_GEOMETRY_HELD",
+          "corePathVerified": false
+        },
+        {
+          "roomId": "F3-R006",
+          "considered": false,
+          "reason": "PRIOR_LOCAL_GEOMETRY_HELD",
+          "corePathVerified": false
+        }
+      ],
+      "retile": {
+        "tested": 195,
+        "rejections": {
+          "area": 155,
+          "mask": 16,
+          "otherRoom": 2,
+          "reservedOrCorridor": 18,
+          "production": 0,
+          "core": 0,
+          "doorOrFrame": 4,
+          "noCorridor": 0,
+          "coreTopology": 0
+        },
+        "passingTotal": 0,
+        "reviewOptions": [],
+        "accepted": 0,
+        "productionEdits": 0
+      },
+      "requiredReview": [
+        "OLD_BOUNDARY_AND_SERVICE_ZONING",
+        "FLOOR_DESIGN",
+        "EXIT_ROUTE",
+        "BEDROCK_DOOR_STATES"
+      ],
+      "retainedAreaClaimed": 0,
+      "independentRoomApproved": false,
+      "constructionApproved": false,
+      "executionAllowed": false,
+      "operations": []
+    },
+    {
+      "sectionId": "apartment/candidate-01/L3",
+      "roomId": "F3-R012",
+      "pattern": "apartment/candidate-01/012",
+      "originalRoom": {
+        "id": "F3-R012",
+        "x": 15,
+        "z": 19,
+        "width": 3,
+        "depth": 3
+      },
+      "roomArea": 9,
+      "oldApertures": 0,
+      "existingApertureCoreAudits": [],
+      "retile": {
+        "tested": 48,
+        "rejections": {
+          "area": 44,
+          "mask": 1,
+          "otherRoom": 0,
+          "reservedOrCorridor": 3,
+          "production": 0,
+          "core": 0,
+          "doorOrFrame": 0,
+          "noCorridor": 0,
+          "coreTopology": 0
+        },
+        "passingTotal": 0,
+        "reviewOptions": [],
+        "accepted": 0,
+        "productionEdits": 0
+      },
+      "requiredReview": [
+        "OLD_BOUNDARY_AND_SERVICE_ZONING",
+        "FLOOR_DESIGN",
+        "EXIT_ROUTE",
+        "BEDROCK_DOOR_STATES"
+      ],
+      "retainedAreaClaimed": 0,
+      "independentRoomApproved": false,
+      "constructionApproved": false,
+      "executionAllowed": false,
+      "operations": []
+    },
+    {
+      "sectionId": "apartment/candidate-01/L3",
+      "roomId": "F3-R013",
+      "pattern": "apartment/candidate-01/013",
+      "originalRoom": {
+        "id": "F3-R013",
+        "x": 25,
+        "z": 19,
+        "width": 3,
+        "depth": 3
+      },
+      "roomArea": 9,
+      "oldApertures": 0,
+      "existingApertureCoreAudits": [],
+      "retile": {
+        "tested": 48,
+        "rejections": {
+          "area": 44,
+          "mask": 2,
+          "otherRoom": 0,
+          "reservedOrCorridor": 2,
+          "production": 0,
+          "core": 0,
+          "doorOrFrame": 0,
+          "noCorridor": 0,
+          "coreTopology": 0
+        },
+        "passingTotal": 0,
+        "reviewOptions": [],
+        "accepted": 0,
+        "productionEdits": 0
+      },
+      "requiredReview": [
+        "OLD_BOUNDARY_AND_SERVICE_ZONING",
+        "FLOOR_DESIGN",
+        "EXIT_ROUTE",
+        "BEDROCK_DOOR_STATES"
+      ],
+      "retainedAreaClaimed": 0,
+      "independentRoomApproved": false,
+      "constructionApproved": false,
+      "executionAllowed": false,
+      "operations": []
+    },
+    {
+      "sectionId": "apartment/candidate-01/L4",
+      "roomId": "F4-R006",
+      "pattern": "apartment/candidate-01/006",
+      "originalRoom": {
+        "id": "F4-R006",
+        "x": 1,
+        "z": 7,
+        "width": 4,
+        "depth": 5
+      },
+      "roomArea": 20,
+      "oldApertures": 6,
+      "existingApertureCoreAudits": [
+        {
+          "roomId": "F4-R006",
+          "considered": false,
+          "reason": "PRIOR_LOCAL_GEOMETRY_HELD",
+          "corePathVerified": false
+        },
+        {
+          "roomId": "F4-R006",
+          "considered": false,
+          "reason": "PRIOR_LOCAL_GEOMETRY_HELD",
+          "corePathVerified": false
+        },
+        {
+          "roomId": "F4-R006",
+          "considered": false,
+          "reason": "PRIOR_LOCAL_GEOMETRY_HELD",
+          "corePathVerified": false
+        },
+        {
+          "roomId": "F4-R006",
+          "considered": false,
+          "reason": "PRIOR_LOCAL_GEOMETRY_HELD",
+          "corePathVerified": false
+        },
+        {
+          "roomId": "F4-R006",
+          "considered": false,
+          "reason": "PRIOR_LOCAL_GEOMETRY_HELD",
+          "corePathVerified": false
+        },
+        {
+          "roomId": "F4-R006",
+          "considered": false,
+          "reason": "PRIOR_LOCAL_GEOMETRY_HELD",
+          "corePathVerified": false
+        }
+      ],
+      "retile": {
+        "tested": 195,
+        "rejections": {
+          "area": 155,
+          "mask": 16,
+          "otherRoom": 2,
+          "reservedOrCorridor": 18,
+          "production": 0,
+          "core": 0,
+          "doorOrFrame": 4,
+          "noCorridor": 0,
+          "coreTopology": 0
+        },
+        "passingTotal": 0,
+        "reviewOptions": [],
+        "accepted": 0,
+        "productionEdits": 0
+      },
+      "requiredReview": [
+        "OLD_BOUNDARY_AND_SERVICE_ZONING",
+        "FLOOR_DESIGN",
+        "EXIT_ROUTE",
+        "BEDROCK_DOOR_STATES"
+      ],
+      "retainedAreaClaimed": 0,
+      "independentRoomApproved": false,
+      "constructionApproved": false,
+      "executionAllowed": false,
+      "operations": []
+    },
+    {
+      "sectionId": "apartment/candidate-01/L4",
+      "roomId": "F4-R012",
+      "pattern": "apartment/candidate-01/012",
+      "originalRoom": {
+        "id": "F4-R012",
+        "x": 15,
+        "z": 19,
+        "width": 3,
+        "depth": 3
+      },
+      "roomArea": 9,
+      "oldApertures": 0,
+      "existingApertureCoreAudits": [],
+      "retile": {
+        "tested": 48,
+        "rejections": {
+          "area": 44,
+          "mask": 1,
+          "otherRoom": 0,
+          "reservedOrCorridor": 3,
+          "production": 0,
+          "core": 0,
+          "doorOrFrame": 0,
+          "noCorridor": 0,
+          "coreTopology": 0
+        },
+        "passingTotal": 0,
+        "reviewOptions": [],
+        "accepted": 0,
+        "productionEdits": 0
+      },
+      "requiredReview": [
+        "OLD_BOUNDARY_AND_SERVICE_ZONING",
+        "FLOOR_DESIGN",
+        "EXIT_ROUTE",
+        "BEDROCK_DOOR_STATES"
+      ],
+      "retainedAreaClaimed": 0,
+      "independentRoomApproved": false,
+      "constructionApproved": false,
+      "executionAllowed": false,
+      "operations": []
+    },
+    {
+      "sectionId": "apartment/candidate-01/L4",
+      "roomId": "F4-R013",
+      "pattern": "apartment/candidate-01/013",
+      "originalRoom": {
+        "id": "F4-R013",
+        "x": 25,
+        "z": 19,
+        "width": 3,
+        "depth": 3
+      },
+      "roomArea": 9,
+      "oldApertures": 0,
+      "existingApertureCoreAudits": [],
+      "retile": {
+        "tested": 48,
+        "rejections": {
+          "area": 44,
+          "mask": 2,
+          "otherRoom": 0,
+          "reservedOrCorridor": 2,
+          "production": 0,
+          "core": 0,
+          "doorOrFrame": 0,
+          "noCorridor": 0,
+          "coreTopology": 0
+        },
+        "passingTotal": 0,
+        "reviewOptions": [],
+        "accepted": 0,
+        "productionEdits": 0
+      },
+      "requiredReview": [
+        "OLD_BOUNDARY_AND_SERVICE_ZONING",
+        "FLOOR_DESIGN",
+        "EXIT_ROUTE",
+        "BEDROCK_DOOR_STATES"
+      ],
+      "retainedAreaClaimed": 0,
+      "independentRoomApproved": false,
+      "constructionApproved": false,
+      "executionAllowed": false,
+      "operations": []
+    },
+    {
+      "sectionId": "apartment/candidate-01/L5",
+      "roomId": "F5-R006",
+      "pattern": "apartment/candidate-01/006",
+      "originalRoom": {
+        "id": "F5-R006",
+        "x": 1,
+        "z": 7,
+        "width": 4,
+        "depth": 5
+      },
+      "roomArea": 20,
+      "oldApertures": 6,
+      "existingApertureCoreAudits": [
+        {
+          "roomId": "F5-R006",
+          "considered": false,
+          "reason": "PRIOR_LOCAL_GEOMETRY_HELD",
+          "corePathVerified": false
+        },
+        {
+          "roomId": "F5-R006",
+          "considered": false,
+          "reason": "PRIOR_LOCAL_GEOMETRY_HELD",
+          "corePathVerified": false
+        },
+        {
+          "roomId": "F5-R006",
+          "considered": false,
+          "reason": "PRIOR_LOCAL_GEOMETRY_HELD",
+          "corePathVerified": false
+        },
+        {
+          "roomId": "F5-R006",
+          "considered": false,
+          "reason": "PRIOR_LOCAL_GEOMETRY_HELD",
+          "corePathVerified": false
+        },
+        {
+          "roomId": "F5-R006",
+          "considered": false,
+          "reason": "PRIOR_LOCAL_GEOMETRY_HELD",
+          "corePathVerified": false
+        },
+        {
+          "roomId": "F5-R006",
+          "considered": false,
+          "reason": "PRIOR_LOCAL_GEOMETRY_HELD",
+          "corePathVerified": false
+        }
+      ],
+      "retile": {
+        "tested": 195,
+        "rejections": {
+          "area": 155,
+          "mask": 16,
+          "otherRoom": 2,
+          "reservedOrCorridor": 18,
+          "production": 0,
+          "core": 0,
+          "doorOrFrame": 4,
+          "noCorridor": 0,
+          "coreTopology": 0
+        },
+        "passingTotal": 0,
+        "reviewOptions": [],
+        "accepted": 0,
+        "productionEdits": 0
+      },
+      "requiredReview": [
+        "OLD_BOUNDARY_AND_SERVICE_ZONING",
+        "FLOOR_DESIGN",
+        "EXIT_ROUTE",
+        "BEDROCK_DOOR_STATES"
+      ],
+      "retainedAreaClaimed": 0,
+      "independentRoomApproved": false,
+      "constructionApproved": false,
+      "executionAllowed": false,
+      "operations": []
+    },
+    {
+      "sectionId": "apartment/candidate-01/L5",
+      "roomId": "F5-R012",
+      "pattern": "apartment/candidate-01/012",
+      "originalRoom": {
+        "id": "F5-R012",
+        "x": 15,
+        "z": 19,
+        "width": 3,
+        "depth": 3
+      },
+      "roomArea": 9,
+      "oldApertures": 0,
+      "existingApertureCoreAudits": [],
+      "retile": {
+        "tested": 48,
+        "rejections": {
+          "area": 44,
+          "mask": 1,
+          "otherRoom": 0,
+          "reservedOrCorridor": 3,
+          "production": 0,
+          "core": 0,
+          "doorOrFrame": 0,
+          "noCorridor": 0,
+          "coreTopology": 0
+        },
+        "passingTotal": 0,
+        "reviewOptions": [],
+        "accepted": 0,
+        "productionEdits": 0
+      },
+      "requiredReview": [
+        "OLD_BOUNDARY_AND_SERVICE_ZONING",
+        "FLOOR_DESIGN",
+        "EXIT_ROUTE",
+        "BEDROCK_DOOR_STATES"
+      ],
+      "retainedAreaClaimed": 0,
+      "independentRoomApproved": false,
+      "constructionApproved": false,
+      "executionAllowed": false,
+      "operations": []
+    },
+    {
+      "sectionId": "apartment/candidate-01/L5",
+      "roomId": "F5-R013",
+      "pattern": "apartment/candidate-01/013",
+      "originalRoom": {
+        "id": "F5-R013",
+        "x": 25,
+        "z": 19,
+        "width": 3,
+        "depth": 3
+      },
+      "roomArea": 9,
+      "oldApertures": 0,
+      "existingApertureCoreAudits": [],
+      "retile": {
+        "tested": 48,
+        "rejections": {
+          "area": 44,
+          "mask": 2,
+          "otherRoom": 0,
+          "reservedOrCorridor": 2,
+          "production": 0,
+          "core": 0,
+          "doorOrFrame": 0,
+          "noCorridor": 0,
+          "coreTopology": 0
+        },
+        "passingTotal": 0,
+        "reviewOptions": [],
+        "accepted": 0,
+        "productionEdits": 0
+      },
+      "requiredReview": [
+        "OLD_BOUNDARY_AND_SERVICE_ZONING",
+        "FLOOR_DESIGN",
+        "EXIT_ROUTE",
+        "BEDROCK_DOOR_STATES"
+      ],
+      "retainedAreaClaimed": 0,
+      "independentRoomApproved": false,
+      "constructionApproved": false,
+      "executionAllowed": false,
+      "operations": []
+    },
+    {
+      "sectionId": "apartment/candidate-01/L6",
+      "roomId": "F6-R013",
+      "pattern": "apartment/candidate-01/013",
+      "originalRoom": {
+        "id": "F6-R013",
+        "x": 25,
+        "z": 19,
+        "width": 3,
+        "depth": 3
+      },
+      "roomArea": 9,
+      "oldApertures": 0,
+      "existingApertureCoreAudits": [],
+      "retile": {
+        "tested": 48,
+        "rejections": {
+          "area": 44,
+          "mask": 2,
+          "otherRoom": 0,
+          "reservedOrCorridor": 2,
+          "production": 0,
+          "core": 0,
+          "doorOrFrame": 0,
+          "noCorridor": 0,
+          "coreTopology": 0
+        },
+        "passingTotal": 0,
+        "reviewOptions": [],
+        "accepted": 0,
+        "productionEdits": 0
+      },
+      "requiredReview": [
+        "OLD_BOUNDARY_AND_SERVICE_ZONING",
+        "FLOOR_DESIGN",
+        "EXIT_ROUTE",
+        "BEDROCK_DOOR_STATES"
+      ],
+      "retainedAreaClaimed": 0,
+      "independentRoomApproved": false,
+      "constructionApproved": false,
+      "executionAllowed": false,
+      "operations": []
+    },
+    {
+      "sectionId": "office/candidate-01/L3",
+      "roomId": "F3-R004",
+      "pattern": "office/candidate-01/004",
+      "originalRoom": {
+        "id": "F3-R004",
+        "x": 19,
+        "z": 2,
+        "width": 4,
+        "depth": 4
+      },
+      "roomArea": 16,
+      "oldApertures": 2,
+      "existingApertureCoreAudits": [
+        {
+          "roomId": "F3-R004",
+          "considered": true,
+          "door": {
+            "x": 20,
+            "z": 5
+          },
+          "physicalCoreRoute": {
+            "reachable": true,
+            "reason": "NOMINAL_VERTICAL_CORE_NEIGHBOR_TWO_HIGH_AIR",
+            "length": 10,
+            "endpoint": {
+              "x": 12,
+              "z": 8
+            },
+            "visited": 32,
+            "exitCertified": false
+          },
+          "corePathVerified": true,
+          "exitCertified": false,
+          "constructionApproved": false
+        },
+        {
+          "roomId": "F3-R004",
+          "considered": false,
+          "reason": "PRIOR_LOCAL_GEOMETRY_HELD",
+          "corePathVerified": false
+        }
+      ],
+      "retile": {
+        "tested": 146,
+        "rejections": {
+          "area": 118,
+          "mask": 13,
+          "otherRoom": 2,
+          "reservedOrCorridor": 9,
+          "production": 0,
+          "core": 0,
+          "doorOrFrame": 4,
+          "noCorridor": 0,
+          "coreTopology": 0
+        },
+        "passingTotal": 0,
+        "reviewOptions": [],
+        "accepted": 0,
+        "productionEdits": 0
+      },
+      "requiredReview": [
+        "OLD_BOUNDARY_AND_SERVICE_ZONING",
+        "FLOOR_DESIGN",
+        "EXIT_ROUTE",
+        "BEDROCK_DOOR_STATES"
+      ],
+      "retainedAreaClaimed": 0,
+      "independentRoomApproved": false,
+      "constructionApproved": false,
+      "executionAllowed": false,
+      "operations": []
+    },
+    {
+      "sectionId": "office/candidate-01/L4",
+      "roomId": "F4-R004",
+      "pattern": "office/candidate-01/004",
+      "originalRoom": {
+        "id": "F4-R004",
+        "x": 19,
+        "z": 2,
+        "width": 4,
+        "depth": 4
+      },
+      "roomArea": 16,
+      "oldApertures": 2,
+      "existingApertureCoreAudits": [
+        {
+          "roomId": "F4-R004",
+          "considered": true,
+          "door": {
+            "x": 20,
+            "z": 5
+          },
+          "physicalCoreRoute": {
+            "reachable": true,
+            "reason": "NOMINAL_VERTICAL_CORE_NEIGHBOR_TWO_HIGH_AIR",
+            "length": 10,
+            "endpoint": {
+              "x": 12,
+              "z": 8
+            },
+            "visited": 32,
+            "exitCertified": false
+          },
+          "corePathVerified": true,
+          "exitCertified": false,
+          "constructionApproved": false
+        },
+        {
+          "roomId": "F4-R004",
+          "considered": false,
+          "reason": "PRIOR_LOCAL_GEOMETRY_HELD",
+          "corePathVerified": false
+        }
+      ],
+      "retile": {
+        "tested": 146,
+        "rejections": {
+          "area": 118,
+          "mask": 13,
+          "otherRoom": 2,
+          "reservedOrCorridor": 9,
+          "production": 0,
+          "core": 0,
+          "doorOrFrame": 4,
+          "noCorridor": 0,
+          "coreTopology": 0
+        },
+        "passingTotal": 0,
+        "reviewOptions": [],
+        "accepted": 0,
+        "productionEdits": 0
+      },
+      "requiredReview": [
+        "OLD_BOUNDARY_AND_SERVICE_ZONING",
+        "FLOOR_DESIGN",
+        "EXIT_ROUTE",
+        "BEDROCK_DOOR_STATES"
+      ],
+      "retainedAreaClaimed": 0,
+      "independentRoomApproved": false,
+      "constructionApproved": false,
+      "executionAllowed": false,
+      "operations": []
+    },
+    {
+      "sectionId": "office/candidate-01/L5",
+      "roomId": "F5-R004",
+      "pattern": "office/candidate-01/004",
+      "originalRoom": {
+        "id": "F5-R004",
+        "x": 19,
+        "z": 2,
+        "width": 4,
+        "depth": 4
+      },
+      "roomArea": 16,
+      "oldApertures": 2,
+      "existingApertureCoreAudits": [
+        {
+          "roomId": "F5-R004",
+          "considered": true,
+          "door": {
+            "x": 20,
+            "z": 5
+          },
+          "physicalCoreRoute": {
+            "reachable": true,
+            "reason": "NOMINAL_VERTICAL_CORE_NEIGHBOR_TWO_HIGH_AIR",
+            "length": 10,
+            "endpoint": {
+              "x": 12,
+              "z": 8
+            },
+            "visited": 32,
+            "exitCertified": false
+          },
+          "corePathVerified": true,
+          "exitCertified": false,
+          "constructionApproved": false
+        },
+        {
+          "roomId": "F5-R004",
+          "considered": false,
+          "reason": "PRIOR_LOCAL_GEOMETRY_HELD",
+          "corePathVerified": false
+        }
+      ],
+      "retile": {
+        "tested": 146,
+        "rejections": {
+          "area": 118,
+          "mask": 13,
+          "otherRoom": 2,
+          "reservedOrCorridor": 9,
+          "production": 0,
+          "core": 0,
+          "doorOrFrame": 4,
+          "noCorridor": 0,
+          "coreTopology": 0
+        },
+        "passingTotal": 0,
+        "reviewOptions": [],
+        "accepted": 0,
+        "productionEdits": 0
+      },
+      "requiredReview": [
+        "OLD_BOUNDARY_AND_SERVICE_ZONING",
+        "FLOOR_DESIGN",
+        "EXIT_ROUTE",
+        "BEDROCK_DOOR_STATES"
+      ],
+      "retainedAreaClaimed": 0,
+      "independentRoomApproved": false,
+      "constructionApproved": false,
+      "executionAllowed": false,
+      "operations": []
+    },
+    {
+      "sectionId": "office/candidate-01/L6",
+      "roomId": "F6-R004",
+      "pattern": "office/candidate-01/004",
+      "originalRoom": {
+        "id": "F6-R004",
+        "x": 19,
+        "z": 2,
+        "width": 4,
+        "depth": 4
+      },
+      "roomArea": 16,
+      "oldApertures": 2,
+      "existingApertureCoreAudits": [
+        {
+          "roomId": "F6-R004",
+          "considered": false,
+          "reason": "PRIOR_LOCAL_GEOMETRY_HELD",
+          "corePathVerified": false
+        },
+        {
+          "roomId": "F6-R004",
+          "considered": false,
+          "reason": "PRIOR_LOCAL_GEOMETRY_HELD",
+          "corePathVerified": false
+        }
+      ],
+      "retile": {
+        "tested": 146,
+        "rejections": {
+          "area": 118,
+          "mask": 13,
+          "otherRoom": 2,
+          "reservedOrCorridor": 9,
+          "production": 0,
+          "core": 0,
+          "doorOrFrame": 4,
+          "noCorridor": 0,
+          "coreTopology": 0
+        },
+        "passingTotal": 0,
+        "reviewOptions": [],
+        "accepted": 0,
+        "productionEdits": 0
+      },
+      "requiredReview": [
+        "OLD_BOUNDARY_AND_SERVICE_ZONING",
+        "FLOOR_DESIGN",
+        "EXIT_ROUTE",
+        "BEDROCK_DOOR_STATES"
+      ],
+      "retainedAreaClaimed": 0,
+      "independentRoomApproved": false,
+      "constructionApproved": false,
+      "executionAllowed": false,
+      "operations": []
+    }
+  ],
+  "floors": [
+    {
+      "sectionId": "apartment/candidate-01/L1",
+      "heldRooms": 1,
+      "geometryCandidates": 0,
+      "provisionallyNonoverlap": 0,
+      "arbitration": {
+        "nonOverlappingReviewBundles": [],
+        "alternativesRejected": [],
+        "approvedRooms": 0,
+        "commands": 0,
+        "worldContacts": 0
+      },
+      "prior296Modified": 0,
+      "productionModified": 0,
+      "worldCoordinates": null,
+      "worldCommands": 0,
+      "approval": "HOLD"
+    },
+    {
+      "sectionId": "apartment/candidate-01/L2",
+      "heldRooms": 3,
+      "geometryCandidates": 0,
+      "provisionallyNonoverlap": 0,
+      "arbitration": {
+        "nonOverlappingReviewBundles": [],
+        "alternativesRejected": [],
+        "approvedRooms": 0,
+        "commands": 0,
+        "worldContacts": 0
+      },
+      "prior296Modified": 0,
+      "productionModified": 0,
+      "worldCoordinates": null,
+      "worldCommands": 0,
+      "approval": "HOLD"
+    },
+    {
+      "sectionId": "apartment/candidate-01/L3",
+      "heldRooms": 3,
+      "geometryCandidates": 0,
+      "provisionallyNonoverlap": 0,
+      "arbitration": {
+        "nonOverlappingReviewBundles": [],
+        "alternativesRejected": [],
+        "approvedRooms": 0,
+        "commands": 0,
+        "worldContacts": 0
+      },
+      "prior296Modified": 0,
+      "productionModified": 0,
+      "worldCoordinates": null,
+      "worldCommands": 0,
+      "approval": "HOLD"
+    },
+    {
+      "sectionId": "apartment/candidate-01/L4",
+      "heldRooms": 3,
+      "geometryCandidates": 0,
+      "provisionallyNonoverlap": 0,
+      "arbitration": {
+        "nonOverlappingReviewBundles": [],
+        "alternativesRejected": [],
+        "approvedRooms": 0,
+        "commands": 0,
+        "worldContacts": 0
+      },
+      "prior296Modified": 0,
+      "productionModified": 0,
+      "worldCoordinates": null,
+      "worldCommands": 0,
+      "approval": "HOLD"
+    },
+    {
+      "sectionId": "apartment/candidate-01/L5",
+      "heldRooms": 3,
+      "geometryCandidates": 0,
+      "provisionallyNonoverlap": 0,
+      "arbitration": {
+        "nonOverlappingReviewBundles": [],
+        "alternativesRejected": [],
+        "approvedRooms": 0,
+        "commands": 0,
+        "worldContacts": 0
+      },
+      "prior296Modified": 0,
+      "productionModified": 0,
+      "worldCoordinates": null,
+      "worldCommands": 0,
+      "approval": "HOLD"
+    },
+    {
+      "sectionId": "apartment/candidate-01/L6",
+      "heldRooms": 1,
+      "geometryCandidates": 0,
+      "provisionallyNonoverlap": 0,
+      "arbitration": {
+        "nonOverlappingReviewBundles": [],
+        "alternativesRejected": [],
+        "approvedRooms": 0,
+        "commands": 0,
+        "worldContacts": 0
+      },
+      "prior296Modified": 0,
+      "productionModified": 0,
+      "worldCoordinates": null,
+      "worldCommands": 0,
+      "approval": "HOLD"
+    },
+    {
+      "sectionId": "office/candidate-01/L3",
+      "heldRooms": 1,
+      "geometryCandidates": 0,
+      "provisionallyNonoverlap": 0,
+      "arbitration": {
+        "nonOverlappingReviewBundles": [],
+        "alternativesRejected": [],
+        "approvedRooms": 0,
+        "commands": 0,
+        "worldContacts": 0
+      },
+      "prior296Modified": 0,
+      "productionModified": 0,
+      "worldCoordinates": null,
+      "worldCommands": 0,
+      "approval": "HOLD"
+    },
+    {
+      "sectionId": "office/candidate-01/L4",
+      "heldRooms": 1,
+      "geometryCandidates": 0,
+      "provisionallyNonoverlap": 0,
+      "arbitration": {
+        "nonOverlappingReviewBundles": [],
+        "alternativesRejected": [],
+        "approvedRooms": 0,
+        "commands": 0,
+        "worldContacts": 0
+      },
+      "prior296Modified": 0,
+      "productionModified": 0,
+      "worldCoordinates": null,
+      "worldCommands": 0,
+      "approval": "HOLD"
+    },
+    {
+      "sectionId": "office/candidate-01/L5",
+      "heldRooms": 1,
+      "geometryCandidates": 0,
+      "provisionallyNonoverlap": 0,
+      "arbitration": {
+        "nonOverlappingReviewBundles": [],
+        "alternativesRejected": [],
+        "approvedRooms": 0,
+        "commands": 0,
+        "worldContacts": 0
+      },
+      "prior296Modified": 0,
+      "productionModified": 0,
+      "worldCoordinates": null,
+      "worldCommands": 0,
+      "approval": "HOLD"
+    },
+    {
+      "sectionId": "office/candidate-01/L6",
+      "heldRooms": 1,
+      "geometryCandidates": 0,
+      "provisionallyNonoverlap": 0,
+      "arbitration": {
+        "nonOverlappingReviewBundles": [],
+        "alternativesRejected": [],
+        "approvedRooms": 0,
+        "commands": 0,
+        "worldContacts": 0
+      },
+      "prior296Modified": 0,
+      "productionModified": 0,
+      "worldCoordinates": null,
+      "worldCommands": 0,
+      "approval": "HOLD"
+    }
+  ],
+  "patterns": [
+    {
+      "pattern": "apartment/candidate-01/006",
+      "rooms": 4,
+      "roomsWithGeometryAlternatives": 0,
+      "fullyPhysicalNamedCoreNeighbor": 0,
+      "newApprovals": 0,
+      "perFloorDecisionRequired": true
+    },
+    {
+      "pattern": "apartment/candidate-01/012",
+      "rooms": 4,
+      "roomsWithGeometryAlternatives": 0,
+      "fullyPhysicalNamedCoreNeighbor": 0,
+      "newApprovals": 0,
+      "perFloorDecisionRequired": true
+    },
+    {
+      "pattern": "apartment/candidate-01/013",
+      "rooms": 6,
+      "roomsWithGeometryAlternatives": 0,
+      "fullyPhysicalNamedCoreNeighbor": 0,
+      "newApprovals": 0,
+      "perFloorDecisionRequired": true
+    },
+    {
+      "pattern": "office/candidate-01/004",
+      "rooms": 4,
+      "roomsWithGeometryAlternatives": 0,
+      "fullyPhysicalNamedCoreNeighbor": 0,
+      "newApprovals": 0,
+      "perFloorDecisionRequired": true
+    }
+  ],
+  "limitations": [
+    "ALL_ROOM_PORTFOLIO_CHANGE_OPTIONS_ARE_UNAPPROVED",
+    "PHYSICAL_NAMED_VERTICAL_CORE_NEIGHBOR_NOT_EGRESS_CERTIFICATION",
+    "OLD_ROOM_AND_OPENING_CLOSURE_NOT_VALIDATED",
+    "NO_BEDROCK_DOOR_OR_HINGE_VERIFICATION",
+    "NO_CONSTRUCTION_AUTHORIZATION",
+    "PREVIOUS_296_LOCAL_CANDIDATES_ARE_NOT_APPROVED_OCCUPANCY"
+  ],
+  "readiness": "NOT_PREPARED",
+  "executionAllowed": false,
+  "constructionApproved": false,
+  "worldContacts": 0,
+  "gates": [
+    {
+      "id": "M4-01",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-02",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-03",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-04",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-05",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-06",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-07",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-08",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-09",
+      "status": "BLOCKED"
+    }
+  ],
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0,
+    "worldCoordinates": null
+  },
+  "reportSha256": "6d863841350358009ee3c9bbd2b99a8d73aa83cee58cbb8a0666853b849a4597"
+}

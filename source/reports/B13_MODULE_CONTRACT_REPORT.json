@@ -1,0 +1,427 @@
+{
+  "schema": "minecraftaibuilder-step8b-b13-module-handoff-contract-v1",
+  "status": "OFFLINE_STATIC_MODULE_CONTRACT",
+  "evidence": {
+    "b12ReportSha256": "3fea52cdd62a45029bcf93b4b64e820a2cdb3e59772898d34666efe76ce6af27",
+    "pinnedSnapshotFiles": {
+      "engine/src/general-building-planner.js": "23be6e8b03827698fb890661f6fd0957a76ac4718f3347531121c8a7dc0450c8",
+      "engine/src/building-grammar.js": "71c0e2bda3e7a044285d681b38d9d4373e3c0aa417808a2f54c652d05ff47d1a",
+      "engine/src/architectural-quality.js": "5cadf22d51867a18fd35f6e9ec2e1318732eca2f2e666d2cfc4b2b32cbede530",
+      "modules/architectural-library.js": "19fa126051a687bfb5c5f6bdf199a6d42aa70b475d908dd38a99e9f354532eee",
+      "styles/urban_japanese.json": "cefb23009e7a96f8d5900e44242c5fa426646be64c5391048f52e29506f1ceec"
+    },
+    "sourceScope": "GENERAL_BUILDING_PLANNER_AND_ARCHITECTURAL_MODULE_REGISTRY_ONLY",
+    "inspection": "SOURCE_BYTE_HASH_MATCHED_ON_2026_10_10",
+    "executedPlanner": false
+  },
+  "coverage": [
+    {
+      "id": "EXTERNAL_FLOOR_PLATES",
+      "engine": "EMITTER_IDENTIFIED",
+      "concept": "FOOTPRINT_ONLY",
+      "source": "general-building-planner.js: plate(masks[f],base,\"floor\",...)",
+      "physical": "UNVERIFIED"
+    },
+    {
+      "id": "EXTERNAL_FACADE_WALLS",
+      "engine": "EMITTER_IDENTIFIED",
+      "concept": "EXTERNAL_ENVELOPE_ONLY",
+      "source": "architectural-quality.js: composeFacade solid_wall",
+      "physical": "UNVERIFIED"
+    },
+    {
+      "id": "EXTERNAL_ENTRANCE",
+      "engine": "EMITTER_IDENTIFIED",
+      "concept": "BUILDING_ENTRANCE_NOT_ROOM_DOORS",
+      "source": "general-building-planner.js: emitModule(entrance,...)",
+      "physical": "UNVERIFIED"
+    },
+    {
+      "id": "INTERIOR_PARTITION_WALLS",
+      "engine": "NO_EMITTER_IDENTIFIED_IN_INSPECTED_PLANNER",
+      "concept": "ROOM_RECTANGLES_ONLY",
+      "source": "inspected planner/module scope",
+      "physical": "UNVERIFIED"
+    },
+    {
+      "id": "INTERIOR_ROOM_DOORS",
+      "engine": "NO_EMITTER_IDENTIFIED_IN_INSPECTED_PLANNER",
+      "concept": "314_NOMINAL_PORTS",
+      "source": "inspected planner/module scope",
+      "physical": "UNVERIFIED"
+    },
+    {
+      "id": "STAIRCASE_BLOCK_ASSEMBLY",
+      "engine": "NO_EMITTER_IDENTIFIED_IN_INSPECTED_PLANNER",
+      "concept": "25_NOMINAL_INTERFLOOR_LINKS",
+      "source": "inspected planner/module scope",
+      "physical": "UNVERIFIED"
+    },
+    {
+      "id": "ELEVATOR_MECHANISM",
+      "engine": "NO_EMITTER_IDENTIFIED_IN_INSPECTED_PLANNER",
+      "concept": "5_VERTICAL_RESERVATION_STACKS",
+      "source": "inspected planner/module scope",
+      "physical": "UNVERIFIED"
+    }
+  ],
+  "candidates": [
+    {
+      "key": "hotel/candidate-01",
+      "levels": 6,
+      "doorPorts": 66,
+      "doorConstructionEvidence": "NONE_IN_INSPECTED_PLANNER",
+      "roomPartitionEvidence": "NONE_IN_INSPECTED_PLANNER",
+      "staircaseConstructionEvidence": "NONE_IN_INSPECTED_PLANNER",
+      "sourceFootprintDiff": 0,
+      "corridorOutside": 0,
+      "nominalVerticalAligned": true
+    },
+    {
+      "key": "apartment/candidate-01",
+      "levels": 6,
+      "doorPorts": 78,
+      "doorConstructionEvidence": "NONE_IN_INSPECTED_PLANNER",
+      "roomPartitionEvidence": "NONE_IN_INSPECTED_PLANNER",
+      "staircaseConstructionEvidence": "NONE_IN_INSPECTED_PLANNER",
+      "sourceFootprintDiff": 0,
+      "corridorOutside": 0,
+      "nominalVerticalAligned": true
+    },
+    {
+      "key": "office/candidate-01",
+      "levels": 6,
+      "doorPorts": 66,
+      "doorConstructionEvidence": "NONE_IN_INSPECTED_PLANNER",
+      "roomPartitionEvidence": "NONE_IN_INSPECTED_PLANNER",
+      "staircaseConstructionEvidence": "NONE_IN_INSPECTED_PLANNER",
+      "sourceFootprintDiff": 0,
+      "corridorOutside": 0,
+      "nominalVerticalAligned": true
+    },
+    {
+      "key": "office/candidate-02",
+      "levels": 6,
+      "doorPorts": 38,
+      "doorConstructionEvidence": "NONE_IN_INSPECTED_PLANNER",
+      "roomPartitionEvidence": "NONE_IN_INSPECTED_PLANNER",
+      "staircaseConstructionEvidence": "NONE_IN_INSPECTED_PLANNER",
+      "sourceFootprintDiff": 123,
+      "corridorOutside": 18,
+      "nominalVerticalAligned": true
+    },
+    {
+      "key": "office/candidate-03",
+      "levels": 6,
+      "doorPorts": 66,
+      "doorConstructionEvidence": "NONE_IN_INSPECTED_PLANNER",
+      "roomPartitionEvidence": "NONE_IN_INSPECTED_PLANNER",
+      "staircaseConstructionEvidence": "NONE_IN_INSPECTED_PLANNER",
+      "sourceFootprintDiff": 0,
+      "corridorOutside": 0,
+      "nominalVerticalAligned": true
+    }
+  ],
+  "office02": {
+    "key": "office/candidate-02",
+    "style": "urban_japanese",
+    "seed": 0,
+    "formula": "min(floor((min(width,depth)-3)/2),max(3,floor(min(width,depth)/4))+seed%2+style.proportion)",
+    "styleProportion": 1,
+    "conceptWing": 5,
+    "sourceWing": 6,
+    "sourceFormulaRectangles": [
+      {
+        "x": 0,
+        "z": 0,
+        "width": 13,
+        "depth": 14,
+        "start": 0,
+        "end": 6
+      },
+      {
+        "x": 11,
+        "z": 6,
+        "width": 13,
+        "depth": 14,
+        "start": 0,
+        "end": 5
+      }
+    ],
+    "levels": [
+      {
+        "level": 1,
+        "sourceCells": 348,
+        "conceptCells": 370,
+        "changedCells": 22,
+        "conceptCorridorOutsideSource": 3,
+        "trimSuggestionCells": 3
+      },
+      {
+        "level": 2,
+        "sourceCells": 348,
+        "conceptCells": 370,
+        "changedCells": 22,
+        "conceptCorridorOutsideSource": 3,
+        "trimSuggestionCells": 3
+      },
+      {
+        "level": 3,
+        "sourceCells": 348,
+        "conceptCells": 370,
+        "changedCells": 22,
+        "conceptCorridorOutsideSource": 3,
+        "trimSuggestionCells": 3
+      },
+      {
+        "level": 4,
+        "sourceCells": 348,
+        "conceptCells": 370,
+        "changedCells": 22,
+        "conceptCorridorOutsideSource": 3,
+        "trimSuggestionCells": 3
+      },
+      {
+        "level": 5,
+        "sourceCells": 348,
+        "conceptCells": 370,
+        "changedCells": 22,
+        "conceptCorridorOutsideSource": 3,
+        "trimSuggestionCells": 3
+      },
+      {
+        "level": 6,
+        "sourceCells": 182,
+        "conceptCells": 195,
+        "changedCells": 13,
+        "conceptCorridorOutsideSource": 3,
+        "trimSuggestionCells": 3
+      }
+    ],
+    "changedCells": 123,
+    "unplacedCorridorCells": 18,
+    "causalChain": [
+      "style proportion +1",
+      "source wing 5 -> 6",
+      "source rectangle z/depth changes",
+      "static footprints differ 123 cells",
+      "nominal corridors outside footprint 18 cells"
+    ],
+    "proof": "STATIC_PINNED_SOURCE_FORMULA_AND_B12_MASKS_ONLY"
+  },
+  "office02Visualization": [
+    {
+      "c": "111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111000000000001111111111111000000000001111111111111000000000001111111111111000000000001111111111111000000000001111111111111",
+      "s": "111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111000000000001111111111111000000000001111111111111000000000001111111111111000000000001111111111111000000000001111111111111000000000001111111111111",
+      "removed": [
+        {
+          "x": 18,
+          "z": 5
+        },
+        {
+          "x": 0,
+          "z": 14
+        },
+        {
+          "x": 6,
+          "z": 14
+        }
+      ]
+    },
+    {
+      "c": "111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111000000000001111111111111000000000001111111111111000000000001111111111111000000000001111111111111000000000001111111111111",
+      "s": "111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111000000000001111111111111000000000001111111111111000000000001111111111111000000000001111111111111000000000001111111111111000000000001111111111111",
+      "removed": [
+        {
+          "x": 18,
+          "z": 5
+        },
+        {
+          "x": 0,
+          "z": 14
+        },
+        {
+          "x": 6,
+          "z": 14
+        }
+      ]
+    },
+    {
+      "c": "111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111000000000001111111111111000000000001111111111111000000000001111111111111000000000001111111111111000000000001111111111111",
+      "s": "111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111000000000001111111111111000000000001111111111111000000000001111111111111000000000001111111111111000000000001111111111111000000000001111111111111",
+      "removed": [
+        {
+          "x": 18,
+          "z": 5
+        },
+        {
+          "x": 0,
+          "z": 14
+        },
+        {
+          "x": 6,
+          "z": 14
+        }
+      ]
+    },
+    {
+      "c": "111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111000000000001111111111111000000000001111111111111000000000001111111111111000000000001111111111111000000000001111111111111",
+      "s": "111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111000000000001111111111111000000000001111111111111000000000001111111111111000000000001111111111111000000000001111111111111000000000001111111111111",
+      "removed": [
+        {
+          "x": 18,
+          "z": 5
+        },
+        {
+          "x": 0,
+          "z": 14
+        },
+        {
+          "x": 6,
+          "z": 14
+        }
+      ]
+    },
+    {
+      "c": "111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111000000000001111111111111000000000001111111111111000000000001111111111111000000000001111111111111000000000001111111111111",
+      "s": "111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111000000000001111111111111000000000001111111111111000000000001111111111111000000000001111111111111000000000001111111111111000000000001111111111111",
+      "removed": [
+        {
+          "x": 18,
+          "z": 5
+        },
+        {
+          "x": 0,
+          "z": 14
+        },
+        {
+          "x": 6,
+          "z": 14
+        }
+      ]
+    },
+    {
+      "c": "111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "s": "111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000111111111111100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "removed": [
+        {
+          "x": 0,
+          "z": 14
+        },
+        {
+          "x": 6,
+          "z": 14
+        },
+        {
+          "x": 12,
+          "z": 14
+        }
+      ]
+    }
+  ],
+  "office02ReviewAlternatives": [
+    {
+      "id": "KEEP_FROZEN",
+      "description": "凍結設計保持。外形差分と廊下はみ出しは残る",
+      "sourcePredictedFootprintChanges": false,
+      "conceptualMismatchCells": 123,
+      "nominalCorridorOutsideCells": 18,
+      "reviewTrimCells": 0,
+      "autoApplied": false,
+      "approved": false,
+      "actualWalkability": "UNVERIFIED",
+      "actualConstruction": "UNVERIFIED",
+      "worldAnchor": null,
+      "materialIds": [],
+      "operations": []
+    },
+    {
+      "id": "TRIM_CORRIDOR_REVIEW",
+      "description": "廊下端だけレビュー上で18セル除外。外形差分は残る",
+      "sourcePredictedFootprintChanges": false,
+      "conceptualMismatchCells": 123,
+      "nominalCorridorOutsideCells": 0,
+      "reviewTrimCells": 18,
+      "autoApplied": false,
+      "approved": false,
+      "actualWalkability": "UNVERIFIED",
+      "actualConstruction": "UNVERIFIED",
+      "worldAnchor": null,
+      "materialIds": [],
+      "operations": []
+    },
+    {
+      "id": "REBASE_CONCEPT_TO_SOURCE_REVIEW",
+      "description": "概念上の輪郭をエンジン予測へ合わせるだけ。室内予約のはみ出しは残る",
+      "sourcePredictedFootprintChanges": false,
+      "conceptualMismatchCells": 0,
+      "nominalCorridorOutsideCells": 18,
+      "reviewTrimCells": 0,
+      "autoApplied": false,
+      "approved": false,
+      "actualWalkability": "UNVERIFIED",
+      "actualConstruction": "UNVERIFIED",
+      "worldAnchor": null,
+      "materialIds": [],
+      "operations": [],
+      "conceptEnvelopeReferenceOnly": true
+    },
+    {
+      "id": "REBASE_AND_TRIM_REVIEW",
+      "description": "概念輪郭整合と廊下端補正の組合せ。新たな概念設計候補のみ",
+      "sourcePredictedFootprintChanges": false,
+      "conceptualMismatchCells": 0,
+      "nominalCorridorOutsideCells": 0,
+      "reviewTrimCells": 18,
+      "autoApplied": false,
+      "approved": false,
+      "actualWalkability": "UNVERIFIED",
+      "actualConstruction": "UNVERIFIED",
+      "worldAnchor": null,
+      "materialIds": [],
+      "operations": [],
+      "conceptEnvelopeReferenceOnly": true
+    }
+  ],
+  "findings": {
+    "sourceFootprintMismatch": 123,
+    "office02NominalCorridorOutside": 18,
+    "nominalRoomDoorPorts": 314,
+    "nominalFloorLayers": 30,
+    "nominalInterfloorStairLinks": 25,
+    "nominalElevatorStacks": 5,
+    "verifiedInteriorDoorEmitters": 0,
+    "verifiedPartitionEmitters": 0,
+    "verifiedStairAssemblers": 0,
+    "verifiedElevatorAssemblers": 0,
+    "limitation": "NO_EMITTER_IDENTIFIED does not prove that no other component exists"
+  },
+  "requiredNextContracts": [
+    "INTERIOR_PARTITION_GEOMETRY",
+    "ROOM_DOOR_BOUNDARY_TO_BLOCK_OPENING",
+    "STAIR_FLIGHT_TO_BLOCK_AND_HEADROOM",
+    "ELEVATOR_OR_ALTERNATE_VERTICAL_PASSAGE",
+    "MATERIAL_ID_SUPPORTED_IN_EDUCATION",
+    "WORLD_ANCHOR_AND_SCAN",
+    "RUNNING_ENGINE_IDENTITY",
+    "EXPLICIT_USER_CONSTRUCTION_APPROVAL"
+  ],
+  "safety": {
+    "notPrepared": true,
+    "constructionApproved": false,
+    "executionAllowed": false,
+    "legacyModified": false,
+    "frozenEvidenceModified": false,
+    "existingWorldModified": false,
+    "apiAccess": false
+  },
+  "deploymentGate": "BLOCKED",
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0,
+    "worldCoordinates": null,
+    "materialIds": []
+  },
+  "reportSha256": "1fbba7ecba2b4b7ed7721e55299e2436255f97836c0e5b663e27e4ac2a70f21e"
+}

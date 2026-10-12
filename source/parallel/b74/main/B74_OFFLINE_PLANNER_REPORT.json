@@ -1,0 +1,77 @@
+{
+  "schema": "minecraftaibuilder-b74-production-planner-offline-v1",
+  "status": "BLOCKED_OFFICIAL_BLOCKS_MISSING",
+  "source": {
+    "pinnedModules": 30,
+    "staticESMClosureMissing": [],
+    "catalogSixVerified": true,
+    "blockListState": "MISSING",
+    "pinnedBlocksSha256": "49ff9c501b1c96b547aa49fda07a53bc19f7d5fe338aff43fe5f65c3eaaf031f"
+  },
+  "results": [],
+  "summary": {
+    "productionPlannerBuildingsRun": 0,
+    "fullFootprintParityBuildings": 0,
+    "footprintCellsMatchAcrossAll": false,
+    "worldCommands": 0,
+    "worldConnections": 0,
+    "physicalDoorsBuilt": 0,
+    "physicalStairsBuilt": 0
+  },
+  "stillBlocked": [
+    "NO_WORLD_TRANSFORM_CALIBRATION",
+    "NO_FACADE_INTERIOR_COLLISION_APPROVAL",
+    "NO_DOOR_STAIR_BLOCK_STATES",
+    "B70_18_OUTSIDE_FLOOR_MASK_HELD",
+    "B42_60_UPPER_DOORS_HELD"
+  ],
+  "readiness": "NOT_PREPARED",
+  "executionAllowed": false,
+  "constructionApproved": false,
+  "gates": [
+    {
+      "id": "M4-01",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-02",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-03",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-04",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-05",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-06",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-07",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-08",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-09",
+      "status": "BLOCKED"
+    }
+  ],
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0,
+    "worldCoordinates": null,
+    "materialIds": []
+  },
+  "reportSha256": "2c0d20792975e6d1e615c05810e531739c62b584a2f6904278cc24d7cd5c0320"
+}

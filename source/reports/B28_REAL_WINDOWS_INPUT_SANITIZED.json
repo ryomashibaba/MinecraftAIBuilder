@@ -1,0 +1,78 @@
+{
+    "schema":  "minecraftaibuilder-step8b-b27-m4-readonly-probe-v1",
+    "collectedAt":  "2026-10-11T12:08:51.5859717+09:00",
+    "intent":  "LOCAL_FILES_AND_OS_METADATA_READ_ONLY",
+    "projectIdentity":  "minecraft-ai-builder",
+    "sourceChecks":  [
+                         {
+                             "key":  "engine/src/general-building-planner.js",
+                             "status":  "OK",
+                             "sha256":  "23be6e8b03827698fb890661f6fd0957a76ac4718f3347531121c8a7dc0450c8"
+                         },
+                         {
+                             "key":  "engine/src/build-anchor.js",
+                             "status":  "OK",
+                             "sha256":  "23bea262e90012fc6bfdd9f1407e1f7cb514f87862ad1c60b0431792f8ef056f"
+                         },
+                         {
+                             "key":  "engine/src/block-states.js",
+                             "status":  "OK",
+                             "sha256":  "7bee6028673be26058e7a54e30c904cf568c66a379acd066c12a0c8f38edcf78"
+                         },
+                         {
+                             "key":  "engine/src/block-catalog.js",
+                             "status":  "OK",
+                             "sha256":  "923c95a45c1c40d3444ffb7f567c797e1e45723c8c332d2ad68f459c360803eb"
+                         },
+                         {
+                             "key":  "engine/src/safety.js",
+                             "status":  "OK",
+                             "sha256":  "ef4f71ec968b46ce937d6b279f9cb5b9b7aecde7fd917a960e1716b72795e9fc"
+                         },
+                         {
+                             "key":  "bridge/src/general-building.js",
+                             "status":  "OK",
+                             "sha256":  "ca1531453d9cb90b5b75b99c0e1d47e22b8e38d244b5adb14da2deda5ef65828"
+                         },
+                         {
+                             "key":  "catalog/education.json",
+                             "status":  "OK",
+                             "sha256":  "842de2f91b0c84c9bd601fbeae9f04e6edf6a1b97b688635163a7c7816bd3a5f"
+                         },
+                         {
+                             "key":  "catalog/semantic.json",
+                             "status":  "OK",
+                             "sha256":  "fca2ba78056d286862e3b0c48f2226c673bc3596c1b7d434f9b4ee30273cc6de"
+                         },
+                         {
+                             "key":  "modules/architectural-library.js",
+                             "status":  "OK",
+                             "sha256":  "19fa126051a687bfb5c5f6bdf199a6d42aa70b475d908dd38a99e9f354532eee"
+                         }
+                     ],
+    "materialProfile":  {
+                            "status":  "UNAVAILABLE",
+                            "version":  null,
+                            "recordCount":  null,
+                            "statusCounts":  null,
+                            "doorStateRecords":  null
+                        },
+    "processSummary":  {
+                           "status":  "OK",
+                           "nodeProcessCount":  7,
+                           "listenerStatus":  "OK",
+                           "listenerPortCount8000":  0,
+                           "listenerPortCount8765":  0,
+                           "rootPathHintCount":  0,
+                           "entrypointHintCount":  0
+                       },
+    "safety":  {
+                   "notPrepared":  true,
+                   "constructionApproved":  false,
+                   "executionAllowed":  false,
+                   "worldAccess":  false,
+                   "bridgeContact":  false,
+                   "projectFilesModified":  false,
+                   "buildOperations":  0
+               }
+}

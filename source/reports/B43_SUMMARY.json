@@ -1,0 +1,15 @@
+{
+  "schema": "minecraftaibuilder-step8b-b43-summary-v1",
+  "scope": "inert six-level corridor and wall replanning, not construction",
+  "building": "apartment/candidate-01",
+  "nominalReachability": "77/78",
+  "wallReplanRequiredCells": 20,
+  "addedCandidateCorridorCells": 35,
+  "wallClearAlternativeTotalSteps": 415,
+  "physicalPassageVerified": 0,
+  "wallEditsAuthorized": 0,
+  "engineCalls": 0,
+  "buildOperations": 0,
+  "readiness": "NOT_PREPARED",
+  "deployment": "BLOCKED"
+}

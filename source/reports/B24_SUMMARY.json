@@ -1,0 +1,45 @@
+{
+  "schema": "minecraftaibuilder-step8b-b24-m3f-assembly-v1",
+  "evidence": {
+    "manifestSha256": "aa2265ffe6423c091ff920060f564fda6ccdd90a7a5b11980aae01292749128c",
+    "b17Sha256": "e04e8ca2789bd8b65548a10e98e940e9537a562ebbf38a63e456ac9b73fb425d",
+    "b21Sha256": "2d7b1e3d71f252331dfe35e600411acc3354c43702e5b3db9fd9a5e0533932bc",
+    "b23Sha256": "cc7ec219ce71f374d0fa24b66692e0e5ff3b7bc238d6817572caf025fd77a9cf"
+  },
+  "counts": {
+    "buildings": 5,
+    "floors": 30,
+    "wallPanels": 5704,
+    "doors": 314,
+    "proposedDoorRelocations": 118,
+    "initialDoorWallVoxelHits": 236,
+    "proposedDoorWallVoxelHits": 0,
+    "baselineMultiOwnerWallVoxels": 3754,
+    "candidateMultiOwnerWallVoxels": 3990,
+    "baselineExcessOwnerClaims": 3754,
+    "candidateExcessOwnerClaims": 3990,
+    "stairInterfaces": 25,
+    "slabCandidateCutoutCells": 50,
+    "stairHeadroomWallVoxelHits": 0,
+    "stairTreadWallVoxelHits": 0,
+    "unapprovedPhysicalRepairs": 0,
+    "executedOperations": 0
+  },
+  "finding": {
+    "candidateDoorClearance": "ZERO_VOXEL_OVERLAPS_ONLY",
+    "sharedWallOwnership": "MULTIPLE_OWNERS_REQUIRE_EXPLICIT_RECONCILIATION",
+    "privacy": "UNKNOWN",
+    "floorSupport": "UNKNOWN",
+    "office02ExteriorDeltaCells": 123,
+    "office02CorridorDeltaCells": 18,
+    "constructionReadiness": "BLOCKED"
+  },
+  "deploymentGate": "BLOCKED",
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0,
+    "worldCoordinates": null,
+    "materialIds": []
+  }
+}

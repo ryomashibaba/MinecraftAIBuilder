@@ -1,0 +1,414 @@
+{
+  "schema": "minecraftaibuilder-b62-reservation-conflict-review-v1",
+  "kind": "READ_ONLY_HYPOTHETICAL_CIRCULATION_SPEC",
+  "provenance": {
+    "b61Sha256": "983c7949bf1ba812ffe83a1b2ab74fe2353fdc11de84d74f33149d7a6e933ad2",
+    "b57Sha256": "7156d1716331c4d87db88b9d28fdc2672eee0a0d3295bb0085d2d9e6683bb3c2",
+    "b14Sha256": "8d12e07b4150c9c15e084fc77857c694b7f6b4ffdc151f92dea854896bd922e6",
+    "b17Sha256": "acdb7a316a036789a77c8fe063a4a186379e9abe87b85454e27bc2d44e92bc9d",
+    "b43Schema": "minecraftaibuilder-step8b-b43-guarded-layout-assembly-v1"
+  },
+  "building": "apartment/candidate-01",
+  "level": 1,
+  "unconnectedDoorId": "apartment/candidate-01/L1/D012",
+  "sourceGeometry": {
+    "floorCells": 400,
+    "existingCorridorCells": 135,
+    "stairReservationCells": 9,
+    "elevatorReservationCells": 9,
+    "nominalWallInterfaces": 212,
+    "b14B17ReservationAgreement": true,
+    "b14B17WallBoundaryAgreement": true
+  },
+  "alternatives": [
+    {
+      "id": "B61_UNCONSTRAINED",
+      "title": "3-cell B61 concept (invalid against elevator reservation)",
+      "minimumAddedCells": 3,
+      "pathSteps": 7,
+      "localPath": [
+        {
+          "x": 17,
+          "z": 18
+        },
+        {
+          "x": 18,
+          "z": 18
+        },
+        {
+          "x": 19,
+          "z": 18
+        },
+        {
+          "x": 20,
+          "z": 18
+        },
+        {
+          "x": 21,
+          "z": 18
+        },
+        {
+          "x": 22,
+          "z": 18
+        },
+        {
+          "x": 23,
+          "z": 18
+        },
+        {
+          "x": 24,
+          "z": 18
+        }
+      ],
+      "newCorridorCells": [
+        {
+          "x": 21,
+          "z": 18
+        },
+        {
+          "x": 22,
+          "z": 18
+        },
+        {
+          "x": 23,
+          "z": 18
+        }
+      ],
+      "reservationCollisions": {
+        "elevator": [
+          {
+            "x": 21,
+            "z": 18
+          },
+          {
+            "x": 22,
+            "z": 18
+          },
+          {
+            "x": 23,
+            "z": 18
+          }
+        ],
+        "stair": []
+      },
+      "nominalWallBoundaryCrossings": [],
+      "nearbyNominalWallOwners": [
+        "apartment/candidate-01/L1/W0058",
+        "apartment/candidate-01/L1/W0063",
+        "apartment/candidate-01/L1/W0064",
+        "apartment/candidate-01/L1/W0105",
+        "apartment/candidate-01/L1/W0106",
+        "apartment/candidate-01/L1/W0119",
+        "apartment/candidate-01/L1/W0120"
+      ],
+      "touchesElevatorReservationAtCellEdge": [
+        {
+          "x": 21,
+          "z": 18
+        },
+        {
+          "x": 22,
+          "z": 18
+        },
+        {
+          "x": 23,
+          "z": 18
+        }
+      ],
+      "conceptualDoorsReachable": 78,
+      "physicalClearanceVerified": false,
+      "wallPhysicalCollisionVerified": false,
+      "roomOccupancyVerified": false,
+      "conceptualCorridorWidthVerified": false,
+      "physicalTraversalVerified": false,
+      "materialIds": [],
+      "emittable": false,
+      "approved": false
+    },
+    {
+      "id": "AVOID_ELEVATOR",
+      "title": "elevator-only constrained shortest candidate",
+      "minimumAddedCells": 4,
+      "pathSteps": 7,
+      "localPath": [
+        {
+          "x": 17,
+          "z": 18
+        },
+        {
+          "x": 16,
+          "z": 18
+        },
+        {
+          "x": 15,
+          "z": 18
+        },
+        {
+          "x": 14,
+          "z": 18
+        },
+        {
+          "x": 13,
+          "z": 18
+        },
+        {
+          "x": 12,
+          "z": 18
+        },
+        {
+          "x": 11,
+          "z": 18
+        },
+        {
+          "x": 10,
+          "z": 18
+        }
+      ],
+      "newCorridorCells": [
+        {
+          "x": 14,
+          "z": 18
+        },
+        {
+          "x": 13,
+          "z": 18
+        },
+        {
+          "x": 12,
+          "z": 18
+        },
+        {
+          "x": 11,
+          "z": 18
+        }
+      ],
+      "reservationCollisions": {
+        "elevator": [],
+        "stair": [
+          {
+            "x": 14,
+            "z": 18
+          },
+          {
+            "x": 13,
+            "z": 18
+          },
+          {
+            "x": 12,
+            "z": 18
+          }
+        ]
+      },
+      "nominalWallBoundaryCrossings": [],
+      "nearbyNominalWallOwners": [
+        "apartment/candidate-01/L1/W0028",
+        "apartment/candidate-01/L1/W0033",
+        "apartment/candidate-01/L1/W0034",
+        "apartment/candidate-01/L1/W0049",
+        "apartment/candidate-01/L1/W0054",
+        "apartment/candidate-01/L1/W0058",
+        "apartment/candidate-01/L1/W0063",
+        "apartment/candidate-01/L1/W0064",
+        "apartment/candidate-01/L1/W0210"
+      ],
+      "touchesElevatorReservationAtCellEdge": [],
+      "conceptualDoorsReachable": 78,
+      "physicalClearanceVerified": false,
+      "wallPhysicalCollisionVerified": false,
+      "roomOccupancyVerified": false,
+      "conceptualCorridorWidthVerified": false,
+      "physicalTraversalVerified": false,
+      "materialIds": [],
+      "emittable": false,
+      "approved": false
+    },
+    {
+      "id": "AVOID_ELEVATOR_AND_STAIR",
+      "title": "both reservations excluded (review-only)",
+      "minimumAddedCells": 5,
+      "pathSteps": 9,
+      "localPath": [
+        {
+          "x": 17,
+          "z": 18
+        },
+        {
+          "x": 18,
+          "z": 18
+        },
+        {
+          "x": 18,
+          "z": 19
+        },
+        {
+          "x": 18,
+          "z": 20
+        },
+        {
+          "x": 19,
+          "z": 20
+        },
+        {
+          "x": 20,
+          "z": 20
+        },
+        {
+          "x": 21,
+          "z": 20
+        },
+        {
+          "x": 22,
+          "z": 20
+        },
+        {
+          "x": 23,
+          "z": 20
+        },
+        {
+          "x": 24,
+          "z": 20
+        }
+      ],
+      "newCorridorCells": [
+        {
+          "x": 19,
+          "z": 20
+        },
+        {
+          "x": 20,
+          "z": 20
+        },
+        {
+          "x": 21,
+          "z": 20
+        },
+        {
+          "x": 22,
+          "z": 20
+        },
+        {
+          "x": 23,
+          "z": 20
+        }
+      ],
+      "reservationCollisions": {
+        "elevator": [],
+        "stair": []
+      },
+      "nominalWallBoundaryCrossings": [],
+      "nearbyNominalWallOwners": [
+        "apartment/candidate-01/L1/W0058",
+        "apartment/candidate-01/L1/W0063",
+        "apartment/candidate-01/L1/W0064",
+        "apartment/candidate-01/L1/W0066",
+        "apartment/candidate-01/L1/W0068",
+        "apartment/candidate-01/L1/W0106",
+        "apartment/candidate-01/L1/W0108",
+        "apartment/candidate-01/L1/W0109"
+      ],
+      "touchesElevatorReservationAtCellEdge": [
+        {
+          "x": 21,
+          "z": 20
+        },
+        {
+          "x": 22,
+          "z": 20
+        },
+        {
+          "x": 23,
+          "z": 20
+        }
+      ],
+      "conceptualDoorsReachable": 78,
+      "physicalClearanceVerified": false,
+      "wallPhysicalCollisionVerified": false,
+      "roomOccupancyVerified": false,
+      "conceptualCorridorWidthVerified": false,
+      "physicalTraversalVerified": false,
+      "materialIds": [],
+      "emittable": false,
+      "approved": false
+    }
+  ],
+  "findings": {
+    "b61ThreeCellProposalCollidesWithElevatorReservation": 3,
+    "fourCellAlternativeCollidesWithStairReservation": 3,
+    "fiveCellAlternativeAvoidsBothReservations": true,
+    "fiveCellAlternativeVerifiedWallPhysicalClearance": false,
+    "fiveCellAlternativeVerifiedRoomOccupancy": false,
+    "fiveCellAlternativeAdjacentToElevatorCount": 3,
+    "fiveCellAlternativeNominalWallBoundaryCrossings": 0,
+    "candidateNetworkDoorCount": 78,
+    "previousB42UnverifiedUpperDoors": 60,
+    "b43PriorCorridorExtensionUnapproved": 35,
+    "b43PriorWallReplansUnapproved": 20,
+    "noBuildingChangeAuthorized": true
+  },
+  "assessment": "FIVE_CELL_GEOMETRIC_ALTERNATIVE_AVOIDS_NOMINAL_SHAFT_AND_STAIR_FOOTPRINTS_ONLY_NOT_PHYSICALLY_BUILDABLE",
+  "blockers": [
+    "B61_THREE_CELLS_COLLIDE_WITH_NOMINAL_ELEVATOR_FOOTPRINT",
+    "B62_ALTERNATIVE_WALL_THICKNESS_UNKNOWN",
+    "B62_ALTERNATIVE_ROOM_OCCUPANCY_UNVERIFIED",
+    "B62_ALTERNATIVE_WIDTH_AND_SHAFT_CLEARANCE_UNVERIFIED",
+    "B43_35_CORRIDOR_AND_20_PARTITION_PROPOSALS_UNAPPROVED",
+    "B42_UPPER_60_DOORS_HISTORICALLY_UNVERIFIED",
+    "DOOR_STAIR_MATERIALS_AND_BLOCK_STATES_UNKNOWN",
+    "PRODUCTION_ENGINE_SOURCE_UNAVAILABLE"
+  ],
+  "readiness": "NOT_PREPARED",
+  "deployment": "BLOCKED",
+  "executionAllowed": false,
+  "constructionApproved": false,
+  "productionFacadeParity": "UNVERIFIED",
+  "physicalQuality": "UNKNOWN",
+  "engineCalls": 0,
+  "worldContacts": 0,
+  "scans": 0,
+  "gates": [
+    {
+      "id": "M4-01",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-02",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-03",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-04",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-05",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-06",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-07",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-08",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-09",
+      "status": "BLOCKED"
+    }
+  ],
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0,
+    "worldCoordinates": null,
+    "materialIds": []
+  },
+  "reportSha256": "76f52614ff864757cd6b75cada6b86ae424ff9c047b4cf9d97c1f14afa97f974"
+}

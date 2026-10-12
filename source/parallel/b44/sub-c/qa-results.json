@@ -1,0 +1,24 @@
+{
+  "schema": "minecraftaibuilder-b44c-qa-offline-results-v1",
+  "status": "PASS",
+  "subCTestFile": "sub-c.test.mjs",
+  "subCTests": {"passed": 13, "failed": 0, "skipped": 0},
+  "existingFocusedRegression": {
+    "tests": [
+      "tests/step8b-m4-static-gate-b26.test.mjs",
+      "tests/step8b-m4-evidence-gate-b27.test.mjs",
+      "tests/step8b-m4-real-evidence-b28.test.mjs",
+      "tests/step8b-m4-assembly-b29.test.mjs",
+      "tests/step8b-compatibility.test.mjs"
+    ],
+    "passed": 158, "failed": 0, "skipped": 0
+  },
+  "baselinePackage": {"command": "node verify-b43-package.mjs", "result": "B43_PACKAGE_PASS", "frozenB42Files": 678, "b43ManifestFiles": 690, "newTests": 34, "relatedTests": 105, "constructionOperations": 0, "engineCalls": 0},
+  "testLevel": "OFFLINE_ONLY",
+  "liveWindowsTested": false,
+  "gameTested": false,
+  "engineInvoked": false,
+  "physicalWalkabilityTested": false,
+  "otherParallelIRTested": false,
+  "note": "Existing B43 verifier internally validated its own declared test suite. 158 regression tests were independently executed; do not sum verifier internal counts as distinct new tests."
+}

@@ -1,0 +1,64 @@
+{
+  "counts": {
+    "buildings": 5,
+    "floors": 30,
+    "candidatePartitionPanels": 5704,
+    "candidateDoorVoids": 314,
+    "candidateStairInterfaces": 25,
+    "stairInterfacesMissingSlabCutout": 25,
+    "nominalDoorEndpointsOutsideEngineFootprint": 0
+  },
+  "sourceVerification": "PINNED_DISK_SOURCE_MATCH",
+  "blockers": [
+    {
+      "id": "NO_ENGINE_INTEGRATION_HOOK",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "CONTINUOUS_TO_BLOCK_QUANTIZATION_NOT_SPECIFIED",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "EDUCATION_MATERIAL_ALLOWLIST_NOT_ATTESTED",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "DOOR_BLOCK_AND_ORIENTATION_NOT_VERIFIED",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "FLOOR_SLAB_STAIR_CUTOUT_NOT_DESIGNED",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "STAIR_HEADROOM_AND_LANDING_NOT_VERIFIED",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "RUNNING_WINDOWS_ENGINE_NOT_ATTESTED",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "WORLD_ANCHOR_AND_SITE_SCAN_NOT_VERIFIED",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "OFFICE02_FOOTPRINT_AND_CORRIDOR_REVIEW_ONLY",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "USER_CONSTRUCTION_APPROVAL_MISSING",
+      "status": "BLOCKED"
+    }
+  ],
+  "developmentMilestone": "M3_DRY_RUN_ADAPTER_PARTIAL_COMPLETE",
+  "nextMilestone": "Implement and validate an isolated, NONEXECUTABLE staging interface for floor cutouts, block quantization and materials before Windows attestation",
+  "deploymentGate": "BLOCKED",
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0,
+    "worldCoordinates": null,
+    "materialIds": []
+  }
+}

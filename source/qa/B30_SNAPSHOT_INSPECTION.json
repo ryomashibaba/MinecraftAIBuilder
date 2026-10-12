@@ -1,0 +1,23 @@
+{
+  "status": "ARCHIVED_DISK_SOURCE_ONLY",
+  "matchedFileCount": 9,
+  "matchedPaths": [
+    "engine/src/general-building-planner.js",
+    "engine/src/build-anchor.js",
+    "engine/src/block-states.js",
+    "engine/src/block-catalog.js",
+    "engine/src/safety.js",
+    "bridge/src/general-building.js",
+    "catalog/education.json",
+    "catalog/semantic.json",
+    "modules/architectural-library.js"
+  ],
+  "plannerInvoked": false,
+  "runtimeIdentityAttested": false,
+  "engineInternalBoundary": "createComposition -> fromComposition -> validateBuildPlan",
+  "floorEmitter": "plate(mask, base, \"floor\", \"floor\")",
+  "floorCutoutHook": "NOT_PRESENT_IN_INSPECTED_PLANNER",
+  "codeImported": false,
+  "constructionOperations": 0,
+  "note": "October 10 archived source snapshot; NOT a current runtime attestation"
+}

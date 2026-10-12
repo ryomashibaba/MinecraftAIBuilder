@@ -1,0 +1,12 @@
+MinecraftAIBuilder Step8B/B0 / OFFLINE READ-ONLY COMPATIBILITY REVIEW
+COMPATIBILITY: UNKNOWN
+BUILD STATUS: NOT PREPARED
+EXECUTION ALLOWED: false
+WORLD OPERATIONS: 0
+Windows latest engine compatibility NOT proven. No Minecraft / Bridge / build / pack / scan.
+Snapshot inventory status: WINDOWS_SOURCE_NOT_PROVIDED
+Blockers:
+- Current installed Windows building-engine behavior and API have not been verified
+- No confirmed mapping from conceptual coordinates to world origin / transform
+- No verified Education block IDs / states / version-skew reconciliation
+- Room, facade, door, stair, elevator, support and world state remain unverified

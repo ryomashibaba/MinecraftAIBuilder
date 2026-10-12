@@ -1,0 +1,85 @@
+{
+  "schema": "minecraftaibuilder-b26-readonly-snapshot-facts-v1",
+  "captureZipSha256": "62d1de7d0148d514fded1544c254a9beab4299018dc054aff353557df0809a1f",
+  "evidenceDate": "2026-10-10",
+  "sourceHashes": {
+    "engine/src/general-building-planner.js": "23be6e8b03827698fb890661f6fd0957a76ac4718f3347531121c8a7dc0450c8",
+    "engine/src/build-anchor.js": "23bea262e90012fc6bfdd9f1407e1f7cb514f87862ad1c60b0431792f8ef056f",
+    "engine/src/block-states.js": "7bee6028673be26058e7a54e30c904cf568c66a379acd066c12a0c8f38edcf78",
+    "engine/src/block-catalog.js": "923c95a45c1c40d3444ffb7f567c797e1e45723c8c332d2ad68f459c360803eb",
+    "engine/src/safety.js": "ef4f71ec968b46ce937d6b279f9cb5b9b7aecde7fd917a960e1716b72795e9fc",
+    "bridge/src/general-building.js": "ca1531453d9cb90b5b75b99c0e1d47e22b8e38d244b5adb14da2deda5ef65828",
+    "catalog/education.json": "842de2f91b0c84c9bd601fbeae9f04e6edf6a1b97b688635163a7c7816bd3a5f",
+    "catalog/semantic.json": "fca2ba78056d286862e3b0c48f2226c673bc3596c1b7d434f9b4ee30273cc6de",
+    "modules/architectural-library.js": "19fa126051a687bfb5c5f6bdf199a6d42aa70b475d908dd38a99e9f354532eee"
+  },
+  "educationVersion": "v26.3",
+  "profileEnvironment": "minecraft-education",
+  "recordCounts": {
+    "total": 966,
+    "statuses": {
+      "unsupported": 139,
+      "verified": 827
+    },
+    "byForm": {
+      "door": {
+        "records": 0,
+        "statuses": {}
+      },
+      "trapdoor": {
+        "records": 128,
+        "statuses": {
+          "verified": 128
+        }
+      },
+      "stairs": {
+        "records": 272,
+        "statuses": {
+          "unsupported": 64,
+          "verified": 208
+        }
+      },
+      "planks": {
+        "records": 12,
+        "statuses": {
+          "unsupported": 1,
+          "verified": 11
+        }
+      },
+      "slab": {
+        "records": 134,
+        "statuses": {
+          "unsupported": 32,
+          "verified": 102
+        }
+      }
+    }
+  },
+  "sourceContracts": {
+    "doorStateTokensInTransformSource": {
+      "upper_block_bit": true,
+      "door_hinge_bit": true,
+      "open_bit": true,
+      "direction": true,
+      "weirdo_direction": true,
+      "minecraft:cardinal_direction": true
+    },
+    "rotateLocalFacings": [
+      "north",
+      "east",
+      "south",
+      "west"
+    ],
+    "doorCatalogFormSupported": true,
+    "catalogValidationExists": true,
+    "sourceIsArchived": true,
+    "engineRuntimeAttested": false,
+    "doorBlockStateLiveVerification": false
+  },
+  "interpretation": "ARCHIVED_SOURCE_AND_PROFILE_ONLY_NOT_LIVE_WORLD_PROOF",
+  "safety": {
+    "constructionApproved": false,
+    "operationCount": 0,
+    "worldAccess": false
+  }
+}

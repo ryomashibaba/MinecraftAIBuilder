@@ -1,0 +1,157 @@
+{
+  "schema": "minecraftaibuilder-step8b-b34-cross-floor-access-v1",
+  "kind": "NONEXECUTABLE_LAYOUT_REVIEW",
+  "building": "apartment/candidate-01",
+  "totals": {
+    "proposals": 6,
+    "levelsReviewed": 30,
+    "zeroVoidBoundaryCandidates": 4,
+    "optionsPreservingNominalDoorPaths": 1,
+    "optionsWithoutCorridorDisplacement": 0,
+    "proposalCorridorDisplacedCells": 50,
+    "proposalDoorPathsLost": 195,
+    "approvedProposals": 0,
+    "operationsEmitted": 0
+  },
+  "candidates": [
+    {
+      "offset": {
+        "dx": 0,
+        "dz": 1
+      },
+      "cutoutVoidAdjacency": 0,
+      "displacedCorridorCells": 5,
+      "nominalDoorPathsLost": 0,
+      "wallBoundaryEndpointFlags": 20,
+      "approved": false,
+      "verdict": "BLOCKED_REQUIRES_LAYOUT_REDESIGN"
+    },
+    {
+      "offset": {
+        "dx": -1,
+        "dz": 1
+      },
+      "cutoutVoidAdjacency": 0,
+      "displacedCorridorCells": 10,
+      "nominalDoorPathsLost": 5,
+      "wallBoundaryEndpointFlags": 25,
+      "approved": false,
+      "verdict": "BLOCKED_REQUIRES_LAYOUT_REDESIGN"
+    },
+    {
+      "offset": {
+        "dx": 0,
+        "dz": 2
+      },
+      "cutoutVoidAdjacency": 0,
+      "displacedCorridorCells": 10,
+      "nominalDoorPathsLost": 65,
+      "wallBoundaryEndpointFlags": 30,
+      "approved": false,
+      "verdict": "BLOCKED_REQUIRES_LAYOUT_REDESIGN"
+    },
+    {
+      "offset": {
+        "dx": 1,
+        "dz": 1
+      },
+      "cutoutVoidAdjacency": 0,
+      "displacedCorridorCells": 5,
+      "nominalDoorPathsLost": 60,
+      "wallBoundaryEndpointFlags": 25,
+      "approved": false,
+      "verdict": "BLOCKED_REQUIRES_LAYOUT_REDESIGN"
+    },
+    {
+      "offset": {
+        "dx": -1,
+        "dz": 0
+      },
+      "cutoutVoidAdjacency": 5,
+      "displacedCorridorCells": 10,
+      "nominalDoorPathsLost": 5,
+      "wallBoundaryEndpointFlags": 15,
+      "approved": false,
+      "verdict": "BLOCKED_REQUIRES_LAYOUT_REDESIGN"
+    },
+    {
+      "offset": {
+        "dx": 1,
+        "dz": 0
+      },
+      "cutoutVoidAdjacency": 5,
+      "displacedCorridorCells": 10,
+      "nominalDoorPathsLost": 60,
+      "wallBoundaryEndpointFlags": 15,
+      "approved": false,
+      "verdict": "BLOCKED_REQUIRES_LAYOUT_REDESIGN"
+    }
+  ],
+  "guidance": "(dx=0,dz=+1) is review-first only; requires 5 corridor cells redesigned; no candidate auto-applied.",
+  "notVerified": [
+    "room volume",
+    "physical staircase access",
+    "wall structural continuity",
+    "floor support",
+    "door Minecraft states",
+    "materials",
+    "world coordinate anchor"
+  ],
+  "blockers": [
+    {
+      "id": "M4-01",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-02",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-03",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-04",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-05",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-06",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-07",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-08",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-09",
+      "status": "BLOCKED"
+    }
+  ],
+  "deployment": "BLOCKED",
+  "readiness": "NOT_PREPARED",
+  "safety": {
+    "constructionApproved": false,
+    "executionAllowed": false,
+    "notPrepared": true,
+    "projectFilesModified": false,
+    "existingWorldModified": false,
+    "legacyModified": false,
+    "frozenEvidenceModified": false,
+    "bridgeContact": false
+  },
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0,
+    "materialIds": [],
+    "worldCoordinates": null
+  }
+}

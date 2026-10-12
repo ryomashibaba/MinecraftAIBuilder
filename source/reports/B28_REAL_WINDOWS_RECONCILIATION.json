@@ -1,0 +1,126 @@
+{
+  "schema": "minecraftaibuilder-step8b-b28-real-evidence-reconciliation-v1",
+  "kind": "READ_ONLY_EVIDENCE_AND_ARCHIVE_IDENTITY_ONLY",
+  "collectedAt": "2026-10-11T12:08:51.5859717+09:00",
+  "originalEvidenceSha256": "391406ef08d01d6966850591da06cf3e85eada696c1d00b8e4a6f4a1b54cb057",
+  "disk": {
+    "checked": 9,
+    "matched": 9,
+    "outcome": "ALL_9_DISK_HASHES_MATCH",
+    "engineLoadedHashAttested": false
+  },
+  "archivedCatalog": {
+    "capturedProfileStatus": "UNAVAILABLE",
+    "verifiedByteIdentity": true,
+    "recoveredBy": "PINNED_CATALOG_SHA256_AND_OFFLINE_SNAPSHOT_RECOUNT",
+    "archiveSnapshotSha256": "62d1de7d0148d514fded1544c254a9beab4299018dc054aff353557df0809a1f",
+    "archiveCatalogSha256": "842de2f91b0c84c9bd601fbeae9f04e6edf6a1b97b688635163a7c7816bd3a5f",
+    "version": "v26.3",
+    "records": 966,
+    "archivedVerified": 827,
+    "archivedUnsupported": 139,
+    "ordinaryDoorExactStateEvidenceRecords": 0,
+    "liveMinecraftAcceptanceProven": false,
+    "finding": "ARCHIVE_COUNTS_RECOVERED_FROM_MATCHED_DISK_BYTES_NOT_LIVE_PROOF"
+  },
+  "runtime": {
+    "collectedAt": "2026-10-11T12:08:51.5859717+09:00",
+    "nodeProcessCount": 7,
+    "rootHints": 0,
+    "entrypointHints": 0,
+    "ports": {
+      "port8000": 0,
+      "port8765": 0
+    },
+    "signal": "NO_PROJECT_RUNTIME_HINT_OR_LISTENER_OBSERVED",
+    "identityAttested": false
+  },
+  "blockers": [
+    {
+      "id": "M4-01",
+      "status": "BLOCKED",
+      "reason": "DISK_MATCH_ONLY_LOADED_RUNTIME_NOT_ATTESTED"
+    },
+    {
+      "id": "M4-02",
+      "status": "BLOCKED",
+      "reason": "ARCHIVED_PROFILE_NOT_LIVE_EXACT_STATES"
+    },
+    {
+      "id": "M4-03",
+      "status": "BLOCKED",
+      "reason": "PHYSICAL_OR_WORLD_PROOF_MISSING"
+    },
+    {
+      "id": "M4-04",
+      "status": "BLOCKED",
+      "reason": "PHYSICAL_OR_WORLD_PROOF_MISSING"
+    },
+    {
+      "id": "M4-05",
+      "status": "BLOCKED",
+      "reason": "ARCHIVED_PROFILE_NOT_LIVE_EXACT_STATES"
+    },
+    {
+      "id": "M4-06",
+      "status": "BLOCKED",
+      "reason": "PHYSICAL_OR_WORLD_PROOF_MISSING"
+    },
+    {
+      "id": "M4-07",
+      "status": "BLOCKED",
+      "reason": "PHYSICAL_OR_WORLD_PROOF_MISSING"
+    },
+    {
+      "id": "M4-08",
+      "status": "BLOCKED",
+      "reason": "PHYSICAL_OR_WORLD_PROOF_MISSING"
+    },
+    {
+      "id": "M4-09",
+      "status": "BLOCKED",
+      "reason": "NO_CONSTRUCTION_AUTHORIZATION"
+    }
+  ],
+  "remainingBlockers": 9,
+  "nextActions": [
+    {
+      "priority": 1,
+      "key": "OFFLINE_DOOR_STAIR_MATERIAL_CONTRACT",
+      "action": "Integrate symbolic doors, stairs and palette roles as an isolated offline contract; do not select actual material IDs",
+      "needsWindowsNow": false,
+      "physicalProof": false
+    },
+    {
+      "priority": 2,
+      "key": "OFFLINE_OFFICE02_SHAPE_RECONCILIATION",
+      "action": "Resolve the preserved office02 exterior/corridor design discrepancy in a candidate-only adapter",
+      "needsWindowsNow": false,
+      "physicalProof": false
+    },
+    {
+      "priority": 3,
+      "key": "TARGETED_RUNTIME_OR_WORLD_ATTESTATION",
+      "action": "Defer until the actual engine is intentionally running or an authorized isolated-world validation is scheduled",
+      "needsWindowsNow": true,
+      "physicalProof": false
+    }
+  ],
+  "repeatSameWindowsCollectionNow": false,
+  "safety": {
+    "notPrepared": true,
+    "constructionApproved": false,
+    "executionAllowed": false,
+    "worldAccess": false,
+    "bridgeContact": false,
+    "physicalModifications": 0
+  },
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0,
+    "worldCoordinates": null,
+    "materialIds": []
+  },
+  "reportSha256": "fe25e9a8335dc0970b26d8738228f02ca47ed6a6ffe6fd0b0bfd94a5285e4fb1"
+}

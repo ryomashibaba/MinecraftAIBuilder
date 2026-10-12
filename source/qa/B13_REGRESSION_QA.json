@@ -1,0 +1,199 @@
+{
+  "schema": "minecraftaibuilder-b13-verification-v1",
+  "date": "2026-10-10",
+  "environment": "Linux Node.js 22 + headless Chromium",
+  "testGroups": 22,
+  "step8bTests": 255,
+  "step8aTests": 80,
+  "pass": 335,
+  "fail": 0,
+  "skip": 0,
+  "scope": "per test file completed runs; not single-process run",
+  "browser": {
+    "status": "PASS",
+    "externalRequests": 0,
+    "pageErrors": 0,
+    "fileSchemeWindows": "UNVERIFIED"
+  },
+  "windowsOperationCount": 0,
+  "deploymentGate": "BLOCKED",
+  "buildPlanStatus": "NOT_PREPARED",
+  "testRuns": [
+    {
+      "testFile": "tests/step8b-candidate-review-b8.test.mjs",
+      "resultFile": "qa/B13_step8b-candidate-review-b8.test.tap",
+      "tests": 22,
+      "pass": 22,
+      "fail": 0,
+      "skip": 0
+    },
+    {
+      "testFile": "tests/step8b-compatibility.test.mjs",
+      "resultFile": "qa/B13_step8b-compatibility.test.tap",
+      "tests": 21,
+      "pass": 21,
+      "fail": 0,
+      "skip": 0
+    },
+    {
+      "testFile": "tests/step8b-diversity-b9.test.mjs",
+      "resultFile": "qa/B13_step8b-diversity-b9.test.tap",
+      "tests": 17,
+      "pass": 17,
+      "fail": 0,
+      "skip": 0
+    },
+    {
+      "testFile": "tests/step8b-evidence-b43.test.mjs",
+      "resultFile": "qa/B13_step8b-evidence-b43.test.tap",
+      "tests": 10,
+      "pass": 10,
+      "fail": 0,
+      "skip": 0
+    },
+    {
+      "testFile": "tests/step8b-geometry-b3.test.mjs",
+      "resultFile": "qa/B13_step8b-geometry-b3.test.tap",
+      "tests": 11,
+      "pass": 11,
+      "fail": 0,
+      "skip": 0
+    },
+    {
+      "testFile": "tests/step8b-guardrails-b44.test.mjs",
+      "resultFile": "qa/B13_step8b-guardrails-b44.test.tap",
+      "tests": 8,
+      "pass": 8,
+      "fail": 0,
+      "skip": 0
+    },
+    {
+      "testFile": "tests/step8b-interior-contract-b10.test.mjs",
+      "resultFile": "qa/B13_step8b-interior-contract-b10.test.tap",
+      "tests": 16,
+      "pass": 16,
+      "fail": 0,
+      "skip": 0
+    },
+    {
+      "testFile": "tests/step8b-interior-repair-b11.test.mjs",
+      "resultFile": "qa/B13_step8b-interior-repair-b11.test.tap",
+      "tests": 20,
+      "pass": 20,
+      "fail": 0,
+      "skip": 0
+    },
+    {
+      "testFile": "tests/step8b-module-contract-b13.test.mjs",
+      "resultFile": "qa/B13_step8b-module-contract-b13.test.tap",
+      "tests": 22,
+      "pass": 22,
+      "fail": 0,
+      "skip": 0
+    },
+    {
+      "testFile": "tests/step8b-readiness-b5.test.mjs",
+      "resultFile": "qa/B13_step8b-readiness-b5.test.tap",
+      "tests": 8,
+      "pass": 8,
+      "fail": 0,
+      "skip": 0
+    },
+    {
+      "testFile": "tests/step8b-review-b7.test.mjs",
+      "resultFile": "qa/B13_step8b-review-b7.test.tap",
+      "tests": 25,
+      "pass": 25,
+      "fail": 0,
+      "skip": 0
+    },
+    {
+      "testFile": "tests/step8b-runtime-b4.test.mjs",
+      "resultFile": "qa/B13_step8b-runtime-b4.test.tap",
+      "tests": 11,
+      "pass": 11,
+      "fail": 0,
+      "skip": 0
+    },
+    {
+      "testFile": "tests/step8b-runtime-b42.test.mjs",
+      "resultFile": "qa/B13_step8b-runtime-b42.test.tap",
+      "tests": 14,
+      "pass": 14,
+      "fail": 0,
+      "skip": 0
+    },
+    {
+      "testFile": "tests/step8b-spatial-b12.test.mjs",
+      "resultFile": "qa/B13_step8b-spatial-b12.test.tap",
+      "tests": 23,
+      "pass": 23,
+      "fail": 0,
+      "skip": 0
+    },
+    {
+      "testFile": "tests/step8b-static-planner-b6.test.mjs",
+      "resultFile": "qa/B13_step8b-static-planner-b6.test.tap",
+      "tests": 17,
+      "pass": 17,
+      "fail": 0,
+      "skip": 0
+    },
+    {
+      "testFile": "tests/step8b-windows-b2.test.mjs",
+      "resultFile": "qa/B13_step8b-windows-b2.test.tap",
+      "tests": 10,
+      "pass": 10,
+      "fail": 0,
+      "skip": 0
+    },
+    {
+      "testFile": "tests/step8a-architecture.test.mjs",
+      "resultFile": "qa/B13_step8a-architecture.test.tap",
+      "tests": 15,
+      "pass": 15,
+      "fail": 0,
+      "skip": 0
+    },
+    {
+      "testFile": "tests/step8a-design.test.mjs",
+      "resultFile": "qa/B13_step8a-design.test.tap",
+      "tests": 10,
+      "pass": 10,
+      "fail": 0,
+      "skip": 0
+    },
+    {
+      "testFile": "tests/step8a-detail.test.mjs",
+      "resultFile": "qa/B13_step8a-detail.test.tap",
+      "tests": 15,
+      "pass": 15,
+      "fail": 0,
+      "skip": 0
+    },
+    {
+      "testFile": "tests/step8a-optimize.test.mjs",
+      "resultFile": "qa/B13_step8a-optimize.test.tap",
+      "tests": 14,
+      "pass": 14,
+      "fail": 0,
+      "skip": 0
+    },
+    {
+      "testFile": "tests/step8a-physical.test.mjs",
+      "resultFile": "qa/B13_step8a-physical.test.tap",
+      "tests": 13,
+      "pass": 13,
+      "fail": 0,
+      "skip": 0
+    },
+    {
+      "testFile": "tests/step8a-review.test.mjs",
+      "resultFile": "qa/B13_step8a-review.test.tap",
+      "tests": 13,
+      "pass": 13,
+      "fail": 0,
+      "skip": 0
+    }
+  ]
+}

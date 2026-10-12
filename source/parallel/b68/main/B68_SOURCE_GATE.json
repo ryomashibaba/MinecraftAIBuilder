@@ -1,0 +1,132 @@
+{
+  "schema": "minecraftaibuilder-b68-static-production-contract-gate-v1",
+  "provenance": {
+    "b67ReportSha256": "0269c450dc466dadffeabfbd6de73d445c3c725cac063d67bde56a288997a0fc",
+    "sourceArchiveSha256": null
+  },
+  "intake": {
+    "required": 5,
+    "found": 0,
+    "exactPinMatch": 0,
+    "versionMismatch": 0,
+    "missing": 5,
+    "metadata": "NOT_PROVIDED"
+  },
+  "interfaceMatrix": [
+    {
+      "source": "engine/src/general-building-planner.js",
+      "concern": "ENTRY_ORCHESTRATION",
+      "b65B66Contract": "NON_EXECUTING_ASSEMBLY_TO_ENGINE_HANDOFF",
+      "sourceStatus": "MISSING",
+      "staticNamesFound": [],
+      "inspectionLevel": "NOT_AVAILABLE",
+      "runtimeParity": "UNVERIFIED",
+      "implementationApproved": false
+    },
+    {
+      "source": "engine/src/building-grammar.js",
+      "concern": "PHYSICAL_STRUCTURE_AND_VERTICAL_GEOMETRY",
+      "b65B66Contract": "WALL_AND_VERTICAL_INTENT_TRANSLATION",
+      "sourceStatus": "MISSING",
+      "staticNamesFound": [],
+      "inspectionLevel": "NOT_AVAILABLE",
+      "runtimeParity": "UNVERIFIED",
+      "implementationApproved": false
+    },
+    {
+      "source": "engine/src/architectural-quality.js",
+      "concern": "GEOMETRY_AND_QUALITY_ASSERTIONS",
+      "b65B66Contract": "OPENING_CLEARANCE_AND_SUPPORT_VALIDATION",
+      "sourceStatus": "MISSING",
+      "staticNamesFound": [],
+      "inspectionLevel": "NOT_AVAILABLE",
+      "runtimeParity": "UNVERIFIED",
+      "implementationApproved": false
+    },
+    {
+      "source": "modules/architectural-library.js",
+      "concern": "ARCHITECTURAL_COMPONENT_FACTORIES",
+      "b65B66Contract": "DOOR_WALL_STAIR_LIBRARY_IDENTIFIERS",
+      "sourceStatus": "MISSING",
+      "staticNamesFound": [],
+      "inspectionLevel": "NOT_AVAILABLE",
+      "runtimeParity": "UNVERIFIED",
+      "implementationApproved": false
+    },
+    {
+      "source": "styles/urban_japanese.json",
+      "concern": "MATERIAL_AND_STYLE_LOOKUP",
+      "b65B66Contract": "PALETTE_BLOCK_AND_STATE_RESOLUTION",
+      "sourceStatus": "MISSING",
+      "staticNamesFound": [],
+      "inspectionLevel": "NOT_AVAILABLE",
+      "runtimeParity": "UNVERIFIED",
+      "implementationApproved": false
+    }
+  ],
+  "concreteNextGate": "B67_ORIGINAL_SOURCE_ZIP_REQUIRED",
+  "hardBlockers": [
+    "PRODUCTION_API_PARITY_NOT_PROVEN",
+    "PHYSICAL_BLOCK_STATE_MAPPING_UNVERIFIED",
+    "REAL_DOOR_SWING_AND_CLEARANCE_UNVERIFIED",
+    "STAIR_SUPPORT_AND_HEADROOM_UNVERIFIED",
+    "B42_UPPER_60_DOOR_CIRCULATION_NOT_VERIFIED",
+    "B62_B64_CONNECTOR_NOT_APPROVED"
+  ],
+  "guards": {
+    "readiness": "NOT_PREPARED",
+    "executionAllowed": false,
+    "constructionApproved": false,
+    "sourceExecuted": false,
+    "sourceImported": false,
+    "worldCalls": 0,
+    "scans": 0,
+    "M4Gates": [
+      {
+        "id": "M4-01",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-02",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-03",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-04",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-05",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-06",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-07",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-08",
+        "status": "BLOCKED"
+      },
+      {
+        "id": "M4-09",
+        "status": "BLOCKED"
+      }
+    ],
+    "BuildPlan": {
+      "status": "NOT_PREPARED",
+      "operations": [],
+      "commandCount": 0,
+      "worldCoordinates": null,
+      "materialIds": []
+    }
+  },
+  "productionParity": "UNVERIFIED",
+  "reportSha256": "f4bf08f9a8bbef459f7ea1fb1bbb7042033faa53d70d736ae7550dfea14e442e"
+}

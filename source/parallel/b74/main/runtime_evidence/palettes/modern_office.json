@@ -1,0 +1,14 @@
+﻿{
+  "name": "modern_office",
+  "version": 1,
+  "description": "Modern office palette using common vanilla building blocks.",
+  "materials": {
+    "structure": "stone",
+    "floor": "stone",
+    "wall": "white_concrete",
+    "glass": "glass",
+    "accent": "gray_concrete",
+    "light": "sea_lantern",
+    "roof": "light_gray_concrete"
+  }
+}

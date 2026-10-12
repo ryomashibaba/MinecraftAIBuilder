@@ -1,0 +1,10 @@
+{
+  "program": "hotel",
+  "width": 26,
+  "depth": 20,
+  "floors": 6,
+  "style": "modern",
+  "seed": 0,
+  "orientation": "north",
+  "massing": "stepped"
+}

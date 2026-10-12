@@ -1,0 +1,5173 @@
+{
+  "stone": {
+    "family": "stone",
+    "colorFamily": "gray",
+    "materialCategory": "stone",
+    "textureCharacter": "masonry",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "stone_bricks": {
+    "family": "stone",
+    "colorFamily": "gray",
+    "materialCategory": "stone",
+    "textureCharacter": "masonry",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "stone_brick_slab": {
+    "family": "stone",
+    "colorFamily": "gray",
+    "materialCategory": "stone",
+    "textureCharacter": "masonry",
+    "form": "slab",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "minecraft:vertical_half"
+    ],
+    "safetyClassification": "building"
+  },
+  "stone_brick_stairs": {
+    "family": "stone",
+    "colorFamily": "gray",
+    "materialCategory": "stone",
+    "textureCharacter": "masonry",
+    "form": "stairs",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "minecraft:corner",
+      "upside_down_bit",
+      "weirdo_direction"
+    ],
+    "safetyClassification": "building"
+  },
+  "stone_brick_wall": {
+    "family": "stone",
+    "colorFamily": "gray",
+    "materialCategory": "stone",
+    "textureCharacter": "masonry",
+    "form": "wall",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "wall_connection_type_east",
+      "wall_connection_type_north",
+      "wall_connection_type_south",
+      "wall_connection_type_west",
+      "wall_post_bit"
+    ],
+    "safetyClassification": "building"
+  },
+  "smooth_stone": {
+    "family": "stone",
+    "colorFamily": "gray",
+    "materialCategory": "stone",
+    "textureCharacter": "masonry",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "smooth_stone_slab": {
+    "family": "stone",
+    "colorFamily": "gray",
+    "materialCategory": "stone",
+    "textureCharacter": "masonry",
+    "form": "slab",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "minecraft:vertical_half"
+    ],
+    "safetyClassification": "building"
+  },
+  "andesite": {
+    "family": "andesite",
+    "colorFamily": "gray",
+    "materialCategory": "stone",
+    "textureCharacter": "speckled",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "polished_andesite": {
+    "family": "andesite",
+    "colorFamily": "gray",
+    "materialCategory": "stone",
+    "textureCharacter": "speckled",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "andesite_slab": {
+    "family": "andesite",
+    "colorFamily": "gray",
+    "materialCategory": "stone",
+    "textureCharacter": "speckled",
+    "form": "slab",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "minecraft:vertical_half"
+    ],
+    "safetyClassification": "building"
+  },
+  "andesite_stairs": {
+    "family": "andesite",
+    "colorFamily": "gray",
+    "materialCategory": "stone",
+    "textureCharacter": "speckled",
+    "form": "stairs",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "minecraft:corner",
+      "upside_down_bit",
+      "weirdo_direction"
+    ],
+    "safetyClassification": "building"
+  },
+  "andesite_wall": {
+    "family": "andesite",
+    "colorFamily": "gray",
+    "materialCategory": "stone",
+    "textureCharacter": "speckled",
+    "form": "wall",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "wall_connection_type_east",
+      "wall_connection_type_north",
+      "wall_connection_type_south",
+      "wall_connection_type_west",
+      "wall_post_bit"
+    ],
+    "safetyClassification": "building"
+  },
+  "polished_andesite_slab": {
+    "family": "andesite",
+    "colorFamily": "gray",
+    "materialCategory": "stone",
+    "textureCharacter": "speckled",
+    "form": "slab",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "minecraft:vertical_half"
+    ],
+    "safetyClassification": "building"
+  },
+  "polished_andesite_stairs": {
+    "family": "andesite",
+    "colorFamily": "gray",
+    "materialCategory": "stone",
+    "textureCharacter": "speckled",
+    "form": "stairs",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "minecraft:corner",
+      "upside_down_bit",
+      "weirdo_direction"
+    ],
+    "safetyClassification": "building"
+  },
+  "quartz_block": {
+    "family": "quartz",
+    "colorFamily": "white",
+    "materialCategory": "stone",
+    "textureCharacter": "smooth",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "pillar_axis"
+    ],
+    "safetyClassification": "building"
+  },
+  "quartz_pillar": {
+    "family": "quartz",
+    "colorFamily": "white",
+    "materialCategory": "stone",
+    "textureCharacter": "smooth",
+    "form": "pillar/log",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "pillar_axis"
+    ],
+    "safetyClassification": "building"
+  },
+  "quartz_slab": {
+    "family": "quartz",
+    "colorFamily": "white",
+    "materialCategory": "stone",
+    "textureCharacter": "smooth",
+    "form": "slab",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "minecraft:vertical_half"
+    ],
+    "safetyClassification": "building"
+  },
+  "quartz_stairs": {
+    "family": "quartz",
+    "colorFamily": "white",
+    "materialCategory": "stone",
+    "textureCharacter": "smooth",
+    "form": "stairs",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "minecraft:corner",
+      "upside_down_bit",
+      "weirdo_direction"
+    ],
+    "safetyClassification": "building"
+  },
+  "smooth_quartz": {
+    "family": "quartz",
+    "colorFamily": "white",
+    "materialCategory": "stone",
+    "textureCharacter": "smooth",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "pillar_axis"
+    ],
+    "safetyClassification": "building"
+  },
+  "smooth_quartz_slab": {
+    "family": "quartz",
+    "colorFamily": "white",
+    "materialCategory": "stone",
+    "textureCharacter": "smooth",
+    "form": "slab",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "minecraft:vertical_half"
+    ],
+    "safetyClassification": "building"
+  },
+  "smooth_quartz_stairs": {
+    "family": "quartz",
+    "colorFamily": "white",
+    "materialCategory": "stone",
+    "textureCharacter": "smooth",
+    "form": "stairs",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "minecraft:corner",
+      "upside_down_bit",
+      "weirdo_direction"
+    ],
+    "safetyClassification": "building"
+  },
+  "brick_block": {
+    "family": "brick",
+    "colorFamily": "warm",
+    "materialCategory": "masonry",
+    "textureCharacter": "brick",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "brick_slab": {
+    "family": "brick",
+    "colorFamily": "warm",
+    "materialCategory": "masonry",
+    "textureCharacter": "brick",
+    "form": "slab",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "minecraft:vertical_half"
+    ],
+    "safetyClassification": "building"
+  },
+  "brick_stairs": {
+    "family": "brick",
+    "colorFamily": "warm",
+    "materialCategory": "masonry",
+    "textureCharacter": "brick",
+    "form": "stairs",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "minecraft:corner",
+      "upside_down_bit",
+      "weirdo_direction"
+    ],
+    "safetyClassification": "building"
+  },
+  "brick_wall": {
+    "family": "brick",
+    "colorFamily": "warm",
+    "materialCategory": "masonry",
+    "textureCharacter": "brick",
+    "form": "wall",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "wall_connection_type_east",
+      "wall_connection_type_north",
+      "wall_connection_type_south",
+      "wall_connection_type_west",
+      "wall_post_bit"
+    ],
+    "safetyClassification": "building"
+  },
+  "sandstone": {
+    "family": "sandstone",
+    "colorFamily": "warm",
+    "materialCategory": "stone",
+    "textureCharacter": "fine_grain",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "smooth_sandstone": {
+    "family": "sandstone",
+    "colorFamily": "warm",
+    "materialCategory": "stone",
+    "textureCharacter": "fine_grain",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "sandstone_slab": {
+    "family": "sandstone",
+    "colorFamily": "warm",
+    "materialCategory": "stone",
+    "textureCharacter": "fine_grain",
+    "form": "slab",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "minecraft:vertical_half"
+    ],
+    "safetyClassification": "building"
+  },
+  "sandstone_stairs": {
+    "family": "sandstone",
+    "colorFamily": "warm",
+    "materialCategory": "stone",
+    "textureCharacter": "fine_grain",
+    "form": "stairs",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "minecraft:corner",
+      "upside_down_bit",
+      "weirdo_direction"
+    ],
+    "safetyClassification": "building"
+  },
+  "sandstone_wall": {
+    "family": "sandstone",
+    "colorFamily": "warm",
+    "materialCategory": "stone",
+    "textureCharacter": "fine_grain",
+    "form": "wall",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "wall_connection_type_east",
+      "wall_connection_type_north",
+      "wall_connection_type_south",
+      "wall_connection_type_west",
+      "wall_post_bit"
+    ],
+    "safetyClassification": "building"
+  },
+  "smooth_sandstone_slab": {
+    "family": "sandstone",
+    "colorFamily": "warm",
+    "materialCategory": "stone",
+    "textureCharacter": "fine_grain",
+    "form": "slab",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "minecraft:vertical_half"
+    ],
+    "safetyClassification": "building"
+  },
+  "smooth_sandstone_stairs": {
+    "family": "sandstone",
+    "colorFamily": "warm",
+    "materialCategory": "stone",
+    "textureCharacter": "fine_grain",
+    "form": "stairs",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "minecraft:corner",
+      "upside_down_bit",
+      "weirdo_direction"
+    ],
+    "safetyClassification": "building"
+  },
+  "polished_blackstone": {
+    "family": "blackstone",
+    "colorFamily": "black",
+    "materialCategory": "stone",
+    "textureCharacter": "masonry",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "polished_blackstone_slab": {
+    "family": "blackstone",
+    "colorFamily": "black",
+    "materialCategory": "stone",
+    "textureCharacter": "masonry",
+    "form": "slab",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "minecraft:vertical_half"
+    ],
+    "safetyClassification": "building"
+  },
+  "polished_blackstone_stairs": {
+    "family": "blackstone",
+    "colorFamily": "black",
+    "materialCategory": "stone",
+    "textureCharacter": "masonry",
+    "form": "stairs",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "minecraft:corner",
+      "upside_down_bit",
+      "weirdo_direction"
+    ],
+    "safetyClassification": "building"
+  },
+  "polished_blackstone_wall": {
+    "family": "blackstone",
+    "colorFamily": "black",
+    "materialCategory": "stone",
+    "textureCharacter": "masonry",
+    "form": "wall",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "wall_connection_type_east",
+      "wall_connection_type_north",
+      "wall_connection_type_south",
+      "wall_connection_type_west",
+      "wall_post_bit"
+    ],
+    "safetyClassification": "building"
+  },
+  "waxed_cut_copper": {
+    "family": "copper",
+    "colorFamily": "warm",
+    "materialCategory": "metal",
+    "textureCharacter": "panel",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "waxed_cut_copper_slab": {
+    "family": "copper",
+    "colorFamily": "warm",
+    "materialCategory": "metal",
+    "textureCharacter": "panel",
+    "form": "slab",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "minecraft:vertical_half"
+    ],
+    "safetyClassification": "building"
+  },
+  "waxed_cut_copper_stairs": {
+    "family": "copper",
+    "colorFamily": "warm",
+    "materialCategory": "metal",
+    "textureCharacter": "panel",
+    "form": "stairs",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "minecraft:corner",
+      "upside_down_bit",
+      "weirdo_direction"
+    ],
+    "safetyClassification": "building"
+  },
+  "waxed_oxidized_cut_copper": {
+    "family": "oxidized_copper",
+    "colorFamily": "green",
+    "materialCategory": "metal",
+    "textureCharacter": "patinated",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "waxed_oxidized_cut_copper_slab": {
+    "family": "oxidized_copper",
+    "colorFamily": "green",
+    "materialCategory": "metal",
+    "textureCharacter": "patinated",
+    "form": "slab",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "minecraft:vertical_half"
+    ],
+    "safetyClassification": "building"
+  },
+  "waxed_oxidized_cut_copper_stairs": {
+    "family": "oxidized_copper",
+    "colorFamily": "green",
+    "materialCategory": "metal",
+    "textureCharacter": "patinated",
+    "form": "stairs",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "minecraft:corner",
+      "upside_down_bit",
+      "weirdo_direction"
+    ],
+    "safetyClassification": "building"
+  },
+  "oak_planks": {
+    "family": "oak",
+    "colorFamily": "warm",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "oak_slab": {
+    "family": "oak",
+    "colorFamily": "warm",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "slab",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "minecraft:vertical_half"
+    ],
+    "safetyClassification": "building"
+  },
+  "oak_stairs": {
+    "family": "oak",
+    "colorFamily": "warm",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "stairs",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "minecraft:corner",
+      "upside_down_bit",
+      "weirdo_direction"
+    ],
+    "safetyClassification": "building"
+  },
+  "oak_fence": {
+    "family": "oak",
+    "colorFamily": "warm",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "fence",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [
+      "solid_below"
+    ],
+    "orientationRequirements": [
+      "minecraft:connection_east",
+      "minecraft:connection_north",
+      "minecraft:connection_south",
+      "minecraft:connection_west"
+    ],
+    "safetyClassification": "building"
+  },
+  "oak_log": {
+    "family": "oak",
+    "colorFamily": "warm",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "pillar/log",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "pillar_axis"
+    ],
+    "safetyClassification": "building"
+  },
+  "trapdoor": {
+    "family": "oak",
+    "colorFamily": "warm",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "trapdoor",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [
+      "attached_surface"
+    ],
+    "orientationRequirements": [
+      "direction",
+      "open_bit",
+      "upside_down_bit"
+    ],
+    "safetyClassification": "building"
+  },
+  "wooden_door": {
+    "family": "oak",
+    "colorFamily": "warm",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "door",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [
+      "solid_below"
+    ],
+    "orientationRequirements": [
+      "door_hinge_bit",
+      "minecraft:cardinal_direction",
+      "open_bit",
+      "upper_block_bit"
+    ],
+    "safetyClassification": "building"
+  },
+  "standing_sign": {
+    "family": "oak",
+    "colorFamily": "warm",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "decorative",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [
+      "solid_below"
+    ],
+    "orientationRequirements": [
+      "ground_sign_direction"
+    ],
+    "safetyClassification": "building"
+  },
+  "wall_sign": {
+    "family": "oak",
+    "colorFamily": "warm",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "decorative",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [
+      "attached_surface"
+    ],
+    "orientationRequirements": [
+      "facing_direction"
+    ],
+    "safetyClassification": "building"
+  },
+  "spruce_planks": {
+    "family": "spruce",
+    "colorFamily": "brown",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "spruce_slab": {
+    "family": "spruce",
+    "colorFamily": "brown",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "slab",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "minecraft:vertical_half"
+    ],
+    "safetyClassification": "building"
+  },
+  "spruce_stairs": {
+    "family": "spruce",
+    "colorFamily": "brown",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "stairs",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "minecraft:corner",
+      "upside_down_bit",
+      "weirdo_direction"
+    ],
+    "safetyClassification": "building"
+  },
+  "spruce_fence": {
+    "family": "spruce",
+    "colorFamily": "brown",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "fence",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [
+      "solid_below"
+    ],
+    "orientationRequirements": [
+      "minecraft:connection_east",
+      "minecraft:connection_north",
+      "minecraft:connection_south",
+      "minecraft:connection_west"
+    ],
+    "safetyClassification": "building"
+  },
+  "spruce_log": {
+    "family": "spruce",
+    "colorFamily": "brown",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "pillar/log",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "pillar_axis"
+    ],
+    "safetyClassification": "building"
+  },
+  "spruce_trapdoor": {
+    "family": "spruce",
+    "colorFamily": "brown",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "trapdoor",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [
+      "attached_surface"
+    ],
+    "orientationRequirements": [
+      "direction",
+      "open_bit",
+      "upside_down_bit"
+    ],
+    "safetyClassification": "building"
+  },
+  "spruce_door": {
+    "family": "spruce",
+    "colorFamily": "brown",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "door",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [
+      "solid_below"
+    ],
+    "orientationRequirements": [
+      "door_hinge_bit",
+      "minecraft:cardinal_direction",
+      "open_bit",
+      "upper_block_bit"
+    ],
+    "safetyClassification": "building"
+  },
+  "spruce_standing_sign": {
+    "family": "spruce",
+    "colorFamily": "brown",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "decorative",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [
+      "solid_below"
+    ],
+    "orientationRequirements": [
+      "ground_sign_direction"
+    ],
+    "safetyClassification": "building"
+  },
+  "spruce_wall_sign": {
+    "family": "spruce",
+    "colorFamily": "brown",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "decorative",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [
+      "attached_surface"
+    ],
+    "orientationRequirements": [
+      "facing_direction"
+    ],
+    "safetyClassification": "building"
+  },
+  "birch_planks": {
+    "family": "birch",
+    "colorFamily": "white",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "birch_slab": {
+    "family": "birch",
+    "colorFamily": "white",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "slab",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "minecraft:vertical_half"
+    ],
+    "safetyClassification": "building"
+  },
+  "birch_stairs": {
+    "family": "birch",
+    "colorFamily": "white",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "stairs",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "minecraft:corner",
+      "upside_down_bit",
+      "weirdo_direction"
+    ],
+    "safetyClassification": "building"
+  },
+  "birch_fence": {
+    "family": "birch",
+    "colorFamily": "white",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "fence",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [
+      "solid_below"
+    ],
+    "orientationRequirements": [
+      "minecraft:connection_east",
+      "minecraft:connection_north",
+      "minecraft:connection_south",
+      "minecraft:connection_west"
+    ],
+    "safetyClassification": "building"
+  },
+  "birch_log": {
+    "family": "birch",
+    "colorFamily": "white",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "pillar/log",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "pillar_axis"
+    ],
+    "safetyClassification": "building"
+  },
+  "birch_trapdoor": {
+    "family": "birch",
+    "colorFamily": "white",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "trapdoor",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [
+      "attached_surface"
+    ],
+    "orientationRequirements": [
+      "direction",
+      "open_bit",
+      "upside_down_bit"
+    ],
+    "safetyClassification": "building"
+  },
+  "birch_door": {
+    "family": "birch",
+    "colorFamily": "white",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "door",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [
+      "solid_below"
+    ],
+    "orientationRequirements": [
+      "door_hinge_bit",
+      "minecraft:cardinal_direction",
+      "open_bit",
+      "upper_block_bit"
+    ],
+    "safetyClassification": "building"
+  },
+  "birch_standing_sign": {
+    "family": "birch",
+    "colorFamily": "white",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "decorative",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [
+      "solid_below"
+    ],
+    "orientationRequirements": [
+      "ground_sign_direction"
+    ],
+    "safetyClassification": "building"
+  },
+  "birch_wall_sign": {
+    "family": "birch",
+    "colorFamily": "white",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "decorative",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [
+      "attached_surface"
+    ],
+    "orientationRequirements": [
+      "facing_direction"
+    ],
+    "safetyClassification": "building"
+  },
+  "dark_oak_planks": {
+    "family": "dark_oak",
+    "colorFamily": "brown",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "dark_oak_slab": {
+    "family": "dark_oak",
+    "colorFamily": "brown",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "slab",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "minecraft:vertical_half"
+    ],
+    "safetyClassification": "building"
+  },
+  "dark_oak_stairs": {
+    "family": "dark_oak",
+    "colorFamily": "brown",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "stairs",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "minecraft:corner",
+      "upside_down_bit",
+      "weirdo_direction"
+    ],
+    "safetyClassification": "building"
+  },
+  "dark_oak_fence": {
+    "family": "dark_oak",
+    "colorFamily": "brown",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "fence",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [
+      "solid_below"
+    ],
+    "orientationRequirements": [
+      "minecraft:connection_east",
+      "minecraft:connection_north",
+      "minecraft:connection_south",
+      "minecraft:connection_west"
+    ],
+    "safetyClassification": "building"
+  },
+  "dark_oak_log": {
+    "family": "dark_oak",
+    "colorFamily": "brown",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "pillar/log",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "pillar_axis"
+    ],
+    "safetyClassification": "building"
+  },
+  "dark_oak_trapdoor": {
+    "family": "dark_oak",
+    "colorFamily": "brown",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "trapdoor",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [
+      "attached_surface"
+    ],
+    "orientationRequirements": [
+      "direction",
+      "open_bit",
+      "upside_down_bit"
+    ],
+    "safetyClassification": "building"
+  },
+  "dark_oak_door": {
+    "family": "dark_oak",
+    "colorFamily": "brown",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "door",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [
+      "solid_below"
+    ],
+    "orientationRequirements": [
+      "door_hinge_bit",
+      "minecraft:cardinal_direction",
+      "open_bit",
+      "upper_block_bit"
+    ],
+    "safetyClassification": "building"
+  },
+  "darkoak_standing_sign": {
+    "family": "dark_oak",
+    "colorFamily": "brown",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "decorative",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [
+      "solid_below"
+    ],
+    "orientationRequirements": [
+      "ground_sign_direction"
+    ],
+    "safetyClassification": "building"
+  },
+  "darkoak_wall_sign": {
+    "family": "dark_oak",
+    "colorFamily": "brown",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "decorative",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [
+      "attached_surface"
+    ],
+    "orientationRequirements": [
+      "facing_direction"
+    ],
+    "safetyClassification": "building"
+  },
+  "acacia_planks": {
+    "family": "acacia",
+    "colorFamily": "warm",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "acacia_slab": {
+    "family": "acacia",
+    "colorFamily": "warm",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "slab",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "minecraft:vertical_half"
+    ],
+    "safetyClassification": "building"
+  },
+  "acacia_stairs": {
+    "family": "acacia",
+    "colorFamily": "warm",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "stairs",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "minecraft:corner",
+      "upside_down_bit",
+      "weirdo_direction"
+    ],
+    "safetyClassification": "building"
+  },
+  "acacia_fence": {
+    "family": "acacia",
+    "colorFamily": "warm",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "fence",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [
+      "solid_below"
+    ],
+    "orientationRequirements": [
+      "minecraft:connection_east",
+      "minecraft:connection_north",
+      "minecraft:connection_south",
+      "minecraft:connection_west"
+    ],
+    "safetyClassification": "building"
+  },
+  "acacia_log": {
+    "family": "acacia",
+    "colorFamily": "warm",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "pillar/log",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "pillar_axis"
+    ],
+    "safetyClassification": "building"
+  },
+  "acacia_trapdoor": {
+    "family": "acacia",
+    "colorFamily": "warm",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "trapdoor",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [
+      "attached_surface"
+    ],
+    "orientationRequirements": [
+      "direction",
+      "open_bit",
+      "upside_down_bit"
+    ],
+    "safetyClassification": "building"
+  },
+  "acacia_door": {
+    "family": "acacia",
+    "colorFamily": "warm",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "door",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [
+      "solid_below"
+    ],
+    "orientationRequirements": [
+      "door_hinge_bit",
+      "minecraft:cardinal_direction",
+      "open_bit",
+      "upper_block_bit"
+    ],
+    "safetyClassification": "building"
+  },
+  "acacia_standing_sign": {
+    "family": "acacia",
+    "colorFamily": "warm",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "decorative",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [
+      "solid_below"
+    ],
+    "orientationRequirements": [
+      "ground_sign_direction"
+    ],
+    "safetyClassification": "building"
+  },
+  "acacia_wall_sign": {
+    "family": "acacia",
+    "colorFamily": "warm",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "decorative",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [
+      "attached_surface"
+    ],
+    "orientationRequirements": [
+      "facing_direction"
+    ],
+    "safetyClassification": "building"
+  },
+  "cherry_planks": {
+    "family": "cherry",
+    "colorFamily": "pink",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "cherry_slab": {
+    "family": "cherry",
+    "colorFamily": "pink",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "slab",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "minecraft:vertical_half"
+    ],
+    "safetyClassification": "building"
+  },
+  "cherry_stairs": {
+    "family": "cherry",
+    "colorFamily": "pink",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "stairs",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "minecraft:corner",
+      "upside_down_bit",
+      "weirdo_direction"
+    ],
+    "safetyClassification": "building"
+  },
+  "cherry_fence": {
+    "family": "cherry",
+    "colorFamily": "pink",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "fence",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [
+      "solid_below"
+    ],
+    "orientationRequirements": [
+      "minecraft:connection_east",
+      "minecraft:connection_north",
+      "minecraft:connection_south",
+      "minecraft:connection_west"
+    ],
+    "safetyClassification": "building"
+  },
+  "cherry_log": {
+    "family": "cherry",
+    "colorFamily": "pink",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "pillar/log",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "pillar_axis"
+    ],
+    "safetyClassification": "building"
+  },
+  "cherry_trapdoor": {
+    "family": "cherry",
+    "colorFamily": "pink",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "trapdoor",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [
+      "attached_surface"
+    ],
+    "orientationRequirements": [
+      "direction",
+      "open_bit",
+      "upside_down_bit"
+    ],
+    "safetyClassification": "building"
+  },
+  "cherry_door": {
+    "family": "cherry",
+    "colorFamily": "pink",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "door",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [
+      "solid_below"
+    ],
+    "orientationRequirements": [
+      "door_hinge_bit",
+      "minecraft:cardinal_direction",
+      "open_bit",
+      "upper_block_bit"
+    ],
+    "safetyClassification": "building"
+  },
+  "cherry_standing_sign": {
+    "family": "cherry",
+    "colorFamily": "pink",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "decorative",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [
+      "solid_below"
+    ],
+    "orientationRequirements": [
+      "ground_sign_direction"
+    ],
+    "safetyClassification": "building"
+  },
+  "cherry_wall_sign": {
+    "family": "cherry",
+    "colorFamily": "pink",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "decorative",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [
+      "attached_surface"
+    ],
+    "orientationRequirements": [
+      "facing_direction"
+    ],
+    "safetyClassification": "building"
+  },
+  "jungle_planks": {
+    "family": "jungle",
+    "colorFamily": "warm",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "jungle_slab": {
+    "family": "jungle",
+    "colorFamily": "warm",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "slab",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "minecraft:vertical_half"
+    ],
+    "safetyClassification": "building"
+  },
+  "jungle_stairs": {
+    "family": "jungle",
+    "colorFamily": "warm",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "stairs",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "minecraft:corner",
+      "upside_down_bit",
+      "weirdo_direction"
+    ],
+    "safetyClassification": "building"
+  },
+  "jungle_fence": {
+    "family": "jungle",
+    "colorFamily": "warm",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "fence",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [
+      "solid_below"
+    ],
+    "orientationRequirements": [
+      "minecraft:connection_east",
+      "minecraft:connection_north",
+      "minecraft:connection_south",
+      "minecraft:connection_west"
+    ],
+    "safetyClassification": "building"
+  },
+  "jungle_log": {
+    "family": "jungle",
+    "colorFamily": "warm",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "pillar/log",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "pillar_axis"
+    ],
+    "safetyClassification": "building"
+  },
+  "jungle_trapdoor": {
+    "family": "jungle",
+    "colorFamily": "warm",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "trapdoor",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [
+      "attached_surface"
+    ],
+    "orientationRequirements": [
+      "direction",
+      "open_bit",
+      "upside_down_bit"
+    ],
+    "safetyClassification": "building"
+  },
+  "jungle_door": {
+    "family": "jungle",
+    "colorFamily": "warm",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "door",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [
+      "solid_below"
+    ],
+    "orientationRequirements": [
+      "door_hinge_bit",
+      "minecraft:cardinal_direction",
+      "open_bit",
+      "upper_block_bit"
+    ],
+    "safetyClassification": "building"
+  },
+  "jungle_standing_sign": {
+    "family": "jungle",
+    "colorFamily": "warm",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "decorative",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [
+      "solid_below"
+    ],
+    "orientationRequirements": [
+      "ground_sign_direction"
+    ],
+    "safetyClassification": "building"
+  },
+  "jungle_wall_sign": {
+    "family": "jungle",
+    "colorFamily": "warm",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "decorative",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [
+      "attached_surface"
+    ],
+    "orientationRequirements": [
+      "facing_direction"
+    ],
+    "safetyClassification": "building"
+  },
+  "mangrove_planks": {
+    "family": "mangrove",
+    "colorFamily": "red",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "mangrove_slab": {
+    "family": "mangrove",
+    "colorFamily": "red",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "slab",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "minecraft:vertical_half"
+    ],
+    "safetyClassification": "building"
+  },
+  "mangrove_stairs": {
+    "family": "mangrove",
+    "colorFamily": "red",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "stairs",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "minecraft:corner",
+      "upside_down_bit",
+      "weirdo_direction"
+    ],
+    "safetyClassification": "building"
+  },
+  "mangrove_fence": {
+    "family": "mangrove",
+    "colorFamily": "red",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "fence",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [
+      "solid_below"
+    ],
+    "orientationRequirements": [
+      "minecraft:connection_east",
+      "minecraft:connection_north",
+      "minecraft:connection_south",
+      "minecraft:connection_west"
+    ],
+    "safetyClassification": "building"
+  },
+  "mangrove_log": {
+    "family": "mangrove",
+    "colorFamily": "red",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "pillar/log",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "pillar_axis"
+    ],
+    "safetyClassification": "building"
+  },
+  "mangrove_trapdoor": {
+    "family": "mangrove",
+    "colorFamily": "red",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "trapdoor",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [
+      "attached_surface"
+    ],
+    "orientationRequirements": [
+      "direction",
+      "open_bit",
+      "upside_down_bit"
+    ],
+    "safetyClassification": "building"
+  },
+  "mangrove_door": {
+    "family": "mangrove",
+    "colorFamily": "red",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "door",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [
+      "solid_below"
+    ],
+    "orientationRequirements": [
+      "door_hinge_bit",
+      "minecraft:cardinal_direction",
+      "open_bit",
+      "upper_block_bit"
+    ],
+    "safetyClassification": "building"
+  },
+  "mangrove_standing_sign": {
+    "family": "mangrove",
+    "colorFamily": "red",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "decorative",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [
+      "solid_below"
+    ],
+    "orientationRequirements": [
+      "ground_sign_direction"
+    ],
+    "safetyClassification": "building"
+  },
+  "mangrove_wall_sign": {
+    "family": "mangrove",
+    "colorFamily": "red",
+    "materialCategory": "wood",
+    "textureCharacter": "grain",
+    "form": "decorative",
+    "architecturalRoles": [
+      "trim",
+      "detail",
+      "frame",
+      "accent"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [
+      "attached_surface"
+    ],
+    "orientationRequirements": [
+      "facing_direction"
+    ],
+    "safetyClassification": "building"
+  },
+  "white_concrete": {
+    "family": "concrete",
+    "colorFamily": "white",
+    "materialCategory": "concrete",
+    "textureCharacter": "smooth",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "white_terracotta": {
+    "family": "terracotta",
+    "colorFamily": "white",
+    "materialCategory": "ceramic",
+    "textureCharacter": "matte",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "light_gray_concrete": {
+    "family": "concrete",
+    "colorFamily": "light_gray",
+    "materialCategory": "concrete",
+    "textureCharacter": "smooth",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "light_gray_terracotta": {
+    "family": "terracotta",
+    "colorFamily": "light_gray",
+    "materialCategory": "ceramic",
+    "textureCharacter": "matte",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "gray_concrete": {
+    "family": "concrete",
+    "colorFamily": "gray",
+    "materialCategory": "concrete",
+    "textureCharacter": "smooth",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "gray_terracotta": {
+    "family": "terracotta",
+    "colorFamily": "gray",
+    "materialCategory": "ceramic",
+    "textureCharacter": "matte",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "black_concrete": {
+    "family": "concrete",
+    "colorFamily": "black",
+    "materialCategory": "concrete",
+    "textureCharacter": "smooth",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "black_terracotta": {
+    "family": "terracotta",
+    "colorFamily": "black",
+    "materialCategory": "ceramic",
+    "textureCharacter": "matte",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "brown_concrete": {
+    "family": "concrete",
+    "colorFamily": "brown",
+    "materialCategory": "concrete",
+    "textureCharacter": "smooth",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "brown_terracotta": {
+    "family": "terracotta",
+    "colorFamily": "brown",
+    "materialCategory": "ceramic",
+    "textureCharacter": "matte",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "red_concrete": {
+    "family": "concrete",
+    "colorFamily": "red",
+    "materialCategory": "concrete",
+    "textureCharacter": "smooth",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "red_terracotta": {
+    "family": "terracotta",
+    "colorFamily": "red",
+    "materialCategory": "ceramic",
+    "textureCharacter": "matte",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "orange_concrete": {
+    "family": "concrete",
+    "colorFamily": "orange",
+    "materialCategory": "concrete",
+    "textureCharacter": "smooth",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "orange_terracotta": {
+    "family": "terracotta",
+    "colorFamily": "orange",
+    "materialCategory": "ceramic",
+    "textureCharacter": "matte",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "yellow_concrete": {
+    "family": "concrete",
+    "colorFamily": "yellow",
+    "materialCategory": "concrete",
+    "textureCharacter": "smooth",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "yellow_terracotta": {
+    "family": "terracotta",
+    "colorFamily": "yellow",
+    "materialCategory": "ceramic",
+    "textureCharacter": "matte",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "green_concrete": {
+    "family": "concrete",
+    "colorFamily": "green",
+    "materialCategory": "concrete",
+    "textureCharacter": "smooth",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "green_terracotta": {
+    "family": "terracotta",
+    "colorFamily": "green",
+    "materialCategory": "ceramic",
+    "textureCharacter": "matte",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "blue_concrete": {
+    "family": "concrete",
+    "colorFamily": "blue",
+    "materialCategory": "concrete",
+    "textureCharacter": "smooth",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "blue_terracotta": {
+    "family": "terracotta",
+    "colorFamily": "blue",
+    "materialCategory": "ceramic",
+    "textureCharacter": "matte",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "cyan_concrete": {
+    "family": "concrete",
+    "colorFamily": "cyan",
+    "materialCategory": "concrete",
+    "textureCharacter": "smooth",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "cyan_terracotta": {
+    "family": "terracotta",
+    "colorFamily": "cyan",
+    "materialCategory": "ceramic",
+    "textureCharacter": "matte",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "pink_concrete": {
+    "family": "concrete",
+    "colorFamily": "pink",
+    "materialCategory": "concrete",
+    "textureCharacter": "smooth",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "pink_terracotta": {
+    "family": "terracotta",
+    "colorFamily": "pink",
+    "materialCategory": "ceramic",
+    "textureCharacter": "matte",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "purple_concrete": {
+    "family": "concrete",
+    "colorFamily": "purple",
+    "materialCategory": "concrete",
+    "textureCharacter": "smooth",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "purple_terracotta": {
+    "family": "terracotta",
+    "colorFamily": "purple",
+    "materialCategory": "ceramic",
+    "textureCharacter": "matte",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "lime_concrete": {
+    "family": "concrete",
+    "colorFamily": "lime",
+    "materialCategory": "concrete",
+    "textureCharacter": "smooth",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "lime_terracotta": {
+    "family": "terracotta",
+    "colorFamily": "lime",
+    "materialCategory": "ceramic",
+    "textureCharacter": "matte",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "magenta_concrete": {
+    "family": "concrete",
+    "colorFamily": "magenta",
+    "materialCategory": "concrete",
+    "textureCharacter": "smooth",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "magenta_terracotta": {
+    "family": "terracotta",
+    "colorFamily": "magenta",
+    "materialCategory": "ceramic",
+    "textureCharacter": "matte",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "light_blue_concrete": {
+    "family": "concrete",
+    "colorFamily": "light_blue",
+    "materialCategory": "concrete",
+    "textureCharacter": "smooth",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "light_blue_terracotta": {
+    "family": "terracotta",
+    "colorFamily": "light_blue",
+    "materialCategory": "ceramic",
+    "textureCharacter": "matte",
+    "form": "full_block",
+    "architecturalRoles": [
+      "primaryWall",
+      "secondaryWall",
+      "structure",
+      "frame",
+      "accent",
+      "floor",
+      "roof",
+      "trim",
+      "detail"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "glass": {
+    "family": "glass",
+    "colorFamily": "neutral",
+    "materialCategory": "glass",
+    "textureCharacter": "transparent",
+    "form": "full_block",
+    "architecturalRoles": [
+      "glazing"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "glass_pane": {
+    "family": "glass",
+    "colorFamily": "neutral",
+    "materialCategory": "glass",
+    "textureCharacter": "transparent",
+    "form": "pane",
+    "architecturalRoles": [
+      "glazing"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "minecraft:connection_east",
+      "minecraft:connection_north",
+      "minecraft:connection_south",
+      "minecraft:connection_west"
+    ],
+    "safetyClassification": "building"
+  },
+  "white_stained_glass": {
+    "family": "glass",
+    "colorFamily": "neutral",
+    "materialCategory": "glass",
+    "textureCharacter": "transparent",
+    "form": "full_block",
+    "architecturalRoles": [
+      "glazing"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "white_stained_glass_pane": {
+    "family": "glass",
+    "colorFamily": "neutral",
+    "materialCategory": "glass",
+    "textureCharacter": "transparent",
+    "form": "pane",
+    "architecturalRoles": [
+      "glazing"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "minecraft:connection_east",
+      "minecraft:connection_north",
+      "minecraft:connection_south",
+      "minecraft:connection_west"
+    ],
+    "safetyClassification": "building"
+  },
+  "gray_stained_glass": {
+    "family": "glass",
+    "colorFamily": "neutral",
+    "materialCategory": "glass",
+    "textureCharacter": "transparent",
+    "form": "full_block",
+    "architecturalRoles": [
+      "glazing"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "gray_stained_glass_pane": {
+    "family": "glass",
+    "colorFamily": "neutral",
+    "materialCategory": "glass",
+    "textureCharacter": "transparent",
+    "form": "pane",
+    "architecturalRoles": [
+      "glazing"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "minecraft:connection_east",
+      "minecraft:connection_north",
+      "minecraft:connection_south",
+      "minecraft:connection_west"
+    ],
+    "safetyClassification": "building"
+  },
+  "brown_stained_glass": {
+    "family": "glass",
+    "colorFamily": "neutral",
+    "materialCategory": "glass",
+    "textureCharacter": "transparent",
+    "form": "full_block",
+    "architecturalRoles": [
+      "glazing"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "brown_stained_glass_pane": {
+    "family": "glass",
+    "colorFamily": "neutral",
+    "materialCategory": "glass",
+    "textureCharacter": "transparent",
+    "form": "pane",
+    "architecturalRoles": [
+      "glazing"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [
+      "minecraft:connection_east",
+      "minecraft:connection_north",
+      "minecraft:connection_south",
+      "minecraft:connection_west"
+    ],
+    "safetyClassification": "building"
+  },
+  "sea_lantern": {
+    "family": "lighting",
+    "colorFamily": "white",
+    "materialCategory": "light",
+    "textureCharacter": "luminous",
+    "form": "light",
+    "architecturalRoles": [
+      "lighting"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  },
+  "glowstone": {
+    "family": "lighting",
+    "colorFamily": "white",
+    "materialCategory": "light",
+    "textureCharacter": "luminous",
+    "form": "light",
+    "architecturalRoles": [
+      "lighting"
+    ],
+    "applicablePrograms": [
+      "office",
+      "apartment",
+      "hotel"
+    ],
+    "applicableStyles": [
+      "modern",
+      "urban_japanese",
+      "industrial",
+      "minimal",
+      "premium",
+      "traditional"
+    ],
+    "supportRequirements": [],
+    "orientationRequirements": [],
+    "safetyClassification": "building"
+  }
+}

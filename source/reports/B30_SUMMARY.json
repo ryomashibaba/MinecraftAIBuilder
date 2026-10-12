@@ -1,0 +1,111 @@
+{
+  "schema": "minecraftaibuilder-step8b-b30-engine-boundary-v1",
+  "kind": "INERT_ENGINE_BOUNDARY_OBSERVATION_NOT_A_BUILDPLAN",
+  "sourceEvidence": {
+    "b29AssemblySha256": "f3c3f5d0d29e80195c464444130fd83aa0bb32d608a0b7e0916e0d26cc7ca0c7",
+    "b7FrozenReportSha256": "4be87b0acfc3641f26a9b71ff329c2386f9e2c8e3461f4d8d70633faf31dcbe8",
+    "b17FrozenReportSha256": "acdb7a316a036789a77c8fe063a4a186379e9abe87b85454e27bc2d44e92bc9d",
+    "snapshotInspection": {
+      "status": "NOT_RECHECKED_IN_THIS_RUN",
+      "runtimeIdentityAttested": false
+    },
+    "engineRuntimeAttested": false,
+    "engineModuleImported": false,
+    "plannerInvoked": false
+  },
+  "engineAPI": {
+    "compositionNormalization": "createComposition(input)",
+    "operationSynthesis": "GeneralBuildingPlanner.fromComposition(composition, options)",
+    "finalSafety": "validateBuildPlan(plan)",
+    "floorPlateEmitter": "plate(mask, base, \"floor\", \"floor\")",
+    "interiorEmitterWired": false,
+    "doorStatesResolved": false,
+    "stairSlabCutoutsImplemented": false,
+    "plannerCallAuthorized": false
+  },
+  "totals": {
+    "buildings": 5,
+    "floors": 30,
+    "wallPanelIntents": 5704,
+    "doorPorts": 314,
+    "stairLinks": 25,
+    "slabCutoutCandidateCells": 50,
+    "mappedMaterialRoles": 0,
+    "verifiedPhysicalDoors": 0,
+    "actualFloorCutouts": 0,
+    "engineCalls": 0,
+    "operationsEmitted": 0
+  },
+  "materialRoles": [
+    {
+      "role": "PARTITION_WALL",
+      "blockId": null,
+      "acceptedInLiveWorld": false,
+      "binding": "BLOCKED"
+    },
+    {
+      "role": "ROOM_DOOR",
+      "blockId": null,
+      "acceptedInLiveWorld": false,
+      "binding": "BLOCKED"
+    },
+    {
+      "role": "STAIR_RUN",
+      "blockId": null,
+      "acceptedInLiveWorld": false,
+      "binding": "BLOCKED"
+    },
+    {
+      "role": "FLOOR_CUTOUT",
+      "blockId": null,
+      "acceptedInLiveWorld": false,
+      "binding": "BLOCKED"
+    },
+    {
+      "role": "JUNCTION",
+      "blockId": null,
+      "acceptedInLiveWorld": false,
+      "binding": "BLOCKED"
+    }
+  ],
+  "office02": {
+    "originalMismatchCells": 123,
+    "originalCorridorOutsideCells": 18,
+    "alternativesCount": 4,
+    "candidateApplied": false
+  },
+  "blockerIds": [
+    "M4-01",
+    "M4-02",
+    "M4-03",
+    "M4-04",
+    "M4-05",
+    "M4-06",
+    "M4-07",
+    "M4-08",
+    "M4-09"
+  ],
+  "unresolvedCount": 9,
+  "readiness": "NOT_PREPARED",
+  "deployment": "BLOCKED",
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0,
+    "worldCoordinates": null,
+    "materialIds": []
+  },
+  "safety": {
+    "constructionApproved": false,
+    "executionAllowed": false,
+    "worldAccess": false,
+    "bridgeContact": false,
+    "engineImported": false,
+    "engineCalled": false,
+    "projectFilesModified": false,
+    "legacyModified": false,
+    "archivedEvidenceModified": false,
+    "buildOperations": 0
+  },
+  "reportSha256": "e38414e3d306ae1edc63d5da9fbf6bf28c78af871bfd81dad1466b1d89119a96"
+}

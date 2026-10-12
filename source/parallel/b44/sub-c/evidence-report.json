@@ -1,0 +1,299 @@
+{
+  "preflight": {
+    "schema": "minecraftaibuilder-b44c-offline-m4-preflight-v1",
+    "kind": "PINNED_EVIDENCE_RECONCILIATION_NO_EXECUTION",
+    "evidencePins": {
+      "reports/B26_M4_READONLY_PREFLIGHT.json": "2173f804b341e475b34ff97087764027bae1a60043e7a1a1011aa797727fc905",
+      "reports/B28_REAL_WINDOWS_RECONCILIATION.json": "fe25e9a8335dc0970b26d8738228f02ca47ed6a6ffe6fd0b0bfd94a5285e4fb1",
+      "reports/B29_M3_M4_ASSEMBLY_IR.json": "f3c3f5d0d29e80195c464444130fd83aa0bb32d608a0b7e0916e0d26cc7ca0c7",
+      "reports/B43_BASELINE_ONLY_ASSESSMENT.json": "7f5137f56e7299122a6a0b3184e99e23c4a28f780f534288bb8892c92df4f9ee",
+      "reports/B43_VERTICAL_CIRCULATION.json": "3d9944fa52bac755557faa9d8b34dfc9f69e61ae45c2bf58f171d8b19fdcec1d"
+    },
+    "educationEdition": {
+      "historicalVersion": "v26.3",
+      "liveVersion": "unknown",
+      "runtimeIdentity": "NOT_PROVEN",
+      "diskMatches": 9,
+      "loadedRuntimeAttested": false,
+      "liveBlockStateProof": false
+    },
+    "archivedCatalog": {
+      "records": 966,
+      "archiveVerified": 827,
+      "archiveUnsupported": 139,
+      "exactOrdinaryDoorRecords": 0,
+      "scope": "ARCHIVED_ONLY",
+      "forms": [
+        {
+          "form": "planks",
+          "evidenceScope": "ARCHIVED_CATALOG_ONLY",
+          "verifiedRecords": 11,
+          "unsupportedRecords": 1,
+          "totalRecords": 12,
+          "actualItemEligibility": "unknown",
+          "selectedBlockId": null,
+          "selectedState": null,
+          "warning": "Historical verified/unsupported counts are NOT per-IR material/state compatibility or game acceptance"
+        },
+        {
+          "form": "stairs",
+          "evidenceScope": "ARCHIVED_CATALOG_ONLY",
+          "verifiedRecords": 208,
+          "unsupportedRecords": 64,
+          "totalRecords": 272,
+          "actualItemEligibility": "unknown",
+          "selectedBlockId": null,
+          "selectedState": null,
+          "warning": "Historical verified/unsupported counts are NOT per-IR material/state compatibility or game acceptance"
+        },
+        {
+          "form": "slab",
+          "evidenceScope": "ARCHIVED_CATALOG_ONLY",
+          "verifiedRecords": 102,
+          "unsupportedRecords": 32,
+          "totalRecords": 134,
+          "actualItemEligibility": "unknown",
+          "selectedBlockId": null,
+          "selectedState": null,
+          "warning": "Historical verified/unsupported counts are NOT per-IR material/state compatibility or game acceptance"
+        },
+        {
+          "form": "door",
+          "evidenceScope": "ARCHIVED_CATALOG_ONLY",
+          "verifiedRecords": 0,
+          "unsupportedRecords": 0,
+          "totalRecords": 0,
+          "actualItemEligibility": "unknown",
+          "selectedBlockId": null,
+          "selectedState": null,
+          "warning": "Historical verified/unsupported counts are NOT per-IR material/state compatibility or game acceptance"
+        },
+        {
+          "form": "trapdoor",
+          "evidenceScope": "ARCHIVED_CATALOG_ONLY",
+          "verifiedRecords": 128,
+          "unsupportedRecords": 0,
+          "totalRecords": 128,
+          "actualItemEligibility": "unknown",
+          "selectedBlockId": null,
+          "selectedState": null,
+          "warning": "Historical verified/unsupported counts are NOT per-IR material/state compatibility or game acceptance"
+        }
+      ]
+    },
+    "capabilityChecks": [
+      {
+        "id": "archive-v26.3-profile",
+        "status": "verified",
+        "scope": "HISTORICAL_ARCHIVE_ONLY",
+        "evidencePath": "b28.archivedCatalog",
+        "explanation": "966 archived records (827 verified, 139 unsupported), cannot transfer to live game"
+      },
+      {
+        "id": "current-education-version",
+        "status": "unknown",
+        "scope": "RUNTIME",
+        "evidencePath": "b26.source.educationVersion",
+        "explanation": "v26.3 appears in historical capture only"
+      },
+      {
+        "id": "loaded-engine-identity",
+        "status": "unknown",
+        "scope": "RUNTIME",
+        "evidencePath": "b43.runtimeIdentity",
+        "explanation": "Source hashes and process counts are not loaded module attestation"
+      },
+      {
+        "id": "ordinary-door-exact-state",
+        "status": "unknown",
+        "scope": "BLOCK_STATE",
+        "evidencePath": "b28.archivedCatalog.ordinaryDoorExactStateEvidenceRecords",
+        "explanation": "Zero exact ordinary door state records; NOT equal to unsupported"
+      },
+      {
+        "id": "door-upper-lower",
+        "status": "unknown",
+        "scope": "BLOCK_STATE",
+        "evidencePath": "b26.interior.lowerAndUpperDoorStatesVerified",
+        "explanation": "Zero certified port states"
+      },
+      {
+        "id": "door-facing-hinge",
+        "status": "unknown",
+        "scope": "BLOCK_STATE",
+        "evidencePath": "b29.totals.physicalDoorsVerified",
+        "explanation": "No physical facing or hinge attested"
+      },
+      {
+        "id": "door-open-close-and-collision",
+        "status": "unknown",
+        "scope": "PHYSICS",
+        "evidencePath": "b29.totals.physicalDoorsVerified",
+        "explanation": "No physical passage testing"
+      },
+      {
+        "id": "stair-facing-shape",
+        "status": "unknown",
+        "scope": "BLOCK_STATE",
+        "evidencePath": "b29.totals.physicalStairsVerified",
+        "explanation": "272 archived stair-form records are not selected exact states"
+      },
+      {
+        "id": "slab-half-and-upper-lower",
+        "status": "unknown",
+        "scope": "BLOCK_STATE",
+        "evidencePath": "b26.archivedProfile.materials",
+        "explanation": "134 archived slab-form records; no supported role/state chosen"
+      },
+      {
+        "id": "stair-collision-support-headroom",
+        "status": "unknown",
+        "scope": "PHYSICS",
+        "evidencePath": "b29.totals.physicalStairsVerified",
+        "explanation": "No physical cutout or support validation"
+      },
+      {
+        "id": "wall-material-joints",
+        "status": "unknown",
+        "scope": "PHYSICS",
+        "evidencePath": "b29.totals.sharedWallVoxelIntents",
+        "explanation": "3990 conceptual overlaps are not validated physical connections"
+      },
+      {
+        "id": "world-site-anchor",
+        "status": "unknown",
+        "scope": "WORLD",
+        "evidencePath": "b26.gate.worldAccess",
+        "explanation": "No world read, site inspection or placement approval"
+      }
+    ],
+    "gates": [
+      {
+        "id": "M4-01",
+        "name": "LOADED_ENGINE_IDENTITY",
+        "status": "BLOCKED",
+        "physicalVerified": false,
+        "reason": "Disk files match archived bytes, not loaded Windows process identity",
+        "evidencePaths": [
+          "b28.disk",
+          "b28.runtime",
+          "b43.runtimeIdentity"
+        ],
+        "missingProof": "Loaded process identity and module attestation"
+      },
+      {
+        "id": "M4-02",
+        "name": "MATERIAL_ROLE_MAPPING",
+        "status": "BLOCKED",
+        "physicalVerified": false,
+        "reason": "Archive catalog totals are not a live, role-specific material mapping",
+        "evidencePaths": [
+          "b26.archivedProfile",
+          "b29.materialRoleContract"
+        ],
+        "missingProof": "Validated live material role mapping"
+      },
+      {
+        "id": "M4-03",
+        "name": "WALL_JUNCTION_MATERIAL_SUPPORT",
+        "status": "BLOCKED",
+        "physicalVerified": false,
+        "reason": "3990 shared wall voxel intents lack material, join and physical validation",
+        "evidencePaths": [
+          "b29.totals",
+          "b29.materialRoleContract"
+        ],
+        "missingProof": "Physically valid wall joins"
+      },
+      {
+        "id": "M4-04",
+        "name": "DOOR_LOWER_UPPER_FACING_HINGE",
+        "status": "BLOCKED",
+        "physicalVerified": false,
+        "reason": "314 door ports lack actual lower/upper, facing and hinge verification",
+        "evidencePaths": [
+          "b29.totals",
+          "b26.interior"
+        ],
+        "missingProof": "Observed exact ordinary door lower/upper, hinge, facing"
+      },
+      {
+        "id": "M4-05",
+        "name": "EXACT_DOOR_BLOCK_STATES",
+        "status": "BLOCKED",
+        "physicalVerified": false,
+        "reason": "Archived ordinary-door exact block-state records are zero",
+        "evidencePaths": [
+          "b28.archivedCatalog",
+          "b26.interior"
+        ],
+        "missingProof": "Accepted Education exact ordinary door states"
+      },
+      {
+        "id": "M4-06",
+        "name": "STAIR_SLAB_CUTOUT_SUPPORT_AND_HEADROOM",
+        "status": "BLOCKED",
+        "physicalVerified": false,
+        "reason": "25 stair interfaces have no certified slab half, direction, collision, headroom or support",
+        "evidencePaths": [
+          "b29.totals",
+          "b43graph.totals"
+        ],
+        "missingProof": "Physical stair, half-slab, headroom, collision and load-bearing support"
+      },
+      {
+        "id": "M4-07",
+        "name": "WORLD_ANCHOR_AND_SITE_SAFETY",
+        "status": "BLOCKED",
+        "physicalVerified": false,
+        "reason": "World anchor, physical site safety, and real movement remain unverified",
+        "evidencePaths": [
+          "b26.gate",
+          "b43graph.safety"
+        ],
+        "missingProof": "Authorized world anchor and site clearance"
+      },
+      {
+        "id": "M4-08",
+        "name": "OFFICE02_SOURCE_VS_CONCEPT",
+        "status": "BLOCKED",
+        "physicalVerified": false,
+        "reason": "Office02 concept/source discrepancy requires candidate-only adjudication",
+        "evidencePaths": [
+          "b29.office02",
+          "b26.interior"
+        ],
+        "missingProof": "Approved structural/corridor design delta"
+      },
+      {
+        "id": "M4-09",
+        "name": "EXPLICIT_CONSTRUCTION_APPROVAL",
+        "status": "BLOCKED",
+        "physicalVerified": false,
+        "reason": "No explicit construction approval; M4 gates must remain blocked",
+        "evidencePaths": [
+          "b26.blockers",
+          "b29.unresolvedGates"
+        ],
+        "missingProof": "Explicit authorization and other eight proofs"
+      }
+    ],
+    "blockedGateCount": 9,
+    "readiness": "NOT_PREPARED",
+    "deployment": "BLOCKED",
+    "reviewOnly": true,
+    "constructionApproved": false,
+    "executionAllowed": false,
+    "engineCalls": 0,
+    "buildOperations": 0,
+    "BuildPlan": {
+      "status": "NOT_PREPARED",
+      "operations": [],
+      "commandCount": 0,
+      "worldCoordinates": null,
+      "materialIds": []
+    },
+    "reportSha256": "15f4de5359cf2246bab696f0c775e5af3710c3ed487d8cc177a8772351ee709b"
+  },
+  "review": null
+}

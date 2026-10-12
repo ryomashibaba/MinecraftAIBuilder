@@ -1,0 +1,72 @@
+{
+  "schema": "minecraftaibuilder-step8b-b32-floor-seam-v1",
+  "kind": "NON_EXECUTING_SOURCE_SEAM_AND_BOOLEAN_MASK_PROOF_NOT_BUILDPLAN",
+  "provenances": {
+    "b31Sha256": "dea8dcb92e4bc635ecbb050e20f1ccb76d8c3a4ac9c1ff5fc3411b521e95c2b6",
+    "archivedPlannerSha256": "23be6e8b03827698fb890661f6fd0957a76ac4718f3347531121c8a7dc0450c8",
+    "inertDevCopySha256": "cec1710da165369d1a34230a620df02a950b74904eb7e07254ae2a75513a35f8",
+    "engineRuntimeAttested": false,
+    "liveWorldAttested": false
+  },
+  "seam": {
+    "oldExpression": "plate(mask, base, \"floor\", \"floor\");",
+    "newExpression": "plate(b32FloorMaskSelector(mask, f), base, \"floor\", \"floor\");",
+    "guardedDevCopy": true,
+    "plannerNotImported": true,
+    "plannerNotInvoked": true,
+    "selectorNotBoundToEngine": true,
+    "candidateOnly": true
+  },
+  "totals": {
+    "buildings": 5,
+    "floors": 30,
+    "sourceFloorCells": 12778,
+    "selectedFloorCells": 12728,
+    "candidateCutoutCells": 50,
+    "nearOuterWallCandidates": 5,
+    "doors": 314,
+    "foundationInputsChanged": 0,
+    "roofInputsChanged": 0,
+    "exteriorInputsChanged": 0,
+    "parapetEnvelopeInputsChanged": 0,
+    "physicalDoorsValidated": 0,
+    "physicalStairSupportsValidated": 0,
+    "engineCalls": 0,
+    "operationsEmitted": 0
+  },
+  "blockers": [
+    "M4-01",
+    "M4-02",
+    "M4-03",
+    "M4-04",
+    "M4-05",
+    "M4-06",
+    "M4-07",
+    "M4-08",
+    "M4-09"
+  ],
+  "additionalReviewGates": [
+    "EDGE_ADJACENT_FLOOR_CUTOUT_SUPPORT_UNVERIFIED",
+    "EXPOSED_ROOF_VS_INTERIOR_STAIR_HEADROOM_UNVERIFIED"
+  ],
+  "readiness": "NOT_PREPARED",
+  "deployment": "BLOCKED",
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0,
+    "materialIds": [],
+    "worldCoordinates": null
+  },
+  "safety": {
+    "constructionApproved": false,
+    "executionAllowed": false,
+    "worldAccess": false,
+    "bridgeContact": false,
+    "archivedSourceModified": false,
+    "legacyModified": false,
+    "engineCalled": false,
+    "buildOperations": 0
+  },
+  "reportSha256": "ed429d13d2d78026569787d9bcf29bf8de330ebac20ba05b4c78e564d82d3602"
+}

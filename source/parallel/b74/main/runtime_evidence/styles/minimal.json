@@ -1,0 +1,11 @@
+{
+  "palette": "modern_office",
+  "facadeOffset": 0,
+  "architecture": {
+    "density": 0,
+    "depth": 1,
+    "moduleStride": 3,
+    "crown": 1,
+    "materialShift": 1
+  }
+}

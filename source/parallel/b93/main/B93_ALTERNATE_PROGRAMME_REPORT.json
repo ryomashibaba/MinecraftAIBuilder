@@ -1,0 +1,3037 @@
+{
+  "schema": "minecraftaibuilder-b93-alternate-whole-floor-programme-branches-v1",
+  "kind": "NON_EXECUTABLE_BUILDING_PROGRAMME_TRADEOFFS_NOT_APPROVED_BUILDING",
+  "provenance": {
+    "b92": "6d863841350358009ee3c9bbd2b99a8d73aa83cee58cbb8a0666853b849a4597",
+    "b91": "65154ea13cd1988c4c1f6b76fe03f62efb2c8e098c08667bd642b18eac9f1c5b",
+    "officialBlocksSha256": "49ff9c501b1c96b547aa49fda07a53bc19f7d5fe338aff43fe5f65c3eaaf031f"
+  },
+  "totals": {
+    "referenceBuildings": 5,
+    "referenceFloors": 30,
+    "reviewedFloors": 10,
+    "originalRooms": 314,
+    "priorUnapprovedRooms": 296,
+    "heldRooms": 18,
+    "approvedAddedRooms": 0,
+    "examinedProgrammeAlternatives": 40,
+    "heldRoomsWithConceptualCoreLink": 18,
+    "withinConceptQualityBudget": 14,
+    "oversizedOrHighInterventionRoutes": 4,
+    "conditionalProductionContacts": 20,
+    "physicalCorridorOrExitCertified": 0,
+    "prior296Modified": 0,
+    "productionEdits": 0,
+    "worldCommands": 0,
+    "worldContacts": 0
+  },
+  "replayed": [
+    {
+      "building": "apartment/candidate-01",
+      "operationsSha256": "6c5802481a5d22a2958cd83cb591dc8e4dbe1a1cd25a1d365f6c7f70635a7ddc",
+      "readOnly": true
+    },
+    {
+      "building": "office/candidate-01",
+      "operationsSha256": "e29a8c11eeb8ce0897995fdbb50de9482d3ec0a6b0767b9ac48bee8397e5249c",
+      "readOnly": true
+    }
+  ],
+  "patterns": [
+    {
+      "pattern": "apartment/candidate-01/006",
+      "heldRooms": 4,
+      "conceptualServiceConnectionFound": 4,
+      "requiresWholeBuildingApproval": true
+    },
+    {
+      "pattern": "apartment/candidate-01/012",
+      "heldRooms": 4,
+      "conceptualServiceConnectionFound": 4,
+      "requiresWholeBuildingApproval": true
+    },
+    {
+      "pattern": "apartment/candidate-01/013",
+      "heldRooms": 6,
+      "conceptualServiceConnectionFound": 6,
+      "requiresWholeBuildingApproval": true
+    },
+    {
+      "pattern": "office/candidate-01/004",
+      "heldRooms": 4,
+      "conceptualServiceConnectionFound": 4,
+      "requiresWholeBuildingApproval": true
+    }
+  ],
+  "floors": [
+    {
+      "sectionId": "apartment/candidate-01/L1",
+      "heldRoomCount": 1,
+      "heldNominalArea": 9,
+      "roomGraph": [
+        {
+          "roomId": "F1-R013",
+          "originalArea": 9,
+          "adjacentSuites": [],
+          "serviceConnection": {
+            "found": true,
+            "path": [
+              {
+                "x": 25,
+                "z": 19
+              },
+              {
+                "x": 24,
+                "z": 19
+              }
+            ],
+            "conceptualCorridorCells": [
+              {
+                "x": 25,
+                "z": 19
+              }
+            ],
+            "unassignedFloorCells": [],
+            "heldRoomsRetired": [
+              "F1-R013"
+            ],
+            "roomCountDelta": -1,
+            "nominalIndependentAreaRetired": 9,
+            "localProductionBlockChangeRequests": [],
+            "productionContactCount": 0,
+            "preservedGlass": true,
+            "priorCandidateContacts": 0,
+            "coreAdjacencyOnly": true,
+            "physicalRouteClaim": false,
+            "withinConceptQualityBudget": true,
+            "qualityHoldReasons": [],
+            "reachableCoreCorridorSites": 48,
+            "conditionalDesignCost": 3,
+            "examined": 10,
+            "requiredApprovals": [
+              "PROGRAM_ROOM_COUNT_REDUCTION",
+              "LOCAL_INTERIOR_OR_STRUCTURAL_BLOCK_REVIEW",
+              "COMMON_PATH_WIDTH_AND_CIRCULATION",
+              "OLD_ROOM_PARTITIONS_AND_OPENING_CLOSURE",
+              "FLOOR_STAIR_ELEVATOR_EGRESS",
+              "BEDROCK_DOOR_HINGE"
+            ],
+            "constructionApproved": false,
+            "worldCoordinates": null,
+            "operations": []
+          },
+          "retainsPrior296WithoutModification": true
+        }
+      ],
+      "alternatives": [
+        {
+          "id": "KEEP_ALL_HELD_UNCERTIFIED",
+          "programmeIndependentRoomsRetired": 0,
+          "approval": "HOLD",
+          "retainOriginal296": true,
+          "heldRemains": 1,
+          "claimedUsableRooms": 0,
+          "nominalHeldArea": 9,
+          "requiresPrior296DesignChange": false,
+          "conceptualCorridorCells": [],
+          "physicalAccessCertified": false,
+          "operations": []
+        },
+        {
+          "id": "REPURPOSE_HELD_ROOMS_AS_COMMON_SERVICE_ZONE",
+          "programmeIndependentRoomsRetired": 1,
+          "approval": "PROGRAMME_REDUCTION_REVIEW",
+          "retainOriginal296": true,
+          "heldRemains": 0,
+          "claimedUsableRooms": 0,
+          "nominalHeldArea": 9,
+          "reassignedCommonServiceArea": 9,
+          "requiresPrior296DesignChange": false,
+          "accessibleCommonServiceAreaCertified": false,
+          "physicalAccessCertified": false,
+          "operations": []
+        },
+        {
+          "id": "MINIMAL_HELD_ROOM_CORE_LINK",
+          "programmeIndependentRoomsRetired": 1,
+          "approval": "CONDITIONAL_UNBUILT_REVIEW",
+          "retainOriginal296": true,
+          "heldRemains": 0,
+          "claimedUsableRooms": 0,
+          "sourceRoomId": "F1-R013",
+          "localPath": [
+            {
+              "x": 25,
+              "z": 19
+            },
+            {
+              "x": 24,
+              "z": 19
+            }
+          ],
+          "conceptualCorridorCells": [
+            {
+              "x": 25,
+              "z": 19
+            }
+          ],
+          "productionBlockChangeRequests": [],
+          "requiresPrior296DesignChange": false,
+          "physicalAccessCertified": false,
+          "constructionApproved": false,
+          "operations": []
+        },
+        {
+          "id": "MERGE_HELD_INTO_EXISTING_ADJACENT_SUITES",
+          "programmeIndependentRoomsRetired": 1,
+          "approval": "HOLD_NO_ADJACENT_ROOM",
+          "retainOriginal296": true,
+          "heldRemains": 0,
+          "claimedUsableRooms": 0,
+          "roomsWithTouchingExistingSuite": 0,
+          "nominalHeldArea": 9,
+          "requiresPrior296DesignChange": true,
+          "affectedPriorProposalRooms": [],
+          "frozenProposalMutationsMade": 0,
+          "operations": []
+        }
+      ],
+      "physicalCorridorClaims": 0,
+      "worldCoordinates": null,
+      "executionAllowed": false,
+      "constructionApproved": false,
+      "operations": []
+    },
+    {
+      "sectionId": "apartment/candidate-01/L2",
+      "heldRoomCount": 3,
+      "heldNominalArea": 38,
+      "roomGraph": [
+        {
+          "roomId": "F2-R006",
+          "originalArea": 20,
+          "adjacentSuites": [],
+          "serviceConnection": {
+            "found": true,
+            "path": [
+              {
+                "x": 1,
+                "z": 8
+              },
+              {
+                "x": 0,
+                "z": 8
+              },
+              {
+                "x": 0,
+                "z": 7
+              },
+              {
+                "x": 0,
+                "z": 6
+              },
+              {
+                "x": 0,
+                "z": 5
+              },
+              {
+                "x": 0,
+                "z": 4
+              },
+              {
+                "x": 0,
+                "z": 3
+              },
+              {
+                "x": 0,
+                "z": 2
+              },
+              {
+                "x": 0,
+                "z": 1
+              },
+              {
+                "x": 0,
+                "z": 0
+              },
+              {
+                "x": 1,
+                "z": 0
+              },
+              {
+                "x": 2,
+                "z": 0
+              },
+              {
+                "x": 3,
+                "z": 0
+              },
+              {
+                "x": 4,
+                "z": 0
+              },
+              {
+                "x": 5,
+                "z": 0
+              },
+              {
+                "x": 6,
+                "z": 0
+              },
+              {
+                "x": 7,
+                "z": 0
+              },
+              {
+                "x": 8,
+                "z": 0
+              },
+              {
+                "x": 9,
+                "z": 0
+              },
+              {
+                "x": 10,
+                "z": 0
+              },
+              {
+                "x": 11,
+                "z": 0
+              },
+              {
+                "x": 12,
+                "z": 0
+              },
+              {
+                "x": 13,
+                "z": 0
+              },
+              {
+                "x": 14,
+                "z": 0
+              },
+              {
+                "x": 15,
+                "z": 0
+              },
+              {
+                "x": 16,
+                "z": 0
+              },
+              {
+                "x": 17,
+                "z": 0
+              },
+              {
+                "x": 18,
+                "z": 0
+              },
+              {
+                "x": 19,
+                "z": 0
+              },
+              {
+                "x": 20,
+                "z": 0
+              },
+              {
+                "x": 21,
+                "z": 0
+              },
+              {
+                "x": 22,
+                "z": 0
+              },
+              {
+                "x": 23,
+                "z": 0
+              },
+              {
+                "x": 24,
+                "z": 0
+              },
+              {
+                "x": 24,
+                "z": 1
+              },
+              {
+                "x": 24,
+                "z": 2
+              },
+              {
+                "x": 24,
+                "z": 3
+              },
+              {
+                "x": 24,
+                "z": 4
+              },
+              {
+                "x": 24,
+                "z": 5
+              },
+              {
+                "x": 24,
+                "z": 6
+              },
+              {
+                "x": 24,
+                "z": 7
+              },
+              {
+                "x": 24,
+                "z": 8
+              },
+              {
+                "x": 24,
+                "z": 9
+              },
+              {
+                "x": 24,
+                "z": 10
+              },
+              {
+                "x": 23,
+                "z": 10
+              },
+              {
+                "x": 23,
+                "z": 11
+              },
+              {
+                "x": 23,
+                "z": 12
+              },
+              {
+                "x": 23,
+                "z": 13
+              },
+              {
+                "x": 24,
+                "z": 13
+              }
+            ],
+            "conceptualCorridorCells": [
+              {
+                "x": 1,
+                "z": 8
+              },
+              {
+                "x": 23,
+                "z": 10
+              },
+              {
+                "x": 23,
+                "z": 11
+              },
+              {
+                "x": 23,
+                "z": 13
+              }
+            ],
+            "unassignedFloorCells": [
+              {
+                "x": 23,
+                "z": 10
+              },
+              {
+                "x": 23,
+                "z": 11
+              },
+              {
+                "x": 23,
+                "z": 13
+              }
+            ],
+            "heldRoomsRetired": [
+              "F2-R006"
+            ],
+            "roomCountDelta": -1,
+            "nominalIndependentAreaRetired": 20,
+            "localProductionBlockChangeRequests": [
+              {
+                "x": 23,
+                "y": 6,
+                "z": 10,
+                "block": "minecraft:light_gray_concrete",
+                "role": "primaryWall",
+                "originalOccupied": true,
+                "protectedReservation": false,
+                "requiresApproval": true,
+                "changeAllowed": false,
+                "blockOperations": []
+              },
+              {
+                "x": 23,
+                "y": 7,
+                "z": 10,
+                "block": "minecraft:light_gray_concrete",
+                "role": "primaryWall",
+                "originalOccupied": true,
+                "protectedReservation": false,
+                "requiresApproval": true,
+                "changeAllowed": false,
+                "blockOperations": []
+              },
+              {
+                "x": 23,
+                "y": 6,
+                "z": 11,
+                "block": "minecraft:black_concrete_stairs",
+                "role": "frame",
+                "originalOccupied": true,
+                "protectedReservation": false,
+                "requiresApproval": true,
+                "changeAllowed": false,
+                "blockOperations": []
+              },
+              {
+                "x": 23,
+                "y": 6,
+                "z": 13,
+                "block": "minecraft:light_gray_concrete",
+                "role": "primaryWall",
+                "originalOccupied": true,
+                "protectedReservation": false,
+                "requiresApproval": true,
+                "changeAllowed": false,
+                "blockOperations": []
+              },
+              {
+                "x": 23,
+                "y": 7,
+                "z": 13,
+                "block": "minecraft:light_gray_concrete",
+                "role": "primaryWall",
+                "originalOccupied": true,
+                "protectedReservation": false,
+                "requiresApproval": true,
+                "changeAllowed": false,
+                "blockOperations": []
+              }
+            ],
+            "productionContactCount": 5,
+            "preservedGlass": true,
+            "priorCandidateContacts": 0,
+            "coreAdjacencyOnly": true,
+            "physicalRouteClaim": false,
+            "withinConceptQualityBudget": false,
+            "qualityHoldReasons": [
+              "ROUTE_TOO_LONG",
+              "TOO_MANY_PRODUCTION_CHANGES"
+            ],
+            "reachableCoreCorridorSites": 17,
+            "conditionalDesignCost": 915,
+            "examined": 122,
+            "requiredApprovals": [
+              "PROGRAM_ROOM_COUNT_REDUCTION",
+              "LOCAL_INTERIOR_OR_STRUCTURAL_BLOCK_REVIEW",
+              "COMMON_PATH_WIDTH_AND_CIRCULATION",
+              "OLD_ROOM_PARTITIONS_AND_OPENING_CLOSURE",
+              "FLOOR_STAIR_ELEVATOR_EGRESS",
+              "BEDROCK_DOOR_HINGE"
+            ],
+            "constructionApproved": false,
+            "worldCoordinates": null,
+            "operations": []
+          },
+          "retainsPrior296WithoutModification": true
+        },
+        {
+          "roomId": "F2-R012",
+          "originalArea": 9,
+          "adjacentSuites": [],
+          "serviceConnection": {
+            "found": true,
+            "path": [
+              {
+                "x": 15,
+                "z": 19
+              },
+              {
+                "x": 15,
+                "z": 18
+              }
+            ],
+            "conceptualCorridorCells": [
+              {
+                "x": 15,
+                "z": 19
+              }
+            ],
+            "unassignedFloorCells": [],
+            "heldRoomsRetired": [
+              "F2-R012"
+            ],
+            "roomCountDelta": -1,
+            "nominalIndependentAreaRetired": 9,
+            "localProductionBlockChangeRequests": [],
+            "productionContactCount": 0,
+            "preservedGlass": true,
+            "priorCandidateContacts": 0,
+            "coreAdjacencyOnly": true,
+            "physicalRouteClaim": false,
+            "withinConceptQualityBudget": true,
+            "qualityHoldReasons": [],
+            "reachableCoreCorridorSites": 17,
+            "conditionalDesignCost": 3,
+            "examined": 9,
+            "requiredApprovals": [
+              "PROGRAM_ROOM_COUNT_REDUCTION",
+              "LOCAL_INTERIOR_OR_STRUCTURAL_BLOCK_REVIEW",
+              "COMMON_PATH_WIDTH_AND_CIRCULATION",
+              "OLD_ROOM_PARTITIONS_AND_OPENING_CLOSURE",
+              "FLOOR_STAIR_ELEVATOR_EGRESS",
+              "BEDROCK_DOOR_HINGE"
+            ],
+            "constructionApproved": false,
+            "worldCoordinates": null,
+            "operations": []
+          },
+          "retainsPrior296WithoutModification": true
+        },
+        {
+          "roomId": "F2-R013",
+          "originalArea": 9,
+          "adjacentSuites": [],
+          "serviceConnection": {
+            "found": true,
+            "path": [
+              {
+                "x": 25,
+                "z": 19
+              },
+              {
+                "x": 24,
+                "z": 19
+              }
+            ],
+            "conceptualCorridorCells": [
+              {
+                "x": 25,
+                "z": 19
+              }
+            ],
+            "unassignedFloorCells": [],
+            "heldRoomsRetired": [
+              "F2-R013"
+            ],
+            "roomCountDelta": -1,
+            "nominalIndependentAreaRetired": 9,
+            "localProductionBlockChangeRequests": [],
+            "productionContactCount": 0,
+            "preservedGlass": true,
+            "priorCandidateContacts": 0,
+            "coreAdjacencyOnly": true,
+            "physicalRouteClaim": false,
+            "withinConceptQualityBudget": true,
+            "qualityHoldReasons": [],
+            "reachableCoreCorridorSites": 17,
+            "conditionalDesignCost": 3,
+            "examined": 9,
+            "requiredApprovals": [
+              "PROGRAM_ROOM_COUNT_REDUCTION",
+              "LOCAL_INTERIOR_OR_STRUCTURAL_BLOCK_REVIEW",
+              "COMMON_PATH_WIDTH_AND_CIRCULATION",
+              "OLD_ROOM_PARTITIONS_AND_OPENING_CLOSURE",
+              "FLOOR_STAIR_ELEVATOR_EGRESS",
+              "BEDROCK_DOOR_HINGE"
+            ],
+            "constructionApproved": false,
+            "worldCoordinates": null,
+            "operations": []
+          },
+          "retainsPrior296WithoutModification": true
+        }
+      ],
+      "alternatives": [
+        {
+          "id": "KEEP_ALL_HELD_UNCERTIFIED",
+          "programmeIndependentRoomsRetired": 0,
+          "approval": "HOLD",
+          "retainOriginal296": true,
+          "heldRemains": 3,
+          "claimedUsableRooms": 0,
+          "nominalHeldArea": 38,
+          "requiresPrior296DesignChange": false,
+          "conceptualCorridorCells": [],
+          "physicalAccessCertified": false,
+          "operations": []
+        },
+        {
+          "id": "REPURPOSE_HELD_ROOMS_AS_COMMON_SERVICE_ZONE",
+          "programmeIndependentRoomsRetired": 3,
+          "approval": "PROGRAMME_REDUCTION_REVIEW",
+          "retainOriginal296": true,
+          "heldRemains": 0,
+          "claimedUsableRooms": 0,
+          "nominalHeldArea": 38,
+          "reassignedCommonServiceArea": 38,
+          "requiresPrior296DesignChange": false,
+          "accessibleCommonServiceAreaCertified": false,
+          "physicalAccessCertified": false,
+          "operations": []
+        },
+        {
+          "id": "MINIMAL_HELD_ROOM_CORE_LINK",
+          "programmeIndependentRoomsRetired": 1,
+          "approval": "CONDITIONAL_UNBUILT_REVIEW",
+          "retainOriginal296": true,
+          "heldRemains": 2,
+          "claimedUsableRooms": 0,
+          "sourceRoomId": "F2-R012",
+          "localPath": [
+            {
+              "x": 15,
+              "z": 19
+            },
+            {
+              "x": 15,
+              "z": 18
+            }
+          ],
+          "conceptualCorridorCells": [
+            {
+              "x": 15,
+              "z": 19
+            }
+          ],
+          "productionBlockChangeRequests": [],
+          "requiresPrior296DesignChange": false,
+          "physicalAccessCertified": false,
+          "constructionApproved": false,
+          "operations": []
+        },
+        {
+          "id": "MERGE_HELD_INTO_EXISTING_ADJACENT_SUITES",
+          "programmeIndependentRoomsRetired": 3,
+          "approval": "HOLD_NO_ADJACENT_ROOM",
+          "retainOriginal296": true,
+          "heldRemains": 0,
+          "claimedUsableRooms": 0,
+          "roomsWithTouchingExistingSuite": 0,
+          "nominalHeldArea": 38,
+          "requiresPrior296DesignChange": true,
+          "affectedPriorProposalRooms": [],
+          "frozenProposalMutationsMade": 0,
+          "operations": []
+        }
+      ],
+      "physicalCorridorClaims": 0,
+      "worldCoordinates": null,
+      "executionAllowed": false,
+      "constructionApproved": false,
+      "operations": []
+    },
+    {
+      "sectionId": "apartment/candidate-01/L3",
+      "heldRoomCount": 3,
+      "heldNominalArea": 38,
+      "roomGraph": [
+        {
+          "roomId": "F3-R006",
+          "originalArea": 20,
+          "adjacentSuites": [],
+          "serviceConnection": {
+            "found": true,
+            "path": [
+              {
+                "x": 1,
+                "z": 8
+              },
+              {
+                "x": 0,
+                "z": 8
+              },
+              {
+                "x": 0,
+                "z": 7
+              },
+              {
+                "x": 0,
+                "z": 6
+              },
+              {
+                "x": 0,
+                "z": 5
+              },
+              {
+                "x": 0,
+                "z": 4
+              },
+              {
+                "x": 0,
+                "z": 3
+              },
+              {
+                "x": 0,
+                "z": 2
+              },
+              {
+                "x": 0,
+                "z": 1
+              },
+              {
+                "x": 0,
+                "z": 0
+              },
+              {
+                "x": 1,
+                "z": 0
+              },
+              {
+                "x": 2,
+                "z": 0
+              },
+              {
+                "x": 3,
+                "z": 0
+              },
+              {
+                "x": 4,
+                "z": 0
+              },
+              {
+                "x": 5,
+                "z": 0
+              },
+              {
+                "x": 6,
+                "z": 0
+              },
+              {
+                "x": 7,
+                "z": 0
+              },
+              {
+                "x": 8,
+                "z": 0
+              },
+              {
+                "x": 9,
+                "z": 0
+              },
+              {
+                "x": 10,
+                "z": 0
+              },
+              {
+                "x": 11,
+                "z": 0
+              },
+              {
+                "x": 12,
+                "z": 0
+              },
+              {
+                "x": 13,
+                "z": 0
+              },
+              {
+                "x": 14,
+                "z": 0
+              },
+              {
+                "x": 15,
+                "z": 0
+              },
+              {
+                "x": 16,
+                "z": 0
+              },
+              {
+                "x": 17,
+                "z": 0
+              },
+              {
+                "x": 18,
+                "z": 0
+              },
+              {
+                "x": 19,
+                "z": 0
+              },
+              {
+                "x": 20,
+                "z": 0
+              },
+              {
+                "x": 21,
+                "z": 0
+              },
+              {
+                "x": 22,
+                "z": 0
+              },
+              {
+                "x": 23,
+                "z": 0
+              },
+              {
+                "x": 24,
+                "z": 0
+              },
+              {
+                "x": 24,
+                "z": 1
+              },
+              {
+                "x": 24,
+                "z": 2
+              },
+              {
+                "x": 24,
+                "z": 3
+              },
+              {
+                "x": 24,
+                "z": 4
+              },
+              {
+                "x": 24,
+                "z": 5
+              },
+              {
+                "x": 24,
+                "z": 6
+              },
+              {
+                "x": 24,
+                "z": 7
+              },
+              {
+                "x": 24,
+                "z": 8
+              },
+              {
+                "x": 24,
+                "z": 9
+              },
+              {
+                "x": 24,
+                "z": 10
+              },
+              {
+                "x": 23,
+                "z": 10
+              },
+              {
+                "x": 23,
+                "z": 11
+              },
+              {
+                "x": 23,
+                "z": 12
+              },
+              {
+                "x": 23,
+                "z": 13
+              },
+              {
+                "x": 24,
+                "z": 13
+              }
+            ],
+            "conceptualCorridorCells": [
+              {
+                "x": 1,
+                "z": 8
+              },
+              {
+                "x": 23,
+                "z": 10
+              },
+              {
+                "x": 23,
+                "z": 11
+              },
+              {
+                "x": 23,
+                "z": 13
+              }
+            ],
+            "unassignedFloorCells": [
+              {
+                "x": 23,
+                "z": 10
+              },
+              {
+                "x": 23,
+                "z": 11
+              },
+              {
+                "x": 23,
+                "z": 13
+              }
+            ],
+            "heldRoomsRetired": [
+              "F3-R006"
+            ],
+            "roomCountDelta": -1,
+            "nominalIndependentAreaRetired": 20,
+            "localProductionBlockChangeRequests": [
+              {
+                "x": 23,
+                "y": 11,
+                "z": 10,
+                "block": "minecraft:light_gray_concrete",
+                "role": "primaryWall",
+                "originalOccupied": true,
+                "protectedReservation": false,
+                "requiresApproval": true,
+                "changeAllowed": false,
+                "blockOperations": []
+              },
+              {
+                "x": 23,
+                "y": 12,
+                "z": 10,
+                "block": "minecraft:light_gray_concrete",
+                "role": "primaryWall",
+                "originalOccupied": true,
+                "protectedReservation": false,
+                "requiresApproval": true,
+                "changeAllowed": false,
+                "blockOperations": []
+              },
+              {
+                "x": 23,
+                "y": 11,
+                "z": 11,
+                "block": "minecraft:black_concrete_stairs",
+                "role": "frame",
+                "originalOccupied": true,
+                "protectedReservation": false,
+                "requiresApproval": true,
+                "changeAllowed": false,
+                "blockOperations": []
+              },
+              {
+                "x": 23,
+                "y": 11,
+                "z": 13,
+                "block": "minecraft:light_gray_concrete",
+                "role": "primaryWall",
+                "originalOccupied": true,
+                "protectedReservation": false,
+                "requiresApproval": true,
+                "changeAllowed": false,
+                "blockOperations": []
+              },
+              {
+                "x": 23,
+                "y": 12,
+                "z": 13,
+                "block": "minecraft:light_gray_concrete",
+                "role": "primaryWall",
+                "originalOccupied": true,
+                "protectedReservation": false,
+                "requiresApproval": true,
+                "changeAllowed": false,
+                "blockOperations": []
+              }
+            ],
+            "productionContactCount": 5,
+            "preservedGlass": true,
+            "priorCandidateContacts": 0,
+            "coreAdjacencyOnly": true,
+            "physicalRouteClaim": false,
+            "withinConceptQualityBudget": false,
+            "qualityHoldReasons": [
+              "ROUTE_TOO_LONG",
+              "TOO_MANY_PRODUCTION_CHANGES"
+            ],
+            "reachableCoreCorridorSites": 17,
+            "conditionalDesignCost": 915,
+            "examined": 122,
+            "requiredApprovals": [
+              "PROGRAM_ROOM_COUNT_REDUCTION",
+              "LOCAL_INTERIOR_OR_STRUCTURAL_BLOCK_REVIEW",
+              "COMMON_PATH_WIDTH_AND_CIRCULATION",
+              "OLD_ROOM_PARTITIONS_AND_OPENING_CLOSURE",
+              "FLOOR_STAIR_ELEVATOR_EGRESS",
+              "BEDROCK_DOOR_HINGE"
+            ],
+            "constructionApproved": false,
+            "worldCoordinates": null,
+            "operations": []
+          },
+          "retainsPrior296WithoutModification": true
+        },
+        {
+          "roomId": "F3-R012",
+          "originalArea": 9,
+          "adjacentSuites": [],
+          "serviceConnection": {
+            "found": true,
+            "path": [
+              {
+                "x": 15,
+                "z": 19
+              },
+              {
+                "x": 15,
+                "z": 18
+              }
+            ],
+            "conceptualCorridorCells": [
+              {
+                "x": 15,
+                "z": 19
+              }
+            ],
+            "unassignedFloorCells": [],
+            "heldRoomsRetired": [
+              "F3-R012"
+            ],
+            "roomCountDelta": -1,
+            "nominalIndependentAreaRetired": 9,
+            "localProductionBlockChangeRequests": [],
+            "productionContactCount": 0,
+            "preservedGlass": true,
+            "priorCandidateContacts": 0,
+            "coreAdjacencyOnly": true,
+            "physicalRouteClaim": false,
+            "withinConceptQualityBudget": true,
+            "qualityHoldReasons": [],
+            "reachableCoreCorridorSites": 17,
+            "conditionalDesignCost": 3,
+            "examined": 9,
+            "requiredApprovals": [
+              "PROGRAM_ROOM_COUNT_REDUCTION",
+              "LOCAL_INTERIOR_OR_STRUCTURAL_BLOCK_REVIEW",
+              "COMMON_PATH_WIDTH_AND_CIRCULATION",
+              "OLD_ROOM_PARTITIONS_AND_OPENING_CLOSURE",
+              "FLOOR_STAIR_ELEVATOR_EGRESS",
+              "BEDROCK_DOOR_HINGE"
+            ],
+            "constructionApproved": false,
+            "worldCoordinates": null,
+            "operations": []
+          },
+          "retainsPrior296WithoutModification": true
+        },
+        {
+          "roomId": "F3-R013",
+          "originalArea": 9,
+          "adjacentSuites": [],
+          "serviceConnection": {
+            "found": true,
+            "path": [
+              {
+                "x": 25,
+                "z": 19
+              },
+              {
+                "x": 24,
+                "z": 19
+              }
+            ],
+            "conceptualCorridorCells": [
+              {
+                "x": 25,
+                "z": 19
+              }
+            ],
+            "unassignedFloorCells": [],
+            "heldRoomsRetired": [
+              "F3-R013"
+            ],
+            "roomCountDelta": -1,
+            "nominalIndependentAreaRetired": 9,
+            "localProductionBlockChangeRequests": [],
+            "productionContactCount": 0,
+            "preservedGlass": true,
+            "priorCandidateContacts": 0,
+            "coreAdjacencyOnly": true,
+            "physicalRouteClaim": false,
+            "withinConceptQualityBudget": true,
+            "qualityHoldReasons": [],
+            "reachableCoreCorridorSites": 17,
+            "conditionalDesignCost": 3,
+            "examined": 9,
+            "requiredApprovals": [
+              "PROGRAM_ROOM_COUNT_REDUCTION",
+              "LOCAL_INTERIOR_OR_STRUCTURAL_BLOCK_REVIEW",
+              "COMMON_PATH_WIDTH_AND_CIRCULATION",
+              "OLD_ROOM_PARTITIONS_AND_OPENING_CLOSURE",
+              "FLOOR_STAIR_ELEVATOR_EGRESS",
+              "BEDROCK_DOOR_HINGE"
+            ],
+            "constructionApproved": false,
+            "worldCoordinates": null,
+            "operations": []
+          },
+          "retainsPrior296WithoutModification": true
+        }
+      ],
+      "alternatives": [
+        {
+          "id": "KEEP_ALL_HELD_UNCERTIFIED",
+          "programmeIndependentRoomsRetired": 0,
+          "approval": "HOLD",
+          "retainOriginal296": true,
+          "heldRemains": 3,
+          "claimedUsableRooms": 0,
+          "nominalHeldArea": 38,
+          "requiresPrior296DesignChange": false,
+          "conceptualCorridorCells": [],
+          "physicalAccessCertified": false,
+          "operations": []
+        },
+        {
+          "id": "REPURPOSE_HELD_ROOMS_AS_COMMON_SERVICE_ZONE",
+          "programmeIndependentRoomsRetired": 3,
+          "approval": "PROGRAMME_REDUCTION_REVIEW",
+          "retainOriginal296": true,
+          "heldRemains": 0,
+          "claimedUsableRooms": 0,
+          "nominalHeldArea": 38,
+          "reassignedCommonServiceArea": 38,
+          "requiresPrior296DesignChange": false,
+          "accessibleCommonServiceAreaCertified": false,
+          "physicalAccessCertified": false,
+          "operations": []
+        },
+        {
+          "id": "MINIMAL_HELD_ROOM_CORE_LINK",
+          "programmeIndependentRoomsRetired": 1,
+          "approval": "CONDITIONAL_UNBUILT_REVIEW",
+          "retainOriginal296": true,
+          "heldRemains": 2,
+          "claimedUsableRooms": 0,
+          "sourceRoomId": "F3-R012",
+          "localPath": [
+            {
+              "x": 15,
+              "z": 19
+            },
+            {
+              "x": 15,
+              "z": 18
+            }
+          ],
+          "conceptualCorridorCells": [
+            {
+              "x": 15,
+              "z": 19
+            }
+          ],
+          "productionBlockChangeRequests": [],
+          "requiresPrior296DesignChange": false,
+          "physicalAccessCertified": false,
+          "constructionApproved": false,
+          "operations": []
+        },
+        {
+          "id": "MERGE_HELD_INTO_EXISTING_ADJACENT_SUITES",
+          "programmeIndependentRoomsRetired": 3,
+          "approval": "HOLD_NO_ADJACENT_ROOM",
+          "retainOriginal296": true,
+          "heldRemains": 0,
+          "claimedUsableRooms": 0,
+          "roomsWithTouchingExistingSuite": 0,
+          "nominalHeldArea": 38,
+          "requiresPrior296DesignChange": true,
+          "affectedPriorProposalRooms": [],
+          "frozenProposalMutationsMade": 0,
+          "operations": []
+        }
+      ],
+      "physicalCorridorClaims": 0,
+      "worldCoordinates": null,
+      "executionAllowed": false,
+      "constructionApproved": false,
+      "operations": []
+    },
+    {
+      "sectionId": "apartment/candidate-01/L4",
+      "heldRoomCount": 3,
+      "heldNominalArea": 38,
+      "roomGraph": [
+        {
+          "roomId": "F4-R006",
+          "originalArea": 20,
+          "adjacentSuites": [],
+          "serviceConnection": {
+            "found": true,
+            "path": [
+              {
+                "x": 1,
+                "z": 8
+              },
+              {
+                "x": 0,
+                "z": 8
+              },
+              {
+                "x": 0,
+                "z": 7
+              },
+              {
+                "x": 0,
+                "z": 6
+              },
+              {
+                "x": 0,
+                "z": 5
+              },
+              {
+                "x": 0,
+                "z": 4
+              },
+              {
+                "x": 0,
+                "z": 3
+              },
+              {
+                "x": 0,
+                "z": 2
+              },
+              {
+                "x": 0,
+                "z": 1
+              },
+              {
+                "x": 0,
+                "z": 0
+              },
+              {
+                "x": 1,
+                "z": 0
+              },
+              {
+                "x": 2,
+                "z": 0
+              },
+              {
+                "x": 3,
+                "z": 0
+              },
+              {
+                "x": 4,
+                "z": 0
+              },
+              {
+                "x": 5,
+                "z": 0
+              },
+              {
+                "x": 6,
+                "z": 0
+              },
+              {
+                "x": 7,
+                "z": 0
+              },
+              {
+                "x": 8,
+                "z": 0
+              },
+              {
+                "x": 9,
+                "z": 0
+              },
+              {
+                "x": 10,
+                "z": 0
+              },
+              {
+                "x": 11,
+                "z": 0
+              },
+              {
+                "x": 12,
+                "z": 0
+              },
+              {
+                "x": 13,
+                "z": 0
+              },
+              {
+                "x": 14,
+                "z": 0
+              },
+              {
+                "x": 15,
+                "z": 0
+              },
+              {
+                "x": 16,
+                "z": 0
+              },
+              {
+                "x": 17,
+                "z": 0
+              },
+              {
+                "x": 18,
+                "z": 0
+              },
+              {
+                "x": 19,
+                "z": 0
+              },
+              {
+                "x": 20,
+                "z": 0
+              },
+              {
+                "x": 21,
+                "z": 0
+              },
+              {
+                "x": 22,
+                "z": 0
+              },
+              {
+                "x": 23,
+                "z": 0
+              },
+              {
+                "x": 24,
+                "z": 0
+              },
+              {
+                "x": 24,
+                "z": 1
+              },
+              {
+                "x": 24,
+                "z": 2
+              },
+              {
+                "x": 24,
+                "z": 3
+              },
+              {
+                "x": 24,
+                "z": 4
+              },
+              {
+                "x": 24,
+                "z": 5
+              },
+              {
+                "x": 24,
+                "z": 6
+              },
+              {
+                "x": 24,
+                "z": 7
+              },
+              {
+                "x": 24,
+                "z": 8
+              },
+              {
+                "x": 24,
+                "z": 9
+              },
+              {
+                "x": 24,
+                "z": 10
+              },
+              {
+                "x": 23,
+                "z": 10
+              },
+              {
+                "x": 23,
+                "z": 11
+              },
+              {
+                "x": 23,
+                "z": 12
+              },
+              {
+                "x": 23,
+                "z": 13
+              },
+              {
+                "x": 24,
+                "z": 13
+              }
+            ],
+            "conceptualCorridorCells": [
+              {
+                "x": 1,
+                "z": 8
+              },
+              {
+                "x": 23,
+                "z": 10
+              },
+              {
+                "x": 23,
+                "z": 11
+              },
+              {
+                "x": 23,
+                "z": 13
+              }
+            ],
+            "unassignedFloorCells": [
+              {
+                "x": 23,
+                "z": 10
+              },
+              {
+                "x": 23,
+                "z": 11
+              },
+              {
+                "x": 23,
+                "z": 13
+              }
+            ],
+            "heldRoomsRetired": [
+              "F4-R006"
+            ],
+            "roomCountDelta": -1,
+            "nominalIndependentAreaRetired": 20,
+            "localProductionBlockChangeRequests": [
+              {
+                "x": 23,
+                "y": 16,
+                "z": 10,
+                "block": "minecraft:light_gray_concrete",
+                "role": "primaryWall",
+                "originalOccupied": true,
+                "protectedReservation": false,
+                "requiresApproval": true,
+                "changeAllowed": false,
+                "blockOperations": []
+              },
+              {
+                "x": 23,
+                "y": 17,
+                "z": 10,
+                "block": "minecraft:light_gray_concrete",
+                "role": "primaryWall",
+                "originalOccupied": true,
+                "protectedReservation": false,
+                "requiresApproval": true,
+                "changeAllowed": false,
+                "blockOperations": []
+              },
+              {
+                "x": 23,
+                "y": 16,
+                "z": 11,
+                "block": "minecraft:black_concrete_stairs",
+                "role": "frame",
+                "originalOccupied": true,
+                "protectedReservation": false,
+                "requiresApproval": true,
+                "changeAllowed": false,
+                "blockOperations": []
+              },
+              {
+                "x": 23,
+                "y": 16,
+                "z": 13,
+                "block": "minecraft:light_gray_concrete",
+                "role": "primaryWall",
+                "originalOccupied": true,
+                "protectedReservation": false,
+                "requiresApproval": true,
+                "changeAllowed": false,
+                "blockOperations": []
+              },
+              {
+                "x": 23,
+                "y": 17,
+                "z": 13,
+                "block": "minecraft:light_gray_concrete",
+                "role": "primaryWall",
+                "originalOccupied": true,
+                "protectedReservation": false,
+                "requiresApproval": true,
+                "changeAllowed": false,
+                "blockOperations": []
+              }
+            ],
+            "productionContactCount": 5,
+            "preservedGlass": true,
+            "priorCandidateContacts": 0,
+            "coreAdjacencyOnly": true,
+            "physicalRouteClaim": false,
+            "withinConceptQualityBudget": false,
+            "qualityHoldReasons": [
+              "ROUTE_TOO_LONG",
+              "TOO_MANY_PRODUCTION_CHANGES"
+            ],
+            "reachableCoreCorridorSites": 17,
+            "conditionalDesignCost": 915,
+            "examined": 122,
+            "requiredApprovals": [
+              "PROGRAM_ROOM_COUNT_REDUCTION",
+              "LOCAL_INTERIOR_OR_STRUCTURAL_BLOCK_REVIEW",
+              "COMMON_PATH_WIDTH_AND_CIRCULATION",
+              "OLD_ROOM_PARTITIONS_AND_OPENING_CLOSURE",
+              "FLOOR_STAIR_ELEVATOR_EGRESS",
+              "BEDROCK_DOOR_HINGE"
+            ],
+            "constructionApproved": false,
+            "worldCoordinates": null,
+            "operations": []
+          },
+          "retainsPrior296WithoutModification": true
+        },
+        {
+          "roomId": "F4-R012",
+          "originalArea": 9,
+          "adjacentSuites": [],
+          "serviceConnection": {
+            "found": true,
+            "path": [
+              {
+                "x": 15,
+                "z": 19
+              },
+              {
+                "x": 15,
+                "z": 18
+              }
+            ],
+            "conceptualCorridorCells": [
+              {
+                "x": 15,
+                "z": 19
+              }
+            ],
+            "unassignedFloorCells": [],
+            "heldRoomsRetired": [
+              "F4-R012"
+            ],
+            "roomCountDelta": -1,
+            "nominalIndependentAreaRetired": 9,
+            "localProductionBlockChangeRequests": [],
+            "productionContactCount": 0,
+            "preservedGlass": true,
+            "priorCandidateContacts": 0,
+            "coreAdjacencyOnly": true,
+            "physicalRouteClaim": false,
+            "withinConceptQualityBudget": true,
+            "qualityHoldReasons": [],
+            "reachableCoreCorridorSites": 17,
+            "conditionalDesignCost": 3,
+            "examined": 9,
+            "requiredApprovals": [
+              "PROGRAM_ROOM_COUNT_REDUCTION",
+              "LOCAL_INTERIOR_OR_STRUCTURAL_BLOCK_REVIEW",
+              "COMMON_PATH_WIDTH_AND_CIRCULATION",
+              "OLD_ROOM_PARTITIONS_AND_OPENING_CLOSURE",
+              "FLOOR_STAIR_ELEVATOR_EGRESS",
+              "BEDROCK_DOOR_HINGE"
+            ],
+            "constructionApproved": false,
+            "worldCoordinates": null,
+            "operations": []
+          },
+          "retainsPrior296WithoutModification": true
+        },
+        {
+          "roomId": "F4-R013",
+          "originalArea": 9,
+          "adjacentSuites": [],
+          "serviceConnection": {
+            "found": true,
+            "path": [
+              {
+                "x": 25,
+                "z": 19
+              },
+              {
+                "x": 24,
+                "z": 19
+              }
+            ],
+            "conceptualCorridorCells": [
+              {
+                "x": 25,
+                "z": 19
+              }
+            ],
+            "unassignedFloorCells": [],
+            "heldRoomsRetired": [
+              "F4-R013"
+            ],
+            "roomCountDelta": -1,
+            "nominalIndependentAreaRetired": 9,
+            "localProductionBlockChangeRequests": [],
+            "productionContactCount": 0,
+            "preservedGlass": true,
+            "priorCandidateContacts": 0,
+            "coreAdjacencyOnly": true,
+            "physicalRouteClaim": false,
+            "withinConceptQualityBudget": true,
+            "qualityHoldReasons": [],
+            "reachableCoreCorridorSites": 17,
+            "conditionalDesignCost": 3,
+            "examined": 9,
+            "requiredApprovals": [
+              "PROGRAM_ROOM_COUNT_REDUCTION",
+              "LOCAL_INTERIOR_OR_STRUCTURAL_BLOCK_REVIEW",
+              "COMMON_PATH_WIDTH_AND_CIRCULATION",
+              "OLD_ROOM_PARTITIONS_AND_OPENING_CLOSURE",
+              "FLOOR_STAIR_ELEVATOR_EGRESS",
+              "BEDROCK_DOOR_HINGE"
+            ],
+            "constructionApproved": false,
+            "worldCoordinates": null,
+            "operations": []
+          },
+          "retainsPrior296WithoutModification": true
+        }
+      ],
+      "alternatives": [
+        {
+          "id": "KEEP_ALL_HELD_UNCERTIFIED",
+          "programmeIndependentRoomsRetired": 0,
+          "approval": "HOLD",
+          "retainOriginal296": true,
+          "heldRemains": 3,
+          "claimedUsableRooms": 0,
+          "nominalHeldArea": 38,
+          "requiresPrior296DesignChange": false,
+          "conceptualCorridorCells": [],
+          "physicalAccessCertified": false,
+          "operations": []
+        },
+        {
+          "id": "REPURPOSE_HELD_ROOMS_AS_COMMON_SERVICE_ZONE",
+          "programmeIndependentRoomsRetired": 3,
+          "approval": "PROGRAMME_REDUCTION_REVIEW",
+          "retainOriginal296": true,
+          "heldRemains": 0,
+          "claimedUsableRooms": 0,
+          "nominalHeldArea": 38,
+          "reassignedCommonServiceArea": 38,
+          "requiresPrior296DesignChange": false,
+          "accessibleCommonServiceAreaCertified": false,
+          "physicalAccessCertified": false,
+          "operations": []
+        },
+        {
+          "id": "MINIMAL_HELD_ROOM_CORE_LINK",
+          "programmeIndependentRoomsRetired": 1,
+          "approval": "CONDITIONAL_UNBUILT_REVIEW",
+          "retainOriginal296": true,
+          "heldRemains": 2,
+          "claimedUsableRooms": 0,
+          "sourceRoomId": "F4-R012",
+          "localPath": [
+            {
+              "x": 15,
+              "z": 19
+            },
+            {
+              "x": 15,
+              "z": 18
+            }
+          ],
+          "conceptualCorridorCells": [
+            {
+              "x": 15,
+              "z": 19
+            }
+          ],
+          "productionBlockChangeRequests": [],
+          "requiresPrior296DesignChange": false,
+          "physicalAccessCertified": false,
+          "constructionApproved": false,
+          "operations": []
+        },
+        {
+          "id": "MERGE_HELD_INTO_EXISTING_ADJACENT_SUITES",
+          "programmeIndependentRoomsRetired": 3,
+          "approval": "HOLD_NO_ADJACENT_ROOM",
+          "retainOriginal296": true,
+          "heldRemains": 0,
+          "claimedUsableRooms": 0,
+          "roomsWithTouchingExistingSuite": 0,
+          "nominalHeldArea": 38,
+          "requiresPrior296DesignChange": true,
+          "affectedPriorProposalRooms": [],
+          "frozenProposalMutationsMade": 0,
+          "operations": []
+        }
+      ],
+      "physicalCorridorClaims": 0,
+      "worldCoordinates": null,
+      "executionAllowed": false,
+      "constructionApproved": false,
+      "operations": []
+    },
+    {
+      "sectionId": "apartment/candidate-01/L5",
+      "heldRoomCount": 3,
+      "heldNominalArea": 38,
+      "roomGraph": [
+        {
+          "roomId": "F5-R006",
+          "originalArea": 20,
+          "adjacentSuites": [],
+          "serviceConnection": {
+            "found": true,
+            "path": [
+              {
+                "x": 1,
+                "z": 8
+              },
+              {
+                "x": 0,
+                "z": 8
+              },
+              {
+                "x": 0,
+                "z": 7
+              },
+              {
+                "x": 0,
+                "z": 6
+              },
+              {
+                "x": 0,
+                "z": 5
+              },
+              {
+                "x": 0,
+                "z": 4
+              },
+              {
+                "x": 0,
+                "z": 3
+              },
+              {
+                "x": 0,
+                "z": 2
+              },
+              {
+                "x": 0,
+                "z": 1
+              },
+              {
+                "x": 0,
+                "z": 0
+              },
+              {
+                "x": 1,
+                "z": 0
+              },
+              {
+                "x": 2,
+                "z": 0
+              },
+              {
+                "x": 3,
+                "z": 0
+              },
+              {
+                "x": 4,
+                "z": 0
+              },
+              {
+                "x": 5,
+                "z": 0
+              },
+              {
+                "x": 6,
+                "z": 0
+              },
+              {
+                "x": 7,
+                "z": 0
+              },
+              {
+                "x": 8,
+                "z": 0
+              },
+              {
+                "x": 9,
+                "z": 0
+              },
+              {
+                "x": 10,
+                "z": 0
+              },
+              {
+                "x": 11,
+                "z": 0
+              },
+              {
+                "x": 12,
+                "z": 0
+              },
+              {
+                "x": 13,
+                "z": 0
+              },
+              {
+                "x": 14,
+                "z": 0
+              },
+              {
+                "x": 15,
+                "z": 0
+              },
+              {
+                "x": 16,
+                "z": 0
+              },
+              {
+                "x": 17,
+                "z": 0
+              },
+              {
+                "x": 18,
+                "z": 0
+              },
+              {
+                "x": 19,
+                "z": 0
+              },
+              {
+                "x": 20,
+                "z": 0
+              },
+              {
+                "x": 21,
+                "z": 0
+              },
+              {
+                "x": 22,
+                "z": 0
+              },
+              {
+                "x": 23,
+                "z": 0
+              },
+              {
+                "x": 24,
+                "z": 0
+              },
+              {
+                "x": 24,
+                "z": 1
+              },
+              {
+                "x": 24,
+                "z": 2
+              },
+              {
+                "x": 24,
+                "z": 3
+              },
+              {
+                "x": 24,
+                "z": 4
+              },
+              {
+                "x": 24,
+                "z": 5
+              },
+              {
+                "x": 24,
+                "z": 6
+              },
+              {
+                "x": 24,
+                "z": 7
+              },
+              {
+                "x": 24,
+                "z": 8
+              },
+              {
+                "x": 24,
+                "z": 9
+              },
+              {
+                "x": 24,
+                "z": 10
+              },
+              {
+                "x": 23,
+                "z": 10
+              },
+              {
+                "x": 23,
+                "z": 11
+              },
+              {
+                "x": 23,
+                "z": 12
+              },
+              {
+                "x": 23,
+                "z": 13
+              },
+              {
+                "x": 24,
+                "z": 13
+              }
+            ],
+            "conceptualCorridorCells": [
+              {
+                "x": 1,
+                "z": 8
+              },
+              {
+                "x": 23,
+                "z": 10
+              },
+              {
+                "x": 23,
+                "z": 11
+              },
+              {
+                "x": 23,
+                "z": 13
+              }
+            ],
+            "unassignedFloorCells": [
+              {
+                "x": 23,
+                "z": 10
+              },
+              {
+                "x": 23,
+                "z": 11
+              },
+              {
+                "x": 23,
+                "z": 13
+              }
+            ],
+            "heldRoomsRetired": [
+              "F5-R006"
+            ],
+            "roomCountDelta": -1,
+            "nominalIndependentAreaRetired": 20,
+            "localProductionBlockChangeRequests": [
+              {
+                "x": 23,
+                "y": 21,
+                "z": 10,
+                "block": "minecraft:light_gray_concrete",
+                "role": "primaryWall",
+                "originalOccupied": true,
+                "protectedReservation": false,
+                "requiresApproval": true,
+                "changeAllowed": false,
+                "blockOperations": []
+              },
+              {
+                "x": 23,
+                "y": 22,
+                "z": 10,
+                "block": "minecraft:light_gray_concrete",
+                "role": "primaryWall",
+                "originalOccupied": true,
+                "protectedReservation": false,
+                "requiresApproval": true,
+                "changeAllowed": false,
+                "blockOperations": []
+              },
+              {
+                "x": 23,
+                "y": 21,
+                "z": 11,
+                "block": "minecraft:black_concrete_stairs",
+                "role": "frame",
+                "originalOccupied": true,
+                "protectedReservation": false,
+                "requiresApproval": true,
+                "changeAllowed": false,
+                "blockOperations": []
+              },
+              {
+                "x": 23,
+                "y": 21,
+                "z": 13,
+                "block": "minecraft:light_gray_concrete",
+                "role": "primaryWall",
+                "originalOccupied": true,
+                "protectedReservation": false,
+                "requiresApproval": true,
+                "changeAllowed": false,
+                "blockOperations": []
+              },
+              {
+                "x": 23,
+                "y": 22,
+                "z": 13,
+                "block": "minecraft:light_gray_concrete",
+                "role": "primaryWall",
+                "originalOccupied": true,
+                "protectedReservation": false,
+                "requiresApproval": true,
+                "changeAllowed": false,
+                "blockOperations": []
+              }
+            ],
+            "productionContactCount": 5,
+            "preservedGlass": true,
+            "priorCandidateContacts": 0,
+            "coreAdjacencyOnly": true,
+            "physicalRouteClaim": false,
+            "withinConceptQualityBudget": false,
+            "qualityHoldReasons": [
+              "ROUTE_TOO_LONG",
+              "TOO_MANY_PRODUCTION_CHANGES"
+            ],
+            "reachableCoreCorridorSites": 17,
+            "conditionalDesignCost": 915,
+            "examined": 122,
+            "requiredApprovals": [
+              "PROGRAM_ROOM_COUNT_REDUCTION",
+              "LOCAL_INTERIOR_OR_STRUCTURAL_BLOCK_REVIEW",
+              "COMMON_PATH_WIDTH_AND_CIRCULATION",
+              "OLD_ROOM_PARTITIONS_AND_OPENING_CLOSURE",
+              "FLOOR_STAIR_ELEVATOR_EGRESS",
+              "BEDROCK_DOOR_HINGE"
+            ],
+            "constructionApproved": false,
+            "worldCoordinates": null,
+            "operations": []
+          },
+          "retainsPrior296WithoutModification": true
+        },
+        {
+          "roomId": "F5-R012",
+          "originalArea": 9,
+          "adjacentSuites": [],
+          "serviceConnection": {
+            "found": true,
+            "path": [
+              {
+                "x": 15,
+                "z": 19
+              },
+              {
+                "x": 15,
+                "z": 18
+              }
+            ],
+            "conceptualCorridorCells": [
+              {
+                "x": 15,
+                "z": 19
+              }
+            ],
+            "unassignedFloorCells": [],
+            "heldRoomsRetired": [
+              "F5-R012"
+            ],
+            "roomCountDelta": -1,
+            "nominalIndependentAreaRetired": 9,
+            "localProductionBlockChangeRequests": [],
+            "productionContactCount": 0,
+            "preservedGlass": true,
+            "priorCandidateContacts": 0,
+            "coreAdjacencyOnly": true,
+            "physicalRouteClaim": false,
+            "withinConceptQualityBudget": true,
+            "qualityHoldReasons": [],
+            "reachableCoreCorridorSites": 17,
+            "conditionalDesignCost": 3,
+            "examined": 9,
+            "requiredApprovals": [
+              "PROGRAM_ROOM_COUNT_REDUCTION",
+              "LOCAL_INTERIOR_OR_STRUCTURAL_BLOCK_REVIEW",
+              "COMMON_PATH_WIDTH_AND_CIRCULATION",
+              "OLD_ROOM_PARTITIONS_AND_OPENING_CLOSURE",
+              "FLOOR_STAIR_ELEVATOR_EGRESS",
+              "BEDROCK_DOOR_HINGE"
+            ],
+            "constructionApproved": false,
+            "worldCoordinates": null,
+            "operations": []
+          },
+          "retainsPrior296WithoutModification": true
+        },
+        {
+          "roomId": "F5-R013",
+          "originalArea": 9,
+          "adjacentSuites": [],
+          "serviceConnection": {
+            "found": true,
+            "path": [
+              {
+                "x": 25,
+                "z": 19
+              },
+              {
+                "x": 24,
+                "z": 19
+              }
+            ],
+            "conceptualCorridorCells": [
+              {
+                "x": 25,
+                "z": 19
+              }
+            ],
+            "unassignedFloorCells": [],
+            "heldRoomsRetired": [
+              "F5-R013"
+            ],
+            "roomCountDelta": -1,
+            "nominalIndependentAreaRetired": 9,
+            "localProductionBlockChangeRequests": [],
+            "productionContactCount": 0,
+            "preservedGlass": true,
+            "priorCandidateContacts": 0,
+            "coreAdjacencyOnly": true,
+            "physicalRouteClaim": false,
+            "withinConceptQualityBudget": true,
+            "qualityHoldReasons": [],
+            "reachableCoreCorridorSites": 17,
+            "conditionalDesignCost": 3,
+            "examined": 9,
+            "requiredApprovals": [
+              "PROGRAM_ROOM_COUNT_REDUCTION",
+              "LOCAL_INTERIOR_OR_STRUCTURAL_BLOCK_REVIEW",
+              "COMMON_PATH_WIDTH_AND_CIRCULATION",
+              "OLD_ROOM_PARTITIONS_AND_OPENING_CLOSURE",
+              "FLOOR_STAIR_ELEVATOR_EGRESS",
+              "BEDROCK_DOOR_HINGE"
+            ],
+            "constructionApproved": false,
+            "worldCoordinates": null,
+            "operations": []
+          },
+          "retainsPrior296WithoutModification": true
+        }
+      ],
+      "alternatives": [
+        {
+          "id": "KEEP_ALL_HELD_UNCERTIFIED",
+          "programmeIndependentRoomsRetired": 0,
+          "approval": "HOLD",
+          "retainOriginal296": true,
+          "heldRemains": 3,
+          "claimedUsableRooms": 0,
+          "nominalHeldArea": 38,
+          "requiresPrior296DesignChange": false,
+          "conceptualCorridorCells": [],
+          "physicalAccessCertified": false,
+          "operations": []
+        },
+        {
+          "id": "REPURPOSE_HELD_ROOMS_AS_COMMON_SERVICE_ZONE",
+          "programmeIndependentRoomsRetired": 3,
+          "approval": "PROGRAMME_REDUCTION_REVIEW",
+          "retainOriginal296": true,
+          "heldRemains": 0,
+          "claimedUsableRooms": 0,
+          "nominalHeldArea": 38,
+          "reassignedCommonServiceArea": 38,
+          "requiresPrior296DesignChange": false,
+          "accessibleCommonServiceAreaCertified": false,
+          "physicalAccessCertified": false,
+          "operations": []
+        },
+        {
+          "id": "MINIMAL_HELD_ROOM_CORE_LINK",
+          "programmeIndependentRoomsRetired": 1,
+          "approval": "CONDITIONAL_UNBUILT_REVIEW",
+          "retainOriginal296": true,
+          "heldRemains": 2,
+          "claimedUsableRooms": 0,
+          "sourceRoomId": "F5-R012",
+          "localPath": [
+            {
+              "x": 15,
+              "z": 19
+            },
+            {
+              "x": 15,
+              "z": 18
+            }
+          ],
+          "conceptualCorridorCells": [
+            {
+              "x": 15,
+              "z": 19
+            }
+          ],
+          "productionBlockChangeRequests": [],
+          "requiresPrior296DesignChange": false,
+          "physicalAccessCertified": false,
+          "constructionApproved": false,
+          "operations": []
+        },
+        {
+          "id": "MERGE_HELD_INTO_EXISTING_ADJACENT_SUITES",
+          "programmeIndependentRoomsRetired": 3,
+          "approval": "HOLD_NO_ADJACENT_ROOM",
+          "retainOriginal296": true,
+          "heldRemains": 0,
+          "claimedUsableRooms": 0,
+          "roomsWithTouchingExistingSuite": 0,
+          "nominalHeldArea": 38,
+          "requiresPrior296DesignChange": true,
+          "affectedPriorProposalRooms": [],
+          "frozenProposalMutationsMade": 0,
+          "operations": []
+        }
+      ],
+      "physicalCorridorClaims": 0,
+      "worldCoordinates": null,
+      "executionAllowed": false,
+      "constructionApproved": false,
+      "operations": []
+    },
+    {
+      "sectionId": "apartment/candidate-01/L6",
+      "heldRoomCount": 1,
+      "heldNominalArea": 9,
+      "roomGraph": [
+        {
+          "roomId": "F6-R013",
+          "originalArea": 9,
+          "adjacentSuites": [],
+          "serviceConnection": {
+            "found": true,
+            "path": [
+              {
+                "x": 25,
+                "z": 19
+              },
+              {
+                "x": 24,
+                "z": 19
+              }
+            ],
+            "conceptualCorridorCells": [
+              {
+                "x": 25,
+                "z": 19
+              }
+            ],
+            "unassignedFloorCells": [],
+            "heldRoomsRetired": [
+              "F6-R013"
+            ],
+            "roomCountDelta": -1,
+            "nominalIndependentAreaRetired": 9,
+            "localProductionBlockChangeRequests": [],
+            "productionContactCount": 0,
+            "preservedGlass": true,
+            "priorCandidateContacts": 0,
+            "coreAdjacencyOnly": true,
+            "physicalRouteClaim": false,
+            "withinConceptQualityBudget": true,
+            "qualityHoldReasons": [],
+            "reachableCoreCorridorSites": 15,
+            "conditionalDesignCost": 3,
+            "examined": 7,
+            "requiredApprovals": [
+              "PROGRAM_ROOM_COUNT_REDUCTION",
+              "LOCAL_INTERIOR_OR_STRUCTURAL_BLOCK_REVIEW",
+              "COMMON_PATH_WIDTH_AND_CIRCULATION",
+              "OLD_ROOM_PARTITIONS_AND_OPENING_CLOSURE",
+              "FLOOR_STAIR_ELEVATOR_EGRESS",
+              "BEDROCK_DOOR_HINGE"
+            ],
+            "constructionApproved": false,
+            "worldCoordinates": null,
+            "operations": []
+          },
+          "retainsPrior296WithoutModification": true
+        }
+      ],
+      "alternatives": [
+        {
+          "id": "KEEP_ALL_HELD_UNCERTIFIED",
+          "programmeIndependentRoomsRetired": 0,
+          "approval": "HOLD",
+          "retainOriginal296": true,
+          "heldRemains": 1,
+          "claimedUsableRooms": 0,
+          "nominalHeldArea": 9,
+          "requiresPrior296DesignChange": false,
+          "conceptualCorridorCells": [],
+          "physicalAccessCertified": false,
+          "operations": []
+        },
+        {
+          "id": "REPURPOSE_HELD_ROOMS_AS_COMMON_SERVICE_ZONE",
+          "programmeIndependentRoomsRetired": 1,
+          "approval": "PROGRAMME_REDUCTION_REVIEW",
+          "retainOriginal296": true,
+          "heldRemains": 0,
+          "claimedUsableRooms": 0,
+          "nominalHeldArea": 9,
+          "reassignedCommonServiceArea": 9,
+          "requiresPrior296DesignChange": false,
+          "accessibleCommonServiceAreaCertified": false,
+          "physicalAccessCertified": false,
+          "operations": []
+        },
+        {
+          "id": "MINIMAL_HELD_ROOM_CORE_LINK",
+          "programmeIndependentRoomsRetired": 1,
+          "approval": "CONDITIONAL_UNBUILT_REVIEW",
+          "retainOriginal296": true,
+          "heldRemains": 0,
+          "claimedUsableRooms": 0,
+          "sourceRoomId": "F6-R013",
+          "localPath": [
+            {
+              "x": 25,
+              "z": 19
+            },
+            {
+              "x": 24,
+              "z": 19
+            }
+          ],
+          "conceptualCorridorCells": [
+            {
+              "x": 25,
+              "z": 19
+            }
+          ],
+          "productionBlockChangeRequests": [],
+          "requiresPrior296DesignChange": false,
+          "physicalAccessCertified": false,
+          "constructionApproved": false,
+          "operations": []
+        },
+        {
+          "id": "MERGE_HELD_INTO_EXISTING_ADJACENT_SUITES",
+          "programmeIndependentRoomsRetired": 1,
+          "approval": "HOLD_NO_ADJACENT_ROOM",
+          "retainOriginal296": true,
+          "heldRemains": 0,
+          "claimedUsableRooms": 0,
+          "roomsWithTouchingExistingSuite": 0,
+          "nominalHeldArea": 9,
+          "requiresPrior296DesignChange": true,
+          "affectedPriorProposalRooms": [],
+          "frozenProposalMutationsMade": 0,
+          "operations": []
+        }
+      ],
+      "physicalCorridorClaims": 0,
+      "worldCoordinates": null,
+      "executionAllowed": false,
+      "constructionApproved": false,
+      "operations": []
+    },
+    {
+      "sectionId": "office/candidate-01/L3",
+      "heldRoomCount": 1,
+      "heldNominalArea": 16,
+      "roomGraph": [
+        {
+          "roomId": "F3-R004",
+          "originalArea": 16,
+          "adjacentSuites": [],
+          "serviceConnection": {
+            "found": true,
+            "path": [
+              {
+                "x": 19,
+                "z": 4
+              },
+              {
+                "x": 18,
+                "z": 4
+              }
+            ],
+            "conceptualCorridorCells": [
+              {
+                "x": 19,
+                "z": 4
+              }
+            ],
+            "unassignedFloorCells": [],
+            "heldRoomsRetired": [
+              "F3-R004"
+            ],
+            "roomCountDelta": -1,
+            "nominalIndependentAreaRetired": 16,
+            "localProductionBlockChangeRequests": [],
+            "productionContactCount": 0,
+            "preservedGlass": true,
+            "priorCandidateContacts": 0,
+            "coreAdjacencyOnly": true,
+            "physicalRouteClaim": false,
+            "withinConceptQualityBudget": true,
+            "qualityHoldReasons": [],
+            "reachableCoreCorridorSites": 73,
+            "conditionalDesignCost": 3,
+            "examined": 14,
+            "requiredApprovals": [
+              "PROGRAM_ROOM_COUNT_REDUCTION",
+              "LOCAL_INTERIOR_OR_STRUCTURAL_BLOCK_REVIEW",
+              "COMMON_PATH_WIDTH_AND_CIRCULATION",
+              "OLD_ROOM_PARTITIONS_AND_OPENING_CLOSURE",
+              "FLOOR_STAIR_ELEVATOR_EGRESS",
+              "BEDROCK_DOOR_HINGE"
+            ],
+            "constructionApproved": false,
+            "worldCoordinates": null,
+            "operations": []
+          },
+          "retainsPrior296WithoutModification": true
+        }
+      ],
+      "alternatives": [
+        {
+          "id": "KEEP_ALL_HELD_UNCERTIFIED",
+          "programmeIndependentRoomsRetired": 0,
+          "approval": "HOLD",
+          "retainOriginal296": true,
+          "heldRemains": 1,
+          "claimedUsableRooms": 0,
+          "nominalHeldArea": 16,
+          "requiresPrior296DesignChange": false,
+          "conceptualCorridorCells": [],
+          "physicalAccessCertified": false,
+          "operations": []
+        },
+        {
+          "id": "REPURPOSE_HELD_ROOMS_AS_COMMON_SERVICE_ZONE",
+          "programmeIndependentRoomsRetired": 1,
+          "approval": "PROGRAMME_REDUCTION_REVIEW",
+          "retainOriginal296": true,
+          "heldRemains": 0,
+          "claimedUsableRooms": 0,
+          "nominalHeldArea": 16,
+          "reassignedCommonServiceArea": 16,
+          "requiresPrior296DesignChange": false,
+          "accessibleCommonServiceAreaCertified": false,
+          "physicalAccessCertified": false,
+          "operations": []
+        },
+        {
+          "id": "MINIMAL_HELD_ROOM_CORE_LINK",
+          "programmeIndependentRoomsRetired": 1,
+          "approval": "CONDITIONAL_UNBUILT_REVIEW",
+          "retainOriginal296": true,
+          "heldRemains": 0,
+          "claimedUsableRooms": 0,
+          "sourceRoomId": "F3-R004",
+          "localPath": [
+            {
+              "x": 19,
+              "z": 4
+            },
+            {
+              "x": 18,
+              "z": 4
+            }
+          ],
+          "conceptualCorridorCells": [
+            {
+              "x": 19,
+              "z": 4
+            }
+          ],
+          "productionBlockChangeRequests": [],
+          "requiresPrior296DesignChange": false,
+          "physicalAccessCertified": false,
+          "constructionApproved": false,
+          "operations": []
+        },
+        {
+          "id": "MERGE_HELD_INTO_EXISTING_ADJACENT_SUITES",
+          "programmeIndependentRoomsRetired": 1,
+          "approval": "HOLD_NO_ADJACENT_ROOM",
+          "retainOriginal296": true,
+          "heldRemains": 0,
+          "claimedUsableRooms": 0,
+          "roomsWithTouchingExistingSuite": 0,
+          "nominalHeldArea": 16,
+          "requiresPrior296DesignChange": true,
+          "affectedPriorProposalRooms": [],
+          "frozenProposalMutationsMade": 0,
+          "operations": []
+        }
+      ],
+      "physicalCorridorClaims": 0,
+      "worldCoordinates": null,
+      "executionAllowed": false,
+      "constructionApproved": false,
+      "operations": []
+    },
+    {
+      "sectionId": "office/candidate-01/L4",
+      "heldRoomCount": 1,
+      "heldNominalArea": 16,
+      "roomGraph": [
+        {
+          "roomId": "F4-R004",
+          "originalArea": 16,
+          "adjacentSuites": [],
+          "serviceConnection": {
+            "found": true,
+            "path": [
+              {
+                "x": 19,
+                "z": 4
+              },
+              {
+                "x": 18,
+                "z": 4
+              }
+            ],
+            "conceptualCorridorCells": [
+              {
+                "x": 19,
+                "z": 4
+              }
+            ],
+            "unassignedFloorCells": [],
+            "heldRoomsRetired": [
+              "F4-R004"
+            ],
+            "roomCountDelta": -1,
+            "nominalIndependentAreaRetired": 16,
+            "localProductionBlockChangeRequests": [],
+            "productionContactCount": 0,
+            "preservedGlass": true,
+            "priorCandidateContacts": 0,
+            "coreAdjacencyOnly": true,
+            "physicalRouteClaim": false,
+            "withinConceptQualityBudget": true,
+            "qualityHoldReasons": [],
+            "reachableCoreCorridorSites": 73,
+            "conditionalDesignCost": 3,
+            "examined": 14,
+            "requiredApprovals": [
+              "PROGRAM_ROOM_COUNT_REDUCTION",
+              "LOCAL_INTERIOR_OR_STRUCTURAL_BLOCK_REVIEW",
+              "COMMON_PATH_WIDTH_AND_CIRCULATION",
+              "OLD_ROOM_PARTITIONS_AND_OPENING_CLOSURE",
+              "FLOOR_STAIR_ELEVATOR_EGRESS",
+              "BEDROCK_DOOR_HINGE"
+            ],
+            "constructionApproved": false,
+            "worldCoordinates": null,
+            "operations": []
+          },
+          "retainsPrior296WithoutModification": true
+        }
+      ],
+      "alternatives": [
+        {
+          "id": "KEEP_ALL_HELD_UNCERTIFIED",
+          "programmeIndependentRoomsRetired": 0,
+          "approval": "HOLD",
+          "retainOriginal296": true,
+          "heldRemains": 1,
+          "claimedUsableRooms": 0,
+          "nominalHeldArea": 16,
+          "requiresPrior296DesignChange": false,
+          "conceptualCorridorCells": [],
+          "physicalAccessCertified": false,
+          "operations": []
+        },
+        {
+          "id": "REPURPOSE_HELD_ROOMS_AS_COMMON_SERVICE_ZONE",
+          "programmeIndependentRoomsRetired": 1,
+          "approval": "PROGRAMME_REDUCTION_REVIEW",
+          "retainOriginal296": true,
+          "heldRemains": 0,
+          "claimedUsableRooms": 0,
+          "nominalHeldArea": 16,
+          "reassignedCommonServiceArea": 16,
+          "requiresPrior296DesignChange": false,
+          "accessibleCommonServiceAreaCertified": false,
+          "physicalAccessCertified": false,
+          "operations": []
+        },
+        {
+          "id": "MINIMAL_HELD_ROOM_CORE_LINK",
+          "programmeIndependentRoomsRetired": 1,
+          "approval": "CONDITIONAL_UNBUILT_REVIEW",
+          "retainOriginal296": true,
+          "heldRemains": 0,
+          "claimedUsableRooms": 0,
+          "sourceRoomId": "F4-R004",
+          "localPath": [
+            {
+              "x": 19,
+              "z": 4
+            },
+            {
+              "x": 18,
+              "z": 4
+            }
+          ],
+          "conceptualCorridorCells": [
+            {
+              "x": 19,
+              "z": 4
+            }
+          ],
+          "productionBlockChangeRequests": [],
+          "requiresPrior296DesignChange": false,
+          "physicalAccessCertified": false,
+          "constructionApproved": false,
+          "operations": []
+        },
+        {
+          "id": "MERGE_HELD_INTO_EXISTING_ADJACENT_SUITES",
+          "programmeIndependentRoomsRetired": 1,
+          "approval": "HOLD_NO_ADJACENT_ROOM",
+          "retainOriginal296": true,
+          "heldRemains": 0,
+          "claimedUsableRooms": 0,
+          "roomsWithTouchingExistingSuite": 0,
+          "nominalHeldArea": 16,
+          "requiresPrior296DesignChange": true,
+          "affectedPriorProposalRooms": [],
+          "frozenProposalMutationsMade": 0,
+          "operations": []
+        }
+      ],
+      "physicalCorridorClaims": 0,
+      "worldCoordinates": null,
+      "executionAllowed": false,
+      "constructionApproved": false,
+      "operations": []
+    },
+    {
+      "sectionId": "office/candidate-01/L5",
+      "heldRoomCount": 1,
+      "heldNominalArea": 16,
+      "roomGraph": [
+        {
+          "roomId": "F5-R004",
+          "originalArea": 16,
+          "adjacentSuites": [],
+          "serviceConnection": {
+            "found": true,
+            "path": [
+              {
+                "x": 19,
+                "z": 4
+              },
+              {
+                "x": 18,
+                "z": 4
+              }
+            ],
+            "conceptualCorridorCells": [
+              {
+                "x": 19,
+                "z": 4
+              }
+            ],
+            "unassignedFloorCells": [],
+            "heldRoomsRetired": [
+              "F5-R004"
+            ],
+            "roomCountDelta": -1,
+            "nominalIndependentAreaRetired": 16,
+            "localProductionBlockChangeRequests": [],
+            "productionContactCount": 0,
+            "preservedGlass": true,
+            "priorCandidateContacts": 0,
+            "coreAdjacencyOnly": true,
+            "physicalRouteClaim": false,
+            "withinConceptQualityBudget": true,
+            "qualityHoldReasons": [],
+            "reachableCoreCorridorSites": 73,
+            "conditionalDesignCost": 3,
+            "examined": 14,
+            "requiredApprovals": [
+              "PROGRAM_ROOM_COUNT_REDUCTION",
+              "LOCAL_INTERIOR_OR_STRUCTURAL_BLOCK_REVIEW",
+              "COMMON_PATH_WIDTH_AND_CIRCULATION",
+              "OLD_ROOM_PARTITIONS_AND_OPENING_CLOSURE",
+              "FLOOR_STAIR_ELEVATOR_EGRESS",
+              "BEDROCK_DOOR_HINGE"
+            ],
+            "constructionApproved": false,
+            "worldCoordinates": null,
+            "operations": []
+          },
+          "retainsPrior296WithoutModification": true
+        }
+      ],
+      "alternatives": [
+        {
+          "id": "KEEP_ALL_HELD_UNCERTIFIED",
+          "programmeIndependentRoomsRetired": 0,
+          "approval": "HOLD",
+          "retainOriginal296": true,
+          "heldRemains": 1,
+          "claimedUsableRooms": 0,
+          "nominalHeldArea": 16,
+          "requiresPrior296DesignChange": false,
+          "conceptualCorridorCells": [],
+          "physicalAccessCertified": false,
+          "operations": []
+        },
+        {
+          "id": "REPURPOSE_HELD_ROOMS_AS_COMMON_SERVICE_ZONE",
+          "programmeIndependentRoomsRetired": 1,
+          "approval": "PROGRAMME_REDUCTION_REVIEW",
+          "retainOriginal296": true,
+          "heldRemains": 0,
+          "claimedUsableRooms": 0,
+          "nominalHeldArea": 16,
+          "reassignedCommonServiceArea": 16,
+          "requiresPrior296DesignChange": false,
+          "accessibleCommonServiceAreaCertified": false,
+          "physicalAccessCertified": false,
+          "operations": []
+        },
+        {
+          "id": "MINIMAL_HELD_ROOM_CORE_LINK",
+          "programmeIndependentRoomsRetired": 1,
+          "approval": "CONDITIONAL_UNBUILT_REVIEW",
+          "retainOriginal296": true,
+          "heldRemains": 0,
+          "claimedUsableRooms": 0,
+          "sourceRoomId": "F5-R004",
+          "localPath": [
+            {
+              "x": 19,
+              "z": 4
+            },
+            {
+              "x": 18,
+              "z": 4
+            }
+          ],
+          "conceptualCorridorCells": [
+            {
+              "x": 19,
+              "z": 4
+            }
+          ],
+          "productionBlockChangeRequests": [],
+          "requiresPrior296DesignChange": false,
+          "physicalAccessCertified": false,
+          "constructionApproved": false,
+          "operations": []
+        },
+        {
+          "id": "MERGE_HELD_INTO_EXISTING_ADJACENT_SUITES",
+          "programmeIndependentRoomsRetired": 1,
+          "approval": "HOLD_NO_ADJACENT_ROOM",
+          "retainOriginal296": true,
+          "heldRemains": 0,
+          "claimedUsableRooms": 0,
+          "roomsWithTouchingExistingSuite": 0,
+          "nominalHeldArea": 16,
+          "requiresPrior296DesignChange": true,
+          "affectedPriorProposalRooms": [],
+          "frozenProposalMutationsMade": 0,
+          "operations": []
+        }
+      ],
+      "physicalCorridorClaims": 0,
+      "worldCoordinates": null,
+      "executionAllowed": false,
+      "constructionApproved": false,
+      "operations": []
+    },
+    {
+      "sectionId": "office/candidate-01/L6",
+      "heldRoomCount": 1,
+      "heldNominalArea": 16,
+      "roomGraph": [
+        {
+          "roomId": "F6-R004",
+          "originalArea": 16,
+          "adjacentSuites": [],
+          "serviceConnection": {
+            "found": true,
+            "path": [
+              {
+                "x": 19,
+                "z": 4
+              },
+              {
+                "x": 18,
+                "z": 4
+              }
+            ],
+            "conceptualCorridorCells": [
+              {
+                "x": 19,
+                "z": 4
+              }
+            ],
+            "unassignedFloorCells": [],
+            "heldRoomsRetired": [
+              "F6-R004"
+            ],
+            "roomCountDelta": -1,
+            "nominalIndependentAreaRetired": 16,
+            "localProductionBlockChangeRequests": [],
+            "productionContactCount": 0,
+            "preservedGlass": true,
+            "priorCandidateContacts": 0,
+            "coreAdjacencyOnly": true,
+            "physicalRouteClaim": false,
+            "withinConceptQualityBudget": true,
+            "qualityHoldReasons": [],
+            "reachableCoreCorridorSites": 76,
+            "conditionalDesignCost": 3,
+            "examined": 13,
+            "requiredApprovals": [
+              "PROGRAM_ROOM_COUNT_REDUCTION",
+              "LOCAL_INTERIOR_OR_STRUCTURAL_BLOCK_REVIEW",
+              "COMMON_PATH_WIDTH_AND_CIRCULATION",
+              "OLD_ROOM_PARTITIONS_AND_OPENING_CLOSURE",
+              "FLOOR_STAIR_ELEVATOR_EGRESS",
+              "BEDROCK_DOOR_HINGE"
+            ],
+            "constructionApproved": false,
+            "worldCoordinates": null,
+            "operations": []
+          },
+          "retainsPrior296WithoutModification": true
+        }
+      ],
+      "alternatives": [
+        {
+          "id": "KEEP_ALL_HELD_UNCERTIFIED",
+          "programmeIndependentRoomsRetired": 0,
+          "approval": "HOLD",
+          "retainOriginal296": true,
+          "heldRemains": 1,
+          "claimedUsableRooms": 0,
+          "nominalHeldArea": 16,
+          "requiresPrior296DesignChange": false,
+          "conceptualCorridorCells": [],
+          "physicalAccessCertified": false,
+          "operations": []
+        },
+        {
+          "id": "REPURPOSE_HELD_ROOMS_AS_COMMON_SERVICE_ZONE",
+          "programmeIndependentRoomsRetired": 1,
+          "approval": "PROGRAMME_REDUCTION_REVIEW",
+          "retainOriginal296": true,
+          "heldRemains": 0,
+          "claimedUsableRooms": 0,
+          "nominalHeldArea": 16,
+          "reassignedCommonServiceArea": 16,
+          "requiresPrior296DesignChange": false,
+          "accessibleCommonServiceAreaCertified": false,
+          "physicalAccessCertified": false,
+          "operations": []
+        },
+        {
+          "id": "MINIMAL_HELD_ROOM_CORE_LINK",
+          "programmeIndependentRoomsRetired": 1,
+          "approval": "CONDITIONAL_UNBUILT_REVIEW",
+          "retainOriginal296": true,
+          "heldRemains": 0,
+          "claimedUsableRooms": 0,
+          "sourceRoomId": "F6-R004",
+          "localPath": [
+            {
+              "x": 19,
+              "z": 4
+            },
+            {
+              "x": 18,
+              "z": 4
+            }
+          ],
+          "conceptualCorridorCells": [
+            {
+              "x": 19,
+              "z": 4
+            }
+          ],
+          "productionBlockChangeRequests": [],
+          "requiresPrior296DesignChange": false,
+          "physicalAccessCertified": false,
+          "constructionApproved": false,
+          "operations": []
+        },
+        {
+          "id": "MERGE_HELD_INTO_EXISTING_ADJACENT_SUITES",
+          "programmeIndependentRoomsRetired": 1,
+          "approval": "HOLD_NO_ADJACENT_ROOM",
+          "retainOriginal296": true,
+          "heldRemains": 0,
+          "claimedUsableRooms": 0,
+          "roomsWithTouchingExistingSuite": 0,
+          "nominalHeldArea": 16,
+          "requiresPrior296DesignChange": true,
+          "affectedPriorProposalRooms": [],
+          "frozenProposalMutationsMade": 0,
+          "operations": []
+        }
+      ],
+      "physicalCorridorClaims": 0,
+      "worldCoordinates": null,
+      "executionAllowed": false,
+      "constructionApproved": false,
+      "operations": []
+    }
+  ],
+  "limitations": [
+    "ROOM_COUNT_REDUCTION_AND_MERGER_ARE_ALTERNATIVE_UNAPPROVED_PROGRAMMES",
+    "EXISTING_296_ROOM_PROPOSALS_REMAIN_UNAPPROVED_AND_FROZEN",
+    "CONCEPTUAL_ROUTE_REQUIRES_NEW_PASSAGES_AND_POTENTIAL_BLOCK_CHANGES",
+    "ANY_MERGE_WITH_PRIOR_ROOMS_REQUIRES_NEW_APPROVAL_AND_PROTECTION_AUDIT",
+    "NO_PHYSICAL_WALKABILITY_OR_EXIT_CERTIFICATION_FOR_PROPOSED_CHANGES",
+    "BEDROCK_DOOR_HINGES_STAIRS_SLAB_OPENINGS_AND_FACADE_UNVERIFIED"
+  ],
+  "readiness": "NOT_PREPARED",
+  "executionAllowed": false,
+  "constructionApproved": false,
+  "worldContacts": 0,
+  "gates": [
+    {
+      "id": "M4-01",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-02",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-03",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-04",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-05",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-06",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-07",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-08",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-09",
+      "status": "BLOCKED"
+    }
+  ],
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0,
+    "worldCoordinates": null
+  },
+  "reportSha256": "d4081039734728d61c80d619b31d3d88fcd282cfe1a50f05564f35541b5e2035"
+}

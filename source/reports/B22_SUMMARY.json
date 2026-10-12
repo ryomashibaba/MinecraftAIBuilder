@@ -1,0 +1,51 @@
+{
+  "schema": "minecraftaibuilder-step8b-b22-m3d-readonly-v1",
+  "evidence": {
+    "b21FrozenSha256": "2d7b1e3d71f252331dfe35e600411acc3354c43702e5b3db9fd9a5e0533932bc",
+    "b17PinnedSha256": "acdb7a316a036789a77c8fe063a4a186379e9abe87b85454e27bc2d44e92bc9d",
+    "sourcePlannerContract": "STATIC_ENGINE_SOURCE_PINNED_IN_B19_ONLY_NOT_RUNTIME"
+  },
+  "counts": {
+    "buildings": 5,
+    "floors": 30,
+    "doorPorts": 314,
+    "wallPanels": 5704,
+    "originalCollisionVoxelHits": 236,
+    "originalConflictedDoorPorts": 118,
+    "candidateSideMoves": 0,
+    "remainingCollisionVoxelHits": 236,
+    "remainingConflictedDoorPorts": 118,
+    "conditionalReliefWallPanels": 118,
+    "conditionalReliefVoxelCount": 236,
+    "stairFloorOpeningCandidates": 50,
+    "physicalRepairs": 0,
+    "executedOperations": 0
+  },
+  "tradeoff": {
+    "safeSideMoves": "REVIEW_ONLY_NOT_APPLIED",
+    "conditionalWallVoids": "REQUIRE_PARTITION_CONTINUITY_ROOM_AND_CORRIDOR_CLEARANCE_ENGINEERING",
+    "residualDoorConflicts": "BLOCKING",
+    "conditionalVoxelClearanceIfApproved": "ZERO_ONLY_FOR_DOOR_WALL_OVERLAP__NOT_PHYSICALLY_VERIFIED",
+    "junctionContinuity": "NOT_VERIFIED",
+    "geometryAndPlannerCoupling": "NOT_COMPLETE"
+  },
+  "engineeringStatus": "NOT_READY_FOR_CONSTRUCTION",
+  "deploymentGate": "BLOCKED",
+  "safety": {
+    "notPrepared": true,
+    "executionAllowed": false,
+    "constructionApproved": false,
+    "worldAccess": false,
+    "bridgeContact": false,
+    "legacyModified": false,
+    "frozenEvidenceModified": false,
+    "existingWorldModified": false
+  },
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0,
+    "worldCoordinates": null,
+    "materialIds": []
+  }
+}

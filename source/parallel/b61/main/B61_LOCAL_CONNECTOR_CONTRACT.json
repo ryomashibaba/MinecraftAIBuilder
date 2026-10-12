@@ -1,0 +1,1696 @@
+{
+  "schema": "minecraftaibuilder-b61-local-connector-and-module-boundary-v1",
+  "kind": "NON_EXECUTABLE_OFFLINE_DESIGN_CONTRACT",
+  "provenance": {
+    "b60ReportSha256": "6eb1b244623647129565e37bed262c8536efd7a7b29f4dae1aff17e62adc97e1",
+    "b57ReportSha256": "7156d1716331c4d87db88b9d28fdc2672eee0a0d3295bb0085d2d9e6683bb3c2",
+    "b43GuardSchema": "minecraftaibuilder-step8b-b43-guarded-layout-assembly-v1"
+  },
+  "gap": {
+    "doorId": "apartment/candidate-01/L1/D012",
+    "level": 1,
+    "mainCorridorCellsBefore": 115,
+    "totalCorridorCellsBefore": 135,
+    "candidateLocalPath": [
+      {
+        "x": 17,
+        "z": 18
+      },
+      {
+        "x": 18,
+        "z": 18
+      },
+      {
+        "x": 19,
+        "z": 18
+      },
+      {
+        "x": 20,
+        "z": 18
+      },
+      {
+        "x": 21,
+        "z": 18
+      },
+      {
+        "x": 22,
+        "z": 18
+      },
+      {
+        "x": 23,
+        "z": 18
+      },
+      {
+        "x": 24,
+        "z": 18
+      }
+    ],
+    "minimumNewCorridorCells": 3,
+    "newCorridorCells": [
+      {
+        "x": 21,
+        "z": 18
+      },
+      {
+        "x": 22,
+        "z": 18
+      },
+      {
+        "x": 23,
+        "z": 18
+      }
+    ],
+    "pathSteps": 7,
+    "solver": "DIJKSTRA_LEX_MIN_ADDED_THEN_STEPS_LOCAL_GRID",
+    "physicalRouteApproved": false,
+    "wallCollisionChecked": false,
+    "roomOccupancyChecked": false
+  },
+  "topology": {
+    "sourceDoors": 78,
+    "originalSymbolicallyConnected": 77,
+    "candidateSymbolicallyConnected": 78,
+    "remainingSymbolicGaps": 0,
+    "historicB42UpperDoorsStillUnverified": 60,
+    "originalB42FloorMismatchPerUpperLevel": 2,
+    "originalB42FloorMismatchComparisons": 5,
+    "repairApplied": false
+  },
+  "moduleInterfaces": {
+    "doorReservations": [
+      {
+        "id": "apartment/candidate-01/L1/D001",
+        "level": 1,
+        "openingCell": {
+          "x": 1,
+          "z": 5
+        },
+        "hallCell": {
+          "x": 1,
+          "z": 6
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L1/D002",
+        "level": 1,
+        "openingCell": {
+          "x": 7,
+          "z": 1
+        },
+        "hallCell": {
+          "x": 6,
+          "z": 1
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L1/D003",
+        "level": 1,
+        "openingCell": {
+          "x": 15,
+          "z": 1
+        },
+        "hallCell": {
+          "x": 15,
+          "z": 0
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L1/D004",
+        "level": 1,
+        "openingCell": {
+          "x": 21,
+          "z": 1
+        },
+        "hallCell": {
+          "x": 21,
+          "z": 0
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L1/D005",
+        "level": 1,
+        "openingCell": {
+          "x": 25,
+          "z": 5
+        },
+        "hallCell": {
+          "x": 24,
+          "z": 5
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L1/D006",
+        "level": 1,
+        "openingCell": {
+          "x": 1,
+          "z": 9
+        },
+        "hallCell": {
+          "x": 0,
+          "z": 9
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L1/D007",
+        "level": 1,
+        "openingCell": {
+          "x": 25,
+          "z": 8
+        },
+        "hallCell": {
+          "x": 24,
+          "z": 8
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L1/D008",
+        "level": 1,
+        "openingCell": {
+          "x": 1,
+          "z": 17
+        },
+        "hallCell": {
+          "x": 1,
+          "z": 18
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L1/D009",
+        "level": 1,
+        "openingCell": {
+          "x": 25,
+          "z": 17
+        },
+        "hallCell": {
+          "x": 24,
+          "z": 17
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L1/D010",
+        "level": 1,
+        "openingCell": {
+          "x": 3,
+          "z": 19
+        },
+        "hallCell": {
+          "x": 3,
+          "z": 18
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L1/D011",
+        "level": 1,
+        "openingCell": {
+          "x": 7,
+          "z": 19
+        },
+        "hallCell": {
+          "x": 7,
+          "z": 18
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L1/D012",
+        "level": 1,
+        "openingCell": {
+          "x": 17,
+          "z": 19
+        },
+        "hallCell": {
+          "x": 17,
+          "z": 18
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L1/D013",
+        "level": 1,
+        "openingCell": {
+          "x": 25,
+          "z": 21
+        },
+        "hallCell": {
+          "x": 24,
+          "z": 21
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L2/D001",
+        "level": 2,
+        "openingCell": {
+          "x": 1,
+          "z": 5
+        },
+        "hallCell": {
+          "x": 1,
+          "z": 6
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L2/D002",
+        "level": 2,
+        "openingCell": {
+          "x": 7,
+          "z": 1
+        },
+        "hallCell": {
+          "x": 6,
+          "z": 1
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L2/D003",
+        "level": 2,
+        "openingCell": {
+          "x": 15,
+          "z": 1
+        },
+        "hallCell": {
+          "x": 15,
+          "z": 0
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L2/D004",
+        "level": 2,
+        "openingCell": {
+          "x": 21,
+          "z": 1
+        },
+        "hallCell": {
+          "x": 21,
+          "z": 0
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L2/D005",
+        "level": 2,
+        "openingCell": {
+          "x": 25,
+          "z": 5
+        },
+        "hallCell": {
+          "x": 24,
+          "z": 5
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L2/D006",
+        "level": 2,
+        "openingCell": {
+          "x": 1,
+          "z": 9
+        },
+        "hallCell": {
+          "x": 0,
+          "z": 9
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L2/D007",
+        "level": 2,
+        "openingCell": {
+          "x": 25,
+          "z": 8
+        },
+        "hallCell": {
+          "x": 24,
+          "z": 8
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L2/D008",
+        "level": 2,
+        "openingCell": {
+          "x": 1,
+          "z": 17
+        },
+        "hallCell": {
+          "x": 1,
+          "z": 18
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L2/D009",
+        "level": 2,
+        "openingCell": {
+          "x": 25,
+          "z": 17
+        },
+        "hallCell": {
+          "x": 24,
+          "z": 17
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L2/D010",
+        "level": 2,
+        "openingCell": {
+          "x": 3,
+          "z": 19
+        },
+        "hallCell": {
+          "x": 3,
+          "z": 18
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L2/D011",
+        "level": 2,
+        "openingCell": {
+          "x": 7,
+          "z": 19
+        },
+        "hallCell": {
+          "x": 7,
+          "z": 18
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L2/D012",
+        "level": 2,
+        "openingCell": {
+          "x": 17,
+          "z": 19
+        },
+        "hallCell": {
+          "x": 17,
+          "z": 18
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L2/D013",
+        "level": 2,
+        "openingCell": {
+          "x": 25,
+          "z": 21
+        },
+        "hallCell": {
+          "x": 24,
+          "z": 21
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L3/D001",
+        "level": 3,
+        "openingCell": {
+          "x": 1,
+          "z": 5
+        },
+        "hallCell": {
+          "x": 1,
+          "z": 6
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L3/D002",
+        "level": 3,
+        "openingCell": {
+          "x": 7,
+          "z": 1
+        },
+        "hallCell": {
+          "x": 6,
+          "z": 1
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L3/D003",
+        "level": 3,
+        "openingCell": {
+          "x": 15,
+          "z": 1
+        },
+        "hallCell": {
+          "x": 15,
+          "z": 0
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L3/D004",
+        "level": 3,
+        "openingCell": {
+          "x": 21,
+          "z": 1
+        },
+        "hallCell": {
+          "x": 21,
+          "z": 0
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L3/D005",
+        "level": 3,
+        "openingCell": {
+          "x": 25,
+          "z": 5
+        },
+        "hallCell": {
+          "x": 24,
+          "z": 5
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L3/D006",
+        "level": 3,
+        "openingCell": {
+          "x": 1,
+          "z": 9
+        },
+        "hallCell": {
+          "x": 0,
+          "z": 9
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L3/D007",
+        "level": 3,
+        "openingCell": {
+          "x": 25,
+          "z": 8
+        },
+        "hallCell": {
+          "x": 24,
+          "z": 8
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L3/D008",
+        "level": 3,
+        "openingCell": {
+          "x": 1,
+          "z": 17
+        },
+        "hallCell": {
+          "x": 1,
+          "z": 18
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L3/D009",
+        "level": 3,
+        "openingCell": {
+          "x": 25,
+          "z": 17
+        },
+        "hallCell": {
+          "x": 24,
+          "z": 17
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L3/D010",
+        "level": 3,
+        "openingCell": {
+          "x": 3,
+          "z": 19
+        },
+        "hallCell": {
+          "x": 3,
+          "z": 18
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L3/D011",
+        "level": 3,
+        "openingCell": {
+          "x": 7,
+          "z": 19
+        },
+        "hallCell": {
+          "x": 7,
+          "z": 18
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L3/D012",
+        "level": 3,
+        "openingCell": {
+          "x": 17,
+          "z": 19
+        },
+        "hallCell": {
+          "x": 17,
+          "z": 18
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L3/D013",
+        "level": 3,
+        "openingCell": {
+          "x": 25,
+          "z": 21
+        },
+        "hallCell": {
+          "x": 24,
+          "z": 21
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L4/D001",
+        "level": 4,
+        "openingCell": {
+          "x": 1,
+          "z": 5
+        },
+        "hallCell": {
+          "x": 1,
+          "z": 6
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L4/D002",
+        "level": 4,
+        "openingCell": {
+          "x": 7,
+          "z": 1
+        },
+        "hallCell": {
+          "x": 6,
+          "z": 1
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L4/D003",
+        "level": 4,
+        "openingCell": {
+          "x": 15,
+          "z": 1
+        },
+        "hallCell": {
+          "x": 15,
+          "z": 0
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L4/D004",
+        "level": 4,
+        "openingCell": {
+          "x": 21,
+          "z": 1
+        },
+        "hallCell": {
+          "x": 21,
+          "z": 0
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L4/D005",
+        "level": 4,
+        "openingCell": {
+          "x": 25,
+          "z": 5
+        },
+        "hallCell": {
+          "x": 24,
+          "z": 5
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L4/D006",
+        "level": 4,
+        "openingCell": {
+          "x": 1,
+          "z": 9
+        },
+        "hallCell": {
+          "x": 0,
+          "z": 9
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L4/D007",
+        "level": 4,
+        "openingCell": {
+          "x": 25,
+          "z": 8
+        },
+        "hallCell": {
+          "x": 24,
+          "z": 8
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L4/D008",
+        "level": 4,
+        "openingCell": {
+          "x": 1,
+          "z": 17
+        },
+        "hallCell": {
+          "x": 1,
+          "z": 18
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L4/D009",
+        "level": 4,
+        "openingCell": {
+          "x": 25,
+          "z": 17
+        },
+        "hallCell": {
+          "x": 24,
+          "z": 17
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L4/D010",
+        "level": 4,
+        "openingCell": {
+          "x": 3,
+          "z": 19
+        },
+        "hallCell": {
+          "x": 3,
+          "z": 18
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L4/D011",
+        "level": 4,
+        "openingCell": {
+          "x": 7,
+          "z": 19
+        },
+        "hallCell": {
+          "x": 7,
+          "z": 18
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L4/D012",
+        "level": 4,
+        "openingCell": {
+          "x": 17,
+          "z": 19
+        },
+        "hallCell": {
+          "x": 17,
+          "z": 18
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L4/D013",
+        "level": 4,
+        "openingCell": {
+          "x": 25,
+          "z": 21
+        },
+        "hallCell": {
+          "x": 24,
+          "z": 21
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L5/D001",
+        "level": 5,
+        "openingCell": {
+          "x": 1,
+          "z": 5
+        },
+        "hallCell": {
+          "x": 1,
+          "z": 6
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L5/D002",
+        "level": 5,
+        "openingCell": {
+          "x": 7,
+          "z": 1
+        },
+        "hallCell": {
+          "x": 6,
+          "z": 1
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L5/D003",
+        "level": 5,
+        "openingCell": {
+          "x": 15,
+          "z": 1
+        },
+        "hallCell": {
+          "x": 15,
+          "z": 0
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L5/D004",
+        "level": 5,
+        "openingCell": {
+          "x": 21,
+          "z": 1
+        },
+        "hallCell": {
+          "x": 21,
+          "z": 0
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L5/D005",
+        "level": 5,
+        "openingCell": {
+          "x": 25,
+          "z": 5
+        },
+        "hallCell": {
+          "x": 24,
+          "z": 5
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L5/D006",
+        "level": 5,
+        "openingCell": {
+          "x": 1,
+          "z": 9
+        },
+        "hallCell": {
+          "x": 0,
+          "z": 9
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L5/D007",
+        "level": 5,
+        "openingCell": {
+          "x": 25,
+          "z": 8
+        },
+        "hallCell": {
+          "x": 24,
+          "z": 8
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L5/D008",
+        "level": 5,
+        "openingCell": {
+          "x": 1,
+          "z": 17
+        },
+        "hallCell": {
+          "x": 1,
+          "z": 18
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L5/D009",
+        "level": 5,
+        "openingCell": {
+          "x": 25,
+          "z": 17
+        },
+        "hallCell": {
+          "x": 24,
+          "z": 17
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L5/D010",
+        "level": 5,
+        "openingCell": {
+          "x": 3,
+          "z": 19
+        },
+        "hallCell": {
+          "x": 3,
+          "z": 18
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L5/D011",
+        "level": 5,
+        "openingCell": {
+          "x": 7,
+          "z": 19
+        },
+        "hallCell": {
+          "x": 7,
+          "z": 18
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L5/D012",
+        "level": 5,
+        "openingCell": {
+          "x": 17,
+          "z": 19
+        },
+        "hallCell": {
+          "x": 17,
+          "z": 18
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L5/D013",
+        "level": 5,
+        "openingCell": {
+          "x": 25,
+          "z": 21
+        },
+        "hallCell": {
+          "x": 24,
+          "z": 21
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L6/D001",
+        "level": 6,
+        "openingCell": {
+          "x": 1,
+          "z": 5
+        },
+        "hallCell": {
+          "x": 1,
+          "z": 6
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L6/D002",
+        "level": 6,
+        "openingCell": {
+          "x": 7,
+          "z": 1
+        },
+        "hallCell": {
+          "x": 6,
+          "z": 1
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L6/D003",
+        "level": 6,
+        "openingCell": {
+          "x": 15,
+          "z": 1
+        },
+        "hallCell": {
+          "x": 15,
+          "z": 0
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L6/D004",
+        "level": 6,
+        "openingCell": {
+          "x": 21,
+          "z": 1
+        },
+        "hallCell": {
+          "x": 21,
+          "z": 0
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L6/D005",
+        "level": 6,
+        "openingCell": {
+          "x": 25,
+          "z": 5
+        },
+        "hallCell": {
+          "x": 24,
+          "z": 5
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L6/D006",
+        "level": 6,
+        "openingCell": {
+          "x": 1,
+          "z": 9
+        },
+        "hallCell": {
+          "x": 0,
+          "z": 9
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L6/D007",
+        "level": 6,
+        "openingCell": {
+          "x": 25,
+          "z": 8
+        },
+        "hallCell": {
+          "x": 24,
+          "z": 8
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L6/D008",
+        "level": 6,
+        "openingCell": {
+          "x": 1,
+          "z": 17
+        },
+        "hallCell": {
+          "x": 1,
+          "z": 18
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L6/D009",
+        "level": 6,
+        "openingCell": {
+          "x": 25,
+          "z": 17
+        },
+        "hallCell": {
+          "x": 24,
+          "z": 17
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L6/D010",
+        "level": 6,
+        "openingCell": {
+          "x": 3,
+          "z": 19
+        },
+        "hallCell": {
+          "x": 3,
+          "z": 18
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L6/D011",
+        "level": 6,
+        "openingCell": {
+          "x": 7,
+          "z": 19
+        },
+        "hallCell": {
+          "x": 7,
+          "z": 18
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L6/D012",
+        "level": 6,
+        "openingCell": {
+          "x": 17,
+          "z": 19
+        },
+        "hallCell": {
+          "x": 17,
+          "z": 18
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "apartment/candidate-01/L6/D013",
+        "level": 6,
+        "openingCell": {
+          "x": 25,
+          "z": 21
+        },
+        "hallCell": {
+          "x": 24,
+          "z": 21
+        },
+        "openingPhysicalVerified": false,
+        "doorBlock": null,
+        "facing": null,
+        "hinge": null,
+        "approved": false,
+        "emittable": false
+      }
+    ],
+    "stairReservations": [
+      {
+        "fromLevel": 1,
+        "toLevel": 2,
+        "lower": {
+          "x": 10,
+          "z": 18
+        },
+        "upper": {
+          "x": 15,
+          "z": 18
+        },
+        "headroomVerified": false,
+        "supportVerified": false,
+        "blockStates": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "fromLevel": 2,
+        "toLevel": 3,
+        "lower": {
+          "x": 10,
+          "z": 18
+        },
+        "upper": {
+          "x": 15,
+          "z": 18
+        },
+        "headroomVerified": false,
+        "supportVerified": false,
+        "blockStates": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "fromLevel": 3,
+        "toLevel": 4,
+        "lower": {
+          "x": 10,
+          "z": 18
+        },
+        "upper": {
+          "x": 15,
+          "z": 18
+        },
+        "headroomVerified": false,
+        "supportVerified": false,
+        "blockStates": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "fromLevel": 4,
+        "toLevel": 5,
+        "lower": {
+          "x": 10,
+          "z": 18
+        },
+        "upper": {
+          "x": 15,
+          "z": 18
+        },
+        "headroomVerified": false,
+        "supportVerified": false,
+        "blockStates": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "fromLevel": 5,
+        "toLevel": 6,
+        "lower": {
+          "x": 10,
+          "z": 18
+        },
+        "upper": {
+          "x": 15,
+          "z": 18
+        },
+        "headroomVerified": false,
+        "supportVerified": false,
+        "blockStates": null,
+        "approved": false,
+        "emittable": false
+      }
+    ],
+    "unapprovedCorridorExtension": [
+      {
+        "id": "B61/L1/HALL_EXT_01",
+        "level": 1,
+        "localCell": {
+          "x": 21,
+          "z": 18
+        },
+        "floorCellPresent": true,
+        "existingCorridor": false,
+        "requiresRoomPartitionReview": true,
+        "wallOwnersIdentified": false,
+        "physicalWidthVerified": false,
+        "openingBlockStates": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "B61/L1/HALL_EXT_02",
+        "level": 1,
+        "localCell": {
+          "x": 22,
+          "z": 18
+        },
+        "floorCellPresent": true,
+        "existingCorridor": false,
+        "requiresRoomPartitionReview": true,
+        "wallOwnersIdentified": false,
+        "physicalWidthVerified": false,
+        "openingBlockStates": null,
+        "approved": false,
+        "emittable": false
+      },
+      {
+        "id": "B61/L1/HALL_EXT_03",
+        "level": 1,
+        "localCell": {
+          "x": 23,
+          "z": 18
+        },
+        "floorCellPresent": true,
+        "existingCorridor": false,
+        "requiresRoomPartitionReview": true,
+        "wallOwnersIdentified": false,
+        "physicalWidthVerified": false,
+        "openingBlockStates": null,
+        "approved": false,
+        "emittable": false
+      }
+    ],
+    "earlierUnapprovedCorridorCells": 35,
+    "earlierWallConflictCells": 20,
+    "allMaterialsUnknown": true,
+    "allDoorBlockStatesUnknown": true,
+    "allStairClearancesUnknown": true,
+    "noPhysicalEmittersIdentified": true
+  },
+  "blockers": [
+    "PRODUCTION_ENGINE_SOURCE_MISSING",
+    "B43_WALL_AND_ROOM_REPLAN_UNAPPROVED",
+    "B61_NEW_CORRIDOR_ROOM_OCCUPANCY_UNKNOWN",
+    "B61_NEW_CORRIDOR_WALL_COLLISIONS_UNKNOWN",
+    "DOOR_BLOCK_STATES_UNVERIFIED",
+    "STAIR_SUPPORT_HEADROOM_UNVERIFIED",
+    "B42_B57_FLOOR_SNAPSHOT_DIFFERENCE",
+    "PHYSICAL_PATHS_NOT_TESTED"
+  ],
+  "assessment": "78_OF_78_ONLY_IN_HYPOTHETICAL_GRAPH_AFTER_3_LOCAL_CELLS_NOT_WALKABLE_OR_BUILDABLE",
+  "readiness": "NOT_PREPARED",
+  "deployment": "BLOCKED",
+  "executionAllowed": false,
+  "constructionApproved": false,
+  "productionFacadeParity": "UNVERIFIED",
+  "physicalQuality": "UNKNOWN",
+  "engineCalls": 0,
+  "worldContacts": 0,
+  "scans": 0,
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0,
+    "worldCoordinates": null,
+    "materialIds": []
+  },
+  "gates": [
+    {
+      "id": "M4-01",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-02",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-03",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-04",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-05",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-06",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-07",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-08",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-09",
+      "status": "BLOCKED"
+    }
+  ],
+  "reportSha256": "983c7949bf1ba812ffe83a1b2ab74fe2353fdc11de84d74f33149d7a6e933ad2"
+}

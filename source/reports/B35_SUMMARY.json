@@ -1,0 +1,50 @@
+{
+  "schema": "minecraftaibuilder-step8b-b35-summary-v1",
+  "building": "apartment/candidate-01",
+  "offset": {
+    "dx": 0,
+    "dz": 1
+  },
+  "totals": {
+    "levelsReviewed": 5,
+    "originalCorridorConflicts": 5,
+    "originalRoomDoorPorts": 65,
+    "optionARemovedCells": 5,
+    "optionBRemovedCells": 10,
+    "optionBExtraTerminalPrunes": 5,
+    "optionAUnservedDoors": 0,
+    "optionBUnservedDoors": 0,
+    "optionAAddedCells": 0,
+    "optionBAddedCells": 0,
+    "physicalValidationCount": 0,
+    "approvedOptions": 0,
+    "operationsEmitted": 0
+  },
+  "alternatives": [
+    {
+      "id": "A_RETAG_ONE_CORRIDOR_CELL",
+      "removed": 1,
+      "isolated": 1,
+      "unservedDoorCount": 0,
+      "roomVolumeClearanceStatus": "NO_NEW_CELLS"
+    },
+    {
+      "id": "B_TRIM_UNUSED_TERMINAL",
+      "removed": 2,
+      "isolated": 0,
+      "unservedDoorCount": 0,
+      "roomVolumeClearanceStatus": "NO_NEW_CELLS"
+    }
+  ],
+  "approved": false,
+  "readiness": "NOT_PREPARED",
+  "deployment": "BLOCKED",
+  "constructionCommands": 0,
+  "missingProof": [
+    "physical stair landing",
+    "wall join",
+    "room volume",
+    "floor support",
+    "door states"
+  ]
+}

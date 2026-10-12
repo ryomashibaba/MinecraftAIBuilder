@@ -1,0 +1,38 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import fs from 'node:fs';import path from 'node:path';import {fileURLToPath} from 'node:url';
+import {classifyOriginal,markVoxel,draftAperture,arbitrateFloor,validateB91} from './b91-floor-design.mjs';
+import {checkPinnedProduction,compileB91} from './compile-b91.mjs';
+import {hash,safe} from '../../b79/main/compile-b79.mjs';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../../..');
+const read=p=>JSON.parse(fs.readFileSync(path.join(root,p),'utf8'));
+const pin=read('parallel/b91/main/B91_FLOOR_BRANCHES_REPORT.json');
+const fixture=({cells=[],fixedSites=[]}={})=>{
+ const idx={final:new Map(cells.map(v=>[`${v.x},${v.y},${v.z}`,{...v,occupied:true,role:v.role??'secondaryWall',block:v.block??'minecraft:sandstone',operationIndex:v.operationIndex??5}]))};
+ const fixed={solids:new Set(),reserved:new Set(),protectedSites:new Set(fixedSites)};
+ const row={sectionId:'test/L1',roomId:'F1-R1',roomArea:9},shape={level:1,floorMaskRows:Array(9).fill('111111111')};
+ const f={roomCell:{x:3,z:4},hallCell:{x:3,z:5},normal:{x:0,z:1},atOriginalPort:true,
+  edgeFrameValidated:true,innerSwingAdjacentClear:true,hallPhysicallyClear:true,componentCoreAdjacent:true};
+ return {row,f,shape,idx,fixed,otherRooms:[]};
+};
+const make=o=>draftAperture(fixture(o));
+test('production role classes fail closed',()=>{assert.equal(classifyOriginal({occupied:true,role:'primaryWall'}),'HOLD_PRIMARY_OR_STRUCTURE');assert.equal(classifyOriginal({occupied:true,role:'glass'}),'HOLD_GLAZING');assert.equal(classifyOriginal({occupied:true,role:'floor'}),'HOLD_FLOOR_SLAB_REVIEW');assert.equal(classifyOriginal({occupied:true,role:'secondaryWall'}),'HOLD_PARTITION_REVIEW');assert.equal(classifyOriginal({occupied:true,role:'surprise'}),'HOLD_OTHER_PRODUCTION');});
+test('unoccupied state is free air',()=>assert.equal(classifyOriginal({occupied:false}),'FREE_AIR'));
+test('air design yields 4 opening 6 jamb 1 lintel, 100% room preserved',()=>{const a=make();assert.equal(a.openingAirSlots.length,4);assert.equal(a.jambColumnSlots.length,6);assert.ok(a.lintelSlot);assert.equal(a.areaRatio,1);});
+test('all-air geometry is review-only, never automatically approved',()=>{const a=make();assert.equal(a.branchClass,'REVIEW_ONLY_ZERO_PRODUCTION_EDIT');assert.equal(a.geometryFailures.length,0);assert.equal(a.executionAllowed,false);assert.equal(a.qualityApproved,false);assert.deepEqual(a.BuildPlan.operations,[]);});
+test('two-high floor block contacts require explicit review',()=>{const a=make({cells:[{x:3,y:1,z:4,role:'floor'},{x:3,y:2,z:4,role:'floor'}]});assert.equal(a.explicitBlockChangeRequests.length,2);assert.ok(a.geometryFailures.includes('HALL_NOT_PHYSICALLY_CLEAR')===false);assert.ok(a.explicitBlockChangeRequests.every(p=>p.changeAllowed===false&&p.blockOperations.length===0));});
+test('primary wall at opening is hard hold',()=>{const a=make({cells:[{x:3,y:2,z:4,role:'primaryWall'}]});assert.ok(a.geometryFailures.includes('PRIMARY_OR_GLAZING_PROTECTED'));});
+test('glazing at opening is hard hold',()=>{const a=make({cells:[{x:3,y:1,z:4,role:'glass',block:'minecraft:glass'}]});assert.ok(a.geometryFailures.includes('PRIMARY_OR_GLAZING_PROTECTED'));});
+test('existing complete homogeneous opaque jamb is reused',()=>{const cells=[1,2,3].flatMap(y=>[{x:4,z:4,y,role:'primaryWall',block:'minecraft:light_gray_concrete'},{x:2,z:4,y,role:'primaryWall',block:'minecraft:light_gray_concrete'}]);const a=make({cells});assert.equal(a.geometryFailures.length,0);assert.equal(a.retainedFrameColumns.filter(x=>x.existingColumnKept).length,2);assert.equal(a.productionContacts,0);});
+test('partial jamb column is rejected',()=>{const a=make({cells:[{x:4,y:1,z:4}]});assert.ok(a.geometryFailures.includes('INVALID_JAMB_COLUMN'));});
+test('prior protected 3D slot is rejected regardless of production air',()=>{const a=make({fixedSites:['3,4']});assert.ok(a.geometryFailures.includes('PREVIOUS_296_PROPOSAL_OR_RESERVED_ROUTE'));});
+test('non-floor hall site is rejected',()=>{const o=fixture();o.shape.floorMaskRows[5]='000000000';const a=draftAperture(o);assert.ok(a.geometryFailures.includes('FLOOR_MASK_OR_OTHER_ROOM'));});
+test('other nominal room at hall blocks proposed doorway',()=>{const o=fixture();o.otherRooms=[{x:3,z:5,width:1,depth:1}];assert.ok(draftAperture(o).geometryFailures.includes('FLOOR_MASK_OR_OTHER_ROOM'));});
+test('swing and nominal core adjacency are not silently assumed',()=>{const o=fixture();o.f.innerSwingAdjacentClear=false;o.f.componentCoreAdjacent=false;const a=draftAperture(o);assert.ok(a.geometryFailures.includes('ROOM_SWING_GEOMETRY_UNVERIFIED'));assert.ok(a.geometryFailures.includes('NO_NOMINAL_CORE_ADJACENCY'));});
+test('production baseline drift is rejected',()=>{const o=fixture(),a=draftAperture(o);assert.equal(checkPinnedProduction(a,o.idx),true);o.idx.final.set('3,1,4',{occupied:true,role:'floor',block:'minecraft:basalt',operationIndex:3});assert.throws(()=>checkPinnedProduction(a,o.idx),/DRIFT/);});
+test('floor arbitration limits to one selected branch per room and prevents overlaps',()=>{const a=make();const b=structuredClone(a);b.roomId='F1-R2';const first={roomId:'F1-R1',apertures:[a]},second={roomId:'F1-R2',apertures:[b]};const arb=arbitrateFloor([first,second]);assert.equal(arb.reviewOnlyAlternatives.length,1);assert.equal(arb.roomCountWithNoValidFullGeometry,1);assert.equal(arb.crossRoomConflicts.length,1);});
+test('floor arbitration never promotes geometrically held variants',()=>{const a=make({cells:[{x:3,y:1,z:4,role:'glass'}]});const arb=arbitrateFloor([{roomId:'F1-R1',apertures:[a]}]);assert.equal(arb.reviewOnlyAlternatives.length,0);assert.equal(arb.physicalEditsAuthorized,0);});
+test('snapshot 18 held rooms, 34 review boundaries and two pinned replays',()=>{assert.equal(pin.rooms.length,18);assert.equal(pin.totals.inspectedArchitecturalBranches,34);assert.equal(pin.replayed.length,2);assert.equal(pin.floors.length,10);assert.equal(pin.totals.previousUnapprovedCandidates,296);});
+test('validated report rejects unlocked construction or wrong number of original held rooms',()=>{assert.ok(validateB91(pin));assert.equal(validateB91({...pin,executionAllowed:true}),false);assert.equal(validateB91({...pin,totals:{...pin.totals,originalHeldRooms:17}}),false);assert.equal(validateB91({...pin,gates:pin.gates.map((v,i)=>i? v:{...v,status:'PASS'})}),false);});
+test('every archived patch is review-only and all 296 historical claims unmodified',()=>{assert.ok(pin.rooms.every(r=>r.apertures.every(a=>a.explicitBlockChangeRequests.every(p=>!p.changeAllowed))));assert.equal(pin.totals.prior296ClaimsModified,0);assert.equal(pin.totals.productionEdits,0);assert.equal(pin.totals.constructionCommands,0);});
+test('b90 hash drift fail-closed',()=>{const p=read('parallel/b90/main/B90_PROGRAM_ZONING_REPORT.json');safe(p,'minecraftaibuilder-b90-program-zoning-intervention-frontier-v1');p.totals.unresolvedIndependentRooms=17;assert.throws(()=>safe(p,'minecraftaibuilder-b90-program-zoning-intervention-frontier-v1'));});
+test('full pinned production replay deterministically reproduces architectural report',async()=>{const a=await compileB91();assert.deepEqual(a,pin);assert.equal(hash((({reportSha256,...rest})=>rest)(a)),a.reportSha256);assert.equal(a.totals.newlyApprovedRooms,0);});

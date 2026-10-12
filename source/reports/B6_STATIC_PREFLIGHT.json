@@ -1,0 +1,742 @@
+{
+  "schema": "minecraftaibuilder-step8b-b6-accelerated-static-preflight-v1",
+  "status": "STATIC_QA_ONLY_NOT_PREPARED",
+  "checkpoints": [
+    "B5.1 Source-pinned planning contract",
+    "B5.2 exposed entrance geometry",
+    "B5.3 material cutover proof limits",
+    "B5.4 runtime evidence triage",
+    "B5.5 fail-closed safety and QA",
+    "B5.6 preview-only entrance alternatives"
+  ],
+  "source": {
+    "status": "PINNED_STATIC_SOURCE_CONTRACT",
+    "inventoryFiles": 249,
+    "manifestSha256": "34ef239cd1d6e59c7d36fb070bd305e7572d944dee949c0648312ec94090534c",
+    "verifiedSources": [
+      {
+        "path": "engine/src/general-building-planner.js",
+        "sha256": "23be6e8b03827698fb890661f6fd0957a76ac4718f3347531121c8a7dc0450c8",
+        "contractCount": 7
+      },
+      {
+        "path": "engine/src/building-grammar.js",
+        "sha256": "71c0e2bda3e7a044285d681b38d9d4373e3c0aa417808a2f54c652d05ff47d1a",
+        "contractCount": 5
+      },
+      {
+        "path": "engine/src/build-anchor.js",
+        "sha256": "23bea262e90012fc6bfdd9f1407e1f7cb514f87862ad1c60b0431792f8ef056f",
+        "contractCount": 3
+      }
+    ],
+    "materialSourceSha256": "bafc749bb9a20035dd49e80e85a054a79910b8be47ef3d46a722ee3a3975bd2d",
+    "signals": {
+      "plannerUsesDynamicMasses": true,
+      "footprintsPerFloor": true,
+      "entranceRequiresExposedNorthLocalRun": true,
+      "orientationPlanRotationNotWorldBinding": true,
+      "defaultMaterialPipeline": "legacy",
+      "phase6cExplicitOptIn": true,
+      "productionBindingNeedsExactVerifiedBlockStates": true
+    },
+    "limit": "Exact source text and formula comparison only. Production planner, Minecraft and Bridge not invoked."
+  },
+  "plannerContract": {
+    "realPlannerInvoked": false,
+    "layoutOrVoxelPlanGenerated": false,
+    "fullyExecutable": false,
+    "localFrontSelection": "front side is exposed -Z local edge prior to rotation; source filters runLen >= doorWidth + 2",
+    "staticFrontRunDetection": "INDEPENDENT_FOOTPRINT_PREDICATE_MIRROR"
+  },
+  "matrix": {
+    "casesVerified": 288,
+    "hotelEntranceValidCases": 288,
+    "hotelEntranceRejectedCases": 0,
+    "boundary": {
+      "casesVerified": 1728,
+      "dimensions": [
+        {
+          "width": 15,
+          "depth": 12
+        },
+        {
+          "width": 15,
+          "depth": 20
+        },
+        {
+          "width": 16,
+          "depth": 16
+        },
+        {
+          "width": 24,
+          "depth": 20
+        },
+        {
+          "width": 48,
+          "depth": 12
+        },
+        {
+          "width": 48,
+          "depth": 40
+        }
+      ],
+      "hotelEntranceRejectedAllMassings": 36,
+      "hotelEntranceRejectedAllowedHotelMassings": 36,
+      "hotelAllowedMassingCases": 864,
+      "previewAlternatives": [
+        {
+          "original": {
+            "width": 15,
+            "depth": 20,
+            "seed": 1,
+            "style": "urban_japanese",
+            "massing": "U_shape"
+          },
+          "status": "STATIC_PREVIEW_ALTERNATIVES_AVAILABLE",
+          "suggestions": [
+            {
+              "change": "SITE_WIDTH_PREVIEW_ONLY",
+              "value": 19,
+              "delta": 4,
+              "requiresUserDesignDecision": true
+            },
+            {
+              "change": "STYLE_PREVIEW_ONLY",
+              "value": "modern",
+              "requiresUserDesignDecision": true
+            },
+            {
+              "change": "MASSING_PREVIEW_ONLY",
+              "value": "stepped",
+              "requiresUserDesignDecision": true
+            }
+          ],
+          "originalDesignModified": false,
+          "warning": "Options are non-executable preview-only candidates, not an approved building plan."
+        },
+        {
+          "original": {
+            "width": 15,
+            "depth": 20,
+            "seed": 5,
+            "style": "urban_japanese",
+            "massing": "U_shape"
+          },
+          "status": "STATIC_PREVIEW_ALTERNATIVES_AVAILABLE",
+          "suggestions": [
+            {
+              "change": "SITE_WIDTH_PREVIEW_ONLY",
+              "value": 19,
+              "delta": 4,
+              "requiresUserDesignDecision": true
+            },
+            {
+              "change": "STYLE_PREVIEW_ONLY",
+              "value": "modern",
+              "requiresUserDesignDecision": true
+            },
+            {
+              "change": "MASSING_PREVIEW_ONLY",
+              "value": "stepped",
+              "requiresUserDesignDecision": true
+            }
+          ],
+          "originalDesignModified": false,
+          "warning": "Options are non-executable preview-only candidates, not an approved building plan."
+        },
+        {
+          "original": {
+            "width": 15,
+            "depth": 20,
+            "seed": 1,
+            "style": "urban_japanese",
+            "massing": "U_shape"
+          },
+          "status": "STATIC_PREVIEW_ALTERNATIVES_AVAILABLE",
+          "suggestions": [
+            {
+              "change": "SITE_WIDTH_PREVIEW_ONLY",
+              "value": 19,
+              "delta": 4,
+              "requiresUserDesignDecision": true
+            },
+            {
+              "change": "STYLE_PREVIEW_ONLY",
+              "value": "modern",
+              "requiresUserDesignDecision": true
+            },
+            {
+              "change": "MASSING_PREVIEW_ONLY",
+              "value": "stepped",
+              "requiresUserDesignDecision": true
+            }
+          ],
+          "originalDesignModified": false,
+          "warning": "Options are non-executable preview-only candidates, not an approved building plan."
+        },
+        {
+          "original": {
+            "width": 15,
+            "depth": 20,
+            "seed": 5,
+            "style": "urban_japanese",
+            "massing": "U_shape"
+          },
+          "status": "STATIC_PREVIEW_ALTERNATIVES_AVAILABLE",
+          "suggestions": [
+            {
+              "change": "SITE_WIDTH_PREVIEW_ONLY",
+              "value": 19,
+              "delta": 4,
+              "requiresUserDesignDecision": true
+            },
+            {
+              "change": "STYLE_PREVIEW_ONLY",
+              "value": "modern",
+              "requiresUserDesignDecision": true
+            },
+            {
+              "change": "MASSING_PREVIEW_ONLY",
+              "value": "stepped",
+              "requiresUserDesignDecision": true
+            }
+          ],
+          "originalDesignModified": false,
+          "warning": "Options are non-executable preview-only candidates, not an approved building plan."
+        }
+      ],
+      "examples": [
+        {
+          "width": 15,
+          "depth": 20,
+          "massing": "U_shape",
+          "orientation": "north",
+          "seed": 1,
+          "style": "urban_japanese",
+          "hotelProgramAllowedMassing": true,
+          "status": "PREDICTED_PLANNER_ENTRANCE_REJECTION",
+          "requiredRunCells": 7,
+          "maxFrontRunCells": 5
+        },
+        {
+          "width": 15,
+          "depth": 20,
+          "massing": "U_shape",
+          "orientation": "north",
+          "seed": 5,
+          "style": "urban_japanese",
+          "hotelProgramAllowedMassing": true,
+          "status": "PREDICTED_PLANNER_ENTRANCE_REJECTION",
+          "requiredRunCells": 7,
+          "maxFrontRunCells": 5
+        },
+        {
+          "width": 15,
+          "depth": 20,
+          "massing": "U_shape",
+          "orientation": "east",
+          "seed": 1,
+          "style": "urban_japanese",
+          "hotelProgramAllowedMassing": true,
+          "status": "PREDICTED_PLANNER_ENTRANCE_REJECTION",
+          "requiredRunCells": 7,
+          "maxFrontRunCells": 5
+        },
+        {
+          "width": 15,
+          "depth": 20,
+          "massing": "U_shape",
+          "orientation": "east",
+          "seed": 5,
+          "style": "urban_japanese",
+          "hotelProgramAllowedMassing": true,
+          "status": "PREDICTED_PLANNER_ENTRANCE_REJECTION",
+          "requiredRunCells": 7,
+          "maxFrontRunCells": 5
+        },
+        {
+          "width": 15,
+          "depth": 20,
+          "massing": "U_shape",
+          "orientation": "south",
+          "seed": 1,
+          "style": "urban_japanese",
+          "hotelProgramAllowedMassing": true,
+          "status": "PREDICTED_PLANNER_ENTRANCE_REJECTION",
+          "requiredRunCells": 7,
+          "maxFrontRunCells": 5
+        },
+        {
+          "width": 15,
+          "depth": 20,
+          "massing": "U_shape",
+          "orientation": "south",
+          "seed": 5,
+          "style": "urban_japanese",
+          "hotelProgramAllowedMassing": true,
+          "status": "PREDICTED_PLANNER_ENTRANCE_REJECTION",
+          "requiredRunCells": 7,
+          "maxFrontRunCells": 5
+        },
+        {
+          "width": 15,
+          "depth": 20,
+          "massing": "U_shape",
+          "orientation": "west",
+          "seed": 1,
+          "style": "urban_japanese",
+          "hotelProgramAllowedMassing": true,
+          "status": "PREDICTED_PLANNER_ENTRANCE_REJECTION",
+          "requiredRunCells": 7,
+          "maxFrontRunCells": 5
+        },
+        {
+          "width": 15,
+          "depth": 20,
+          "massing": "U_shape",
+          "orientation": "west",
+          "seed": 5,
+          "style": "urban_japanese",
+          "hotelProgramAllowedMassing": true,
+          "status": "PREDICTED_PLANNER_ENTRANCE_REJECTION",
+          "requiredRunCells": 7,
+          "maxFrontRunCells": 5
+        },
+        {
+          "width": 16,
+          "depth": 16,
+          "massing": "U_shape",
+          "orientation": "north",
+          "seed": 0,
+          "style": "urban_japanese",
+          "hotelProgramAllowedMassing": true,
+          "status": "PREDICTED_PLANNER_ENTRANCE_REJECTION",
+          "requiredRunCells": 7,
+          "maxFrontRunCells": 6
+        },
+        {
+          "width": 16,
+          "depth": 16,
+          "massing": "U_shape",
+          "orientation": "north",
+          "seed": 1,
+          "style": "modern",
+          "hotelProgramAllowedMassing": true,
+          "status": "PREDICTED_PLANNER_ENTRANCE_REJECTION",
+          "requiredRunCells": 7,
+          "maxFrontRunCells": 6
+        },
+        {
+          "width": 16,
+          "depth": 16,
+          "massing": "U_shape",
+          "orientation": "north",
+          "seed": 1,
+          "style": "urban_japanese",
+          "hotelProgramAllowedMassing": true,
+          "status": "PREDICTED_PLANNER_ENTRANCE_REJECTION",
+          "requiredRunCells": 7,
+          "maxFrontRunCells": 6
+        },
+        {
+          "width": 16,
+          "depth": 16,
+          "massing": "U_shape",
+          "orientation": "north",
+          "seed": 1,
+          "style": "traditional",
+          "hotelProgramAllowedMassing": true,
+          "status": "PREDICTED_PLANNER_ENTRANCE_REJECTION",
+          "requiredRunCells": 7,
+          "maxFrontRunCells": 6
+        },
+        {
+          "width": 16,
+          "depth": 16,
+          "massing": "U_shape",
+          "orientation": "north",
+          "seed": 5,
+          "style": "modern",
+          "hotelProgramAllowedMassing": true,
+          "status": "PREDICTED_PLANNER_ENTRANCE_REJECTION",
+          "requiredRunCells": 7,
+          "maxFrontRunCells": 6
+        },
+        {
+          "width": 16,
+          "depth": 16,
+          "massing": "U_shape",
+          "orientation": "north",
+          "seed": 5,
+          "style": "urban_japanese",
+          "hotelProgramAllowedMassing": true,
+          "status": "PREDICTED_PLANNER_ENTRANCE_REJECTION",
+          "requiredRunCells": 7,
+          "maxFrontRunCells": 6
+        },
+        {
+          "width": 16,
+          "depth": 16,
+          "massing": "U_shape",
+          "orientation": "north",
+          "seed": 5,
+          "style": "traditional",
+          "hotelProgramAllowedMassing": true,
+          "status": "PREDICTED_PLANNER_ENTRANCE_REJECTION",
+          "requiredRunCells": 7,
+          "maxFrontRunCells": 6
+        }
+      ],
+      "distribution": {
+        "slab": {
+          "tested": 216,
+          "rejected": 0,
+          "hotelRegistered": false
+        },
+        "L_shape": {
+          "tested": 216,
+          "rejected": 0,
+          "hotelRegistered": false
+        },
+        "U_shape": {
+          "tested": 216,
+          "rejected": 36,
+          "hotelRegistered": true
+        },
+        "courtyard": {
+          "tested": 216,
+          "rejected": 0,
+          "hotelRegistered": false
+        },
+        "tower_on_podium": {
+          "tested": 216,
+          "rejected": 0,
+          "hotelRegistered": true
+        },
+        "stepped": {
+          "tested": 216,
+          "rejected": 0,
+          "hotelRegistered": true
+        },
+        "twin_bar": {
+          "tested": 216,
+          "rejected": 0,
+          "hotelRegistered": false
+        },
+        "asymmetric_block": {
+          "tested": 216,
+          "rejected": 0,
+          "hotelRegistered": true
+        }
+      }
+    },
+    "warningScope": "All 288 source-pinned shape/style/seed/orientation cases evaluated against HOTEL entrance threshold, regardless of usual program selection",
+    "sampleRejected": [],
+    "byMassing": {
+      "slab": {
+        "tested": 36,
+        "staticHotelEntranceRejects": 0
+      },
+      "L_shape": {
+        "tested": 36,
+        "staticHotelEntranceRejects": 0
+      },
+      "U_shape": {
+        "tested": 36,
+        "staticHotelEntranceRejects": 0
+      },
+      "courtyard": {
+        "tested": 36,
+        "staticHotelEntranceRejects": 0
+      },
+      "tower_on_podium": {
+        "tested": 36,
+        "staticHotelEntranceRejects": 0
+      },
+      "stepped": {
+        "tested": 36,
+        "staticHotelEntranceRejects": 0
+      },
+      "twin_bar": {
+        "tested": 36,
+        "staticHotelEntranceRejects": 0
+      },
+      "asymmetric_block": {
+        "tested": 36,
+        "staticHotelEntranceRejects": 0
+      }
+    }
+  },
+  "candidates": [
+    {
+      "id": "candidate-01",
+      "program": "hotel",
+      "massing": "slab",
+      "orientation": {
+        "orientedLocalEnvelope": {
+          "width": 26,
+          "depth": 20
+        },
+        "areaPreserved": true,
+        "worldRotationAttested": false
+      },
+      "seed": 0,
+      "conceptualFootprintMatch": true,
+      "conceptVsSourceRemovedCellsTotal": 0,
+      "entrance": {
+        "program": "hotel",
+        "requiredRunCells": 7,
+        "entranceWidth": 5,
+        "frontRunCount": 1,
+        "maximumFrontRunCells": 26,
+        "qualifyingRunCount": 1,
+        "predictedStatus": "FRONT_RUN_FOUND_STATIC_ONLY",
+        "exposure": {
+          "frontEdge": "unoriented local -Z",
+          "worldDirection": "UNBOUND"
+        },
+        "caveat": "Static footprint predicate only; modules, entrance carve-out and complete plan not generated."
+      },
+      "hasVerifiedInteriorOrExit": false,
+      "diagnosticOnly": true
+    },
+    {
+      "id": "candidate-01",
+      "program": "apartment",
+      "massing": "courtyard",
+      "orientation": {
+        "orientedLocalEnvelope": {
+          "width": 28,
+          "depth": 22
+        },
+        "areaPreserved": true,
+        "worldRotationAttested": false
+      },
+      "seed": 0,
+      "conceptualFootprintMatch": true,
+      "conceptVsSourceRemovedCellsTotal": 0,
+      "entrance": {
+        "program": "apartment",
+        "requiredRunCells": 4,
+        "entranceWidth": 2,
+        "frontRunCount": 2,
+        "maximumFrontRunCells": 28,
+        "qualifyingRunCount": 2,
+        "predictedStatus": "FRONT_RUN_FOUND_STATIC_ONLY",
+        "exposure": {
+          "frontEdge": "unoriented local -Z",
+          "worldDirection": "UNBOUND"
+        },
+        "caveat": "Static footprint predicate only; modules, entrance carve-out and complete plan not generated."
+      },
+      "hasVerifiedInteriorOrExit": false,
+      "diagnosticOnly": true
+    },
+    {
+      "id": "candidate-01",
+      "program": "office",
+      "massing": "tower_on_podium",
+      "orientation": {
+        "orientedLocalEnvelope": {
+          "width": 24,
+          "depth": 20
+        },
+        "areaPreserved": true,
+        "worldRotationAttested": false
+      },
+      "seed": 0,
+      "conceptualFootprintMatch": true,
+      "conceptVsSourceRemovedCellsTotal": 0,
+      "entrance": {
+        "program": "office",
+        "requiredRunCells": 6,
+        "entranceWidth": 4,
+        "frontRunCount": 1,
+        "maximumFrontRunCells": 24,
+        "qualifyingRunCount": 1,
+        "predictedStatus": "FRONT_RUN_FOUND_STATIC_ONLY",
+        "exposure": {
+          "frontEdge": "unoriented local -Z",
+          "worldDirection": "UNBOUND"
+        },
+        "caveat": "Static footprint predicate only; modules, entrance carve-out and complete plan not generated."
+      },
+      "hasVerifiedInteriorOrExit": false,
+      "diagnosticOnly": true
+    },
+    {
+      "id": "candidate-02",
+      "program": "office",
+      "massing": "asymmetric_block",
+      "orientation": {
+        "orientedLocalEnvelope": {
+          "width": 24,
+          "depth": 20
+        },
+        "areaPreserved": true,
+        "worldRotationAttested": false
+      },
+      "seed": 0,
+      "conceptualFootprintMatch": false,
+      "conceptVsSourceRemovedCellsTotal": 123,
+      "entrance": {
+        "program": "office",
+        "requiredRunCells": 6,
+        "entranceWidth": 4,
+        "frontRunCount": 2,
+        "maximumFrontRunCells": 13,
+        "qualifyingRunCount": 2,
+        "predictedStatus": "FRONT_RUN_FOUND_STATIC_ONLY",
+        "exposure": {
+          "frontEdge": "unoriented local -Z",
+          "worldDirection": "UNBOUND"
+        },
+        "caveat": "Static footprint predicate only; modules, entrance carve-out and complete plan not generated."
+      },
+      "hasVerifiedInteriorOrExit": false,
+      "diagnosticOnly": true
+    },
+    {
+      "id": "candidate-03",
+      "program": "office",
+      "massing": "slab",
+      "orientation": {
+        "orientedLocalEnvelope": {
+          "width": 24,
+          "depth": 20
+        },
+        "areaPreserved": true,
+        "worldRotationAttested": false
+      },
+      "seed": 0,
+      "conceptualFootprintMatch": true,
+      "conceptVsSourceRemovedCellsTotal": 0,
+      "entrance": {
+        "program": "office",
+        "requiredRunCells": 6,
+        "entranceWidth": 4,
+        "frontRunCount": 1,
+        "maximumFrontRunCells": 24,
+        "qualifyingRunCount": 1,
+        "predictedStatus": "FRONT_RUN_FOUND_STATIC_ONLY",
+        "exposure": {
+          "frontEdge": "unoriented local -Z",
+          "worldDirection": "UNBOUND"
+        },
+        "caveat": "Static footprint predicate only; modules, entrance carve-out and complete plan not generated."
+      },
+      "hasVerifiedInteriorOrExit": false,
+      "diagnosticOnly": true
+    }
+  ],
+  "risks": [
+    {
+      "code": "PREVIEW_FOOTPRINT_DRIFT",
+      "program": "office",
+      "candidate": "candidate-02",
+      "severity": "REVIEW_REQUIRED"
+    },
+    {
+      "code": "MASSING_ENTRANCE_COMPATIBILITY_HOLES",
+      "severity": "REVIEW_REQUIRED",
+      "failedStaticCases": 36
+    }
+  ],
+  "materialCutover": {
+    "default": "legacy",
+    "alternate": "phase6c",
+    "alternateOnlyWhenExplicitlyConfigured": true,
+    "materialIdsAttested": false,
+    "blockStatesAttested": false,
+    "versionSkewResolved": false,
+    "runtimeMaterialCompatibility": "UNKNOWN",
+    "cutover": "BLOCKED",
+    "materialBlockIds": [],
+    "blockStates": []
+  },
+  "coordinates": {
+    "conceptX": "east",
+    "conceptZ": "south",
+    "previewOrientation": "rotatePlanPoint LOCAL ONLY",
+    "worldNorthZ": "negative",
+    "worldTransform": "UNBOUND",
+    "anchor": null,
+    "worldCoordinates": null
+  },
+  "runtime": {
+    "lastNodeCount": 0,
+    "previousNodeCount": 4,
+    "delta": -4,
+    "status": "NO_NODE_PROCESS_OBSERVED_AT_CAPTURE",
+    "interpretation": "Not observed at capture; startup mode and cause unknown. Do not classify as broken.",
+    "listenerQuery": "QUERY_SUCCEEDED_NOT_PROOF_OF_ACTIVE_LISTENER",
+    "runtimeIdentity": "NOT_PROVEN",
+    "runtimeBehavior": "UNTESTED",
+    "restartRequested": false,
+    "noAPIContact": true
+  },
+  "buildReadiness": {
+    "gates": [
+      {
+        "gate": "STATIC_SOURCE_PIN",
+        "state": "EVIDENCED_DISK_ONLY",
+        "requirement": "Source pin does not prove loaded code"
+      },
+      {
+        "gate": "RUNTIME_IDENTITY_AND_VERSION",
+        "state": "BLOCKED",
+        "requirement": "Live process and loaded code not independently attested"
+      },
+      {
+        "gate": "PLANNER_VOXEL_LAYER_EQUIVALENCE",
+        "state": "BLOCKED",
+        "requirement": "Real planner/voxel payload not safely established"
+      },
+      {
+        "gate": "WORLD_AND_COORDINATE_BINDING",
+        "state": "BLOCKED",
+        "requirement": "World, anchor, facing, terrain unbound"
+      },
+      {
+        "gate": "EDUCATION_MATERIAL_STATES",
+        "state": "BLOCKED",
+        "requirement": "Validated in-world block identifiers/states absent"
+      },
+      {
+        "gate": "SITE_PERMISSION_AND_CLEARANCE",
+        "state": "BLOCKED",
+        "requirement": "No scan/site clearance approval"
+      },
+      {
+        "gate": "STRUCTURE_DOORS_ACCESSIBILITY",
+        "state": "BLOCKED",
+        "requirement": "Stairs, lifts, exits and structure not verified"
+      },
+      {
+        "gate": "EXPLICIT_USER_APPROVAL",
+        "state": "BLOCKED",
+        "requirement": "Construction not authorized"
+      }
+    ],
+    "allConstructionGatesRemainClosed": true
+  },
+  "safety": {
+    "constructionApproved": false,
+    "executionAllowed": false,
+    "notPrepared": true,
+    "noWorldMutation": true,
+    "noBridge": true,
+    "noScan": true,
+    "noPackGeneration": true,
+    "worldIdentityProven": false
+  },
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0
+  },
+  "deploymentGate": "BLOCKED",
+  "next": "Offline review/preview corrections only. No new Windows action required until a justified read-only runtime attestation is possible.",
+  "reportSha256": "90774b3a0db9e2253be9f8cce3a8e5d3081352e78eb38bd71c5adb0acc613b87"
+}

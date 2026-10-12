@@ -1,0 +1,725 @@
+{
+  "schema": "minecraftaibuilder-b75-production-footprint-reconciliation-v1",
+  "kind": "OFFLINE_CANDIDATE_PROPOSALS_NON_EXECUTABLE",
+  "source": {
+    "productionModulesPinned": 30,
+    "officialBlockCatalogSha256": "49ff9c501b1c96b547aa49fda07a53bc19f7d5fe338aff43fe5f65c3eaaf031f",
+    "productionB74EvidenceSha256": "584eb7cd83442787ca2b9c6323c409bac5abfb081c469a71f092be451f4002f5",
+    "grammarSha256": "71c0e2bda3e7a044285d681b38d9d4373e3c0aa417808a2f54c652d05ff47d1a",
+    "nominalB66Sha256": "d7b2a313c79a29365f50fdaedfc6bf60bcb332209ae89f9e9f1fde7bca7179e6",
+    "logicalB65Sha256": "49033ca417fbbaadb439ac7cae1f2dd0d037be6a88e1770b228a9d085716973e",
+    "nominalB70Sha256": "0a9f7d8cbd87bf7224a8fe717921615fa377a58e4f8424c2cd7e05ba33d2e382"
+  },
+  "statistics": {
+    "originalBuildingsWithExactFootprint": 1,
+    "candidateBuildingsWithExactFootprint": 4,
+    "originalMismatchCells": 2944,
+    "candidateMismatchCells": 448,
+    "plannerVerifiedCandidates": 5,
+    "physicalDoorBlocks": 0,
+    "physicalStairBlocks": 0,
+    "worldCommands": 0
+  },
+  "results": [
+    {
+      "id": "apartment/candidate-01",
+      "program": "apartment",
+      "original": {
+        "massing": "L_shape",
+        "seed": 0,
+        "matched": 1350,
+        "missing": 1050,
+        "extra": 0,
+        "delta": 1050,
+        "floors": [
+          {
+            "level": 1,
+            "matched": 225,
+            "missing": 175,
+            "extra": 0
+          },
+          {
+            "level": 2,
+            "matched": 225,
+            "missing": 175,
+            "extra": 0
+          },
+          {
+            "level": 3,
+            "matched": 225,
+            "missing": 175,
+            "extra": 0
+          },
+          {
+            "level": 4,
+            "matched": 225,
+            "missing": 175,
+            "extra": 0
+          },
+          {
+            "level": 5,
+            "matched": 225,
+            "missing": 175,
+            "extra": 0
+          },
+          {
+            "level": 6,
+            "matched": 225,
+            "missing": 175,
+            "extra": 0
+          }
+        ],
+        "interior": {
+          "roomCellsOutside": 414,
+          "corridorCellsOutside": 344,
+          "stairCellsOutside": 54,
+          "elevatorCellsOutside": 54,
+          "doorPortsUnsupported": 36,
+          "nominalWallEdgesTouchingProductionExterior": 696
+        }
+      },
+      "candidate": {
+        "massing": "courtyard",
+        "seed": 0,
+        "comparison": {
+          "matched": 2400,
+          "missing": 0,
+          "extra": 0,
+          "delta": 0,
+          "floors": [
+            {
+              "level": 1,
+              "matched": 400,
+              "missing": 0,
+              "extra": 0
+            },
+            {
+              "level": 2,
+              "matched": 400,
+              "missing": 0,
+              "extra": 0
+            },
+            {
+              "level": 3,
+              "matched": 400,
+              "missing": 0,
+              "extra": 0
+            },
+            {
+              "level": 4,
+              "matched": 400,
+              "missing": 0,
+              "extra": 0
+            },
+            {
+              "level": 5,
+              "matched": 400,
+              "missing": 0,
+              "extra": 0
+            },
+            {
+              "level": 6,
+              "matched": 400,
+              "missing": 0,
+              "extra": 0
+            }
+          ]
+        },
+        "interior": {
+          "roomCellsOutside": 0,
+          "corridorCellsOutside": 0,
+          "stairCellsOutside": 0,
+          "elevatorCellsOutside": 0,
+          "doorPortsUnsupported": 0,
+          "nominalWallEdgesTouchingProductionExterior": 348
+        },
+        "verifiedByActualPlanner": true,
+        "plannerOpsInspectedOnly": 747,
+        "verification": "LOCALLY_REPLAYED_PINNED_OFFICIAL_PLANNER"
+      },
+      "heldReason": "AWAIT_PHYSICAL_CLEARANCE_FACADE_AND_WORLD_TRANSFORM",
+      "inputProposal": {
+        "buildingType": "apartment",
+        "width": 28,
+        "depth": 22,
+        "floors": 6,
+        "floorHeight": 5,
+        "massing": "courtyard",
+        "seed": 0
+      },
+      "authority": "PROPOSED_ONLY_NO_APPROVAL"
+    },
+    {
+      "id": "hotel/candidate-01",
+      "program": "hotel",
+      "original": {
+        "massing": "stepped",
+        "seed": 0,
+        "matched": 2608,
+        "missing": 512,
+        "extra": 0,
+        "delta": 512,
+        "floors": [
+          {
+            "level": 1,
+            "matched": 520,
+            "missing": 0,
+            "extra": 0
+          },
+          {
+            "level": 2,
+            "matched": 520,
+            "missing": 0,
+            "extra": 0
+          },
+          {
+            "level": 3,
+            "matched": 432,
+            "missing": 88,
+            "extra": 0
+          },
+          {
+            "level": 4,
+            "matched": 432,
+            "missing": 88,
+            "extra": 0
+          },
+          {
+            "level": 5,
+            "matched": 352,
+            "missing": 168,
+            "extra": 0
+          },
+          {
+            "level": 6,
+            "matched": 352,
+            "missing": 168,
+            "extra": 0
+          }
+        ],
+        "interior": {
+          "roomCellsOutside": 52,
+          "corridorCellsOutside": 300,
+          "stairCellsOutside": 0,
+          "elevatorCellsOutside": 0,
+          "doorPortsUnsupported": 12,
+          "nominalWallEdgesTouchingProductionExterior": 158
+        }
+      },
+      "candidate": {
+        "massing": "tower_on_podium",
+        "seed": 0,
+        "comparison": {
+          "matched": 2672,
+          "missing": 448,
+          "extra": 0,
+          "delta": 448,
+          "floors": [
+            {
+              "level": 1,
+              "matched": 520,
+              "missing": 0,
+              "extra": 0
+            },
+            {
+              "level": 2,
+              "matched": 520,
+              "missing": 0,
+              "extra": 0
+            },
+            {
+              "level": 3,
+              "matched": 408,
+              "missing": 112,
+              "extra": 0
+            },
+            {
+              "level": 4,
+              "matched": 408,
+              "missing": 112,
+              "extra": 0
+            },
+            {
+              "level": 5,
+              "matched": 408,
+              "missing": 112,
+              "extra": 0
+            },
+            {
+              "level": 6,
+              "matched": 408,
+              "missing": 112,
+              "extra": 0
+            }
+          ]
+        },
+        "interior": {
+          "roomCellsOutside": 48,
+          "corridorCellsOutside": 224,
+          "stairCellsOutside": 0,
+          "elevatorCellsOutside": 0,
+          "doorPortsUnsupported": 4,
+          "nominalWallEdgesTouchingProductionExterior": 128
+        },
+        "verifiedByActualPlanner": true,
+        "plannerOpsInspectedOnly": 546,
+        "verification": "LOCALLY_REPLAYED_PINNED_OFFICIAL_PLANNER"
+      },
+      "heldReason": "FOOTPRINT_MISMATCH_REMAINS",
+      "inputProposal": {
+        "buildingType": "hotel",
+        "width": 26,
+        "depth": 20,
+        "floors": 6,
+        "floorHeight": 5,
+        "massing": "tower_on_podium",
+        "seed": 0
+      },
+      "authority": "PROPOSED_ONLY_NO_APPROVAL"
+    },
+    {
+      "id": "office/candidate-01",
+      "program": "office",
+      "original": {
+        "massing": "slab",
+        "seed": 0,
+        "matched": 2456,
+        "missing": 0,
+        "extra": 424,
+        "delta": 424,
+        "floors": [
+          {
+            "level": 1,
+            "matched": 480,
+            "missing": 0,
+            "extra": 0
+          },
+          {
+            "level": 2,
+            "matched": 480,
+            "missing": 0,
+            "extra": 0
+          },
+          {
+            "level": 3,
+            "matched": 374,
+            "missing": 0,
+            "extra": 106
+          },
+          {
+            "level": 4,
+            "matched": 374,
+            "missing": 0,
+            "extra": 106
+          },
+          {
+            "level": 5,
+            "matched": 374,
+            "missing": 0,
+            "extra": 106
+          },
+          {
+            "level": 6,
+            "matched": 374,
+            "missing": 0,
+            "extra": 106
+          }
+        ],
+        "interior": {
+          "roomCellsOutside": 0,
+          "corridorCellsOutside": 0,
+          "stairCellsOutside": 0,
+          "elevatorCellsOutside": 0,
+          "doorPortsUnsupported": 0,
+          "nominalWallEdgesTouchingProductionExterior": 30
+        }
+      },
+      "candidate": {
+        "massing": "tower_on_podium",
+        "seed": 0,
+        "comparison": {
+          "matched": 2456,
+          "missing": 0,
+          "extra": 0,
+          "delta": 0,
+          "floors": [
+            {
+              "level": 1,
+              "matched": 480,
+              "missing": 0,
+              "extra": 0
+            },
+            {
+              "level": 2,
+              "matched": 480,
+              "missing": 0,
+              "extra": 0
+            },
+            {
+              "level": 3,
+              "matched": 374,
+              "missing": 0,
+              "extra": 0
+            },
+            {
+              "level": 4,
+              "matched": 374,
+              "missing": 0,
+              "extra": 0
+            },
+            {
+              "level": 5,
+              "matched": 374,
+              "missing": 0,
+              "extra": 0
+            },
+            {
+              "level": 6,
+              "matched": 374,
+              "missing": 0,
+              "extra": 0
+            }
+          ]
+        },
+        "interior": {
+          "roomCellsOutside": 0,
+          "corridorCellsOutside": 0,
+          "stairCellsOutside": 0,
+          "elevatorCellsOutside": 0,
+          "doorPortsUnsupported": 0,
+          "nominalWallEdgesTouchingProductionExterior": 218
+        },
+        "verifiedByActualPlanner": true,
+        "plannerOpsInspectedOnly": 500,
+        "verification": "LOCALLY_REPLAYED_PINNED_OFFICIAL_PLANNER"
+      },
+      "heldReason": "AWAIT_PHYSICAL_CLEARANCE_FACADE_AND_WORLD_TRANSFORM",
+      "inputProposal": {
+        "buildingType": "office",
+        "width": 24,
+        "depth": 20,
+        "floors": 6,
+        "floorHeight": 5,
+        "massing": "tower_on_podium",
+        "seed": 0
+      },
+      "authority": "PROPOSED_ONLY_NO_APPROVAL"
+    },
+    {
+      "id": "office/candidate-02",
+      "program": "office",
+      "original": {
+        "massing": "slab",
+        "seed": 0,
+        "matched": 1922,
+        "missing": 0,
+        "extra": 958,
+        "delta": 958,
+        "floors": [
+          {
+            "level": 1,
+            "matched": 348,
+            "missing": 0,
+            "extra": 132
+          },
+          {
+            "level": 2,
+            "matched": 348,
+            "missing": 0,
+            "extra": 132
+          },
+          {
+            "level": 3,
+            "matched": 348,
+            "missing": 0,
+            "extra": 132
+          },
+          {
+            "level": 4,
+            "matched": 348,
+            "missing": 0,
+            "extra": 132
+          },
+          {
+            "level": 5,
+            "matched": 348,
+            "missing": 0,
+            "extra": 132
+          },
+          {
+            "level": 6,
+            "matched": 182,
+            "missing": 0,
+            "extra": 298
+          }
+        ],
+        "interior": {
+          "roomCellsOutside": 0,
+          "corridorCellsOutside": 0,
+          "stairCellsOutside": 0,
+          "elevatorCellsOutside": 0,
+          "doorPortsUnsupported": 0,
+          "nominalWallEdgesTouchingProductionExterior": 50
+        }
+      },
+      "candidate": {
+        "massing": "asymmetric_block",
+        "seed": 5,
+        "comparison": {
+          "matched": 1922,
+          "missing": 0,
+          "extra": 0,
+          "delta": 0,
+          "floors": [
+            {
+              "level": 1,
+              "matched": 348,
+              "missing": 0,
+              "extra": 0
+            },
+            {
+              "level": 2,
+              "matched": 348,
+              "missing": 0,
+              "extra": 0
+            },
+            {
+              "level": 3,
+              "matched": 348,
+              "missing": 0,
+              "extra": 0
+            },
+            {
+              "level": 4,
+              "matched": 348,
+              "missing": 0,
+              "extra": 0
+            },
+            {
+              "level": 5,
+              "matched": 348,
+              "missing": 0,
+              "extra": 0
+            },
+            {
+              "level": 6,
+              "matched": 182,
+              "missing": 0,
+              "extra": 0
+            }
+          ]
+        },
+        "interior": {
+          "roomCellsOutside": 0,
+          "corridorCellsOutside": 18,
+          "stairCellsOutside": 0,
+          "elevatorCellsOutside": 0,
+          "doorPortsUnsupported": 0,
+          "nominalWallEdgesTouchingProductionExterior": 50
+        },
+        "verifiedByActualPlanner": true,
+        "plannerOpsInspectedOnly": 642,
+        "verification": "LOCALLY_REPLAYED_PINNED_OFFICIAL_PLANNER"
+      },
+      "heldReason": "AWAIT_PHYSICAL_CLEARANCE_FACADE_AND_WORLD_TRANSFORM",
+      "inputProposal": {
+        "buildingType": "office",
+        "width": 24,
+        "depth": 20,
+        "floors": 6,
+        "floorHeight": 5,
+        "massing": "asymmetric_block",
+        "seed": 5
+      },
+      "authority": "PROPOSED_ONLY_NO_APPROVAL"
+    },
+    {
+      "id": "office/candidate-03",
+      "program": "office",
+      "original": {
+        "massing": "slab",
+        "seed": 0,
+        "matched": 2880,
+        "missing": 0,
+        "extra": 0,
+        "delta": 0,
+        "floors": [
+          {
+            "level": 1,
+            "matched": 480,
+            "missing": 0,
+            "extra": 0
+          },
+          {
+            "level": 2,
+            "matched": 480,
+            "missing": 0,
+            "extra": 0
+          },
+          {
+            "level": 3,
+            "matched": 480,
+            "missing": 0,
+            "extra": 0
+          },
+          {
+            "level": 4,
+            "matched": 480,
+            "missing": 0,
+            "extra": 0
+          },
+          {
+            "level": 5,
+            "matched": 480,
+            "missing": 0,
+            "extra": 0
+          },
+          {
+            "level": 6,
+            "matched": 480,
+            "missing": 0,
+            "extra": 0
+          }
+        ],
+        "interior": {
+          "roomCellsOutside": 0,
+          "corridorCellsOutside": 0,
+          "stairCellsOutside": 0,
+          "elevatorCellsOutside": 0,
+          "doorPortsUnsupported": 0,
+          "nominalWallEdgesTouchingProductionExterior": 90
+        }
+      },
+      "candidate": {
+        "massing": "slab",
+        "seed": 0,
+        "comparison": {
+          "matched": 2880,
+          "missing": 0,
+          "extra": 0,
+          "delta": 0,
+          "floors": [
+            {
+              "level": 1,
+              "matched": 480,
+              "missing": 0,
+              "extra": 0
+            },
+            {
+              "level": 2,
+              "matched": 480,
+              "missing": 0,
+              "extra": 0
+            },
+            {
+              "level": 3,
+              "matched": 480,
+              "missing": 0,
+              "extra": 0
+            },
+            {
+              "level": 4,
+              "matched": 480,
+              "missing": 0,
+              "extra": 0
+            },
+            {
+              "level": 5,
+              "matched": 480,
+              "missing": 0,
+              "extra": 0
+            },
+            {
+              "level": 6,
+              "matched": 480,
+              "missing": 0,
+              "extra": 0
+            }
+          ]
+        },
+        "interior": {
+          "roomCellsOutside": 0,
+          "corridorCellsOutside": 0,
+          "stairCellsOutside": 0,
+          "elevatorCellsOutside": 0,
+          "doorPortsUnsupported": 0,
+          "nominalWallEdgesTouchingProductionExterior": 90
+        },
+        "verifiedByActualPlanner": true,
+        "plannerOpsInspectedOnly": 548,
+        "verification": "UPLOADED_OFFICIAL_WINDOWS_ORIGINAL"
+      },
+      "heldReason": "AWAIT_PHYSICAL_CLEARANCE_FACADE_AND_WORLD_TRANSFORM",
+      "inputProposal": {
+        "buildingType": "office",
+        "width": 24,
+        "depth": 20,
+        "floors": 6,
+        "floorHeight": 5,
+        "massing": "slab",
+        "seed": 0
+      },
+      "authority": "PROPOSED_ONLY_NO_APPROVAL"
+    }
+  ],
+  "remaining": [
+    "HOTEL_FOOTPRINT_REQUIRES_DESIGN_APPROVAL_OR_EXTENDED_MASSING",
+    "OFF_MASK_CORRIDORS_18_HELD",
+    "B42_UPPER_DOORS_60_HELD",
+    "NO_REAL_DOOR_BLOCK_STATES",
+    "NO_STAIR_HEADROOM_SUPPORT",
+    "NO_FACADE_INTERIOR_COLLISION_ANALYSIS",
+    "NO_WORLD_COORDINATE_CALIBRATION"
+  ],
+  "scope": "READONLY_LOCAL_GEOMETRY_NOT_MINECRAFT_WORLD",
+  "readiness": "NOT_PREPARED",
+  "executionAllowed": false,
+  "constructionApproved": false,
+  "gates": [
+    {
+      "id": "M4-01",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-02",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-03",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-04",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-05",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-06",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-07",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-08",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-09",
+      "status": "BLOCKED"
+    }
+  ],
+  "worldContacts": 0,
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0,
+    "worldCoordinates": null,
+    "materialIds": []
+  },
+  "reportSha256": "d180535179b9bef68070628e01badefd3206a7a00acc33a0a94d9f9f59a4b7a4"
+}

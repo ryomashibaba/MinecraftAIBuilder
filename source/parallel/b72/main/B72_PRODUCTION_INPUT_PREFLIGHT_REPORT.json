@@ -1,0 +1,185 @@
+{
+  "schema": "minecraftaibuilder-b72-production-input-and-mask-preflight-v1",
+  "kind": "SOURCE_BACKED_PLANNER_INPUT_CANDIDATES_NOT_PLAN_EXECUTION",
+  "provenance": {
+    "b65": "49033ca417fbbaadb439ac7cae1f2dd0d037be6a88e1770b228a9d085716973e",
+    "b66": "d7b2a313c79a29365f50fdaedfc6bf60bcb332209ae89f9e9f1fde7bca7179e6",
+    "b69": "bb6ee9b57d04bb3a44dff4d0a42d8fad99132f2eed38d000bf144d7865876f6d",
+    "b70": "0a9f7d8cbd87bf7224a8fe717921615fa377a58e4f8424c2cd7e05ba33d2e382",
+    "b71": "f9c79bec9ed0a5b40da701ab38caf6b7418d8f15e23cbf9404fad2c453dd8566",
+    "pinnedGrammarSha256": "71c0e2bda3e7a044285d681b38d9d4373e3c0aa417808a2f54c652d05ff47d1a",
+    "sourceEvidenceZipSha256": "2bb665badb3519af829ca842ac6ac4cf3893407ff366c341473716eb8a012168"
+  },
+  "summary": {
+    "buildings": 5,
+    "sections": 30,
+    "explicitFiveHighInputCandidateBuildings": 5,
+    "existingFourHighDefaultBuildings": 4,
+    "defaultMismatchFloors": 24,
+    "sourceSupportedFloorPitchFiveCandidates": 30,
+    "realOutputVerifiedFloors": 0,
+    "physicalDoorBlocks": 0,
+    "physicalStairBlocks": 0,
+    "worldCommands": 0
+  },
+  "jobs": [
+    {
+      "id": "apartment/candidate-01",
+      "createBuildingPlanInputCandidate": {
+        "buildingType": "apartment",
+        "width": 28,
+        "depth": 22,
+        "floors": 6,
+        "floorHeight": 5
+      },
+      "explicitFloorHeightOverride": true,
+      "nominalPitchInputCompatible": true,
+      "productionOutputReceived": false,
+      "existingMassingAndFloorMaskCompared": false,
+      "worldOrientationCalibrated": false,
+      "physicalDoorsAndStairsMapped": false,
+      "sendToPlannerAllowed": false,
+      "constructionApproved": false
+    },
+    {
+      "id": "hotel/candidate-01",
+      "createBuildingPlanInputCandidate": {
+        "buildingType": "hotel",
+        "width": 26,
+        "depth": 20,
+        "floors": 6,
+        "floorHeight": 5
+      },
+      "explicitFloorHeightOverride": false,
+      "nominalPitchInputCompatible": true,
+      "productionOutputReceived": false,
+      "existingMassingAndFloorMaskCompared": false,
+      "worldOrientationCalibrated": false,
+      "physicalDoorsAndStairsMapped": false,
+      "sendToPlannerAllowed": false,
+      "constructionApproved": false
+    },
+    {
+      "id": "office/candidate-01",
+      "createBuildingPlanInputCandidate": {
+        "buildingType": "office",
+        "width": 24,
+        "depth": 20,
+        "floors": 6,
+        "floorHeight": 5
+      },
+      "explicitFloorHeightOverride": true,
+      "nominalPitchInputCompatible": true,
+      "productionOutputReceived": false,
+      "existingMassingAndFloorMaskCompared": false,
+      "worldOrientationCalibrated": false,
+      "physicalDoorsAndStairsMapped": false,
+      "sendToPlannerAllowed": false,
+      "constructionApproved": false
+    },
+    {
+      "id": "office/candidate-02",
+      "createBuildingPlanInputCandidate": {
+        "buildingType": "office",
+        "width": 24,
+        "depth": 20,
+        "floors": 6,
+        "floorHeight": 5
+      },
+      "explicitFloorHeightOverride": true,
+      "nominalPitchInputCompatible": true,
+      "productionOutputReceived": false,
+      "existingMassingAndFloorMaskCompared": false,
+      "worldOrientationCalibrated": false,
+      "physicalDoorsAndStairsMapped": false,
+      "sendToPlannerAllowed": false,
+      "constructionApproved": false
+    },
+    {
+      "id": "office/candidate-03",
+      "createBuildingPlanInputCandidate": {
+        "buildingType": "office",
+        "width": 24,
+        "depth": 20,
+        "floors": 6,
+        "floorHeight": 5
+      },
+      "explicitFloorHeightOverride": true,
+      "nominalPitchInputCompatible": true,
+      "productionOutputReceived": false,
+      "existingMassingAndFloorMaskCompared": false,
+      "worldOrientationCalibrated": false,
+      "physicalDoorsAndStairsMapped": false,
+      "sendToPlannerAllowed": false,
+      "constructionApproved": false
+    }
+  ],
+  "preflight": {
+    "productionAPI": "createBuildingPlan(input, options) / GeneralBuildingPlanner.fromComposition",
+    "requirement": "READ_ONLY_PRODUCTION_OUTPUT_SNAPSHOT_PLUS_TRANSFORM_CALIBRATION",
+    "runtimeStatus": "NOT_EXECUTED",
+    "maskParity": "UNVERIFIED",
+    "externalWallConflict": "UNVERIFIED",
+    "doorHeadroom": "UNVERIFIED"
+  },
+  "unresolved": [
+    "PRODUCTION_DEPENDENCIES_NOT_YET_PROVIDED",
+    "PRODUCTION_OUTPUT_NOT_AVAILABLE",
+    "REAL_MASKING_MASSING_ORIENTATION_AND_FACADE_CONFLICT_UNVERIFIED",
+    "REAL_INTERIOR_DOOR_AND_STAIR_MODULES_NOT_PRESENT_IN_5_PINNED_FILES",
+    "B70_18_OUT_OF_MASK_RESERVATIONS_HELD",
+    "B42_UPPER_60_DOORS_HELD",
+    "B62_B64_ALTERNATIVE_HELD"
+  ],
+  "readiness": "NOT_PREPARED",
+  "executionAllowed": false,
+  "constructionApproved": false,
+  "gates": [
+    {
+      "id": "M4-01",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-02",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-03",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-04",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-05",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-06",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-07",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-08",
+      "status": "BLOCKED"
+    },
+    {
+      "id": "M4-09",
+      "status": "BLOCKED"
+    }
+  ],
+  "worldContacts": 0,
+  "engineCalls": 0,
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0,
+    "worldCoordinates": null,
+    "materialIds": []
+  },
+  "reportSha256": "80e8b26474488d5bbea6d41a6db0fcd061bb7658ea3fda385b7b2df7a96af4cd"
+}

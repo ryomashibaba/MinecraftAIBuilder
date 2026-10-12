@@ -1,0 +1,2 @@
+# Freeze digests use original bytes. No checkout line-ending normalization.
+* -text

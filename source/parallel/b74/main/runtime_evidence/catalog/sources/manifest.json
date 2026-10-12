@@ -1,0 +1,33 @@
+{
+  "repository": "https://github.com/MicrosoftDocs/minecraft-creator",
+  "revision": "1dfc5c4fa1cd75cabe558b08adee3420264ff0b5",
+  "retrievedAt": "2026-09-27",
+  "baseUrl": "https://raw.githubusercontent.com/MicrosoftDocs/minecraft-creator/1dfc5c4fa1cd75cabe558b08adee3420264ff0b5/creator/Reference/Content/VanillaListingsReference/",
+  "files": [
+    {
+      "file": "AuxValueToBlockStateMap.md",
+      "url": "https://raw.githubusercontent.com/MicrosoftDocs/minecraft-creator/1dfc5c4fa1cd75cabe558b08adee3420264ff0b5/creator/Reference/Content/BlockReference/Examples/AuxValueToBlockStateMap.md",
+      "sha256": "96d2351299fac3e3f3869feac07fa779703b618b9abf07f050421aabbe0c7229"
+    },
+    {
+      "file": "Blocks.md",
+      "url": "https://raw.githubusercontent.com/MicrosoftDocs/minecraft-creator/1dfc5c4fa1cd75cabe558b08adee3420264ff0b5/creator/Reference/Content/VanillaListingsReference/Blocks.md",
+      "sha256": "49ff9c501b1c96b547aa49fda07a53bc19f7d5fe338aff43fe5f65c3eaaf031f"
+    },
+    {
+      "file": "BlockStateAndTraitListings.md",
+      "url": "https://raw.githubusercontent.com/MicrosoftDocs/minecraft-creator/1dfc5c4fa1cd75cabe558b08adee3420264ff0b5/creator/Reference/Content/BlockReference/Examples/BlockStateAndTraitListings.md",
+      "sha256": "66f91b974a21db6832c563f91782e52669f823b2c39bca8b06b262560afa687f"
+    },
+    {
+      "file": "BlockStatesAndPermutations.md",
+      "url": "https://raw.githubusercontent.com/MicrosoftDocs/minecraft-creator/1dfc5c4fa1cd75cabe558b08adee3420264ff0b5/creator/Reference/Content/BlockReference/Examples/BlockStatesAndPermutations.md",
+      "sha256": "6a78c50f69aa13b918d294163fcb9d1855dd1ee81bfb9caed165630a84b53eaa"
+    },
+    {
+      "file": "IntrinsicBlockStatesList.md",
+      "url": "https://raw.githubusercontent.com/MicrosoftDocs/minecraft-creator/1dfc5c4fa1cd75cabe558b08adee3420264ff0b5/creator/Reference/Content/BlockReference/Examples/IntrinsicBlockStatesList.md",
+      "sha256": "ef1f9cdf2408a788e840564a77906ba4c30626e29aeca60c6c07e70b4e6c83df"
+    }
+  ]
+}

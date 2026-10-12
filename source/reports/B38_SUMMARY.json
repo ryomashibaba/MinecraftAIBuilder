@@ -1,0 +1,18 @@
+{
+  "schema": "minecraftaibuilder-step8b-b38-summary-v1",
+  "building": "apartment/candidate-01",
+  "levels": 5,
+  "reviewVariants": 10,
+  "landingCandidate4of4CellsRetained": 10,
+  "candidateRectangleCoverageExact": 10,
+  "stairTopSurfaceYMatchesUpperPlate": 10,
+  "directEdgeTransitionVerified": 0,
+  "transitionRedesignRequired": 10,
+  "actualSupportOrPassabilityCertified": 0,
+  "approvedVariant": null,
+  "readiness": "NOT_PREPARED",
+  "deployment": "BLOCKED",
+  "buildOperations": 0,
+  "windowsActions": 0,
+  "next": "B39_NONEXECUTABLE_STAIR_TOP_TO_LANDING_ROUTE_REDESIGN"
+}

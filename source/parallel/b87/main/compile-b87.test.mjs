@@ -1,0 +1,43 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {hash} from '../../b79/main/compile-b79.mjs';
+import {compileB87,shapeVariants,validAllocation,structuralFree,reuseExistingJamb,validateDelta} from './compile-b87.mjs';
+const here=path.dirname(fileURLToPath(import.meta.url));
+const root=path.resolve(here,'../../..');
+const a=JSON.parse(fs.readFileSync(path.join(here,'B87_STRUCTURAL_FREE_REPORT.json')));
+const b=JSON.parse(fs.readFileSync(path.join(root,'parallel/b86/main/B86_JOINT_ENVELOPE_INTERIOR_REPORT.json')));
+const originals=b.sections.flatMap(s=>s.rooms).filter(r=>r.variants.length).map(r=>r.variants[0]);
+const converted=a.sections.flatMap(s=>s.rooms).filter(r=>r.selected).map(r=>r.selected);
+const mock=v=>({final:new Map(v.virtualLocalEnvelopePatch.map(x=>[`${x.x},${x.y},${x.z}`,{occupied:true,role:x.priorRole,block:x.priorBlock,operationIndex:x.operationIndex}]))});
+function noMutationReport(report){
+ assert.equal(report.readiness,'NOT_PREPARED');assert.equal(report.executionAllowed,false);assert.equal(report.constructionApproved,false);
+ assert.equal(report.BuildPlan.operations.length,0);assert.equal(report.BuildPlan.commandCount,0);
+ assert.equal(report.BuildPlan.worldCoordinates,null);assert.equal(report.gates.length,9);assert(report.gates.every(x=>x.status==='BLOCKED'));
+}
+test('B86 immutable source report digest',()=>{const {reportSha256,...body}=b;assert.equal(hash(body),reportSha256);assert.equal(a.provenance.b86,b.reportSha256);});
+test('B87 report digest',()=>{const {reportSha256,...body}=a;assert.equal(hash(body),reportSha256);});
+test('nine gates blocked and zero commands or world coords',()=>noMutationReport(a));
+test('5 pinned planner hashes, 30 floors, 314 rooms accounted',()=>{assert.deepEqual(a.productionReplays,b.productionReplays);assert.equal(a.sections.length,30);assert.equal(a.totals.rooms,314);assert.equal(a.totals.totalLocalReviewCandidates+a.totals.stillHeldAfterB87,314);});
+test('nine B86 cases retain block IDs and become non-editing facade designs',()=>{assert.equal(originals.length,9);assert.equal(converted.length,9);assert(converted.every(x=>x.virtualLocalEnvelopePatch.length===0&&x.jointPatchVoxelCount===0&&x.operations.length===0&&structuralFree(x)));});
+test('six full-column primary wall jambs reused, not deleted',()=>{const p=converted.filter(x=>x.existingWallJambEvidence.some(v=>v.existingProductionRole==='primaryWall'));assert.equal(p.length,6);assert.equal(p.flatMap(x=>x.existingWallJambEvidence).length,18);assert(p.flatMap(x=>x.existingWallJambEvidence).every(v=>v.existingBlock==='minecraft:light_gray_concrete'&&v.action==='KEEP_EXISTING_WALL_NO_EDIT'));});
+test('three secondary-wall panels unchanged',()=>{const v=converted.filter(x=>x.existingWallJambEvidence.every(p=>p.existingProductionRole==='secondaryWall'));assert.equal(v.length,3);assert.equal(v.flatMap(x=>x.existingWallJambEvidence).length,9);});
+test('strict in-situ conversion preserves coordinates and original source',()=>{for(let i=0;i<originals.length;i++){const old=originals[i],next=reuseExistingJamb(old,mock(old));assert(next);assert.equal(next.existingWallJambEvidence.length,3);assert.equal(old.virtualLocalEnvelopePatch.length,3);assert.equal(old.jointPatchVoxelCount,3);assert.equal(next.local3DVoxels.length,old.local3DVoxels.length);assert.equal(next.glassAreaNetChange,0);}});
+test('unknown panel material rejected, no guessed load-bearing frame',()=>{const v=structuredClone(originals[0]);v.virtualLocalEnvelopePatch[0].priorBlock='minecraft:slab';assert.equal(reuseExistingJamb(v,mock(v)),null);});
+test('production block role or operation index drift rejected',()=>{const v=originals[1],idx=mock(v);idx.final.get(`${v.virtualLocalEnvelopePatch[0].x},${v.virtualLocalEnvelopePatch[0].y},${v.virtualLocalEnvelopePatch[0].z}`).operationIndex=-1;assert.equal(reuseExistingJamb(v,idx),null);});
+test('wall on DOOR_VOID cannot be re-labelled as preserved jamb',()=>{const v=structuredClone(originals[1]);v.virtualLocalEnvelopePatch[0].x=v.doorRoomCell.x;v.virtualLocalEnvelopePatch[0].z=v.doorRoomCell.z;assert.equal(reuseExistingJamb(v,mock(v)),null);});
+test('missing segment in full three-high jamb rejected',()=>{const v=structuredClone(originals[1]);v.virtualLocalEnvelopePatch.pop();assert.equal(reuseExistingJamb(v,mock(v)),null);});
+test('facade glass change rejects conversion rather than becoming an opaque wall',()=>{const v=structuredClone(originals[1]);v.existingGlassRemoved=1;assert.equal(reuseExistingJamb(v,mock(v)),null);});
+test('area-retaining rectangle enumeration never creates sub-75% cropped rooms',()=>{const vars=shapeVariants({id:'a',x:1,z:1,width:5,depth:4});assert(vars.length>1);assert(vars.every(x=>x.areaRatio>=0.75&&x.rect.width>=2&&x.rect.depth>=2));});
+test('protected room/core, outside mask and named corridor block reallocation',()=>{
+ const room={id:'r',x:1,z:1,width:3,depth:3},shape={floorMaskRows:Array(7).fill('1111111'),conceptReservations:{corridors:[{x:4,z:1}],stairs:[],elevators:[]}};
+ assert.equal(validAllocation(room,{rect:room,areaRatio:1},shape,[],new Set()),true);
+ assert.equal(validAllocation(room,{rect:{...room,x:2},areaRatio:1},shape,[],new Set()),false);
+ assert.equal(validAllocation(room,{rect:room,areaRatio:1},shape,[],new Set(['2,2'])),false);
+ assert.equal(validAllocation(room,{rect:room,areaRatio:1},shape,[{x:2,z:2,width:1,depth:1}],new Set()),false);
+});
+test('converted assembly retains door pair/frame and two-block swing reservations',()=>{for(const c of converted){assert.equal(c.local3DVoxels.filter(v=>v.role==='DOOR_VOID').length,2);assert.equal(c.local3DVoxels.filter(v=>v.role.startsWith('JAMB_')).length,6);assert.equal(c.local3DVoxels.filter(v=>v.role==='LINTEL').length,1);assert.equal(c.localSwingAirReservation.length,4);assert.equal(c.retainedRoomAreaRatio,1);}});
+test('active view only contains non-executable typed proposals',()=>{for(const s of a.sections){assert.equal(s.executionAllowed,false);for(const r of s.rooms){assert.equal(r.operations.length,0);assert.equal(r.worldCoordinates,null);if(r.selected){assert.equal(r.selected.worldCoordinates,null);assert.equal(r.selected.executionAllowed,false);assert.equal(r.selected.existingFrameRetentionProof,'NO_PRODUCTION_BLOCK_MUTATED__GEOMETRY_ONLY');}}}});
+test('actual read-only pinned Planner rerun reproduces exact report',async()=>{const r=await compileB87();assert.equal(r.reportSha256,a.reportSha256);assert.deepEqual(r.totals,a.totals);});

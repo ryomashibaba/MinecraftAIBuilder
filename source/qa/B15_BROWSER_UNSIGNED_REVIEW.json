@@ -1,0 +1,16 @@
+{
+  "schema": "minecraftaibuilder-b15-unsigned-review-v1",
+  "reportSha256": "c16d11e6d51fb3ead5e79affa87035a72d357df6f1256529ca21d2e2814051e6",
+  "selectedBuilding": "office/candidate-02",
+  "selectedLevel": 6,
+  "selectedScenario": "THICK_REVIEW",
+  "approved": false,
+  "applied": false,
+  "constructionApproved": false,
+  "executionAllowed": false,
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0
+  }
+}

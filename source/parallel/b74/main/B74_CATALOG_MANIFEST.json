@@ -1,0 +1,43 @@
+{
+  "schema": "minecraftaibuilder-b73-runtime-data-v1",
+  "project": "minecraft-ai-builder",
+  "pinChecks": 5,
+  "assets": [
+    {
+      "path": "catalog/education.json",
+      "sha256": "842de2f91b0c84c9bd601fbeae9f04e6edf6a1b97b688635163a7c7816bd3a5f",
+      "size": 1892723
+    },
+    {
+      "path": "catalog/semantic.json",
+      "sha256": "fca2ba78056d286862e3b0c48f2226c673bc3596c1b7d434f9b4ee30273cc6de",
+      "size": 111740
+    },
+    {
+      "path": "catalog/semantic-overrides.json",
+      "sha256": "977e94f0fdd9593c36532187654c18808a9307c2df9f03e259a89f1d28a643e7",
+      "size": 15
+    },
+    {
+      "path": "catalog/sources/manifest.json",
+      "sha256": "69430b6978926a0ca523a6445484601a1658bdd05020b72e0b809da1c9b2a08d",
+      "size": 2068
+    },
+    {
+      "path": "catalog/sources/IntrinsicBlockStatesList.md",
+      "sha256": "ef1f9cdf2408a788e840564a77906ba4c30626e29aeca60c6c07e70b4e6c83df",
+      "size": 24113
+    },
+    {
+      "path": "catalog/sources/BlockStateAndTraitListings.md",
+      "sha256": "66f91b974a21db6832c563f91782e52669f823b2c39bca8b06b262560afa687f",
+      "size": 22697
+    }
+  ],
+  "notIncluded": "No 30 production JS/JSON files repeated",
+  "sourceExecuted": false,
+  "projectFilesModified": false,
+  "network": false,
+  "minecraftAccess": false,
+  "constructionCommands": 0
+}

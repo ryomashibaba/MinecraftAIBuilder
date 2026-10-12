@@ -1,0 +1,138 @@
+import { shapeStates, transformBlockStates } from './block-states.js';
+import { measureMaterials } from './material-metrics.js';
+import { pruneUnsupportedScreens } from './shape-support.js';
+import { createComposition, massings, palettes, grounds, roofs } from "./building-grammar.js";
+import { footprint, inside, rectangles, edges } from "../../modules/walls/building-envelope.js";
+import { validateBuildPlan } from "./safety.js";
+import { rotatePlanPoint, deterministicId } from "./build-anchor.js";
+
+import { qualityComposition, materialGrammar, composeFacade } from './architectural-quality.js';
+import { measureGeometry } from './geometry-quality.js';
+import { emitModule } from '../../modules/architectural-library.js';
+import { materialPipelineMode, bindPhase6cProductionMaterials } from './material-production-binding.js';
+
+export class GeneralBuildingPlanner {
+  create(input, options = {}) { materialPipelineMode(options); return this.fromComposition(createComposition(input), options); }
+  fromComposition(composition, options = {}) {
+    throw new Error("B32_NOT_EXECUTABLE_DEV_COPY_NO_CONSTRUCTION_AUTHORIZATION");
+    const materialPipeline = materialPipelineMode(options);
+    const materialStarted = materialPipeline === 'phase6c' ? performance.now() : 0;
+    if (!composition || composition.version !== 1 || composition.compatibilityPreset) throw new Error("Unsupported composition version or compatibility preset; use the original preset API");
+    // Re-normalize persisted compositions through the same validation boundary.
+    const c = createComposition({ buildingType: composition.program, ...composition.dimensions,
+      floors: composition.floorCount, floorHeight: composition.floorHeight, seed: composition.variationSeed, materialRequirements: composition.materialRequirements,
+      massing: composition.massing, ...Object.fromEntries(["style", "palette", "quality", "orientation", "forward", "facadeStrategy", "groundFloorStrategy", "roofStrategy"].map((k) => [k, k==='facadeStrategy'?(composition.requestedFacadeStrategy??composition[k]):composition[k]])) });
+    if (!composition.materialPalette && !composition.palette) c.palette='modern_office';
+    if (composition.materialPalette) {
+      if (deterministicId(composition.materialPalette)!==deterministicId(c.materialPalette)) throw new Error('Material palette revision/identity mismatch');
+      c.materialPalette=structuredClone(composition.materialPalette);
+    }
+    const { width: w, depth: d } = c.dimensions, fh = c.floorHeight;
+    const quality = qualityComposition(c);
+    c.architecture = quality;
+    const masses = massings.get(c.massing)(c), material = materialGrammar(c.materialPalette ? {...c.materialPalette.roles,glass:c.materialPalette.roles.glazing,light:c.materialPalette.roles.lighting,wall:c.materialPalette.roles.primaryWall} : palettes.get(c.palette)), operations = [];
+    for (const m of masses) {
+      if (![m.x, m.z, m.width, m.depth, m.start, m.end].every(Number.isInteger) || m.x < 0 || m.z < 0 || m.width < 3 || m.depth < 3 || m.x + m.width > w || m.z + m.depth > d || m.start < 0 || m.end > c.floorCount || m.start >= m.end) throw new Error("Invalid mass geometry");
+    }
+    const transform = (point) => rotatePlanPoint(point, c.orientation, w, d);
+    const add = (role, from, to, phase, description) => {
+      const a = transform(from), b = transform(to);
+      operations.push({ type: "fill", role, block: role === "air" ? "air" : material[role],
+        from: { x: Math.min(a.x, b.x), y: Math.min(a.y, b.y), z: Math.min(a.z, b.z) },
+        to: { x: Math.max(a.x, b.x), y: Math.max(a.y, b.y), z: Math.max(a.z, b.z) }, phase, architecturalRole: phase, description });
+    };
+    const plate = (mask, y, role, phase) => {
+      for (const r of rectangles(mask)) add(role, { x: r.x, y, z: r.z }, { x: r.x + r.width - 1, y, z: r.z + r.depth - 1 }, phase, `${phase} plate`);
+    };
+    const line = (e, start, end, y1, y2, role, phase, inset = 0, endInset = inset) => {
+      if(c.materialPalette && phase==='secondary_frame' && y1 % fh===0) role='floor';
+      const point = (t, y, layer = inset) => e.axis === "x" ? { x: t, y, z: e.fixed - e.sign * layer } : { x: e.fixed - e.sign * layer, y, z: t };
+      add(role, point(start, y1), point(end, y2, endInset), phase, `${phase} ${e.axis} bay`);
+      if(c.materialPalette && c.quality!=='compact') {
+        const shapes=c.materialPalette.shapes;
+        const form=phase==='detail_cornice'?'stairs':phase==='facade_screen'?'trapdoor':phase==='secondary_frame'&&role!=='floor'?'stairs':phase==='balcony_rail'?(shapes.fence?'fence':'wall'):phase==='canopy'?'slab':phase==='parapet'?(c.quality==='premium'&&shapes.wall?'wall':'slab'):phase==='glazing'&&c.program==='apartment'?'pane':phase==='primary_structure'&&c.quality==='premium'?'pillar/log':null;
+        if(form&&shapes[form]) {
+          if(form==='slab'&&y2>y1) {const original=operations.at(-1);operations.push({...original,from:{...original.from,y:original.to.y},to:{...original.to}});}
+          const o=operations.at(-1),block=shapes[form],outward=e.axis==='x'?(e.sign===-1?'north':'south'):(e.sign===-1?'west':'east');
+          o.block=block; o.blockStates=transformBlockStates(block,shapeStates(block,outward),p=>rotatePlanPoint(p,c.orientation,1,1));
+          if(form==='slab') o.to.y=o.from.y;
+        }
+      }
+      const wallPoint = transform(point(start,y1,0));
+      const planeAxis = ['east','west'].includes(c.orientation) ? (e.axis==='x'?'x':'z') : (e.axis==='x'?'z':'x');
+      operations.at(-1).surface = { axis: e.axis, fixed: e.fixed, sign:e.sign, planeAxis, wallPlane:wallPoint[planeAxis], runStart:e.start,runEnd:e.end, tangentStart:transform(point(e.start,y1,0))[planeAxis==='x'?'z':'x'], tangentEnd:transform(point(e.end,y1,0))[planeAxis==='x'?'z':'x'] };
+    };
+    const masks = Array.from({ length: c.floorCount }, (_, f) => footprint(masses, f, w, d));
+    const ground = grounds.get(c.groundFloorStrategy), roof = roofs.get(c.roofStrategy);
+    plate(masks[0], -1, "structure", "foundation");
+    for (let f = 0; f < c.floorCount; f++) {
+      const mask = masks[f], base = f * fh, top = base + fh - 1;
+      plate(b32FloorMaskSelector(mask, f), base, "floor", "floor");
+      for (const e of edges(mask)) {
+        composeFacade(c, quality, e, f, base, top, line, (id,instance)=>Object.assign(operations.at(-1),{moduleId:id,moduleInstance:instance+':'+e.axis+':'+e.fixed+':'+e.sign}),material);
+      }
+      const next = masks[f + 1];
+      const exposed = mask.map((row, z) => row.map((cell, x) => cell && !inside(next ?? [], x, z)));
+      plate(exposed, (f + 1) * fh, "roof", "roof");
+      for (const e of edges(exposed)) {
+        // No parapets at the joint with a continuing tower (avoids walls through it).
+        const clear = (t) => !next || !inside(next, e.axis === "x" ? t : e.fixed + e.sign, e.axis === "x" ? e.fixed + e.sign : t);
+        let start = e.start;
+        while (start <= e.end) {
+          if (!clear(start)) { start++; continue; }
+          let end = start; while (end < e.end && clear(end + 1)) end++;
+          line(e, start, end, (f + 1) * fh + 1, (f + 1) * fh + roof.parapet, "accent", "parapet"); start = end + 1;
+        }
+      }
+    }
+    // Entrance chooses an actual exposed front run, even for an indented mass.
+    const entranceWidth = c.program === 'hotel' ? 5 : c.program === 'apartment' ? 2 : 4;
+    const front = edges(masks[0]).filter((e) => e.axis === "x" && e.sign === -1 && e.end - e.start >= entranceWidth+1).sort((a, b) => a.fixed - b.fixed || (b.end - b.start) - (a.end - a.start))[0];
+    if (!front) throw new Error('Composition has no usable entrance surface');
+    if (front) {
+      const width = entranceWidth;
+      const middle = Math.max(front.start+1,Math.min(front.end-width,Math.floor((front.start+front.end-width)/2)+quality.entranceBias));
+      const context = { program:c.program, massing:c.massing, start:middle,end:middle+width-1,y1:1,y2:2,inset:ground.inset,material,annotate:(id,instance)=>Object.assign(operations.at(-1),{moduleId:id,moduleInstance:instance}),line:(a,b,y1,y2,role,phase,depth=0,endDepth=depth)=>line(front,a,b,y1,y2,role,phase,depth,endDepth) };
+      const entrance = quality.grammar.entrance;
+      emitModule(entrance,{...context,program:entrance==='entrance_office_lobby'?'office':c.program});
+      emitModule('entrance_canopy',{...context,y2:fh-1});
+      if(quality.secondary) emitModule('entrance_light',{...context,y2:fh-2});
+    }
+    if (quality.secondary) {
+      const r = rectangles(masks.at(-1)).sort((a,b)=>b.width*b.depth-a.width*a.depth)[0];
+      if(r && r.width>=5 && r.depth>=5) {
+        const y=c.floorCount*fh+1, x=r.x+1+quality.roofVariant, z=r.z+1;
+        const id = c.roofStrategy==='terrace'&&c.program!=='hotel'?'roof_terrace':c.roofStrategy==='mechanical_crown'?'roof_mechanical_cluster':quality.grammar.roof;
+        const roofWidth = Math.min(r.width-2, c.program==='hotel'?5:3);
+        const height = id==='roof_terrace'?0:Math.min(c.floorCount-1,quality.style.crown+quality.roofVariant+(quality.detail?1:0));
+        const from={x:Math.min(x,r.x+r.width-roofWidth-1),y,z}, to={x:Math.min(x,r.x+r.width-roofWidth-1)+roofWidth-1,y:y+height,z:z+2};
+        emitModule(id,{program:c.program,massing:c.massing,start:0,end:roofWidth-1,y1:y,y2:y+height,from,to,material,annotate:(id,instance)=>Object.assign(operations.at(-1),{moduleId:id,moduleInstance:instance}),box:add});
+        if(quality.detail) add('accent',{x:r.x+1,y:y+height+1,z:r.z+1},{x:r.x+1,y:y+height+1,z:r.z+Math.min(4,r.depth-2)},'core_extension','Vertical core roof extension');
+      }
+    }
+    const bounds = { from: {}, to: {} };
+    for (const axis of ["x", "y", "z"]) {
+      bounds.from[axis] = Math.min(...operations.map((o) => o.from[axis]));
+      bounds.to[axis] = Math.max(...operations.map((o) => o.to[axis]));
+    }
+    const removedScreens=pruneUnsupportedScreens(operations,bounds);
+    if(removedScreens) c.architecture.repairs.push(`Omitted ${removedScreens/2} unsupported optional facade screens`);
+    const localWidth = bounds.to.x - bounds.from.x + 1, localDepth = bounds.to.z - bounds.from.z + 1;
+    const footprintSummary = localWidth === w && localDepth === d
+      ? `uses full ${w}×${d} site envelope`
+      : `planned footprint ${localWidth}×${localDepth} within requested ${w}×${d} site envelope`;
+    const result = validateBuildPlan({ type: "general_building", composition: c, parameters: { ...inputFromComposition(c) }, masses, bounds,
+      dimensions: { width: bounds.to.x - bounds.from.x + 1, depth: bounds.to.z - bounds.from.z + 1, height: bounds.to.y - bounds.from.y + 1 }, operations,
+      summary: `${c.program}/${c.massing}, requested envelope ${w}×${d}; ${footprintSummary}; ${c.floorCount} floors; ${c.facadeStrategy}. Local coordinates; live construction requires a fixed anchor and clear site scan.` });
+    result.geometryMetrics = measureGeometry(result);
+    Object.assign(result,measureMaterials(result));
+    return materialPipeline === 'phase6c' ? bindPhase6cProductionMaterials(result, options, performance.now()-materialStarted) : result;
+  }
+}
+export function inputFromComposition(c) {
+  return { buildingType: c.program, ...c.dimensions, floors: c.floorCount, floorHeight: c.floorHeight, style: c.style, quality: c.quality, massing: c.massing, seed: c.variationSeed, forward: c.forward, materialRequirements:c.materialRequirements, palette:c.palette, orientation:c.orientation };
+}
+export const createBuildingPlan = (input, options) => new GeneralBuildingPlanner().create(input, options);
+
+// B32 source-only seam. Intentionally disabled; no BuildPlan or engine invocation.
+const b32FloorMaskSelector = () => { throw new Error("B32_SELECTOR_UNBOUND"); };

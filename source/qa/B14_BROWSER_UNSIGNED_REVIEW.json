@@ -1,0 +1,15 @@
+{
+  "schema": "minecraftaibuilder-b14-unsigned-review-v1",
+  "sourceSha256": "8d12e07b4150c9c15e084fc77857c694b7f6b4ffdc151f92dea854896bd922e6",
+  "selectedBuilding": "office/candidate-02",
+  "selectedFloor": 6,
+  "selectedAlternative": "REBASE_AND_TRIM_REVIEW",
+  "approved": false,
+  "executionAllowed": false,
+  "constructionApproved": false,
+  "BuildPlan": {
+    "status": "NOT_PREPARED",
+    "operations": [],
+    "commandCount": 0
+  }
+}
