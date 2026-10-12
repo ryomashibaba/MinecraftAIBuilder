@@ -12,7 +12,7 @@ permissions:
 jobs:
   offline-tests:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -26,7 +26,9 @@ jobs:
         run: node source/parallel/b102/main/compile-b102.mjs
       - name: B103 adaptive circulation diagnostics (offline only)
         run: node source/parallel/b103/main/compile-b103.mjs
-      - name: B92-B103 regression suite (352 cases)
+      - name: B104 joint room-gallery design diagnostics (offline only)
+        run: node source/parallel/b104/main/compile-b104.mjs
+      - name: B92-B104 regression suite (382 cases)
         working-directory: source
         run: |
           node --experimental-vm-modules --test \
@@ -41,10 +43,13 @@ jobs:
             parallel/b100/main/compile-b100.test.mjs \
             parallel/b101/main/compile-b101.test.mjs \
             parallel/b102/main/compile-b102.test.mjs \
-            parallel/b103/main/compile-b103.test.mjs
+            parallel/b103/main/compile-b103.test.mjs \
+            parallel/b104/main/compile-b104.test.mjs
       - name: B101 strict concept-only safety gate
         run: node scripts/verify-b101-safety.mjs
       - name: B102 spatial 3D concept and fail-closed safety gate
         run: node scripts/verify-b102-safety.mjs
       - name: B103 global 3D concept and fail-closed safety gate
         run: node scripts/verify-b103-safety.mjs
+      - name: B104 whole-building concept and fail-closed safety gate
+        run: node scripts/verify-b104-safety.mjs
