@@ -22,7 +22,7 @@ jobs:
         run: node scripts/verify-freeze.mjs
       - name: Education edition construction safety (offline only)
         run: node scripts/verify-safety.mjs
-      - name: B92-B101 regression suite (287 cases)
+      - name: B92-B102 regression suite (319 cases)
         working-directory: source
         run: |
           node --experimental-vm-modules --test \
@@ -35,7 +35,11 @@ jobs:
             parallel/b98/main/compile-b98.test.mjs \
             parallel/b99/main/compile-b99.test.mjs \
             parallel/b100/main/compile-b100.test.mjs \
-            parallel/b101/main/compile-b101.test.mjs
+            parallel/b101/main/compile-b101.test.mjs \
+            parallel/b102/main/compile-b102.test.mjs
 
       - name: B101 strict concept-only safety gate
         run: node scripts/verify-b101-safety.mjs
+
+      - name: B102 spatial 3D concept and fail-closed safety gate
+        run: node scripts/verify-b102-safety.mjs
