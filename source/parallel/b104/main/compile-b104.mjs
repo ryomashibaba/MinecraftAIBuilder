@@ -44,7 +44,7 @@ export function compileB104(){
    variantsSelectingNonBaseline:choices.filter(c=>c.selection!=='BASELINE').length,
    secondCoreVariants:choices.filter(c=>c.coreCount===2).length,
    conceptualGroundExits:sum('groundExitCandidates'),totalNetRoomCells:sum('netRoomArea'),
-   3DConflicts:sum('global3DCollisions'),doorwayHeadroomConflicts:sum('blockedDoorways'),
+   '3DConflicts':sum('global3DCollisions'),doorwayHeadroomConflicts:sum('blockedDoorways'),
    stairProxyConflicts:sum('obstructedStairProxies'),legacyUnapprovedCandidates:296,legacyHeldRooms:18,
    realBlocksEmitted:0,certifiedPhysicalStairs:0,certifiedRealExits:0,worldContacts:0},
   limitations:['B102_RECTANGLE_GREEDY_PLACEMENT_IS_REUSED_INSIDE_ALTERNATING_OPTIMIZER',
