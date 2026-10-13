@@ -63,6 +63,80 @@ function stairModel(link,i,flight,floors,foreign){
   b114ConditionalConnection:link.selected.hypotheticalInterfloorLink,
   minecraftCollisionVerified:false,appliedToOriginal:false};
 }
+/** Incremental two-wide corridor alternative, respecting both staircase mass and upper shaft holes. */
+function bridgeTwoWide(floor,level,b113,stairModels,current,holeSet){
+ const inRoom=p=>floor.rooms.some(r=>p.x>=r.x&&p.x<r.x+r.width&&
+  p.z>=r.z&&p.z<r.z+r.depth);
+ const available=p=>{
+  if(!hasFloor(floor,p)||inRoom(p)||holeSet.has(K(p)))return false;
+  const air=cube(p,level*5+1,2);
+  return !stairModels.some(s=>s.solids.concat(s.supports).some(b=>intersects(b,air)));
+ };
+ const square=a=>[a,{x:a.x+1,z:a.z},{x:a.x,z:a.z+1},{x:a.x+1,z:a.z+1}];
+ const anchors=new Map();
+ for(let z=0;z<floor.footprintRows.length-1;z++)
+  for(let x=0;x<floor.footprintRows[z].length-1;x++){
+   const a={x,z},cells=square(a);
+   if(cells.every(available))anchors.set(K(a),a);
+  }
+ const requirements=[];
+ if(level===0)for(const e of floor.exits)
+  requirements.push({kind:'GROUND_EXIT',id:'EXIT_'+requirements.length,cells:e.edge,full:true});
+ for(const m of stairModels){
+  if(m.fromLevel===level)requirements.push({kind:'LOWER_STAIR',id:'STAIR_'+m.index,
+   cells:m.lowerLanding,adjacent:true});
+  if(m.toLevel===level)requirements.push({kind:'UPPER_STAIR',id:'STAIR_'+m.index,
+   cells:m.upperLanding,adjacent:true});
+ }
+ for(const r of b113.rooms.filter(r=>r.level===level)){
+  const p=floor.rooms.find(x=>x.id===r.roomId)?.conceptualDoorOpening?.outside;
+  if(p)requirements.push({kind:'DOOR',id:r.roomId,cells:[p],full:true});
+ }
+ const aList=[...anchors.values()];
+ const candidates=group=>aList.filter(a=>{
+  const cells=square(a),keys=new Set(cells.map(K));
+  return group.cells.every(p=>keys.has(K(p))||
+   (!group.full&&neighbors(p).some(n=>keys.has(K(n)))));
+ }).sort((a,b)=>{
+  const favor=p=>square(p).filter(q=>current.has(K(q))).length;
+  return favor(b)-favor(a)||a.z-b.z||a.x-b.x;
+ });
+ const first=requirements[0],starts=first?candidates(first):[];
+ const chosen=new Set(),unreachable=[];
+ if(starts.length)chosen.add(K(starts[0]));
+ else if(first)unreachable.push({kind:first.kind,id:first.id,reason:'NO_TWO_WIDE_START'});
+ const pathTo=group=>{
+  const goals=new Set(candidates(group).map(K));
+  if(!goals.size||!chosen.size)return null;
+  const q=[...chosen],prior=new Map(q.map(k=>[k,null]));
+  let found=null;
+  for(let i=0;i<q.length&&found===null;i++){
+   const k=q[i];
+   if(goals.has(k)){found=k;break;}
+   const a=anchors.get(k);if(!a)continue;
+   for(const n of neighbors(a)){
+    const nk=K(n);
+    if(anchors.has(nk)&&!prior.has(nk)){prior.set(nk,k);q.push(nk);}
+   }
+  }
+  if(found===null)return null;
+  const path=[];
+  for(let k=found;k!==null&&!chosen.has(k);k=prior.get(k))path.push(k);
+  return path;
+ };
+ for(const group of requirements.slice(starts.length?1:0)){
+  const path=pathTo(group);
+  if(path===null){unreachable.push({kind:group.kind,id:group.id,reason:'TWO_WIDE_ANCHOR_NETWORK_UNAVAILABLE'});continue;}
+  for(const k of path)chosen.add(k);
+ }
+ const whole=new Set(current);
+ for(const k of chosen)for(const p of square(anchors.get(k)))whole.add(K(p));
+ const additions=[...whole].filter(k=>!current.has(k));
+ return {level,routeCells:whole,
+  addedCells:additions.sort(),unreachable,
+  sourceOriginalUnchanged:true,editsApplied:false,
+  valid2WideAnchorCount:anchors.size,selected2WideAnchors:chosen.size};
+}
 function joinedRoutes(floors,b113,models){
  const apertureByLevel=floors.map(()=>new Set());
  for(const m of models)for(const p of m.aperture)apertureByLevel[m.toLevel].add(K(p));
@@ -74,6 +148,9 @@ function joinedRoutes(floors,b113,models){
   return !models.some(m=>m.solids.concat(m.supports).some(v=>intersects(v,air)));
  })));
  const blocked=source.map((s,i)=>[...s].filter(k=>!free[i].has(k)));
+ const detourProposals=floors.map((f,i)=>bridgeTwoWide(
+  f,i,b113,models,free[i],apertureByLevel[i]));
+ for(const repair of detourProposals)free[repair.level]=repair.routeCells;
  const landingSupported=models.map(m=>
   m.lowerLandingSupported&&m.upperLandingSupported&&
   !m.lowerLanding.some(p=>apertureByLevel[m.fromLevel].has(K(p)))&&
@@ -118,6 +195,7 @@ function joinedRoutes(floors,b113,models){
  });
  return {apertureByLevel,sourceGalleryCounts:source.map(s=>s.size),freeGalleryCounts:free.map(s=>s.size),
   blockedGallery:blocked.map((arr,i)=>({level:i,count:arr.length,cells:arr.slice(0,30)})),
+  twoWideDetours:detourProposals.map(({routeCells,...d})=>d),
   landingSupported,flightClashes,links,rooms,
   reachedFloors:reached.filter(s=>s.size>0).length,
   reachedCells:reached.map(s=>s.size),validEntrances:seeds.filter(p=>free[0].has(K(p))).length};
@@ -144,6 +222,8 @@ export function inspectHouse(parent,b113,b114){
   postPlacementStairLinks:walk.links.filter(l=>l.provisionalGeometryLink).length,
   postPlacementRoomsReached:roomsReached,postPlacementFloorsReached:walk.reachedFloors,
   corridorCellsObstructed:walk.blockedGallery.reduce((n,r)=>n+r.count,0),
+  additionalTwoWideDetourCells:walk.twoWideDetours.reduce((n,r)=>n+r.addedCells.length,0),
+  unresolvedTwoWideTargets:walk.twoWideDetours.reduce((n,r)=>n+r.unreachable.length,0),
   proposedUpperFloorOpenings:walk.apertureByLevel.reduce((n,s)=>n+s.size,0),
   unsupportedLandingGroups:walk.landingSupported.filter(x=>!x).length,
   modelledFinalStepLandingOverlaps:models.reduce((n,m)=>n+m.modelledFinalStepFloorOverlap,0),
@@ -189,6 +269,8 @@ export function writeHouse(r,dir){
   '|原B114の仮階段接続|'+t.originalConditionalStairLinks+' / '+t.stairs+'|',
   '|階段を重ね、開口と廊下を考慮した仮接続|'+t.postPlacementStairLinks+' / '+t.stairs+'|',
   '|塞がれた廊下セル|'+t.corridorCellsObstructed+'|',
+  '|迂回通路として追加提案するセル|'+t.additionalTwoWideDetourCells+'|',
+  '|幅2の経路でつながらない要件|'+t.unresolvedTwoWideTargets+'|',
   '|新設が必要な上階床開口候補セル|'+t.proposedUpperFloorOpenings+'|',
   '|支持不足の踊り場群|'+t.unsupportedLandingGroups+'|',
   '|最終半段差で支持床と広域AABBが重なる候補（未認証）|'+t.modelledFinalStepLandingOverlaps+'|',

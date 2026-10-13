@@ -13,6 +13,11 @@ test('floor apertures, support and blocked galleries are counted, not declared i
  assert.equal(r.totals.proposedUpperFloorOpenings,r.floorApertureProposals.reduce((n,a)=>n+a.count,0));
  assert(r.stairs.every(s=>s.appliedToOriginal===false&&s.minecraftCollisionVerified===false));
  assert.equal(r.designChangesApplied,false);
+ assert(r.gallery.twoWideDetours.every(p=>p.sourceOriginalUnchanged&&p.editsApplied===false));
+ assert.equal(r.totals.additionalTwoWideDetourCells,
+  r.gallery.twoWideDetours.reduce((n,p)=>n+p.addedCells.length,0));
+ assert.equal(r.totals.unresolvedTwoWideTargets,
+  r.gallery.twoWideDetours.reduce((n,p)=>n+p.unreachable.length,0));
  assert(r.stairs.every(s=>s.upperLandingSupported===true));
  assert(r.stairs.every(s=>s.finalStepTransitionPhysicallyVerified===false));
  for(const stair of r.stairs){
