@@ -12,7 +12,7 @@ permissions:
 jobs:
   offline-tests:
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    timeout-minutes: 55
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -57,6 +57,15 @@ jobs:
           path: b108-preview-output/
           if-no-files-found: error
           retention-days: 14
+      - name: B109 generate continuous facade/roof/glazing presentation
+        run: node source/parallel/b109/main/compile-b109.mjs --write-preview
+      - name: Save B109 cohesive 15-building 3D design review
+        uses: actions/upload-artifact@v4
+        with:
+          name: B109-Cohesive-Architecture-Review
+          path: b109-preview-output/
+          if-no-files-found: error
+          retention-days: 14
       - name: Install headless Chrome for real browser QA
         id: chrome
         uses: browser-actions/setup-chrome@v1
@@ -73,7 +82,18 @@ jobs:
           path: b108-browser-output/
           if-no-files-found: error
           retention-days: 14
-      - name: B92-B108 regression suite (492 cases)
+      - name: B109 real Chrome facade, roof, glazing and mobile QA
+        env:
+          CHROME_BIN: ${{ steps.chrome.outputs.chrome-path }}
+        run: node scripts/verify-b109-browser.mjs
+      - name: Save B109 real Chrome visual QA screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: B109-Real-Chromium-Visual-Evidence
+          path: b109-browser-output/
+          if-no-files-found: error
+          retention-days: 14
+      - name: B92-B109 regression suite (516 cases)
         working-directory: source
         run: |
           node --experimental-vm-modules --test \
@@ -93,7 +113,8 @@ jobs:
             parallel/b105/main/compile-b105.test.mjs \
             parallel/b106/main/compile-b106.test.mjs \
             parallel/b107/main/compile-b107.test.mjs \
-            parallel/b108/main/compile-b108.test.mjs
+            parallel/b108/main/compile-b108.test.mjs \
+            parallel/b109/main/compile-b109.test.mjs
       - name: B101 strict concept-only safety gate
         run: node scripts/verify-b101-safety.mjs
       - name: B102 spatial 3D concept and fail-closed safety gate
@@ -110,3 +131,5 @@ jobs:
         run: node scripts/verify-b107-safety.mjs
       - name: B108 repaired roof/facade source provenance and construction safety
         run: node scripts/verify-b108-safety.mjs
+      - name: B109 continuous material visual QA and construction safety
+        run: node scripts/verify-b109-safety.mjs
