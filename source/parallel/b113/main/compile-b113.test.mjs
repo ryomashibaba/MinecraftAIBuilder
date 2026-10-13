@@ -1,15 +1,19 @@
-import test from 'node:test';
+import test,{before} from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {assembleB111} from '../../b111/main/compile-b111.mjs';
+import {assembleReferenceParent} from './b113-reference-parent.mjs';
 import {buildB113,validateB113,writeB113,sha} from './compile-b113.mjs';
 import {blockEvidence,inspectStateCandidate,OBSERVATION} from './b113-evidence.mjs';
 import {straightFlight,auditFlight,intersects} from './b113-geometry.mjs';
 import {inspectDoorPair,inspectBedPair,inspectRoomAssembly} from './b113-interiors.mjs';
 let parent,report;
-const all=()=>report??(parent=process.env.B113_PARENT_CACHE?JSON.parse(fs.readFileSync(process.env.B113_PARENT_CACHE,'utf8')):assembleB111(),report=buildB113(parent));
+before(async()=>{
+ parent=process.env.B113_PARENT_CACHE?JSON.parse(fs.readFileSync(process.env.B113_PARENT_CACHE,'utf8')):await assembleReferenceParent();
+ report=buildB113(parent);
+});
+const all=()=>report;
 const rehash=r=>{const {integritySha256,...b}=r;return {...b,integritySha256:sha(b)};};
 test('01 version comes from non-contact Windows package/file evidence, never v26.3 guessing',()=>{
  assert.equal(OBSERVATION.packageVersion,'1.26.3200.0');assert.equal(OBSERVATION.executableProductVersion,'1.26.32.0');
@@ -134,4 +138,10 @@ test('25 diagnostics import graph cannot reach a network or Minecraft transport'
   assert(!/\b(?:fetch|WebSocket)\s*\(/.test(code));
  }
  inspect(fileURLToPath(new URL('./compile-b113.mjs',import.meta.url)));assert(seen.size>10);
+ inspect(fileURLToPath(new URL('./b113-reference-worker.mjs',import.meta.url)));
+});
+test('26 an unrelated caller keeps its native locale ordering after source derivation',()=>{
+ assert.equal('寝室'.localeCompare('居間'),new Intl.Collator().compare('寝室','居間'));
+ assert.equal(all().sourceDerivationLocale,'en-US');
+ const r=structuredClone(all());r.sourceDerivationLocale='ja-JP';assert.equal(validateB113(rehash(r)),false);
 });

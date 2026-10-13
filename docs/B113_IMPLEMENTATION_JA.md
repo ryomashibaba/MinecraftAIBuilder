@@ -22,7 +22,7 @@
 - Windows 11 build 26200、PowerShell 7.6.5、Node.js 24.18.1、Python 3.13.15、Git利用可。GitHub CLIはPATHで見つからない。GitHubコネクターとGitによるネットワークアクセスを使用。
 - Windowsパッケージ登録とAppxManifestは **1.26.3200.0**。Minecraft Education実行ファイルのFileVersion/ProductVersionは **1.26.32.0**。ゲームは起動していない。この記録は今回のWindows観測値であり、CIのLinuxにEducationが存在するという主張ではない。
 - B112 CI run `38411320204` の `B112-Integrated-Handoff-Review`、artifact ID `11821238426` の `00_START_HERE_B113_LOCAL_WORK_HANDOFF.md` を取得して読んだ。生成元SHAは上記B112基準と一致。
-- B112統合コードもローカル再実行し、279室・102接続・300ベッド・9 BLOCKEDを確認。B112統合JSONのintegrityは `7bbd51ec84b3377bb719b2b3fe1d3f1022d53c7fb1491e2d2e3cbb89e5b028f9`。
+- B112統合コードもローカル再実行し、279室・102接続・300ベッド・9 BLOCKEDを確認。正本CIの統合JSONのintegrityは `027fcd590ed364656915f39f0e07395e6e54e6a6862c459b29a67ba0d48fbb15`。初回Windows既定言語での生成値とは異なったため、以下の原因を解決して正本の15案へ照合した。
 - 元ローカルのエンジン、素材辞書、互換性コード、検証ログの存在を確認。旧設定の `v26.3` は略称で正確な版の証明にならない。旧ログにはワールド情報が含まれ得るため、B113の実機認証として転用・アップロードしない。
 
 ## 9役割のブロック仕様
@@ -85,6 +85,10 @@ node scripts/verify-freeze.mjs
 ```
 
 テストは元B111を一度だけ生成して全15案を診断し、JSON・15案CSV・代表5案の日本語レポートを `b113-review-output` に出す。開発時の親キャッシュはローカルartifactsに限り、15案の固定ソースSHA・B110/B111ダイジェストを照合する。通常実行とCIはキャッシュ無し。既存のB92～B112 QAを改変せず、B113専用CIを追加した。
+
+初回B113 CIはWindows生成時のダイジェストと不一致で失敗した。B102の部屋用途とB104の同点選択に、言語指定なしの `localeCompare` が使われているため、Windowsのja-JPとLinuxのen-USで配列順が変わることを特定した。失敗は無視せず、B112正本CI成果物との全15案照合で確認した。
+
+B113ではWorkerの独立したJavaScript環境で、言語未指定の比較にだけen-USを明示し、B111を再生成する。呼び出し元のString/Intlや凍結ソースは変更しない。Workerは外部プロセス、ネットワーク、Minecraftへ接続しない。正本CIのB110/B111ダイジェストと一致する値を固定し、Windows側の異なる生成値を正本へ昇格させない。テスト開始時に一度だけ再生成し、その処理が失敗した場合も再生成を各テストで繰り返さない。
 
 実機未認証の認可昇格、ハッシュ再計算を伴う安全値の改ざん、凍結ファイルの変更を失敗させる。常にNOT_PREPARED、9 BLOCKED、constructionApproved=false、executionAllowed=false、worldContacts=0、worldCoordinates=null、BuildPlan.operations=[]、commandCount=0。旧296未承認・18保留も維持。
 

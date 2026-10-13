@@ -3,7 +3,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
-import {assembleB111,validateB111Report} from '../../b111/main/compile-b111.mjs';
+import {validateB111Report} from '../../b111/main/compile-b111.mjs';
+import {assembleReferenceParent} from './b113-reference-parent.mjs';
 import {auditB111Model} from '../../b111/main/b111-interior-access.mjs';
 import {generateB105} from '../../b105/main/b105-building-volume.mjs';
 import {OBSERVATION,blockEvidence} from './b113-evidence.mjs';
@@ -66,7 +67,7 @@ export function buildB113(parent){
  });
  const sum=k=>cases.reduce((n,c)=>n+c.metrics[k],0);
  const report={schema:'minecraftaibuilder-b113-offline-compatibility-v1',
-  baseCommit:BASE.baseCommit,b112Integrity:BASE.b112Integrity,sourceBaseline:BASE,
+  baseCommit:BASE.baseCommit,b112Integrity:BASE.b112Integrity,sourceBaseline:BASE,sourceDerivationLocale:'en-US',
   environmentObservation:{...OBSERVATION},blockRoles:blockEvidence(),cases,
   representativeIds:cases.filter(c=>c.id.endsWith('_V1')).map(c=>c.id),
   replacementModule:straightFlight(),replacementModuleAudit:auditFlight(straightFlight()),
@@ -97,7 +98,7 @@ export function validateB113(r){
  try{
   const {integritySha256,...body}=r??{};
   if(!safety(r)||integritySha256!==sha(body)||r.schema!=='minecraftaibuilder-b113-offline-compatibility-v1'||
-   sha(r.sourceBaseline)!==sha(BASE)||r.baseCommit!==BASE.baseCommit||r.b112Integrity!==BASE.b112Integrity||
+   sha(r.sourceBaseline)!==sha(BASE)||r.baseCommit!==BASE.baseCommit||r.b112Integrity!==BASE.b112Integrity||r.sourceDerivationLocale!=='en-US'||
    sha(r.environmentObservation)!==sha(OBSERVATION)||sha(r.blockRoles)!==sha(blockEvidence())||
    sha(r.replacementModule)!==sha(straightFlight())||sha(r.replacementModuleAudit)!==sha(auditFlight(straightFlight()))||
    r.cases.length!==15||r.nextChecks.length!==5||r.nextChecks.some((c,i)=>c.priority!==i+1||c.requiresGameApproval!==(i<4)))return false;
@@ -134,7 +135,7 @@ export function validateB113(r){
   return true;
  }catch{return false;}
 }
-export function assembleB113(){const r=buildB113(assembleB111());if(!validateB113(r))throw Error('B113_REPORT_FAILED');return r;}
+export async function assembleB113(){const r=buildB113(await assembleReferenceParent());if(!validateB113(r))throw Error('B113_REPORT_FAILED');return r;}
 export function writeB113(r,dir){
  if(!validateB113(r))throw Error('B113_UNSAFE_EXPORT');
  fs.mkdirSync(dir,{recursive:true});
@@ -163,6 +164,6 @@ export function writeB113(r,dir){
  return {directory:dir,files:3,worldContacts:0};
 }
 if(process.argv[1]===fileURLToPath(import.meta.url)){
- const r=assembleB113();console.log(JSON.stringify({totals:r.totals,integritySha256:r.integritySha256,
+ const r=await assembleB113();console.log(JSON.stringify({totals:r.totals,integritySha256:r.integritySha256,
   artifacts:process.argv.includes('--write-review')?writeB113(r,path.resolve('b113-review-output')):null},null,2));
 }

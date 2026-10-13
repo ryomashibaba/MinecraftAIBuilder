@@ -1,25 +1,25 @@
 {
   "baseCommit": "8b8b1f726fc5cf82b6d3e633f24ca219164983fc",
-  "b112Integrity": "7bbd51ec84b3377bb719b2b3fe1d3f1022d53c7fb1491e2d2e3cbb89e5b028f9",
+  "b112Integrity": "027fcd590ed364656915f39f0e07395e6e54e6a6862c459b29a67ba0d48fbb15",
   "b100Sha": "7ea6e3364f31ec76060dd742622ddff4142d5a3e120c240bc8ef69fd883c8e81",
   "cases": [
     {
       "id": "HOUSE_V1",
-      "b110Digest": "241f2f9ab402445e3f6bb2b49ee24a1289c8ef463fd37a565b5285fdfb09d826",
-      "b111Digest": "1d82c5fcee5e789ada458359a39d21a58a257b01a2f629c040e06d6fb5b063b5",
-      "sourceDesignSha256": "e1dc37416f01b53f8fa78cb59e61c4daf45f599c99131cef0a7a36669c860e29"
+      "b110Digest": "8c6471171635c9ae0ae67e7e573cc27e6429a8a7c2d186e9d7d427411fa6af54",
+      "b111Digest": "33ca89334805de8ee0b704ca2668618dcee7f41681f81b56be7fab8b928afca7",
+      "sourceDesignSha256": "c5580a07d96145b5871662ff56d55b6e14076f16df6d4152272122b599eca8b7"
     },
     {
       "id": "HOUSE_V2",
-      "b110Digest": "cc1569d4d664b6af404aec37653ec9799291b99bf2e307c792db75213ffe874a",
-      "b111Digest": "e6455199b286395b0e88755e35143a6cd252d931cce55f2aa33992d939c16b33",
-      "sourceDesignSha256": "4da717d746403d7508c71ce4da55f1bc1538c7ad1981bb40da447ea4d6ee5ff2"
+      "b110Digest": "204970b706ea481581e674cf687f94b94cbc980eadf240e27295f46f7a14f1d4",
+      "b111Digest": "34d8bb2c2f650bd654485436eb0bd1014eb9505930ad66b11566df66a4999eb1",
+      "sourceDesignSha256": "e82f1043534b8372d00dc2eb94219e14b9394a93b4f4f755d7343b37a5eae86c"
     },
     {
       "id": "HOUSE_V3",
-      "b110Digest": "c65eb81cb8842ab4956f4caa275b6a4a68edb7268e312848918198a062e84eec",
-      "b111Digest": "f5c762e06f7ee89695722add995d009ca47bd627a796005706d9018375b06a9d",
-      "sourceDesignSha256": "dc15c68ee4235f850b9a30b1b86a08a01509da1a5a99d43caf8d520257af6956"
+      "b110Digest": "f90d37c8de3fe7b549c976f7c8a34b2908a9fd164e45808d9972df2ea1b125f2",
+      "b111Digest": "25df09260ae0f64fd44ad516a1f148a6a16869a5de532b6554db63717298f0d0",
+      "sourceDesignSha256": "1c4afcc0a73b07d2fa4e7a71fd99cba72905b829e4cb6b85bde920542bb0627d"
     },
     {
       "id": "HOTEL_V1",
@@ -41,21 +41,21 @@
     },
     {
       "id": "APARTMENT_V1",
-      "b110Digest": "9d1d321ea59549b483acad1b567580ffd2a87074fe3a21cb7960f787ccf1a227",
-      "b111Digest": "51a23b37c19bae971779c117b8e7d4cb94c9ad1e8e426b4af6ece3074c32cc83",
-      "sourceDesignSha256": "01d53e3dd7ccd97d5502cfdeaf5727ac41e41ac207d105c0404ccea6914231fb"
+      "b110Digest": "50cbd0f61f3594b026a382508dd3fd805fa7cb331d5cc48fd74b2ab4ba6097b5",
+      "b111Digest": "b4e686d4ea973e14847a219be61aab94577a7fb09101d31f2dce3107c99b74bd",
+      "sourceDesignSha256": "5d1421947bafa26deacc1e4d017c752322476af212f476efbb283dda1ebb1e76"
     },
     {
       "id": "APARTMENT_V2",
-      "b110Digest": "dc473a1f820c30f9eaba3010b283bd908749b7ab8134fa30138b0b728e8376bd",
-      "b111Digest": "86328d574996fd61016eaaf5568c57867a0bdb73084f2a3f601e87689f1a700d",
-      "sourceDesignSha256": "85060373e07d6f4d2d31b6705058c8d5224d1571e5a1af82ed12e9cc3062f6bd"
+      "b110Digest": "9f0623adc7ddf02d77565b481de2844a380bf8a54d394f46cd859c62fabc91cb",
+      "b111Digest": "de420bbdc023c138a3b3ac20278047d669f1c850d20891e2a21b3defdf13bdb3",
+      "sourceDesignSha256": "2e76bef31a62a3383b65a367bf8aaf265391ff0e201153856ba82b5e46380207"
     },
     {
       "id": "APARTMENT_V3",
-      "b110Digest": "36c7af1d4534469bd613bf106e89b8ed409117c7ecdb4ca983458a9dd2d39903",
-      "b111Digest": "2b8de5b898660aca0268c2980c5f43f2eeddf135797f5d7a889104366e5a73f3",
-      "sourceDesignSha256": "5acb43c4da2f95ffc2d03e44b04b06a5ee9b20840890c06b5da8c90d3886a2b9"
+      "b110Digest": "a8d60d1df35b7561467afd647cbfd00ca3229b0f9681dc67597a77892d1cd753",
+      "b111Digest": "bab89b25e6150bb4b533598ab289a3264f9e57f9fc6f73056c99a33719ff6302",
+      "sourceDesignSha256": "d3e2d4aeedec57ca145a04a183cc82fce76d1730a247717c3f75307eabea7f4b"
     },
     {
       "id": "OFFICE_V1",
@@ -78,20 +78,20 @@
     {
       "id": "LIBRARY_V1",
       "b110Digest": "baa5cf77e8afc3f127530e1eaa627f4d448e4bf5d88a9a6fd40378bbbd15b6db",
-      "b111Digest": "69b9959b287807be0824e5bd9640e35828859c14eb926b4ea7094d0223ba10b2",
-      "sourceDesignSha256": "b150b4e9946e90310e6cf2eb1fa943a1a3306ae262198df8f1e297ab8ea1d66c"
+      "b111Digest": "39777a550a5dcdcc055ea56018cf5aab2313711c4cff6287ecee7c4875ec250d",
+      "sourceDesignSha256": "49dc78d3a3bed022d136fe0be64778faef675aa2f2925b958f00440b2f7742d6"
     },
     {
       "id": "LIBRARY_V2",
       "b110Digest": "8649a22557e0aa33337efd5964da83bb07ebf8c6e2b9e0f9c4d0fbd24b5d09a2",
-      "b111Digest": "3f0ea5def27b8e6a31da766990120c17c96eb793bfe2a3f8763005f63dcf1136",
-      "sourceDesignSha256": "ee088d960a82569c55215cc59e27af00fd9e636c8a4f3a4c13ce4b246585d129"
+      "b111Digest": "543badb78f8c7e1606826189896c1d5e1db34156bfbec166697446ecf83df68a",
+      "sourceDesignSha256": "c7863ccd22f7c6ab77e87a2a769af970127b84fdd2225439ebbdb59956784db4"
     },
     {
       "id": "LIBRARY_V3",
       "b110Digest": "ad2e1c6f31e6ab59af73f3f0492ac181e7516970310339c438802a6c30f3afd4",
-      "b111Digest": "a7f68765ab4d4c487ce8ee532cf3c622fe52feb1b9528cbc2349e525a5b22f3b",
-      "sourceDesignSha256": "425916d3b20b15088a64fda8fcea0aa0bcc361cc92b47dd2d0383f4511dbab26"
+      "b111Digest": "1a752e837b6bfa6a6f663befc2d8d615ae966bdebc90c8018401e788f4cc372c",
+      "sourceDesignSha256": "880f04d82d237963dc49140b50161178fe62784eefda0834f668171a00ffb12f"
     }
   ]
 }
