@@ -1,0 +1,34 @@
+name: B114 offline integrated circulation
+on:
+  pull_request:
+    paths:
+      - 'source/parallel/b114/**'
+      - 'scripts/verify-b114-safety.mjs'
+      - '.github/workflows/b114.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  b114-offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify frozen source baseline
+        run: node scripts/verify-freeze.mjs
+      - name: Build source-linked B114 conditional circulation report
+        run: node source/parallel/b114/main/compile-b114.mjs --write-review
+      - name: B114 source geometry, safety and conditional graph tests
+        run: node --test source/parallel/b114/main/compile-b114.test.mjs
+      - name: Independent no-world-contact construction gate
+        run: node scripts/verify-b114-safety.mjs
+      - name: Upload B114 non-executable evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: B114-Offline-Integrated-Circulation
+          path: b114-review-output/
+          retention-days: 21
+          if-no-files-found: error
