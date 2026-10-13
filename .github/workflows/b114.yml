@@ -23,6 +23,10 @@ jobs:
         run: node source/parallel/b114/main/compile-b114.mjs --write-review
       - name: B114 source geometry, safety and conditional graph tests
         run: node --test source/parallel/b114/main/compile-b114.test.mjs
+      - name: Audit provisional 3D stair supports against neighboring floor body sweeps
+        run: node source/parallel/b114/main/b114-stack-3d-audit.mjs --write-review
+      - name: Verify cross-floor collisions and no false certification
+        run: node --test source/parallel/b114/main/b114-stack-3d-audit.test.mjs
       - name: Independent no-world-contact construction gate
         run: node scripts/verify-b114-safety.mjs
       - name: Upload B114 non-executable evidence
