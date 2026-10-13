@@ -13,6 +13,12 @@ test('floor apertures, support and blocked galleries are counted, not declared i
  assert.equal(r.totals.proposedUpperFloorOpenings,r.floorApertureProposals.reduce((n,a)=>n+a.count,0));
  assert(r.stairs.every(s=>s.appliedToOriginal===false&&s.minecraftCollisionVerified===false));
  assert.equal(r.designChangesApplied,false);
+ assert(r.stairs.every(s=>s.upperLandingSupported===true));
+ assert(r.stairs.every(s=>s.finalStepTransitionPhysicallyVerified===false));
+ for(const stair of r.stairs){
+  const cut=new Set(stair.aperture.map(p=>p.x+','+p.z));
+  assert(stair.upperLanding.every(p=>!cut.has(p.x+','+p.z)));
+ }
 });
 test('post-insertion paths do not overstate pre-insertion paths',()=>{
  assert(r.totals.postPlacementRoomsReached<=r.totals.originalOptimisticRooms);

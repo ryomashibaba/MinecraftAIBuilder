@@ -37,11 +37,20 @@ function stairModel(link,i,flight,floors,foreign){
  const solids=flight.solids.map(b=>lift(b,link));
  const supports=flight.supports.map(b=>lift(b,link));
  const lo=floors[link.fromLevel],hi=floors[link.toLevel];
- const aperture=ordered(floorCells(hi).filter(p=>body.some(b=>intersects(b,cube(p,hi.level*5)))));
+ // The upper landing is a required supporting floor block, not a shaft hole.
+ // Wide AABB sweeps can overlap it during the final half-step transition.
+ // Keep it and mark transition collision as UNKNOWN pending real Education physics.
+ const upperLandingSet=new Set(link.selected.upperLanding.map(K));
+ const aperture=ordered(floorCells(hi).filter(p=>
+  !upperLandingSet.has(K(p))&&body.some(b=>intersects(b,cube(p,hi.level*5)))));
  const required=new Set(aperture.map(K));
  const residualSlabCollisions=floors.flatMap(f=>floorCells(f).filter(p=>
-  (f.level!==hi.level||!required.has(K(p)))&&body.some(b=>intersects(b,cube(p,f.level*5))))
+  (f.level!==hi.level||!required.has(K(p)))&&
+  !(f.level===hi.level&&upperLandingSet.has(K(p)))&&
+  body.some(b=>intersects(b,cube(p,f.level*5))))
   .map(p=>({level:f.level,x:p.x,z:p.z})));
+ const modelledFinalStepFloorOverlap=link.selected.upperLanding.filter(p=>
+  body.some(b=>intersects(b,cube(p,hi.level*5)))).length;
  const foreignVolumeCollisions=foreign.filter(b=>body.some(o=>intersects(o,b)))
   .map(p=>({kind:p.kind,x:p.x,y:p.y,z:p.z}));
  return {index:i,coreIndex:link.coreIndex,fromLevel:link.fromLevel,toLevel:link.toLevel,
@@ -49,7 +58,8 @@ function stairModel(link,i,flight,floors,foreign){
   lowerLanding:link.selected.lowerLanding,upperLanding:link.selected.upperLanding,
   lowerLandingSupported:link.selected.lowerLanding.every(p=>hasFloor(lo,p)),
   upperLandingSupported:link.selected.upperLanding.every(p=>hasFloor(hi,p)&&!required.has(K(p))),
-  aperture,body,solids,supports,residualSlabCollisions,foreignVolumeCollisions,
+  aperture,body,solids,supports,modelledFinalStepFloorOverlap,
+  finalStepTransitionPhysicallyVerified:false,residualSlabCollisions,foreignVolumeCollisions,
   b114ConditionalConnection:link.selected.hypotheticalInterfloorLink,
   minecraftCollisionVerified:false,appliedToOriginal:false};
 }
@@ -136,6 +146,7 @@ export function inspectHouse(parent,b113,b114){
   corridorCellsObstructed:walk.blockedGallery.reduce((n,r)=>n+r.count,0),
   proposedUpperFloorOpenings:walk.apertureByLevel.reduce((n,s)=>n+s.size,0),
   unsupportedLandingGroups:walk.landingSupported.filter(x=>!x).length,
+  modelledFinalStepLandingOverlaps:models.reduce((n,m)=>n+m.modelledFinalStepFloorOverlap,0),
   otherStairCollisionPairs:walk.flightClashes.length,
   residualSlabBodyClashes:models.reduce((n,m)=>n+m.residualSlabCollisions.length,0),
   foreignVolumeClashes:models.reduce((n,m)=>n+m.foreignVolumeCollisions.length,0),
@@ -180,6 +191,7 @@ export function writeHouse(r,dir){
   '|塞がれた廊下セル|'+t.corridorCellsObstructed+'|',
   '|新設が必要な上階床開口候補セル|'+t.proposedUpperFloorOpenings+'|',
   '|支持不足の踊り場群|'+t.unsupportedLandingGroups+'|',
+  '|最終半段差で支持床と広域AABBが重なる候補（未認証）|'+t.modelledFinalStepLandingOverlaps+'|',
   '|別階段との干渉組|'+t.otherStairCollisionPairs+'|',
   '|残る床との身体干渉|'+t.residualSlabBodyClashes+'|',
   '|B105外装・家具との身体干渉|'+t.foreignVolumeClashes+'|',
