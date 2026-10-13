@@ -31,6 +31,10 @@ jobs:
         run: node source/parallel/b114/main/b114-house-v3-integrated.mjs
       - name: Verify HOUSE_V3 source-safe integrated building candidate
         run: node --test source/parallel/b114/main/b114-house-v3-integrated.test.mjs
+      - name: Build unified HOUSE_V3 solid-volume and strict two-wide route model
+        run: node source/parallel/b114/main/b114-house-unified-3d.mjs
+      - name: Independently verify solid collisions and 2-wide entrance-to-room paths
+        run: node --test source/parallel/b114/main/b114-house-unified-3d.test.mjs
       - name: Independent no-world-contact construction gate
         run: node scripts/verify-b114-safety.mjs
       - name: Upload B114 non-executable evidence
