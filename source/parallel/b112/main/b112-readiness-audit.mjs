@@ -11,7 +11,7 @@ import {auditB111Model} from '../../b111/main/b111-interior-access.mjs';
 import {validateB109Scene} from '../../b109/main/b109-surface-model.mjs';
 const sha=x=>createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const safe=r=>r?.readiness==='NOT_PREPARED'&&r.constructionApproved===false&&
- r.worldContacts===0&&r.worldCoordinates===null&&
+ (r.worldContacts===0||r.actualWorldContacts===0)&&r.worldCoordinates===null&&
  r.BuildPlan?.status==='NOT_PREPARED'&&r.BuildPlan.operations?.length===0&&
  r.BuildPlan.commandCount===0&&r.BuildPlan.worldCoordinates===null&&
  r.gates?.length===9&&r.gates.every(g=>g.status==='BLOCKED');
