@@ -1,0 +1,28 @@
+name: B113 offline Education compatibility
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  b113-offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Frozen source hashes
+        run: node scripts/verify-freeze.mjs
+      - name: B113 geometry, state domains, real source integration and rehashed safety attacks
+        run: node --test source/parallel/b113/main/compile-b113.test.mjs
+      - name: Independent construction prohibition gate
+        run: node scripts/verify-b113-safety.mjs
+      - name: Save non-executable B113 diagnostics
+        uses: actions/upload-artifact@v4
+        with:
+          name: B113-Offline-Compatibility-Review
+          path: b113-review-output/
+          if-no-files-found: error
+          retention-days: 21
