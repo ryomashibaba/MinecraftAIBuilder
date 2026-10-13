@@ -102,7 +102,8 @@ export function deriveB110Interfaces(design,volume){
     blockCandidate:'door',hinge:'UNASSIGNED',openState:'UNASSIGNED',
     realBlockPlacementValidated:false,actualUsabilityCertified:false});
    const furnished=floorR.find(x=>x.roomId===room.id);
-   if(!furnished||furnished.fixtures.length<1||!furnished.accessible)
+   if(!furnished||furnished.fixtures.length<1||!furnished.entry||
+    furnished.walkableInteriorCells<3)
     fail('MISSING_VALID_PARENT_FIXTURE');
    const role=fixtureRoles[furnished.fixtureKind];
    if(!role)fail('UNKNOWN_FURNITURE_KIND');
