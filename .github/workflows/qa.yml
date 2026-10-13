@@ -12,7 +12,7 @@ permissions:
 jobs:
   offline-tests:
     runs-on: ubuntu-latest
-    timeout-minutes: 65
+    timeout-minutes: 70
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -84,6 +84,15 @@ jobs:
           path: b111-review-output/
           if-no-files-found: error
           retention-days: 14
+      - name: B112 integrated building readiness, evidence provenance and Work handoff
+        run: node source/parallel/b112/main/compile-b112.mjs --write-review
+      - name: Save B112 audited 15-building status and local Work handoff
+        uses: actions/upload-artifact@v4
+        with:
+          name: B112-Integrated-Handoff-Review
+          path: b112-review-output/
+          if-no-files-found: error
+          retention-days: 21
       - name: Install headless Chrome for real browser QA
         id: chrome
         uses: browser-actions/setup-chrome@v1
@@ -111,7 +120,7 @@ jobs:
           path: b109-browser-output/
           if-no-files-found: error
           retention-days: 14
-      - name: B92-B111 regression suite (576 cases)
+      - name: B92-B112 regression suite (606 cases)
         working-directory: source
         run: |
           node --experimental-vm-modules --test \
@@ -134,7 +143,8 @@ jobs:
             parallel/b108/main/compile-b108.test.mjs \
             parallel/b109/main/compile-b109.test.mjs \
             parallel/b110/main/compile-b110.test.mjs \
-            parallel/b111/main/compile-b111.test.mjs
+            parallel/b111/main/compile-b111.test.mjs \
+            parallel/b112/main/compile-b112.test.mjs
       - name: B101 strict concept-only safety gate
         run: node scripts/verify-b101-safety.mjs
       - name: B102 spatial 3D concept and fail-closed safety gate
@@ -157,3 +167,5 @@ jobs:
         run: node scripts/verify-b110-safety.mjs
       - name: B111 interior occupancy provenance and blocked construction safety
         run: node scripts/verify-b111-safety.mjs
+      - name: B112 offline cross-source integrity and Work transfer safety
+        run: node scripts/verify-b112-safety.mjs
