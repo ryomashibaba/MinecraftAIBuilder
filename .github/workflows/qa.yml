@@ -12,7 +12,7 @@ permissions:
 jobs:
   offline-tests:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 65
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -75,6 +75,15 @@ jobs:
           path: b110-review-output/
           if-no-files-found: error
           retention-days: 14
+      - name: B111 occupancy and room approach path review (offline only)
+        run: node source/parallel/b111/main/compile-b111.mjs --write-review
+      - name: Save B111 room walkability, furniture fit and five interior maps
+        uses: actions/upload-artifact@v4
+        with:
+          name: B111-Interior-Occupancy-Review
+          path: b111-review-output/
+          if-no-files-found: error
+          retention-days: 14
       - name: Install headless Chrome for real browser QA
         id: chrome
         uses: browser-actions/setup-chrome@v1
@@ -102,7 +111,7 @@ jobs:
           path: b109-browser-output/
           if-no-files-found: error
           retention-days: 14
-      - name: B92-B110 regression suite (546 cases)
+      - name: B92-B111 regression suite (576 cases)
         working-directory: source
         run: |
           node --experimental-vm-modules --test \
@@ -124,7 +133,8 @@ jobs:
             parallel/b107/main/compile-b107.test.mjs \
             parallel/b108/main/compile-b108.test.mjs \
             parallel/b109/main/compile-b109.test.mjs \
-            parallel/b110/main/compile-b110.test.mjs
+            parallel/b110/main/compile-b110.test.mjs \
+            parallel/b111/main/compile-b111.test.mjs
       - name: B101 strict concept-only safety gate
         run: node scripts/verify-b101-safety.mjs
       - name: B102 spatial 3D concept and fail-closed safety gate
@@ -145,3 +155,5 @@ jobs:
         run: node scripts/verify-b109-safety.mjs
       - name: B110 Education reference, door/stair/interior interfaces and construction gate
         run: node scripts/verify-b110-safety.mjs
+      - name: B111 interior occupancy provenance and blocked construction safety
+        run: node scripts/verify-b111-safety.mjs
