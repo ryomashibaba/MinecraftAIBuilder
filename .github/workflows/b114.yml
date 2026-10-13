@@ -33,6 +33,8 @@ jobs:
         run: node --test source/parallel/b114/main/b114-house-architecture.test.mjs
       - name: Verify one-pass source identity and all expected reports
         run: node --test source/parallel/b114/main/b114-batch-review.test.mjs
+      - name: Verify HOUSE_V3 five offline blueprint SVGs
+        run: node --test source/parallel/b114/main/b114-house-blueprints.test.mjs
       - name: Independent no-world-contact construction gate
         run: node scripts/verify-b114-safety.mjs
       - name: Upload B114 non-executable evidence
