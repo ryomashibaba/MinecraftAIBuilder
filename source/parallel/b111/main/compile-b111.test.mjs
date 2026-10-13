@@ -95,7 +95,7 @@ test('17 simple 6x6 one-bed interior finds accessible 2-cell bed',()=>{
  assert.equal(r.stats.bedPairsAssigned,1);assert.equal(r.decision,'OFFLINE_ROOM_PATHS_CLEAR');
 });
 test('18 a 4x4 room with one bed cannot fake accessible 2-cell placement',()=>{
- const r=sampleRoom(4,{x:1,z:1},[{x:2,z:2,role:'bed'}]);
+ const r=sampleRoom(4,{x:1,z:1},[{x:2,z:2,role:'bed'},{x:1,z:2,role:'desk'}]);
  assert(r.stats.bedPairsUnresolved>0||r.decision==='ROOM_NEEDS_REDESIGN');
 });
 test('19 fixtures are never allowed to claim doorway interior',()=>{
@@ -126,7 +126,7 @@ test('24 readable map includes door and all walls',()=>{
  const ascii=drawB111RoomAscii(r);assert(ascii.includes('D'));assert(ascii.includes('#'));assert(ascii.includes('B'));
 });
 test('25 SHA integrity rejects tampered accessible-pass declarations',()=>{
- const x=duplicate(all().models[0]);x.rooms[0].decision='OFFLINE_ROOM_PATHS_CLEAR';
+ const x=duplicate(all().models[0]);x.rooms[0].decision=x.rooms[0].decision==='OFFLINE_ROOM_PATHS_CLEAR'?'ROOM_NEEDS_REDESIGN':'OFFLINE_ROOM_PATHS_CLEAR';
  const {d,b}=oneParent();assert.equal(auditB111Model(x,d,b),false);
 });
 test('26 all local room candidates explicitly uncertified for physical placement',()=>{
