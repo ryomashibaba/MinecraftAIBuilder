@@ -19,26 +19,20 @@ jobs:
           node-version: '22'
       - name: Verify frozen source baseline
         run: node scripts/verify-freeze.mjs
-      - name: Build source-linked B114 conditional circulation report
-        run: node source/parallel/b114/main/compile-b114.mjs --write-review
+      - name: Generate all five source-linked reviews in one parent derivation
+        run: node source/parallel/b114/main/b114-batch-review.mjs
       - name: B114 source geometry, safety and conditional graph tests
         run: node --test source/parallel/b114/main/compile-b114.test.mjs
-      - name: Audit provisional 3D stair supports against neighboring floor body sweeps
-        run: node source/parallel/b114/main/b114-stack-3d-audit.mjs --write-review
       - name: Verify cross-floor collisions and no false certification
         run: node --test source/parallel/b114/main/b114-stack-3d-audit.test.mjs
-      - name: Generate HOUSE_V3 full-scale floor stair gallery room offline integration
-        run: node source/parallel/b114/main/b114-house-v3-integrated.mjs
       - name: Verify HOUSE_V3 source-safe integrated building candidate
         run: node --test source/parallel/b114/main/b114-house-v3-integrated.test.mjs
-      - name: Build unified HOUSE_V3 solid-volume and strict two-wide route model
-        run: node source/parallel/b114/main/b114-house-unified-3d.mjs
       - name: Independently verify solid collisions and 2-wide entrance-to-room paths
         run: node --test source/parallel/b114/main/b114-house-unified-3d.test.mjs
-      - name: Review full-height room partition walls, facade closure, and stepped roof shape
-        run: node source/parallel/b114/main/b114-house-architecture.mjs
       - name: Verify protected room openings and source-safe architectural overlays
         run: node --test source/parallel/b114/main/b114-house-architecture.test.mjs
+      - name: Verify one-pass source identity and all expected reports
+        run: node --test source/parallel/b114/main/b114-batch-review.test.mjs
       - name: Independent no-world-contact construction gate
         run: node scripts/verify-b114-safety.mjs
       - name: Upload B114 non-executable evidence
