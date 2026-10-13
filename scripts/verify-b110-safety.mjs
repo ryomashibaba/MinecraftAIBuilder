@@ -1,0 +1,28 @@
+/** B110 final safety gate — construction must stay NOT_PREPARED. */
+import assert from 'node:assert/strict';
+import {assembleB110,validateB110Report} from '../source/parallel/b110/main/compile-b110.mjs';
+import {auditB110Model,B110_BLOCK_CANDIDATES} from '../source/parallel/b110/main/b110-functional-interfaces.mjs';
+const x=assembleB110(),r=x.report;
+assert(validateB110Report(r));
+assert.equal(r.readiness,'NOT_PREPARED');
+assert.equal(r.constructionApproved,false);
+assert.equal(r.executionAllowed,false);
+assert.equal(r.actualWorldContacts,0);
+assert.equal(r.worldCoordinates,null);
+assert.deepEqual(r.blockOperations,[]);
+assert.equal(r.BuildPlan.status,'NOT_PREPARED');
+assert.deepEqual(r.BuildPlan.operations,[]);
+assert.equal(r.BuildPlan.commandCount,0);
+assert.equal(r.BuildPlan.worldCoordinates,null);
+assert.equal(r.gates.length,9);
+assert(r.gates.every(g=>g.status==='BLOCKED'));
+assert.equal(x.models.length,15);
+assert(x.models.every(auditB110Model));
+assert(Object.values(B110_BLOCK_CANDIDATES).every(c=>c.verifiedEducation===false));
+assert.equal(r.totals.legacyUnapproved,296);
+assert.equal(r.totals.legacyHeld,18);
+assert.equal(r.totals.versionPinnedEducationVerifiedBlocks,0);
+assert.equal(r.totals.actualUsableDoors,0);
+assert.equal(r.totals.actualTraversableStairs,0);
+assert.equal(r.totals.physicallyCompletedRooms,0);
+console.log('PASS B110: 15 read-only functional interface sets, 30 tests separately, NO world/operations, nine gates BLOCKED');
