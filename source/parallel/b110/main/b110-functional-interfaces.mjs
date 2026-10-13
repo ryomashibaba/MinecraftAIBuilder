@@ -21,7 +21,7 @@ export const B110_REFERENCE=Object.freeze({
  readiness:'EDUCATION_TARGET_UNVERIFIED'
 });
 export const B110_BLOCK_CANDIDATES=Object.freeze({
- door:{id:'minecraft:oak_door',states:['minecraft:cardinal_direction','door_hinge_bit','open_bit','upper_block_bit'],scope:'TWO_BLOCK_PAIR',verifiedEducation:false},
+ door:{id:'minecraft:spruce_door',states:['minecraft:cardinal_direction','door_hinge_bit','open_bit','upper_block_bit'],scope:'TWO_BLOCK_PAIR',verifiedEducation:false},
  stairs:{id:'minecraft:oak_stairs',states:['weirdo_direction','upside_down_bit','minecraft:corner'],scope:'RISING_FLIGHT',verifiedEducation:false},
  frame:{id:'minecraft:oak_planks',states:[],scope:'SOLID_FACADE',verifiedEducation:false},
  glass:{id:'minecraft:glass',states:[],scope:'EXTERIOR_GLAZING',verifiedEducation:false},
