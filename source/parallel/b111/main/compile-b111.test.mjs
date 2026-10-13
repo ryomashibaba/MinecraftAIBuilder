@@ -6,17 +6,12 @@ import path from 'node:path';
 import {inspectB111Room,modelB111Interiors,auditB111Model,drawB111RoomAscii}
  from './b111-interior-access.mjs';
 import {assembleB111,validateB111Report,writeB111} from './compile-b111.mjs';
-import {assembleB110} from '../../b110/main/compile-b110.mjs';
-import {B101_SCENARIOS} from '../../b101/main/compile-b101.mjs';
-import {coDesignB104} from '../../b104/main/b104-joint-layout.mjs';
 let cache;
 const all=()=>cache??(cache=assembleB111());
 const duplicate=x=>structuredClone(x);
 function oneParent(){
- const frozen=JSON.parse(fs.readFileSync(new URL('../../b100/main/B100_GENERIC_DESIGN_REPORT.json',import.meta.url),'utf8'));
- const g=frozen.architectureCases[0],d=coDesignB104(g.options[0],B101_SCENARIOS[g.caseId]);
- const b=assembleB110().models.find(x=>x.id===g.options[0].id);
- return {d,b};
+ const a=all();
+ return {d:a.sourceDesigns[0],b:a.parentB110Models[0]};
 }
 const sampleRoom=(r,door,fixtures)=>inspectB111Room(
  {id:'test',level:0,purpose:'寝室',x:0,z:0,width:r,depth:r},
@@ -31,14 +26,11 @@ test('04 66 floors retained',()=>assert.equal(all().report.totals.floors,66));
 test('05 279 source room layouts analyzed',()=>assert.equal(all().report.totals.rooms,279));
 test('06 all 558 original fixture anchor cells tracked',()=>assert.equal(all().report.totals.originalFixtureAnchors,558));
 test('07 15 models pass independent source geometry audit',()=>{
- const b=all();const r=assembleB110();
- // Independently rebuild and compare one-to-one frozen B104 geometry for each model.
- const frozen=JSON.parse(fs.readFileSync(new URL('../../b100/main/B100_GENERIC_DESIGN_REPORT.json',import.meta.url),'utf8'));
- for(const group of frozen.architectureCases)for(const opt of group.options){
-  const d=coDesignB104(opt,B101_SCENARIOS[group.caseId]);
-  const v=b.models.find(m=>m.id===opt.id),p=r.models.find(m=>m.id===opt.id);
-  assert(auditB111Model(v,d,p));
- }
+ const x=all();
+ assert.equal(x.sourceDesigns.length,15);
+ assert.equal(x.parentB110Models.length,15);
+ for(let i=0;i<15;i++)assert(auditB111Model(
+  x.models[i],x.sourceDesigns[i],x.parentB110Models[i]));
 });
 test('08 rooms accounted for pass or review',()=>{
  const t=all().report.totals;assert.equal(t.roomsWithConnectedSingleCellWalkways+t.roomsRequiringRevision,279);

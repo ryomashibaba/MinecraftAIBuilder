@@ -14,7 +14,7 @@ export function assembleB111(){
  const frozen=JSON.parse(fs.readFileSync(new URL('../../b100/main/B100_GENERIC_DESIGN_REPORT.json',import.meta.url),'utf8'));
  if(!validateB100(frozen)||frozen.reportSha256!==parent.report.frozenParentSha256)
   throw Error('B111_INVALID_FROZEN_B100');
- const models=[];
+ const models=[],sourceDesigns=[];
  for(const group of frozen.architectureCases){
   const programme=B101_SCENARIOS[group.caseId];
   if(!programme)throw Error('B111_UNKNOWN_CASE');
@@ -24,7 +24,7 @@ export function assembleB111(){
    const d=coDesignB104(option,programme);
    const m=modelB111Interiors(d,original);
    if(!auditB111Model(m,d,original))throw Error('B111_SPATIAL_DATA_INVALID');
-   models.push(m);
+   models.push(m);sourceDesigns.push(d);
   }
  }
  const sum=k=>models.reduce((n,m)=>n+m.metrics[k],0);
@@ -65,7 +65,7 @@ export function assembleB111(){
   worldContacts:0,worldCoordinates:null,
   BuildPlan:{status:'NOT_PREPARED',operations:[],commandCount:0,worldCoordinates:null}};
  if(!validateB111Report(report))throw Error('B111_INVALID_REPORT');
- return {report,models};
+ return {report,models,sourceDesigns,parentB110Models:parent.models};
 }
 export function validateB111Report(r){
  if(r?.schema!=='minecraftaibuilder-b111-readonly-interior-usability-report-v1'||
