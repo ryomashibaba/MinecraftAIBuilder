@@ -27,6 +27,10 @@ jobs:
         run: node source/parallel/b114/main/b114-stack-3d-audit.mjs --write-review
       - name: Verify cross-floor collisions and no false certification
         run: node --test source/parallel/b114/main/b114-stack-3d-audit.test.mjs
+      - name: Generate HOUSE_V3 full-scale floor stair gallery room offline integration
+        run: node source/parallel/b114/main/b114-house-v3-integrated.mjs
+      - name: Verify HOUSE_V3 source-safe integrated building candidate
+        run: node --test source/parallel/b114/main/b114-house-v3-integrated.test.mjs
       - name: Independent no-world-contact construction gate
         run: node scripts/verify-b114-safety.mjs
       - name: Upload B114 non-executable evidence
