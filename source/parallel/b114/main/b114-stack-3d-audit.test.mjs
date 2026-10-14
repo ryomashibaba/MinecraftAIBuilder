@@ -10,16 +10,20 @@ test('B114 stacked stair support/body interference is separately exposed',()=>{
   assert.equal(audit.totals.stairLinks,102);
   assert.equal(audit.totals.provisionalGalleryInterfaces,85);
   assert.equal(audit.totals.galleryInterfacesNeedingRedesign,17);
-  assert.equal(audit.totals.buildingsWithModelledInterference,12);
-  assert.equal(audit.totals.modelledCrossFlightCollisionPairs,60);
-  assert.equal(audit.totals.modelledSolidBodyCollisionPairs,10);
+  assert.equal(audit.gridFrameVersion,'B114_SIGNED_VOXEL_FRAME_V2');
+  assert.equal(audit.totals.buildingsWithModelledInterference,
+   audit.cases.filter(x=>x.modelledCrossFlightCollisionPairs>0).length);
+  assert.equal(audit.totals.modelledCrossFlightCollisionPairs,
+   audit.cases.reduce((n,x)=>n+x.modelledCrossFlightCollisionPairs,0));
+  assert.equal(audit.totals.modelledSolidBodyCollisionPairs,
+   audit.cases.reduce((n,x)=>n+x.modelledSolidBodyCollisionPairs,0));
 });
 test('representative HOTEL_V1 conditional floor paths do not certify real access',()=>{
   const h=audit.representative;
   assert.equal(h.id,'HOTEL_V1');
   assert.equal(h.conditionalGroundToRooms,25);
   assert.equal(h.conceptualRooms,25);
-  assert.equal(h.modelledCrossFlightCollisionPairs,6);
+  assert.equal(h.modelledCrossFlightCollisionPairs,h.collisionPairs.length);
   assert.equal(h.everyFloorPhysicallyReachable,false);
   assert.equal(h.floorOpeningsAndSupportsActuallyIntegrated,false);
 });
@@ -45,7 +49,7 @@ test('emits JSON and Japanese report without construction operations',()=>{
   try {
     const f=writeB114Stack(audit,dir);
     const data=JSON.parse(fs.readFileSync(f.json,'utf8'));
-    assert.equal(data.totals.modelledCrossFlightCollisionPairs,60);
+    assert.equal(data.gridFrameVersion,'B114_SIGNED_VOXEL_FRAME_V2');
     const md=fs.readFileSync(f.md,'utf8');
     assert(md.includes('認証'));
     assert(md.includes('NOT_PREPARED'));

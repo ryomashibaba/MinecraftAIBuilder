@@ -14,6 +14,7 @@ import {validateB113} from '../../b113/main/compile-b113.mjs';
 import {validateB114} from './compile-b114.mjs';
 import {validateHeldBedRepair} from './b114-held-bed-repair.mjs';
 import {validateHeldRoomStaging} from './b114-held-room-staging.mjs';
+import {transformStairBox,STAIR_GRID_FRAME_VERSION} from './b114-stair-grid-frame.mjs';
 
 const hash=o=>createHash('sha256').update(JSON.stringify(o)).digest('hex');
 const xyz=p=>p.x+','+p.y+','+p.z;
@@ -46,15 +47,8 @@ function sweptSamples(f){
    height:Math.abs(q.y-p.y)+2,depth:Math.abs(q.z-p.z)+.6}];
  });
 }
-function lift(local,link){
- const {x,z}=link.selected.origin,{dx,dz}=link.selected.ascent;
- const corners=[[local.x,local.z],[local.x+local.width,local.z],
-  [local.x,local.z+local.depth],[local.x+local.width,local.z+local.depth]]
-  .map(([a,b])=>[x+dx*a-dz*b,z+dz*a+dx*b]);
- const xs=corners.map(p=>p[0]),zs=corners.map(p=>p[1]);
- return {x:Math.min(...xs),y:link.fromLevel*5+1+local.y,
-  z:Math.min(...zs),width:Math.max(...xs)-Math.min(...xs),
-  height:local.height,depth:Math.max(...zs)-Math.min(...zs)};
+function lift(box,link){
+ return transformStairBox(box,{...link.selected,fromLevel:link.fromLevel});
 }
 function floorAperture(link,swept,plates){
  const top=plates[link.toLevel];
@@ -305,6 +299,7 @@ export function auditFleet3D(parent,b113,b114,stack,furniture,held,staging,arch)
   sourceB113Integrity:b113.integritySha256,
   sourceStagingIntegrity:staging.integritySha256,
   scope:'FIFTEEN_PINNED_BUILDINGS_LOCAL_AABB_AND_SOURCE_VOXELS_ONLY',
+  stairGridFrameVersion:STAIR_GRID_FRAME_VERSION,
   cases,rankedPriorities:ranked.map(c=>({
    id:c.id,priorityScore:c.diagnostics.priorityScore,
    blockingCodes:c.diagnostics.items.filter(a=>a.impact==='HIGH').map(a=>a.code)})),

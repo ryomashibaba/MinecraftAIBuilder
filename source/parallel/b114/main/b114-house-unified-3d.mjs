@@ -13,6 +13,7 @@ import {buildB114,validateB114} from './compile-b114.mjs';
 import {inspectHouse} from './b114-house-v3-integrated.mjs';
 import {generateB105,auditB105} from '../../b105/main/b105-building-volume.mjs';
 import {K,neighbors,straightFlight,intersects} from '../../b113/main/b113-geometry.mjs';
+import {transformStairBox,STAIR_GRID_FRAME_VERSION} from './b114-stair-grid-frame.mjs';
 
 const key3=(x,y,z)=>x+','+y+','+z;
 const p2=s=>{const [x,z]=s.split(',').map(Number);return {x,z};};
@@ -27,12 +28,7 @@ function cells(f){
  return a;
 }
 function rotateAABB(b,link){
- const {x,z}=link.origin,{dx,dz}=link.ascent;
- const corners=[[b.x,b.z],[b.x+b.width,b.z],[b.x,b.z+b.depth],[b.x+b.width,b.z+b.depth]]
-  .map(([u,v])=>[x+dx*u-dz*v,z+dz*u+dx*v]);
- const xs=corners.map(c=>c[0]),zs=corners.map(c=>c[1]);
- return {x:Math.min(...xs),y:link.fromLevel*5+1+b.y,z:Math.min(...zs),
-  width:Math.max(...xs)-Math.min(...xs),height:b.height,depth:Math.max(...zs)-Math.min(...zs)};
+ return transformStairBox(b,link);
 }
 function range(box,axis){
  const lo=box[axis],hi=lo+box[{x:'width',y:'height',z:'depth'}[axis]];
@@ -243,6 +239,7 @@ export function buildHouseUnified3D(parent,b113,b114,house){
  const result={schema:'minecraftaibuilder-b114-house-unified-3d-offline-v1',id:'HOUSE_V3',
   sourceB114Integrity:b114.integritySha256,sourceHouseSourceDigest:house.sourceDesignProof,
   referenceSource:'B104_B105_B113_B114_PROVISIONAL_ONLY',
+  stairGridFrameVersion:STAIR_GRID_FRAME_VERSION,
   floorLevels:floors.map((f,i)=>({level:i,slabY:i*5,
    originalFloorCellCount:cells(f).length,removedForShaft:[...apertures[i]].sort(),
    floorCellsRetained:floorRemaining[i]})),

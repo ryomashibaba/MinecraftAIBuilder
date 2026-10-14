@@ -7,18 +7,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {straightFlight,intersects} from '../../b113/main/b113-geometry.mjs';
+import {transformStairBox,STAIR_GRID_FRAME_VERSION} from './b114-stair-grid-frame.mjs';
 import {validateB114} from './compile-b114.mjs';
 
 function lift(box,link) {
-  const {x,z}=link.selected.origin,{dx,dz}=link.selected.ascent;
-  const corners=[
-    [box.x,box.z],[box.x+box.width,box.z],
-    [box.x,box.z+box.depth],[box.x+box.width,box.z+box.depth]
-  ].map(([a,b])=>[x+dx*a-dz*b,z+dz*a+dx*b]);
-  const xx=corners.map(p=>p[0]),zz=corners.map(p=>p[1]);
-  const minX=Math.min(...xx),minZ=Math.min(...zz);
-  return {x:minX,y:link.fromLevel*5+1+box.y,z:minZ,
-    width:Math.max(...xx)-minX,height:box.height,depth:Math.max(...zz)-minZ};
+ return transformStairBox(box,{...link.selected,fromLevel:link.fromLevel});
 }
 function sweptBodies(flight) {
   return flight.samples.flatMap((p,i)=>{
@@ -92,6 +85,7 @@ export function auditB114Stack(input) {
     schema:'minecraftaibuilder-b114-vertical-stack-audit-v1',
     sourceB114IntegritySha256:input.integritySha256,sourceBaseCommit:input.frozenB112BaseCommit,
     geometryModel:'B113_5_RISE_STRAIGHT_HALF_STEP_WITH_PROVISIONAL_FULL_SUPPORT',
+    gridFrameVersion:STAIR_GRID_FRAME_VERSION,
     interpretation:'STATIC_AABB_WARNING_ON_UNBUILT_DESIGN; NOT ACTUAL EDUCATION COLLISION',
     fullFloorAndCeilingVoxelSource:'NOT_AVAILABLE_FOR_COMPLETE_3D_CERTIFICATION',
     issuePriorities:[
