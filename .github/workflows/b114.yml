@@ -51,6 +51,8 @@ jobs:
         run: node --test source/parallel/b114/main/b114-stair-support-reprofile.test.mjs
       - name: Re-evaluate 13 residual cross-floor stair clashes with mask and 2-wide gallery checks
         run: node --test source/parallel/b114/main/b114-cross-flight-position-search.test.mjs
+      - name: Profile remaining 2 stair clashes and bounded alternate flight footprints
+        run: node --test source/parallel/b114/main/b114-two-residual-stair-study.test.mjs
       - name: Independent no-world-contact construction gate
         run: node scripts/verify-b114-safety.mjs
       - name: Upload B114 non-executable evidence
