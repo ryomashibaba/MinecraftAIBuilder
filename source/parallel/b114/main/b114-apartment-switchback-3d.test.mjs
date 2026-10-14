@@ -27,6 +27,11 @@ test('rigorous source masks, gallery and adjacent-flight AABB screening preserve
  assert.equal(report.totals.finalInterferencePairsConditional,
   report.selectedCandidate?0:1);
  assert(report.tests.reasonCounts.SOURCE_FLOOR_ROOM_OR_CORE>=0);
+ assert.equal(report.totals.footprintFloorRoomCoreClear,
+  report.totals.rawRectangularPlacementsAttempted-report.tests.reasonCounts.SOURCE_FLOOR_ROOM_OR_CORE);
+ assert(report.totals.footprintFloorRoomCoreClear>=report.totals.bothGalleryInterfacesClear);
+ assert(report.preferredCandidates.every(c=>c.noB105StructuralClashes&&
+  c.noCrossFlightStructuralVoxelOverlap&&c.ownSupportBodyAABBConflicts===0));
 });
 test('all proposed geometry remains non-executable; no physical certification',()=>{
  assert.equal(report.physicallyConstructible,false);

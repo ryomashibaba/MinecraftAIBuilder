@@ -231,7 +231,7 @@ function inspectCandidate(param,{target,design,b113,source,otherModels,stairMeta
  const upper=design.plan.floors[target.toLevel],lower=design.plan.floors[target.fromLevel];
  const projected=project(plan,origin,ascent,target.fromLevel);
  const footprint=contiguousFloorMask(projected,design,lower,upper,target.coreIndex);
- if(!footprint.passes)return {passed:false,reason:'SOURCE_FLOOR_ROOM_OR_CORE',footprint};
+ if(!footprint.passes)return {passed:false,reason:'SOURCE_FLOOR_ROOM_OR_CORE',floorGuardPassed:false,footprint};
  const walkLower=new Set([...lower.gallery,
   ...b113.horizontalRoutes[target.fromLevel].repair.addedCells].map(k));
  const walkUpper=new Set([...upper.gallery,
@@ -240,29 +240,38 @@ function inspectCandidate(param,{target,design,b113,source,otherModels,stairMeta
  const upperConnected=twoWideAccess(projected.exitCells,walkUpper);
  if(!lowerConnected||!upperConnected)
   return {passed:false,reason:'BOTH_TWO_WIDE_GALLERY_LANDINGS_NOT_ADJACENT',
-   lowerConnected,upperConnected};
+   floorGuardPassed:true,lowerConnected,upperConnected};
  const intrusions=staticClashes(projected.body,source);
  if(intrusions.length)return {passed:false,reason:'SOURCE_B105_SOLID_BLOCKS_BODY',
-  solidClashes:intrusions.length};
+  floorGuardPassed:true,solidClashes:intrusions.length};
+ const structuralClashes=staticClashes([...projected.treads,...projected.platform,...projected.supports],source);
+ if(structuralClashes.length)return {passed:false,reason:'SOURCE_B105_SOLID_BLOCKS_STRUCTURAL_TREAD_LANDING_OR_PIER',
+  floorGuardPassed:true,solidClashes:structuralClashes.length};
+ const ownSupportBodyCollision=hit(projected.supports,projected.body);
+ if(ownSupportBodyCollision)return {passed:false,reason:'OWN_SUPPORT_BLOWS_PLAYER_CLEARANCE',floorGuardPassed:true};
  const opening=aperture(projected,upper);
  if(!opening.length||opening.some(p=>upper.rooms.some(r=>inside(r,p))))
   return {passed:false,reason:'UNSAFE_UPPER_APERTURE',
-   openingCells:opening.length};
+   floorGuardPassed:true,openingCells:opening.length};
  // Avoid destroying the footprint of another flight sharing this floor.
  const overlap=oldStairs.some((s,i)=>i!==flightIndex&&
   s.fromLevel===target.fromLevel&&
   projected.footprint.some(p=>s.cells.some(c=>k(p)===k(c))));
- if(overlap)return {passed:false,reason:'NEIGHBOR_FLIGHT_FOOTPRINT_OVERLAP'};
+ if(overlap)return {passed:false,reason:'NEIGHBOR_FLIGHT_FOOTPRINT_OVERLAP',floorGuardPassed:true};
  const errs=[];
+ const shapes=[...projected.treads,...projected.platform,...projected.supports];
  for(let i=0;i<otherModels.length;i++){
   if(i===flightIndex)continue;
   if(oldStairs[i].fromLevel===target.fromLevel||
    Math.abs(oldStairs[i].fromLevel-target.fromLevel)>1)continue;
   const c=cross(projected,otherModels[i]);
-  if(c.either)errs.push({other:i,...c});
+  const solidShapeInterference=hit(shapes,[...otherModels[i].treads,...otherModels[i].supports]);
+  if(c.either||solidShapeInterference)errs.push({other:i,...c,solidShapeInterference});
  }
  return {passed:errs.length===0,reason:errs.length?'CROSS_FLIGHT_AABB_COLLISION':'STAGED_AABB_CLEAR',
-  lowerConnected,upperConnected,openingCells:opening.length,
+  floorGuardPassed:true,lowerConnected,upperConnected,openingCells:opening.length,
+  ownSupportVsBodyAABBConflicts:0,
+  ownConservativeSweptBodyVsLandingAABB:projected.body.reduce((n,b)=>n+projected.platform.filter(p=>intersects(b,p)).length,0),
   candidate3DConflicts:errs,
   firstRise:plan.split[0],lastRise:plan.split[1],
   footprint:projected.footprint,entryCells:projected.entryCells,
@@ -334,7 +343,7 @@ export function studyApartmentV1Switchbacks(parent,b113,b114,cross,rail,two){
        target:stair,design,b113:ref,source:solids,otherModels:models,
        stairMeta:rails.stairs[index],oldStairs:c.proposedOriginalStairs});
       reasonCounts[checked.reason]=(reasonCounts[checked.reason]??0)+1;
-      if(checked.footprint?.passes)protectedPass++;
+      if(checked.floorGuardPassed)protectedPass++;
       if(checked.lowerConnected&&checked.upperConnected)connectedPass++;
       if(checked.reason==='STAGED_AABB_CLEAR'||checked.reason==='CROSS_FLIGHT_AABB_COLLISION')staticallyClear++;
       if(checked.passed) {
@@ -352,6 +361,11 @@ export function studyApartmentV1Switchbacks(parent,b113,b114,cross,rail,two){
         supportAABBs:geometry.supports,
         sweptPlayerAABBs:geometry.body,
         allAdjacentFlightAABBClashes:0,
+        noB105StructuralClashes:true,
+        noCrossFlightStructuralVoxelOverlap:true,
+        ownSupportBodyAABBConflicts:checked.ownSupportVsBodyAABBConflicts,
+        ownConservativeBodyVsLandingAABB:checked.ownConservativeSweptBodyVsLandingAABB,
+        conservativePlatformSweepRequiresDetailedPhysicsReview:true,
         realEducationCollisionVerified:false,sourceChanged:false});
       }
       // Gather nearest non-passing candidates with valid B104 source footprint.
@@ -377,6 +391,7 @@ export function studyApartmentV1Switchbacks(parent,b113,b114,cross,rail,two){
   zeroInterferenceSwitchbackCandidates:finalPass,
   finalInterferencePairsConditional:selected?0:1,
   sourceUnmodified:true,originalB114RemainingPairsAcrossFleet:1,
+  floorMaskPassedCandidatesAccountedFor:true,
   materialAndPhysicsCertifications:0,actualMinecraftCommands:0,
   worldContacts:0};
  const r={schema:'minecraftaibuilder-b114-apartment-switchback-first-geometry-study-v1',
@@ -434,6 +449,9 @@ export function validateApartmentSwitchback(r){
    r.totals.orientationVariants===4&&r.totals.risePartitionsStudied===2&&
    r.totals.originalB114RemainingPairsAcrossFleet===1&&
    r.totals.zeroInterferenceSwitchbackCandidates>=0&&
+   r.totals.floorMaskPassedCandidatesAccountedFor===true&&
+   r.totals.footprintFloorRoomCoreClear===r.totals.rawRectangularPlacementsAttempted-(r.tests.reasonCounts.SOURCE_FLOOR_ROOM_OR_CORE??0)&&
+   r.preferredCandidates.every(c=>c.noB105StructuralClashes&&c.noCrossFlightStructuralVoxelOverlap&&c.ownSupportBodyAABBConflicts===0)&&
    r.totals.finalInterferencePairsConditional===(r.selectedCandidate?0:1)&&
    r.totals.worldContacts===0&&r.totals.actualMinecraftCommands===0&&
    r.switchbackMinecraftStairOrientationNotCertified===true&&
@@ -469,6 +487,7 @@ export function writeApartmentSwitchback(r,dir){
  '|床・部屋・他コア・階段コア条件を通過|'+t.footprintFloorRoomCoreClear+'|',
  '|元2幅廊下の上下両端へ接続|'+t.bothGalleryInterfacesClear+'|',
  '|静的障害物・床開口条件を通過|'+t.staticSourceAndApertureClear+'|',
+ '|採用候補のうち支持体と自身の人体包絡の重なり|'+(r.selectedCandidate?.ownSupportBodyAABBConflicts??'未採用')+'|',
  '|全隣接階段との干渉なし|'+t.zeroInterferenceSwitchbackCandidates+'|',
  '|元ソース変更数|0|','',
  '## 結論','',
@@ -482,6 +501,7 @@ export function writeApartmentSwitchback(r,dir){
  '- 2+3 / 3+2のサンプル高さ・AABBは概念形状であり実Minecraft Bedrockの階段・ハーフブロック衝突ではない。',
  '- 支持体は概念ピア。現実の荷重やEducationの施工部材の有無を保証しない。',
  '- 各階の廊下と踊り場を幅2で実歩行できる保証はない。',
+ '- 階段と踊り場の自己衝突は保守的なAABBの限界があり、実ブロックの滑らかな歩行通過を保証しない。',
  'NOT_PREPARED / 9 BLOCKED / worldContacts=0 / BuildPlan.operations=[]'
  ].join('\n')+'\n');
  fs.writeFileSync(svg,projectPlanSvg());
