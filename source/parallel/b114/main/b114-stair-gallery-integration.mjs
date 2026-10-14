@@ -56,7 +56,7 @@ function patchHasTwoGallery(p,walk){
  const tiles=squares(p).filter(q=>walk.has(K(q)));
  return tiles.some((x,i)=>tiles.slice(i+1).some(y=>isAdjacent(x,y)));
 }
-function planTwoWide({landing,ascent,upper,allowed,walk}){
+export function planTwoWide({landing,ascent,upper,allowed,walk}){
  const start=edgeSeed(landing,ascent,upper);
  if(start.outward.length!==2||start.second.length!==2)
   throw Error('B114_GALLERY_LANDING_WIDTH_REGRESSION');

@@ -19,6 +19,8 @@ jobs:
           node-version: '22'
       - name: Verify frozen source baseline
         run: node scripts/verify-freeze.mjs
+      - name: Fast geometry-only 2-wide gallery route regression (no B111 parent)
+        run: node --test source/parallel/b114/main/b114-stair-gallery-routing-fast.test.mjs
       - name: Generate all five source-linked reviews in one parent derivation
         run: node source/parallel/b114/main/b114-batch-review.mjs
       - name: B114 source geometry, safety and conditional graph tests
