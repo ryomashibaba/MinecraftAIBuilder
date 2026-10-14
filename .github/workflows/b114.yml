@@ -47,6 +47,8 @@ jobs:
         run: node --test source/parallel/b114/main/b114-fleet-3d-readiness.test.mjs
       - name: Verify signed stair AABB rotation matches all four voxel orientations
         run: node --test source/parallel/b114/main/b114-stair-grid-frame.test.mjs
+      - name: Audit reversible floor-grounded edge-rail stair support alternatives
+        run: node --test source/parallel/b114/main/b114-stair-support-reprofile.test.mjs
       - name: Independent no-world-contact construction gate
         run: node scripts/verify-b114-safety.mjs
       - name: Upload B114 non-executable evidence
