@@ -1,0 +1,70 @@
+name: B114 offline integrated circulation
+on:
+  pull_request:
+    paths:
+      - 'source/parallel/b114/**'
+      - 'scripts/verify-b114-safety.mjs'
+      - '.github/workflows/b114.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  b114-offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify frozen source baseline
+        run: node scripts/verify-freeze.mjs
+      - name: Fast geometry-only 2-wide gallery route regression (no B111 parent)
+        run: node --test source/parallel/b114/main/b114-stair-gallery-routing-fast.test.mjs
+      - name: Generate all five source-linked reviews in one parent derivation
+        run: node source/parallel/b114/main/b114-batch-review.mjs
+      - name: B114 source geometry, safety and conditional graph tests
+        run: node --test source/parallel/b114/main/compile-b114.test.mjs
+      - name: Verify cross-floor collisions and no false certification
+        run: node --test source/parallel/b114/main/b114-stack-3d-audit.test.mjs
+      - name: Verify HOUSE_V3 source-safe integrated building candidate
+        run: node --test source/parallel/b114/main/b114-house-v3-integrated.test.mjs
+      - name: Independently verify solid collisions and 2-wide entrance-to-room paths
+        run: node --test source/parallel/b114/main/b114-house-unified-3d.test.mjs
+      - name: Verify protected room openings and source-safe architectural overlays
+        run: node --test source/parallel/b114/main/b114-house-architecture.test.mjs
+      - name: Verify one-pass source identity and all expected reports
+        run: node --test source/parallel/b114/main/b114-batch-review.test.mjs
+      - name: Verify HOUSE_V3 five offline blueprint SVGs
+        run: node --test source/parallel/b114/main/b114-house-blueprints.test.mjs
+      - name: Check architectural finishes and source-safe room furniture separation
+        run: node --test source/parallel/b114/main/b114-house-finish-study.test.mjs
+      - name: Validate non-executable B105-to-B113 furniture reconciliation for all 15 buildings
+        run: node --test source/parallel/b114/main/b114-furniture-reconciliation.test.mjs
+      - name: Verify four held bedroom two-bed circulation redesign candidates
+        run: node --test source/parallel/b114/main/b114-held-bed-repair.test.mjs
+      - name: Audit preferred bedrooms in two integrated local building overlays
+        run: node --test source/parallel/b114/main/b114-held-room-staging.test.mjs
+      - name: Audit 15-building source-grounded 3D readiness and risk matrix
+        run: node --test source/parallel/b114/main/b114-fleet-3d-readiness.test.mjs
+      - name: Verify signed stair AABB rotation matches all four voxel orientations
+        run: node --test source/parallel/b114/main/b114-stair-grid-frame.test.mjs
+      - name: Audit reversible floor-grounded edge-rail stair support alternatives
+        run: node --test source/parallel/b114/main/b114-stair-support-reprofile.test.mjs
+      - name: Re-evaluate 13 residual cross-floor stair clashes with mask and 2-wide gallery checks
+        run: node --test source/parallel/b114/main/b114-cross-flight-position-search.test.mjs
+      - name: Profile remaining 2 stair clashes and bounded alternate flight footprints
+        run: node --test source/parallel/b114/main/b114-two-residual-stair-study.test.mjs
+      - name: Model APARTMENT_V1 five-rise 2-wide switchback geometry and physical blockers
+        run: node --test source/parallel/b114/main/b114-apartment-switchback-3d.test.mjs
+      - name: Validate source-safe two-wide stair gallery connector proposals and reversible local U-turn slab opening
+        run: node --test source/parallel/b114/main/b114-stair-gallery-integration.test.mjs
+      - name: Independent no-world-contact construction gate
+        run: node scripts/verify-b114-safety.mjs
+      - name: Upload B114 non-executable evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: B114-Offline-Integrated-Circulation
+          path: b114-review-output/
+          retention-days: 21
+          if-no-files-found: error
