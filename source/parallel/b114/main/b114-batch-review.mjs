@@ -10,6 +10,7 @@ import {buildHouseUnified3D,validateHouseUnified3D,writeUnified} from './b114-ho
 import {auditHouseArchitecture,writeArchitecture} from './b114-house-architecture.mjs';
 import {makeHouseBlueprints} from './b114-house-blueprints.mjs';
 import {buildFinishStudy,writeFinishStudy} from './b114-house-finish-study.mjs';
+import {reconcileAll,writeFurnitureReview} from './b114-furniture-reconciliation.mjs';
 
 export async function writeB114ReviewBatch(output){
  const start=Date.now();
@@ -34,12 +35,13 @@ export async function writeB114ReviewBatch(output){
  const architecturalFiles=writeArchitecture(architectural,output);
  const drawings=makeHouseBlueprints(parent,b113,b114,house,unified,architectural,output);
  const finish=writeFinishStudy(buildFinishStudy(parent,b113,b114,house,unified,architectural),output);
+ const furniture=writeFurnitureReview(reconcileAll(parent,b113,b114,house,unified,architectural),output);
  return {batch:'ONE_REFERENCE_PARENT_FOR_FIVE_REPORTS',
   sourceIntegrity:b114.integritySha256,buildings:b114.totals.buildings,
   elapsedMs:Date.now()-start,
   houseThreeDimensionalTotals:unified.totals,
   architecturalTotals:architectural.totals,
-  reports:[b114Files,stackFiles,houseFiles,unifiedFiles,architecturalFiles,drawings,finish],
+  reports:[b114Files,stackFiles,houseFiles,unifiedFiles,architecturalFiles,drawings,finish,furniture],
   readiness:'NOT_PREPARED',constructionApproved:false,worldContacts:0,commandCount:0};
 }
 if(process.argv[1]===fileURLToPath(import.meta.url)){
