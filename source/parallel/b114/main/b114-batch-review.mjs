@@ -11,6 +11,7 @@ import {auditHouseArchitecture,writeArchitecture} from './b114-house-architectur
 import {makeHouseBlueprints} from './b114-house-blueprints.mjs';
 import {buildFinishStudy,writeFinishStudy} from './b114-house-finish-study.mjs';
 import {reconcileAll,writeFurnitureReview} from './b114-furniture-reconciliation.mjs';
+import {proposeHeldBedRepairs,writeHeldBedRepairs} from './b114-held-bed-repair.mjs';
 
 export async function writeB114ReviewBatch(output){
  const start=Date.now();
@@ -35,13 +36,15 @@ export async function writeB114ReviewBatch(output){
  const architecturalFiles=writeArchitecture(architectural,output);
  const drawings=makeHouseBlueprints(parent,b113,b114,house,unified,architectural,output);
  const finish=writeFinishStudy(buildFinishStudy(parent,b113,b114,house,unified,architectural),output);
- const furniture=writeFurnitureReview(reconcileAll(parent,b113,b114,house,unified,architectural),output);
+ const furnitureSource=reconcileAll(parent,b113,b114,house,unified,architectural);
+ const furniture=writeFurnitureReview(furnitureSource,output);
+ const heldBedRepairs=writeHeldBedRepairs(proposeHeldBedRepairs(furnitureSource),output);
  return {batch:'ONE_REFERENCE_PARENT_FOR_FIVE_REPORTS',
   sourceIntegrity:b114.integritySha256,buildings:b114.totals.buildings,
   elapsedMs:Date.now()-start,
   houseThreeDimensionalTotals:unified.totals,
   architecturalTotals:architectural.totals,
-  reports:[b114Files,stackFiles,houseFiles,unifiedFiles,architecturalFiles,drawings,finish,furniture],
+  reports:[b114Files,stackFiles,houseFiles,unifiedFiles,architecturalFiles,drawings,finish,furniture,heldBedRepairs],
   readiness:'NOT_PREPARED',constructionApproved:false,worldContacts:0,commandCount:0};
 }
 if(process.argv[1]===fileURLToPath(import.meta.url)){

@@ -39,6 +39,8 @@ jobs:
         run: node --test source/parallel/b114/main/b114-house-finish-study.test.mjs
       - name: Validate non-executable B105-to-B113 furniture reconciliation for all 15 buildings
         run: node --test source/parallel/b114/main/b114-furniture-reconciliation.test.mjs
+      - name: Verify four held bedroom two-bed circulation redesign candidates
+        run: node --test source/parallel/b114/main/b114-held-bed-repair.test.mjs
       - name: Independent no-world-contact construction gate
         run: node scripts/verify-b114-safety.mjs
       - name: Upload B114 non-executable evidence
