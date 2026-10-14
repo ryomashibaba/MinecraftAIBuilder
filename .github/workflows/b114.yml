@@ -43,6 +43,8 @@ jobs:
         run: node --test source/parallel/b114/main/b114-held-bed-repair.test.mjs
       - name: Audit preferred bedrooms in two integrated local building overlays
         run: node --test source/parallel/b114/main/b114-held-room-staging.test.mjs
+      - name: Audit 15-building source-grounded 3D readiness and risk matrix
+        run: node --test source/parallel/b114/main/b114-fleet-3d-readiness.test.mjs
       - name: Independent no-world-contact construction gate
         run: node scripts/verify-b114-safety.mjs
       - name: Upload B114 non-executable evidence

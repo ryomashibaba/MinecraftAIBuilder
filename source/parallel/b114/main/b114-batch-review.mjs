@@ -13,6 +13,7 @@ import {buildFinishStudy,writeFinishStudy} from './b114-house-finish-study.mjs';
 import {reconcileAll,writeFurnitureReview} from './b114-furniture-reconciliation.mjs';
 import {proposeHeldBedRepairs,writeHeldBedRepairs} from './b114-held-bed-repair.mjs';
 import {stageHeldRoomRecommendations,writeHeldRoomStaging} from './b114-held-room-staging.mjs';
+import {auditFleet3D,writeFleet3D} from './b114-fleet-3d-readiness.mjs';
 
 export async function writeB114ReviewBatch(output){
  const start=Date.now();
@@ -41,13 +42,15 @@ export async function writeB114ReviewBatch(output){
  const furniture=writeFurnitureReview(furnitureSource,output);
  const heldSource=proposeHeldBedRepairs(furnitureSource);
  const heldBedRepairs=writeHeldBedRepairs(heldSource,output);
- const preferredStaging=writeHeldRoomStaging(stageHeldRoomRecommendations(furnitureSource,heldSource,parent),heldSource,output);
+ const stagedSource=stageHeldRoomRecommendations(furnitureSource,heldSource,parent);
+ const preferredStaging=writeHeldRoomStaging(stagedSource,heldSource,output);
+ const fleet=writeFleet3D(auditFleet3D(parent,b113,b114,stack,furnitureSource,heldSource,stagedSource,architectural),output);
  return {batch:'ONE_REFERENCE_PARENT_FOR_FIVE_REPORTS',
   sourceIntegrity:b114.integritySha256,buildings:b114.totals.buildings,
   elapsedMs:Date.now()-start,
   houseThreeDimensionalTotals:unified.totals,
   architecturalTotals:architectural.totals,
-  reports:[b114Files,stackFiles,houseFiles,unifiedFiles,architecturalFiles,drawings,finish,furniture,heldBedRepairs,preferredStaging],
+  reports:[b114Files,stackFiles,houseFiles,unifiedFiles,architecturalFiles,drawings,finish,furniture,heldBedRepairs,preferredStaging,fleet],
   readiness:'NOT_PREPARED',constructionApproved:false,worldContacts:0,commandCount:0};
 }
 if(process.argv[1]===fileURLToPath(import.meta.url)){
