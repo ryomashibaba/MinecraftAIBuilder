@@ -15,6 +15,7 @@ import {proposeHeldBedRepairs,writeHeldBedRepairs} from './b114-held-bed-repair.
 import {stageHeldRoomRecommendations,writeHeldRoomStaging} from './b114-held-room-staging.mjs';
 import {auditFleet3D,writeFleet3D} from './b114-fleet-3d-readiness.mjs';
 import {designB114SupportRails,writeSupportRails} from './b114-stair-support-reprofile.mjs';
+import {searchB114CrossFlightRepairs,writeCrossFlightSearch} from './b114-cross-flight-position-search.mjs';
 
 export async function writeB114ReviewBatch(output){
  const start=Date.now();
@@ -26,7 +27,9 @@ export async function writeB114ReviewBatch(output){
  const b114Files=writeB114(b114,output);
  const stack=auditB114Stack(b114);
  const stackFiles=writeB114Stack(stack,output);
- const edgeRailFiles=writeSupportRails(designB114SupportRails(b114,stack),output);
+ const edgeRails=designB114SupportRails(b114,stack);
+ const edgeRailFiles=writeSupportRails(edgeRails,output);
+ const crossFlightFiles=writeCrossFlightSearch(searchB114CrossFlightRepairs(parent,b113,b114,stack,edgeRails),output);
  const house=inspectHouse(parent,b113,b114);
  const houseFiles=writeHouse(house,output);
  const unified=buildHouseUnified3D(parent,b113,b114,house);
@@ -52,7 +55,7 @@ export async function writeB114ReviewBatch(output){
   elapsedMs:Date.now()-start,
   houseThreeDimensionalTotals:unified.totals,
   architecturalTotals:architectural.totals,
-  reports:[b114Files,stackFiles,edgeRailFiles,houseFiles,unifiedFiles,architecturalFiles,drawings,finish,furniture,heldBedRepairs,preferredStaging,fleet],
+  reports:[b114Files,stackFiles,edgeRailFiles,crossFlightFiles,houseFiles,unifiedFiles,architecturalFiles,drawings,finish,furniture,heldBedRepairs,preferredStaging,fleet],
   readiness:'NOT_PREPARED',constructionApproved:false,worldContacts:0,commandCount:0};
 }
 if(process.argv[1]===fileURLToPath(import.meta.url)){
