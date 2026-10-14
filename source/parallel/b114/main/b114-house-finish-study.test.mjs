@@ -41,6 +41,15 @@ test('all real fixture footprints tracked separately from B105 decorative placeh
   assert.equal(room.proxyDisagreementExpected,true);
  }
 });
+test('B105 and B113 furniture proxy mismatch creates explicit mandatory review',()=>{
+ const x=r.fixtureProxyReconciliation;
+ assert.equal(x.affectedRooms.length,2);
+ assert.equal(r.reviewRequired,true);
+ assert(x.affectedRooms.every(v=>v.b113FurnitureFootprintCells>v.b105ProxyCells));
+ assert(x.affectedRooms.every(v=>v.requiresManualVisualReview===true));
+ assert(x.affectedRooms.every(v=>v.remedy==='DO_NOT_PLACE_B105_PROXY_AND_B113_REAL_FIXTURE_TOGETHER'));
+ assert.equal(x.sourceB105PlaceholdersNeedRemovalBeforeRealB113Fixtures,true);
+});
 test('static preview SVGs include proposal warning and multiple themes',()=>{
  const facade=fs.readFileSync(base+'B114_HOUSE_V3_Facade_Material_Options.svg','utf8'),
   interior=fs.readFileSync(base+'B114_HOUSE_V3_Interior_Options.svg','utf8');

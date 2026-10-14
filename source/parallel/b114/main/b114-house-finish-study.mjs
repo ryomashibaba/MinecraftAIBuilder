@@ -141,7 +141,8 @@ function interiorBoard(rooms,theme) {
   const bx=30+i*493,by=121,r=room.roomRectangle;
   body+=rect(bx,by,cardW,cardH,'#142335','#32475c',1);
   body+=text(bx+24,by+35,'LEVEL '+room.level+' / '+room.roomId,20,'#f1f5f8',700);
-  body+=text(bx+24,by+58,'Furniture '+room.fixtures.length+' / '+(room.offlineClear?'clear':'review'),12,'#b1c3d0');
+  body+=text(bx+24,by+58,'Fixtures '+room.fixtures.length+' / B105 proxy '+room.b105ProxyCount+' cells / B113 '+room.b113ActualFootprintCells+' cells',12,'#b1c3d0');
+  if(room.b105ProxyCount!==room.b113ActualFootprintCells)body+=text(bx+24,by+79,'PROXY REPLACEMENT REVIEW REQUIRED',11,'#ffce91',700);
   const sc=Math.min(27,Math.floor(350/Math.max(r.width,r.depth)));
   const ox=bx+44,oy=by+98;
   const occupied=new Map();
@@ -236,6 +237,18 @@ export function buildFinishStudy(parent,b113,b114,house,unified,architecture){
    sourceSourceCollisions:unified.totals.solidVoxelRoleConflicts,
    additionalArchitecturalCollisions:architecture.totals.overlapsExistingSourceSolids},
   coordinateLedger:assignments,stairFinishes:stairs,rooms,facade,
+  fixtureProxyReconciliation:{
+   affectedRooms:rooms.filter(r=>r.b113ActualFootprintCells!==r.b105ProxyCount||
+    r.matchingProxyFootprints!==r.b113ActualFootprintCells).map(r=>({
+     level:r.level,roomId:r.roomId,b105ProxyCells:r.b105ProxyCount,
+     b113FurnitureFootprintCells:r.b113ActualFootprintCells,
+     matchedCells:r.matchingProxyFootprints,
+     remedy:'DO_NOT_PLACE_B105_PROXY_AND_B113_REAL_FIXTURE_TOGETHER',
+     requiresManualVisualReview:true
+    })),
+   sourceB105PlaceholdersNeedRemovalBeforeRealB113Fixtures:true,
+   educationInventoryOrBedUseCertified:false
+  },
   proxyActualFurnitureDifferenceNotAnError:true,
   visualMockupsHumanApproved:false,educationEditionVersionVerified:false,
   noClaimOfFunctionalFurniture:true,roofWeatherproofCertified:false,
@@ -249,7 +262,8 @@ export function buildFinishStudy(parent,b113,b114,house,unified,architecture){
   readiness:'NOT_PREPARED',constructionApproved:false,executionAllowed:false,
   worldContacts:0,worldCoordinates:null,commandCount:0,gates:b114.gates.map(x=>({...x})),
   BuildPlan:{status:'NOT_PREPARED',operations:[],commandCount:0,worldCoordinates:null}};
- if(missingRoles||doorObstructions.length||rooms.some(r=>!r.offlineClear))report.reviewRequired=true;
+ if(missingRoles||doorObstructions.length||rooms.some(r=>!r.offlineClear)||
+  report.fixtureProxyReconciliation.affectedRooms.length)report.reviewRequired=true;
  else report.reviewRequired=false;
  return {report,source:{volume,band:architecture.addedElements.filter(v=>v.role==='FACADE_LINTEL_BAND'),
    roof:architecture.addedElements.filter(v=>v.role==='ROOF_STEPPED_MASSING')}};
@@ -287,7 +301,8 @@ export function writeFinishStudy(output,dir){
   '|階段半段差候補|'+t.stairHalfStepProxies+'|',
   '|未分類の素材ロール|'+t.unmappedRoles+'|',
   '|保護ドア開口の塞がれたセル|'+t.blockedReservedDoorCells+'|',
-  '|実機でブロック・家具機能を認証した数|0|','',
+  '|実機でブロック・家具機能を認証した数|0|',
+  '|旧家具表示を差し替える必要のある部屋|'+report.fixtureProxyReconciliation.affectedRooms.length+'|','',
   '## 各室の実占有候補と表示用家具の違い',
   ...report.rooms.map(r=>'- L'+r.level+' '+r.roomId+': B113設備'+r.fixtures.length+
     '点、設備占有'+r.b113ActualFootprintCells+'セル、B105表示用プロキシ'+r.b105ProxyCount+
@@ -296,6 +311,7 @@ export function writeFinishStudy(output,dir){
   '## 未認証の重要条件',
   ...report.unresolved.map(v=>'- '+v),
   '',
+  'B105の家具表示とB113の実設備占有は別物。両方を施工せず、置換が必要な室はレビュー保留とする。',
   '各minecraft:*はデザイン段階の候補IDにすぎず、Educationでの使用可否やBlockStateを確認していない。',
   'NOT_PREPARED / 9 BLOCKED / worldContacts=0 / BuildPlan.operations=[]'
  ];
