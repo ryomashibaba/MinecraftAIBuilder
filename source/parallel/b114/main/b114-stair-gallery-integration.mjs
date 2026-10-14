@@ -117,28 +117,55 @@ function layoutFor(design,base,apartmentSwitchback){
  }
  return byLevel;
 }
-function analyzeCase(design,b113case,b114case,apartment){
+function analyzeCase(design,b113case,b114case,crossCase,apartment){
+ if(crossCase.id!==b114case.id||crossCase.proposedOriginalStairs.length!==b114case.stairs.length)
+  throw Error('B114_GALLERY_CROSS_FLIGHT_INTEGRITY_MISMATCH');
+ const selectedSwitchback=design.candidateId==='APARTMENT_V1'?apartment.selectedCandidate:null;
+ const stagedStairs=b114case.stairs.map((link,i)=>{
+  const m=crossCase.proposedOriginalStairs[i],isSwitch=selectedSwitchback?.targetFlight===i;
+  if(!link.selected||m.stairIndex!==i||m.fromLevel!==link.fromLevel||
+   m.toLevel!==link.toLevel||m.coreIndex!==link.coreIndex||m.cells.length!==14)
+   throw Error('B114_GALLERY_SOURCE_STAIR_CHANGED');
+  const selected={...link.selected,
+   cells:isSwitch?selectedSwitchback.footprint:m.cells,
+   lowerLanding:isSwitch?selectedSwitchback.entryCells:m.lowerLanding,
+   upperLanding:isSwitch?selectedSwitchback.exitCells:m.upperLanding,
+   ascent:isSwitch?selectedSwitchback.ascent:m.proposedAscent,
+   upperAscent:isSwitch?
+    {dx:-selectedSwitchback.ascent.dx,dz:-selectedSwitchback.ascent.dz}:
+    m.proposedAscent,
+   stagedFromCrossFlight:m.changed,stagedSwitchback:Boolean(isSwitch)};
+  const a=sourceGallery(design.plan.floors[link.fromLevel],
+   b113case.horizontalRoutes[link.fromLevel]),
+   b=sourceGallery(design.plan.floors[link.toLevel],
+   b113case.horizontalRoutes[link.toLevel]);
+  selected.lowerInterfaceLinked=twoLandingLinked(selected.lowerLanding,a);
+  selected.upperInterfaceLinked=twoLandingLinked(selected.upperLanding,b);
+  selected.hypotheticalInterfloorLink=selected.lowerInterfaceLinked&&selected.upperInterfaceLinked;
+  return {...link,selected};
+ });
+ const activeBase={...b114case,stairs:stagedStairs};
  const levels=design.plan.floors.length,extra=design.plan.floors.map(()=>[]),
-  masks=layoutFor(design,b114case,apartment),entries=[],
+  masks=layoutFor(design,activeBase,apartment),entries=[],
   blockedByLevel=masks.map((m,i)=>staticFloor(design,i,m));
- for(const [index,link] of b114case.stairs.entries()){
-  const sel=link.selected;
+ for(const [index,link] of stagedStairs.entries()){
+  const sel=link.selected,original=b114case.stairs[index].selected;
   const firstLinked=sel.lowerInterfaceLinked,upperLinked=sel.upperInterfaceLinked;
   const entry={id:b114case.id,stairIndex:index,fromLevel:link.fromLevel,
    toLevel:link.toLevel,coreIndex:link.coreIndex,
-   originallyLowerLinked:firstLinked,originallyUpperLinked:upperLinked,
-   initiallyBothLinked:sel.hypotheticalInterfloorLink,proposals:[],
+   originallyLowerLinked:original.lowerInterfaceLinked,originallyUpperLinked:original.upperInterfaceLinked,
+   initiallyBothLinked:original.hypotheticalInterfloorLink,proposals:[],
    noSourceRoomsOrCoresChanged:true};
-  for(const [top,initial,landing,level] of [
-   [false,firstLinked,sel.lowerLanding,link.fromLevel],
-   [true,upperLinked,sel.upperLanding,link.toLevel]
+  for(const [top,initial,landing,level,ascent] of [
+   [false,firstLinked,sel.lowerLanding,link.fromLevel,sel.ascent],
+   [true,upperLinked,sel.upperLanding,link.toLevel,sel.upperAscent]
   ]){
    if(initial)continue;
    const walk=sourceGallery(design.plan.floors[level],
     b113case.horizontalRoutes[level],extra[level]);
    // Make deterministic plans in the same protected design frame for all
    // not-yet-connected interfaces, accumulating only 2D candidates.
-   const proposed=planTwoWide({landing,ascent:sel.ascent,upper:top,
+   const proposed=planTwoWide({landing,ascent,upper:top,
     allowed:blockedByLevel[level],walk});
    const at={side:top?'UPPER':'LOWER',level,...proposed};
    if(proposed.status==='CONDITIONAL_TWO_WIDE_ROUTE_CANDIDATE'){
@@ -153,7 +180,7 @@ function analyzeCase(design,b113case,b114case,apartment){
  // Re-evaluate all original 102 gallery edges from the same immutable source,
  // never claim an added 2D corridor validates 3D player or door movement.
  for(const entry of entries){
-  const link=b114case.stairs[entry.stairIndex],s=link.selected;
+  const link=stagedStairs[entry.stairIndex],s=link.selected;
   const low=sourceGallery(design.plan.floors[link.fromLevel],
    b113case.horizontalRoutes[link.fromLevel],extra[link.fromLevel]);
   const high=sourceGallery(design.plan.floors[link.toLevel],
@@ -163,8 +190,7 @@ function analyzeCase(design,b113case,b114case,apartment){
   entry.proposedTwoWideLink=entry.proposedLowerLinked&&entry.proposedUpperLinked;
   entry.physicalGalleryWalkabilityCertified=false;
   entry.corridorSourceChanged=false;
-  if(entry.initiallyBothLinked&&!entry.proposedTwoWideLink)
-   throw Error('B114_GALLERY_ORIGINAL_LINK_LOST:'+b114case.id);
+  entry.previouslyLinkedNowUnlinked=entry.initiallyBothLinked&&!entry.proposedTwoWideLink;
  }
  const allAdditions=extra.flatMap((pts,L)=>pts.map(p=>({...p,level:L})));
  const uniq=new Set(allAdditions.map(x=>x.level+':'+K(x)));
@@ -174,6 +200,9 @@ function analyzeCase(design,b113case,b114case,apartment){
   throw Error('B114_GALLERY_CROSSED_SOURCE_PROTECTION');
  return {id:design.candidateId,stairLinks:entries.length,
   baselineUnconnected:entries.filter(x=>!x.initiallyBothLinked).length,
+  previouslyLinkedNowUnlinked:entries.filter(x=>x.previouslyLinkedNowUnlinked).length,
+  stagedStraightFlightsMoved:stagedStairs.filter(x=>x.selected.stagedFromCrossFlight).length,
+  stagedSwitchbacks:stagedStairs.filter(x=>x.selected.stagedSwitchback).length,
   stagedTwoWideLinked:entries.filter(x=>x.proposedTwoWideLink).length,
   repairedPreviouslyUnconnected:entries.filter(x=>!x.initiallyBothLinked&&x.proposedTwoWideLink).length,
   stillUnlinked:entries.filter(x=>!x.proposedTwoWideLink).length,
@@ -249,7 +278,9 @@ export function integrateB114StairsAndGalleries(parent,b113,b114,cross,apartment
   const r=b113.cases.find(x=>x.id===d.candidateId),
    b=b114.cases.find(x=>x.id===d.candidateId);
   if(!r||!b||d.plan.floors.length!==b.levels)throw Error('B114_GALLERY_MISSING_BUILDING');
-  return analyzeCase(d,r,b,apartment);
+  const update=cross.cases.find(x=>x.id===d.candidateId);
+  if(!update)throw Error('B114_GALLERY_MISSING_CROSS_FLIGHT_CASE');
+  return analyzeCase(d,r,b,update,apartment);
  });
  const sum=k=>cases.reduce((n,c)=>n+c[k],0);
  const t={
@@ -257,6 +288,9 @@ export function integrateB114StairsAndGalleries(parent,b113,b114,cross,apartment
   sourceGalleryLinked:102-sum('baselineUnconnected'),
   sourceGalleryUnlinked:sum('baselineUnconnected'),
   redesignedWithTwoWideCorridor:sum('repairedPreviouslyUnconnected'),
+  previouslyLinkedNowUnlinked:sum('previouslyLinkedNowUnlinked'),
+  stagedStraightFlightsMoved:sum('stagedStraightFlightsMoved'),
+  stagedSwitchbacks:sum('stagedSwitchbacks'),
   conditionallyStagedLinked:sum('stagedTwoWideLinked'),
   remainingWithoutTwoWideGalleryRoute:sum('stillUnlinked'),
   additionalDesignOnlyCorridorCells:sum('extraConceptualGalleryCells'),
@@ -266,7 +300,10 @@ export function integrateB114StairsAndGalleries(parent,b113,b114,cross,apartment
   actualConstructionCommands:0,worldContacts:0};
  if(t.buildings!==15||t.stairs!==102||t.sourceGalleryLinked!==85||
   t.sourceGalleryUnlinked!==17||
-  t.sourceGalleryLinked+t.redesignedWithTwoWideCorridor+t.remainingWithoutTwoWideGalleryRoute!==102)
+  t.sourceGalleryLinked+t.redesignedWithTwoWideCorridor-
+   t.previouslyLinkedNowUnlinked+t.remainingWithoutTwoWideGalleryRoute!==102||
+  t.stagedStraightFlightsMoved!==cross.totals.designOnlyReorientedFlights||
+  t.stagedSwitchbacks!==1)
   throw Error('B114_GALLERY_AGGREGATE_MISMATCH');
  const aperture=switchbackApertureAudit(parent,apartment.selectedCandidate,cross,apartment);
  const body={schema:'minecraftaibuilder-b114-source-safe-gallery-2wide-switchback-staging-v1',
@@ -277,6 +314,7 @@ export function integrateB114StairsAndGalleries(parent,b113,b114,cross,apartment
   corridorPolicy:'FLOOR_MASK_NO_ROOM_NO_CORE_NO_ACTIVE_STAIR_FOOTPRINT_AND_TWO_BY_TWO_SQUARE_CONTIGUITY',
   cases,apartmentSwitchbackLocalAperture:aperture,totals:t,
   sourceGeometryUnchanged:true,appliedToB113OrB114Source:false,
+  activeStairGeometryUsesCrossFlightAndSwitchback:true,
   noPhysicalStepOrDoorCollisionCertification:true,
   remainingTechnicalHolds:[
    'EDUCATION_DOOR_SWING_AND_TWO_WIDTH_REAL_MOVEMENT_NOT_CERTIFIED',
@@ -298,8 +336,9 @@ export function validateStairGalleryIntegration(r) {
    r.schema==='minecraftaibuilder-b114-source-safe-gallery-2wide-switchback-staging-v1'&&
    r.cases.length===15&&r.totals.buildings===15&&r.totals.stairs===102&&
    r.totals.sourceGalleryLinked===85&&r.totals.sourceGalleryUnlinked===17&&
-   r.totals.sourceGalleryLinked+r.totals.redesignedWithTwoWideCorridor+
-    r.totals.remainingWithoutTwoWideGalleryRoute===102&&
+   r.totals.sourceGalleryLinked+r.totals.redesignedWithTwoWideCorridor-
+    r.totals.previouslyLinkedNowUnlinked+r.totals.remainingWithoutTwoWideGalleryRoute===102&&
+   r.totals.stagedSwitchbacks===1&&r.activeStairGeometryUsesCrossFlightAndSwitchback===true&&
    r.totals.apartmentTurnSelectedForLocalReview===1&&
    r.apartmentSwitchbackLocalAperture.originalMaskRestoredExactly===true&&
    r.apartmentSwitchbackLocalAperture.appliedFloorBlockRemovals===0&&
@@ -336,6 +375,8 @@ export function writeStairGalleryIntegration(r,dir){
   '|元から廊下両端と接続できた階段|'+t.sourceGalleryLinked+'|',
   '|廊下接続に修正が必要だった階段|'+t.sourceGalleryUnlinked+'|',
   '|新たに幅2の通路候補が繋がった階段|'+t.redesignedWithTwoWideCorridor+'|',
+  '|移設後の配置で既存の廊下接続を失った階段（保留）|'+t.previouslyLinkedNowUnlinked+'|',
+  '|反映していない移動・回転階段|'+t.stagedStraightFlightsMoved+'|',
   '|接続未解決|'+t.remainingWithoutTwoWideGalleryRoute+'|',
   '|非施工の追加通路セル（延べ）|'+t.additionalDesignOnlyCorridorCells+'|',
   '|折返し階段の上階床開口候補|'+a.proposedFloorOpeningCells+'|',

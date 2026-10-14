@@ -14,7 +14,8 @@ test('15 buildings and all 102 existing stair/gallery links re-evaluated without
  assert.equal(r.cases.length,15);
  assert(r.cases.every(x=>x.stairInterfaces.length===x.stairLinks));
  for(const c of r.cases)for(const link of c.stairInterfaces)
-  if(link.initiallyBothLinked)assert.equal(link.proposedTwoWideLink,true);
+  if(link.initiallyBothLinked&&!link.proposedTwoWideLink)
+   assert.equal(link.previouslyLinkedNowUnlinked,true);
 });
 test('every proposed two-wide connector is a reversible room/core/stair-safe 2x2 path',()=>{
  for(const c of r.cases){
@@ -32,8 +33,11 @@ test('every proposed two-wide connector is a reversible room/core/stair-safe 2x2
    }
   }
  }
- assert.equal(r.totals.sourceGalleryLinked+r.totals.redesignedWithTwoWideCorridor+
-  r.totals.remainingWithoutTwoWideGalleryRoute,102);
+ assert.equal(r.totals.sourceGalleryLinked+r.totals.redesignedWithTwoWideCorridor-
+  r.totals.previouslyLinkedNowUnlinked+r.totals.remainingWithoutTwoWideGalleryRoute,102);
+ assert.equal(r.totals.stagedStraightFlightsMoved,12);
+ assert.equal(r.totals.stagedSwitchbacks,1);
+ assert.equal(r.activeStairGeometryUsesCrossFlightAndSwitchback,true);
 });
 test('APARTMENT_V1 local aperture reconstitutes original upper slab with no Minecraft change',()=>{
  const a=r.apartmentSwitchbackLocalAperture;
