@@ -1,0 +1,98 @@
+name: B133 isolated stair state read-only probe Windows
+on:
+  pull_request:
+    paths:
+      - 'source/parallel/b133/**'
+      - '.github/workflows/b133.yml'
+      - 'docs/B133_IMPLEMENTATION_JA.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  b133-build-isolated-probe-bundle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate B133 syntax
+        run: |
+          node --check source/parallel/b133/main/b133-readonly-probe.mjs
+          node --check source/parallel/b133/main/b133-readonly-kit.mjs
+          node --check source/parallel/b133/main/b133-readonly-probe.test.mjs
+      - name: Confirm original frozen design
+        run: node scripts/verify-freeze.mjs
+
+      - name: Regenerate B114 offline
+        run: node source/parallel/b114/main/b114-batch-review.mjs
+      - name: Regenerate B117 offline
+        run: node source/parallel/b117/main/b117-fleet-review.mjs
+      - name: Regenerate B118 offline
+        run: node source/parallel/b118/main/b118-fleet-review.mjs
+      - name: Regenerate B119 offline
+        run: node source/parallel/b119/main/b119-fleet-whole-stair-review.mjs
+      - name: Regenerate B120 offline
+        run: node source/parallel/b120/main/b120-fleet-review.mjs
+      - name: Regenerate B121 offline
+        run: node source/parallel/b121/main/b121-fleet-review.mjs
+      - name: Regenerate B122 offline
+        run: node source/parallel/b122/main/b122-fleet-route-review.mjs
+      - name: Regenerate B123 offline
+        run: node source/parallel/b123/main/b123-fleet-network-review.mjs
+      - name: Regenerate B124 offline
+        run: node source/parallel/b124/main/b124-fleet-3d-review.mjs
+      - name: Regenerate B125 offline
+        run: node source/parallel/b125/main/b125-fleet-fine-review.mjs
+      - name: Regenerate B126 offline
+        run: node source/parallel/b126/main/b126-fleet-blockstate-review.mjs
+      - name: Regenerate B127 offline
+        run: node source/parallel/b127/main/b127-fleet-calibration-review.mjs
+      - name: Regenerate B128 offline
+        run: node source/parallel/b128/main/b128-fleet-intake-review.mjs
+      - name: Regenerate B129 offline
+        run: node source/parallel/b129/main/b129-fleet-protocol.mjs
+      - name: Build offline package on pinned B132 sources
+        run: node source/parallel/b133/main/b133-readonly-kit.mjs
+      - name: Test command sanitization, blank receipts and tamper rejection
+        run: node --test source/parallel/b133/main/b133-readonly-probe.test.mjs
+      - name: Reverify nine blocked construction gates
+        run: node scripts/verify-b114-safety.mjs
+      - name: Publish Windows probe and original B130 record wizard
+        uses: actions/upload-artifact@v4
+        with:
+          name: B133-Windows-ReadOnly-Stair-Probe
+          path: b133-review-output/B133_ReadOnly_Stair_Probe/
+          if-no-files-found: error
+          retention-days: 14
+  b133-native-windows-offline-cli:
+    needs: b133-build-isolated-probe-bundle
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Download exact unchanged B133 artifact into spaced path
+        uses: actions/download-artifact@v4
+        with:
+          name: B133-Windows-ReadOnly-Stair-Probe
+          path: B133 Native Probe With Spaces
+      - name: Validate packaged Windows CMD --check and four inert commands
+        shell: pwsh
+        env:
+          B133_KIT_PATH: ${{ github.workspace }}/B133 Native Probe With Spaces
+        run: |
+          node --test source/parallel/b133/main/b133-readonly-probe.test.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Verify shipping artifact contains zero synthetic trials or game writes
+        shell: pwsh
+        env:
+          B133_KIT_PATH: ${{ github.workspace }}/B133 Native Probe With Spaces
+        run: |
+          $receipts = Get-Content -Raw -LiteralPath (Join-Path $env:B133_KIT_PATH 'data/B130_Observation_Receipts.json') | ConvertFrom-Json
+          if ($receipts.receipts.Count -ne 0) { throw 'Test receipt leaked into artifact' }
+          $pin = Get-Content -Raw -LiteralPath (Join-Path $env:B133_KIT_PATH 'B133_READONLY_SOURCE_PIN.json') | ConvertFrom-Json
+          if ($pin.worldContacts -ne 0 -or $pin.constructionAllowed -ne $false -or $pin.operations.Count -ne 0) { throw 'Unsafe B133 artifact' }
