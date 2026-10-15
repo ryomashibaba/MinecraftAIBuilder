@@ -1,0 +1,63 @@
+name: B130 one-click offline Windows Education calibration lab
+on:
+  pull_request:
+    paths:
+      - 'source/parallel/b130/**'
+      - '.github/workflows/b130.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  b130-offline-windows-kit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify immutable frozen B100 reference
+        run: node scripts/verify-freeze.mjs
+      - name: Verify B130 manual-only receipt wizard and evidence integrity tests
+        run: node --test source/parallel/b130/main/b130-lab-tool.test.mjs
+      - name: Generate B114 original design
+        run: node source/parallel/b114/main/b114-batch-review.mjs
+      - name: Generate B117 original slab
+        run: node source/parallel/b117/main/b117-fleet-review.mjs
+      - name: Generate B118 held exits
+        run: node source/parallel/b118/main/b118-fleet-review.mjs
+      - name: Generate B119 stair flights
+        run: node source/parallel/b119/main/b119-fleet-whole-stair-review.mjs
+      - name: Generate B120 U turn
+        run: node source/parallel/b120/main/b120-fleet-review.mjs
+      - name: Generate B121 corridor joint
+        run: node source/parallel/b121/main/b121-fleet-review.mjs
+      - name: Generate B122 corridor full
+        run: node source/parallel/b122/main/b122-fleet-route-review.mjs
+      - name: Generate B123 original stairs
+        run: node source/parallel/b123/main/b123-fleet-network-review.mjs
+      - name: Generate B124 3D transitions
+        run: node source/parallel/b124/main/b124-fleet-3d-review.mjs
+      - name: Generate B125 halfstep cuts
+        run: node source/parallel/b125/main/b125-fleet-fine-review.mjs
+      - name: Generate B126 stair candidate state
+        run: node source/parallel/b126/main/b126-fleet-blockstate-review.mjs
+      - name: Generate B127 original direction hypotheses
+        run: node source/parallel/b127/main/b127-fleet-calibration-review.mjs
+      - name: Generate B128 empty receipt intake
+        run: node source/parallel/b128/main/b128-fleet-intake-review.mjs
+      - name: Generate B129 manual eight-slot observation plan
+        run: node source/parallel/b129/main/b129-fleet-protocol.mjs
+      - name: Generate B130 Windows 1-click portable lab kit
+        run: node source/parallel/b130/main/b130-package.mjs
+      - name: Verify self-contained Windows kit, no Minecraft calls and 8 blank slots
+        run: node --test source/parallel/b130/main/b130-package.test.mjs
+      - name: Verify original B114 blocked construction gates
+        run: node scripts/verify-b114-safety.mjs
+      - name: Upload B130 Windows one-click offline calibration kit
+        uses: actions/upload-artifact@v4
+        with:
+          name: B130-Windows-OneClick-Offline-Stair-Lab
+          path: b130-review-output/B130_Windows_Offline_Lab/
+          retention-days: 14
+          if-no-files-found: error
