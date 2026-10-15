@@ -14,10 +14,16 @@ export const FOOTPRINT_LENGTH=7,FOOTPRINT_WIDTH=2;
 export function straightModel(origin,ascent,fromLevel,flight=straightFlight()){
  if(!cell(origin)||!card(ascent)||!Number.isInteger(fromLevel)||fromLevel<0)
   throw Error('B119_INVALID_FLIGHT_POSE');
- const foot=[];
- for(let n=0;n<FOOTPRINT_LENGTH;n++)for(let w=0;w<FOOTPRINT_WIDTH;w++)
-  foot.push({x:origin.x+ascent.dx*n-ascent.dz*w,z:origin.z+ascent.dz*n+ascent.dx*w});
  const frame={origin,ascent,fromLevel};
+ const foot=[];
+ // Every cell follows the same signed-grid transform as the 3D stair solids.
+ // The old raw x/z formula misplaces the second lane under some rotations.
+ for(let n=0;n<FOOTPRINT_LENGTH;n++)for(let w=0;w<FOOTPRINT_WIDTH;w++){
+  const tile=transformStairBox({x:n,y:0,z:w,width:1,height:1,depth:1},frame);
+  if(!Number.isInteger(tile.x)||!Number.isInteger(tile.z)||tile.width!==1||tile.depth!==1)
+   throw Error('B119_SIGNED_STAIR_CELL_GRID_MISMATCH');
+  foot.push({x:tile.x,z:tile.z});
+ }
  const swept=[];
  for(const [i,p] of flight.samples.entries()){
   swept.push({x:p.x-.3,y:p.y,z:p.z-.3,width:.6,height:2,depth:.6});
