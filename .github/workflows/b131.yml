@@ -1,0 +1,96 @@
+name: B131 Windows-native one-click offline lab proof
+on:
+  pull_request:
+    paths:
+      - 'source/parallel/b131/**'
+      - '.github/workflows/b131.yml'
+      - 'docs/B131_IMPLEMENTATION_JA.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  b131-build-source-pinned-kit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify immutable baseline and original safety HOLD
+        run: node scripts/verify-freeze.mjs
+      - name: B130 original recorder regression suite
+        run: node --test source/parallel/b130/main/b130-lab-tool.test.mjs
+      - name: Build B114 source
+        run: node source/parallel/b114/main/b114-batch-review.mjs
+      - name: Build B117 source
+        run: node source/parallel/b117/main/b117-fleet-review.mjs
+      - name: Build B118 held stair exits
+        run: node source/parallel/b118/main/b118-fleet-review.mjs
+      - name: Build B119 stair flights
+        run: node source/parallel/b119/main/b119-fleet-whole-stair-review.mjs
+      - name: Build B120 U-turn
+        run: node source/parallel/b120/main/b120-fleet-review.mjs
+      - name: Build B121 joint corridors
+        run: node source/parallel/b121/main/b121-fleet-review.mjs
+      - name: Build B122 full corridors
+        run: node source/parallel/b122/main/b122-fleet-route-review.mjs
+      - name: Build B123 full stair networks
+        run: node source/parallel/b123/main/b123-fleet-network-review.mjs
+      - name: Build B124 3D transitions
+        run: node source/parallel/b124/main/b124-fleet-3d-review.mjs
+      - name: Build B125 halfstep landings
+        run: node source/parallel/b125/main/b125-fleet-fine-review.mjs
+      - name: Build B126 hypothetical blockstates
+        run: node source/parallel/b126/main/b126-fleet-blockstate-review.mjs
+      - name: Build B127 facing hypotheses
+        run: node source/parallel/b127/main/b127-fleet-calibration-review.mjs
+      - name: Build B128 empty evidence intake
+        run: node source/parallel/b128/main/b128-fleet-intake-review.mjs
+      - name: Build B129 manual protocol
+        run: node source/parallel/b129/main/b129-fleet-protocol.mjs
+      - name: Build B131 Windows package, manifest and read-only launcher
+        run: node source/parallel/b131/main/b131-package.mjs
+      - name: Verify B131 portable files and no-world invariants on Linux
+        run: node --test source/parallel/b131/main/b131-package.test.mjs
+      - name: Verify original B114 BLOCKED safety gate
+        run: node scripts/verify-b114-safety.mjs
+      - name: Upload the exact bundle to test on Windows
+        uses: actions/upload-artifact@v4
+        with:
+          name: B131-Windows-Native-Smoke-Verified-Lab-Kit
+          path: b131-review-output/B131_Windows_Lab/
+          retention-days: 14
+          if-no-files-found: error
+  b131-actual-windows-cmd-smoke:
+    needs: b131-build-source-pinned-kit
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Download the same unmodified artifact to a path containing spaces
+        uses: actions/download-artifact@v4
+        with:
+          name: B131-Windows-Native-Smoke-Verified-Lab-Kit
+          path: B131 Native QA With Spaces
+      - name: Test the packaged Windows .cmd and safe manual-recording code on native Windows
+        env:
+          B131_KIT_PATH: ${{ github.workspace }}/B131 Native QA With Spaces
+        run: |
+          node --test source/parallel/b131/main/b131-package.test.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node --test source/parallel/b130/main/b130-lab-tool.test.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        shell: pwsh
+      - name: Verify Windows test made no actual lab receipts or game connections
+        env:
+          B131_KIT_PATH: ${{ github.workspace }}/B131 Native QA With Spaces
+        shell: pwsh
+        run: |
+          $receipts = Get-Content -Raw -LiteralPath (Join-Path $env:B131_KIT_PATH 'data/B130_Observation_Receipts.json') | ConvertFrom-Json
+          if ($receipts.receipts.Count -ne 0) { throw 'Unexpected real receipt write' }
+          $report = Get-Content -Raw -LiteralPath (Join-Path $env:B131_KIT_PATH 'B131_MANIFEST_SHA256.json') | ConvertFrom-Json
+          if ($report.constructionAllowed -ne $false -or $report.worldContacts -ne 0) { throw 'Unsafe package claims' }
