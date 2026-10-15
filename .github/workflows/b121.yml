@@ -1,0 +1,45 @@
+name: B121 joint stair and staged gallery offline review
+on:
+  pull_request:
+    paths:
+      - 'source/parallel/b121/**'
+      - '.github/workflows/b121.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  b121-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Frozen source safety
+        run: node scripts/verify-freeze.mjs
+      - name: Local immutable vs staged corridor design tests
+        run: node --test source/parallel/b121/main/b121-joint-corridor-planner.test.mjs
+      - name: B114 offline source reports
+        run: node source/parallel/b114/main/b114-batch-review.mjs
+      - name: B117 slab source reconstruction
+        run: node source/parallel/b117/main/b117-fleet-review.mjs
+      - name: B118 source gallery hold reconstruction
+        run: node source/parallel/b118/main/b118-fleet-review.mjs
+      - name: B119 straight stair source reconstruction
+        run: node source/parallel/b119/main/b119-fleet-whole-stair-review.mjs
+      - name: B120 U-turn stair reconstruction
+        run: node source/parallel/b120/main/b120-fleet-review.mjs
+      - name: B121 joint stair plus staged gallery design review
+        run: node source/parallel/b121/main/b121-fleet-review.mjs
+      - name: Verify all eight held exits and no-world safety
+        run: node --test source/parallel/b121/main/b121-fleet-review.test.mjs
+      - name: Verify original construction gates
+        run: node scripts/verify-b114-safety.mjs
+      - name: Upload non-executable review evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: B121-Joint-Stair-Gallery-Offline-Review
+          path: b121-review-output/
+          retention-days: 14
+          if-no-files-found: error
