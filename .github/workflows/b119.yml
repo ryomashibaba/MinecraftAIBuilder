@@ -1,0 +1,41 @@
+name: B119 all-in-one stair 3D local design audit (offline)
+on:
+  pull_request:
+    paths:
+      - 'source/parallel/b119/**'
+      - '.github/workflows/b119.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  b119-offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify B100 frozen source baseline
+        run: node scripts/verify-freeze.mjs
+      - name: Run eight independent 3D stair and blocking tests
+        run: node --test source/parallel/b119/main/b119-full-stair-3d-search.test.mjs
+      - name: Regenerate B114 canonical offline design and provenance
+        run: node source/parallel/b114/main/b114-batch-review.mjs
+      - name: Regenerate B117 slab and all nine held exits
+        run: node source/parallel/b117/main/b117-fleet-review.mjs
+      - name: Regenerate B118 nine guarded gallery alternatives
+        run: node source/parallel/b118/main/b118-fleet-review.mjs
+      - name: Explore nine complete local 3D stair configurations
+        run: node source/parallel/b119/main/b119-fleet-whole-stair-review.mjs
+      - name: Verify full 15-building 102-stair and construction gate constraints
+        run: node --test source/parallel/b119/main/b119-fleet-whole-stair-review.test.mjs
+      - name: Revalidate frozen B114 safety gates
+        run: node scripts/verify-b114-safety.mjs
+      - name: Archive review-only local 3D alternatives
+        uses: actions/upload-artifact@v4
+        with:
+          name: B119-Whole-Stair-3D-Offline-Review
+          path: b119-review-output/
+          retention-days: 14
+          if-no-files-found: error
