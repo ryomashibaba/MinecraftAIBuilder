@@ -102,7 +102,7 @@ export function reconcileB123StairInterfaces({sourceByLevel,stagedByLevel,
  const delta=(key)=>after.reduce((n,g)=>n+g[key],0)-
   before.reduce((n,g)=>n+g[key],0);
  const output={stairCount:records.length,
-  targetStairIndex,replacedTargetBothRooted:target.after.LOWER&&target.after.UPPER,
+  targetStairIndex:replacedStairIndex,replacedTargetBothRooted:target.after.LOWER&&target.after.UPPER,
   otherStairRegressionCount:regressions.length,regressions,
   previouslyRootedOtherInterfaceSidesLost:regressions.reduce((n,x)=>n+x.lostSides.length,0),
   baselineRootedAnchorCount:before.reduce((n,g)=>n+g.rootedAnchors,0),
