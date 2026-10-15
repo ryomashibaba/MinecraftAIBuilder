@@ -87,7 +87,7 @@ test('no slot can be silently overwritten, direction labels are fixed',t=>{
 test('contradictory direction claims cannot become even a partial receipt',t=>{
  const root=make();t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
  take(root,'LAB-R1-EAST',3,at(1,0));
- assert.throws(()=>take(root,'LAB-R1-NORTH',3,at(1,1)),/B128_CONTRADICTORY_FACING_TO_STATE/);
+ assert.throws(()=>take(root,'LAB-R1-NORTH',3,at(1,1)),/B128_CONTRADICTORY_STATE_TO_FACING/);
  assert.equal(inspectB130Package(root).status.humanClaimedReceiptCount,1);
 });
 test('same manually selected proof digest is rejected across trials',t=>{
