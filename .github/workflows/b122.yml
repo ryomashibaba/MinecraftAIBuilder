@@ -1,0 +1,47 @@
+name: B122 full-length corridor and staged network audit (offline)
+on:
+  pull_request:
+    paths:
+      - 'source/parallel/b122/**'
+      - '.github/workflows/b122.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  b122-offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify frozen source integrity
+        run: node scripts/verify-freeze.mjs
+      - name: Independent full-length route blocker and root-network unit tests
+        run: node --test source/parallel/b122/main/b122-full-corridor-proof.test.mjs
+      - name: Generate B114 source evidence
+        run: node source/parallel/b114/main/b114-batch-review.mjs
+      - name: Generate B117 floor aperture evidence
+        run: node source/parallel/b117/main/b117-fleet-review.mjs
+      - name: Generate B118 nine original HOLD records
+        run: node source/parallel/b118/main/b118-fleet-review.mjs
+      - name: Generate B119 whole stair exploration
+        run: node source/parallel/b119/main/b119-fleet-whole-stair-review.mjs
+      - name: Generate B120 U-turn evidence
+        run: node source/parallel/b120/main/b120-fleet-review.mjs
+      - name: Generate B121 joint stair / gallery conceptual source
+        run: node source/parallel/b121/main/b121-fleet-review.mjs
+      - name: Independently audit complete proposed corridor and staged B114 network
+        run: node source/parallel/b122/main/b122-fleet-route-review.mjs
+      - name: Verify 15-building full route evidence and blocked construction gates
+        run: node --test source/parallel/b122/main/b122-fleet-route-review.test.mjs
+      - name: Verify B114 original construction safeguards
+        run: node scripts/verify-b114-safety.mjs
+      - name: Archive all B122 non-executable evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: B122-Full-Route-Offline-Evidence
+          path: b122-review-output/
+          retention-days: 14
+          if-no-files-found: error
