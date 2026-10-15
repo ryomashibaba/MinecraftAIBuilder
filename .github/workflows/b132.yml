@@ -17,6 +17,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Syntax check B132 modules before costly regeneration
+        run: |
+          node --check source/parallel/b132/main/b132-active-kit.mjs
+          node --check source/parallel/b132/main/b132-interactive.test.mjs
       - name: Verify original freeze safety
         run: node scripts/verify-freeze.mjs
       - name: Validate original B130 receipt handling
