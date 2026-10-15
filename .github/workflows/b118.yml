@@ -1,0 +1,39 @@
+name: B118 nine held exits bounded offline design review
+on:
+  pull_request:
+    paths:
+      - 'source/parallel/b118/**'
+      - '.github/workflows/b118.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  b118-offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify frozen source
+        run: node scripts/verify-freeze.mjs
+      - name: Unit test guarded width-two exit and no-world shift hints
+        run: node --test source/parallel/b118/main/b118-exit-alternatives.test.mjs
+      - name: Derive B114 source-linked reference offline
+        run: node source/parallel/b114/main/b114-batch-review.mjs
+      - name: Derive B117 102-flight slab evidence offline
+        run: node source/parallel/b117/main/b117-fleet-review.mjs
+      - name: Independently screen nine original held exits
+        run: node source/parallel/b118/main/b118-fleet-review.mjs
+      - name: Verify exactly nine held interfaces and blocked construction
+        run: node --test source/parallel/b118/main/b118-fleet-review.test.mjs
+      - name: No-world construction gate
+        run: node scripts/verify-b114-safety.mjs
+      - name: Archive B118 non-executable review
+        uses: actions/upload-artifact@v4
+        with:
+          name: B118-Nine-Exit-Offline-Alternatives
+          path: b118-review-output/
+          retention-days: 14
+          if-no-files-found: error
