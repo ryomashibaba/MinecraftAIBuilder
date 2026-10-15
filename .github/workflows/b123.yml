@@ -1,0 +1,49 @@
+name: B123 15-building stair-interface rooted network reconciliation (offline)
+on:
+  pull_request:
+    paths:
+      - 'source/parallel/b123/**'
+      - '.github/workflows/b123.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  b123-offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify frozen source integrity
+        run: node scripts/verify-freeze.mjs
+      - name: Verify synthetic two-wide stair-interface counterexamples
+        run: node --test source/parallel/b123/main/b123-interface-network.test.mjs
+      - name: Generate B114 original stair and gallery source
+        run: node source/parallel/b114/main/b114-batch-review.mjs
+      - name: Generate B117 protected floor-aperture source
+        run: node source/parallel/b117/main/b117-fleet-review.mjs
+      - name: Generate B118 nine HOLD exit alternatives
+        run: node source/parallel/b118/main/b118-fleet-review.mjs
+      - name: Generate B119 complete stair search
+        run: node source/parallel/b119/main/b119-fleet-whole-stair-review.mjs
+      - name: Generate B120 U-turn source
+        run: node source/parallel/b120/main/b120-fleet-review.mjs
+      - name: Generate B121 joint stair-gallery source
+        run: node source/parallel/b121/main/b121-fleet-review.mjs
+      - name: Generate B122 independently audited complete corridor routes
+        run: node source/parallel/b122/main/b122-fleet-route-review.mjs
+      - name: Generate B123 all stair-interface rooted network review
+        run: node source/parallel/b123/main/b123-fleet-network-review.mjs
+      - name: Verify all 15 buildings and 102 stair interfaces with construction blocked
+        run: node --test source/parallel/b123/main/b123-fleet-network-review.test.mjs
+      - name: Verify original B114 no-construction safeguards
+        run: node scripts/verify-b114-safety.mjs
+      - name: Publish non-executable B123 evidence only
+        uses: actions/upload-artifact@v4
+        with:
+          name: B123-All-Stair-Interface-Offline-Evidence
+          path: b123-review-output/
+          retention-days: 14
+          if-no-files-found: error
