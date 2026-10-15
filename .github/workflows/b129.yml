@@ -1,0 +1,61 @@
+name: B129 offline repeated Education stair calibration packet
+on:
+  pull_request:
+    paths:
+      - 'source/parallel/b129/**'
+      - '.github/workflows/b129.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  b129-offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify original frozen source
+        run: node scripts/verify-freeze.mjs
+      - name: 12 repeated observation and fail-closed contradiction tests
+        run: node --test source/parallel/b129/main/b129-repeated-calibration.test.mjs
+      - name: Generate original B114 pinned designs
+        run: node source/parallel/b114/main/b114-batch-review.mjs
+      - name: Generate B117 original slab
+        run: node source/parallel/b117/main/b117-fleet-review.mjs
+      - name: Generate B118 held stair exits
+        run: node source/parallel/b118/main/b118-fleet-review.mjs
+      - name: Generate B119 stair flights
+        run: node source/parallel/b119/main/b119-fleet-whole-stair-review.mjs
+      - name: Generate B120 U turn
+        run: node source/parallel/b120/main/b120-fleet-review.mjs
+      - name: Generate B121 stair corridor
+        run: node source/parallel/b121/main/b121-fleet-review.mjs
+      - name: Generate B122 complete corridor
+        run: node source/parallel/b122/main/b122-fleet-route-review.mjs
+      - name: Generate B123 102 stair network
+        run: node source/parallel/b123/main/b123-fleet-network-review.mjs
+      - name: Generate B124 3D connection
+        run: node source/parallel/b124/main/b124-fleet-3d-review.mjs
+      - name: Generate B125 half step landing
+        run: node source/parallel/b125/main/b125-fleet-fine-review.mjs
+      - name: Generate B126 hypothetical stair block states
+        run: node source/parallel/b126/main/b126-fleet-blockstate-review.mjs
+      - name: Generate B127 uncalibrated direction hypotheses
+        run: node source/parallel/b127/main/b127-fleet-calibration-review.mjs
+      - name: Generate B128 empty receipt intake
+        run: node source/parallel/b128/main/b128-fleet-intake-review.mjs
+      - name: Generate B129 actual eight-slot no-execution protocol
+        run: node source/parallel/b129/main/b129-fleet-protocol.mjs
+      - name: Verify six pinned fleet/protocol/no-construction tests
+        run: node --test source/parallel/b129/main/b129-fleet-protocol.test.mjs
+      - name: Recheck original construction gates
+        run: node scripts/verify-b114-safety.mjs
+      - name: Archive B129 manual calibration worksheets without real game data
+        uses: actions/upload-artifact@v4
+        with:
+          name: B129-Eight-Trial-Calibration-Offline-Packet
+          path: b129-review-output/
+          retention-days: 14
+          if-no-files-found: error
