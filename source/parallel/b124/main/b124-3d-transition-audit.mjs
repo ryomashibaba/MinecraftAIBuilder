@@ -89,7 +89,7 @@ export function auditB124StairCorridor3D({model,lowerFloor,upperFloor,
   for(const p of route){
    if(!mask(floor,p))sample('CORRIDOR_SOURCE_FLOOR_ABSENT',{side,...p});
    if(lvl===upper&&cut.has(K(p)))sample('CORRIDOR_OVER_REQUIRED_STAIR_SLAB_OPENING',{side,...p});
-   if(foreignOpeningCells.has(K(p)))sample('CORRIDOR_OVER_OTHER_STAIR_OPENING',{side,...p});
+   if(lvl===upper&&foreignOpeningCells.has(K(p)))sample('CORRIDOR_OVER_OTHER_STAIR_OPENING',{side,...p});
    const walk={x:p.x,y:lvl*5+1,z:p.z,width:1,height:2,depth:1};
    for(let y=lvl*5+1;y<=lvl*5+2;y++){
     const id=Q({x:p.x,y,z:p.z}),v=staticIndex.get(id);
