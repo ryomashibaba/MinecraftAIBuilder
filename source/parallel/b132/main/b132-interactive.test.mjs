@@ -5,7 +5,6 @@ import os from 'node:os';
 import path from 'node:path';
 import {spawn} from 'node:child_process';
 import {createHash} from 'node:crypto';
-import {createHash} from 'node:crypto';
 import {buildB132Kit,verifyB132ActiveKit} from './b132-active-kit.mjs';
 import {addB130ManualObservation} from '../../b130/main/b130-lab-tool.mjs';
 
