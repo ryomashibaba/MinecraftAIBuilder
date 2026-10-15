@@ -3,6 +3,21 @@ import assert from 'node:assert/strict';
 import {straightModel,buildB119ProxyIndex,inspectB119Pose,searchB119Stair}
  from './b119-full-stair-3d-search.mjs';
 const p=(x,z)=>({x,z});
+import {transformStairBox} from '../../b114/main/b114-stair-grid-frame.mjs';
+test('all four cardinal rotations have exact voxel-grid footprint alignment',()=>{
+ const directions=[{dx:1,dz:0},{dx:-1,dz:0},{dx:0,dz:1},{dx:0,dz:-1}];
+ for(const d of directions){
+  const origin={x:10,z:10},model=straightModel(origin,d,0);
+  const unique=new Set(model.footprint.map(p=>p.x+','+p.z));
+  assert.equal(unique.size,14);
+  for(let n=0;n<7;n++)for(let w=0;w<2;w++){
+   const b=transformStairBox({x:n,y:0,z:w,width:1,height:1,depth:1},
+    {origin,ascent:d,fromLevel:0});
+   assert.deepEqual(model.footprint[n*2+w],{x:b.x,z:b.z});
+  }
+ }
+});
+
 const floor=()=>({footprintRows:Array(24).fill('1'.repeat(24)),rooms:[],gallery:[]});
 function scenario(){
  const design={plan:{floors:[floor(),floor()],cores:[{x:10,z:8,width:2,depth:2}]}};
