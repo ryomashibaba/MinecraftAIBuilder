@@ -50,6 +50,10 @@ test('B133 kit remains empty, pinned and physically unverified',()=>{
  assert.deepEqual(report.operations,[]);
  assert.equal(fs.readFileSync(path.join(kit,'START_B133_READONLY_PROBE.cmd'),'utf8'),B133_CMD);
  assert.equal(fs.existsSync(path.join(kit,'evidence')),false);
+ const guide=fs.readFileSync(path.join(kit,'B133_START_HERE_JA.txt'),'utf8');
+ assert.match(guide,/本番ワールドは存在せず/);
+ assert.match(guide,/試験ごとの承認は不要/);
+ assert.doesNotMatch(guide,/先に独立検証ワールドでの手動試験内容について承認/);
 });
 test('a corrupt B133 source fails closed',t=>{
  const root=copy(t);

@@ -1,8 +1,8 @@
 /**
  * B133: offline-only operator aid. Generates text for four read-only
  * /testforblock probes; never opens Minecraft or executes a game command.
- * A human must separately approve/select an isolated world and run the
- * queries. A typed result is not an authenticated game observation.
+ * User permits experiments in any test world; there is no production world.
+ * A human runs the queries; a typed result is not authenticated game evidence.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -86,8 +86,8 @@ export async function interactiveProbe(root=ROOT,rl=readline.createInterface({in
    console.log('8枠は申告済み。実機認証済みを意味しません。');
    return 2;
   }
-  console.log('別途承認済みの独立・非本番ワールドに限ります。');
-  console.log('実験ワールドで手動設置した通常のオーク階段1個のXYZ座標を確認します。');
+  console.log('すべてのワールドはテスト用です。既存のワールドを再利用できます。');
+  console.log('既存の建築を傷つけない場所で、通常のオーク階段1個のXYZ座標を確認します。');
   console.log('Minecraft Educationの権限や構文対応は未確認です。');
   console.log('ゲームの変更・起動・操作はこのツールでは実行しません。');
   const raw=(await rl.question('階段のXYZ座標を整数3個で入力（Qで中止）: ')).trim();

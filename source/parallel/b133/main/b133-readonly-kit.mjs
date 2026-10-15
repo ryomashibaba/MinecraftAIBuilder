@@ -78,9 +78,9 @@ export function buildB133Kit({
  fs.writeFileSync(path.join(out,'B133_START_HERE_JA.txt'),[
   'B133 — Minecraft Education 階段状態の読み取り専用プローブ',
   '',
-  '1. 先に独立検証ワールドでの手動試験内容について承認を得てください。',
-  '2. 本番ワールドや15棟66階床102階段には一切手を加えないでください。',
-  '3. 別途承認済みの実験ワールド内に通常のオーク階段を手動設置し、XYZ座標を確認します。',
+  '1. ユーザー確認済み：本番ワールドは存在せず、すべてテストワールドです。試験ごとの承認は不要です。',
+  '2. 既存のテストワールドを再利用できます。既存の作業成果を壊さない空き領域を選んでください。',
+  '3. 通常のオーク階段1個を手動設置し、XYZ座標を確認します。',
   '4. START_B133_READONLY_PROBE.cmdをダブルクリック。座標を一度入力。',
   '5. 表示された4行の/testforblockをゲーム内で手動実行して成否を確認します。',
   '6. 同時に目で見た上り方向・上半形状を確認し、必要なら証拠画像を保存。',
@@ -101,7 +101,7 @@ export function buildB133Kit({
   'Microsoft Learn vanilla block states (oak_stairs, weirdo_direction):',
   'https://learn.microsoft.com/en-us/minecraft/creator/reference/content/vanillalistingsreference/blocks?view=minecraft-bedrock-stable',
   '',
-  'NOT_PREPARED / HOLD 9 / BLOCKED 9 / BuildPlan.operations=[] / worldContacts=0.'
+  'この配布ツールによる接続なし。NOT_PREPARED / HOLD 9 / BLOCKED 9 / BuildPlan.operations=[] / worldContacts=0.'
  ].join('\r\n')+'\r\n');
  return verifyB133Kit(out);
 }
