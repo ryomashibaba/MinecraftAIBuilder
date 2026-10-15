@@ -30,7 +30,7 @@ export const B131_CMD=[
   'if errorlevel 1 goto BAD_DIRECTORY',
   'where node >nul 2>nul',
   'if errorlevel 1 goto NO_NODE',
-  'node -e "if(Number(process.versions.node.split('+"'"+'.'+"'"+')[0]) < 22) process.exit(2)"',
+  "node -e \"if (Number(process.versions.node.split(\u0027.\u0027)[0]) < 22) process.exit(2)\"",
   'if errorlevel 1 goto OLD_NODE',
   'if /I "%~1"=="--check" goto CHECK',
   'if not "%~1"=="" goto BAD_ARGUMENT',
