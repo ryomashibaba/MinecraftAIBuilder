@@ -148,7 +148,9 @@ async function wizard(root=PACKAGE_ROOT){
    const actual=(await rl.question('実機で階段を調べ、状態値を読み取りましたか？ 本当に実施した場合のみ READBACK と入力: ')).trim();
    if(actual!=='READBACK'){console.log('未実施として残します。');continue;}
    const version=(await rl.question('表示・確認した Minecraft Education の正確な版 (例: 1.26.32.0): ')).trim();
-   const value=Number((await rl.question('本当にreadbackした weirdo_direction 値（0〜3）: ')).trim());
+   const rawValue=(await rl.question('本当にreadbackした weirdo_direction 値（0〜3）: ')).trim();
+   if(!/^[0-3]$/.test(rawValue)){console.log('未記入または不正な状態値。記録せず終了します。');continue;}
+   const value=Number(rawValue);
    const shape=(await rl.question('踏面の見え方 FORWARD_UPPER_HALF / REVERSE_UPPER_HALF / UNOBSERVED: ')).trim();
    const filename=(await rl.question('自分で撮影した証拠画像ファイル(.png/.jpg/.jpeg/.webp)のパス: ')).trim().replace(/^"|"$/g,'');
    const approved=(await rl.question('この画像をオフライン記録フォルダーへコピーしますか？ YES で確定: ')).trim();
