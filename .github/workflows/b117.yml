@@ -1,0 +1,37 @@
+name: B117 source-linked stair slab and gallery HOLD diagnosis (offline)
+on:
+  pull_request:
+    paths:
+      - 'source/parallel/b117/**'
+      - '.github/workflows/b117.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  b117-offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify frozen source baseline
+        run: node scripts/verify-freeze.mjs
+      - name: Verify independent support and corridor geometry cases
+        run: node --test source/parallel/b117/main/b117-geometry.test.mjs
+      - name: Generate B114 parent reports without Minecraft access
+        run: node source/parallel/b114/main/b114-batch-review.mjs
+      - name: Audit 102 slab interfaces and classify 9 gallery HOLDs
+        run: node source/parallel/b117/main/b117-fleet-review.mjs
+      - name: Verify all 15 building findings and construction gate invariants
+        run: node --test source/parallel/b117/main/b117-fleet-review.test.mjs
+      - name: Verify original construction prohibitions
+        run: node scripts/verify-b114-safety.mjs
+      - name: Upload B117 review-only evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: B117-Offline-Slab-Gallery-Holds
+          path: b117-review-output/
+          retention-days: 14
+          if-no-files-found: error
