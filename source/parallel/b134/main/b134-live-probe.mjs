@@ -4,17 +4,31 @@
  * Observations are NOT independent certification; no B130 receipts auto-created.
  */
 import fs from 'node:fs';
+import {createHash} from 'node:crypto';
 import path from 'node:path';
 import os from 'node:os';
 import readline from 'node:readline/promises';
 import {fileURLToPath} from 'node:url';
 import {stdin,stdout} from 'node:process';
-import {parseStairPosition,renderReadOnlyStairProbes} from '../../b133/main/b133-readonly-probe.mjs';
+import {parseStairPosition,renderReadOnlyStairProbes,checkB133Sources} from '../../b133/main/b133-readonly-probe.mjs';
 
 const DIR=path.dirname(fileURLToPath(import.meta.url));
 const ROOT=path.resolve(DIR,'../../../..');
 export const LIVE_PORT=8000;
 const COUNTABLE=new Set([0,1]);
+export function preflightB134Live(root=ROOT){
+ // Fail closed if the local B133 inherited runtime or B134 bridge was modified.
+ const old=checkB133Sources(root);
+ const manifest=JSON.parse(fs.readFileSync(path.join(root,'B134_LIVE_READONLY_MANIFEST.json'),'utf8'));
+ const digest=createHash('sha256').update(fs.readFileSync(path.join(root,
+  'source/parallel/b134/main/b134-live-probe.mjs'))).digest('hex');
+ if(manifest.schema!=='minecraftaibuilder-b134-live-readonly-bundle-v1'||
+    manifest.b134SourceSha256!==digest||manifest.blockWritesAllowed!==false||
+    manifest.constructionAllowed!==false||manifest.operations?.length!==0||
+    old.realEducationReadbacksCertified!==0||old.physicalWalkabilityCertified!==0)
+  throw Error('B134_LIVE_PREFLIGHT_SOURCE_CHANGED_OR_UNSAFE');
+ return {readyForDiagnosticOnly:true,constructionAllowed:false};
+}
 
 export function createB134Commands(position){
  const p=parseStairPosition(position);
@@ -105,6 +119,7 @@ export function saveB134Diagnostic(report,root=ROOT){
  return final;
 }
 export async function runB134Live({root=ROOT,inputPosition=null}={}){
+ preflightB134Live(root);
  const rl=readline.createInterface({input:stdin,output:stdout});
  let position;
  try{
