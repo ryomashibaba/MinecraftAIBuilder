@@ -57,6 +57,7 @@ export function buildB132Kit({
   'このキットはMinecraft Educationを起動・操作しません。',
   '観察が無ければ未実施のままにしてください。自動的に観察値を生成しません。',
   'テストで作られる合成画像と記録はWindows CIの一時フォルダーだけに作られます。',
+  '実際のゲーム内BlockStateの取得・確認は未実施で、合成記録はその代わりにはなりません。',
   'Minecraft実機で階段の向きが確認済みとは解釈できません。',
   'NOT_PREPARED、施工HOLD9件、9 BLOCKED、BuildPlan.operations=[]、worldContacts=0。',
   ''
