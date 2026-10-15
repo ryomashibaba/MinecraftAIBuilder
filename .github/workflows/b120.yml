@@ -1,0 +1,43 @@
+name: B120 flexible U-turn stair proxies (offline)
+on:
+  pull_request:
+    paths:
+      - 'source/parallel/b120/**'
+      - '.github/workflows/b120.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  b120-offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Frozen source verification
+        run: node scripts/verify-freeze.mjs
+      - name: U-turn shape rotation and blocker injection unit tests
+        run: node --test source/parallel/b120/main/b120-u-return-screener.test.mjs
+      - name: Regenerate B114 reference source
+        run: node source/parallel/b114/main/b114-batch-review.mjs
+      - name: Regenerate B117 102 stair slab evidence
+        run: node source/parallel/b117/main/b117-fleet-review.mjs
+      - name: Regenerate B118 nine gallery HOLDs
+        run: node source/parallel/b118/main/b118-fleet-review.mjs
+      - name: Regenerate B119 nine whole-stair designs
+        run: node source/parallel/b119/main/b119-fleet-whole-stair-review.mjs
+      - name: Analyze B120 eight remaining U-turn redesigns
+        run: node source/parallel/b120/main/b120-fleet-review.mjs
+      - name: Verify full coverage and nine blocked construction gates
+        run: node --test source/parallel/b120/main/b120-fleet-review.test.mjs
+      - name: Reconfirm no Minecraft world operations
+        run: node scripts/verify-b114-safety.mjs
+      - name: Upload B120 offline evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: B120-Eight-U-Turn-Offline-Evidence
+          path: b120-review-output/
+          retention-days: 14
+          if-no-files-found: error
