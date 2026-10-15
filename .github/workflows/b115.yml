@@ -1,0 +1,36 @@
+name: B115 independent two-wide gallery audit (offline)
+on:
+  pull_request:
+    paths:
+      - 'source/parallel/b115/**'
+      - '.github/workflows/b115.yml'
+      - 'docs/B115_IMPLEMENTATION_JA.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  b115-offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Preserve frozen source baseline
+        run: node scripts/verify-freeze.mjs
+      - name: Geometry-only independent B115 regression tests
+        run: node --test source/parallel/b115/main/b115-independent-gallery-proof.test.mjs
+      - name: Generate B114 inherited reports with no Minecraft access
+        run: node source/parallel/b114/main/b114-batch-review.mjs
+      - name: Re-audit all inherited B114 2-wide proposals
+        run: node source/parallel/b115/main/b115-independent-gallery-proof.mjs
+      - name: Verify B114 construction gates still blocked
+        run: node scripts/verify-b114-safety.mjs
+      - name: Upload read-only B115 report
+        uses: actions/upload-artifact@v4
+        with:
+          name: B115-Offline-Two-Wide-Topology
+          path: b115-review-output/
+          retention-days: 14
+          if-no-files-found: error
