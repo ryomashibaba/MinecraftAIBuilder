@@ -17,4 +17,6 @@ MIGRATION_WORKTREE/
 .migration_tmp/
 reports/generated/
 artifacts/
+b112-review-output/
+b113-review-output/
 coverage/
