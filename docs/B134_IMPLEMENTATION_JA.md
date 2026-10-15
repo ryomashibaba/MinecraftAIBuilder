@@ -10,7 +10,7 @@ B133ではWindows側で/testforblockの文字列を表示しただけだった�
 
 1. B134 Actions成果物ZIPを展開し、WindowsでSTART_B134_LIVE_PROBE.cmdを起動。
 2. 座標を一度入力。既存のテストワールド内にオーク階段があればそれを使用。初回起動時はsocket-be 2.8.0依存ライブラリをnpmから取得（ネットワーク接続が必要）。
-3. Minecraft Educationを開き、/wsserver localhost:8000 を入力。既に他の開発ツールが8000番ポートを占有していれば、そちらを終了してから試す。
+3. Minecraft Educationを開き、/wsserver 127.0.0.1:8000 を入力。既に他の開発ツールが8000番ポートを占有していれば、そちらを終了してから試す。
 4. ゲーム内チャットに !b134 を一度送る。B134は指定座標に5回だけtestforblockを送る。
 5. 返答はdata/B134_Live_Diagnostics/へJSON保存。B130の8観察枠に自動転記しない。実際の版とレスポンスが確認できれば次の実機向き校正に進む。
 

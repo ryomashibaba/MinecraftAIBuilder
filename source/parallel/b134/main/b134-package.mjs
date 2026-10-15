@@ -66,7 +66,7 @@ export function buildB134Kit({
   '2. 初回だけnpmのsocket-be 2.8.0を取得するためインターネット接続が必要です。',
   '3. Windows窓でオーク階段1個のブロックXYZ（整数3個）を入力。',
   '4. Minecraft Educationで同じWindows PCのテストワールドを開き、',
-  '   /wsserver localhost:8000 でローカル接続。',
+  '   /wsserver 127.0.0.1:8000 でローカル接続。',
   '5. ゲームのチャットに !b134 を一度送信。',
   '6. 送信されるのは testforblock に限定した5つの読み取りコマンド。',
   '7. Windowsに診断結果と保存先が表示されます。',

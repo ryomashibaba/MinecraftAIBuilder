@@ -6,7 +6,7 @@ import path from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {
  createB134Commands,classifyB134Response,evaluateB134Results,
- queryB134World,saveB134Diagnostic,preflightB134Live
+ queryB134World,saveB134Diagnostic,preflightB134Live,B134_SERVER_OPTIONS
 } from './b134-live-probe.mjs';
 import {buildB134Kit,verifyB134Kit,B134_CMD} from './b134-package.mjs';
 
@@ -23,6 +23,11 @@ test('B134 commands are five bounded read-only testforblock queries',()=>{
  for(const unsafe of ['', '1 2', '1 2 3;setblock 2 2 2 stone','1e4 2 3','1 9999 3']){
   assert.throws(()=>createB134Commands(unsafe),/B133_COORDINATES/);
  }
+});
+test('SocketBE network listener binds to loopback only, not LAN',()=>{
+ assert.equal(B134_SERVER_OPTIONS.webSocketOptions.host,'127.0.0.1');
+ assert.equal(B134_SERVER_OPTIONS.port,8000);
+ assert.equal(B134_SERVER_OPTIONS.webSocketOptions.maxPayload,65536);
 });
 test('response parser never converts statusMessage or undefined successCount into a match',()=>{
  assert.equal(classifyB134Response({statusCode:0,statusMessage:'testforblock succeeded'}),'UNKNOWN');

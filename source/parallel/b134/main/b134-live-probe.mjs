@@ -15,6 +15,7 @@ import {parseStairPosition,renderReadOnlyStairProbes,checkB133Sources} from '../
 const DIR=path.dirname(fileURLToPath(import.meta.url));
 const ROOT=path.resolve(DIR,'../../../..');
 export const LIVE_PORT=8000;
+export const B134_SERVER_OPTIONS={port:LIVE_PORT,webSocketOptions:{host:'127.0.0.1',maxPayload:65536}};
 const COUNTABLE=new Set([0,1]);
 export function preflightB134Live(root=ROOT){
  // Fail closed if the local B133 inherited runtime or B134 bridge was modified.
@@ -129,7 +130,7 @@ export async function runB134Live({root=ROOT,inputPosition=null}={}){
   position=parseStairPosition(raw);
  }finally{rl.close();}
  console.log('B134 開始：テストワールドへの接続のみ許可。ブロック変更はしません。');
- console.log('Minecraft Educationで /wsserver localhost:8000 を実行してください。');
+ console.log('Minecraft Educationで /wsserver 127.0.0.1:8000 を実行してください。');
  console.log('接続後、ゲームのチャットに !b134 を送ってください。5つの読み取りコマンドだけ送信します。');
  console.log('結果はローカルの data/B134_Live_Diagnostics/ に保存します。');
  let socket;
@@ -139,8 +140,8 @@ export async function runB134Live({root=ROOT,inputPosition=null}={}){
  }
  const {Server,ServerEvent}=socket;
  let started=false;
- const server=new Server({port:LIVE_PORT,ip:'127.0.0.1',host:'127.0.0.1'});
- server.on(ServerEvent.Open,()=>console.log('WebSocketリスナー開始: localhost:8000'));
+ const server=new Server(B134_SERVER_OPTIONS);
+ server.on(ServerEvent.Open,()=>console.log('WebSocketリスナー開始: 127.0.0.1:8000'));
  server.on(ServerEvent.PlayerChat,async ev=>{
   if(started||ev?.message!=='!b134'||!ev.world)return;
   started=true;
