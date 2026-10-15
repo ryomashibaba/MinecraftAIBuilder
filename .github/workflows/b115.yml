@@ -1,5 +1,10 @@
 name: B115 independent two-wide gallery audit (offline)
 on:
+  pull_request:
+    paths:
+      - 'source/parallel/b115/**'
+      - '.github/workflows/b115.yml'
+      - 'docs/B115_IMPLEMENTATION_JA.md'
   workflow_dispatch:
 permissions:
   contents: read
