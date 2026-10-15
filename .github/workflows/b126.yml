@@ -1,0 +1,55 @@
+name: B126 offline Education stair BlockState candidates and slab-fit review
+on:
+  pull_request:
+    paths:
+      - 'source/parallel/b126/**'
+      - '.github/workflows/b126.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  b126-offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 80
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify frozen source unmodified
+        run: node scripts/verify-freeze.mjs
+      - name: Test 9 independent non-executable blockstate and slab-fit counterexamples
+        run: node --test source/parallel/b126/main/b126-stair-blockstate-witness.test.mjs
+      - name: Build B114 pinned source
+        run: node source/parallel/b114/main/b114-batch-review.mjs
+      - name: Build B117 slab source
+        run: node source/parallel/b117/main/b117-fleet-review.mjs
+      - name: Build B118 held exit source
+        run: node source/parallel/b118/main/b118-fleet-review.mjs
+      - name: Build B119 stair source
+        run: node source/parallel/b119/main/b119-fleet-whole-stair-review.mjs
+      - name: Build B120 U-turn source
+        run: node source/parallel/b120/main/b120-fleet-review.mjs
+      - name: Build B121 joint stair and corridor source
+        run: node source/parallel/b121/main/b121-fleet-review.mjs
+      - name: Build B122 full corridor source
+        run: node source/parallel/b122/main/b122-fleet-route-review.mjs
+      - name: Build B123 102 stair network source
+        run: node source/parallel/b123/main/b123-fleet-network-review.mjs
+      - name: Build B124 slab collision source
+        run: node source/parallel/b124/main/b124-fleet-3d-review.mjs
+      - name: Build B125 half-step landing source
+        run: node source/parallel/b125/main/b125-fleet-fine-review.mjs
+      - name: Assemble B126 hypothetical block state and floor overlap evidence
+        run: node source/parallel/b126/main/b126-fleet-blockstate-review.mjs
+      - name: Validate 15 buildings 102 stair inventory and immutable HOLDs
+        run: node --test source/parallel/b126/main/b126-fleet-blockstate-review.test.mjs
+      - name: Verify original B114 construction safety
+        run: node scripts/verify-b114-safety.mjs
+      - name: Upload non-executable B126 review evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: B126-Offline-Stair-Blockstate-Slab-Evidence
+          path: b126-review-output/
+          retention-days: 14
+          if-no-files-found: error
