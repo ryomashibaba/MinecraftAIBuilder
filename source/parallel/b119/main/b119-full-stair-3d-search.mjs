@@ -107,7 +107,16 @@ export function inspectB119Pose({design,stair,model,otherModels=[],solidMap,
  }
  const sides={},entry={LOWER:{level:fromLevel,landing:model.lowerLanding},
   UPPER:{level:toLevel,landing:model.upperLanding}};
+ // Avoid rebuilding the floor-wide 2x2 navigation graph for any pose that
+ // already hits a protected floor, room, other flight, or headroom proxy.
+ // Such a pose can never be a complete geometrically valid solution.
+ const routeScreeningBlocked=reasons.length>0;
  for(const side of ['LOWER','UPPER']){
+  if(routeScreeningBlocked){
+   sides[side]={status:'NOT_RUN_STRUCTURAL_POSE_ALREADY_REJECTED',concepts:0,
+    bestExtraCells:null,firstBlockerCounts:{}};
+   continue;
+  }
   const {level,landing}=entry[side],walk=walkByLevel[level];
   if(!(walk instanceof Set))throw Error('B119_WALK_GRAPH_MISSING');
   const occupied=new Set(occupiedByLevel[level]??[]);
