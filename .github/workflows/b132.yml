@@ -1,0 +1,98 @@
+name: B132 Windows interactive native offline lab end-to-end
+on:
+  pull_request:
+    paths:
+      - 'source/parallel/b132/**'
+      - '.github/workflows/b132.yml'
+      - 'docs/B132_IMPLEMENTATION_JA.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  b132-create-safe-source-pinned-kit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check B132 modules before costly regeneration
+        run: |
+          node --check source/parallel/b132/main/b132-active-kit.mjs
+          node --check source/parallel/b132/main/b132-interactive.test.mjs
+      - name: Verify original freeze safety
+        run: node scripts/verify-freeze.mjs
+      - name: Validate original B130 receipt handling
+        run: node --test source/parallel/b130/main/b130-lab-tool.test.mjs
+      - name: Regenerate B114
+        run: node source/parallel/b114/main/b114-batch-review.mjs
+      - name: Regenerate B117
+        run: node source/parallel/b117/main/b117-fleet-review.mjs
+      - name: Regenerate B118
+        run: node source/parallel/b118/main/b118-fleet-review.mjs
+      - name: Regenerate B119
+        run: node source/parallel/b119/main/b119-fleet-whole-stair-review.mjs
+      - name: Regenerate B120
+        run: node source/parallel/b120/main/b120-fleet-review.mjs
+      - name: Regenerate B121
+        run: node source/parallel/b121/main/b121-fleet-review.mjs
+      - name: Regenerate B122
+        run: node source/parallel/b122/main/b122-fleet-route-review.mjs
+      - name: Regenerate B123
+        run: node source/parallel/b123/main/b123-fleet-network-review.mjs
+      - name: Regenerate B124
+        run: node source/parallel/b124/main/b124-fleet-3d-review.mjs
+      - name: Regenerate B125
+        run: node source/parallel/b125/main/b125-fleet-fine-review.mjs
+      - name: Regenerate B126
+        run: node source/parallel/b126/main/b126-fleet-blockstate-review.mjs
+      - name: Regenerate B127
+        run: node source/parallel/b127/main/b127-fleet-calibration-review.mjs
+      - name: Regenerate B128
+        run: node source/parallel/b128/main/b128-fleet-intake-review.mjs
+      - name: Regenerate B129
+        run: node source/parallel/b129/main/b129-fleet-protocol.mjs
+      - name: Package B132 with static-vs-mutable proof separation
+        run: node source/parallel/b132/main/b132-active-kit.mjs
+      - name: Verify active kit, synthetic recording and immutability on Linux
+        run: node --test source/parallel/b132/main/b132-interactive.test.mjs
+      - name: Reverify all original construction safety gates remain blocked
+        run: node scripts/verify-b114-safety.mjs
+      - name: Publish exact B132 Windows recorder for native interactive CI
+        uses: actions/upload-artifact@v4
+        with:
+          name: B132-Windows-Interactive-Offline-Lab
+          path: b132-review-output/B132_Windows_Offline_Lab/
+          if-no-files-found: error
+          retention-days: 14
+  b132-windows-real-interactive-cli:
+    needs: b132-create-safe-source-pinned-kit
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Get exact unchanged artifact built on Ubuntu
+        uses: actions/download-artifact@v4
+        with:
+          name: B132-Windows-Interactive-Offline-Lab
+          path: B132 Native Interactive With Spaces
+      - name: Run actual native Windows CMD interactive E2E with synthetic evidence only
+        shell: pwsh
+        env:
+          B132_KIT_PATH: ${{ github.workspace }}/B132 Native Interactive With Spaces
+        run: |
+          node --test source/parallel/b132/main/b132-interactive.test.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Verify published artifact remained entirely blank
+        shell: pwsh
+        env:
+          B132_KIT_PATH: ${{ github.workspace }}/B132 Native Interactive With Spaces
+        run: |
+          $receipts = Get-Content -Raw -LiteralPath (Join-Path $env:B132_KIT_PATH 'data/B130_Observation_Receipts.json') | ConvertFrom-Json
+          if ($receipts.receipts.Count -ne 0) { throw 'Synthetic test leaked into published artifact' }
+          $manifest = Get-Content -Raw -LiteralPath (Join-Path $env:B132_KIT_PATH 'B132_STATIC_SOURCE_MANIFEST.json') | ConvertFrom-Json
+          if ($manifest.constructionAllowed -ne $false -or $manifest.worldContacts -ne 0) { throw 'Unsafe source manifest' }
