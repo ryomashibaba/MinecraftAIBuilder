@@ -6,7 +6,7 @@ import path from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {
  createB134Commands,classifyB134Response,evaluateB134Results,
- queryB134World,saveB134Diagnostic
+ queryB134World,saveB134Diagnostic,preflightB134Live
 } from './b134-live-probe.mjs';
 import {buildB134Kit,verifyB134Kit,B134_CMD} from './b134-package.mjs';
 
@@ -109,6 +109,7 @@ test('published B134 kit protects unchanged B133 and records no game contacts',(
  assert.equal(s.readiness,'NOT_PREPARED');
  assert.equal(s.constructionAllowed,false);
  assert.equal(s.previous.operations.length,0);
+ assert.deepEqual(preflightB134Live(OUT),{readyForDiagnosticOnly:true,constructionAllowed:false});
  assert.equal(fs.readFileSync(path.join(OUT,'START_B134_LIVE_PROBE.cmd'),'utf8'),B134_CMD);
  assert.equal(fs.existsSync(path.join(OUT,'data/B134_Live_Diagnostics')),false);
 });
@@ -119,6 +120,7 @@ test('tampering a packaged B134 executable is rejected',t=>{
  fs.cpSync(OUT,target,{recursive:true});
  fs.appendFileSync(path.join(target,'source/parallel/b134/main/b134-live-probe.mjs'),'\n// tampered\n');
  assert.throws(()=>verifyB134Kit(target),/B134_KIT_TAMPER_OR_UNSAFE/);
+ assert.throws(()=>preflightB134Live(target),/B134_LIVE_PREFLIGHT_SOURCE_CHANGED_OR_UNSAFE/);
 });
 test('Windows native CMD --check works without npm or Minecraft',
  {skip:process.platform!=='win32'},()=>{
