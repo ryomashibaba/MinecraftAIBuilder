@@ -33,7 +33,10 @@ function mapForeignModel(caseCross,apartment,index){
   treads:[...selected.stairTreadAABBs,...selected.platformAABBs],
   supports:selected.supportAABBs,fromLevel:s.fromLevel,toLevel:s.toLevel};
  const m=straightModel(s.proposedOrigin,s.proposedAscent,s.fromLevel);
- return {id:index,footprint:m.footprint,body:m.body,treads:m.treads,supports:m.supports,
+ // B114's conceptual footprint uses an older raw frame. Conservatively
+ // reserve both its recorded cells and the correctly signed 3D voxel cells.
+ const footprint=[...new Map([...s.cells,...m.footprint].map(p=>[K(p),p])).values()];
+ return {id:index,footprint,body:m.body,treads:m.treads,supports:m.supports,
   fromLevel:s.fromLevel,toLevel:s.toLevel};
 }
 export async function buildB119(dir){
