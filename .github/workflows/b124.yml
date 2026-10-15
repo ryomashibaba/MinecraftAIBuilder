@@ -1,0 +1,51 @@
+name: B124 offline stair-corridor 3D slab and landing transition audit
+on:
+  pull_request:
+    paths:
+      - 'source/parallel/b124/**'
+      - '.github/workflows/b124.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  b124-offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 65
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Frozen source integrity
+        run: node scripts/verify-freeze.mjs
+      - name: Independent 3D box slab and seam counterexamples
+        run: node --test source/parallel/b124/main/b124-3d-transition-audit.test.mjs
+      - name: Generate B114 source evidence
+        run: node source/parallel/b114/main/b114-batch-review.mjs
+      - name: Generate B117 source floor opening inventory
+        run: node source/parallel/b117/main/b117-fleet-review.mjs
+      - name: Generate B118 nine HOLD exit cases
+        run: node source/parallel/b118/main/b118-fleet-review.mjs
+      - name: Generate B119 whole-stair pose source
+        run: node source/parallel/b119/main/b119-fleet-whole-stair-review.mjs
+      - name: Generate B120 U-return source
+        run: node source/parallel/b120/main/b120-fleet-review.mjs
+      - name: Generate B121 stair and corridor conceptual source
+        run: node source/parallel/b121/main/b121-fleet-review.mjs
+      - name: Generate B122 independently audited corridor source
+        run: node source/parallel/b122/main/b122-fleet-route-review.mjs
+      - name: Generate B123 all original stair interface connectivity source
+        run: node source/parallel/b123/main/b123-fleet-network-review.mjs
+      - name: Generate B124 independent 3D stair corridor and slab transition findings
+        run: node source/parallel/b124/main/b124-fleet-3d-review.mjs
+      - name: Verify B124 15 buildings 102 stairs and nine construction HOLDS
+        run: node --test source/parallel/b124/main/b124-fleet-3d-review.test.mjs
+      - name: Verify B114 original no-world construction safeguards
+        run: node scripts/verify-b114-safety.mjs
+      - name: Upload B124 non-executable review artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: B124-3D-Stair-Corridor-Offline-Evidence
+          path: b124-review-output/
+          retention-days: 14
+          if-no-files-found: error
