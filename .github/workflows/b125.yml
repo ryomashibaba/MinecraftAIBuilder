@@ -1,0 +1,53 @@
+name: B125 offline fine-step landing and conceptual slab cut review
+on:
+  pull_request:
+    paths:
+      - 'source/parallel/b125/**'
+      - '.github/workflows/b125.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  b125-offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify frozen source files unchanged
+        run: node scripts/verify-freeze.mjs
+      - name: Verify fine half-step sample and cut conservation counterexamples
+        run: node --test source/parallel/b125/main/b125-fine-landing-proof.test.mjs
+      - name: Generate B114 original source
+        run: node source/parallel/b114/main/b114-batch-review.mjs
+      - name: Generate B117 conceptual slab source
+        run: node source/parallel/b117/main/b117-fleet-review.mjs
+      - name: Generate B118 original nine held exits
+        run: node source/parallel/b118/main/b118-fleet-review.mjs
+      - name: Generate B119 whole stair search evidence
+        run: node source/parallel/b119/main/b119-fleet-whole-stair-review.mjs
+      - name: Generate B120 U-return source
+        run: node source/parallel/b120/main/b120-fleet-review.mjs
+      - name: Generate B121 joint corridor and stair review
+        run: node source/parallel/b121/main/b121-fleet-review.mjs
+      - name: Generate B122 full corridor source
+        run: node source/parallel/b122/main/b122-fleet-route-review.mjs
+      - name: Generate B123 102 stair network source
+        run: node source/parallel/b123/main/b123-fleet-network-review.mjs
+      - name: Generate B124 3D transition and eight slab cut source
+        run: node source/parallel/b124/main/b124-fleet-3d-review.mjs
+      - name: Generate independent B125 fine-step landing and cut report
+        run: node source/parallel/b125/main/b125-fleet-fine-review.mjs
+      - name: Verify full fleet integrity and unchanged construction prohibition
+        run: node --test source/parallel/b125/main/b125-fleet-fine-review.test.mjs
+      - name: Verify original B114 no-construction gates
+        run: node scripts/verify-b114-safety.mjs
+      - name: Archive non-executable B125 evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: B125-Fine-Landing-Slab-Offline-Evidence
+          path: b125-review-output/
+          retention-days: 14
+          if-no-files-found: error
