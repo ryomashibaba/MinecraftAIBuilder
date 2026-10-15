@@ -21,7 +21,7 @@ function hitCount(boxes,solids){
 function validSets(x){
  return Array.isArray(x)&&x.every(v=>v instanceof Set);
 }
-/** Soft cells are pending B113/B114 additions, never permission to erase source gallery. */
+/** Only B114 pending addition cells are soft. Source and B113 repaired gallery are immutable. */
 export function assessB121JointPose({design,stair,model,sourceWalk,stagedWalk,
   otherStairs,otherStairCells,otherOpenings,sourceSolidMap,maxSoftRelocation=12}){
  if(!design?.plan?.floors||!stair||!model||!validSets(sourceWalk)||!validSets(stagedWalk)||
