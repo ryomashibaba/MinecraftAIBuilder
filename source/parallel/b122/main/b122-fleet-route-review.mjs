@@ -78,7 +78,7 @@ export async function assembleB122(dir){
    for(const entry of report.heldExits){
     if(!entry.jointDesign.conditionalTotal)continue;
     for(const [rank,idea]of entry.jointDesign.shortlisted.entries()){
-     const uid=entry.stairIndex+'/'+idea.shape+'/'+K(idea.origin)+'/'+K(idea.ascent)+'/'+idea.firstRise;
+     const uid=entry.stairIndex+'/'+idea.shape+'/'+K(idea.origin)+'/'+idea.ascent.dx+','+idea.ascent.dz+'/'+idea.firstRise;
      if(reviewed.has(uid))continue;reviewed.add(uid);
      const stair=rc.proposedOriginalStairs[entry.stairIndex];
      if(!stair)throw Error('B122_BAD_STAIR_IDENTIFIER');
