@@ -1,0 +1,45 @@
+name: B121 joint stair and draft gallery reroute (offline)
+on:
+  pull_request:
+    paths:
+      - 'source/parallel/b121/**'
+      - '.github/workflows/b121.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  b121-offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify frozen B100 source
+        run: node scripts/verify-freeze.mjs
+      - name: Prove source-gallery immutable counterfactual semantics
+        run: node --test source/parallel/b121/main/b121-joint-gallery-counterfactual.test.mjs
+      - name: Generate B114 reference reports offline
+        run: node source/parallel/b114/main/b114-batch-review.mjs
+      - name: Generate B117 stair floor aperture evidence
+        run: node source/parallel/b117/main/b117-fleet-review.mjs
+      - name: Generate B118 nine blocked corridors
+        run: node source/parallel/b118/main/b118-fleet-review.mjs
+      - name: Generate B119 bounded full stair poses
+        run: node source/parallel/b119/main/b119-fleet-whole-stair-review.mjs
+      - name: Generate B120 eight original U-turn holds
+        run: node source/parallel/b120/main/b120-fleet-review.mjs
+      - name: Screen 1400 joint unbuilt B114 gallery and U-turn alternative placements
+        run: node source/parallel/b121/main/b121-fleet-review.mjs
+      - name: Verify full 15 building and 8 held-exit safety gate coverage
+        run: node --test source/parallel/b121/main/b121-fleet-review.test.mjs
+      - name: Recheck construction gates
+        run: node scripts/verify-b114-safety.mjs
+      - name: Archive B121 design review artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: B121-Joint-Stair-Gallery-Offline-Review
+          path: b121-review-output/
+          retention-days: 14
+          if-no-files-found: error
