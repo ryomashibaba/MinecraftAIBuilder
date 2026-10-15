@@ -1,0 +1,59 @@
+name: B128 offline Education readback receipt intake and construction HOLD
+on:
+  pull_request:
+    paths:
+      - 'source/parallel/b128/**'
+      - '.github/workflows/b128.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  b128-offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify frozen source and immutable geometry
+        run: node scripts/verify-freeze.mjs
+      - name: Verify 10 receipt contradictions and fail closed safety tests
+        run: node --test source/parallel/b128/main/b128-readback-receipts.test.mjs
+      - name: Generate B114 original reference
+        run: node source/parallel/b114/main/b114-batch-review.mjs
+      - name: Generate B117 original slab reference
+        run: node source/parallel/b117/main/b117-fleet-review.mjs
+      - name: Generate B118 held exit reference
+        run: node source/parallel/b118/main/b118-fleet-review.mjs
+      - name: Generate B119 stair flight source
+        run: node source/parallel/b119/main/b119-fleet-whole-stair-review.mjs
+      - name: Generate B120 U-turn source
+        run: node source/parallel/b120/main/b120-fleet-review.mjs
+      - name: Generate B121 joint stair corridor source
+        run: node source/parallel/b121/main/b121-fleet-review.mjs
+      - name: Generate B122 full corridor source
+        run: node source/parallel/b122/main/b122-fleet-route-review.mjs
+      - name: Generate B123 original stair network source
+        run: node source/parallel/b123/main/b123-fleet-network-review.mjs
+      - name: Generate B124 3D geometry source
+        run: node source/parallel/b124/main/b124-fleet-3d-review.mjs
+      - name: Generate B125 halfstep landing source
+        run: node source/parallel/b125/main/b125-fleet-fine-review.mjs
+      - name: Generate B126 blockstate candidate source
+        run: node source/parallel/b126/main/b126-fleet-blockstate-review.mjs
+      - name: Generate B127 original shape and 24 direction hypotheses
+        run: node source/parallel/b127/main/b127-fleet-calibration-review.mjs
+      - name: Generate B128 empty receipt intake without invented real game evidence
+        run: node source/parallel/b128/main/b128-fleet-intake-review.mjs
+      - name: Verify 15 buildings source integrity receipt template and no construction
+        run: node --test source/parallel/b128/main/b128-fleet-intake-review.test.mjs
+      - name: Verify B114 original safety HOLD
+        run: node scripts/verify-b114-safety.mjs
+      - name: Archive B128 non-executable intake report and template
+        uses: actions/upload-artifact@v4
+        with:
+          name: B128-Education-Readback-Receipt-Offline-Evidence
+          path: b128-review-output/
+          retention-days: 14
+          if-no-files-found: error
