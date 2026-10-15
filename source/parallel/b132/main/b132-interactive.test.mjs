@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {spawn} from 'node:child_process';
+import {createHash} from 'node:crypto';
 import {buildB132Kit,verifyB132ActiveKit} from './b132-active-kit.mjs';
 import {addB130ManualObservation} from '../../b130/main/b130-lab-tool.mjs';
 
@@ -49,7 +50,7 @@ test('a legitimate synthetic offline receipt changes mutable data without causin
  assert.equal(after.constructionAllowed,false);
  const expected=JSON.parse(fs.readFileSync(path.join(root,'B131_MANIFEST_SHA256.json'),'utf8'));
  const current=fs.readFileSync(path.join(root,'data','B130_Observation_Receipts.json'));
- assert.notEqual((await import('node:crypto')).createHash('sha256').update(current).digest('hex'),
+ assert.notEqual(createHash('sha256').update(current).digest('hex'),
   expected.fileHashes['data/B130_Observation_Receipts.json'],
   'mutable receipt changes intentionally');
 });
