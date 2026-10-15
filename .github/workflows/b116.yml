@@ -1,0 +1,36 @@
+name: B116 source-pinned 3D corridor audit (offline)
+on:
+  pull_request:
+    paths:
+      - 'source/parallel/b116/**'
+      - '.github/workflows/b116.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  b116-offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Frozen source safety
+        run: node scripts/verify-freeze.mjs
+      - name: B116 independent 3D blocker injection tests
+        run: node --test source/parallel/b116/main/b116-corridor-3d-core.test.mjs
+      - name: Regenerate B114 pinned source reports offline
+        run: node source/parallel/b114/main/b114-batch-review.mjs
+      - name: Reaudit 15-building source 3D proxies
+        run: node source/parallel/b116/main/b116-corridor-3d-review.mjs
+      - name: Verify B116 report coverage and blocked construction
+        run: node --test source/parallel/b116/main/b116-review-output.test.mjs
+      - name: Recheck B114 construction prohibition
+        run: node scripts/verify-b114-safety.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: B116-Offline-Corridor-3D-Evidence
+          path: b116-review-output/
+          retention-days: 14
+          if-no-files-found: error
