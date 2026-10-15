@@ -142,7 +142,7 @@ export function searchB119Stair({design,stair,otherModels,solidMap,walkByLevel,
   for(let dx=-maxShift;dx<=maxShift;dx++)for(let dz=-maxShift;dz<=maxShift;dz++){
    if(Math.abs(dx)+Math.abs(dz)>maxShift)continue;
    const origin={x:stair.proposedOrigin.x+dx,z:stair.proposedOrigin.z+dz};
-   const key=K(origin)+'/'+K(ascent);
+   const key=K(origin)+'/'+ascent.dx+','+ascent.dz;
    if(seen.has(key))continue;seen.add(key);count.attempted++;
    const model=straightModel(origin,ascent,stair.fromLevel);
    const result=inspectB119Pose({design,stair,model,otherModels,solidMap,
