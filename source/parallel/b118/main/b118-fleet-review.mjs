@@ -204,6 +204,7 @@ export function writeB118Report(r,out){
   '|階段全体の再設計が引き続き必要な出口|'+t.interfacesStillNeedingWholeStairRedesign+'|',
   '|再設計が必要な仮移設参考案|'+t.shiftHintsRequiringStairRedesign+'|',
   '|実機の歩行を認証した数|0|','',
+  '元のHOLDは維持：9件とも実Minecraftでの通行・建築が認証されておらず、施工は禁止。','',
   '## 全9件の個別判定',
   ...r.cases.flatMap(c=>c.exits.map(e=>'- '+c.id+' #'+e.stairIndex+' '+e.side+
    ' L'+e.level+': '+(e.candidates.some(x=>x.possibleInScoped2DModel)?
