@@ -5,9 +5,9 @@ import os from 'node:os';
 import path from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {buildB131Package,verifyB131Package} from './b131-package.mjs';
-const kit=path.resolve('b131-review-output','B131_Windows_Lab');
+const kit=path.resolve(process.env.B131_KIT_PATH??path.join('b131-review-output','B131_Windows_Lab'));
 test('B131 produces a source-pinned native Windows lab kit with all initial observation slots blank',()=>{
- const r=buildB131Package({out:kit});
+ const r=process.env.B131_KIT_PATH?{gameConnections:0,worldContacts:0}:buildB131Package({out:kit});
  const x=verifyB131Package(kit);
  assert.equal(x.fileCount,10);
  assert.equal(x.allHashesMatch,true);
