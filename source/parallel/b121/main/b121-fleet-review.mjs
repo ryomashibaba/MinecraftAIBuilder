@@ -79,11 +79,13 @@ export async function assembleB121(dir){
    if(qa.issueCount||qa.envelopeConflicts)throw Error('B121_B105_SOURCE_UNSAFE_'+id);
    const sourceSolidMap=buildB119ProxyIndex(generated.voxels);
    const models=cx.proposedOriginalStairs.map((_,i)=>originalStairProxy(cx,apt,i));
-   const sourceWalk=design.plan.floors.map(f=>new Set(f.gallery.map(K)));
-   const stagedWalk=design.plan.floors.map((f,level)=>new Set([
-    ...c113.horizontalRoutes[level].repair.addedCells,
-    ...c114.addedGalleryCells.filter(p=>p.level===level)
+   // B113 repaired corridors form the protected baseline once validated.
+   // ONLY B114 additions are unbuilt, retractable concept reservations.
+   const sourceWalk=design.plan.floors.map((f,level)=>new Set([
+    ...f.gallery,...c113.horizontalRoutes[level].repair.addedCells
    ].map(K)));
+   const stagedWalk=design.plan.floors.map((f,level)=>new Set(
+    c114.addedGalleryCells.filter(p=>p.level===level).map(K)));
    const groups=new Map();
    for(const e of held){
     const parentEntry=c119.heldExits.find(x=>x.stairIndex===e.stairIndex&&
