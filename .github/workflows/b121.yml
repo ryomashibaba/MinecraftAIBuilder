@@ -1,0 +1,45 @@
+name: B121 joint stair and unbuilt-gallery alternatives (offline)
+on:
+  pull_request:
+    paths:
+      - 'source/parallel/b121/**'
+      - '.github/workflows/b121.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  b121-offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify original B100 frozen source
+        run: node scripts/verify-freeze.mjs
+      - name: Independently verify protected vs tentative gallery behavior
+        run: node --test source/parallel/b121/main/b121-joint-gallery-screener.test.mjs
+      - name: Regenerate B114 pinned design reports
+        run: node source/parallel/b114/main/b114-batch-review.mjs
+      - name: Regenerate B117 source floor aperture evidence
+        run: node source/parallel/b117/main/b117-fleet-review.mjs
+      - name: Regenerate B118 nine gallery HOLDs
+        run: node source/parallel/b118/main/b118-fleet-review.mjs
+      - name: Regenerate B119 all-stair 3D designs
+        run: node source/parallel/b119/main/b119-fleet-whole-stair-review.mjs
+      - name: Regenerate B120 eight held U-return alternatives
+        run: node source/parallel/b120/main/b120-fleet-review.mjs
+      - name: Audit B121 joint tentative gallery and stair what-if on eight exits
+        run: node source/parallel/b121/main/b121-fleet-review.mjs
+      - name: Verify eight still-held exits and immutable world gate
+        run: node --test source/parallel/b121/main/b121-fleet-review.test.mjs
+      - name: Verify old offline construction safety
+        run: node scripts/verify-b114-safety.mjs
+      - name: Archive B121 non-executable gallery alternatives
+        uses: actions/upload-artifact@v4
+        with:
+          name: B121-Joint-Stair-Gallery-WhatIf-Offline
+          path: b121-review-output/
+          retention-days: 14
+          if-no-files-found: error
