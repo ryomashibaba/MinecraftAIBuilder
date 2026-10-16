@@ -178,6 +178,7 @@ export function planMultiturnSkybridge(original,params=DOPPLER_ROUTE,{supportBas
   return n+((p[0]-prior[0]!==prior[0]-prevprev[0]||
      p[2]-prior[2]!==prior[2]-prevprev[2])?1:0)
  },0);
+ yes(turns>=3,'NOT_A_GENUINE_MULTITURN_ROUTE');
  const report={schema:SCHEMA,
   sourceSha256:source.sourceSha256,
   sourceGeometrySha256:source.geometrySha256,
