@@ -89,6 +89,54 @@ test('Boolean blockstate commands use true/false, never numeric 0/1',async()=>{
  assert.equal(r.outcomes.lowerHalf.statusCode,0);
  assert.equal(r.outcomes.upperHalf.statusCode,-2147352576);
 });
+test('real Education R4 pattern: combined normal+NORTH matches despite both single-half probes failing',async t=>{
+ const layout=b136Layout('123 -60 -18','NORTH');
+ const world=mockWorld(layout);
+ const original=world.runCommand.bind(world);
+ world.runCommand=async(cmd,opts)=>{
+  const r=await original(cmd,opts);
+  if(/^testforblock .* minecraft:oak_stairs \["upside_down_bit" = (?:true|false)\]$/.test(cmd))
+   return {statusCode:-2147352576,statusMessage:'game returns state mismatch'};
+  return r;
+ };
+ const report=await b136InspectStair(world,layout.anchor,3);
+ assert.equal(report.outcomes.existence.statusCode,0);
+ assert.equal(report.outcomes.direction.statusCode,0);
+ assert.equal(report.outcomes.lowerHalf.statusCode,-2147352576);
+ assert.equal(report.outcomes.upperHalf.statusCode,-2147352576);
+ assert.equal(report.outcomes.combined.statusCode,0);
+ assert.equal(report.matched,true);
+ assert.equal(report.reason,'READY');
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'B136 Education R4 combined '));
+ t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
+ const built=await b136BuildExtension(world,layout,root);
+ assert.equal(built.success,true);
+ assert.equal(built.added,2);
+ assert.equal((await b136CheckLayout(world,layout)).fullLayoutMatches,true);
+ assert.equal((await b136Cleanup(world,root)).status,'CLEAN');
+ assert.equal(world.map.get(xyz(layout.anchor)),
+  'minecraft:oak_stairs ["upside_down_bit" = false, "weirdo_direction" = 3]');
+});
+test('conflicting positive upside-down response blocks construction even if combined matches',async t=>{
+ const layout=b136Layout('123 -60 -18','NORTH');
+ const world=mockWorld(layout);
+ const original=world.runCommand.bind(world);
+ world.runCommand=async(cmd,opts)=>{
+  const r=await original(cmd,opts);
+  if(cmd.includes('minecraft:oak_stairs ["upside_down_bit" = true]'))
+   return {statusCode:0,statusMessage:'contradictory positive upper half'};
+  return r;
+ };
+ const report=await b136InspectStair(world,layout.anchor,3);
+ assert.equal(report.outcomes.combined.match,true);
+ assert.equal(report.outcomes.upperHalf.match,true);
+ assert.equal(report.matched,false);
+ assert.equal(report.reason,'UPSIDE_DOWN_STAIR_OR_CONTRADICTORY_PROBE');
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'B136 contradiction '));
+ t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
+ await assert.rejects(b136BuildExtension(world,layout,root),/CONTRADICTORY_PROBE/);
+ assert.equal(world.sent.some(x=>x.startsWith('setblock ')),false);
+});
 test('B135-tested direction and lower-half checks survive unsupported combined parser',async t=>{
  const l=b136Layout('123 -60 -18','NORTH');
  const w=mockWorld(l,{combinedUnsupported:true});
@@ -114,10 +162,10 @@ test('upside-down original stair gets explicit safe refusal before any writes',a
  const w=mockWorld(l,{inverted:true});
  const report=await b136InspectStair(w,l.anchor,l.state);
  assert.equal(report.matched,false);
- assert.equal(report.reason,'UPSIDE_DOWN_STAIR');
+ assert.equal(report.reason,'UPSIDE_DOWN_STAIR_OR_CONTRADICTORY_PROBE');
  const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'B136 inverted stair '));
  t.after(()=>fs.rmSync(tmp,{recursive:true,force:true}));
- await assert.rejects(b136BuildExtension(w,l,tmp),/UPSIDE_DOWN_STAIR/);
+ await assert.rejects(b136BuildExtension(w,l,tmp),/UPSIDE_DOWN_STAIR_OR_CONTRADICTORY_PROBE/);
  assert.equal(w.sent.some(x=>x.startsWith('setblock ')),false);
 });
 test('wrong direction and absent stair identify exact cause without writing',async()=>{
