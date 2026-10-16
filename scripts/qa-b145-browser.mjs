@@ -26,7 +26,8 @@ const pages=[
  {name:'B151-clearance',url:'ai/clearance/index.html',minimum:14,expected:14},
  {name:'B152-footprint',url:'ai/footprint/index.html',minimum:15,expected:15},
  {name:'B153-transitions',url:'ai/transitions/index.html',minimum:16,expected:16},
- {name:'B154-bypass',url:'ai/bypass/index.html',minimum:17,expected:17}
+ {name:'B154-bypass',url:'ai/bypass/index.html',minimum:17,expected:17},
+ {name:'B155-interchange',url:'ai/bridge-design/index.html',minimum:19,expected:19}
 ];
 const browser=await chromium.launch({headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
 const results=[];
@@ -82,6 +83,26 @@ async function inspect(info,mobile){
   await page.waitForTimeout(950);
   const last=await page.locator('#building').inputValue();
   if(last!==String(options-1))fail(info.name+'_MODEL_SELECTION_FAILED');
+  if(info.name==='B155-interchange'){
+   const models=page.locator('#building'),status=page.locator('#b155-status');
+   await models.selectOption('17');await page.waitForTimeout(350);
+   const before=await status.innerText();
+   if(!before.includes('FOOTPRINT_UNREACHABLE')||
+      !before.includes('GEOMETRIC_FLOOR_PROPOSAL_ONLY'))
+    fail('B155_AURORA_R0_NOT_DISCONNECTED_'+before);
+   await models.selectOption('18');await page.waitForTimeout(400);
+   const after=await status.innerText();
+   if(!after.includes('PASS_FLAT_FOOTPRINT_GEOMETRY')||
+      !after.includes('26水平移動'))
+    fail('B155_AURORA_R1_NOT_REPAIRED_'+after);
+   const layer=page.locator('#b155-route');
+   if(!await layer.isChecked())fail('B155_OVERLAY_DISABLED');
+   await layer.uncheck();await layer.check();
+   await models.selectOption('16');await page.waitForTimeout(180);
+   if(!(await status.innerText()).includes('B155診断はありません'))
+    fail('B155_OLDER_MODEL_FALSE_CERTIFICATION');
+   await models.selectOption('18');
+  }
   if(info.name==='B154-bypass'){
    const models=page.locator('#building'),route=page.locator('#b154-target'),
     status=page.locator('#b154-status');
