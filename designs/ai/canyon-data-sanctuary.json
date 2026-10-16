@@ -1,0 +1,348 @@
+{
+  "schema": "minecraftaibuilder-b143-building-dsl-v1",
+  "id": "canyon-data-sanctuary",
+  "title": "峡谷の懸架データ聖堂",
+  "brief": "ChatGPT設計デモ：崖状基壇に埋め込んだ多層データ聖堂。大きな貫通アーチ、積層した空中デッキ、垂直コア、片持ち展望施設をもつ。用途キーワードに依存せず独自構成を表現。",
+  "bounds": {
+    "width": 86,
+    "height": 65,
+    "depth": 78
+  },
+  "designOnly": true,
+  "elements": [
+    {
+      "id": "canyon-north",
+      "shape": "box",
+      "mode": "add",
+      "material": "stone",
+      "origin": [
+        3,
+        0,
+        4
+      ],
+      "size": [
+        21,
+        26,
+        70
+      ]
+    },
+    {
+      "id": "canyon-south",
+      "shape": "box",
+      "mode": "add",
+      "material": "stone",
+      "origin": [
+        61,
+        0,
+        4
+      ],
+      "size": [
+        21,
+        34,
+        70
+      ]
+    },
+    {
+      "id": "ledge-platform",
+      "shape": "box",
+      "mode": "add",
+      "material": "concrete",
+      "origin": [
+        16,
+        16,
+        13
+      ],
+      "size": [
+        56,
+        3,
+        51
+      ]
+    },
+    {
+      "id": "gate-arch-mass",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        24,
+        19,
+        14
+      ],
+      "size": [
+        38,
+        28,
+        47
+      ],
+      "shell": 3
+    },
+    {
+      "id": "arched-void",
+      "shape": "cylinder",
+      "mode": "cut",
+      "axis": "z",
+      "origin": [
+        43,
+        29,
+        13
+      ],
+      "radius": 12,
+      "length": 51
+    },
+    {
+      "id": "gate-base-pier-left",
+      "shape": "box",
+      "mode": "add",
+      "material": "accent",
+      "origin": [
+        24,
+        19,
+        18
+      ],
+      "size": [
+        5,
+        32,
+        8
+      ]
+    },
+    {
+      "id": "gate-base-pier-right",
+      "shape": "box",
+      "mode": "add",
+      "material": "accent",
+      "origin": [
+        57,
+        19,
+        18
+      ],
+      "size": [
+        5,
+        32,
+        8
+      ]
+    },
+    {
+      "id": "bridge-underpass",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        17,
+        15,
+        32
+      ],
+      "size": [
+        52,
+        2,
+        14
+      ]
+    },
+    {
+      "id": "skydeck-low",
+      "shape": "box",
+      "mode": "add",
+      "material": "concrete",
+      "origin": [
+        26,
+        27,
+        16
+      ],
+      "size": [
+        34,
+        2,
+        43
+      ]
+    },
+    {
+      "id": "skydeck-mid",
+      "shape": "box",
+      "mode": "add",
+      "material": "concrete",
+      "origin": [
+        25,
+        36,
+        20
+      ],
+      "size": [
+        36,
+        2,
+        37
+      ]
+    },
+    {
+      "id": "skydeck-high",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        31,
+        47,
+        21
+      ],
+      "size": [
+        27,
+        2,
+        32
+      ]
+    },
+    {
+      "id": "vault-pod-west",
+      "shape": "ellipsoid",
+      "mode": "add",
+      "material": "glass",
+      "center": [
+        25,
+        42,
+        30
+      ],
+      "radii": [
+        10,
+        7,
+        12
+      ],
+      "shell": 2
+    },
+    {
+      "id": "vault-pod-east",
+      "shape": "ellipsoid",
+      "mode": "add",
+      "material": "glass",
+      "center": [
+        62,
+        44,
+        45
+      ],
+      "radii": [
+        11,
+        7,
+        10
+      ],
+      "shell": 2
+    },
+    {
+      "id": "central-axis",
+      "shape": "cylinder",
+      "mode": "add",
+      "material": "metal",
+      "axis": "y",
+      "origin": [
+        44,
+        18,
+        40
+      ],
+      "radius": 4,
+      "length": 37,
+      "shell": 1
+    },
+    {
+      "id": "observation-arm",
+      "shape": "box",
+      "mode": "add",
+      "material": "glass",
+      "origin": [
+        56,
+        47,
+        38
+      ],
+      "size": [
+        22,
+        6,
+        13
+      ],
+      "shell": 1
+    },
+    {
+      "id": "canopy-spire",
+      "shape": "cylinder",
+      "mode": "add",
+      "material": "glow",
+      "axis": "y",
+      "origin": [
+        44,
+        55,
+        40
+      ],
+      "radius": 2,
+      "length": 8
+    },
+    {
+      "id": "upper-beam-front",
+      "shape": "box",
+      "mode": "add",
+      "material": "accent",
+      "origin": [
+        24,
+        48,
+        14
+      ],
+      "size": [
+        39,
+        2,
+        5
+      ]
+    },
+    {
+      "id": "upper-beam-rear",
+      "shape": "box",
+      "mode": "add",
+      "material": "accent",
+      "origin": [
+        24,
+        48,
+        57
+      ],
+      "size": [
+        39,
+        2,
+        5
+      ]
+    },
+    {
+      "id": "cliff-west-window",
+      "shape": "box",
+      "mode": "add",
+      "material": "glass",
+      "origin": [
+        19,
+        18,
+        19
+      ],
+      "size": [
+        5,
+        5,
+        33
+      ]
+    },
+    {
+      "id": "cliff-east-window",
+      "shape": "box",
+      "mode": "add",
+      "material": "glass",
+      "origin": [
+        61,
+        21,
+        18
+      ],
+      "size": [
+        5,
+        7,
+        39
+      ]
+    },
+    {
+      "id": "central-floor-light",
+      "shape": "box",
+      "mode": "add",
+      "material": "glow",
+      "origin": [
+        29,
+        27,
+        21
+      ],
+      "size": [
+        29,
+        1,
+        3
+      ]
+    }
+  ]
+}

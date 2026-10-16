@@ -1,0 +1,118 @@
+name: B143 Universal ChatGPT Architecture DSL and 3D Gallery
+on:
+  # All future B-number feature branches inherited from B143 auto-publish,
+  # after full offline verification and without per-branch workflow edits.
+  push:
+    branches:
+      - 'feature/b*'
+    paths:
+      - 'designs/**'
+      - 'source/**'
+      - 'scripts/build-b142-site.mjs'
+      - 'scripts/build-b143-site*'
+      - '.github/workflows/b143.yml'
+  pull_request:
+    paths:
+      - 'designs/**'
+      - 'source/**'
+      - 'scripts/build-b142-site.mjs'
+      - 'scripts/build-b143-site*'
+      - '.github/workflows/b143.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: b143-gallery-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  design-validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Frozen reference and syntax
+        run: |
+          node scripts/verify-freeze.mjs
+          node --check source/ai/b143-building-dsl.mjs
+          node --check scripts/build-b143-site.mjs
+          node --check scripts/build-b143-site.test.mjs
+      - name: New-purpose 3D geometry, replay, injection guards, blocked construction tests
+        run: node --test scripts/build-b143-site.test.mjs
+  b143-site:
+    needs: design-validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 100
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Frozen B100 source and construction invariant
+        run: node scripts/verify-freeze.mjs
+      - name: Exact-source cache of verified B142 and B143 site files
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            b142-site-output/
+            b141-review-output/
+          key: b143-node22-${{ runner.os }}-${{ hashFiles('source/**','designs/ai/**','scripts/build-b142-site.mjs','scripts/build-b143-site.mjs','scripts/build-b143-site.test.mjs','scripts/verify-freeze.mjs') }}
+      - name: Compile frozen B142 design baseline and new ChatGPT-authored architecture
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          node scripts/build-b142-site.mjs
+          node scripts/build-b143-site.mjs
+      - name: Verify base source hashes, exact DSL provenance and zero world writes
+        run: |
+          node scripts/build-b142-site.mjs --verify
+          node scripts/build-b143-site.mjs --verify
+          node --input-type=module -e "
+          import fs from 'node:fs';
+          import {verifyB141} from './source/parallel/b141/main/b141-integrated-network.mjs';
+          const b=JSON.parse(fs.readFileSync('b141-review-output/B141_15Buildings_Shared_2Wide_Network.json'));
+          const m=JSON.parse(fs.readFileSync('b142-site-output/B143_MANIFEST.json'));
+          if(!verifyB141(b)||b.readiness!=='NOT_PREPARED'||b.gates.length!==9||
+             b.gates.some(x=>x.status!=='BLOCKED')||b.BuildPlan.operations.length!==0||
+             m.minecraftWrites!==0||m.constructionApproved!==false||
+             m.sourceIds.length<2||m.b142IntegritySha256!==b.integritySha256)
+            throw Error('B143_CONSTRUCTION_OR_INTEGRITY_HOLD');
+          console.log('B143_TWO_FREEFORM_DESIGNS_AND_B141_SAFE_PROVENANCE_PASS');
+          "
+      - name: Evidence summary
+        run: |
+          echo '## B143 new-purpose architectural models' >> "$GITHUB_STEP_SUMMARY"
+          echo '- ChatGPT-authored category-free DSL documents under designs/ai/' >> "$GITHUB_STEP_SUMMARY"
+          echo '- Composition: boxes, ellipsoids, cylinders, subtractive voids' >> "$GITHUB_STEP_SUMMARY"
+          echo '- 2 new-purpose designs, 15 B142 baseline buildings preserved' >> "$GITHUB_STEP_SUMMARY"
+          echo '- No commands, no world coordinates, no actual construction' >> "$GITHUB_STEP_SUMMARY"
+          echo '- B141 source hash and 9/9 BLOCKED gates validated before publication' >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: B143-Freeform-AI-Design-Gallery-And-Safe-B142
+          path: |
+            b142-site-output/
+            b141-review-output/
+          if-no-files-found: error
+          retention-days: 21
+      - name: Upload verified Pages site
+        if: ${{ github.event_name == 'push' }}
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: b142-site-output/
+  deploy:
+    if: ${{ github.event_name == 'push' }}
+    needs: b143-site
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/deploy-pages@v4
+        id: deployment
