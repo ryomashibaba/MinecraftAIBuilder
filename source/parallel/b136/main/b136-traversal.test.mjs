@@ -5,16 +5,16 @@ import os from 'node:os';
 import path from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {
- B136_DIRECTIONS,b136Layout,b136Preflight,b136CheckLayout,
+ B136_DIRECTIONS,b136Layout,b136Preflight,b136CheckLayout,b136InspectStair,
  b136BuildExtension,b136Cleanup,b136ParseEntityResult,
  b136EvaluateWalk,b136Capture,b136SaveCapture
 } from './b136-traversal.mjs';
 import {buildB136Kit,verifyB136Kit,B136_CMD} from './b136-package.mjs';
 const OUT=path.resolve(process.env.B136_KIT_PATH??'b136-review-output/B136_Live_Stair_Traversal');
 const xyz=p=>[p.x,p.y,p.z].join(' ');
-function mockWorld(layout,{empty=true,base=true}={}){
+function mockWorld(layout,{empty=true,base=true,combinedUnsupported=false,inverted=false,otherDirection=null}={}){
  const map=new Map();
- const oak='minecraft:oak_stairs ["upside_down_bit" = 0, "weirdo_direction" = '+layout.state+']';
+ const oak='minecraft:oak_stairs ["upside_down_bit" = '+(inverted?1:0)+', "weirdo_direction" = '+(otherDirection??layout.state)+']';
  if(base)map.set(xyz(layout.anchor),oak);
  if(!empty)map.set(xyz(layout.addOnly[0]),'minecraft:stone');
  const sent=[];
@@ -27,8 +27,20 @@ function mockWorld(layout,{empty=true,base=true}={}){
     const m=/^testforblock (-?\d+ -?\d+ -?\d+) (.+)$/.exec(line);
     if(!m)throw Error('unexpected testforblock');
     const actual=map.get(m[1])??'minecraft:air';
-    return {statusCode:actual===m[2]?0:-2147352576,
-     statusMessage:actual===m[2]?'found':'mismatch'};
+    const query=m[2];
+    if(combinedUnsupported&&query.includes('upside_down_bit')&&query.includes('weirdo_direction'))
+     return {statusCode:-2147483648,statusMessage:'InvalidOverloadSyntax'};
+    let matches=actual===query;
+    if(actual.startsWith('minecraft:oak_stairs')&&query.startsWith('minecraft:oak_stairs')){
+     const actualDir=Number(/"weirdo_direction" = ([0-3])/.exec(actual)?.[1]);
+     const actualHalf=Number(/"upside_down_bit" = ([01])/.exec(actual)?.[1]);
+     const requestedDir=/"weirdo_direction" = ([0-3])/.exec(query);
+     const requestedHalf=/"upside_down_bit" = ([01])/.exec(query);
+     matches=(!requestedDir||Number(requestedDir[1])===actualDir)&&
+      (!requestedHalf||Number(requestedHalf[1])===actualHalf);
+    }
+    return {statusCode:matches?0:-2147352576,
+     statusMessage:matches?'found':'mismatch'};
    }
    if(line.startsWith('setblock ')){
     const m=/^setblock (-?\d+ -?\d+ -?\d+) (.+)$/.exec(line);
@@ -61,6 +73,48 @@ test('three-stair readbacks check exact orientation and ascending height',async(
  for(const p of l.addOnly)w.map.set(xyz(p),'minecraft:oak_stairs ["upside_down_bit" = 0, "weirdo_direction" = 0]');
  assert.equal((await b136CheckLayout(w,l)).fullLayoutMatches,true);
  assert(w.sent.every(x=>x.startsWith('testforblock ')));
+});
+test('B135-tested direction and lower-half checks survive unsupported combined parser',async t=>{
+ const l=b136Layout('123 -60 -18','NORTH');
+ const w=mockWorld(l,{combinedUnsupported:true});
+ const first=await b136InspectStair(w,l.anchor,l.state);
+ assert.equal(first.matched,true);
+ assert.equal(first.reason,'READY');
+ assert.equal(first.outcomes.existence.match,true);
+ assert.equal(first.outcomes.direction.match,true);
+ assert.equal(first.outcomes.lowerHalf.match,true);
+ assert.equal(first.outcomes.upperHalf.match,false);
+ assert.equal(first.combinedStateQuerySupported,false);
+ const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'B136 separate states '));
+ t.after(()=>fs.rmSync(tmp,{recursive:true,force:true}));
+ // With unsupported composite placement syntax, fail after attempting at most
+ // one write; journal protects the region until cleanup checks actual blocks.
+ const r=await b136BuildExtension(w,l,tmp);
+ assert.equal(r.success,false);
+ assert.equal(r.added,0);
+ assert.equal(fs.existsSync(r.journalPath),true);
+});
+test('upside-down original stair gets explicit safe refusal before any writes',async t=>{
+ const l=b136Layout('123 -60 -18','NORTH');
+ const w=mockWorld(l,{inverted:true});
+ const report=await b136InspectStair(w,l.anchor,l.state);
+ assert.equal(report.matched,false);
+ assert.equal(report.reason,'UPSIDE_DOWN_STAIR');
+ const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'B136 inverted stair '));
+ t.after(()=>fs.rmSync(tmp,{recursive:true,force:true}));
+ await assert.rejects(b136BuildExtension(w,l,tmp),/UPSIDE_DOWN_STAIR/);
+ assert.equal(w.sent.some(x=>x.startsWith('setblock ')),false);
+});
+test('wrong direction and absent stair identify exact cause without writing',async()=>{
+ const l=b136Layout('123 -60 -18','NORTH');
+ const wrong=mockWorld(l,{otherDirection:0});
+ assert.equal((await b136InspectStair(wrong,l.anchor,l.state)).reason,
+  'DIRECTION_DIFFERS_OR_COMMAND_ERROR');
+ const absent=mockWorld(l,{base:false});
+ assert.equal((await b136InspectStair(absent,l.anchor,l.state)).reason,
+  'MISSING_OAK_OR_COMMAND_ERROR');
+ assert.equal(wrong.sent.some(x=>x.startsWith('setblock ')),false);
+ assert.equal(absent.sent.some(x=>x.startsWith('setblock ')),false);
 });
 test('fail closed on occupied extension: never write and never journal',async t=>{
  const l=b136Layout('123 -60 -18','EAST');
