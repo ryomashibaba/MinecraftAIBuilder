@@ -1,0 +1,602 @@
+{
+  "schema": "minecraftaibuilder-b143-building-dsl-v1",
+  "id": "stratos-observatory-interior-r2",
+  "title": "成層圏観測研究所 — 格納庫・上層デッキ連絡R2",
+  "brief": "R1格納庫の後方壁に3幅の大開口を設け、段状接続部と上層デッキへの歩行候補を増築。平面経路と段差候補を区別。実機階段・施工未認証。",
+  "bounds": {
+    "width": 80,
+    "height": 56,
+    "depth": 78
+  },
+  "designOnly": true,
+  "elements": [
+    {
+      "id": "ground-plinth",
+      "shape": "box",
+      "mode": "add",
+      "material": "stone",
+      "origin": [
+        5,
+        3,
+        5
+      ],
+      "size": [
+        70,
+        3,
+        68
+      ]
+    },
+    {
+      "id": "island-foundation",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        9,
+        6,
+        9
+      ],
+      "size": [
+        62,
+        2,
+        60
+      ]
+    },
+    {
+      "id": "main-platform",
+      "shape": "box",
+      "mode": "add",
+      "material": "concrete",
+      "origin": [
+        19,
+        11,
+        19
+      ],
+      "size": [
+        41,
+        2,
+        39
+      ]
+    },
+    {
+      "id": "main-chamber",
+      "shape": "cylinder",
+      "mode": "add",
+      "material": "glass",
+      "axis": "y",
+      "origin": [
+        39,
+        13,
+        38
+      ],
+      "radius": 17,
+      "length": 15,
+      "shell": 2
+    },
+    {
+      "id": "atrium-floor",
+      "shape": "cylinder",
+      "mode": "add",
+      "material": "concrete",
+      "axis": "y",
+      "origin": [
+        39,
+        13,
+        38
+      ],
+      "radius": 17,
+      "length": 1
+    },
+    {
+      "id": "dome-envelope",
+      "shape": "ellipsoid",
+      "mode": "add",
+      "material": "glass",
+      "center": [
+        39,
+        26,
+        38
+      ],
+      "radii": [
+        17,
+        14,
+        17
+      ],
+      "shell": 2
+    },
+    {
+      "id": "clear-dome-bottom",
+      "shape": "box",
+      "mode": "cut",
+      "origin": [
+        21,
+        12,
+        20
+      ],
+      "size": [
+        37,
+        14,
+        37
+      ]
+    },
+    {
+      "id": "dome-reinforce-top",
+      "shape": "cylinder",
+      "mode": "add",
+      "material": "metal",
+      "axis": "y",
+      "origin": [
+        39,
+        37,
+        38
+      ],
+      "radius": 2,
+      "length": 4
+    },
+    {
+      "id": "left-tower-base",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        4,
+        7,
+        19
+      ],
+      "size": [
+        17,
+        4,
+        19
+      ]
+    },
+    {
+      "id": "left-tower-body",
+      "shape": "box",
+      "mode": "add",
+      "material": "concrete",
+      "origin": [
+        6,
+        11,
+        21
+      ],
+      "size": [
+        13,
+        28,
+        15
+      ],
+      "shell": 2
+    },
+    {
+      "id": "left-tower-crown",
+      "shape": "box",
+      "mode": "add",
+      "material": "glass",
+      "origin": [
+        4,
+        39,
+        19
+      ],
+      "size": [
+        17,
+        5,
+        19
+      ],
+      "shell": 1
+    },
+    {
+      "id": "left-tower-light",
+      "shape": "box",
+      "mode": "add",
+      "material": "glow",
+      "origin": [
+        10,
+        44,
+        25
+      ],
+      "size": [
+        4,
+        3,
+        5
+      ]
+    },
+    {
+      "id": "right-tower-base",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        58,
+        7,
+        30
+      ],
+      "size": [
+        18,
+        4,
+        21
+      ]
+    },
+    {
+      "id": "right-tower-body",
+      "shape": "box",
+      "mode": "add",
+      "material": "concrete",
+      "origin": [
+        60,
+        11,
+        32
+      ],
+      "size": [
+        14,
+        20,
+        17
+      ],
+      "shell": 2
+    },
+    {
+      "id": "right-tower-crown",
+      "shape": "ellipsoid",
+      "mode": "add",
+      "material": "glass",
+      "center": [
+        67,
+        32,
+        40
+      ],
+      "radii": [
+        9,
+        5,
+        10
+      ],
+      "shell": 1
+    },
+    {
+      "id": "west-skybridge",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        18,
+        22,
+        28
+      ],
+      "size": [
+        8,
+        2,
+        6
+      ]
+    },
+    {
+      "id": "west-skybridge-window",
+      "shape": "box",
+      "mode": "add",
+      "material": "glass",
+      "origin": [
+        18,
+        24,
+        28
+      ],
+      "size": [
+        8,
+        3,
+        6
+      ],
+      "shell": 1
+    },
+    {
+      "id": "east-skybridge",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        54,
+        19,
+        36
+      ],
+      "size": [
+        9,
+        2,
+        6
+      ]
+    },
+    {
+      "id": "east-skybridge-glass",
+      "shape": "box",
+      "mode": "add",
+      "material": "glass",
+      "origin": [
+        54,
+        21,
+        36
+      ],
+      "size": [
+        9,
+        3,
+        6
+      ],
+      "shell": 1
+    },
+    {
+      "id": "atrium-light",
+      "shape": "cylinder",
+      "mode": "add",
+      "material": "glow",
+      "axis": "y",
+      "origin": [
+        39,
+        13,
+        38
+      ],
+      "radius": 2,
+      "length": 1
+    },
+    {
+      "id": "central-hatch",
+      "shape": "box",
+      "mode": "cut",
+      "origin": [
+        37,
+        13,
+        53
+      ],
+      "size": [
+        5,
+        3,
+        4
+      ]
+    },
+    {
+      "id": "northern-hangar",
+      "shape": "box",
+      "mode": "add",
+      "material": "concrete",
+      "origin": [
+        28,
+        8,
+        4
+      ],
+      "size": [
+        25,
+        11,
+        15
+      ],
+      "shell": 2
+    },
+    {
+      "id": "hangar-door",
+      "shape": "box",
+      "mode": "cut",
+      "origin": [
+        37,
+        9,
+        4
+      ],
+      "size": [
+        8,
+        7,
+        3
+      ]
+    },
+    {
+      "id": "hangar-lights",
+      "shape": "box",
+      "mode": "add",
+      "material": "accent",
+      "origin": [
+        30,
+        19,
+        5
+      ],
+      "size": [
+        21,
+        1,
+        13
+      ]
+    },
+    {
+      "id": "b149-entrance-landing",
+      "shape": "box",
+      "mode": "add",
+      "material": "concrete",
+      "origin": [
+        36,
+        9,
+        2
+      ],
+      "size": [
+        9,
+        1,
+        8
+      ]
+    },
+    {
+      "id": "b149-internal-crosswall",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        30,
+        10,
+        12
+      ],
+      "size": [
+        21,
+        5,
+        1
+      ]
+    },
+    {
+      "id": "b149-crosswall-clear-door",
+      "shape": "box",
+      "mode": "cut",
+      "origin": [
+        39,
+        10,
+        12
+      ],
+      "size": [
+        3,
+        4,
+        1
+      ]
+    },
+    {
+      "id": "b149-west-gallery-wall",
+      "shape": "box",
+      "mode": "add",
+      "material": "glass",
+      "origin": [
+        34,
+        10,
+        7
+      ],
+      "size": [
+        1,
+        4,
+        5
+      ]
+    },
+    {
+      "id": "b149-east-gallery-wall",
+      "shape": "box",
+      "mode": "add",
+      "material": "glass",
+      "origin": [
+        46,
+        10,
+        7
+      ],
+      "size": [
+        1,
+        4,
+        5
+      ]
+    },
+    {
+      "id": "b149-center-hall-floor",
+      "shape": "box",
+      "mode": "add",
+      "material": "accent",
+      "origin": [
+        38,
+        9,
+        7
+      ],
+      "size": [
+        5,
+        1,
+        10
+      ]
+    },
+    {
+      "id": "b149-overlook-west",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        30,
+        15,
+        13
+      ],
+      "size": [
+        7,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "b149-overlook-east",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        45,
+        15,
+        13
+      ],
+      "size": [
+        6,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "b150-rear-portal",
+      "shape": "box",
+      "mode": "cut",
+      "origin": [
+        39,
+        10,
+        17
+      ],
+      "size": [
+        3,
+        7,
+        2
+      ]
+    },
+    {
+      "id": "b150-first-rising-step",
+      "shape": "box",
+      "mode": "add",
+      "material": "concrete",
+      "origin": [
+        39,
+        10,
+        17
+      ],
+      "size": [
+        3,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "b150-second-rising-step",
+      "shape": "box",
+      "mode": "add",
+      "material": "concrete",
+      "origin": [
+        39,
+        11,
+        18
+      ],
+      "size": [
+        3,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "b150-upper-balustrade-west",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        37,
+        13,
+        19
+      ],
+      "size": [
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "id": "b150-upper-balustrade-east",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        43,
+        13,
+        19
+      ],
+      "size": [
+        1,
+        2,
+        3
+      ]
+    }
+  ]
+}
