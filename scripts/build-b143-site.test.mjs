@@ -45,7 +45,7 @@ test('malicious / unintended keys, unbounded work and world placement are reject
  assert.throws(()=>compileDesign(badShape),/B143_SHAPE_MODE/);
  const huge=minimal();huge.bounds={width:128,height:96,depth:128};
  huge.elements=[{id:'huge',shape:'box',mode:'add',origin:[0,0,0],size:[128,96,128],material:'stone'}];
- assert.throws(()=>compileDesign(huge),/B143_WORK_BUDGET|B143_VOXEL_BUDGET/);
+ assert.throws(()=>compileDesign(huge),/B143_BOUNDS|B143_WORK_BUDGET|B143_VOXEL_BUDGET/);
 });
 test('repeated IDs and malformed or injected titles are fail-closed',()=>{
  const d=minimal();d.elements.push({...d.elements[0]});
