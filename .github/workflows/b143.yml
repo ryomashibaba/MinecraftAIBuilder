@@ -142,7 +142,7 @@ jobs:
           repository: ryomashibaba/MinecraftAIBuilder
           run-id: 38972077307
           github-token: ${{ github.token }}
-          name: B152-Verified-Footprint-Gallery
+          name: B151-Verified-Corridor-Clearance
           path: .
       - name: Download verified B150 fallback for efficient delta rebuild
         if: steps.cache.outputs.cache-hit != 'true'
