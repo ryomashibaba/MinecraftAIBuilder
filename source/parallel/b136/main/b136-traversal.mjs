@@ -59,6 +59,8 @@ export function b136Layout(raw,direction){
 }
 const xyz=p=>[p.x,p.y,p.z].join(' ');
 const oak=state=>'minecraft:oak_stairs ["upside_down_bit" = 0, "weirdo_direction" = '+state+']';
+const dirOnly=state=>'minecraft:oak_stairs ["weirdo_direction" = '+state+']';
+const halfOnly=bit=>'minecraft:oak_stairs ["upside_down_bit" = '+bit+']';
 const query=(p,block)=>'testforblock '+xyz(p)+' '+block;
 function enforce(cmd){
  if(!ALLOWED.test(cmd))throw Error('B136_COMMAND_NOT_ALLOWLISTED');
@@ -66,7 +68,7 @@ function enforce(cmd){
   if(cmd!=='querytarget @a')throw Error('B136_UNSAFE_ENTITY_QUERY');
   return;
  }
- if(!/^(?:testforblock|setblock) -?\d+ -?\d+ -?\d+ minecraft:(?:air|oak_stairs(?: \["upside_down_bit" = 0, "weirdo_direction" = [0-3]\])?)$/.test(cmd))
+ if(!/^(?:testforblock|setblock) -?\d+ -?\d+ -?\d+ minecraft:(?:air|oak_stairs(?: \["weirdo_direction" = [0-3]\]|\["upside_down_bit" = [01]\]|\["upside_down_bit" = 0, "weirdo_direction" = [0-3]\])?)$/.test(cmd))
   throw Error('B136_BLOCK_COMMAND_INVALID');
 }
 async function command(world,cmd){
@@ -82,16 +84,49 @@ function saveJson(name,value,root=ROOT){
  return file;
 }
 const timestamp=()=>new Date().toISOString().replace(/[:.]/g,'-');
+export async function b136InspectStair(world,position,state){
+ if(!Number.isInteger(state)||state<0||state>3)throw Error('B136_INVALID_STAIR_STATE');
+ const probes=[
+  ['existence',query(position,'minecraft:oak_stairs')],
+  ['direction',query(position,dirOnly(state))],
+  ['lowerHalf',query(position,halfOnly(0))],
+  ['upperHalf',query(position,halfOnly(1))],
+  ['combined',query(position,oak(state))]
+ ];
+ const outcomes={};
+ for(const [name,cmd] of probes){
+  try{
+   const r=await command(world,cmd);
+   outcomes[name]={
+    match:isMatch(r),
+    statusCode:Number.isInteger(r?.statusCode)?r.statusCode:null,
+    message:String(r?.statusMessage??'').slice(0,250)
+   };
+  }catch(e){
+   outcomes[name]={match:false,statusCode:null,message:String(e.message).slice(0,250),
+    transportError:true};
+  }
+ }
+ // The R1-R4 calibration only proves direction. Lower half must be validated
+ // separately. An unsupported combined-state query must NOT falsely cause MISSING.
+ const safe=outcomes.existence.match&&outcomes.direction.match&&
+  outcomes.lowerHalf.match&&
+  outcomes.upperHalf.statusCode===-2147352576;
+ let reason='READY';
+ if(!outcomes.existence.match)reason='MISSING_OAK_OR_COMMAND_ERROR';
+ else if(!outcomes.direction.match)reason='DIRECTION_DIFFERS_OR_COMMAND_ERROR';
+ else if(outcomes.upperHalf.match)reason='UPSIDE_DOWN_STAIR';
+ else if(!outcomes.lowerHalf.match)reason='LOWER_HALF_NOT_CONFIRMED';
+ else if(outcomes.upperHalf.statusCode!==-2147352576)reason='UPPER_HALF_CONTROL_INCONCLUSIVE';
+ return {position,state,matched:safe,reason,outcomes,
+  combinedStateQuerySupported:outcomes.combined.match};
+}
 export async function b136CheckLayout(world,layout){
  const checks=[];
  for(let i=0;i<3;i++){
   const pos=layout.stairs[i];
-  let reply;
-  try{reply=await command(world,query(pos,oak(layout.state)));}
-  catch(e){reply={transportError:true,statusMessage:String(e.message)};}
-  checks.push({step:i,position:pos,matched:isMatch(reply),
-   statusCode:Number.isInteger(reply?.statusCode)?reply.statusCode:null,
-   message:String(reply?.statusMessage??'').slice(0,200)});
+  const result=await b136InspectStair(world,pos,layout.state);
+  checks.push({step:i,...result});
  }
  return {steps:checks,fullLayoutMatches:checks.every(x=>x.matched)};
 }
@@ -104,8 +139,13 @@ export async function b136BuildExtension(world,layout,root=ROOT){
  if(!world?.runCommand)throw Error('B136_WORLD_REQUIRED');
  const journalPath=path.join(dataDir(root),'B136_STAGE_JOURNAL.json');
  if(fs.existsSync(journalPath))throw Error('B136_JOURNAL_EXISTS_REVIEW_OR_CLEAN_FIRST');
- const anchor=await command(world,query(layout.anchor,oak(layout.state)));
- if(!isMatch(anchor))throw Error('B136_ORIGINAL_STAIR_NOT_MATCHING_CALIBRATION');
+ const anchor=await b136InspectStair(world,layout.anchor,layout.state);
+ if(!anchor.matched)throw Error('B136_ORIGINAL_STAIR_NOT_MATCHING_CALIBRATION: '+anchor.reason+
+  ' | existence='+anchor.outcomes.existence.statusCode+
+  ' direction='+anchor.outcomes.direction.statusCode+
+  ' lower='+anchor.outcomes.lowerHalf.statusCode+
+  ' upper='+anchor.outcomes.upperHalf.statusCode+
+  ' combined='+anchor.outcomes.combined.statusCode);
  const airPositions=[];
  for(const p of layout.addOnly){
   for(let height=0;height<=2;height++){
@@ -134,8 +174,8 @@ export async function b136BuildExtension(world,layout,root=ROOT){
    fs.writeFileSync(journalPath,JSON.stringify(journal,null,2)+'\n');
    const response=await command(world,'setblock '+xyz(p)+' '+oak(layout.state));
    if(!isMatch(response))throw Error('B136_SETBLOCK_FAILED '+xyz(p));
-   const readback=await command(world,query(p,oak(layout.state)));
-   if(!isMatch(readback))throw Error('B136_NEW_STAIR_READBACK_FAILED '+xyz(p));
+   const readback=await b136InspectStair(world,p,layout.state);
+   if(!readback.matched)throw Error('B136_NEW_STAIR_READBACK_FAILED '+xyz(p)+' '+readback.reason);
    journal.installed++;
    fs.writeFileSync(journalPath,JSON.stringify(journal,null,2)+'\n');
   }
@@ -157,8 +197,8 @@ export async function b136Cleanup(world,root=ROOT){
  let cleaned=0,skipped=0;
  for(const p of journal.added.slice(0,journal.attempted)){
   parseStairPosition(xyz(p));
-  const current=await command(world,query(p,oak(state)));
-  if(!isMatch(current)){
+  const current=await b136InspectStair(world,p,state);
+  if(!current.matched){
    const air=await command(world,query(p,'minecraft:air'));
    if(!isMatch(air))skipped++;
    continue;
@@ -264,7 +304,14 @@ export async function b136Live(root=ROOT){
    if(action==='!b136-check'){
     const info=await b136CheckLayout(world,layout);
     console.log('3段の方向・高さ照合: '+(info.fullLayoutMatches?'ALL_MATCH':'INCOMPLETE'));
-    info.steps.forEach(x=>console.log('STEP'+x.step+' '+xyz(x.position)+' '+(x.matched?'MATCH':'MISSING')));
+    info.steps.forEach(x=>{
+     console.log('STEP'+x.step+' '+xyz(x.position)+' '+(x.matched?'MATCH':x.reason)+
+      ' (base='+x.outcomes.existence.statusCode+
+      ',dir='+x.outcomes.direction.statusCode+
+      ',lower='+x.outcomes.lowerHalf.statusCode+
+      ',upper='+x.outcomes.upperHalf.statusCode+
+      ',combined='+x.outcomes.combined.statusCode+')');
+    });
    }else if(action==='!b136-build'){
     const result=await b136BuildExtension(world,layout,root);
     console.log('テスト階段の2段追加: '+JSON.stringify(result));
