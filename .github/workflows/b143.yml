@@ -133,7 +133,7 @@ jobs:
           repository: ryomashibaba/MinecraftAIBuilder
           run-id: 38970418390
           github-token: ${{ github.token }}
-          name: B151-Verified-Corridor-Clearance
+          name: B150-Verified-Vertical-Circulation
           path: .
       - name: Download immutable B148 fallback for delta-only regeneration
         if: steps.cache.outputs.cache-hit != 'true'
