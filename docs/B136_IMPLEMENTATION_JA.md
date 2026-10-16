@@ -13,6 +13,24 @@
 
 証拠の系統：ユーザー提供 `B135_R1_2026-10-16T09-23-20-806Z.json`、`B135_R2_2026-10-16T09-25-23-052Z.json`、`B135_R3_2026-10-16T09-25-31-560Z.json`、`B135_R4_2026-10-16T09-25-39-230Z.json`、続くユーザー自身の4方位確認。**BlockStateと外見上の方位対応は実機照合済み**。JSONには映像・歩行衝突情報は含まれない。認証済みの歩行PASS、102階段全体の建築準備完了とは混同しない。
 
+## B136実機検証で判明した互換性問題と修正
+
+ユーザーが従来のWindowsキットで `(123,-60,-18), NORTH` を選ぶと、3段がすべて `MISSING`、`!b136-build` は `B136_ORIGINAL_STAIR_NOT_MATCHING_CALIBRATION` で**ブロック書き込み前に停止**した。初段はB135のR4で方向値3を実測していたが、B135では `upside_down_bit` までは確認していない。
+
+以前のB136は `testforblock ... minecraft:oak_stairs ["upside_down_bit" = 0, "weirdo_direction" = 3]` の一括照合だけで「階段が無い」と判定したため、**(a) 階段自体が無い・移動した、(b) 向きが異なる、(c) 上半状態、(d) 複合BlockState式が対象Educationで拒否された**という異なる原因を混同していた。公式BlockState一覧では複合式自体は有効だが、使用中のEducation環境で動作するかは未確認。
+
+修正版は5つの読み取り専用テストを別々に記録する。
+
+1. オーク階段そのものの存在
+2. B135で実測した `weirdo_direction` の一致
+3. `upside_down_bit = 0` の一致（下付き）
+4. `upside_down_bit = 1` の不一致（上付きではない）
+5. 複合式の一致（参考診断、**これだけの不一致では拒否しない**）
+
+存在＋向き＋下付きの正の一致、および上付きの明確な不一致コードが確認できた場合のみ安全な拡張へ進める。曖昧な場合は元のように安全停止する。Windowsログには `STEP0: READY / UPSIDE_DOWN_STAIR / DIRECTION_DIFFERS_OR_COMMAND_ERROR / MISSING_OAK_OR_COMMAND_ERROR / LOWER_HALF_NOT_CONFIRMED / UPPER_HALF_CONTROL_INCONCLUSIVE` と各statusCodeが表示される。
+
+**重要**：これまでの `MISSING` だけでは原因は確定せず、「B136修正版の再測定」によって本当の理由を特定する。修正後のキットも実機でまだ試されていない。新しいZIPを展開し、旧B136フォルダで実機データに上書きしないこと。
+
 ## B136実装内容
 
 従来のB135キットを**再生成せずに使う**（GitHub Actions成果物 38871411964／`B135-Windows-Controlled-Live-Stair` を取得して正本ハッシュを検証）。B136ではWindowsのCMD1回起動＋Minecraft `/wsserver 127.0.0.1:8000` 接続で実機を検証できる。
