@@ -151,7 +151,7 @@ jobs:
           repository: ryomashibaba/MinecraftAIBuilder
           run-id: 38972999079
           github-token: ${{ github.token }}
-          name: B153-Verified-Transition-Envelopes
+          name: B152-Verified-Footprint-Gallery
           path: .
       - name: Download verified B151 fallback for source delta
         if: steps.cache.outputs.cache-hit != 'true'
