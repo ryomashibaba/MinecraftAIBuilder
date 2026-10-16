@@ -24,7 +24,8 @@ const pages=[
  {name:'B149-interiors',url:'ai/interiors/index.html',minimum:12,expected:12},
  {name:'B150-vertical',url:'ai/vertical/index.html',minimum:13,expected:13},
  {name:'B151-clearance',url:'ai/clearance/index.html',minimum:14,expected:14},
- {name:'B152-footprint',url:'ai/footprint/index.html',minimum:15,expected:15}
+ {name:'B152-footprint',url:'ai/footprint/index.html',minimum:15,expected:15},
+ {name:'B153-transitions',url:'ai/transitions/index.html',minimum:16,expected:16}
 ];
 const browser=await chromium.launch({headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
 const results=[];
@@ -80,6 +81,33 @@ async function inspect(info,mobile){
   await page.waitForTimeout(950);
   const last=await page.locator('#building').inputValue();
   if(last!==String(options-1))fail(info.name+'_MODEL_SELECTION_FAILED');
+  if(info.name==='B153-transitions'){
+   const models=page.locator('#building'),size=page.locator('#b153-size'),
+    status=page.locator('#b153-status');
+   await models.selectOption('14');await page.waitForTimeout(250);
+   const old=await status.innerText();
+   if(!old.includes('INVALID_DESTINATION_ENVELOPE'))
+    fail('B153_OLD_R4_NEW_DECK_NOT_MISSING_'+old);
+   await models.selectOption('15');await page.waitForTimeout(350);
+   const small=await status.innerText();
+   if(!small.includes('VERTICAL_CANDIDATE_UNCERTIFIED')||
+      !small.includes('Minecraft物理未認証'))
+    fail('B153_SMALL_STEP_NOT_FLAGGED_'+small);
+   await size.selectOption('large');await page.waitForTimeout(300);
+   const large=await status.innerText();
+   if(!large.includes('NO_PROVEN_GEOMETRIC_CONNECTION'))
+    fail('B153_WIDE_STEP_COLLISION_NOT_REJECTED_'+large);
+   const toggle=page.locator('#b153-show-route');
+   if(!await toggle.isChecked())fail('B153_ROUTE_OVERLAY_OFF');
+   await toggle.uncheck();await toggle.check();
+   await size.selectOption('small');await page.waitForTimeout(250);
+   if(!(await status.innerText()).includes('VERTICAL_CANDIDATE_UNCERTIFIED'))
+    fail('B153_SMALL_MODE_NOT_RESTORED');
+   await models.selectOption('13');await page.waitForTimeout(200);
+   if(!(await status.innerText()).includes('検査はありません'))
+    fail('B153_OLDER_MODEL_FALSE_MOTION_CERTIFICATION');
+   await models.selectOption('15');
+  }
   if(info.name==='B152-footprint'){
    const models=page.locator('#building'),target=page.locator('#b152-target'),
     status=page.locator('#b152-status');
