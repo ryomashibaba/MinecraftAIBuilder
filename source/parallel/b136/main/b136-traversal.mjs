@@ -58,9 +58,9 @@ export function b136Layout(raw,direction){
   addOnly:stairs.slice(1),anchor:stairs[0]};
 }
 const xyz=p=>[p.x,p.y,p.z].join(' ');
-const oak=state=>'minecraft:oak_stairs ["upside_down_bit" = 0, "weirdo_direction" = '+state+']';
+const oak=state=>'minecraft:oak_stairs ["upside_down_bit" = false, "weirdo_direction" = '+state+']';
 const dirOnly=state=>'minecraft:oak_stairs ["weirdo_direction" = '+state+']';
-const halfOnly=bit=>'minecraft:oak_stairs ["upside_down_bit" = '+bit+']';
+const halfOnly=bit=>'minecraft:oak_stairs ["upside_down_bit" = '+String(bit)+']';
 const query=(p,block)=>'testforblock '+xyz(p)+' '+block;
 function enforce(cmd){
  if(!ALLOWED.test(cmd))throw Error('B136_COMMAND_NOT_ALLOWLISTED');
@@ -68,7 +68,7 @@ function enforce(cmd){
   if(cmd!=='querytarget @a')throw Error('B136_UNSAFE_ENTITY_QUERY');
   return;
  }
- if(!/^(?:testforblock|setblock) -?\d+ -?\d+ -?\d+ minecraft:(?:air|oak_stairs(?: \[(?:"weirdo_direction" = [0-3]|"upside_down_bit" = [01]|"upside_down_bit" = 0, "weirdo_direction" = [0-3])\])?)$/.test(cmd))
+ if(!/^(?:testforblock|setblock) -?\d+ -?\d+ -?\d+ minecraft:(?:air|oak_stairs(?: \[(?:"weirdo_direction" = [0-3]|"upside_down_bit" = (?:true|false)|"upside_down_bit" = false, "weirdo_direction" = [0-3])\])?)$/.test(cmd))
   throw Error('B136_BLOCK_COMMAND_INVALID');
 }
 async function command(world,cmd){
@@ -89,8 +89,8 @@ export async function b136InspectStair(world,position,state){
  const probes=[
   ['existence',query(position,'minecraft:oak_stairs')],
   ['direction',query(position,dirOnly(state))],
-  ['lowerHalf',query(position,halfOnly(0))],
-  ['upperHalf',query(position,halfOnly(1))],
+  ['lowerHalf',query(position,halfOnly(false))],
+  ['upperHalf',query(position,halfOnly(true))],
   ['combined',query(position,oak(state))]
  ];
  const outcomes={};
@@ -107,6 +107,7 @@ export async function b136InspectStair(world,position,state){
     transportError:true};
   }
  }
+ // Official Bedrock intrinsic-state schema defines upside_down_bit as Boolean.
  // The R1-R4 calibration only proves direction. Lower half must be validated
  // separately. An unsupported combined-state query must NOT falsely cause MISSING.
  const safe=outcomes.existence.match&&outcomes.direction.match&&
