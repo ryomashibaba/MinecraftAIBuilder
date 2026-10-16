@@ -1,0 +1,117 @@
+name: B142 verified live 3D design preview
+
+on:
+  push:
+    branches:
+      - main
+      - feature/b142-ci-cache-live-design-preview
+    paths:
+      - 'source/**'
+      - 'scripts/build-b142-site.mjs'
+      - 'scripts/build-b142-site.test.mjs'
+      - '.github/workflows/b142.yml'
+  pull_request:
+    paths:
+      - 'source/**'
+      - 'scripts/build-b142-site.mjs'
+      - 'scripts/build-b142-site.test.mjs'
+      - '.github/workflows/b142.yml'
+  workflow_dispatch:
+    inputs:
+      full_validation:
+        type: boolean
+        description: Recompute all frozen source models; ignore incremental preview cache
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: b142-preview-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  prepare-and-prove:
+    runs-on: ubuntu-latest
+    timeout-minutes: 100
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify frozen source regardless of cache
+        run: node scripts/verify-freeze.mjs
+      - name: B142 renderer provenance and construction HOLD regressions
+        run: |
+          node --check scripts/build-b142-site.mjs
+          node --test scripts/build-b142-site.test.mjs
+          node --test source/parallel/b141/main/b141-integrated-network.test.mjs
+      - name: Restore only source-exact offline verified preview
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.full_validation) }}
+        id: preview-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            b142-site-output/
+            b141-review-output/
+          # Any changed source model, compiler, geometry, renderer, or build script invalidates.
+          # No restore-keys: stale designs must never pass as newer source.
+          key: b142-node22-${{ runner.os }}-${{ hashFiles('source/**', 'scripts/build-b142-site.mjs', 'scripts/build-b142-site.test.mjs', 'scripts/verify-freeze.mjs') }}
+      - name: Rebuild verified B113-B141 and B106 15-building site on cache miss
+        if: ${{ steps.preview-cache.outputs.cache-hit != 'true' || (github.event_name == 'workflow_dispatch' && inputs.full_validation) }}
+        run: node scripts/build-b142-site.mjs
+      - name: Verify source identity, output digest, nine blocked construction gates
+        run: |
+          node scripts/build-b142-site.mjs --verify
+          node --input-type=module -e "
+          import fs from 'node:fs';
+          import {verifyB141} from './source/parallel/b141/main/b141-integrated-network.mjs';
+          const r=JSON.parse(fs.readFileSync('b141-review-output/B141_15Buildings_Shared_2Wide_Network.json','utf8'));
+          const m=JSON.parse(fs.readFileSync('b142-site-output/manifest.json','utf8'));
+          if(!verifyB141(r)||r.integritySha256!==m.b141IntegritySha256||
+             r.readiness!=='NOT_PREPARED'||r.gates.length!==9||
+             r.gates.some(x=>x.status!=='BLOCKED')||
+             r.BuildPlan.operations.length!==0||r.commandCount!==0||
+             r.totals.buildings!==15||r.totals.floors!==66||r.totals.stairs!==102)
+            throw Error('B142_SOURCE_VALIDATION_AND_NINE_GATES_HOLD');
+          console.log('B142_FULL_SOURCE_HASH_AND_CONSTRUCTION_HOLD_PASS');
+          "
+      - name: Publish CI evidence and cache statistics
+        env:
+          CACHE_HIT: ${{ steps.preview-cache.outputs.cache-hit }}
+        run: |
+          echo "### B142 source-verified offline preview" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Source: B113 → B140 → B141, plus B106 architecture" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Preview cache hit: \${CACHE_HIT:-no / full validation}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Safety: NOT_PREPARED / 9 BLOCKED / no world commands" >> "$GITHUB_STEP_SUMMARY"
+          echo "- 15 buildings, 66 levels, 102 source stairs; proposed overlays only" >> "$GITHUB_STEP_SUMMARY"
+      - name: Save permanent review diagnostics for this run
+        uses: actions/upload-artifact@v4
+        with:
+          name: B142-Verified-Design-Site-And-B141-Provenance
+          path: |
+            b142-site-output/
+            b141-review-output/
+          if-no-files-found: error
+          retention-days: 21
+      - name: Upload verified static site to GitHub Pages
+        if: ${{ github.event_name == 'push' }}
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: b142-site-output/
+
+  deploy:
+    if: ${{ github.event_name == 'push' }}
+    needs: prepare-and-prove
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy ONLY after validated offline site build succeeds
+        id: deployment
+        uses: actions/deploy-pages@v4
