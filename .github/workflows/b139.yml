@@ -1,0 +1,49 @@
+name: B139 all-building five-rise 3D clearance and 24-site remediation
+on:
+  pull_request:
+    paths:
+      - 'source/parallel/b139/**'
+      - '.github/workflows/b139.yml'
+      - 'docs/B139_IMPLEMENTATION_JA.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  b139-five-rise-fleet:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify frozen original design and JS parsing
+        run: |
+          node scripts/verify-freeze.mjs
+          node --check source/parallel/b139/main/b139-five-rise-repair.mjs
+          node --check source/parallel/b139/main/b139-five-rise-repair.test.mjs
+      - name: Test 3D source voxels, upper-slab cuts, protected room and two-wide corridor search
+        run: node --test source/parallel/b139/main/b139-five-rise-repair.test.mjs
+      - name: Rebuild original B113 and B138 data and audit all B139 sites
+        run: node source/parallel/b139/main/b139-five-rise-repair.mjs
+      - name: Strictly reject fabricated world events or original 102-stair layout drift
+        run: |
+          node --input-type=module -e "
+          import fs from 'node:fs';
+          import {verifyB139} from './source/parallel/b139/main/b139-five-rise-repair.mjs';
+          const r=JSON.parse(fs.readFileSync('b139-review-output/B139_15_Building_5_Rise_3D_Review.json'));
+          if(!verifyB139(r)||r.totals.sourceBuildings!==15||r.totals.sourceFloors!==66||
+             r.totals.originalStairs!==102||r.totals.b138PinnedCandidates!==78||
+             r.totals.b138WithoutPinnedCandidate!==24||r.totals.actualWorldWritesAllowed!==0||
+             r.prioritizedUnresolved.length!==24||r.BuildPlan.operations.length!==0)
+            throw Error('B139_SOURCE_GATE_OR_78_24_INVENTORY_DRIFT');
+          console.log('B139_SOURCE_AND_WORLD_OPERATION_HOLD_OK');
+          console.log(JSON.stringify(r.totals));
+          "
+      - name: Publish Japanese remediation summary and all actual source-derived audits
+        uses: actions/upload-artifact@v4
+        with:
+          name: B139-5Rise-Fleet-3D-Remediation
+          path: b139-review-output/
+          if-no-files-found: error
+          retention-days: 14
