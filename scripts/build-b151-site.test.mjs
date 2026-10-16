@@ -55,6 +55,9 @@ test('stale vertical proof, forged gates and unsafe geometry fail closed',()=>{
  const modified=structuredClone(r);modified.constructionApproved=true;
  assert.equal(verifyClearance(s,v,{},modified),false);
  assert.throws(()=>analyzeClearance(s,{...v,geometrySha256:'0'.repeat(64)}),/B151_INVALID_VERTICAL_SOURCE/);
+ const forgedRoute=structuredClone(v);
+ forgedRoute.routes[0].path[0]=[9,3,9];
+ assert.throws(()=>analyzeClearance(s,forgedRoute),/B151_INVALID_VERTICAL_SOURCE/);
  assert.throws(()=>analyzeClearance({...s,worldContacts:1},v),/B151_INVALID_SCENE/);
  assert.throws(()=>analyzeClearance(s,v,{minWidth:100}),/B151_WIDTH_PARAMETERS/);
 });
