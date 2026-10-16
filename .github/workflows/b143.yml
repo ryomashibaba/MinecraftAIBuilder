@@ -1,4 +1,4 @@
-name: Universal AI Architecture Studio B148 / Incremental Repair Proposals
+name: Universal AI Architecture Studio B149 / Interior Traversability
 on:
   # All future B-number feature branches inherited from B143 auto-publish,
   # after full offline verification and without per-branch workflow edits.
@@ -15,7 +15,9 @@ on:
       - 'scripts/build-b146-site*'
       - 'scripts/build-b147-site*'
       - 'scripts/build-b148-site*'
+      - 'scripts/build-b149-site*'
       - 'scripts/prepare-b148-baseline.mjs'
+      - 'scripts/prepare-b149-baseline.mjs'
       - 'scripts/qa-b145-browser.mjs'
       - '.github/workflows/b143.yml'
   pull_request:
@@ -29,7 +31,9 @@ on:
       - 'scripts/build-b146-site*'
       - 'scripts/build-b147-site*'
       - 'scripts/build-b148-site*'
+      - 'scripts/build-b149-site*'
       - 'scripts/prepare-b148-baseline.mjs'
+      - 'scripts/prepare-b149-baseline.mjs'
       - 'scripts/qa-b145-browser.mjs'
       - '.github/workflows/b143.yml'
   workflow_dispatch:
@@ -69,6 +73,10 @@ jobs:
           node --check scripts/build-b148-site.mjs
           node --check scripts/build-b148-site.test.mjs
           node --check scripts/prepare-b148-baseline.mjs
+          node --check source/ai/b149-traversability.mjs
+          node --check scripts/build-b149-site.mjs
+          node --check scripts/build-b149-site.test.mjs
+          node --check scripts/prepare-b149-baseline.mjs
           node --check scripts/qa-b145-browser.mjs
       - name: New-purpose 3D geometry, replay, injection guards, blocked construction tests
         run: |
@@ -78,6 +86,7 @@ jobs:
           node --test scripts/build-b146-site.test.mjs
           node --test scripts/build-b147-site.test.mjs
           node --test scripts/build-b148-site.test.mjs
+          node --test scripts/build-b149-site.test.mjs
   b143-site:
     needs: design-validation
     runs-on: ubuntu-latest
@@ -96,56 +105,58 @@ jobs:
           path: |
             b142-site-output/
             b141-review-output/
-            b148-build-evidence/
-          key: b148-node22-${{ runner.os }}-${{ hashFiles('source/**','designs/ai/**','scripts/build-b142-site.mjs','scripts/build-b143-site.mjs','scripts/build-b144-site.mjs','scripts/build-b145-site.mjs','scripts/build-b146-site.mjs','scripts/build-b147-site.mjs','scripts/build-b148-site.mjs','scripts/prepare-b148-baseline.mjs','scripts/build-b148-site.test.mjs','scripts/qa-b145-browser.mjs','scripts/verify-freeze.mjs') }}
-      - name: Download B147 predecessor artifact when available
+            b149-build-evidence/
+          key: b149-node22-${{ runner.os }}-${{ hashFiles('source/**','designs/ai/**','scripts/build-b142-site.mjs','scripts/build-b143-site.mjs','scripts/build-b144-site.mjs','scripts/build-b145-site.mjs','scripts/build-b146-site.mjs','scripts/build-b147-site.mjs','scripts/build-b148-site.mjs','scripts/prepare-b148-baseline.mjs','source/ai/b149-traversability.mjs','scripts/build-b149-site.mjs','scripts/build-b149-site.test.mjs','scripts/prepare-b149-baseline.mjs','scripts/build-b148-site.test.mjs','scripts/qa-b145-browser.mjs','scripts/verify-freeze.mjs') }}
+      - name: Download B148 predecessor artifact when available
         if: steps.cache.outputs.cache-hit != 'true'
         continue-on-error: true
         uses: actions/download-artifact@v4
         with:
           repository: ryomashibaba/MinecraftAIBuilder
-          run-id: 38912391490
+          run-id: 38915321401
           github-token: ${{ github.token }}
-          name: B147-AI-Repair-And-Verified-History
+          name: B148-Verified-Repair-Proposals-And-Incremental-Source
           path: .
-      - name: Validate B147 provenance or source-rebuild, then build B148 delta
+      - name: Validate B148 provenance or source-rebuild, then build B149 delta
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          node scripts/prepare-b148-baseline.mjs
-          node scripts/build-b148-site.mjs
-      - name: Verify B142 through B148 recursively once and construction HOLD
+          node scripts/prepare-b149-baseline.mjs
+          node scripts/build-b149-site.mjs
+      - name: Verify B142 through B149 recursively once and construction HOLD
         run: |
-          node scripts/build-b148-site.mjs --verify
+          node scripts/build-b149-site.mjs --verify
           node --input-type=module -e "
           import fs from 'node:fs';
           import {verifyB141} from './source/parallel/b141/main/b141-integrated-network.mjs';
           const b=JSON.parse(fs.readFileSync('b141-review-output/B141_15Buildings_Shared_2Wide_Network.json'));
-          const p=JSON.parse(fs.readFileSync('b142-site-output/B148_MANIFEST.json'));
-          const v=JSON.parse(fs.readFileSync('b148-build-evidence/B148_BASELINE_PATH.json'));
+          const p=JSON.parse(fs.readFileSync('b142-site-output/B149_MANIFEST.json'));
+          const v=JSON.parse(fs.readFileSync('b149-build-evidence/B149_BASELINE_PATH.json'));
           if(!verifyB141(b)||b.readiness!=='NOT_PREPARED'||b.gates.length!==9||
              b.gates.some(x=>x.status!=='BLOCKED')||b.BuildPlan.operations.length!==0||
-             p.constructionApproved!==false||p.worldWrites!==0||p.selected!==null||
-             p.proposedDetachedCells.join()!=='0,0'||p.inheritedB141Sha256!==b.integritySha256||
+             p.constructionApproved!==false||p.worldWrites!==0||
+             p.beforeEntranceStatus!=='INVALID_ENTRANCE'||
+             p.newRouteStatuses.slice(0,2).join()!=='PASS_FLAT_GEOMETRY,PASS_FLAT_GEOMETRY'||p.inheritedB141Sha256!==b.integritySha256||
              v.status!=='PASS'||v.constructionApproved!==false||v.worldWrites!==0)
-            throw Error('B148_CONSTRUCTION_OR_INTEGRITY_HOLD');
-          console.log('B148_TWO_UNAPPROVED_PROPOSALS_SAFE_PASS');
+            throw Error('B149_CONSTRUCTION_OR_INTEGRITY_HOLD');
+          console.log('B149_INTERIOR_GEOMETRIC_ROUTE_SAFE_PASS');
           "
       - name: Evidence summary
         run: |
           echo '## B143 new-purpose architectural models' >> "$GITHUB_STEP_SUMMARY"
           echo '- ChatGPT-authored category-free DSL designs and B144 source-pinned revisions' >> "$GITHUB_STEP_SUMMARY"
           echo '- Composition: boxes, ellipsoids, cylinders, toruses, diagonal beams and subtractive voids' >> "$GITHUB_STEP_SUMMARY"
-          echo '- 9 historic revisions plus 2 automatic unapproved repair options: 11 geometric scenes'  >> "$GITHUB_STEP_SUMMARY"
+          echo '- 11 preserved B148 scenes plus 1 immutable B149 interior redesign: 12 geometric scenes'  >> "$GITHUB_STEP_SUMMARY"
+          echo '- B149 two headroom-checked flat routes through the revised hangar; vertical transitions are uncertified' >> "$GITHUB_STEP_SUMMARY"
           echo '- R4 390 detached; saved R5 and both B148 options 0 locally detached' >> "$GITHUB_STEP_SUMMARY"
           echo '- No commands, no world coordinates, no actual construction' >> "$GITHUB_STEP_SUMMARY"
           echo '- B141 source hash and 9/9 BLOCKED gates validated before publication' >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
         with:
-          name: B148-Verified-Repair-Proposals-And-Incremental-Source
+          name: B149-Verified-Interior-Traversability
           path: |
             b142-site-output/
             b141-review-output/
-            b148-build-evidence/
+            b149-build-evidence/
           if-no-files-found: error
           retention-days: 21
       - name: Upload verified Pages site
@@ -165,7 +176,7 @@ jobs:
       - name: Download the exact previously verified site artifact
         uses: actions/download-artifact@v4
         with:
-          name: B148-Verified-Repair-Proposals-And-Incremental-Source
+          name: B149-Verified-Interior-Traversability
           path: .
       - name: Install pinned Playwright runtime without changing repository lockfiles
         run: |
@@ -177,7 +188,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: B148-Chromium-Visual-QA
+          name: B149-Chromium-Visual-QA
           path: b145-browser-evidence/
           if-no-files-found: warn
           retention-days: 21
