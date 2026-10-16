@@ -1,0 +1,48 @@
+name: B138 source-pinned fleet five-rise circulation
+on:
+  pull_request:
+    paths:
+      - 'source/parallel/b138/**'
+      - '.github/workflows/b138.yml'
+      - 'docs/B138_IMPLEMENTATION_JA.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  b138-build-circulation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify code parses and source design freeze remains intact
+        run: |
+          node --check source/parallel/b138/main/b138-five-rise-fleet.mjs
+          node --check source/parallel/b138/main/b138-five-rise-fleet.test.mjs
+          node scripts/verify-freeze.mjs
+      - name: Fast offline five-rise geometry, disconnected-graph and fail-closed tests
+        run: node --test source/parallel/b138/main/b138-five-rise-fleet.test.mjs
+      - name: Assemble REAL frozen 15 buildings and export all 102 per-stair plans
+        run: node source/parallel/b138/main/b138-five-rise-fleet.mjs
+      - name: Confirm actual source inventory, integrity and all construction gates
+        run: |
+          node --input-type=module -e "
+          import fs from 'node:fs';
+          import {verifyB138} from './source/parallel/b138/main/b138-five-rise-fleet.mjs';
+          const r=JSON.parse(fs.readFileSync('b138-review-output/B138_15_Buildings_5_Rise_Connectivity.json'));
+          if(!verifyB138(r)||r.totals.buildings!==15||r.totals.sourceFloors!==66||
+             r.totals.sourceStairs!==102||r.geometryTransfer.directB137RouteReuseAllowed!==false||
+             r.gates.length!==9||r.BuildPlan.operations.length!==0)
+            throw Error('B138_REAL_SOURCE_OR_GATE_MISMATCH');
+          console.log('B138_FROZEN_SOURCE_15_66_102_AND_GATES_PASS');
+          console.log(JSON.stringify(r.totals));
+          "
+      - name: Upload offline fleet integration artifact, never game write commands
+        uses: actions/upload-artifact@v4
+        with:
+          name: B138-Source-Fleet-Circulation
+          path: b138-review-output/
+          if-no-files-found: error
+          retention-days: 14
