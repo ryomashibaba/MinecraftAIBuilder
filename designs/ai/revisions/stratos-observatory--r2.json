@@ -1,0 +1,82 @@
+{
+  "schema": "minecraftaibuilder-b144-design-revision-v1",
+  "revisionId": "stratos-observatory-r2",
+  "targetId": "stratos-observatory",
+  "baseSourceSha256": "f2db5e4b326c9c74f2e417da03212d8389dd91417f1116af64c6b394ab687676",
+  "request": "中央の観測ドームをさらに巨大にし、頂上の円環と南側の新しいデッキを追加して。左塔のクラウンは色を変え、シルエットにメリハリをつけて。",
+  "edits": [
+    {
+      "action": "replaceElement",
+      "target": "dome-envelope",
+      "element": {
+        "id": "dome-envelope",
+        "shape": "ellipsoid",
+        "mode": "add",
+        "material": "glass",
+        "center": [
+          39,
+          26,
+          38
+        ],
+        "radii": [
+          19,
+          17,
+          19
+        ],
+        "shell": 2
+      }
+    },
+    {
+      "action": "addElement",
+      "target": "orbital-halo",
+      "element": {
+        "id": "orbital-halo",
+        "shape": "cylinder",
+        "mode": "add",
+        "material": "metal",
+        "axis": "y",
+        "origin": [
+          39,
+          43,
+          38
+        ],
+        "radius": 21,
+        "length": 2,
+        "shell": 2
+      }
+    },
+    {
+      "action": "addElement",
+      "target": "south-landing",
+      "element": {
+        "id": "south-landing",
+        "shape": "box",
+        "mode": "add",
+        "material": "concrete",
+        "origin": [
+          29,
+          8,
+          58
+        ],
+        "size": [
+          22,
+          3,
+          11
+        ]
+      }
+    },
+    {
+      "action": "setMaterial",
+      "target": "left-tower-crown",
+      "material": "accent"
+    },
+    {
+      "action": "setTitle",
+      "value": "成層圏観測ドーム — 拡張版 R2"
+    },
+    {
+      "action": "setBrief",
+      "value": "ChatGPTへの追加指示で、既存観測ドームの半径を拡張し、上部円環と南デッキを増設。左塔外装を変更。旧設計は一切書き換えず差分版として独立保存。"
+    }
+  ]
+}
