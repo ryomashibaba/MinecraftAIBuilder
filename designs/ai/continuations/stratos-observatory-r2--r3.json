@@ -1,0 +1,53 @@
+{
+  "schema": "minecraftaibuilder-b144-design-revision-v1",
+  "revisionId": "stratos-observatory-r3",
+  "targetId": "stratos-observatory-r2",
+  "baseSourceSha256": "d93df2b3b13ddde69c5d0fdc278e10be295ee9fef3eac92689ecf8b5df84e0f5",
+  "request": "前回の大型化案は残したまま、屋上に中空リング状の観測装置を配置して。さらに施設中央に縦向きの巨大な光輪を設置し、ドームを未来的なシルエットにして。",
+  "edits": [
+    {
+      "action": "replaceElement",
+      "target": "orbital-halo",
+      "element": {
+        "id": "orbital-halo",
+        "shape": "torus",
+        "mode": "add",
+        "material": "metal",
+        "center": [
+          39,
+          43,
+          38
+        ],
+        "axis": "y",
+        "majorRadius": 21,
+        "tubeRadius": 2
+      }
+    },
+    {
+      "action": "addElement",
+      "target": "vertical-light-arc",
+      "element": {
+        "id": "vertical-light-arc",
+        "shape": "torus",
+        "mode": "add",
+        "material": "glow",
+        "center": [
+          39,
+          30,
+          38
+        ],
+        "axis": "z",
+        "majorRadius": 17,
+        "tubeRadius": 2
+      }
+    },
+    {
+      "action": "setTitle",
+      "value": "成層圏観測ドーム — 双方向光輪 R3"
+    },
+    {
+      "action": "setBrief",
+      "value": "B143原案→B144拡張→B145曲面追加の3段階。追加指示に従い、上部の水平円環を中空トーラスに改修し、中央ドームに垂直の光輪を加えた。"
+    }
+  ]
+}
