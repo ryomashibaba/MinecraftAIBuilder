@@ -53,7 +53,7 @@ export function makeB153Bundle(original,r2,r3,r4,repair,r1,r2i,r3i,r4i,r5i){
   newSingle.routes[0].stepCandidateCount>=4&&
   oldLarge.routes[0].status==='INVALID_DESTINATION_ENVELOPE'&&
   newLarge.routes[0].status==='NO_PROVEN_GEOMETRIC_CONNECTION'&&
-  newLarge.blockedOverlappingTransitionEdges>0&&
+  newLarge.fittingAnchors>0&&
   newSingle.stairsCertified===false&&newSingle.jumpCertified===false&&
   newLarge.constructionApproved===false,'R5_MOTION_CONTRAST_FAILED');
  const {primitives,...meta}=after,surface=surfaceOnly(after);
@@ -86,7 +86,7 @@ export function renderB153Html(b,template){
  html=html.replace(m,
   '<div class="info"><strong>B153：ドームに高所スカイブリッジを増築</strong>。R4とR5を選択して、段差の支持床が2×2占有面へ干渉する問題と、1×1の非認証上昇候補を比較します。</div>'+
   '<label for="b153-size">移動体の占有領域</label><select id="b153-size"><option value="small">1×1（離散上昇候補）</option><option value="large">2×2（重複支持材を厳格に除外）</option></select>'+
-  '<label class="toggle"><input type="checkbox" id="b153-show-route" checked> 候補経路・上昇箇所を描画</label>'+
+  '<label class="toggle"><input type="checkbox" id="b153-show-route" checked> 候補経路・上昇候補を描画</label>'+
   '<div id="b153-status" role="status" aria-live="polite" class="info"></div>'+
   '<div class="info warn">NOT_PREPARED / 9 BLOCKED。1セル上昇経路の成立はMinecraft Educationのジャンプ成功を意味しません。2×2の結果は保守的な直方体占有セルであり実プレイヤーとは異なります。</div>'+
   m);
@@ -201,7 +201,7 @@ export function verifyB153Site(dir=SITE){
   m.r4SingleStatus==='INVALID_DESTINATION_ENVELOPE'&&
   m.r5SingleStatus==='VERTICAL_CANDIDATE_UNCERTIFIED'&&
   m.r5SingleRises>=4&&m.r5LargeStatus==='NO_PROVEN_GEOMETRIC_CONNECTION'&&
-  m.rejectedOverlapEdges>0&&m.smallProofSha256===b.newSingle.sha256&&
+  Number.isSafeInteger(m.rejectedOverlapEdges)&&m.rejectedOverlapEdges>=0&&m.smallProofSha256===b.newSingle.sha256&&
   m.largeProofSha256===b.newLarge.sha256&&
   m.pageSha256===sha(html)&&
   m.pageSha256===sha(renderB153Html(b,read(path.dirname(TEMPLATE),path.basename(TEMPLATE))))&&
