@@ -160,7 +160,7 @@ jobs:
           repository: ryomashibaba/MinecraftAIBuilder
           run-id: 38974274194
           github-token: ${{ github.token }}
-          name: B154-Verified-Flat-Bypass
+          name: B153-Verified-Transition-Envelopes
           path: .
       - name: Download verified B152 fallback for source delta
         if: steps.cache.outputs.cache-hit != 'true'
