@@ -14,7 +14,7 @@ const OUT=path.resolve(process.env.B136_KIT_PATH??'b136-review-output/B136_Live_
 const xyz=p=>[p.x,p.y,p.z].join(' ');
 function mockWorld(layout,{empty=true,base=true,combinedUnsupported=false,inverted=false,otherDirection=null}={}){
  const map=new Map();
- const oak='minecraft:oak_stairs ["upside_down_bit" = '+(inverted?1:0)+', "weirdo_direction" = '+(otherDirection??layout.state)+']';
+ const oak='minecraft:oak_stairs ["upside_down_bit" = '+(inverted?'true':'false')+', "weirdo_direction" = '+(otherDirection??layout.state)+']';
  if(base)map.set(xyz(layout.anchor),oak);
  if(!empty)map.set(xyz(layout.addOnly[0]),'minecraft:stone');
  const sent=[];
@@ -33,11 +33,11 @@ function mockWorld(layout,{empty=true,base=true,combinedUnsupported=false,invert
     let matches=actual===query;
     if(actual.startsWith('minecraft:oak_stairs')&&query.startsWith('minecraft:oak_stairs')){
      const actualDir=Number(/"weirdo_direction" = ([0-3])/.exec(actual)?.[1]);
-     const actualHalf=Number(/"upside_down_bit" = ([01])/.exec(actual)?.[1]);
+     const actualHalf=String(/"upside_down_bit" = (true|false)/.exec(actual)?.[1]);
      const requestedDir=/"weirdo_direction" = ([0-3])/.exec(query);
-     const requestedHalf=/"upside_down_bit" = ([01])/.exec(query);
+     const requestedHalf=/"upside_down_bit" = (true|false)/.exec(query);
      matches=(!requestedDir||Number(requestedDir[1])===actualDir)&&
-      (!requestedHalf||Number(requestedHalf[1])===actualHalf);
+      (!requestedHalf||requestedHalf[1]===actualHalf);
     }
     return {statusCode:matches?0:-2147352576,
      statusMessage:matches?'found':'mismatch'};
@@ -72,9 +72,22 @@ test('three-stair readbacks check exact orientation and ascending height',async(
  const l=b136Layout('123 -60 -18','EAST');
  const w=mockWorld(l);
  assert.equal((await b136CheckLayout(w,l)).fullLayoutMatches,false);
- for(const p of l.addOnly)w.map.set(xyz(p),'minecraft:oak_stairs ["upside_down_bit" = 0, "weirdo_direction" = 0]');
+ for(const p of l.addOnly)w.map.set(xyz(p),'minecraft:oak_stairs ["upside_down_bit" = false, "weirdo_direction" = 0]');
  assert.equal((await b136CheckLayout(w,l)).fullLayoutMatches,true);
  assert(w.sent.every(x=>x.startsWith('testforblock ')));
+});
+test('Boolean blockstate commands use true/false, never numeric 0/1',async()=>{
+ const layout=b136Layout('123 -60 -18','NORTH');
+ const w=mockWorld(layout);
+ const r=await b136InspectStair(w,layout.anchor,layout.state);
+ assert.equal(r.reason,'READY');
+ assert.equal(r.matched,true);
+ const s=w.sent.join('\n');
+ assert.match(s,/\\?"upside_down_bit\\?" = false/);
+ assert.match(s,/\\?"upside_down_bit\\?" = true/);
+ assert.doesNotMatch(s,/upside_down_bit\\?" = [01]/);
+ assert.equal(r.outcomes.lowerHalf.statusCode,0);
+ assert.equal(r.outcomes.upperHalf.statusCode,-2147352576);
 });
 test('B135-tested direction and lower-half checks survive unsupported combined parser',async t=>{
  const l=b136Layout('123 -60 -18','NORTH');
@@ -138,7 +151,7 @@ test('test-world builder writes only two verified air stairs and cleans precisel
  assert.equal((await b136CheckLayout(w,l)).fullLayoutMatches,true);
  assert.equal(w.sent.filter(x=>x.startsWith('setblock ')).length,2);
  assert.equal((await b136Cleanup(w,root)).status,'CLEAN');
- assert.equal(w.map.get(xyz(l.anchor)),'minecraft:oak_stairs ["upside_down_bit" = 0, "weirdo_direction" = 3]');
+ assert.equal(w.map.get(xyz(l.anchor)),'minecraft:oak_stairs ["upside_down_bit" = false, "weirdo_direction" = 3]');
  assert.equal(w.map.get(xyz(l.addOnly[0])),'minecraft:air');
  assert.equal(w.map.get(xyz(l.addOnly[1])),'minecraft:air');
  assert.equal((await b136Cleanup(w,root)).status,'NO_STAGE_JOURNAL');
@@ -154,7 +167,7 @@ test('cleanup avoids deleting any changed user block and requires manual review'
  assert.equal(r.status,'MANUAL_REVIEW_REQUIRED');
  assert.equal(r.skipped,1);
  assert.equal(w.map.get(xyz(l.addOnly[1])),'minecraft:stone');
- assert.equal(w.map.get(xyz(l.anchor)),'minecraft:oak_stairs ["upside_down_bit" = 0, "weirdo_direction" = 1]');
+ assert.equal(w.map.get(xyz(l.anchor)),'minecraft:oak_stairs ["upside_down_bit" = false, "weirdo_direction" = 1]');
 });
 test('querytarget requires one player, finite XYZ, and JSON from a successful command',()=>{
  assert.deepEqual(b136ParseEntityResult({statusCode:0,details:JSON.stringify([{
