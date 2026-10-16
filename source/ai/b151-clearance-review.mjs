@@ -4,6 +4,7 @@
  * certify stair physics, infer enclosed rooms, or produce BuildPlan operations.
  */
 import {createHash} from 'node:crypto';
+import {verifyVerticalCandidates} from './b150-vertical-candidates.mjs';
 export const SCHEMA='minecraftaibuilder-b151-clearance-v1';
 const K=(x,y,z)=>x+','+y+','+z;
 const sha=x=>createHash('sha256').update(JSON.stringify(x)).digest('hex');
@@ -24,7 +25,11 @@ export function analyzeClearance(scene,verticalReport,{minWidth=4,maxWidth=24}={
   verticalReport?.constructionApproved===false&&verticalReport?.stairsCertified===false&&
   verticalReport?.BuildPlan?.operations?.length===0&&
   verticalReport?.gates?.length===9&&verticalReport.gates.every(x=>x==='BLOCKED')&&
-  Array.isArray(verticalReport.routes),'INVALID_VERTICAL_SOURCE');
+  Array.isArray(verticalReport.routes)&&
+  verifyVerticalCandidates(scene,{
+   entrance:verticalReport.entrance,
+   destinations:verticalReport.routes.map(r=>({id:r.id,at:r.at}))
+  },verticalReport),'INVALID_VERTICAL_SOURCE');
  const solids=new Set();
  for(const p of scene.primitives){
   ok(Array.isArray(p)&&p.length===5&&p.slice(0,3).every(Number.isSafeInteger),
