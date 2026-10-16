@@ -25,7 +25,8 @@ const pages=[
  {name:'B150-vertical',url:'ai/vertical/index.html',minimum:13,expected:13},
  {name:'B151-clearance',url:'ai/clearance/index.html',minimum:14,expected:14},
  {name:'B152-footprint',url:'ai/footprint/index.html',minimum:15,expected:15},
- {name:'B153-transitions',url:'ai/transitions/index.html',minimum:16,expected:16}
+ {name:'B153-transitions',url:'ai/transitions/index.html',minimum:16,expected:16},
+ {name:'B154-bypass',url:'ai/bypass/index.html',minimum:17,expected:17}
 ];
 const browser=await chromium.launch({headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
 const results=[];
@@ -81,6 +82,29 @@ async function inspect(info,mobile){
   await page.waitForTimeout(950);
   const last=await page.locator('#building').inputValue();
   if(last!==String(options-1))fail(info.name+'_MODEL_SELECTION_FAILED');
+  if(info.name==='B154-bypass'){
+   const models=page.locator('#building'),route=page.locator('#b154-target'),
+    status=page.locator('#b154-status');
+   await models.selectOption('15');await route.selectOption('lower-lookout');
+   await page.waitForTimeout(320);
+   if(!(await status.innerText()).includes('INVALID_GOAL_FOOTPRINT'))
+    fail('B154_R5_OBSERVATION_MISSING_NOT_VISIBLE_'+await status.innerText());
+   await models.selectOption('16');await page.waitForTimeout(350);
+   const verified=await status.innerText();
+   if(!verified.includes('PASS_FLAT_FOOTPRINT_GEOMETRY')||
+      !verified.includes('26水平移動')||!verified.includes('高度変化0'))
+    fail('B154_R6_REAL_BYPASS_NOT_AVAILABLE_'+verified);
+   const overlay=page.locator('#b154-show-route');
+   if(!await overlay.isChecked())fail('B154_PATH_OVERLAY_NOT_ENABLED');
+   await overlay.uncheck();await overlay.check();
+   await route.selectOption('promenade-middle');await page.waitForTimeout(200);
+   if(!(await status.innerText()).includes('PASS_FLAT_FOOTPRINT_GEOMETRY'))
+    fail('B154_MID_PROMENADE_UNREACHABLE');
+   await models.selectOption('14');await page.waitForTimeout(200);
+   if(!(await status.innerText()).includes('検証はありません'))
+    fail('B154_PREVIOUS_MODEL_FALSE_CERTIFICATION');
+   await models.selectOption('16');
+  }
   if(info.name==='B153-transitions'){
    const models=page.locator('#building'),size=page.locator('#b153-size'),
     status=page.locator('#b153-status');
