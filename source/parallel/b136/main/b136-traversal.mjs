@@ -107,16 +107,21 @@ export async function b136InspectStair(world,position,state){
     transportError:true};
   }
  }
- // Official Bedrock intrinsic-state schema defines upside_down_bit as Boolean.
- // The R1-R4 calibration only proves direction. Lower half must be validated
- // separately. An unsupported combined-state query must NOT falsely cause MISSING.
- const safe=outcomes.existence.match&&outcomes.direction.match&&
-  outcomes.lowerHalf.match&&
+ // Bedrock declares upside_down_bit Boolean. Education live R4 evidence showed
+ // existence=0, direction=0 and combined=0, while BOTH single-state half
+ // probes returned NO_MATCH. Combined positive is a stronger *direct* proof
+ // of lower-half+direction; do not reject it due to untrusted single-state probes.
+ // A contradictory successful upper-half probe still forces a safe HOLD.
+ const combinedConfirmed=outcomes.combined.match;
+ const separatelyConfirmed=outcomes.lowerHalf.match&&
   outcomes.upperHalf.statusCode===-2147352576;
+ const safe=outcomes.existence.match&&outcomes.direction.match&&
+  !outcomes.upperHalf.match&&(combinedConfirmed||separatelyConfirmed);
  let reason='READY';
  if(!outcomes.existence.match)reason='MISSING_OAK_OR_COMMAND_ERROR';
  else if(!outcomes.direction.match)reason='DIRECTION_DIFFERS_OR_COMMAND_ERROR';
- else if(outcomes.upperHalf.match)reason='UPSIDE_DOWN_STAIR';
+ else if(outcomes.upperHalf.match)reason='UPSIDE_DOWN_STAIR_OR_CONTRADICTORY_PROBE';
+ else if(combinedConfirmed)reason='READY';
  else if(!outcomes.lowerHalf.match)reason='LOWER_HALF_NOT_CONFIRMED';
  else if(outcomes.upperHalf.statusCode!==-2147352576)reason='UPPER_HALF_CONTROL_INCONCLUSIVE';
  return {position,state,matched:safe,reason,outcomes,
