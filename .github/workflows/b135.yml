@@ -63,8 +63,15 @@ jobs:
         env:
           B135_KIT_PATH: ${{ github.workspace }}/b135-review-output/B135_Controlled_Live_Test_World
         run: node --test source/parallel/b135/main/b135-controlled-live.test.mjs
-      - name: Reverify nine blocked construction gates
+      - name: Reverify nine blocked construction gates when offline source outputs were regenerated
+        if: steps.existing_b134.outcome != 'success'
         run: node scripts/verify-b114-safety.mjs
+      - name: Verify inherited B134 nonconstruction manifests when using a prior passing artifact
+        if: steps.existing_b134.outcome == 'success'
+        env:
+          B135_KIT_PATH: ${{ github.workspace }}/b135-review-output/B135_Controlled_Live_Test_World
+        run: |
+          node --input-type=module -e "import('./source/parallel/b135/main/b135-package.mjs').then(async m=>{const r=m.verifyB135Kit(process.env.B135_KIT_PATH); if(r.initialRealGameEvidence!==0||r.constructionAllowed!==false||r.readiness!=='NOT_PREPARED'||r.operations.length!==0)process.exitCode=3;console.log('B135_VERIFIED_INHERITED_HOLD',r.initialRealGameEvidence)})"
       - name: Publish one-click Windows test-world diagnostics
         uses: actions/upload-artifact@v4
         with:
