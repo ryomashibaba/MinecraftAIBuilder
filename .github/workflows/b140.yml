@@ -1,0 +1,49 @@
+name: B140 two-wide corridor bridge plans for 15 buildings and 102 stairs
+on:
+  pull_request:
+    paths:
+      - 'source/parallel/b140/**'
+      - '.github/workflows/b140.yml'
+      - 'docs/B140_IMPLEMENTATION_JA.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  b140-two-wide-gallery-bridges:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Preserve frozen design and check syntax
+        run: |
+          node scripts/verify-freeze.mjs
+          node --check source/parallel/b140/main/b140-two-wide-gallery-bridge.mjs
+          node --check source/parallel/b140/main/b140-two-wide-gallery-bridge.test.mjs
+      - name: Unit tests verify two-wide turns, protected rooms and nonconstruction
+        run: node --test source/parallel/b140/main/b140-two-wide-gallery-bridge.test.mjs
+      - name: Rebuild frozen B113/B138/B139 and plan 102 real source stair corridor bridges
+        run: node source/parallel/b140/main/b140-two-wide-gallery-bridge.mjs
+      - name: Strictly enforce 15/66/102 inventory, 9 BLOCKED and zero game writes
+        run: |
+          node --input-type=module -e "
+          import fs from 'node:fs';
+          import {verifyB140} from './source/parallel/b140/main/b140-two-wide-gallery-bridge.mjs';
+          const r=JSON.parse(fs.readFileSync('b140-review-output/B140_15Building_TwoWide_Gallery_Bridge_Plan.json'));
+          if(!verifyB140(r)||r.totals.buildings!==15||r.totals.floors!==66||
+             r.totals.stairs!==102||r.totals.authorizedWorldWrites!==0||
+             r.totals.independentStairCorridorConcepts+r.totals.stillUnrouted!==102||
+             r.gates.length!==9||r.BuildPlan.operations.length!==0)
+            throw Error('B140_SOURCE_INVENTORY_OR_SAFETY_DRIFT');
+          console.log('B140_ALL_15_66_102_SOURCE_AND_NINE_GATE_PASS');
+          console.log(JSON.stringify(r.totals));
+          "
+      - name: Upload source-derived conceptual bridges and Japanese summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: B140-Fleet-TwoWide-Gallery-Bridges
+          path: b140-review-output/
+          if-no-files-found: error
+          retention-days: 14
