@@ -23,8 +23,9 @@ export function surfaceOnly(scene){
  return scene.primitives.filter(p=>sides.some(([dx,dy,dz])=>
   !occupied.has((p[0]+dx)+','+(p[1]+dy)+','+(p[2]+dz))));
 }
-export function compileB143Gallery(documents){
+export function compileB143Gallery(documents,{auditCompiled=null}={}){
  ensure(Array.isArray(documents)&&documents.length>0&&documents.length<=24,'GALLERY_COUNT');
+ ensure(auditCompiled===null||typeof auditCompiled==='function','INVALID_AUDITOR');
  const ids=new Set(),sourceHashes=[],geometryHashes=[];
  const scenes=documents.map(d=>{
   validateDesign(d);
@@ -35,7 +36,9 @@ export function compileB143Gallery(documents){
   const {primitives,...meta}=result;
   const surface=surfaceOnly(result);
   ensure(surface.length>50&&surface.length<=primitives.length,'EMPTY_SURFACE');
-  return {...meta,surface,stats:{...result.stats,renderedSurfaceCells:surface.length}};
+  const extraAudit=auditCompiled===null?{}:{
+   topologyReview:auditCompiled(result)};
+  return {...meta,...extraAudit,surface,stats:{...result.stats,renderedSurfaceCells:surface.length}};
  });
  ensure(new Set(geometryHashes).size===documents.length,'DUPLICATE_GEOMETRIES');
  return {schema:'minecraftaibuilder-b143-gallery-v1',edition:'MINECRAFT_EDUCATION',
