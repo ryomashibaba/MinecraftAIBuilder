@@ -1,10 +1,16 @@
 name: Education-first offline QA
 
 on:
+  # Feature branches are already covered by pull_request: no duplicate full QA.
   push:
-    branches: [main, 'feature/**', 'migration/**']
+    branches: [main]
   pull_request:
   workflow_dispatch:
+
+# Cancel obsolete commits within the same PR, but never suppress a new PR.
+concurrency:
+  group: education-qa-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
