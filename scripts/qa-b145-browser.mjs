@@ -30,7 +30,8 @@ const pages=[
  {name:'B155-interchange',url:'ai/bridge-design/index.html',minimum:19,expected:19},
  {name:'B156-auto',url:'ai/auto-bridge/index.html',minimum:20,expected:20},
  {name:'B157-finished',url:'ai/finished-bridge/index.html',minimum:21,expected:21},
- {name:'B158-helios',url:'ai/helios/index.html',minimum:23,expected:23}
+ {name:'B158-helios',url:'ai/helios/index.html',minimum:23,expected:23},
+ {name:'B159-polaris',url:'ai/polaris/index.html',minimum:25,expected:25}
 ];
 const browser=await chromium.launch({headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
 const results=[];
@@ -86,6 +87,28 @@ async function inspect(info,mobile){
   await page.waitForTimeout(950);
   const last=await page.locator('#building').inputValue();
   if(last!==String(options-1))fail(info.name+'_MODEL_SELECTION_FAILED');
+  if(info.name==='B159-polaris'){
+   const model=page.locator('#building'),status=page.locator('#b159-status');
+   await model.selectOption('23');await page.waitForTimeout(280);
+   const before=await status.innerText();
+   if(!before.includes('FOOTPRINT_UNREACHABLE')||
+      !before.includes('接続経路なし'))
+    fail('B159_POLARIS_GAP_NOT_PRESENT_'+before);
+   await model.selectOption('24');await page.waitForTimeout(400);
+   const repaired=await status.innerText();
+   if(!repaired.includes('PASS_FLAT_FOOTPRINT_GEOMETRY')||
+      !repaired.includes('73水平移動')||
+      !repaired.includes('Z_THEN_X')||
+      !repaired.includes('仕上げ16部材'))
+    fail('B159_BENT_2X2_ROUTE_REVIEW_FAILED_'+repaired);
+   const line=page.locator('#b159-route');
+   if(!await line.isChecked())fail('B159_ROUTE_OVERLAY_DISABLED');
+   await line.uncheck();await line.check();
+   await model.selectOption('22');await page.waitForTimeout(180);
+   if(!(await status.innerText()).includes('B159の経路診断はありません'))
+    fail('B159_HELIOS_FALSE_L_ROUTE');
+   await model.selectOption('24');
+  }
   if(info.name==='B158-helios'){
    const models=page.locator('#building'),status=page.locator('#b158-status');
    await models.selectOption('21');await page.waitForTimeout(300);
