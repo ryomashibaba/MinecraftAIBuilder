@@ -20,7 +20,8 @@ const pages=[
  {name:'B145-iterations',url:'ai/iterations/index.html',minimum:6,expected:6},
  {name:'B146-structure',url:'ai/structure/index.html',minimum:8,expected:8},
  {name:'B147-repairs',url:'ai/repairs/index.html',minimum:9,expected:9},
- {name:'B148-options',url:'ai/options/index.html',minimum:11,expected:11}
+ {name:'B148-options',url:'ai/options/index.html',minimum:11,expected:11},
+ {name:'B149-interiors',url:'ai/interiors/index.html',minimum:12,expected:12}
 ];
 const browser=await chromium.launch({headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
 const results=[];
@@ -76,6 +77,28 @@ async function inspect(info,mobile){
   await page.waitForTimeout(950);
   const last=await page.locator('#building').inputValue();
   if(last!==String(options-1))fail(info.name+'_MODEL_SELECTION_FAILED');
+  if(info.name==='B149-interiors'){
+   const selector=page.locator('#building'),destination=page.locator('#routeTarget');
+   const route=page.locator('#routeStatus');
+   await selector.selectOption('11');await page.waitForTimeout(350);
+   for(const id of ['hangar-hall','hangar-inner']){
+    await destination.selectOption(id);await page.waitForTimeout(200);
+    const text=await route.innerText();
+    if(!text.includes('PASS_FLAT_GEOMETRY')||!text.includes('平面ステップ'))
+     fail('B149_REAL_INTERIOR_ROUTE_NOT_VISIBLE_'+id+'_'+text);
+   }
+   const routeToggle=page.locator('#showRoute');
+   if(!await routeToggle.isChecked())fail('B149_ROUTE_OVERLAY_DISABLED');
+   await routeToggle.uncheck();await routeToggle.check();
+   await destination.selectOption('atrium-deck');await page.waitForTimeout(200);
+   const extra=await route.innerText();
+   if(!/INVALID_DESTINATION|UNREACHABLE|UNKNOWN_BUDGET|PASS_FLAT_GEOMETRY/.test(extra))
+    fail('B149_THIRD_DESTINATION_UNKNOWN_'+extra);
+   await selector.selectOption('1');await page.waitForTimeout(200);
+   if(!(await route.innerText()).includes('移動判定はありません'))
+    fail('B149_BASELINE_MODEL_FALSE_ROUTE');
+   await selector.selectOption('11');
+  }
   if(info.name==='B148-options'){
    const status=page.locator('#repairStatus'),selector=page.locator('#building');
    await selector.selectOption('6');await page.waitForTimeout(300);
@@ -124,7 +147,7 @@ async function inspect(info,mobile){
 }
 try{
  for(const item of pages)await inspect(item,false);
- await inspect(pages[6],true);
+ await inspect(pages[pages.length-1],true);
  fs.writeFileSync(path.join(ART,'B145_BROWSER_RESULTS.json'),JSON.stringify({status:'PASS',results},null,2)+'\n');
  console.log(JSON.stringify({status:'PASS',results},null,2));
 }catch(e){
