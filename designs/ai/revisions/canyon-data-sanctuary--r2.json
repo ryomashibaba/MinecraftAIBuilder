@@ -1,0 +1,96 @@
+{
+  "schema": "minecraftaibuilder-b144-design-revision-v1",
+  "revisionId": "canyon-data-sanctuary-r2",
+  "targetId": "canyon-data-sanctuary",
+  "baseSourceSha256": "24d339868b3c848ec6f5e490668ee8d4408092a35119db220408d2318e9ac720",
+  "request": "右手の展望デッキを大きく張り出させて。中心の縦コアに発光ラインを通し、上部には長い浮遊屋根を追加して、もとのアーチを残して。",
+  "edits": [
+    {
+      "action": "replaceElement",
+      "target": "observation-arm",
+      "element": {
+        "id": "observation-arm",
+        "shape": "box",
+        "mode": "add",
+        "material": "glass",
+        "origin": [
+          55,
+          47,
+          36
+        ],
+        "size": [
+          26,
+          7,
+          16
+        ],
+        "shell": 1
+      }
+    },
+    {
+      "action": "addElement",
+      "target": "cantilever-trim",
+      "element": {
+        "id": "cantilever-trim",
+        "shape": "box",
+        "mode": "add",
+        "material": "metal",
+        "origin": [
+          54,
+          54,
+          36
+        ],
+        "size": [
+          27,
+          2,
+          16
+        ]
+      }
+    },
+    {
+      "action": "addElement",
+      "target": "luminous-spine",
+      "element": {
+        "id": "luminous-spine",
+        "shape": "cylinder",
+        "mode": "add",
+        "material": "glow",
+        "axis": "y",
+        "origin": [
+          44,
+          18,
+          40
+        ],
+        "radius": 2,
+        "length": 42
+      }
+    },
+    {
+      "action": "addElement",
+      "target": "outer-lookout",
+      "element": {
+        "id": "outer-lookout",
+        "shape": "box",
+        "mode": "add",
+        "material": "accent",
+        "origin": [
+          67,
+          16,
+          49
+        ],
+        "size": [
+          16,
+          3,
+          14
+        ]
+      }
+    },
+    {
+      "action": "setTitle",
+      "value": "峡谷データ聖堂 — 展望施設拡張版 R2"
+    },
+    {
+      "action": "setBrief",
+      "value": "ChatGPTへの追加指示で右展望デッキの片持ち形状を拡張し、浮遊屋根・発光コア・外側展望プラットフォームを追加。原形を残した改修差分。"
+    }
+  ]
+}

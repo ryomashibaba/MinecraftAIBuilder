@@ -1,4 +1,4 @@
-name: B143 Universal ChatGPT Architecture DSL and 3D Gallery
+name: Universal AI Architecture Studio / B143+B144 checked publication
 on:
   # All future B-number feature branches inherited from B143 auto-publish,
   # after full offline verification and without per-branch workflow edits.
@@ -10,6 +10,7 @@ on:
       - 'source/**'
       - 'scripts/build-b142-site.mjs'
       - 'scripts/build-b143-site*'
+      - 'scripts/build-b144-site*'
       - '.github/workflows/b143.yml'
   pull_request:
     paths:
@@ -17,6 +18,7 @@ on:
       - 'source/**'
       - 'scripts/build-b142-site.mjs'
       - 'scripts/build-b143-site*'
+      - 'scripts/build-b144-site*'
       - '.github/workflows/b143.yml'
   workflow_dispatch:
 permissions:
@@ -39,8 +41,13 @@ jobs:
           node --check source/ai/b143-building-dsl.mjs
           node --check scripts/build-b143-site.mjs
           node --check scripts/build-b143-site.test.mjs
+          node --check source/ai/b144-design-revisions.mjs
+          node --check scripts/build-b144-site.mjs
+          node --check scripts/build-b144-site.test.mjs
       - name: New-purpose 3D geometry, replay, injection guards, blocked construction tests
-        run: node --test scripts/build-b143-site.test.mjs
+        run: |
+          node --test scripts/build-b143-site.test.mjs
+          node --test scripts/build-b144-site.test.mjs
   b143-site:
     needs: design-validation
     runs-on: ubuntu-latest
@@ -59,16 +66,18 @@ jobs:
           path: |
             b142-site-output/
             b141-review-output/
-          key: b143-node22-${{ runner.os }}-${{ hashFiles('source/**','designs/ai/**','scripts/build-b142-site.mjs','scripts/build-b143-site.mjs','scripts/build-b143-site.test.mjs','scripts/verify-freeze.mjs') }}
+          key: b144-node22-${{ runner.os }}-${{ hashFiles('source/**','designs/ai/**','scripts/build-b142-site.mjs','scripts/build-b143-site.mjs','scripts/build-b143-site.test.mjs','scripts/build-b144-site.mjs','scripts/build-b144-site.test.mjs','scripts/verify-freeze.mjs') }}
       - name: Compile frozen B142 design baseline and new ChatGPT-authored architecture
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
           node scripts/build-b142-site.mjs
           node scripts/build-b143-site.mjs
+          node scripts/build-b144-site.mjs
       - name: Verify base source hashes, exact DSL provenance and zero world writes
         run: |
           node scripts/build-b142-site.mjs --verify
           node scripts/build-b143-site.mjs --verify
+          node scripts/build-b144-site.mjs --verify
           node --input-type=module -e "
           import fs from 'node:fs';
           import {verifyB141} from './source/parallel/b141/main/b141-integrated-network.mjs';
@@ -84,14 +93,14 @@ jobs:
       - name: Evidence summary
         run: |
           echo '## B143 new-purpose architectural models' >> "$GITHUB_STEP_SUMMARY"
-          echo '- ChatGPT-authored category-free DSL documents under designs/ai/' >> "$GITHUB_STEP_SUMMARY"
+          echo '- ChatGPT-authored category-free DSL designs and B144 source-pinned revisions' >> "$GITHUB_STEP_SUMMARY"
           echo '- Composition: boxes, ellipsoids, cylinders, subtractive voids' >> "$GITHUB_STEP_SUMMARY"
-          echo '- 2 new-purpose designs, 15 B142 baseline buildings preserved' >> "$GITHUB_STEP_SUMMARY"
+          echo '- 2 original new-purpose designs + 2 derived revisions; 15 B142 baseline buildings preserved' >> "$GITHUB_STEP_SUMMARY"
           echo '- No commands, no world coordinates, no actual construction' >> "$GITHUB_STEP_SUMMARY"
           echo '- B141 source hash and 9/9 BLOCKED gates validated before publication' >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
         with:
-          name: B143-Freeform-AI-Design-Gallery-And-Safe-B142
+          name: B144-Revision-Studio-With-Frozen-B143-B142
           path: |
             b142-site-output/
             b141-review-output/
