@@ -16,7 +16,7 @@ export function analyzeBypassIntervention(before,after,parameters){
   before?.worldContacts===0&&after?.worldContacts===0&&
   before?.BuildPlan?.operations?.length===0&&after?.BuildPlan?.operations?.length===0&&
   Array.isArray(before?.primitives)&&Array.isArray(after?.primitives),'INVALID_REVISIONS');
- yes(parameters?.width>=2&&parameters?.depth>=2&&parameters?.headroom>=2,
+ yes(parameters?.width>=2&&parameters?.depth>=2&&(parameters?.headroom??2)>=2,
   'EXPECTED_BODY_CLEARANCE');
  const oldReport=analyzeFootprint(before,parameters);
  const newReport=analyzeFootprint(after,parameters);
