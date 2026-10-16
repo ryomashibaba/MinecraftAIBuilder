@@ -58,7 +58,7 @@ test('three-stair readbacks check exact orientation and ascending height',async(
  const l=b136Layout('123 -60 -18','EAST');
  const w=mockWorld(l);
  assert.equal((await b136CheckLayout(w,l)).fullLayoutMatches,false);
- for(const p of l.addOnly)w.map.set(xyz(p),'minecraft:oak_stairs ["weirdo_direction" = 0]');
+ for(const p of l.addOnly)w.map.set(xyz(p),'minecraft:oak_stairs ["upside_down_bit" = 0, "weirdo_direction" = 0]');
  assert.equal((await b136CheckLayout(w,l)).fullLayoutMatches,true);
  assert(w.sent.every(x=>x.startsWith('testforblock ')));
 });
@@ -82,7 +82,7 @@ test('test-world builder writes only two verified air stairs and cleans precisel
  assert.equal((await b136CheckLayout(w,l)).fullLayoutMatches,true);
  assert.equal(w.sent.filter(x=>x.startsWith('setblock ')).length,2);
  assert.equal((await b136Cleanup(w,root)).status,'CLEAN');
- assert.equal(w.map.get(xyz(l.anchor)),'minecraft:oak_stairs ["weirdo_direction" = 3]');
+ assert.equal(w.map.get(xyz(l.anchor)),'minecraft:oak_stairs ["upside_down_bit" = 0, "weirdo_direction" = 3]');
  assert.equal(w.map.get(xyz(l.addOnly[0])),'minecraft:air');
  assert.equal(w.map.get(xyz(l.addOnly[1])),'minecraft:air');
  assert.equal((await b136Cleanup(w,root)).status,'NO_STAGE_JOURNAL');
@@ -98,7 +98,7 @@ test('cleanup avoids deleting any changed user block and requires manual review'
  assert.equal(r.status,'MANUAL_REVIEW_REQUIRED');
  assert.equal(r.skipped,1);
  assert.equal(w.map.get(xyz(l.addOnly[1])),'minecraft:stone');
- assert.equal(w.map.get(xyz(l.anchor)),'minecraft:oak_stairs ["weirdo_direction" = 1]');
+ assert.equal(w.map.get(xyz(l.anchor)),'minecraft:oak_stairs ["upside_down_bit" = 0, "weirdo_direction" = 1]');
 });
 test('querytarget requires one player, finite XYZ, and JSON from a successful command',()=>{
  assert.deepEqual(b136ParseEntityResult({statusCode:0,details:JSON.stringify([{
