@@ -1,0 +1,492 @@
+{
+  "schema": "minecraftaibuilder-b143-building-dsl-v1",
+  "id": "doppler-switchback-terminal-r0",
+  "title": "DOPPLER SWITCHBACK TERMINAL — 多重迂回を要する巨大宇宙港",
+  "brief": "北西と南東の巨大ドッキング施設を高架で結ぶ計画。高い遮蔽タワー3棟が直線と単純なL字経路を遮断する。空中連絡回廊は未設置で、経路計算と3D比較のためだけの不変デザイン。",
+  "bounds": {
+    "width": 90,
+    "height": 54,
+    "depth": 96
+  },
+  "designOnly": true,
+  "elements": [
+    {
+      "id": "north-foundation",
+      "shape": "box",
+      "mode": "add",
+      "material": "stone",
+      "origin": [
+        8,
+        3,
+        8
+      ],
+      "size": [
+        36,
+        6,
+        33
+      ]
+    },
+    {
+      "id": "south-foundation",
+      "shape": "box",
+      "mode": "add",
+      "material": "stone",
+      "origin": [
+        50,
+        3,
+        65
+      ],
+      "size": [
+        35,
+        6,
+        26
+      ]
+    },
+    {
+      "id": "north-elevated-pedestal",
+      "shape": "box",
+      "mode": "add",
+      "material": "concrete",
+      "origin": [
+        10,
+        9,
+        11
+      ],
+      "size": [
+        27,
+        8,
+        25
+      ]
+    },
+    {
+      "id": "south-elevated-pedestal",
+      "shape": "box",
+      "mode": "add",
+      "material": "concrete",
+      "origin": [
+        55,
+        9,
+        70
+      ],
+      "size": [
+        25,
+        8,
+        21
+      ]
+    },
+    {
+      "id": "north-transfer-deck",
+      "shape": "box",
+      "mode": "add",
+      "material": "concrete",
+      "origin": [
+        12,
+        17,
+        12
+      ],
+      "size": [
+        24,
+        2,
+        20
+      ]
+    },
+    {
+      "id": "south-transfer-deck",
+      "shape": "box",
+      "mode": "add",
+      "material": "concrete",
+      "origin": [
+        57,
+        17,
+        73
+      ],
+      "size": [
+        22,
+        2,
+        18
+      ]
+    },
+    {
+      "id": "screening-tower-a",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        27,
+        19,
+        32
+      ],
+      "size": [
+        26,
+        25,
+        19
+      ]
+    },
+    {
+      "id": "screening-tower-b",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        48,
+        19,
+        53
+      ],
+      "size": [
+        29,
+        27,
+        20
+      ]
+    },
+    {
+      "id": "screening-tower-c",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        21,
+        19,
+        67
+      ],
+      "size": [
+        20,
+        17,
+        13
+      ]
+    },
+    {
+      "id": "tower-a-glow-band",
+      "shape": "box",
+      "mode": "add",
+      "material": "glow",
+      "origin": [
+        27,
+        42,
+        32
+      ],
+      "size": [
+        26,
+        2,
+        19
+      ]
+    },
+    {
+      "id": "tower-b-glow-band",
+      "shape": "box",
+      "mode": "add",
+      "material": "glow",
+      "origin": [
+        48,
+        44,
+        53
+      ],
+      "size": [
+        29,
+        2,
+        20
+      ]
+    },
+    {
+      "id": "tower-c-glow-band",
+      "shape": "box",
+      "mode": "add",
+      "material": "glow",
+      "origin": [
+        21,
+        35,
+        67
+      ],
+      "size": [
+        20,
+        1,
+        13
+      ]
+    },
+    {
+      "id": "north-glass-flight-hall",
+      "shape": "ellipsoid",
+      "mode": "add",
+      "material": "glass",
+      "center": [
+        20,
+        32,
+        22
+      ],
+      "radii": [
+        9,
+        9,
+        9
+      ],
+      "shell": 2
+    },
+    {
+      "id": "south-glass-flight-hall",
+      "shape": "ellipsoid",
+      "mode": "add",
+      "material": "glass",
+      "center": [
+        72,
+        32,
+        82
+      ],
+      "radii": [
+        9,
+        9,
+        9
+      ],
+      "shell": 2
+    },
+    {
+      "id": "north-orbital-docking-ring",
+      "shape": "torus",
+      "mode": "add",
+      "material": "accent",
+      "center": [
+        22,
+        35,
+        20
+      ],
+      "axis": "z",
+      "majorRadius": 12,
+      "tubeRadius": 2
+    },
+    {
+      "id": "south-orbital-docking-ring",
+      "shape": "torus",
+      "mode": "add",
+      "material": "accent",
+      "center": [
+        70,
+        35,
+        81
+      ],
+      "axis": "z",
+      "majorRadius": 12,
+      "tubeRadius": 2
+    },
+    {
+      "id": "north-west-light-column",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        8,
+        17,
+        16
+      ],
+      "size": [
+        3,
+        21,
+        3
+      ]
+    },
+    {
+      "id": "north-east-light-column",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        37,
+        17,
+        16
+      ],
+      "size": [
+        3,
+        21,
+        3
+      ]
+    },
+    {
+      "id": "south-west-light-column",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        54,
+        17,
+        85
+      ],
+      "size": [
+        3,
+        21,
+        3
+      ]
+    },
+    {
+      "id": "south-east-light-column",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        81,
+        17,
+        85
+      ],
+      "size": [
+        3,
+        21,
+        3
+      ]
+    },
+    {
+      "id": "north-skybeam",
+      "shape": "box",
+      "mode": "add",
+      "material": "accent",
+      "origin": [
+        8,
+        38,
+        15
+      ],
+      "size": [
+        32,
+        2,
+        4
+      ]
+    },
+    {
+      "id": "south-skybeam",
+      "shape": "box",
+      "mode": "add",
+      "material": "accent",
+      "origin": [
+        54,
+        38,
+        83
+      ],
+      "size": [
+        30,
+        2,
+        4
+      ]
+    },
+    {
+      "id": "north-front-glass",
+      "shape": "box",
+      "mode": "add",
+      "material": "glass",
+      "origin": [
+        15,
+        21,
+        11
+      ],
+      "size": [
+        18,
+        4,
+        1
+      ]
+    },
+    {
+      "id": "south-back-glass",
+      "shape": "box",
+      "mode": "add",
+      "material": "glass",
+      "origin": [
+        61,
+        21,
+        92
+      ],
+      "size": [
+        15,
+        4,
+        1
+      ]
+    },
+    {
+      "id": "signal-spire-a",
+      "shape": "box",
+      "mode": "add",
+      "material": "glow",
+      "origin": [
+        37,
+        46,
+        37
+      ],
+      "size": [
+        4,
+        7,
+        4
+      ]
+    },
+    {
+      "id": "signal-spire-b",
+      "shape": "box",
+      "mode": "add",
+      "material": "glow",
+      "origin": [
+        59,
+        46,
+        60
+      ],
+      "size": [
+        4,
+        7,
+        4
+      ]
+    },
+    {
+      "id": "north-internal-console",
+      "shape": "box",
+      "mode": "add",
+      "material": "glow",
+      "origin": [
+        18,
+        19,
+        15
+      ],
+      "size": [
+        4,
+        2,
+        3
+      ]
+    },
+    {
+      "id": "south-internal-console",
+      "shape": "box",
+      "mode": "add",
+      "material": "glow",
+      "origin": [
+        73,
+        19,
+        87
+      ],
+      "size": [
+        4,
+        2,
+        3
+      ]
+    },
+    {
+      "id": "central-suspended-truss",
+      "shape": "box",
+      "mode": "add",
+      "material": "accent",
+      "origin": [
+        41,
+        45,
+        43
+      ],
+      "size": [
+        7,
+        2,
+        7
+      ]
+    },
+    {
+      "id": "central-antenna",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        43,
+        47,
+        45
+      ],
+      "size": [
+        2,
+        6,
+        2
+      ]
+    }
+  ]
+}
