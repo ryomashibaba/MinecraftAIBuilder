@@ -137,13 +137,12 @@ test('B140 held stair produces explicit next geometric remediation without ficti
  assert.equal(c[1].priority,'CORRIDOR_ROOT_OR_TWO_WIDE_INTERFLOOR_REDESIGN');
  assert(c.every(x=>x.worldOperations.length===0&&!x.roomEditsAuthorized));
 });
-test('full one-building integration rejects forged source inventory and controls permissions',()=>{
+test('full B141 integration refuses untrusted B105 synthetic design and forged source',()=>{
  const f=fixture();
- const one=b141AssembleBuilding(f.design,f.c113,f.c139,f.c140);
- assert.equal(one.selectedStairs,1);
- assert.equal(one.unresolved.length,0);
- assert.equal(one.originalFloorsRoomsAndCoresUnchanged,true);
- assert.deepEqual(one.worldCommands,[]);
+ // This minimal fixture is NOT a B104 architectural design; it must fail B105
+ // validation instead of masquerading as a real generated building.
+ assert.throws(()=>b141AssembleBuilding(f.design,f.c113,f.c139,f.c140),
+  /B105_UNSAFE_PARENT_DESIGN/);
  assert.throws(()=>b141AssembleBuilding(f.design,{...f.c113,id:'FAKE'},
   f.c139,f.c140),/B141_CASE_INVENTORY_MISMATCH/);
  assert.equal(B141_LIMITS.b140IndependentPlans,70);
