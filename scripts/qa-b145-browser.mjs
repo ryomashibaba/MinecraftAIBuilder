@@ -21,7 +21,8 @@ const pages=[
  {name:'B146-structure',url:'ai/structure/index.html',minimum:8,expected:8},
  {name:'B147-repairs',url:'ai/repairs/index.html',minimum:9,expected:9},
  {name:'B148-options',url:'ai/options/index.html',minimum:11,expected:11},
- {name:'B149-interiors',url:'ai/interiors/index.html',minimum:12,expected:12}
+ {name:'B149-interiors',url:'ai/interiors/index.html',minimum:12,expected:12},
+ {name:'B150-vertical',url:'ai/vertical/index.html',minimum:13,expected:13}
 ];
 const browser=await chromium.launch({headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
 const results=[];
@@ -77,6 +78,26 @@ async function inspect(info,mobile){
   await page.waitForTimeout(950);
   const last=await page.locator('#building').inputValue();
   if(last!==String(options-1))fail(info.name+'_MODEL_SELECTION_FAILED');
+  if(info.name==='B150-vertical'){
+   const sel=page.locator('#building'),route=page.locator('#b150-route'),status=page.locator('#b150-status');
+   await sel.selectOption('12');await page.waitForTimeout(300);
+   await route.selectOption('hangar-inner');await page.waitForTimeout(200);
+   if(!(await status.innerText()).includes('PASS_FLAT_GEOMETRY'))
+    fail('B150_MISSING_FLAT_ROUTE');
+   for(const target of ['mid-step','upper-deck']){
+    await route.selectOption(target);await page.waitForTimeout(200);
+    const text=await status.innerText();
+    if(!text.includes('STEP_CANDIDATE_ONLY')||!text.includes('高さ1の候補'))
+     fail('B150_UNCERTIFIED_STEP_NOT_REPORTED_'+target+'_'+text);
+   }
+   const flag=page.locator('#b150-overlay');
+   if(!await flag.isChecked())fail('B150_PATH_LAYER_HIDDEN');
+   await flag.uncheck();await flag.check();
+   await sel.selectOption('11');await page.waitForTimeout(200);
+   if(!(await status.innerText()).includes('診断はありません'))
+    fail('B150_OLD_MODEL_FALSE_CERTIFICATION');
+   await sel.selectOption('12');
+  }
   if(info.name==='B149-interiors'){
    const selector=page.locator('#building'),destination=page.locator('#routeTarget');
    const route=page.locator('#routeStatus');
