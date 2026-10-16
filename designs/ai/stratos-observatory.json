@@ -1,0 +1,396 @@
+{
+  "schema": "minecraftaibuilder-b143-building-dsl-v1",
+  "id": "stratos-observatory",
+  "title": "成層圏観測ドームと双塔空中研究所",
+  "brief": "ChatGPT設計デモ：巨大な半球状観測ドーム、左右非対称の研究塔、空中渡り廊下、円形の観測基壇。既存の住宅・ホテル・図書館等の5カテゴリには該当しない。",
+  "bounds": {
+    "width": 80,
+    "height": 56,
+    "depth": 78
+  },
+  "designOnly": true,
+  "elements": [
+    {
+      "id": "ground-plinth",
+      "shape": "box",
+      "mode": "add",
+      "material": "stone",
+      "origin": [
+        5,
+        3,
+        5
+      ],
+      "size": [
+        70,
+        3,
+        68
+      ]
+    },
+    {
+      "id": "island-foundation",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        9,
+        6,
+        9
+      ],
+      "size": [
+        62,
+        2,
+        60
+      ]
+    },
+    {
+      "id": "main-platform",
+      "shape": "box",
+      "mode": "add",
+      "material": "concrete",
+      "origin": [
+        19,
+        11,
+        19
+      ],
+      "size": [
+        41,
+        2,
+        39
+      ]
+    },
+    {
+      "id": "main-chamber",
+      "shape": "cylinder",
+      "mode": "add",
+      "material": "glass",
+      "axis": "y",
+      "origin": [
+        39,
+        13,
+        38
+      ],
+      "radius": 17,
+      "length": 15,
+      "shell": 2
+    },
+    {
+      "id": "atrium-floor",
+      "shape": "cylinder",
+      "mode": "add",
+      "material": "concrete",
+      "axis": "y",
+      "origin": [
+        39,
+        13,
+        38
+      ],
+      "radius": 17,
+      "length": 1
+    },
+    {
+      "id": "dome-envelope",
+      "shape": "ellipsoid",
+      "mode": "add",
+      "material": "glass",
+      "center": [
+        39,
+        26,
+        38
+      ],
+      "radii": [
+        17,
+        14,
+        17
+      ],
+      "shell": 2
+    },
+    {
+      "id": "clear-dome-bottom",
+      "shape": "box",
+      "mode": "cut",
+      "origin": [
+        21,
+        12,
+        20
+      ],
+      "size": [
+        37,
+        14,
+        37
+      ]
+    },
+    {
+      "id": "dome-reinforce-top",
+      "shape": "cylinder",
+      "mode": "add",
+      "material": "metal",
+      "axis": "y",
+      "origin": [
+        39,
+        37,
+        38
+      ],
+      "radius": 2,
+      "length": 4
+    },
+    {
+      "id": "left-tower-base",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        4,
+        7,
+        19
+      ],
+      "size": [
+        17,
+        4,
+        19
+      ]
+    },
+    {
+      "id": "left-tower-body",
+      "shape": "box",
+      "mode": "add",
+      "material": "concrete",
+      "origin": [
+        6,
+        11,
+        21
+      ],
+      "size": [
+        13,
+        28,
+        15
+      ],
+      "shell": 2
+    },
+    {
+      "id": "left-tower-crown",
+      "shape": "box",
+      "mode": "add",
+      "material": "glass",
+      "origin": [
+        4,
+        39,
+        19
+      ],
+      "size": [
+        17,
+        5,
+        19
+      ],
+      "shell": 1
+    },
+    {
+      "id": "left-tower-light",
+      "shape": "box",
+      "mode": "add",
+      "material": "glow",
+      "origin": [
+        10,
+        44,
+        25
+      ],
+      "size": [
+        4,
+        3,
+        5
+      ]
+    },
+    {
+      "id": "right-tower-base",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        58,
+        7,
+        30
+      ],
+      "size": [
+        18,
+        4,
+        21
+      ]
+    },
+    {
+      "id": "right-tower-body",
+      "shape": "box",
+      "mode": "add",
+      "material": "concrete",
+      "origin": [
+        60,
+        11,
+        32
+      ],
+      "size": [
+        14,
+        20,
+        17
+      ],
+      "shell": 2
+    },
+    {
+      "id": "right-tower-crown",
+      "shape": "ellipsoid",
+      "mode": "add",
+      "material": "glass",
+      "center": [
+        67,
+        32,
+        40
+      ],
+      "radii": [
+        9,
+        5,
+        10
+      ],
+      "shell": 1
+    },
+    {
+      "id": "west-skybridge",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        18,
+        22,
+        28
+      ],
+      "size": [
+        8,
+        2,
+        6
+      ]
+    },
+    {
+      "id": "west-skybridge-window",
+      "shape": "box",
+      "mode": "add",
+      "material": "glass",
+      "origin": [
+        18,
+        24,
+        28
+      ],
+      "size": [
+        8,
+        3,
+        6
+      ],
+      "shell": 1
+    },
+    {
+      "id": "east-skybridge",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        54,
+        19,
+        36
+      ],
+      "size": [
+        9,
+        2,
+        6
+      ]
+    },
+    {
+      "id": "east-skybridge-glass",
+      "shape": "box",
+      "mode": "add",
+      "material": "glass",
+      "origin": [
+        54,
+        21,
+        36
+      ],
+      "size": [
+        9,
+        3,
+        6
+      ],
+      "shell": 1
+    },
+    {
+      "id": "atrium-light",
+      "shape": "cylinder",
+      "mode": "add",
+      "material": "glow",
+      "axis": "y",
+      "origin": [
+        39,
+        13,
+        38
+      ],
+      "radius": 2,
+      "length": 1
+    },
+    {
+      "id": "central-hatch",
+      "shape": "box",
+      "mode": "cut",
+      "origin": [
+        37,
+        13,
+        53
+      ],
+      "size": [
+        5,
+        3,
+        4
+      ]
+    },
+    {
+      "id": "northern-hangar",
+      "shape": "box",
+      "mode": "add",
+      "material": "concrete",
+      "origin": [
+        28,
+        8,
+        4
+      ],
+      "size": [
+        25,
+        11,
+        15
+      ],
+      "shell": 2
+    },
+    {
+      "id": "hangar-door",
+      "shape": "box",
+      "mode": "cut",
+      "origin": [
+        37,
+        9,
+        4
+      ],
+      "size": [
+        8,
+        7,
+        3
+      ]
+    },
+    {
+      "id": "hangar-lights",
+      "shape": "box",
+      "mode": "add",
+      "material": "accent",
+      "origin": [
+        30,
+        19,
+        5
+      ],
+      "size": [
+        21,
+        1,
+        13
+      ]
+    }
+  ]
+}
