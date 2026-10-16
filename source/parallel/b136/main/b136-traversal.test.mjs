@@ -43,6 +43,8 @@ function mockWorld(layout,{empty=true,base=true,combinedUnsupported=false,invert
      statusMessage:matches?'found':'mismatch'};
    }
    if(line.startsWith('setblock ')){
+    if(combinedUnsupported&&line.includes('upside_down_bit')&&line.includes('weirdo_direction'))
+     return {statusCode:-2147483648,statusMessage:'InvalidOverloadSyntax'};
     const m=/^setblock (-?\d+ -?\d+ -?\d+) (.+)$/.exec(line);
     assert(m);
     map.set(m[1],m[2]);
