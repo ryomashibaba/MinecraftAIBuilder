@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MinecraftAIBuilder — B143 AI Architecture Studio</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,"Yu Gothic",sans-serif;color:#eaf4ff;background:#07121c}
+*{box-sizing:border-box}body{margin:0}
+header{padding:16px max(20px,3vw);display:flex;align-items:center;justify-content:space-between;gap:12px;background:#0b1825;border-bottom:1px solid #294252}
+h1{font-size:clamp(1.1rem,1.7vw,1.6rem);margin:0;letter-spacing:.02em}
+header a{color:#8ce5ff;text-decoration:none;font-weight:600}
+small,.muted{color:#9bb1c7}.sup{color:#7ae9c7;font-weight:700;font-size:.72rem;letter-spacing:.11em}
+.layout{display:grid;grid-template-columns:minmax(275px,340px) minmax(0,1fr);min-height:calc(100vh - 70px)}
+aside{background:#0e1d2c;border-right:1px solid #273e52;padding:24px;overflow:auto}
+main{padding:16px;min-width:0}
+h2{font-size:1.05rem;margin:0 0 12px}
+.info{padding:13px;background:#153246;border:1px solid #286079;border-radius:10px;line-height:1.65;font-size:.84rem;margin:16px 0}
+.warn{background:#33261d;border-color:#73573b;color:#ffe5bb}
+label{font-size:.86rem;color:#cce1f5;display:block;margin:12px 0 6px}
+select,input[type=range],button{background:#172e41;border:1px solid #426079;border-radius:9px;color:#f3fbff;font:inherit;padding:10px;width:100%}
+button{cursor:pointer}button:hover{background:#27495d}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #5ed6f5}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+.toggle{display:flex;align-items:center;gap:10px;margin:9px 0;font-size:.86rem}
+.toggle input{accent-color:#6ddfc4;width:18px;height:18px}
+.stats{display:grid;grid-template-columns:1fr auto;gap:9px;border-bottom:1px solid #2a4153;padding:7px 0;font-size:.84rem}
+.canvas-shell{height:min(77vh,790px);min-height:380px;border:1px solid #38566e;border-radius:18px;overflow:hidden;position:relative;background:radial-gradient(ellipse at 60% 35%,#203d56,#081320 70%)}
+canvas{width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+canvas:active{cursor:grabbing}.canvas-label{position:absolute;left:20px;top:18px;pointer-events:none;background:#061421bb;padding:10px 12px;border-radius:9px;font-size:.78rem}
+#sceneTitle{font-size:1rem;font-weight:700;margin-bottom:3px}
+#meta{margin-top:10px;font-size:.83rem;line-height:1.7;color:#a3bbce}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin:13px 0;font-size:.8rem;color:#c4d9e8}
+.dot{display:inline-block;border-radius:3px;width:11px;height:11px;margin-right:5px}
+@media(max-width:800px){.layout{grid-template-columns:1fr}aside{border-right:0;border-bottom:1px solid #38566e}.canvas-shell{height:55vh;min-height:320px}}
+</style></head>
+<body>
+<header><div><div class="sup">B143 / UNIVERSAL AI DESIGN</div><h1>MinecraftAIBuilder — AI Architecture Studio</h1></div>
+<a href="../">既存15棟の設計レビュー →</a></header>
+<div class="layout"><aside>
+<h2>ChatGPTが設計した新規建築</h2>
+<div class="muted" style="font-size:.86rem">固定の住宅・ホテル・集合住宅・オフィス・図書館カテゴリに依存しない建築データの実証。</div>
+<label for="building">建築を選択</label><select id="building"></select>
+<div id="description" class="info"></div><div id="stats"></div>
+<h2 style="margin-top:20px">表示設定</h2>
+<label for="floor">表示する上限階 <strong id="floorValue">全階</strong></label>
+<input type="range" id="floor" min="0" max="1" value="1">
+<div class="toggle"><input id="allFloors" type="checkbox" checked><label for="allFloors">全階表示</label></div>
+<div id="materialToggles"></div>
+<div class="controls"><button id="reset">視点リセット</button><button id="cutaway">上階を外す</button></div>
+<div class="info warn"><strong>これは設計プレビューです。</strong> Minecraft Educationで建設済みではありません。強度・動線・支持材・屋根の完成・実ブロック互換性は未認証。施工はNOT_PREPARED、9ゲートBLOCKEDのままです。</div>
+</aside><main>
+<div class="canvas-shell"><canvas id="view" aria-label="自由回転可能なMinecraft建築の概念3Dモデル"></canvas>
+<div class="canvas-label"><div id="sceneTitle"></div><span class="muted">ドラッグ：回転　ホイール：ズーム</span></div></div>
+<div class="legend" id="legend"></div><div id="meta"></div></main></div>
+<script>
+"use strict";
+const payload=__B143_GALLERY_JSON__;
+const names=payload.scenes;
+const palette={stone:"#9b9a95",concrete:"#c0d0db",metal:"#5c96b4",glass:"#5be0e8",wood:"#b48c62",glow:"#f9dc80",accent:"#cc7fa9"};
+const el=id=>document.getElementById(id),canvas=el("view"),ctx=canvas.getContext("2d",{alpha:false});
+const select=el("building"),floor=el("floor"),all=el("allFloors");
+let index=0,yaw=.72,pitch=.58,zoom=1,pressed=false,last=[0,0],queued=false;
+for(let i=0;i<names.length;i++){const o=document.createElement("option");o.value=i;o.textContent=names[i].title;select.appendChild(o);}
+function scene(){return names[index];}
+function infoLine(k,v){const div=document.createElement("div");div.className="stats";
+ const a=document.createElement("span"),b=document.createElement("strong");a.textContent=k;b.textContent=v;div.append(a,b);return div;}
+function setScene(){
+ const s=scene();floor.max=s.levels-1;floor.value=s.levels-1;all.checked=true;
+ el("sceneTitle").textContent=s.title;el("description").textContent=s.brief;
+ const st=el("stats");st.replaceChildren(
+  infoLine("デザイン識別子",s.id),infoLine("概念セル",s.stats.voxels.toLocaleString()+"個"),
+  infoLine("建築高さ",s.bounds.maxY-s.bounds.minY+1+"ブロック"),
+  infoLine("構成操作",s.stats.designOperations.length+"回"),
+  infoLine("3D生成の整合性","SHA256検証済み"),
+  infoLine("Minecraftでの施工","未実施"));
+ const toggles=el("materialToggles");toggles.replaceChildren();el("legend").replaceChildren();
+ for(const [i,layer] of s.layerNames.entries()){
+  const m=layer.slice(5).toLowerCase(),label=document.createElement("label"),check=document.createElement("input");
+  label.className="toggle";check.type="checkbox";check.checked=true;check.dataset.layer=layer;
+  label.append(check,document.createTextNode(" "+m+" ("+(s.stats.layerCounts[m]||0)+")"));toggles.append(label);
+  check.addEventListener("change",drawSoon);
+  const span=document.createElement("span"),dot=document.createElement("span");
+  dot.className="dot";dot.style.background=palette[m];span.append(dot,document.createTextNode(m));el("legend").append(span);
+ }
+ updateFloor();drawSoon();
+}
+function updateFloor(){el("floorValue").textContent=all.checked?"全階":String(Number(floor.value)+1)+"階まで";}
+function drawSoon(){if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;draw();});}
+function draw(){
+ const dpr=Math.min(2,window.devicePixelRatio||1),w=Math.max(canvas.clientWidth,250),h=Math.max(canvas.clientHeight,250);
+ canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);
+ ctx.setTransform(dpr,0,0,dpr,0,0);ctx.fillStyle="#0a1b2a";ctx.fillRect(0,0,w,h);
+ const s=scene(),visibleMaterials=new Set([...document.querySelectorAll("#materialToggles input:checked")].map(e=>e.dataset.layer));
+ const limit=all.checked?s.levels-1:Number(floor.value),active=s.surface.filter(p=>p[4]<=limit&&visibleMaterials.has(s.layerNames[p[3]]));
+ const c=[(s.bounds.minX+s.bounds.maxX+1)/2,(s.bounds.minY+s.bounds.maxY+1)/2,(s.bounds.minZ+s.bounds.maxZ+1)/2];
+ const diag=Math.max(s.bounds.maxX-s.bounds.minX+1,s.bounds.maxY-s.bounds.minY+1,s.bounds.maxZ-s.bounds.minZ+1);
+ const scale=Math.min(w,h)*.66/diag*zoom;
+ const sy=Math.sin(yaw),cy=Math.cos(yaw),sp=Math.sin(pitch),cp=Math.cos(pitch);
+ const project=(x,y,z)=>{
+  const dx=x-c[0],dy=y-c[1],dz=z-c[2],rx=dx*cy-dz*sy,rz=dx*sy+dz*cy;
+  return [w/2+rx*scale,h/2-(dy*cp-rz*sp)*scale,dy*sp+rz*cp];
+ };
+ active.sort((a,b)=>{
+  const p=x=>project(x[0]+.5,x[1]+.5,x[2]+.5)[2];
+  return p(a)-p(b);
+ });
+ let painted=0;
+ const faces=[[4,5,6,7],[0,1,5,4],[1,2,6,5],[2,3,7,6],[3,0,4,7]];
+ for(const p of active){
+  const x=p[0],y=p[1],z=p[2],m=s.layerNames[p[3]].slice(5).toLowerCase();
+  const color=palette[m]||"#aabbcc",height=1;
+  const vertices=[[x,y,z],[x+1,y,z],[x+1,y,z+1],[x,y,z+1],
+   [x,y+height,z],[x+1,y+height,z],[x+1,y+height,z+1],[x,y+height,z+1]].map(q=>project(...q));
+  const shown=faces.filter((f,i)=>i===0||(i===1&&sy>0)||(i===3&&sy<=0)||(i===2&&cy>0)||(i===4&&cy<=0));
+  ctx.globalAlpha=m==="glass"?.74:1;
+  for(const f of shown){
+   ctx.beginPath();ctx.moveTo(vertices[f[0]][0],vertices[f[0]][1]);
+   for(let i=1;i<f.length;i++)ctx.lineTo(vertices[f[i]][0],vertices[f[i]][1]);
+   ctx.closePath();ctx.fillStyle=color;ctx.fill();
+   ctx.strokeStyle="#07152155";ctx.lineWidth=.2;ctx.stroke();painted++;
+  }
+ }
+ ctx.globalAlpha=1;
+ el("meta").textContent="表示: "+active.length.toLocaleString()+" / "+s.surface.length.toLocaleString()+
+  " 表面セル、"+painted.toLocaleString()+" 面｜モデル SHA256: "+s.geometrySha256.slice(0,16)+
+  "…｜表示は設計上のローカル座標。実ワールドの座標・施工データではありません。";
+}
+select.addEventListener("change",()=>{index=Number(select.value);setScene();});
+floor.addEventListener("input",()=>{all.checked=false;updateFloor();drawSoon();});
+all.addEventListener("change",()=>{updateFloor();drawSoon();});
+el("reset").addEventListener("click",()=>{yaw=.72;pitch=.58;zoom=1;all.checked=true;updateFloor();drawSoon();});
+el("cutaway").addEventListener("click",()=>{all.checked=false;floor.value=Math.max(0,Math.floor(scene().levels*.55));updateFloor();drawSoon();});
+canvas.addEventListener("pointerdown",e=>{pressed=true;last=[e.clientX,e.clientY];canvas.setPointerCapture(e.pointerId);});
+canvas.addEventListener("pointermove",e=>{if(!pressed)return;yaw+=(e.clientX-last[0])*.007;pitch=Math.min(1.4,Math.max(.15,pitch+(e.clientY-last[1])*.005));last=[e.clientX,e.clientY];drawSoon();});
+canvas.addEventListener("pointerup",()=>pressed=false);
+canvas.addEventListener("pointercancel",()=>pressed=false);
+canvas.addEventListener("wheel",e=>{e.preventDefault();zoom=Math.max(.3,Math.min(5,zoom*Math.exp(-e.deltaY*.001)));drawSoon();},{passive:false});
+window.addEventListener("resize",drawSoon);
+setScene();
+</script></body></html>
