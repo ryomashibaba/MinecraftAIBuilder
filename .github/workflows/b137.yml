@@ -1,0 +1,121 @@
+name: B137 connected stair-landing-stair live validation Windows
+on:
+  pull_request:
+    paths:
+      - 'source/parallel/b137/**'
+      - '.github/workflows/b137.yml'
+      - 'docs/B137_IMPLEMENTATION_JA.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  b137-build-route-kit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: B137 code parsing and original design freeze
+        run: |
+          node --check source/parallel/b137/main/b137-landing-live.mjs
+          node --check source/parallel/b137/main/b137-package.mjs
+          node --check source/parallel/b137/main/b137-landing-live.test.mjs
+          node scripts/verify-freeze.mjs
+      - name: Reuse previously successful B136 verified kit when available
+        id: existing_b136
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          run-id: 38885105028
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          name: B136-Windows-Live-Stair-Traversal
+          path: b137-review-output/B137_Live_Landing_Connection
+      - name: Rebuild B114 to B129 if the pinned B136 artifact expired or is unavailable
+        if: steps.existing_b136.outcome != 'success'
+        run: |
+          node source/parallel/b114/main/b114-batch-review.mjs
+          node source/parallel/b117/main/b117-fleet-review.mjs
+          node source/parallel/b118/main/b118-fleet-review.mjs
+          node source/parallel/b119/main/b119-fleet-whole-stair-review.mjs
+          node source/parallel/b120/main/b120-fleet-review.mjs
+          node source/parallel/b121/main/b121-fleet-review.mjs
+          node source/parallel/b122/main/b122-fleet-route-review.mjs
+          node source/parallel/b123/main/b123-fleet-network-review.mjs
+          node source/parallel/b124/main/b124-fleet-3d-review.mjs
+          node source/parallel/b125/main/b125-fleet-fine-review.mjs
+          node source/parallel/b126/main/b126-fleet-blockstate-review.mjs
+          node source/parallel/b127/main/b127-fleet-calibration-review.mjs
+          node source/parallel/b128/main/b128-fleet-intake-review.mjs
+          node source/parallel/b129/main/b129-fleet-protocol.mjs
+      - name: Build B137 test-world route overlay with original design freeze
+        env:
+          B136_REUSE: ${{ steps.existing_b136.outcome }}
+        run: |
+          if [ "$B136_REUSE" = 'success' ]; then
+            node source/parallel/b137/main/b137-package.mjs --reuse b137-review-output/B137_Live_Landing_Connection
+          else
+            node source/parallel/b137/main/b137-package.mjs
+          fi
+      - name: Offline mock world, command allowlist, response controls, package tamper tests
+        env:
+          B137_KIT_PATH: ${{ github.workspace }}/b137-review-output/B137_Live_Landing_Connection
+        run: node --test source/parallel/b137/main/b137-landing-live.test.mjs
+      - name: Reverify nine blocked construction gates when offline source outputs were regenerated
+        if: steps.existing_b136.outcome != 'success'
+        run: node scripts/verify-b114-safety.mjs
+      - name: Verify inherited B136 nonconstruction manifests on artifact reuse
+        if: steps.existing_b136.outcome == 'success'
+        env:
+          B137_KIT_PATH: ${{ github.workspace }}/b137-review-output/B137_Live_Landing_Connection
+        run: |
+          node --input-type=module -e "import('./source/parallel/b137/main/b137-package.mjs').then(async m=>{const r=m.verifyB137Kit(process.env.B137_KIT_PATH); if(r.realGameTestsIncluded!==0||r.constructionAllowed!==false||r.readiness!=='NOT_PREPARED'||r.operations.length!==0)process.exitCode=3;console.log('B137_VERIFIED_INHERITED_HOLD',r.realGameTestsIncluded)})"
+      - name: Publish one-click Windows test-world diagnostics
+        uses: actions/upload-artifact@v4
+        with:
+          name: B137-Windows-Landing-Continuity
+          path: b137-review-output/B137_Live_Landing_Connection/
+          if-no-files-found: error
+          retention-days: 14
+  b137-native-windows-qa:
+    needs: b137-build-route-kit
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Fetch Windows kit into path with spaces
+        uses: actions/download-artifact@v4
+        with:
+          name: B137-Windows-Landing-Continuity
+          path: B137 Windows Route Kit With Spaces
+      - name: Native Windows CMD smoke and packaged source integrity
+        shell: pwsh
+        env:
+          B137_KIT_PATH: ${{ github.workspace }}/B137 Windows Route Kit With Spaces
+        run: |
+          node --test source/parallel/b137/main/b137-landing-live.test.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Verify pinned SocketBE real module API on Windows
+        shell: pwsh
+        env:
+          B137_KIT_PATH: ${{ github.workspace }}/B137 Windows Route Kit With Spaces
+        run: |
+          Push-Location $env:B137_KIT_PATH
+          npm.cmd install --ignore-scripts --no-audit --no-fund --omit=dev
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node --input-type=module -e "import('socket-be').then(m=>{if(typeof m.Server!=='function'||m.ServerEvent?.WorldAdd===undefined||m.ServerEvent?.PlayerChat===undefined){process.exitCode=2}else{console.log('B137_SocketBE_event_API_OK')}})"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Pop-Location
+      - name: Reject synthetic real-world evidence or construction permissions
+        shell: pwsh
+        env:
+          B137_KIT_PATH: ${{ github.workspace }}/B137 Windows Route Kit With Spaces
+        run: |
+          $pin = Get-Content -Raw -LiteralPath (Join-Path $env:B137_KIT_PATH 'B137_LANDING_MANIFEST.json') | ConvertFrom-Json
+          if ($pin.constructionAllowed -ne $false -or $pin.massConstructionAllowed -ne $false -or $pin.operations.Count -ne 0 -or $pin.initialB137GameMeasurements -ne 0) { throw 'B137 must not ship fake walk reports or bulk permission' }
+          if (Test-Path (Join-Path $env:B137_KIT_PATH 'data/B137_Live_Diagnostics')) { throw 'Unexpected shipping game diagnostic evidence' }
