@@ -1,0 +1,121 @@
+name: B135 controlled live stair calibrator Windows
+on:
+  pull_request:
+    paths:
+      - 'source/parallel/b135/**'
+      - '.github/workflows/b135.yml'
+      - 'docs/B135_IMPLEMENTATION_JA.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  b135-build-live-calibrator:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: B135 code parsing and original design freeze
+        run: |
+          node --check source/parallel/b135/main/b135-controlled-live.mjs
+          node --check source/parallel/b135/main/b135-package.mjs
+          node --check source/parallel/b135/main/b135-controlled-live.test.mjs
+          node scripts/verify-freeze.mjs
+      - name: Reuse previously successful B134 verified kit when available
+        id: existing_b134
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          run-id: 38810256775
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          name: B134-Windows-Live-ReadOnly-Stair
+          path: b135-review-output/B135_Controlled_Live_Test_World
+      - name: Rebuild B114 to B129 if the pinned B134 artifact expired or is unavailable
+        if: steps.existing_b134.outcome != 'success'
+        run: |
+          node source/parallel/b114/main/b114-batch-review.mjs
+          node source/parallel/b117/main/b117-fleet-review.mjs
+          node source/parallel/b118/main/b118-fleet-review.mjs
+          node source/parallel/b119/main/b119-fleet-whole-stair-review.mjs
+          node source/parallel/b120/main/b120-fleet-review.mjs
+          node source/parallel/b121/main/b121-fleet-review.mjs
+          node source/parallel/b122/main/b122-fleet-route-review.mjs
+          node source/parallel/b123/main/b123-fleet-network-review.mjs
+          node source/parallel/b124/main/b124-fleet-3d-review.mjs
+          node source/parallel/b125/main/b125-fleet-fine-review.mjs
+          node source/parallel/b126/main/b126-fleet-blockstate-review.mjs
+          node source/parallel/b127/main/b127-fleet-calibration-review.mjs
+          node source/parallel/b128/main/b128-fleet-intake-review.mjs
+          node source/parallel/b129/main/b129-fleet-protocol.mjs
+      - name: Build B135 with original frozen design still protected
+        env:
+          B134_REUSE: ${{ steps.existing_b134.outcome }}
+        run: |
+          if [ "$B134_REUSE" = 'success' ]; then
+            node source/parallel/b135/main/b135-package.mjs --reuse b135-review-output/B135_Controlled_Live_Test_World
+          else
+            node source/parallel/b135/main/b135-package.mjs
+          fi
+      - name: Offline mock world, command allowlist, response controls, package tamper tests
+        env:
+          B135_KIT_PATH: ${{ github.workspace }}/b135-review-output/B135_Controlled_Live_Test_World
+        run: node --test source/parallel/b135/main/b135-controlled-live.test.mjs
+      - name: Reverify nine blocked construction gates when offline source outputs were regenerated
+        if: steps.existing_b134.outcome != 'success'
+        run: node scripts/verify-b114-safety.mjs
+      - name: Verify inherited B134 nonconstruction manifests when using a prior passing artifact
+        if: steps.existing_b134.outcome == 'success'
+        env:
+          B135_KIT_PATH: ${{ github.workspace }}/b135-review-output/B135_Controlled_Live_Test_World
+        run: |
+          node --input-type=module -e "import('./source/parallel/b135/main/b135-package.mjs').then(async m=>{const r=m.verifyB135Kit(process.env.B135_KIT_PATH); if(r.initialRealGameEvidence!==0||r.constructionAllowed!==false||r.readiness!=='NOT_PREPARED'||r.operations.length!==0)process.exitCode=3;console.log('B135_VERIFIED_INHERITED_HOLD',r.initialRealGameEvidence)})"
+      - name: Publish one-click Windows test-world diagnostics
+        uses: actions/upload-artifact@v4
+        with:
+          name: B135-Windows-Controlled-Live-Stair
+          path: b135-review-output/B135_Controlled_Live_Test_World/
+          if-no-files-found: error
+          retention-days: 14
+  b135-native-windows-qa:
+    needs: b135-build-live-calibrator
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Fetch Windows kit into path with spaces
+        uses: actions/download-artifact@v4
+        with:
+          name: B135-Windows-Controlled-Live-Stair
+          path: B135 Windows Kit With Spaces
+      - name: Native Windows CMD smoke and packaged source integrity
+        shell: pwsh
+        env:
+          B135_KIT_PATH: ${{ github.workspace }}/B135 Windows Kit With Spaces
+        run: |
+          node --test source/parallel/b135/main/b135-controlled-live.test.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Verify pinned SocketBE real module API on Windows
+        shell: pwsh
+        env:
+          B135_KIT_PATH: ${{ github.workspace }}/B135 Windows Kit With Spaces
+        run: |
+          Push-Location $env:B135_KIT_PATH
+          npm.cmd install --ignore-scripts --no-audit --no-fund --omit=dev
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node --input-type=module -e "import('socket-be').then(m=>{if(typeof m.Server!=='function'||m.ServerEvent?.WorldAdd===undefined||m.ServerEvent?.PlayerChat===undefined){process.exitCode=2}else{console.log('B135_SocketBE_event_API_OK')}})"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Pop-Location
+      - name: Reject synthetic real-world evidence or construction permissions
+        shell: pwsh
+        env:
+          B135_KIT_PATH: ${{ github.workspace }}/B135 Windows Kit With Spaces
+        run: |
+          $pin = Get-Content -Raw -LiteralPath (Join-Path $env:B135_KIT_PATH 'B135_CONTROLLED_READBACK_MANIFEST.json') | ConvertFrom-Json
+          if ($pin.constructionAllowed -ne $false -or $pin.operations.Count -ne 0 -or $pin.initialAuthenticatedGameObservations -ne 0) { throw 'B135 must ship with no fake game observations or authorized construction' }
+          if (Test-Path (Join-Path $env:B135_KIT_PATH 'data/B135_Live_Diagnostics')) { throw 'Unexpected shipping game diagnostic evidence' }
