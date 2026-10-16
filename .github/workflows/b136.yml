@@ -1,0 +1,121 @@
+name: B136 live three-stair traversal telemetry Windows
+on:
+  pull_request:
+    paths:
+      - 'source/parallel/b136/**'
+      - '.github/workflows/b136.yml'
+      - 'docs/B136_IMPLEMENTATION_JA.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  b136-build-live-calibrator:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: B136 code parsing and original design freeze
+        run: |
+          node --check source/parallel/b136/main/b136-traversal.mjs
+          node --check source/parallel/b136/main/b136-package.mjs
+          node --check source/parallel/b136/main/b136-traversal.test.mjs
+          node scripts/verify-freeze.mjs
+      - name: Reuse previously successful B135 verified kit when available
+        id: existing_b135
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          run-id: 38871411964
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          name: B135-Windows-Controlled-Live-Stair
+          path: b136-review-output/B136_Live_Stair_Traversal
+      - name: Rebuild B114 to B129 if the pinned B135 artifact expired or is unavailable
+        if: steps.existing_b135.outcome != 'success'
+        run: |
+          node source/parallel/b114/main/b114-batch-review.mjs
+          node source/parallel/b117/main/b117-fleet-review.mjs
+          node source/parallel/b118/main/b118-fleet-review.mjs
+          node source/parallel/b119/main/b119-fleet-whole-stair-review.mjs
+          node source/parallel/b120/main/b120-fleet-review.mjs
+          node source/parallel/b121/main/b121-fleet-review.mjs
+          node source/parallel/b122/main/b122-fleet-route-review.mjs
+          node source/parallel/b123/main/b123-fleet-network-review.mjs
+          node source/parallel/b124/main/b124-fleet-3d-review.mjs
+          node source/parallel/b125/main/b125-fleet-fine-review.mjs
+          node source/parallel/b126/main/b126-fleet-blockstate-review.mjs
+          node source/parallel/b127/main/b127-fleet-calibration-review.mjs
+          node source/parallel/b128/main/b128-fleet-intake-review.mjs
+          node source/parallel/b129/main/b129-fleet-protocol.mjs
+      - name: Build B136 with original frozen design still protected
+        env:
+          B135_REUSE: ${{ steps.existing_b135.outcome }}
+        run: |
+          if [ "$B135_REUSE" = 'success' ]; then
+            node source/parallel/b136/main/b136-package.mjs --reuse b136-review-output/B136_Live_Stair_Traversal
+          else
+            node source/parallel/b136/main/b136-package.mjs
+          fi
+      - name: Offline mock world, command allowlist, response controls, package tamper tests
+        env:
+          B136_KIT_PATH: ${{ github.workspace }}/b136-review-output/B136_Live_Stair_Traversal
+        run: node --test source/parallel/b136/main/b136-traversal.test.mjs
+      - name: Reverify nine blocked construction gates when offline source outputs were regenerated
+        if: steps.existing_b135.outcome != 'success'
+        run: node scripts/verify-b114-safety.mjs
+      - name: Verify inherited B135 nonconstruction manifests on artifact reuse
+        if: steps.existing_b135.outcome == 'success'
+        env:
+          B136_KIT_PATH: ${{ github.workspace }}/b136-review-output/B136_Live_Stair_Traversal
+        run: |
+          node --input-type=module -e "import('./source/parallel/b136/main/b136-package.mjs').then(async m=>{const r=m.verifyB136Kit(process.env.B136_KIT_PATH); if(r.initialWalkCaptures!==0||r.constructionAllowed!==false||r.readiness!=='NOT_PREPARED'||r.operations.length!==0)process.exitCode=3;console.log('B136_VERIFIED_INHERITED_HOLD',r.initialWalkCaptures)})"
+      - name: Publish one-click Windows test-world diagnostics
+        uses: actions/upload-artifact@v4
+        with:
+          name: B136-Windows-Live-Stair-Traversal
+          path: b136-review-output/B136_Live_Stair_Traversal/
+          if-no-files-found: error
+          retention-days: 14
+  b136-native-windows-qa:
+    needs: b136-build-live-calibrator
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Fetch Windows kit into path with spaces
+        uses: actions/download-artifact@v4
+        with:
+          name: B136-Windows-Live-Stair-Traversal
+          path: B136 Windows Stair Kit With Spaces
+      - name: Native Windows CMD smoke and packaged source integrity
+        shell: pwsh
+        env:
+          B136_KIT_PATH: ${{ github.workspace }}/B136 Windows Stair Kit With Spaces
+        run: |
+          node --test source/parallel/b136/main/b136-traversal.test.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Verify pinned SocketBE real module API on Windows
+        shell: pwsh
+        env:
+          B136_KIT_PATH: ${{ github.workspace }}/B136 Windows Stair Kit With Spaces
+        run: |
+          Push-Location $env:B136_KIT_PATH
+          npm.cmd install --ignore-scripts --no-audit --no-fund --omit=dev
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node --input-type=module -e "import('socket-be').then(m=>{if(typeof m.Server!=='function'||m.ServerEvent?.WorldAdd===undefined||m.ServerEvent?.PlayerChat===undefined){process.exitCode=2}else{console.log('B136_SocketBE_event_API_OK')}})"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Pop-Location
+      - name: Reject synthetic real-world evidence or construction permissions
+        shell: pwsh
+        env:
+          B136_KIT_PATH: ${{ github.workspace }}/B136 Windows Stair Kit With Spaces
+        run: |
+          $pin = Get-Content -Raw -LiteralPath (Join-Path $env:B136_KIT_PATH 'B136_TRAVERSAL_MANIFEST.json') | ConvertFrom-Json
+          if ($pin.constructionAllowed -ne $false -or $pin.massConstructionAllowed -ne $false -or $pin.operations.Count -ne 0 -or $pin.initialActualWalkCaptures -ne 0) { throw 'B136 must ship with no fake game observations or authorized construction' }
+          if (Test-Path (Join-Path $env:B136_KIT_PATH 'data/B136_Live_Diagnostics')) { throw 'Unexpected shipping game diagnostic evidence' }
