@@ -36,7 +36,7 @@ export function makeB157Bundle(original,r2,r3,r4,repair,r1,r2i,r3i,r4i,r5i,r6i,t
   finish.report.connectedFlatMoves===26&&
   finish.report.finishingElementCount===14&&
   finish.report.foundationPiers===2&&finish.report.guardrailPieces===2&&
-  finish.report.railingReviewRequired!==false&&
+  finish.report.railStrengthCertified===false&&
   finish.finished.elements.length===prev.candidate.candidate.elements.length+14&&
   JSON.stringify(finish.finished.elements.slice(0,prev.candidate.candidate.elements.length))===
    JSON.stringify(prev.candidate.candidate.elements)&&
