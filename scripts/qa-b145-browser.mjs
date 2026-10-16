@@ -17,7 +17,8 @@ const pages=[
  {name:'B142-main',url:'index.html',minimum:15,expected:15},
  {name:'B143-freeform',url:'ai/index.html',minimum:2,expected:2},
  {name:'B144-revisions',url:'ai/revisions/index.html',minimum:4,expected:4},
- {name:'B145-iterations',url:'ai/iterations/index.html',minimum:6,expected:6}
+ {name:'B145-iterations',url:'ai/iterations/index.html',minimum:6,expected:6},
+ {name:'B146-structure',url:'ai/structure/index.html',minimum:8,expected:8}
 ];
 const browser=await chromium.launch({headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
 const results=[];
@@ -73,6 +74,11 @@ async function inspect(info,mobile){
   await page.waitForTimeout(950);
   const last=await page.locator('#building').inputValue();
   if(last!==String(options-1))fail(info.name+'_MODEL_SELECTION_FAILED');
+  if(info.name==='B146-structure'){
+   const review=await page.locator('#topologyReview').innerText();
+   if(!review.includes('局所接続群')||!review.includes('実構造の認証ではありません'))
+    fail('B146_STRUCTURAL_REVIEW_NOT_UPDATED');
+  }
   if(info.name!=='B142-main'){
    const txt=await page.locator('#sceneTitle').innerText();
    if(!txt.trim())fail(info.name+'_SCENE_TITLE_EMPTY');
@@ -85,7 +91,7 @@ async function inspect(info,mobile){
 }
 try{
  for(const item of pages)await inspect(item,false);
- await inspect(pages[3],true);
+ await inspect(pages[4],true);
  fs.writeFileSync(path.join(ART,'B145_BROWSER_RESULTS.json'),JSON.stringify({status:'PASS',results},null,2)+'\n');
  console.log(JSON.stringify({status:'PASS',results},null,2));
 }catch(e){
