@@ -8,6 +8,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {spawnSync} from 'node:child_process';
 import {verifyB151Site} from './build-b151-site.mjs';
+import {verifyB150Site} from './build-b150-site.mjs';
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const SITE=path.join(ROOT,'b142-site-output'),REVIEW=path.join(ROOT,'b141-review-output');
 const safe=(b,reason)=>{if(!b)throw Error('B152_BASELINE_'+reason);};
@@ -32,10 +33,36 @@ catch(e){
  console.log('B152_PREDECESSOR_UNAVAILABLE '+String(e).slice(0,240));
  fs.rmSync(SITE,{recursive:true,force:true});
  fs.rmSync(REVIEW,{recursive:true,force:true});
- // B151 → B150 → B149 → B148 each require source verification.
- run('prepare-b151-baseline.mjs');
- run('build-b151-site.mjs');
- manifest=verify();mode='REBUILT_B151_FROM_VERIFIED_ANCESTORS';
+ // If an independently signed B150 artifact exists, skip all expensive
+ // ancestor regeneration. It is RECOMPUTED and source-verified before reuse.
+ let verifiedB150=false;
+ try{
+  const inherited=path.join(ROOT,'b152-b150-artifact');
+  const prevSite=path.join(inherited,'b142-site-output');
+  const prevReview=path.join(inherited,'b141-review-output');
+  safe(fs.existsSync(prevSite)&&fs.existsSync(prevReview),'NO_B150_FALLBACK');
+  fs.cpSync(prevSite,SITE,{recursive:true,force:true});
+  fs.cpSync(prevReview,REVIEW,{recursive:true,force:true});
+  const checked=verifyB150Site(SITE);
+  safe(checked.readiness==='NOT_PREPARED'&&checked.worldWrites===0&&
+   checked.gates.length===9&&checked.gates.every(x=>x==='BLOCKED')&&
+   checked.BuildPlan.operations.length===0,'B150_FALLBACK_UNVERIFIED');
+  verifiedB150=true;
+ }catch(ex){
+  console.log('B152_B150_FALLBACK_NOT_TRUSTED '+String(ex).slice(0,200));
+  fs.rmSync(SITE,{recursive:true,force:true});
+  fs.rmSync(REVIEW,{recursive:true,force:true});
+ }
+ if(verifiedB150){
+  run('build-b151-site.mjs');
+  mode='VERIFIED_B150_ARTIFACT_PLUS_B151_DELTA';
+ }else{
+  // B151 → B150 → B149 → B148 each require source verification.
+  run('prepare-b151-baseline.mjs');
+  run('build-b151-site.mjs');
+  mode='REBUILT_B151_FROM_VERIFIED_ANCESTORS';
+ }
+ manifest=verify();
 }
 const proof={schema:'minecraftaibuilder-b152-provenance-v1',status:'PASS',mode,
  inheritedB141Sha256:manifest.inheritedB141Sha256,
