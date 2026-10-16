@@ -23,7 +23,8 @@ const pages=[
  {name:'B148-options',url:'ai/options/index.html',minimum:11,expected:11},
  {name:'B149-interiors',url:'ai/interiors/index.html',minimum:12,expected:12},
  {name:'B150-vertical',url:'ai/vertical/index.html',minimum:13,expected:13},
- {name:'B151-clearance',url:'ai/clearance/index.html',minimum:14,expected:14}
+ {name:'B151-clearance',url:'ai/clearance/index.html',minimum:14,expected:14},
+ {name:'B152-footprint',url:'ai/footprint/index.html',minimum:15,expected:15}
 ];
 const browser=await chromium.launch({headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
 const results=[];
@@ -79,6 +80,28 @@ async function inspect(info,mobile){
   await page.waitForTimeout(950);
   const last=await page.locator('#building').inputValue();
   if(last!==String(options-1))fail(info.name+'_MODEL_SELECTION_FAILED');
+  if(info.name==='B152-footprint'){
+   const models=page.locator('#building'),target=page.locator('#b152-target'),
+    status=page.locator('#b152-status');
+   await models.selectOption('13');await target.selectOption('observation-platform');
+   await page.waitForTimeout(350);
+   if(!(await status.innerText()).includes('INVALID_GOAL_FOOTPRINT'))
+    fail('B152_R3_MISSING_FLOOR_NOT_DETECTED_'+await status.innerText());
+   await models.selectOption('14');await page.waitForTimeout(400);
+   const after=await status.innerText();
+   if(!after.includes('PASS_FLAT_FOOTPRINT_GEOMETRY')||!after.includes('18移動'))
+    fail('B152_R4_FOOTPRINT_NOT_REACHABLE_'+after);
+   const layer=page.locator('#b152-show-footprint');
+   if(!await layer.isChecked())fail('B152_FOOTPRINT_OVERLAY_HIDDEN');
+   await layer.uncheck();await layer.check();
+   await target.selectOption('observation-turn');await page.waitForTimeout(250);
+   if(!(await status.innerText()).includes('PASS_FLAT_FOOTPRINT_GEOMETRY'))
+    fail('B152_TURN_CANNOT_BE_INSPECTED');
+   await models.selectOption('12');await page.waitForTimeout(200);
+   if(!(await status.innerText()).includes('2×2検査はありません'))
+    fail('B152_PREVIOUS_MODELS_FALSE_CERTIFICATION');
+   await models.selectOption('14');
+  }
   if(info.name==='B151-clearance'){
    const selector=page.locator('#building'),target=page.locator('#b151-route');
    const status=page.locator('#b151-status');
