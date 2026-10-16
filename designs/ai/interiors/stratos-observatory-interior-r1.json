@@ -2,7 +2,7 @@
   "schema": "minecraftaibuilder-b143-building-dsl-v1",
   "id": "stratos-observatory-interior-r1",
   "title": "成層圏観測研究所 — 格納庫内部回廊 R1",
-  "brief": "ChatGPTが既存成層圏観測研究所の格納庫を改修した、独立保存の設計案。欠けていた入口床を補い、内部回廊・間仕切り・歩行可能な開口を追加。平面通行はローカル幾何のみ検証し、階段・強度・Minecraft Education施工は未認証。",
+  "brief": "既存の成層圏観測研究所に入口床・ホール・間仕切りと通過開口を追加した改修案。2ブロックの頭上空間と平面経路だけを検証。階段・強度・実施工は未承認。",
   "bounds": {
     "width": 80,
     "height": 56,
