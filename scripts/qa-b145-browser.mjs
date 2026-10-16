@@ -19,7 +19,8 @@ const pages=[
  {name:'B144-revisions',url:'ai/revisions/index.html',minimum:4,expected:4},
  {name:'B145-iterations',url:'ai/iterations/index.html',minimum:6,expected:6},
  {name:'B146-structure',url:'ai/structure/index.html',minimum:8,expected:8},
- {name:'B147-repairs',url:'ai/repairs/index.html',minimum:9,expected:9}
+ {name:'B147-repairs',url:'ai/repairs/index.html',minimum:9,expected:9},
+ {name:'B148-options',url:'ai/options/index.html',minimum:11,expected:11}
 ];
 const browser=await chromium.launch({headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
 const results=[];
@@ -75,6 +76,24 @@ async function inspect(info,mobile){
   await page.waitForTimeout(950);
   const last=await page.locator('#building').inputValue();
   if(last!==String(options-1))fail(info.name+'_MODEL_SELECTION_FAILED');
+  if(info.name==='B148-options'){
+   const status=page.locator('#repairStatus'),selector=page.locator('#building');
+   await selector.selectOption('6');await page.waitForTimeout(300);
+   const baseline=await status.innerText();
+   if(!baseline.includes('390 非連結セル'))fail('B148_R4_390_NOT_VISIBLE_'+baseline);
+   const toggle=page.locator('#markDisconnected');
+   if(!await toggle.isChecked())fail('B148_HIGHLIGHT_NOT_ENABLED');
+   await toggle.uncheck();await toggle.check();
+   for(const index of [9,10]){
+    await selector.selectOption(String(index));await page.waitForTimeout(300);
+    const t=await status.innerText();
+    if(!t.includes('0 非連結セル')||!t.includes('未採用'))
+     fail('B148_UNAPPROVED_OPTION_NOT_ZERO_'+index+'_'+t);
+   }
+   await selector.selectOption('8');await page.waitForTimeout(250);
+   const r5=await status.innerText();
+   if(!r5.includes('0 非連結セル'))fail('B148_R5_REGRESSED_'+r5);
+  }
   if(info.name==='B147-repairs'){
    await page.locator('#building').selectOption('6');
    await page.waitForTimeout(350);
@@ -105,7 +124,7 @@ async function inspect(info,mobile){
 }
 try{
  for(const item of pages)await inspect(item,false);
- await inspect(pages[5],true);
+ await inspect(pages[6],true);
  fs.writeFileSync(path.join(ART,'B145_BROWSER_RESULTS.json'),JSON.stringify({status:'PASS',results},null,2)+'\n');
  console.log(JSON.stringify({status:'PASS',results},null,2));
 }catch(e){
