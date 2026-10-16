@@ -77,7 +77,6 @@ export function renderB145Html(bundle,template){
 }
 const ROOT_NAV='<div id="b145-iteration-navigation" style="padding:12px 24px;background:#153c49;color:#d5faff;border-bottom:1px solid #288b90"><strong>B145 NEW:</strong> ChatGPTへの2回目の追加指示で中空リング・アーチを追加 → <a style="color:#8af5dd" href="./ai/iterations/">3世代の3D建築比較</a>（未施工）</div>';
 const AI_NAV='<div id="b145-iteration-navigation" class="info"><strong>B145 NEW:</strong> ChatGPTの連続改修を3Dで比較 → <a style="color:#8ef4dc" href="./iterations/">初期案 → R2 → R3</a></div>';
-const REV_NAV='<div id="b145-iteration-navigation" class="info"><strong>B145 NEW:</strong> 追加指示を重ねた改修 → <a style="color:#8ef4dc" href="../iterations/">初期案・R2・R3の比較</a></div>';
 function addAfter(doc,where,node){
  fatal(doc.includes(where)&&!doc.includes('id="b145-iteration-navigation"'),'NAV_INSERTION_FAILED');
  return doc.replace(where,where+node);
@@ -88,19 +87,18 @@ function hashUpdate(dir,filename,fn){
 }
 export function writeB145Site(bundle,dir=SITE){
  verifyB142Output(dir);verifyB143Site(dir);verifyB144Site(dir);
- const html=renderB145Html(bundle,rd(TEMPLATE.split('/').slice(0,-1).join('/'),path.basename(TEMPLATE)));
+ const html=renderB145Html(bundle,rd(path.dirname(TEMPLATE),path.basename(TEMPLATE)));
  const out=path.join(dir,'ai/iterations');fs.mkdirSync(out,{recursive:true});
  fs.writeFileSync(path.join(out,'index.html'),html);
  const home=addAfter(rd(dir,'index.html'),'</header>',ROOT_NAV);
  const ai=addAfter(rd(dir,'ai/index.html'),'<h2>ChatGPTが設計した新規建築</h2>',AI_NAV);
- const rev=addAfter(rd(dir,'ai/revisions/index.html'),'<h2>ChatGPTによる建築の原案と改修案</h2>',REV_NAV);
+ const rev=rd(dir,'ai/revisions/index.html'); // preserve the B144 source-pinned view byte-for-byte
  fs.writeFileSync(path.join(dir,'index.html'),home);
  fs.writeFileSync(path.join(dir,'ai/index.html'),ai);
- fs.writeFileSync(path.join(dir,'ai/revisions/index.html'),rev);
  hashUpdate(dir,'manifest.json',m=>{m.htmlSha256=sha(home);});
  hashUpdate(dir,'B143_MANIFEST.json',m=>{m.rootSha256=sha(home);m.gallerySha256=sha(ai);});
  hashUpdate(dir,'B144_MANIFEST.json',m=>{
-  m.rootSha256=sha(home);m.aiSha256=sha(ai);m.previewSha256=sha(rev);
+  m.rootSha256=sha(home);m.aiSha256=sha(ai); // B144 preview SHA remains independently verified
  });
  const old=JSON.parse(rd(dir,'B144_MANIFEST.json'));
  const manifest={
@@ -136,8 +134,7 @@ export function verifyB145Site(dir=SITE){
   m.constructionApproved===false&&m.minecraftWrites===0&&m.worldCoordinates===null&&
   m.gates?.length===9&&m.gates.every(x=>x==='BLOCKED')&&
   rd(dir,'index.html').includes('b145-iteration-navigation')&&
-  rd(dir,'ai/index.html').includes('b145-iteration-navigation')&&
-  rd(dir,'ai/revisions/index.html').includes('b145-iteration-navigation'),'SITE_VERIFICATION_FAILED');
+  rd(dir,'ai/index.html').includes('b145-iteration-navigation'),'SITE_VERIFICATION_FAILED');
  return m;
 }
 if(process.argv[1]===fileURLToPath(import.meta.url)){
