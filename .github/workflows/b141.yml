@@ -1,0 +1,49 @@
+name: B141 integrated two-wide corridor network and aperture consistency
+on:
+  pull_request:
+    paths:
+      - 'source/parallel/b141/**'
+      - '.github/workflows/b141.yml'
+      - 'docs/B141_IMPLEMENTATION_JA.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  b141-network:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Frozen source and syntax guards
+        run: |
+          node scripts/verify-freeze.mjs
+          node --check source/parallel/b141/main/b141-integrated-network.mjs
+          node --check source/parallel/b141/main/b141-integrated-network.test.mjs
+      - name: Network merge, 2-wide turn, multi-floor routing, slab and unresolved tests
+        run: node --test source/parallel/b141/main/b141-integrated-network.test.mjs
+      - name: Rebuild frozen B113-B140 and integrate real 15-building corridor plans
+        run: node source/parallel/b141/main/b141-integrated-network.mjs
+      - name: Assert all 15 buildings 66 floors 102 stairs and 9 blocked construction gates
+        run: |
+          node --input-type=module -e "
+          import fs from 'node:fs';
+          import {verifyB141} from './source/parallel/b141/main/b141-integrated-network.mjs';
+          const r=JSON.parse(fs.readFileSync('b141-review-output/B141_15Buildings_Shared_2Wide_Network.json'));
+          if(!verifyB141(r)||r.totals.buildings!==15||r.totals.floors!==66||
+             r.totals.stairs!==102||r.totals.selectedIndependent!==70||
+             r.totals.held!==32||r.totals.actualWorldWritesAllowed!==0||
+             r.gates.length!==9||r.BuildPlan.operations.length!==0)
+            throw Error('B141_15_66_102_OR_FREEZE_GATE_DRIFT');
+          console.log('B141_ALL_SOURCE_AND_NINE_BLOCKED_GATES_PASS');
+          console.log(JSON.stringify(r.totals));
+          "
+      - name: Save source-pinned network plan and Japanese milestone report
+        uses: actions/upload-artifact@v4
+        with:
+          name: B141-Integrated-TwoWide-Network
+          path: b141-review-output/
+          if-no-files-found: error
+          retention-days: 14
