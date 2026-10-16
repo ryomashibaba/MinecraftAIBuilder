@@ -1,0 +1,53 @@
+{
+  "schema": "minecraftaibuilder-b144-design-revision-v1",
+  "revisionId": "canyon-data-sanctuary-r3",
+  "targetId": "canyon-data-sanctuary-r2",
+  "baseSourceSha256": "97106f724ac09b63380a2763c90eaee7e7215795354c9fea93e3bc5ecac23b4c",
+  "request": "峡谷に架かる聖堂の中央コアに巨大な円形フレームを追加して。頂上には浮遊する発光リングを増設し、既存の大アーチや展望デッキは維持して。",
+  "edits": [
+    {
+      "action": "addElement",
+      "target": "halo-ring-top",
+      "element": {
+        "id": "halo-ring-top",
+        "shape": "torus",
+        "mode": "add",
+        "material": "glow",
+        "center": [
+          44,
+          56,
+          40
+        ],
+        "axis": "y",
+        "majorRadius": 16,
+        "tubeRadius": 2
+      }
+    },
+    {
+      "action": "addElement",
+      "target": "vertical-portal-ring",
+      "element": {
+        "id": "vertical-portal-ring",
+        "shape": "torus",
+        "mode": "add",
+        "material": "metal",
+        "center": [
+          43,
+          35,
+          30
+        ],
+        "axis": "z",
+        "majorRadius": 12,
+        "tubeRadius": 2
+      }
+    },
+    {
+      "action": "setTitle",
+      "value": "峡谷データ聖堂 — 二重リングゲート R3"
+    },
+    {
+      "action": "setBrief",
+      "value": "B143原案→B144片持ちデッキ改修→B145リング機構追加の3段階。元の大アーチと展望施設を維持しながら、新しい環状構造を積み重ねた。"
+    }
+  ]
+}
