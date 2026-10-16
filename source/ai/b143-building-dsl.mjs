@@ -28,10 +28,10 @@ export function validateDesign(d){
  yes(Array.isArray(d.elements)&&d.elements.length>=1&&d.elements.length<=160,'ELEMENT_COUNT');
  const ids=new Set();let work=0,hasAdd=false;
  for(const e of d.elements){
-  yes(only(e,['id','shape','mode','material','origin','size','center','radii','axis','radius','length','shell']),'ELEMENT_FIELDS');
+  yes(only(e,['id','shape','mode','material','origin','size','center','radii','axis','radius','length','shell','majorRadius','tubeRadius']),'ELEMENT_FIELDS');
   yes(typeof e.id==='string'&&/^[a-zA-Z][a-zA-Z0-9_-]{0,39}$/.test(e.id)&&!ids.has(e.id),'ELEMENT_ID');
   ids.add(e.id);
-  yes(['box','ellipsoid','cylinder'].includes(e.shape)&&['add','cut'].includes(e.mode),'SHAPE_MODE');
+  yes(['box','ellipsoid','cylinder','torus'].includes(e.shape)&&['add','cut'].includes(e.mode),'SHAPE_MODE');
   yes(e.mode==='cut'?e.material===undefined:MATERIALS.includes(e.material),'MATERIAL');
   const shell=e.shell??0;
   yes(int(shell,0,4)&&!(e.mode==='cut'&&shell),'SHELL');
@@ -40,13 +40,23 @@ export function validateDesign(d){
    yes(trip(e.origin,0,128)&&trip(e.size,1,128),'BOX_COORD');
    a=e.origin;b=e.origin.map((v,i)=>v+e.size[i]-1);
    if(shell)yes(e.size.every(n=>n>shell*2),'SHELL_TOO_THICK');
-   yes(e.center===undefined&&e.radii===undefined&&e.axis===undefined&&e.radius===undefined&&e.length===undefined,'BOX_EXTRA');
+   yes(e.center===undefined&&e.radii===undefined&&e.axis===undefined&&e.radius===undefined&&e.length===undefined&&e.majorRadius===undefined&&e.tubeRadius===undefined,'BOX_EXTRA');
   }else if(e.shape==='ellipsoid'){
    yes(trip(e.center,0,128)&&trip(e.radii,1,64),'ELLIPSOID_COORD');
    a=e.center.map((v,i)=>v-e.radii[i]);
    b=e.center.map((v,i)=>v+e.radii[i]);
    if(shell)yes(e.radii.every(r=>r>shell),'SHELL_TOO_THICK');
-   yes(e.origin===undefined&&e.size===undefined&&e.axis===undefined&&e.radius===undefined&&e.length===undefined,'ELLIPSOID_EXTRA');
+   yes(e.origin===undefined&&e.size===undefined&&e.axis===undefined&&e.radius===undefined&&e.length===undefined&&e.majorRadius===undefined&&e.tubeRadius===undefined,'ELLIPSOID_EXTRA');
+  }else if(e.shape==='torus'){
+   yes(trip(e.center,0,128)&&['x','y','z'].includes(e.axis)&&
+     int(e.majorRadius,3,45)&&int(e.tubeRadius,1,9)&&
+     e.majorRadius>e.tubeRadius+1,'TORUS_COORD');
+   const i={x:0,y:1,z:2}[e.axis],span=e.majorRadius+e.tubeRadius;
+   a=e.center.map((v,j)=>v-(j===i?e.tubeRadius:span));
+   b=e.center.map((v,j)=>v+(j===i?e.tubeRadius:span));
+   if(shell)yes(e.tubeRadius>shell,'SHELL_TOO_THICK');
+   yes(e.origin===undefined&&e.size===undefined&&e.radii===undefined&&
+     e.radius===undefined&&e.length===undefined,'TORUS_EXTRA');
   }else{
    yes(trip(e.origin,0,128)&&['x','y','z'].includes(e.axis)&&
      int(e.radius,1,64)&&int(e.length,1,128),'CYLINDER_COORD');
@@ -54,7 +64,7 @@ export function validateDesign(d){
    a=e.origin.map((v,j)=>v-(j===i?0:e.radius));
    b=e.origin.map((v,j)=>v+(j===i?e.length-1:e.radius));
    if(shell)yes(e.radius>shell,'SHELL_TOO_THICK');
-   yes(e.center===undefined&&e.radii===undefined&&e.size===undefined,'CYLINDER_EXTRA');
+   yes(e.center===undefined&&e.radii===undefined&&e.size===undefined&&e.majorRadius===undefined&&e.tubeRadius===undefined,'CYLINDER_EXTRA');
   }
   yes(a.every((v,i)=>v>=0)&&b.every((v,i)=>v<[w,h,z][i]),'OUTSIDE_LOCAL_BOUNDS');
   const volume=b.reduce((n,v,i)=>n*(v-a[i]+1),1);
@@ -80,6 +90,12 @@ function inside(e,x,y,z){
   return ((x-cx)/(rx-e.shell))**2+
    ((y-cy)/(ry-e.shell))**2+((z-cz)/(rz-e.shell))**2>=1;
  }
+ if(e.shape==='torus'){
+  const i={x:0,y:1,z:2}[e.axis],p=[x,y,z],j=(i+1)%3,k=(i+2)%3;
+  const sweep=Math.hypot(p[j]-e.center[j],p[k]-e.center[k])-e.majorRadius;
+  const q=sweep*sweep+(p[i]-e.center[i])**2;
+  return q<=e.tubeRadius**2&&(!e.shell||q>=(e.tubeRadius-e.shell)**2);
+ }
  const i={x:0,y:1,z:2}[e.axis],p=[x,y,z];
  if(p[i]<e.origin[i]||p[i]>=e.origin[i]+e.length)return false;
  const j=(i+1)%3,k=(i+2)%3;
@@ -89,6 +105,11 @@ function inside(e,x,y,z){
 function domain(e){
  if(e.shape==='box')return [e.origin,e.origin.map((v,i)=>v+e.size[i]-1)];
  if(e.shape==='ellipsoid')return [e.center.map((v,i)=>v-e.radii[i]),e.center.map((v,i)=>v+e.radii[i])];
+ if(e.shape==='torus'){
+  const i={x:0,y:1,z:2}[e.axis],span=e.majorRadius+e.tubeRadius;
+  return [e.center.map((v,j)=>v-(j===i?e.tubeRadius:span)),
+   e.center.map((v,j)=>v+(j===i?e.tubeRadius:span))];
+ }
  const i={x:0,y:1,z:2}[e.axis];
  return [e.origin.map((v,j)=>v-(j===i?0:e.radius)),
   e.origin.map((v,j)=>v+(j===i?e.length-1:e.radius))];
