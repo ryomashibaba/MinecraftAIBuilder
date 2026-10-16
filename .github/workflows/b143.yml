@@ -1,4 +1,4 @@
-name: Universal AI Architecture Studio B146 / Topology QA
+name: Universal AI Architecture Studio B147 / Verified AI Repair
 on:
   # All future B-number feature branches inherited from B143 auto-publish,
   # after full offline verification and without per-branch workflow edits.
@@ -13,6 +13,7 @@ on:
       - 'scripts/build-b144-site*'
       - 'scripts/build-b145-site*'
       - 'scripts/build-b146-site*'
+      - 'scripts/build-b147-site*'
       - 'scripts/qa-b145-browser.mjs'
       - '.github/workflows/b143.yml'
   pull_request:
@@ -24,6 +25,7 @@ on:
       - 'scripts/build-b144-site*'
       - 'scripts/build-b145-site*'
       - 'scripts/build-b146-site*'
+      - 'scripts/build-b147-site*'
       - 'scripts/qa-b145-browser.mjs'
       - '.github/workflows/b143.yml'
   workflow_dispatch:
@@ -55,6 +57,9 @@ jobs:
           node --check source/ai/b146-topology-review.mjs
           node --check scripts/build-b146-site.mjs
           node --check scripts/build-b146-site.test.mjs
+          node --check source/ai/b147-detachment-diagnosis.mjs
+          node --check scripts/build-b147-site.mjs
+          node --check scripts/build-b147-site.test.mjs
           node --check scripts/qa-b145-browser.mjs
       - name: New-purpose 3D geometry, replay, injection guards, blocked construction tests
         run: |
@@ -62,6 +67,7 @@ jobs:
           node --test scripts/build-b144-site.test.mjs
           node --test scripts/build-b145-site.test.mjs
           node --test scripts/build-b146-site.test.mjs
+          node --test scripts/build-b147-site.test.mjs
   b143-site:
     needs: design-validation
     runs-on: ubuntu-latest
@@ -80,7 +86,7 @@ jobs:
           path: |
             b142-site-output/
             b141-review-output/
-          key: b146-node22-${{ runner.os }}-${{ hashFiles('source/**','designs/ai/**','scripts/build-b142-site.mjs','scripts/build-b143-site.mjs','scripts/build-b143-site.test.mjs','scripts/build-b144-site.mjs','scripts/build-b144-site.test.mjs','scripts/build-b145-site.mjs','scripts/build-b145-site.test.mjs','scripts/build-b146-site.mjs','scripts/build-b146-site.test.mjs','scripts/qa-b145-browser.mjs','scripts/verify-freeze.mjs') }}
+          key: b147-node22-${{ runner.os }}-${{ hashFiles('source/**','designs/ai/**','scripts/build-b142-site.mjs','scripts/build-b143-site.mjs','scripts/build-b143-site.test.mjs','scripts/build-b144-site.mjs','scripts/build-b144-site.test.mjs','scripts/build-b145-site.mjs','scripts/build-b145-site.test.mjs','scripts/build-b146-site.mjs','scripts/build-b146-site.test.mjs','scripts/build-b147-site.mjs','scripts/build-b147-site.test.mjs','scripts/qa-b145-browser.mjs','scripts/verify-freeze.mjs') }}
       - name: Compile frozen B142 design baseline and new ChatGPT-authored architecture
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
@@ -89,6 +95,7 @@ jobs:
           node scripts/build-b144-site.mjs
           node scripts/build-b145-site.mjs
           node scripts/build-b146-site.mjs
+          node scripts/build-b147-site.mjs
       - name: Verify base source hashes, exact DSL provenance and zero world writes
         run: |
           node scripts/build-b142-site.mjs --verify
@@ -96,6 +103,7 @@ jobs:
           node scripts/build-b144-site.mjs --verify
           node scripts/build-b145-site.mjs --verify
           node scripts/build-b146-site.mjs --verify
+          node scripts/build-b147-site.mjs --verify
           node --input-type=module -e "
           import fs from 'node:fs';
           import {verifyB141} from './source/parallel/b141/main/b141-integrated-network.mjs';
@@ -113,12 +121,13 @@ jobs:
           echo '## B143 new-purpose architectural models' >> "$GITHUB_STEP_SUMMARY"
           echo '- ChatGPT-authored category-free DSL designs and B144 source-pinned revisions' >> "$GITHUB_STEP_SUMMARY"
           echo '- Composition: boxes, ellipsoids, cylinders, toruses, diagonal beams and subtractive voids' >> "$GITHUB_STEP_SUMMARY"
-          echo '- 2 originals, R2, R3, R4 each; 8 topology-audited scenes; 15 B142 frozen baseline preserved' >> "$GITHUB_STEP_SUMMARY"
+          echo '- 2 originals + 2 R2 + 2 R3 + 2 R4 + repaired R5: 9 design scenes'  >> "$GITHUB_STEP_SUMMARY"
+          echo '- R4 rear beam 390 disconnected voxels, R5 0 after three source-linked support components' >> "$GITHUB_STEP_SUMMARY"
           echo '- No commands, no world coordinates, no actual construction' >> "$GITHUB_STEP_SUMMARY"
           echo '- B141 source hash and 9/9 BLOCKED gates validated before publication' >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
         with:
-          name: B146-Verified-Structural-Topology-Site
+          name: B147-AI-Repair-And-Verified-History
           path: |
             b142-site-output/
             b141-review-output/
@@ -141,7 +150,7 @@ jobs:
       - name: Download the exact previously verified site artifact
         uses: actions/download-artifact@v4
         with:
-          name: B146-Verified-Structural-Topology-Site
+          name: B147-AI-Repair-And-Verified-History
           path: .
       - name: Install pinned Playwright runtime without changing repository lockfiles
         run: |
@@ -153,7 +162,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: B146-Chromium-Visual-QA
+          name: B147-Chromium-Visual-QA
           path: b145-browser-evidence/
           if-no-files-found: warn
           retention-days: 21
