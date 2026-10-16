@@ -2,7 +2,7 @@
   "schema": "minecraftaibuilder-b143-building-dsl-v1",
   "id": "stratos-observatory-interior-r2",
   "title": "成層圏観測研究所 — 格納庫・上層デッキ連絡R2",
-  "brief": "R1格納庫の後方壁に3幅の大開口を設け、段状接続部と上層デッキへの歩行候補を増築。平面経路と段差候補を区別。実機階段・施工未認証。",
+  "brief": "格納庫から段状連絡部、上層デッキと観測施設入口へ続く開口・床・ガードを増築。1ブロック段差は通行候補のみで、階段の実機動作と施工は未認証。",
   "bounds": {
     "width": 80,
     "height": 56,
@@ -596,6 +596,37 @@
         1,
         2,
         3
+      ]
+    },
+    {
+      "id": "b150-upper-deck-glass-opening",
+      "shape": "box",
+      "mode": "cut",
+      "origin": [
+        39,
+        13,
+        20
+      ],
+      "size": [
+        3,
+        4,
+        4
+      ]
+    },
+    {
+      "id": "b150-upper-connector-floor",
+      "shape": "box",
+      "mode": "add",
+      "material": "concrete",
+      "origin": [
+        39,
+        12,
+        19
+      ],
+      "size": [
+        3,
+        1,
+        6
       ]
     }
   ]
