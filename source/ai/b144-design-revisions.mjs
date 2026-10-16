@@ -31,6 +31,7 @@ export function applyRevision(base,proposal){
  ok(validKeys(proposal,['schema','revisionId','targetId','baseSourceSha256','request','edits']),'PROPOSAL_FIELDS');
  ok(proposal.schema===REVISION_SCHEMA&&id(proposal.revisionId)&&
   proposal.revisionId!==base.id&&proposal.targetId===base.id,'IDENTITY');
+ const baseJsonBefore=sha(base);
  const baseline=compileDesign(base);
  ok(/^[a-f0-9]{64}$/.test(proposal.baseSourceSha256||'')&&
     proposal.baseSourceSha256===baseline.sourceSha256,'STALE_OR_FORGED_BASE');
@@ -91,7 +92,7 @@ export function applyRevision(base,proposal){
   afterGeometrySha256:after.geometrySha256,
   beforeCells:baseline.primitives.length,afterCells:after.primitives.length,
   changes:delta,edits:proposal.edits.map(e=>({action:e.action,target:e.target??null})),
-  sourceUnchanged:sha(base)===sha(clone(base)), // immutable API behavior asserted separately
+  sourceUnchanged:sha(base)===baseJsonBefore, // no mutation of the input design
   designOnly:true,readiness:'NOT_PREPARED',constructionApproved:false,
   executionAllowed:false,worldContacts:0,worldCoordinates:null,
   gateStatuses:Array(9).fill('BLOCKED'),BuildPlan:{operations:[]}
