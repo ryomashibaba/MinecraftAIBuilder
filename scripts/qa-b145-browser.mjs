@@ -28,7 +28,8 @@ const pages=[
  {name:'B153-transitions',url:'ai/transitions/index.html',minimum:16,expected:16},
  {name:'B154-bypass',url:'ai/bypass/index.html',minimum:17,expected:17},
  {name:'B155-interchange',url:'ai/bridge-design/index.html',minimum:19,expected:19},
- {name:'B156-auto',url:'ai/auto-bridge/index.html',minimum:20,expected:20}
+ {name:'B156-auto',url:'ai/auto-bridge/index.html',minimum:20,expected:20},
+ {name:'B157-finished',url:'ai/finished-bridge/index.html',minimum:21,expected:21}
 ];
 const browser=await chromium.launch({headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
 const results=[];
@@ -84,6 +85,28 @@ async function inspect(info,mobile){
   await page.waitForTimeout(950);
   const last=await page.locator('#building').inputValue();
   if(last!==String(options-1))fail(info.name+'_MODEL_SELECTION_FAILED');
+  if(info.name==='B157-finished'){
+   const models=page.locator('#building'),status=page.locator('#b157-status');
+   await models.selectOption('17');await page.waitForTimeout(280);
+   if(!(await status.innerText()).includes('FOOTPRINT_UNREACHABLE'))
+    fail('B157_INITIAL_GAP_NOT_VISIBLE_'+await status.innerText());
+   for(const id of ['18','19','20']){
+    await models.selectOption(id);await page.waitForTimeout(280);
+    const value=await status.innerText();
+    if(!value.includes('PASS_FLAT_FOOTPRINT_GEOMETRY')||!value.includes('26水平移動'))
+     fail('B157_ROUTE_REGRESSED_'+id+'_'+value);
+   }
+   const final=await status.innerText();
+   if(!final.includes('自動仕上げ14部材')||!final.includes('柵2')||!final.includes('支柱2'))
+    fail('B157_FINISHED_PARTS_NOT_VISIBLE_'+final);
+   const layer=page.locator('#b157-route');
+   if(!await layer.isChecked())fail('B157_ROUTE_OVERLAY_MISSING');
+   await layer.uncheck();await layer.check();
+   await models.selectOption('16');await page.waitForTimeout(180);
+   if(!(await status.innerText()).includes('経路評価はありません'))
+    fail('B157_OLDER_SCENE_FALSE_STATUS');
+   await models.selectOption('20');
+  }
   if(info.name==='B156-auto'){
    const models=page.locator('#building'),status=page.locator('#b156-status');
    await models.selectOption('17');await page.waitForTimeout(300);
