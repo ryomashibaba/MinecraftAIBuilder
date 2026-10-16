@@ -115,7 +115,7 @@ jobs:
           repository: ryomashibaba/MinecraftAIBuilder
           run-id: 38915321401
           github-token: ${{ github.token }}
-          name: B149-Verified-Interior-Traversability
+          name: B148-Verified-Repair-Proposals-And-Incremental-Source
           path: .
       - name: Validate B148 provenance or source-rebuild, then build B149 delta
         if: steps.cache.outputs.cache-hit != 'true'
