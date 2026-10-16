@@ -1,17 +1,21 @@
 name: B143 Universal ChatGPT Architecture DSL and 3D Gallery
 on:
+  # All future B-number feature branches inherited from B143 auto-publish,
+  # after full offline verification and without per-branch workflow edits.
   push:
     branches:
-      - feature/b143-universal-llm-building-dsl
+      - 'feature/b*'
     paths:
-      - 'designs/ai/**'
-      - 'source/ai/**'
+      - 'designs/**'
+      - 'source/**'
+      - 'scripts/build-b142-site.mjs'
       - 'scripts/build-b143-site*'
       - '.github/workflows/b143.yml'
   pull_request:
     paths:
-      - 'designs/ai/**'
-      - 'source/ai/**'
+      - 'designs/**'
+      - 'source/**'
+      - 'scripts/build-b142-site.mjs'
       - 'scripts/build-b143-site*'
       - '.github/workflows/b143.yml'
   workflow_dispatch:
