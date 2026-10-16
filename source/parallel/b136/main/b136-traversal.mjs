@@ -68,7 +68,7 @@ function enforce(cmd){
   if(cmd!=='querytarget @a')throw Error('B136_UNSAFE_ENTITY_QUERY');
   return;
  }
- if(!/^(?:testforblock|setblock) -?\d+ -?\d+ -?\d+ minecraft:(?:air|oak_stairs(?: \["weirdo_direction" = [0-3]\]|\["upside_down_bit" = [01]\]|\["upside_down_bit" = 0, "weirdo_direction" = [0-3]\])?)$/.test(cmd))
+ if(!/^(?:testforblock|setblock) -?\d+ -?\d+ -?\d+ minecraft:(?:air|oak_stairs(?: \[(?:"weirdo_direction" = [0-3]|"upside_down_bit" = [01]|"upside_down_bit" = 0, "weirdo_direction" = [0-3])\])?)$/.test(cmd))
   throw Error('B136_BLOCK_COMMAND_INVALID');
 }
 async function command(world,cmd){
