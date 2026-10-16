@@ -169,7 +169,7 @@ jobs:
           repository: ryomashibaba/MinecraftAIBuilder
           run-id: 38975180923
           github-token: ${{ github.token }}
-          name: B155-Verified-Cross-Architecture-Bridges
+          name: B154-Verified-Flat-Bypass
           path: .
       - name: Download verified B153 fallback for source delta
         if: steps.cache.outputs.cache-hit != 'true'
