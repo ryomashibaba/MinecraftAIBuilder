@@ -29,7 +29,8 @@ const pages=[
  {name:'B154-bypass',url:'ai/bypass/index.html',minimum:17,expected:17},
  {name:'B155-interchange',url:'ai/bridge-design/index.html',minimum:19,expected:19},
  {name:'B156-auto',url:'ai/auto-bridge/index.html',minimum:20,expected:20},
- {name:'B157-finished',url:'ai/finished-bridge/index.html',minimum:21,expected:21}
+ {name:'B157-finished',url:'ai/finished-bridge/index.html',minimum:21,expected:21},
+ {name:'B158-helios',url:'ai/helios/index.html',minimum:23,expected:23}
 ];
 const browser=await chromium.launch({headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
 const results=[];
@@ -85,6 +86,29 @@ async function inspect(info,mobile){
   await page.waitForTimeout(950);
   const last=await page.locator('#building').inputValue();
   if(last!==String(options-1))fail(info.name+'_MODEL_SELECTION_FAILED');
+  if(info.name==='B158-helios'){
+   const models=page.locator('#building'),status=page.locator('#b158-status');
+   await models.selectOption('21');await page.waitForTimeout(300);
+   const before=await status.innerText();
+   if(!before.includes('FOOTPRINT_UNREACHABLE')||!before.includes('到達経路なし'))
+    fail('B158_HELIOS_DISCONNECTED_R0_MISSING_'+before);
+   await models.selectOption('22');await page.waitForTimeout(420);
+   const connected=await status.innerText();
+   if(!connected.includes('PASS_FLAT_FOOTPRINT_GEOMETRY')||
+      !connected.includes('38水平移動')||
+      !connected.includes('自動仕上げ 14部材'))
+    fail('B158_NORTH_SOUTH_BRIDGE_BROKEN_'+connected);
+   const layer=page.locator('#b158-route');
+   if(!await layer.isChecked())fail('B158_ROUTE_HIDDEN');
+   await layer.uncheck();await layer.check();
+   await models.selectOption('20');await page.waitForTimeout(180);
+   if(!(await status.innerText()).includes('26水平移動'))
+    fail('B158_EAST_WEST_PREDECESSOR_DISAPPEARED');
+   await models.selectOption('19');await page.waitForTimeout(180);
+   if(!(await status.innerText()).includes('26水平移動'))
+    fail('B158_GENERATED_PREDECESSOR_DISAPPEARED');
+   await models.selectOption('22');
+  }
   if(info.name==='B157-finished'){
    const models=page.locator('#building'),status=page.locator('#b157-status');
    await models.selectOption('17');await page.waitForTimeout(280);

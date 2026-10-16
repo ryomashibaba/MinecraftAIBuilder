@@ -1,4 +1,4 @@
-name: Universal AI Architecture Studio B157 / Finished Generated Architecture
+name: Universal AI Architecture Studio B158 / Cross-Axis Helios Freight Harbor
 on:
   # All future B-number feature branches inherited from B143 auto-publish,
   # after full offline verification and without per-branch workflow edits.
@@ -24,6 +24,7 @@ on:
       - 'scripts/build-b155-site*'
       - 'scripts/build-b156-site*'
       - 'scripts/build-b157-site*'
+      - 'scripts/build-b158-site*'
       - 'scripts/prepare-b148-baseline.mjs'
       - 'scripts/prepare-b149-baseline.mjs'
       - 'scripts/prepare-b150-baseline.mjs'
@@ -34,6 +35,7 @@ on:
       - 'scripts/prepare-b155-baseline.mjs'
       - 'scripts/prepare-b156-baseline.mjs'
       - 'scripts/prepare-b157-baseline.mjs'
+      - 'scripts/prepare-b158-baseline.mjs'
       - 'scripts/qa-b145-browser.mjs'
       - '.github/workflows/b143.yml'
   pull_request:
@@ -56,6 +58,7 @@ on:
       - 'scripts/build-b155-site*'
       - 'scripts/build-b156-site*'
       - 'scripts/build-b157-site*'
+      - 'scripts/build-b158-site*'
       - 'scripts/prepare-b148-baseline.mjs'
       - 'scripts/prepare-b149-baseline.mjs'
       - 'scripts/prepare-b150-baseline.mjs'
@@ -66,6 +69,7 @@ on:
       - 'scripts/prepare-b155-baseline.mjs'
       - 'scripts/prepare-b156-baseline.mjs'
       - 'scripts/prepare-b157-baseline.mjs'
+      - 'scripts/prepare-b158-baseline.mjs'
       - 'scripts/qa-b145-browser.mjs'
       - '.github/workflows/b143.yml'
   workflow_dispatch:
@@ -141,6 +145,10 @@ jobs:
           node --check scripts/build-b157-site.mjs
           node --check scripts/build-b157-site.test.mjs
           node --check scripts/prepare-b157-baseline.mjs
+          node --check source/ai/b158-axis-transfer.mjs
+          node --check scripts/build-b158-site.mjs
+          node --check scripts/build-b158-site.test.mjs
+          node --check scripts/prepare-b158-baseline.mjs
           node --check scripts/qa-b145-browser.mjs
       - name: New-purpose 3D geometry, replay, injection guards, blocked construction tests
         run: |
@@ -159,6 +167,7 @@ jobs:
           node --test scripts/build-b155-site.test.mjs
           node --test scripts/build-b156-site.test.mjs
           node --test scripts/build-b157-site.test.mjs
+          node --test scripts/build-b158-site.test.mjs
   b143-site:
     needs: design-validation
     runs-on: ubuntu-latest
@@ -170,16 +179,26 @@ jobs:
           node-version: '22'
       - name: Frozen B100 source and construction invariant
         run: node scripts/verify-freeze.mjs
-      - name: Exact-input B157 cache
+      - name: Exact-input B158 cache
         id: cache
         uses: actions/cache@v4
         with:
           path: |
             b142-site-output/
             b141-review-output/
-            b157-build-evidence/
-          key: b157-node22-${{ runner.os }}-${{ hashFiles('source/**','designs/ai/**','scripts/build-b142-site.mjs','scripts/build-b143-site.mjs','scripts/build-b144-site.mjs','scripts/build-b145-site.mjs','scripts/build-b146-site.mjs','scripts/build-b147-site.mjs','scripts/build-b148-site.mjs','scripts/prepare-b148-baseline.mjs','source/ai/b149-traversability.mjs','scripts/build-b149-site.mjs','scripts/build-b149-site.test.mjs','scripts/prepare-b149-baseline.mjs','source/ai/b150-vertical-candidates.mjs','scripts/build-b150-site.mjs','scripts/build-b150-site.test.mjs','scripts/prepare-b150-baseline.mjs','source/ai/b151-clearance-review.mjs','scripts/build-b151-site.mjs','scripts/build-b151-site.test.mjs','scripts/prepare-b151-baseline.mjs','source/ai/b152-footprint-review.mjs','scripts/build-b152-site.mjs','scripts/build-b152-site.test.mjs','scripts/prepare-b152-baseline.mjs','source/ai/b153-transition-envelopes.mjs','scripts/build-b153-site.mjs','scripts/build-b153-site.test.mjs','scripts/prepare-b153-baseline.mjs','source/ai/b154-bypass-evidence.mjs','scripts/build-b154-site.mjs','scripts/build-b154-site.test.mjs','scripts/prepare-b154-baseline.mjs','source/ai/b155-bridge-proposal.mjs','scripts/build-b155-site.mjs','scripts/build-b155-site.test.mjs','scripts/prepare-b155-baseline.mjs','source/ai/b156-candidate-proof.mjs','scripts/build-b156-site.mjs','scripts/build-b156-site.test.mjs','scripts/prepare-b156-baseline.mjs','source/ai/b157-finished-bridge.mjs','scripts/build-b157-site.mjs','scripts/build-b157-site.test.mjs','scripts/prepare-b157-baseline.mjs','scripts/build-b148-site.test.mjs','scripts/qa-b145-browser.mjs','scripts/verify-freeze.mjs') }}
-      - name: Download B156 predecessor artifact when available
+            b158-build-evidence/
+          key: b158-node22-${{ runner.os }}-${{ hashFiles('source/**','designs/ai/**','scripts/build-b142-site.mjs','scripts/build-b143-site.mjs','scripts/build-b144-site.mjs','scripts/build-b145-site.mjs','scripts/build-b146-site.mjs','scripts/build-b147-site.mjs','scripts/build-b148-site.mjs','scripts/prepare-b148-baseline.mjs','source/ai/b149-traversability.mjs','scripts/build-b149-site.mjs','scripts/build-b149-site.test.mjs','scripts/prepare-b149-baseline.mjs','source/ai/b150-vertical-candidates.mjs','scripts/build-b150-site.mjs','scripts/build-b150-site.test.mjs','scripts/prepare-b150-baseline.mjs','source/ai/b151-clearance-review.mjs','scripts/build-b151-site.mjs','scripts/build-b151-site.test.mjs','scripts/prepare-b151-baseline.mjs','source/ai/b152-footprint-review.mjs','scripts/build-b152-site.mjs','scripts/build-b152-site.test.mjs','scripts/prepare-b152-baseline.mjs','source/ai/b153-transition-envelopes.mjs','scripts/build-b153-site.mjs','scripts/build-b153-site.test.mjs','scripts/prepare-b153-baseline.mjs','source/ai/b154-bypass-evidence.mjs','scripts/build-b154-site.mjs','scripts/build-b154-site.test.mjs','scripts/prepare-b154-baseline.mjs','source/ai/b155-bridge-proposal.mjs','scripts/build-b155-site.mjs','scripts/build-b155-site.test.mjs','scripts/prepare-b155-baseline.mjs','source/ai/b156-candidate-proof.mjs','scripts/build-b156-site.mjs','scripts/build-b156-site.test.mjs','scripts/prepare-b156-baseline.mjs','source/ai/b157-finished-bridge.mjs','scripts/build-b157-site.mjs','scripts/build-b157-site.test.mjs','scripts/prepare-b157-baseline.mjs','source/ai/b158-axis-transfer.mjs','scripts/build-b158-site.mjs','scripts/build-b158-site.test.mjs','scripts/prepare-b158-baseline.mjs','scripts/build-b148-site.test.mjs','scripts/qa-b145-browser.mjs','scripts/verify-freeze.mjs') }}
+      - name: Download B157 predecessor artifact when available
+        if: steps.cache.outputs.cache-hit != 'true'
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          repository: ryomashibaba/MinecraftAIBuilder
+          run-id: 38977376303
+          github-token: ${{ github.token }}
+          name: B157-Verified-Finished-Bridge
+          path: .
+      - name: Download verified B156 fallback for source delta
         if: steps.cache.outputs.cache-hit != 'true'
         continue-on-error: true
         uses: actions/download-artifact@v4
@@ -188,7 +207,7 @@ jobs:
           run-id: 38976705889
           github-token: ${{ github.token }}
           name: B156-Verified-Generated-Bridge-Candidate
-          path: .
+          path: b158-b156-artifact/
       - name: Download verified B155 fallback for source delta
         if: steps.cache.outputs.cache-hit != 'true'
         continue-on-error: true
@@ -259,49 +278,51 @@ jobs:
           github-token: ${{ github.token }}
           name: B148-Verified-Repair-Proposals-And-Incremental-Source
           path: b150-b148-artifact/
-      - name: Validate B156 provenance or source-rebuild, then build B157 delta
+      - name: Validate B157 provenance or source-rebuild, then build B158 delta
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          node scripts/prepare-b157-baseline.mjs
-          node scripts/build-b157-site.mjs
-      - name: Verify B142 through B157 recursively once and construction HOLD
+          node scripts/prepare-b158-baseline.mjs
+          node scripts/build-b158-site.mjs
+      - name: Verify B142 through B158 recursively once and construction HOLD
         run: |
-          node scripts/build-b157-site.mjs --verify
+          node scripts/build-b158-site.mjs --verify
           node --input-type=module -e "
           import fs from 'node:fs';
           import {verifyB141} from './source/parallel/b141/main/b141-integrated-network.mjs';
           const b=JSON.parse(fs.readFileSync('b141-review-output/B141_15Buildings_Shared_2Wide_Network.json'));
-          const p=JSON.parse(fs.readFileSync('b142-site-output/B157_MANIFEST.json'));
-          const v=JSON.parse(fs.readFileSync('b157-build-evidence/B157_BASELINE_PATH.json'));
+          const p=JSON.parse(fs.readFileSync('b142-site-output/B158_MANIFEST.json'));
+          const v=JSON.parse(fs.readFileSync('b158-build-evidence/B158_BASELINE_PATH.json'));
           if(!verifyB141(b)||b.readiness!=='NOT_PREPARED'||b.gates.length!==9||
              b.gates.some(x=>x.status!=='BLOCKED')||b.BuildPlan.operations.length!==0||
              p.constructionApproved!==false||p.worldWrites!==0||
              p.playerCollisionCertified!==false||p.structuralStrengthCertified!==false||
-             p.connectedFlatMoves!==26||p.addedElements!==14||
-             p.railingPieces!==2||p.supportPiers!==2||
-             p.portalFrames!==2||p.lightStrips!==2||
+             p.eastPathMoves!==26||p.northPathMoves!==38||
+             p.missingBridgeStatus!=='FOOTPRINT_UNREACHABLE'||
+             p.finishedBridgeStatus!=='PASS_FLAT_FOOTPRINT_GEOMETRY'||
+             p.addedFinishingElements!==14||
+             p.testedAxes.join(',')!=='x,z'||
              p.inheritedB141Sha256!==b.integritySha256||
              v.status!=='PASS'||v.constructionApproved!==false||v.worldWrites!==0)
-            throw Error('B157_CONSTRUCTION_OR_INTEGRITY_HOLD');
-          console.log('B157_FINISHED_ARCHITECTURE_SOURCE_HOLD_PASS');
+            throw Error('B158_CONSTRUCTION_OR_INTEGRITY_HOLD');
+          console.log('B158_NORTH_SOUTH_ARCHITECTURE_SOURCE_HOLD_PASS');
           "
       - name: Evidence summary
         run: |
           echo '## B143 new-purpose architectural models' >> "$GITHUB_STEP_SUMMARY"
           echo '- ChatGPT-authored category-free DSL designs and B144 source-pinned revisions' >> "$GITHUB_STEP_SUMMARY"
           echo '- Composition: boxes, ellipsoids, cylinders, toruses, diagonal beams and subtractive voids' >> "$GITHUB_STEP_SUMMARY"
-          echo '- 20 preserved historical models plus 21st generated finished skybridge scene' >> "$GITHUB_STEP_SUMMARY"
-          echo '- Automatic glass rails, 2 support piers, 2 lower trusses, two lighting strips and portal arches; 2x2 flat route remains pass (not structural certification)' >> "$GITHUB_STEP_SUMMARY"
+          echo '- 21 preserved historical models plus HELIOS base and auto-finished bridge: 23 model scenes' >> "$GITHUB_STEP_SUMMARY"
+          echo '- One finisher on two unrelated large designs: east-west AURORA 26-flat-step path and north-south HELIOS 38-flat-step path; all Minecraft worlds HOLD' >> "$GITHUB_STEP_SUMMARY"
           echo '- R4 390 detached; saved R5 and both B148 options 0 locally detached' >> "$GITHUB_STEP_SUMMARY"
           echo '- No commands, no world coordinates, no actual construction' >> "$GITHUB_STEP_SUMMARY"
           echo '- B141 source hash and 9/9 BLOCKED gates validated before publication' >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
         with:
-          name: B157-Verified-Finished-Bridge
+          name: B158-Verified-North-South-Helios
           path: |
             b142-site-output/
             b141-review-output/
-            b157-build-evidence/
+            b158-build-evidence/
           if-no-files-found: error
           retention-days: 21
       - name: Upload verified Pages site
@@ -321,7 +342,7 @@ jobs:
       - name: Download the exact previously verified site artifact
         uses: actions/download-artifact@v4
         with:
-          name: B157-Verified-Finished-Bridge
+          name: B158-Verified-North-South-Helios
           path: .
       - name: Install pinned Playwright runtime without changing repository lockfiles
         run: |
@@ -333,7 +354,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: B157-Chromium-Visual-QA
+          name: B158-Chromium-Visual-QA
           path: b145-browser-evidence/
           if-no-files-found: warn
           retention-days: 21

@@ -1,0 +1,540 @@
+{
+  "schema": "minecraftaibuilder-b143-building-dsl-v1",
+  "id": "helios-freight-harbor-r0",
+  "title": "ヘリオス・フレイトハーバー — 超大型南北貨物宇宙港 R0",
+  "brief": "巨大光輪とエアロドームを持つ南北二つの独立高架貨物ターミナル。二つのプラットフォームは29セルの空隙で分断。中央空中動線は2×2移動不可。オフライン建築案。",
+  "bounds": {
+    "width": 90,
+    "height": 58,
+    "depth": 94
+  },
+  "designOnly": true,
+  "elements": [
+    {
+      "id": "deep-freight-foundation",
+      "shape": "box",
+      "mode": "add",
+      "material": "stone",
+      "origin": [
+        8,
+        3,
+        5
+      ],
+      "size": [
+        74,
+        4,
+        84
+      ]
+    },
+    {
+      "id": "north-hangar-socle",
+      "shape": "box",
+      "mode": "add",
+      "material": "concrete",
+      "origin": [
+        15,
+        7,
+        8
+      ],
+      "size": [
+        60,
+        7,
+        33
+      ]
+    },
+    {
+      "id": "south-hangar-socle",
+      "shape": "box",
+      "mode": "add",
+      "material": "concrete",
+      "origin": [
+        15,
+        7,
+        60
+      ],
+      "size": [
+        60,
+        7,
+        29
+      ]
+    },
+    {
+      "id": "north-platform",
+      "shape": "box",
+      "mode": "add",
+      "material": "concrete",
+      "origin": [
+        28,
+        17,
+        16
+      ],
+      "size": [
+        35,
+        2,
+        20
+      ]
+    },
+    {
+      "id": "south-platform",
+      "shape": "box",
+      "mode": "add",
+      "material": "concrete",
+      "origin": [
+        28,
+        17,
+        64
+      ],
+      "size": [
+        35,
+        2,
+        22
+      ]
+    },
+    {
+      "id": "north-rail-left",
+      "shape": "box",
+      "mode": "add",
+      "material": "glass",
+      "origin": [
+        28,
+        19,
+        16
+      ],
+      "size": [
+        1,
+        2,
+        20
+      ]
+    },
+    {
+      "id": "north-rail-right",
+      "shape": "box",
+      "mode": "add",
+      "material": "glass",
+      "origin": [
+        62,
+        19,
+        16
+      ],
+      "size": [
+        1,
+        2,
+        20
+      ]
+    },
+    {
+      "id": "south-rail-left",
+      "shape": "box",
+      "mode": "add",
+      "material": "glass",
+      "origin": [
+        28,
+        19,
+        64
+      ],
+      "size": [
+        1,
+        2,
+        22
+      ]
+    },
+    {
+      "id": "south-rail-right",
+      "shape": "box",
+      "mode": "add",
+      "material": "glass",
+      "origin": [
+        62,
+        19,
+        64
+      ],
+      "size": [
+        1,
+        2,
+        22
+      ]
+    },
+    {
+      "id": "north-boarding-mast-a",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        22,
+        14,
+        18
+      ],
+      "size": [
+        4,
+        26,
+        4
+      ]
+    },
+    {
+      "id": "north-boarding-mast-b",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        64,
+        14,
+        18
+      ],
+      "size": [
+        4,
+        26,
+        4
+      ]
+    },
+    {
+      "id": "south-boarding-mast-a",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        22,
+        14,
+        72
+      ],
+      "size": [
+        4,
+        26,
+        4
+      ]
+    },
+    {
+      "id": "south-boarding-mast-b",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        64,
+        14,
+        72
+      ],
+      "size": [
+        4,
+        26,
+        4
+      ]
+    },
+    {
+      "id": "north-suspended-gantry",
+      "shape": "box",
+      "mode": "add",
+      "material": "accent",
+      "origin": [
+        20,
+        40,
+        19
+      ],
+      "size": [
+        50,
+        2,
+        5
+      ]
+    },
+    {
+      "id": "south-suspended-gantry",
+      "shape": "box",
+      "mode": "add",
+      "material": "accent",
+      "origin": [
+        20,
+        40,
+        74
+      ],
+      "size": [
+        50,
+        2,
+        5
+      ]
+    },
+    {
+      "id": "north-wing-dome",
+      "shape": "ellipsoid",
+      "mode": "add",
+      "material": "glass",
+      "center": [
+        25,
+        34,
+        26
+      ],
+      "radii": [
+        13,
+        12,
+        10
+      ],
+      "shell": 2
+    },
+    {
+      "id": "south-wing-dome",
+      "shape": "ellipsoid",
+      "mode": "add",
+      "material": "glass",
+      "center": [
+        65,
+        34,
+        76
+      ],
+      "radii": [
+        13,
+        12,
+        10
+      ],
+      "shell": 2
+    },
+    {
+      "id": "north-cargo-light-ring",
+      "shape": "torus",
+      "mode": "add",
+      "material": "accent",
+      "center": [
+        45,
+        39,
+        23
+      ],
+      "axis": "z",
+      "majorRadius": 12,
+      "tubeRadius": 2
+    },
+    {
+      "id": "south-cargo-light-ring",
+      "shape": "torus",
+      "mode": "add",
+      "material": "accent",
+      "center": [
+        45,
+        39,
+        78
+      ],
+      "axis": "z",
+      "majorRadius": 12,
+      "tubeRadius": 2
+    },
+    {
+      "id": "north-console-left",
+      "shape": "box",
+      "mode": "add",
+      "material": "glow",
+      "origin": [
+        31,
+        19,
+        22
+      ],
+      "size": [
+        6,
+        2,
+        3
+      ]
+    },
+    {
+      "id": "north-console-right",
+      "shape": "box",
+      "mode": "add",
+      "material": "glow",
+      "origin": [
+        52,
+        19,
+        22
+      ],
+      "size": [
+        6,
+        2,
+        3
+      ]
+    },
+    {
+      "id": "south-console-left",
+      "shape": "box",
+      "mode": "add",
+      "material": "glow",
+      "origin": [
+        31,
+        19,
+        80
+      ],
+      "size": [
+        6,
+        2,
+        3
+      ]
+    },
+    {
+      "id": "south-console-right",
+      "shape": "box",
+      "mode": "add",
+      "material": "glow",
+      "origin": [
+        52,
+        19,
+        80
+      ],
+      "size": [
+        6,
+        2,
+        3
+      ]
+    },
+    {
+      "id": "north-overhead-station",
+      "shape": "box",
+      "mode": "add",
+      "material": "glass",
+      "origin": [
+        35,
+        33,
+        17
+      ],
+      "size": [
+        20,
+        5,
+        3
+      ]
+    },
+    {
+      "id": "south-overhead-station",
+      "shape": "box",
+      "mode": "add",
+      "material": "glass",
+      "origin": [
+        35,
+        33,
+        81
+      ],
+      "size": [
+        20,
+        5,
+        3
+      ]
+    },
+    {
+      "id": "north-outer-catwalk",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        15,
+        21,
+        26
+      ],
+      "size": [
+        11,
+        2,
+        8
+      ]
+    },
+    {
+      "id": "south-outer-catwalk",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        64,
+        21,
+        72
+      ],
+      "size": [
+        11,
+        2,
+        8
+      ]
+    },
+    {
+      "id": "north-hangar-cable",
+      "shape": "box",
+      "mode": "add",
+      "material": "glow",
+      "origin": [
+        20,
+        27,
+        16
+      ],
+      "size": [
+        3,
+        1,
+        19
+      ]
+    },
+    {
+      "id": "south-hangar-cable",
+      "shape": "box",
+      "mode": "add",
+      "material": "glow",
+      "origin": [
+        67,
+        27,
+        67
+      ],
+      "size": [
+        3,
+        1,
+        19
+      ]
+    },
+    {
+      "id": "north-loading-canopy",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        33,
+        28,
+        12
+      ],
+      "size": [
+        25,
+        2,
+        5
+      ]
+    },
+    {
+      "id": "south-loading-canopy",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        33,
+        28,
+        85
+      ],
+      "size": [
+        25,
+        2,
+        5
+      ]
+    },
+    {
+      "id": "north-vertical-beacon",
+      "shape": "box",
+      "mode": "add",
+      "material": "glow",
+      "origin": [
+        43,
+        41,
+        17
+      ],
+      "size": [
+        4,
+        12,
+        3
+      ]
+    },
+    {
+      "id": "south-vertical-beacon",
+      "shape": "box",
+      "mode": "add",
+      "material": "glow",
+      "origin": [
+        43,
+        41,
+        82
+      ],
+      "size": [
+        4,
+        12,
+        3
+      ]
+    }
+  ]
+}
