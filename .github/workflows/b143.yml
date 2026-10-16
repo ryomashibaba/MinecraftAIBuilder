@@ -124,7 +124,7 @@ jobs:
           repository: ryomashibaba/MinecraftAIBuilder
           run-id: 38968976565
           github-token: ${{ github.token }}
-          name: B150-Verified-Vertical-Circulation
+          name: B149-Verified-Interior-Traversability
           path: .
       - name: Validate B149 provenance or source-rebuild, then build B150 delta
         if: steps.cache.outputs.cache-hit != 'true'
