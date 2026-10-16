@@ -22,7 +22,8 @@ const pages=[
  {name:'B147-repairs',url:'ai/repairs/index.html',minimum:9,expected:9},
  {name:'B148-options',url:'ai/options/index.html',minimum:11,expected:11},
  {name:'B149-interiors',url:'ai/interiors/index.html',minimum:12,expected:12},
- {name:'B150-vertical',url:'ai/vertical/index.html',minimum:13,expected:13}
+ {name:'B150-vertical',url:'ai/vertical/index.html',minimum:13,expected:13},
+ {name:'B151-clearance',url:'ai/clearance/index.html',minimum:14,expected:14}
 ];
 const browser=await chromium.launch({headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
 const results=[];
@@ -78,6 +79,30 @@ async function inspect(info,mobile){
   await page.waitForTimeout(950);
   const last=await page.locator('#building').inputValue();
   if(last!==String(options-1))fail(info.name+'_MODEL_SELECTION_FAILED');
+  if(info.name==='B151-clearance'){
+   const selector=page.locator('#building'),target=page.locator('#b151-route');
+   const status=page.locator('#b151-status');
+   await selector.selectOption('12');await target.selectOption('upper-deck');
+   await page.waitForTimeout(350);
+   const old=await status.innerText();
+   if(!old.includes('BELOW_REQUESTED_WIDTH')||!old.includes('幅不足'))
+    fail('B151_OLD_R2_WIDTH_NOT_DETECTED_'+old);
+   await selector.selectOption('13');await page.waitForTimeout(400);
+   const improved=await status.innerText();
+   if(!improved.includes('PASS_WIDTH_GEOMETRY')||!improved.includes('最小5')||
+      !improved.includes('幅不足0箇所'))
+    fail('B151_R3_NOT_WIDENED_'+improved);
+   const toggle=page.locator('#b151-overlay');
+   if(!await toggle.isChecked())fail('B151_CLEARANCE_OVERLAY_OFF');
+   await toggle.uncheck();await toggle.check();
+   await target.selectOption('hangar-inner');await page.waitForTimeout(250);
+   if(!(await status.innerText()).includes('局所経路幅'))
+    fail('B151_FLAT_ROUTE_NOT_REVIEWABLE');
+   await selector.selectOption('11');await page.waitForTimeout(200);
+   if(!(await status.innerText()).includes('診断はありません'))
+    fail('B151_OLD_MODELS_FALSE_RESULT');
+   await selector.selectOption('13');
+  }
   if(info.name==='B150-vertical'){
    const sel=page.locator('#building'),route=page.locator('#b150-route'),status=page.locator('#b150-status');
    await sel.selectOption('12');await page.waitForTimeout(300);
