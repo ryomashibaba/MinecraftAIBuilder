@@ -126,6 +126,16 @@ jobs:
           github-token: ${{ github.token }}
           name: B149-Verified-Interior-Traversability
           path: .
+      - name: Download immutable B148 fallback for delta-only regeneration
+        if: steps.cache.outputs.cache-hit != 'true'
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          repository: ryomashibaba/MinecraftAIBuilder
+          run-id: 38915321401
+          github-token: ${{ github.token }}
+          name: B148-Verified-Repair-Proposals-And-Incremental-Source
+          path: b150-b148-artifact/
       - name: Validate B149 provenance or source-rebuild, then build B150 delta
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
