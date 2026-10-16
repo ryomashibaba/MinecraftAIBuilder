@@ -31,6 +31,9 @@ let mode,manifest;
 try{manifest=verify();mode='INHERITED_B150_ARTIFACT_VERIFIED';}
 catch(error){
  console.log('B151_PARENT_UNAVAILABLE '+String(error).slice(0,240));
+ // Never build B150 on top of a possibly modified or incomplete B150 gallery.
+ fs.rmSync(site,{recursive:true,force:true});
+ fs.rmSync(review,{recursive:true,force:true});
  // Failed B150 checks never authorize reuse. Existing B150 bootstrap itself
  // discards partial sites and can validate the pinned B148 artifact fallback.
  run('prepare-b150-baseline.mjs');
