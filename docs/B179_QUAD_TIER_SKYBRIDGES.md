@@ -1,0 +1,18 @@
+# B179 — QUAD TIER SKYBRIDGES
+
+B179 extends the high-quality 37th NEBULA ARK original architectural model with another independent strict B143 3D module, without touching the separate user-directed Minecraft Education quick prototype branch/chat.
+
+**Real 3D build features:** all four historic interior gallery levels at Y60/64/68/72 gain substantial 7-deep roofed interbuilding bridge decks across **two spans per floor**. New 12 substantial atrium-edge observation balconies, vertically staged luminous architectural lines, large exterior pylon arrays, genuinely volumetric glass roofs and giant floating decorative rings. The giant central multi-storey court voids are preserved as much as possible and can be audited.
+
+**Real interior source-only clearance:** The eight large interterminal corridors use a strictly restricted local-air reservation: only Y61–62/65–66/69–70/73–74 above the corresponding floor slabs at local Z29–30 across X35–51 and X74–91. The composer removes only obstructing cells in that 2×2 body/upper-head envelope, with a maximum offline removal budget of 180 occupied voxels, coordinate-list SHA proof and no change to original modules. It is **not** a Minecraft world delete or authorization. No protected low/front/roof passage is in this reservation range.
+
+**New geometry gate:** For each of eight actual bridge route corridors, inspect every occupied source-compiled support cell and every two-voxel head envelope in a 2x2 column along X. This is a meaningful stricter claim than merely placing bridge slabs. Do not claim success for individual bridges whose support or body clearance fails. If the inherited scene blocks a bridge, re-route the new bridge or limit a source-only opening precisely, preserving the old frozen source geometry. Keep preserved older long flat routes and the 3-portal top-level connected grid.
+
+**Limitations:** Complete inter-floor stair motion, real Minecraft player walking/collision and fall/structural safety remain untested in Education. Standalone orbitable 3D HTML viewer + exact 7-module original design JSON, SHAs, and Chromium desktop/mobile screenshots in GitHub Actions artifacts.
+
+**Hard safety:** readiness NOT_PREPARED, all nine BLOCKED, constructionApproved false, worldCoordinates null, worldContacts 0, worldWrites 0, BuildPlan.operations empty; no main merge, no Work, no real Minecraft construction. Each strict B143 module <=160 authored elements; combined occupied voxels <=160k.
+
+**B180:** develop the actual portal/chamber transitions at the four interior Y levels, improve route wayfinding by architecture itself and tie the real 2wide bridge corridors to genuinely supported hall-side 2wide squares. Never claim game physics without measured evidence.
+
+## B179 measured source delta
+Source-backed CI compiled **90,643 actual occupied voxels**, adding 2,884 unique cells and reserving exactly **119 conceptual air cells** in eight clearance sections: net +2,765 from B178's 87,878. The output contains **590 total authored elements across seven strict modules**, including 70 new B179 3D parts, and 73,739 rendered surface cells. All eight 2wide full-footprint bridge geometry checks and five regression tests passed. This is not Education-world writing.
