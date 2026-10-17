@@ -182,6 +182,12 @@ export function buildInterlevelNetwork(original){
   constructionApproved:false,worldContacts:0,worldCoordinates:null,
   readiness:'NOT_PREPARED',
   gates:Array(9).fill('BLOCKED'),BuildPlan:{operations:[]}};
+ console.log('B166_NETWORK_GATE_DIAGNOSTIC',JSON.stringify({
+  authored:added.length,addedSolids:newVox.length,
+  lowConflict:corrupted.length,stairPaths:stairs.map(x=>({
+   wing:x.wing,rise:x.netHeightGain,verticalStep:x.maxRise,moves:x.horizontalSteps})),
+  upper:upper.map(x=>({wing:x.wing,moves:x.flatMoves,nodes:x.reachableAnchors})),
+  originalIntact:JSON.stringify(original)===initial}));
  assert(added.length===2&&newVox.length>=80&&
   corrupted.length===0&&stairs.every(s=>s.netHeightGain===7&&
    s.maxRise===1&&s.horizontalSteps>=8)&&
