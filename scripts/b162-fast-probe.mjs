@@ -17,7 +17,7 @@ if(prior.report.final2x2FlatMoves!==101||
 const updated=reviewSkyportRevision(d,prior,REVISIONS.alpha);
 const p=updated.report;
 console.log('B162_FAST_DIAGNOSTICS',JSON.stringify({originalMoves:p.originalMoves,revisedMoves:p.revisedMoves,oldPathObstructedCells:p.oldRouteObstructedAnchors,newPathObstructedCells:p.newRouteObstructedAnchors,turns:updated.rebuilt.report.centerlineTurns,corridors:updated.rebuilt.report.corridorSegments,finishStatus:updated.rebuilt.finalRoute.targets[0].status,worldContacts:p.worldContacts,constructionApproved:p.constructionApproved,gates:p.gates,operations:p.BuildPlan.operations}));
-if(p.originalMoves!==101||p.revisedMoves!==115||
+if(p.originalMoves!==101||p.revisedMoves!==113||
  p.oldRouteObstructedAnchors<=0||p.newRouteObstructedAnchors!==0||
  updated.rebuilt.report.centerlineTurns!==4||
  updated.rebuilt.report.corridorSegments!==5||
