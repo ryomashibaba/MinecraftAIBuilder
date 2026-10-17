@@ -91,7 +91,8 @@ export function renderB160Html(b,template){
  yes(html.includes(scene),'SCENE_HOOK');
  html=html.replace(scene,[
   ' const s=scene();',
-  ' const r=s.routeReview?.targets[0],p=s.multiTurnReview;',
+  ' const isDoppler=s.id===\"doppler-switchback-terminal-r0\"||s.id===\"doppler-switchback-terminal-generated-detour\";',
+  ' const r=isDoppler?s.routeReview?.targets[0]:null,p=isDoppler?s.multiTurnReview:null;',
   ' el("b160-status").textContent=r?',
   '  "2×2床支持経路: "+r.status+" / "+(r.steps===null?"接続できない":"水平"+r.steps+"移動")+',
   '  (p?" / 方向転換"+p.verifiedPathDirectionChanges+"回 / 4区間・仕上げ"+p.finishingElements+"部材":" / 分断した元設計")+',
@@ -103,7 +104,7 @@ export function renderB160Html(b,template){
  yes(html.includes(draw),'DRAW_HOOK');
  html=html.replace(draw,[
   ' ctx.globalAlpha=1;',
-  ' const path=s.routeReview?.targets[0]?.path;',
+  ' const path=isDoppler?s.routeReview?.targets[0]?.path:null;',
   ' if(el("b160-route").checked&&path?.length){',
   '  ctx.save();ctx.strokeStyle="#a4ffdc";ctx.lineWidth=3;ctx.lineJoin="round";',
   '  ctx.beginPath();path.forEach((p,i)=>{',
