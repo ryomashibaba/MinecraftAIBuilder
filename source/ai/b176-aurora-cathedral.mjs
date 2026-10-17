@@ -156,9 +156,21 @@ export function analyzeAuroraTransit(scene){
  // Z43..44 via a TWO-WIDE horizontal Z-turn at X118 on the open terrace.
  for(let z=40;z<=43;z++)checkStation([118,57,z],'promenade-z-turn-'+z);
  let travel=0;
+ const errors=[];
  for(let x=12;x<=117+1;x++){
-  checkStation([x,57,43],'promenade-'+x);travel++;
+  for(let dx=0;dx<2;dx++)for(let dz=0;dz<2;dz++){
+   if(!floor(x+dx,57,43+dz))
+    errors.push('floor:'+K(x+dx,56,43+dz));
+   for(let dy=0;dy<2;dy++){
+    if(occ.has(K(x+dx,57+dy,43+dz)))
+     errors.push('body:'+K(x+dx,57+dy,43+dz));
+   }
+  }
+  travel++;
  }
+ guard(errors.length===0,
+  'REAR_PROMENADE_OBSTRUCTIONS_'+[...new Set(errors)].slice(0,36).join('|')+
+  '_COUNT_'+[...new Set(errors)].length);
  return {previousB174Steps:ASCENT_STATIONS.length,
   newOneRiseStairs:FLIGHT.length,
   newAdjacentMixedHeightSeams:FLIGHT.length-1,
