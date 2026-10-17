@@ -103,6 +103,7 @@ export function renderB159Html(b,template){
  check(html.includes(drawing),'DRAW_HOOK_MISSING');
  html=html.replace(drawing,[
   ' ctx.globalAlpha=1;',
+  ' const isPolaris=s.id===\"polaris-orbital-switchyard-r0\"||s.id===\"polaris-orbital-switchyard-generated-bent\";',
   ' const rt=isPolaris?s.routeReview?.targets[0]:null;',
   ' if(el("b159-route").checked&&rt?.path?.length){',
   '  ctx.save();ctx.lineWidth=3;ctx.strokeStyle="#a5ffde";ctx.lineJoin="round";',
