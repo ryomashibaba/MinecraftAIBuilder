@@ -104,6 +104,7 @@ export function renderB160Html(b,template){
  yes(html.includes(draw),'DRAW_HOOK');
  html=html.replace(draw,[
   ' ctx.globalAlpha=1;',
+  ' const isDoppler=s.id===\"doppler-switchback-terminal-r0\"||s.id===\"doppler-switchback-terminal-generated-detour\";',
   ' const path=isDoppler?s.routeReview?.targets[0]?.path:null;',
   ' if(el("b160-route").checked&&path?.length){',
   '  ctx.save();ctx.strokeStyle="#a4ffdc";ctx.lineWidth=3;ctx.lineJoin="round";',
