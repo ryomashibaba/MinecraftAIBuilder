@@ -90,7 +90,7 @@ export function createNebulaArkB173Design(){
   'ORIGINAL_FINAL_ROUTE_CUT_MOVED');
  const result={...base,id:'nebula-ark-atrium-cascade',
   title:'NEBULA ARK — 巨大三大ターミナル・多層アトリウムと空中回廊',
-  brief:'B172の三連巨大ドームと軌道環に、内部の三大吹き抜け、二系統の階段状の立体造形、連続展望テラス、四重の天空環、空中回廊と巨大ガラス天蓋を実ボクセルで増設したオフライン設計。Minecraft実施工・階間移動は未認証。',
+  brief:'三大ドームに巨大吹き抜け、二系統の階段状造形、空中テラス、天空環、巨大ガラス天蓋を実ボクセルで増設。Minecraft施工と階間移動は未認証。',
   elements:[...base.elements.slice(0,-1),...atriumCascadeElements(),
    base.elements.at(-1)]};
  validateDesign(result);
