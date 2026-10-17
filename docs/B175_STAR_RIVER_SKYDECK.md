@@ -10,6 +10,7 @@ B174 is inherited without modifying original B172/B173/B174 source files. A new 
 - The actual new voxels are quantified after full compilation and compared with the B174 source geometry, using SHA256 pinned source and merged-geometry hashes.
 
 ### Circulation geometry versus actual Minecraft walkability
+- A **targeted three-cell local design cut** at (72,39,46..48) removes an inherited upper arrival-deck collision at the final staircase interface. Original B174 source remains frozen and the cut is explicitly whitelisted in the B175 composer; this is not an approved Minecraft block deletion. Regression tests assert exactly which old cells existed and that the new composite clears them.
 - The B174 Skycanyon's 15 individually supported 2x2 stations are upgraded with **14 adjacent mixed-height step-interface validations**: a contiguous lower/upper tread edge, one-cell nominal rise, two-cell upper headroom, staging support and future station clearance.
 - These are offline voxel/collision *proxies only*, not certified continuous movement, vanilla stairs or player step mechanics; in fact, the interface's two floor columns are at different heights. In-game walking, jumping, fall risk and collision calibration remain **HOLD**.
 - The new high Sky River horizontal gallery at design Y60 has a **100-move uninterrupted, 2x2 fully supported flat route** with two blocks of clear headroom. Old flat lower (102) and upper (98) routes remain supported and unobstructed.

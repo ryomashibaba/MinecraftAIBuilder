@@ -17,8 +17,16 @@ test('third valid strict-B143 module adds materially new actual 3D spaces',()=>{
  assert.equal(r.design.elements.length,starRiverParts().length);
  assert(r.design.elements.length>=50&&r.design.elements.length<=160);
  assert.equal(p.inheritedAuthoredElements,225);
+ const prev=new Set(original.compiled.primitives.map(a=>a.slice(0,3).join(',')));
+ const now=new Set(r.compiled.primitives.map(a=>a.slice(0,3).join(',')));
+ for(let z=46;z<=48;z++){
+  assert(prev.has([72,39,z].join(',')),'old parent must contain obstructing voxel');
+  assert(!now.has([72,39,z].join(',')),'new merged corridor must clear voxel');
+ }
+ for(let z=46;z<=47;z++)assert(now.has([73,39,z].join(',')));
  assert(p.addedUnique3dCells>=2000);
- assert.equal(p.real3dCells,p.parentVoxelCount+p.addedUnique3dCells);
+ assert.equal(p.removedDesignCells,3);
+ assert.equal(p.real3dCells,p.parentVoxelCount+p.addedUnique3dCells-3);
  assert(p.real3dCells<=MAX_CELLS);
  assert.notEqual(p.geometrySha256,p.parentGeometrySha256);
  assert(verifyStarRiver(p));
