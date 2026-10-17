@@ -23,7 +23,7 @@ export const MODEL_OFFSET=Object.freeze({
  worldPlacementAuthorized:false
 });
 export const GATEWAY=Object.freeze({
- standingY:73,floorY:72,mainAnchorX:108,mainAnchorZ:29,
+ standingY:61,floorY:60,mainAnchorX:108,mainAnchorZ:29,
  annexLocalAnchorX:4,annexLocalAnchorZ:31,
  // Four-wide source corridor, 2wide travel footprints and 2-high head.
  floorZ0:29,floorZ1:32,sourceOnlyMaxNewCells:480
@@ -132,9 +132,9 @@ export function evaluateSourceGateway(main,annex,offset=MODEL_OFFSET){
  fail(blocked.length===0,'GATEWAY_CLEARANCE_HOLD_'+JSON.stringify(blocked.slice(0,12).map(p=>({
    ...p,reason:[[p.x, p.z],[p.x+1,p.z],[p.x,p.z+1],[p.x+1,p.z+1]]
      .map(([x,z])=>({x,z,
-      floor:sourceUnion.has(K(x,72,z)),
-      body:sourceUnion.has(K(x,73,z)),
-      head:sourceUnion.has(K(x,74,z))}))
+      floor:sourceUnion.has(K(x,GATEWAY.floorY,z)),
+      body:sourceUnion.has(K(x,GATEWAY.standingY,z)),
+      head:sourceUnion.has(K(x,GATEWAY.standingY+1,z))}))
  }))));
  // Ensure the bridge has not collided with *any* original body/head space
  // in its 2x2 travel footprint; explicit per-station check covers both.
