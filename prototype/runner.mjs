@@ -54,14 +54,18 @@ export function validatePlan(){
     if(seen.has(key)||!MATERIALS.includes(p.block))throw Error('P0_BAD_VOXELS');
     seen.add(key);
   }
-  let n=0;
+  let n=0;const covered=new Set();
   for(const r of PLAN.runs){
-    if(r.x2<r.x1||r.x2-r.x1>64||!MATERIALS.includes(r.block))
+    const volume=(r.x2-r.x1+1)*(r.y2-r.y1+1)*(r.z2-r.z1+1);
+    if(r.x2<r.x1||r.y2<r.y1||r.z2<r.z1||
+       volume>2048||volume<1||!MATERIALS.includes(r.block))
       throw Error('P0_BAD_RUN');
-    for(let x=r.x1;x<=r.x2;x++){
-      if(!seen.has(x+' '+r.y+' '+r.z))throw Error('P0_RUN_MISMATCH');
-      n++;
-    }
+    for(let y=r.y1;y<=r.y2;y++)for(let z=r.z1;z<=r.z2;z++)
+      for(let x=r.x1;x<=r.x2;x++){
+        const k=x+' '+y+' '+z;
+        if(!seen.has(k)||covered.has(k))throw Error('P0_RUN_MISMATCH');
+        covered.add(k);n++;
+      }
   }
   if(n!==PLAN.placementCount)throw Error('P0_BAD_RUN_TOTAL');
   return {sha256:PLAN.sha256,blocks:PLAN.placementCount,runs:PLAN.runs.length,
@@ -69,12 +73,12 @@ export function validatePlan(){
 }
 export function commandFor(run,origin,kind='build'){
   validateOrigin(origin);
-  const p=absolute({x:run.x1,y:run.y,z:run.z},origin);
-  const q=absolute({x:run.x2,y:run.y,z:run.z},origin);
+  const p=absolute({x:run.x1,y:run.y1,z:run.z1},origin);
+  const q=absolute({x:run.x2,y:run.y2,z:run.z2},origin);
   if(!MATERIALS.includes(run.block))throw Error('P0_BLOCK_NOT_ALLOWED');
   if(kind==='build'){
     // "keep" is fail-safe against a new occupant between survey and placement.
-    return run.x1===run.x2
+    return run.x1===run.x2&&run.y1===run.y2&&run.z1===run.z2
       ? 'setblock '+xyz(p)+' '+run.block+' keep'
       : 'fill '+xyz(p)+' '+xyz(q)+' '+run.block+' keep';
   }
@@ -82,9 +86,12 @@ export function commandFor(run,origin,kind='build'){
 }
 const query=(p,b)=>'testforblock '+xyz(p)+' '+b;
 const remove=(p,b)=>'fill '+xyz(p)+' '+xyz(p)+' minecraft:air replace '+b;
-const fullPos=(run,x,origin)=>absolute({x,y:run.y,z:run.z},origin);
-const cells=(run,origin)=>Array.from({length:run.x2-run.x1+1},
-  (_,i)=>fullPos(run,run.x1+i,origin));
+const cells=(run,origin)=>{
+ const out=[];
+ for(let y=run.y1;y<=run.y2;y++)for(let z=run.z1;z<=run.z2;z++)
+   for(let x=run.x1;x<=run.x2;x++)out.push(absolute({x,y,z},origin));
+ return out;
+};
 const testCommand=cmd=>
  /^(?:testforblock|setblock|fill) [-\d ]+ minecraft:(?:air|quartz_block|iron_block|glass|glowstone|stone)(?: (?:keep|replace minecraft:(?:quartz_block|iron_block|glass|glowstone|stone)))?$/.test(cmd)||
  /^fill [-\d ]+ minecraft:(?:quartz_block|iron_block|glass|glowstone|stone) keep$/.test(cmd);
