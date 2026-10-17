@@ -8,7 +8,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
-import {buildB190} from '../source/ai/b190-skyport-annex.mjs';
+import {buildB190} from '../source/ai/b190-source-gateway.mjs';
 import {MATERIALS} from '../source/ai/b143-building-dsl.mjs';
 import {surfaceOnly,verifyB143Payload,renderB143Html}
  from './build-b143-site.mjs';
