@@ -75,13 +75,32 @@ export function makeArkLite(){
     box(x,1,z,x,6,z,metal);put(x,7,z,light);
   }
   const voxels=[...map.values()].sort((a,b)=>a.y-b.y||a.z-b.z||a.x-b.x);
+  // Greedy homogenous XY/XZ/XYZ cuboids: fewer world writes than X-only RLE.
+  // Every compressed cuboid is at most 2048 cells (Bedrock fill limit margin).
+  const remaining=new Map(map);
+  const at=(x,y,z,b)=>remaining.get(k(x,y,z))?.block===b;
   const runs=[];
   for(const p of voxels){
-    const last=runs[runs.length-1];
-    if(last&&last.y===p.y&&last.z===p.z&&last.x2+1===p.x&&last.block===p.block)
-      last.x2=p.x;
-    else runs.push({x1:p.x,x2:p.x,y:p.y,z:p.z,block:p.block});
+    if(!remaining.has(k(p.x,p.y,p.z)))continue;
+    const b=p.block,x1=p.x,y1=p.y,z1=p.z;
+    let x2=x1,y2=y1,z2=z1;
+    while(x2<47&&at(x2+1,y1,z1,b)&&x2-x1+2<=2048)x2++;
+    let layer=(x2-x1+1);
+    zloop:while(z2<39&&layer+(x2-x1+1)<=2048){
+      for(let x=x1;x<=x2;x++)if(!at(x,y1,z2+1,b))break zloop;
+      z2++;layer+=(x2-x1+1);
+    }
+    yloop:while(y2<29&&layer*2<=2048){
+      for(let z=z1;z<=z2;z++)for(let x=x1;x<=x2;x++)
+        if(!at(x,y2+1,z,b))break yloop;
+      y2++;
+      layer=(x2-x1+1)*(z2-z1+1)*(y2-y1+1);
+    }
+    for(let y=y1;y<=y2;y++)for(let z=z1;z<=z2;z++)
+      for(let x=x1;x<=x2;x++)remaining.delete(k(x,y,z));
+    runs.push({x1,x2,y1,y2,z1,z2,block:b});
   }
+  if(remaining.size)throw Error('P0_COMPRESSION_FAILED');
   const serialized=JSON.stringify(voxels.map(p=>[p.x,p.y,p.z,p.block]));
   const sha256=createHash('sha256').update(serialized).digest('hex');
   const counts=Object.fromEntries(MATERIALS.map(m=>[m,voxels.filter(p=>p.block===m).length]));
