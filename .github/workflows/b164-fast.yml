@@ -1,0 +1,47 @@
+name: B164 orbital megastructure geometry gate
+on:
+  push:
+    branches:
+      - feature/b164-orbital-crown-megastructure
+    paths:
+      - 'source/ai/b164-orbital-crown.mjs'
+      - 'scripts/b164-fast-probe.mjs'
+      - 'scripts/build-b164-site.test.mjs'
+      - '.github/workflows/b164-fast.yml'
+  pull_request:
+    paths:
+      - 'source/ai/b164-orbital-crown.mjs'
+      - 'scripts/b164-fast-probe.mjs'
+      - 'scripts/build-b164-site.test.mjs'
+      - '.github/workflows/b164-fast.yml'
+permissions:
+  contents: read
+concurrency:
+  group: b164-fast-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  new-megastructure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate generated architectural source
+        run: |
+          node --check source/ai/b164-orbital-crown.mjs
+          node --check scripts/b164-fast-probe.mjs
+      - name: Verify vaulted mega roofs, upper decks and 127-cell 2x2 route
+        run: node scripts/b164-fast-probe.mjs
+      - name: Inspect new architecture tests and viewer
+        if: hashFiles('scripts/build-b164-site.test.mjs') != ''
+        run: node --test scripts/build-b164-site.test.mjs
+      - name: Archive reproducible local-geometry-only proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: B164-Orbital-Crown-Architecture
+          path: b164-fast-evidence/B164_ARCHITECTURE.json
+          if-no-files-found: warn
+          retention-days: 14
