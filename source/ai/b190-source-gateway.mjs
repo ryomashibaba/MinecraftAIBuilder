@@ -175,6 +175,8 @@ export function evaluateSourceGateway(main,annex,offset=MODEL_OFFSET,
    !mainCells.has(K(...p))&&!virtualAnnexCells.has(K(...p)));
  fail(occupiedBridgeOutsideModels,'BRIDGE_OVERWROTE_ORIGINAL_CELL');
  return {schema:'minecraftaibuilder-b190-source-gateway-proof-v1',
+  reviewStatus:'SOURCE_GEOMETRY_APPROACH_VALIDATED',
+  evaluatedStandingY:standingY,
   offset,mainModelCells:main.primitives.length,
   annexModelCells:annex.primitives.length,
   virtualIndependentSum:main.primitives.length+annex.primitives.length,
