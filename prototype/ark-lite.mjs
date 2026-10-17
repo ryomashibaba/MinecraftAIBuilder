@@ -111,7 +111,7 @@ export function makeArkLite(){
 export function validateOrigin(o){
   if(!o||!['x','y','z'].every(k=>Number.isSafeInteger(o[k])))
     throw Error('P0_ORIGIN_THREE_INTEGERS_REQUIRED');
-  if(o.y< -40||o.y+29>300||Math.abs(o.x)>29999940||
+  if(o.y< -64||o.y+29>319||Math.abs(o.x)>29999940||
      Math.abs(o.z)>29999940)throw Error('P0_ORIGIN_OUT_OF_BOUNDS');
   return o;
 }
