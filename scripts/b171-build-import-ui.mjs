@@ -93,7 +93,7 @@ byId('add').addEventListener('click',async()=>{
 byId('download').addEventListener('click',()=>{
  const record={schema:'minecraftaibuilder-b171-readback-receipts-v1',
  packetSha256:info.packetSha256,receipts};
- const blob=new Blob([JSON.stringify(record,null,2)+'\n'],{type:'application/json'});
+ const blob=new Blob([JSON.stringify(record,null,2)+'\\n'],{type:'application/json'});
  const url=URL.createObjectURL(blob);
  const a=document.createElement('a');a.href=url;a.download='B171_READBACK_ARCHIVE.json';
  a.click();URL.revokeObjectURL(url);
