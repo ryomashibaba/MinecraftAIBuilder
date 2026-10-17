@@ -24,7 +24,7 @@ function makeReviewedHtml({design,provenance}){
  requireIt(verifyB143Payload(gallery),'RENDER_SAFETY');
  const template=fs.readFileSync(path.join(root,'source/ai/b143-viewer-template.html'),'utf8');
  const base=renderB143Html(gallery,template);
- const banner=provenance==='FIXTURE_ONLY_NOT_NATURAL_LANGUAGE_PROOF'?
+ const banner=provenance==='INJECTED_TEST_DOUBLE'?
   'B198B TEST FIXTURE — 模擬モデル出力。AIの日本語理解・建築品質の合格を意味しません。':
   'B198B MODEL PROPOSAL — 意味の一致・建築品質・Minecraft実機歩行は未評価。';
  const bodyStart=base.match(/<body\b[^>]*>/i)?.[0];
