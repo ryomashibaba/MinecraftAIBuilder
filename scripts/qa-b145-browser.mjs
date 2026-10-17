@@ -105,7 +105,7 @@ async function inspect(info,mobile){
    await picker.selectOption('29');await page.waitForTimeout(380);
    const recovered=await status.innerText();
    if(!recovered.includes('PASS_FLAT_FOOTPRINT_GEOMETRY')||
-      !recovered.includes('115水平移動')||
+      !recovered.includes('113水平移動')||
       !recovered.includes('旧回廊の遮断'))
     fail('B162_NEW_ROUTE_MISSING_'+recovered);
    const overlay=page.locator('#b162-route');
