@@ -31,7 +31,7 @@ export function navigationArchitecture(){
  return [
   {id:'b166-south-upper-dome-passage',shape:'box',mode:'cut',
    origin:[70,26,80],size:[13,2,11]},
-  box('b166-south-suspended-observation-gallery',[66,32,78],[12,2,5],'accent')
+  box('b166-south-suspended-observation-gallery',[60,36,76],[19,2,8],'accent')
  ];
 }
 
