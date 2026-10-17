@@ -21,6 +21,9 @@ const assert=(v,name)=>{if(!v)throw Error('B170_'+name)};
 const eq=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
 const pt=x=>Array.isArray(x)&&x.length===3&&
  x.every(n=>Number.isSafeInteger(n)&&n>=0&&n<=128);
+const worldPt=x=>Array.isArray(x)&&x.length===3&&
+ x.every(Number.isSafeInteger)&&Math.abs(x[0])<=30000000&&
+ Math.abs(x[2])<=30000000&&x[1]>=-64&&x[1]<=320;
 const wingList=[
  {wing:'north',x:30,z:17,entry:[30,19,15],top:[30,26,30]},
  {wing:'south',x:79,z:75,entry:[79,19,73],top:[79,26,88]}
@@ -128,7 +131,7 @@ export function reviewProbeSubmission(packet,submission){
    .includes(o.captureMethod),'MEASUREMENT_PROVENANCE');
   assert(typeof o.minecraftVersion==='string'&&
    o.minecraftVersion.length<=55,'MINECRAFT_VERSION');
-  assert(o.worldXYZ===null||pt(o.worldXYZ),'WORLD_COORDINATES');
+  assert(o.worldXYZ===null||worldPt(o.worldXYZ),'WORLD_COORDINATES');
   assert(['not_tested','observed_pass','observed_fail'].includes(o.movementOutcome),
    'MOVEMENT_VALUE');
   assert(typeof o.evidenceNote==='string'&&o.evidenceNote.length<=320,
