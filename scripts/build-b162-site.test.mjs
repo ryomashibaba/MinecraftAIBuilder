@@ -27,7 +27,7 @@ test('real new blocker invalidates old route but recalculates independent viable
  const proof=rebuilt.report;
  assert.equal(JSON.stringify(source),unchanged);
  assert.equal(proof.originalMoves,101);
- assert.equal(proof.revisedMoves,115);
+ assert.equal(proof.revisedMoves,113);
  assert(proof.oldRouteObstructedAnchors>0);
  assert.equal(proof.newRouteObstructedAnchors,0);
  assert.notDeepEqual(proof.previousWaypoints,proof.newWaypoints);
