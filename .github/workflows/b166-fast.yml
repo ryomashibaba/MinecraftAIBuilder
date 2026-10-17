@@ -1,0 +1,46 @@
+name: B166 inter-level voxel network proof
+on:
+  push:
+    branches: [feature/b166-upper-level-route-and-stair-transition-proof]
+    paths:
+      - 'source/ai/b166-interlevel-network.mjs'
+      - 'scripts/b166-fast-probe.mjs'
+      - 'scripts/build-b166-site.test.mjs'
+      - '.github/workflows/b166-fast.yml'
+  pull_request:
+    paths:
+      - 'source/ai/b166-interlevel-network.mjs'
+      - 'scripts/b166-fast-probe.mjs'
+      - 'scripts/build-b166-site.test.mjs'
+      - '.github/workflows/b166-fast.yml'
+permissions:
+  contents: read
+concurrency:
+  group: b166-fast-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  two-level-voxel-nav:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check source syntax
+        run: |
+          node --check source/ai/b166-interlevel-network.mjs
+          node --check scripts/b166-fast-probe.mjs
+      - name: Prove two stair grid traversals and two fully supported upper platforms
+        run: node scripts/b166-fast-probe.mjs
+      - name: 36 architectural model regression
+        if: hashFiles('scripts/build-b166-site.test.mjs') != ''
+        run: node --test scripts/build-b166-site.test.mjs
+      - name: Archive reproducible no-build geometry
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: B166-Interlevel-Network-Proof
+          path: b166-fast-evidence/B166_NETWORK.json
+          if-no-files-found: warn
+          retention-days: 14
