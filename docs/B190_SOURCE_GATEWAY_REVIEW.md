@@ -22,3 +22,6 @@ B190 CI must prove five strict genuine-geometry/source/integrity tests, reproduc
 
 ## Next stage B191
 Test alternative virtual alignments and ergonomics/visual readability for the proposed interbuilding connector, resolve potential source-height differences without rewriting existing independent models, and find a truly reviewable composite model view without evading single-model limits. Still NO physical Minecraft execution.
+
+## Verified B190 outcome
+The four shared design-level gateway candidates at standing Y73/69/65/61 were all actually tested. TWO passed a wholly source-geometric candidate route check, TWO correctly returned HOLD with zero proposal cells and no carving. The default passing proposal required 31 successive 2wide floor/headroom source stations and exactly 38 NEW conceptual missing floor support cells; two translated architectural 3D volumes have 0 overlapping source-voxel cells. These results are specifically NOT a real physical-world bridge, no world placement, no player movement/collision/fall certification, and all nine construction gates remain blocked. The evidence JSON includes the exact per-elevation PASS/HOLD records.
