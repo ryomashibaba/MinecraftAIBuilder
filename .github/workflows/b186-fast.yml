@@ -1,0 +1,81 @@
+name: B186 Crown Observatory Fourteen-Module Network
+on:
+  push:
+    branches: [feature/b186-nebula-ark-crown-observatory-network]
+    paths:
+      - 'source/ai/b186-crown-observatory.mjs'
+      - 'scripts/b186-fast-probe.mjs'
+      - 'scripts/b186-macro.test.mjs'
+      - 'scripts/b186-build-preview.mjs'
+      - 'scripts/b186-browser-qa.mjs'
+      - '.github/workflows/b186-fast.yml'
+  pull_request:
+    paths:
+      - 'source/ai/b186-crown-observatory.mjs'
+      - 'scripts/b186-fast-probe.mjs'
+      - 'scripts/b186-macro.test.mjs'
+      - 'scripts/b186-build-preview.mjs'
+      - 'scripts/b186-browser-qa.mjs'
+      - '.github/workflows/b186-fast.yml'
+permissions:
+  contents: read
+concurrency:
+  group: b186-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  macro-architecture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Validate source and safe build scripts
+        run: |
+          node --check source/ai/b186-crown-observatory.mjs
+          node --check scripts/b186-fast-probe.mjs
+      - name: Three raised sky observatories, 99-move higher walkway and 18-vertex civic route source graph
+        run: node scripts/b186-fast-probe.mjs
+      - name: Architecture geometry, obstruction and anti-forgery tests
+        if: hashFiles('scripts/b186-macro.test.mjs') != ''
+        run: node --test scripts/b186-macro.test.mjs
+      - name: Build standalone offline 3D city preview
+        if: hashFiles('scripts/b186-build-preview.mjs') != ''
+        run: node scripts/b186-build-preview.mjs
+      - name: Archive city-scale voxel model and interactive preview
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: B186-NEBULA-ARK-Grand-Terminal-3D
+          path: b186-evidence/
+          if-no-files-found: warn
+          retention-days: 14
+
+  chromium-visual-qa:
+    needs: [macro-architecture]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned browser QA runtime without lockfile mutation
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Regenerate offline 3D model from pinned source
+        run: node scripts/b186-build-preview.mjs
+      - name: Test real Chromium desktop/mobile canvas, all presets, and save screenshots
+        run: node scripts/b186-browser-qa.mjs
+      - name: Upload actual rendered visual evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: B186-NEBULA-ARK-Desktop-Mobile-Screenshots
+          path: |
+            b186-evidence/B186_DESKTOP.png
+            b186-evidence/B186_MOBILE.png
+            b186-evidence/B186_CHROMIUM_QA.json
+          if-no-files-found: warn
+          retention-days: 14
