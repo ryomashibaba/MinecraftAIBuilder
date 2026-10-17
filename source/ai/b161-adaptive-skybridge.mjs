@@ -73,7 +73,6 @@ function makeBlockedGrid(scene,w,h,standingY){
   sum[(z+1)*cols+(x+1)]=data[at(x,z)]+sum[z*cols+x+1]+
    sum[(z+1)*cols+x]-sum[z*cols+x];
  }
- const pad=Math.floor((corridorWidthOffset=>corridorWidthOffset)(0)); // no global mutable state
  return {full:(x,z,size)=>{
    const left=Math.floor((size-1)/2),minX=x-left,minZ=z-left;
    const maxX=minX+size,maxZ=minZ+size;
@@ -156,6 +155,13 @@ function finishDecks(parts,p,baseY){
      [x+(side?sx-1:0),base-1,z+trim],
     alongX?[span,1,1]:[1,1,span],'metal'));
   }
+  shape.push(box(tag+'-pier',
+   [x+Math.floor(sx/2),baseY,z+Math.floor(sz/2)],
+   [2,base-baseY,2],'metal'));
+  shape.push(box(tag+'-overhead',
+   alongX?[x+Math.floor(sx/2),y+6,z-1]:
+    [x-1,y+6,z+Math.floor(sz/2)],
+   alongX?[1,1,sz+2]:[sx+2,1,1],'accent'));
  }
  return shape;
 }
