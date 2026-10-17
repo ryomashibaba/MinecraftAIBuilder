@@ -1,0 +1,81 @@
+name: B176 AURORA TRANSIT CATHEDRAL 4-module city
+on:
+  push:
+    branches: [feature/b176-nebula-ark-aurora-transit-cathedral]
+    paths:
+      - 'source/ai/b176-aurora-cathedral.mjs'
+      - 'scripts/b176-fast-probe.mjs'
+      - 'scripts/b176-macro.test.mjs'
+      - 'scripts/b176-build-preview.mjs'
+      - 'scripts/b176-browser-qa.mjs'
+      - '.github/workflows/b176-fast.yml'
+  pull_request:
+    paths:
+      - 'source/ai/b176-aurora-cathedral.mjs'
+      - 'scripts/b176-fast-probe.mjs'
+      - 'scripts/b176-macro.test.mjs'
+      - 'scripts/b176-build-preview.mjs'
+      - 'scripts/b176-browser-qa.mjs'
+      - '.github/workflows/b176-fast.yml'
+permissions:
+  contents: read
+concurrency:
+  group: b176-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  macro-architecture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Validate source and safe build scripts
+        run: |
+          node --check source/ai/b176-aurora-cathedral.mjs
+          node --check scripts/b176-fast-probe.mjs
+      - name: Source-backed massive NEW city architecture and two 2x2 accessible flat corridors
+        run: node scripts/b176-fast-probe.mjs
+      - name: Architecture geometry, obstruction and anti-forgery tests
+        if: hashFiles('scripts/b176-macro.test.mjs') != ''
+        run: node --test scripts/b176-macro.test.mjs
+      - name: Build standalone offline 3D city preview
+        if: hashFiles('scripts/b176-build-preview.mjs') != ''
+        run: node scripts/b176-build-preview.mjs
+      - name: Archive city-scale voxel model and interactive preview
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: B176-NEBULA-ARK-Grand-Terminal-3D
+          path: b176-evidence/
+          if-no-files-found: warn
+          retention-days: 14
+
+  chromium-visual-qa:
+    needs: [macro-architecture]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned browser QA runtime without lockfile mutation
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Regenerate offline 3D model from pinned source
+        run: node scripts/b176-build-preview.mjs
+      - name: Test real Chromium desktop/mobile canvas, all presets, and save screenshots
+        run: node scripts/b176-browser-qa.mjs
+      - name: Upload actual rendered visual evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: B176-NEBULA-ARK-Desktop-Mobile-Screenshots
+          path: |
+            b176-evidence/B176_DESKTOP.png
+            b176-evidence/B176_MOBILE.png
+            b176-evidence/B176_CHROMIUM_QA.json
+          if-no-files-found: warn
+          retention-days: 14
