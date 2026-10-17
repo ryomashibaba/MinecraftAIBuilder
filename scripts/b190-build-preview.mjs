@@ -87,7 +87,7 @@ export function buildB190Preview({dir=out}={}){
   'セル｜連絡通路の支持床・頭上検証：'+gateway.full2wide2highStations+
   '地点｜新規支持床候補：'+gateway.candidateBridgeNewCells+'セル</p>'+
   '<p><strong>注意：</strong>実機での歩行・衝突判定・地形・安全性は未検証です。'+
-  'Minecraft Educationへの配置・施工・連絡橋の建築は一切していません。</p>'+
+  '通路候補がHOLDの場合は接続不成立です。Minecraft Educationへの配置・施工・連絡橋の建築は一切していません。</p>'+
   '</section>';
  const insert='<h2 style="margin-top:20px">表示設定</h2>';
  check(html.includes(insert),'CONTROL_HOOK');
@@ -138,7 +138,9 @@ export function buildB190Preview({dir=out}={}){
   numberOfActualNew3dScenes:2,
   newConceptModelTotalOutsideHistoric36:38,
   moduleCount:17,annexOccupiedCells:report.annexOccupiedCells,viewerSceneCount:5,
-  gatewayStations:report.candidateGatewaySourceStations,gatewayProposalOnly:true,
+  gatewayStations:report.candidateGatewaySourceStations,
+  gatewayReviewStatus:report.gatewayReviewStatus,
+  gatewayProposalOnly:true,
   real3dCells:compiled.primitives.length,annexReal3dCells:annex.compiled.primitives.length,
   surfaceCells:surface.length,authoredElements:parent.report.totalAuthoredElements+annex.design.elements.length,
   htmlSha256:H(html),designFileSha256:H(fs.readFileSync(sourceFile)),
