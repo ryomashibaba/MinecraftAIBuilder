@@ -189,6 +189,18 @@ function compose(old,addon,design){
   m.set(id,p);added++;
  }
  check(added>=3000,'INSUFFICIENT_NEW_3D_ARCHITECTURE');
+ // Strictly bounded conceptual SOURCE-ONLY air volumes above the new Y75
+ // raised observation deck: X12..115, Z29..43, only body Y76 and head Y77.
+ // This keeps ALL inherited B184/B185 roof portals (Z<=28), old gallery
+ // floors, stairs and real Minecraft blocks untouched. Never a world command.
+ const localClearance=[];
+ for(let x=12;x<=115;x++)for(let z=29;z<=43;z++)
+  for(let y=76;y<=77;y++){
+   const id=K(x,y,z);
+   if(m.delete(id))localClearance.push(id);
+  }
+ check(localClearance.length>=100&&localClearance.length<=3200,
+  'BOUNDED_UPPER_AIR_RESERVATION_'+localClearance.length);
  check(m.size<=MAX_CELLS,'STRICT_VOXEL_CAP');
  const primitives=[...m.values()].sort((a,b)=>a[1]-b[1]||a[2]-b[2]||a[0]-b[0]);
  const bounds={minX:Infinity,maxX:-Infinity,minY:Infinity,maxY:-Infinity,minZ:Infinity,maxZ:-Infinity};
@@ -201,7 +213,7 @@ function compose(old,addon,design){
  }
  check(bounds.maxX<124&&bounds.maxY<78&&bounds.maxZ<50,'OUTSIDE_B143_ENVELOPE');
  const sourceSha256=H({schema:SCHEMA,parent:old.sourceSha256,
-  module:addon.sourceSha256,policy:'strictly-additive-preserve-every-parent-cell'});
+  module:addon.sourceSha256,policy:'bounded-Y76-77-observation-headspace-composite-only'});
  const geometrySha256=H({sourceSha256,primitives});
  return {compiled:{...old,id:'nebula-ark-crown-observatory-network',
   title:'NEBULA ARK — CROWN OBSERVATORY NETWORK / 王冠展望都市',
@@ -211,7 +223,8 @@ function compose(old,addon,design){
   stats:{...old.stats,voxels:primitives.length,
    layerCounts,moduleCount:14,designOperations:[...old.stats.designOperations,
     ...addon.stats.designOperations.map(op=>({...op,module:design.id}))]}},
-  added,overlap};
+  added,overlap,airRemoved:localClearance.length,
+  airMaskSha256:H(localClearance.sort())};
 }
 export function buildCrownObservatory(){
  const parent=buildCelestialPortico(),design=createCrownModule(),
@@ -237,7 +250,9 @@ export function buildCrownObservatory(){
   geometrySha256:joined.compiled.geometrySha256,
   parentGeometrySha256:parent.compiled.geometrySha256,
   parent3dCells:parent.compiled.primitives.length,
-  added3dCells:joined.added,total3dCells:joined.compiled.primitives.length,
+  added3dCells:joined.added,upperBodyAirRemoved:joined.airRemoved,
+  localAirReservationSha256:joined.airMaskSha256,
+  total3dCells:joined.compiled.primitives.length,
   parent3dOverlapPreserved:joined.overlap,
   inheritedElements:parent.report.totalElements,
   newElements:design.elements.length,
@@ -273,7 +288,9 @@ export function buildCrownObservatory(){
 export function verifyCrownReport(r){
  return Boolean(r&&r.schema===SCHEMA&&r.id==='nebula-ark-crown-observatory-network'&&
   r.parent3dCells===123583&&r.added3dCells>=3000&&
-  r.total3dCells===r.parent3dCells+r.added3dCells&&
+  r.upperBodyAirRemoved>=100&&r.upperBodyAirRemoved<=3200&&
+  r.localAirReservationSha256?.length===64&&
+  r.total3dCells===r.parent3dCells+r.added3dCells-r.upperBodyAirRemoved&&
   r.total3dCells<=MAX_CELLS&&r.remaining3dCellBudget===MAX_CELLS-r.total3dCells&&
   r.inheritedElements===1264&&r.newElements>=90&&r.newElements<=160&&
   r.totalElements===r.inheritedElements+r.newElements&&
