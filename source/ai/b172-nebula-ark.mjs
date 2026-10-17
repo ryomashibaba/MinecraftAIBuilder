@@ -169,7 +169,7 @@ export function createNebulaArkDesign(){
   schema:DSL,
   id:'nebula-ark-grand-terminal',
   title:'NEBULA ARK — 巨大軌道環と三大ターミナルの未来都市',
-  brief:'全長約109ブロックの巨大空中旅客ターミナル。三連の中空ガラス大屋根、二重の軌道リング、60ブロック級の観測主塔、吊り下げ回廊、2層に実在する直通散策動線、外壁大トラス、空中庭園で構成した、探索したくなる立体都市の新規設計。Minecraft実施工・強度・階間移動は未認証。',
+  brief:'全長109ブロックの三連巨大ドーム、二重軌道環、60ブロック級主塔、空中庭園と多層展望回廊。上下2層の直通動線を備える未来都市。Minecraftでの施工・強度・階間移動は未認証。',
   bounds:{...sourceBounds},elements:nebulaArkElements(),designOnly:true
  };
  validateDesign(d);
