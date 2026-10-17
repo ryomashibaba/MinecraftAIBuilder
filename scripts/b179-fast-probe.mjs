@@ -14,6 +14,7 @@ fs.writeFileSync(path.join(root,'b179-evidence/B179_ARCHITECTURE_PROOF.json'),
 console.log('B179_ARCHITECTURE_PROOF',JSON.stringify({
  voxels:report.voxels,added:report.addedUniqueVoxels,
  newParts:report.addonAuthoredElements,totalParts:report.authoredElements,
+ offlineApertureCells:report.sourceOnlyAirCellsReserved,
  surfaces:output.real3dSurfaceCells,modules:report.moduleCount,
  inspectedBridges:report.bridgeInterfacesChecked,clearBridges:report.bridgeInterfacesVerified,
  worldWrites:0,readiness:'NOT_PREPARED'}));

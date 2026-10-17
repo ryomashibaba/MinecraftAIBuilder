@@ -17,7 +17,8 @@ test('7 independently source-valid modules: massive actual architectural expansi
  assert.equal(v.design.elements.length,quadTierParts().length);
  assert(v.design.elements.length>=65&&v.design.elements.length<=160);
  assert(r.addedUniqueVoxels>=1400);
- assert.equal(r.voxels,87878+r.addedUniqueVoxels);
+ assert(r.sourceOnlyAirCellsReserved>=50&&r.sourceOnlyAirCellsReserved<=180);
+ assert.equal(r.voxels,87878+r.addedUniqueVoxels-r.sourceOnlyAirCellsReserved);
  assert(r.voxels<=MAX_CELLS);
  assert.notEqual(r.geometrySha256,r.previousGeometrySha256);
  assert.equal(verifyQuadTierReport(r),true);
@@ -26,6 +27,15 @@ test('all eight real 2x2 source-backed cross-corridors pass floor and head clear
  const s=buildQuadTier(),c=inspectQuadTierAccess(s.compiled);
  assert.equal(c.bridges.length,TIERS.length*CROSSINGS.length);
  assert.equal(c.passed,8);
+ const cSet=new Set(s.compiled.primitives.map(p=>p.slice(0,3).join(',')));
+ // Every 2x2 route footprint including the last X column, not merely
+ // isolated centreline voxels, must carry support and clean headroom.
+ for(const x of c.bridges)for(let n=x.x0;n<=x.xLast;n++)
+  for(let dx=0;dx<2;dx++)for(let dz=0;dz<2;dz++){
+   assert(cSet.has([n+dx,x.deckY,29+dz].join(',')));
+   assert(!cSet.has([n+dx,x.standingY,29+dz].join(',')));
+   assert(!cSet.has([n+dx,x.standingY+1,29+dz].join(',')));
+  }
  assert(c.bridges.every(x=>x.supported2x2&&x.violationsTotal===0));
  assert(c.bridges.every(x=>x.spanMoves>=15));
  assert.equal(c.isTrueMinecraftWalkingCertified,false);

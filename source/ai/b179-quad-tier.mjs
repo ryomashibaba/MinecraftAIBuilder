@@ -85,11 +85,13 @@ export function inspectQuadTierAccess(scene){
   const errors=[];
   // One source-true 2x2 footprint per increment of X. The end areas must
   // be supported too, rather than assuming a visually contiguous bridge.
-  for(let x=c.x;x<c.x+c.span-1;x++)for(let dz=0;dz<2;dz++){
-   if(!occupied.has(k(x, y,29+dz)))errors.push('floor:'+k(x,y,29+dz));
-   for(let dy=1;dy<=2;dy++)if(occupied.has(k(x,y+dy,29+dz)))
-    errors.push('body:'+k(x,y+dy,29+dz));
-  }
+  for(let x=c.x;x<c.x+c.span-1;x++)for(let dx=0;dx<2;dx++)
+   for(let dz=0;dz<2;dz++){
+    if(!occupied.has(k(x+dx,y,29+dz)))
+     errors.push('floor:'+k(x+dx,y,29+dz));
+    for(let dy=1;dy<=2;dy++)if(occupied.has(k(x+dx,y+dy,29+dz)))
+     errors.push('body:'+k(x+dx,y+dy,29+dz));
+   }
   const unique=[...new Set(errors)];
   proof.push({level:i,deckY:y,standingY:y+1,bridge:c.id,
    x0:c.x,xLast:c.x+c.span-2,z:29,
@@ -111,6 +113,22 @@ function combine(old,extra,d){
  }
  fail(fresh>=1400,'INSUFFICIENT_ARCHITECTURE_ADDED');
  fail(m.size<=MAX_CELLS,'MAX_CELLS');
+ // Strict local-air reservations for the 8 original four-tier 2wide bridges.
+ // We carve corridor void cells in the *offline composite only*. No original
+ // B172-B178 source or Minecraft world block is ever mutated or authorized.
+ // The reservation contains the exact 17/18 x two body columns x two height
+ // envelopes at local Z29..30; floors at Y60,64,68,72 are never cut.
+ let removed=0;
+ const carved=[];
+ for(const y of TIERS)for(const c of CROSSINGS)
+  for(let x=c.x;x<c.x+c.span;x++)for(let z=29;z<=30;z++)
+   for(let dy=1;dy<=2;dy++){
+    const id=k(x,y+dy,z);
+    if(!m.has(id))continue;
+    m.delete(id);removed++;carved.push([x,y+dy,z]);
+   }
+ fail(removed>=50&&removed<=180,'APERTURE_DELTA_OUTSIDE_REVIEW_BUDGET_'+removed);
+ const reserveSha256=hash(carved.sort((a,b)=>a[1]-b[1]||a[2]-b[2]||a[0]-b[0]));
  const primitives=[...m.values()].sort((a,b)=>a[1]-b[1]||a[2]-b[2]||a[0]-b[0]);
  const bounds={minX:Infinity,maxX:-Infinity,minY:Infinity,maxY:-Infinity,minZ:Infinity,maxZ:-Infinity};
  const counts=Object.fromEntries(MATERIALS.map(x=>[x,0]));
@@ -132,7 +150,7 @@ function combine(old,extra,d){
    layerCounts:counts,moduleCount:7,designOperations:[
     ...old.stats.designOperations,
     ...extra.stats.designOperations.map(p=>({...p,module:d.id}))]}},
-  fresh,overlap};
+  fresh,overlap,removed,reserveSha256};
 }
 export function buildQuadTier(){
  const parent=buildConnectedSky();
@@ -149,6 +167,8 @@ export function buildQuadTier(){
   previousGeometrySha256:parent.compiled.geometrySha256,
   oldVoxels:parent.compiled.primitives.length,
   addedUniqueVoxels:joined.fresh,voxels:joined.compiled.primitives.length,
+  sourceOnlyAirCellsReserved:joined.removed,
+  reservedAirCoordinatesSha256:joined.reserveSha256,
   preservedOverlaps:joined.overlap,
   baseAuthoredElements:parent.report.totalElements,
   addonAuthoredElements:design.elements.length,
@@ -173,7 +193,9 @@ export function verifyQuadTierReport(r){
  return Boolean(r&&r.schema===SCHEMA&&r.id==='nebula-ark-quad-tier-skybridges'&&
   r.moduleCount===7&&r.perModuleElementMax===160&&r.voxelLimit===MAX_CELLS&&
   r.oldVoxels===87878&&r.addedUniqueVoxels>=1400&&
-  r.voxels===r.oldVoxels+r.addedUniqueVoxels&&
+  r.sourceOnlyAirCellsReserved>=50&&r.sourceOnlyAirCellsReserved<=180&&
+  r.reservedAirCoordinatesSha256?.length===64&&
+  r.voxels===r.oldVoxels+r.addedUniqueVoxels-r.sourceOnlyAirCellsReserved&&
   r.baseAuthoredElements===520&&r.addonAuthoredElements>=65&&r.addonAuthoredElements<=160&&
   r.authoredElements===r.baseAuthoredElements+r.addonAuthoredElements&&
   r.bridgeInterfacesChecked===8&&r.bridgeInterfacesVerified===8&&
