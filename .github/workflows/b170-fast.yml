@@ -1,0 +1,49 @@
+name: B170 offline Education stair observation kit
+on:
+  push:
+    branches: [feature/b170-readonly-education-stair-probe-packet]
+    paths:
+      - 'source/ai/b170-readonly-probe-packet.mjs'
+      - 'scripts/b170-*.mjs'
+      - 'scripts/b170-*.test.mjs'
+      - '.github/workflows/b170-fast.yml'
+  pull_request:
+    paths:
+      - 'source/ai/b170-readonly-probe-packet.mjs'
+      - 'scripts/b170-*.mjs'
+      - 'scripts/b170-*.test.mjs'
+      - '.github/workflows/b170-fast.yml'
+permissions:
+  contents: read
+concurrency:
+  group: b170-offline-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  offline-readonly-measurement:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Validate read-only scripts
+        run: |
+          node --check source/ai/b170-readonly-probe-packet.mjs
+          node --check scripts/b170-build-capture-kit.mjs
+          node --check scripts/b170-review-submission.mjs
+      - name: Re-run 18 checkpoint and adversarial safety regressions
+        run: node --test scripts/b170-readonly-probe.test.mjs
+      - name: Build interactive offline observation kit with source hashes
+        run: node scripts/b170-build-capture-kit.mjs
+      - name: Prove empty evidence cannot be promoted to runtime verification
+        run: |
+          node scripts/b170-review-submission.mjs b170-readonly-kit/B170_PROBE_PACKET.json b170-readonly-kit/B170_EMPTY_SUBMISSION.json b170-readonly-kit/B170_EMPTY_REVIEW.json
+          node --input-type=module -e "import fs from 'node:fs';const m=JSON.parse(fs.readFileSync('b170-readonly-kit/B170_EMPTY_REVIEW.json','utf8'));if(m.stage!=='UNOBSERVED'||m.worldWrites!==0||m.actualBlockStatesCertified!==false||m.missingCheckpointIds.length!==18||m.gates.some(x=>x!=='BLOCKED'))throw Error('B170_HOLD');"
+      - name: Archive no-install browser UI and full 18-point packet
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: B170-ReadOnly-Education-Stair-Kit
+          path: b170-readonly-kit/
+          if-no-files-found: warn
+          retention-days: 30
