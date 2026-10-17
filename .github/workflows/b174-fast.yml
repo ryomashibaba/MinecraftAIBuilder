@@ -3,7 +3,7 @@ on:
   push:
     branches: [feature/b174-nebula-ark-skycanyon-transit]
     paths:
-      - 'source/ai/b174-nebula-ark.mjs'
+      - 'source/ai/b174-skycanyon.mjs'
       - 'scripts/b174-fast-probe.mjs'
       - 'scripts/b174-macro.test.mjs'
       - 'scripts/b174-build-preview.mjs'
@@ -11,7 +11,7 @@ on:
       - '.github/workflows/b174-fast.yml'
   pull_request:
     paths:
-      - 'source/ai/b174-nebula-ark.mjs'
+      - 'source/ai/b174-skycanyon.mjs'
       - 'scripts/b174-fast-probe.mjs'
       - 'scripts/b174-macro.test.mjs'
       - 'scripts/b174-build-preview.mjs'
@@ -32,7 +32,7 @@ jobs:
         with: {node-version: '22'}
       - name: Validate source and safe build scripts
         run: |
-          node --check source/ai/b174-nebula-ark.mjs
+          node --check source/ai/b174-skycanyon.mjs
           node --check scripts/b174-fast-probe.mjs
       - name: Source-backed massive NEW city architecture and two 2x2 accessible flat corridors
         run: node scripts/b174-fast-probe.mjs
