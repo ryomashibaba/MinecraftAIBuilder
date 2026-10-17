@@ -86,7 +86,8 @@ export function reviewSkyportRevision(original,originalPlan,revision=REVISIONS.a
  const stale=blockedOldRoute(originalPlan.finalRoute,revision,
   DEFAULT_ROUTE.footprintWidth,DEFAULT_ROUTE.footprintDepth,2);
  yes(stale.length>0,'OLD_PATH_NOT_AFFECTED');
- const rebuilt=planAdaptiveSkybridge(revised,DEFAULT_ROUTE);
+ const rebuilt=planAdaptiveSkybridge(revised,DEFAULT_ROUTE,
+  {finishedId:'doppler-switchback-terminal-replanned-r3'});
  yes(rebuilt.before.targets[0].status==='FOOTPRINT_UNREACHABLE'&&
   rebuilt.finalRoute.targets[0].status==='PASS_FLAT_FOOTPRINT_GEOMETRY'&&
   rebuilt.report.final2x2FlatMoves>originalPlan.report.final2x2FlatMoves&&
