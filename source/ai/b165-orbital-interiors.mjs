@@ -26,8 +26,8 @@ const flightConfigs=Object.freeze([
   top:[30,26,30],cut:[30,24,23],cutSize:[4,2,8]
  }),
  Object.freeze({
-  id:'south',x:72,z:75,sign:1,entry:[72,19,73],
-  top:[72,26,88],cut:[72,24,81],cutSize:[4,2,8]
+  id:'south',x:79,z:75,sign:1,entry:[79,19,73],
+  top:[79,26,88],cut:[79,24,81],cutSize:[4,2,8]
  })
 ]);
 export function orbitalInteriorElements(){
@@ -36,6 +36,11 @@ export function orbitalInteriorElements(){
  // occupied solids at Y19 or Y20.
  for(const f of flightConfigs){
   shapes.push(box('b165-'+f.id+'-stairwell',f.cut,f.cutSize,undefined,'cut'));
+  if(f.id==='south'){
+   // The rightmost wing begins just beyond the old Y18 boarding deck,
+   // outside the low orbital torus solid. Give it an actual entry foundation.
+   shapes.push(box('b165-south-entry-platform',[79,18,73],[4,1,2],'concrete'));
+  }
   // The first support steps use the 17/18 upper surface as a real foundation.
   // Each following tread is 4-wide x 2-deep, ascending one vertical voxel.
   for(let i=0;i<7;i++){
