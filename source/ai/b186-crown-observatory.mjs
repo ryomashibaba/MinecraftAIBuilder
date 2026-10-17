@@ -34,7 +34,7 @@ const tor=(id,center,majorRadius,tubeRadius,material='glow')=>
 export const RAISED_Y=76;
 export const OVERLOOKS=Object.freeze(HALLS.map(h=>Object.freeze({
  hall:h.id,x:h.centerX,lowerStandingY:75,upperStandingY:76,
- lowerNodeZ:30,raisedNodeZ:32,panoramaZ:40
+ lowerNodeZ:27,raisedNodeZ:29,panoramaZ:40
 })));
 export const RAISED_LONG_WAY=Object.freeze({startX:13,endX:112,z:39});
 export function crownObservatoryElements(){
@@ -55,8 +55,8 @@ export function crownObservatoryElements(){
   e.push(
    // Reserved only on X=cx-2..cx+1 at Z27..31, outside B185
    // roof access opening at X=cx+4..+6 / Z27..28.
-   box(p+'-lower-roof-foyer',[x-2,74,27],[4,1,5],'wood'),
-   box(p+'-upper-observatory-terrace',[x-10,75,32],[21,1,12],'glass'),
+   box(p+'-midlevel-architectural-foyer',[x-2,67,25],[4,1,3],'wood'),
+   box(p+'-upper-observatory-terrace',[x-10,75,29],[21,1,15],'glass'),
    box(p+'-side-observation-east',[x+11,75,38],[4,1,6],'wood'),
    box(p+'-side-observation-west',[x-14,75,38],[4,1,6],'wood'),
    // Large full-span rear facade with huge open interior transparency.
@@ -127,17 +127,17 @@ function planeReachability(c,y,bounds,start){
 export function auditRaisedCrown(scene){
  const c=occupied(scene),upperY=RAISED_Y;
  const open=planeReachability(c,upperY,
-  {x0:10,x1:115,z0:31,z1:44},'24,39');
+  {x0:10,x1:115,z0:28,z1:44},'24,39');
  for(let x=RAISED_LONG_WAY.startX;x<=RAISED_LONG_WAY.endX;x++)
   check(walk(c,x,upperY,RAISED_LONG_WAY.z),'TRUNK_INTERRUPTED_'+x);
  const portals=[];
  for(const p of OVERLOOKS){
   // Genuine source-supported adjacent 1-rise stages.
-  check(walk(c,p.x,75,30),'ROOF_START_NOT_WALKABLE_'+p.hall);
-  check(walk(c,p.x,76,32),'RAISED_STATION_NOT_WALKABLE_'+p.hall);
-  check(open.seen.has(p.x+',32')&&open.seen.has(p.x+',40'),
+  check(walk(c,p.x,75,27),'ROOF_START_NOT_WALKABLE_'+p.hall);
+  check(walk(c,p.x,76,29),'RAISED_STATION_NOT_WALKABLE_'+p.hall);
+  check(open.seen.has(p.x+',29')&&open.seen.has(p.x+',40'),
    'PANORAMA_DESTINATION_UNREACHABLE_'+p.hall);
-  for(let z=32;z<=40;z++)
+  for(let z=29;z<=40;z++)
    check(walk(c,p.x,76,z),'SKY_PARK_BRANCH_BLOCKED_'+p.hall+'_'+z);
   portals.push({hall:p.hall,sourceLowerY:75,sourceUpperY:76,
    sourceOneBlockRiseEdge:true,sourceRaisedDeckConnected:true,
