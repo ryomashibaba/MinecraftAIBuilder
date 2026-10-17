@@ -34,7 +34,7 @@ jobs:
         run: |
           node --check source/ai/b179-quad-tier.mjs
           node --check scripts/b179-fast-probe.mjs
-      - name: Source-backed massive NEW city architecture and two 2x2 accessible flat corridors
+      - name: Source-backed quad-tier skybridge model with eight 2x2 clearance-checked bridges
         run: node scripts/b179-fast-probe.mjs
       - name: Architecture geometry, obstruction and anti-forgery tests
         if: hashFiles('scripts/b179-macro.test.mjs') != ''

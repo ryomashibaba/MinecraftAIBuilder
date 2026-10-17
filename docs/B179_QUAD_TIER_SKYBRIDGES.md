@@ -13,3 +13,6 @@ B179 extends the high-quality 37th NEBULA ARK original architectural model with 
 **Hard safety:** readiness NOT_PREPARED, all nine BLOCKED, constructionApproved false, worldCoordinates null, worldContacts 0, worldWrites 0, BuildPlan.operations empty; no main merge, no Work, no real Minecraft construction. Each strict B143 module <=160 authored elements; combined occupied voxels <=160k.
 
 **B180:** develop the actual portal/chamber transitions at the four interior Y levels, improve route wayfinding by architecture itself and tie the real 2wide bridge corridors to genuinely supported hall-side 2wide squares. Never claim game physics without measured evidence.
+
+## B179 measured source delta
+Source-backed CI compiled **90,643 actual occupied voxels**, adding 2,884 unique cells and reserving exactly **119 conceptual air cells** in eight clearance sections: net +2,765 from B178's 87,878. The output contains **590 total authored elements across seven strict modules**, including 70 new B179 3D parts, and 73,739 rendered surface cells. All eight 2wide full-footprint bridge geometry checks and five regression tests passed. This is not Education-world writing.

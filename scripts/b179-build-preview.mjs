@@ -35,7 +35,7 @@ export function buildB179Preview({dir=out}={}){
  const template=fs.readFileSync(path.join(root,
   'source/ai/b143-viewer-template.html'),'utf8');
  let html=renderB143Html(payload,template)
-  .replace('B143 / UNIVERSAL AI DESIGN','B179 / NEBULA ARK · STAR RIVER SKYDECK')
+  .replace('B143 / UNIVERSAL AI DESIGN','B179 / NEBULA ARK · QUAD TIER SKYBRIDGES')
   .replace('B143 AI Architecture Studio','B179 — QUAD TIER SKYBRIDGES / 4層の巨大立体渡り廊下 3D Studio')
   .replace('ChatGPTが設計した新規建築','NEBULA ARK · QUAD TIER SKYBRIDGES 巨大立体都市')
   .replace('固定の住宅・ホテル・集合住宅・オフィス・図書館カテゴリに依存しない建築データの実証。',
@@ -46,7 +46,7 @@ export function buildB179Preview({dir=out}={}){
  html=html.replace(insert,
   '<div class="info"><strong>B179 / 7モジュール統合</strong><p>高さ約'+
   (compiled.bounds.maxY-compiled.bounds.minY+1)+
-  'ブロック、'+report.totalElements+'個の立体構造要素、'+
+  'ブロック、'+report.authoredElements+'個の立体構造要素、'+
   compiled.primitives.length.toLocaleString('ja-JP')+
   'ボクセル。新しいモデルはGitHubで実際に生成されています。</p>'+
   '<p>下層102移動・上層98移動の2×2平面通路は保持。4層×左右の計8本の大型連絡橋の幅2支持・頭上空間を検査。Minecraft実機移動・階段当たり判定は未認証。</p></div>'+

@@ -87,6 +87,8 @@ test('standalone 3D viewer packages exactly seven independently authored modules
   const html=fs.readFileSync(path.join(dir,'index.html'),'utf8');
   for(const name of ['overview','low','upper','ring'])
    assert(html.includes('id="b179-'+name+'"'));
+  assert(!html.includes('undefined個'));
+  assert(html.includes('590個')||html.includes(r.report.authoredElements+'個'));
   assert(!html.includes('fetch(')&&!html.includes('new WebSocket('));
   const js=html.match(/<script>([\s\S]*?)<\/script>/)?.[1];
   assert(js);assert.doesNotThrow(()=>new vm.Script(js));
