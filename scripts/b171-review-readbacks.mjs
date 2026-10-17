@@ -50,7 +50,7 @@ export function initializeB171(dir=path.join(ROOT,'b171-readback-output')){
   outputFiles:outputs.map(x=>x[0]),constructionApproved:false};
 }
 export function analyzeB171Files(packetFile,submissionFile,archiveFile,outputFile){
- const files=[packetFile,submissionFile,archiveFile,outputFile].map(path.resolve);
+ const files=[packetFile,submissionFile,archiveFile,outputFile].map(file=>path.resolve(file));
  if(new Set(files).size!==4||fs.existsSync(files[3]))
   throw Error('B171_OUTPUT_INPUT_OVERWRITE_REFUSED');
  const packet=parse(files[0]),submission=parse(files[1]),archive=parse(files[2]);
