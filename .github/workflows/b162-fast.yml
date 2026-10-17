@@ -35,7 +35,7 @@ jobs:
           node --check source/ai/b161-adaptive-skybridge.mjs
           node --check source/ai/b162-revision-replan.mjs
           node --check scripts/b162-fast-probe.mjs
-      - name: Verify stale 101-cell path is invalid and fresh 115-cell path avoids revision tower
+      - name: Verify stale 101-cell path is invalid and fresh 113-cell path avoids revision tower
         run: node scripts/b162-fast-probe.mjs
       - name: Store no-world-write proof
         if: always()
