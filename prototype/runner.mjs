@@ -12,7 +12,7 @@ import {createHash} from 'node:crypto';
 import {makeArkLite,validateOrigin,absolute,MATERIALS} from './ark-lite.mjs';
 
 const DIR=path.dirname(fileURLToPath(import.meta.url));
-const DATA=path.join(DIR,'data');
+const DATA=path.resolve(process.env.ARK_LITE_DATA_DIR??path.join(DIR,'data'));
 const JOURNAL=path.join(DATA,'ARK_LITE_STAGE_JOURNAL.json');
 const REPORT=path.join(DATA,'ARK_LITE_LAST_REPORT.json');
 const PORT=8000;
@@ -170,6 +170,7 @@ async function beforeRun(world,run,site,alreadyAttempted){
 }
 export async function build(world,site,confirm){
   const old=saved();ensureJournal(site,old);
+  if(old?.cleanupAt)throw Error('P0_CLEANED_JOURNAL_CANNOT_BE_REBUILT');
   const check=await survey(world,site,old);
   const phrase='BUILD '+PLAN.sha256.slice(0,12)+' '+site.label;
   if(confirm!==phrase)throw Error('P0_EXPLICIT_BUILD_CONFIRMATION_REQUIRED: '+phrase);
