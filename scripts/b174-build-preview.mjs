@@ -8,7 +8,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
-import {buildNebulaArkB174} from '../source/ai/b174-nebula-ark.mjs';
+import {buildSkycanyon} from '../source/ai/b174-skycanyon.mjs';
 import {surfaceOnly,verifyB143Payload,renderB143Html}
  from './build-b143-site.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
@@ -16,7 +16,7 @@ const out=path.join(root,'b174-evidence');
 const H=x=>createHash('sha256').update(x).digest('hex');
 const check=(x,reason)=>{if(!x)throw Error('B174_PREVIEW_'+reason)};
 export function buildB174Preview({dir=out}={}){
- const {compiled,design,report}=buildNebulaArkB174();
+ const {compiled,design,report,parent}=buildSkycanyon();
  const surface=surfaceOnly(compiled),{primitives,...rest}=compiled;
  check(surface.length>3000&&surface.length<=primitives.length,'NO_SURFACE_GEOMETRY');
  const payload={
@@ -84,7 +84,7 @@ export function buildB174Preview({dir=out}={}){
  fs.writeFileSync(sourceFile,JSON.stringify({schema:'B174_SAFETY_GATED_MODULE_COMPOSITION',modules:[parent.design,design],policy:'parent-wins-overlap'},null,2)+'\n');
  const manifest={
   schema:'minecraftaibuilder-b174-3d-preview-v1',
-  modelId:design.id,sourceSha256:compiled.sourceSha256,
+  modelId:compiled.id,sourceSha256:compiled.sourceSha256,
   geometrySha256:compiled.geometrySha256,
   numberOfActualNew3dScenes:1,
   newConceptModelTotalOutsideHistoric36:37,
