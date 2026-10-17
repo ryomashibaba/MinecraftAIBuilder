@@ -132,8 +132,11 @@ export async function survey(world,site,journal=null){
   validatePlan();ensureJournal(site,journal);
   // Calibrate against the same known-air location; failures never authorize writes.
   const first=absolute(PLAN.voxels[0],site.origin);
-  const controlType=journal?.attemptedRuns?.includes(0)?PLAN.voxels[0].block:'minecraft:air';
-  const positive=await run(world,query(first,controlType));
+  const airControl=await run(world,query(first,'minecraft:air'));
+  const positive=success(airControl)?airControl:
+    journal?.attemptedRuns?.includes(0)
+      ?await run(world,query(first,PLAN.voxels[0].block))
+      :airControl;
   const negative=await run(world,query(first,'minecraft:stone'));
   if(!success(positive)||!failCode(negative))
     throw Error('P0_LIVE_AIR_CONTROL_FAILED (site must be air and responses conclusive)');
