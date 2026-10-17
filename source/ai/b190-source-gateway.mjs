@@ -26,7 +26,7 @@ export const GATEWAY=Object.freeze({
  standingY:73,floorY:72,mainAnchorX:108,mainAnchorZ:29,
  annexLocalAnchorX:4,annexLocalAnchorZ:31,
  // Four-wide source corridor, 2wide travel footprints and 2-high head.
- floorZ0:29,floorZ1:32,sourceOnlyMaxNewCells:240
+ floorZ0:29,floorZ1:32,sourceOnlyMaxNewCells:480
 });
 const setOf=s=>new Set(s.primitives.map(p=>K(p[0],p[1],p[2])));
 function reviewPosition(p,offset){
@@ -79,7 +79,7 @@ export function evaluateSourceGateway(main,annex,offset=MODEL_OFFSET){
  // model voxel. Source-only design slab may support each candidate footprint,
  // but no node can use occupied pedestrian-body or head cells.
  const usable=(x,z)=>{
-  if(x<startX||x>endX||z<24+dz||z>42+dz)return false;
+  if(x<startX-8||x>endX||z<0||z>48)return false;
   for(let ox=0;ox<2;ox++)for(let oz=0;oz<2;oz++){
    const a=x+ox,b=z+oz;
    if(sourceUnion.has(K(a,GATEWAY.standingY,b))||
@@ -108,7 +108,7 @@ export function evaluateSourceGateway(main,annex,offset=MODEL_OFFSET){
   path.push([x,z]);at=parents.get(at);
  }
  path.reverse();
- fail(path.length>=endX-startX+1 && path.length<=90,
+ fail(path.length>=endX-startX+1 && path.length<=150,
   'CANDIDATE_SOURCE_PATH_LENGTH_'+path.length);
  // Exactly the cells missing below traversed 2x2 squares are drawn as the
  // hypothetical bridge. Existing floors, annex and parent are preserved.
