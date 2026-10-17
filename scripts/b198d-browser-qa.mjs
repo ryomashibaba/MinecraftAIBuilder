@@ -36,6 +36,14 @@ try{
    page.on('pageerror',e=>errors.push(e.message));
    page.setDefaultTimeout(60000);
    await page.goto(app.url,{waitUntil:'load',timeout:60000});
+   await page.waitForTimeout(1200);
+   console.log('B198D_DESKTOP_UI_STARTUP_DIAG',JSON.stringify({
+    label,url:page.url(),
+    summary:await page.locator('#b198d-summary').innerText().catch(()=>'<MISSING>'),
+    error:await page.locator('#b198d-error').innerText().catch(()=>'<MISSING>'),
+    jsErrors:errors,
+    visibleHtml:await page.locator('body').innerText().then(x=>x.slice(0,450)).catch(()=>'<MISSING>')
+   }));
    await page.waitForFunction(()=>document.querySelector('#b198d-summary')?.textContent.includes('v0001'));
    check((await page.locator('#building option').count())===1,
     label+'_INITIAL_APPROVED_SCENE_NOT_REAL');
