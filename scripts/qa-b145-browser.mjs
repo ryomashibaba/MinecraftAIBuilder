@@ -36,7 +36,8 @@ const pages=[
  {name:'B161-adaptive',url:'ai/adaptive-route/index.html',minimum:28,expected:28},
  {name:'B162-revised',url:'ai/revised-bridge/index.html',minimum:30,expected:30},
  {name:'B163-portfolio',url:'ai/corridor-options/index.html',minimum:33,expected:33},
- {name:'B164-orbital-crown',url:'ai/orbital-crown/index.html',minimum:34,expected:34}
+ {name:'B164-orbital-crown',url:'ai/orbital-crown/index.html',minimum:34,expected:34},
+ {name:'B165-orbital-interiors',url:'ai/orbital-interiors/index.html',minimum:35,expected:35}
 ];
 const browser=await chromium.launch({headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
 const results=[];
@@ -92,6 +93,28 @@ async function inspect(info,mobile){
   await page.waitForTimeout(950);
   const last=await page.locator('#building').inputValue();
   if(last!==String(options-1))fail(info.name+'_MODEL_SELECTION_FAILED');
+  if(info.name==='B165-orbital-interiors'){
+   const picker=page.locator('#building'),status=page.locator('#b165-status');
+   await picker.selectOption('33');await page.waitForTimeout(230);
+   if(!(await status.innerText()).includes('35番目の内部改築'))
+    fail('B165_WRONG_PREVIOUS_MEGA_STRUCTURE_STATUS');
+   await picker.selectOption('34');await page.waitForTimeout(440);
+   const text=await status.innerText();
+   if(!text.includes('二翼階段 2基')||
+      !text.includes('追加 489セル')||
+      !text.includes('吹抜け 88セル')||
+      !text.includes('各9地点')||
+      !text.includes('127移動')||
+      !text.includes('PASS_FLAT_FOOTPRINT_GEOMETRY'))
+    fail('B165_STAIRS_OR_MEZZANINES_NOT_VISIBLE_'+text);
+   const overlay=page.locator('#b165-route');
+   if(!await overlay.isChecked())fail('B165_LOWER_CORRIDOR_HIDDEN');
+   await overlay.uncheck();await overlay.check();
+   await picker.selectOption('32');await page.waitForTimeout(180);
+   if(!(await status.innerText()).includes('35番目の内部改築'))
+    fail('B165_HISTORIC_SCENE_FALSIFIED');
+   await picker.selectOption('34');
+  }
   if(info.name==='B164-orbital-crown'){
    const picker=page.locator('#building'),status=page.locator('#b164-status');
    await picker.selectOption('32');await page.waitForTimeout(230);
