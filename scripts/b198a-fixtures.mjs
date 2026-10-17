@@ -10,7 +10,7 @@ const tor=(id,center,majorRadius,material)=>({id,shape:'torus',mode:'add',center
 export const fixtureAmphitheater=()=>({
  schema:SCHEMA,id:'crescent-amphitheater',
  title:'Crescent Amphitheater — Floating Music Forum',
- brief:'Three stepped horizontal public viewing terraces, a hollow luminous stage shell and the open musical gathering plaza. Source-only fixture.',
+ brief:'Three stepped viewing terraces and a hollow luminous music stage. Test-only source fixture.',
  bounds:{width:60,height:48,depth:46},designOnly:true,
  elements:[
   box('main-limestone-court',[4,3,4],[51,1,38],'stone'),
@@ -25,7 +25,7 @@ export const fixtureAmphitheater=()=>({
 export const fixtureLighthouse=()=>({
  schema:SCHEMA,id:'glass-observatory-tower',
  title:'Glass Observatory — Planetarium Beacon',
- brief:'A tall narrow observation tower with a vast glass upper viewing sphere, sky terraces and a planetary halo. Source-only fixture.',
+ brief:'A tall observatory with a transparent viewing sphere and orbital halo. Test-only source fixture.',
  bounds:{width:50,height:82,depth:50},designOnly:true,
  elements:[
   box('ground-granite-base',[11,3,11],[28,2,28],'stone'),
