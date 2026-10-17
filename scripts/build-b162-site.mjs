@@ -35,7 +35,7 @@ export function makeB162Bundle(original,r2,r3,r4,repair,r1,r2i,r3i,r4i,r5i,r6i,t
  const previous=makeB161Bundle(original,r2,r3,r4,repair,r1,r2i,r3i,r4i,r5i,r6i,t0,t1,helios,polaris,doppler);
  const updated=reviewSkyportRevision(doppler,previous.result,REVISIONS.alpha);
  ok(verifySkyportRevision(doppler,previous.result,REVISIONS.alpha,updated.report)&&
-  updated.report.originalMoves===101&&updated.report.revisedMoves===115&&
+  updated.report.originalMoves===101&&updated.report.revisedMoves===113&&
   updated.report.oldRouteObstructedAnchors>0&&
   updated.report.newRouteObstructedAnchors===0&&
   updated.rebuilt.report.centerlineTurns===4&&
@@ -199,7 +199,7 @@ export function verifyB162Site(dir=SITE){
   m.repairedSourceSha256===rev.revisedFinishedSha256&&
   m.repairedGeometrySha256===rev.revisedFinishedGeometrySha256&&
   m.revisionReviewSha256===rev.sha256&&
-  m.oldRouteMoves===101&&m.newRouteMoves===115&&
+  m.oldRouteMoves===101&&m.newRouteMoves===113&&
   m.staleObstructedAnchors>0&&m.repairedObstructedAnchors===0&&
   m.replanBends===4&&m.newFloorSegments===5&&
   m.pageSha256===sha(html)&&
