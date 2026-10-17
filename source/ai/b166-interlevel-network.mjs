@@ -25,25 +25,14 @@ const S={north:{entry:[30,19,15],top:[30,26,30],x:30,zmin:14,zmax:33},
  south:{entry:[79,19,73],top:[79,26,88],x:79,zmin:72,zmax:91}};
 const box=(id,origin,size,material='metal')=>({id,shape:'box',mode:'add',material,origin,size});
 export function navigationArchitecture(){
+ // The inherited B143 DSL allows a maximum of 160 primitives.
+ // Large, contiguous architectural accents consume just TWO element slots.
  return [
-  box('b166-north-hall-beacon-a',[18,31,14],[3,4,3],'accent'),
-  box('b166-north-hall-beacon-b',[34,31,34],[3,4,3],'accent'),
-  box('b166-south-hall-beacon-a',[61,31,73],[3,4,3],'accent'),
-  box('b166-south-hall-beacon-b',[75,31,88],[3,4,3],'accent'),
-  box('b166-north-balcony-light-west',[11,31,23],[2,3,6],'glow'),
-  box('b166-north-balcony-light-east',[36,31,23],[2,3,6],'glow'),
-  box('b166-south-balcony-light-west',[54,31,76],[2,3,7],'glow'),
-  box('b166-south-balcony-light-east',[82,31,76],[2,3,7],'glow'),
-  box('b166-north-roof-internal-aerial',[16,36,12],[18,1,2],'glass'),
-  box('b166-south-roof-internal-aerial',[61,36,89],[18,1,2],'glass'),
-  box('b166-north-atrium-wayfinding',[21,33,16],[12,2,2],'glow'),
-  box('b166-south-atrium-wayfinding',[64,33,86],[12,2,2],'glow'),
-  box('b166-north-observation-luminance',[13,32,33],[12,1,2],'accent'),
-  box('b166-south-observation-luminance',[64,32,71],[12,1,2],'accent'),
-  box('b166-north-gallery-mast',[25,29,34],[2,6,2],'metal'),
-  box('b166-south-gallery-mast',[71,29,71],[2,6,2],'metal')
+  box('b166-north-panoramic-arch',[13,31,33],[22,3,2],'accent'),
+  box('b166-south-panoramic-arch',[60,31,73],[21,3,2],'accent')
  ];
 }
+
 function readSolids(scene){
  const data=new Set(scene.primitives.map(p=>key(p[0],p[1],p[2])));
  const solid=(x,y,z)=>data.has(key(x,y,z));
@@ -190,7 +179,7 @@ export function buildInterlevelNetwork(original){
   constructionApproved:false,worldContacts:0,worldCoordinates:null,
   readiness:'NOT_PREPARED',
   gates:Array(9).fill('BLOCKED'),BuildPlan:{operations:[]}};
- assert(added.length>=14&&newVox.length>=80&&
+ assert(added.length===2&&newVox.length>=80&&
   corrupted.length===0&&stairs.every(s=>s.netHeightGain===7&&
    s.maxRise===1&&s.horizontalSteps>=8)&&
   upper.every(s=>s.flatMoves>=8)&&JSON.stringify(original)===initial,
