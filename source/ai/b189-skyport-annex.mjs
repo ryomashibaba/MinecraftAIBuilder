@@ -26,7 +26,7 @@ const tor=(id,center,majorRadius,tubeRadius,material='glow')=>
  ({id,shape:'torus',mode:'add',center,majorRadius,tubeRadius,axis:'z',material});
 export const ANNEX_BOUNDS=Object.freeze({width:48,height:78,depth:50});
 export const ANNEX_HALL_CENTERS=Object.freeze([11,24,37]);
-export const ANNEX_PUBLIC_LEVELS=Object.freeze([61,65,69,73,75]);
+export const ANNEX_PUBLIC_LEVELS=Object.freeze([57,61,65,69,73]);
 export function annexParts(){
  const parts=[
   box('b189-grand-dock-foundation',[2,3,4],[44,1,20],'stone'),
@@ -41,7 +41,7 @@ export function annexParts(){
   box('b189-roof-beacon-crest',[3,76,5],[42,1,3],'glow'),
   box('b189-harbor-suspended-glow',[2,54,42],[44,1,3],'glow')
  ];
- for(const [i,y] of [60,64,68,72,74].entries()){
+ for(const [i,y] of [56,60,64,68,72].entries()){
   // Every 2x2 corridor on deck y+1 has 2 empty vertical head cells.
   parts.push(
    box('b189-civic-skyway-'+i,[3,y,29],[42,1,7],
@@ -205,7 +205,7 @@ export function buildB189(){
   mainOccupiedCells:parent.compiled.primitives.length,
   annexOccupiedCells:annex.compiled.primitives.length,
   sourceModelCount:manifest.sourceModelCount,
-  3dViewerSceneCount:manifest.viewerSceneCount,
+  viewerSceneCount:manifest.viewerSceneCount,
   inheritedMainIndependentModules:16,
   newAnnexIndependentModules:1,
   independentAuthoringModulesTotal:17,
@@ -230,7 +230,7 @@ export function buildB189(){
 export function verifyB189Report(r){
  return Boolean(r&&r.schema===SCHEMA&&r.mainOccupiedCells===142773&&
   r.annexOccupiedCells>=7000&&r.annexOccupiedCells<=MAX_CELLS&&
-  r.sourceModelCount===2&&r['3dViewerSceneCount']===5&&
+  r.sourceModelCount===2&&r.viewerSceneCount===5&&
   r.inheritedMainIndependentModules===16&&r.newAnnexIndependentModules===1&&
   r.independentAuthoringModulesTotal===17&&
   r.annexAuthoredParts>=90&&r.annexAuthoredParts<=160&&
