@@ -71,7 +71,7 @@ try{
   // individual-part checkbox changes the native painting, not a fake UI.
   await page.locator('#building').selectOption('6');
   await page.waitForTimeout(1100);
-  check((await page.locator('#sceneTitle').innerText()).includes('B194'),
+  check((await page.locator('#sceneTitle').innerText()).includes('3棟'),
    label+'_VIRTUAL_CITYSCAPE_NOT_SELECTED');
   check((await page.locator('#stats').innerText()).includes('162,816'),
    label+'_CITYSCAPE_COMPOSITE_VOXEL_SUM_WRONG');
