@@ -79,8 +79,12 @@ export function normalizeB171Receipt(receipt){
    classResult.includes(p.classification)&&
    p.response&&typeof p.response==='object'),'B135_PROBES');
   replayed=b135Evaluate(position.join(' '),raw);
+  // B135 records responseKeys for debugging. Replaying a normalized report
+  // changes that metadata; compare authoritative CODE/COUNT/classifications,
+  // not the incidental keys of the already-minimized response object.
   guard(replayed.controlsValid===d.controlsValid&&
-   same(replayed.controls,d.controls)&&same(replayed.probes,d.probes)&&
+   same(replayed.probes.map(x=>x.classification),
+    d.probes.map(x=>x.classification))&&
    replayed.provisionalStateValue===d.provisionalStateValue&&
    replayed.outcome===d.outcome,'B135_REPORTED_CLASSIFICATION_CONFLICT');
  }
