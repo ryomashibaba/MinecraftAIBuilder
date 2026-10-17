@@ -1,0 +1,93 @@
+name: B193 Three-Building Virtual Cityscape Source-Only QA
+on:
+  push:
+    branches: [feature/b193-nebula-ark-multimodel-cityscape-review]
+    paths:
+      - 'source/ai/b193-virtual-cityscape.mjs'
+      - 'scripts/b193-fast-probe.mjs'
+      - 'scripts/b193-macro.test.mjs'
+      - 'scripts/b193-build-preview.mjs'
+      - 'scripts/b193-browser-qa.mjs'
+      - '.github/workflows/b193-fast.yml'
+  pull_request:
+    paths:
+      - 'source/ai/b193-virtual-cityscape.mjs'
+      - 'scripts/b193-fast-probe.mjs'
+      - 'scripts/b193-macro.test.mjs'
+      - 'scripts/b193-build-preview.mjs'
+      - 'scripts/b193-browser-qa.mjs'
+      - '.github/workflows/b193-fast.yml'
+permissions:
+  contents: read
+concurrency:
+  group: b193-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  macro-architecture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Validate source and safe build scripts
+        run: |
+          node --check source/ai/b193-virtual-cityscape.mjs
+          node --check scripts/b193-fast-probe.mjs
+      - name: Virtual review of three immutable strict sources, 162816 unique cells, 7 scenes and zero intersection
+        run: node scripts/b193-fast-probe.mjs
+      - name: Architecture geometry, obstruction and anti-forgery tests
+        if: hashFiles('scripts/b193-macro.test.mjs') != ''
+        run: node --test scripts/b193-macro.test.mjs
+      - name: Build standalone offline 3D city preview
+        if: hashFiles('scripts/b193-build-preview.mjs') != ''
+        run: node scripts/b193-build-preview.mjs
+      - name: Archive city-scale voxel model and interactive preview
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: B193-NEBULA-ARK-Grand-Terminal-3D
+          path: b193-evidence/
+          if-no-files-found: warn
+          retention-days: 14
+
+  chromium-visual-qa:
+    needs: [macro-architecture]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned browser QA runtime without lockfile mutation
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Regenerate offline 3D model from pinned source
+        run: node scripts/b193-build-preview.mjs
+      - name: Test real Chromium desktop/mobile canvas, all presets, and save screenshots
+        run: node scripts/b193-browser-qa.mjs
+      - name: Upload actual rendered visual evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: B193-NEBULA-ARK-Desktop-Mobile-Screenshots
+          path: |
+            b193-evidence/B193_DESKTOP.png
+            b193-evidence/B193_MOBILE.png
+            b193-evidence/B193_DESKTOP_ANNEX.png
+            b193-evidence/B193_DESKTOP_SKYBRIDGE.png
+            b193-evidence/B193_DESKTOP_CITYSCAPE.png
+            b193-evidence/B193_DESKTOP_CITYSCAPE_BRIDGE.png
+            b193-evidence/B193_DESKTOP_Y69.png
+            b193-evidence/B193_DESKTOP_Y65.png
+            b193-evidence/B193_MOBILE_ANNEX.png
+            b193-evidence/B193_MOBILE_SKYBRIDGE.png
+            b193-evidence/B193_MOBILE_CITYSCAPE.png
+            b193-evidence/B193_MOBILE_CITYSCAPE_BRIDGE.png
+            b193-evidence/B193_MOBILE_Y69.png
+            b193-evidence/B193_MOBILE_Y65.png
+            b193-evidence/B193_CHROMIUM_QA.json
+          if-no-files-found: warn
+          retention-days: 14
