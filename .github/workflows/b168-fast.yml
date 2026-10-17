@@ -6,12 +6,14 @@ on:
       - 'source/ai/b168-fractional-collision-lab.mjs'
       - 'scripts/b168-fast-probe.mjs'
       - 'scripts/b168-fast.test.mjs'
+      - 'scripts/b168-render-lab.mjs'
       - '.github/workflows/b168-fast.yml'
   pull_request:
     paths:
       - 'source/ai/b168-fractional-collision-lab.mjs'
       - 'scripts/b168-fast-probe.mjs'
       - 'scripts/b168-fast.test.mjs'
+      - 'scripts/b168-render-lab.mjs'
       - '.github/workflows/b168-fast.yml'
 permissions:
   contents: read
@@ -35,11 +37,15 @@ jobs:
       - name: Geometry regression and forgery rejection
         if: hashFiles('scripts/b168-fast.test.mjs') != ''
         run: node --test scripts/b168-fast.test.mjs
+      - name: Produce clickable offline collision comparison page
+        run: |
+          node --check scripts/b168-render-lab.mjs
+          node scripts/b168-render-lab.mjs
       - name: Preserve architecture review without touching the world
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: B168-Fractional-Collision-Research
-          path: b168-evidence/B168_HALF_HEIGHT.json
+          path: b168-evidence/
           retention-days: 14
           if-no-files-found: warn
