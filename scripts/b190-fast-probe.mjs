@@ -11,7 +11,7 @@ console.log('B190_OFFLINE_GATEWAY_PROOF',JSON.stringify({
  sourceAnnexModelCells:report.annexOccupiedCells,
  reviewOnlyOffset:gateway.offset,
  overlapCells:gateway.modelToModelOccupiedCellCollisionCount,
- 2wideSupportedStations:report.candidateGatewaySourceStations,
+ supported2WideStations:report.candidateGatewaySourceStations,
  proposedIndependentBridgeSlabCells:report.candidateGatewayNewFloorCells,
  historicalMainNetworkNodes:report.original21SupportedMainPublicWaypoints,
  oldAnnexPublicMoves:report.originalAnnex190TwoWideMoves,
