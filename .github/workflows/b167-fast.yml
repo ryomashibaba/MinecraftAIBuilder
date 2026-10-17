@@ -1,0 +1,45 @@
+name: B167 continuous journey audit
+on:
+  push:
+    branches: [feature/b167-end-to-end-one-footprint-journeys]
+    paths:
+      - 'source/ai/b167-unified-journey.mjs'
+      - 'scripts/b167-fast-probe.mjs'
+      - 'scripts/build-b167-site.test.mjs'
+      - '.github/workflows/b167-fast.yml'
+  pull_request:
+    paths:
+      - 'source/ai/b167-unified-journey.mjs'
+      - 'scripts/b167-fast-probe.mjs'
+      - 'scripts/build-b167-site.test.mjs'
+      - '.github/workflows/b167-fast.yml'
+permissions:
+  contents: read
+concurrency:
+  group: b167-fast-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  full-stair-to-upper-route:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Syntax
+        run: |
+          node --check source/ai/b167-unified-journey.mjs
+          node --check scripts/b167-fast-probe.mjs
+      - name: End-to-end consistent-size actor proof, including negative cases
+        run: node scripts/b167-fast-probe.mjs
+      - name: Source-only complete gallery regression
+        if: hashFiles('scripts/build-b167-site.test.mjs') != ''
+        run: node --test scripts/build-b167-site.test.mjs
+      - name: Archive geometry-only evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: B167-Journey-Footprint-Review
+          path: b167-fast-evidence/B167_FIRST_LOOK.json
+          if-no-files-found: warn
+          retention-days: 14
