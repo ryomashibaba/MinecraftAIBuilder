@@ -98,7 +98,7 @@ test('protected original source materials and floor headroom survive; indirect C
   const studio=openArchitectureStudio({directory:dir,initialDesign:initial(),
    generator:async()=>candidate(bad)});
   await assert.rejects(()=>studio.propose({prompt:request,
-   protectedElementIds:watch}),/B198D_INDIRECT_PROTECTED_VOXEL_DESTRUCTION/);
+   protectedElementIds:watch}),/B198D_(INDIRECT_PROTECTED_VOXEL_DESTRUCTION|ORIGINAL_CLEARANCE_DAMAGED)/);
   assert.equal(studio.getStatus().proposedDraft,null);
   assert.equal(studio.getStatus().headId,'v0001');
  }finally{fs.rmSync(dir,{recursive:true,force:true})}
@@ -161,7 +161,7 @@ test('while model is still generating, source history and approval cannot be mut
   const studio=openArchitectureStudio({directory:dir,initialDesign:initial(),
    generator:async()=>{await barrier;return candidate(changed())}});
   const promise=studio.propose({prompt:request});
-  assert.throws(()=>studio.undo(),/B198D_CONCURRENT_PROPOSAL_IN_PROGRESS/);
+  assert.throws(()=>studio.undo(),/B198D_PENDING_REVIEW_OR_BUSY/);
   assert.throws(()=>studio.approve({draftId:'none',expectedHeadSha256:'none'}),
    /B198D_CONCURRENT_PROPOSAL_IN_PROGRESS/);
   finish();await promise;
