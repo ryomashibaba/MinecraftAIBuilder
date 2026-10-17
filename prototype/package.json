@@ -1,0 +1,10 @@
+{
+  "name": "minecraftaibuilder-ark-lite-prototype",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Education test-world only, no inherited construction approval",
+  "dependencies": {
+    "socket-be": "2.8.0"
+  }
+}
