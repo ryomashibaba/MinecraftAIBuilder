@@ -104,6 +104,7 @@ function upperRegion(scene,solid,wing){
  // destination and no falsely inferred join to distant disconnected platforms.
  const last=queue.at(-1),distance=queue.length?
   reverseChain(parent,key(...last),startKey).length-1:0;
+ console.log('B166_UPPER_PLATFORM_DIAGNOSTICS',JSON.stringify({wing,origin:start,destination:last,distance,anchors:seen.size,preview:queue.slice(0,10)}));
  assert(distance>=8&&seen.size>=30,'UPPER_PLATFORM_TOO_SMALL_'+wing);
  const args={start,destinations:[{id:'farthest-upper',at:last}],
   width:2,depth:2,headroom:2};
