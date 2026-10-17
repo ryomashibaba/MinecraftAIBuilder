@@ -50,21 +50,21 @@ export function porticoElements(){
    box(id+'-upper-civic-terrace',[cx-11,54,0],[23,1,10],'concrete'),
    box(id+'-third-facade-band',[cx-12,66,0],[25,1,9],'glass'),
    box(id+'-suspended-upper-fin',[cx-12,73,0],[25,1,4],'accent'),
-   beam(id+'-left-colossal-spire',[cx-11,35,0],[cx-10,75,0],'metal',1),
-   beam(id+'-right-colossal-spire',[cx+11,35,0],[cx+10,75,0],'metal',1)
+   beam(id+'-left-colossal-spire',[cx-11,35,1],[cx-10,75,1],'metal',1),
+   beam(id+'-right-colossal-spire',[cx+11,35,1],[cx+10,75,1],'metal',1)
   );
   for(let n=0;n<5;n++){
    const x=cx-10+n*5;
    parts.push(
-    beam(id+'-outer-column-'+n,[x,27,0],[x,73,1],n%2?'accent':'metal'),
+    beam(id+'-outer-column-'+n,[x,27,1],[x,73,1],n%2?'accent':'metal'),
     beam(id+'-diagonal-light-column-'+n,[x,31,3],[x+1,68,4],n%2?'glow':'metal'),
     beam(id+'-portal-chord-'+n,[x,40,5],[x+2,63,6],n%2?'accent':'metal')
    );
   }
  }
  parts.push(
-  beam('b185-west-urban-portico',[36,40,1],[53,72,4],'accent',2),
-  beam('b185-east-urban-portico',[90,40,1],[73,72,4],'accent',2),
+  beam('b185-west-urban-portico',[36,40,2],[53,72,4],'accent',2),
+  beam('b185-east-urban-portico',[90,40,2],[73,72,4],'accent',2),
   box('b185-west-city-low-span',[35,34,0],[18,1,8],'metal'),
   box('b185-east-city-low-span',[74,34,0],[18,1,8],'metal')
  );
