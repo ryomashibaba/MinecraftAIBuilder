@@ -91,6 +91,14 @@ function inspectTreads(compiled,originalRoute){
     if(!solid(x+dx,y-1,z+dz))supported=false;
     if(solid(x+dx,y,z+dz)||solid(x+dx,y+1,z+dz))clear=false;
    }
+   if(!supported||!clear){
+    const cells=[];
+    for(let dx=0;dx<2;dx++)for(let dz=0;dz<2;dz++)
+     cells.push({xyz:[x+dx,y,z+dz],foot:solid(x+dx,y-1,z+dz),
+      blockedBody:solid(x+dx,y,z+dz),blockedHead:solid(x+dx,y+1,z+dz)});
+    console.error('B165_TREAD_DIAGNOSTIC',JSON.stringify({wing:f.id,
+     at:p.at,supported,clear,cells}));
+   }
    ensure(supported&&clear,'TREAD_2X2_SUPPORT_OR_HEADROOM_'+f.id+'_'+p.id);
    checks.push({id:p.id,at:p.at,support2x2:true,headroom2:true});
   }
