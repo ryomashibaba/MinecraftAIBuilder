@@ -76,7 +76,7 @@ const PANEL=`<section id="b198d-studio">
  <div id="b198d-error" role="alert"></div>
  <p class="hint">AIの文章理解・美しさ・実Minecraftでの歩行・施工はいずれも未認証。NOT_PREPARED / 9 BLOCKED / ワールド書き込み0。AIモデル未接続時は閲覧と履歴操作のみ。</p>
 </section>`;
-const SCRIPT=`<script id="b198d-client">
+const SCRIPT=String.raw`<script id="b198d-client">
 "use strict";
 (function(){
  const TOKEN=__TOKEN__;
