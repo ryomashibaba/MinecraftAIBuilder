@@ -1,0 +1,76 @@
+name: B197 NEBULA ARK Original Main Architecture Recovery and Real Browser QA
+on:
+  push:
+    branches: [feature/b197-nebula-ark-grand-atrium-recovery]
+    paths:
+      - 'source/ai/b197-grand-hollow-atria.mjs'
+      - 'scripts/b197-fast-probe.mjs'
+      - 'scripts/b197-macro.test.mjs'
+      - 'scripts/b197-build-preview.mjs'
+      - 'scripts/b197-browser-qa.mjs'
+      - '.github/workflows/b197-fast.yml'
+  pull_request:
+    paths:
+      - 'source/ai/b197-grand-hollow-atria.mjs'
+      - 'scripts/b197-fast-probe.mjs'
+      - 'scripts/b197-macro.test.mjs'
+      - 'scripts/b197-build-preview.mjs'
+      - 'scripts/b197-browser-qa.mjs'
+      - '.github/workflows/b197-fast.yml'
+permissions:
+  contents: read
+jobs:
+  main-architectural-source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Strict NEBULA ARK original main architectural source
+        run: |
+          node --check source/ai/b197-grand-hollow-atria.mjs
+          node --check scripts/b197-fast-probe.mjs
+          node scripts/b197-fast-probe.mjs
+      - name: Five source geometry, inherited access, safe build-plan regression tests
+        run: node --test scripts/b197-macro.test.mjs
+      - name: Build before-and-after standalone original main + updated city 3D review
+        run: node scripts/b197-build-preview.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: B197-NEBULA-ARK-Original-Main-3D-Designs-and-Proof
+          path: b197-evidence/
+          if-no-files-found: warn
+          retention-days: 14
+
+  focused-chromium-qa:
+    needs: [main-architectural-source]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Install pinned Chromium QA without modifying lockfile
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Rebuild source-only main architectural proof and offline 3D reviewer
+        run: node scripts/b197-build-preview.mjs
+      - name: Verify 13 live renderer views and actual original vs upgraded desktop/mobile geometry
+        run: node scripts/b197-browser-qa.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: B197-NEBULA-ARK-Before-After-Desktop-Mobile
+          path: |
+            b197-evidence/B197_DESKTOP_UPGRADED_MAIN.png
+            b197-evidence/B197_DESKTOP_B188_BEFORE.png
+            b197-evidence/B197_DESKTOP_UPDATED_FIVE_CITY.png
+            b197-evidence/B197_MOBILE_UPGRADED_MAIN.png
+            b197-evidence/B197_MOBILE_B188_BEFORE.png
+            b197-evidence/B197_MOBILE_UPDATED_FIVE_CITY.png
+            b197-evidence/B197_CHROMIUM_QA.json
+          if-no-files-found: warn
+          retention-days: 14
