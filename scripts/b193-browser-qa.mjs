@@ -77,7 +77,7 @@ try{
    label+'_CITYSCAPE_COMPOSITE_VOXEL_SUM_WRONG');
   const visibleCount=async()=>{
    const str=await page.locator('#meta').innerText();
-   const m=str.match(/表示:\\s*([\\d,]+)/);
+   const m=str.match(/表示:\s*([\d,]+)/);
    if(!m)throw Error('B193_META_NOT_RENDERED_'+str);
    return Number(m[1].replaceAll(',',''));
   };
