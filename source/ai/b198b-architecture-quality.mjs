@@ -60,7 +60,7 @@ export function inspectSourceGeometry({design,compiled}){
     if(run>longestRun){
      longestRun=run;longestSourceMoves=Math.max(0,run-1);
      top.length=0;top.push({standingY:y,z,startX:from,endX:xs[i-1],
-      2WideSupportedSquares:run});
+      supported2WideSquares:run});
     }
     if(i<xs.length){from=xs[i];run=1;}
    }
