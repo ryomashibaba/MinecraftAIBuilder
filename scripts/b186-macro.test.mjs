@@ -41,7 +41,7 @@ test('actual source 2x2 head and support floors, protected all older vertical ro
  for(const h of OVERLOOKS){
   assert(valid(h.x,75,h.lowerNodeZ));
   assert(valid(h.x,RAISED_Y,h.raisedNodeZ));
-  for(let z=32;z<=40;z++)assert(valid(h.x,RAISED_Y,z));
+  for(let z=29;z<=40;z++)assert(valid(h.x,RAISED_Y,z));
  }
  assert.equal(v.report.protectedNineStairways,9);
  assert.equal(v.report.protectedRoofGates,3);
