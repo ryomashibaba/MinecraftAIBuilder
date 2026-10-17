@@ -145,7 +145,7 @@ export function buildB192(){
   inheritedB191OtherLevel:b191.other.standingY,
   inheritedOriginalNetworkNodes:21,
   inheritedOriginalNetworkEdges:30,
-  2wideTravellerRouteStations:traceProof.source2WideStations,
+  '2wideTravellerRouteStations':traceProof.source2WideStations,
   originalModelsBridgeOccupiedVoxelIntersections:traceProof.parentOrAnnexOverlapCells,
   originalModelCellsKeptExactly:traceProof.originalBothModelsUntouched,
   bridgeReal3dSHA256:compiled.geometrySha256,
