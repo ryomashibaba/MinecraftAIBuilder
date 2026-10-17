@@ -36,7 +36,13 @@ export async function runB198CRepair({args=process.argv.slice(2),adapter=null}={
   protectedElementIds:cfg.protect.split(',').filter(Boolean),
   minimumLargestConnectedGain:Number(cfg['minimum-gain']??2)
  });
- const gallery=compileB143Gallery([base,result.design]);
+ // Viewer-only distinct IDs. Real exported source designs and their
+ // source hashes are never changed: revision MUST preserve original ID.
+ const gallery=compileB143Gallery([
+  {...base,id:'b198c-preview-before',title:'BEFORE - '+base.title.slice(0,65)},
+  {...result.design,id:'b198c-preview-after',
+   title:'AFTER - '+result.design.title.slice(0,65)}
+ ]);
  if(!verifyB143Payload(gallery))fail('TWO_SCENE_SOURCE_RENDER_HOLD');
  const template=fs.readFileSync(path.join(root,'source/ai/b143-viewer-template.html'),'utf8');
  const baseHtml=renderB143Html(gallery,template);
