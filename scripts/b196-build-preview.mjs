@@ -373,7 +373,7 @@ export function buildB196Preview({dir=out}={}){
  fs.writeFileSync(htmlFile,html);
  fs.writeFileSync(sourceFile,JSON.stringify({schema:'B196_SAFETY_GATED_TWENTY_MODULE_COMPOSITION',modules:[parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.previous.parent.design,parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.previous.design,parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.design,parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.design,parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.design,parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.design,parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.design,parent.parent.parent.parent.parent.parent.parent.parent.parent.design,parent.parent.parent.parent.parent.parent.parent.parent.design,parent.parent.parent.parent.parent.parent.parent.design,parent.parent.parent.parent.parent.parent.design,parent.parent.parent.parent.parent.design,parent.parent.parent.parent.design,parent.parent.parent.design,parent.parent.design,parent.design,design,bridge.design,transitDesign,orbitalDesign],policy:'parent-wins-overlap'},null,2)+'\n');
  const manifest={
-  schema:'minecraftaibuilder-b195-3d-preview-v1',
+  schema:'minecraftaibuilder-b196-3d-preview-v1',
   modelId:compiled.id,sourceSha256:compiled.sourceSha256,
   geometrySha256:compiled.geometrySha256,
   numberOfActualNew3dScenes:5,
