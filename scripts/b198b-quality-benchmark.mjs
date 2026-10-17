@@ -27,7 +27,10 @@ function makeReviewedHtml({design,provenance}){
  const banner=provenance==='FIXTURE_ONLY_NOT_NATURAL_LANGUAGE_PROOF'?
   'B198B TEST FIXTURE — 模擬モデル出力。AIの日本語理解・建築品質の合格を意味しません。':
   'B198B MODEL PROPOSAL — 意味の一致・建築品質・Minecraft実機歩行は未評価。';
- return base.replace('<body>','<body><div style="padding:12px 18px;background:#51371f;color:#fff;font-weight:700">'+
+ const bodyStart=base.match(/<body\b[^>]*>/i)?.[0];
+ requireIt(Boolean(bodyStart),'OFFLINE_VIEWER_BODY_NOT_PRESENT');
+ return base.replace(bodyStart,bodyStart+
+  '<div id="b198b-inference-disclaimer" style="padding:12px 18px;background:#51371f;color:#fff;font-weight:700">'+
   escapeHtml(banner)+' / NOT_PREPARED・Minecraft施工禁止</div>');
 }
 /**
