@@ -18,7 +18,7 @@ console.log('B192_SOURCE_SKYBRIDGE_PASS',JSON.stringify({
  independentlyAuthoredBridgeParts:report.newBridgeSourceElements,
  sourceDesignModules:report.totalStrictB143Documents,
  independentConceptBuildings:report.sourceArchitectureModels,
- 2wideSupportedBridgeStations:report['2wideTravellerRouteStations'],
+ supportedBridge2WideStations:report['2wideTravellerRouteStations'],
  auditedUniqueFloorCells:report.conceptFloorCells,
  sourceWorldlessModelIntersection:report.originalModelsBridgeOccupiedVoxelIntersections,
  viewerSceneCount:report.viewableSourceScenes,worldWrites:0,readiness:'NOT_PREPARED'}));
