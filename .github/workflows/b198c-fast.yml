@@ -1,0 +1,76 @@
+name: B198C Source Geometry Critic and Guarded Architectural Repair
+on:
+  push:
+    branches: [feature/b198c-geometry-critic-and-guarded-repair]
+    paths:
+      - 'source/ai/b198c-spatial-critic.mjs'
+      - 'source/ai/b198c-guarded-repair.mjs'
+      - 'scripts/b198c-fixtures.mjs'
+      - 'scripts/b198c-critic.test.mjs'
+      - 'scripts/b198c-offline-probe.mjs'
+      - 'scripts/b198c-repair-cli.mjs'
+      - 'scripts/b198c-browser-qa.mjs'
+      - '.github/workflows/b198c-fast.yml'
+  pull_request:
+    paths:
+      - 'source/ai/b198c-spatial-critic.mjs'
+      - 'source/ai/b198c-guarded-repair.mjs'
+      - 'scripts/b198c-fixtures.mjs'
+      - 'scripts/b198c-critic.test.mjs'
+      - 'scripts/b198c-offline-probe.mjs'
+      - 'scripts/b198c-repair-cli.mjs'
+      - 'scripts/b198c-browser-qa.mjs'
+      - '.github/workflows/b198c-fast.yml'
+permissions:
+  contents: read
+jobs:
+  exact-source-critique:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: All B198C source-code syntax gates
+        run: |
+          node --check source/ai/b198c-spatial-critic.mjs
+          node --check source/ai/b198c-guarded-repair.mjs
+          node --check scripts/b198c-repair-cli.mjs
+          node --check scripts/b198c-offline-probe.mjs
+      - name: Existing generative engine and new real voxel critic safety regression
+        run: node --test scripts/b198a-engine.test.mjs scripts/b198a-cli.test.mjs scripts/b198b-quality.test.mjs scripts/b198c-critic.test.mjs
+      - name: Create genuine before-after connected source B143 architecture 3D review
+        run: node scripts/b198c-offline-probe.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: B198C-Guarded-Repair-MOCK-Source-Geometry-Before-After
+          path: b198c-evidence/
+          retention-days: 14
+          if-no-files-found: warn
+  actual-chromium-source-review:
+    needs: [exact-source-critique]
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Install Chromium only for real renderer QA
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Recreate exact original + repaired source viewer
+        run: node scripts/b198c-offline-probe.mjs
+      - name: Verify desktop/mobile before-after actual voxel rendering and user scene controls
+        run: node scripts/b198c-browser-qa.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: B198C-Chromium-Real-3D-Renderer-MOCK-Only
+          path: |
+            b198c-evidence/B198C_*_BEFORE.png
+            b198c-evidence/B198C_*_AFTER.png
+            b198c-evidence/B198C_CHROMIUM_QA.json
+          if-no-files-found: warn
+          retention-days: 14
