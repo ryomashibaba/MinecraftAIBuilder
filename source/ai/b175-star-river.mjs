@@ -147,11 +147,16 @@ export function analyzeSteppedInterfaces(scene){
 }
 function verifyFlatGallery(scene){
  const occupied=new Set(scene.primitives.map(p=>K(p[0],p[1],p[2])));
+ const failures=[];
  for(let x=12;x<=112+1;x++)for(let dz=0;dz<2;dz++){
-  yes(occupied.has(K(x,59,11+dz)),'STAR_RIVER_FLOOR_MISSING_'+x);
+  if(!occupied.has(K(x,59,11+dz)))
+   failures.push('floor:'+x+',59,'+(11+dz));
   for(let dy=0;dy<2;dy++)
-   yes(!occupied.has(K(x,60+dy,11+dz)),'STAR_RIVER_BLOCKED_'+x);
+   if(occupied.has(K(x,60+dy,11+dz)))
+    failures.push('body:'+x+','+(60+dy)+','+(11+dz));
  }
+ yes(failures.length===0,'STAR_RIVER_GEOMETRY_'+failures.slice(0,32).join('|')+
+  '_COUNT_'+failures.length);
  return {standingY:60,z:11,fromX:12,toX:112,
   supported2x2FlatMoves:100,realWorldMovementCertified:false};
 }
