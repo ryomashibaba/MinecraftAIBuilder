@@ -7,6 +7,7 @@ on:
       - 'scripts/b172-fast-probe.mjs'
       - 'scripts/b172-macro.test.mjs'
       - 'scripts/b172-build-preview.mjs'
+      - 'scripts/b172-browser-qa.mjs'
       - '.github/workflows/b172-fast.yml'
   pull_request:
     paths:
@@ -14,6 +15,7 @@ on:
       - 'scripts/b172-fast-probe.mjs'
       - 'scripts/b172-macro.test.mjs'
       - 'scripts/b172-build-preview.mjs'
+      - 'scripts/b172-browser-qa.mjs'
       - '.github/workflows/b172-fast.yml'
 permissions:
   contents: read
@@ -46,5 +48,34 @@ jobs:
         with:
           name: B172-NEBULA-ARK-Grand-Terminal-3D
           path: b172-evidence/
+          if-no-files-found: warn
+          retention-days: 14
+
+  chromium-visual-qa:
+    needs: [macro-architecture]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned browser QA runtime without lockfile mutation
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Regenerate offline 3D model from pinned source
+        run: node scripts/b172-build-preview.mjs
+      - name: Test real Chromium desktop/mobile canvas, all presets, and save screenshots
+        run: node scripts/b172-browser-qa.mjs
+      - name: Upload actual rendered visual evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: B172-NEBULA-ARK-Desktop-Mobile-Screenshots
+          path: |
+            b172-evidence/B172_DESKTOP.png
+            b172-evidence/B172_MOBILE.png
+            b172-evidence/B172_CHROMIUM_QA.json
           if-no-files-found: warn
           retention-days: 14
