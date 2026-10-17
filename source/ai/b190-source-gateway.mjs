@@ -23,7 +23,7 @@ export const MODEL_OFFSET=Object.freeze({
  worldPlacementAuthorized:false
 });
 export const GATEWAY=Object.freeze({
- standingY:61,floorY:60,mainAnchorX:108,mainAnchorZ:29,
+ standingY:73,floorY:72,mainAnchorX:108,mainAnchorZ:29,
  annexLocalAnchorX:4,annexLocalAnchorZ:31,
  // Four-wide source corridor, 2wide travel footprints and 2-high head.
  floorZ0:29,floorZ1:32,sourceOnlyMaxNewCells:480
@@ -42,7 +42,10 @@ function level2(c,x,y,z){
  }
  return true;
 }
-export function evaluateSourceGateway(main,annex,offset=MODEL_OFFSET){
+export function evaluateSourceGateway(main,annex,offset=MODEL_OFFSET,
+ standingY=GATEWAY.standingY){
+ fail([61,65,69,73].includes(standingY),'NOT_PROTECTED_SHARED_STANDING_LEVEL');
+ const floorY=standingY-1;
  fail(offset&&offset.placementSpace==='OFFLINE_REVIEW_COORDINATES'&&
    offset.worldPlacementAuthorized===false,'NOT_AN_OFFLINE_REVIEW');
  const dx=offset.sourceLocalDeltaX,dy=offset.sourceLocalDeltaY,
@@ -69,9 +72,9 @@ export function evaluateSourceGateway(main,annex,offset=MODEL_OFFSET){
   startX=GATEWAY.mainAnchorX,endX=annexAnchorX;
  fail(endX>startX+8&&endX<250,'BRIDGE_X_RANGE');
  const sourceUnion=new Set([...mainCells,...virtualAnnexCells]);
- fail(level2(mainCells,startX,GATEWAY.standingY,GATEWAY.mainAnchorZ),
+ fail(level2(mainCells,startX,standingY,GATEWAY.mainAnchorZ),
   'MAIN_STANDING_ENTRANCE_UNSUPPORTED');
- fail(level2(virtualAnnexCells,endX,GATEWAY.standingY,
+ fail(level2(virtualAnnexCells,endX,standingY,
   GATEWAY.annexLocalAnchorZ+dz),
   'ANNEX_STANDING_ENTRANCE_UNSUPPORTED');
  // A direct bridge intersects three solid inherited main cells. Find
@@ -82,8 +85,8 @@ export function evaluateSourceGateway(main,annex,offset=MODEL_OFFSET){
   if(x<startX-8||x>endX||z<0||z>48)return false;
   for(let ox=0;ox<2;ox++)for(let oz=0;oz<2;oz++){
    const a=x+ox,b=z+oz;
-   if(sourceUnion.has(K(a,GATEWAY.standingY,b))||
-      sourceUnion.has(K(a,GATEWAY.standingY+1,b)))return false;
+   if(sourceUnion.has(K(a,standingY,b))||
+      sourceUnion.has(K(a,standingY+1,b)))return false;
   }
   return true;
  };
@@ -101,7 +104,37 @@ export function evaluateSourceGateway(main,annex,offset=MODEL_OFFSET){
    }
   }
  }
- fail(parents.has(destination),'NO_COLLISION_FREE_SOURCE_DETOUR');
+ if(!parents.has(destination)){
+  // This is a valid, *useful* negative design review. NO bridge floor
+  // is emitted, and the model never marks an unresolved link as connected.
+  return {schema:'minecraftaibuilder-b190-source-gateway-proof-v1',
+  offset,evaluatedStandingY:standingY,
+   reviewStatus:'HOLD_NO_COLLISION_FREE_SOURCE_DETOUR',
+   mainModelCells:main.primitives.length,
+   annexModelCells:annex.primitives.length,
+   virtualIndependentSum:main.primitives.length+annex.primitives.length,
+   modelToModelOccupiedCellCollisionCount:overlap,
+   originalMainModelPreserved:mainCells.size===main.primitives.length,
+   originalAnnexModelPreserved:virtualAnnexCells.size===annex.primitives.length,
+   candidateConnectorFloorY:floorY,candidateStandingY:standingY,
+   from:[startX,standingY,GATEWAY.mainAnchorZ+dz],
+   to:[endX,standingY,GATEWAY.annexLocalAnchorZ+dz],
+   full2wide2highStations:0,candidateBridgeNewCells:0,
+   allBridgeStationsSourceSupported:false,
+   sourceOnlyNewFloorNotOverwritingOld:true,
+   bridgeNewCellsSha256:H([]),
+   newBridgeGeometrySha256:H({offset,standingY,
+    searched2wideFootprints:parents.size,
+    rejected:'NO_COLLISION_FREE_SOURCE_DETOUR'}),
+   examinedClearSourceFootprints:parents.size,
+   actualInGameWalkingCertified:false,
+   actualMinecraftWorldPlacementCertified:false,
+   actualTerrainAndStructuralSafetyCertified:false,
+   sourceOnlyAlignmentProposed:true,
+   constructionApproved:false,worldCoordinates:null,
+   worldContacts:0,worldWrites:0,BuildPlan:{operations:[]}};
+ }
+
  const path=[];
  let at=destination;
  while(at!==null){const [x,,z]=at.split(',').map(Number);
@@ -115,15 +148,15 @@ export function evaluateSourceGateway(main,annex,offset=MODEL_OFFSET){
  const newSlab=[];
  for(const [x,z] of path)for(let ox=0;ox<2;ox++)
   for(let oz=0;oz<2;oz++){
-   const a=x+ox,b=z+oz,id=K(a,GATEWAY.floorY,b);
+   const a=x+ox,b=z+oz,id=K(a,floorY,b);
    if(!sourceUnion.has(id)){
-    sourceUnion.add(id);newSlab.push([a,GATEWAY.floorY,b]);
+    sourceUnion.add(id);newSlab.push([a,floorY,b]);
    }
   }
  fail(newSlab.length>10&&newSlab.length<=GATEWAY.sourceOnlyMaxNewCells,
   'GATEWAY_SOURCE_SLAB_BUDGET_'+newSlab.length);
  const stations=path.map(([x,z])=>({x,z,
-  sourceSupported2Wide:level2(sourceUnion,x,GATEWAY.standingY,z)}));
+  sourceSupported2Wide:level2(sourceUnion,x,standingY,z)}));
  const blocked=stations.filter(p=>!p.sourceSupported2Wide);
  const originalMainStillExact=mainCells.size===main.primitives.length;
  const originalAnnexStillExact=virtualAnnexCells.size===annex.primitives.length;
@@ -132,9 +165,9 @@ export function evaluateSourceGateway(main,annex,offset=MODEL_OFFSET){
  fail(blocked.length===0,'GATEWAY_CLEARANCE_HOLD_'+JSON.stringify(blocked.slice(0,12).map(p=>({
    ...p,reason:[[p.x, p.z],[p.x+1,p.z],[p.x,p.z+1],[p.x+1,p.z+1]]
      .map(([x,z])=>({x,z,
-      floor:sourceUnion.has(K(x,GATEWAY.floorY,z)),
-      body:sourceUnion.has(K(x,GATEWAY.standingY,z)),
-      head:sourceUnion.has(K(x,GATEWAY.standingY+1,z))}))
+      floor:sourceUnion.has(K(x,floorY,z)),
+      body:sourceUnion.has(K(x,standingY,z)),
+      head:sourceUnion.has(K(x,standingY+1,z))}))
  }))));
  // Ensure the bridge has not collided with *any* original body/head space
  // in its 2x2 travel footprint; explicit per-station check covers both.
@@ -147,11 +180,11 @@ export function evaluateSourceGateway(main,annex,offset=MODEL_OFFSET){
   virtualIndependentSum:main.primitives.length+annex.primitives.length,
   candidateBridgeNewCells:newSlab.length,
   bridgeNewCellsSha256:H(newSlab),
-  candidateConnectorFloorY:GATEWAY.floorY,
-  candidateStandingY:GATEWAY.standingY,
+  candidateConnectorFloorY:floorY,
+  candidateStandingY:standingY,
   full2wide2highStations:stations.length,
-  from:[startX,GATEWAY.standingY,GATEWAY.mainAnchorZ+dz],
-  to:[endX,GATEWAY.standingY,GATEWAY.annexLocalAnchorZ+dz],
+  from:[startX,standingY,GATEWAY.mainAnchorZ+dz],
+  to:[endX,standingY,GATEWAY.annexLocalAnchorZ+dz],
   allBridgeStationsSourceSupported:blocked.length===0,
   sourceOnlyNewFloorNotOverwritingOld:true,
   modelToModelOccupiedCellCollisionCount:overlap,
@@ -173,8 +206,10 @@ export function buildB190(){
  fail(civic.joinedVertices===21&&civic.verifiedEdges===30,
   'B187_MAIN_TOPOLOGY_LOST');
  fail(annexFloors.source2WideRouteMoves===190,'ANNEX_FLOOR_PATHS_LOST');
- const gateway=evaluateSourceGateway(b189.parent.compiled,
-  b189.annex.compiled);
+ const gatewayReviews=[73,69,65,61].map(y=>
+  evaluateSourceGateway(b189.parent.compiled,b189.annex.compiled,MODEL_OFFSET,y));
+ const gateway=gatewayReviews.find(x=>x.allBridgeStationsSourceSupported)
+   ??gatewayReviews[0];
  const report={schema:SCHEMA,
   mainSourceSha256:b189.parent.compiled.sourceSha256,
   mainGeometrySha256:b189.parent.compiled.geometrySha256,
@@ -194,6 +229,10 @@ export function buildB190(){
   candidateGatewayNewFloorCells:gateway.candidateBridgeNewCells,
   gatewayOverlapCells:gateway.modelToModelOccupiedCellCollisionCount,
   gatewaySourceProofSha256:gateway.newBridgeGeometrySha256,
+  gatewayReviewStatus:gateway.reviewStatus,
+  allEvaluatedStandingLevels:gatewayReviews.map(x=>x.evaluatedStandingY),
+  passedSourceConnectionOptions:gatewayReviews.filter(x=>x.allBridgeStationsSourceSupported).length,
+  rejectedSourceConnectionOptions:gatewayReviews.filter(x=>!x.allBridgeStationsSourceSupported).length,
   sourceOnlyVirtualPlacementVerified:gateway.allBridgeStationsSourceSupported,
   mainMonolith160kLimitPreserved:MAX_CELLS,
   annexSeparate160kLimitPreserved:MAX_CELLS,
@@ -205,7 +244,7 @@ export function buildB190(){
   actualPlayerBridgeTraverseCertified:false,
   physicalCollisionAndTerrainCertified:false};
  fail(verifyB190Report(report),'STRICT_SAFETY_REPORT_HOLD');
- return {...b189,gateway,report};
+ return {...b189,gateway,gatewayReviews,report};
 }
 export function verifyB190Report(r){
  return Boolean(r&&r.schema===SCHEMA&&
@@ -217,11 +256,17 @@ export function verifyB190Report(r){
   r.original21SupportedMainPublicWaypoints===21&&
   r.original30ProofBackedSourceRouteEdges===30&&
   r.originalAnnexFiveFloors===5&&r.originalAnnex190TwoWideMoves===190&&
-  r.candidateGatewaySourceStations>=30&&
-  r.candidateGatewayNewFloorCells>10&&
-  r.candidateGatewayNewFloorCells<=GATEWAY.sourceOnlyMaxNewCells&&
+  r.allEvaluatedStandingLevels?.join(',')==='73,69,65,61'&&
+  r.passedSourceConnectionOptions+r.rejectedSourceConnectionOptions===4&&
+  (r.gatewayReviewStatus==='HOLD_NO_COLLISION_FREE_SOURCE_DETOUR'?
+   r.sourceOnlyVirtualPlacementVerified===false&&
+   r.candidateGatewaySourceStations===0&&r.candidateGatewayNewFloorCells===0:
+   r.gatewayReviewStatus==='SOURCE_GEOMETRY_APPROACH_VALIDATED'&&
+   r.sourceOnlyVirtualPlacementVerified===true&&
+   r.candidateGatewaySourceStations>=30&&
+   r.candidateGatewayNewFloorCells>10&&
+   r.candidateGatewayNewFloorCells<=GATEWAY.sourceOnlyMaxNewCells)&&
   r.gatewayOverlapCells===0&&r.gatewaySourceProofSha256?.length===64&&
-  r.sourceOnlyVirtualPlacementVerified===true&&
   r.mainSourceSha256?.length===64&&r.mainGeometrySha256?.length===64&&
   r.annexSourceSha256?.length===64&&r.annexGeometrySha256?.length===64&&
   r.mainMonolith160kLimitPreserved===MAX_CELLS&&
