@@ -1,0 +1,45 @@
+name: B168 fractional collision models
+on:
+  push:
+    branches: [feature/b168-partial-height-stair-collision-lab]
+    paths:
+      - 'source/ai/b168-fractional-collision-lab.mjs'
+      - 'scripts/b168-fast-probe.mjs'
+      - 'scripts/b168-fast.test.mjs'
+      - '.github/workflows/b168-fast.yml'
+  pull_request:
+    paths:
+      - 'source/ai/b168-fractional-collision-lab.mjs'
+      - 'scripts/b168-fast-probe.mjs'
+      - 'scripts/b168-fast.test.mjs'
+      - '.github/workflows/b168-fast.yml'
+permissions:
+  contents: read
+concurrency:
+  group: b168-fast-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  geometry-collision-lab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Syntax and source hygiene
+        run: |
+          node --check source/ai/b168-fractional-collision-lab.mjs
+          node --check scripts/b168-fast-probe.mjs
+      - name: Compare half steps, full steps, blocked headroom and full-size DOPPLER stair geometry
+        run: node scripts/b168-fast-probe.mjs
+      - name: Geometry regression and forgery rejection
+        if: hashFiles('scripts/b168-fast.test.mjs') != ''
+        run: node --test scripts/b168-fast.test.mjs
+      - name: Preserve architecture review without touching the world
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: B168-Fractional-Collision-Research
+          path: b168-evidence/B168_HALF_HEIGHT.json
+          retention-days: 14
+          if-no-files-found: warn
