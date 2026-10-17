@@ -33,6 +33,8 @@ jobs:
           node --check scripts/b170-review-submission.mjs
       - name: Re-run 18 checkpoint and adversarial safety regressions
         run: node --test scripts/b170-readonly-probe.test.mjs
+      - name: Verify self-contained HTML, no-network policy and original packet
+        run: node --test scripts/b170-capture-kit.test.mjs
       - name: Build interactive offline observation kit with source hashes
         run: node scripts/b170-build-capture-kit.mjs
       - name: Prove empty evidence cannot be promoted to runtime verification
