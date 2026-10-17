@@ -97,6 +97,7 @@ export function renderB161Html(bundle,template){
  need(html.includes(draw),'DRAW_HOOK');
  html=html.replace(draw,[
   ' ctx.globalAlpha=1;',
+  ' const isDoppler=s.id===\"doppler-switchback-terminal-r0\"||s.id===\"doppler-switchback-terminal-generated-detour\"||s.id===\"doppler-switchback-terminal-adaptive-r2\";',
   ' const route=isDoppler?s.routeReview?.targets[0]?.path:null;',
   ' if(el("b161-route").checked&&route?.length){',
   '  ctx.save();ctx.strokeStyle="#b1ffe5";ctx.lineWidth=3;ctx.lineJoin="round";',
