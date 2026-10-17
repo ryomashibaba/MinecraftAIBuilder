@@ -114,7 +114,13 @@ function planeReachability(c,y,bounds,start){
  for(let x=bounds.x0;x<=bounds.x1;x++)for(let z=bounds.z0;z<=bounds.z1;z++)
   if(walk(c,x,y,z))nodes.add(x+','+z);
  const seen=new Set([start]),q=[start];
- check(nodes.has(start),'FLAT_GRAPH_START_NOT_WALKABLE_'+start);
+ check(nodes.has(start),'FLAT_GRAPH_START_NOT_WALKABLE_'+start+'_DIAGNOSTIC_'+JSON.stringify(
+  [24,62,101].map(x=>({x,stations:Array.from({length:16},(_,i)=>{
+   const z=i+29;return {z,ok:walk(c,x,y,z),columns:[[x,z],[x+1,z],[x,z+1],[x+1,z+1]]
+    .map(([a,b])=>({x:a,z:b,floor:c.has(K(a,y-1,b)),
+     occupiedBody:c.has(K(a,y,b)),occupiedHead:c.has(K(a,y+1,b))}))};
+  }).filter(q=>!q.ok).map(q=>({z:q.z,blocked:q.columns.filter(t=>!t.floor||t.occupiedBody||t.occupiedHead)}))})))
+ );
  for(let i=0;i<q.length;i++){
   const [x,z]=q[i].split(',').map(Number);
   for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]]){
