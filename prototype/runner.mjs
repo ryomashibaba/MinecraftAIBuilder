@@ -18,7 +18,11 @@ const REPORT=path.join(DATA,'ARK_LITE_LAST_REPORT.json');
 const PORT=8000;
 export const MAX_BLOCK_WRITES=12000;
 export const MAX_RUNS=3000;
-export const CONCURRENCY=4;
+// Read-only checks can safely overlap; writes remain strictly serialized.
+// Override only for diagnosing slower Education devices: 1..32 workers.
+const configuredWorkers=Number(process.env.ARK_LITE_READ_WORKERS??16);
+export const CONCURRENCY=Number.isInteger(configuredWorkers)&&configuredWorkers>=1&&configuredWorkers<=32
+  ?configuredWorkers:16;
 const PLAN=makeArkLite();
 const hash=s=>createHash('sha256').update(s).digest('hex');
 const same=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
@@ -103,13 +107,13 @@ export async function run(world,cmd){
   catch(e){return {transportError:true,statusMessage:String(e?.message??e).slice(0,160)};}
 }
 async function asMatch(world,p,block){return success(await run(world,query(p,block)));}
-async function parallelChecks(items,work){
+async function parallelChecks(items,work,phase='Read-only preflight'){
   let next=0,count=0,failed=null;
   const workers=Array.from({length:CONCURRENCY},async()=>{
     while(!failed&&next<items.length){
       const i=next++;
       try{await work(items[i],i);count++;
-        if(count%500===0)console.log('Read-only preflight '+count+'/'+items.length);}
+        if(phase&&count%500===0)console.log(phase+' '+count+'/'+items.length);}
       catch(e){failed=e;}
     }
   });
@@ -128,7 +132,8 @@ function ensureJournal(site,journal){
      journal.completedRuns.some(i=>!journal.attemptedRuns.includes(i)))
     throw Error('P0_EXISTING_JOURNAL_CONFLICT: do not overwrite or delete');
 }
-export async function survey(world,site,journal=null){
+export async function survey(world,site,journal=null,{collectMissing=false}={}){
+  const started=Date.now();
   validatePlan();ensureJournal(site,journal);
   // Calibrate against the same known-air location; failures never authorize writes.
   const first=absolute(PLAN.voxels[0],site.origin);
@@ -154,35 +159,35 @@ export async function survey(world,site,journal=null){
     for(const p of cells(PLAN.runs[i],site.origin))
       items.push({i,p,block:PLAN.runs[i].block});
   let preexisting=0;
+  const missingByRun=new Array(PLAN.runs.length).fill(0);
+  console.log('Read-only full survey: '+items.length+' positions; '+CONCURRENCY+' parallel workers.');
   await parallelChecks(items,async item=>{
-    if(await asMatch(world,item.p,'minecraft:air'))return;
+    if(await asMatch(world,item.p,'minecraft:air')){
+      missingByRun[item.i]++;return;
+    }
     if(owned.has(item.i)&&await asMatch(world,item.p,item.block)){
       preexisting++;return;
     }
     throw Error('P0_SITE_OCCUPIED_OR_UNKNOWN '+xyz(item.p));
   });
-  return {checked:items.length,verifiedAir:items.length-preexisting,
+  const result={checked:items.length,verifiedAir:items.length-preexisting,
     journalOwnedMatching:preexisting,interiorSampled:32,
-    airControlPass:true};
+    airControlPass:true,readWorkers:CONCURRENCY,elapsedMs:Date.now()-started};
+  if(collectMissing)result.missingByRun=missingByRun;
+  return result;
 }
 async function verifyRun(world,run,site){
-  for(const p of cells(run,site.origin))
+  await parallelChecks(cells(run,site.origin),async p=>{
     if(!await asMatch(world,p,run.block))
       throw Error('P0_READBACK_MISMATCH '+xyz(p));
-}
-async function beforeRun(world,run,site,alreadyAttempted){
-  let missing=0;
-  for(const p of cells(run,site.origin)){
-    if(await asMatch(world,p,'minecraft:air')){missing++;continue;}
-    if(alreadyAttempted&&await asMatch(world,p,run.block))continue;
-    throw Error('P0_OCCUPIED_DURING_PLACEMENT '+xyz(p));
-  }
-  return missing;
+  },null);
 }
 export async function build(world,site,confirm){
   const old=saved();ensureJournal(site,old);
   if(old?.cleanupAt)throw Error('P0_CLEANED_JOURNAL_CANNOT_BE_REBUILT');
-  const check=await survey(world,site,old);
+  // One complete fail-closed site scan, then keep-only writes and parallel
+  // exact readback. Avoid checking all 7,363 voxels a second time before writes.
+  const {missingByRun,...check}=await survey(world,site,old,{collectMissing:true});
   const phrase='BUILD '+PLAN.sha256.slice(0,12)+' '+site.label;
   if(confirm!==phrase)throw Error('P0_EXPLICIT_BUILD_CONFIRMATION_REQUIRED: '+phrase);
   const journal=old??{schema:'minecraftaibuilder-ark-lite-journal-p0',
@@ -195,7 +200,9 @@ export async function build(world,site,confirm){
     if(journal.completedRuns.includes(i))continue;
     const segment=PLAN.runs[i];
     const attempted=journal.attemptedRuns.includes(i);
-    const missing=await beforeRun(world,segment,site,attempted);
+    // Per-run air counts come from the immediately preceding full survey.
+    // The keep-only write will not replace blocks added after that survey.
+    const missing=missingByRun[i];
     if(!attempted){journal.attemptedRuns.push(i);save(JOURNAL,journal);}
     if(missing){
       if(journal.writeAttempts>=MAX_RUNS)throw Error('P0_WRITE_COMMAND_LIMIT');
