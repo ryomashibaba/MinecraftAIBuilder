@@ -25,9 +25,9 @@ const cut=(id,origin,size)=>({id,shape:'box',mode:'cut',origin,size});
 export function starRiverParts(){
  const e=[
   // Long contiguous 2x2+ supported source-real public concourse.
-  box('b175-star-river-main-deck',[9,59,9],[108,1,8],'concrete'),
-  box('b175-star-river-front-parapet',[9,60,7],[108,2,2],'glass'),
-  box('b175-star-river-rear-parapet',[9,60,17],[108,2,2],'glass'),
+  box('b175-star-river-main-deck',[9,59,2],[108,1,8],'concrete'),
+  box('b175-star-river-front-parapet',[9,60,0],[108,2,2],'glass'),
+  box('b175-star-river-rear-parapet',[9,60,10],[108,2,2],'glass'),
   // Vast vertically separate external stage projecting towards the viewer.
   box('b175-north-projection',[13,54,3],[27,1,8],'accent'),
   box('b175-central-projection',[44,54,3],[36,1,8],'accent'),
@@ -70,10 +70,10 @@ export function starRiverParts(){
  e.push(
   tor('b175-orbital-east-light',[83,66,24],8,1,'glow'),
   tor('b175-orbital-west-light',[41,66,24],8,1,'glow'),
-  beam('b175-front-bridge-west',[37,54,3],[49,68,5],'metal',2),
-  beam('b175-front-bridge-east',[88,54,3],[76,68,5],'metal',2),
-  beam('b175-west-tower-web',[16,48,3],[31,71,6],'accent'),
-  beam('b175-east-tower-web',[109,48,3],[94,71,6],'accent'),
+  beam('b175-front-bridge-west',[37,54,12],[49,68,14],'metal',2),
+  beam('b175-front-bridge-east',[88,54,12],[76,68,14],'metal',2),
+  beam('b175-west-tower-web',[16,48,13],[31,71,15],'accent'),
+  beam('b175-east-tower-web',[109,48,13],[94,71,15],'accent'),
   // One explicitly allowed offline correction to the B174 landing pier:
   // X72/Y39/Z46..48 occludes the next-to-last tread's body envelope.
   // This conceptual design CUT is handled by the versioned compositor;
@@ -149,15 +149,15 @@ function verifyFlatGallery(scene){
  const occupied=new Set(scene.primitives.map(p=>K(p[0],p[1],p[2])));
  const failures=[];
  for(let x=12;x<=112+1;x++)for(let dz=0;dz<2;dz++){
-  if(!occupied.has(K(x,59,11+dz)))
-   failures.push('floor:'+x+',59,'+(11+dz));
+  if(!occupied.has(K(x,59,3+dz)))
+   failures.push('floor:'+x+',59,'+(3+dz));
   for(let dy=0;dy<2;dy++)
-   if(occupied.has(K(x,60+dy,11+dz)))
-    failures.push('body:'+x+','+(60+dy)+','+(11+dz));
+   if(occupied.has(K(x,60+dy,3+dz)))
+    failures.push('body:'+x+','+(60+dy)+','+(3+dz));
  }
  yes(failures.length===0,'STAR_RIVER_GEOMETRY_'+failures.slice(0,32).join('|')+
   '_COUNT_'+failures.length);
- return {standingY:60,z:11,fromX:12,toX:112,
+ return {standingY:60,z:3,fromX:12,toX:112,
   supported2x2FlatMoves:100,realWorldMovementCertified:false};
 }
 function checkHistoricRoutes(scene){

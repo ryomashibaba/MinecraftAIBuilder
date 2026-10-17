@@ -45,7 +45,7 @@ test('14 adjacent 2x2 mixed-height step interfaces verified without physics cert
 test('new long sky gallery has exact support/headroom and old lower+upper 2x2 proof survives',()=>{
  const {compiled,report}=buildStarRiver();
  const occupied=new Set(compiled.primitives.map(p=>p.slice(0,3).join(',')));
- for(const [y,z,start,end] of [[60,11,12,112],[14,7,10,112],[26,20,12,110]])
+ for(const [y,z,start,end] of [[60,3,12,112],[14,7,10,112],[26,20,12,110]])
   for(let x=start;x<=end+1;x++)for(let dz=0;dz<2;dz++){
    assert(occupied.has([x,y-1,z+dz].join(',')));
    assert(!occupied.has([x,y,z+dz].join(',')));
