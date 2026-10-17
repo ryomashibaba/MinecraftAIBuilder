@@ -35,7 +35,7 @@ export function porticoElements(){
    box(pre+'-first-rise',[g.x,73,27],[3,1,2],'metal'),
    box(pre+'-roof-arrival-deck',[g.x+1,74,24],[5,1,3],'wood'),
    box(pre+'-approach-light',[g.x+1,70,24],[5,1,2],'glow'),
-   box(pre+'-outer-roof-curb',[g.x+7,73,25],[2,1,5],'accent'),
+   box(pre+'-outer-roof-curb',[g.x+7,70,19],[2,1,4],'accent'),
    beam(pre+'-hanging-roof-member',[g.x+8,55,18],[g.x+8,71,20],'metal')
   );
  }
