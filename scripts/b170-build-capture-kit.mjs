@@ -168,7 +168,7 @@ function render(){
 }
 $('make').addEventListener('click',render);
 $('download').addEventListener('click',()=>{
- const t=JSON.stringify(render(),null,2)+'\n';
+ const t=JSON.stringify(render(),null,2)+'\\n';
  const url=URL.createObjectURL(new Blob([t],{type:'application/json'}));
  const a=document.createElement('a');a.href=url;a.download='B170_OBSERVATIONS.json';
  a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);
