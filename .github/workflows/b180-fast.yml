@@ -1,0 +1,81 @@
+name: B180 Four Tier Atrium Eight-Module Arrivals
+on:
+  push:
+    branches: [feature/b180-nebula-ark-four-tier-atrium-arrivals]
+    paths:
+      - 'source/ai/b180-atrium-arrivals.mjs'
+      - 'scripts/b180-fast-probe.mjs'
+      - 'scripts/b180-macro.test.mjs'
+      - 'scripts/b180-build-preview.mjs'
+      - 'scripts/b180-browser-qa.mjs'
+      - '.github/workflows/b180-fast.yml'
+  pull_request:
+    paths:
+      - 'source/ai/b180-atrium-arrivals.mjs'
+      - 'scripts/b180-fast-probe.mjs'
+      - 'scripts/b180-macro.test.mjs'
+      - 'scripts/b180-build-preview.mjs'
+      - 'scripts/b180-browser-qa.mjs'
+      - '.github/workflows/b180-fast.yml'
+permissions:
+  contents: read
+concurrency:
+  group: b180-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  macro-architecture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Validate source and safe build scripts
+        run: |
+          node --check source/ai/b180-atrium-arrivals.mjs
+          node --check scripts/b180-fast-probe.mjs
+      - name: Source-backed quad-tier skybridge model with eight 2x2 clearance-checked bridges
+        run: node scripts/b180-fast-probe.mjs
+      - name: Architecture geometry, obstruction and anti-forgery tests
+        if: hashFiles('scripts/b180-macro.test.mjs') != ''
+        run: node --test scripts/b180-macro.test.mjs
+      - name: Build standalone offline 3D city preview
+        if: hashFiles('scripts/b180-build-preview.mjs') != ''
+        run: node scripts/b180-build-preview.mjs
+      - name: Archive city-scale voxel model and interactive preview
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: B180-NEBULA-ARK-Grand-Terminal-3D
+          path: b180-evidence/
+          if-no-files-found: warn
+          retention-days: 14
+
+  chromium-visual-qa:
+    needs: [macro-architecture]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned browser QA runtime without lockfile mutation
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Regenerate offline 3D model from pinned source
+        run: node scripts/b180-build-preview.mjs
+      - name: Test real Chromium desktop/mobile canvas, all presets, and save screenshots
+        run: node scripts/b180-browser-qa.mjs
+      - name: Upload actual rendered visual evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: B180-NEBULA-ARK-Desktop-Mobile-Screenshots
+          path: |
+            b180-evidence/B180_DESKTOP.png
+            b180-evidence/B180_MOBILE.png
+            b180-evidence/B180_CHROMIUM_QA.json
+          if-no-files-found: warn
+          retention-days: 14
