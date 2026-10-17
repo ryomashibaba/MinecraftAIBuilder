@@ -61,12 +61,12 @@ export function normalizeB171Receipt(receipt){
  }
  if(receipt.source==='B134'){
   position=[d.coords.x,d.coords.y,d.coords.z];
-  expected=createB134Commands(d.coords);
+  expected=createB134Commands(position.join(' '));
   guard(d.results.every((v,i)=>v?.command===expected[i]&&
    classResult.includes(v.classification)&&
    v.response&&typeof v.response==='object'),'B134_COMMANDS_OR_RESPONSES');
   raw=d.results.map(x=>x.response);
-  replayed=evaluateB134Results(d.coords,raw);
+  replayed=evaluateB134Results(position.join(' '),raw);
   guard(same(replayed.results,d.results)&&
    replayed.outcome===d.outcome&&
    replayed.provisionalStateValue===d.provisionalStateValue,
