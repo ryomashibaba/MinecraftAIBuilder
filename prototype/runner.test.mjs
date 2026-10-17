@@ -37,7 +37,7 @@ const mkWorld=()=>{
            const k=[x,y,z].join(' ');
            if(!blocks.has(k)){blocks.set(k,m[7]);n++;}
          }
-     return n?positive:negative;
+     return n?{statusCode:0,successCount:n}:negative;
    }
    m=/^fill (-?\d+) (-?\d+) (-?\d+) (-?\d+) (-?\d+) (-?\d+) minecraft:air replace (minecraft:\w+)$/.exec(cmd);
    if(m){
@@ -48,7 +48,7 @@ const mkWorld=()=>{
            const k=[x,y,z].join(' ');
            if(blocks.get(k)===m[7]){blocks.delete(k);n++;}
          }
-     return n?positive:negative;
+     return n?{statusCode:0,successCount:n}:negative;
    }
    throw Error('MOCK_REJECTED '+cmd);
  }};
