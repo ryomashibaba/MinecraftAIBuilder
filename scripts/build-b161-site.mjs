@@ -84,7 +84,8 @@ export function renderB161Html(bundle,template){
  need(html.includes(hook),'NO_SCENE_HOOK');
  html=html.replace(hook,[
   ' const s=scene();',
-  ' const r=s.routeReview?.targets[0],proof=s.adaptiveReview;',
+  ' const isDoppler=s.id===\"doppler-switchback-terminal-r0\"||s.id===\"doppler-switchback-terminal-generated-detour\"||s.id===\"doppler-switchback-terminal-adaptive-r2\";',
+  ' const r=isDoppler?s.routeReview?.targets[0]:null,proof=isDoppler?s.adaptiveReview:null;',
   ' el("b161-status").textContent=r?',
   '  "2×2検証経路："+r.status+" / "+(r.steps===null?"通路なし":r.steps+"水平移動")+',
   '  (proof?" / A*中心線"+proof.centerlineSteps+"移動・曲がり"+proof.centerlineTurns+"回・"+proof.searchExpansionCount+"状態探索":" / 従来設計")+',
@@ -96,7 +97,7 @@ export function renderB161Html(bundle,template){
  need(html.includes(draw),'DRAW_HOOK');
  html=html.replace(draw,[
   ' ctx.globalAlpha=1;',
-  ' const route=s.routeReview?.targets[0]?.path;',
+  ' const route=isDoppler?s.routeReview?.targets[0]?.path:null;',
   ' if(el("b161-route").checked&&route?.length){',
   '  ctx.save();ctx.strokeStyle="#b1ffe5";ctx.lineWidth=3;ctx.lineJoin="round";',
   '  ctx.beginPath();route.forEach((p,i)=>{const q=project(p[0]+1,p[1]+.15,p[2]+1);',
