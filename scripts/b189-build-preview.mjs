@@ -17,9 +17,9 @@ const out=path.join(root,'b189-evidence');
 const H=x=>createHash('sha256').update(x).digest('hex');
 const check=(x,reason)=>{if(!x)throw Error('B189_PREVIEW_'+reason)};
 export function buildB189Preview({dir=out}={}){
- const {parent,annex,manifest,report}=buildB189();
+ const {parent,annex,manifest:multimodel,report}=buildB189();
  const compiled=parent.compiled,design=annex.design;
- const districts=manifest.scenes.slice(1,4);
+ const districts=multimodel.scenes.slice(1,4);
  const districtScenes=districts.map((d,i)=>{
   const ranges=[[0,42],[43,82],[83,123]],range=ranges[i];
   const sub=compiled.primitives.filter(p=>p[0]>=range[0]&&p[0]<=range[1]);
