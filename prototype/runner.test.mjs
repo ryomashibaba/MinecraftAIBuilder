@@ -31,19 +31,23 @@ const mkWorld=()=>{
    m=/^fill (-?\d+) (-?\d+) (-?\d+) (-?\d+) (-?\d+) (-?\d+) (minecraft:\w+) keep$/.exec(cmd);
    if(m){
      let n=0;
-     for(let x=Number(m[1]);x<=Number(m[4]);x++){
-       const k=[x,m[2],m[3]].join(' ');
-       if(!blocks.has(k)){blocks.set(k,m[7]);n++;}
-     }
+     for(let y=Number(m[2]);y<=Number(m[5]);y++)
+       for(let z=Number(m[3]);z<=Number(m[6]);z++)
+         for(let x=Number(m[1]);x<=Number(m[4]);x++){
+           const k=[x,y,z].join(' ');
+           if(!blocks.has(k)){blocks.set(k,m[7]);n++;}
+         }
      return n?positive:negative;
    }
    m=/^fill (-?\d+) (-?\d+) (-?\d+) (-?\d+) (-?\d+) (-?\d+) minecraft:air replace (minecraft:\w+)$/.exec(cmd);
    if(m){
      let n=0;
-     for(let x=Number(m[1]);x<=Number(m[4]);x++){
-       const k=[x,m[2],m[3]].join(' ');
-       if(blocks.get(k)===m[7]){blocks.delete(k);n++;}
-     }
+     for(let y=Number(m[2]);y<=Number(m[5]);y++)
+       for(let z=Number(m[3]);z<=Number(m[6]);z++)
+         for(let x=Number(m[1]);x<=Number(m[4]);x++){
+           const k=[x,y,z].join(' ');
+           if(blocks.get(k)===m[7]){blocks.delete(k);n++;}
+         }
      return n?positive:negative;
    }
    throw Error('MOCK_REJECTED '+cmd);
