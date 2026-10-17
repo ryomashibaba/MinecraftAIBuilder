@@ -20,7 +20,7 @@ const check=(x,reason)=>{if(!x)throw Error('B197_PREVIEW_'+reason)};
 export function buildB197Preview({dir=out}={}){
  const upgraded=buildB197();
  const {previous,design:orbitalDesign,compiled:orbitalCompiled,
-  readOnlyScene:fiveCityScene,report}=buildB196();
+  readOnlyScene:fiveCityScene,report,modelViews:originalFiveModels}=buildB196();
  const {historical,design:transitDesign,compiled:transitCompiled,
   readOnlyScene:fourCityScene,report:oldReport}=previous;
  const {b192,models,readOnlyScene,junctions}=historical;
@@ -110,7 +110,7 @@ export function buildB197Preview({dir=out}={}){
   {...g,end:upgradedSurf.length,
    sourceVoxelCount:upgraded.compiled.primitives.length}:
   {...g,start:g.start+deltaSurface,end:g.end+deltaSurface});
- const others=previous.modelViews.slice(1).flatMap(m=>m.primitives);
+ const others=originalFiveModels.slice(1).flatMap(m=>m.primitives);
  const upgradeFull=[...upgraded.compiled.primitives,...others];
  const seen=new Set();
  for(const p of upgradeFull){
