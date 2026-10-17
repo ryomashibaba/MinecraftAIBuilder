@@ -48,10 +48,10 @@ export function aerialSwitchbackParts(){
   // Four giant side rails, visually communicating elevation and structure,
   // are placed outside the actual 2-wide stair support columns.
   a.push(
-   beam(name+'-side-stringer',[f.x-1,f.deck+1,34],
-    [f.x-1,f.deck+5,44],'glow'),
-   beam(name+'-outer-stringer',[f.x+6,f.deck+1,34],
-    [f.x+6,f.deck+5,44],'accent')
+   beam(name+'-side-stringer',[f.x-1,f.deck+1,45],
+    [f.x-1,f.deck+5,47],'glow'),
+   beam(name+'-outer-stringer',[f.x+6,f.deck+1,45],
+    [f.x+6,f.deck+5,47],'accent')
   );
  }
  // Architectural skylines: three immense hollow glazed façade lanterns,
