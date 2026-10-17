@@ -209,7 +209,7 @@ export function actualStairRegion(scene,wing){
   p[1]>=reg.y[0]&&p[1]<reg.y[1]).map(
    p=>box(p[0],p[1],p[2],p[0]+1,p[1]+1,p[2]+1));
  return {wing,world:createCollisionWorld(solids,{region:reg}),
-  start:[x,19,z-2],goal:[x,26,z+13]};
+  start:[x,19,z],goal:[x,26,z+15]};
 }
 export function runCollisionLab(original){
  const originalString=JSON.stringify(original);
