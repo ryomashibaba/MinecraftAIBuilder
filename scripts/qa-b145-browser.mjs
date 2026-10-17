@@ -37,7 +37,8 @@ const pages=[
  {name:'B162-revised',url:'ai/revised-bridge/index.html',minimum:30,expected:30},
  {name:'B163-portfolio',url:'ai/corridor-options/index.html',minimum:33,expected:33},
  {name:'B164-orbital-crown',url:'ai/orbital-crown/index.html',minimum:34,expected:34},
- {name:'B165-orbital-interiors',url:'ai/orbital-interiors/index.html',minimum:35,expected:35}
+ {name:'B165-orbital-interiors',url:'ai/orbital-interiors/index.html',minimum:35,expected:35},
+ {name:'B166-interlevel',url:'ai/interlevel-navigation/index.html',minimum:36,expected:36}
 ];
 const browser=await chromium.launch({headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
 const results=[];
@@ -93,6 +94,25 @@ async function inspect(info,mobile){
   await page.waitForTimeout(950);
   const last=await page.locator('#building').inputValue();
   if(last!==String(options-1))fail(info.name+'_MODEL_SELECTION_FAILED');
+  if(info.name==='B166-interlevel'){
+   const models=page.locator('#building'),status=page.locator('#b166-status');
+   await models.selectOption('34');await page.waitForTimeout(180);
+   if(!(await status.innerText()).includes('36番目の多層通路モデル'))
+    fail('B166_PREDECESSOR_LABEL_MISMATCH');
+   await models.selectOption('35');await page.waitForTimeout(450);
+   const text=await status.innerText();
+   for(const fragment of ['15移動','7段上昇','北48移動','221地点',
+    '南71移動','290地点','127移動']){
+    if(!text.includes(fragment))fail('B166_NETWORK_NOT_RENDERED_'+fragment+'_'+text);
+   }
+   const overlay=page.locator('#b166-route');
+   if(!await overlay.isChecked())fail('B166_PATHS_NOT_DEFAULT_VISIBLE');
+   await overlay.uncheck();await overlay.check();
+   await models.selectOption('32');await page.waitForTimeout(130);
+   if(!(await status.innerText()).includes('36番目の多層通路モデル'))
+    fail('B166_OLD_SCENE_FALSE_NETWORK');
+   await models.selectOption('35');
+  }
   if(info.name==='B165-orbital-interiors'){
    const picker=page.locator('#building'),status=page.locator('#b165-status');
    await picker.selectOption('33');await page.waitForTimeout(230);
