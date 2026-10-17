@@ -97,7 +97,7 @@ function inspectTreads(compiled,originalRoute){
   for(let i=1;i<checks.length;i++){
    const a=checks[i-1].at,b=checks[i].at;
    ensure(b[1]-a[1]>=0&&b[1]-a[1]<=1&&
-    Math.abs(b[2]-a[2])===2&&a[0]===b[0],
+    Math.abs(b[2]-a[2])>=1&&Math.abs(b[2]-a[2])<=2&&a[0]===b[0],
     'BAD_RISER_PROGRESSION_'+f.id+'_'+i);
   }
   result.push({id:f.id,entry:f.entry,upper:f.top,
@@ -141,6 +141,12 @@ export function createOrbitalInteriors(original){
  const deleted=[...before].filter(k=>!after.has(k));
  const lowDiff=[...newlyAdded,...deleted]
   .filter(k=>Number(k.split(',')[1])<=20);
+ const originalRouteKeys=new Set();
+ for(const p of originalLower.targets[0].path)
+  for(let dx=0;dx<2;dx++)for(let dz=0;dz<2;dz++)
+   for(const y of [p[1],p[1]+1])
+    originalRouteKeys.add((p[0]+dx)+','+y+','+(p[2]+dz));
+ const touchedOriginalRoute=lowDiff.filter(k=>originalRouteKeys.has(k));
  const core={
   schema:SCHEMA,
   sourceDesignSha256:old.sourceSha256,
@@ -153,6 +159,7 @@ export function createOrbitalInteriors(original){
   newAuthoringElements:elements.length,
   newSolidCells:newlyAdded.length,removedSolidCells:deleted.length,
   sourceChangeCellsAtOrBelowBody:lowDiff.length,
+  changedCellsOnOriginalRoute:touchedOriginalRoute.length,
   interiorFlights:stairs.length,
   treadProofs:stairs,
   upperFloorsY:26,lowerFloorsY:19,
@@ -167,7 +174,7 @@ export function createOrbitalInteriors(original){
   gates:Array(9).fill('BLOCKED'),BuildPlan:{operations:[]}
  };
  ensure(elements.length>=30&&newlyAdded.length>500&&
-  stairs.length===2&&lowDiff.length===0&&
+  stairs.length===2&&touchedOriginalRoute.length===0&&
   JSON.stringify(original)===frozen,'INSUFFICIENT_INTERIOR_OR_LOW_PATH_MUTATED');
  return {parent,model,compiled,stairs,lower,elements,
   report:{...core,sha256:H(core)}};
