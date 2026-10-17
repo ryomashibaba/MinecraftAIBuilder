@@ -165,9 +165,10 @@ function finishDecks(parts,p,baseY){
  }
  return shape;
 }
-export function planAdaptiveSkybridge(design,params=DEFAULT_ROUTE,{supportBaseY=6}={}){
+export function planAdaptiveSkybridge(design,params=DEFAULT_ROUTE,{supportBaseY=6,finishedId='doppler-switchback-terminal-adaptive-r2'}={}){
  validateParams(design,params);
- assert(Number.isSafeInteger(supportBaseY)&&supportBaseY>=0&&
+ assert(typeof finishedId==='string'&&/^[a-z][a-z0-9-]{2,47}$/.test(finishedId)&&
+  Number.isSafeInteger(supportBaseY)&&supportBaseY>=0&&
   supportBaseY<params.start[1]-3,'SUPPORT_SETTING');
  const source=compileDesign(design);
  assert(verifyCompiled(design,source)&&source.designOnly===true&&
@@ -201,7 +202,7 @@ export function planAdaptiveSkybridge(design,params=DEFAULT_ROUTE,{supportBaseY=
  const finishing=finishDecks(floors,params,supportBaseY);
  assert(finishing.length>=4,'NO_ARCHITECTURAL_COMPONENTS');
  const finished={...structuredClone(candidate),
-  id:'doppler-switchback-terminal-adaptive-r2',
+  id:finishedId,
   title:'DOPPLER — 最短候補探索による適応空中回廊 R2',
   brief:'障害物を避ける複数回曲がる自動回廊。全セル通路と頭上空間を確認した設計案。橋梁強度・転落防止・Minecraft実機衝突・施工は未認証。',
   elements:[...structuredClone(candidate.elements),...finishing]};

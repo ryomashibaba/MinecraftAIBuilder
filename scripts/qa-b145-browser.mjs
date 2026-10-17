@@ -33,7 +33,8 @@ const pages=[
  {name:'B158-helios',url:'ai/helios/index.html',minimum:23,expected:23},
  {name:'B159-polaris',url:'ai/polaris/index.html',minimum:25,expected:25},
  {name:'B160-doppler',url:'ai/doppler/index.html',minimum:27,expected:27},
- {name:'B161-adaptive',url:'ai/adaptive-route/index.html',minimum:28,expected:28}
+ {name:'B161-adaptive',url:'ai/adaptive-route/index.html',minimum:28,expected:28},
+ {name:'B162-revised',url:'ai/revised-bridge/index.html',minimum:30,expected:30}
 ];
 const browser=await chromium.launch({headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
 const results=[];
@@ -89,6 +90,32 @@ async function inspect(info,mobile){
   await page.waitForTimeout(950);
   const last=await page.locator('#building').inputValue();
   if(last!==String(options-1))fail(info.name+'_MODEL_SELECTION_FAILED');
+  if(info.name==='B162-revised'){
+   const picker=page.locator('#building'),status=page.locator('#b162-status');
+   await picker.selectOption('27');await page.waitForTimeout(250);
+   const prior=await status.innerText();
+   if(!prior.includes('PASS_FLAT_FOOTPRINT_GEOMETRY')||
+      !prior.includes('101水平移動'))
+    fail('B162_ORIGINAL_ROUTE_MISSING_'+prior);
+   await picker.selectOption('28');await page.waitForTimeout(280);
+   const blocked=await status.innerText();
+   if(!blocked.includes('FOOTPRINT_UNREACHABLE')||
+      !blocked.includes('接続されていない'))
+    fail('B162_CHANGED_BUILDING_NOT_DISCONNECTED_'+blocked);
+   await picker.selectOption('29');await page.waitForTimeout(380);
+   const recovered=await status.innerText();
+   if(!recovered.includes('PASS_FLAT_FOOTPRINT_GEOMETRY')||
+      !recovered.includes('113水平移動')||
+      !recovered.includes('旧回廊の遮断'))
+    fail('B162_NEW_ROUTE_MISSING_'+recovered);
+   const overlay=page.locator('#b162-route');
+   if(!await overlay.isChecked())fail('B162_ROUTE_HIDDEN');
+   await overlay.uncheck();await overlay.check();
+   await picker.selectOption('24');await page.waitForTimeout(170);
+   if(!(await status.innerText()).includes('B162はDOPPLER'))
+    fail('B162_UNRELATED_MODEL_FALSE_STATUS');
+   await picker.selectOption('29');
+  }
   if(info.name==='B161-adaptive'){
    const buildings=page.locator('#building'),status=page.locator('#b161-status');
    await buildings.selectOption('25');await page.waitForTimeout(280);
