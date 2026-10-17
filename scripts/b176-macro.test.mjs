@@ -38,7 +38,7 @@ test('2-wide support + clear 2-cell headspace survives all four flat routes',()=
  const r=buildAuroraCathedral();
  const cells=new Set(r.compiled.primitives.map(a=>a.slice(0,3).join(',')));
  for(const [y,z,a,b] of [[14,7,10,112],[26,20,12,110],
-                          [60,3,12,112],[57,43,12,118]]){
+                          [60,3,12,112],[57,45,12,118]]){
   for(let x=a;x<=b+1;x++)for(let dz=0;dz<2;dz++){
    assert(cells.has([x,y-1,z+dz].join(',')));
    assert(!cells.has([x,y,z+dz].join(',')));

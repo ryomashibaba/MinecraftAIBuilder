@@ -47,9 +47,9 @@ export function auroraParts(){
   s.id%3===0?'accent':'metal')));
  // A genuine, rear-of-building multistorey elevated public artery.
  e.push(
-  box('b176-rear-public-promenade',[10,56,39],[110,1,7],'concrete'),
+  box('b176-rear-public-promenade',[10,56,39],[110,1,9],'concrete'),
   box('b176-rear-edge-light',[10,57,37],[110,2,2],'glow'),
-  box('b176-rear-glass-parapet',[10,57,46],[110,2,2],'glass')
+  box('b176-rear-glass-parapet',[10,57,48],[110,2,2],'glass')
  );
  // Three enormous hollow glazed terminal lanterns; no miniature furniture.
  for(const zone of [
@@ -153,17 +153,17 @@ export function analyzeAuroraTransit(scene){
  // terminal flight's top tread is at identical standing Y57 and Z40..42.
  for(let x=118;x<=120;x++)checkStation([x,57,40],'new-gallery-link-'+x);
  // The final stair at Z40..42 reaches the 100+ step long passage on
- // Z43..44 via a TWO-WIDE horizontal Z-turn at X118 on the open terrace.
- for(let z=40;z<=43;z++)checkStation([118,57,z],'promenade-z-turn-'+z);
+ // Z45..46 via a TWO-WIDE horizontal Z-turn at X118 on the open terrace.
+ for(let z=40;z<=45;z++)checkStation([118,57,z],'promenade-z-turn-'+z);
  let travel=0;
  const errors=[];
  for(let x=12;x<=117+1;x++){
   for(let dx=0;dx<2;dx++)for(let dz=0;dz<2;dz++){
-   if(!floor(x+dx,57,43+dz))
-    errors.push('floor:'+K(x+dx,56,43+dz));
+   if(!floor(x+dx,57,45+dz))
+    errors.push('floor:'+K(x+dx,56,45+dz));
    for(let dy=0;dy<2;dy++){
-    if(occ.has(K(x+dx,57+dy,43+dz)))
-     errors.push('body:'+K(x+dx,57+dy,43+dz));
+    if(occ.has(K(x+dx,57+dy,45+dz)))
+     errors.push('body:'+K(x+dx,57+dy,45+dz));
    }
   }
   travel++;
