@@ -8,6 +8,7 @@ on:
       - 'scripts/b198b-quality-benchmark.mjs'
       - 'scripts/b198b-quality.test.mjs'
       - 'scripts/b198b-offline-probe.mjs'
+      - 'scripts/b198b-browser-qa.mjs'
       - '.github/workflows/b198b-fast.yml'
   pull_request:
     paths:
@@ -16,6 +17,7 @@ on:
       - 'scripts/b198b-quality-benchmark.mjs'
       - 'scripts/b198b-quality.test.mjs'
       - 'scripts/b198b-offline-probe.mjs'
+      - 'scripts/b198b-browser-qa.mjs'
       - '.github/workflows/b198b-fast.yml'
 permissions:
   contents: read
@@ -43,5 +45,32 @@ jobs:
         with:
           name: B198B-Quality-Evaluation-Not-Live-Inference-Test-FIXTURE
           path: b198b-evidence/
+          if-no-files-found: warn
+          retention-days: 14
+
+  playwright-actual-source-preview:
+    needs: [source-quality-benchmark]
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Install self-contained Chromium reviewer
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Generate actual compiled independent mock-architecture preview scenes
+        run: node scripts/b198b-offline-probe.mjs
+      - name: Validate source-only desktop/mobile canvas, distinct scenes, and cutaway restore
+        run: node scripts/b198b-browser-qa.mjs
+      - name: Archive true Chrome screenshots (FIXTURE ONLY, not proof of LLM reasoning)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: B198B-Real-Chromium-3D-Viewer-Fixture-Only
+          path: |
+            b198b-evidence/B198B_*_SOURCE_VIEW.png
+            b198b-evidence/B198B_CHROMIUM_FIXTURE_QA.json
           if-no-files-found: warn
           retention-days: 14
