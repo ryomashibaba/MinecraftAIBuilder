@@ -1,0 +1,66 @@
+name: ARK-LITE-P0 Education test-world prototype
+on:
+  push:
+    branches:
+      - 'feature/prototype-*'
+    paths:
+      - 'prototype/**'
+      - '.github/workflows/ark-lite-p0.yml'
+  pull_request:
+    paths:
+      - 'prototype/**'
+      - '.github/workflows/ark-lite-p0.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline-ark-lite-and-package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax and isolated mock-world regression
+        run: |
+          node --check prototype/ark-lite.mjs
+          node --check prototype/runner.mjs
+          node --check prototype/runner.test.mjs
+          node --test prototype/runner.test.mjs
+      - name: Emit deterministic block counts and plan digest
+        run: node prototype/runner.mjs --inspect | tee prototype/ARK_LITE_PLAN_REPORT.json
+      - name: Verify inherited original safety checks remain blocked
+        run: node scripts/verify-safety.mjs
+      - name: Create complete Windows single-launch package
+        uses: actions/upload-artifact@v4
+        with:
+          name: ARK-LITE-P0-Windows-Test-World
+          path: |
+            prototype/ark-lite.mjs
+            prototype/runner.mjs
+            prototype/package.json
+            prototype/START_ARK_LITE.cmd
+            prototype/README_JA.md
+            prototype/ARK_LITE_PLAN_REPORT.json
+          retention-days: 30
+          if-no-files-found: error
+  windows-runtime-api:
+    needs: offline-ark-lite-and-package
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Windows syntax check and pinned socket-be API
+        shell: pwsh
+        working-directory: prototype
+        run: |
+          npm.cmd install --ignore-scripts --no-audit --no-fund --omit=dev
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node --input-type=module -e "import('socket-be').then(m=>{if(typeof m.Server!=='function'||!m.ServerEvent?.WorldAdd){process.exit(2)} console.log('P0_SOCKET_BE_API_OK')})"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node runner.mjs --inspect
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
