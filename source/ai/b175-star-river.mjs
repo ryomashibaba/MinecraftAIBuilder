@@ -19,6 +19,7 @@ const beam=(id,start,end,material='metal',thickness=1)=>({
  id,shape:'beam',mode:'add',start,end,thickness,material});
 const tor=(id,center,majorRadius,tubeRadius,material='glow')=>({
  id,shape:'torus',mode:'add',center,axis:'z',majorRadius,tubeRadius,material});
+const cut=(id,origin,size)=>({id,shape:'box',mode:'cut',origin,size});
 
 /** New volumetric architecture: a >100-block sky promenade and three canopy plazas. */
 export function starRiverParts(){
@@ -72,7 +73,12 @@ export function starRiverParts(){
   beam('b175-front-bridge-west',[37,54,8],[49,68,11],'metal',2),
   beam('b175-front-bridge-east',[88,54,8],[76,68,11],'metal',2),
   beam('b175-west-tower-web',[16,48,3],[31,71,6],'accent'),
-  beam('b175-east-tower-web',[109,48,3],[94,71,6],'accent')
+  beam('b175-east-tower-web',[109,48,3],[94,71,6],'accent'),
+  // One explicitly allowed offline correction to the B174 landing pier:
+  // X72/Y39/Z46..48 occludes the next-to-last tread's body envelope.
+  // This conceptual design CUT is handled by the versioned compositor;
+  // never interpreted as a Minecraft setblock/fill operation.
+  cut('b175-landing-body-clearance',[72,39,46],[1,1,3])
  );
  yes(e.length>=50&&e.length<160,'MODULE_ELEMENT_COUNT');
  yes(new Set(e.map(x=>x.id)).size===e.length,'DUPLICATE_ELEMENTS');
@@ -162,6 +168,21 @@ function checkHistoricRoutes(scene){
 }
 function joinParentFirst(old,add,design){
  const cells=new Map(old.primitives.map(p=>[K(p[0],p[1],p[2]),p]));
+ // The only cross-module deletion is an explicit, three-cell local
+ // design clearance at the transition into the inherited high arrival pier.
+ // The frozen parent remains unchanged; no protected lower/upper route
+ // voxels or Minecraft world state are touched.
+ const cuts=design.elements.filter(x=>x.mode==='cut');
+ yes(cuts.length===1&&cuts[0].id==='b175-landing-body-clearance'&&
+  JSON.stringify(cuts[0].origin)==='[72,39,46]'&&
+  JSON.stringify(cuts[0].size)==='[1,1,3]',
+  'ONLY_WHITELISTED_OFFLINE_CUT_ALLOWED');
+ let removedParentCells=0;
+ for(let z=46;z<=48;z++){
+  const k=K(72,39,z);
+  yes(cells.delete(k),'LANDING_CLEARANCE_PARENT_SOURCE_MISMATCH_'+z);
+  removedParentCells++;
+ }
  let added=0,overlap=0;
  for(const p of add.primitives){
   const k=K(p[0],p[1],p[2]);
@@ -193,7 +214,7 @@ function joinParentFirst(old,add,design){
    moduleCount:3,designOperations:[
     ...old.stats.designOperations,
     ...add.stats.designOperations.map(a=>({...a,module:design.id}))]}};
- return {scene,unique:added,overlap};
+ return {scene,unique:added,overlap,removedParentCells};
 }
 export function buildStarRiver(){
  const previous=buildSkycanyon();
@@ -211,7 +232,8 @@ export function buildStarRiver(){
   parentGeometrySha256:previous.compiled.geometrySha256,
   addonSourceSha256:addon.sourceSha256,
   parentVoxelCount:previous.compiled.primitives.length,
-  addedUnique3dCells:merged.unique,unmodifiedParentOverlap:merged.overlap,
+  addedUnique3dCells:merged.unique,removedDesignCells:merged.removedParentCells,
+  unmodifiedParentOverlap:merged.overlap,
   real3dCells:merged.scene.primitives.length,
   inheritedAuthoredElements:previous.report.totalAuthoredElements,
   newAuthoredElements:design.elements.length,
@@ -240,7 +262,8 @@ export function verifyStarRiver(r){
   r.newAuthoredElements<=160&&
   r.totalAuthoredElements===r.inheritedAuthoredElements+r.newAuthoredElements&&
   r.addedUnique3dCells>=2000&&
-  r.real3dCells===r.parentVoxelCount+r.addedUnique3dCells&&
+  r.removedDesignCells===3&&
+  r.real3dCells===r.parentVoxelCount+r.addedUnique3dCells-r.removedDesignCells&&
   r.sourceSha256?.length===64&&r.geometrySha256?.length===64&&
   r.geometrySha256!==r.parentGeometrySha256&&
   r.sourceGeometryAscentStations===15&&r.inspectedMixedHeightTransitions===14&&
