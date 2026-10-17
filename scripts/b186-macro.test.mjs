@@ -14,7 +14,8 @@ test('14 independent strictly limited B143 modules add new real volumetric skyli
  assert.equal(s.design.elements.length,crownObservatoryElements().length);
  assert(s.design.elements.length>=90&&s.design.elements.length<=160);
  assert(r.added3dCells>=3000);
- assert.equal(r.total3dCells,123583+r.added3dCells);
+ assert(r.upperBodyAirRemoved>=100&&r.upperBodyAirRemoved<=3200);
+ assert.equal(r.total3dCells,123583+r.added3dCells-r.upperBodyAirRemoved);
  assert(r.total3dCells<=MAX_CELLS);
  assert.equal(r.remaining3dCellBudget,MAX_CELLS-r.total3dCells);
  assert.notEqual(r.geometrySha256,r.parentGeometrySha256);
