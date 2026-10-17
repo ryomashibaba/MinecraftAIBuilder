@@ -1,0 +1,47 @@
+name: B162 fast geometry and safety gate
+on:
+  push:
+    branches:
+      - feature/b162-adaptive-route-revision-and-stale-path-rejection
+    paths:
+      - 'source/ai/b161-adaptive-skybridge.mjs'
+      - 'source/ai/b162-revision-replan.mjs'
+      - 'scripts/b162-fast-probe.mjs'
+      - 'designs/ai/interiors/doppler-switchback-terminal-r0.json'
+      - '.github/workflows/b162-fast.yml'
+  pull_request:
+    paths:
+      - 'source/ai/b161-adaptive-skybridge.mjs'
+      - 'source/ai/b162-revision-replan.mjs'
+      - 'scripts/b162-fast-probe.mjs'
+      - 'designs/ai/interiors/doppler-switchback-terminal-r0.json'
+      - '.github/workflows/b162-fast.yml'
+permissions:
+  contents: read
+concurrency:
+  group: b162-fast-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  geometric-revision-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate focused geometry and source syntax
+        run: |
+          node --check source/ai/b161-adaptive-skybridge.mjs
+          node --check source/ai/b162-revision-replan.mjs
+          node --check scripts/b162-fast-probe.mjs
+      - name: Verify stale 101-cell path is invalid and fresh 115-cell path avoids revision tower
+        run: node scripts/b162-fast-probe.mjs
+      - name: Store no-world-write proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: B162-Rapid-Replanning-Proof
+          path: b162-fast-evidence/B162_FAST_GATE.json
+          retention-days: 14
+          if-no-files-found: warn
