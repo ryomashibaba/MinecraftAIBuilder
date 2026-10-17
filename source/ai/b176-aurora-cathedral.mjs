@@ -127,8 +127,9 @@ export function analyzeAuroraTransit(scene){
   guard(b-y===1,'RISER_NOT_ONE_'+i);
   let valid=0;
   if(a-x===3&&z===c){
-   // The last two columns of lower tread must have clear standable heads.
-   for(let dx=1;dx<=2;dx++)checkStation([x+dx,y,z],'x-seam-'+i+'-'+dx);
+   // Check two *complete* 2x2 lower-staging footprints; do not falsely
+   // require headspace spanning the taller next tread's solid riser.
+   for(let dx=0;dx<=1;dx++)checkStation([x+dx,y,z],'x-seam-'+i+'-'+dx);
    for(let dz=0;dz<2;dz++){
     guard(floor(x+2,y,z+dz),'LAST_LOWER_SUPPORT_'+i);
     guard(floor(a,b,c+dz),'NEXT_HIGHER_SUPPORT_'+i);
@@ -136,7 +137,7 @@ export function analyzeAuroraTransit(scene){
    valid=2;
   }else if(a===x&&z-c===3){
    // Turn on two orthogonal axes at the far eastern sky-tower.
-   for(let dz=1;dz<=2;dz++)checkStation([x,y,z+dz],'z-seam-'+i+'-'+dz);
+   for(let dz=0;dz<=1;dz++)checkStation([x,y,z+dz],'z-seam-'+i+'-'+dz);
    for(let dx=0;dx<2;dx++){
     guard(floor(x+dx,y,z+2),'LAST_LOWER_SUPPORT_'+i);
     guard(floor(a+dx,b,c+2),'NEXT_HIGHER_SUPPORT_'+i);
