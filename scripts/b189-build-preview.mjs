@@ -24,8 +24,8 @@ export function buildB189Preview({dir=out}={}){
   const ranges=[[0,42],[43,82],[83,123]],range=ranges[i];
   const sub=compiled.primitives.filter(p=>p[0]>=range[0]&&p[0]<=range[1]);
   check(sub.length===d.voxels,'DISTRICT_VOXEL_MISMATCH_'+d.id);
-  const min=(axis)=>Math.min(...sub.map(p=>p[axis]));
-  const max=(axis)=>Math.max(...sub.map(p=>p[axis]));
+  const min=(axis)=>sub.reduce((a,p)=>Math.min(a,p[axis]),Infinity);
+  const max=(axis)=>sub.reduce((a,p)=>Math.max(a,p[axis]),-Infinity);
   const counts=Object.fromEntries(MATERIALS.map((m,k)=>[m,
    sub.filter(p=>p[3]===k).length]));
   const bounds={minX:min(0),maxX:max(0),minY:min(1),maxY:max(1),
@@ -122,8 +122,8 @@ export function buildB189Preview({dir=out}={}){
   schema:'minecraftaibuilder-b189-3d-preview-v1',
   modelId:compiled.id,sourceSha256:compiled.sourceSha256,
   geometrySha256:compiled.geometrySha256,
-  numberOfActualNew3dScenes:1,
-  newConceptModelTotalOutsideHistoric36:37,
+  numberOfActualNew3dScenes:2,
+  newConceptModelTotalOutsideHistoric36:38,
   moduleCount:17,annexOccupiedCells:report.annexOccupiedCells,viewerSceneCount:5,
   real3dCells:compiled.primitives.length,annexReal3dCells:annex.compiled.primitives.length,
   surfaceCells:surface.length,authoredElements:parent.report.totalAuthoredElements+annex.design.elements.length,
