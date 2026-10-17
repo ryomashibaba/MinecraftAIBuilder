@@ -88,8 +88,22 @@ export function createCorridorPortfolio(original){
    a.actuallyOccupiedCellsAdded<b.actuallyOccupiedCellsAdded);
  const pareto=metrics.filter(a=>!metrics.some(b=>b!==a&&dominates(b,a)))
   .map(m=>m.profileId);
+ // Width is a meaningful positive objective for the broader portfolio:
+ // a more spacious corridor is NOT considered dominated by a smaller one
+ // solely because the smaller one has fewer occupied cells.
+ const byAllFour=(a,b)=>a.flatMoves<=b.flatMoves&&
+  a.directionChanges<=b.directionChanges&&
+  a.actuallyOccupiedCellsAdded<=b.actuallyOccupiedCellsAdded&&
+  a.corridorDesignWidth>=b.corridorDesignWidth&&
+  (a.flatMoves<b.flatMoves||a.directionChanges<b.directionChanges||
+   a.actuallyOccupiedCellsAdded<b.actuallyOccupiedCellsAdded||
+   a.corridorDesignWidth>b.corridorDesignWidth);
+ const widthAwarePareto=metrics.filter(a=>!metrics.some(b=>b!==a&&byAllFour(b,a)))
+  .map(m=>m.profileId);
  const minimum=(prop)=>[...metrics].sort((a,b)=>
-  stableCompare(a[prop],b[prop])||a.profileId.localeCompare(b.profileId))[0].profileId;
+  stableCompare(a[prop],b[prop])||
+  stableCompare(a.actuallyOccupiedCellsAdded,b.actuallyOccupiedCellsAdded)||
+  a.profileId.localeCompare(b.profileId))[0].profileId;
  const maximum=(prop)=>[...metrics].sort((a,b)=>
   stableCompare(b[prop],a[prop])||a.profileId.localeCompare(b.profileId))[0].profileId;
  const bestFor={
@@ -106,7 +120,7 @@ export function createCorridorPortfolio(original){
   pathQualityMetrics:['flatMoves','directionChanges','actuallyOccupiedCellsAdded'],
   corridorWidthIsDesignParameterNotPlayerWidthCertification:true,
   optionCount:candidates.length,options:metrics,
-  paretoByRouteAndSolids:pareto,bestFor,
+  paretoByRouteAndSolids:pareto,paretoIncludingCorridorWidth:widthAwarePareto,bestFor,
   immutableOriginal:true,independentCandidateGeometry:true,
   wholeFootprintReplayedAfterFinishing:true,
   structuralStrengthCertified:false,
