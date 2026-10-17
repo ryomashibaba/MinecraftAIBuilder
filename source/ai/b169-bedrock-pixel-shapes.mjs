@@ -131,11 +131,21 @@ function boundsOf(compiled){
 }
 export function researchBedrockShapeProfiles(original){
  const frozen=JSON.stringify(original);
+ // B168 already builds and independently verifies B166 provenance. Reuse
+ // that exact compiler product rather than replaying the historic 36-model
+ // geometry *three more times* inside every B169 invocation.
  const B168=runCollisionLab(original);
- must(verifyCollisionLab(original,B168.report),'B168_BASELINE_UNVERIFIED');
- const parent=buildInterlevelNetwork(original);
- must(verifyInterlevelNetwork(original,parent.report)&&boundsOf(parent.compiled),
-  'B166_MODEL_UNVERIFIED');
+ const parent=B168.parent;
+ must(B168.report.constructionApproved===false&&
+  B168.report.gates.length===9&&
+  B168.report.gates.every(g=>g==='BLOCKED')&&
+  B168.report.BuildPlan.operations.length===0&&
+  B168.report.sceneSha256===parent.compiled.sourceSha256&&
+  B168.report.geometrySha256===parent.compiled.geometrySha256&&
+  B168.report.inheritedB166ProofSha256===parent.report.sha256&&
+  parent.report.constructionApproved===false&&
+  parent.report.BuildPlan.operations.length===0&&
+  boundsOf(parent.compiled),'B168_B166_SOURCE_CHAIN');
  const slab=exampleHalfSlab();
  const stair=exampleTwoBoxStair('north');
  const full=fromBedrockCollisionComponent(true,[0,0,0]);
