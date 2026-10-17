@@ -43,10 +43,10 @@ export function panoramaCrownElements(){
    // Three much larger 21 x 12 rooftop observation parks, physically
    // joined to already source-supported B178 portal arrival Z18.
    box(p+'-grand-skypark-deck',[cx-10,74,17],[21,1,12],'wood'),
-   box(p+'-outer-terrace-lip',[cx-10,73,27],[21,1,3],'accent'),
-   box(p+'-hanging-foundation-ridge',[cx-10,71,29],[21,1,5],'metal'),
+   box(p+'-outer-terrace-lip',[cx-10,73,22],[21,1,2],'accent'),
+   box(p+'-hanging-foundation-ridge',[cx-10,69,22],[21,1,2],'metal'),
    box(p+'-front-garden-outline',[cx-9,72,15],[19,1,2],'glow'),
-   box(p+'-rear-architectural-brow',[cx-9,70,33],[19,1,5],'glass'),
+   box(p+'-rear-architectural-brow',[cx-9,68,21],[19,1,2],'glass'),
    ell(p+'-monumental-front-lantern',[cx,52,15],[12,10,6],'glass',1),
    ell(p+'-internal-public-oculus',[cx,46,15],[9,7,5],'accent',1),
    tor(p+'-halo-one',[cx,61,14],8,1,'glow','z'),
