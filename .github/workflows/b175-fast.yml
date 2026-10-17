@@ -11,7 +11,7 @@ on:
       - '.github/workflows/b175-fast.yml'
   pull_request:
     paths:
-      - 'source/ai/b175-skycanyon.mjs'
+      - 'source/ai/b175-star-river.mjs'
       - 'scripts/b175-fast-probe.mjs'
       - 'scripts/b175-macro.test.mjs'
       - 'scripts/b175-build-preview.mjs'
@@ -32,7 +32,7 @@ jobs:
         with: {node-version: '22'}
       - name: Validate source and safe build scripts
         run: |
-          node --check source/ai/b175-skycanyon.mjs
+          node --check source/ai/b175-star-river.mjs
           node --check scripts/b175-fast-probe.mjs
       - name: Source-backed massive NEW city architecture and two 2x2 accessible flat corridors
         run: node scripts/b175-fast-probe.mjs
