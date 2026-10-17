@@ -1,0 +1,81 @@
+name: B185 Celestial Portico Thirteen-Module Sky Access
+on:
+  push:
+    branches: [feature/b185-nebula-ark-celestial-portico-sky-access]
+    paths:
+      - 'source/ai/b185-celestial-portico.mjs'
+      - 'scripts/b185-fast-probe.mjs'
+      - 'scripts/b185-macro.test.mjs'
+      - 'scripts/b185-build-preview.mjs'
+      - 'scripts/b185-browser-qa.mjs'
+      - '.github/workflows/b185-fast.yml'
+  pull_request:
+    paths:
+      - 'source/ai/b185-celestial-portico.mjs'
+      - 'scripts/b185-fast-probe.mjs'
+      - 'scripts/b185-macro.test.mjs'
+      - 'scripts/b185-build-preview.mjs'
+      - 'scripts/b185-browser-qa.mjs'
+      - '.github/workflows/b185-fast.yml'
+permissions:
+  contents: read
+concurrency:
+  group: b185-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  macro-architecture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Validate source and safe build scripts
+        run: |
+          node --check source/ai/b185-celestial-portico.mjs
+          node --check scripts/b185-fast-probe.mjs
+      - name: Three source hall-to-skypark two-rise access geometry proofs
+        run: node scripts/b185-fast-probe.mjs
+      - name: Architecture geometry, obstruction and anti-forgery tests
+        if: hashFiles('scripts/b185-macro.test.mjs') != ''
+        run: node --test scripts/b185-macro.test.mjs
+      - name: Build standalone offline 3D city preview
+        if: hashFiles('scripts/b185-build-preview.mjs') != ''
+        run: node scripts/b185-build-preview.mjs
+      - name: Archive city-scale voxel model and interactive preview
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: B185-NEBULA-ARK-Grand-Terminal-3D
+          path: b185-evidence/
+          if-no-files-found: warn
+          retention-days: 14
+
+  chromium-visual-qa:
+    needs: [macro-architecture]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned browser QA runtime without lockfile mutation
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Regenerate offline 3D model from pinned source
+        run: node scripts/b185-build-preview.mjs
+      - name: Test real Chromium desktop/mobile canvas, all presets, and save screenshots
+        run: node scripts/b185-browser-qa.mjs
+      - name: Upload actual rendered visual evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: B185-NEBULA-ARK-Desktop-Mobile-Screenshots
+          path: |
+            b185-evidence/B185_DESKTOP.png
+            b185-evidence/B185_MOBILE.png
+            b185-evidence/B185_CHROMIUM_QA.json
+          if-no-files-found: warn
+          retention-days: 14
