@@ -37,7 +37,7 @@ test('all three actual big hollow civic halls have four actual supported U-galle
  assert.equal(atria.sourceVerifiedLocalGalleries+atria.heldInaccessibleLocalGalleries,12);
  assert(atria.horizontalSourceVerifiedEdges>=0);
  const byHall=new Set(atria.gallerySourceLevels.map(x=>x.hall));
- assert.deepEqual([...byHall].sort(),['central','north','south']);
+ assert.deepEqual([...byHall].sort(),['core','north','south']);
  for(const g of atria.gallerySourceLevels){
   assert(['SOURCE_SUPPORTED_LOCAL_SPAN','HOLD_BLOCKED_BY_INHERITED_GEOMETRY'].includes(g.auditStatus));
   if(g.auditStatus==='SOURCE_SUPPORTED_LOCAL_SPAN'){
