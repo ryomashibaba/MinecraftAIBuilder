@@ -11,7 +11,7 @@ on:
       - '.github/workflows/b176-fast.yml'
   pull_request:
     paths:
-      - 'source/ai/b176-star-river.mjs'
+      - 'source/ai/b176-aurora-cathedral.mjs'
       - 'scripts/b176-fast-probe.mjs'
       - 'scripts/b176-macro.test.mjs'
       - 'scripts/b176-build-preview.mjs'
@@ -32,7 +32,7 @@ jobs:
         with: {node-version: '22'}
       - name: Validate source and safe build scripts
         run: |
-          node --check source/ai/b176-star-river.mjs
+          node --check source/ai/b176-aurora-cathedral.mjs
           node --check scripts/b176-fast-probe.mjs
       - name: Source-backed massive NEW city architecture and two 2x2 accessible flat corridors
         run: node scripts/b176-fast-probe.mjs
