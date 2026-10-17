@@ -1,0 +1,70 @@
+name: B198D Interactive Versioned Architecture Studio & Safe Revision UI
+on:
+  push:
+    branches: [feature/b198d-conversational-architecture-studio]
+    paths:
+      - 'source/ai/b198d-studio-session.mjs'
+      - 'source/ai/b198d-local-review-server.mjs'
+      - 'scripts/b198d-studio.mjs'
+      - 'scripts/b198d-session.test.mjs'
+      - 'scripts/b198d-browser-qa.mjs'
+      - 'scripts/b198d-offline-probe.mjs'
+      - '.github/workflows/b198d-fast.yml'
+  pull_request:
+    paths:
+      - 'source/ai/b198d-studio-session.mjs'
+      - 'source/ai/b198d-local-review-server.mjs'
+      - 'scripts/b198d-studio.mjs'
+      - 'scripts/b198d-session.test.mjs'
+      - 'scripts/b198d-browser-qa.mjs'
+      - 'scripts/b198d-offline-probe.mjs'
+      - '.github/workflows/b198d-fast.yml'
+permissions:
+  contents: read
+jobs:
+  versioned-design-safety:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Check local server, versioned source core, and CLI syntax
+        run: |
+          node --check source/ai/b198d-studio-session.mjs
+          node --check source/ai/b198d-local-review-server.mjs
+          node --check scripts/b198d-studio.mjs
+      - name: Full previous B198A-C regressions and source-only versioned studio
+        run: node --test scripts/b198a-engine.test.mjs scripts/b198a-cli.test.mjs scripts/b198b-quality.test.mjs scripts/b198c-critic.test.mjs scripts/b198d-session.test.mjs
+      - name: Render standalone honest mock-only local-studio review archive
+        run: node scripts/b198d-offline-probe.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: B198D-Mock-Source-Studio-Session-History-3D
+          path: b198d-evidence/
+          retention-days: 14
+          if-no-files-found: warn
+  real-browser-studio:
+    needs: [versioned-design-safety]
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Install actual local browser
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Test desktop and mobile actual approval, rejection and undo/redo UI
+        run: node scripts/b198d-browser-qa.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: B198D-Real-Chromium-Desktop-Mobile-Model-FIXTURE
+          path: |
+            b198d-evidence/B198D_*_*.png
+            b198d-evidence/B198D_CHROMIUM_QA.json
+          retention-days: 14
+          if-no-files-found: warn
