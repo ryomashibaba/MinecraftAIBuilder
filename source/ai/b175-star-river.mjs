@@ -70,8 +70,8 @@ export function starRiverParts(){
  e.push(
   tor('b175-orbital-east-light',[83,66,24],8,1,'glow'),
   tor('b175-orbital-west-light',[41,66,24],8,1,'glow'),
-  beam('b175-front-bridge-west',[37,54,8],[49,68,11],'metal',2),
-  beam('b175-front-bridge-east',[88,54,8],[76,68,11],'metal',2),
+  beam('b175-front-bridge-west',[37,54,3],[49,68,5],'metal',2),
+  beam('b175-front-bridge-east',[88,54,3],[76,68,5],'metal',2),
   beam('b175-west-tower-web',[16,48,3],[31,71,6],'accent'),
   beam('b175-east-tower-web',[109,48,3],[94,71,6],'accent'),
   // One explicitly allowed offline correction to the B174 landing pier:
