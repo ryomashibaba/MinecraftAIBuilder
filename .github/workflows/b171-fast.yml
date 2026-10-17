@@ -7,6 +7,8 @@ on:
       - 'source/ai/b171-readback-reconciler.mjs'
       - 'scripts/b171-readback-reconciler.test.mjs'
       - 'scripts/b171-review-readbacks.mjs'
+      - 'scripts/b171-build-import-ui.mjs'
+      - 'scripts/b171-import-ui.test.mjs'
       - 'docs/B171_READBACK_RECONCILIATION.md'
       - '.github/workflows/b171-fast.yml'
   pull_request:
@@ -35,14 +37,18 @@ jobs:
           node --check source/ai/b171-readback-reconciler.mjs
           node --check scripts/b171-review-readbacks.mjs
           node --check scripts/b171-readback-reconciler.test.mjs
+          node --check scripts/b171-build-import-ui.mjs
+          node --check scripts/b171-import-ui.test.mjs
       - name: Replay B134/B135 diagnostic controls and reject faked approvals
-        run: node --test scripts/b171-readback-reconciler.test.mjs
+        run: node --test scripts/b171-readback-reconciler.test.mjs scripts/b171-import-ui.test.mjs
       - name: Generate honest empty 18-checkpoint evidence bundle (no game access)
         run: node scripts/b171-review-readbacks.mjs --init b171-readback-output
       - name: Reanalyse empty diagnostic bundle to ensure zero certifications
         run: |
           node scripts/b171-review-readbacks.mjs --review b171-readback-output/B171_PINNED_PROBE_PACKET.json b171-readback-output/B171_EMPTY_SUBMISSION.json b171-readback-output/B171_READBACK_ARCHIVE.json b171-readback-output/B171_REVIEW_REPLAY.json
           node --input-type=module -e "import fs from 'node:fs'; const x=JSON.parse(fs.readFileSync('b171-readback-output/B171_REVIEW_REPLAY.json'));if(x.checkpointCount!==18||x.noReadbacks!==18||x.diagnosticCount!==0||x.actualEducationReadbacksAuthenticated!==0||x.constructionApproved!==false||x.gates.some(y=>y!=='BLOCKED')||x.BuildPlan.operations.length)process.exit(1)"
+      - name: Generate standalone offline B134/B135 drag-and-drop import UI
+        run: node scripts/b171-build-import-ui.mjs b171-readback-output
       - name: Archive portable empty evidence + reviewed local-only protocol
         if: always()
         uses: actions/upload-artifact@v4
