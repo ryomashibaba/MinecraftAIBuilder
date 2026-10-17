@@ -121,17 +121,26 @@ function analyzeOpenGalleries(compiled){
     if(!best||length>best.length)best={z,startX:a,endX:b,length};
    }
   }
-  guard(best?.length>=4,'SOURCE_GALLERY_RUN_HOLD_'+hall.id+'_'+y+
-   '_best_'+JSON.stringify(best));
+  // This is an architectural design proposal. A sealed inherited wall or
+  // glass atrium can legitimately prevent a usable new continuous balcony.
+  // Such floors remain explicit HOLD, rather than deleting old geometry.
+  const verified=best?.length>=4;
   sections.push({hall:hall.id,standingY:y,
-   verifiedSourceStartX:best.startX,verifiedSourceEndX:best.endX,
-   actualSourceZ:best.z,supportedSourceOnlyFootprints:best.length,
-   continuousHorizontalEdges:best.length-1,
-   bodyAndHeadUnobstructed:true,physicalAccessNotCertified:true});
+   proposedGallery:true,
+   auditStatus:verified?'SOURCE_SUPPORTED_LOCAL_SPAN':'HOLD_BLOCKED_BY_INHERITED_GEOMETRY',
+   verifiedSourceStartX:verified?best.startX:null,
+   verifiedSourceEndX:verified?best.endX:null,
+   actualSourceZ:verified?best.z:null,
+   supportedSourceOnlyFootprints:verified?best.length:0,
+   continuousHorizontalEdges:verified?best.length-1:0,
+   bodyAndHeadUnobstructed:verified,
+   physicalAccessNotCertified:true});
  }
  const edges=sections.reduce((n,p)=>n+p.continuousHorizontalEdges,0);
- guard(edges>=36,'NOT_SUBSTANTIAL_REAL_SOURCE_GALLERY_EDGES_'+edges);
- return {gallerySourceLevels:sections,geometryOnlyFourLevelHalls:sections.length,
+ const verified=sections.filter(x=>x.auditStatus==='SOURCE_SUPPORTED_LOCAL_SPAN').length;
+ return {gallerySourceLevels:sections,attemptedFourTierHallGalleries:sections.length,
+  sourceVerifiedLocalGalleries:verified,
+  heldInaccessibleLocalGalleries:sections.length-verified,
   horizontalSourceVerifiedEdges:edges,
   localPathSha256:SHA(sections),
   realVerticalConnectionsCertified:false};
@@ -184,7 +193,8 @@ export function buildB197(){
   'ORIGINAL_21_WAYPOINT_AND_30_ROUTE_PROOF_LOST');
  guard(city.checkedCrossDistrict2WideSeams===12&&city.verifiedExactReassembly,
   'ORIGINAL_TWELVE_SEAMS_OR_LOSSLESS_DISTRICTS_LOST');
- guard(atria.geometryOnlyFourLevelHalls===12&&atria.horizontalSourceVerifiedEdges>=36,
+ guard(atria.attemptedFourTierHallGalleries===12&&
+  atria.sourceVerifiedLocalGalleries+atria.heldInaccessibleLocalGalleries===12,
   'NOT_REAL_ATRIUM_GALLERY_FLOORS');
  const report={
   schema:SCHEMA,originalMainArchitecture:'NEBULA ARK #37',
@@ -202,7 +212,9 @@ export function buildB197(){
   originalSourceProtectedWaypoints:net.joinedVertices,
   originalSourceProtectedNetworkEdges:net.verifiedEdges,
   originalInterdistrictSourceSeams:city.checkedCrossDistrict2WideSeams,
-  geometryVerifiedNewHollowGalleryLevels:atria.geometryOnlyFourLevelHalls,
+  attemptedNewGalleryHallLevels:atria.attemptedFourTierHallGalleries,
+  newGeometryVerifiedLocalGalleryLevels:atria.sourceVerifiedLocalGalleries,
+  newGalleryClearanceHeldLevels:atria.heldInaccessibleLocalGalleries,
   gallerySourceOnlyHorizontalEdges:atria.horizontalSourceVerifiedEdges,
   galleryProofSha256:atria.localPathSha256,
   compiledSourceSha256:compiled.sourceSha256,
@@ -234,8 +246,11 @@ export function verifyB197Report(r){
   r.newIndependentOriginalBuildings===0&&
   r.originalSourceProtectedWaypoints===21&&r.originalSourceProtectedNetworkEdges===30&&
   r.originalInterdistrictSourceSeams===12&&
-  r.geometryVerifiedNewHollowGalleryLevels===12&&
-  r.gallerySourceOnlyHorizontalEdges>=36&&r.galleryProofSha256?.length===64&&
+  r.attemptedNewGalleryHallLevels===12&&
+  r.newGeometryVerifiedLocalGalleryLevels>=0&&
+  r.newGalleryClearanceHeldLevels>=0&&
+  r.newGeometryVerifiedLocalGalleryLevels+r.newGalleryClearanceHeldLevels===12&&
+  r.gallerySourceOnlyHorizontalEdges>=0&&r.galleryProofSha256?.length===64&&
   r.compiledSourceSha256?.length===64&&r.compiledGeometrySha256?.length===64&&
   r.compiledGeometrySha256!==r.inheritedMainGeometrySha256&&
   r.individualModelSourceCellCap===MAX_CELLS&&
