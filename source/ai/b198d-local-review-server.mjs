@@ -50,6 +50,11 @@ const CSS=`<style>
 #b198d-protected input{width:16px;height:16px}
 #b198d-studio .controls{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 #b198d-studio .hint{font-size:.77rem;color:#adc9da;line-height:1.5}
+#b198d-comparison{display:none;margin:12px 0;padding:12px;border:1px solid #47687a;border-radius:12px;background:#102838}
+#b198d-comparison img{width:100%;aspect-ratio:5 / 3;object-fit:contain;background:#081924;border-radius:8px}
+#b198d-compare-images{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+#b198d-comparison figcaption{font-size:.77rem;margin:4px 0 8px;color:#c4e4f5}
+@media(max-width:600px){#b198d-compare-images{grid-template-columns:1fr}}
 </style>`;
 const PANEL=`<section id="b198d-studio">
  <h2>B198D — 対話型建築設計 / 版管理</h2>
@@ -124,9 +129,20 @@ const SCRIPT=`<script id="b198d-client">
   try{
    const res=await fetch('/api/status',{credentials:'same-origin'});
    if(!res.ok)throw Error('Source state could not be read');
-   status=await res.json();controls();
+   status=await res.json();controls();if(status.proposedDraft)captureCompare();
   }catch(e){label('b198d-error',String(e.message||e))}
  }
+ function captureCompare(){
+  if(!status?.proposedDraft)return;
+  const saved=index,canvas=E('view');
+  index=0;select.value='0';setScene();draw();
+  E('b198d-before-image').src=canvas.toDataURL('image/png');
+  index=1;select.value='1';setScene();draw();
+  E('b198d-after-image').src=canvas.toDataURL('image/png');
+  index=saved;select.value=String(saved);setScene();draw();
+  E('b198d-comparison').style.display='block';
+ }
+ E('b198d-compare-refresh').addEventListener('click',captureCompare);
  E('b198d-propose').addEventListener('click',()=>post('propose',{
   prompt:E('b198d-request').value,
   protectedElementIds:Array.from(document.querySelectorAll(
@@ -153,6 +169,14 @@ export function renderB198DStudioHtml(state,token){
  return template.replace('__B143_GALLERY_JSON__',safeJson)
   .replace('</head>',CSS+'</head>')
   .replace('<h2>ChatGPTが設計した新規建築</h2>',PANEL)
+  .replace('</main></div>','<section id="b198d-comparison" aria-label="修正前後の建築3D比較">'+
+   '<h2>同じカメラ角度での修正前後比較</h2>'+
+   '<button type="button" id="b198d-compare-refresh">現在の視点で比較画像を更新</button>'+
+   '<div id="b198d-compare-images">'+
+   '<figure><img id="b198d-before-image" alt="承認済み設計の3D形状比較"><figcaption>承認済み ORIGINAL</figcaption></figure>'+
+   '<figure><img id="b198d-after-image" alt="未承認の修正提案の3D形状比較"><figcaption>未承認 DRAFT</figcaption></figure>'+
+   '</div><p>同じ視点の静止画像です。上の3Dは選択・回転できます。画像の違いは自然言語の指示達成や実施工成功を証明しません。</p>'+
+   '</section></main></div>')
   .replace('</body>',SCRIPT.replace('__TOKEN__',JSON.stringify(token))+'</body>');
 }
 async function bodyJson(req){
