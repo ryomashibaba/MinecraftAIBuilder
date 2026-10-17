@@ -10,7 +10,7 @@ const output={...report,real2WideGraph:traffic,surfaceCells:surfaceOnly(compiled
 fs.mkdirSync(path.join(root,'b178-evidence'),{recursive:true});
 fs.writeFileSync(path.join(root,'b178-evidence/B178_ARCHITECTURE_PROOF.json'),JSON.stringify(output,null,2)+'\n');
 console.log('B178_ARCHITECTURE_PROOF',JSON.stringify({
- voxels:report.total3dVoxels,newVoxels:report.newlyOccupiedVoxels,
+ voxels:report.total3dVoxels,newVoxels:report.newlyOccupiedVoxels,sourceGatewayCarved:report.sourceOnlyGatewayCarvedCells,
  elements:report.totalElements,addedElements:report.newElements,
  surfaceCells:output.surfaceCells,modules:report.independentModules,
  old2WideRoutes:report.old2WideMoves,connectedPortals:report.reachablePublicPortals,

@@ -12,6 +12,7 @@ const k=(x,y,z)=>x+','+y+','+z;
 const ok=(v,s)=>{if(!v)throw Error('B178_'+s)};
 const box=(id,origin,size,material='metal')=>({id,mode:'add',shape:'box',origin,size,material});
 const beam=(id,start,end,material='metal',thickness=1)=>({id,mode:'add',shape:'beam',start,end,thickness,material});
+const cut=(id,origin,size)=>({id,mode:'cut',shape:'box',origin,size});
 const tor=(id,center,majorRadius,tubeRadius,material='glow')=>({id,mode:'add',shape:'torus',axis:'z',center,majorRadius,tubeRadius,material});
 export const PORTALS=Object.freeze([
  {id:'north',x:24,left:13,w:25},{id:'core',x:62,left:48,w:29},{id:'south',x:101,left:89,w:25}
@@ -54,7 +55,10 @@ export function connectedSkyElements(){
   box('b178-northern-sky-mezzanine',[17,67,19],[16,1,8],'wood'),
   box('b178-southern-sky-mezzanine',[92,67,19],[16,1,8],'wood'),
   beam('b178-west-exterior-hanging-rib',[36,57,19],[54,70,21],'metal',2),
-  beam('b178-east-exterior-hanging-rib',[89,57,19],[74,70,21],'metal',2)
+  beam('b178-east-exterior-hanging-rib',[89,57,19],[74,70,21],'metal',2),
+  // Legitimate SOURCE-ONLY passage through inherited B177 roof rail;
+  // the original B177 file and any Education world blocks are untouched.
+  cut('b178-whitelisted-roof-gateway',[12,75,7],[3,2,1])
  );
  ok(e.length>=65&&e.length<=160,'MODULE_ELEMENT_COUNT');
  ok(new Set(e.map(x=>x.id)).size===e.length,'DUPLICATE_ID');
@@ -105,6 +109,18 @@ export function inspectPublicConcourse(scene){
 }
 function union(parent,addon,design){
  const cells=new Map(parent.primitives.map(p=>[k(p[0],p[1],p[2]),p]));
+ // Exactly one source-level 3x2 gateway through B177 glass guardrail.
+ // Never convert this cut into an authorized Minecraft world operation.
+ const cuts=design.elements.filter(e=>e.mode==='cut');
+ ok(cuts.length===1&&cuts[0].id==='b178-whitelisted-roof-gateway'&&
+  JSON.stringify(cuts[0].origin)==='[12,75,7]'&&
+  JSON.stringify(cuts[0].size)==='[3,2,1]',
+  'ONLY_EXPLICIT_GATEWAY_IS_ALLOWED');
+ let removed=0;
+ for(let x=12;x<=14;x++)for(let y=75;y<=76;y++){
+  ok(cells.delete(k(x,y,7)),'ORIGINAL_RAIL_MISSING_'+x+'_'+y);
+  removed++;
+ }
  let fresh=0,overlap=0;
  for(const p of addon.primitives){
   const id=k(p[0],p[1],p[2]);
@@ -136,7 +152,7 @@ function union(parent,addon,design){
    moduleCount:6,designOperations:[
     ...parent.stats.designOperations,
     ...addon.stats.designOperations.map(v=>({...v,module:design.id}))]}},
-  fresh,overlap};
+  fresh,overlap,removed};
 }
 export function buildConnectedSky(){
  const parent=buildTripleAtrium(),design=createConnectedSkyModule(),
@@ -153,6 +169,7 @@ export function buildConnectedSky(){
   originalVoxels:parent.compiled.primitives.length,
   newlyOccupiedVoxels:merged.fresh,total3dVoxels:merged.compiled.primitives.length,
   parentOverlapPreserved:merged.overlap,
+  sourceOnlyGatewayCarvedCells:merged.removed,
   inheritedElements:parent.report.totalElements,
   newElements:design.elements.length,
   totalElements:parent.report.totalElements+design.elements.length,
@@ -177,7 +194,8 @@ export function verifyConnectedSkyReport(r){
  return Boolean(r&&r.schema===SCHEMA&&r.modelId==='nebula-ark-connected-sky-concourse'&&
   r.independentModules===6&&r.moduleElementCap===160&&r.voxelCap===MAX_CELLS&&
   r.originalVoxels===83531&&r.newlyOccupiedVoxels>=1500&&
-  r.total3dVoxels===r.originalVoxels+r.newlyOccupiedVoxels&&
+  r.sourceOnlyGatewayCarvedCells===6&&
+  r.total3dVoxels===r.originalVoxels+r.newlyOccupiedVoxels-r.sourceOnlyGatewayCarvedCells&&
   r.inheritedElements===451&&r.newElements>=65&&r.newElements<=160&&
   r.totalElements===r.inheritedElements+r.newElements&&
   r.sourceSha256?.length===64&&r.geometrySha256?.length===64&&

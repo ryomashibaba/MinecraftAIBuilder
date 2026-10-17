@@ -17,7 +17,8 @@ test('independent sixth strict B143 module adds substantial real volumetric arch
  assert.equal(connectedSkyElements().length,r.design.elements.length);
  assert(r.design.elements.length>=65&&r.design.elements.length<=160);
  assert(p.newlyOccupiedVoxels>=1500);
- assert.equal(p.total3dVoxels,83531+p.newlyOccupiedVoxels);
+ assert.equal(p.sourceOnlyGatewayCarvedCells,6);
+ assert.equal(p.total3dVoxels,83531+p.newlyOccupiedVoxels-6);
  assert(p.total3dVoxels<=MAX_CELLS);
  assert.notEqual(p.geometrySha256,p.parentGeometrySha256);
  assert(verifyConnectedSkyReport(p));
@@ -26,6 +27,13 @@ test('all 3 landmark entrances connected through same-floor real supported 2x2 g
  const r=buildConnectedSky(),a=inspectPublicConcourse(r.compiled);
  assert.equal(a.connectedSkyPortals,3);
  assert.equal(a.transverseMoves,100);
+ const old=new Set(buildTripleAtrium().compiled.primitives.map(p=>p.slice(0,3).join(',')));
+ const now=new Set(r.compiled.primitives.map(p=>p.slice(0,3).join(',')));
+ for(let x=12;x<=14;x++)for(let y=75;y<=76;y++){
+  const v=[x,y,7].join(',');
+  assert(old.has(v),'original glass rail must be retained in frozen parent');
+  assert(!now.has(v),'gateway portal must be actually open in new model');
+ }
  assert(a.reachable2WideNodes>=150);
  assert.deepEqual(a.portalIds,['north','core','south']);
  assert.equal(a.physicalWalkingCertified,false);
