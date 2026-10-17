@@ -1,0 +1,51 @@
+name: B198A Generic Natural Language Architecture — Strict Model Adapter QA
+on:
+  push:
+    branches: [feature/b198a-generic-nl-to-building-dsl]
+    paths:
+      - 'source/ai/b198-natural-language-design.mjs'
+      - 'source/ai/b198-openai-provider.mjs'
+      - 'scripts/b198a-architect.mjs'
+      - 'scripts/b198a-cli.test.mjs'
+      - 'scripts/b198a-engine.test.mjs'
+      - 'scripts/b198a-fixtures.mjs'
+      - 'scripts/b198a-offline-fixture-probe.mjs'
+      - '.github/workflows/b198a-fast.yml'
+  pull_request:
+    paths:
+      - 'source/ai/b198-natural-language-design.mjs'
+      - 'source/ai/b198-openai-provider.mjs'
+      - 'scripts/b198a-architect.mjs'
+      - 'scripts/b198a-cli.test.mjs'
+      - 'scripts/b198a-engine.test.mjs'
+      - 'scripts/b198a-fixtures.mjs'
+      - 'scripts/b198a-offline-fixture-probe.mjs'
+      - '.github/workflows/b198a-fast.yml'
+permissions:
+  contents: read
+jobs:
+  generative-architecture-safety:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Check source and CLI JavaScript syntax
+        run: |
+          node --check source/ai/b198-natural-language-design.mjs
+          node --check source/ai/b198-openai-provider.mjs
+          node --check scripts/b198a-architect.mjs
+          node --check scripts/b198a-offline-fixture-probe.mjs
+      - name: Strict generic architecture creation revision and adversarial model output tests
+        run: node --test scripts/b198a-engine.test.mjs scripts/b198a-cli.test.mjs
+      - name: Build and archive TWO distinct offline fixture geometry reviews and one safe revision
+        run: node scripts/b198a-offline-fixture-probe.mjs
+      - name: Archive honestly labeled mock-only 3D source QA examples
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: B198A-Generic-Architecture-Source-Only-Fixture-QA
+          path: b198a-evidence/
+          if-no-files-found: error
+          retention-days: 14
