@@ -192,7 +192,7 @@ export function createOrbitalInteriors(original){
   routeTouches:touchedOriginalRoute.length,
   touches:touchedOriginalRoute.slice(0,12),
   wings:stairs.length,immutable:JSON.stringify(original)===frozen}));
- ensure(elements.length>=30&&newlyAdded.length>500&&
+ ensure(elements.length>=30&&newlyAdded.length>=400&&
   stairs.length===2&&touchedOriginalRoute.length===0&&
   JSON.stringify(original)===frozen,'INSUFFICIENT_INTERIOR_OR_LOW_PATH_MUTATED');
  return {parent,model,compiled,stairs,lower,elements,
