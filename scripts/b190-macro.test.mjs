@@ -24,7 +24,8 @@ test('all four shared-level candidate paths are checked fail-closed, no fictitio
  const p=buildB190(),g=p.gateway,r=p.report;
  assert.equal(p.gatewayReviews.length,4);
  assert.deepEqual(p.gatewayReviews.map(q=>q.evaluatedStandingY),[73,69,65,61]);
- assert.equal(r.passedSourceConnectionOptions+r.rejectedSourceConnectionOptions,4);
+ assert.equal(r.passedSourceConnectionOptions,2);
+ assert.equal(r.rejectedSourceConnectionOptions,2);
  for(const item of p.gatewayReviews){
   assert.equal(item.modelToModelOccupiedCellCollisionCount,0);
   assert.equal(item.originalMainModelPreserved,true);
