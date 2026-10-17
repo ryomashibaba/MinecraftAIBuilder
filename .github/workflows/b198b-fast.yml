@@ -1,0 +1,47 @@
+name: B198B 12-Genre AI Architecture Quality Evaluation Bench and Revision Safety
+on:
+  push:
+    branches: [feature/b198b-quality-benchmark-and-live-eval]
+    paths:
+      - 'source/ai/b198b-benchmark-cases.mjs'
+      - 'source/ai/b198b-architecture-quality.mjs'
+      - 'scripts/b198b-quality-benchmark.mjs'
+      - 'scripts/b198b-quality.test.mjs'
+      - 'scripts/b198b-offline-probe.mjs'
+      - '.github/workflows/b198b-fast.yml'
+  pull_request:
+    paths:
+      - 'source/ai/b198b-benchmark-cases.mjs'
+      - 'source/ai/b198b-architecture-quality.mjs'
+      - 'scripts/b198b-quality-benchmark.mjs'
+      - 'scripts/b198b-quality.test.mjs'
+      - 'scripts/b198b-offline-probe.mjs'
+      - '.github/workflows/b198b-fast.yml'
+permissions:
+  contents: read
+jobs:
+  source-quality-benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Check syntax of non-executable, model-agnostic quality pipeline
+        run: |
+          node --check source/ai/b198b-benchmark-cases.mjs
+          node --check source/ai/b198b-architecture-quality.mjs
+          node --check scripts/b198b-quality-benchmark.mjs
+          node --check scripts/b198b-offline-probe.mjs
+      - name: Generic model boundary and 12 genre + 4 revision quality regression
+        run: node --test scripts/b198a-engine.test.mjs scripts/b198a-cli.test.mjs scripts/b198b-quality.test.mjs
+      - name: Render genuine 3D model-agnostic SOURCE-ONLY quality proof (fixtures clearly marked)
+        run: node scripts/b198b-offline-probe.mjs
+      - name: Archive source voxel audits, 3D reviews and explicit UNREVIEWED semantic rubric
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: B198B-Quality-Evaluation-Not-Live-Inference-Test-FIXTURE
+          path: b198b-evidence/
+          if-no-files-found: warn
+          retention-days: 14
