@@ -1,0 +1,522 @@
+{
+  "schema": "minecraftaibuilder-b143-building-dsl-v1",
+  "id": "polaris-orbital-switchyard-r0",
+  "title": "POLARIS ORBITAL SWITCHYARD — 対角線で分離された二翼研究宇宙港 R0",
+  "brief": "巨大回転リングと研究ドームをもつ未来研究宇宙港。対角線上の高架ターミナルは途切れており、南東の曲がり角は柱で閉塞。自動迂回設計に向けた未施工の基準モデル。",
+  "bounds": {
+    "width": 92,
+    "height": 52,
+    "depth": 92
+  },
+  "designOnly": true,
+  "elements": [
+    {
+      "id": "polar-foundation",
+      "shape": "box",
+      "mode": "add",
+      "material": "stone",
+      "origin": [
+        5,
+        3,
+        5
+      ],
+      "size": [
+        82,
+        4,
+        82
+      ]
+    },
+    {
+      "id": "west-central-pedestal",
+      "shape": "box",
+      "mode": "add",
+      "material": "concrete",
+      "origin": [
+        14,
+        7,
+        20
+      ],
+      "size": [
+        20,
+        10,
+        21
+      ]
+    },
+    {
+      "id": "east-central-pedestal",
+      "shape": "box",
+      "mode": "add",
+      "material": "concrete",
+      "origin": [
+        58,
+        7,
+        57
+      ],
+      "size": [
+        20,
+        10,
+        21
+      ]
+    },
+    {
+      "id": "west-transfer-platform",
+      "shape": "box",
+      "mode": "add",
+      "material": "concrete",
+      "origin": [
+        13,
+        17,
+        19
+      ],
+      "size": [
+        24,
+        2,
+        23
+      ]
+    },
+    {
+      "id": "east-transfer-platform",
+      "shape": "box",
+      "mode": "add",
+      "material": "concrete",
+      "origin": [
+        57,
+        17,
+        56
+      ],
+      "size": [
+        24,
+        2,
+        23
+      ]
+    },
+    {
+      "id": "west-skyport-front",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        13,
+        19,
+        18
+      ],
+      "size": [
+        24,
+        3,
+        1
+      ]
+    },
+    {
+      "id": "east-skyport-rear",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        57,
+        19,
+        79
+      ],
+      "size": [
+        24,
+        3,
+        1
+      ]
+    },
+    {
+      "id": "west-ring-research",
+      "shape": "ellipsoid",
+      "mode": "add",
+      "material": "glass",
+      "center": [
+        22,
+        36,
+        30
+      ],
+      "radii": [
+        10,
+        11,
+        10
+      ],
+      "shell": 2
+    },
+    {
+      "id": "east-ring-research",
+      "shape": "ellipsoid",
+      "mode": "add",
+      "material": "glass",
+      "center": [
+        69,
+        36,
+        65
+      ],
+      "radii": [
+        10,
+        11,
+        10
+      ],
+      "shell": 2
+    },
+    {
+      "id": "west-orbital-emblem",
+      "shape": "torus",
+      "mode": "add",
+      "material": "accent",
+      "center": [
+        22,
+        38,
+        30
+      ],
+      "axis": "z",
+      "majorRadius": 11,
+      "tubeRadius": 2
+    },
+    {
+      "id": "east-orbital-emblem",
+      "shape": "torus",
+      "mode": "add",
+      "material": "accent",
+      "center": [
+        69,
+        38,
+        65
+      ],
+      "axis": "z",
+      "majorRadius": 11,
+      "tubeRadius": 2
+    },
+    {
+      "id": "center-super-ring",
+      "shape": "torus",
+      "mode": "add",
+      "material": "metal",
+      "center": [
+        46,
+        39,
+        46
+      ],
+      "axis": "y",
+      "majorRadius": 18,
+      "tubeRadius": 2
+    },
+    {
+      "id": "west-skycrane-leg",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        10,
+        9,
+        28
+      ],
+      "size": [
+        3,
+        27,
+        3
+      ]
+    },
+    {
+      "id": "west-skycrane-cap",
+      "shape": "box",
+      "mode": "add",
+      "material": "accent",
+      "origin": [
+        9,
+        35,
+        25
+      ],
+      "size": [
+        20,
+        2,
+        7
+      ]
+    },
+    {
+      "id": "east-skycrane-leg",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        79,
+        9,
+        64
+      ],
+      "size": [
+        3,
+        27,
+        3
+      ]
+    },
+    {
+      "id": "east-skycrane-cap",
+      "shape": "box",
+      "mode": "add",
+      "material": "accent",
+      "origin": [
+        63,
+        35,
+        64
+      ],
+      "size": [
+        20,
+        2,
+        7
+      ]
+    },
+    {
+      "id": "center-signal-mast",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        58,
+        19,
+        25
+      ],
+      "size": [
+        5,
+        17,
+        8
+      ]
+    },
+    {
+      "id": "center-signal-beacon",
+      "shape": "box",
+      "mode": "add",
+      "material": "glow",
+      "origin": [
+        58,
+        36,
+        25
+      ],
+      "size": [
+        5,
+        3,
+        8
+      ]
+    },
+    {
+      "id": "west-glow-stripe",
+      "shape": "box",
+      "mode": "add",
+      "material": "glow",
+      "origin": [
+        14,
+        17,
+        39
+      ],
+      "size": [
+        21,
+        1,
+        2
+      ]
+    },
+    {
+      "id": "east-glow-stripe",
+      "shape": "box",
+      "mode": "add",
+      "material": "glow",
+      "origin": [
+        58,
+        17,
+        76
+      ],
+      "size": [
+        21,
+        1,
+        2
+      ]
+    },
+    {
+      "id": "west-terminal-frontscreen",
+      "shape": "box",
+      "mode": "add",
+      "material": "glass",
+      "origin": [
+        18,
+        28,
+        19
+      ],
+      "size": [
+        14,
+        3,
+        2
+      ]
+    },
+    {
+      "id": "east-terminal-backscreen",
+      "shape": "box",
+      "mode": "add",
+      "material": "glass",
+      "origin": [
+        62,
+        28,
+        78
+      ],
+      "size": [
+        14,
+        3,
+        2
+      ]
+    },
+    {
+      "id": "central-moonlit-pylon",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        44,
+        7,
+        44
+      ],
+      "size": [
+        5,
+        13,
+        5
+      ]
+    },
+    {
+      "id": "central-pylon-crown",
+      "shape": "box",
+      "mode": "add",
+      "material": "accent",
+      "origin": [
+        42,
+        20,
+        42
+      ],
+      "size": [
+        9,
+        3,
+        9
+      ]
+    },
+    {
+      "id": "west-service-cable",
+      "shape": "box",
+      "mode": "add",
+      "material": "glow",
+      "origin": [
+        19,
+        24,
+        22
+      ],
+      "size": [
+        1,
+        1,
+        18
+      ]
+    },
+    {
+      "id": "east-service-cable",
+      "shape": "box",
+      "mode": "add",
+      "material": "glow",
+      "origin": [
+        74,
+        24,
+        57
+      ],
+      "size": [
+        1,
+        1,
+        18
+      ]
+    },
+    {
+      "id": "west-overhang",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        11,
+        30,
+        22
+      ],
+      "size": [
+        16,
+        2,
+        4
+      ]
+    },
+    {
+      "id": "east-overhang",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        65,
+        30,
+        72
+      ],
+      "size": [
+        17,
+        2,
+        4
+      ]
+    },
+    {
+      "id": "west-high-light",
+      "shape": "box",
+      "mode": "add",
+      "material": "glow",
+      "origin": [
+        15,
+        37,
+        25
+      ],
+      "size": [
+        5,
+        3,
+        2
+      ]
+    },
+    {
+      "id": "east-high-light",
+      "shape": "box",
+      "mode": "add",
+      "material": "glow",
+      "origin": [
+        73,
+        37,
+        68
+      ],
+      "size": [
+        5,
+        3,
+        2
+      ]
+    },
+    {
+      "id": "west-atrium-post",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        33,
+        19,
+        39
+      ],
+      "size": [
+        2,
+        11,
+        2
+      ]
+    },
+    {
+      "id": "east-atrium-post",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        58,
+        19,
+        56
+      ],
+      "size": [
+        2,
+        11,
+        2
+      ]
+    }
+  ]
+}
