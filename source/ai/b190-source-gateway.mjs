@@ -74,30 +74,56 @@ export function evaluateSourceGateway(main,annex,offset=MODEL_OFFSET){
  fail(level2(virtualAnnexCells,endX,GATEWAY.standingY,
   GATEWAY.annexLocalAnchorZ+dz),
   'ANNEX_STANDING_ENTRANCE_UNSUPPORTED');
- // Provisional source-only bridge slab has no construction commands:
- // preserve and reuse any original y72 floor cells; add only currently
- // absent slab positions, never overwrite an inherited occupied position.
+ // A direct bridge intersects three solid inherited main cells. Find
+ // a real supported-candidate detour instead of deleting even ONE source
+ // model voxel. Source-only design slab may support each candidate footprint,
+ // but no node can use occupied pedestrian-body or head cells.
+ const usable=(x,z)=>{
+  if(x<startX||x>endX||z<24+dz||z>42+dz)return false;
+  for(let ox=0;ox<2;ox++)for(let oz=0;oz<2;oz++){
+   const a=x+ox,b=z+oz;
+   if(sourceUnion.has(K(a,GATEWAY.standingY,b))||
+      sourceUnion.has(K(a,GATEWAY.standingY+1,b)))return false;
+  }
+  return true;
+ };
+ const origin=K(startX,0,GATEWAY.mainAnchorZ+dz),
+  destination=K(endX,0,GATEWAY.annexLocalAnchorZ+dz);
+ fail(usable(startX,GATEWAY.mainAnchorZ+dz) &&
+  usable(endX,GATEWAY.annexLocalAnchorZ+dz),'UNSAFE_BRIDGE_ENDPOINT');
+ const queue=[[startX,GATEWAY.mainAnchorZ+dz]],parents=new Map([[origin,null]]);
+ for(let cursor=0;cursor<queue.length&&!parents.has(destination);cursor++){
+  const [x,z]=queue[cursor];
+  for(const [xx,zz] of [[x+1,z],[x,z+1],[x,z-1],[x-1,z]]){
+   const candidate=K(xx,0,zz);
+   if(!parents.has(candidate)&&usable(xx,zz)){
+    parents.set(candidate,K(x,0,z));queue.push([xx,zz]);
+   }
+  }
+ }
+ fail(parents.has(destination),'NO_COLLISION_FREE_SOURCE_DETOUR');
+ const path=[];
+ let at=destination;
+ while(at!==null){const [x,,z]=at.split(',').map(Number);
+  path.push([x,z]);at=parents.get(at);
+ }
+ path.reverse();
+ fail(path.length>=endX-startX+1 && path.length<=90,
+  'CANDIDATE_SOURCE_PATH_LENGTH_'+path.length);
+ // Exactly the cells missing below traversed 2x2 squares are drawn as the
+ // hypothetical bridge. Existing floors, annex and parent are preserved.
  const newSlab=[];
- for(let x=startX+1;x<=endX+1;x++)
-  for(let z=GATEWAY.floorZ0+dz;z<=GATEWAY.floorZ1+dz;z++){
-   const cell=K(x,GATEWAY.floorY,z);
-   if(!sourceUnion.has(cell)){sourceUnion.add(cell);newSlab.push([x,GATEWAY.floorY,z])}
+ for(const [x,z] of path)for(let ox=0;ox<2;ox++)
+  for(let oz=0;oz<2;oz++){
+   const a=x+ox,b=z+oz,id=K(a,GATEWAY.floorY,b);
+   if(!sourceUnion.has(id)){
+    sourceUnion.add(id);newSlab.push([a,GATEWAY.floorY,b]);
+   }
   }
  fail(newSlab.length>10&&newSlab.length<=GATEWAY.sourceOnlyMaxNewCells,
   'GATEWAY_SOURCE_SLAB_BUDGET_'+newSlab.length);
- // This proves a complete floor and headroom trace, not just endpoint
- // touching. A body obstruction caused by previous MAIN source must fail.
- const stations=[];
- for(let x=startX;x<=endX;x++){
-  const clear=level2(sourceUnion,x,GATEWAY.standingY,GATEWAY.floorZ0+dz);
-  stations.push({x,z:GATEWAY.floorZ0+dz,sourceSupported2Wide:clear});
- }
- // At the new building, transition sideways at the SAME elevation to its
- // actual B189 source-checked z31 public skyway station.
- for(let z=GATEWAY.floorZ0+dz+1;z<=GATEWAY.annexLocalAnchorZ+dz;z++){
-  const clear=level2(sourceUnion,endX,GATEWAY.standingY,z);
-  stations.push({x:endX,z,sourceSupported2Wide:clear});
- }
+ const stations=path.map(([x,z])=>({x,z,
+  sourceSupported2Wide:level2(sourceUnion,x,GATEWAY.standingY,z)}));
  const blocked=stations.filter(p=>!p.sourceSupported2Wide);
  const originalMainStillExact=mainCells.size===main.primitives.length;
  const originalAnnexStillExact=virtualAnnexCells.size===annex.primitives.length;
