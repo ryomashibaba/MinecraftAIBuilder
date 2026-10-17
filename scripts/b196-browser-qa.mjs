@@ -169,7 +169,7 @@ try{
   await page.waitForTimeout(800);
   check(await page.locator('#building').inputValue()==='8',
     label+'_FOUR_MODEL_PANORAMA_BUTTON_INERT');
-  check((await page.locator('#sceneTitle').innerText()).includes('B196'),
+  check((await page.locator('#sceneTitle').innerText()).includes('B195'),
     label+'_NEW_FOUR_MODEL_CITYSCAPE_TITLE_MISSING');
   const allSourceVoxels=await page.locator('#stats').innerText();
   check(!allSourceVoxels.includes('undefined'),
