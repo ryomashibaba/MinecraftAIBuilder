@@ -84,7 +84,7 @@ export function buildB190Preview({dir=out}={}){
   '<p>配置方式：OFFLINE_REVIEW_COORDINATES（実ワールド座標ではありません）</p>'+
   '<p>別棟の設計用相対Xオフセット：+'+gateway.offset.sourceLocalDeltaX+
   '｜幾何モデル重複：'+gateway.modelToModelOccupiedCellCollisionCount+
-  'セル｜検証結果：'+gateway.reviewStatus+'｜支持床・頭上検査：'+gateway.full2wide2highStations+
+  'セル｜検証結果：'+gateway.reviewStatus+'｜採用候補の設計上の高さ：Y'+gateway.evaluatedStandingY+'｜支持床・頭上検査：'+gateway.full2wide2highStations+
   '地点｜新規支持床候補：'+gateway.candidateBridgeNewCells+'セル</p>'+
   '<p><strong>注意：</strong>実機での歩行・衝突判定・地形・安全性は未検証です。'+
   '通路候補がHOLDの場合は接続不成立です。Minecraft Educationへの配置・施工・連絡橋の建築は一切していません。</p>'+
