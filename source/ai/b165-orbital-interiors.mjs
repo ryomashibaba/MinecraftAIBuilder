@@ -186,6 +186,12 @@ export function createOrbitalInteriors(original){
   readiness:'NOT_PREPARED',
   gates:Array(9).fill('BLOCKED'),BuildPlan:{operations:[]}
  };
+ console.log('B165_INTERIOR_GATE_DIAGNOSTIC',JSON.stringify({
+  elementCount:elements.length,newCells:newlyAdded.length,
+  removedCells:deleted.length,lowChanges:lowDiff.length,
+  routeTouches:touchedOriginalRoute.length,
+  touches:touchedOriginalRoute.slice(0,12),
+  wings:stairs.length,immutable:JSON.stringify(original)===frozen}));
  ensure(elements.length>=30&&newlyAdded.length>500&&
   stairs.length===2&&touchedOriginalRoute.length===0&&
   JSON.stringify(original)===frozen,'INSUFFICIENT_INTERIOR_OR_LOW_PATH_MUTATED');
