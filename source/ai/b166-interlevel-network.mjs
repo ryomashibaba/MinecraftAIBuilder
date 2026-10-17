@@ -25,11 +25,13 @@ const S={north:{entry:[30,19,15],top:[30,26,30],x:30,zmin:14,zmax:33},
  south:{entry:[79,19,73],top:[79,26,88],x:79,zmin:72,zmax:91}};
 const box=(id,origin,size,material='metal')=>({id,shape:'box',mode:'add',material,origin,size});
 export function navigationArchitecture(){
- // The inherited B143 DSL allows a maximum of 160 primitives.
- // Large, contiguous architectural accents consume just TWO element slots.
+ // B165 has 158 of 160 allowed DSL elements. Open one real Y26-27
+ // south dome / internal fascia passage without removing supported Y25 floor.
+ // The second (and final) element is a substantial overhead portal.
  return [
-  box('b166-north-panoramic-arch',[13,31,33],[22,3,2],'accent'),
-  box('b166-south-panoramic-arch',[60,31,73],[21,3,2],'accent')
+  {id:'b166-south-upper-dome-passage',shape:'box',mode:'cut',
+   origin:[70,26,80],size:[13,2,11]},
+  box('b166-south-overlook-portal',[70,31,79],[13,3,3],'accent')
  ];
 }
 
