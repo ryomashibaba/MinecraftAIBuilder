@@ -35,7 +35,8 @@ const pages=[
  {name:'B160-doppler',url:'ai/doppler/index.html',minimum:27,expected:27},
  {name:'B161-adaptive',url:'ai/adaptive-route/index.html',minimum:28,expected:28},
  {name:'B162-revised',url:'ai/revised-bridge/index.html',minimum:30,expected:30},
- {name:'B163-portfolio',url:'ai/corridor-options/index.html',minimum:33,expected:33}
+ {name:'B163-portfolio',url:'ai/corridor-options/index.html',minimum:33,expected:33},
+ {name:'B164-orbital-crown',url:'ai/orbital-crown/index.html',minimum:34,expected:34}
 ];
 const browser=await chromium.launch({headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
 const results=[];
@@ -91,6 +92,27 @@ async function inspect(info,mobile){
   await page.waitForTimeout(950);
   const last=await page.locator('#building').inputValue();
   if(last!==String(options-1))fail(info.name+'_MODEL_SELECTION_FAILED');
+  if(info.name==='B164-orbital-crown'){
+   const picker=page.locator('#building'),status=page.locator('#b164-status');
+   await picker.selectOption('32');await page.waitForTimeout(230);
+   if(!(await status.innerText()).includes('34番目の巨大宇宙港'))
+    fail('B164_MONUMENTAL_BEFORE_DESIGN_STATUS_WRONG');
+   await picker.selectOption('33');await page.waitForTimeout(450);
+   const actual=await status.innerText();
+   if(!actual.includes('13,133セル')||
+      !actual.includes('43設計要素')||
+      !actual.includes('高度52')||
+      !actual.includes('127移動')||
+      !actual.includes('PASS_FLAT_FOOTPRINT_GEOMETRY'))
+    fail('B164_ORBITAL_CROWN_NOT_RENDERED_'+actual);
+   const over=page.locator('#b164-route');
+   if(!await over.isChecked())fail('B164_PATH_LAYER_HIDDEN');
+   await over.uncheck();await over.check();
+   await picker.selectOption('27');await page.waitForTimeout(170);
+   if(!(await status.innerText()).includes('34番目の巨大宇宙港'))
+    fail('B164_OLD_SCENE_FALSE_MEGA_PIECES');
+   await picker.selectOption('33');
+  }
   if(info.name==='B163-portfolio'){
    const model=page.locator('#building'),status=page.locator('#b163-status');
    const choices=[
