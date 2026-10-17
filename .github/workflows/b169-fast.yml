@@ -1,0 +1,52 @@
+name: B169 source-backed pixel collision models
+on:
+  push:
+    branches:
+      - feature/b169-pixel-collision-components-and-oriented-stairs
+    paths:
+      - 'source/ai/b169-bedrock-pixel-shapes.mjs'
+      - 'scripts/b169-fast-probe.mjs'
+      - 'scripts/b169-geometry.test.mjs'
+      - 'scripts/b169-shape-review.mjs'
+      - '.github/workflows/b169-fast.yml'
+  pull_request:
+    paths:
+      - 'source/ai/b169-bedrock-pixel-shapes.mjs'
+      - 'scripts/b169-fast-probe.mjs'
+      - 'scripts/b169-geometry.test.mjs'
+      - 'scripts/b169-shape-review.mjs'
+      - '.github/workflows/b169-fast.yml'
+permissions:
+  contents: read
+concurrency:
+  group: b169-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  pixel-shape-validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate schema and source syntax
+        run: |
+          node --check source/ai/b169-bedrock-pixel-shapes.mjs
+          node --check scripts/b169-fast-probe.mjs
+      - name: Prove collisions and no source mutations
+        run: node scripts/b169-fast-probe.mjs
+      - name: Geometry unit tests
+        if: hashFiles('scripts/b169-geometry.test.mjs') != ''
+        run: node --test scripts/b169-geometry.test.mjs
+      - name: Generate static interactive oriented stair comparator
+        if: hashFiles('scripts/b169-shape-review.mjs') != ''
+        run: node scripts/b169-shape-review.mjs
+      - name: Archive read-only source proofs and HTML
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: B169-Bedrock-Collision-Pixel-Review
+          path: b169-fast-evidence/
+          if-no-files-found: warn
+          retention-days: 14
