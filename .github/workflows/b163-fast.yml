@@ -1,0 +1,49 @@
+name: B163 independent corridor design portfolio
+on:
+  push:
+    branches:
+      - feature/b163-multicriteria-corridor-portfolio
+    paths:
+      - 'source/ai/b161-adaptive-skybridge.mjs'
+      - 'source/ai/b163-corridor-portfolio.mjs'
+      - 'scripts/b163-fast-probe.mjs'
+      - 'scripts/build-b163-site.test.mjs'
+      - '.github/workflows/b163-fast.yml'
+  pull_request:
+    paths:
+      - 'source/ai/b161-adaptive-skybridge.mjs'
+      - 'source/ai/b163-corridor-portfolio.mjs'
+      - 'scripts/b163-fast-probe.mjs'
+      - 'scripts/build-b163-site.test.mjs'
+      - '.github/workflows/b163-fast.yml'
+permissions:
+  contents: read
+concurrency:
+  group: b163-fast-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  independent-corridor-comparison:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax and source verification
+        run: |
+          node --check source/ai/b163-corridor-portfolio.mjs
+          node --check scripts/b163-fast-probe.mjs
+      - name: Rebuild 2/4/8-wide architecture and prove after-finish 2x2 geometry
+        run: node scripts/b163-fast-probe.mjs
+      - name: Test portfolio, invalid inputs and 3D scenes
+        if: hashFiles('scripts/build-b163-site.test.mjs') != ''
+        run: node --test scripts/build-b163-site.test.mjs
+      - name: Preserve evidence without world data
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: B163-Independent-Corridor-Proofs
+          path: b163-fast-evidence/B163_PORTFOLIO.json
+          if-no-files-found: warn
+          retention-days: 14
