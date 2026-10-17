@@ -1,0 +1,109 @@
+name: B196 Giant Orbital Skyrail Fifth Model CI & 11 Scene Review
+on:
+  push:
+    branches: [feature/b196-nebula-ark-orbital-skyrail-district]
+    paths:
+      - 'source/ai/b196-orbital-skyrail.mjs'
+      - 'scripts/b196-fast-probe.mjs'
+      - 'scripts/b196-macro.test.mjs'
+      - 'scripts/b196-build-preview.mjs'
+      - 'scripts/b196-browser-qa.mjs'
+      - '.github/workflows/b196-fast.yml'
+  pull_request:
+    paths:
+      - 'source/ai/b196-orbital-skyrail.mjs'
+      - 'scripts/b196-fast-probe.mjs'
+      - 'scripts/b196-macro.test.mjs'
+      - 'scripts/b196-build-preview.mjs'
+      - 'scripts/b196-browser-qa.mjs'
+      - '.github/workflows/b196-fast.yml'
+permissions:
+  contents: read
+concurrency:
+  group: b196-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  macro-architecture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Validate source and safe build scripts
+        run: |
+          node --check source/ai/b196-orbital-skyrail.mjs
+          node --check scripts/b196-fast-probe.mjs
+      - name: New giant orbital source architecture, five independently verified elevated skyways, five-model virtual nonwriting audit
+        run: node scripts/b196-fast-probe.mjs
+      - name: Architecture geometry, obstruction and anti-forgery tests
+        if: hashFiles('scripts/b196-macro.test.mjs') != ''
+        run: node --test scripts/b196-macro.test.mjs
+      - name: Build standalone offline 3D city preview
+        if: hashFiles('scripts/b196-build-preview.mjs') != ''
+        run: node scripts/b196-build-preview.mjs
+      - name: Archive city-scale voxel model and interactive preview
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: B196-NEBULA-ARK-Grand-Terminal-3D
+          path: b196-evidence/
+          if-no-files-found: warn
+          retention-days: 14
+
+  chromium-visual-qa:
+    needs: [macro-architecture]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned browser QA runtime without lockfile mutation
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Regenerate offline 3D model from pinned source
+        run: node scripts/b196-build-preview.mjs
+      - name: Test real Chromium desktop/mobile canvas, all presets, and save screenshots
+        run: node scripts/b196-browser-qa.mjs
+      - name: Upload actual rendered visual evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: B196-NEBULA-ARK-Desktop-Mobile-Screenshots
+          path: |
+            b196-evidence/B196_DESKTOP.png
+            b196-evidence/B196_MOBILE.png
+            b196-evidence/B196_DESKTOP_ANNEX.png
+            b196-evidence/B196_DESKTOP_SKYBRIDGE.png
+            b196-evidence/B196_DESKTOP_CITYSCAPE.png
+            b196-evidence/B196_DESKTOP_IDENTITY_COLORS.png
+            b196-evidence/B196_DESKTOP_TRANSIT.png
+            b196-evidence/B196_DESKTOP_ORBITAL.png
+            b196-evidence/B196_DESKTOP_FIVE_CITY.png
+            b196-evidence/B196_DESKTOP_FOUR_CITYSCAPE.png
+            b196-evidence/B196_DESKTOP_SOURCE_MATERIALS.png
+            b196-evidence/B196_DESKTOP_MAIN_JUNCTION.png
+            b196-evidence/B196_DESKTOP_ANNEX_JUNCTION.png
+            b196-evidence/B196_DESKTOP_CITYSCAPE_BRIDGE.png
+            b196-evidence/B196_DESKTOP_Y69.png
+            b196-evidence/B196_DESKTOP_Y65.png
+            b196-evidence/B196_MOBILE_ANNEX.png
+            b196-evidence/B196_MOBILE_SKYBRIDGE.png
+            b196-evidence/B196_MOBILE_CITYSCAPE.png
+            b196-evidence/B196_MOBILE_IDENTITY_COLORS.png
+            b196-evidence/B196_MOBILE_TRANSIT.png
+            b196-evidence/B196_MOBILE_ORBITAL.png
+            b196-evidence/B196_MOBILE_FIVE_CITY.png
+            b196-evidence/B196_MOBILE_FOUR_CITYSCAPE.png
+            b196-evidence/B196_MOBILE_SOURCE_MATERIALS.png
+            b196-evidence/B196_MOBILE_MAIN_JUNCTION.png
+            b196-evidence/B196_MOBILE_ANNEX_JUNCTION.png
+            b196-evidence/B196_MOBILE_CITYSCAPE_BRIDGE.png
+            b196-evidence/B196_MOBILE_Y69.png
+            b196-evidence/B196_MOBILE_Y65.png
+            b196-evidence/B196_CHROMIUM_QA.json
+          if-no-files-found: warn
+          retention-days: 14
