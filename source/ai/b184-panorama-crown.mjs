@@ -54,7 +54,9 @@ export function panoramaCrownElements(){
    box(p+'-wide-exterior-observation',[cx-11,33,9],[23,1,12],'concrete'),
    box(p+'-middle-flight-terrace',[cx-11,47,9],[23,1,11],'wood'),
    box(p+'-high-exterior-mezzanine',[cx-11,57,10],[23,1,9],'glass'),
-   box(p+'-midlevel-light-crown',[cx-10,68,11],[21,1,9],'accent')
+   box(p+'-midlevel-light-crown',[cx-10,68,11],[21,1,9],'accent'),
+   beam(p+'-lower-east-aerial-cable',[cx+10,29,11],[cx+11,51,12],'metal'),
+   beam(p+'-lower-west-aerial-cable',[cx-10,29,11],[cx-11,51,12],'accent')
   );
   for(let n=0;n<6;n++){
    const x=cx-11+n*4;
