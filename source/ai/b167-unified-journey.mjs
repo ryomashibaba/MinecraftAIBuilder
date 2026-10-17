@@ -30,8 +30,8 @@ function voxelReader(scene){
  };
  return {stand,occupied};
 }
-function pathBetween(reader,start,goal,{stayY=null,maxStates=170000}={}){
- yes(reader.stand(...start)&&reader.stand(...goal),'BAD_ENDPOINT');
+function pathBetween(reader,start,goal,{stayY=null,maxStates=170000,width=1,depth=1}={}){
+ yes(reader.stand(...start,width,depth)&&reader.stand(...goal,width,depth),'BAD_ENDPOINT');
  const source=K(...start),dest=K(...goal);
  const q=[start],visited=new Set([source]),parents=new Map();let found=false;
  const stepOptions=stayY===null?[0,1,-1]:[0];
@@ -41,7 +41,7 @@ function pathBetween(reader,start,goal,{stayY=null,maxStates=170000}={}){
   for(const [dx,dz] of dirs)for(const dy of stepOptions){
    const nx=x+dx,ny=y+dy,nz=z+dz,next=K(nx,ny,nz);
    if(stayY!==null&&ny!==stayY)continue;
-   if(visited.has(next)||!reader.stand(nx,ny,nz))continue;
+   if(visited.has(next)||!reader.stand(nx,ny,nz,width,depth))continue;
    parents.set(next,key);visited.add(next);q.push([nx,ny,nz]);
    yes(q.length<=maxStates,'SEARCH_BUDGET');
   }
@@ -86,6 +86,11 @@ export function auditUnifiedJourneys(original){
   verifySegment(reader,stair.path,1,1);
   verifySegment(reader,upperRoute,2,2);
   verifySegment(reader,upperRoute,1,1);
+  // Distinct audit: is the SAME 2x2 actor connected all the way from
+  // the original lower terminal to this upper endpoint under our exact
+  // full-tile support model? Never transfer a 1x1 stair proof to 2x2.
+  const twoByTwo=pathBetween(reader,main,upper.destination,
+   {width:2,depth:2});
   const all=lower.reachable?joined(lower.path,stair.path,upperRoute):[];
   if(all.length)verifySegment(reader,all,1,1);
   reviews.push({
@@ -97,6 +102,9 @@ export function auditUnifiedJourneys(original){
    upper2x2Moves:upper.flatMoves,
    upper2x2Verified:true,
    full1x1Connected:all.length>0,
+   wholeJourney2x2GridReachable:twoByTwo.reachable,
+   wholeJourney2x2AttemptedStates:twoByTwo.explored,
+   wholeJourney2x2Moves:twoByTwo.moves,
    full1x1Moves:all.length?all.length-1:null,
    full1x1Path:all,
    exactSame1x1FootprintEveryStep:all.length>0,
