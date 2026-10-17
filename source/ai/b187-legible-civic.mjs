@@ -36,7 +36,7 @@ export function legibleCivicElements(){
  // identity bands, each in FRONT of the occupied true floor route (Z29).
  // Every landmark is SOURCE voxel material, not an HTML-only indicator.
  for(const [i,deck] of [60,64,68,72].entries())for(const hall of HALLS){
-  const id='b187-'+hall.id+'-level-'+i,cx=hall.centerX;
+  const id='b187-'+hall.id[0]+i,cx=hall.centerX;
   e.push(
    box(id+'-civic-wayfinding-brow',[cx-8,deck-4,20],[17,1,4],
      i%2?'accent':'metal'),
