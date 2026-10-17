@@ -1,0 +1,101 @@
+name: B194 Colored Cityscape & True Junction Camera Source QA
+on:
+  push:
+    branches: [feature/b194-nebula-ark-junction-color-review]
+    paths:
+      - 'source/ai/b194-junction-inspector.mjs'
+      - 'scripts/b194-fast-probe.mjs'
+      - 'scripts/b194-macro.test.mjs'
+      - 'scripts/b194-build-preview.mjs'
+      - 'scripts/b194-browser-qa.mjs'
+      - '.github/workflows/b194-fast.yml'
+  pull_request:
+    paths:
+      - 'source/ai/b194-junction-inspector.mjs'
+      - 'scripts/b194-fast-probe.mjs'
+      - 'scripts/b194-macro.test.mjs'
+      - 'scripts/b194-build-preview.mjs'
+      - 'scripts/b194-browser-qa.mjs'
+      - '.github/workflows/b194-fast.yml'
+permissions:
+  contents: read
+concurrency:
+  group: b194-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  macro-architecture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Validate source and safe build scripts
+        run: |
+          node --check source/ai/b194-junction-inspector.mjs
+          node --check scripts/b194-fast-probe.mjs
+      - name: True Y69 two-terminal 2wide source proof, 3 colored models and focused 3D camera targets
+        run: node scripts/b194-fast-probe.mjs
+      - name: Architecture geometry, obstruction and anti-forgery tests
+        if: hashFiles('scripts/b194-macro.test.mjs') != ''
+        run: node --test scripts/b194-macro.test.mjs
+      - name: Build standalone offline 3D city preview
+        if: hashFiles('scripts/b194-build-preview.mjs') != ''
+        run: node scripts/b194-build-preview.mjs
+      - name: Archive city-scale voxel model and interactive preview
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: B194-NEBULA-ARK-Grand-Terminal-3D
+          path: b194-evidence/
+          if-no-files-found: warn
+          retention-days: 14
+
+  chromium-visual-qa:
+    needs: [macro-architecture]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned browser QA runtime without lockfile mutation
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Regenerate offline 3D model from pinned source
+        run: node scripts/b194-build-preview.mjs
+      - name: Test real Chromium desktop/mobile canvas, all presets, and save screenshots
+        run: node scripts/b194-browser-qa.mjs
+      - name: Upload actual rendered visual evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: B194-NEBULA-ARK-Desktop-Mobile-Screenshots
+          path: |
+            b194-evidence/B194_DESKTOP.png
+            b194-evidence/B194_MOBILE.png
+            b194-evidence/B194_DESKTOP_ANNEX.png
+            b194-evidence/B194_DESKTOP_SKYBRIDGE.png
+            b194-evidence/B194_DESKTOP_CITYSCAPE.png
+            b194-evidence/B194_DESKTOP_IDENTITY_COLORS.png
+            b194-evidence/B194_DESKTOP_SOURCE_MATERIALS.png
+            b194-evidence/B194_DESKTOP_MAIN_JUNCTION.png
+            b194-evidence/B194_DESKTOP_ANNEX_JUNCTION.png
+            b194-evidence/B194_DESKTOP_CITYSCAPE_BRIDGE.png
+            b194-evidence/B194_DESKTOP_Y69.png
+            b194-evidence/B194_DESKTOP_Y65.png
+            b194-evidence/B194_MOBILE_ANNEX.png
+            b194-evidence/B194_MOBILE_SKYBRIDGE.png
+            b194-evidence/B194_MOBILE_CITYSCAPE.png
+            b194-evidence/B194_MOBILE_IDENTITY_COLORS.png
+            b194-evidence/B194_MOBILE_SOURCE_MATERIALS.png
+            b194-evidence/B194_MOBILE_MAIN_JUNCTION.png
+            b194-evidence/B194_MOBILE_ANNEX_JUNCTION.png
+            b194-evidence/B194_MOBILE_CITYSCAPE_BRIDGE.png
+            b194-evidence/B194_MOBILE_Y69.png
+            b194-evidence/B194_MOBILE_Y65.png
+            b194-evidence/B194_CHROMIUM_QA.json
+          if-no-files-found: warn
+          retention-days: 14
