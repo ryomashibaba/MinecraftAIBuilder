@@ -35,7 +35,7 @@ export function panoramaCrownElements(){
   box('b184-102m-connected-panoramic-spine',[12,74,24],[104,1,5],'concrete'),
   box('b184-citywide-outer-glass-rim',[12,72,29],[104,1,3],'glass'),
   box('b184-citywide-luminous-front-trim',[12,71,23],[104,1,2],'glow'),
-  box('b184-suspended-rear-stabilizer',[12,69,32],[104,1,3],'metal')
+  box('b184-lower-front-transverse-connector',[12,45,0],[104,1,3],'metal')
  ];
  for(const h of HALLS){
   const p='b184-'+h.id,cx=h.centerX;
