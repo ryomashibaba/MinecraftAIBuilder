@@ -20,21 +20,34 @@ test('safe offline placement proves two independent original building voxel sets
  assert.equal(r.neverCombinedIntoOneB143Monolith,true);
  assert(verifyB190Report(r));
 });
-test('proposed floor-only connector has real 2wide support and 2-high body/head clear at EVERY station',()=>{
- const p=buildB190(),g=p.gateway;
- assert.equal(g.allBridgeStationsSourceSupported,true);
- assert(g.full2wide2highStations>=30);
- assert(g.candidateBridgeNewCells>10&&g.candidateBridgeNewCells<=GATEWAY.sourceOnlyMaxNewCells);
- assert.equal(g.candidateConnectorFloorY,72);
- assert.equal(g.candidateStandingY,73);
- assert.equal(g.from[0],108);
- assert.equal(g.to[0],MODEL_OFFSET.sourceLocalDeltaX+4);
- assert.equal(g.sourceOnlyNewFloorNotOverwritingOld,true);
- assert.match(g.bridgeNewCellsSha256,/^[a-f0-9]{64}$/);
- assert.match(g.newBridgeGeometrySha256,/^[a-f0-9]{64}$/);
- assert.equal(g.actualInGameWalkingCertified,false);
- assert.equal(g.actualMinecraftWorldPlacementCertified,false);
- assert.equal(g.actualTerrainAndStructuralSafetyCertified,false);
+test('all four shared-level candidate paths are checked fail-closed, no fictitious bridge success',()=>{
+ const p=buildB190(),g=p.gateway,r=p.report;
+ assert.equal(p.gatewayReviews.length,4);
+ assert.deepEqual(p.gatewayReviews.map(q=>q.evaluatedStandingY),[73,69,65,61]);
+ assert.equal(r.passedSourceConnectionOptions+r.rejectedSourceConnectionOptions,4);
+ for(const item of p.gatewayReviews){
+  assert.equal(item.modelToModelOccupiedCellCollisionCount,0);
+  assert.equal(item.originalMainModelPreserved,true);
+  assert.equal(item.originalAnnexModelPreserved,true);
+  assert.equal(item.actualInGameWalkingCertified,false);
+  assert.equal(item.actualMinecraftWorldPlacementCertified,false);
+  assert.equal(item.actualTerrainAndStructuralSafetyCertified,false);
+  if(item.reviewStatus==='HOLD_NO_COLLISION_FREE_SOURCE_DETOUR'){
+   assert.equal(item.allBridgeStationsSourceSupported,false);
+   assert.equal(item.full2wide2highStations,0);
+   assert.equal(item.candidateBridgeNewCells,0);
+  }else{
+   assert.equal(item.reviewStatus,'SOURCE_GEOMETRY_APPROACH_VALIDATED');
+   assert.equal(item.allBridgeStationsSourceSupported,true);
+   assert(item.full2wide2highStations>=30);
+   assert(item.candidateBridgeNewCells>10);
+   assert(item.candidateBridgeNewCells<=GATEWAY.sourceOnlyMaxNewCells);
+  }
+  assert.match(item.newBridgeGeometrySha256,/^[a-f0-9]{64}$/);
+ }
+ assert.equal(g.reviewStatus,r.gatewayReviewStatus);
+ assert.equal(r.actualPlayerBridgeTraverseCertified,false);
+ assert.equal(r.constructionApproved,false);
 });
 test('disallow unsafe, arbitrary or misrepresented offline placement parameters',()=>{
  const {parent,annex}=buildB189();
