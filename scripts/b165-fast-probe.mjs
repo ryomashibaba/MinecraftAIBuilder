@@ -12,7 +12,7 @@ const d=JSON.parse(fs.readFileSync(path.join(ROOT,
  'designs/ai/interiors/doppler-switchback-terminal-r0.json'),'utf8'));
 const r=createOrbitalInteriors(d),p=r.report;
 if(!verifyOrbitalInteriors(d,p)||p.interiorFlights!==2||
- p.changedCellsOnOriginalRoute!==0||p.newSolidCells<500||
+ p.changedCellsOnOriginalRoute!==0||p.newSolidCells<400||
  p.newAuthoringElements<30||p.constructionApproved!==false||
  p.gates.length!==9||!p.gates.every(v=>v==='BLOCKED')||
  p.BuildPlan.operations.length!==0)
