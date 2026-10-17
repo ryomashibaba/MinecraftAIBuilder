@@ -1,0 +1,105 @@
+name: B195 Original Massive Metro Transit 4-Building Source QA
+on:
+  push:
+    branches: [feature/b195-nebula-ark-metropolis-transit-district]
+    paths:
+      - 'source/ai/b195-metropolis-transit.mjs'
+      - 'scripts/b195-fast-probe.mjs'
+      - 'scripts/b195-macro.test.mjs'
+      - 'scripts/b195-build-preview.mjs'
+      - 'scripts/b195-browser-qa.mjs'
+      - '.github/workflows/b195-fast.yml'
+  pull_request:
+    paths:
+      - 'source/ai/b195-metropolis-transit.mjs'
+      - 'scripts/b195-fast-probe.mjs'
+      - 'scripts/b195-macro.test.mjs'
+      - 'scripts/b195-build-preview.mjs'
+      - 'scripts/b195-browser-qa.mjs'
+      - '.github/workflows/b195-fast.yml'
+permissions:
+  contents: read
+concurrency:
+  group: b195-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  macro-architecture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Validate source and safe build scripts
+        run: |
+          node --check source/ai/b195-metropolis-transit.mjs
+          node --check scripts/b195-fast-probe.mjs
+      - name: New giant transit source design, five 2wide public floors, four real independent source-model topology proof
+        run: node scripts/b195-fast-probe.mjs
+      - name: Architecture geometry, obstruction and anti-forgery tests
+        if: hashFiles('scripts/b195-macro.test.mjs') != ''
+        run: node --test scripts/b195-macro.test.mjs
+      - name: Build standalone offline 3D city preview
+        if: hashFiles('scripts/b195-build-preview.mjs') != ''
+        run: node scripts/b195-build-preview.mjs
+      - name: Archive city-scale voxel model and interactive preview
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: B195-NEBULA-ARK-Grand-Terminal-3D
+          path: b195-evidence/
+          if-no-files-found: warn
+          retention-days: 14
+
+  chromium-visual-qa:
+    needs: [macro-architecture]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned browser QA runtime without lockfile mutation
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Regenerate offline 3D model from pinned source
+        run: node scripts/b195-build-preview.mjs
+      - name: Test real Chromium desktop/mobile canvas, all presets, and save screenshots
+        run: node scripts/b195-browser-qa.mjs
+      - name: Upload actual rendered visual evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: B195-NEBULA-ARK-Desktop-Mobile-Screenshots
+          path: |
+            b195-evidence/B195_DESKTOP.png
+            b195-evidence/B195_MOBILE.png
+            b195-evidence/B195_DESKTOP_ANNEX.png
+            b195-evidence/B195_DESKTOP_SKYBRIDGE.png
+            b195-evidence/B195_DESKTOP_CITYSCAPE.png
+            b195-evidence/B195_DESKTOP_IDENTITY_COLORS.png
+            b195-evidence/B195_DESKTOP_TRANSIT.png
+            b195-evidence/B195_DESKTOP_FOUR_CITYSCAPE.png
+            b195-evidence/B195_DESKTOP_SOURCE_MATERIALS.png
+            b195-evidence/B195_DESKTOP_MAIN_JUNCTION.png
+            b195-evidence/B195_DESKTOP_ANNEX_JUNCTION.png
+            b195-evidence/B195_DESKTOP_CITYSCAPE_BRIDGE.png
+            b195-evidence/B195_DESKTOP_Y69.png
+            b195-evidence/B195_DESKTOP_Y65.png
+            b195-evidence/B195_MOBILE_ANNEX.png
+            b195-evidence/B195_MOBILE_SKYBRIDGE.png
+            b195-evidence/B195_MOBILE_CITYSCAPE.png
+            b195-evidence/B195_MOBILE_IDENTITY_COLORS.png
+            b195-evidence/B195_MOBILE_TRANSIT.png
+            b195-evidence/B195_MOBILE_FOUR_CITYSCAPE.png
+            b195-evidence/B195_MOBILE_SOURCE_MATERIALS.png
+            b195-evidence/B195_MOBILE_MAIN_JUNCTION.png
+            b195-evidence/B195_MOBILE_ANNEX_JUNCTION.png
+            b195-evidence/B195_MOBILE_CITYSCAPE_BRIDGE.png
+            b195-evidence/B195_MOBILE_Y69.png
+            b195-evidence/B195_MOBILE_Y65.png
+            b195-evidence/B195_CHROMIUM_QA.json
+          if-no-files-found: warn
+          retention-days: 14
