@@ -42,8 +42,8 @@ export function porticoElements(){
  for(const h of HALLS){
   const cx=h.centerX,id='b185-'+h.id;
   parts.push(
-   ell(id+'-grand-arch-shell',[cx,56,4],[12,15,7],'glass',1),
-   ell(id+'-luminous-arched-hall',[cx,61,5],[11,13,6],'accent',1),
+   ell(id+'-grand-arch-shell',[cx,56,7],[12,15,7],'glass',1),
+   ell(id+'-luminous-arched-hall',[cx,61,6],[11,13,6],'accent',1),
    tor(id+'-lower-orbit-ring',[cx,46,5],8,1,'glow'),
    tor(id+'-upper-orbit-ring',[cx,64,5],8,1,'glow'),
    box(id+'-front-civic-terrace',[cx-11,43,0],[23,1,10],'wood'),
