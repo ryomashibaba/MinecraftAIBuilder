@@ -32,7 +32,7 @@ try{
    }return {hash,painted};
   });
   const legacy=await page.locator('#building').inputValue();
-  check(legacy==='0',mode+'_LEGACY_ORIGINAL_SCENE_REPLACED');
+  check(legacy==='11',mode+'_UPGRADED_MAIN_NOT_DEFAULT');
   await page.locator('#b197-open-main').click();
   check(await page.locator('#building').inputValue()==='11',
    mode+'_ACTUAL_MAIN_UPGRADE_BUTTON_INERT');
