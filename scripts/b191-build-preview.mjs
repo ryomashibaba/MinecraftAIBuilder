@@ -186,7 +186,7 @@ export function buildB191Preview({dir=out}={}){
   comparedRouteDataSha256:report.routeDataSha256,
   gatewayProposalOnly:true,
   real3dCells:compiled.primitives.length,annexReal3dCells:annex.compiled.primitives.length,
-  surfaceCells:surface.length,authoredElements:parent.parent.report.totalAuthoredElements+annex.design.elements.length,
+  surfaceCells:surface.length,authoredElements:parent.report.totalAuthoredElements+annex.design.elements.length,
   htmlSha256:H(html),designFileSha256:H(fs.readFileSync(sourceFile)),
   mainModelCapUnchanged:160000,annexConnectedToMain:false,
   districtBoundaryProofCount:12,
