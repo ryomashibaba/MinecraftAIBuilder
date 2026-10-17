@@ -32,7 +32,8 @@ const pages=[
  {name:'B157-finished',url:'ai/finished-bridge/index.html',minimum:21,expected:21},
  {name:'B158-helios',url:'ai/helios/index.html',minimum:23,expected:23},
  {name:'B159-polaris',url:'ai/polaris/index.html',minimum:25,expected:25},
- {name:'B160-doppler',url:'ai/doppler/index.html',minimum:27,expected:27}
+ {name:'B160-doppler',url:'ai/doppler/index.html',minimum:27,expected:27},
+ {name:'B161-adaptive',url:'ai/adaptive-route/index.html',minimum:28,expected:28}
 ];
 const browser=await chromium.launch({headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
 const results=[];
@@ -88,6 +89,30 @@ async function inspect(info,mobile){
   await page.waitForTimeout(950);
   const last=await page.locator('#building').inputValue();
   if(last!==String(options-1))fail(info.name+'_MODEL_SELECTION_FAILED');
+  if(info.name==='B161-adaptive'){
+   const buildings=page.locator('#building'),status=page.locator('#b161-status');
+   await buildings.selectOption('25');await page.waitForTimeout(280);
+   const empty=await status.innerText();
+   if(!empty.includes('FOOTPRINT_UNREACHABLE')||
+      !empty.includes('通路なし'))fail('B161_DISCONNECTED_BASELINE_NOT_VISIBLE_'+empty);
+   await buildings.selectOption('26');await page.waitForTimeout(250);
+   if(!(await status.innerText()).includes('117水平移動'))
+    fail('B161_OLD_ROUTE_MISSING');
+   await buildings.selectOption('27');await page.waitForTimeout(350);
+   const improved=await status.innerText();
+   if(!improved.includes('PASS_FLAT_FOOTPRINT_GEOMETRY')||
+      !improved.includes('101水平移動')||
+      !improved.includes('A*中心線101移動')||
+      !improved.includes('曲がり3回'))
+    fail('B161_ASTAR_ROUTE_REGRESSED_'+improved);
+   const overlay=page.locator('#b161-route');
+   if(!await overlay.isChecked())fail('B161_ROUTE_OVERLAY_MISSING');
+   await overlay.uncheck();await overlay.check();
+   await buildings.selectOption('24');await page.waitForTimeout(200);
+   if(!(await status.innerText()).includes('B161の通路レビュー対象外'))
+    fail('B161_ANCESTOR_FALSE_CERTIFICATION');
+   await buildings.selectOption('27');
+  }
   if(info.name==='B160-doppler'){
    const models=page.locator('#building'),status=page.locator('#b160-status');
    await models.selectOption('25');await page.waitForTimeout(300);
