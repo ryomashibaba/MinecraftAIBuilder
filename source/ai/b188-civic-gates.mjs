@@ -63,9 +63,9 @@ export function civicGateElements(){
    box(p+'-gateway-luminous-brow',[x-9,25,4],[19,1,2],'glow'),
    box(p+'-terrace-observation-lip',[x-9,9,15],[19,1,3],primary[idx]),
    box(p+'-intermediate-garden-ribbon',[x-8,15,13],[17,1,4],'wood'),
-   ell(p+'-glazed-hollow-vestibule',[x,14,10],[8,8,7],'glass',1),
-   tor(p+'-wayfinding-oculus',[x,15,9],6,1,'glow'),
-   tor(p+'-tiered-lumen-ring',[x,21,9],4,1,crown[idx]),
+   ell(p+'-glazed-hollow-vestibule',[x,14,16],[8,8,4],'glass',1),
+   tor(p+'-wayfinding-oculus',[x,15,15],6,1,'glow'),
+   tor(p+'-tiered-lumen-ring',[x,21,15],4,1,crown[idx]),
    beam(p+'-western-portal-pylon',[x-10,2,3],[x-10,27,4],'metal'),
    beam(p+'-eastern-portal-pylon',[x+10,2,3],[x+10,27,4],'metal'),
    beam(p+'-west-upper-chord',[x-9,13,3],[x-3,26,5],crown[idx]),
@@ -88,10 +88,10 @@ export function civicGateElements(){
    box(p+'-double-north-light',[x-5,8,2],[11,1,3],'glow'),
    beam(p+'-upper-north-spire',[x,15,4],[x,27,5],'accent'));
   if(idx===1)elements.push(
-   ell(p+'-central-focal-core',[x,10,7],[5,4,4],'accent',1),
+   ell(p+'-central-focal-core',[x,10,15],[5,4,4],'accent',1),
    box(p+'-central-terraced-hall',[x-6,21,3],[13,1,7],'glow'));
   if(idx===2)elements.push(
-   tor(p+'-south-forward-ring',[x,10,8],8,1,'accent'),
+   tor(p+'-south-forward-ring',[x,10,15],8,1,'accent'),
    box(p+'-south-public-lip',[x-7,7,1],[15,1,6],'wood'));
  }
  // Ground-connected districts get a continuous architectural foundation,
