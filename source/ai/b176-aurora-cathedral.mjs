@@ -153,8 +153,8 @@ export function analyzeAuroraTransit(scene){
  // terminal flight's top tread is at identical standing Y57 and Z40..42.
  for(let x=118;x<=120;x++)checkStation([x,57,40],'new-gallery-link-'+x);
  // The final stair at Z40..42 reaches the 100+ step long passage on
- // Z43..44 via a TWO-WIDE horizontal Z-turn inside the open terrace end.
- for(let z=40;z<=43;z++)checkStation([119,57,z],'promenade-z-turn-'+z);
+ // Z43..44 via a TWO-WIDE horizontal Z-turn at X118 on the open terrace.
+ for(let z=40;z<=43;z++)checkStation([118,57,z],'promenade-z-turn-'+z);
  let travel=0;
  for(let x=12;x<=117+1;x++){
   checkStation([x,57,43],'promenade-'+x);travel++;
