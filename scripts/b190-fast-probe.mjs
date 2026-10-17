@@ -7,6 +7,9 @@ fs.mkdirSync(path.join(root,'b190-evidence'),{recursive:true});
 fs.writeFileSync(path.join(root,'b190-evidence/B190_OFFLINE_GATEWAY_PROOF.json'),
  JSON.stringify({report,gateway},null,2)+'\n');
 console.log('B190_OFFLINE_GATEWAY_PROOF',JSON.stringify({
+ gatewayReviewStatus:report.gatewayReviewStatus,
+ evaluatedPublicLevels:report.allEvaluatedStandingLevels,
+ rejectedConnectionLevels:report.rejectedSourceConnectionOptions,
  sourceMainModelCells:report.mainOccupiedCells,
  sourceAnnexModelCells:report.annexOccupiedCells,
  reviewOnlyOffset:gateway.offset,
