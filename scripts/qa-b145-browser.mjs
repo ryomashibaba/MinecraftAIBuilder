@@ -38,7 +38,8 @@ const pages=[
  {name:'B163-portfolio',url:'ai/corridor-options/index.html',minimum:33,expected:33},
  {name:'B164-orbital-crown',url:'ai/orbital-crown/index.html',minimum:34,expected:34},
  {name:'B165-orbital-interiors',url:'ai/orbital-interiors/index.html',minimum:35,expected:35},
- {name:'B166-interlevel',url:'ai/interlevel-navigation/index.html',minimum:36,expected:36}
+ {name:'B166-interlevel',url:'ai/interlevel-navigation/index.html',minimum:36,expected:36},
+ {name:'B167-complete-journey',url:'ai/whole-journey/index.html',minimum:36,expected:36}
 ];
 const browser=await chromium.launch({headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
 const results=[];
@@ -94,6 +95,23 @@ async function inspect(info,mobile){
   await page.waitForTimeout(950);
   const last=await page.locator('#building').inputValue();
   if(last!==String(options-1))fail(info.name+'_MODEL_SELECTION_FAILED');
+  if(info.name==='B167-complete-journey'){
+   const model=page.locator('#building'),status=page.locator('#b167-status');
+   await model.selectOption('34');await page.waitForTimeout(150);
+   if(!(await status.innerText()).includes('36番目を選択'))
+    fail('B167_HISTORICAL_MODEL_WAS_FALSLY_CERTIFIED');
+   await model.selectOption('35');await page.waitForTimeout(460);
+   const result=await status.innerText();
+   for(const fragment of ['74移動','228移動','同一1×1幅','2×2全行程・実機物理は未認証'])
+    if(!result.includes(fragment))fail('B167_CONTINUOUS_JOURNEY_STATUS_MISSING_'+fragment+'_'+result);
+   const layer=page.locator('#b167-route');
+   if(!await layer.isChecked())fail('B167_JOURNEY_LAYER_HIDDEN');
+   await layer.uncheck();await layer.check();
+   await model.selectOption('30');await page.waitForTimeout(100);
+   if(!(await status.innerText()).includes('36番目を選択'))
+    fail('B167_UNRELATED_MODEL_FALSE_ROUTE');
+   await model.selectOption('35');
+  }
   if(info.name==='B166-interlevel'){
    const models=page.locator('#building'),status=page.locator('#b166-status');
    await models.selectOption('34');await page.waitForTimeout(180);
