@@ -24,7 +24,7 @@ const hash=s=>createHash('sha256').update(s).digest('hex');
 const same=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
 const xyz=p=>[p.x,p.y,p.z].join(' ');
 const success=r=>r&&r.transportError!==true&&r.statusCode===0&&
- (r.successCount===undefined||r.successCount===1);
+ (r.successCount===undefined||(Number.isInteger(r.successCount)&&r.successCount>0));
 const failCode=r=>r&&r.transportError!==true&&
  Number.isInteger(r.statusCode)&&r.statusCode<0&&
  (r.successCount===undefined||r.successCount===0);
