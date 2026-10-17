@@ -66,8 +66,9 @@ export function atriumSpineElements(){
    e.push(
     beam('b177-'+z.id+'-front-pylon-'+n,
      [x,56,27],[x,73,29],n%2?'accent':'metal',1),
+    // Stand above the inherited Y57 2-wide rear public promenade.
     beam('b177-'+z.id+'-rear-pylon-'+n,
-     [x,57,46],[x,74,43],n%2?'glow':'metal',1)
+     [x,60,46],[x,74,43],n%2?'glow':'metal',1)
    );
   }
  }
