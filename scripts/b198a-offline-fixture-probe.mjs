@@ -23,7 +23,10 @@ for(const sample of samples){
   prompt:sample.prompt,generator:async()=>candidate(sample.source)});
  const payload=compileB143Gallery([data.design]);
  if(!verifyB143Payload(payload))throw Error('B198A_FIXTURE_SOURCE_RENDER_REJECTED');
- const rendered=renderB143Html(payload,template);
+ const rendered=renderB143Html(payload,template).replace(
+  '<body>', '<body><div style="padding:14px 20px;background:#402612;color:#fff2da;font-weight:700">'+
+  'B198A CI TEST FIXTURE ONLY — この建築は人間が用意したテスト用形状です。'+
+  'AIが自然言語を理解して生成した結果ではありません。 Minecraft施工は禁止。</div>');
  const folder=path.join(dir,sample.name);fs.mkdirSync(folder,{recursive:true});
  fs.writeFileSync(path.join(folder,'index.html'),rendered);
  fs.writeFileSync(path.join(folder,'source-design.json'),
@@ -51,7 +54,10 @@ const edited=await proposeArchitecture({
 const changed=compileB143Gallery([edited.design]);
 if(!verifyB143Payload(changed))throw Error('B198A_CHANGED_FIXTURE_NOT_RENDERABLE');
 fs.mkdirSync(path.join(dir,'REVISION'),{recursive:true});
-fs.writeFileSync(path.join(dir,'REVISION/index.html'),renderB143Html(changed,template));
+fs.writeFileSync(path.join(dir,'REVISION/index.html'),
+ renderB143Html(changed,template).replace('<body>',
+ '<body><div style="padding:14px 20px;background:#402612;color:#fff2da;font-weight:700">'+
+ 'B198A TEST-ONLY REVISION — テスト用の設計差分であり実モデル推論結果ではありません。 Minecraft施工禁止。</div>'));
 fs.writeFileSync(path.join(dir,'REVISION/source-proof.json'),JSON.stringify(edited.review,null,2)+'\n');
 const summary={schema:'b198a-fixture-only-qa-v1',genuineLLMInferenceTested:false,
  realMinecraftConstructionTested:false,semanticUnderstandingProven:false,
