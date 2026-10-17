@@ -68,7 +68,7 @@ test('replay original legacy B134/B135 classifiers rather than trusting reported
  assert.equal(r134.gameClientAuthenticated,false);
  assert.equal(r135.realWorldAnchorCalibrated,false);
  assert.equal(r135.vanillaFacingMapped,false);
- assert.equal(createB134Commands(pos).length,5);
+ assert.equal(createB134Commands(xyz).length,5);
  const packet=makeProbePacket();
  const data=archive(packet,[b134(),b135()]);
  const result=reconcileB171(packet,obs(packet,pos),data);
