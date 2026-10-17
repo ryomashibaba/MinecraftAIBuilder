@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {makeArkLite,absolute} from './ark-lite.mjs';
+import {makeArkLite,absolute,validateOrigin} from './ark-lite.mjs';
 
 const temp=fs.mkdtempSync(path.join(os.tmpdir(),'ark-lite-test-'));
 process.env.ARK_LITE_DATA_DIR=temp;
@@ -65,6 +65,14 @@ test('large authored building is deterministic, bounded and not a cube',()=>{
  assert(!plan.voxels.some(p=>p.z===0&&p.x===23&&p.y===3));
  assert(validatePlan().blocks===plan.placementCount);
  assert.equal(planInfo().mainSafety,'NOT_PREPARED_9_BLOCKED_UNCHANGED');
+});
+test('Y=-60 is valid Education build height and outside-height coordinates fail closed',()=>{
+ const origin=validateOrigin({x:0,y:-60,z:0});
+ const siteAtDepth=sitePlan(origin,'minecraftaibuildertest');
+ assert.deepEqual(siteAtDepth.extent,{x:[0,47],y:[-60,-31],z:[-4,39]});
+ assert.deepEqual(validateOrigin({x:0,y:-64,z:0}),{x:0,y:-64,z:0});
+ assert.throws(()=>validateOrigin({x:0,y:-65,z:0}),/P0_ORIGIN_OUT_OF_BOUNDS/);
+ assert.throws(()=>validateOrigin({x:0,y:291,z:0}),/P0_ORIGIN_OUT_OF_BOUNDS/);
 });
 test('only safe keep-mode commands generated; no unconditional replace',()=>{
  for(const run of plan.runs){
