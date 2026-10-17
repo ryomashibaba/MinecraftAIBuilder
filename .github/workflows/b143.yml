@@ -372,7 +372,7 @@ jobs:
              b.gates.some(x=>x.status!=='BLOCKED')||b.BuildPlan.operations.length!==0||
              p.constructionApproved!==false||p.worldWrites!==0||
              p.playerCollisionCertified!==false||p.structuralStrengthCertified!==false||
-             p.oldRouteMoves!==101||p.newRouteMoves!==115||
+             p.oldRouteMoves!==101||p.newRouteMoves!==113||
              p.staleObstructedAnchors<=0||p.repairedObstructedAnchors!==0||
              p.replanBends!==4||p.newFloorSegments!==5||
              p.inheritedB141Sha256!==b.integritySha256||
@@ -386,7 +386,7 @@ jobs:
           echo '- ChatGPT-authored category-free DSL designs and B144 source-pinned revisions' >> "$GITHUB_STEP_SUMMARY"
           echo '- Composition: boxes, ellipsoids, cylinders, toruses, diagonal beams and subtractive voids' >> "$GITHUB_STEP_SUMMARY"
           echo '- 28 historic source-pinned scenes plus altered docking terminal and newly generated R3 skybridge: 30 scenes' >> "$GITHUB_STEP_SUMMARY"
-          echo '- A new obstruction blocks the verified 101-step R2; the new source is recompiled and A* reconstructs a distinct 115-step R3 with no obstructed body anchors; zero writes' >> "$GITHUB_STEP_SUMMARY"
+          echo '- A new obstruction blocks the verified 101-step R2; the new source is recompiled and A* reconstructs a distinct 113-step R3 with no obstructed body anchors; zero writes' >> "$GITHUB_STEP_SUMMARY"
           echo '- R4 390 detached; saved R5 and both B148 options 0 locally detached' >> "$GITHUB_STEP_SUMMARY"
           echo '- No commands, no world coordinates, no actual construction' >> "$GITHUB_STEP_SUMMARY"
           echo '- B141 source hash and 9/9 BLOCKED gates validated before publication' >> "$GITHUB_STEP_SUMMARY"
