@@ -47,6 +47,10 @@ export function grandAtriumElements(){
   for(const [n,standing] of STANDING_LEVELS.entries()){
    const y=standing-1,k=p+'-L'+n;
    e.push(
+    // New open-air front gallery above the original entrance portico.
+    // Z1..3 is outside old rear/roof circulation and avoids the original
+    // inherited facade shell at Z7..20; source tests still verify clearance.
+    box(k+'-clear-forecourt',[x-8,y,1],[17,1,3],n%2?'glass':'concrete'),
     box(k+'-front-gallery',[x-8,y,7],[17,1,4],n%2?'wood':'concrete'),
     box(k+'-rear-observation',[x-8,y,17],[17,1,2],n%2?'accent':'glass'),
     box(k+'-side-balcony-west',[x-10,y,11],[3,1,7],m),
@@ -108,7 +112,7 @@ function analyzeOpenGalleries(compiled){
   // floor/headroom squares within the actually authored front galleries.
   // Unverified/blocked spans never become fictitious route edges.
   let best=null;
-  for(const z of [7,8,9]){
+  for(const z of [1,2,7,8,9]){
    let start=null;
    const found=[];
    for(let x=hall.centerX-8;x<=hall.centerX+6;x++){
