@@ -428,7 +428,7 @@ export function buildB197Preview({dir=out}={}){
   'el("b197-open-updated-city").addEventListener("click",()=>{',
   ' index=12;select.value="12";setScene();yaw=.69;pitch=.52;zoom=1.05;drawSoon();',
   '});',
-  'setScene();',
+  'index=11;select.value="11";setScene();',
   '</script>'
  ].join('\n'));
  check(!html.includes('fetch(')&&!html.includes('__B143_GALLERY_JSON__')&&
@@ -442,8 +442,8 @@ export function buildB197Preview({dir=out}={}){
  fs.writeFileSync(sourceFile,JSON.stringify({schema:'B196_SAFETY_GATED_TWENTY_ONE_MODULE_COMPOSITION',modules:[parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.previous.parent.design,parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.previous.design,parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.design,parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.design,parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.design,parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.design,parent.parent.parent.parent.parent.parent.parent.parent.parent.parent.design,parent.parent.parent.parent.parent.parent.parent.parent.parent.design,parent.parent.parent.parent.parent.parent.parent.parent.design,parent.parent.parent.parent.parent.parent.parent.design,parent.parent.parent.parent.parent.parent.design,parent.parent.parent.parent.parent.design,parent.parent.parent.parent.design,parent.parent.parent.design,parent.parent.design,parent.design,design,bridge.design,transitDesign,orbitalDesign,upgraded.design],policy:'parent-wins-overlap'},null,2)+'\n');
  const manifest={
   schema:'minecraftaibuilder-b197-3d-preview-v1',
-  modelId:compiled.id,sourceSha256:compiled.sourceSha256,
-  geometrySha256:compiled.geometrySha256,
+  modelId:upgraded.compiled.id,sourceSha256:upgraded.compiled.sourceSha256,
+  geometrySha256:upgraded.compiled.geometrySha256,
   numberOfActualNew3dScenes:5,
   newConceptModelTotalOutsideHistoric36:41,
   moduleCount:21,mainArchitecturalModules:17,originalIndependentBuildings:5,
@@ -461,8 +461,8 @@ export function buildB197Preview({dir=out}={}){
   primaryRouteSteps:chosen.metrics.sourceSteps,alternativeRouteSteps:other.metrics.sourceSteps,
   comparedRouteDataSha256:H(chosen.sourcePathSha256+other.sourcePathSha256),
   gatewayProposalOnly:true,
-  real3dCells:compiled.primitives.length,annexReal3dCells:annex.compiled.primitives.length,bridgeReal3dCells:bridge.compiled.primitives.length,
-  surfaceCells:surface.length,authoredElements:parent.report.totalAuthoredElements+annex.design.elements.length+bridge.design.elements.length+transitDesign.elements.length+orbitalDesign.elements.length+upgraded.design.elements.length,
+  real3dCells:upgraded.compiled.primitives.length,annexReal3dCells:annex.compiled.primitives.length,bridgeReal3dCells:bridge.compiled.primitives.length,
+  surfaceCells:upgradedSurf.length,authoredElements:parent.report.totalAuthoredElements+annex.design.elements.length+bridge.design.elements.length+transitDesign.elements.length+orbitalDesign.elements.length+upgraded.design.elements.length,
   htmlSha256:H(html),designFileSha256:H(fs.readFileSync(sourceFile)),
   mainModelCapUnchanged:160000,annexConnectedToMain:false,
   districtBoundaryProofCount:12,
