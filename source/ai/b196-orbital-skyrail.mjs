@@ -107,7 +107,7 @@ export function authoredOrbitalDistrictParts(){
 export function createOrbitalDesign(){
  const design={schema:DSL,id:'orbital-skyrail-interchange',
   title:'ORBITAL SKYRAIL — Monumental Aerial Transit District',
-  brief:'独立した第5都市建築。大型交通施設に続く巨大空中乗換都市、三大ガラスアトリウム、真の3D二重環、巨大吊り屋根、5階層公共回廊、支柱と高架ホーム。実ワールド座標・既存都市との物理接続・Minecraft施工は未認証。',
+  brief:'巨大空中乗換都市、三大ガラスアトリウム、発光する二重環、吊り屋根、5層の公共回廊、巨大支柱・高架ホーム。実施工・物理接続未認証。',
   designOnly:true,bounds:{...BOUNDS},elements:authoredOrbitalDistrictParts()};
  validateDesign(design);return design;
 }
