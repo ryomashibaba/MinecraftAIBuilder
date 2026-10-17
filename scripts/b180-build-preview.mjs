@@ -90,7 +90,7 @@ export function buildB180Preview({dir=out}={}){
   newConceptModelTotalOutsideHistoric36:37,
   moduleCount:8,uniqueNewCells:report.uniqueNewCells,
   real3dCells:compiled.primitives.length,
-  surfaceCells:surface.length,authoredElements:report.authoredElements,
+  surfaceCells:surface.length,authoredElements:report.totalParts,
   htmlSha256:H(html),designFileSha256:H(fs.readFileSync(sourceFile)),
   structuralSafetyCertified:false,minecraftActualMovementCertified:false,
   worldWrites:0,constructionApproved:false,readiness:'NOT_PREPARED',

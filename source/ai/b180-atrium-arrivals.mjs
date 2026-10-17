@@ -141,7 +141,7 @@ export function inspectFourTierArrivalPaths(scene){
    bodyClearanceViolations:blocked,
    connectedHalls:HALLS.map(x=>x.id),
    connectedBridges:bridgeNodes,
-   2WideRouteMoves:ARRIVAL.xLast-ARRIVAL.x0,
+   full2WideRouteMoves:ARRIVAL.xLast-ARRIVAL.x0,
    connectedNodeCount:seen.size,
    sourceOnly:true,minecraftPlayerPathCertified:false});
   yes(unsupported===0&&blocked===0,
@@ -220,7 +220,7 @@ export function buildAtriumArrivals(){
   inheritedParts:parent.report.authoredElements,
   addedParts:design.elements.length,totalParts:parent.report.authoredElements+design.elements.length,
   independentModules:8,moduleCap:160,globalCellsCap:MAX_CELLS,
-  4VerifiedPublicLevels:geometry.tiers.length,
+  verifiedPublicLevels:geometry.tiers.length,
   hallToBridgeConnections:geometry.checkedHallToBridgeConnections,
   arrivalRouteDigest:geometry.routeSha256,
   preserved8BridgePaths:bridgeProof.passed,
@@ -245,7 +245,7 @@ export function verifyAtriumArrivalReport(r){
   r.inheritedParts===590&&r.addedParts>=85&&r.addedParts<=160&&
   r.totalParts===r.inheritedParts+r.addedParts&&
   r.independentModules===8&&r.moduleCap===160&&r.globalCellsCap===MAX_CELLS&&
-  r['4VerifiedPublicLevels']===4&&r.hallToBridgeConnections===24&&
+  r.verifiedPublicLevels===4&&r.hallToBridgeConnections===24&&
   r.arrivalRouteDigest?.length===64&&r.preserved8BridgePaths===8&&
   r.inheritedThreeSkyPortalPaths===3&&r.inherited17RiserSeams===17&&
   r.sourceSha256?.length===64&&r.geometrySha256?.length===64&&

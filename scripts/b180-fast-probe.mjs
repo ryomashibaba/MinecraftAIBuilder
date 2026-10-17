@@ -6,7 +6,7 @@ import {buildAtriumArrivals,verifyAtriumArrivalReport} from '../source/ai/b180-a
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const {compiled,report,geometry}=buildAtriumArrivals();
 if(!verifyAtriumArrivalReport(report))throw Error('B180_SECURITY_HOLD');
-const result={...report,4LevelRoutingEvidence:geometry,
+const result={...report,routingEvidenceFourLevels:geometry,
  actualSurfaceCells:surfaceOnly(compiled).length};
 fs.mkdirSync(path.join(root,'b180-evidence'),{recursive:true});
 fs.writeFileSync(path.join(root,'b180-evidence/B180_ARCHITECTURE_PROOF.json'),
@@ -14,7 +14,7 @@ fs.writeFileSync(path.join(root,'b180-evidence/B180_ARCHITECTURE_PROOF.json'),
 console.log('B180_ARCHITECTURE_PROOF',JSON.stringify({
  cells:report.finalCells,newCells:report.uniqueNewCells,airCells:report.conceptualAirCells,
  surfaces:result.actualSurfaceCells,totalParts:report.totalParts,addedParts:report.addedParts,
- modules:report.independentModules,checkedFloors:report['4VerifiedPublicLevels'],
+ modules:report.independentModules,checkedFloors:report.verifiedPublicLevels,
  hallBridgeConnections:report.hallToBridgeConnections,
  preservedBridges:report.preserved8BridgePaths,
  worldWrites:0,readiness:'NOT_PREPARED'}));
