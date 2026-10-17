@@ -1,0 +1,47 @@
+name: B165 multi-level terminal interior geometry
+on:
+  push:
+    branches:
+      - feature/b165-orbital-crown-interior-stairs-galleries
+    paths:
+      - 'source/ai/b165-orbital-interiors.mjs'
+      - 'scripts/b165-fast-probe.mjs'
+      - 'scripts/build-b165-site.test.mjs'
+      - '.github/workflows/b165-fast.yml'
+  pull_request:
+    paths:
+      - 'source/ai/b165-orbital-interiors.mjs'
+      - 'scripts/b165-fast-probe.mjs'
+      - 'scripts/build-b165-site.test.mjs'
+      - '.github/workflows/b165-fast.yml'
+permissions:
+  contents: read
+concurrency:
+  group: b165-fast-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify-interior:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Confirm geometry source syntax
+        run: |
+          node --check source/ai/b165-orbital-interiors.mjs
+          node --check scripts/b165-fast-probe.mjs
+      - name: Recompile 2 stair flights with actual voxel support and preserve lower route
+        run: node scripts/b165-fast-probe.mjs
+      - name: Test two wings and 35-scene gallery
+        if: hashFiles('scripts/build-b165-site.test.mjs') != ''
+        run: node --test scripts/build-b165-site.test.mjs
+      - name: Preserve reproducible no-world-write proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: B165-Verified-Interior-Stairs
+          path: b165-fast-evidence/B165_INTERIOR_PROOF.json
+          if-no-files-found: warn
+          retention-days: 14
