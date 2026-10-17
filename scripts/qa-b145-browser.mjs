@@ -34,7 +34,8 @@ const pages=[
  {name:'B159-polaris',url:'ai/polaris/index.html',minimum:25,expected:25},
  {name:'B160-doppler',url:'ai/doppler/index.html',minimum:27,expected:27},
  {name:'B161-adaptive',url:'ai/adaptive-route/index.html',minimum:28,expected:28},
- {name:'B162-revised',url:'ai/revised-bridge/index.html',minimum:30,expected:30}
+ {name:'B162-revised',url:'ai/revised-bridge/index.html',minimum:30,expected:30},
+ {name:'B163-portfolio',url:'ai/corridor-options/index.html',minimum:33,expected:33}
 ];
 const browser=await chromium.launch({headless:true,args:['--no-sandbox','--disable-dev-shm-usage']});
 const results=[];
@@ -90,6 +91,29 @@ async function inspect(info,mobile){
   await page.waitForTimeout(950);
   const last=await page.locator('#building').inputValue();
   if(last!==String(options-1))fail(info.name+'_MODEL_SELECTION_FAILED');
+  if(info.name==='B163-portfolio'){
+   const model=page.locator('#building'),status=page.locator('#b163-status');
+   const choices=[
+    {index:'30',width:'幅2',moves:'水平101移動',cells:'追加セル825'},
+    {index:'31',width:'幅4',moves:'水平101移動',cells:'追加セル1,212'},
+    {index:'32',width:'幅8',moves:'水平127移動',cells:'追加セル2,318'}
+   ];
+   for(const c of choices){
+    await model.selectOption(c.index);await page.waitForTimeout(210);
+    const view=await status.innerText();
+    if(!view.includes(c.width)||!view.includes(c.moves)||
+       !view.includes(c.cells)||
+       !view.includes('PASS_FLAT_FOOTPRINT_GEOMETRY'))
+      fail('B163_PROFILE_GEOMETRY_MISMATCH_'+c.index+'_'+view);
+   }
+   const overlay=page.locator('#b163-route');
+   if(!await overlay.isChecked())fail('B163_PATH_OVERLAY_HIDDEN');
+   await overlay.uncheck();await overlay.check();
+   await model.selectOption('29');await page.waitForTimeout(170);
+   if(!(await status.innerText()).includes('比較対象外'))
+    fail('B163_HISTORICAL_MODEL_FALSE_PROFILE');
+   await model.selectOption('32');
+  }
   if(info.name==='B162-revised'){
    const picker=page.locator('#building'),status=page.locator('#b162-status');
    await picker.selectOption('27');await page.waitForTimeout(250);
