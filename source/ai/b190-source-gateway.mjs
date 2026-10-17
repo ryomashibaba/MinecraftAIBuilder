@@ -103,7 +103,13 @@ export function evaluateSourceGateway(main,annex,offset=MODEL_OFFSET){
  const originalAnnexStillExact=virtualAnnexCells.size===annex.primitives.length;
  fail(originalMainStillExact&&originalAnnexStillExact,
   'SOURCE_MODELS_MUTATED');
- fail(blocked.length===0,'GATEWAY_CLEARANCE_HOLD_'+JSON.stringify(blocked.slice(0,12)));
+ fail(blocked.length===0,'GATEWAY_CLEARANCE_HOLD_'+JSON.stringify(blocked.slice(0,12).map(p=>({
+   ...p,reason:[[p.x, p.z],[p.x+1,p.z],[p.x,p.z+1],[p.x+1,p.z+1]]
+     .map(([x,z])=>({x,z,
+      floor:sourceUnion.has(K(x,72,z)),
+      body:sourceUnion.has(K(x,73,z)),
+      head:sourceUnion.has(K(x,74,z))}))
+ }))));
  // Ensure the bridge has not collided with *any* original body/head space
  // in its 2x2 travel footprint; explicit per-station check covers both.
  const occupiedBridgeOutsideModels=newSlab.every(p=>
