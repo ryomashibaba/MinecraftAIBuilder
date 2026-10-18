@@ -31,3 +31,23 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File $p -Model 'qwen3.8:27b'
 
 ## 次の合格判定
 (1) 独立B143でソース・幾何SHA再計算PASS → (2) 人間が3D外観・内部・吹き抜け・ラウンジ・用途への忠実性を評価 → (3) 低評価なら元ソースと選択された保護部材のSHAを保持して改修 → (4) 図書館以外にも横展開。固定建物カテゴリへの退化は禁止。
+
+## 2026-10-18 実Qwen失敗証拠 — B198S_UPLOAD_THIS_RESULT(2).zip
+
+ユーザー提出ZIPの3ファイルを確認。これはWindows Qwen `qwen3.8:27b`、凍結c01、1回の実モデル要求、`num_ctx=6144`、`num_predict=3072`、`think:false`要求で、35,151ms後に**Ollama /api/chatがHTTP 500を返した**失敗例。結果は`SERVER_HTTP_HOLD`、`HOLD_NO_COMPILED_SOURCE`、B143ソース0件、未採点。元応答はサーバーが正常に返さなかったため保存なし (`originalUnmodifiedResponseStored=false`)。Minecraft接続/書込み0、9ゲートBLOCKED。
+
+**原因未確定**: HTTP 500はVRAM不足、モデルrunner停止、ランタイム不具合など複数の原因があり得る。単に`num_ctx`や出力トークンを小さくして高価な再試行を繰り返すのは禁止。旧B198S bridgeは非2xxの応答本文を無条件で破棄していたので、B198YではJSON/プレーンテキストの両方を**固定カテゴリのみに分類**し、SHA256指紋とHTTPステータスを診断結果に残す（元のOllamaエラー文、ユーザーパス、プロンプトは外部提出しない）。これは**今後の実行にだけ**作用する。旧提出ZIPから破棄されたエラー本文を復元することはできない。Windows v4のSHA固定の旧インストールは書換え禁止で、このGitHub改修が既存v4に自動反映されたとは主張しない。
+
+**次の最小操作（LLM呼出0、Minecraft 0）**: Windows PowerShellで公式Ollamaサーバーログを確認する。Ollama公式のWindowsログは `%LOCALAPPDATA%\\Ollama\\server.log`、過去分は `server-#.log`。エラー行の機密の可能性があるパスを除いて共有する。
+
+```powershell
+$logs = @(Get-ChildItem (Join-Path $env:LOCALAPPDATA 'Ollama') -Filter 'server*.log' -File -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending | Select-Object -First 2)
+foreach ($file in $logs) {
+  Write-Host ('=== ' + $file.Name + ' ===')
+  Get-Content -LiteralPath $file.FullName -Tail 1800 |
+    Select-String -Pattern '500|ERROR|runner|terminated|out of memory|alloc|CUDA|GGML|load failed' |
+    Select-Object -Last 35
+}
+```
+
+このログ確認だけではモデルは起動しない。メモリ・GPU情報、障害発生時刻、runnerの終了理由に基づいて**次の実モデル実行設定を決める**。まずこの原因追跡を行い、再試行が本当に必要な場合のみユーザーが明示的に実行する。
