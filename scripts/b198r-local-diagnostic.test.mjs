@@ -97,15 +97,15 @@ test('non-JSON and wrong answer are HOLD, not a false success',async()=>{
  assert.equal(r.telemetry.generatedTokensPerSecond,12);
  assert.equal(r.response.jsonMatchedExpectedShape,false);
 });
-test('only caller-supplied local model IDs, bounded times/ports, fresh output and known CLI flags',()=>{
+test('only caller-supplied local model IDs, bounded times/ports, fresh output and known CLI flags',async()=>{
  const a=parseB198RArgs(['--model',MOCK,'--out','fresh-result.json',
   '--timeout-seconds','60','--port','11434']);
  assert.equal(a.timeoutSeconds,60);
  assert.equal(a.port,11434);
  assert.equal(parseB198RArgs(['--help']).help,true);
- assert.throws(()=>runB198RDiagnostic({model:'m'}),/B198R_EXPLICIT_LOCAL_MODEL_REQUIRED/);
+ await assert.rejects(runB198RDiagnostic({model:'m'}),/B198R_EXPLICIT_LOCAL_MODEL_REQUIRED/);
  for(const timeoutSeconds of [0,14,121,900,3.5]){
-  assert.rejects(runB198RDiagnostic({model:MOCK,timeoutSeconds}),
+  await assert.rejects(runB198RDiagnostic({model:MOCK,timeoutSeconds}),
    /B198R_TIMEOUT_SECONDS_15_TO_120/);
  }
  assert.throws(()=>parseB198RArgs(['--model',MOCK,'--out','x','--port','99999']),
