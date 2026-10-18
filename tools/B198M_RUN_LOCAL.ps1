@@ -13,7 +13,7 @@ param(
 )
 $ErrorActionPreference='Stop'
 $ProgressPreference='SilentlyContinue'
-$branch='feature/b198p-measured-local-model-timeouts'
+$branch='feature/b198q-long-local-http-transport-failfast'
 $root=$null
 function Hold([string]$reason){throw "B198M_HOLD_$reason"}
 try{
@@ -100,7 +100,9 @@ try{
  }
  if($Mode -eq 'Pilot'){$cmd+='--stop-on-timeout'}
  Write-Host ("Local timeout per model request: {0} seconds." -f $TimeoutSeconds)
- Write-Host 'B198P Pilot is one original Japanese creation task by default; revisions are opt-in.'
+ Write-Host 'B198Q: transport uses 127.0.0.1-only native HTTP; no hidden 300-second fetch header cutoff.'
+ Write-Host 'B198Q: fatal network errors stop repeated model calls; reviews remain source-only.'
+ Write-Host 'Pilot is one original Japanese creation task by default; revisions are opt-in.'
  Write-Host ('Starting localhost source-only A/B for {0} creation task(s).' -f $Cases)
  $old=Get-Location
  try{
