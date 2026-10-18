@@ -1,4 +1,4 @@
-# B198V one-time local source-only workbench. Does NOT run an LLM.
+# B198W review-enabled workbench: v2 installs BESIDE v1; never overwrites v1. No LLM during install.
 [CmdletBinding()]
 param(
  [string]$InstallRoot='',
@@ -8,7 +8,7 @@ param(
 )
 $ErrorActionPreference='Stop'
 $ProgressPreference='SilentlyContinue'
-$branch='feature/b198v-persistent-offline-workbench'
+$branch='feature/b198w-offline-source-quality-review'
 $temporary=$null
 $stage=$null
 function Hold([string]$reason){throw "B198V_INSTALL_HOLD_$reason"}
@@ -42,7 +42,7 @@ function Shortcut([string]$file,[string]$mode,[string]$modelId,[string]$endpoint
  [IO.File]::WriteAllText($file,(($lines -join [Environment]::NewLine)+[Environment]::NewLine),[Text.Encoding]::ASCII)
 }
 try{
- Write-Host 'B198V ONE-TIME OFFLINE WORKBENCH INSTALL (NO LLM)' -ForegroundColor Cyan
+ Write-Host 'B198W OFFLINE SOURCE REVIEW WORKBENCH INSTALL (NO LLM)' -ForegroundColor Cyan
  if(-not (Get-Command node -ErrorAction SilentlyContinue)){Hold 'NODE_22_PLUS_REQUIRED'}
  $version=[string](& node --version)
  if($LASTEXITCODE -ne 0 -or $version -notmatch '^v([0-9]+)\.'){Hold 'NODE_22_PLUS_REQUIRED'}
@@ -61,11 +61,11 @@ try{
  }
  $InstallRoot=[IO.Path]::GetFullPath($InstallRoot)
  New-Item -ItemType Directory -Path $InstallRoot -Force | Out-Null
- $kit=Join-Path $InstallRoot 'offline-workbench-v1'
+ $kit=Join-Path $InstallRoot 'offline-workbench-v2'
  $engine=Join-Path $kit 'engine'
  if(Test-Path -LiteralPath $kit){
   VerifyCache $engine
-  Write-Host 'B198V_EXISTING_WORKBENCH_VERIFIED (NO DOWNLOAD, NO OVERWRITE)' -ForegroundColor Green
+  Write-Host 'B198W_EXISTING_REVIEW_WORKBENCH_VERIFIED (NO DOWNLOAD, NO OVERWRITE)' -ForegroundColor Green
   Write-Host ('Offline shortcut: {0}' -f (Join-Path $kit 'REPLAY_LATEST_OFFLINE.cmd'))
   if(Test-Path -LiteralPath (Join-Path $kit 'RUN_ONE_REAL_MODEL_ONCE.cmd')){
    Write-Host ('Explicit local model shortcut: {0}' -f (Join-Path $kit 'RUN_ONE_REAL_MODEL_ONCE.cmd'))
@@ -111,7 +111,7 @@ try{
   Shortcut (Join-Path $stage 'RUN_ONE_REAL_MODEL_ONCE.cmd') 'SourceProbe' $Model $Endpoint
  }
  $info=[ordered]@{
-  schema='minecraftaibuilder-b198v-offline-one-click-v1'
+  schema='minecraftaibuilder-b198w-offline-source-review-v1'
   baseBranch=$branch
   model=if($Model){$Model}else{$null}
   sourceEngine='engine'
@@ -123,20 +123,20 @@ try{
   worldWrites=0
   readiness='NOT_PREPARED'
  }
- [IO.File]::WriteAllText((Join-Path $stage 'B198V_WORKBENCH_INFO.json'),
+ [IO.File]::WriteAllText((Join-Path $stage 'B198W_WORKBENCH_INFO.json'),
   ($info|ConvertTo-Json -Depth 6),[Text.Encoding]::UTF8)
  if(Test-Path -LiteralPath $kit){Hold 'CONCURRENT_INSTALL_REFUSE_OVERWRITE'}
  Move-Item -LiteralPath $stage -Destination $kit
  $stage=$null
  VerifyCache $engine
- Write-Host 'B198V_INSTALL_FINISHED OFFLINE_SOURCE_CACHE_READY_NO_MODEL_CALLED' -ForegroundColor Green
+ Write-Host 'B198W_INSTALL_FINISHED REVIEW_WORKBENCH_READY_NO_MODEL_CALLED' -ForegroundColor Green
  Write-Host ('OFFLINE REPLAY: {0}' -f (Join-Path $kit 'REPLAY_LATEST_OFFLINE.cmd'))
  if($Model){
   Write-Host ('ONE REAL LLM RUN (ONLY WHEN YOU CHOOSE): {0}' -f (Join-Path $kit 'RUN_ONE_REAL_MODEL_ONCE.cmd'))
  }
  Write-Host 'No model inference, paid API, or Minecraft world writes during installation.'
 }catch{
- Write-Host ('B198V_INSTALL_FINISHED HOLD: {0}' -f $_.Exception.Message) -ForegroundColor Yellow
+ Write-Host ('B198W_INSTALL_FINISHED HOLD: {0}' -f $_.Exception.Message) -ForegroundColor Yellow
  exit 1
 }finally{
  if($stage -and (Test-Path -LiteralPath $stage)){
