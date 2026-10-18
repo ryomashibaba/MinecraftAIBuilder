@@ -8,8 +8,8 @@
  */
 import http from 'node:http';
 import {performance} from 'node:perf_hooks';
-import {repairB198TMetadataOnly}
- from './b198t-metadata-only-repair.mjs';
+import {prepareCapturedModelSource}
+ from './b198u-bounds-only-repair.mjs';
 
 export const SCHEMA='minecraftaibuilder-b198s-native-single-source-json-v1';
 const ENDPOINT=/^http:\/\/127\.0\.0\.1:(\d{2,5})\/v1\/chat\/completions$/;
@@ -43,6 +43,8 @@ const STRUCTURAL_GUIDE=[
  'For beam use start:[x,y,z],end:[x,y,z],thickness 1..3.',
  'Do not include fields of unrelated shapes, invented types, or Minecraft commands.',
  'All coordinates integer, nonnegative and inside bounds. Include genuine supported floors and cleared two-block headroom.',
+ 'Check every shape extent before finalizing bounds: box ends origin+size-1; ellipsoid center+radius; cylinder and torus also need transverse radius; beam thickness adds padding.',
+ 'Declare width, height, depth large enough to fully enclose all originally authored shapes, without negative domains.',
  'Use distinctive overall silhouette, multiple functional zones and a meaningful interior void when the request needs them.',
  'Make a coherent first-pass design with approximately 12..28 meaningful source elements, not hundreds of redundant decorations.',
  'Keep explanation short (under 150 characters), assumptions a short array. Prioritize complete compact JSON over verbose prose.',
@@ -51,7 +53,8 @@ const STRUCTURAL_GUIDE=[
 
 export function createB198SNativeBridge({
  numPredict=3072,numCtx=6144,keepAlive='10m',
- transport=http,addArchitectureGuide=true
+ transport=http,addArchitectureGuide=true,
+ onModelResponse=null
 }={}){
  if(!Number.isSafeInteger(numPredict)||numPredict<512||numPredict>4096)
   throw fail('OUTPUT_TOKENS_512_TO_4096');
@@ -60,6 +63,8 @@ export function createB198SNativeBridge({
  if(numPredict>numCtx-2048)throw fail('INSUFFICIENT_CONTEXT_ROOM');
  if(keepAlive!=='10m'&&keepAlive!=='5m')throw fail('KEEP_ALIVE_INVALID');
  if(typeof transport?.request!=='function')throw fail('TRANSPORT_REQUIRED');
+ if(onModelResponse!==null&&typeof onModelResponse!=='function')
+  throw fail('EVIDENCE_PERSISTENCE_CALLBACK_REQUIRED');
  const entries=[];
  const fetcher=(url,opts={})=>{
   const match=typeof url==='string'?ENDPOINT.exec(url):null;
@@ -145,15 +150,26 @@ export function createB198SNativeBridge({
      // Preserve the real model source geometry. Only an excess of B143
      // title/brief characters can be trimmed with SHA and explicit disclosure.
      let normalized;
-     try{normalized=repairB198TMetadataOnly(content)}
-     catch{return final(fail('METADATA_AUDIT_FAILURE'))}
+     try{
+      normalized=prepareCapturedModelSource(content);
+      // Write the FULL ORIGINAL response before strict source validation.
+      // Invalid geometry remains evidence; user need not spend another
+      // local 27B inference just to recover the model-authored payload.
+      if(onModelResponse)onModelResponse({
+       originalContent:content,correctedContent:normalized.content,
+       metadataRepair:normalized.metadataRepair,
+       boundsRepair:normalized.boundsRepair
+      });
+     }catch{return final(fail('SOURCE_AUDIT_OR_EVIDENCE_PERSISTENCE_FAILED'))}
      const detail={
       outcome:ended&&!isLength?'MODEL_RETURNED':'MODEL_INCOMPLETE',
       elapsedMs,
       complete:ended&&!isLength,doneReason:typeof body.done_reason==='string'?
        body.done_reason.slice(0,50):null,
       responseCharacters:content.length,
-      metadataRepair:normalized.provenance,
+      metadataRepair:normalized.metadataRepair,
+      boundsRepair:normalized.boundsRepair,
+      rawModelOutputEvidenceStored:onModelResponse!==null,
       thinkingCharacters:number(body.message?.thinking?.length),
       totalSeconds:seconds(body.total_duration),
       loadSeconds:seconds(body.load_duration),
@@ -186,5 +202,8 @@ export function createB198SNativeBridge({
    thinkingOffIndependentlyVerified:false,
    nativeOllamaSourceOnly:true,
     boundedMetadataRepairEnabled:true,
-    geometryRepairNeverAutomatic:true,worldWrites:0}};
+    geometryRepairNeverAutomatic:true,
+    declaredBoundsExpansionOnlyIfNoGeometryChanges:true,
+    invalidModelOutputCapturedForOfflineReview:onModelResponse!==null,
+    worldWrites:0}};
 }
