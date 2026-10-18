@@ -50,6 +50,13 @@ test('B198H CLI refuses implicit model spending and incompatible modes',()=>{
  const ro=parseB198HArgs(['studio','--project','dir']);
  assert.equal(ro.model,null);
  assert.equal(ro.port,0);
+ assert.throws(()=>parseB198HArgs(['studio','--project','new',
+  '--prompt','展望ラウンジのある建築を設計して']),
+  /B198H_WORKFLOW_PROMPT_REQUIRES_EXPLICIT_MODEL/);
+ assert.throws(()=>parseB198HArgs(['studio','--project','new',
+  '--design','old.json','--prompt','未来建築を設計して',
+  '--local-model','mock']),
+  /B198H_WORKFLOW_PROMPT_AND_EXISTING_DESIGN_MUTUALLY_EXCLUSIVE/);
 });
 
 test('existing Studio is reused with draft review + explicit rejection, preserving approval and zero world actions',async()=>{
@@ -183,5 +190,47 @@ test('benchmark run refuses existing directory before invoking any generator',as
    outDir:dir,modelId:'test-double'
   }),/B198H_REFUSE_EXISTING_OUTPUT/);
   assert.equal(calls,0);
+ }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
+
+
+test('one Japanese instruction creates initial exact source and opens live draft-review Studio in one call, without replacing history',async()=>{
+ const dir=temp(),project=path.join(dir,'one-command-studio');
+ let calls=0;
+ const good=fixtureAmphitheater();
+ good.elements=[{id:'large-original-public-floor',shape:'box',mode:'add',
+  material:'stone',origin:[6,3,6],size:[22,1,22]}];
+ const opts=parseB198HArgs(['studio','--project',project,
+  '--prompt','大きな床を持つ明るい建築を作り、のちほど自分で修正したい',
+  '--local-model','test-provider']);
+ const provider=async req=>{
+  calls++;
+  assert.equal(req.mode,'creation');
+  return candidate(good);
+ };
+ try{
+  const produced=await executeB198H(opts,{generator:provider});
+  try{
+   assert.equal(produced.modelConnected,true);
+   assert.equal(produced.initialSourceReport.status,
+    'SOURCE_CANDIDATE_REVIEW_REQUIRED');
+   assert.equal(produced.initialSourceReport.finalHighRiskCount,0);
+   assert.equal(calls,1);
+   assert.equal(produced.initialSourceReport.world.worldWrites,0);
+   const status=await(await fetch(produced.url+'/api/status')).json();
+   assert.equal(status.headId,'v0001');
+   assert.equal(status.approvedDesign.elements.length,1);
+   assert.equal(status.proposedDraft,null);
+   assert.equal(status.requiresRealModel,false);
+   assert.equal(status.safety.readiness,'NOT_PREPARED');
+   const evidence=JSON.parse(fs.readFileSync(path.join(project,
+    'B198H_INITIAL_MODEL_SOURCE_REVIEW.json'),'utf8'));
+   assert.equal(evidence.sourceSha256,status.approvedHeadSha256);
+   await assert.rejects(executeB198H(opts,{generator:provider}),
+    /B198H_WORKFLOW_PROMPT_REQUIRES_NEW_EMPTY_PROJECT/);
+   assert.equal(calls,1);
+   assert.equal((await(await fetch(produced.url+'/api/status')).json())
+    .approvedHeadSha256,status.approvedHeadSha256);
+  }finally{await produced.app.close();}
  }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });
