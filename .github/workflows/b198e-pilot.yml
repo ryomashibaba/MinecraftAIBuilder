@@ -27,7 +27,7 @@ jobs:
         run: node scripts/b198e-pilot-fast-probe.mjs
       - name: Regression tests and precise source-goal audit
         run: |
-          node --test scripts/b198a-engine.test.mjs scripts/b198a-cli.test.mjs scripts/b198b-quality.test.mjs scripts/b198c-critic.test.mjs scripts/b198d-session.test.mjs
+          node --test scripts/b198a-engine.test.mjs scripts/b198a-cli.test.mjs scripts/b198b-quality.test.mjs scripts/b198c-critic.test.mjs scripts/b198d-session.test.mjs scripts/b198e-pilot.test.mjs
       - name: Create truthful source-pinned 3D architecture research review
         run: node scripts/b198e-build-review.mjs
       - uses: actions/upload-artifact@v4
