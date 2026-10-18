@@ -56,7 +56,10 @@ export function buildB198EPreview({dir=path.join(root,'b198e-evidence')}={}){
   c.caseId,[c.naturalLanguageRequest,
    'ソース形状基礎検査: '+c.sourceObjectiveGoals.status,
    '計画した座標サンプル: '+c.fixedCoordinateSamplesPassed+'/'+c.fixedCoordinateArchitecturalSamples.length,
-   '美観・依頼への意味一致: UNREVIEWED / 人間による3D確認が必要']
+   '美観・依頼への意味一致: UNREVIEWED / 人間による3D確認が必要',
+   '自己監査で発見した不足: '+proof.candidQualitativeGaps[c.caseId],
+   '対応する修正案の不足: '+proof.candidQualitativeGaps[
+    ({c01:'r01',c03:'r02',c05:'r03',c08:'r04'})[c.caseId]]]
  ]));
  const browserJs=[
  '<script id="b198e-review-navigator">',
