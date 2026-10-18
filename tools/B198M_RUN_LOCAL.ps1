@@ -18,7 +18,7 @@ param(
 )
 $ErrorActionPreference='Stop'
 $ProgressPreference='SilentlyContinue'
-$branch='feature/b198w-offline-source-quality-review'
+$branch='feature/b198x-reviewed-quality-revision-brief'
 $root=$null
 function Hold([string]$reason){throw "B198M_HOLD_$reason"}
 try{
