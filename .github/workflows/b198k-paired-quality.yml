@@ -1,0 +1,68 @@
+name: B198K Frozen 12+4 Direct vs Directed Architecture Source Quality
+on:
+  push:
+    branches: [feature/b198k-real-provider-ab-architecture]
+  pull_request:
+    paths:
+      - 'source/ai/b198k-paired-study.mjs'
+      - 'scripts/b198k-local-comparison.mjs'
+      - 'scripts/b198k-paired-study.test.mjs'
+      - '.github/workflows/b198k-paired-quality.yml'
+permissions:
+  contents: read
+jobs:
+  paired-real-b143-source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Syntax and safety boundary
+        run: |
+          node --check source/ai/b198k-paired-study.mjs
+          node --check scripts/b198k-local-comparison.mjs
+          node --check scripts/b198k-paired-study.test.mjs
+      - name: Previous B198A-J and B198K paired source/3D regression
+        run: |
+          node --test \
+            scripts/b198a-engine.test.mjs \
+            scripts/b198a-cli.test.mjs \
+            scripts/b198b-quality.test.mjs \
+            scripts/b198c-critic.test.mjs \
+            scripts/b198d-session.test.mjs \
+            scripts/b198e-pilot.test.mjs \
+            scripts/b198f-evidence.test.mjs \
+            scripts/b198g-autonomous-quality.test.mjs \
+            scripts/b198g-local-adapter.test.mjs \
+            scripts/b198h-local-workflow.test.mjs \
+            scripts/b198i-design-director.test.mjs \
+            scripts/b198i-studio-director.test.mjs \
+            scripts/b198j-circulation.test.mjs \
+            scripts/b198k-paired-study.test.mjs
+  old-and-new-real-browser:
+    needs: [paired-real-b143-source]
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Install Chromium
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Verify existing desktop/mobile Studio and source comparison
+        run: |
+          node scripts/b198d-browser-qa.mjs
+          node scripts/b198i-browser-qa.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: B198K-Inherited-Source-Only-3D-Screenshots
+          path: |
+            b198d-evidence/B198D_*_*.png
+            b198i-browser-evidence/B198I_*_*.png
+            b198i-browser-evidence/B198I_CHROMIUM_REPORT.json
+          if-no-files-found: warn
+          retention-days: 14
