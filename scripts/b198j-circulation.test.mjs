@@ -176,7 +176,9 @@ test('multi-elevation floor anchors are never promoted to independently verified
   planner:async()=>p,generator:async()=>{calls++;return output(d);},
   maxRepairRounds:0,maxSourceAttempts:3
  });
- assert.equal(calls,1);
+ // B198L now makes one genuine repair request for a missing vertical route,
+ // then stops when the model returns the exact same source SHA again.
+ assert.equal(calls,2);
  assert.equal(generated.report.planProof.failedAnchors,0);
  assert.equal(generated.report.circulationProof.allDeclaredSameElevationPairsConnected,true);
  assert.equal(generated.report.circulationProof.differentElevationGroups,2);
