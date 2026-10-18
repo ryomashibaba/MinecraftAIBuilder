@@ -1,7 +1,7 @@
 # B198M Windows LOCAL model pilot. Never contacts Minecraft or a paid model API.
 [CmdletBinding()]
 param(
- [ValidateSet('Pilot','Full','Preflight','Diagnose','SourceProbe')][string]$Mode='Pilot',
+ [ValidateSet('Pilot','Full','Preflight','Diagnose','SourceProbe','ReplayLatest')][string]$Mode='Pilot',
  [string]$Model='',
  [string]$Endpoint='http://127.0.0.1:11434/v1/chat/completions',
  [string]$SourceDirectory='',
@@ -12,12 +12,13 @@ param(
  [ValidateRange(60,360)][int]$SourceTimeoutSeconds=300,
  [ValidateRange(512,4096)][int]$SourceOutputTokens=3072,
  [ValidateRange(4096,8192)][int]$SourceContextTokens=6144,
+ [string]$ReplaySourceFile='',
  [switch]$IncludePilotRevision,
  [switch]$NoRevisions
 )
 $ErrorActionPreference='Stop'
 $ProgressPreference='SilentlyContinue'
-$branch='feature/b198t-provenance-preserving-metadata-repair'
+$branch='feature/b198u-save-repair-replay-source'
 $root=$null
 function Hold([string]$reason){throw "B198M_HOLD_$reason"}
 try{
@@ -34,6 +35,7 @@ try{
  }
  $major=[int]$Matches[1]
  if($major -lt 22){Hold 'NODE_22_PLUS_REQUIRED'}
+ if($Mode -eq 'ReplayLatest'){$Model='B198U_OFFLINE_NO_MODEL'}
  if(-not $Model){
   if($Endpoint -ne 'http://127.0.0.1:11434/v1/chat/completions'){
    Hold 'EXPLICIT_MODEL_REQUIRED_FOR_ALTERNATE_LOCAL_SERVER'
@@ -56,7 +58,9 @@ try{
   }
  }
  if($Model -notmatch '^[A-Za-z0-9._:/-]{2,140}$'){Hold 'INVALID_LOCAL_MODEL_ID'}
- Write-Host "Selected LOCAL model: $Model"
+ if($Mode -eq 'ReplayLatest'){
+  Write-Host 'B198U OFFLINE REPLAY — existing model response, NO Ollama model call.'
+ }else{Write-Host "Selected LOCAL model: $Model"}
  if($Mode -eq 'Preflight'){
   Write-Host 'B198M_TEST_FINISHED PREFLIGHT_READY_NO_INFERENCE' -ForegroundColor Green
   return
@@ -75,7 +79,7 @@ try{
   $SourceDirectory=$folders[0].FullName
  }
  $SourceDirectory=(Resolve-Path -LiteralPath $SourceDirectory).Path
- foreach($rel in @('scripts\b198k-local-comparison.mjs','scripts\b198m-pilot-summary.mjs','scripts\b198r-local-diagnostic.mjs','scripts\b198s-single-source-probe.mjs')){
+ foreach($rel in @('scripts\b198k-local-comparison.mjs','scripts\b198m-pilot-summary.mjs','scripts\b198r-local-diagnostic.mjs','scripts\b198s-single-source-probe.mjs','scripts\b198u-offline-replay.mjs')){
   if(-not (Test-Path -LiteralPath (Join-Path $SourceDirectory $rel) -PathType Leaf)){
    Hold 'REQUIRED_GITHUB_SOURCE_MISSING'
   }
@@ -121,7 +125,7 @@ try{
    Hold 'B198S_OUTPUT_CONTEXT_OVERLAP'
   }
   $study=Join-Path $root 'source-study'
-  Write-Host 'B198T: ONE original c01 model request; bounded title/brief repair preserves all geometry.'
+  Write-Host 'B198U: one model call, always save original candidate; safely expand declared bounds WITHOUT altering geometry.'
   Write-Host ('B198S native Ollama: think OFF requested, max output {0} tokens, context {1}, timeout {2}s.' -f $SourceOutputTokens,$SourceContextTokens,$SourceTimeoutSeconds)
   $old=Get-Location
   try{
@@ -139,6 +143,10 @@ try{
   $upload=Join-Path $root 'B198S_UPLOAD_THIS_RESULT'
   New-Item -ItemType Directory -Path $upload | Out-Null
   Copy-Item -LiteralPath $report -Destination $upload
+  foreach($f in @('B198U_ORIGINAL_MODEL_RESPONSE.txt','B198U_CORRECTED_CANDIDATE.txt','B198U_SOURCE_REPAIR_TRACE.json')){
+   $sourceEvidence=Join-Path $root $f
+   if(Test-Path -LiteralPath $sourceEvidence){Copy-Item -LiteralPath $sourceEvidence -Destination $upload}
+  }
   Copy-Item -LiteralPath (Join-Path $study 'B198H_INDEPENDENT_SOURCE_EVIDENCE.json') -Destination $upload
   Copy-Item -LiteralPath (Join-Path $study 'B198B_RESULTS.json') -Destination $upload
   foreach($name in @('source-design.json','source-audit.json','index.html')){
@@ -150,6 +158,9 @@ try{
   $archive=Join-Path $root 'B198S_UPLOAD_THIS_RESULT.zip'
   Compress-Archive -Path (Join-Path $upload '*') -DestinationPath $archive -CompressionLevel Optimal
   if($result.independentlyCompiled){
+   if($result.originalModelBoundsOnlyRepair.applied){
+    Write-Host 'B198U: declared bounds expanded without changing any model-authored elements; provenance saved.' -ForegroundColor Yellow
+   }
    if($result.originalModelMetadataOnlyRepair.applied){
     Write-Host 'B198T: model title/brief was shortened to B143 limits; original text and geometry SHA provenance saved.' -ForegroundColor Yellow
    }
@@ -159,9 +170,42 @@ try{
   }else{
    Write-Host ('B198S_TEST_FINISHED {0}' -f $result.status) -ForegroundColor Yellow
    Write-Host 'SOURCE HOLD: no valid B143 building; do not claim architectural quality.'
+   if($result.savedModelSource.originalUnmodifiedResponseStored){
+    Write-Host 'B198U: full original model response SAVED in ZIP for offline repair. Do not repeat LLM solely to inspect source.' -ForegroundColor Cyan
+   }
   }
   Write-Host "Upload to ChatGPT: $archive"
   Write-Host 'No Minecraft contacts/writes; model aesthetics and walking unreviewed.'
+  return
+ }
+ # Reuse the most recent saved unaltered source without calling a model.
+ if($Mode -eq 'ReplayLatest'){
+  if(-not $ReplaySourceFile){
+   $docs=[Environment]::GetFolderPath('MyDocuments')
+   if(-not $docs){$docs=$env:USERPROFILE}
+   $parent=Join-Path $docs 'MinecraftAIBuilder-B198M'
+   $items=@(Get-ChildItem -LiteralPath $parent -Filter 'B198U_ORIGINAL_MODEL_RESPONSE.txt' -File -Recurse -ErrorAction SilentlyContinue |
+    Sort-Object LastWriteTime -Descending)
+   if($items.Count -eq 0){Hold 'NO_PREVIOUS_CAPTURED_MODEL_SOURCE'}
+   $ReplaySourceFile=$items[0].FullName
+  }
+  if(-not (Test-Path -LiteralPath $ReplaySourceFile -PathType Leaf)){
+   Hold 'REPLAY_SOURCE_FILE_NOT_FOUND'
+  }
+  $replayDir=Join-Path $root 'offline-review'
+  Write-Host ('Replaying saved model source WITHOUT LLM inference: {0}' -f $ReplaySourceFile)
+  $old=Get-Location
+  try{
+   Set-Location -LiteralPath $SourceDirectory
+   & node 'scripts/b198u-offline-replay.mjs' '--source' $ReplaySourceFile '--out' $replayDir
+   if($LASTEXITCODE -ne 0){Hold 'B198U_OFFLINE_REPLAY_FAILED'}
+  }finally{Set-Location -LiteralPath $old}
+  $zip=Join-Path $root 'B198U_UPLOAD_THIS_REPLAY.zip'
+  Compress-Archive -Path (Join-Path $replayDir '*') -DestinationPath $zip -CompressionLevel Optimal
+  $summary=Get-Content (Join-Path $replayDir 'B198U_REPLAY_SUMMARY.json') -Raw | ConvertFrom-Json
+  Write-Host ('B198U_REPLAY_FINISHED {0}' -f $summary.status)
+  Write-Host ('Local model requests in replay: {0}' -f $summary.modelCallsMade)
+  Write-Host "Upload to ChatGPT: $zip"
   return
  }
  $run=Join-Path $root 'source-study'
