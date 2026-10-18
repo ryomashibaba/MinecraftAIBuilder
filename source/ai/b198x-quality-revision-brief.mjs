@@ -119,7 +119,7 @@ export function renderB198XRevisionMarkdown(brief){
   '- 元の独創的な形状はモデルに任せる。キーワードに応じた固定テンプレートは生成しない。',
   '- 元の source SHA を維持して比較し、選択済み要素・元の開放2×2床の保護を別途コンパイル検証する。',
   '- 変更された候補は新しいソースとして3Dで再審査。AIの自己採点では合格にしない。',
-  '- この資料はLLM実行・Minecraftへの施工を許可しない。',
+  '- この資料はモデル実行・Minecraftへの施工を許可しない。',
   '',
   '次の判断：'+brief.qualityNextStep,'');
  return lines.join('\n');
