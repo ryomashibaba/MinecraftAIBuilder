@@ -1,0 +1,67 @@
+name: B198J Actual Compiled Public Circulation Quality
+on:
+  push:
+    branches: [feature/b198j-source-circulation-quality]
+  pull_request:
+    paths:
+      - 'source/ai/b198i-design-director.mjs'
+      - 'source/ai/b198j-circulation-proof.mjs'
+      - 'scripts/b198j-circulation.test.mjs'
+      - '.github/workflows/b198j-source-circulation.yml'
+permissions:
+  contents: read
+jobs:
+  real-source-graph-and-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Source parsing
+        run: |
+          node --check source/ai/b198i-design-director.mjs
+          node --check source/ai/b198j-circulation-proof.mjs
+          node --check scripts/b198j-circulation.test.mjs
+      - name: Source exact public route proof, safe regeneration and inherited tests
+        run: |
+          node --test \
+            scripts/b198a-engine.test.mjs \
+            scripts/b198a-cli.test.mjs \
+            scripts/b198b-quality.test.mjs \
+            scripts/b198c-critic.test.mjs \
+            scripts/b198d-session.test.mjs \
+            scripts/b198e-pilot.test.mjs \
+            scripts/b198f-evidence.test.mjs \
+            scripts/b198g-autonomous-quality.test.mjs \
+            scripts/b198g-local-adapter.test.mjs \
+            scripts/b198h-local-workflow.test.mjs \
+            scripts/b198i-design-director.test.mjs \
+            scripts/b198i-studio-director.test.mjs \
+            scripts/b198j-circulation.test.mjs
+  real-chromium-3d-studio:
+    needs: [real-source-graph-and-regression]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Install real browser
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Test old source history, review, reject and undo
+        run: node scripts/b198d-browser-qa.mjs
+      - name: Test new directed source 3D and before-after on desktop and mobile
+        run: node scripts/b198i-browser-qa.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: B198J-Source-Only-3D-Regression-Screenshots
+          path: |
+            b198d-evidence/B198D_*_*.png
+            b198i-browser-evidence/B198I_*_*.png
+            b198i-browser-evidence/B198I_CHROMIUM_REPORT.json
+          retention-days: 14
+          if-no-files-found: warn
