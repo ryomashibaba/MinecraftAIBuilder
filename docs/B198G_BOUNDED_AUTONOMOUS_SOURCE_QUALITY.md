@@ -24,6 +24,20 @@ The new GitHub Actions workflow runs B198A–F Node regressions and B198G tests,
 
 B198E's four original buildings and four revisions are preserved unchanged. The full 12+4 true-model Japanese task benchmark, independent human semantic/aesthetic scores and Minecraft world placement/readback remain unverified.
 
+## Optional real local model source generation (not exercised in CI)
+
+The optional `createB198GLocalModelAdapter` accepts an **explicit** model ID and a literal loopback-only URL `http://127.0.0.1:PORT/v1/chat/completions` (default port 11434). The adapter sends a JSON-only strict B143 architecture request through an OpenAI-compatible local chat-completions protocol, then validates returned structured content against the original B198A strict grammar and compiler. It performs no HTTP until the user invokes a generation call. This is **not** proof that a particular local server or model supports this protocol, nor proof that the model can produce good architecture.
+
+After a compatible model is already running locally, users may explicitly run a command like:
+
+```sh
+node scripts/b198g-local-design.mjs --model YOUR_LOCAL_MODEL_ID --prompt "中央が吹き抜けの公共図書館。大きな閲覧床と明るい上部ラウンジを備える" --out ./b198g-my-review
+```
+
+The CLI refuses pre-existing output directories and writes only `DESIGN_SOURCE_REVIEW_ONLY.json` and `SOURCE_QUALITY_REPORT.json` in a new directory, without contacting Minecraft or any paid remote model API. The local endpoint can be overridden only with an explicit numeric loopback address and the exact `/v1/chat/completions` path.
+
+The local adapter tests use **mock HTTP responses only**. Real local-model quality and protocol compatibility remain NOT_RUN. All source is human-review-only even after successful local generation.
+
 ## Next step after B198G
 
-Connect a separately authorized real provider (potentially a locally hosted no-charge model) to the new loop and Studio, run all 12+4 frozen tasks with exact per-output provenance, provide real source-rendered comparisons for independent human review, and improve 3D quality from the observed failures. No paid API or Work mode is authorized by this phase. Protect the existing 160-element/160,000 occupied voxel B143 limits, B197 NEBULA ARK and historical designs, and all existing stacked Draft PRs.
+Test a separately authorized real local provider with the new loop (and integrate it into the Studio), then run all 12+4 frozen tasks with exact per-output provenance, provide real source-rendered comparisons for independent human review, and improve 3D quality from the observed failures. No paid API or Work mode is authorized by this phase. Protect the existing 160-element/160,000 occupied voxel B143 limits, B197 NEBULA ARK and historical designs, and all existing stacked Draft PRs.
