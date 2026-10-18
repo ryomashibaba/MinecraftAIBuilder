@@ -218,8 +218,8 @@ export async function runB198KPairedStudy({
     frozenJapanesePrompt:spec.prompt,
     promptSha256:sha(spec.prompt),criteria:spec.criteria,
     armA:a,armB:b,
-    armARecord:results.get(a+':'+spec.id),
-    armBRecord:results.get(b+':'+spec.id),
+    armARecord:results.get(a+':'+spec.id)??recordFor(spec,a),
+    armBRecord:results.get(b+':'+spec.id)??recordFor(spec,b),
     humanReviewStatus:'NOT_REVIEWED',
     winnerNotAutomaticallyDeclared:true,
     both3DScenesAvailable:!!(left?.sourceMetrics&&right?.sourceMetrics)});
