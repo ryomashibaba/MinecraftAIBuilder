@@ -1,0 +1,32 @@
+name: B198F Evidence-Linked Architecture Quality Review (Source Only)
+on:
+  push:
+    branches: [feature/b198f-evidence-linked-design-review]
+    paths:
+      - 'source/ai/b198f-evidence-review.mjs'
+      - 'scripts/b198f-*'
+      - '.github/workflows/b198f-review.yml'
+  pull_request:
+    paths:
+      - 'source/ai/b198f-evidence-review.mjs'
+      - 'scripts/b198f-*'
+      - '.github/workflows/b198f-review.yml'
+permissions:
+  contents: read
+jobs:
+  evidence-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Compile source evidence and reject ungrounded ratings
+        run: node --test scripts/b198f-evidence.test.mjs
+      - name: Produce actual source-pinned, unreviewed criterion assignments
+        run: node scripts/b198f-prepare-review.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: B198F-Real-Design-Semantic-Review-Pending
+          path: b198f-evidence/
+          retention-days: 14
