@@ -76,7 +76,7 @@ jobs:
           & powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./tools/B198V_INSTALL_OFFLINE.ps1 -InstallRoot $base -Model 'B198S_FIXTURE_NOT_REAL_LLM' -Endpoint 'http://127.0.0.1:11785/v1/chat/completions'
           if($LASTEXITCODE -ne 0){throw 'B198V_REPEATED_INSTALL_FAIL'}
           Write-Host 'B198V_WINPS51_INSTALL_TWO_RUNS_CACHE_VERIFIED_ZERO_INFERENCE'
-      - name: One-click cached source: one fake local model call, then offline replay with fake Ollama STOPPED
+      - name: 'One-click cached source: one fake local model call, then offline replay with fake Ollama STOPPED'
         shell: pwsh
         run: |
           $ErrorActionPreference='Stop'
