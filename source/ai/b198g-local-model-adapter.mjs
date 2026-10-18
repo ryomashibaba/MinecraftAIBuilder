@@ -52,7 +52,7 @@ export function createB198GLocalModelAdapter({
     attempt,maxAttempts,
     output:'entire original or safely revised B143 source only'};
    const response=await fetcher(endpoint,{
-    method:'POST',signal:controller.signal,
+    method:'POST',signal:controller.signal,redirect:'error',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({model,stream:false,temperature:0.35,
      response_format:{type:'json_object'},
