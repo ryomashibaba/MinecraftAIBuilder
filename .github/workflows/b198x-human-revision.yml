@@ -146,3 +146,17 @@ jobs:
           if($accepted.status -ne 'REVIEWED_REVISION_BRIEF_READY_FOR_SEPARATE_AUTHORIZATION'){throw 'B198X_MODEL_WAS_AUTOMATICALLY_AUTHORIZED'}
           if($accepted.realModelRequestsMade -ne 0){throw 'B198X_MODEL_REQUEST_NOT_ZERO'}
           Write-Host 'B198X_WINDOWS_PS51_ONE_MOCK_MODEL_SOURCE_THEN_ZERO_INFERENCE_REVIEW_BRIEFS_PASS MOCK_ONLY'
+          # Deliberate pre-inference HOLD: a failed source trial must still
+          # supply a useful ZIP without calling Ollama or touching a world.
+          $bad=Join-Path $env:RUNNER_TEMP 'B198Y-DELIBERATE-HOLD'
+          & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $kit 'engine/tools/B198M_RUN_LOCAL.ps1') -Mode SourceProbe -SourceDirectory (Join-Path $kit 'engine') -Model 'B198S_FIXTURE_NOT_REAL_LLM' -Endpoint 'http://127.0.0.1:11785/v1/chat/completions' -OutputDirectory $bad -SourceOutputTokens 4096 -SourceContextTokens 4096
+          if($LASTEXITCODE -eq 0){throw 'B198Y_INVALID_OUTPUT_CONTEXT_NOT_REJECTED'}
+          $recoverZip=Join-Path $bad 'B198S_UPLOAD_THIS_RESULT.zip'
+          if(-not (Test-Path -LiteralPath $recoverZip)){throw 'B198Y_HOLD_RECOVERY_ZIP_MISSING'}
+          $readBack=Join-Path $env:RUNNER_TEMP 'B198Y-HOLD-READBACK'
+          Expand-Archive -LiteralPath $recoverZip -DestinationPath $readBack -ErrorAction Stop
+          $status=Get-Content (Join-Path $readBack 'B198Y_RECOVERY_STATUS.json') -Raw | ConvertFrom-Json
+          if($status.status -ne 'HOLD_SOURCEPROBE_NOT_CERTIFIED' -or $status.originalModelResponseStored -or $status.modelCallsMade -ne 'UNKNOWN' -or $status.worldWrites -ne 0 -or $status.gates.Count -ne 9){throw 'B198Y_RECOVERY_FALSE_PASS_OR_UNSAFE'}
+          if(-not (Test-Path (Join-Path $readBack 'B198M_LAST_STATUS.txt'))){throw 'B198Y_RECOVERY_DIAGNOSTIC_MISSING'}
+          $global:LASTEXITCODE=0
+          Write-Host 'B198Y_FAIL_CLOSED_LOCAL_SOURCE_RECOVERY_ZIP_WITHOUT_MODEL_PASS'
