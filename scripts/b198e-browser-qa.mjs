@@ -76,11 +76,11 @@ try{
   // Fill synthetic scores in the browser only to verify input gating and
   // downloaded JSON provenance. The output is NEVER committed as ratings.
   const scores=page.locator('#b198e-review-fields select');
-  const evidence=page.locator('#b198e-review-fields textarea');
+  const reviewReasons=page.locator('#b198e-review-fields textarea');
   check(await scores.count()>=3,mode+'_HUMAN_REVIEW_RUBRIC_FIELDS_MISSING');
   for(let i=0;i<await scores.count();i++){
    await scores.nth(i).selectOption('2');
-   await evidence.nth(i).fill('自動入力テストのための根拠テキストであり、人間による品質判定ではありません。');
+   await reviewReasons.nth(i).fill('自動入力テストのための根拠テキストであり、人間による品質判定ではありません。');
   }
   check(!(await ratingButton.isDisabled()),mode+'_VALIDATED_DOWNLOAD_INERT');
   const capture=page.waitForEvent('download',{timeout:120000});
