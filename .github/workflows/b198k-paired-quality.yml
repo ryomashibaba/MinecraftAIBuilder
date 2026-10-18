@@ -56,6 +56,8 @@ jobs:
         run: |
           node scripts/b198d-browser-qa.mjs
           node scripts/b198i-browser-qa.mjs
+      - name: Verify NEW B198K offline human A/B review form using real desktop/mobile Chromium
+        run: node scripts/b198k-browser-qa.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -64,5 +66,7 @@ jobs:
             b198d-evidence/B198D_*_*.png
             b198i-browser-evidence/B198I_*_*.png
             b198i-browser-evidence/B198I_CHROMIUM_REPORT.json
+            b198k-browser-evidence/B198K_*.png
+            b198k-browser-evidence/B198K_BROWSER_QA.json
           if-no-files-found: warn
           retention-days: 14
