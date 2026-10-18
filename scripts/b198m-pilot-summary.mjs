@@ -101,7 +101,10 @@ export function summarizeB198M({runDirectory}={}){
   sourceEvidenceIntegrityHolds:unverified,
   failedAttemptedSourceRecords:failures,
   requestCounts:b.providerRequestCounts,
-  budgets:b.budgets,results:inspected,
+  budgets:b.budgets,
+  modelCallTiming:b.timing??{status:'NOT_RECORDED_LEGACY'},
+  stopOnTimeoutApplied:b.stopOnTimeoutApplied??false,
+  results:inspected,
   originalPairedManifestSha256:sha(fs.readFileSync(file)),
   humanScoredPairCount:0,
   nextAction:paired>0?
