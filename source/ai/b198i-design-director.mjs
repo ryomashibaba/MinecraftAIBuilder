@@ -150,7 +150,7 @@ export async function generateModelDirectedArchitecture({
   JSON.stringify(plan)+'\nCreate ORIGINAL strict B143 JSON design with the exact plan id/bounds.'+
   ' Make SOLID points occupied, AIR points empty, SUPPORTED_FLOOR points a real 2x2 supported floor with two blocks of headroom.';
  yes(brief.length<=6100,'PROMPT_PLUS_PLAN_TOO_LONG');
- const attempts=[];let best=null,bestProof=null,bestCirculation=null,bestSteps=null,bestHigh=Infinity;
+ const attempts=[];let best=null,bestProof=null,bestCirculation=null,bestSteps=null,bestHigh=Infinity,bestRawHigh=Infinity;
  let modelCalls=0;
  const counted=async req=>{modelCalls++;return generator(req);};
  for(let n=1;n<=maxSourceAttempts;n++){
@@ -184,13 +184,22 @@ export async function generateModelDirectedArchitecture({
    const proof=inspectPlanAgainstSource({
     plan,design:created.design,compiled:created.compiled
    });
-   const risk=created.report.finalHighRiskCount;
+   const rawRisk=created.report.finalHighRiskCount;
    const circulation=inspectPlannedPublicCirculation({
     plan,design:created.design,compiled:created.compiled
    });
    const stepProof=inspectMultiLevelSourceCirculation({
     plan,design:created.design,compiled:created.compiled
    });
+   // B198C correctly reports SAME-HEIGHT fragments. In a multilevel
+   // building that warning alone may be fully resolved by a proven
+   // stepped source graph, but only if every 2x2 source floor footprint
+   // belongs to that single component. Never waive missing floor/other HIGH.
+   const fullStepped=stepProof.declaredSourceStepChainsSupported&&
+    stepProof.allSourceSupportedFloorsInOneSteppedComponent;
+   const risk=created.report.remainingSourceFindings.filter(f=>
+    f.severity==='HIGH'&&!(fullStepped&&
+     f.id==='FRAGMENTED_PUBLIC_SOURCE_FLOORS')).length;
    const sameAnchors=best&&proof.passedAnchors===bestProof.passedAnchors;
    const sameConnections=sameAnchors&&
     circulation.connectedSameElevationAnchorPairs===
@@ -211,9 +220,15 @@ export async function generateModelDirectedArchitecture({
     disconnectedSameElevationPairs:circulation.disconnectedSameElevationAnchorPairs,
     connectedDifferentElevationPairs:stepProof.connectedDifferentElevationAnchorPairs,
     disconnectedDifferentElevationPairs:stepProof.disconnectedDifferentElevationAnchorPairs,
-    highRiskSourceFindings:risk});
+    highRiskSourceFindings:risk,
+    originalB198CSourceHighRisks:rawRisk,
+    steppedSourceMitigatedSameHeightFragmentation:fullStepped&&rawRisk>risk});
    if(better){best=created;bestProof=proof;
-    bestCirculation=circulation;bestSteps=stepProof;bestHigh=risk;}
+    bestCirculation=circulation;bestSteps=stepProof;bestHigh=risk;
+    bestRawHigh=rawRisk;}
+   // Do not spend another actual model request on an identical response
+   // that has just failed to improve the best independently compiled source.
+   if(!better&&proof.sourceSha256===bestProof.sourceSha256)break;
    // Vertical travel is deliberately not certified. Re-generating the
    // same architectural program cannot make an unverified stair proof PASS.
    if(bestProof.allDeclaredPlanAnchorsMatchSource&&bestHigh===0&&
@@ -247,6 +262,9 @@ export async function generateModelDirectedArchitecture({
    circulationProof:bestCirculation,
    multiLevelSourceProof:bestSteps,
    remainingHighRiskSourceFindings:bestHigh,
+   originalB198CHighRiskCount:bestRawHigh,
+   sameHeightFragmentationMitigatedByFullSteppedSourceProof:
+    bestRawHigh>bestHigh,
    attempts,plannerCalls:1,designModelCalls:modelCalls,
    generatorProvenance:'CALLER_SUPPLIED_NOT_INDEPENDENTLY_VERIFIED',
    humanSemanticJudgment:'UNREVIEWED',
