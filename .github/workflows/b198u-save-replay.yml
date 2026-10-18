@@ -1,0 +1,99 @@
+name: B198U Recover Model Source Once and Replay Locally Without LLM
+on:
+  push:
+    branches: [feature/b198u-save-repair-replay-source]
+  pull_request:
+    paths:
+      - 'source/ai/b198u-bounds-only-repair.mjs'
+      - 'source/ai/b198s-native-ollama-source.mjs'
+      - 'scripts/b198u-*.mjs'
+      - 'scripts/b198s-single-source-probe.mjs'
+      - 'tools/B198M_RUN_LOCAL.ps1'
+      - '.github/workflows/b198u-save-replay.yml'
+permissions:
+  contents: read
+jobs:
+  safe-model-output-repair-and-all-regressions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: JavaScript syntax checks
+        run: |
+          node --check source/ai/b198u-bounds-only-repair.mjs
+          node --check source/ai/b198s-native-ollama-source.mjs
+          node --check scripts/b198s-single-source-probe.mjs
+          node --check scripts/b198u-offline-replay.mjs
+          node --check scripts/b198u-save-replay.test.mjs
+      - name: Verify immutable model geometry, bounds-only repair, original capture, zero-inference replay and all inherited safety
+        run: |
+          node --test \
+            scripts/b198u-save-replay.test.mjs \
+            scripts/b198t-metadata-only.test.mjs \
+            scripts/b198s-native-source.test.mjs \
+            scripts/b198r-local-diagnostic.test.mjs \
+            scripts/b198q-long-http.test.mjs \
+            scripts/b198p-model-timeout.test.mjs \
+            scripts/b198m-local-transport.test.mjs \
+            scripts/b198a-engine.test.mjs \
+            scripts/b198a-cli.test.mjs \
+            scripts/b198b-quality.test.mjs \
+            scripts/b198c-critic.test.mjs \
+            scripts/b198d-session.test.mjs \
+            scripts/b198e-pilot.test.mjs \
+            scripts/b198f-evidence.test.mjs \
+            scripts/b198g-autonomous-quality.test.mjs \
+            scripts/b198g-local-adapter.test.mjs \
+            scripts/b198h-local-workflow.test.mjs \
+            scripts/b198i-design-director.test.mjs \
+            scripts/b198i-studio-director.test.mjs \
+            scripts/b198j-circulation.test.mjs \
+            scripts/b198k-paired-study.test.mjs \
+            scripts/b198l-step-chain.test.mjs
+  native-windows-ps51-raw-capture-and-no-ollama-replay:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Real PowerShell 5.1 GitHub ZIP model mock generates ONCE, captures source, then replays with Ollama STOPPED
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $server=Start-Process -FilePath node -ArgumentList @('scripts/b198s-native-fixture-server.mjs','--port','11785') -NoNewWindow -PassThru
+          $folder=Join-Path $env:RUNNER_TEMP 'B198U-WINPS51-ONCE'
+          try {
+            Start-Sleep -Seconds 3
+            # Deliberately omit -SourceDirectory: exercise actual GitHub archive.
+            & powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./tools/B198M_RUN_LOCAL.ps1 -Mode SourceProbe -Model B198S_FIXTURE_NOT_REAL_LLM -Endpoint 'http://127.0.0.1:11785/v1/chat/completions' -OutputDirectory $folder -SourceTimeoutSeconds 300
+            if($LASTEXITCODE -ne 0){throw 'B198U_WINPS51_FIRST_CAPTURE_FAILED'}
+            $raw=Join-Path $folder 'B198U_ORIGINAL_MODEL_RESPONSE.txt'
+            if(-not (Test-Path -LiteralPath $raw)){throw 'B198U_RAW_ORIGINAL_NOT_RETAINED'}
+            $summary=Get-Content (Join-Path $folder 'B198S_UPLOAD_THIS_SUMMARY.json') -Raw | ConvertFrom-Json
+            if(-not $summary.independentlyCompiled){throw 'B198U_STRICT_B143_SOURCE_MISSING'}
+            if($summary.modelCalls.Count -ne 1){throw 'B198U_FIRST_RUN_MODEL_REQUEST_COUNT'}
+            if($summary.safety.worldWrites -ne 0){throw 'B198U_WORLD_WRITES_UNEXPECTED'}
+            $zip=Join-Path $folder 'B198S_UPLOAD_THIS_RESULT.zip'
+            $unpacked=Join-Path $env:RUNNER_TEMP 'B198U-USER-UPLOAD-ZIP'
+            Expand-Archive -LiteralPath $zip -DestinationPath $unpacked -ErrorAction Stop
+            if(-not (Test-Path (Join-Path $unpacked 'B198U_ORIGINAL_MODEL_RESPONSE.txt'))){
+              throw 'B198U_SOURCE_NOT_INCLUDED_IN_UPLOAD_ZIP'
+            }
+          }finally{
+            if($server -and -not $server.HasExited){Stop-Process -Id $server.Id -Force}
+          }
+          # Offline replay MUST succeed with ZERO running Ollama/model server.
+          $replayFolder=Join-Path $env:RUNNER_TEMP 'B198U-WINPS51-REPLAY'
+          & powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./tools/B198M_RUN_LOCAL.ps1 -Mode ReplayLatest -ReplaySourceFile (Join-Path $folder 'B198U_ORIGINAL_MODEL_RESPONSE.txt') -OutputDirectory $replayFolder
+          if($LASTEXITCODE -ne 0){throw 'B198U_WINPS51_OFFLINE_REPLAY_HOLD'}
+          $summaryFile=Join-Path $replayFolder 'offline-review/B198U_REPLAY_SUMMARY.json'
+          $replay=Get-Content $summaryFile -Raw | ConvertFrom-Json
+          if($replay.modelCallsMade -ne 0){throw 'B198U_REPLAY_CALLED_LOCAL_LLM'}
+          if($replay.status -ne 'OFFLINE_COMPILED_HUMAN_REVIEW_REQUIRED'){throw 'B198U_OFFLINE_SOURCE_HOLD'}
+          if($replay.compiledSource.sourceSha256 -ne $summary.independentlyCompiled.sourceSha256){throw 'B198U_REPLAY_SOURCE_SHA_CHANGED'}
+          if(-not (Test-Path (Join-Path $replayFolder 'B198U_UPLOAD_THIS_REPLAY.zip'))){throw 'B198U_REPLAY_ZIP_NOT_CREATED'}
+          if($replay.safety.worldWrites -ne 0){throw 'B198U_REPLAY_WORLD_WRITES'}
+          Write-Host 'B198U_WINDOWS_PS51_CAPTURE_AND_0_OLLAMA_REPLAY_PASS MOCK_ONLY_NO_REAL_LLM'
