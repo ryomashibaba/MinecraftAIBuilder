@@ -1,0 +1,148 @@
+name: B198X Offline Human Quality Review to Source Revision Plan
+on:
+  push:
+    branches: [feature/b198x-reviewed-quality-revision-brief]
+  pull_request:
+    paths:
+      - 'source/ai/b198x-quality-revision-brief.mjs'
+      - 'scripts/b198x-offline-review-to-revision*.mjs'
+      - 'tools/B198X_PREPARE_QUALITY_REVISION.ps1'
+      - 'tools/B198V_INSTALL_OFFLINE.ps1'
+      - 'tools/B198M_RUN_LOCAL.ps1'
+      - '.github/workflows/b198x-human-revision.yml'
+permissions:
+  contents: read
+jobs:
+  human-review-to-safe-source-revision-and-historical-gates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Validate source-only review-to-revision JS syntax
+        run: |
+          node --check source/ai/b198x-quality-revision-brief.mjs
+          node --check scripts/b198x-offline-review-to-revision.mjs
+          node --check scripts/b198x-offline-review-to-revision.test.mjs
+      - name: B198X frozen-human-rubric, no-inference, protected geometry, and all inherited B198A-W tests
+        run: |
+          node --test \
+            scripts/b198x-offline-review-to-revision.test.mjs \
+            scripts/b198w-quality-review.test.mjs \
+            scripts/b198v-cache-integrity.test.mjs \
+            scripts/b198u-save-replay.test.mjs \
+            scripts/b198t-metadata-only.test.mjs \
+            scripts/b198s-native-source.test.mjs \
+            scripts/b198r-local-diagnostic.test.mjs \
+            scripts/b198q-long-http.test.mjs \
+            scripts/b198p-model-timeout.test.mjs \
+            scripts/b198m-local-transport.test.mjs \
+            scripts/b198a-engine.test.mjs \
+            scripts/b198a-cli.test.mjs \
+            scripts/b198b-quality.test.mjs \
+            scripts/b198c-critic.test.mjs \
+            scripts/b198d-session.test.mjs \
+            scripts/b198e-pilot.test.mjs \
+            scripts/b198f-evidence.test.mjs \
+            scripts/b198g-autonomous-quality.test.mjs \
+            scripts/b198g-local-adapter.test.mjs \
+            scripts/b198h-local-workflow.test.mjs \
+            scripts/b198i-design-director.test.mjs \
+            scripts/b198i-studio-director.test.mjs \
+            scripts/b198j-circulation.test.mjs \
+            scripts/b198k-paired-study.test.mjs \
+            scripts/b198l-step-chain.test.mjs
+  native-windows-ps51-reviewed-revision-without-ollama:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Download and seal new isolated v3 workbench with no model call
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $kitRoot=Join-Path $env:RUNNER_TEMP 'B198X-WORKBENCH-V3'
+          & powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./tools/B198V_INSTALL_OFFLINE.ps1 -InstallRoot $kitRoot -Model 'B198S_FIXTURE_NOT_REAL_LLM' -Endpoint 'http://127.0.0.1:11785/v1/chat/completions'
+          if($LASTEXITCODE -ne 0){throw 'B198X_WIN_PS51_INSTALL_FAILED'}
+          $kit=Join-Path $kitRoot 'offline-workbench-v3'
+          foreach($file in @('B198X_WORKBENCH_INFO.json','REPLAY_LATEST_OFFLINE.cmd','RUN_ONE_REAL_MODEL_ONCE.cmd','PREPARE_QUALITY_REVISION.cmd','engine/tools/B198X_PREPARE_QUALITY_REVISION.ps1','engine/scripts/b198x-offline-review-to-revision.mjs')){
+            if(-not (Test-Path -LiteralPath (Join-Path $kit $file))){throw ('B198X_MISSING_INSTALL_FILE_'+$file)}
+          }
+          $info=Get-Content (Join-Path $kit 'B198X_WORKBENCH_INFO.json') -Raw | ConvertFrom-Json
+          if($info.installModelRequests -ne 0 -or $info.revisionPlanningModelRequests -ne 0 -or $info.worldWrites -ne 0){throw 'B198X_UNAUTHORIZED_INSTALL_ACTION'}
+          & node (Join-Path $kit 'engine/scripts/b198v-cache-integrity.mjs') --verify (Join-Path $kit 'engine')
+          if($LASTEXITCODE -ne 0){throw 'B198X_ENGINE_NOT_SEALED'}
+          Write-Host 'B198X_WINDOWS_PS51_INSTALLED_CACHED_V3_NO_OLLAMA_PASS'
+      - name: Stop mock model before rating-to-revision; zero extra calls, SHA, user-ready ZIP
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $env:B198V_NONINTERACTIVE='1'
+          $kit=Join-Path $env:RUNNER_TEMP 'B198X-WORKBENCH-V3/offline-workbench-v3'
+          $docs=[Environment]::GetFolderPath('MyDocuments')
+          if(-not $docs){$docs=$env:USERPROFILE}
+          $trial=Join-Path $docs 'MinecraftAIBuilder-B198M/pilot-B198X-CI'
+          $modelCmd=Join-Path $kit 'RUN_ONE_REAL_MODEL_ONCE.cmd'
+          $server=Start-Process -FilePath node -ArgumentList @('scripts/b198s-native-fixture-server.mjs','--port','11785') -NoNewWindow -PassThru
+          try{
+            Start-Sleep -Seconds 3
+            & $modelCmd -OutputDirectory $trial
+            if($LASTEXITCODE -ne 0){throw 'B198X_MOCK_SOURCE_COMPILER_HOLD'}
+            $sum=Get-Content (Join-Path $trial 'B198S_UPLOAD_THIS_SUMMARY.json') -Raw | ConvertFrom-Json
+            if(-not $sum.independentlyCompiled){throw 'B198X_B143_COMPILATION_MISSING'}
+            if($sum.modelCalls.Count -ne 1){throw 'B198X_MOCK_SOURCE_MULTIPLE_CALLS'}
+            if($sum.safety.worldWrites -ne 0){throw 'B198X_WORLD_CONTACT'}
+          }finally{
+            if($server -and -not $server.HasExited){Stop-Process -Id $server.Id -Force}
+          }
+          # Human review is synthetically simulated for CI ONLY. This is not real human judgement.
+          $evidence=Join-Path $trial 'source-study/c01/B198W_SOURCE_QUALITY_EVIDENCE.json'
+          $dossier=Get-Content -LiteralPath $evidence -Raw | ConvertFrom-Json
+          $scores=@(1,2,3,4)
+          $rows=@()
+          for($i=0;$i -lt $dossier.humanRubric.rubric.Count;$i++){
+            $rows+=@{
+              criterionId=$dossier.humanRubric.rubric[$i].criterionId
+              score=$scores[$i]
+              evidence=('CIの決定的な模擬レビューであり、人間の実際の建築評価ではない。試験項目 {0}' -f $i)
+            }
+          }
+          $fakeRating=[ordered]@{
+            schema='minecraftaibuilder-b198w-human-source-rating-v1'
+            caseId='c01'
+            sourceSha256=$dossier.independentlyCompiled.sourceSha256
+            geometrySha256=$dossier.independentlyCompiled.geometrySha256
+            reviewerConfirmedHuman=$true
+            syntheticCIOnly=$true
+            rubric=$rows
+          }
+          $rating=Join-Path $env:RUNNER_TEMP 'B198W_CI_FAKE_RATING.json'
+          $fakeRating | ConvertTo-Json -Depth 9 | Set-Content -LiteralPath $rating -Encoding UTF8
+          # With local model fully STOPPED, the normal drag-and-drop shortcut
+          # must locate the exact matching original source SHA in Documents.
+          $planCmd=Join-Path $kit 'PREPARE_QUALITY_REVISION.cmd'
+          & $planCmd $rating
+          if($LASTEXITCODE -ne 0){throw 'B198X_ONE_CLICK_ZERO_LLM_PLAN_HOLD'}
+          $savedPlans=Join-Path $docs 'MinecraftAIBuilder-B198M/quality-revisions'
+          $zips=@(Get-ChildItem -LiteralPath $savedPlans -Filter 'B198X_UPLOAD_THIS_QUALITY_PLAN_*.zip' -File)
+          if($zips.Count -ne 1){throw 'B198X_UPLOAD_PLAN_ZIP_COUNT'}
+          $extracted=Join-Path $env:RUNNER_TEMP 'B198X-CHECK-UPLOAD'
+          Expand-Archive -LiteralPath $zips[0].FullName -DestinationPath $extracted -ErrorAction Stop
+          $p=Get-Content (Join-Path $extracted 'B198X_REVIEWED_REVISION_BRIEF.json') -Raw | ConvertFrom-Json
+          if($p.status -ne 'DRAFT_NEEDS_EXPLICIT_PROTECTED_PARTS'){throw 'B198X_MISSING_MANUAL_PROTECTION_GATE'}
+          if($p.baseSourceSha256 -ne $sum.independentlyCompiled.sourceSha256){throw 'B198X_STALE_SOURCE_SHA'}
+          if($p.topHumanRevisionPriorities.Count -ne 2){throw 'B198X_HUMAN_RUBRIC_PRIORITY_INCORRECT'}
+          $summary=Get-Content (Join-Path $extracted 'B198X_RUN_SUMMARY.json') -Raw | ConvertFrom-Json
+          if($summary.realModelRequestsMade -ne 0 -or $summary.worldWrites -ne 0){throw 'B198X_MODEL_CALLED_DURING_REVIEW'}
+          # A separate explicit preservation selection upgrades DRAFT to
+          # "ready for SEPARATE model authorization" but never runs model.
+          $out=Join-Path $env:RUNNER_TEMP 'B198X-EXPLICIT-PROTECTION'
+          & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $kit 'engine/tools/B198X_PREPARE_QUALITY_REVISION.ps1') -SourceDirectory (Join-Path $kit 'engine') -ReviewFile $rating -SourceFolder (Join-Path $trial 'source-study/c01') -ProtectedElementIds 'ground-public-floor' -OutputDirectory $out
+          if($LASTEXITCODE -ne 0){throw 'B198X_EXPLICIT_ELEMENT_SELECTION_FAILED'}
+          $accepted=Get-Content (Join-Path $out 'B198X_RUN_SUMMARY.json') -Raw | ConvertFrom-Json
+          if($accepted.status -ne 'REVIEWED_REVISION_BRIEF_READY_FOR_SEPARATE_AUTHORIZATION'){throw 'B198X_MODEL_WAS_AUTOMATICALLY_AUTHORIZED'}
+          if($accepted.realModelRequestsMade -ne 0){throw 'B198X_MODEL_REQUEST_NOT_ZERO'}
+          Write-Host 'B198X_WINDOWS_PS51_ONE_MOCK_MODEL_SOURCE_THEN_ZERO_INFERENCE_REVIEW_BRIEFS_PASS MOCK_ONLY'

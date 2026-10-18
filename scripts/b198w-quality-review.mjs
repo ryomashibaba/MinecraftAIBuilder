@@ -79,6 +79,10 @@ export function evaluateB198WSource({design,compiled,caseId='c01'}={}){
   sourceCriticFindings:critique.findings,
   highRiskCount:critique.highRiskCount,
   humanRubric:emptyHumanRubric(spec),
+  preservableModelElements:design.elements.filter(x=>x.mode==='add').map(x=>({
+   id:x.id,shape:x.shape,material:x.material
+  })),
+  protectionsAreNeverAutomaticallySelected:true,
   reviewStatus:'WAITING_FOR_HUMAN_VISUAL_AND_SEMANTIC_REVIEW',
   semanticsCertified:false,aestheticsCertified:false,
   validCentralAtriumMeaningCertified:false,
@@ -106,6 +110,13 @@ export function validateB198WHumanReview({dossier,submission}={}){
   'HUMAN_REVIEW_CONFIRMATION_REQUIRED');
  const spec=CREATION_CASES.find(s=>s.id===dossier.caseId);
  yes(!!spec,'FROZEN_CASE_REQUIRED');
+ if(submission.protectedElementIds!==undefined){
+  const ids=submission.protectedElementIds;
+  const allowed=new Set((dossier.preservableModelElements??[]).map(x=>x.id));
+  yes(Array.isArray(ids)&&ids.length<=allowed.size&&
+   ids.every(x=>typeof x==='string'&&allowed.has(x))&&
+   new Set(ids).size===ids.length,'PROTECTED_SELECTION_INVALID');
+ }
  const scored=scoreHumanRubric(spec,submission);
  return {...scored,
   schema:'minecraftaibuilder-b198w-human-rating-validation-v1',
@@ -134,7 +145,8 @@ export function renderB198WReviewHtml(dossier,viewerName='c01_index.html'){
   sourceGeometry:dossier.sourceGeometry,
   goals:dossier.sourceOnlyGoals,
   findings:dossier.sourceCriticFindings,
-  rubric:dossier.humanRubric.rubric
+  rubric:dossier.humanRubric.rubric,
+  preservableModelElements:dossier.preservableModelElements
  };
  const html=template.replace(marker,escJson(embedded))
   .replaceAll(viewMarker,viewerName);
