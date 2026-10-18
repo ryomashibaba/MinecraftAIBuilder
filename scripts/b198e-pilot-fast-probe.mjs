@@ -30,3 +30,7 @@ for(const [id,design] of Object.entries(p.revised)){
 console.log('B198E_MODEL_PROVENANCE',p.provenance,
  'MODEL_API_CALLS',p.liveAPIResponsesObserved,
  'NOT_RUN',p.unattemptedCreationCases);
+
+import {inspectB198EChatPilot} from '../source/ai/b198e-source-evidence.mjs';
+const detailed=inspectB198EChatPilot();
+console.log('B198E_SOURCE_EVIDENCE_HOLDS',JSON.stringify({samples:detailed.creations.map(x=>({id:x.caseId,failed:x.fixedCoordinateArchitecturalSamples.filter(y=>!y.actualSourceSatisfied)})),revisions:detailed.revisions.map(x=>({id:x.caseId,clear:x.originalFloors,protected:x.protectedVoxels.exactProtectedVoxelPreservationPassed,edits:x.sourceChangeList.totalTouched}))}));
