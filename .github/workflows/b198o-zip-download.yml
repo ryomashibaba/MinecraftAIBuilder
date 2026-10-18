@@ -1,0 +1,53 @@
+name: B198O Windows PS5.1 GitHub ZIP Download and Local Pilot
+on:
+  push:
+    branches: [feature/b198o-powershell51-zip-extraction]
+  pull_request:
+    paths:
+      - 'tools/B198M_RUN_LOCAL.ps1'
+      - '.github/workflows/b198o-zip-download.yml'
+permissions:
+  contents: read
+jobs:
+  windows-powershell51-genuine-download:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Verify PS5.1 Expand-Archive works on native local ZIP
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $root=Join-Path $env:RUNNER_TEMP 'B198O-ZIP-PS51'
+          New-Item -ItemType Directory -Force -Path $root | Out-Null
+          Set-Content -LiteralPath (Join-Path $root 'probe.txt') -Value 'B198O ZIP PS5.1 PROBE'
+          $zip=Join-Path $env:RUNNER_TEMP 'B198O-PS51-PROBE.zip'
+          Compress-Archive -LiteralPath (Join-Path $root 'probe.txt') -DestinationPath $zip
+          $target=Join-Path $env:RUNNER_TEMP 'B198O-PS51-UNPACK'
+          & powershell.exe -NoProfile -Command "Expand-Archive -LiteralPath '$zip' -DestinationPath '$target' -ErrorAction Stop"
+          if($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath (Join-Path $target 'probe.txt'))) {
+            throw 'B198O_PS51_ZIP_EXTRACTION_FAILED'
+          }
+          Write-Host 'B198O_PS51_EXPAND_ARCHIVE_PASS'
+      - name: Run ACTUAL original user flow including GitHub SOURCE download and mock model transport
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $server=Start-Process -FilePath node -ArgumentList @('scripts/b198m-fixture-server.mjs','--port','11783') -NoNewWindow -PassThru
+          try {
+            Start-Sleep -Seconds 3
+            $dest=Join-Path $env:RUNNER_TEMP 'B198O-ACTUAL-USER-FLOW'
+            # Deliberately OMIT -SourceDirectory so this cannot bypass the failing ZIP download/extraction step.
+            & powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./tools/B198M_RUN_LOCAL.ps1 -Mode Pilot -Model B198M_MOCK_NOT_REAL_LLM -Endpoint 'http://127.0.0.1:11783/v1/chat/completions' -OutputDirectory $dest -Cases 1 -NoRevisions
+            if($LASTEXITCODE -ne 0){throw 'B198O_USER_FLOW_FAILED'}
+            $zip=Join-Path $dest 'B198M_UPLOAD_THIS_RESULT.zip'
+            if(-not (Test-Path -LiteralPath $zip)){throw 'B198O_UPLOAD_ZIP_MISSING'}
+            $summary=Get-Content -LiteralPath (Join-Path $dest 'B198M_UPLOAD_THIS_SUMMARY.json') -Raw | ConvertFrom-Json
+            if($summary.independentlyVerifiedPairedSourceCases -ne 1){throw 'B198O_SOURCE_PROOF_NOT_VERIFIED'}
+            if($summary.realModelArchitectureQualityCertified -or $summary.safety.worldWrites -ne 0){throw 'B198O_FALSE_QUALITY_OR_WORLD_ASSERTION'}
+            Write-Host 'B198O_WINDOWS_PS51_ACTUAL_GITHUB_DOWNLOAD_ZIP_AND_PILOT_PASS MOCK_ONLY'
+          } finally {
+            if($server -and -not $server.HasExited){Stop-Process -Id $server.Id -Force}
+          }
