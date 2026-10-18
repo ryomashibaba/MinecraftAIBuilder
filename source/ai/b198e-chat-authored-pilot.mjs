@@ -157,7 +157,7 @@ function station(){
  x.push(b('station-largest-canopy-ribbon',7,62,12,86,2,42,'metal'));
  x.push(e('station-vaulted-lightroof',50,63,30,43,8,22,'glass',1));
  x.push(g('station-skycanopy-central-spine',8,68,29,91,68,29,'glow',2));
- x.push(b('station-hall-wayfinding-halo',43,46,24,15,2,14,'accent',1));
+ x.push(b('station-hall-wayfinding-halo',43,46,24,15,4,14,'accent',1));
  x.push(g('station-aerial-approach',15,32,5,85,35,5,'wood',1));
  return design('b198e-megacity-aerial-terminal',
   'C08 | 吊り屋根の立体乗換駅',
