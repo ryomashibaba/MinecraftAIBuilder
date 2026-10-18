@@ -170,9 +170,12 @@ const CREATE=Object.freeze({
 function revise(id,source){
  const d=structuredClone(source);
  if(id==='r01'){
-  const dome=d.elements.find(x=>x.id==='lib-skyroom-original-glass-dome');
-  dome.center=[42,68,35];
-  dome.radii=[10,7,10];
+  // Non-destructive enlargement candidate: translucent orbital lounge
+  // outside the original dome instead of enveloping/obstructing its roof.
+  // This is visually an expanded circular glass observatory but DOES NOT
+  // claim a fully enclosed enlarged sphere or accessible outer ring.
+  d.elements.push(t('lib-skyroom-larger-glass-outer-halo',42,64,35,'y',14,1,'glass'));
+  d.elements.push(t('lib-skyroom-higher-view-ring',42,69,35,'y',14,1,'glow'));
  }else if(id==='r02'){
   // A new high sloping crown raises the crane's silhouette WITHOUT
   // modifying the original horizontal gantry deck or its headroom.
