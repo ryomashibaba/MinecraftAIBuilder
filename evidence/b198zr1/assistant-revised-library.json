@@ -1,0 +1,2211 @@
+{
+  "schema": "minecraftaibuilder-b143-building-dsl-v1",
+  "id": "coastal-futuristic-library-r1",
+  "title": "海辺の未来型公共図書館 — R1設計レビュー候補",
+  "brief": "Qwen原本を出発点として人手で再設計した中空曲面図書館。中央吹抜け・環状閲覧階・立体書架・折返し階段・最上階の星空観察ラウンジ。外観と使用性は未認定。",
+  "bounds": {
+    "width": 48,
+    "height": 40,
+    "depth": 48
+  },
+  "elements": [
+    {
+      "id": "base-platform",
+      "shape": "box",
+      "mode": "add",
+      "material": "concrete",
+      "origin": [
+        0,
+        0,
+        0
+      ],
+      "size": [
+        48,
+        2,
+        48
+      ]
+    },
+    {
+      "id": "curved-roof",
+      "shape": "ellipsoid",
+      "mode": "add",
+      "material": "glass",
+      "center": [
+        24,
+        30,
+        24
+      ],
+      "radii": [
+        21,
+        9,
+        21
+      ],
+      "shell": 1
+    },
+    {
+      "id": "roof-lower-half-cut",
+      "shape": "box",
+      "mode": "cut",
+      "origin": [
+        0,
+        19,
+        0
+      ],
+      "size": [
+        48,
+        11,
+        48
+      ]
+    },
+    {
+      "id": "main-shell",
+      "shape": "cylinder",
+      "mode": "add",
+      "material": "glass",
+      "origin": [
+        24,
+        2,
+        24
+      ],
+      "axis": "y",
+      "radius": 21,
+      "length": 29,
+      "shell": 1
+    },
+    {
+      "id": "floor-1",
+      "shape": "cylinder",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        24,
+        9,
+        24
+      ],
+      "axis": "y",
+      "radius": 19,
+      "length": 1
+    },
+    {
+      "id": "floor-2",
+      "shape": "cylinder",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        24,
+        17,
+        24
+      ],
+      "axis": "y",
+      "radius": 19,
+      "length": 1
+    },
+    {
+      "id": "floor-3",
+      "shape": "cylinder",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        24,
+        25,
+        24
+      ],
+      "axis": "y",
+      "radius": 18,
+      "length": 1
+    },
+    {
+      "id": "floor-4",
+      "shape": "cylinder",
+      "mode": "add",
+      "material": "concrete",
+      "origin": [
+        24,
+        33,
+        24
+      ],
+      "axis": "y",
+      "radius": 15,
+      "length": 1
+    },
+    {
+      "id": "facade-arc-band-1",
+      "shape": "torus",
+      "mode": "add",
+      "material": "metal",
+      "center": [
+        24,
+        8,
+        24
+      ],
+      "axis": "y",
+      "majorRadius": 20,
+      "tubeRadius": 1
+    },
+    {
+      "id": "facade-arc-band-2",
+      "shape": "torus",
+      "mode": "add",
+      "material": "metal",
+      "center": [
+        24,
+        16,
+        24
+      ],
+      "axis": "y",
+      "majorRadius": 20,
+      "tubeRadius": 1
+    },
+    {
+      "id": "facade-arc-band-3",
+      "shape": "torus",
+      "mode": "add",
+      "material": "metal",
+      "center": [
+        24,
+        24,
+        24
+      ],
+      "axis": "y",
+      "majorRadius": 20,
+      "tubeRadius": 1
+    },
+    {
+      "id": "facade-arc-band-4",
+      "shape": "torus",
+      "mode": "add",
+      "material": "metal",
+      "center": [
+        24,
+        31,
+        24
+      ],
+      "axis": "y",
+      "majorRadius": 20,
+      "tubeRadius": 1
+    },
+    {
+      "id": "lounge-ring",
+      "shape": "torus",
+      "mode": "add",
+      "material": "glass",
+      "center": [
+        24,
+        36,
+        24
+      ],
+      "axis": "y",
+      "majorRadius": 15,
+      "tubeRadius": 1
+    },
+    {
+      "id": "lounge-oculus-frame",
+      "shape": "torus",
+      "mode": "add",
+      "material": "accent",
+      "center": [
+        24,
+        37,
+        24
+      ],
+      "axis": "y",
+      "majorRadius": 9,
+      "tubeRadius": 1
+    },
+    {
+      "id": "stair-well-cut-y9",
+      "shape": "box",
+      "mode": "cut",
+      "origin": [
+        11,
+        9,
+        14
+      ],
+      "size": [
+        8,
+        1,
+        6
+      ]
+    },
+    {
+      "id": "stair-well-cut-y17",
+      "shape": "box",
+      "mode": "cut",
+      "origin": [
+        11,
+        17,
+        14
+      ],
+      "size": [
+        8,
+        1,
+        6
+      ]
+    },
+    {
+      "id": "stair-well-cut-y25",
+      "shape": "box",
+      "mode": "cut",
+      "origin": [
+        11,
+        25,
+        14
+      ],
+      "size": [
+        8,
+        1,
+        6
+      ]
+    },
+    {
+      "id": "stair-well-cut-y33",
+      "shape": "box",
+      "mode": "cut",
+      "origin": [
+        11,
+        33,
+        14
+      ],
+      "size": [
+        8,
+        1,
+        6
+      ]
+    },
+    {
+      "id": "stair-1-out-1",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        12,
+        2,
+        14
+      ],
+      "size": [
+        2,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "stair-1-out-2",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        12,
+        3,
+        15
+      ],
+      "size": [
+        2,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "stair-1-out-3",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        12,
+        4,
+        16
+      ],
+      "size": [
+        2,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "stair-1-out-4",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        12,
+        5,
+        17
+      ],
+      "size": [
+        2,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "stair-1-turn",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        12,
+        5,
+        18
+      ],
+      "size": [
+        6,
+        1,
+        2
+      ]
+    },
+    {
+      "id": "stair-1-return-1",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        16,
+        6,
+        17
+      ],
+      "size": [
+        2,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "stair-1-return-2",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        16,
+        7,
+        16
+      ],
+      "size": [
+        2,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "stair-1-return-3",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        16,
+        8,
+        15
+      ],
+      "size": [
+        2,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "stair-1-return-4",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        16,
+        9,
+        14
+      ],
+      "size": [
+        2,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "stair-2-out-1",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        12,
+        10,
+        14
+      ],
+      "size": [
+        2,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "stair-2-out-2",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        12,
+        11,
+        15
+      ],
+      "size": [
+        2,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "stair-2-out-3",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        12,
+        12,
+        16
+      ],
+      "size": [
+        2,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "stair-2-out-4",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        12,
+        13,
+        17
+      ],
+      "size": [
+        2,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "stair-2-turn",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        12,
+        13,
+        18
+      ],
+      "size": [
+        6,
+        1,
+        2
+      ]
+    },
+    {
+      "id": "stair-2-return-1",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        16,
+        14,
+        17
+      ],
+      "size": [
+        2,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "stair-2-return-2",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        16,
+        15,
+        16
+      ],
+      "size": [
+        2,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "stair-2-return-3",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        16,
+        16,
+        15
+      ],
+      "size": [
+        2,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "stair-2-return-4",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        16,
+        17,
+        14
+      ],
+      "size": [
+        2,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "stair-3-out-1",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        12,
+        18,
+        14
+      ],
+      "size": [
+        2,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "stair-3-out-2",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        12,
+        19,
+        15
+      ],
+      "size": [
+        2,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "stair-3-out-3",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        12,
+        20,
+        16
+      ],
+      "size": [
+        2,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "stair-3-out-4",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        12,
+        21,
+        17
+      ],
+      "size": [
+        2,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "stair-3-turn",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        12,
+        21,
+        18
+      ],
+      "size": [
+        6,
+        1,
+        2
+      ]
+    },
+    {
+      "id": "stair-3-return-1",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        16,
+        22,
+        17
+      ],
+      "size": [
+        2,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "stair-3-return-2",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        16,
+        23,
+        16
+      ],
+      "size": [
+        2,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "stair-3-return-3",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        16,
+        24,
+        15
+      ],
+      "size": [
+        2,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "stair-3-return-4",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        16,
+        25,
+        14
+      ],
+      "size": [
+        2,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "stair-4-out-1",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        12,
+        26,
+        14
+      ],
+      "size": [
+        2,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "stair-4-out-2",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        12,
+        27,
+        15
+      ],
+      "size": [
+        2,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "stair-4-out-3",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        12,
+        28,
+        16
+      ],
+      "size": [
+        2,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "stair-4-out-4",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        12,
+        29,
+        17
+      ],
+      "size": [
+        2,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "stair-4-turn",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        12,
+        29,
+        18
+      ],
+      "size": [
+        6,
+        1,
+        2
+      ]
+    },
+    {
+      "id": "stair-4-return-1",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        16,
+        30,
+        17
+      ],
+      "size": [
+        2,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "stair-4-return-2",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        16,
+        31,
+        16
+      ],
+      "size": [
+        2,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "stair-4-return-3",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        16,
+        32,
+        15
+      ],
+      "size": [
+        2,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "stair-4-return-4",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        16,
+        33,
+        14
+      ],
+      "size": [
+        2,
+        1,
+        1
+      ]
+    },
+    {
+      "id": "lounge-oculus-glazing",
+      "shape": "box",
+      "mode": "add",
+      "material": "glass",
+      "origin": [
+        19,
+        38,
+        19
+      ],
+      "size": [
+        11,
+        1,
+        11
+      ]
+    },
+    {
+      "id": "bookbay-1-west-1-spine",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        9,
+        2,
+        19
+      ],
+      "size": [
+        1,
+        4,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-1-west-1-lower",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        9,
+        3,
+        19
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-1-west-1-upper",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        9,
+        5,
+        19
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-1-west-2-spine",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        9,
+        2,
+        27
+      ],
+      "size": [
+        1,
+        4,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-1-west-2-lower",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        9,
+        3,
+        27
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-1-west-2-upper",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        9,
+        5,
+        27
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-1-west-3-spine",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        9,
+        2,
+        35
+      ],
+      "size": [
+        1,
+        4,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-1-west-3-lower",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        9,
+        3,
+        35
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-1-west-3-upper",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        9,
+        5,
+        35
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-1-east-1-spine",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        38,
+        2,
+        19
+      ],
+      "size": [
+        1,
+        4,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-1-east-1-lower",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        38,
+        3,
+        19
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-1-east-1-upper",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        38,
+        5,
+        19
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-1-east-2-spine",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        38,
+        2,
+        27
+      ],
+      "size": [
+        1,
+        4,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-1-east-2-lower",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        38,
+        3,
+        27
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-1-east-2-upper",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        38,
+        5,
+        27
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-1-east-3-spine",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        38,
+        2,
+        35
+      ],
+      "size": [
+        1,
+        4,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-1-east-3-lower",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        38,
+        3,
+        35
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-1-east-3-upper",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        38,
+        5,
+        35
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-2-west-1-spine",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        9,
+        10,
+        19
+      ],
+      "size": [
+        1,
+        4,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-2-west-1-lower",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        9,
+        11,
+        19
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-2-west-1-upper",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        9,
+        13,
+        19
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-2-west-2-spine",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        9,
+        10,
+        27
+      ],
+      "size": [
+        1,
+        4,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-2-west-2-lower",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        9,
+        11,
+        27
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-2-west-2-upper",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        9,
+        13,
+        27
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-2-west-3-spine",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        9,
+        10,
+        35
+      ],
+      "size": [
+        1,
+        4,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-2-west-3-lower",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        9,
+        11,
+        35
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-2-west-3-upper",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        9,
+        13,
+        35
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-2-east-1-spine",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        38,
+        10,
+        19
+      ],
+      "size": [
+        1,
+        4,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-2-east-1-lower",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        38,
+        11,
+        19
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-2-east-1-upper",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        38,
+        13,
+        19
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-2-east-2-spine",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        38,
+        10,
+        27
+      ],
+      "size": [
+        1,
+        4,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-2-east-2-lower",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        38,
+        11,
+        27
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-2-east-2-upper",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        38,
+        13,
+        27
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-2-east-3-spine",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        38,
+        10,
+        35
+      ],
+      "size": [
+        1,
+        4,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-2-east-3-lower",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        38,
+        11,
+        35
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-2-east-3-upper",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        38,
+        13,
+        35
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-3-west-1-spine",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        9,
+        18,
+        19
+      ],
+      "size": [
+        1,
+        4,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-3-west-1-lower",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        9,
+        19,
+        19
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-3-west-1-upper",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        9,
+        21,
+        19
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-3-west-2-spine",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        9,
+        18,
+        27
+      ],
+      "size": [
+        1,
+        4,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-3-west-2-lower",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        9,
+        19,
+        27
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-3-west-2-upper",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        9,
+        21,
+        27
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-3-west-3-spine",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        9,
+        18,
+        35
+      ],
+      "size": [
+        1,
+        4,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-3-west-3-lower",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        9,
+        19,
+        35
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-3-west-3-upper",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        9,
+        21,
+        35
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-3-east-1-spine",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        38,
+        18,
+        19
+      ],
+      "size": [
+        1,
+        4,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-3-east-1-lower",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        38,
+        19,
+        19
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-3-east-1-upper",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        38,
+        21,
+        19
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-3-east-2-spine",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        38,
+        18,
+        27
+      ],
+      "size": [
+        1,
+        4,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-3-east-2-lower",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        38,
+        19,
+        27
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-3-east-2-upper",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        38,
+        21,
+        27
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-3-east-3-spine",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        38,
+        18,
+        35
+      ],
+      "size": [
+        1,
+        4,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-3-east-3-lower",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        38,
+        19,
+        35
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-3-east-3-upper",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        38,
+        21,
+        35
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-4-west-1-spine",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        9,
+        26,
+        19
+      ],
+      "size": [
+        1,
+        4,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-4-west-1-lower",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        9,
+        27,
+        19
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-4-west-1-upper",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        9,
+        29,
+        19
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-4-west-2-spine",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        9,
+        26,
+        27
+      ],
+      "size": [
+        1,
+        4,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-4-west-2-lower",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        9,
+        27,
+        27
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-4-west-2-upper",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        9,
+        29,
+        27
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-4-west-3-spine",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        9,
+        26,
+        35
+      ],
+      "size": [
+        1,
+        4,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-4-west-3-lower",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        9,
+        27,
+        35
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-4-west-3-upper",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        9,
+        29,
+        35
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-4-east-1-spine",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        38,
+        26,
+        19
+      ],
+      "size": [
+        1,
+        4,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-4-east-1-lower",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        38,
+        27,
+        19
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-4-east-1-upper",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        38,
+        29,
+        19
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-4-east-2-spine",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        38,
+        26,
+        27
+      ],
+      "size": [
+        1,
+        4,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-4-east-2-lower",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        38,
+        27,
+        27
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-4-east-2-upper",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        38,
+        29,
+        27
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-4-east-3-spine",
+      "shape": "box",
+      "mode": "add",
+      "material": "metal",
+      "origin": [
+        38,
+        26,
+        35
+      ],
+      "size": [
+        1,
+        4,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-4-east-3-lower",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        38,
+        27,
+        35
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "bookbay-4-east-3-upper",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        38,
+        29,
+        35
+      ],
+      "size": [
+        2,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "reading-desk-1-west",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        14,
+        2,
+        31
+      ],
+      "size": [
+        3,
+        1,
+        2
+      ]
+    },
+    {
+      "id": "reading-desk-1-east",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        32,
+        2,
+        31
+      ],
+      "size": [
+        3,
+        1,
+        2
+      ]
+    },
+    {
+      "id": "reading-desk-2-west",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        14,
+        10,
+        31
+      ],
+      "size": [
+        3,
+        1,
+        2
+      ]
+    },
+    {
+      "id": "reading-desk-2-east",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        32,
+        10,
+        31
+      ],
+      "size": [
+        3,
+        1,
+        2
+      ]
+    },
+    {
+      "id": "reading-desk-3-west",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        14,
+        18,
+        31
+      ],
+      "size": [
+        3,
+        1,
+        2
+      ]
+    },
+    {
+      "id": "reading-desk-3-east",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        32,
+        18,
+        31
+      ],
+      "size": [
+        3,
+        1,
+        2
+      ]
+    },
+    {
+      "id": "reading-desk-4-west",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        14,
+        26,
+        31
+      ],
+      "size": [
+        3,
+        1,
+        2
+      ]
+    },
+    {
+      "id": "reading-desk-4-east",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        32,
+        26,
+        31
+      ],
+      "size": [
+        3,
+        1,
+        2
+      ]
+    },
+    {
+      "id": "entrance-light-1",
+      "shape": "box",
+      "mode": "add",
+      "material": "glow",
+      "origin": [
+        18,
+        6,
+        40
+      ],
+      "size": [
+        2,
+        1,
+        3
+      ]
+    },
+    {
+      "id": "entrance-light-2",
+      "shape": "box",
+      "mode": "add",
+      "material": "glow",
+      "origin": [
+        28,
+        6,
+        40
+      ],
+      "size": [
+        2,
+        1,
+        3
+      ]
+    },
+    {
+      "id": "central-void",
+      "shape": "box",
+      "mode": "cut",
+      "origin": [
+        19,
+        2,
+        19
+      ],
+      "size": [
+        11,
+        36,
+        11
+      ]
+    },
+    {
+      "id": "sea-entry",
+      "shape": "box",
+      "mode": "cut",
+      "origin": [
+        22,
+        2,
+        29
+      ],
+      "size": [
+        5,
+        5,
+        19
+      ]
+    }
+  ],
+  "designOnly": true
+}
