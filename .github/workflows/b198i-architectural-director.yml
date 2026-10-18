@@ -25,6 +25,7 @@ jobs:
           node --check scripts/b198h-local-workflow.mjs
           node --check scripts/b198i-design-director.test.mjs
           node --check scripts/b198i-studio-director.test.mjs
+          node --check scripts/b198i-browser-qa.mjs
       - name: Strict B198A-I source, legacy Studio, 3D geometry and directed intent regressions
         run: |
           node --test \
@@ -54,6 +55,8 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Preserve existing real-source desktop and mobile approval / reject / undo / redo
         run: node scripts/b198d-browser-qa.mjs
+      - name: Verify NEW planned-source Studio desktop/mobile 3D rendering and unapproved draft comparison
+        run: node scripts/b198i-browser-qa.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -61,5 +64,7 @@ jobs:
           path: |
             b198d-evidence/B198D_*_*.png
             b198d-evidence/B198D_CHROMIUM_QA.json
+            b198i-browser-evidence/B198I_*.png
+            b198i-browser-evidence/B198I_CHROMIUM_REPORT.json
           retention-days: 14
           if-no-files-found: warn
