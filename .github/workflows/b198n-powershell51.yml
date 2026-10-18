@@ -1,0 +1,44 @@
+name: B198N Windows PowerShell 5.1 Node Argument Compatibility
+on:
+  push:
+    branches: [feature/b198n-windows-powershell51-hotfix]
+  pull_request:
+    paths:
+      - 'tools/B198M_RUN_LOCAL.ps1'
+      - '.github/workflows/b198n-powershell51.yml'
+permissions:
+  contents: read
+jobs:
+  legacy-windows-powershell-51-real-ps1:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Execute Node version preflight through Windows PowerShell 5.1, not pwsh 7
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          & powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./tools/B198M_RUN_LOCAL.ps1 -Mode Preflight -Model B198M_MOCK_NOT_REAL_LLM -Endpoint 'http://127.0.0.1:11783/v1/chat/completions'
+          if($LASTEXITCODE -ne 0){throw 'B198N_WINDOWS_POWERSHELL_51_PREFLIGHT_FAILED'}
+          Write-Host 'B198N_POWERSHELL_51_NODE_PREFLIGHT_PASS'
+      - name: Run exact PowerShell 5.1 launcher against loopback-only MOCK provider to verify ZIP path
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $server=Start-Process -FilePath node -ArgumentList @('scripts/b198m-fixture-server.mjs','--port','11783') -NoNewWindow -PassThru
+          try {
+            Start-Sleep -Seconds 3
+            $dest=Join-Path $env:RUNNER_TEMP 'B198N-WINDOWS-PS51-TEST-OUTPUT'
+            & powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./tools/B198M_RUN_LOCAL.ps1 -Mode Pilot -SourceDirectory . -Model B198M_MOCK_NOT_REAL_LLM -Endpoint 'http://127.0.0.1:11783/v1/chat/completions' -OutputDirectory $dest -Cases 1 -NoRevisions
+            if($LASTEXITCODE -ne 0){throw 'B198N_WINDOWS_POWERSHELL_51_PILOT_FAILED'}
+            $zip=Join-Path $dest 'B198M_UPLOAD_THIS_RESULT.zip'
+            if(-not (Test-Path -LiteralPath $zip)){throw 'B198N_EXPECTED_USER_ZIP_MISSING'}
+            $summary=Get-Content -LiteralPath (Join-Path $dest 'B198M_UPLOAD_THIS_SUMMARY.json') -Raw | ConvertFrom-Json
+            if($summary.independentlyVerifiedPairedSourceCases -ne 1){throw 'B198N_SOURCE_PAIR_NOT_VERIFIED'}
+            if($summary.realModelArchitectureQualityCertified -or $summary.safety.worldWrites -ne 0){throw 'B198N_FALSE_QUALITY_OR_WORLD_CLAIM'}
+            Write-Host 'B198N_POWERSHELL_51_USER_ZIP_PATH_PASS MOCK_ONLY'
+          } finally {
+            if($server -and -not $server.HasExited){Stop-Process -Id $server.Id -Force}
+          }
