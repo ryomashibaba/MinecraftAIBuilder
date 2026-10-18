@@ -1,7 +1,7 @@
 # B198M Windows LOCAL model pilot. Never contacts Minecraft or a paid model API.
 [CmdletBinding()]
 param(
- [ValidateSet('Pilot','Full','Preflight','Diagnose')][string]$Mode='Pilot',
+ [ValidateSet('Pilot','Full','Preflight','Diagnose','SourceProbe')][string]$Mode='Pilot',
  [string]$Model='',
  [string]$Endpoint='http://127.0.0.1:11434/v1/chat/completions',
  [string]$SourceDirectory='',
@@ -9,12 +9,15 @@ param(
  [ValidateRange(1,12)][int]$Cases=1,
  [ValidateRange(30,900)][int]$TimeoutSeconds=360,
  [ValidateRange(15,120)][int]$ProbeTimeoutSeconds=60,
+ [ValidateRange(60,360)][int]$SourceTimeoutSeconds=300,
+ [ValidateRange(512,4096)][int]$SourceOutputTokens=3072,
+ [ValidateRange(4096,8192)][int]$SourceContextTokens=6144,
  [switch]$IncludePilotRevision,
  [switch]$NoRevisions
 )
 $ErrorActionPreference='Stop'
 $ProgressPreference='SilentlyContinue'
-$branch='feature/b198r-bounded-local-inference-probe'
+$branch='feature/b198s-calibrated-single-source-ollama'
 $root=$null
 function Hold([string]$reason){throw "B198M_HOLD_$reason"}
 try{
@@ -72,7 +75,7 @@ try{
   $SourceDirectory=$folders[0].FullName
  }
  $SourceDirectory=(Resolve-Path -LiteralPath $SourceDirectory).Path
- foreach($rel in @('scripts\b198k-local-comparison.mjs','scripts\b198m-pilot-summary.mjs','scripts\b198r-local-diagnostic.mjs')){
+ foreach($rel in @('scripts\b198k-local-comparison.mjs','scripts\b198m-pilot-summary.mjs','scripts\b198r-local-diagnostic.mjs','scripts\b198s-single-source-probe.mjs')){
   if(-not (Test-Path -LiteralPath (Join-Path $SourceDirectory $rel) -PathType Leaf)){
    Hold 'REQUIRED_GITHUB_SOURCE_MISSING'
   }
@@ -110,6 +113,52 @@ try{
   Write-Host ('Model loaded VRAM bytes: {0}' -f $diagnostic.modelResidency.vramBytes)
   Write-Host "Upload to ChatGPT: $uploadZip"
   Write-Host 'No complete architecture model call and no Minecraft world contact.'
+  return
+ }
+ # B198S SourceProbe: exactly one real native model request, no A/B.
+ if($Mode -eq 'SourceProbe'){
+  if($SourceOutputTokens -gt $SourceContextTokens-2048){
+   Hold 'B198S_OUTPUT_CONTEXT_OVERLAP'
+  }
+  $study=Join-Path $root 'source-study'
+  Write-Host 'B198S: ONE original c01 architectural source-model request.'
+  Write-Host ('B198S native Ollama: think OFF requested, max output {0} tokens, context {1}, timeout {2}s.' -f $SourceOutputTokens,$SourceContextTokens,$SourceTimeoutSeconds)
+  $old=Get-Location
+  try{
+   Set-Location -LiteralPath $SourceDirectory
+   $probeArgs=@('scripts/b198s-single-source-probe.mjs','--model',$Model,
+    '--out',$study,'--port',([string]$port),
+    '--timeout-seconds',([string]$SourceTimeoutSeconds),
+    '--source-tokens',([string]$SourceOutputTokens),
+    '--context-tokens',([string]$SourceContextTokens))
+   & node @probeArgs
+   if($LASTEXITCODE -ne 0){Hold 'B198S_SOURCE_MODEL_OR_COMPILER_UNEXPECTED_FATAL'}
+  }finally{Set-Location -LiteralPath $old}
+  $report=Join-Path $root 'B198S_UPLOAD_THIS_SUMMARY.json'
+  $result=Get-Content -LiteralPath $report -Raw | ConvertFrom-Json
+  $upload=Join-Path $root 'B198S_UPLOAD_THIS_RESULT'
+  New-Item -ItemType Directory -Path $upload | Out-Null
+  Copy-Item -LiteralPath $report -Destination $upload
+  Copy-Item -LiteralPath (Join-Path $study 'B198H_INDEPENDENT_SOURCE_EVIDENCE.json') -Destination $upload
+  Copy-Item -LiteralPath (Join-Path $study 'B198B_RESULTS.json') -Destination $upload
+  foreach($name in @('source-design.json','source-audit.json','index.html')){
+   $sourceFile=Join-Path (Join-Path $study 'c01') $name
+   if(Test-Path -LiteralPath $sourceFile){
+    Copy-Item -LiteralPath $sourceFile -Destination (Join-Path $upload ('c01_'+$name))
+   }
+  }
+  $archive=Join-Path $root 'B198S_UPLOAD_THIS_RESULT.zip'
+  Compress-Archive -Path (Join-Path $upload '*') -DestinationPath $archive -CompressionLevel Optimal
+  if($result.independentlyCompiled){
+   Write-Host ('B198S_TEST_FINISHED {0}' -f $result.status) -ForegroundColor Green
+   Write-Host ('B143 SOURCE independently compiled; element count: {0}' -f $result.independentlyCompiled.elements)
+   Write-Host ('3D source review: {0}' -f (Join-Path (Join-Path $study 'c01') 'index.html'))
+  }else{
+   Write-Host ('B198S_TEST_FINISHED {0}' -f $result.status) -ForegroundColor Yellow
+   Write-Host 'SOURCE HOLD: no valid B143 building; do not claim architectural quality.'
+  }
+  Write-Host "Upload to ChatGPT: $archive"
+  Write-Host 'No Minecraft contacts/writes; model aesthetics and walking unreviewed.'
   return
  }
  $run=Join-Path $root 'source-study'
