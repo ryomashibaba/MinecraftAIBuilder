@@ -1,0 +1,42 @@
+name: B198G Bounded Autonomous Architecture Quality (source-only)
+on:
+  push:
+    branches:
+      - feature/b198g-bounded-autonomous-source-improvement
+  pull_request:
+    paths:
+      - 'source/ai/b198g-autonomous-quality.mjs'
+      - 'scripts/b198g-autonomous-quality.test.mjs'
+      - 'source/ai/b198g-local-model-adapter.mjs'
+      - 'scripts/b198g-local-design.mjs'
+      - 'scripts/b198g-local-adapter.test.mjs'
+      - '.github/workflows/b198g-quality.yml'
+permissions:
+  contents: read
+jobs:
+  original-source-geometry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: B198A-G original regressions and source topology QA
+        run: |
+          node --test \
+            scripts/b198a-engine.test.mjs \
+            scripts/b198b-quality.test.mjs \
+            scripts/b198c-critic.test.mjs \
+            scripts/b198d-session.test.mjs \
+            scripts/b198e-pilot.test.mjs \
+            scripts/b198f-evidence.test.mjs \
+            scripts/b198g-autonomous-quality.test.mjs \
+            scripts/b198g-local-adapter.test.mjs
+      - name: Keep the original Minecraft world offline
+        run: |
+          node --check source/ai/b198g-autonomous-quality.mjs
+          node --check scripts/b198g-autonomous-quality.test.mjs
+          node --check source/ai/b198g-local-model-adapter.mjs
+          node --check scripts/b198g-local-design.mjs
+          node --check scripts/b198g-local-adapter.test.mjs
