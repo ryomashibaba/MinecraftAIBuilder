@@ -18,7 +18,7 @@ param(
 )
 $ErrorActionPreference='Stop'
 $ProgressPreference='SilentlyContinue'
-$branch='feature/b198v-persistent-offline-workbench'
+$branch='feature/b198w-offline-source-quality-review'
 $root=$null
 function Hold([string]$reason){throw "B198M_HOLD_$reason"}
 try{
@@ -149,7 +149,7 @@ try{
   }
   Copy-Item -LiteralPath (Join-Path $study 'B198H_INDEPENDENT_SOURCE_EVIDENCE.json') -Destination $upload
   Copy-Item -LiteralPath (Join-Path $study 'B198B_RESULTS.json') -Destination $upload
-  foreach($name in @('source-design.json','source-audit.json','index.html')){
+  foreach($name in @('source-design.json','source-audit.json','index.html','B198W_SOURCE_QUALITY_EVIDENCE.json','B198W_REVIEW_BOARD.html')){
    $sourceFile=Join-Path (Join-Path $study 'c01') $name
    if(Test-Path -LiteralPath $sourceFile){
     Copy-Item -LiteralPath $sourceFile -Destination (Join-Path $upload ('c01_'+$name))
@@ -167,6 +167,7 @@ try{
    Write-Host ('B198S_TEST_FINISHED {0}' -f $result.status) -ForegroundColor Green
    Write-Host ('B143 SOURCE independently compiled; element count: {0}' -f $result.independentlyCompiled.elements)
    Write-Host ('3D source review: {0}' -f (Join-Path (Join-Path $study 'c01') 'index.html'))
+   Write-Host ('B198W quality review: {0}' -f (Join-Path (Join-Path $study 'c01') 'B198W_REVIEW_BOARD.html'))
   }else{
    Write-Host ('B198S_TEST_FINISHED {0}' -f $result.status) -ForegroundColor Yellow
    Write-Host 'SOURCE HOLD: no valid B143 building; do not claim architectural quality.'
