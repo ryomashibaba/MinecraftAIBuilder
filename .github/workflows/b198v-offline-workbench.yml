@@ -1,0 +1,121 @@
+name: B198V Persistent One-Click Offline Source Workbench
+on:
+  push:
+    branches: [feature/b198v-persistent-offline-workbench]
+  pull_request:
+    paths:
+      - 'tools/B198V_INSTALL_OFFLINE.ps1'
+      - 'tools/B198M_RUN_LOCAL.ps1'
+      - 'scripts/b198v-cache-integrity*.mjs'
+      - '.github/workflows/b198v-offline-workbench.yml'
+permissions:
+  contents: read
+jobs:
+  offline-integrity-and-full-source-regressions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Integrity validator syntax
+        run: |
+          node --check scripts/b198v-cache-integrity.mjs
+          node --check scripts/b198v-cache-integrity.test.mjs
+      - name: B198V immutable cache and every inherited B198A–U source/test gate
+        run: |
+          node --test \
+            scripts/b198v-cache-integrity.test.mjs \
+            scripts/b198u-save-replay.test.mjs \
+            scripts/b198t-metadata-only.test.mjs \
+            scripts/b198s-native-source.test.mjs \
+            scripts/b198r-local-diagnostic.test.mjs \
+            scripts/b198q-long-http.test.mjs \
+            scripts/b198p-model-timeout.test.mjs \
+            scripts/b198m-local-transport.test.mjs \
+            scripts/b198a-engine.test.mjs \
+            scripts/b198a-cli.test.mjs \
+            scripts/b198b-quality.test.mjs \
+            scripts/b198c-critic.test.mjs \
+            scripts/b198d-session.test.mjs \
+            scripts/b198e-pilot.test.mjs \
+            scripts/b198f-evidence.test.mjs \
+            scripts/b198g-autonomous-quality.test.mjs \
+            scripts/b198g-local-adapter.test.mjs \
+            scripts/b198h-local-workflow.test.mjs \
+            scripts/b198i-design-director.test.mjs \
+            scripts/b198i-studio-director.test.mjs \
+            scripts/b198j-circulation.test.mjs \
+            scripts/b198k-paired-study.test.mjs \
+            scripts/b198l-step-chain.test.mjs
+  real-windows-ps51-install-and-one-click-replay:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: True WinPS5.1 one-time GitHub download + install when Ollama is OFF
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $base=Join-Path $env:RUNNER_TEMP 'B198V-WORKBENCH-TEST'
+          # Do not pass -SourceDirectory: this tests one real HTTPS GitHub source ZIP installation.
+          & powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./tools/B198V_INSTALL_OFFLINE.ps1 -InstallRoot $base -Model 'B198S_FIXTURE_NOT_REAL_LLM' -Endpoint 'http://127.0.0.1:11785/v1/chat/completions'
+          if($LASTEXITCODE -ne 0){throw 'B198V_INSTALL_PS51_FAIL'}
+          $kit=Join-Path $base 'offline-workbench-v1'
+          $engine=Join-Path $kit 'engine'
+          foreach($rel in @('B198V_WORKBENCH_INFO.json','B198V_OFFLINE_ENGINE_SEAL.json','REPLAY_LATEST_OFFLINE.cmd','RUN_ONE_REAL_MODEL_ONCE.cmd','engine/scripts/b198u-offline-replay.mjs','engine/scripts/b198v-cache-integrity.mjs')){
+            if(-not (Test-Path (Join-Path $kit $rel))){throw ('B198V_MISSING_'+$rel)}
+          }
+          $info=Get-Content (Join-Path $kit 'B198V_WORKBENCH_INFO.json') -Raw | ConvertFrom-Json
+          if($info.installModelRequests -ne 0 -or $info.offlineReplayModelRequests -ne 0 -or $info.worldWrites -ne 0){throw 'B198V_INSTALL_UNAUTHORIZED_ACTION'}
+          & node (Join-Path $engine 'scripts/b198v-cache-integrity.mjs') --verify $engine
+          if($LASTEXITCODE -ne 0){throw 'B198V_CACHE_VERIFY_AFTER_COPY_FAIL'}
+          # Second installation: MUST be a no-download, no-overwrite, integrity-only operation.
+          & powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./tools/B198V_INSTALL_OFFLINE.ps1 -InstallRoot $base -Model 'B198S_FIXTURE_NOT_REAL_LLM' -Endpoint 'http://127.0.0.1:11785/v1/chat/completions'
+          if($LASTEXITCODE -ne 0){throw 'B198V_REPEATED_INSTALL_FAIL'}
+          Write-Host 'B198V_WINPS51_INSTALL_TWO_RUNS_CACHE_VERIFIED_ZERO_INFERENCE'
+      - name: 'One-click cached source: one fake local model call, then offline replay with fake Ollama STOPPED'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $env:B198V_NONINTERACTIVE='1'
+          $base=Join-Path $env:RUNNER_TEMP 'B198V-WORKBENCH-TEST'
+          $kit=Join-Path $base 'offline-workbench-v1'
+          $probeCmd=Join-Path $kit 'RUN_ONE_REAL_MODEL_ONCE.cmd'
+          $replayCmd=Join-Path $kit 'REPLAY_LATEST_OFFLINE.cmd'
+          $firstOut=Join-Path $env:RUNNER_TEMP 'B198V-ONE-MODEL-TRIAL'
+          $offlineOut=Join-Path $env:RUNNER_TEMP 'B198V-OFFLINE-REPLAY'
+          $server=Start-Process -FilePath node -ArgumentList @('scripts/b198s-native-fixture-server.mjs','--port','11785') -NoNewWindow -PassThru
+          try{
+            Start-Sleep -Seconds 3
+            & $probeCmd -OutputDirectory $firstOut
+            if($LASTEXITCODE -ne 0){throw 'B198V_CACHED_SOURCE_PROBE_FAILED'}
+            $raw=Join-Path $firstOut 'B198U_ORIGINAL_MODEL_RESPONSE.txt'
+            if(-not (Test-Path $raw)){throw 'B198V_ORIGINAL_MODEL_LOST'}
+            $modelSummary=Get-Content (Join-Path $firstOut 'B198S_UPLOAD_THIS_SUMMARY.json') -Raw | ConvertFrom-Json
+            if(-not $modelSummary.independentlyCompiled){throw 'B198V_MODEL_SOURCE_COMPILER_HOLD'}
+            if($modelSummary.modelCalls.Count -ne 1){throw 'B198V_MULTIPLE_MODEL_CALLS'}
+            if($modelSummary.safety.worldWrites -ne 0){throw 'B198V_WORLD_WRITES'}
+          }finally{
+            if($server -and -not $server.HasExited){Stop-Process -Id $server.Id -Force}
+          }
+          # No Ollama is listening: replay must use only persisted JSON, the sealed offline engine, and zero internet requests.
+          & $replayCmd -ReplaySourceFile (Join-Path $firstOut 'B198U_ORIGINAL_MODEL_RESPONSE.txt') -OutputDirectory $offlineOut
+          if($LASTEXITCODE -ne 0){throw 'B198V_CACHED_OFFLINE_REPLAY_FAILED'}
+          $summary=Get-Content (Join-Path $offlineOut 'offline-review/B198U_REPLAY_SUMMARY.json') -Raw | ConvertFrom-Json
+          if($summary.modelCallsMade -ne 0 -or $summary.safety.worldWrites -ne 0){throw 'B198V_OFFLINE_CONTACTS'}
+          if($summary.status -ne 'OFFLINE_COMPILED_HUMAN_REVIEW_REQUIRED'){throw 'B198V_OFFLINE_COMPILE_HOLD'}
+          if($summary.compiledSource.sourceSha256 -ne $modelSummary.independentlyCompiled.sourceSha256){throw 'B198V_SOURCE_SHA_DRIFT'}
+          if(-not (Test-Path (Join-Path $offlineOut 'B198U_UPLOAD_THIS_REPLAY.zip'))){throw 'B198V_ZIP_MISSING'}
+          # Any accidental changed engine code causes a hard HOLD; no hidden download to replace it.
+          $script=Join-Path $kit 'engine/scripts/b198u-offline-replay.mjs'
+          Add-Content -LiteralPath $script -Value '// tampered fixture'
+          & $replayCmd -ReplaySourceFile (Join-Path $firstOut 'B198U_ORIGINAL_MODEL_RESPONSE.txt') -OutputDirectory (Join-Path $env:RUNNER_TEMP 'B198V-SHOULD-NOT-RUN')
+          if($LASTEXITCODE -eq 0){throw 'B198V_CACHE_TAMPER_WAS_NOT_BLOCKED'}
+          if(Test-Path (Join-Path $env:RUNNER_TEMP 'B198V-SHOULD-NOT-RUN')){throw 'B198V_TAMPER_EXECUTED_OFFLINE_RUN'}
+          # We deliberately executed a command expected to exit 1 for changed engine code.
+          # Reset PowerShell's native exit status after explicitly verifying the rejection.
+          $global:LASTEXITCODE=0
+          Write-Host 'B198V_ONE_CLICK_CACHED_SOURCE_THEN_ZERO_OLLAMA_NO_DOWNLOAD_REPLAY_PASS MOCK_ONLY'
