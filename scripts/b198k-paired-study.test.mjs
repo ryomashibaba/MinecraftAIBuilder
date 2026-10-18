@@ -21,7 +21,7 @@ const design=()=>({
   {id:'upper-glazed-roof',mode:'add',shape:'box',
    material:'glass',origin:[8,27,8],size:[26,1,22]},
   {id:'side-high-spire',mode:'add',shape:'beam',
-   material:'accent',from:[36,4,22],to:[36,31,22],radius:1}
+   material:'accent',start:[36,4,22],end:[36,31,22],thickness:1}
  ]
 });
 const revised=()=>{
@@ -55,7 +55,7 @@ const plan=()=>({
  ]
 });
 const response=design=>({design,explanation:'Explicit TEST DOUBLE, not actual AI',assumptions:[]});
-test('B198K CLI requires explicit local model, bounded cases and refuses remotely paid API targets',()=>{
+test('B198K CLI requires explicit local model, bounded cases and refuses remotely paid API targets',async()=>{
  assert.throws(()=>parseB198KArgs(['--out','new']),/B198K_CLI_EXPLICIT_MODEL_AND_OUTPUT_REQUIRED/);
  assert.throws(()=>parseB198KArgs(['--model','m','--out','new','--cases','0']),
  /B198K_CLI_INVALID_--cases/);
@@ -68,7 +68,7 @@ test('B198K CLI requires explicit local model, bounded cases and refuses remotel
  assert.equal(args.creationCount,1);
  assert.equal(args.includeRevisions,true);
  assert.equal(args.directedAttempts,3);
- assert.throws(()=>runB198KCli({...args,endpoint:'https://api.openai.com/v1/chat/completions'},{
+ await assert.rejects(runB198KCli({...args,endpoint:'https://api.openai.com/v1/chat/completions'},{
   generator:async()=>response(design()),planner:async()=>plan()}),
  /B198G_LOCAL_ONLY_EXPLICIT_127_0_0_1_CHAT_COMPLETIONS_ALLOWED/);
 });
