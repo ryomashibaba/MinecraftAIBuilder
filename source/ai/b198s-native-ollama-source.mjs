@@ -1,0 +1,178 @@
+/**
+ * B198S: explicit LOCAL Ollama native JSON bridge for ONE frozen architecture
+ * source case. Reuses the B198G strict original model proposal grammar and
+ * B143 compiler. This is never an automatic template or a Minecraft writer.
+ *
+ * Only literal 127.0.0.1 native /api/chat; not fetch/Undici and no redirects,
+ * external hosts, credentials, shells, downloads or user-world operations.
+ */
+import http from 'node:http';
+import {performance} from 'node:perf_hooks';
+
+export const SCHEMA='minecraftaibuilder-b198s-native-single-source-json-v1';
+const ENDPOINT=/^http:\/\/127\.0\.0\.1:(\d{2,5})\/v1\/chat\/completions$/;
+const MODEL=/^[A-Za-z0-9._:/-]{2,140}$/;
+const requestMaxBytes=128*1024,responseMaxBytes=512*1024;
+const fail=s=>{
+ const e=Error('B198S_LOCAL_TRANSPORT_'+s);
+ e.code='B198S_LOCAL_TRANSPORT_'+s;
+ return e;
+};
+const number=x=>Number.isSafeInteger(x)&&x>=0?x:null;
+const seconds=x=>typeof x==='number'&&Number.isFinite(x)&&x>=0?
+ Number((x/1e9).toFixed(3)):null;
+
+/** Full architectural quality is not claimed; this is an *initial source* trial.
+ * Output budget trims excessively verbose descriptions, NOT a generic building
+ * type or fixed geometry. Whole-source B143 compiler is still authoritative.
+ */
+const STRUCTURAL_GUIDE=[
+ 'Return ORIGINAL architecture for the supplied Japanese request. Never use a fixed building template.',
+ 'The ONLY outer keys are design, explanation, assumptions.',
+ 'Inside design exactly: schema, id, title, brief, bounds, elements, designOnly.',
+ 'Set schema "minecraftaibuilder-b143-building-dsl-v1", designOnly true.',
+ 'id must be a lowercase-hyphenated 3..48 character slug. bounds width/depth 8..128, height 8..96.',
+ 'Each element needs id (distinct), shape, mode. add requires material in stone/concrete/metal/glass/wood/glow/accent; cut omits material.',
+ 'For box use origin:[x,y,z],size:[sx,sy,sz]; ellipsoid uses center:[x,y,z],radii:[rx,ry,rz].',
+ 'For cylinder use origin:[x,y,z],axis:"x"/"y"/"z",radius,length.',
+ 'For torus use center:[x,y,z],axis,majorRadius,tubeRadius.',
+ 'For beam use start:[x,y,z],end:[x,y,z],thickness 1..3.',
+ 'Do not include fields of unrelated shapes, invented types, or Minecraft commands.',
+ 'All coordinates integer, nonnegative and inside bounds. Include genuine supported floors and cleared two-block headroom.',
+ 'Use distinctive overall silhouette, multiple functional zones and a meaningful interior void when the request needs them.',
+ 'Make a coherent first-pass design with approximately 12..28 meaningful source elements, not hundreds of redundant decorations.',
+ 'Keep explanation short (under 150 characters), assumptions a short array. Prioritize complete compact JSON over verbose prose.',
+ 'Do not claim the design is constructed, traversable or artistically approved.'
+].join('\n');
+
+export function createB198SNativeBridge({
+ numPredict=3072,numCtx=6144,keepAlive='10m',
+ transport=http,addArchitectureGuide=true
+}={}){
+ if(!Number.isSafeInteger(numPredict)||numPredict<512||numPredict>4096)
+  throw fail('OUTPUT_TOKENS_512_TO_4096');
+ if(!Number.isSafeInteger(numCtx)||numCtx<4096||numCtx>8192)
+  throw fail('CONTEXT_4096_TO_8192');
+ if(numPredict>numCtx-2048)throw fail('INSUFFICIENT_CONTEXT_ROOM');
+ if(keepAlive!=='10m'&&keepAlive!=='5m')throw fail('KEEP_ALIVE_INVALID');
+ if(typeof transport?.request!=='function')throw fail('TRANSPORT_REQUIRED');
+ const entries=[];
+ const fetcher=(url,opts={})=>{
+  const match=typeof url==='string'?ENDPOINT.exec(url):null;
+  if(!match||Number(match[1])<1||Number(match[1])>65535)
+   return Promise.reject(fail('LOOPBACK_URL_ONLY'));
+  if(opts.method!=='POST'||opts.redirect!=='error'||
+     opts.headers?.Authorization!==undefined||
+     opts.headers?.authorization!==undefined||
+     opts.signal?.aborted) {
+   return Promise.reject(fail('UNSAFE_REQUEST_OPTIONS_OR_ALREADY_CANCELLED'));
+  }
+  if(typeof opts.body!=='string'||Buffer.byteLength(opts.body)>requestMaxBytes)
+   return Promise.reject(fail('INVALID_OR_OVERSIZED_REQUEST'));
+  let payload;
+  try{payload=JSON.parse(opts.body)}
+  catch{return Promise.reject(fail('INVALID_OPENAI_ADAPTER_PAYLOAD'))}
+  if(!payload||!MODEL.test(payload.model??'')||
+     payload.stream!==false||payload.response_format?.type!=='json_object'||
+     !Array.isArray(payload.messages)||payload.messages.length!==2||
+     payload.messages[0]?.role!=='system'||payload.messages[1]?.role!=='user'||
+     payload.messages.some(x=>typeof x.content!=='string')) {
+   return Promise.reject(fail('UNSAFE_MODEL_REQUEST'));
+  }
+  const messages=payload.messages.map(x=>({role:x.role,content:x.content}));
+  if(addArchitectureGuide)messages[0].content+='\n'+STRUCTURAL_GUIDE;
+  const native={
+   model:payload.model,messages,stream:false,format:'json',think:false,
+   keep_alive:keepAlive,
+   options:{num_predict:numPredict,num_ctx:numCtx,temperature:0.35}
+  };
+  const raw=JSON.stringify(native);
+  if(Buffer.byteLength(raw)>requestMaxBytes)
+   return Promise.reject(fail('NATIVE_REQUEST_TOO_LARGE'));
+  return new Promise((resolve,reject)=>{
+   const start=performance.now();let settled=false,received=0;
+   const final=(error,value)=>{
+    if(settled)return;settled=true;
+    opts.signal?.removeEventListener('abort',abort);
+    const elapsedMs=Math.round(performance.now()-start);
+    if(error){
+     const reason=String(error?.code??error?.message??error).slice(0,140);
+     entries.push({outcome:'TRANSPORT_HOLD',elapsedMs,reason,
+      outputTokenLimit:numPredict,contextTokenLimit:numCtx});
+     reject(error?.code?.startsWith?.('B198S_LOCAL_TRANSPORT_')?
+      error:fail(String(error?.code??'CONNECTION_ERROR').replace(/[^A-Z0-9_]/gi,'').slice(0,40)));
+    }else{resolve(value)}
+   };
+   const abort=()=>req.destroy(fail('MODEL_DEADLINE_EXPIRED'));
+   const req=transport.request({
+    hostname:'127.0.0.1',port:Number(match[1]),path:'/api/chat',
+    method:'POST',agent:false,
+    headers:{'Content-Type':'application/json',
+     'Content-Length':Buffer.byteLength(raw)}
+   },res=>{
+    let chunks=[];
+    res.on('data',chunk=>{
+     received+=chunk.length;
+     if(received>responseMaxBytes){
+      req.destroy(fail('RESPONSE_TOO_LARGE'));res.destroy();
+      return;
+     }
+     chunks.push(chunk);
+    });
+    res.on('error',e=>final(e));
+    res.on('end',()=>{
+     const responseText=Buffer.concat(chunks).toString('utf8');
+     let body;
+     try{body=JSON.parse(responseText)}
+     catch{return final(fail('INVALID_NATIVE_RESPONSE_JSON'))}
+     const elapsedMs=Math.round(performance.now()-start);
+     const ok=res.statusCode>=200&&res.statusCode<300;
+     if(!ok){
+      entries.push({outcome:'SERVER_HTTP_HOLD',elapsedMs,status:res.statusCode,
+       // Do not expose arbitrary raw model server errors in the uploaded report.
+       outputTokenLimit:numPredict,contextTokenLimit:numCtx});
+      return final(null,{ok:false,status:res.statusCode,json:async()=>({})});
+     }
+     const content=body?.message?.content;
+     if(typeof content!=='string'||content.length>60000)
+      return final(fail('UNEXPECTED_MODEL_CONTENT'));
+     const ended=body.done===true;
+     const isLength=body.done_reason==='length'||body.done_reason==='max_tokens';
+     const detail={
+      outcome:ended&&!isLength?'MODEL_RETURNED':'MODEL_INCOMPLETE',
+      elapsedMs,
+      complete:ended&&!isLength,doneReason:typeof body.done_reason==='string'?
+       body.done_reason.slice(0,50):null,
+      responseCharacters:content.length,
+      thinkingCharacters:number(body.message?.thinking?.length),
+      totalSeconds:seconds(body.total_duration),
+      loadSeconds:seconds(body.load_duration),
+      promptSeconds:seconds(body.prompt_eval_duration),
+      promptTokens:number(body.prompt_eval_count),
+      generationSeconds:seconds(body.eval_duration),
+      generatedTokens:number(body.eval_count),
+      outputTokenLimit:numPredict,contextTokenLimit:numCtx,
+      requestedThinkingOff:true,
+      thinkingActuallyDisabledUnverified:true,
+      actualArchitectureQualityUnreviewed:true
+     };
+     if(detail.generatedTokens!==null&&detail.generationSeconds>0)
+      detail.generatedTokensPerSecond=
+       Number((detail.generatedTokens/detail.generationSeconds).toFixed(2));
+     entries.push(detail);
+     final(null,{ok:true,status:200,json:async()=>({
+      choices:[{finish_reason:!ended||isLength?'length':'stop',
+       message:{content}}]
+     })});
+    });
+   });
+   opts.signal?.addEventListener('abort',abort,{once:true});
+   req.on('error',e=>final(e));
+   req.end(raw);
+  });
+ };
+ return {fetcher,telemetry:()=>structuredClone(entries),
+  requestBudget:{numPredict,numCtx,keepAlive,thinkingOffRequested:true,
+   thinkingOffIndependentlyVerified:false,
+   nativeOllamaSourceOnly:true,worldWrites:0}};
+}
