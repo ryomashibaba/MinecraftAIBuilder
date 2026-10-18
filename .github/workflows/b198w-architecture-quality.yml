@@ -102,6 +102,11 @@ jobs:
             foreach($name in @('c01_B198W_REVIEW_BOARD.html','c01_B198W_SOURCE_QUALITY_EVIDENCE.json','c01_index.html','B198U_ORIGINAL_MODEL_RESPONSE.txt')){
               if(-not (Test-Path (Join-Path $upload $name))){throw ('B198W_UPLOADED_RESULT_MISSING_'+$name)}
             }
+            $flatBoard=Get-Content (Join-Path $upload 'c01_B198W_REVIEW_BOARD.html') -Raw
+            if(-not $flatBoard.Contains('src="c01_index.html"') -or
+               -not $flatBoard.Contains('href="c01_index.html"')){
+              throw 'B198W_FLATTENED_UPLOAD_IFRAME_OR_LINK_BROKEN'
+            }
             $compiled=Get-Content (Join-Path $upload 'c01_B198W_SOURCE_QUALITY_EVIDENCE.json') -Raw | ConvertFrom-Json
             if($compiled.humanRubric.status -ne 'UNREVIEWED' -or $compiled.humanRubric.rubric.Count -ne 4){throw 'B198W_FROZEN_JAPANESE_RUBRIC_MISMATCH'}
             if($compiled.semanticsCertified -or $compiled.aestheticsCertified){throw 'B198W_FALSE_QUALITY_PASS'}
