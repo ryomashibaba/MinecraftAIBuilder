@@ -14,6 +14,8 @@ import {runB198HBenchmark}
  from '../source/ai/b198h-model-benchmark.mjs';
 import {compileDesign,verifyCompiled}
  from '../source/ai/b143-building-dsl.mjs';
+import {writeB198WReviewBundle}
+ from './b198w-quality-review.mjs';
 
 export const SCHEMA='minecraftaibuilder-b198u-one-inference-recoverable-source-v1';
 const fail=s=>{throw Error('B198S_SINGLE_SOURCE_'+s)};
@@ -92,7 +94,7 @@ export async function runB198SSingleSource({
   creationCount:1,includeRevisions:false,attemptsPerCase:1
  });
  const file=path.join(dir,'c01','source-design.json');
- let independentlyCompiled=null;
+ let independentlyCompiled=null,qualityReview=null;
  if(fs.existsSync(file)){
   const source=JSON.parse(fs.readFileSync(file,'utf8'));
   const compiled=compileDesign(source);
@@ -103,6 +105,10 @@ export async function runB198SSingleSource({
    voxels:compiled.primitives.length,
    elements:source.elements.length
   };
+  qualityReview=writeB198WReviewBundle({
+   design:source,compiled,destination:path.join(dir,'c01'),
+   viewerName:'index.html',caseId:'c01'
+  });
  }
  const original=report.cases.find(x=>x.caseId==='c01');
  const modelCalls=bridge.telemetry();
@@ -141,6 +147,8 @@ export async function runB198SSingleSource({
   originalSourceGoals:original?.status??'HOLD',
   originalSourceError:original?.error??null,
   independentlyCompiled,
+  qualityReviewBundle:qualityReview,
+  humanRubricScore:'UNREVIEWED',
   compiledSourceReview:original?.sourceReview??null,
   modelTransport:BRIDGE_SCHEMA,
   nativeRequestBudgets:bridge.requestBudget,
