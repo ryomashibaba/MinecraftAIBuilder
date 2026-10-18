@@ -12,7 +12,7 @@ const yes=(x,s)=>{if(!x)fail(s)};
 const allowedId=/^[a-zA-Z][a-zA-Z0-9_-]{0,39}$/;
 
 export function createB198XRevisionBrief({
- design,dossier,review,protectedElementIds=[],maxPriorities=2
+ design,dossier,review,protectedElementIds=null,maxPriorities=2
 }={}){
  yes(!!design&&dossier?.schema===REVIEW_SCHEMA,'SOURCE_AND_REVIEW_EVIDENCE_REQUIRED');
  yes(Number.isSafeInteger(maxPriorities)&&maxPriorities>=1&&maxPriorities<=4,
@@ -29,14 +29,22 @@ export function createB198XRevisionBrief({
   yes(JSON.stringify(dossier[field])===JSON.stringify(actual[field]),
    'SOURCE_DOSSIER_FIELD_MISMATCH_'+field);
  }
+ if(dossier.preservableModelElements!==undefined){
+  yes(JSON.stringify(dossier.preservableModelElements)===
+   JSON.stringify(actual.preservableModelElements),
+   'SOURCE_DOSSIER_PRESERVABLE_ELEMENTS_MISMATCH');
+ }
  const rating=validateB198WHumanReview({dossier:actual,submission:review});
- yes(Array.isArray(protectedElementIds)&&
-  protectedElementIds.length<=design.elements.length&&
-  protectedElementIds.every(x=>typeof x==='string'&&allowedId.test(x))&&
-  new Set(protectedElementIds).size===protectedElementIds.length,
+ // The reviewer already checked source IDs in the same JSON as their
+ // 4 criterion scores. Explicit CLI --protect overrides only when supplied.
+ const selected=protectedElementIds===null?
+  (review.protectedElementIds??[]):protectedElementIds;
+ yes(Array.isArray(selected)&&selected.length<=design.elements.length&&
+  selected.every(x=>typeof x==='string'&&allowedId.test(x))&&
+  new Set(selected).size===selected.length,
   'PROTECTED_IDS_INVALID');
  const elements=new Map(design.elements.map(x=>[x.id,x]));
- yes(protectedElementIds.every(id=>elements.get(id)?.mode==='add'),
+ yes(selected.every(id=>elements.get(id)?.mode==='add'),
   'PROTECTED_IDS_MUST_REFERENCE_EXISTING_ADD_ELEMENTS');
  const reviewed=actual.humanRubric.rubric.map((row,i)=>({
   criterionId:row.criterionId,frozenCriterion:row.description,
@@ -55,7 +63,7 @@ export function createB198XRevisionBrief({
  const needsQualityRevision=priority.length>0||sourceRisks.length>0;
  const status=!needsQualityRevision?
   'NO_REVIEWED_DEFICIENCY_HUMAN_CHOICE_REQUIRED':
-  !protectedElementIds.length?
+  !selected.length?
   'DRAFT_NEEDS_EXPLICIT_PROTECTED_PARTS':
   'REVIEWED_REVISION_BRIEF_READY_FOR_SEPARATE_AUTHORIZATION';
  return {
@@ -68,7 +76,9 @@ export function createB198XRevisionBrief({
   completeHumanObservations:reviewed,
   topHumanRevisionPriorities:priority,
   objectiveSourceRiskHints:sourceRisks,
-  protectedOriginalAddElementIds:[...protectedElementIds],
+  protectedOriginalAddElementIds:[...selected],
+  humanSourceProtectionSelectedFromSameRatingJSON:
+   protectedElementIds===null&&Array.isArray(review.protectedElementIds),
   unprotectedChangesNOTAuthorized:true,
   preserveExistingSourceOnlyFloorsAndOpenHeadroom:true,
   preserveOriginalModelAuthoredFreeformArchitecture:true,
