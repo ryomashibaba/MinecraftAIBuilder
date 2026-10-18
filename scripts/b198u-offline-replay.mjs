@@ -13,6 +13,8 @@ import {compileDesign,verifyCompiled}
  from '../source/ai/b143-building-dsl.mjs';
 import {critiqueArchitecture}
  from '../source/ai/b198c-spatial-critic.mjs';
+import {writeB198WReviewBundle}
+ from './b198w-quality-review.mjs';
 import {compileB143Gallery,verifyB143Payload,renderB143Html}
  from './build-b143-site.mjs';
 
@@ -39,7 +41,7 @@ export function runB198UOfflineReplay({sourceFile,outDir}={}){
   raw,{flag:'wx'});
  fs.writeFileSync(path.join(dest,'B198U_CORRECTED_CANDIDATE.txt'),
   prepared.content,{flag:'wx'});
- let evidence=null,error=null;
+ let evidence=null,error=null,qualityReview=null;
  try{
   const d=readModelProposal(prepared.content).design;
   const compiled=compileDesign(d);
@@ -59,6 +61,10 @@ export function runB198UOfflineReplay({sourceFile,outDir}={}){
    JSON.stringify(d,null,2)+'\n',{flag:'wx'});
   fs.writeFileSync(path.join(dest,'c01_index.html'),
    annotated,{flag:'wx'});
+  qualityReview=writeB198WReviewBundle({
+   design:d,compiled,destination:dest,
+   viewerName:'c01_index.html',caseId:'c01'
+  });
   const audit=critiqueArchitecture({design:d,compiled});
   evidence={sourceSha256:compiled.sourceSha256,
    geometrySha256:compiled.geometrySha256,
@@ -76,6 +82,9 @@ export function runB198UOfflineReplay({sourceFile,outDir}={}){
   modelCallsMade:0,originalModelWasNotReinvoked:true,
   providerIdentityFromCaptureNotAuthenticated:true,
   sourceOnly:true,compiledSource:evidence,error,
+  qualityReviewBundle:qualityReview,
+  humanRubricScore:'UNREVIEWED',
+  semanticComplianceAutomaticallyApproved:false,
   humanAestheticReview:'NOT_REVIEWED',
   MinecraftWalking:'NOT_TESTED',safety:safety()
  };

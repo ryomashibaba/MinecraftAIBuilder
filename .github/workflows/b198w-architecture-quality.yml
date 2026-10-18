@@ -1,0 +1,131 @@
+name: B198W Real-Source Human Architecture Quality Dossier
+on:
+  push:
+    branches: [feature/b198w-offline-source-quality-review]
+  pull_request:
+    paths:
+      - 'scripts/b198w-quality-review*.mjs'
+      - 'source/ai/b198w-review-board-template.html'
+      - 'scripts/b198u-offline-replay.mjs'
+      - 'scripts/b198s-single-source-probe.mjs'
+      - 'tools/B198M_RUN_LOCAL.ps1'
+      - 'tools/B198V_INSTALL_OFFLINE.ps1'
+      - '.github/workflows/b198w-architecture-quality.yml'
+permissions:
+  contents: read
+jobs:
+  independent-source-quality-rubric-and-regressions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Check B198W source and review scripts
+        run: |
+          node --check scripts/b198w-quality-review.mjs
+          node --check scripts/b198w-quality-review.test.mjs
+          node --check scripts/b198u-offline-replay.mjs
+          node --check scripts/b198s-single-source-probe.mjs
+      - name: Test frozen Japanese prompt, SHA-backed geometry metrics, unreviewed human rubric, online access denial, source-only safety and all historical regressions
+        run: |
+          node --test \
+            scripts/b198w-quality-review.test.mjs \
+            scripts/b198v-cache-integrity.test.mjs \
+            scripts/b198u-save-replay.test.mjs \
+            scripts/b198t-metadata-only.test.mjs \
+            scripts/b198s-native-source.test.mjs \
+            scripts/b198r-local-diagnostic.test.mjs \
+            scripts/b198q-long-http.test.mjs \
+            scripts/b198p-model-timeout.test.mjs \
+            scripts/b198m-local-transport.test.mjs \
+            scripts/b198a-engine.test.mjs \
+            scripts/b198a-cli.test.mjs \
+            scripts/b198b-quality.test.mjs \
+            scripts/b198c-critic.test.mjs \
+            scripts/b198d-session.test.mjs \
+            scripts/b198e-pilot.test.mjs \
+            scripts/b198f-evidence.test.mjs \
+            scripts/b198g-autonomous-quality.test.mjs \
+            scripts/b198g-local-adapter.test.mjs \
+            scripts/b198h-local-workflow.test.mjs \
+            scripts/b198i-design-director.test.mjs \
+            scripts/b198i-studio-director.test.mjs \
+            scripts/b198j-circulation.test.mjs \
+            scripts/b198k-paired-study.test.mjs \
+            scripts/b198l-step-chain.test.mjs
+  windows-ps51-model-source-to-human-review-offline:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Install v2 once from real GitHub ZIP with NO Ollama running
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $root=Join-Path $env:RUNNER_TEMP 'B198W-REVIEW-WORKBENCH'
+          & powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./tools/B198V_INSTALL_OFFLINE.ps1 -InstallRoot $root -Model 'B198S_FIXTURE_NOT_REAL_LLM' -Endpoint 'http://127.0.0.1:11785/v1/chat/completions'
+          if($LASTEXITCODE -ne 0){throw 'B198W_WINPS51_INSTALLED_HOLD'}
+          $kit=Join-Path $root 'offline-workbench-v2'
+          foreach($name in @('B198W_WORKBENCH_INFO.json','REPLAY_LATEST_OFFLINE.cmd','RUN_ONE_REAL_MODEL_ONCE.cmd','engine/scripts/b198w-quality-review.mjs','engine/source/ai/b198w-review-board-template.html')){
+            if(-not (Test-Path (Join-Path $kit $name))){throw ('B198W_REQUIRED_REVIEW_FILE_MISSING_'+$name)}
+          }
+          $info=Get-Content (Join-Path $kit 'B198W_WORKBENCH_INFO.json') -Raw | ConvertFrom-Json
+          if($info.installModelRequests -ne 0 -or $info.worldWrites -ne 0){throw 'B198W_INSTALL_UNAUTHORIZED_ACTION'}
+          & node (Join-Path $kit 'engine/scripts/b198v-cache-integrity.mjs') --verify (Join-Path $kit 'engine')
+          if($LASTEXITCODE -ne 0){throw 'B198W_SEALED_REVIEW_ENGINE_HOLD'}
+          Write-Host 'B198W_WINDOWS_PS51_REAL_GITHUB_SOURCE_INSTALL_NO_MODEL_PASS'
+      - name: One mock source then STOP mock Ollama, produce frozen Japanese quality review by local-only replay
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $env:B198V_NONINTERACTIVE='1'
+          $root=Join-Path $env:RUNNER_TEMP 'B198W-REVIEW-WORKBENCH'
+          $kit=Join-Path $root 'offline-workbench-v2'
+          $modelCmd=Join-Path $kit 'RUN_ONE_REAL_MODEL_ONCE.cmd'
+          $replayCmd=Join-Path $kit 'REPLAY_LATEST_OFFLINE.cmd'
+          $trial=Join-Path $env:RUNNER_TEMP 'B198W-TEST-DOUBLE-SOURCE'
+          $offline=Join-Path $env:RUNNER_TEMP 'B198W-ZERO-LLM-REVIEW'
+          $server=Start-Process -FilePath node -ArgumentList @('scripts/b198s-native-fixture-server.mjs','--port','11785') -NoNewWindow -PassThru
+          try {
+            Start-Sleep -Seconds 3
+            & $modelCmd -OutputDirectory $trial
+            if($LASTEXITCODE -ne 0){throw 'B198W_INITIAL_MOCK_SOURCE_HOLD'}
+            $summary=Get-Content (Join-Path $trial 'B198S_UPLOAD_THIS_SUMMARY.json') -Raw | ConvertFrom-Json
+            if(-not $summary.independentlyCompiled){throw 'B198W_INITIAL_SOURCE_NOT_B143_COMPILED'}
+            if($summary.modelCalls.Count -ne 1){throw 'B198W_UNEXPECTED_EXTRA_MODEL_CALL'}
+            if($summary.qualityReviewBundle.status -ne 'WAITING_FOR_HUMAN_VISUAL_AND_SEMANTIC_REVIEW'){throw 'B198W_PREMATURE_HUMAN_PASS'}
+            $upload=Join-Path $env:RUNNER_TEMP 'B198W-CHECK-MODEL-UPLOAD'
+            Expand-Archive -LiteralPath (Join-Path $trial 'B198S_UPLOAD_THIS_RESULT.zip') -DestinationPath $upload -ErrorAction Stop
+            foreach($name in @('c01_B198W_REVIEW_BOARD.html','c01_B198W_SOURCE_QUALITY_EVIDENCE.json','c01_index.html','B198U_ORIGINAL_MODEL_RESPONSE.txt')){
+              if(-not (Test-Path (Join-Path $upload $name))){throw ('B198W_UPLOADED_RESULT_MISSING_'+$name)}
+            }
+            $flatBoard=Get-Content (Join-Path $upload 'c01_B198W_REVIEW_BOARD.html') -Raw
+            if(-not $flatBoard.Contains('src="c01_index.html"') -or
+               -not $flatBoard.Contains('href="c01_index.html"')){
+              throw 'B198W_FLATTENED_UPLOAD_IFRAME_OR_LINK_BROKEN'
+            }
+            $compiled=Get-Content (Join-Path $upload 'c01_B198W_SOURCE_QUALITY_EVIDENCE.json') -Raw | ConvertFrom-Json
+            if($compiled.humanRubric.status -ne 'UNREVIEWED' -or $compiled.humanRubric.rubric.Count -ne 4){throw 'B198W_FROZEN_JAPANESE_RUBRIC_MISMATCH'}
+            if($compiled.semanticsCertified -or $compiled.aestheticsCertified){throw 'B198W_FALSE_QUALITY_PASS'}
+            if($compiled.safety.worldWrites -ne 0){throw 'B198W_SOURCE_WORLD_WRITE'}
+          } finally {
+            if($server -and -not $server.HasExited){Stop-Process -Id $server.Id -Force}
+          }
+          # Offline replay must run successfully with no model server and without downloading source.
+          & $replayCmd -ReplaySourceFile (Join-Path $trial 'B198U_ORIGINAL_MODEL_RESPONSE.txt') -OutputDirectory $offline
+          if($LASTEXITCODE -ne 0){throw 'B198W_OFFLINE_MODEL_FREE_REPLAY_HOLD'}
+          $rep=Get-Content (Join-Path $offline 'offline-review/B198U_REPLAY_SUMMARY.json') -Raw | ConvertFrom-Json
+          if($rep.modelCallsMade -ne 0 -or $rep.safety.worldWrites -ne 0){throw 'B198W_MODEL_OR_WORLD_USED_DURING_REPLAY'}
+          if($rep.status -ne 'OFFLINE_COMPILED_HUMAN_REVIEW_REQUIRED'){throw 'B198W_REPLAY_COMPILER_HOLD'}
+          if($rep.qualityReviewBundle.status -ne 'WAITING_FOR_HUMAN_VISUAL_AND_SEMANTIC_REVIEW'){throw 'B198W_REPLAY_FALSE_HUMAN_RATING'}
+          if($rep.compiledSource.sourceSha256 -ne $summary.independentlyCompiled.sourceSha256){throw 'B198W_REPLAY_SOURCE_SHA_DRIFT'}
+          $zip=Join-Path $offline 'B198U_UPLOAD_THIS_REPLAY.zip'
+          $verify=Join-Path $env:RUNNER_TEMP 'B198W-OFFLINE-UPLOAD-INSPECT'
+          Expand-Archive -LiteralPath $zip -DestinationPath $verify -ErrorAction Stop
+          foreach($name in @('B198W_REVIEW_BOARD.html','B198W_SOURCE_QUALITY_EVIDENCE.json','c01_index.html')){
+            if(-not (Test-Path (Join-Path $verify $name))){throw ('B198W_REPLAY_UPLOAD_MISSING_'+$name)}
+          }
+          Write-Host 'B198W_WINDOWS_PS51_ONE_MOCK_SOURCE_AND_FULL_ZERO_OLLAMA_HUMAN_REVIEW_PACKAGE_PASS MOCK_ONLY'
