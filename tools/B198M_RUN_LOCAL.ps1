@@ -1,19 +1,20 @@
 # B198M Windows LOCAL model pilot. Never contacts Minecraft or a paid model API.
 [CmdletBinding()]
 param(
- [ValidateSet('Pilot','Full','Preflight')][string]$Mode='Pilot',
+ [ValidateSet('Pilot','Full','Preflight','Diagnose')][string]$Mode='Pilot',
  [string]$Model='',
  [string]$Endpoint='http://127.0.0.1:11434/v1/chat/completions',
  [string]$SourceDirectory='',
  [string]$OutputDirectory='',
  [ValidateRange(1,12)][int]$Cases=1,
  [ValidateRange(30,900)][int]$TimeoutSeconds=360,
+ [ValidateRange(15,120)][int]$ProbeTimeoutSeconds=60,
  [switch]$IncludePilotRevision,
  [switch]$NoRevisions
 )
 $ErrorActionPreference='Stop'
 $ProgressPreference='SilentlyContinue'
-$branch='feature/b198q-long-local-http-transport-failfast'
+$branch='feature/b198r-bounded-local-inference-probe'
 $root=$null
 function Hold([string]$reason){throw "B198M_HOLD_$reason"}
 try{
@@ -71,7 +72,7 @@ try{
   $SourceDirectory=$folders[0].FullName
  }
  $SourceDirectory=(Resolve-Path -LiteralPath $SourceDirectory).Path
- foreach($rel in @('scripts\b198k-local-comparison.mjs','scripts\b198m-pilot-summary.mjs')){
+ foreach($rel in @('scripts\b198k-local-comparison.mjs','scripts\b198m-pilot-summary.mjs','scripts\b198r-local-diagnostic.mjs')){
   if(-not (Test-Path -LiteralPath (Join-Path $SourceDirectory $rel) -PathType Leaf)){
    Hold 'REQUIRED_GITHUB_SOURCE_MISSING'
   }
@@ -87,6 +88,30 @@ try{
  if(Test-Path -LiteralPath $OutputDirectory){Hold 'REFUSE_EXISTING_RESULTS'}
  New-Item -ItemType Directory -Path $OutputDirectory | Out-Null
  $root=$OutputDirectory
+ # B198R Diagnose: ONE tiny native Ollama request, not an architecture A/B.
+ if($Mode -eq 'Diagnose'){
+  $report=Join-Path $root 'B198R_UPLOAD_THIS_DIAGNOSTIC.json'
+  Write-Host ('B198R small-model diagnostic: max {0} seconds.' -f $ProbeTimeoutSeconds)
+  $old=Get-Location
+  try{
+   Set-Location -LiteralPath $SourceDirectory
+   & node 'scripts/b198r-local-diagnostic.mjs' '--model' $Model '--out' $report '--port' ([string]$port) '--timeout-seconds' ([string]$ProbeTimeoutSeconds)
+   if($LASTEXITCODE -ne 0){Hold 'LOCAL_DIAGNOSTIC_FAILED'}
+  }finally{Set-Location -LiteralPath $old}
+  $diagnostic=Get-Content -LiteralPath $report -Raw | ConvertFrom-Json
+  $uploadZip=Join-Path $root 'B198R_UPLOAD_THIS_DIAGNOSTIC.zip'
+  Compress-Archive -LiteralPath $report -DestinationPath $uploadZip -CompressionLevel Optimal
+  if($diagnostic.status -eq 'LOCAL_SMALL_JSON_PROBE_PASS'){
+   Write-Host 'B198R_TEST_FINISHED LOCAL_SMALL_JSON_PROBE_PASS_NO_ARCHITECTURE_GENERATED' -ForegroundColor Green
+  }else{
+   Write-Host ('B198R_TEST_FINISHED {0}' -f $diagnostic.status) -ForegroundColor Yellow
+  }
+  Write-Host ('Generated tokens/s: {0}' -f $diagnostic.telemetry.generatedTokensPerSecond)
+  Write-Host ('Model loaded VRAM bytes: {0}' -f $diagnostic.modelResidency.vramBytes)
+  Write-Host "Upload to ChatGPT: $uploadZip"
+  Write-Host 'No complete architecture model call and no Minecraft world contact.'
+  return
+ }
  $run=Join-Path $root 'source-study'
  $log=Join-Path $root 'B198M_RUN_LOG.txt'
  $cmd=@('scripts/b198k-local-comparison.mjs','--model',$Model,
