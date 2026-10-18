@@ -26,7 +26,7 @@ function Shortcut([string]$file,[string]$mode,[string]$modelId,[string]$endpoint
   'if errorlevel 1 goto BAD_CACHE'
  )
  if($mode -eq 'ReplayLatest'){
-  $lines+='powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0engine\tools\B198M_RUN_LOCAL.ps1" -Mode ReplayLatest -SourceDirectory "%~dp0engine"'
+  $lines+='powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0engine\tools\B198M_RUN_LOCAL.ps1" -Mode ReplayLatest -SourceDirectory "%~dp0engine" %*'
  }else{
   $lines+=('powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0engine\tools\B198M_RUN_LOCAL.ps1" -Mode SourceProbe -SourceDirectory "%~dp0engine" -Model "{0}" -Endpoint "{1}"' -f $modelId,$endpoint)
  }
