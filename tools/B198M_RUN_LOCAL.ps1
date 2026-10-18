@@ -11,7 +11,7 @@ param(
 )
 $ErrorActionPreference='Stop'
 $ProgressPreference='SilentlyContinue'
-$branch='feature/b198m-one-run-real-local-model-pilot'
+$branch='feature/b198n-windows-powershell51-hotfix'
 $root=$null
 function Hold([string]$reason){throw "B198M_HOLD_$reason"}
 try{
@@ -22,8 +22,12 @@ try{
  $port=[int]$Matches[1]
  if($port -lt 1 -or $port -gt 65535){Hold 'INVALID_PORT'}
  if(-not (Get-Command node -ErrorAction SilentlyContinue)){Hold 'NODE_22_PLUS_REQUIRED'}
- $major=[int](& node -p 'process.versions.node.split(".")[0]')
- if($LASTEXITCODE -ne 0 -or $major -lt 22){Hold 'NODE_22_PLUS_REQUIRED'}
+ $nodeVersion = [string](& node --version)
+ if($LASTEXITCODE -ne 0 -or $nodeVersion -notmatch '^v([0-9]+)\\.'){
+  Hold 'NODE_22_PLUS_REQUIRED'
+ }
+ $major=[int]$Matches[1]
+ if($major -lt 22){Hold 'NODE_22_PLUS_REQUIRED'}
  if(-not $Model){
   if($Endpoint -ne 'http://127.0.0.1:11434/v1/chat/completions'){
    Hold 'EXPLICIT_MODEL_REQUIRED_FOR_ALTERNATE_LOCAL_SERVER'
