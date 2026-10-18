@@ -12,7 +12,7 @@ param(
  [ValidateRange(60,360)][int]$SourceTimeoutSeconds=300,
  [ValidateRange(512,4096)][int]$SourceOutputTokens=3072,
  [ValidateRange(4096,8192)][int]$SourceContextTokens=6144,
- [string]$ReplaySourceFile=''',
+ [string]$ReplaySourceFile='',
  [switch]$IncludePilotRevision,
  [switch]$NoRevisions
 )
@@ -158,6 +158,9 @@ try{
   $archive=Join-Path $root 'B198S_UPLOAD_THIS_RESULT.zip'
   Compress-Archive -Path (Join-Path $upload '*') -DestinationPath $archive -CompressionLevel Optimal
   if($result.independentlyCompiled){
+   if($result.originalModelBoundsOnlyRepair.applied){
+    Write-Host 'B198U: declared bounds expanded without changing any model-authored elements; provenance saved.' -ForegroundColor Yellow
+   }
    if($result.originalModelMetadataOnlyRepair.applied){
     Write-Host 'B198T: model title/brief was shortened to B143 limits; original text and geometry SHA provenance saved.' -ForegroundColor Yellow
    }
@@ -167,6 +170,9 @@ try{
   }else{
    Write-Host ('B198S_TEST_FINISHED {0}' -f $result.status) -ForegroundColor Yellow
    Write-Host 'SOURCE HOLD: no valid B143 building; do not claim architectural quality.'
+   if($result.savedModelSource.originalUnmodifiedResponseStored){
+    Write-Host 'B198U: full original model response SAVED in ZIP for offline repair. Do not repeat LLM solely to inspect source.' -ForegroundColor Cyan
+   }
   }
   Write-Host "Upload to ChatGPT: $archive"
   Write-Host 'No Minecraft contacts/writes; model aesthetics and walking unreviewed.'
