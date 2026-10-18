@@ -15,6 +15,18 @@ import {inspectSourceGeometry,evaluateSourceGoals,
 import {critiqueArchitecture} from './b198c-spatial-critic.mjs';
 import {diffSourceDesigns} from './b198-natural-language-design.mjs';
 export const SCHEMA='minecraftaibuilder-b198e-inchat-architectural-pilot-v1';
+/** Candid GPT-authored limitations: these are qualitative warnings, not
+ * independently verified semantic ratings or permission to build. */
+export const KNOWN_QUALITY_GAPS=Object.freeze({
+ c01:'中央吹抜けと読書翼は形状で表現したが、書架の実用性・階間アクセス・美観は未認証。',
+ r01:'元のドームを壊さず外側に大型透明リングを追加。完全に密閉された大きな球形ラウンジには未到達（PARTIAL）。',
+ c03:'貨物ヤード・クレーン・旅客区画は明確に分けたが、水面や稼働クレーン・物流動線の実機機能は未実装。',
+ r02:'元のクレーンを保全し上段に傾斜フレームを追加。新しい骨格の構造耐久性は不明。',
+ c05:'三段屋根・門・参道は表現したが、日本寺院らしい勾配瓦屋根の厳密な造形は未実現。',
+ r03:'背後の光塔に新しい発光リングを追加。参道・本堂は保全、リング支持構造は未確認。',
+ c08:'3つの水平ホーム・上層広場・吊り屋根は存在。実際の上下階移動やホーム安全は未証明。',
+ r04:'元のホームを変えず最上部に広い新屋根を配置したが、連続支持材をまだ備えない（HOLD）。'
+});
 const digest=s=>createHash('sha256').update(JSON.stringify(s)).digest('hex');
 const assert=(b,s)=>{if(!b)throw Error('B198E_'+s)};
 const pos=(x,y,z)=>[x,y,z].join(',');
@@ -174,6 +186,8 @@ export function inspectB198EChatPilot(){
   worldConstructionGates:Array(9).fill('BLOCKED'),
   worldCoordinates:null,worldContacts:0,worldWrites:0,
   constructionApproved:false,BuildPlan:{operations:[]},
+  candidQualitativeGaps:KNOWN_QUALITY_GAPS,
+  identifiedPartialSemanticCompliance:['r01','r04'],
   sourceReportSha256:digest({
    creation:creations.map(c=>c.sourceSha256),
    revision:revisions.map(c=>c.sourceSha256),
