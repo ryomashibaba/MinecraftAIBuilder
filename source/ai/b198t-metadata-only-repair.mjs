@@ -68,7 +68,8 @@ export function repairB198TMetadataOnly(raw){
   const candidate=cutValidString(original,max);
   if(candidate===null){
    return {content:raw,provenance:{
-    ...provenance,status:'INVALID_'+field.toUpperCase()+'_UNMODIFIED'
+    ...provenance,status:'INVALID_'+field.toUpperCase()+'_UNMODIFIED',
+    fields:[] // no partial repair was applied or returned
    }};
   }
   if(candidate!==original){
