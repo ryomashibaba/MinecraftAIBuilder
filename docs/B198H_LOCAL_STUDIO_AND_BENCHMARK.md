@@ -8,7 +8,15 @@ This phase **implements integration**. The tests use deterministic generator dou
 
 ## Source-only interactive Studio
 
-After starting a compatible local OpenAI-style chat-completions model separately (typically listening on 127.0.0.1), initialize a fresh Studio with an existing original, strict B143 JSON:
+After starting a compatible local OpenAI-style chat-completions model separately (typically listening on 127.0.0.1), **create a new architecture from a Japanese free-form prompt and enter the local versioned Studio in one command**:
+
+```sh
+node scripts/b198h-local-workflow.mjs studio --project ./new-architecture-project --prompt "大きな吹き抜けと上階の展望ラウンジがある、曲線的な公共図書館を設計して" --local-model YOUR_EXPLICIT_MODEL_ID
+```
+
+B198G first produces the original strict B143 model-authored 3D source, performs bounded voxel-topology checks and source-preserving repair when its objective high-risk source findings require it, then initializes the existing B198D Studio without any Minecraft world calls. It also records a source-SHA-pinned `B198H_INITIAL_MODEL_SOURCE_REVIEW.json` beside the versioned project. **The first source becomes the Studio's initial editable working version; this is NOT a human quality review, aesthetic approval or permission to build in Minecraft.** An original high-risk geometry HOLD remains recorded honestly in the report. The launcher refuses to use `--prompt` to overwrite any nonempty existing project.
+
+Alternatively, initialize from a pre-existing strict B143 source:
 
 ```sh
 node scripts/b198h-local-workflow.mjs studio --project ./my-architecture-project --design ./original-design.json --local-model YOUR_EXPLICIT_MODEL_ID
@@ -47,7 +55,7 @@ The benchmark result never reports automatic aesthetic certification, real in-ga
 
 ## Evidence
 
-The B198H new integration tests exercise the inherited versioned Studio with an injected deterministic model reply over its actual local HTTP API; verify that unapproved model output stays in Draft and rejection leaves the original SHA untouched; verify the disabled-without-model UI; run an actual frozen B198B selected original+revision pipeline using deterministic source fixtures and independent compilations; enforce full 16-ID reporting with 14 NOT_RUN for partial tests; confirm dangerous added source ceiling over an original floor causes a revision HOLD rather than a false quality PASS; and test refusal to overwrite an existing output directory.
+The B198H new integration tests verify **one Japanese prompt to a new source-backed Studio**, persistent SHA-pinned initial geometry evidence, rejection of a repeated prompt that could overwrite the established design; they also exercise the inherited versioned Studio with an injected deterministic model reply over its actual local HTTP API; verify that unapproved model output stays in Draft and rejection leaves the original SHA untouched; verify the disabled-without-model UI; run an actual frozen B198B selected original+revision pipeline using deterministic source fixtures and independent compilations; enforce full 16-ID reporting with 14 NOT_RUN for partial tests; confirm dangerous added source ceiling over an original floor causes a revision HOLD rather than a false quality PASS; and test refusal to overwrite an existing output directory.
 
 CI also runs all B198A–G regressions and real desktop/mobile Chromium browser automation of the original B198D approval/reject/Undo/Redo interface. **Browser rendering and fixture-model tests are not evidence of true local-model architectural quality.**
 
