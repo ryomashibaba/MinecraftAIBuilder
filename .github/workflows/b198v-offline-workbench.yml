@@ -63,12 +63,12 @@ jobs:
           # Do not pass -SourceDirectory: this tests one real HTTPS GitHub source ZIP installation.
           & powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./tools/B198V_INSTALL_OFFLINE.ps1 -InstallRoot $base -Model 'B198S_FIXTURE_NOT_REAL_LLM' -Endpoint 'http://127.0.0.1:11785/v1/chat/completions'
           if($LASTEXITCODE -ne 0){throw 'B198V_INSTALL_PS51_FAIL'}
-          $kit=Join-Path $base 'offline-workbench-v1'
+          $kit=Join-Path $base 'offline-workbench-v4'
           $engine=Join-Path $kit 'engine'
-          foreach($rel in @('B198V_WORKBENCH_INFO.json','B198V_OFFLINE_ENGINE_SEAL.json','REPLAY_LATEST_OFFLINE.cmd','RUN_ONE_REAL_MODEL_ONCE.cmd','engine/scripts/b198u-offline-replay.mjs','engine/scripts/b198v-cache-integrity.mjs')){
+          foreach($rel in @('B198Y_WORKBENCH_INFO.json','B198V_OFFLINE_ENGINE_SEAL.json','REPLAY_LATEST_OFFLINE.cmd','RUN_ONE_REAL_MODEL_ONCE.cmd','engine/scripts/b198u-offline-replay.mjs','engine/scripts/b198v-cache-integrity.mjs')){
             if(-not (Test-Path (Join-Path $kit $rel))){throw ('B198V_MISSING_'+$rel)}
           }
-          $info=Get-Content (Join-Path $kit 'B198V_WORKBENCH_INFO.json') -Raw | ConvertFrom-Json
+          $info=Get-Content (Join-Path $kit 'B198Y_WORKBENCH_INFO.json') -Raw | ConvertFrom-Json
           if($info.installModelRequests -ne 0 -or $info.offlineReplayModelRequests -ne 0 -or $info.worldWrites -ne 0){throw 'B198V_INSTALL_UNAUTHORIZED_ACTION'}
           & node (Join-Path $engine 'scripts/b198v-cache-integrity.mjs') --verify $engine
           if($LASTEXITCODE -ne 0){throw 'B198V_CACHE_VERIFY_AFTER_COPY_FAIL'}
@@ -82,7 +82,7 @@ jobs:
           $ErrorActionPreference='Stop'
           $env:B198V_NONINTERACTIVE='1'
           $base=Join-Path $env:RUNNER_TEMP 'B198V-WORKBENCH-TEST'
-          $kit=Join-Path $base 'offline-workbench-v1'
+          $kit=Join-Path $base 'offline-workbench-v4'
           $probeCmd=Join-Path $kit 'RUN_ONE_REAL_MODEL_ONCE.cmd'
           $replayCmd=Join-Path $kit 'REPLAY_LATEST_OFFLINE.cmd'
           $firstOut=Join-Path $env:RUNNER_TEMP 'B198V-ONE-MODEL-TRIAL'
