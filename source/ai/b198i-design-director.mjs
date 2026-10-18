@@ -13,6 +13,7 @@ import {createHash} from 'node:crypto';
 import {compileDesign,verifyCompiled} from './b143-building-dsl.mjs';
 import {generateArchitectureWithFeedback} from './b198g-autonomous-quality.mjs';
 import {inspectPlannedPublicCirculation} from './b198j-circulation-proof.mjs';
+import {inspectMultiLevelSourceCirculation} from './b198l-step-chain-proof.mjs';
 
 export const PLAN_SCHEMA='minecraftaibuilder-b198i-program-v1';
 export const RESULT_SCHEMA='minecraftaibuilder-b198i-directed-source-v1';
@@ -149,23 +150,28 @@ export async function generateModelDirectedArchitecture({
   JSON.stringify(plan)+'\nCreate ORIGINAL strict B143 JSON design with the exact plan id/bounds.'+
   ' Make SOLID points occupied, AIR points empty, SUPPORTED_FLOOR points a real 2x2 supported floor with two blocks of headroom.';
  yes(brief.length<=6100,'PROMPT_PLUS_PLAN_TOO_LONG');
- const attempts=[];let best=null,bestProof=null,bestCirculation=null,bestHigh=Infinity;
+ const attempts=[];let best=null,bestProof=null,bestCirculation=null,bestSteps=null,bestHigh=Infinity;
  let modelCalls=0;
  const counted=async req=>{modelCalls++;return generator(req);};
  for(let n=1;n<=maxSourceAttempts;n++){
   let sourcePrompt=brief;
   if(bestProof&&(bestProof.failedAnchors>0||
-      bestCirculation?.disconnectedSameElevationAnchorPairs>0)){
+      bestCirculation?.disconnectedSameElevationAnchorPairs>0||
+      bestSteps?.disconnectedDifferentElevationAnchorPairs>0)){
    const missing=bestProof.results.filter(x=>!x.passed)
      .map(x=>({id:x.id,point:x.point,expectation:x.expect}));
    const disconnected=bestCirculation?.disconnectedPairs.slice(0,8)
      .map(x=>({from:x.fromAnchor,to:x.toAnchor,
       standingY:x.standingY,reason:x.reason}))??[];
+   const vertical=bestSteps?.disconnectedPairs.slice(0,6)
+     .map(x=>({from:x.fromAnchor,to:x.toAnchor,
+      fromY:x.fromFloorY,toY:x.toFloorY,
+      reason:x.reason}))??[];
    const prefix='\nSOURCE REGENERATION FEEDBACK (REAL B143 COMPILED):\n';
-   const suffix='\nCorrect source geometry and connect promised same-height 2-wide public floors; do not fake traversal.';
+   const suffix='\nRepair the real source-only 2-wide floor paths; for different levels, use side-adjacent 1-block steps with clear headroom. Do not claim actual in-game walking.';
    const room=6100-sourcePrompt.length-prefix.length-suffix.length;
    yes(room>=60,'NO_SPACE_FOR_SOURCE_FEEDBACK');
-   sourcePrompt+=prefix+JSON.stringify({missing,disconnected}).slice(0,room)+suffix;
+   sourcePrompt+=prefix+JSON.stringify({missing,disconnected,vertical}).slice(0,room)+suffix;
   }
   yes(sourcePrompt.length<=6100,'REGENERATION_PROMPT_TOO_LONG');
   // B198G provides existing conservative source-topology diagnostics and
@@ -182,26 +188,39 @@ export async function generateModelDirectedArchitecture({
    const circulation=inspectPlannedPublicCirculation({
     plan,design:created.design,compiled:created.compiled
    });
+   const stepProof=inspectMultiLevelSourceCirculation({
+    plan,design:created.design,compiled:created.compiled
+   });
    const sameAnchors=best&&proof.passedAnchors===bestProof.passedAnchors;
    const sameConnections=sameAnchors&&
     circulation.connectedSameElevationAnchorPairs===
      bestCirculation.connectedSameElevationAnchorPairs;
+   const sameSteps=sameConnections&&
+    stepProof.connectedDifferentElevationAnchorPairs===
+     bestSteps.connectedDifferentElevationAnchorPairs;
    const better=!best||proof.passedAnchors>bestProof.passedAnchors||
     (sameAnchors&&circulation.connectedSameElevationAnchorPairs>
       bestCirculation.connectedSameElevationAnchorPairs)||
-    (sameConnections&&risk<bestHigh);
+    (sameConnections&&stepProof.connectedDifferentElevationAnchorPairs>
+      bestSteps.connectedDifferentElevationAnchorPairs)||
+    (sameSteps&&risk<bestHigh);
    attempts.push({attempt:n,decision:better?'RETAINED_BEST_SOURCE':'REJECTED_NO_EVIDENCE_GAIN',
     sourceSha256:proof.sourceSha256,passedAnchors:proof.passedAnchors,
     failedAnchors:proof.failedAnchors,
     connectedSameElevationPairs:circulation.connectedSameElevationAnchorPairs,
     disconnectedSameElevationPairs:circulation.disconnectedSameElevationAnchorPairs,
+    connectedDifferentElevationPairs:stepProof.connectedDifferentElevationAnchorPairs,
+    disconnectedDifferentElevationPairs:stepProof.disconnectedDifferentElevationAnchorPairs,
     highRiskSourceFindings:risk});
    if(better){best=created;bestProof=proof;
-    bestCirculation=circulation;bestHigh=risk;}
+    bestCirculation=circulation;bestSteps=stepProof;bestHigh=risk;}
    // Vertical travel is deliberately not certified. Re-generating the
    // same architectural program cannot make an unverified stair proof PASS.
    if(bestProof.allDeclaredPlanAnchorsMatchSource&&bestHigh===0&&
-      bestCirculation.allDeclaredSameElevationPairsConnected)break;
+      (bestCirculation.allDeclaredSameElevationPairsConnected||
+       bestCirculation.evaluatedSameElevationAnchorPairs===0)&&
+      (bestSteps.distinctDeclaredFloorElevations===1||
+       bestSteps.declaredSourceStepChainsSupported))break;
   }catch(e){
    attempts.push({attempt:n,decision:'REJECTED_MODEL_OR_SOURCE',
     reason:String(e?.message??e).slice(0,240)});
@@ -214,15 +233,19 @@ export async function generateModelDirectedArchitecture({
    geometrySha256:best.compiled.geometrySha256,
    status:!bestProof.allDeclaredPlanAnchorsMatchSource||bestHigh>0?
     'HOLD_SOURCE_PLAN_OR_TOPOLOGY':
-    bestCirculation.evaluatedSameElevationAnchorPairs===0?
-    'HOLD_SOURCE_CIRCULATION_UNTESTED':
+    bestCirculation.evaluatedSameElevationAnchorPairs>0&&
     !bestCirculation.allDeclaredSameElevationPairsConnected?
     'HOLD_SOURCE_CIRCULATION':
-    bestCirculation.differentElevationGroups>1?
-    'HOLD_SOURCE_VERTICAL_CIRCULATION_UNVERIFIED':
+    bestSteps.distinctDeclaredFloorElevations>1?
+     (bestSteps.declaredSourceStepChainsSupported?
+      'SOURCE_MULTILEVEL_STEP_CHAIN_REVIEW_REQUIRED':
+      'HOLD_SOURCE_VERTICAL_CIRCULATION_UNVERIFIED'):
+    bestCirculation.evaluatedSameElevationAnchorPairs===0?
+    'HOLD_SOURCE_CIRCULATION_UNTESTED':
     'SOURCE_PLAN_ANCHORS_PASS_HUMAN_REVIEW_REQUIRED',
    planProof:bestProof,
    circulationProof:bestCirculation,
+   multiLevelSourceProof:bestSteps,
    remainingHighRiskSourceFindings:bestHigh,
    attempts,plannerCalls:1,designModelCalls:modelCalls,
    generatorProvenance:'CALLER_SUPPLIED_NOT_INDEPENDENTLY_VERIFIED',
