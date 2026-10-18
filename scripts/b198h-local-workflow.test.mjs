@@ -54,7 +54,9 @@ test('B198H CLI refuses implicit model spending and incompatible modes',()=>{
 
 test('existing Studio is reused with draft review + explicit rejection, preserving approval and zero world actions',async()=>{
  const dir=temp();
- const params=parseB198HArgs(['studio','--project',dir]);
+ const sourceFile=path.join(dir,'original-source.json');
+ fs.writeFileSync(sourceFile,JSON.stringify(fixtureAmphitheater()));
+ const params=parseB198HArgs(['studio','--project',dir,'--design',sourceFile]);
  // Caller-injected generator is a TEST DOUBLE, not a claimed live model.
  const app=await executeB198H(params,{
   generator:async()=>candidate(newSource())
