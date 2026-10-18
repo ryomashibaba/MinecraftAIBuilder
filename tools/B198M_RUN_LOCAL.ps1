@@ -11,7 +11,7 @@ param(
 )
 $ErrorActionPreference='Stop'
 $ProgressPreference='SilentlyContinue'
-$branch='feature/b198n-windows-powershell51-hotfix'
+$branch='feature/b198o-powershell51-zip-extraction'
 $root=$null
 function Hold([string]$reason){throw "B198M_HOLD_$reason"}
 try{
@@ -63,7 +63,7 @@ try{
   $url='https://codeload.github.com/ryomashibaba/MinecraftAIBuilder/zip/refs/heads/'+$branch
   Write-Host 'Downloading separate GitHub SOURCE snapshot...'
   Invoke-WebRequest -Uri $url -OutFile $sourceZip -TimeoutSec 120
-  [System.IO.Compression.ZipFile]::ExtractToDirectory($sourceZip,(Join-Path $tmp 'extracted'))
+  Expand-Archive -LiteralPath $sourceZip -DestinationPath (Join-Path $tmp 'extracted') -ErrorAction Stop
   $folders=@(Get-ChildItem -LiteralPath (Join-Path $tmp 'extracted') -Directory)
   if($folders.Count -ne 1){Hold 'UNEXPECTED_GITHUB_SOURCE_ARCHIVE'}
   $SourceDirectory=$folders[0].FullName
