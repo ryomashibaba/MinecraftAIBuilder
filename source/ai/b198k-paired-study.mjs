@@ -328,7 +328,7 @@ export function makeB198KReviewHtml(manifest){
  'return arr}'+
  'function valid(){const ok=!!(current?.A&&current?.B&&values()&&'+
  '$("choice").value&&$("why").value.trim().length>=25);'+
- '$("export").disabled=!ok;$("status").textContent=ok?'根拠付きで保存可能':'UNREVIEWED：A/B全基準の0〜4点・各25文字以上の根拠と比較理由が必要';}'+
+ '$("export").disabled=!ok;$("status").textContent=ok?"根拠付きで保存可能":"UNREVIEWED：A/B全基準の0〜4点・各25文字以上の根拠と比較理由が必要";}'+
  '$("case").addEventListener("change",attach);'+
  '$("choice").addEventListener("change",valid);$("why").addEventListener("input",valid);'+
  '$("export").addEventListener("click",()=>{const criteria=values();if(!criteria||$("export").disabled)return;'+
