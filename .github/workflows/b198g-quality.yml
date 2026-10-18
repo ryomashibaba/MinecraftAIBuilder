@@ -7,6 +7,9 @@ on:
     paths:
       - 'source/ai/b198g-autonomous-quality.mjs'
       - 'scripts/b198g-autonomous-quality.test.mjs'
+      - 'source/ai/b198g-local-model-adapter.mjs'
+      - 'scripts/b198g-local-design.mjs'
+      - 'scripts/b198g-local-adapter.test.mjs'
       - '.github/workflows/b198g-quality.yml'
 permissions:
   contents: read
@@ -28,8 +31,12 @@ jobs:
             scripts/b198d-session.test.mjs \
             scripts/b198e-pilot.test.mjs \
             scripts/b198f-evidence.test.mjs \
-            scripts/b198g-autonomous-quality.test.mjs
+            scripts/b198g-autonomous-quality.test.mjs \
+            scripts/b198g-local-adapter.test.mjs
       - name: Keep the original Minecraft world offline
         run: |
           node --check source/ai/b198g-autonomous-quality.mjs
           node --check scripts/b198g-autonomous-quality.test.mjs
+          node --check source/ai/b198g-local-model-adapter.mjs
+          node --check scripts/b198g-local-design.mjs
+          node --check scripts/b198g-local-adapter.test.mjs
