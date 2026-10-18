@@ -13,6 +13,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
+import {performance} from 'node:perf_hooks';
 import {CREATION_CASES,REVISION_CASES,verifyBenchmark,SUITE_VERSION}
  from './b198b-benchmark-cases.mjs';
 import {generateModelDirectedArchitecture}
@@ -88,9 +89,12 @@ function recordFor(spec,arm,kind='NOT_RUN'){
 export async function runB198KPairedStudy({
  generator,planner,outDir,modelId,providerOrigin='INJECTED_TEST_DOUBLE',
  creationCount=12,includeRevisions=true,directedAttempts=3,
- directedTopologyRounds=1,directAttempts=1
+ directedTopologyRounds=1,directAttempts=1,
+ stopOnTimeout=false,onModelCall=null
 }={}){
  check(verifyBenchmark(),'FROZEN_12_PLUS_4_TAMPERED');
+ check(typeof stopOnTimeout==='boolean','STOP_ON_TIMEOUT_BOOLEAN');
+ check(onModelCall===null||typeof onModelCall==='function','CALL_OBSERVER_FUNCTION');
  check(typeof generator==='function'&&typeof planner==='function',
   'TWO_EXPLICIT_MODEL_FUNCTIONS_REQUIRED');
  check(['INJECTED_TEST_DOUBLE','EXPLICIT_LOCAL_LOOPBACK'].includes(providerOrigin),
@@ -119,9 +123,32 @@ export async function runB198KPairedStudy({
   'source/ai/b143-viewer-template.html'),'utf8');
  const results=new Map(),directedBase=new Map();
  let plannerCalls=0,directedSourceRequests=0;
+ const calls=[];
+ const measured=async ({arm,caseId,phase,modelCall})=>{
+  const started=performance.now();
+  const id=calls.length+1;
+  const obs=data=>{try{onModelCall?.(data)}catch{ /* progress observer cannot abort source QA */ }};
+  obs({event:'START',arm,caseId,phase,requestSequence:id});
+  let outcome='RETURNED',reason=null;
+  try{return await modelCall()}
+  catch(e){
+   reason=short(e);
+   outcome=/\b(aborted|aborterror|timeout|timed out)\b/i.test(reason)?
+    'ABORT_OR_TIMEOUT':'MODEL_OR_FORMAT_ERROR';
+   throw e;
+  }finally{
+   const durationMs=Math.round(performance.now()-started);
+   const rec={requestSequence:id,arm,caseId,phase,durationMs,outcome,
+    ...(reason?{reason}:{}),isRealLlmProven:false};
+   calls.push(rec);
+   obs({event:'END',...rec});
+  }
+ };
  try{
   const direct=await runB198HBenchmark({
-   provider:generator,outDir:path.join(scratch,'direct'),
+   provider:request=>measured({arm:'direct',caseId:null,
+    phase:request.mode,modelCall:()=>generator(request)}),
+   outDir:path.join(scratch,'direct'),
    modelId,providerOrigin,creationCount,
    includeRevisions,attemptsPerCase:directAttempts
   });
@@ -139,12 +166,24 @@ export async function runB198KPairedStudy({
   }
   fs.mkdirSync(path.join(scratch,'directed'));
   for(const spec of selected){
+   const prior=results.get('direct:'+spec.id);
    const row=recordFor(spec,'directed');
+   if(stopOnTimeout&&/\b(aborted|aborterror|timeout|timed out)\b/i.test(
+     String(prior?.error??''))){
+    row.status='NOT_RUN_PRIOR_ARM_TIMEOUT';
+    row.error='PAIRED_COMPARISON_PAUSED_AFTER_DIRECT_MODEL_TIMEOUT';
+    results.set('directed:'+spec.id,row);
+    continue;
+   }
    try{
     const generated=await generateModelDirectedArchitecture({
      prompt:spec.prompt,
-     planner:async input=>{plannerCalls++;return planner(input);},
-     generator:async input=>{directedSourceRequests++;return generator(input);},
+     planner:async input=>{plannerCalls++;return measured({arm:'directed',
+      caseId:spec.id,phase:'architecture-plan',
+      modelCall:()=>planner(input)});},
+     generator:async input=>{directedSourceRequests++;
+      return measured({arm:'directed',caseId:spec.id,
+       phase:input.mode,modelCall:()=>generator(input)});},
      maxSourceAttempts:directedAttempts,maxRepairRounds:directedTopologyRounds
     });
     const metrics=sourceMetrics(spec,generated);
@@ -183,7 +222,8 @@ export async function runB198KPairedStudy({
     const changed=await proposeArchitecture({
      prompt:spec.prompt,
      generator:async input=>{directedSourceRequests++;attemptedCalls++;
-      return generator(input);},
+      return measured({arm:'directed',caseId:spec.id,phase:'revision',
+       modelCall:()=>generator(input)});},
      baseDesign:base.design,
      expectedBaseSha256:base.compiled.sourceSha256,
      protectedElementIds:protectedIds,
@@ -239,6 +279,16 @@ export async function runB198KPairedStudy({
     note:'Different search budgets and extra planner calls: NOT a controlled equal-token causal trial'},
    providerRequestCounts:{direct:direct.report.modelGeneratorInvocations,
     directedPlanning:plannerCalls,directedSource:directedSourceRequests},
+   timing:{
+    units:'milliseconds',source:'node_performance_now_monotonic',
+    calls,timeoutOrAbortCount:calls.filter(x=>
+     x.outcome==='ABORT_OR_TIMEOUT').length,
+    observedCallDurationMs:calls.reduce((n,x)=>n+x.durationMs,0),
+    excludesModelStartupOutsideHTTP:true,
+    cannotInferTokensPerSecond:true,
+    sourceOnlyNotHumanQuality:true
+   },
+   stopOnTimeoutApplied:stopOnTimeout,
    runStatus:'SOURCE_ONLY_HUMAN_QUALITY_UNREVIEWED',
    crossArmAutomaticWinner:null,
    trueIndependentHumanPreferenceMeasured:false,
