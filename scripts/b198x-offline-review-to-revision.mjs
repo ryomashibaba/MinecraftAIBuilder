@@ -32,7 +32,7 @@ export function parseB198XArgs(args=[]){
   'FOLDER_REVIEW_OUTPUT_REQUIRED');
  const n=values['--max-priorities']??'2';
  yes(/^[1-4]$/.test(n),'MAX_PRIORITY_1_TO_4');
- const protection=values['--protect']===undefined?[]:
+ const protection=values['--protect']===undefined?null:
   values['--protect'].split(',');
  return {sourceFolder:path.resolve(values['--folder']),
   reviewPath:path.resolve(values['--review']),
@@ -40,7 +40,7 @@ export function parseB198XArgs(args=[]){
   protectedElementIds:protection,maxPriorities:Number(n)};
 }
 export function runB198XOfflineRevision({
- sourceFolder,reviewPath,outDir,protectedElementIds=[],maxPriorities=2
+ sourceFolder,reviewPath,outDir,protectedElementIds=null,maxPriorities=2
 }={}){
  yes(typeof sourceFolder==='string'&&typeof reviewPath==='string'&&
   typeof outDir==='string','PATH_ARGS_REQUIRED');
@@ -80,6 +80,8 @@ export function runB198XOfflineRevision({
   lowRatedPriorities:brief.topHumanRevisionPriorities.length,
   sourceGeometryRiskHints:brief.objectiveSourceRiskHints.length,
   humanProtectionSelectionRequired:brief.protectedOriginalAddElementIds.length===0,
+  selectedProtectedParts:brief.protectedOriginalAddElementIds.length,
+  protectionImportedFromOriginalHumanReview:brief.humanSourceProtectionSelectedFromSameRatingJSON,
   offlineBundleFileCount:5,
   realModelRequestsMade:0,modelRevisionNotAttempted:true,
   actualArchitectureQualityNotCertified:true,
