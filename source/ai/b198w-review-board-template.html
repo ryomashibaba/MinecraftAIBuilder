@@ -67,6 +67,9 @@ iframe{display:block;width:100%;height:calc(100vh - 250px);min-height:480px;bord
   <h2>人間による評価（4項目）</h2>
   <p class="small">正面・上から・横からの3方向で3Dモデルを見てください。各項目0〜4点と、15文字以上の具体的根拠が必要です。</p>
   <div id="rubric"></div>
+  <h2>次回も必ず残したい既存部材（任意）</h2>
+  <p class="small">元のAIが命名した部材です。次回の修正でも守りたい部材だけ明示的に選んでください。未選択のままだと改修計画はドラフトになります。選択だけではLLMを呼びません。</p>
+  <div id="source-protections"></div>
   <label class="review-check"><input type="checkbox" id="human-confirm">
    <span>生成モデルの自己申告ではなく、私自身が3Dモデルを見て採点しました</span>
   </label>
@@ -121,6 +124,17 @@ for(const issue of data.findings){
  item.textContent=issue.severity+" / "+issue.id+"： "+issue.recommendation;
  el("critic-list").append(item);
 }
+const elements=data.preservableModelElements||[];
+const protectedChecks=[];
+for(const part of elements){
+ const label=document.createElement("label");label.className="review-check";
+ const checkbox=document.createElement("input");checkbox.type="checkbox";
+ checkbox.setAttribute("aria-label","この既存部材を次回の改修から保護する: "+part.id);
+ const span=document.createElement("span");
+ span.textContent=part.id+"（"+part.shape+" / "+part.material+"）";
+ label.append(checkbox,span);el("source-protections").append(label);
+ protectedChecks.push({id:part.id,checkbox});
+}
 const entries=[],button=el("export");
 for(const item of data.rubric){
  const wrap=document.createElement("div");wrap.className="review-item";
@@ -161,7 +175,10 @@ button.addEventListener("click",()=>{
   schema:"minecraftaibuilder-b198w-human-source-rating-v1",
   caseId:data.caseId,sourceSha256:data.sourceSha256,
   geometrySha256:data.geometrySha256,reviewerConfirmedHuman:true,
-  rubric:getScores(),sourceOnly:true,
+  rubric:getScores(),
+  protectedElementIds:protectedChecks.filter(x=>x.checkbox.checked).map(x=>x.id),
+  protectionSelectedExplicitlyByReviewer:true,
+  sourceOnly:true,
   selfReportedNotIndependentlyVerified:true,
   worldWrites:0,constructionApproved:false
  };
