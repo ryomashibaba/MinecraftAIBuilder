@@ -21,7 +21,9 @@ export function inspectPlannedPublicCirculation({plan,design,compiled}={}){
  const p=readArchitecturalProgram(plan);
  check(design?.id===p.id,'PROGRAM_SOURCE_ID_MISMATCH');
  check(verifyCompiled(design,compiled),'UNVERIFIED_REAL_VOXELS');
- check(JSON.stringify(design.bounds)===JSON.stringify(p.bounds),
+ check(design.bounds?.width===p.bounds.width&&
+   design.bounds?.height===p.bounds.height&&
+   design.bounds?.depth===p.bounds.depth,
   'PROGRAM_SOURCE_BOUNDS_MISMATCH');
  const vox=new Set(compiled.primitives.map(v=>K(v[0],v[1],v[2])));
  const floorAnchors=p.anchors.filter(a=>a.expect==='SUPPORTED_FLOOR');
