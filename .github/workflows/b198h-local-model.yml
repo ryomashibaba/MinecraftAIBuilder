@@ -1,0 +1,64 @@
+name: B198H Local Model Studio and Frozen Architecture Benchmark
+on:
+  push:
+    branches:
+      - feature/b198h-local-studio-and-full-benchmark
+  pull_request:
+    paths:
+      - 'source/ai/b198h-model-benchmark.mjs'
+      - 'source/ai/b198g-local-model-adapter.mjs'
+      - 'scripts/b198h-local-workflow.mjs'
+      - 'scripts/b198h-local-workflow.test.mjs'
+      - '.github/workflows/b198h-local-model.yml'
+permissions:
+  contents: read
+jobs:
+  source-integrity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Validate B198H source and inherited model adapter
+        run: |
+          node --check scripts/b198h-local-workflow.mjs
+          node --check scripts/b198h-local-workflow.test.mjs
+          node --check source/ai/b198h-model-benchmark.mjs
+          node --check source/ai/b198g-local-model-adapter.mjs
+      - name: Run the previous B198A-G plus B198H genuine source and studio integration regression
+        run: |
+          node --test \
+            scripts/b198a-engine.test.mjs \
+            scripts/b198a-cli.test.mjs \
+            scripts/b198b-quality.test.mjs \
+            scripts/b198c-critic.test.mjs \
+            scripts/b198d-session.test.mjs \
+            scripts/b198e-pilot.test.mjs \
+            scripts/b198f-evidence.test.mjs \
+            scripts/b198g-autonomous-quality.test.mjs \
+            scripts/b198g-local-adapter.test.mjs \
+            scripts/b198h-local-workflow.test.mjs
+  inherited-studio-browser:
+    needs: [source-integrity]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Install real Chromium
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Verify reused desktop/mobile Studio approval, rejection and Undo/Redo
+        run: node scripts/b198d-browser-qa.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: B198H-Inherited-Real-Chromium-Review-Fixture
+          path: |
+            b198d-evidence/B198D_*_*.png
+            b198d-evidence/B198D_CHROMIUM_QA.json
+          if-no-files-found: warn
+          retention-days: 14
