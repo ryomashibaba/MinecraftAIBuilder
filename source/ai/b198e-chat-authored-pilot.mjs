@@ -171,26 +171,21 @@ function revise(id,source){
  const d=structuredClone(source);
  if(id==='r01'){
   const dome=d.elements.find(x=>x.id==='lib-skyroom-original-glass-dome');
-  dome.radii=[10,8,10];
+  dome.center=[42,68,35];
+  dome.radii=[10,7,10];
  }else if(id==='r02'){
-  // Raising ONLY crane structure without altering quay, passenger or control.
-  for(const item of d.elements){
-   if(item.id==='port-crane-pylon-west'||item.id==='port-crane-pylon-east')
-    item.end[1]=64;
-   if(item.id==='port-crane-upper-crossbeam'){item.start[1]=65;item.end[1]=65;}
-   if(item.id==='port-crane-cantilever-toward-water'){
-    item.start=[80,63,5];item.end=[86,65,45];
-   }
-   if(item.id==='port-crane-hanging-hoist'){
-    item.start=[82,63,12];item.end=[82,30,12];
-   }
-  }
+  // A new high sloping crown raises the crane's silhouette WITHOUT
+  // modifying the original horizontal gantry deck or its headroom.
+  d.elements.push(g('port-upper-crane-west-lean',72,62,23,77,68,23,'metal',1));
+  d.elements.push(g('port-upper-crane-east-lean',88,62,23,84,68,23,'metal',1));
+  d.elements.push(g('port-upper-crane-raked-cap',77,67,23,84,68,23,'accent',1));
+  d.elements.push(g('port-crane-high-cantilever',79,67,7,85,68,43,'metal',1));
  }else if(id==='r03'){
   d.elements.push(t('temple-new-sky-radiance-ring',75,57,28,'y',9,1,'glow'));
  }else if(id==='r04'){
-  // Extend only existing upper canopy ribbon farther; still within local bounds.
-  const roof=d.elements.find(x=>x.id==='station-largest-canopy-ribbon');
-  roof.origin=[3,62,6];roof.size=[94,2,50];
+  // Bold NEW highest broad-span canopy. The old shell, original beams,
+  // platforms and their existing clear source floor/headroom are kept.
+  d.elements.push(b('station-high-canopy-extended-skydeck',3,75,5,94,2,50,'metal'));
  }else throw Error('B198E_REVISION_CASE_NOT_IN_PILOT');
  validateDesign(d);return d;
 }
