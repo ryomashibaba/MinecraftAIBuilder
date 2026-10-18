@@ -1,0 +1,71 @@
+name: B198L Real-Source Multi-Level Circulation Quality
+on:
+  push:
+    branches: [feature/b198l-multilevel-source-circulation]
+  pull_request:
+    paths:
+      - 'source/ai/b198l-step-chain-proof.mjs'
+      - 'source/ai/b198i-design-director.mjs'
+      - 'scripts/b198l-step-chain.test.mjs'
+      - '.github/workflows/b198l-source-steps.yml'
+permissions:
+  contents: read
+jobs:
+  strict-voxel-source-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Syntax and no world execution
+        run: |
+          node --check source/ai/b198l-step-chain-proof.mjs
+          node --check source/ai/b198i-design-director.mjs
+          node --check scripts/b198l-step-chain.test.mjs
+      - name: B198A-L regressions including real source step connectivity
+        run: |
+          node --test \
+            scripts/b198a-engine.test.mjs \
+            scripts/b198a-cli.test.mjs \
+            scripts/b198b-quality.test.mjs \
+            scripts/b198c-critic.test.mjs \
+            scripts/b198d-session.test.mjs \
+            scripts/b198e-pilot.test.mjs \
+            scripts/b198f-evidence.test.mjs \
+            scripts/b198g-autonomous-quality.test.mjs \
+            scripts/b198g-local-adapter.test.mjs \
+            scripts/b198h-local-workflow.test.mjs \
+            scripts/b198i-design-director.test.mjs \
+            scripts/b198i-studio-director.test.mjs \
+            scripts/b198j-circulation.test.mjs \
+            scripts/b198k-paired-study.test.mjs \
+            scripts/b198l-step-chain.test.mjs
+  browser-source-review:
+    needs: [strict-voxel-source-evidence]
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Install real Chromium
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Verify inherited actual source 3D and human-comparison UI on desktop/mobile
+        run: |
+          node scripts/b198d-browser-qa.mjs
+          node scripts/b198i-browser-qa.mjs
+          node scripts/b198k-browser-qa.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: B198L-Inherited-Real-Chromium-Source-Reviews
+          path: |
+            b198d-evidence/B198D_*_*.png
+            b198i-browser-evidence/B198I_*.png
+            b198k-browser-evidence/B198K_*_*.png
+            b198k-browser-evidence/B198K_BROWSER_QA.json
+          retention-days: 14
+          if-no-files-found: warn
