@@ -16,10 +16,12 @@ import {createB198GLocalModelAdapter}
   from '../source/ai/b198g-local-model-adapter.mjs';
 import {runB198HBenchmark}
   from '../source/ai/b198h-model-benchmark.mjs';
+import {generateArchitectureWithFeedback}
+  from '../source/ai/b198g-autonomous-quality.mjs';
 
 const fail=why=>{throw Error('B198H_WORKFLOW_'+why)};
 export const GUIDE=[
- 'studio --project DIRECTORY [--design EXISTING_B143_SOURCE.json] [--local-model MODEL_ID] [--port 0..65535]',
+ 'studio --project DIRECTORY [--design EXISTING_B143_SOURCE.json | --prompt JAPANESE_REQUEST --local-model MODEL_ID] [--port 0..65535]',
  'benchmark --out NEW_DIRECTORY --local-model MODEL_ID [--cases 1..12] [--no-revisions]',
  'Both modes optionally accept --endpoint http://127.0.0.1:PORT/v1/chat/completions',
  'Studio with no --local-model is intentionally read-only: no fake generation.',
@@ -30,7 +32,7 @@ export function parseB198HArgs(argv){
  if(argv.length===1&&argv[0]==='--help')return {help:true};
  const mode=argv[0];
  if(!['studio','benchmark'].includes(mode))fail('MODE_REQUIRED');
- const allowed=new Set(['--project','--design','--local-model','--port',
+ const allowed=new Set(['--project','--design','--prompt','--local-model','--port',
   '--endpoint','--out','--cases','--no-revisions']);
  const values={};
  for(let i=1;i<argv.length;i++){
@@ -47,17 +49,24 @@ export function parseB198HArgs(argv){
    fail('STUDIO_BENCHMARK_OPTION');
   if(values['--endpoint']&&!values['--local-model'])
    fail('ENDPOINT_WITHOUT_MODEL');
+  if(values['--prompt']&&values['--design'])
+   fail('PROMPT_AND_EXISTING_DESIGN_MUTUALLY_EXCLUSIVE');
+  if(values['--prompt']&&!values['--local-model'])
+   fail('PROMPT_REQUIRES_EXPLICIT_MODEL');
+  if(values['--prompt']&&(values['--prompt'].trim().length<8||
+   values['--prompt'].length>6100))fail('PROMPT_LENGTH');
   const port=values['--port']===undefined?0:Number(values['--port']);
   if(!/^(?:0|[1-9][0-9]{0,4})$/.test(values['--port']??'0')||
    !Number.isSafeInteger(port)||port>65535)fail('INVALID_STUDIO_PORT');
   return {mode,projectDirectory:path.resolve(values['--project']),
    designFile:values['--design']?path.resolve(values['--design']):null,
+   prompt:values['--prompt']??null,
    model:values['--local-model']??null,endpoint:values['--endpoint']??null,
    port};
  }
  if(!values['--local-model']||!values['--out'])
   fail('BENCHMARK_EXPLICIT_MODEL_AND_OUTPUT_REQUIRED');
- if(values['--project']||values['--design']||values['--port'])
+ if(values['--project']||values['--design']||values['--prompt']||values['--port'])
   fail('BENCHMARK_STUDIO_OPTION');
  const creationCount=values['--cases']===undefined?12:Number(values['--cases']);
  if(!/^(?:[1-9]|1[0-2])$/.test(values['--cases']??'12'))
@@ -75,13 +84,33 @@ export async function executeB198H(options,{generator=null}={}){
     ...(options.endpoint?{endpoint:options.endpoint}:{})
    }));
  if(options.mode==='studio'){
-  const initialDesign=options.designFile===null?null:
+  let initialDesign=options.designFile===null?null:
    JSON.parse(fs.readFileSync(options.designFile,'utf8'));
+  let initialSourceReport=null;
+  if(options.prompt!==null){
+   if(provider===null)fail('PROMPT_WITHOUT_REAL_GENERATOR');
+   const project=options.projectDirectory;
+   // A prompt can initialize only a new or empty project: never replace
+   // approved designs, pending drafts, or existing source history.
+   if(fs.existsSync(project)&&fs.readdirSync(project).length!==0)
+    fail('PROMPT_REQUIRES_NEW_EMPTY_PROJECT');
+   const created=await generateArchitectureWithFeedback({
+    prompt:options.prompt,generator:provider,maxRepairRounds:2
+   });
+   initialDesign=created.design;
+   initialSourceReport=created.report;
+  }
   const app=await startB198DLocalStudio({
     projectDirectory:options.projectDirectory,
     initialDesign,generator:provider,port:options.port
   });
+  if(initialSourceReport!==null){
+   fs.writeFileSync(path.join(options.projectDirectory,
+    'B198H_INITIAL_MODEL_SOURCE_REVIEW.json'),
+    JSON.stringify(initialSourceReport,null,2)+'\n',{flag:'wx'});
+  }
   return {mode:'studio',app,url:app.url,
+   initialSourceReport,
    modelConnected:provider!==null,
    providerClassification:generator!==null?'INJECTED_TEST_DOUBLE':
     provider===null?'NONE':'EXPLICIT_LOCAL_LOOPBACK',
@@ -109,6 +138,8 @@ if(process.argv[1]===fileURLToPath(import.meta.url)){
   else if(result.mode==='studio'){
    console.log('B198H_LOCAL_SOURCE_REVIEW_STUDIO',result.url);
    console.log('MODEL_CONNECTION',result.providerClassification);
+   if(result.initialSourceReport)console.log('INITIAL_SOURCE_REVIEW',
+    result.initialSourceReport.status);
    console.log('Approvals affect B143 design history only, never Minecraft blocks.');
   }else{
    console.log('B198H_FROZEN_BENCHMARK_SOURCE_ONLY',JSON.stringify({
