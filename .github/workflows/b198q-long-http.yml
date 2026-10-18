@@ -1,0 +1,79 @@
+name: B198Q Bounded Native Long-Running Local HTTP and Fast-Fail
+on:
+  push:
+    branches: [feature/b198q-long-local-http-transport-failfast]
+  pull_request:
+    paths:
+      - 'source/ai/b198q-loopback-http.mjs'
+      - 'source/ai/b198-natural-language-design.mjs'
+      - 'source/ai/b198i-design-director.mjs'
+      - 'source/ai/b198k-paired-study.mjs'
+      - 'scripts/b198k-local-comparison.mjs'
+      - 'scripts/b198q-long-http.test.mjs'
+      - 'tools/B198M_RUN_LOCAL.ps1'
+      - '.github/workflows/b198q-long-http.yml'
+permissions:
+  contents: read
+jobs:
+  native-local-http-safety-and-regressions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: B198Q source syntax
+        run: |
+          node --check source/ai/b198q-loopback-http.mjs
+          node --check source/ai/b198k-paired-study.mjs
+          node --check source/ai/b198i-design-director.mjs
+          node --check scripts/b198k-local-comparison.mjs
+          node --check scripts/b198q-long-http.test.mjs
+      - name: Validate native HTTP timeout / failure / payload and all historic source tests
+        run: |
+          node --test \
+            scripts/b198q-long-http.test.mjs \
+            scripts/b198p-model-timeout.test.mjs \
+            scripts/b198m-local-transport.test.mjs \
+            scripts/b198a-engine.test.mjs \
+            scripts/b198a-cli.test.mjs \
+            scripts/b198b-quality.test.mjs \
+            scripts/b198c-critic.test.mjs \
+            scripts/b198d-session.test.mjs \
+            scripts/b198e-pilot.test.mjs \
+            scripts/b198f-evidence.test.mjs \
+            scripts/b198g-autonomous-quality.test.mjs \
+            scripts/b198g-local-adapter.test.mjs \
+            scripts/b198h-local-workflow.test.mjs \
+            scripts/b198i-design-director.test.mjs \
+            scripts/b198i-studio-director.test.mjs \
+            scripts/b198j-circulation.test.mjs \
+            scripts/b198k-paired-study.test.mjs \
+            scripts/b198l-step-chain.test.mjs
+  windows-powershell-51-real-script-and-source-zip:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Actual PS5.1 GitHub archive + non-LLM local mock -> independent B143 source ZIP
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $server=Start-Process -FilePath node -ArgumentList @('scripts/b198m-fixture-server.mjs','--port','11783') -NoNewWindow -PassThru
+          try {
+            Start-Sleep -Seconds 3
+            $dest=Join-Path $env:RUNNER_TEMP 'B198Q-EXACT-PS51-USER-FLOW'
+            & powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./tools/B198M_RUN_LOCAL.ps1 -Mode Pilot -Model B198M_MOCK_NOT_REAL_LLM -Endpoint 'http://127.0.0.1:11783/v1/chat/completions' -OutputDirectory $dest -Cases 1 -TimeoutSeconds 360
+            if($LASTEXITCODE -ne 0){throw 'B198Q_WINDOWS_PS51_PILOT_FAILED'}
+            $zip=Join-Path $dest 'B198M_UPLOAD_THIS_RESULT.zip'
+            if(-not (Test-Path -LiteralPath $zip)){throw 'B198Q_ZIP_NOT_CREATED'}
+            $summary=Get-Content (Join-Path $dest 'B198M_UPLOAD_THIS_SUMMARY.json') -Raw | ConvertFrom-Json
+            if($summary.independentlyVerifiedPairedSourceCases -ne 1){throw 'B198Q_SOURCE_SHA_NOT_VERIFIED'}
+            if($summary.modelCallTiming.calls.Count -ne 3){throw 'B198Q_TIMING_INCOMPLETE'}
+            if($summary.safety.worldWrites -ne 0){throw 'B198Q_WORLD_WRITE_REGRESSION'}
+            Write-Host 'B198Q_PS51_NATIVE_LOCAL_HTTP_REAL_ZIP_PASS DETERMINISTIC_MOCK_NOT_REAL_LLM'
+          } finally {
+            if($server -and -not $server.HasExited){Stop-Process -Id $server.Id -Force}
+          }
