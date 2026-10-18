@@ -8,6 +8,8 @@
  */
 import http from 'node:http';
 import {performance} from 'node:perf_hooks';
+import {repairB198TMetadataOnly}
+ from './b198t-metadata-only-repair.mjs';
 
 export const SCHEMA='minecraftaibuilder-b198s-native-single-source-json-v1';
 const ENDPOINT=/^http:\/\/127\.0\.0\.1:(\d{2,5})\/v1\/chat\/completions$/;
@@ -30,6 +32,8 @@ const STRUCTURAL_GUIDE=[
  'Return ORIGINAL architecture for the supplied Japanese request. Never use a fixed building template.',
  'The ONLY outer keys are design, explanation, assumptions.',
  'Inside design exactly: schema, id, title, brief, bounds, elements, designOnly.',
+ 'IMPORTANT: title MUST be 1..100 UTF-16 characters; brief MUST be 1..500 UTF-16 characters. Do not use <, >, control characters or line breaks in either.',
+ 'Prefer a concise Japanese title under 45 characters and a concise brief under 160 characters; metadata is NOT a place to serialize all geometry.',
  'Set schema "minecraftaibuilder-b143-building-dsl-v1", designOnly true.',
  'id must be a lowercase-hyphenated 3..48 character slug. bounds width/depth 8..128, height 8..96.',
  'Each element needs id (distinct), shape, mode. add requires material in stone/concrete/metal/glass/wood/glow/accent; cut omits material.',
@@ -138,12 +142,18 @@ export function createB198SNativeBridge({
       return final(fail('UNEXPECTED_MODEL_CONTENT'));
      const ended=body.done===true;
      const isLength=body.done_reason==='length'||body.done_reason==='max_tokens';
+     // Preserve the real model source geometry. Only an excess of B143
+     // title/brief characters can be trimmed with SHA and explicit disclosure.
+     let normalized;
+     try{normalized=repairB198TMetadataOnly(content)}
+     catch{return final(fail('METADATA_AUDIT_FAILURE'))}
      const detail={
       outcome:ended&&!isLength?'MODEL_RETURNED':'MODEL_INCOMPLETE',
       elapsedMs,
       complete:ended&&!isLength,doneReason:typeof body.done_reason==='string'?
        body.done_reason.slice(0,50):null,
       responseCharacters:content.length,
+      metadataRepair:normalized.provenance,
       thinkingCharacters:number(body.message?.thinking?.length),
       totalSeconds:seconds(body.total_duration),
       loadSeconds:seconds(body.load_duration),
@@ -162,7 +172,7 @@ export function createB198SNativeBridge({
      entries.push(detail);
      final(null,{ok:true,status:200,json:async()=>({
       choices:[{finish_reason:!ended||isLength?'length':'stop',
-       message:{content}}]
+       message:{content:normalized.content}}]
      })});
     });
    });
@@ -174,5 +184,7 @@ export function createB198SNativeBridge({
  return {fetcher,telemetry:()=>structuredClone(entries),
   requestBudget:{numPredict,numCtx,keepAlive,thinkingOffRequested:true,
    thinkingOffIndependentlyVerified:false,
-   nativeOllamaSourceOnly:true,worldWrites:0}};
+   nativeOllamaSourceOnly:true,
+    boundedMetadataRepairEnabled:true,
+    geometryRepairNeverAutomatic:true,worldWrites:0}};
 }
