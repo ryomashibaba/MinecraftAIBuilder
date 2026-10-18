@@ -1,0 +1,64 @@
+name: B198E Chat-Authored Architecture Quality Pilot (NOT Live API)
+on:
+  push:
+    branches: [feature/b198e-inchat-architecture-quality-pilot]
+    paths:
+      - 'source/ai/b198e-chat-authored-pilot.mjs'
+      - 'scripts/b198e-*'
+      - 'docs/B198E_*'
+      - '.github/workflows/b198e-pilot.yml'
+  pull_request:
+    paths:
+      - 'source/ai/b198e-chat-authored-pilot.mjs'
+      - 'scripts/b198e-*'
+      - 'docs/B198E_*'
+      - '.github/workflows/b198e-pilot.yml'
+permissions:
+  contents: read
+jobs:
+  authored-geometry-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Compile and measure four original Japanese architectural design responses and four source-safe revisions
+        run: node scripts/b198e-pilot-fast-probe.mjs
+      - name: Regression tests and precise source-goal audit
+        run: |
+          node --test scripts/b198a-engine.test.mjs scripts/b198a-cli.test.mjs scripts/b198b-quality.test.mjs scripts/b198c-critic.test.mjs scripts/b198d-session.test.mjs scripts/b198e-pilot.test.mjs
+      - name: Create truthful source-pinned 3D architecture research review
+        run: node scripts/b198e-build-review.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: B198E-Chat-Authored-Architecture-3D-Research-No-API
+          path: b198e-evidence/
+          if-no-files-found: warn
+          retention-days: 14
+  real-chromium:
+    needs: [authored-geometry-evidence]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Install browser for exact source preview screenshots
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Build reproducible source gallery
+        run: node scripts/b198e-build-review.mjs
+      - name: Compare actual four architectural concept and local revisions on desktop and mobile
+        run: node scripts/b198e-browser-qa.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: B198E-Real-Chromium-Four-Genres-Chat-Authored
+          path: |
+            b198e-evidence/B198E_*_*.png
+            b198e-evidence/B198E_CHROMIUM_QA.json
+          if-no-files-found: warn
+          retention-days: 14
