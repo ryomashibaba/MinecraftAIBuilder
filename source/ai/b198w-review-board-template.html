@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>B198W | Minecraft Architecture Quality Review</title>
+<style>
+:root{font-family:system-ui,-apple-system,"Yu Gothic",sans-serif;color:#152c3e;background:#f2f5f8}
+*{box-sizing:border-box}body{margin:0}
+.header{background:white;border-bottom:1px solid #dbe3ec;padding:18px clamp(16px,3vw,36px)}
+.eyebrow{letter-spacing:.12em;color:#49677e;font-size:.68rem;font-weight:800;margin-bottom:6px}
+h1{font-size:clamp(1.18rem,2vw,1.65rem);margin:0 0 6px}
+.sub{color:#627486;font-size:.87rem;line-height:1.6}
+.layout{display:grid;grid-template-columns:minmax(335px,415px) minmax(0,1fr);gap:16px;padding:16px;max-width:1900px;margin:auto}
+.panel{background:white;border:1px solid #dbe3ec;border-radius:13px;padding:18px}
+.left{max-height:calc(100vh - 136px);overflow:auto}
+h2{font-size:1.02rem;margin:24px 0 10px}
+h2:first-child{margin-top:0}
+p{line-height:1.62;font-size:.88rem;margin:8px 0 14px}
+.small{font-size:.79rem;color:#64778a;line-height:1.55}
+.warning{background:#fff3e0;border:1px solid #f0d7aa;padding:12px;border-radius:9px;color:#6d4c23}
+.chip{display:inline-block;font-size:.71rem;font-weight:750;color:#745124;background:#fff0d0;padding:4px 9px;border-radius:15px;margin:8px 0}
+.facts{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;margin-top:10px;font-size:.83rem}
+.facts div{padding:6px 0;border-bottom:1px solid #edf1f5}
+.facts strong{text-align:right;font-variant-numeric:tabular-nums}
+.summary{font-weight:650;color:#31526d}
+.review-item{padding:16px 0;border-top:1px solid #e2e9f0}
+.review-item label{display:block;font-size:.89rem;font-weight:730;line-height:1.5;margin-bottom:8px}
+select,textarea{border:1px solid #9db5c6;border-radius:8px;padding:10px;font:inherit;font-size:.86rem;background:#fff;width:100%}
+textarea{margin-top:9px;min-height:78px;resize:vertical}
+select:focus-visible,textarea:focus-visible,input:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid #38a5d8;outline-offset:2px}
+button{border:0;border-radius:9px;background:#155c87;color:white;padding:12px;width:100%;font-weight:750;cursor:pointer}
+button:disabled{opacity:.4;cursor:not-allowed}
+ul{padding-left:22px;font-size:.82rem;line-height:1.7}
+.review-check{display:flex;gap:9px;align-items:flex-start;margin:16px 0;font-size:.81rem;line-height:1.5}
+.review-check input{flex:none;margin-top:3px}
+.viewer-panel{min-width:0}
+.viewer-heading{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.viewer-heading h2{margin:0}
+.viewer-heading a{color:#145b89;font-size:.83rem;font-weight:700}
+iframe{display:block;width:100%;height:calc(100vh - 250px);min-height:480px;border:1px solid #ccdce9;border-radius:10px;background:#0c1825}
+.sourcehash{font-family:ui-monospace,monospace;word-break:break-all;font-size:.72rem;color:#607689;margin:10px 0}
+.panel-foot{margin-top:13px;border-top:1px solid #edf1f5;padding-top:10px;color:#657789;font-size:.78rem}
+@media(max-width:950px){.layout{grid-template-columns:1fr}.left{max-height:none}iframe{height:65vh;min-height:390px}}
+</style>
+</head>
+<body>
+<header class="header">
+ <div class="eyebrow">B198W · EVIDENCE-BASED REVIEW · OFFLINE</div>
+ <h1>建築ソースの品質レビュー</h1>
+ <div class="sub">形状の事実と、人間が見て判断する外観・意味・使いやすさを分けて評価します。Minecraftへの施工は行いません。</div>
+</header>
+<div class="layout">
+ <aside class="panel left">
+  <div class="chip">B143検証済み / 人間の評価は未実施</div>
+  <h2>元の日本語の設計要求</h2>
+  <p id="request"></p>
+  <h2>ソースから測定した事実</h2>
+  <div class="facts" id="facts"></div>
+  <h2>基礎的な形状目標</h2>
+  <p class="summary" id="source-goal"></p>
+  <p class="small">セル数や階床面積が目標を満たしていても、図書館として魅力的・完成しているとは判定しません。</p>
+  <h2>見直しが必要な構造上の兆候</h2>
+  <ul id="critic-list"></ul>
+  <p class="warning">2×2の足場候補はMinecraftでの実移動を保証しません。ガラスの位置だけで星空観察ラウンジの成立は判断できません。空洞の体積だけで中央吹き抜けの成立を判断できません。</p>
+  <h2>人間による評価（4項目）</h2>
+  <p class="small">正面・上から・横からの3方向で3Dモデルを見てください。各項目0〜4点と、15文字以上の具体的根拠が必要です。</p>
+  <div id="rubric"></div>
+  <label class="review-check"><input type="checkbox" id="human-confirm">
+   <span>生成モデルの自己申告ではなく、私自身が3Dモデルを見て採点しました</span>
+  </label>
+  <button id="export" type="button" disabled>人間の評価結果をJSONで保存</button>
+  <p class="small" id="feedback" aria-live="polite">採点・根拠・確認が揃うまで保存できません。</p>
+ </aside>
+ <main class="panel viewer-panel">
+  <div class="viewer-heading">
+   <h2>形状の3Dレビュー</h2>
+   <a href="__B198W_LOCAL_VIEWER_NAME__" target="_blank" rel="noopener noreferrer">3Dモデルを別タブで開く <span aria-hidden="true">↗</span></a>
+  </div>
+  <iframe title="独立コンパイルしたMinecraft建築の3Dソース" sandbox="allow-scripts"
+    src="__B198W_LOCAL_VIEWER_NAME__" loading="eager"></iframe>
+  <p class="sourcehash" id="sha"></p>
+  <div class="panel-foot">このページはオフラインのレビュー専用です。サーバー・LLM・Minecraftには接続せず、評価JSONの保存はブラウザ内でのみ行われます。採点結果は独立認証ではなく、レビュー者の自己申告です。</div>
+ </main>
+</div>
+<script>
+"use strict";
+const data=__B198W_SOURCE_REVIEW_DATA_JSON__;
+const el=id=>document.getElementById(id);
+el("request").textContent=data.request;
+el("sha").textContent="SOURCE SHA256: "+data.sourceSha256+
+ " / GEOMETRY SHA256: "+data.geometrySha256;
+const g=data.sourceGeometry;
+const factRows=[
+ ["占有セル数",g.occupiedVoxels.toLocaleString()+" 個"],
+ ["建築の高さ",g.actualHeightSpan+" ブロック"],
+ ["設計した要素",g.authoredElements+" 個"],
+ ["プリミティブの種類",g.distinctShapeFamilies+" 種類"],
+ ["使用素材",g.usedMaterialFamilies+" 種類"],
+ ["頭上が空いた2×2支持足場",g.twoWideSupportedStandingSquares+" 箇所"],
+ ["別々の同じ高さの足場領域",g.sameHeightFloorComponents+" 領域"],
+ ["高さの異なる足場階層",g.standingLevels+" 種類"],
+ ["最大同じ高さの足場領域",Math.round(g.largestSameHeightShare*100)+"%"],
+ ["囲まれた空気の領域",g.enclosedAirComponents+" 箇所"],
+ ["上部1/4のガラスセル",g.upperQuartileGlassVoxels+" 個"]
+];
+for(const [label,value] of factRows){
+ const a=document.createElement("div"),b=document.createElement("div");
+ a.textContent=label;b.textContent=value;b.style.fontWeight="700";
+ el("facts").append(a,b);
+}
+el("source-goal").textContent=data.goals.status+" — 数値的なソース要件のみ";
+if(!data.findings.length){
+ const item=document.createElement("li");
+ item.textContent="既存の数値検査では重大な兆候なし。ただし建築品質は未評価。";
+ el("critic-list").append(item);
+}
+for(const issue of data.findings){
+ const item=document.createElement("li");
+ item.textContent=issue.severity+" / "+issue.id+"： "+issue.recommendation;
+ el("critic-list").append(item);
+}
+const entries=[],button=el("export");
+for(const item of data.rubric){
+ const wrap=document.createElement("div");wrap.className="review-item";
+ const label=document.createElement("label");label.textContent=item.description;
+ const select=document.createElement("select");select.setAttribute("aria-label",item.description);
+ const options=[["","未採点"],["0","0 — 満たさない"],["1","1 — 大幅に不足"],
+  ["2","2 — 一部は満たす"],["3","3 — おおむね満たす"],["4","4 — 明確に満たす"]];
+ for(const [value,text] of options){
+  const option=document.createElement("option");option.value=value;option.textContent=text;
+  select.append(option);
+ }
+ const textarea=document.createElement("textarea");textarea.maxLength=750;
+ textarea.placeholder="見えている部位・位置・階の関係を具体的に書く（15文字以上）";
+ wrap.append(label,select,textarea);el("rubric").append(wrap);
+ entries.push({criterionId:item.criterionId,select,textarea});
+ select.addEventListener("change",refresh);
+ textarea.addEventListener("input",refresh);
+}
+el("human-confirm").addEventListener("change",refresh);
+function getScores(){
+ return entries.map(e=>({criterionId:e.criterionId,
+  score:e.select.value===""?null:Number(e.select.value),
+  evidence:e.textarea.value.trim()}));
+}
+function refresh(){
+ const rows=getScores();
+ const complete=el("human-confirm").checked&&rows.every(row=>
+  Number.isInteger(row.score)&&row.score>=0&&row.score<=4&&
+  row.evidence.length>=15&&row.evidence.length<=750);
+ button.disabled=!complete;
+ el("feedback").textContent=complete?
+  "評価JSONを保存できます。これは自己申告で、施工承認・AIモデルの性能認証ではありません。":
+  "すべての評価点・15文字以上の説明・人間の確認を入力してください。";
+}
+button.addEventListener("click",()=>{
+ if(button.disabled)return;
+ const result={
+  schema:"minecraftaibuilder-b198w-human-source-rating-v1",
+  caseId:data.caseId,sourceSha256:data.sourceSha256,
+  geometrySha256:data.geometrySha256,reviewerConfirmedHuman:true,
+  rubric:getScores(),sourceOnly:true,
+  selfReportedNotIndependentlyVerified:true,
+  worldWrites:0,constructionApproved:false
+ };
+ const blob=new Blob([JSON.stringify(result,null,2)+"\n"],{type:"application/json"});
+ const url=URL.createObjectURL(blob);
+ const a=document.createElement("a");
+ a.href=url;a.download="B198W_HUMAN_REVIEW_"+data.caseId+".json";
+ a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+});
+</script>
+</body>
+</html>
