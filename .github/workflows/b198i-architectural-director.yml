@@ -1,0 +1,65 @@
+name: B198I Model-Directed Architectural Program and Real B143 Evidence
+on:
+  push:
+    branches: [feature/b198i-model-directed-architecture-plan]
+  pull_request:
+    paths:
+      - 'source/ai/b198i-*.mjs'
+      - 'scripts/b198i-*.mjs'
+      - 'scripts/b198h-local-workflow.mjs'
+      - '.github/workflows/b198i-architectural-director.yml'
+permissions:
+  contents: read
+jobs:
+  source-and-intent-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Syntax checks (no model calls or Minecraft world operations)
+        run: |
+          node --check source/ai/b198i-design-director.mjs
+          node --check source/ai/b198i-local-planner.mjs
+          node --check scripts/b198h-local-workflow.mjs
+          node --check scripts/b198i-design-director.test.mjs
+          node --check scripts/b198i-studio-director.test.mjs
+      - name: Strict B198A-I source, legacy Studio, 3D geometry and directed intent regressions
+        run: |
+          node --test \
+            scripts/b198a-engine.test.mjs \
+            scripts/b198a-cli.test.mjs \
+            scripts/b198b-quality.test.mjs \
+            scripts/b198c-critic.test.mjs \
+            scripts/b198d-session.test.mjs \
+            scripts/b198e-pilot.test.mjs \
+            scripts/b198f-evidence.test.mjs \
+            scripts/b198g-autonomous-quality.test.mjs \
+            scripts/b198g-local-adapter.test.mjs \
+            scripts/b198h-local-workflow.test.mjs \
+            scripts/b198i-design-director.test.mjs \
+            scripts/b198i-studio-director.test.mjs
+  real-3d-review-browser:
+    needs: [source-and-intent-contract]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Install local Chromium only
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Preserve existing real-source desktop and mobile approval / reject / undo / redo
+        run: node scripts/b198d-browser-qa.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: B198I-Inherited-Desktop-Mobile-Studio-Source-Screenshots
+          path: |
+            b198d-evidence/B198D_*_*.png
+            b198d-evidence/B198D_CHROMIUM_QA.json
+          retention-days: 14
+          if-no-files-found: warn
