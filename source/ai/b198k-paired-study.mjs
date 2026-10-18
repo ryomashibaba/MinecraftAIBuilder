@@ -133,7 +133,9 @@ export async function runB198KPairedStudy({
   try{return await modelCall()}
   catch(e){
    reason=short(e);
-   outcome=/\b(aborted|aborterror|timeout|timed out)\b/i.test(reason)?
+   outcome=reason.includes('B198Q_LOCAL_TRANSPORT_')?
+    'TRANSPORT_FAILURE':
+    /\b(aborted|aborterror|timeout|timed out)\b/i.test(reason)?
     'ABORT_OR_TIMEOUT':'MODEL_OR_FORMAT_ERROR';
    throw e;
   }finally{
@@ -168,10 +170,11 @@ export async function runB198KPairedStudy({
   for(const spec of selected){
    const prior=results.get('direct:'+spec.id);
    const row=recordFor(spec,'directed');
-   if(stopOnTimeout&&/\b(aborted|aborterror|timeout|timed out)\b/i.test(
-     String(prior?.error??''))){
+   if(stopOnTimeout&&(/\b(aborted|aborterror|timeout|timed out)\b/i.test(
+     String(prior?.error??''))||
+     String(prior?.error??'').includes('B198Q_LOCAL_TRANSPORT_'))){
     row.status='NOT_RUN_PRIOR_ARM_TIMEOUT';
-    row.error='PAIRED_COMPARISON_PAUSED_AFTER_DIRECT_MODEL_TIMEOUT';
+    row.error='PAIRED_COMPARISON_PAUSED_AFTER_DIRECT_MODEL_TIMEOUT_OR_TRANSPORT_FAILURE';
     results.set('directed:'+spec.id,row);
     continue;
    }
@@ -284,6 +287,7 @@ export async function runB198KPairedStudy({
     calls,timeoutOrAbortCount:calls.filter(x=>
      x.outcome==='ABORT_OR_TIMEOUT').length,
     observedCallDurationMs:calls.reduce((n,x)=>n+x.durationMs,0),
+    transportFailureCount:calls.filter(x=>x.outcome==='TRANSPORT_FAILURE').length,
     excludesModelStartupOutsideHTTP:true,
     cannotInferTokensPerSecond:true,
     sourceOnlyNotHumanQuality:true

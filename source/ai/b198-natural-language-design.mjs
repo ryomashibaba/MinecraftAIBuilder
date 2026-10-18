@@ -175,6 +175,9 @@ export async function proposeArchitecture({
    // keys or complete raw prior model output.
    const reason=String(e?.message??e).slice(0,350);
    errors.push({attempt,reason});
+   // Transport/connection failure is not a malformed B143 proposal. Never
+   // repeat an expensive local request for the identical broken connection.
+   if(reason.includes('B198Q_LOCAL_TRANSPORT_'))throw e;
    if(attempt===maxAttempts){
     const err=Error('B198A_CANDIDATE_REJECTED_AFTER_'+maxAttempts+
       '_ATTEMPTS_'+reason);

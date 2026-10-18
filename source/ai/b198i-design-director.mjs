@@ -237,6 +237,8 @@ export async function generateModelDirectedArchitecture({
       (bestSteps.distinctDeclaredFloorElevations===1||
        bestSteps.declaredSourceStepChainsSupported))break;
   }catch(e){
+   // A disconnected request cannot be repaired by another model call.
+   if(String(e?.message??e).includes('B198Q_LOCAL_TRANSPORT_'))throw e;
    attempts.push({attempt:n,decision:'REJECTED_MODEL_OR_SOURCE',
     reason:String(e?.message??e).slice(0,240)});
   }

@@ -13,6 +13,8 @@ import {createB198GLocalModelAdapter}
  from '../source/ai/b198g-local-model-adapter.mjs';
 import {createB198ILocalPlanner}
  from '../source/ai/b198i-local-planner.mjs';
+import {createB198QLoopbackFetcher}
+ from '../source/ai/b198q-loopback-http.mjs';
 import {runB198KPairedStudy}
  from '../source/ai/b198k-paired-study.mjs';
 const fail=s=>{throw Error('B198K_CLI_'+s)};
@@ -52,6 +54,7 @@ export async function runB198KCli(options,{generator=null,planner=null}={}){
  // Always construct the strict loopback adapters, even if test functions
  // are injected; malformed or paid endpoints must never be accepted.
  const cfg={model:options.modelId,
+  fetcher:createB198QLoopbackFetcher(),
   timeoutMs:(options.timeoutSeconds??360)*1000,
   ...(options.endpoint?{endpoint:options.endpoint}:{})};
  const liveGenerator=createB198GLocalModelAdapter(cfg);
