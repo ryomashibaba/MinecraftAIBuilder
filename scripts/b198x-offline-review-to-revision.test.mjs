@@ -141,10 +141,30 @@ test('full offline user package preserves source and scored rating, SHA, and nev
    /B198X_OFFLINE_REFUSE_EXISTING_OUTPUT_OR_MISSING_PARENT/);
  }finally{fs.rmSync(root,{recursive:true,force:true})}
 });
+test('human reviewer picks immutable ADD element IDs in the SAME SHA-bound JSON; next plan imports them without CLI protection selection',()=>{
+ const {design,dossier,rated}=fixture();
+ const id=design.elements[1].id;
+ rated.protectedElementIds=[id];
+ const draft=createB198XRevisionBrief({design,dossier,review:rated});
+ assert.equal(draft.status,'REVIEWED_REVISION_BRIEF_READY_FOR_SEPARATE_AUTHORIZATION');
+ assert.deepEqual(draft.protectedOriginalAddElementIds,[id]);
+ assert.equal(draft.humanSourceProtectionSelectedFromSameRatingJSON,true);
+ assert.equal(draft.modelCallsMade,0);
+ // Forged id in a manually edited rating file is rejected before planning.
+ const invalid=structuredClone(rated);invalid.protectedElementIds=['made-up-id'];
+ assert.throws(()=>createB198XRevisionBrief({
+  design,dossier,review:invalid}),/B198W_PROTECTED_SELECTION_INVALID/);
+ // Explicit override is safe, but must still match a real original ADD part.
+ const override=createB198XRevisionBrief({
+  design,dossier,review:rated,protectedElementIds:[design.elements[0].id]
+ });
+ assert.deepEqual(override.protectedOriginalAddElementIds,[design.elements[0].id]);
+ assert.equal(override.humanSourceProtectionSelectedFromSameRatingJSON,false);
+});
 test('offline runner accepts original replay layout and refuses unknown/missing options',()=>{
  const a=parseB198XArgs(['--folder','/tmp/a','--review','/tmp/b',
   '--out','/tmp/c']);
- assert.deepEqual(a.protectedElementIds,[]);
+ assert.equal(a.protectedElementIds,null);
  assert.equal(a.maxPriorities,2);
  assert.throws(()=>parseB198XArgs(['--folder','a','--review','b']),
   /B198X_OFFLINE_FOLDER_REVIEW_OUTPUT_REQUIRED/);
