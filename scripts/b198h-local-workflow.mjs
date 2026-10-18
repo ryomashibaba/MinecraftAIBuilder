@@ -18,10 +18,14 @@ import {runB198HBenchmark}
   from '../source/ai/b198h-model-benchmark.mjs';
 import {generateArchitectureWithFeedback}
   from '../source/ai/b198g-autonomous-quality.mjs';
+import {generateModelDirectedArchitecture}
+  from '../source/ai/b198i-design-director.mjs';
+import {createB198ILocalPlanner}
+  from '../source/ai/b198i-local-planner.mjs';
 
 const fail=why=>{throw Error('B198H_WORKFLOW_'+why)};
 export const GUIDE=[
- 'studio --project DIRECTORY [--design EXISTING_B143_SOURCE.json | --prompt JAPANESE_REQUEST --local-model MODEL_ID] [--port 0..65535]',
+ 'studio --project DIRECTORY [--design EXISTING_B143_SOURCE.json | --prompt JAPANESE_REQUEST --local-model MODEL_ID [--directed]] [--port 0..65535]',
  'benchmark --out NEW_DIRECTORY --local-model MODEL_ID [--cases 1..12] [--no-revisions]',
  'Both modes optionally accept --endpoint http://127.0.0.1:PORT/v1/chat/completions',
  'Studio with no --local-model is intentionally read-only: no fake generation.',
@@ -33,12 +37,14 @@ export function parseB198HArgs(argv){
  const mode=argv[0];
  if(!['studio','benchmark'].includes(mode))fail('MODE_REQUIRED');
  const allowed=new Set(['--project','--design','--prompt','--local-model','--port',
-  '--endpoint','--out','--cases','--no-revisions']);
+  '--endpoint','--out','--cases','--no-revisions','--directed']);
  const values={};
  for(let i=1;i<argv.length;i++){
   const key=argv[i];
   if(!allowed.has(key)||values[key]!==undefined)fail('INVALID_OR_REPEATED_'+key);
-  if(key==='--no-revisions'){values[key]=true;continue;}
+  if(key==='--no-revisions'||key==='--directed'){
+   values[key]=true;continue;
+  }
   const val=argv[++i];
   if(!val||val.startsWith('--'))fail('MISSING_VALUE_'+key);
   values[key]=val;
@@ -49,6 +55,8 @@ export function parseB198HArgs(argv){
    fail('STUDIO_BENCHMARK_OPTION');
   if(values['--endpoint']&&!values['--local-model'])
    fail('ENDPOINT_WITHOUT_MODEL');
+  if(values['--directed']&&!values['--prompt'])
+   fail('DIRECTOR_REQUIRES_NEW_PROMPT');
   if(values['--prompt']&&values['--design'])
    fail('PROMPT_AND_EXISTING_DESIGN_MUTUALLY_EXCLUSIVE');
   if(values['--prompt']&&!values['--local-model'])
@@ -61,12 +69,13 @@ export function parseB198HArgs(argv){
   return {mode,projectDirectory:path.resolve(values['--project']),
    designFile:values['--design']?path.resolve(values['--design']):null,
    prompt:values['--prompt']??null,
+   directed:Boolean(values['--directed']),
    model:values['--local-model']??null,endpoint:values['--endpoint']??null,
    port};
  }
  if(!values['--local-model']||!values['--out'])
   fail('BENCHMARK_EXPLICIT_MODEL_AND_OUTPUT_REQUIRED');
- if(values['--project']||values['--design']||values['--prompt']||values['--port'])
+ if(values['--project']||values['--design']||values['--prompt']||values['--port']||values['--directed'])
   fail('BENCHMARK_STUDIO_OPTION');
  const creationCount=values['--cases']===undefined?12:Number(values['--cases']);
  if(!/^(?:[1-9]|1[0-2])$/.test(values['--cases']??'12'))
@@ -76,7 +85,7 @@ export function parseB198HArgs(argv){
   outDir:path.resolve(values['--out']),creationCount,
   includeRevisions:!values['--no-revisions']};
 }
-export async function executeB198H(options,{generator=null}={}){
+export async function executeB198H(options,{generator=null,planner=null}={}){
  if(options.help)return {help:GUIDE};
  const provider=generator??(options.model===null?null:
    createB198GLocalModelAdapter({
@@ -86,7 +95,7 @@ export async function executeB198H(options,{generator=null}={}){
  if(options.mode==='studio'){
   let initialDesign=options.designFile===null?null:
    JSON.parse(fs.readFileSync(options.designFile,'utf8'));
-  let initialSourceReport=null;
+  let initialSourceReport=null,architecturalProgram=null;
   if(options.prompt!==null){
    if(provider===null)fail('PROMPT_WITHOUT_REAL_GENERATOR');
    const project=options.projectDirectory;
@@ -94,11 +103,20 @@ export async function executeB198H(options,{generator=null}={}){
    // approved designs, pending drafts, or existing source history.
    if(fs.existsSync(project)&&fs.readdirSync(project).length!==0)
     fail('PROMPT_REQUIRES_NEW_EMPTY_PROJECT');
-   const created=await generateArchitectureWithFeedback({
-    prompt:options.prompt,generator:provider,maxRepairRounds:2
-   });
+   const created=options.directed?
+    await generateModelDirectedArchitecture({
+     prompt:options.prompt,generator:provider,
+     planner:planner??createB198ILocalPlanner({
+      model:options.model,
+      ...(options.endpoint?{endpoint:options.endpoint}:{})
+     })
+    }):
+    await generateArchitectureWithFeedback({
+     prompt:options.prompt,generator:provider,maxRepairRounds:2
+    });
    initialDesign=created.design;
    initialSourceReport=created.report;
+   architecturalProgram=created.plan??null;
   }
   const app=await startB198DLocalStudio({
     projectDirectory:options.projectDirectory,
@@ -108,9 +126,12 @@ export async function executeB198H(options,{generator=null}={}){
    fs.writeFileSync(path.join(options.projectDirectory,
     'B198H_INITIAL_MODEL_SOURCE_REVIEW.json'),
     JSON.stringify(initialSourceReport,null,2)+'\n',{flag:'wx'});
+   if(architecturalProgram!==null)fs.writeFileSync(
+    path.join(options.projectDirectory,'B198I_MODEL_ARCHITECTURAL_PROGRAM.json'),
+    JSON.stringify(architecturalProgram,null,2)+'\n',{flag:'wx'});
   }
   return {mode:'studio',app,url:app.url,
-   initialSourceReport,
+   initialSourceReport,architecturalProgram,
    modelConnected:provider!==null,
    providerClassification:generator!==null?'INJECTED_TEST_DOUBLE':
     provider===null?'NONE':'EXPLICIT_LOCAL_LOOPBACK',
@@ -140,6 +161,8 @@ if(process.argv[1]===fileURLToPath(import.meta.url)){
    console.log('MODEL_CONNECTION',result.providerClassification);
    if(result.initialSourceReport)console.log('INITIAL_SOURCE_REVIEW',
     result.initialSourceReport.status);
+   if(result.architecturalProgram)console.log('DIRECTED_PROGRAM',
+    result.architecturalProgram.id);
    console.log('Approvals affect B143 design history only, never Minecraft blocks.');
   }else{
    console.log('B198H_FROZEN_BENCHMARK_SOURCE_ONLY',JSON.stringify({
