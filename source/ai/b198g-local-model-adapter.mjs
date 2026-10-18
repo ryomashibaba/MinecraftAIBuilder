@@ -34,7 +34,7 @@ export function createB198GLocalModelAdapter({
  if(!m||Number(m[1])>65535||Number(m[1])<1)
   refuse('ONLY_EXPLICIT_127_0_0_1_CHAT_COMPLETIONS_ALLOWED');
  if(typeof fetcher!=='function')refuse('INVALID_FETCHER');
- if(!Number.isSafeInteger(timeoutMs)||timeoutMs<1000||timeoutMs>180000)
+ if(!Number.isSafeInteger(timeoutMs)||timeoutMs<1000||timeoutMs>900000)
   refuse('TIMEOUT_BOUNDS');
  return async function sourceGenerator({
   mode,prompt,previousDesign=null,feedback=[],attempt=1,maxAttempts=2

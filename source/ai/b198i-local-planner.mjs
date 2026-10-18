@@ -42,7 +42,7 @@ export function createB198ILocalPlanner({
  if(!match||Number(match[1])<1||Number(match[1])>65535)
   fail('STRICT_LOOPBACK_ENDPOINT_ONLY');
  if(typeof fetcher!=='function')fail('FETCHER_REQUIRED');
- if(!Number.isSafeInteger(timeoutMs)||timeoutMs<1000||timeoutMs>180000)
+ if(!Number.isSafeInteger(timeoutMs)||timeoutMs<1000||timeoutMs>900000)
   fail('TIMEOUT_RANGE');
  return async function localArchitecturePlanner({prompt}={}){
   if(typeof prompt!=='string'||prompt.trim().length<8||prompt.length>3500)

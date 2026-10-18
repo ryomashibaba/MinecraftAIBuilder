@@ -1,0 +1,78 @@
+name: B198P Local-Model Latency and Abort Control
+on:
+  push:
+    branches: [feature/b198p-measured-local-model-timeouts]
+  pull_request:
+    paths:
+      - 'scripts/b198p-model-timeout.test.mjs'
+      - 'scripts/b198k-local-comparison.mjs'
+      - 'source/ai/b198k-paired-study.mjs'
+      - 'source/ai/b198g-local-model-adapter.mjs'
+      - 'source/ai/b198i-local-planner.mjs'
+      - 'tools/B198M_RUN_LOCAL.ps1'
+      - '.github/workflows/b198p-model-latency.yml'
+permissions:
+  contents: read
+jobs:
+  explicit-timeout-and-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Verify 30–900 sec timeout flags and timing code syntax
+        run: |
+          node --check source/ai/b198k-paired-study.mjs
+          node --check scripts/b198k-local-comparison.mjs
+          node --check scripts/b198m-pilot-summary.mjs
+          node --check scripts/b198p-model-timeout.test.mjs
+      - name: B198P abort regression and all historical B198A–M source tests
+        run: |
+          node --test \
+            scripts/b198p-model-timeout.test.mjs \
+            scripts/b198m-local-transport.test.mjs \
+            scripts/b198a-engine.test.mjs \
+            scripts/b198a-cli.test.mjs \
+            scripts/b198b-quality.test.mjs \
+            scripts/b198c-critic.test.mjs \
+            scripts/b198d-session.test.mjs \
+            scripts/b198e-pilot.test.mjs \
+            scripts/b198f-evidence.test.mjs \
+            scripts/b198g-autonomous-quality.test.mjs \
+            scripts/b198g-local-adapter.test.mjs \
+            scripts/b198h-local-workflow.test.mjs \
+            scripts/b198i-design-director.test.mjs \
+            scripts/b198i-studio-director.test.mjs \
+            scripts/b198j-circulation.test.mjs \
+            scripts/b198k-paired-study.test.mjs \
+            scripts/b198l-step-chain.test.mjs
+  actual-windows-ps51-creation-only-pilot:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Real Windows PowerShell 5.1 GitHub source archive and first-creation pilot, mock provider only
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $server=Start-Process -FilePath node -ArgumentList @('scripts/b198m-fixture-server.mjs','--port','11783') -NoNewWindow -PassThru
+          try{
+            Start-Sleep -Seconds 3
+            $dest=Join-Path $env:RUNNER_TEMP 'B198P-WINDOWS-MOCK-EXACT-USER-OPERATION'
+            & powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./tools/B198M_RUN_LOCAL.ps1 -Mode Pilot -Model B198M_MOCK_NOT_REAL_LLM -Endpoint 'http://127.0.0.1:11783/v1/chat/completions' -OutputDirectory $dest -Cases 1 -TimeoutSeconds 360
+            if($LASTEXITCODE -ne 0){throw 'B198P_WINDOWS_LAUNCHER_HOLD'}
+            $zip=Join-Path $dest 'B198M_UPLOAD_THIS_RESULT.zip'
+            if(-not (Test-Path -LiteralPath $zip)){throw 'B198P_ZIP_MISSING'}
+            $report=Get-Content (Join-Path $dest 'B198M_UPLOAD_THIS_SUMMARY.json') -Raw | ConvertFrom-Json
+            if($report.plannedRevisionCases -ne 0){throw 'B198P_PILOT_REVISION_SHOULD_BE_OFF'}
+            if($report.independentlyVerifiedPairedSourceCases -ne 1){throw 'B198P_SOURCE_PAIR_NOT_VERIFIED'}
+            if($report.modelCallTiming.calls.Count -ne 3){throw 'B198P_REQUEST_DURATION_EVIDENCE_MISSING'}
+            if(-not $report.stopOnTimeoutApplied){throw 'B198P_NO_WASTE_STOP_NOT_APPLIED'}
+            if($report.safety.worldWrites -ne 0){throw 'B198P_WORLD_WRITES_NOT_ZERO'}
+            Write-Host 'B198P_WINDOWS_PS51_CREATION_ONLY_TIMED_MODEL_RUN_PASS MOCK_ONLY'
+          }finally{
+            if($server -and -not $server.HasExited){Stop-Process -Id $server.Id -Force}
+          }

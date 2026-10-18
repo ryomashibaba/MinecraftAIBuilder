@@ -7,11 +7,13 @@ param(
  [string]$SourceDirectory='',
  [string]$OutputDirectory='',
  [ValidateRange(1,12)][int]$Cases=1,
+ [ValidateRange(30,900)][int]$TimeoutSeconds=360,
+ [switch]$IncludePilotRevision,
  [switch]$NoRevisions
 )
 $ErrorActionPreference='Stop'
 $ProgressPreference='SilentlyContinue'
-$branch='feature/b198o-powershell51-zip-extraction'
+$branch='feature/b198p-measured-local-model-timeouts'
 $root=$null
 function Hold([string]$reason){throw "B198M_HOLD_$reason"}
 try{
@@ -89,8 +91,16 @@ try{
  $log=Join-Path $root 'B198M_RUN_LOG.txt'
  $cmd=@('scripts/b198k-local-comparison.mjs','--model',$Model,
   '--out',$run,'--endpoint',$Endpoint,'--cases',[string]$Cases,
-  '--directed-attempts','2','--directed-repairs','0')
- if($NoRevisions){$cmd+='--no-revisions'}
+  '--directed-attempts','2','--directed-repairs','0',
+  '--timeout-seconds',[string]$TimeoutSeconds)
+ # Make the first real-model probe SMALL: compare creation only by default.
+ # The full suite still includes the frozen dependent revisions.
+ if($NoRevisions -or ($Mode -eq 'Pilot' -and -not $IncludePilotRevision)){
+  $cmd+='--no-revisions'
+ }
+ if($Mode -eq 'Pilot'){$cmd+='--stop-on-timeout'}
+ Write-Host ("Local timeout per model request: {0} seconds." -f $TimeoutSeconds)
+ Write-Host 'B198P Pilot is one original Japanese creation task by default; revisions are opt-in.'
  Write-Host ('Starting localhost source-only A/B for {0} creation task(s).' -f $Cases)
  $old=Get-Location
  try{
@@ -122,7 +132,13 @@ try{
  }
  $uploadZip=Join-Path $root 'B198M_UPLOAD_THIS_RESULT.zip'
  Compress-Archive -Path (Join-Path $upload '*') -DestinationPath $uploadZip -CompressionLevel Optimal
- Write-Host 'B198M_TEST_FINISHED SOURCE_CAPTURED_HUMAN_QUALITY_NOT_REVIEWED' -ForegroundColor Green
+ $verified=Get-Content -LiteralPath $summary -Raw | ConvertFrom-Json
+ if($verified.independentlyVerifiedPairedSourceCases -eq 0){
+  Write-Host 'B198M_TEST_FINISHED HOLD_NO_COMPARABLE_SOURCE_PAIRS' -ForegroundColor Yellow
+  Write-Host 'Local model responses may have timed out or failed strict JSON / source checks.'
+ }else{
+  Write-Host 'B198M_TEST_FINISHED SOURCE_CAPTURED_HUMAN_QUALITY_NOT_REVIEWED' -ForegroundColor Green
+ }
  Write-Host "3D review: $run\index.html"
  Write-Host "Upload to ChatGPT: $uploadZip"
  Write-Host 'No paid API or Minecraft world writes.'
