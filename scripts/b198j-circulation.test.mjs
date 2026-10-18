@@ -160,3 +160,26 @@ test('separate vertical floors are explicitly noncertified instead of pretending
  assert.equal(result.evidenceForMultiplePublicPoints,true);
  assert.equal(result.actuallyTraversableInMinecraft,false);
 });
+
+
+test('multi-elevation floor anchors are never promoted to independently verified vertical access',async()=>{
+ const p=program();
+ p.anchors.push({id:'upper-floor',zoneId:'connector',
+  point:[5,8,5],expect:'SUPPORTED_FLOOR',
+  purpose:'二階にも上部閲覧床を設ける'});
+ const d=joined();
+ d.elements.push({id:'unconnected-second-level-floor',mode:'add',
+  shape:'box',material:'wood',origin:[3,8,3],size:[8,1,8]});
+ let calls=0;
+ const generated=await generateModelDirectedArchitecture({
+  prompt:'二つの展示室を低層でつなぎ、もう一階に上層の閲覧床を設ける。',
+  planner:async()=>p,generator:async()=>{calls++;return output(d);},
+  maxRepairRounds:0,maxSourceAttempts:3
+ });
+ assert.equal(calls,1);
+ assert.equal(generated.report.planProof.failedAnchors,0);
+ assert.equal(generated.report.circulationProof.allDeclaredSameElevationPairsConnected,true);
+ assert.equal(generated.report.circulationProof.differentElevationGroups,2);
+ assert.equal(generated.report.status,'HOLD_SOURCE_VERTICAL_CIRCULATION_UNVERIFIED');
+ assert.equal(generated.report.circulationProof.crossElevationTransfersCertified,false);
+});
