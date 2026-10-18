@@ -181,9 +181,11 @@ export function parseB198RArgs(args=[]){
  }
  check(!!opts['--model']&&!!opts['--out'],'MODEL_AND_OUTPUT_REQUIRED');
  const strict=(v,exp,why)=>{check(exp.test(v),why);return Number(v)};
+ const port=strict(opts['--port']??'11434',/^[0-9]{2,5}$/,'INVALID_LOCAL_PORT');
+ check(port>=1&&port<=65535,'INVALID_LOCAL_PORT');
  return {
   model:opts['--model'],outDir:path.resolve(opts['--out']),
-  port:strict(opts['--port']??'11434',/^[0-9]{2,5}$/,'INVALID_PORT'),
+  port,
   timeoutSeconds:strict(opts['--timeout-seconds']??'60',
    /^(?:1[5-9]|[2-9][0-9]|1[01][0-9]|120)$/,'INVALID_WAIT')};
 }
