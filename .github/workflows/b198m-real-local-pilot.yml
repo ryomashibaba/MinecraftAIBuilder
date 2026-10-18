@@ -1,0 +1,69 @@
+name: B198M Real-Local-Model Pilot Launcher and Source Provenance
+on:
+  push:
+    branches: [feature/b198m-one-run-real-local-model-pilot]
+  pull_request:
+    paths:
+      - 'scripts/b198m-*.mjs'
+      - 'tools/B198M_RUN_LOCAL.ps1'
+      - '.github/workflows/b198m-real-local-pilot.yml'
+permissions:
+  contents: read
+jobs:
+  source-transport-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: B198M source-only syntax and actual loopback HTTP mock transport
+        run: |
+          node --check scripts/b198m-pilot-summary.mjs
+          node --check scripts/b198m-local-transport.test.mjs
+          node --check scripts/b198m-fixture-server.mjs
+          node --test scripts/b198m-local-transport.test.mjs
+      - name: All inherited B198A-L source and review regressions
+        run: |
+          node --test \
+            scripts/b198a-engine.test.mjs \
+            scripts/b198a-cli.test.mjs \
+            scripts/b198b-quality.test.mjs \
+            scripts/b198c-critic.test.mjs \
+            scripts/b198d-session.test.mjs \
+            scripts/b198e-pilot.test.mjs \
+            scripts/b198f-evidence.test.mjs \
+            scripts/b198g-autonomous-quality.test.mjs \
+            scripts/b198g-local-adapter.test.mjs \
+            scripts/b198h-local-workflow.test.mjs \
+            scripts/b198i-design-director.test.mjs \
+            scripts/b198i-studio-director.test.mjs \
+            scripts/b198j-circulation.test.mjs \
+            scripts/b198k-paired-study.test.mjs \
+            scripts/b198l-step-chain.test.mjs
+  windows-actual-launcher-no-llm:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: B198M Windows real PowerShell command and ZIP using only a mock-local HTTP server
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $server = Start-Process -FilePath node -ArgumentList @('scripts/b198m-fixture-server.mjs','--port','11783') -NoNewWindow -PassThru
+          try {
+            Start-Sleep -Seconds 3
+            & ./tools/B198M_RUN_LOCAL.ps1 -Mode Pilot -SourceDirectory . -Model B198M_MOCK_NOT_REAL_LLM -Endpoint 'http://127.0.0.1:11783/v1/chat/completions' -OutputDirectory "$env:RUNNER_TEMP/B198M-WINDOWS-MOCK" -Cases 1 -NoRevisions
+            if($LASTEXITCODE -ne 0){throw 'B198M_WINDOWS_LAUNCHER_EXITED_HOLD'}
+            $base = "$env:RUNNER_TEMP/B198M-WINDOWS-MOCK"
+            if(-not (Test-Path "$base/B198M_UPLOAD_THIS_RESULT.zip")){throw 'B198M_RESULT_ZIP_MISSING'}
+            $summary=Get-Content "$base/B198M_UPLOAD_THIS_SUMMARY.json" -Raw | ConvertFrom-Json
+            if($summary.independentlyVerifiedPairedSourceCases -ne 1){throw 'B198M_SOURCE_PAIR_MISSING'}
+            if($summary.realModelArchitectureQualityCertified){throw 'B198M_FALSE_REAL_MODEL_QUALITY_CLAIM'}
+            if($summary.safety.worldWrites -ne 0){throw 'B198M_WORLD_WRITE_REGRESSION'}
+            Write-Host 'B198M_WINDOWS_TRANSPORT_AND_UPLOAD_ZIP_PASS TEST_DOUBLE_ONLY'
+          } finally {
+            if($server -and -not $server.HasExited){Stop-Process -Id $server.Id -Force}
+          }
