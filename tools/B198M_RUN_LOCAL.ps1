@@ -23,7 +23,7 @@ try{
  if($port -lt 1 -or $port -gt 65535){Hold 'INVALID_PORT'}
  if(-not (Get-Command node -ErrorAction SilentlyContinue)){Hold 'NODE_22_PLUS_REQUIRED'}
  $nodeVersion = [string](& node --version)
- if($LASTEXITCODE -ne 0 -or $nodeVersion -notmatch '^v([0-9]+)\\.'){
+ if($LASTEXITCODE -ne 0 -or $nodeVersion -notmatch '^v([0-9]+)\.'){
   Hold 'NODE_22_PLUS_REQUIRED'
  }
  $major=[int]$Matches[1]
