@@ -15,7 +15,7 @@ import {runB198HBenchmark}
 import {compileDesign,verifyCompiled}
  from '../source/ai/b143-building-dsl.mjs';
 
-export const SCHEMA='minecraftaibuilder-b198t-single-source-provenance-v1';
+export const SCHEMA='minecraftaibuilder-b198u-one-inference-recoverable-source-v1';
 const fail=s=>{throw Error('B198S_SINGLE_SOURCE_'+s)};
 const must=(x,y)=>{if(!x)fail(y)};
 const modelId=s=>typeof s==='string'&&/^[A-Za-z0-9._:/-]{2,140}$/.test(s);
@@ -59,8 +59,24 @@ export async function runB198SSingleSource({
  must(Number.isInteger(timeoutSeconds)&&timeoutSeconds>=60&&timeoutSeconds<=360,
   'TIMEOUT_SECONDS_RANGE');
  must(Number.isInteger(port)&&port>=1&&port<=65535,'PORT_RANGE');
+ const dir=path.resolve(outDir);
+ const evidenceRoot=path.dirname(dir);
+ const rawModelFile=path.join(evidenceRoot,'B198U_ORIGINAL_MODEL_RESPONSE.txt');
+ const repairedFile=path.join(evidenceRoot,'B198U_CORRECTED_CANDIDATE.txt');
+ const sourceTrace=path.join(evidenceRoot,'B198U_SOURCE_REPAIR_TRACE.json');
  const bridge=bridgeFactory({
-  numPredict:sourceTokens,numCtx:contextTokens
+  numPredict:sourceTokens,numCtx:contextTokens,
+  onModelResponse:({originalContent,correctedContent,metadataRepair,boundsRepair})=>{
+   // Preserve the returned original BEFORE strict compiler validation.
+   // Do not overwrite existing model evidence, even if tests are rerun.
+   fs.writeFileSync(rawModelFile,originalContent,{flag:'wx'});
+   fs.writeFileSync(repairedFile,correctedContent,{flag:'wx'});
+   fs.writeFileSync(sourceTrace,JSON.stringify({
+    schema:'minecraftaibuilder-b198u-saved-candidate-provenance-v1',
+    originalModelTextCaptured:true,notValidatedUntilB143Compilation:true,
+    metadataRepair,boundsRepair,sourceOnly:true,worldWrites:0
+   },null,2)+'\n',{flag:'wx'});
+  }
  });
  must(bridge&&typeof bridge.fetcher==='function'&&
   typeof bridge.telemetry==='function','NATIVE_BRIDGE_REQUIRED');
@@ -70,7 +86,6 @@ export async function runB198SSingleSource({
   model,endpoint:'http://127.0.0.1:'+port+'/v1/chat/completions',
   fetcher:bridge.fetcher,timeoutMs:timeoutSeconds*1000
  });
- const dir=path.resolve(outDir);
  const {report,native}=await runB198HBenchmark({
   provider:adapter,outDir:dir,modelId:model,
   providerOrigin:mock?'INJECTED_TEST_DOUBLE':'EXPLICIT_LOCAL_LOOPBACK',
@@ -93,6 +108,8 @@ export async function runB198SSingleSource({
  const modelCalls=bridge.telemetry();
  const metadataRepair=modelCalls.find(x=>x.metadataRepair)?.metadataRepair??null;
  const metadataRepairApplied=metadataRepair?.applied===true;
+ const boundsRepair=modelCalls.find(x=>x.boundsRepair)?.boundsRepair??null;
+ const boundsRepairApplied=boundsRepair?.applied===true;
  // Metadata may be shortened; real model geometry remains untouched,
  // and B143 recompile with independent SHA is still compulsory.
  if(metadataRepairApplied){
@@ -101,6 +118,10 @@ export async function runB198SSingleSource({
    'REPAIRED_METADATA_GEOMETRY_GUARD');
  }
  const status=independentlyCompiled&&report.successfullyCompiledCaseCount===1?
+  metadataRepairApplied&&boundsRepairApplied?
+   'SOURCE_COMPILED_AFTER_METADATA_AND_BOUNDS_REPAIR_HUMAN_REVIEW_REQUIRED':
+  boundsRepairApplied?
+   'SOURCE_COMPILED_AFTER_BOUNDS_ONLY_REPAIR_HUMAN_REVIEW_REQUIRED':
   metadataRepairApplied?
    'SOURCE_COMPILED_AFTER_METADATA_ONLY_REPAIR_HUMAN_REVIEW_REQUIRED':
    'SOURCE_COMPILED_HUMAN_ARCHITECTURE_REVIEW_REQUIRED':
@@ -131,6 +152,19 @@ export async function runB198SSingleSource({
    automaticQualityCertification:false
   },
   modelCalls,
+  savedModelSource:{
+   originalUnmodifiedResponseStored:fs.existsSync(rawModelFile),
+   candidateAfterSafeRepairStored:fs.existsSync(repairedFile),
+   repairTraceStored:fs.existsSync(sourceTrace),
+   replayRequiresHumanReviewAndStrictB143:true,
+   noAutomaticGeometryChanges:true,
+   originalModelResponseSha256:metadataRepair?.originalResponseSha256??null
+  },
+  originalModelBoundsOnlyRepair:{
+   applied:boundsRepairApplied,provenance:boundsRepair,
+   geometryElementsUnchanged:boundsRepair?.geometryEditsMade===0,
+   normalizedCandidateRequiresStrictB143:true
+  },
   modelWasNotReloadedInThisProcessUnverified:true,
   humanVisualReview:'NOT_REVIEWED',
   readiness:'NOT_PREPARED',safety:{
