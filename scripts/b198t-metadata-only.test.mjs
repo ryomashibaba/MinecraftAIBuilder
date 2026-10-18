@@ -44,6 +44,27 @@ function send(res,body){
  res.writeHead(200,{'Content-Type':'application/json'});
  res.end(JSON.stringify(body));
 }
+test('B143 metadata contract actually accepts descriptions 101 through 500 characters, never 501',()=>{
+ const d=base();
+ d.brief='日本語の説明。'.repeat(17);
+ assert(d.brief.length>100&&d.brief.length<=500);
+ assert.equal(readModelProposal(JSON.stringify(envelope(d))).design.brief,d.brief);
+ assert(verifyCompiled(d,compileDesign(d)));
+ for(const len of [101,250,500]){
+  const x={...d,brief:'A'.repeat(len)};
+  assert.equal(readModelProposal(JSON.stringify(envelope(x))).design.brief.length,len);
+ }
+ const invalid={...d,brief:'A'.repeat(501)};
+ assert.throws(()=>readModelProposal(JSON.stringify(envelope(invalid))),
+  /B143_TITLE_OR_BRIEF/);
+ const invalidTitle={...d,title:'A'.repeat(101)};
+ assert.throws(()=>readModelProposal(JSON.stringify(envelope(invalidTitle))),
+  /B143_TITLE_OR_BRIEF/);
+ const withTag={...d,brief:'valid text <minecraft command>'};
+ assert.throws(()=>readModelProposal(JSON.stringify(envelope(withTag))),
+  /B143_TITLE_OR_BRIEF/);
+});
+
 test('real B143 overlong title/brief: length-only source repair retains all voxels, coordinates, order and materials',()=>{
  const d=base();
  d.title='未来の沿岸公共図書館の特徴ある名前'.repeat(9);
