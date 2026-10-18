@@ -115,4 +115,7 @@ jobs:
           & $replayCmd -ReplaySourceFile (Join-Path $firstOut 'B198U_ORIGINAL_MODEL_RESPONSE.txt') -OutputDirectory (Join-Path $env:RUNNER_TEMP 'B198V-SHOULD-NOT-RUN')
           if($LASTEXITCODE -eq 0){throw 'B198V_CACHE_TAMPER_WAS_NOT_BLOCKED'}
           if(Test-Path (Join-Path $env:RUNNER_TEMP 'B198V-SHOULD-NOT-RUN')){throw 'B198V_TAMPER_EXECUTED_OFFLINE_RUN'}
+          # We deliberately executed a command expected to exit 1 for changed engine code.
+          # Reset PowerShell's native exit status after explicitly verifying the rejection.
+          $global:LASTEXITCODE=0
           Write-Host 'B198V_ONE_CLICK_CACHED_SOURCE_THEN_ZERO_OLLAMA_NO_DOWNLOAD_REPLAY_PASS MOCK_ONLY'
