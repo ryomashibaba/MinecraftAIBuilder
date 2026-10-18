@@ -9,6 +9,8 @@ import {runB198HBenchmark}
  from '../source/ai/b198h-model-benchmark.mjs';
 import {compileDesign}
  from '../source/ai/b143-building-dsl.mjs';
+import {createB198GLocalModelAdapter}
+ from '../source/ai/b198g-local-model-adapter.mjs';
 import {fixtureAmphitheater,candidate}
  from './b198a-fixtures.mjs';
 
@@ -233,4 +235,28 @@ test('one Japanese instruction creates initial exact source and opens live draft
     .approvedHeadSha256,status.approvedHeadSha256);
   }finally{await produced.app.close();}
  }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
+
+
+test('real local adapter forbids automatic HTTP redirects to remote locations',async()=>{
+ let count=0;
+ const mock=createB198GLocalModelAdapter({
+  model:'local-stub',
+  fetcher:async(url,options)=>{
+   count++;
+   assert.equal(url,'http://127.0.0.1:11434/v1/chat/completions');
+   assert.equal(options.redirect,'error');
+   return {ok:true,json:async()=>({
+    choices:[{finish_reason:'stop',message:{
+     content:JSON.stringify(candidate(fixtureAmphitheater()))
+    }}]
+   })};
+  }
+ });
+ const produced=await mock({
+  mode:'creation',prompt:'未来型の公共施設をここで設計して',
+  previousDesign:null,feedback:[],attempt:1,maxAttempts:1
+ });
+ assert.equal(count,1);
+ assert.equal(produced.design.id,'crescent-amphitheater');
 });
