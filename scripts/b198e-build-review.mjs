@@ -8,6 +8,7 @@ import {getB198EChatAuthoredPilot} from '../source/ai/b198e-chat-authored-pilot.
 import {inspectB198EChatPilot} from '../source/ai/b198e-source-evidence.mjs';
 import {compileB143Gallery,renderB143Html,verifyB143Payload}
  from './build-b143-site.mjs';
+import {makeHumanRubricUI} from './b198e-human-rating-ui.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const fail=s=>{throw Error('B198E_'+s)};
 export function buildB198EPreview({dir=path.join(root,'b198e-evidence')}={}){
@@ -30,6 +31,7 @@ export function buildB198EPreview({dir=path.join(root,'b198e-evidence')}={}){
  if(!verifyB143Payload(gallery)||gallery.scenes.length!==8)
   fail('SOURCE_ACCURATE_GALLERY_FAILED');
  const template=fs.readFileSync(path.join(root,'source/ai/b143-viewer-template.html'),'utf8');
+ const humanUI=makeHumanRubricUI(proof);
  const warnings='<section id="b198e-source-provenance" class="info warn">'+
   '<strong>B198E GPT-6 Chat著作の実ソース建築</strong>'+
   '<p>このChatで日本語課題を読み、個別に設計した4つの新規建築と4件の修正案です。'+
@@ -65,7 +67,8 @@ export function buildB198EPreview({dir=path.join(root,'b198e-evidence')}={}){
  'let current="c01";',
  'function pick(slot){const i=paired.indexOf(current)*2+slot;index=i;select.value=String(i);setScene();drawSoon();sync();}',
  'function sync(){current=paired[Math.floor(Number(select.value)/2)];',
- 'document.getElementById("b198e-current-criteria").textContent=caseCriteria[current].join("\\n");}',
+ 'document.getElementById("b198e-current-criteria").textContent=caseCriteria[current].join("\\n");',
+ 'document.dispatchEvent(new Event("b198e-sample-changed"));}',
  'document.querySelectorAll("[data-b198e]").forEach(b=>b.addEventListener("click",()=>{current=b.dataset.b198e;pick(0);}));',
  'document.getElementById("b198e-select-original").addEventListener("click",()=>pick(0));',
  'document.getElementById("b198e-select-revised").addEventListener("click",()=>pick(1));',
@@ -75,8 +78,8 @@ export function buildB198EPreview({dir=path.join(root,'b198e-evidence')}={}){
  ].join('\n');
  const html=renderB143Html(gallery,template)
   .replace('<h2>ChatGPTが設計した新規建築</h2>',
-   warnings+choices+'<h2>元のB143コンパイラで検証した3D設計</h2>')
-  .replace('</body>',browserJs+'</body>');
+   warnings+choices+humanUI.panel+'<h2>元のB143コンパイラで検証した3D設計</h2>')
+  .replace('</body>',browserJs+humanUI.script+'</body>');
  fs.mkdirSync(dir,{recursive:true});
  const write=(name,value)=>fs.writeFileSync(path.join(dir,name),
   typeof value==='string'?value:JSON.stringify(value,null,2)+'\n',
