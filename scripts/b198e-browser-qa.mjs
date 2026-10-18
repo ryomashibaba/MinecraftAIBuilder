@@ -27,6 +27,9 @@ try{
    mode+'_FALSE_CONFIDENCE_WARNING_MISSING');
   check((await page.locator('#b198e-source-provenance').innerText()).includes('APIへの'),
    mode+'_PRODUCTION_LLM_UNVERIFIED_WARNING');
+  const ratingButton=page.locator('#b198e-export-score');
+  await ratingButton.waitFor({state:'visible'});
+  check(await ratingButton.isDisabled(),mode+'_AUTOMATIC_HUMAN_SCORE_NOT_BLOCKED');
   const cases=['c01','c03','c05','c08'];
   const pixels=async()=>page.evaluate(()=>{
    const canvas=document.getElementById('view');
@@ -69,6 +72,30 @@ try{
     actualVisibleSurfaceAfter:surfaceAfter,sourceImageDifferent:before!==after,
     actualHumanAestheticRatingProvided:false,worldWrites:0});
   }
+  // Automated form QA does NOT constitute a real human review.
+  // Fill synthetic scores in the browser only to verify input gating and
+  // downloaded JSON provenance. The output is NEVER committed as ratings.
+  const scores=page.locator('#b198e-review-fields select');
+  const evidence=page.locator('#b198e-review-fields textarea');
+  check(await scores.count()>=3,mode+'_HUMAN_REVIEW_RUBRIC_FIELDS_MISSING');
+  for(let i=0;i<await scores.count();i++){
+   await scores.nth(i).selectOption('2');
+   await evidence.nth(i).fill('自動入力テストのための根拠テキストであり、人間による品質判定ではありません。');
+  }
+  check(!(await ratingButton.isDisabled()),mode+'_VALIDATED_DOWNLOAD_INERT');
+  const capture=page.waitForEvent('download',{timeout:120000});
+  await ratingButton.click();
+  const downloaded=await capture;
+  check(downloaded.suggestedFilename().includes('HUMAN_RUBRIC'),
+   mode+'_SCORE_FILE_EXPORT_NOT_JSON');
+  const saved=path.join(dir,'B198E_'+mode+'_SYNTHETIC_FORM_QA.json');
+  await downloaded.saveAs(saved);
+  const fake=JSON.parse(fs.readFileSync(saved,'utf8'));
+  check(fake.modelAutomaticRating===false&&
+   fake.humanIdentityIndependentlyVerified===false&&
+   fake.actualMinecraftWalkingCertified===false,
+   mode+'_FORM_FALSIFIES_HUMAN_SCORING');
+  fs.rmSync(saved,{force:true}); // no synthetic score artifact to mislead readers
   check(errs.length===0,mode+'_REAL_PAGE_JS_ERRORS_'+errs.join(';'));
   await ctx.close();
  }
