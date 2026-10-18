@@ -64,24 +64,24 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference='Stop'
-          $kitRoot=Join-Path $env:RUNNER_TEMP 'B198X-WORKBENCH-V3'
+          $kitRoot=Join-Path $env:RUNNER_TEMP 'B198Y-WORKBENCH-V4'
           & powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./tools/B198V_INSTALL_OFFLINE.ps1 -InstallRoot $kitRoot -Model 'B198S_FIXTURE_NOT_REAL_LLM' -Endpoint 'http://127.0.0.1:11785/v1/chat/completions'
           if($LASTEXITCODE -ne 0){throw 'B198X_WIN_PS51_INSTALL_FAILED'}
-          $kit=Join-Path $kitRoot 'offline-workbench-v3'
-          foreach($file in @('B198X_WORKBENCH_INFO.json','REPLAY_LATEST_OFFLINE.cmd','RUN_ONE_REAL_MODEL_ONCE.cmd','PREPARE_QUALITY_REVISION.cmd','engine/tools/B198X_PREPARE_QUALITY_REVISION.ps1','engine/scripts/b198x-offline-review-to-revision.mjs')){
+          $kit=Join-Path $kitRoot 'offline-workbench-v4'
+          foreach($file in @('B198Y_WORKBENCH_INFO.json','REPLAY_LATEST_OFFLINE.cmd','RUN_ONE_REAL_MODEL_ONCE.cmd','PREPARE_QUALITY_REVISION.cmd','engine/tools/B198X_PREPARE_QUALITY_REVISION.ps1','engine/scripts/b198x-offline-review-to-revision.mjs')){
             if(-not (Test-Path -LiteralPath (Join-Path $kit $file))){throw ('B198X_MISSING_INSTALL_FILE_'+$file)}
           }
-          $info=Get-Content (Join-Path $kit 'B198X_WORKBENCH_INFO.json') -Raw | ConvertFrom-Json
+          $info=Get-Content (Join-Path $kit 'B198Y_WORKBENCH_INFO.json') -Raw | ConvertFrom-Json
           if($info.installModelRequests -ne 0 -or $info.revisionPlanningModelRequests -ne 0 -or $info.worldWrites -ne 0){throw 'B198X_UNAUTHORIZED_INSTALL_ACTION'}
           & node (Join-Path $kit 'engine/scripts/b198v-cache-integrity.mjs') --verify (Join-Path $kit 'engine')
           if($LASTEXITCODE -ne 0){throw 'B198X_ENGINE_NOT_SEALED'}
-          Write-Host 'B198X_WINDOWS_PS51_INSTALLED_CACHED_V3_NO_OLLAMA_PASS'
+          Write-Host 'B198X_WINDOWS_PS51_INSTALLED_CACHED_V4_NO_OLLAMA_PASS'
       - name: Stop mock model before rating-to-revision; zero extra calls, SHA, user-ready ZIP
         shell: pwsh
         run: |
           $ErrorActionPreference='Stop'
           $env:B198V_NONINTERACTIVE='1'
-          $kit=Join-Path $env:RUNNER_TEMP 'B198X-WORKBENCH-V3/offline-workbench-v3'
+          $kit=Join-Path $env:RUNNER_TEMP 'B198Y-WORKBENCH-V4/offline-workbench-v4'
           $docs=[Environment]::GetFolderPath('MyDocuments')
           if(-not $docs){$docs=$env:USERPROFILE}
           $trial=Join-Path $docs 'MinecraftAIBuilder-B198M/pilot-B198X-CI'
@@ -146,3 +146,17 @@ jobs:
           if($accepted.status -ne 'REVIEWED_REVISION_BRIEF_READY_FOR_SEPARATE_AUTHORIZATION'){throw 'B198X_MODEL_WAS_AUTOMATICALLY_AUTHORIZED'}
           if($accepted.realModelRequestsMade -ne 0){throw 'B198X_MODEL_REQUEST_NOT_ZERO'}
           Write-Host 'B198X_WINDOWS_PS51_ONE_MOCK_MODEL_SOURCE_THEN_ZERO_INFERENCE_REVIEW_BRIEFS_PASS MOCK_ONLY'
+          # Deliberate pre-inference HOLD: a failed source trial must still
+          # supply a useful ZIP without calling Ollama or touching a world.
+          $bad=Join-Path $env:RUNNER_TEMP 'B198Y-DELIBERATE-HOLD'
+          & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $kit 'engine/tools/B198M_RUN_LOCAL.ps1') -Mode SourceProbe -SourceDirectory (Join-Path $kit 'engine') -Model 'B198S_FIXTURE_NOT_REAL_LLM' -Endpoint 'http://127.0.0.1:11785/v1/chat/completions' -OutputDirectory $bad -SourceOutputTokens 4096 -SourceContextTokens 4096
+          if($LASTEXITCODE -eq 0){throw 'B198Y_INVALID_OUTPUT_CONTEXT_NOT_REJECTED'}
+          $recoverZip=Join-Path $bad 'B198S_UPLOAD_THIS_RESULT.zip'
+          if(-not (Test-Path -LiteralPath $recoverZip)){throw 'B198Y_HOLD_RECOVERY_ZIP_MISSING'}
+          $readBack=Join-Path $env:RUNNER_TEMP 'B198Y-HOLD-READBACK'
+          Expand-Archive -LiteralPath $recoverZip -DestinationPath $readBack -ErrorAction Stop
+          $status=Get-Content (Join-Path $readBack 'B198Y_RECOVERY_STATUS.json') -Raw | ConvertFrom-Json
+          if($status.status -ne 'HOLD_SOURCEPROBE_NOT_CERTIFIED' -or $status.originalModelResponseStored -or $status.modelCallsMade -ne 'UNKNOWN' -or $status.worldWrites -ne 0 -or $status.gates.Count -ne 9){throw 'B198Y_RECOVERY_FALSE_PASS_OR_UNSAFE'}
+          if(-not (Test-Path (Join-Path $readBack 'B198M_LAST_STATUS.txt'))){throw 'B198Y_RECOVERY_DIAGNOSTIC_MISSING'}
+          $global:LASTEXITCODE=0
+          Write-Host 'B198Y_FAIL_CLOSED_LOCAL_SOURCE_RECOVERY_ZIP_WITHOUT_MODEL_PASS'

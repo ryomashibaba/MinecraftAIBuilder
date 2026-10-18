@@ -1,4 +1,4 @@
-# B198X v3 quality revision kit alongside v1/v2; never overwrites earlier kit or calls an LLM during install.
+# B198Y v4 first-source recovery kit alongside v1/v2/v3; never overwrites earlier kits or invokes a model during install.
 [CmdletBinding()]
 param(
  [string]$InstallRoot='',
@@ -8,7 +8,7 @@ param(
 )
 $ErrorActionPreference='Stop'
 $ProgressPreference='SilentlyContinue'
-$branch='feature/b198x-reviewed-quality-revision-brief'
+$branch='feature/b198y-first-real-source-recovery'
 $temporary=$null
 $stage=$null
 function Hold([string]$reason){throw "B198V_INSTALL_HOLD_$reason"}
@@ -45,7 +45,7 @@ function Shortcut([string]$file,[string]$mode,[string]$modelId,[string]$endpoint
  [IO.File]::WriteAllText($file,(($lines -join [Environment]::NewLine)+[Environment]::NewLine),[Text.Encoding]::ASCII)
 }
 try{
- Write-Host 'B198X OFFLINE QUALITY REVISION WORKBENCH INSTALL (NO LLM)' -ForegroundColor Cyan
+ Write-Host 'B198Y SOURCE RECOVERY AND QUALITY WORKBENCH INSTALL (NO LLM)' -ForegroundColor Cyan
  if(-not (Get-Command node -ErrorAction SilentlyContinue)){Hold 'NODE_22_PLUS_REQUIRED'}
  $version=[string](& node --version)
  if($LASTEXITCODE -ne 0 -or $version -notmatch '^v([0-9]+)\.'){Hold 'NODE_22_PLUS_REQUIRED'}
@@ -64,11 +64,11 @@ try{
  }
  $InstallRoot=[IO.Path]::GetFullPath($InstallRoot)
  New-Item -ItemType Directory -Path $InstallRoot -Force | Out-Null
- $kit=Join-Path $InstallRoot 'offline-workbench-v3'
+ $kit=Join-Path $InstallRoot 'offline-workbench-v4'
  $engine=Join-Path $kit 'engine'
  if(Test-Path -LiteralPath $kit){
   VerifyCache $engine
-  Write-Host 'B198X_EXISTING_REVISION_WORKBENCH_VERIFIED (NO DOWNLOAD, NO OVERWRITE)' -ForegroundColor Green
+  Write-Host 'B198Y_EXISTING_RECOVERY_WORKBENCH_VERIFIED (NO DOWNLOAD, NO OVERWRITE)' -ForegroundColor Green
   Write-Host ('Offline shortcut: {0}' -f (Join-Path $kit 'REPLAY_LATEST_OFFLINE.cmd'))
   Write-Host ('Quality revision shortcut: {0}' -f (Join-Path $kit 'PREPARE_QUALITY_REVISION.cmd'))
   if(Test-Path -LiteralPath (Join-Path $kit 'RUN_ONE_REAL_MODEL_ONCE.cmd')){
@@ -119,7 +119,7 @@ try{
   Shortcut (Join-Path $stage 'RUN_ONE_REAL_MODEL_ONCE.cmd') 'SourceProbe' $Model $Endpoint
  }
  $info=[ordered]@{
-  schema='minecraftaibuilder-b198x-review-to-revision-offline-v1'
+  schema='minecraftaibuilder-b198y-first-source-recovery-offline-v1'
   baseBranch=$branch
   model=if($Model){$Model}else{$null}
   sourceEngine='engine'
@@ -133,13 +133,13 @@ try{
   worldWrites=0
   readiness='NOT_PREPARED'
  }
- [IO.File]::WriteAllText((Join-Path $stage 'B198X_WORKBENCH_INFO.json'),
+ [IO.File]::WriteAllText((Join-Path $stage 'B198Y_WORKBENCH_INFO.json'),
   ($info|ConvertTo-Json -Depth 6),[Text.Encoding]::UTF8)
  if(Test-Path -LiteralPath $kit){Hold 'CONCURRENT_INSTALL_REFUSE_OVERWRITE'}
  Move-Item -LiteralPath $stage -Destination $kit
  $stage=$null
  VerifyCache $engine
- Write-Host 'B198X_INSTALL_FINISHED REVISION_WORKBENCH_READY_NO_MODEL_CALLED' -ForegroundColor Green
+ Write-Host 'B198Y_INSTALL_FINISHED REVISION_WORKBENCH_READY_NO_MODEL_CALLED' -ForegroundColor Green
  Write-Host ('OFFLINE REPLAY: {0}' -f (Join-Path $kit 'REPLAY_LATEST_OFFLINE.cmd'))
  Write-Host ('QUALITY REVISION (drag saved human rating JSON onto this): {0}' -f (Join-Path $kit 'PREPARE_QUALITY_REVISION.cmd'))
  if($Model){
@@ -147,7 +147,7 @@ try{
  }
  Write-Host 'No model inference, paid API, or Minecraft world writes during installation.'
 }catch{
- Write-Host ('B198X_INSTALL_FINISHED HOLD: {0}' -f $_.Exception.Message) -ForegroundColor Yellow
+ Write-Host ('B198Y_INSTALL_FINISHED HOLD: {0}' -f $_.Exception.Message) -ForegroundColor Yellow
  exit 1
 }finally{
  if($stage -and (Test-Path -LiteralPath $stage)){

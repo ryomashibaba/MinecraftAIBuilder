@@ -68,11 +68,11 @@ jobs:
           $root=Join-Path $env:RUNNER_TEMP 'B198W-REVIEW-WORKBENCH'
           & powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./tools/B198V_INSTALL_OFFLINE.ps1 -InstallRoot $root -Model 'B198S_FIXTURE_NOT_REAL_LLM' -Endpoint 'http://127.0.0.1:11785/v1/chat/completions'
           if($LASTEXITCODE -ne 0){throw 'B198W_WINPS51_INSTALLED_HOLD'}
-          $kit=Join-Path $root 'offline-workbench-v2'
-          foreach($name in @('B198W_WORKBENCH_INFO.json','REPLAY_LATEST_OFFLINE.cmd','RUN_ONE_REAL_MODEL_ONCE.cmd','engine/scripts/b198w-quality-review.mjs','engine/source/ai/b198w-review-board-template.html')){
+          $kit=Join-Path $root 'offline-workbench-v4'
+          foreach($name in @('B198Y_WORKBENCH_INFO.json','REPLAY_LATEST_OFFLINE.cmd','RUN_ONE_REAL_MODEL_ONCE.cmd','engine/scripts/b198w-quality-review.mjs','engine/source/ai/b198w-review-board-template.html')){
             if(-not (Test-Path (Join-Path $kit $name))){throw ('B198W_REQUIRED_REVIEW_FILE_MISSING_'+$name)}
           }
-          $info=Get-Content (Join-Path $kit 'B198W_WORKBENCH_INFO.json') -Raw | ConvertFrom-Json
+          $info=Get-Content (Join-Path $kit 'B198Y_WORKBENCH_INFO.json') -Raw | ConvertFrom-Json
           if($info.installModelRequests -ne 0 -or $info.worldWrites -ne 0){throw 'B198W_INSTALL_UNAUTHORIZED_ACTION'}
           & node (Join-Path $kit 'engine/scripts/b198v-cache-integrity.mjs') --verify (Join-Path $kit 'engine')
           if($LASTEXITCODE -ne 0){throw 'B198W_SEALED_REVIEW_ENGINE_HOLD'}
@@ -83,7 +83,7 @@ jobs:
           $ErrorActionPreference='Stop'
           $env:B198V_NONINTERACTIVE='1'
           $root=Join-Path $env:RUNNER_TEMP 'B198W-REVIEW-WORKBENCH'
-          $kit=Join-Path $root 'offline-workbench-v2'
+          $kit=Join-Path $root 'offline-workbench-v4'
           $modelCmd=Join-Path $kit 'RUN_ONE_REAL_MODEL_ONCE.cmd'
           $replayCmd=Join-Path $kit 'REPLAY_LATEST_OFFLINE.cmd'
           $trial=Join-Path $env:RUNNER_TEMP 'B198W-TEST-DOUBLE-SOURCE'

@@ -4,7 +4,7 @@ import http from 'node:http';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {createB198SNativeBridge}
+import {createB198SNativeBridge,classifyOllamaServerError}
  from '../source/ai/b198s-native-ollama-source.mjs';
 import {createB198GLocalModelAdapter}
  from '../source/ai/b198g-local-model-adapter.mjs';
@@ -58,6 +58,55 @@ function openaiInput(){
    messages:[{role:'system',content:'Build original valid B143 source only.'},
     {role:'user',content:'海沿いの未来型図書館と大きな吹き抜けを設計して'}]})};
 }
+test('B198Y classifies Ollama failures without disclosing arbitrary error text',()=>{
+ assert.equal(classifyOllamaServerError('model runner has unexpectedly stopped, exit status 2'),'MODEL_RUNNER_STOPPED');
+ assert.equal(classifyOllamaServerError('CUDA error: out of memory at private path'),'RESOURCE_ALLOCATION');
+ assert.equal(classifyOllamaServerError('failed to allocate compute buffers'),'RESOURCE_ALLOCATION');
+ assert.equal(classifyOllamaServerError('model \\"bad\\" not found'),'MODEL_NOT_FOUND');
+ assert.equal(classifyOllamaServerError('invalid option json'),'REQUEST_OPTION_UNSUPPORTED');
+ assert.equal(classifyOllamaServerError('private arbitrary text'),'UNCLASSIFIED_SERVER_FAILURE');
+});
+test('B198Y HTTP 500 stores only sanitized diagnostic class and fingerprint, not private server error text',async()=>{
+ const secret='C:/Users/PrivateAccount/hidden/path';
+ const message='model runner process has terminated: exit status 2 '+secret;
+ let calls=0;
+ const srv=await local(async(req,res)=>{
+  calls++;await json(req);
+  res.writeHead(500,{'Content-Type':'application/json'});
+  res.end(JSON.stringify({error:message}));
+ });
+ try{
+  const bridge=createB198SNativeBridge();
+  const response=await bridge.fetcher(srv.endpoint,openaiInput());
+  assert.equal(calls,1);
+  assert.equal(response.ok,false);
+  assert.equal(response.status,500);
+  assert.deepEqual(await response.json(),{});
+  const [t]=bridge.telemetry();
+  assert.equal(t.outcome,'SERVER_HTTP_HOLD');
+  assert.equal(t.status,500);
+  assert.equal(t.serverErrorClass,'MODEL_RUNNER_STOPPED');
+  assert.match(t.serverErrorFingerprintSha256,/^[a-f0-9]{64}$/);
+  assert.equal(t.serverErrorTextDisclosed,false);
+  assert(!JSON.stringify(t).includes(secret));
+  assert(!JSON.stringify(t).includes(message));
+ }finally{await srv.close()}
+});
+test('B198Y keeps HTTP status for non-JSON error bodies, rather than reporting invalid JSON',async()=>{
+ const srv=await local(async(req,res)=>{
+  await json(req);
+  res.writeHead(500,{'Content-Type':'text/plain'});
+  res.end('CUDA error: out of memory at secret machine location');
+ });
+ try{
+  const b=createB198SNativeBridge();
+  const response=await b.fetcher(srv.endpoint,openaiInput());
+  assert.equal(response.status,500);
+  assert.equal(response.ok,false);
+  assert.equal(b.telemetry()[0].serverErrorClass,'RESOURCE_ALLOCATION');
+  assert(!JSON.stringify(b.telemetry()).includes('secret machine location'));
+ }finally{await srv.close()}
+});
 test('native transport actually sends thinking OFF, strict JSON, compact model budgets, and preserves source-only OpenAI bridge',async()=>{
  let seen=null,visits=0;
  const srv=await local(async(req,res)=>{
