@@ -1,0 +1,81 @@
+name: B198R Bounded Local Ollama Speed and GPU Residency Probe
+on:
+  push:
+    branches: [feature/b198r-bounded-local-inference-probe]
+  pull_request:
+    paths:
+      - 'scripts/b198r-local-diagnostic.mjs'
+      - 'scripts/b198r-local-diagnostic.test.mjs'
+      - 'scripts/b198r-ollama-fixture-server.mjs'
+      - 'tools/B198M_RUN_LOCAL.ps1'
+      - '.github/workflows/b198r-speed-probe.yml'
+permissions:
+  contents: read
+jobs:
+  ollama-native-diagnostic-and-inherited-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: B198R syntax and genuine loopback protocol tests
+        run: |
+          node --check scripts/b198r-local-diagnostic.mjs
+          node --check scripts/b198r-local-diagnostic.test.mjs
+          node --check scripts/b198r-ollama-fixture-server.mjs
+          node --test scripts/b198r-local-diagnostic.test.mjs
+      - name: All inherited B198A–Q source-safety regressions
+        run: |
+          node --test \
+            scripts/b198q-long-http.test.mjs \
+            scripts/b198p-model-timeout.test.mjs \
+            scripts/b198m-local-transport.test.mjs \
+            scripts/b198a-engine.test.mjs \
+            scripts/b198a-cli.test.mjs \
+            scripts/b198b-quality.test.mjs \
+            scripts/b198c-critic.test.mjs \
+            scripts/b198d-session.test.mjs \
+            scripts/b198e-pilot.test.mjs \
+            scripts/b198f-evidence.test.mjs \
+            scripts/b198g-autonomous-quality.test.mjs \
+            scripts/b198g-local-adapter.test.mjs \
+            scripts/b198h-local-workflow.test.mjs \
+            scripts/b198i-design-director.test.mjs \
+            scripts/b198i-studio-director.test.mjs \
+            scripts/b198j-circulation.test.mjs \
+            scripts/b198k-paired-study.test.mjs \
+            scripts/b198l-step-chain.test.mjs
+  real-windows-powershell51-one-command-diagnose:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Windows PowerShell 5.1 download source then Diagnose WITHOUT full architecture
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $server=Start-Process -FilePath node -ArgumentList @('scripts/b198r-ollama-fixture-server.mjs','--port','11784') -NoNewWindow -PassThru
+          try{
+            Start-Sleep -Seconds 3
+            $destination=Join-Path $env:RUNNER_TEMP 'B198R-WINDOWS-PS51-SHORT-DIAGNOSIS'
+            # Deliberately do not supply -SourceDirectory: exercise real GitHub ZIP and Expand-Archive.
+            & powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./tools/B198M_RUN_LOCAL.ps1 -Mode Diagnose -Model B198R_MOCK_NOT_REAL_LLM -Endpoint 'http://127.0.0.1:11784/v1/chat/completions' -OutputDirectory $destination -ProbeTimeoutSeconds 60
+            if($LASTEXITCODE -ne 0){throw 'B198R_DIAGNOSTIC_WINDOWS_HOLD'}
+            $zip=Join-Path $destination 'B198R_UPLOAD_THIS_DIAGNOSTIC.zip'
+            $file=Join-Path $destination 'B198R_UPLOAD_THIS_DIAGNOSTIC.json'
+            if(-not (Test-Path -LiteralPath $zip)){throw 'B198R_DIAGNOSTIC_ZIP_MISSING'}
+            if(-not (Test-Path -LiteralPath $file)){throw 'B198R_DIAGNOSTIC_JSON_MISSING'}
+            $report=Get-Content -LiteralPath $file -Raw | ConvertFrom-Json
+            if($report.status -ne 'LOCAL_SMALL_JSON_PROBE_PASS'){throw 'B198R_MOCK_DIAGNOSTIC_NOT_PASS'}
+            if($report.telemetry.generatedTokensPerSecond -ne 26.67){throw 'B198R_MODEL_SPEED_TELEMETRY_NOT_RECORDED'}
+            if($report.modelResidency.vramBytes -ne 14000000000){throw 'B198R_MODEL_VRAM_NOT_MEASURED'}
+            if(-not $report.didNotAttemptFullBuilding){throw 'B198R_DID_RUN_FULL_ARCHITECTURE_UNEXPECTED'}
+            if($report.safety.worldWrites -ne 0){throw 'B198R_UNAUTHORIZED_WORLD_WRITE'}
+            if(Test-Path -LiteralPath (Join-Path $destination 'source-study')){throw 'B198R_UNNECESSARY_FULL_ARCHITECTURE_RUN'}
+            Write-Host 'B198R_NATIVE_OLLAMA_DIAGNOSTIC_PS51_GITHUB_DOWNLOAD_ZIP_PASS MOCK_ONLY'
+          }finally{
+            if($server -and -not $server.HasExited){Stop-Process -Id $server.Id -Force}
+          }
