@@ -286,8 +286,63 @@ try{
  Write-Host "B198M_TEST_FINISHED HOLD: $reason" -ForegroundColor Yellow
  if($root){
   $diag=Join-Path $root 'B198M_LAST_STATUS.txt'
-  [IO.File]::WriteAllText($diag,$reason+[Environment]::NewLine)
-  Write-Host "Diagnostic: $diag"
+  try{
+   [IO.File]::WriteAllText($diag,$reason+[Environment]::NewLine)
+   Write-Host "Diagnostic: $diag"
+   # A real Qwen reply may already be saved even when the source runner,
+   # compiler or ZIP packaging fails unexpectedly. Never lose that reply.
+   # This recovery path makes NO model request and never calls Minecraft.
+   if($Mode -eq 'SourceProbe'){
+    $upload=Join-Path $root 'B198S_UPLOAD_THIS_RESULT'
+    if(-not (Test-Path -LiteralPath $upload)){
+     New-Item -ItemType Directory -Path $upload | Out-Null
+    }
+    foreach($f in @('B198M_LAST_STATUS.txt','B198S_UPLOAD_THIS_SUMMARY.json',
+      'B198U_ORIGINAL_MODEL_RESPONSE.txt','B198U_CORRECTED_CANDIDATE.txt',
+      'B198U_SOURCE_REPAIR_TRACE.json')){
+     $from=Join-Path $root $f
+     $to=Join-Path $upload $f
+     if((Test-Path -LiteralPath $from -PathType Leaf) -and
+        -not (Test-Path -LiteralPath $to)){
+      Copy-Item -LiteralPath $from -Destination $to
+     }
+    }
+    $raw=Join-Path $root 'B198U_ORIGINAL_MODEL_RESPONSE.txt'
+    $recovery=[ordered]@{
+     schema='minecraftaibuilder-b198y-sourceprobe-failure-recovery-v1'
+     status='HOLD_SOURCEPROBE_NOT_CERTIFIED'
+     originalModelResponseStored=(Test-Path -LiteralPath $raw -PathType Leaf)
+     modelCallsMade='UNKNOWN'
+     sourceB143Compiled='UNVERIFIED'
+     humanQualityApproved=$false
+     readiness='NOT_PREPARED'
+     worldContacts=0
+     worldWrites=0
+     constructionApproved=$false
+     executionAllowed=$false
+     gates=@('BLOCKED') * 9
+     reason=$reason.Substring(0,[Math]::Min(350,$reason.Length))
+    }
+    $recoveryPath=Join-Path $upload 'B198Y_RECOVERY_STATUS.json'
+    if(-not (Test-Path -LiteralPath $recoveryPath)){
+     [IO.File]::WriteAllText($recoveryPath,
+      ($recovery | ConvertTo-Json -Depth 6),[Text.Encoding]::UTF8)
+    }
+    $archive=Join-Path $root 'B198S_UPLOAD_THIS_RESULT.zip'
+    if(-not (Test-Path -LiteralPath $archive)){
+     Compress-Archive -Path (Join-Path $upload '*') -DestinationPath $archive -CompressionLevel Optimal
+    }
+    Write-Host "B198Y_RECOVERY_HOLD_UPLOAD_ZIP: $archive" -ForegroundColor Yellow
+    if($recovery.originalModelResponseStored){
+     Write-Host 'Original model response preserved. Analyze OFFLINE; do not rerun Qwen only to recover JSON.' -ForegroundColor Cyan
+    }else{
+     Write-Host 'NO_SAVED_MODEL_RESPONSE. This ZIP is diagnostic only, NOT an AI building.' -ForegroundColor Yellow
+    }
+   }
+  }catch{
+   Write-Host ("B198Y_RECOVERY_PACKAGING_HOLD: "+[string]$_.Exception.Message) -ForegroundColor Yellow
+   Write-Host "Available evidence directory: $root"
+  }
  }
  exit 1
 }
