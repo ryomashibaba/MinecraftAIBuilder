@@ -64,24 +64,24 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference='Stop'
-          $kitRoot=Join-Path $env:RUNNER_TEMP 'B198X-WORKBENCH-V3'
+          $kitRoot=Join-Path $env:RUNNER_TEMP 'B198Y-WORKBENCH-V4'
           & powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./tools/B198V_INSTALL_OFFLINE.ps1 -InstallRoot $kitRoot -Model 'B198S_FIXTURE_NOT_REAL_LLM' -Endpoint 'http://127.0.0.1:11785/v1/chat/completions'
           if($LASTEXITCODE -ne 0){throw 'B198X_WIN_PS51_INSTALL_FAILED'}
-          $kit=Join-Path $kitRoot 'offline-workbench-v3'
-          foreach($file in @('B198X_WORKBENCH_INFO.json','REPLAY_LATEST_OFFLINE.cmd','RUN_ONE_REAL_MODEL_ONCE.cmd','PREPARE_QUALITY_REVISION.cmd','engine/tools/B198X_PREPARE_QUALITY_REVISION.ps1','engine/scripts/b198x-offline-review-to-revision.mjs')){
+          $kit=Join-Path $kitRoot 'offline-workbench-v4'
+          foreach($file in @('B198Y_WORKBENCH_INFO.json','REPLAY_LATEST_OFFLINE.cmd','RUN_ONE_REAL_MODEL_ONCE.cmd','PREPARE_QUALITY_REVISION.cmd','engine/tools/B198X_PREPARE_QUALITY_REVISION.ps1','engine/scripts/b198x-offline-review-to-revision.mjs')){
             if(-not (Test-Path -LiteralPath (Join-Path $kit $file))){throw ('B198X_MISSING_INSTALL_FILE_'+$file)}
           }
-          $info=Get-Content (Join-Path $kit 'B198X_WORKBENCH_INFO.json') -Raw | ConvertFrom-Json
+          $info=Get-Content (Join-Path $kit 'B198Y_WORKBENCH_INFO.json') -Raw | ConvertFrom-Json
           if($info.installModelRequests -ne 0 -or $info.revisionPlanningModelRequests -ne 0 -or $info.worldWrites -ne 0){throw 'B198X_UNAUTHORIZED_INSTALL_ACTION'}
           & node (Join-Path $kit 'engine/scripts/b198v-cache-integrity.mjs') --verify (Join-Path $kit 'engine')
           if($LASTEXITCODE -ne 0){throw 'B198X_ENGINE_NOT_SEALED'}
-          Write-Host 'B198X_WINDOWS_PS51_INSTALLED_CACHED_V3_NO_OLLAMA_PASS'
+          Write-Host 'B198X_WINDOWS_PS51_INSTALLED_CACHED_V4_NO_OLLAMA_PASS'
       - name: Stop mock model before rating-to-revision; zero extra calls, SHA, user-ready ZIP
         shell: pwsh
         run: |
           $ErrorActionPreference='Stop'
           $env:B198V_NONINTERACTIVE='1'
-          $kit=Join-Path $env:RUNNER_TEMP 'B198X-WORKBENCH-V3/offline-workbench-v3'
+          $kit=Join-Path $env:RUNNER_TEMP 'B198Y-WORKBENCH-V4/offline-workbench-v4'
           $docs=[Environment]::GetFolderPath('MyDocuments')
           if(-not $docs){$docs=$env:USERPROFILE}
           $trial=Join-Path $docs 'MinecraftAIBuilder-B198M/pilot-B198X-CI'
