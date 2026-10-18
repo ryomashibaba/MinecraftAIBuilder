@@ -110,6 +110,9 @@ export function inspectMultiLevelSourceCirculation({plan,design,compiled}={}){
   geometrySha256:compiled.geometrySha256,
   occupiedVoxelCount:compiled.primitives.length,
   supportedTwoWideSourceSquares:squares.size,
+  allSourceSupportedFloorsInOneSteppedComponent:
+   nextComponent===1&&components.size===squares.size&&squares.size>0,
+  unvisitedNonAnchoredSourceFloorSquares:squares.size-components.size,
   declaredFloorAnchors:anchors.length,
   distinctDeclaredFloorElevations:levels.size,
   testedDifferentElevationAnchorPairs:crossPairs,
