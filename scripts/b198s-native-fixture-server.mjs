@@ -13,8 +13,8 @@ export function mockDesign(){
  return {
   schema:'minecraftaibuilder-b143-building-dsl-v1',
   id:'b198s-frozen-library-fixture',
-  title:'Mock test only public library',
-  brief:'Explicitly deterministic test fixture, not a trained model design.',
+  title:'TEST_DOUBLE_LIBRARY_TITLE_WITH_LONG_TEXT_'.repeat(4),
+  brief:'This is a fake local-model response for B198T metadata-only repair verification. '.repeat(8),
   bounds:{width:48,height:40,depth:44},designOnly:true,
   elements:[
    {id:'ground-public-floor',shape:'box',mode:'add',material:'stone',

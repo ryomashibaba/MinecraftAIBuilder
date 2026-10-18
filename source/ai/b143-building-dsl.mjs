@@ -15,13 +15,14 @@ function fail(reason){throw Error('B143_'+reason);}
 function yes(ok,reason){if(!ok)fail(reason);}
 const trip=(a,low,high)=>Array.isArray(a)&&a.length===3&&a.every(n=>int(n,low,high));
 const sha=x=>createHash('sha256').update(JSON.stringify(x)).digest('hex');
-const strictName=x=>typeof x==='string'&&x.length>=1&&x.length<=100&&
+const strictName=(x,maxLength=100)=>typeof x==='string'&&
+ x.length>=1&&x.length<=maxLength&&
  !/[\u0000-\u001f<>]/.test(x);
 export function validateDesign(d){
  yes(only(d,['schema','id','title','brief','bounds','elements','designOnly']),'TOP_LEVEL_UNKNOWN');
  yes(d.schema===SCHEMA&&d.designOnly===true,'SCHEMA_OR_MODE');
  yes(typeof d.id==='string'&&/^[a-z][a-z0-9-]{2,47}$/.test(d.id),'ID');
- yes(strictName(d.title)&&strictName(d.brief)&&d.brief.length<=500,'TITLE_OR_BRIEF');
+ yes(strictName(d.title,100)&&strictName(d.brief,500),'TITLE_OR_BRIEF');
  yes(only(d.bounds,['width','height','depth']),'BOUNDS_FIELDS');
  const {width:w,height:h,depth:z}=d.bounds;
  yes(int(w,8,128)&&int(h,8,96)&&int(z,8,128)&&w*h*z<=500000,'BOUNDS');

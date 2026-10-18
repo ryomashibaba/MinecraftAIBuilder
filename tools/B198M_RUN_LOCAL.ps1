@@ -17,7 +17,7 @@ param(
 )
 $ErrorActionPreference='Stop'
 $ProgressPreference='SilentlyContinue'
-$branch='feature/b198s-calibrated-single-source-ollama'
+$branch='feature/b198t-provenance-preserving-metadata-repair'
 $root=$null
 function Hold([string]$reason){throw "B198M_HOLD_$reason"}
 try{
@@ -121,7 +121,7 @@ try{
    Hold 'B198S_OUTPUT_CONTEXT_OVERLAP'
   }
   $study=Join-Path $root 'source-study'
-  Write-Host 'B198S: ONE original c01 architectural source-model request.'
+  Write-Host 'B198T: ONE original c01 model request; bounded title/brief repair preserves all geometry.'
   Write-Host ('B198S native Ollama: think OFF requested, max output {0} tokens, context {1}, timeout {2}s.' -f $SourceOutputTokens,$SourceContextTokens,$SourceTimeoutSeconds)
   $old=Get-Location
   try{
@@ -150,6 +150,9 @@ try{
   $archive=Join-Path $root 'B198S_UPLOAD_THIS_RESULT.zip'
   Compress-Archive -Path (Join-Path $upload '*') -DestinationPath $archive -CompressionLevel Optimal
   if($result.independentlyCompiled){
+   if($result.originalModelMetadataOnlyRepair.applied){
+    Write-Host 'B198T: model title/brief was shortened to B143 limits; original text and geometry SHA provenance saved.' -ForegroundColor Yellow
+   }
    Write-Host ('B198S_TEST_FINISHED {0}' -f $result.status) -ForegroundColor Green
    Write-Host ('B143 SOURCE independently compiled; element count: {0}' -f $result.independentlyCompiled.elements)
    Write-Host ('3D source review: {0}' -f (Join-Path (Join-Path $study 'c01') 'index.html'))

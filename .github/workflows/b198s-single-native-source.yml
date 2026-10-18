@@ -68,7 +68,10 @@ jobs:
             $zip=Join-Path $folder 'B198S_UPLOAD_THIS_RESULT.zip'
             if(-not (Test-Path -LiteralPath $zip)){throw 'B198S_UPLOAD_ZIP_MISSING'}
             $raw=Get-Content (Join-Path $folder 'B198S_UPLOAD_THIS_SUMMARY.json') -Raw | ConvertFrom-Json
-            if($raw.status -ne 'SOURCE_COMPILED_HUMAN_ARCHITECTURE_REVIEW_REQUIRED'){throw 'B198S_GENUINE_SOURCE_PROOF_MISSING'}
+            if($raw.status -ne 'SOURCE_COMPILED_AFTER_METADATA_ONLY_REPAIR_HUMAN_REVIEW_REQUIRED'){throw 'B198T_METADATA_CORRECTED_SOURCE_PROOF_MISSING'}
+            if(-not $raw.originalModelMetadataOnlyRepair.applied){throw 'B198T_METADATA_REPAIR_WAS_NOT_RECORDED'}
+            if(-not $raw.originalModelMetadataOnlyRepair.provenance.geometryFieldsUnchanged){throw 'B198T_SOURCE_GEOMETRY_WAS_CHANGED'}
+            if($raw.originalModelMetadataOnlyRepair.provenance.fields.Count -ne 2){throw 'B198T_EXPECTED_TITLE_AND_BRIEF_REPAIR_NOT_RECORDED'}
             if($raw.independentlyCompiled.elements -lt 4){throw 'B198S_GEOMETRY_NOT_COMPILED'}
             if($raw.modelCalls.Count -ne 1){throw 'B198S_WASTEFUL_REPEATED_MODEL_CALL'}
             if($raw.modelCalls[0].generatedTokensPerSecond -le 0){throw 'B198S_LOCAL_INFERENCE_TIMING_MISSING'}
@@ -82,7 +85,7 @@ jobs:
             foreach($name in @('B198S_UPLOAD_THIS_SUMMARY.json','c01_source-design.json','c01_index.html')){
               if(-not (Test-Path (Join-Path $unpack $name))){throw ('B198S_USER_ZIP_MISSING_'+$name)}
             }
-            Write-Host 'B198S_WINDOWS_NATIVE_ONE_SOURCE_AND_ZIP_PASS MOCK_ONLY_NOT_ACTUAL_QWEN'
+            Write-Host 'B198T_WINDOWS_METADATA_ONLY_REPAIR_AND_GENUINE_B143_COMPILER_PASS MOCK_ONLY_NOT_ACTUAL_QWEN'
           }finally{
             if($server -and -not $server.HasExited){Stop-Process -Id $server.Id -Force}
           }

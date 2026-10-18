@@ -1,0 +1,91 @@
+name: B198T Metadata-Only B143 Source Rescue and Provenance
+on:
+  push:
+    branches: [feature/b198t-provenance-preserving-metadata-repair]
+  pull_request:
+    paths:
+      - 'source/ai/b198t-metadata-only-repair.mjs'
+      - 'source/ai/b198s-native-ollama-source.mjs'
+      - 'scripts/b198s-single-source-probe.mjs'
+      - 'scripts/b198s-native-fixture-server.mjs'
+      - 'scripts/b198t-metadata-only.test.mjs'
+      - 'tools/B198M_RUN_LOCAL.ps1'
+      - '.github/workflows/b198t-metadata-only.yml'
+permissions:
+  contents: read
+jobs:
+  transparent-metadata-and-strict-source-regressions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Validate B198T and inherited model bridge sources
+        run: |
+          node --check source/ai/b198t-metadata-only-repair.mjs
+          node --check source/ai/b198s-native-ollama-source.mjs
+          node --check scripts/b198s-single-source-probe.mjs
+          node --check scripts/b198t-metadata-only.test.mjs
+      - name: Validate metadata-only SHA, 1-call compiler, rejection and 114 inherited source tests
+        run: |
+          node --test \
+            scripts/b198t-metadata-only.test.mjs \
+            scripts/b198s-native-source.test.mjs \
+            scripts/b198r-local-diagnostic.test.mjs \
+            scripts/b198q-long-http.test.mjs \
+            scripts/b198p-model-timeout.test.mjs \
+            scripts/b198m-local-transport.test.mjs \
+            scripts/b198a-engine.test.mjs \
+            scripts/b198a-cli.test.mjs \
+            scripts/b198b-quality.test.mjs \
+            scripts/b198c-critic.test.mjs \
+            scripts/b198d-session.test.mjs \
+            scripts/b198e-pilot.test.mjs \
+            scripts/b198f-evidence.test.mjs \
+            scripts/b198g-autonomous-quality.test.mjs \
+            scripts/b198g-local-adapter.test.mjs \
+            scripts/b198h-local-workflow.test.mjs \
+            scripts/b198i-design-director.test.mjs \
+            scripts/b198i-studio-director.test.mjs \
+            scripts/b198j-circulation.test.mjs \
+            scripts/b198k-paired-study.test.mjs \
+            scripts/b198l-step-chain.test.mjs
+  actual-windows-powershell51-metadata-only-source-rescue:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Native Windows PowerShell 5.1 source ZIP and long-title mock -> exactly one B143 source / ZIP
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $server=Start-Process -FilePath node -ArgumentList @('scripts/b198s-native-fixture-server.mjs','--port','11785') -NoNewWindow -PassThru
+          try {
+            Start-Sleep -Seconds 3
+            $folder=Join-Path $env:RUNNER_TEMP 'B198T-WINDOWS-PS51-CORRECTED'
+            # Use original downloader/extractor; never skip via -SourceDirectory.
+            & powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./tools/B198M_RUN_LOCAL.ps1 -Mode SourceProbe -Model B198S_FIXTURE_NOT_REAL_LLM -Endpoint 'http://127.0.0.1:11785/v1/chat/completions' -OutputDirectory $folder -SourceTimeoutSeconds 300 -SourceOutputTokens 3072 -SourceContextTokens 6144
+            if($LASTEXITCODE -ne 0){throw 'B198T_WINDOWS_SOURCE_PROBE_FATAL'}
+            $summary=Get-Content (Join-Path $folder 'B198S_UPLOAD_THIS_SUMMARY.json') -Raw | ConvertFrom-Json
+            if($summary.status -ne 'SOURCE_COMPILED_AFTER_METADATA_ONLY_REPAIR_HUMAN_REVIEW_REQUIRED'){throw 'B198T_EXPECTED_DISCLOSED_METADATA_REPAIR_STATUS'}
+            if(-not $summary.originalModelMetadataOnlyRepair.applied){throw 'B198T_REPAIR_NOT_DISCLOSED'}
+            if($summary.originalModelMetadataOnlyRepair.provenance.fields.Count -ne 2){throw 'B198T_TITLE_AND_BRIEF_SHOULD_BOTH_BE_REPAIRED'}
+            if(-not $summary.originalModelMetadataOnlyRepair.provenance.geometryFieldsUnchanged){throw 'B198T_GEOMETRY_MUTATION_REFUSED'}
+            if(-not $summary.independentlyCompiled.sourceSha256){throw 'B198T_COMPILER_PROOF_MISSING'}
+            if($summary.modelCalls.Count -ne 1){throw 'B198T_WASTEFUL_MODEL_RETRY'}
+            if($summary.safety.worldWrites -ne 0){throw 'B198T_WORLD_WRITE_REFUSED'}
+            $zip=Join-Path $folder 'B198S_UPLOAD_THIS_RESULT.zip'
+            if(-not (Test-Path -LiteralPath $zip)){throw 'B198T_USER_ZIP_MISSING'}
+            $target=Join-Path $env:RUNNER_TEMP 'B198T-USER-ZIP-INSPECT'
+            Expand-Archive -LiteralPath $zip -DestinationPath $target -ErrorAction Stop
+            $content=Get-Content (Join-Path $target 'c01_source-design.json') -Raw | ConvertFrom-Json
+            if($content.title.Length -gt 100 -or $content.brief.Length -gt 500){throw 'B198T_SOURCE_METADATA_STILL_INVALID'}
+            if($content.elements.Count -ne 8){throw 'B198T_REAL_MODEL_ELEMENTS_REMOVED_OR_CHANGED'}
+            if(-not (Test-Path (Join-Path $target 'c01_index.html'))){throw 'B198T_REAL_3D_REVIEW_MISSING'}
+            Write-Host 'B198T_WINDOWS_PS51_MODEL_METADATA_ONLY_REPAIRED_AND_B143_SHA_PASS MOCK_ONLY'
+          }finally {
+            if($server -and -not $server.HasExited){Stop-Process -Id $server.Id -Force}
+          }

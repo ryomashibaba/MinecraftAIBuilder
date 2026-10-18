@@ -15,7 +15,7 @@ import {runB198HBenchmark}
 import {compileDesign,verifyCompiled}
  from '../source/ai/b143-building-dsl.mjs';
 
-export const SCHEMA='minecraftaibuilder-b198s-calibrated-one-building-source-v1';
+export const SCHEMA='minecraftaibuilder-b198t-single-source-provenance-v1';
 const fail=s=>{throw Error('B198S_SINGLE_SOURCE_'+s)};
 const must=(x,y)=>{if(!x)fail(y)};
 const modelId=s=>typeof s==='string'&&/^[A-Za-z0-9._:/-]{2,140}$/.test(s);
@@ -90,8 +90,20 @@ export async function runB198SSingleSource({
   };
  }
  const original=report.cases.find(x=>x.caseId==='c01');
+ const modelCalls=bridge.telemetry();
+ const metadataRepair=modelCalls.find(x=>x.metadataRepair)?.metadataRepair??null;
+ const metadataRepairApplied=metadataRepair?.applied===true;
+ // Metadata may be shortened; real model geometry remains untouched,
+ // and B143 recompile with independent SHA is still compulsory.
+ if(metadataRepairApplied){
+  must(metadataRepair.geometryFieldsUnchanged===true&&
+   metadataRepair.unchangedElementArraySha256?.length===64,
+   'REPAIRED_METADATA_GEOMETRY_GUARD');
+ }
  const status=independentlyCompiled&&report.successfullyCompiledCaseCount===1?
-  'SOURCE_COMPILED_HUMAN_ARCHITECTURE_REVIEW_REQUIRED':
+  metadataRepairApplied?
+   'SOURCE_COMPILED_AFTER_METADATA_ONLY_REPAIR_HUMAN_REVIEW_REQUIRED':
+   'SOURCE_COMPILED_HUMAN_ARCHITECTURE_REVIEW_REQUIRED':
   'HOLD_NO_COMPILED_SOURCE';
  const summary={
   schema:SCHEMA,
@@ -111,7 +123,14 @@ export async function runB198SSingleSource({
   compiledSourceReview:original?.sourceReview??null,
   modelTransport:BRIDGE_SCHEMA,
   nativeRequestBudgets:bridge.requestBudget,
-  modelCalls:bridge.telemetry(),
+  originalModelMetadataOnlyRepair:{
+   applied:metadataRepairApplied,
+   provenance:metadataRepair,
+   geometryAndSourceRequiresStrictIndependentCompiler:true,
+   repairedTextRequiresHumanReview:metadataRepairApplied,
+   automaticQualityCertification:false
+  },
+  modelCalls,
   modelWasNotReloadedInThisProcessUnverified:true,
   humanVisualReview:'NOT_REVIEWED',
   readiness:'NOT_PREPARED',safety:{
