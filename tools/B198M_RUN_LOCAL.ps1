@@ -152,7 +152,22 @@ try{
   foreach($name in @('source-design.json','source-audit.json','index.html','B198W_SOURCE_QUALITY_EVIDENCE.json','B198W_REVIEW_BOARD.html')){
    $sourceFile=Join-Path (Join-Path $study 'c01') $name
    if(Test-Path -LiteralPath $sourceFile){
-    Copy-Item -LiteralPath $sourceFile -Destination (Join-Path $upload ('c01_'+$name))
+    $destination=Join-Path $upload ('c01_'+$name)
+    if($name -eq 'B198W_REVIEW_BOARD.html'){
+     # Source folder uses index.html; the upload ZIP intentionally flattens
+     # this to c01_index.html. Keep BOTH iframe and open-in-new-tab functional
+     # when the user extracts and opens the Chat-upload ZIP independently.
+     $board=[IO.File]::ReadAllText($sourceFile,[Text.Encoding]::UTF8)
+     if(-not $board.Contains('src="index.html"') -or
+      -not $board.Contains('href="index.html"')){
+      Hold 'B198W_SOURCE_REVIEW_VIEWER_REFERENCE_INVALID'
+     }
+     $board=$board.Replace('src="index.html"','src="c01_index.html"')
+     $board=$board.Replace('href="index.html"','href="c01_index.html"')
+     [IO.File]::WriteAllText($destination,$board,(New-Object System.Text.UTF8Encoding($false)))
+    }else{
+     Copy-Item -LiteralPath $sourceFile -Destination $destination
+    }
    }
   }
   $archive=Join-Path $root 'B198S_UPLOAD_THIS_RESULT.zip'
