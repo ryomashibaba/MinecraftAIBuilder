@@ -7,6 +7,7 @@
  * external hosts, credentials, shells, downloads or user-world operations.
  */
 import http from 'node:http';
+import {createHash} from 'node:crypto';
 import {performance} from 'node:perf_hooks';
 import {prepareCapturedModelSource}
  from './b198u-bounds-only-repair.mjs';
@@ -20,6 +21,20 @@ const fail=s=>{
  e.code='B198S_LOCAL_TRANSPORT_'+s;
  return e;
 };
+// Classify ONLY the failure kind. Never export arbitrary server-side text or
+// user paths from Ollama's error object into source audit uploads.
+export function classifyOllamaServerError(value){
+ const s=typeof value==='string'?value.slice(0,32768).toLowerCase():'';
+ if(/out of memory|insufficient memory|not enough (?:available )?(?:system |gpu |vram |ram )?memory|failed to alloc|cannot alloc|cublas_status_alloc_failed|cuda.*alloc/.test(s))
+  return 'RESOURCE_ALLOCATION';
+ if(/runner.*(?:unexpectedly stopped|terminated|exit status|exited|killed)|llama.server.*(?:terminated|exited|killed)|exit status 0x[0-9a-f]+/.test(s))
+  return 'MODEL_RUNNER_STOPPED';
+ if(/model.*(?:not found|does not exist|not available)|no such model/.test(s))
+  return 'MODEL_NOT_FOUND';
+ if(/(?:unsupported|not supported|invalid option|template error|unrecognized parameter)/.test(s))
+  return 'REQUEST_OPTION_UNSUPPORTED';
+ return 'UNCLASSIFIED_SERVER_FAILURE';
+}
 const number=x=>Number.isSafeInteger(x)&&x>=0?x:null;
 const seconds=x=>typeof x==='number'&&Number.isFinite(x)&&x>=0?
  Number((x/1e9).toFixed(3)):null;
@@ -131,17 +146,26 @@ export function createB198SNativeBridge({
     res.on('error',e=>final(e));
     res.on('end',()=>{
      const responseText=Buffer.concat(chunks).toString('utf8');
-     let body;
-     try{body=JSON.parse(responseText)}
-     catch{return final(fail('INVALID_NATIVE_RESPONSE_JSON'))}
      const elapsedMs=Math.round(performance.now()-start);
      const ok=res.statusCode>=200&&res.statusCode<300;
      if(!ok){
+      // Ollama error bodies may be either JSON or plain text. Previously we
+      // discarded the only useful diagnostic after a 500. Never leak it raw.
+      let description=responseText;
+      try{
+       const parsed=JSON.parse(responseText);
+       if(typeof parsed?.error==='string')description=parsed.error;
+      }catch{}
       entries.push({outcome:'SERVER_HTTP_HOLD',elapsedMs,status:res.statusCode,
-       // Do not expose arbitrary raw model server errors in the uploaded report.
+       serverErrorClass:classifyOllamaServerError(description),
+       serverErrorFingerprintSha256:createHash('sha256').update(responseText).digest('hex'),
+       serverErrorTextDisclosed:false,
        outputTokenLimit:numPredict,contextTokenLimit:numCtx});
       return final(null,{ok:false,status:res.statusCode,json:async()=>({})});
      }
+     let body;
+     try{body=JSON.parse(responseText)}
+     catch{return final(fail('INVALID_NATIVE_RESPONSE_JSON'))}
      const content=body?.message?.content;
      if(typeof content!=='string'||content.length>60000)
       return final(fail('UNEXPECTED_MODEL_CONTENT'));
