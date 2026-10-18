@@ -5,6 +5,7 @@
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
 import {compileDesign, verifyCompiled} from '../source/ai/b143-building-dsl.mjs';
+import {evaluateSpatialClaims} from '../source/ai/b198zr1-spatial-claims.mjs';
 const d=JSON.parse(fs.readFileSync(new URL('../evidence/b198zr1/assistant-revised-library.json',import.meta.url),'utf8'));
 const scene=compileDesign(d);
 assert.equal(verifyCompiled(d,scene),true,'B143 independent deterministic verification');
@@ -47,6 +48,21 @@ const stairs=d.elements.filter(x=>x.id.startsWith('stair-')&&x.mode==='add');
 assert.equal(stairs.length,36,'32 risers + 4 turn landings');
 const shelves=d.elements.filter(x=>x.id.startsWith('bookbay-'));
 assert.equal(shelves.length,72,'24 visibly framed shelves / three geometry pieces each');
+// Generic semantic geometry contract (library here is only a test case).
+const review=evaluateSpatialClaims({
+ design:d,compiled:scene,
+ protectedVoids:[{id:'protected-central-void',origin:[19,2,19],size:[11,36,11],maximumOccupied:0}],
+ walkRoutes:[{
+  id:'entrance-to-gallery-and-observatory',
+  start:[24,2,45],headroom:2,maximumRise:1,maximumDrop:1,
+  anchors:[2,10,18,26,34].flatMap(y=>[[16,y,13],[30,y,31],[24,y,32],[36,y,23]])
+ }]
+});
+assert.equal(review.passed,true,'category-neutral final-voxel spatial claims');
+assert.equal(review.voids[0].occupied,0);
+assert.equal(review.routes[0].reached,20);
+assert.equal(review.semanticQualityCertified,false);
+assert.equal(review.realMinecraftWalkingTested,false);
 console.log('B198ZR1_STRICT_B143_AND_ABSTRACT_CONNECTIVITY_PASS',JSON.stringify({
  proven:'SOURCE_ONLY',sourceSha256:scene.sourceSha256,geometrySha256:scene.geometrySha256,
  voxels:scene.stats.voxels,elements:d.elements.length,atriumAir:air,
