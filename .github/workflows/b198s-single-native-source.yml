@@ -1,0 +1,88 @@
+name: B198S Single Native-Ollama B143 Source Pilot and Safety
+on:
+  push:
+    branches: [feature/b198s-calibrated-single-source-ollama]
+  pull_request:
+    paths:
+      - 'scripts/b198s-*.mjs'
+      - 'source/ai/b198s-native-ollama-source.mjs'
+      - 'tools/B198M_RUN_LOCAL.ps1'
+      - '.github/workflows/b198s-single-native-source.yml'
+permissions:
+  contents: read
+jobs:
+  one-request-native-source-and-historical-regressions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: B198S native Ollama transport and one-source test syntax
+        run: |
+          node --check source/ai/b198s-native-ollama-source.mjs
+          node --check scripts/b198s-single-source-probe.mjs
+          node --check scripts/b198s-native-source.test.mjs
+          node --check scripts/b198s-native-fixture-server.mjs
+      - name: B198S original model source evidence, aborts, immutable world and all prior B198A–R regressions
+        run: |
+          node --test \
+            scripts/b198s-native-source.test.mjs \
+            scripts/b198r-local-diagnostic.test.mjs \
+            scripts/b198q-long-http.test.mjs \
+            scripts/b198p-model-timeout.test.mjs \
+            scripts/b198m-local-transport.test.mjs \
+            scripts/b198a-engine.test.mjs \
+            scripts/b198a-cli.test.mjs \
+            scripts/b198b-quality.test.mjs \
+            scripts/b198c-critic.test.mjs \
+            scripts/b198d-session.test.mjs \
+            scripts/b198e-pilot.test.mjs \
+            scripts/b198f-evidence.test.mjs \
+            scripts/b198g-autonomous-quality.test.mjs \
+            scripts/b198g-local-adapter.test.mjs \
+            scripts/b198h-local-workflow.test.mjs \
+            scripts/b198i-design-director.test.mjs \
+            scripts/b198i-studio-director.test.mjs \
+            scripts/b198j-circulation.test.mjs \
+            scripts/b198k-paired-study.test.mjs \
+            scripts/b198l-step-chain.test.mjs
+  windows-ps51-single-source-model-proof:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: EXACT Windows PowerShell 5.1 source ZIP download + one mock native B143 source + human 3D + upload ZIP
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $server=Start-Process -FilePath node -ArgumentList @('scripts/b198s-native-fixture-server.mjs','--port','11785') -NoNewWindow -PassThru
+          try {
+            Start-Sleep -Seconds 3
+            $folder=Join-Path $env:RUNNER_TEMP 'B198S-WINPS51-SOURCE'
+            # Deliberately omit SourceDirectory; test original full GitHub archive path.
+            & powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./tools/B198M_RUN_LOCAL.ps1 -Mode SourceProbe -Model B198S_FIXTURE_NOT_REAL_LLM -Endpoint 'http://127.0.0.1:11785/v1/chat/completions' -OutputDirectory $folder -SourceTimeoutSeconds 300 -SourceOutputTokens 3072 -SourceContextTokens 6144
+            if($LASTEXITCODE -ne 0){throw 'B198S_WINDOWS_SOURCE_PROBE_FAILED'}
+            $zip=Join-Path $folder 'B198S_UPLOAD_THIS_RESULT.zip'
+            if(-not (Test-Path -LiteralPath $zip)){throw 'B198S_UPLOAD_ZIP_MISSING'}
+            $raw=Get-Content (Join-Path $folder 'B198S_UPLOAD_THIS_SUMMARY.json') -Raw | ConvertFrom-Json
+            if($raw.status -ne 'SOURCE_COMPILED_HUMAN_ARCHITECTURE_REVIEW_REQUIRED'){throw 'B198S_GENUINE_SOURCE_PROOF_MISSING'}
+            if($raw.independentlyCompiled.elements -lt 4){throw 'B198S_GEOMETRY_NOT_COMPILED'}
+            if($raw.modelCalls.Count -ne 1){throw 'B198S_WASTEFUL_REPEATED_MODEL_CALL'}
+            if($raw.modelCalls[0].generatedTokensPerSecond -le 0){throw 'B198S_LOCAL_INFERENCE_TIMING_MISSING'}
+            if(-not $raw.nativeRequestBudgets.thinkingOffRequested){throw 'B198S_THINKING_NOT_DISABLED'}
+            if($raw.safety.worldWrites -ne 0){throw 'B198S_WORLD_WRITE_FORBIDDEN'}
+            if(-not (Test-Path -LiteralPath (Join-Path $folder 'source-study/c01/index.html'))){throw 'B198S_HUMAN_3D_REVIEW_MISSING'}
+            if(-not (Test-Path -LiteralPath (Join-Path $folder 'source-study/c01/source-design.json'))){throw 'B198S_SOURCE_JSON_MISSING'}
+            if(Test-Path -LiteralPath (Join-Path $folder 'source-study/c02')){throw 'B198S_MORE_THAN_ONE_TASK'}
+            $unpack=Join-Path $env:RUNNER_TEMP 'B198S-VERIFY-UPLOAD'
+            Expand-Archive -LiteralPath $zip -DestinationPath $unpack -ErrorAction Stop
+            foreach($name in @('B198S_UPLOAD_THIS_SUMMARY.json','c01_source-design.json','c01_index.html')){
+              if(-not (Test-Path (Join-Path $unpack $name))){throw ('B198S_USER_ZIP_MISSING_'+$name)}
+            }
+            Write-Host 'B198S_WINDOWS_NATIVE_ONE_SOURCE_AND_ZIP_PASS MOCK_ONLY_NOT_ACTUAL_QWEN'
+          }finally{
+            if($server -and -not $server.HasExited){Stop-Process -Id $server.Id -Force}
+          }
