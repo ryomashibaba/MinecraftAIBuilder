@@ -198,6 +198,8 @@ export async function generateModelDirectedArchitecture({
     highRiskSourceFindings:risk});
    if(better){best=created;bestProof=proof;
     bestCirculation=circulation;bestHigh=risk;}
+   // Vertical travel is deliberately not certified. Re-generating the
+   // same architectural program cannot make an unverified stair proof PASS.
    if(bestProof.allDeclaredPlanAnchorsMatchSource&&bestHigh===0&&
       bestCirculation.allDeclaredSameElevationPairsConnected)break;
   }catch(e){
@@ -214,9 +216,11 @@ export async function generateModelDirectedArchitecture({
     'HOLD_SOURCE_PLAN_OR_TOPOLOGY':
     bestCirculation.evaluatedSameElevationAnchorPairs===0?
     'HOLD_SOURCE_CIRCULATION_UNTESTED':
-    bestCirculation.allDeclaredSameElevationPairsConnected?
-    'SOURCE_PLAN_ANCHORS_PASS_HUMAN_REVIEW_REQUIRED':
-    'HOLD_SOURCE_CIRCULATION',
+    !bestCirculation.allDeclaredSameElevationPairsConnected?
+    'HOLD_SOURCE_CIRCULATION':
+    bestCirculation.differentElevationGroups>1?
+    'HOLD_SOURCE_VERTICAL_CIRCULATION_UNVERIFIED':
+    'SOURCE_PLAN_ANCHORS_PASS_HUMAN_REVIEW_REQUIRED',
    planProof:bestProof,
    circulationProof:bestCirculation,
    remainingHighRiskSourceFindings:bestHigh,
