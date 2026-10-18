@@ -156,11 +156,13 @@ export async function generateModelDirectedArchitecture({
   if(bestProof&&bestProof.failedAnchors>0){
    const missing=bestProof.results.filter(x=>!x.passed)
      .map(x=>({id:x.id,point:x.point,expectation:x.expect}));
-   sourcePrompt+='\nSOURCE REGENERATION FEEDBACK (REAL B143 COMPILED):\n'+
-    JSON.stringify(missing).slice(0,850)+
-    '\nDo not repeat these failed solid/air/supported-floor results.';
+   const prefix='\nSOURCE REGENERATION FEEDBACK (REAL B143 COMPILED):\n';
+   const suffix='\nReview the failed source occupancy/headroom point evidence.';
+   const room=6100-sourcePrompt.length-prefix.length-suffix.length;
+   yes(room>=60,'NO_SPACE_FOR_SOURCE_FEEDBACK');
+   sourcePrompt+=prefix+JSON.stringify(missing).slice(0,room)+suffix;
   }
-  yes(sourcePrompt.length<=7200,'REGENERATION_PROMPT_TOO_LONG');
+  yes(sourcePrompt.length<=6100,'REGENERATION_PROMPT_TOO_LONG');
   // B198G provides existing conservative source-topology diagnostics and
   // attempts guarded repair, but *not* semantic/aesthetic certification.
   try{
@@ -198,6 +200,6 @@ export async function generateModelDirectedArchitecture({
    humanSemanticJudgment:'UNREVIEWED',
    humanAestheticJudgment:'UNREVIEWED',
    independentlyVerifiedJapaneseIntent:false,
-   MinecraftWalkingCertified:false,world:world()}}
+   MinecraftWalkingCertified:false,world:world()}
  };
 }
