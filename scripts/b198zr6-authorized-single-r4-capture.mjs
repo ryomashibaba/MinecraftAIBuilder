@@ -143,6 +143,19 @@ export async function runR6AuthorizedCapture({
   modelCannotSelfApprove:true,
   comparisonAgainstBaseline:'NOT_PERFORMED_BY_THIS_RUN',
   sourceOnly:true,worldContacts:0,worldWrites:0,safety:guard()};
+ // R5-compatible receipt is an UNVERIFIED claim, NOT a provider signature.
+ // Store it even when the source is invalid; the R5 compiler will HOLD it.
+ if(original!==null){
+  const r5Receipt={
+   schema:'minecraftaibuilder-b198zr5-receipt-v1',
+   mode:'PLANNED_R4_4KEY',rawSha256:sha(original),
+   promptSha256:sha(spec.prompt),modelId:model,
+   origin:'USER_SUPPLIED_REAL_MODEL_CLAIM',
+   modelRequestsClaimed:requested?1:0
+  };
+  fs.writeFileSync(path.join(dir,'R6_R5_UNVERIFIED_CAPTURE_RECEIPT.json'),
+   JSON.stringify(r5Receipt,null,2)+'\\n',{flag:'wx'});
+ }
  fs.writeFileSync(path.join(dir,'R6_SINGLE_CAPTURE_RESULT.json'),
   JSON.stringify(result,null,2)+'\n',{flag:'wx'});
  return result;
