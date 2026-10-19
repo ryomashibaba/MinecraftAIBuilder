@@ -36,6 +36,11 @@ export function validateDesign(d){
   yes(e.mode==='cut'?e.material===undefined:MATERIALS.includes(e.material),'MATERIAL');
   const shell=e.shell??0;
   yes(int(shell,0,4)&&!(e.mode==='cut'&&shell),'SHELL');
+  // New staircase-only fields must never weaken the strict grammar for
+  // pre-existing B143 shapes. Reject surplus keys instead of ignoring them.
+  if(e.shape!=='staircase')
+   yes(['direction','width','steps','treadDepth'].every(k=>!Object.hasOwn(e,k)),
+    'NON_STAIRCASE_EXTRA');
   let a,b;
   if(e.shape==='staircase'){
    // Compact, generic straight flight. One source element is an exact ordered
