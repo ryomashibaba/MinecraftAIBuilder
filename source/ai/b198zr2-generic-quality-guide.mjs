@@ -10,5 +10,5 @@ export const R2_FREEFORM_QUALITY_GUIDE=[
  'For atria, courtyards, tunnels, rooms and apertures, preserve the empty interior in the FINAL geometry; a cut followed by later floors or walls can accidentally refill the void. Sequence ADD then the required final protected CUT.',
  'A transparent exterior is not a giant filled glass ellipsoid; use supported shell geometry or explicit cuts. Separate shelves, desks, equipment and furniture into believable thin components and preserve human approach aisles.',
  'Before returning JSON, mentally recheck exact bounding extents, inter-floor collisions, final empty air, entrances, landings, supports and functional connections. Source compile success alone is not aesthetic or Minecraft physical certification.',
- 'Keep every claim as design intent only. No world coordinates, Minecraft block ID/state, executable BuildPlan, real-world write, or construction approval.'
+ 'Keep every claim as design intent only. No world coordinates, Minecraft block ID/state, executable construction plan, real-world write, or construction approval.'
 ].join('\n');
