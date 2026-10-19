@@ -1,0 +1,140 @@
+/** R6 source-only tests use a local HTTP fixture, never a real Qwen model. */
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import http from 'node:http';
+import {createHash} from 'node:crypto';
+import {runR6AuthorizedCapture,EXPLICIT_AUTHORIZATION,parseR6Args}
+ from './b198zr6-authorized-single-r4-capture.mjs';
+
+const sha=s=>createHash('sha256').update(s).digest('hex');
+const fixture=()=>({
+ design:{schema:'minecraftaibuilder-b143-building-dsl-v1',designOnly:true,
+  id:'r6-fixture-pavilion',title:'R6 Mock Only Pavilion',
+  brief:'Synthetic test fixture: not a Qwen output or approved building',
+  bounds:{width:16,height:12,depth:16},elements:[
+   {id:'base',shape:'box',mode:'add',material:'concrete',
+    origin:[0,0,0],size:[16,1,16]},
+   {id:'shell',shape:'box',mode:'add',material:'glass',
+    origin:[1,1,1],size:[14,5,14],shell:1},
+   {id:'clear-bottom',shape:'box',mode:'cut',origin:[2,1,2],size:[12,1,12]},
+   {id:'skylight',shape:'box',mode:'cut',origin:[6,5,6],size:[4,1,4]},
+   {id:'open-entrance',shape:'box',mode:'cut',origin:[6,1,1],size:[4,3,2]}
+  ]},
+ explanation:'A deterministic test double, not a genuine model response.',
+ assumptions:['Independent human aesthetic review has not happened.'],
+ spatialPlan:{
+  designIntent:'A public multiuse covered courtyard for visitors.',
+  massStrategy:'A small protective hollow pavilion with an opening above.',
+  circulationStrategy:'The entry opens directly to an accessible public floor.',
+  entrance:[7,1,2],headroom:2,
+  protectedVoids:[{id:'courtyard',origin:[6,1,6],size:[4,4,4],maxOccupiedCells:0}],
+  destinations:[{id:'rear-public-zone',point:[8,1,10],maximumPathSteps:25}],
+  functionalZones:[{id:'usable-interior',origin:[3,1,3],size:[10,1,10],
+   minimumReachablePositions:90,minimumReachablePercent:90}]
+ }
+});
+const mk=()=>fs.mkdtempSync(path.join(os.tmpdir(),'b198zr6-ci-'));
+async function serverWith(content,reason='stop'){
+ let count=0,captured=null;
+ const server=http.createServer(async(req,res)=>{
+  count++;let data='';for await(const part of req)data+=String(part);
+  captured=JSON.parse(data);
+  res.writeHead(200,{'Content-Type':'application/json'});
+  res.end(JSON.stringify({done:true,done_reason:reason,
+   message:{content},total_duration:3100000000,eval_count:100,
+   eval_duration:2000000000}));
+ });
+ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+ return {port:server.address().port,get count(){return count},
+  get payload(){return captured},
+  close:()=>new Promise(resolve=>server.close(resolve))};
+}
+const cfg=(root,srv)=>({
+ authorization:EXPLICIT_AUTHORIZATION,model:'R6_CI_FAKE_PROVIDER',
+ outDir:path.join(root,'single'),port:srv.port,timeoutSeconds:60
+});
+test('R6 refuses absent explicit authorization BEFORE any folder or model contact',async()=>{
+ const root=mk();const output=path.join(root,'unauthorized');
+ try{
+  await assert.rejects(runR6AuthorizedCapture({
+   authorization:'',model:'qwen3.8:27b',outDir:output}),
+   /NO_EXPLICIT_AUTHORIZATION/);
+  assert.equal(fs.existsSync(output),false);
+  assert.throws(()=>parseR6Args(['--model','qwen3.8:27b','--out',output]),
+   /EXPLICIT_AUTHORIZATION_MODEL_AND_OUT_REQUIRED/);
+  assert.throws(()=>parseR6Args([
+   '--model','qwen3.8:27b','--out',output,'--authorize-one',EXPLICIT_AUTHORIZATION,
+   '--source-tokens','4096','--context-tokens','4096']),/MODEL_BUDGET/);
+ }finally{fs.rmSync(root,{recursive:true,force:true})}
+});
+test('R6 native single request preserves four-key original byte for byte and independently checks actual voxels',async()=>{
+ const root=mk();const raw=JSON.stringify(fixture(),null,2)+'\n';
+ const srv=await serverWith(raw);
+ try{
+  const report=await runR6AuthorizedCapture(cfg(root,srv));
+  assert.equal(srv.count,1);
+  assert.equal(srv.payload.think,false);
+  assert.equal(srv.payload.format,'json');
+  assert.equal(srv.payload.stream,false);
+  assert.equal(srv.payload.model,'R6_CI_FAKE_PROVIDER');
+  assert.match(srv.payload.messages[0].content,/spatialPlan/);
+  assert.equal(report.originalSaved,true);
+  assert.equal(report.originalRawSha256,sha(raw));
+  assert.equal(fs.readFileSync(path.join(root,'single','R6_ORIGINAL_MODEL_RESPONSE_UNMODIFIED.txt'),'utf8'),raw);
+  assert.equal(report.status,'SOURCE_AND_DECLARED_SPATIAL_CLAIMS_FORMALLY_PASS');
+  assert.equal(report.modelDeclaredSpatialReview.status,'FORMAL_GEOMETRY_AND_ROUTE_CONSTRAINTS_PASS');
+  assert.equal(report.modelGeneralizationCertified,false);
+  assert.equal(report.modelAuthorshipIndependentlyAuthenticated,false);
+  assert.equal(report.safety.readiness,'NOT_PREPARED');
+  assert.equal(report.safety.gates.filter(x=>x==='BLOCKED').length,9);
+  assert.deepEqual(report.safety.BuildPlan.operations,[]);
+  assert.equal(report.worldWrites,0);
+  await assert.rejects(runR6AuthorizedCapture(cfg(root,srv)),/NEW_OUTPUT_FOLDER_REQUIRED/);
+  assert.equal(srv.count,1);
+ }finally{await srv.close();fs.rmSync(root,{recursive:true,force:true})}
+});
+test('R6 saves bad three-key model raw and reports HOLD rather than replaying the provider',async()=>{
+ const root=mk();const x=fixture();delete x.spatialPlan;
+ const raw=JSON.stringify(x);const srv=await serverWith(raw);
+ try{
+  const report=await runR6AuthorizedCapture(cfg(root,srv));
+  assert.equal(srv.count,1);assert.equal(report.originalSaved,true);
+  assert.equal(report.status,'HOLD_MODEL_TRANSPORT_OR_SOURCE_REVIEW');
+  assert.equal(report.reasonCode,'B198ZR4_EXPECTED_FOUR_KEYS');
+  assert.equal(report.originalRawSha256,sha(raw));
+  assert.equal(report.elementCount,null);
+  assert.equal(report.worldWrites,0);
+ }finally{await srv.close();fs.rmSync(root,{recursive:true,force:true})}
+});
+test('R6 records truncated reply without any automatic retry or success claim',async()=>{
+ const root=mk();const raw='{"design":{';
+ const srv=await serverWith(raw,'length');
+ try{
+  const report=await runR6AuthorizedCapture(cfg(root,srv));
+  assert.equal(srv.count,1);
+  assert.equal(report.originalSaved,true);
+  assert.equal(report.status,'HOLD_MODEL_TRANSPORT_OR_SOURCE_REVIEW');
+  assert.equal(report.reasonCode,'B198G_LOCAL_TRUNCATED_MODEL_RESPONSE');
+  assert.equal(report.originalRawSha256,sha(raw));
+  assert.equal(report.geometrySha256,null);
+  assert.equal(report.safety.worldWrites,0);
+ }finally{await srv.close();fs.rmSync(root,{recursive:true,force:true})}
+});
+test('R6 rejects model-declared occupied protected void but preserves source receipt',async()=>{
+ const root=mk();const x=fixture();
+ x.design.elements.push({id:'later-fill',shape:'box',mode:'add',
+  material:'metal',origin:[6,1,6],size:[4,4,4]});
+ const raw=JSON.stringify(x);const srv=await serverWith(raw);
+ try{
+  const report=await runR6AuthorizedCapture(cfg(root,srv));
+  assert.equal(srv.count,1);
+  assert.equal(report.status,'HOLD_SPATIAL_PLAN_OR_INDEPENDENT_CONTRACT');
+  assert.equal(report.modelDeclaredSpatialReview.results.protectedVoids[0].passed,false);
+  assert.equal(report.originalSaved,true);
+  assert.equal(report.originalRawSha256,sha(raw));
+  assert.equal(report.safety.constructionApproved,false);
+ }finally{await srv.close();fs.rmSync(root,{recursive:true,force:true})}
+});
