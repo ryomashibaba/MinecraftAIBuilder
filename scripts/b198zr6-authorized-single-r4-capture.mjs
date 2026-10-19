@@ -11,6 +11,8 @@ import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import {CREATION_CASES} from '../source/ai/b198b-benchmark-cases.mjs';
+import {compileDesign,verifyCompiled}
+ from '../source/ai/b143-building-dsl.mjs';
 import {createB198SNativeBridge} from '../source/ai/b198s-native-ollama-source.mjs';
 import {createB198GLocalModelAdapter}
  from '../source/ai/b198g-local-model-adapter.mjs';
@@ -89,6 +91,7 @@ export async function runR6AuthorizedCapture({
  let originalSaved=false,requested=false,review=null,status='HOLD_NO_MODEL_RESPONSE';
  let reasonCode=null,bridge=null;
  let visualReview=null,visualReviewIssue=null,readOnlyPreflight=null;
+ let salvageCompiled=null,salvageDesign=null;
  try{
   // R8: read-only exact-model check BEFORE allocating GPU for the expensive POST.
   // A listed model is not proof of sufficient GPU memory or actual model identity.
@@ -143,6 +146,24 @@ export async function runR6AuthorizedCapture({
   const tagged=/^(B198[A-Z0-9_-]+)/.exec(message);
   reasonCode=tagged?tagged[1].slice(0,100):
    'UNCLASSIFIED_FAILURE_SENSITIVE_DETAILS_OMITTED';
+  // R8 audit: one expensive Qwen answer might contain perfectly valid B143
+  // geometry but a malformed R4 spatialPlan/envelope. Do NOT throw away
+  // its useful visual geometry or invent a repaired R4 response. Keep HOLD.
+  if(originalSaved&&visualReview===null){
+   try{
+    const rawSaved=fs.readFileSync(originalPath,'utf8');
+    const envelope=JSON.parse(rawSaved);
+    salvageDesign=envelope?.design;
+    salvageCompiled=compileDesign(salvageDesign);
+    yes(verifyCompiled(salvageDesign,salvageCompiled),
+     'SALVAGE_B143_INTEGRITY');
+    visualReview=writeR7OfflineVisualReview({
+     design:salvageDesign,compiled:salvageCompiled,destination:dir,caseId:'c01'});
+   }catch(_error){
+    salvageCompiled=null;salvageDesign=null;
+    visualReviewIssue='NO_STRICT_COMPILABLE_FALLBACK_DESIGN';
+   }
+  }
  }
  const original=originalSaved?fs.readFileSync(originalPath,'utf8'):null;
  const trace=bridge?.telemetry?.()??[];
@@ -153,10 +174,12 @@ export async function runR6AuthorizedCapture({
   readOnlyPreflight,
   originalRawSha256:original===null?null:sha(original),
   originalRawBytes:original===null?0:Buffer.byteLength(original),
-  sourceSha256:review?.compiled.sourceSha256??null,
-  geometrySha256:review?.compiled.geometrySha256??null,
-  finalVoxels:review?.compiled.primitives.length??null,
-  elementCount:review?.design.elements.length??null,
+  sourceSha256:(review?.compiled??salvageCompiled)?.sourceSha256??null,
+  geometrySha256:(review?.compiled??salvageCompiled)?.geometrySha256??null,
+  finalVoxels:(review?.compiled??salvageCompiled)?.primitives.length??null,
+  elementCount:(review?.design??salvageDesign)?.elements.length??null,
+  sourcePreviewSalvagedFromUnacceptedR4Envelope:salvageCompiled!==null,
+  salvagedGeometryCannotCountAsAcceptedR4Plan:true,
   modelDeclaredSpatialReview:review?.declaredPlanReview??null,
   humanVisualQuality:'NOT_REVIEWED',
   modelAuthorshipIndependentlyAuthenticated:false,
