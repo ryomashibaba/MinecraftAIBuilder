@@ -17,6 +17,8 @@ import {R4_PLANNING_GUIDE}
  from './b198zr4-planned-source.mjs';
 import {R11_COMPACT_GUIDE,R11_GUIDE_SHA256}
  from './b198zr11-compact-r4-output.mjs';
+import {R21_FUTURE_GUIDE,R21_FUTURE_GUIDE_SHA256}
+ from './b198zr21-future-architecture-guide.mjs';
 
 export const SCHEMA='minecraftaibuilder-b198s-native-single-source-json-v1';
 const ENDPOINT=/^http:\/\/127\.0\.0\.1:(\d{2,5})\/v1\/chat\/completions$/;
@@ -81,7 +83,7 @@ const STRUCTURAL_GUIDE=[
 export function createB198SNativeBridge({
  numPredict=3072,numCtx=6144,keepAlive='10m',
  transport=http,addArchitectureGuide=true,plannedSourceMode=false,
- compactPlannedGuide=false,onModelResponse=null
+ compactPlannedGuide=false,r22QualityGuide=false,onModelResponse=null
 }={}){
  if(!Number.isSafeInteger(numPredict)||numPredict<512||numPredict>4096)
   throw fail('OUTPUT_TOKENS_512_TO_4096');
@@ -95,6 +97,13 @@ export function createB198SNativeBridge({
   (compactPlannedGuide&&!plannedSourceMode)||
   (compactPlannedGuide&&!addArchitectureGuide))
   throw fail('R11_COMPACT_REQUIRES_PLANNED_MODE_AND_GUIDE');
+ // Future R22 opt-in is separately named; the frozen R11 request path
+ // remains byte-identical and this does not authorize a model invocation.
+ if(typeof r22QualityGuide!=='boolean'||
+   (r22QualityGuide&&!plannedSourceMode)||
+   (r22QualityGuide&&!addArchitectureGuide)||
+   (r22QualityGuide&&compactPlannedGuide))
+  throw fail('R22_QUALITY_REQUIRES_DISTINCT_PLANNED_GUIDE');
  if(onModelResponse!==null&&typeof onModelResponse!=='function')
   throw fail('EVIDENCE_PERSISTENCE_CALLBACK_REQUIRED');
  const entries=[];
@@ -121,7 +130,12 @@ export function createB198SNativeBridge({
    return Promise.reject(fail('UNSAFE_MODEL_REQUEST'));
   }
   const messages=payload.messages.map(x=>({role:x.role,content:x.content}));
-  if(compactPlannedGuide){
+  if(r22QualityGuide){
+   // R22 is future-consent-only; no automatic changes to R11 or legacy.
+   // R21's corrective guide is pinned as ONE system message rather than
+   // stacked twice on top of B198G's already verbose default guide.
+   messages[0].content=R21_FUTURE_GUIDE;
+  }else if(compactPlannedGuide){
    // Opt-in R11 collapses duplicate system instructions into one complete,
    // concise contract. The frozen natural-language c01 task is unchanged.
    messages[0].content=R11_COMPACT_GUIDE;
@@ -259,6 +273,8 @@ export function createB198SNativeBridge({
    r4PlannedSourceOptIn:plannedSourceMode,
    r11CompactOutputProfileOptIn:compactPlannedGuide,
    r11CompactGuideSha256:compactPlannedGuide?R11_GUIDE_SHA256:null,
+   r22QualityOutputProfileOptIn:r22QualityGuide,
+   r22QualityGuideSha256:r22QualityGuide?R21_FUTURE_GUIDE_SHA256:null,
    r4OriginalReturnedUnmodified:true,
    fourKeyR4RequiresIndependentReview:true,
     boundedMetadataRepairEnabled:true,
