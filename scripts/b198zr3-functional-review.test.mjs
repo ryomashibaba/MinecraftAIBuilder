@@ -22,7 +22,7 @@ test('R2 real B143 cells prove 5 functional floor zones, shelf approach, atrium,
  assert(r.results.destinations.every(x=>x.passed&&x.shortestPathSteps<=x.maximumPathSteps));
  assert.equal(r.results.functionalZones.length,6);
  assert(r.results.functionalZones.every(x=>x.passed));
- assert(r.results.functionalZones.every(x=>x.reachable>=x.reachable));
+ assert(r.results.functionalZones.every(x=>x.reachable>=140));
  assert.equal(r.contractAuthorship,'ASSISTANT_PROPOSED_UNAPPROVED');
  assert.equal(r.unverified.architecturalQuality,true);
  assert.equal(r.unverified.minecraftActualWalking,true);
