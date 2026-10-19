@@ -18,6 +18,11 @@ on:
       - 'source/ai/b198zr4-planned-source.mjs'
       - 'scripts/b198zr4-planned-source.test.mjs'
       - 'scripts/b198zr4-offline-replay.mjs'
+      - 'scripts/b198zr5-comparison.test.mjs'
+      - 'scripts/b198zr5-compare-captures.mjs'
+      - 'source/ai/b198zr5-model-comparison.mjs'
+      - 'evidence/b198zr5/**'
+      - 'docs/B198ZR5_COMPARISON_PROTOCOL_JA.md'
       - 'docs/B198ZR4_SINGLE_PASS_MODEL_SPATIAL_PLANNING_JA.md'
       - 'scripts/b198s-native-source.test.mjs'
       - 'docs/B198ZR1_PROTECTED_ARCHITECTURAL_REVISION_JA.md'
@@ -38,6 +43,11 @@ on:
       - 'source/ai/b198zr4-planned-source.mjs'
       - 'scripts/b198zr4-planned-source.test.mjs'
       - 'scripts/b198zr4-offline-replay.mjs'
+      - 'scripts/b198zr5-comparison.test.mjs'
+      - 'scripts/b198zr5-compare-captures.mjs'
+      - 'source/ai/b198zr5-model-comparison.mjs'
+      - 'evidence/b198zr5/**'
+      - 'docs/B198ZR5_COMPARISON_PROTOCOL_JA.md'
       - 'docs/B198ZR4_SINGLE_PASS_MODEL_SPATIAL_PLANNING_JA.md'
       - 'scripts/b198s-native-source.test.mjs'
       - 'docs/B198ZR1_PROTECTED_ARCHITECTURAL_REVISION_JA.md'
@@ -63,6 +73,8 @@ jobs:
         run: node --test scripts/b198zr3-functional-review.test.mjs
       - name: One-pass opt-in model-authored spatial program fixture + independent HOLD
         run: node --test scripts/b198zr4-planned-source.test.mjs
+      - name: R5 real-evidence comparability and no-false-winner regressions
+        run: node --test scripts/b198zr5-comparison.test.mjs
       - name: End-to-end offline contract report (non-Minecraft)
         run: |
           node scripts/b198zr3-offline-review.mjs --design evidence/b198zr2/assistant-revised-library-r2.json --contract evidence/b198zr3/r2-functional-review-contract.json --out "$RUNNER_TEMP/b198zr3-offline-report.json"
