@@ -58,9 +58,11 @@ try {
   $found=@{}
   [long]$total=0
   foreach($entry in $reader.Entries){
-   $name=$entry.FullName
+   # Windows Compress-Archive may encode path separators as backslashes.
+   # Normalize both forms BEFORE strict relative-path and traversal checks.
+   $name=$entry.FullName.Replace('\','/')
    # Never extract arbitrary archives or even parse traversal paths.
-   if($name.Contains('\') -or $name.StartsWith('/') -or
+   if($name.StartsWith('/') -or
     $name.Contains(':') -or $name -match '(^|/)\.\.(/|$)' -or
     $name -match '(^|/)\.(/|$)' -or
     $name -notmatch '^(?:R6_[a-zA-Z0-9._-]{1,100}/)?[a-zA-Z0-9._-]+/?$'){
