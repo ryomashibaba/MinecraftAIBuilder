@@ -141,7 +141,8 @@ export function compareR5SavedCaptures({
  // from becoming a comparison of two real model samples.
  const eligible=complete&&
   [baseline,planned].every(x=>x.receipt.status==='SOURCE_AND_PROMPT_DIGEST_MATCH'&&
-   x.receipt.provenance==='USER_SUPPLIED_REAL_MODEL_CLAIM');
+   x.receipt.provenance==='USER_SUPPLIED_REAL_MODEL_CLAIM')&&
+  baseline.receipt.modelId===planned.receipt.modelId;
  const bothRated=eligible&&[baseline,planned].every(x=>
   x.humanReview.status==='SELF_REPORTED_HUMAN_REVIEW_NOT_INDEPENDENTLY_AUTHENTICATED');
  const difference=bothRated&&[baseline,planned].every(x=>
