@@ -15,6 +15,8 @@ import {R2_FREEFORM_QUALITY_GUIDE}
  from './b198zr2-generic-quality-guide.mjs';
 import {R4_PLANNING_GUIDE}
  from './b198zr4-planned-source.mjs';
+import {R11_COMPACT_GUIDE,R11_GUIDE_SHA256}
+ from './b198zr11-compact-r4-output.mjs';
 
 export const SCHEMA='minecraftaibuilder-b198s-native-single-source-json-v1';
 const ENDPOINT=/^http:\/\/127\.0\.0\.1:(\d{2,5})\/v1\/chat\/completions$/;
@@ -79,7 +81,7 @@ const STRUCTURAL_GUIDE=[
 export function createB198SNativeBridge({
  numPredict=3072,numCtx=6144,keepAlive='10m',
  transport=http,addArchitectureGuide=true,plannedSourceMode=false,
- onModelResponse=null
+ compactPlannedGuide=false,onModelResponse=null
 }={}){
  if(!Number.isSafeInteger(numPredict)||numPredict<512||numPredict>4096)
   throw fail('OUTPUT_TOKENS_512_TO_4096');
@@ -89,6 +91,10 @@ export function createB198SNativeBridge({
  if(keepAlive!=='10m'&&keepAlive!=='5m')throw fail('KEEP_ALIVE_INVALID');
  if(typeof transport?.request!=='function')throw fail('TRANSPORT_REQUIRED');
  if(typeof plannedSourceMode!=='boolean')throw fail('PLANNED_MODE_INVALID');
+ if(typeof compactPlannedGuide!=='boolean'||
+  (compactPlannedGuide&&!plannedSourceMode)||
+  (compactPlannedGuide&&!addArchitectureGuide))
+  throw fail('R11_COMPACT_REQUIRES_PLANNED_MODE_AND_GUIDE');
  if(onModelResponse!==null&&typeof onModelResponse!=='function')
   throw fail('EVIDENCE_PERSISTENCE_CALLBACK_REQUIRED');
  const entries=[];
@@ -115,7 +121,11 @@ export function createB198SNativeBridge({
    return Promise.reject(fail('UNSAFE_MODEL_REQUEST'));
   }
   const messages=payload.messages.map(x=>({role:x.role,content:x.content}));
-  if(addArchitectureGuide)messages[0].content+='\n'+(plannedSourceMode?
+  if(compactPlannedGuide){
+   // Opt-in R11 collapses duplicate system instructions into one complete,
+   // concise contract. The frozen natural-language c01 task is unchanged.
+   messages[0].content=R11_COMPACT_GUIDE;
+  }else if(addArchitectureGuide)messages[0].content+='\n'+(plannedSourceMode?
    STRUCTURAL_GUIDE.replace('The ONLY outer keys are design, explanation, assumptions.',
     'The ONLY outer keys are design, explanation, assumptions, spatialPlan.')+
     '\n'+R4_PLANNING_GUIDE:STRUCTURAL_GUIDE)+
@@ -247,6 +257,8 @@ export function createB198SNativeBridge({
    thinkingOffIndependentlyVerified:false,
    nativeOllamaSourceOnly:true,
    r4PlannedSourceOptIn:plannedSourceMode,
+   r11CompactOutputProfileOptIn:compactPlannedGuide,
+   r11CompactGuideSha256:compactPlannedGuide?R11_GUIDE_SHA256:null,
    r4OriginalReturnedUnmodified:true,
    fourKeyR4RequiresIndependentReview:true,
     boundedMetadataRepairEnabled:true,
