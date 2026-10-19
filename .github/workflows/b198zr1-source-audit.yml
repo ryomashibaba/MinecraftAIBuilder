@@ -29,6 +29,7 @@ on:
       - 'scripts/b198zr7-offline-visual-review.mjs'
       - 'docs/B198ZR7_OFFLINE_VISUAL_REVIEW_JA.md'
       - 'source/ai/b198zr8-read-only-model-preflight.mjs'
+      - 'scripts/b198zr8-windows-launcher-smoke.test.mjs'
       - 'docs/B198ZR8_PLAIN_JAPANESE_APPROVAL_AND_READINESS_JA.md'
       - 'evidence/b198zr5/**'
       - 'docs/B198ZR5_COMPARISON_PROTOCOL_JA.md'
@@ -63,6 +64,7 @@ on:
       - 'scripts/b198zr7-offline-visual-review.mjs'
       - 'docs/B198ZR7_OFFLINE_VISUAL_REVIEW_JA.md'
       - 'source/ai/b198zr8-read-only-model-preflight.mjs'
+      - 'scripts/b198zr8-windows-launcher-smoke.test.mjs'
       - 'docs/B198ZR8_PLAIN_JAPANESE_APPROVAL_AND_READINESS_JA.md'
       - 'evidence/b198zr5/**'
       - 'docs/B198ZR5_COMPARISON_PROTOCOL_JA.md'
@@ -99,3 +101,15 @@ jobs:
         run: |
           node scripts/b198zr3-offline-review.mjs --design evidence/b198zr2/assistant-revised-library-r2.json --contract evidence/b198zr3/r2-functional-review-contract.json --out "$RUNNER_TEMP/b198zr3-offline-report.json"
           test -s "$RUNNER_TEMP/b198zr3-offline-report.json"
+
+  actual-windows-command-and-zip-fixture:
+    runs-on: windows-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Real Windows CMD approval and ZIP packaging with fake localhost Ollama only
+        shell: pwsh
+        run: node --test scripts/b198zr8-windows-launcher-smoke.test.mjs
