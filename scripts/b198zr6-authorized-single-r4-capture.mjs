@@ -15,6 +15,8 @@ import {createB198SNativeBridge} from '../source/ai/b198s-native-ollama-source.m
 import {createB198GLocalModelAdapter}
  from '../source/ai/b198g-local-model-adapter.mjs';
 import {reviewR4PlannedProposal} from '../source/ai/b198zr4-planned-source.mjs';
+import {checkR8LocalModelAvailable}
+ from '../source/ai/b198zr8-read-only-model-preflight.mjs';
 import {writeR7OfflineVisualReview}
  from './b198zr7-offline-visual-review.mjs';
 
@@ -86,8 +88,13 @@ export async function runR6AuthorizedCapture({
   JSON.stringify(request,null,2)+'\n',{flag:'wx'});
  let originalSaved=false,requested=false,review=null,status='HOLD_NO_MODEL_RESPONSE';
  let reasonCode=null,bridge=null;
- let visualReview=null,visualReviewIssue=null;
+ let visualReview=null,visualReviewIssue=null,readOnlyPreflight=null;
  try{
+  // R8: read-only exact-model check BEFORE allocating GPU for the expensive POST.
+  // A listed model is not proof of sufficient GPU memory or actual model identity.
+  readOnlyPreflight=await checkR8LocalModelAvailable({model,port});
+  yes(readOnlyPreflight.status==='EXACT_MODEL_LISTED',
+   'PRECHECK_'+readOnlyPreflight.status);
   bridge=bridgeFactory({
    numPredict:sourceTokens,numCtx:contextTokens,
    plannedSourceMode:true,
@@ -143,6 +150,7 @@ export async function runR6AuthorizedCapture({
   request,requestedSingleCall:requested,
   reportedNativeRequestEvents:trace.length,
   nativeTrace:trace,originalSaved,
+  readOnlyPreflight,
   originalRawSha256:original===null?null:sha(original),
   originalRawBytes:original===null?0:Buffer.byteLength(original),
   sourceSha256:review?.compiled.sourceSha256??null,
