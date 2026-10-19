@@ -33,8 +33,10 @@ export async function checkR8LocalModelAvailable({
   };
   let req;
   const timer=setTimeout(()=>{
-   if(req)req.destroy();
+   // Set the true timeout result BEFORE destroying the socket: destruction
+   // may emit an error, and must never replace a timeout with 'unreachable'.
    done('HOLD_TAGS_TIMEOUT');
+   if(req)req.destroy();
   },timeoutMs);
   try{
    req=transport.request({
