@@ -55,6 +55,9 @@ export function analyzeR13SavedCapture({
   if(runResult.r11CompletionAudit?.rawSha256!==undefined&&
     runResult.r11CompletionAudit.rawSha256!==rawSha256)
    discrepancies.push('R11_RAW_AUDIT_SHA_MISMATCH');
+  if(matchingReceipt&&typeof runResult.request?.modelRequested==='string'&&
+   runResult.request.modelRequested!==receipt.modelId)
+   discrepancies.push('R6_MODEL_ID_AND_RECEIPT_DISAGREE');
  }
  let parsed=null,parsedAsJson=false,fourKeys=false;
  let declaredPlanStatus='NOT_EVALUATED';
@@ -117,6 +120,8 @@ export function analyzeR13SavedCapture({
   status='HOLD_DECLARED_FUNCTIONAL_CLAIM';
  else if(sourceQuality?.sourceGoalsStatus!=='SOURCE_GOALS_PASS')
   status='HOLD_FROZEN_SOURCE_GEOMETRY_GOALS';
+ else if(!matchingReceipt||receipt.origin!=='USER_SUPPLIED_REAL_MODEL_CLAIM')
+  status='HOLD_CAPTURE_PROVENANCE_NOT_SUBSTANTIATED';
  else status='WAITING_FOR_INDEPENDENT_HUMAN_ARCHITECTURE_REVIEW';
  // No acceptance state includes approved construction or inferred model
  // quality; even a clean source still requires independent manual review.
