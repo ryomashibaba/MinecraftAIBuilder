@@ -234,6 +234,8 @@ export function createB198SNativeBridge({
   requestBudget:{numPredict,numCtx,keepAlive,thinkingOffRequested:true,
    thinkingOffIndependentlyVerified:false,
    nativeOllamaSourceOnly:true,
+   r4PlannedSourceOptIn:plannedSourceMode,
+   fourKeyR4RequiresIndependentReview:true,
     boundedMetadataRepairEnabled:true,
     geometryRepairNeverAutomatic:true,
     declaredBoundsExpansionOnlyIfNoGeometryChanges:true,
