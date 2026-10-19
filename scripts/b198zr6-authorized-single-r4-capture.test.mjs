@@ -37,9 +37,18 @@ const fixture=()=>({
  }
 });
 const mk=()=>fs.mkdtempSync(path.join(os.tmpdir(),'b198zr6-ci-'));
-async function serverWith(content,reason='stop'){
- let count=0,captured=null;
+async function serverWith(content,reason='stop',tags=['R6_CI_FAKE_PROVIDER']){
+ let count=0,captured=null,tagsChecks=0;
  const server=http.createServer(async(req,res)=>{
+  if(req.method==='GET'&&req.url==='/api/tags'){
+   tagsChecks++;
+   res.writeHead(200,{'Content-Type':'application/json'});
+   res.end(JSON.stringify({models:tags.map(name=>({name}))}));
+   return;
+  }
+  if(req.method!=='POST'||req.url!=='/api/chat'){
+   res.writeHead(404);res.end();return;
+  }
   count++;let data='';for await(const part of req)data+=String(part);
   captured=JSON.parse(data);
   res.writeHead(200,{'Content-Type':'application/json'});
@@ -49,6 +58,7 @@ async function serverWith(content,reason='stop'){
  });
  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
  return {port:server.address().port,get count(){return count},
+  get tagsChecks(){return tagsChecks},
   get payload(){return captured},
   close:()=>new Promise(resolve=>server.close(resolve))};
 }
@@ -76,6 +86,9 @@ test('R6 native single request preserves four-key original byte for byte and ind
  try{
   const report=await runR6AuthorizedCapture(cfg(root,srv));
   assert.equal(srv.count,1);
+  assert.equal(srv.tagsChecks,1);
+  assert.equal(report.readOnlyPreflight.status,'EXACT_MODEL_LISTED');
+  assert.equal(report.readOnlyPreflight.inferenceRequests,0);
   assert.equal(srv.payload.think,false);
   assert.equal(srv.payload.format,'json');
   assert.equal(srv.payload.stream,false);
@@ -162,5 +175,21 @@ test('R6 rejects model-declared occupied protected void but preserves source rec
   assert.equal(report.originalSaved,true);
   assert.equal(report.originalRawSha256,sha(raw));
   assert.equal(report.safety.constructionApproved,false);
+ }finally{await srv.close();fs.rmSync(root,{recursive:true,force:true})}
+});
+
+test('R8 preflight stops non-installed model before any heavy POST; evidence HOLD is still saved',async()=>{
+ const root=mk();const srv=await serverWith(JSON.stringify(fixture()),'stop',[]);
+ try{
+  const result=await runR6AuthorizedCapture(cfg(root,srv));
+  assert.equal(srv.tagsChecks,1);
+  assert.equal(srv.count,0);
+  assert.equal(result.originalSaved,false);
+  assert.equal(result.requestedSingleCall,false);
+  assert.equal(result.readOnlyPreflight.status,'HOLD_EXACT_MODEL_MISSING');
+  assert.equal(result.reasonCode,'B198ZR6_PRECHECK_HOLD_EXACT_MODEL_MISSING');
+  assert.equal(result.status,'HOLD_MODEL_TRANSPORT_OR_SOURCE_REVIEW');
+  assert.equal(fs.existsSync(path.join(root,'single','R6_SINGLE_CAPTURE_RESULT.json')),true);
+  assert.equal(result.safety.worldWrites,0);
  }finally{await srv.close();fs.rmSync(root,{recursive:true,force:true})}
 });
