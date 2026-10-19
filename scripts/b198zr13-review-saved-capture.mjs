@@ -20,12 +20,20 @@ function optionalJson(file){
  yes(info.isFile()&&info.size<=300000,'OVERSIZE_OR_INVALID_JSON_EVIDENCE');
  return JSON.parse(fs.readFileSync(file,'utf8'));
 }
-export function renderR13QualityReport(report){
+export function renderR13QualityReport(report,{sameFolderViewer=false}={}){
  yes(report?.schema==='minecraftaibuilder-b198zr13-quality-decision-v1',
   'EXPECTED_PINNED_R13_REPORT');
  const row=(label,value)=>`<tr><th>${html(label)}</th><td>${html(value)}</td></tr>`;
  const criteria=report.frozenHumanReview.map((c,i)=>`<li><b>${i+1}. ${html(c.question)}</b><p>未審査 — 3Dを見て人間が判断してください</p></li>`).join('');
  const issues=report.evidenceProvenance.discrepancies.map(s=>`<li>${html(s)}</li>`).join('');
+ const riskItems=(report.machineAuditedGeometry?.sourceCriticFindings??[])
+  .slice(0,12).map(item=>`<li><b>${html(item.severity)} / ${html(item.id)}</b>
+   <p>${html(typeof item.evidence==='string'?item.evidence:
+    JSON.stringify(item.evidence))}</p>
+   <p>注意：${html(item.recommendation)}</p></li>`).join('');
+ const viewerLinks=sameFolderViewer?
+  '<p>同じフォルダーで <a href="index.html">3D建築を開く</a> → <a href="B198W_REVIEW_BOARD.html">人間評価票を開く</a> の順に確認してください。</p>':'';
+
  const reason=report.source.sourceError||report.declaredFunctionality.issue||'—';
  return `<!doctype html>
 <html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -62,12 +70,13 @@ ${row('厳格B143コンパイル',report.source.geometryStatus)}
 ${row('形状の最終ボクセル数',report.source.compiledVoxels)}
 ${row('ソース要素数',report.source.modelAuthoredElementCount)}
 ${row('凍結した目標寸法・素材等の達成',report.machineAuditedGeometry?.sourceGoalsStatus??'未検証')}
+${row('形状リスク（HIGH）',report.machineAuditedGeometry?.highRiskCount??'未検証')}
 ${row('モデルが宣言した動線',report.declaredFunctionality.status)}
 ${row('実際のMinecraftプレイヤー歩行','未検証')}
-</table></section>
+</table>${riskItems?`<h3>機械が検出した注意点（建築品質の自動評価ではありません）</h3><ul>${riskItems}</ul>`:''}</section>
 <section><h2>人間が3Dを見て判断する項目</h2>
 <p>下記は「未審査」です。項目が存在することだけでは得点や合格にはなりません。</p><ol>${criteria}</ol>
-<p>既存のB198W 3Dビューアーと評価票があれば、視覚と意味の判断に利用してください。</p></section>
+<p>既存のB198W 3Dビューアーと評価票があれば、視覚と意味の判断に利用してください。</p>${viewerLinks}</section>
 <section><h2>利用状況と安全</h2><table>
 ${row('今回の分析で使用したQwen推論','0回')}
 ${row('Ollama出力トークン（記録された場合）',report.nativeTelemetryClaim.outputTokens)}
