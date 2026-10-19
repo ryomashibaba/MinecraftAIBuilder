@@ -32,6 +32,8 @@ export const R4_PLANNING_GUIDE=[
  'Include at least one genuinely occupiable functional zone and one destination; leave protectedVoids empty only when a building legitimately needs no open void.',
  'Do not invent unrealistically low requirements to fabricate a pass. Allocate substantial meaningful floor area and fully connected supported rooms.',
  'Verify the FINAL ordered ADD/CUT composition against the declared plan, not just the individual element names or intended appearances.',
+ 'Budget JSON to fit in one response. Prefer one supported staircase element (origin, axis, direction, width, steps, treadDepth) for a straight flight instead of 20-30 repetitive boxes. Connect each end to real floor landings.',
+ 'A B143 staircase is only conceptual supported voxel geometry; do not claim real Minecraft stairs, avatar walkability or automatic architectural approval.',
  'Return geometry AND spatialPlan within the existing output token limit, with source-only coordinates; never output Minecraft commands or construction claims.',
  'Architectural originality belongs to the model. Do not use fixed genres, keyword-to-shape mappings, or a predefined floorplan.'
 ].join('\n');
