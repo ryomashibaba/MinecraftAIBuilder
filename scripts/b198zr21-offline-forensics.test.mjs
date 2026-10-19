@@ -75,6 +75,24 @@ test('R21 detects exactly five missing ADD materials, not valid wood, and bad la
  assert.equal(r.safety.gates.length,9);
  assert.deepEqual(r.safety.BuildPlan.operations,[]);
 });
+test('R21 curved-primary-mass signal rejects straight beam, accepts sizable true curved primitive only as advisory',()=>{
+ const beamOnly=structuredClone(fixture);
+ beamOnly.design.elements.push({id:'straight-spine',shape:'beam',mode:'add',
+  start:[10,7,10],end:[40,7,10],thickness:2,material:'metal'});
+ const b=inspectR21SavedOriginal(JSON.stringify(beamOnly),{
+  requestPrompt:'curved coastal public building'});
+ assert(b.advisoryArchitecturalFindings.some(
+  v=>v.code==='CURVED_SILHOUETTE_NOT_DEMONSTRATED_BY_MACRO_FORMS'));
+ const withCurve=structuredClone(beamOnly);
+ withCurve.design.elements.push({id:'curved-primary-volume',
+  shape:'ellipsoid',mode:'add',center:[32,16,32],radii:[12,6,8],material:'glass'});
+ const c=inspectR21SavedOriginal(JSON.stringify(withCurve),{
+  requestPrompt:'curved coastal public building'});
+ assert(!c.advisoryArchitecturalFindings.some(
+  v=>v.code==='CURVED_SILHOUETTE_NOT_DEMONSTRATED_BY_MACRO_FORMS'));
+ assert.equal(c.qualityCertified,false);
+ assert.equal(c.safety.constructionApproved,false);
+});
 test('R21 refuses mismatched saved original digest, preserves raw, never fixes JSON',()=>{
  assert.throws(()=>inspectR21SavedOriginal(raw,{
   expectedRawSha256:'0'.repeat(64)}),/SAVED_ORIGINAL_HASH_MISMATCH/);
