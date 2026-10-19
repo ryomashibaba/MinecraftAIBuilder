@@ -132,7 +132,16 @@ export function inspectR21SavedOriginal(raw,{
   advisory.push(issue('ENTRANCE_BOTTOM_BOUNDARY_NO_LOCAL_SUPPORT',
    {entrance:p.entrance,externalGroundUnknown:true}));
  const curved=/(曲線|曲面|曲がった|curv(?:ed|e|ature)|湾曲)/i.test(requestPrompt);
- if(curved&&!els.some(e=>['ellipsoid','torus','beam'].includes(e?.shape)))
+ // A straight beam is not curved. Small cylinders/pillars likewise
+ // cannot demonstrate the *main building mass* described as curved.
+ // This is only an advisory proxy; even large curved primitives are not
+ // an independent human certification of the actual silhouette.
+ const macroCurve=els.some(e=>
+  (e?.shape==='ellipsoid'&&vec(e.radii)&&
+    e.radii.filter(v=>v>=5).length>=2)||
+  (e?.shape==='torus'&&Number.isSafeInteger(e.majorRadius)&&
+    e.majorRadius>=6));
+ if(curved&&!macroCurve)
   advisory.push(issue('CURVED_SILHOUETTE_NOT_DEMONSTRATED_BY_MACRO_FORMS',
    {semanticShapeJudgmentRequiresHuman:true}));
  return {
