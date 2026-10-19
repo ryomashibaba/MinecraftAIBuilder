@@ -57,8 +57,8 @@ export function inspectR11OriginalRaw(raw,{profile=PROFILE,outputTokenLimit=3072
  // Only capture model-reported telemetry, not fabricated token estimates
  // based on JSON length, human quality or local model identity.
  const last=nativeTrace.at(-1);
- const evalCount=last&&Number.isSafeInteger(last.outputTokens)&&
-  last.outputTokens>=0?last.outputTokens:null;
+ const evalCount=last&&Number.isSafeInteger(last.generatedTokens)&&
+  last.generatedTokens>=0?last.generatedTokens:null;
  const atLimit=evalCount===null?null:evalCount>=outputTokenLimit;
  return {
   schema:SCHEMA,profile,profileGuideSha256:R11_GUIDE_SHA256,
