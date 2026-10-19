@@ -11,6 +11,8 @@ import {createHash} from 'node:crypto';
 import {performance} from 'node:perf_hooks';
 import {prepareCapturedModelSource}
  from './b198u-bounds-only-repair.mjs';
+import {R2_FREEFORM_QUALITY_GUIDE}
+ from './b198zr2-generic-quality-guide.mjs';
 
 export const SCHEMA='minecraftaibuilder-b198s-native-single-source-json-v1';
 const ENDPOINT=/^http:\/\/127\.0\.0\.1:(\d{2,5})\/v1\/chat\/completions$/;
@@ -104,7 +106,7 @@ export function createB198SNativeBridge({
    return Promise.reject(fail('UNSAFE_MODEL_REQUEST'));
   }
   const messages=payload.messages.map(x=>({role:x.role,content:x.content}));
-  if(addArchitectureGuide)messages[0].content+='\n'+STRUCTURAL_GUIDE;
+  if(addArchitectureGuide)messages[0].content+='\n'+STRUCTURAL_GUIDE+'\n'+R2_FREEFORM_QUALITY_GUIDE;
   const native={
    model:payload.model,messages,stream:false,format:'json',think:false,
    keep_alive:keepAlive,
