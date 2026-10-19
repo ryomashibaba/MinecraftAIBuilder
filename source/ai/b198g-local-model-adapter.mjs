@@ -21,6 +21,8 @@ const SYSTEM=[
  'Primitive shapes: box,ellipsoid,cylinder,torus,beam,staircase. Modes: add and cut (staircase only add).',
  'Compact staircases: one add element with shape staircase, origin:[x,y,z],axis:x or z,direction:1 or -1,width:2..12,steps:2..32,treadDepth:1..3. Each step rises exactly one voxel.',
  'Use a staircase element instead of dozens of individually authored stair boxes; reserve output tokens for original composition and functional rooms.',
+ 'Optional repeat:{count:2..32,offset:[dx,dy,dz]} on an individual add/cut element translates it by the given integer vector each time; repeated copies must remain inside bounds and use the original shape parameters.',
+ 'Use repeat for columns, facade ribs and repetitive beam/void components, not fixed typology, floorplan presets or semantically unique areas.',
  'Allowed add materials: stone,concrete,metal,glass,wood,glow,accent.',
  'Use only local integer coordinates within bounds; no Minecraft commands.',
  'Original designs must be architectural and respond specifically to Japanese prompts.',
