@@ -10,7 +10,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {verifyCompiled} from '../source/ai/b143-building-dsl.mjs';
 import {compileB143Gallery,renderB143Html,verifyB143Payload}
- from './build-b143-site.mjs';
+ from './b143-gallery-core.mjs';
 import {writeB198WReviewBundle}
  from './b198w-quality-review.mjs';
 export const SCHEMA='minecraftaibuilder-b198zr7-offline-visual-review-v1';
