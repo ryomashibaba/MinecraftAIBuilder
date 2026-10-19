@@ -5,15 +5,25 @@ on:
       - feature/b198zr1-protected-architectural-revision
     paths:
       - 'evidence/b198zr1/**'
+      - 'evidence/b198zr2/**'
       - 'scripts/b198zr1-strict-source-audit.mjs'
       - 'source/ai/b198zr1-spatial-claims.mjs'
+      - 'source/ai/b198zr2-generic-quality-guide.mjs'
+      - 'source/ai/b198s-native-ollama-source.mjs'
+      - 'scripts/b198zr2-strict-architecture-audit.mjs'
+      - 'scripts/b198s-native-source.test.mjs'
       - 'docs/B198ZR1_PROTECTED_ARCHITECTURAL_REVISION_JA.md'
       - '.github/workflows/b198zr1-source-audit.yml'
   pull_request:
     paths:
       - 'evidence/b198zr1/**'
+      - 'evidence/b198zr2/**'
       - 'scripts/b198zr1-strict-source-audit.mjs'
       - 'source/ai/b198zr1-spatial-claims.mjs'
+      - 'source/ai/b198zr2-generic-quality-guide.mjs'
+      - 'source/ai/b198s-native-ollama-source.mjs'
+      - 'scripts/b198zr2-strict-architecture-audit.mjs'
+      - 'scripts/b198s-native-source.test.mjs'
       - 'docs/B198ZR1_PROTECTED_ARCHITECTURAL_REVISION_JA.md'
       - '.github/workflows/b198zr1-source-audit.yml'
 permissions:
@@ -29,3 +39,7 @@ jobs:
           node-version: '24'
       - name: Strict B143 design compiler and discrete occupancy review
         run: node scripts/b198zr1-strict-source-audit.mjs
+      - name: B198Z-R2 genuine compiler and negative architecture regressions
+        run: node scripts/b198zr2-strict-architecture-audit.mjs
+      - name: Verify native model-transport fixture and quality-guide integration
+        run: node --test scripts/b198s-native-source.test.mjs
