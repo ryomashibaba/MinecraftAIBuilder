@@ -56,19 +56,20 @@ function walk(dir){
 }
 async function fakeOllama(){
  const calls={tags:0,chat:0,unrecognized:0,request:null};
+ const state={available:['qwen3.8:27b'],output:original,reason:'stop'};
  const server=http.createServer(async(req,res)=>{
   if(req.method==='GET'&&req.url==='/api/tags'){
    calls.tags++;
    res.writeHead(200,{'Content-Type':'application/json'});
-   res.end(JSON.stringify({models:[{name:'qwen3.8:27b'}]}));return;
+   res.end(JSON.stringify({models:state.available.map(name=>({name}))}));return;
   }
   if(req.method==='POST'&&req.url==='/api/chat'){
    calls.chat++;
    let payload='';for await(const b of req)payload+=String(b);
    calls.request=JSON.parse(payload);
    res.writeHead(200,{'Content-Type':'application/json'});
-   res.end(JSON.stringify({done:true,done_reason:'stop',
-    message:{content:original},eval_count:640,eval_duration:2800000000}));
+   res.end(JSON.stringify({done:true,done_reason:state.reason,
+    message:{content:state.output},eval_count:640,eval_duration:2800000000}));
    return;
   }
   calls.unrecognized++;res.writeHead(403);res.end();
@@ -78,7 +79,7 @@ async function fakeOllama(){
   server.once('error',reject);
   server.listen(11434,'127.0.0.1',resolve);
  });
- return {calls,close:()=>new Promise(resolve=>server.close(resolve))};
+ return {calls,state,close:()=>new Promise(resolve=>server.close(resolve))};
 }
 function runCmd(approval,env){
  return new Promise((resolve,reject)=>{
@@ -139,6 +140,25 @@ test('real Windows CMD: typed authorization -> fake Ollama 1 request -> ZIP of s
   assert.deepEqual(report.safety.BuildPlan.operations,[]);
   assert.equal(report.worldContacts,0);
   assert.equal(report.worldWrites,0);
+  // Windows failure-path regression: exact model no longer installed.
+  // This second typed approval is a CI fixture, NOT another real inference.
+  fake.state.available=[];
+  const missing=await runCmd('I_APPROVE_ONE_LOCAL_MODEL_REQUEST',env);
+  assert.equal(missing.code,2,JSON.stringify(missing).slice(-1200));
+  assert.equal(fake.calls.tags,2);
+  assert.equal(fake.calls.chat,1,'missing model must never trigger a POST');
+  const files2=walk(outputRoot);
+  const holdReports=files2.filter(x=>path.basename(x)==='R6_SINGLE_CAPTURE_RESULT.json');
+  assert.equal(holdReports.length,2);
+  const held=holdReports.map(x=>JSON.parse(fs.readFileSync(x,'utf8')))
+   .find(x=>x.readOnlyPreflight?.status==='HOLD_EXACT_MODEL_MISSING');
+  assert(held,'missing-model report should survive the Windows wrapper');
+  assert.equal(held.originalSaved,false);
+  assert.equal(held.requestedSingleCall,false);
+  assert.equal(fs.readdirSync(outputRoot)
+   .filter(x=>x.endsWith('_UPLOAD_THIS_RESULT.zip')).length,2,
+   'even a no-model HOLD should produce one uploadable diagnostic ZIP');
+
  }finally{
   await fake.close();
   fs.rmSync(temporary,{recursive:true,force:true});
