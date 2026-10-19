@@ -131,6 +131,10 @@ test('real Windows CMD: typed authorization -> fake Ollama 1 request -> ZIP of s
   assert.equal(fs.readFileSync(originalPath,'utf8'),original);
   assert(find('index.html'),'3D viewer must be inside ZIP');
   assert(find('B198W_REVIEW_BOARD.html'),'human scoring board must be in ZIP');
+  assert(find('R13_OFFLINE_QUALITY_DECISION.json'),
+   'Independent R13 quality decision must be inside final Windows ZIP');
+  assert(find('R13_OFFLINE_QUALITY_OVERVIEW.html'),
+   'Human-readable Japanese R13 quality overview must be inside final Windows ZIP');
   const report=JSON.parse(fs.readFileSync(find('R6_SINGLE_CAPTURE_RESULT.json'),'utf8'));
   assert.equal(report.originalRawSha256,sha(original));
   assert.equal(report.status,'SOURCE_AND_DECLARED_SPATIAL_CLAIMS_FORMALLY_PASS');
