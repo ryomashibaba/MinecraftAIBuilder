@@ -148,7 +148,7 @@ test('reusable R4 native Ollama fixture sends four-key plan with ONE HTTP reques
 test('R4 offline replay preserves ORIGINAL captured four-key bytes; never rewrites or reinvokes model',()=>{
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'b198zr4-replay-'));
  try{
-  const raw=JSON.stringify(fixture(),null,2)+'\\n';
+  const raw=JSON.stringify(fixture(),null,2)+'\n';
   const source=path.join(root,'captured-original.txt');
   fs.writeFileSync(source,raw);
   const out=path.join(root,'r4-report');
