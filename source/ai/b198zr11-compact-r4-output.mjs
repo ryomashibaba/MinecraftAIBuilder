@@ -60,6 +60,10 @@ export function inspectR11OriginalRaw(raw,{profile=PROFILE,outputTokenLimit=3072
  const evalCount=last&&Number.isSafeInteger(last.generatedTokens)&&
   last.generatedTokens>=0?last.generatedTokens:null;
  const atLimit=evalCount===null?null:evalCount>=outputTokenLimit;
+ const serverReportedIncomplete=last&&
+  typeof last.complete==='boolean'?!last.complete:null;
+ const serverDoneReason=last&&typeof last.doneReason==='string'?
+  last.doneReason:null;
  return {
   schema:SCHEMA,profile,profileGuideSha256:R11_GUIDE_SHA256,
   rawSha256:hash(raw),rawUtf8Bytes:Buffer.byteLength(raw),
@@ -69,6 +73,7 @@ export function inspectR11OriginalRaw(raw,{profile=PROFILE,outputTokenLimit=3072
   originalModelIdentityVerified:false,
   actualModelTokenUsage:evalCount,
   modelReportedOutputLimitReached:atLimit,
+  serverReportedIncomplete,serverDoneReason,
   sourceElements,staircaseElements,repeatedElements,declaredInstanceCount,
   noAutomaticRepairOrRetry:true,
   modelCallsInitiatedByInspection:0,
