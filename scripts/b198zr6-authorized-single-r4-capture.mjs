@@ -27,9 +27,16 @@ import {renderR13QualityReport}
  from './b198zr13-review-saved-capture.mjs';
 import {PROFILE as R11_PROFILE,R11_GUIDE_SHA256,inspectR11OriginalRaw}
  from '../source/ai/b198zr11-compact-r4-output.mjs';
+import {R21_FUTURE_GUIDE_SHA256}
+ from '../source/ai/b198zr21-future-architecture-guide.mjs';
+import {inspectR21SavedOriginal}
+ from '../source/ai/b198zr21-offline-forensics.mjs';
 
 export const SCHEMA='minecraftaibuilder-b198zr6-authorized-single-capture-v1';
 export const EXPLICIT_AUTHORIZATION='I_APPROVE_ONE_LOCAL_MODEL_REQUEST';
+// R23 quality profile is distinct from the already-consumed R17 permission.
+export const R23_FUTURE_AUTHORIZATION='I_APPROVE_R23_ONE_LOCAL_QWEN_REQUEST';
+export const R23_PROFILE='r22-quality';
 const fail=s=>{throw Error('B198ZR6_'+s)};
 const yes=(p,s)=>{if(!p)fail(s)};
 const sha=s=>createHash('sha256').update(s).digest('hex');
@@ -68,7 +75,9 @@ export async function runR6AuthorizedCapture({
  promptProfile='r8-original',bridgeFactory=createB198SNativeBridge
 }={}){
  // ALL cheap guards run before even making the output folder.
- yes(authorization===EXPLICIT_AUTHORIZATION,'NO_EXPLICIT_AUTHORIZATION');
+ const future=promptProfile===R23_PROFILE;
+ yes(authorization===(future?R23_FUTURE_AUTHORIZATION:EXPLICIT_AUTHORIZATION),
+  'NO_EXPLICIT_AUTHORIZATION');
  yes(typeof model==='string'&&
   /^[A-Za-z0-9._:/-]{2,140}$/.test(model),'EXPLICIT_MODEL_ID');
  yes(typeof outDir==='string'&&outDir.length>0&&
@@ -79,7 +88,8 @@ export async function runR6AuthorizedCapture({
   Number.isSafeInteger(sourceTokens)&&sourceTokens>=512&&sourceTokens<=4096&&
   Number.isSafeInteger(contextTokens)&&contextTokens>=4096&&contextTokens<=8192&&
   sourceTokens<=contextTokens-2048,'INVALID_BUDGET');
- yes(['r8-original',R11_PROFILE].includes(promptProfile),'PROMPT_PROFILE');
+ yes(['r8-original',R11_PROFILE,R23_PROFILE].includes(promptProfile),
+  'PROMPT_PROFILE');
  const spec=CREATION_CASES.find(s=>s.id==='c01');
  yes(spec?.kind==='creation','FROZEN_C01_REQUIRED');
  const dir=path.resolve(outDir);
@@ -92,6 +102,7 @@ export async function runR6AuthorizedCapture({
   requestedMode:'R4_PLANNED_SOURCE_FOUR_KEYS',
   explicitPromptProfile:promptProfile,
   optInR11CompactGuideSha256:promptProfile===R11_PROFILE?R11_GUIDE_SHA256:null,
+  optInR23QualityGuideSha256:future?R21_FUTURE_GUIDE_SHA256:null,
   budget:{port,timeoutSeconds,sourceTokens,contextTokens,
    thinkingOff:true,temperature:0.35,keepAlive:'10m'},
   existingB198UOriginalNeverModified:true,
@@ -112,6 +123,7 @@ export async function runR6AuthorizedCapture({
   bridge=bridgeFactory({
    numPredict:sourceTokens,numCtx:contextTokens,
    plannedSourceMode:true,compactPlannedGuide:promptProfile===R11_PROFILE,
+   r22QualityGuide:future,
    onModelResponse:({originalContent,correctedContent,metadataRepair,boundsRepair})=>{
     yes(typeof originalContent==='string'&&originalContent.length>0&&
      originalContent.length<=60000,'UNTRUSTED_RESPONSE_LENGTH');
@@ -129,6 +141,10 @@ export async function runR6AuthorizedCapture({
    'FOUR_KEY_BRIDGE_REQUIRED');
   yes(bridge.requestBudget?.r11CompactOutputProfileOptIn===
     (promptProfile===R11_PROFILE),'PROMPT_PROFILE_BRIDGE_MISMATCH');
+  yes(bridge.requestBudget?.r22QualityOutputProfileOptIn===future&&
+    bridge.requestBudget?.r22QualityGuideSha256===
+    (future?R21_FUTURE_GUIDE_SHA256:null),
+   'R23_QUALITY_PROFILE_BRIDGE_MISMATCH');
   const generate=createB198GLocalModelAdapter({
    model,endpoint:'http://127.0.0.1:'+port+'/v1/chat/completions',
    fetcher:bridge.fetcher,timeoutMs:timeoutSeconds*1000,
@@ -187,8 +203,18 @@ export async function runR6AuthorizedCapture({
   fs.writeFileSync(path.join(dir,'R11_OFFLINE_COMPLETION_AUDIT.json'),
    JSON.stringify(r11Report,null,2)+'\n',{flag:'wx'});
  }
+ const r23Forensics=future&&original!==null?
+  inspectR21SavedOriginal(original,{
+   expectedRawSha256:sha(original),requestPrompt:spec.prompt,
+   sourceLabel:'R23_SAVED_ORIGINAL'}):null;
+ if(r23Forensics!==null){
+  fs.writeFileSync(path.join(dir,'R23_SOURCE_FORENSICS.json'),
+   JSON.stringify(r23Forensics,null,2)+'\n',{flag:'wx'});
+ }
  const result={schema:SCHEMA,status,reasonCode,
   promptProfile,r11CompletionAudit:r11Report,
+  r23FutureProfileGuideSha256:future?R21_FUTURE_GUIDE_SHA256:null,
+  r23SourceForensics:r23Forensics,
   request,requestedSingleCall:requested,
   reportedNativeRequestEvents:trace.length,
   nativeTrace:trace,originalSaved,
