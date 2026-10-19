@@ -113,17 +113,15 @@ export function validateDesign(d){
    if(shell)yes(e.radius>shell,'SHELL_TOO_THICK');
    yes(e.center===undefined&&e.radii===undefined&&e.size===undefined&&e.majorRadius===undefined&&e.tubeRadius===undefined&&e.start===undefined&&e.end===undefined&&e.thickness===undefined,'CYLINDER_EXTRA');
   }
+  const domainVolume=b.reduce((n,v,i)=>n*(v-a[i]+1),1);
   if(repeated){
    const final=rep.offset.map(delta=>delta*(rep.count-1));
    a=a.map((v,i)=>v+Math.min(0,final[i]));
    b=b.map((v,i)=>v+Math.max(0,final[i]));
   }
   yes(a.every((v,i)=>v>=0)&&b.every((v,i)=>v<[w,h,z][i]),'OUTSIDE_LOCAL_BOUNDS');
-  // Budget counts EVERY instance's source volume, even on total overlap.
-  // This deliberately prevents a repeated "cut" from hiding excess work.
-  const domainVolume=e.shape==='staircase'?
-   e.steps*e.treadDepth*e.width*e.steps:
-   domain(e)[1].reduce((n,v,i)=>n*(v-domain(e)[0][i]+1),1);
+  // Budget EVERY instance, including overlap or cuts. For old elements the
+  // original domain work and source hashes remain unchanged.
   work+=domainVolume*(rep?.count??1);
   yes(work<=MAX_WORK,'WORK_BUDGET');
   hasAdd||=e.mode==='add';
