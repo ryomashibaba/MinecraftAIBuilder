@@ -11,4 +11,4 @@ export const R2_FREEFORM_QUALITY_GUIDE=[
  'A transparent exterior is not a giant filled glass ellipsoid; use supported shell geometry or explicit cuts. Separate shelves, desks, equipment and furniture into believable thin components and preserve human approach aisles.',
  'Before returning JSON, mentally recheck exact bounding extents, inter-floor collisions, final empty air, entrances, landings, supports and functional connections. Source compile success alone is not aesthetic or Minecraft physical certification.',
  'Keep every claim as design intent only. No world coordinates, Minecraft block ID/state, executable BuildPlan, real-world write, or construction approval.'
-].join('\\n');
+].join('\n');
