@@ -106,10 +106,32 @@ export function evaluateR15Comparison({baseline,candidate,human=null}={}){
  const baselineStage=machineStage(baseline);
  const candidateStage=machineStage(candidate);
  const sameRaw=baseline.rawSha256===candidate.rawSha256;
+ const sameGeometry=typeof baseline.source.geometrySha256==='string'&&
+  shaRx.test(baseline.source.geometrySha256)&&
+  baseline.source.geometrySha256===candidate.source.geometrySha256;
+ const baselineModel=baseline.evidenceProvenance.modelIdClaimed;
+ const candidateModel=candidate.evidenceProvenance.modelIdClaimed;
+ const baselineLimit=baseline.nativeTelemetryClaim?.outputTokenLimit;
+ const candidateLimit=candidate.nativeTelemetryClaim?.outputTokenLimit;
+ const comparable={
+  frozenPromptShaEqual:baseline.frozenPromptSha256===candidate.frozenPromptSha256,
+  bothModelClaimsPresent:typeof baselineModel==='string'&&
+   baselineModel.trim().length>0&&typeof candidateModel==='string'&&
+   candidateModel.trim().length>0,
+  sameClaimedModel:null,
+  sameKnownModelOutputBudget:null,
+  settingOrProviderChangeMayConfoundAttribution:true,
+  noCausalPromptImprovementProven:true
+ };
+ if(comparable.bothModelClaimsPresent)
+  comparable.sameClaimedModel=baselineModel===candidateModel;
+ if(Number.isSafeInteger(baselineLimit)&&Number.isSafeInteger(candidateLimit))
+  comparable.sameKnownModelOutputBudget=baselineLimit===candidateLimit;
  const candidateReady=candidateStage==='MACHINE_READINESS_FOR_HUMAN_JUDGMENT';
  // No human review is evaluated if model-authored source isn't valid enough:
  // this prevents bogus positive scores from laundering truncated model data.
- const reviewed=candidateReady&&!sameRaw?humanReview(human,candidate):
+ const reviewed=candidateReady&&!sameRaw&&!sameGeometry?
+  humanReview(human,candidate):
   humanReview(null,candidate);
  const risk=candidate.machineAuditedGeometry?.highRiskCount;
  const highRisk=Number.isSafeInteger(risk)&&risk>0;
@@ -117,6 +139,9 @@ export function evaluateR15Comparison({baseline,candidate,human=null}={}){
  if(sameRaw){
   decision='HOLD_SAME_RAW_NOT_NEW_GENERATION';
   criticalNextStep='新しい原本が存在しない。旧結果の再監査をモデル改善と数えない。';
+ }else if(sameGeometry){
+  decision='HOLD_SAME_GEOMETRY_NO_ARCHITECTURAL_REVISION';
+  criticalNextStep='文章が変わっても最終建築形状が同じなら、建築の新しい設計成果として数えない。';
  }else if(!candidateReady){
   decision='HOLD_CANDIDATE_SOURCE_OR_PROVENANCE';
   criticalNextStep='原本の完全性・B143形状・独立R3動線・出力原本の出所を先に確認する。';
@@ -149,7 +174,8 @@ export function evaluateR15Comparison({baseline,candidate,human=null}={}){
    modelIdClaimed:candidate.evidenceProvenance.modelIdClaimed??null,
    independentlyAuthenticated:false},
   comparableFrozenPrompt:baseline.frozenPromptSha256===candidate.frozenPromptSha256,
-  sameRaw,
+  sameRaw,sameGeometry,
+  comparability:comparable,
   recoveredCompleteFourKeyOutputComparedWithBaseline:sourceProgress,
   jsonCompletionIsNotArchitecturalImprovementProof:true,
   frozenCriteria:checks(),
