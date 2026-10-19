@@ -119,6 +119,15 @@ test('R6 native single request preserves four-key original byte for byte and ind
   assert.equal(manifest.automaticAestheticQualityCertification,false);
   assert(fs.readFileSync(path.join(reviewFolder,'B198W_REVIEW_BOARD.html'),'utf8')
    .includes('B198W'));
+  const r13=JSON.parse(fs.readFileSync(
+   path.join(reviewFolder,'R13_OFFLINE_QUALITY_DECISION.json'),'utf8'));
+  const r13Html=fs.readFileSync(
+   path.join(reviewFolder,'R13_OFFLINE_QUALITY_OVERVIEW.html'),'utf8');
+  assert.equal(r13.rawSha256,sha(raw));
+  assert.equal(r13.source.geometryStatus,'B143_SOURCE_ONLY_GEOMETRY_VERIFIED');
+  assert.equal(r13.reviewerHasNotScoredAnything,true);
+  assert.equal(r13.safety.worldWrites,0);
+  assert(r13Html.includes('未審査'));
   assert.equal(report.modelDeclaredSpatialReview.status,'FORMAL_GEOMETRY_AND_ROUTE_CONSTRAINTS_PASS');
   assert.equal(report.modelGeneralizationCertified,false);
   assert.equal(report.modelAuthorshipIndependentlyAuthenticated,false);
@@ -157,6 +166,12 @@ test('R6 records truncated reply without any automatic retry or success claim',a
   assert.equal(report.reasonCode,'B198G_LOCAL_TRUNCATED_MODEL_RESPONSE');
   assert.equal(report.originalRawSha256,sha(raw));
   assert.equal(report.geometrySha256,null);
+  const r13Truncated=JSON.parse(fs.readFileSync(
+   path.join(root,'single','R13_OFFLINE_QUALITY_DECISION.json'),'utf8'));
+  assert.equal(r13Truncated.rawSha256,sha(raw));
+  assert.equal(r13Truncated.status,'HOLD_ORIGINAL_JSON_TRUNCATED_OR_INVALID');
+  assert(fs.readFileSync(path.join(root,'single','R13_OFFLINE_QUALITY_OVERVIEW.html'),'utf8')
+   .includes('途中終了または形式不正'));
   assert.equal(report.safety.worldWrites,0);
  }finally{await srv.close();fs.rmSync(root,{recursive:true,force:true})}
 });
