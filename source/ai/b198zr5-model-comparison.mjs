@@ -148,6 +148,8 @@ export function compareR5SavedCaptures({
   Number((planned.humanReview.scoreRatio-baseline.humanReview.scoreRatio).toFixed(4)):null;
  const status=!complete?'HOLD_MISSING_SAVED_MODEL_PAIR':
   !eligible?'HOLD_NOT_COMPARABLE_MODEL_PROVENANCE':
+  [baseline,planned].some(x=>x.status!=='SOURCE_COMPILED_HUMAN_REVIEW_REQUIRED')?
+   'HOLD_SOURCE_OR_DECLARED_SPATIAL_PLAN':
   !bothRated?'HOLD_PAIRED_HUMAN_REVIEW_MISSING':
   'PAIRED_SELF_REPORTED_HUMAN_SCORES_AVAILABLE_NOT_MODEL_CERTIFICATION';
  return {schema:SCHEMA,caseId,frozenBenchmark:'b198b-architecture-benchmark-v1',
