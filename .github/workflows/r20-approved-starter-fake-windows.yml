@@ -1,0 +1,28 @@
+name: R20 Approved Starter — Windows Fake Ollama Only
+on:
+  push:
+    branches:
+      - feature/b198zr1-protected-architectural-revision
+    paths:
+      - 'tools/r20-approved-once/**'
+      - 'scripts/b198zr20-approved-wrapper-fake-windows.test.mjs'
+      - '.github/workflows/r20-approved-starter-fake-windows.yml'
+  pull_request:
+    paths:
+      - 'tools/r20-approved-once/**'
+      - 'scripts/b198zr20-approved-wrapper-fake-windows.test.mjs'
+      - '.github/workflows/r20-approved-starter-fake-windows.yml'
+permissions:
+  contents: read
+jobs:
+  windows-only-fake-model:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Bind fake Ollama BEFORE starter; no real Qwen or Minecraft
+        shell: pwsh
+        run: node --test scripts/b198zr20-approved-wrapper-fake-windows.test.mjs
