@@ -5,12 +5,14 @@ on:
       - feature/b198zr1-protected-architectural-revision
     paths:
       - 'tools/r16-mini/**'
+      - 'tools/r16-starter/**'
       - 'scripts/b198zr16-offline-preflight.mjs'
       - 'scripts/b198zr16-windows-mini-smoke.ps1'
       - '.github/workflows/r16-mini-windows.yml'
   pull_request:
     paths:
       - 'tools/r16-mini/**'
+      - 'tools/r16-starter/**'
       - 'scripts/b198zr16-offline-preflight.mjs'
       - 'scripts/b198zr16-windows-mini-smoke.ps1'
       - '.github/workflows/r16-mini-windows.yml'
