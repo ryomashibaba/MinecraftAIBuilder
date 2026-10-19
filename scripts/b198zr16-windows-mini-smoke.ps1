@@ -5,6 +5,8 @@ $ErrorActionPreference='Stop'
 $repo=Split-Path -Parent $PSScriptRoot
 $script=Join-Path $repo 'tools\r16-mini\SETUP_R16_OFFLINE_ONLY.cmd'
 $install=Join-Path $repo 'tools\r16-mini\INSTALL_R16_MINI.ps1'
+$starter=Join-Path $repo 'tools\r16-starter\START_R16_OFFLINE.cmd'
+$bootstrap=Join-Path $repo 'tools\r16-starter\FETCH_PINNED_R16.ps1'
 $oldLocal=$env:LOCALAPPDATA
 $oldCI=$env:CI
 $temp=Join-Path $env:RUNNER_TEMP ('R16_MINI_CI_'+[Guid]::NewGuid().ToString('N'))
@@ -16,6 +18,18 @@ try {
  $check=(& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $install -CheckOnly 2>&1 | Out-String)
  if($LASTEXITCODE -ne 0 -or -not $check.Contains('32 SHA-verified files')){
   throw ('R16 manifest preflight failed: '+$check)
+ }
+ if(-not (Test-Path -LiteralPath $starter) -or
+    -not (Test-Path -LiteralPath $bootstrap)) {throw 'Starter ZIP scripts missing'}
+ # Run actual 3-file user ZIP bootstrap first: pinned-downloads the pinned
+ # installer, then 32-file source QA, without model launchers.
+ $starterOut=('' | & $starter 2>&1 | Out-String)
+ if($LASTEXITCODE -ne 0 -or -not $starterOut.Contains('Offline preparation only')){
+  throw ('R16 real ZIP starter failed: '+$starterOut)
+ }
+ $cachedInstaller=Join-Path $temp 'MinecraftAIBuilder\R16_SetupCache\INSTALL_R16_8675fb2ca2aa.ps1'
+ if(-not (Test-Path -LiteralPath $cachedInstaller -PathType Leaf)){
+  throw 'R16 ZIP starter installer cache missing'
  }
  $output=('' | & $script 2>&1 | Out-String)
  if($LASTEXITCODE -ne 0 -or -not $output.Contains('[PASS] R16 source integrity')){
