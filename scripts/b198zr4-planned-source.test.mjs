@@ -53,7 +53,7 @@ const reviewer=(d=fixture().design)=>({
 test('R4 one injected generator call yields separate UNVERIFIED model plan + independently verified functional result',async()=>{
  let count=0;
  const result=await proposeR4PlannedSource({
-  prompt:'未知の用途にも共通する中庭を持つ公共建物を設計してください',
+  prompt:'未知の用途にも共通する中庭を持つ公共建物を設計してください\n独創的な移動動線を備えてください',
   generator:async data=>{count++;
    assert.equal(data.attempt,1);assert.equal(data.maxAttempts,1);
    assert.equal(data.outputMode,'PLANNED_SOURCE_V1');return fixture();
