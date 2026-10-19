@@ -6,7 +6,7 @@ $ErrorActionPreference='Stop'
 $required='I_APPROVE_R23_ONE_LOCAL_QWEN_REQUEST'
 $model='qwen3.8:27b'
 $revision='44108944d0d9b0f892d01729c3fa3c76d006fe55'
-$expectedInstallerBlob='19178d748cec4876f5b433ab2bfdd6ad6de5eefa'
+$expectedInstallerBlob='65c6b5308a1921629d0a656dd0b1c0e81cea621b'
 function GitBlobSha([byte[]]$bytes){
  $prefix=[Text.Encoding]::ASCII.GetBytes('blob '+$bytes.Length+[char]0)
  $full=New-Object byte[] ($prefix.Length+$bytes.Length)
