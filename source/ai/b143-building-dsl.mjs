@@ -29,15 +29,35 @@ export function validateDesign(d){
  yes(Array.isArray(d.elements)&&d.elements.length>=1&&d.elements.length<=160,'ELEMENT_COUNT');
  const ids=new Set();let work=0,hasAdd=false;
  for(const e of d.elements){
-  yes(only(e,['id','shape','mode','material','origin','size','center','radii','axis','radius','length','shell','majorRadius','tubeRadius','start','end','thickness']),'ELEMENT_FIELDS');
+  yes(only(e,['id','shape','mode','material','origin','size','center','radii','axis','radius','length','shell','majorRadius','tubeRadius','start','end','thickness','direction','width','steps','treadDepth']),'ELEMENT_FIELDS');
   yes(typeof e.id==='string'&&/^[a-zA-Z][a-zA-Z0-9_-]{0,39}$/.test(e.id)&&!ids.has(e.id),'ELEMENT_ID');
   ids.add(e.id);
-  yes(['box','ellipsoid','cylinder','torus','beam'].includes(e.shape)&&['add','cut'].includes(e.mode),'SHAPE_MODE');
+  yes(['box','ellipsoid','cylinder','torus','beam','staircase'].includes(e.shape)&&['add','cut'].includes(e.mode),'SHAPE_MODE');
   yes(e.mode==='cut'?e.material===undefined:MATERIALS.includes(e.material),'MATERIAL');
   const shell=e.shell??0;
   yes(int(shell,0,4)&&!(e.mode==='cut'&&shell),'SHELL');
   let a,b;
-  if(e.shape==='box'){
+  if(e.shape==='staircase'){
+   // Compact, generic straight flight. One source element is an exact ordered
+   // solid voxel wedge: tread 0 at origin.y, tread i at origin.y+i.
+   // "staircase" is conceptual source geometry, NOT Minecraft stair blocks.
+   yes(e.mode==='add'&&!shell&&trip(e.origin,0,128)&&
+    ['x','z'].includes(e.axis)&&[1,-1].includes(e.direction)&&
+    int(e.width,2,12)&&int(e.steps,2,32)&&int(e.treadDepth,1,3),
+    'STAIRCASE_FIELDS');
+   yes(e.size===undefined&&e.center===undefined&&e.radii===undefined&&
+    e.radius===undefined&&e.length===undefined&&
+    e.majorRadius===undefined&&e.tubeRadius===undefined&&
+    e.start===undefined&&e.end===undefined&&e.thickness===undefined,
+    'STAIRCASE_EXTRA');
+   const v=e.steps*e.treadDepth,along=e.axis==='x'?0:2,
+    across=along===0?2:0;
+   a=e.origin.slice();b=e.origin.slice();
+   a[along]=Math.min(e.origin[along],e.origin[along]+e.direction*(v-1));
+   b[along]=Math.max(e.origin[along],e.origin[along]+e.direction*(v-1));
+   b[1]=e.origin[1]+e.steps-1;
+   b[across]=e.origin[across]+e.width-1;
+  }else if(e.shape==='box'){
    yes(trip(e.origin,0,128)&&trip(e.size,1,128),'BOX_COORD');
    a=e.origin;b=e.origin.map((v,i)=>v+e.size[i]-1);
    if(shell)yes(e.size.every(n=>n>shell*2),'SHELL_TOO_THICK');
@@ -85,6 +105,15 @@ export function validateDesign(d){
  return true;
 }
 function inside(e,x,y,z){
+ if(e.shape==='staircase'){
+  const along=e.axis==='x'?0:2,across=along===0?2:0,
+   p=[x,y,z],
+   forward=(p[along]-e.origin[along])*e.direction,
+   lateral=p[across]-e.origin[across];
+  return forward>=0&&forward<e.steps*e.treadDepth&&
+   lateral>=0&&lateral<e.width&&y>=e.origin[1]&&
+   y<=e.origin[1]+Math.floor(forward/e.treadDepth);
+ }
  if(e.shape==='box'){
   const [ax,ay,az]=e.origin,[sx,sy,sz]=e.size;
   if(x<ax||y<ay||z<az||x>=ax+sx||y>=ay+sy||z>=az+sz)return false;
@@ -121,6 +150,16 @@ function inside(e,x,y,z){
  return r2<=e.radius**2&&(!e.shell||r2>=(e.radius-e.shell)**2);
 }
 function domain(e){
+ if(e.shape==='staircase'){
+  const along=e.axis==='x'?0:2,across=along===0?2:0,
+   end=e.origin[along]+e.direction*(e.steps*e.treadDepth-1),
+   a=e.origin.slice(),b=e.origin.slice();
+  a[along]=Math.min(e.origin[along],end);
+  b[along]=Math.max(e.origin[along],end);
+  b[1]=e.origin[1]+e.steps-1;
+  b[across]=e.origin[across]+e.width-1;
+  return [a,b];
+ }
  if(e.shape==='box')return [e.origin,e.origin.map((v,i)=>v+e.size[i]-1)];
  if(e.shape==='ellipsoid')return [e.center.map((v,i)=>v-e.radii[i]),e.center.map((v,i)=>v+e.radii[i])];
  if(e.shape==='beam')
