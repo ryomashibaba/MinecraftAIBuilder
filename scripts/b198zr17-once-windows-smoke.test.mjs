@@ -201,8 +201,17 @@ test('R17 true Windows launcher: no approval/old approval => no GET or POST; fre
    'exit /b %errorlevel%',
    ''
   ].join('\r\n'));
+  // Windows commonly spells this environment key "Path", not "PATH".
+  // Never create two case-variant keys: Node may select only one.
+  const inheritedPath=Object.entries(env)
+   .find(([k])=>k.toLowerCase()==='path')?.[1];
+  assert(inheritedPath,'Windows PATH required for the isolated fake test');
   const failedEnv={...env,LOCALAPPDATA:failedApp,
-   PATH:shimDir+path.delimiter+env.PATH,R18_REAL_NODE_EXE:process.execPath};
+   R18_REAL_NODE_EXE:process.execPath};
+  for(const key of Object.keys(failedEnv)){
+   if(key.toLowerCase()==='path')delete failedEnv[key];
+  }
+  failedEnv.Path=shimDir+path.delimiter+inheritedPath;
   const failed=await execute('I_APPROVE_R17_ONE_LOCAL_QWEN_REQUEST',failedEnv);
   assert.equal(failed.code,2,JSON.stringify(failed).slice(-1900));
   assert.equal(fake.calls.get,1,'early Node failure must not contact the model');
