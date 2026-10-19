@@ -35,6 +35,9 @@ on:
       - 'docs/B198ZR8_PRE_EXECUTION_BUG_AUDIT_20261019_JA.md'
       - 'scripts/b198zr9-compact-staircase.test.mjs'
       - 'scripts/b198zr10-generic-repeat.test.mjs'
+      - 'source/ai/b198zr11-compact-r4-output.mjs'
+      - 'scripts/b198zr11-output-budget.test.mjs'
+      - 'docs/B198ZR11_COMPACT_COMPLETE_JSON_JA.md'
       - 'docs/B198ZR10_GENERIC_REPEAT_JA.md'
       - 'source/ai/b143-building-dsl.mjs'
       - 'docs/B198ZR9_COMPACT_SOURCE_STAIRS_JA.md'
@@ -77,6 +80,9 @@ on:
       - 'docs/B198ZR8_PRE_EXECUTION_BUG_AUDIT_20261019_JA.md'
       - 'scripts/b198zr9-compact-staircase.test.mjs'
       - 'scripts/b198zr10-generic-repeat.test.mjs'
+      - 'source/ai/b198zr11-compact-r4-output.mjs'
+      - 'scripts/b198zr11-output-budget.test.mjs'
+      - 'docs/B198ZR11_COMPACT_COMPLETE_JSON_JA.md'
       - 'docs/B198ZR10_GENERIC_REPEAT_JA.md'
       - 'source/ai/b143-building-dsl.mjs'
       - 'docs/B198ZR9_COMPACT_SOURCE_STAIRS_JA.md'
@@ -117,6 +123,8 @@ jobs:
         run: node --test scripts/b198zr9-compact-staircase.test.mjs
       - name: R10 generic repetition exact voxel parity, negative tests, quotas, independent route and legacy SHA
         run: node --test scripts/b198zr10-generic-repeat.test.mjs
+      - name: R11 opt-in concise complete-JSON prompt and immutable raw fixture tests
+        run: node --test scripts/b198zr11-output-budget.test.mjs
       - name: End-to-end offline contract report (non-Minecraft)
         run: |
           node scripts/b198zr3-offline-review.mjs --design evidence/b198zr2/assistant-revised-library-r2.json --contract evidence/b198zr3/r2-functional-review-contract.json --out "$RUNNER_TEMP/b198zr3-offline-report.json"
