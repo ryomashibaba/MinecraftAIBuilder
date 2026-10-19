@@ -144,7 +144,8 @@ export function compareR5SavedCaptures({
    x.receipt.provenance==='USER_SUPPLIED_REAL_MODEL_CLAIM');
  const bothRated=eligible&&[baseline,planned].every(x=>
   x.humanReview.status==='SELF_REPORTED_HUMAN_REVIEW_NOT_INDEPENDENTLY_AUTHENTICATED');
- const difference=bothRated?
+ const difference=bothRated&&[baseline,planned].every(x=>
+  x.status==='SOURCE_COMPILED_HUMAN_REVIEW_REQUIRED')?
   Number((planned.humanReview.scoreRatio-baseline.humanReview.scoreRatio).toFixed(4)):null;
  const status=!complete?'HOLD_MISSING_SAVED_MODEL_PAIR':
   !eligible?'HOLD_NOT_COMPARABLE_MODEL_PROVENANCE':
