@@ -2,7 +2,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import http from 'node:http';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import {compileDesign} from '../source/ai/b143-building-dsl.mjs';
+import {runR4OfflineReplay} from './b198zr4-offline-replay.mjs';
 import {createB198GLocalModelAdapter} from '../source/ai/b198g-local-model-adapter.mjs';
 import {createB198SNativeBridge} from '../source/ai/b198s-native-ollama-source.mjs';
 import {readR4PlannedProposal,proposeR4PlannedSource,reviewR4PlannedProposal}
@@ -139,4 +143,32 @@ test('reusable R4 native Ollama fixture sends four-key plan with ONE HTTP reques
   assert.equal(result.actualModelIdentityAuthenticated,false);
   assert.equal(b.requestBudget.r4PlannedSourceOptIn,true);
  }finally{await new Promise(resolve=>server.close(resolve))}
+});
+
+test('R4 offline replay preserves ORIGINAL captured four-key bytes; never rewrites or reinvokes model',()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'b198zr4-replay-'));
+ try{
+  const raw=JSON.stringify(fixture(),null,2)+'\\n';
+  const source=path.join(root,'captured-original.txt');
+  fs.writeFileSync(source,raw);
+  const out=path.join(root,'r4-report');
+  const r=runR4OfflineReplay({originalPath:source,outDir:out});
+  assert.equal(r.status,'SOURCE_AND_DECLARED_SPATIAL_CLAIMS_FORMALLY_PASS');
+  assert.equal(r.independentContractWasSupplied,false);
+  assert.equal(r.modelCalls,0);
+  assert.equal(r.sourceProvenance,'CAPTURED_OUTPUT_IDENTITY_UNVERIFIED');
+  assert.equal(fs.readFileSync(path.join(out,'R4_UNMODIFIED_ORIGINAL.txt'),'utf8'),raw);
+  assert.deepEqual(r.safety.BuildPlan.operations,[]);
+  assert.throws(()=>runR4OfflineReplay({originalPath:source,outDir:out}),/REFUSE_OVERWRITE/);
+ }finally{fs.rmSync(root,{recursive:true,force:true})}
+});
+test('R4 plan requires an explicit generator, and malformed planned response has no fallback',async()=>{
+ await assert.rejects(proposeR4PlannedSource({prompt:'Generative architectural brief without model adapter'}),
+  /EXPLICIT_GENERATOR_REQUIRED/);
+ let once=0;
+ await assert.rejects(proposeR4PlannedSource({
+  prompt:'Design a building with an original functional circulation plan',
+  generator:async()=>{once++;return {design:fixture().design,explanation:'bad',assumptions:[]}}
+ }),/EXPECTED_FOUR_KEYS/);
+ assert.equal(once,1);
 });
