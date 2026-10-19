@@ -162,12 +162,17 @@ test('R11 does not claim success for syntactically valid but malformed four-key 
  assert.equal(result.modelReportedOutputLimitReached,null);
 });
 test('R11 profile is explicit; R8 legacy parse default and strict authorization are untouched',()=>{
- const out=path.join(mk(),'future-r11');
- const a=parseR6Args(['--model',model,'--out',out]);
- const b=parseR6Args(['--model',model,'--out',out,'--prompt-profile',PROFILE]);
- assert.equal(a.promptProfile,'r8-original');
- assert.equal(b.promptProfile,PROFILE);
- assert.throws(()=>parseR6Args(['--model',model,'--out',out,'--prompt-profile','r11-unchecked','--authorize-one','x']),/|/);
+ const root=mk(),out=path.join(root,'future-r11');
+ try{
+  const basic=['--model',model,'--out',out,
+   '--authorize-one',EXPLICIT_AUTHORIZATION];
+  const a=parseR6Args(basic);
+  const b=parseR6Args([...basic,'--prompt-profile',PROFILE]);
+  assert.equal(a.promptProfile,'r8-original');
+  assert.equal(b.promptProfile,PROFILE);
+  assert.throws(()=>parseR6Args([...basic,'--prompt-profile','r11-unchecked','--port','bad']),
+   /B198ZR6_MODEL_BUDGET/);
+ }finally{fs.rmSync(root,{recursive:true,force:true})}
  const bridge=createB198SNativeBridge({plannedSourceMode:true});
  assert.equal(bridge.requestBudget.r11CompactOutputProfileOptIn,false);
  assert.throws(()=>createB198SNativeBridge({compactPlannedGuide:true}),
