@@ -84,6 +84,11 @@ test('R6 native single request preserves four-key original byte for byte and ind
   assert.equal(report.originalSaved,true);
   assert.equal(report.originalRawSha256,sha(raw));
   assert.equal(fs.readFileSync(path.join(root,'single','R6_ORIGINAL_MODEL_RESPONSE_UNMODIFIED.txt'),'utf8'),raw);
+  const receipt=JSON.parse(fs.readFileSync(
+   path.join(root,'single','R6_R5_UNVERIFIED_CAPTURE_RECEIPT.json'),'utf8'));
+  assert.equal(receipt.rawSha256,sha(raw));
+  assert.equal(receipt.modelId,'R6_CI_FAKE_PROVIDER');
+  assert.equal(receipt.modelRequestsClaimed,1);
   assert.equal(report.status,'SOURCE_AND_DECLARED_SPATIAL_CLAIMS_FORMALLY_PASS');
   assert.equal(report.modelDeclaredSpatialReview.status,'FORMAL_GEOMETRY_AND_ROUTE_CONSTRAINTS_PASS');
   assert.equal(report.modelGeneralizationCertified,false);
