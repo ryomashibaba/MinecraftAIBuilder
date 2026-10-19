@@ -154,7 +154,7 @@ export async function runR6AuthorizedCapture({
    modelRequestsClaimed:requested?1:0
   };
   fs.writeFileSync(path.join(dir,'R6_R5_UNVERIFIED_CAPTURE_RECEIPT.json'),
-   JSON.stringify(r5Receipt,null,2)+'\\n',{flag:'wx'});
+   JSON.stringify(r5Receipt,null,2)+'\n',{flag:'wx'});
  }
  fs.writeFileSync(path.join(dir,'R6_SINGLE_CAPTURE_RESULT.json'),
   JSON.stringify(result,null,2)+'\n',{flag:'wx'});
