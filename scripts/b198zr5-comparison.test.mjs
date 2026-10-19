@@ -137,3 +137,13 @@ test('CLI creates one non-overwriting HOLD report without making missing R4',()=
   assert.throws(()=>runR5Comparison({baselinePath:baseline,out}),/REFUSE_OVERWRITE/);
  }finally{fs.rmSync(folder,{recursive:true,force:true})}
 });
+
+test('same-case with different underlying model IDs cannot isolate impact of R4 prompting',()=>{
+ const receipts=pairedReceipt('USER_SUPPLIED_REAL_MODEL_CLAIM');
+ receipts.plannedReceipt.modelId='ANOTHER_DIFFERENT_MODEL';
+ const result=compareR5SavedCaptures({baselineRaw,plannedRaw:r4Raw,...receipts});
+ assert.equal(result.modelIdMatched,false);
+ assert.equal(result.modelPairEligibleByUnverifiedReceipts,false);
+ assert.equal(result.status,'HOLD_NOT_COMPARABLE_MODEL_PROVENANCE');
+ assert.equal(result.controlledExperimentCertified,false);
+});
