@@ -63,6 +63,13 @@ echo.
 echo [R6] Upload this single ZIP back to ChatGPT:
 echo %R6_ZIP%
 echo.
+if exist "%R6_ZIP%" (
+  rem Bring the one upload file into view; no manual path searching.
+  start "" explorer.exe /select,"%R6_ZIP%"
+)
+echo Inside the ZIP: index.html is the offline rotating 3D review.
+echo B198W_REVIEW_BOARD.html provides the frozen human quality rubric.
+echo.
 if not "%R6_EXIT%"=="0" (
   echo [R6] The model or source review is HOLD. Original evidence is retained.
   echo [R6] Never rerun automatically; ask for review of the saved ZIP.
