@@ -18,6 +18,8 @@ const exact=(obj,keys)=>object(obj)&&Object.keys(obj).length===keys.length&&
  keys.every(key=>Object.hasOwn(obj,key));
 const text=(s,min,max)=>typeof s==='string'&&s.length>=min&&s.length<=max&&
  !/[\u0000-\u001f<>]/.test(s);
+const validPrompt=s=>typeof s==='string'&&s.trim().length>=8&&s.length<=8000&&
+ !/[\\u0000-\\u0008\\u000b-\\u001f]/.test(s);
 const safety=()=>({readiness:'NOT_PREPARED',constructionApproved:false,
  executionAllowed:false,worldContacts:0,worldWrites:0,
  gates:Array(9).fill('BLOCKED'),BuildPlan:{operations:[]}});
@@ -98,7 +100,7 @@ export function reviewR4PlannedProposal(raw,{independentContract=null,
  * source probe to attach real Ollama and preserve original raw bytes.
  */
 export async function proposeR4PlannedSource({prompt,generator,independentContract=null}={}){
- yes(text(prompt,8,8000),'PROMPT');
+ yes(validPrompt(prompt),'PROMPT');
  yes(typeof generator==='function','EXPLICIT_GENERATOR_REQUIRED');
  const response=await generator({
   mode:'creation',prompt,previousDesign:null,feedback:[],
