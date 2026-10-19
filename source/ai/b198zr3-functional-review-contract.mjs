@@ -52,7 +52,7 @@ export function evaluateFunctionalReviewContract({design,compiled,contract}={}){
  yes(new Set(allIds).size===allIds.length,'CONTRACT_DUPLICATE_ID');
  const occupied=new Uint8Array(w*h*d);
  for(const p of compiled.primitives){
-  yes(Array.isArray(p)&&p.length>=4&&vec(p,dim)&&int(p[3],0,6),'COMPILER_PRIMITIVE');
+  yes(Array.isArray(p)&&p.length>=4&&vec(p.slice(0,3),dim)&&int(p[3],0,6),'COMPILER_PRIMITIVE');
   occupied[position(p[0],p[1],p[2],w,d)]=p[3]+1;
  }
  const block=(x,y,z)=>occupied[position(x,y,z,w,d)]!==0;
