@@ -19,6 +19,8 @@
 
 ## 厳格な段階判定（出力JSONの完成≠建築の成功）
 1. **異なる原本を要求**。古いR6 ZIPの再検証・コピー・再圧縮は新しい設計実績として数えない。原文SHA-256と、固定したc01課題SHAが一致することを確認。
+   - **原文だけ変わっても最終ボクセル形状のSHAが同一なら**、建築としての新規改善と数えず `HOLD_SAME_GEOMETRY_NO_ARCHITECTURAL_REVISION`。旧原文が未完成で形状SHAも存在しない場合は判定不能とし、自動で「異なる建築」と断言しない。
+   - 比較する旧・新モデル名は**自己申告**であるため別途 `sameClaimedModel`、生成出力予算は `sameKnownModelOutputBudget`（情報不足ならnull）として記録する。モデルや生成上限が異なれば、成功率の差を短縮プロンプトの効果と**因果推定しない**。
 2. **構造が完成していること**。ネイティブ推論完了理由と原本の4-key JSON (design,spatialPlan,explanation,assumptions) の完結。単に`3072`に達しなかっただけでも、JSON不正ならHOLD。
 3. **B143で厳格に成立する形状**。設計データの正当なソースSHA・幾何SHAを保存。R9の`staircase`、R10の`repeat`を使っても、結果の実ボクセルで正しく検査する。
 4. **R3で独立した概念空間の動線検証ができること**。入口の安全な立ち位置、頭上空間、中央の保護空洞、階床・上階・目的地への通路が成立する。モデルが`circulationStrategy`に「通れる」と書いただけでは通行成功にならない。
@@ -34,6 +36,7 @@
   `node scripts/b198zr15-compare-saved-reviews.mjs --baseline <R13 old JSON> --candidate <R13 new JSON> [--human <B198W JSON>] --out <new distinct directory>`
   元ファイルを変更せず、**R15_OFFLINE_COMPARE.json と R15_OFFLINE_COMPARE.html**を新規保存。HTMLは静的日本語。ネットワーク／モデル呼び出し／JavaScript自動実行なし。
 - 主な状態:
+  - `HOLD_SAME_GEOMETRY_NO_ARCHITECTURAL_REVISION`: 原文だけ変えても、建築の最終的な形は完全に同一
   - `HOLD_SAME_RAW_NOT_NEW_GENERATION`: 再監査だけでは新しい建築生成ではない
   - `HOLD_CANDIDATE_SOURCE_OR_PROVENANCE`: 4キー/形状/R3/出所に問題
   - `HUMAN_VISUAL_REVIEW_REQUIRED`: 機械検査のみ合格
