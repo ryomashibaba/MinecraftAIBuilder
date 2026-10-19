@@ -242,7 +242,10 @@ export async function runR6AuthorizedCapture({
    fs.writeFileSync(path.join(dir,'R13_OFFLINE_QUALITY_DECISION.json'),
     JSON.stringify(r13,null,2)+'\n',{flag:'wx'});
    fs.writeFileSync(path.join(dir,'R13_OFFLINE_QUALITY_OVERVIEW.html'),
-    renderR13QualityReport(r13),{flag:'wx'});
+    renderR13QualityReport(r13,{
+     sameFolderViewer:fs.existsSync(path.join(dir,'index.html'))&&
+      fs.existsSync(path.join(dir,'B198W_REVIEW_BOARD.html'))
+    }),{flag:'wx'});
   }catch(_error){
    // Never expose unsanitized output/provider paths or rerun the model.
    fs.writeFileSync(path.join(dir,'R13_OFFLINE_REVIEW_UNAVAILABLE.txt'),
