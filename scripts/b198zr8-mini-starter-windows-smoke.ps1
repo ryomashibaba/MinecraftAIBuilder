@@ -43,8 +43,15 @@ try {
  # Tamper must be rejected, never silently overwritten.
  $tampered=Join-Path $target 'source\ai\b143-building-dsl.mjs'
  [IO.File]::AppendAllText($tampered,'INVALID EXTRA BYTE')
- $tamperOutput=& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $installer 2>&1 | Out-String
- if ($LASTEXITCODE -eq 0 -or -not $tamperOutput.Contains('Integrity mismatch')) {
+ # Native stderr from an intentionally failing child should be captured,
+ # not elevated by THIS smoke test's $ErrorActionPreference='Stop'.
+ $previousAction=$ErrorActionPreference
+ try {
+  $ErrorActionPreference='Continue'
+  $tamperOutput=(& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $installer 2>&1 | Out-String)
+  $tamperExit=$LASTEXITCODE
+ }finally{ $ErrorActionPreference=$previousAction }
+ if ($tamperExit -eq 0 -or -not $tamperOutput.Contains('Integrity mismatch')) {
   throw ('Tampering was not blocked: '+$tamperOutput)
  }
  Write-Host 'R8_MINI_REAL_WINDOWS_INSTALL_PASS'
