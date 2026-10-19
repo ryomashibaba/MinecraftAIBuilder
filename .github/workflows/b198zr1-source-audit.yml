@@ -38,6 +38,10 @@ on:
       - 'source/ai/b198zr11-compact-r4-output.mjs'
       - 'scripts/b198zr11-output-budget.test.mjs'
       - 'docs/B198ZR11_COMPACT_COMPLETE_JSON_JA.md'
+      - 'source/ai/b198zr13-quality-decision.mjs'
+      - 'scripts/b198zr13-review-saved-capture.mjs'
+      - 'scripts/b198zr13-quality-decision.test.mjs'
+      - 'docs/B198ZR13_CAPTURE_QUALITY_GATE_JA.md'
       - 'docs/B198ZR10_GENERIC_REPEAT_JA.md'
       - 'source/ai/b143-building-dsl.mjs'
       - 'docs/B198ZR9_COMPACT_SOURCE_STAIRS_JA.md'
@@ -83,6 +87,10 @@ on:
       - 'source/ai/b198zr11-compact-r4-output.mjs'
       - 'scripts/b198zr11-output-budget.test.mjs'
       - 'docs/B198ZR11_COMPACT_COMPLETE_JSON_JA.md'
+      - 'source/ai/b198zr13-quality-decision.mjs'
+      - 'scripts/b198zr13-review-saved-capture.mjs'
+      - 'scripts/b198zr13-quality-decision.test.mjs'
+      - 'docs/B198ZR13_CAPTURE_QUALITY_GATE_JA.md'
       - 'docs/B198ZR10_GENERIC_REPEAT_JA.md'
       - 'source/ai/b143-building-dsl.mjs'
       - 'docs/B198ZR9_COMPACT_SOURCE_STAIRS_JA.md'
@@ -125,6 +133,8 @@ jobs:
         run: node --test scripts/b198zr10-generic-repeat.test.mjs
       - name: R11 opt-in concise complete-JSON prompt and immutable raw fixture tests
         run: node --test scripts/b198zr11-output-budget.test.mjs
+      - name: R13 independent architecture quality decision and human-review provenance HOLD
+        run: node --test scripts/b198zr13-quality-decision.test.mjs
       - name: End-to-end offline contract report (non-Minecraft)
         run: |
           node scripts/b198zr3-offline-review.mjs --design evidence/b198zr2/assistant-revised-library-r2.json --contract evidence/b198zr3/r2-functional-review-contract.json --out "$RUNNER_TEMP/b198zr3-offline-report.json"
