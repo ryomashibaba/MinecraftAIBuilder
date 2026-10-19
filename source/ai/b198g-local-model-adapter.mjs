@@ -5,6 +5,8 @@
  * This function does not contact even localhost until directly invoked.
  */
 import {readModelProposal} from './b198-natural-language-design.mjs';
+import {readR4PlannedProposal,R4_PLANNING_GUIDE}
+ from './b198zr4-planned-source.mjs';
 export const DEFAULT_LOCAL_ENDPOINT='http://127.0.0.1:11434/v1/chat/completions';
 const MODEL_RE=/^[A-Za-z0-9._:/-]{2,140}$/;
 const ENDPOINT_RE=/^http:\/\/127\.0\.0\.1:(\d{2,5})\/v1\/chat\/completions$/;
@@ -26,7 +28,8 @@ const SYSTEM=[
 ].join('\n');
 
 export function createB198GLocalModelAdapter({
- model,endpoint=DEFAULT_LOCAL_ENDPOINT,fetcher=fetch,timeoutMs=120000
+ model,endpoint=DEFAULT_LOCAL_ENDPOINT,fetcher=fetch,timeoutMs=120000,
+ plannedSourceMode=false
 }={}){
  if(typeof model!=='string'||!MODEL_RE.test(model))
   refuse('EXPLICIT_MODEL_ID_REQUIRED');
@@ -34,6 +37,7 @@ export function createB198GLocalModelAdapter({
  if(!m||Number(m[1])>65535||Number(m[1])<1)
   refuse('ONLY_EXPLICIT_127_0_0_1_CHAT_COMPLETIONS_ALLOWED');
  if(typeof fetcher!=='function')refuse('INVALID_FETCHER');
+ if(typeof plannedSourceMode!=='boolean')refuse('INVALID_PLANNED_MODE');
  if(!Number.isSafeInteger(timeoutMs)||timeoutMs<1000||timeoutMs>900000)
   refuse('TIMEOUT_BOUNDS');
  return async function sourceGenerator({
@@ -50,13 +54,17 @@ export function createB198GLocalModelAdapter({
    const input={mode,architectural_request:prompt,previousDesign,
     strictCompilerFeedback:feedback.map(x=>String(x.reason??'').slice(0,350)),
     attempt,maxAttempts,
-    output:'entire original or safely revised B143 source only'};
+    output:plannedSourceMode?'R4 one-response B143 design plus model spatialPlan':
+     'entire original or safely revised B143 source only'};
    const response=await fetcher(endpoint,{
     method:'POST',signal:controller.signal,redirect:'error',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({model,stream:false,temperature:0.35,
      response_format:{type:'json_object'},
-     messages:[{role:'system',content:SYSTEM},
+     messages:[{role:'system',content:plannedSourceMode?
+      SYSTEM.replace('Return ONLY a JSON object with EXACT keys design, explanation, assumptions.',
+       'Return ONLY a JSON object with EXACT keys design, explanation, assumptions, spatialPlan.')+
+       '\n'+R4_PLANNING_GUIDE:SYSTEM},
        {role:'user',content:JSON.stringify(input)}]})
    });
    if(!response||response.ok!==true)
@@ -70,7 +78,7 @@ export function createB198GLocalModelAdapter({
     refuse('INVALID_MODEL_CONTENT');
    // A local provider is never a trusted source. Reuse the real strict adapter
    // grammar, and let B198A/B143 independently compile every proposed design.
-   return readModelProposal(raw);
+   return plannedSourceMode?readR4PlannedProposal(raw):readModelProposal(raw);
   }finally{clearTimeout(timer);}
  };
 }
