@@ -119,6 +119,15 @@ try{
    $linkState='HOLD_EVIDENCE_LINKS'
   }
  }elseif(-not $recoveredNoFolder){
+  # R19 fail-closed: an exit 0 from the native child is NOT proof that
+  # a captured model original exists. This can happen if the child behaves
+  # unexpectedly, is replaced by a wrapper, or terminates prematurely.
+  # Preflight/transport HOLD with a nonzero exit remains a legitimate
+  # NO_RAW status (never claim that a request actually happened).
+  if($originalNodeExit -eq 0){
+   $issues.Add('ZERO_EXIT_WITHOUT_MODEL_ORIGINAL')
+   $linkState='HOLD_EVIDENCE_LINKS'
+  }
   $resultPath=Join-Path $folder 'R6_SINGLE_CAPTURE_RESULT.json'
   if(Test-Path -LiteralPath $resultPath -PathType Leaf){
    try{
