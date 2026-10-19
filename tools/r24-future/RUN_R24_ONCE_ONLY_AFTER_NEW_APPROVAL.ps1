@@ -79,14 +79,26 @@ try{
    $audit=Get-Content -LiteralPath $auditPath -Raw -Encoding UTF8 |
     ConvertFrom-Json -ErrorAction Stop
    $auditStatus=$audit.status
+   # Use the same .NET raw-byte SHA calculation as R18/R23. On some
+   # Windows PowerShell 5.1 hosts Get-FileHash/PS pipeline throws AFTER
+   # successful JSON parsing; classify it separately rather than converting
+   # an intact raw original into an unreadable audit claim.
    $raw=Join-Path $folder 'R6_ORIGINAL_MODEL_RESPONSE_UNMODIFIED.txt'
    if(Test-Path -LiteralPath $raw -PathType Leaf){
-    $digest=(Get-FileHash -LiteralPath $raw -Algorithm SHA256).Hash.ToLowerInvariant()
-    $rawMatch=($digest -ceq $audit.rawSha256)
-    if(-not $rawMatch){$issues+= 'R24_RAW_DIGEST_MISMATCH'}
+    try{
+     $hash=[Security.Cryptography.SHA256]::Create()
+     try{
+      $bytes=[IO.File]::ReadAllBytes($raw)
+      $digest=([BitConverter]::ToString($hash.ComputeHash($bytes))).Replace('-','').ToLowerInvariant()
+     }finally{$hash.Dispose()}
+     $rawMatch=($digest -ceq [string]$audit.rawSha256)
+     if(-not $rawMatch){$issues+='R24_RAW_DIGEST_MISMATCH'}
+    }catch{$issues+='R24_RAW_SHA_CALCULATION_FAILED'}
    }else{$issues+='R24_RAW_MISSING'}
-   if($audit.issues.Count -gt 0){$issues+='R23_AUDIT_HAS_ISSUES'}
-  }catch{$issues+='R24_AUDIT_UNREADABLE'}
+   if($null -ne $audit.issues -and @($audit.issues).Count -gt 0){
+    $issues+='R23_AUDIT_HAS_ISSUES'
+   }
+  }catch{$issues+='R24_AUDIT_JSON_OR_FIELDS_INVALID'}
  }else{$issues+='R23_AUDIT_MISSING'}
  if($nodeExit -eq 0 -and
    ($auditStatus -cne 'EVIDENCE_CHAIN_PASS_HUMAN_REVIEW_REQUIRED' -or
