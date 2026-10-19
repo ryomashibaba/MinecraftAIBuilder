@@ -19,7 +19,7 @@ if errorlevel 1 (
  pause
  exit /b 1
 )
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0PREPARE_AND_START_APPROVED_ONCE.ps1"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0BOOTSTRAP_APPROVED_R20.ps1"
 set "R20_STATUS=%errorlevel%"
 echo.
 if "%R20_STATUS%"=="0" (
