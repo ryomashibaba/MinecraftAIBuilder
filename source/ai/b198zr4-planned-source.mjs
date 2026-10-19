@@ -34,6 +34,8 @@ export const R4_PLANNING_GUIDE=[
  'Verify the FINAL ordered ADD/CUT composition against the declared plan, not just the individual element names or intended appearances.',
  'Budget JSON to fit in one response. Prefer one supported staircase element (origin, axis, direction, width, steps, treadDepth) for a straight flight instead of 20-30 repetitive boxes. Connect each end to real floor landings.',
  'A B143 staircase is only conceptual supported voxel geometry; do not claim real Minecraft stairs, avatar walkability or automatic architectural approval.',
+ 'Use B143 optional repeat:{count,offset:[dx,dy,dz]} for truly repeated columns/fins, beams, windows and mass modules instead of individually enumerating near-identical objects. count 2..32, signed integer offsets, final copies all in local bounds.',
+ 'Repeat remains one authored element with many exact final B143 voxels; judge function from the final ADD/CUT ordering and actual reachable supported floor, not the model description.',
  'Return geometry AND spatialPlan within the existing output token limit, with source-only coordinates; never output Minecraft commands or construction claims.',
  'Architectural originality belongs to the model. Do not use fixed genres, keyword-to-shape mappings, or a predefined floorplan.'
 ].join('\n');
