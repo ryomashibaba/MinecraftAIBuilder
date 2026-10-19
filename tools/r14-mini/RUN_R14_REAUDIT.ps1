@@ -32,7 +32,7 @@ try {
  # Verify all source modules against immutable GitHub object IDs.
  & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'INSTALL_R14_MINI.ps1')
  if($LASTEXITCODE -ne 0){Hold 'PINNED_INSTALL_FAILED'}
- $root=Join-Path $env:LOCALAPPDATA 'MinecraftAIBuilder\R14_Mini_PIN_REPLACE'
+ $root=Join-Path $env:LOCALAPPDATA 'MinecraftAIBuilder\R14_Mini_b320b2535374'
  $cli=Join-Path $root 'scripts\b198zr13-review-saved-capture.mjs'
  if(-not (Test-Path -LiteralPath $cli -PathType Leaf)){Hold 'PINNED_AUDITOR_NOT_INSTALLED'}
  $parent=Join-Path $env:LOCALAPPDATA 'MinecraftAIBuilder\R14_Reviews'
@@ -136,7 +136,7 @@ try {
  }
  $manifestPath=Join-Path $outDir 'R14_OFFLINE_AUDIT_MANIFEST.json'
  [IO.File]::WriteAllText($manifestPath,
-  (($manifest|ConvertTo-Json -Depth 5)+'`n'),(New-Object Text.UTF8Encoding $false))
+  (($manifest|ConvertTo-Json -Depth 5)+'`n'),([System.Text.UTF8Encoding]::new($false)))
  $payload=@((Join-Path $outDir 'R13_OFFLINE_QUALITY_DECISION.json'),
    (Join-Path $outDir 'R13_OFFLINE_QUALITY_OVERVIEW.html'),$manifestPath)
  Compress-Archive -LiteralPath $payload -DestinationPath $resultZip -CompressionLevel Optimal -ErrorAction Stop
