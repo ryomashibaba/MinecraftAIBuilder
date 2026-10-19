@@ -21,6 +21,14 @@ try{
   $raw,([Text.UTF8Encoding]::new($false)))
  $inZip=Join-Path $temp 'R6_SYNTHETIC_CI_UPLOAD_THIS_RESULT.zip'
  Compress-Archive -LiteralPath $inFolder -DestinationPath $inZip -CompressionLevel Optimal
+ Add-Type -AssemblyName System.IO.Compression
+ Add-Type -AssemblyName System.IO.Compression.FileSystem
+ $dbg=[IO.Compression.ZipFile]::OpenRead($inZip)
+ try{
+  foreach($entry in $dbg.Entries){
+   Write-Host ('R14_CI_EXPECTED_ENTRY='+$entry.FullName)
+  }
+ }finally{$dbg.Dispose()}
  $before=(Get-FileHash -LiteralPath $inZip -Algorithm SHA256).Hash.ToLowerInvariant()
  # This is the exact Windows beginner CMD, stdin only acknowledges pause.
  $out=('' | & $launcher $inZip 2>&1 | Out-String)
