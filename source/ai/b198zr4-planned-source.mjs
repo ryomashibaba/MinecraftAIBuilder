@@ -19,7 +19,7 @@ const exact=(obj,keys)=>object(obj)&&Object.keys(obj).length===keys.length&&
 const text=(s,min,max)=>typeof s==='string'&&s.length>=min&&s.length<=max&&
  !/[\u0000-\u001f<>]/.test(s);
 const validPrompt=s=>typeof s==='string'&&s.trim().length>=8&&s.length<=8000&&
- !/[\\u0000-\\u0008\\u000b-\\u001f]/.test(s);
+ !/[\u0000-\u0008\u000b-\u001f]/.test(s);
 const safety=()=>({readiness:'NOT_PREPARED',constructionApproved:false,
  executionAllowed:false,worldContacts:0,worldWrites:0,
  gates:Array(9).fill('BLOCKED'),BuildPlan:{operations:[]}});
