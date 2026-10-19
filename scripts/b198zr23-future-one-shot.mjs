@@ -16,6 +16,7 @@ import {checkR8LocalModelAvailable}
 import {R21_FUTURE_GUIDE_SHA256}
  from '../source/ai/b198zr21-future-architecture-guide.mjs';
 
+export {R23_FUTURE_AUTHORIZATION};
 export const SCHEMA='minecraftaibuilder-b198zr23-consent-gated-single-quality-source-v1';
 export const EXACT_FUTURE_MODEL='qwen3.8:27b';
 const sha=b=>createHash('sha256').update(b).digest('hex');
