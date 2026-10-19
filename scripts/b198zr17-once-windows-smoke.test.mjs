@@ -150,6 +150,7 @@ test('R17 true Windows launcher: no approval/old approval => no GET or POST; fre
   assert(find('R13_OFFLINE_QUALITY_DECISION.json'));
   assert(find('R13_OFFLINE_QUALITY_OVERVIEW.html'));
   assert(find('R11_OFFLINE_COMPLETION_AUDIT.json'));
+  assert(find('R18_OFFLINE_EVIDENCE_LINK_AUDIT.json'));
   assert.equal(fs.readFileSync(find('R6_ORIGINAL_MODEL_RESPONSE_UNMODIFIED.txt'),'utf8'),fixture);
   const manifest=JSON.parse(fs.readFileSync(find('R17_ONE_SHOT_MANIFEST.json'),'utf8'));
   assert.equal(manifest.profile,'r11-compact');
@@ -157,6 +158,15 @@ test('R17 true Windows launcher: no approval/old approval => no GET or POST; fre
   assert.equal(manifest.modelQualityAutoAccepted,false);
   assert.equal(manifest.worldWrites,0);
   assert.equal(manifest.readiness,'NOT_PREPARED');
+  assert.equal(manifest.offlineEvidenceLinkStatus,'SHA_LINKED_EVIDENCE_PRESENT');
+  assert.deepEqual(manifest.offlineEvidenceLinkIssues,[]);
+  assert.equal(manifest.earlyCaptureFolderRecovered,false);
+  const links=JSON.parse(fs.readFileSync(find('R18_OFFLINE_EVIDENCE_LINK_AUDIT.json'),'utf8'));
+  assert.equal(links.status,'SHA_LINKED_EVIDENCE_PRESENT');
+  assert.equal(links.rawSha256,sha(fixture));
+  assert.deepEqual(links.linkedEvidenceIssues,[]);
+  assert.equal(links.modelRequestsAddedByThisAudit,0);
+  assert.equal(links.worldWrites,0);
   const audit=JSON.parse(fs.readFileSync(find('R11_OFFLINE_COMPLETION_AUDIT.json'),'utf8'));
   assert.equal(audit.profileGuideSha256,R11_GUIDE_SHA256);
   assert.equal(audit.rawSha256,sha(fixture));
