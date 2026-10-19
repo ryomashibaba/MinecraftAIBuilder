@@ -145,6 +145,31 @@ test('R15 never counts re-auditing the identical original as fresh model improve
  assert.equal(d.decision,'HOLD_SAME_RAW_NOT_NEW_GENERATION');
  assert.equal(d.recoveredCompleteFourKeyOutputComparedWithBaseline,false);
 });
+test('R15 separate raw JSON with identical compiled building geometry is NOT a new architectural revision',()=>{
+ const old=cloned(),current=cloned();
+ current.rawSha256=sha('different JSON narration not geometry');
+ const d=evaluateR15Comparison({baseline:old,candidate:current,human:rating(current)});
+ assert.equal(d.sameRaw,false);
+ assert.equal(d.sameGeometry,true);
+ assert.equal(d.decision,'HOLD_SAME_GEOMETRY_NO_ARCHITECTURAL_REVISION');
+ assert.equal(d.humanReview.status,'UNREVIEWED');
+ assert.equal(d.safety.worldWrites,0);
+});
+test('R15 model identity and output-budget comparability is explicit, not a causal proof',()=>{
+ const old=cloned(),fresh=cloned();
+ fresh.rawSha256=sha('completely independent fixture candidate');
+ fresh.source.geometrySha256=sha('different dummy geometry');
+ old.nativeTelemetryClaim.outputTokenLimit=3072;
+ fresh.nativeTelemetryClaim.outputTokenLimit=4096;
+ old.evidenceProvenance.modelIdClaimed='QWEN_CLAIM';
+ fresh.evidenceProvenance.modelIdClaimed='DIFFERENT_MODEL_CLAIM';
+ const d=evaluateR15Comparison({baseline:old,candidate:fresh});
+ assert.equal(d.comparability.bothModelClaimsPresent,true);
+ assert.equal(d.comparability.sameClaimedModel,false);
+ assert.equal(d.comparability.sameKnownModelOutputBudget,false);
+ assert.equal(d.comparability.noCausalPromptImprovementProven,true);
+ assert.equal(d.decision,'HUMAN_VISUAL_REVIEW_REQUIRED');
+});
 test('R15 static report escapes human HTML and never uses browser network/script handlers',()=>{
  const c=cloned();c.machineAuditedGeometry.highRiskCount=0;
  const h=rating(c);h.rubric[0].evidence='<script>alert(1)</script> deliberately test escaping';
