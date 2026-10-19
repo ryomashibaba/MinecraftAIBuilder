@@ -98,6 +98,11 @@ test('R17 true Windows launcher: no approval/old approval => no GET or POST; fre
  const temp=fs.mkdtempSync(path.join(os.tmpdir(),'r17-only-fake-'));
  const app=path.join(temp,'LocalAppData');fs.mkdirSync(app);
  const env={...process.env,LOCALAPPDATA:app,CI:'true'};
+ // Node --test tags the current worker with an internal test context.
+ // A second Node --test from pinned R16 must behave like normal Windows
+ // execution, not inherit the parent's TAP aggregation channel.
+ delete env.NODE_TEST_CONTEXT;
+ delete env.NODE_TEST_WORKER_ID;
  try{
   const denied=await execute('NO',env);
   assert.equal(denied.code,2,denied.stdout.slice(-600));
