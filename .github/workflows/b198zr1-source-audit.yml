@@ -11,6 +11,10 @@ on:
       - 'source/ai/b198zr2-generic-quality-guide.mjs'
       - 'source/ai/b198s-native-ollama-source.mjs'
       - 'scripts/b198zr2-strict-architecture-audit.mjs'
+      - 'scripts/b198zr3-functional-review.test.mjs'
+      - 'scripts/b198zr3-offline-review.mjs'
+      - 'source/ai/b198zr3-functional-review-contract.mjs'
+      - 'evidence/b198zr3/**'
       - 'scripts/b198s-native-source.test.mjs'
       - 'docs/B198ZR1_PROTECTED_ARCHITECTURAL_REVISION_JA.md'
       - '.github/workflows/b198zr1-source-audit.yml'
@@ -23,6 +27,10 @@ on:
       - 'source/ai/b198zr2-generic-quality-guide.mjs'
       - 'source/ai/b198s-native-ollama-source.mjs'
       - 'scripts/b198zr2-strict-architecture-audit.mjs'
+      - 'scripts/b198zr3-functional-review.test.mjs'
+      - 'scripts/b198zr3-offline-review.mjs'
+      - 'source/ai/b198zr3-functional-review-contract.mjs'
+      - 'evidence/b198zr3/**'
       - 'scripts/b198s-native-source.test.mjs'
       - 'docs/B198ZR1_PROTECTED_ARCHITECTURAL_REVISION_JA.md'
       - '.github/workflows/b198zr1-source-audit.yml'
@@ -43,3 +51,9 @@ jobs:
         run: node scripts/b198zr2-strict-architecture-audit.mjs
       - name: Verify native model-transport fixture and quality-guide integration
         run: node --test scripts/b198s-native-source.test.mjs
+      - name: Generic functional contract positive and adversarial regressions
+        run: node --test scripts/b198zr3-functional-review.test.mjs
+      - name: End-to-end offline contract report (non-Minecraft)
+        run: |
+          node scripts/b198zr3-offline-review.mjs --design evidence/b198zr2/assistant-revised-library-r2.json --contract evidence/b198zr3/r2-functional-review-contract.json --out "$RUNNER_TEMP/b198zr3-offline-report.json"
+          test -s "$RUNNER_TEMP/b198zr3-offline-report.json"
