@@ -81,6 +81,8 @@ test('same contract evaluator works on an unrelated empty pavilion without typol
     origin:[0,0,0],size:[16,1,16]},
    {id:'hall-shell',shape:'box',mode:'add',material:'glass',
     origin:[1,1,1],size:[14,5,14],shell:1},
+   // A shell box also contains a solid bottom plane: clear the interior floor explicitly.
+   {id:'clear-interior-bottom',shape:'box',mode:'cut',origin:[2,1,2],size:[12,1,12]},
    {id:'clear-skylight',shape:'box',mode:'cut',origin:[6,5,6],size:[4,1,4]},
    {id:'open-entrance',shape:'box',mode:'cut',origin:[6,1,1],size:[4,3,2]}
   ]};
