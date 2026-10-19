@@ -111,8 +111,9 @@ try {
  }
  $reportPath=Join-Path $outDir 'R13_OFFLINE_QUALITY_DECISION.json'
  $data=Get-Content -LiteralPath $reportPath -Encoding UTF8 -Raw | ConvertFrom-Json
- if($data.rawSha256 -ne (Get-FileHash -LiteralPath
-   (Join-Path $evidence 'R6_ORIGINAL_MODEL_RESPONSE_UNMODIFIED.txt') -Algorithm SHA256).Hash.ToLowerInvariant()){
+ $extractedFile=Join-Path $evidence 'R6_ORIGINAL_MODEL_RESPONSE_UNMODIFIED.txt'
+ $extractedSha=(Get-FileHash -LiteralPath $extractedFile -Algorithm SHA256).Hash.ToLowerInvariant()
+ if($data.rawSha256 -ne $extractedSha){
   Hold 'ANALYSIS_ORIGINAL_SHA_MISMATCH'
  }
  $after=(Get-FileHash -LiteralPath $item.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
