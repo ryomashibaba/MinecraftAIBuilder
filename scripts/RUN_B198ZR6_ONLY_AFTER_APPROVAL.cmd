@@ -49,9 +49,14 @@ echo.
 echo [R6] Starting exactly one authorized local source-only model attempt...
 node "%~dp0b198zr6-authorized-single-r4-capture.mjs" --model qwen3.8:27b --authorize-one I_APPROVE_ONE_LOCAL_MODEL_REQUEST --out "%R6_OUT%"
 set "R6_EXIT=%ERRORLEVEL%"
-if not exist "%R6_OUT%\R6_SINGLE_CAPTURE_RESULT.json" (
-  echo [HOLD] No complete R6 report was written. Review local console diagnostics.
+if not exist "%R6_OUT%" (
+  echo [HOLD] No evidence folder; model operation did not complete.
   exit /b 1
+)
+set "R6_REPORT_MISSING=0"
+if not exist "%R6_OUT%\R6_SINGLE_CAPTURE_RESULT.json" (
+  echo [HOLD] Partial evidence only: R6 result JSON missing. Packing remaining evidence anyway.
+  set "R6_REPORT_MISSING=1"
 )
 powershell -NoProfile -Command "Compress-Archive -LiteralPath $env:R6_OUT -DestinationPath $env:R6_ZIP -CompressionLevel Optimal"
 if errorlevel 1 (
@@ -70,6 +75,10 @@ if exist "%R6_ZIP%" (
 echo Inside the ZIP: index.html is the offline rotating 3D review.
 echo B198W_REVIEW_BOARD.html provides the frozen human quality rubric.
 echo.
+if "%R6_REPORT_MISSING%"=="1" (
+  echo [R8] Partial evidence ZIP saved; bring it back for diagnosis, never rerun automatically.
+  exit /b 2
+)
 if not "%R6_EXIT%"=="0" (
   echo [R6] The model or source review is HOLD. Original evidence is retained.
   echo [R6] Never rerun automatically; ask for review of the saved ZIP.
