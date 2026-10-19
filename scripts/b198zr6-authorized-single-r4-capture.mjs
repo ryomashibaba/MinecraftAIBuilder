@@ -15,6 +15,8 @@ import {createB198SNativeBridge} from '../source/ai/b198s-native-ollama-source.m
 import {createB198GLocalModelAdapter}
  from '../source/ai/b198g-local-model-adapter.mjs';
 import {reviewR4PlannedProposal} from '../source/ai/b198zr4-planned-source.mjs';
+import {writeR7OfflineVisualReview}
+ from './b198zr7-offline-visual-review.mjs';
 
 export const SCHEMA='minecraftaibuilder-b198zr6-authorized-single-capture-v1';
 export const EXPLICIT_AUTHORIZATION='I_APPROVE_ONE_LOCAL_MODEL_REQUEST';
@@ -84,6 +86,7 @@ export async function runR6AuthorizedCapture({
   JSON.stringify(request,null,2)+'\n',{flag:'wx'});
  let originalSaved=false,requested=false,review=null,status='HOLD_NO_MODEL_RESPONSE';
  let reasonCode=null,bridge=null;
+ let visualReview=null,visualReviewIssue=null;
  try{
   bridge=bridgeFactory({
    numPredict:sourceTokens,numCtx:contextTokens,
@@ -116,6 +119,17 @@ export async function runR6AuthorizedCapture({
   review=reviewR4PlannedProposal(fs.readFileSync(originalPath,'utf8'),
    {caseId:'r6-original-c01'});
   status=review.status;
+  // Strict geometry may compile even when the model's plan is unreachable:
+  // both cases still deserve a visual dossier for human inspection.
+  // Viewer failure must NEVER lose the saved original or hide source status.
+  try{
+   visualReview=writeR7OfflineVisualReview({
+    design:review.design,compiled:review.compiled,destination:dir,caseId:'c01'});
+  }catch(e){
+   const text=String(e?.message??'').slice(0,160);
+   visualReviewIssue=/^(B198(?:ZR7|W|B|C|[0-9A-Z_-]+)_)/.exec(text)?.[1]??
+    'R7_VIEWER_UNAVAILABLE_REASON_REDACTED';
+  }
  }catch(e){
   status='HOLD_MODEL_TRANSPORT_OR_SOURCE_REVIEW';
   const message=String(e?.code??e?.message??'').slice(0,240);
@@ -142,6 +156,9 @@ export async function runR6AuthorizedCapture({
   realMinecraftWalkingTested:false,
   modelCannotSelfApprove:true,
   comparisonAgainstBaseline:'NOT_PERFORMED_BY_THIS_RUN',
+  visualReviewStatus:visualReview?.status??'HOLD_NO_OFFLINE_3D_REVIEW',
+  visualReviewFiles:visualReview?.visualizationFiles??[],
+  visualReviewIssue,
   sourceOnly:true,worldContacts:0,worldWrites:0,safety:guard()};
  // R5-compatible receipt is an UNVERIFIED claim, NOT a provider signature.
  // Store it even when the source is invalid; the R5 compiler will HOLD it.
