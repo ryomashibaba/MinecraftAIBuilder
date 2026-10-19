@@ -139,9 +139,10 @@ test('R6 saves bad three-key model raw and reports HOLD rather than replaying th
   assert.equal(report.status,'HOLD_MODEL_TRANSPORT_OR_SOURCE_REVIEW');
   assert.equal(report.reasonCode,'B198ZR4_EXPECTED_FOUR_KEYS');
   assert.equal(report.originalRawSha256,sha(raw));
-  assert.equal(report.elementCount,null);
-  assert.equal(report.visualReviewStatus,'HOLD_NO_OFFLINE_3D_REVIEW');
-  assert.equal(fs.existsSync(path.join(root,'single','index.html')),false);
+  assert.equal(report.elementCount,5);
+  assert.equal(report.sourcePreviewSalvagedFromUnacceptedR4Envelope,true);
+  assert.equal(report.visualReviewStatus,'WAITING_FOR_HUMAN_VISUAL_AND_SEMANTIC_REVIEW');
+  assert(fs.existsSync(path.join(root,'single','index.html')));
   assert.equal(report.worldWrites,0);
  }finally{await srv.close();fs.rmSync(root,{recursive:true,force:true})}
 });
@@ -191,5 +192,23 @@ test('R8 preflight stops non-installed model before any heavy POST; evidence HOL
   assert.equal(result.status,'HOLD_MODEL_TRANSPORT_OR_SOURCE_REVIEW');
   assert.equal(fs.existsSync(path.join(root,'single','R6_SINGLE_CAPTURE_RESULT.json')),true);
   assert.equal(result.safety.worldWrites,0);
+ }finally{await srv.close();fs.rmSync(root,{recursive:true,force:true})}
+});
+
+test('R8 malformed R4 spatial claim does not destroy compiled design or falsely mark plan valid',async()=>{
+ const root=mk(),x=fixture();
+ x.spatialPlan.entrance=[99,3,99];
+ const raw=JSON.stringify(x),srv=await serverWith(raw);
+ try{
+  const result=await runR6AuthorizedCapture(cfg(root,srv));
+  assert.equal(srv.count,1);
+  assert.equal(result.status,'HOLD_MODEL_TRANSPORT_OR_SOURCE_REVIEW');
+  assert.equal(result.originalRawSha256,sha(raw));
+  assert.equal(result.sourcePreviewSalvagedFromUnacceptedR4Envelope,true);
+  assert.equal(result.salvagedGeometryCannotCountAsAcceptedR4Plan,true);
+  assert(result.sourceSha256);
+  assert.equal(result.visualReviewStatus,'WAITING_FOR_HUMAN_VISUAL_AND_SEMANTIC_REVIEW');
+  assert.equal(result.safety.constructionApproved,false);
+  assert(fs.existsSync(path.join(root,'single','B198W_REVIEW_BOARD.html')));
  }finally{await srv.close();fs.rmSync(root,{recursive:true,force:true})}
 });
