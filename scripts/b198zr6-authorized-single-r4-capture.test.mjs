@@ -128,6 +128,8 @@ test('R6 native single request preserves four-key original byte for byte and ind
   assert.equal(r13.reviewerHasNotScoredAnything,true);
   assert.equal(r13.safety.worldWrites,0);
   assert(r13Html.includes('未審査'));
+  assert(r13Html.includes('href="index.html"'));
+  assert(r13Html.includes('href="B198W_REVIEW_BOARD.html"'));
   assert.equal(report.modelDeclaredSpatialReview.status,'FORMAL_GEOMETRY_AND_ROUTE_CONSTRAINTS_PASS');
   assert.equal(report.modelGeneralizationCertified,false);
   assert.equal(report.modelAuthorshipIndependentlyAuthenticated,false);
