@@ -155,7 +155,7 @@ test('R24 Windows real setup verifies 37 pinned files; future consent routes exa
   const manifest=JSON.parse(fs.readFileSync(find('R24_PACKAGING_MANIFEST.json'),'utf8'));
   assert.equal(audit.rawSha256,sha(fakeOriginal));
   assert.equal(audit.issues.length,0);
-  assert.equal(manifest.auditAndRawMatch,true);
+  assert.equal(manifest.auditAndRawMatch,true,JSON.stringify({manifest,audit,first},null,2).slice(-3500));
   assert.equal(manifest.approvalConsumed,true);
   assert.equal(manifest.automaticRetries,0);
   assert.equal(manifest.worldWrites,0);
