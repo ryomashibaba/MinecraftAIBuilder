@@ -122,7 +122,7 @@ test('compilable R4 with failed declared spatial intent is still a quality HOLD'
   baselineHuman:score(2),plannedHuman:score(4)});
  assert.equal(result.planned.status,'HOLD_MODEL_DECLARED_SPATIAL_PLAN');
  assert.equal(result.status,'HOLD_SOURCE_OR_DECLARED_SPATIAL_PLAN');
- assert.equal(result.humanScoreDifferenceR4MinusBaseline,0.5); // scores captured but never 'win'
+ assert.equal(result.humanScoreDifferenceR4MinusBaseline,null); // HOLD suppresses score comparison
  assert.equal(result.noOriginalityOrAestheticWinnerAutomaticallyDeclared,true);
 });
 test('CLI creates one non-overwriting HOLD report without making missing R4',()=>{
