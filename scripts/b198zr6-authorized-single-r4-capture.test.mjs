@@ -90,6 +90,22 @@ test('R6 native single request preserves four-key original byte for byte and ind
   assert.equal(receipt.modelId,'R6_CI_FAKE_PROVIDER');
   assert.equal(receipt.modelRequestsClaimed,1);
   assert.equal(report.status,'SOURCE_AND_DECLARED_SPATIAL_CLAIMS_FORMALLY_PASS');
+  assert.equal(report.visualReviewStatus,'WAITING_FOR_HUMAN_VISUAL_AND_SEMANTIC_REVIEW');
+  const reviewFolder=path.join(root,'single');
+  const viewer=fs.readFileSync(path.join(reviewFolder,'index.html'),'utf8');
+  assert(viewer.includes('R7 MODEL CANDIDATE'));
+  assert(viewer.includes('minecraftaibuilder-b143-gallery-v1'));
+  assert(!viewer.includes('fetch('));
+  assert(!viewer.includes('ChatGPTが設計した新規建築'));
+  const dossier=JSON.parse(fs.readFileSync(
+   path.join(reviewFolder,'B198W_SOURCE_QUALITY_EVIDENCE.json'),'utf8'));
+  const manifest=JSON.parse(fs.readFileSync(
+   path.join(reviewFolder,'R7_VISUAL_REVIEW_MANIFEST.json'),'utf8'));
+  assert.equal(manifest.sourceSha256,report.sourceSha256);
+  assert.equal(dossier.independentlyCompiled.sourceSha256,report.sourceSha256);
+  assert.equal(manifest.automaticAestheticQualityCertification,false);
+  assert(fs.readFileSync(path.join(reviewFolder,'B198W_REVIEW_BOARD.html'),'utf8')
+   .includes('B198W'));
   assert.equal(report.modelDeclaredSpatialReview.status,'FORMAL_GEOMETRY_AND_ROUTE_CONSTRAINTS_PASS');
   assert.equal(report.modelGeneralizationCertified,false);
   assert.equal(report.modelAuthorshipIndependentlyAuthenticated,false);
@@ -111,6 +127,8 @@ test('R6 saves bad three-key model raw and reports HOLD rather than replaying th
   assert.equal(report.reasonCode,'B198ZR4_EXPECTED_FOUR_KEYS');
   assert.equal(report.originalRawSha256,sha(raw));
   assert.equal(report.elementCount,null);
+  assert.equal(report.visualReviewStatus,'HOLD_NO_OFFLINE_3D_REVIEW');
+  assert.equal(fs.existsSync(path.join(root,'single','index.html')),false);
   assert.equal(report.worldWrites,0);
  }finally{await srv.close();fs.rmSync(root,{recursive:true,force:true})}
 });
@@ -137,6 +155,9 @@ test('R6 rejects model-declared occupied protected void but preserves source rec
   const report=await runR6AuthorizedCapture(cfg(root,srv));
   assert.equal(srv.count,1);
   assert.equal(report.status,'HOLD_SPATIAL_PLAN_OR_INDEPENDENT_CONTRACT');
+  assert.equal(report.visualReviewStatus,'WAITING_FOR_HUMAN_VISUAL_AND_SEMANTIC_REVIEW',
+   'bad declared intent remains inspectable when strict geometry still compiles');
+  assert(fs.existsSync(path.join(root,'single','index.html')));
   assert.equal(report.modelDeclaredSpatialReview.results.protectedVoids[0].passed,false);
   assert.equal(report.originalSaved,true);
   assert.equal(report.originalRawSha256,sha(raw));
