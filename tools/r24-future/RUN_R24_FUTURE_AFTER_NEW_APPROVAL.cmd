@@ -11,6 +11,13 @@ where powershell.exe >nul 2>nul
 if errorlevel 1 (echo [HOLD] PowerShell required.& exit /b 1)
 where node >nul 2>nul
 if errorlevel 1 (echo [HOLD] Node.js required.& exit /b 1)
+echo [R24] Preparing SHA-pinned sources and FAKE-only offline tests first.
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0INSTALL_R24_OFFLINE_ONLY.ps1"
+if errorlevel 1 (
+ echo [HOLD] Safe offline preparation failed. No real Qwen inference.
+ exit /b 1
+)
+echo [R24] Offline QA passed. Real model remains untouched.
 echo Confirm a NEW, explicit R23/R24 Qwen single-call approval in Chat.
 echo EXACT future authorization phrase:
 echo I_APPROVE_R23_ONE_LOCAL_QWEN_REQUEST
