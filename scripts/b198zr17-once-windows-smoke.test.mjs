@@ -196,7 +196,11 @@ test('R17 true Windows launcher: no approval/old approval => no GET or POST; fre
   fs.writeFileSync(path.join(shimDir,'node.cmd'),[
    '@echo off',
    'echo %* | findstr /C:"b198zr6-authorized-single-r4-capture.mjs" >nul',
-   'if not errorlevel 1 exit /b 99',
+   'if not errorlevel 1 (',
+   '  if "%R19_EMPTY_SUCCESS_SCRIPT%"=="" exit /b 99',
+   '  "%R18_REAL_NODE_EXE%" "%R19_EMPTY_SUCCESS_SCRIPT%" %*',
+   '  exit /b %errorlevel%',
+   ')',
    '"%R18_REAL_NODE_EXE%" %*',
    'exit /b %errorlevel%',
    ''
@@ -241,6 +245,57 @@ test('R17 true Windows launcher: no approval/old approval => no GET or POST; fre
   assert.equal(failureAudit.modelRequestsAddedByThisAudit,0);
   const refused=await execute('I_APPROVE_R17_ONE_LOCAL_QWEN_REQUEST',failedEnv);
   assert.equal(refused.code,1);
+  assert.equal(fake.calls.post,1);
+
+  // R19 regression: a child process can exit zero after creating an empty
+  // output folder. That is NEVER a valid capture or proof of Qwen quality.
+  const emptyApp=path.join(temp,'ZeroExitWithoutOriginalLocalAppData');
+  const emptyBase=path.join(emptyApp,'MinecraftAIBuilder');
+  fs.mkdirSync(emptyBase,{recursive:true});
+  for(const name of ['R16_Mini_a0438d8fa250','R16_SetupCache']){
+   fs.cpSync(path.join(app,'MinecraftAIBuilder',name),
+    path.join(emptyBase,name),{recursive:true});
+  }
+  const emptyScript=path.join(temp,'r19-empty-original-test-only.mjs');
+  fs.writeFileSync(emptyScript,[
+   "import fs from 'node:fs';",
+   "const i=process.argv.indexOf('--out');",
+   "if(i<0||!process.argv[i+1])process.exit(88);",
+   "fs.mkdirSync(process.argv[i+1]);",
+   "// Intentionally returns status 0 WITHOUT any model original.",
+   ""
+  ].join('\n'));
+  const emptyEnv={...failedEnv,LOCALAPPDATA:emptyApp,
+   R19_EMPTY_SUCCESS_SCRIPT:emptyScript};
+  const emptyRun=await execute('I_APPROVE_R17_ONE_LOCAL_QWEN_REQUEST',emptyEnv);
+  assert.equal(emptyRun.code,2,'zero-exit empty evidence must be HOLD');
+  assert.equal(fake.calls.get,1,'empty original cannot cause a model preflight');
+  assert.equal(fake.calls.post,1,'empty original cannot trigger generation');
+  const emptyEvidence=path.join(emptyBase,'R17_OneShot_Evidence');
+  assert(fs.existsSync(path.join(emptyEvidence,'R17_APPROVAL_CONSUMED_LOCK.txt')));
+  const emptyZips=fs.readdirSync(emptyEvidence)
+   .filter(x=>x.endsWith('_UPLOAD_THIS_RESULT.zip'));
+  assert.equal(emptyZips.length,1,'zero-exit empty original retains diagnostic ZIP');
+  const emptyOutput=path.join(temp,'zero-exit-empty-output');
+  const unpackEmpty=spawnSync('powershell.exe',['-NoProfile','-Command',
+   'Expand-Archive -LiteralPath $env:ZIP_FOR_R17 -DestinationPath $env:OUT_R17'],{
+   env:{...emptyEnv,ZIP_FOR_R17:path.join(emptyEvidence,emptyZips[0]),
+    OUT_R17:emptyOutput},encoding:'utf8',timeout:45000
+  });
+  assert.equal(unpackEmpty.status,0,unpackEmpty.stderr.slice(-1000));
+  const emptyContents=files(emptyOutput);
+  const emptyFind=n=>emptyContents.find(x=>path.basename(x)===n);
+  const emptyManifest=JSON.parse(fs.readFileSync(
+   emptyFind('R17_ONE_SHOT_MANIFEST.json'),'utf8'));
+  const emptyAudit=JSON.parse(fs.readFileSync(
+   emptyFind('R18_OFFLINE_EVIDENCE_LINK_AUDIT.json'),'utf8'));
+  assert.equal(emptyManifest.nodeExitCode,2);
+  assert.equal(emptyManifest.offlineEvidenceLinkStatus,'HOLD_EVIDENCE_LINKS');
+  assert(emptyManifest.offlineEvidenceLinkIssues.includes('ZERO_EXIT_WITHOUT_MODEL_ORIGINAL'));
+  assert.equal(emptyAudit.status,'HOLD_EVIDENCE_LINKS');
+  assert(!emptyFind('R6_ORIGINAL_MODEL_RESPONSE_UNMODIFIED.txt'));
+  const emptyRefused=await execute('I_APPROVE_R17_ONE_LOCAL_QWEN_REQUEST',emptyEnv);
+  assert.equal(emptyRefused.code,1,'consumed approval cannot be re-run');
   assert.equal(fake.calls.post,1);
  }finally{
   await fake.close();
