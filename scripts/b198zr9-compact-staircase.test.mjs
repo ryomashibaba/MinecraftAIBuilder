@@ -99,6 +99,13 @@ test('R9 refuses schema pollution, incomplete or outside bounds and unsupported 
   assert.throws(()=>validateDesign(design([wrong])),/B143_/,
    'bad staircase should never bypass strict grammar');
 });
+test('R9 staircase-only options can NEVER be smuggled onto pre-existing shape types',()=>{
+ const base=box('legacy-rectangle',[1,1,1],[3,2,3]);
+ for(const key of ['direction','width','steps','treadDepth']){
+  const polluted={...base,[key]:2};
+  assert.throws(()=>validateDesign(design([polluted])),/B143_NON_STAIRCASE_EXTRA/);
+ }
+});
 test('R9 ordered cut of open shaft still obeys final B143 voxel occupancy',()=>{
  const d=design([
   flight(),
