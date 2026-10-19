@@ -21,6 +21,8 @@ import {checkR8LocalModelAvailable}
  from '../source/ai/b198zr8-read-only-model-preflight.mjs';
 import {writeR7OfflineVisualReview}
  from './b198zr7-offline-visual-review.mjs';
+import {PROFILE as R11_PROFILE,R11_GUIDE_SHA256,inspectR11OriginalRaw}
+ from '../source/ai/b198zr11-compact-r4-output.mjs';
 
 export const SCHEMA='minecraftaibuilder-b198zr6-authorized-single-capture-v1';
 export const EXPLICIT_AUTHORIZATION='I_APPROVE_ONE_LOCAL_MODEL_REQUEST';
@@ -34,7 +36,8 @@ const guard=()=>({readiness:'NOT_PREPARED',constructionApproved:false,
  gates:Array(9).fill('BLOCKED'),BuildPlan:{operations:[]}});
 export function parseR6Args(argv=[]){
  const allowed=new Set(['--authorize-one','--model','--out','--port',
-  '--timeout-seconds','--source-tokens','--context-tokens']);
+  '--timeout-seconds','--source-tokens','--context-tokens',
+  '--prompt-profile']);
  const args={};
  for(let i=0;i<argv.length;i++){
   const k=argv[i],v=argv[++i];
@@ -52,12 +55,13 @@ export function parseR6Args(argv=[]){
   sourceTokens<=contextTokens-2048,'MODEL_BUDGET');
  return {authorization:args['--authorize-one'],model:args['--model'],
   outDir:path.resolve(args['--out']),port,timeoutSeconds,
-  sourceTokens,contextTokens};
+  sourceTokens,contextTokens,
+  promptProfile:args['--prompt-profile']??'r8-original'};
 }
 export async function runR6AuthorizedCapture({
  authorization,model,outDir,port=11434,timeoutSeconds=300,
  sourceTokens=3072,contextTokens=6144,
- bridgeFactory=createB198SNativeBridge
+ promptProfile='r8-original',bridgeFactory=createB198SNativeBridge
 }={}){
  // ALL cheap guards run before even making the output folder.
  yes(authorization===EXPLICIT_AUTHORIZATION,'NO_EXPLICIT_AUTHORIZATION');
@@ -71,6 +75,7 @@ export async function runR6AuthorizedCapture({
   Number.isSafeInteger(sourceTokens)&&sourceTokens>=512&&sourceTokens<=4096&&
   Number.isSafeInteger(contextTokens)&&contextTokens>=4096&&contextTokens<=8192&&
   sourceTokens<=contextTokens-2048,'INVALID_BUDGET');
+ yes(['r8-original',R11_PROFILE].includes(promptProfile),'PROMPT_PROFILE');
  const spec=CREATION_CASES.find(s=>s.id==='c01');
  yes(spec?.kind==='creation','FROZEN_C01_REQUIRED');
  const dir=path.resolve(outDir);
@@ -81,6 +86,8 @@ export async function runR6AuthorizedCapture({
   promptSha256:sha(spec.prompt),originalPrompt:spec.prompt,
   origin:'EXPLICIT_LOCAL_LOOPBACK_USER_AUTHORIZED',
   requestedMode:'R4_PLANNED_SOURCE_FOUR_KEYS',
+  explicitPromptProfile:promptProfile,
+  optInR11CompactGuideSha256:promptProfile===R11_PROFILE?R11_GUIDE_SHA256:null,
   budget:{port,timeoutSeconds,sourceTokens,contextTokens,
    thinkingOff:true,temperature:0.35,keepAlive:'10m'},
   existingB198UOriginalNeverModified:true,
@@ -100,7 +107,7 @@ export async function runR6AuthorizedCapture({
    'PRECHECK_'+readOnlyPreflight.status);
   bridge=bridgeFactory({
    numPredict:sourceTokens,numCtx:contextTokens,
-   plannedSourceMode:true,
+   plannedSourceMode:true,compactPlannedGuide:promptProfile===R11_PROFILE,
    onModelResponse:({originalContent,correctedContent,metadataRepair,boundsRepair})=>{
     yes(typeof originalContent==='string'&&originalContent.length>0&&
      originalContent.length<=60000,'UNTRUSTED_RESPONSE_LENGTH');
@@ -116,6 +123,8 @@ export async function runR6AuthorizedCapture({
    typeof bridge.telemetry==='function'&&
    bridge.requestBudget?.r4PlannedSourceOptIn===true,
    'FOUR_KEY_BRIDGE_REQUIRED');
+  yes(bridge.requestBudget?.r11CompactOutputProfileOptIn===
+    (promptProfile===R11_PROFILE),'PROMPT_PROFILE_BRIDGE_MISMATCH');
   const generate=createB198GLocalModelAdapter({
    model,endpoint:'http://127.0.0.1:'+port+'/v1/chat/completions',
    fetcher:bridge.fetcher,timeoutMs:timeoutSeconds*1000,
@@ -167,7 +176,15 @@ export async function runR6AuthorizedCapture({
  }
  const original=originalSaved?fs.readFileSync(originalPath,'utf8'):null;
  const trace=bridge?.telemetry?.()??[];
+ const r11Report=promptProfile===R11_PROFILE&&original!==null?
+  inspectR11OriginalRaw(original,{
+   profile:R11_PROFILE,outputTokenLimit:sourceTokens,nativeTrace:trace}):null;
+ if(r11Report!==null){
+  fs.writeFileSync(path.join(dir,'R11_OFFLINE_COMPLETION_AUDIT.json'),
+   JSON.stringify(r11Report,null,2)+'\n',{flag:'wx'});
+ }
  const result={schema:SCHEMA,status,reasonCode,
+  promptProfile,r11CompletionAudit:r11Report,
   request,requestedSingleCall:requested,
   reportedNativeRequestEvents:trace.length,
   nativeTrace:trace,originalSaved,
