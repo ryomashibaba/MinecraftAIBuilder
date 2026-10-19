@@ -21,6 +21,10 @@ import {checkR8LocalModelAvailable}
  from '../source/ai/b198zr8-read-only-model-preflight.mjs';
 import {writeR7OfflineVisualReview}
  from './b198zr7-offline-visual-review.mjs';
+import {analyzeR13SavedCapture}
+ from '../source/ai/b198zr13-quality-decision.mjs';
+import {renderR13QualityReport}
+ from './b198zr13-review-saved-capture.mjs';
 import {PROFILE as R11_PROFILE,R11_GUIDE_SHA256,inspectR11OriginalRaw}
  from '../source/ai/b198zr11-compact-r4-output.mjs';
 
@@ -223,6 +227,29 @@ export async function runR6AuthorizedCapture({
  }
  fs.writeFileSync(path.join(dir,'R6_SINGLE_CAPTURE_RESULT.json'),
   JSON.stringify(result,null,2)+'\n',{flag:'wx'});
+ // R13: save an independent "what can be judged?" dossier directly into
+ // the one ZIP R6 already packages. Only NEW report files are created;
+ // original model bytes, frozen request and all existing evidence remain
+ // immutable. A reporting error cannot trigger a retry or erase evidence.
+ if(original!==null){
+  try{
+   const r13=analyzeR13SavedCapture({
+    raw:original,caseId:'c01',
+    receipt:JSON.parse(fs.readFileSync(
+     path.join(dir,'R6_R5_UNVERIFIED_CAPTURE_RECEIPT.json'),'utf8')),
+    runResult:result
+   });
+   fs.writeFileSync(path.join(dir,'R13_OFFLINE_QUALITY_DECISION.json'),
+    JSON.stringify(r13,null,2)+'\n',{flag:'wx'});
+   fs.writeFileSync(path.join(dir,'R13_OFFLINE_QUALITY_OVERVIEW.html'),
+    renderR13QualityReport(r13),{flag:'wx'});
+  }catch(_error){
+   // Never expose unsanitized output/provider paths or rerun the model.
+   fs.writeFileSync(path.join(dir,'R13_OFFLINE_REVIEW_UNAVAILABLE.txt'),
+    'R13 offline quality overview unavailable. R6 original and model results are unchanged. No re-inference.\n',
+    {flag:'wx'});
+  }
+ }
  return result;
 }
 if(process.argv[1]===fileURLToPath(import.meta.url)){
