@@ -139,7 +139,7 @@ try {
  }
  $manifestPath=Join-Path $outDir 'R14_OFFLINE_AUDIT_MANIFEST.json'
  [IO.File]::WriteAllText($manifestPath,
-  (($manifest|ConvertTo-Json -Depth 5)+'`n'),([System.Text.UTF8Encoding]::new($false)))
+  (($manifest|ConvertTo-Json -Depth 5)+[Environment]::NewLine),([System.Text.UTF8Encoding]::new($false)))
  $payload=@((Join-Path $outDir 'R13_OFFLINE_QUALITY_DECISION.json'),
    (Join-Path $outDir 'R13_OFFLINE_QUALITY_OVERVIEW.html'),$manifestPath)
  Compress-Archive -LiteralPath $payload -DestinationPath $resultZip -CompressionLevel Optimal -ErrorAction Stop
