@@ -46,8 +46,7 @@ try{
   throw 'R14 manifest provenance or safety mismatch'
  }
  # Re-audit same input: another new result, no silent overwrites.
- $out2=(& powershell.exe -NoProfile -ExecutionPolicy Bypass -File
-  (Join-Path $repo 'tools\r14-mini\RUN_R14_REAUDIT.ps1') -ZipPath $inZip 2>&1 | Out-String)
+ $out2=(& powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $repo 'tools\r14-mini\RUN_R14_REAUDIT.ps1') -ZipPath $inZip 2>&1 | Out-String)
  if($LASTEXITCODE -ne 0 -or -not $out2.Contains('R14_OFFLINE_REAUDIT_COMPLETE')){
   throw ('R14 second no-inference audit failed: '+$out2)
  }
@@ -66,8 +65,7 @@ try{
  $old=$ErrorActionPreference
  try{
   $ErrorActionPreference='Continue'
-  $reject=(& powershell.exe -NoProfile -ExecutionPolicy Bypass -File
-   (Join-Path $repo 'tools\r14-mini\RUN_R14_REAUDIT.ps1') -ZipPath $evil 2>&1 | Out-String)
+  $reject=(& powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $repo 'tools\r14-mini\RUN_R14_REAUDIT.ps1') -ZipPath $evil 2>&1 | Out-String)
   $code=$LASTEXITCODE
  }finally{$ErrorActionPreference=$old}
  if($code -eq 0 -or -not $reject.Contains('R14_HOLD_UNSAFE_OR_NON_R6_ZIP_ENTRY')){
