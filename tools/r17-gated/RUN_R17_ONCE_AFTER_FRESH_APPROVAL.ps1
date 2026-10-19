@@ -65,9 +65,92 @@ try{
  Write-Host '[R17] Exactly one planned-source Qwen request, no automatic retries.'
  & node $node --model $MODEL --authorize-one I_APPROVE_ONE_LOCAL_MODEL_REQUEST --out $folder --prompt-profile r11-compact --source-tokens 3072 --context-tokens 6144
  $originalNodeExit=$LASTEXITCODE
+ $recoveredNoFolder=$false
  if(-not (Test-Path -LiteralPath $folder -PathType Container)){
-  throw 'ATTEMPT_CONSUMED_BUT_NO_RESULT_FOLDER'
+  # An early Node failure can occur AFTER the one-shot lock was consumed,
+  # but BEFORE the R6 capture module makes its folder. Preserve a diagnostic
+  # ZIP instead of leaving the user with only an irreversible lock.
+  [void](New-Item -ItemType Directory -Path $folder -ErrorAction Stop)
+  $recoveredNoFolder=$true
+  $originalNodeExit=1
+  [IO.File]::WriteAllText(
+   (Join-Path $folder 'R18_EARLY_NODE_FAILURE_NO_RAW.txt'),
+   'HOLD: capture did not create its evidence folder. The one-shot approval is consumed. Whether model transport started is UNKNOWN. NEVER retry automatically.',
+   (New-Object System.Text.UTF8Encoding($false)))
  }
+ # R18: independent, read-only file-to-file SHA continuity audit.
+ # A missing/invalid downstream report must not be treated as a fully
+ # packaged successful capture, and may not trigger any extra Qwen request.
+ $issues=New-Object 'System.Collections.Generic.List[string]'
+ $rawPath=Join-Path $folder 'R6_ORIGINAL_MODEL_RESPONSE_UNMODIFIED.txt'
+ $rawSha=$null
+ $linkState='NO_RAW_MODEL_RESPONSE'
+ if(Test-Path -LiteralPath $rawPath -PathType Leaf){
+  try{
+   $shaObj=[Security.Cryptography.SHA256]::Create()
+   try{
+    $rawSha=([BitConverter]::ToString(
+     $shaObj.ComputeHash([IO.File]::ReadAllBytes($rawPath)))).Replace('-','').ToLowerInvariant()
+   }finally{$shaObj.Dispose()}
+   $links=@(
+    @{Name='R6_SINGLE_CAPTURE_RESULT.json';Field='originalRawSha256'},
+    @{Name='R11_OFFLINE_COMPLETION_AUDIT.json';Field='rawSha256'},
+    @{Name='R13_OFFLINE_QUALITY_DECISION.json';Field='rawSha256'},
+    @{Name='R6_R5_UNVERIFIED_CAPTURE_RECEIPT.json';Field='rawSha256'}
+   )
+   foreach($link in $links){
+    $evidencePath=Join-Path $folder $link.Name
+    if(-not (Test-Path -LiteralPath $evidencePath -PathType Leaf)){
+     $issues.Add('MISSING_'+$link.Name)
+     continue
+    }
+    try{
+     $data=Get-Content -LiteralPath $evidencePath -Raw -Encoding UTF8 |
+      ConvertFrom-Json -ErrorAction Stop
+     $claimed=$data.($link.Field)
+     if($claimed -cne $rawSha){$issues.Add('RAW_SHA_MISMATCH_'+$link.Name)}
+    }catch{
+     $issues.Add('UNREADABLE_'+$link.Name)
+    }
+   }
+   $linkState=if($issues.Count -eq 0){'SHA_LINKED_EVIDENCE_PRESENT'}else{'HOLD_EVIDENCE_LINKS'}
+  }catch{
+   $issues.Add('RAW_SHA256_CANNOT_BE_READ')
+   $linkState='HOLD_EVIDENCE_LINKS'
+  }
+ }elseif(-not $recoveredNoFolder){
+  $resultPath=Join-Path $folder 'R6_SINGLE_CAPTURE_RESULT.json'
+  if(Test-Path -LiteralPath $resultPath -PathType Leaf){
+   try{
+    $captureResult=Get-Content -LiteralPath $resultPath -Raw -Encoding UTF8 |
+     ConvertFrom-Json -ErrorAction Stop
+    if($captureResult.originalSaved -eq $true){
+     $issues.Add('CAPTURE_REPORT_CLAIMS_MISSING_RAW')
+     $linkState='HOLD_EVIDENCE_LINKS'
+    }
+   }catch{
+    $issues.Add('UNREADABLE_R6_SINGLE_CAPTURE_RESULT.json')
+    $linkState='HOLD_EVIDENCE_LINKS'
+   }
+  }
+ }
+ $linkAudit=[ordered]@{
+  schema='minecraftaibuilder-b198zr18-offline-evidence-links-v1'
+  status=$linkState
+  rawSha256=$rawSha
+  linkedEvidenceIssues=@($issues.ToArray())
+  earlyCaptureFolderRecovered=$recoveredNoFolder
+  modelRequestsAddedByThisAudit=0
+  noAutomaticRetry=$true
+  sourceOnly=$true
+  worldContacts=0
+  worldWrites=0
+  readiness='NOT_PREPARED'
+ }
+ [IO.File]::WriteAllText((Join-Path $folder 'R18_OFFLINE_EVIDENCE_LINK_AUDIT.json'),
+  (($linkAudit|ConvertTo-Json -Depth 5)+[Environment]::NewLine),
+  (New-Object System.Text.UTF8Encoding($false)))
+ if($issues.Count -gt 0 -and $originalNodeExit -eq 0){$originalNodeExit=2}
  # Report only; no imaginary comparison to historic R6 evidence.
  $manifest=[ordered]@{
   schema='minecraftaibuilder-b198zr17-future-one-shot-launch-v1'
@@ -79,6 +162,9 @@ try{
   oneRunGuard='CONSUMED'
   nodeExitCode=$originalNodeExit
   baselineComparison='NOT_RUN_BASELINE_NOT_AUTO_SELECTED'
+  offlineEvidenceLinkStatus=$linkState
+  offlineEvidenceLinkIssues=@($issues.ToArray())
+  earlyCaptureFolderRecovered=$recoveredNoFolder
   modelQualityAutoAccepted=$false
   validHumanReviewRequired=$true
   actualMinecraftPlayerWalkingVerified=$false
