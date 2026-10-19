@@ -135,6 +135,7 @@ test('R11 raw inspection is cryptographic, complete-JSON-aware and never certifi
  assert.equal(result.declaredInstanceCount,8);
  assert.equal(result.actualModelTokenUsage,942);
  assert.equal(result.modelReportedOutputLimitReached,false);
+ assert.equal(result.serverReportedIncomplete,null);
  assert.equal(result.compileAndReachabilityCertified,false);
  assert.equal(result.structurallyValidR4Certified,false);
  assert.equal(result.safety.worldWrites,0);
@@ -194,6 +195,8 @@ test('R11 COMPLETE native fake Ollama one-shot captures original, guide SHA and 
   assert.equal(report.r11CompletionAudit.exactFourKeyJsonParseable,true);
   assert.equal(report.r11CompletionAudit.actualModelTokenUsage,950);
   assert.equal(report.r11CompletionAudit.modelReportedOutputLimitReached,false);
+  assert.equal(report.r11CompletionAudit.serverReportedIncomplete,false);
+  assert.equal(report.r11CompletionAudit.serverDoneReason,'stop');
   assert.equal(report.modelAuthorshipIndependentlyAuthenticated,false);
   assert.equal(report.safety.worldWrites,0);
   assert.equal(report.safety.readiness,'NOT_PREPARED');
@@ -214,6 +217,8 @@ test('R11 fake model truncation: raw preserved, no retry, no misleading quality 
   assert.equal(report.status,'HOLD_MODEL_TRANSPORT_OR_SOURCE_REVIEW');
   assert.equal(report.originalRawSha256,sha(raw));
   assert.equal(report.r11CompletionAudit.modelReportedOutputLimitReached,true);
+  assert.equal(report.r11CompletionAudit.serverReportedIncomplete,true);
+  assert.equal(report.r11CompletionAudit.serverDoneReason,'length');
   assert.equal(report.r11CompletionAudit.exactFourKeyJsonParseable,false);
   assert.equal(fake.requests.filter(x=>x.method==='POST').length,1);
   assert.equal(report.safety.worldWrites,0);
