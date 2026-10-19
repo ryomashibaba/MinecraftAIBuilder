@@ -55,11 +55,14 @@ small{color:#637387}footer{padding-top:14px;border-top:1px solid #bcc9d6;color:#
 <section><h2>以前の原本と新しい原本</h2>
 <table><thead><tr><th>項目</th><th>旧R6などの基準</th><th>次回の候補</th></tr></thead>
 <tbody>${row('原本SHA-256',d.baseline.rawSha256,d.candidate.rawSha256)}
+${row('完成した建築形状のSHA-256',d.baseline.geometrySha256,d.candidate.geometrySha256)}
 ${row('R13判定',d.baseline.status,d.candidate.status)}
 ${row('JSONの完成',d.baseline.rawJsonComplete?'完成':'不完全',d.candidate.rawJsonComplete?'完成':'不完全')}
 ${row('厳格な幾何・動線',d.baseline.machineStage,d.candidate.machineStage)}
 ${row('ボクセル数',d.baseline.compiledVoxels,d.candidate.compiledVoxels)}
-</tbody></table><p>${esc(evidenceNote)}</p></section>
+</tbody></table><p>${esc(evidenceNote)}</p>
+<p>形状が同一か：${d.sameGeometry?'同一（再設計の成果ではありません）':'同一と確認できない（それだけでは改善の証拠ではありません）'}</p>
+<p>モデル名の自己申告の一致：${esc(d.comparability.sameClaimedModel)}／既知の出力上限の一致：${esc(d.comparability.sameKnownModelOutputBudget)}。どちらも性能向上の因果関係を証明するものではありません。</p></section>
 <section><h2>建築として認めるための4項目</h2>
 <p>従来のB198Wの人間評価票をそのまま使います。全項目3点以上、うち2項目以上は4点が「オフラインでの品質目標」です。これは施工許可ではありません。</p>
 <table><thead><tr><th>評価項目</th><th>人間の点数</th><th>観察した証拠</th></tr></thead><tbody>${rubric}</tbody></table>
