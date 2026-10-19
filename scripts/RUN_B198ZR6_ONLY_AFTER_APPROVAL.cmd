@@ -28,7 +28,7 @@ if not "%ACK%"=="I_APPROVE_ONE_LOCAL_MODEL_REQUEST" (
   echo [HOLD] No explicit approval. Nothing started.
   exit /b 2
 )
-for /f %%G in ('powershell -NoProfile -Command "[guid]::NewGuid().ToString('N')"') do set "RID=%%G"
+for /f %%G in ('powershell -NoProfile -Command "[guid]::NewGuid().ToString()"') do set "RID=%%G"
 if not defined RID (
   echo [HOLD] Unable to obtain a unique output ID.
   exit /b 1
