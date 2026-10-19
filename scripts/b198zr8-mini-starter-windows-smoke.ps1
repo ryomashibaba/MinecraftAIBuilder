@@ -56,6 +56,8 @@ try {
  }
  Write-Host 'R8_MINI_REAL_WINDOWS_INSTALL_PASS'
  Write-Host 'Same ZIP bytes, 20 installed source files, no inference, idempotent verification, tampering rejected.'
+ # Child's intentionally nonzero tamper exit code must not be this test's exit.
+ $global:LASTEXITCODE=0
 }finally{
  $env:LOCALAPPDATA=$previous
  if (Test-Path $temp) { Remove-Item -LiteralPath $temp -Recurse -Force -ErrorAction SilentlyContinue }
