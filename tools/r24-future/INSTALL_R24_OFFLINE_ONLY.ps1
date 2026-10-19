@@ -94,8 +94,10 @@ function OfflineQA([string]$dir){
  )
  $files=@($suite|ForEach-Object {Join-Path $dir ($_.Replace('/','\'))})
  $stdout=(& node --test $files 2>&1 | Out-String)
- if($LASTEXITCODE -ne 0 -or
-  -not [regex]::IsMatch($stdout,'(?m)^\s*(?:#|ℹ)\s*fail\s+0\s*$')){
+ # Node's exit status is the authoritative result. PowerShell 5.1
+ # can transcode Node's Unicode TAP summary differently by console codepage;
+ # do NOT falsely HOLD a 0-exit test just because "ℹ fail 0" is mangled.
+ if($LASTEXITCODE -ne 0){
   throw ('R24_SYNTHETIC_QA_FAILED: '+$stdout.Substring(0,[Math]::Min(600,$stdout.Length)))
  }
  Write-Host '[R24] Fake-server R23 / R22 / R6 regressions: PASS.'
