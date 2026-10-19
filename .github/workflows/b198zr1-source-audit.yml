@@ -30,6 +30,7 @@ on:
       - 'docs/B198ZR7_OFFLINE_VISUAL_REVIEW_JA.md'
       - 'source/ai/b198zr8-read-only-model-preflight.mjs'
       - 'scripts/b198zr8-windows-launcher-smoke.test.mjs'
+      - 'scripts/b198zr8-read-only-preflight.test.mjs'
       - 'docs/B198ZR8_PLAIN_JAPANESE_APPROVAL_AND_READINESS_JA.md'
       - 'evidence/b198zr5/**'
       - 'docs/B198ZR5_COMPARISON_PROTOCOL_JA.md'
@@ -65,6 +66,7 @@ on:
       - 'docs/B198ZR7_OFFLINE_VISUAL_REVIEW_JA.md'
       - 'source/ai/b198zr8-read-only-model-preflight.mjs'
       - 'scripts/b198zr8-windows-launcher-smoke.test.mjs'
+      - 'scripts/b198zr8-read-only-preflight.test.mjs'
       - 'docs/B198ZR8_PLAIN_JAPANESE_APPROVAL_AND_READINESS_JA.md'
       - 'evidence/b198zr5/**'
       - 'docs/B198ZR5_COMPARISON_PROTOCOL_JA.md'
@@ -97,6 +99,8 @@ jobs:
         run: node --test scripts/b198zr5-comparison.test.mjs
       - name: R6 authorization gate and one native HTTP capture (fixture only)
         run: node --test scripts/b198zr6-authorized-single-r4-capture.test.mjs
+      - name: R8 exact-model read-only preflight and timeout error regressions
+        run: node --test scripts/b198zr8-read-only-preflight.test.mjs
       - name: End-to-end offline contract report (non-Minecraft)
         run: |
           node scripts/b198zr3-offline-review.mjs --design evidence/b198zr2/assistant-revised-library-r2.json --contract evidence/b198zr3/r2-functional-review-contract.json --out "$RUNNER_TEMP/b198zr3-offline-report.json"
