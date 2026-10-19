@@ -184,7 +184,13 @@ export function createB198SNativeBridge({
      // title/brief characters can be trimmed with SHA and explicit disclosure.
      let normalized;
      try{
-      normalized=prepareCapturedModelSource(content);
+      // R4's four-key original is primary evidence: never silently modify it.
+      // Legacy three-key mode keeps bounded metadata/bounds repair unchanged.
+      normalized=plannedSourceMode?{
+       content,
+       metadataRepair:{applied:false,status:'R4_UNMODIFIED_ORIGINAL'},
+       boundsRepair:{applied:false,status:'R4_UNMODIFIED_ORIGINAL'}
+      }:prepareCapturedModelSource(content);
       // Write the FULL ORIGINAL response before strict source validation.
       // Invalid geometry remains evidence; user need not spend another
       // local 27B inference just to recover the model-authored payload.
@@ -235,6 +241,7 @@ export function createB198SNativeBridge({
    thinkingOffIndependentlyVerified:false,
    nativeOllamaSourceOnly:true,
    r4PlannedSourceOptIn:plannedSourceMode,
+   r4OriginalReturnedUnmodified:true,
    fourKeyR4RequiresIndependentReview:true,
     boundedMetadataRepairEnabled:true,
     geometryRepairNeverAutomatic:true,
