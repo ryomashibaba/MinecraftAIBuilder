@@ -180,6 +180,59 @@ test('R17 true Windows launcher: no approval/old approval => no GET or POST; fre
   assert.equal(fake.calls.get,1,'repeated approved click may NEVER contact Ollama');
   assert.equal(fake.calls.post,1,'repeated approved click may NEVER generate');
   assert.equal(fs.readdirSync(evidence).filter(x=>x.endsWith('_UPLOAD_THIS_RESULT.zip')).length,1);
+
+  // R18 failure regression: simulate Node exiting before the capture can
+  // create its output directory. The consumed approval MUST still yield one
+  // diagnostic ZIP, with 0 additional transport requests and no second try.
+  const failedApp=path.join(temp,'EarlyNodeFailureLocalAppData');
+  const failBase=path.join(failedApp,'MinecraftAIBuilder');
+  fs.mkdirSync(failBase,{recursive:true});
+  for(const name of ['R16_Mini_a0438d8fa250','R16_SetupCache']){
+   fs.cpSync(path.join(app,'MinecraftAIBuilder',name),path.join(failBase,name),
+    {recursive:true});
+  }
+  const shimDir=path.join(temp,'node-shim');
+  fs.mkdirSync(shimDir);
+  fs.writeFileSync(path.join(shimDir,'node.cmd'),[
+   '@echo off',
+   'echo %* | findstr /C:"b198zr6-authorized-single-r4-capture.mjs" >nul',
+   'if not errorlevel 1 exit /b 99',
+   '"%R18_REAL_NODE_EXE%" %*',
+   'exit /b %errorlevel%',
+   ''
+  ].join('\r\n'));
+  const failedEnv={...env,LOCALAPPDATA:failedApp,
+   PATH:shimDir+path.delimiter+env.PATH,R18_REAL_NODE_EXE:process.execPath};
+  const failed=await execute('I_APPROVE_R17_ONE_LOCAL_QWEN_REQUEST',failedEnv);
+  assert.equal(failed.code,2,JSON.stringify(failed).slice(-1900));
+  assert.equal(fake.calls.get,1,'early Node failure must not contact the model');
+  assert.equal(fake.calls.post,1,'early Node failure must not trigger POST');
+  const failedEvidence=path.join(failBase,'R17_OneShot_Evidence');
+  assert(fs.existsSync(path.join(failedEvidence,'R17_APPROVAL_CONSUMED_LOCK.txt')));
+  const failedZips=fs.readdirSync(failedEvidence)
+   .filter(x=>x.endsWith('_UPLOAD_THIS_RESULT.zip'));
+  assert.equal(failedZips.length,1,'early Node failure must still produce diagnostic ZIP');
+  const failedOutput=path.join(temp,'early-node-diagnostic');
+  const expandFailed=spawnSync('powershell.exe',['-NoProfile','-Command',
+   'Expand-Archive -LiteralPath $env:ZIP_FOR_R17 -DestinationPath $env:OUT_R17'],{
+   env:{...failedEnv,ZIP_FOR_R17:path.join(failedEvidence,failedZips[0]),
+    OUT_R17:failedOutput},encoding:'utf8',timeout:45000
+  });
+  assert.equal(expandFailed.status,0,expandFailed.stderr.slice(-1000));
+  const failContents=files(failedOutput);
+  const failFind=name=>failContents.find(x=>path.basename(x)===name);
+  assert(failFind('R18_EARLY_NODE_FAILURE_NO_RAW.txt'));
+  const failureManifest=JSON.parse(fs.readFileSync(
+   failFind('R17_ONE_SHOT_MANIFEST.json'),'utf8'));
+  assert.equal(failureManifest.earlyCaptureFolderRecovered,true);
+  assert.equal(failureManifest.nodeExitCode,1);
+  const failureAudit=JSON.parse(fs.readFileSync(
+   failFind('R18_OFFLINE_EVIDENCE_LINK_AUDIT.json'),'utf8'));
+  assert.equal(failureAudit.earlyCaptureFolderRecovered,true);
+  assert.equal(failureAudit.modelRequestsAddedByThisAudit,0);
+  const refused=await execute('I_APPROVE_R17_ONE_LOCAL_QWEN_REQUEST',failedEnv);
+  assert.equal(refused.code,1);
+  assert.equal(fake.calls.post,1);
  }finally{
   await fake.close();
   fs.rmSync(temp,{recursive:true,force:true});
