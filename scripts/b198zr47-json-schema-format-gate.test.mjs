@@ -86,14 +86,39 @@ test('R47 authentic B143 shapes remain general and not a fixed building template
  for(const fn of [r32Courtyard,r32Bridge]){
   const raw=JSON.stringify(fn());
   const r=inspectR47SavedCandidate(raw);
-  assert.equal(r.status,'STRICT_B143_GEOMETRY_ONLY_PASS_R3_AND_HUMAN_PENDING');
+  assert.equal(r.status,'STRICT_B143_AND_MODEL_DECLARED_SPATIAL_PASS_HUMAN_PENDING');
   assert(r.compilerVoxelCount>0);
   assert.equal(r.rawSha256,sha(raw));
   assert.equal(r.declaredPlanIsNotIndependent,true);
-  assert.equal(r.functionalReachabilityVerified,false);
+  assert.equal(r.functionalReachabilityVerified,true);
+  assert.equal(r.independentlyVerifiedSpatialProgram,false);
+  assert.equal(r.declaredPlanStatus,'FORMAL_GEOMETRY_AND_ROUTE_CONSTRAINTS_PASS');
   assert.equal(r.visualOriginalityApproved,false);
   assert.equal(r.modelRequests,0);
  }
+});
+test('R47 final ordered voxels detect fake void and stop without claiming a room',()=>{
+ const p=r32Courtyard();
+ p.design.elements.push({id:'fill-claimed-courtyard',shape:'box',
+  mode:'add',material:'metal',origin:[6,1,6],size:[4,4,4]});
+ const raw=JSON.stringify(p),r=inspectR47SavedCandidate(raw);
+ assert.equal(r.status,'HOLD_MODEL_DECLARED_SPATIAL_FAILURE');
+ assert.equal(r.rawSha256,sha(raw));
+ assert(r.voidResults.some(x=>x.id==='court-air'&&
+  x.passed===false&&x.occupied>0));
+ assert.equal(r.independentlyVerifiedSpatialProgram,false);
+ assert.equal(r.modelQualityApproved,false);
+ assert.equal(r.worldContacts,0);
+});
+test('R47 final ordered voxels reject blocked declared entrance without repairing coordinates',()=>{
+ const p=r32Courtyard();
+ p.design.elements.push({id:'block-entrance',shape:'box',
+  mode:'add',material:'glass',origin:[7,1,2],size:[1,3,1]});
+ const raw=JSON.stringify(p),r=inspectR47SavedCandidate(raw);
+ assert.equal(r.status,'HOLD_ABSTRACT_SPATIAL_CONTRACT');
+ assert.equal(r.errorCode,'B198ZR3_CONTRACT_ENTRANCE_NOT_STANDABLE');
+ assert.deepEqual(JSON.parse(raw).spatialPlan.entrance,[7,1,2]);
+ assert.equal(r.actualMinecraftWalkabilityCertified,false);
 });
 async function fakeServer(raw){
  const calls=[];
