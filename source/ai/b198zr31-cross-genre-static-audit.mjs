@@ -59,7 +59,7 @@ export function auditR31CrossGenre({additionalGuide=R30_ADDITIONAL_GUIDE}={}){
  // not whether a model can or did construct any of these designs.
  const genres=R31_GENRES.map(g=>({
   ...g,checks:coverage.map(x=>({id:x.id,covered:x.covered})),
-  hardcodedLayoutRequired:false, // no R30 fixed geometry is prescribed
+  hardcodedLayoutRequirementDetected:contradictions.includes('FIXED_TEMPLATE_REQUIRED'),
   modelWasAskedToGenerate:false,
   generatedGeometryExamined:false,
   structuralFeasibilityIndependentlyVerified:false
