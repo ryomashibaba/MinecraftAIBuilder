@@ -24,7 +24,7 @@ test('R41 is shorter than R30 and cannot trigger Qwen or world operations',()=>{
  assert.deepEqual(r.safety.BuildPlan.operations,[]);
 });
 test('R41 guidance preserves originality and known failure constraints',()=>{
- for(const t of ['Japanese brief','NEVER a category template','four','CUT',
+ for(const t of ['Japanese brief','never a category template','four','CUT',
    'MUST OMIT material','shell','before the openings/void cuts',
    'y>=1','supported floors','destinations','functionalZones',
    '3D','Minecraft']){
@@ -53,7 +53,7 @@ test('R41 catches illegal CUT material without modifying raw original',()=>{
  assert.equal(r.status,'HOLD_SOURCE_OR_ENTRANCE');
  assert.equal(r.sourceErrorCode,'B143_MATERIAL');
  assert.equal(r.rawSha256,sha(raw));
- assert.equal(JSON.parse(raw).design.elements.find(e=>e.id===e.id)?.material,'glass');
+ assert.equal(JSON.parse(raw).design.elements.find(e=>e.mode==='cut')?.material,'glass');
 });
 test('R41 detects a later ADD that refills a supposed open courtyard',()=>{
  const p=r32Courtyard();
