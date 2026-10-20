@@ -23,6 +23,8 @@ import {R41_DRAFT_GUIDE,GUIDE_SHA256 as R41_GUIDE_SHA256}
  from './b198zr41-architecture-authoring-candidate.mjs';
 import {R46_GUIDE,GUIDE_SHA256 as R46_GUIDE_SHA256}
  from './b198zr46-corrected-architecture-guide.mjs';
+import {R47_JSON_SCHEMA,R47_JSON_SCHEMA_SHA256}
+ from './b198zr47-json-schema-format-gate.mjs';
 
 export const SCHEMA='minecraftaibuilder-b198s-native-single-source-json-v1';
 const ENDPOINT=/^http:\/\/127\.0\.0\.1:(\d{2,5})\/v1\/chat\/completions$/;
@@ -88,7 +90,8 @@ export function createB198SNativeBridge({
  numPredict=3072,numCtx=6144,keepAlive='10m',
  transport=http,addArchitectureGuide=true,plannedSourceMode=false,
  compactPlannedGuide=false,r22QualityGuide=false,
- r44SpaceGuide=false,r46CorrectedGuide=false,onModelResponse=null
+ r44SpaceGuide=false,r46CorrectedGuide=false,
+ r47SchemaFormat=false,onModelResponse=null
 }={}){
  if(!Number.isSafeInteger(numPredict)||numPredict<512||numPredict>4096)
   throw fail('OUTPUT_TOKENS_512_TO_4096');
@@ -119,6 +122,10 @@ export function createB198SNativeBridge({
   throw fail('R46_GUIDE_REQUIRES_EXCLUSIVE_PLANNED_MODE');
  if(r44SpaceGuide&&r46CorrectedGuide)
   throw fail('R44_R46_EXCLUSIVE_GUIDES');
+ if(typeof r47SchemaFormat!=='boolean'||
+  (r47SchemaFormat&&(!plannedSourceMode||!addArchitectureGuide||
+   compactPlannedGuide||r22QualityGuide||r44SpaceGuide||r46CorrectedGuide)))
+  throw fail('R47_SCHEMA_REQUIRES_EXCLUSIVE_PLANNED_MODE');
  if(onModelResponse!==null&&typeof onModelResponse!=='function')
   throw fail('EVIDENCE_PERSISTENCE_CALLBACK_REQUIRED');
  const entries=[];
@@ -145,7 +152,11 @@ export function createB198SNativeBridge({
    return Promise.reject(fail('UNSAFE_MODEL_REQUEST'));
   }
   const messages=payload.messages.map(x=>({role:x.role,content:x.content}));
-  if(r46CorrectedGuide){
+  if(r47SchemaFormat){
+   // Future *fresh-consent* mode only; never enabled by R46 or R44.
+   messages[0].content=R46_GUIDE+
+    '\nNative Ollama format uses a strict JSON Schema. Respect exactly the allowed bounds fields and staircase steps <=32; do not waste output tokens on extra properties. Prioritize genuinely hollow, supported, accessible and original architecture.';
+  }else if(r46CorrectedGuide){
    messages[0].content=R46_GUIDE;
   }else if(r44SpaceGuide){
    // R44 opt-in only; legacy R11/R21/R23 behavior remains unchanged.
@@ -165,7 +176,8 @@ export function createB198SNativeBridge({
     '\n'+R4_PLANNING_GUIDE:STRUCTURAL_GUIDE)+
    '\n'+R2_FREEFORM_QUALITY_GUIDE;
   const native={
-   model:payload.model,messages,stream:false,format:'json',think:false,
+   model:payload.model,messages,stream:false,
+   format:r47SchemaFormat?R47_JSON_SCHEMA:'json',think:false,
    keep_alive:keepAlive,
    options:{num_predict:numPredict,num_ctx:numCtx,temperature:0.35}
   };
@@ -299,6 +311,8 @@ export function createB198SNativeBridge({
    r44SpaceGuideSha256:r44SpaceGuide?R41_GUIDE_SHA256:null,
    r46CorrectedGuideProfileOptIn:r46CorrectedGuide,
    r46CorrectedGuideSha256:r46CorrectedGuide?R46_GUIDE_SHA256:null,
+   r47SchemaFormatOptIn:r47SchemaFormat,
+   r47SchemaFormatSha256:r47SchemaFormat?R47_JSON_SCHEMA_SHA256:null,
    r4OriginalReturnedUnmodified:true,
    fourKeyR4RequiresIndependentReview:true,
     boundedMetadataRepairEnabled:true,
