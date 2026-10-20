@@ -8,7 +8,8 @@
  * geometry and functional reachability still require B143/R3 validators.
  */
 import {createHash} from 'node:crypto';
-import {readR4PlannedProposal} from './b198zr4-planned-source.mjs';
+import {readR4PlannedProposal,reviewR4PlannedProposal}
+ from './b198zr4-planned-source.mjs';
 import {compileDesign,verifyCompiled} from './b143-building-dsl.mjs';
 
 export const SCHEMA='minecraftaibuilder-b198zr47-structured-output-proposal-v1';
@@ -129,10 +130,36 @@ export function inspectR47SavedCandidate(raw){
   return {...base,status:'HOLD_B143_GEOMETRY',
    errorCode:String(e?.message??'').match(/\b(?:B143|B198ZR47)_[A-Z0-9_]+/)?.[0]??'INVALID_UNTRUSTED_GEOMETRY'};
  }
- return {...base,status:'STRICT_B143_GEOMETRY_ONLY_PASS_R3_AND_HUMAN_PENDING',
+ const geometry={
   compilerSourceSha256:compiled.sourceSha256,
   compilerGeometrySha256:compiled.geometrySha256,
   compilerVoxelCount:compiled.primitives.length,
-  functionalReachabilityVerified:false,
-  declaredPlanIsNotIndependent:true,visualOriginalityApproved:false};
+  declaredPlanIsNotIndependent:true,
+  independentContractProvided:false,
+  actualMinecraftWalkabilityCertified:false,
+  visualOriginalityApproved:false
+ };
+ // Evaluate the model's OWN declared plan against final, ordered B143 voxels.
+ // Even a formal PASS is not a valid independent architectural acceptance.
+ let evaluated;
+ try{evaluated=reviewR4PlannedProposal(raw)}
+ catch(e){
+  return {...base,...geometry,status:'HOLD_ABSTRACT_SPATIAL_CONTRACT',
+   errorCode:String(e?.message??'').match(
+    /\\b(?:B198ZR3|B198ZR4|B143)_[A-Z0-9_]+/)?.[0]??
+     'SPATIAL_VALIDATOR_HOLD',
+   functionalReachabilityVerified:false};
+ }
+ const evidence=evaluated.declaredPlanReview;
+ return {...base,...geometry,
+  status:evidence.status==='FORMAL_GEOMETRY_AND_ROUTE_CONSTRAINTS_PASS'?
+   'STRICT_B143_AND_MODEL_DECLARED_SPATIAL_PASS_HUMAN_PENDING':
+   'HOLD_MODEL_DECLARED_SPATIAL_FAILURE',
+  declaredPlanStatus:evidence.status,
+  functionalReachabilityVerified:
+   evidence.status==='FORMAL_GEOMETRY_AND_ROUTE_CONSTRAINTS_PASS',
+  independentlyVerifiedSpatialProgram:false,
+  voidResults:evidence.results.protectedVoids,
+  destinationResults:evidence.results.destinations,
+  functionalZoneResults:evidence.results.functionalZones};
 }
