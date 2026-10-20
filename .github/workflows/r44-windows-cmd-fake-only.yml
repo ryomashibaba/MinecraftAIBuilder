@@ -1,0 +1,26 @@
+name: R44 Actual Windows CMD — Prebound Fake Ollama Only
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'tools/r44-approved/**'
+      - 'scripts/b198zr44-windows-one-click-fake.test.mjs'
+      - '.github/workflows/r44-windows-cmd-fake-only.yml'
+  pull_request:
+    paths:
+      - 'tools/r44-approved/**'
+      - 'scripts/b198zr44-windows-one-click-fake.test.mjs'
+      - '.github/workflows/r44-windows-cmd-fake-only.yml'
+permissions:
+  contents: read
+jobs:
+  actual-cmd-with-fake-provider-only:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Fail closed unless a local in-process fake HTTP server pre-binds Ollama port
+        run: node --test scripts/b198zr44-windows-one-click-fake.test.mjs
