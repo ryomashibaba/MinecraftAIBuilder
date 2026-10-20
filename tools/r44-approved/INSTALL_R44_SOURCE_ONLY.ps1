@@ -50,18 +50,21 @@ function VerifyTarget([string]$target,[string]$base){
  $baseFiles=@(Get-ChildItem -LiteralPath $base -Recurse -File)
  if($baseFiles.Count -ne 37){throw 'R24_BASE_FILE_COUNT_MISMATCH'}
  foreach($item in $baseFiles){
-  $relative=$item.FullName.Substring($base.Length+1)
+  $relative=$item.FullName.Substring($base.Length+1).Replace('\','/')
   $expected[$relative]=(GitBlobSha ([IO.File]::ReadAllBytes($item.FullName)))
  }
  foreach($item in $Overlay){
-  $relative=$item.Path.Replace('/','\')
+  $relative=$item.Path.Replace('\','/')
   $expected[$relative]=$item.Sha
  }
- if($expected.Count -ne 46){throw 'R44_EXACT_SOURCE_COUNT_EXPECTED_46'}
+ if($expected.Count -ne 46){
+  throw ('R44_EXACT_SOURCE_COUNT_EXPECTED_46_ACTUAL_'+$expected.Count+
+   '_BASE_'+$baseFiles.Count+'_OVERLAY_'+$Overlay.Count)
+ }
  $actual=@(Get-ChildItem -LiteralPath $target -Recurse -File)
  if($actual.Count -ne $expected.Count){throw 'R44_UNKNOWN_OR_MISSING_SOURCE_FILES'}
  foreach($item in $expected.GetEnumerator()){
-  VerifyBlob (Join-Path $target $item.Key) $item.Value
+  VerifyBlob (Join-Path $target ($item.Key.Replace('/','\'))) $item.Value
  }
  if(Test-Path -LiteralPath (Join-Path $target 'scripts\RUN_B198ZR6_ONLY_AFTER_APPROVAL.cmd')){
   throw 'LEGACY_UNCONTROLLED_LAUNCHER_IN_SOURCE'
