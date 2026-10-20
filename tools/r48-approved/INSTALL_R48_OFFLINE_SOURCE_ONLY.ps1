@@ -3,7 +3,7 @@
 # 5 SHA-pinned overlay paths: replaces 1 and adds 4, total 453 files.
 param([switch]$CheckOnly)
 $ErrorActionPreference='Stop'
-$Revision='5c54d0f43fc31dd591e8d7122e40911bb33b896b'
+$Revision='68396b9483fd426f6764621ac48bcfd62c6c384d'
 $R46Rev='214fec3002de6837a6e6174687a5047ffb6d6c7c'
 $R46InstallerRev='6f39d96880efe34515eea39e04310003255df92c'
 $R46InstallerSha='b00ead462f633c6671772a4fab59994dcabb3579'
@@ -11,7 +11,7 @@ $Overlay=@(
  @{Path='source/ai/b198s-native-ollama-source.mjs';Sha='af732c1d3fde3bf64cad307855c9e897a67bffca'},
  @{Path='source/ai/b198zr47-json-schema-format-gate.mjs';Sha='72d83f8eaa54c27fdf3a28fcce87c4acf0c0f080'},
  @{Path='scripts/b198zr48-consented-schema-qwen-once.mjs';Sha='4ec495a203b60f34f5d986e67b74a915ea413000'},
- @{Path='scripts/b198zr48-consented-schema-qwen-once.test.mjs';Sha='147137fae1f4dc9133d70e6eab62bd9279dfa59d'},
+ @{Path='scripts/b198zr48-consented-schema-qwen-once.test.mjs';Sha='19b32411262693f9b2e85b3f93e587d1a5ce3dcd'},
  @{Path='scripts/b198zr47-json-schema-format-gate.test.mjs';Sha='bf2a3fe103c2284c67cdb98daeb7066d8c44792f'}
 )
 function Blob([byte[]]$b){
