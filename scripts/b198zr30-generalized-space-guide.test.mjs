@@ -40,7 +40,7 @@ test('R30 handles every known R27 failure without guessing floorplan or construc
   'ADD primitive as solid','a later CUT','functionalZone',
   'headroom (2 or 3 air cells)','entrance must have y>=1',
   'Every doorway/opening must intersect','ONE or MANY routes',
-  'every declared destination','minimumReachablePositions',
+  'Every declared destination','minimumReachablePositions',
   'minimumReachablePercent','each CUT omits the material property',
   'independent R3 route/functional contract'
  ])assert(R30_ADDITIONAL_GUIDE.includes(text),text);
