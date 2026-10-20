@@ -131,7 +131,7 @@ function classify(message){
  if(message.startsWith('ENOENT:'))return ['DIRECTORY_OR_FILE_MISSING','対象フォルダーまたは必須ファイルがありません。','ENOENT'];
  if(message.startsWith('ENOTDIR:'))return ['DIRECTORY_TYPE','通常のフォルダーを指定してください。','ENOTDIR'];
  if(message.startsWith('EACCES:')||message.startsWith('EPERM:'))return ['FILESYSTEM_PERMISSION','ファイルを読み取る権限がありません。','ACCESS_DENIED'];
- const code=message.match(/^(R38_[A-Z0-9_.]+|R39_[A-Z0-9_]+)$/)?.[1]||'UNRECOGNIZED_ERROR';
+ const code=message.match(/^(R38_[A-Za-z0-9_.]+|R39_[A-Z0-9_]+)$/)?.[1]||'UNRECOGNIZED_ERROR';
  if(DIAGNOSTICS[code])return [...DIAGNOSTICS[code],code];
  if(code.startsWith('R38_R37_LEDGER_'))
   return ['R37_HASH_CHAIN','レビューの記録順・前のSHA・ID・各項目が破損しています。',code];
