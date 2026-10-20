@@ -43,6 +43,7 @@ test('R31 flags prohibited loops and forced fixed floorplans',()=>{
  assert.equal(a.status,'HOLD_STATIC_GUIDE_CONTRACT');
  assert(a.contradictoryInstructionFlags.includes('LOOPS_PROHIBITED'));
  assert(a.contradictoryInstructionFlags.includes('FIXED_TEMPLATE_REQUIRED'));
+ assert(a.scenarios.every(g=>g.hardcodedLayoutRequirementDetected));
 });
 test('R31 rejects CUT material requirement and historical entrance coordinate leakage',()=>{
  const a=auditR31CrossGenre({additionalGuide:
