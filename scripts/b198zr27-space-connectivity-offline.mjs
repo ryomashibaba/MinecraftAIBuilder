@@ -163,7 +163,7 @@ function inspectGeometry(design,compiled,plan){
  return {
   conceptualGridCells:volume,finalOccupiedCells:compiled.primitives.length,
   standablePositions:standableTotal,connectedComponentCount:sizes.length,
-  largestComponentPositions:Math.max(0,...sizes),
+  largestComponentPositions:sizes.reduce((m,n)=>Math.max(m,n),0),
   entrance:entranceStatus,
   nearestStandableCandidates,
   zones:zoneResults,destinations:destinationResults,
