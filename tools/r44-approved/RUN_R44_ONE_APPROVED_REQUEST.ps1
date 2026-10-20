@@ -3,7 +3,7 @@
 param([string]$R44Consent)
 $ErrorActionPreference='Stop'
 $required='I_APPROVE_R44_ONE_LOCAL_QWEN_REQUEST'
-$installerBlob='8b3b6652b6b0fc935857f86def3478ad0d495639'
+$installerBlob='689a818e8b424f6d4b2d3d028d3be40a5ed1ccf0'
 $revision='539daac020143efe2f24f981727f8dc5d6beeb50'
 function GitBlobSha([byte[]]$b){
  $prefix=[Text.Encoding]::ASCII.GetBytes('blob '+$b.Length+[char]0)
@@ -40,7 +40,7 @@ try{
  if(-not(Test-Path -LiteralPath $installer -PathType Leaf)){
   [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
   $url='https://raw.githubusercontent.com/ryomashibaba/MinecraftAIBuilder/'+
-   '8ea5dcc3deefa2b965d0f888dffe77a916811ae9/tools/r44-approved/INSTALL_R44_SOURCE_ONLY.ps1'
+   '68fd49f31585d363b9f0d9d3b744e0918315e6ef/tools/r44-approved/INSTALL_R44_SOURCE_ONLY.ps1'
   $web=New-Object System.Net.WebClient
   try{$bytes=$web.DownloadData($url)}finally{$web.Dispose()}
   if($bytes.Length -lt 1000 -or $bytes.Length -gt 25000 -or
