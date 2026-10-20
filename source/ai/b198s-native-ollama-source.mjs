@@ -19,6 +19,8 @@ import {R11_COMPACT_GUIDE,R11_GUIDE_SHA256}
  from './b198zr11-compact-r4-output.mjs';
 import {R21_FUTURE_GUIDE,R21_FUTURE_GUIDE_SHA256}
  from './b198zr21-future-architecture-guide.mjs';
+import {R41_DRAFT_GUIDE,GUIDE_SHA256 as R41_GUIDE_SHA256}
+ from './b198zr41-architecture-authoring-candidate.mjs';
 
 export const SCHEMA='minecraftaibuilder-b198s-native-single-source-json-v1';
 const ENDPOINT=/^http:\/\/127\.0\.0\.1:(\d{2,5})\/v1\/chat\/completions$/;
@@ -83,7 +85,8 @@ const STRUCTURAL_GUIDE=[
 export function createB198SNativeBridge({
  numPredict=3072,numCtx=6144,keepAlive='10m',
  transport=http,addArchitectureGuide=true,plannedSourceMode=false,
- compactPlannedGuide=false,r22QualityGuide=false,onModelResponse=null
+ compactPlannedGuide=false,r22QualityGuide=false,
+ r44SpaceGuide=false,onModelResponse=null
 }={}){
  if(!Number.isSafeInteger(numPredict)||numPredict<512||numPredict>4096)
   throw fail('OUTPUT_TOKENS_512_TO_4096');
@@ -104,6 +107,10 @@ export function createB198SNativeBridge({
    (r22QualityGuide&&!addArchitectureGuide)||
    (r22QualityGuide&&compactPlannedGuide))
   throw fail('R22_QUALITY_REQUIRES_DISTINCT_PLANNED_GUIDE');
+ if(typeof r44SpaceGuide!=='boolean'||
+  (r44SpaceGuide&&(!plannedSourceMode||!addArchitectureGuide||
+   compactPlannedGuide||r22QualityGuide)))
+  throw fail('R44_SPACE_GUIDE_REQUIRES_EXCLUSIVE_PLANNED_MODE');
  if(onModelResponse!==null&&typeof onModelResponse!=='function')
   throw fail('EVIDENCE_PERSISTENCE_CALLBACK_REQUIRED');
  const entries=[];
@@ -130,7 +137,10 @@ export function createB198SNativeBridge({
    return Promise.reject(fail('UNSAFE_MODEL_REQUEST'));
   }
   const messages=payload.messages.map(x=>({role:x.role,content:x.content}));
-  if(r22QualityGuide){
+  if(r44SpaceGuide){
+   // R44 opt-in only; legacy R11/R21/R23 behavior remains unchanged.
+   messages[0].content=R41_DRAFT_GUIDE;
+  }else if(r22QualityGuide){
    // R22 is future-consent-only; no automatic changes to R11 or legacy.
    // R21's corrective guide is pinned as ONE system message rather than
    // stacked twice on top of B198G's already verbose default guide.
@@ -275,6 +285,8 @@ export function createB198SNativeBridge({
    r11CompactGuideSha256:compactPlannedGuide?R11_GUIDE_SHA256:null,
    r22QualityOutputProfileOptIn:r22QualityGuide,
    r22QualityGuideSha256:r22QualityGuide?R21_FUTURE_GUIDE_SHA256:null,
+   r44SpaceGuideProfileOptIn:r44SpaceGuide,
+   r44SpaceGuideSha256:r44SpaceGuide?R41_GUIDE_SHA256:null,
    r4OriginalReturnedUnmodified:true,
    fourKeyR4RequiresIndependentReview:true,
     boundedMetadataRepairEnabled:true,
