@@ -17,7 +17,7 @@ export const R34_R25_BASELINE=Object.freeze({
  originalStrictB143Status:'FAIL_CUT_MATERIAL',
  invalidCutMaterialCount:5,
  originalFormalGeometryStatus:'NOT_PASSED',
- originalIndependentR3Status:'NOT_PASSED',
+ originalIndependentR3Status:'NOT_EVALUATED_ON_ORIGINAL',
  historicalWhatIf:Object.freeze({
   source:'R27_IN_MEMORY_REMOVAL_OF_FIVE_CUT_MATERIAL_FIELDS_ONLY',
   isOriginal:false,notOriginalModelOutput:true,
@@ -102,7 +102,8 @@ export function compareR34Evidence({candidateRaw=null,expectedSha256=null,
   return {...result,
    status:formal?'CANDIDATE_FORMAL_DECLARED_PASS_NOT_INDEPENDENT':
     'HOLD_CANDIDATE_DECLARED_SPATIAL',
-   candidateSha256,candidateOriginalBytesVerified:true,
+   candidateSha256,candidateOriginalBytesVerified:false,
+   suppliedTextShaMatchesExpected:true,
    candidateStrictB143:'PASS_UNMODIFIED',
    candidateFinalVoxelCount:review.compiled.primitives.length,
    candidateCompiledSourceSha256:review.compiled.sourceSha256,
@@ -115,7 +116,8 @@ export function compareR34Evidence({candidateRaw=null,expectedSha256=null,
   };
  }catch(e){
   return {...result,status:'HOLD_CANDIDATE_STRICT_REVIEW',
-   candidateSha256,candidateOriginalBytesVerified:true,
+   candidateSha256,candidateOriginalBytesVerified:false,
+   suppliedTextShaMatchesExpected:true,
    candidateStrictB143:'FAIL_OR_NOT_REACHED',
    candidateDeclaredR3:'NOT_EVALUATED',
    candidateIndependentR3:'NOT_EVALUATED',
