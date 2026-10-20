@@ -31,6 +31,7 @@ export function r32Courtyard(){
    box('floor','add',[0,0,0],[16,1,16],'concrete'),
    {id:'outer-shell',shape:'box',mode:'add',material:'glass',
     origin:[1,1,1],size:[14,5,14],shell:1},
+   box('clear-interior-floor','cut',[2,1,2],[12,1,12]),
    box('skylight','cut',[6,5,6],[4,1,4]),
    box('door','cut',[6,1,1],[4,3,2])
   ],{
