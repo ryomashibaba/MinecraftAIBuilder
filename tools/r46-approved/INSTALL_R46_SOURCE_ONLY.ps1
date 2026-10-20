@@ -70,8 +70,11 @@ function InstallPinned([string]$target){
      if($slash -lt 0){continue}
      $p=$p.Substring($slash+1)
     }else{$p=$p.Substring($prefix.Length)}
-    if(-not @('scripts/','source/ai/','evidence/b198zr2/','evidence/b198zr3/')|
-      Where-Object {$p.StartsWith($_,[StringComparison]::Ordinal)}){continue}
+    $allowed=$p.StartsWith('scripts/',[StringComparison]::Ordinal) -or
+      $p.StartsWith('source/ai/',[StringComparison]::Ordinal) -or
+      $p.StartsWith('evidence/b198zr2/',[StringComparison]::Ordinal) -or
+      $p.StartsWith('evidence/b198zr3/',[StringComparison]::Ordinal)
+    if(-not $allowed){continue}
     if($p.EndsWith('/')){continue}
     if($p.StartsWith('/') -or $p.Contains('\') -or
       @($p.Split('/')|Where-Object {$_ -eq '..' -or $_ -eq '.'}).Count -gt 0){
