@@ -66,7 +66,7 @@ test('R48 model missing is HOLD before lock and expensive request',async()=>{
   assert.equal(fs.existsSync(path.join(base,'out')),false);
  }finally{await fake.close();fs.rmSync(base,{recursive:true,force:true})}
 });
-test('R48 authorized mock runs once; exact R41 guide; immutable raw; offline evaluation and one-shot lock',async()=>{
+test('R48 authorized mock runs once; exact native schema; immutable raw; offline evaluation and one-shot lock',async()=>{
  const original=fixture(),fake=await fakeServer(original),base=temp();
  try{
   const dir=path.join(base,'out');
@@ -79,7 +79,7 @@ test('R48 authorized mock runs once; exact R41 guide; immutable raw; offline eva
   assert.equal(fake.calls.body.messages[0].content.includes('CRITICAL B143 FLAT SOURCE SYNTAX'),true);
   assert.equal(fake.calls.body.stream,false);
   assert.equal(fake.calls.body.think,false);
-  assert.equal(fake.calls.body.format,R47_JSON_SCHEMA);
+  assert.deepEqual(fake.calls.body.format,R47_JSON_SCHEMA);
   assert.equal(fake.calls.body.options.num_ctx,6144);
   assert.equal(fake.calls.body.options.num_predict,3072);
   assert.equal(r.status,'SOURCE_AND_DECLARED_SPATIAL_CLAIMS_FORMALLY_PASS');
