@@ -5,6 +5,8 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
+import {execFileSync} from 'node:child_process';
+import {fileURLToPath} from 'node:url';
 import {ENTRY_SCHEMA,AXES,verifyR37Ledger}
  from './b198zr37-human-quality-audit-offline.mjs';
 import {SNAPSHOT_FILE,MANIFEST_FILE,buildR38Bundle,
@@ -184,4 +186,24 @@ test('R38 never enables inference, Minecraft or construction',()=>{
  assert.equal(b.safety.worldContacts,0);
  assert.equal(b.safety.worldWrites,0);
  assert.equal(b.safety.constructionApproved,false);
+});
+
+test('R38 explicit CLI pack/verify roundtrip requires user-supplied files and pins',()=>{
+ tmp(root=>{
+  const entryFile=path.join(root,'entries.json'),pinFile=path.join(root,'pins.json');
+  const outputDir=path.join(root,'cli-output');
+  fs.writeFileSync(entryFile,JSON.stringify([entry()]));
+  fs.writeFileSync(pinFile,JSON.stringify(pins()));
+  const cli=fileURLToPath(new URL('./b198zr38-audit-bundle-cli.mjs',
+   import.meta.url));
+  const packed=JSON.parse(execFileSync(process.execPath,[
+   cli,'pack',entryFile,pinFile,outputDir
+  ],{encoding:'utf8'}));
+  assert.equal(packed.status,'BUNDLE_WRITTEN_AND_READBACK_CHECKED_NOT_AUTHENTICATED');
+  const unpacked=JSON.parse(execFileSync(process.execPath,[
+   cli,'verify',outputDir,packed.manifestSha256,pinFile
+  ],{encoding:'utf8'}));
+  assert.equal(unpacked.status,'SUPPLIED_MANIFEST_PIN_MATCHED_NOT_AUTHENTICATED');
+  assert.equal(unpacked.entries,1);
+ });
 });
