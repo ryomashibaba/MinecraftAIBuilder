@@ -3,7 +3,7 @@
 param([string]$R46Consent)
 $ErrorActionPreference='Stop'
 $required='I_APPROVE_R46_ONE_LOCAL_QWEN_REQUEST'
-$installerBlob='1b4441f3039fbb53661f18385d2b66ed9fe2d306'
+$installerBlob='b00ead462f633c6671772a4fab59994dcabb3579'
 $revision='214fec3002de6837a6e6174687a5047ffb6d6c7c'
 function GitBlobSha([byte[]]$b){
  $prefix=[Text.Encoding]::ASCII.GetBytes('blob '+$b.Length+[char]0)
@@ -40,7 +40,7 @@ try{
  if(-not(Test-Path -LiteralPath $installer -PathType Leaf)){
   [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
   $url='https://raw.githubusercontent.com/ryomashibaba/MinecraftAIBuilder/'+
-   '28e57e85c6e223f739556846b2c00d186abeda93/tools/r46-approved/INSTALL_R46_SOURCE_ONLY.ps1'
+   '6f39d96880efe34515eea39e04310003255df92c/tools/r46-approved/INSTALL_R46_SOURCE_ONLY.ps1'
   $web=New-Object System.Net.WebClient
   try{$bytes=$web.DownloadData($url)}finally{$web.Dispose()}
   if($bytes.Length -lt 1000 -or $bytes.Length -gt 25000 -or
