@@ -146,7 +146,7 @@ export function inspectR47SavedCandidate(raw){
  catch(e){
   return {...base,...geometry,status:'HOLD_ABSTRACT_SPATIAL_CONTRACT',
    errorCode:String(e?.message??'').match(
-    /\\b(?:B198ZR3|B198ZR4|B143)_[A-Z0-9_]+/)?.[0]??
+    /\b(?:B198ZR3|B198ZR4|B143)_[A-Z0-9_]+/)?.[0]??
      'SPATIAL_VALIDATOR_HOLD',
    functionalReachabilityVerified:false};
  }
