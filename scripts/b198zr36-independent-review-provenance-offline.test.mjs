@@ -56,7 +56,8 @@ test('R36 independent synthetic review passes consistency, not human authorship'
  assert.equal(r.status,'REVIEWER_EVIDENCE_CONSISTENCY_PASS_AUTHORSHIP_UNVERIFIED');
  assert.equal(r.r35Status,'INDEPENDENT_FORMAL_PASS_PROVENANCE_UNVERIFIED');
  assert.equal(r.modelSpatialPlanCopiedDetected,false);
- assert.equal(r.reviewerEvidenceSignatureVerifiedAgainstSuppliedValues,true);
+ assert.equal(r.reviewerEvidenceHashPinsMatchSuppliedValues,true);
+ assert.equal(r.reviewEvidenceJsonSha256,sha(JSON.stringify(make().reviewerEvidence)));
  assert.equal(r.independentAuthorshipAuthenticated,false);
  assert.equal(r.reviewerIdentityAuthenticated,false);
  assert.equal(r.reviewerTimestampExternallyVerified,false);
