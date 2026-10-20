@@ -4,10 +4,12 @@ on:
     branches: [feature/b198zr1-protected-architectural-revision]
     paths:
       - 'scripts/b198zr38-audit-bundle-offline*'
+      - 'scripts/b198zr38-audit-bundle-cli.mjs'
       - '.github/workflows/r38-audit-bundle-offline.yml'
   pull_request:
     paths:
       - 'scripts/b198zr38-audit-bundle-offline*'
+      - 'scripts/b198zr38-audit-bundle-cli.mjs'
       - '.github/workflows/r38-audit-bundle-offline.yml'
 permissions:
   contents: read
