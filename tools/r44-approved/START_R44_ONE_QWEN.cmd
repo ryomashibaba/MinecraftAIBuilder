@@ -2,32 +2,30 @@
 setlocal EnableExtensions DisableDelayedExpansion
 title MinecraftAIBuilder R44 - One Approved Local Qwen Trial
 echo ============================================================
-echo MinecraftAIBuilder R44 - 1 local Qwen 27B design generation
-echo Model: qwen3.8:27b / user-approved single request
-echo No Minecraft connection, world changes, or automatic retry
-echo Original R25 evidence is never modified
+echo R44: ONE approved local qwen3.8:27b generation on this PC
+echo Model source and scripts are pinned to immutable Git blobs.
+echo No Minecraft contact, placement, deletion or automatic retry.
 echo ============================================================
 where node >nul 2>nul
 if errorlevel 1 (echo [HOLD] Node.js 24 required.& pause& exit /b 1)
 where powershell.exe >nul 2>nul
-if errorlevel 1 (echo [HOLD] Windows PowerShell required.& pause& exit /b 1)
+if errorlevel 1 (echo [HOLD] PowerShell required.& pause& exit /b 1)
 echo.
-echo IMPORTANT: GPU and system memory will be used by ONE real inference.
-echo This request is ALREADY approved in Chat, but local confirmation
-echo is still required to avoid accidental double-click execution.
-set "R44_ACK="
-set /p "R44_ACK=Type YES for ONE request (anything else cancels): "
-if /I not "%R44_ACK%"=="YES" (
- echo [SAFE] Cancelled. No real Qwen request.
+echo This ONE real local generation uses GPU/CPU resources.
+echo Chat approval exists; local YES prevents accidental execution.
+set "ACK="
+set /p "ACK=Type YES to consume the R44 one-shot approval: "
+if /I not "%ACK%"=="YES" (
+ echo [SAFE] Cancelled. No model request.
  pause
  exit /b 2
 )
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0RUN_R44_ONE_APPROVED_REQUEST.ps1" -R44Consent I_APPROVE_R44_ONE_LOCAL_QWEN_REQUEST
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "$ErrorActionPreference='Stop';$rev='a4ff7d24407ef0f547f6c5e628d8fd33ba85eddd';$expected='5b4d0532eafe15398b800cedeef0c3cad1d0fe4b';$dir=Join-Path $env:LOCALAPPDATA 'MinecraftAIBuilder\R44_Starter';[void](New-Item -ItemType Directory -Path $dir -Force);$dest=Join-Path $dir 'RUN_R44_ONE_APPROVED_REQUEST.ps1';[Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;$web=New-Object Net.WebClient;try{$bytes=$web.DownloadData('https://raw.githubusercontent.com/ryomashibaba/MinecraftAIBuilder/'+$rev+'/tools/r44-approved/RUN_R44_ONE_APPROVED_REQUEST.ps1')}finally{$web.Dispose()};$prefix=[Text.Encoding]::ASCII.GetBytes('blob '+$bytes.Length+[char]0);$all=New-Object byte[] ($prefix.Length+$bytes.Length);[Array]::Copy($prefix,0,$all,0,$prefix.Length);[Array]::Copy($bytes,0,$all,$prefix.Length,$bytes.Length);$h=[Security.Cryptography.SHA1]::Create();try{$actual=([BitConverter]::ToString($h.ComputeHash($all))).Replace('-','').ToLowerInvariant()}finally{$h.Dispose()};if($actual -cne $expected){throw 'R44_STARTER_SHA_MISMATCH'};[IO.File]::WriteAllBytes($dest,$bytes);& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $dest -R44Consent I_APPROVE_R44_ONE_LOCAL_QWEN_REQUEST;exit $LASTEXITCODE"
 set "RESULT=%ERRORLEVEL%"
 if "%RESULT%"=="0" (
- echo [R44] Result ZIP is selected in Explorer.
+ echo [R44] Result ZIP selected in Explorer. Upload to ChatGPT.
 ) else (
- echo [R44 HOLD] If approval was consumed, do not run this again.
+ echo [R44 HOLD] If consent was consumed, NEVER retry automatically.
 )
 pause
 exit /b %RESULT%
