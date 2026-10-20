@@ -31,9 +31,25 @@ try{
  if(-not (Get-Command node -ErrorAction SilentlyContinue)){
   throw 'NODE24_REQUIRED'
  }
+ $root=Join-Path $env:LOCALAPPDATA 'MinecraftAIBuilder'
+ $base=Join-Path $root 'R44_OneShot_Evidence'
+ $lock=Join-Path $base 'R44_APPROVAL_CONSUMED_LOCK.txt'
+ # Refuse a second run BEFORE downloading or invoking any source, even offline.
+ if(Test-Path -LiteralPath $lock){throw 'R44_APPROVAL_ALREADY_CONSUMED_NO_RETRY'}
  $installer=Join-Path $PSScriptRoot 'INSTALL_R44_SOURCE_ONLY.ps1'
- if(-not (Test-Path -LiteralPath $installer -PathType Leaf) -or
-  (GitBlobSha ([IO.File]::ReadAllBytes($installer))) -cne $installerBlob){
+ if(-not(Test-Path -LiteralPath $installer -PathType Leaf)){
+  [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
+  $url='https://raw.githubusercontent.com/ryomashibaba/MinecraftAIBuilder/'+
+   '8ea5dcc3deefa2b965d0f888dffe77a916811ae9/tools/r44-approved/INSTALL_R44_SOURCE_ONLY.ps1'
+  $web=New-Object System.Net.WebClient
+  try{$bytes=$web.DownloadData($url)}finally{$web.Dispose()}
+  if($bytes.Length -lt 1000 -or $bytes.Length -gt 25000 -or
+   (GitBlobSha $bytes) -cne $installerBlob){
+   throw 'PINNED_INSTALLER_DOWNLOAD_REJECTED'
+  }
+  [IO.File]::WriteAllBytes($installer,$bytes)
+ }
+ if((GitBlobSha ([IO.File]::ReadAllBytes($installer))) -cne $installerBlob){
   throw 'INSTALLER_SHA_PIN_MISMATCH'
  }
  # This is a synthetic-only offline download + SHA check + test. The REAL
@@ -42,16 +58,11 @@ try{
  if($LASTEXITCODE -ne 0){throw 'OFFLINE_SOURCE_PREPARATION_FAILED'}
  & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $installer -CheckOnly
  if($LASTEXITCODE -ne 0){throw 'OFFLINE_SOURCE_RECHECK_FAILED'}
- $root=Join-Path $env:LOCALAPPDATA 'MinecraftAIBuilder'
  $src=Join-Path $root ('R44_Source_'+$revision.Substring(0,12))
  $runner=Join-Path $src 'scripts\b198zr44-consented-single-qwen.mjs'
  if(-not (Test-Path -LiteralPath $runner -PathType Leaf)){
   throw 'R44_RUNNER_NOT_FOUND'
  }
- $base=Join-Path $root 'R44_OneShot_Evidence'
- $lock=Join-Path $base 'R44_APPROVAL_CONSUMED_LOCK.txt'
- # If a previous real run used the lock, no other model calls or
- # download/update will be permitted by this launcher.
  if(Test-Path -LiteralPath $lock){throw 'R44_APPROVAL_ALREADY_CONSUMED_NO_RETRY'}
  Write-Host '[R44] Exact model: qwen3.8:27b. Approved one inference only.'
  Write-Host '[R44] No Minecraft world read, placement, deletion or retry.'
