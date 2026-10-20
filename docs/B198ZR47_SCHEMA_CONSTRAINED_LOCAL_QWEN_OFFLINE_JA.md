@@ -23,7 +23,7 @@
   - 階段はADDに限定、`steps:2..32`、`treadDepth:1..3`、`width:2..12`などB143仕様に沿う。
   - `spatialPlan`の`entrance`は3要素整数配列、`headroom`は2または3の数値。
   - すべての定義済みオブジェクトで`additionalProperties:false`。モデルが任意の余計な属性を付け足す余地を減らす。
-  - `inspectR47SavedCandidate(raw)`は保存済みの無改変原文をB143の既存パーサーと最終コンパイラへ渡し、合格しても**B143の幾何成立まで**しか認めない。R3の動線、独創性、美観、Minecraft実歩行を認証しない。
+  - `inspectR47SavedCandidate(raw)`は保存済みの無改変原文をB143の既存パーサーと最終コンパイラへ渡す。次に**R3でモデル自身の空洞・入口・到達性の宣言**と最終ボクセルを照合する。入口閉塞はHOLD、空洞再充填や断線は個別診断。R3自己宣言契約PASSは第三者審査でなく、独創性・美観・Minecraft実歩行を認証しない。
 - `source/ai/b198s-native-ollama-source.mjs`
   - 別スイッチ`r47SchemaFormat:true`を追加。R46/R44/R22/R11などとの併用は禁止。
   - オプトイン時にのみ`format:R47_JSON_SCHEMA`。従来すべての`format:'json'`経路を維持する。
@@ -31,7 +31,7 @@
   - R47候補の**模擬試験だけ**であり、実Qwenへの接続や新しい単発ランナーを追加しない。
 - `scripts/b198zr47-json-schema-format-gate.test.mjs`
   - schemaの要素種類・フィールド・上限・独立性を検査。
-  - B143が`bounds.volume`と36段の階段を厳格に拒否することを確認。
+  - B143が`bounds.volume`と36段の階段を厳格に拒否することを確認。最終ADDで空洞を塞いだケース、入口を塞いだケースをR3でHOLDできることを確認。
   - 偽localhostサーバーへ1回だけ`format:{...}`を渡し、原文を保存することを確認。
   - 旧R46プロファイルが`format:'json'`のままであることを確認。
 - `.github/workflows/r47-structured-output-offline.yml`
