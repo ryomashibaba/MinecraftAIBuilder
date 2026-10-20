@@ -21,6 +21,8 @@ import {R21_FUTURE_GUIDE,R21_FUTURE_GUIDE_SHA256}
  from './b198zr21-future-architecture-guide.mjs';
 import {R41_DRAFT_GUIDE,GUIDE_SHA256 as R41_GUIDE_SHA256}
  from './b198zr41-architecture-authoring-candidate.mjs';
+import {R46_GUIDE,GUIDE_SHA256 as R46_GUIDE_SHA256}
+ from './b198zr46-corrected-architecture-guide.mjs';
 
 export const SCHEMA='minecraftaibuilder-b198s-native-single-source-json-v1';
 const ENDPOINT=/^http:\/\/127\.0\.0\.1:(\d{2,5})\/v1\/chat\/completions$/;
@@ -86,7 +88,7 @@ export function createB198SNativeBridge({
  numPredict=3072,numCtx=6144,keepAlive='10m',
  transport=http,addArchitectureGuide=true,plannedSourceMode=false,
  compactPlannedGuide=false,r22QualityGuide=false,
- r44SpaceGuide=false,onModelResponse=null
+ r44SpaceGuide=false,r46CorrectedGuide=false,onModelResponse=null
 }={}){
  if(!Number.isSafeInteger(numPredict)||numPredict<512||numPredict>4096)
   throw fail('OUTPUT_TOKENS_512_TO_4096');
@@ -111,6 +113,12 @@ export function createB198SNativeBridge({
   (r44SpaceGuide&&(!plannedSourceMode||!addArchitectureGuide||
    compactPlannedGuide||r22QualityGuide)))
   throw fail('R44_SPACE_GUIDE_REQUIRES_EXCLUSIVE_PLANNED_MODE');
+ if(typeof r46CorrectedGuide!=='boolean'||
+  (r46CorrectedGuide&&(!plannedSourceMode||!addArchitectureGuide||
+   compactPlannedGuide||r22QualityGuide||r44SpaceGuide)))
+  throw fail('R46_GUIDE_REQUIRES_EXCLUSIVE_PLANNED_MODE');
+ if(r44SpaceGuide&&r46CorrectedGuide)
+  throw fail('R44_R46_EXCLUSIVE_GUIDES');
  if(onModelResponse!==null&&typeof onModelResponse!=='function')
   throw fail('EVIDENCE_PERSISTENCE_CALLBACK_REQUIRED');
  const entries=[];
@@ -137,7 +145,9 @@ export function createB198SNativeBridge({
    return Promise.reject(fail('UNSAFE_MODEL_REQUEST'));
   }
   const messages=payload.messages.map(x=>({role:x.role,content:x.content}));
-  if(r44SpaceGuide){
+  if(r46CorrectedGuide){
+   messages[0].content=R46_GUIDE;
+  }else if(r44SpaceGuide){
    // R44 opt-in only; legacy R11/R21/R23 behavior remains unchanged.
    messages[0].content=R41_DRAFT_GUIDE;
   }else if(r22QualityGuide){
@@ -287,6 +297,8 @@ export function createB198SNativeBridge({
    r22QualityGuideSha256:r22QualityGuide?R21_FUTURE_GUIDE_SHA256:null,
    r44SpaceGuideProfileOptIn:r44SpaceGuide,
    r44SpaceGuideSha256:r44SpaceGuide?R41_GUIDE_SHA256:null,
+   r46CorrectedGuideProfileOptIn:r46CorrectedGuide,
+   r46CorrectedGuideSha256:r46CorrectedGuide?R46_GUIDE_SHA256:null,
    r4OriginalReturnedUnmodified:true,
    fourKeyR4RequiresIndependentReview:true,
     boundedMetadataRepairEnabled:true,
