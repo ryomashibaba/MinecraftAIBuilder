@@ -77,7 +77,7 @@ const spatialPlan=noExtra({
  entrance:position,headroom:{type:'integer',enum:[2,3]},
  protectedVoids:zoneArray(voidSpec),
  destinations:{type:'array',items:destination,minItems:1,maxItems:48},
- functionalZones:{type:'array',items:zone,minItems:1,maxItems:48}
+ functionalZones:{type:'array',items:zone,minItems:1,maxItems:24}
 });
 const design=noExtra({
  schema:{type:'string',const:'minecraftaibuilder-b143-building-dsl-v1'},
@@ -89,8 +89,8 @@ const design=noExtra({
 });
 export const R47_JSON_SCHEMA=noExtra({
  design,spatialPlan,
- explanation:{type:'string',maxLength:2000},
- assumptions:{type:'array',items:str(0,350),maxItems:20}
+ explanation:str(3,800),
+ assumptions:{type:'array',items:str(0,250),maxItems:12}
 });
 export const R47_JSON_SCHEMA_SHA256=sha(JSON.stringify(R47_JSON_SCHEMA));
 export const R47_SCHEMA_UTF8_BYTES=Buffer.byteLength(JSON.stringify(R47_JSON_SCHEMA));
