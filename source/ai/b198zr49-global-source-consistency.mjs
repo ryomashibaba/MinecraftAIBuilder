@@ -11,7 +11,8 @@ export const SCHEMA='minecraftaibuilder-b198zr49-global-consistency-audit-v1';
 const digest=raw=>createHash('sha256').update(raw).digest('hex');
 const bounded=(n,min,max)=>Number.isSafeInteger(n)&&n>=min&&n<=max;
 const vec=v=>Array.isArray(v)&&v.length===3&&v.every(n=>Number.isSafeInteger(n));
-const validBounds=b=>b&&['width','height','depth'].every(k=>bounded(b[k],8,128));
+const validBounds=b=>b&&bounded(b.width,8,128)&&
+ bounded(b.height,8,96)&&bounded(b.depth,8,128);
 const keys=['width','height','depth'];
 const cmp=(min,max,dim)=>min.every((v,i)=>v>=0)&&max.every((v,i)=>v<dim[i]);
 const basicSize=v=>vec(v)&&v.every(x=>x>=1);
@@ -57,8 +58,6 @@ const localEnvelope=e=>{
  }
  return {min:a,max:b};
 };
-const overlap=(a,b)=>a&&b?
- a.reduce((n,x,i)=>n*Math.max(0,Math.min(x[1],b[i][1])-Math.max(x[0],b[i][0])),1):0;
 const commonSafety=()=>({readiness:'NOT_PREPARED',constructionApproved:false,
  executionAllowed:false,worldContacts:0,worldWrites:0,
  gates:Array(9).fill('BLOCKED'),BuildPlan:{operations:[]}});
@@ -77,7 +76,10 @@ export function inspectR49GlobalConsistency(raw){
  const b=parsed?.design?.bounds;
  const els=parsed?.design?.elements;
  const plan=parsed?.spatialPlan;
- if(!validBounds(b)||!Array.isArray(els)||els.length>160||!plan){
+ if(!validBounds(b)||!Array.isArray(els)||els.length>160||
+  !plan||typeof plan!=='object'||
+  !['protectedVoids','destinations','functionalZones'].every(k=>
+   Array.isArray(plan[k]))){
   return {...base,status:'HOLD_MISSING_SOURCE_OR_BOUNDS',
    issues:[{kind:'INVALID_SOURCE_ENVELOPE',count:1}]};
  }
