@@ -1,0 +1,30 @@
+name: R60 Evidence-Bound Visual Review — OFFLINE Only
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'scripts/b198zr60-evidence-bound-visual-review.mjs'
+      - 'scripts/b198zr60-evidence-bound-visual-review.test.mjs'
+      - '.github/workflows/r60-evidence-bound-visual-review-offline.yml'
+  pull_request:
+    paths:
+      - 'scripts/b198zr60-evidence-bound-visual-review.mjs'
+      - 'scripts/b198zr60-evidence-bound-visual-review.test.mjs'
+      - '.github/workflows/r60-evidence-bound-visual-review-offline.yml'
+permissions:
+  contents: read
+jobs:
+  offline-visual-architecture-review:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: R60 plus R59 R58 offline regression
+        run: node --test scripts/b198zr60-evidence-bound-visual-review.test.mjs scripts/b198zr59-safe-result-zip-to-review.test.mjs scripts/b198zr58-frozen-c01-quality-review-packet.test.mjs
