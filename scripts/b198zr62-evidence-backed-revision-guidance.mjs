@@ -14,6 +14,8 @@ import {SCHEMA as R61_SCHEMA}
  from './b198zr61-final-voxel-section-review.mjs';
 import {bridgeR65IndependentSpatialEvidence}
  from './b198zr65-independent-network-feedback.mjs';
+import {assessR66OverheadSpace,SCHEMA as R66_SCHEMA}
+ from './b198zr66-overhead-space-audit.mjs';
 
 export const SCHEMA='minecraftaibuilder-b198zr62-evidence-backed-next-design-guidance-v1';
 const sha=s=>createHash('sha256').update(s).digest('hex');
@@ -63,7 +65,7 @@ function assertR61(x,rawHash,geometrySha){
 }
 export function prepareR62FutureDesignGuidance({
  raw,expectedRawSha256,b143Status,r61Evidence=null,
- expectedGeometrySha256=null,r64Evidence=null
+ expectedGeometrySha256=null,r64Evidence=null,r66Evidence=null
 }={}){
  if(typeof raw!=='string'||!raw||
   Buffer.byteLength(raw)>120000||
@@ -77,7 +79,8 @@ export function prepareR62FutureDesignGuidance({
   if(!/^[a-f0-9]{64}$/.test(expectedGeometrySha256??''))
    fail('COMPILER_GEOMETRY_SHA_REQUIRED');
   assertR61(r61Evidence,expectedRawSha256,expectedGeometrySha256);
- }else if(r61Evidence!==null||expectedGeometrySha256!==null||r64Evidence!==null){
+ }else if(r61Evidence!==null||expectedGeometrySha256!==null||
+  r64Evidence!==null||r66Evidence!==null){
   fail('NEVER_CLAIM_FINAL_VOXELS_WHEN_B143_HOLD');
  }
  const global=inspectR49GlobalConsistency(raw);
@@ -118,6 +121,36 @@ export function prepareR62FutureDesignGuidance({
   bridgeR65IndependentSpatialEvidence({raw,expectedRawSha256,
    expectedGeometrySha256,r64Evidence});
  if(network)issues.push(...network.issues);
+ let overheadAudit=null;
+ if(r66Evidence!==null){
+  overheadAudit=assessR66OverheadSpace({raw,expectedRawSha256,
+   expectedGeometrySha256});
+  if(r66Evidence.schema!==R66_SCHEMA||
+   r66Evidence.originalRawSha256!==expectedRawSha256||
+   r66Evidence.geometrySha256!==expectedGeometrySha256||
+   r66Evidence.originalSpatialPlanRead!==false||
+   JSON.stringify(r66Evidence.metrics)!==JSON.stringify(overheadAudit.metrics)||
+   JSON.stringify(r66Evidence.possibleConcerns)!==
+    JSON.stringify(overheadAudit.possibleConcerns))
+   fail('R66_OVERHEAD_EVIDENCE_RECOMPUTE_MISMATCH');
+  const nextNotes={
+   NO_STANDING_POSITION_HAS_ANY_OVERHEAD_SOLID:
+    'The whole structure might be a deliberately open-air public space, but check whether the actual program asks for sheltered, genuinely usable rooms. Keep intentional atria and terraces; do not cover everything mechanically.',
+   MOST_SUPPORTED_POSITIONS_OPEN_ABOVE:
+    'Most conceptual floor positions have no overhead solid. Study the spatial balance between indoor uses, open terraces and public courtyards without forcing a roof over every meaningful void.',
+   NO_COVERED_2X2_STANDING_PAD:
+    'Reconsider whether enclosed-use spaces have genuinely usable clear width, while preserving slender canopies and dramatic openings where architecturally intentional.'
+  };
+  for(const finding of overheadAudit.possibleConcerns){
+   if(!Object.hasOwn(nextNotes,finding.kind))
+    fail('R66_UNKNOWN_OVERHEAD_CONCERN');
+   issues.push({kind:finding.kind,count:1,
+    basis:'R66_FINAL_VOXEL_OVERHEAD_COLUMN_PROXY_ONLY',
+    objectiveFinalVoxelEvidence:true,
+    independentHumanReviewRequired:true,automaticReject:false,
+    instructions:nextNotes[finding.kind]});
+  }
+ }
  const human=c01.criteria.map(x=>({id:x.id,requirement:x.description,
   assessment:'NOT_REVIEWED',
   fulfilledByAnySourceMetric:false,
@@ -145,6 +178,9 @@ export function prepareR62FutureDesignGuidance({
   r65NetworkEvidenceSha256:network?.r64NetworkFactsSha256??null,
   modelIndependentNetworkEvidenceUsed:network!==null,
   networkDefectsNeedHumanReview:network?.humanDecisionBeforeRepairRequired??null,
+  r66OverheadAuditStatus:overheadAudit?.status??'NOT_INCLUDED',
+  r66OverheadSourceIndependentUsed:overheadAudit!==null,
+  r66CoveredStandingPositions:overheadAudit?.metrics.positionsWithAnyOverheadSolid??null,
   proposedOnePassGuidance:instructions,
   generatedGeometry:false,priorModelOriginalRepaired:false,
   realModelImprovementDemonstrated:false,
@@ -154,7 +190,7 @@ export function prepareR62FutureDesignGuidance({
 }
 export function writeR62FutureDesignGuidance({
  raw,expectedRawSha256,b143Status,r61Evidence=null,
- expectedGeometrySha256=null,r64Evidence=null,destination
+ expectedGeometrySha256=null,r64Evidence=null,r66Evidence=null,destination
 }={}){
  if(typeof destination!=='string'||!path.isAbsolute(destination)||
   !fs.existsSync(destination)||!fs.lstatSync(destination).isDirectory()||
@@ -166,7 +202,7 @@ export function writeR62FutureDesignGuidance({
   fail('NEVER_OVERWRITE_DERIVED_REVIEW');
  const report=prepareR62FutureDesignGuidance({
   raw,expectedRawSha256,b143Status,r61Evidence,expectedGeometrySha256,
-  r64Evidence});
+  r64Evidence,r66Evidence});
  const lines=report.evidenceIssues.map(x=>
   '<li><b>'+esc(x.kind)+'</b> ['+esc(x.basis)+']：'+
   esc(x.instructions)+'</li>').join('');

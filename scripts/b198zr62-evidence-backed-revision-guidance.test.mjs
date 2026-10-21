@@ -9,6 +9,8 @@ import {r32Courtyard} from './b198zr32-synthetic-geometry-fixtures.mjs';
 import {prepareR61Sections} from './b198zr61-final-voxel-section-review.mjs';
 import {analyzeR64UnclaimedFloorConnectivity}
  from './b198zr64-unclaimed-floor-connectivity.mjs';
+import {assessR66OverheadSpace}
+ from './b198zr66-overhead-space-audit.mjs';
 import {prepareR62FutureDesignGuidance,writeR62FutureDesignGuidance}
  from './b198zr62-evidence-backed-revision-guidance.mjs';
 import {CREATION_CASES} from '../source/ai/b198b-benchmark-cases.mjs';
@@ -161,4 +163,42 @@ test('R62 refuses injected R64 summary and does not invent final voxels for B143
  assert.throws(()=>prepareR62FutureDesignGuidance({
   raw,expectedRawSha256:sha(raw),b143Status:'HOLD_B143_NOT_COMPILED',
   r64Evidence:valid}),/NEVER_CLAIM_FINAL_VOXELS_WHEN_B143_HOLD/);
+});
+
+test('R62 integrates validated R66 open-air-versus-overhead evidence without passing architecture',()=>{
+ const p=r32Courtyard();
+ p.design.elements=[{id:'open-public-platform',shape:'box',mode:'add',
+  material:'stone',origin:[0,0,0],size:[10,1,10]}];
+ const {raw,compiled,r61}=pack(p);
+ const evidence=assessR66OverheadSpace({raw,expectedRawSha256:sha(raw),
+  expectedGeometrySha256:compiled.geometrySha256});
+ const report=prepareR62FutureDesignGuidance({
+  raw,expectedRawSha256:sha(raw),
+  b143Status:'B143_FINAL_VOXELS_COMPILED_NOT_SPATIAL_OR_HUMAN_PASS',
+  expectedGeometrySha256:compiled.geometrySha256,r61Evidence:r61,
+  r66Evidence:evidence});
+ assert.equal(report.r66OverheadSourceIndependentUsed,true);
+ assert.equal(report.r66CoveredStandingPositions,0);
+ assert(report.evidenceIssues.some(x=>
+  x.kind==='NO_STANDING_POSITION_HAS_ANY_OVERHEAD_SOLID'&&
+  x.automaticReject===false));
+ assert.equal(report.independentHumanCriteria.length,4);
+ assert(report.independentHumanCriteria.every(x=>x.assessment==='NOT_REVIEWED'));
+ assert.equal(report.approvedForInference,false);
+});
+test('R62 refuses R66 forged metrics and R66 final voxels if B143 HOLD',()=>{
+ const {raw,compiled,r61}=pack(r32Courtyard());
+ const valid=assessR66OverheadSpace({
+  raw,expectedRawSha256:sha(raw),
+  expectedGeometrySha256:compiled.geometrySha256});
+ const forged=structuredClone(valid);
+ forged.metrics.positionsWithAnyOverheadSolid++;
+ const base={raw,expectedRawSha256:sha(raw),
+  b143Status:'B143_FINAL_VOXELS_COMPILED_NOT_SPATIAL_OR_HUMAN_PASS',
+  expectedGeometrySha256:compiled.geometrySha256,r61Evidence:r61};
+ assert.throws(()=>prepareR62FutureDesignGuidance({...base,
+  r66Evidence:forged}),/R66_OVERHEAD_EVIDENCE_RECOMPUTE_MISMATCH/);
+ assert.throws(()=>prepareR62FutureDesignGuidance({
+  raw,expectedRawSha256:sha(raw),b143Status:'HOLD_B143_NOT_COMPILED',
+  r66Evidence:valid}),/NEVER_CLAIM_FINAL_VOXELS_WHEN_B143_HOLD/);
 });

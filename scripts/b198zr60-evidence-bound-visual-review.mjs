@@ -15,6 +15,7 @@ import {writeR61FinalVoxelSections} from './b198zr61-final-voxel-section-review.
 import {writeR62FutureDesignGuidance} from './b198zr62-evidence-backed-revision-guidance.mjs';
 import {writeR63ArchitecturalContinuity} from './b198zr63-architectural-continuity-watch.mjs';
 import {writeR64UnclaimedFloorConnectivity} from './b198zr64-unclaimed-floor-connectivity.mjs';
+import {writeR66OverheadSpace} from './b198zr66-overhead-space-audit.mjs';
 import {inspectR59Archive,reviewR59AlreadySavedZip}
  from './b198zr59-safe-result-zip-to-review.mjs';
 export const SCHEMA='minecraftaibuilder-b198zr60-visual-human-review-v1';
@@ -41,7 +42,7 @@ function visual(z,evidence,stage){
   fail('R58_B143_VERDICT_DISAGREES');
  const dirname=z.tag+(compiled?'_R7_FINAL_ABSTRACT_3D':'_R51_UNCOMPILED_ENVELOPES');
  const folder=path.join(stage,dirname);
- let kind,link,board=null,sections=null,guidance=null,independentFloor=null;
+ let kind,link,board=null,sections=null,guidance=null,independentFloor=null,overheadReview=null;
  if(compiled){
   fs.mkdirSync(folder);
   const r=writeR7OfflineVisualReview({
@@ -56,6 +57,10 @@ function visual(z,evidence,stage){
    expectedRawSha256:evidence.rawSha256,
    expectedGeometrySha256:compiled.geometrySha256,destination:folder});
   independentFloor=dirname+'/'+floor.relativeFile;
+  const overhead=writeR66OverheadSpace({raw,
+   expectedRawSha256:evidence.rawSha256,
+   expectedGeometrySha256:compiled.geometrySha256,destination:folder});
+  overheadReview=dirname+'/'+overhead.relativeFile;
   kind='STRICT_B143_FINAL_ABSTRACT_VOXELS';
   link=dirname+'/index.html';
   board=dirname+'/B198W_REVIEW_BOARD.html';
@@ -69,15 +74,18 @@ function visual(z,evidence,stage){
   'R61_FINAL_VOXEL_SPATIAL_EVIDENCE.json'),'utf8')):null;
  const r64=compiled?JSON.parse(fs.readFileSync(path.join(folder,
   'R64_INDEPENDENT_FLOOR_NETWORK.json'),'utf8')):null;
+ const r66=compiled?JSON.parse(fs.readFileSync(path.join(folder,
+  'R66_OVERHEAD_SPACE_EVIDENCE.json'),'utf8')):null;
  const next=writeR62FutureDesignGuidance({raw,
   expectedRawSha256:evidence.rawSha256,b143Status:evidence.b143.status,
   expectedGeometrySha256:compiled?.geometrySha256??null,
-  r61Evidence:r61,r64Evidence:r64,destination:folder});
+  r61Evidence:r61,r64Evidence:r64,r66Evidence:r66,destination:folder});
  guidance=dirname+'/'+next.relativeFile;
  return {tag:z.tag,originalRawSha256:evidence.rawSha256,
   evidenceType:kind,relativeViewer:link,relativeHumanBoard:board,
   relativeFunctionalSections:sections,
   relativeIndependentFloorReview:independentFloor,
+  relativeOverheadSpaceReview:overheadReview,
   relativeFutureDesignGuidance:guidance,
   independentHumanReview:'NOT_PERFORMED',
   actualMinecraftPlayerWalkingVerified:false};
@@ -142,6 +150,8 @@ export function createR60VisualReview({r54Zip,r48Zip=null,destination}={}){
     '">モデル宣言に基づく断面</a>':'')+
    (v.relativeIndependentFloorReview?' / <a href="'+v.relativeIndependentFloorReview+
     '">R64 全体の床と空間の独立調査</a>':'')+
+   (v.relativeOverheadSpaceReview?' / <a href="'+v.relativeOverheadSpaceReview+
+    '">R66 屋根下と開放空間の比較</a>':'')+
    (v.relativeFutureDesignGuidance?' / <a href="'+v.relativeFutureDesignGuidance+
     '">次回設計への根拠</a>':'')+'</li>').join('');
   const html='<!doctype html><html lang="ja"><meta charset="utf-8">'+

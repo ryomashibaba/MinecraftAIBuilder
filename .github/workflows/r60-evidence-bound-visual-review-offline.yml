@@ -15,6 +15,8 @@ on:
       - 'scripts/b198zr64-unclaimed-floor-connectivity.test.mjs'
       - 'scripts/b198zr65-independent-network-feedback.mjs'
       - 'scripts/b198zr65-independent-network-feedback.test.mjs'
+      - 'scripts/b198zr66-overhead-space-audit.mjs'
+      - 'scripts/b198zr66-overhead-space-audit.test.mjs'
       - '.github/workflows/r60-evidence-bound-visual-review-offline.yml'
   pull_request:
     paths:
@@ -30,6 +32,8 @@ on:
       - 'scripts/b198zr64-unclaimed-floor-connectivity.test.mjs'
       - 'scripts/b198zr65-independent-network-feedback.mjs'
       - 'scripts/b198zr65-independent-network-feedback.test.mjs'
+      - 'scripts/b198zr66-overhead-space-audit.mjs'
+      - 'scripts/b198zr66-overhead-space-audit.test.mjs'
       - '.github/workflows/r60-evidence-bound-visual-review-offline.yml'
 permissions:
   contents: read
@@ -47,4 +51,4 @@ jobs:
         with:
           node-version: '24'
       - name: R60 plus R59 R58 offline regression
-        run: node --test scripts/b198zr60-evidence-bound-visual-review.test.mjs scripts/b198zr61-final-voxel-section-review.test.mjs scripts/b198zr62-evidence-backed-revision-guidance.test.mjs scripts/b198zr63-architectural-continuity-watch.test.mjs scripts/b198zr64-unclaimed-floor-connectivity.test.mjs scripts/b198zr65-independent-network-feedback.test.mjs scripts/b198zr59-safe-result-zip-to-review.test.mjs scripts/b198zr58-frozen-c01-quality-review-packet.test.mjs
+        run: node --test scripts/b198zr60-evidence-bound-visual-review.test.mjs scripts/b198zr61-final-voxel-section-review.test.mjs scripts/b198zr62-evidence-backed-revision-guidance.test.mjs scripts/b198zr63-architectural-continuity-watch.test.mjs scripts/b198zr64-unclaimed-floor-connectivity.test.mjs scripts/b198zr65-independent-network-feedback.test.mjs scripts/b198zr66-overhead-space-audit.test.mjs scripts/b198zr59-safe-result-zip-to-review.test.mjs scripts/b198zr58-frozen-c01-quality-review-packet.test.mjs
