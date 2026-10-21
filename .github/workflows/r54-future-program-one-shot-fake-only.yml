@@ -10,6 +10,8 @@ on:
       - 'tools/r55-future/INSTALL_R55_OFFLINE_SOURCE_ONLY.ps1'
       - 'tools/r56-future/RUN_R54_ONE_FRESHLY_APPROVED_REQUEST.ps1'
       - 'scripts/b198zr56-future-wrapper-windows-fake.test.mjs'
+      - 'tools/r57-future/START_R54_ONE_QWEN_FUTURE_ONLY.cmd'
+      - 'scripts/b198zr57-future-cmd-one-click-fake.test.mjs'
   pull_request:
     paths:
       - 'scripts/b198zr54-future-program-first-once.mjs'
@@ -19,6 +21,8 @@ on:
       - 'tools/r55-future/INSTALL_R55_OFFLINE_SOURCE_ONLY.ps1'
       - 'tools/r56-future/RUN_R54_ONE_FRESHLY_APPROVED_REQUEST.ps1'
       - 'scripts/b198zr56-future-wrapper-windows-fake.test.mjs'
+      - 'tools/r57-future/START_R54_ONE_QWEN_FUTURE_ONLY.cmd'
+      - 'scripts/b198zr57-future-cmd-one-click-fake.test.mjs'
 permissions:
   contents: read
 jobs:
@@ -47,3 +51,14 @@ jobs:
           node-version: '24'
       - name: Fail closed if fake localhost 11434 unavailable; verify new R55 source and R56 PowerShell result ZIP
         run: node --test scripts/b198zr56-future-wrapper-windows-fake.test.mjs
+
+  r57-future-single-cmd-with-consumed-latch:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Only prebound fake Ollama receives R57 user YES; verify CMD download pins and one ZIP
+        run: node --test scripts/b198zr57-future-cmd-one-click-fake.test.mjs
