@@ -100,8 +100,15 @@ try{
   (Join-Path $dest 'scripts\b198zr54-future-program-first-once.test.mjs'),
   (Join-Path $dest 'scripts\b198zr54-future-one-shot-auto-zip.fake.test.mjs'),
   (Join-Path $dest 'scripts\b198zr52-postcapture-auto-storyboard.test.mjs'))
- & node --test @tests
- if($LASTEXITCODE -ne 0){throw 'R55_FAKE_QA_FAILED'}
+ # Tests use relative paths only within their own SHA-pinned source tree.
+ # Running with arbitrary user's current directory would silently pick up
+ # unrelated files or fail to find the R52 ZIP helper.
+ Push-Location $dest
+ try{
+  & node --test @tests
+  $testExit=$LASTEXITCODE
+ }finally{Pop-Location}
+ if($testExit -ne 0){throw 'R55_FAKE_QA_FAILED'}
  Write-Host '[R55] ALL OFFLINE QA PASS. NO REAL MODEL REQUEST. NO MINECRAFT.'
  exit 0
 }catch{
