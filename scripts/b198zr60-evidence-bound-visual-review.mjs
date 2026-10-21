@@ -12,6 +12,7 @@ import {compileDesign,verifyCompiled} from '../source/ai/b143-building-dsl.mjs';
 import {writeR7OfflineVisualReview} from './b198zr7-offline-visual-review.mjs';
 import {writeR51EnvelopeStoryboard} from './b198zr51-uncompiled-envelope-storyboard.mjs';
 import {writeR61FinalVoxelSections} from './b198zr61-final-voxel-section-review.mjs';
+import {writeR62FutureDesignGuidance} from './b198zr62-evidence-backed-revision-guidance.mjs';
 import {inspectR59Archive,reviewR59AlreadySavedZip}
  from './b198zr59-safe-result-zip-to-review.mjs';
 export const SCHEMA='minecraftaibuilder-b198zr60-visual-human-review-v1';
@@ -38,7 +39,7 @@ function visual(z,evidence,stage){
   fail('R58_B143_VERDICT_DISAGREES');
  const dirname=z.tag+(compiled?'_R7_FINAL_ABSTRACT_3D':'_R51_UNCOMPILED_ENVELOPES');
  const folder=path.join(stage,dirname);
- let kind,link,board=null,sections=null;
+ let kind,link,board=null,sections=null,guidance=null;
  if(compiled){
   fs.mkdirSync(folder);
   const r=writeR7OfflineVisualReview({
@@ -58,9 +59,17 @@ function visual(z,evidence,stage){
   kind='UNCOMPILED_SHAPE_ENVELOPES_ONLY';
   link=dirname+'/R51_UNCOMPILED_SPATIAL_STORYBOARD.html';
  }
+ const r61=compiled?JSON.parse(fs.readFileSync(path.join(folder,
+  'R61_FINAL_VOXEL_SPATIAL_EVIDENCE.json'),'utf8')):null;
+ const next=writeR62FutureDesignGuidance({raw,
+  expectedRawSha256:evidence.rawSha256,b143Status:evidence.b143.status,
+  expectedGeometrySha256:compiled?.geometrySha256??null,
+  r61Evidence:r61,destination:folder});
+ guidance=dirname+'/'+next.relativeFile;
  return {tag:z.tag,originalRawSha256:evidence.rawSha256,
   evidenceType:kind,relativeViewer:link,relativeHumanBoard:board,
   relativeFunctionalSections:sections,
+  relativeFutureDesignGuidance:guidance,
   independentHumanReview:'NOT_PERFORMED',
   actualMinecraftPlayerWalkingVerified:false};
 }
@@ -104,7 +113,9 @@ export function createR60VisualReview({r54Zip,r48Zip=null,destination}={}){
    (v.relativeHumanBoard?' / <a href="'+v.relativeHumanBoard+
     '">人間審査ボード</a>':'')+
    (v.relativeFunctionalSections?' / <a href="'+v.relativeFunctionalSections+
-    '">内部断面・動線</a>':'')+'</li>').join('');
+    '">内部断面・動線</a>':'')+
+   (v.relativeFutureDesignGuidance?' / <a href="'+v.relativeFutureDesignGuidance+
+    '">次回設計への根拠</a>':'')+'</li>').join('');
   const html='<!doctype html><html lang="ja"><meta charset="utf-8">'+
    '<meta http-equiv="Content-Security-Policy" content="default-src &#39;none&#39;; style-src &#39;unsafe-inline&#39;">'+
    '<title>R60 建築品質の人間審査</title>'+

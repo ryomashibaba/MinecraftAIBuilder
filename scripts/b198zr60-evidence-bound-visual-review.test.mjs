@@ -72,6 +72,10 @@ test('R60 failed B143 only shows R51 envelopes; keeps originals and never scores
   assert(fs.existsSync(path.join(output,'R54_R51_UNCOMPILED_ENVELOPES',
    'R51_UNCOMPILED_SPATIAL_STORYBOARD.html')));
   assert(!fs.existsSync(path.join(output,'R54_R51_UNCOMPILED_ENVELOPES','index.html')));
+  const next=JSON.parse(fs.readFileSync(path.join(output,'R54_R51_UNCOMPILED_ENVELOPES','R62_NEXT_DESIGN_EVIDENCE.json')));
+  assert(next.evidenceIssues.some(x=>x.kind==='STRICT_B143_HOLD'));
+  assert(next.evidenceIssues.some(x=>x.kind==='ELEMENT_OUTSIDE_LOCAL_BOUNDS'));
+  assert.equal(next.approvedForInference,false);
   const m=JSON.parse(fs.readFileSync(path.join(output,'R60_MANIFEST.json')));
   assert.equal(m.views[0].originalRawSha256,f.digest);
   assert.equal(m.independentHumanReview,'NOT_PERFORMED');
@@ -94,6 +98,11 @@ test('R60 strict B143 PASS creates R7 actual abstract voxel 3D and B198W board',
   assert(fs.existsSync(path.join(folder,'index.html')));
   assert(fs.existsSync(path.join(folder,'B198W_REVIEW_BOARD.html')));
   assert(fs.existsSync(path.join(folder,'R61_FINAL_VOXEL_SECTION_REVIEW.html')));
+  assert(fs.existsSync(path.join(folder,'R62_NEXT_DESIGN_REVIEW.html')));
+  const next=JSON.parse(fs.readFileSync(path.join(folder,'R62_NEXT_DESIGN_EVIDENCE.json')));
+  assert.equal(next.independentHumanCriteria.length,4);
+  assert.equal(next.realModelImprovementDemonstrated,false);
+  assert.equal(next.freshConsentRequired,true);
   const s=JSON.parse(fs.readFileSync(path.join(folder,'R61_FINAL_VOXEL_SPATIAL_EVIDENCE.json')));
   assert.equal(s.humanQualityReview,'NOT_REVIEWED');
   assert.equal(s.modelCriteriaAreNotIndependent,true);
