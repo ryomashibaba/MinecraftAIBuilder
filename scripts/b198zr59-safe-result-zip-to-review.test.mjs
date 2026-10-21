@@ -142,7 +142,7 @@ test('R59 rejects all ZIP traversal, duplicate path, archive corruption, and uns
   const z=zip(a.entries);
   z[35]^=0x1;fs.writeFileSync(p,z);
   assert.throws(()=>inspectR59Archive(p,{tag:'R54'}),/B198ZR59_/);
-  const encrypted=zip(a.entries);encrypted.writeUInt16LE(1,36);
+  const encrypted=zip(a.entries);encrypted.writeUInt16LE(1,encrypted.readUInt32LE(encrypted.length-6)+8);
   const e=path.join(dir,'encrypted.zip');fs.writeFileSync(e,encrypted);
   assert.throws(()=>inspectR59Archive(e,{tag:'R54'}),/B198ZR59_ZIP_UNSUPPORTED_ENTRY/);
  }finally{fs.rmSync(dir,{recursive:true,force:true})}
