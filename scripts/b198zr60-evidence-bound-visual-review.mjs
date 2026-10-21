@@ -11,6 +11,7 @@ import {fileURLToPath} from 'node:url';
 import {compileDesign,verifyCompiled} from '../source/ai/b143-building-dsl.mjs';
 import {writeR7OfflineVisualReview} from './b198zr7-offline-visual-review.mjs';
 import {writeR51EnvelopeStoryboard} from './b198zr51-uncompiled-envelope-storyboard.mjs';
+import {writeR61FinalVoxelSections} from './b198zr61-final-voxel-section-review.mjs';
 import {inspectR59Archive,reviewR59AlreadySavedZip}
  from './b198zr59-safe-result-zip-to-review.mjs';
 export const SCHEMA='minecraftaibuilder-b198zr60-visual-human-review-v1';
@@ -37,13 +38,17 @@ function visual(z,evidence,stage){
   fail('R58_B143_VERDICT_DISAGREES');
  const dirname=z.tag+(compiled?'_R7_FINAL_ABSTRACT_3D':'_R51_UNCOMPILED_ENVELOPES');
  const folder=path.join(stage,dirname);
- let kind,link,board=null;
+ let kind,link,board=null,sections=null;
  if(compiled){
   fs.mkdirSync(folder);
   const r=writeR7OfflineVisualReview({
    design,compiled,destination:folder,caseId:'c01'});
   if(r.sourceSha256!==compiled.sourceSha256||
    r.geometrySha256!==compiled.geometrySha256)fail('R7_SHA_MISMATCH');
+  const sectionReport=writeR61FinalVoxelSections({raw,
+   expectedRawSha256:evidence.rawSha256,
+   expectedGeometrySha256:compiled.geometrySha256,destination:folder});
+  sections=dirname+'/'+sectionReport.relativeFile;
   kind='STRICT_B143_FINAL_ABSTRACT_VOXELS';
   link=dirname+'/index.html';
   board=dirname+'/B198W_REVIEW_BOARD.html';
@@ -55,6 +60,7 @@ function visual(z,evidence,stage){
  }
  return {tag:z.tag,originalRawSha256:evidence.rawSha256,
   evidenceType:kind,relativeViewer:link,relativeHumanBoard:board,
+  relativeFunctionalSections:sections,
   independentHumanReview:'NOT_PERFORMED',
   actualMinecraftPlayerWalkingVerified:false};
 }
@@ -96,7 +102,9 @@ export function createR60VisualReview({r54Zip,r48Zip=null,destination}={}){
   const items=views.map(v=>'<li>'+v.tag+': <a href="'+
    v.relativeViewer+'">図面を開く</a> ('+v.evidenceType+')'+
    (v.relativeHumanBoard?' / <a href="'+v.relativeHumanBoard+
-    '">人間審査ボード</a>':'')+'</li>').join('');
+    '">人間審査ボード</a>':'')+
+   (v.relativeFunctionalSections?' / <a href="'+v.relativeFunctionalSections+
+    '">内部断面・動線</a>':'')+'</li>').join('');
   const html='<!doctype html><html lang="ja"><meta charset="utf-8">'+
    '<meta http-equiv="Content-Security-Policy" content="default-src &#39;none&#39;; style-src &#39;unsafe-inline&#39;">'+
    '<title>R60 建築品質の人間審査</title>'+

@@ -93,6 +93,10 @@ test('R60 strict B143 PASS creates R7 actual abstract voxel 3D and B198W board',
   const folder=path.join(output,'R54_R7_FINAL_ABSTRACT_3D');
   assert(fs.existsSync(path.join(folder,'index.html')));
   assert(fs.existsSync(path.join(folder,'B198W_REVIEW_BOARD.html')));
+  assert(fs.existsSync(path.join(folder,'R61_FINAL_VOXEL_SECTION_REVIEW.html')));
+  const s=JSON.parse(fs.readFileSync(path.join(folder,'R61_FINAL_VOXEL_SPATIAL_EVIDENCE.json')));
+  assert.equal(s.humanQualityReview,'NOT_REVIEWED');
+  assert.equal(s.modelCriteriaAreNotIndependent,true);
   const m=JSON.parse(fs.readFileSync(path.join(folder,'R7_VISUAL_REVIEW_MANIFEST.json')));
   assert.equal(m.status,'WAITING_FOR_HUMAN_VISUAL_AND_SEMANTIC_REVIEW');
   assert.equal(m.actualMinecraftPlayerWalkingNotTested,true);
