@@ -27,7 +27,7 @@ test('R50 guidance focuses on live air, supported routes, exact extents, artisti
  assert.equal(r.frozenCases,12);
  assert.equal(r.distinctFrozenPrograms,12);
  assert.equal(r.historicalCoordinatesLeaked.length,0);
- for(const phrase of ['SAME idea','usable','standing','stairs',
+ for(const phrase of ['SAME idea','usable','standing','staircase',
   'max(abs(x-ex)+abs(z-ez),abs(y-ey))','zero-occupied',
   'upper limits','JSON Schema','human']){
   assert(R50_ARCHITECTURE_GUIDE.toLowerCase().includes(phrase.toLowerCase()),phrase);
