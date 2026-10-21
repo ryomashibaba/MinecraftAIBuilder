@@ -75,6 +75,7 @@ test('R60 failed B143 only shows R51 envelopes; keeps originals and never scores
   assert(!fs.existsSync(path.join(output,'R54_R51_UNCOMPILED_ENVELOPES','R64_INDEPENDENT_FLOOR_NETWORK.json')));
   assert(!fs.existsSync(path.join(output,'R54_R51_UNCOMPILED_ENVELOPES','R66_OVERHEAD_SPACE_EVIDENCE.json')));
   assert(!fs.existsSync(path.join(output,'R54_R51_UNCOMPILED_ENVELOPES','R67_SURROUNDING_SPACE_EVIDENCE.json')));
+  assert(!fs.existsSync(path.join(output,'R54_R51_UNCOMPILED_ENVELOPES','R68_HORIZONTAL_AIR_TOPOLOGY.json')));
   const next=JSON.parse(fs.readFileSync(path.join(output,'R54_R51_UNCOMPILED_ENVELOPES','R62_NEXT_DESIGN_EVIDENCE.json')));
   assert(next.evidenceIssues.some(x=>x.kind==='STRICT_B143_HOLD'));
   assert(next.evidenceIssues.some(x=>x.kind==='ELEMENT_OUTSIDE_LOCAL_BOUNDS'));
@@ -105,6 +106,10 @@ test('R60 strict B143 PASS creates R7 actual abstract voxel 3D and B198W board',
   assert(fs.existsSync(path.join(folder,'R64_FLOOR_CONNECTIVITY_REVIEW.html')));
   assert(fs.existsSync(path.join(folder,'R66_OVERHEAD_SPACE_REVIEW.html')));
   assert(fs.existsSync(path.join(folder,'R67_SURROUNDING_SPACE_REVIEW.html')));
+  assert(fs.existsSync(path.join(folder,'R68_HUMAN_AIR_CONTINUITY_REVIEW.html')));
+  const air=JSON.parse(fs.readFileSync(path.join(folder,'R68_HORIZONTAL_AIR_TOPOLOGY.json')));
+  assert.equal(air.originalSpatialPlanRead,false);
+  assert.equal(air.independentHumanReview,'NOT_REVIEWED');
   const perimeter=JSON.parse(fs.readFileSync(path.join(folder,'R67_SURROUNDING_SPACE_EVIDENCE.json')));
   assert.equal(perimeter.sourceSpatialPlanIgnored,true);
   assert.equal(perimeter.fullyEnclosedRoomOrFunctionVerified,false);
@@ -123,6 +128,9 @@ test('R60 strict B143 PASS creates R7 actual abstract voxel 3D and B198W board',
   assert.equal(next.modelIndependentNetworkEvidenceUsed,true);
   assert.equal(next.r66OverheadSourceIndependentUsed,true);
   assert.equal(next.r67SourceIndependentUsed,true);
+  assert.equal(next.r68AirTopologyIndependentUsed,true);
+  assert.equal(next.r68HorizontalAirStatus,
+   'HORIZONTAL_TWO_HIGH_AIR_TOPOLOGY_FOR_HUMAN_REVIEW');
   assert.equal(next.r67ContainmentReviewStatus,
    'ROOF_AND_NEARBY_SOLID_PROXY_FOR_HUMAN_REVIEW');
   assert.equal(next.r66OverheadAuditStatus,

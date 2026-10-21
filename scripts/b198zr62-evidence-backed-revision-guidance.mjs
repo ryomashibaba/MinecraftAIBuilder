@@ -18,6 +18,8 @@ import {assessR66OverheadSpace,SCHEMA as R66_SCHEMA}
  from './b198zr66-overhead-space-audit.mjs';
 import {assessR67SpatialContainment,SCHEMA as R67_SCHEMA}
  from './b198zr67-spatial-containment-audit.mjs';
+import {inspectR68AirContinuity,SCHEMA as R68_SCHEMA}
+ from './b198zr68-horizontal-air-continuity.mjs';
 
 export const SCHEMA='minecraftaibuilder-b198zr62-evidence-backed-next-design-guidance-v1';
 const sha=s=>createHash('sha256').update(s).digest('hex');
@@ -68,7 +70,7 @@ function assertR61(x,rawHash,geometrySha){
 export function prepareR62FutureDesignGuidance({
  raw,expectedRawSha256,b143Status,r61Evidence=null,
  expectedGeometrySha256=null,r64Evidence=null,r66Evidence=null,
- r67Evidence=null
+ r67Evidence=null,r68Evidence=null
 }={}){
  if(typeof raw!=='string'||!raw||
   Buffer.byteLength(raw)>120000||
@@ -83,7 +85,8 @@ export function prepareR62FutureDesignGuidance({
    fail('COMPILER_GEOMETRY_SHA_REQUIRED');
   assertR61(r61Evidence,expectedRawSha256,expectedGeometrySha256);
  }else if(r61Evidence!==null||expectedGeometrySha256!==null||
-  r64Evidence!==null||r66Evidence!==null||r67Evidence!==null){
+  r64Evidence!==null||r66Evidence!==null||r67Evidence!==null||
+  r68Evidence!==null){
   fail('NEVER_CLAIM_FINAL_VOXELS_WHEN_B143_HOLD');
  }
  const global=inspectR49GlobalConsistency(raw);
@@ -193,6 +196,49 @@ export function prepareR62FutureDesignGuidance({
     instructions:nextNotes[finding.kind]});
   }
  }
+ let horizontalAir=null;
+ if(r68Evidence!==null){
+  horizontalAir=inspectR68AirContinuity({raw,expectedRawSha256,
+   expectedGeometrySha256});
+  if(r68Evidence.schema!==R68_SCHEMA||
+   r68Evidence.originalRawSha256!==expectedRawSha256||
+   r68Evidence.geometrySha256!==expectedGeometrySha256||
+   r68Evidence.originalSpatialPlanRead!==false||
+   JSON.stringify(r68Evidence.metrics)!==
+    JSON.stringify(horizontalAir.metrics)||
+   JSON.stringify(r68Evidence.possibleConcerns)!==
+    JSON.stringify(horizontalAir.possibleConcerns))
+   fail('R68_AIR_TOPOLOGY_EVIDENCE_RECOMPUTE_MISMATCH');
+  if(network!==null&&
+   horizontalAir.metrics.supportedTwoHighStandingPositions!==
+    r64Evidence.metrics.supportedTwoHighStandingPositions)
+   fail('R68_R64_SUPPORTED_FLOOR_COUNT_MISMATCH');
+  if(overheadAudit!==null&&
+   horizontalAir.metrics.positionsWithAnyOverheadVoxel!==
+    overheadAudit.metrics.positionsWithAnyOverheadSolid)
+   fail('R68_R66_OVERHEAD_COUNT_MISMATCH');
+  if(spatialContainment!==null&&
+   horizontalAir.metrics.positionsWithAnyOverheadVoxel!==
+    spatialContainment.metrics.positionsWithOverheadVoxel)
+   fail('R68_R67_OVERHEAD_COUNT_MISMATCH');
+  const nextNotes={
+   LATERALLY_SEALED_AIR_POCKETS_NEED_ACCESS_REVIEW:
+    'The entire two-cell-high air pocket has no same-floor exit to the design boundary. Verify real supported entrances, doors or meaningful vertical transitions. Do not fill magnificent atria simply to close a heuristic gap; a closed pocket is not proof of accessible function.',
+   ROOFED_SPACES_WITH_LATERAL_OPENINGS_NEED_ROOM_REVIEW:
+    'Covered air reaches the design boundary along same-level two-high space. A door can make a good room boundary-connected. Review room enclosure, openings and the intended relationship between interior, courtyard and exterior rather than automatically adding walls.',
+   NO_CONNECTED_2X2_ROOFED_SUPPORT_PATCH:
+    'No fully roofed supported 2x2 region appears within a connected two-high-air patch. Verify room floor area and turning zones, but do not replace the architectural idea with arbitrary square boxes.'
+  };
+  for(const finding of horizontalAir.possibleConcerns){
+   if(!Object.hasOwn(nextNotes,finding.kind))
+    fail('R68_UNKNOWN_HORIZONTAL_AIR_FINDING');
+   issues.push({kind:finding.kind,count:1,
+    basis:'R68_ALL_TWO_HIGH_AIR_COMPONENTS_NOT_MODEL_DECLARED',
+    objectiveFinalVoxelEvidence:true,
+    independentHumanReviewRequired:true,automaticReject:false,
+    instructions:nextNotes[finding.kind]});
+  }
+ }
  const human=c01.criteria.map(x=>({id:x.id,requirement:x.description,
   assessment:'NOT_REVIEWED',
   fulfilledByAnySourceMetric:false,
@@ -226,6 +272,10 @@ export function prepareR62FutureDesignGuidance({
   r67ContainmentReviewStatus:spatialContainment?.status??'NOT_INCLUDED',
   r67SourceIndependentUsed:spatialContainment!==null,
   r67RoomLikeProxyPositions:spatialContainment?.metrics.roofedPositionsWith3PlusSideDirectionsWithin24??null,
+  r68HorizontalAirStatus:horizontalAir?.status??'NOT_INCLUDED',
+  r68AirTopologyIndependentUsed:horizontalAir!==null,
+  r68BoundaryConnectedCoveredPositions:horizontalAir?.metrics.roofedStandingInLaterallyBoundaryConnectedAir??null,
+  r68SealedCoveredPositions:horizontalAir?.metrics.roofedStandingInLaterallySealedAirPockets??null,
   proposedOnePassGuidance:instructions,
   generatedGeometry:false,priorModelOriginalRepaired:false,
   realModelImprovementDemonstrated:false,
@@ -236,7 +286,7 @@ export function prepareR62FutureDesignGuidance({
 export function writeR62FutureDesignGuidance({
  raw,expectedRawSha256,b143Status,r61Evidence=null,
  expectedGeometrySha256=null,r64Evidence=null,r66Evidence=null,
- r67Evidence=null,destination
+ r67Evidence=null,r68Evidence=null,destination
 }={}){
  if(typeof destination!=='string'||!path.isAbsolute(destination)||
   !fs.existsSync(destination)||!fs.lstatSync(destination).isDirectory()||
@@ -248,7 +298,7 @@ export function writeR62FutureDesignGuidance({
   fail('NEVER_OVERWRITE_DERIVED_REVIEW');
  const report=prepareR62FutureDesignGuidance({
   raw,expectedRawSha256,b143Status,r61Evidence,expectedGeometrySha256,
-  r64Evidence,r66Evidence,r67Evidence});
+  r64Evidence,r66Evidence,r67Evidence,r68Evidence});
  const lines=report.evidenceIssues.map(x=>
   '<li><b>'+esc(x.kind)+'</b> ['+esc(x.basis)+']：'+
   esc(x.instructions)+'</li>').join('');
