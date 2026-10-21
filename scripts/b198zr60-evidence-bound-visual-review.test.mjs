@@ -72,6 +72,7 @@ test('R60 failed B143 only shows R51 envelopes; keeps originals and never scores
   assert(fs.existsSync(path.join(output,'R54_R51_UNCOMPILED_ENVELOPES',
    'R51_UNCOMPILED_SPATIAL_STORYBOARD.html')));
   assert(!fs.existsSync(path.join(output,'R54_R51_UNCOMPILED_ENVELOPES','index.html')));
+  assert(!fs.existsSync(path.join(output,'R54_R51_UNCOMPILED_ENVELOPES','R64_INDEPENDENT_FLOOR_NETWORK.json')));
   const next=JSON.parse(fs.readFileSync(path.join(output,'R54_R51_UNCOMPILED_ENVELOPES','R62_NEXT_DESIGN_EVIDENCE.json')));
   assert(next.evidenceIssues.some(x=>x.kind==='STRICT_B143_HOLD'));
   assert(next.evidenceIssues.some(x=>x.kind==='ELEMENT_OUTSIDE_LOCAL_BOUNDS'));
@@ -98,6 +99,11 @@ test('R60 strict B143 PASS creates R7 actual abstract voxel 3D and B198W board',
   assert(fs.existsSync(path.join(folder,'index.html')));
   assert(fs.existsSync(path.join(folder,'B198W_REVIEW_BOARD.html')));
   assert(fs.existsSync(path.join(folder,'R61_FINAL_VOXEL_SECTION_REVIEW.html')));
+  assert(fs.existsSync(path.join(folder,'R64_FLOOR_CONNECTIVITY_REVIEW.html')));
+  const floor=JSON.parse(fs.readFileSync(path.join(folder,'R64_INDEPENDENT_FLOOR_NETWORK.json')));
+  assert.equal(floor.spatialPlanReadOrTrusted,false);
+  assert(floor.metrics.supportedTwoHighStandingPositions>0);
+  assert.equal(floor.independentArchitecturalQuality,'NOT_REVIEWED');
   assert(fs.existsSync(path.join(folder,'R62_NEXT_DESIGN_REVIEW.html')));
   const next=JSON.parse(fs.readFileSync(path.join(folder,'R62_NEXT_DESIGN_EVIDENCE.json')));
   assert.equal(next.independentHumanCriteria.length,4);
