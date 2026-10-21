@@ -151,15 +151,18 @@ test('R52 Windows current Compress-Archive includes four auto-generated files',(
  const root=temporary();
  try{
   const fixture=make(root,{audit:true});
-  attachR52FailedSourceStoryboard({evidenceDir:fixture.dir});
   const zip=path.join(root,'future-one-click-result.zip');
+  const helper=path.join('tools','r52-future',
+   'ARCHIVE_WITH_R51_DIAGNOSTIC_OFFLINE.ps1');
+  const packed=spawnSync('powershell.exe',[
+   '-NoProfile','-ExecutionPolicy','Bypass','-File',helper,
+   '-EvidenceDir',fixture.dir,'-SourceRoot',process.cwd(),
+   '-ZipOutput',zip
+  ],{encoding:'utf8',timeout:120000});
+  assert.equal(packed.status,0,packed.stdout+'\n'+packed.stderr);
+  assert.match(packed.stdout,/R52_UPLOAD_THIS_RESULT_ZIP/);
   const extracted=path.join(root,'unpacked');
-  const script=[
-   'Compress-Archive -LiteralPath $env:R52_TEST_SOURCE',
-   '-DestinationPath $env:R52_TEST_ZIP -CompressionLevel Optimal -ErrorAction Stop;',
-   'Expand-Archive -LiteralPath $env:R52_TEST_ZIP',
-   '-DestinationPath $env:R52_TEST_EXTRACT -ErrorAction Stop'
-  ].join(' ');
+  const script='Expand-Archive -LiteralPath $env:R52_TEST_ZIP -DestinationPath $env:R52_TEST_EXTRACT -ErrorAction Stop';
   const r=spawnSync('powershell.exe',['-NoProfile','-Command',script],{
    env:{...process.env,R52_TEST_SOURCE:fixture.dir,
     R52_TEST_ZIP:zip,R52_TEST_EXTRACT:extracted},
