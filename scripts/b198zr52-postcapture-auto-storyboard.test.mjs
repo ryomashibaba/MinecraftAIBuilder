@@ -207,3 +207,24 @@ test('R52 Windows future archiver keeps early transport failure logs WITHOUT a f
    'R52_FAILED_SOURCE_DIAGNOSTIC')),false);
  }finally{fs.rmSync(root,{recursive:true,force:true})}
 });
+
+test('R52 Windows archiver refuses tampered model original and does NOT create a ZIP',()=>{
+ if(process.platform!=='win32')return;
+ const root=temporary();
+ try{
+  const fixture=make(root,{wrongSha:true});
+  const zip=path.join(root,'must-not-exist.zip');
+  const helper=path.join('tools','r52-future',
+   'ARCHIVE_WITH_R51_DIAGNOSTIC_OFFLINE.ps1');
+  const run=spawnSync('powershell.exe',[
+   '-NoProfile','-ExecutionPolicy','Bypass','-File',helper,
+   '-EvidenceDir',fixture.dir,
+   '-SourceRoot',process.cwd(),'-ZipOutput',zip
+  ],{encoding:'utf8',timeout:120000});
+  assert.equal(run.status,1,run.stdout+'\n'+run.stderr);
+  assert.match(run.stdout,/R52_DIAGNOSTIC_SHA_OR_SOURCE_HOLD/);
+  assert.equal(fs.existsSync(zip),false);
+  assert.equal(fs.readFileSync(path.join(fixture.dir,
+   'R48_ORIGINAL_MODEL_RESPONSE_UNMODIFIED.txt'),'utf8'),fixture.raw);
+ }finally{fs.rmSync(root,{recursive:true,force:true})}
+});
