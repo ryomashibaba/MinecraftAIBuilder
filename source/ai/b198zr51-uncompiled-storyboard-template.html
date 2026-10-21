@@ -75,17 +75,19 @@ for(const [k,v] of [['簡易判定',q.status],['要素',d.elements.length],
  ['設計寸法',d.bounds.join(' × ')],['最終ボクセル','未表示']]){
  const e=document.createElement('span');e.className='pill';e.textContent=k+'：'+v;id('summary').appendChild(e);
 }
-function span(n,axis){let a=0,b=d.bounds[axis];
+function span(axis){let a=0,b=d.bounds[axis];
  for(const e of d.elements){
   if(!e.envelope)continue;
   a=Math.min(a,e.envelope.min[axis]);b=Math.max(b,e.envelope.max[axis]+1);
  }
  return [a-2,Math.max(1,b-a)+4];
 }
-const [minX,sizeX]=span(0,0),[minZ,sizeZ]=span(0,2),[minY,sizeY]=span(0,1);
+const [minX,sizeX]=span(0),[minZ,sizeZ]=span(2),[minY,sizeY]=span(1);
 id('plan').setAttribute('viewBox',[minX,minZ,sizeX,sizeZ].join(' '));
 id('elev').setAttribute('viewBox',[minX,minY,sizeX,sizeY].join(' '));
-id('floor').max=String(Math.max(0,d.bounds[1]-1));
+const yExtents=d.elements.filter(e=>e.envelope).flatMap(e=>[e.envelope.min[1],e.envelope.max[1]]);
+id('floor').min=String(Math.min(0,...yExtents));
+id('floor').max=String(Math.max(0,d.bounds[1]-1,...yExtents));
 const isPoint=p=>Array.isArray(p)&&p.length===3&&p.every(Number.isInteger);
 function rect(parent,x,y,w,h,fill,stroke,opacity,width,dash=''){
  return svg('rect',{x,y,width:w,height:h,fill,stroke,
@@ -100,8 +102,10 @@ function plan(){
   const a=e.envelope.min,b=e.envelope.max;
   const color=e.violated?'#bc3641':e.mode==='cut'?'#d9a03b':'#276ba0';
   const node=rect(root,a[0],a[2],b[0]-a[0]+1,b[2]-a[2]+1,
-   color,color,e.violated?.50:.23,e.violated?.7:.18);
-  svg('title',{},node,e.id+'（外接範囲、実ボクセルでない）');
+   color,color,e.violated?0.5:0.23,e.violated?0.7:0.18);
+  const hint=document.createElementNS(ns,'title');
+  hint.textContent=e.id+'（外接範囲、実ボクセルでない）';
+  node.appendChild(hint);
  }
  for(const v of d.voids){
   if(!isPoint(v.origin)||!isPoint(v.size)||y<v.origin[1]||
@@ -119,7 +123,9 @@ function plan(){
   const n=svg('circle',{cx:p.point[0]+.5,cy:p.point[2]+.5,r:.7,
    fill:p.kind==='entrance'?'#008b6a':'#7e4ca6',stroke:'white',
    'stroke-width':.15},root);
-  svg('title',{},n,p.id+' 宣言地点（未検証）');
+  const hint=document.createElementNS(ns,'title');
+  hint.textContent=p.id+' 宣言地点（未検証）';
+  n.appendChild(hint);
  }
 }
 function elev(){
@@ -131,7 +137,7 @@ function elev(){
   if(!e.envelope)continue;
   const a=e.envelope.min,b=e.envelope.max,color=e.violated?'#bc3641':e.mode==='cut'?'#d9a03b':'#276ba0';
   rect(g,a[0],a[1],b[0]-a[0]+1,b[1]-a[1]+1,color,color,
-   e.violated?.5:.18,e.violated?.6:.1);
+   e.violated?0.5:0.18,e.violated?0.6:0.1);
  }
 }
 id('floor').addEventListener('input',plan);
