@@ -1,0 +1,124 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import {createHash} from 'node:crypto';
+import {deflateRawSync} from 'node:zlib';
+import {CREATION_CASES} from '../source/ai/b198b-benchmark-cases.mjs';
+import {r32Courtyard} from './b198zr32-synthetic-geometry-fixtures.mjs';
+import {createR60VisualReview}
+ from './b198zr60-evidence-bound-visual-review.mjs';
+const sha=b=>createHash('sha256').update(b).digest('hex');
+const tmp=()=>fs.mkdtempSync(path.join(os.tmpdir(),'r60-visual-'));
+function crc32(b){
+ let c=0xffffffff;for(const x of b){c^=x;for(let i=0;i<8;i++)
+  c=(c&1)?0xedb88320^(c>>>1):c>>>1}
+ return (c^0xffffffff)>>>0;
+}
+function zip(entries){
+ const locals=[],dirs=[];let offset=0,centralSize=0;
+ for(const [name,value] of entries){
+  const raw=Buffer.from(value),n=Buffer.from(name),data=deflateRawSync(raw);
+  const h=Buffer.alloc(30),d=Buffer.alloc(46);
+  h.writeUInt32LE(0x04034b50,0);h.writeUInt16LE(20,4);
+  h.writeUInt16LE(8,8);h.writeUInt32LE(crc32(raw),14);
+  h.writeUInt32LE(data.length,18);h.writeUInt32LE(raw.length,22);
+  h.writeUInt16LE(n.length,26);locals.push(h,n,data);
+  d.writeUInt32LE(0x02014b50,0);d.writeUInt16LE(20,4);
+  d.writeUInt16LE(20,6);d.writeUInt16LE(8,10);
+  d.writeUInt32LE(crc32(raw),16);d.writeUInt32LE(data.length,20);
+  d.writeUInt32LE(raw.length,24);d.writeUInt16LE(n.length,28);
+  d.writeUInt32LE(offset,42);dirs.push(d,n);
+  offset+=h.length+n.length+data.length;centralSize+=d.length+n.length;
+ }
+ const e=Buffer.alloc(22);e.writeUInt32LE(0x06054b50,0);
+ e.writeUInt16LE(entries.length,8);e.writeUInt16LE(entries.length,10);
+ e.writeUInt32LE(centralSize,12);e.writeUInt32LE(offset,16);
+ return Buffer.concat([...locals,...dirs,e]);
+}
+function fixture({tag='R54',invalid=false,corrupt=false}={}){
+ const p=r32Courtyard();
+ if(invalid)p.design.elements.push({id:'r60-bounds-overflow',
+  shape:'box',mode:'add',material:'metal',
+  origin:[1,p.design.bounds.height,1],size:[2,1,2]});
+ const raw=JSON.stringify(p),digest=sha(raw),c01=CREATION_CASES.find(x=>x.id==='c01');
+ const root=tag+'_780917eb-b6cd-4b6c-ab61-69f923d4b672';
+ const members={
+  [tag+'_ORIGINAL_MODEL_RESPONSE_UNMODIFIED.txt']:raw,
+  [tag+'_FROZEN_REQUEST.json']:JSON.stringify({
+   caseId:'c01',originalPrompt:c01.prompt,
+   originalPromptSha256:sha(c01.prompt),guideSha256:'6'.repeat(64)}),
+  [tag+'_CAPTURE_RESULT.json']:JSON.stringify({
+   originalSaved:true,originalRawSha256:digest}),
+  [tag+'_FINAL_EVIDENCE_MANIFEST.json']:JSON.stringify({
+   originalRawCaptured:true,rawSha256:corrupt?'0'.repeat(64):digest,
+   oneTimeLock:'CONSUMED',c01PromptSha256:sha(c01.prompt),
+   model:'qwen3.8:27b',r47NativeSchemaSha256:'5'.repeat(64),
+   r50ArchitectureGuideSha256:'6'.repeat(64)})
+ };
+ return {bytes:zip(Object.entries(members).map(([n,v])=>[root+'/'+n,v])),
+  digest};
+}
+test('R60 failed B143 only shows R51 envelopes; keeps originals and never scores beauty',()=>{
+ const dir=tmp();
+ try{
+  const f=fixture({invalid:true}),p=path.join(dir,'r54.zip'),
+   output=path.join(dir,'review');
+  fs.writeFileSync(p,f.bytes);
+  const r=createR60VisualReview({r54Zip:p,destination:output});
+  assert.equal(r.modelCalls,0);
+  assert.equal(r.views[0].evidenceType,'UNCOMPILED_SHAPE_ENVELOPES_ONLY');
+  assert(fs.existsSync(path.join(output,'R54_R51_UNCOMPILED_ENVELOPES',
+   'R51_UNCOMPILED_SPATIAL_STORYBOARD.html')));
+  assert(!fs.existsSync(path.join(output,'R54_R51_UNCOMPILED_ENVELOPES','index.html')));
+  const m=JSON.parse(fs.readFileSync(path.join(output,'R60_MANIFEST.json')));
+  assert.equal(m.views[0].originalRawSha256,f.digest);
+  assert.equal(m.independentHumanReview,'NOT_PERFORMED');
+  assert.equal(m.architectureQualityCertified,false);
+  assert(m.safety.gates.every(x=>x==='BLOCKED'));
+  assert.deepEqual(m.safety.BuildPlan.operations,[]);
+  assert.deepEqual(fs.readFileSync(p),f.bytes);
+  assert.throws(()=>createR60VisualReview({r54Zip:p,destination:output}),
+   /FRESH_ABSOLUTE_OUTPUT_REQUIRED/);
+ }finally{fs.rmSync(dir,{recursive:true,force:true})}
+});
+test('R60 strict B143 PASS creates R7 actual abstract voxel 3D and B198W board',()=>{
+ const dir=tmp();
+ try{
+  const f=fixture(),p=path.join(dir,'r54.zip'),output=path.join(dir,'review');
+  fs.writeFileSync(p,f.bytes);
+  const r=createR60VisualReview({r54Zip:p,destination:output});
+  assert.equal(r.views[0].evidenceType,'STRICT_B143_FINAL_ABSTRACT_VOXELS');
+  const folder=path.join(output,'R54_R7_FINAL_ABSTRACT_3D');
+  assert(fs.existsSync(path.join(folder,'index.html')));
+  assert(fs.existsSync(path.join(folder,'B198W_REVIEW_BOARD.html')));
+  const m=JSON.parse(fs.readFileSync(path.join(folder,'R7_VISUAL_REVIEW_MANIFEST.json')));
+  assert.equal(m.status,'WAITING_FOR_HUMAN_VISUAL_AND_SEMANTIC_REVIEW');
+  assert.equal(m.actualMinecraftPlayerWalkingNotTested,true);
+  assert.deepEqual(fs.readFileSync(p),f.bytes);
+ }finally{fs.rmSync(dir,{recursive:true,force:true})}
+});
+test('R60 refuses corrupt original SHA and never publishes a partial output folder',()=>{
+ const dir=tmp();
+ try{
+  const f=fixture({corrupt:true}),p=path.join(dir,'bad.zip'),output=path.join(dir,'out');
+  fs.writeFileSync(p,f.bytes);
+  assert.throws(()=>createR60VisualReview({r54Zip:p,destination:output}),
+   /B198ZR58_EVIDENCE_SHA_CHAIN_MISMATCH_OR_UNCAPTURED/);
+  assert(!fs.existsSync(output));
+  assert.deepEqual(fs.readFileSync(p),f.bytes);
+ }finally{fs.rmSync(dir,{recursive:true,force:true})}
+});
+test('R60 refuses a synthetic R48 masquerading as the real historical original',()=>{
+ const dir=tmp();
+ try{
+  const a=fixture({tag:'R48',invalid:true});
+  const b=fixture({tag:'R54',invalid:true});
+  const p=path.join(dir,'r48.zip'),q=path.join(dir,'r54.zip'),out=path.join(dir,'out');
+  fs.writeFileSync(p,a.bytes);fs.writeFileSync(q,b.bytes);
+  assert.throws(()=>createR60VisualReview({r54Zip:q,r48Zip:p,destination:out}),
+   /R48_REPORTED_HISTORICAL_ORIGINAL_SHA_MISMATCH/);
+  assert(!fs.existsSync(out));
+ }finally{fs.rmSync(dir,{recursive:true,force:true})}
+});
