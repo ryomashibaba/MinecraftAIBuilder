@@ -13,6 +13,7 @@ import {writeR7OfflineVisualReview} from './b198zr7-offline-visual-review.mjs';
 import {writeR51EnvelopeStoryboard} from './b198zr51-uncompiled-envelope-storyboard.mjs';
 import {writeR61FinalVoxelSections} from './b198zr61-final-voxel-section-review.mjs';
 import {writeR62FutureDesignGuidance} from './b198zr62-evidence-backed-revision-guidance.mjs';
+import {writeR63ArchitecturalContinuity} from './b198zr63-architectural-continuity-watch.mjs';
 import {inspectR59Archive,reviewR59AlreadySavedZip}
  from './b198zr59-safe-result-zip-to-review.mjs';
 export const SCHEMA='minecraftaibuilder-b198zr60-visual-human-review-v1';
@@ -97,6 +98,22 @@ export function createR60VisualReview({r54Zip,r48Zip=null,destination}={}){
    fail('R59_EVIDENCE_RECEIPT_MISMATCH');
   const views=[visual(a,report.candidate,stage)];
   if(b)views.unshift(visual(b,report.baseline,stage));
+  let continuityReview=null;
+  if(b){
+   // R59 verifies the historical R48 original SHA before this comparison.
+   const rawOf=z=>{
+    const raw=z.selectedFiles.find(f=>
+     f.name===z.tag+'_ORIGINAL_MODEL_RESPONSE_UNMODIFIED.txt');
+    if(!raw)fail('R63_ORIGINAL_MISSING');
+    return raw.bytes.toString('utf8');
+   };
+   const result=writeR63ArchitecturalContinuity({
+    beforeRaw:rawOf(b),beforeSha256:report.baseline.rawSha256,
+    afterRaw:rawOf(a),afterSha256:report.candidate.rawSha256,
+    destination:stage
+   });
+   continuityReview=result.relativeFile;
+  }
   for(const z of [a,b].filter(Boolean)){
    const now=inspectR59Archive(z.tag==='R54'?r54Zip:r48Zip,{tag:z.tag});
    if(now.archiveSHA256!==z.archiveSHA256)fail('ZIP_CHANGED_DURING_REVIEW');
@@ -105,7 +122,8 @@ export function createR60VisualReview({r54Zip,r48Zip=null,destination}={}){
    status:'READY_FOR_INDEPENDENT_HUMAN_REVIEW_NOT_YET_REVIEWED',
    frozenCase:'c01',r59ComparisonStatus:report.status,
    r54ArchiveSha256:a.archiveSHA256,r48ArchiveSha256:b?.archiveSHA256??null,
-   views,sourceZipsUnmodified:true,actualQwenOriginAuthenticated:false,
+   views,relativeContinuityReview:continuityReview,
+   sourceZipsUnmodified:true,actualQwenOriginAuthenticated:false,
    geometryRepairPerformed:false,architectureQualityCertified:false,
    independentHumanReview:'NOT_PERFORMED',safety:safety()};
   const items=views.map(v=>'<li>'+v.tag+': <a href="'+
@@ -123,7 +141,10 @@ export function createR60VisualReview({r54Zip,r48Zip=null,destination}={}){
    '<h1>R60 建築設計の実態を確認</h1>'+
    '<p>R7は最終概念ボクセルの3D。R51は未コンパイル形状の外接範囲のみ。'+
    '双方ともMinecraft施工・実際の歩行・美観・独創性の証明ではありません。</p>'+
-   '<ul>'+items+'</ul><p><a href="R59_ORIGINAL_REVIEW/R58_C01_HUMAN_REVIEW.html">'+
+   '<ul>'+items+'</ul>'+
+   (continuityReview?'<p><a href="'+continuityReview+
+    '">R63 元案から主要空間・造形が失われていないか確認</a></p>':'')+
+   '<p><a href="R59_ORIGINAL_REVIEW/R58_C01_HUMAN_REVIEW.html">'+
    '原本比較と凍結した4つの人間品質審査項目</a></p>'+
    '<p>レビュー未実施。推論0、ワールド操作0、NOT_PREPARED、9 BLOCKED。</p></body></html>';
   fs.writeFileSync(path.join(stage,'R60_INDEX.html'),html,{flag:'wx'});
