@@ -16,6 +16,8 @@ import {bridgeR65IndependentSpatialEvidence}
  from './b198zr65-independent-network-feedback.mjs';
 import {assessR66OverheadSpace,SCHEMA as R66_SCHEMA}
  from './b198zr66-overhead-space-audit.mjs';
+import {assessR67SpatialContainment,SCHEMA as R67_SCHEMA}
+ from './b198zr67-spatial-containment-audit.mjs';
 
 export const SCHEMA='minecraftaibuilder-b198zr62-evidence-backed-next-design-guidance-v1';
 const sha=s=>createHash('sha256').update(s).digest('hex');
@@ -65,7 +67,8 @@ function assertR61(x,rawHash,geometrySha){
 }
 export function prepareR62FutureDesignGuidance({
  raw,expectedRawSha256,b143Status,r61Evidence=null,
- expectedGeometrySha256=null,r64Evidence=null,r66Evidence=null
+ expectedGeometrySha256=null,r64Evidence=null,r66Evidence=null,
+ r67Evidence=null
 }={}){
  if(typeof raw!=='string'||!raw||
   Buffer.byteLength(raw)>120000||
@@ -80,7 +83,7 @@ export function prepareR62FutureDesignGuidance({
    fail('COMPILER_GEOMETRY_SHA_REQUIRED');
   assertR61(r61Evidence,expectedRawSha256,expectedGeometrySha256);
  }else if(r61Evidence!==null||expectedGeometrySha256!==null||
-  r64Evidence!==null||r66Evidence!==null){
+  r64Evidence!==null||r66Evidence!==null||r67Evidence!==null){
   fail('NEVER_CLAIM_FINAL_VOXELS_WHEN_B143_HOLD');
  }
  const global=inspectR49GlobalConsistency(raw);
@@ -151,6 +154,45 @@ export function prepareR62FutureDesignGuidance({
     instructions:nextNotes[finding.kind]});
   }
  }
+ let spatialContainment=null;
+ if(r67Evidence!==null){
+  spatialContainment=assessR67SpatialContainment({raw,
+   expectedRawSha256,expectedGeometrySha256});
+  if(r67Evidence.schema!==R67_SCHEMA||
+   r67Evidence.originalRawSha256!==expectedRawSha256||
+   r67Evidence.geometrySha256!==expectedGeometrySha256||
+   r67Evidence.sourceSpatialPlanIgnored!==true||
+   JSON.stringify(r67Evidence.metrics)!==
+    JSON.stringify(spatialContainment.metrics)||
+   JSON.stringify(r67Evidence.possibleConcerns)!==
+    JSON.stringify(spatialContainment.possibleConcerns))
+   fail('R67_SPATIAL_EVIDENCE_RECOMPUTE_MISMATCH');
+  if(overheadAudit!==null&&
+   spatialContainment.metrics.positionsWithOverheadVoxel!==
+    overheadAudit.metrics.positionsWithAnyOverheadSolid)
+   fail('R67_R66_ROOF_COUNT_CONTRADICTION');
+  if(network!==null&&
+   spatialContainment.metrics.supportedTwoHighStandingPositions!==
+    r64Evidence.metrics.supportedTwoHighStandingPositions)
+   fail('R67_R64_STANDING_COUNT_CONTRADICTION');
+  const nextNotes={
+   ROOFED_FLOORS_WITHOUT_3_NEARBY_SIDE_DIRECTIONS:
+    'Roofs and standing floors exist, yet none of the roofed positions has solids nearby in three cardinal directions. Review whether library rooms and galleries are actually framed by substantial architecture rather than only broad canopies; preserve intentionally open and monumental volumes.',
+   MOST_ROOFED_POSITIONS_LACK_3_NEARBY_SIDE_DIRECTIONS:
+    'Check whether roofed public floors connect to properly considered enclosed or partially enclosed program areas. Avoid reducing a grand hall merely to satisfy a 24-cell proximity radius.',
+   NO_ROOFED_3_DIRECTION_2X2_ROOM_PROXY:
+    'Inspect adequate floor breadth, outer enclosure and internal room usability together. Walls, columns and furniture can create misleading proximity; do not blindly add box walls or block required atria.'
+  };
+  for(const finding of spatialContainment.possibleConcerns){
+   if(!Object.hasOwn(nextNotes,finding.kind))
+    fail('R67_UNKNOWN_SPATIAL_CONCERN');
+   issues.push({kind:finding.kind,count:1,
+    basis:'R67_FINAL_VOXEL_ROOF_AND_SIDE_SOLID_PROXY',
+    objectiveFinalVoxelEvidence:true,
+    independentHumanReviewRequired:true,automaticReject:false,
+    instructions:nextNotes[finding.kind]});
+  }
+ }
  const human=c01.criteria.map(x=>({id:x.id,requirement:x.description,
   assessment:'NOT_REVIEWED',
   fulfilledByAnySourceMetric:false,
@@ -181,6 +223,9 @@ export function prepareR62FutureDesignGuidance({
   r66OverheadAuditStatus:overheadAudit?.status??'NOT_INCLUDED',
   r66OverheadSourceIndependentUsed:overheadAudit!==null,
   r66CoveredStandingPositions:overheadAudit?.metrics.positionsWithAnyOverheadSolid??null,
+  r67ContainmentReviewStatus:spatialContainment?.status??'NOT_INCLUDED',
+  r67SourceIndependentUsed:spatialContainment!==null,
+  r67RoomLikeProxyPositions:spatialContainment?.metrics.roofedPositionsWith3PlusSideDirectionsWithin24??null,
   proposedOnePassGuidance:instructions,
   generatedGeometry:false,priorModelOriginalRepaired:false,
   realModelImprovementDemonstrated:false,
@@ -190,7 +235,8 @@ export function prepareR62FutureDesignGuidance({
 }
 export function writeR62FutureDesignGuidance({
  raw,expectedRawSha256,b143Status,r61Evidence=null,
- expectedGeometrySha256=null,r64Evidence=null,r66Evidence=null,destination
+ expectedGeometrySha256=null,r64Evidence=null,r66Evidence=null,
+ r67Evidence=null,destination
 }={}){
  if(typeof destination!=='string'||!path.isAbsolute(destination)||
   !fs.existsSync(destination)||!fs.lstatSync(destination).isDirectory()||
@@ -202,7 +248,7 @@ export function writeR62FutureDesignGuidance({
   fail('NEVER_OVERWRITE_DERIVED_REVIEW');
  const report=prepareR62FutureDesignGuidance({
   raw,expectedRawSha256,b143Status,r61Evidence,expectedGeometrySha256,
-  r64Evidence,r66Evidence});
+  r64Evidence,r66Evidence,r67Evidence});
  const lines=report.evidenceIssues.map(x=>
   '<li><b>'+esc(x.kind)+'</b> ['+esc(x.basis)+']：'+
   esc(x.instructions)+'</li>').join('');

@@ -11,6 +11,8 @@ import {analyzeR64UnclaimedFloorConnectivity}
  from './b198zr64-unclaimed-floor-connectivity.mjs';
 import {assessR66OverheadSpace}
  from './b198zr66-overhead-space-audit.mjs';
+import {assessR67SpatialContainment}
+ from './b198zr67-spatial-containment-audit.mjs';
 import {prepareR62FutureDesignGuidance,writeR62FutureDesignGuidance}
  from './b198zr62-evidence-backed-revision-guidance.mjs';
 import {CREATION_CASES} from '../source/ai/b198b-benchmark-cases.mjs';
@@ -201,4 +203,42 @@ test('R62 refuses R66 forged metrics and R66 final voxels if B143 HOLD',()=>{
  assert.throws(()=>prepareR62FutureDesignGuidance({
   raw,expectedRawSha256:sha(raw),b143Status:'HOLD_B143_NOT_COMPILED',
   r66Evidence:valid}),/NEVER_CLAIM_FINAL_VOXELS_WHEN_B143_HOLD/);
+});
+
+test('R62 consumes R67 room-proximity warning but preserves architectural creativity and human review',()=>{
+ const p=r32Courtyard();
+ p.design.elements=[
+  {id:'floor',shape:'box',mode:'add',origin:[0,0,0],size:[12,1,12],material:'wood'},
+  {id:'roof',shape:'box',mode:'add',origin:[0,6,0],size:[12,1,12],material:'glass'}
+ ];
+ const {raw,compiled,r61}=pack(p);
+ const expectedRawSha256=sha(raw),
+  expectedGeometrySha256=compiled.geometrySha256;
+ const r66Evidence=assessR66OverheadSpace({raw,expectedRawSha256,expectedGeometrySha256});
+ const r67Evidence=assessR67SpatialContainment({raw,expectedRawSha256,expectedGeometrySha256});
+ const report=prepareR62FutureDesignGuidance({raw,expectedRawSha256,
+  expectedGeometrySha256,b143Status:'B143_FINAL_VOXELS_COMPILED_NOT_SPATIAL_OR_HUMAN_PASS',
+  r61Evidence:r61,r66Evidence,r67Evidence});
+ assert.equal(report.r67SourceIndependentUsed,true);
+ assert.equal(report.r67ContainmentReviewStatus,'ROOF_AND_NEARBY_SOLID_PROXY_FOR_HUMAN_REVIEW');
+ assert(report.evidenceIssues.some(x=>x.kind==='ROOFED_FLOORS_WITHOUT_3_NEARBY_SIDE_DIRECTIONS'));
+ assert(report.evidenceIssues.some(x=>x.kind==='NO_ROOFED_3_DIRECTION_2X2_ROOM_PROXY'));
+ assert(report.evidenceIssues.filter(x=>x.basis===
+  'R67_FINAL_VOXEL_ROOF_AND_SIDE_SOLID_PROXY').every(x=>x.automaticReject===false));
+ assert.equal(report.approvedForInference,false);
+ assert(report.independentHumanCriteria.every(x=>x.assessment==='NOT_REVIEWED'));
+});
+test('R62 rejects forged R67 counts, cross-tool contradictions and B143 HOLD R67',()=>{
+ const p=r32Courtyard(),{raw,compiled,r61}=pack(p);
+ const expectedRawSha256=sha(raw),expectedGeometrySha256=compiled.geometrySha256;
+ const good=assessR67SpatialContainment({raw,expectedRawSha256,expectedGeometrySha256});
+ const altered=structuredClone(good);
+ altered.metrics.roofedPositionsWith3PlusSideDirectionsWithin24++;
+ const args={raw,expectedRawSha256,expectedGeometrySha256,
+  b143Status:'B143_FINAL_VOXELS_COMPILED_NOT_SPATIAL_OR_HUMAN_PASS',r61Evidence:r61};
+ assert.throws(()=>prepareR62FutureDesignGuidance({...args,r67Evidence:altered}),
+  /R67_SPATIAL_EVIDENCE_RECOMPUTE_MISMATCH/);
+ assert.throws(()=>prepareR62FutureDesignGuidance({raw,expectedRawSha256,
+  b143Status:'HOLD_B143_NOT_COMPILED',r67Evidence:good}),
+  /NEVER_CLAIM_FINAL_VOXELS_WHEN_B143_HOLD/);
 });
