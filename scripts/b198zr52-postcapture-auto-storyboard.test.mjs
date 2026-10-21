@@ -62,9 +62,9 @@ test('R52 auto-attaches evidence after FAILED B143, preserves raw and all past a
   assert.equal(manifest.originalRawSha256,fixture.sha);
   assert.equal(manifest.B143FinalVoxelEvidenceProvided,false);
   assert.equal(manifest.failedElementEnvelopesCount,1);
-  const html=fs.readFileSync(path.join(fixture.dir,
-   'R51_SCHEMATIC_PROVENANCE.json'),'utf8').includes('unexpected');
-  assert.equal(html,false);
+  const preview=fs.readFileSync(path.join(fixture.dir,
+   'R52_FAILED_SOURCE_DIAGNOSTIC','R51_UNCOMPILED_SPATIAL_STORYBOARD.html'),'utf8');
+  assert(preview.includes('roofOutOfBounds'));
   assert.throws(()=>attachR52FailedSourceStoryboard({evidenceDir:fixture.dir}),
    /NEVER_OVERWRITE_EXISTING_R52_DERIVATIVE/);
  }finally{fs.rmSync(root,{recursive:true,force:true})}
