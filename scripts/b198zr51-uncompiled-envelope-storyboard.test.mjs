@@ -87,6 +87,7 @@ test('R51 safely embeds arbitrary model text without HTML/script escape',()=>{
  const p=brokenDraft();
  p.design.title='</script><img src=x onerror=alert(1)>';
  p.spatialPlan.designIntent='</script><script>evil()</script>';
+ p.design.elements[0].id='</script><img src=x onerror=alert(2)>';
  const raw=JSON.stringify(p);
  const r=createR51EnvelopeStoryboard(raw);
  assert(!r.html.includes('</script><img'));
