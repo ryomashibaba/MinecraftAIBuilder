@@ -23,10 +23,34 @@ try{
  if([IO.Path]::GetExtension($dest).ToLowerInvariant() -ne '.zip'){
   throw 'EXPECTED_ZIP_OUTPUT'
  }
- # Internal offline source preview generation; does not open any network.
- # Abort packaging instead of losing provenance on audit mismatch.
- & node $runner --evidence-dir $e
- if($LASTEXITCODE -ne 0){throw 'R52_DIAGNOSTIC_SHA_OR_SOURCE_HOLD'}
+ # No original response after a transport failure? Preserve the early
+ # failure logs in the ZIP without inventing model bytes or a preview.
+ # When a raw DOES exist, any SHA mismatch is strictly fatal.
+ $rawFiles=@(Get-ChildItem -LiteralPath $e -File |
+  Where-Object {$_.Name -match '^R[0-9]+_ORIGINAL_MODEL_RESPONSE_UNMODIFIED[.]txt
+ if(-not (Test-Path -LiteralPath $dest -PathType Leaf)){
+  throw 'R52_ARCHIVE_NOT_WRITTEN'
+ }
+ Write-Host ('R52_UPLOAD_THIS_RESULT_ZIP='+$dest)
+ Write-Host '[R52] R51 storyboard automatically included when B143 failed.'
+ Write-Host '[R52] No model request, no world actions, no retry.'
+ exit 0
+}catch{
+ Write-Host ('[R52 ZIP HOLD] '+$_.Exception.Message) -ForegroundColor Red
+ Write-Host 'Existing model original and previous ZIPs are never modified.'
+ exit 1
+}
+})
+ if($rawFiles.Count -eq 0){
+  $logs=@(Get-ChildItem -LiteralPath $e -File)
+  if($logs.Count -eq 0){throw 'NO_CAPTURE_OR_EARLY_FAILURE_EVIDENCE'}
+  Write-Host '[R52] No raw model response; packaging existing early-failure evidence WITHOUT diagram.'
+ }else{
+  # Internal offline source preview generation; no network or model call.
+  # Fail closed on wrong raw SHA or ambiguous original.
+  & node $runner --evidence-dir $e
+  if($LASTEXITCODE -ne 0){throw 'R52_DIAGNOSTIC_SHA_OR_SOURCE_HOLD'}
+ }
  Compress-Archive -LiteralPath $e -DestinationPath $dest -CompressionLevel Optimal -ErrorAction Stop
  if(-not (Test-Path -LiteralPath $dest -PathType Leaf)){
   throw 'R52_ARCHIVE_NOT_WRITTEN'
