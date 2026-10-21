@@ -16,7 +16,7 @@ const validBounds=b=>b&&bounded(b.width,8,128)&&
 const keys=['width','height','depth'];
 const cmp=(min,max,dim)=>min.every((v,i)=>v>=0)&&max.every((v,i)=>v<dim[i]);
 const basicSize=v=>vec(v)&&v.every(x=>x>=1);
-const localEnvelope=e=>{
+export const localEnvelope=e=>{
  if(!e||typeof e!=='object')return null;
  const s=e.shape,origin=e.origin,axis=e.axis;
  let a,b;
