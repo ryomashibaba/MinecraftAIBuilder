@@ -115,8 +115,20 @@ export function inspectR59Archive(zipPath,{tag}={}){
     if(localOffset+30>b.length||
      b.readUInt32LE(localOffset)!==0x04034b50)
      bad('ZIP_LOCAL_HEADER_INVALID');
-    const offset=localOffset+30+
-     b.readUInt16LE(localOffset+26)+b.readUInt16LE(localOffset+28);
+    const localFlags=b.readUInt16LE(localOffset+6);
+    const localMethod=b.readUInt16LE(localOffset+8);
+    const localNameLength=b.readUInt16LE(localOffset+26);
+    const localExtraLength=b.readUInt16LE(localOffset+28);
+    const offset=localOffset+30+localNameLength+localExtraLength;
+    if(localFlags!==flags||localMethod!==method||
+     localNameLength!==nameLength||
+     !b.subarray(localOffset+30,localOffset+30+localNameLength).equals(nameBytes))
+     bad('ZIP_LOCAL_VS_CENTRAL_HEADER_MISMATCH');
+    if(!(flags&8)&&(
+     b.readUInt32LE(localOffset+14)!==crc||
+     b.readUInt32LE(localOffset+18)!==compressed||
+     b.readUInt32LE(localOffset+22)!==expanded))
+     bad('ZIP_LOCAL_VS_CENTRAL_SIZE_MISMATCH');
     if(offset+compressed>b.length||offset+compressed>centralOffset)
      bad('ZIP_DATA_OUT_OF_BOUNDS');
     const encoded=b.subarray(offset,offset+compressed);
