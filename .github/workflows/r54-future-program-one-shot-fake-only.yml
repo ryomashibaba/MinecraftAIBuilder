@@ -1,0 +1,32 @@
+name: R54 Future Consent-Gated R50 One-Shot to Diagnostic ZIP — FAKE Only
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'scripts/b198zr54-future-program-first-once.mjs'
+      - 'scripts/b198zr54-future-program-first-once.test.mjs'
+      - 'scripts/b198zr54-future-one-shot-auto-zip.fake.test.mjs'
+      - '.github/workflows/r54-future-program-one-shot-fake-only.yml'
+  pull_request:
+    paths:
+      - 'scripts/b198zr54-future-program-first-once.mjs'
+      - 'scripts/b198zr54-future-program-first-once.test.mjs'
+      - 'scripts/b198zr54-future-one-shot-auto-zip.fake.test.mjs'
+      - '.github/workflows/r54-future-program-one-shot-fake-only.yml'
+permissions:
+  contents: read
+jobs:
+  future-gated-r50-fake-and-r52-zip:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Fake-only R54 future consent, original SHA, R50 guide and archived R51
+        run: node --test scripts/b198zr54-future-program-first-once.test.mjs scripts/b198zr54-future-one-shot-auto-zip.fake.test.mjs scripts/b198zr53-fake-one-shot-to-zip.integration.test.mjs scripts/b198zr52-postcapture-auto-storyboard.test.mjs
