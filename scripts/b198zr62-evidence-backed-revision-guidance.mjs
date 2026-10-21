@@ -12,6 +12,8 @@ import {inspectR49GlobalConsistency}
  from '../source/ai/b198zr49-global-source-consistency.mjs';
 import {SCHEMA as R61_SCHEMA}
  from './b198zr61-final-voxel-section-review.mjs';
+import {bridgeR65IndependentSpatialEvidence}
+ from './b198zr65-independent-network-feedback.mjs';
 
 export const SCHEMA='minecraftaibuilder-b198zr62-evidence-backed-next-design-guidance-v1';
 const sha=s=>createHash('sha256').update(s).digest('hex');
@@ -61,7 +63,7 @@ function assertR61(x,rawHash,geometrySha){
 }
 export function prepareR62FutureDesignGuidance({
  raw,expectedRawSha256,b143Status,r61Evidence=null,
- expectedGeometrySha256=null
+ expectedGeometrySha256=null,r64Evidence=null
 }={}){
  if(typeof raw!=='string'||!raw||
   Buffer.byteLength(raw)>120000||
@@ -75,7 +77,7 @@ export function prepareR62FutureDesignGuidance({
   if(!/^[a-f0-9]{64}$/.test(expectedGeometrySha256??''))
    fail('COMPILER_GEOMETRY_SHA_REQUIRED');
   assertR61(r61Evidence,expectedRawSha256,expectedGeometrySha256);
- }else if(r61Evidence!==null||expectedGeometrySha256!==null){
+ }else if(r61Evidence!==null||expectedGeometrySha256!==null||r64Evidence!==null){
   fail('NEVER_CLAIM_FINAL_VOXELS_WHEN_B143_HOLD');
  }
  const global=inspectR49GlobalConsistency(raw);
@@ -112,6 +114,10 @@ export function prepareR62FutureDesignGuidance({
     objectiveFinalVoxelEvidence:false,
     instructions:'Redesign entrance and spatialPlan so positions and required clearances can be independently tested against final voxels; do not claim reachability.'});
  }
+ const network=r64Evidence===null?null:
+  bridgeR65IndependentSpatialEvidence({raw,expectedRawSha256,
+   expectedGeometrySha256,r64Evidence});
+ if(network)issues.push(...network.issues);
  const human=c01.criteria.map(x=>({id:x.id,requirement:x.description,
   assessment:'NOT_REVIEWED',
   fulfilledByAnySourceMetric:false,
@@ -135,6 +141,10 @@ export function prepareR62FutureDesignGuidance({
   b143Status,r61Status:r61Evidence?.r43Status??null,
   finalConceptualGeometrySha256:compiled?expectedGeometrySha256:null,
   evidenceIssues:issues,independentHumanCriteria:human,
+  r65NetworkAuditStatus:network?.status??'NOT_INCLUDED',
+  r65NetworkEvidenceSha256:network?.r64NetworkFactsSha256??null,
+  modelIndependentNetworkEvidenceUsed:network!==null,
+  networkDefectsNeedHumanReview:network?.humanDecisionBeforeRepairRequired??null,
   proposedOnePassGuidance:instructions,
   generatedGeometry:false,priorModelOriginalRepaired:false,
   realModelImprovementDemonstrated:false,
@@ -144,7 +154,7 @@ export function prepareR62FutureDesignGuidance({
 }
 export function writeR62FutureDesignGuidance({
  raw,expectedRawSha256,b143Status,r61Evidence=null,
- expectedGeometrySha256=null,destination
+ expectedGeometrySha256=null,r64Evidence=null,destination
 }={}){
  if(typeof destination!=='string'||!path.isAbsolute(destination)||
   !fs.existsSync(destination)||!fs.lstatSync(destination).isDirectory()||
@@ -155,7 +165,8 @@ export function writeR62FutureDesignGuidance({
  if([jsonPath,htmlPath,textPath].some(p=>fs.existsSync(p)))
   fail('NEVER_OVERWRITE_DERIVED_REVIEW');
  const report=prepareR62FutureDesignGuidance({
-  raw,expectedRawSha256,b143Status,r61Evidence,expectedGeometrySha256});
+  raw,expectedRawSha256,b143Status,r61Evidence,expectedGeometrySha256,
+  r64Evidence});
  const lines=report.evidenceIssues.map(x=>
   '<li><b>'+esc(x.kind)+'</b> ['+esc(x.basis)+']：'+
   esc(x.instructions)+'</li>').join('');

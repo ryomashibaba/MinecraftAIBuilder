@@ -67,10 +67,12 @@ function visual(z,evidence,stage){
  }
  const r61=compiled?JSON.parse(fs.readFileSync(path.join(folder,
   'R61_FINAL_VOXEL_SPATIAL_EVIDENCE.json'),'utf8')):null;
+ const r64=compiled?JSON.parse(fs.readFileSync(path.join(folder,
+  'R64_INDEPENDENT_FLOOR_NETWORK.json'),'utf8')):null;
  const next=writeR62FutureDesignGuidance({raw,
   expectedRawSha256:evidence.rawSha256,b143Status:evidence.b143.status,
   expectedGeometrySha256:compiled?.geometrySha256??null,
-  r61Evidence:r61,destination:folder});
+  r61Evidence:r61,r64Evidence:r64,destination:folder});
  guidance=dirname+'/'+next.relativeFile;
  return {tag:z.tag,originalRawSha256:evidence.rawSha256,
   evidenceType:kind,relativeViewer:link,relativeHumanBoard:board,

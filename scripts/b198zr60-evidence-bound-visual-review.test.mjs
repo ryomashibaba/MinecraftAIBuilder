@@ -77,6 +77,7 @@ test('R60 failed B143 only shows R51 envelopes; keeps originals and never scores
   assert(next.evidenceIssues.some(x=>x.kind==='STRICT_B143_HOLD'));
   assert(next.evidenceIssues.some(x=>x.kind==='ELEMENT_OUTSIDE_LOCAL_BOUNDS'));
   assert.equal(next.approvedForInference,false);
+  assert.equal(next.modelIndependentNetworkEvidenceUsed,false);
   const m=JSON.parse(fs.readFileSync(path.join(output,'R60_MANIFEST.json')));
   assert.equal(m.views[0].originalRawSha256,f.digest);
   assert.equal(m.independentHumanReview,'NOT_PERFORMED');
@@ -109,6 +110,10 @@ test('R60 strict B143 PASS creates R7 actual abstract voxel 3D and B198W board',
   assert.equal(next.independentHumanCriteria.length,4);
   assert.equal(next.realModelImprovementDemonstrated,false);
   assert.equal(next.freshConsentRequired,true);
+  assert.equal(next.modelIndependentNetworkEvidenceUsed,true);
+  assert.equal(next.r65NetworkAuditStatus,
+   'CONCEPT_NETWORK_FEEDBACK_DERIVED_NOT_APPLIED');
+  assert.equal(next.independentHumanCriteria[0].assessment,'NOT_REVIEWED');
   const s=JSON.parse(fs.readFileSync(path.join(folder,'R61_FINAL_VOXEL_SPATIAL_EVIDENCE.json')));
   assert.equal(s.humanQualityReview,'NOT_REVIEWED');
   assert.equal(s.modelCriteriaAreNotIndependent,true);

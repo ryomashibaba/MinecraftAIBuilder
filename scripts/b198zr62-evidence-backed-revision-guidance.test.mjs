@@ -7,6 +7,8 @@ import {createHash} from 'node:crypto';
 import {compileDesign} from '../source/ai/b143-building-dsl.mjs';
 import {r32Courtyard} from './b198zr32-synthetic-geometry-fixtures.mjs';
 import {prepareR61Sections} from './b198zr61-final-voxel-section-review.mjs';
+import {analyzeR64UnclaimedFloorConnectivity}
+ from './b198zr64-unclaimed-floor-connectivity.mjs';
 import {prepareR62FutureDesignGuidance,writeR62FutureDesignGuidance}
  from './b198zr62-evidence-backed-revision-guidance.mjs';
 import {CREATION_CASES} from '../source/ai/b198b-benchmark-cases.mjs';
@@ -117,4 +119,46 @@ test('R62 new output only, no overwrite, with human review still pending',()=>{
   assert.throws(()=>writeR62FutureDesignGuidance(opts),
    /NEVER_OVERWRITE_DERIVED_REVIEW/);
  }finally{fs.rmSync(dir,{recursive:true,force:true})}
+});
+
+test('R62 integrates independently reproduced R64 full-building network findings',()=>{
+ const p=r32Courtyard();
+ p.design.elements.push({id:'isolated-high-deck',shape:'box',mode:'add',
+  material:'wood',origin:[2,8,2],size:[5,1,5]});
+ const {raw,compiled,r61}=pack(p);
+ const opts={raw,expectedRawSha256:sha(raw),
+  b143Status:'B143_FINAL_VOXELS_COMPILED_NOT_SPATIAL_OR_HUMAN_PASS',
+  expectedGeometrySha256:compiled.geometrySha256,r61Evidence:r61};
+ const r64Evidence=analyzeR64UnclaimedFloorConnectivity({
+  raw,expectedRawSha256:sha(raw),
+  expectedGeometrySha256:compiled.geometrySha256});
+ const report=prepareR62FutureDesignGuidance({...opts,r64Evidence});
+ assert.equal(report.modelIndependentNetworkEvidenceUsed,true);
+ assert.equal(report.r65NetworkAuditStatus,'CONCEPT_NETWORK_FEEDBACK_DERIVED_NOT_APPLIED');
+ const problem=report.evidenceIssues.find(x=>
+  x.kind==='NO_LOW_LEVEL_CANDIDATE_IN_SOME_COMPONENTS');
+ assert(problem);
+ assert.equal(problem.objectiveFinalVoxelEvidence,true);
+ assert.equal(problem.independentHumanReviewRequired,true);
+ assert.equal(problem.automaticReject,false);
+ assert(report.proposedOnePassGuidance.includes('NO_LOW_LEVEL_CANDIDATE_IN_SOME_COMPONENTS'));
+ assert.equal(report.independentHumanCriteria.length,4);
+ assert(report.independentHumanCriteria.every(x=>x.assessment==='NOT_REVIEWED'));
+ assert.equal(report.approvedForInference,false);
+});
+test('R62 refuses injected R64 summary and does not invent final voxels for B143 HOLD',()=>{
+ const {raw,compiled,r61}=pack(r32Courtyard());
+ const valid=analyzeR64UnclaimedFloorConnectivity({
+  raw,expectedRawSha256:sha(raw),
+  expectedGeometrySha256:compiled.geometrySha256});
+ const forged=structuredClone(valid);
+ forged.metrics.conceptualMotionComponents+=2;
+ const shared={raw,expectedRawSha256:sha(raw),
+  b143Status:'B143_FINAL_VOXELS_COMPILED_NOT_SPATIAL_OR_HUMAN_PASS',
+  expectedGeometrySha256:compiled.geometrySha256,r61Evidence:r61};
+ assert.throws(()=>prepareR62FutureDesignGuidance({
+  ...shared,r64Evidence:forged}),/R64_NUMERICAL_EVIDENCE_TAMPER_OR_STALE/);
+ assert.throws(()=>prepareR62FutureDesignGuidance({
+  raw,expectedRawSha256:sha(raw),b143Status:'HOLD_B143_NOT_COMPILED',
+  r64Evidence:valid}),/NEVER_CLAIM_FINAL_VOXELS_WHEN_B143_HOLD/);
 });
