@@ -141,7 +141,7 @@ test('R58 does not call synthetic baseline the actual historical R48 output',()=
   assert.throws(()=>compareR58FrozenC01({r48Dir:a,r54Dir:b}),
    /R48_REPORTED_HISTORICAL_ORIGINAL_SHA_MISMATCH/);
   assert.notEqual(hash(fs.readFileSync(path.join(a,
-   'R48_ORIGINAL_MODEL_RESPONSE_UNMODIFIED.txt')),
+   'R48_ORIGINAL_MODEL_RESPONSE_UNMODIFIED.txt'))),
    HISTORICAL_R48_ORIGINAL_SHA256);
  }finally{fs.rmSync(root,{recursive:true,force:true})}
 });
