@@ -83,6 +83,10 @@ test('R60 failed B143 only shows R51 envelopes; keeps originals and never scores
   assert(!fs.existsSync(path.join(output,'R54_R51_UNCOMPILED_ENVELOPES','R73_HUMAN_CIRCULATION_OPTIONS.json')));
   assert(!fs.existsSync(path.join(output,'R54_R51_UNCOMPILED_ENVELOPES','R74_HUMAN_COMPARISON_BLANK.json')));
   assert(!fs.existsSync(path.join(output,'R54_R51_UNCOMPILED_ENVELOPES','R75_HUMAN_DRAFT_INTAKE_GUIDE.html')));
+  assert(fs.existsSync(path.join(output,'R54_R51_UNCOMPILED_ENVELOPES','R76_ARCHITECTURE_NEXT_DECISIONS.html')));
+  const heldPriority=JSON.parse(fs.readFileSync(path.join(output,'R54_R51_UNCOMPILED_ENVELOPES','R76_ARCHITECTURE_PRIORITY_REVIEW.json')));
+  assert.equal(heldPriority.status,'HOLD_NO_FINAL_VOXEL_ARCHITECTURE');
+  assert.equal(heldPriority.currentDecisionPackage,'01_SOURCE_TRUTH');
   const next=JSON.parse(fs.readFileSync(path.join(output,'R54_R51_UNCOMPILED_ENVELOPES','R62_NEXT_DESIGN_EVIDENCE.json')));
   assert(next.evidenceIssues.some(x=>x.kind==='STRICT_B143_HOLD'));
   assert(next.evidenceIssues.some(x=>x.kind==='ELEMENT_OUTSIDE_LOCAL_BOUNDS'));
@@ -121,6 +125,10 @@ test('R60 strict B143 PASS creates R7 actual abstract voxel 3D and B198W board',
   assert(fs.existsSync(path.join(folder,'R73_PRESERVE_ARCHITECTURE_ALTERNATIVES.html')));
   assert(fs.existsSync(path.join(folder,'R74_HUMAN_OPTION_REVIEW_SHEET.html')));
   assert(fs.existsSync(path.join(folder,'R75_HUMAN_DRAFT_INTAKE_GUIDE.html')));
+  assert(fs.existsSync(path.join(folder,'R76_ARCHITECTURE_NEXT_DECISIONS.html')));
+  const nextSteps=JSON.parse(fs.readFileSync(path.join(folder,'R76_ARCHITECTURE_PRIORITY_REVIEW.json')));
+  assert.equal(nextSteps.currentDecisionPackage,'02_REAL_PUBLIC_USE');
+  assert.equal(nextSteps.independentHumanQualityApproval,false);
   assert.equal(fs.existsSync(path.join(folder,'R75_HUMAN_REVIEW_OUTSTANDING.json')),false);
   const worksheet=JSON.parse(fs.readFileSync(path.join(folder,
    'R74_HUMAN_COMPARISON_BLANK.json'),'utf8'));
