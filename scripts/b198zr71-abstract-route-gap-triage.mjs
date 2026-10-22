@@ -269,7 +269,7 @@ export function writeR71AbstractRouteGaps({
   '<title>R71 未到達支持床の位置関係</title>'+
   '<style>body{font:15px/1.6 system-ui;max-width:1024px;margin:28px auto;padding:0 20px;color:#273846}table{border-collapse:collapse}th,td{border:1px solid #d0dbe4;padding:7px}.warn{background:#fff2df;padding:12px}</style>'+
   '</head><body><h1>R71 支持床の分断候補と近接位置</h1>'+
-  '<p class="warn">最短の2点間距離は固体・空中を貫通する純粋な格子距離です。ここに橋や階段を作れという指示ではありません。入口候補も実際の入口を保証しません。</p>'+
+  '<p class="warn">最短の2点間距離は固体・空中を貫通する純粋な格子距離です。ここに橋や階段を作れという指示ではありません。入口候補も実際の入口を保証しません。Minecraft実機の移動・当たり判定・入口の妥当性は未検証です。</p>'+
   '<p>原本SHA '+escape(r.originalRawSha256)+'</p>'+
   '<p>状態 '+r.status+' ／低層候補 '+m.originalR70ProvisionalApproachSeeds+
   ' ／未到達支持床 '+(m.unreachableSupportedPositions??'未判定')+
