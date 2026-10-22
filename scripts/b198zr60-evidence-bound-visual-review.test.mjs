@@ -107,6 +107,11 @@ test('R60 failed B143 only shows R51 envelopes; keeps originals and never scores
    'R54_R51_UNCOMPILED_ENVELOPES','R81_ENVELOPE_COLLISIONS_AND_PORTALS.json')));
   assert.equal(heldR81.oldB143Status,'HOLD_B143_NOT_COMPILED');
   assert.equal(heldR81.minecraftWalkingVerified,false);
+  const heldR82=JSON.parse(fs.readFileSync(path.join(output,
+   'R54_R51_UNCOMPILED_ENVELOPES','R82_DECK_TERRACE_PORTAL_GEOMETRY.json')));
+  assert.equal(heldR82.oldB143Status,'HOLD_B143_NOT_COMPILED');
+  assert.equal(heldR82.audit.sampledPortalRays,105);
+  assert.equal(heldR82.noHumanMovementOrAestheticPass,true);
   assert(fs.existsSync(path.join(output,
    'R54_R51_UNCOMPILED_ENVELOPES','R81_TIDAL_LIBRARY_PORTAL_RELIEF_STUDY.obj')));
   assert(fs.existsSync(path.join(output,
@@ -179,6 +184,11 @@ test('R60 strict B143 PASS creates R7 actual abstract voxel 3D and B198W board',
    'R81_ENVELOPE_COLLISIONS_AND_PORTALS.json')));
   assert.equal(portal.r80RecomputedAndAuthenticated,true);
   assert.equal(portal.independentHumanQuality,'NOT_REVIEWED');
+  const inspection=JSON.parse(fs.readFileSync(path.join(folder,
+   'R82_DECK_TERRACE_PORTAL_GEOMETRY.json')));
+  assert.equal(inspection.r81RecomputedAndAuthenticated,true);
+  assert.equal(inspection.noHumanMovementOrAestheticPass,true);
+  assert(fs.existsSync(path.join(folder,'R82_INTERIOR_CLEARANCE_AND_LANDING_REVIEW.html')));
   assert(fs.existsSync(path.join(folder,'R81_ARCHITECTURE_PORTAL_AND_SUPPORT_REVIEW.html')));
   assert(fs.existsSync(path.join(folder,'R80_LIBRARY_ACCESS_AND_STRUCTURE_VIEWS.html')));
   assert(fs.existsSync(path.join(folder,'R79_ARCHITECTURE_FOUR_VIEWS_AND_SECTIONS.html')));
