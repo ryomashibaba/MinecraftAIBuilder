@@ -174,3 +174,22 @@ test('R89 deterministic planar length is integer-root rounded and V8/JIT-indepen
  assert.throws(()=>deterministicR84PlanLength([Infinity,0,0],[0,0,0]),
   /NONFINITE_OR_OUT_OF_RESEARCH_COORDINATE_RANGE/);
 });
+
+test('R90 rank tie-breaking is stable across repeated historic terrace rebuilds',()=>{
+ const a=pack(true);
+ const routes=a.r80Evidence.conceptualRouteNodes;
+ const first=buildR84MultilevelResearch(routes);
+ const picks=JSON.stringify(first.tiers.map(x=>({
+  side:x.side,tier:x.tier,triangleIndex:x.triangleIndex,
+  sourceRoutePoint:x.sourceRoutePoint,padCenter:x.padCenter,
+  connectionReview:x.connectionReview
+ })));
+ for(let k=0;k<15;k++){
+  const n=buildR84MultilevelResearch(routes);
+  assert.equal(JSON.stringify(n.tiers.map(x=>({
+   side:x.side,tier:x.tier,triangleIndex:x.triangleIndex,
+   sourceRoutePoint:x.sourceRoutePoint,padCenter:x.padCenter,
+   connectionReview:x.connectionReview
+  }))),picks);
+ }
+});

@@ -151,12 +151,17 @@ function nearestTierCandidate({side,tier,source,faces}){
  let best=null;
  for(const s of route)for(const {face,i} of matches){
   const point=nearestR82TerracePointXZ(s.point,face);
+  // R90: compare candidates on a coarse, deterministic RESEARCH
+  // score grid, not on the final low bits of native floating-point hypot.
+  // Keep source-order tie-breaking. Precision is not a walking metric.
   const score=point.spatialDistance+.30*Math.abs(point.verticalDifference);
-  if(!best||score<best.score-1e-10||
-   (Math.abs(score-best.score)<1e-10&&
+  const scoreBucket=10*Math.round(point.spatialDistance*1e4)+
+    3*Math.round(Math.abs(point.verticalDifference)*1e4);
+  if(!best||scoreBucket<best.scoreBucket||
+   (scoreBucket===best.scoreBucket&&
     (s.segmentIndex<best.segmentIndex||
      (s.segmentIndex===best.segmentIndex&&i<best.triangleIndex)))){
-   best={score,segmentIndex:s.segmentIndex,segmentFraction:s.t,
+   best={score,scoreBucket,segmentIndex:s.segmentIndex,segmentFraction:s.t,
     routePoint:s.point,triangleIndex:i,triangle:face,
     sourceDistance:point.spatialDistance};
   }
