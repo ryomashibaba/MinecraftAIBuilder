@@ -122,6 +122,14 @@ test('R60 failed B143 only shows R51 envelopes; keeps originals and never scores
   assert.equal(heldR84.oldB143Status,'HOLD_B143_NOT_COMPILED');
   assert.equal(heldR84.tiers.length,7);
   assert.equal(heldR84.minecraftActualWalkingProven,false);
+  const heldR86=JSON.parse(fs.readFileSync(path.join(output,
+   'R54_R51_UNCOMPILED_ENVELOPES','R86_READING_TIER_WIDTH_SCREEN.json')));
+  assert.equal(heldR86.oldB143Status,'HOLD_B143_NOT_COMPILED');
+  assert.equal(heldR86.decisions.length,7);
+  assert.equal(heldR86.actualWalkingCertified,false);
+  assert.equal(heldR86.humanArchitectureQuality,'NOT_REVIEWED');
+  assert(fs.existsSync(path.join(output,
+   'R54_R51_UNCOMPILED_ENVELOPES','R86_READING_DECK_WIDTH_CANDIDATES.obj')));
   assert(fs.existsSync(path.join(output,
    'R54_R51_UNCOMPILED_ENVELOPES','R84_MULTILEVEL_BOOKSTACK_LANDINGS.obj')));
   assert(fs.existsSync(path.join(output,
