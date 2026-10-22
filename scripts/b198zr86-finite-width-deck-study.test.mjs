@@ -115,3 +115,18 @@ test('R86 generates SHA-bound review HTML/OBJ/JSON without overwrite',()=>{
   assert.throws(()=>writeR86DeckReview({...a,destination:dir}),/DO_NOT_OVERWRITE/);
  }finally{fs.rmSync(dir,{recursive:true,force:true})}
 });
+
+test('R86 width catches hull impacts that a thin centerline would miss',()=>{
+ const points=[[-.70,.10,-.18],[-.68,.10,0],[-.64,.12,.17]];
+ const hull=[
+  {kind:'left_outer',a:[-.63,.02,-.1],b:[-.63,.02,.3],c:[-.63,.30,.3]},
+  {kind:'left_outer',a:[-.63,.02,-.1],b:[-.63,.30,.3],c:[-.63,.30,-.1]}
+ ];
+ const narrow=screenR86ResearchRibbon(points,'left',hull,{width:.008});
+ assert.equal(narrow.accepted,true);
+ const wide=screenR86ResearchRibbon(points,'left',hull,{width:.032});
+ assert.equal(wide.accepted,false);
+ assert.equal(wide.triangles.length,0);
+ assert(wide.sampledHullIntersectionCount>0);
+ assert(wide.reasonCodes.includes('WIDTH_OR_OVERHEAD_PROXY_INTERSECTS_HULL'));
+});
