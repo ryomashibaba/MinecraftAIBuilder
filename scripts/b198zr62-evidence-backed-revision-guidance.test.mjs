@@ -513,7 +513,7 @@ test('R62 consumes R73 grounded three-way human directions without selecting or 
  const r72Evidence=assessR72MassVoidGapContext({...base,r70Evidence,r71Evidence});
  const r73Evidence=compareR73CirculationConcepts({...base,r70Evidence,r71Evidence,r72Evidence});
  const report=prepareR62FutureDesignGuidance({
-  ...base,r61Evidence,b143Status:'B143_FINAL_VOXELS_COMPILED_NOT_SPATIAL_OR_HUMAN_PASS',
+  ...base,r61Evidence:r61,b143Status:'B143_FINAL_VOXELS_COMPILED_NOT_SPATIAL_OR_HUMAN_PASS',
   r70Evidence,r71Evidence,r72Evidence,r73Evidence});
  assert.equal(report.r73HumanAlternativesReviewUsed,true);
  assert.equal(report.r73HumanComparisonSiteCount,1);
