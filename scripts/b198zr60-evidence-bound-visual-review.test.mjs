@@ -95,6 +95,12 @@ test('R60 failed B143 only shows R51 envelopes; keeps originals and never scores
    'R54_R51_UNCOMPILED_ENVELOPES','R78_ARCHITECTURAL_SPATIAL_PROGRAM.json')));
   assert.equal(holdPlan.status,'FUTURE_HUMAN_PROGRAM_SPEC_WITH_OLD_B143_HOLD');
   assert.equal(holdPlan.programGraphAudit.geometryOrWalkabilityVerified,false);
+  const holdArt=JSON.parse(fs.readFileSync(path.join(output,
+   'R54_R51_UNCOMPILED_ENVELOPES','R79_ART_STUDY_EVIDENCE.json')));
+  assert.equal(holdArt.oldB143Status,'HOLD_B143_NOT_COMPILED');
+  assert.equal(holdArt.originalArtNotActualQwenOutput,true);
+  assert(fs.existsSync(path.join(output,
+   'R54_R51_UNCOMPILED_ENVELOPES','R79_TIDAL_LIGHT_ART_STUDY.obj')));
   const next=JSON.parse(fs.readFileSync(path.join(output,'R54_R51_UNCOMPILED_ENVELOPES','R62_NEXT_DESIGN_EVIDENCE.json')));
   assert(next.evidenceIssues.some(x=>x.kind==='STRICT_B143_HOLD'));
   assert(next.evidenceIssues.some(x=>x.kind==='ELEMENT_OUTSIDE_LOCAL_BOUNDS'));
@@ -148,6 +154,11 @@ test('R60 strict B143 PASS creates R7 actual abstract voxel 3D and B198W board',
   assert.equal(spatialPlan.programGraphAudit.programDestinationsReachableInPaperGraph,true);
   assert.equal(spatialPlan.programGraphAudit.geometryOrWalkabilityVerified,false);
   assert.equal(spatialPlan.independentHumanQualityPass,false);
+  const volume=JSON.parse(fs.readFileSync(path.join(folder,
+   'R79_ART_STUDY_EVIDENCE.json')));
+  assert.equal(volume.actual3DArtifact,true);
+  assert.equal(volume.readyForConstruction,false);
+  assert(fs.existsSync(path.join(folder,'R79_ARCHITECTURE_FOUR_VIEWS_AND_SECTIONS.html')));
   assert.equal(fs.existsSync(path.join(folder,'R75_HUMAN_REVIEW_OUTSTANDING.json')),false);
   const worksheet=JSON.parse(fs.readFileSync(path.join(folder,
    'R74_HUMAN_COMPARISON_BLANK.json'),'utf8'));
