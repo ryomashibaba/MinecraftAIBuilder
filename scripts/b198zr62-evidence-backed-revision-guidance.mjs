@@ -26,6 +26,8 @@ import {assessR70ProvisionalEntranceRoutes,SCHEMA as R70_SCHEMA}
  from './b198zr70-exterior-approach-route-review.mjs';
 import {inspectR71AbstractRouteGaps,SCHEMA as R71_SCHEMA}
  from './b198zr71-abstract-route-gap-triage.mjs';
+import {assessR72MassVoidGapContext,SCHEMA as R72_SCHEMA}
+ from './b198zr72-mass-void-gap-context.mjs';
 
 export const SCHEMA='minecraftaibuilder-b198zr62-evidence-backed-next-design-guidance-v1';
 const sha=s=>createHash('sha256').update(s).digest('hex');
@@ -77,7 +79,7 @@ export function prepareR62FutureDesignGuidance({
  raw,expectedRawSha256,b143Status,r61Evidence=null,
  expectedGeometrySha256=null,r64Evidence=null,r66Evidence=null,
  r67Evidence=null,r68Evidence=null,r69Evidence=null,
- r70Evidence=null,r71Evidence=null
+ r70Evidence=null,r71Evidence=null,r72Evidence=null
 }={}){
  if(typeof raw!=='string'||!raw||
   Buffer.byteLength(raw)>120000||
@@ -93,7 +95,8 @@ export function prepareR62FutureDesignGuidance({
   assertR61(r61Evidence,expectedRawSha256,expectedGeometrySha256);
  }else if(r61Evidence!==null||expectedGeometrySha256!==null||
   r64Evidence!==null||r66Evidence!==null||r67Evidence!==null||
-  r68Evidence!==null||r69Evidence!==null||r70Evidence!==null||r71Evidence!==null){
+  r68Evidence!==null||r69Evidence!==null||r70Evidence!==null||r71Evidence!==null||
+  r72Evidence!==null){
   fail('NEVER_CLAIM_FINAL_VOXELS_WHEN_B143_HOLD');
  }
  const global=inspectR49GlobalConsistency(raw);
@@ -367,6 +370,48 @@ export function prepareR62FutureDesignGuidance({
     instructions:guidance[finding.kind]});
   }
  }
+ let preservationReview=null;
+ if(r72Evidence!==null){
+  if(r70Evidence===null||r71Evidence===null)
+   fail('R72_REQUIRES_AUTHENTICATED_R70_AND_R71');
+  preservationReview=assessR72MassVoidGapContext({
+   raw,expectedRawSha256,expectedGeometrySha256,
+   r70Evidence,r71Evidence,r72Evidence});
+  if(r72Evidence.schema!==R72_SCHEMA||
+   r72Evidence.originalRawSha256!==expectedRawSha256||
+   r72Evidence.geometrySha256!==expectedGeometrySha256||
+   r72Evidence.r71RecomputedAndAuthenticated!==true||
+   r72Evidence.status!==preservationReview.status||
+   JSON.stringify(r72Evidence.metrics)!==
+    JSON.stringify(preservationReview.metrics)||
+   JSON.stringify(r72Evidence.possibleConcerns)!==
+    JSON.stringify(preservationReview.possibleConcerns))
+   fail('R72_SOURCE_DERIVED_PRESERVATION_REVIEW_MISMATCH');
+  const guidance={
+   ORIGINAL_APPROACH_UNCERTAIN_SKIP_ROUTE_OVERLAY:
+    'The R71 approach seed is unresolved. Do not invent nearest pairs or corridors. Locate the intended entrance and consult the actual original architecture before proposing any structural change.',
+   NEAREST_PAIR_BOXES_NOT_SAFE_PATHS:
+    'R72 identifies existing FINAL voxel mass, air and long open vertical columns inside the smallest geometry-only box between R71 nearest supported points. Use its accurate plan/section drawings to preserve the intended giant atrium, roof composition and program; a box is not a missing bridge or recommended tunnel.'
+  };
+  for(const finding of preservationReview.possibleConcerns){
+   if(!Object.hasOwn(guidance,finding.kind))
+    fail('R72_UNKNOWN_PRESERVATION_CONCERN');
+   issues.push({kind:finding.kind,count:1,
+    basis:'R72_AUTHENTICATED_FINAL_VOXEL_MASS_VOID_SECTION_REVIEW',
+    objectiveFinalVoxelEvidence:true,
+    independentHumanReviewRequired:true,automaticReject:false,
+    measured:finding.measured??null,
+    reviewSites:preservationReview.metrics.sites.slice(0,3).map(x=>({
+     componentRank:x.componentRank,boxMinInclusive:x.boxMinInclusive,
+     boxMaxInclusive:x.boxMaxInclusive,
+     boxSolidVoxelCount:x.boxSolidVoxelCount,
+     boxAirVoxelCount:x.boxAirVoxelCount,
+     localColumnsWithAtLeast4ContinuousAirCells:
+      x.localColumnsWithAtLeast4ContinuousAirCells,
+     isThisAConstructibleCorridor:false})),
+    instructions:guidance[finding.kind]});
+  }
+ }
  const human=c01.criteria.map(x=>({id:x.id,requirement:x.description,
   assessment:'NOT_REVIEWED',
   fulfilledByAnySourceMetric:false,
@@ -416,6 +461,9 @@ export function prepareR62FutureDesignGuidance({
   r71SourceVerifiedRouteGapUsed:gapTriage!==null,
   r71DisconnectedComponentCount:gapTriage?.metrics.unreachableSupportedMotionComponents??null,
   r71HumanReviewCoordinatesOnly:gapTriage!==null,
+  r72PreservationReviewStatus:preservationReview?.status??'NOT_INCLUDED',
+  r72MassAndVoidSectionReviewUsed:preservationReview!==null,
+  r72ReviewedDisconnectedComponents:preservationReview?.metrics.reviewedTopDisconnectedComponents??null,
   proposedOnePassGuidance:instructions,
   generatedGeometry:false,priorModelOriginalRepaired:false,
   realModelImprovementDemonstrated:false,
@@ -427,7 +475,7 @@ export function writeR62FutureDesignGuidance({
  raw,expectedRawSha256,b143Status,r61Evidence=null,
  expectedGeometrySha256=null,r64Evidence=null,r66Evidence=null,
  r67Evidence=null,r68Evidence=null,r69Evidence=null,
- r70Evidence=null,r71Evidence=null,destination
+ r70Evidence=null,r71Evidence=null,r72Evidence=null,destination
 }={}){
  if(typeof destination!=='string'||!path.isAbsolute(destination)||
   !fs.existsSync(destination)||!fs.lstatSync(destination).isDirectory()||

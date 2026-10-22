@@ -21,6 +21,8 @@ import {assessR70ProvisionalEntranceRoutes}
  from './b198zr70-exterior-approach-route-review.mjs';
 import {inspectR71AbstractRouteGaps}
  from './b198zr71-abstract-route-gap-triage.mjs';
+import {assessR72MassVoidGapContext}
+ from './b198zr72-mass-void-gap-context.mjs';
 import {prepareR62FutureDesignGuidance,writeR62FutureDesignGuidance}
  from './b198zr62-evidence-backed-revision-guidance.mjs';
 import {CREATION_CASES} from '../source/ai/b198b-benchmark-cases.mjs';
@@ -439,4 +441,56 @@ test('R62 refuses R71 forged counts or unauthenticated R70 source',()=>{
  assert.throws(()=>prepareR62FutureDesignGuidance({
   raw,expectedRawSha256,b143Status:'HOLD_B143_NOT_COMPILED',
   r71Evidence}),/NEVER_CLAIM_FINAL_VOXELS_WHEN_B143_HOLD/);
+});
+
+test('R62 uses R72 authentic final-voxel mass/air preservation instead of proposing a bridge',()=>{
+ const p=r32Courtyard();
+ p.design.elements=[
+  {id:'low',shape:'box',mode:'add',material:'stone',origin:[0,0,0],size:[12,1,12]},
+  {id:'upper',shape:'box',mode:'add',material:'glass',origin:[0,5,0],size:[12,1,12]}
+ ];
+ const {raw,compiled,r61}=pack(p),
+  expectedRawSha256=sha(raw),expectedGeometrySha256=compiled.geometrySha256;
+ const r70Evidence=assessR70ProvisionalEntranceRoutes({raw,
+  expectedRawSha256,expectedGeometrySha256});
+ const r71Evidence=inspectR71AbstractRouteGaps({raw,
+  expectedRawSha256,expectedGeometrySha256,r70Evidence});
+ const r72Evidence=assessR72MassVoidGapContext({raw,
+  expectedRawSha256,expectedGeometrySha256,r70Evidence,r71Evidence});
+ const report=prepareR62FutureDesignGuidance({
+  raw,expectedRawSha256,expectedGeometrySha256,r61Evidence:r61,
+  b143Status:'B143_FINAL_VOXELS_COMPILED_NOT_SPATIAL_OR_HUMAN_PASS',
+  r70Evidence,r71Evidence,r72Evidence});
+ assert.equal(report.r72MassAndVoidSectionReviewUsed,true);
+ assert.equal(report.r72ReviewedDisconnectedComponents,1);
+ const issue=report.evidenceIssues.find(x=>
+  x.kind==='NEAREST_PAIR_BOXES_NOT_SAFE_PATHS');
+ assert(issue);
+ assert.equal(issue.reviewSites[0].isThisAConstructibleCorridor,false);
+ assert.equal(issue.reviewSites[0].boxSolidVoxelCount,1);
+ assert.equal(issue.automaticReject,false);
+ assert.equal(report.approvedForInference,false);
+ assert(report.independentHumanCriteria.every(x=>x.assessment==='NOT_REVIEWED'));
+});
+test('R62 rejects forged R72 voxel mass and cannot use R72 with no R70+R71 provenance',()=>{
+ const {raw,compiled,r61}=pack(r32Courtyard()),
+  expectedRawSha256=sha(raw),expectedGeometrySha256=compiled.geometrySha256;
+ const r70Evidence=assessR70ProvisionalEntranceRoutes({raw,
+  expectedRawSha256,expectedGeometrySha256});
+ const r71Evidence=inspectR71AbstractRouteGaps({raw,
+  expectedRawSha256,expectedGeometrySha256,r70Evidence});
+ const valid=assessR72MassVoidGapContext({raw,
+  expectedRawSha256,expectedGeometrySha256,r70Evidence,r71Evidence});
+ const altered=structuredClone(valid);
+ altered.metrics.minimumReviewBoxTotalCellCount++;
+ const base={raw,expectedRawSha256,expectedGeometrySha256,r61Evidence:r61,
+  b143Status:'B143_FINAL_VOXELS_COMPILED_NOT_SPATIAL_OR_HUMAN_PASS'};
+ assert.throws(()=>prepareR62FutureDesignGuidance({...base,
+  r70Evidence,r71Evidence,r72Evidence:altered}),
+  /R72_SOURCE_DERIVED_PRESERVATION_REVIEW_MISMATCH/);
+ assert.throws(()=>prepareR62FutureDesignGuidance({...base,
+  r72Evidence:valid}),/R72_REQUIRES_AUTHENTICATED_R70_AND_R71/);
+ assert.throws(()=>prepareR62FutureDesignGuidance({raw,expectedRawSha256,
+  b143Status:'HOLD_B143_NOT_COMPILED',r72Evidence:valid}),
+  /NEVER_CLAIM_FINAL_VOXELS_WHEN_B143_HOLD/);
 });
