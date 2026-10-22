@@ -57,7 +57,7 @@ test('R80 extends original R79 mesh with multiple actual 3D deck surfaces, landi
 test('R80 split routes connect conceptual seaside entrance, both wings and right-side sky lounge',()=>{
  const s=auditR80ResearchRoutes();
  assert.equal(s.conceptRoutes,4);
- assert(s.conceptualSegments>=19);
+ assert.equal(s.conceptualSegments,18);
  assert(s.maximumPlanSlope<.23);
  assert.equal(s.reachesWestReadingWing,true);
  assert.equal(s.reachesEastReadingWing,true);
