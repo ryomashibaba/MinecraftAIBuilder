@@ -453,7 +453,7 @@ export function prepareR62FutureDesignGuidance({
    fail('R74_REQUIRES_AUTHENTICATED_R70_TO_R73');
   blankHumanWorksheet=makeR74HumanWorksheet({
    raw,expectedRawSha256,expectedGeometrySha256,
-   r70Evidence,r71Evidence,r72Evidence,r73Evidence});
+   r70Evidence,r71Evidence,r72Evidence,r73Evidence,r74Evidence});
   if(r74Evidence.schema!==R74_SCHEMA||
    r74Evidence.originalRawSha256!==expectedRawSha256||
    r74Evidence.finalConceptualGeometrySha256!==expectedGeometrySha256||
