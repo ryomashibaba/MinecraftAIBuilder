@@ -80,6 +80,7 @@ test('R60 failed B143 only shows R51 envelopes; keeps originals and never scores
   assert(!fs.existsSync(path.join(output,'R54_R51_UNCOMPILED_ENVELOPES','R70_APPROACH_ROUTE_EVIDENCE.json')));
   assert(!fs.existsSync(path.join(output,'R54_R51_UNCOMPILED_ENVELOPES','R71_ROUTE_GAPS_EVIDENCE.json')));
   assert(!fs.existsSync(path.join(output,'R54_R51_UNCOMPILED_ENVELOPES','R72_MASS_VOID_GAP_CONTEXT.json')));
+  assert(!fs.existsSync(path.join(output,'R54_R51_UNCOMPILED_ENVELOPES','R73_HUMAN_CIRCULATION_OPTIONS.json')));
   const next=JSON.parse(fs.readFileSync(path.join(output,'R54_R51_UNCOMPILED_ENVELOPES','R62_NEXT_DESIGN_EVIDENCE.json')));
   assert(next.evidenceIssues.some(x=>x.kind==='STRICT_B143_HOLD'));
   assert(next.evidenceIssues.some(x=>x.kind==='ELEMENT_OUTSIDE_LOCAL_BOUNDS'));
@@ -115,6 +116,10 @@ test('R60 strict B143 PASS creates R7 actual abstract voxel 3D and B198W board',
   assert(fs.existsSync(path.join(folder,'R70_APPROACH_TO_UPPER_LEVELS_REVIEW.html')));
   assert(fs.existsSync(path.join(folder,'R71_ROUTE_GAP_TRIAGE_REVIEW.html')));
   assert(fs.existsSync(path.join(folder,'R72_ARCHITECTURE_PRESERVATION_SECTIONS.html')));
+  assert(fs.existsSync(path.join(folder,'R73_PRESERVE_ARCHITECTURE_ALTERNATIVES.html')));
+  const alternatives=JSON.parse(fs.readFileSync(path.join(folder,'R73_HUMAN_CIRCULATION_OPTIONS.json')));
+  assert.equal(alternatives.r72RecomputedAndAuthenticated,true);
+  assert.equal(alternatives.allHumanCriteria,'NOT_REVIEWED');
   const preserve=JSON.parse(fs.readFileSync(path.join(folder,'R72_MASS_VOID_GAP_CONTEXT.json')));
   assert.equal(preserve.r71RecomputedAndAuthenticated,true);
   assert.equal(preserve.independentArchitecturalQuality,'NOT_REVIEWED');
@@ -153,6 +158,8 @@ test('R60 strict B143 PASS creates R7 actual abstract voxel 3D and B198W board',
   assert.equal(next.r70IndependentApproachUsed,true);
   assert.equal(next.r71SourceVerifiedRouteGapUsed,true);
   assert.equal(next.r72MassAndVoidSectionReviewUsed,true);
+  assert.equal(next.r73HumanAlternativesReviewUsed,true);
+  assert.notEqual(next.r73ConceptComparisonStatus,'NOT_INCLUDED');
   assert.notEqual(next.r72PreservationReviewStatus,'NOT_INCLUDED');
   assert.equal(next.r71HumanReviewCoordinatesOnly,true);
   assert.notEqual(next.r70ProvisionalRouteStatus,'NOT_INCLUDED');

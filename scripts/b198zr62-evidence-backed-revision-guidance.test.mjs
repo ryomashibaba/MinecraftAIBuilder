@@ -23,6 +23,8 @@ import {inspectR71AbstractRouteGaps}
  from './b198zr71-abstract-route-gap-triage.mjs';
 import {assessR72MassVoidGapContext}
  from './b198zr72-mass-void-gap-context.mjs';
+import {compareR73CirculationConcepts}
+ from './b198zr73-preserve-concept-circulation-comparison.mjs';
 import {prepareR62FutureDesignGuidance,writeR62FutureDesignGuidance}
  from './b198zr62-evidence-backed-revision-guidance.mjs';
 import {CREATION_CASES} from '../source/ai/b198b-benchmark-cases.mjs';
@@ -493,4 +495,57 @@ test('R62 rejects forged R72 voxel mass and cannot use R72 with no R70+R71 prove
  assert.throws(()=>prepareR62FutureDesignGuidance({raw,expectedRawSha256,
   b143Status:'HOLD_B143_NOT_COMPILED',r72Evidence:valid}),
   /NEVER_CLAIM_FINAL_VOXELS_WHEN_B143_HOLD/);
+});
+
+test('R62 consumes R73 grounded three-way human directions without selecting or constructing',()=>{
+ const p=r32Courtyard();
+ p.design.elements=[
+  {id:'ground',shape:'box',mode:'add',origin:[0,0,0],
+   size:[12,1,12],material:'stone'},
+  {id:'upper',shape:'box',mode:'add',origin:[0,5,0],
+   size:[12,1,12],material:'stone'}
+ ];
+ const {raw,compiled,r61}=pack(p);
+ const expectedRawSha256=sha(raw),expectedGeometrySha256=compiled.geometrySha256;
+ const base={raw,expectedRawSha256,expectedGeometrySha256};
+ const r70Evidence=assessR70ProvisionalEntranceRoutes(base);
+ const r71Evidence=inspectR71AbstractRouteGaps({...base,r70Evidence});
+ const r72Evidence=assessR72MassVoidGapContext({...base,r70Evidence,r71Evidence});
+ const r73Evidence=compareR73CirculationConcepts({...base,r70Evidence,r71Evidence,r72Evidence});
+ const report=prepareR62FutureDesignGuidance({
+  ...base,r61Evidence,b143Status:'B143_FINAL_VOXELS_COMPILED_NOT_SPATIAL_OR_HUMAN_PASS',
+  r70Evidence,r71Evidence,r72Evidence,r73Evidence});
+ assert.equal(report.r73HumanAlternativesReviewUsed,true);
+ assert.equal(report.r73HumanComparisonSiteCount,1);
+ const item=report.evidenceIssues.find(x=>x.kind==='R73_COMPARE_UNRANKED_HUMAN_DIRECTIONS');
+ assert(item);
+ assert.equal(item.automaticReject,false);
+ assert.equal(item.alternatives[0].selectedOption,null);
+ assert.deepEqual(item.alternatives[0].availableConceptIds,[
+  'LANDING_LED_VERTICAL_CIRCULATION',
+  'PERIPHERAL_OR_SIDE_WING_CIRCULATION',
+  'INTENTIONAL_SEPARATION_OR_PROGRAM_REVIEW']);
+ assert.equal(report.approvedForInference,false);
+ assert(report.independentHumanCriteria.every(x=>x.assessment==='NOT_REVIEWED'));
+});
+test('R62 rejects forged R73 options, missing prerequisite, and false B143 FINAL',()=>{
+ const {raw,compiled,r61}=pack(r32Courtyard());
+ const expectedRawSha256=sha(raw),expectedGeometrySha256=compiled.geometrySha256,
+  base={raw,expectedRawSha256,expectedGeometrySha256};
+ const r70Evidence=assessR70ProvisionalEntranceRoutes(base);
+ const r71Evidence=inspectR71AbstractRouteGaps({...base,r70Evidence});
+ const r72Evidence=assessR72MassVoidGapContext({...base,r70Evidence,r71Evidence});
+ const good=compareR73CirculationConcepts({...base,r70Evidence,r71Evidence,r72Evidence});
+ const forged=structuredClone(good);
+ forged.sites.push({componentRank:99,families:[]});
+ const options={...base,r61Evidence:r61,
+  b143Status:'B143_FINAL_VOXELS_COMPILED_NOT_SPATIAL_OR_HUMAN_PASS'};
+ assert.throws(()=>prepareR62FutureDesignGuidance({
+  ...options,r70Evidence,r71Evidence,r72Evidence,r73Evidence:forged}),
+  /R73_HUMAN_OPTIONS_EVIDENCE_RECOMPUTE_MISMATCH/);
+ assert.throws(()=>prepareR62FutureDesignGuidance({
+  ...options,r73Evidence:good}),/R73_REQUIRES_AUTHENTICATED_R70_R71_R72/);
+ assert.throws(()=>prepareR62FutureDesignGuidance({
+  raw,expectedRawSha256,b143Status:'HOLD_B143_NOT_COMPILED',
+  r73Evidence:good}),/NEVER_CLAIM_FINAL_VOXELS_WHEN_B143_HOLD/);
 });
