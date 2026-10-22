@@ -22,6 +22,8 @@ import {inspectR68AirContinuity,SCHEMA as R68_SCHEMA}
  from './b198zr68-horizontal-air-continuity.mjs';
 import {analyzeR69VerticalAirAndMotion,SCHEMA as R69_SCHEMA}
  from './b198zr69-vertical-air-vs-motion.mjs';
+import {assessR70ProvisionalEntranceRoutes,SCHEMA as R70_SCHEMA}
+ from './b198zr70-exterior-approach-route-review.mjs';
 
 export const SCHEMA='minecraftaibuilder-b198zr62-evidence-backed-next-design-guidance-v1';
 const sha=s=>createHash('sha256').update(s).digest('hex');
@@ -72,7 +74,8 @@ function assertR61(x,rawHash,geometrySha){
 export function prepareR62FutureDesignGuidance({
  raw,expectedRawSha256,b143Status,r61Evidence=null,
  expectedGeometrySha256=null,r64Evidence=null,r66Evidence=null,
- r67Evidence=null,r68Evidence=null,r69Evidence=null
+ r67Evidence=null,r68Evidence=null,r69Evidence=null,
+ r70Evidence=null
 }={}){
  if(typeof raw!=='string'||!raw||
   Buffer.byteLength(raw)>120000||
@@ -88,7 +91,7 @@ export function prepareR62FutureDesignGuidance({
   assertR61(r61Evidence,expectedRawSha256,expectedGeometrySha256);
  }else if(r61Evidence!==null||expectedGeometrySha256!==null||
   r64Evidence!==null||r66Evidence!==null||r67Evidence!==null||
-  r68Evidence!==null||r69Evidence!==null){
+  r68Evidence!==null||r69Evidence!==null||r70Evidence!==null){
   fail('NEVER_CLAIM_FINAL_VOXELS_WHEN_B143_HOLD');
  }
  const global=inspectR49GlobalConsistency(raw);
@@ -281,6 +284,48 @@ export function prepareR62FutureDesignGuidance({
     instructions:instructions[finding.kind]});
   }
  }
+ let provisionalAccess=null;
+ if(r70Evidence!==null){
+  provisionalAccess=assessR70ProvisionalEntranceRoutes({
+   raw,expectedRawSha256,expectedGeometrySha256});
+  if(r70Evidence.schema!==R70_SCHEMA||
+   r70Evidence.originalRawSha256!==expectedRawSha256||
+   r70Evidence.geometrySha256!==expectedGeometrySha256||
+   r70Evidence.sourceSpatialPlanAndModelEntranceIgnored!==true||
+   JSON.stringify(r70Evidence.metrics)!==
+    JSON.stringify(provisionalAccess.metrics)||
+   JSON.stringify(r70Evidence.possibleConcerns)!==
+    JSON.stringify(provisionalAccess.possibleConcerns))
+   fail('R70_PROVISIONAL_APPROACH_RECOMPUTE_MISMATCH');
+  if(network!==null&&
+   provisionalAccess.metrics.supportedTwoHighStandingPositions!==
+    r64Evidence.metrics.supportedTwoHighStandingPositions)
+   fail('R70_R64_SUPPORTED_POSITION_MISMATCH');
+  if(verticalGraph!==null&&
+   provisionalAccess.metrics.supportedTwoHighStandingPositions!==
+    verticalGraph.metrics.supportedTwoHighStandingPositions)
+   fail('R70_R69_SUPPORTED_POSITION_MISMATCH');
+  const guidance={
+   NO_LOW_LEVEL_EXTERIOR_AIR_RAY_SEEDS:
+    'No low-level supported point has a straight two-high air ray to the local design boundary. This does NOT prove there is no real entrance. Human review must identify street approach, door openings and credible access rather than equating source coordinate edges with outside terrain.',
+   NO_SUPPORTED_STANDING_AIR_ANYWHERE:
+    'No candidate supported two-high standing position exists in final source voxels. Revisit meaningful occupiable floors and interior air while retaining the architectural intent, without asserting Minecraft physical usability.',
+   LOW_LEVEL_CANDIDATES_DO_NOT_REACH_ANY_UPPER_SUPPORT:
+    'In the abstract supported-motion graph none of the high floors can be reached from low-level, boundary-visible air candidates. Check upper public rooms, stairs and continuous landings in human review; preserve the architectural skyline and grand atrium.',
+   SOME_UPPER_SUPPORT_DISCONNECTED_FROM_APPROACH_CANDIDATES:
+    'Some upper supported positions are disconnected from provisional exterior-air low-floor candidates. Inspect independent pavilions, intentional terraces and paths; do not enforce one fixed staircase style or silently eliminate separated buildings.'
+  };
+  for(const finding of provisionalAccess.possibleConcerns){
+   if(!Object.hasOwn(guidance,finding.kind))
+    fail('R70_UNKNOWN_APPROACH_CONCERN');
+   issues.push({kind:finding.kind,count:1,
+    basis:'R70_FINAL_VOXEL_LOW_LEVEL_GRID_EDGE_AIR_PROXY',
+    objectiveFinalVoxelEvidence:true,
+    independentHumanReviewRequired:true,automaticReject:false,
+    measured:finding.measured??null,
+    instructions:guidance[finding.kind]});
+  }
+ }
  const human=c01.criteria.map(x=>({id:x.id,requirement:x.description,
   assessment:'NOT_REVIEWED',
   fulfilledByAnySourceMetric:false,
@@ -322,6 +367,10 @@ export function prepareR62FutureDesignGuidance({
   r69IndependentVerticalGraphUsed:verticalGraph!==null,
   r69SupportedInterlevelEdges:verticalGraph?.metrics.abstractSupportedMotionInterlevelEdges??null,
   r69AirConnectedButTravelSeparatedRegions:verticalGraph?.metrics.largeAirConnectedButSupportedMotionSeparatedRegions??null,
+  r70ProvisionalRouteStatus:provisionalAccess?.status??'NOT_INCLUDED',
+  r70IndependentApproachUsed:provisionalAccess!==null,
+  r70LowLevelApproachCandidates:provisionalAccess?.metrics.lowLevelClearAirRayApproachCandidates??null,
+  r70ReachedHigherSupportPositions:provisionalAccess?.metrics.provisionallyReachedUpperPositions??null,
   proposedOnePassGuidance:instructions,
   generatedGeometry:false,priorModelOriginalRepaired:false,
   realModelImprovementDemonstrated:false,
@@ -332,7 +381,8 @@ export function prepareR62FutureDesignGuidance({
 export function writeR62FutureDesignGuidance({
  raw,expectedRawSha256,b143Status,r61Evidence=null,
  expectedGeometrySha256=null,r64Evidence=null,r66Evidence=null,
- r67Evidence=null,r68Evidence=null,r69Evidence=null,destination
+ r67Evidence=null,r68Evidence=null,r69Evidence=null,
+ r70Evidence=null,destination
 }={}){
  if(typeof destination!=='string'||!path.isAbsolute(destination)||
   !fs.existsSync(destination)||!fs.lstatSync(destination).isDirectory()||
@@ -344,7 +394,8 @@ export function writeR62FutureDesignGuidance({
   fail('NEVER_OVERWRITE_DERIVED_REVIEW');
  const report=prepareR62FutureDesignGuidance({
   raw,expectedRawSha256,b143Status,r61Evidence,expectedGeometrySha256,
-  r64Evidence,r66Evidence,r67Evidence,r68Evidence,r69Evidence});
+  r64Evidence,r66Evidence,r67Evidence,r68Evidence,r69Evidence,
+  r70Evidence});
  const lines=report.evidenceIssues.map(x=>
   '<li><b>'+esc(x.kind)+'</b> ['+esc(x.basis)+']：'+
   esc(x.instructions)+'</li>').join('');

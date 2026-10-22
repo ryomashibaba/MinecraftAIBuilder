@@ -77,6 +77,7 @@ test('R60 failed B143 only shows R51 envelopes; keeps originals and never scores
   assert(!fs.existsSync(path.join(output,'R54_R51_UNCOMPILED_ENVELOPES','R67_SURROUNDING_SPACE_EVIDENCE.json')));
   assert(!fs.existsSync(path.join(output,'R54_R51_UNCOMPILED_ENVELOPES','R68_HORIZONTAL_AIR_TOPOLOGY.json')));
   assert(!fs.existsSync(path.join(output,'R54_R51_UNCOMPILED_ENVELOPES','R69_VERTICAL_AIR_VS_MOTION.json')));
+  assert(!fs.existsSync(path.join(output,'R54_R51_UNCOMPILED_ENVELOPES','R70_APPROACH_ROUTE_EVIDENCE.json')));
   const next=JSON.parse(fs.readFileSync(path.join(output,'R54_R51_UNCOMPILED_ENVELOPES','R62_NEXT_DESIGN_EVIDENCE.json')));
   assert(next.evidenceIssues.some(x=>x.kind==='STRICT_B143_HOLD'));
   assert(next.evidenceIssues.some(x=>x.kind==='ELEMENT_OUTSIDE_LOCAL_BOUNDS'));
@@ -109,6 +110,10 @@ test('R60 strict B143 PASS creates R7 actual abstract voxel 3D and B198W board',
   assert(fs.existsSync(path.join(folder,'R67_SURROUNDING_SPACE_REVIEW.html')));
   assert(fs.existsSync(path.join(folder,'R68_HUMAN_AIR_CONTINUITY_REVIEW.html')));
   assert(fs.existsSync(path.join(folder,'R69_VERTICAL_CIRCULATION_REVIEW.html')));
+  assert(fs.existsSync(path.join(folder,'R70_APPROACH_TO_UPPER_LEVELS_REVIEW.html')));
+  const approach=JSON.parse(fs.readFileSync(path.join(folder,'R70_APPROACH_ROUTE_EVIDENCE.json')));
+  assert.equal(approach.sourceSpatialPlanAndModelEntranceIgnored,true);
+  assert.equal(approach.independentHumanReview,'NOT_REVIEWED');
   const vertical=JSON.parse(fs.readFileSync(path.join(folder,'R69_VERTICAL_AIR_VS_MOTION.json')));
   assert.equal(vertical.modelSpatialPlanIgnored,true);
   assert.equal(vertical.independentHumanReview,'NOT_REVIEWED');
@@ -135,6 +140,8 @@ test('R60 strict B143 PASS creates R7 actual abstract voxel 3D and B198W board',
   assert.equal(next.r67SourceIndependentUsed,true);
   assert.equal(next.r68AirTopologyIndependentUsed,true);
   assert.equal(next.r69IndependentVerticalGraphUsed,true);
+  assert.equal(next.r70IndependentApproachUsed,true);
+  assert.notEqual(next.r70ProvisionalRouteStatus,'NOT_INCLUDED');
   assert.equal(next.r69VerticalGraphStatus,
    'VERTICAL_AIR_AND_SUPPORTED_MOTION_FACTS_ONLY');
   assert.equal(next.r68HorizontalAirStatus,

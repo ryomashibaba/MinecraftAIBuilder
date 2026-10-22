@@ -17,6 +17,8 @@ import {inspectR68AirContinuity}
  from './b198zr68-horizontal-air-continuity.mjs';
 import {analyzeR69VerticalAirAndMotion}
  from './b198zr69-vertical-air-vs-motion.mjs';
+import {assessR70ProvisionalEntranceRoutes}
+ from './b198zr70-exterior-approach-route-review.mjs';
 import {prepareR62FutureDesignGuidance,writeR62FutureDesignGuidance}
  from './b198zr62-evidence-backed-revision-guidance.mjs';
 import {CREATION_CASES} from '../source/ai/b198b-benchmark-cases.mjs';
@@ -345,4 +347,49 @@ test('R62 rejects injected R69 geometry graph data and B143-HOLD source',()=>{
  assert.throws(()=>prepareR62FutureDesignGuidance({raw,expectedRawSha256,
   b143Status:'HOLD_B143_NOT_COMPILED',r69Evidence:good}),
   /NEVER_CLAIM_FINAL_VOXELS_WHEN_B143_HOLD/);
+});
+
+test('R62 R70 upper-floor approach regression remains future human guidance only',()=>{
+ const p=r32Courtyard();
+ p.design.elements=[
+  {id:'floor',shape:'box',mode:'add',material:'stone',origin:[0,0,0],size:[12,1,12]},
+  {id:'upper',shape:'box',mode:'add',material:'stone',origin:[0,5,0],size:[12,1,12]}
+ ];
+ const {raw,compiled,r61}=pack(p),
+  expectedRawSha256=sha(raw),
+  expectedGeometrySha256=compiled.geometrySha256;
+ const r64Evidence=analyzeR64UnclaimedFloorConnectivity({
+  raw,expectedRawSha256,expectedGeometrySha256});
+ const r69Evidence=analyzeR69VerticalAirAndMotion({
+  raw,expectedRawSha256,expectedGeometrySha256});
+ const r70Evidence=assessR70ProvisionalEntranceRoutes({
+  raw,expectedRawSha256,expectedGeometrySha256});
+ const report=prepareR62FutureDesignGuidance({
+  raw,expectedRawSha256,expectedGeometrySha256,
+  b143Status:'B143_FINAL_VOXELS_COMPILED_NOT_SPATIAL_OR_HUMAN_PASS',
+  r61Evidence:r61,r64Evidence,r69Evidence,r70Evidence});
+ assert.equal(report.r70IndependentApproachUsed,true);
+ assert.equal(report.r70ReachedHigherSupportPositions,0);
+ assert(report.evidenceIssues.some(x=>x.kind===
+  'LOW_LEVEL_CANDIDATES_DO_NOT_REACH_ANY_UPPER_SUPPORT'&&
+  x.automaticReject===false));
+ assert.equal(report.freshConsentRequired,true);
+ assert.equal(report.approvedForInference,false);
+ assert(report.independentHumanCriteria.every(x=>x.assessment==='NOT_REVIEWED'));
+});
+test('R62 R70 recomputes numeric evidence and B143 HOLD cannot claim real voxels',()=>{
+ const {raw,compiled,r61}=pack(r32Courtyard());
+ const expectedRawSha256=sha(raw),
+  expectedGeometrySha256=compiled.geometrySha256;
+ const good=assessR70ProvisionalEntranceRoutes({
+  raw,expectedRawSha256,expectedGeometrySha256});
+ const tampered=structuredClone(good);
+ tampered.metrics.lowLevelClearAirRayApproachCandidates++;
+ assert.throws(()=>prepareR62FutureDesignGuidance({
+  raw,expectedRawSha256,expectedGeometrySha256,r61Evidence:r61,
+  b143Status:'B143_FINAL_VOXELS_COMPILED_NOT_SPATIAL_OR_HUMAN_PASS',
+  r70Evidence:tampered}),/R70_PROVISIONAL_APPROACH_RECOMPUTE_MISMATCH/);
+ assert.throws(()=>prepareR62FutureDesignGuidance({
+  raw,expectedRawSha256,b143Status:'HOLD_B143_NOT_COMPILED',
+  r70Evidence:good}),/NEVER_CLAIM_FINAL_VOXELS_WHEN_B143_HOLD/);
 });

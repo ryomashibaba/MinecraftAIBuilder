@@ -19,6 +19,7 @@ import {writeR66OverheadSpace} from './b198zr66-overhead-space-audit.mjs';
 import {writeR67SpatialContainment} from './b198zr67-spatial-containment-audit.mjs';
 import {writeR68AirContinuity} from './b198zr68-horizontal-air-continuity.mjs';
 import {writeR69VerticalAirAndMotion} from './b198zr69-vertical-air-vs-motion.mjs';
+import {writeR70ProvisionalEntranceRoutes} from './b198zr70-exterior-approach-route-review.mjs';
 import {inspectR59Archive,reviewR59AlreadySavedZip}
  from './b198zr59-safe-result-zip-to-review.mjs';
 export const SCHEMA='minecraftaibuilder-b198zr60-visual-human-review-v1';
@@ -45,7 +46,7 @@ function visual(z,evidence,stage){
   fail('R58_B143_VERDICT_DISAGREES');
  const dirname=z.tag+(compiled?'_R7_FINAL_ABSTRACT_3D':'_R51_UNCOMPILED_ENVELOPES');
  const folder=path.join(stage,dirname);
- let kind,link,board=null,sections=null,guidance=null,independentFloor=null,overheadReview=null,containmentReview=null,airTopologyReview=null,verticalReview=null;
+ let kind,link,board=null,sections=null,guidance=null,independentFloor=null,overheadReview=null,containmentReview=null,airTopologyReview=null,verticalReview=null,approachReview=null;
  if(compiled){
   fs.mkdirSync(folder);
   const r=writeR7OfflineVisualReview({
@@ -76,6 +77,10 @@ function visual(z,evidence,stage){
    expectedRawSha256:evidence.rawSha256,
    expectedGeometrySha256:compiled.geometrySha256,destination:folder});
   verticalReview=dirname+'/'+vertical.relativeFile;
+  const approach=writeR70ProvisionalEntranceRoutes({raw,
+   expectedRawSha256:evidence.rawSha256,
+   expectedGeometrySha256:compiled.geometrySha256,destination:folder});
+  approachReview=dirname+'/'+approach.relativeFile;
   kind='STRICT_B143_FINAL_ABSTRACT_VOXELS';
   link=dirname+'/index.html';
   board=dirname+'/B198W_REVIEW_BOARD.html';
@@ -97,11 +102,14 @@ function visual(z,evidence,stage){
   'R68_HORIZONTAL_AIR_TOPOLOGY.json'),'utf8')):null;
  const r69=compiled?JSON.parse(fs.readFileSync(path.join(folder,
   'R69_VERTICAL_AIR_VS_MOTION.json'),'utf8')):null;
+ const r70=compiled?JSON.parse(fs.readFileSync(path.join(folder,
+  'R70_APPROACH_ROUTE_EVIDENCE.json'),'utf8')):null;
  const next=writeR62FutureDesignGuidance({raw,
   expectedRawSha256:evidence.rawSha256,b143Status:evidence.b143.status,
   expectedGeometrySha256:compiled?.geometrySha256??null,
   r61Evidence:r61,r64Evidence:r64,r66Evidence:r66,
-  r67Evidence:r67,r68Evidence:r68,r69Evidence:r69,destination:folder});
+  r67Evidence:r67,r68Evidence:r68,r69Evidence:r69,
+  r70Evidence:r70,destination:folder});
  guidance=dirname+'/'+next.relativeFile;
  return {tag:z.tag,originalRawSha256:evidence.rawSha256,
   evidenceType:kind,relativeViewer:link,relativeHumanBoard:board,
@@ -111,6 +119,7 @@ function visual(z,evidence,stage){
   relativeContainmentReview:containmentReview,
   relativeAirTopologyReview:airTopologyReview,
   relativeVerticalGraphReview:verticalReview,
+  relativeProvisionalApproachReview:approachReview,
   relativeFutureDesignGuidance:guidance,
   independentHumanReview:'NOT_PERFORMED',
   actualMinecraftPlayerWalkingVerified:false};
@@ -183,6 +192,8 @@ export function createR60VisualReview({r54Zip,r48Zip=null,destination}={}){
     '">R68 水平空気の連続性と閉鎖空間</a>':'')+
    (v.relativeVerticalGraphReview?' / <a href="'+v.relativeVerticalGraphReview+
     '">R69 上下空気と支持床動線の比較</a>':'')+
+   (v.relativeProvisionalApproachReview?' / <a href="'+v.relativeProvisionalApproachReview+
+    '">R70 外側の入口候補から上階への仮経路</a>':'')+
    (v.relativeFutureDesignGuidance?' / <a href="'+v.relativeFutureDesignGuidance+
     '">次回設計への根拠</a>':'')+'</li>').join('');
   const html='<!doctype html><html lang="ja"><meta charset="utf-8">'+
