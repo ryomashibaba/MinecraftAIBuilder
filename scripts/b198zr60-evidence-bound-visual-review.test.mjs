@@ -143,6 +143,15 @@ test('R60 failed B143 only shows R51 envelopes; keeps originals and never scores
   assert.equal(heldR89.levels.length,7);
   assert.equal(heldR89.oldB143Status,'HOLD_B143_NOT_COMPILED');
   assert.equal(heldR89.actualHumanWalkabilityCertified,false);
+  const heldR90=JSON.parse(fs.readFileSync(path.join(output,
+   'R54_R51_UNCOMPILED_ENVELOPES','R90_SOURCE_SURFACE_SEAM_EVIDENCE.json')));
+  assert.equal(heldR90.tiers.length,7);
+  assert.equal(heldR90.oldB143Status,'HOLD_B143_NOT_COMPILED');
+  assert.equal(heldR90.fullPhysicalHumanWalkabilityProven,false);
+  assert.equal(heldR90.unresolvedTrue3DSeams,1);
+  assert.equal(heldR90.safety.readiness,'NOT_PREPARED');
+  assert(fs.existsSync(path.join(output,
+   'R54_R51_UNCOMPILED_ENVELOPES','R90_SOURCE_DECK_TO_PAD_3D_SEAMS.obj')));
   assert.equal(heldR89.independentArchitecturalQuality,'NOT_REVIEWED');
   assert.equal(heldR89.safety.readiness,'NOT_PREPARED');
   assert(fs.existsSync(path.join(output,
