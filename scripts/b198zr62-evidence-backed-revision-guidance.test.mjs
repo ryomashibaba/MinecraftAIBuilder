@@ -19,6 +19,8 @@ import {analyzeR69VerticalAirAndMotion}
  from './b198zr69-vertical-air-vs-motion.mjs';
 import {assessR70ProvisionalEntranceRoutes}
  from './b198zr70-exterior-approach-route-review.mjs';
+import {inspectR71AbstractRouteGaps}
+ from './b198zr71-abstract-route-gap-triage.mjs';
 import {prepareR62FutureDesignGuidance,writeR62FutureDesignGuidance}
  from './b198zr62-evidence-backed-revision-guidance.mjs';
 import {CREATION_CASES} from '../source/ai/b198b-benchmark-cases.mjs';
@@ -392,4 +394,49 @@ test('R62 R70 recomputes numeric evidence and B143 HOLD cannot claim real voxels
  assert.throws(()=>prepareR62FutureDesignGuidance({
   raw,expectedRawSha256,b143Status:'HOLD_B143_NOT_COMPILED',
   r70Evidence:good}),/NEVER_CLAIM_FINAL_VOXELS_WHEN_B143_HOLD/);
+});
+
+test('R62 uses R71 disconnected component coordinates only as human review',()=>{
+ const p=r32Courtyard();
+ p.design.elements=[
+  {id:'ground',shape:'box',mode:'add',origin:[0,0,0],size:[12,1,12],material:'stone'},
+  {id:'upper',shape:'box',mode:'add',origin:[0,5,0],size:[12,1,12],material:'wood'}
+ ];
+ const {raw,compiled,r61}=pack(p),expectedRawSha256=sha(raw),
+  expectedGeometrySha256=compiled.geometrySha256;
+ const r70Evidence=assessR70ProvisionalEntranceRoutes({
+  raw,expectedRawSha256,expectedGeometrySha256});
+ const r71Evidence=inspectR71AbstractRouteGaps({
+  raw,expectedRawSha256,expectedGeometrySha256,r70Evidence});
+ const report=prepareR62FutureDesignGuidance({
+  raw,expectedRawSha256,expectedGeometrySha256,r61Evidence:r61,r70Evidence,r71Evidence,
+  b143Status:'B143_FINAL_VOXELS_COMPILED_NOT_SPATIAL_OR_HUMAN_PASS'});
+ assert.equal(report.r71SourceVerifiedRouteGapUsed,true);
+ assert.equal(report.r71DisconnectedComponentCount,1);
+ const gap=report.evidenceIssues.find(x=>x.kind==='R71_DISCONNECTED_SUPPORT_GAPS_TO_INSPECT');
+ assert(gap);
+ assert.deepEqual(gap.exampleDisconnectedComponents[0].closestReachedSupportedLocal.length,3);
+ assert.equal(gap.exampleDisconnectedComponents[0].bridgeGeometryProposed,false);
+ assert.equal(gap.automaticReject,false);
+ assert.equal(report.approvedForInference,false);
+ assert(report.independentHumanCriteria.every(x=>x.assessment==='NOT_REVIEWED'));
+});
+test('R62 refuses R71 forged counts or unauthenticated R70 source',()=>{
+ const {raw,compiled,r61}=pack(r32Courtyard()),
+  expectedRawSha256=sha(raw),expectedGeometrySha256=compiled.geometrySha256;
+ const r70Evidence=assessR70ProvisionalEntranceRoutes({
+  raw,expectedRawSha256,expectedGeometrySha256});
+ const r71Evidence=inspectR71AbstractRouteGaps({
+  raw,expectedRawSha256,expectedGeometrySha256,r70Evidence});
+ const forged=structuredClone(r71Evidence);
+ forged.metrics.originalR70ProvisionalApproachSeeds++;
+ const base={raw,expectedRawSha256,expectedGeometrySha256,r61Evidence:r61,
+  b143Status:'B143_FINAL_VOXELS_COMPILED_NOT_SPATIAL_OR_HUMAN_PASS'};
+ assert.throws(()=>prepareR62FutureDesignGuidance({...base,
+  r70Evidence,r71Evidence:forged}),/R71_GAP_EVIDENCE_RECOMPUTE_MISMATCH/);
+ assert.throws(()=>prepareR62FutureDesignGuidance({...base,
+  r71Evidence}),/R71_REQUIRES_ORIGINAL_R70_REVIEW_EVIDENCE/);
+ assert.throws(()=>prepareR62FutureDesignGuidance({
+  raw,expectedRawSha256,b143Status:'HOLD_B143_NOT_COMPILED',
+  r71Evidence}),/NEVER_CLAIM_FINAL_VOXELS_WHEN_B143_HOLD/);
 });

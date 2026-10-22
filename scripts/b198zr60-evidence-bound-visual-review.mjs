@@ -20,6 +20,7 @@ import {writeR67SpatialContainment} from './b198zr67-spatial-containment-audit.m
 import {writeR68AirContinuity} from './b198zr68-horizontal-air-continuity.mjs';
 import {writeR69VerticalAirAndMotion} from './b198zr69-vertical-air-vs-motion.mjs';
 import {writeR70ProvisionalEntranceRoutes} from './b198zr70-exterior-approach-route-review.mjs';
+import {writeR71AbstractRouteGaps} from './b198zr71-abstract-route-gap-triage.mjs';
 import {inspectR59Archive,reviewR59AlreadySavedZip}
  from './b198zr59-safe-result-zip-to-review.mjs';
 export const SCHEMA='minecraftaibuilder-b198zr60-visual-human-review-v1';
@@ -46,7 +47,7 @@ function visual(z,evidence,stage){
   fail('R58_B143_VERDICT_DISAGREES');
  const dirname=z.tag+(compiled?'_R7_FINAL_ABSTRACT_3D':'_R51_UNCOMPILED_ENVELOPES');
  const folder=path.join(stage,dirname);
- let kind,link,board=null,sections=null,guidance=null,independentFloor=null,overheadReview=null,containmentReview=null,airTopologyReview=null,verticalReview=null,approachReview=null;
+ let kind,link,board=null,sections=null,guidance=null,independentFloor=null,overheadReview=null,containmentReview=null,airTopologyReview=null,verticalReview=null,approachReview=null,routeGapReview=null;
  if(compiled){
   fs.mkdirSync(folder);
   const r=writeR7OfflineVisualReview({
@@ -104,12 +105,21 @@ function visual(z,evidence,stage){
   'R69_VERTICAL_AIR_VS_MOTION.json'),'utf8')):null;
  const r70=compiled?JSON.parse(fs.readFileSync(path.join(folder,
   'R70_APPROACH_ROUTE_EVIDENCE.json'),'utf8')):null;
+ const r71=compiled?writeR71AbstractRouteGaps({raw,
+  expectedRawSha256:evidence.rawSha256,
+  expectedGeometrySha256:compiled.geometrySha256,
+  r70Evidence:JSON.parse(fs.readFileSync(path.join(folder,
+   'R70_APPROACH_ROUTE_EVIDENCE.json'),'utf8')),
+  destination:folder}):null;
+ routeGapReview=r71?dirname+'/'+r71.relativeFile:null;
+ const r71Evidence=compiled?JSON.parse(fs.readFileSync(path.join(folder,
+  'R71_ROUTE_GAPS_EVIDENCE.json'),'utf8')):null;
  const next=writeR62FutureDesignGuidance({raw,
   expectedRawSha256:evidence.rawSha256,b143Status:evidence.b143.status,
   expectedGeometrySha256:compiled?.geometrySha256??null,
   r61Evidence:r61,r64Evidence:r64,r66Evidence:r66,
   r67Evidence:r67,r68Evidence:r68,r69Evidence:r69,
-  r70Evidence:r70,destination:folder});
+  r70Evidence:r70,r71Evidence,destination:folder});
  guidance=dirname+'/'+next.relativeFile;
  return {tag:z.tag,originalRawSha256:evidence.rawSha256,
   evidenceType:kind,relativeViewer:link,relativeHumanBoard:board,
@@ -120,6 +130,7 @@ function visual(z,evidence,stage){
   relativeAirTopologyReview:airTopologyReview,
   relativeVerticalGraphReview:verticalReview,
   relativeProvisionalApproachReview:approachReview,
+  relativeRouteGapReview:routeGapReview,
   relativeFutureDesignGuidance:guidance,
   independentHumanReview:'NOT_PERFORMED',
   actualMinecraftPlayerWalkingVerified:false};
@@ -194,6 +205,8 @@ export function createR60VisualReview({r54Zip,r48Zip=null,destination}={}){
     '">R69 上下空気と支持床動線の比較</a>':'')+
    (v.relativeProvisionalApproachReview?' / <a href="'+v.relativeProvisionalApproachReview+
     '">R70 外側の入口候補から上階への仮経路</a>':'')+
+   (v.relativeRouteGapReview?' / <a href="'+v.relativeRouteGapReview+
+    '">R71 分断領域と近接座標の調査</a>':'')+
    (v.relativeFutureDesignGuidance?' / <a href="'+v.relativeFutureDesignGuidance+
     '">次回設計への根拠</a>':'')+'</li>').join('');
   const html='<!doctype html><html lang="ja"><meta charset="utf-8">'+

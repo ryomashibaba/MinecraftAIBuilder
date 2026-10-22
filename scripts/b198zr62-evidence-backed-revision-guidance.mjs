@@ -24,6 +24,8 @@ import {analyzeR69VerticalAirAndMotion,SCHEMA as R69_SCHEMA}
  from './b198zr69-vertical-air-vs-motion.mjs';
 import {assessR70ProvisionalEntranceRoutes,SCHEMA as R70_SCHEMA}
  from './b198zr70-exterior-approach-route-review.mjs';
+import {inspectR71AbstractRouteGaps,SCHEMA as R71_SCHEMA}
+ from './b198zr71-abstract-route-gap-triage.mjs';
 
 export const SCHEMA='minecraftaibuilder-b198zr62-evidence-backed-next-design-guidance-v1';
 const sha=s=>createHash('sha256').update(s).digest('hex');
@@ -75,7 +77,7 @@ export function prepareR62FutureDesignGuidance({
  raw,expectedRawSha256,b143Status,r61Evidence=null,
  expectedGeometrySha256=null,r64Evidence=null,r66Evidence=null,
  r67Evidence=null,r68Evidence=null,r69Evidence=null,
- r70Evidence=null
+ r70Evidence=null,r71Evidence=null
 }={}){
  if(typeof raw!=='string'||!raw||
   Buffer.byteLength(raw)>120000||
@@ -91,7 +93,7 @@ export function prepareR62FutureDesignGuidance({
   assertR61(r61Evidence,expectedRawSha256,expectedGeometrySha256);
  }else if(r61Evidence!==null||expectedGeometrySha256!==null||
   r64Evidence!==null||r66Evidence!==null||r67Evidence!==null||
-  r68Evidence!==null||r69Evidence!==null||r70Evidence!==null){
+  r68Evidence!==null||r69Evidence!==null||r70Evidence!==null||r71Evidence!==null){
   fail('NEVER_CLAIM_FINAL_VOXELS_WHEN_B143_HOLD');
  }
  const global=inspectR49GlobalConsistency(raw);
@@ -326,6 +328,45 @@ export function prepareR62FutureDesignGuidance({
     instructions:guidance[finding.kind]});
   }
  }
+ let gapTriage=null;
+ if(r71Evidence!==null){
+  if(r70Evidence===null)
+   fail('R71_REQUIRES_ORIGINAL_R70_REVIEW_EVIDENCE');
+  gapTriage=inspectR71AbstractRouteGaps({raw,expectedRawSha256,
+   expectedGeometrySha256,r70Evidence});
+  if(r71Evidence.schema!==R71_SCHEMA||
+   r71Evidence.originalRawSha256!==expectedRawSha256||
+   r71Evidence.geometrySha256!==expectedGeometrySha256||
+   r71Evidence.r70EvidenceRecomputedAndAuthenticated!==true||
+   r71Evidence.status!==gapTriage.status||
+   JSON.stringify(r71Evidence.metrics)!==
+    JSON.stringify(gapTriage.metrics)||
+   JSON.stringify(r71Evidence.possibleConcerns)!==
+    JSON.stringify(gapTriage.possibleConcerns))
+   fail('R71_GAP_EVIDENCE_RECOMPUTE_MISMATCH');
+  if(provisionalAccess!==null&&
+   gapTriage.metrics.originalR70ProvisionalApproachSeeds!==
+    provisionalAccess.metrics.lowLevelClearAirRayApproachCandidates)
+   fail('R71_R70_SEED_COUNT_MISMATCH');
+  const guidance={
+   R71_NO_APPROACH_NO_GAP_PAIR_INFERENCE:
+    'No provisional entrance was inferred: the system must not invent coordinates of a break or claim the building has no real door. Examine the intended street access, ground level and original architecture before proposing changes.',
+   R71_DISCONNECTED_SUPPORT_GAPS_TO_INSPECT:
+    'Review the leading disconnected upper-floor components and their nearby supported voxel pairs in the 3D viewer. Manhattan distance passes through floors, walls and air; it is NOT a buildable path or a missing-stair diagnosis. Confirm which intended rooms need public access, then design genuine landings and circulation without flattening atria, shrinking roofs, or eliminating independent wings.'
+  };
+  for(const finding of gapTriage.possibleConcerns){
+   if(!Object.hasOwn(guidance,finding.kind))
+    fail('R71_UNKNOWN_GAP_CONCERN');
+   issues.push({kind:finding.kind,count:1,
+    basis:'R71_AUTHENTICATED_R70_ABSTRACT_SUPPORTED_COMPONENT_TRIAGE',
+    measured:finding.measured??null,
+    exampleDisconnectedComponents:
+     gapTriage.metrics.topUnreachableComponents.slice(0,3),
+    objectiveFinalVoxelEvidence:true,
+    independentHumanReviewRequired:true,automaticReject:false,
+    instructions:guidance[finding.kind]});
+  }
+ }
  const human=c01.criteria.map(x=>({id:x.id,requirement:x.description,
   assessment:'NOT_REVIEWED',
   fulfilledByAnySourceMetric:false,
@@ -371,6 +412,10 @@ export function prepareR62FutureDesignGuidance({
   r70IndependentApproachUsed:provisionalAccess!==null,
   r70LowLevelApproachCandidates:provisionalAccess?.metrics.lowLevelClearAirRayApproachCandidates??null,
   r70ReachedHigherSupportPositions:provisionalAccess?.metrics.provisionallyReachedUpperPositions??null,
+  r71RouteGapTriageStatus:gapTriage?.status??'NOT_INCLUDED',
+  r71SourceVerifiedRouteGapUsed:gapTriage!==null,
+  r71DisconnectedComponentCount:gapTriage?.metrics.unreachableSupportedMotionComponents??null,
+  r71HumanReviewCoordinatesOnly:gapTriage!==null,
   proposedOnePassGuidance:instructions,
   generatedGeometry:false,priorModelOriginalRepaired:false,
   realModelImprovementDemonstrated:false,
@@ -382,7 +427,7 @@ export function writeR62FutureDesignGuidance({
  raw,expectedRawSha256,b143Status,r61Evidence=null,
  expectedGeometrySha256=null,r64Evidence=null,r66Evidence=null,
  r67Evidence=null,r68Evidence=null,r69Evidence=null,
- r70Evidence=null,destination
+ r70Evidence=null,r71Evidence=null,destination
 }={}){
  if(typeof destination!=='string'||!path.isAbsolute(destination)||
   !fs.existsSync(destination)||!fs.lstatSync(destination).isDirectory()||
@@ -395,7 +440,7 @@ export function writeR62FutureDesignGuidance({
  const report=prepareR62FutureDesignGuidance({
   raw,expectedRawSha256,b143Status,r61Evidence,expectedGeometrySha256,
   r64Evidence,r66Evidence,r67Evidence,r68Evidence,r69Evidence,
-  r70Evidence});
+  r70Evidence,r71Evidence});
  const lines=report.evidenceIssues.map(x=>
   '<li><b>'+esc(x.kind)+'</b> ['+esc(x.basis)+']：'+
   esc(x.instructions)+'</li>').join('');
