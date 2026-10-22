@@ -94,8 +94,27 @@ export function prepareR85RouteReview(args={}){
  const checked=prepareR84MultilevelReview(prior);
  if(!r84Evidence||r84Evidence.schema!==R84_SCHEMA)
   fail('R84_FULL_EVIDENCE_MISMATCH_MISSING_OR_SCHEMA');
- if(JSON.stringify(r84Evidence)!==JSON.stringify(checked))
-  fail('R84_FULL_EVIDENCE_MISMATCH_AT_'+firstEvidenceMismatch(r84Evidence,checked));
+ if(JSON.stringify(r84Evidence)!==JSON.stringify(checked)){
+  const point=firstEvidenceMismatch(r84Evidence,checked);
+  // Diagnostic values here are generated dimensionless test coordinates,
+  // never credentials or user-owned data. Evidence equality stays strict.
+  const match=/^ROOT\\["tiers"\\]\\["(\\d+)"\\]\\["connectionReview"\\]\\["horizontalLength"\\]$/.exec(point);
+  if(match){
+   const oldTier=r84Evidence.tiers[Number(match[1])];
+   const newTier=checked.tiers[Number(match[1])];
+   fail('R84_FULL_EVIDENCE_MISMATCH_AT_'+point+
+    '_WITNESS_'+JSON.stringify({
+      previousLength:oldTier.connectionReview.horizontalLength,
+      recomputedLength:newTier.connectionReview.horizontalLength,
+      previousStart:oldTier.sourceRoutePoint,
+      recomputedStart:newTier.sourceRoutePoint,
+      previousPad:oldTier.padCenter,recomputedPad:newTier.padCenter,
+      previousTriangle:oldTier.triangleIndex,
+      recomputedTriangle:newTier.triangleIndex
+    }));
+  }
+  fail('R84_FULL_EVIDENCE_MISMATCH_AT_'+point);
+ }
  if(hash(args.raw)!==args.expectedRawSha256)fail('RAW_SHA_MISMATCH');
  const out=studyR85RouteAlternatives(args.r80Evidence.conceptualRouteNodes);
  const {faces,...details}=out;
