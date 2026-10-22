@@ -488,7 +488,7 @@ export function writeR62FutureDesignGuidance({
  const report=prepareR62FutureDesignGuidance({
   raw,expectedRawSha256,b143Status,r61Evidence,expectedGeometrySha256,
   r64Evidence,r66Evidence,r67Evidence,r68Evidence,r69Evidence,
-  r70Evidence,r71Evidence});
+  r70Evidence,r71Evidence,r72Evidence});
  const lines=report.evidenceIssues.map(x=>
   '<li><b>'+esc(x.kind)+'</b> ['+esc(x.basis)+']：'+
   esc(x.instructions)+'</li>').join('');

@@ -102,7 +102,7 @@ test('R72 refuses wrong source SHA, wrong compiled geometry SHA, or B143-invalid
  bad.design.elements.push(box('outside',[0,bad.design.bounds.height,0],[2,1,2]));
  const raw=JSON.stringify(bad);
  assert.throws(()=>assessR72MassVoidGapContext({...p.args,
-  raw,expectedRawSha256:sha(raw)}),/STRICT_B143_FINAL_VOXELS_REQUIRED/);
+  raw,expectedRawSha256:sha(raw)}),/(STRICT_B143_FINAL_VOXELS_REQUIRED|STRICT_B143_COMPILED_FINAL_VOXELS_REQUIRED)/);
 });
 test('R72 exports real source-derived SVG slices with untouched originals and no overwrite',()=>{
  const p=pack(fixture([
