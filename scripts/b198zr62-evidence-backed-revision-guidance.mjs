@@ -30,6 +30,8 @@ import {assessR72MassVoidGapContext,SCHEMA as R72_SCHEMA}
  from './b198zr72-mass-void-gap-context.mjs';
 import {compareR73CirculationConcepts,SCHEMA as R73_SCHEMA}
  from './b198zr73-preserve-concept-circulation-comparison.mjs';
+import {makeR74HumanWorksheet,SCHEMA as R74_SCHEMA}
+ from './b198zr74-human-option-review-worksheet.mjs';
 
 export const SCHEMA='minecraftaibuilder-b198zr62-evidence-backed-next-design-guidance-v1';
 const sha=s=>createHash('sha256').update(s).digest('hex');
@@ -82,7 +84,7 @@ export function prepareR62FutureDesignGuidance({
  expectedGeometrySha256=null,r64Evidence=null,r66Evidence=null,
  r67Evidence=null,r68Evidence=null,r69Evidence=null,
  r70Evidence=null,r71Evidence=null,r72Evidence=null,
- r73Evidence=null
+ r73Evidence=null,r74Evidence=null
 }={}){
  if(typeof raw!=='string'||!raw||
   Buffer.byteLength(raw)>120000||
@@ -99,7 +101,7 @@ export function prepareR62FutureDesignGuidance({
  }else if(r61Evidence!==null||expectedGeometrySha256!==null||
   r64Evidence!==null||r66Evidence!==null||r67Evidence!==null||
   r68Evidence!==null||r69Evidence!==null||r70Evidence!==null||r71Evidence!==null||
-  r72Evidence!==null||r73Evidence!==null){
+  r72Evidence!==null||r73Evidence!==null||r74Evidence!==null){
   fail('NEVER_CLAIM_FINAL_VOXELS_WHEN_B143_HOLD');
  }
  const global=inspectR49GlobalConsistency(raw);
@@ -379,7 +381,7 @@ export function prepareR62FutureDesignGuidance({
    fail('R72_REQUIRES_AUTHENTICATED_R70_AND_R71');
   preservationReview=assessR72MassVoidGapContext({
    raw,expectedRawSha256,expectedGeometrySha256,
-   r70Evidence,r71Evidence,r72Evidence,r73Evidence});
+   r70Evidence,r71Evidence,r72Evidence,r73Evidence,r74Evidence});
   if(r72Evidence.schema!==R72_SCHEMA||
    r72Evidence.originalRawSha256!==expectedRawSha256||
    r72Evidence.geometrySha256!==expectedGeometrySha256||
@@ -444,6 +446,26 @@ export function prepareR62FutureDesignGuidance({
      applicabilityNotYetProven:true,selectedOption:null})),
     instructions:'Do not automatically bridge nearest supported cells. Compare meaningful landing-led circulation, perimeter/side-wing detours, and preserving intentional independent wings against original user requirements, source-exact mass/void sections, real constructibility and visual quality. No preferred route or build instructions exist.'});
  }
+ let blankHumanWorksheet=null;
+ if(r74Evidence!==null){
+  if(r70Evidence===null||r71Evidence===null||
+   r72Evidence===null||r73Evidence===null)
+   fail('R74_REQUIRES_AUTHENTICATED_R70_TO_R73');
+  blankHumanWorksheet=makeR74HumanWorksheet({
+   raw,expectedRawSha256,expectedGeometrySha256,
+   r70Evidence,r71Evidence,r72Evidence,r73Evidence});
+  if(r74Evidence.schema!==R74_SCHEMA||
+   r74Evidence.originalRawSha256!==expectedRawSha256||
+   r74Evidence.finalConceptualGeometrySha256!==expectedGeometrySha256||
+   r74Evidence.formStatus!=='UNFILLED_HUMAN_WORKSHEET'||
+   r74Evidence.qualityCertification!=='NOT_PERFORMED'||
+   r74Evidence.independentHumanAssessment!=='NOT_REVIEWED'||
+   JSON.stringify(r74Evidence.assessments)!==
+    JSON.stringify(blankHumanWorksheet.assessments)||
+   JSON.stringify(r74Evidence.axes)!==
+    JSON.stringify(blankHumanWorksheet.axes))
+   fail('R74_UNFILLED_HUMAN_WORKSHEET_TAMPERED');
+ }
  const human=c01.criteria.map(x=>({id:x.id,requirement:x.description,
   assessment:'NOT_REVIEWED',
   fulfilledByAnySourceMetric:false,
@@ -499,6 +521,9 @@ export function prepareR62FutureDesignGuidance({
   r73ConceptComparisonStatus:alternativeReview?.status??'NOT_INCLUDED',
   r73HumanAlternativesReviewUsed:alternativeReview!==null,
   r73HumanComparisonSiteCount:alternativeReview?.siteCount??null,
+  r74HumanWorksheetGenerated:blankHumanWorksheet!==null,
+  r74HumanWorksheetSiteCount:blankHumanWorksheet?.assessments.length??null,
+  r74IndependentReviewStatus:'NOT_REVIEWED',
   proposedOnePassGuidance:instructions,
   generatedGeometry:false,priorModelOriginalRepaired:false,
   realModelImprovementDemonstrated:false,
@@ -511,7 +536,7 @@ export function writeR62FutureDesignGuidance({
  expectedGeometrySha256=null,r64Evidence=null,r66Evidence=null,
  r67Evidence=null,r68Evidence=null,r69Evidence=null,
  r70Evidence=null,r71Evidence=null,r72Evidence=null,
- r73Evidence=null,destination
+ r73Evidence=null,r74Evidence=null,destination
 }={}){
  if(typeof destination!=='string'||!path.isAbsolute(destination)||
   !fs.existsSync(destination)||!fs.lstatSync(destination).isDirectory()||

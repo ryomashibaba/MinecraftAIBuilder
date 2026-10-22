@@ -25,6 +25,8 @@ import {assessR72MassVoidGapContext}
  from './b198zr72-mass-void-gap-context.mjs';
 import {compareR73CirculationConcepts}
  from './b198zr73-preserve-concept-circulation-comparison.mjs';
+import {makeR74HumanWorksheet}
+ from './b198zr74-human-option-review-worksheet.mjs';
 import {prepareR62FutureDesignGuidance,writeR62FutureDesignGuidance}
  from './b198zr62-evidence-backed-revision-guidance.mjs';
 import {CREATION_CASES} from '../source/ai/b198b-benchmark-cases.mjs';
@@ -548,4 +550,58 @@ test('R62 rejects forged R73 options, missing prerequisite, and false B143 FINAL
  assert.throws(()=>prepareR62FutureDesignGuidance({
   raw,expectedRawSha256,b143Status:'HOLD_B143_NOT_COMPILED',
   r73Evidence:good}),/NEVER_CLAIM_FINAL_VOXELS_WHEN_B143_HOLD/);
+});
+
+test('R62 includes only verified blank human R74 worksheet, never quality PASS',()=>{
+ const p=r32Courtyard();
+ p.design.elements=[
+  {id:'ground',shape:'box',mode:'add',material:'stone',
+   origin:[0,0,0],size:[12,1,12]},
+  {id:'upper',shape:'box',mode:'add',material:'stone',
+   origin:[0,5,0],size:[12,1,12]}
+ ];
+ const {raw,compiled,r61}=pack(p);
+ const base={raw,expectedRawSha256:sha(raw),
+  expectedGeometrySha256:compiled.geometrySha256};
+ const r70Evidence=assessR70ProvisionalEntranceRoutes(base);
+ const r71Evidence=inspectR71AbstractRouteGaps({...base,r70Evidence});
+ const r72Evidence=assessR72MassVoidGapContext({...base,r70Evidence,r71Evidence});
+ const r73Evidence=compareR73CirculationConcepts({
+  ...base,r70Evidence,r71Evidence,r72Evidence});
+ const r74Evidence=makeR74HumanWorksheet({
+  ...base,r70Evidence,r71Evidence,r72Evidence,r73Evidence});
+ const report=prepareR62FutureDesignGuidance({
+  ...base,b143Status:'B143_FINAL_VOXELS_COMPILED_NOT_SPATIAL_OR_HUMAN_PASS',
+  r61Evidence:r61,r70Evidence,r71Evidence,r72Evidence,r73Evidence,r74Evidence});
+ assert.equal(report.r74HumanWorksheetGenerated,true);
+ assert.equal(report.r74HumanWorksheetSiteCount,1);
+ assert.equal(report.r74IndependentReviewStatus,'NOT_REVIEWED');
+ assert.equal(report.realModelImprovementDemonstrated,false);
+ assert.equal(report.approvedForInference,false);
+ assert(report.independentHumanCriteria.every(x=>x.assessment==='NOT_REVIEWED'));
+ assert(report.safety.gates.every(x=>x==='BLOCKED'));
+});
+test('R62 blocks human worksheet tampering and missing R70-R73 chain',()=>{
+ const {raw,compiled,r61}=pack(r32Courtyard());
+ const base={raw,expectedRawSha256:sha(raw),
+  expectedGeometrySha256:compiled.geometrySha256};
+ const r70Evidence=assessR70ProvisionalEntranceRoutes(base);
+ const r71Evidence=inspectR71AbstractRouteGaps({...base,r70Evidence});
+ const r72Evidence=assessR72MassVoidGapContext({...base,r70Evidence,r71Evidence});
+ const r73Evidence=compareR73CirculationConcepts({
+  ...base,r70Evidence,r71Evidence,r72Evidence});
+ const good=makeR74HumanWorksheet({
+  ...base,r70Evidence,r71Evidence,r72Evidence,r73Evidence});
+ const forged=structuredClone(good);
+ forged.qualityCertification='PASS';
+ const args={...base,r61Evidence:r61,
+  b143Status:'B143_FINAL_VOXELS_COMPILED_NOT_SPATIAL_OR_HUMAN_PASS'};
+ assert.throws(()=>prepareR62FutureDesignGuidance({
+  ...args,r70Evidence,r71Evidence,r72Evidence,r73Evidence,r74Evidence:forged}),
+  /R74_UNFILLED_HUMAN_WORKSHEET_TAMPERED/);
+ assert.throws(()=>prepareR62FutureDesignGuidance({
+  ...args,r74Evidence:good}),/R74_REQUIRES_AUTHENTICATED_R70_TO_R73/);
+ assert.throws(()=>prepareR62FutureDesignGuidance({
+  raw,expectedRawSha256:sha(raw),b143Status:'HOLD_B143_NOT_COMPILED',
+  r74Evidence:good}),/NEVER_CLAIM_FINAL_VOXELS_WHEN_B143_HOLD/);
 });
