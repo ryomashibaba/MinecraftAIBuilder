@@ -73,6 +73,86 @@ export function studyR85RouteAlternatives(nodes){
   tentativeDetourCount:rows.filter(x=>x.alternatives.some(p=>p.tentativeCenterlineOnly)).length,
   massAndAtriumUnmodified:true,continuousWalkingProof:false};
 }
+// Diagnostic only: strict equality is unchanged. Do not log source values.
+function firstEvidenceMismatch(a,b,p='
+ const {r84Evidence,...prior}=args;
+ const checked=prepareR84MultilevelReview(prior);
+ if(!r84Evidence||r84Evidence.schema!==R84_SCHEMA)
+  fail('R84_FULL_EVIDENCE_MISMATCH_MISSING_OR_SCHEMA');
+ if(JSON.stringify(r84Evidence)!==JSON.stringify(checked))
+  fail('R84_FULL_EVIDENCE_MISMATCH_AT_'+firstEvidenceMismatch(r84Evidence,checked));
+ if(hash(args.raw)!==args.expectedRawSha256)fail('RAW_SHA_MISMATCH');
+ const out=studyR85RouteAlternatives(args.r80Evidence.conceptualRouteNodes);
+ const {faces,...details}=out;
+ return {schema:SCHEMA,originalRawSha256:args.expectedRawSha256,
+  oldB143Status:checked.oldB143Status,authenticatedR84:true,...details,
+  actualModelCalls:0,worldWrites:0,humanArtReview:'NOT_REVIEWED',
+  certifiedTravelPaths:0,constructionApproved:false,
+  sourceUnmodified:true,safety:safe()};
+}
+function obj(study){
+ const rows=['# R85 original R84 triangles plus non-walkable proposal polylines'];
+ let n=1;
+ for(const f of study.faces){
+  for(const v of [f.a,f.b,f.c])rows.push('v '+v.join(' '));
+  rows.push('f '+n+' '+(n+1)+' '+(n+2));n+=3;
+ }
+ for(const t of study.rows){
+  if(!t.alternatives.length)continue;
+  rows.push('g R85_'+t.side+'_tier'+t.tier+'_NOT_A_DECK');
+  for(const v of t.alternatives[0].points)rows.push('v '+v.join(' '));
+  rows.push('l '+n+' '+(n+1)+' '+(n+2));n+=3;
+ }
+ return rows.join('\n')+'\n';
+}
+export function writeR85RouteReview({destination,...args}={}){
+ if(typeof destination!=='string'||!path.isAbsolute(destination)||
+  !fs.existsSync(destination)||!fs.lstatSync(destination).isDirectory()||
+  fs.lstatSync(destination).isSymbolicLink())
+  fail('SAFE_EXISTING_DESTINATION_REQUIRED');
+ const j=path.join(destination,'R85_SEVEN_TIER_ROUTE_ALTERNATIVES.json'),
+  h=path.join(destination,'R85_SEVEN_TIER_ROUTE_REVIEW.html'),
+  o=path.join(destination,'R85_TENTATIVE_REVIEW_CENTERLINES.obj');
+ if([j,h,o].some(x=>fs.existsSync(x)))fail('DO_NOT_OVERWRITE');
+ const proof=prepareR85RouteReview(args);
+ const st=studyR85RouteAlternatives(args.r80Evidence.conceptualRouteNodes);
+ const body=proof.rows.map(t=>'<tr><td>'+esc(t.side)+'</td><td>'+t.tier+
+  '</td><td>'+(t.existingResearchConnector?'暫定研究連絡あり':'連絡なし')+
+  '</td><td>'+esc(t.alternatives[0]?.kind||'—')+'</td><td>'+
+  esc(t.alternatives[0]?.reasons.join('・')||'人体の通行性は未検証')+
+  '</td></tr>').join('');
+ const html='<!doctype html><html lang="ja"><meta charset="utf-8">'+
+  '<meta http-equiv="Content-Security-Policy" content="default-src &#39;none&#39;; style-src &#39;unsafe-inline&#39;">'+
+  '<title>R85 7層への翼側動線検討</title><style>body{font:15px/1.7 system-ui;max-width:1050px;margin:24px auto;padding:0 18px}table{border-collapse:collapse;width:100%}td,th{border:1px solid #abc;padding:8px}</style>'+
+  '<h1>R85 全7層の未接続箇所と3種類の翼側経路比較</h1>'+
+  '<p>中央アトリウム・元の三角形は不変更。経路は正規化単位の中心線のみ。人体幅、床の支持、屋根クリアランス、全衝突、実Minecraft歩行、美術品質は未認証です。</p>'+
+  '<p>未接続の研究層：'+proof.unresolvedTierCount+
+  '、中心線の限定条件を通過する別案のある層：'+proof.tentativeDetourCount+
+  '（建築品質PASSではありません）。</p>'+
+  '<table><tr><th>翼</th><th>層</th><th>R84</th><th>別案候補</th><th>保留要因</th></tr>'+body+'</table>'+
+  '<p><a href="R85_TENTATIVE_REVIEW_CENTERLINES.obj">非歩行研究用ライン付きOBJ</a> ／'+
+  '<a href="R84_MULTILEVEL_LIBRARY_CIRCULATION_REVIEW.html">R84の3D資料</a></p>'+
+  '<p>SHA '+esc(proof.originalRawSha256)+' / NOT_PREPARED / 9 BLOCKED / 推論0 / World接続0</p>';
+ fs.writeFileSync(j,JSON.stringify(proof,null,2)+'\n',{flag:'wx'});
+ fs.writeFileSync(o,obj(st),{flag:'wx'});
+ fs.writeFileSync(h,html,{flag:'wx'});
+ return {relativeFile:path.basename(h),tierCount:proof.rows.length,modelCalls:0,worldWrites:0};
+}
+,depth=0){
+ if(JSON.stringify(a)===JSON.stringify(b))return null;
+ if(depth>40)return p+'.MAX_DEPTH';
+ if(a===null||b===null||typeof a!=='object'||typeof b!=='object')
+  return p;
+ if(Array.isArray(a)!==Array.isArray(b))return p+'.TYPE';
+ const x=Object.keys(a),y=Object.keys(b);
+ if(x.length!==y.length)return p+'.KEY_COUNT';
+ for(let i=0;i<x.length;i++)if(x[i]!==y[i])return p+'.KEY_ORDER_'+i;
+ for(const key of x){
+  if(JSON.stringify(a[key])!==JSON.stringify(b[key]))
+   return firstEvidenceMismatch(a[key],b[key],p+'['+JSON.stringify(key)+']',depth+1);
+ }
+ return p+'.SERIALIZATION';
+}
 export function prepareR85RouteReview(args={}){
  const {r84Evidence,...prior}=args;
  const checked=prepareR84MultilevelReview(prior);
