@@ -128,6 +128,14 @@ test('R60 failed B143 only shows R51 envelopes; keeps originals and never scores
   assert.equal(heldR86.decisions.length,7);
   assert.equal(heldR86.actualWalkingCertified,false);
   assert.equal(heldR86.humanArchitectureQuality,'NOT_REVIEWED');
+  const heldR87=JSON.parse(fs.readFileSync(path.join(output,
+   'R54_R51_UNCOMPILED_ENVELOPES','R87_SEVEN_READING_ROOMS_ARCHITECTURAL_EVIDENCE.json')));
+  assert.equal(heldR87.createdProgramAreaCount,7);
+  assert.equal(heldR87.fullFloorStairEntryLoungeTravelProven,false);
+  assert.equal(heldR87.humanArchitecturalCriteria,'NOT_REVIEWED');
+  assert.equal(heldR87.safety.readiness,'NOT_PREPARED');
+  assert(fs.existsSync(path.join(output,
+   'R54_R51_UNCOMPILED_ENVELOPES','R87_SAIL_COVE_LANTERN_GALLERY_ARCHITECTURE.obj')));
   assert(fs.existsSync(path.join(output,
    'R54_R51_UNCOMPILED_ENVELOPES','R86_READING_DECK_WIDTH_CANDIDATES.obj')));
   assert(fs.existsSync(path.join(output,
