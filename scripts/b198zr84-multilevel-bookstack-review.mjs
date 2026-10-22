@@ -21,6 +21,36 @@ const mix=(a,b,t)=>a.map((v,i)=>v+(b[i]-v)*t);
 const norm=p=>Math.hypot(...p);
 const difference=(a,b)=>a.map((v,i)=>v-b[i]);
 const gap=(a,b)=>norm(difference(a,b));
+
+/* R89: for persisted 7-decimal X/Z coordinates, measure planar distance
+ * in integer 1e-7 units. A BigInt squared-distance and integer square root
+ * make half-unit rounding independent of Math.hypot implementation/JIT.
+ * This is a RESEARCH-COMPARISON number, never a physical measurement.
+ */
+const R89_SCALE=1e7;
+const integerCoordinate=v=>{
+ if(!Number.isFinite(v)||Math.abs(v)>100000)
+  fail('NONFINITE_OR_OUT_OF_RESEARCH_COORDINATE_RANGE');
+ return BigInt(Math.round(v*R89_SCALE));
+};
+function integerSqrt(n){
+ if(n<0n)fail('NEGATIVE_INTEGER_SQUARED_DISTANCE');
+ if(n<2n)return n;
+ let x=n,y=(x+1n)>>1n;
+ while(y<x){x=y;y=(x+n/x)>>1n}
+ return x;
+}
+export function deterministicR84PlanLength(a,b){
+ if(!Array.isArray(a)||!Array.isArray(b)||a.length!==3||b.length!==3)
+  fail('FINITE_3D_PLANAR_ENDPOINTS_REQUIRED');
+ const dx=integerCoordinate(b[0])-integerCoordinate(a[0]);
+ const dz=integerCoordinate(b[2])-integerCoordinate(a[2]);
+ const n=dx*dx+dz*dz;
+ const floor=integerSqrt(n);
+ const rounded=n-floor*floor>floor?floor+1n:floor;
+ return Number(rounded)/R89_SCALE;
+}
+
 const escape=x=>String(x).replaceAll('&','&amp;').replaceAll('<','&lt;')
  .replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
 const safety=()=>({readiness:'NOT_PREPARED',constructionApproved:false,
@@ -79,7 +109,7 @@ const envelopes=new Set(['left_outer','left_inner','left_crown',
  'left_end','right_outer','right_inner','right_crown','right_end',
  'sky_lounge_glass']);
 function screenLink(a,b,side,faces){
- const dx=b[0]-a[0],dz=b[2]-a[2],run=Math.hypot(dx,dz);
+ const run=deterministicR84PlanLength(a,b);
  let crossedVoid=false,crossedWrongWing=false;
  const pts=[];
  for(let i=0;i<=32;i++){
@@ -103,7 +133,7 @@ function screenLink(a,b,side,faces){
  if(slope===null||slope>.24)rejected.push('LOCAL_RAMP_GRADE_UNRESOLVED');
  if(crossedVoid||crossedWrongWing)rejected.push('PRESERVED_CENTRAL_ATRIUM_OR_WING_BOUNDARY');
  if(surfaceIntersections)rejected.push('EXTERIOR_OR_ROOF_MESH_INTERSECTION');
- return {horizontalLength:R(run),verticalRise:R(dy),
+ return {horizontalLength:run,verticalRise:R(dy),
   normalizedSlope:slope===null?null:R(slope),
   centerlineSamples:pts.length,surfaceIntersections,
   crossedVoid,crossedWrongWing,intersectedKinds:[...kinds],

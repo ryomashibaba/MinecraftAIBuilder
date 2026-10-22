@@ -17,6 +17,7 @@ import {prepareR81ArchitectureReview} from './b198zr81-envelope-portal-connectio
 import {prepareR82GeometryAudit} from './b198zr82-mesh-clearance-and-terrace-audit.mjs';
 import {prepareR83ArchitecturalLandingReview} from './b198zr83-wing-terrace-landing-prototypes.mjs';
 import {buildR84MultilevelResearch,prepareR84MultilevelReview,
+ deterministicR84PlanLength,
  writeR84MultilevelReview}
  from './b198zr84-multilevel-bookstack-review.mjs';
 const sha=s=>createHash('sha256').update(s).digest('hex');
@@ -151,4 +152,25 @@ test('R84 generates full 3D OBJ, four mesh-based views, seven-tier section and i
   assert.throws(()=>writeR84MultilevelReview({...a,destination:dir}),
    /DO_NOT_OVERWRITE/);
  }finally{fs.rmSync(dir,{recursive:true,force:true})}
+});
+
+
+test('R89 deterministic planar length is integer-root rounded and V8/JIT-independent',()=>{
+ assert.equal(deterministicR84PlanLength([0,0,0],[.03,0,.04]),.05);
+ assert.equal(deterministicR84PlanLength([1,0,1],[1,0,1]),0);
+ assert.equal(deterministicR84PlanLength([.5,.20,-.2],[.6,.1,-.2]),.1);
+ const points=[
+  [[-.53,.1625,.3525],[-.5246561,.1534512,.370303]],
+  [[-.68,.29,0],[-.5463524,.3118908,.0284848]],
+  [[-.53,.38,-.72],[-.5523288,.4110521,-.7406061]]
+ ];
+ for(const [a,b] of points){
+  const expected=deterministicR84PlanLength(a,b);
+  for(let i=0;i<3000;i++){
+   assert.equal(deterministicR84PlanLength(a,b),expected);
+   assert.equal(deterministicR84PlanLength(b,a),expected);
+  }
+ }
+ assert.throws(()=>deterministicR84PlanLength([Infinity,0,0],[0,0,0]),
+  /NONFINITE_OR_OUT_OF_RESEARCH_COORDINATE_RANGE/);
 });
