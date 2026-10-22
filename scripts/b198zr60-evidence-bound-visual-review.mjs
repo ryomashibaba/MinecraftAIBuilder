@@ -24,6 +24,7 @@ import {writeR71AbstractRouteGaps} from './b198zr71-abstract-route-gap-triage.mj
 import {writeR72MassVoidGapContext} from './b198zr72-mass-void-gap-context.mjs';
 import {writeR73CirculationComparison} from './b198zr73-preserve-concept-circulation-comparison.mjs';
 import {writeR74HumanWorksheet} from './b198zr74-human-option-review-worksheet.mjs';
+import {writeR75IntakeInstructions} from './b198zr75-human-review-handoff.mjs';
 import {inspectR59Archive,reviewR59AlreadySavedZip}
  from './b198zr59-safe-result-zip-to-review.mjs';
 export const SCHEMA='minecraftaibuilder-b198zr60-visual-human-review-v1';
@@ -50,7 +51,7 @@ function visual(z,evidence,stage){
   fail('R58_B143_VERDICT_DISAGREES');
  const dirname=z.tag+(compiled?'_R7_FINAL_ABSTRACT_3D':'_R51_UNCOMPILED_ENVELOPES');
  const folder=path.join(stage,dirname);
- let kind,link,board=null,sections=null,guidance=null,independentFloor=null,overheadReview=null,containmentReview=null,airTopologyReview=null,verticalReview=null,approachReview=null,routeGapReview=null,preservationReview=null,alternativesReview=null,humanWorksheetReview=null;
+ let kind,link,board=null,sections=null,guidance=null,independentFloor=null,overheadReview=null,containmentReview=null,airTopologyReview=null,verticalReview=null,approachReview=null,routeGapReview=null,preservationReview=null,alternativesReview=null,humanWorksheetReview=null,humanDraftGuide=null;
  if(compiled){
   fs.mkdirSync(folder);
   const r=writeR7OfflineVisualReview({
@@ -139,6 +140,8 @@ function visual(z,evidence,stage){
  humanWorksheetReview=r74?dirname+'/'+r74.relativeFile:null;
  const r74Evidence=compiled?JSON.parse(fs.readFileSync(path.join(folder,
   'R74_HUMAN_COMPARISON_BLANK.json'),'utf8')):null;
+ const intake=compiled?writeR75IntakeInstructions({destination:folder}):null;
+ humanDraftGuide=intake?dirname+'/'+intake.relativeFile:null;
  const next=writeR62FutureDesignGuidance({raw,
   expectedRawSha256:evidence.rawSha256,b143Status:evidence.b143.status,
   expectedGeometrySha256:compiled?.geometrySha256??null,
@@ -160,6 +163,7 @@ function visual(z,evidence,stage){
   relativePreservationSections:preservationReview,
   relativeCirculationAlternatives:alternativesReview,
   relativeHumanOptionWorksheet:humanWorksheetReview,
+  relativeHumanDraftIntakeGuide:humanDraftGuide,
   relativeFutureDesignGuidance:guidance,
   independentHumanReview:'NOT_PERFORMED',
   actualMinecraftPlayerWalkingVerified:false};
@@ -242,6 +246,8 @@ export function createR60VisualReview({r54Zip,r48Zip=null,destination}={}){
     '">R73 建築を守る3つの動線検討方向</a>':'')+
    (v.relativeHumanOptionWorksheet?' / <a href="'+v.relativeHumanOptionWorksheet+
     '">R74 3方向×6軸の人間審査票</a>':'')+
+   (v.relativeHumanDraftIntakeGuide?' / <a href="'+v.relativeHumanDraftIntakeGuide+
+    '">R75 記入済み審査票の安全な提出手順</a>':'')+
    (v.relativeFutureDesignGuidance?' / <a href="'+v.relativeFutureDesignGuidance+
     '">次回設計への根拠</a>':'')+'</li>').join('');
   const html='<!doctype html><html lang="ja"><meta charset="utf-8">'+

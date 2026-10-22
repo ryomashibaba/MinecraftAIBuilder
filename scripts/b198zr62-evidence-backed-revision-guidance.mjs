@@ -381,7 +381,7 @@ export function prepareR62FutureDesignGuidance({
    fail('R72_REQUIRES_AUTHENTICATED_R70_AND_R71');
   preservationReview=assessR72MassVoidGapContext({
    raw,expectedRawSha256,expectedGeometrySha256,
-   r70Evidence,r71Evidence,r72Evidence,r73Evidence,r74Evidence});
+   r70Evidence,r71Evidence});
   if(r72Evidence.schema!==R72_SCHEMA||
    r72Evidence.originalRawSha256!==expectedRawSha256||
    r72Evidence.geometrySha256!==expectedGeometrySha256||
@@ -549,7 +549,7 @@ export function writeR62FutureDesignGuidance({
  const report=prepareR62FutureDesignGuidance({
   raw,expectedRawSha256,b143Status,r61Evidence,expectedGeometrySha256,
   r64Evidence,r66Evidence,r67Evidence,r68Evidence,r69Evidence,
-  r70Evidence,r71Evidence,r72Evidence,r73Evidence});
+  r70Evidence,r71Evidence,r72Evidence,r73Evidence,r74Evidence});
  const lines=report.evidenceIssues.map(x=>
   '<li><b>'+esc(x.kind)+'</b> ['+esc(x.basis)+']：'+
   esc(x.instructions)+'</li>').join('');
