@@ -137,6 +137,17 @@ export function auditR80ResearchRoutes(network=NETWORK){
   structuralLoadCalculationPassed:false,
   sourceWorldModified:false};
 }
+/** Existing R80 bracket layout exposed without altering R80's original mesh. */
+export function getR80ConceptBracketSpecs(){
+ const specs=[];
+ for(const side of [-1,1])for(const h of side===1?[.24,.44,.64,.80]:[.20,.38,.54]){
+  const z=h===.80?-.70:h>=.54?.69:h>=.38?-.69:.70;
+  specs.push({side,h,z,
+   target:[side*(h>=.54?.57:.60),h-.04,z],
+   from:[side*.84,Math.max(.05,h-.095),z]});
+ }
+ return specs;
+}
 export function buildR80CompositeStudy(network=NETWORK){
  const audit=auditR80ResearchRoutes(network);
  const base=buildR79OriginalMesh();
@@ -150,12 +161,8 @@ export function buildR80CompositeStudy(network=NETWORK){
  }
  // Brackets from outer-wing region to distinct deck elevations. These
  // suggest architectural attachment, not validated load-bearing columns.
- for(const side of [-1,1])for(const h of side===1?[.24,.44,.64,.80]:[.20,.38,.54]){
-  const z=h===.80?-.70:h>=.54?.69:h>=.38?-.69:.70;
-  const target=[side*(h>=.54?.57:.60),h-.04,z];
-  const from=[side*.84,Math.max(.05,h-.095),z];
+ for(const {from,target} of getR80ConceptBracketSpecs())
   beam(overlays,from,target,.018,'shell_side_bracket');
- }
  domeFloor(overlays);
  const all=[...base.artStudy,...overlays];
  if(all.some(f=>[f.a,f.b,f.c].some(p=>p.some(x=>!Number.isFinite(x)))))

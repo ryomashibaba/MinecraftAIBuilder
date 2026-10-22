@@ -30,6 +30,7 @@ import {writeR77FutureArchitecturalBrief} from './b198zr77-cohesive-architecture
 import {writeR78SpatialProgramSpec} from './b198zr78-spatial-program-design-spec.mjs';
 import {writeR79ParametricStudy} from './b198zr79-parametric-library-massing.mjs';
 import {writeR80ResearchGeometry} from './b198zr80-supported-route-concept-study.mjs';
+import {writeR81ArchitectureReview} from './b198zr81-envelope-portal-connection-review.mjs';
 import {inspectR59Archive,reviewR59AlreadySavedZip}
  from './b198zr59-safe-result-zip-to-review.mjs';
 export const SCHEMA='minecraftaibuilder-b198zr60-visual-human-review-v1';
@@ -56,7 +57,7 @@ function visual(z,evidence,stage){
   fail('R58_B143_VERDICT_DISAGREES');
  const dirname=z.tag+(compiled?'_R7_FINAL_ABSTRACT_3D':'_R51_UNCOMPILED_ENVELOPES');
  const folder=path.join(stage,dirname);
- let kind,link,board=null,sections=null,guidance=null,independentFloor=null,overheadReview=null,containmentReview=null,airTopologyReview=null,verticalReview=null,approachReview=null,routeGapReview=null,preservationReview=null,alternativesReview=null,humanWorksheetReview=null,humanDraftGuide=null,priorityBoard=null,architectureBrief=null,spatialProgramSpec=null,parametricStudy=null,publicCirculationStudy=null;
+ let kind,link,board=null,sections=null,guidance=null,independentFloor=null,overheadReview=null,containmentReview=null,airTopologyReview=null,verticalReview=null,approachReview=null,routeGapReview=null,preservationReview=null,alternativesReview=null,humanWorksheetReview=null,humanDraftGuide=null,priorityBoard=null,architectureBrief=null,spatialProgramSpec=null,parametricStudy=null,publicCirculationStudy=null,portalReviewStudy=null;
  if(compiled){
   fs.mkdirSync(folder);
   const r=writeR7OfflineVisualReview({
@@ -239,6 +240,29 @@ function visual(z,evidence,stage){
   destination:folder
  });
  publicCirculationStudy=dirname+'/'+publicStudy.relativeFile;
+ const portalStudy=writeR81ArchitectureReview({
+  raw,expectedRawSha256:evidence.rawSha256,
+  b143Status:evidence.b143.status,
+  expectedGeometrySha256:compiled?.geometrySha256??null,
+  r61Evidence:r61,r64Evidence:r64,r66Evidence:r66,
+  r67Evidence:r67,r68Evidence:r68,r69Evidence:r69,
+  r70Evidence:r70,r71Evidence,r72Evidence,r73Evidence,
+  r74Evidence,
+  r62Evidence:JSON.parse(fs.readFileSync(path.join(folder,
+   'R62_NEXT_DESIGN_EVIDENCE.json'),'utf8')),
+  r76Evidence:JSON.parse(fs.readFileSync(path.join(folder,
+   'R76_ARCHITECTURE_PRIORITY_REVIEW.json'),'utf8')),
+  r77Evidence:JSON.parse(fs.readFileSync(path.join(folder,
+   'R77_FUTURE_ARCHITECTURE_BRIEF.json'),'utf8')),
+  r78Evidence:JSON.parse(fs.readFileSync(path.join(folder,
+   'R78_ARCHITECTURAL_SPATIAL_PROGRAM.json'),'utf8')),
+  r79Evidence:JSON.parse(fs.readFileSync(path.join(folder,
+   'R79_ART_STUDY_EVIDENCE.json'),'utf8')),
+  r80Evidence:JSON.parse(fs.readFileSync(path.join(folder,
+   'R80_3D_CIRCULATION_STUDY_EVIDENCE.json'),'utf8')),
+  destination:folder
+ });
+ portalReviewStudy=dirname+'/'+portalStudy.relativeFile;
  return {tag:z.tag,originalRawSha256:evidence.rawSha256,
   evidenceType:kind,relativeViewer:link,relativeHumanBoard:board,
   relativeFunctionalSections:sections,
@@ -259,6 +283,7 @@ function visual(z,evidence,stage){
   relativeFutureSpatialProgramSpec:spatialProgramSpec,
   relativeOriginalArtStudy:parametricStudy,
   relativeResearchPublicCirculation:publicCirculationStudy,
+  relativePortalAndSupportStudy:portalReviewStudy,
   independentHumanReview:'NOT_PERFORMED',
   actualMinecraftPlayerWalkingVerified:false};
 }
@@ -353,7 +378,9 @@ export function createR60VisualReview({r54Zip,r48Zip=null,destination}={}){
    (v.relativeOriginalArtStudy?' / <a href="'+v.relativeOriginalArtStudy+
     '">R79 原創3D形態と6図面</a>':'')+
    (v.relativeResearchPublicCirculation?' / <a href="'+v.relativeResearchPublicCirculation+
-    '">R80 立体動線・支持研究と6図面</a>':'')+'</li>').join('');
+    '">R80 立体動線・支持研究と6図面</a>':'')+
+   (v.relativePortalAndSupportStudy?' / <a href="'+v.relativePortalAndSupportStudy+
+    '">R81 入口開口・ラウンジガラス・支持の接合研究</a>':'')+'</li>').join('');
   const html='<!doctype html><html lang="ja"><meta charset="utf-8">'+
    '<meta http-equiv="Content-Security-Policy" content="default-src &#39;none&#39;; style-src &#39;unsafe-inline&#39;">'+
    '<title>R60 建築品質の人間審査</title>'+

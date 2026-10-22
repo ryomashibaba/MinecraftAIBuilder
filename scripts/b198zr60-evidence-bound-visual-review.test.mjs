@@ -103,6 +103,12 @@ test('R60 failed B143 only shows R51 envelopes; keeps originals and never scores
    'R54_R51_UNCOMPILED_ENVELOPES','R80_3D_CIRCULATION_STUDY_EVIDENCE.json')));
   assert.equal(holdCirculation.previousB143Status,'HOLD_B143_NOT_COMPILED');
   assert.equal(holdCirculation.noPhysicalWalkingCertificate,true);
+  const heldR81=JSON.parse(fs.readFileSync(path.join(output,
+   'R54_R51_UNCOMPILED_ENVELOPES','R81_ENVELOPE_COLLISIONS_AND_PORTALS.json')));
+  assert.equal(heldR81.oldB143Status,'HOLD_B143_NOT_COMPILED');
+  assert.equal(heldR81.minecraftWalkingVerified,false);
+  assert(fs.existsSync(path.join(output,
+   'R54_R51_UNCOMPILED_ENVELOPES','R81_TIDAL_LIBRARY_PORTAL_RELIEF_STUDY.obj')));
   assert(fs.existsSync(path.join(output,
    'R54_R51_UNCOMPILED_ENVELOPES','R80_LIBRARY_RAMP_AND_SUPPORT_STUDY.obj')));
   assert(fs.existsSync(path.join(output,
@@ -169,6 +175,11 @@ test('R60 strict B143 PASS creates R7 actual abstract voxel 3D and B198W board',
   assert.equal(circulation.actualNew3DArtStudy,true);
   assert.equal(circulation.noHumanArchitecturalPass,true);
   assert.equal(circulation.modelCalls,0);
+  const portal=JSON.parse(fs.readFileSync(path.join(folder,
+   'R81_ENVELOPE_COLLISIONS_AND_PORTALS.json')));
+  assert.equal(portal.r80RecomputedAndAuthenticated,true);
+  assert.equal(portal.independentHumanQuality,'NOT_REVIEWED');
+  assert(fs.existsSync(path.join(folder,'R81_ARCHITECTURE_PORTAL_AND_SUPPORT_REVIEW.html')));
   assert(fs.existsSync(path.join(folder,'R80_LIBRARY_ACCESS_AND_STRUCTURE_VIEWS.html')));
   assert(fs.existsSync(path.join(folder,'R79_ARCHITECTURE_FOUR_VIEWS_AND_SECTIONS.html')));
   assert.equal(fs.existsSync(path.join(folder,'R75_HUMAN_REVIEW_OUTSTANDING.json')),false);

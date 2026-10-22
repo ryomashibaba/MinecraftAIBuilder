@@ -34,6 +34,16 @@ function profile(side,t,z){
  return {inner:[sign*inset,y,z],outer:[sign*out,y,z],height:ytop,
   corridorHalfWidth:inset,occupiedWingDepth:out-inset};
 }
+/** Source-exact shell sample for later architectural studies; dimensionless. */
+export function sampleR79WingOuterAtElevation(side,y,z){
+ if(!['left','right'].includes(side)||![y,z].every(Number.isFinite))
+  throw Error('B198ZR79_INVALID_PROFILE_QUERY');
+ const crown=side==='left'?.83-.065*(z+.28)**2:
+  .98-.095*(z-.17)**2;
+ if(y<0||y>crown||z<-.94||z>.94)
+  throw Error('B198ZR79_PROFILE_OUT_OF_MODEL_RANGE');
+ return profile(side,y/crown,z).outer;
+}
 const tri=(all,a,b,c,kind)=>all.push({a,b,c,kind});
 const quad=(all,a,b,c,d,kind)=>{
  tri(all,a,b,c,kind);tri(all,a,c,d,kind);
