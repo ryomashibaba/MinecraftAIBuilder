@@ -98,10 +98,14 @@ export function prepareR85RouteReview(args={}){
   const point=firstEvidenceMismatch(r84Evidence,checked);
   // Diagnostic values here are generated dimensionless test coordinates,
   // never credentials or user-owned data. Evidence equality stays strict.
-  const match=/^ROOT\\["tiers"\\]\\["(\\d+)"\\]\\["connectionReview"\\]\\["horizontalLength"\\]$/.exec(point);
-  if(match){
-   const oldTier=r84Evidence.tiers[Number(match[1])];
-   const newTier=checked.tiers[Number(match[1])];
+  const prefix='ROOT["tiers"]["';
+  const suffix='"]["connectionReview"]["horizontalLength"]';
+  const isDistanceField=point.startsWith(prefix)&&point.endsWith(suffix);
+  const index=isDistanceField?Number(point.slice(prefix.length,-suffix.length)):NaN;
+  if(Number.isSafeInteger(index)&&index>=0&&
+   index<r84Evidence.tiers.length&&index<checked.tiers.length){
+   const oldTier=r84Evidence.tiers[index];
+   const newTier=checked.tiers[index];
    fail('R84_FULL_EVIDENCE_MISMATCH_AT_'+point+
     '_WITNESS_'+JSON.stringify({
       previousLength:oldTier.connectionReview.horizontalLength,
