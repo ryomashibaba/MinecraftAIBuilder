@@ -15,6 +15,8 @@ import {assessR67SpatialContainment}
  from './b198zr67-spatial-containment-audit.mjs';
 import {inspectR68AirContinuity}
  from './b198zr68-horizontal-air-continuity.mjs';
+import {analyzeR69VerticalAirAndMotion}
+ from './b198zr69-vertical-air-vs-motion.mjs';
 import {prepareR62FutureDesignGuidance,writeR62FutureDesignGuidance}
  from './b198zr62-evidence-backed-revision-guidance.mjs';
 import {CREATION_CASES} from '../source/ai/b198b-benchmark-cases.mjs';
@@ -299,4 +301,48 @@ test('R62 rejects forged R68 evidence and disallows false B143-final air for HOL
  assert.throws(()=>prepareR62FutureDesignGuidance({raw,
   expectedRawSha256,b143Status:'HOLD_B143_NOT_COMPILED',
   r68Evidence:original}),/NEVER_CLAIM_FINAL_VOXELS_WHEN_B143_HOLD/);
+});
+
+test('R62 includes R69 disconnected supported floors despite vertically continuous air',()=>{
+ const p=r32Courtyard();
+ p.design.elements=[
+  {id:'base',shape:'box',mode:'add',material:'stone',origin:[0,0,0],size:[12,1,12]},
+  {id:'upper',shape:'box',mode:'add',material:'stone',origin:[0,5,0],size:[12,1,12]},
+  {id:'shaft',shape:'box',mode:'cut',origin:[5,5,5],size:[1,1,1]}
+ ];
+ const {raw,compiled,r61}=pack(p),expectedRawSha256=sha(raw),
+  expectedGeometrySha256=compiled.geometrySha256;
+ const r64Evidence=analyzeR64UnclaimedFloorConnectivity({raw,
+  expectedRawSha256,expectedGeometrySha256});
+ const r68Evidence=inspectR68AirContinuity({raw,
+  expectedRawSha256,expectedGeometrySha256});
+ const r69Evidence=analyzeR69VerticalAirAndMotion({raw,
+  expectedRawSha256,expectedGeometrySha256});
+ const report=prepareR62FutureDesignGuidance({
+  raw,expectedRawSha256,expectedGeometrySha256,
+  b143Status:'B143_FINAL_VOXELS_COMPILED_NOT_SPATIAL_OR_HUMAN_PASS',
+  r61Evidence:r61,r64Evidence,r68Evidence,r69Evidence});
+ assert.equal(report.r69IndependentVerticalGraphUsed,true);
+ assert.equal(report.r69SupportedInterlevelEdges,0);
+ assert(report.evidenceIssues.some(x=>x.kind===
+  'VERTICAL_AIR_CONNECTED_BUT_SUPPORTED_TRAVEL_DISCONNECTED'&&
+  x.automaticReject===false));
+ assert.equal(report.independentHumanCriteria.length,4);
+ assert(report.independentHumanCriteria.every(x=>x.assessment==='NOT_REVIEWED'));
+ assert.equal(report.approvedForInference,false);
+});
+test('R62 rejects injected R69 geometry graph data and B143-HOLD source',()=>{
+ const {raw,compiled,r61}=pack(r32Courtyard()),
+  expectedRawSha256=sha(raw),expectedGeometrySha256=compiled.geometrySha256;
+ const good=analyzeR69VerticalAirAndMotion({raw,expectedRawSha256,
+  expectedGeometrySha256});
+ const forged=structuredClone(good);
+ forged.metrics.abstractSupportedMotionInterlevelEdges++;
+ assert.throws(()=>prepareR62FutureDesignGuidance({raw,expectedRawSha256,
+  expectedGeometrySha256,r61Evidence:r61,
+  b143Status:'B143_FINAL_VOXELS_COMPILED_NOT_SPATIAL_OR_HUMAN_PASS',
+  r69Evidence:forged}),/R69_VERTICAL_GRAPH_RECOMPUTE_MISMATCH/);
+ assert.throws(()=>prepareR62FutureDesignGuidance({raw,expectedRawSha256,
+  b143Status:'HOLD_B143_NOT_COMPILED',r69Evidence:good}),
+  /NEVER_CLAIM_FINAL_VOXELS_WHEN_B143_HOLD/);
 });

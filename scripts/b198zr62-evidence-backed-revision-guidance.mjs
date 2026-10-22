@@ -20,6 +20,8 @@ import {assessR67SpatialContainment,SCHEMA as R67_SCHEMA}
  from './b198zr67-spatial-containment-audit.mjs';
 import {inspectR68AirContinuity,SCHEMA as R68_SCHEMA}
  from './b198zr68-horizontal-air-continuity.mjs';
+import {analyzeR69VerticalAirAndMotion,SCHEMA as R69_SCHEMA}
+ from './b198zr69-vertical-air-vs-motion.mjs';
 
 export const SCHEMA='minecraftaibuilder-b198zr62-evidence-backed-next-design-guidance-v1';
 const sha=s=>createHash('sha256').update(s).digest('hex');
@@ -70,7 +72,7 @@ function assertR61(x,rawHash,geometrySha){
 export function prepareR62FutureDesignGuidance({
  raw,expectedRawSha256,b143Status,r61Evidence=null,
  expectedGeometrySha256=null,r64Evidence=null,r66Evidence=null,
- r67Evidence=null,r68Evidence=null
+ r67Evidence=null,r68Evidence=null,r69Evidence=null
 }={}){
  if(typeof raw!=='string'||!raw||
   Buffer.byteLength(raw)>120000||
@@ -86,7 +88,7 @@ export function prepareR62FutureDesignGuidance({
   assertR61(r61Evidence,expectedRawSha256,expectedGeometrySha256);
  }else if(r61Evidence!==null||expectedGeometrySha256!==null||
   r64Evidence!==null||r66Evidence!==null||r67Evidence!==null||
-  r68Evidence!==null){
+  r68Evidence!==null||r69Evidence!==null){
   fail('NEVER_CLAIM_FINAL_VOXELS_WHEN_B143_HOLD');
  }
  const global=inspectR49GlobalConsistency(raw);
@@ -239,6 +241,46 @@ export function prepareR62FutureDesignGuidance({
     instructions:nextNotes[finding.kind]});
   }
  }
+ let verticalGraph=null;
+ if(r69Evidence!==null){
+  verticalGraph=analyzeR69VerticalAirAndMotion({
+   raw,expectedRawSha256,expectedGeometrySha256});
+  if(r69Evidence.schema!==R69_SCHEMA||
+   r69Evidence.originalRawSha256!==expectedRawSha256||
+   r69Evidence.geometrySha256!==expectedGeometrySha256||
+   r69Evidence.modelSpatialPlanIgnored!==true||
+   JSON.stringify(r69Evidence.metrics)!==
+    JSON.stringify(verticalGraph.metrics)||
+   JSON.stringify(r69Evidence.possibleConcerns)!==
+    JSON.stringify(verticalGraph.possibleConcerns))
+   fail('R69_VERTICAL_GRAPH_RECOMPUTE_MISMATCH');
+  if(network!==null&&(
+   verticalGraph.metrics.supportedTwoHighStandingPositions!==
+    r64Evidence.metrics.supportedTwoHighStandingPositions||
+   verticalGraph.metrics.abstractSupportedMotionComponentCount!==
+    r64Evidence.metrics.conceptualMotionComponents))
+   fail('R69_R64_SUPPORTED_ROUTE_COUNT_MISMATCH');
+  if(horizontalAir!==null&&
+   verticalGraph.metrics.supportedTwoHighStandingPositions!==
+    horizontalAir.metrics.supportedTwoHighStandingPositions)
+   fail('R69_R68_TOTAL_SUPPORTED_COUNT_MISMATCH');
+  const instructions={
+   VERTICAL_AIR_CONNECTED_BUT_SUPPORTED_TRAVEL_DISCONNECTED:
+    'A shared 3D atrium or air shaft does not create a usable staircase or public transfer between levels. Preserve the dramatic air volume and architectural scale while inspecting genuine supported landing-to-landing circulation. Intentionally separate wings need not be forcibly connected.',
+   VERTICAL_AIR_PRESENT_WITHOUT_INTERLEVEL_SUPPORTED_MOTION:
+    'The abstract final solids create multiheight air with zero supported interlevel motion edges. Review upper destinations and conceptual stairs/ramps; do not infer Minecraft stair-block collision or automatically fill the void.'
+  };
+  for(const finding of verticalGraph.possibleConcerns){
+   if(!Object.hasOwn(instructions,finding.kind))
+    fail('R69_UNKNOWN_VERTICAL_GRAPH_CONCERN');
+   issues.push({kind:finding.kind,count:1,
+    basis:'R69_FINAL_VOXEL_3D_AIR_VS_SUPPORTED_STEP_GRAPH',
+    objectiveFinalVoxelEvidence:true,
+    independentHumanReviewRequired:true,automaticReject:false,
+    measured:finding.measured,
+    instructions:instructions[finding.kind]});
+  }
+ }
  const human=c01.criteria.map(x=>({id:x.id,requirement:x.description,
   assessment:'NOT_REVIEWED',
   fulfilledByAnySourceMetric:false,
@@ -276,6 +318,10 @@ export function prepareR62FutureDesignGuidance({
   r68AirTopologyIndependentUsed:horizontalAir!==null,
   r68BoundaryConnectedCoveredPositions:horizontalAir?.metrics.roofedStandingInLaterallyBoundaryConnectedAir??null,
   r68SealedCoveredPositions:horizontalAir?.metrics.roofedStandingInLaterallySealedAirPockets??null,
+  r69VerticalGraphStatus:verticalGraph?.status??'NOT_INCLUDED',
+  r69IndependentVerticalGraphUsed:verticalGraph!==null,
+  r69SupportedInterlevelEdges:verticalGraph?.metrics.abstractSupportedMotionInterlevelEdges??null,
+  r69AirConnectedButTravelSeparatedRegions:verticalGraph?.metrics.largeAirConnectedButSupportedMotionSeparatedRegions??null,
   proposedOnePassGuidance:instructions,
   generatedGeometry:false,priorModelOriginalRepaired:false,
   realModelImprovementDemonstrated:false,
@@ -286,7 +332,7 @@ export function prepareR62FutureDesignGuidance({
 export function writeR62FutureDesignGuidance({
  raw,expectedRawSha256,b143Status,r61Evidence=null,
  expectedGeometrySha256=null,r64Evidence=null,r66Evidence=null,
- r67Evidence=null,r68Evidence=null,destination
+ r67Evidence=null,r68Evidence=null,r69Evidence=null,destination
 }={}){
  if(typeof destination!=='string'||!path.isAbsolute(destination)||
   !fs.existsSync(destination)||!fs.lstatSync(destination).isDirectory()||
@@ -298,7 +344,7 @@ export function writeR62FutureDesignGuidance({
   fail('NEVER_OVERWRITE_DERIVED_REVIEW');
  const report=prepareR62FutureDesignGuidance({
   raw,expectedRawSha256,b143Status,r61Evidence,expectedGeometrySha256,
-  r64Evidence,r66Evidence,r67Evidence,r68Evidence});
+  r64Evidence,r66Evidence,r67Evidence,r68Evidence,r69Evidence});
  const lines=report.evidenceIssues.map(x=>
   '<li><b>'+esc(x.kind)+'</b> ['+esc(x.basis)+']：'+
   esc(x.instructions)+'</li>').join('');
