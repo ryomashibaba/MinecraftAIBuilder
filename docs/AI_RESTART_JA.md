@@ -10,8 +10,8 @@
 | 継続ブランチ | `feature/b198zr1-protected-architectural-revision` |
 | 継続PR | [#128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128) — Open / Draft / Unmerged |
 | HEAD | [開発ブランチの最新HEADを毎回GitHubで確認](https://github.com/ryomashibaba/MinecraftAIBuilder/commits/feature/b198zr1-protected-architectural-revision)（R98の初期実メッシュ検証対象は `9a2b5de9d8ba41a2b7ca4e626aa9d54ff4ffffdd`） |
-| 最新確認済み実装工程 | **B198Z-R104：現行R91床を使う補修候補を実装。R103実7通路QA両OS成功（3床接合、右翼tier2は旧R88辺なし）、R104全形状QA待ち** |
-| 次に取り組む工程 | **R103/R104実メッシュCI結果・右翼tier2の床改善を確認→正しい接合面を選別、造形審査はHOLD** |
+| 最新確認済み実装工程 | **B198Z-R105：右翼tier2の頭上の交差元を特定し、床拡張の再評価を条件付きで実装。R104全実メッシュCI両OS成功・床拡張は不採用** |
+| 次に取り組む工程 | **R105実メッシュログで頭上衝突面の種類/座標を確定→元の屋根・手すりなど実際の原因に対する局所形状修正。美術はHOLD** |
 | 施工・モデル | NOT_PREPARED / 9 BLOCKED / BuildPlan空。新たな実Qwen/Gemma禁止。World接続/読取/書込禁止 |
 
 **最新情報への直リンク：** [ブランチの現在地](https://github.com/ryomashibaba/MinecraftAIBuilder/tree/feature/b198zr1-protected-architectural-revision) ／ [Actions一覧](https://github.com/ryomashibaba/MinecraftAIBuilder/actions) ／ [PR #128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128)
@@ -94,6 +94,14 @@
 - [R103実7経路CI](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39956894901)は本更新時点で未完了。R102の[軽量Windows/Ubuntu CI](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39952046303)は成功済み。
 - R104の人工形状スモークだけでなく、前のコミットの通常CIで実R98→R102→R104の**全源メッシュ回帰を1回投入**。この更新からR104も通常CIは軽量テストへ戻し、重い全館回帰は既存手動workflow_dispatchに残す。結果が出たら採否件数を記載。結果が出るまで人工形状以外の件数を断定しない。
 - Qwen/Gemma追加実推論0、Minecraft世界接続/読込/書込0、原本保護、NOT_PREPARED、9 BLOCKED、BuildPlan.operations=[]。
+
+## R105の確定した問題と現在地（2026-10-23 JST）
+
+- R104の[実全メッシュWindows/Ubuntuテスト成功](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39958650488)。両OSの実ログ同値：R102由来の3連絡床（左tier1、右tier1、右tier3）は保持、無証拠で除外した追加床は0。**右翼tier2：元床未検出0、頭上の交差1、現行R91床を広げる候補でも床改善0、追加面0、HOLD**。
+- 観測から、右翼tier2について次に必要なのは「床の拡幅」ではなく**頭上で何に当たっているか（屋根／手すり／他）を実形状から確定すること**。ヒット元を見ずに屋根を動かしたり階段を増やしたりしない。
+- [R105実装](../scripts/b198zr105-active-r91-throat-width-selection.mjs)／[R105テスト](../scripts/b198zr105-active-r91-throat-width-selection.test.mjs)。源R104/R91の正しい場所に対し拡幅ピーク5候補を実Rayで検査。いずれも元の床未検出を減らさない場合は追加しない。実頭上交差Rayがヒットした元の三角形の種類と位置もログとJSONへ記録。
+- R60の同一レビュー内にR105新候補OBJ、実測JSON、R102/R104/R105六視点の比較を組み込み。既存R98/R100/R102/R104のファイルや原本は上書きしない。R105の実7経路CIもこの工程のコミットで一度通常プッシュから起動済み。ただし**R105最新実モデル結果は未確認**、通常PR/Pushはその後軽量に戻す。重い完全回帰は同じ手動workflow_dispatchに残す。
+- 構造、人の移動、デザイン美術、AI汎用生成、Minecraft実機施工は認証不可／HOLD。Qwen/Gemma追加推論0、ワールド操作0、NOT_PREPARED、9ゲートBLOCKED、BuildPlan空。
 
 ## 直近CIの注意点（2026-10-23時点。変化したら再確認）
 - [R44 Windows CMD](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39914804614)：46を期待、実ファイル47で `R44_EXACT_SOURCE_COUNT_EXPECTED_46_ACTUAL_47_BASE_37_OVERLAY_10`。ファイル数合わせではなく期待リストと実マニフェストを照合する。
