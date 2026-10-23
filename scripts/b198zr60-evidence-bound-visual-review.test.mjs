@@ -167,6 +167,17 @@ test('R60 failed B143 only shows R51 envelopes; keeps originals and never scores
   assert.equal(heldR93.longitudinalRoomsWithArchitecture,7);
   assert.equal(heldR93.totalEmittedBays,28);
   assert.equal(heldR93.newMultiBayBookGalleryTriangles,168);
+  const heldR94=JSON.parse(fs.readFileSync(path.join(output,
+   'R54_R51_UNCOMPILED_ENVELOPES','R94_READING_ROOM_TRUE_TERRACE_ENTRY_EVIDENCE.json')));
+  assert.equal(heldR94.oldB143Status,'HOLD_B143_NOT_COMPILED');
+  assert.equal(heldR94.connectedResearchDoorwayCount,7);
+  assert.equal(heldR94.displacedFurnishingTriangles,84);
+  assert.equal(heldR94.newTrueSourceFloorDoorwayTriangles,56);
+  assert.equal(heldR94.newActiveArchitectureTriangles,4446);
+  assert.equal(heldR94.certifiedPhysicalDoorways,0);
+  assert.equal(heldR94.safety.readiness,'NOT_PREPARED');
+  assert(fs.existsSync(path.join(output,
+   'R54_R51_UNCOMPILED_ENVELOPES','R94_READING_ROOM_TRUE_TERRACE_ENTRY_ACTIVE_ARCHITECTURE.obj')));
   assert.equal(heldR93.certifiedFloorPaths,0);
   assert.equal(heldR93.safety.readiness,'NOT_PREPARED');
   assert(fs.existsSync(path.join(output,
