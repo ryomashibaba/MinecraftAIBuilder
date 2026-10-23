@@ -152,14 +152,18 @@ export function buildR102TaperedGalleryStudy(nodes){
    humanContinuousRouteCertification:false,structureCertified:false,
    artQuality:'NOT_REVIEWED',sourceModelGenerationImproved:false,safety:safe()}};
 }
-export function prepareR102TaperedReview(args={}){
+function prepareR102Runtime(args){
  const {r100Evidence,...old}=args,source=prepareR100ShoulderReview(old);
  if(!r100Evidence||r100Evidence.schema!==R100_SCHEMA||
   JSON.stringify(r100Evidence)!==JSON.stringify(source))
   fail('R100_SOURCE_EVIDENCE_RECOMPUTE_MISMATCH');
- const r=buildR102TaperedGalleryStudy(args.r80Evidence.conceptualRouteNodes);
- return {schema:SCHEMA,originalRawSha256:args.expectedRawSha256,
-  oldB143Status:source.oldB143Status,r100StrictAncestryVerified:true,...r.report};
+ const mesh=buildR102TaperedGalleryStudy(args.r80Evidence.conceptualRouteNodes);
+ return {report:{schema:SCHEMA,originalRawSha256:args.expectedRawSha256,
+  oldB143Status:source.oldB143Status,r100StrictAncestryVerified:true,
+  ...mesh.report},mesh};
+}
+export function prepareR102TaperedReview(args={}){
+ return prepareR102Runtime(args).report;
 }
 function obj(faces){
  let id=1,last='',out=['# R102 source gallery end transition; NOT a certified building'];
@@ -178,8 +182,8 @@ export function writeR102TaperedReview({destination,...args}={}){
   paths=[prefix+'_EVIDENCE.json',prefix+'_ACTIVE_ARCHITECTURE.obj',
    prefix+'_SIX_VIEW.html'].map(x=>path.join(destination,x));
  if(paths.some(p=>fs.existsSync(p)))fail('NO_OVERWRITE');
- const report=prepareR102TaperedReview(args),mesh=buildR102TaperedGalleryStudy(
-  args.r80Evidence.conceptualRouteNodes);
+ // Single source-bound build; no second expensive full mesh recreation.
+ const {report,mesh}=prepareR102Runtime(args);
  const views=buildR97CompareViews([
   {revision:'R98',faces:mesh.sourceR98Faces},
   {revision:'R100 rectangular',faces:mesh.priorR100Faces},

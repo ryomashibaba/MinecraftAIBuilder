@@ -10,8 +10,8 @@
 | 継続ブランチ | `feature/b198zr1-protected-architectural-revision` |
 | 継続PR | [#128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128) — Open / Draft / Unmerged |
 | HEAD | [開発ブランチの最新HEADを毎回GitHubで確認](https://github.com/ryomashibaba/MinecraftAIBuilder/commits/feature/b198zr1-protected-architectural-revision)（R98の初期実メッシュ検証対象は `9a2b5de9d8ba41a2b7ca4e626aa9d54ff4ffffdd`） |
-| 最新確認済み実装工程 | **B198Z-R101：経路安全判定の欠落を修正し、低い障害物の床誤認を防止。CI未検証** |
-| 次に取り組む工程 | **R101 CI結果、R100実モデルでの床改善件数を確認→重要な通路の実形状修正** |
+| 最新確認済み実装工程 | **B198Z-R102：連絡床のテーパ実形状を実装・R60接続、CI待ち。R101の専用CIは両OS成功** |
+| 次に取り組む工程 | **R102 CI結果とテーパ採否件数を確認→必要に応じて端部接合の改修・美術審査** |
 | 施工・モデル | NOT_PREPARED / 9 BLOCKED / BuildPlan空。新たな実Qwen/Gemma禁止。World接続/読取/書込禁止 |
 
 **最新情報への直リンク：** [ブランチの現在地](https://github.com/ryomashibaba/MinecraftAIBuilder/tree/feature/b198zr1-protected-architectural-revision) ／ [Actions一覧](https://github.com/ryomashibaba/MinecraftAIBuilder/actions) ／ [PR #128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128)
@@ -61,6 +61,15 @@
 - 垂直方向のみの源経路区間・急勾配>0.28・24分割では0.07間隔を守れない長い区間を**明示的に不完全検査のHOLD**として数え、R100で改善案を誤採択しない。
 - [R101最新CI](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39950219073) は確認時queued。人工形状の回帰テストを追加したが**結果は未確認**。R100の全実メッシュでの少なくとも1件改善を要求する重いテストは既存の手動全履歴回帰へ戻した。初回R100試験もqueuedのまま。検証結果を想像してPASSにしない。
 - 変更はR99/R100の研究用検証コードとテスト、ワークフローのみ。旧モデル/実Qwen/Gemma/ワールド/施工は手を付けず、安全ゲート9件BLOCKEDを維持。
+
+## R102現在地（2026-10-23 JST）
+
+- 事後確認：R99の[軽量Windows/Ubuntu CI成功](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39946559669)。R100の[実メッシュを含むWindows/Ubuntu CI成功](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39947874799)。R100は実R88接続のうち少なくとも1件で局所的床プローブ改善を確認するassertを通過。**改善した実件数と完全8経路の通行可能性は未認証**。
+- R101の[専用CI（両OS成功）](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39950219073)を確認。床の誤認防止、垂直/急坂/疎サンプルHOLD検査を含む。後続の最新HEADの全履歴成功を意味しない。
+- [R102実形状](../scripts/b198zr102-tapered-gallery-aprons.mjs)／[専用テスト](../scripts/b198zr102-tapered-gallery-aprons.test.mjs)／[仕様](B198ZR102_GALLERY_APRON_TRANSITIONS_JA.md)。R100の矩形床帯を元R88の細い床へ徐々につなぐ候補。新しい三角形は片側4面・左右計8面。源R98は4,692面の完全prefix。
+- R101厳格床プローブで改善が証明でき、元R100改善値の60%以上を保ち、頭上・横断の問題が増えず、吹抜け保護帯を維持したときのみテーパ採用。失敗ならR100矩形案を維持。R100で却下した候補は作り直さずHOLD。
+- R60一括レビューへR102の実OBJ/JSONとR98/R100/R102六視点比較HTMLを追加。実メッシュのテーパ採択件数、実HTMLの人間美術審査、最新CI成功は**未確認**。
+- 元Qwen/B143、Minecraft、原本・mainは非変更。9ゲートBLOCKED、NOT_PREPARED、実推論/施工0。
 
 ## 直近CIの注意点（2026-10-23時点。変化したら再確認）
 - [R44 Windows CMD](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39914804614)：46を期待、実ファイル47で `R44_EXACT_SOURCE_COUNT_EXPECTED_46_ACTUAL_47_BASE_37_OVERLAY_10`。ファイル数合わせではなく期待リストと実マニフェストを照合する。
