@@ -9,9 +9,9 @@
 | リポジトリ | [ryomashibaba/MinecraftAIBuilder](https://github.com/ryomashibaba/MinecraftAIBuilder) |
 | 継続ブランチ | `feature/b198zr1-protected-architectural-revision` |
 | 継続PR | [#128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128) — Open / Draft / Unmerged |
-| この文書の更新直前の開発HEAD | `ee67e1ced4ed5e2fe444b5eb60ac6a40fd628c30` |
-| 最新確認済み実装工程 | **B198Z-R98：右上層屋根の実メッシュ別案を実装、専用QA確認中** |
-| 次に取り組む工程 | **R98実メッシュ検証とR97/R98比較美術審査→R99の動線検証** |
+| HEAD | [開発ブランチの最新HEADを毎回GitHubで確認](https://github.com/ryomashibaba/MinecraftAIBuilder/commits/feature/b198zr1-protected-architectural-revision)（R98の初期実メッシュ検証対象は `9a2b5de9d8ba41a2b7ca4e626aa9d54ff4ffffdd`） |
+| 最新確認済み実装工程 | **B198Z-R98：幾何候補とWindows/Ubuntu実メッシュテスト完了・美術HOLD** |
+| 次に取り組む工程 | **R98実3Dの独立美術審査→R99の有限幅・有限高の経路研究** |
 | 施工・モデル | NOT_PREPARED / 9 BLOCKED / BuildPlan空。新たな実Qwen/Gemma禁止。World接続/読取/書込禁止 |
 
 **最新情報への直リンク：** [ブランチの現在地](https://github.com/ryomashibaba/MinecraftAIBuilder/tree/feature/b198zr1-protected-architectural-revision) ／ [Actions一覧](https://github.com/ryomashibaba/MinecraftAIBuilder/actions) ／ [PR #128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128)
@@ -28,7 +28,7 @@
 - [R97実装](../scripts/b198zr97-multiview-mesh-review.mjs) / [テスト](../scripts/b198zr97-multiview-mesh-review.test.mjs) / [設計書](B198ZR97_MESH_BOUND_SIX_VIEW_REVIEW_JA.md)。R94/R95/R96の**実三角形4,446/4,608/4,692面**から、正面・斜視・側面・俯瞰・反対向き外形・右上層tier3局所拡大の**同一カメラ/同一縮尺6視点×3版**を生成する研究実装。結果を既存R60一操作レビューに追加するコードを導入。
 - [初回R97全館生成のUbuntu実行](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39940423587)：全館形状の比較テスト自体は約174秒でPASS。ただし同じ古いコミットのCIは「証拠不足入力のエラー文字列を限定しすぎたテスト」が1件FAIL。該当テスト修正済み。
 - 通常Push/PRのR97は軽量検査のみとし、**全館生成の重いテストは手動の完全回帰へ**戻した。R97本体はJSON証拠再計算とHTML6視点出力を共有して無駄な再計算を削減。
-- この時点で**最新HEAD上のWindows+Ubuntu両方のCI成功は未確認**。本機能による実際の出力ファイルの人間美術審査も未実施。R97を美術合格やQwen生成成功へ昇格しない。
+- [R97軽量CI](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39940965462)はWindows/Ubuntu両方成功。R97/R98の実出力の独立美術審査は未実施。R97を美術合格やQwen生成成功へ昇格しない。
 - R60への統合後、R94〜R96 OBJとR97比較HTMLがレビュー画面に揃う。実人体頭上高・経路・窓支持/採光・Minecraft実歩行は未認証。R98の新形状修正は未開始。
 
 ## R98現在地（2026-10-23 JST）
@@ -36,8 +36,8 @@
 - R97最新軽量CIの[Windows/Ubuntu両OS成功](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39940965462)を確認。ただし完全履歴回帰や人間による美術審査ではない。
 - [R98屋根ロフト実装](../scripts/b198zr98-elevated-right-crown.mjs) / [専用テスト](../scripts/b198zr98-elevated-right-crown.test.mjs) / [設計書](B198ZR98_ELEVATED_RIGHT_CROWN_JA.md)。元R96全館4,692面を保護し、右側上部の実頂点を最大0.085正規化単位の局所滑らかな形に持ち上げる比較候補を追加。改修前後の頭上方向の交差と7室×9本の視線を再測定する。改善を観測しなければHOLD。
 - R60一括レビューへR98候補の**実OBJ、証拠JSON、6視点のR95/R96/R98比較HTML**を追加。元Qwen出力・旧R95/R96/97成果物を変更しない。
-- **R98の専用実メッシュCIは実行中で未判定。** 人による実画像審査、構造/実歩行/Minecraft/実Qwen生成能力の検証も未実施。「R98美術合格」や施工可能と表示しない。
-- R98の専用幾何検証後に、通常CIは再び軽量テスト中心に戻す。R99は有限幅・有限高さの入口→7室→ラウンジの機能検証を優先候補とする。
+- [R98の初期実メッシュ検証CI](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39942654481)は**Windows/Ubuntu両方SUCCESS**。R98ソースから実三角形の変化、実交差に基づく頭上プローブ改善（少なくとも0.02正規化単位）、7室×9本の視線未悪化、原本保護をテスト。R60へ統合した全レビューの実出力と独立美術審査は別途未実施。構造/実歩行/Minecraft/実Qwen生成能力も未認証。R98は美術HOLDであり施工不可。
+- 通常Push/PRのCIは再び軽量テスト中心、全館幾何/歴史回帰は手動workflow_dispatchに維持。R99は有限幅・有限高さの入口→7室→ラウンジの機能検証を優先候補とする。
 
 ## 直近CIの注意点（2026-10-23時点。変化したら再確認）
 - [R44 Windows CMD](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39914804614)：46を期待、実ファイル47で `R44_EXACT_SOURCE_COUNT_EXPECTED_46_ACTUAL_47_BASE_37_OVERLAY_10`。ファイル数合わせではなく期待リストと実マニフェストを照合する。
