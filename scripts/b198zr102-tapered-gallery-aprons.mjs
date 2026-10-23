@@ -26,6 +26,8 @@ import {inspectR109RealFloorReferencedRoute}
  from './b198zr109-realfloor-referenced-r91-route.mjs';
 import {inspectR110RightSourceContouredApproach}
  from './b198zr110-source-contoured-right-room-approach.mjs';
+import {studyR111RealFinishTransition}
+ from './b198zr111-reversible-floor-finish-transition.mjs';
 
 export const SCHEMA='minecraftaibuilder-b198zr102-tapered-source-gallery-end-transitions-v1';
 const fail=s=>{throw Error('B198ZR102_'+s)};
@@ -212,7 +214,9 @@ export function writeR102TaperedReview({destination,...args}={}){
    'R108_R91_RIGHT_LANES_EXACT_HIT_EVIDENCE.json',
    'R109_R91_REAL_FLOOR_DATUM_COMPARISON_EVIDENCE.json',
    'R110_R91_SOURCE_CONTOURED_ROUTE_EVIDENCE.json',
-   'R110_R91_SOURCE_CONTOURED_ROUTE.obj'].map(x=>path.join(destination,x));
+   'R110_R91_SOURCE_CONTOURED_ROUTE.obj',
+   'R111_R87_R94_FLOOR_FINISH_EVIDENCE.json',
+   'R111_R87_R94_REVISED_FINISH_ALTERNATIVE.obj'].map(x=>path.join(destination,x));
  if(paths.some(p=>fs.existsSync(p)))fail('NO_OVERWRITE');
  // Single source-bound build; no second expensive full mesh recreation.
  const {report,mesh}=prepareR102Runtime(args);
@@ -225,6 +229,11 @@ export function writeR102TaperedReview({destination,...args}={}){
  const r108=inspectR108RightLaneSourceHits(r107);
  const r109=inspectR109RealFloorReferencedRoute(r107);
  const r110=inspectR110RightSourceContouredApproach(r107);
+ const r111=studyR111RealFinishTransition(r107);
+ const r111Views=r111.report.sourceGeometryChanged?buildR97CompareViews([
+  {revision:'R107 preserved source',faces:r107.faces},
+  {revision:'R111 floor finish comparison',faces:r111.faces}
+ ],[.55,.45,-.69]):[];
  const views=buildR97CompareViews([
   {revision:'R105 source collision',faces:r105.faces},
   {revision:'R106 relocated furniture',faces:r106.faces},
@@ -287,6 +296,11 @@ export function writeR102TaperedReview({destination,...args}={}){
   '（建物の形状変更なし）。<a href="R110_R91_SOURCE_CONTOURED_ROUTE_EVIDENCE.json">源標高/勾配/衝突</a> / '+
   '<a href="R110_R91_SOURCE_CONTOURED_ROUTE.obj">3D経路線（床メッシュではない）</a>。'+
   '全て非施工・非人体認証。</p>'+ 
+  '<p>R111：仕上げ面のみの局所補正条件 '+esc(r111.report.evaluationStatus)+
+  '。既存床・家具・外殻は保持。'+
+  '<a href="R111_R87_R94_FLOOR_FINISH_EVIDENCE.json">R110交差源・差分・採否</a> / '+
+  '<a href="R111_R87_R94_REVISED_FINISH_ALTERNATIVE.obj">3D比較メッシュ（HOLDなら元R107と同形状）</a>。'+
+  '人間の美術・利用審査は未実施。</p>'+r111Views.map(v=>v.html).join('')+ 
   '<p>R106衝突源はR87の読書テーブル。家具7三角形だけを対象にした別案：'+
   esc(r106.report.correctionMode)+
   '。R105の頭上検出 '+r106.report.beforeRoute.overhead+
@@ -315,7 +329,8 @@ export function writeR102TaperedReview({destination,...args}={}){
   '# R110 3D research route polyline only; NOT a floor or a Minecraft BuildPlan\n'+
   (r110.selectedRoute?r110.selectedRoute.map(p=>'v '+p.join(' ')).join('\n')+'\n'+
    'l '+r110.selectedRoute.map((_,i)=>i+1).join(' ')+'\n':
-   '# HOLD: no accepted route; no invented geometry\n')],created=[];
+   '# HOLD: no accepted route; no invented geometry\n'),
+  JSON.stringify(r111.report,null,2)+'\n',obj(r111.faces)],created=[];
  try{for(let i=0;i<paths.length;i++){fs.writeFileSync(paths[i],bytes[i],{flag:'wx'});created.push(paths[i]);}}
  catch(e){for(const p of created)fs.rmSync(p,{force:true});throw e;}
  return {relativeFile:path.basename(paths[2]),
