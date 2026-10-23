@@ -10,8 +10,8 @@
 | 継続ブランチ | `feature/b198zr1-protected-architectural-revision` |
 | 継続PR | [#128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128) — Open / Draft / Unmerged |
 | HEAD | [開発ブランチの最新HEADを毎回GitHubで確認](https://github.com/ryomashibaba/MinecraftAIBuilder/commits/feature/b198zr1-protected-architectural-revision)（R98の初期実メッシュ検証対象は `9a2b5de9d8ba41a2b7ca4e626aa9d54ff4ffffdd`） |
-| 最新確認済み実装工程 | **B198Z-R112：R111両OS実源で頭上7件すべてR93灯籠キャノピー源面4474と確定。R111床仕上げ変更0件・HOLD。R112は外側の書架上端を保護し、内側の庇だけ後退させる実3D比較4案を実装。Windows/Ubuntu実源判定待ち、美術HOLD** |
-| 次に取り組む工程 | **R112実メッシュCIで庇後退4案の実源頭上改善と5通路の非悪化を確認。採択案のみ多視点美術・空洞/入口審査へ進み、拒否なら正確な失敗原因から庇形状を再設計。旧源床/家具/安全を維持** |
+| 最新確認済み実装工程 | **B198Z-R113：R112両OS実源CIで庇後退4案すべて頭上Ray7→7、不採用HOLD。R113は源R93の外側書架頂を固定し、採光用の内側庇稜線を持ち上げる4つの実3D比較案を実装。両OS実源判定待ち／美術・人体通行HOLD** |
+| 次に取り組む工程 | **R113実メッシュCIで採光稜線立ち上げ4案の頭上交差と旧5通路非悪化を検査。採用時は同カメラ形状と利用空間の美術審査へ、不採用なら実交差の位置に基づく次案を考える。原本・床・家具・安全は保護** |
 | 施工・モデル | NOT_PREPARED / 9 BLOCKED / BuildPlan空。新たな実Qwen/Gemma禁止。World接続/読取/書込禁止 |
 
 **最新情報への直リンク：** [ブランチの現在地](https://github.com/ryomashibaba/MinecraftAIBuilder/tree/feature/b198zr1-protected-architectural-revision) ／ [Actions一覧](https://github.com/ryomashibaba/MinecraftAIBuilder/actions) ／ [PR #128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128)
@@ -155,6 +155,13 @@
 - [R112の実形状実装](../scripts/b198zr112-lantern-canopy-clearance.mjs)／[テスト](../scripts/b198zr112-lantern-canopy-clearance.test.mjs)／[設計](B198ZR112_LANTERN_CANOPY_RELIEF_JA.md)。問題のR93灯籠庇の共有辺連結トライアングルを取得し、**書架の外側取付点を残して内側張り出し縁だけ後退**する4案（係数0.35/0.55/0.75/0.88）を実メッシュ比較。旧R107の5本の床/頭上/横断Ray非悪化、R110の連続床/勾配/頭上Ray改善、無関係の元床・家具・外殻・玄関非変更を必須にする。基準源のR98/R107形状は別保持。採用根拠なしなら元形状のままHOLD。
 - R60の既存同一レビューにR112 JSON/3D比較OBJ、採用時のみ同カメラ比較図を追加。初回両OS実源試験は[Actions #40024243758](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40024243758)と[#40024249354](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40024249354)に固定。**この文書更新時点では実値・採用不明**。通常Push/PRは軽量テストへ復帰し、手動の全歴史回帰にR112実源テストを残した。
 - アート品質と人の連続移動/頭上空間/荷重・支持・Minecraftワールド施工・実LLM汎用建築能力はHOLD。NOT_PREPARED／9 BLOCKED／BuildPlan空、新規推論・ワールド接続/読取/書込/施工・ローカルWork 0、main/凍結原本/PR #128 Draft維持。
+
+## R113内側採光稜線の3D改修（2026-10-24 JST／実源CI結果未確定）
+
+- R112の[実メッシュCI #40024243758](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40024243758)でWindows/Ubuntuが共にSUCCESS、実ログ一致。R93灯籠庇の共辺2三角形（4473/4474）について内側の張り出し縁を0.35/0.55/0.75/0.88だけ後退させた4形状は、全てR110コンター経路の**頭上Ray7→7**、床欠落0、横断0、旧5本の各Rayは非悪化。**4案とも不採用、R112で採択した形状改変は0**。単に庇を狭めるのは有効でないと判明。
+- [R113実装](../scripts/b198zr113-pitched-lantern-daylight-canopy.mjs)／[テスト](../scripts/b198zr113-pitched-lantern-daylight-canopy.test.mjs)／[資料](B198ZR113_PITCHED_LANTERN_DAYLIGHT_JA.md)では、R112の局所・共辺・棚縁保護を維持し、内側採光稜線の後退と高さ増分を同時に設計。4案（0.55/+0.06, 0.65/+0.09, 0.75/+0.12, 0.88/+0.15；正規化値）。旧R107 5通路のRay非悪化、R110の実床9地点×3サンプル/勾配/頭上改善、外壁屋根マージン確保を厳格に要求。**実際の3D形状を比較し、条件が足りなければHOLD・旧形状を完全保持**。
+- 既存R60レビューにR113 JSONとOBJ、採用された場合のみR107との同カメラ比較を追加。[一度だけの実源CI #40024745083](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40024745083)、[#40024765222](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40024765222)は再開文書更新時点でqueued。**採用数・頭上改善数は未確認であり断言しない**。Push/PRは軽量試験に戻し、既存R60手動フル回帰に重いR113を継続。
+- 元R98/R107/R112・凍結B143/Qwen、main、旧Freezeは非変更。実モデルによる未知用途への生成能力、人体の実歩行/荷重、建築美術（正面/斜視/側面/内部/入口）の独立判断はすべて未認証。施工・Minecraftワールド接続読取書込・追加モデル推論・ローカルWorkを行わずNOT_PREPARED／9ゲートBLOCKED／BuildPlan空。PR #128はDraft・未マージ。
 
 ## 直近CIの注意点（2026-10-23時点。変化したら再確認）
 - [R44 Windows CMD](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39914804614)：46を期待、実ファイル47で `R44_EXACT_SOURCE_COUNT_EXPECTED_46_ACTUAL_47_BASE_37_OVERLAY_10`。ファイル数合わせではなく期待リストと実マニフェストを照合する。
