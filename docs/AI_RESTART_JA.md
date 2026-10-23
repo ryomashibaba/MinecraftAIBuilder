@@ -10,8 +10,8 @@
 | 継続ブランチ | `feature/b198zr1-protected-architectural-revision` |
 | 継続PR | [#128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128) — Open / Draft / Unmerged |
 | HEAD | [開発ブランチの最新HEADを毎回GitHubで確認](https://github.com/ryomashibaba/MinecraftAIBuilder/commits/feature/b198zr1-protected-architectural-revision)（R98の初期実メッシュ検証対象は `9a2b5de9d8ba41a2b7ca4e626aa9d54ff4ffffdd`） |
-| 最新確認済み実装工程 | **B198Z-R110：R109で実床参照は右+0.023のみ頭上Ray1→0、右+0.035は1件残存と両OS実測。R110でR91→R94/R87の9地点×横幅3点に沿う実源床コンター経路設計を導入。実源CI判定待ち、旧建築メッシュ不変／美術HOLD** |
-| 次に取り組む工程 | **R110実メッシュの9地点・全横幅・勾配・衝突結果を確認し、代理経路が通らなければR111で根拠に基づく局所入口形状を改修。通っても実歩行・美術はHOLD。源床/家具の削除は禁止** |
+| 最新確認済み実装工程 | **B198Z-R111：R110両OS実源計測で、右+0.035の9地点×幅3床・最大勾配0.125942は成立するが、頭上Ray7件×4候補でHOLD。R111は原因のsource faceを同定し、実床の上に重なった仕上げ面のみ再設計する保守的な実3D比較を実装。R111実源CI待ち／美術HOLD** |
+| 次に取り組む工程 | **R111の実メッシュCIで7件の衝突元と修正候補の採否を確認。仕上げ面以外が原因/改善なしならHOLD維持し、特定された本当の部材に限定した次の実質的な局所修正へ。原本の床/家具・安全ゲートは保存** |
 | 施工・モデル | NOT_PREPARED / 9 BLOCKED / BuildPlan空。新たな実Qwen/Gemma禁止。World接続/読取/書込禁止 |
 
 **最新情報への直リンク：** [ブランチの現在地](https://github.com/ryomashibaba/MinecraftAIBuilder/tree/feature/b198zr1-protected-architectural-revision) ／ [Actions一覧](https://github.com/ryomashibaba/MinecraftAIBuilder/actions) ／ [PR #128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128)
@@ -141,6 +141,13 @@
 - [R110実装](../scripts/b198zr110-source-contoured-right-room-approach.mjs)／[テスト](../scripts/b198zr110-source-contoured-right-room-approach.test.mjs)／[資料](B198ZR110_SOURCE_CONTOURED_APPROACH_JA.md)。R109未解決の右+0.035についてR91実床の2端・9観測地点の本物のR94/R87/R91三角形に沿って、高さオフセット4候補を比較。各点の横方向±0.023と中央の3サンプル実床近接、隣接勾配≦0.28、連続R99プローブ、5本旧線不変を条件として採否を判定。**まだ実建築を改変せず、通れば研究用OBJ polylineとJSON、通らなければHOLD**。
 - R60/R102既存レビューに`R110_R91_SOURCE_CONTOURED_ROUTE_EVIDENCE.json`と経路OBJ（床でない線）を追加。R98/R107/R109の3D原本/家具/床の全三角形は変更なし。Push/PRは軽量スモークへ復帰し、手動完全回帰にR110追加。R110初回実源比較の[Actions 39976426159](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39976426159)と[39976436857](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39976436857)は再開文書更新時点でqueued。**採用候補の有無・実測の改善を推測しない**。
 - この研究は単位なしの代理通路であり、物理的な連続床、支持荷重、実人体/実Minecraft歩行、独創性・美術、原本Qwenの汎用能力はすべて未認証・HOLD。新規Qwen/Gemma推論、Minecraft接続/読取/書込/施工、ローカルWorkの実施なし。NOT_PREPARED／9 BLOCKED／BuildPlan空、PR #128はDraft未マージ維持。
+
+## R111実装・源形状再評価（2026-10-24 JST／実メッシュ判定待ち）
+
+- R110の[Windows/Ubuntu実源CI #39976426159](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39976426159)は両OS成功、ログ同値。右翼tier2 R91→R94/R87の9地点すべて横幅3点で床有／最大源勾配0.125942。ただし4つの高さ候補0.003/0.004/0.005/0.006はすべて頭上Ray7・床未検出0・横断0で不採用。旧R109の+0.023側条件付き成功と、+0.035側のHOLDを混同しない。
+- [R111実装](../scripts/b198zr111-reversible-floor-finish-transition.mjs)／[専用検証](../scripts/b198zr111-reversible-floor-finish-transition.test.mjs)／[資料](B198ZR111_REVERSIBLE_FLOOR_FINISH_TRANSITION_JA.md)。R110の7交差の実三角形番号/kindを検証し、**全交差が源の真正テラスに裏付けられたR87またはR94の薄い床仕上げだと証明できる場合だけ**、つながった仕上げ三角形の高さを源床+0.001/+0.002とする**実3D比較案**を作成。源R98本体、R107歴史形状、読書家具、入口門柱、元の床を残す。5経路床/頭上/横断非悪化とR110の幅3点・9地点・勾配・頭上の改善を求める。条件不足は形状不変HOLD。
+- R60の既存画面にR111 JSON/OBJ、および合格候補が存在したときだけ同カメラ比較図を追加。旧ZIP/CMD/Workflowを増やさず既存Windows/Ubuntu CIへR111の実源1回試験を追加。現時点の[Actions #39978338498](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39978338498)と[#39978346028](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39978346028)は最終確認でqueued。**R111による形状変更の採否・7件のsource種類・新しい通行性能は未確定**。コードコミット成功を実QA成功と混同しない。
+- 現行建築の美術・独創性・人体歩行・荷重支持・Minecraft教育版検証、Qwen/Gemmaの汎用建築能力はHOLD/未検証。施工・ワールド接続/読取/書込・追加推論・ローカルWork禁止、NOT_PREPARED・9 BLOCKED・BuildPlan空、PR #128 Draft・未マージは継続。
 
 ## 直近CIの注意点（2026-10-23時点。変化したら再確認）
 - [R44 Windows CMD](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39914804614)：46を期待、実ファイル47で `R44_EXACT_SOURCE_COUNT_EXPECTED_46_ACTUAL_47_BASE_37_OVERLAY_10`。ファイル数合わせではなく期待リストと実マニフェストを照合する。
