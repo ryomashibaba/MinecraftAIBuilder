@@ -19,6 +19,7 @@ import {auditR103SourceJoint,auditR103SevenJunctions}
 import {reconcileR104SourceMesh} from './b198zr104-r91-active-throat-repair.mjs';
 import {optimizeR105LiveR91Widening} from './b198zr105-active-r91-throat-width-selection.mjs';
 import {reflowR106SourceTable} from './b198zr106-reading-table-doorway-reflow.mjs';
+import {proposeR107CompactRecovery} from './b198zr107-compact-reading-table-recovery.mjs';
 
 export const SCHEMA='minecraftaibuilder-b198zr102-tapered-source-gallery-end-transitions-v1';
 const fail=s=>{throw Error('B198ZR102_'+s)};
@@ -199,7 +200,9 @@ export function writeR102TaperedReview({destination,...args}={}){
    'R105_R91_WIDTH_OVERHEAD_ORIGIN_EVIDENCE.json',
    'R105_R91_WIDTH_ALTERNATIVE.obj',
    'R106_READING_TABLE_REFLOW_EVIDENCE.json',
-   'R106_READING_TABLE_REFLOW_ACTIVE_ARCHITECTURE.obj'].map(x=>path.join(destination,x));
+   'R106_READING_TABLE_REFLOW_ACTIVE_ARCHITECTURE.obj',
+   'R107_R91_FIVE_LANES_EVIDENCE.json',
+   'R107_R91_FIVE_LANES_ARCHITECTURE.obj'].map(x=>path.join(destination,x));
  if(paths.some(p=>fs.existsSync(p)))fail('NO_OVERWRITE');
  // Single source-bound build; no second expensive full mesh recreation.
  const {report,mesh}=prepareR102Runtime(args);
@@ -208,10 +211,11 @@ export function writeR102TaperedReview({destination,...args}={}){
  const activeR104=reconcileR104SourceMesh(mesh);
  const r105=optimizeR105LiveR91Widening(activeR104);
  const r106=reflowR106SourceTable(r105);
+ const r107=proposeR107CompactRecovery(r106);
  const views=buildR97CompareViews([
-  {revision:'R104 old source-corrected',faces:activeR104.faces},
-  {revision:'R105 table collision verified',faces:r105.faces},
-  {revision:'R106 furniture-only correction',faces:r106.faces}
+  {revision:'R105 source collision',faces:r105.faces},
+  {revision:'R106 relocated furniture',faces:r106.faces},
+  {revision:'R107 five-lane comparison',faces:r107.faces}
  ],[.55,.37,0]);
  const rows=report.records.map(r=>{
   const joint=report.junctionAudit.details.find(q=>q.id===r.id);
@@ -251,6 +255,9 @@ export function writeR102TaperedReview({destination,...args}={}){
   esc(activeR104.report.r91ProposedCorrectionStatus)+
   '。元R102成果物は別ファイルのまま保存。</p>'+
   views.map(x=>x.html).join('')+
+  '<p>R107：左右5本の実通路線で移設テーブルを再検査。'+
+  esc(r107.report.evaluationStatus)+
+  '。これは研究用Rayであり人の実通行を保証しない。</p>'+
   '<p>R106衝突源はR87の読書テーブル。家具7三角形だけを対象にした別案：'+
   esc(r106.report.correctionMode)+
   '。R105の頭上検出 '+r106.report.beforeRoute.overhead+
@@ -265,12 +272,14 @@ export function writeR102TaperedReview({destination,...args}={}){
   '<a href="R104_R91_ACTIVE_THROAT_REVISED.obj">R104 実形状OBJ</a> / '+
   '<a href="R105_R91_WIDTH_ALTERNATIVE.obj">R105 張出し候補OBJ</a> / '+
   '<a href="R106_READING_TABLE_REFLOW_ACTIVE_ARCHITECTURE.obj">R106 家具修正OBJ</a> / '+
+  '<a href="R107_R91_FIVE_LANES_ARCHITECTURE.obj">R107 家具・幅方向比較OBJ</a> / '+
   '<a href="R100_SOURCE_GALLERY_WIDENING_SIX_VIEW.html">旧R100</a></p>'+
   '<p>HOLD / NOT_REVIEWED / NOT_PREPARED / 9 BLOCKED / BuildPlan空 / model0 / world0</p></html>';
  const bytes=[JSON.stringify(report,null,2)+'\n',obj(mesh.faces),html,
   JSON.stringify(activeR104.report,null,2)+'\n',obj(activeR104.faces),
   JSON.stringify(r105.report,null,2)+'\n',obj(r105.faces),
-  JSON.stringify(r106.report,null,2)+'\n',obj(r106.faces)],created=[];
+  JSON.stringify(r106.report,null,2)+'\n',obj(r106.faces),
+  JSON.stringify(r107.report,null,2)+'\n',obj(r107.faces)],created=[];
  try{for(let i=0;i<paths.length;i++){fs.writeFileSync(paths[i],bytes[i],{flag:'wx'});created.push(paths[i]);}}
  catch(e){for(const p of created)fs.rmSync(p,{force:true});throw e;}
  return {relativeFile:path.basename(paths[2]),
