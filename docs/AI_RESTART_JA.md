@@ -10,8 +10,8 @@
 | 継続ブランチ | `feature/b198zr1-protected-architectural-revision` |
 | 継続PR | [#128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128) — Open / Draft / Unmerged |
 | HEAD | [開発ブランチの最新HEADを毎回GitHubで確認](https://github.com/ryomashibaba/MinecraftAIBuilder/commits/feature/b198zr1-protected-architectural-revision)（R98の初期実メッシュ検証対象は `9a2b5de9d8ba41a2b7ca4e626aa9d54ff4ffffdd`） |
-| 最新確認済み実装工程 | **B198Z-R113：R112両OS実源CIで庇後退4案すべて頭上Ray7→7、不採用HOLD。R113は源R93の外側書架頂を固定し、採光用の内側庇稜線を持ち上げる4つの実3D比較案を実装。両OS実源判定待ち／美術・人体通行HOLD** |
-| 次に取り組む工程 | **R113実メッシュCIで採光稜線立ち上げ4案の頭上交差と旧5通路非悪化を検査。採用時は同カメラ形状と利用空間の美術審査へ、不採用なら実交差の位置に基づく次案を考える。原本・床・家具・安全は保護** |
+| 最新確認済み実装工程 | **B198Z-R114：R113実メッシュCIは確認時queuedのまま。採択形状発生時にR111〜113のR60六視点描画が3案必須APIに2案を渡して失敗する潜在バグを修正。元全館／候補全館／実変更面のみの3ペイン×6視点レビューに変更。建築美術・実歩行HOLD** |
+| 次に取り組む工程 | **R113実源CIの4候補の採否とR114新軽量CIを確認。採択時はR114の実メッシュ3ペイン×6視点で内観/建築としての意味を審査し、不採択時は新たな形状を勝手に採用せず実測原因に基づく次改修へ。人間の美術・実歩行HOLD** |
 | 施工・モデル | NOT_PREPARED / 9 BLOCKED / BuildPlan空。新たな実Qwen/Gemma禁止。World接続/読取/書込禁止 |
 
 **最新情報への直リンク：** [ブランチの現在地](https://github.com/ryomashibaba/MinecraftAIBuilder/tree/feature/b198zr1-protected-architectural-revision) ／ [Actions一覧](https://github.com/ryomashibaba/MinecraftAIBuilder/actions) ／ [PR #128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128)
@@ -162,6 +162,14 @@
 - [R113実装](../scripts/b198zr113-pitched-lantern-daylight-canopy.mjs)／[テスト](../scripts/b198zr113-pitched-lantern-daylight-canopy.test.mjs)／[資料](B198ZR113_PITCHED_LANTERN_DAYLIGHT_JA.md)では、R112の局所・共辺・棚縁保護を維持し、内側採光稜線の後退と高さ増分を同時に設計。4案（0.55/+0.06, 0.65/+0.09, 0.75/+0.12, 0.88/+0.15；正規化値）。旧R107 5通路のRay非悪化、R110の実床9地点×3サンプル/勾配/頭上改善、外壁屋根マージン確保を厳格に要求。**実際の3D形状を比較し、条件が足りなければHOLD・旧形状を完全保持**。
 - 既存R60レビューにR113 JSONとOBJ、採用された場合のみR107との同カメラ比較を追加。[一度だけの実源CI #40024745083](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40024745083)、[#40024765222](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40024765222)は再開文書更新時点でqueued。**採用数・頭上改善数は未確認であり断言しない**。Push/PRは軽量試験に戻し、既存R60手動フル回帰に重いR113を継続。
 - 元R98/R107/R112・凍結B143/Qwen、main、旧Freezeは非変更。実モデルによる未知用途への生成能力、人体の実歩行/荷重、建築美術（正面/斜視/側面/内部/入口）の独立判断はすべて未認証。施工・Minecraftワールド接続読取書込・追加モデル推論・ローカルWorkを行わずNOT_PREPARED／9ゲートBLOCKED／BuildPlan空。PR #128はDraft・未マージ。
+
+## R114六視点レビューの採択時不具合を修正（2026-10-24 JST）
+
+- R113の源メッシュ4候補のWindows/Ubuntu CI [#40024745083](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40024745083) と [#40024765222](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40024765222) は**R114作業時点でqueued、数値未確認**。R113の形状採用は未確定。古いR112が7→7で不採用だった事実は維持。
+- 新たに、R111/R112/R113のR60レビューで**形状変更が成功した場合だけ**、既存R97描画器が要求する3形状ではなく2形状を渡して `THREE_SOURCE_VARIANTS_AND_DETAIL_FOCUS_REQUIRED` エラーになる不具合を発見。先行R111/112はHOLDのため露呈していなかった。**成功経路の回帰欠落**をそのまま残さない。
+- [R114実装](../scripts/b198zr114-actual-three-pane-art-review.mjs)／[テスト](../scripts/b198zr114-actual-three-pane-art-review.test.mjs)／[資料](B198ZR114_TRUE_THREE_PANE_ARCH_REVIEW_JA.md)。元の実全館メッシュ、改修後の実全館メッシュ、実変更部分の源三角形だけを抽出したCLIPPED局所面の**3ペイン×同一カメラ6視点**へ統一。変更元のkind・SHA/全館非変更範囲・六視点の面数を照合し、比較元を捏造しない。R60同一レビューと `R114_REAL_THREE_PANE_ARCHITECTURE_REVIEW_EVIDENCE.json` に統合。
+- R114専用quick testを既存Windows/Ubuntuの軽量Push/PR CIへ、同テストを従来の手動フル回帰へ追加。完了まではテスト成功を主張しない。**新たな建築修正を採用したわけではない**。人の美術判定や3D構造・屋根・実Minecraft動線を6視点の画家順SVGで認証しない。
+- 引き継ぎは本ファイルを継続更新。R113の実源Ray改善/棄却を確かめた後だけ次の形状意思決定に進む。旧R98/Qwen・R107、main/Freeze、PR Draftを保持。NOT_PREPARED／BLOCKED×9／BuildPlan空／追加推論0／Minecraft世界操作0／ローカルWork0。
 
 ## 直近CIの注意点（2026-10-23時点。変化したら再確認）
 - [R44 Windows CMD](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39914804614)：46を期待、実ファイル47で `R44_EXACT_SOURCE_COUNT_EXPECTED_46_ACTUAL_47_BASE_37_OVERLAY_10`。ファイル数合わせではなく期待リストと実マニフェストを照合する。
