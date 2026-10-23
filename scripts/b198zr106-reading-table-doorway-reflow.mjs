@@ -57,13 +57,13 @@ function readFloor(faces,p){
  return faces.some(f=>FLOOR.has(f.kind)&&
   intersectR81SegmentTriangle(from,to,f));
 }
-function sourceSupported(faces,unit){
+export function sourceSupported(faces,unit){
  const y=Math.min(...tri(unit.top).map(p=>p[1]));
  const base=unit.faces.slice(1).flatMap(f=>tri(f).filter(p=>p[1]<y-.005));
  const unique=[...new Map(base.map(p=>[p.map(round).join(','),p])).values()];
  return unique.length>=3&&unique.every(p=>readFloor(faces,p));
 }
-function meshIntersections(other,unit){
+export function meshIntersections(other,unit){
  // Bounding gate and 2 study cross rays, excluding floor and original unit.
  const pts=unit.faces.flatMap(tri);
  const min=[0,1,2].map(i=>Math.min(...pts.map(p=>p[i])));
