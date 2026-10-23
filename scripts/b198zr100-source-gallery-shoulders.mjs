@@ -99,7 +99,11 @@ export function buildR100WidenedGalleryStudy(nodes){
   const b=baseline.witnessCounts,a=improved.witnessCounts;
   const regained=Math.max(0,b.floor-a.floor);
   const noNewOtherCollision=a.overhead<=b.overhead&&a.lateral<=b.lateral;
-  const adopt=regained>0&&noNewOtherCollision;
+  // R101: neither an untested vertical rise nor an under-sampled/steep
+  // corridor may be promoted into the source candidate by a local floor hit.
+  const fullySampled=baseline.allDeclaredSourceSegmentsWithinProbeCoverage&&
+   improved.allDeclaredSourceSegmentsWithinProbeCoverage;
+  const adopt=regained>0&&noNewOtherCollision&&fullySampled;
   if(adopt){active=[...active,...geometry.faces];adopted++;}
   records.push({...record,status:adopt?
    'GEOMETRIC_FLOOR_WITNESS_GAIN_BUT_ARCHITECTURAL_HOLD':
@@ -107,6 +111,7 @@ export function buildR100WidenedGalleryStudy(nodes){
    beforeWitnessCounts:b,afterWitnessCounts:a,
    restoredSampledFloorWitnesses:regained,
    noNewOverheadOrLateralProbeIntersections:noNewOtherCollision,
+   noIncompleteSourceSegments:fullySampled,
    addedSourceFaces:adopt?geometry.faces.length:0,
    rejectedCandidateDoesNotAlterActiveMesh:!adopt});
  }

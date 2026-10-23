@@ -58,7 +58,10 @@ function sampleAt(mesh,p,normal){
  const witnesses=[];
  for(const offset of [-PROXY.halfWidth,0,PROXY.halfWidth]){
   const q=add(p,normal[0]*offset,0,normal[2]*offset);
-  const support=intersectsAny(mesh,add(q,0,.024,0),add(q,0,-PROXY.footToleranceBelow,0));
+  // R101: support must lie at/below the foot. A low overhang at +.015
+  // must NEVER count as a load-bearing floor just because an older probe
+  // started .024 ABOVE the foot location.
+  const support=intersectsAny(mesh,add(q,0,.002,0),add(q,0,-PROXY.footToleranceBelow,0));
   const ceiling=intersectsAny(mesh,add(q,0,.012,0),add(q,0,PROXY.height,0));
   if(!support)witnesses.push({class:'floor',offset:R(offset)});
   if(ceiling)witnesses.push({class:'overhead',offset:R(offset),...ceiling});
@@ -79,7 +82,7 @@ function sampleAt(mesh,p,normal){
 export function screenR99FiniteRoute(faces,points){
  if(!Array.isArray(points)||points.length<2||points.some(p=>!finite(p))||
   points.length>64)fail('VALID_LIMITED_3D_ROUTE_REQUIRED');
- const mesh=indexMesh(faces),stations=[],segments=[];
+ const mesh=indexMesh(faces),stations=[],segments=[],incomplete=[];
  let totalDist=0;
  for(let i=1;i<points.length;i++){
   const a=points[i-1],b=points[i],len=dist(a,b);
@@ -87,13 +90,25 @@ export function screenR99FiniteRoute(faces,points){
   totalDist+=len;
   const planar=Math.hypot(b[0]-a[0],b[2]-a[2]);
   if(planar<1e-7){
-   segments.push({i,classification:'VERTICAL_SOURCE_SEGMENT_UNSCREENED'});
+   const reason='VERTICAL_SOURCE_SEGMENT_UNSCREENED';
+   incomplete.push({segment:i,reason});
+   segments.push({i,classification:reason,normalizedLength:R(len)});
    continue;
   }
+  const gradient=Math.abs(b[1]-a[1])/planar;
+  if(gradient>.28){
+   incomplete.push({segment:i,reason:'STEEP_SOURCE_GRADE_NOT_PROVEN',
+    observedPlanarGradient:R(gradient)});
+  }
   const normal=[(b[2]-a[2])/planar,0,-(b[0]-a[0])/planar];
-  const divisions=Math.min(24,Math.max(1,Math.ceil(len/PROXY.sampleSpacingUpperBound)));
+  const desiredDivisions=Math.max(1,Math.ceil(len/PROXY.sampleSpacingUpperBound));
+  const divisions=Math.min(24,desiredDivisions);
+  if(desiredDivisions>24){
+   incomplete.push({segment:i,reason:'SAMPLING_GAP_EXCEEDS_DECLARED_MAXIMUM',
+    actualSampleInterval:R(len/divisions)});
+  }
   segments.push({i,divisions,normalizedLength:R(len),
-   planarGradient:R(Math.abs(b[1]-a[1])/planar)});
+   planarGradient:R(gradient),sampleIntervalNormalized:R(len/divisions)});
   for(let step=0;step<=divisions;step++){
    const pt=lerp(a,b,step/divisions),obs=sampleAt(mesh,pt,normal);
    if(obs.length)stations.push({segment:i,step,at:pt.map(R),
@@ -108,9 +123,14 @@ export function screenR99FiniteRoute(faces,points){
  return {normalizedRouteLength:R(totalDist),segments,
   stationCount:segments.reduce((s,v)=>s+(v.divisions===undefined?0:v.divisions+1),0),
   witnessStationCount:stations.length,witnessCounts:counts,
+  unscreenedSegmentCount:incomplete.length,
+  incompleteSourceCoverage:incomplete,
+  allDeclaredSourceSegmentsWithinProbeCoverage:incomplete.length===0,
   // Retain only first 24 witness stations for bounded review JSON; totals are full.
   examples:stations.slice(0,24),
-  screeningStatus:counts.floor+counts.overhead+counts.lateral>0?
+  screeningStatus:incomplete.length?
+   'HOLD_SOURCE_SEGMENTS_NOT_FULLY_SCREENED':
+   counts.floor+counts.overhead+counts.lateral>0?
    'HOLD_FINITE_VOLUME_PROBES_FOUND_GAPS_OR_INTERSECTIONS':
    'NO_PROBE_HITS_NOT_PHYSICAL_WALKABILITY_CERTIFICATION',
   finite3DSweepCertified:false,humanBodyVolumeCertified:false,
@@ -162,6 +182,8 @@ export function buildR99FiniteVolumeStudy(nodes){
   actual3DTriangleIntersections:true,
   originalRoutesAndR98SourceUnmodified:true,
   warningCountByClass:totals,
+  unscreenedSourceSegments:routeAudit.reduce((sum,r)=>sum+r.unscreenedSegmentCount,0),
+  sourceGraphNotFullyScreened:routeAudit.some(r=>r.incompleteSourceCoverage.length>0),
   researchGraphIsNotTraversableGeometry:true,
   certifiedAccessibleDestinations:0,
   pathCollisionFreeCertification:false,
@@ -215,6 +237,7 @@ export function writeR99FiniteVolumeReview({destination,...args}={}){
   r.routeNodes+'</td><td>'+r.stationCount+'</td><td>'+
   r.witnessCounts.floor+'</td><td>'+r.witnessCounts.overhead+
   '</td><td>'+r.witnessCounts.lateral+'</td><td>'+
+  r.unscreenedSegmentCount+'</td><td>'+
   esc(r.screeningStatus)+'</td></tr>').join('');
  const doc='<!doctype html><html lang="ja"><meta charset="utf-8">'+
   '<meta http-equiv="Content-Security-Policy" content="default-src &#39;none&#39;; style-src &#39;unsafe-inline&#39;">'+
@@ -230,7 +253,7 @@ export function writeR99FiniteVolumeReview({destination,...args}={}){
   '経路上に実際の床や壁が存在する/存在しないことの完全証明ではない。</p>'+
   routeDiagram(all)+
   '<table><tr><th>目的地</th><th>節点</th><th>観察ステーション</th>'+
-  '<th>床未検出</th><th>頭上交差</th><th>横断交差</th><th>判断</th></tr>'+rows+'</table>'+
+  '<th>床未検出</th><th>頭上交差</th><th>横断交差</th><th>未検査の区間</th><th>判断</th></tr>'+rows+'</table>'+
   '<p>グラフ上の7室＋ラウンジ接続と、現実の人が歩けるという判定は別。'+
   '検出した失敗はR100以降の形状修正候補にする。'+
   '<a href="R98_RIGHT_CROWN_LOCAL_LOFT_ACTIVE_ARCHITECTURE.obj">元R98 OBJ</a> / '+
