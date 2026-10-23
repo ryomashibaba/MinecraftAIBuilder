@@ -10,8 +10,8 @@
 | 継続ブランチ | `feature/b198zr1-protected-architectural-revision` |
 | 継続PR | [#128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128) — Open / Draft / Unmerged |
 | HEAD | [開発ブランチの最新HEADを毎回GitHubで確認](https://github.com/ryomashibaba/MinecraftAIBuilder/commits/feature/b198zr1-protected-architectural-revision)（R98の初期実メッシュ検証対象は `9a2b5de9d8ba41a2b7ca4e626aa9d54ff4ffffdd`） |
-| 最新確認済み実装工程 | **B198Z-R117：R116修復後のR113とR115実源両OS試験はSUCCESSだが、各4案とも頭上Ray7→7で全形状不採用。R117で最大改修後に残る真のsource三角形と交点、変形した実三角形頂点を追跡。初回R117実測未確定、建築原本はHOLD** |
-| 次に取り組む工程 | **R117実源Windows/Ubuntuから最大R113/R115変更後の7件のfirst-hit部材のkind・三角形番号を確定し、実際の残留部材を局所設計し直す。新たな根拠なしに前の改修案を繰り返さない。実歩行・美術・支持はHOLD** |
+| 最新確認済み実装工程 | **B198Z-R118：R117両OS実源SUCCESSで庇4474の7交差が庇改修後すべて読書座面4476へ移ると判明。R118で書架/庇一体上昇＋連続座面の手前縁を後退させる4形状を作成し、R60の3Dレビュー/両OS CIと接続。実測で採否確定までは元建築HOLD／美術・人体歩行未認証** |
+| 次に取り組む工程 | **R118実メッシュのWindows/Ubuntuログで4候補の残存座面奥行き、頭上Ray・床・横断・元5通路非悪化を確認。実測改善時のみR114の同カメラ3ペイン×6視点で建築美術を評価。人体の座面寸法と接合支持は依然未認証** |
 | 施工・モデル | NOT_PREPARED / 9 BLOCKED / BuildPlan空。新たな実Qwen/Gemma禁止。World接続/読取/書込禁止 |
 
 **最新情報への直リンク：** [ブランチの現在地](https://github.com/ryomashibaba/MinecraftAIBuilder/tree/feature/b198zr1-protected-architectural-revision) ／ [Actions一覧](https://github.com/ryomashibaba/MinecraftAIBuilder/actions) ／ [PR #128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128)
@@ -190,6 +190,13 @@
 - [R116/R113 source CI](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40028599761) は両OS成功。R113の後退・内縁持上げ4候補は全て頭上7→7、床欠落0、横断0、旧5通路非悪化、全案HOLD。[R115 source CI](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40026552643)も両OS成功。書架上端・庇一体持上げ4候補は全て頭上7→7、他のprobe悪化なし、全案HOLD。**CI成功を建築性能の改善としない**。
 - [R117 real source scanner](../scripts/b198zr117-post-canopy-real-source-hits.mjs)／[test](../scripts/b198zr117-post-canopy-real-source-hits.test.mjs)／[資料](B198ZR117_SOURCE_REATTRIBUTION_JA.md)。旧R107の真正SHAを保持したまま、R113最大（0.88/+0.15）・R115最大（+0.16）の研究用実メッシュから、交点7件のsource kind/index/XYZと実変更面XYZを記録。旧面に当たり続けるのか、別面へfirst-hitが移動したのかを切り分ける。採否はR117 CI実測待ち。
 - 施工・Minecraft世界操作・追加Qwen/Gemma推論・Workは0、NOT_PREPARED/9 BLOCKED/BuildPlan空。美術・人の歩行・支持は全HOLD、Draft PR #128維持、main/Freeze/B143原本未変更。
+
+## R118の建築改修：庇から連続座面へ移った7交差に対処（2026-10-24 JST）
+
+- [R117両OS CI](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40037989415)は成功。R113最大ピッチ改修およびR115最大本棚一体上昇のどちらも、元のR93庇4474から**実R93連続座面4476へ7件全てfirst-hitが移動**した。旧R113/R115は頭上7→7のため不採用。これまでの原因の見落としを修正し、座面張り出しに直接取り組む。
+- [R118実3D修正](../scripts/b198zr118-reading-seat-clearance.mjs)／[テスト](../scripts/b198zr118-reading-seat-clearance.test.mjs)／[資料](B198ZR118_READING_SEAT_CLEARANCE_JA.md)。R115高窓の実源庇4面＋R93源4476に共辺で連なる連続座面帯を保持し、座面手前縁の35/55/70/82%後退を試験する。座面そのものを削除せず、背面の書架と足元の真正床・入口・外殻は非変更。残存座面幅0.0085以上（研究用正規化量）・旧幅17%以上を要求。美術/人間に使えるサイズは未認証。
+- 既存R60レビューにR118 JSON/OBJを追加。真正床9×幅3と実源Ray・旧5通路の非悪化に合格し頭上7件が減った候補だけ形状採択。採択時のみR114の元全館/候補全館/局所変更面の3ペイン6視点を生成。CI quickは通常push/PR、重いR118 sourceは指定push一度だけ、既存手動fullにも追加。**本引き継ぎ作成時点ではR118候補の採否・CI結果は未確認。**
+- 人体歩行・座り心地・構造・Minecraft実使用・Qwen/Gemma汎用モデル能力は未認証、c01はコード独立研究。NOT_PREPARED／9 BLOCKED／BuildPlan空／モデル推論0／ワールド接続・読取・書込・施工0／ローカルWork0。PR #128 Draft・main/Freeze/B143原本保持。
 
 ## 直近CIの注意点（2026-10-23時点。変化したら再確認）
 - [R44 Windows CMD](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39914804614)：46を期待、実ファイル47で `R44_EXACT_SOURCE_COUNT_EXPECTED_46_ACTUAL_47_BASE_37_OVERLAY_10`。ファイル数合わせではなく期待リストと実マニフェストを照合する。
