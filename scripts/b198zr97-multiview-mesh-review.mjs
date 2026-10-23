@@ -145,7 +145,7 @@ export function buildR97Comparison(nodes){
   sharedCameraForAllVariants:true,
   no3DShapeChanged:true};
 }
-export function prepareR97ComparisonReview(args={}){
+function prepareR97Runtime(args={}){
  const {r96Evidence,...prior}=args;
  const exact=prepareR96WindowReview(prior);
  if(!r96Evidence||r96Evidence.schema!==R96_SCHEMA||
@@ -155,7 +155,7 @@ export function prepareR97ComparisonReview(args={}){
   fail('FROZEN_RAW_SHA_MISMATCH');
  const r=buildR97Comparison(args.r80Evidence.conceptualRouteNodes);
  const {views,...rest}=r;
- return {schema:SCHEMA,originalRawSha256:args.expectedRawSha256,
+ return {report:{schema:SCHEMA,originalRawSha256:args.expectedRawSha256,
   oldB143Status:exact.oldB143Status,strictR96EvidenceRecomputed:true,
   ...rest,
   viewSpecs:views.map(v=>({id:v.id,title:v.title,camera:v.camera,
@@ -163,7 +163,10 @@ export function prepareR97ComparisonReview(args={}){
   multiViewAuthorReview:'NOT_REVIEWED',
   architectureQualityCertified:false,structuralSupportCertified:false,
   physicalTraversalCertified:false,modelGenerationImprovementCertified:false,
-  safety:safe()};
+  safety:safe()},views};
+}
+export function prepareR97ComparisonReview(args={}){
+ return prepareR97Runtime(args).report;
 }
 const hashSource=s=>createHash('sha256').update(s).digest('hex');
 export function writeR97ComparisonReview({destination,...args}={}){
@@ -175,8 +178,7 @@ export function writeR97ComparisonReview({destination,...args}={}){
   evidenceFile=path.join(destination,base+'_EVIDENCE.json'),
   reviewFile=path.join(destination,base+'_REVIEW.html');
  if(fs.existsSync(evidenceFile)||fs.existsSync(reviewFile))fail('NO_OVERWRITE');
- const report=prepareR97ComparisonReview(args);
- const views=buildR97Comparison(args.r80Evidence.conceptualRouteNodes).views;
+ const {report,views}=prepareR97Runtime(args);
  const roof=report.roofProbe;
  const issues=[
   'P0: 右側tier 3の屋根方向の実三角形交差候補 ('+
