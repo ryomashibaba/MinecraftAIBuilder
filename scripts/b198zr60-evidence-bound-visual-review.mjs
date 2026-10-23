@@ -1017,7 +1017,7 @@ export function createR60VisualReview({r54Zip,r48Zip=null,destination}={}){
    (v.relativeR100SourceShoulderFloor?' / <a href="'+v.relativeR100SourceShoulderFloor+
     '">R100 幅不足の連絡デッキへ実床面追加した比較案（施工禁止）</a>':'')+
    (v.relativeR102TaperedGalleryAprons?' / <a href="'+v.relativeR102TaperedGalleryAprons+
-    '">R102 元通路端部へなめらかにつながる実3D床面別案（美術HOLD）</a>':'')+'</li>').join('');
+    '">R102/R104 旧R88と現行R91の接合を比較・不接続床を除外（美術HOLD）</a>':'')+'</li>').join('');
   const html='<!doctype html><html lang="ja"><meta charset="utf-8">'+
    '<meta http-equiv="Content-Security-Policy" content="default-src &#39;none&#39;; style-src &#39;unsafe-inline&#39;">'+
    '<title>R60 建築品質の人間審査</title>'+
