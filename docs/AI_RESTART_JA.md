@@ -9,9 +9,9 @@
 | リポジトリ | [ryomashibaba/MinecraftAIBuilder](https://github.com/ryomashibaba/MinecraftAIBuilder) |
 | 継続ブランチ | `feature/b198zr1-protected-architectural-revision` |
 | 継続PR | [#128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128) — Open / Draft / Unmerged |
-| この文書を作る前の確認済みHEAD | `b2e247ae538297d91371496f964271816a09fdd2` |
-| 最新確認済み実装工程 | **B198Z-R96** |
-| 次に取り組む工程 | **R97：実3D全館多視点美術レビュー** |
+| この文書の更新直前の開発HEAD | `ee67e1ced4ed5e2fe444b5eb60ac6a40fd628c30` |
+| 最新確認済み実装工程 | **B198Z-R97：比較実装あり／最新CI結果は確認中** |
+| 次に取り組む工程 | **R97の実レビュー検証→R98の形状改修** |
 | 施工・モデル | NOT_PREPARED / 9 BLOCKED / BuildPlan空。新たな実Qwen/Gemma禁止。World接続/読取/書込禁止 |
 
 **最新情報への直リンク：** [ブランチの現在地](https://github.com/ryomashibaba/MinecraftAIBuilder/tree/feature/b198zr1-protected-architectural-revision) ／ [Actions一覧](https://github.com/ryomashibaba/MinecraftAIBuilder/actions) ／ [PR #128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128)
@@ -23,19 +23,27 @@
 - これは**Qwenが生成した新モデルではない**。実Qwen由来の失敗原本は凍結保持し、B143 HOLD。
 - [R60軽量CI（HEAD b2e247、Windows＋Ubuntu成功）](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39914890947)。これは軽量スモーク中心であり、**R58〜R96の全履歴回帰を合格した意味ではない**。全履歴の最新版での成功は未確認。
 
+## R97現在地（2026-10-23 JST）
+
+- [R97実装](../scripts/b198zr97-multiview-mesh-review.mjs) / [テスト](../scripts/b198zr97-multiview-mesh-review.test.mjs) / [設計書](B198ZR97_MESH_BOUND_SIX_VIEW_REVIEW_JA.md)。R94/R95/R96の**実三角形4,446/4,608/4,692面**から、正面・斜視・側面・俯瞰・反対向き外形・右上層tier3局所拡大の**同一カメラ/同一縮尺6視点×3版**を生成する研究実装。結果を既存R60一操作レビューに追加するコードを導入。
+- [初回R97全館生成のUbuntu実行](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39940423587)：全館形状の比較テスト自体は約174秒でPASS。ただし同じ古いコミットのCIは「証拠不足入力のエラー文字列を限定しすぎたテスト」が1件FAIL。該当テスト修正済み。
+- 通常Push/PRのR97は軽量検査のみとし、**全館生成の重いテストは手動の完全回帰へ**戻した。R97本体はJSON証拠再計算とHTML6視点出力を共有して無駄な再計算を削減。
+- この時点で**最新HEAD上のWindows+Ubuntu両方のCI成功は未確認**。本機能による実際の出力ファイルの人間美術審査も未実施。R97を美術合格やQwen生成成功へ昇格しない。
+- R60への統合後、R94〜R96 OBJとR97比較HTMLがレビュー画面に揃う。実人体頭上高・経路・窓支持/採光・Minecraft実歩行は未認証。R98の新形状修正は未開始。
+
 ## 直近CIの注意点（2026-10-23時点。変化したら再確認）
 - [R44 Windows CMD](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39914804614)：46を期待、実ファイル47で `R44_EXACT_SOURCE_COUNT_EXPECTED_46_ACTUAL_47_BASE_37_OVERLAY_10`。ファイル数合わせではなく期待リストと実マニフェストを照合する。
 - [B198H Chromium](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39914803840)：Playwright 1.56.1が当該Ubuntu 26.04のChromium導入に非対応。ブラウザ審査自体はこのCIで未実施。
 - [R55 workflow](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39914889413)：失敗状態。取得結果から根因を断定できない。
 - PR本文はR1〜R17中心で、後続R77〜R96の要約が古い。再開時に整える価値がある。
 
-## 次工程R97（提案。まだ実装完了ではない）
+## R97の残作業とR98への移行条件
 1. 現在HEADとPR #128、最新CIを再照合。
-2. R94/R95/R96の**実3Dメッシュ**を同一条件の正面・斜視・側面・俯瞰・吹抜け側・閲覧室の6視点以上で比較。R96の窓周りも全館に含める。生成画像を実形状証拠として使わない。
+2. R97で生成される6視点×3版の比較HTMLを実際に開き、同一カメラ/倍率と形状描画を人が確認する。新規建築画像を生成して証拠と混同しない。
 3. R95で見つかった右側最上層tier3の頭上外殻交差、7室の通行/視線/窓部支持の形状上の問題を目視と実メッシュで検討。
 4. 明確な欠点と優先順位をまとめ、R98で形状修正する対象を絞る。審査していない美術をPASSにしない。
 5. 既存R60レビューの導線を再利用し、新規ZIP・CMD・モデル推論・Minecraft接続を増やさない。
-6. R97の**実作業・テスト・Commit/CIを完了してから**この現在地を更新し、必要に応じてPR概要に追記。
+6. R97の最新HEADでのCI結果と実HTML美術審査を区別して報告し、重要な改善対象が明確になってからR98へ移る。
 
 ## 次の研究段階（変更可能な計画）
 - R98：R97で証拠の得られた美術/頭上高/接合上の重要欠点を比較バリアントで直す。
