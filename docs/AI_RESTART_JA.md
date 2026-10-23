@@ -10,8 +10,8 @@
 | 継続ブランチ | `feature/b198zr1-protected-architectural-revision` |
 | 継続PR | [#128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128) — Open / Draft / Unmerged |
 | HEAD | [開発ブランチの最新HEADを毎回GitHubで確認](https://github.com/ryomashibaba/MinecraftAIBuilder/commits/feature/b198zr1-protected-architectural-revision)（R98の初期実メッシュ検証対象は `9a2b5de9d8ba41a2b7ca4e626aa9d54ff4ffffdd`） |
-| 最新確認済み実装工程 | **B198Z-R100：R88連絡デッキの幅拡張を実形状で実装。実モデルQA待ち（PASS未宣言）** |
-| 次に取り組む工程 | **R99/R100の実モデル検証→R100の改善件数を確定。0件なら改修案を見直す** |
+| 最新確認済み実装工程 | **B198Z-R101：経路安全判定の欠落を修正し、低い障害物の床誤認を防止。CI未検証** |
+| 次に取り組む工程 | **R101 CI結果、R100実モデルでの床改善件数を確認→重要な通路の実形状修正** |
 | 施工・モデル | NOT_PREPARED / 9 BLOCKED / BuildPlan空。新たな実Qwen/Gemma禁止。World接続/読取/書込禁止 |
 
 **最新情報への直リンク：** [ブランチの現在地](https://github.com/ryomashibaba/MinecraftAIBuilder/tree/feature/b198zr1-protected-architectural-revision) ／ [Actions一覧](https://github.com/ryomashibaba/MinecraftAIBuilder/actions) ／ [PR #128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128)
@@ -54,6 +54,13 @@
 - R60レビューにR100候補のOBJ/JSON/6視点比較HTMLを追加。既存Draft PR #128継続。元Qwen・R98以前の成果物は非改変。
 - [R100実モデル検証CI](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39947874799) は確認時点でqueued。通常CIは原則軽量、今回の測定を含むコミットだけ実メッシュ回帰を追加している。成功件数、Windows/UbuntuのPASSともに**未確定**。
 - R99の全館8経路は別途[CI待ち](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39946559669)。R100が一部で床改善しても、全館の人間歩行・建築美術・構造耐荷・汎用AI生成能力は未認証。次の設計修正は**取得できた問題地点**に基づいて選ぶ。
+
+## R101現在地（2026-10-23 JST／未検証）
+
+- [R101専用回帰テスト](../scripts/b198zr101-route-coverage-regression.test.mjs)／[修正資料](B198ZR101_ROUTE_COVERAGE_QA_JA.md)。R99の床判定線が足元から上に伸び、低い障害物を床と誤認する可能性を排除。床レイ始点を足元+0.024から+0.002正規化単位に変更。
+- 垂直方向のみの源経路区間・急勾配>0.28・24分割では0.07間隔を守れない長い区間を**明示的に不完全検査のHOLD**として数え、R100で改善案を誤採択しない。
+- [R101最新CI](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39950219073) は確認時queued。人工形状の回帰テストを追加したが**結果は未確認**。R100の全実メッシュでの少なくとも1件改善を要求する重いテストは既存の手動全履歴回帰へ戻した。初回R100試験もqueuedのまま。検証結果を想像してPASSにしない。
+- 変更はR99/R100の研究用検証コードとテスト、ワークフローのみ。旧モデル/実Qwen/Gemma/ワールド/施工は手を付けず、安全ゲート9件BLOCKEDを維持。
 
 ## 直近CIの注意点（2026-10-23時点。変化したら再確認）
 - [R44 Windows CMD](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39914804614)：46を期待、実ファイル47で `R44_EXACT_SOURCE_COUNT_EXPECTED_46_ACTUAL_47_BASE_37_OVERLAY_10`。ファイル数合わせではなく期待リストと実マニフェストを照合する。
