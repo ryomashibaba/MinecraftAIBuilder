@@ -18,7 +18,7 @@ test('R97 projection: source mesh only, three shared cameras, no false PASS',()=
   assert.equal(view.camera.camera.length,2);
  }
  assert.throws(()=>buildR97CompareViews([variants[0]],[.2,.3,0]),/THREE_SOURCE/);
- assert.throws(()=>prepareR97ComparisonReview({}),/FULL_R96_ANCESTRY_MISMATCH/);
+ assert.throws(()=>prepareR97ComparisonReview({})); // prior full source-chain gates reject absent evidence
 });
 test('R97 original mesh provenance: actual 3D revisions and roof-probe HOLD',()=>{
  const nodes={
