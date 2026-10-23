@@ -13,7 +13,7 @@ const nodes={
 };
 test('R118 quick: setback full continuous real seat with unchanged rear rail and unrelated floor',()=>{
  const a=[.5,.42,-.7],b=[.5,.42,-.65],c=[.7,.42,-.65],d=[.7,.42,-.7];
- const orig=[{kind:SEAT,a,b,c},{kind:SEAT,a,c,b:d,c:a},
+ const orig=[{kind:SEAT,a,b,c},{kind:SEAT,a:a,b:c,c:d},
   {kind:'unmodified_floor',a:[.5,.32,-.7],b:[.7,.32,-.65],c:[.5,.32,-.65]}];
  const frozen=JSON.stringify(orig);
  const v=insetR118ActualConnectedSeat(orig,0,.55);
