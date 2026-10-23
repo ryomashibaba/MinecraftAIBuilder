@@ -40,6 +40,7 @@ test('R100 real source: only witnessed-gain changes and immutable R98 prefix',()
  assert.equal(r.addedRealShoulderFaces,4*r.widenedResearchGalleryCount);
  assert.equal(r.numberOfSourceRooms,7);
  assert.equal(r.records.length,7);
+ assert(r.widenedResearchGalleryCount>0,'Real R88 gallery mesh must gain actual supported shoulder surface');
  assert.equal(r.originalR98Preserved,true);
  assert.equal(r.genuineHumanWalkabilityCertified,false);
  assert.equal(r.independentArchitecturalArtReview,'NOT_REVIEWED');
