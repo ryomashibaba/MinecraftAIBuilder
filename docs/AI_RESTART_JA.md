@@ -10,8 +10,8 @@
 | 継続ブランチ | `feature/b198zr1-protected-architectural-revision` |
 | 継続PR | [#128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128) — Open / Draft / Unmerged |
 | HEAD | [開発ブランチの最新HEADを毎回GitHubで確認](https://github.com/ryomashibaba/MinecraftAIBuilder/commits/feature/b198zr1-protected-architectural-revision)（R98の初期実メッシュ検証対象は `9a2b5de9d8ba41a2b7ca4e626aa9d54ff4ffffdd`） |
-| 最新確認済み実装工程 | **B198Z-R115：R113実源CIは直近確認でqueued。R114の3ペイン×6視点描画修正済み。R115は衝突源R93の庇と書架上端を接合保持のまま一体で上げる4つの実3D建築案を実装。元床/家具/入り口不変・実源両OSの判定待ち／美術HOLD** |
-| 次に取り組む工程 | **R113とR115の両OS実メッシュCIから庇の頭上Ray・旧5経路非悪化を検証し、単なる数値PASSではなく同一カメラの実3D美術比較も行う。候補不採用ならHOLDを維持。人の美術・実歩行・荷重は未認証** |
+| 最新確認済み実装工程 | **B198Z-R116：R113の実源CIはWindows/UbuntuともFAIL。R112 helper未許可の0.65後退率が2案目で例外を出し、4案を未完了のまま中断したことを特定。R116ではR112の過去4候補は変更せず、R113にだけ0.65を限定許可、候補ごとの不適合をHOLDとして記録するよう修正。R115の実源CIは待機、R116実源CI待ち／美術HOLD** |
+| 次に取り組む工程 | **R116で修復したR113の全4候補と、R115の書架一体型庇の実源CIが完了したか確認。4案ごとの幾何HOLD/採用と元5通路非悪化を区別し、採用時だけR114の3ペイン6視点で美術を評価。人の実歩行・荷重はHOLD** |
 | 施工・モデル | NOT_PREPARED / 9 BLOCKED / BuildPlan空。新たな実Qwen/Gemma禁止。World接続/読取/書込禁止 |
 
 **最新情報への直リンク：** [ブランチの現在地](https://github.com/ryomashibaba/MinecraftAIBuilder/tree/feature/b198zr1-protected-architectural-revision) ／ [Actions一覧](https://github.com/ryomashibaba/MinecraftAIBuilder/actions) ／ [PR #128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128)
@@ -177,6 +177,13 @@
 - [R115実装](../scripts/b198zr115-integral-lantern-clerestory.mjs)／[試験](../scripts/b198zr115-integral-lantern-clerestory.test.mjs)／[説明](B198ZR115_REAL_INTEGRAL_LANTERN_CLERESTORY_JA.md)。R111で**同一R93庇面4474への実交差7件**とR112での**内縁のみ後退4案7→7の失敗**に基づき、R93のキャノピーだけでなく、その**真正の共辺接合を持つ書架壁の上端**も一緒に上げる局所造形を実装。屋根・読書用途・書架壁を消さず、壁の下端、実床、書机、玄関、外殻を完全保持する。4候補は正規化上昇+.07/+ .10/+ .13/+ .16。原本R98・R107のSHA、真正源4三角形（キャノピー2＋書架壁2）の共有上端と他面の不変性、旧5経路のRay非悪化、R110の実床9×3と交差改善、屋根マージンを保証できない案はHOLD。
 - 既存R60レビューへR115 JSONと全館候補OBJを追加し、候補が検証に採択されたときだけR114の**元全館／変更後全館／変更面のみの実源3ペイン×6視点**を作成。R114にはR115の書架壁kindの保護された差分だけ追加許可。R115の専用quick試験を既存軽量PR CIと既存手動フル回帰へ、実源試験は**このR115コミットのpushだけ**を条件に追加し、以降の通常pushで重いテストを繰り返さない。ZIP/CMD/Workflowの増設なし。
 - **この時点でR115の実測値・選ばれた建築案は未確定**。GitHub Actionsの実行範囲・実ログを確認してからのみ採否を公表。c01はLLM新規生成ではなく独立手続き型の研究であり、建築の独創性/人体実歩行/荷重/実Minecraft/汎用生成は未認証。NOT_PREPARED、9 BLOCKED、BuildPlan空、Qwen/Gemma0、Minecraft接続読取書込施工0、ローカルWork0、main/Freeze/凍結原本保存、PR#128 Draft継続。
+
+## R116：R113実源CIの致命的中断原因を修復（2026-10-24 JST／修正後の実測未確定）
+
+- [R113旧CI #40024745083](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40024745083) はWindows/UbuntuのR113重い実源テストが両方FAIL、双方で`B198ZR112_AUTHENTIC_R93_CANOPY_TRIANGLE_AND_BOUNDED_RETRACTION_REQUIRED`を記録。R113候補率0.65がR112 helperで許可されていなかったため、**2案目で例外が出て全4案比較が中断**した。これは頭上7件が幾何的に解決できないとの実測とは異なり、CIが途中で壊れたソース上のバグ。R113が改善したとは言えない。
+- [R112の源庇 helper](../scripts/b198zr112-lantern-canopy-clearance.mjs) の研究候補4つはそのまま維持。R113から`allowR113Intermediate=true`を明示した場合に限り、前工程R113で固定した率0.65を許容する。範囲外の量は拒否。R113の各候補について実源roof margin/共辺/試験経路で既知のB198ZR112/113拒否があれば当該案HOLDとして残し**他の候補まで検証を止めない**。未知の例外は黙殺しない。R113全4件の採否数を検査し、0.65の短い局所試験を追加。
+- 一度だけのR116修正後R113実源両OS試験を既存R60ワークフローへ登録。旧R115の[実源試験#40026557584](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40026557584)、R114の[軽量CI#40025353582](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40025353582)はR116作業開始時点でqueued。**修正後R113のHEAD/実源判定、R115新造形の判定はいずれも未確定**。HOLDや未完了を美術認証・Qwen汎用生成改善にしない。
+- 原本R98/Qwen/Freeze、R107、mainを保護。PR #128 Draft/未マージ。NOT_PREPARED、9 BLOCKED、BuildPlan空。追加Qwen/Gemma推論0、Minecraft世界の接続/読取/書込/施工0、ローカルWork0。
 
 ## 直近CIの注意点（2026-10-23時点。変化したら再確認）
 - [R44 Windows CMD](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39914804614)：46を期待、実ファイル47で `R44_EXACT_SOURCE_COUNT_EXPECTED_46_ACTUAL_47_BASE_37_OVERLAY_10`。ファイル数合わせではなく期待リストと実マニフェストを照合する。

@@ -33,7 +33,8 @@ const area=f=>{const u=f.b.map((x,i)=>x-f.a[i]),v=f.c.map((x,i)=>x-f.a[i]);
 export function reshapeR113SourceCanopy(faces,hitIndex,{retract,rise}={}){
  if(!PROFILES.some(x=>x.retract===retract&&x.rise===rise))
   fail('PREAPPROVED_BOUNDED_PITCH_PROFILE_REQUIRED');
- const prior=retreatR112SourceCanopy(faces,hitIndex,{fraction:retract});
+ const prior=retreatR112SourceCanopy(faces,hitIndex,
+  {fraction:retract,allowR113Intermediate:retract===.65});
  const groups=new Map();
  for(const i of prior.changedIndices)for(const p of
   [prior.faces[i].a,prior.faces[i].b,prior.faces[i].c]){
@@ -88,7 +89,8 @@ export function inspectR113PitchedCanopyStudy(r107){
  const five=auditR107AdjacentCorridor(r107.faces,throat);
  const candidates=[];let winner=null;
  for(const option of PROFILES){
-  const variant=reshapeR113SourceCanopy(r107.faces,4474,option);
+  try {
+   const variant=reshapeR113SourceCanopy(r107.faces,4474,option);
   const inspected=deriveR110SourceLane(variant.faces,r107.originalR98Faces,.035,{gap:.003});
   const adjacent=auditR107AdjacentCorridor(variant.faces,throat);
   const noneWorse=adjacent.allFiniteSourceLanesScreened&&
@@ -112,7 +114,19 @@ export function inspectR113PitchedCanopyStudy(r107){
   if(valid&&(!winner||record.newOverhead<winner.record.newOverhead||
     record.newOverhead===winner.record.newOverhead&&
     record.rise<winner.record.rise))winner={...variant,record};
+  }catch(error){
+   // A genuine roof/collision/continuity rejection must not prevent
+   // inspection of the other three already-authored architectural proposals.
+   const message=String(error?.message??error);
+   if(!message.startsWith('B198ZR112_')&&
+      !message.startsWith('B198ZR113_'))throw error;
+   candidates.push({...option,accepted:false,
+    rejectedByRealSourceGeometry:message,
+    alteredSourceTriangles:0,geometryChanged:false});
+  }
  }
+ if(candidates.length!==PROFILES.length)
+  fail('FOUR_INDEPENDENT_ARCHITECTURAL_DECISIONS_REQUIRED');
  const active=winner?.faces??r107.faces;
  return {faces:active,report:{schema:SCHEMA,
   sourceR98Sha256:sha(r107.originalR98Faces),

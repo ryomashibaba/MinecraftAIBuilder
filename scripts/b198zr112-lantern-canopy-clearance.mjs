@@ -32,10 +32,16 @@ const area=f=>{const u=f.b.map((v,i)=>v-f.a[i]),v=f.c.map((w,i)=>w-f.a[i]);
  * stable outer high-shelf edge. Shared canopy vertices move together.
  * Preserve both triangles and any connected adjacent canopy of that bay.
  */
-export function retreatR112SourceCanopy(faces,sourceIndex,{fraction}={}){
+export function retreatR112SourceCanopy(faces,sourceIndex,
+ {fraction,allowR113Intermediate=false}={}){
+ // R112's original four measured candidates stay immutable. R113's
+ // intermediate .65 is opt-in only, never added to its historical sweep.
+ if(typeof allowR113Intermediate!=='boolean')
+  fail('EXPLICIT_R113_INTERMEDIATE_PERMISSION_REQUIRED');
  if(!Array.isArray(faces)||!Number.isInteger(sourceIndex)||
   sourceIndex<0||sourceIndex>=faces.length||
-  !RETRACTIONS.includes(fraction)||faces[sourceIndex]?.kind!==CANOPY)
+  !(RETRACTIONS.includes(fraction)||
+    allowR113Intermediate&&fraction===.65)||faces[sourceIndex]?.kind!==CANOPY)
   fail('AUTHENTIC_R93_CANOPY_TRIANGLE_AND_BOUNDED_RETRACTION_REQUIRED');
  const edgeMap=new Map(),canopies=[];
  faces.forEach((f,i)=>{
