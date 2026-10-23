@@ -28,6 +28,8 @@ import {inspectR110RightSourceContouredApproach}
  from './b198zr110-source-contoured-right-room-approach.mjs';
 import {studyR111RealFinishTransition}
  from './b198zr111-reversible-floor-finish-transition.mjs';
+import {inspectR112LanternCanopyRevision}
+ from './b198zr112-lantern-canopy-clearance.mjs';
 
 export const SCHEMA='minecraftaibuilder-b198zr102-tapered-source-gallery-end-transitions-v1';
 const fail=s=>{throw Error('B198ZR102_'+s)};
@@ -216,7 +218,9 @@ export function writeR102TaperedReview({destination,...args}={}){
    'R110_R91_SOURCE_CONTOURED_ROUTE_EVIDENCE.json',
    'R110_R91_SOURCE_CONTOURED_ROUTE.obj',
    'R111_R87_R94_FLOOR_FINISH_EVIDENCE.json',
-   'R111_R87_R94_REVISED_FINISH_ALTERNATIVE.obj'].map(x=>path.join(destination,x));
+   'R111_R87_R94_REVISED_FINISH_ALTERNATIVE.obj',
+   'R112_R93_LANTERN_CANOPY_CLEARANCE_EVIDENCE.json',
+   'R112_R93_LANTERN_CANOPY_ALTERNATIVE.obj'].map(x=>path.join(destination,x));
  if(paths.some(p=>fs.existsSync(p)))fail('NO_OVERWRITE');
  // Single source-bound build; no second expensive full mesh recreation.
  const {report,mesh}=prepareR102Runtime(args);
@@ -230,6 +234,11 @@ export function writeR102TaperedReview({destination,...args}={}){
  const r109=inspectR109RealFloorReferencedRoute(r107);
  const r110=inspectR110RightSourceContouredApproach(r107);
  const r111=studyR111RealFinishTransition(r107);
+ const r112=inspectR112LanternCanopyRevision(r107);
+ const r112Views=r112.report.sourceGeometryChanged?buildR97CompareViews([
+  {revision:'R107 original lantern',faces:r107.faces},
+  {revision:'R112 eave relief',faces:r112.faces}
+ ],[.55,.45,-.69]):[];
  const r111Views=r111.report.sourceGeometryChanged?buildR97CompareViews([
   {revision:'R107 preserved source',faces:r107.faces},
   {revision:'R111 floor finish comparison',faces:r111.faces}
@@ -301,6 +310,12 @@ export function writeR102TaperedReview({destination,...args}={}){
   '<a href="R111_R87_R94_FLOOR_FINISH_EVIDENCE.json">R110交差源・差分・採否</a> / '+
   '<a href="R111_R87_R94_REVISED_FINISH_ALTERNATIVE.obj">3D比較メッシュ（HOLDなら元R107と同形状）</a>。'+
   '人間の美術・利用審査は未実施。</p>'+r111Views.map(v=>v.html).join('')+ 
+  '<p>R112：灯籠書架の外側取付点を保存して内側の庇だけ後退する比較 '+
+  esc(r112.report.status)+'。R110頭上Ray '+r112.report.originalR110OverheadHits+
+  '→'+(r112.report.selected?.overheadHits??'未改善')+
+  '。<a href="R112_R93_LANTERN_CANOPY_CLEARANCE_EVIDENCE.json">実源検査・旧材保持・4候補</a> / '+
+  '<a href="R112_R93_LANTERN_CANOPY_ALTERNATIVE.obj">採否付き実3D模型</a>。'+
+  '人の美術・動線・施工は未認証。</p>'+r112Views.map(v=>v.html).join('')+ 
   '<p>R106衝突源はR87の読書テーブル。家具7三角形だけを対象にした別案：'+
   esc(r106.report.correctionMode)+
   '。R105の頭上検出 '+r106.report.beforeRoute.overhead+
@@ -330,7 +345,8 @@ export function writeR102TaperedReview({destination,...args}={}){
   (r110.selectedRoute?r110.selectedRoute.map(p=>'v '+p.join(' ')).join('\n')+'\n'+
    'l '+r110.selectedRoute.map((_,i)=>i+1).join(' ')+'\n':
    '# HOLD: no accepted route; no invented geometry\n'),
-  JSON.stringify(r111.report,null,2)+'\n',obj(r111.faces)],created=[];
+  JSON.stringify(r111.report,null,2)+'\n',obj(r111.faces),
+  JSON.stringify(r112.report,null,2)+'\n',obj(r112.faces)],created=[];
  try{for(let i=0;i<paths.length;i++){fs.writeFileSync(paths[i],bytes[i],{flag:'wx'});created.push(paths[i]);}}
  catch(e){for(const p of created)fs.rmSync(p,{force:true});throw e;}
  return {relativeFile:path.basename(paths[2]),
