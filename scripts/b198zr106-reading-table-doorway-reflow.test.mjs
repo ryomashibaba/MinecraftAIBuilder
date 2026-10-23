@@ -65,7 +65,9 @@ test('R106 real source: one table unit reflow, original 4692 faces preserved sep
  const study=buildR106ReadingTableReflowStudy(nodeSet),r=study.report;
  assert.equal(r.targetedOriginalFurnitureKind,topKind);
  assert.equal(r.targetedHistoricSourceTriangleIndices.length,7);
- assert.equal(r.historicR98SourceFaces.length,4692);
+ assert.equal(study.historicR98SourceFaces.length,4692);
+ assert.equal(sha(study.historicR98SourceFaces),r.sourceR98Sha256);
+ assert.equal(sha(study.faces),r.activeR106Sha256);
  assert.equal(r.historicR98RetainedSeparately,true);
  assert.equal(r.restOfReadingProgramUnchanged,true);
  assert.equal(r.safety.readiness,'NOT_PREPARED');
