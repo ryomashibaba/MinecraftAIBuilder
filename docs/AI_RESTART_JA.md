@@ -10,8 +10,8 @@
 | 継続ブランチ | `feature/b198zr1-protected-architectural-revision` |
 | 継続PR | [#128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128) — Open / Draft / Unmerged |
 | HEAD | [開発ブランチの最新HEADを毎回GitHubで確認](https://github.com/ryomashibaba/MinecraftAIBuilder/commits/feature/b198zr1-protected-architectural-revision)（R98の初期実メッシュ検証対象は `9a2b5de9d8ba41a2b7ca4e626aa9d54ff4ffffdd`） |
-| 最新確認済み実装工程 | **B198Z-R107：R106家具移設の左右5本の通路チェックを実装。R106実メッシュQA両OS成功、R107実モデルQA待ち** |
-| 次に取り組む工程 | **R107実5本の通路Rayの合否・再配置位置を確定。中央で改善済みの家具が左右で干渉する場合は配置だけ再調整。美術は未審査** |
+| 最新確認済み実装工程 | **B198Z-R107：右翼tier2のR87テーブルをx+0.045,z-0.055へ再配置。5本の局所頭上交差の合計をR106の3→2に改善し、Windows/Ubuntu実メッシュQA成功（美術HOLD）** |
+| 次に取り組む工程 | **R108：右側+0.023/+0.035の残存頭上交差2件の元三角形種別・交点を特定し、家具以外の物体も含めて原因部材だけ改修。実際の歩行・美術はHOLD** |
 | 施工・モデル | NOT_PREPARED / 9 BLOCKED / BuildPlan空。新たな実Qwen/Gemma禁止。World接続/読取/書込禁止 |
 
 **最新情報への直リンク：** [ブランチの現在地](https://github.com/ryomashibaba/MinecraftAIBuilder/tree/feature/b198zr1-protected-architectural-revision) ／ [Actions一覧](https://github.com/ryomashibaba/MinecraftAIBuilder/actions) ／ [PR #128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128)
@@ -116,7 +116,7 @@
 - 実R106証拠：右翼tier2の現行R91経路で、R87テーブル上面4158＋側面6面を x+0.045、z+0 だけ移設。**頭上Ray1→0／床未検出0→0／横断Ray0→0**。当該家具は撤去していない。14移設候補のうち3座標が元の局所検査を通過。
 - [R107実装](../scripts/b198zr107-compact-reading-table-recovery.mjs)／[専用テスト](../scripts/b198zr107-compact-reading-table-recovery.test.mjs)／[設計書](B198ZR107_R91_FIVE_LANE_REVIEW_JA.md)。既存のR91実通路の左右オフセット−0.035／−0.023／0／+0.023／+0.035の5本を旧R105とR106へ当て、元R106が検証済みだった3座標を再選別。中央線の改善を維持したまま他4本で新しい床/頭上/横断の交差を増やさない場合のみ採用候補。
 - R60一括比較の中へR105/R106/R107同カメラの6視点、R107 JSON/OBJを追加。旧R98/R105/R106は非変更。コンパクト家具案は**元家具を撤去した場合だけ**の研究分岐であり、現在の主実装では撤去なし。
-- [R107全実メッシュCI](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39965968797)は確認時点で実行中。両OS採否、左右の実交差件数と美術審査は**未確定**。以後の通常CIは軽量へ戻し、同じ手動全履歴回帰に重いテストを維持。
+- [R107全実メッシュCI](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39965968797)が**Windows／UbuntuともSUCCESS**。両OSのログで同一の実値を確認。右tier2のテーブル再配置を x+0.045, z-0.055 とする候補が選出され、5本の頭上交差合計がR105の5／R106の3／R107の2に減少。左右それぞれの行は、offset -0.035: 0/1/0、-0.023: 1/0/0、0: 1/0/0、+0.023: 2/1/1、+0.035: 1/1/1（R105/R106/R107）。床未検出・横断交差は全5本でそれぞれ0。ただし**右側2本は頭上交差が残るため、全館通行と美術品質はHOLD**。通常CIは軽量へ戻し、手動全履歴回帰に重いテストを維持。
 - Qwen/Gemmaの追加実推論0、Minecraftワールド操作0、原本・main保護、NOT_PREPARED／9ゲートBLOCKED／BuildPlan.operations=[]。
 
 ## 直近CIの注意点（2026-10-23時点。変化したら再確認）
