@@ -20,6 +20,10 @@ function screen(mesh,route){
  const w=screenR99FiniteRoute(mesh,route);
  return {floor:w.witnessCounts.floor,headroom:w.witnessCounts.overhead,
   lateral:w.witnessCounts.lateral,
+  overheadWitnesses:w.examples.flatMap(st=>st.observed.filter(v=>v.class==='overhead')
+   .map(v=>({segment:st.segment,at:st.at,
+    sourceTriangle:v.triangle,sourceKind:v.kind,
+    intersection:v.position}))).slice(0,16),
   uncovered:w.unscreenedSegmentCount,
   coverageComplete:w.allDeclaredSourceSegmentsWithinProbeCoverage,
   sampleStations:w.stationCount};
@@ -80,6 +84,16 @@ export function optimizeR105LiveR91Widening(r104){
   candidateR105MeshSHA256:SHA(shape),
   priorR104Status:r104.report.r91ProposedCorrectionStatus,
   priorR104AddedTriangles:originalCount,
+  actualR91OverheadSourceKinds:[...new Set(ground.overheadWitnesses.map(x=>x.sourceKind))],
+  actualR91OverheadFirstHit:ground.overheadWitnesses[0]??null,
+  roofMustNotBeMovedUnlessHitSourceIsRoof:true,
+  headroomPriority:ground.overheadWitnesses.length?
+   (ground.overheadWitnesses.some(w=>String(w.sourceKind).includes('RAIL'))?
+    'SOURCE_R91_RAIL_GEOMETRY_INSPECTION_REQUIRED':
+    ground.overheadWitnesses.some(w=>String(w.sourceKind)==='right_crown')?
+    'RIGHT_CROWN_SOURCE_LOCAL_ROOF_INSPECTION_REQUIRED':
+    'OTHER_TRUE_SOURCE_HEADROOM_INTERSECTION_INSPECTION_REQUIRED'):
+   'NO_REPORTED_HEADROOM_INTERSECTION_NOT_HUMAN_CERTIFIED',
   stableR102WeldedGalleryIDs:r104.report.keptR102JointVerifiedAprons,
   priorHeldApronIDs:r104.report.withheldUnjoinedAprons.map(x=>x.id),
   changedMeshFromR104:SHA(shape)!==SHA(r104.faces),

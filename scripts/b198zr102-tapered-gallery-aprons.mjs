@@ -17,6 +17,7 @@ import {buildR97CompareViews}
 import {auditR103SourceJoint,auditR103SevenJunctions}
  from './b198zr103-source-junction-integrity.mjs';
 import {reconcileR104SourceMesh} from './b198zr104-r91-active-throat-repair.mjs';
+import {optimizeR105LiveR91Widening} from './b198zr105-active-r91-throat-width-selection.mjs';
 
 export const SCHEMA='minecraftaibuilder-b198zr102-tapered-source-gallery-end-transitions-v1';
 const fail=s=>{throw Error('B198ZR102_'+s)};
@@ -193,17 +194,20 @@ export function writeR102TaperedReview({destination,...args}={}){
  const prefix='R102_SOURCE_GALLERY_TAPERED_APRONS',
   paths=[prefix+'_EVIDENCE.json',prefix+'_ACTIVE_ARCHITECTURE.obj',
    prefix+'_SIX_VIEW.html','R104_R91_ACTIVE_THROAT_EVIDENCE.json',
-   'R104_R91_ACTIVE_THROAT_REVISED.obj'].map(x=>path.join(destination,x));
+   'R104_R91_ACTIVE_THROAT_REVISED.obj',
+   'R105_R91_WIDTH_OVERHEAD_ORIGIN_EVIDENCE.json',
+   'R105_R91_WIDTH_ALTERNATIVE.obj'].map(x=>path.join(destination,x));
  if(paths.some(p=>fs.existsSync(p)))fail('NO_OVERWRITE');
  // Single source-bound build; no second expensive full mesh recreation.
  const {report,mesh}=prepareR102Runtime(args);
  // R104 uses these exact authenticated source faces, avoiding a second
  // expensive R98/R102 full-geometry build inside R60.
  const activeR104=reconcileR104SourceMesh(mesh);
+ const r105=optimizeR105LiveR91Widening(activeR104);
  const views=buildR97CompareViews([
-  {revision:'R98 source',faces:mesh.sourceR98Faces},
   {revision:'R102 old candidate',faces:mesh.faces},
-  {revision:'R104 active R91-aware candidate',faces:activeR104.faces}
+  {revision:'R104 source-corrected',faces:activeR104.faces},
+  {revision:'R105 adaptive R91 candidate',faces:r105.faces}
  ],[.55,.37,0]);
  const rows=report.records.map(r=>{
   const joint=report.junctionAudit.details.find(q=>q.id===r.id);
@@ -243,12 +247,19 @@ export function writeR102TaperedReview({destination,...args}={}){
   esc(activeR104.report.r91ProposedCorrectionStatus)+
   '。元R102成果物は別ファイルのまま保存。</p>'+
   views.map(x=>x.html).join('')+
+  '<p>R105 源メッシュ頭上の最初の交差: '+
+  esc(r105.report.actualR91OverheadFirstHit?.sourceKind??'未検出')+
+  '。優先事項：'+esc(r105.report.headroomPriority)+
+  '。張り出し変更採用：'+(r105.report.changedMeshFromR104?'候補あり':'変更なし・HOLD')+
+  '。本診断だけでは障害物除去・安全を証明しない。</p>'+
   '<p><a href="'+prefix+'_ACTIVE_ARCHITECTURE.obj">旧R102 OBJ</a> / '+
   '<a href="R104_R91_ACTIVE_THROAT_REVISED.obj">R104 実形状OBJ</a> / '+
+  '<a href="R105_R91_WIDTH_ALTERNATIVE.obj">R105 張出し候補OBJ</a> / '+
   '<a href="R100_SOURCE_GALLERY_WIDENING_SIX_VIEW.html">旧R100</a></p>'+
   '<p>HOLD / NOT_REVIEWED / NOT_PREPARED / 9 BLOCKED / BuildPlan空 / model0 / world0</p></html>';
  const bytes=[JSON.stringify(report,null,2)+'\n',obj(mesh.faces),html,
-  JSON.stringify(activeR104.report,null,2)+'\n',obj(activeR104.faces)],created=[];
+  JSON.stringify(activeR104.report,null,2)+'\n',obj(activeR104.faces),
+  JSON.stringify(r105.report,null,2)+'\n',obj(r105.faces)],created=[];
  try{for(let i=0;i<paths.length;i++){fs.writeFileSync(paths[i],bytes[i],{flag:'wx'});created.push(paths[i]);}}
  catch(e){for(const p of created)fs.rmSync(p,{force:true});throw e;}
  return {relativeFile:path.basename(paths[2]),
