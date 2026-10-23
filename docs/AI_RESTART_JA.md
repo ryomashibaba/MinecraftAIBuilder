@@ -10,8 +10,8 @@
 | 継続ブランチ | `feature/b198zr1-protected-architectural-revision` |
 | 継続PR | [#128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128) — Open / Draft / Unmerged |
 | HEAD | [開発ブランチの最新HEADを毎回GitHubで確認](https://github.com/ryomashibaba/MinecraftAIBuilder/commits/feature/b198zr1-protected-architectural-revision)（R98の初期実メッシュ検証対象は `9a2b5de9d8ba41a2b7ca4e626aa9d54ff4ffffdd`） |
-| 最新確認済み実装工程 | **B198Z-R109：R108で判明した右翼tier2のR94入口しきい面4530とR87テラス床面4148に対し、既存床の実標高へ代理経路を照合する比較研究を実装。建物メッシュ無改変、実源CI結果待ち／美術HOLD** |
-| 次に取り組む工程 | **R109実メッシュ比較CIの実値を確認。既存床の補正だけでは成立しなければR110でR91→R94/R87をつなぐ必要最小の現物形状を設計。源床・入口を削除しない。実歩行/美術HOLD** |
+| 最新確認済み実装工程 | **B198Z-R110：R109で実床参照は右+0.023のみ頭上Ray1→0、右+0.035は1件残存と両OS実測。R110でR91→R94/R87の9地点×横幅3点に沿う実源床コンター経路設計を導入。実源CI判定待ち、旧建築メッシュ不変／美術HOLD** |
+| 次に取り組む工程 | **R110実メッシュの9地点・全横幅・勾配・衝突結果を確認し、代理経路が通らなければR111で根拠に基づく局所入口形状を改修。通っても実歩行・美術はHOLD。源床/家具の削除は禁止** |
 | 施工・モデル | NOT_PREPARED / 9 BLOCKED / BuildPlan空。新たな実Qwen/Gemma禁止。World接続/読取/書込禁止 |
 
 **最新情報への直リンク：** [ブランチの現在地](https://github.com/ryomashibaba/MinecraftAIBuilder/tree/feature/b198zr1-protected-architectural-revision) ／ [Actions一覧](https://github.com/ryomashibaba/MinecraftAIBuilder/actions) ／ [PR #128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128)
@@ -134,6 +134,13 @@
 - [R109実装](../scripts/b198zr109-realfloor-referenced-r91-route.mjs)、[テスト](../scripts/b198zr109-realfloor-referenced-r91-route.test.mjs)、[詳細](B198ZR109_REAL_FLOOR_DATUM_COMPARISON_JA.md)。R108で確定した床2枚を起点に、同じ5本の経路のうち2本を**元R87/R94/R91実床高へ寄せた研究用代理線**として別に再評価。5点の実床一致、勾配、元の床欠落/頭上/横断Rayとの非悪化、同じ観察点数を検査し、成立しない案はHOLD。**床メッシュは一枚も削除/変更しない。**
 - 既存R60の同一レビューに`R109_R91_REAL_FLOOR_DATUM_COMPARISON_EVIDENCE.json`を追加。[R109実源Windows/Ubuntu CI](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39969992086) は**確認時queued、結果未確定**。[同HEADの別トリガー](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39970000334)も確認時queued。軽量CIは復帰し、完全実メッシュの手動R60回帰にはR109テストを残した。PASS件数・代理線で改善した値はログ確認まで主張しない。
 - R109代理経路が減らせたとしても、元のR107実床/頭上問題、現実の入口段差、実アバターの継続通行、建築独創性/美術の人間審査、Qwenの汎用生成能力の合格ではない。源に接続した本物の局所面の修正が必要かは数値と3D美術比較後に判断。Qwen/Gemma追加推論0、Minecraft読取/接続/書込/施工0、ローカルWork0、9 BLOCKED、NOT_PREPARED、BuildPlan空。PR #128 Draft継続。
+
+## R110源床連続経路設計（2026-10-24 JST／実メッシュ結果待ち）
+
+- R109の[実メッシュCI 39969992086](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39969992086)はWindows/UbuntuともSUCCESS。両ジョブで同じ観測：旧R107の5本の頭上Ray合計2、R109条件付き比較では1。右+0.023はR94しきい面に合わせて**頭上1→0**／足元未検出0／横断0、右+0.035はR94しきい→R87テラス床を両端に合わせても**頭上1残留**。よってR109を全線の改善完了と認定しない。
+- [R110実装](../scripts/b198zr110-source-contoured-right-room-approach.mjs)／[テスト](../scripts/b198zr110-source-contoured-right-room-approach.test.mjs)／[資料](B198ZR110_SOURCE_CONTOURED_APPROACH_JA.md)。R109未解決の右+0.035についてR91実床の2端・9観測地点の本物のR94/R87/R91三角形に沿って、高さオフセット4候補を比較。各点の横方向±0.023と中央の3サンプル実床近接、隣接勾配≦0.28、連続R99プローブ、5本旧線不変を条件として採否を判定。**まだ実建築を改変せず、通れば研究用OBJ polylineとJSON、通らなければHOLD**。
+- R60/R102既存レビューに`R110_R91_SOURCE_CONTOURED_ROUTE_EVIDENCE.json`と経路OBJ（床でない線）を追加。R98/R107/R109の3D原本/家具/床の全三角形は変更なし。Push/PRは軽量スモークへ復帰し、手動完全回帰にR110追加。R110初回実源比較の[Actions 39976426159](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39976426159)と[39976436857](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39976436857)は再開文書更新時点でqueued。**採用候補の有無・実測の改善を推測しない**。
+- この研究は単位なしの代理通路であり、物理的な連続床、支持荷重、実人体/実Minecraft歩行、独創性・美術、原本Qwenの汎用能力はすべて未認証・HOLD。新規Qwen/Gemma推論、Minecraft接続/読取/書込/施工、ローカルWorkの実施なし。NOT_PREPARED／9 BLOCKED／BuildPlan空、PR #128はDraft未マージ維持。
 
 ## 直近CIの注意点（2026-10-23時点。変化したら再確認）
 - [R44 Windows CMD](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39914804614)：46を期待、実ファイル47で `R44_EXACT_SOURCE_COUNT_EXPECTED_46_ACTUAL_47_BASE_37_OVERLAY_10`。ファイル数合わせではなく期待リストと実マニフェストを照合する。
