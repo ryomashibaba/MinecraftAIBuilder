@@ -200,10 +200,17 @@ export function writeR102TaperedReview({destination,...args}={}){
   {revision:'R100 rectangular',faces:mesh.priorR100Faces},
   {revision:'R102 tapered/reverted',faces:mesh.faces}
  ],[.55,.37,0]);
- const rows=report.records.map(r=>'<tr><td>'+esc(r.id)+'</td><td>'+
-  esc(r.status)+'</td><td>'+(r.rectangularRestoredFloorWitnesses??'—')+
-  '</td><td>'+(r.taperedRestoredFloorWitnesses??'—')+
-  '</td><td>'+r.addedTriangles+'</td></tr>').join('');
+ const rows=report.records.map(r=>{
+  const joint=report.junctionAudit.details.find(q=>q.id===r.id);
+  if(!joint)fail('MISSING_R103_SOURCE_JOINT_ROW');
+  return '<tr><td>'+esc(r.id)+'</td><td>'+esc(r.status)+'</td><td>'+
+   (r.rectangularRestoredFloorWitnesses??'—')+'</td><td>'+
+   (r.taperedRestoredFloorWitnesses??'—')+'</td><td>'+
+   (joint.sourceEndpointEdgesVerified?'両端に実R88辺あり':'接合元の端辺未確認')+
+   '</td><td>'+(joint.addedTriangles?
+    (joint.addedApronEndpointCornersVerified?'頂点一致':'追加床が端点未接続'):
+    '研究追加なし')+'</td><td>'+r.addedTriangles+'</td></tr>';
+ }).join('');
  const html='<!doctype html><html lang="ja"><meta charset="utf-8">'+
   '<meta http-equiv="Content-Security-Policy" content="default-src &#39;none&#39;; style-src &#39;unsafe-inline&#39;">'+
   '<title>R102 Source-Joined Gallery Apron Architectural Comparison</title>'+
@@ -220,7 +227,11 @@ export function writeR102TaperedReview({destination,...args}={}){
   '、従来HOLD '+report.unmodifiedRejectedGalleryCount+
   '。美術・耐荷・実移動・Minecraftは未認証。</p>'+
   '<table><tr><th>連絡室</th><th>判断</th><th>R100改善レイ</th>'+
-  '<th>R102改善レイ</th><th>追加面</th></tr>'+rows+'</table>'+
+  '<th>R102改善レイ</th><th>元床の両端辺</th><th>追加床端点</th><th>追加面</th></tr>'+rows+'</table>'+
+  '<p>R103源端辺確認 '+report.junctionAudit.originalR88EndpointEdgeRoutes+
+  '/7、接合点一致 '+report.junctionAudit.sourceJoinedSelectedAprons+
+  '、未確認の採択済み床 '+report.junctionAudit.selectedApronEndpointDefects+
+  '。頂点一致は人の通行や支持安全の証明ではありません。</p>'+
   views.map(x=>x.html).join('')+
   '<p><a href="'+prefix+'_ACTIVE_ARCHITECTURE.obj">実3D候補OBJ</a> / '+
   '<a href="R100_SOURCE_GALLERY_WIDENING_SIX_VIEW.html">旧R100</a></p>'+

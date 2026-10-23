@@ -10,8 +10,8 @@
 | 継続ブランチ | `feature/b198zr1-protected-architectural-revision` |
 | 継続PR | [#128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128) — Open / Draft / Unmerged |
 | HEAD | [開発ブランチの最新HEADを毎回GitHubで確認](https://github.com/ryomashibaba/MinecraftAIBuilder/commits/feature/b198zr1-protected-architectural-revision)（R98の初期実メッシュ検証対象は `9a2b5de9d8ba41a2b7ca4e626aa9d54ff4ffffdd`） |
-| 最新確認済み実装工程 | **B198Z-R102：連絡床のテーパ実形状を実装・R60接続、CI待ち。R101の専用CIは両OS成功** |
-| 次に取り組む工程 | **R102 CI結果とテーパ採否件数を確認→必要に応じて端部接合の改修・美術審査** |
+| 最新確認済み実装工程 | **B198Z-R103：元R88床の実端辺への接合を検査・テーパ採用条件へ追加。R103実7件CI待ち** |
+| 次に取り組む工程 | **R103実7経路CIの出力を確認→不一致の通路を実形状で補修。美術審査は未実施** |
 | 施工・モデル | NOT_PREPARED / 9 BLOCKED / BuildPlan空。新たな実Qwen/Gemma禁止。World接続/読取/書込禁止 |
 
 **最新情報への直リンク：** [ブランチの現在地](https://github.com/ryomashibaba/MinecraftAIBuilder/tree/feature/b198zr1-protected-architectural-revision) ／ [Actions一覧](https://github.com/ryomashibaba/MinecraftAIBuilder/actions) ／ [PR #128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128)
@@ -70,6 +70,14 @@
 - R101厳格床プローブで改善が証明でき、元R100改善値の60%以上を保ち、頭上・横断の問題が増えず、吹抜け保護帯を維持したときのみテーパ採用。失敗ならR100矩形案を維持。R100で却下した候補は作り直さずHOLD。
 - R60一括レビューへR102の実OBJ/JSONとR98/R100/R102六視点比較HTMLを追加。実メッシュのテーパ採択件数、実HTMLの人間美術審査、最新CI成功は**未確認**。
 - 元Qwen/B143、Minecraft、原本・mainは非変更。9ゲートBLOCKED、NOT_PREPARED、実推論/施工0。
+
+## R103現在地（2026-10-23 JST）
+
+- [R102軽量CI（Windows/Ubuntu成功）](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39952046303)を確認。ただし元R88から7経路全体の実メッシュ試験ではない。
+- [R103元床端面診断](../scripts/b198zr103-source-junction-integrity.mjs)／[専用テスト](../scripts/b198zr103-source-junction-integrity.test.mjs)／[設計書](B198ZR103_SOURCE_GALLERY_JUNCTION_JA.md)。元R98内のR88研究デッキ実三角形で、入口側と室内側の幅0.032の端辺を確認。R102追加床の左右の端頂点も別途照合。端辺と接合点の両方を観察できない新規テーパを採用しない。
+- 7目的地の正確な接合検査、元の実床端辺を確認した件数、R102の採用/矩形維持件数を同じR102証拠JSONとレビューHTMLに追加。**未実施の実3D人間美術/実歩行検査をPASSにしない。**
+- [R103実7通路CI](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39956894901)を一度通常pushで起動（確認時点queued）。実際の件数はまだ未確認。以後のpushのR103は軽量モックのみに戻し、完全実モデル回帰は既存手動workflow_dispatchで行う。新規ワークフロー/ZIP/CMDは追加なし。
+- 元Qwen/B143、main、Minecraft世界は未変更。NOT_PREPARED、9 BLOCKED、BuildPlan空、実モデル追加推論0。
 
 ## 直近CIの注意点（2026-10-23時点。変化したら再確認）
 - [R44 Windows CMD](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39914804614)：46を期待、実ファイル47で `R44_EXACT_SOURCE_COUNT_EXPECTED_46_ACTUAL_47_BASE_37_OVERLAY_10`。ファイル数合わせではなく期待リストと実マニフェストを照合する。
