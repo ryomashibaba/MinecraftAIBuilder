@@ -256,6 +256,40 @@ function obj(faces){
  }
  return out.join('\n')+'\n';
 }
+
+/** Static four-angle projection of the TRUE active mesh (not generated art). */
+function projectionR95(faces,angle,elevation,name){
+ const A=angle*Math.PI/180,E=elevation*Math.PI/180;
+ const p=v=>{
+  const d=Math.sin(A)*v[0]+Math.cos(A)*v[2];
+  return [Math.cos(A)*v[0]-Math.sin(A)*v[2],
+   Math.cos(E)*v[1]-Math.sin(E)*d,
+   Math.sin(E)*v[1]+Math.cos(E)*d];
+ };
+ const show=faces.filter((f,i)=>f.kind.includes('R95')||
+  (f.kind.endsWith('_inner')&&i%3===0)||i%9===0)
+  .map(f=>({kind:f.kind,verts:[f.a,f.b,f.c].map(p)}));
+ const xs=show.flatMap(f=>f.verts.map(v=>v[0])),
+  ys=show.flatMap(f=>f.verts.map(v=>v[1]));
+ const midX=(Math.min(...xs)+Math.max(...xs))/2,
+  midY=(Math.min(...ys)+Math.max(...ys))/2,
+  scale=Math.min(740/(Math.max(...xs)-Math.min(...xs)),
+   475/(Math.max(...ys)-Math.min(...ys)));
+ show.sort((a,b)=>a.verts.reduce((z,x)=>z+x[2],0)-
+  b.verts.reduce((z,x)=>z+x[2],0));
+ const color=k=>k.includes('R95')?'#f8bc67':
+  k==='left_inner'?'#3a6c92':k==='right_inner'?'#445a87':
+  k.startsWith('left')?'#7da0af':k.startsWith('right')?'#8b9ba9':'#b7c6c9';
+ return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 555">'+
+  '<rect width="820" height="555" fill="#edf3f6"/>'+
+  show.map(f=>'<polygon points="'+f.verts.map(v=>
+   (410+(v[0]-midX)*scale).toFixed(1)+','+
+   (290-(v[1]-midY)*scale).toFixed(1)).join(' ')+
+   '" fill="'+color(f.kind)+'" stroke="#2e495c" stroke-width=".35"'+
+   ' opacity="'+(f.kind.includes('glass')?.28:.91)+'"/>').join('')+
+  '<text x="20" y="36" font-family="system-ui" font-size="18" fill="#1d3749">'+enc(name)+
+  ' — R95 active preview, non-certified</text></svg>';
+}
 export function writeR95DaylightReview({destination,...args}={}){
  if(typeof destination!=='string'||!path.isAbsolute(destination)||
   !fs.existsSync(destination)||!fs.lstatSync(destination).isDirectory()||
@@ -266,6 +300,9 @@ export function writeR95DaylightReview({destination,...args}={}){
  if(files.some(p=>fs.existsSync(p)))fail('DO_NOT_OVERWRITE');
  const proof=prepareR95DaylightReview(args);
  const study=buildR95DaylightAtriumVariant(args.r80Evidence.conceptualRouteNodes);
+ const pictures=[['FRONT',0,12],['OBLIQUE',35,25],['SIDE',90,15],['AERIAL',35,70]]
+  .map(([name,az,el])=>'<figure><figcaption>'+name+'</figcaption>'+
+   projectionR95(study.faces,az,el,name)+'</figure>').join('');
  const rows=proof.proofs.map(q=>'<tr><td>'+enc(q.side)+'</td><td>'+q.tier+
   '</td><td>'+q.sourceBlockedSightlines+'</td><td>'+
   q.postCutInnerHullSightHits+'</td><td>'+q.unobstructedSamples+'/'+q.sightlineProbes+
@@ -273,7 +310,7 @@ export function writeR95DaylightReview({destination,...args}={}){
  const h='<!doctype html><html lang="ja"><meta charset="utf-8">'+
  '<meta http-equiv="Content-Security-Policy" content="default-src &#39;none&#39;; style-src &#39;unsafe-inline&#39;">'+
  '<title>R95 Atrium Light Apertures — Research</title>'+
- '<style>body{font:15px/1.7 system-ui;margin:24px auto;max-width:1200px;padding:0 18px}table{border-collapse:collapse;width:100%}td,th{border:1px solid #adbcca;padding:8px}</style>'+
+ '<style>body{font:15px/1.7 system-ui;margin:24px auto;max-width:1200px;padding:0 18px}table{border-collapse:collapse;width:100%}td,th{border:1px solid #adbcca;padding:8px}.views{display:grid;grid-template-columns:repeat(auto-fit,minmax(430px,1fr));gap:18px}.views svg{width:100%;border:1px solid #9cb0bd}</style>'+
  '<h1>R95：七つの書架室から中央吹抜けへ、実内壁を切り抜く採光開口</h1>'+
  '<p>R94旧モデルでは入口・座席からの視線を7室の内壁がすべて遮っていた。'+
  '元R79内壁の実三角形をY/Z長方形窓で切り分け、窓内に穴を残し、'+
@@ -283,6 +320,7 @@ export function writeR95DaylightReview({destination,...args}={}){
  '室で外殻に交差しました。交差しなかった部屋も実有効高さの証明ではありません。</p>'+
  '<p>R94元 '+proof.sourceR94Faces+'面、変更した源内壁 '+proof.replacedOriginalInnerHullTriangleCount+
  '面、窓枠 '+proof.addedSplayedRevealFaces+'面、改修形 '+proof.wholeAtriumPreviewTriangles+'面。</p>'+
+ '<div class="views">'+pictures+'</div>'+ 
  '<table><tr><th>翼</th><th>層</th><th>元内壁への視線交差</th><th>改修後の中央視線交差</th><th>局所9本光線中の開放</th></tr>'+
  rows+'</table><p><a href="'+base+'_ARCHITECTURE.obj">窓の空洞がある全館3D OBJ</a> ／'+
  '<a href="R94_READING_ROOM_TRUE_TERRACE_ENTRY_ARCHITECTURAL_REVIEW.html">R94元の入口研究</a> ／'+
