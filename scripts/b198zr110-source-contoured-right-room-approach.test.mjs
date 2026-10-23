@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {deriveR110SourceLane,buildR110RightSourceApproachStudy,
  PROFILE_STATIONS} from './b198zr110-source-contoured-right-room-approach.mjs';
+import {buildR107CompactReadingStudy} from './b198zr107-compact-reading-table-recovery.mjs';
 
 const nodes={
  entrance:[[0,.05,-1.11],[.53,.05,-1.11],[.53,.05,-.75]],
@@ -50,4 +51,20 @@ test('R110 real: source-backed R87/R94 transition profile cannot fake a floor',(
   candidates:r.candidateSummaries,selectedGap:r.selectedFootGap,
   endpoints:r.selectedRoute?[r.selectedRoute[0],r.selectedRoute.at(-1)]:null
  }));
+});
+
+test('R111 source-only: reveal R110 real geometric overhead source faces before modification',()=>{
+ const original=buildR107CompactReadingStudy(nodes);
+ const lane=deriveR110SourceLane(original.faces,original.originalR98Faces,.035,{gap:.003});
+ assert(lane.measured?.allDeclaredSourceSegmentsWithinProbeCoverage);
+ const hits=lane.measured.examples.flatMap(st=>st.observed
+  .filter(w=>w.class==='overhead')
+  .map(w=>({kind:w.kind,index:w.triangle,
+   at:w.position,step:st.step,point:st.at,probe:w.offset})));
+ const coverage=hits.length===lane.measured.witnessCounts.overhead;
+ console.log('R111_R110_OVERHEAD_FACE_EVIDENCE',JSON.stringify({
+  count:lane.measured.witnessCounts.overhead,captured:hits.length,
+  complete:coverage,faces:hits
+ }));
+ assert.equal(coverage,true,'HOLD_R99_TRUNCATED_HIT_EVIDENCE');
 });
