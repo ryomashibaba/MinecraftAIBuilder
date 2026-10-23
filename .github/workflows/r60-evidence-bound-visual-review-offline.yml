@@ -223,7 +223,7 @@ jobs:
           node --test --test-concurrency=2 --test-name-pattern="R103 quick: real source edges" scripts/b198zr103-source-junction-integrity.test.mjs
           node --test --test-concurrency=2 --test-name-pattern="R104 quick: new ramp shoulders" scripts/b198zr104-r91-active-throat-repair.test.mjs
           node --test --test-concurrency=2 --test-name-pattern="R105 quick: choose only an independently witnessed" scripts/b198zr105-active-r91-throat-width-selection.test.mjs
-          node --test --test-concurrency=2 scripts/b198zr106-reading-table-doorway-reflow.test.mjs
+          node --test --test-concurrency=2 --test-name-pattern="R106 quick: isolate seven actual table facets" scripts/b198zr106-reading-table-doorway-reflow.test.mjs
           node --test --test-concurrency=2 --test-name-pattern="R100 quick: actual shoulder triangles cure" scripts/b198zr100-source-gallery-shoulders.test.mjs
           node --test --test-concurrency=2 --test-name-pattern="R60 refuses corrupt original SHA|R60 refuses a synthetic R48|R89 deterministic planar length|R95 clipped wall subtracts true surface area|R96 requires actual shell source points" scripts/b198zr60-evidence-bound-visual-review.test.mjs scripts/b198zr84-multilevel-bookstack-review.test.mjs scripts/b198zr95-atrium-daylight-portals.test.mjs scripts/b198zr96-window-structure-and-light-study.test.mjs
       - name: Full R58-R96 offline historical regression (manual workflow dispatch)

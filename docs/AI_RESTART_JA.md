@@ -10,8 +10,8 @@
 | 継続ブランチ | `feature/b198zr1-protected-architectural-revision` |
 | 継続PR | [#128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128) — Open / Draft / Unmerged |
 | HEAD | [開発ブランチの最新HEADを毎回GitHubで確認](https://github.com/ryomashibaba/MinecraftAIBuilder/commits/feature/b198zr1-protected-architectural-revision)（R98の初期実メッシュ検証対象は `9a2b5de9d8ba41a2b7ca4e626aa9d54ff4ffffdd`） |
-| 最新確認済み実装工程 | **B198Z-R105：右翼tier2の頭上の交差元を特定し、床拡張の再評価を条件付きで実装。R104全実メッシュCI両OS成功・床拡張は不採用** |
-| 次に取り組む工程 | **R105実メッシュログで頭上衝突面の種類/座標を確定→元の屋根・手すりなど実際の原因に対する局所形状修正。美術はHOLD** |
+| 最新確認済み実装工程 | **B198Z-R106：右翼tier2のR87テーブル1組（7実面）を局所移設／保留する別案を実装。R105実メッシュ両OS成功、R106実モデルQA待ち** |
+| 次に取り組む工程 | **R106実メッシュ両OSテスト・テーブル移設/除外の実採否を確認。必要なら実配置をさらに修正し、目視の美術審査へ** |
 | 施工・モデル | NOT_PREPARED / 9 BLOCKED / BuildPlan空。新たな実Qwen/Gemma禁止。World接続/読取/書込禁止 |
 
 **最新情報への直リンク：** [ブランチの現在地](https://github.com/ryomashibaba/MinecraftAIBuilder/tree/feature/b198zr1-protected-architectural-revision) ／ [Actions一覧](https://github.com/ryomashibaba/MinecraftAIBuilder/actions) ／ [PR #128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128)
@@ -102,6 +102,13 @@
 - [R105実装](../scripts/b198zr105-active-r91-throat-width-selection.mjs)／[R105テスト](../scripts/b198zr105-active-r91-throat-width-selection.test.mjs)。源R104/R91の正しい場所に対し拡幅ピーク5候補を実Rayで検査。いずれも元の床未検出を減らさない場合は追加しない。実頭上交差Rayがヒットした元の三角形の種類と位置もログとJSONへ記録。
 - R60の同一レビュー内にR105新候補OBJ、実測JSON、R102/R104/R105六視点の比較を組み込み。既存R98/R100/R102/R104のファイルや原本は上書きしない。R105の実7経路CIもこの工程のコミットで一度通常プッシュから起動済み。ただし**R105最新実モデル結果は未確認**、通常PR/Pushはその後軽量に戻す。重い完全回帰は同じ手動workflow_dispatchに残す。
 - 構造、人の移動、デザイン美術、AI汎用生成、Minecraft実機施工は認証不可／HOLD。Qwen/Gemma追加推論0、ワールド操作0、NOT_PREPARED、9ゲートBLOCKED、BuildPlan空。
+
+## R106確定原因と修正候補（2026-10-23 JST）
+
+- R105の[実メッシュWindows/Ubuntu両OS成功](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39960220420)をログで確認。右tier2の頭上交差（研究用）の**元メッシュ三角形4158、種類right_R87_READING_TABLE_NOT_OCCUPANCY、交点(0.5231758, 0.4734807, -0.7406061)**。床未検出0、頭上交差1、5種類の拡幅はすべて0改善・不採用。**屋根でも手すりでもなくR87の読書テーブルが原因**。
+- [R106実装](../scripts/b198zr106-reading-table-doorway-reflow.mjs)／[専用テスト](../scripts/b198zr106-reading-table-doorway-reflow.test.mjs)／[設計書](B198ZR106_READING_TABLE_REFLOW_JA.md)。対象のR87テーブル上面1＋側面6の実7三角形だけを隔離。元R98モデル4692面とR105モデルは別に保持。テーブルの支持床がRayで確認できる場所へ移設を14候補試し、無理なら当該家具のみ除外した研究案を比較。床/頭上/横断の実Rayが改善しない案は採用しない。
+- R106は元テーブルを除いた時点で**元R98の完全prefixではなくなる**ので、旧SHAと元7面、変更後SHA、残る元三角形の完全一致を保存する。旧原本は一切変更しない。R60にR104/R105/R106の同一六視点比較とR106 OBJ/JSONを追加した。
+- [R106全館実モデルCI](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39962533812)は確認時点でqueued。**実際の修正採否や美術品質は未判定**。通常CIは一度重い実テストを投入し、その後は軽量スモークへ戻す。元Qwen/B143・Minecraft実ワールドは未変更、NOT_PREPARED、9ゲートBLOCKED、BuildPlan空。
 
 ## 直近CIの注意点（2026-10-23時点。変化したら再確認）
 - [R44 Windows CMD](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39914804614)：46を期待、実ファイル47で `R44_EXACT_SOURCE_COUNT_EXPECTED_46_ACTUAL_47_BASE_37_OVERLAY_10`。ファイル数合わせではなく期待リストと実マニフェストを照合する。
