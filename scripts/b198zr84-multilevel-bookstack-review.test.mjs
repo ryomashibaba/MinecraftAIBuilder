@@ -193,3 +193,18 @@ test('R90 rank tie-breaking is stable across repeated historic terrace rebuilds'
   }))),picks);
  }
 });
+
+test('R92 R84 final evidence metrics always derive EXACTLY from each tier source endpoints',()=>{
+ const a=pack(true);
+ for(let k=0;k<45;k++){
+  const study=buildR84MultilevelResearch(a.r80Evidence.conceptualRouteNodes);
+  for(const tier of study.tiers){
+   if(tier.reuseR83Landing)continue;
+   const expected=deterministicR84PlanLength(tier.sourceRoutePoint,tier.padCenter);
+   assert.equal(tier.connectionReview.horizontalLength,expected);
+   assert.equal(tier.connectionReview.verticalRise,
+    +Math.abs(tier.sourceRoutePoint[1]-tier.padCenter[1]).toFixed(7));
+   assert.equal(Object.isFrozen(tier.connectionReview),true);
+  }
+ }
+});

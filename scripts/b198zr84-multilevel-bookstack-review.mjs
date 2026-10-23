@@ -215,6 +215,28 @@ export function buildR84MultilevelResearch(nodes){
   tiers.filter(x=>x.side==='left').length!==3||
   tiers.filter(x=>x.side==='right').length!==4)
   fail('SEVEN_ORIGINAL_READING_TIERS_NOT_PRESERVED');
+ // R92: reconstruct persisted metric fields from ORIGINAL immutable
+ // endpoints at the serialization boundary. CI witnesses proved that
+ // a previous review sometimes carried the right-tier3 measurement on
+ // unrelated records while endpoints and triangle IDs were unchanged.
+ // No tolerance, approval, or altered source vertices are involved.
+ for(const t of tiers){
+  if(t.reuseR83Landing)continue;
+  const run=deterministicR84PlanLength(t.sourceRoutePoint,t.padCenter);
+  const rise=R(Math.abs(t.sourceRoutePoint[1]-t.padCenter[1]));
+  const slope=run>.001?R(Math.abs(t.sourceRoutePoint[1]-t.padCenter[1])/run):null;
+  const measured={...t.connectionReview,horizontalLength:run,
+   verticalRise:rise,normalizedSlope:slope};
+  // Verify rejection reasons against source-derived geometry, not an
+  // invalid horizontal metric carried by the provisional review object.
+  const recomputed=screenLink(t.sourceRoutePoint,t.padCenter,t.side,faces);
+  if(JSON.stringify(recomputed.designReviewRejections)!==
+   JSON.stringify(measured.designReviewRejections)||
+   recomputed.acceptedAsTentativeArtStudyOnly!==
+   measured.acceptedAsTentativeArtStudyOnly)
+   fail('R92_SOURCE_METRIC_FLAGS_INCONSISTENT');
+  t.connectionReview=Object.freeze(measured);
+ }
  const checkedR84=tiers.filter(x=>!x.reuseR83Landing);
  const all=[...faces,...additions];
  if(all.some(f=>[f.a,f.b,f.c].some(p=>p.length!==3||
