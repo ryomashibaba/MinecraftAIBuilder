@@ -146,7 +146,7 @@
 
 - R110の[Windows/Ubuntu実源CI #39976426159](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39976426159)は両OS成功、ログ同値。右翼tier2 R91→R94/R87の9地点すべて横幅3点で床有／最大源勾配0.125942。ただし4つの高さ候補0.003/0.004/0.005/0.006はすべて頭上Ray7・床未検出0・横断0で不採用。旧R109の+0.023側条件付き成功と、+0.035側のHOLDを混同しない。
 - [R111実装](../scripts/b198zr111-reversible-floor-finish-transition.mjs)／[専用検証](../scripts/b198zr111-reversible-floor-finish-transition.test.mjs)／[資料](B198ZR111_REVERSIBLE_FLOOR_FINISH_TRANSITION_JA.md)。R110の7交差の実三角形番号/kindを検証し、**全交差が源の真正テラスに裏付けられたR87またはR94の薄い床仕上げだと証明できる場合だけ**、つながった仕上げ三角形の高さを源床+0.001/+0.002とする**実3D比較案**を作成。源R98本体、R107歴史形状、読書家具、入口門柱、元の床を残す。5経路床/頭上/横断非悪化とR110の幅3点・9地点・勾配・頭上の改善を求める。条件不足は形状不変HOLD。
-- R60の既存画面にR111 JSON/OBJ、および合格候補が存在したときだけ同カメラ比較図を追加。旧ZIP/CMD/Workflowを増やさず既存Windows/Ubuntu CIへR111の実源1回試験を追加。現時点の[Actions #39978338498](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39978338498)と[#39978346028](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39978346028)は最終確認でqueued。**R111による形状変更の採否・7件のsource種類・新しい通行性能は未確定**。コードコミット成功を実QA成功と混同しない。
+- R60の既存画面にR111 JSON/OBJ、および合格候補が存在したときだけ同カメラ比較図を追加。旧ZIP/CMD/Workflowを増やさず既存Windows/Ubuntu CIの当該コミットへR111の実源1回試験を投入し、その後はPush/PR軽量スモークへ復帰。手動の完全回帰にはR111実源テストを保持。現時点の[Actions #39978338498](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39978338498)と[#39978346028](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39978346028)は最終確認でqueued。**R111による形状変更の採否・7件のsource種類・新しい通行性能は未確定**。コードコミット成功を実QA成功と混同しない。
 - 現行建築の美術・独創性・人体歩行・荷重支持・Minecraft教育版検証、Qwen/Gemmaの汎用建築能力はHOLD/未検証。施工・ワールド接続/読取/書込・追加推論・ローカルWork禁止、NOT_PREPARED・9 BLOCKED・BuildPlan空、PR #128 Draft・未マージは継続。
 
 ## 直近CIの注意点（2026-10-23時点。変化したら再確認）
