@@ -41,6 +41,7 @@ import {writeR88GalleryReview} from './b198zr88-gallery-circulation-study.mjs';
 import {writeR89AccessReview} from './b198zr89-gallery-interface-architecture.mjs';
 import {writeR90SeamReview} from './b198zr90-source-surface-seams.mjs';
 import {writeR91TurnoutReview} from './b198zr91-tapered-gallery-turnout.mjs';
+import {writeR92WholeLibraryReview} from './b198zr92-whole-library-circulation-atlas.mjs';
 import {inspectR59Archive,reviewR59AlreadySavedZip}
  from './b198zr59-safe-result-zip-to-review.mjs';
 export const SCHEMA='minecraftaibuilder-b198zr60-visual-human-review-v1';
@@ -67,7 +68,7 @@ function visual(z,evidence,stage){
   fail('R58_B143_VERDICT_DISAGREES');
  const dirname=z.tag+(compiled?'_R7_FINAL_ABSTRACT_3D':'_R51_UNCOMPILED_ENVELOPES');
  const folder=path.join(stage,dirname);
- let kind,link,board=null,sections=null,guidance=null,independentFloor=null,overheadReview=null,containmentReview=null,airTopologyReview=null,verticalReview=null,approachReview=null,routeGapReview=null,preservationReview=null,alternativesReview=null,humanWorksheetReview=null,humanDraftGuide=null,priorityBoard=null,architectureBrief=null,spatialProgramSpec=null,parametricStudy=null,publicCirculationStudy=null,portalReviewStudy=null,interiorClearanceReview=null,readingTerraceLandingStudy=null,multilevelReadingStudy=null,wingRouteStudy=null,finiteWidthDeckStudy=null,readingRooms87=null,researchGalleries88=null,architectureInterface89=null,sourceSeams90=null,taperedTurnout91=null;
+ let kind,link,board=null,sections=null,guidance=null,independentFloor=null,overheadReview=null,containmentReview=null,airTopologyReview=null,verticalReview=null,approachReview=null,routeGapReview=null,preservationReview=null,alternativesReview=null,humanWorksheetReview=null,humanDraftGuide=null,priorityBoard=null,architectureBrief=null,spatialProgramSpec=null,parametricStudy=null,publicCirculationStudy=null,portalReviewStudy=null,interiorClearanceReview=null,readingTerraceLandingStudy=null,multilevelReadingStudy=null,wingRouteStudy=null,finiteWidthDeckStudy=null,readingRooms87=null,researchGalleries88=null,architectureInterface89=null,sourceSeams90=null,taperedTurnout91=null,wholeLibrary92=null;
  if(compiled){
   fs.mkdirSync(folder);
   const r=writeR7OfflineVisualReview({
@@ -515,6 +516,33 @@ function visual(z,evidence,stage){
   destination:folder
  });
  taperedTurnout91=dirname+'/'+r91.relativeFile;
+ const r92=writeR92WholeLibraryReview({
+  raw,expectedRawSha256:evidence.rawSha256,
+  b143Status:evidence.b143.status,
+  expectedGeometrySha256:compiled?.geometrySha256??null,
+  r61Evidence:r61,r64Evidence:r64,r66Evidence:r66,
+  r67Evidence:r67,r68Evidence:r68,r69Evidence:r69,
+  r70Evidence:r70,r71Evidence,r72Evidence,r73Evidence,r74Evidence,
+  r62Evidence:JSON.parse(fs.readFileSync(path.join(folder,'R62_NEXT_DESIGN_EVIDENCE.json'),'utf8')),
+  r76Evidence:JSON.parse(fs.readFileSync(path.join(folder,'R76_ARCHITECTURE_PRIORITY_REVIEW.json'),'utf8')),
+  r77Evidence:JSON.parse(fs.readFileSync(path.join(folder,'R77_FUTURE_ARCHITECTURE_BRIEF.json'),'utf8')),
+  r78Evidence:JSON.parse(fs.readFileSync(path.join(folder,'R78_ARCHITECTURAL_SPATIAL_PROGRAM.json'),'utf8')),
+  r79Evidence:JSON.parse(fs.readFileSync(path.join(folder,'R79_ART_STUDY_EVIDENCE.json'),'utf8')),
+  r80Evidence:JSON.parse(fs.readFileSync(path.join(folder,'R80_3D_CIRCULATION_STUDY_EVIDENCE.json'),'utf8')),
+  r81Evidence:JSON.parse(fs.readFileSync(path.join(folder,'R81_ENVELOPE_COLLISIONS_AND_PORTALS.json'),'utf8')),
+  r82Evidence:JSON.parse(fs.readFileSync(path.join(folder,'R82_DECK_TERRACE_PORTAL_GEOMETRY.json'),'utf8')),
+  r83Evidence:JSON.parse(fs.readFileSync(path.join(folder,'R83_WING_LANDINGS_AND_ROUTE_GAPS.json'),'utf8')),
+  r84Evidence:JSON.parse(fs.readFileSync(path.join(folder,'R84_SEVEN_BOOKSTACK_LEVELS_EVIDENCE.json'),'utf8')),
+  r85Evidence:JSON.parse(fs.readFileSync(path.join(folder,'R85_SEVEN_TIER_ROUTE_ALTERNATIVES.json'),'utf8')),
+  r86Evidence:JSON.parse(fs.readFileSync(path.join(folder,'R86_READING_TIER_WIDTH_SCREEN.json'),'utf8')),
+  r87Evidence:JSON.parse(fs.readFileSync(path.join(folder,'R87_SEVEN_READING_ROOMS_ARCHITECTURAL_EVIDENCE.json'),'utf8')),
+  r88Evidence:JSON.parse(fs.readFileSync(path.join(folder,'R88_GALLERY_TO_SEVEN_READING_ROOMS_EVIDENCE.json'),'utf8')),
+  r89Evidence:JSON.parse(fs.readFileSync(path.join(folder,'R89_GALLERY_INTEGRATION_EVIDENCE.json'),'utf8')),
+  r90Evidence:JSON.parse(fs.readFileSync(path.join(folder,'R90_SOURCE_SURFACE_SEAM_EVIDENCE.json'),'utf8')),
+  r91Evidence:JSON.parse(fs.readFileSync(path.join(folder,'R91_TRUE_PAD_TAPERED_RIGHT_TIER2_EVIDENCE.json'),'utf8')),
+  destination:folder
+ });
+ wholeLibrary92=dirname+'/'+r92.relativeFile;
  return {tag:z.tag,originalRawSha256:evidence.rawSha256,
   evidenceType:kind,relativeViewer:link,relativeHumanBoard:board,
   relativeFunctionalSections:sections,
@@ -546,6 +574,7 @@ function visual(z,evidence,stage){
   relativeR89GalleryLandingStudy:architectureInterface89,
   relativeR90SourceSeamReview:sourceSeams90,
   relativeR91TaperedTurnout:taperedTurnout91,
+  relativeR92WholeLibraryAtlas:wholeLibrary92,
   independentHumanReview:'NOT_PERFORMED',
   actualMinecraftPlayerWalkingVerified:false};
 }
@@ -662,7 +691,9 @@ export function createR60VisualReview({r54Zip,r48Zip=null,destination}={}){
    (v.relativeR90SourceSeamReview?' / <a href="'+v.relativeR90SourceSeamReview+
     '">R90 実際の昇降デッキ・着地面への3D接続と未成立箇所</a>':'')+
    (v.relativeR91TaperedTurnout?' / <a href="'+v.relativeR91TaperedTurnout+
-    '">R91 右書架tier 2の着地点内へ収める改修3D案</a>':'')+'</li>').join('');
+    '">R91 右書架tier 2の着地点内へ収める改修3D案</a>':'')+
+   (v.relativeR92WholeLibraryAtlas?' / <a href="'+v.relativeR92WholeLibraryAtlas+
+    '">R92 入口から全7層と展望ラウンジまでの建築全館研究</a>':'')+'</li>').join('');
   const html='<!doctype html><html lang="ja"><meta charset="utf-8">'+
    '<meta http-equiv="Content-Security-Policy" content="default-src &#39;none&#39;; style-src &#39;unsafe-inline&#39;">'+
    '<title>R60 建築品質の人間審査</title>'+

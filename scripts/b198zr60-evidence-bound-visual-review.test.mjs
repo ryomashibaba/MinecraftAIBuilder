@@ -155,6 +155,15 @@ test('R60 failed B143 only shows R51 envelopes; keeps originals and never scores
   assert.equal(heldR91.sourceR90Faces,4291);
   assert.equal(heldR91.newTurnoutFaces,11);
   assert.equal(heldR91.activeModelTriangleCount,4294);
+  const heldR92=JSON.parse(fs.readFileSync(path.join(output,
+   'R54_R51_UNCOMPILED_ENVELOPES','R92_LIBRARY_PUBLIC_CIRCULATION_ATLAS.json')));
+  assert.equal(heldR92.oldB143Status,'HOLD_B143_NOT_COMPILED');
+  assert.equal(heldR92.graph.summary.researchGraphRoomsReached,7);
+  assert.equal(heldR92.graph.summary.physicalCertifiedRoomsReached,0);
+  assert.equal(heldR92.activeWholeLibraryTriangles,4306);
+  assert.equal(heldR92.safety.readiness,'NOT_PREPARED');
+  assert(fs.existsSync(path.join(output,
+   'R54_R51_UNCOMPILED_ENVELOPES','R92_FOLIO_ENTRANCE_WHOLE_ARCHITECTURE.obj')));
   assert.equal(heldR91.rightTier2Alternative.chosenTaper,.75);
   assert.equal(heldR91.safety.readiness,'NOT_PREPARED');
   assert(fs.existsSync(path.join(output,
