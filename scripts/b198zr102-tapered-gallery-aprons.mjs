@@ -16,6 +16,7 @@ import {buildR97CompareViews}
  from './b198zr97-multiview-mesh-review.mjs';
 import {auditR103SourceJoint,auditR103SevenJunctions}
  from './b198zr103-source-junction-integrity.mjs';
+import {reconcileR104SourceMesh} from './b198zr104-r91-active-throat-repair.mjs';
 
 export const SCHEMA='minecraftaibuilder-b198zr102-tapered-source-gallery-end-transitions-v1';
 const fail=s=>{throw Error('B198ZR102_'+s)};
@@ -191,14 +192,18 @@ export function writeR102TaperedReview({destination,...args}={}){
   fs.lstatSync(destination).isSymbolicLink())fail('SAFE_EXISTING_DIR_REQUIRED');
  const prefix='R102_SOURCE_GALLERY_TAPERED_APRONS',
   paths=[prefix+'_EVIDENCE.json',prefix+'_ACTIVE_ARCHITECTURE.obj',
-   prefix+'_SIX_VIEW.html'].map(x=>path.join(destination,x));
+   prefix+'_SIX_VIEW.html','R104_R91_ACTIVE_THROAT_EVIDENCE.json',
+   'R104_R91_ACTIVE_THROAT_REVISED.obj'].map(x=>path.join(destination,x));
  if(paths.some(p=>fs.existsSync(p)))fail('NO_OVERWRITE');
  // Single source-bound build; no second expensive full mesh recreation.
  const {report,mesh}=prepareR102Runtime(args);
+ // R104 uses these exact authenticated source faces, avoiding a second
+ // expensive R98/R102 full-geometry build inside R60.
+ const activeR104=reconcileR104SourceMesh(mesh);
  const views=buildR97CompareViews([
-  {revision:'R98',faces:mesh.sourceR98Faces},
-  {revision:'R100 rectangular',faces:mesh.priorR100Faces},
-  {revision:'R102 tapered/reverted',faces:mesh.faces}
+  {revision:'R98 source',faces:mesh.sourceR98Faces},
+  {revision:'R102 old candidate',faces:mesh.faces},
+  {revision:'R104 active R91-aware candidate',faces:activeR104.faces}
  ],[.55,.37,0]);
  const rows=report.records.map(r=>{
   const joint=report.junctionAudit.details.find(q=>q.id===r.id);
@@ -218,7 +223,7 @@ export function writeR102TaperedReview({destination,...args}={}){
   'table{border-collapse:collapse;width:100%}td,th{border:1px solid #abc;padding:7px}'+
   'svg{width:100%;border:1px solid #b7c4d0}.triptych{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}'+
   '@media(max-width:850px){.triptych{grid-template-columns:1fr}}</style>'+
-  '<h1>R102：両端で自然に細くなる実3D連絡デッキの床</h1>'+
+  '<h1>R102 → R104：元R88と実R91終端に接続する通路の比較</h1>'+
   '<p>R98完全prefix。R100の矩形床帯の両端に急な幅変化があるため、'+
   '端部0.016/中央0.030正規化半幅の局所テーパを実三角形で研究。'+
   '床のRay改善、無新規衝突、保存空洞、R101の源区間検査を満たす候補だけ採用。</p>'+
@@ -232,11 +237,18 @@ export function writeR102TaperedReview({destination,...args}={}){
   '/7、接合点一致 '+report.junctionAudit.sourceJoinedSelectedAprons+
   '、未確認の採択済み床 '+report.junctionAudit.selectedApronEndpointDefects+
   '。頂点一致は人の通行や支持安全の証明ではありません。</p>'+
+  '<p>R104はR103で接合証拠のない追加床 '+activeR104.report.withheldCount+
+  '件を次の比較形状から除外。右tier2は実際のR91置換床を出発点とし、'+
+  '新形状は床Ray改善・頭上/横断非悪化でのみ条件付き追加：'+
+  esc(activeR104.report.r91ProposedCorrectionStatus)+
+  '。元R102成果物は別ファイルのまま保存。</p>'+
   views.map(x=>x.html).join('')+
-  '<p><a href="'+prefix+'_ACTIVE_ARCHITECTURE.obj">実3D候補OBJ</a> / '+
+  '<p><a href="'+prefix+'_ACTIVE_ARCHITECTURE.obj">旧R102 OBJ</a> / '+
+  '<a href="R104_R91_ACTIVE_THROAT_REVISED.obj">R104 実形状OBJ</a> / '+
   '<a href="R100_SOURCE_GALLERY_WIDENING_SIX_VIEW.html">旧R100</a></p>'+
   '<p>HOLD / NOT_REVIEWED / NOT_PREPARED / 9 BLOCKED / BuildPlan空 / model0 / world0</p></html>';
- const bytes=[JSON.stringify(report,null,2)+'\n',obj(mesh.faces),html],created=[];
+ const bytes=[JSON.stringify(report,null,2)+'\n',obj(mesh.faces),html,
+  JSON.stringify(activeR104.report,null,2)+'\n',obj(activeR104.faces)],created=[];
  try{for(let i=0;i<paths.length;i++){fs.writeFileSync(paths[i],bytes[i],{flag:'wx'});created.push(paths[i]);}}
  catch(e){for(const p of created)fs.rmSync(p,{force:true});throw e;}
  return {relativeFile:path.basename(paths[2]),
