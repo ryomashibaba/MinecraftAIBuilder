@@ -32,6 +32,8 @@ import {inspectR112LanternCanopyRevision}
  from './b198zr112-lantern-canopy-clearance.mjs';
 import {inspectR113PitchedCanopyStudy}
  from './b198zr113-pitched-lantern-daylight-canopy.mjs';
+import {studyR115IntegralLantern}
+ from './b198zr115-integral-lantern-clerestory.mjs';
 import {buildR114ThreePaneReview}
  from './b198zr114-actual-three-pane-art-review.mjs';
 
@@ -227,7 +229,9 @@ export function writeR102TaperedReview({destination,...args}={}){
    'R112_R93_LANTERN_CANOPY_ALTERNATIVE.obj',
    'R113_R93_PITCHED_LANTERN_EVIDENCE.json',
    'R113_R93_PITCHED_LANTERN_ALTERNATIVE.obj',
-   'R114_REAL_THREE_PANE_ARCHITECTURE_REVIEW_EVIDENCE.json'].map(x=>path.join(destination,x));
+   'R114_REAL_THREE_PANE_ARCHITECTURE_REVIEW_EVIDENCE.json',
+   'R115_INTEGRAL_LANTERN_CLERESTORY_EVIDENCE.json',
+   'R115_INTEGRAL_LANTERN_CLERESTORY_ALTERNATIVE.obj'].map(x=>path.join(destination,x));
  if(paths.some(p=>fs.existsSync(p)))fail('NO_OVERWRITE');
  // Single source-bound build; no second expensive full mesh recreation.
  const {report,mesh}=prepareR102Runtime(args);
@@ -243,6 +247,9 @@ export function writeR102TaperedReview({destination,...args}={}){
  const r111=studyR111RealFinishTransition(r107);
  const r112=inspectR112LanternCanopyRevision(r107);
  const r113=inspectR113PitchedCanopyStudy(r107);
+ const r115=studyR115IntegralLantern(r107);
+ const review115=r115.report.geometryChanged?
+  buildR114ThreePaneReview(r107.faces,r115.faces,{phase:'R115'}):null;
  // R97 strictly requires 3 source-backed variants. Older R111/R112/R113
  // conditional branches supplied two and crashed precisely on success.
  const review111=r111.report.sourceGeometryChanged?
@@ -255,7 +262,7 @@ export function writeR102TaperedReview({destination,...args}={}){
   r113Views=review113?.views??[];
  const review114={schema:'minecraftaibuilder-b198zr114-review-delta-overview-v1',
   sourcePreserved:true,artApproval:'NOT_REVIEWED',
-  acceptedVisualComparisons:[review111,review112,review113].filter(Boolean)
+  acceptedVisualComparisons:[review111,review112,review113,review115].filter(Boolean)
    .map(({views,...evidence})=>({...evidence,
     views:views.map(v=>({id:v.id,camera:v.camera,
      sourceTriangleCounts:v.sampleTriangleCounts}))})),
@@ -343,6 +350,13 @@ export function writeR102TaperedReview({destination,...args}={}){
   '6視点を同じカメラに固定。'+
   '<a href="R114_REAL_THREE_PANE_ARCHITECTURE_REVIEW_EVIDENCE.json">各視点の源面数と実差分</a>。'+
   '採択案が無い時は比較画像を捏造しない。人間の美術判断はNOT_REVIEWED。</p>'+ 
+  '<p>R115：実R93灯籠屋根と書架上端を一体で持ち上げる、源面接合型の高窓。'+
+  esc(r115.report.decision)+'。R110頭上Ray7→'+
+  (r115.report.selection?.overhead??'未改善')+
+  '。<a href="R115_INTEGRAL_LANTERN_CLERESTORY_EVIDENCE.json">実源4候補/形状差分/旧5通路証拠</a> / '+
+  '<a href="R115_INTEGRAL_LANTERN_CLERESTORY_ALTERNATIVE.obj">3D模型（HOLDなら元R107のまま）</a>。'+
+  '研究用であり人の歩行・荷重・美術は未合格。</p>'+
+  (review115?.views.map(v=>v.html).join('')??'')+ 
   '<p>R106衝突源はR87の読書テーブル。家具7三角形だけを対象にした別案：'+
   esc(r106.report.correctionMode)+
   '。R105の頭上検出 '+r106.report.beforeRoute.overhead+
@@ -375,7 +389,8 @@ export function writeR102TaperedReview({destination,...args}={}){
   JSON.stringify(r111.report,null,2)+'\n',obj(r111.faces),
   JSON.stringify(r112.report,null,2)+'\n',obj(r112.faces),
   JSON.stringify(r113.report,null,2)+'\n',obj(r113.faces),
-  JSON.stringify(review114,null,2)+'\n'],created=[];
+  JSON.stringify(review114,null,2)+'\n',
+  JSON.stringify(r115.report,null,2)+'\n',obj(r115.faces)],created=[];
  try{for(let i=0;i<paths.length;i++){fs.writeFileSync(paths[i],bytes[i],{flag:'wx'});created.push(paths[i]);}}
  catch(e){for(const p of created)fs.rmSync(p,{force:true});throw e;}
  return {relativeFile:path.basename(paths[2]),

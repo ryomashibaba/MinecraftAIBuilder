@@ -16,11 +16,13 @@ const safe=()=>({readiness:'NOT_PREPARED',constructionApproved:false,
  BuildPlan:{operations:[]},modelCalls:0,worldContacts:0,worldReads:0,worldWrites:0});
 const finite=p=>Array.isArray(p)&&p.length===3&&p.every(Number.isFinite);
 const canopy=k=>k==='right_R93_ANGLED_LANTERN_CANOPY_ART_STUDY';
+const bookwall=k=>k==='right_R93_LANTERN_BOOKWALL_NOT_CERTIFIED';
 const floor=k=>k.startsWith('right_R87_CONTIGUOUS_PROGRAM_TERRACE')||
  k.startsWith('right_R94_UNFURNISHED_TRUE_TERRACE_THRESHOLD');
-const permitted=(k,phase)=>phase==='R111'?floor(k):canopy(k);
+const permitted=(k,phase)=>phase==='R111'?floor(k):
+ phase==='R115'?(canopy(k)||bookwall(k)):canopy(k);
 export function buildR114ThreePaneReview(before,after,{phase,focus=[.54,.55,-.69]}={}){
- if(!['R111','R112','R113'].includes(phase)||!Array.isArray(before)||
+ if(!['R111','R112','R113','R115'].includes(phase)||!Array.isArray(before)||
   !Array.isArray(after)||before.length!==after.length||before.length<1||
   !finite(focus))
   fail('TWO_EQUAL_LENGTH_REAL_SOURCE_VARIANTS_REQUIRED');
