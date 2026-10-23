@@ -10,7 +10,7 @@
 | 継続ブランチ | `feature/b198zr1-protected-architectural-revision` |
 | 継続PR | [#128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128) — Open / Draft / Unmerged |
 | HEAD | [開発ブランチの最新HEADを毎回GitHubで確認](https://github.com/ryomashibaba/MinecraftAIBuilder/commits/feature/b198zr1-protected-architectural-revision)（R98の初期実メッシュ検証対象は `9a2b5de9d8ba41a2b7ca4e626aa9d54ff4ffffdd`） |
-| 最新確認済み実装工程 | **B198Z-R104：右翼tier2の現行R91床から補修候補を生成・不接続R102床を比較モデルから除外。実モデルQA待ち** |
+| 最新確認済み実装工程 | **B198Z-R104：現行R91床を使う補修候補を実装。R103実7通路QA両OS成功（3床接合、右翼tier2は旧R88辺なし）、R104全形状QA待ち** |
 | 次に取り組む工程 | **R103/R104実メッシュCI結果・右翼tier2の床改善を確認→正しい接合面を選別、造形審査はHOLD** |
 | 施工・モデル | NOT_PREPARED / 9 BLOCKED / BuildPlan空。新たな実Qwen/Gemma禁止。World接続/読取/書込禁止 |
 
@@ -79,13 +79,20 @@
 - [R103実7通路CI](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39956894901)を一度通常pushで起動（確認時点queued）。実際の件数はまだ未確認。以後のpushのR103は軽量モックのみに戻し、完全実モデル回帰は既存手動workflow_dispatchで行う。新規ワークフロー/ZIP/CMDは追加なし。
 - 元Qwen/B143、main、Minecraft世界は未変更。NOT_PREPARED、9 BLOCKED、BuildPlan空、実モデル追加推論0。
 
+## R103実7経路の確定計測（2026-10-23 JST）
+
+[Windows/Ubuntuとも成功した実メッシュCI](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39956894901)の両OSジョブログで**同値**を確認：
+- R102の採用テーパ 3室（左tier1、右tier1、右tier3）／矩形維持0／旧HOLD4。元R88の端辺を確認6/7、採用された接合床の端点一致3/3、採用済みの接合不良0。
+- 右翼tier2のみ「元R88端辺なし」。歴史的R91が同区間の旧R88終端2面を置換したことと一致。右翼tier2は今後も旧R88の線を捏造せず、現行のR91源メッシュを使う。
+- R104の補修後の右翼tier2を改善として採用できたかどうか、全館の実際の通行安全と美術は**なお未判定**。
+
 ## R104現在地（2026-10-23 JST／新しい実メッシュQA待ち）
 
 - コード再照合で見つけた**具体的な差異：R91は右翼tier2でR88元終端2枚を除外し、R91専用の床三角形2枚を用いて元パッド内へ絞った。** R103は旧R88の端面を要求するため、旧線に基づく候補の現行床への接続を証明できない。
 - [R104実装](../scripts/b198zr104-r91-active-throat-repair.mjs)／[専用テスト](../scripts/b198zr104-r91-active-throat-repair.test.mjs)／[理由と設計](B198ZR104_R91_ACTIVE_THROAT_REPAIR_JA.md)。元R98の正規4692三角形を完全prefixとするR104別モデルで、R103端点接続証明のない追加床を保留し、右翼tier2現行R91の2枚のソースから中央拡幅、両端は元の端辺を保持する12実三角形を候補生成。元床支持レイが改善・衝突非悪化など満たした場合のみ追加。
 - R60一括レビューのR102比較画面でR98/R102/R104同一6視点を表示し、R104の実OBJ/JSONを追加して参照できる。**元R98/R102の成果物はそのまま別ファイルとして保存**。
 - [R103実7経路CI](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39956894901)は本更新時点で未完了。R102の[軽量Windows/Ubuntu CI](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39952046303)は成功済み。
-- R104の人工形状スモークだけでなく、今回のコミットで実R98→R102→R104の**独立7経路実メッシュ回帰を一度だけ通常CIで試験対象に追加**した。確定結果が得られたら軽量CIに戻し、採否件数を記載。結果が出るまで人工形状以外の件数を断定しない。
+- R104の人工形状スモークだけでなく、前のコミットの通常CIで実R98→R102→R104の**全源メッシュ回帰を1回投入**。この更新からR104も通常CIは軽量テストへ戻し、重い全館回帰は既存手動workflow_dispatchに残す。結果が出たら採否件数を記載。結果が出るまで人工形状以外の件数を断定しない。
 - Qwen/Gemma追加実推論0、Minecraft世界接続/読込/書込0、原本保護、NOT_PREPARED、9 BLOCKED、BuildPlan.operations=[]。
 
 ## 直近CIの注意点（2026-10-23時点。変化したら再確認）
