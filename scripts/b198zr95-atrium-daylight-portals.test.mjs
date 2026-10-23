@@ -133,6 +133,9 @@ test('R95 writes actual wall-hole OBJ, full audit and one-step HTML only once',(
   assert.equal((model.match(/^f /gm)||[]).length,result.activeTriangles);
   assert.equal(report.proofs.length,7);
   assert(html.includes('R94_READING_ROOM_TRUE_TERRACE_ENTRY_ARCHITECTURAL_REVIEW.html'));
+  for(const view of ['FRONT','OBLIQUE','SIDE','AERIAL'])
+   assert(html.includes('>'+view+'</figcaption>'));
+  assert((html.match(/<svg xmlns=/g)||[]).length===4);
   assert.equal(report.safety.readiness,'NOT_PREPARED');
   assert.throws(()=>writeR95DaylightReview({...a,destination:dir}),/DO_NOT_OVERWRITE/);
  }finally{fs.rmSync(dir,{recursive:true,force:true})}
