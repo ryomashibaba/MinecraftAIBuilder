@@ -178,6 +178,16 @@ test('R60 failed B143 only shows R51 envelopes; keeps originals and never scores
    'R54_R51_UNCOMPILED_ENVELOPES','R95_SEVEN_SOURCE_DAYLIGHT_PORTALS_EVIDENCE.json')));
   assert.equal(heldR95.oldB143Status,'HOLD_B143_NOT_COMPILED');
   assert.equal(heldR95.proofs.length,7);
+  const heldR96=JSON.parse(fs.readFileSync(path.join(output,
+   'R54_R51_UNCOMPILED_ENVELOPES','R96_ATRIUM_SOURCE_WINDOW_SURROUND_EVIDENCE.json')));
+  assert.equal(heldR96.oldB143Status,'HOLD_B143_NOT_COMPILED');
+  assert.equal(heldR96.rooms.length,7);
+  assert.equal(heldR96.addedArchitecturalSurroundTriangles,84);
+  assert.equal(heldR96.buildingFacadeStructuralContinuityCertified,false);
+  assert(heldR96.sightlineRays.every(x=>x.after.blocked===0));
+  assert.equal(heldR96.safety.readiness,'NOT_PREPARED');
+  assert(fs.existsSync(path.join(output,
+   'R54_R51_UNCOMPILED_ENVELOPES','R96_ATRIUM_SOURCE_WINDOW_SURROUND_ARCHITECTURE.obj')));
   assert(heldR95.proofs.every(x=>x.unobstructedSamples===9));
   assert.equal(heldR95.structuralCapacityOfCutWallVerified,false);
   assert.equal(heldR95.physicalSunlightIlluminationLuxMeasured,false);
