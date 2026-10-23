@@ -10,8 +10,8 @@
 | 継続ブランチ | `feature/b198zr1-protected-architectural-revision` |
 | 継続PR | [#128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128) — Open / Draft / Unmerged |
 | この文書の更新直前の開発HEAD | `ee67e1ced4ed5e2fe444b5eb60ac6a40fd628c30` |
-| 最新確認済み実装工程 | **B198Z-R97：比較実装あり／最新CI結果は確認中** |
-| 次に取り組む工程 | **R97の実レビュー検証→R98の形状改修** |
+| 最新確認済み実装工程 | **B198Z-R98：右上層屋根の実メッシュ別案を実装、専用QA確認中** |
+| 次に取り組む工程 | **R98実メッシュ検証とR97/R98比較美術審査→R99の動線検証** |
 | 施工・モデル | NOT_PREPARED / 9 BLOCKED / BuildPlan空。新たな実Qwen/Gemma禁止。World接続/読取/書込禁止 |
 
 **最新情報への直リンク：** [ブランチの現在地](https://github.com/ryomashibaba/MinecraftAIBuilder/tree/feature/b198zr1-protected-architectural-revision) ／ [Actions一覧](https://github.com/ryomashibaba/MinecraftAIBuilder/actions) ／ [PR #128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128)
@@ -30,6 +30,14 @@
 - 通常Push/PRのR97は軽量検査のみとし、**全館生成の重いテストは手動の完全回帰へ**戻した。R97本体はJSON証拠再計算とHTML6視点出力を共有して無駄な再計算を削減。
 - この時点で**最新HEAD上のWindows+Ubuntu両方のCI成功は未確認**。本機能による実際の出力ファイルの人間美術審査も未実施。R97を美術合格やQwen生成成功へ昇格しない。
 - R60への統合後、R94〜R96 OBJとR97比較HTMLがレビュー画面に揃う。実人体頭上高・経路・窓支持/採光・Minecraft実歩行は未認証。R98の新形状修正は未開始。
+
+## R98現在地（2026-10-23 JST）
+
+- R97最新軽量CIの[Windows/Ubuntu両OS成功](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39940965462)を確認。ただし完全履歴回帰や人間による美術審査ではない。
+- [R98屋根ロフト実装](../scripts/b198zr98-elevated-right-crown.mjs) / [専用テスト](../scripts/b198zr98-elevated-right-crown.test.mjs) / [設計書](B198ZR98_ELEVATED_RIGHT_CROWN_JA.md)。元R96全館4,692面を保護し、右側上部の実頂点を最大0.085正規化単位の局所滑らかな形に持ち上げる比較候補を追加。改修前後の頭上方向の交差と7室×9本の視線を再測定する。改善を観測しなければHOLD。
+- R60一括レビューへR98候補の**実OBJ、証拠JSON、6視点のR95/R96/R98比較HTML**を追加。元Qwen出力・旧R95/R96/97成果物を変更しない。
+- **R98の専用実メッシュCIは実行中で未判定。** 人による実画像審査、構造/実歩行/Minecraft/実Qwen生成能力の検証も未実施。「R98美術合格」や施工可能と表示しない。
+- R98の専用幾何検証後に、通常CIは再び軽量テスト中心に戻す。R99は有限幅・有限高さの入口→7室→ラウンジの機能検証を優先候補とする。
 
 ## 直近CIの注意点（2026-10-23時点。変化したら再確認）
 - [R44 Windows CMD](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39914804614)：46を期待、実ファイル47で `R44_EXACT_SOURCE_COUNT_EXPECTED_46_ACTUAL_47_BASE_37_OVERLAY_10`。ファイル数合わせではなく期待リストと実マニフェストを照合する。
