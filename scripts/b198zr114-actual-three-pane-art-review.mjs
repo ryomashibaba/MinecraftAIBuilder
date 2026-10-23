@@ -17,12 +17,14 @@ const safe=()=>({readiness:'NOT_PREPARED',constructionApproved:false,
 const finite=p=>Array.isArray(p)&&p.length===3&&p.every(Number.isFinite);
 const canopy=k=>k==='right_R93_ANGLED_LANTERN_CANOPY_ART_STUDY';
 const bookwall=k=>k==='right_R93_LANTERN_BOOKWALL_NOT_CERTIFIED';
+const bench=k=>k==='right_R93_CONTINUOUS_READING_SEAT_LEDGE_NOT_OCCUPANCY_CERTIFIED';
 const floor=k=>k.startsWith('right_R87_CONTIGUOUS_PROGRAM_TERRACE')||
  k.startsWith('right_R94_UNFURNISHED_TRUE_TERRACE_THRESHOLD');
 const permitted=(k,phase)=>phase==='R111'?floor(k):
- phase==='R115'?(canopy(k)||bookwall(k)):canopy(k);
+ (phase==='R115'||phase==='R118')?(canopy(k)||bookwall(k)||
+  phase==='R118'&&bench(k)):canopy(k);
 export function buildR114ThreePaneReview(before,after,{phase,focus=[.54,.55,-.69]}={}){
- if(!['R111','R112','R113','R115'].includes(phase)||!Array.isArray(before)||
+ if(!['R111','R112','R113','R115','R118'].includes(phase)||!Array.isArray(before)||
   !Array.isArray(after)||before.length!==after.length||before.length<1||
   !finite(focus))
   fail('TWO_EQUAL_LENGTH_REAL_SOURCE_VARIANTS_REQUIRED');
@@ -38,7 +40,7 @@ export function buildR114ThreePaneReview(before,after,{phase,focus=[.54,.55,-.69
    fail('ONLY_PHASE_SOURCE_FACETS_MAY_CHANGE');
   changes.push(i);
  }
- if(changes.length<1||changes.length>24)
+ if(changes.length<1||changes.length>40)
   fail('LOCAL_BOUNDED_REAL_SOURCE_DELTA_REQUIRED');
  const clipped=changes.map(i=>after[i]);
  // These are the exact final changed facets, not invented render proxies.
