@@ -49,6 +49,7 @@ import {writeR96WindowReview} from './b198zr96-window-structure-and-light-study.
 import {writeR97ComparisonReview} from './b198zr97-multiview-mesh-review.mjs';
 import {writeR98ElevatedCrownReview} from './b198zr98-elevated-right-crown.mjs';
 import {writeR99FiniteVolumeReview} from './b198zr99-finite-volume-route-witness.mjs';
+import {writeR100ShoulderReview} from './b198zr100-source-gallery-shoulders.mjs';
 import {inspectR59Archive,reviewR59AlreadySavedZip}
  from './b198zr59-safe-result-zip-to-review.mjs';
 export const SCHEMA='minecraftaibuilder-b198zr60-visual-human-review-v1';
@@ -75,7 +76,7 @@ function visual(z,evidence,stage){
   fail('R58_B143_VERDICT_DISAGREES');
  const dirname=z.tag+(compiled?'_R7_FINAL_ABSTRACT_3D':'_R51_UNCOMPILED_ENVELOPES');
  const folder=path.join(stage,dirname);
- let kind,link,board=null,sections=null,guidance=null,independentFloor=null,overheadReview=null,containmentReview=null,airTopologyReview=null,verticalReview=null,approachReview=null,routeGapReview=null,preservationReview=null,alternativesReview=null,humanWorksheetReview=null,humanDraftGuide=null,priorityBoard=null,architectureBrief=null,spatialProgramSpec=null,parametricStudy=null,publicCirculationStudy=null,portalReviewStudy=null,interiorClearanceReview=null,readingTerraceLandingStudy=null,multilevelReadingStudy=null,wingRouteStudy=null,finiteWidthDeckStudy=null,readingRooms87=null,researchGalleries88=null,architectureInterface89=null,sourceSeams90=null,taperedTurnout91=null,wholeLibrary92=null,readingArcades93=null,readingDoors94=null,daylightR95=null,architecturalWindows96=null,comparisonR97=null,candidateR98=null,finiteRoutesR99=null;
+ let kind,link,board=null,sections=null,guidance=null,independentFloor=null,overheadReview=null,containmentReview=null,airTopologyReview=null,verticalReview=null,approachReview=null,routeGapReview=null,preservationReview=null,alternativesReview=null,humanWorksheetReview=null,humanDraftGuide=null,priorityBoard=null,architectureBrief=null,spatialProgramSpec=null,parametricStudy=null,publicCirculationStudy=null,portalReviewStudy=null,interiorClearanceReview=null,readingTerraceLandingStudy=null,multilevelReadingStudy=null,wingRouteStudy=null,finiteWidthDeckStudy=null,readingRooms87=null,researchGalleries88=null,architectureInterface89=null,sourceSeams90=null,taperedTurnout91=null,wholeLibrary92=null,readingArcades93=null,readingDoors94=null,daylightR95=null,architecturalWindows96=null,comparisonR97=null,candidateR98=null,finiteRoutesR99=null,galleryShouldersR100=null;
  if(compiled){
   fs.mkdirSync(folder);
   const r=writeR7OfflineVisualReview({
@@ -767,6 +768,41 @@ function visual(z,evidence,stage){
   destination:folder
  });
  finiteRoutesR99=dirname+'/'+r99.relativeFile;
+ const r100=writeR100ShoulderReview({
+  raw,expectedRawSha256:evidence.rawSha256,
+  b143Status:evidence.b143.status,
+  expectedGeometrySha256:compiled?.geometrySha256??null,
+  r61Evidence:r61,r64Evidence:r64,r66Evidence:r66,
+  r67Evidence:r67,r68Evidence:r68,r69Evidence:r69,
+  r70Evidence:r70,r71Evidence,r72Evidence,r73Evidence,r74Evidence,
+  r62Evidence:JSON.parse(fs.readFileSync(path.join(folder,'R62_NEXT_DESIGN_EVIDENCE.json'),'utf8')),
+  r76Evidence:JSON.parse(fs.readFileSync(path.join(folder,'R76_ARCHITECTURE_PRIORITY_REVIEW.json'),'utf8')),
+  r77Evidence:JSON.parse(fs.readFileSync(path.join(folder,'R77_FUTURE_ARCHITECTURE_BRIEF.json'),'utf8')),
+  r78Evidence:JSON.parse(fs.readFileSync(path.join(folder,'R78_ARCHITECTURAL_SPATIAL_PROGRAM.json'),'utf8')),
+  r79Evidence:JSON.parse(fs.readFileSync(path.join(folder,'R79_ART_STUDY_EVIDENCE.json'),'utf8')),
+  r80Evidence:JSON.parse(fs.readFileSync(path.join(folder,'R80_3D_CIRCULATION_STUDY_EVIDENCE.json'),'utf8')),
+  r81Evidence:JSON.parse(fs.readFileSync(path.join(folder,'R81_ENVELOPE_COLLISIONS_AND_PORTALS.json'),'utf8')),
+  r82Evidence:JSON.parse(fs.readFileSync(path.join(folder,'R82_DECK_TERRACE_PORTAL_GEOMETRY.json'),'utf8')),
+  r83Evidence:JSON.parse(fs.readFileSync(path.join(folder,'R83_WING_LANDINGS_AND_ROUTE_GAPS.json'),'utf8')),
+  r84Evidence:JSON.parse(fs.readFileSync(path.join(folder,'R84_SEVEN_BOOKSTACK_LEVELS_EVIDENCE.json'),'utf8')),
+  r85Evidence:JSON.parse(fs.readFileSync(path.join(folder,'R85_SEVEN_TIER_ROUTE_ALTERNATIVES.json'),'utf8')),
+  r86Evidence:JSON.parse(fs.readFileSync(path.join(folder,'R86_READING_TIER_WIDTH_SCREEN.json'),'utf8')),
+  r87Evidence:JSON.parse(fs.readFileSync(path.join(folder,'R87_SEVEN_READING_ROOMS_ARCHITECTURAL_EVIDENCE.json'),'utf8')),
+  r88Evidence:JSON.parse(fs.readFileSync(path.join(folder,'R88_GALLERY_TO_SEVEN_READING_ROOMS_EVIDENCE.json'),'utf8')),
+  r89Evidence:JSON.parse(fs.readFileSync(path.join(folder,'R89_GALLERY_INTEGRATION_EVIDENCE.json'),'utf8')),
+  r90Evidence:JSON.parse(fs.readFileSync(path.join(folder,'R90_SOURCE_SURFACE_SEAM_EVIDENCE.json'),'utf8')),
+  r91Evidence:JSON.parse(fs.readFileSync(path.join(folder,'R91_TRUE_PAD_TAPERED_RIGHT_TIER2_EVIDENCE.json'),'utf8')),
+  r92Evidence:JSON.parse(fs.readFileSync(path.join(folder,'R92_LIBRARY_PUBLIC_CIRCULATION_ATLAS.json'),'utf8')),
+  r93Evidence:JSON.parse(fs.readFileSync(path.join(folder,'R93_ORIGINAL_SEVEN_LONG_READING_GALLERIES_EVIDENCE.json'),'utf8')),
+  r94Evidence:JSON.parse(fs.readFileSync(path.join(folder,'R94_READING_ROOM_TRUE_TERRACE_ENTRY_EVIDENCE.json'),'utf8')),
+  r95Evidence:JSON.parse(fs.readFileSync(path.join(folder,'R95_SEVEN_SOURCE_DAYLIGHT_PORTALS_EVIDENCE.json'),'utf8')),
+  r96Evidence:JSON.parse(fs.readFileSync(path.join(folder,'R96_ATRIUM_SOURCE_WINDOW_SURROUND_EVIDENCE.json'),'utf8')),
+  r97Evidence:JSON.parse(fs.readFileSync(path.join(folder,'R97_MESH_BOUND_SIX_VIEW_COMPARISON_EVIDENCE.json'),'utf8')),
+  r98Evidence:JSON.parse(fs.readFileSync(path.join(folder,'R98_RIGHT_CROWN_LOCAL_LOFT_EVIDENCE.json'),'utf8')),
+  r99Evidence:JSON.parse(fs.readFileSync(path.join(folder,'R99_FINITE_WIDTH_HEADROOM_SOURCE_ROUTES_EVIDENCE.json'),'utf8')),
+  destination:folder
+ });
+ galleryShouldersR100=dirname+'/'+r100.relativeFile;
  return {tag:z.tag,originalRawSha256:evidence.rawSha256,
   evidenceType:kind,relativeViewer:link,relativeHumanBoard:board,
   relativeFunctionalSections:sections,
@@ -806,6 +842,7 @@ function visual(z,evidence,stage){
   relativeR97MultiViewComparison:comparisonR97,
   relativeR98RoofLoftCandidate:candidateR98,
   relativeR99FiniteRouteWitness:finiteRoutesR99,
+  relativeR100SourceShoulderFloor:galleryShouldersR100,
   independentHumanReview:'NOT_PERFORMED',
   actualMinecraftPlayerWalkingVerified:false};
 }
@@ -938,7 +975,9 @@ export function createR60VisualReview({r54Zip,r48Zip=null,destination}={}){
    (v.relativeR98RoofLoftCandidate?' / <a href="'+v.relativeR98RoofLoftCandidate+
     '">R98 右側上部屋根を滑らかに持ち上げた実3D候補（美術HOLD）</a>':'')+
    (v.relativeR99FiniteRouteWitness?' / <a href="'+v.relativeR99FiniteRouteWitness+
-    '">R99 入口から7室・ラウンジの有限幅/頭上/足元の実形状HOLD監査</a>':'')+'</li>').join('');
+    '">R99 入口から7室・ラウンジの有限幅/頭上/足元の実形状HOLD監査</a>':'')+
+   (v.relativeR100SourceShoulderFloor?' / <a href="'+v.relativeR100SourceShoulderFloor+
+    '">R100 幅不足の連絡デッキへ実床面追加した比較案（施工禁止）</a>':'')+'</li>').join('');
   const html='<!doctype html><html lang="ja"><meta charset="utf-8">'+
    '<meta http-equiv="Content-Security-Policy" content="default-src &#39;none&#39;; style-src &#39;unsafe-inline&#39;">'+
    '<title>R60 建築品質の人間審査</title>'+
