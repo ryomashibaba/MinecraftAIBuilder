@@ -36,6 +36,8 @@ import {studyR115IntegralLantern}
  from './b198zr115-integral-lantern-clerestory.mjs';
 import {traceR117ResidualCanopyHits}
  from './b198zr117-post-canopy-real-source-hits.mjs';
+import {assessR118JoinedSeat}
+ from './b198zr118-reading-seat-clearance.mjs';
 import {buildR114ThreePaneReview}
  from './b198zr114-actual-three-pane-art-review.mjs';
 
@@ -234,7 +236,9 @@ export function writeR102TaperedReview({destination,...args}={}){
    'R114_REAL_THREE_PANE_ARCHITECTURE_REVIEW_EVIDENCE.json',
    'R115_INTEGRAL_LANTERN_CLERESTORY_EVIDENCE.json',
    'R115_INTEGRAL_LANTERN_CLERESTORY_ALTERNATIVE.obj',
-   'R117_POST_CANOPY_REAL_SOURCE_HITS_EVIDENCE.json'].map(x=>path.join(destination,x));
+   'R117_POST_CANOPY_REAL_SOURCE_HITS_EVIDENCE.json',
+   'R118_JOINED_READING_SEAT_SOURCE_EVIDENCE.json',
+   'R118_JOINED_READING_SEAT_ARCHITECTURE.obj'].map(x=>path.join(destination,x));
  if(paths.some(p=>fs.existsSync(p)))fail('NO_OVERWRITE');
  // Single source-bound build; no second expensive full mesh recreation.
  const {report,mesh}=prepareR102Runtime(args);
@@ -252,6 +256,9 @@ export function writeR102TaperedReview({destination,...args}={}){
  const r113=inspectR113PitchedCanopyStudy(r107);
  const r115=studyR115IntegralLantern(r107);
  const r117=traceR117ResidualCanopyHits(r107);
+ const r118=assessR118JoinedSeat(r107);
+ const review118=r118.report.geometryChanged?
+  buildR114ThreePaneReview(r107.faces,r118.faces,{phase:'R118'}):null;
  const review115=r115.report.geometryChanged?
   buildR114ThreePaneReview(r107.faces,r115.faces,{phase:'R115'}):null;
  // R97 strictly requires 3 source-backed variants. Older R111/R112/R113
@@ -266,7 +273,7 @@ export function writeR102TaperedReview({destination,...args}={}){
   r113Views=review113?.views??[];
  const review114={schema:'minecraftaibuilder-b198zr114-review-delta-overview-v1',
   sourcePreserved:true,artApproval:'NOT_REVIEWED',
-  acceptedVisualComparisons:[review111,review112,review113,review115].filter(Boolean)
+  acceptedVisualComparisons:[review111,review112,review113,review115,review118].filter(Boolean)
    .map(({views,...evidence})=>({...evidence,
     views:views.map(v=>({id:v.id,camera:v.camera,
      sourceTriangleCounts:v.sampleTriangleCounts}))})),
@@ -364,6 +371,11 @@ export function writeR102TaperedReview({destination,...args}={}){
   '<p>R117：R113/R115の最大形状変更後に残る頭上Ray7件の真正なfirst-hit sourceを追跡。'+
   '<a href="R117_POST_CANOPY_REAL_SOURCE_HITS_EVIDENCE.json">元/候補の三角形番号・交点・変更頂点</a>。'+
   '現在建築は変更なしHOLDであり、実人間の通行・支持は未認証。</p>'+ 
+  '<p>R118：本棚上縁と灯籠庇の上昇に加え、実座面4476の連続帯を棚方向へ後退。'+
+  esc(r118.report.status)+'。7件→'+(r118.report.chosen?.overhead??'未改善')+
+  '。<a href="R118_JOINED_READING_SEAT_SOURCE_EVIDENCE.json">源座面奥行きと旧5経路の採否</a> / '+
+  '<a href="R118_JOINED_READING_SEAT_ARCHITECTURE.obj">座面保持3D形状</a>。'+
+  '人の歩行/美術/荷重は未認証。</p>'+(review118?.views.map(v=>v.html).join('')??'')+ 
   '<p>R106衝突源はR87の読書テーブル。家具7三角形だけを対象にした別案：'+
   esc(r106.report.correctionMode)+
   '。R105の頭上検出 '+r106.report.beforeRoute.overhead+
@@ -398,7 +410,8 @@ export function writeR102TaperedReview({destination,...args}={}){
   JSON.stringify(r113.report,null,2)+'\n',obj(r113.faces),
   JSON.stringify(review114,null,2)+'\n',
   JSON.stringify(r115.report,null,2)+'\n',obj(r115.faces),
-  JSON.stringify(r117,null,2)+'\n'],created=[];
+  JSON.stringify(r117,null,2)+'\n',
+  JSON.stringify(r118.report,null,2)+'\n',obj(r118.faces)],created=[];
  try{for(let i=0;i<paths.length;i++){fs.writeFileSync(paths[i],bytes[i],{flag:'wx'});created.push(paths[i]);}}
  catch(e){for(const p of created)fs.rmSync(p,{force:true});throw e;}
  return {relativeFile:path.basename(paths[2]),
