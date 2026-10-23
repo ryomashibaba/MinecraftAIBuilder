@@ -34,6 +34,8 @@ import {inspectR113PitchedCanopyStudy}
  from './b198zr113-pitched-lantern-daylight-canopy.mjs';
 import {studyR115IntegralLantern}
  from './b198zr115-integral-lantern-clerestory.mjs';
+import {traceR117ResidualCanopyHits}
+ from './b198zr117-post-canopy-real-source-hits.mjs';
 import {buildR114ThreePaneReview}
  from './b198zr114-actual-three-pane-art-review.mjs';
 
@@ -231,7 +233,8 @@ export function writeR102TaperedReview({destination,...args}={}){
    'R113_R93_PITCHED_LANTERN_ALTERNATIVE.obj',
    'R114_REAL_THREE_PANE_ARCHITECTURE_REVIEW_EVIDENCE.json',
    'R115_INTEGRAL_LANTERN_CLERESTORY_EVIDENCE.json',
-   'R115_INTEGRAL_LANTERN_CLERESTORY_ALTERNATIVE.obj'].map(x=>path.join(destination,x));
+   'R115_INTEGRAL_LANTERN_CLERESTORY_ALTERNATIVE.obj',
+   'R117_POST_CANOPY_REAL_SOURCE_HITS_EVIDENCE.json'].map(x=>path.join(destination,x));
  if(paths.some(p=>fs.existsSync(p)))fail('NO_OVERWRITE');
  // Single source-bound build; no second expensive full mesh recreation.
  const {report,mesh}=prepareR102Runtime(args);
@@ -248,6 +251,7 @@ export function writeR102TaperedReview({destination,...args}={}){
  const r112=inspectR112LanternCanopyRevision(r107);
  const r113=inspectR113PitchedCanopyStudy(r107);
  const r115=studyR115IntegralLantern(r107);
+ const r117=traceR117ResidualCanopyHits(r107);
  const review115=r115.report.geometryChanged?
   buildR114ThreePaneReview(r107.faces,r115.faces,{phase:'R115'}):null;
  // R97 strictly requires 3 source-backed variants. Older R111/R112/R113
@@ -357,6 +361,9 @@ export function writeR102TaperedReview({destination,...args}={}){
   '<a href="R115_INTEGRAL_LANTERN_CLERESTORY_ALTERNATIVE.obj">3D模型（HOLDなら元R107のまま）</a>。'+
   '研究用であり人の歩行・荷重・美術は未合格。</p>'+
   (review115?.views.map(v=>v.html).join('')??'')+ 
+  '<p>R117：R113/R115の最大形状変更後に残る頭上Ray7件の真正なfirst-hit sourceを追跡。'+
+  '<a href="R117_POST_CANOPY_REAL_SOURCE_HITS_EVIDENCE.json">元/候補の三角形番号・交点・変更頂点</a>。'+
+  '現在建築は変更なしHOLDであり、実人間の通行・支持は未認証。</p>'+ 
   '<p>R106衝突源はR87の読書テーブル。家具7三角形だけを対象にした別案：'+
   esc(r106.report.correctionMode)+
   '。R105の頭上検出 '+r106.report.beforeRoute.overhead+
@@ -390,7 +397,8 @@ export function writeR102TaperedReview({destination,...args}={}){
   JSON.stringify(r112.report,null,2)+'\n',obj(r112.faces),
   JSON.stringify(r113.report,null,2)+'\n',obj(r113.faces),
   JSON.stringify(review114,null,2)+'\n',
-  JSON.stringify(r115.report,null,2)+'\n',obj(r115.faces)],created=[];
+  JSON.stringify(r115.report,null,2)+'\n',obj(r115.faces),
+  JSON.stringify(r117,null,2)+'\n'],created=[];
  try{for(let i=0;i<paths.length;i++){fs.writeFileSync(paths[i],bytes[i],{flag:'wx'});created.push(paths[i]);}}
  catch(e){for(const p of created)fs.rmSync(p,{force:true});throw e;}
  return {relativeFile:path.basename(paths[2]),
