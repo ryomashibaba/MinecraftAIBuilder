@@ -186,7 +186,7 @@ jobs:
         run: |
           node --test --test-concurrency=2 scripts/b198zr96-critical-offline-smoke.test.mjs
           node --test --test-concurrency=2 --test-name-pattern="R97 projection: source mesh only" scripts/b198zr97-multiview-mesh-review.test.mjs
-          node --test --test-concurrency=2 scripts/b198zr98-elevated-right-crown.test.mjs
+          node --test --test-concurrency=2 --test-name-pattern="R98 quick: loft has smooth bounded upper-shell field" scripts/b198zr98-elevated-right-crown.test.mjs
           node --test --test-concurrency=2 --test-name-pattern="R60 refuses corrupt original SHA|R60 refuses a synthetic R48|R89 deterministic planar length|R95 clipped wall subtracts true surface area|R96 requires actual shell source points" scripts/b198zr60-evidence-bound-visual-review.test.mjs scripts/b198zr84-multilevel-bookstack-review.test.mjs scripts/b198zr95-atrium-daylight-portals.test.mjs scripts/b198zr96-window-structure-and-light-study.test.mjs
       - name: Full R58-R96 offline historical regression (manual workflow dispatch)
         if: github.event_name == 'workflow_dispatch'
