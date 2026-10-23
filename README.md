@@ -1,5 +1,7 @@
 # MinecraftAIBuilder
 
+> **継続開発AI・新しいチャットの最初の入口：** [AI_RESTART_JA.md](docs/AI_RESTART_JA.md) を開き、記載のブランチ・PR・CIをGitHubで再照合してください。変更禁止方針は [AI_PROJECT_CHARTER_JA.md](docs/AI_PROJECT_CHARTER_JA.md)。毎日の完全引き継ぎプロンプトは不要です。
+
 **Minecraft Education Edition first · Java Edition later · private source repository**
 
 ## Development baseline
