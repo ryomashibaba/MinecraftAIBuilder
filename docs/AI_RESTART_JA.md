@@ -10,8 +10,8 @@
 | 継続ブランチ | `feature/b198zr1-protected-architectural-revision` |
 | 継続PR | [#128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128) — Open / Draft / Unmerged |
 | HEAD | [開発ブランチの最新HEADを毎回GitHubで確認](https://github.com/ryomashibaba/MinecraftAIBuilder/commits/feature/b198zr1-protected-architectural-revision)（R98の初期実メッシュ検証対象は `9a2b5de9d8ba41a2b7ca4e626aa9d54ff4ffffdd`） |
-| 最新確認済み実装工程 | **B198Z-R98：幾何候補とWindows/Ubuntu実メッシュテスト完了・美術HOLD** |
-| 次に取り組む工程 | **R98実3Dの独立美術審査→R99の有限幅・有限高の経路研究** |
+| 最新確認済み実装工程 | **B198Z-R99：有限幅／頭上／足元の実三角形検査を実装。全館CI確認中（PASS未宣言）** |
+| 次に取り組む工程 | **R99の両OS CIと8経路の実測結果確認→主要障害箇所の形状修正を優先** |
 | 施工・モデル | NOT_PREPARED / 9 BLOCKED / BuildPlan空。新たな実Qwen/Gemma禁止。World接続/読取/書込禁止 |
 
 **最新情報への直リンク：** [ブランチの現在地](https://github.com/ryomashibaba/MinecraftAIBuilder/tree/feature/b198zr1-protected-architectural-revision) ／ [Actions一覧](https://github.com/ryomashibaba/MinecraftAIBuilder/actions) ／ [PR #128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128)
@@ -38,6 +38,14 @@
 - R60一括レビューへR98候補の**実OBJ、証拠JSON、6視点のR95/R96/R98比較HTML**を追加。元Qwen出力・旧R95/R96/97成果物を変更しない。
 - [R98の初期実メッシュ検証CI](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39942654481)は**Windows/Ubuntu両方SUCCESS**。R98ソースから実三角形の変化、実交差に基づく頭上プローブ改善（少なくとも0.02正規化単位）、7室×9本の視線未悪化、原本保護をテスト。R60へ統合した全レビューの実出力と独立美術審査は別途未実施。構造/実歩行/Minecraft/実Qwen生成能力も未認証。R98は美術HOLDであり施工不可。
 - 通常Push/PRのCIは再び軽量テスト中心、全館幾何/歴史回帰は手動workflow_dispatchに維持。R99は有限幅・有限高さの入口→7室→ラウンジの機能検証を優先候補とする。
+
+## R99現在地（2026-10-23 JST、CI結果未確認）
+
+- [R99本体](../scripts/b198zr99-finite-volume-route-witness.mjs)／[専用テスト](../scripts/b198zr99-finite-volume-route-witness.test.mjs)／[仕様](B198ZR99_FINITE_VOLUME_ROUTE_REVIEW_JA.md)。R92の入口→左右7閲覧室＋ラウンジ計8経路を、R98実建築三角形に対し**中央・両端の足元と頭上、横断方向の限定レイ**で調査する。
+- 正規化単位での仮の半幅0.023／高さ0.135。Minecraftブロックやメートルではない。局所レイの成功も人間の有効通行幅や全連続経路の認証にはならない。認証済み目的地は常時0、判定HOLD。
+- R60一括レビューへのR99表示導線追加。新しいGitHub PRやZIP、CMD、実Qwen推論やワールド操作はなし。
+- [初回R99全館回帰CI](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39946180591) は確認時点でqueued。**Windows/Ubuntu結果、8経路の実測検出件数、実HTML審査はまだ未確定。** 未検証の成功件数を記載せず、確定した結果だけで次工程を選ぶ。
+- R98初期ジオメトリの[両OS成功](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39942654481)は維持。ただし独立美術評価と実Minecraft歩行認証は保留。
 
 ## 直近CIの注意点（2026-10-23時点。変化したら再確認）
 - [R44 Windows CMD](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39914804614)：46を期待、実ファイル47で `R44_EXACT_SOURCE_COUNT_EXPECTED_46_ACTUAL_47_BASE_37_OVERLAY_10`。ファイル数合わせではなく期待リストと実マニフェストを照合する。
