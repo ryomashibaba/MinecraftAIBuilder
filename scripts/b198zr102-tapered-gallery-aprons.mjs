@@ -32,6 +32,8 @@ import {inspectR112LanternCanopyRevision}
  from './b198zr112-lantern-canopy-clearance.mjs';
 import {inspectR113PitchedCanopyStudy}
  from './b198zr113-pitched-lantern-daylight-canopy.mjs';
+import {buildR114ThreePaneReview}
+ from './b198zr114-actual-three-pane-art-review.mjs';
 
 export const SCHEMA='minecraftaibuilder-b198zr102-tapered-source-gallery-end-transitions-v1';
 const fail=s=>{throw Error('B198ZR102_'+s)};
@@ -224,7 +226,8 @@ export function writeR102TaperedReview({destination,...args}={}){
    'R112_R93_LANTERN_CANOPY_CLEARANCE_EVIDENCE.json',
    'R112_R93_LANTERN_CANOPY_ALTERNATIVE.obj',
    'R113_R93_PITCHED_LANTERN_EVIDENCE.json',
-   'R113_R93_PITCHED_LANTERN_ALTERNATIVE.obj'].map(x=>path.join(destination,x));
+   'R113_R93_PITCHED_LANTERN_ALTERNATIVE.obj',
+   'R114_REAL_THREE_PANE_ARCHITECTURE_REVIEW_EVIDENCE.json'].map(x=>path.join(destination,x));
  if(paths.some(p=>fs.existsSync(p)))fail('NO_OVERWRITE');
  // Single source-bound build; no second expensive full mesh recreation.
  const {report,mesh}=prepareR102Runtime(args);
@@ -240,18 +243,23 @@ export function writeR102TaperedReview({destination,...args}={}){
  const r111=studyR111RealFinishTransition(r107);
  const r112=inspectR112LanternCanopyRevision(r107);
  const r113=inspectR113PitchedCanopyStudy(r107);
- const r113Views=r113.report.geometryChanged?buildR97CompareViews([
-  {revision:'R107 source lantern',faces:r107.faces},
-  {revision:'R113 high daylight inner ridge',faces:r113.faces}
- ],[.55,.45,-.69]):[];
- const r112Views=r112.report.sourceGeometryChanged?buildR97CompareViews([
-  {revision:'R107 original lantern',faces:r107.faces},
-  {revision:'R112 eave relief',faces:r112.faces}
- ],[.55,.45,-.69]):[];
- const r111Views=r111.report.sourceGeometryChanged?buildR97CompareViews([
-  {revision:'R107 preserved source',faces:r107.faces},
-  {revision:'R111 floor finish comparison',faces:r111.faces}
- ],[.55,.45,-.69]):[];
+ // R97 strictly requires 3 source-backed variants. Older R111/R112/R113
+ // conditional branches supplied two and crashed precisely on success.
+ const review111=r111.report.sourceGeometryChanged?
+  buildR114ThreePaneReview(r107.faces,r111.faces,{phase:'R111'}):null;
+ const review112=r112.report.sourceGeometryChanged?
+  buildR114ThreePaneReview(r107.faces,r112.faces,{phase:'R112'}):null;
+ const review113=r113.report.geometryChanged?
+  buildR114ThreePaneReview(r107.faces,r113.faces,{phase:'R113'}):null;
+ const r111Views=review111?.views??[],r112Views=review112?.views??[],
+  r113Views=review113?.views??[];
+ const review114={schema:'minecraftaibuilder-b198zr114-review-delta-overview-v1',
+  sourcePreserved:true,artApproval:'NOT_REVIEWED',
+  acceptedVisualComparisons:[review111,review112,review113].filter(Boolean)
+   .map(({views,...evidence})=>({...evidence,
+    views:views.map(v=>({id:v.id,camera:v.camera,
+     sourceTriangleCounts:v.sampleTriangleCounts}))})),
+  rejectedCandidatesNotPaintedAsAccepted:true};
  const views=buildR97CompareViews([
   {revision:'R105 source collision',faces:r105.faces},
   {revision:'R106 relocated furniture',faces:r106.faces},
@@ -331,6 +339,10 @@ export function writeR102TaperedReview({destination,...args}={}){
   '。<a href="R113_R93_PITCHED_LANTERN_EVIDENCE.json">源三角形・4候補・通路判定</a> / '+
   '<a href="R113_R93_PITCHED_LANTERN_ALTERNATIVE.obj">比較3D形状</a>。'+
   '認証済みの歩行路ではない。</p>'+r113Views.map(v=>v.html).join('')+ 
+  '<p>R114：採択形状の比較時は元の全館／改修後の全館／実際に変更した面のみの3ペインで、'+
+  '6視点を同じカメラに固定。'+
+  '<a href="R114_REAL_THREE_PANE_ARCHITECTURE_REVIEW_EVIDENCE.json">各視点の源面数と実差分</a>。'+
+  '採択案が無い時は比較画像を捏造しない。人間の美術判断はNOT_REVIEWED。</p>'+ 
   '<p>R106衝突源はR87の読書テーブル。家具7三角形だけを対象にした別案：'+
   esc(r106.report.correctionMode)+
   '。R105の頭上検出 '+r106.report.beforeRoute.overhead+
@@ -362,7 +374,8 @@ export function writeR102TaperedReview({destination,...args}={}){
    '# HOLD: no accepted route; no invented geometry\n'),
   JSON.stringify(r111.report,null,2)+'\n',obj(r111.faces),
   JSON.stringify(r112.report,null,2)+'\n',obj(r112.faces),
-  JSON.stringify(r113.report,null,2)+'\n',obj(r113.faces)],created=[];
+  JSON.stringify(r113.report,null,2)+'\n',obj(r113.faces),
+  JSON.stringify(review114,null,2)+'\n'],created=[];
  try{for(let i=0;i<paths.length;i++){fs.writeFileSync(paths[i],bytes[i],{flag:'wx'});created.push(paths[i]);}}
  catch(e){for(const p of created)fs.rmSync(p,{force:true});throw e;}
  return {relativeFile:path.basename(paths[2]),
