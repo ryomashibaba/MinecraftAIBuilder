@@ -14,6 +14,8 @@ import {screenR99FiniteRoute}
  from './b198zr99-finite-volume-route-witness.mjs';
 import {buildR97CompareViews}
  from './b198zr97-multiview-mesh-review.mjs';
+import {auditR103SourceJoint,auditR103SevenJunctions}
+ from './b198zr103-source-junction-integrity.mjs';
 
 export const SCHEMA='minecraftaibuilder-b198zr102-tapered-source-gallery-end-transitions-v1';
 const fail=s=>{throw Error('B198ZR102_'+s)};
@@ -99,6 +101,7 @@ export function buildR102TaperedGalleryStudy(nodes){
   if(r.addedSourceFaces!==4){
    rejected++;
    records.push({id:r.id,priorStatus:r.status,
+    sourceLine:r.actualSourceSegment,
     status:'RETAIN_R100_REJECTED_NO_NEW_CANDIDATE',
     addedTriangles:0});continue;
   }
@@ -120,12 +123,17 @@ export function buildR102TaperedGalleryStudy(nodes){
   const taperedGain=source.floor-candidate.floor;
   const sufficientGain=taperedGain>=Math.max(1,Math.ceil(rectangularGain*.6));
   const fit=preservedAtrium(taperedShape.faces,side);
-  const choose=shared&&noNewCollision&&floorGain&&sufficientGain&&fit;
+  const join=auditR103SourceJoint({sourceFaces:old.sourceFaces,
+   addedFaces:taperedShape.faces,sourceAnchor:entry,sourcePad:pad});
+  const choose=shared&&noNewCollision&&floorGain&&sufficientGain&&fit&&
+   join.sourceEndpointEdgesVerified&&join.addedApronEndpointCornersVerified;
   const kept=choose?taperedShape.faces:original.faces;
   next.push(...kept);
   if(choose)tapered++;else retained++;
   records.push({id:r.id,side:r.side,tier:r.tier,
-   priorStatus:r.status,
+   sourceLine:line,priorStatus:r.status,
+   originalSourceR88EndEdgesVerified:join.sourceEndpointEdgesVerified,
+   proposedTaperWeldsOriginalCorners:join.addedApronEndpointCornersVerified,
    status:choose?'TAPERED_END_TRANSITION_GEOMETRICALLY_SUPPORTED_ART_HOLD':
     'RETAIN_R100_RECTANGULAR_SHOULDER_NO_TAPER_CERTIFICATION',
    sourceProbes:source,R100RectangularProbes:rectangle,
@@ -140,8 +148,11 @@ export function buildR102TaperedGalleryStudy(nodes){
  const added=next.length-old.sourceFaces.length;
  if(added!==tapered*8+retained*4||sha(next.slice(0,4692))!==sha(old.sourceFaces))
   fail('SOURCE_PREFIX_OR_FACE_ACCOUNTING_FAILED');
+ const junctionAudit=auditR103SevenJunctions({sourceFaces:old.sourceFaces,
+  activeFaces:next,records});
  return {faces:next,priorR100Faces:old.faces,sourceR98Faces:old.sourceFaces,
-  report:{schema:SCHEMA,exactOriginalR98MeshSha256:sha(old.sourceFaces),
+  report:{schema:SCHEMA,junctionAudit,
+   exactOriginalR98MeshSha256:sha(old.sourceFaces),
    priorR100MeshSha256:sha(old.faces),alternativeMeshSha256:sha(next),
    originalR98ExactPrefix:true,originalSourceFaces:4692,
    oldAcceptedGalleryCount:old.report.widenedResearchGalleryCount,
