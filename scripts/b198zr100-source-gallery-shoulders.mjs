@@ -28,7 +28,7 @@ function tri(list,a,b,c,kind){list.push({a:a.map(R),b:b.map(R),c:c.map(R),kind})
 function quad(list,a,b,c,d,kind){tri(list,a,b,c,kind);tri(list,a,c,d,kind);}
 function normal2D(a,b){
  const dx=b[0]-a[0],dz=b[2]-a[2],run=Math.hypot(dx,dz);
- if(run<.03||run>.38)fail('SOURCE_CONNECTOR_OUTSIDE_FINITE_LOCAL_SPAN');
+ if(run<.03||run>.420001)fail('SOURCE_CONNECTOR_OUTSIDE_FINITE_LOCAL_SPAN');
  return [-dz/run,dx/run];
 }
 function shift(p,n,side,width){return [
