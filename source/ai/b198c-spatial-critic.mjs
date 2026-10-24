@@ -125,7 +125,7 @@ export function auditInteriorTopology({design,compiled=compileDesign(design)}){
   }).sort((a,b)=>a.standingY-b.standingY);
  const fragmentedElevations=elevationConnectivity.filter(x=>
   x.totalStandingSquares>=20&&x.componentCount>=2&&
-  x.largestComponentShare<0.5);
+  x.largestComponentShare<0.75);
  const summary={
   schema:SCHEMA,sourceSha256:compiled.sourceSha256,
   geometrySha256:compiled.geometrySha256,
