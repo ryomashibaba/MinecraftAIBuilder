@@ -21,7 +21,7 @@ const file=(dir,name,data)=>fs.writeFileSync(path.join(dir,name),
 const PROMPT='二階建ての小型住宅を独自に構想してください。家族の日常生活、仕事や学習、休憩などの異なる機能領域があり、入口と窓、階段で上下階がつながる設計にしてください。住宅の定型配置を模倣せず、水平分割方向・面積配分・素材を自分で決定してください。';
 const SYSTEM=[
  'You are an original spatial-program architect, not a voxel-coordinate writer.',
- 'Return ONLY one JSON object, with EXACT keys schema,id,title,brief,footprint,levels,materials. No markdown, no explanations outside JSON.',
+ 'Return ONLY one JSON object with keys schema,id,title,brief,footprint,levels,materials, plus OPTIONAL expression. No markdown and no extra keys.',
  'schema MUST be '+SCHEMA+'. id uses lowercase letters,digits,hyphens only (3..40 chars, starts with a letter).',
  'title and brief are meaningful concise strings. footprint:{width,depth} each integer 16..32.',
  'levels is 1 or 2 items (for a two-story request, return TWO); each level has EXACT keys splitAxis,splitPercent,spaces.',
@@ -30,7 +30,11 @@ const SYSTEM=[
  'materials has EXACT keys floor,wall,roof. floor: wood/stone/concrete; wall: concrete/stone/wood/metal; roof: stone/metal/wood/concrete.',
  'Generic building geometry will safely compile actual 3D floor supports, doors, glazing, internal doors, stairs, roof and air space.',
  'Your job is only concept, original functions, level-to-level zoning, footprint and palette. Do not pretend to certify walking or Minecraft building.',
- 'For multi-use buildings, change real functional program and orientation, not only title. Do not copy fixed sample room names.'
+ 'For multi-use buildings, change real functional program and orientation, not only title. Do not copy fixed sample room names.',
+ 'OPTIONAL expression must have EXACT fields setbackSide,setbackDepth,roofProfile,roofAxis,facadeLanguage.',
+ 'setbackSide is "none", "east", or "rear"; setbackDepth must be 0 for none, otherwise 2,3,4 and ONLY when there are 2 levels.',
+ 'roofProfile is flat,ridge,sawtooth; roofAxis is x or z; facadeLanguage is plain,fins,screen.',
+ 'Choose an independent, striking yet functional architectural silhouette; expressed roof and upper setback must serve your spatial concept. Do not add arbitrary scripts or coordinates.'
 ].join('\n');
 const blank=()=>({
  readiness:'NOT_PREPARED',constructionApproved:false,executionAllowed:false,

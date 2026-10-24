@@ -114,3 +114,55 @@ test('source stair probes HOLD on a new obstruction even if roof/floor stats loo
  assert.ok(probe.failures.some(x=>x.code==='STAIR_TREAD_BLOCKED_OR_UNSUPPORTED'));
  assert.equal(probe.continuousRealPlayerPathCertified,false);
 });
+
+
+test('optional generative form actually changes silhouette, roof heights and facade',()=>{
+ const base=plan('maker-studio',['x','z'],['assembling prototypes','resting']);
+ base.footprint={width:24,depth:28};
+ const legacy=compileArchitecturePlan(base);
+ const form={...base,expression:{setbackSide:'east',setbackDepth:3,
+  roofProfile:'ridge',roofAxis:'x',facadeLanguage:'fins'}};
+ const built=compileArchitecturePlan(form);
+ assert.equal(verifyCompiled(built.design,built.compiled),true);
+ assert.notDeepEqual(built.compiled.primitives,legacy.compiled.primitives);
+ assert.ok(built.compiled.bounds.maxY>legacy.compiled.bounds.maxY);
+ assert.ok(built.design.elements.some(e=>e.id==='roof-profile-7'));
+ assert.ok(built.design.elements.some(e=>e.id==='l0-fin-2'));
+ const fullWidth=base.footprint.width-2;
+ assert.ok(built.design.elements.some(e=>e.id==='l1-east'&&
+  e.origin[0]===fullWidth-3));
+ assert.ok(built.design.elements.find(e=>e.id==='roof-base').size[0]<fullWidth);
+ assert.equal(built.worldWrites,0);
+ assert.equal(built.gates.every(x=>x==='BLOCKED'),true);
+ const a=auditArchitecturePlanCirculation(built);
+ assert.equal(a.status,'SOURCE_CLEARANCE_PROBES_PASS');
+ assert.equal(a.worldWalking,'NOT_TESTED');
+});
+test('roof axis and setback direction are truly geometry-changing plan decisions',()=>{
+ const base=plan('research-hall',['z','x'],['analysis','display']);
+ base.footprint={width:24,depth:28};
+ const a={...base,expression:{setbackSide:'rear',setbackDepth:2,
+  roofProfile:'sawtooth',roofAxis:'x',facadeLanguage:'screen'}};
+ const b={...base,expression:{...a.expression,roofAxis:'z',
+  setbackSide:'east',facadeLanguage:'fins'}};
+ const first=compileArchitecturePlan(a),second=compileArchitecturePlan(b);
+ assert.notDeepEqual(first.compiled.primitives,second.compiled.primitives);
+ assert.equal(verifyCompiled(first.design,first.compiled),true);
+ assert.equal(auditArchitecturePlanCirculation(first).status,
+  'SOURCE_CLEARANCE_PROBES_PASS');
+ assert.equal(auditArchitecturePlanCirculation(second).status,
+  'SOURCE_CLEARANCE_PROBES_PASS');
+});
+test('unknown form field, unsafe single-story setback, invalid roof rejected',()=>{
+ const original=plan('safe-workshop',['x'],['shop','storage']);
+ const sample={setbackSide:'none',setbackDepth:0,
+  roofProfile:'ridge',roofAxis:'x',facadeLanguage:'screen'};
+ for(const f of [
+  {...sample,executable:true},
+  {...sample,setbackSide:'east',setbackDepth:4},
+  {...sample,setbackDepth:4},
+  {...sample,roofProfile:'javascript'}
+ ]){
+  assert.throws(()=>compileArchitecturePlan({...original,expression:f}),/R125_PLAN_/);
+ }
+});

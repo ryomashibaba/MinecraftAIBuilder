@@ -19,7 +19,9 @@ const text=s=>typeof s==='string'&&s.length>=3&&s.length<=180&&
  !/[\u0000-\u001f<>]/.test(s);
 const integer=(v,a,b)=>Number.isSafeInteger(v)&&v>=a&&v<=b;
 export function validateArchitecturePlan(p){
- check(keys(p,['schema','id','title','brief','footprint','levels','materials']),
+ const standard=['schema','id','title','brief','footprint','levels','materials'];
+ const expressive=Object.hasOwn(p??{},'expression');
+ check(keys(p,expressive?[...standard,'expression']:standard),
   'TOP_LEVEL_FIELDS');
  check(p.schema===SCHEMA,'SCHEMA');
  check(slug(p.id)&&text(p.title)&&text(p.brief),'IDENTITY');
@@ -32,6 +34,19 @@ export function validateArchitecturePlan(p){
   ['concrete','stone','wood','metal'].includes(p.materials.wall)&&
   ['stone','metal','wood','concrete'].includes(p.materials.roof),
   'MATERIAL_PALETTE');
+ if(expressive){
+  const e=p.expression;
+  check(keys(e,['setbackSide','setbackDepth','roofProfile','roofAxis','facadeLanguage']),
+   'EXPRESSION_FIELDS');
+  check(['none','east','rear'].includes(e.setbackSide)&&
+   ((e.setbackSide==='none'&&e.setbackDepth===0)||
+    (e.setbackSide!=='none'&&p.levels.length===2&&[2,3,4].includes(e.setbackDepth))),
+   'EXPRESSION_SETBACK');
+  check(['flat','ridge','sawtooth'].includes(e.roofProfile)&&
+   ['x','z'].includes(e.roofAxis)&&
+   ['plain','fins','screen'].includes(e.facadeLanguage),
+   'EXPRESSION_STYLE');
+ }
  const seen=new Set();
  for(const level of p.levels){
   check(keys(level,['splitAxis','splitPercent','spaces'])&&
@@ -49,6 +64,7 @@ export function validateArchitecturePlan(p){
 export function compileArchitecturePlan(plan){
  validateArchitecturePlan(plan);
  const original=structuredClone(plan);
+ if(original.expression)return compileExpressiveArchitecturePlan(original);
  const {width:w,depth:d}=original.footprint;
  const count=original.levels.length;
  const floor=original.materials.floor,wall=original.materials.wall,
@@ -234,4 +250,120 @@ export function auditArchitecturePlanCirculation(product){
   onlyDeterministicLocalSourceProbes:true,
   continuousRealPlayerPathCertified:false,
   worldWalking:'NOT_TESTED',worldWrites:0};
+}
+
+
+/**
+ * Optional generative massing. Legacy ArchitecturePlan compiles byte-for-byte
+ * identically without expression; do NOT change the old pinned Qwen 14B 2620-
+ * voxel result or its source digest. No typology-specific templates.
+ */
+function compileExpressiveArchitecturePlan(original){
+ const {width:w,depth:d}=original.footprint;
+ const count=original.levels.length;
+ const {setbackSide,setbackDepth,roofProfile,roofAxis,facadeLanguage}=original.expression;
+ const {floor,wall,roof}=original.materials,elements=[],program=[];
+ const box=(id,mode,material,origin,size)=>elements.push({
+  id,shape:'box',mode,...(mode==='add'?{material}:{}),origin,size});
+ const envelope=l=>({
+  x0:1,z0:1,
+  x1:w-2-(l===1&&setbackSide==='east'?setbackDepth:0),
+  z1:d-2-(l===1&&setbackSide==='rear'?setbackDepth:0)
+ });
+ for(let l=0;l<count;l++)
+  box('floor-'+l,'add',floor,[1,1+5*l,1],[w-2,1,d-2]);
+ if(count===2)box('stair-shaft','cut',null,[3,6,3],[2,1,5]);
+ for(let l=0;l<count;l++){
+  const {x0,x1,z0,z1}=envelope(l);
+  const y=2+5*l,tag='l'+l;
+  box(tag+'-west','add',wall,[x0,y,z0],[1,4,z1-z0+1]);
+  box(tag+'-east','add',wall,[x1,y,z0],[1,4,z1-z0+1]);
+  box(tag+'-front','add',wall,[x0+1,y,z0],[x1-x0-1,4,1]);
+  box(tag+'-rear','add',wall,[x0+1,y,z1],[x1-x0-1,4,1]);
+  const level=original.levels[l];
+  const axis=level.splitAxis,ratio=level.splitPercent/100;
+  const split=axis==='x'?
+   Math.max(x0+4,Math.min(x1-4,Math.round(x0+(x1-x0)*ratio))):
+   Math.max(z0+4,Math.min(z1-4,Math.round(z0+(z1-z0)*ratio)));
+  if(axis==='x'){
+   box(tag+'-divider','add',wall,[split,y,z0+1],[1,4,z1-z0-1]);
+   box(tag+'-internal-door','cut',null,
+    [split,y,Math.floor((z0+z1)/2)-1],[1,3,2]);
+  }else{
+   box(tag+'-divider','add',wall,[x0+1,y,split],[x1-x0-1,4,1]);
+   box(tag+'-internal-door','cut',null,[x0+2,y,split],[2,3,1]);
+  }
+  if(l===0)
+   box('exterior-entrance','cut',null,
+    [Math.floor(w/2)-1,y,z0],[2,3,1]);
+  const windows=[
+   ['front',[x0+2,y+1,z0],[2,2,1]],
+   ['rear',[x1-3,y+1,z1],[2,2,1]],
+   ['west',[x0,y+1,z1-3],[1,2,2]],
+   ['east',[x1,y+1,z1-3],[1,2,2]]
+  ];
+  for(const [name,at,size] of windows){
+   box(tag+'-window-'+name+'-cut','cut',null,at,size);
+   box(tag+'-window-'+name+'-glass','add','glass',at,size);
+  }
+  // Purely architectural articulation outside the envelope. Dynamic plan
+  // controls the rhythm and materials; no fixed building-type switch.
+  if(facadeLanguage==='fins'){
+   for(let x=x0+1;x<x1-1;x+=4)
+    box(tag+'-fin-'+x,'add','accent',[x,y+1,z0-1],[1,3,1]);
+  }else if(facadeLanguage==='screen'){
+   for(let z=z0+1;z<z1-1;z+=4)
+    box(tag+'-screen-'+z,'add','metal',[x0-1,y+1,z],[1,3,1]);
+  }
+  const [first,second]=level.spaces;
+  program.push({level:l,splitAxis:axis,requestedPercent:level.splitPercent,
+   splitCoordinate:split,standingFloorY:y,
+   zones:axis==='x'?[
+    {id:first.id,purpose:first.purpose,range:{x:[x0+1,split-1],z:[z0+1,z1-1]}},
+    {id:second.id,purpose:second.purpose,range:{x:[split+1,x1-1],z:[z0+1,z1-1]}}
+   ]:[
+    {id:first.id,purpose:first.purpose,range:{x:[x0+1,x1-1],z:[z0+1,split-1]}},
+    {id:second.id,purpose:second.purpose,range:{x:[x0+1,x1-1],z:[split+1,z1-1]}}
+   ],
+   partitionDoorModelled:true,doorAccessibleInMinecraft:'NOT_TESTED'});
+ }
+ if(count===2){
+  elements.push({id:'interfloor-stair',shape:'staircase',mode:'add',
+   material:floor,origin:[3,1,3],axis:'z',direction:1,
+   width:2,steps:5,treadDepth:1});
+ }
+ const upper=envelope(count-1),top=1+5*count;
+ box('roof-base','add',roof,[upper.x0,top,upper.z0],
+  [upper.x1-upper.x0+1,1,upper.z1-upper.z0+1]);
+ if(roofProfile!=='flat'){
+  const span=roofAxis==='x'?upper.x1-upper.x0+1:upper.z1-upper.z0+1;
+  for(let pos=0;pos<span;pos++){
+   const height=roofProfile==='ridge'?
+    Math.min(3,Math.floor(Math.min(pos,span-1-pos)/2)):
+    (pos%6===0?0:Math.ceil((pos%6)/2));
+   if(height<1)continue;
+   const origin=roofAxis==='x'?
+    [upper.x0+pos,top+1,upper.z0]:[upper.x0,top+1,upper.z0+pos];
+   const size=roofAxis==='x'?
+    [1,height,upper.z1-upper.z0+1]:
+    [upper.x1-upper.x0+1,height,1];
+   box('roof-profile-'+pos,'add',roof,origin,size);
+  }
+ }
+ // The upper floor is an occupied terrace plate beyond the upper envelope;
+ // it is NOT proof of railings, weather safety, or accessible outdoor space.
+ const design={schema:B143,id:original.id,title:original.title,
+  brief:original.brief,bounds:{width:w,height:5*count+8,depth:d},
+  elements,designOnly:true};
+ const compiled=compileDesign(design);
+ check(verifyCompiled(design,compiled),'EXPRESSION_COMPILER_NONDETERMINISTIC');
+ return {schema:'minecraftaibuilder-r125-plan-to-b143-result-v1',
+  planSha256:hash(original),plan:original,design,compiled,program,
+  sourceSha256:compiled.sourceSha256,geometrySha256:compiled.geometrySha256,
+  modelAuthorship:'CALLER_PROVIDED_PLAN_UNVERIFIED',
+  geometricRules:'GENERIC_EXPRESSIVE_ENVELOPE_NOT_STYLE_CERTIFIED',
+  expression:structuredClone(original.expression),
+  inGameWalking:'NOT_TESTED',architecturalQuality:'NOT_REVIEWED',
+  constructionApproved:false,worldContacts:0,worldWrites:0,
+  gates:Array(9).fill('BLOCKED')};
 }

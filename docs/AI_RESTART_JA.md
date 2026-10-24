@@ -18,6 +18,11 @@
 
 
 
+## R125 汎用建築表現の拡張（2026-10-24 JST）
+- ArchitecturePlanに**任意**の `expression:{setbackSide,setbackDepth,roofProfile,roofAxis,facadeLanguage}` を追加。上階の片側セットバック（2〜4セル）、独立の屋根輪郭（flat/ridge/sawtooth、x/z軸）、壁面リズム（plain/fins/screen）の幾何形状を同一共通エンジンが生成。**住宅名・店舗名による固定テンプレート振分けはしない**。
+- 以前の実Qwen14B住宅の`expression`未指定時は従来の`compileArchitecturePlan`経路を維持し、**Source SHA / Geometry SHA / 2620セル完全一致を継続保証**。新たな表現はソース幾何を変えることが必須で、形状に対応したB143/Circulation QAを併用。外観の「美術PASS」やワールド実歩行は自動認証しない。
+- 新規のローカルQwen呼出しは今回のGitHub CIでは行わない。次に実推論で新`expression`付き案を生成して既存のオフライン3Dビューで美術審査する。セットバック上のデッキ等は安全性未認証で、Minecraft施工は9 BLOCKED。
+
 ## R125 実Qwen14B 2,620ボクセル結果に基づく誤判定修正（2026-10-24 JST）
 - ユーザーOMENで実`qwen3:14b`→IR生成→真正B143 compileを**14.613秒・2,620ボクセル**で初回実測。提供された`ARCHITECTURE_PLAN.json`は`residential-2024a / Lumina Residence` 24×28、1階x50%・2階z40%、木床/石壁/コンクリート屋根。保存済み`B198C_GEOMETRY_CRITIQUE.json`は`Y=2:378 / Y=7:383 / Y=12:525`候補の3高度にそれぞれ単独成分あり、従来グローバルshare `525/1286=0.4082` を同一階分断として誤認し、`FRAGMENTED_PUBLIC_SOURCE_FLOORS` HIGH 1件。**これは階を跨いだ誤判定であり、真の上下階歩行の証明ではない**。
 - B198Cはグローバル比率の従来統計を残すが、HIGH判定を**同じstandingY内の複数連結成分と比率**で判定するよう修正。従来同一高度の本当の分断HIGHは維持。実IR全文を回帰fixture [ここ](../scripts/fixtures/r125-qwen14b-residential-2024a.json) に固定し、実測ソースSHA・幾何SHA・2620セルが再現されることも検査。
