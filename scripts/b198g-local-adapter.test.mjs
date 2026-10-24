@@ -60,6 +60,9 @@ test('mock local JSON protocol drives a genuine B143 compile but never claims ac
    assert.equal(opts.headers.Authorization,undefined);
    const sent=JSON.parse(opts.body);
    assert.equal(sent.model,'my-local-model:latest');
+   assert.match(sent.messages[0].content,/assumptions is an array of 0\.\.12 PLAIN STRINGS/);
+   assert.match(sent.messages[0].content,/each at most 250 characters/);
+   assert.match(sent.messages[0].content,/Use \[\] when there are no assumptions/);
    assert.equal(sent.stream,false);
    assert.equal(sent.messages[0].role,'system');
    assert.equal(sent.messages[1].role,'user');

@@ -18,6 +18,11 @@
 
 
 
+## R125 Qwen14Bの設計原文・前提条件形式の確認（2026-10-24 JST）
+- ユーザーOMENで実モデル`qwen3:14b`を1回実行し、住宅ケースは**64,579msでモデル応答を保存**（`originalRawCaptured=true`）。ただし`B198A_CANDIDATE_REJECTED_AFTER_1_ATTEMPTS_B198A_UNTRUSTED_ASSUMPTIONS`のため、ソースおよび3Dは未検証／未生成。これはタイムアウトではない。
+- B198Aの契約は`assumptions`を**0〜12件の文字列配列、各250字以下**に制限。B198G system promptにこの型・長さの説明が不足していたので明示し、通常の厳格B198A検証は**緩和しない**。模型の類型固定も行わない。
+- **保存済み原文**`r125-qwen14b-20261024-181344/home-two-level/MODEL_RESPONSE_ORIGINAL.txt`の実際の`assumptions`型および他の設計フィールドは未閲覧。既存の原文を改変したりQwenを再呼び出ししたりせず、現物の中身を確認したうえでオフラインの再評価・必要最小限の規格修正を選ぶ。Minecraft書込0／9 BLOCKED。
+
 ## R125実Qwen 14B 初回診断（2026-10-24 JST）
 - ユーザーOMENが最新HEAD `6a12bb4` をfast-forward取得後、インストール済み `qwen3:14b`（Ollama報告9.3GB）で住宅1例を実際に要求。上位結果は `COMPARISON_SOURCE_RESULTS_READY_REVIEW_REQUIRED`、しかし実際のcase statusは**`HOLD_GENERATION_OR_REVIEW`／`sourceSha256=null`／modelCallCount=1／worldWrites=0**。これは**建築ソース未成立**であり、上位表示は集計不具合だった。タイムアウトとは断定せず、`r125-qwen14b-20261024-181344/home-two-level/R125_REPORT.json` の `reason` と原文保存有無を次に確認する。
 - 本修正は上位statusをHOLDとして厳密に集計し、子の `reason`／`elapsedMs`／`originalRawCaptured` を転記。真正ソースSHAと幾何SHAが存在し、全ケースのsource statusが人間レビュー待ちであるときのみ比較準備OKを返す。元の出力証拠は変更せず、モデルの再実行は必要なし。図書館専用修正なし・Minecraft実施工なし。

@@ -14,6 +14,8 @@ const refuse=msg=>{throw Error('B198G_LOCAL_'+msg);};
 const SYSTEM=[
  'You are an original voxel building architect, never a fixed genre template.',
  'Return ONLY a JSON object with EXACT keys design, explanation, assumptions.',
+ 'Metadata contract: explanation is a plain string (3..800 chars). assumptions is an array of 0..12 PLAIN STRINGS, each at most 250 characters. Use [] when there are no assumptions.',
+ 'Do NOT return assumptions as an object, dictionary, single string, or array of objects. Example for metadata fields only: "explanation":"A small building has two functions.","assumptions":["Flat site","No external stairs"]. All coordinates and building elements remain your independent architectural choices.',
  'The design must comply with minecraftaibuilder-b143-building-dsl-v1.',
  'Use schema,id,title,brief,bounds,elements,designOnly as the only design fields.',
  'Set designOnly=true. Bounds width/depth 8..128,height 8..96,product<=500000.',
