@@ -22,6 +22,8 @@ on:
       - 'scripts/r125-architecture-plan.test.mjs'
       - 'scripts/r125-semantic-pilot.mjs'
       - 'scripts/r125-semantic-pilot.test.mjs'
+      - 'scripts/r125-expression-gallery.mjs'
+      - 'scripts/r125-expression-gallery.test.mjs'
       - 'source/ai/b198c-spatial-critic.mjs'
       - 'scripts/r125-real-plan-replay.test.mjs'
       - 'scripts/fixtures/r125-qwen14b-residential-2024a.json'
@@ -61,7 +63,18 @@ jobs:
           node --check scripts/r125-semantic-pilot.mjs
           node --check scripts/r125-semantic-pilot.test.mjs
           node --check scripts/r125-real-plan-replay.test.mjs
-          node --test scripts/r125-mvp.test.mjs scripts/r125-world-diff.test.mjs scripts/r125-pilot.test.mjs scripts/r125-offline-replay.test.mjs scripts/r125-architecture-plan.test.mjs scripts/r125-semantic-pilot.test.mjs scripts/r125-real-plan-replay.test.mjs
+          node --check scripts/r125-expression-gallery.mjs
+          node --check scripts/r125-expression-gallery.test.mjs
+          node --test scripts/r125-mvp.test.mjs scripts/r125-world-diff.test.mjs scripts/r125-pilot.test.mjs scripts/r125-offline-replay.test.mjs scripts/r125-architecture-plan.test.mjs scripts/r125-semantic-pilot.test.mjs scripts/r125-real-plan-replay.test.mjs scripts/r125-expression-gallery.test.mjs
+      - name: Build genuine-source four-scene visual review
+        run: node scripts/r125-expression-gallery.mjs --out r125-expression-preview
+      - name: Upload source-only 3D comparison for human review
+        uses: actions/upload-artifact@v4
+        with:
+          name: R125-EXPRESSION-FOUR-3D-VIEWS
+          path: r125-expression-preview/
+          retention-days: 14
+          if-no-files-found: error
       - name: Keep the original Minecraft world offline
         run: |
           node --check source/ai/b198g-autonomous-quality.mjs

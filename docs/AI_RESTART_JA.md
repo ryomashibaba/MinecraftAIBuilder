@@ -18,6 +18,11 @@
 
 
 
+## R125 表現拡張の実3D比較ギャラリー（2026-10-24 JST）
+- [オフライン比較生成](../scripts/r125-expression-gallery.mjs)と[独立検証](../scripts/r125-expression-gallery.test.mjs)を追加。実Qwen14Bの`Lumina Residence`原文24×28を固定し、元の1案＋共通幾何エンジンの表現パラメータを変えた**3派生案**を、既存B143の一つの4場面オフラインHTMLビューにまとめる。
+- 元案だけが**Qwen14B実創作の意味設計**。派生3案は**AIを再実行した結果ではなく、AIの元計画を入力した共通エンジンの能力比較**。混同しないようJSONにprovenanceを記録。素材・外観・ボクセル・ソースSHA・構造診断・美術未審査を個別保存。
+- CI成功時は同じ[GitHub Actions B198Gソース回帰](../.github/workflows/b198g-quality.yml)に`R125-EXPRESSION-FOUR-3D-VIEWS`アーティファクトを保存し、ユーザーが`index.html`をブラウザで開いて各案を目視比較できる。ローカルOllama実行不要、ワールド操作なし。最終美術審査とワールド施工は未実施。
+
 ## R125 汎用建築表現の拡張（2026-10-24 JST）
 - ArchitecturePlanに**任意**の `expression:{setbackSide,setbackDepth,roofProfile,roofAxis,facadeLanguage}` を追加。上階の片側セットバック（2〜4セル）、独立の屋根輪郭（flat/ridge/sawtooth、x/z軸）、壁面リズム（plain/fins/screen）の幾何形状を同一共通エンジンが生成。**住宅名・店舗名による固定テンプレート振分けはしない**。
 - 以前の実Qwen14B住宅の`expression`未指定時は従来の`compileArchitecturePlan`経路を維持し、**Source SHA / Geometry SHA / 2620セル完全一致を継続保証**。新たな表現はソース幾何を変えることが必須で、形状に対応したB143/Circulation QAを併用。外観の「美術PASS」やワールド実歩行は自動認証しない。
