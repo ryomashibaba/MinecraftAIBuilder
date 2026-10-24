@@ -33,6 +33,8 @@ on:
       - 'scripts/r125-functional-layer.test.mjs'
       - 'scripts/r125-functional-preview.mjs'
       - 'scripts/r125-functional-preview.test.mjs'
+      - 'scripts/r125-feature-model-pilot.mjs'
+      - 'scripts/r125-feature-model-pilot.test.mjs'
       - 'scripts/fixtures/r125-qwen14b-shop-20261024.json'
       - 'scripts/fixtures/r125-qwen14b-research-20261024.json'
       - 'source/ai/b198c-spatial-critic.mjs'
@@ -85,7 +87,9 @@ jobs:
           node --check scripts/r125-functional-layer.test.mjs
           node --check scripts/r125-functional-preview.mjs
           node --check scripts/r125-functional-preview.test.mjs
-          node --test scripts/r125-mvp.test.mjs scripts/r125-world-diff.test.mjs scripts/r125-pilot.test.mjs scripts/r125-offline-replay.test.mjs scripts/r125-architecture-plan.test.mjs scripts/r125-semantic-pilot.test.mjs scripts/r125-real-plan-replay.test.mjs scripts/r125-expression-gallery.test.mjs scripts/r125-multiuse-pilot.test.mjs scripts/r125-real-multiuse-replay.test.mjs scripts/r125-functional-layer.test.mjs scripts/r125-functional-preview.test.mjs
+          node --check scripts/r125-feature-model-pilot.mjs
+          node --check scripts/r125-feature-model-pilot.test.mjs
+          node --test scripts/r125-mvp.test.mjs scripts/r125-world-diff.test.mjs scripts/r125-pilot.test.mjs scripts/r125-offline-replay.test.mjs scripts/r125-architecture-plan.test.mjs scripts/r125-semantic-pilot.test.mjs scripts/r125-real-plan-replay.test.mjs scripts/r125-expression-gallery.test.mjs scripts/r125-multiuse-pilot.test.mjs scripts/r125-real-multiuse-replay.test.mjs scripts/r125-functional-layer.test.mjs scripts/r125-functional-preview.test.mjs scripts/r125-feature-model-pilot.test.mjs
       - name: Build genuine-source four-scene visual review
         run: node scripts/r125-expression-gallery.mjs --out r125-expression-preview
       - name: Upload source-only 3D comparison for human review

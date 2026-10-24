@@ -18,6 +18,13 @@
 
 
 
+## R127 LLMによる設備意味IR → 汎用B143生成（2026-10-25 JST）
+- [1回のローカルLLM設備推論](../scripts/r125-feature-model-pilot.mjs)を実装。任意の既存ArchitecturePlan JSONを読み、ゾーンID・用途・追加の機能要求から、モデルは座標無しの短い \`{"objects":[{"id":"...","zoneId":"...","role":"...","corner":"..."}]}\` のみを出力する。元計画のSHA・schemaは信頼できる呼出側が固定し、既存の共通設備B143コンパイラへ渡す。ジャンル別生成器の追加なし。
+- 入口修復は元Qwen設計を変更せず派生ソースとして適用。生のモデル応答、機能IR、3D HTML、ボクセル数、元SHA、2幅Source経路QAを新しい別フォルダに証拠保存。未検証の役割/閉塞/不正なJSONはHOLD。小型LLM向け出力上限768 token、1回の推論のみ、127.0.0.1以外は拒否。
+- **CIはテストダブル**であり新しい実Qwen推論は未実施。設備計画の汎用性・美術・実Minecraft歩行は未認証。worldWrites0、NOT_PREPARED、9ゲートBLOCKED、BuildPlan空を継続。
+- ローカル試験例: \`node scripts/r125-feature-model-pilot.mjs --model qwen3:14b --plan scripts/fixtures/r125-qwen14b-shop-20261024.json --out r127-shop-features-001\`。同じCLIは任意の適合ArchitecturePlanにも使用でき、既存出力を上書きしない。
+- 次の課題は実Qwen/Gemma設備推論と3用途の評価、利用目的に応じた設備の数量/配置の強化、真正3Dの美術審査。現在の汎用5役割/各1〜6ボクセルは実務設備として不足し、これを完成品とは扱わない。
+
 ## R126 3D改善前後のオフライン美術レビュー（2026-10-25 JST）
 - [実モデル2用途の改善前後4シーン](../scripts/r125-functional-preview.mjs)を新設。実Qwen14B店舗・研究所の**元のB143ソースとSHAを変えず**、別の機能設備IRの派生版も2個生成。各シーンを独立したB143 HTMLにするので、ギャラリー表示の都合で設計IDとソースSHAを偽装・変更しない。GitHub Actions成果物`R125-QWEN14B-SHOP-RESEARCH-FUNCTIONAL-3D`に`index.html`と4 HTMLを出力する。
 - 新しいQwen呼び出しは**0回**、展示用設備IRは人間が定義したテスト入力。モデルが設備を発想した結果ではない。研究所旧入口はHOLDのまま記録、修復済み派生案だけSOURCE ROUTE PASS。美術品質とMinecraft実機移動は未認証。worldWrites0。
