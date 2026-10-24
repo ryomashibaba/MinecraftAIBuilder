@@ -18,6 +18,12 @@
 
 
 
+## R126 シンプル機能IRとソース経路QA（2026-10-25 JST）
+- 新規 [R125機能IR B143レイヤー](../source/ai/r125-functional-layer.mjs)：`{schema,basePlanSha256,objects:[{id,zoneId,role,corner}]}` を厳格検査し、work-surface / equipment-bank / display-stand / storage-rack / seating を汎用実ボクセルで生成。実LLMの文章から暗黙に機能を推測したり、住宅／店舗／研究所の固定様式で切り替えたりしない。**本工程の設備意図はテストfixture側の明示入力であり、実Qwenが設備IRを出した実績ではない**。
+- [実ソース経路グラフ](../source/ai/r125-source-routes.mjs)は入口内側から支持床2ブロック幅(x軸)、上方2ブロック空き、移動先の高さ差±1のグラフで全zoneまで到達可能かを数え、壁閉塞はHOLD。階段の5段/上下接続もsourceのみ確認。**全方向2幅や実Minecraftプレイヤーの経路、屋外地形の安全は認証しない**。
+- 新機能の配置は既存B143ソース/voxel SHAを変更しない**別派生モデル**としてのみ追加。追加予定位置が埋まっている／支持床無し／既存の入口→zone経路が断たれる場合は位置変更、それも不可ならHOLD。原建築3件は当時の元SHAを回帰テストに保持し、施工は`NOT_PREPARED`／9 BLOCKED／worldWrites0。
+- 次は設備特徴量の任意プロンプトを実LLMへ渡す経路、モデル2B目標、そして美術とMinecraft実プレイヤー動線の別々の検証。単に設備が出来たことを完成品と主張しない。
+
 ## R125 実Qwen3用途と美術審査の到達点（2026-10-24 JST）
 - OMENでQwen14Bを実行し、店舗1階933 voxel（35.313秒）／研究施設2階2,936 voxel（8.059秒）の**真正B143シーン**を得た。旧住宅2620 voxelとあわせて3用途3件。モデル追加推論2回、Minecraft worldWrites=0。
 - 詳細と必須の品質不足は [3用途実測審査](R125_REAL_THREE_USE_REVIEW_20261024_JA.md)。**用途別の設備が実体化せず、売場/バックヤードは左右配置なのにfront/backという名前、実体はいまだに箱型が中心**。general B198C HIGHは研究所の段状屋根で1件。ソースQA PASS≠建築用途/美術/実ゲーム歩行PASS。次は共通IRから機能設備の実体化・経路QA。Open/Draft PRを維持し、施工は9 BLOCKED。
