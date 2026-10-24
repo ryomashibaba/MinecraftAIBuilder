@@ -1,0 +1,34 @@
+name: R46 Corrected Qwen One-Shot FAKE Only
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'source/ai/b198zr46-corrected-architecture-guide.mjs'
+      - 'scripts/b198zr46-consented-single-qwen.mjs'
+      - 'scripts/b198zr46-consented-single-qwen.test.mjs'
+      - 'source/ai/b198s-native-ollama-source.mjs'
+      - '.github/workflows/r46-corrected-one-shot-fake-only.yml'
+  pull_request:
+    paths:
+      - 'source/ai/b198zr46-corrected-architecture-guide.mjs'
+      - 'scripts/b198zr46-consented-single-qwen.mjs'
+      - 'scripts/b198zr46-consented-single-qwen.test.mjs'
+      - 'source/ai/b198s-native-ollama-source.mjs'
+      - '.github/workflows/r46-corrected-one-shot-fake-only.yml'
+permissions:
+  contents: read
+jobs:
+  mock-only-corrected-generator:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: R46 strict source and one-call guard, fake local server ONLY
+        run: node --test scripts/b198zr46-consented-single-qwen.test.mjs scripts/b198zr45-original-grammar-and-program-audit.test.mjs

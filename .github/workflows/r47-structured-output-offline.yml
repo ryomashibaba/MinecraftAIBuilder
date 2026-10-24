@@ -1,0 +1,32 @@
+name: R47 B143 Structured Output — FAKE ONLY
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'source/ai/b198zr47-json-schema-format-gate.mjs'
+      - 'scripts/b198zr47-json-schema-format-gate.test.mjs'
+      - 'source/ai/b198s-native-ollama-source.mjs'
+      - '.github/workflows/r47-structured-output-offline.yml'
+  pull_request:
+    paths:
+      - 'source/ai/b198zr47-json-schema-format-gate.mjs'
+      - 'scripts/b198zr47-json-schema-format-gate.test.mjs'
+      - 'source/ai/b198s-native-ollama-source.mjs'
+      - '.github/workflows/r47-structured-output-offline.yml'
+permissions:
+  contents: read
+jobs:
+  exact-schema-strict-validator:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Run R47 schema and source-contract QA using ephemeral fake HTTP only
+        run: node --test scripts/b198zr47-json-schema-format-gate.test.mjs scripts/b198zr46-consented-single-qwen.test.mjs scripts/b198zr45-original-grammar-and-program-audit.test.mjs

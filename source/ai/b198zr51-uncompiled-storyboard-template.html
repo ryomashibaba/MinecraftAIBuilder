@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src 'none'">
+<title>R51｜未コンパイル建築・形状範囲図</title>
+<style>
+:root{color-scheme:light;font-family:system-ui,'Yu Gothic',Meiryo,sans-serif;color:#172c43;background:#f4f7fa}
+*{box-sizing:border-box}body{margin:0 auto;max-width:1300px;padding:25px}
+h1{font-size:clamp(23px,2.3vw,30px);margin:5px 0}h2{font-size:18px;margin:0 0 13px}
+p{line-height:1.65}small,footer{color:#54677b}
+header{border-bottom:1px solid #c6d3de;padding-bottom:14px;margin-bottom:19px}
+.warning{background:#fff7e6;border:1px solid #e4c37f;padding:13px;border-radius:8px}
+.summary,.legend,.controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.summary{margin:15px 0}.pill{background:#fff;border:1px solid #d2dde7;padding:7px 11px;border-radius:8px;font-size:13px}
+main{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(300px,.8fr);gap:17px}
+section{background:#fff;border:1px solid #d5dee8;border-radius:12px;padding:18px;margin-bottom:18px;min-width:0}
+.controls{margin:12px 0}.controls input{flex:1;accent-color:#246298;min-width:60px}
+svg{display:block;overflow:visible;width:100%;background:#f8fbfd;border:1px solid #d7e3ef;border-radius:8px}
+#plan{height:480px}#elev{height:320px}
+.legend{margin:13px 0;font-size:12px;color:#52677a}
+.legend b{display:inline-block;width:13px;height:13px;margin-right:4px;vertical-align:-2px}
+.note{font-size:12px;color:#586d7d}
+.scroll{max-height:480px;overflow:auto;font-size:13px}.entry{padding:10px 0;border-bottom:1px solid #e5eaf1;overflow-wrap:anywhere}
+footer{margin-top:15px;font-size:12px}
+@media(max-width:920px){main{display:block}#plan{height:420px}#elev{height:260px}}
+</style></head><body>
+<header><small>MinecraftAIBuilder / R51 / 完全オフライン / <span id="hash"></span></small>
+<h1>B143失敗時にも見られる建築・形状範囲図</h1>
+<p class="warning"><strong>これは完成3D建築ではありません。</strong> 要素の外接直方体を表示する図面です。CUT適用後の実ボクセル、実際の曲面、頭上空間、移動可能な経路や美観の証明ではありません。Minecraftへの施工や接続はありません。</p>
+<div class="summary" id="summary"></div>
+</header>
+<main><div>
+<section><h2>水平断面（X–Z）</h2>
+<div class="controls"><label for="floor">Y高さ</label><input type="range" id="floor" min="0" step="1" value="1"><strong id="level"></strong></div>
+<svg id="plan" role="img" aria-label="Y層別の形状外接範囲を示す"></svg>
+<div class="legend"><span><b style="background:#276ba0"></b>ADDの外接範囲</span><span><b style="background:#d9a03b"></b>CUTの外接範囲</span><span><b style="background:#bc3641"></b>範囲外</span><span><b style="border:2px dashed #a05b9a"></b>保護空洞の宣言</span><span>●入口/目的地</span></div>
+<p class="note">矢印や破線は直線の位置関係だけを示し、実際の歩行経路ではありません。全体表示は原本の座標指定そのままで、クリッピングしません。</p>
+</section>
+<section><h2>正面投影（X–Y）</h2><svg id="elev" role="img" aria-label="建築要素の高さ方向の外接範囲を示す"></svg>
+<p class="note">Z方向は重ね合わせています。B143の厳密な外形・断面ではありません。</p>
+</section></div><div>
+<section><h2>凍結した設計要求</h2><p id="brief"></p><div id="criteria" class="scroll"></div>
+<p class="note">評価基準は元の日本語の依頼から取得。モデルの自己申告を審査基準に置き換えません。</p>
+</section><section><h2>検出された矛盾</h2><div id="issues" class="scroll"></div></section>
+<section><h2>形状要素</h2><div id="elements" class="scroll"></div></section>
+</div></main>
+<footer>R51 original-preserving source-envelope storyboard / no model calls / no world writes / NOT_PREPARED / 9 BLOCKED</footer>
+<script>
+'use strict';
+const d=__R51_STORYBOARD_DATA__;
+const ns='http://www.w3.org/2000/svg',id=s=>document.getElementById(s);
+function line(where,s){const p=document.createElement('div');p.className='entry';p.textContent=String(s);where.appendChild(p)}
+function svg(tag,attrs={},parent=null,title=''){
+ const e=document.createElementNS(ns,tag);
+ Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,String(v)));
+ if(title){const t=document.createElementNS(ns,'title');t.textContent=title;e.appendChild(t)}
+ if(parent)parent.appendChild(e);return e;
+}
+id('hash').textContent='SHA-256 '+d.sha.slice(0,16)+'…';
+id('brief').textContent=d.brief;
+for(const c of d.criteria)line(id('criteria'),c.description);
+for(const e of d.elements)line(id('elements'),
+ (e.mode||'?').toUpperCase()+'  '+e.id+' / '+e.shape+'  '+
+ (e.envelope?e.envelope.min.join(',')+' → '+e.envelope.max.join(','):'解析不可')+
+ (e.violated?' [範囲外]':''));
+const q=d.diagnostic;
+for(const i of q.issues||[])line(id('issues'),i.kind+'：'+i.count+'件');
+for(const e of q.elementBoundsViolations||[])line(id('issues'),
+ '範囲外 '+e.id+'：'+e.min+' → '+e.max);
+for(const x of q.impossiblePathDeclarations||[])line(id('issues'),
+ '目的地 '+x.id+'：最低'+x.safeStepLowerBound+'歩 / 宣言'+x.declaredMax+'歩');
+for(const x of q.duplicatedR3Ids||[])line(id('issues'),'空間ID重複 '+x.id);
+if(!(q.issues||[]).length)line(id('issues'),'簡易矛盾なし（B143/R3や美観の合格ではありません）');
+for(const [k,v] of [['簡易判定',q.status],['要素',d.elements.length],
+ ['設計寸法',d.bounds.join(' × ')],['最終ボクセル','未表示']]){
+ const e=document.createElement('span');e.className='pill';e.textContent=k+'：'+v;id('summary').appendChild(e);
+}
+function span(axis){let a=0,b=d.bounds[axis];
+ for(const e of d.elements){
+  if(!e.envelope)continue;
+  a=Math.min(a,e.envelope.min[axis]);b=Math.max(b,e.envelope.max[axis]+1);
+ }
+ return [a-2,Math.max(1,b-a)+4];
+}
+const [minX,sizeX]=span(0),[minZ,sizeZ]=span(2),[minY,sizeY]=span(1);
+id('plan').setAttribute('viewBox',[minX,minZ,sizeX,sizeZ].join(' '));
+id('elev').setAttribute('viewBox',[minX,minY,sizeX,sizeY].join(' '));
+const yExtents=d.elements.filter(e=>e.envelope).flatMap(e=>[e.envelope.min[1],e.envelope.max[1]]);
+id('floor').min=String(Math.min(0,...yExtents));
+id('floor').max=String(Math.max(0,d.bounds[1]-1,...yExtents));
+const isPoint=p=>Array.isArray(p)&&p.length===3&&p.every(Number.isInteger);
+function rect(parent,x,y,w,h,fill,stroke,opacity,width,dash=''){
+ return svg('rect',{x,y,width:w,height:h,fill,stroke,
+  'fill-opacity':opacity,'stroke-width':width,'stroke-dasharray':dash},parent);
+}
+function plan(){
+ const y=Number(id('floor').value),root=id('plan');root.textContent='';
+ id('level').textContent=String(y);
+ rect(root,0,0,d.bounds[0],d.bounds[2],'#e0eaf1','#406380',.25,.3);
+ for(const e of d.elements){
+  if(!e.envelope||e.envelope.min[1]>y||e.envelope.max[1]<y)continue;
+  const a=e.envelope.min,b=e.envelope.max;
+  const color=e.violated?'#bc3641':e.mode==='cut'?'#d9a03b':'#276ba0';
+  const node=rect(root,a[0],a[2],b[0]-a[0]+1,b[2]-a[2]+1,
+   color,color,e.violated?0.5:0.23,e.violated?0.7:0.18);
+  const hint=document.createElementNS(ns,'title');
+  hint.textContent=e.id+'（外接範囲、実ボクセルでない）';
+  node.appendChild(hint);
+ }
+ for(const v of d.voids){
+  if(!isPoint(v.origin)||!isPoint(v.size)||y<v.origin[1]||
+   y>=v.origin[1]+v.size[1])continue;
+  rect(root,v.origin[0],v.origin[2],v.size[0],v.size[2],
+   'none','#a05b9a',0,.65,'1.3 .7');
+ }
+ for(const p of d.points){
+  if(!isPoint(p.point)||p.point[1]!==y)continue;
+  if(p.kind==='destination'&&isPoint(d.entrance)){
+   svg('line',{x1:d.entrance[0]+.5,y1:d.entrance[2]+.5,
+    x2:p.point[0]+.5,y2:p.point[2]+.5,stroke:'#997cb2',
+    'stroke-width':.2,'stroke-dasharray':'.9 .8'},root);
+  }
+  const n=svg('circle',{cx:p.point[0]+.5,cy:p.point[2]+.5,r:.7,
+   fill:p.kind==='entrance'?'#008b6a':'#7e4ca6',stroke:'white',
+   'stroke-width':.15},root);
+  const hint=document.createElementNS(ns,'title');
+  hint.textContent=p.id+' 宣言地点（未検証）';
+  n.appendChild(hint);
+ }
+}
+function elev(){
+ const outer=id('elev');outer.textContent='';
+ // SVG coordinates grow downwards. Mirror the entire projection.
+ const g=svg('g',{transform:'translate(0 '+(2*minY+sizeY)+') scale(1 -1)'},outer);
+ rect(g,0,0,d.bounds[0],d.bounds[1],'#e0eaf1','#406380',.22,.3);
+ for(const e of d.elements){
+  if(!e.envelope)continue;
+  const a=e.envelope.min,b=e.envelope.max,color=e.violated?'#bc3641':e.mode==='cut'?'#d9a03b':'#276ba0';
+  rect(g,a[0],a[1],b[0]-a[0]+1,b[1]-a[1]+1,color,color,
+   e.violated?0.5:0.18,e.violated?0.6:0.1);
+ }
+}
+id('floor').addEventListener('input',plan);
+plan();elev();
+</script></body></html>

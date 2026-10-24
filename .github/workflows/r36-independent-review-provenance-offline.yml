@@ -1,0 +1,28 @@
+name: R36 Independent Review Provenance Offline
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'scripts/b198zr36-independent-review-provenance-offline*'
+      - '.github/workflows/r36-independent-review-provenance-offline.yml'
+  pull_request:
+    paths:
+      - 'scripts/b198zr36-independent-review-provenance-offline*'
+      - '.github/workflows/r36-independent-review-provenance-offline.yml'
+permissions:
+  contents: read
+jobs:
+  r36-provenance-no-model-no-world:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Run R36 offline reviewer evidence validation with synthetic geometry
+        run: node --test scripts/b198zr36-independent-review-provenance-offline.test.mjs

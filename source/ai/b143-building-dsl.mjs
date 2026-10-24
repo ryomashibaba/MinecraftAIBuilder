@@ -29,15 +29,52 @@ export function validateDesign(d){
  yes(Array.isArray(d.elements)&&d.elements.length>=1&&d.elements.length<=160,'ELEMENT_COUNT');
  const ids=new Set();let work=0,hasAdd=false;
  for(const e of d.elements){
-  yes(only(e,['id','shape','mode','material','origin','size','center','radii','axis','radius','length','shell','majorRadius','tubeRadius','start','end','thickness']),'ELEMENT_FIELDS');
+  yes(only(e,['id','shape','mode','material','origin','size','center','radii','axis','radius','length','shell','majorRadius','tubeRadius','start','end','thickness','direction','width','steps','treadDepth','repeat']),'ELEMENT_FIELDS');
   yes(typeof e.id==='string'&&/^[a-zA-Z][a-zA-Z0-9_-]{0,39}$/.test(e.id)&&!ids.has(e.id),'ELEMENT_ID');
   ids.add(e.id);
-  yes(['box','ellipsoid','cylinder','torus','beam'].includes(e.shape)&&['add','cut'].includes(e.mode),'SHAPE_MODE');
+  yes(['box','ellipsoid','cylinder','torus','beam','staircase'].includes(e.shape)&&['add','cut'].includes(e.mode),'SHAPE_MODE');
   yes(e.mode==='cut'?e.material===undefined:MATERIALS.includes(e.material),'MATERIAL');
   const shell=e.shell??0;
   yes(int(shell,0,4)&&!(e.mode==='cut'&&shell),'SHELL');
+  // New staircase-only fields must never weaken the strict grammar for
+  // pre-existing B143 shapes. Reject surplus keys instead of ignoring them.
+  if(e.shape!=='staircase')
+   yes(['direction','width','steps','treadDepth'].every(k=>!Object.hasOwn(e,k)),
+    'NON_STAIRCASE_EXTRA');
+  // One optional source-level translation array. No nesting, scripts,
+  // floating increments, rotations, world coordinates or external lookups.
+  // Each instance is validated against the SAME strict local bounds.
+  const repeated=Object.hasOwn(e,'repeat');
+  const rep=e.repeat;
+  if(repeated){
+   yes(only(rep,['count','offset'])&&Object.keys(rep).length===2&&
+    int(rep.count,2,32)&&
+    Array.isArray(rep.offset)&&rep.offset.length===3&&
+    rep.offset.every(v=>int(v,-128,128))&&
+    rep.offset.some(v=>v!==0),'REPEAT_FIELDS');
+  }
   let a,b;
-  if(e.shape==='box'){
+  if(e.shape==='staircase'){
+   // Compact, generic straight flight. One source element is an exact ordered
+   // solid voxel wedge: tread 0 at origin.y, tread i at origin.y+i.
+   // "staircase" is conceptual source geometry, NOT Minecraft stair blocks.
+   yes(e.mode==='add'&&!shell&&trip(e.origin,0,128)&&
+    ['x','z'].includes(e.axis)&&[1,-1].includes(e.direction)&&
+    int(e.width,2,12)&&int(e.steps,2,32)&&int(e.treadDepth,1,3),
+    'STAIRCASE_FIELDS');
+   yes(e.size===undefined&&e.center===undefined&&e.radii===undefined&&
+    e.radius===undefined&&e.length===undefined&&
+    e.majorRadius===undefined&&e.tubeRadius===undefined&&
+    e.start===undefined&&e.end===undefined&&e.thickness===undefined,
+    'STAIRCASE_EXTRA');
+   const v=e.steps*e.treadDepth,along=e.axis==='x'?0:2,
+    across=along===0?2:0;
+   a=e.origin.slice();b=e.origin.slice();
+   a[along]=Math.min(e.origin[along],e.origin[along]+e.direction*(v-1));
+   b[along]=Math.max(e.origin[along],e.origin[along]+e.direction*(v-1));
+   b[1]=e.origin[1]+e.steps-1;
+   b[across]=e.origin[across]+e.width-1;
+  }else if(e.shape==='box'){
    yes(trip(e.origin,0,128)&&trip(e.size,1,128),'BOX_COORD');
    a=e.origin;b=e.origin.map((v,i)=>v+e.size[i]-1);
    if(shell)yes(e.size.every(n=>n>shell*2),'SHELL_TOO_THICK');
@@ -76,15 +113,32 @@ export function validateDesign(d){
    if(shell)yes(e.radius>shell,'SHELL_TOO_THICK');
    yes(e.center===undefined&&e.radii===undefined&&e.size===undefined&&e.majorRadius===undefined&&e.tubeRadius===undefined&&e.start===undefined&&e.end===undefined&&e.thickness===undefined,'CYLINDER_EXTRA');
   }
+  const domainVolume=b.reduce((n,v,i)=>n*(v-a[i]+1),1);
+  if(repeated){
+   const final=rep.offset.map(delta=>delta*(rep.count-1));
+   a=a.map((v,i)=>v+Math.min(0,final[i]));
+   b=b.map((v,i)=>v+Math.max(0,final[i]));
+  }
   yes(a.every((v,i)=>v>=0)&&b.every((v,i)=>v<[w,h,z][i]),'OUTSIDE_LOCAL_BOUNDS');
-  const volume=b.reduce((n,v,i)=>n*(v-a[i]+1),1);
-  work+=volume;yes(work<=MAX_WORK,'WORK_BUDGET');
+  // Budget EVERY instance, including overlap or cuts. For old elements the
+  // original domain work and source hashes remain unchanged.
+  work+=domainVolume*(rep?.count??1);
+  yes(work<=MAX_WORK,'WORK_BUDGET');
   hasAdd||=e.mode==='add';
  }
  yes(hasAdd,'NO_ADD_ELEMENTS');
  return true;
 }
 function inside(e,x,y,z){
+ if(e.shape==='staircase'){
+  const along=e.axis==='x'?0:2,across=along===0?2:0,
+   p=[x,y,z],
+   forward=(p[along]-e.origin[along])*e.direction,
+   lateral=p[across]-e.origin[across];
+  return forward>=0&&forward<e.steps*e.treadDepth&&
+   lateral>=0&&lateral<e.width&&y>=e.origin[1]&&
+   y<=e.origin[1]+Math.floor(forward/e.treadDepth);
+ }
  if(e.shape==='box'){
   const [ax,ay,az]=e.origin,[sx,sy,sz]=e.size;
   if(x<ax||y<ay||z<az||x>=ax+sx||y>=ay+sy||z>=az+sz)return false;
@@ -121,6 +175,16 @@ function inside(e,x,y,z){
  return r2<=e.radius**2&&(!e.shell||r2>=(e.radius-e.shell)**2);
 }
 function domain(e){
+ if(e.shape==='staircase'){
+  const along=e.axis==='x'?0:2,across=along===0?2:0,
+   end=e.origin[along]+e.direction*(e.steps*e.treadDepth-1),
+   a=e.origin.slice(),b=e.origin.slice();
+  a[along]=Math.min(e.origin[along],end);
+  b[along]=Math.max(e.origin[along],end);
+  b[1]=e.origin[1]+e.steps-1;
+  b[across]=e.origin[across]+e.width-1;
+  return [a,b];
+ }
  if(e.shape==='box')return [e.origin,e.origin.map((v,i)=>v+e.size[i]-1)];
  if(e.shape==='ellipsoid')return [e.center.map((v,i)=>v-e.radii[i]),e.center.map((v,i)=>v+e.radii[i])];
  if(e.shape==='beam')
@@ -135,27 +199,45 @@ function domain(e){
  return [e.origin.map((v,j)=>v-(j===i?0:e.radius)),
   e.origin.map((v,j)=>v+(j===i?e.length-1:e.radius))];
 }
+/** Translate one B143 conceptual element without modifying original authorship.
+ * Translation happens inside the same ordered element, before next source
+ * element, so ADD/CUT layering remains deterministic and source-hash pinned.
+ */
+function sourceInstance(e,i){
+ if(i===0)return e;
+ const delta=e.repeat.offset.map(n=>n*i),v={...e};
+ for(const key of ['origin','center','start','end'])
+  if(Array.isArray(e[key]))
+   v[key]=e[key].map((n,j)=>n+delta[j]);
+ return v;
+}
 /** A cut removes local conceptual cells only, never Minecraft blocks. */
 export function compileDesign(d){
  validateDesign(d);
  const cells=new Map(),operations=[];
  for(const e of d.elements){
   let added=0,removed=0;
-  const [a,b]=domain(e);
-  for(let y=a[1];y<=b[1];y++)
-   for(let z=a[2];z<=b[2];z++)
-    for(let x=a[0];x<=b[0];x++){
-     if(!inside(e,x,y,z))continue;
-     const key=K(x,y,z);
-     if(e.mode==='cut'){
-      if(cells.delete(key))removed++;
-     }else{
-      if(!cells.has(key))added++;
-      cells.set(key,{x,y,z,material:e.material});
-      yes(cells.size<=MAX_CELLS,'VOXEL_BUDGET');
+  const count=e.repeat?.count??1;
+  for(let i=0;i<count;i++){
+   const part=sourceInstance(e,i);
+   const [a,b]=domain(part);
+   for(let y=a[1];y<=b[1];y++)
+    for(let z=a[2];z<=b[2];z++)
+     for(let x=a[0];x<=b[0];x++){
+      if(!inside(part,x,y,z))continue;
+      const key=K(x,y,z);
+      if(e.mode==='cut'){
+       if(cells.delete(key))removed++;
+      }else{
+       if(!cells.has(key))added++;
+       cells.set(key,{x,y,z,material:e.material});
+       yes(cells.size<=MAX_CELLS,'VOXEL_BUDGET');
+      }
      }
-    }
-  operations.push({element:e.id,mode:e.mode,added,removed}); // design transformations, not build ops
+  }
+  // Legacy operations remain BYTE-IDENTICAL when no repeat is present.
+  operations.push(e.repeat?{element:e.id,mode:e.mode,added,removed,
+   instances:count}:{element:e.id,mode:e.mode,added,removed}); // source only
  }
  yes(cells.size>0,'EMPTY_GEOMETRY');
  const names=MATERIALS.map(m=>'B143_'+m.toUpperCase());

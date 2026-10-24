@@ -1,0 +1,185 @@
+{
+  "schema": "minecraftaibuilder-b198zr3-functional-review-contract-v1",
+  "caseId": "r2-coastal-library-functional-review",
+  "authorship": "ASSISTANT_PROPOSED_UNAPPROVED",
+  "sourceSha256": "7e5b1885a398d5e98f1298915947bc66eae56d4ccf4b413274da780a3778c218",
+  "entrance": [
+    24,
+    2,
+    45
+  ],
+  "headroom": 2,
+  "protectedVoids": [
+    {
+      "id": "central-continuous-open-atrium",
+      "origin": [
+        19,
+        2,
+        19
+      ],
+      "size": [
+        11,
+        36,
+        11
+      ],
+      "maxOccupiedCells": 0
+    }
+  ],
+  "destinations": [
+    {
+      "id": "reading-floor-0",
+      "point": [
+        16,
+        2,
+        13
+      ],
+      "maximumPathSteps": 65
+    },
+    {
+      "id": "reading-floor-1",
+      "point": [
+        30,
+        10,
+        31
+      ],
+      "maximumPathSteps": 130
+    },
+    {
+      "id": "reading-floor-2",
+      "point": [
+        30,
+        18,
+        31
+      ],
+      "maximumPathSteps": 150
+    },
+    {
+      "id": "reading-floor-3",
+      "point": [
+        30,
+        26,
+        31
+      ],
+      "maximumPathSteps": 170
+    },
+    {
+      "id": "observatory",
+      "point": [
+        30,
+        34,
+        31
+      ],
+      "maximumPathSteps": 195
+    },
+    {
+      "id": "west-exterior-terrace",
+      "point": [
+        5,
+        26,
+        22
+      ],
+      "maximumPathSteps": 155
+    },
+    {
+      "id": "east-exterior-terrace",
+      "point": [
+        42,
+        18,
+        24
+      ],
+      "maximumPathSteps": 160
+    }
+  ],
+  "functionalZones": [
+    {
+      "id": "ground-reading-circulation",
+      "origin": [
+        11,
+        2,
+        12
+      ],
+      "size": [
+        9,
+        1,
+        28
+      ],
+      "minimumReachablePositions": 210,
+      "minimumReachablePercent": 80
+    },
+    {
+      "id": "level-1-reading-circulation",
+      "origin": [
+        11,
+        10,
+        12
+      ],
+      "size": [
+        9,
+        1,
+        28
+      ],
+      "minimumReachablePositions": 170,
+      "minimumReachablePercent": 65
+    },
+    {
+      "id": "level-2-reading-circulation",
+      "origin": [
+        11,
+        18,
+        12
+      ],
+      "size": [
+        9,
+        1,
+        28
+      ],
+      "minimumReachablePositions": 170,
+      "minimumReachablePercent": 65
+    },
+    {
+      "id": "level-3-reading-circulation",
+      "origin": [
+        11,
+        26,
+        12
+      ],
+      "size": [
+        9,
+        1,
+        28
+      ],
+      "minimumReachablePositions": 170,
+      "minimumReachablePercent": 65
+    },
+    {
+      "id": "upper-observation-circulation",
+      "origin": [
+        11,
+        34,
+        12
+      ],
+      "size": [
+        9,
+        1,
+        28
+      ],
+      "minimumReachablePositions": 140,
+      "minimumReachablePercent": 50
+    },
+    {
+      "id": "shelves-front-aisle",
+      "origin": [
+        29,
+        18,
+        11
+      ],
+      "size": [
+        10,
+        1,
+        27
+      ],
+      "minimumReachablePositions": 210,
+      "minimumReachablePercent": 75
+    }
+  ]
+}
