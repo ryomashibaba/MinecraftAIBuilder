@@ -113,7 +113,16 @@ export async function runR125Multiuse({model,outDir,endpoint}={},
    allSources&&distinct?'MULTIUSE_SOURCE_COMPARISON_READY_HUMAN_REVIEW':
    'HOLD_SOURCE_OR_FUNCTIONAL_QA';
   report.geometryDistinctFromHistorical=distinct;
-  report.allSourcesPassSourceQA=allSources;
+  report.allSourcesCompiledAndProgramFloorQA=allSources;
+  // Keep this older property conservative: general B198C HIGH warnings are
+  // still present in the source evidence even when limited program floors pass.
+  report.allSourcesPassSourceQA=allSources&&
+   report.reportedTrials.every(x=>x.sourceHighRiskFindings===0);
+  report.generalSourceHighRiskTotal=completed?
+   report.reportedTrials.reduce((n,x)=>n+(x.sourceHighRiskFindings??0),0):null;
+  report.semanticProgramPhysicallyRealized='NOT_ESTABLISHED';
+  report.aestheticApproval=false;
+  report.inGameWalkingCertified=false;
   return report;
  }finally{
   save(args.outDir,'R125_MULTIUSE_REPORT.json',report);

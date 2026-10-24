@@ -1,0 +1,38 @@
+{
+  "schema": "minecraftaibuilder-r125-architecture-plan-v1",
+  "id": "small-shop-layout-01",
+  "title": "Minimalist Shop with Front and Back Zones",
+  "brief": "A compact single-story shop with a front retail area and a back employee zone, designed for efficient customer flow and functional separation.",
+  "footprint": {
+    "width": 24,
+    "depth": 16
+  },
+  "levels": [
+    {
+      "splitAxis": "x",
+      "splitPercent": 60,
+      "spaces": [
+        {
+          "id": "front-retail-space",
+          "purpose": "Customer-facing retail and display area with window glazing and entry doors."
+        },
+        {
+          "id": "back-employee-space",
+          "purpose": "Employee-only area for inventory, restrooms, and storage."
+        }
+      ]
+    }
+  ],
+  "materials": {
+    "floor": "wood",
+    "wall": "stone",
+    "roof": "concrete"
+  },
+  "expression": {
+    "setbackSide": "none",
+    "setbackDepth": 0,
+    "roofProfile": "flat",
+    "roofAxis": "z",
+    "facadeLanguage": "screen"
+  }
+}

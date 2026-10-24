@@ -18,6 +18,10 @@
 
 
 
+## R125 実Qwen3用途と美術審査の到達点（2026-10-24 JST）
+- OMENでQwen14Bを実行し、店舗1階933 voxel（35.313秒）／研究施設2階2,936 voxel（8.059秒）の**真正B143シーン**を得た。旧住宅2620 voxelとあわせて3用途3件。モデル追加推論2回、Minecraft worldWrites=0。
+- 詳細と必須の品質不足は [3用途実測審査](R125_REAL_THREE_USE_REVIEW_20261024_JA.md)。**用途別の設備が実体化せず、売場/バックヤードは左右配置なのにfront/backという名前、実体はいまだに箱型が中心**。general B198C HIGHは研究所の段状屋根で1件。ソースQA PASS≠建築用途/美術/実ゲーム歩行PASS。次は共通IRから機能設備の実体化・経路QA。Open/Draft PRを維持し、施工は9 BLOCKED。
+
 ## R125 異用途3件の実モデル再現性比較（2026-10-24 JST）
 - [2用途ワンコマンドパイロット](../scripts/r125-multiuse-pilot.mjs)、[localhost/stub回帰](../scripts/r125-multiuse-pilot.test.mjs)。既に本物のQwen14Bで住宅`Lumina Residence`が生成済みなので、**住宅再推論なし**で保存済みユーザー提供住宅計画のSHA/2620セルを再利用。新規`entry-shop`（平屋の店舗）と`research-studio`（二階建て研究施設）を同じ既存`runR125SemanticPilot`経由で**最大2回**のみ実モデル要求。建物カテゴリによるエンジン振り分けは禁止・同一IR+コンパイラを使用。
 - 実行例（Windows OMENにOllama実模型ある場合）: `node scripts/r125-multiuse-pilot.mjs --model qwen3:14b --out r125-multiuse-001`。必ず既存結果フォルダを上書きせず、店舗・研究施設それぞれの`ARCHITECTURE_PLAN.json`、`B143_SOURCE.json`、`index.html`、QAを保存。`R125_MULTIUSE_REPORT.json`に原文保存、真のmodelCalls、座標/幾何SHA、ソースQA、実行時間、PROVENANCEを集約。fixture-only CIでは実推論成功としない。
