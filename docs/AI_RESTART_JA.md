@@ -18,6 +18,10 @@
 
 
 
+## R125実Qwen 14B 初回診断（2026-10-24 JST）
+- ユーザーOMENが最新HEAD `6a12bb4` をfast-forward取得後、インストール済み `qwen3:14b`（Ollama報告9.3GB）で住宅1例を実際に要求。上位結果は `COMPARISON_SOURCE_RESULTS_READY_REVIEW_REQUIRED`、しかし実際のcase statusは**`HOLD_GENERATION_OR_REVIEW`／`sourceSha256=null`／modelCallCount=1／worldWrites=0**。これは**建築ソース未成立**であり、上位表示は集計不具合だった。タイムアウトとは断定せず、`r125-qwen14b-20261024-181344/home-two-level/R125_REPORT.json` の `reason` と原文保存有無を次に確認する。
+- 本修正は上位statusをHOLDとして厳密に集計し、子の `reason`／`elapsedMs`／`originalRawCaptured` を転記。真正ソースSHAと幾何SHAが存在し、全ケースのsource statusが人間レビュー待ちであるときのみ比較準備OKを返す。元の出力証拠は変更せず、モデルの再実行は必要なし。図書館専用修正なし・Minecraft実施工なし。
+
 ## R125実Qwen初回タイムアウトと改善（2026-10-24 JST）
 - ユーザーOMENで`qwen3.8:27b`を**実呼出し1回**実施。Ollama `/api/tags`モデル確認とリポジトリ取得は成功。住宅例は`HOLD_LOCAL_TRANSPORT`／本体`B198A_CANDIDATE_REJECTED_AFTER_1_ATTEMPTS_This operation was aborted`／`elapsedMs=300032`。これは**既存の300秒deadlineでAbortした直接証拠**。モデルが内部でどこまで推論したか・CPU/GPUオフロード・速度は未確認。元応答は未着で`originalRawCaptured=false`／真正3Dなし／worldWrites=0／9 BLOCKED。
 - 同じ27Bで300秒待つ試行を繰り返さない。OllamaのOpenAI互換APIにある `reasoning_effort:'none'` + `max_tokens:4096` を**R125 pilot経路のみ**で指定し、上限180秒へ変更。これらは推論軽量化・生成長さ上限の診断条件であり、成功保証ではない。旧B198Gアダプタ通常運用には設定を強制せず、任意オプションのみ追加。モデル設定は`REQUEST.json`に残す。モデルが未対応なら通常エラー/再タイムアウトの可能性を示す。

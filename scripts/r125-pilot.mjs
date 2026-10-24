@@ -26,6 +26,19 @@ export const R125_CASES=Object.freeze([
   prompt:'小規模な研究施設を独自に設計してください。外部入口、作業・実験エリアと観察または記録エリアの二つの機能領域、窓、屋根、開放的な内部動線と支持床を備えてください。安全な動線の考え方と外形を用途から発想してください。店舗や住宅の同一平面のラベル変更は禁止です。'})
 ]);
 
+export function classifyR125Cases(caseResults,caseCount,testInjectionPresent){
+ if(testInjectionPresent)return 'HOLD_TEST_DOUBLE_NOT_REAL_INFERENCE';
+ if(caseResults.length!==caseCount)return 'HOLD_INCOMPLETE';
+ const allCompiled=caseResults.every(x=>
+  x.sourceReview==='B143_COMPILED_VERIFIED'&&
+  typeof x.sourceSha256==='string'&&x.sourceSha256.length===64&&
+  typeof x.geometrySha256==='string'&&x.geometrySha256.length===64);
+ if(!allCompiled)return 'HOLD_GENERATION_OR_REVIEW';
+ if(caseResults.some(x=>x.status!=='SOURCE_CANDIDATE_HUMAN_REVIEW_REQUIRED'))
+  return 'HOLD_SOURCE_GEOMETRY';
+ return 'COMPARISON_SOURCE_RESULTS_READY_REVIEW_REQUIRED';
+}
+
 export function parseR125PilotArgs(argv){
  if(argv.length===1&&argv[0]==='--help')return {help:true};
  const values={},allowed=new Set(['--model','--out','--cases','--endpoint']);
@@ -127,6 +140,9 @@ export async function runR125Pilot({model,outDir,endpoint=DEFAULT_LOCAL_ENDPOINT
     status:candidate.status,
     provider:candidate.provider,
     modelCalls:candidate.modelCallCount??0,
+    reason:candidate.reason??null,
+    elapsedMs:candidate.elapsedMs??null,
+    originalRawCaptured:candidate.originalRawCaptured??false,
     sourceSha256:candidate.sourceSha256??null,
     geometrySha256:candidate.geometrySha256??null,
     sourceReview:candidate.sourceReview??'HOLD',
@@ -157,10 +173,8 @@ export async function runR125Pilot({model,outDir,endpoint=DEFAULT_LOCAL_ENDPOINT
    }
   }
   if(report.status==='HOLD_NOT_STARTED')
-   report.status=report.testInjectionPresent?
-    'HOLD_TEST_DOUBLE_NOT_REAL_INFERENCE':
-    report.caseResults.length===caseCount?
-     'COMPARISON_SOURCE_RESULTS_READY_REVIEW_REQUIRED':'HOLD_INCOMPLETE';
+   report.status=classifyR125Cases(report.caseResults,caseCount,
+    report.testInjectionPresent);
   return report;
  }catch(e){
   report.status='HOLD_PREFLIGHT';
@@ -179,7 +193,8 @@ if(process.argv[1]===fileURLToPath(import.meta.url)){
   else{
    const report=await runR125Pilot(args);
    console.log(JSON.stringify({status:report.status,cases:report.caseResults.map(x=>({
-    id:x.id,status:x.status,sourceSha256:x.sourceSha256})),
+    id:x.id,status:x.status,sourceSha256:x.sourceSha256,
+    reason:x.reason??null,elapsedMs:x.elapsedMs??null})),
     modelGenerationCalls:report.modelGenerationCalls,
     folder:args.outDir,worldWrites:0}));
    if(report.status.startsWith('HOLD_'))process.exitCode=2;

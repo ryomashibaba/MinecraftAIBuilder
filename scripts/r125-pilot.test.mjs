@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {R125_CASES,parseR125PilotArgs,preflightR125Ollama,runR125Pilot} from './r125-pilot.mjs';
+import {R125_CASES,parseR125PilotArgs,preflightR125Ollama,runR125Pilot,
+ classifyR125Cases} from './r125-pilot.mjs';
 
 const root=()=>fs.mkdtempSync(path.join(os.tmpdir(),'r125-local-pilot-'));
 const tags=(names)=>async (url,options)=>{
@@ -105,4 +106,49 @@ test('malformed /api/tags response remains HOLD, no model request',async t=>{
  });
  assert.equal(report.status,'HOLD_PREFLIGHT');
  assert.equal(calls,0);
+});
+
+
+test('real local provider label does not turn failed source compilation into a ready report',async t=>{
+ const base=root();t.after(()=>fs.rmSync(base,{recursive:true,force:true}));
+ const f=path.join(base,'real-provider-failed');
+ // Preflight is injected, so provenance remains test-only, but the receipt
+ // must still be diagnosed independently of the later test-provider HOLD.
+ const fakeCase={provider:'EXPLICIT_LOCAL_LOOPBACK',modelId:'qwen3:14b',
+  modelCallCount:1,status:'HOLD_GENERATION_OR_REVIEW',
+  reason:'B198A_CANDIDATE_REJECTED_AFTER_1_ATTEMPTS_INVALID_FORMAT',
+  elapsedMs:11127,originalRawCaptured:true};
+ const report=await runR125Pilot({model:'qwen3:14b',outDir:f},{
+  fetcher:tags(['qwen3:14b']),runSingle:async()=>fakeCase
+ });
+ assert.equal(report.caseResults[0].status,'HOLD_GENERATION_OR_REVIEW');
+ assert.equal(report.caseResults[0].reason,fakeCase.reason);
+ assert.equal(report.caseResults[0].elapsedMs,11127);
+ assert.equal(report.caseResults[0].originalRawCaptured,true);
+ assert.equal(report.status,'HOLD_TEST_DOUBLE_NOT_REAL_INFERENCE');
+ // Production equivalent without test injection must not be promoted, either.
+ const sourceReview=report.caseResults[0].sourceReview;
+ assert.equal(sourceReview,'HOLD');
+});
+
+test('human-review-ready is never inferred from a malformed or geometry-HOLD result',async t=>{
+ const base=root();t.after(()=>fs.rmSync(base,{recursive:true,force:true}));
+ const valid={provider:'EXPLICIT_LOCAL_LOOPBACK',modelId:'qwen3:14b',
+  modelCallCount:1,status:'SOURCE_CANDIDATE_HUMAN_REVIEW_REQUIRED',
+  sourceReview:'B143_COMPILED_VERIFIED',sourceSha256:'a'.repeat(64),
+  geometrySha256:'b'.repeat(64)};
+ // Injection always forces provenance HOLD, even when the source fields are
+ // otherwise well-formed. We verify the classifier also via its pure helper.
+ assert.equal(classifyR125Cases([{
+  status:'HOLD_GENERATION_OR_REVIEW',sourceReview:'HOLD',
+  sourceSha256:null,geometrySha256:null
+ }],1,false),'HOLD_GENERATION_OR_REVIEW');
+ assert.equal(classifyR125Cases([{
+  ...valid,status:'HOLD_SOURCE_GEOMETRY'
+ }],1,false),'HOLD_SOURCE_GEOMETRY');
+ assert.equal(classifyR125Cases([valid],1,false),
+  'COMPARISON_SOURCE_RESULTS_READY_REVIEW_REQUIRED');
+ assert.equal(classifyR125Cases([valid],3,false),'HOLD_INCOMPLETE');
+ assert.equal(classifyR125Cases([valid],1,true),
+  'HOLD_TEST_DOUBLE_NOT_REAL_INFERENCE');
 });
