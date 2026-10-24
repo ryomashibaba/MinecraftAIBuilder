@@ -80,7 +80,7 @@ export function makeUnboundWorldPreview(compiled){
  * The real path uses exactly one local model request and captures the raw
  * message.content string BEFORE B198A/B143 validation, even on DSL failure.
  */
-export async function runR125({prompt,model,outDir,endpoint}={}, {generator=null}={}){
+export async function runR125({prompt,model,outDir,endpoint,timeoutMs=120000}={}, {generator=null}={}){
  if(!validPrompt(prompt)||!validModel(model)||typeof outDir!=='string'||!outDir.trim())
   fail('INVALID_REQUEST');
  // Adapter validates endpoint before first HTTP call; do not create evidence
@@ -115,7 +115,7 @@ export async function runR125({prompt,model,outDir,endpoint}={}, {generator=null
  };
  try{
   const adapter=generator??createB198GLocalModelAdapter({
-   model,...(endpoint?{endpoint}:{}),fetcher:fetchAndCapture
+   model,timeoutMs,...(endpoint?{endpoint}:{}),fetcher:fetchAndCapture
   });
   const counted=async request=>{
    modelCalls++;

@@ -66,6 +66,7 @@ test('three distinct live-labelled receipts remain uncategorized aesthetics/worl
   fetcher:tags(['gemma4:26b']),
   runSingle:async args=>{
    prompts.push(args.prompt);
+   assert.equal(args.timeoutMs,300000);
    return {provider:'EXPLICIT_LOCAL_LOOPBACK',modelId:args.model,
     modelCallCount:1,status:'HOLD_SOURCE_GEOMETRY',sourceReview:'B143_COMPILED_VERIFIED',
     sourceSha256:'c'.repeat(64),geometrySha256:'d'.repeat(64),
@@ -75,7 +76,8 @@ test('three distinct live-labelled receipts remain uncategorized aesthetics/worl
  assert.equal(prompts.length,3);
  assert.equal(new Set(prompts).size,3);
  assert.equal(report.caseResults.length,3);
- assert.equal(report.status,'COMPARISON_SOURCE_RESULTS_READY_REVIEW_REQUIRED');
+ assert.equal(report.status,'HOLD_TEST_DOUBLE_NOT_REAL_INFERENCE');
+ assert.equal(report.testInjectionPresent,true);
  assert.equal(report.modelGenerationCalls,3);
  assert.ok(report.caseResults.every(x=>x.humanAesthetics==='NOT_REVIEWED'));
  assert.ok(report.caseResults.every(x=>x.minecraftWorld==='NOT_TESTED'));

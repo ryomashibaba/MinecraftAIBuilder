@@ -93,7 +93,8 @@ export async function runR125Pilot({model,outDir,endpoint=DEFAULT_LOCAL_ENDPOINT
   schema:'minecraftaibuilder-r125-local-pilot-v1',status:'HOLD_NOT_STARTED',
   modelId:model,provider:'LOCAL_OLLAMA_LOOPBACK_NOT_CRYPTOGRAPHICALLY_AUTHENTICATED',
   caseCountRequested:caseCount,modelGenerationCalls:0,caseResults:[],
-  preflight:null,architectureArt:'NOT_REVIEWED',
+  preflight:null,testInjectionPresent:fetcher!==fetch||runSingle!==runR125,
+  architectureArt:'NOT_REVIEWED',
   inWorldWalkability:'NOT_TESTED',mac8Gb2B:'NOT_TESTED',
   worldContacts:0,worldWrites:0,constructionApproved:false,
   executionAllowed:false,gates:Array(9).fill('BLOCKED')
@@ -109,7 +110,7 @@ export async function runR125Pilot({model,outDir,endpoint=DEFAULT_LOCAL_ENDPOINT
    let candidate;
    try{
     candidate=await runSingle({prompt:item.prompt,model,
-     endpoint,outDir:path.join(dir,item.id)});
+     endpoint,outDir:path.join(dir,item.id),timeoutMs:300000});
     if(!candidate||candidate.modelId!==model||
      !['EXPLICIT_LOCAL_LOOPBACK','INJECTED_TEST_DOUBLE'].includes(candidate.provider))
      fail('UNTRUSTED_RUN_RECEIPT');
@@ -150,9 +151,11 @@ export async function runR125Pilot({model,outDir,endpoint=DEFAULT_LOCAL_ENDPOINT
     break;
    }
   }
-  if(!report.status.startsWith('HOLD_')||report.status==='HOLD_NOT_STARTED')
-   report.status=report.caseResults.length===caseCount?
-    'COMPARISON_SOURCE_RESULTS_READY_REVIEW_REQUIRED':'HOLD_INCOMPLETE';
+  if(report.status==='HOLD_NOT_STARTED')
+   report.status=report.testInjectionPresent?
+    'HOLD_TEST_DOUBLE_NOT_REAL_INFERENCE':
+    report.caseResults.length===caseCount?
+     'COMPARISON_SOURCE_RESULTS_READY_REVIEW_REQUIRED':'HOLD_INCOMPLETE';
   return report;
  }catch(e){
   report.status='HOLD_PREFLIGHT';
