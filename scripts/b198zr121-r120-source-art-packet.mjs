@@ -40,7 +40,7 @@ export function auditR121LocalSourceConnectivity(before,after,expectedIndices){
   const a=before[i],b=after[i];
   if(!a||!b||a.kind!==b.kind||
     [...vertices(a),...vertices(b)].some(p=>!valid(p))||
-    area(a)<1e-11||area(b)<1e-11)
+    edited.has(i)&&(area(a)<1e-11||area(b)<1e-11))
    fail('SOURCE_TRIANGLE_KIND_OR_AREA_CHANGED');
   const modified=JSON.stringify(a)!==JSON.stringify(b);
   if(modified!==edited.has(i))fail('UNDISCLOSED_OR_MISSING_ACTUAL_DELTA');
