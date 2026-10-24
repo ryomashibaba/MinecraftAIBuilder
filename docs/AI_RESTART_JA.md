@@ -10,14 +10,21 @@
 | 継続ブランチ | `feature/b198zr1-protected-architectural-revision` |
 | 継続PR | [#128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128) — Open / Draft / Unmerged |
 | HEAD | [開発ブランチの最新HEADを毎回GitHubで確認](https://github.com/ryomashibaba/MinecraftAIBuilder/commits/feature/b198zr1-protected-architectural-revision)（R98の初期実メッシュ検証対象は `9a2b5de9d8ba41a2b7ca4e626aa9d54ff4ffffdd`） |
-| 最新確認済み実装工程 | **B198Z-R124実装済み・実源結果は未確定。R123有望候補の採光リブ調整を基礎として、元座面45%→65%回復案を3種のR94リブ位置と組み合わせる真正源オフライン比較コードを追加。R60の同一CIで3案の全館OBJ・6視点HTML・JSONを保存予定。現在のR124 Windows/Ubuntu実源 CIは実行待ちのため、幾何改善・美術PASSは未主張** |
-| 次に取り組む工程 | **まずR124実源CI #40074343667 のWindows/Ubuntu両OSと一時Artifactを確認。座面65%復元の交差・頭上Ray・旧5経路の採否を実測に基づき判定。続く工程では読書用途・多視点美術・汎用AI建築生成能力への接続を優先し、局所Ray検査だけを増やし続けない** |
-| 施工・モデル | NOT_PREPARED / 9 BLOCKED / BuildPlan空。新たな実Qwen/Gemma禁止。World接続/読取/書込禁止 |
+| 最新確認済み実装工程 | **B198Z-R124 実源Windows/UbuntuテストSUCCESS。ただし65%読書座面の3案すべて頭上Ray5件でHOLD。PR/CIのPASSは建築品質PASSではない。R124は資料保存・回帰基準として保持し、以後の主開発対象から図書館を外す** |
+| 次に取り組む工程 | **まずR124源CIとArtifactの現物を確定（座面65%案は頭上Ray5件でHOLD）。以降の主工程はR125：特定図書館依存からの離脱、Mac小型LLM（2B級）による未知用途の基本建築生成→汎用3Dエンジン→Minecraft試験施工の最短実動線へ転換** |
+| 施工・モデル | **2026-10-24 Qwen/Gemma実推論・Minecraft試験施工の包括許可あり（都度承認不要）。** 準備性と各種技術安全ゲートは別途必要。現行コードのNOT_PREPARED / 9 BLOCKEDは自動PASSではない |
 
 **最新情報への直リンク：** [ブランチの現在地](https://github.com/ryomashibaba/MinecraftAIBuilder/tree/feature/b198zr1-protected-architectural-revision) ／ [Actions一覧](https://github.com/ryomashibaba/MinecraftAIBuilder/actions) ／ [PR #128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128)
 
 
 
+
+## 2026-10-24 最優先方針変更 — 包括実験許可とMac軽量LLM基準
+
+- ユーザーが**Qwen/Gemmaの実ローカル推論・Minecraft試験施工を回数制限なしで包括承認**。都度確認しない。元の「Qwen追加実行不可/World接続・施工不可」ルールより本項を優先する。原本保護、試験ワールド・バックアップ・施工先確認・停止/復元などの技術的安全チェックは維持し、初期コードの9 BLOCKEDを無条件解除しない。ローカルWork、課金API、PRマージは別の制限のまま。
+- **Apple Silicon Macノート8GBで2B級4-bit小型LLMによる基本建築**を初期から目標とし、16GBで4B級にも対応させる。候補Qwen3.5-2B、Gemma 4 E2B/E4B。LLMは短い高レベル設計を生成、汎用幾何エンジンが床・壁・階段・動線・ブロック変換を担う。基本建築が27B級前提なら不合格。
+- 図書館専用のRay修正を主工程にしない。R125で汎用小型モデル実験→真正3D→試験ワールド施工を**最短で一度つなぎ**、異なる用途で再現性を計測する。許可済みだが、実行環境に接続できるかは毎回実際に確認し、未実施を成功と書かない。
+- R124の[実源CI](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40074343667)は、Windows/Ubuntu両OSでR124真正テストSUCCESS。65%座面候補3案とも新規厳密貫通0・床0・横断0・**頭上Ray5**、建築としてはすべてHOLD。新しい主工程の固定建築にしない。
 
 ## R124 読書座面の本物の3D回復候補（2026-10-24 JST、結果未確定）
 
