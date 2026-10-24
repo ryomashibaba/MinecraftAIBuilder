@@ -10,11 +10,17 @@
 | 継続ブランチ | `feature/b198zr1-protected-architectural-revision` |
 | 継続PR | [#128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128) — Open / Draft / Unmerged |
 | HEAD | [開発ブランチの最新HEADを毎回GitHubで確認](https://github.com/ryomashibaba/MinecraftAIBuilder/commits/feature/b198zr1-protected-architectural-revision)（R98の初期実メッシュ検証対象は `9a2b5de9d8ba41a2b7ca4e626aa9d54ff4ffffdd`） |
-| 最新確認済み実装工程 | **B198Z-R121完了：R120の実源頭上Ray7→0改修候補についてR121のWindows/Ubuntu両OS実メッシュ試験成功。変更8源面の旧共有辺5組／頂点関係9組に接合切れ0件。元全館/候補全館/8面差分OBJ、同じカメラ6視点HTMLと真正検証JSONを両OSのGitHub Actions成果物へ保存済み。人の美術・歩行・構造は未認証、施工HOLD** |
-| 次に取り組む工程 | **R122ではR121のGitHub Actions成果物から元全館/改修全館/8面差分の6視点を実際に見比べ、右R91読書室の採光リブ・長手座面・外観の美術と用途が成立しているかを審査する。SVGは正確な遮蔽レンダリングではないので、必要なら現物3Dに基づく追加視点を作る。実歩行/荷重/人体座面はHOLD** |
+| 最新確認済み実装工程 | **B198Z-R122実3D監査：R121の真正OBJによりR94リブ4535/採光エッジ4536と未変更上層テラス3477の新規交差2組を確認。座面幅・面積は元の約45%。R120は限定Ray改善候補として保持するが建築採用HOLD。人の美術審査NOT_REVIEWED** |
+| 次に取り組む工程 | **R123：新規交差4535/4536↔3477を解く最小実形状比較。旧Ray、共有接合、読書座面、入口と窓、上階の美術非悪化を確認。無効ならHOLD。汎用AI建築創造の最上位目標は維持** |
 | 施工・モデル | NOT_PREPARED / 9 BLOCKED / BuildPlan空。新たな実Qwen/Gemma禁止。World接続/読取/書込禁止 |
 
 **最新情報への直リンク：** [ブランチの現在地](https://github.com/ryomashibaba/MinecraftAIBuilder/tree/feature/b198zr1-protected-architectural-revision) ／ [Actions一覧](https://github.com/ryomashibaba/MinecraftAIBuilder/actions) ／ [PR #128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128)
+
+
+## R122実3D監査（2026-10-24 JST）
+
+- [R122実源交差レビュー](B198ZR122_R120_SOURCE_FACET_COLLISION_REVIEW_JA.md)：R121実OBJを比較。改修R94リブ4535/採光エッジ4536は未改変の上層テラス3477と新規に厳密交差する2組を確認。読書座面幅/面積も約45%に縮小。**R120はHOLD**。
+- R121 [Windows/Ubuntu既存SUCCESS](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40069281457)をR122の新規CI成功と混同しない。美術NOT_REVIEWED、歩行・支持・Minecraft実使用・AI汎用生成は未認証。R123は新規貫通を解消する意味ある候補比較へ。
 
 ## R96が実際に達成したこと / 達成していないこと
 - 独立研究《潮光の裂帆図書館》：R94の4,446三角形→R95の4,608→R96の4,692（旧4,608を変更せず84面の開口意匠追加）。7開口を維持、7×9本の局所視線検査成功。
