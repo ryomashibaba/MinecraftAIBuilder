@@ -50,6 +50,8 @@ test('injected real-looking response proves real voxels but never model provenan
  assert.equal(result.world.worldWrites,0);
  assert.deepEqual(result.world.BuildPlan.operations,[]);
  assert.ok(fs.existsSync(path.join(out,'B143_SCENE.json')));
+ const audit=JSON.parse(fs.readFileSync(path.join(out,'R125_SOURCE_CIRCULATION_AUDIT.json'),'utf8'));
+ assert.equal(audit.status,'SOURCE_CLEARANCE_PROBES_PASS');
  assert.ok(fs.existsSync(path.join(out,'index.html')));
  assert.equal(JSON.parse(fs.readFileSync(path.join(out,'ARCHITECTURE_PLAN.json'))).id,
   'programmed-independent-lab');

@@ -22,6 +22,9 @@ on:
       - 'scripts/r125-architecture-plan.test.mjs'
       - 'scripts/r125-semantic-pilot.mjs'
       - 'scripts/r125-semantic-pilot.test.mjs'
+      - 'source/ai/b198c-spatial-critic.mjs'
+      - 'scripts/r125-real-plan-replay.test.mjs'
+      - 'scripts/fixtures/r125-qwen14b-residential-2024a.json'
       - '.github/workflows/b198g-quality.yml'
 permissions:
   contents: read
@@ -57,7 +60,8 @@ jobs:
           node --check scripts/r125-architecture-plan.test.mjs
           node --check scripts/r125-semantic-pilot.mjs
           node --check scripts/r125-semantic-pilot.test.mjs
-          node --test scripts/r125-mvp.test.mjs scripts/r125-world-diff.test.mjs scripts/r125-pilot.test.mjs scripts/r125-offline-replay.test.mjs scripts/r125-architecture-plan.test.mjs scripts/r125-semantic-pilot.test.mjs
+          node --check scripts/r125-real-plan-replay.test.mjs
+          node --test scripts/r125-mvp.test.mjs scripts/r125-world-diff.test.mjs scripts/r125-pilot.test.mjs scripts/r125-offline-replay.test.mjs scripts/r125-architecture-plan.test.mjs scripts/r125-semantic-pilot.test.mjs scripts/r125-real-plan-replay.test.mjs
       - name: Keep the original Minecraft world offline
         run: |
           node --check source/ai/b198g-autonomous-quality.mjs

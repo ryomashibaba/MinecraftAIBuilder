@@ -18,6 +18,12 @@
 
 
 
+## R125 実Qwen14B 2,620ボクセル結果に基づく誤判定修正（2026-10-24 JST）
+- ユーザーOMENで実`qwen3:14b`→IR生成→真正B143 compileを**14.613秒・2,620ボクセル**で初回実測。提供された`ARCHITECTURE_PLAN.json`は`residential-2024a / Lumina Residence` 24×28、1階x50%・2階z40%、木床/石壁/コンクリート屋根。保存済み`B198C_GEOMETRY_CRITIQUE.json`は`Y=2:378 / Y=7:383 / Y=12:525`候補の3高度にそれぞれ単独成分あり、従来グローバルshare `525/1286=0.4082` を同一階分断として誤認し、`FRAGMENTED_PUBLIC_SOURCE_FLOORS` HIGH 1件。**これは階を跨いだ誤判定であり、真の上下階歩行の証明ではない**。
+- B198Cはグローバル比率の従来統計を残すが、HIGH判定を**同じstandingY内の複数連結成分と比率**で判定するよう修正。従来同一高度の本当の分断HIGHは維持。実IR全文を回帰fixture [ここ](../scripts/fixtures/r125-qwen14b-residential-2024a.json) に固定し、実測ソースSHA・幾何SHA・2620セルが再現されることも検査。
+- R125計画の幾何源から**段ごとの支持・頭上2セル空気・上階着地点・各部屋区画の2×2支持・仕切り通路**をSource検査で区別して計算。モデル名や住宅ラベルに応じて検査を無効化しない。2階へ本当に歩けるか、屋根へのアクセス、外部の地形・入口、Minecraft物理・美術は未検証のまま。必要な場合は`HOLD_SOURCE_CIRCULATION`で停止。既存ワールドへの書込0／9 BLOCKED／Draft PR #128維持。
+- ローカルPCは既存`r125-semantic-20261024-191231`を**再生成せず保存**。今後は必要時に最新コードでこのPLANをオフライン再評価する。古い`B198C_GEOMETRY_CRITIQUE.json`の結果は当時の実測として改変しない。
+
 ## R125 実Qwen → 短いArchitecturePlan → 真正3D、単一入口（2026-10-24 JST）
 - [実ローカル意味設計パイロット](../scripts/r125-semantic-pilot.mjs) と [オフライン+localhost HTTP回帰](../scripts/r125-semantic-pilot.test.mjs) を追加。Ollamaの実モデル名をexact照合し、**1回だけ**OpenAI互換loopback呼出し(`reasoning_effort:none`, `max_tokens:1536`, 120秒)で短いArchitecturePlanを生成。厳格なIRバリデータ→B143の真正voxel→B198Cの独立ソースQA→既存3D HTMLビューまで自動作成。URLは明示的`127.0.0.1`以外不可。
 - CLI（**OMENに既存Ollamaモデルがある環境のみ**）:`node scripts/r125-semantic-pilot.mjs --model qwen3:14b --out r125-semantic-house-001`。出力に`MODEL_RESPONSE_ORIGINAL.txt`、`ARCHITECTURE_PLAN.json`、`B143_SOURCE.json`、`B143_SCENE.json`、`ZONE_PROGRAM.json`、`index.html`と独立検査・REPORT。失敗時は原文を保存可能な限り保存してHOLD。出力先既存は拒否。ダミーテストの原文を「実Qwen成功」に読み替えない。

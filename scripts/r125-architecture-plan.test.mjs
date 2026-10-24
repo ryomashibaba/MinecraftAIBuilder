@@ -1,8 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {SCHEMA,validateArchitecturePlan,compileArchitecturePlan}
+import {SCHEMA,validateArchitecturePlan,compileArchitecturePlan,
+ auditArchitecturePlanCirculation}
  from '../source/ai/r125-architecture-plan.mjs';
-import {verifyCompiled} from '../source/ai/b143-building-dsl.mjs';
+import {verifyCompiled,compileDesign} from '../source/ai/b143-building-dsl.mjs';
 import {critiqueArchitecture} from '../source/ai/b198c-spatial-critic.mjs';
 
 const plan=(id,axes=['x'],spaces=['family room','kitchen'])=>({
@@ -84,4 +85,32 @@ test('bounded IR rejects structural abuse, unknown keys and malicious input',()=
   alter(changed);
   assert.throws(()=>compileArchitecturePlan(changed),/R125_PLAN_/);
  }
+});
+
+test('generic source circulation detects intact zone openings, stairs and upper landing',()=>{
+ const r=compileArchitecturePlan(plan('floor-test-home',['x','z'],
+  ['kitchen','sleeping']));
+ const audit=auditArchitecturePlanCirculation(r);
+ assert.equal(audit.status,'SOURCE_CLEARANCE_PROBES_PASS');
+ assert.equal(audit.failures.length,0);
+ assert.equal(audit.stairFlights[0].clearSupportedTreads,5);
+ assert.equal(audit.stairFlights[0].sourceUpperLandingPass,true);
+ assert.equal(audit.levels.every(l=>l.partitionSourcePass),true);
+ assert.equal(audit.continuousRealPlayerPathCertified,false);
+ assert.equal(audit.worldWrites,0);
+});
+test('source stair probes HOLD on a new obstruction even if roof/floor stats look good',()=>{
+ const r=compileArchitecturePlan(plan('blocked-stair-home',['x','z']));
+ const changed={...r,design:{...r.design,elements:[
+  ...r.design.elements,
+  {id:'unexpected-upper-stair-obstruction',shape:'box',mode:'add',
+   material:'stone',origin:[3,7,7],size:[2,1,1]}
+ ]}};
+ // Recompile genuine source/geometry so the verifier cannot be bypassed.
+ const rebuilt=compileDesign(changed.design);
+ const probe=auditArchitecturePlanCirculation({...changed,compiled:rebuilt,
+  sourceSha256:rebuilt.sourceSha256,geometrySha256:rebuilt.geometrySha256});
+ assert.equal(probe.status,'HOLD_SOURCE_CIRCULATION');
+ assert.ok(probe.failures.some(x=>x.code==='STAIR_TREAD_BLOCKED_OR_UNSUPPORTED'));
+ assert.equal(probe.continuousRealPlayerPathCertified,false);
 });

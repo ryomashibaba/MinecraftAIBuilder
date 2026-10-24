@@ -7,7 +7,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {compileArchitecturePlan,SCHEMA} from '../source/ai/r125-architecture-plan.mjs';
+import {compileArchitecturePlan,auditArchitecturePlanCirculation,SCHEMA} from '../source/ai/r125-architecture-plan.mjs';
 import {preflightR125Ollama} from './r125-pilot.mjs';
 import {critiqueArchitecture} from '../source/ai/b198c-spatial-critic.mjs';
 import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
@@ -77,6 +77,7 @@ export async function runR125SemanticPilot({model,outDir,prompt=PROMPT,
   originalRawCaptured:false,modelCalls:0,
   planSha256:null,sourceSha256:null,geometrySha256:null,
   sourceVoxelCount:null,sourceHighRiskFindings:null,
+  sourceCirculationStatus:'NOT_TESTED',sourceCirculationFindings:null,
   semanticMatch:'NOT_REVIEWED',humanArt:'NOT_REVIEWED',
   architectureProgramUsability:'NOT_TESTED_IN_MINECRAFT',world:blank()
  };
@@ -123,6 +124,7 @@ export async function runR125SemanticPilot({model,outDir,prompt=PROMPT,
    const product=compileArchitecturePlan(plan);
    const critique=critiqueArchitecture({
     design:product.design,compiled:product.compiled});
+   const circulation=auditArchitecturePlanCirculation(product);
    const gallery=compileB143Gallery([product.design]);
    const tpl=fs.readFileSync(path.join(ROOT,'source/ai/b143-viewer-template.html'),'utf8');
    const html=renderB143Html(gallery,tpl);
@@ -130,6 +132,7 @@ export async function runR125SemanticPilot({model,outDir,prompt=PROMPT,
    put('B143_SOURCE.json',product.design);
    put('B143_SCENE.json',product.compiled);
    put('B198C_GEOMETRY_CRITIQUE.json',critique);
+   put('R125_SOURCE_CIRCULATION_AUDIT.json',circulation);
    put('ZONE_PROGRAM.json',product.program);
    put('index.html',html);
    report.planSha256=product.planSha256;
@@ -137,8 +140,12 @@ export async function runR125SemanticPilot({model,outDir,prompt=PROMPT,
    report.geometrySha256=product.geometrySha256;
    report.sourceVoxelCount=product.compiled.primitives.length;
    report.sourceHighRiskFindings=critique.highRiskCount;
+   report.sourceCirculationStatus=circulation.status;
+   report.sourceCirculationFindings=circulation.failures.length;
    report.status=report.testInjectionPresent?'HOLD_TEST_DOUBLE_NOT_REAL_INFERENCE':
     critique.highRiskCount>0?'HOLD_SOURCE_GEOMETRY':
+    circulation.status!=='SOURCE_CLEARANCE_PROBES_PASS'?
+     'HOLD_SOURCE_CIRCULATION':
      'SOURCE_AND_3D_READY_HUMAN_REVIEW_REQUIRED';
    return report;
   }finally{clearTimeout(timer);}

@@ -112,6 +112,20 @@ export function auditInteriorTopology({design,compiled=compileDesign(design)}){
  }
  const count=standing.size;
  const largest=comps[0]?.stationCount??0;
+ // Per-elevation connectivity, deliberately separate from the LEGACY
+ // global largestComponentShare metric. Roof surfaces and other storeys are
+ // not disconnected fragments merely because they have different Y values.
+ const elevationConnectivity=[...levels.entries()]
+  .map(([standingY,points])=>{
+   const atY=comps.filter(c=>c.standingY===standingY);
+   const biggest=Math.max(0,...atY.map(c=>c.stationCount));
+   return {standingY,totalStandingSquares:points.length,
+    componentCount:atY.length,largestComponentSquares:biggest,
+    largestComponentShare:round(biggest/points.length)};
+  }).sort((a,b)=>a.standingY-b.standingY);
+ const fragmentedElevations=elevationConnectivity.filter(x=>
+  x.totalStandingSquares>=20&&x.componentCount>=2&&
+  x.largestComponentShare<0.5);
  const summary={
   schema:SCHEMA,sourceSha256:compiled.sourceSha256,
   geometrySha256:compiled.geometrySha256,
@@ -121,6 +135,9 @@ export function auditInteriorTopology({design,compiled=compileDesign(design)}){
   sameLevelComponentCount:comps.length,
   largestSameLevelConnectedSquareCount:largest,
   largestComponentShare:count?round(largest/count):0,
+  legacyGlobalShareMustNotDetermineFragmentation:true,
+  elevationConnectivity,
+  fragmentedElevations,
   otherSameLevelComponents:comps.length?comps.length-1:0,
   largestComponents:comps.slice(0,12),
   potentialSingleStepAdjacencies:potentialStepNeighbors/2,
@@ -151,13 +168,11 @@ export function critiqueArchitecture({design,compiled=compileDesign(design)}){
   add('LACKS_USABLE_TWO_WIDE_SOURCE_FLOORS','HIGH',
    {sourceFootprintCount:audit.verifiedTwoWideStandingSquares},
    'Add broad independently supported public floor slabs with at least two empty headroom voxels; retain original supports');
- if(audit.verifiedTwoWideStandingSquares>=20&&
-  audit.largestComponentShare<0.5)
+ if(audit.fragmentedElevations.length>0)
   add('FRAGMENTED_PUBLIC_SOURCE_FLOORS','HIGH',
-   {largest:audit.largestSameLevelConnectedSquareCount,
-    total:audit.verifiedTwoWideStandingSquares,
-    componentShare:audit.largestComponentShare},
-   'Link adjacent same-level galleries with legitimate 2wide supported floors without deleting existing solids');
+   {fragmentedElevations:audit.fragmentedElevations,
+    legacyGlobalShareNotUsed:audit.largestComponentShare},
+   'Link disconnected 2-wide footprints WITHIN each affected elevation. Different floors and roof surfaces are separate by design; verify vertical connections independently.');
  const maxHeight=compiled.bounds.maxY-compiled.bounds.minY+1;
  if(maxHeight>=16&&audit.standingLevelCount>=2&&
   audit.potentialSingleStepAdjacencies===0)

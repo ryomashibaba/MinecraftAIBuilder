@@ -133,3 +133,105 @@ export function compileArchitecturePlan(plan){
   gates:Array(9).fill('BLOCKED')
  };
 }
+
+/**
+ * Verify finite, model-independent SOURCE voxel evidence for this compiler's
+ * program zones and, for two-level plans, every staircase tread and landing.
+ * This is NOT Minecraft physics / walking or structural safety certification.
+ */
+export function auditArchitecturePlanCirculation(product){
+ check(product?.schema==='minecraftaibuilder-r125-plan-to-b143-result-v1'&&
+  product.design&&product.compiled&&Array.isArray(product.program),
+  'INVALID_CIRCULATION_INPUT');
+ check(verifyCompiled(product.design,product.compiled),'STALE_GEOMETRY');
+ const occupied=new Set(product.compiled.primitives.map(v=>
+  v[0]+','+v[1]+','+v[2]));
+ const has=(x,y,z)=>occupied.has(x+','+y+','+z);
+ const inBounds=(x,y,z)=>x>=0&&y>=0&&z>=0&&
+  x<product.design.bounds.width&&y<product.design.bounds.height&&
+  z<product.design.bounds.depth;
+ const stand=(x,footY,z)=>inBounds(x,footY+1,z)&&
+  has(x,footY-1,z)&&!has(x,footY,z)&&!has(x,footY+1,z);
+ const failures=[],levels=[];
+ const miss=(code,where)=>failures.push({code,...where});
+ for(const level of product.program){
+  const y=level.standingFloorY;
+  const witnesses=level.zones.map(zone=>{
+   const box=zone.range;
+   let witness=null;
+   for(let x=box.x[0];x<=box.x[1]&&!witness;x++)
+    for(let z=box.z[0];z<=box.z[1]&&!witness;z++){
+     if(stand(x,y,z)&&stand(x+1,y,z)&&
+       stand(x,y,z+1)&&stand(x+1,y,z+1))witness=[x,y,z];
+    }
+   if(!witness)miss('ZONE_HAS_NO_TWO_WIDE_CLEAR_SOURCE_FLOOR',{
+    level:level.level,zone:zone.id});
+   return {zone:zone.id,twoWideClearWitness:witness};
+  });
+  // Partition openings must expose 2 adjacent columns/rows and have
+  // real supported air on BOTH sides of the partition.
+  const {splitAxis:axis,splitCoordinate:split}=level;
+  let partitionPass=false;
+  if(axis==='x'){
+   for(let z=2;z<product.design.bounds.depth-2;z++)
+    if([split-1,split,split+1].every(x=>stand(x,y,z)&&stand(x,y,z+1))){
+     partitionPass=true;break;
+    }
+  }else{
+   for(let x=2;x<product.design.bounds.width-2;x++)
+    if([split-1,split,split+1].every(z=>stand(x,y,z)&&stand(x+1,y,z))){
+     partitionPass=true;break;
+    }
+  }
+  if(!partitionPass)miss('PARTITION_OPENING_NOT_SUPPORTED_AND_CLEAR',{
+   level:level.level});
+  levels.push({level:level.level,standingFloorY:y,
+   zoneWitnesses:witnesses,partitionSourcePass:partitionPass});
+ }
+ const stairs=product.design.elements.filter(e=>e.shape==='staircase');
+ const flights=[];
+ if(product.program.length===2&&stairs.length!==1)
+  miss('TWO_LEVEL_STAIRS_MISSING',{found:stairs.length});
+ for(const e of stairs){
+  let supportedTreads=0,blockedTreads=0;
+  const across=e.axis==='z'?0:2,along=e.axis==='z'?2:0;
+  const point=(offset,step)=>{const p=e.origin.slice();
+   p[across]+=offset;p[along]+=step*e.treadDepth*e.direction;
+   return p;};
+  for(let step=0;step<e.steps;step++){
+   const [ax,,az]=point(0,step);
+   const top=e.origin[1]+step;
+   let clear=true;
+   for(let acrossOffset=0;acrossOffset<e.width;acrossOffset++)
+    for(let tread=0;tread<e.treadDepth;tread++){
+     const p=point(acrossOffset,step);
+     p[along]+=tread*e.direction;
+     const [x,,z]=p;
+     if(!inBounds(x,top+2,z)||!has(x,top,z)||
+      has(x,top+1,z)||has(x,top+2,z))clear=false;
+    }
+   if(clear)supportedTreads++;else{
+    blockedTreads++;miss('STAIR_TREAD_BLOCKED_OR_UNSUPPORTED',{
+     elementId:e.id,step,at:[ax,top,az]});
+   }
+  }
+  // At the top of a straight run, the next adjacent cell is the required
+  // higher landing slab. Also verify there is air above that landing.
+  let landing=true;
+  for(let i=0;i<e.width;i++){
+   const p=point(i,e.steps);const [x,,z]=p;
+   if(!stand(x,e.origin[1]+e.steps+1,z))landing=false;
+  }
+  if(!landing)miss('STAIR_UPPER_LANDING_MISSING_OR_BLOCKED',{elementId:e.id});
+  flights.push({elementId:e.id,sourceTreadCount:e.steps,
+   clearSupportedTreads:supportedTreads,blockedTreads,
+   sourceUpperLandingPass:landing});
+ }
+ return {schema:'r125-plan-source-circulation-audit-v1',
+  sourceSha256:product.sourceSha256,geometrySha256:product.geometrySha256,
+  status:failures.length?'HOLD_SOURCE_CIRCULATION':'SOURCE_CLEARANCE_PROBES_PASS',
+  failures,levels,stairFlights:flights,
+  onlyDeterministicLocalSourceProbes:true,
+  continuousRealPlayerPathCertified:false,
+  worldWalking:'NOT_TESTED',worldWrites:0};
+}
