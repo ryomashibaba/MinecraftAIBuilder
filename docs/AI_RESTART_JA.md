@@ -18,6 +18,11 @@
 
 
 
+## R125 異用途3件の実モデル再現性比較（2026-10-24 JST）
+- [2用途ワンコマンドパイロット](../scripts/r125-multiuse-pilot.mjs)、[localhost/stub回帰](../scripts/r125-multiuse-pilot.test.mjs)。既に本物のQwen14Bで住宅`Lumina Residence`が生成済みなので、**住宅再推論なし**で保存済みユーザー提供住宅計画のSHA/2620セルを再利用。新規`entry-shop`（平屋の店舗）と`research-studio`（二階建て研究施設）を同じ既存`runR125SemanticPilot`経由で**最大2回**のみ実モデル要求。建物カテゴリによるエンジン振り分けは禁止・同一IR+コンパイラを使用。
+- 実行例（Windows OMENにOllama実模型ある場合）: `node scripts/r125-multiuse-pilot.mjs --model qwen3:14b --out r125-multiuse-001`。必ず既存結果フォルダを上書きせず、店舗・研究施設それぞれの`ARCHITECTURE_PLAN.json`、`B143_SOURCE.json`、`index.html`、QAを保存。`R125_MULTIUSE_REPORT.json`に原文保存、真のmodelCalls、座標/幾何SHA、ソースQA、実行時間、PROVENANCEを集約。fixture-only CIでは実推論成功としない。
+- 本工程では**実店舗・研究施設Qwen推論をまだ行っていない**。PC操作にアクセスできる場合のみ1回の一括コマンドで実測する。施工は引き続き`NOT_PREPARED`／9 BLOCKED／worldWrites 0。CIのテストは構造プロトコル検証であり、3用途の実モデル評価と美術審査を代替しない。
+
 ## R125 セットバック外部動線と床・屋根QA分離（2026-10-24 JST）
 - 実Qwen住宅から派生した3外観案にB198C HIGH 1件ずつあり、比較ギャラリーCI成功＝建築合格ではなかった。新しいセットバック上階のテラスには外部への2幅ドアが欠けているリスクがあるため、`upper-terrace-access`を幾何源でCUTし、床の2wide通過・上下階・着地点を再検査する。
 - B198Cの一般的HIGHは**削除・隠蔽しない**。新しい[ArchitecturePlan用途階QA](../source/ai/r125-architecture-plan.mjs)では、`program[].standingFloorY`の1階/2階を独立に検査し、本当にフロア分断があればHOLD。一方屋根上の段状表面は**EXTERIOR REVIEW REQUIRED**として区別し、安全や美術を自動合格させない。元計画は無変更、Minecraft worldWrites=0。
