@@ -10,8 +10,8 @@
 | 継続ブランチ | `feature/b198zr1-protected-architectural-revision` |
 | 継続PR | [#128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128) — Open / Draft / Unmerged |
 | HEAD | [開発ブランチの最新HEADを毎回GitHubで確認](https://github.com/ryomashibaba/MinecraftAIBuilder/commits/feature/b198zr1-protected-architectural-revision)（R98の初期実メッシュ検証対象は `9a2b5de9d8ba41a2b7ca4e626aa9d54ff4ffffdd`） |
-| 最新確認済み実装工程 | **B198Z-R121：R120 Windows/Ubuntu実源CI両方SUCCESS。R94リブ+0.100が初めてR110頭上Ray7→0（床0・側面0・旧5経路非悪化）、計8源面の研究用形状候補を採択。R121は実源8面の共有辺/頂点維持を検証し、6視点3ペインHTML＋全館・改修・差分OBJと根拠JSONを既存R60 CI成果物に保存する工程。R121実源実行結果は未確定、人間の美術・歩行・構造はHOLD** |
-| 次に取り組む工程 | **R121両OSの実源共有辺・共有頂点検証とR120の6視点×3ペイン成果物の生成・Actions保存を確認。成功時に実OBJ/HTMLを美術審査へ（自動美術合格は不可）。旧R107源床・5経路・採光/書架/座面機能を保護し、実歩行や構造はHOLDのまま** |
+| 最新確認済み実装工程 | **B198Z-R121完了：R120の実源頭上Ray7→0改修候補についてR121のWindows/Ubuntu両OS実メッシュ試験成功。変更8源面の旧共有辺5組／頂点関係9組に接合切れ0件。元全館/候補全館/8面差分OBJ、同じカメラ6視点HTMLと真正検証JSONを両OSのGitHub Actions成果物へ保存済み。人の美術・歩行・構造は未認証、施工HOLD** |
+| 次に取り組む工程 | **R122ではR121のGitHub Actions成果物から元全館/改修全館/8面差分の6視点を実際に見比べ、右R91読書室の採光リブ・長手座面・外観の美術と用途が成立しているかを審査する。SVGは正確な遮蔽レンダリングではないので、必要なら現物3Dに基づく追加視点を作る。実歩行/荷重/人体座面はHOLD** |
 | 施工・モデル | NOT_PREPARED / 9 BLOCKED / BuildPlan空。新たな実Qwen/Gemma禁止。World接続/読取/書込禁止 |
 
 **最新情報への直リンク：** [ブランチの現在地](https://github.com/ryomashibaba/MinecraftAIBuilder/tree/feature/b198zr1-protected-architectural-revision) ／ [Actions一覧](https://github.com/ryomashibaba/MinecraftAIBuilder/actions) ／ [PR #128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128)
@@ -216,7 +216,7 @@
 
 - [R120 Windows/Ubuntu実源CI #40050564935](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40050564935)で4案のうちR94採光リブ+0.100と+0.135が**真正R110の頭上Ray7→0**、床0・側面0・旧5経路非悪化。小変化量+0.100のR120源メッシュSHA256 `f83df1cea30da0e149ccd2159667bb8230cd5b3c1f444a774fdaa24d332588b2` が幾何検証候補。変更源面は4471〜4476,4535,4536の8枚。+0.045/+0.070は7件残留・不採用。
 - [R121実源の建築接合・6視点化](../scripts/b198zr121-r120-source-art-packet.mjs)／[テスト](../scripts/b198zr121-r120-source-art-packet.test.mjs)／[説明](B198ZR121_R120_SOURCE_ART_PACKET_JA.md)。元R107/凍結R98 SHAを再検証し、変わる8枚と旧共有辺/頂点との接続を元メッシュと照合する。R114の元全館/候補全館/変更8面を6方向×同カメラ・実頂点投影で生成。既存R60内の**R121初回だけ**Actions artifactに証拠JSON、6視点HTML、元OBJ、候補OBJ、差分OBJを保存（保持30日）。新workflowなし、手動ユーザーZIPなし。GitHub上にはコード・検査・比較資料を継続保存。
-- **この文書作成時点でR121源面共有辺・美術比較のCI結果は未確定**。R120のRay PASSは実歩行の連続掃引・採光性能・荷重安全性・人の独立美術評価ではない。美術NOT_REVIEWED、工事NOT_PREPARED、9 BLOCKED、BuildPlan空、モデル推論0、ワールド0、ユーザーPC Work0。旧main/Freeze/B143凍結元Qwenを改変せず、PR#128はDraft。
+- **R121実源CIのWindows/Ubuntu両方成功、5組の旧共有辺と9組の旧頂点関係で切れ0件（[Actions #40069281457](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40069281457)）。5ファイルの同内容成果物をOS別にアップロード済み（各約848KB、Actions保持30日）**。R120のRay PASSは実歩行の連続掃引・採光性能・荷重安全性・人の独立美術評価ではない。美術NOT_REVIEWED、工事NOT_PREPARED、9 BLOCKED、BuildPlan空、モデル推論0、ワールド0、ユーザーPC Work0。旧main/Freeze/B143凍結元Qwenを改変せず、PR#128はDraft。
 
 ## 直近CIの注意点（2026-10-23時点。変化したら再確認）
 - [R44 Windows CMD](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39914804614)：46を期待、実ファイル47で `R44_EXACT_SOURCE_COUNT_EXPECTED_46_ACTUAL_47_BASE_37_OVERLAY_10`。ファイル数合わせではなく期待リストと実マニフェストを照合する。
