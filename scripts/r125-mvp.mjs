@@ -64,7 +64,7 @@ export function makeUnboundWorldPreview(compiled){
   targetEdition:'MINECRAFT_EDUCATION',
   localBounds:compiled.bounds,localVoxelCount:compiled.primitives.length,
   palette:MATERIALS,localVoxelDataFile:'B143_SCENE.json',
-  localVoxelDataSha256:cellDigest,
+  localVoxelArraySha256:cellDigest,
   materialCounts:compiled.stats.layerCounts,
   translationAllowed:false,worldId:null,anchor:null,backupRef:null,
   executableOperations:[],checksum:sha(compiled.sourceSha256+':'+cellDigest),
@@ -100,17 +100,16 @@ export async function runR125({prompt,model,outDir,endpoint}={}, {generator=null
   // clone does not issue another request. Preserve the exact decoded assistant
   // content (not an invented JSON reconstruction) before any DSL parsing.
   const text=await response.clone().text();
+  let raw=null;
   if(text.length<=1000000){
-   try{
-    const raw=JSON.parse(text)?.choices?.[0]?.message?.content;
-    if(typeof raw==='string'&&raw.length<=60000){
-     write(dir,'MODEL_RESPONSE_ORIGINAL.txt',raw);
-     rawCaptured=true;
-    }
-   }catch(e){
-    if(e?.code==='EEXIST')throw e;
-    // Malformed HTTP data is independently rejected by the real adapter.
-   }
+   try{raw=JSON.parse(text)?.choices?.[0]?.message?.content;}
+   catch{ /* Invalid HTTP JSON is rejected by the underlying adapter. */ }
+  }
+  if(typeof raw==='string'&&raw.length<=60000){
+   // Disk failure is fatal: never consume and validate a response whose
+   // original evidence could not be preserved.
+   write(dir,'MODEL_RESPONSE_ORIGINAL.txt',raw);
+   rawCaptured=true;
   }
   return response;
  };
