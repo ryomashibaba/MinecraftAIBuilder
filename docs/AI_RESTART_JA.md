@@ -10,13 +10,20 @@
 | 継続ブランチ | `feature/b198zr1-protected-architectural-revision` |
 | 継続PR | [#128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128) — Open / Draft / Unmerged |
 | HEAD | [開発ブランチの最新HEADを毎回GitHubで確認](https://github.com/ryomashibaba/MinecraftAIBuilder/commits/feature/b198zr1-protected-architectural-revision)（R98の初期実メッシュ検証対象は `9a2b5de9d8ba41a2b7ca4e626aa9d54ff4ffffdd`） |
-| 最新確認済み実装工程 | **B198Z-R123実源候補比較がWindows/Ubuntu両OS SUCCESS。R94採光リブの前方位置調整（dx=0/dy=-0.020/dz=+0.010）が上層テラス3477への新規貫通2→0、源床/頭上/側方Ray0、旧5経路非悪化。リブ面積約82%、採光エッジ約81%を保持。ただし読書座面45%と独立美術・実歩行はHOLD** |
-| 次に取り組む工程 | **R124：R123局所幾何候補と元形状を実3Dの室内/外観・複数視点で比較し、約45%へ縮んだ読書座面の用途改善案を検討。再び頭上交差や部材干渉を作らず、美術・読書空間を優先。汎用AI建築生成への展開も計画する** |
+| 最新確認済み実装工程 | **B198Z-R124実装済み・実源結果は未確定。R123有望候補の採光リブ調整を基礎として、元座面45%→65%回復案を3種のR94リブ位置と組み合わせる真正源オフライン比較コードを追加。R60の同一CIで3案の全館OBJ・6視点HTML・JSONを保存予定。現在のR124 Windows/Ubuntu実源 CIは実行待ちのため、幾何改善・美術PASSは未主張** |
+| 次に取り組む工程 | **まずR124実源CI #40074343667 のWindows/Ubuntu両OSと一時Artifactを確認。座面65%復元の交差・頭上Ray・旧5経路の採否を実測に基づき判定。続く工程では読書用途・多視点美術・汎用AI建築生成能力への接続を優先し、局所Ray検査だけを増やし続けない** |
 | 施工・モデル | NOT_PREPARED / 9 BLOCKED / BuildPlan空。新たな実Qwen/Gemma禁止。World接続/読取/書込禁止 |
 
 **最新情報への直リンク：** [ブランチの現在地](https://github.com/ryomashibaba/MinecraftAIBuilder/tree/feature/b198zr1-protected-architectural-revision) ／ [Actions一覧](https://github.com/ryomashibaba/MinecraftAIBuilder/actions) ／ [PR #128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128)
 
 
+
+
+## R124 読書座面の本物の3D回復候補（2026-10-24 JST、結果未確定）
+
+- [R124源モデル試行コード](../scripts/b198zr124-reading-seat-art-study.mjs)・[設計記録](B198ZR124_READING_SEAT_THREE_MESH_REVIEW_JA.md)。R123成功を出発点に、R118の座面55%後退を35%へ緩め、元面積65%回復を狙う。R123採光リブの3位置案との相互干渉を、元の全館4,716面に基づいて比較する。
+- 既存R60 Actions [Run #40074343667](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40074343667)は最終確認で**queued**。未実行の真正源合格/失敗、座面回復成功、OBJ/HTMLアップロード成功は断言しない。実際にArtifactsが揃ってから人の3D審査へ。
+- 旧原本とR123候補は保持、PR #128 Open/Draft/Unmerged、NOT_PREPARED・9 BLOCKED・BuildPlan空、新たな実モデル推論/ワールド操作なし。独立美術NOT_REVIEWED、座席人体利用・荷重・採光・汎用AI生成は未認証。
 
 ## R123実源幾何候補比較（2026-10-24 JST）
 
