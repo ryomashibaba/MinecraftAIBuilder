@@ -61,10 +61,10 @@ export function buildR125ReversibleDryRun({design,scene,baseline,maxOperations=1
   allowedRegion.max.every((n,i)=>n-allowedRegion.min[i]<=64),
   'TEST_REGION');
  ok(validBackupRef(backupRef),'BACKUP_REFERENCE_REQUIRED');
- ok(Array.isArray(blocks)&&blocks.length<=maxOperations,
-  'BASELINE_BLOCK_BUDGET');
  ok(canonical.primitives.length<=maxOperations,
   'PILOT_LIMIT_EXCEEDED');
+ ok(Array.isArray(blocks)&&blocks.length<=maxOperations,
+  'BASELINE_BLOCK_BUDGET');
 
  const target=canonical.primitives.map(p=>{
   const coordinate=[p[0]+anchor[0],p[1]+anchor[1],p[2]+anchor[2]];
