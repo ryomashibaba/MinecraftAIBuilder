@@ -51,7 +51,7 @@ test('one-shot double: B143 compiler, actual local voxels, existing offline view
  assert.equal(src.id,'r125-home-test');
  assert.ok(scene.primitives.length>50);
  assert.equal(candidate.localVoxelCount,scene.primitives.length);
- assert.equal(candidate.localVoxelDataSha256.length,64);
+ assert.equal(candidate.localVoxelArraySha256.length,64);
  assert.equal(candidate.status,'UNBOUND_NO_WORLD_WRITES');
  assert.deepEqual(candidate.executableOperations,[]);
  assert.equal(candidate.worldId,null);
