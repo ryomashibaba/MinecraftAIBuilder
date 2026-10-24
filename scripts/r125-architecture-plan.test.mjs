@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {SCHEMA,validateArchitecturePlan,compileArchitecturePlan,
- auditArchitecturePlanCirculation}
+ auditArchitecturePlanCirculation,assessR125ProgramGeometry}
  from '../source/ai/r125-architecture-plan.mjs';
 import {verifyCompiled,compileDesign} from '../source/ai/b143-building-dsl.mjs';
 import {critiqueArchitecture} from '../source/ai/b198c-spatial-critic.mjs';
@@ -165,4 +165,38 @@ test('unknown form field, unsafe single-story setback, invalid roof rejected',()
  ]){
   assert.throws(()=>compileArchitecturePlan({...original,expression:f}),/R125_PLAN_/);
  }
+});
+
+test('the upper setback is accessible from within through a real 2-wide source opening',()=>{
+ const base=plan('terrace-access-home',['x','z'],['living','sleeping']);
+ base.footprint={width:24,depth:28};
+ for(const side of ['east','rear']){
+  const r=compileArchitecturePlan({...base,
+   expression:{setbackSide:side,setbackDepth:3,
+    roofProfile:'flat',roofAxis:'x',facadeLanguage:'plain'}});
+  assert.ok(r.design.elements.find(e=>e.id==='upper-terrace-access'));
+  const q=critiqueArchitecture({design:r.design,compiled:r.compiled});
+  const report=assessR125ProgramGeometry(r,q);
+  assert.equal(report.programFloorIssues.length,0,
+   JSON.stringify(report.programFloorIssues));
+  assert.equal(q.objectiveAudit.elevationConnectivity.find(x=>
+   x.standingY===7).componentCount,1);
+  assert.equal(auditArchitecturePlanCirculation(r).status,
+   'SOURCE_CLEARANCE_PROBES_PASS');
+ }
+});
+test('program risk cannot be masked using an unrelated roof surface',()=>{
+ const base=plan('separate-terrace-room',['x','z'],['living','sleeping']);
+ base.footprint={width:24,depth:28};
+ const r=compileArchitecturePlan({...base,expression:{
+  setbackSide:'east',setbackDepth:3,roofProfile:'ridge',
+  roofAxis:'x',facadeLanguage:'fins'}});
+ const c=critiqueArchitecture({design:r.design,compiled:r.compiled});
+ const report=assessR125ProgramGeometry(r,c);
+ assert.equal(report.programFloorIssues.length,0,
+  JSON.stringify(report.programFloorIssues));
+ assert.equal(report.worldWalking,'NOT_TESTED');
+ assert.equal(report.worldWrites,0);
+ assert.throws(()=>assessR125ProgramGeometry(r,
+  {...c,sourceSha256:'0'.repeat(64)}),/R125_PLAN_UNTRUSTED_CRITIQUE/);
 });

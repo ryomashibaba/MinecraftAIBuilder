@@ -296,6 +296,15 @@ function compileExpressiveArchitecturePlan(original){
   if(l===0)
    box('exterior-entrance','cut',null,
     [Math.floor(w/2)-1,y,z0],[2,3,1]);
+  // A setback makes a real second-floor terrace. It must not be separated
+  // from the interior by an uninterrupted exterior wall. Cut a 2-wide door
+  // at upper-floor standing height without changing the 1st-floor envelope.
+  if(l===1&&setbackSide==='east')
+   box('upper-terrace-access','cut',null,
+    [x1,y,Math.floor((z0+z1)/2)-1],[1,3,2]);
+  else if(l===1&&setbackSide==='rear')
+   box('upper-terrace-access','cut',null,
+    [Math.floor((x0+x1)/2)-1,y,z1],[2,3,1]);
   const windows=[
    ['front',[x0+2,y+1,z0],[2,2,1]],
    ['rear',[x1-3,y+1,z1],[2,2,1]],
@@ -366,4 +375,55 @@ function compileExpressiveArchitecturePlan(original){
   inGameWalking:'NOT_TESTED',architecturalQuality:'NOT_REVIEWED',
   constructionApproved:false,worldContacts:0,worldWrites:0,
   gates:Array(9).fill('BLOCKED')};
+}
+
+/**
+ * R125 geometry classification is PROGRAM-aware and source-pinned:
+ * conservatively HOLD if any requested standing floor has multiple disconnected
+ * 2-wide components, or if B198C flags any HIGH other than exterior/massing
+ * elevations. Roof surface fragmentation remains separately reported as a
+ * B198C advisory. No release to Minecraft is implied.
+ */
+export function assessR125ProgramGeometry(product,critique){
+ check(product?.schema==='minecraftaibuilder-r125-plan-to-b143-result-v1'&&
+  product.design&&product.compiled&&Array.isArray(product.program)&&
+  verifyCompiled(product.design,product.compiled),'BAD_PROGRAM_GEOMETRY');
+ check(critique?.sourceSha256===product.sourceSha256&&
+  critique?.objectiveAudit?.geometrySha256===product.geometrySha256&&
+  Array.isArray(critique.objectiveAudit.elevationConnectivity)&&
+  Array.isArray(critique.findings),'UNTRUSTED_CRITIQUE');
+ const levels=new Set(product.program.map(x=>x.standingFloorY));
+ const programFloorIssues=[];
+ const exteriorSurfaceAdvisories=[];
+ const reports=critique.objectiveAudit.elevationConnectivity;
+ for(const y of levels){
+  const row=reports.find(x=>x.standingY===y);
+  if(!row||row.componentCount!==1||row.totalStandingSquares<10)
+   programFloorIssues.push({code:'PROGRAM_FLOOR_DISCONNECTED_OR_MISSING',
+    standingY:y,componentCount:row?.componentCount??0});
+ }
+ for(const finding of critique.findings.filter(x=>x.severity==='HIGH')){
+  if(finding.id!=='FRAGMENTED_PUBLIC_SOURCE_FLOORS'||
+   !Array.isArray(finding.evidence?.fragmentedElevations)){
+   programFloorIssues.push({code:'B198C_HIGH_PROGRAM_UNRESOLVED',
+    findingId:finding.id});
+   continue;
+  }
+  const relevant=finding.evidence.fragmentedElevations.filter(x=>levels.has(x.standingY));
+  const exterior=finding.evidence.fragmentedElevations.filter(x=>!levels.has(x.standingY));
+  for(const x of relevant)programFloorIssues.push({
+   code:'FRAGMENTED_PROGRAM_FLOOR',standingY:x.standingY,
+   componentCount:x.componentCount});
+  for(const x of exterior)exteriorSurfaceAdvisories.push({
+   code:'NONPROGRAM_SURFACE_FRAGMENTATION',
+   standingY:x.standingY,componentCount:x.componentCount});
+ }
+ return {schema:'r125-program-floor-risk-v1',
+  sourceSha256:product.sourceSha256,geometrySha256:product.geometrySha256,
+  status:programFloorIssues.length?'HOLD_PROGRAM_FLOORS':
+   exteriorSurfaceAdvisories.length?'PROGRAM_FLOORS_CLEAR_EXTERIOR_REVIEW_REQUIRED':
+    'PROGRAM_FLOORS_CLEAR',
+  programFloorIssues,exteriorSurfaceAdvisories,
+  genericB198CHighRiskCount:critique.highRiskCount,
+  surfaceIsNotPlayerPath:true,worldWrites:0,worldWalking:'NOT_TESTED'};
 }

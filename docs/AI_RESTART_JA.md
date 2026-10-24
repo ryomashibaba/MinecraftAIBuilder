@@ -18,6 +18,10 @@
 
 
 
+## R125 セットバック外部動線と床・屋根QA分離（2026-10-24 JST）
+- 実Qwen住宅から派生した3外観案にB198C HIGH 1件ずつあり、比較ギャラリーCI成功＝建築合格ではなかった。新しいセットバック上階のテラスには外部への2幅ドアが欠けているリスクがあるため、`upper-terrace-access`を幾何源でCUTし、床の2wide通過・上下階・着地点を再検査する。
+- B198Cの一般的HIGHは**削除・隠蔽しない**。新しい[ArchitecturePlan用途階QA](../source/ai/r125-architecture-plan.mjs)では、`program[].standingFloorY`の1階/2階を独立に検査し、本当にフロア分断があればHOLD。一方屋根上の段状表面は**EXTERIOR REVIEW REQUIRED**として区別し、安全や美術を自動合格させない。元計画は無変更、Minecraft worldWrites=0。
+
 ## R125 表現拡張の実3D比較ギャラリー（2026-10-24 JST）
 - [オフライン比較生成](../scripts/r125-expression-gallery.mjs)と[独立検証](../scripts/r125-expression-gallery.test.mjs)を追加。実Qwen14Bの`Lumina Residence`原文24×28を固定し、元の1案＋共通幾何エンジンの表現パラメータを変えた**3派生案**を、既存B143の一つの4場面オフラインHTMLビューにまとめる。
 - 元案だけが**Qwen14B実創作の意味設計**。派生3案は**AIを再実行した結果ではなく、AIの元計画を入力した共通エンジンの能力比較**。混同しないようJSONにprovenanceを記録。素材・外観・ボクセル・ソースSHA・構造診断・美術未審査を個別保存。

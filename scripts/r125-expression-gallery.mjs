@@ -6,7 +6,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {compileArchitecturePlan,auditArchitecturePlanCirculation}
+import {compileArchitecturePlan,auditArchitecturePlanCirculation,
+ assessR125ProgramGeometry}
  from '../source/ai/r125-architecture-plan.mjs';
 import {critiqueArchitecture} from '../source/ai/b198c-spatial-critic.mjs';
 import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
@@ -53,6 +54,7 @@ export function buildR125ExpressionComparison(){
   const r=compileArchitecturePlan(p);
   const circulation=auditArchitecturePlanCirculation(r);
   const qa=critiqueArchitecture({design:r.design,compiled:r.compiled});
+  const programRisk=assessR125ProgramGeometry(r,qa);
   sources.push(r.design);
   plans.push(p);
   rows.push({
@@ -62,6 +64,10 @@ export function buildR125ExpressionComparison(){
    actualB143SourceVerified:true,
    newLLMInvocation:false,
    highRiskSourceFindings:qa.highRiskCount,
+   highRiskIds:qa.findings.filter(x=>x.severity==='HIGH').map(x=>x.id),
+   programFloors:programRisk.status,
+   programFloorIssues:programRisk.programFloorIssues,
+   nonProgramExteriorAdvisories:programRisk.exteriorSurfaceAdvisories,
    sourceCirculation:circulation.status,
    actualMinecraftWalking:'NOT_TESTED',
    humanAestheticReview:'NOT_REVIEWED',worldWrites:0
