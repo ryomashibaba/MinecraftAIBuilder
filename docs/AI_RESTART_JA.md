@@ -11,13 +11,20 @@
 | 継続PR | [#128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128) — Open / Draft / Unmerged |
 | HEAD | [開発ブランチの最新HEADを毎回GitHubで確認](https://github.com/ryomashibaba/MinecraftAIBuilder/commits/feature/b198zr1-protected-architectural-revision)（R98の初期実メッシュ検証対象は `9a2b5de9d8ba41a2b7ca4e626aa9d54ff4ffffdd`） |
 | 最新確認済み実装工程 | **B198Z-R124 実源Windows/UbuntuテストSUCCESS。ただし65%読書座面の3案すべて頭上Ray5件でHOLD。PR/CIのPASSは建築品質PASSではない。R124は資料保存・回帰基準として保持し、以後の主開発対象から図書館を外す** |
-| 次に取り組む工程 | **まずR124源CIとArtifactの現物を確定（座面65%案は頭上Ray5件でHOLD）。以降の主工程はR125：特定図書館依存からの離脱、Mac小型LLM（2B級）による未知用途の基本建築生成→汎用3Dエンジン→Minecraft試験施工の最短実動線へ転換** |
+| 次に取り組む工程 | **R125：既存B143＋B198G/Hを使う最短MVP。実Qwen/Gemma→新規非図書館建築の真正3D→安全なMinecraft Education試験施工の未接続部分を確認・実装。8GB Mac小型LLM目標を同時に設計**。詳細は [R125計画](R125_THIN_VERTICAL_SLICE_PLAN_JA.md) |
 | 施工・モデル | **2026-10-24 Qwen/Gemma実推論・Minecraft試験施工の包括許可あり（都度承認不要）。** 準備性と各種技術安全ゲートは別途必要。現行コードのNOT_PREPARED / 9 BLOCKEDは自動PASSではない |
 
 **最新情報への直リンク：** [ブランチの現在地](https://github.com/ryomashibaba/MinecraftAIBuilder/tree/feature/b198zr1-protected-architectural-revision) ／ [Actions一覧](https://github.com/ryomashibaba/MinecraftAIBuilder/actions) ／ [PR #128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128)
 
 
 
+
+## 2026-10-24 確定新方針 — 最短実用化戦略 v2
+- **最優先で読む:** [戦略 v2](PROJECT_STRATEGY_V2_JA.md) / [R125 実装計画](R125_THIN_VERTICAL_SLICE_PLAN_JA.md)。以前の長期R125〜R304案は工程数前提として撤回した。最初に既存B143/B198G/Hをつないで実モデル→真正3D→試験施工を成立させる。
+- **図書館を主工程から外す。** R124の座面回復3案は両OSで頭上Ray5件、建築候補HOLD。履歴として保存し次の修正対象にはしない。
+- **Mac小型モデル先行:** 8GB級Apple Siliconと2B級4bitが基本建築の目標。LLMはコンパクトな構想/ゾーン/機能関係を作り、汎用幾何エンジンが実座標を組み立てる。モデルやMacの成功率/処理時間は未実測。
+- **Qwen/Gemma・Minecraft試験施工は包括許可済み。** ただし試験ワールドの識別、バックアップ、範囲保護、停止/復元、対応版などの技術安全ゲートは維持し、B143のデザイン専用BuildPlan空を自動施工に読み替えない。
+- **現時点で新戦略の実モデル運用・試験施工は未実施**。本コミットは方針・計画・入口の更新であり、実装の動作証明ではない。
 
 ## 2026-10-24 最優先方針変更 — 包括実験許可とMac軽量LLM基準
 
