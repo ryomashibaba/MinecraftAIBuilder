@@ -53,7 +53,7 @@ test('two story lab includes shaft, stair wedge, usable upper floors and real vo
  assert.equal(includes(v,3,5,7),true); // upper stair tread is one below slab
  assert.equal(includes(v,3,6,8),true); // floor landing next to tread
  assert.equal(includes(v,9,6,9),true); // second floor supported
- assert.equal(includes(v,10,7,9),false); // headroom
+ assert.equal(includes(v,10,7,10),false); // headroom away from partition
  assert.equal(includes(v,9,11,9),true); // roof
  assert.equal(r.compiled.readiness,'NOT_PREPARED');
  assert.deepEqual(r.compiled.BuildPlan.operations,[]);

@@ -20,6 +20,8 @@ on:
       - 'scripts/r125-offline-replay.test.mjs'
       - 'source/ai/r125-architecture-plan.mjs'
       - 'scripts/r125-architecture-plan.test.mjs'
+      - 'scripts/r125-semantic-pilot.mjs'
+      - 'scripts/r125-semantic-pilot.test.mjs'
       - '.github/workflows/b198g-quality.yml'
 permissions:
   contents: read
@@ -53,7 +55,9 @@ jobs:
           node --check scripts/r125-offline-replay.test.mjs
           node --check source/ai/r125-architecture-plan.mjs
           node --check scripts/r125-architecture-plan.test.mjs
-          node --test scripts/r125-mvp.test.mjs scripts/r125-world-diff.test.mjs scripts/r125-pilot.test.mjs scripts/r125-offline-replay.test.mjs scripts/r125-architecture-plan.test.mjs
+          node --check scripts/r125-semantic-pilot.mjs
+          node --check scripts/r125-semantic-pilot.test.mjs
+          node --test scripts/r125-mvp.test.mjs scripts/r125-world-diff.test.mjs scripts/r125-pilot.test.mjs scripts/r125-offline-replay.test.mjs scripts/r125-architecture-plan.test.mjs scripts/r125-semantic-pilot.test.mjs
       - name: Keep the original Minecraft world offline
         run: |
           node --check source/ai/b198g-autonomous-quality.mjs

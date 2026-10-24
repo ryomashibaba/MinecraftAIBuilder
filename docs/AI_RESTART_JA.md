@@ -18,6 +18,11 @@
 
 
 
+## R125 実Qwen → 短いArchitecturePlan → 真正3D、単一入口（2026-10-24 JST）
+- [実ローカル意味設計パイロット](../scripts/r125-semantic-pilot.mjs) と [オフライン+localhost HTTP回帰](../scripts/r125-semantic-pilot.test.mjs) を追加。Ollamaの実モデル名をexact照合し、**1回だけ**OpenAI互換loopback呼出し(`reasoning_effort:none`, `max_tokens:1536`, 120秒)で短いArchitecturePlanを生成。厳格なIRバリデータ→B143の真正voxel→B198Cの独立ソースQA→既存3D HTMLビューまで自動作成。URLは明示的`127.0.0.1`以外不可。
+- CLI（**OMENに既存Ollamaモデルがある環境のみ**）:`node scripts/r125-semantic-pilot.mjs --model qwen3:14b --out r125-semantic-house-001`。出力に`MODEL_RESPONSE_ORIGINAL.txt`、`ARCHITECTURE_PLAN.json`、`B143_SOURCE.json`、`B143_SCENE.json`、`ZONE_PROGRAM.json`、`index.html`と独立検査・REPORT。失敗時は原文を保存可能な限り保存してHOLD。出力先既存は拒否。ダミーテストの原文を「実Qwen成功」に読み替えない。
+- この工程のGitHub Actions検査は**fixture / localhost test**であり、初回実Qwen14Bがこの短いIRを生成した実績とは区別する。設計図の美術性やMinecraftプレイヤーの実歩行は未検証、World BuildPlanは空/9 BLOCKED。MVP施工完了ではない。
+
 ## R125 最小意味設計（ArchitecturePlan）の真正3D化（2026-10-24 JST）
 - [R125共有エンジン](../source/ai/r125-architecture-plan.mjs) と [独立真正ボクセルQA](../scripts/r125-architecture-plan.test.mjs)を新設。固定した建物の「住宅・店・研究所」は一切入力せず、モデル（または呼出し元）が**用途・室名、水平分割の向き、占有率、階数、外形寸法、素材**を短いIRで選び、汎用エンジンが厳密B143を生成する。
 - 初期能力は**16〜32幅×奥行、1〜2階、各階2機能ゾーン**に限定。共通で支持床・頭上空気・外壁・仕切り開口・外部玄関開口・壁をくり抜いた窓とガラス・屋根を生成。2階の場合は階段5段（踏面深さ1）の真正ウェッジ、上階床の5セル長シャフト、着地点を組み合わせる。全てコンパイル・ソースSHAで検証し、`BuildPlan=[]`／9 BLOCKEDを維持。
