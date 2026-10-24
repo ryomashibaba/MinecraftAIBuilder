@@ -110,7 +110,8 @@ export async function runR125Pilot({model,outDir,endpoint=DEFAULT_LOCAL_ENDPOINT
    let candidate;
    try{
     candidate=await runSingle({prompt:item.prompt,model,
-     endpoint,outDir:path.join(dir,item.id),timeoutMs:300000});
+     endpoint,outDir:path.join(dir,item.id),timeoutMs:180000,
+     reasoningEffort:'none',maxOutputTokens:4096});
     if(!candidate||candidate.modelId!==model||
      !['EXPLICIT_LOCAL_LOOPBACK','INJECTED_TEST_DOUBLE'].includes(candidate.provider))
      fail('UNTRUSTED_RUN_RECEIPT');
@@ -142,6 +143,10 @@ export async function runR125Pilot({model,outDir,endpoint=DEFAULT_LOCAL_ENDPOINT
    report.modelGenerationCalls+=candidate.modelCallCount??0;
    if(candidate.provider!=='EXPLICIT_LOCAL_LOOPBACK'){
     report.status='HOLD_TEST_DOUBLE_NOT_REAL_INFERENCE';
+    break;
+   }
+   if(candidate.status==='HOLD_MODEL_TIMEOUT'){
+    report.status='HOLD_MODEL_TIMEOUT';
     break;
    }
    if(candidate.status==='HOLD_GENERATION_OR_REVIEW'&&

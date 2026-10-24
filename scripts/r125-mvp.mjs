@@ -80,12 +80,15 @@ export function makeUnboundWorldPreview(compiled){
  * The real path uses exactly one local model request and captures the raw
  * message.content string BEFORE B198A/B143 validation, even on DSL failure.
  */
-export async function runR125({prompt,model,outDir,endpoint,timeoutMs=120000}={}, {generator=null}={}){
+export async function runR125({prompt,model,outDir,endpoint,timeoutMs=120000,
+ reasoningEffort=undefined,maxOutputTokens=undefined}={}, {generator=null}={}){
  if(!validPrompt(prompt)||!validModel(model)||typeof outDir!=='string'||!outDir.trim())
   fail('INVALID_REQUEST');
  // Adapter validates endpoint before first HTTP call; do not create evidence
  // in an existing directory and never overwrite a prior original capture.
  if(generator!==null&&typeof generator!=='function')fail('INVALID_TEST_GENERATOR');
+ if(!Number.isSafeInteger(timeoutMs)||timeoutMs<1000||timeoutMs>900000)
+  fail('TIMEOUT_BOUNDS');
  if(fs.existsSync(outDir))fail('OUTPUT_ALREADY_EXISTS');
  const live=generator===null;
  const dir=path.resolve(outDir);
@@ -93,7 +96,10 @@ export async function runR125({prompt,model,outDir,endpoint,timeoutMs=120000}={}
  const start=Date.now();
  write(dir,'REQUEST.json',{prompt,model,endpoint:endpoint??'DEFAULT_LOCAL_LOOPBACK',
   provider:live?'EXPLICIT_LOCAL_LOOPBACK':'INJECTED_TEST_DOUBLE',
-  modelQuantization:'UNKNOWN_NOT_VERIFIED',captureStartedAt:new Date().toISOString()});
+  modelQuantization:'UNKNOWN_NOT_VERIFIED',
+  timeoutMs,reasoningEffort:reasoningEffort??'PROVIDER_DEFAULT',
+  maxOutputTokens:maxOutputTokens??'PROVIDER_DEFAULT',
+  captureStartedAt:new Date().toISOString()});
  let rawCaptured=false,modelCalls=0;
  const fetchAndCapture=async(url,options)=>{
   const response=await fetch(url,options);
@@ -115,7 +121,8 @@ export async function runR125({prompt,model,outDir,endpoint,timeoutMs=120000}={}
  };
  try{
   const adapter=generator??createB198GLocalModelAdapter({
-   model,timeoutMs,...(endpoint?{endpoint}:{}),fetcher:fetchAndCapture
+   model,timeoutMs,reasoningEffort,maxOutputTokens,
+   ...(endpoint?{endpoint}:{}),fetcher:fetchAndCapture
   });
   const counted=async request=>{
    modelCalls++;
@@ -155,12 +162,19 @@ export async function runR125({prompt,model,outDir,endpoint,timeoutMs=120000}={}
   write(dir,'R125_REPORT.json',report);
   return report;
  }catch(error){
+  const elapsedMs=Date.now()-start;
+  const reason=String(error?.message??error).slice(0,450);
+  // B198A wraps an AbortError; only call this a timeout when it occurs at
+  // the configured deadline, not merely because a response was rejected.
+  const timedOut=live&&Math.abs(elapsedMs-timeoutMs)<2500&&
+   /(?:operation was aborted|AbortError|aborted)/i.test(reason);
   const report={schema:'minecraftaibuilder-r125-first-slice-v1',
-   status:'HOLD_GENERATION_OR_REVIEW',
-   reason:String(error?.message??error).slice(0,450),
+   status:timedOut?'HOLD_MODEL_TIMEOUT':'HOLD_GENERATION_OR_REVIEW',
+   reason,timeoutMs,reasoningEffort:reasoningEffort??'PROVIDER_DEFAULT',
+   maxOutputTokens:maxOutputTokens??'PROVIDER_DEFAULT',
    provider:live?'EXPLICIT_LOCAL_LOOPBACK':'INJECTED_TEST_DOUBLE',
    originalRawCaptured:rawCaptured,modelId:model,modelCallCount:modelCalls,
-   elapsedMs:Date.now()-start,world:worldBlock(),
+   elapsedMs,world:worldBlock(),
    sourceReview:'HOLD',realVoxel3D:'NOT_ESTABLISHED',
    artisticReview:'NOT_REVIEWED',minecraftWalkability:'NOT_TESTED'};
   write(dir,'R125_REPORT.json',report);

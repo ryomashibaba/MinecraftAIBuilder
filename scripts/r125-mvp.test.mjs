@@ -139,3 +139,33 @@ test('loopback truncated JSON retains original response but produces HOLD',async
  assert.equal(fs.readFileSync(path.join(out,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8'),bad);
  assert.equal(fs.existsSync(path.join(out,'B143_SCENE.json')),false);
 });
+
+
+test('pilot inference settings appear in exact OpenAI request and evidence receipt',async t=>{
+ const base=temp();t.after(()=>fs.rmSync(base,{recursive:true,force:true}));
+ const original=JSON.stringify(response());let sent;
+ const server=http.createServer((req,res)=>{
+  let body='';
+  req.on('data',x=>body+=x);
+  req.on('end',()=>{
+   sent=JSON.parse(body);
+   res.writeHead(200,{'Content-Type':'application/json'});
+   res.end(JSON.stringify({choices:[{message:{content:original},finish_reason:'stop'}]}));
+  });
+ });
+ await new Promise((resolve,reject)=>server.listen(0,'127.0.0.1',e=>
+  e?reject(e):resolve()));
+ t.after(()=>server.close());
+ const out=path.join(base,'bounded');
+ const r=await runR125({prompt:request,model:'qwen3.8:27b',outDir:out,
+  endpoint:'http://127.0.0.1:'+server.address().port+'/v1/chat/completions',
+  timeoutMs:180000,reasoningEffort:'none',maxOutputTokens:4096});
+ assert.equal(r.modelCallCount,1);
+ assert.equal(sent.reasoning_effort,'none');
+ assert.equal(sent.max_tokens,4096);
+ const req=read(out,'REQUEST.json');
+ assert.equal(req.timeoutMs,180000);
+ assert.equal(req.reasoningEffort,'none');
+ assert.equal(req.maxOutputTokens,4096);
+ assert.equal(r.world.worldWrites,0);
+});

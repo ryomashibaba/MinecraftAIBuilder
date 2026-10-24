@@ -66,7 +66,9 @@ test('three distinct live-labelled receipts remain uncategorized aesthetics/worl
   fetcher:tags(['gemma4:26b']),
   runSingle:async args=>{
    prompts.push(args.prompt);
-   assert.equal(args.timeoutMs,300000);
+   assert.equal(args.timeoutMs,180000);
+   assert.equal(args.reasoningEffort,'none');
+   assert.equal(args.maxOutputTokens,4096);
    return {provider:'EXPLICIT_LOCAL_LOOPBACK',modelId:args.model,
     modelCallCount:1,status:'HOLD_SOURCE_GEOMETRY',sourceReview:'B143_COMPILED_VERIFIED',
     sourceSha256:'c'.repeat(64),geometrySha256:'d'.repeat(64),

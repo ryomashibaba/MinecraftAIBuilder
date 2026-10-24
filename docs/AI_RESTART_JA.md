@@ -18,6 +18,11 @@
 
 
 
+## R125実Qwen初回タイムアウトと改善（2026-10-24 JST）
+- ユーザーOMENで`qwen3.8:27b`を**実呼出し1回**実施。Ollama `/api/tags`モデル確認とリポジトリ取得は成功。住宅例は`HOLD_LOCAL_TRANSPORT`／本体`B198A_CANDIDATE_REJECTED_AFTER_1_ATTEMPTS_This operation was aborted`／`elapsedMs=300032`。これは**既存の300秒deadlineでAbortした直接証拠**。モデルが内部でどこまで推論したか・CPU/GPUオフロード・速度は未確認。元応答は未着で`originalRawCaptured=false`／真正3Dなし／worldWrites=0／9 BLOCKED。
+- 同じ27Bで300秒待つ試行を繰り返さない。OllamaのOpenAI互換APIにある `reasoning_effort:'none'` + `max_tokens:4096` を**R125 pilot経路のみ**で指定し、上限180秒へ変更。これらは推論軽量化・生成長さ上限の診断条件であり、成功保証ではない。旧B198Gアダプタ通常運用には設定を強制せず、任意オプションのみ追加。モデル設定は`REQUEST.json`に残す。モデルが未対応なら通常エラー/再タイムアウトの可能性を示す。
+- 次のユーザー操作は**まず`ollama ps`と`ollama list`でProcessor/GPUオフロードと小型モデルの有無を取得するだけ**。現段階で重い27Bを再生成しない。R125単独の正確な締切Abortは`HOLD_MODEL_TIMEOUT`で区別する。実Minecraft・美術・Mac8GBは一切未検証。
+
 ## R125 実LLM初回測定の省操作化（2026-10-24 JST）
 - [1コマンドのローカル実験入口](../scripts/r125-pilot.mjs) と [独立テスト](../scripts/r125-pilot.test.mjs) を追加。Ollama `GET /api/tags` の**読取専用**検出で正確なモデル名を照合し、存在しなければ**生成POST 0**でHOLD。モデル存在はGPU推論成功や真正プロバイダ証明ではない。
 - 通過した場合、初期設定で非図書館の**小さな二階建て住宅1件**、`--cases 3` 指定で店舗・小研究施設を含む計3件を**異なる自然言語要求で独立生成**。既存R125→B198G/B143→真正ボクセル→3Dレビューと失敗の原文保存を使い、住宅テンプレートや部材固定ルータを新設しない。推論応答の上限はこの実験入口に限り300秒（既存単独R125は120秒）とし、低速環境の途中打切りを減らす。テスト用関数注入を使った実験結果は、たとえプロバイダ名が実モデル風でも`HOLD_TEST_DOUBLE_NOT_REAL_INFERENCE`として保存し実LLM成功にはしない。出力 `R125_PILOT_REPORT.json` に件数・モデルID・Source / 3D / Human art / Minecraft / Macを分離。自動リトライ、モデル自動切替、課金API、Minecraft書込なし。

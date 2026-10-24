@@ -33,7 +33,7 @@ const SYSTEM=[
 
 export function createB198GLocalModelAdapter({
  model,endpoint=DEFAULT_LOCAL_ENDPOINT,fetcher=fetch,timeoutMs=120000,
- plannedSourceMode=false
+ plannedSourceMode=false,reasoningEffort=undefined,maxOutputTokens=undefined
 }={}){
  if(typeof model!=='string'||!MODEL_RE.test(model))
   refuse('EXPLICIT_MODEL_ID_REQUIRED');
@@ -44,6 +44,11 @@ export function createB198GLocalModelAdapter({
  if(typeof plannedSourceMode!=='boolean')refuse('INVALID_PLANNED_MODE');
  if(!Number.isSafeInteger(timeoutMs)||timeoutMs<1000||timeoutMs>900000)
   refuse('TIMEOUT_BOUNDS');
+ if(reasoningEffort!==undefined&&!['none','low','medium','high'].includes(reasoningEffort))
+  refuse('INVALID_REASONING_EFFORT');
+ if(maxOutputTokens!==undefined&&(!Number.isSafeInteger(maxOutputTokens)||
+  maxOutputTokens<256||maxOutputTokens>16384))
+  refuse('INVALID_MAX_OUTPUT_TOKENS');
  return async function sourceGenerator({
   mode,prompt,previousDesign=null,feedback=[],attempt=1,maxAttempts=2
  }={}){
@@ -65,6 +70,8 @@ export function createB198GLocalModelAdapter({
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({model,stream:false,temperature:0.35,
      response_format:{type:'json_object'},
+     ...(reasoningEffort!==undefined?{reasoning_effort:reasoningEffort}:{}),
+     ...(maxOutputTokens!==undefined?{max_tokens:maxOutputTokens}:{}),
      messages:[{role:'system',content:plannedSourceMode?
       SYSTEM.replace('Return ONLY a JSON object with EXACT keys design, explanation, assumptions.',
        'Return ONLY a JSON object with EXACT keys design, explanation, assumptions, spatialPlan.')+
