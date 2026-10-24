@@ -10,8 +10,8 @@
 | 継続ブランチ | `feature/b198zr1-protected-architectural-revision` |
 | 継続PR | [#128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128) — Open / Draft / Unmerged |
 | HEAD | [開発ブランチの最新HEADを毎回GitHubで確認](https://github.com/ryomashibaba/MinecraftAIBuilder/commits/feature/b198zr1-protected-architectural-revision)（R98の初期実メッシュ検証対象は `9a2b5de9d8ba41a2b7ca4e626aa9d54ff4ffffdd`） |
-| 最新確認済み実装工程 | **B198Z-R118：R117両OS実源SUCCESSで庇4474の7交差が庇改修後すべて読書座面4476へ移ると判明。R118で書架/庇一体上昇＋連続座面の手前縁を後退させる4形状を作成し、R60の3Dレビュー/両OS CIと接続。実測で採否確定までは元建築HOLD／美術・人体歩行未認証** |
-| 次に取り組む工程 | **R118実メッシュのWindows/Ubuntuログで4候補の残存座面奥行き、頭上Ray・床・横断・元5通路非悪化を確認。実測改善時のみR114の同カメラ3ペイン×6視点で建築美術を評価。人体の座面寸法と接合支持は依然未認証** |
+| 最新確認済み実装工程 | **B198Z-R119：R118両OS実源CI成功だが全4座面候補が頭上7→7でHOLD。35%は源4476＋4535、55%以上は4535だけが残った。R119は4535の実源kindを検証した上で2番目の連続読書座面帯を追加後退する3D候補を実装。両OSの実測判定待ち、現行建築HOLD／美術・人体歩行未認証** |
+| 次に取り組む工程 | **R119の両OS真正3D試験で源4535のkind・ベンチ接合・2座面帯後退後の全first-hit、足元27点、既存5経路を検査。R118と同様に条件付きでのみ研究用実3D案を採択し6視点美術審査へ。非合格なら源番号を特定してHOLDを続ける** |
 | 施工・モデル | NOT_PREPARED / 9 BLOCKED / BuildPlan空。新たな実Qwen/Gemma禁止。World接続/読取/書込禁止 |
 
 **最新情報への直リンク：** [ブランチの現在地](https://github.com/ryomashibaba/MinecraftAIBuilder/tree/feature/b198zr1-protected-architectural-revision) ／ [Actions一覧](https://github.com/ryomashibaba/MinecraftAIBuilder/actions) ／ [PR #128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128)
@@ -197,6 +197,13 @@
 - [R118実3D修正](../scripts/b198zr118-reading-seat-clearance.mjs)／[テスト](../scripts/b198zr118-reading-seat-clearance.test.mjs)／[資料](B198ZR118_READING_SEAT_CLEARANCE_JA.md)。R115高窓の実源庇4面＋R93源4476に共辺で連なる連続座面帯を保持し、座面手前縁の35/55/70/82%後退を試験する。座面そのものを削除せず、背面の書架と足元の真正床・入口・外殻は非変更。残存座面幅0.0085以上（研究用正規化量）・旧幅17%以上を要求。美術/人間に使えるサイズは未認証。
 - 既存R60レビューにR118 JSON/OBJを追加。真正床9×幅3と実源Ray・旧5通路の非悪化に合格し頭上7件が減った候補だけ形状採択。採択時のみR114の元全館/候補全館/局所変更面の3ペイン6視点を生成。CI quickは通常push/PR、重いR118 sourceは指定push一度だけ、既存手動fullにも追加。**本引き継ぎ作成時点ではR118候補の採否・CI結果は未確認。**
 - 人体歩行・座り心地・構造・Minecraft実使用・Qwen/Gemma汎用モデル能力は未認証、c01はコード独立研究。NOT_PREPARED／9 BLOCKED／BuildPlan空／モデル推論0／ワールド接続・読取・書込・施工0／ローカルWork0。PR #128 Draft・main/Freeze/B143原本保持。
+
+## R119：2箇所目の読書座面源4535を比較（2026-10-24 JST）
+
+- [R118実源CI #40039411668](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40039411668)はWindows/Ubuntu両方SUCCESS、ただし4案とも頭上7→7でHOLD。座面後退35%ならfirst-hit源4476＋4535、55/70/82%なら源4535のみ。床欠落0・横方向交差0・旧5経路非悪化。
+- [R119実源2座面案](../scripts/b198zr119-two-reading-bay-setback.mjs)／[テスト](../scripts/b198zr119-two-reading-bay-setback.test.mjs)／[工程資料](B198ZR119_TWO_BAY_SEAT_CLEARANCE_JA.md)。R115庇上昇とR118元座面4476の55%後退を行った上で、4535が本当にR93連続座面であり、独立の真正共辺帯である場合のみ第二帯を35/55/70/82%後退。座面・床・開口・書架を消さず、源面kindと四隅、残存奥行きを保護。元R107/R98原本は不変。差分は庇／書架頂／座面だけに制限し、実Rayと既存5経路の非悪化で採否。
+- R119 source JSON/OBJと採択時の3ペイン6視点を既存R60レビューへ統合。**この文書の時点でR119実メッシュCI・採否は未確定**。過去のCI PASSは形状改善・人体通行・美術完成を意味しない。
+- NOT_PREPARED、9 BLOCKED、BuildPlan空、Qwen/Gemma実推論0、ワールド接続/読取/書込/施工0、Work0。main/Freeze/B143元モデル保持、PR#128 Draft。
 
 ## 直近CIの注意点（2026-10-23時点。変化したら再確認）
 - [R44 Windows CMD](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39914804614)：46を期待、実ファイル47で `R44_EXACT_SOURCE_COUNT_EXPECTED_46_ACTUAL_47_BASE_37_OVERLAY_10`。ファイル数合わせではなく期待リストと実マニフェストを照合する。

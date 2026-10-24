@@ -21,10 +21,10 @@ const bench=k=>k==='right_R93_CONTINUOUS_READING_SEAT_LEDGE_NOT_OCCUPANCY_CERTIF
 const floor=k=>k.startsWith('right_R87_CONTIGUOUS_PROGRAM_TERRACE')||
  k.startsWith('right_R94_UNFURNISHED_TRUE_TERRACE_THRESHOLD');
 const permitted=(k,phase)=>phase==='R111'?floor(k):
- (phase==='R115'||phase==='R118')?(canopy(k)||bookwall(k)||
-  phase==='R118'&&bench(k)):canopy(k);
+ (phase==='R115'||phase==='R118'||phase==='R119')?(canopy(k)||bookwall(k)||
+  (phase==='R118'||phase==='R119')&&bench(k)):canopy(k);
 export function buildR114ThreePaneReview(before,after,{phase,focus=[.54,.55,-.69]}={}){
- if(!['R111','R112','R113','R115','R118'].includes(phase)||!Array.isArray(before)||
+ if(!['R111','R112','R113','R115','R118','R119'].includes(phase)||!Array.isArray(before)||
   !Array.isArray(after)||before.length!==after.length||before.length<1||
   !finite(focus))
   fail('TWO_EQUAL_LENGTH_REAL_SOURCE_VARIANTS_REQUIRED');
