@@ -14,6 +14,8 @@ on:
       - 'scripts/r125-mvp.test.mjs'
       - 'scripts/r125-world-diff.mjs'
       - 'scripts/r125-world-diff.test.mjs'
+      - 'scripts/r125-pilot.mjs'
+      - 'scripts/r125-pilot.test.mjs'
       - '.github/workflows/b198g-quality.yml'
 permissions:
   contents: read
@@ -41,7 +43,9 @@ jobs:
         run: |
           node --check scripts/r125-mvp.mjs
           node --check scripts/r125-mvp.test.mjs
-          node --test scripts/r125-mvp.test.mjs scripts/r125-world-diff.test.mjs
+          node --check scripts/r125-pilot.mjs
+          node --check scripts/r125-pilot.test.mjs
+          node --test scripts/r125-mvp.test.mjs scripts/r125-world-diff.test.mjs scripts/r125-pilot.test.mjs
       - name: Keep the original Minecraft world offline
         run: |
           node --check source/ai/b198g-autonomous-quality.mjs

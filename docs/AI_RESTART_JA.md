@@ -18,6 +18,12 @@
 
 
 
+## R125 実LLM初回測定の省操作化（2026-10-24 JST）
+- [1コマンドのローカル実験入口](../scripts/r125-pilot.mjs) と [独立テスト](../scripts/r125-pilot.test.mjs) を追加。Ollama `GET /api/tags` の**読取専用**検出で正確なモデル名を照合し、存在しなければ**生成POST 0**でHOLD。モデル存在はGPU推論成功や真正プロバイダ証明ではない。
+- 通過した場合、初期設定で非図書館の**小さな二階建て住宅1件**、`--cases 3` 指定で店舗・小研究施設を含む計3件を**異なる自然言語要求で独立生成**。既存R125→B198G/B143→真正ボクセル→3Dレビューと失敗の原文保存を使い、住宅テンプレートや部材固定ルータを新設しない。出力 `R125_PILOT_REPORT.json` に件数・モデルID・Source / 3D / Human art / Minecraft / Macを分離。自動リトライ、モデル自動切替、課金API、Minecraft書込なし。
+- ローカルPC実行例（リポジトリの最新版を取得済みでNode.js/Ollamaが起動している場合のみ）：`node scripts/r125-pilot.mjs --model qwen3.8:27b --out r125-live-001`。デフォルトは1モデル要求、追加試験 `--cases 3` は必要に応じて使用。既存PR #128に保存したプログラムはChatからユーザーPCへ自動実行できないため、**実Qwen/Gemma推論・実Minecraft・Mac測定は未実施**。
+- 既存B198G CIは模擬タグ/モデル応答のみ。ローカル実モデルの結果が得られたら大型B143直接JSONの可否・失敗原因を確認し、証拠が出た場合だけMac 2B向け短いArchitecturePlan IRへ進む。世界書込は引き続き9 BLOCKED。
+
 ## R125 試験ワールド差分橋の研究段階（2026-10-24 JST）
 - [オフライン差分生成器](../scripts/r125-world-diff.mjs)／[専用回帰](../scripts/r125-world-diff.test.mjs) を追加。真正B143 source + compiler sceneを再検証し、**正確に指定されたテストworldId/座標範囲/バックアップ参照/配置前セル一覧**が揃った場合だけ、1024セル以下の記号的な配置差分と逆順復元差分を作成。B143の空BuildPlanは変更しない。
 - この差分は**Minecraftコマンドではなく、実ワールドへの書込も実行も不可**。入力スナップショットの真正性、World ID、復元バックアップ、Educationの実ブロックID、環境内動線は未証明。出力`HOLD_WORLD_SNAPSHOT_UNVERIFIED`、9 BLOCKED、`executionAllowed=false`、0ワールド操作を維持。偽の「バックアップ済み」や偽のreadbackを成功として扱わない。
