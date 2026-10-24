@@ -18,13 +18,17 @@ const finite=p=>Array.isArray(p)&&p.length===3&&p.every(Number.isFinite);
 const canopy=k=>k==='right_R93_ANGLED_LANTERN_CANOPY_ART_STUDY';
 const bookwall=k=>k==='right_R93_LANTERN_BOOKWALL_NOT_CERTIFIED';
 const bench=k=>k==='right_R93_CONTINUOUS_READING_SEAT_LEDGE_NOT_OCCUPANCY_CERTIFIED';
+const rib=k=>k==='right_R94_SUSPENDED_LIGHT_RIB_NOT_HEADROOM_CERTIFIED'||
+ k==='right_R94_DAYLIGHT_EDGE_NOT_GUARD';
 const floor=k=>k.startsWith('right_R87_CONTIGUOUS_PROGRAM_TERRACE')||
  k.startsWith('right_R94_UNFURNISHED_TRUE_TERRACE_THRESHOLD');
 const permitted=(k,phase)=>phase==='R111'?floor(k):
- (phase==='R115'||phase==='R118'||phase==='R119')?(canopy(k)||bookwall(k)||
-  (phase==='R118'||phase==='R119')&&bench(k)):canopy(k);
+ (phase==='R115'||phase==='R118'||phase==='R119'||phase==='R120')?
+ (canopy(k)||bookwall(k)||
+  ['R118','R119','R120'].includes(phase)&&bench(k)||
+  phase==='R120'&&rib(k)):canopy(k);
 export function buildR114ThreePaneReview(before,after,{phase,focus=[.54,.55,-.69]}={}){
- if(!['R111','R112','R113','R115','R118','R119'].includes(phase)||!Array.isArray(before)||
+ if(!['R111','R112','R113','R115','R118','R119','R120'].includes(phase)||!Array.isArray(before)||
   !Array.isArray(after)||before.length!==after.length||before.length<1||
   !finite(focus))
   fail('TWO_EQUAL_LENGTH_REAL_SOURCE_VARIANTS_REQUIRED');

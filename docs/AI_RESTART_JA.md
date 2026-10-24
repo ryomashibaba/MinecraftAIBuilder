@@ -10,8 +10,8 @@
 | 継続ブランチ | `feature/b198zr1-protected-architectural-revision` |
 | 継続PR | [#128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128) — Open / Draft / Unmerged |
 | HEAD | [開発ブランチの最新HEADを毎回GitHubで確認](https://github.com/ryomashibaba/MinecraftAIBuilder/commits/feature/b198zr1-protected-architectural-revision)（R98の初期実メッシュ検証対象は `9a2b5de9d8ba41a2b7ca4e626aa9d54ff4ffffdd`） |
-| 最新確認済み実装工程 | **B198Z-R119：R118両OS実源CI成功だが全4座面候補が頭上7→7でHOLD。35%は源4476＋4535、55%以上は4535だけが残った。R119は4535の実源kindを検証した上で2番目の連続読書座面帯を追加後退する3D候補を実装。両OSの実測判定待ち、現行建築HOLD／美術・人体歩行未認証** |
-| 次に取り組む工程 | **R119の両OS真正3D試験で源4535のkind・ベンチ接合・2座面帯後退後の全first-hit、足元27点、既存5経路を検査。R118と同様に条件付きでのみ研究用実3D案を採択し6視点美術審査へ。非合格なら源番号を特定してHOLDを続ける** |
+| 最新確認済み実装工程 | **B198Z-R120：R119 Windows/Ubuntu CI両方SUCCESS。源4535は2つ目の座面ではなくR94吊り下げ採光リブと判明し、R119は正しくHOLD。R120でR115屋根上昇＋R118座面55%後退＋R94源採光リブ4535と採光エッジ4536の一体上昇4案を設計。R120実源両OS判定待ち・現行建築HOLD・美術未審査** |
+| 次に取り組む工程 | **R120の源R94採光リブ改修4案のWindows/Ubuntu実メッシュRay・旧5経路・屋根マージンを確認。真の頭上Ray改善があった案だけR114の全館/差分3ペイン×6視点で審査。別部材への衝突移動なら新源に即した対応。美術/人体歩行/構造はHOLD** |
 | 施工・モデル | NOT_PREPARED / 9 BLOCKED / BuildPlan空。新たな実Qwen/Gemma禁止。World接続/読取/書込禁止 |
 
 **最新情報への直リンク：** [ブランチの現在地](https://github.com/ryomashibaba/MinecraftAIBuilder/tree/feature/b198zr1-protected-architectural-revision) ／ [Actions一覧](https://github.com/ryomashibaba/MinecraftAIBuilder/actions) ／ [PR #128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128)
@@ -204,6 +204,13 @@
 - [R119実源2座面案](../scripts/b198zr119-two-reading-bay-setback.mjs)／[テスト](../scripts/b198zr119-two-reading-bay-setback.test.mjs)／[工程資料](B198ZR119_TWO_BAY_SEAT_CLEARANCE_JA.md)。R115庇上昇とR118元座面4476の55%後退を行った上で、4535が本当にR93連続座面であり、独立の真正共辺帯である場合のみ第二帯を35/55/70/82%後退。座面・床・開口・書架を消さず、源面kindと四隅、残存奥行きを保護。元R107/R98原本は不変。差分は庇／書架頂／座面だけに制限し、実Rayと既存5経路の非悪化で採否。
 - R119 source JSON/OBJと採択時の3ペイン6視点を既存R60レビューへ統合。**この文書の時点でR119実メッシュCI・採否は未確定**。過去のCI PASSは形状改善・人体通行・美術完成を意味しない。
 - NOT_PREPARED、9 BLOCKED、BuildPlan空、Qwen/Gemma実推論0、ワールド接続/読取/書込/施工0、Work0。main/Freeze/B143元モデル保持、PR#128 Draft。
+
+## R120：原因は2番目のベンチではなくR94吊り下げ採光リブ（2026-10-24 JST）
+
+- [R119実メッシュCI #40049744767](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40049744767)は両OS成功。初めて真のsource **4535 = `right_R94_SUSPENDED_LIGHT_RIB_NOT_HEADROOM_CERTIFIED`** と三角形頂点XYZを実測（座面ではない）。R119は2つ目の座面を削らずHOLD。因果の順序はR93庇4474→R93ベンチ4476→R94採光リブ4535。元R93庇と座面の元建築は保持。
+- [R120実形状](../scripts/b198zr120-r94-suspended-light-rib-relief.mjs)／[テスト](../scripts/b198zr120-r94-suspended-light-rib-relief.test.mjs)／[設計](B198ZR120_R94_LIGHT_RIB_JA.md)。R115の庇＋書架頂実源上昇0.16、R118のベンチ前縁55%後退、R94吊り下げ採光リブ4535と連続採光エッジ4536の屋内頂上昇+0.045/0.070/0.100/0.135を**同一3Dメッシュ**で比較。屋外側の取り付け点、R94入口柱、座面、実床は保護。頂点の共用、面積・屋根余白の拒否を実装。
+- 旧R107/R98 SHA、真の床9×幅3点、源Ray床0・側面0・頭上7減少、旧5源通路の非悪化が全て必要。採択時のみR60既存JSON/OBJとR114同カメラ3ペイン×6視点へ。既存R60にquick、初回push限定のsource-test、手動full回帰を統合。**本時点でR120実源CI・形状採否未確定**。
+- c01はQwen生成能力ではない。美術/人の通行/構造/実ゲームはNOT_REVIEWED/HOLD、NOT_PREPARED／9 BLOCKED／BuildPlan空／追加推論0／ワールド接続/読取/書込/施工0／Work0。main/Freeze/B143原本保護、PR #128 Draft継続。
 
 ## 直近CIの注意点（2026-10-23時点。変化したら再確認）
 - [R44 Windows CMD](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/39914804614)：46を期待、実ファイル47で `R44_EXACT_SOURCE_COUNT_EXPECTED_46_ACTUAL_47_BASE_37_OVERLAY_10`。ファイル数合わせではなく期待リストと実マニフェストを照合する。
