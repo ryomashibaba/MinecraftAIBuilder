@@ -20,3 +20,29 @@
 
 ## 安全
 NOT_PREPARED / constructionApproved=false / executionAllowed=false / 9 BLOCKED / BuildPlan.operations=[]。追加モデル推論0、Minecraft世界操作0、ユーザーPC Work0、原本上書き0、PR #128 Open/Draft/Unmerged。
+
+
+## 実源Windows/Ubuntuの確定結果（2026-10-24 JST）
+
+[既存R60 Windows/Ubuntu両OS SUCCESS — GitHub Actions #40073301165](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40073301165)の実ジョブログで、R123一度だけの真正源再構成テスト実施・PASSを確認した。これは単なるfast smokeではない。
+
+| R123候補 | R120に対する変更（正規化座標） | 新規異部材の厳密貫通 | 床/頭上/側方Ray | 元5経路非悪化 | 幾何候補 |
+|---|---|---:|---|---|---|
+| forward-relief-original-span | dx=0, dy=-0.020, dz=+0.010 | 0 | 0/0/0 | true | ○ |
+| forward-relief-moderate-span | dx=+0.020, dy=-0.020, dz=+0.010 | 0 | 0/0/0 | true | ○ |
+| forward-relief-narrow-span | dx=+0.035, dy=-0.020, dz=+0.010 | 0 | 未測定 | 未測定 | ×：リブ面積比0.473が0.5条件未満 |
+| high-near-wall-fin | dx=+0.050, dy=0, dz=0 | 0 | 0/0/0 | true | ○ |
+
+R120に対して最小の位置修正量で、採光部の面積も最も保てる候補は **forward-relief-original-span**。リブ面積比0.8238191、採光エッジ面積比0.8101761。選定の局所幾何SHA256は
+
+`c9c4a31acae3676a5b7fb1062d808186b9b1b8f9f3ff26b9cc79bd7ae940bddb`
+
+であり、Windows/Ubuntuで同一。R122で新規と確認された4535/4536↔3477を再検出したうえで、候補の「元形状対比の新規厳密貫通0」を確認。R121の旧共有接合を破壊せず、R110の9地点×3幅の実源被覆を保持し、床・頭上・側方0、旧5通路の非悪化を確認した。
+
+**採択は局所幾何比較の段階だけであり、建築の採用ではない。** 元R107は実装上の faces として保持され、候補は possibleCandidate に分離。特に、R120時点で読書座面が45%へ退縮していること、0.160持上げた庇/書架の美術、実人体滞在・歩行、上層テラスの用途、採光、荷重、全館自己交差・共面接触は依然HOLD/未認証。
+
+## 次の判断（R124）
+
+R123で「新規の異部材貫通」を回避する幾何案が3つ出たため、同じ局所Ray試験を増やし続けない。次は有望候補の**実3D多視点外観・室内視点**と、読書座面の奥行き45%による実用性低下の設計判断を優先する。読書座面を戻せばR117/R118の頭上Rayが悪化し得るため、単独の座面復元を「改善」としない。元資料を保護して候補として比較する。美術は人の審査がない限りNOT_REVIEWEDのまま。
+
+汎用AIが自由な建築を創造する最上位目標への接続を次段階の計画に含め、手作りした図書館の局所Ray最適化のみで開発を継続しない。

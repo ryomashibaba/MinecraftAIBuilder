@@ -10,12 +10,18 @@
 | 継続ブランチ | `feature/b198zr1-protected-architectural-revision` |
 | 継続PR | [#128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128) — Open / Draft / Unmerged |
 | HEAD | [開発ブランチの最新HEADを毎回GitHubで確認](https://github.com/ryomashibaba/MinecraftAIBuilder/commits/feature/b198zr1-protected-architectural-revision)（R98の初期実メッシュ検証対象は `9a2b5de9d8ba41a2b7ca4e626aa9d54ff4ffffdd`） |
-| 最新確認済み実装工程 | **B198Z-R122実3D監査：R121の真正OBJによりR94リブ4535/採光エッジ4536と未変更上層テラス3477の新規交差2組を確認。座面幅・面積は元の約45%。R120は限定Ray改善候補として保持するが建築採用HOLD。人の美術審査NOT_REVIEWED** |
-| 次に取り組む工程 | **R123：新規交差4535/4536↔3477を解く最小実形状比較。旧Ray、共有接合、読書座面、入口と窓、上階の美術非悪化を確認。無効ならHOLD。汎用AI建築創造の最上位目標は維持** |
+| 最新確認済み実装工程 | **B198Z-R123実源候補比較がWindows/Ubuntu両OS SUCCESS。R94採光リブの前方位置調整（dx=0/dy=-0.020/dz=+0.010）が上層テラス3477への新規貫通2→0、源床/頭上/側方Ray0、旧5経路非悪化。リブ面積約82%、採光エッジ約81%を保持。ただし読書座面45%と独立美術・実歩行はHOLD** |
+| 次に取り組む工程 | **R124：R123局所幾何候補と元形状を実3Dの室内/外観・複数視点で比較し、約45%へ縮んだ読書座面の用途改善案を検討。再び頭上交差や部材干渉を作らず、美術・読書空間を優先。汎用AI建築生成への展開も計画する** |
 | 施工・モデル | NOT_PREPARED / 9 BLOCKED / BuildPlan空。新たな実Qwen/Gemma禁止。World接続/読取/書込禁止 |
 
 **最新情報への直リンク：** [ブランチの現在地](https://github.com/ryomashibaba/MinecraftAIBuilder/tree/feature/b198zr1-protected-architectural-revision) ／ [Actions一覧](https://github.com/ryomashibaba/MinecraftAIBuilder/actions) ／ [PR #128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128)
 
+
+
+## R123実源幾何候補比較（2026-10-24 JST）
+
+- [R123候補比較・詳細](B198ZR123_R94_RIB_TERRACE_TRIALS_JA.md)：[Windows/Ubuntu SOURCE CI #40073301165](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40073301165) は**両方SUCCESS**。R122の新規貫通2組を実源で再現後、先端の前方調整候補で新規貫通0、R110床/頭上/側方0、旧5経路非悪化。3案が局所幾何候補、1案は残存リブ面積の条件で不採用。候補SHAは `c9c4a31acae3676a5b7fb1062d808186b9b1b8f9f3ff26b9cc79bd7ae940bddb`。
+- **元実メッシュは不変・建築合格HOLD**。R123候補は先端2面の差分。既存座面は45%に縮小したまま。独立美術NOT_REVIEWED、人体の歩行・荷重・採光・全館自己交差・Minecraft実使用・AI自身の汎用創造力は未認証。次のR124は読書空間と多視点美術へ。
 
 ## R122実3D監査（2026-10-24 JST）
 
