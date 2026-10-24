@@ -128,6 +128,8 @@ on:
       - 'scripts/b198zr121-r120-source-art-packet.test.mjs'
       - 'scripts/b198zr123-r94-rib-terrace-alternatives.mjs'
       - 'scripts/b198zr123-r94-rib-terrace-alternatives.test.mjs'
+      - 'scripts/b198zr124-reading-seat-art-study.mjs'
+      - 'scripts/b198zr124-reading-seat-art-study.test.mjs'
       - '.github/workflows/r60-evidence-bound-visual-review-offline.yml'
   pull_request:
     paths:
@@ -255,6 +257,8 @@ on:
       - 'scripts/b198zr121-r120-source-art-packet.test.mjs'
       - 'scripts/b198zr123-r94-rib-terrace-alternatives.mjs'
       - 'scripts/b198zr123-r94-rib-terrace-alternatives.test.mjs'
+      - 'scripts/b198zr124-reading-seat-art-study.mjs'
+      - 'scripts/b198zr124-reading-seat-art-study.test.mjs'
       - '.github/workflows/r60-evidence-bound-visual-review-offline.yml'
 permissions:
   contents: read
@@ -300,6 +304,7 @@ jobs:
           node --test --test-concurrency=2 --test-name-pattern="R120 quick: real rib peak" scripts/b198zr120-r94-suspended-light-rib-relief.test.mjs
           node --test --test-concurrency=2 --test-name-pattern="R121 quick: preserve shared source edge" scripts/b198zr121-r120-source-art-packet.test.mjs
           node --test --test-concurrency=2 --test-name-pattern="R123 quick:" scripts/b198zr123-r94-rib-terrace-alternatives.test.mjs
+          node --test --test-concurrency=2 --test-name-pattern="R124 quick:" scripts/b198zr124-reading-seat-art-study.test.mjs
           node --test --test-concurrency=2 --test-name-pattern="R100 quick: actual shoulder triangles cure" scripts/b198zr100-source-gallery-shoulders.test.mjs
           node --test --test-concurrency=2 --test-name-pattern="R60 refuses corrupt original SHA|R60 refuses a synthetic R48|R89 deterministic planar length|R95 clipped wall subtracts true surface area|R96 requires actual shell source points" scripts/b198zr60-evidence-bound-visual-review.test.mjs scripts/b198zr84-multilevel-bookstack-review.test.mjs scripts/b198zr95-atrium-daylight-portals.test.mjs scripts/b198zr96-window-structure-and-light-study.test.mjs
       - name: R115 one-time true R93 clerestory source regression on both OS
@@ -326,6 +331,19 @@ jobs:
         if: github.event_name == 'push' && contains(github.event.head_commit.message, 'R120 one-time true R94 rib')
         run: |
           node --test --test-concurrency=2 --test-name-pattern="R120 real: source R94 suspended light rib" scripts/b198zr120-r94-suspended-light-rib-relief.test.mjs
+      - name: R124 one-time source 65-percent seat and three-mesh art packet
+        if: github.event_name == 'push' && contains(github.event.head_commit.message, 'R124 one-time true-source reading seat')
+        env:
+          R124_ARTIFACT_DIR: r124-artifacts
+        run: |
+          node --test --test-concurrency=2 --test-name-pattern="R124 real: source-based reading seat" scripts/b198zr124-reading-seat-art-study.test.mjs
+      - uses: actions/upload-artifact@v4
+        if: github.event_name == 'push' && contains(github.event.head_commit.message, 'R124 one-time true-source reading seat')
+        with:
+          name: r124-reading-seat-three-mesh-${{ matrix.os }}
+          path: r124-artifacts/
+          if-no-files-found: error
+          retention-days: 30
       - name: R123 one-time real R94 daylight rib terrace clearance comparison
         if: github.event_name == 'push' && contains(github.event.head_commit.message, 'R123 one-time rib reposition')
         run: |
