@@ -10,6 +10,8 @@ on:
       - 'source/ai/b198g-local-model-adapter.mjs'
       - 'scripts/b198g-local-design.mjs'
       - 'scripts/b198g-local-adapter.test.mjs'
+      - 'scripts/r125-mvp.mjs'
+      - 'scripts/r125-mvp.test.mjs'
       - '.github/workflows/b198g-quality.yml'
 permissions:
   contents: read
@@ -33,6 +35,11 @@ jobs:
             scripts/b198f-evidence.test.mjs \
             scripts/b198g-autonomous-quality.test.mjs \
             scripts/b198g-local-adapter.test.mjs
+      - name: R125 one-shot local-HTTP fixture, real B143 voxels, fail-closed world gates
+        run: |
+          node --check scripts/r125-mvp.mjs
+          node --check scripts/r125-mvp.test.mjs
+          node --test scripts/r125-mvp.test.mjs
       - name: Keep the original Minecraft world offline
         run: |
           node --check source/ai/b198g-autonomous-quality.mjs
