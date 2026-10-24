@@ -28,6 +28,7 @@ on:
       - 'scripts/r125-multiuse-pilot.test.mjs'
       - 'scripts/r125-real-multiuse-replay.test.mjs'
       - 'source/ai/r125-source-routes.mjs'
+      - 'source/ai/r125-entrance-repair.mjs'
       - 'source/ai/r125-functional-layer.mjs'
       - 'scripts/r125-functional-layer.test.mjs'
       - 'scripts/fixtures/r125-qwen14b-shop-20261024.json'
@@ -77,6 +78,7 @@ jobs:
           node --check scripts/r125-multiuse-pilot.test.mjs
           node --check scripts/r125-real-multiuse-replay.test.mjs
           node --check source/ai/r125-source-routes.mjs
+          node --check source/ai/r125-entrance-repair.mjs
           node --check source/ai/r125-functional-layer.mjs
           node --check scripts/r125-functional-layer.test.mjs
           node --test scripts/r125-mvp.test.mjs scripts/r125-world-diff.test.mjs scripts/r125-pilot.test.mjs scripts/r125-offline-replay.test.mjs scripts/r125-architecture-plan.test.mjs scripts/r125-semantic-pilot.test.mjs scripts/r125-real-plan-replay.test.mjs scripts/r125-expression-gallery.test.mjs scripts/r125-multiuse-pilot.test.mjs scripts/r125-real-multiuse-replay.test.mjs scripts/r125-functional-layer.test.mjs

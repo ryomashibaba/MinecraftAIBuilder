@@ -6,24 +6,39 @@ import {compileDesign} from '../source/ai/b143-building-dsl.mjs';
 import {auditR125SourceRoutes} from '../source/ai/r125-source-routes.mjs';
 import {applyR125FeatureIntent,SCHEMA as FEATURES}
  from '../source/ai/r125-functional-layer.mjs';
+import {proposeR125ThresholdRepair}
+ from '../source/ai/r125-entrance-repair.mjs';
 const fixture=id=>JSON.parse(fs.readFileSync(new URL(
  './fixtures/r125-qwen14b-'+id+'-20261024.json',import.meta.url),'utf8'));
 const originalHouse=()=>JSON.parse(fs.readFileSync(new URL(
  './fixtures/r125-qwen14b-residential-2024a.json',import.meta.url),'utf8'));
-test('actual three user-supplied Qwen designs: interior entrance reaches all functional zones in SOURCE graph',()=>{
+test('three original Qwen designs uncover the REAL entrance conflict without rewriting source; bounded derived repair restores continuous source routes',()=>{
  const plans=[originalHouse(),fixture('shop'),fixture('research')];
  const expected=[2620,933,2936];
+ const statuses=['HOLD_SOURCE_ROUTES','SOURCE_ROUTES_REACH_ALL_ZONES','HOLD_SOURCE_ROUTES'];
  for(let i=0;i<plans.length;i++){
   const base=compileArchitecturePlan(plans[i]);
+  const frozen=JSON.stringify(base.design);
   assert.equal(base.compiled.primitives.length,expected[i]);
-  const a=auditR125SourceRoutes(base);
-  assert.equal(a.status,'SOURCE_ROUTES_REACH_ALL_ZONES',JSON.stringify(a.issues));
-  assert.equal(a.zones.length,plans[i].levels.length*2);
-  assert.ok(a.reachedPadCount>40);
-  assert.equal(a.continuousRealPlayerPathCertified,false);
-  assert.equal(a.worldWrites,0);
-  if(plans[i].levels.length===2)
-   assert.ok(a.zones.some(z=>z.level===1&&z.reachedFromEntrance));
+  const before=auditR125SourceRoutes(base);
+  assert.equal(before.status,statuses[i],JSON.stringify(before.issues));
+  const proposal=proposeR125ThresholdRepair(base);
+  assert.equal(proposal.routeAudit.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert.equal(proposal.routeAudit.zones.length,plans[i].levels.length*2);
+  assert.ok(proposal.routeAudit.reachedPadCount>40);
+  assert.equal(proposal.routeAudit.continuousRealPlayerPathCertified,false);
+  assert.equal(proposal.worldWrites,0);
+  assert.equal(JSON.stringify(base.design),frozen);
+  if(i===1){
+   assert.equal(proposal.sourceChanged,false);
+   assert.equal(proposal.revisedSourceSha256,base.sourceSha256);
+  }else{
+   assert.equal(proposal.sourceChanged,true);
+   assert.ok(proposal.changedVoxelCoordinates>0);
+   assert.equal(proposal.changeFootprintConfinedToTwoDoorCutRegions,true);
+   assert.notEqual(proposal.revisedSourceSha256,base.sourceSha256);
+   assert.ok(proposal.routeAudit.zones.some(z=>z.level===1&&z.reachedFromEntrance));
+  }
  }
 });
 test('new obstruction through the only internal doorway must HOLD even with clear zone floor witnesses',()=>{
@@ -52,8 +67,10 @@ test('real shop and research accept category-independent equipment intent withou
    {id:'record-console',zoneId:'data-recording',role:'equipment-bank',corner:'far-right'}
   ]]
  ]){
-  const p=fixture(id),base=compileArchitecturePlan(p);
-  const frozen=JSON.stringify(base.design);
+  const p=fixture(id),original=compileArchitecturePlan(p);
+  const frozen=JSON.stringify(original.design);
+  const repaired=proposeR125ThresholdRepair(original);
+  const base=repaired.candidate;
   const intent={schema:FEATURES,basePlanSha256:base.planSha256,objects};
   const out=applyR125FeatureIntent({base,intent});
   assert.equal(out.placements.length,objects.length);
@@ -63,8 +80,8 @@ test('real shop and research accept category-independent equipment intent withou
   assert.equal(out.compiled.BuildPlan.operations.length,0);
   assert.equal(out.worldWrites,0);
   assert.deepEqual(out.gates,Array(9).fill('BLOCKED'));
-  assert.equal(JSON.stringify(base.design),frozen);
-  assert.equal(base.compiled.primitives.length,id==='shop'?933:2936);
+  assert.equal(JSON.stringify(original.design),frozen);
+  assert.equal(original.compiled.primitives.length,id==='shop'?933:2936);
  }
 });
 test('feature contract rejects unknown commands, stale sources and duplicate IDs',()=>{
