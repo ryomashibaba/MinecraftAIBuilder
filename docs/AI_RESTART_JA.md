@@ -18,6 +18,12 @@
 
 
 
+## R125 Qwen14B保存原文の多層診断（2026-10-24 JST）
+- ユーザー提供済みの本物の `MODEL_RESPONSE_ORIGINAL.txt`（住宅1件、3,384文字）を確認。B198A最初の失敗は `assumptions` が文字列（正規形は文字列配列）。それ以外に、**design.idのアンダースコア、全15部材で`type:"add"`と`mode`欠如、階段にmaterial欠如・局所z範囲超過**がある。二階床のy=0,1、入口/窓の追加ソリッド、詰まったroomボックス等も人間利用空間として問題。真正3Dには未到達。**この原文から形式だけを直して建築合格とはしない**。
+- 既存B198G system指示に**B143のmode/material/id/bounds/空室・開口・階分離の契約**を明示。変換器と厳格検査は緩和せず、固定住宅テンプレートは導入しない。
+- [原文オフライン再診断](../scripts/r125-offline-replay.mjs) は同じ保存テキストを**改変・AI再呼出し・施工せず**解析し、B198Aの最初の実際の失敗と多数の独立形式/空間上のリスクを個別に記録。実行例：`node scripts/r125-offline-replay.mjs --raw "r125-qwen14b-20261024-181344/home-two-level/MODEL_RESPONSE_ORIGINAL.txt" --out "r125-qwen14b-diagnosis.json"`。結果は新規ファイルのみ。原文自体を自動修復して再ビルドする機能ではない。
+- 次の優先課題は**建築を発想するLLMと正確な3D部材・床・開口・階段を作る共通エンジンを分離する短いArchitecturePlan IR**の小規模原型。数十工程の追加や同一住宅の無限修正はしない。世界書込0／試験施工未実施。
+
 ## R125 Qwen14Bの設計原文・前提条件形式の確認（2026-10-24 JST）
 - ユーザーOMENで実モデル`qwen3:14b`を1回実行し、住宅ケースは**64,579msでモデル応答を保存**（`originalRawCaptured=true`）。ただし`B198A_CANDIDATE_REJECTED_AFTER_1_ATTEMPTS_B198A_UNTRUSTED_ASSUMPTIONS`のため、ソースおよび3Dは未検証／未生成。これはタイムアウトではない。
 - B198Aの契約は`assumptions`を**0〜12件の文字列配列、各250字以下**に制限。B198G system promptにこの型・長さの説明が不足していたので明示し、通常の厳格B198A検証は**緩和しない**。模型の類型固定も行わない。
