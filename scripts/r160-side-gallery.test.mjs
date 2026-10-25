@@ -21,7 +21,11 @@ const rel=(base,entry='zone-3',pairs=[['zone-1','zone-2']])=>({
  schema:R139,basePlanSha256:base.planSha256,
  entryFacingZoneId:entry,directAdjacencies:pairs});
 const safe=r=>{
- assert.equal(r.readiness,'NOT_PREPARED');
+ // The legacy R125 featured-source object has no readiness field; it is
+ // an intermediate, never a BuildPlan or construction-ready result.
+ if(r.schema==='minecraftaibuilder-r125-featured-source-v1')
+  assert.equal(r.readiness,undefined);
+ else assert.equal(r.readiness,'NOT_PREPARED');
  assert.equal(r.constructionApproved,false);assert.equal(r.executionAllowed,false);
  assert.deepEqual(r.gates,Array(9).fill('BLOCKED'));
  assert.deepEqual(r.BuildPlan.operations,[]);
