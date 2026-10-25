@@ -5,6 +5,8 @@ import {makeR134FreshRequest}
 import {parseR139RelationalFurnishedReply,RELATIONAL_INSTRUCTIONS}
  from './r139-relational-model.mjs';
 
+import {parseR135FreshFurnishedReply}
+ from './r135-furnished-program.mjs';
 const request=makeR134FreshRequest({brief:
  'Invent a small independent learning and fabrication workspace with distinct use areas.'});
 const reply=()=>({
@@ -49,4 +51,19 @@ test('legacy reply without a genuine relation object cannot claim model-selected
  const forged=reply();forged.relations.entryFacingZoneId='not-a-room';
  assert.throws(()=>parseR139RelationalFurnishedReply(
   JSON.stringify(forged),request),/R139_RELATIONS_INVALID_ENTRY_ZONE/);
+});
+
+test('R141: cramped legacy strip furniture cannot block genuinely viable graph-first layout',()=>{
+ const response=reply();
+ response.footprint.depth=24;
+ const {relations,...legacy}=response;
+ assert.throws(()=>parseR135FreshFurnishedReply(
+  JSON.stringify(legacy),request),/R125_FEATURE_|R135_FURNISHED_/);
+ const graph=parseR139RelationalFurnishedReply(JSON.stringify(response),request);
+ assert.equal(graph.legacyStripFurnitureNotRequired,true);
+ assert.equal(graph.relationalBase.directAdjacencyDoorEvidence.length,2);
+ assert.equal(graph.featured.placements.length,4);
+ assert.equal(graph.featured.sourceRouteAudit.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(graph.worldWrites,0);
+ assert.deepEqual(graph.gates,Array(9).fill('BLOCKED'));
 });
