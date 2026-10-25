@@ -156,6 +156,8 @@ const R160_SYSTEM=R151_SYSTEM.replace(
  'When spatialTopology is west-gallery/east-gallery, layout.spaces MUST contain EXACTLY 3 rooms.',
  'For side galleries choose EXACTLY ONE directAdjacencies pair of room ids.',
  'A 4-room layout MUST choose central-spine; no silently dropped fourth room.',
+ 'layout.axis MUST be the SINGLE STRING "z" (not an object, not the layoutAxisMeaning legend).',
+ 'The meaning legend describes coordinate directions; copy NEITHER its keys nor its object into layout.axis.',
  'The host compiles real B143 walls, doors and circulation without model voxel coordinates.',
  'Host compiler derives actual usable tall rooms and stepped roofs from the room weights and locations.',
  'Upper exterior-facing room walls receive genuine glazed clerestory daylight; enclosed walls do not.',
