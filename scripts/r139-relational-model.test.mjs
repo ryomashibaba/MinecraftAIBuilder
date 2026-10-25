@@ -341,3 +341,53 @@ test('R168: opt-in grid research makes TWO model shared-node direct links throug
  assert.deepEqual(result.architectural.completed.BuildPlan.operations,[]);
  assert.equal(result.worldWrites,0);
 });
+
+
+test('R169: synthetic four-room eight-fixture observatory arrangement keeps original functional furniture when optional detailing threatens true service routes',()=>{
+ // Reconstructs the physical *shape* of the failed user local case with
+ // synthetic room purposes; no model call and no copied user raw evidence.
+ const model=reply();
+ model.id='synthetic-four-room-observatory';
+ model.title='Synthetic four-room general instrument workshop';
+ model.footprint={width:24,depth:24};
+ model.materials={floor:'stone',wall:'concrete',roof:'metal'};
+ model.form={roofProfile:'ridge',facadeLanguage:'screen'};
+ model.layout.spaces=[
+  {id:'observation-terrace',purpose:'Fixture access zone',weight:2},
+  {id:'data-analysis-room',purpose:'Analysis and equipment zone',weight:3},
+  {id:'instrument-storage',purpose:'Secure instrument storage',weight:1},
+  {id:'discussion-studio',purpose:'Team meeting zone',weight:4}
+ ];
+ model.objects=[
+  {id:'telescope-control-table',zoneId:'observation-terrace',role:'work-surface',corner:'near-left'},
+  {id:'instrument-shelves',zoneId:'instrument-storage',role:'equipment-bank',corner:'far-right'},
+  {id:'monitor-stand',zoneId:'data-analysis-room',role:'display-stand',corner:'near-right'},
+  {id:'data-storage-rack',zoneId:'data-analysis-room',role:'storage-rack',corner:'far-left'},
+  {id:'collaboration-table',zoneId:'discussion-studio',role:'work-surface',corner:'near-left'},
+  {id:'seating-near-telescope',zoneId:'observation-terrace',role:'seating',corner:'far-right'},
+  {id:'seating-for-meetings',zoneId:'discussion-studio',role:'seating',corner:'far-left'},
+  {id:'instrument-access-aisle',zoneId:'instrument-storage',role:'work-surface',corner:'near-left'}
+ ];
+ model.relations={entryFacingZoneId:'discussion-studio',
+  directAdjacencies:[['observation-terrace','instrument-storage']]};
+ model.architecture={schema:'minecraftaibuilder-r160-topology-ir-v1',
+  entryHierarchy:'emphasized',daylightStrategy:'focused',
+  roofEdge:'fine',spatialTopology:'central-spine'};
+ const a=parseR139RelationalFurnishedReply(JSON.stringify(model),request,
+  {allowTopologyComposition:true,allowHostGridResearch:true});
+ const completed=a.architectural.completed,ev=completed.r150EquipmentEvidence;
+ assert.equal(a.hostGridResearchOverride,null);
+ assert.equal(completed.program[0].zones.length,4);
+ assert.equal(completed.placements.length,8);
+ assert.equal(ev.originalEquipmentCount,8);
+ assert.equal(ev.preservedModelEquipmentChoices,true);
+ assert.equal(ev.originalEquipmentUnmodified,true);
+ assert.equal(completed.sourceRouteAudit.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(completed.sourceRouteAudit.featureAccess.length,8);
+ assert.ok(completed.sourceRouteAudit.featureAccess.every(f=>f.reachableFromEntrance));
+ assert.equal(completed.worldWrites,0);
+ assert.deepEqual(completed.gates,Array(9).fill('BLOCKED'));
+ assert.deepEqual(completed.BuildPlan.operations,[]);
+ if(ev.optionalDetailSuppressionOccurred)
+  assert.equal(ev.suppressedUnsafeComponentCount,ev.suppressedUnsafeComponents.length);
+});
