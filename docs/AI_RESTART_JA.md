@@ -1,5 +1,12 @@
 # MinecraftAIBuilder — 最短AI再開入口
 
+## R170実ユーザーZIP検証 → R171共通屋根境界修正（2026-10-26）
+- ユーザー提出 `r157-unknown-use-20261025T125222536Z-r170-room-volumes-offline.zip` に収録された `R167_OFFLINE_REPLAY.json` を検査。住宅・店舗・研究施設すべて `R170_FOUR_ROOM_ORIGINAL_ROOF_CONTRACT` でHOLD。生成 `geometryEvidenceCases=0`、実ボクセルと5方向図はZIPに無し。R169の3/3成功が消滅したのではなく、R170の研究用派生だけが共通契約エラーで停止。元Qwen原文、施工保護、世界書込み0、推論追加0を維持。
+- 原因: R170はR149→R150で `plan` を持たない派生 `featured-source` から `base.plan.form.roofProfile` を読み、検証条件がすべてfalseになっていた。R149が正式に保存する `r149ExpressionEvidence.originalRoofProfile`（元モデル指定屋根形式）を読み、`roof-base` の高さ・大きさも明示検証するよう修正。
+- 再発防止: R170の既存flat/ridge/sawtooth 3形態の合成実3D回帰テストで、R149の屋根由来証拠を明示的に検証。CIと実ユーザー実データでの再実行は**未確認**であり、形状実現・美術水準を合格とは主張しない。
+- Windows保存済み実験ワンクリック経路は前回の失敗ZIPを上書きせず、別フォルダと `R171_VOLUME_EVIDENCE_ZIP` を生成。新しいLLMコール禁止の `-ReuseOnly` を維持。次回は3用途のR171実3D・各実際の室内高さ・経路・屋根の5方向図を確認する。
+- 常時 **ART HOLD / NOT_PREPARED / 9 BLOCKED / BuildPlan.operations=[] / worldWrites=0**。Draft PR #128はDraft、mainへmergeなし。
+
 ## R169実モデル3/3ソース生成 → R170 本物の4室立体構成（2026-10-26）
 - 受領ユーザーZIP `r157-unknown-use-20261025T125222536Z-r169-safe-furniture-offline.zip`: 保存済み `qwen3:14b` 3ケース全て真正のローカル回答由来+ホスト補正研究で実B143 sourceVerified=true。住宅1,697ボクセル・店舗1,765・研究2,731。新LLM呼び出し0、世界接続0、施工0、ART HOLD、NOT_PREPARED、9 BLOCKED、BuildPlan空。
 - 研究施設は選択された4室/8設備を維持。R150補助形状10候補中9採用、`collaboration-table` の `undershelf` 1件を2幅ソース動線／設備アクセス遮断のため拒否し、理由付きで記録。既存の元モデル回答と研究用派生原本は保護。
