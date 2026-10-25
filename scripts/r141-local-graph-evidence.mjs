@@ -16,6 +16,7 @@ import {fileURLToPath} from 'node:url';
 import {preflightR125Ollama} from './r125-pilot.mjs';
 import {chooseR136Model} from './r136-local-evidence.mjs';
 import {runR134FreshModel} from './r134-fresh-model-pilot.mjs';
+import {auditR143GraphEvidence} from './r143-independent-graph-audit.mjs';
 
 const MODEL=/^[A-Za-z0-9._:/-]{2,140}$/;
 const ENDPOINT=/^http:\/\/127\.0\.0\.1:(\d{2,5})\/v1\/chat\/completions$/;
@@ -74,6 +75,7 @@ export async function runR141GraphTrial({model=null,endpoint=
   modelRequestedDirectPairs:0,sourceVerifiedDirectDoors:0,
   modelRequestedEntryRoomId:null,sourceEntranceRoomVerified:false,
   spatialDecisionDemonstrated:false,
+  independentVoxelAuditStatus:'NOT_CHECKED',
   roomCount:null,equipmentCount:null,
   sourceRoutes:'NOT_CHECKED',
   humanArtReview:'NOT_REVIEWED',mac8GB2B:'NOT_TESTED',
@@ -126,13 +128,22 @@ export async function runR141GraphTrial({model=null,endpoint=
     audit.entryFacing?.zoneId===intent.entryFacingZoneId&&
     audit.entryFacing?.exteriorEntranceDirectlyOpensIntoSelectedRoom===true&&
     audit.entryFacing?.interiorThresholdSupportedAndClearInB143Source===true;
+   const read=file=>JSON.parse(fs.readFileSync(
+    path.join(base,file),'utf8'));
+   const independent=auditR143GraphEvidence({
+    intent,graphAudit:audit,
+    graphDesign:read('R139_HOST_GRAPH_B143_SOURCE.json'),
+    finalDesign:read('DERIVED_B143_SOURCE.json'),
+    finalCompiled:read('DERIVED_REAL_VOXELS.json')
+   });
+   write(base,'R143_INDEPENDENT_VOXEL_AUDIT.json',independent);
+   report.independentVoxelAuditStatus=independent.status;
    report.spatialDecisionDemonstrated=
     report.sourceEntranceRoomVerified&&
-    intent.directAdjacencies.length>=1&&
-    audit.directDoors.length===intent.directAdjacencies.length&&
-    audit.sourceRoutes==='SOURCE_ROUTES_REACH_ALL_ZONES'&&
-    audit.directDoors.every(door=>intent.directAdjacencies.some(pair=>
-     pair.includes(door.zoneA)&&pair.includes(door.zoneB)));
+    report.sourceRoutes==='SOURCE_ROUTES_REACH_ALL_ZONES'&&
+    independent.status==='SOURCE_ROOM_GRAPH_VERIFIED'&&
+    independent.directPairCount===intent.directAdjacencies.length&&
+    independent.independentlyVerifiedDirectPairCount>=1;
   }
   if(synthetic)report.status='HOLD_TEST_DOUBLE_NOT_REAL_INFERENCE';
   else if(result.status==='SOURCE_CANDIDATE_REAL_LOCAL_RESPONSE_HUMAN_REVIEW_REQUIRED'&&
