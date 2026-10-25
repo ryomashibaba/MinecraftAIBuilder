@@ -30,7 +30,7 @@ try {
         foreach ($candidate in $candidates) {
             $manifestFile = Join-Path $candidate.FullName 'R156_STUDY_MANIFEST.json'
             if (-not (Test-Path -LiteralPath $manifestFile)) { continue }
-            try { $manifest = Get-Content -LiteralPath $manifestFile -Raw | ConvertFrom-Json }
+            try { $manifest = Get-Content -LiteralPath $manifestFile -Raw -Encoding UTF8 | ConvertFrom-Json }
             catch { continue }
             if ($manifest.schema -ne 'r156-unknown-use-v1' -or
                 $manifest.architectureMode -ne 'topology' -or
@@ -103,6 +103,24 @@ try {
             $newReviewFiles = $true
         }
     }
+    # Explain *why* each genuine local model result is HOLD without another
+    # request or modifying any MODEL_RAW_ORIGINAL.txt. Read Node UTF-8 explicitly
+    # on Windows PowerShell 5.1, whose default text decoder may be ANSI.
+    foreach ($useId in @('home', 'shop', 'laboratory')) {
+        $modelReportFile = Join-Path $folder "$useId/R134_MODEL_REPORT.json"
+        if (-not (Test-Path -LiteralPath $modelReportFile)) {
+            Write-Host "R166_$($useId)_RESULT: HOLD_NO_MODEL_REPORT"
+            continue
+        }
+        try {
+            $modelReport = Get-Content -LiteralPath $modelReportFile -Raw -Encoding UTF8 | ConvertFrom-Json
+            $reasonProp = $modelReport.PSObject.Properties['reason']
+            $reason = if ($null -ne $reasonProp) { [string]$reasonProp.Value } else { 'NO_RECORDED_REASON' }
+            Write-Host "R166_$($useId)_RESULT: $($modelReport.status) / $reason"
+        } catch {
+            Write-Host "R166_$($useId)_RESULT: HOLD_REPORT_UNREADABLE"
+        }
+    }
     # When an old ZIP already exists, preserve it even if extra reviews were
     # generated from the saved originals during this invocation.
     if ($newReviewFiles -and (Test-Path $archive)) {
@@ -115,16 +133,16 @@ try {
     $summary = $null
     $review = $null
     if (Test-Path $studyFile) {
-        $summary = Get-Content $studyFile -Raw | ConvertFrom-Json
+        $summary = Get-Content $studyFile -Raw -Encoding UTF8 | ConvertFrom-Json
     }
     $independent = $null
     $independentFile = Join-Path $folder 'R165_INDEPENDENT_AUDIT.json'
     if (Test-Path $independentFile) {
-        $independent = Get-Content $independentFile -Raw | ConvertFrom-Json
+        $independent = Get-Content $independentFile -Raw -Encoding UTF8 | ConvertFrom-Json
     }
     $reviewFile = Join-Path $folder 'R157_SPATIAL_AUDIT.json'
     if (Test-Path $reviewFile) {
-        $review = Get-Content $reviewFile -Raw | ConvertFrom-Json
+        $review = Get-Content $reviewFile -Raw -Encoding UTF8 | ConvertFrom-Json
     }
     $provenance = [ordered]@{
         schema = 'minecraftaibuilder-r157-user-local-evidence-bundle-v1'
