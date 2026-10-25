@@ -88,6 +88,24 @@ export function deriveR139RelationalTopology(base,intent){
  const byId=new Map(program[0].zones.map(z=>[z.id,z]));
  const design=structuredClone(branched.design);
  const {width:w,depth:d}=base.plan.footprint;
+ // R142: "entrance-facing" must mean a REAL exterior threshold into the
+ // chosen model room, not merely a front-row label. The old R138 central
+ // spine entrance is replaced (not left as an invisible second entrance).
+ const entryZone=byId.get(intent.entryFacingZoneId);
+ const entryRange=entryZone.range;
+ const entryX=Math.floor((entryRange.x[0]+entryRange.x[1])/2);
+ const exteriorDoor=design.elements.find(e=>e.id==='exterior-entrance');
+ const frontGlazing=design.elements.filter(e=>
+  e.id==='window-front-glass'&&e.mode==='add');
+ if(!exteriorDoor||exteriorDoor.shape!=='box'||
+  exteriorDoor.mode!=='cut'||exteriorDoor.size[0]!==2||
+  exteriorDoor.size[1]<3||exteriorDoor.size[2]!==1||
+  entryRange.z[0]!==2||
+  entryX<entryRange.x[0]||entryX+1>entryRange.x[1]||
+  frontGlazing.some(e=>entryX<=e.origin[0]+e.size[0]-1&&
+   entryX+1>=e.origin[0]))
+  fail('REAL_ROOM_ENTRANCE_CANNOT_FIT_WITHOUT_GLASS_CONFLICT');
+ exteriorDoor.origin=[entryX,2,1];
  const divider=Math.floor(d/2);
  const doors=[];
  for(const [i,[a,b]] of intent.directAdjacencies.entries()){
@@ -110,6 +128,16 @@ export function deriveR139RelationalTopology(base,intent){
  if(!verifyCompiled(design,compiled))fail('B143_SOURCE_MISMATCH');
  const blocks=new Set(compiled.primitives.map(p=>p.slice(0,3).join(',')));
  const has=(x,y,z)=>blocks.has([x,y,z].join(','));
+ // The source doorway is cut into the physically selected room's FRONT
+ // perimeter, with continuous supported clear interior threshold.
+ const entrance=design.elements.find(e=>e.id==='exterior-entrance');
+ for(let dx=0;dx<2;dx++){
+  const x=entryX+dx;
+  if(!has(x,1,2)||has(x,2,1)||has(x,3,1)||has(x,4,1)||
+   has(x,2,2)||has(x,3,2)||
+   x<entryRange.x[0]||x>entryRange.x[1])
+   fail('SELECTED_ROOM_ENTRANCE_BLOCKED_OR_UNSUPPORTED');
+ }
  for(const door of doors){
   const [x,,z]=door.origin;
   for(let dx=0;dx<2;dx++)for(const dz of [-1,0,1]){
@@ -137,8 +165,13 @@ export function deriveR139RelationalTopology(base,intent){
   directAdjacencyDoorEvidence:doors,
   entryFacingZoneEvidence:{
    zoneId:intent.entryFacingZoneId,
-   physicalSector:byId.get(intent.entryFacingZoneId).physicalSector,
-   entranceFacingFrontRow:true
+   physicalSector:entryZone.physicalSector,
+   exteriorOpeningOrigin:[...entrance.origin],
+   exteriorOpeningSize:[...entrance.size],
+   chosenZoneActualRange:structuredClone(entryRange),
+   exteriorEntranceDirectlyOpensIntoSelectedRoom:true,
+   interiorThresholdSupportedAndClearInB143Source:true,
+   externalTerrainUnverified:true
   },
   modelAuthorship:'CALLER_SUPPLIED_RELATIONS_NOT_PROVEN_LLM;HOST_GEOMETRY',
   topologyProvenance:'HOST_COMPILED_FROM_EXPLICIT_RELATIONS',
