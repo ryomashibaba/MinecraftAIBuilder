@@ -10,8 +10,8 @@
 | 継続ブランチ | `feature/b198zr1-protected-architectural-revision` |
 | 継続PR | [#128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128) — Open / Draft / Unmerged |
 | HEAD | [開発ブランチの最新HEADを毎回GitHubで確認](https://github.com/ryomashibaba/MinecraftAIBuilder/commits/feature/b198zr1-protected-architectural-revision)（R98の初期実メッシュ検証対象は `9a2b5de9d8ba41a2b7ca4e626aa9d54ff4ffffdd`） |
-| 最新確認済み実装工程 | **R139 ソース実装／テスト追加。CI完了・人間美術・実Minecraft施工は別途判定**（R138までは既存CI成功） |
-| 次に取り組む工程 | **R139のCI・実3Dを確認し、新しい単一ローカルQwen/Gemma返信で `relations` を実測。次は一般の非矩形・複数階配置へ拡張**。旧R125計画は基盤として維持 |
+| 最新確認済み実装工程 | **R140 実装・CI再検証中。前回R139は123/124 PASS、3室グラフ1件失敗→原因修正済み。美術・実Minecraft・実モデルの新関係設計は未検証** |
+| 次に取り組む工程 | **R140のCI・R139真正3D成果物を判定。成功後、新しいローカルQwen/Gemma1回の関係IR入り応答で独自の配置判断を実測** |
 | 施工・モデル | **2026-10-24 Qwen/Gemma実推論・Minecraft試験施工の包括許可あり（都度承認不要）。** 準備性と各種技術安全ゲートは別途必要。現行コードのNOT_PREPARED / 9 BLOCKEDは自動PASSではない |
 
 **最新情報への直リンク：** [ブランチの現在地](https://github.com/ryomashibaba/MinecraftAIBuilder/tree/feature/b198zr1-protected-architectural-revision) ／ [Actions一覧](https://github.com/ryomashibaba/MinecraftAIBuilder/actions) ／ [PR #128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128)
@@ -19,6 +19,14 @@
 
 
 
+
+## R140 — 入口側判定修正＋ローカルモデル1回の空間関係設計経路（2026-10-25 JST）
+- R139 CI（run `40161735323`）の **124件中123件PASS／1件FAIL** を根拠に修正。3室構成の右側全奥行室 `whole-right` は入口側にも実際に面するので、`entryFacingZoneId` として扱う。R138間取りを変えず、ソース検証・元原本・安全ゲートは維持。
+- 既存 `scripts/r134-fresh-model-pilot.mjs` に `--equipment assembled --topology graph` を追加。新しい単一ローカルQwen/Gemma返信が **部屋・設備・入口側・直接隣接ペア** を明示的に生成した場合にのみ、R139グラフ配置→B143実ボクセル→R130設備→R125動線QAを実行。ホスト座標とモデル意味設計は混同しない。
+- 証拠：元モデル生回答／意味関係IR／ホスト生成グラフの真正B143ソース・開口/経路監査／設備付き完成3Dを別保存。非対応グラフ、サイト不足、旧返信に関係IRがない場合は **HOLD**。ホスト補正で架空のモデル決定を作らない。
+- 既存CLIの従来動作は既定値 `--topology linear` で保持。対象ローカル実行例（まだ実機実行していない）：`node scripts/r134-fresh-model-pilot.mjs --model qwen3:14b --brief "Invent an original multi-room building with physical equipment and meaningful adjacent rooms" --equipment assembled --topology graph --out r140-local-first`。既存フォルダの上書き禁止。
+- 新テスト：`scripts/r140-relational-local-runner.test.mjs`。CIは**ローカル接続を模したTEST DOUBLE**。実Qwen/Gemma応答・Minecraft内施工・Mac 2B測定・人間美術は別途未検証。安全状態は `NOT_PREPARED`、9×`BLOCKED`、`BuildPlan.operations=[]`、世界操作0のまま。
+- 次の意味ある判定はCIの成否、6個のR139比較3D成果物、そして1回の**実モデル**回答からの完全出力まで。未達をPASS扱いしない。
 
 ## R139 — モデル指定の入口向きと直接隣接グラフ → 真正3D（2026-10-25 JST）
 - `source/ai/r139-room-relations.mjs`：小型意味IR `minecraftaibuilder-r139-room-relations-v1` は `basePlanSha256` / `entryFacingZoneId` / `directAdjacencies` を厳格検証する。R134／R138から実B143間取りを派生し、指定された隣室の隔壁に2ブロック幅の実開口をCUT、支持床・3ブロック頭上空気・入口から各室への2幅ソース経路を確認する。部屋用途の文字列による固定用途推測は禁止。表現不能な共有頂点グラフ・要求はHOLD。
