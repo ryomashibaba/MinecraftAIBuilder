@@ -19,6 +19,14 @@
 
 
 
+
+## R130 — 複合設備の真正3D表現 / 効率戦略再監査（2026-10-25 JST）
+- 戦略v2の「LLMは短い意味IR、共通エンジンは3D幾何」「ジャンル固定しない」「原本SHA不変」「CIと実機の評価を分ける」「工程数でなく能力を伸ばす」を再確認。R126〜R129は検査側が先行し、設備が単なる数個の直方体に留まる効率上の偏りを認定。
+- R129 CI #40148347068 は4件FAIL: B143のvoxel materialは文字列ではなく数値ID。既存ゲートを緩めず正式MATERIALS IDと比較する修正を実施。修復CI [#40149004627](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40149004627) SUCCESS。
+- R130で既存の短いモデル出力と完全に別の「呼出側の幾何表現モード」を分離し、任意の \`--detail assembled\` から共通の複合設備（支持脚つき作業面、棚板、段状展示、操作盤、背もたれ等）をB143複数ソリッドで組立。**部屋名/店舗/住宅/研究用途によるコード分岐なし。** R125旧v1は変更せず、v2は別スキーマ・派生ソースとして処理。
+- 追加設備の各B143部品と実voxel material IDをR129独立QAでも再コンパイルし、数だけでなく実ボクセルとアクセスを確認する。source onlyであり、機材の実操作・視覚品質・Minecraft実プレイヤー歩行を証明するものではない。構想の美術評価・実ローカルQwen設備IR・8GB Mac 2B・Minecraft試験施工は未実施。
+- 今後の順序：既存3用途を使って見た目の多視点比較 → 本物のローカルモデルが出した設備IRで再検証 → 最短MVP施工橋。検査器だけを何工程も続ける旧ループに戻さない。試験ワールド特定/スナップショット/バックアップ/復帰等が欠ける限り NOT_PREPARED / 9 BLOCKED / worldWrites0 を維持。
+
 ## R129 Independent functional intent and true B143 geometry evidence (2026-10-25 JST)
 - A category-independent functional acceptance engine verifies independently supplied requirements: zone equipment role/count, actual additional voxel volume, remaining reachable two-wide clear paths, and real front/back or left/right zone ordering. Source coordinates and voxels, not the LLM descriptions or self-declared successes, are evaluated.
 - The previously named front/back shop is actually split left/right; an independent z-axis requirement therefore remains HOLD. Too-few pieces and tiny fixtures are independently detected. A matching requirement is only SOURCE_ONLY_REQUIREMENTS_MET_REAL_FUNCTION_UNVERIFIED, never an in-world functional or artistic certification.

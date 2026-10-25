@@ -129,3 +129,28 @@ test('fifth feature in same zone uses perimeter-search beyond only four corners'
  assert.equal(derived.worldWrites,0);
  assert.deepEqual(derived.gates,Array(9).fill('BLOCKED'));
 });
+
+test('assembled geometry is multi-material and still source-reachable without replacing Qwen original',()=>{
+ for(const [id,zoneId,role] of [
+  ['shop','front-retail-space','display-stand'],
+  ['research','observation-lab','work-surface'],
+  ['research','equipment-storage','storage-rack'],
+  ['research','data-recording','equipment-bank']
+ ]){
+  const old=compileArchitecturePlan(fixture(id));
+  const base=proposeR125ThresholdRepair(old).candidate;
+  const product=applyR125FeatureIntent({base,intent:{
+   schema:'minecraftaibuilder-r130-feature-intent-v2',
+   basePlanSha256:base.planSha256,objects:[
+    {id:'built-fixture',zoneId,role,corner:'far-left',detail:'assembled'}
+   ]}});
+  assert.equal(product.assemblyMode,'MULTI_PART_ASSEMBLED');
+  assert.ok(product.placements[0].elementIds.length>=2);
+  assert.ok(product.addedVoxelCount>6);
+  assert.equal(product.sourceRouteAudit.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert.equal(product.everyFeatureSourceAccessible,true);
+  assert.equal(product.originalSourceSha256,base.sourceSha256);
+  assert.equal(product.worldWrites,0);
+  assert.deepEqual(product.gates,Array(9).fill('BLOCKED'));
+ }
+});

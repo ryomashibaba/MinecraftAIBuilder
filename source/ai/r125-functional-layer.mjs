@@ -11,6 +11,7 @@ import {createHash} from 'node:crypto';
 import {compileDesign,verifyCompiled} from './b143-building-dsl.mjs';
 import {auditR125SourceRoutes} from './r125-source-routes.mjs';
 export const SCHEMA='minecraftaibuilder-r125-feature-intent-v1';
+export const ASSEMBLED_SCHEMA='minecraftaibuilder-r130-feature-intent-v2';
 const sha=x=>createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const hold=x=>{throw Error('R125_FEATURE_'+x);};
 const exact=(o,keys)=>o&&typeof o==='object'&&!Array.isArray(o)&&
@@ -23,10 +24,21 @@ const presets=Object.freeze({
  'storage-rack':{size:[2,2,1],material:'stone'},
  'seating':{size:[2,1,1],material:'wood'}
 });
+// Physical assembly mode is a host-controlled compiler parameter, not
+// a collection of templates indexed by "shop"/"home"/"research" names.
+const assembled=Object.freeze({
+ 'work-surface':{size:[5,3,3],material:'wood'},
+ 'equipment-bank':{size:[5,3,2],material:'metal'},
+ 'display-stand':{size:[5,3,2],material:'glass'},
+ 'storage-rack':{size:[5,4,2],material:'metal'},
+ 'seating':{size:[4,2,3],material:'wood'}
+});
+const config=feature=>feature.detail==='assembled'?
+ assembled[feature.role]:presets[feature.role];
 const corners=['near-left','near-right','far-left','far-right'];
 const k=(x,y,z)=>x+','+y+','+z;
 function makeBlocks(feature,zone,y,corner){
- const cfg=presets[feature.role],sx=cfg.size[0],sz=cfg.size[2];
+ const cfg=config(feature),sx=cfg.size[0],sz=cfg.size[2];
  const xmin=zone.range.x[0]+1,xmax=zone.range.x[1]-1;
  const zmin=zone.range.z[0]+1,zmax=zone.range.z[1]-1;
  if(xmax-xmin+1<sx||zmax-zmin+1<sz)return null;
@@ -41,7 +53,7 @@ function makeBlocks(feature,zone,y,corner){
  * Every candidate still faces the full source route + service access checks.
  */
 function* candidatePositions(feature,zone,y){
- const cfg=presets[feature.role],sx=cfg.size[0],sz=cfg.size[2];
+ const cfg=config(feature),sx=cfg.size[0],sz=cfg.size[2];
  const xmin=zone.range.x[0]+1,xmax=zone.range.x[1]-sx;
  const zmin=zone.range.z[0]+1,zmax=zone.range.z[1]-sz;
  if(xmin>xmax||zmin>zmax)return;
@@ -82,17 +94,53 @@ function* candidatePositions(feature,zone,y){
   }
  }
 }
-function asElement(feature,pos){
- return {id:'feature-'+feature.id,shape:'box',mode:'add',
-  material:pos.cfg.material,origin:[pos.x,pos.y,pos.z],
-  size:pos.cfg.size};
+function asElements(feature,pos){
+ const id='feature-'+feature.id;
+ if(feature.detail!=='assembled')return [{
+  id,shape:'box',mode:'add',material:pos.cfg.material,
+  origin:[pos.x,pos.y,pos.z],size:pos.cfg.size
+ }];
+ const box=(suffix,material,x,y,z,sx,sy,sz)=>({
+  id:id+'-'+suffix,shape:'box',mode:'add',material,
+  origin:[pos.x+x,pos.y+y,pos.z+z],size:[sx,sy,sz]
+ });
+ // A real multi-piece cross-category vocabulary: free space between worktop
+ // supports, stocked shelves, display tiers and an upright console/backrest.
+ // Components are actual separate B143 solids, not category-name labels.
+ switch(feature.role){
+  case 'work-surface':return [
+   box('top','wood',0,2,0,5,1,3),
+   box('leg-nw','metal',0,0,0,1,2,1),
+   box('leg-ne','metal',4,0,0,1,2,1),
+   box('leg-sw','metal',0,0,2,1,2,1),
+   box('leg-se','metal',4,0,2,1,2,1)];
+  case 'equipment-bank':return [
+   box('foundation','metal',0,0,0,5,1,2),
+   box('controls','metal',0,1,1,5,1,1),
+   box('display','glass',0,2,1,5,1,1)];
+  case 'display-stand':return [
+   box('plinth','stone',0,0,0,5,1,2),
+   box('clear-display','glass',0,1,0,5,1,2),
+   box('header','glass',0,2,1,5,1,1)];
+  case 'storage-rack':return [
+   box('frame-left','metal',0,0,0,1,4,2),
+   box('frame-right','metal',4,0,0,1,4,2),
+   box('shelf-low','wood',1,1,0,3,1,2),
+   box('shelf-high','wood',1,3,0,3,1,2)];
+  case 'seating':return [
+   box('platform','wood',0,0,0,4,1,3),
+   box('backrest','wood',0,1,2,4,1,1)];
+  default:throw Error('R125_FEATURE_UNSUPPORTED_ASSEMBLY');
+ }
 }
 export function applyR125FeatureIntent({base,intent}={}){
  if(!base?.design||!base.compiled||
   base.schema!=='minecraftaibuilder-r125-plan-to-b143-result-v1'||
   !verifyCompiled(base.design,base.compiled))hold('UNVERIFIED_BASE');
+ const v2=intent?.schema===ASSEMBLED_SCHEMA;
  if(!exact(intent,['schema','basePlanSha256','objects'])||
-  intent.schema!==SCHEMA||intent.basePlanSha256!==base.planSha256||
+  !(intent.schema===SCHEMA||v2)||
+  intent.basePlanSha256!==base.planSha256||
   !Array.isArray(intent.objects)||intent.objects.length<1||
   intent.objects.length>8)hold('INTENT_CONTRACT');
  const zones=new Map();
@@ -100,7 +148,9 @@ export function applyR125FeatureIntent({base,intent}={}){
   zones.set(zone.id,{zone,y:level.standingFloorY});
  const ids=new Set();
  for(const obj of intent.objects){
-  if(!exact(obj,['id','zoneId','role','corner'])||
+  if(!exact(obj,v2?['id','zoneId','role','corner','detail']:
+   ['id','zoneId','role','corner'])||
+   (v2&&obj.detail!=='assembled')||
    !slug(obj.id)||ids.has(obj.id)||!zones.has(obj.zoneId)||
    !Object.hasOwn(presets,obj.role)||!corners.includes(obj.corner))
    hold('INVALID_FEATURE_OBJECT');
@@ -124,7 +174,8 @@ export function applyR125FeatureIntent({base,intent}={}){
       if(keep.has(xx)||!keep.has(k(x,y-1,z)))clear=false;
      }
    if(!clear)continue;
-   const testDesign={...design,elements:[...design.elements,asElement(obj,pos)]};
+   const elements=asElements(obj,pos);
+   const testDesign={...design,elements:[...design.elements,...elements]};
    let tested,route;
    try{
     tested=compileDesign(testDesign);
@@ -135,7 +186,7 @@ export function applyR125FeatureIntent({base,intent}={}){
      {featureTargets:targets});
    }catch{continue;}
    if(route.status!=='SOURCE_ROUTES_REACH_ALL_ZONES')continue;
-   chosen={corner,pos,method,testDesign,tested,route};break;
+   chosen={corner,pos,method,elements,testDesign,tested,route};break;
   }
   if(!chosen)hold('NO_SAFE_PLACEMENT_'+obj.id);
   design.elements=chosen.testDesign.elements;
@@ -144,6 +195,7 @@ export function applyR125FeatureIntent({base,intent}={}){
   placements.push({id:obj.id,zoneId:obj.zoneId,role:obj.role,
    requestedCorner:obj.corner,actualCorner:chosen.corner,
    placementMethod:chosen.method,
+   ...(v2?{detail:'assembled',elementIds:chosen.elements.map(e=>e.id)}:{}),
    origin:[chosen.pos.x,chosen.pos.y,chosen.pos.z],
    size:chosen.pos.cfg.size,material:chosen.pos.cfg.material});
  }
@@ -166,6 +218,7 @@ export function applyR125FeatureIntent({base,intent}={}){
   originalSourceSha256:base.sourceSha256,
   originalGeometrySha256:base.geometrySha256,
   featurePlan:structuredClone(intent),placements,
+  assemblyMode:v2?'MULTI_PART_ASSEMBLED':'LEGACY_COMPACT',
   design,compiled,program:structuredClone(base.program),
   sourceSha256:compiled.sourceSha256,
   geometrySha256:compiled.geometrySha256,

@@ -7,7 +7,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {compileArchitecturePlan} from '../source/ai/r125-architecture-plan.mjs';
 import {proposeR125ThresholdRepair} from '../source/ai/r125-entrance-repair.mjs';
-import {applyR125FeatureIntent,SCHEMA as FEATURE_SCHEMA} from '../source/ai/r125-functional-layer.mjs';
+import {applyR125FeatureIntent,SCHEMA as FEATURE_SCHEMA,ASSEMBLED_SCHEMA} from '../source/ai/r125-functional-layer.mjs';
 import {auditR129FunctionalAcceptance} from '../source/ai/r125-functional-acceptance.mjs';
 import {preflightR125Ollama} from './r125-pilot.mjs';
 import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
@@ -46,7 +46,9 @@ export function makeR127FeatureRequest(base,brief=''){
    id:z.id,purpose:z.purpose,level:l.level}))),
   roles:ROLES,corners:CORNERS,maxObjects:8};
 }
-export function parseR127ModelFeatures(raw,base){
+export function parseR127ModelFeatures(raw,base,{equipmentDetail='compact'}={}){
+ if(!['compact','assembled'].includes(equipmentDetail))
+  reject('DETAIL_MODE');
  if(typeof raw!=='string'||raw.length<10||raw.length>15000)
   reject('MISSING_OR_OVERSIZE_RAW');
  let data;
@@ -56,12 +58,14 @@ export function parseR127ModelFeatures(raw,base){
   !Array.isArray(data.objects)||data.objects.length<1||
   data.objects.length>8)reject('INVALID_OBJECT_ARRAY');
  // Small models output only intent; trusted host stamps immutable source SHA.
- return {schema:FEATURE_SCHEMA,basePlanSha256:base.planSha256,
-  objects:data.objects};
+ return {schema:equipmentDetail==='assembled'?ASSEMBLED_SCHEMA:FEATURE_SCHEMA,
+  basePlanSha256:base.planSha256,
+  objects:data.objects.map(o=>equipmentDetail==='assembled'?
+   {...o,detail:'assembled'}:o)};
 }
 export function parseR127Args(argv){
  if(argv.length===1&&argv[0]==='--help')return {help:true};
- const args={},allowed=new Set(['--model','--plan','--out','--brief','--endpoint','--requirements']);
+ const args={},allowed=new Set(['--model','--plan','--out','--brief','--endpoint','--requirements','--detail']);
  for(let i=0;i<argv.length;i++){
   const k=argv[i],v=argv[++i];
   if(!allowed.has(k)||Object.hasOwn(args,k)||!v||v.startsWith('--'))
@@ -74,13 +78,16 @@ export function parseR127Args(argv){
  const port=ENDPOINT.exec(endpoint);
  if(!port||Number(port[1])<1||Number(port[1])>65535)
   reject('LOOPBACK_ONLY');
+ if(args['--detail']&&!['compact','assembled'].includes(args['--detail']))
+  reject('DETAIL_MODE');
  return {model:args['--model'],plan:JSON.parse(fs.readFileSync(args['--plan'],'utf8')),
   outDir:path.resolve(args['--out']),brief:args['--brief']??'',endpoint,
+  equipmentDetail:args['--detail']??'compact',
   ...(args['--requirements']?{independentSpec:JSON.parse(
    fs.readFileSync(args['--requirements'],'utf8'))}:{})};
 }
 export async function runR127FeatureModel({
- model,plan,outDir,brief='',independentSpec=null,
+ model,plan,outDir,brief='',independentSpec=null,equipmentDetail='compact',
  endpoint='http://127.0.0.1:11434/v1/chat/completions'
 }={}, {fetcher=fetch,timeoutMs=120000}={}){
  const port=ENDPOINT.exec(endpoint??'');
@@ -88,6 +95,7 @@ export async function runR127FeatureModel({
   Number(port[1])>65535||typeof outDir!=='string'||!outDir.trim()||
   typeof fetcher!=='function'||!Number.isSafeInteger(timeoutMs)||
   timeoutMs<1000||timeoutMs>300000)reject('BAD_INPUT');
+ if(!['compact','assembled'].includes(equipmentDetail))reject('DETAIL_MODE');
  if(fs.existsSync(outDir))reject('OUTPUT_ALREADY_EXISTS');
  const original=compileArchitecturePlan(plan);
  const repair=proposeR125ThresholdRepair(original);
@@ -99,6 +107,7 @@ export async function runR127FeatureModel({
   schema:'r127-model-feature-to-b143-v1',
   status:'HOLD_NOT_STARTED',model,provider:'DECLARED_LOCAL_OLLAMA_NOT_INDEPENDENTLY_AUTHENTICATED',
   testInjectionPresent:injected,modelCalls:0,originalRawCaptured:false,
+  geometryDetailChosenByHost:equipmentDetail,
   originalPlanSha256:original.planSha256,
   originalSourceSha256:original.sourceSha256,
   originalGeometrySha256:original.geometrySha256,
@@ -138,7 +147,7 @@ export async function runR127FeatureModel({
     reject('INVALID_MODEL_CONTENT');
    write(dir,'FEATURE_MODEL_ORIGINAL.txt',raw);
    report.originalRawCaptured=true;
-   const intent=parseR127ModelFeatures(raw,base);
+   const intent=parseR127ModelFeatures(raw,base,{equipmentDetail});
    const built=applyR125FeatureIntent({base,intent});
    write(dir,'FEATURE_INTENT.json',intent);
    write(dir,'DERIVED_B143_SOURCE.json',built.design);
@@ -177,7 +186,7 @@ export async function runR127FeatureModel({
 if(process.argv[1]===fileURLToPath(import.meta.url)){
  try{
   const args=parseR127Args(process.argv.slice(2));
-  if(args.help)console.log('node scripts/r125-feature-model-pilot.mjs --model qwen3:14b --plan scripts/fixtures/r125-qwen14b-shop-20261024.json --out NEW_DIR [--brief TEXT] (no world writes)');
+  if(args.help)console.log('node scripts/r125-feature-model-pilot.mjs --model qwen3:14b --plan scripts/fixtures/r125-qwen14b-shop-20261024.json --out NEW_DIR [--detail assembled] [--brief TEXT] (no world writes)');
   else{
    const r=await runR127FeatureModel(args);
    console.log(JSON.stringify({status:r.status,modelCalls:r.modelCalls,

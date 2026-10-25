@@ -4,7 +4,7 @@
  * An authored brief alone, a room label, and an added object count are NOT
  * evidence that a Minecraft building works. Every test remains source-only.
  */
-import {verifyCompiled,MATERIALS} from './b143-building-dsl.mjs';
+import {verifyCompiled,compileDesign} from './b143-building-dsl.mjs';
 import {auditR125SourceRoutes} from './r125-source-routes.mjs';
 export const SCHEMA='minecraftaibuilder-r129-functional-acceptance-v1';
 const fail=s=>{throw Error('R129_ACCEPTANCE_'+s);};
@@ -59,43 +59,56 @@ export function auditR129FunctionalAcceptance({base,featured,spec}={}){
  for(const [key,mat] of before)if(after.get(key)!==mat)fail('BASE_VOXEL_MUTATION');
  const placements=featured.placements;
  if(!Array.isArray(placements)||placements.length<1||placements.length>8||
-  featured.design.elements.length!==originals.length+placements.length||
   featured.featurePlan?.basePlanSha256!==base.planSha256||
   !Array.isArray(featured.featurePlan?.objects))fail('FEATURE_COUNT');
  const placedIds=new Set(),newVoxelKeys=new Set(),evidence=[];
- for(let i=0;i<placements.length;i++){
-  const p=placements[i],e=featured.design.elements[originals.length+i];
+ let cursor=originals.length;
+ for(const p of placements){
+  const partIds=p.elementIds??['feature-'+p.id];
   if(!slug(p.id)||placedIds.has(p.id)||!zones.has(p.zoneId)||
    !slug(p.role)||!Array.isArray(p.origin)||p.origin.length!==3||
    !Array.isArray(p.size)||p.size.length!==3||
    !p.origin.every(x=>int(x,0,10000))||
    !p.size.every(x=>int(x,1,10000))||
-   !e||e.id!=='feature-'+p.id||e.shape!=='box'||e.mode!=='add'||
-   e.material!==p.material||!same(e.origin,p.origin)||!same(e.size,p.size)||
+   !Array.isArray(partIds)||!int(partIds.length,1,8)||
+   new Set(partIds).size!==partIds.length||
    !featured.featurePlan.objects.some(x=>x.id===p.id&&
-    x.zoneId===p.zoneId&&x.role===p.role))
+    x.zoneId===p.zoneId&&x.role===p.role&&
+    (x.detail??null)===(p.detail??null)))
    fail('FEATURE_METADATA_NOT_SUPPORTED_BY_SOURCE');
+  const parts=featured.design.elements.slice(cursor,cursor+partIds.length);
+  cursor+=partIds.length;
+  if(parts.length!==partIds.length||
+   parts.some((e,i)=>e.id!==partIds[i]||e.shape!=='box'||
+    e.mode!=='add'||!e.material||
+    !e.id.startsWith('feature-'+p.id)))
+   fail('FEATURE_PART_LIST_INVALID');
+  if(!p.elementIds&&(!same(parts[0].origin,p.origin)||
+   !same(parts[0].size,p.size)||parts[0].material!==p.material))
+   fail('LEGACY_FEATURE_SOURCE_MISMATCH');
   const zone=zones.get(p.zoneId),[x0,y0,z0]=p.origin;
   const [sx,sy,sz]=p.size;
-  // B143 primitives encode materials as zero-based numeric MATERIALS IDs.
-  const materialIndex=MATERIALS.indexOf(p.material);
-  if(materialIndex<0)fail('FEATURE_MATERIAL_INVALID');
   const floor=base.program.find(l=>l.level===zone.level).standingFloorY;
   if(y0!==floor||x0<zone.range.x[0]||x0+sx-1>zone.range.x[1]||
    z0<zone.range.z[0]||z0+sz-1>zone.range.z[1])
    fail('FEATURE_OUTSIDE_ZONE');
+  // Compile this item's actual B143 pieces in isolation. Preserve numeric
+  // material IDs and repeated/additive union exactly as the B143 compiler does.
+  const isolated=compileDesign({...featured.design,elements:parts});
   let count=0;
-  for(let x=x0;x<x0+sx;x++)for(let y=y0;y<y0+sy;y++)
-   for(let z=z0;z<z0+sz;z++){
-    const key=coord(x,y,z);
-    if(before.has(key)||newVoxelKeys.has(key)||after.get(key)!==materialIndex)
-     fail('FEATURE_VOXEL_MISMATCH');
-    newVoxelKeys.add(key);count++;
-   }
+  for(const voxel of isolated.primitives){
+   const k=coord(...voxel.slice(0,3)),[x,y,z]=voxel;
+   if(x<x0||x>=x0+sx||y<y0||y>=y0+sy||z<z0||z>=z0+sz||
+    before.has(k)||newVoxelKeys.has(k)||after.get(k)!==voxel[3])
+    fail('FEATURE_VOXEL_MISMATCH');
+   newVoxelKeys.add(k);count++;
+  }
   evidence.push({id:p.id,zoneId:p.zoneId,role:p.role,
-   occupiedNewVoxels:count,origin:p.origin,size:p.size});
+   occupiedNewVoxels:count,partCount:parts.length,
+   origin:p.origin,size:p.size});
   placedIds.add(p.id);
  }
+ if(cursor!==featured.design.elements.length)fail('EXTRA_SOURCE_ELEMENTS');
  const added=[...after.keys()].filter(k=>!before.has(k));
  if(added.length!==newVoxelKeys.size||
   added.some(k=>!newVoxelKeys.has(k))||

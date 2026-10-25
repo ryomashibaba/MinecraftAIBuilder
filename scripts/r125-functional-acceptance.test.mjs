@@ -103,3 +103,20 @@ test('untrusted B143 material evidence is checked against canonical numeric pale
  assert.throws(()=>auditR129FunctionalAcceptance({base,featured:d,spec:spec(base,[
   need('display','front-retail-space','display-stand')])}),/R129_ACCEPTANCE_/);
 });
+
+test('independent acceptance counts assembled multi-material parts from B143 numeric voxel records',()=>{
+ const {base}=build('shop',shopObjects);
+ const assembled=applyR125FeatureIntent({base,intent:{
+  schema:'minecraftaibuilder-r130-feature-intent-v2',
+  basePlanSha256:base.planSha256,objects:[
+   {id:'built-merch',zoneId:'front-retail-space',role:'display-stand',
+    corner:'far-left',detail:'assembled'}
+  ]}});
+ const verdict=auditR129FunctionalAcceptance({base,featured:assembled,spec:spec(base,[
+  need('substantial-display','front-retail-space','display-stand',1,20,1)
+ ])});
+ assert.equal(verdict.status,'SOURCE_ONLY_REQUIREMENTS_MET_REAL_FUNCTION_UNVERIFIED');
+ assert.ok(verdict.addedVoxelsVerified>=20);
+ assert.ok(verdict.featureEvidence[0].partCount>1);
+ assert.equal(verdict.worldWrites,0);
+});

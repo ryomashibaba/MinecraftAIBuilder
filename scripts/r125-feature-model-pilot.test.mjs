@@ -83,3 +83,20 @@ test('unlisted model makes zero generation calls',async t=>{
  assert.equal(r.status,'HOLD_MODEL_NOT_INSTALLED');
  assert.equal(r.modelCalls,0);assert.equal(post,0);
 });
+
+test('optional host-assembled mode keeps model JSON small and saves true assembled B143 without real-model claim',async t=>{
+ const dir=tmp();t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));
+ const r=await runR127FeatureModel({model:'qwen3:14b',plan:shop(),
+  equipmentDetail:'assembled',outDir:path.join(dir,'built')},
+  {fetcher:mock(proposal())});
+ assert.equal(r.status,'HOLD_TEST_DOUBLE_NOT_REAL_INFERENCE');
+ assert.equal(r.geometryDetailChosenByHost,'assembled');
+ assert.ok(r.addedVoxelCount>7);
+ assert.equal(r.featureCount,2);
+ assert.equal(r.sourceRouteStatus,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ const intent=JSON.parse(fs.readFileSync(path.join(dir,'built/FEATURE_INTENT.json'),'utf8'));
+ assert.ok(intent.objects.every(o=>o.detail==='assembled'));
+ assert.equal(fs.existsSync(path.join(dir,'built/index.html')),true);
+ assert.equal(r.world.worldWrites,0);
+ assert.deepEqual(r.world.gates,Array(9).fill('BLOCKED'));
+});
