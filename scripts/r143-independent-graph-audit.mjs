@@ -105,6 +105,43 @@ export function auditR143GraphEvidence({intent,graphDesign,finalDesign,
  }
  if(graphAudit.directDoors.length!==needs.length)
   fail('INVENTED_OR_DROPPED_DIRECT_PAIR');
+ // A fake feature target can have a reachable service pad even when
+ // its alleged equipment was never placed there. Independently match EVERY
+ // assembly element to the declared feature's bounding box and vice versa.
+ const finalFeatureElements=finalDesign.elements.slice(
+  graphDesign.elements.length);
+ const allDeclaredIds=new Set(),allElementIds=new Set(),seenFeatureIds=new Set();
+ let confirmedFeatureCount=0;
+ for(const feature of featurePlacements){
+  if(!feature||typeof feature.id!=='string'||seenFeatureIds.has(feature.id)||
+   !zones.has(feature.zoneId)||
+   !Array.isArray(feature.elementIds)||feature.elementIds.length<1||
+   !Array.isArray(feature.origin)||feature.origin.length!==3||
+   !Array.isArray(feature.size)||feature.size.length!==3)
+   fail('FEATURE_PLACEMENT_CONTRACT');
+  seenFeatureIds.add(feature.id);
+  const parts=feature.elementIds.map(id=>{
+   if(typeof id!=='string'||!id.startsWith('feature-'+feature.id+'-')||
+    allDeclaredIds.has(id))fail('FEATURE_ELEMENT_NOT_PINNED');
+   allDeclaredIds.add(id);
+   return finalFeatureElements.find(e=>e.id===id);
+  });
+  if(parts.some(e=>!e||e.mode!=='add'||e.shape!=='box'))
+   fail('FEATURE_ELEMENT_NOT_PINNED');
+  const lo=[0,1,2].map(axis=>Math.min(...parts.map(e=>e.origin[axis])));
+  const hi=[0,1,2].map(axis=>Math.max(...parts.map(e=>
+   e.origin[axis]+e.size[axis]-1)));
+  if(eq(lo,feature.origin)&&eq(hi,feature.origin.map((n,i)=>
+   n+feature.size[i]-1)))confirmedFeatureCount++;
+ }
+ for(const element of finalFeatureElements){
+  if(allElementIds.has(element.id)||!allDeclaredIds.has(element.id))
+   fail('UNCLAIMED_OR_DUPLICATE_FEATURE_SOLIDS');
+  allElementIds.add(element.id);
+ }
+ const equipmentFootprintsVerified=
+  confirmedFeatureCount===featurePlacements.length&&
+  allElementIds.size===allDeclaredIds.size;
  const features=featurePlacements.map(item=>({
   id:item.id,zoneId:item.zoneId,origin:item.origin,size:item.size
  }));
@@ -124,7 +161,8 @@ export function auditR143GraphEvidence({intent,graphDesign,finalDesign,
   schema:'r144-independent-room-boundary-and-route-voxel-audit-v1',
   status:supported&&needs.length>0&&pairEvidence.length===needs.length&&
    pairEvidence.every(x=>x.supportedTwoWideSourceCrossing)&&
-   sourcePass?'SOURCE_ROOM_GRAPH_VERIFIED':'HOLD_SOURCE_ROOM_GRAPH',
+   sourcePass&&equipmentFootprintsVerified?
+    'SOURCE_ROOM_GRAPH_VERIFIED':'HOLD_SOURCE_ROOM_GRAPH',
   selectedEntranceRoomId:intent.entryFacingZoneId,
   selectedRoomExteriorEntranceVerified:supported,
   directPairCount:needs.length,
@@ -137,6 +175,8 @@ export function auditR143GraphEvidence({intent,graphDesign,finalDesign,
   independentEquipmentServiceCount:independentRoutes.featureAccess.filter(
    x=>x.reachableFromEntrance).length,
   claimedEquipmentCount:featurePlacements.length,
+  physicallyLocatedEquipmentCount:confirmedFeatureCount,
+  equipmentFootprintsVerified,
   graphSourceSha256:graph.sourceSha256,
   graphGeometrySha256:graph.geometrySha256,
   finalSourceSha256:finalCompiled.sourceSha256,
