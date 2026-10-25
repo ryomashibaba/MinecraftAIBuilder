@@ -79,14 +79,14 @@ const RELATIONAL_SYSTEM=SYSTEM.replace(
 const R151_SYSTEM=RELATIONAL_SYSTEM.replace(
  'Return ONLY JSON with EXACT keys: id,title,footprint,materials,layout,form,objects,relations.',
  'Return ONLY JSON with EXACT keys: id,title,footprint,materials,layout,form,objects,relations,architecture.'
-)+'\\n'+[
+)+'\n'+[
  'architecture is exactly one small object with schema,entryHierarchy,daylightStrategy,roofEdge.',
  'architecture.schema must be minecraftaibuilder-r151-envelope-intent-v1.',
  'entryHierarchy quiet or emphasized; daylightStrategy even or focused;',
  'roofEdge fine or parapet. Choose by the purpose and spatial program,',
  'not by a building-category template. Do not emit coordinates.',
  'A failed or infeasible choice is a HOLD; the host never silently replaces it.'
-].join('\\n');
+].join('\n');
 export function makeR134FreshRequest({brief,siteWidth=32,siteDepth=32}={}){
  if(!text(brief)||!range(siteWidth,18,32)||!range(siteDepth,18,32))
   fail('BRIEF_OR_SITE');

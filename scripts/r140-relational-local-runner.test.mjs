@@ -119,6 +119,7 @@ test('R151: one local-shaped model response emits semantic architecture IR and d
  },{fetcher:fakeLocal(answer,body=>{
   assert.ok(body.messages[0].content.includes('objects,relations,architecture'));
   assert.ok(body.messages[0].content.includes('roofEdge fine or parapet'));
+  assert.ok(body.messages[0].content.includes('\narchitecture is exactly'));
  })});
  assert.equal(r.status,'HOLD_TEST_DOUBLE_NOT_REAL_INFERENCE',r.reason);
  assert.equal(r.modelCalls,1);
