@@ -1,5 +1,5 @@
 # MinecraftAIBuilder — 最短AI再開入口
-更新：2026-10-25 JST。**毎日の追記禁止。履歴は [R148までの原記録](../archive/AI_RESTART_HISTORY_THROUGH_R148_JA.md) とGit履歴で保持。**
+更新：2026-10-25 JST。**毎日の追記禁止。履歴は [R148までの原記録](archive/AI_RESTART_HISTORY_THROUGH_R148_JA.md) とGit履歴で保持。**
 
 ## 正本
 - [固定憲章](AI_PROJECT_CHARTER_JA.md) / [戦略v2](PROJECT_STRATEGY_V2_JA.md)
