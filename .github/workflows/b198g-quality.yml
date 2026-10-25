@@ -101,14 +101,14 @@ jobs:
           node --check scripts/r131-real-3d-comparison.test.mjs
           node --check source/ai/r132-spatial-relations.mjs
           node --check scripts/r132-spatial-comparison.mjs
-          node --check scripts/r132-spatial-comparison.test.mjs scripts/r133-spatial-onepass.test.mjs
+          node --check scripts/r132-spatial-comparison.test.mjs
           node --check scripts/r133-spatial-onepass.mjs
           node --check scripts/r133-spatial-onepass.test.mjs
           node --check scripts/r125-feature-model-pilot.mjs
           node --check scripts/r125-feature-model-pilot.test.mjs
           node --check source/ai/r125-functional-acceptance.mjs
           node --check scripts/r125-functional-acceptance.test.mjs
-          node --test scripts/r125-mvp.test.mjs scripts/r125-world-diff.test.mjs scripts/r125-pilot.test.mjs scripts/r125-offline-replay.test.mjs scripts/r125-architecture-plan.test.mjs scripts/r125-semantic-pilot.test.mjs scripts/r125-real-plan-replay.test.mjs scripts/r125-expression-gallery.test.mjs scripts/r125-multiuse-pilot.test.mjs scripts/r125-real-multiuse-replay.test.mjs scripts/r125-functional-layer.test.mjs scripts/r125-functional-preview.test.mjs scripts/r125-feature-model-pilot.test.mjs scripts/r125-functional-acceptance.test.mjs scripts/r131-real-3d-comparison.test.mjs scripts/r132-spatial-comparison.test.mjs
+          node --test scripts/r125-mvp.test.mjs scripts/r125-world-diff.test.mjs scripts/r125-pilot.test.mjs scripts/r125-offline-replay.test.mjs scripts/r125-architecture-plan.test.mjs scripts/r125-semantic-pilot.test.mjs scripts/r125-real-plan-replay.test.mjs scripts/r125-expression-gallery.test.mjs scripts/r125-multiuse-pilot.test.mjs scripts/r125-real-multiuse-replay.test.mjs scripts/r125-functional-layer.test.mjs scripts/r125-functional-preview.test.mjs scripts/r125-feature-model-pilot.test.mjs scripts/r125-functional-acceptance.test.mjs scripts/r131-real-3d-comparison.test.mjs scripts/r132-spatial-comparison.test.mjs scripts/r133-spatial-onepass.test.mjs
       - name: Build genuine-source four-scene visual review
         run: node scripts/r125-expression-gallery.mjs --out r125-expression-preview
       - name: Upload source-only 3D comparison for human review
