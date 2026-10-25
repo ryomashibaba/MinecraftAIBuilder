@@ -111,3 +111,67 @@ test('R151 malformed, non-opted-in, or invented architecture choices HOLD instea
    request,{allowArchitecturalExpression:true}),/R149_EXPRESSION_MODEL_EXPRESSION_INTENT_CONTRACT/);
  }
 });
+
+test('R152 opt-in raised entry room has a real roof and remains accessible (synthetic model choice)',()=>{
+ const variant=reply();
+ variant.architecture={schema:'minecraftaibuilder-r152-envelope-intent-v1',
+  entryHierarchy:'quiet',daylightStrategy:'even',
+  roofEdge:'fine',section:'raised-entry'};
+ assert.throws(()=>parseR139RelationalFurnishedReply(JSON.stringify(variant),
+  request,{allowArchitecturalExpression:true}),
+  /R149_EXPRESSION_MODEL_EXPRESSION_INTENT_CONTRACT/);
+ const actual=parseR139RelationalFurnishedReply(JSON.stringify(variant),request,
+  {allowArchitecturalMassing:true});
+ const section=actual.architectural.envelope.r149ExpressionEvidence.r152RealRoomRaisedSection;
+ assert.ok(section);
+ assert.equal(section.roofHeight,9);
+ assert.equal(section.oldCeilingHeight,6);
+ assert.equal(actual.featured.placements.length,4);
+ assert.equal(actual.architectural.completed.sourceRouteAudit.status,
+  'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(actual.architectural.completed.sourceRouteAudit.featureAccess.length,4);
+ assert.equal(actual.architectural.completed.r150EquipmentEvidence.noExteriorWallFloorRoofCorridorChanged,true);
+ assert.equal(actual.architectural.completed.readiness,'NOT_PREPARED');
+ assert.deepEqual(actual.architectural.completed.BuildPlan.operations,[]);
+ const flat=reply();
+ flat.architecture={...variant.architecture,section:'continuous'};
+ const flatResult=parseR139RelationalFurnishedReply(JSON.stringify(flat),request,
+  {allowArchitecturalMassing:true});
+ assert.equal(flatResult.architectural.envelope.r149ExpressionEvidence.r152RealRoomRaisedSection,null);
+ assert.notEqual(actual.architectural.completed.geometrySha256,
+  flatResult.architectural.completed.geometrySha256);
+ for(const invalid of ['floating','fake-second-floor',null]){
+  const bad=reply();bad.architecture={...variant.architecture,section:invalid};
+  assert.throws(()=>parseR139RelationalFurnishedReply(JSON.stringify(bad),request,
+   {allowArchitecturalMassing:true}),/R149_EXPRESSION_MODEL_R152_SECTION_CONTRACT/);
+ }
+});
+test('R152 source geometry depends on shared semantic architecture choices, never building-kind templates',()=>{
+ const cases=[
+  {purpose:'A private residence with living, study and sleeping activities',section:'continuous'},
+  {purpose:'A community retail space with cashier, stock and customer circulation',section:'raised-entry'},
+  {purpose:'A laboratory supporting sample handling, observation and review',section:'raised-entry'}
+ ];
+ const built=cases.map((item,i)=>{
+  const design=reply();
+  design.id='unseen-case-'+i;
+  design.title='Unseen functional building '+i;
+  design.layout.spaces=design.layout.spaces.map((space,j)=>({
+   ...space,purpose:item.purpose+' zone '+j}));
+  design.architecture={schema:'minecraftaibuilder-r152-envelope-intent-v1',
+   entryHierarchy:'quiet',daylightStrategy:'even',roofEdge:'fine',
+   section:item.section};
+  return parseR139RelationalFurnishedReply(JSON.stringify(design),request,
+   {allowArchitecturalMassing:true});
+ });
+ assert.equal(built.length,3);
+ assert.ok(built.every(x=>x.featured.placements.length===4));
+ assert.ok(built.every(x=>x.architectural.completed.sourceRouteAudit.status===
+  'SOURCE_ROUTES_REACH_ALL_ZONES'));
+ assert.equal(built[0].architectural.envelope.r149ExpressionEvidence.r152RealRoomRaisedSection,null);
+ assert.ok(built[1].architectural.envelope.r149ExpressionEvidence.r152RealRoomRaisedSection);
+ assert.ok(built[2].architectural.envelope.r149ExpressionEvidence.r152RealRoomRaisedSection);
+ // These are deliberately TEST DOUBLEs, not real LLM generalization.
+ assert.ok(built.every(x=>x.modelReplyAuthenticity==='CALLER_PROVIDED_UNVERIFIED'));
+ assert.ok(built.every(x=>x.worldWrites===0));
+});

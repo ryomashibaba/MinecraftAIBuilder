@@ -31,6 +31,13 @@ test('real R146 pinned Qwen source -> two actual B143 3D scenes with proven unch
  assert.ok(bundle.pages.some(p=>p.file==='before-r146.html'));
  assert.ok(bundle.pages.some(p=>p.file==='after-r149.html'));
  assert.ok(bundle.pages.some(p=>p.file==='after-r150.html'));
+ assert.ok(bundle.pages.some(p=>p.file==='after-r152-host-study.html'));
+ assert.equal(e.r152HostStudy.intentAuthorship,'HOST_RESEARCH_NOT_QWEN_MODEL_SELECTION');
+ assert.equal(e.r152HostStudy.reachedEquipment,8);
+ assert.equal(e.r152HostStudy.sourceRoutes,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(e.r152HostStudy.raisedSection.roofHeight,9);
+ assert.equal(e.r152HostStudy.humanArtReview,'NOT_REVIEWED');
+ assert.notEqual(e.r152HostStudy.geometrySha256,e.r150GeometrySha256);
  assert.equal(e.r150EquipmentEvidence.preservedModelEquipmentChoices,true);
  assert.equal(e.r150EquipmentEvidence.originalEquipmentCount,8);
  assert.ok(e.r150EquipmentEvidence.appendedSmallComponentCount>=8);

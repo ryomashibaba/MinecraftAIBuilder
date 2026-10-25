@@ -8,7 +8,7 @@ import {parseR139RelationalFurnishedReply}
 import {makeR134FreshRequest} from './r134-fresh-model-pilot.mjs';
 import {CASE} from './r141-local-graph-evidence.mjs';
 import {auditR143GraphEvidence} from './r143-independent-graph-audit.mjs';
-import {deriveR149EnvelopeExpression}
+import {deriveR149EnvelopeExpression,R152_EXPRESSION_SCHEMA}
  from '../source/ai/r149-architectural-expression.mjs';
 import {deriveR150FurnitureArticulation}
  from '../source/ai/r150-furniture-articulation.mjs';
@@ -49,6 +49,13 @@ export function buildR149PairedComparison(){
   throw Error('R149_R146_INDEPENDENT_AUDIT_HOLD');
  const after=deriveR149EnvelopeExpression(before,{plan:graph.plan});
  const complete=deriveR150FurnitureArticulation(after);
+ // Archived Qwen did NOT select this shape; HOST research option only.
+ const massingIntent={schema:R152_EXPRESSION_SCHEMA,
+  entryHierarchy:'quiet',daylightStrategy:'even',
+  roofEdge:'fine',section:'raised-entry'};
+ const raisedEnvelope=deriveR149EnvelopeExpression(before,{
+  plan:graph.plan,expressionIntent:massingIntent});
+ const raised=deriveR150FurnitureArticulation(raisedEnvelope);
  const template=fs.readFileSync(path.join(root,
   'source/ai/b143-viewer-template.html'),'utf8');
  const pages=[
@@ -57,7 +64,9 @@ export function buildR149PairedComparison(){
   {file:'after-r149.html',content:renderB143Html(
    compileB143Gallery([after.design]),template)},
   {file:'after-r150.html',content:renderB143Html(
-   compileB143Gallery([complete.design]),template)}
+   compileB143Gallery([complete.design]),template)},
+  {file:'after-r152-host-study.html',content:renderB143Html(
+   compileB143Gallery([raised.design]),template)}
  ];
  const evidence={
   schema:'r149-exterior-source-visual-paired-audit-v1',
@@ -84,6 +93,19 @@ export function buildR149PairedComparison(){
   r150EquipmentEvidence:complete.r150EquipmentEvidence,
   r150SourceRoutes:complete.sourceRouteAudit.status,
   threeGenuineB143Viewers:true,
+  r152HostStudy:{
+   intentAuthorship:'HOST_RESEARCH_NOT_QWEN_MODEL_SELECTION',
+   modelCallsDuringStudy:0,
+   sourceSha256:raised.sourceSha256,
+   geometrySha256:raised.geometrySha256,
+   voxelCount:raised.compiled.primitives.length,
+   raisedSection:raisedEnvelope.r149ExpressionEvidence.r152RealRoomRaisedSection,
+   sourceRoutes:raised.sourceRouteAudit.status,
+   reachedEquipment:raised.sourceRouteAudit.featureAccess.filter(
+    x=>x.reachableFromEntrance).length,
+   humanArtReview:'NOT_REVIEWED',minecraftWalking:'NOT_TESTED',
+   safety:'NOT_PREPARED_9_BLOCKED'
+  },
   actualPairedB143Viewers:true,humanArtReview:'NOT_REVIEWED',
   minecraftWalking:'NOT_TESTED',readiness:'NOT_PREPARED',
   constructionApproved:false,executionAllowed:false,
@@ -92,20 +114,21 @@ export function buildR149PairedComparison(){
  };
  const html='<!doctype html><html lang="ja"><meta charset="utf-8">'+
   '<meta name="viewport" content="width=device-width,initial-scale=1">'+
-  '<title>R150｜R146・R149・R150の真正B143比較</title>'+
+  '<title>R152｜R146・R149・R150・R152の真正B143比較</title>'+
   '<style>body{background:#0d1724;color:#eaf2ff;font:14px/1.6 system-ui;'+
   'padding:16px}main{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));'+
   'gap:12px}section{background:#192a40;padding:12px;border-radius:9px}'+
   'iframe{width:100%;height:600px;border:1px solid #61748b}'+
   '@media(max-width:850px){main{grid-template-columns:1fr}}</style>'+
-  '<h1>R150｜保存済み実Qwen設計から派生した3段階の実3D比較</h1>'+
+  '<h1>R152｜R146から実天井高変更までの4段階比較</h1>'+
   '<p>R146原本→R149外装→R150内部設備の3段階。'+
-  'すべて同じ4室・8設備・直接接続。モデル本人が選んだ設備用途は不変。回転・拡大可能。</p>'+
+  '4室・8設備・直接接続は維持。R152はホストによる比較用研究案で、Qwenが選んだ形ではありません。</p>'+
   '<p>変更した意匠はモデル自身の選択ではありません。美術審査HOLD、Minecraft未施工。'+
   '部屋・設備のソース到達検証のみPASS。数値改善を美術合格と見なしません。</p>'+
   '<main><section><h2>R146 従来版</h2><iframe src="before-r146.html" title="R146 B143 genuine viewer"></iframe></section>'+
   '<section><h2>R149 汎用外装派生案</h2><iframe src="after-r149.html" title="R149 B143 genuine viewer"></iframe></section>'+
-  '<section><h2>R150 機能が読める設備形態</h2><iframe src="after-r150.html" title="R150 B143 genuine viewer"></iframe></section></main>'+
+  '<section><h2>R150 機能が読める設備形態</h2><iframe src="after-r150.html" title="R150 B143 genuine viewer"></iframe></section>'+
+  '<section><h2>R152 実際の天井高を変える案（ホスト提案）</h2><iframe src="after-r152-host-study.html" title="R152 B143 host study"></iframe></section></main>'+
   '<p><a style="color:#9bd8ff" href="R149_EVIDENCE.json">出所・ソース非退行・安全証拠</a></p>'+
   '</html>';
  pages.unshift({file:'index.html',content:html});
@@ -113,6 +136,7 @@ export function buildR149PairedComparison(){
  pages.push({file:'R149_DERIVED_SOURCE.json',content:JSON.stringify(after.design,null,2)+'\n'});
  pages.push({file:'R150_DERIVED_SOURCE.json',content:JSON.stringify(complete.design,null,2)+'\n'});
  pages.push({file:'R150_EVIDENCE.json',content:JSON.stringify(complete.r150EquipmentEvidence,null,2)+'\n'});
+ pages.push({file:'R152_HOST_DERIVED_SOURCE.json',content:JSON.stringify(raised.design,null,2)+'\n'});
  return {evidence,pages};
 }
 export function saveR149PairedComparison(out){

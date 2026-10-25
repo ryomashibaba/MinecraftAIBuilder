@@ -15,7 +15,8 @@ import {applyR125FeatureIntent,ASSEMBLED_SCHEMA}
 import {createHash} from 'node:crypto';
 import {recoverR146RoofProfileAsMaterial}
  from '../source/ai/r146-roof-material-boundary.mjs';
-import {deriveR149EnvelopeExpression,validateR151EnvelopeIntent}
+import {deriveR149EnvelopeExpression,validateR151EnvelopeIntent,
+ validateR152EnvelopeIntent}
  from '../source/ai/r149-architectural-expression.mjs';
 import {deriveR150FurnitureArticulation}
  from '../source/ai/r150-furniture-articulation.mjs';
@@ -29,18 +30,21 @@ const sha=x=>createHash('sha256').update(x).digest('hex');
 export {RELATIONAL_INSTRUCTIONS} from './r139-relational-instructions.mjs';
 
 export function parseR139RelationalFurnishedReply(raw,request,
- {allowRoofMaterialCorrection=false,allowArchitecturalExpression=false}={}){
+ {allowRoofMaterialCorrection=false,allowArchitecturalExpression=false,
+  allowArchitecturalMassing=false}={}){
  if(typeof raw!=='string'||raw.length<20||raw.length>22000)
   fail('MISSING_OR_OVERSIZED_MODEL_REPLY');
  let reply;
  try{reply=JSON.parse(raw);}catch{fail('NOT_JSON');}
  const keys=['id','title','footprint','materials','layout','form',
   'objects','relations'];
- const expressive=allowArchitecturalExpression===true;
+ const expressive=allowArchitecturalExpression===true||
+  allowArchitecturalMassing===true;
  if(!only(reply,expressive?[...keys,'architecture']:keys)||
   !only(reply.relations,['entryFacingZoneId','directAdjacencies']))
   fail('FULL_REPLY_CONTRACT');
- if(expressive)validateR151EnvelopeIntent(reply.architecture);
+ if(allowArchitecturalMassing)validateR152EnvelopeIntent(reply.architecture);
+ else if(expressive)validateR151EnvelopeIntent(reply.architecture);
  const repaired=allowRoofMaterialCorrection?
   recoverR146RoofProfileAsMaterial(raw,reply):{
    derivedReply:structuredClone(reply),evidence:{

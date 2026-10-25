@@ -87,6 +87,16 @@ const R151_SYSTEM=RELATIONAL_SYSTEM.replace(
  'not by a building-category template. Do not emit coordinates.',
  'A failed or infeasible choice is a HOLD; the host never silently replaces it.'
 ].join('\n');
+const R152_SYSTEM=R151_SYSTEM.replace(
+ 'architecture is exactly one small object with schema,entryHierarchy,daylightStrategy,roofEdge.',
+ 'architecture is exactly one small object with schema,entryHierarchy,daylightStrategy,roofEdge,section.'
+).replace('minecraftaibuilder-r151-envelope-intent-v1',
+ 'minecraftaibuilder-r152-envelope-intent-v1')+'\n'+[
+ 'section MUST be continuous or raised-entry.',
+ 'raised-entry means an actual higher ceiling and roof over the model-selected entry room,',
+ 'not a decorative false upper floor or building-specific template.',
+ 'Select by building use and desired section. The host rejects invalid geometry.'
+].join('\n');
 export function makeR134FreshRequest({brief,siteWidth=32,siteDepth=32}={}){
  if(!text(brief)||!range(siteWidth,18,32)||!range(siteDepth,18,32))
   fail('BRIEF_OR_SITE');
@@ -137,8 +147,8 @@ export function parseR134FreshArgs(argv){
  if(!['none','assembled'].includes(equipmentMode))fail('INVALID_EQUIPMENT_MODE');
  const topologyMode=args['--topology']??'linear';
  const architectureMode=args['--architecture']??'none';
- if(!['none','intent'].includes(architectureMode)||
-  (architectureMode==='intent'&&topologyMode!=='graph'))
+ if(!['none','intent','massing'].includes(architectureMode)||
+  (architectureMode!=='none'&&topologyMode!=='graph'))
   fail('ARCHITECTURE_REQUIRES_GRAPH_TOPOLOGY');
  if(!['linear','graph'].includes(topologyMode)||
   (topologyMode==='graph'&&(equipmentMode!=='assembled'||
@@ -155,8 +165,8 @@ export async function runR134FreshModel({
  endpoint='http://127.0.0.1:11434/v1/chat/completions'
 }={}, {fetcher=fetch,timeoutMs=120000}={}){
  const p=ENDPOINT.exec(endpoint??'');
- if(!['none','intent'].includes(architectureMode)||
-  (architectureMode==='intent'&&topologyMode!=='graph')||
+ if(!['none','intent','massing'].includes(architectureMode)||
+  (architectureMode!=='none'&&topologyMode!=='graph')||
   !['none','bounded','roof-material-only'].includes(recoveryMode)||
   (recoveryMode==='bounded'&&equipmentMode!=='assembled')||
   !['none','assembled'].includes(equipmentMode)||
@@ -176,7 +186,8 @@ export async function runR134FreshModel({
   semanticEquipment:{perRoomAtLeastOne:true,maxObjects:8,
    allowedRoles:['work-surface','equipment-bank','display-stand',
     'storage-rack','seating']}}:request;
- const maxTokens=architectureMode==='intent'?1900:
+ const maxTokens=architectureMode==='massing'?2050:
+  architectureMode==='intent'?1900:
   topologyMode==='graph'?1750:
   equipmentMode==='assembled'?1450:900;
  fs.mkdirSync(dir,{recursive:false});
@@ -215,7 +226,8 @@ export async function runR134FreshModel({
     body:JSON.stringify({model,stream:false,temperature:0.65,
      max_tokens:maxTokens,reasoning_effort:'none',
      response_format:{type:'json_object'},messages:[
-      {role:'system',content:architectureMode==='intent'?R151_SYSTEM:
+      {role:'system',content:architectureMode==='massing'?R152_SYSTEM:
+       architectureMode==='intent'?R151_SYSTEM:
        topologyMode==='graph'?RELATIONAL_SYSTEM:
        equipmentMode==='assembled'?SYSTEM+'\n'+FURNISHED_SYSTEM:SYSTEM},
       {role:'user',content:JSON.stringify(sourceRequest)}]})});
@@ -243,7 +255,8 @@ export async function runR134FreshModel({
    const composed=topologyMode==='graph'?
     relationalParser(raw,request,{
      allowRoofMaterialCorrection:recoveryMode==='roof-material-only',
-     allowArchitecturalExpression:architectureMode==='intent'
+     allowArchitecturalExpression:architectureMode==='intent',
+     allowArchitecturalMassing:architectureMode==='massing'
     }):
     recovered?.result??(equipmentMode==='assembled'?
      parseR135FreshFurnishedReply(raw,request):null);
@@ -277,11 +290,12 @@ export async function runR134FreshModel({
     if(topologyMode==='graph'){
      write(dir,'R139_MODEL_SPATIAL_RELATIONS.json',composed.semanticIntent);
      if(composed.architectural){
-      write(dir,'R151_MODEL_ARCHITECTURE_IR.json',
+      const archTag=architectureMode==='massing'?'R152':'R151';
+      write(dir,archTag+'_MODEL_ARCHITECTURE_IR.json',
        composed.architectural.intent);
-      write(dir,'R151_HOST_EXTERIOR_B143_SOURCE.json',
+      write(dir,archTag+'_HOST_EXTERIOR_B143_SOURCE.json',
        composed.architectural.envelope.design);
-      write(dir,'R151_HOST_ARCHITECTURE_EVIDENCE.json',{
+      write(dir,archTag+'_HOST_ARCHITECTURE_EVIDENCE.json',{
        originalRawSha256:composed.originalRawSha256,
        intentAuthorship:composed.architectural.intentAuthorship,
        geometryAuthorship:composed.architectural.geometryAuthorship,

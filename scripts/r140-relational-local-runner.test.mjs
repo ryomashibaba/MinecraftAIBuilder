@@ -36,7 +36,9 @@ const fakeLocal=(answer,inspect=()=>{})=>async(url,opts)=>{
  assert.equal(opts.method,'POST');
  const body=JSON.parse(opts.body);
  assert.equal(body.model,'qwen3:14b');
- assert.equal(body.max_tokens,Object.hasOwn(answer,'architecture')?1900:1750);
+ assert.equal(body.max_tokens,
+  !Object.hasOwn(answer,'architecture')?1750:
+   answer.architecture?.schema==='minecraftaibuilder-r152-envelope-intent-v1'?2050:1900);
  assert.equal(body.stream,false);
  assert.ok(body.messages[0].content.includes('entryFacingZoneId'));
  assert.ok(body.messages[0].content.includes('directAdjacencies'));
@@ -138,4 +140,34 @@ test('R151: one local-shaped model response emits semantic architecture IR and d
  const opts=parseR134FreshArgs([...oldArgs,
   '--equipment','assembled','--topology','graph','--architecture','intent']);
  assert.equal(opts.architectureMode,'intent');
+});
+
+test('R152 single synthetic provider response makes raised-section B143 with original room equipment routes',async t=>{
+ const dir=tmp();t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));
+ const answer=reply();
+ answer.architecture={schema:'minecraftaibuilder-r152-envelope-intent-v1',
+  entryHierarchy:'quiet',daylightStrategy:'focused',
+  roofEdge:'fine',section:'raised-entry'};
+ const dest=path.join(dir,'r152-massing');
+ const result=await runR134FreshModel({model:'qwen3:14b',brief,
+  outDir:dest,topologyMode:'graph',
+  equipmentMode:'assembled',architectureMode:'massing'},
+  {fetcher:fakeLocal(answer,body=>{
+   assert.ok(body.messages[0].content.includes('section MUST be continuous or raised-entry'));
+   assert.ok(body.messages[0].content.includes('minecraftaibuilder-r152-envelope-intent-v1'));
+  })});
+ assert.equal(result.status,'HOLD_TEST_DOUBLE_NOT_REAL_INFERENCE',result.reason);
+ assert.equal(result.architectureIntentFromModel,false);
+ assert.equal(result.architecture3DSourceOnly,true);
+ assert.equal(result.equipmentCount,4);
+ assert.equal(result.sourceRoutes,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.ok(fs.existsSync(path.join(dest,'R152_MODEL_ARCHITECTURE_IR.json')));
+ assert.ok(fs.existsSync(path.join(dest,'R152_HOST_ARCHITECTURE_EVIDENCE.json')));
+ assert.ok(fs.existsSync(path.join(dest,'index.html')));
+ assert.equal(result.worldWrites,0);
+ assert.deepEqual(result.gates,Array(9).fill('BLOCKED'));
+ const opts=parseR134FreshArgs(['--model','qwen3:14b','--brief',brief,
+  '--equipment','assembled','--topology','graph',
+  '--architecture','massing','--out','r152-test']);
+ assert.equal(opts.architectureMode,'massing');
 });

@@ -10,6 +10,20 @@ const fail=s=>{throw Error('R149_EXPRESSION_'+s);};
 const eq=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
 const cell=p=>p.join(',');
 export const R151_EXPRESSION_SCHEMA='minecraftaibuilder-r151-envelope-intent-v1';
+export const R152_EXPRESSION_SCHEMA='minecraftaibuilder-r152-envelope-intent-v1';
+export function validateR152EnvelopeIntent(intent){
+ const keys=['schema','entryHierarchy','daylightStrategy','roofEdge','section'];
+ if(!intent||typeof intent!=='object'||Array.isArray(intent)||
+  Object.keys(intent).length!==keys.length||
+  !keys.every(k=>Object.hasOwn(intent,k))||
+  intent.schema!==R152_EXPRESSION_SCHEMA||
+  !['quiet','emphasized'].includes(intent.entryHierarchy)||
+  !['even','focused'].includes(intent.daylightStrategy)||
+  !['fine','parapet'].includes(intent.roofEdge)||
+  !['continuous','raised-entry'].includes(intent.section))
+  fail('MODEL_R152_SECTION_CONTRACT');
+ return true;
+}
 export function validateR151EnvelopeIntent(intent){
  const keys=['schema','entryHierarchy','daylightStrategy','roofEdge'];
  if(!intent||typeof intent!=='object'||Array.isArray(intent)||
@@ -28,7 +42,11 @@ function interior(compiled,w,d){
   .map(cell).sort();
 }
 export function deriveR149EnvelopeExpression(base,{plan,expressionIntent=null}={}){
- if(expressionIntent!==null)validateR151EnvelopeIntent(expressionIntent);
+ if(expressionIntent!==null){
+  if(expressionIntent.schema===R152_EXPRESSION_SCHEMA)
+   validateR152EnvelopeIntent(expressionIntent);
+  else validateR151EnvelopeIntent(expressionIntent);
+ }
  if(base?.schema!=='minecraftaibuilder-r125-featured-source-v1'||
   !plan?.footprint||!plan?.materials||!plan?.form||
   !base.design||!base.compiled||
@@ -104,6 +122,41 @@ export function deriveR149EnvelopeExpression(base,{plan,expressionIntent=null}={
   add('entry-portal-left','add','accent',[xDoor-2,2,0],[1,4,1]);
   add('entry-portal-right','add','accent',[xDoor+3,2,0],[1,4,1]);
  }
+ // R152 genuine taller entry-room section, rather than a fake rooftop box.
+ // Ceiling under this segment is REMOVED; upper walls, high windows and
+ // weather-covering roof are rebuilt. All existing room/feature voxels y<=5 stay.
+ let raisedRoom=null;
+ if(expressionIntent?.section==='raised-entry'){
+  const matches=base.program[0].zones.filter(zone=>
+   zone.range.z[0]===2&&xDoor>=zone.range.x[0]&&
+   xDoor+1<=zone.range.x[1]);
+  if(matches.length!==1)fail('R152_REAL_ENTRY_ROOM_NOT_UNIQUE');
+  const zone=matches[0],x0=zone.range.x[0]-1,
+   x1=zone.range.x[1]+1,z0=1,z1=zone.range.z[1]+1,
+   sx=x1-x0+1,sz=z1-z0+1;
+  if(x0<1||x1>w-2||z1>d-2||sx<7||sz<7||
+   design.bounds.height<=9)
+   fail('R152_ROOM_CANNOT_SUPPORT_SECTION');
+  add('section-remove-low-ceiling','cut',null,
+   [x0+1,6,z0+1],[sx-2,4,sz-2]);
+  add('section-front','add',plan.materials.wall,
+   [x0,6,z0],[sx,3,1]);
+  add('section-back','add',plan.materials.wall,
+   [x0,6,z1],[sx,3,1]);
+  add('section-west','add',plan.materials.wall,
+   [x0,6,z0+1],[1,3,sz-2]);
+  add('section-east','add',plan.materials.wall,
+   [x1,6,z0+1],[1,3,sz-2]);
+  add('section-glazing-cut','cut',null,
+   [x0+1,7,z0],[sx-2,2,1]);
+  add('section-glazing-glass','add','glass',
+   [x0+1,7,z0],[sx-2,2,1]);
+  add('section-higher-roof','add',roof,
+   [x0,9,z0],[sx,1,sz]);
+  raisedRoom={zoneId:zone.id,roofHeight:9,
+   oldCeilingHeight:6,footprint:{x:[x0,x1],z:[z0,z1]},
+   interiorWitness:[x0+2,z0+2]};
+ }
  const compiled=compileDesign(design);
  if(!verifyCompiled(design,compiled))fail('B143_COMPILE_MISMATCH');
  if(!eq(design.elements.slice(0,initial),base.design.elements)||
@@ -111,6 +164,12 @@ export function deriveR149EnvelopeExpression(base,{plan,expressionIntent=null}={
   fail('INTERIOR_OR_MODEL_PROGRAM_REGRESSION');
  // Windows may NOT turn the real exterior door into a glass wall.
  const occupied=new Set(compiled.primitives.map(p=>cell(p.slice(0,3))));
+ if(raisedRoom){
+  const [cx,cz]=raisedRoom.interiorWitness;
+  if([6,7,8].some(y=>occupied.has(cell([cx,y,cz])))||
+   !occupied.has(cell([cx,9,cz])))
+   fail('R152_HIGH_ROOM_CEILING_NOT_REAL');
+ }
  for(const x of [xDoor,xDoor+1])for(const z of [0,1,2])
   for(const y of [2,3,4]){
    if(occupied.has(cell([x,y,z])))fail('EXTERIOR_ENTRY_BLOCKED');
@@ -158,6 +217,7 @@ export function deriveR149EnvelopeExpression(base,{plan,expressionIntent=null}={
    originalRoofProfile:plan.form.roofProfile,
    modelIntentChanged:false,
    modelExpressionIntentProvided:expressionIntent!==null,
+   r152RealRoomRaisedSection:raisedRoom,
    originalSourceSha256:base.sourceSha256,
    enhancedSourceSha256:compiled.sourceSha256,
    aestheticJudgement:'HOLD_FOR_HUMAN_3D_REVIEW',
