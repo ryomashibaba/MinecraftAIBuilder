@@ -123,3 +123,20 @@ test('CLI accepts explicit assembled mode and rejects all unsupported mode value
  assert.throws(()=>parseR134FreshArgs([...argv.slice(0,-1),'danger']),
   /R134_MODEL_INVALID_EQUIPMENT_MODE/);
 });
+
+
+test('R168: long meaningful model equipment IDs compile bounded unique source elements without altering the semantic labels',()=>{
+ const p=proposal();
+ p.objects=[
+  {id:'telescope-control-table',zoneId:'public-workshop',role:'work-surface',corner:'far-left'},
+  {id:'seating-near-telescope',zoneId:'gallery-space',role:'seating',corner:'far-right'},
+  {id:'instrument-access-aisle',zoneId:'component-storage',role:'work-surface',corner:'far-left'}
+ ];
+ const r=parseR135FreshFurnishedReply(JSON.stringify(p),req());
+ assert.deepEqual(r.featured.placements.map(x=>x.id),p.objects.map(x=>x.id));
+ assert.equal(r.sourceRoutes,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ for(const e of r.featured.design.elements)assert.ok(e.id.length<=40);
+ assert.ok(r.featured.placements.some(x=>x.elementIds.some(id=>
+  id.startsWith('feature-')&&!id.includes('telescope-control-table'))));
+ assert.equal(r.worldWrites,0);
+});
