@@ -10,8 +10,8 @@
 | 継続ブランチ | `feature/b198zr1-protected-architectural-revision` |
 | 継続PR | [#128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128) — Open / Draft / Unmerged |
 | HEAD | [開発ブランチの最新HEADを毎回GitHubで確認](https://github.com/ryomashibaba/MinecraftAIBuilder/commits/feature/b198zr1-protected-architectural-revision)（R98の初期実メッシュ検証対象は `9a2b5de9d8ba41a2b7ca4e626aa9d54ff4ffffdd`） |
-| 最新確認済み実装工程 | **R142 玄関の物理接続を追加・CI検証待ち。前のR140 CI成功、R141/R142のCI合格は未確定。新グラフの実Qwen推論とMinecraft実機は未実施** |
-| 次に取り組む工程 | **R141/R142 CIと3D成果を確認。入口→モデル指定室の真の到達・部屋間の直接開口・設備利用性を検査後、実ローカルQwen/Gemmaで新しい設計1件を試行** |
+| 最新確認済み実装工程 | **R143：CI実テスト登録漏れを修正、完成ボクセル独立監査を導入、既存Qwen保存3Dにも適用。R140旧CI成功だがR140/R141新テストは未実行だったため、R143再検証待ち。実ローカル新グラフQwen未実施。** |
+| 次に取り組む工程 | **R143 CIの真の全新テスト実行を確認、失敗なら即修正。既存実Qwenの独立監査を評価し、その後新規実ローカルQwen/Gemmaで1回空間グラフ提案を生成し意味・3D・設備を審査。** |
 | 施工・モデル | **2026-10-24 Qwen/Gemma実推論・Minecraft試験施工の包括許可あり（都度承認不要）。** 準備性と各種技術安全ゲートは別途必要。現行コードのNOT_PREPARED / 9 BLOCKEDは自動PASSではない |
 
 **最新情報への直リンク：** [ブランチの現在地](https://github.com/ryomashibaba/MinecraftAIBuilder/tree/feature/b198zr1-protected-architectural-revision) ／ [Actions一覧](https://github.com/ryomashibaba/MinecraftAIBuilder/actions) ／ [PR #128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128)
@@ -19,6 +19,14 @@
 
 
 
+
+## R143 — 未実行だったテスト登録の修正＋完成ボクセル独立検証（2026-10-25 JST）
+- R140/R141は過去の `node --check`（構文確認）には含まれたが、GitHub Actionsの実 `node --test` 一覧に未登録だったことを発見。前CIのSUCCESSはこれらの新規テスト合格の証拠ではなかったため、`.github/workflows/b198g-quality.yml` の実テスト一覧にR140/R141、さらにR143の新監査を登録し、重複・連結された構文検査の混乱を整理。
+- **`scripts/r143-independent-graph-audit.mjs`**：モデルの隣接ペア・入口指定と、保存された**R139グラフB143ソース＋R130設備付き完成B143ボクセル**を独立再コンパイル。source/geometry SHA照合、モデル指定室の実外壁2幅入口と支持床・3高の空洞・外装側クリアランス、各直接ペアが本当に`add wall`から`cut`で壁を除去したこと、ペア前後の床・頭上空間の実ボクセルを検証。ホストが記録した `directDoors` 等の真偽フラグのみで成功扱いしない。
+- **`scripts/r143-independent-graph-audit.test.mjs`** に4室2直接ドア／3室1直接ドア／偽造SHA・改ざん開口・空グラフを検査。R141実ローカル推論受付も独立監査結果 `SOURCE_ROOM_GRAPH_VERIFIED` を必須化し、`R143_INDEPENDENT_VOXEL_AUDIT.json` を保存。
+- 保存済み実Qwen回答3件の `scripts/r139-user-qwen-relations-comparison.mjs` にも同一独立監査を統合し、R138/R139の比較3Dで **Qwen選択の部屋/設備、ホスト選択の隣接・入口、物理ボクセル監査** を区別して記録。新しいQwen空間選択を行った証拠ではない。
+- **現時点の結果**：GitHubへコード・テスト・この文書は保存した。R141/R142以降のActionsは長くQUEUEDであり、R143追加テストの実PASSは **未確認**。未実行を合格扱いせず、ランナーが動いた時に失敗ログを読み差分修正すること。新しいローカルQwen/Gemma推論・美術審査・Minecraft実動線・Mac2B動作は未実施。
+- **安全**：施工 `NOT_PREPARED`、9ゲートBLOCKED、`BuildPlan.operations=[]`、世界操作0、Draft PR #128未マージ。無関係なビルドカテゴリ別テンプレートや余分なモデル呼び出しを導入していない。
 
 ## R142 — モデルが選んだ部屋へ直接つながる玄関（2026-10-25 JST）
 - 前段R139/R141の `entryFacingZoneId` は**前列の部屋ラベル**を選ぶだけで、実際の外部入口はR138から引き継いだ中央通路の玄関に固定されていた。この意味／実ジオメトリ不一致を解消。
