@@ -132,7 +132,8 @@ export function deriveR155Roofline(base,{intent,authorship=
   }
   const highest=Math.max(...slope),
    peaks=slope.map((level,k)=>level===highest?k:-1).filter(k=>k>=0),
-   mid=peaks[Math.floor(peaks.length/2)];
+   mid=peaks[Math.floor(peaks.length/2)],
+   roomIndex=intent.roofSilhouette==='shed'?Math.max(1,mid-1):mid;
   certificates.push({zoneId:v.zoneId,roofHeightBefore:h,
    silhouette:intent.roofSilhouette,roofHeightAtPeak:h+highest,
    footprint:v.volumeFootprint,slopeLevels:slope,
@@ -140,7 +141,7 @@ export function deriveR155Roofline(base,{intent,authorship=
    // Y=h was the OLD flat ceiling. It must now be physically empty.
    // A narrow ridge may require an opaque riser at y=h+highest-1,
    // which is structurally valid but not a reason to label y=h sealed.
-   sectionCavity:[x0+mid,h,z0+Math.floor(sz/2)],
+   sectionCavity:[x0+roomIndex,h,z0+Math.floor(sz/2)],
    sourceElementsAdded:copy.elements.length});
  }
  if(copy.elements.length>160)
