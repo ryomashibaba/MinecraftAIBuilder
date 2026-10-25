@@ -344,6 +344,7 @@ test('R160 fake local model produces side gallery real source; never certified a
  assert.equal(result.status,'HOLD_TEST_DOUBLE_NOT_REAL_INFERENCE',result.reason);
  assert.equal(result.genuineNonCentralTopologySourceOnly,true);
  assert.equal(result.genuineTopologyDrivenHighRoomsSourceOnly,true);
+ assert.equal(result.genuineTopologyDrivenDaylightSourceOnly,true);
  assert.equal(result.architectureIntentFromModel,false);
  assert.equal(result.sourceRoutes,'SOURCE_ROUTES_REACH_ALL_ZONES');
  assert.equal(result.zoneCount,3);assert.equal(result.equipmentCount,3);
@@ -351,6 +352,8 @@ test('R160 fake local model produces side gallery real source; never certified a
   'R160_HOST_ARCHITECTURE_EVIDENCE.json'),'utf8'));
  assert.equal(evidence.independentSideGalleryProof.side,'west-gallery');
  assert.equal(evidence.independentSideGalleryProof.realRoomRanges.length,3);
+ assert.equal(evidence.actualExteriorClerestoryProof.windowCount,3);
+ assert.equal(evidence.actualExteriorClerestoryProof.allHighRoomsActuallyDaylitViaExteriorGlass,true);
  assert.equal(evidence.realUsableRoomSectionProof.realRoomCount,3);
  assert.equal(evidence.realUsableRoomSectionProof.sourceRoutes,
   'SOURCE_ROUTES_REACH_ALL_ZONES');

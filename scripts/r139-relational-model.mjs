@@ -32,6 +32,8 @@ import {deriveR160SideGalleryTopology}
  from '../source/ai/r160-side-gallery.mjs';
 import {deriveR162RoomSectionMassing}
  from '../source/ai/r162-room-section-massing.mjs';
+import {deriveR163DaylitSections}
+ from '../source/ai/r163-daylit-sections.mjs';
 import {validateR160TopologyIntent,r160ToR151}
  from '../source/ai/r160-topology-intent.mjs';
 
@@ -140,8 +142,10 @@ export function parseR139RelationalFurnishedReply(raw,request,
   const integrated=allowTopologyComposition?
    deriveR162RoomSectionMassing(envelope,{
     topologyIntent:architecture.spatialTopology}):null;
-  const completed=deriveR150FurnitureArticulation(
+  const articulated=deriveR150FurnitureArticulation(
    integrated??roofline??volume??envelope);
+  const completed=allowTopologyComposition?
+   deriveR163DaylitSections(articulated):articulated;
   return {intent:structuredClone(architecture),envelope,volume,roofline,
    integrated,completed,
    intentAuthorship:'IN_THIS_SAME_MODEL_REPLY_NOT_HOST_INFERRED',
