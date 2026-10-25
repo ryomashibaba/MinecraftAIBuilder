@@ -5,7 +5,7 @@
 - 住宅4室: living/sleeping/kitchen/storage、モデル指定直接扉2、ホスト追加連絡扉1。店舗4室: craftwork/storefront/inventory/employee、同2+1。いずれもホスト研究用4室グリッドであり、元モデルのcentral-spine実現には**該当しない**。原文SHA/派生SHA記録あり。
 - 研究施設（8設備）: `R150_ROLE_ORIGINAL_EQUIPMENT_ACCESS_OR_ROOM_ROUTE_REGRESSION`。実家具配置はR149時点で経路成立。原因は後続の**任意の**R150細部追加が通路・設備アクセスを再度遮ること。部屋／設備の数や位置を黙って削除する代わりに、R169では詳細追加だけを安全な順に再採択し、通行を損なう追加装飾をスキップして理由を個別記録する。
 - 5方向画像美術審査: 住宅と店舗とも同じ24×24のほぼ平面長方形屋根・同種の外壁と窓。差が小さく**現代建築の美術水準未達**。成功は「室内の機能と現実B143ソースの生成」であり、外観ART PASSではない。
-- R169変更: `source/ai/r150-furniture-articulation.mjs` が任意詳細を元設備境界内かつ全室/全設備への2幅経路の通過時のみ採用する。危険な詳細は `suppressedUnsafeComponents` に記録。採用不能ならHOLD。原家具・原源形状は不変。合成8設備の回帰テスト追加。オフラインZIP出力名 `R169_FURNITURE_EVIDENCE_ZIP` は旧R168を上書きしない。
+- R169変更: `source/ai/r150-furniture-articulation.mjs` が任意詳細を元設備境界内かつ全室/全設備への2幅経路の通過時のみ採用する。危険な詳細は `suppressedUnsafeComponents` に記録。通常経路では全件採用不能ならHOLD。**保存済みモデルの明示研究オプションに限り、全詳細保留でも安全な元R149家具付き3Dを維持し、ART HOLD_DETAILS_DEFERRED と記録**。原家具・原源形状は不変。合成8設備の回帰テスト追加。オフラインZIP出力名 `R169_FURNITURE_EVIDENCE_ZIP` は旧R168を上書きしない。
 - 未確認: R169の合成CI、ユーザー保存済み実3用途による再生、実Minecraft内歩行、美術品質。次は **再推論なし**で保存済み原本のR169 ZIPを検査。各ソース真偽と家具詳細の抑制状況を確認後、独立した外観・高さ・ボリューム改善に着手する。旧原本・main・Draft PR #128・施工禁止を維持。
 
 ## R167実モデル原本の失敗判明 → R168共通生成器研究（2026-10-25）
