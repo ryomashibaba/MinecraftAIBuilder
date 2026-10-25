@@ -10,8 +10,8 @@
 | 継続ブランチ | `feature/b198zr1-protected-architectural-revision` |
 | 継続PR | [#128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128) — Open / Draft / Unmerged |
 | HEAD | [開発ブランチの最新HEADを毎回GitHubで確認](https://github.com/ryomashibaba/MinecraftAIBuilder/commits/feature/b198zr1-protected-architectural-revision)（R98の初期実メッシュ検証対象は `9a2b5de9d8ba41a2b7ca4e626aa9d54ff4ffffdd`） |
-| 最新確認済み実装工程 | **R141 実装とCI回帰追加。R140 CI成功・R139/R138比較3D成果物確認。R141 CIと新しい実モデル関係設計の成功は未確定** |
-| 次に取り組む工程 | **R141 CI結果の確認・失敗修正。ローカルQwen/Gemmaでの1回の新グラフ設計実測、3Dと意味関係の独立検証。** |
+| 最新確認済み実装工程 | **R142 玄関の物理接続を追加・CI検証待ち。前のR140 CI成功、R141/R142のCI合格は未確定。新グラフの実Qwen推論とMinecraft実機は未実施** |
+| 次に取り組む工程 | **R141/R142 CIと3D成果を確認。入口→モデル指定室の真の到達・部屋間の直接開口・設備利用性を検査後、実ローカルQwen/Gemmaで新しい設計1件を試行** |
 | 施工・モデル | **2026-10-24 Qwen/Gemma実推論・Minecraft試験施工の包括許可あり（都度承認不要）。** 準備性と各種技術安全ゲートは別途必要。現行コードのNOT_PREPARED / 9 BLOCKEDは自動PASSではない |
 
 **最新情報への直リンク：** [ブランチの現在地](https://github.com/ryomashibaba/MinecraftAIBuilder/tree/feature/b198zr1-protected-architectural-revision) ／ [Actions一覧](https://github.com/ryomashibaba/MinecraftAIBuilder/actions) ／ [PR #128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128)
@@ -19,6 +19,14 @@
 
 
 
+
+## R142 — モデルが選んだ部屋へ直接つながる玄関（2026-10-25 JST）
+- 前段R139/R141の `entryFacingZoneId` は**前列の部屋ラベル**を選ぶだけで、実際の外部入口はR138から引き継いだ中央通路の玄関に固定されていた。この意味／実ジオメトリ不一致を解消。
+- `source/ai/r139-room-relations.mjs` でモデル指定ゾーンの前方外壁に2ブロック幅・高さ3ブロックの玄関CUTを移設。元の中央通路の開口は残さない。正面窓ガラスとの干渉、開口そのものの占有、支持床と内側頭上空気を実B143プリミティブから検査。ソース経路監査は**新しい玄関の内側から各部屋と設備への到達**に変更。3室の全奥行右翼(`whole-right`)も入口可能。
+- `scripts/r139-room-relations.test.mjs` に玄関の実ボクセル状態・開口位置とモデル指定室の同一性・旧R138データ非改変を検査する回帰を追加。
+- `scripts/r141-local-graph-evidence.mjs` では `modelRequestedEntryRoomId`／`sourceEntranceRoomVerified` を個別記録。直接隣接室間の実開口と新玄関の両方がソース検証された場合にのみ `spatialDecisionDemonstrated` を認める。現状**ローカル実Qwenの新関係提案は未実測**。
+- 停止条件は変えない：`NOT_PREPARED`・9 BLOCKED・Minecraftワールド操作0。外部地形/着地点、実Minecraft歩行、UI/美術品質、人間審査は未検証。CIは実際の実行結果で後日確定し、成功と推定しない。
+- 次の1手：R142 CIでモデル入口先・実動線・旧版非退行を確定。失敗時は共通原因を修正し、成功後に実ローカルモデルを1回実行する。
 
 ## R141 — グラフ優先の設備配置と実ローカルモデル検証入口（2026-10-25 JST）
 - **R140成功確認**：CI `40163248832` は SUCCESS。Artifact `R139-REAL-QWEN-SEMANTICS-HOST-GRAPH-3D` と `R138-REAL-QWEN14B-STRIP-VS-BRANCH-3D` をGitHub Actionsに生成済み。これは実Qwen保存回答の意味要素をホスト指定グラフへ変換した成果であって、Qwen自体が新グラフを作った証拠ではない。
