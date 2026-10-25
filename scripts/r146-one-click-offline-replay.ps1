@@ -15,11 +15,20 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'R146_STAGED_CHANGES_PRESENT' }
     & git pull --ff-only origin $branch
     if ($LASTEXITCODE -ne 0) { throw 'R146_FAST_FORWARD_FAILED' }
+    # Import-only smoke test catches ESM top-level circular initialization
+    # BEFORE creating an output folder. This makes zero Ollama calls.
+    & node --input-type=module --eval "await import('./scripts/r146-replay-saved-qwen.mjs')"
+    if ($LASTEXITCODE -ne 0) {
+        throw 'R147_MODULE_IMPORT_PRECHECK_FAILED_NO_OUTPUT_CREATED'
+    }
+    Write-Host 'R147_MODULE_IMPORT_OK (zero model calls)'
     $folder = 'r146-offline-qwen-review-' + (Get-Date -Format 'yyyyMMdd-HHmmssfff')
     & node scripts/r146-replay-saved-qwen.mjs --out $folder
     $nodeExit = $LASTEXITCODE
     $reportPath = Join-Path $folder 'R146_REPORT.json'
-    if (-not (Test-Path $reportPath)) { throw 'R146_NO_REPORT' }
+    if (-not (Test-Path $reportPath)) {
+        throw "R146_STARTUP_FAILED_NO_REPORT (Node exit code $nodeExit; see Node error above)"
+    }
     $report = Get-Content $reportPath -Raw | ConvertFrom-Json
     Write-Host ''
     Write-Host "R146_STATUS: $($report.status)"
