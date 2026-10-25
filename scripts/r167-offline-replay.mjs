@@ -68,7 +68,9 @@ function replayCase(dir,c,manifestCase){
   entry.hostAxisDerivation=result.hostAxisDerivation;
   const req=makeR134FreshRequest({brief:c.brief,siteWidth:32,siteDepth:32});
   const composed=parseR139RelationalFurnishedReply(result.derivedRaw,req,
-   {allowTopologyComposition:true});
+   {allowTopologyComposition:true,allowHostGridResearch:true});
+  entry.hostGridResearchOverride=composed.hostGridResearchOverride;
+  entry.sectionScope=composed.architectural?.roomSectionScope??'UNKNOWN';
   const built=composed.architectural?.completed;
   if(!built||!verifyCompiled(built.design,built.compiled)||
     built.sourceSha256!==built.compiled.sourceSha256||
@@ -100,6 +102,7 @@ function reportHtml(report) {
  report.cases.map(c=>'<section><h2>'+esc(c.use)+'</h2>'+
  '<p>'+esc(c.reason)+'</p>'+
  '<p>元回答SHA256 '+esc(c.rawSha256)+' / 由来 '+esc(c.hostAxisDerivation?.code??'変換なし')+'</p>'+
+ '<p>ホスト別配置: '+esc(c.hostGridResearchOverride?.modelExplicitTopologyNotImplemented?'モデルの中央通路指定とは異なる4室グリッド研究案':'追加なし')+' / 上部断面: '+esc(c.sectionScope??'未生成')+'</p>'+
  (c.sourceVerified?'<iframe src="'+c.id+'-derived.html"></iframe><div>'+
  ['front','rear','west','east','roof'].map(d=>'<a href="'+c.id+'-'+d+'.svg"><img src="'+c.id+'-'+d+'.svg" alt="'+esc(d)+'"></a>').join('')+'</div>':
  '<p>実3Dは未生成。未対応の部屋関係を黙って削除しません。</p>')+'</section>').join('')+
