@@ -11,6 +11,7 @@ import {compileR134MultiZonePlan,SCHEMA}
  from '../source/ai/r134-multi-zone-plan.mjs';
 import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
 import {parseR135FreshFurnishedReply} from './r135-furnished-program.mjs';
+import {recoverR137Furnished} from './r137-bounded-recovery.mjs';
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const ENDPOINT=/^http:\/\/127\.0\.0\.1:(\d{2,5})\/v1\/chat\/completions$/;
 const MODEL=/^[A-Za-z0-9._:/-]{2,140}$/;
@@ -81,7 +82,7 @@ export function parseR134FreshModelReply(raw,request){
 export function parseR134FreshArgs(argv){
  if(argv.length===1&&argv[0]==='--help')return {help:true};
  const allowed=new Set(['--model','--brief','--out','--site-width',
-  '--site-depth','--endpoint','--equipment']);
+  '--site-depth','--endpoint','--equipment','--recovery']);
  const args={};
  for(let i=0;i<argv.length;i+=2){
   const name=argv[i],value=argv[i+1];
@@ -96,17 +97,21 @@ export function parseR134FreshArgs(argv){
  const siteWidth=args['--site-width']?Number(args['--site-width']):32,
   siteDepth=args['--site-depth']?Number(args['--site-depth']):32;
  makeR134FreshRequest({brief:args['--brief'],siteWidth,siteDepth});
+ const recoveryMode=args['--recovery']??'none';
+ if(!['none','bounded'].includes(recoveryMode))fail('INVALID_RECOVERY_MODE');
  const equipmentMode=args['--equipment']??'none';
  if(!['none','assembled'].includes(equipmentMode))fail('INVALID_EQUIPMENT_MODE');
- return {model:args['--model'],brief:args['--brief'],equipmentMode,
+ return {model:args['--model'],brief:args['--brief'],equipmentMode,recoveryMode,
   outDir:path.resolve(args['--out']),siteWidth,siteDepth,endpoint};
 }
 export async function runR134FreshModel({
- model,brief,outDir,siteWidth=32,siteDepth=32,equipmentMode='none',
+ model,brief,outDir,siteWidth=32,siteDepth=32,equipmentMode='none',recoveryMode='none',
  endpoint='http://127.0.0.1:11434/v1/chat/completions'
 }={}, {fetcher=fetch,timeoutMs=120000}={}){
  const p=ENDPOINT.exec(endpoint??'');
- if(!['none','assembled'].includes(equipmentMode)||
+ if(!['none','bounded'].includes(recoveryMode)||
+  (recoveryMode==='bounded'&&equipmentMode!=='assembled')||
+  !['none','assembled'].includes(equipmentMode)||
   !MODEL.test(model??'')||!p||!range(Number(p[1]),1,65535)||
   typeof outDir!=='string'||!outDir.trim()||
   typeof fetcher!=='function'||!range(timeoutMs,1000,300000))
@@ -124,7 +129,8 @@ export async function runR134FreshModel({
   schema:'r134-fresh-one-model-to-real-multizone-v1',
   status:'HOLD_NOT_STARTED',model,modelCalls:0,
   testInjectionPresent:injected,
-  originalModelResponseCaptured:false,equipmentMode,
+  originalModelResponseCaptured:false,equipmentMode,recoveryMode,
+  boundedHostRepairRequired:false,hostRepairActions:[],
   equipmentCount:0,addedEquipmentVoxels:0,
   eachRoomHasModelChosenEquipment:false,
   modelProvenance:injected?'TEST_DOUBLE':'LOCAL_RESPONSE_NOT_AUTHENTICATED',
@@ -168,8 +174,16 @@ export async function runR134FreshModel({
     fail('NO_MODEL_CONTENT');
    write(dir,'MODEL_RAW_ORIGINAL.txt',raw);
    report.originalModelResponseCaptured=true;
-   const composed=equipmentMode==='assembled'?
-    parseR135FreshFurnishedReply(raw,request):null;
+   const recovered=recoveryMode==='bounded'?
+    recoverR137Furnished({raw,request,build:parseR135FreshFurnishedReply}):null;
+   const composed=recovered?.result??(equipmentMode==='assembled'?
+    parseR135FreshFurnishedReply(raw,request):null);
+   if(recovered){
+    write(dir,'R137_BOUNDED_RECOVERY_EVIDENCE.json',recovered.evidence);
+    write(dir,'R137_DERIVED_MODEL_IR_NOT_ORIGINAL.json',recovered.derivedReply);
+    report.boundedHostRepairRequired=recovered.evidence.boundedHostRepairRequired;
+    report.hostRepairActions=recovered.evidence.repairActions;
+   }
    const base=composed?.base??parseR134FreshModelReply(raw,request);
    const result=composed?.featured??base;
    write(dir,'MODEL_PROGRAM_IR.json',base.plan);
@@ -207,7 +221,9 @@ export async function runR134FreshModel({
    }
    report.sourceRoutes=result.sourceRouteAudit.status;
    report.status=injected?'HOLD_TEST_DOUBLE_NOT_REAL_INFERENCE':
-    'SOURCE_CANDIDATE_REAL_LOCAL_RESPONSE_HUMAN_REVIEW_REQUIRED';
+    report.boundedHostRepairRequired?
+     'SOURCE_CANDIDATE_REAL_LOCAL_WITH_HOST_RECOVERY_HUMAN_REVIEW_REQUIRED':
+     'SOURCE_CANDIDATE_REAL_LOCAL_RESPONSE_HUMAN_REVIEW_REQUIRED';
    return report;
   }finally{clearTimeout(timer);}
  }catch(e){

@@ -90,6 +90,8 @@ export function compileR136Report({model,selection,runs,source}){
   zoneCount:report.zoneCount,voxels:report.voxels,
   equipmentCount:report.equipmentCount??0,
   addedEquipmentVoxels:report.addedEquipmentVoxels??0,
+  boundedHostRepairRequired:report.boundedHostRepairRequired??false,
+  hostRepairActions:report.hostRepairActions??[],
   sourceRoutes:report.sourceRoutes,sourceSha256:report.sourceSha256,
   geometrySha256:report.geometrySha256,
   failureReason:report.reason??null,elapsedMs:report.elapsedMs??null,
@@ -97,13 +99,19 @@ export function compileR136Report({model,selection,runs,source}){
  }));
  const geometryHashes=summaries.filter(x=>x.geometrySha256).map(x=>x.geometrySha256);
  const sourceReady=summaries.filter(x=>
-  x.status==='SOURCE_CANDIDATE_REAL_LOCAL_RESPONSE_HUMAN_REVIEW_REQUIRED').length;
+  x.status==='SOURCE_CANDIDATE_REAL_LOCAL_RESPONSE_HUMAN_REVIEW_REQUIRED'||
+  x.status==='SOURCE_CANDIDATE_REAL_LOCAL_WITH_HOST_RECOVERY_HUMAN_REVIEW_REQUIRED').length;
+ const hostRepairCount=runs.filter(x=>x.report.boundedHostRepairRequired===true).length;
+ // A genuine *failed* response has modelAuthoredProgram=false. That is
+ // NOT proof of synthetic inference. Inspect the actual request injection.
  const synthetic=source!=='LOCAL_PROVIDER_NOT_AUTHENTICATED'||runs.some(x=>
-  x.report.testInjectionPresent===true||x.report.modelAuthoredProgram===false);
+  x.report.testInjectionPresent===true);
  let status;
  if(synthetic)status='HOLD_TEST_DOUBLE_NOT_REAL_INFERENCE';
  else if(sourceReady!==runs.length)status='HOLD_REAL_MODEL_GENERATION_OR_GEOMETRY';
- else status='REAL_LOCAL_PROVIDER_SOURCE_CANDIDATES_VISUAL_REVIEW_REQUIRED';
+ else status=hostRepairCount?
+  'REAL_LOCAL_PROVIDER_HOST_REPAIRED_SOURCE_CANDIDATES_VISUAL_REVIEW_REQUIRED':
+  'REAL_LOCAL_PROVIDER_SOURCE_CANDIDATES_VISUAL_REVIEW_REQUIRED';
  return {
   schema:'r136-real-local-3-brief-evidence-v1',status,model,
   modelSelection:selection,
@@ -111,6 +119,7 @@ export function compileR136Report({model,selection,runs,source}){
   modelTier:selection.tier,
   isAppleSilicon8GBProven:false,
   sourceOnlyValidCases:sourceReady,totalCases:runs.length,
+  boundedHostRepairCaseCount:hostRepairCount,
   distinctGeometryHashes:new Set(geometryHashes).size,
   independentHumanArtReview:'NOT_REVIEWED',
   actualMinecraftWalking:'NOT_TESTED',
@@ -189,7 +198,7 @@ export async function runR136Benchmark({model=null,outDir,
    let report;
    try{
     report=await runSingle({model:selection.selected,brief:row.brief,
-     outDir:subDir,equipmentMode:'assembled',endpoint},{fetcher});
+     outDir:subDir,equipmentMode:'assembled',recoveryMode:'bounded',endpoint},{fetcher});
    }catch(e){
     report={status:'HOLD_THROWN_GENERATION',
      reason:String(e?.message??e).slice(0,450),
