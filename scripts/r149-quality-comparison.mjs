@@ -45,7 +45,7 @@ export function buildR149PairedComparison(){
  });
  if(independent.status!=='SOURCE_ROOM_GRAPH_VERIFIED')
   throw Error('R149_R146_INDEPENDENT_AUDIT_HOLD');
- const after=deriveR149EnvelopeExpression(before);
+ const after=deriveR149EnvelopeExpression(before,{plan:graph.plan});
  const template=fs.readFileSync(path.join(root,
   'source/ai/b143-viewer-template.html'),'utf8');
  const pages=[

@@ -14,8 +14,10 @@ function interior(compiled,w,d){
   p[2]>=2&&p[2]<=d-3&&p[1]>=1&&p[1]<=5)
   .map(cell).sort();
 }
-export function deriveR149EnvelopeExpression(base){
- if(!base?.plan?.footprint||!base.design||!base.compiled||
+export function deriveR149EnvelopeExpression(base,{plan}={}){
+ if(base?.schema!=='minecraftaibuilder-r125-featured-source-v1'||
+  !plan?.footprint||!plan?.materials||!plan?.form||
+  !base.design||!base.compiled||
   !verifyCompiled(base.design,base.compiled)||
   base.compiled.sourceSha256!==base.sourceSha256||
   base.compiled.geometrySha256!==base.geometrySha256||
@@ -26,7 +28,9 @@ export function deriveR149EnvelopeExpression(base){
   fail('VERIFIED_FURNISHED_BASE_REQUIRED');
  const w=base.design.bounds.width,d=base.design.bounds.depth;
  if(w<24||d<24||base.design.bounds.height<8||
-  !['flat','ridge','sawtooth'].includes(base.plan.form?.roofProfile))
+  plan.footprint.width!==w||plan.footprint.depth!==d||
+  !['wood','stone','concrete','metal'].includes(plan.materials.roof)||
+  !['flat','ridge','sawtooth'].includes(plan.form.roofProfile))
   fail('UNSUPPORTED_ENVELOPE_DIMENSIONS');
  const entry=base.design.elements.find(e=>e.id==='exterior-entrance');
  if(!entry||entry.mode!=='cut'||entry.shape!=='box'||
@@ -58,7 +62,7 @@ export function deriveR149EnvelopeExpression(base){
  }
  // Continuous slender eave unifies the roof edge without modifying the
  // caller's chosen roof profile; roof does not intrude on any room.
- const roof=base.plan.materials.roof;
+ const roof=plan.materials.roof;
  add('eave-front','add',roof,[0,6,0],[w,1,1]);
  add('eave-back','add',roof,[0,6,d-1],[w,1,1]);
  add('eave-west','add',roof,[0,6,1],[1,1,d-2]);
@@ -94,7 +98,14 @@ export function deriveR149EnvelopeExpression(base){
  const targets=base.placements.map(p=>({
   id:p.id,zoneId:p.zoneId,origin:p.origin,size:p.size
  }));
- const routes=auditR125SourceRoutes(enhanced,{featureTargets:targets});
+ // R130's furnished result deliberately has a DIFFERENT wrapper schema.
+ // Route QA expects only the generic B143 plan-to-source audit shape.
+ const routes=auditR125SourceRoutes({
+  schema:'minecraftaibuilder-r125-plan-to-b143-result-v1',
+  design,compiled,program:base.program,
+  sourceSha256:compiled.sourceSha256,
+  geometrySha256:compiled.geometrySha256
+ },{featureTargets:targets});
  if(routes.status!=='SOURCE_ROUTES_REACH_ALL_ZONES'||
   routes.featureAccess?.length!==targets.length||
   !routes.featureAccess.every(p=>p.reachableFromEntrance))
@@ -109,7 +120,7 @@ export function deriveR149EnvelopeExpression(base){
    unchangedInteriorVoxels:true,
    originalRoomCount:base.program[0].zones.length,
    originalEquipmentCount:base.placements.length,
-   originalRoofProfile:base.plan.form.roofProfile,
+   originalRoofProfile:plan.form.roofProfile,
    modelIntentChanged:false,
    originalSourceSha256:base.sourceSha256,
    enhancedSourceSha256:compiled.sourceSha256,
