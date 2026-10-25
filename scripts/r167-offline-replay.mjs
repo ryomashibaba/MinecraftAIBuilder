@@ -68,9 +68,10 @@ function replayCase(dir,c,manifestCase){
   entry.hostAxisDerivation=result.hostAxisDerivation;
   const req=makeR134FreshRequest({brief:c.brief,siteWidth:32,siteDepth:32});
   const composed=parseR139RelationalFurnishedReply(result.derivedRaw,req,
-   {allowTopologyComposition:true,allowHostGridResearch:true});
+   {allowTopologyComposition:true,allowHostGridResearch:true,allowHostVolumeResearch:true});
   entry.hostGridResearchOverride=composed.hostGridResearchOverride;
   entry.sectionScope=composed.architectural?.roomSectionScope??'UNKNOWN';
+  entry.r170VolumeAudit=composed.architectural?.completed?.r170FourRoomVolumeEvidence??null;
   entry.r150DetailAudit=composed.architectural?.completed?.r150EquipmentEvidence?
    {
     originalEquipmentCount:composed.architectural.completed.r150EquipmentEvidence.originalEquipmentCount,
@@ -111,6 +112,8 @@ function reportHtml(report) {
  '<p>'+esc(c.reason)+'</p>'+
  '<p>元回答SHA256 '+esc(c.rawSha256)+' / 由来 '+esc(c.hostAxisDerivation?.code??'変換なし')+'</p>'+
  '<p>ホスト別配置: '+esc(c.hostGridResearchOverride?.modelExplicitTopologyNotImplemented?'モデルの中央通路指定とは異なる4室グリッド研究案':'追加なし')+' / 上部断面: '+esc(c.sectionScope??'未生成')+'</p>'+
+ '<p>4室の実高天井空間: '+esc(c.r170VolumeAudit?.clearHighInteriorSampleCount??'未生成')+
+ ' / 元の低層・入口・設備は変更なし</p>'+
  '<p>家具詳細の抑制: '+esc(c.r150DetailAudit?.suppressedUnsafeComponentCount??'生成前にHOLD')+
  ' / モデルが選択した元設備は変更しない</p>'+
  (c.sourceVerified?'<iframe src="'+c.id+'-derived.html"></iframe><div>'+
