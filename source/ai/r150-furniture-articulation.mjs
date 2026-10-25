@@ -4,6 +4,7 @@
  * Host adds only small features strictly INSIDE each existing equipment volume.
  * Uses genuine B143 voxels, not extra labels or typology-specific furniture.
  */
+import {createHash} from 'node:crypto';
 import {compileDesign,verifyCompiled} from './b143-building-dsl.mjs';
 import {auditR125SourceRoutes} from './r125-source-routes.mjs';
 const fail=s=>{throw Error('R150_ROLE_'+s);};
@@ -50,7 +51,10 @@ export function deriveR150FurnitureArticulation(base){
   roleCounts[feature.role]=(roleCounts[feature.role]??0)+1;
   for(const [tag,material,offset,size] of parts[feature.role]){
    const origin=feature.origin.map((v,i)=>v+offset[i]);
-   const element={id:'r150-'+feature.id+'-'+tag,
+   const fullId='r150-'+feature.id+'-'+tag;
+   const elementId=fullId.length<=40?fullId:
+    'r150-'+createHash('sha256').update(feature.id).digest('hex').slice(0,16)+'-'+tag;
+   const element={id:elementId,
     shape:'box',mode:'add',material,origin,size};
    if(element.id.length>40||!size.every((s,i)=>
     s>0&&offset[i]>=0&&offset[i]+s<=feature.size[i]))
