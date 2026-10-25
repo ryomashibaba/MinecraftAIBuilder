@@ -49,6 +49,9 @@ test('R141 fake Ollama creates actual source graph and evidence but NEVER says g
  assert.equal(r.selectedModel,'qwen3:14b');
  assert.equal(r.modelCalls,1);
  assert.equal(r.compiledGraph3D,true);
+ assert.equal(r.modelRequestedDirectPairs,2);
+ assert.equal(r.sourceVerifiedDirectDoors,2);
+ assert.equal(r.spatialDecisionDemonstrated,true);
  assert.equal(r.modelSelectedRelations,false);
  assert.equal(r.sourceRoutes,'SOURCE_ROUTES_REACH_ALL_ZONES');
  assert.equal(r.equipmentCount,4);
@@ -77,5 +80,20 @@ test('R141 no local Qwen/Gemma prevents any POST or false 3D',async t=>{
  assert.equal(result.status,'HOLD_NO_QWEN_GEMMA_INSTALLED');
  assert.equal(result.modelCalls,0);
  assert.equal(posts,0);
+ assert.equal(result.worldWrites,0);
+});
+
+test('R141 refuses to count an empty direct-edge declaration as genuine spatial-graph demonstration',async t=>{
+ const root=dir();t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
+ const model=valid();
+ model.relations.directAdjacencies=[];
+ const result=await runR141GraphTrial({outDir:path.join(root,'empty')},
+  {fetcher:mock(model)});
+ assert.equal(result.compiledGraph3D,true);
+ assert.equal(result.modelRequestedDirectPairs,0);
+ assert.equal(result.sourceVerifiedDirectDoors,0);
+ assert.equal(result.spatialDecisionDemonstrated,false);
+ assert.equal(result.modelSelectedRelations,false);
+ assert.equal(result.status,'HOLD_TEST_DOUBLE_NOT_REAL_INFERENCE');
  assert.equal(result.worldWrites,0);
 });
