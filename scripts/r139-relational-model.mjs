@@ -139,15 +139,25 @@ export function parseR139RelationalFurnishedReply(raw,request,
      allowSpatialBalanceComposition?toR155RoofIntent(architecture):architecture,
     authorship:'CALLER_ARCHITECTURE_IR_NOT_AUTHENTICATED'
    }):null;
-  const integrated=allowTopologyComposition?
+  // R168: R162/R163 high-room geometry is honestly verified for EXACTLY
+  // three rooms. Four-room programs retain real R149 envelope and furnishing
+  // without falsely claiming any high ceiling or clerestory.
+  const roomCount=envelope.program?.[0]?.zones?.length;
+  const highSectionEligible=allowTopologyComposition&&roomCount===3;
+  const integrated=highSectionEligible?
    deriveR162RoomSectionMassing(envelope,{
     topologyIntent:architecture.spatialTopology}):null;
   const articulated=deriveR150FurnitureArticulation(
    integrated??roofline??volume??envelope);
-  const completed=allowTopologyComposition?
+  const completed=highSectionEligible?
    deriveR163DaylitSections(articulated):articulated;
   return {intent:structuredClone(architecture),envelope,volume,roofline,
    integrated,completed,
+   roomSectionScope:highSectionEligible?
+    'REAL_THREE_ROOM_SECTIONS_AND_CLERESTORY':
+    allowTopologyComposition&&roomCount===4?
+     'FOUR_ROOMS_BASIC_ENVELOPE_NO_HIGHROOM_CLAIM':
+     'NOT_APPLICABLE',
    intentAuthorship:'IN_THIS_SAME_MODEL_REPLY_NOT_HOST_INFERRED',
    geometryAuthorship:'HOST_DERIVED_FROM_BOUNDED_MODEL_SEMANTIC_IR',
    aestheticApproval:'NOT_REVIEWED'};
