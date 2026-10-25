@@ -36,7 +36,7 @@ const fakeLocal=(answer,inspect=()=>{})=>async(url,opts)=>{
  assert.equal(opts.method,'POST');
  const body=JSON.parse(opts.body);
  assert.equal(body.model,'qwen3:14b');
- assert.equal(body.max_tokens,1750);
+ assert.equal(body.max_tokens,Object.hasOwn(answer,'architecture')?1900:1750);
  assert.equal(body.stream,false);
  assert.ok(body.messages[0].content.includes('entryFacingZoneId'));
  assert.ok(body.messages[0].content.includes('directAdjacencies'));
@@ -104,4 +104,37 @@ test('invalid model-chosen room relationship is not silently rewritten or given 
  assert.ok(fs.existsSync(path.join(folder,'MODEL_RAW_ORIGINAL.txt')));
  assert.equal(fs.existsSync(path.join(folder,'DERIVED_B143_SOURCE.json')),false);
  assert.equal(r.worldWrites,0);
+});
+
+test('R151: one local-shaped model response emits semantic architecture IR and distinct source 3D; fake inference is not certified',async t=>{
+ const dir=tmp();t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));
+ const answer=reply();
+ answer.architecture={
+  schema:'minecraftaibuilder-r151-envelope-intent-v1',
+  entryHierarchy:'quiet',daylightStrategy:'focused',roofEdge:'parapet'};
+ const out=path.join(dir,'expressive');
+ const r=await runR134FreshModel({
+  model:'qwen3:14b',brief,outDir:out,equipmentMode:'assembled',
+  topologyMode:'graph',architectureMode:'intent'
+ },{fetcher:fakeLocal(answer,body=>{
+  assert.ok(body.messages[0].content.includes('objects,relations,architecture'));
+  assert.ok(body.messages[0].content.includes('roofEdge fine or parapet'));
+ })});
+ assert.equal(r.status,'HOLD_TEST_DOUBLE_NOT_REAL_INFERENCE',r.reason);
+ assert.equal(r.modelCalls,1);
+ assert.equal(r.architectureIntentFromModel,false);
+ assert.equal(r.architecture3DSourceOnly,true);
+ assert.equal(r.sourceRoutes,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(r.equipmentCount,4);
+ assert.ok(fs.existsSync(path.join(out,'R151_MODEL_ARCHITECTURE_IR.json')));
+ assert.ok(fs.existsSync(path.join(out,'R151_HOST_ARCHITECTURE_EVIDENCE.json')));
+ assert.ok(fs.existsSync(path.join(out,'index.html')));
+ assert.deepEqual(r.gates,Array(9).fill('BLOCKED'));
+ assert.equal(r.worldWrites,0);
+ const oldArgs=['--model','qwen3:14b','--brief',brief,'--out','new-dir'];
+ assert.throws(()=>parseR134FreshArgs([...oldArgs,'--architecture','intent']),
+  /R134_MODEL_ARCHITECTURE_REQUIRES_GRAPH_TOPOLOGY/);
+ const opts=parseR134FreshArgs([...oldArgs,
+  '--equipment','assembled','--topology','graph','--architecture','intent']);
+ assert.equal(opts.architectureMode,'intent');
 });

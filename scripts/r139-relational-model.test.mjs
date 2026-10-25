@@ -67,3 +67,47 @@ test('R141: cramped legacy strip furniture cannot block genuinely viable graph-f
  assert.equal(graph.worldWrites,0);
  assert.deepEqual(graph.gates,Array(9).fill('BLOCKED'));
 });
+
+test('R151 optional one-model-reply architecture intent produces genuinely different B143 geometry without changing the chosen functional program',()=>{
+ const ordinary=parseR139RelationalFurnishedReply(JSON.stringify(reply()),request);
+ const upgraded=reply();
+ upgraded.architecture={
+  schema:'minecraftaibuilder-r151-envelope-intent-v1',
+  entryHierarchy:'quiet',daylightStrategy:'focused',roofEdge:'parapet'};
+ assert.throws(()=>parseR139RelationalFurnishedReply(JSON.stringify(upgraded),request),
+  /R139_MODEL_FULL_REPLY_CONTRACT/);
+ const one=parseR139RelationalFurnishedReply(JSON.stringify(upgraded),request,
+  {allowArchitecturalExpression:true});
+ assert.deepEqual(one.semanticIntent,ordinary.semanticIntent);
+ assert.equal(one.featured.sourceSha256,ordinary.featured.sourceSha256);
+ assert.equal(one.featured.placements.length,ordinary.featured.placements.length);
+ assert.equal(one.architectural.intentAuthorship,'IN_THIS_SAME_MODEL_REPLY_NOT_HOST_INFERRED');
+ assert.equal(one.architectural.completed.sourceRouteAudit.status,
+  'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(one.architectural.completed.sourceRouteAudit.featureAccess.length,4);
+ assert.notEqual(one.architectural.completed.geometrySha256,ordinary.featured.geometrySha256);
+ assert.equal(one.architectural.envelope.r149ExpressionEvidence.modelExpressionIntentProvided,true);
+ assert.equal(one.architectural.completed.worldWrites,0);
+ assert.deepEqual(one.architectural.completed.gates,Array(9).fill('BLOCKED'));
+ const twoRaw=reply();twoRaw.architecture={
+  schema:'minecraftaibuilder-r151-envelope-intent-v1',
+  entryHierarchy:'emphasized',daylightStrategy:'even',roofEdge:'fine'};
+ const two=parseR139RelationalFurnishedReply(JSON.stringify(twoRaw),request,
+  {allowArchitecturalExpression:true});
+ assert.notEqual(one.architectural.completed.geometrySha256,
+  two.architectural.completed.geometrySha256);
+});
+test('R151 malformed, non-opted-in, or invented architecture choices HOLD instead of defaulting to a style',()=>{
+ for(const bad of [
+  {schema:'minecraftaibuilder-r151-envelope-intent-v1',entryHierarchy:'quiet',
+   daylightStrategy:'all-glass',roofEdge:'fine'},
+  {schema:'minecraftaibuilder-r151-envelope-intent-v1',entryHierarchy:'quiet',
+   daylightStrategy:'focused',roofEdge:'parapet',extra:'fake'},
+  {schema:'invalid',entryHierarchy:'quiet',daylightStrategy:'even',roofEdge:'fine'},
+  null
+ ]){
+  const candidate=reply();candidate.architecture=bad;
+  assert.throws(()=>parseR139RelationalFurnishedReply(JSON.stringify(candidate),
+   request,{allowArchitecturalExpression:true}),/R149_EXPRESSION_MODEL_EXPRESSION_INTENT_CONTRACT/);
+ }
+});

@@ -74,6 +74,19 @@ const RELATIONAL_SYSTEM=SYSTEM.replace(
  'Also output exactly one extra top-level key: relations.',
  'The relations key is required.'
  );
+// This is OPT-IN. Existing archived eight-key Qwen replies and the
+// default one-response graph parser remain byte-for-byte compatible.
+const R151_SYSTEM=RELATIONAL_SYSTEM.replace(
+ 'Return ONLY JSON with EXACT keys: id,title,footprint,materials,layout,form,objects,relations.',
+ 'Return ONLY JSON with EXACT keys: id,title,footprint,materials,layout,form,objects,relations,architecture.'
+)+'\\n'+[
+ 'architecture is exactly one small object with schema,entryHierarchy,daylightStrategy,roofEdge.',
+ 'architecture.schema must be minecraftaibuilder-r151-envelope-intent-v1.',
+ 'entryHierarchy quiet or emphasized; daylightStrategy even or focused;',
+ 'roofEdge fine or parapet. Choose by the purpose and spatial program,',
+ 'not by a building-category template. Do not emit coordinates.',
+ 'A failed or infeasible choice is a HOLD; the host never silently replaces it.'
+].join('\\n');
 export function makeR134FreshRequest({brief,siteWidth=32,siteDepth=32}={}){
  if(!text(brief)||!range(siteWidth,18,32)||!range(siteDepth,18,32))
   fail('BRIEF_OR_SITE');
@@ -102,7 +115,8 @@ export function parseR134FreshModelReply(raw,request){
 export function parseR134FreshArgs(argv){
  if(argv.length===1&&argv[0]==='--help')return {help:true};
  const allowed=new Set(['--model','--brief','--out','--site-width',
-  '--site-depth','--endpoint','--equipment','--recovery','--topology']);
+  '--site-depth','--endpoint','--equipment','--recovery','--topology',
+  '--architecture']);
  const args={};
  for(let i=0;i<argv.length;i+=2){
   const name=argv[i],value=argv[i+1];
@@ -122,6 +136,10 @@ export function parseR134FreshArgs(argv){
  const equipmentMode=args['--equipment']??'none';
  if(!['none','assembled'].includes(equipmentMode))fail('INVALID_EQUIPMENT_MODE');
  const topologyMode=args['--topology']??'linear';
+ const architectureMode=args['--architecture']??'none';
+ if(!['none','intent'].includes(architectureMode)||
+  (architectureMode==='intent'&&topologyMode!=='graph'))
+  fail('ARCHITECTURE_REQUIRES_GRAPH_TOPOLOGY');
  if(!['linear','graph'].includes(topologyMode)||
   (topologyMode==='graph'&&(equipmentMode!=='assembled'||
    !['none','roof-material-only'].includes(recoveryMode)||
@@ -129,14 +147,17 @@ export function parseR134FreshArgs(argv){
   (recoveryMode==='roof-material-only'&&topologyMode!=='graph'))
   fail('GRAPH_REQUIRES_ASSEMBLED_NO_RECOVERY_AND_SITE_24');
  return {model:args['--model'],brief:args['--brief'],equipmentMode,recoveryMode,topologyMode,
-  outDir:path.resolve(args['--out']),siteWidth,siteDepth,endpoint};
+  architectureMode,outDir:path.resolve(args['--out']),siteWidth,siteDepth,endpoint};
 }
 export async function runR134FreshModel({
  model,brief,outDir,siteWidth=32,siteDepth=32,equipmentMode='none',recoveryMode='none',topologyMode='linear',
+ architectureMode='none',
  endpoint='http://127.0.0.1:11434/v1/chat/completions'
 }={}, {fetcher=fetch,timeoutMs=120000}={}){
  const p=ENDPOINT.exec(endpoint??'');
- if(!['none','bounded','roof-material-only'].includes(recoveryMode)||
+ if(!['none','intent'].includes(architectureMode)||
+  (architectureMode==='intent'&&topologyMode!=='graph')||
+  !['none','bounded','roof-material-only'].includes(recoveryMode)||
   (recoveryMode==='bounded'&&equipmentMode!=='assembled')||
   !['none','assembled'].includes(equipmentMode)||
   !['linear','graph'].includes(topologyMode)||
@@ -155,7 +176,8 @@ export async function runR134FreshModel({
   semanticEquipment:{perRoomAtLeastOne:true,maxObjects:8,
    allowedRoles:['work-surface','equipment-bank','display-stand',
     'storage-rack','seating']}}:request;
- const maxTokens=topologyMode==='graph'?1750:
+ const maxTokens=architectureMode==='intent'?1900:
+  topologyMode==='graph'?1750:
   equipmentMode==='assembled'?1450:900;
  fs.mkdirSync(dir,{recursive:false});
  const report={
@@ -163,6 +185,7 @@ export async function runR134FreshModel({
   status:'HOLD_NOT_STARTED',model,modelCalls:0,
   testInjectionPresent:injected,
   originalModelResponseCaptured:false,equipmentMode,recoveryMode,topologyMode,
+  architectureMode,architectureIntentFromModel:false,architecture3DSourceOnly:false,
   relationalIntentFromModel:false,realRoomGraph3D:false,
   boundedHostRepairRequired:false,hostRepairActions:[],
   equipmentCount:0,addedEquipmentVoxels:0,
@@ -192,7 +215,8 @@ export async function runR134FreshModel({
     body:JSON.stringify({model,stream:false,temperature:0.65,
      max_tokens:maxTokens,reasoning_effort:'none',
      response_format:{type:'json_object'},messages:[
-      {role:'system',content:topologyMode==='graph'?RELATIONAL_SYSTEM:
+      {role:'system',content:architectureMode==='intent'?R151_SYSTEM:
+       topologyMode==='graph'?RELATIONAL_SYSTEM:
        equipmentMode==='assembled'?SYSTEM+'\n'+FURNISHED_SYSTEM:SYSTEM},
       {role:'user',content:JSON.stringify(sourceRequest)}]})});
    if(!response||response.ok!==true)
@@ -218,7 +242,8 @@ export async function runR134FreshModel({
     (await import('./r139-relational-model.mjs')).parseR139RelationalFurnishedReply:null;
    const composed=topologyMode==='graph'?
     relationalParser(raw,request,{
-     allowRoofMaterialCorrection:recoveryMode==='roof-material-only'
+     allowRoofMaterialCorrection:recoveryMode==='roof-material-only',
+     allowArchitecturalExpression:architectureMode==='intent'
     }):
     recovered?.result??(equipmentMode==='assembled'?
      parseR135FreshFurnishedReply(raw,request):null);
@@ -240,7 +265,7 @@ export async function runR134FreshModel({
    }
    const base=composed?.originalSequentialBase??composed?.base??
     parseR134FreshModelReply(raw,request);
-   const result=composed?.featured??base;
+   const result=composed?.architectural?.completed??composed?.featured??base;
    write(dir,'MODEL_PROGRAM_IR.json',base.plan);
    if(composed){
     write(dir,'MODEL_CHOSEN_FUNCTIONAL_EQUIPMENT.json',
@@ -251,6 +276,19 @@ export async function runR134FreshModel({
      composed.intent??composed.featured.featurePlan);
     if(topologyMode==='graph'){
      write(dir,'R139_MODEL_SPATIAL_RELATIONS.json',composed.semanticIntent);
+     if(composed.architectural){
+      write(dir,'R151_MODEL_ARCHITECTURE_IR.json',
+       composed.architectural.intent);
+      write(dir,'R151_HOST_EXTERIOR_B143_SOURCE.json',
+       composed.architectural.envelope.design);
+      write(dir,'R151_HOST_ARCHITECTURE_EVIDENCE.json',{
+       originalRawSha256:composed.originalRawSha256,
+       intentAuthorship:composed.architectural.intentAuthorship,
+       geometryAuthorship:composed.architectural.geometryAuthorship,
+       architecturalSourceSha256:result.sourceSha256,
+       humanArtReview:'NOT_REVIEWED',
+       minecraftWalking:'NOT_TESTED',worldWrites:0});
+     }
      write(dir,'R139_HOST_GRAPH_B143_SOURCE.json',
       composed.relationalBase.design);
      write(dir,'R139_HOST_ROOM_SECTOR_PROGRAM.json',
@@ -283,6 +321,8 @@ export async function runR134FreshModel({
     compileB143Gallery([base.design]),tpl));
    report.modelAuthoredProgram=!injected;
    report.relationalIntentFromModel=topologyMode==='graph'&&!injected;
+   report.architectureIntentFromModel=Boolean(composed?.architectural)&&!injected;
+   report.architecture3DSourceOnly=Boolean(composed?.architectural);
    report.realRoomGraph3D=topologyMode==='graph';
    report.newRealB143Source=true;
    report.sourceSha256=result.sourceSha256;

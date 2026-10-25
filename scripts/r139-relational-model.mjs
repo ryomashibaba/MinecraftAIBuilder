@@ -15,6 +15,10 @@ import {applyR125FeatureIntent,ASSEMBLED_SCHEMA}
 import {createHash} from 'node:crypto';
 import {recoverR146RoofProfileAsMaterial}
  from '../source/ai/r146-roof-material-boundary.mjs';
+import {deriveR149EnvelopeExpression,validateR151EnvelopeIntent}
+ from '../source/ai/r149-architectural-expression.mjs';
+import {deriveR150FurnitureArticulation}
+ from '../source/ai/r150-furniture-articulation.mjs';
 
 const fail=x=>{throw Error('R139_MODEL_'+x);};
 const only=(v,fields)=>v!==null&&typeof v==='object'&&!Array.isArray(v)&&
@@ -25,16 +29,18 @@ const sha=x=>createHash('sha256').update(x).digest('hex');
 export {RELATIONAL_INSTRUCTIONS} from './r139-relational-instructions.mjs';
 
 export function parseR139RelationalFurnishedReply(raw,request,
- {allowRoofMaterialCorrection=false}={}){
+ {allowRoofMaterialCorrection=false,allowArchitecturalExpression=false}={}){
  if(typeof raw!=='string'||raw.length<20||raw.length>22000)
   fail('MISSING_OR_OVERSIZED_MODEL_REPLY');
  let reply;
  try{reply=JSON.parse(raw);}catch{fail('NOT_JSON');}
  const keys=['id','title','footprint','materials','layout','form',
   'objects','relations'];
- if(!only(reply,keys)||!only(reply.relations,
-  ['entryFacingZoneId','directAdjacencies']))
+ const expressive=allowArchitecturalExpression===true;
+ if(!only(reply,expressive?[...keys,'architecture']:keys)||
+  !only(reply.relations,['entryFacingZoneId','directAdjacencies']))
   fail('FULL_REPLY_CONTRACT');
+ if(expressive)validateR151EnvelopeIntent(reply.architecture);
  const repaired=allowRoofMaterialCorrection?
   recoverR146RoofProfileAsMaterial(raw,reply):{
    derivedReply:structuredClone(reply),evidence:{
@@ -43,7 +49,7 @@ export function parseR139RelationalFurnishedReply(raw,request,
     hostRepairRequired:false,repairActions:[],modelCalls:0,worldWrites:0
    }
   };
- const {relations,...originalReply}=repaired.derivedReply;
+ const {relations,architecture,...originalReply}=repaired.derivedReply;
  // Validate semantic room program FIRST, without furnishing the obsolete
  // strip. A valid spatial graph can have more usable equipment clearance
  // than a narrow linear strip; premature strip fitting gave false HOLDs.
@@ -71,11 +77,22 @@ export function parseR139RelationalFurnishedReply(raw,request,
  if(featured.sourceRouteAudit.status!=='SOURCE_ROUTES_REACH_ALL_ZONES'||
   !featured.everyFeatureSourceAccessible)
   fail('FURNISHED_SOURCE_ROUTES');
+ const architectural=expressive?(()=>{
+  const envelope=deriveR149EnvelopeExpression(featured,{
+   plan:relational.plan,expressionIntent:architecture});
+  const completed=deriveR150FurnitureArticulation(envelope);
+  return {intent:structuredClone(architecture),envelope,completed,
+   intentAuthorship:'IN_THIS_SAME_MODEL_REPLY_NOT_HOST_INFERRED',
+   geometryAuthorship:'HOST_DERIVED_FROM_BOUNDED_MODEL_SEMANTIC_IR',
+   aestheticApproval:'NOT_REVIEWED'};
+ })():null;
  return {
   schema:'r139-one-reply-room-graph-and-furniture-v1',
   originalRawSha256:sha(raw),sourceModelReplyRaw:raw,
   modelReplyAuthenticity:'CALLER_PROVIDED_UNVERIFIED',
-  authoredFields:['layout.spaces','objects','relations'],
+  authoredFields:expressive?['layout.spaces','objects','relations','architecture']:
+   ['layout.spaces','objects','relations'],
+  architectural,
   derivedModelReply:repaired.derivedReply,
   boundedHostRepairRequired:repaired.evidence.hostRepairRequired,
   hostRepairActions:repaired.evidence.repairActions,

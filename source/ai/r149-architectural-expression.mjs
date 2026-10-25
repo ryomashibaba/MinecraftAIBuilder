@@ -9,12 +9,26 @@ import {auditR125SourceRoutes} from './r125-source-routes.mjs';
 const fail=s=>{throw Error('R149_EXPRESSION_'+s);};
 const eq=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
 const cell=p=>p.join(',');
+export const R151_EXPRESSION_SCHEMA='minecraftaibuilder-r151-envelope-intent-v1';
+export function validateR151EnvelopeIntent(intent){
+ const keys=['schema','entryHierarchy','daylightStrategy','roofEdge'];
+ if(!intent||typeof intent!=='object'||Array.isArray(intent)||
+  Object.keys(intent).length!==keys.length||
+  !keys.every(k=>Object.hasOwn(intent,k))||
+  intent.schema!==R151_EXPRESSION_SCHEMA||
+  !['quiet','emphasized'].includes(intent.entryHierarchy)||
+  !['even','focused'].includes(intent.daylightStrategy)||
+  !['fine','parapet'].includes(intent.roofEdge))
+  fail('MODEL_EXPRESSION_INTENT_CONTRACT');
+ return true;
+}
 function interior(compiled,w,d){
  return compiled.primitives.filter(p=>p[0]>=2&&p[0]<=w-3&&
   p[2]>=2&&p[2]<=d-3&&p[1]>=1&&p[1]<=5)
   .map(cell).sort();
 }
-export function deriveR149EnvelopeExpression(base,{plan}={}){
+export function deriveR149EnvelopeExpression(base,{plan,expressionIntent=null}={}){
+ if(expressionIntent!==null)validateR151EnvelopeIntent(expressionIntent);
  if(base?.schema!=='minecraftaibuilder-r125-featured-source-v1'||
   !plan?.footprint||!plan?.materials||!plan?.form||
   !base.design||!base.compiled||
@@ -54,9 +68,11 @@ export function deriveR149EnvelopeExpression(base,{plan}={}){
   if(x+2<xDoor-1||x>xDoor+2){
    window('front',front++,[x,3,1],[3,2,1]);
   }
-  window('rear',rear++,[x,3,d-2],[3,2,1]);
+  if(expressionIntent?.daylightStrategy!=='focused'||x%12===3)
+   window('rear',rear++,[x,3,d-2],[3,2,1]);
  }
  for(let z=3;z<=d-6;z+=6){
+  if(expressionIntent?.daylightStrategy==='focused'&&z>3)continue;
   window('west',side,[1,3,z],[1,2,3]);
   window('east',side,[w-2,3,z],[1,2,3]);side++;
  }
@@ -67,12 +83,27 @@ export function deriveR149EnvelopeExpression(base,{plan}={}){
  add('eave-back','add',roof,[0,6,d-1],[w,1,1]);
  add('eave-west','add',roof,[0,6,1],[1,1,d-2]);
  add('eave-east','add',roof,[w-1,6,1],[1,1,d-2]);
+ if(expressionIntent?.roofEdge==='parapet'){
+  // Exterior roof-edge mass, without cutting the original roof profile.
+  add('parapet-front','add',roof,[0,7,0],[w,1,1]);
+  add('parapet-rear','add',roof,[0,7,d-1],[w,1,1]);
+  add('parapet-west','add',roof,[0,7,1],[1,1,d-2]);
+  add('parapet-east','add',roof,[w-1,7,1],[1,1,d-2]);
+ }
  // Actual exterior face (z=0), not a fictitious second doorway.
  // Vertical jambs + lintel make the entrance legible from the street.
  add('entry-jamb-west','add','accent',[xDoor-1,2,0],[1,3,1]);
  add('entry-jamb-east','add','accent',[xDoor+2,2,0],[1,3,1]);
  add('entry-lintel','add','accent',[xDoor-1,5,0],[4,1,1]);
- add('entry-canopy','add','accent',[xDoor-1,6,0],[4,1,1]);
+ if(expressionIntent?.entryHierarchy==='emphasized'&&
+   (xDoor<3||xDoor+4>=w))
+  fail('REQUESTED_PORTICO_EXCEEDS_BUILDING_FOOTPRINT');
+ add('entry-canopy','add','accent',[xDoor-1,6,0],
+  [expressionIntent?.entryHierarchy==='emphasized'?6:4,1,1]);
+ if(expressionIntent?.entryHierarchy==='emphasized'){
+  add('entry-portal-left','add','accent',[xDoor-2,2,0],[1,4,1]);
+  add('entry-portal-right','add','accent',[xDoor+3,2,0],[1,4,1]);
+ }
  const compiled=compileDesign(design);
  if(!verifyCompiled(design,compiled))fail('B143_COMPILE_MISMATCH');
  if(!eq(design.elements.slice(0,initial),base.design.elements)||
@@ -112,7 +143,11 @@ export function deriveR149EnvelopeExpression(base,{plan}={}){
   fail('ROOM_OR_EQUIPMENT_ROUTE_REGRESSION');
  return {...enhanced,sourceRouteAudit:routes,
   r149ExpressionEvidence:{
-   proposalSource:'HOST_DERIVED_GENERIC_ENVELOPE_NOT_QWEN_SELECTED',
+   proposalSource:expressionIntent===null?
+    'HOST_DERIVED_GENERIC_ENVELOPE_NOT_QWEN_SELECTED':
+    'HOST_GEOMETRY_FROM_EXPLICIT_CALLER_EXPRESSION_INTENT',
+   explicitR151ArchitectureIntent:expressionIntent===null?null:
+    structuredClone(expressionIntent),
    retainedOriginalSourceElements:initial,
    appendedExteriorSourceElements:design.elements.length-initial,
    windowBays:{front,rear,eachSide:side},
@@ -122,6 +157,7 @@ export function deriveR149EnvelopeExpression(base,{plan}={}){
    originalEquipmentCount:base.placements.length,
    originalRoofProfile:plan.form.roofProfile,
    modelIntentChanged:false,
+   modelExpressionIntentProvided:expressionIntent!==null,
    originalSourceSha256:base.sourceSha256,
    enhancedSourceSha256:compiled.sourceSha256,
    aestheticJudgement:'HOLD_FOR_HUMAN_3D_REVIEW',
