@@ -88,6 +88,9 @@ on:
       - 'source/ai/r163-daylit-sections.mjs'
       - 'scripts/r163-daylight-comparison.mjs'
       - 'scripts/r163-daylight-comparison.test.mjs'
+      - 'source/ai/r164-envelope-continuity.mjs'
+      - 'scripts/r164-exterior-audit.mjs'
+      - 'scripts/r164-exterior-audit.test.mjs'
       - 'scripts/r162-room-section-comparison.mjs'
       - 'scripts/r162-room-section-comparison.test.mjs'
       - 'scripts/r160-side-gallery.test.mjs'
@@ -208,6 +211,9 @@ jobs:
           node --check source/ai/r163-daylit-sections.mjs
           node --check scripts/r163-daylight-comparison.mjs
           node --check scripts/r163-daylight-comparison.test.mjs
+          node --check source/ai/r164-envelope-continuity.mjs
+          node --check scripts/r164-exterior-audit.mjs
+          node --check scripts/r164-exterior-audit.test.mjs
           node --check scripts/r162-room-section-comparison.mjs
           node --check scripts/r162-room-section-comparison.test.mjs
           node --check scripts/r160-side-gallery.test.mjs
@@ -232,7 +238,7 @@ jobs:
           node --check scripts/r157-comparative-review.test.mjs
           node --check scripts/r161-real-comparison.mjs
           node --check scripts/r161-real-comparison.test.mjs
-          node --test scripts/r125-mvp.test.mjs scripts/r125-world-diff.test.mjs scripts/r125-pilot.test.mjs scripts/r125-offline-replay.test.mjs scripts/r125-architecture-plan.test.mjs scripts/r125-semantic-pilot.test.mjs scripts/r125-real-plan-replay.test.mjs scripts/r125-expression-gallery.test.mjs scripts/r125-multiuse-pilot.test.mjs scripts/r125-real-multiuse-replay.test.mjs scripts/r125-functional-layer.test.mjs scripts/r125-functional-preview.test.mjs scripts/r125-feature-model-pilot.test.mjs scripts/r125-functional-acceptance.test.mjs scripts/r131-real-3d-comparison.test.mjs scripts/r132-spatial-comparison.test.mjs scripts/r133-spatial-onepass.test.mjs scripts/r135-furnished-program.test.mjs scripts/r134-multi-zone-plan.test.mjs scripts/r134-fresh-model-pilot.test.mjs scripts/r134-multi-zone-gallery.test.mjs scripts/r136-local-evidence.test.mjs scripts/r137-bounded-recovery.test.mjs scripts/r137-user-capture-replay.test.mjs scripts/r138-branching-topology.test.mjs scripts/r138-user-branch-comparison.test.mjs scripts/r139-room-relations.test.mjs scripts/r139-relational-model.test.mjs scripts/r139-user-qwen-relations-comparison.test.mjs scripts/r140-relational-local-runner.test.mjs scripts/r141-local-graph-evidence.test.mjs scripts/r143-independent-graph-audit.test.mjs scripts/r146-user-real-roof-recovery.test.mjs scripts/r149-quality-comparison.test.mjs scripts/r156-unknown-use-study.test.mjs scripts/r157-comparative-review.test.mjs scripts/r160-side-gallery.test.mjs scripts/r161-real-comparison.test.mjs scripts/r162-room-section-comparison.test.mjs scripts/r163-daylight-comparison.test.mjs
+          node --test scripts/r125-mvp.test.mjs scripts/r125-world-diff.test.mjs scripts/r125-pilot.test.mjs scripts/r125-offline-replay.test.mjs scripts/r125-architecture-plan.test.mjs scripts/r125-semantic-pilot.test.mjs scripts/r125-real-plan-replay.test.mjs scripts/r125-expression-gallery.test.mjs scripts/r125-multiuse-pilot.test.mjs scripts/r125-real-multiuse-replay.test.mjs scripts/r125-functional-layer.test.mjs scripts/r125-functional-preview.test.mjs scripts/r125-feature-model-pilot.test.mjs scripts/r125-functional-acceptance.test.mjs scripts/r131-real-3d-comparison.test.mjs scripts/r132-spatial-comparison.test.mjs scripts/r133-spatial-onepass.test.mjs scripts/r135-furnished-program.test.mjs scripts/r134-multi-zone-plan.test.mjs scripts/r134-fresh-model-pilot.test.mjs scripts/r134-multi-zone-gallery.test.mjs scripts/r136-local-evidence.test.mjs scripts/r137-bounded-recovery.test.mjs scripts/r137-user-capture-replay.test.mjs scripts/r138-branching-topology.test.mjs scripts/r138-user-branch-comparison.test.mjs scripts/r139-room-relations.test.mjs scripts/r139-relational-model.test.mjs scripts/r139-user-qwen-relations-comparison.test.mjs scripts/r140-relational-local-runner.test.mjs scripts/r141-local-graph-evidence.test.mjs scripts/r143-independent-graph-audit.test.mjs scripts/r146-user-real-roof-recovery.test.mjs scripts/r149-quality-comparison.test.mjs scripts/r156-unknown-use-study.test.mjs scripts/r157-comparative-review.test.mjs scripts/r160-side-gallery.test.mjs scripts/r161-real-comparison.test.mjs scripts/r162-room-section-comparison.test.mjs scripts/r163-daylight-comparison.test.mjs scripts/r164-exterior-audit.test.mjs
       - name: Build genuine-source four-scene visual review
         run: node scripts/r125-expression-gallery.mjs --out r125-expression-preview
       - name: Upload source-only 3D comparison for human review
@@ -339,6 +345,15 @@ jobs:
         with:
           name: R163-REAL-ROOM-DAYLIGHT-AND-ROOF-3D-REVIEW
           path: r163-source-daylight-review/
+          retention-days: 14
+          if-no-files-found: error
+      - name: R164 independent all-wall upper air leak and true four elevations review
+        run: node scripts/r164-exterior-audit.mjs --out r164-independent-envelope-review
+      - name: Upload R164 real voxel elevations and upper-shell continuity
+        uses: actions/upload-artifact@v4
+        with:
+          name: R164-REAL-VOXEL-4-DIRECTION-ENVELOPE-AUDIT
+          path: r164-independent-envelope-review/
           retention-days: 14
           if-no-files-found: error
       - name: Keep the original Minecraft world offline
