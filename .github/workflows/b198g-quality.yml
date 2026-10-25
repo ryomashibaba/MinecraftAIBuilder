@@ -35,6 +35,9 @@ on:
       - 'scripts/r125-functional-preview.test.mjs'
       - 'scripts/r131-real-3d-comparison.mjs'
       - 'scripts/r131-real-3d-comparison.test.mjs'
+      - 'source/ai/r132-spatial-relations.mjs'
+      - 'scripts/r132-spatial-comparison.mjs'
+      - 'scripts/r132-spatial-comparison.test.mjs'
       - 'scripts/r125-feature-model-pilot.mjs'
       - 'scripts/r125-feature-model-pilot.test.mjs'
       - 'source/ai/r125-functional-acceptance.mjs'
@@ -93,11 +96,14 @@ jobs:
           node --check scripts/r125-functional-preview.test.mjs
           node --check scripts/r131-real-3d-comparison.mjs
           node --check scripts/r131-real-3d-comparison.test.mjs
+          node --check source/ai/r132-spatial-relations.mjs
+          node --check scripts/r132-spatial-comparison.mjs
+          node --check scripts/r132-spatial-comparison.test.mjs
           node --check scripts/r125-feature-model-pilot.mjs
           node --check scripts/r125-feature-model-pilot.test.mjs
           node --check source/ai/r125-functional-acceptance.mjs
           node --check scripts/r125-functional-acceptance.test.mjs
-          node --test scripts/r125-mvp.test.mjs scripts/r125-world-diff.test.mjs scripts/r125-pilot.test.mjs scripts/r125-offline-replay.test.mjs scripts/r125-architecture-plan.test.mjs scripts/r125-semantic-pilot.test.mjs scripts/r125-real-plan-replay.test.mjs scripts/r125-expression-gallery.test.mjs scripts/r125-multiuse-pilot.test.mjs scripts/r125-real-multiuse-replay.test.mjs scripts/r125-functional-layer.test.mjs scripts/r125-functional-preview.test.mjs scripts/r125-feature-model-pilot.test.mjs scripts/r125-functional-acceptance.test.mjs scripts/r131-real-3d-comparison.test.mjs
+          node --test scripts/r125-mvp.test.mjs scripts/r125-world-diff.test.mjs scripts/r125-pilot.test.mjs scripts/r125-offline-replay.test.mjs scripts/r125-architecture-plan.test.mjs scripts/r125-semantic-pilot.test.mjs scripts/r125-real-plan-replay.test.mjs scripts/r125-expression-gallery.test.mjs scripts/r125-multiuse-pilot.test.mjs scripts/r125-real-multiuse-replay.test.mjs scripts/r125-functional-layer.test.mjs scripts/r125-functional-preview.test.mjs scripts/r125-feature-model-pilot.test.mjs scripts/r125-functional-acceptance.test.mjs scripts/r131-real-3d-comparison.test.mjs scripts/r132-spatial-comparison.test.mjs
       - name: Build genuine-source four-scene visual review
         run: node scripts/r125-expression-gallery.mjs --out r125-expression-preview
       - name: Upload source-only 3D comparison for human review
@@ -114,6 +120,15 @@ jobs:
         with:
           name: R125-QWEN14B-SHOP-RESEARCH-FUNCTIONAL-3D
           path: r131-functional-comparison/
+          retention-days: 14
+          if-no-files-found: error
+      - name: Build source-only spatial correction 3D comparison
+        run: node scripts/r132-spatial-comparison.mjs --out r132-spatial-comparison
+      - name: Upload bounded spatial-correction B143 scenes
+        uses: actions/upload-artifact@v4
+        with:
+          name: R132-QWEN14B-SPATIAL-ORDER-3D
+          path: r132-spatial-comparison/
           retention-days: 14
           if-no-files-found: error
       - name: Keep the original Minecraft world offline
