@@ -309,3 +309,35 @@ test('R168: four-room R160 topology compiles REAL B143 and feature access withou
  assert.equal(result.architectural.completed.worldWrites,0);
  assert.deepEqual(result.architectural.completed.BuildPlan.operations,[]);
 });
+
+
+test('R168: opt-in grid research makes TWO model shared-node direct links through real four-room shared walls and adds minimal visible host access',()=>{
+ const model=reply();
+ model.footprint={width:24,depth:24};
+ model.form.facadeLanguage='plain';
+ model.relations.entryFacingZoneId='activity-2';
+ model.relations.directAdjacencies=[
+  ['activity-2','activity-1'],['activity-2','activity-3']
+ ];
+ model.architecture={schema:'minecraftaibuilder-r160-topology-ir-v1',
+  entryHierarchy:'emphasized',daylightStrategy:'even',
+  roofEdge:'fine',spatialTopology:'central-spine'};
+ const raw=JSON.stringify(model);
+ assert.throws(()=>parseR139RelationalFurnishedReply(raw,request,
+  {allowTopologyComposition:true}),/R139_RELATIONS_GRAPH_REQUIRES_RICHER_GEOMETRY/);
+ const result=parseR139RelationalFurnishedReply(raw,request,
+  {allowTopologyComposition:true,allowHostGridResearch:true});
+ const grid=result.hostGridResearchOverride;
+ assert.equal(grid.modelRequestedDoorCount,2);
+ assert.equal(grid.hostExtraDoorCount,1);
+ assert.equal(grid.modelExplicitTopologyNotImplemented,true);
+ assert.equal(result.architectural.roomSectionScope,
+  'FOUR_ROOMS_BASIC_ENVELOPE_NO_HIGHROOM_CLAIM');
+ assert.equal(result.relationalBase.sourceRouteAudit.status,
+  'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(result.architectural.completed.sourceRouteAudit.status,
+  'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(result.architectural.completed.sourceRouteAudit.featureAccess.length,4);
+ assert.deepEqual(result.architectural.completed.BuildPlan.operations,[]);
+ assert.equal(result.worldWrites,0);
+});
