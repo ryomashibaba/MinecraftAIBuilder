@@ -36,6 +36,8 @@ import {deriveR162RoomSectionMassing}
  from '../source/ai/r162-room-section-massing.mjs';
 import {deriveR163DaylitSections}
  from '../source/ai/r163-daylit-sections.mjs';
+import {deriveR170FourRoomVolumes}
+ from '../source/ai/r170-four-room-volumes.mjs';
 import {validateR160TopologyIntent,r160ToR151}
  from '../source/ai/r160-topology-intent.mjs';
 
@@ -52,7 +54,7 @@ export function parseR139RelationalFurnishedReply(raw,request,
   allowArchitecturalMassing=false,allowVolumeComposition=false,
   allowRooflineComposition=false,allowSpatialBalanceComposition=false,
   allowFloorplanComposition=false,allowTopologyComposition=false,
-  allowHostGridResearch=false}={}){
+  allowHostGridResearch=false,allowHostVolumeResearch=false}={}){
  if(typeof raw!=='string'||raw.length<20||raw.length>22000)
   fail('MISSING_OR_OVERSIZED_MODEL_REPLY');
  let reply;
@@ -163,12 +165,17 @@ export function parseR139RelationalFurnishedReply(raw,request,
   const articulated=deriveR150FurnitureArticulation(
    integrated??roofline??volume??envelope,
    {allowDecorativeDeferral:allowHostGridResearch===true});
+  const hostFourRoomVolume=allowHostVolumeResearch===true&&
+   allowTopologyComposition===true&&roomCount===4;
   const completed=highSectionEligible?
-   deriveR163DaylitSections(articulated):articulated;
+   deriveR163DaylitSections(articulated):
+   hostFourRoomVolume?deriveR170FourRoomVolumes(articulated):articulated;
   return {intent:structuredClone(architecture),envelope,volume,roofline,
    integrated,completed,
    roomSectionScope:highSectionEligible?
     'REAL_THREE_ROOM_SECTIONS_AND_CLERESTORY':
+    hostFourRoomVolume?
+     'FOUR_ROOMS_HOST_RESEARCH_TRUE_HIGH_ROOM_VOLUMES':
     allowTopologyComposition&&roomCount===4?
      'FOUR_ROOMS_BASIC_ENVELOPE_NO_HIGHROOM_CLAIM':
      'NOT_APPLICABLE',
