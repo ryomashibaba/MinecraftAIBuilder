@@ -24,6 +24,8 @@ import {applyR125FeatureIntent,ASSEMBLED_SCHEMA}
  from '../source/ai/r125-functional-layer.mjs';
 import {compileB143Gallery,renderB143Html}
  from './b143-gallery-core.mjs';
+import {auditR143GraphEvidence}
+ from './r143-independent-graph-audit.mjs';
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const escape=s=>String(s).replaceAll('&','&amp;').replaceAll('<','&lt;')
  .replaceAll('>','&gt;').replaceAll('"','&quot;');
@@ -59,6 +61,18 @@ export function buildR139SavedQwenRelationGallery(){
    before.sourceRouteAudit.status!=='SOURCE_ROUTES_REACH_ALL_ZONES'||
    after.sourceRouteAudit.status!=='SOURCE_ROUTES_REACH_ALL_ZONES')
    throw Error('R139_GALLERY_REAL_QWEN_FURNITURE_OR_ROUTES');
+  const independent=auditR143GraphEvidence({
+   intent,graphDesign:relation.design,finalDesign:after.design,
+   finalCompiled:after.compiled,
+   graphAudit:{
+    sourceSha256:relation.sourceSha256,
+    geometrySha256:relation.geometrySha256,
+    entryFacing:relation.entryFacingZoneEvidence,
+    directDoors:relation.directAdjacencyDoorEvidence
+   }
+  });
+  if(independent.status!=='SOURCE_ROOM_GRAPH_VERIFIED')
+   throw Error('R143_GALLERY_INDEPENDENT_SOURCE_ROOM_GRAPH_HOLD');
   const id=CASES[i].id;
   for(const [filename,design] of [
    ['r138-branch',before.design],['r139-room-graph',after.design]])
@@ -72,6 +86,7 @@ export function buildR139SavedQwenRelationGallery(){
    roomAssignments:relation.program[0].zones.map(z=>({
     zoneId:z.id,purpose:z.purpose,sector:z.physicalSector})),
    physicalDoors:relation.directAdjacencyDoorEvidence,
+   independentR143VoxelAudit:independent,
    retainedQwenEquipmentCount:after.placements.length,
    geometrySha256:{R138:before.geometrySha256,R139:after.geometrySha256},
    sourceRoutes:{R138:before.sourceRouteAudit.status,
@@ -84,7 +99,8 @@ export function buildR139SavedQwenRelationGallery(){
   '<p>実Qwen回答の4室・8設備は保持。新しい入口/隣接グラフはモデルが'+
   '提案したものではなく、ホスト側の検証シナリオです。</p>'+
   '<p>R139入口向き: '+escape(r.relationIntent.entryFacingZoneId)+
-  ' / 直接室間ドア: '+r.physicalDoors.length+'</p>'+
+  ' / 直接室間ドア: '+r.physicalDoors.length+
+  ' / ボクセル独立監査: '+escape(r.independentR143VoxelAudit.status)+'</p>'+
   '<div class="compare"><div><b>R138 中央通路</b><iframe src="'+
   r.id+'/r138-branch.html" title="R138 source"></iframe></div>'+
   '<div><b>R139 指定関係を持つ実3D</b><iframe src="'+
