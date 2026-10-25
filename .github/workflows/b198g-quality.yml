@@ -79,6 +79,7 @@ on:
       - 'source/ai/r149-architectural-expression.mjs'
       - 'source/ai/r150-furniture-articulation.mjs'
       - 'source/ai/r154-volume-composition.mjs'
+      - 'source/ai/r155-roofline.mjs'
       - 'scripts/r149-quality-comparison.mjs'
       - 'scripts/r149-quality-comparison.test.mjs'
       - 'scripts/fixtures/r146-user-qwen14b-20261025-raw.json'
@@ -179,6 +180,7 @@ jobs:
           node --check scripts/r139-room-relations.test.mjs
           node --check scripts/r139-relational-model.mjs
           node --check source/ai/r154-volume-composition.mjs
+          node --check source/ai/r155-roofline.mjs
           node --check scripts/r139-relational-model.test.mjs
           node --check scripts/r139-user-qwen-relations-comparison.mjs
           node --check scripts/r139-user-qwen-relations-comparison.test.mjs

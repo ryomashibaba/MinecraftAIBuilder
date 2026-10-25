@@ -235,3 +235,58 @@ test('R154 input failures HOLD; existing baseline and model choices are never si
  assert.throws(()=>parseR139RelationalFurnishedReply(JSON.stringify(raw),request),
   /R139_MODEL_FULL_REPLY_CONTRACT/);
 });
+
+test('R155 pitch creates a real inhabited roofline without corrupting frozen semantic building',()=>{
+ const raw=reply();raw.architecture={
+  schema:'minecraftaibuilder-r155-roofline-ir-v1',
+  entryHierarchy:'quiet',daylightStrategy:'even',roofEdge:'fine',
+  volumeHierarchy:'paired',arrivalSpace:'covered',roofSilhouette:'ridge'};
+ const parsed=parseR139RelationalFurnishedReply(JSON.stringify(raw),request,
+  {allowRooflineComposition:true});
+ const roof=parsed.architectural.roofline.r155RooflineEvidence;
+ assert.equal(roof.authorship,'CALLER_ARCHITECTURE_IR_NOT_AUTHENTICATED');
+ assert.equal(roof.upperVolumes.length,2);
+ assert.equal(roof.unchangedAllInteriorBelowY6,true);
+ assert.equal(roof.routeStatus,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(roof.reachedEquipment,4);
+ assert.ok(roof.newB143ElementCount<=160);
+ assert.ok(roof.upperVolumes.every(v=>v.roofHeightAtPeak>v.roofHeightBefore));
+ assert.ok(roof.upperVolumes.every(v=>v.slopeLevels[0]===0));
+ assert.equal(parsed.architectural.completed.sourceRouteAudit.featureAccess.length,4);
+ assert.equal(parsed.architectural.completed.worldWrites,0);
+ assert.deepEqual(parsed.architectural.completed.gates,Array(9).fill('BLOCKED'));
+ assert.deepEqual(parsed.architectural.completed.BuildPlan.operations,[]);
+ const original=parseR139RelationalFurnishedReply(JSON.stringify(reply()),request);
+ assert.equal(parsed.featured.geometrySha256,original.featured.geometrySha256);
+ assert.equal(parsed.featured.sourceSha256,original.featured.sourceSha256);
+ const shed=reply();shed.architecture={...raw.architecture,roofSilhouette:'shed'};
+ const shedProduct=parseR139RelationalFurnishedReply(JSON.stringify(shed),request,
+  {allowRooflineComposition:true});
+ assert.notEqual(parsed.architectural.completed.geometrySha256,
+  shedProduct.architectural.completed.geometrySha256);
+ assert.ok(shedProduct.architectural.roofline.r155RooflineEvidence
+  .upperVolumes.every(v=>v.silhouette==='shed'));
+ assert.equal(shedProduct.architectural.completed.sourceRouteAudit.status,
+  'SOURCE_ROUTES_REACH_ALL_ZONES');
+});
+test('R155 fail-closed IR does not mutate or silently downgrade model roof selections',()=>{
+ for(const invalid of [
+  {roofSilhouette:'gabled-random'},
+  {roofSilhouette:null},
+  {arrivalSpace:'massive-unbounded-porch'},
+  {aNewField:'disallowed'}
+ ]){
+  const r=reply();r.architecture={schema:'minecraftaibuilder-r155-roofline-ir-v1',
+   entryHierarchy:'quiet',daylightStrategy:'even',roofEdge:'fine',
+   volumeHierarchy:'paired',arrivalSpace:'covered',
+   roofSilhouette:'ridge',...invalid};
+  assert.throws(()=>parseR139RelationalFurnishedReply(JSON.stringify(r),request,
+   {allowRooflineComposition:true}),/R155_ROOFLINE_STRICT_ROOFLINE_IR/);
+ }
+ const past=reply();past.architecture={
+  schema:'minecraftaibuilder-r155-roofline-ir-v1',
+  entryHierarchy:'quiet',daylightStrategy:'even',roofEdge:'fine',
+  volumeHierarchy:'paired',arrivalSpace:'covered',roofSilhouette:'ridge'};
+ assert.throws(()=>parseR139RelationalFurnishedReply(JSON.stringify(past),request,
+  {allowVolumeComposition:true}),/R154_VOLUME_STRICT_INTENT_CONTRACT/);
+});

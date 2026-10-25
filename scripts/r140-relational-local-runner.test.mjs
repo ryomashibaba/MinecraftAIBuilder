@@ -38,6 +38,7 @@ const fakeLocal=(answer,inspect=()=>{})=>async(url,opts)=>{
  assert.equal(body.model,'qwen3:14b');
  assert.equal(body.max_tokens,
   !Object.hasOwn(answer,'architecture')?1750:
+   answer.architecture?.schema==='minecraftaibuilder-r155-roofline-ir-v1'?2400:
    answer.architecture?.schema==='minecraftaibuilder-r154-volume-ir-v1'?2300:
    answer.architecture?.schema==='minecraftaibuilder-r152-envelope-intent-v1'?2050:1900);
  assert.equal(body.stream,false);
@@ -215,5 +216,43 @@ test('R154 one local-shaped synthetic answer chooses TWO real roof volumes in a 
  assert.equal(args.architectureMode,'volumes');
  assert.throws(()=>parseR134FreshArgs(['--model','qwen3:14b','--brief',brief,
   '--architecture','volumes','--out','invalid']),
+  /R134_MODEL_ARCHITECTURE_REQUIRES_GRAPH_TOPOLOGY/);
+});
+
+test('R155 local single synthetic reply outputs genuine B143 roof silhouette without claiming real LLM evidence',async t=>{
+ const dir=tmp();t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));
+ const answer=reply();answer.architecture={
+  schema:'minecraftaibuilder-r155-roofline-ir-v1',
+  entryHierarchy:'quiet',daylightStrategy:'even',roofEdge:'fine',
+  volumeHierarchy:'paired',arrivalSpace:'covered',roofSilhouette:'ridge'};
+ const out=path.join(dir,'r155');
+ const r=await runR134FreshModel({model:'qwen3:14b',brief,
+  outDir:out,topologyMode:'graph',equipmentMode:'assembled',
+  architectureMode:'roofline'
+ },{fetcher:fakeLocal(answer,request=>{
+  assert.ok(request.messages[0].content.includes('roofSilhouette MUST be ridge or shed'));
+  assert.ok(request.messages[0].content.includes('minecraftaibuilder-r155-roofline-ir-v1'));
+ })});
+ assert.equal(r.status,'HOLD_TEST_DOUBLE_NOT_REAL_INFERENCE',r.reason);
+ assert.equal(r.modelCalls,1);
+ assert.equal(r.architectureIntentFromModel,false);
+ assert.equal(r.genuineVolumeCompositionSourceOnly,true);
+ assert.equal(r.genuineRooflineSourceOnly,true);
+ assert.equal(r.sourceRoutes,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(r.equipmentCount,4);
+ const evidence=JSON.parse(fs.readFileSync(path.join(
+  out,'R155_HOST_ARCHITECTURE_EVIDENCE.json'),'utf8'));
+ assert.equal(evidence.rooflineProof.upperVolumes.length,2);
+ assert.ok(evidence.rooflineProof.newB143ElementCount<=160);
+ assert.ok(fs.existsSync(path.join(out,'R155_MODEL_ARCHITECTURE_IR.json')));
+ assert.ok(fs.existsSync(path.join(out,'index.html')));
+ assert.deepEqual(r.gates,Array(9).fill('BLOCKED'));
+ assert.equal(r.worldWrites,0);
+ const args=parseR134FreshArgs(['--model','qwen3:14b','--brief',brief,
+  '--equipment','assembled','--topology','graph',
+  '--architecture','roofline','--out','r155-output']);
+ assert.equal(args.architectureMode,'roofline');
+ assert.throws(()=>parseR134FreshArgs(['--model','qwen3:14b','--brief',brief,
+  '--architecture','roofline','--out','r155-output']),
   /R134_MODEL_ARCHITECTURE_REQUIRES_GRAPH_TOPOLOGY/);
 });

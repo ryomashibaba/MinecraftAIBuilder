@@ -33,6 +33,16 @@ test('real R146 pinned Qwen source -> two actual B143 3D scenes with proven unch
  assert.ok(bundle.pages.some(p=>p.file==='after-r150.html'));
  assert.ok(bundle.pages.some(p=>p.file==='after-r152-host-study.html'));
  assert.ok(bundle.pages.some(p=>p.file==='after-r154-host-study.html'));
+ assert.ok(bundle.pages.some(p=>p.file==='after-r155-host-study.html'));
+ assert.equal(e.sixGenuineB143Viewers,true);
+ assert.equal(e.r155HostStudy.intentAuthorship,'HOST_RESEARCH_NOT_QWEN_SELECTED');
+ assert.equal(e.r155HostStudy.rooflineProof.upperVolumes.length,2);
+ assert.equal(e.r155HostStudy.rooflineProof.reachedEquipment,8);
+ assert.ok(e.r155HostStudy.rooflineProof.newB143ElementCount<=160);
+ assert.equal(e.r155HostStudy.rooflineProof.unchangedAllInteriorBelowY6,true);
+ assert.equal(e.r155HostStudy.sourceRoutes,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(e.r155HostStudy.humanArtReview,'NOT_REVIEWED');
+ assert.notEqual(e.r155HostStudy.geometrySha256,e.r154HostStudy.geometrySha256);
  assert.equal(e.fiveGenuineB143Viewers,true);
  assert.equal(e.r154HostStudy.intentAuthorship,'HOST_RESEARCH_NOT_ORIGINAL_QWEN');
  assert.equal(e.r154HostStudy.volumeProof.volumeCount,2);
@@ -70,6 +80,10 @@ test('no overwrite and real viewer/evidence source output, not a screenshot simu
  assert.ok(fs.readFileSync(path.join(dest,'after-r150.html'),'utf8').includes('<'));
  assert.ok(fs.readFileSync(path.join(dest,'R150_DERIVED_SOURCE.json'),'utf8').includes('r150-'));
  assert.ok(fs.readFileSync(path.join(dest,'after-r154-host-study.html'),'utf8').includes('<'));
+ assert.ok(fs.readFileSync(path.join(dest,'after-r155-host-study.html'),'utf8').includes('<'));
+ const r155=JSON.parse(fs.readFileSync(path.join(dest,'R155_HOST_GEOMETRY_EVIDENCE.json'),'utf8'));
+ assert.equal(r155.upperVolumes.length,2);
+ assert.ok(r155.newB143ElementCount<=160);
  const r154=JSON.parse(fs.readFileSync(path.join(dest,'R154_HOST_GEOMETRY_EVIDENCE.json'),'utf8'));
  assert.equal(r154.volumeCount,2);
  assert.equal(r154.sourceRoutes,'SOURCE_ROUTES_REACH_ALL_ZONES');
