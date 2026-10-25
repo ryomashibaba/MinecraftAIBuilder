@@ -35,12 +35,16 @@ export function deriveR170FourRoomVolumes(base){
   fail('BOUNDS_UNSUPPORTED');
  const roof=base.design.elements.find(e=>e.id==='roof-base');
  const west=base.design.elements.find(e=>e.id==='shell-west');
+ // R149 returns a derived furnished-source wrapper without base.plan.
+ // The verified host envelope evidence pins the ORIGINAL model roof family.
+ // Never guess it from the material or roof silhouette.
+ const profile=base.r149ExpressionEvidence?.originalRoofProfile;
  if(!roof||roof.shape!=='box'||roof.mode!=='add'||
-  roof.origin?.[1]!==6||!west||west.mode!=='add'||
-  !['flat','ridge','sawtooth'].includes(base.plan?.form?.roofProfile))
+  roof.origin?.[1]!==6||roof.size?.[1]!==1||
+  roof.size?.[0]!==w-2||roof.size?.[2]!==d-2||
+  !west||west.mode!=='add'||!west.material||
+  !['flat','ridge','sawtooth'].includes(profile))
   fail('ORIGINAL_ROOF_CONTRACT');
- const profile=base.plan.form.roofProfile;
- const sourcePrefix=structuredClone(base.design);
  const design=structuredClone(base.design);
  // Rebuild the legacy profile only above y=6; keep all lower model-selected
  // rooms and equipment as exact voxels. Never delete a semantic room.
