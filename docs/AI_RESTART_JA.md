@@ -20,6 +20,10 @@
 
 
 
+## R135 CI coverage correction — R134 new test suites were not in node --test (2026-10-25 JST)
+- Audit identified that syntax-check and path filters included R134 tests, but the main `node --test` command had accidentally omitted ALL three R134 new suites. Earlier 137/137 numbers describe ONLY the tests executed, not evidence of R134 unit regression success. The historical CI source 3D gallery was executed, but the unregistered unit tests cannot be claimed to have passed.
+- Added `scripts/r134-multi-zone-plan.test.mjs`, `scripts/r134-fresh-model-pilot.test.mjs` and `scripts/r134-multi-zone-gallery.test.mjs` explicitly to the actual test runner alongside R135. Treat R134/R135 as pending until the new workflow passes. No test skip or gate downgrade.
+
 ## R135 — fresh original room plan AND useful physical room equipment in one model reply (2026-10-25 JST)
 - R134's `runR134FreshModel` now accepts the optional `--equipment assembled` flag, keeping its older default unmodified. In furnished mode, ONE short localhost model response selects the new 3/4-room spatial program and one-or-more per-room equipment semantic intents (5 generic roles, no building-type templates). The untrusted response is captured byte-for-byte before validation; the host compiles the new R134 shell into B143, then uses existing R130 assembled solids and R125 2-wide source route/service checks. It refuses model output that forgets a room, invents a zone or asks for arbitrary code.
 - Saves BOTH original unfurnished shell (`shell.html`) and actually furnished B143 rotating design (`index.html`), the model's semantic equipment decisions, derived B143 voxels, source access and hashes, in one save-once results folder. This moves beyond empty labeled rooms; NOT a human art approval or proof of a player-usable furnished building.
