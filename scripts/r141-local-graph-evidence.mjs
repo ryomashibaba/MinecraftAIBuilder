@@ -71,6 +71,8 @@ export async function runR141GraphTrial({model=null,endpoint=
   modelCalls:0,rawReplyCaptured:false,
   modelSelectedRelations:false,
   compiledGraph3D:false,sourceSha256:null,geometrySha256:null,
+  modelRequestedDirectPairs:0,sourceVerifiedDirectDoors:0,
+  spatialDecisionDemonstrated:false,
   roomCount:null,equipmentCount:null,
   sourceRoutes:'NOT_CHECKED',
   humanArtReview:'NOT_REVIEWED',mac8GB2B:'NOT_TESTED',
@@ -110,13 +112,32 @@ export async function runR141GraphTrial({model=null,endpoint=
   report.sourceRoutes=result.sourceRoutes;
   report.inferenceStatus=result.status;
   report.failureReason=result.reason??null;
+  if(result.realRoomGraph3D===true){
+   const base=path.join(folder,'single-real-local-attempt');
+   const intent=JSON.parse(fs.readFileSync(
+    path.join(base,'R139_MODEL_SPATIAL_RELATIONS.json'),'utf8'));
+   const audit=JSON.parse(fs.readFileSync(
+    path.join(base,'R139_GRAPH_SOURCE_AUDIT.json'),'utf8'));
+   report.modelRequestedDirectPairs=intent.directAdjacencies.length;
+   report.sourceVerifiedDirectDoors=audit.directDoors.length;
+   report.spatialDecisionDemonstrated=
+    intent.directAdjacencies.length>=1&&
+    audit.directDoors.length===intent.directAdjacencies.length&&
+    audit.sourceRoutes==='SOURCE_ROUTES_REACH_ALL_ZONES'&&
+    audit.directDoors.every(door=>intent.directAdjacencies.some(pair=>
+     pair.includes(door.zoneA)&&pair.includes(door.zoneB)));
+  }
   if(synthetic)report.status='HOLD_TEST_DOUBLE_NOT_REAL_INFERENCE';
   else if(result.status==='SOURCE_CANDIDATE_REAL_LOCAL_RESPONSE_HUMAN_REVIEW_REQUIRED'&&
    result.realRoomGraph3D&&result.relationalIntentFromModel&&
    result.sourceRoutes==='SOURCE_ROUTES_REACH_ALL_ZONES'&&
+   report.spatialDecisionDemonstrated&&
    result.modelCalls===1&&result.originalModelResponseCaptured===true)
    report.status='REAL_LOCAL_ROOM_GRAPH_3D_SOURCE_REVIEW_REQUIRED';
-  else report.status='HOLD_REAL_LOCAL_GRAPH_OR_GEOMETRY';
+  else report.status=result.realRoomGraph3D&&
+   !report.spatialDecisionDemonstrated?
+    'HOLD_GRAPH_SPATIAL_DECISION_NOT_DEMONSTRATED':
+    'HOLD_REAL_LOCAL_GRAPH_OR_GEOMETRY';
   const page='<!doctype html><html lang="ja"><meta charset="utf-8">'+
    '<title>R141 source-only local model room-graph trial</title>'+
    '<style>body{font:15px/1.6 system-ui;max-width:1100px;margin:auto;'+
