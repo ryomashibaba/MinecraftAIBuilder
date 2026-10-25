@@ -36,14 +36,27 @@ try {
     Write-Host "SOURCE_AUDIT: $($report.independentGraphSourceAudit)"
     Write-Host "QWEN_RAW_SHA256: $($report.originalQwenRawSha256)"
     Write-Host "REVIEW_FOLDER: $(Join-Path $repo $folder)"
-    if ($report.failureReason) {
-        Write-Host "HOLD_REASON: $($report.failureReason)"
+    # A successful R146 report intentionally omits failureReason. Under
+    # Set-StrictMode -Version Latest, direct access to an absent property
+    # raises PropertyNotFoundStrict AFTER the model and 3D audit succeeded.
+    $reasonProperty = $report.PSObject.Properties['failureReason']
+    if ($null -ne $reasonProperty -and
+        -not [string]::IsNullOrWhiteSpace([string]$reasonProperty.Value)) {
+        Write-Host "HOLD_REASON: $($reasonProperty.Value)"
     }
-    if ($nodeExit -eq 0) {
-        Write-Host "Open index.html in the review folder to inspect real B143 3D."
+    $sourcePass = $nodeExit -eq 0 -and
+        $report.status -eq 'REAL_QWEN_PROGRAM_HOST_CORRECTED_MATERIAL_REAL_3D_SOURCE_REVIEW_REQUIRED' -and
+        $report.independentGraphSourceAudit -eq 'SOURCE_ROOM_GRAPH_VERIFIED'
+    if ($sourcePass) {
+        $viewer = Join-Path (Join-Path $repo $folder) 'index.html'
+        if (-not (Test-Path $viewer)) {
+            throw 'R146_SOURCE_PASSED_BUT_3D_VIEWER_MISSING'
+        }
+        Write-Host "R146_VIEWER: $viewer"
+        Write-Host 'R146_SOURCE_ONLY_SUCCESS. Review in browser; no Minecraft execution approved.'
     } else {
         Write-Warning 'Offline replay HOLD. Preserve R146_REPORT.json; do not rerun Qwen.'
-        exit 2
+        throw "R146_SOURCE_HOLD_OR_NODE_ERROR (exit=$nodeExit, status=$($report.status))"
     }
 } finally {
     Pop-Location
