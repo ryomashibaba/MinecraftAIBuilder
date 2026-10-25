@@ -34,6 +34,54 @@ function makeBlocks(feature,zone,y,corner){
  const z=corner.startsWith('near')?zmin:zmax-sz+1;
  return {x,y,z,sx,sz,cfg};
 }
+/**
+ * Preserve original corner-priority outputs, then search progressively
+ * along the room perimeter and nearby interior bands when corners are busy.
+ * The requested corner remains intent, never a hardcoded genre layout.
+ * Every candidate still faces the full source route + service access checks.
+ */
+function* candidatePositions(feature,zone,y){
+ const cfg=presets[feature.role],sx=cfg.size[0],sz=cfg.size[2];
+ const xmin=zone.range.x[0]+1,xmax=zone.range.x[1]-sx;
+ const zmin=zone.range.z[0]+1,zmax=zone.range.z[1]-sz;
+ if(xmin>xmax||zmin>zmax)return;
+ const emitted=new Set();
+ const candidate=(x,z,corner,method)=>{
+  if(x<xmin||x>xmax||z<zmin||z>zmax||emitted.has(x+','+z))
+   return null;
+  emitted.add(x+','+z);
+  return {corner,method,pos:{x,y,z,sx,sz,cfg}};
+ };
+ for(const corner of [feature.corner,...corners.filter(c=>c!==feature.corner)]){
+  const old=makeBlocks(feature,zone,y,corner);
+  if(!old)continue;
+  const p=candidate(old.x,old.z,corner,'corner');
+  if(p)yield p;
+ }
+ // Search up to 3 bands of perimeter candidates. A source audit is
+ // expensive; place near envelope first and cap possible evaluations.
+ let checked=0;
+ for(let ring=0;ring<=3;ring++){
+  if(xmin+ring>xmax-ring||zmin+ring>zmax-ring)break;
+  const places=[];
+  for(let x=xmin+ring;x<=xmax-ring;x++){
+   places.push([x,zmin+ring],[x,zmax-ring]);
+  }
+  for(let z=zmin+ring;z<=zmax-ring;z++){
+   places.push([xmin+ring,z],[xmax-ring,z]);
+  }
+  const wishX=feature.corner.endsWith('left')?xmin:xmax;
+  const wishZ=feature.corner.startsWith('near')?zmin:zmax;
+  places.sort((a,b)=>
+   (Math.abs(a[0]-wishX)+Math.abs(a[1]-wishZ))-
+   (Math.abs(b[0]-wishX)+Math.abs(b[1]-wishZ)));
+  for(const [x,z] of places){
+   if(checked>=192)return;
+   const p=candidate(x,z,feature.corner,'perimeter-and-inward-band');
+   if(p){checked++;yield p;}
+  }
+ }
+}
 function asElement(feature,pos){
  return {id:'feature-'+feature.id,shape:'box',mode:'add',
   material:pos.cfg.material,origin:[pos.x,pos.y,pos.z],
@@ -66,9 +114,8 @@ export function applyR125FeatureIntent({base,intent}={}){
  for(const obj of intent.objects){
   const {zone,y}=zones.get(obj.zoneId);
   let chosen=null;
-  for(const corner of [obj.corner,...corners.filter(x=>x!==obj.corner)]){
-   const pos=makeBlocks(obj,zone,y,corner);
-   if(!pos)continue;
+  for(const option of candidatePositions(obj,zone,y)){
+   const {corner,pos,method}=option;
    let clear=true;
    for(let x=pos.x;x<pos.x+pos.sx;x++)
     for(let z=pos.z;z<pos.z+pos.sz;z++)
@@ -81,11 +128,14 @@ export function applyR125FeatureIntent({base,intent}={}){
    let tested,route;
    try{
     tested=compileDesign(testDesign);
+    const targets=[...placements,{id:obj.id,zoneId:obj.zoneId,
+     origin:[pos.x,pos.y,pos.z],size:pos.cfg.size}];
     route=auditR125SourceRoutes({...base,design:testDesign,compiled:tested,
-     sourceSha256:tested.sourceSha256,geometrySha256:tested.geometrySha256});
+     sourceSha256:tested.sourceSha256,geometrySha256:tested.geometrySha256},
+     {featureTargets:targets});
    }catch{continue;}
    if(route.status!=='SOURCE_ROUTES_REACH_ALL_ZONES')continue;
-   chosen={corner,pos,testDesign,tested,route};break;
+   chosen={corner,pos,method,testDesign,tested,route};break;
   }
   if(!chosen)hold('NO_SAFE_PLACEMENT_'+obj.id);
   design.elements=chosen.testDesign.elements;
@@ -93,6 +143,7 @@ export function applyR125FeatureIntent({base,intent}={}){
    keep.set(k(p[0],p[1],p[2]),p[3]);
   placements.push({id:obj.id,zoneId:obj.zoneId,role:obj.role,
    requestedCorner:obj.corner,actualCorner:chosen.corner,
+   placementMethod:chosen.method,
    origin:[chosen.pos.x,chosen.pos.y,chosen.pos.z],
    size:chosen.pos.cfg.size,material:chosen.pos.cfg.material});
  }
@@ -104,7 +155,8 @@ export function applyR125FeatureIntent({base,intent}={}){
   if(after.get(coord)!==material)hold('ORIGINAL_GEOMETRY_MODIFIED');
  }
  const routes=auditR125SourceRoutes({...base,design,compiled,
-  sourceSha256:compiled.sourceSha256,geometrySha256:compiled.geometrySha256});
+  sourceSha256:compiled.sourceSha256,geometrySha256:compiled.geometrySha256},
+  {featureTargets:placements});
  if(routes.status!=='SOURCE_ROUTES_REACH_ALL_ZONES')hold('ROUTE_REGRESSION');
  if(compiled.primitives.length<=base.compiled.primitives.length)
   hold('NO_NEW_GEOMETRY');
@@ -121,6 +173,8 @@ export function applyR125FeatureIntent({base,intent}={}){
   addedVoxelCount:compiled.primitives.length-base.compiled.primitives.length,
   immutableBaseGeometryProven:true,
   sourceRouteAudit:routes,
+  featureServiceAccessSourceOnly:routes.featureAccess,
+  everyFeatureSourceAccessible:routes.featureAccess.every(x=>x.reachableFromEntrance),
   modelFeatureAuthorship:'CALLER_PROVIDED_NOT_ATTESTED_AS_LLM',
   semanticFunctionInGameCertified:false,
   aestheticReview:'NOT_REVIEWED',

@@ -2,12 +2,15 @@
  * R125 source-only graph: a 2-block-wide x-axis standing pad, with 2-block
  * headroom and an underlying pair of supporting voxels. One horizontal move
  * may change standing height by at most 1. Starts JUST INSIDE the entrance.
+ * Optional feature service frontage uses the same source-only graph.
  * This is NOT game physics, jumping, mob pathfinding, or world certification.
  */
 import {verifyCompiled} from './b143-building-dsl.mjs';
 const err=msg=>{throw Error('R125_ROUTE_'+msg);};
 const key=(x,y,z)=>x+','+y+','+z;
-export function auditR125SourceRoutes(product){
+export function auditR125SourceRoutes(product,{featureTargets=[]}={}){
+ if(!Array.isArray(featureTargets)||featureTargets.length>8)
+  err('FEATURE_TARGET_CONTRACT');
  if(product?.schema!=='minecraftaibuilder-r125-plan-to-b143-result-v1'||
   !product.design||!product.compiled||!Array.isArray(product.program)||
   !verifyCompiled(product.design,product.compiled))err('UNVERIFIED_SOURCE');
@@ -76,6 +79,47 @@ export function auditR125SourceRoutes(product){
  const upper=product.program.length>1?zones.filter(x=>x.level>0):[];
  if(upper.length&&!upper.every(x=>x.reachedFromEntrance))
   issues.push('UPPER_PROGRAM_NOT_CONNECTED_TO_INTERIOR_THRESHOLD');
+ // A room being reachable says nothing about its equipment. Optional
+ // source-only service-side witnesses require 2-wide supported clear pads
+ // immediately adjacent to a proposed item and connected to the entrance.
+ // No claim about the player's actual interaction range or game physics.
+ const featureAccess=[];
+ const zoneMap=new Map(product.program.flatMap(l=>l.zones.map(z=>
+  [z.id,{range:z.range,y:l.standingFloorY}])));
+ const seenFeatureIds=new Set();
+ for(const target of featureTargets){
+  const {id,zoneId,origin,size}=target??{};
+  if(typeof id!=='string'||!id||seenFeatureIds.has(id)||
+   !zoneMap.has(zoneId)||!Array.isArray(origin)||origin.length!==3||
+   !origin.every(Number.isSafeInteger)||!Array.isArray(size)||
+   size.length!==3||!size.every(n=>Number.isSafeInteger(n)&&n>0))
+   err('INVALID_FEATURE_TARGET');
+  seenFeatureIds.add(id);
+  const {range,y}=zoneMap.get(zoneId),[x0,fy,z0]=origin;
+  const [sx,,sz]=size;
+  let best=null,bestDistance=Infinity,side=null;
+  for(const [padId,distance] of distances){
+   const pad=pads.get(padId);
+   if(pad.y!==y||fy!==y||pad.x<range.x[0]||
+    pad.x+1>range.x[1]||pad.z<range.z[0]||
+    pad.z>range.z[1])continue;
+   const frontX=pad.x>=x0&&pad.x+1<x0+sx;
+   const near=frontX&&pad.z===z0-1;
+   const far=frontX&&pad.z===z0+sz;
+   const left=pad.x+1===x0-1&&pad.z>=z0&&pad.z<z0+sz;
+   const right=pad.x===x0+sx&&pad.z>=z0&&pad.z<z0+sz;
+   if((near||far||left||right)&&distance<bestDistance){
+    bestDistance=distance;best=[pad.x,pad.y,pad.z];
+    side=near?'near':far?'far':left?'left':'right';
+   }
+  }
+  const reached=best!==null;
+  if(!reached)issues.push('UNREACHABLE_FEATURE_SERVICE_'+id);
+  featureAccess.push({id,zoneId,sourceServiceSide:side,
+   supportedTwoWideServiceWitness:best,
+   reachableFromEntrance:reached,
+   sourceGraphMoves:reached?bestDistance:null});
+ }
  return {
   schema:'r125-two-wide-source-route-audit-v1',
   status:issues.length?'HOLD_SOURCE_ROUTES':'SOURCE_ROUTES_REACH_ALL_ZONES',
@@ -83,7 +127,7 @@ export function auditR125SourceRoutes(product){
   geometrySha256:product.geometrySha256,
   graphDefinition:'2-wide x-axis pads, 2-air headroom, horizontal neighbor with dy<=1',
   verifiedPadCount:pads.size,reachedPadCount:distances.size,
-  sourceInteriorEntrance:start,zones,
+  sourceInteriorEntrance:start,zones,featureAccess,
   externalTerrainNotChecked:true,
   sourceGraphOnly:true,
   stairsGamePhysicsUnverified:true,

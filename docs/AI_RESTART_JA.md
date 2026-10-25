@@ -18,6 +18,12 @@
 
 
 
+## R128 機能設備の実アクセス・高密度配置Source QA（2026-10-25 JST）
+- R127の[GitHub Actions #40143280425](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40143280425) はSUCCESS（テストダブルであり新たな実Qwen推論なし）。
+- [共通機能設備生成器](../source/ai/r125-functional-layer.mjs)を改良。従来4隅の優先配置と原本回帰を維持したまま、4隅で置けない場合は領域の縁に沿って候補を探索。独立した設備5件以上も同一領域に配置できる可能性を広げる。配置都合で元ボクセルを破壊しない。
+- [Source経路監査](../source/ai/r125-source-routes.mjs)に任意の設備「利用側」ターゲットを追加。入口から各機能領域までに加え、各設備の正面・側面に**支持された横2幅・頭上2空気ブロックの経路グラフ**で実際に到達できるかを判定。設備が見えるだけ・部屋には入れるだけの偽PASSを回避。候補が不可なら次位置、全候補不可ならHOLD。
+- これはなお限定Source探索であってMinecraftの実歩行・操作範囲・美術・設備の本物の機能ではない。現時点で5役割の小型ボクセル設備を実用設備と認証しない。Qwen/Gemma設備生成の実測、実3Dの人間審査、元ワールドバックアップ/復帰を次の重要な検証とする。Minecraft worldWrites0、NOT_PREPARED・9 BLOCKED維持。
+
 ## R127 LLMによる設備意味IR → 汎用B143生成（2026-10-25 JST）
 - [1回のローカルLLM設備推論](../scripts/r125-feature-model-pilot.mjs)を実装。任意の既存ArchitecturePlan JSONを読み、ゾーンID・用途・追加の機能要求から、モデルは座標無しの短い \`{"objects":[{"id":"...","zoneId":"...","role":"...","corner":"..."}]}\` のみを出力する。元計画のSHA・schemaは信頼できる呼出側が固定し、既存の共通設備B143コンパイラへ渡す。ジャンル別生成器の追加なし。
 - 入口修復は元Qwen設計を変更せず派生ソースとして適用。生のモデル応答、機能IR、3D HTML、ボクセル数、元SHA、2幅Source経路QAを新しい別フォルダに証拠保存。未検証の役割/閉塞/不正なJSONはHOLD。小型LLM向け出力上限768 token、1回の推論のみ、127.0.0.1以外は拒否。

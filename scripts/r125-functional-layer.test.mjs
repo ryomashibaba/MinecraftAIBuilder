@@ -98,3 +98,34 @@ test('feature contract rejects unknown commands, stale sources and duplicate IDs
   assert.throws(()=>applyR125FeatureIntent({base,intent:mutated}),/R125_FEATURE_/);
  }
 });
+
+test('source-only service frontage rejects unreachable fixtures even if all zones are connected',()=>{
+ const base=compileArchitecturePlan(fixture('shop'));
+ const unchanged=auditR125SourceRoutes(base);
+ assert.equal(unchanged.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ const checked=auditR125SourceRoutes(base,{featureTargets:[{
+  id:'inaccessible-rack',zoneId:'front-retail-space',origin:[0,2,0],size:[2,2,1]
+ }]});
+ assert.equal(checked.status,'HOLD_SOURCE_ROUTES');
+ assert.deepEqual(checked.featureAccess.map(x=>x.reachableFromEntrance),[false]);
+ assert.ok(checked.issues.includes('UNREACHABLE_FEATURE_SERVICE_inaccessible-rack'));
+ assert.equal(checked.worldWrites,0);
+});
+test('fifth feature in same zone uses perimeter-search beyond only four corners',()=>{
+ const original=compileArchitecturePlan(fixture('shop'));
+ const intent={schema:FEATURES,basePlanSha256:original.planSha256,
+  objects:Array.from({length:5},(_,i)=>({
+   id:'seat-'+String(i+1),zoneId:'front-retail-space',
+   role:'seating',corner:'far-left'
+  }))};
+ const derived=applyR125FeatureIntent({base:original,intent});
+ assert.equal(derived.placements.length,5);
+ assert.equal(new Set(derived.placements.map(x=>x.origin.join(','))).size,5);
+ assert.ok(derived.placements.some(x=>x.placementMethod==='perimeter-and-inward-band'));
+ assert.equal(derived.everyFeatureSourceAccessible,true);
+ assert.ok(derived.featureServiceAccessSourceOnly.every(x=>x.supportedTwoWideServiceWitness));
+ assert.equal(derived.sourceRouteAudit.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(derived.originalSourceSha256,original.sourceSha256);
+ assert.equal(derived.worldWrites,0);
+ assert.deepEqual(derived.gates,Array(9).fill('BLOCKED'));
+});
