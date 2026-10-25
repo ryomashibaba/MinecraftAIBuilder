@@ -61,7 +61,7 @@ export function auditR164EnclosedHighRooms(source){
    for(let x=minX-1;x<=maxX+1;x++)
     for(const z of [minZ-1,maxZ+1]){
      const k=key(x,y,z),mat=occupied.get(k);
-     if(mat!==wallMat&&mat!==glass)fail('UPPER_PERIMETER_HOLE');
+     if(mat!==wallMat&&mat!==glass)fail('UPPER_PERIMETER_HOLE_'+s.zoneId+'_'+x+'_'+y+'_'+z+'_MAT'+String(mat));
      if(mat===glass&&!expectedWindowCells.has(k))
       fail('UNAPPROVED_PERIMETER_GLAZING');
      if(mat===glass)glazing++;else walls++;
@@ -69,7 +69,7 @@ export function auditR164EnclosedHighRooms(source){
    for(let z=minZ;z<=maxZ;z++)
     for(const x of [minX-1,maxX+1]){
      const k=key(x,y,z),mat=occupied.get(k);
-     if(mat!==wallMat&&mat!==glass)fail('UPPER_PERIMETER_HOLE');
+     if(mat!==wallMat&&mat!==glass)fail('UPPER_PERIMETER_HOLE_'+s.zoneId+'_'+x+'_'+y+'_'+z+'_MAT'+String(mat));
      if(mat===glass&&!expectedWindowCells.has(k))
       fail('UNAPPROVED_PERIMETER_GLAZING');
      if(mat===glass)glazing++;else walls++;
