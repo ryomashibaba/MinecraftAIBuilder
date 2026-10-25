@@ -84,7 +84,7 @@ export function deriveR170FourRoomVolumes(base){
  for(const [i,s] of sections.entries()){
   const {x:[xl,xr],z:[zf,zb]}=s.perimeter;
   const height=s.roofY-6+(profile!=='flat'?2:0);
-  if(s.roofY+2>=h)fail('ROOF_ABOVE_SOURCE_BOUNDS');
+  if(s.roofY+(profile!=='flat'?2:0)>=h)fail('ROOF_ABOVE_SOURCE_BOUNDS');
   addBox(design,'r170-wall-west-'+i,'add',[xl,6,zf],
    [1,height,zb-zf+1],west.material);
   addBox(design,'r170-wall-east-'+i,'add',[xr,6,zf],
