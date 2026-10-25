@@ -32,9 +32,12 @@ try {
     $studyExit = $LASTEXITCODE
     $studyFile = Join-Path $folder 'R156_STUDY_MANIFEST.json'
     $reviewExit = 2
+    $independentExit = 2
     if (Test-Path $studyFile) {
         & node scripts/r157-comparative-review.mjs --study $folder
         $reviewExit = $LASTEXITCODE
+        & node scripts/r165-local-model-architecture-audit.mjs --study $folder
+        $independentExit = $LASTEXITCODE
     }
     if (-not (Test-Path $folder)) {
         throw "R157_HOLD_NO_EVIDENCE_FOLDER (nodeExit=$studyExit)"
@@ -43,6 +46,11 @@ try {
     $review = $null
     if (Test-Path $studyFile) {
         $summary = Get-Content $studyFile -Raw | ConvertFrom-Json
+    }
+    $independent = $null
+    $independentFile = Join-Path $folder 'R165_INDEPENDENT_AUDIT.json'
+    if (Test-Path $independentFile) {
+        $independent = Get-Content $independentFile -Raw | ConvertFrom-Json
     }
     $reviewFile = Join-Path $folder 'R157_SPATIAL_AUDIT.json'
     if (Test-Path $reviewFile) {
@@ -60,6 +68,9 @@ try {
         spatialStatus = if ($null -ne $review) { $review.status } else { 'HOLD_SPATIAL_AUDIT_MISSING' }
         nodeExit = $studyExit
         spatialReviewExit = $reviewExit
+        independent3dReviewExit = $independentExit
+        independent3dStatus = if ($null -ne $independent) { $independent.status } else { 'HOLD_NO_R165_3D_REVIEW' }
+        independentB143Cases = if ($null -ne $independent) { $independent.geometryEvidenceCases } else { 0 }
         archiveContainsRawOriginalsIfCaptured = $true
         modelProvenance = 'LOCAL_HTTP_PROVIDER_UNATTESTED'
         artReview = 'ART_HOLD'
@@ -80,10 +91,12 @@ try {
     Write-Host ''
     Write-Host "R157_STUDY_STATUS: $($provenance.studyStatus)"
     Write-Host "R157_SPATIAL_STATUS: $($provenance.spatialStatus)"
+    Write-Host "R165_REAL_B143_STATUS: $($provenance.independent3dStatus)"
     Write-Host "REVIEW_HTML: $(Join-Path $repo (Join-Path $folder 'R157_COMPARE.html'))"
+    Write-Host "REAL_3D_AUDIT_HTML: $(Join-Path $repo (Join-Path $folder 'R165_COMPARE.html'))"
     Write-Host "EVIDENCE_ZIP: $(Join-Path $repo $archive)"
     Write-Host 'Minecraft world operations: ZERO. ART HOLD.'
-    if ($studyExit -ne 0 -or $reviewExit -ne 0) {
+    if ($studyExit -ne 0 -or $reviewExit -ne 0 -or $independentExit -ne 0) {
         Write-Warning 'Partial evidence/HOLD preserved. No automatic model retries.'
     }
 } finally {
