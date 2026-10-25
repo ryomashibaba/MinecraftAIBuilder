@@ -61,8 +61,8 @@ test('R141 fake Ollama creates actual source graph and evidence but NEVER says g
  assert.ok(fs.existsSync(path.join(destination,'index.html')));
  assert.ok(fs.existsSync(path.join(destination,
   'single-real-local-attempt','R139_MODEL_SPATIAL_RELATIONS.json')));
- assert.throws(()=>runR141GraphTrial({outDir:destination},{fetcher:mock()}),
-  /R141_TRIAL_NO_OVERWRITE/);
+ await assert.rejects(runR141GraphTrial({outDir:destination},
+  {fetcher:mock()}),/R141_TRIAL_NO_OVERWRITE/);
 });
 test('R141 no local Qwen/Gemma prevents any POST or false 3D',async t=>{
  const root=dir();t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
