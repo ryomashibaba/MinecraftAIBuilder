@@ -407,6 +407,9 @@ test('R170: four genuine high-room voids and roof masses preserve low-level furn
   const studied=parseR139RelationalFurnishedReply(raw,request,
    {allowTopologyComposition:true,allowHostVolumeResearch:true});
   const shell=studied.architectural.completed,proof=shell.r170FourRoomVolumeEvidence;
+  // The R149 derived featured wrapper does not expose the original plan.
+  // The pin is the R149-provenanced roof style, not a missing base.plan.
+  assert.equal(baseline.architectural.completed.r149ExpressionEvidence.originalRoofProfile,profile);
   assert.equal(studied.architectural.roomSectionScope,
    'FOUR_ROOMS_HOST_RESEARCH_TRUE_HIGH_ROOM_VOLUMES');
   assert.equal(proof.modelSelectedRoomCount,4);
