@@ -10,8 +10,8 @@
 | 継続ブランチ | `feature/b198zr1-protected-architectural-revision` |
 | 継続PR | [#128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128) — Open / Draft / Unmerged |
 | HEAD | [開発ブランチの最新HEADを毎回GitHubで確認](https://github.com/ryomashibaba/MinecraftAIBuilder/commits/feature/b198zr1-protected-architectural-revision)（R98の初期実メッシュ検証対象は `9a2b5de9d8ba41a2b7ca4e626aa9d54ff4ffffdd`） |
-| 最新確認済み実装工程 | **B198Z-R124 実源Windows/UbuntuテストSUCCESS。ただし65%読書座面の3案すべて頭上Ray5件でHOLD。PR/CIのPASSは建築品質PASSではない。R124は資料保存・回帰基準として保持し、以後の主開発対象から図書館を外す** |
-| 次に取り組む工程 | **R125：既存B143＋B198G/Hを使う最短MVP。実Qwen/Gemma→新規非図書館建築の真正3D→安全なMinecraft Education試験施工の未接続部分を確認・実装。8GB Mac小型LLM目標を同時に設計**。詳細は [R125計画](R125_THIN_VERTICAL_SLICE_PLAN_JA.md) |
+| 最新確認済み実装工程 | **R139 ソース実装／テスト追加。CI完了・人間美術・実Minecraft施工は別途判定**（R138までは既存CI成功） |
+| 次に取り組む工程 | **R139のCI・実3Dを確認し、新しい単一ローカルQwen/Gemma返信で `relations` を実測。次は一般の非矩形・複数階配置へ拡張**。旧R125計画は基盤として維持 |
 | 施工・モデル | **2026-10-24 Qwen/Gemma実推論・Minecraft試験施工の包括許可あり（都度承認不要）。** 準備性と各種技術安全ゲートは別途必要。現行コードのNOT_PREPARED / 9 BLOCKEDは自動PASSではない |
 
 **最新情報への直リンク：** [ブランチの現在地](https://github.com/ryomashibaba/MinecraftAIBuilder/tree/feature/b198zr1-protected-architectural-revision) ／ [Actions一覧](https://github.com/ryomashibaba/MinecraftAIBuilder/actions) ／ [PR #128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128)
@@ -19,6 +19,13 @@
 
 
 
+
+## R139 — モデル指定の入口向きと直接隣接グラフ → 真正3D（2026-10-25 JST）
+- `source/ai/r139-room-relations.mjs`：小型意味IR `minecraftaibuilder-r139-room-relations-v1` は `basePlanSha256` / `entryFacingZoneId` / `directAdjacencies` を厳格検証する。R134／R138から実B143間取りを派生し、指定された隣室の隔壁に2ブロック幅の実開口をCUT、支持床・3ブロック頭上空気・入口から各室への2幅ソース経路を確認する。部屋用途の文字列による固定用途推測は禁止。表現不能な共有頂点グラフ・要求はHOLD。
+- `scripts/r139-relational-model.mjs`：新たなモデル返信で `relations` を明示的に出力した場合だけ、同一応答内の部屋・設備選択と空間関係を統合してR130組立設備まで実3D化する境界を追加。R136保存済み実Qwen回答3件に `relations` は存在しないため、モデル自身がそのグラフを選んだ証拠とは呼ばない。今回のテスト入力は**合成応答（TEST DOUBLE）**。
+- 安全：原本と既存R138出力は変更しない。常に `NOT_PREPARED`、9×`BLOCKED`、施工操作0、Minecraft未施工。新モデル推論・人間美術審査・ゲーム内歩行・2B Mac実測は**未実施**。
+- 限界：R139は**3〜4部屋、1階、共用中央通路＋左右翼、重複しない直接隣接関係**の最小汎用グラフ。非矩形、多層、鎖状や交差する一般グラフは未対応。次は初見のローカルモデルに新関係IRを1回出力させ、未知用途で部屋・設備・入口が一致するか検証してから拡張する。
+- CI対象：`scripts/r139-room-relations.test.mjs`、`scripts/r139-relational-model.test.mjs` を既存B198G品質ワークフローに追加。実行結果はGitHub Actionsで別途確認する。
 
 ## R138 — two-wing branching topology made real from exact 3 archived Qwen3-14B semantic designs (2026-10-25 JST)
 - R137 is confirmed fully GREEN: 54/54 + 111/111 source-only tests. CI built six real B143 source scenes from three SHA-pinned user Qwen14B replies. Derived furnished voxels: 2921 / 3103 / 2874, with 4 functional rooms and all 8 original Qwen-selected semantic features each. Host-corrected depths: 22→27, 20→29, 20→26; first also corrected roof material `sawtooth` to existing `metal`. These outputs are actual compiled host derivatives, NOT original replies passing unaided nor artistic PASS, and world writes=0.
