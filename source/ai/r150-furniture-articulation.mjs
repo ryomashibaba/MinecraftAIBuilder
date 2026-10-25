@@ -29,7 +29,8 @@ function contains(p,feature){
  const [x,y,z]=p,[ox,oy,oz]=feature.origin,[sx,sy,sz]=feature.size;
  return x>=ox&&x<ox+sx&&y>=oy&&y<oy+sy&&z>=oz&&z<oz+sz;
 }
-export function deriveR150FurnitureArticulation(base){
+export function deriveR150FurnitureArticulation(base,
+ {allowDecorativeDeferral=false}={}){
  if(base?.schema!=='minecraftaibuilder-r125-featured-source-v1'||
   base.r149ExpressionEvidence?.unchangedInteriorVoxels!==true||
   !base?.design||!base?.compiled||!verifyCompiled(base.design,base.compiled)||
@@ -110,7 +111,44 @@ export function deriveR150FurnitureArticulation(base){
      issues:nextAudit.issues.slice(0,12)});
    }
   }
-  if(!safeDetails.length)fail('ALL_DETAILS_BLOCK_REAL_SERVICE_ROUTES');
+  if(!safeDetails.length){
+   // R169 opt-in research: R149 already contains real reachable furnishings.
+   // Decoration never becomes a mandatory condition for preserving a valid
+   // building. Explicitly defer ALL optional changes, do not fabricate art.
+   if(!allowDecorativeDeferral)
+    fail('ALL_DETAILS_BLOCK_REAL_SERVICE_ROUTES');
+   if(base.sourceRouteAudit?.status!=='SOURCE_ROUTES_REACH_ALL_ZONES'||
+    !base.sourceRouteAudit.featureAccess?.every(x=>x.reachableFromEntrance))
+    fail('UNSAFE_ORIGINAL_FURNISHED_SOURCE');
+   return {...base,
+    r150EquipmentEvidence:{
+     source:'HOST_OPTIONAL_FURNITURE_DETAILS_DEFERRED_DUE_TO_ROUTE_SAFETY',
+     originalEquipmentCount:base.placements.length,
+     appendedSmallComponentCount:0,
+     optionalDetailSuppressionOccurred:true,
+     suppressedUnsafeComponentCount:suppressedDetails.length,
+     suppressedUnsafeComponents:suppressedDetails,
+     originalEquipmentUnmodified:true,
+     preservedOriginalQwenRooms:true,
+     preservedOriginalQwenRelations:true,
+     preservedModelEquipmentChoices:true,
+     noExteriorWallFloorRoofCorridorChanged:true,
+     sourceRouteStatus:base.sourceRouteAudit.status,
+     reachableEquipment:base.sourceRouteAudit.featureAccess.length,
+     originalSourceSha256:base.sourceSha256,
+     newSourceSha256:base.sourceSha256,
+     actualMinecraftWalking:'NOT_TESTED',
+     humanArtReview:'ART_HOLD',
+     fixedStyleOrBuildingTypeTemplate:false,
+     decorativePass:false
+    },
+    architecturalQuality:'ART_HOLD_DETAILS_DEFERRED',
+    aestheticApproved:false,readiness:'NOT_PREPARED',
+    constructionApproved:false,executionAllowed:false,
+    gates:Array(9).fill('BLOCKED'),BuildPlan:{operations:[]},
+    worldContacts:0,worldWrites:0
+   };
+  }
   plan.elements=trial.elements;
   compiled=trialCompiled;audit=trialAudit;
   added.length=0;added.push(...safeDetails);
