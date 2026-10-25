@@ -10,8 +10,8 @@
 | 継続ブランチ | `feature/b198zr1-protected-architectural-revision` |
 | 継続PR | [#128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128) — Open / Draft / Unmerged |
 | HEAD | [開発ブランチの最新HEADを毎回GitHubで確認](https://github.com/ryomashibaba/MinecraftAIBuilder/commits/feature/b198zr1-protected-architectural-revision)（R98の初期実メッシュ検証対象は `9a2b5de9d8ba41a2b7ca4e626aa9d54ff4ffffdd`） |
-| 最新確認済み実装工程 | **R143：CI実テスト登録漏れを修正、完成ボクセル独立監査を導入、既存Qwen保存3Dにも適用。R140旧CI成功だがR140/R141新テストは未実行だったため、R143再検証待ち。実ローカル新グラフQwen未実施。** |
-| 次に取り組む工程 | **R143 CIの真の全新テスト実行を確認、失敗なら即修正。既存実Qwenの独立監査を評価し、その後新規実ローカルQwen/Gemmaで1回空間グラフ提案を生成し意味・3D・設備を審査。** |
+| 最新確認済み実装工程 | **R144 部屋境界・入口から全室/全設備の独立ボクセル動線QA実装。R140旧CIは成功だが後続の実テストはActions QUEUEDのため未確認。新規実Qwenグラフ試験は未実施。** |
+| 次に取り組む工程 | **R144 CIが実際に走った時点でログ・全回帰・3用途各8設備の監査結果を確定。失敗修正後、ローカルQwen/Gemmaの初回実空間グラフ推論と美術比較へ進む。** |
 | 施工・モデル | **2026-10-24 Qwen/Gemma実推論・Minecraft試験施工の包括許可あり（都度承認不要）。** 準備性と各種技術安全ゲートは別途必要。現行コードのNOT_PREPARED / 9 BLOCKEDは自動PASSではない |
 
 **最新情報への直リンク：** [ブランチの現在地](https://github.com/ryomashibaba/MinecraftAIBuilder/tree/feature/b198zr1-protected-architectural-revision) ／ [Actions一覧](https://github.com/ryomashibaba/MinecraftAIBuilder/actions) ／ [PR #128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128)
@@ -19,6 +19,16 @@
 
 
 
+
+## R144 — 部屋境界と全設備の独立ルート再計算（2026-10-25 JST）
+- R143監査の残課題：ホスト証拠の `chosenZoneActualRange` と入口・ドアの物理ボクセルだけでは「本当に**モデル指定の2部屋同士**の境界か」「入口から全設備の利用地点まで独立に歩けるか」は証明できない。
+- `scripts/r143-independent-graph-audit.mjs` を強化（従来ファイル名を継続）：**実ソースの同一性をSHAで再照合**、完成設備付きB143ソースのグラフ部分がR139から改変されていないことを検査。独立した `roomProgram` から入口指定室のセクタと実範囲を検査。ペア両室の前後境界が1ブロック隔壁を挟んで接し、CUTがその正しい隔壁・双方の室幅の重なりに存在することを検証。壁の存在→CUT後2幅の空間/床を再コンパイルして証明。
+- 同監査は完成設備付きボクセルから **`auditR125SourceRoutes` を独立再実行**。入口→全室の支持された2幅動線と、全モデル設備に対する利用側2幅パッドを個別に評価し、全てPASSでなければ `SOURCE_ROOM_GRAPH_VERIFIED` としない。これはMinecraft内の実歩行や実設備使用とは異なる**ソース上の証拠**。
+- R141の1コマンド実モデル実験用に `scripts/r134-fresh-model-pilot.mjs` が `R139_HOST_ROOM_SECTOR_PROGRAM.json` と `R139_HOST_GRAPH_EQUIPMENT_PLACEMENTS.json` を別途保存。監査の入力はこの証拠ファイルを使用。
+- 保存済み本物のQwen回答3件（各8設備）の再生比較も、この全室・全設備の独立QAを必須とする。ここで新しい直接隣接グラフを考えたのはホスト側であり、元Qwenの回答に関係IRは無い。
+- R144テスト：4室＋2直接ドア＋4設備、3室＋1直接ドア＋3設備、室境界範囲改ざん、不正設備利用地点、不正室ID、3用途×各8設備の独立ルート計数。さらに新しいモデル向けプロンプトでは意味ある空間関係を測るため **少なくとも1直接隣接**を要求する。LLMが書かなかったものをホストが捏造してはいけない。
+- GitHub ActionsはR141–R144の増分実行が長時間 `queued` のまま。**R144 CIの実PASSは未確認**。次工程は新しいテストの実行状態と実ログの検証が最優先、その後にユーザーPCの本物のローカルQwen/Gemma 1回で、未知の用途から意味IR→真正3Dまで実測。
+- 施工安全：`NOT_PREPARED`、9 `BLOCKED`、`BuildPlan.operations=[]`、Minecraftワールド操作0。実Minecraft歩行、美術品質審査、Mac8GB 2B動作は未確認。Draft PR #128未マージ、ソース原本の保護継続。
 
 ## R143 — 未実行だったテスト登録の修正＋完成ボクセル独立検証（2026-10-25 JST）
 - R140/R141は過去の `node --check`（構文確認）には含まれたが、GitHub Actionsの実 `node --test` 一覧に未登録だったことを発見。前CIのSUCCESSはこれらの新規テスト合格の証拠ではなかったため、`.github/workflows/b198g-quality.yml` の実テスト一覧にR140/R141、さらにR143の新監査を登録し、重複・連結された構文検査の混乱を整理。
