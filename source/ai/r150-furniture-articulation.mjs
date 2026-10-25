@@ -63,16 +63,66 @@ export function deriveR150FurnitureArticulation(base){
     featureId:feature.id,elementId:element.id,origin,size});
   }
  }
- const compiled=compileDesign(plan);
+ // R169: the model's full assembled furnishings and source-reachable
+ // service fronts are already safe. Decorative details are optional:
+ // if adding all details blocks a genuine 2-wide service route, derive
+ // the maximal safe prefix incrementally, without shifting/removing even one
+ // original model-chosen equipment solid. Every omission is audit-visible.
+ const targets=base.placements.map(p=>({
+  id:p.id,zoneId:p.zoneId,origin:p.origin,size:p.size
+ }));
+ const inspect=(design,compiled)=>auditR125SourceRoutes({
+  schema:'minecraftaibuilder-r125-plan-to-b143-result-v1',
+  design,compiled,program:base.program,
+  sourceSha256:compiled.sourceSha256,
+  geometrySha256:compiled.geometrySha256
+ },{featureTargets:targets});
+ const routeSafe=a=>a.status==='SOURCE_ROUTES_REACH_ALL_ZONES'&&
+  a.featureAccess.length===base.placements.length&&
+  a.featureAccess.every(x=>x.reachableFromEntrance);
+ let compiled=compileDesign(plan);
+ let audit=inspect(plan,compiled);
+ const suppressedDetails=[];
+ if(!routeSafe(audit)){
+  const candidates=new Map(plan.elements.slice(originalElements).map(e=>[e.id,e]));
+  const trial=structuredClone(base.design),safeDetails=[];
+  let trialCompiled=base.compiled,trialAudit=base.sourceRouteAudit;
+  for(const item of added){
+   const shape=candidates.get(item.elementId);
+   if(!shape)fail('DETAIL_SOURCE_LOST');
+   const next={...trial,elements:[...trial.elements,shape]};
+   let built,nextAudit;
+   try{
+    built=compileDesign(next);
+    nextAudit=inspect(next,built);
+   }catch(e){
+    suppressedDetails.push({elementId:item.elementId,featureId:item.featureId,
+     reason:'DETAIL_COMPILE_HOLD',errorCode:String(e?.message??e).slice(0,80)});
+    continue;
+   }
+   if(routeSafe(nextAudit)){
+    trial.elements=next.elements;
+    trialCompiled=built;trialAudit=nextAudit;
+    safeDetails.push(item);
+   }else{
+    suppressedDetails.push({elementId:item.elementId,featureId:item.featureId,
+     reason:'DETAIL_BLOCKS_REAL_SERVICE_OR_ROOM_ROUTE',
+     issues:nextAudit.issues.slice(0,12)});
+   }
+  }
+  if(!safeDetails.length)fail('ALL_DETAILS_BLOCK_REAL_SERVICE_ROUTES');
+  plan.elements=trial.elements;
+  compiled=trialCompiled;audit=trialAudit;
+  added.length=0;added.push(...safeDetails);
+ }
  if(!verifyCompiled(plan,compiled)||
   !equal(plan.elements.slice(0,originalElements),base.design.elements))
   fail('ORIGINAL_SOURCE_PREFIX_CHANGED');
  const before=new Map(base.compiled.primitives.map(p=>[loc(p),p[3]]));
  const after=new Map(compiled.primitives.map(p=>[loc(p),p[3]]));
  let changedMaterialCells=0,newOccupiedCells=0;
- // A changed voxel is permissible only INSIDE a model-selected piece of
- // equipment. Every original exterior, roof, wall, door, floor and corridor
- // voxel must stay identical, including its material.
+ // No previously occupied voxel outside actual selected equipment may be
+ // removed or re-materialized; no newly occupied cell may leave that volume.
  for(const [location,oldMat] of before){
   const newMat=after.get(location);
   const p=location.split(',').map(Number);
@@ -90,17 +140,7 @@ export function deriveR150FurnitureArticulation(base){
  }
  if(changedMaterialCells+newOccupiedCells===0)
   fail('NO_VISUAL_GEOMETRY_OR_MATERIAL_CHANGE');
- const audit=auditR125SourceRoutes({
-  schema:'minecraftaibuilder-r125-plan-to-b143-result-v1',
-  design:plan,compiled,program:base.program,
-  sourceSha256:compiled.sourceSha256,
-  geometrySha256:compiled.geometrySha256
- },{featureTargets:base.placements.map(p=>({
-  id:p.id,zoneId:p.zoneId,origin:p.origin,size:p.size
- }))});
- if(audit.status!=='SOURCE_ROUTES_REACH_ALL_ZONES'||
-  audit.featureAccess.length!==base.placements.length||
-  !audit.featureAccess.every(x=>x.reachableFromEntrance))
+ if(!routeSafe(audit))
   fail('ORIGINAL_EQUIPMENT_ACCESS_OR_ROOM_ROUTE_REGRESSION');
  return {...base,design:plan,compiled,
   sourceSha256:compiled.sourceSha256,
@@ -122,6 +162,10 @@ export function deriveR150FurnitureArticulation(base){
    roles:roleCounts,
    originalEquipmentCount:base.placements.length,
    appendedSmallComponentCount:added.length,
+   optionalDetailSuppressionOccurred:suppressedDetails.length>0,
+   suppressedUnsafeComponentCount:suppressedDetails.length,
+   suppressedUnsafeComponents:suppressedDetails,
+   originalEquipmentUnmodified:true,
    changedMaterialCellsInsideEquipment:changedMaterialCells,
    newlyOccupiedCellsInsideEquipment:newOccupiedCells,
    noExteriorWallFloorRoofCorridorChanged:true,
