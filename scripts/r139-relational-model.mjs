@@ -6,8 +6,8 @@
  */
 import {validateR135SemanticObjects}
  from './r135-furnished-program.mjs';
-import {parseR134FreshModelReply}
- from './r134-fresh-model-pilot.mjs';
+import {compileR134MultiZonePlan,SCHEMA as R134_SCHEMA}
+ from '../source/ai/r134-multi-zone-plan.mjs';
 import {SCHEMA,deriveR139RelationalTopology}
  from '../source/ai/r139-room-relations.mjs';
 import {applyR125FeatureIntent,ASSEMBLED_SCHEMA}
@@ -48,7 +48,14 @@ export function parseR139RelationalFurnishedReply(raw,request){
  // strip. A valid spatial graph can have more usable equipment clearance
  // than a narrow linear strip; premature strip fitting gave false HOLDs.
  const {objects,...programReply}=originalReply;
- const base=parseR134FreshModelReply(JSON.stringify(programReply),request);
+ if(!only(programReply,['id','title','footprint','materials','layout','form'])||
+  !request?.site||!programReply.footprint||
+  programReply.footprint.width>request.site.maxWidth||
+  programReply.footprint.depth>request.site.maxDepth)
+  fail('PROGRAM_OR_SITE_CONTRACT');
+ const base=compileR134MultiZonePlan({
+  schema:R134_SCHEMA,...programReply,brief:request.naturalLanguageBrief
+ });
  const semantics=validateR135SemanticObjects(objects,
   base.program[0].zones.map(z=>z.id));
  const semanticIntent={
