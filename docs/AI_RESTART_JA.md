@@ -10,8 +10,8 @@
 | 継続ブランチ | `feature/b198zr1-protected-architectural-revision` |
 | 継続PR | [#128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128) — Open / Draft / Unmerged |
 | HEAD | [開発ブランチの最新HEADを毎回GitHubで確認](https://github.com/ryomashibaba/MinecraftAIBuilder/commits/feature/b198zr1-protected-architectural-revision)（R98の初期実メッシュ検証対象は `9a2b5de9d8ba41a2b7ca4e626aa9d54ff4ffffdd`） |
-| 最新確認済み実装工程 | **R144 部屋境界・入口から全室/全設備の独立ボクセル動線QA実装。R140旧CIは成功だが後続の実テストはActions QUEUEDのため未確認。新規実Qwenグラフ試験は未実施。** |
-| 次に取り組む工程 | **R144 CIが実際に走った時点でログ・全回帰・3用途各8設備の監査結果を確定。失敗修正後、ローカルQwen/Gemmaの初回実空間グラフ推論と美術比較へ進む。** |
+| 最新確認済み実装工程 | **R145：同一PRの旧CI自動キャンセル、Windows 1操作の本物ローカルQwen 1試行→真正3D/独立QA/ZIP収集を実装。GitHubコミット済みだが、CIはQueued/Pendingで増分PASS未確定、実モデル生成は未実施。** |
+| 次に取り組む工程 | **R145実CIの確認・不具合修正、R145の安全な1回ローカルQwen/Gemma実測ZIPの受領と3D評価。そのデータで初めて機能/美術の次の改善方向を決める。** |
 | 施工・モデル | **2026-10-24 Qwen/Gemma実推論・Minecraft試験施工の包括許可あり（都度承認不要）。** 準備性と各種技術安全ゲートは別途必要。現行コードのNOT_PREPARED / 9 BLOCKEDは自動PASSではない |
 
 **最新情報への直リンク：** [ブランチの現在地](https://github.com/ryomashibaba/MinecraftAIBuilder/tree/feature/b198zr1-protected-architectural-revision) ／ [Actions一覧](https://github.com/ryomashibaba/MinecraftAIBuilder/actions) ／ [PR #128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128)
@@ -19,6 +19,14 @@
 
 
 
+
+## R145 — 実モデル実測用1操作入口とCIの古い実行抑止（2026-10-25 JST）
+- **GitHub Actionsの滞留対策**：`.github/workflows/b198g-quality.yml` にPR/ブランチ単位の `concurrency`／`cancel-in-progress: true` を追加。新しいコミットが来たら同一PRの古い検証をキャンセルし、検証済みのSHAを明示する。今までの大量の古いQueuedジョブがテスト成功を意味することはない。
+- **実モデル試験入口**：GitHubから最新を取得済みのWindows作業フォルダで `RUN_R145_REAL_GRAPH.cmd` をダブルクリックするだけ（既定モデル `qwen3:14b`、PowerShell側で `-Model` 任意指定可）。`scripts/r145-one-command-real-graph.ps1` は固定開発ブランチをチェック、未コミット変更を保護、`git pull --ff-only`、既存 `scripts/r141-local-graph-evidence.mjs` を **1回だけ** 起動する。失敗してもR141 REPORTを保存して、SHA・モデル・出所・監査結果を記した `R145_BUNDLE_PROVENANCE.json` と共にZIP化。`UPLOAD_THIS_ZIP` を表示する。
+- **再利用**：新しいテンプレート、モデルの追加呼出し、Minecraft操作やDocker・WSLコマンドはなし。従来の本物のQwen/Gemma応答→R134→R139→R130→R143/144ボクセル監査→回転3Dの経路を変更せず接続する。
+- **R144監査の最後の品質改善**：完成設備の全パーツ実在だけでなく、配置座標が該当モデル指定室の範囲内にあること、3〜4室すべてに本当に設備が存在することを要求。単なる設備ラベルと利用マーカーの偽PASSを禁止。
+- **正直な検証状態**：本チャット環境はユーザーのWindows/Ollamaに直接接続できない。R145スクリプトはGitHubへ保存済みだが、実Qwen3:14bから得た新しい空間グラフの原本証拠は**まだ得ていない**。ユーザーにモデルが生成したと偽った説明をしない。R141〜R145の増分CIはQueued/Pending中で、古いR140 CI成功は新しいテスト群の合格証拠ではない。
+- **次の実務**：CIが実行されるなら新しいR140/R141/R143/R144回帰の失敗を優先修正。ローカル1回実証ZIPがあれば `R141_REPORT.json`、`R143_INDEPENDENT_VOXEL_AUDIT.json`、生モデル回答、回転3D、ユーザー美術感想を突き合わせ、モデル選択の意味と実世界の見た目との差を修正。世界施工は `NOT_PREPARED`、全9ゲートBLOCKED、0書込のまま。
 
 ## R144 — 部屋境界と全設備の独立ルート再計算（2026-10-25 JST）
 - R143監査の残課題：ホスト証拠の `chosenZoneActualRange` と入口・ドアの物理ボクセルだけでは「本当に**モデル指定の2部屋同士**の境界か」「入口から全設備の利用地点まで独立に歩けるか」は証明できない。
