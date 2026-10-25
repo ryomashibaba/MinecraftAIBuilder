@@ -83,6 +83,7 @@ on:
       - 'source/ai/r158-spatial-balance.mjs'
       - 'source/ai/r159-floorplan-intent.mjs'
       - 'source/ai/r160-side-gallery.mjs'
+      - 'source/ai/r168-room-grid.mjs'
       - 'source/ai/r160-topology-intent.mjs'
       - 'source/ai/r162-room-section-massing.mjs'
       - 'source/ai/r163-daylit-sections.mjs'
@@ -210,6 +211,7 @@ jobs:
           node --check source/ai/r158-spatial-balance.mjs
           node --check source/ai/r159-floorplan-intent.mjs
           node --check source/ai/r160-side-gallery.mjs
+          node --check source/ai/r168-room-grid.mjs
           node --check source/ai/r160-topology-intent.mjs
           node --check source/ai/r162-room-section-massing.mjs
           node --check source/ai/r163-daylit-sections.mjs
