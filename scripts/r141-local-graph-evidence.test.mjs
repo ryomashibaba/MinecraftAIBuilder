@@ -54,6 +54,12 @@ test('R141 fake Ollama creates actual source graph and evidence but NEVER says g
  assert.equal(r.modelRequestedEntryRoomId,'unique-zone-4');
  assert.equal(r.sourceEntranceRoomVerified,true);
  assert.equal(r.spatialDecisionDemonstrated,true);
+ assert.equal(r.independentVoxelAuditStatus,'SOURCE_ROOM_GRAPH_VERIFIED');
+ const independent=JSON.parse(fs.readFileSync(path.join(destination,
+  'single-real-local-attempt','R143_INDEPENDENT_VOXEL_AUDIT.json'),'utf8'));
+ assert.equal(independent.independentlyReachedRoomCount,4);
+ assert.equal(independent.independentEquipmentServiceCount,4);
+ assert.equal(independent.independentlyVerifiedDirectPairCount,2);
  assert.equal(r.modelSelectedRelations,false);
  assert.equal(r.sourceRoutes,'SOURCE_ROUTES_REACH_ALL_ZONES');
  assert.equal(r.equipmentCount,4);
