@@ -18,6 +18,8 @@ test('auto-select installed candidate small; classify larger installed as NOT sm
  assert.deepEqual(chooseR136Model(['qwen3.8:27b','gemma4:e2b','qwen3:14b']).selected,'gemma4:e2b');
  assert.equal(chooseR136Model(['qwen3:14b','gemma4:26b']).tier,
   'LARGER_OR_UNKNOWN_NOT_SMALL_MODEL_PROOF');
+ assert.equal(chooseR136Model(['gemma4:26b','qwen3.8:27b','qwen3:14b']).selected,
+  'qwen3:14b');
  assert.equal(chooseR136Model(['qwen3:14b'],{requested:'qwen3.5:2b'}).status,
   'HOLD_EXACT_MODEL_NOT_INSTALLED');
  assert.equal(chooseR136Model([],{}).status,'HOLD_NO_QWEN_GEMMA_INSTALLED');

@@ -30,6 +30,10 @@ const save=(dir,name,value)=>fs.writeFileSync(path.join(dir,name),
  typeof value==='string'?value:JSON.stringify(value,null,2)+'\n',{flag:'wx'});
 const isQwenGemma=s=>/^(qwen|gemma)/i.test(s);
 const smallModel=s=>/(?:^|[:/_-])(?:e2b|e4b|0\.5b|0\.8b|1b|1\.5b|2b|3b|4b)(?:$|[-_.])/i.test(s);
+const approximateBillions=s=>{
+ const m=String(s).match(/(?:^|[:/_-])(e?)(0\.5|0\.8|1|1\.5|2|3|4|7|8|9|12|14|16|20|24|26|27|30|32|34|35|40|70|72)b(?:$|[-_.])/i);
+ return m?Number(m[2]):Infinity;
+};
 export function chooseR136Model(installed,{requested=null}={}){
  if(!Array.isArray(installed)||installed.some(s=>typeof s!=='string'||!MODEL.test(s))||
   new Set(installed).size!==installed.length||installed.length>1000)
@@ -50,7 +54,8 @@ export function chooseR136Model(installed,{requested=null}={}){
    /(?:^|:)1b\b|1\.5b/i.test(s)?1:/2b|3b/i.test(s)?2:3;
   return weight(a)-weight(b)||a.localeCompare(b);
  });
- const selected=small[0]??candidates.sort()[0];
+ const selected=small[0]??candidates.sort((a,b)=>
+  approximateBillions(a)-approximateBillions(b)||a.localeCompare(b))[0];
  return {status:'MODEL_FOUND',requested:null,selected,
   tier:small.length?'SMALL_CANDIDATE_NOT_MAC_MEASURED':
    'LARGER_OR_UNKNOWN_NOT_SMALL_MODEL_PROOF'};
