@@ -168,3 +168,38 @@ test('R158 narrow site and hallucinated IR cannot silently become centered',()=>
  assert.throws(()=>deriveR139RelationalTopology(base,intent(base),{spatialBalance:'invalid'}),
   /R139_RELATIONS_INVALID_SPATIAL_BALANCE/);
 });
+
+test('R159 model-selected real front/rear room-depth balance moves partition and actual direct openings',()=>{
+ const p=plan();p.footprint.width=30;p.footprint.depth=30;
+ const base=compileR134MultiZonePlan(p),relation=intent(base);
+ const front=deriveR139RelationalTopology(base,relation,
+  {spatialBalance:'left-wide',depthBalance:'front-deep'});
+ const rear=deriveR139RelationalTopology(base,relation,
+  {spatialBalance:'left-wide',depthBalance:'rear-deep'});
+ const balanced=deriveR139RelationalTopology(base,relation,
+  {spatialBalance:'left-wide'});
+ const fe=front.r159DepthBalanceEvidence,re=rear.r159DepthBalanceEvidence;
+ assert.ok(fe.realFrontRoomDepth>fe.realRearRoomDepth);
+ assert.ok(re.realRearRoomDepth>re.realFrontRoomDepth);
+ assert.equal(front.program[0].frontRearDivider,fe.actualDividerZ);
+ assert.equal(rear.program[0].frontRearDivider,re.actualDividerZ);
+ assert.equal(front.directAdjacencyDoorEvidence[0].origin[2],fe.actualDividerZ);
+ assert.equal(rear.directAdjacencyDoorEvidence[0].origin[2],re.actualDividerZ);
+ assert.notEqual(front.sourceSha256,rear.sourceSha256);
+ assert.notEqual(front.geometrySha256,balanced.geometrySha256);
+ assert.notEqual(front.planSha256,rear.planSha256,'plan pin must change with actual geometry');
+ for(const x of [front,rear,balanced]){
+  assert.equal(x.sourceRouteAudit.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert.equal(x.directAdjacencyVerifiedBySourceDoorVoxels,true);
+  assert.equal(x.originalQwenRoomIntentUnmodified,true);
+  assert.equal(x.readiness,'NOT_PREPARED');
+  assert.deepEqual(x.gates,Array(9).fill('BLOCKED'));
+  assert.deepEqual(x.BuildPlan.operations,[]);
+  assert.equal(x.worldWrites,0);
+ }
+});
+test('R159 invalid depth design intent is not silently mapped to a centered floorplan',()=>{
+ const base=compileR134MultiZonePlan(plan());
+ assert.throws(()=>deriveR139RelationalTopology(base,intent(base),
+  {depthBalance:'invented'}),/R139_RELATIONS_INVALID_DEPTH_BALANCE/);
+});

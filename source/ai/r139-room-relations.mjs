@@ -56,13 +56,15 @@ export function validateR139RoomRelations(base,intent){
 }
 
 export function deriveR139RelationalTopology(base,intent,
- {spatialBalance='balanced'}={}){
+ {spatialBalance='balanced',depthBalance='balanced'}={}){
+ if(!['balanced','front-deep','rear-deep'].includes(depthBalance))
+  fail('INVALID_DEPTH_BALANCE');
  if(!['balanced','left-wide','right-wide'].includes(spatialBalance))
   fail('INVALID_SPATIAL_BALANCE');
  validateR139RoomRelations(base,intent);
  const originalPlan=JSON.stringify(base.plan);
  const originalDesign=JSON.stringify(base.design);
- const branched=deriveR138BranchedTopology(base,{spatialBalance});
+ const branched=deriveR138BranchedTopology(base,{spatialBalance,depthBalance});
  const sourceZones=new Map(base.program[0].zones.map(z=>[z.id,z]));
  const sectors=branched.program[0].zones;
  const zoneIds=base.program[0].zones.map(z=>z.id);
@@ -120,7 +122,7 @@ export function deriveR139RelationalTopology(base,intent,
   entryRange.z[0]!==2||entryX===undefined)
   fail('REAL_ROOM_ENTRANCE_CANNOT_FIT_WITHOUT_FACADE_CONFLICT');
  exteriorDoor.origin=[entryX,2,1];
- const divider=Math.floor(d/2);
+ const divider=branched.program[0].frontRearDivider;
  const doors=[];
  for(const [i,[a,b]] of intent.directAdjacencies.entries()){
   const za=byId.get(a),zb=byId.get(b);
@@ -171,7 +173,9 @@ export function deriveR139RelationalTopology(base,intent,
   originalGeometrySha256:base.geometrySha256,
   originalPlanSha256:base.planSha256,
   planSha256:hash({basePlanSha256:base.planSha256,
-   spatialIntent:intent,roomSectorAssignment:assignment}),
+   spatialIntent:intent,roomSectorAssignment:assignment,
+   ...(spatialBalance==='balanced'?{}:{spatialBalance}),
+   ...(depthBalance==='balanced'?{}:{depthBalance})}),
   sourceSha256:compiled.sourceSha256,
   geometrySha256:compiled.geometrySha256,
   zoneDoorEvidence:branched.zoneDoorEvidence.map((door,i)=>({
@@ -211,7 +215,9 @@ export function deriveR139RelationalTopology(base,intent,
   fail('ORIGINAL_PROGRAM_CHANGED');
  return {...result,sourceRouteAudit:route,
   directAdjacencyVerifiedBySourceDoorVoxels:true,
-  zoneLayoutShape:spatialBalance==='balanced'?
+  zoneLayoutShape:depthBalance!=='balanced'?
+   'R159_MODEL_SELECTED_REAL_FRONT_REAR_DEPTH_BALANCE':
+   spatialBalance==='balanced'?
    'R139_MODEL_SELECTABLE_ROOM_GRAPH_BOUNDED_WINGS':
    'R158_MODEL_SELECTED_REAL_ROOM_WIDTH_BALANCE'};
 }

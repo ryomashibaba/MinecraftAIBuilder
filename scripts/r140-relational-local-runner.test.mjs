@@ -38,6 +38,7 @@ const fakeLocal=(answer,inspect=()=>{})=>async(url,opts)=>{
  assert.equal(body.model,'qwen3:14b');
  assert.equal(body.max_tokens,
   !Object.hasOwn(answer,'architecture')?1750:
+   answer.architecture?.schema==='minecraftaibuilder-r159-floorplan-ir-v1'?2800:
    answer.architecture?.schema==='minecraftaibuilder-r158-spatial-balance-ir-v1'?2600:
    answer.architecture?.schema==='minecraftaibuilder-r155-roofline-ir-v1'?2400:
    answer.architecture?.schema==='minecraftaibuilder-r154-volume-ir-v1'?2300:
@@ -285,4 +286,36 @@ test('R158 one fake-local response genuinely changes B143 room layout but not mo
  assert.equal(parseR134FreshArgs(['--model','qwen3:14b','--brief',brief,
   '--equipment','assembled','--topology','graph','--architecture','spatial',
   '--out','source-review']).architectureMode,'spatial');
+});
+
+test('R159 one synthetic local reply chooses real front/rear depth with B143 and preserves HOLD provenance',async t=>{
+ const dir=tmp();t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));
+ const answer=reply();answer.footprint={width:30,depth:30};
+ answer.architecture={schema:'minecraftaibuilder-r159-floorplan-ir-v1',
+  entryHierarchy:'quiet',daylightStrategy:'even',roofEdge:'fine',
+  volumeHierarchy:'single',arrivalSpace:'flush',roofSilhouette:'ridge',
+  spatialBalance:'left-wide',depthBalance:'rear-deep'};
+ const r=await runR134FreshModel({model:'qwen3:14b',brief,
+  outDir:path.join(dir,'r159'),equipmentMode:'assembled',topologyMode:'graph',
+  architectureMode:'floorplan'},{fetcher:fakeLocal(answer,body=>{
+   assert.match(body.messages[0].content,/depthBalance MUST be balanced/);
+   assert.match(body.messages[0].content,/minecraftaibuilder-r159-floorplan-ir-v1/);
+  })});
+ assert.equal(r.status,'HOLD_TEST_DOUBLE_NOT_REAL_INFERENCE',r.reason);
+ assert.equal(r.genuineDepthBalanceSourceOnly,true);
+ assert.equal(r.architectureIntentFromModel,false);
+ assert.equal(r.sourceRoutes,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ const proof=JSON.parse(fs.readFileSync(path.join(dir,'r159',
+  'R159_HOST_ARCHITECTURE_EVIDENCE.json'),'utf8'));
+ assert.equal(proof.depthBalanceProof.depthBalance,'rear-deep');
+ assert.ok(proof.depthBalanceProof.realRearRoomDepth>
+  proof.depthBalanceProof.realFrontRoomDepth);
+ assert.equal(proof.spatialBalanceProof.spatialBalance,'left-wide');
+ assert.ok(fs.existsSync(path.join(dir,'r159','R159_MODEL_ARCHITECTURE_IR.json')));
+ assert.ok(fs.existsSync(path.join(dir,'r159','DERIVED_B143_SOURCE.json')));
+ assert.deepEqual(r.gates,Array(9).fill('BLOCKED'));
+ assert.equal(r.worldWrites,0);
+ assert.equal(parseR134FreshArgs(['--model','qwen3:14b','--brief',brief,
+ '--equipment','assembled','--topology','graph','--architecture','floorplan',
+ '--out','qa']).architectureMode,'floorplan');
 });

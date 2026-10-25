@@ -28,7 +28,7 @@ try {
     }
     Write-Host "R157: THREE new local Ollama trials with model $Model."
     Write-Host 'The same B143 compiler handles home, shop and laboratory.'
-    & node scripts/r156-unknown-use-study.mjs --model $Model --architecture spatial --out $folder
+    & node scripts/r156-unknown-use-study.mjs --model $Model --architecture floorplan --out $folder
     $studyExit = $LASTEXITCODE
     $studyFile = Join-Path $folder 'R156_STUDY_MANIFEST.json'
     $reviewExit = 2

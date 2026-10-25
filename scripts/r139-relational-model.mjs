@@ -26,6 +26,8 @@ import {deriveR155Roofline,validateR155RooflineIntent}
  from '../source/ai/r155-roofline.mjs';
 import {validateR158SpatialBalanceIntent,toR155RoofIntent}
  from '../source/ai/r158-spatial-balance.mjs';
+import {validateR159FloorplanIntent,toR155FromR159}
+ from '../source/ai/r159-floorplan-intent.mjs';
 
 const fail=x=>{throw Error('R139_MODEL_'+x);};
 const only=(v,fields)=>v!==null&&typeof v==='object'&&!Array.isArray(v)&&
@@ -38,7 +40,8 @@ export {RELATIONAL_INSTRUCTIONS} from './r139-relational-instructions.mjs';
 export function parseR139RelationalFurnishedReply(raw,request,
  {allowRoofMaterialCorrection=false,allowArchitecturalExpression=false,
   allowArchitecturalMassing=false,allowVolumeComposition=false,
-  allowRooflineComposition=false,allowSpatialBalanceComposition=false}={}){
+  allowRooflineComposition=false,allowSpatialBalanceComposition=false,
+  allowFloorplanComposition=false}={}){
  if(typeof raw!=='string'||raw.length<20||raw.length>22000)
   fail('MISSING_OR_OVERSIZED_MODEL_REPLY');
  let reply;
@@ -47,11 +50,13 @@ export function parseR139RelationalFurnishedReply(raw,request,
   'objects','relations'];
  const expressive=allowArchitecturalExpression===true||
   allowArchitecturalMassing===true||allowVolumeComposition===true||
-  allowRooflineComposition===true||allowSpatialBalanceComposition===true;
+  allowRooflineComposition===true||allowSpatialBalanceComposition===true||
+  allowFloorplanComposition===true;
  if(!only(reply,expressive?[...keys,'architecture']:keys)||
   !only(reply.relations,['entryFacingZoneId','directAdjacencies']))
   fail('FULL_REPLY_CONTRACT');
- if(allowSpatialBalanceComposition)validateR158SpatialBalanceIntent(reply.architecture);
+ if(allowFloorplanComposition)validateR159FloorplanIntent(reply.architecture);
+ else if(allowSpatialBalanceComposition)validateR158SpatialBalanceIntent(reply.architecture);
  else if(allowRooflineComposition)validateR155RooflineIntent(reply.architecture);
  else if(allowVolumeComposition)validateR154VolumeIntent(reply.architecture);
  else if(allowArchitecturalMassing)validateR152EnvelopeIntent(reply.architecture);
@@ -85,7 +90,9 @@ export function parseR139RelationalFurnishedReply(raw,request,
   directAdjacencies:relations.directAdjacencies
  };
  const relational=deriveR139RelationalTopology(base,semanticIntent,{
-  spatialBalance:allowSpatialBalanceComposition?architecture.spatialBalance:'balanced'
+  spatialBalance:(allowSpatialBalanceComposition||allowFloorplanComposition)?
+   architecture.spatialBalance:'balanced',
+  depthBalance:allowFloorplanComposition?architecture.depthBalance:'balanced'
  });
  const featured=applyR125FeatureIntent({base:relational,intent:{
   schema:ASSEMBLED_SCHEMA,basePlanSha256:relational.planSha256,
@@ -97,14 +104,14 @@ export function parseR139RelationalFurnishedReply(raw,request,
  const architectural=expressive?(()=>{
   const envelope=deriveR149EnvelopeExpression(featured,{
    plan:relational.plan,expressionIntent:
-    (allowVolumeComposition||allowRooflineComposition||allowSpatialBalanceComposition)?{
+    (allowVolumeComposition||allowRooflineComposition||allowSpatialBalanceComposition||allowFloorplanComposition)?{
     schema:'minecraftaibuilder-r151-envelope-intent-v1',
     entryHierarchy:architecture.entryHierarchy,
     daylightStrategy:architecture.daylightStrategy,
     roofEdge:architecture.roofEdge
    }:architecture});
-  const volume=(allowVolumeComposition||allowRooflineComposition||allowSpatialBalanceComposition)?
-   deriveR154VolumeComposition(envelope,{intent:(allowRooflineComposition||allowSpatialBalanceComposition)?{
+  const volume=(allowVolumeComposition||allowRooflineComposition||allowSpatialBalanceComposition||allowFloorplanComposition)?
+   deriveR154VolumeComposition(envelope,{intent:(allowRooflineComposition||allowSpatialBalanceComposition||allowFloorplanComposition)?{
     schema:R154_VOLUME_SCHEMA,
     entryHierarchy:architecture.entryHierarchy,
     daylightStrategy:architecture.daylightStrategy,
@@ -113,9 +120,10 @@ export function parseR139RelationalFurnishedReply(raw,request,
     arrivalSpace:architecture.arrivalSpace
    }:architecture,authorship:'CALLER_ARCHITECTURE_IR_NOT_AUTHENTICATED'
    }):null;
-  const roofline=(allowRooflineComposition||allowSpatialBalanceComposition)?
+  const roofline=(allowRooflineComposition||allowSpatialBalanceComposition||allowFloorplanComposition)?
    deriveR155Roofline(volume,{
-    intent:allowSpatialBalanceComposition?toR155RoofIntent(architecture):architecture,
+    intent:allowFloorplanComposition?toR155FromR159(architecture):
+     allowSpatialBalanceComposition?toR155RoofIntent(architecture):architecture,
     authorship:'CALLER_ARCHITECTURE_IR_NOT_AUTHENTICATED'
    }):null;
   const completed=deriveR150FurnitureArticulation(roofline??volume??envelope);

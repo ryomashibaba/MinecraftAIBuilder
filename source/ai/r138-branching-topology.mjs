@@ -13,7 +13,10 @@ import {compileDesign,verifyCompiled} from './b143-building-dsl.mjs';
 import {auditR125SourceRoutes} from './r125-source-routes.mjs';
 const fail=s=>{throw Error('R138_BRANCH_'+s);};
 const sha=o=>createHash('sha256').update(JSON.stringify(o)).digest('hex');
-export function deriveR138BranchedTopology(base,{spatialBalance='balanced'}={}){
+export function deriveR138BranchedTopology(base,{spatialBalance='balanced',
+ depthBalance='balanced'}={}){
+ if(!['balanced','front-deep','rear-deep'].includes(depthBalance))
+  fail('INVALID_DEPTH_BALANCE');
  if(!['balanced','left-wide','right-wide'].includes(spatialBalance))
   fail('INVALID_SPATIAL_BALANCE');
  if(base?.schema!=='minecraftaibuilder-r125-plan-to-b143-result-v1'||
@@ -35,7 +38,11 @@ export function deriveR138BranchedTopology(base,{spatialBalance='balanced'}={}){
   rightWall=Math.floor(w/2)+2+shift;
  const gapStart=leftWall+1,gapEnd=rightWall-1;
  if(shift!==0&&w<28)fail('SHIFTED_SPINE_NEEDS_REAL_ROOM_WIDTH');
- const divider=Math.floor(d/2);
+ // R159: the same short model intent can allocate real floor area forward
+ // or rearward; room footprints, walls and 2-wide doors move together.
+ const depthShift=depthBalance==='front-deep'?2:
+  depthBalance==='rear-deep'?-2:0;
+ const divider=Math.floor(d/2)+depthShift;
  const front=[2,divider-1],rear=[divider+1,d-3];
  const left=[2,leftWall-1],right=[rightWall+1,w-3];
  if(gapEnd-gapStart+1<4||left[1]-left[0]+1<7||
@@ -96,6 +103,7 @@ export function deriveR138BranchedTopology(base,{spatialBalance='balanced'}={}){
  const program=[{
   ...structuredClone(base.program[0]),splitAxis:'branch-central-spine',
   partitionCount:rooms===4?4:3,
+  frontRearDivider:divider,
   centralSharedSpine:{range:{x:[gapStart,gapEnd],z:[2,d-3]},
    standingFloorY:2},
   zones:zones.map((z,i)=>({
@@ -112,7 +120,9 @@ export function deriveR138BranchedTopology(base,{spatialBalance='balanced'}={}){
   planSha256:sha({
    basePlanSha256:base.planSha256,
    variant:'r138-central-spine',
-   positions:footprints.map((f,i)=>[zones[i].id,f.sector])
+   positions:footprints.map((f,i)=>[zones[i].id,f.sector]),
+   ...(spatialBalance==='balanced'?{}:{spatialBalance}),
+   ...(depthBalance==='balanced'?{}:{depthBalance})
   }),
   sourceSha256:compiled.sourceSha256,
   geometrySha256:compiled.geometrySha256,
@@ -132,6 +142,12 @@ export function deriveR138BranchedTopology(base,{spatialBalance='balanced'}={}){
   topologyProvenance:'HOST_DERIVED_NOT_MODEL_ARCHITECTURAL_CHOICE',
   zoneLayoutShape:shift===0?'BRANCHED_CENTRAL_SPINE_WITH_SIDE_ROOMS':
    'BRANCHED_SHIFTED_SPINE_WITH_REAL_DIFFERENT_WING_WIDTHS',
+  r159DepthBalanceEvidence:{depthBalance,depthShiftCells:depthShift,
+   realFrontRoomDepth:front[1]-front[0]+1,
+   realRearRoomDepth:rear[1]-rear[0]+1,
+   actualDividerZ:divider,
+   sourceOnly:true,modelSelectionAuthenticated:false,
+   artReview:'NOT_REVIEWED',minecraftWalking:'NOT_TESTED'},
   r158SpatialBalanceEvidence:{spatialBalance,shiftCells:shift,
    modelSelectionAuthenticated:false,
    leftWingInteriorWidth:left[1]-left[0]+1,
