@@ -54,6 +54,10 @@ on:
       - 'scripts/r137-bounded-recovery.test.mjs'
       - 'scripts/r137-user-capture-replay.mjs'
       - 'scripts/r137-user-capture-replay.test.mjs'
+      - 'source/ai/r138-branching-topology.mjs'
+      - 'scripts/r138-branching-topology.test.mjs'
+      - 'scripts/r138-user-branch-comparison.mjs'
+      - 'scripts/r138-user-branch-comparison.test.mjs'
       - 'scripts/fixtures/r136-user-qwen14b-20261025.json.gz'
       - 'scripts/fixtures/r133-shop-independent-goals.json'
       - 'scripts/r125-feature-model-pilot.mjs'
@@ -133,11 +137,15 @@ jobs:
           node --check scripts/r137-bounded-recovery.test.mjs
           node --check scripts/r137-user-capture-replay.mjs
           node --check scripts/r137-user-capture-replay.test.mjs
+          node --check source/ai/r138-branching-topology.mjs
+          node --check scripts/r138-branching-topology.test.mjs
+          node --check scripts/r138-user-branch-comparison.mjs
+          node --check scripts/r138-user-branch-comparison.test.mjs
           node --check scripts/r125-feature-model-pilot.mjs
           node --check scripts/r125-feature-model-pilot.test.mjs
           node --check source/ai/r125-functional-acceptance.mjs
           node --check scripts/r125-functional-acceptance.test.mjs
-          node --test scripts/r125-mvp.test.mjs scripts/r125-world-diff.test.mjs scripts/r125-pilot.test.mjs scripts/r125-offline-replay.test.mjs scripts/r125-architecture-plan.test.mjs scripts/r125-semantic-pilot.test.mjs scripts/r125-real-plan-replay.test.mjs scripts/r125-expression-gallery.test.mjs scripts/r125-multiuse-pilot.test.mjs scripts/r125-real-multiuse-replay.test.mjs scripts/r125-functional-layer.test.mjs scripts/r125-functional-preview.test.mjs scripts/r125-feature-model-pilot.test.mjs scripts/r125-functional-acceptance.test.mjs scripts/r131-real-3d-comparison.test.mjs scripts/r132-spatial-comparison.test.mjs scripts/r133-spatial-onepass.test.mjs scripts/r135-furnished-program.test.mjs scripts/r134-multi-zone-plan.test.mjs scripts/r134-fresh-model-pilot.test.mjs scripts/r134-multi-zone-gallery.test.mjs scripts/r136-local-evidence.test.mjs scripts/r137-bounded-recovery.test.mjs scripts/r137-user-capture-replay.test.mjs
+          node --test scripts/r125-mvp.test.mjs scripts/r125-world-diff.test.mjs scripts/r125-pilot.test.mjs scripts/r125-offline-replay.test.mjs scripts/r125-architecture-plan.test.mjs scripts/r125-semantic-pilot.test.mjs scripts/r125-real-plan-replay.test.mjs scripts/r125-expression-gallery.test.mjs scripts/r125-multiuse-pilot.test.mjs scripts/r125-real-multiuse-replay.test.mjs scripts/r125-functional-layer.test.mjs scripts/r125-functional-preview.test.mjs scripts/r125-feature-model-pilot.test.mjs scripts/r125-functional-acceptance.test.mjs scripts/r131-real-3d-comparison.test.mjs scripts/r132-spatial-comparison.test.mjs scripts/r133-spatial-onepass.test.mjs scripts/r135-furnished-program.test.mjs scripts/r134-multi-zone-plan.test.mjs scripts/r134-fresh-model-pilot.test.mjs scripts/r134-multi-zone-gallery.test.mjs scripts/r136-local-evidence.test.mjs scripts/r137-bounded-recovery.test.mjs scripts/r137-user-capture-replay.test.mjs scripts/r138-branching-topology.test.mjs scripts/r138-user-branch-comparison.test.mjs
       - name: Build genuine-source four-scene visual review
         run: node scripts/r125-expression-gallery.mjs --out r125-expression-preview
       - name: Upload source-only 3D comparison for human review
@@ -181,6 +189,15 @@ jobs:
         with:
           name: R137-REAL-QWEN14B-THREE-BUILDINGS-3D-REPLAY
           path: r137-user-real-qwen-3d/
+          retention-days: 14
+          if-no-files-found: error
+      - name: Build exact-user-Qwen strip vs branch six scene real source 3D
+        run: node scripts/r138-user-branch-comparison.mjs --out r138-qwen-branch-3d
+      - name: Upload real source branched topology comparative views
+        uses: actions/upload-artifact@v4
+        with:
+          name: R138-REAL-QWEN14B-STRIP-VS-BRANCH-3D
+          path: r138-qwen-branch-3d/
           retention-days: 14
           if-no-files-found: error
       - name: Keep the original Minecraft world offline
