@@ -14,7 +14,7 @@ const ROLES=new Set([
  'work-surface','equipment-bank','display-stand','storage-rack','seating'
 ]);
 const CORNERS=new Set(['near-left','near-right','far-left','far-right']);
-const slug=s=>typeof s==='string'&&/^[a-z][a-z0-9-]{2,20}$/.test(s);
+const slug=s=>typeof s==='string'&&/^[a-z][a-z0-9-]{2,31}$/.test(s);
 /**
  * Validate model-selected objects independently of any particular physical
  * layout. R141 graph mode must NOT require legacy strip furnishing to succeed
