@@ -111,6 +111,7 @@ export function auditR143GraphEvidence({intent,graphDesign,finalDesign,
  const finalFeatureElements=finalDesign.elements.slice(
   graphDesign.elements.length);
  const allDeclaredIds=new Set(),allElementIds=new Set(),seenFeatureIds=new Set();
+ const representedRooms=new Set();
  let confirmedFeatureCount=0;
  for(const feature of featurePlacements){
   if(!feature||typeof feature.id!=='string'||seenFeatureIds.has(feature.id)||
@@ -120,6 +121,20 @@ export function auditR143GraphEvidence({intent,graphDesign,finalDesign,
    !Array.isArray(feature.size)||feature.size.length!==3)
    fail('FEATURE_PLACEMENT_CONTRACT');
   seenFeatureIds.add(feature.id);
+  const featureZone=zones.get(feature.zoneId);
+  representedRooms.add(feature.zoneId);
+  const physicallyInsideNamedRoom=
+   feature.origin[1]===roomProgram[0].standingFloorY&&
+   [0,2].every(axis=>{
+    const span=axis===0?featureZone.range.x:featureZone.range.z;
+    return Number.isSafeInteger(feature.origin[axis])&&
+     Number.isSafeInteger(feature.size[axis])&&
+     feature.size[axis]>0&&
+     feature.origin[axis]>=span[0]&&
+     feature.origin[axis]+feature.size[axis]-1<=span[1];
+   });
+  if(!physicallyInsideNamedRoom)
+   fail('FEATURE_OUTSIDE_NAMED_ROOM');
   const parts=feature.elementIds.map(id=>{
    if(typeof id!=='string'||!id.startsWith('feature-'+feature.id+'-')||
     allDeclaredIds.has(id))fail('FEATURE_ELEMENT_NOT_PINNED');
@@ -140,6 +155,8 @@ export function auditR143GraphEvidence({intent,graphDesign,finalDesign,
   allElementIds.add(element.id);
  }
  const equipmentFootprintsVerified=
+  featurePlacements.length>=rooms.length&&
+  representedRooms.size===rooms.length&&
   confirmedFeatureCount===featurePlacements.length&&
   allElementIds.size===allDeclaredIds.size;
  const features=featurePlacements.map(item=>({
