@@ -4,8 +4,10 @@
  * An added "relations" field is NEW model output; old saved R136 captures
  * have no such field and must never be labelled model-authored relations.
  */
-import {parseR135FreshFurnishedReply}
+import {validateR135SemanticObjects}
  from './r135-furnished-program.mjs';
+import {parseR134FreshModelReply}
+ from './r134-fresh-model-pilot.mjs';
 import {SCHEMA,deriveR139RelationalTopology}
  from '../source/ai/r139-room-relations.mjs';
 import {applyR125FeatureIntent,ASSEMBLED_SCHEMA}
@@ -42,18 +44,22 @@ export function parseR139RelationalFurnishedReply(raw,request){
   ['entryFacingZoneId','directAdjacencies']))
   fail('FULL_REPLY_CONTRACT');
  const {relations,...originalReply}=reply;
- // Existing R135 validates objects, roles and ALL original room semantics.
- // No category-dependent fallback or prompt-to-room-name guess is used.
- const prior=parseR135FreshFurnishedReply(JSON.stringify(originalReply),request);
+ // Validate semantic room program FIRST, without furnishing the obsolete
+ // strip. A valid spatial graph can have more usable equipment clearance
+ // than a narrow linear strip; premature strip fitting gave false HOLDs.
+ const {objects,...programReply}=originalReply;
+ const base=parseR134FreshModelReply(JSON.stringify(programReply),request);
+ const semantics=validateR135SemanticObjects(objects,
+  base.program[0].zones.map(z=>z.id));
  const semanticIntent={
-  schema:SCHEMA,basePlanSha256:prior.base.planSha256,
+  schema:SCHEMA,basePlanSha256:base.planSha256,
   entryFacingZoneId:relations.entryFacingZoneId,
   directAdjacencies:relations.directAdjacencies
  };
- const relational=deriveR139RelationalTopology(prior.base,semanticIntent);
+ const relational=deriveR139RelationalTopology(base,semanticIntent);
  const featured=applyR125FeatureIntent({base:relational,intent:{
   schema:ASSEMBLED_SCHEMA,basePlanSha256:relational.planSha256,
-  objects:prior.objectRolesChosenByModel.map(x=>({...x,detail:'assembled'}))
+  objects:semantics.objects.map(x=>({...x,detail:'assembled'}))
  }});
  if(featured.sourceRouteAudit.status!=='SOURCE_ROUTES_REACH_ALL_ZONES'||
   !featured.everyFeatureSourceAccessible)
@@ -64,11 +70,13 @@ export function parseR139RelationalFurnishedReply(raw,request){
   modelReplyAuthenticity:'CALLER_PROVIDED_UNVERIFIED',
   authoredFields:['layout.spaces','objects','relations'],
   semanticIntent,
-  originalSequentialBase:prior.base,
+  originalSequentialBase:base,
   relationalBase:relational,featured,
   derivedSourceSha256:featured.sourceSha256,
   derivedGeometrySha256:featured.geometrySha256,
   modelCallsDuringParsing:0,
+  legacyStripFurnitureNotRequired:true,
+  semanticEquipmentZoneCount:semantics.physicallyRepresentedZoneCount,
   hostGeneratedGeometry:true,
   aestheticStatus:'NOT_REVIEWED',
   minecraftWalking:'NOT_TESTED',
