@@ -161,7 +161,8 @@ export function parseR139RelationalFurnishedReply(raw,request,
    deriveR162RoomSectionMassing(envelope,{
     topologyIntent:architecture.spatialTopology}):null;
   const articulated=deriveR150FurnitureArticulation(
-   integrated??roofline??volume??envelope);
+   integrated??roofline??volume??envelope,
+   {allowDecorativeDeferral:allowHostGridResearch===true});
   const completed=highSectionEligible?
    deriveR163DaylitSections(articulated):articulated;
   return {intent:structuredClone(architecture),envelope,volume,roofline,
