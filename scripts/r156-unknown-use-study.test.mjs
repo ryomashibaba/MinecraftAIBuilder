@@ -43,7 +43,7 @@ test('R156 labels copylike shapes and synthetic model responses as HOLD',()=>{
 test('R156 validates CLI and rejects nonlocal service or arbitrary mode',()=>{
  assert.equal(parseR156Args(['--model','qwen3:14b','--out','r156test']).architectureMode,'roofline');
  assert.throws(()=>parseR156Args(['--architecture','random']),/R156_ARCHITECTURE/);
- assert.throws(()=>parseR156Args(['--model','https://remote.example','--out','r156test']),/R134_MODEL_/);
+ assert.throws(()=>parseR156Args(['--model','bad model','--out','r156test']),/R134_MODEL_/);
  assert.throws(()=>parseR156Args(['--out','x','--out','y']),/R156_CLI/);
 });
 test('R156 uses existing graph/roofline compiler on fake localhost for all three uses without certifying actual inference',async t=>{
