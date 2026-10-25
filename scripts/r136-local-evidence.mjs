@@ -193,7 +193,7 @@ export async function runR136Benchmark({model=null,outDir,
      sourceSha256:null,geometrySha256:null,zoneCount:null,
      equipmentCount:0,voxels:null,sourceRoutes:'NOT_CHECKED',
      worldWrites:0,testInjectionPresent:injected};
-    fs.mkdirSync(subDir,{recursive:false});
+    if(!fs.existsSync(subDir))fs.mkdirSync(subDir,{recursive:false});
     save(subDir,'R136_CASE_ERROR.json',report);
    }
    runs.push({...row,report});
