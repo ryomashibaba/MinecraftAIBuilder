@@ -78,6 +78,12 @@ export function deriveR155Roofline(base,{intent,authorship=
   if(sx<7||sz<7||h<9||h>10||x1>=copy.bounds.width||
    z1>=copy.bounds.depth)
    fail('UPPER_VOLUME_FOOTPRINT_INVALID');
+  // R134 sawtooth roof profiles can extend ABOVE the old R154 cap
+  // (especially the 9-high secondary wing). Remove those residual
+  // interior slabs BEFORE placing the new roof surface; otherwise a
+  // visually pitched shell still has a hidden false interior ceiling.
+  add(id+'-clear-residual-old-roof','cut',null,
+   [x0+1,h,z0+1],[sx-2,5,sz-2]);
   const slope=Array.from({length:sx},(_,k)=>
    intent.roofSilhouette==='ridge'?
     Math.min(2,Math.floor((Math.min(k,sx-1-k)+1)/2)):
@@ -124,12 +130,17 @@ export function deriveR155Roofline(base,{intent,authorship=
    // isn't openly exposed across the end face.
    add(id+'-shed-end','add',wall,[x1,h,z0+1],[1,2,sz-2]);
   }
-  const highest=Math.max(...slope),mid=slope.indexOf(highest);
+  const highest=Math.max(...slope),
+   peaks=slope.map((level,k)=>level===highest?k:-1).filter(k=>k>=0),
+   mid=peaks[Math.floor(peaks.length/2)];
   certificates.push({zoneId:v.zoneId,roofHeightBefore:h,
    silhouette:intent.roofSilhouette,roofHeightAtPeak:h+highest,
    footprint:v.volumeFootprint,slopeLevels:slope,
    witnessAboveRoom:[x0+mid,h+highest,z0+Math.floor(sz/2)],
-   sectionCavity:[x0+mid,h+highest-1,z0+Math.floor(sz/2)],
+   // Y=h was the OLD flat ceiling. It must now be physically empty.
+   // A narrow ridge may require an opaque riser at y=h+highest-1,
+   // which is structurally valid but not a reason to label y=h sealed.
+   sectionCavity:[x0+mid,h,z0+Math.floor(sz/2)],
    sourceElementsAdded:copy.elements.length});
  }
  if(copy.elements.length>160)
