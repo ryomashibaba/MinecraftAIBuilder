@@ -30,6 +30,8 @@ import {validateR159FloorplanIntent,toR155FromR159}
  from '../source/ai/r159-floorplan-intent.mjs';
 import {deriveR160SideGalleryTopology}
  from '../source/ai/r160-side-gallery.mjs';
+import {deriveR168RoomGridTopology}
+ from '../source/ai/r168-room-grid.mjs';
 import {deriveR162RoomSectionMassing}
  from '../source/ai/r162-room-section-massing.mjs';
 import {deriveR163DaylitSections}
@@ -49,7 +51,8 @@ export function parseR139RelationalFurnishedReply(raw,request,
  {allowRoofMaterialCorrection=false,allowArchitecturalExpression=false,
   allowArchitecturalMassing=false,allowVolumeComposition=false,
   allowRooflineComposition=false,allowSpatialBalanceComposition=false,
-  allowFloorplanComposition=false,allowTopologyComposition=false}={}){
+  allowFloorplanComposition=false,allowTopologyComposition=false,
+  allowHostGridResearch=false}={}){
  if(typeof raw!=='string'||raw.length<20||raw.length>22000)
   fail('MISSING_OR_OVERSIZED_MODEL_REPLY');
  let reply;
@@ -98,15 +101,25 @@ export function parseR139RelationalFurnishedReply(raw,request,
   entryFacingZoneId:relations.entryFacingZoneId,
   directAdjacencies:relations.directAdjacencies
  };
- const relational=allowTopologyComposition&&
-  architecture.spatialTopology!=='central-spine'?
-  deriveR160SideGalleryTopology(base,semanticIntent,{
-   gallerySide:architecture.spatialTopology}):
-  deriveR139RelationalTopology(base,semanticIntent,{
-   spatialBalance:(allowSpatialBalanceComposition||allowFloorplanComposition)?
-    architecture.spatialBalance:'balanced',
-   depthBalance:allowFloorplanComposition?architecture.depthBalance:'balanced'
-  });
+ // Explicit R167/R168 HOST RESEARCH ONLY: shared-node room edges cannot
+ // exist as direct physical walls in R139's central-spine-only plan.
+ // Do not present a grid as the model's chosen central spine.
+ const nodes=semanticIntent.directAdjacencies.flat();
+ const sharedNode=nodes.length!==new Set(nodes).size;
+ const gridStudy=allowHostGridResearch===true&&
+  allowTopologyComposition===true&&
+  architecture.spatialTopology==='central-spine'&&
+  base.program[0].zones.length===4&&sharedNode;
+ const relational=gridStudy?
+  deriveR168RoomGridTopology(base,semanticIntent):
+  allowTopologyComposition&&architecture.spatialTopology!=='central-spine'?
+   deriveR160SideGalleryTopology(base,semanticIntent,{
+    gallerySide:architecture.spatialTopology}):
+   deriveR139RelationalTopology(base,semanticIntent,{
+    spatialBalance:(allowSpatialBalanceComposition||allowFloorplanComposition)?
+     architecture.spatialBalance:'balanced',
+    depthBalance:allowFloorplanComposition?architecture.depthBalance:'balanced'
+   });
  const featured=applyR125FeatureIntent({base:relational,intent:{
   schema:ASSEMBLED_SCHEMA,basePlanSha256:relational.planSha256,
   objects:semantics.objects.map(x=>({...x,detail:'assembled'}))
@@ -174,6 +187,7 @@ export function parseR139RelationalFurnishedReply(raw,request,
   hostRepairActions:repaired.evidence.repairActions,
   roofMaterialBoundaryEvidence:repaired.evidence,
   semanticIntent,
+  hostGridResearchOverride:relational.r168GridEvidence??null,
   originalSequentialBase:base,
   relationalBase:relational,featured,
   derivedSourceSha256:featured.sourceSha256,
