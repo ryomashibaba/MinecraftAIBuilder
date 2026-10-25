@@ -15,6 +15,32 @@ const ROLES=new Set([
 ]);
 const CORNERS=new Set(['near-left','near-right','far-left','far-right']);
 const slug=s=>typeof s==='string'&&/^[a-z][a-z0-9-]{2,20}$/.test(s);
+/**
+ * Validate model-selected objects independently of any particular physical
+ * layout. R141 graph mode must NOT require legacy strip furnishing to succeed
+ * before applying its own spatial layout; reuse exactly the same semantic
+ * contract as the legacy R135 parser.
+ */
+export function validateR135SemanticObjects(objects,zoneIds){
+ if(!Array.isArray(zoneIds)||zoneIds.length<3||zoneIds.length>4||
+  new Set(zoneIds).size!==zoneIds.length||
+  !Array.isArray(objects)||objects.length<3||objects.length>8)
+  fail('SEMANTIC_OBJECT_OR_ZONE_COUNT');
+ const seenIds=new Set(),representedZones=new Set();
+ for(const o of objects){
+  if(!fields(o,['id','zoneId','role','corner'])||
+   !slug(o.id)||seenIds.has(o.id)||!zoneIds.includes(o.zoneId)||
+   !ROLES.has(o.role)||!CORNERS.has(o.corner))
+   fail('UNSUPPORTED_SEMANTIC_OBJECT');
+  seenIds.add(o.id);
+  representedZones.add(o.zoneId);
+ }
+ if(zoneIds.some(id=>!representedZones.has(id)))
+  fail('FUNCTIONAL_ZONE_WITHOUT_PROPOSED_EQUIPMENT');
+ return {objects:objects.map(o=>({...o})),
+  physicallyRepresentedZoneCount:representedZones.size};
+}
+
 export function parseR135FreshFurnishedReply(raw,request){
  if(typeof raw!=='string'||raw.length<20||raw.length>22000)
   fail('MODEL_OUTPUT_MISSING_OR_TOO_LARGE');
@@ -29,17 +55,7 @@ export function parseR135FreshFurnishedReply(raw,request){
  const originalProgram=Object.fromEntries(fieldsV1.map(k=>[k,answer[k]]));
  const base=parseR134FreshModelReply(JSON.stringify(originalProgram),request);
  const zones=base.program[0].zones.map(z=>z.id);
- const seenIds=new Set(),representedZones=new Set();
- for(const o of answer.objects){
-  if(!fields(o,['id','zoneId','role','corner'])||
-   !slug(o.id)||seenIds.has(o.id)||!zones.includes(o.zoneId)||
-   !ROLES.has(o.role)||!CORNERS.has(o.corner))
-   fail('UNSUPPORTED_SEMANTIC_OBJECT');
-  seenIds.add(o.id);
-  representedZones.add(o.zoneId);
- }
- if(zones.some(id=>!representedZones.has(id)))
-  fail('FUNCTIONAL_ZONE_WITHOUT_PROPOSED_EQUIPMENT');
+ const semantics=validateR135SemanticObjects(answer.objects,zones);
  const intent={
   schema:ASSEMBLED_SCHEMA,basePlanSha256:base.planSha256,
   objects:answer.objects.map(o=>({...o,detail:'assembled'}))
@@ -55,7 +71,7 @@ export function parseR135FreshFurnishedReply(raw,request){
   base,featured,intent,
   objectRolesChosenByModel:answer.objects.map(o=>({
    id:o.id,zoneId:o.zoneId,role:o.role,corner:o.corner})),
-  physicallyRepresentedZoneCount:representedZones.size,
+  physicallyRepresentedZoneCount:semantics.physicallyRepresentedZoneCount,
   originalShellSourceSha256:base.sourceSha256,
   furnishedSourceSha256:featured.sourceSha256,
   addedTrueB143Voxels:featured.addedVoxelCount,
