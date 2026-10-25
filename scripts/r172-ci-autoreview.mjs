@@ -68,6 +68,10 @@ export function buildR172Autoreview(){
    allowTopologyComposition:true,
    allowHostGridResearch:true,allowHostVolumeResearch:true});
   const model=r.architectural?.completed;
+  const variant=parseR139RelationalFurnishedReply(JSON.stringify(raw),request,{
+   allowTopologyComposition:true,allowHostGridResearch:true,
+   allowHostVolumeResearch:true,allowHostSculpturalResearch:true
+  }).architectural?.completed;
   if(!model||!verifyCompiled(model.design,model.compiled)||
    !safety(model)||!safety(r)||
    model.sourceRouteAudit?.status!=='SOURCE_ROUTES_REACH_ALL_ZONES'||
@@ -78,7 +82,26 @@ export function buildR172Autoreview(){
    !model.r170FourRoomVolumeEvidence.originalLowerFiveLevelsUnchanged||
    model.r170FourRoomVolumeEvidence.clearHighInteriorSampleCount<120)
    fail('SYNTHETIC_SOURCE_OR_SAFETY_'+t.id);
-  return {id:t.id,use:t.use,source:model,
+  if(!variant||!verifyCompiled(variant.design,variant.compiled)||
+   !safety(variant)||
+   variant.sourceRouteAudit.status!=='SOURCE_ROUTES_REACH_ALL_ZONES'||
+   variant.sourceRouteAudit.featureAccess.length!==t.objects.length||
+   !variant.sourceRouteAudit.featureAccess.every(x=>x.reachableFromEntrance)||
+   variant.r170FourRoomVolumeEvidence?.sculptedVolumeVariant!==true||
+   variant.r170FourRoomVolumeEvidence.realExteriorClerestoryWindows<4||
+   !variant.r170FourRoomVolumeEvidence.originalLowerFiveLevelsUnchanged||
+   variant.compiled.primitives.some(p=>p[1]>=18)||
+   model.compiled.primitives.filter(p=>p[1]<=5).length!==
+    variant.compiled.primitives.filter(p=>p[1]<=5).length)
+   fail('SCULPTED_SOURCE_OR_ROOM_SAFETY_'+t.id);
+  const ymax=p=>Math.max(...p.compiled.primitives.map(v=>v[1]));
+  const maxBaselineY=ymax(model),maxSculptedY=ymax(variant);
+  if(maxSculptedY<=maxBaselineY+1)
+   fail('SCULPTED_SILHOUETTE_NOT_HIGHER_'+t.id);
+  const highGlass=variant.compiled.primitives.filter(p=>p[1]>=6&&
+   p[3]===3).length;
+  if(highGlass<12)fail('REAL_CLERESTORY_VOXELS_MISSING_'+t.id);
+  return {id:t.id,use:t.use,source:model,sculpted:variant,
    audit:{id:t.id,use:t.use,sourceSha256:model.sourceSha256,
     geometrySha256:model.geometrySha256,voxels:model.compiled.primitives.length,
     rooms:4,originalObjectsPreserved:t.objects.length,
@@ -87,6 +110,15 @@ export function buildR172Autoreview(){
      q=>({zoneId:q.zoneId,roofY:q.roofY,clearCells:q.extraAirColumnsAtY6Y7})),
     sourceRouteStatus:model.sourceRouteAudit.status,
     hostGridOverrideUsed:Boolean(r.hostGridResearchOverride),
+    sculptedSourceSha256:variant.sourceSha256,
+    sculptedGeometrySha256:variant.geometrySha256,
+    sculptedVoxelCount:variant.compiled.primitives.length,
+    actualBaselineHighestOccupiedY:maxBaselineY,
+    actualSculptedHighestOccupiedY:maxSculptedY,
+    realSculptedClerestoryGlazingCells:highGlass,
+    realSculptedClerestoryWindows:
+     variant.r170FourRoomVolumeEvidence.realExteriorClerestoryWindows,
+    sculptedHeights:variant.r170FourRoomVolumeEvidence.roomSections.map(q=>q.roofY),
     freshModelCalls:0,realLocalInference:false,
     provenance:'SYNTHETIC_CI_FIXTURE_HOST_DERIVED_NOT_GENUINE_QWEN',
     humanArtReview:'ART_HOLD',readiness:'NOT_PREPARED',
@@ -110,10 +142,15 @@ function html(report){
   '<section><h2>'+esc(c.use)+'</h2><p>'+c.voxels+
   ' B143 voxels · 四室の天井高さ '+
   c.hostDerivedHeights.map(r=>r.roofY).join(' / ')+'</p>'+
-  '<iframe loading="lazy" title="'+esc(c.use)+' B143" src="'+c.id+'.html"></iframe>'+
+  '<p>基準: 最大Y='+c.actualBaselineHighestOccupiedY+' / 彫塑研究: 最大Y='+
+   c.actualSculptedHighestOccupiedY+' · 上部実ガラス '+c.realSculptedClerestoryGlazingCells+
+   'セル。美術判定は未実施。</p>'+
+  '<h3>基準 R170</h3><iframe loading="lazy" title="'+esc(c.use)+' R170" src="'+c.id+'.html"></iframe>'+
+  '<h3>研究候補 R173</h3><iframe loading="lazy" title="'+esc(c.use)+' R173" src="'+c.id+'-sculpted.html"></iframe>'+
   '<div class="elev">'+['front','rear','west','east','roof'].map(d=>
    '<figure><img src="'+c.id+'-'+d+'.svg" alt="'+esc(d)+
-   '"><figcaption>'+esc(d)+'</figcaption></figure>').join('')+'</div></section>'
+   '"><img src="'+c.id+'-sculpted-'+d+'.svg" alt="sculpted '+esc(d)+
+   '"><figcaption>'+esc(d)+' · 上 R170 / 下 R173</figcaption></figure>').join('')+'</div></section>'
  ).join('');
  return '<!doctype html><html lang="ja"><meta charset="utf-8">'+
  '<meta name="viewport" content="width=device-width,initial-scale=1">'+
@@ -139,12 +176,17 @@ export function saveR172Autoreview(out){
   path.dirname(fileURLToPath(import.meta.url)),
   '../source/ai/b143-viewer-template.html'),'utf8');
  const files=new Map();
- for(const {id,source} of r.cases){
+ for(const {id,source,sculpted} of r.cases){
   files.set(id+'.html',renderB143Html(
    compileB143Gallery([source.design]),template));
-  for(const d of ['front','rear','west','east','roof'])
+  files.set(id+'-sculpted.html',renderB143Html(
+   compileB143Gallery([sculpted.design]),template));
+  for(const d of ['front','rear','west','east','roof']){
    files.set(id+'-'+d+'.svg',
     renderR164Elevation(source.compiled,source.design,d));
+   files.set(id+'-sculpted-'+d+'.svg',
+    renderR164Elevation(sculpted.compiled,sculpted.design,d));
+  }
  }
  const {cases,...top}=r;
  const report={...top,cases:r.cases.map(c=>c.audit)};
@@ -156,10 +198,11 @@ export function saveR172Autoreview(out){
  if(process.env.GITHUB_STEP_SUMMARY){
   const lines=['### R172 自動3用途・B143ソースレビュー',
    '**静的な合成入力のみ。実Qwen推論ではありません。ART HOLD / 施工禁止。**','',
-   '| 用途 | ボクセル | 屋根形式 | 実空間Y | 結果 |',
-   '|---|---:|---|---|---|',...report.cases.map(c=>
-    '| '+c.use+' | '+c.voxels+' | '+c.modelRequestedRoofFamily+
-    ' | '+c.hostDerivedHeights.map(q=>q.roofY).join('/')+' | ソースPASS |'),
+   '| 用途 | R170実ボクセル | R173実ボクセル | 最上部Yの変化 | 外部高窓 | 結果 |',
+   '|---|---:|---:|---|---:|---|',...report.cases.map(c=>
+    '| '+c.use+' | '+c.voxels+' | '+c.sculptedVoxelCount+
+    ' | '+c.actualBaselineHighestOccupiedY+' → '+c.actualSculptedHighestOccupiedY+
+    ' | '+c.realSculptedClerestoryWindows+' | ソースPASS / 美術HOLD |'),
     '', 'モデル推論0、Minecraft書込0。5方向画像と3Dは成果物 R172-CI-THREE-USE-SOURCE-3D を確認。',''];
   fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,lines.join('\n'));
  }
