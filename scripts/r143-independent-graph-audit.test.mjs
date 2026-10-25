@@ -111,9 +111,11 @@ test('R144 source audit refuses invented room geometry or furnishings that block
   /R143_SOURCE_ROOM_PROGRAM_OR_ENTRY_CONFLICT|R143_SOURCE_DIRECT_PAIR_SOURCE_ID_OR_SHAPE/);
  const altered=structuredClone(real);
  altered.featurePlacements[0].origin=[1,2,1];
- const proof=auditR143GraphEvidence(altered);
- assert.equal(proof.status,'HOLD_SOURCE_ROOM_GRAPH');
- assert.ok(proof.independentEquipmentServiceCount<4);
+ // A claimed feature physically outside its named room must not be
+ // represented as a normal audited candidate. The independent boundary
+ // validator intentionally FAILS CLOSED with an exception.
+ assert.throws(()=>auditR143GraphEvidence(altered),
+  /R143_SOURCE_FEATURE_OUTSIDE_NAMED_ROOM/);
 });
 
 test('R153 fail-closed audit checks ALL room sectors, even ones without direct pair openings',()=>{
