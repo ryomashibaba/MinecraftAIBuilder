@@ -13,6 +13,8 @@ import {SCHEMA,deriveR139RelationalTopology}
 import {applyR125FeatureIntent,ASSEMBLED_SCHEMA}
  from '../source/ai/r125-functional-layer.mjs';
 import {createHash} from 'node:crypto';
+import {recoverR146RoofProfileAsMaterial}
+ from '../source/ai/r146-roof-material-boundary.mjs';
 
 const fail=x=>{throw Error('R139_MODEL_'+x);};
 const only=(v,fields)=>v!==null&&typeof v==='object'&&!Array.isArray(v)&&
@@ -34,7 +36,8 @@ export const RELATIONAL_INSTRUCTIONS=[
  'The host validates feasible geometry and will reject incompatible graphs.'
 ].join('\n');
 
-export function parseR139RelationalFurnishedReply(raw,request){
+export function parseR139RelationalFurnishedReply(raw,request,
+ {allowRoofMaterialCorrection=false}={}){
  if(typeof raw!=='string'||raw.length<20||raw.length>22000)
   fail('MISSING_OR_OVERSIZED_MODEL_REPLY');
  let reply;
@@ -44,7 +47,15 @@ export function parseR139RelationalFurnishedReply(raw,request){
  if(!only(reply,keys)||!only(reply.relations,
   ['entryFacingZoneId','directAdjacencies']))
   fail('FULL_REPLY_CONTRACT');
- const {relations,...originalReply}=reply;
+ const repaired=allowRoofMaterialCorrection?
+  recoverR146RoofProfileAsMaterial(raw,reply):{
+   derivedReply:structuredClone(reply),evidence:{
+    schema:'r146-exact-roof-material-boundary-v1',
+    rawSha256:sha(raw),originalRawPreserved:true,
+    hostRepairRequired:false,repairActions:[],modelCalls:0,worldWrites:0
+   }
+  };
+ const {relations,...originalReply}=repaired.derivedReply;
  // Validate semantic room program FIRST, without furnishing the obsolete
  // strip. A valid spatial graph can have more usable equipment clearance
  // than a narrow linear strip; premature strip fitting gave false HOLDs.
@@ -77,6 +88,10 @@ export function parseR139RelationalFurnishedReply(raw,request){
   originalRawSha256:sha(raw),sourceModelReplyRaw:raw,
   modelReplyAuthenticity:'CALLER_PROVIDED_UNVERIFIED',
   authoredFields:['layout.spaces','objects','relations'],
+  derivedModelReply:repaired.derivedReply,
+  boundedHostRepairRequired:repaired.evidence.hostRepairRequired,
+  hostRepairActions:repaired.evidence.repairActions,
+  roofMaterialBoundaryEvidence:repaired.evidence,
   semanticIntent,
   originalSequentialBase:base,
   relationalBase:relational,featured,
