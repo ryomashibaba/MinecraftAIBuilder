@@ -10,6 +10,7 @@ import {preflightR125Ollama} from './r125-pilot.mjs';
 import {compileR134MultiZonePlan,SCHEMA}
  from '../source/ai/r134-multi-zone-plan.mjs';
 import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
+import {parseR135FreshFurnishedReply} from './r135-furnished-program.mjs';
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const ENDPOINT=/^http:\/\/127\.0\.0\.1:(\d{2,5})\/v1\/chat\/completions$/;
 const MODEL=/^[A-Za-z0-9._:/-]{2,140}$/;
@@ -42,6 +43,16 @@ const SYSTEM=[
  'The host builds exact solids, supported floors, doors and continuous paths.',
  'Do not output any code, Minecraft commands, extra keys or approval claims.'
 ].join('\n');
+const FURNISHED_SYSTEM=[
+ 'In addition to the architecture keys, output EXACTLY one more key: objects.',
+ 'objects MUST be 3-8 records, one or more for EVERY functional room.',
+ 'Every object has EXACTLY id,zoneId,role,corner. zoneId matches a space id.',
+ 'Select roles from work-surface, equipment-bank, display-stand, storage-rack, seating.',
+ 'Select corner from near-left, near-right, far-left, far-right.',
+ 'Do not invent coordinates, materials for equipment, or Minecraft commands.',
+ 'Choose equipment based on room activity; preserve clear physical walkways.',
+ 'The host makes real assembled furniture and rejects unreachable rooms.'
+].join('\n');
 export function makeR134FreshRequest({brief,siteWidth=32,siteDepth=32}={}){
  if(!text(brief)||!range(siteWidth,18,32)||!range(siteDepth,18,32))
   fail('BRIEF_OR_SITE');
@@ -70,7 +81,7 @@ export function parseR134FreshModelReply(raw,request){
 export function parseR134FreshArgs(argv){
  if(argv.length===1&&argv[0]==='--help')return {help:true};
  const allowed=new Set(['--model','--brief','--out','--site-width',
-  '--site-depth','--endpoint']);
+  '--site-depth','--endpoint','--equipment']);
  const args={};
  for(let i=0;i<argv.length;i+=2){
   const name=argv[i],value=argv[i+1];
@@ -85,27 +96,37 @@ export function parseR134FreshArgs(argv){
  const siteWidth=args['--site-width']?Number(args['--site-width']):32,
   siteDepth=args['--site-depth']?Number(args['--site-depth']):32;
  makeR134FreshRequest({brief:args['--brief'],siteWidth,siteDepth});
- return {model:args['--model'],brief:args['--brief'],
+ const equipmentMode=args['--equipment']??'none';
+ if(!['none','assembled'].includes(equipmentMode))fail('INVALID_EQUIPMENT_MODE');
+ return {model:args['--model'],brief:args['--brief'],equipmentMode,
   outDir:path.resolve(args['--out']),siteWidth,siteDepth,endpoint};
 }
 export async function runR134FreshModel({
- model,brief,outDir,siteWidth=32,siteDepth=32,
+ model,brief,outDir,siteWidth=32,siteDepth=32,equipmentMode='none',
  endpoint='http://127.0.0.1:11434/v1/chat/completions'
 }={}, {fetcher=fetch,timeoutMs=120000}={}){
  const p=ENDPOINT.exec(endpoint??'');
- if(!MODEL.test(model??'')||!p||!range(Number(p[1]),1,65535)||
+ if(!['none','assembled'].includes(equipmentMode)||
+  !MODEL.test(model??'')||!p||!range(Number(p[1]),1,65535)||
   typeof outDir!=='string'||!outDir.trim()||
   typeof fetcher!=='function'||!range(timeoutMs,1000,300000))
   fail('INVALID_MODEL_OR_ENDPOINT');
  const request=makeR134FreshRequest({brief,siteWidth,siteDepth});
  if(fs.existsSync(outDir))fail('OUTPUT_ALREADY_EXISTS');
  const dir=path.resolve(outDir),injected=fetcher!==fetch,start=Date.now();
+ const sourceRequest=equipmentMode==='assembled'?{...request,
+  semanticEquipment:{perRoomAtLeastOne:true,maxObjects:8,
+   allowedRoles:['work-surface','equipment-bank','display-stand',
+    'storage-rack','seating']}}:request;
+ const maxTokens=equipmentMode==='assembled'?1450:900;
  fs.mkdirSync(dir,{recursive:false});
  const report={
   schema:'r134-fresh-one-model-to-real-multizone-v1',
   status:'HOLD_NOT_STARTED',model,modelCalls:0,
   testInjectionPresent:injected,
-  originalModelResponseCaptured:false,
+  originalModelResponseCaptured:false,equipmentMode,
+  equipmentCount:0,addedEquipmentVoxels:0,
+  eachRoomHasModelChosenEquipment:false,
   modelProvenance:injected?'TEST_DOUBLE':'LOCAL_RESPONSE_NOT_AUTHENTICATED',
   modelAuthoredProgram:false,
   newRealB143Source:false,sourceSha256:null,geometrySha256:null,
@@ -116,7 +137,7 @@ export async function runR134FreshModel({
   gates:Array(9).fill('BLOCKED'),BuildPlan:{operations:[]}
  };
  write(dir,'MODEL_REQUEST_NO_HIDDEN_GOALS.json',{model,endpoint,
-  request,maxTokens:900,protocol:'ONE_LOCAL_RESPONSE_NO_RETRY'});
+  request:sourceRequest,maxTokens,protocol:'ONE_LOCAL_RESPONSE_NO_RETRY'});
  try{
   const p=await preflightR125Ollama({model,endpoint,fetcher});
   if(p.status!=='LOCAL_MODEL_LISTED'){
@@ -129,10 +150,11 @@ export async function runR134FreshModel({
    const response=await fetcher(endpoint,{method:'POST',redirect:'error',
     signal:controller.signal,headers:{'Content-Type':'application/json'},
     body:JSON.stringify({model,stream:false,temperature:0.65,
-     max_tokens:900,reasoning_effort:'none',
+     max_tokens:maxTokens,reasoning_effort:'none',
      response_format:{type:'json_object'},messages:[
-      {role:'system',content:SYSTEM},
-      {role:'user',content:JSON.stringify(request)}]})});
+      {role:'system',content:equipmentMode==='assembled'?
+       SYSTEM+'\n'+FURNISHED_SYSTEM:SYSTEM},
+      {role:'user',content:JSON.stringify(sourceRequest)}]})});
    if(!response||response.ok!==true)
     fail('MODEL_HTTP_'+String(response?.status??'UNKNOWN'));
    const http=await response.text();
@@ -146,8 +168,21 @@ export async function runR134FreshModel({
     fail('NO_MODEL_CONTENT');
    write(dir,'MODEL_RAW_ORIGINAL.txt',raw);
    report.originalModelResponseCaptured=true;
-   const result=parseR134FreshModelReply(raw,request);
-   write(dir,'MODEL_PROGRAM_IR.json',result.plan);
+   const composed=equipmentMode==='assembled'?
+    parseR135FreshFurnishedReply(raw,request):null;
+   const base=composed?.base??parseR134FreshModelReply(raw,request);
+   const result=composed?.featured??base;
+   write(dir,'MODEL_PROGRAM_IR.json',base.plan);
+   if(composed){
+    write(dir,'MODEL_CHOSEN_FUNCTIONAL_EQUIPMENT.json',
+     composed.objectRolesChosenByModel);
+    write(dir,'ASSEMBLED_FEATURE_INTENT.json',composed.intent);
+    write(dir,'ORIGINAL_B143_SHELL_SOURCE.json',base.design);
+    write(dir,'ORIGINAL_SHELL_VOXEL_EVIDENCE.json',{
+     sourceSha256:base.sourceSha256,geometrySha256:base.geometrySha256,
+     voxelCount:base.compiled.primitives.length,
+     sourceRoutes:base.sourceRouteAudit.status});
+   }
    write(dir,'DERIVED_B143_SOURCE.json',result.design);
    write(dir,'DERIVED_REAL_VOXELS.json',result.compiled);
    write(dir,'SOURCE_ROUTES.json',result.sourceRouteAudit);
@@ -155,12 +190,21 @@ export async function runR134FreshModel({
     'source/ai/b143-viewer-template.html'),'utf8');
    write(dir,'index.html',renderB143Html(
     compileB143Gallery([result.design]),tpl));
+   if(composed)write(dir,'shell.html',renderB143Html(
+    compileB143Gallery([base.design]),tpl));
    report.modelAuthoredProgram=!injected;
    report.newRealB143Source=true;
    report.sourceSha256=result.sourceSha256;
    report.geometrySha256=result.geometrySha256;
    report.voxels=result.compiled.primitives.length;
-   report.zoneCount=result.program[0].zones.length;
+   report.zoneCount=base.program[0].zones.length;
+   if(composed){
+    report.equipmentCount=composed.featured.placements.length;
+    report.addedEquipmentVoxels=composed.addedTrueB143Voxels;
+    report.eachRoomHasModelChosenEquipment=
+     composed.physicallyRepresentedZoneCount===report.zoneCount;
+    report.shellSourceSha256=base.sourceSha256;
+   }
    report.sourceRoutes=result.sourceRouteAudit.status;
    report.status=injected?'HOLD_TEST_DOUBLE_NOT_REAL_INFERENCE':
     'SOURCE_CANDIDATE_REAL_LOCAL_RESPONSE_HUMAN_REVIEW_REQUIRED';
@@ -178,7 +222,7 @@ export async function runR134FreshModel({
 if(process.argv[1]===fileURLToPath(import.meta.url)){
  try{
   const opts=parseR134FreshArgs(process.argv.slice(2));
-  if(opts.help)console.log('node scripts/r134-fresh-model-pilot.mjs --model qwen3.5:2b --brief "Invent a compact workshop with four distinct rooms" --out NEW_DIR (local Ollama only, no world writes)');
+  if(opts.help)console.log('node scripts/r134-fresh-model-pilot.mjs --model qwen3.5:2b --brief "Invent a compact workshop with four distinct rooms" --equipment assembled --out NEW_DIR (local Ollama only, no world writes)');
   else{
    const report=await runR134FreshModel(opts);
    console.log(JSON.stringify({status:report.status,modelCalls:report.modelCalls,
