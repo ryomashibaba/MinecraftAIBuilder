@@ -42,6 +42,10 @@ on:
       - 'scripts/r133-spatial-onepass.test.mjs'
       - 'source/ai/r134-multi-zone-plan.mjs'
       - 'scripts/r134-multi-zone-plan.test.mjs'
+      - 'scripts/r134-fresh-model-pilot.mjs'
+      - 'scripts/r134-fresh-model-pilot.test.mjs'
+      - 'scripts/r134-multi-zone-gallery.mjs'
+      - 'scripts/r134-multi-zone-gallery.test.mjs'
       - 'scripts/fixtures/r133-shop-independent-goals.json'
       - 'scripts/r125-feature-model-pilot.mjs'
       - 'scripts/r125-feature-model-pilot.test.mjs'
@@ -105,9 +109,13 @@ jobs:
           node --check scripts/r132-spatial-comparison.mjs
           node --check scripts/r132-spatial-comparison.test.mjs
           node --check scripts/r133-spatial-onepass.mjs
-          node --check scripts/r133-spatial-onepass.test.mjs scripts/r134-multi-zone-plan.test.mjs
+          node --check scripts/r133-spatial-onepass.test.mjs scripts/r134-multi-zone-plan.test.mjs scripts/r134-fresh-model-pilot.test.mjs scripts/r134-multi-zone-gallery.test.mjs
           node --check source/ai/r134-multi-zone-plan.mjs
           node --check scripts/r134-multi-zone-plan.test.mjs
+          node --check scripts/r134-fresh-model-pilot.mjs
+          node --check scripts/r134-fresh-model-pilot.test.mjs
+          node --check scripts/r134-multi-zone-gallery.mjs
+          node --check scripts/r134-multi-zone-gallery.test.mjs
           node --check scripts/r125-feature-model-pilot.mjs
           node --check scripts/r125-feature-model-pilot.test.mjs
           node --check source/ai/r125-functional-acceptance.mjs
@@ -138,6 +146,15 @@ jobs:
         with:
           name: R132-QWEN14B-SPATIAL-ORDER-3D
           path: r132-spatial-comparison/
+          retention-days: 14
+          if-no-files-found: error
+      - name: Build independent new three and four room genuine 3D review
+        run: node scripts/r134-multi-zone-gallery.mjs --out r134-multi-zone-review
+      - name: Upload new multi room source only 3D scenes
+        uses: actions/upload-artifact@v4
+        with:
+          name: R134-NEW-MULTIZONE-THREE-3D-SCENES
+          path: r134-multi-zone-review/
           retention-days: 14
           if-no-files-found: error
       - name: Keep the original Minecraft world offline
