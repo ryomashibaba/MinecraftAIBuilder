@@ -34,6 +34,7 @@ try {
         Write-Host "Open index.html in the review folder to inspect real B143 3D."
     } else {
         Write-Warning 'Offline replay HOLD. Preserve R146_REPORT.json; do not rerun Qwen.'
+        exit 2
     }
 } finally {
     Pop-Location
