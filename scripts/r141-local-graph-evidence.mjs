@@ -71,6 +71,7 @@ export async function runR141GraphTrial({model=null,endpoint=
   selectedModel:null,modelTier:null,
   modelCalls:0,rawReplyCaptured:false,
   modelSelectedRelations:false,
+  modelMaterialCorrectionApplied:false,hostRepairActions:[],
   compiledGraph3D:false,sourceSha256:null,geometrySha256:null,
   modelRequestedDirectPairs:0,sourceVerifiedDirectDoors:0,
   modelRequestedEntryRoomId:null,sourceEntranceRoomVerified:false,
@@ -101,11 +102,14 @@ export async function runR141GraphTrial({model=null,endpoint=
   const result=await runSingle({
    model:chosen.selected,brief:CASE.brief,
    outDir:path.join(folder,'single-real-local-attempt'),
-   equipmentMode:'assembled',topologyMode:'graph',recoveryMode:'none',
+   equipmentMode:'assembled',topologyMode:'graph',
+   recoveryMode:'roof-material-only',
    siteWidth:32,siteDepth:32,endpoint
   },{fetcher});
   report.modelCalls=result.modelCalls;
   report.rawReplyCaptured=result.originalModelResponseCaptured;
+  report.modelMaterialCorrectionApplied=result.boundedHostRepairRequired===true;
+  report.hostRepairActions=result.hostRepairActions??[];
   report.modelSelectedRelations=result.relationalIntentFromModel===true&&!synthetic;
   report.compiledGraph3D=result.realRoomGraph3D===true;
   report.sourceSha256=result.sourceSha256;
@@ -148,12 +152,17 @@ export async function runR141GraphTrial({model=null,endpoint=
     independent.independentlyVerifiedDirectPairCount>=1;
   }
   if(synthetic)report.status='HOLD_TEST_DOUBLE_NOT_REAL_INFERENCE';
-  else if(result.status==='SOURCE_CANDIDATE_REAL_LOCAL_RESPONSE_HUMAN_REVIEW_REQUIRED'&&
+  else if([
+   'SOURCE_CANDIDATE_REAL_LOCAL_RESPONSE_HUMAN_REVIEW_REQUIRED',
+   'SOURCE_CANDIDATE_REAL_LOCAL_WITH_HOST_RECOVERY_HUMAN_REVIEW_REQUIRED'
+  ].includes(result.status)&&
    result.realRoomGraph3D&&result.relationalIntentFromModel&&
    result.sourceRoutes==='SOURCE_ROUTES_REACH_ALL_ZONES'&&
    report.spatialDecisionDemonstrated&&
    result.modelCalls===1&&result.originalModelResponseCaptured===true)
-   report.status='REAL_LOCAL_ROOM_GRAPH_3D_SOURCE_REVIEW_REQUIRED';
+   report.status=report.modelMaterialCorrectionApplied?
+    'REAL_LOCAL_GRAPH_WITH_EXPLICIT_HOST_ROOF_MATERIAL_CORRECTION_REVIEW_REQUIRED':
+    'REAL_LOCAL_ROOM_GRAPH_3D_SOURCE_REVIEW_REQUIRED';
   else report.status=result.realRoomGraph3D&&
    !report.spatialDecisionDemonstrated?
     'HOLD_GRAPH_SPATIAL_DECISION_NOT_DEMONSTRATED':
