@@ -53,6 +53,7 @@ test('R143 recompiled source independently confirms two direct 2-wide cuts AND r
  assert.equal(evidence.claimedEquipmentCount,4);
  assert.equal(evidence.physicallyLocatedEquipmentCount,4);
  assert.equal(evidence.equipmentFootprintsVerified,true);
+ assert.equal(evidence.independentlyVerifiedAllRoomPhysicalBounds,true);
  assert.equal(evidence.independentSourceRoutes,'SOURCE_ROUTES_REACH_ALL_ZONES');
  assert.ok(evidence.directPairs.every(x=>x.spansRealNamedBoundary));
  assert.ok(evidence.directPairs.every(x=>x.actuallyCutsSolid&&
@@ -97,7 +98,9 @@ test('R144 rejects room-boundary forgery despite physically open hole and otherw
  room.range.z[1]-=2;
  const evidence=auditR143GraphEvidence(forged);
  assert.equal(evidence.status,'HOLD_SOURCE_ROOM_GRAPH');
- assert.ok(evidence.directPairs.some(x=>!x.spansRealNamedBoundary));
+ assert.equal(evidence.independentlyVerifiedAllRoomPhysicalBounds,false);
+ // Even a hole whose 2-wide cut is elsewhere cannot authorize a
+ // modified semantic room boundary in any of the four rooms.
  assert.equal(evidence.worldWrites,0);
 });
 test('R144 source audit refuses invented room geometry or furnishings that block the door',()=>{
@@ -105,10 +108,29 @@ test('R144 source audit refuses invented room geometry or furnishings that block
  const tampered=structuredClone(real);
  tampered.roomProgram[0].zones[0].id='fake-room';
  assert.throws(()=>auditR143GraphEvidence(tampered),
-  /R143_SOURCE_DIRECT_PAIR_SOURCE_ID_OR_SHAPE/);
+  /R143_SOURCE_ROOM_PROGRAM_OR_ENTRY_CONFLICT|R143_SOURCE_DIRECT_PAIR_SOURCE_ID_OR_SHAPE/);
  const altered=structuredClone(real);
  altered.featurePlacements[0].origin=[1,2,1];
  const proof=auditR143GraphEvidence(altered);
  assert.equal(proof.status,'HOLD_SOURCE_ROOM_GRAPH');
  assert.ok(proof.independentEquipmentServiceCount<4);
+});
+
+test('R153 fail-closed audit checks ALL room sectors, even ones without direct pair openings',()=>{
+ const real=shaped();
+ const reference=auditR143GraphEvidence(real);
+ assert.equal(reference.independentlyVerifiedAllRoomPhysicalBounds,true);
+ for(const index of [0,1,2,3]){
+  const changed=structuredClone(real);
+  const room=changed.roomProgram[0].zones[index];
+  room.range.x[1]-=1;
+  const evidence=auditR143GraphEvidence(changed);
+  assert.equal(evidence.independentlyVerifiedAllRoomPhysicalBounds,false);
+  assert.equal(evidence.status,'HOLD_SOURCE_ROOM_GRAPH');
+ }
+ const relabelled=structuredClone(real);
+ relabelled.roomProgram[0].zones[0].physicalSector='front-right';
+ const wrong=auditR143GraphEvidence(relabelled);
+ assert.equal(wrong.independentlyVerifiedAllRoomPhysicalBounds,false);
+ assert.equal(wrong.status,'HOLD_SOURCE_ROOM_GRAPH');
 });

@@ -37,6 +37,32 @@ export function auditR143GraphEvidence({intent,graphDesign,finalDesign,
  const zones=new Map(rooms.map(z=>[z.id,z]));
  if(zones.size!==rooms.length||!zones.has(intent.entryFacingZoneId))
   fail('ROOM_PROGRAM_OR_ENTRY_CONFLICT');
+ // Independently recompute the *entire* R138 physical room sector grid
+ // from B143 envelope dimensions. Checking only selected doorway pairs
+ // allowed a forged, unused room-boundary range to be certified.
+ // This validation does not rely on room purpose/category, or on the
+ // model's textual labels for coordinates.
+ const w=graphDesign.bounds.width,d=graphDesign.bounds.depth;
+ const leftWall=Math.floor(w/2)-3;
+ const rightWall=Math.floor(w/2)+2;
+ const divider=Math.floor(d/2);
+ const boundsBySector={
+  'front-left':{x:[2,leftWall-1],z:[2,divider-1]},
+  'rear-left':{x:[2,leftWall-1],z:[divider+1,d-3]},
+  'front-right':{x:[rightWall+1,w-3],z:[2,divider-1]},
+  'rear-right':{x:[rightWall+1,w-3],z:[divider+1,d-3]},
+  'whole-right':{x:[rightWall+1,w-3],z:[2,d-3]}
+ };
+ const validSectorSet=rooms.length===4?
+  ['front-left','front-right','rear-left','rear-right']:
+  ['front-left','whole-right','rear-left'];
+ const sectorNames=rooms.map(r=>r.physicalSector);
+ const allRoomsMatchPhysicalBoundaries=
+  sectorNames.length===validSectorSet.length&&
+  new Set(sectorNames).size===validSectorSet.length&&
+  validSectorSet.every(name=>sectorNames.includes(name))&&
+  rooms.every(room=>room.actualSourceRoomRangeDerivedByHost===true&&
+   eq(room.range,boundsBySector[room.physicalSector]));
  const occupied=new Set(finalCompiled.primitives.map(p=>key(...p.slice(0,3))));
  const graphOccupied=new Set(graph.primitives.map(p=>key(...p.slice(0,3))));
  const has=(x,y,z)=>occupied.has(key(x,y,z));
@@ -176,11 +202,13 @@ export function auditR143GraphEvidence({intent,graphDesign,finalDesign,
   independentRoutes.featureAccess.every(a=>a.reachableFromEntrance);
  return {
   schema:'r144-independent-room-boundary-and-route-voxel-audit-v1',
-  status:supported&&needs.length>0&&pairEvidence.length===needs.length&&
+  status:supported&&allRoomsMatchPhysicalBoundaries&&
+   needs.length>0&&pairEvidence.length===needs.length&&
    pairEvidence.every(x=>x.supportedTwoWideSourceCrossing)&&
    sourcePass&&equipmentFootprintsVerified?
     'SOURCE_ROOM_GRAPH_VERIFIED':'HOLD_SOURCE_ROOM_GRAPH',
   selectedEntranceRoomId:intent.entryFacingZoneId,
+  independentlyVerifiedAllRoomPhysicalBounds:allRoomsMatchPhysicalBoundaries,
   selectedRoomExteriorEntranceVerified:supported,
   directPairCount:needs.length,
   independentlyVerifiedDirectPairCount:pairEvidence.filter(
