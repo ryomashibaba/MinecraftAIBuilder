@@ -10,8 +10,8 @@
 | 継続ブランチ | `feature/b198zr1-protected-architectural-revision` |
 | 継続PR | [#128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128) — Open / Draft / Unmerged |
 | HEAD | [開発ブランチの最新HEADを毎回GitHubで確認](https://github.com/ryomashibaba/MinecraftAIBuilder/commits/feature/b198zr1-protected-architectural-revision)（R98の初期実メッシュ検証対象は `9a2b5de9d8ba41a2b7ca4e626aa9d54ff4ffffdd`） |
-| 最新確認済み実装工程 | **R147：R146起動時のRELATIONAL_INSTRUCTIONSのESM循環import TDZを特定。命令文を依存なしの別モジュールへ移動、R139パーサーを遅延importし、新Nodeプロセスの双方向実importテスト・Windows実起動プリフライトを導入。CI/再実行の実合格は未確認。** |
-| 次に取り組む工程 | **R147の実Node importテストの合否を確認し、ゼロ推論R146実Qwen原文を再生。起動後のB143生成・8設備/1直接接続の独立QA結果を取得し、次のHOLDだけを修正。** |
+| 最新確認済み実装工程 | **R148：ユーザー実機で保存Qwen回答の再生に成功。4室/8設備/1直接ドア、2,986ボクセル、全室動線・独立室間QA VERIFIED、追加推論0。Windows成功レポートにない failureReason を StrictMode で読んだ表示のみの例外を修正済み。美術/ゲーム内実歩行未審査。** |
+| 次に取り組む工程 | **生成済みR146の index.html の実3Dをユーザー/AIで審査。成果フォルダまたは画像から意匠・見た目の機能性の改善点を特定し、類型固定化せずR149の最小有効差分へ。追加Qwen推論は現時点では不要。** |
 | 施工・モデル | **2026-10-24 Qwen/Gemma実推論・Minecraft試験施工の包括許可あり（都度承認不要）。** 準備性と各種技術安全ゲートは別途必要。現行コードのNOT_PREPARED / 9 BLOCKEDは自動PASSではない |
 
 **最新情報への直リンク：** [ブランチの現在地](https://github.com/ryomashibaba/MinecraftAIBuilder/tree/feature/b198zr1-protected-architectural-revision) ／ [Actions一覧](https://github.com/ryomashibaba/MinecraftAIBuilder/actions) ／ [PR #128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128)
@@ -19,6 +19,15 @@
 
 
 
+
+## R148 — 実Qwen 4室＋8設備＋室間直結の真正B143 3D独立QAが初成功（2026-10-25 JST）
+- **ユーザー本人のWindows端末から実R146再生ログと `R146_REPORT.json` を受領**。`R147_MODULE_IMPORT_OK (zero model calls)` の後、R146は `REAL_QWEN_PROGRAM_HOST_CORRECTED_MATERIAL_REAL_3D_SOURCE_REVIEW_REQUIRED` で正常に終了。保存済み本物のQwen回答SHA-256 `d67dc624744b4745e8e8c228e20bde00ccd39c7b506d0ad82753f54f1db82591` の一致確認 `verifiedOriginalR145RawSha256=true`、追加推論0。
+- **数字で確認できた成果**：4室、設備8個、元Qwenが実際に指定した1直接接続、完成ボクセル2,986、全室の動線検証 `SOURCE_ROUTES_REACH_ALL_ZONES`、独立室間/開口/設備/動線QA `SOURCE_ROOM_GRAPH_VERIFIED`。完成3D SHA-256 `3adee1495ae0295eaadd5555c4b7538b38aceda740751ffe654c9976841e472f`、原ソースSHA `9003677576db7ccf1766f7bfdc9c80c03b10ac19a9975d8656cb1919b539a299`。モデルが選んだ間取り・部屋関係・設備はいずれも変更されていないとレポートで確認できる。
+- **屋根材料だけ明示的ホスト修正**：`hostMaterialCorrectionApplied=true`（元Qwenは材料欄に形状`sawtooth`を誤指定）。未補正の完全なモデル出力が成功したとは表現しない。
+- **R148で発覚した表示のみの問題**：Windows再生スクリプトには`Set-StrictMode -Version Latest`があり、成功したJSONに存在しない任意プロパティ`failureReason`への直アクセス`$report.failureReason`が`PropertyNotFoundStrict`を発生させた。これは**B143生成も独立QAも成功したあと**に、出力結果を案内する部分だけで失敗したもの。元の完成3D `index.html` と全データは作成済みで再実行不要。
+- `scripts/r146-one-click-offline-replay.ps1` 修正：`$report.PSObject.Properties['failureReason']` により任意フィールドを安全に取得。成功時は実際の`index.html`の存在を確認して `R146_VIEWER:` のフルパスを表示し、`R146_SOURCE_ONLY_SUCCESS` を表示。HOLDなら正確に非ゼロで終了。原ソース/ゲームワールドに変更は加えない。
+- **次の優先順位**：新しいQwen推論や同じR146の再生に戻らない。ユーザーは既存の `r146-offline-qwen-review-20261025-152116529/index.html` をブラウザで開いて、建築としての美術・使いやすさ（見た目の規模感、外装、屋根、部屋構成）を実際に評価する。必要なら画像や既存出力フォルダのZIPを受け取って品質改善を始める。**人間美術審査/実Minecraft内歩行はまだ未実施であり、ソースの成功だけで施工承認しない**。
+- 安全継続：`NOT_PREPARED`、9 `BLOCKED`、`BuildPlan.operations=[]`、Minecraftワールド接触/書き込み0、Draft PR #128未マージ。
 
 ## R147 — R146で判明した循環import起動障害の修正（2026-10-25 JST）
 - ユーザーは実Qwen原文の再利用を試したが、R146開始時に `ReferenceError: Cannot access 'RELATIONAL_INSTRUCTIONS' before initialization`（`scripts/r134-fresh-model-pilot.mjs:73`）でNode ESMが異常終了。これは**モデル回答に起因しないソフトウェア側の初期化バグ**であり、`R146_NO_REPORT` は処理の開始前に例外でレポートが作成されなかった二次症状。
