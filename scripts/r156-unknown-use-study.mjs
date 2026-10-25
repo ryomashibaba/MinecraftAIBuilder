@@ -79,7 +79,7 @@ export function parseR156Args(argv){
   opts[argv[i]]=argv[i+1];
  }
  const model=opts['--model']??'qwen3:14b',architectureMode=opts['--architecture']??'roofline';
- if(!['roofline','volumes','massing'].includes(architectureMode))fail('ARCHITECTURE');
+ if(!['roofline','volumes','massing','spatial'].includes(architectureMode))fail('ARCHITECTURE');
  const suffix=new Date().toISOString().replace(/[-:.TZ]/g,'');
  const outDir=path.resolve(opts['--out']??('r156-unknown-use-'+suffix));
  parseR134FreshArgs(['--model',model,'--brief',R156_CASES[0].brief,

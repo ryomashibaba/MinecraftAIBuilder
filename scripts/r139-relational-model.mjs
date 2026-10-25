@@ -24,6 +24,8 @@ import {deriveR154VolumeComposition,validateR154VolumeIntent,R154_VOLUME_SCHEMA}
  from '../source/ai/r154-volume-composition.mjs';
 import {deriveR155Roofline,validateR155RooflineIntent}
  from '../source/ai/r155-roofline.mjs';
+import {validateR158SpatialBalanceIntent,toR155RoofIntent}
+ from '../source/ai/r158-spatial-balance.mjs';
 
 const fail=x=>{throw Error('R139_MODEL_'+x);};
 const only=(v,fields)=>v!==null&&typeof v==='object'&&!Array.isArray(v)&&
@@ -36,7 +38,7 @@ export {RELATIONAL_INSTRUCTIONS} from './r139-relational-instructions.mjs';
 export function parseR139RelationalFurnishedReply(raw,request,
  {allowRoofMaterialCorrection=false,allowArchitecturalExpression=false,
   allowArchitecturalMassing=false,allowVolumeComposition=false,
-  allowRooflineComposition=false}={}){
+  allowRooflineComposition=false,allowSpatialBalanceComposition=false}={}){
  if(typeof raw!=='string'||raw.length<20||raw.length>22000)
   fail('MISSING_OR_OVERSIZED_MODEL_REPLY');
  let reply;
@@ -45,11 +47,12 @@ export function parseR139RelationalFurnishedReply(raw,request,
   'objects','relations'];
  const expressive=allowArchitecturalExpression===true||
   allowArchitecturalMassing===true||allowVolumeComposition===true||
-  allowRooflineComposition===true;
+  allowRooflineComposition===true||allowSpatialBalanceComposition===true;
  if(!only(reply,expressive?[...keys,'architecture']:keys)||
   !only(reply.relations,['entryFacingZoneId','directAdjacencies']))
   fail('FULL_REPLY_CONTRACT');
- if(allowRooflineComposition)validateR155RooflineIntent(reply.architecture);
+ if(allowSpatialBalanceComposition)validateR158SpatialBalanceIntent(reply.architecture);
+ else if(allowRooflineComposition)validateR155RooflineIntent(reply.architecture);
  else if(allowVolumeComposition)validateR154VolumeIntent(reply.architecture);
  else if(allowArchitecturalMassing)validateR152EnvelopeIntent(reply.architecture);
  else if(expressive)validateR151EnvelopeIntent(reply.architecture);
@@ -81,7 +84,9 @@ export function parseR139RelationalFurnishedReply(raw,request,
   entryFacingZoneId:relations.entryFacingZoneId,
   directAdjacencies:relations.directAdjacencies
  };
- const relational=deriveR139RelationalTopology(base,semanticIntent);
+ const relational=deriveR139RelationalTopology(base,semanticIntent,{
+  spatialBalance:allowSpatialBalanceComposition?architecture.spatialBalance:'balanced'
+ });
  const featured=applyR125FeatureIntent({base:relational,intent:{
   schema:ASSEMBLED_SCHEMA,basePlanSha256:relational.planSha256,
   objects:semantics.objects.map(x=>({...x,detail:'assembled'}))
@@ -92,14 +97,14 @@ export function parseR139RelationalFurnishedReply(raw,request,
  const architectural=expressive?(()=>{
   const envelope=deriveR149EnvelopeExpression(featured,{
    plan:relational.plan,expressionIntent:
-    (allowVolumeComposition||allowRooflineComposition)?{
+    (allowVolumeComposition||allowRooflineComposition||allowSpatialBalanceComposition)?{
     schema:'minecraftaibuilder-r151-envelope-intent-v1',
     entryHierarchy:architecture.entryHierarchy,
     daylightStrategy:architecture.daylightStrategy,
     roofEdge:architecture.roofEdge
    }:architecture});
-  const volume=(allowVolumeComposition||allowRooflineComposition)?
-   deriveR154VolumeComposition(envelope,{intent:allowRooflineComposition?{
+  const volume=(allowVolumeComposition||allowRooflineComposition||allowSpatialBalanceComposition)?
+   deriveR154VolumeComposition(envelope,{intent:(allowRooflineComposition||allowSpatialBalanceComposition)?{
     schema:R154_VOLUME_SCHEMA,
     entryHierarchy:architecture.entryHierarchy,
     daylightStrategy:architecture.daylightStrategy,
@@ -108,9 +113,11 @@ export function parseR139RelationalFurnishedReply(raw,request,
     arrivalSpace:architecture.arrivalSpace
    }:architecture,authorship:'CALLER_ARCHITECTURE_IR_NOT_AUTHENTICATED'
    }):null;
-  const roofline=allowRooflineComposition?deriveR155Roofline(volume,{
-   intent:architecture,authorship:'CALLER_ARCHITECTURE_IR_NOT_AUTHENTICATED'
-  }):null;
+  const roofline=(allowRooflineComposition||allowSpatialBalanceComposition)?
+   deriveR155Roofline(volume,{
+    intent:allowSpatialBalanceComposition?toR155RoofIntent(architecture):architecture,
+    authorship:'CALLER_ARCHITECTURE_IR_NOT_AUTHENTICATED'
+   }):null;
   const completed=deriveR150FurnitureArticulation(roofline??volume??envelope);
   return {intent:structuredClone(architecture),envelope,volume,roofline,completed,
    intentAuthorship:'IN_THIS_SAME_MODEL_REPLY_NOT_HOST_INFERRED',

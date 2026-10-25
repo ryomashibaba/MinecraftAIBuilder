@@ -38,6 +38,7 @@ const fakeLocal=(answer,inspect=()=>{})=>async(url,opts)=>{
  assert.equal(body.model,'qwen3:14b');
  assert.equal(body.max_tokens,
   !Object.hasOwn(answer,'architecture')?1750:
+   answer.architecture?.schema==='minecraftaibuilder-r158-spatial-balance-ir-v1'?2600:
    answer.architecture?.schema==='minecraftaibuilder-r155-roofline-ir-v1'?2400:
    answer.architecture?.schema==='minecraftaibuilder-r154-volume-ir-v1'?2300:
    answer.architecture?.schema==='minecraftaibuilder-r152-envelope-intent-v1'?2050:1900);
@@ -255,4 +256,33 @@ test('R155 local single synthetic reply outputs genuine B143 roof silhouette wit
  assert.throws(()=>parseR134FreshArgs(['--model','qwen3:14b','--brief',brief,
   '--architecture','roofline','--out','r155-output']),
   /R134_MODEL_ARCHITECTURE_REQUIRES_GRAPH_TOPOLOGY/);
+});
+
+test('R158 one fake-local response genuinely changes B143 room layout but not model provenance',async t=>{
+ const dir=tmp();t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));
+ const a=reply();a.footprint={width:30,depth:30};
+ a.architecture={schema:'minecraftaibuilder-r158-spatial-balance-ir-v1',
+  entryHierarchy:'quiet',daylightStrategy:'even',roofEdge:'fine',
+  volumeHierarchy:'single',arrivalSpace:'flush',roofSilhouette:'ridge',
+  spatialBalance:'left-wide'};
+ const result=await runR134FreshModel({model:'qwen3:14b',brief,outDir:path.join(dir,'r158'),
+  equipmentMode:'assembled',topologyMode:'graph',architectureMode:'spatial'},
+  {fetcher:fakeLocal(a,body=>{
+   assert.match(body.messages[0].content,/spatialBalance MUST be balanced/);
+   assert.match(body.messages[0].content,/minecraftaibuilder-r158-spatial-balance-ir-v1/);
+  })});
+ assert.equal(result.status,'HOLD_TEST_DOUBLE_NOT_REAL_INFERENCE',result.reason);
+ assert.equal(result.sourceRoutes,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(result.genuineSpatialBalanceSourceOnly,true);
+ assert.equal(result.architectureIntentFromModel,false);
+ const proof=JSON.parse(fs.readFileSync(path.join(dir,'r158','R158_HOST_ARCHITECTURE_EVIDENCE.json'),'utf8'));
+ assert.equal(proof.spatialBalanceProof.spatialBalance,'left-wide');
+ assert.ok(proof.spatialBalanceProof.leftWingInteriorWidth>proof.spatialBalanceProof.rightWingInteriorWidth);
+ assert.ok(fs.existsSync(path.join(dir,'r158','R158_MODEL_ARCHITECTURE_IR.json')));
+ assert.ok(fs.existsSync(path.join(dir,'r158','DERIVED_B143_SOURCE.json')));
+ assert.deepEqual(result.gates,Array(9).fill('BLOCKED'));
+ assert.equal(result.worldWrites,0);
+ assert.equal(parseR134FreshArgs(['--model','qwen3:14b','--brief',brief,
+  '--equipment','assembled','--topology','graph','--architecture','spatial',
+  '--out','source-review']).architectureMode,'spatial');
 });

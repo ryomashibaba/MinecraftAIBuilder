@@ -26,13 +26,14 @@ function normal(p){
   partitionAxis:p.layout?.axis??null,entryRoomIndex:index(p.relations?.entryFacingZoneId),
   adjacency:edges,roofSilhouette:choices.roofSilhouette??null,
   volumeHierarchy:choices.volumeHierarchy??null,
+  spatialBalance:choices.spatialBalance??null,
   arrivalSpace:choices.arrivalSpace??null,
   roofProfile:p.form?.roofProfile??null
  };
 }
 const signature=x=>x===null?null:JSON.stringify(x);
 const keys=['footprint','roomCount','weightDistribution','partitionAxis',
- 'entryRoomIndex','adjacency','roofSilhouette','volumeHierarchy','arrivalSpace','roofProfile'];
+ 'entryRoomIndex','adjacency','roofSilhouette','volumeHierarchy','spatialBalance','arrivalSpace','roofProfile'];
 export function compareR157Pairs(cases){
  if(!Array.isArray(cases)||cases.length!==3)fail('CASES');
  const parsed=cases.map(x=>normal(x.parsedRaw));

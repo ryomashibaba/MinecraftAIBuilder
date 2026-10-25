@@ -141,3 +141,30 @@ test('impossible or forged graphs HOLD instead of faking adjacency',()=>{
  assert.throws(()=>deriveR139RelationalTopology(unsupported,intent(unsupported)),
   /R138_BRANCH_/);
 });
+
+test('R158 model-selected side balance physically changes rooms and direct doors',()=>{
+ const p=plan();p.footprint.width=30;
+ const base=compileR134MultiZonePlan(p),relation=intent(base);
+ const balanced=deriveR139RelationalTopology(base,relation);
+ const left=deriveR139RelationalTopology(base,relation,{spatialBalance:'left-wide'});
+ const right=deriveR139RelationalTopology(base,relation,{spatialBalance:'right-wide'});
+ assert.ok(left.r158SpatialBalanceEvidence.leftWingInteriorWidth>left.r158SpatialBalanceEvidence.rightWingInteriorWidth);
+ assert.ok(right.r158SpatialBalanceEvidence.rightWingInteriorWidth>right.r158SpatialBalanceEvidence.leftWingInteriorWidth);
+ assert.notEqual(left.geometrySha256,right.geometrySha256);
+ assert.notEqual(left.sourceSha256,balanced.sourceSha256);
+ for(const x of [left,right]){
+  assert.equal(x.sourceRouteAudit.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert.equal(x.directAdjacencyDoorEvidence.length,2);
+  assert.equal(x.originalQwenRoomIntentUnmodified,true);
+  assert.equal(x.readiness,'NOT_PREPARED');
+  assert.deepEqual(x.gates,Array(9).fill('BLOCKED'));
+  assert.equal(x.worldWrites,0);
+ }
+});
+test('R158 narrow site and hallucinated IR cannot silently become centered',()=>{
+ const base=compileR134MultiZonePlan(plan());
+ assert.throws(()=>deriveR139RelationalTopology(base,intent(base),{spatialBalance:'left-wide'}),
+  /R138_BRANCH_SHIFTED_SPINE_NEEDS_REAL_ROOM_WIDTH/);
+ assert.throws(()=>deriveR139RelationalTopology(base,intent(base),{spatialBalance:'invalid'}),
+  /R139_RELATIONS_INVALID_SPATIAL_BALANCE/);
+});

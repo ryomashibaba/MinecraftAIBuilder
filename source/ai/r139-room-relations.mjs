@@ -55,11 +55,14 @@ export function validateR139RoomRelations(base,intent){
  return true;
 }
 
-export function deriveR139RelationalTopology(base,intent){
+export function deriveR139RelationalTopology(base,intent,
+ {spatialBalance='balanced'}={}){
+ if(!['balanced','left-wide','right-wide'].includes(spatialBalance))
+  fail('INVALID_SPATIAL_BALANCE');
  validateR139RoomRelations(base,intent);
  const originalPlan=JSON.stringify(base.plan);
  const originalDesign=JSON.stringify(base.design);
- const branched=deriveR138BranchedTopology(base);
+ const branched=deriveR138BranchedTopology(base,{spatialBalance});
  const sourceZones=new Map(base.program[0].zones.map(z=>[z.id,z]));
  const sectors=branched.program[0].zones;
  const zoneIds=base.program[0].zones.map(z=>z.id);
@@ -208,5 +211,7 @@ export function deriveR139RelationalTopology(base,intent){
   fail('ORIGINAL_PROGRAM_CHANGED');
  return {...result,sourceRouteAudit:route,
   directAdjacencyVerifiedBySourceDoorVoxels:true,
-  zoneLayoutShape:'R139_MODEL_SELECTABLE_ROOM_GRAPH_BOUNDED_WINGS'};
+  zoneLayoutShape:spatialBalance==='balanced'?
+   'R139_MODEL_SELECTABLE_ROOM_GRAPH_BOUNDED_WINGS':
+   'R158_MODEL_SELECTED_REAL_ROOM_WIDTH_BALANCE'};
 }

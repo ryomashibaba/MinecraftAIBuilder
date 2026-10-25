@@ -13,7 +13,9 @@ import {compileDesign,verifyCompiled} from './b143-building-dsl.mjs';
 import {auditR125SourceRoutes} from './r125-source-routes.mjs';
 const fail=s=>{throw Error('R138_BRANCH_'+s);};
 const sha=o=>createHash('sha256').update(JSON.stringify(o)).digest('hex');
-export function deriveR138BranchedTopology(base){
+export function deriveR138BranchedTopology(base,{spatialBalance='balanced'}={}){
+ if(!['balanced','left-wide','right-wide'].includes(spatialBalance))
+  fail('INVALID_SPATIAL_BALANCE');
  if(base?.schema!=='minecraftaibuilder-r125-plan-to-b143-result-v1'||
   base?.spatialIRSchema!=='minecraftaibuilder-r134-multi-zone-program-v1'||
   !base?.plan||!base?.design||!base?.compiled||
@@ -26,7 +28,11 @@ export function deriveR138BranchedTopology(base){
  const zones=base.program[0].zones,rooms=zones.length;
  if(![3,4].includes(rooms)||w<24||d<24||w>32||d>32)
   fail('OUT_OF_BOUNDS_FOR_ACTUAL_BRANCHING');
- const leftWall=Math.floor(w/2)-3,rightWall=Math.floor(w/2)+2;
+ // R158: genuinely change room width, not the facade labels.
+ const shift=spatialBalance==='left-wide'?2:
+  spatialBalance==='right-wide'?-2:0;
+ const leftWall=Math.floor(w/2)-3+shift,
+  rightWall=Math.floor(w/2)+2+shift;
  const gapStart=leftWall+1,gapEnd=rightWall-1;
  const divider=Math.floor(d/2);
  const front=[2,divider-1],rear=[divider+1,d-3];
@@ -34,6 +40,8 @@ export function deriveR138BranchedTopology(base){
  if(gapEnd-gapStart+1<4||left[1]-left[0]+1<7||
   right[1]-right[0]+1<7||front[1]-front[0]+1<7||
   rear[1]-rear[0]+1<7)fail('BRANCH_WINGS_TOO_SMALL_FOR_REAL_FURNITURE');
+ if(shift!==0&&(w<28||leftWall-2<7||w-3-rightWall<7))
+  fail('SHIFTED_SPINE_NEEDS_REAL_ROOM_WIDTH');
  const footprints=rooms===4?[
   {sector:'front-left',x:left,z:front,wallX:leftWall},
   {sector:'front-right',x:right,z:front,wallX:rightWall},
@@ -111,7 +119,15 @@ export function deriveR138BranchedTopology(base){
   ...derivative,
   sourceRouteAudit:route,
   topologyProvenance:'HOST_DERIVED_NOT_MODEL_ARCHITECTURAL_CHOICE',
-  zoneLayoutShape:'BRANCHED_CENTRAL_SPINE_WITH_SIDE_ROOMS',
+  zoneLayoutShape:shift===0?'BRANCHED_CENTRAL_SPINE_WITH_SIDE_ROOMS':
+   'BRANCHED_SHIFTED_SPINE_WITH_REAL_DIFFERENT_WING_WIDTHS',
+  r158SpatialBalanceEvidence:{spatialBalance,shiftCells:shift,
+   modelSelectionAuthenticated:false,
+   leftWingInteriorWidth:left[1]-left[0]+1,
+   rightWingInteriorWidth:right[1]-right[0]+1,
+   centralSpineX:[gapStart,gapEnd],
+   sectors:footprints.map(f=>({sector:f.sector,x:f.x,z:f.z})),
+   humanArtReview:'NOT_REVIEWED',minecraftWalking:'NOT_TESTED'},
   zoneDoorEvidence:doors,
   originalQwenRoomIntentUnmodified:zones.every((z,i)=>
    z.id===program[0].zones[i].id&&

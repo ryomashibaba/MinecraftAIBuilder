@@ -80,6 +80,7 @@ on:
       - 'source/ai/r150-furniture-articulation.mjs'
       - 'source/ai/r154-volume-composition.mjs'
       - 'source/ai/r155-roofline.mjs'
+      - 'source/ai/r158-spatial-balance.mjs'
       - 'scripts/r149-quality-comparison.mjs'
       - 'scripts/r149-quality-comparison.test.mjs'
       - 'scripts/r156-unknown-use-study.mjs'
@@ -187,6 +188,7 @@ jobs:
           node --check scripts/r139-relational-model.mjs
           node --check source/ai/r154-volume-composition.mjs
           node --check source/ai/r155-roofline.mjs
+          node --check source/ai/r158-spatial-balance.mjs
           node --check scripts/r139-relational-model.test.mjs
           node --check scripts/r139-user-qwen-relations-comparison.mjs
           node --check scripts/r139-user-qwen-relations-comparison.test.mjs
