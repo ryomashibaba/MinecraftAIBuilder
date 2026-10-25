@@ -1,5 +1,14 @@
 # MinecraftAIBuilder — 最短AI再開入口
 
+## R171真正3用途3D PASS → R172 手動工程削減（2026-10-26）
+- ユーザーアップロードの `r157-unknown-use-20261025T125222536Z-r171-room-volumes-offline.zip` を実検査。住宅2061、店舗2129、研究施設2598ボクセルのB143 3Dが3/3生成。4室の実際の屋根Y: 住宅10/9/8/8、店舗10/9/8/8、研究施設9/9/8/8。新Qwen呼出0、世界書込0。天井は実空間だが、美術はART HOLD。24×24の画一外形は依然未達。
+- **効率改善の新方針**：これ以降は GitHub へ開発コミットしただけで、既存のB198G Actions内の独立 `r172-quick-three-use-review` CIが3用途の**合成fixture**から実B143・全室/家具アクセス・高天井・5方向画像・回転3Dを自動生成・回帰検査して `R172-CI-THREE-USE-SOURCE-3D` artifactを出す。毎工程のユーザーPowerShell→ZIP→添付は**要求しない**。Actionsの表示結果から開発者側が継続する。
+- R172は公開可能な静的合成入力のCIであり、新規実Qwen/Gemma推論やユーザー保存済み実回答の再実験ではない。**合成QAを真正LLM検証と偽らない**。R171真正実験の成果と出所を別々に管理する。
+- ユーザー作業を依頼するのは(1)新しい実ローカルモデルでの独立汎化確認、(2)大規模な設計エンジン変更後のまとまった節目、(3)実Minecraft歩行・人間美術評価を必要とする場合のみ。小規模修正・ユニットテスト・ソース上の建築形状・画像比較はGitHubと現在あるデータで継続する。
+- 原文の秘密やプライベートなQwen回答を自動的にpublic GitHubへアップロードしない。ローカル常駐監視・自動モデルGPU呼び出し・Minecraft書込みは勝手に設定しない。ART HOLD / NOT_PREPARED / 9 BLOCKED / BuildPlan.operations=[] を永続維持。
+- CIについては成功/失敗/待機を別々に扱い、プレビューの公開だけで美術PASSを宣言しない。
+
+
 ## R170実ユーザーZIP検証 → R171共通屋根境界修正（2026-10-26）
 - ユーザー提出 `r157-unknown-use-20261025T125222536Z-r170-room-volumes-offline.zip` に収録された `R167_OFFLINE_REPLAY.json` を検査。住宅・店舗・研究施設すべて `R170_FOUR_ROOM_ORIGINAL_ROOF_CONTRACT` でHOLD。生成 `geometryEvidenceCases=0`、実ボクセルと5方向図はZIPに無し。R169の3/3成功が消滅したのではなく、R170の研究用派生だけが共通契約エラーで停止。元Qwen原文、施工保護、世界書込み0、推論追加0を維持。
 - 原因: R170はR149→R150で `plan` を持たない派生 `featured-source` から `base.plan.form.roofProfile` を読み、検証条件がすべてfalseになっていた。R149が正式に保存する `r149ExpressionEvidence.originalRoofProfile`（元モデル指定屋根形式）を読み、`roof-base` の高さ・大きさも明示検証するよう修正。
