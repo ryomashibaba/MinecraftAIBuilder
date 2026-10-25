@@ -38,6 +38,7 @@ const fakeLocal=(answer,inspect=()=>{})=>async(url,opts)=>{
  assert.equal(body.model,'qwen3:14b');
  assert.equal(body.max_tokens,
   !Object.hasOwn(answer,'architecture')?1750:
+   answer.architecture?.schema==='minecraftaibuilder-r160-topology-ir-v1'?2200:
    answer.architecture?.schema==='minecraftaibuilder-r159-floorplan-ir-v1'?2800:
    answer.architecture?.schema==='minecraftaibuilder-r158-spatial-balance-ir-v1'?2600:
    answer.architecture?.schema==='minecraftaibuilder-r155-roofline-ir-v1'?2400:
@@ -318,4 +319,39 @@ test('R159 one synthetic local reply chooses real front/rear depth with B143 and
  assert.equal(parseR134FreshArgs(['--model','qwen3:14b','--brief',brief,
  '--equipment','assembled','--topology','graph','--architecture','floorplan',
  '--out','qa']).architectureMode,'floorplan');
+});
+
+test('R160 fake local model produces side gallery real source; never certified as real inference',async t=>{
+ const dir=tmp();t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));
+ const value=reply();
+ value.footprint={width:30,depth:32};
+ value.layout.spaces=value.layout.spaces.slice(0,3);
+ value.objects=value.objects.slice(0,3);
+ value.relations={entryFacingZoneId:'zone-3',
+  directAdjacencies:[['zone-1','zone-2']]};
+ value.architecture={
+  schema:'minecraftaibuilder-r160-topology-ir-v1',
+  entryHierarchy:'quiet',daylightStrategy:'even',roofEdge:'fine',
+  spatialTopology:'west-gallery'
+ };
+ const out=path.join(dir,'r160');
+ const result=await runR134FreshModel({model:'qwen3:14b',brief,outDir:out,
+  equipmentMode:'assembled',topologyMode:'graph',architectureMode:'topology'},
+  {fetcher:fakeLocal(value,body=>{
+   assert.match(body.messages[0].content,/west-gallery/);
+   assert.match(body.messages[0].content,/EXACTLY 3 rooms/);
+  })});
+ assert.equal(result.status,'HOLD_TEST_DOUBLE_NOT_REAL_INFERENCE',result.reason);
+ assert.equal(result.genuineNonCentralTopologySourceOnly,true);
+ assert.equal(result.architectureIntentFromModel,false);
+ assert.equal(result.sourceRoutes,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(result.zoneCount,3);assert.equal(result.equipmentCount,3);
+ const evidence=JSON.parse(fs.readFileSync(path.join(out,
+  'R160_HOST_ARCHITECTURE_EVIDENCE.json'),'utf8'));
+ assert.equal(evidence.independentSideGalleryProof.side,'west-gallery');
+ assert.equal(evidence.independentSideGalleryProof.realRoomRanges.length,3);
+ assert.ok(fs.existsSync(path.join(out,'index.html')));
+ assert.ok(fs.existsSync(path.join(out,'DERIVED_B143_SOURCE.json')));
+ assert.deepEqual(result.gates,Array(9).fill('BLOCKED'));
+ assert.equal(result.worldWrites,0);
 });

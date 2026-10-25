@@ -28,6 +28,10 @@ import {validateR158SpatialBalanceIntent,toR155RoofIntent}
  from '../source/ai/r158-spatial-balance.mjs';
 import {validateR159FloorplanIntent,toR155FromR159}
  from '../source/ai/r159-floorplan-intent.mjs';
+import {deriveR160SideGalleryTopology}
+ from '../source/ai/r160-side-gallery.mjs';
+import {validateR160TopologyIntent,r160ToR151}
+ from '../source/ai/r160-topology-intent.mjs';
 
 const fail=x=>{throw Error('R139_MODEL_'+x);};
 const only=(v,fields)=>v!==null&&typeof v==='object'&&!Array.isArray(v)&&
@@ -41,7 +45,7 @@ export function parseR139RelationalFurnishedReply(raw,request,
  {allowRoofMaterialCorrection=false,allowArchitecturalExpression=false,
   allowArchitecturalMassing=false,allowVolumeComposition=false,
   allowRooflineComposition=false,allowSpatialBalanceComposition=false,
-  allowFloorplanComposition=false}={}){
+  allowFloorplanComposition=false,allowTopologyComposition=false}={}){
  if(typeof raw!=='string'||raw.length<20||raw.length>22000)
   fail('MISSING_OR_OVERSIZED_MODEL_REPLY');
  let reply;
@@ -51,11 +55,12 @@ export function parseR139RelationalFurnishedReply(raw,request,
  const expressive=allowArchitecturalExpression===true||
   allowArchitecturalMassing===true||allowVolumeComposition===true||
   allowRooflineComposition===true||allowSpatialBalanceComposition===true||
-  allowFloorplanComposition===true;
+  allowFloorplanComposition===true||allowTopologyComposition===true;
  if(!only(reply,expressive?[...keys,'architecture']:keys)||
   !only(reply.relations,['entryFacingZoneId','directAdjacencies']))
   fail('FULL_REPLY_CONTRACT');
- if(allowFloorplanComposition)validateR159FloorplanIntent(reply.architecture);
+ if(allowTopologyComposition)validateR160TopologyIntent(reply.architecture);
+ else if(allowFloorplanComposition)validateR159FloorplanIntent(reply.architecture);
  else if(allowSpatialBalanceComposition)validateR158SpatialBalanceIntent(reply.architecture);
  else if(allowRooflineComposition)validateR155RooflineIntent(reply.architecture);
  else if(allowVolumeComposition)validateR154VolumeIntent(reply.architecture);
@@ -89,11 +94,15 @@ export function parseR139RelationalFurnishedReply(raw,request,
   entryFacingZoneId:relations.entryFacingZoneId,
   directAdjacencies:relations.directAdjacencies
  };
- const relational=deriveR139RelationalTopology(base,semanticIntent,{
-  spatialBalance:(allowSpatialBalanceComposition||allowFloorplanComposition)?
-   architecture.spatialBalance:'balanced',
-  depthBalance:allowFloorplanComposition?architecture.depthBalance:'balanced'
- });
+ const relational=allowTopologyComposition&&
+  architecture.spatialTopology!=='central-spine'?
+  deriveR160SideGalleryTopology(base,semanticIntent,{
+   gallerySide:architecture.spatialTopology}):
+  deriveR139RelationalTopology(base,semanticIntent,{
+   spatialBalance:(allowSpatialBalanceComposition||allowFloorplanComposition)?
+    architecture.spatialBalance:'balanced',
+   depthBalance:allowFloorplanComposition?architecture.depthBalance:'balanced'
+  });
  const featured=applyR125FeatureIntent({base:relational,intent:{
   schema:ASSEMBLED_SCHEMA,basePlanSha256:relational.planSha256,
   objects:semantics.objects.map(x=>({...x,detail:'assembled'}))
@@ -109,7 +118,7 @@ export function parseR139RelationalFurnishedReply(raw,request,
     entryHierarchy:architecture.entryHierarchy,
     daylightStrategy:architecture.daylightStrategy,
     roofEdge:architecture.roofEdge
-   }:architecture});
+   }:allowTopologyComposition?r160ToR151(architecture):architecture});
   const volume=(allowVolumeComposition||allowRooflineComposition||allowSpatialBalanceComposition||allowFloorplanComposition)?
    deriveR154VolumeComposition(envelope,{intent:(allowRooflineComposition||allowSpatialBalanceComposition||allowFloorplanComposition)?{
     schema:R154_VOLUME_SCHEMA,

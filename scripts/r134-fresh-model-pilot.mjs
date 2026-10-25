@@ -146,7 +146,23 @@ const R159_SYSTEM=R158_SYSTEM.replace(
  'These choices move real B143 internal partition walls and connecting doorways.',
  'Do not emit voxel coordinates; infeasible room sizes return HOLD.'
 ].join('\n');
+const R160_SYSTEM=R151_SYSTEM.replace(
+ 'schema,entryHierarchy,daylightStrategy,roofEdge.',
+ 'schema,entryHierarchy,daylightStrategy,roofEdge,spatialTopology.'
+).replace('minecraftaibuilder-r151-envelope-intent-v1',
+ 'minecraftaibuilder-r160-topology-ir-v1')+'\n'+[
+ 'spatialTopology MUST be central-spine, west-gallery or east-gallery.',
+ 'A side gallery is a REAL shared corridor along one exterior side, not a center spine.',
+ 'When spatialTopology is west-gallery/east-gallery, layout.spaces MUST contain EXACTLY 3 rooms.',
+ 'For side galleries choose EXACTLY ONE directAdjacencies pair of room ids.',
+ 'A 4-room layout MUST choose central-spine; no silently dropped fourth room.',
+ 'The host compiles real B143 walls, doors and circulation without model voxel coordinates.',
+ 'Do not request roof silhouette, volumeHierarchy, spatialBalance or depthBalance.',
+ 'Make topology selection from functional room needs, not building genre labels.',
+ 'Unrealizable layouts return HOLD, never silent fallback.'
+].join('\n');
 export function makeR134FreshRequest({brief,siteWidth=32,siteDepth=32}={}){
+
 
 
  if(!text(brief)||!range(siteWidth,18,32)||!range(siteDepth,18,32))
@@ -198,7 +214,7 @@ export function parseR134FreshArgs(argv){
  if(!['none','assembled'].includes(equipmentMode))fail('INVALID_EQUIPMENT_MODE');
  const topologyMode=args['--topology']??'linear';
  const architectureMode=args['--architecture']??'none';
- if(!['none','intent','massing','volumes','roofline','spatial','floorplan'].includes(architectureMode)||
+ if(!['none','intent','massing','volumes','roofline','spatial','floorplan','topology'].includes(architectureMode)||
   (architectureMode!=='none'&&topologyMode!=='graph'))
   fail('ARCHITECTURE_REQUIRES_GRAPH_TOPOLOGY');
  if(!['linear','graph'].includes(topologyMode)||
@@ -216,7 +232,7 @@ export async function runR134FreshModel({
  endpoint='http://127.0.0.1:11434/v1/chat/completions'
 }={}, {fetcher=fetch,timeoutMs=120000}={}){
  const p=ENDPOINT.exec(endpoint??'');
- if(!['none','intent','massing','volumes','roofline','spatial','floorplan'].includes(architectureMode)||
+ if(!['none','intent','massing','volumes','roofline','spatial','floorplan','topology'].includes(architectureMode)||
   (architectureMode!=='none'&&topologyMode!=='graph')||
   !['none','bounded','roof-material-only'].includes(recoveryMode)||
   (recoveryMode==='bounded'&&equipmentMode!=='assembled')||
@@ -237,7 +253,8 @@ export async function runR134FreshModel({
   semanticEquipment:{perRoomAtLeastOne:true,maxObjects:8,
    allowedRoles:['work-surface','equipment-bank','display-stand',
     'storage-rack','seating']}}:request;
- const maxTokens=architectureMode==='floorplan'?2800:
+ const maxTokens=architectureMode==='topology'?2200:
+  architectureMode==='floorplan'?2800:
   architectureMode==='spatial'?2600:
   architectureMode==='roofline'?2400:
   architectureMode==='volumes'?2300:
@@ -281,7 +298,8 @@ export async function runR134FreshModel({
     body:JSON.stringify({model,stream:false,temperature:0.65,
      max_tokens:maxTokens,reasoning_effort:'none',
      response_format:{type:'json_object'},messages:[
-      {role:'system',content:architectureMode==='floorplan'?R159_SYSTEM:
+      {role:'system',content:architectureMode==='topology'?R160_SYSTEM:
+       architectureMode==='floorplan'?R159_SYSTEM:
        architectureMode==='spatial'?R158_SYSTEM:
        architectureMode==='roofline'?R155_SYSTEM:
        architectureMode==='volumes'?R154_SYSTEM:
@@ -319,7 +337,8 @@ export async function runR134FreshModel({
      allowVolumeComposition:architectureMode==='volumes',
      allowRooflineComposition:architectureMode==='roofline',
      allowSpatialBalanceComposition:architectureMode==='spatial',
-     allowFloorplanComposition:architectureMode==='floorplan'
+     allowFloorplanComposition:architectureMode==='floorplan',
+     allowTopologyComposition:architectureMode==='topology'
     }):
     recovered?.result??(equipmentMode==='assembled'?
      parseR135FreshFurnishedReply(raw,request):null);
@@ -353,7 +372,8 @@ export async function runR134FreshModel({
     if(topologyMode==='graph'){
      write(dir,'R139_MODEL_SPATIAL_RELATIONS.json',composed.semanticIntent);
      if(composed.architectural){
-      const archTag=architectureMode==='floorplan'?'R159':
+      const archTag=architectureMode==='topology'?'R160':
+       architectureMode==='floorplan'?'R159':
        architectureMode==='spatial'?'R158':
        architectureMode==='roofline'?'R155':
        architectureMode==='volumes'?'R154':
@@ -371,6 +391,7 @@ export async function runR134FreshModel({
        rooflineProof:composed.architectural.roofline?.r155RooflineEvidence??null,
        spatialBalanceProof:composed.relationalBase?.r158SpatialBalanceEvidence??null,
        depthBalanceProof:composed.relationalBase?.r159DepthBalanceEvidence??null,
+       independentSideGalleryProof:composed.relationalBase?.r160TopologyEvidence??null,
        humanArtReview:'NOT_REVIEWED',
        minecraftWalking:'NOT_TESTED',worldWrites:0});
      }
@@ -412,9 +433,11 @@ export async function runR134FreshModel({
     Boolean(composed?.architectural?.volume);
    report.genuineRooflineSourceOnly=
     Boolean(composed?.architectural?.roofline);
+   report.genuineNonCentralTopologySourceOnly=architectureMode==='topology'&&
+    Boolean(composed?.relationalBase?.r160TopologyEvidence);
    report.genuineDepthBalanceSourceOnly=architectureMode==='floorplan'&&
     Boolean(composed?.relationalBase?.r159DepthBalanceEvidence);
-   report.genuineSpatialBalanceSourceOnly=['spatial','floorplan'].includes(architectureMode)&&
+   report.genuineSpatialBalanceSourceOnly=['spatial','floorplan','topology'].includes(architectureMode)&&
     Boolean(composed?.relationalBase?.r158SpatialBalanceEvidence);
    report.realRoomGraph3D=topologyMode==='graph';
    report.newRealB143Source=true;
