@@ -77,6 +77,7 @@ on:
       - 'scripts/r146-replay-saved-qwen.mjs'
       - 'scripts/r146-user-real-roof-recovery.test.mjs'
       - 'source/ai/r149-architectural-expression.mjs'
+      - 'source/ai/r150-furniture-articulation.mjs'
       - 'scripts/r149-quality-comparison.mjs'
       - 'scripts/r149-quality-comparison.test.mjs'
       - 'scripts/fixtures/r146-user-qwen14b-20261025-raw.json'

@@ -10,6 +10,8 @@ import {CASE} from './r141-local-graph-evidence.mjs';
 import {auditR143GraphEvidence} from './r143-independent-graph-audit.mjs';
 import {deriveR149EnvelopeExpression}
  from '../source/ai/r149-architectural-expression.mjs';
+import {deriveR150FurnitureArticulation}
+ from '../source/ai/r150-furniture-articulation.mjs';
 import {compileB143Gallery,renderB143Html}
  from './b143-gallery-core.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
@@ -46,13 +48,16 @@ export function buildR149PairedComparison(){
  if(independent.status!=='SOURCE_ROOM_GRAPH_VERIFIED')
   throw Error('R149_R146_INDEPENDENT_AUDIT_HOLD');
  const after=deriveR149EnvelopeExpression(before,{plan:graph.plan});
+ const complete=deriveR150FurnitureArticulation(after);
  const template=fs.readFileSync(path.join(root,
   'source/ai/b143-viewer-template.html'),'utf8');
  const pages=[
   {file:'before-r146.html',content:renderB143Html(
    compileB143Gallery([before.design]),template)},
   {file:'after-r149.html',content:renderB143Html(
-   compileB143Gallery([after.design]),template)}
+   compileB143Gallery([after.design]),template)},
+  {file:'after-r150.html',content:renderB143Html(
+   compileB143Gallery([complete.design]),template)}
  ];
  const evidence={
   schema:'r149-exterior-source-visual-paired-audit-v1',
@@ -73,6 +78,12 @@ export function buildR149PairedComparison(){
   reachableEquipmentAfter:after.sourceRouteAudit.featureAccess.filter(
    f=>f.reachableFromEntrance).length,
   expression:after.r149ExpressionEvidence,
+  r150SourceSha256:complete.sourceSha256,
+  r150GeometrySha256:complete.geometrySha256,
+  r150Voxels:complete.compiled.primitives.length,
+  r150EquipmentEvidence:complete.r150EquipmentEvidence,
+  r150SourceRoutes:complete.sourceRouteAudit.status,
+  threeGenuineB143Viewers:true,
   actualPairedB143Viewers:true,humanArtReview:'NOT_REVIEWED',
   minecraftWalking:'NOT_TESTED',readiness:'NOT_PREPARED',
   constructionApproved:false,executionAllowed:false,
@@ -81,24 +92,27 @@ export function buildR149PairedComparison(){
  };
  const html='<!doctype html><html lang="ja"><meta charset="utf-8">'+
   '<meta name="viewport" content="width=device-width,initial-scale=1">'+
-  '<title>R149｜R146と汎用外装改善案の真正B143比較</title>'+
+  '<title>R150｜R146・R149・R150の真正B143比較</title>'+
   '<style>body{background:#0d1724;color:#eaf2ff;font:14px/1.6 system-ui;'+
-  'padding:16px}main{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));'+
+  'padding:16px}main{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));'+
   'gap:12px}section{background:#192a40;padding:12px;border-radius:9px}'+
   'iframe{width:100%;height:600px;border:1px solid #61748b}'+
   '@media(max-width:850px){main{grid-template-columns:1fr}}</style>'+
-  '<h1>R149｜保存済み実Qwen設計から派生した外装3D比較</h1>'+
-  '<p>左：元のR146真正B143。右：同じ4室・8設備・直接接続を保ったホスト外装案。'+
-  '入口、ガラス開口、軒先を同じ条件で見比べてください。回転/ズーム可能。</p>'+
+  '<h1>R150｜保存済み実Qwen設計から派生した3段階の実3D比較</h1>'+
+  '<p>R146原本→R149外装→R150内部設備の3段階。'+
+  'すべて同じ4室・8設備・直接接続。モデル本人が選んだ設備用途は不変。回転・拡大可能。</p>'+
   '<p>変更した意匠はモデル自身の選択ではありません。美術審査HOLD、Minecraft未施工。'+
   '部屋・設備のソース到達検証のみPASS。数値改善を美術合格と見なしません。</p>'+
   '<main><section><h2>R146 従来版</h2><iframe src="before-r146.html" title="R146 B143 genuine viewer"></iframe></section>'+
-  '<section><h2>R149 汎用外装派生案</h2><iframe src="after-r149.html" title="R149 B143 genuine viewer"></iframe></section></main>'+
+  '<section><h2>R149 汎用外装派生案</h2><iframe src="after-r149.html" title="R149 B143 genuine viewer"></iframe></section>'+
+  '<section><h2>R150 機能が読める設備形態</h2><iframe src="after-r150.html" title="R150 B143 genuine viewer"></iframe></section></main>'+
   '<p><a style="color:#9bd8ff" href="R149_EVIDENCE.json">出所・ソース非退行・安全証拠</a></p>'+
   '</html>';
  pages.unshift({file:'index.html',content:html});
  pages.push({file:'R149_EVIDENCE.json',content:JSON.stringify(evidence,null,2)+'\n'});
  pages.push({file:'R149_DERIVED_SOURCE.json',content:JSON.stringify(after.design,null,2)+'\n'});
+ pages.push({file:'R150_DERIVED_SOURCE.json',content:JSON.stringify(complete.design,null,2)+'\n'});
+ pages.push({file:'R150_EVIDENCE.json',content:JSON.stringify(complete.r150EquipmentEvidence,null,2)+'\n'});
  return {evidence,pages};
 }
 export function saveR149PairedComparison(out){

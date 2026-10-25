@@ -30,6 +30,16 @@ test('real R146 pinned Qwen source -> two actual B143 3D scenes with proven unch
  assert.deepEqual(e.BuildPlan.operations,[]);
  assert.ok(bundle.pages.some(p=>p.file==='before-r146.html'));
  assert.ok(bundle.pages.some(p=>p.file==='after-r149.html'));
+ assert.ok(bundle.pages.some(p=>p.file==='after-r150.html'));
+ assert.equal(e.r150EquipmentEvidence.preservedModelEquipmentChoices,true);
+ assert.equal(e.r150EquipmentEvidence.originalEquipmentCount,8);
+ assert.ok(e.r150EquipmentEvidence.appendedSmallComponentCount>=8);
+ assert.ok(e.r150EquipmentEvidence.changedMaterialCellsInsideEquipment+
+  e.r150EquipmentEvidence.newlyOccupiedCellsInsideEquipment>0);
+ assert.equal(e.r150EquipmentEvidence.noExteriorWallFloorRoofCorridorChanged,true);
+ assert.equal(e.r150SourceRoutes,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.notEqual(e.enhancedGeometrySha256,e.r150GeometrySha256);
+ assert.equal(e.r150EquipmentEvidence.humanArtReview,'NOT_REVIEWED');
  assert.ok(bundle.pages.some(p=>p.file==='index.html'));
 });
 test('no overwrite and real viewer/evidence source output, not a screenshot simulation',t=>{
@@ -39,6 +49,8 @@ test('no overwrite and real viewer/evidence source output, not a screenshot simu
  const r=saveR149PairedComparison(dest);
  assert.ok(fs.readFileSync(path.join(dest,'before-r146.html'),'utf8').includes('<'));
  assert.ok(fs.readFileSync(path.join(dest,'after-r149.html'),'utf8').includes('<'));
+ assert.ok(fs.readFileSync(path.join(dest,'after-r150.html'),'utf8').includes('<'));
+ assert.ok(fs.readFileSync(path.join(dest,'R150_DERIVED_SOURCE.json'),'utf8').includes('r150-'));
  assert.equal(JSON.parse(fs.readFileSync(path.join(dest,'R149_EVIDENCE.json'))).enhancedSourceSha256,r.enhancedSourceSha256);
  assert.throws(()=>saveR149PairedComparison(dest),/NO_OVERWRITE/);
 });
