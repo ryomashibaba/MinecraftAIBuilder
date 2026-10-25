@@ -8,6 +8,7 @@ import {fileURLToPath} from 'node:url';
 import {compileArchitecturePlan} from '../source/ai/r125-architecture-plan.mjs';
 import {proposeR125ThresholdRepair} from '../source/ai/r125-entrance-repair.mjs';
 import {applyR125FeatureIntent,SCHEMA as FEATURE_SCHEMA} from '../source/ai/r125-functional-layer.mjs';
+import {auditR129FunctionalAcceptance} from '../source/ai/r125-functional-acceptance.mjs';
 import {preflightR125Ollama} from './r125-pilot.mjs';
 import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
 
@@ -60,7 +61,7 @@ export function parseR127ModelFeatures(raw,base){
 }
 export function parseR127Args(argv){
  if(argv.length===1&&argv[0]==='--help')return {help:true};
- const args={},allowed=new Set(['--model','--plan','--out','--brief','--endpoint']);
+ const args={},allowed=new Set(['--model','--plan','--out','--brief','--endpoint','--requirements']);
  for(let i=0;i<argv.length;i++){
   const k=argv[i],v=argv[++i];
   if(!allowed.has(k)||Object.hasOwn(args,k)||!v||v.startsWith('--'))
@@ -74,10 +75,13 @@ export function parseR127Args(argv){
  if(!port||Number(port[1])<1||Number(port[1])>65535)
   reject('LOOPBACK_ONLY');
  return {model:args['--model'],plan:JSON.parse(fs.readFileSync(args['--plan'],'utf8')),
-  outDir:path.resolve(args['--out']),brief:args['--brief']??'',endpoint};
+  outDir:path.resolve(args['--out']),brief:args['--brief']??'',endpoint,
+  ...(args['--requirements']?{independentSpec:JSON.parse(
+   fs.readFileSync(args['--requirements'],'utf8'))}:{})};
 }
 export async function runR127FeatureModel({
- model,plan,outDir,brief='',endpoint='http://127.0.0.1:11434/v1/chat/completions'
+ model,plan,outDir,brief='',independentSpec=null,
+ endpoint='http://127.0.0.1:11434/v1/chat/completions'
 }={}, {fetcher=fetch,timeoutMs=120000}={}){
  const port=ENDPOINT.exec(endpoint??'');
  if(!MODEL.test(model??'')||!port||Number(port[1])<1||
@@ -103,6 +107,7 @@ export async function runR127FeatureModel({
   baseSourceSha256:base.sourceSha256,
   derivedSourceSha256:null,featureIntentSha256:null,
   featureCount:0,addedVoxelCount:null,sourceRouteStatus:'NOT_TESTED',
+  independentAcceptance:'NOT_EVALUATED_NO_INDEPENDENT_SPEC',
   authorship:'NOT_ESTABLISHED',humanArt:'NOT_REVIEWED',
   minecraftWalking:'NOT_TESTED',world:freezeWorld()};
  write(dir,'FEATURE_REQUEST.json',{model,endpoint,request,timeoutMs,
@@ -140,6 +145,11 @@ export async function runR127FeatureModel({
    write(dir,'DERIVED_B143_SCENE.json',built.compiled);
    write(dir,'FEATURE_PLACEMENTS.json',built.placements);
    write(dir,'SOURCE_ROUTE_AUDIT.json',built.sourceRouteAudit);
+   if(independentSpec!==null){
+    const verdict=auditR129FunctionalAcceptance({base,featured:built,spec:independentSpec});
+    write(dir,'INDEPENDENT_FUNCTIONAL_ACCEPTANCE.json',verdict);
+    report.independentAcceptance=verdict.status;
+   }
    const tpl=fs.readFileSync(path.join(ROOT,'source/ai/b143-viewer-template.html'),'utf8');
    write(dir,'index.html',renderB143Html(compileB143Gallery([built.design]),tpl));
    report.derivedSourceSha256=built.sourceSha256;
@@ -150,7 +160,9 @@ export async function runR127FeatureModel({
    report.authorship=injected?'TEST_DOUBLE_NOT_REAL_MODEL':
     'LOCAL_PROVIDER_RESPONSE_NOT_INDEPENDENTLY_AUTHENTICATED';
    report.status=injected?'HOLD_TEST_DOUBLE_NOT_REAL_INFERENCE':
-    'FEATURE_SOURCE_CANDIDATE_HUMAN_REVIEW_REQUIRED';
+    report.independentAcceptance.startsWith('HOLD_')?
+     'HOLD_INDEPENDENT_FUNCTIONAL_REQUIREMENTS':
+     'FEATURE_SOURCE_CANDIDATE_HUMAN_REVIEW_REQUIRED';
    return report;
   }finally{clearTimeout(timer);}
  }catch(e){

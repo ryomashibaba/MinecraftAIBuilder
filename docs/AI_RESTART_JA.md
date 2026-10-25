@@ -18,6 +18,13 @@
 
 
 
+
+## R129 Independent functional intent and true B143 geometry evidence (2026-10-25 JST)
+- A category-independent functional acceptance engine verifies independently supplied requirements: zone equipment role/count, actual additional voxel volume, remaining reachable two-wide clear paths, and real front/back or left/right zone ordering. Source coordinates and voxels, not the LLM descriptions or self-declared successes, are evaluated.
+- The previously named front/back shop is actually split left/right; an independent z-axis requirement therefore remains HOLD. Too-few pieces and tiny fixtures are independently detected. A matching requirement is only SOURCE_ONLY_REQUIREMENTS_MET_REAL_FUNCTION_UNVERIFIED, never an in-world functional or artistic certification.
+- The local R127 workflow accepts optional --requirements INDEPENDENT_SPEC.json; original model raw output and independent test requirements remain separate, evidence saved to INDEPENDENT_FUNCTIONAL_ACCEPTANCE.json. Without a spec it is NOT_EVALUATED, not PASS.
+- Pinned original Qwen home/shop/research SHA and voxel counts are not altered. No real new Qwen inference, no Mac 2B benchmark, no Minecraft contact or writes. NOT_PREPARED / nine BLOCKED / empty BuildPlan remain unchanged.
+
 ## R128 機能設備の実アクセス・高密度配置Source QA（2026-10-25 JST）
 - R127の[GitHub Actions #40143280425](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40143280425) はSUCCESS（テストダブルであり新たな実Qwen推論なし）。
 - [共通機能設備生成器](../source/ai/r125-functional-layer.mjs)を改良。従来4隅の優先配置と原本回帰を維持したまま、4隅で置けない場合は領域の縁に沿って候補を探索。独立した設備5件以上も同一領域に配置できる可能性を広げる。配置都合で元ボクセルを破壊しない。

@@ -59,19 +59,20 @@ export function auditR125SourceRoutes(product,{featureTargets=[]}={}){
  }
  const zones=[];
  for(const level of product.program)for(const zone of level.zones){
-  let best=null,bestDistance=Infinity;
+  let best=null,bestDistance=Infinity,reachedTwoWidePadCount=0;
   for(const [k,n] of distances){
    const p=pads.get(k);
    if(p.y!==level.standingFloorY||p.x<zone.range.x[0]||
     p.x+1>zone.range.x[1]||p.z<zone.range.z[0]||
     p.z>zone.range.z[1])continue;
+   reachedTwoWidePadCount++;
    if(n<bestDistance){bestDistance=n;best=[p.x,p.y,p.z];}
   }
   const reachable=best!==null;
   if(!reachable)issues.push('UNREACHABLE_ZONE_'+zone.id);
   zones.push({id:zone.id,level:level.level,
    standingFloorY:level.standingFloorY,
-   reachedFromEntrance:reachable,
+   reachedFromEntrance:reachable,reachedTwoWidePadCount,
    sourceWitness:best,sourceGraphMoves:reachable?bestDistance:null});
  }
  // Check the upper landing is in the same connected source component as
