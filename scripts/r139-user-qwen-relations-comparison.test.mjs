@@ -16,6 +16,10 @@ test('all three SHA-pinned real Qwen designs retain eight model equipment object
   assert.equal(row.independentR143VoxelAudit.independentlyVerifiedDirectPairCount,2);
   assert.equal(row.independentR143VoxelAudit.selectedRoomExteriorEntranceVerified,true);
   assert.equal(row.independentR143VoxelAudit.worldWrites,0);
+  assert.equal(row.independentR143VoxelAudit.independentSourceRoutes,
+   'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert.equal(row.independentR143VoxelAudit.independentlyReachedRoomCount,4);
+  assert.equal(row.independentR143VoxelAudit.independentEquipmentServiceCount,8);
   assert.equal(row.sourceRoutes.R139,'SOURCE_ROUTES_REACH_ALL_ZONES');
   assert.notEqual(row.geometrySha256.R138,row.geometrySha256.R139);
  }
