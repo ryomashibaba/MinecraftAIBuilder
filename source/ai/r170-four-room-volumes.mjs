@@ -16,7 +16,11 @@ const sorted=m=>JSON.stringify([...m].sort(([a],[b])=>a.localeCompare(b)));
 const addBox=(design,id,mode,origin,size,material)=>design.elements.push({
  id,shape:'box',mode,...(mode==='add'?{material}:{}),origin,size
 });
-export function deriveR170FourRoomVolumes(base){
+export function deriveR170FourRoomVolumes(base,
+ {studyStyle='R170_TERRACED_BASELINE'}={}){
+ const sculpted=studyStyle==='R173_SCULPTED_CLERESTORY';
+ if(!sculpted&&studyStyle!=='R170_TERRACED_BASELINE')
+  fail('HOST_STUDY_STYLE_UNSUPPORTED');
  if(base?.schema!=='minecraftaibuilder-r125-featured-source-v1'||
   base?.r149ExpressionEvidence?.unchangedInteriorVoxels!==true||
   !base.design||!base.compiled||
@@ -46,6 +50,9 @@ export function deriveR170FourRoomVolumes(base){
   !['flat','ridge','sawtooth'].includes(profile))
   fail('ORIGINAL_ROOF_CONTRACT');
  const design=structuredClone(base.design);
+ // Only the explicitly requested R173 host study expands the private B143
+ // display bounds. This does NOT enlarge any Minecraft/world construction.
+ if(sculpted)design.bounds.height=Math.max(h,18);
  // Rebuild the legacy profile only above y=6; keep all lower model-selected
  // rooms and equipment as exact voxels. Never delete a semantic room.
  const legacyProfileIds=design.elements.filter(e=>
@@ -67,9 +74,11 @@ export function deriveR170FourRoomVolumes(base){
    x1-x0+1<7||z1-z0+1<7)
    fail('ROOM_BOUNDS_OR_MINIMUM_USABLE_SIZE');
   const rank=ranks.indexOf(z.id);
-  const roofY=profile==='flat'?
-   8+(rank>=2?1:0)+(rank===3?1:0):
-   8+(rank>=2?1:0);
+  const roofY=sculpted?
+   [9,10,12,14][rank]:
+   profile==='flat'?
+    8+(rank>=2?1:0)+(rank===3?1:0):
+    8+(rank>=2?1:0);
   return {
    zoneId:z.id,modelSelectedWeight:z.relativeWeight,
    rank,roofY,
@@ -83,12 +92,13 @@ export function deriveR170FourRoomVolumes(base){
  for(const [i,s] of sections.entries()){
   const {x:[xl,xr],z:[zf,zb]}=s.interior;
   addBox(design,'r170-clear-'+i,'cut',[xl,6,zf],
-   [xr-xl+1,h-6,zb-zf+1]);
+   [xr-xl+1,design.bounds.height-6,zb-zf+1]);
  }
  for(const [i,s] of sections.entries()){
   const {x:[xl,xr],z:[zf,zb]}=s.perimeter;
   const height=s.roofY-6+(profile!=='flat'?2:0);
-  if(s.roofY+(profile!=='flat'?2:0)>=h)fail('ROOF_ABOVE_SOURCE_BOUNDS');
+  if(s.roofY+(profile!=='flat'?2:0)>=design.bounds.height)
+   fail('ROOF_ABOVE_SOURCE_BOUNDS');
   addBox(design,'r170-wall-west-'+i,'add',[xl,6,zf],
    [1,height,zb-zf+1],west.material);
   addBox(design,'r170-wall-east-'+i,'add',[xr,6,zf],
@@ -114,6 +124,41 @@ export function deriveR170FourRoomVolumes(base){
      [xl,s.roofY+1,z],[xr-xl+1,height,1],roof.material);
    }
   }
+ }
+ // R173 option: genuinely CUT the newly built upper wall and refill it
+ // with colored glazing, rather than merely drawing rectangles on an SVG.
+ // Use room ranges only. Never touch the model-selected doors, floor or
+ // furnishings (all y<=5). Constrain windows to an exterior-facing side.
+ let realClerestoryWindowCount=0;
+ if(sculpted){
+  for(const [i,section] of sections.entries()){
+   const {x:[xl,xr],z:[zf,zb]}=section.perimeter;
+   const winHeight=Math.min(4,section.roofY-7);
+   const winY=section.roofY-winHeight;
+   const horizontal=Math.min(5,xr-xl-3);
+   const longitudinal=Math.min(5,zb-zf-3);
+   if(winHeight<2||horizontal<3||longitudinal<3)
+    fail('R173_UPPER_GLAZING_NOT_FIT');
+   const winX=xl+Math.floor((xr-xl-horizontal+1)/2);
+   const winZ=zf+Math.floor((zb-zf-longitudinal+1)/2);
+   const windows=[];
+   if(zf===1)windows.push({side:'front',origin:[winX,winY,zf],
+    size:[horizontal,winHeight,1]});
+   if(zb===d-2)windows.push({side:'rear',origin:[winX,winY,zb],
+    size:[horizontal,winHeight,1]});
+   if(xl===1)windows.push({side:'west',origin:[xl,winY,winZ],
+    size:[1,winHeight,longitudinal]});
+   if(xr===w-2)windows.push({side:'east',origin:[xr,winY,winZ],
+    size:[1,winHeight,longitudinal]});
+   for(const win of windows){
+    const name='r173-clerestory-'+i+'-'+win.side;
+    addBox(design,name+'-cut','cut',win.origin,win.size);
+    addBox(design,name+'-glass','add',win.origin,win.size,'glass');
+    realClerestoryWindowCount++;
+   }
+  }
+  if(realClerestoryWindowCount<4)
+   fail('R173_NO_REAL_EXTERIOR_CLERESTORY');
  }
  if(design.elements.length>160)
   fail('B143_ELEMENT_BUDGET_EXCEEDED');
@@ -168,6 +213,9 @@ export function deriveR170FourRoomVolumes(base){
   BuildPlan:{operations:[]},worldContacts:0,worldWrites:0,
   r170FourRoomVolumeEvidence:{
    sourceOnly:true,hostArtStudyNotModelHeightChoice:true,
+   studyStyle,sculptedVolumeVariant:sculpted,
+   realExteriorClerestoryWindows:realClerestoryWindowCount,
+   derivedBuildingBoundsHeight:design.bounds.height,
    legacyRoofProfileRemovedFromDerivedOnly:legacyProfileIds,
    modelSelectedRoofFamilyPreserved:profile,
    modelSelectedRoomCount:4,
