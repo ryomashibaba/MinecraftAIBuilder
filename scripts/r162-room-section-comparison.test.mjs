@@ -32,7 +32,7 @@ test('R162 produces genuine independently usable high rooms and real three-way r
  assert.deepEqual(rows.map(x=>x.id),['central','west','east']);
  for(const row of rows){
   assert.equal(row.sections.length,3);
-  assert.deepEqual(row.sections.map(x=>x.roofY).sort(),[8,9,10]);
+  assert.deepEqual(row.sections.map(x=>x.roofY).sort((a,b)=>a-b),[8,9,10]);
   assert.ok(row.sections.every(x=>x.clearHighInteriorArea>=35));
   assert.ok(row.allRoomRoutesReachable);
   assert.ok(row.allEquipmentServiceReachable);
