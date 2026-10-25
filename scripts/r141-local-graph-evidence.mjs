@@ -72,6 +72,7 @@ export async function runR141GraphTrial({model=null,endpoint=
   modelSelectedRelations:false,
   compiledGraph3D:false,sourceSha256:null,geometrySha256:null,
   modelRequestedDirectPairs:0,sourceVerifiedDirectDoors:0,
+  modelRequestedEntryRoomId:null,sourceEntranceRoomVerified:false,
   spatialDecisionDemonstrated:false,
   roomCount:null,equipmentCount:null,
   sourceRoutes:'NOT_CHECKED',
@@ -120,7 +121,13 @@ export async function runR141GraphTrial({model=null,endpoint=
     path.join(base,'R139_GRAPH_SOURCE_AUDIT.json'),'utf8'));
    report.modelRequestedDirectPairs=intent.directAdjacencies.length;
    report.sourceVerifiedDirectDoors=audit.directDoors.length;
+   report.modelRequestedEntryRoomId=intent.entryFacingZoneId;
+   report.sourceEntranceRoomVerified=
+    audit.entryFacing?.zoneId===intent.entryFacingZoneId&&
+    audit.entryFacing?.exteriorEntranceDirectlyOpensIntoSelectedRoom===true&&
+    audit.entryFacing?.interiorThresholdSupportedAndClearInB143Source===true;
    report.spatialDecisionDemonstrated=
+    report.sourceEntranceRoomVerified&&
     intent.directAdjacencies.length>=1&&
     audit.directDoors.length===intent.directAdjacencies.length&&
     audit.sourceRoutes==='SOURCE_ROUTES_REACH_ALL_ZONES'&&
