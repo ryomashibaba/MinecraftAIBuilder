@@ -40,7 +40,14 @@ export function auditR164EnclosedHighRooms(source){
  const wallMat=MATERIALS.indexOf(
   source.design.elements.find(x=>x.id==='shell-west')?.material);
  if(glass<0||roofMat<0||wallMat<0)fail('SOURCE_MATERIALS');
- let totalRoof=0,totalUpperWalls=0,totalPane=0;
+ // At steps, a lower room's roof can overlap a neighboring taller room's
+ // wall at exactly that lower roof elevation. Treat ONLY authenticated
+ // adjoining roof footprints as weather-shell junctions, not arbitrary metal.
+ const roofJunction=(current,x,y,z)=>sections.some(other=>
+  other.zoneId!==current.zoneId&&y===other.roofY&&
+  x>=other.perimeter.x[0]&&x<=other.perimeter.x[1]&&
+  z>=other.perimeter.z[0]&&z<=other.perimeter.z[1]);
+ let totalRoof=0,totalUpperWalls=0,totalPane=0,totalJunctions=0;
  const envelopeRooms=[];
  for(const s of sections){
   const q=s.sourceRange,range=s.perimeter,roofY=s.roofY;
@@ -54,14 +61,17 @@ export function auditR164EnclosedHighRooms(source){
   const expectedWindowCells=new Set(pane[0].realExteriorDaylightWitnesses.map(x=>key(...x.wall)));
   if(expectedWindowCells.size!==pane[0].paneVoxelCount)
    fail('PANES_DUPLICATE_OR_FORGED');
-  let walls=0,glazing=0,roof=0,voidCells=0;
+  let walls=0,glazing=0,roof=0,voidCells=0,junctions=0;
   const [minX,maxX]=q.x,[minZ,maxZ]=q.z;
   for(let y=6;y<roofY;y++){
    // Validate the complete horizontal perimeter, not sampled corners.
    for(let x=minX-1;x<=maxX+1;x++)
     for(const z of [minZ-1,maxZ+1]){
      const k=key(x,y,z),mat=occupied.get(k);
-     if(mat!==wallMat&&mat!==glass)fail('UPPER_PERIMETER_HOLE_'+s.zoneId+'_'+x+'_'+y+'_'+z+'_MAT'+String(mat));
+     if(mat!==wallMat&&mat!==glass&&
+      !(mat===roofMat&&roofJunction(s,x,y,z)))
+      fail('UPPER_PERIMETER_HOLE_'+s.zoneId+'_'+x+'_'+y+'_'+z+'_MAT'+String(mat));
+     if(mat===roofMat)junctions++;
      if(mat===glass&&!expectedWindowCells.has(k))
       fail('UNAPPROVED_PERIMETER_GLAZING');
      if(mat===glass)glazing++;else walls++;
@@ -69,7 +79,10 @@ export function auditR164EnclosedHighRooms(source){
    for(let z=minZ;z<=maxZ;z++)
     for(const x of [minX-1,maxX+1]){
      const k=key(x,y,z),mat=occupied.get(k);
-     if(mat!==wallMat&&mat!==glass)fail('UPPER_PERIMETER_HOLE_'+s.zoneId+'_'+x+'_'+y+'_'+z+'_MAT'+String(mat));
+     if(mat!==wallMat&&mat!==glass&&
+      !(mat===roofMat&&roofJunction(s,x,y,z)))
+      fail('UPPER_PERIMETER_HOLE_'+s.zoneId+'_'+x+'_'+y+'_'+z+'_MAT'+String(mat));
+     if(mat===roofMat)junctions++;
      if(mat===glass&&!expectedWindowCells.has(k))
       fail('UNAPPROVED_PERIMETER_GLAZING');
      if(mat===glass)glazing++;else walls++;
@@ -107,11 +120,13 @@ export function auditR164EnclosedHighRooms(source){
   }
   if(escape)fail('ROOM_UPPER_AIR_LEAKS_TO_OUTDOORS');
   totalRoof+=roof;totalUpperWalls+=walls;totalPane+=glazing;
+  totalJunctions+=junctions;
   envelopeRooms.push({
    zoneId:s.zoneId,
    roofHeightY:roofY,
    checkedFullRoofCells:roof,
    checkedUpperWallCells:walls,
+   checkedSharedRoofJunctionCells:junctions,
    checkedActualGlassCells:glazing,
    clearHighInteriorVoxels:voidCells,
    connectedAirCellsVisited:seen.size,
@@ -133,6 +148,7 @@ export function auditR164EnclosedHighRooms(source){
   independentlyFloodedHighInteriorAir:true,
   checkedRoofVoxelCells:totalRoof,
   checkedWallVoxelCells:totalUpperWalls,
+  checkedRoofToHighWallJunctionCells:totalJunctions,
   checkedGlassVoxelCells:totalPane,
   allThreeRoomUpperEnvelopesSourceClosed:true,
   realHighRooms:envelopeRooms,
