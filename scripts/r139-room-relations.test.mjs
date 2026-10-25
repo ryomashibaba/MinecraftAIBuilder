@@ -38,6 +38,27 @@ test('four-room model-selectable adjacency genuinely cuts supported doorways',()
   new Set(original.program[0].zones.map(z=>z.id)));
  assert.equal(result.directAdjacencyDoorEvidence.length,2);
  assert.ok(result.directAdjacencyVerifiedBySourceDoorVoxels);
+ // R142: the exterior entrance must physically OPEN into the model-chosen
+ // zone instead of always opening to the host's central corridor.
+ const evidence=result.entryFacingZoneEvidence;
+ const [ex,ey,ez]=evidence.exteriorOpeningOrigin;
+ const zone=result.program[0].zones.find(z=>z.id==='room-4');
+ assert.equal(evidence.exteriorEntranceDirectlyOpensIntoSelectedRoom,true);
+ assert.equal(evidence.interiorThresholdSupportedAndClearInB143Source,true);
+ assert.ok(ex>=zone.range.x[0]&&ex+1<=zone.range.x[1]);
+ assert.equal(ez,1);
+ assert.equal(ey,2);
+ assert.equal(result.sourceRouteAudit.sourceInteriorEntrance.x,ex);
+ assert.equal(result.sourceRouteAudit.sourceInteriorEntrance.z,2);
+ const voxels=new Set(result.compiled.primitives.map(p=>p.slice(0,3).join(',')));
+ for(let dx=0;dx<2;dx++){
+  assert.equal(voxels.has([ex+dx,1,2].join(',')),true);
+  for(let y=2;y<=4;y++)assert.equal(voxels.has([ex+dx,y,1].join(',')),false);
+ }
+ const oldSpine=branch.design.elements.find(x=>x.id==='exterior-entrance');
+ assert.notDeepEqual(evidence.exteriorOpeningOrigin,oldSpine.origin);
+ assert.deepEqual(branch.design.elements.find(x=>x.id==='exterior-entrance').origin,
+  oldSpine.origin);
  assert.notEqual(result.sourceSha256,branch.sourceSha256);
  assert.notEqual(result.geometrySha256,branch.geometrySha256);
  assert.equal(result.sourceRouteAudit.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
@@ -60,6 +81,11 @@ test('three-zone source graph selects entry face and a direct adjacent pair',()=
  // third zone MUST occupy the physically front-reaching whole-right wing.
  assert.equal(result.program[0].zones.find(x=>x.id==='room-3')
   .physicalSector,'whole-right');
+ const entry=result.entryFacingZoneEvidence;
+ assert.equal(entry.exteriorEntranceDirectlyOpensIntoSelectedRoom,true);
+ assert.equal(entry.physicalSector,'whole-right');
+ assert.equal(result.sourceRouteAudit.sourceInteriorEntrance.x,
+  entry.exteriorOpeningOrigin[0]);
 });
 test('short semantic IR preserves R130 assembled furniture compatibility',()=>{
  const base=compileR134MultiZonePlan(plan());
