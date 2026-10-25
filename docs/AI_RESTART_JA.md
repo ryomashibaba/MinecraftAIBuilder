@@ -10,8 +10,8 @@
 | 継続ブランチ | `feature/b198zr1-protected-architectural-revision` |
 | 継続PR | [#128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128) — Open / Draft / Unmerged |
 | HEAD | [開発ブランチの最新HEADを毎回GitHubで確認](https://github.com/ryomashibaba/MinecraftAIBuilder/commits/feature/b198zr1-protected-architectural-revision)（R98の初期実メッシュ検証対象は `9a2b5de9d8ba41a2b7ca4e626aa9d54ff4ffffdd`） |
-| 最新確認済み実装工程 | **R140 実装・CI再検証中。前回R139は123/124 PASS、3室グラフ1件失敗→原因修正済み。美術・実Minecraft・実モデルの新関係設計は未検証** |
-| 次に取り組む工程 | **R140のCI・R139真正3D成果物を判定。成功後、新しいローカルQwen/Gemma1回の関係IR入り応答で独自の配置判断を実測** |
+| 最新確認済み実装工程 | **R141 実装とCI回帰追加。R140 CI成功・R139/R138比較3D成果物確認。R141 CIと新しい実モデル関係設計の成功は未確定** |
+| 次に取り組む工程 | **R141 CI結果の確認・失敗修正。ローカルQwen/Gemmaでの1回の新グラフ設計実測、3Dと意味関係の独立検証。** |
 | 施工・モデル | **2026-10-24 Qwen/Gemma実推論・Minecraft試験施工の包括許可あり（都度承認不要）。** 準備性と各種技術安全ゲートは別途必要。現行コードのNOT_PREPARED / 9 BLOCKEDは自動PASSではない |
 
 **最新情報への直リンク：** [ブランチの現在地](https://github.com/ryomashibaba/MinecraftAIBuilder/tree/feature/b198zr1-protected-architectural-revision) ／ [Actions一覧](https://github.com/ryomashibaba/MinecraftAIBuilder/actions) ／ [PR #128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128)
@@ -19,6 +19,14 @@
 
 
 
+
+## R141 — グラフ優先の設備配置と実ローカルモデル検証入口（2026-10-25 JST）
+- **R140成功確認**：CI `40163248832` は SUCCESS。Artifact `R139-REAL-QWEN-SEMANTICS-HOST-GRAPH-3D` と `R138-REAL-QWEN14B-STRIP-VS-BRANCH-3D` をGitHub Actionsに生成済み。これは実Qwen保存回答の意味要素をホスト指定グラフへ変換した成果であって、Qwen自体が新グラフを作った証拠ではない。
+- **重要なアーキテクチャ修正**：R139の新モデル単一応答解析はR135の設備配置成功を前提としており、直列型では組立設備を置けないが新しい分岐型なら置ける設計まで誤ってHOLDしていた。R135の意味検証（役割/部屋ID/全室設備指定）を独立関数 `validateR135SemanticObjects` に抽出し、R139で **意味検証→R134基底コンパイル→R139空間グラフ生成→R130実設備生成** の順にする。R135旧通常モードは従来の外部インターフェイスと幾何生成を維持。サイト上限は引き続き厳格に照合。
+- **最短の実モデル試験入口**：`node scripts/r141-local-graph-evidence.mjs`。読取専用Ollamaモデル探索でQwen/Gemmaを自動選択（`--model` で正確なインストール名を任意指定可能）、未知のコミュニティ設備の用途を1回のローカルモデル返信で設計。保存専用新フォルダに生回答・IR・本物のB143ソース/ボクセル/回転3D・経路監査・モデル選択/時間/判定証拠を保存。既存ローカルユーザーデータやワールドへの書込なし、Auto GitHub pushなし。モデルがローカルにない場合はHOLD。
+- CIに `scripts/r139-relational-model.test.mjs` の「旧直列型設備は失敗／グラフ型は成功」回帰と `scripts/r141-local-graph-evidence.test.mjs` の1コマンド擬似ローカル実行、安全停止、出所区別を追加。**CIの擬似プロバイダ実行を本物のQwen/Gemma推論に昇格してはならない。** R141の追加CI結果はActionsで確認するまで未確定。
+- 禁止事項・未検証は不変：施工 `NOT_PREPARED`、9×`BLOCKED`、`BuildPlan.operations=[]`、世界操作0。美術/C、Minecraft/D、モデル新グラフ実推論/E、Mac8GB 2B性能は未検証。
+- **次の1手**：R141のCIが通れば3D比較を視覚審査し、新しいローカルQwen/Gemma実モデルで1回のグラフ設計試験を行い、元回答の関係選択とホスト実3Dが対応したか検証する。新しい専用テンプレート追加やR番号増殖はしない。
 
 ## R140 — 入口側判定修正＋ローカルモデル1回の空間関係設計経路（2026-10-25 JST）
 - R139 CI（run `40161735323`）の **124件中123件PASS／1件FAIL** を根拠に修正。3室構成の右側全奥行室 `whole-right` は入口側にも実際に面するので、`entryFacingZoneId` として扱う。R138間取りを変えず、ソース検証・元原本・安全ゲートは維持。
