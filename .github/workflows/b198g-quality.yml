@@ -60,6 +60,10 @@ on:
       - 'scripts/r138-user-branch-comparison.test.mjs'
       - 'source/ai/r139-room-relations.mjs'
       - 'scripts/r139-room-relations.test.mjs'
+      - 'scripts/r139-relational-instructions.mjs'
+      - 'scripts/r147-esm-import-order.test.mjs'
+      - 'scripts/r146-one-click-offline-replay.ps1'
+      - 'RUN_R146_OFFLINE_REPLAY.cmd'
       - 'scripts/r139-relational-model.mjs'
       - 'scripts/r139-relational-model.test.mjs'
       - 'scripts/r139-user-qwen-relations-comparison.mjs'
@@ -101,6 +105,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: R147 real fresh Node process import cycle smoke (before expensive QA)
+        run: |
+          node --check scripts/r139-relational-instructions.mjs
+          node --check scripts/r147-esm-import-order.test.mjs
+          node --test scripts/r147-esm-import-order.test.mjs
       - name: B198A-G original regressions and source topology QA
         run: |
           node --test \
