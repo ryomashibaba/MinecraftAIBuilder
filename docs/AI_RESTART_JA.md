@@ -20,6 +20,12 @@
 
 
 
+## R131 - six-scene real Qwen source 3D comparison (2026-10-25 JST)
+- Added scripts/r131-real-3d-comparison.mjs and a connected CI evidence artifact. The two immutable real Qwen14B source plans (shop: 933 voxels, research: 2936) are paired with source-derived compact and assembled furniture scenes: six rotating local HTML viewers plus an iframe-based side-by-side index and precise JSON results.
+- The same independent criteria measure each derivative: per-zone item count, minimum 8 real new voxels per required role, one reachable two-wide pad and explicit shop z-axis front-back ordering. The historic shop is split sideways; even when its added equipment is larger, the spatial ordering remains HOLD. Increasing voxels is NOT a certification of useful equipment or design aesthetics.
+- Source provenance: the original plans were model-authored in 2026-10-24 evidence; every furniture-intent fixture in this comparison is host/human authored, not new Qwen inference. User visual review remains NOT_REVIEWED, Minecraft world writes=0, all 9 gates BLOCKED, BuildPlan empty.
+- Efficiency choice: reuse B143 offline 3D viewer, existing source hashes, general feature compiler, independent audit and the previous review artifact name; avoid a new UI engine or second test suite. After reviewing the visual result, priority moves to a real local Qwen/Gemma source run and whole-building spatial creativity, not more abstract unit probes.
+
 ## R130 — 複合設備の真正3D表現 / 効率戦略再監査（2026-10-25 JST）
 - 戦略v2の「LLMは短い意味IR、共通エンジンは3D幾何」「ジャンル固定しない」「原本SHA不変」「CIと実機の評価を分ける」「工程数でなく能力を伸ばす」を再確認。R126〜R129は検査側が先行し、設備が単なる数個の直方体に留まる効率上の偏りを認定。
 - R129 CI #40148347068 は4件FAIL: B143のvoxel materialは文字列ではなく数値ID。既存ゲートを緩めず正式MATERIALS IDと比較する修正を実施。修復CI [#40149004627](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40149004627) SUCCESS。
