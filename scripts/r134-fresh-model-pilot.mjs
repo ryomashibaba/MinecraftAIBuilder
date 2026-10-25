@@ -33,6 +33,8 @@ const SYSTEM=[
  'footprint EXACT width and depth, whole numbers between 18 and site limits.',
  'materials EXACT floor,wall,roof. floor wood/stone/concrete.',
  'wall and roof wood/stone/concrete/metal.',
+ 'Important: materials.roof MUST be a material such as metal, NEVER sawtooth/ridge/flat.',
+ 'form.roofProfile is a shape (flat/ridge/sawtooth), and is NOT materials.roof.',
  'layout EXACT axis and spaces. axis x=west-east, z=entrance-front-to-rear.',
  'spaces must have 3 or 4 distinct rooms; each EXACT id,purpose,weight.',
  'Every purpose is a meaningful description of 3-180 characters.',
@@ -116,13 +118,15 @@ export function parseR134FreshArgs(argv){
   siteDepth=args['--site-depth']?Number(args['--site-depth']):32;
  makeR134FreshRequest({brief:args['--brief'],siteWidth,siteDepth});
  const recoveryMode=args['--recovery']??'none';
- if(!['none','bounded'].includes(recoveryMode))fail('INVALID_RECOVERY_MODE');
+ if(!['none','bounded','roof-material-only'].includes(recoveryMode))fail('INVALID_RECOVERY_MODE');
  const equipmentMode=args['--equipment']??'none';
  if(!['none','assembled'].includes(equipmentMode))fail('INVALID_EQUIPMENT_MODE');
  const topologyMode=args['--topology']??'linear';
  if(!['linear','graph'].includes(topologyMode)||
   (topologyMode==='graph'&&(equipmentMode!=='assembled'||
-   recoveryMode!=='none'||siteWidth<24||siteDepth<24)))
+   !['none','roof-material-only'].includes(recoveryMode)||
+   siteWidth<24||siteDepth<24))||
+  (recoveryMode==='roof-material-only'&&topologyMode!=='graph'))
   fail('GRAPH_REQUIRES_ASSEMBLED_NO_RECOVERY_AND_SITE_24');
  return {model:args['--model'],brief:args['--brief'],equipmentMode,recoveryMode,topologyMode,
   outDir:path.resolve(args['--out']),siteWidth,siteDepth,endpoint};
@@ -132,12 +136,14 @@ export async function runR134FreshModel({
  endpoint='http://127.0.0.1:11434/v1/chat/completions'
 }={}, {fetcher=fetch,timeoutMs=120000}={}){
  const p=ENDPOINT.exec(endpoint??'');
- if(!['none','bounded'].includes(recoveryMode)||
+ if(!['none','bounded','roof-material-only'].includes(recoveryMode)||
   (recoveryMode==='bounded'&&equipmentMode!=='assembled')||
   !['none','assembled'].includes(equipmentMode)||
   !['linear','graph'].includes(topologyMode)||
   (topologyMode==='graph'&&(equipmentMode!=='assembled'||
-   recoveryMode!=='none'||siteWidth<24||siteDepth<24))||
+   !['none','roof-material-only'].includes(recoveryMode)||
+   siteWidth<24||siteDepth<24))||
+  (recoveryMode==='roof-material-only'&&topologyMode!=='graph')||
   !MODEL.test(model??'')||!p||!range(Number(p[1]),1,65535)||
   typeof outDir!=='string'||!outDir.trim()||
   typeof fetcher!=='function'||!range(timeoutMs,1000,300000))
@@ -205,9 +211,21 @@ export async function runR134FreshModel({
    const recovered=recoveryMode==='bounded'?
     recoverR137Furnished({raw,request,build:parseR135FreshFurnishedReply}):null;
    const composed=topologyMode==='graph'?
-    parseR139RelationalFurnishedReply(raw,request):
+    parseR139RelationalFurnishedReply(raw,request,{
+     allowRoofMaterialCorrection:recoveryMode==='roof-material-only'
+    }):
     recovered?.result??(equipmentMode==='assembled'?
      parseR135FreshFurnishedReply(raw,request):null);
+   if(composed?.roofMaterialBoundaryEvidence){
+    write(dir,'R146_ROOF_MATERIAL_BOUNDARY_EVIDENCE.json',
+     composed.roofMaterialBoundaryEvidence);
+    if(composed.boundedHostRepairRequired){
+     write(dir,'R146_DERIVED_MODEL_REPLY_NOT_ORIGINAL.json',
+      composed.derivedModelReply);
+     report.boundedHostRepairRequired=true;
+     report.hostRepairActions=composed.hostRepairActions;
+    }
+   }
    if(recovered){
     write(dir,'R137_BOUNDED_RECOVERY_EVIDENCE.json',recovered.evidence);
     write(dir,'R137_DERIVED_MODEL_IR_NOT_ORIGINAL.json',recovered.derivedReply);
