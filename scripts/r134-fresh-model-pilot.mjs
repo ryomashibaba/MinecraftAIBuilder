@@ -12,6 +12,8 @@ import {compileR134MultiZonePlan,SCHEMA}
 import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
 import {parseR135FreshFurnishedReply} from './r135-furnished-program.mjs';
 import {recoverR137Furnished} from './r137-bounded-recovery.mjs';
+import {parseR139RelationalFurnishedReply,RELATIONAL_INSTRUCTIONS}
+ from './r139-relational-model.mjs';
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const ENDPOINT=/^http:\/\/127\.0\.0\.1:(\d{2,5})\/v1\/chat\/completions$/;
 const MODEL=/^[A-Za-z0-9._:/-]{2,140}$/;
@@ -54,6 +56,22 @@ const FURNISHED_SYSTEM=[
  'Choose equipment based on room activity; preserve clear physical walkways.',
  'The host makes real assembled furniture and rejects unreachable rooms.'
 ].join('\n');
+// Graph mode is an OPT-IN new model instruction, not an inferred
+// attribute of any archived raw reply.  A small IR, not model coordinates.
+const RELATIONAL_SYSTEM=SYSTEM.replace(
+ 'Return ONLY JSON with EXACT keys: id,title,footprint,materials,layout,form.',
+ 'Return ONLY JSON with EXACT keys: id,title,footprint,materials,layout,form,objects,relations.'
+).replace('For 4 zones on the layout axis, footprint along that axis MUST be >=23.',
+ 'For 4 zones use layout axis z and a footprint at least 24 by 24.'
+).replace('For 3 zones on the layout axis, footprint along that axis MUST be >=18.',
+ 'For 3 zones use layout axis z and a footprint at least 24 by 24.')+
+ '\n'+FURNISHED_SYSTEM.replace(
+ 'In addition to the architecture keys, output EXACTLY one more key: objects.',
+ 'The objects key is required.'
+ )+'\n'+RELATIONAL_INSTRUCTIONS.replace(
+ 'Also output exactly one extra top-level key: relations.',
+ 'The relations key is required.'
+ );
 export function makeR134FreshRequest({brief,siteWidth=32,siteDepth=32}={}){
  if(!text(brief)||!range(siteWidth,18,32)||!range(siteDepth,18,32))
   fail('BRIEF_OR_SITE');
@@ -82,7 +100,7 @@ export function parseR134FreshModelReply(raw,request){
 export function parseR134FreshArgs(argv){
  if(argv.length===1&&argv[0]==='--help')return {help:true};
  const allowed=new Set(['--model','--brief','--out','--site-width',
-  '--site-depth','--endpoint','--equipment','--recovery']);
+  '--site-depth','--endpoint','--equipment','--recovery','--topology']);
  const args={};
  for(let i=0;i<argv.length;i+=2){
   const name=argv[i],value=argv[i+1];
@@ -101,17 +119,25 @@ export function parseR134FreshArgs(argv){
  if(!['none','bounded'].includes(recoveryMode))fail('INVALID_RECOVERY_MODE');
  const equipmentMode=args['--equipment']??'none';
  if(!['none','assembled'].includes(equipmentMode))fail('INVALID_EQUIPMENT_MODE');
- return {model:args['--model'],brief:args['--brief'],equipmentMode,recoveryMode,
+ const topologyMode=args['--topology']??'linear';
+ if(!['linear','graph'].includes(topologyMode)||
+  (topologyMode==='graph'&&(equipmentMode!=='assembled'||
+   recoveryMode!=='none'||siteWidth<24||siteDepth<24)))
+  fail('GRAPH_REQUIRES_ASSEMBLED_NO_RECOVERY_AND_SITE_24');
+ return {model:args['--model'],brief:args['--brief'],equipmentMode,recoveryMode,topologyMode,
   outDir:path.resolve(args['--out']),siteWidth,siteDepth,endpoint};
 }
 export async function runR134FreshModel({
- model,brief,outDir,siteWidth=32,siteDepth=32,equipmentMode='none',recoveryMode='none',
+ model,brief,outDir,siteWidth=32,siteDepth=32,equipmentMode='none',recoveryMode='none',topologyMode='linear',
  endpoint='http://127.0.0.1:11434/v1/chat/completions'
 }={}, {fetcher=fetch,timeoutMs=120000}={}){
  const p=ENDPOINT.exec(endpoint??'');
  if(!['none','bounded'].includes(recoveryMode)||
   (recoveryMode==='bounded'&&equipmentMode!=='assembled')||
   !['none','assembled'].includes(equipmentMode)||
+  !['linear','graph'].includes(topologyMode)||
+  (topologyMode==='graph'&&(equipmentMode!=='assembled'||
+   recoveryMode!=='none'||siteWidth<24||siteDepth<24))||
   !MODEL.test(model??'')||!p||!range(Number(p[1]),1,65535)||
   typeof outDir!=='string'||!outDir.trim()||
   typeof fetcher!=='function'||!range(timeoutMs,1000,300000))
@@ -123,13 +149,15 @@ export async function runR134FreshModel({
   semanticEquipment:{perRoomAtLeastOne:true,maxObjects:8,
    allowedRoles:['work-surface','equipment-bank','display-stand',
     'storage-rack','seating']}}:request;
- const maxTokens=equipmentMode==='assembled'?1450:900;
+ const maxTokens=topologyMode==='graph'?1750:
+  equipmentMode==='assembled'?1450:900;
  fs.mkdirSync(dir,{recursive:false});
  const report={
   schema:'r134-fresh-one-model-to-real-multizone-v1',
   status:'HOLD_NOT_STARTED',model,modelCalls:0,
   testInjectionPresent:injected,
-  originalModelResponseCaptured:false,equipmentMode,recoveryMode,
+  originalModelResponseCaptured:false,equipmentMode,recoveryMode,topologyMode,
+  relationalIntentFromModel:false,realRoomGraph3D:false,
   boundedHostRepairRequired:false,hostRepairActions:[],
   equipmentCount:0,addedEquipmentVoxels:0,
   eachRoomHasModelChosenEquipment:false,
@@ -158,8 +186,8 @@ export async function runR134FreshModel({
     body:JSON.stringify({model,stream:false,temperature:0.65,
      max_tokens:maxTokens,reasoning_effort:'none',
      response_format:{type:'json_object'},messages:[
-      {role:'system',content:equipmentMode==='assembled'?
-       SYSTEM+'\n'+FURNISHED_SYSTEM:SYSTEM},
+      {role:'system',content:topologyMode==='graph'?RELATIONAL_SYSTEM:
+       equipmentMode==='assembled'?SYSTEM+'\n'+FURNISHED_SYSTEM:SYSTEM},
       {role:'user',content:JSON.stringify(sourceRequest)}]})});
    if(!response||response.ok!==true)
     fail('MODEL_HTTP_'+String(response?.status??'UNKNOWN'));
@@ -176,21 +204,40 @@ export async function runR134FreshModel({
    report.originalModelResponseCaptured=true;
    const recovered=recoveryMode==='bounded'?
     recoverR137Furnished({raw,request,build:parseR135FreshFurnishedReply}):null;
-   const composed=recovered?.result??(equipmentMode==='assembled'?
-    parseR135FreshFurnishedReply(raw,request):null);
+   const composed=topologyMode==='graph'?
+    parseR139RelationalFurnishedReply(raw,request):
+    recovered?.result??(equipmentMode==='assembled'?
+     parseR135FreshFurnishedReply(raw,request):null);
    if(recovered){
     write(dir,'R137_BOUNDED_RECOVERY_EVIDENCE.json',recovered.evidence);
     write(dir,'R137_DERIVED_MODEL_IR_NOT_ORIGINAL.json',recovered.derivedReply);
     report.boundedHostRepairRequired=recovered.evidence.boundedHostRepairRequired;
     report.hostRepairActions=recovered.evidence.repairActions;
    }
-   const base=composed?.base??parseR134FreshModelReply(raw,request);
+   const base=composed?.originalSequentialBase??composed?.base??
+    parseR134FreshModelReply(raw,request);
    const result=composed?.featured??base;
    write(dir,'MODEL_PROGRAM_IR.json',base.plan);
    if(composed){
     write(dir,'MODEL_CHOSEN_FUNCTIONAL_EQUIPMENT.json',
-     composed.objectRolesChosenByModel);
-    write(dir,'ASSEMBLED_FEATURE_INTENT.json',composed.intent);
+     composed.objectRolesChosenByModel??
+      composed.featured.featurePlan.objects.map(
+       ({id,zoneId,role,corner})=>({id,zoneId,role,corner})));
+    write(dir,'ASSEMBLED_FEATURE_INTENT.json',
+     composed.intent??composed.featured.featurePlan);
+    if(topologyMode==='graph'){
+     write(dir,'R139_MODEL_SPATIAL_RELATIONS.json',composed.semanticIntent);
+     write(dir,'R139_HOST_GRAPH_B143_SOURCE.json',
+      composed.relationalBase.design);
+     write(dir,'R139_GRAPH_SOURCE_AUDIT.json',{
+      directDoors:composed.relationalBase.directAdjacencyDoorEvidence,
+      entryFacing:composed.relationalBase.entryFacingZoneEvidence,
+      sourceSha256:composed.relationalBase.sourceSha256,
+      geometrySha256:composed.relationalBase.geometrySha256,
+      sourceRoutes:composed.relationalBase.sourceRouteAudit.status,
+      sourceOnly:true,actualMinecraftWalking:'NOT_TESTED'
+     });
+    }
     write(dir,'ORIGINAL_B143_SHELL_SOURCE.json',base.design);
     write(dir,'ORIGINAL_SHELL_VOXEL_EVIDENCE.json',{
      sourceSha256:base.sourceSha256,geometrySha256:base.geometrySha256,
@@ -207,6 +254,8 @@ export async function runR134FreshModel({
    if(composed)write(dir,'shell.html',renderB143Html(
     compileB143Gallery([base.design]),tpl));
    report.modelAuthoredProgram=!injected;
+   report.relationalIntentFromModel=topologyMode==='graph'&&!injected;
+   report.realRoomGraph3D=topologyMode==='graph';
    report.newRealB143Source=true;
    report.sourceSha256=result.sourceSha256;
    report.geometrySha256=result.geometrySha256;
@@ -214,9 +263,12 @@ export async function runR134FreshModel({
    report.zoneCount=base.program[0].zones.length;
    if(composed){
     report.equipmentCount=composed.featured.placements.length;
-    report.addedEquipmentVoxels=composed.addedTrueB143Voxels;
+    report.addedEquipmentVoxels=composed.addedTrueB143Voxels??
+     composed.featured.addedVoxelCount;
     report.eachRoomHasModelChosenEquipment=
-     composed.physicallyRepresentedZoneCount===report.zoneCount;
+     (composed.physicallyRepresentedZoneCount??
+      new Set(composed.featured.placements.map(x=>x.zoneId)).size)
+       ===report.zoneCount;
     report.shellSourceSha256=base.sourceSha256;
    }
    report.sourceRoutes=result.sourceRouteAudit.status;
@@ -238,7 +290,7 @@ export async function runR134FreshModel({
 if(process.argv[1]===fileURLToPath(import.meta.url)){
  try{
   const opts=parseR134FreshArgs(process.argv.slice(2));
-  if(opts.help)console.log('node scripts/r134-fresh-model-pilot.mjs --model qwen3.5:2b --brief "Invent a compact workshop with four distinct rooms" --equipment assembled --out NEW_DIR (local Ollama only, no world writes)');
+  if(opts.help)console.log('node scripts/r134-fresh-model-pilot.mjs --model qwen3:14b --brief "Invent a compact workshop with four distinct rooms" --equipment assembled --topology graph --out NEW_DIR (local Ollama only, no world writes)');
   else{
    const report=await runR134FreshModel(opts);
    console.log(JSON.stringify({status:report.status,modelCalls:report.modelCalls,
