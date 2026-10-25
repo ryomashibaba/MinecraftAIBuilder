@@ -229,6 +229,10 @@ export async function runR134FreshModel({
      write(dir,'R139_MODEL_SPATIAL_RELATIONS.json',composed.semanticIntent);
      write(dir,'R139_HOST_GRAPH_B143_SOURCE.json',
       composed.relationalBase.design);
+     write(dir,'R139_HOST_ROOM_SECTOR_PROGRAM.json',
+      composed.relationalBase.program);
+     write(dir,'R139_HOST_GRAPH_EQUIPMENT_PLACEMENTS.json',
+      composed.featured.placements);
      write(dir,'R139_GRAPH_SOURCE_AUDIT.json',{
       directDoors:composed.relationalBase.directAdjacencyDoorEvidence,
       entryFacing:composed.relationalBase.entryFacingZoneEvidence,
