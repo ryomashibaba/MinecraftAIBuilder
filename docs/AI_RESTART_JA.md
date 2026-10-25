@@ -1,5 +1,14 @@
 # MinecraftAIBuilder — 最短AI再開入口
 
+## R167実モデル原本の失敗判明 → R168共通生成器研究（2026-10-25）
+- 実ユーザー保存済み `r157-unknown-use-20261025T125222536Z` のQwen3:14bによる3用途回答を、追加推論0回でR167再生。原文SHAは住宅 `ee1a1a30…`、店舗 `8623599c…`、研究 `3cb09a75…`。**R167は3件とも実B143生成0/3、真正美術成功0件**。
+- 原文共通問題：`layout.axis` に文字列 `z` ではなくリクエストの方向説明オブジェクトをコピー。R167の研究派生ではこれを`z`に限定補正し、**補正はホスト由来、モデルの自発的軸選択ではない**と明示。
+- 補正後HOLD：住宅と店舗は共有ノードを持つ2本の直接部屋接続 `R139_RELATIONS_GRAPH_REQUIRES_RICHER_GEOMETRY`、研究は機器IDが旧20字を超えるため `R135_FURNISHED_UNSUPPORTED_SEMANTIC_OBJECT`。3件とも元回答・安全ゲート維持。
+- R168研究では、一般的な長めの設備IDを検証し、必要時は短い安定ハッシュ由来B143要素IDへ変換（意味IDと設備位置の原本は保持）。4室R160では3室専用のR162/R163上部高窓を**偽適用せず**、R149実壁・入口・家具・屋根のみを先に検証。
+- 共有ノードのある4室は明示的な **host-only research** オプションで、2×2の物理4室グリッド、モデル指定の真の直接扉と必要最小限のホスト追加接続を別記録。モデルの `central-spine` と一致する構成とは**主張しない**。既定モデルコンパイラは無変更。
+- 既存Windows `RUN_R157_UNKNOWN_USE.cmd -ReuseOnly` はR156原本を再利用し、以前のR167証拠を上書きせず別の `R168_GRAPH_EVIDENCE_ZIP` に新たなオフライン評価を生成する構成。ユーザー実行・美術判定・Minecraft実歩行は未確認。実際のR168 CIが完了するまでPASSを主張しない。
+- 次は実R168 ZIPで**B143各用途の実ソース・5方向外観と未成立理由**を読み、外観/用途の差・家具アクセスをレビュー。ART HOLD / NOT_PREPARED / 9 BLOCKED / BuildPlan.operations=[]、main・原本・Draft PR #128保護。
+
 ## 最新現在地（R166、2026-10-25）
 - R165確定：HEAD `8dd18d4560412c618c491067a8c2073f0a990fbe`、source-only B198G品質CI [#40191931567](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40191931567) 成功（193テスト）。**未知用途3件の実Qwen/Gemma品質成功ではない**。
 - R166で既存の `RUN_R157_UNKNOWN_USE.cmd` が呼ぶ `scripts/r157-one-click-unknown-use.ps1` を改善。既存 `r157-unknown-use-*` の非模擬・topology・3ケースのR156マニフェストを発見した場合、**追加推論0回**で未作成のR157/R165監査のみ実行。既存原文とZIPを上書きしない。監査によるHOLD判定は維持。
