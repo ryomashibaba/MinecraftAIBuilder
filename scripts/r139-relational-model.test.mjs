@@ -391,3 +391,36 @@ test('R169: synthetic four-room eight-fixture observatory arrangement keeps orig
  if(ev.optionalDetailSuppressionOccurred)
   assert.equal(ev.suppressedUnsafeComponentCount,ev.suppressedUnsafeComponents.length);
 });
+
+
+test('R170: four genuine high-room voids and roof masses preserve low-level furniture, routes and blocked world gates',()=>{
+ for(const profile of ['flat','ridge','sawtooth']){
+  const model=reply();
+  model.id='r170-multi-volume-'+profile;
+  model.form={roofProfile:profile,facadeLanguage:'plain'};
+  model.architecture={schema:'minecraftaibuilder-r160-topology-ir-v1',
+   entryHierarchy:'emphasized',daylightStrategy:'even',
+   roofEdge:'fine',spatialTopology:'central-spine'};
+  const raw=JSON.stringify(model);
+  const baseline=parseR139RelationalFurnishedReply(raw,request,
+   {allowTopologyComposition:true});
+  const studied=parseR139RelationalFurnishedReply(raw,request,
+   {allowTopologyComposition:true,allowHostVolumeResearch:true});
+  const shell=studied.architectural.completed,proof=shell.r170FourRoomVolumeEvidence;
+  assert.equal(studied.architectural.roomSectionScope,
+   'FOUR_ROOMS_HOST_RESEARCH_TRUE_HIGH_ROOM_VOLUMES');
+  assert.equal(proof.modelSelectedRoomCount,4);
+  assert.equal(proof.modelSelectedRoofFamilyPreserved,profile);
+  assert.equal(proof.hostArtStudyNotModelHeightChoice,true);
+  assert.equal(proof.originalLowerFiveLevelsUnchanged,true);
+  assert.equal(proof.roomSections.length,4);
+  assert.ok(proof.roomSections.every(q=>q.extraAirColumnsAtY6Y7>=30));
+  assert.equal(shell.sourceRouteAudit.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert.equal(shell.sourceRouteAudit.featureAccess.length,4);
+  assert.ok(shell.sourceRouteAudit.featureAccess.every(x=>x.reachableFromEntrance));
+  assert.notEqual(shell.geometrySha256,baseline.architectural.completed.geometrySha256);
+  assert.equal(shell.worldWrites,0);
+  assert.deepEqual(shell.gates,Array(9).fill('BLOCKED'));
+  assert.deepEqual(shell.BuildPlan.operations,[]);
+ }
+});
