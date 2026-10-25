@@ -10,8 +10,8 @@
 | 継続ブランチ | `feature/b198zr1-protected-architectural-revision` |
 | 継続PR | [#128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128) — Open / Draft / Unmerged |
 | HEAD | [開発ブランチの最新HEADを毎回GitHubで確認](https://github.com/ryomashibaba/MinecraftAIBuilder/commits/feature/b198zr1-protected-architectural-revision)（R98の初期実メッシュ検証対象は `9a2b5de9d8ba41a2b7ca4e626aa9d54ff4ffffdd`） |
-| 最新確認済み実装工程 | **R145：同一PRの旧CI自動キャンセル、Windows 1操作の本物ローカルQwen 1試行→真正3D/独立QA/ZIP収集を実装。GitHubコミット済みだが、CIはQueued/Pendingで増分PASS未確定、実モデル生成は未実施。** |
-| 次に取り組む工程 | **R145実CIの確認・不具合修正、R145の安全な1回ローカルQwen/Gemma実測ZIPの受領と3D評価。そのデータで初めて機能/美術の次の改善方向を決める。** |
+| 最新確認済み実装工程 | **R146：ユーザー提供の実Qwen R145 HOLD ZIP原因確定＝sawtoothを材料欄に誤使用。原文SHA保存、屋根材だけの透明HOST補正、モデル再推論0のオフライン真正B143 3D検証コードと回帰CI登録済み。R146 CI成功・補正後全3D成功は未確認。** |
+| 次に取り組む工程 | **R146の保存済み本物Qwen回答をオフライン再生して3D/独立監査の合否を確定し、もし次段階でHOLDならその二次原因を絞って修正。成功後は出力3Dの人間美術審査。** |
 | 施工・モデル | **2026-10-24 Qwen/Gemma実推論・Minecraft試験施工の包括許可あり（都度承認不要）。** 準備性と各種技術安全ゲートは別途必要。現行コードのNOT_PREPARED / 9 BLOCKEDは自動PASSではない |
 
 **最新情報への直リンク：** [ブランチの現在地](https://github.com/ryomashibaba/MinecraftAIBuilder/tree/feature/b198zr1-protected-architectural-revision) ／ [Actions一覧](https://github.com/ryomashibaba/MinecraftAIBuilder/actions) ／ [PR #128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128)
@@ -19,6 +19,18 @@
 
 
 
+
+## R146 — 実Qwen R145 HOLDの根本原因とゼロ再推論復旧（2026-10-25 JST）
+- **本物のQwen3:14b R145回答をユーザーから受領**：`r145-real-qwen-graph-20261025T054407418Z.zip`、R141_REPORT = `HOLD_REAL_LOCAL_GRAPH_OR_GEOMETRY`、真の下位停止理由 `R134_MULTIZONE_PLAN_CONTRACT`。モデル呼び出し1回、原文取得成功、3D/独立動線監査には未到達。
+- **原因確定**：Qwenが`materials.roof: "sawtooth"`、`form.roofProfile: "sawtooth"`を同時指定。後者は正しい屋根形状、前者は不正な材質（許可：wood/stone/concrete/metal）。他のモデル回答に4室・各室2個で合計8設備・入口に`entry-demonstration`・直接隣接に`fabrication-studio ↔ technical-repair-bay`が入っている。これは実Qwenの**空間関係の生回答**であり、以前の保存済みQwenが関係IRを持たなかったR139ホスト案とは明確に異なる。
+- 生回答の SHA-256 は `d67dc624744b4745e8e8c228e20bde00ccd39c7b506d0ad82753f54f1db82591`。内容そのままの文字列を `scripts/fixtures/r146-user-qwen14b-20261025-raw.json` に保存。後続の生成・監査と**オリジナル原文の同一性**を区別する。
+- **境界処理の限定修正**：`source/ai/r146-roof-material-boundary.mjs` に1フィールドのみ修正する純粋関数を実装。`materials.roof` が合法な屋根形状で、`form.roofProfile` と完全一致し、壁材が合法である場合**だけ**、Qwenが既に選んだ `materials.wall` を屋根材へ複写する。その他の屋根素材/間取り/室/関係/設備/用途は補正しない。原文SHAとHOST修正操作をすべて記録する。曖昧な値はHOLD。
+- `scripts/r139-relational-model.mjs` にオプトイン`allowRoofMaterialCorrection`を追加（既定OFFで旧厳格処理維持）。`scripts/r134-fresh-model-pilot.mjs` は`--topology graph --recovery roof-material-only`だけを追加許容、元モデルの生回答と補正後を別ファイルへ保存。モデルへの指示でもroof材料とroofProfile形状の区別を明示。
+- `scripts/r141-local-graph-evidence.mjs`の次回単発モデル試験は、限定の`roof-material-only`だけ許可。成功しても`REAL_LOCAL_GRAPH_WITH_EXPLICIT_HOST_ROOF_MATERIAL_CORRECTION_REVIEW_REQUIRED`と明示し、Qwenが合法な屋根材を自身で提案したという偽りはしない。元のモデル選択の部屋関係はそのまま。
+- **Qwen再推論0回で今回の実データを検証**：`scripts/r146-replay-saved-qwen.mjs` を追加。`node scripts/r146-replay-saved-qwen.mjs --out r146-saved-real-review` で原文固定fixtureを再生し、HOST材質補正→R139空間グラフ→R130設備→B143真正3D→R144独立ボクセル室/開口/設備/動線監査→ブラウザ3D出力。原文、不正/修正境界、SHA、3D、監査、README相当レポートを個別に残し、失敗時はHOLD理由を出す。
+- `scripts/r146-user-real-roof-recovery.test.mjs` は生回答SHA・厳格HOLD・素材1件以外の非改変・4室/8設備/1直接接続・真の完成3D検証・異常材料の非自動補正・施工0をテスト。CI`.github/workflows/b198g-quality.yml` に実テスト、3D再生、14日保持の成果ZIPアップロードを登録。
+- **重要な限界**：新コードはGitHubに保存したが、R146 Actions完走は未確認（Queued/Pending）。材質を補正した結果、設備や形態で次のHOLDが発生する可能性は残る。現時点では**ユーザー提供ZIPから修正後B143 3Dが合格したとは主張しない**。次工程はR146の実テストまたはユーザーPC上でゼロ推論オフライン再生し、二次原因を直す。
+- 安全不変：`NOT_PREPARED`、9ゲート`BLOCKED`、`BuildPlan.operations=[]`、ユーザーワールド操作0、Draft PR #128未マージ。Mac2B推論・Minecraft実歩行・美術品質は未認証。
 
 ## R145 — 実モデル実測用1操作入口とCIの古い実行抑止（2026-10-25 JST）
 - **GitHub Actionsの滞留対策**：`.github/workflows/b198g-quality.yml` にPR/ブランチ単位の `concurrency`／`cancel-in-progress: true` を追加。新しいコミットが来たら同一PRの古い検証をキャンセルし、検証済みのSHAを明示する。今までの大量の古いQueuedジョブがテスト成功を意味することはない。
