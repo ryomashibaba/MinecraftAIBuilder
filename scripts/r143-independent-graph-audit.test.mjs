@@ -32,6 +32,7 @@ const shaped=(count=4,pairs=undefined)=>{
  const graph=parsed.relationalBase,featured=parsed.featured;
  return {intent:parsed.semanticIntent,graphDesign:graph.design,
   finalDesign:featured.design,finalCompiled:featured.compiled,
+  roomProgram:graph.program,featurePlacements:featured.placements,
   graphAudit:{
    sourceSha256:graph.sourceSha256,geometrySha256:graph.geometrySha256,
    directDoors:graph.directAdjacencyDoorEvidence,
@@ -47,6 +48,11 @@ test('R143 recompiled source independently confirms two direct 2-wide cuts AND r
  assert.equal(evidence.selectedRoomExteriorEntranceVerified,true);
  assert.equal(evidence.directPairCount,2);
  assert.equal(evidence.independentlyVerifiedDirectPairCount,2);
+ assert.equal(evidence.independentlyReachedRoomCount,4);
+ assert.equal(evidence.independentEquipmentServiceCount,4);
+ assert.equal(evidence.claimedEquipmentCount,4);
+ assert.equal(evidence.independentSourceRoutes,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.ok(evidence.directPairs.every(x=>x.spansRealNamedBoundary));
  assert.ok(evidence.directPairs.every(x=>x.actuallyCutsSolid&&
   x.physicallyOpen&&x.supportedTwoWideSourceCrossing));
  assert.equal(evidence.readiness,'NOT_PREPARED');
@@ -59,6 +65,8 @@ test('R143 actually verifies three-room full-depth entry rather than trusting gr
  assert.equal(e.status,'SOURCE_ROOM_GRAPH_VERIFIED');
  assert.equal(e.selectedEntranceRoomId,'space-3');
  assert.equal(e.independentlyVerifiedDirectPairCount,1);
+ assert.equal(e.independentlyReachedRoomCount,3);
+ assert.equal(e.independentEquipmentServiceCount,3);
 });
 test('R143 refuses forged source identifiers, moved cuts and invented direct graph',()=>{
  const real=shaped();
@@ -78,4 +86,27 @@ test('R143 refuses forged source identifiers, moved cuts and invented direct gra
  const result=auditR143GraphEvidence(none);
  assert.equal(result.status,'HOLD_SOURCE_ROOM_GRAPH');
  assert.equal(result.independentlyVerifiedDirectPairCount,0);
+});
+
+test('R144 rejects room-boundary forgery despite physically open hole and otherwise valid host evidence',()=>{
+ const forged=structuredClone(shaped());
+ const room=forged.roomProgram[0].zones.find(z=>z.id==='space-1');
+ // The door itself remains present; only the claimed zone location changed.
+ room.range.z[1]-=2;
+ const evidence=auditR143GraphEvidence(forged);
+ assert.equal(evidence.status,'HOLD_SOURCE_ROOM_GRAPH');
+ assert.ok(evidence.directPairs.some(x=>!x.spansRealNamedBoundary));
+ assert.equal(evidence.worldWrites,0);
+});
+test('R144 source audit refuses invented room geometry or furnishings that block the door',()=>{
+ const real=shaped();
+ const tampered=structuredClone(real);
+ tampered.roomProgram[0].zones[0].id='fake-room';
+ assert.throws(()=>auditR143GraphEvidence(tampered),
+  /R143_SOURCE_DIRECT_PAIR_SOURCE_ID_OR_SHAPE/);
+ const altered=structuredClone(real);
+ altered.featurePlacements[0].origin=[1,2,1];
+ const proof=auditR143GraphEvidence(altered);
+ assert.equal(proof.status,'HOLD_SOURCE_ROOM_GRAPH');
+ assert.ok(proof.independentEquipmentServiceCount<4);
 });
