@@ -98,6 +98,10 @@ test('R167 saved-source three-use full replay uses only immutable synthetic HTTP
  assert.ok(r.cases.every(c=>c.sourceVerified),
   JSON.stringify(r.cases.map(c=>[c.id,c.reason])));
  assert.equal(r.geometryEvidenceCases,3);
+ assert.ok(r.cases.every(c=>c.r170VolumeAudit?.roomSections?.length===4),
+  JSON.stringify(r.cases.map(c=>[c.id,c.reason])));
+ assert.ok(r.cases.every(c=>c.r170VolumeAudit?.originalLowerFiveLevelsUnchanged===true));
+ assert.ok(r.cases.every(c=>c.r170VolumeAudit?.clearHighInteriorSampleCount>=120));
  for(const c of R156_CASES){
   assert.ok(fs.existsSync(path.join(out,c.id+'-derived.html')));
   assert.ok(fs.existsSync(path.join(out,c.id+'-roof.svg')));
