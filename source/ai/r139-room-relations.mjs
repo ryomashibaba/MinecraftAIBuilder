@@ -93,18 +93,29 @@ export function deriveR139RelationalTopology(base,intent){
  // spine entrance is replaced (not left as an invisible second entrance).
  const entryZone=byId.get(intent.entryFacingZoneId);
  const entryRange=entryZone.range;
- const entryX=Math.floor((entryRange.x[0]+entryRange.x[1])/2);
  const exteriorDoor=design.elements.find(e=>e.id==='exterior-entrance');
  const frontGlazing=design.elements.filter(e=>
   e.id==='window-front-glass'&&e.mode==='add');
+ const centerX=(entryRange.x[0]+entryRange.x[1])/2;
+ const candidates=Array.from({length:entryRange.x[1]-entryRange.x[0]},
+  (_,i)=>entryRange.x[0]+i).sort((a,b)=>
+  Math.abs(a+.5-centerX)-Math.abs(b+.5-centerX)||a-b);
+ const overlaps=(x,e,z)=>e.mode==='add'&&e.shape==='box'&&
+  e.origin[2]<=z&&z<e.origin[2]+e.size[2]&&
+  e.origin[1]<=4&&e.origin[1]+e.size[1]>2&&
+  e.origin[0]<=x+1&&e.origin[0]+e.size[0]>x;
+ // Façade fins at z=0 must not cross a doorway even when the inner
+ // threshold has perfect source clearance. This is source geometry, not
+ // an assumption about the unknown exterior terrain.
+ const entryX=candidates.find(x=>
+  !frontGlazing.some(e=>x<=e.origin[0]+e.size[0]-1&&
+   x+1>=e.origin[0])&&
+  !design.elements.some(e=>overlaps(x,e,0)));
  if(!exteriorDoor||exteriorDoor.shape!=='box'||
   exteriorDoor.mode!=='cut'||exteriorDoor.size[0]!==2||
   exteriorDoor.size[1]<3||exteriorDoor.size[2]!==1||
-  entryRange.z[0]!==2||
-  entryX<entryRange.x[0]||entryX+1>entryRange.x[1]||
-  frontGlazing.some(e=>entryX<=e.origin[0]+e.size[0]-1&&
-   entryX+1>=e.origin[0]))
-  fail('REAL_ROOM_ENTRANCE_CANNOT_FIT_WITHOUT_GLASS_CONFLICT');
+  entryRange.z[0]!==2||entryX===undefined)
+  fail('REAL_ROOM_ENTRANCE_CANNOT_FIT_WITHOUT_FACADE_CONFLICT');
  exteriorDoor.origin=[entryX,2,1];
  const divider=Math.floor(d/2);
  const doors=[];
@@ -134,7 +145,7 @@ export function deriveR139RelationalTopology(base,intent){
  for(let dx=0;dx<2;dx++){
   const x=entryX+dx;
   if(!has(x,1,2)||has(x,2,1)||has(x,3,1)||has(x,4,1)||
-   has(x,2,2)||has(x,3,2)||
+   has(x,2,2)||has(x,3,2)||has(x,4,2)||
    x<entryRange.x[0]||x>entryRange.x[1])
    fail('SELECTED_ROOM_ENTRANCE_BLOCKED_OR_UNSUPPORTED');
  }
