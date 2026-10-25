@@ -94,3 +94,12 @@ test('malicious specs and forged featured positions fail closed',()=>{
  assert.throws(()=>auditR129FunctionalAcceptance({
   base,featured:forged,spec:good}),/R129_ACCEPTANCE_/);
 });
+
+// A tampered material index must not be accepted even if an element exists.
+test('untrusted B143 material evidence is checked against canonical numeric palette',()=>{
+ const {base,featured}=build('shop',shopObjects);
+ const d=structuredClone(featured);const original=d.placements[0];
+ original.material='stone';
+ assert.throws(()=>auditR129FunctionalAcceptance({base,featured:d,spec:spec(base,[
+  need('display','front-retail-space','display-stand')])}),/R129_ACCEPTANCE_/);
+});

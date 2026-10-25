@@ -4,7 +4,7 @@
  * An authored brief alone, a room label, and an added object count are NOT
  * evidence that a Minecraft building works. Every test remains source-only.
  */
-import {verifyCompiled} from './b143-building-dsl.mjs';
+import {verifyCompiled,MATERIALS} from './b143-building-dsl.mjs';
 import {auditR125SourceRoutes} from './r125-source-routes.mjs';
 export const SCHEMA='minecraftaibuilder-r129-functional-acceptance-v1';
 const fail=s=>{throw Error('R129_ACCEPTANCE_'+s);};
@@ -77,6 +77,9 @@ export function auditR129FunctionalAcceptance({base,featured,spec}={}){
    fail('FEATURE_METADATA_NOT_SUPPORTED_BY_SOURCE');
   const zone=zones.get(p.zoneId),[x0,y0,z0]=p.origin;
   const [sx,sy,sz]=p.size;
+  // B143 primitives encode materials as zero-based numeric MATERIALS IDs.
+  const materialIndex=MATERIALS.indexOf(p.material);
+  if(materialIndex<0)fail('FEATURE_MATERIAL_INVALID');
   const floor=base.program.find(l=>l.level===zone.level).standingFloorY;
   if(y0!==floor||x0<zone.range.x[0]||x0+sx-1>zone.range.x[1]||
    z0<zone.range.z[0]||z0+sz-1>zone.range.z[1])
@@ -85,7 +88,7 @@ export function auditR129FunctionalAcceptance({base,featured,spec}={}){
   for(let x=x0;x<x0+sx;x++)for(let y=y0;y<y0+sy;y++)
    for(let z=z0;z<z0+sz;z++){
     const key=coord(x,y,z);
-    if(before.has(key)||newVoxelKeys.has(key)||after.get(key)!==p.material)
+    if(before.has(key)||newVoxelKeys.has(key)||after.get(key)!==materialIndex)
      fail('FEATURE_VOXEL_MISMATCH');
     newVoxelKeys.add(key);count++;
    }
