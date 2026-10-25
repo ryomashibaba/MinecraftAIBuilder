@@ -104,6 +104,27 @@ test('short semantic IR preserves R130 assembled furniture compatibility',()=>{
  assert.equal(furnished.sourceRouteAudit.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
  assert.deepEqual(furnished.gates,Array(9).fill('BLOCKED'));
 });
+test('R142 exterior entrance avoids real facade fins and reaches the model-selected zone',()=>{
+ const model=plan();model.form.facadeLanguage='fins';
+ const base=compileR134MultiZonePlan(model);
+ // Leave the direct adjacency pair in the left wing so the selected third
+ // room occupies the full-depth right wing, opposite to the old spine.
+ const derivative=deriveR139RelationalTopology(base,intent(base,'room-4',
+  [['room-1','room-2'],['room-3','room-4']]));
+ const selected=derivative.entryFacingZoneEvidence;
+ const [x,y,z]=selected.exteriorOpeningOrigin;
+ const solids=new Set(derivative.compiled.primitives.map(p=>
+  p.slice(0,3).join(',')));
+ assert.equal(selected.exteriorEntranceDirectlyOpensIntoSelectedRoom,true);
+ for(let dx=0;dx<2;dx++)for(let clearY=2;clearY<=4;clearY++){
+  assert.equal(solids.has([x+dx,clearY,z].join(',')),false);
+  assert.equal(solids.has([x+dx,clearY,0].join(',')),false,
+   'No facade fin may block the two-column source approach');
+ }
+ assert.equal(derivative.sourceRouteAudit.status,
+  'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(derivative.worldWrites,0);
+});
 test('impossible or forged graphs HOLD instead of faking adjacency',()=>{
  const base=compileR134MultiZonePlan(plan());
  assert.throws(()=>deriveR139RelationalTopology(base,
