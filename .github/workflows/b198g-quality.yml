@@ -65,6 +65,8 @@ on:
       - 'scripts/r139-user-qwen-relations-comparison.mjs'
       - 'scripts/r139-user-qwen-relations-comparison.test.mjs'
       - 'scripts/r140-relational-local-runner.test.mjs'
+      - 'scripts/r141-local-graph-evidence.mjs'
+      - 'scripts/r141-local-graph-evidence.test.mjs'
       - 'scripts/fixtures/r136-user-qwen14b-20261025.json.gz'
       - 'scripts/fixtures/r133-shop-independent-goals.json'
       - 'scripts/r125-feature-model-pilot.mjs'
@@ -153,8 +155,10 @@ jobs:
           node --check scripts/r139-relational-model.mjs
           node --check scripts/r139-relational-model.test.mjs
           node --check scripts/r139-user-qwen-relations-comparison.mjs
-          node --check scripts/r139-user-qwen-relations-comparison.test.mjs scripts/r140-relational-local-runner.test.mjs
+          node --check scripts/r139-user-qwen-relations-comparison.test.mjs scripts/r140-relational-local-runner.test.mjs scripts/r141-local-graph-evidence.test.mjs
           node --check scripts/r140-relational-local-runner.test.mjs
+          node --check scripts/r141-local-graph-evidence.mjs
+          node --check scripts/r141-local-graph-evidence.test.mjs
           node --check scripts/r125-feature-model-pilot.mjs
           node --check scripts/r125-feature-model-pilot.test.mjs
           node --check source/ai/r125-functional-acceptance.mjs
