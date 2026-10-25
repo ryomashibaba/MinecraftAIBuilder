@@ -1,6 +1,6 @@
 # R157 one-click local Qwen/Gemma genuine three-use study + strict provenance ZIP.
 # ALL inference is localhost via unchanged R134. No Minecraft/world writes.
-param([string]$Model = 'qwen3:14b')
+param([string]$Model = '', [switch]$Fresh)
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $branch = 'feature/b198zr1-protected-architectural-revision'
@@ -20,24 +20,94 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'R157_HOLD_FF_ONLY_FAILED' }
     $head = (& git rev-parse HEAD).Trim()
     if ($LASTEXITCODE -ne 0) { throw 'R157_HOLD_UNKNOWN_HEAD' }
-    $stamp = (Get-Date).ToUniversalTime().ToString('yyyyMMddTHHmmssfffZ')
-    $folder = "r157-unknown-use-$stamp"
-    $archive = "$folder.zip"
-    if ((Test-Path $folder) -or (Test-Path $archive)) {
-        throw 'R157_HOLD_OUTPUT_COLLISION'
+    # R166: preferentially inspect saved local model results (no new model calls).
+    # -Fresh forces three fresh requests, -Model limits reuse to that exact tag.
+    $existing = $null
+    $existingManifest = $null
+    if (-not $Fresh) {
+        $candidates = @(Get-ChildItem -LiteralPath $repo -Directory -Filter 'r157-unknown-use-*' |
+            Sort-Object LastWriteTimeUtc -Descending)
+        foreach ($candidate in $candidates) {
+            $manifestFile = Join-Path $candidate.FullName 'R156_STUDY_MANIFEST.json'
+            if (-not (Test-Path -LiteralPath $manifestFile)) { continue }
+            try { $manifest = Get-Content -LiteralPath $manifestFile -Raw | ConvertFrom-Json }
+            catch { continue }
+            if ($manifest.schema -ne 'r156-unknown-use-v1' -or
+                $manifest.architectureMode -ne 'topology' -or
+                $manifest.injectedFakeHttp -ne $false -or
+                @($manifest.cases).Count -ne 3) { continue }
+            if ($Model -and $manifest.model -ne $Model) { continue }
+            $existing = $candidate
+            $existingManifest = $manifest
+            break
+        }
     }
-    Write-Host "R157: THREE new local Ollama trials with model $Model."
-    Write-Host 'The same B143 compiler handles home, shop and laboratory.'
-    & node scripts/r156-unknown-use-study.mjs --model $Model --architecture topology --out $folder
-    $studyExit = $LASTEXITCODE
+    $reusedStudy = $null -ne $existing
+    if ($reusedStudy) {
+        $folder = $existing.Name
+        $archive = "$folder.zip"
+        $Model = [string]$existingManifest.model
+        $studyExit = 0
+        Write-Host "R166: saved $folder ($Model) selected, no new inference."
+        Write-Host 'To request new model output instead, pass -Fresh.'
+    } else {
+        # Check only localhost. Never create an evidence directory if Ollama/model
+        # is absent; never pull/download a model or silently change an explicit tag.
+        try {
+            $ollamaTags = Invoke-RestMethod -Uri 'http://127.0.0.1:11434/api/tags' -Method Get -TimeoutSec 10 -ErrorAction Stop
+        } catch {
+            throw 'R166_HOLD_LOCAL_OLLAMA_NOT_AVAILABLE'
+        }
+        $installed = @($ollamaTags.models | ForEach-Object { $_.name } |
+            Where-Object { $_ -is [string] -and $_ -match '^[A-Za-z0-9._:/-]{2,140}$' })
+        if (-not $Model) {
+            foreach ($name in @('qwen3:14b','qwen3.8:27b','gemma4:26b','qwen3.5:4b','gemma4:e4b')) {
+                if ($installed -contains $name) { $Model = $name; break }
+            }
+            if (-not $Model) {
+                $alternatives = @($installed | Where-Object { $_ -match '^(qwen|gemma)' } | Sort-Object)
+                if ($alternatives.Count -gt 0) { $Model = [string]$alternatives[0] }
+            }
+        }
+        if (-not $Model -or $installed -notcontains $Model) {
+            throw "R166_HOLD_MODEL_NOT_INSTALLED: requested=$Model; available=$($installed -join ',')"
+        }
+        $stamp = (Get-Date).ToUniversalTime().ToString('yyyyMMddTHHmmssfffZ')
+        $folder = "r157-unknown-use-$stamp"
+        $archive = "$folder.zip"
+        if ((Test-Path $folder) -or (Test-Path $archive)) { throw 'R157_HOLD_OUTPUT_COLLISION' }
+        Write-Host "R166: three new local Ollama trials with installed model $Model."
+        Write-Host 'Same B143 generator: home, shop, laboratory; no Minecraft writes.'
+        & node scripts/r156-unknown-use-study.mjs --model $Model --architecture topology --out $folder
+        $studyExit = $LASTEXITCODE
+    }
     $studyFile = Join-Path $folder 'R156_STUDY_MANIFEST.json'
     $reviewExit = 2
     $independentExit = 2
+    $newReviewFiles = $false
     if (Test-Path $studyFile) {
-        & node scripts/r157-comparative-review.mjs --study $folder
-        $reviewExit = $LASTEXITCODE
-        & node scripts/r165-local-model-architecture-audit.mjs --study $folder
-        $independentExit = $LASTEXITCODE
+        if (Test-Path (Join-Path $folder 'R157_SPATIAL_AUDIT.json')) {
+            $reviewExit = 0
+            Write-Host 'R166: existing R157 review preserved.'
+        } else {
+            & node scripts/r157-comparative-review.mjs --study $folder
+            $reviewExit = $LASTEXITCODE
+            $newReviewFiles = $true
+        }
+        if (Test-Path (Join-Path $folder 'R165_INDEPENDENT_AUDIT.json')) {
+            $independentExit = 0
+            Write-Host 'R166: existing R165 review preserved.'
+        } else {
+            & node scripts/r165-local-model-architecture-audit.mjs --study $folder
+            $independentExit = $LASTEXITCODE
+            $newReviewFiles = $true
+        }
+    }
+    # When an old ZIP already exists, preserve it even if extra reviews were
+    # generated from the saved originals during this invocation.
+    if ($newReviewFiles -and (Test-Path $archive)) {
+        $archive = "$folder-r166-review.zip"
+        if (Test-Path $archive) { throw 'R166_HOLD_REVIEW_ARCHIVE_ALREADY_EXISTS' }
     }
     if (-not (Test-Path $folder)) {
         throw "R157_HOLD_NO_EVIDENCE_FOLDER (nodeExit=$studyExit)"
@@ -58,9 +128,11 @@ try {
     }
     $provenance = [ordered]@{
         schema = 'minecraftaibuilder-r157-user-local-evidence-bundle-v1'
-        commit = $head
+        commit = if ($reusedStudy) { 'SAVED_STUDY_COMMIT_NOT_ATTESTED_HERE' } else { $head }
         branch = $branch
         requestedModel = $Model
+        savedEvidenceReused = $reusedStudy
+        newModelCallsInThisInvocation = if ($reusedStudy) { 0 } else { $null }
         inferenceHost = '127.0.0.1'
         expectedIndependentUseCalls = 3
         recordedUseResults = if ($null -ne $summary) { @($summary.cases).Count } else { 0 }
@@ -84,9 +156,15 @@ try {
         worldContacts = 0
         worldWrites = 0
     }
-    $provenance | ConvertTo-Json -Depth 8 |
-        Set-Content (Join-Path $folder 'R157_BUNDLE_PROVENANCE.json') -Encoding UTF8
-    Compress-Archive -Path $folder -DestinationPath $archive -CompressionLevel Optimal
+    if (-not (Test-Path (Join-Path $folder 'R157_BUNDLE_PROVENANCE.json'))) {
+        $provenance | ConvertTo-Json -Depth 8 |
+            Set-Content (Join-Path $folder 'R157_BUNDLE_PROVENANCE.json') -Encoding UTF8
+    }
+    if (-not (Test-Path $archive)) {
+        Compress-Archive -Path $folder -DestinationPath $archive -CompressionLevel Optimal
+    } else {
+        Write-Host 'R166: saved ZIP preserved; no overwrite.'
+    }
     if (-not (Test-Path $archive)) { throw 'R157_HOLD_NO_ARCHIVE' }
     Write-Host ''
     Write-Host "R157_STUDY_STATUS: $($provenance.studyStatus)"
