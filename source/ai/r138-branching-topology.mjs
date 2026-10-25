@@ -34,6 +34,7 @@ export function deriveR138BranchedTopology(base,{spatialBalance='balanced'}={}){
  const leftWall=Math.floor(w/2)-3+shift,
   rightWall=Math.floor(w/2)+2+shift;
  const gapStart=leftWall+1,gapEnd=rightWall-1;
+ if(shift!==0&&w<28)fail('SHIFTED_SPINE_NEEDS_REAL_ROOM_WIDTH');
  const divider=Math.floor(d/2);
  const front=[2,divider-1],rear=[divider+1,d-3];
  const left=[2,leftWall-1],right=[rightWall+1,w-3];
@@ -53,6 +54,16 @@ export function deriveR138BranchedTopology(base,{spatialBalance='balanced'}={}){
   {sector:'rear-left',x:left,z:rear,wallX:leftWall}
  ];
  const design=structuredClone(base.design);
+ // The original source entrance is centered. A shifted shared spine MUST
+ // move that physical opening before the R138 independent route audit;
+ // R139 subsequently relocates the exterior door into the selected room.
+ const preliminaryEntry=design.elements.find(e=>e.id==='exterior-entrance');
+ if(shift!==0){
+  if(!preliminaryEntry||preliminaryEntry.mode!=='cut'||
+   preliminaryEntry.shape!=='box'||preliminaryEntry.size[0]!==2)
+   fail('ORIGINAL_EXTERIOR_DOOR_MISSING');
+  preliminaryEntry.origin[0]+=shift;
+ }
  // Existing genuine envelope, roof, front door and source glass are reused.
  // Replaces ONLY the original internal linear partition.
  design.elements=design.elements.filter(x=>
