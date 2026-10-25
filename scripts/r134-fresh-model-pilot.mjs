@@ -157,6 +157,7 @@ const R160_SYSTEM=R151_SYSTEM.replace(
  'For side galleries choose EXACTLY ONE directAdjacencies pair of room ids.',
  'A 4-room layout MUST choose central-spine; no silently dropped fourth room.',
  'The host compiles real B143 walls, doors and circulation without model voxel coordinates.',
+ 'Host compiler derives actual usable tall rooms and stepped roofs from the room weights and locations.',
  'Do not request roof silhouette, volumeHierarchy, spatialBalance or depthBalance.',
  'Make topology selection from functional room needs, not building genre labels.',
  'Unrealizable layouts return HOLD, never silent fallback.'
@@ -392,6 +393,7 @@ export async function runR134FreshModel({
        spatialBalanceProof:composed.relationalBase?.r158SpatialBalanceEvidence??null,
        depthBalanceProof:composed.relationalBase?.r159DepthBalanceEvidence??null,
        independentSideGalleryProof:composed.relationalBase?.r160TopologyEvidence??null,
+       realUsableRoomSectionProof:composed.architectural?.integrated?.r162RoomSectionEvidence??null,
        humanArtReview:'NOT_REVIEWED',
        minecraftWalking:'NOT_TESTED',worldWrites:0});
      }
@@ -433,6 +435,8 @@ export async function runR134FreshModel({
     Boolean(composed?.architectural?.volume);
    report.genuineRooflineSourceOnly=
     Boolean(composed?.architectural?.roofline);
+   report.genuineTopologyDrivenHighRoomsSourceOnly=architectureMode==='topology'&&
+    Boolean(composed?.architectural?.integrated?.r162RoomSectionEvidence);
    report.genuineNonCentralTopologySourceOnly=architectureMode==='topology'&&
     Boolean(composed?.relationalBase?.r160TopologyEvidence);
    report.genuineDepthBalanceSourceOnly=architectureMode==='floorplan'&&

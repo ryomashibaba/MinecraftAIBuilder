@@ -30,6 +30,8 @@ import {validateR159FloorplanIntent,toR155FromR159}
  from '../source/ai/r159-floorplan-intent.mjs';
 import {deriveR160SideGalleryTopology}
  from '../source/ai/r160-side-gallery.mjs';
+import {deriveR162RoomSectionMassing}
+ from '../source/ai/r162-room-section-massing.mjs';
 import {validateR160TopologyIntent,r160ToR151}
  from '../source/ai/r160-topology-intent.mjs';
 
@@ -135,8 +137,13 @@ export function parseR139RelationalFurnishedReply(raw,request,
      allowSpatialBalanceComposition?toR155RoofIntent(architecture):architecture,
     authorship:'CALLER_ARCHITECTURE_IR_NOT_AUTHENTICATED'
    }):null;
-  const completed=deriveR150FurnitureArticulation(roofline??volume??envelope);
-  return {intent:structuredClone(architecture),envelope,volume,roofline,completed,
+  const integrated=allowTopologyComposition?
+   deriveR162RoomSectionMassing(envelope,{
+    topologyIntent:architecture.spatialTopology}):null;
+  const completed=deriveR150FurnitureArticulation(
+   integrated??roofline??volume??envelope);
+  return {intent:structuredClone(architecture),envelope,volume,roofline,
+   integrated,completed,
    intentAuthorship:'IN_THIS_SAME_MODEL_REPLY_NOT_HOST_INFERRED',
    geometryAuthorship:'HOST_DERIVED_FROM_BOUNDED_MODEL_SEMANTIC_IR',
    aestheticApproval:'NOT_REVIEWED'};
