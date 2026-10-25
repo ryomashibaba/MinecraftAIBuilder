@@ -12,8 +12,8 @@ import {compileR134MultiZonePlan,SCHEMA}
 import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
 import {parseR135FreshFurnishedReply} from './r135-furnished-program.mjs';
 import {recoverR137Furnished} from './r137-bounded-recovery.mjs';
-import {parseR139RelationalFurnishedReply,RELATIONAL_INSTRUCTIONS}
- from './r139-relational-model.mjs';
+import {RELATIONAL_INSTRUCTIONS}
+ from './r139-relational-instructions.mjs';
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const ENDPOINT=/^http:\/\/127\.0\.0\.1:(\d{2,5})\/v1\/chat\/completions$/;
 const MODEL=/^[A-Za-z0-9._:/-]{2,140}$/;
@@ -210,8 +210,14 @@ export async function runR134FreshModel({
    report.originalModelResponseCaptured=true;
    const recovered=recoveryMode==='bounded'?
     recoverR137Furnished({raw,request,build:parseR135FreshFurnishedReply}):null;
+   // Dynamic parser loading prevents the model PROMPT from constructing
+   // a static R134 -> R139 -> R135 -> R134 initialization cycle.
+   // This import reads only local code; it neither invokes the model again
+   // nor changes the original response or any Minecraft safety gate.
+   const relationalParser=topologyMode==='graph'?
+    (await import('./r139-relational-model.mjs')).parseR139RelationalFurnishedReply:null;
    const composed=topologyMode==='graph'?
-    parseR139RelationalFurnishedReply(raw,request,{
+    relationalParser(raw,request,{
      allowRoofMaterialCorrection:recoveryMode==='roof-material-only'
     }):
     recovered?.result??(equipmentMode==='assembled'?
