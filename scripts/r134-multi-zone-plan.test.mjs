@@ -87,6 +87,20 @@ test('true assembled furniture can be placed and independently counted in a four
  assert.equal(ev.unmetIds.length,0);
  assert.equal(ev.worldWrites,0);
 });
+test('long original natural-language prompts do not get rejected by the 180-char room-purpose limit',()=>{
+ const x=base('z',4);
+ x.brief='A truly new architectural research brief with usable functional spaces and equipment. '.repeat(6).slice(0,480);
+ const p=compileR134MultiZonePlan(x);
+ assert.equal(p.plan.brief,x.brief);
+ assert.equal(p.design.brief,x.brief);
+ assert.equal(p.sourceRouteAudit.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ const long=structuredClone(x);
+ long.brief+=' Extra details for the user that exceed the bounded 500 character B143 display field.';
+ const second=compileR134MultiZonePlan(long);
+ assert.equal(second.plan.brief,long.brief);
+ assert.equal(second.design.brief.length,500);
+ assert.equal(second.sourceRouteAudit.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+});
 test('an invalid tight footprint or malicious program fails without emitting source',()=>{
  for(const x of [
   p=>p.footprint.depth=18,

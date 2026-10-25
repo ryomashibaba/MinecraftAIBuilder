@@ -20,6 +20,10 @@ const n=(x,a,b)=>Number.isSafeInteger(x)&&x>=a&&x<=b;
 const slug=s=>typeof s==='string'&&/^[a-z][a-z0-9-]{2,39}$/.test(s);
 const description=s=>typeof s==='string'&&s.length>=3&&s.length<=180&&
  !/[\u0000-\u001f<>]/.test(s);
+const titleText=s=>typeof s==='string'&&s.length>=3&&s.length<=100&&
+ !/[\u0000-\u001f<>]/.test(s);
+const briefText=s=>typeof s==='string'&&s.length>=3&&s.length<=800&&
+ !/[\u0000-\u001f<>]/.test(s);
 /** Allocate real room clear lengths; no room may be only a one-cell label. */
 function spans(axisLength,items){
  const partitions=items.length-1;
@@ -45,7 +49,7 @@ function spans(axisLength,items){
 export function validateR134MultiZonePlan(plan){
  if(!only(plan,['schema','id','title','brief','footprint',
   'materials','layout','form'])||plan.schema!==SCHEMA||
-  !slug(plan.id)||!description(plan.title)||!description(plan.brief)||
+  !slug(plan.id)||!titleText(plan.title)||!briefText(plan.brief)||
   !only(plan.footprint,['width','depth'])||
   !n(plan.footprint.width,18,32)||!n(plan.footprint.depth,18,32)||
   !only(plan.materials,['floor','wall','roof'])||
@@ -144,7 +148,10 @@ export function compileR134MultiZonePlan(input){
    {x:[z.from,z.to],z:[2,d-3]},
   allocatedAxisCells:z.size,relativeWeight:items[i].weight
  }));
- const design={schema:B143,id:plan.id,title:plan.title,brief:plan.brief,
+ // B143's display-only brief is bounded to 500 characters; the full
+ // model/user specification remains unchanged in `product.plan.brief`.
+ const design={schema:B143,id:plan.id,title:plan.title,
+  brief:plan.brief.slice(0,500),
   bounds:{width:w,height:12,depth:d},elements,designOnly:true};
  const compiled=compileDesign(design);
  if(!verifyCompiled(design,compiled))hold('SOURCE_MISMATCH');
