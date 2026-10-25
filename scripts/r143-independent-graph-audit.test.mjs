@@ -51,6 +51,8 @@ test('R143 recompiled source independently confirms two direct 2-wide cuts AND r
  assert.equal(evidence.independentlyReachedRoomCount,4);
  assert.equal(evidence.independentEquipmentServiceCount,4);
  assert.equal(evidence.claimedEquipmentCount,4);
+ assert.equal(evidence.physicallyLocatedEquipmentCount,4);
+ assert.equal(evidence.equipmentFootprintsVerified,true);
  assert.equal(evidence.independentSourceRoutes,'SOURCE_ROUTES_REACH_ALL_ZONES');
  assert.ok(evidence.directPairs.every(x=>x.spansRealNamedBoundary));
  assert.ok(evidence.directPairs.every(x=>x.actuallyCutsSolid&&
