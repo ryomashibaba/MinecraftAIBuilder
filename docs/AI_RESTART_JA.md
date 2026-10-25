@@ -10,8 +10,8 @@
 | 継続ブランチ | `feature/b198zr1-protected-architectural-revision` |
 | 継続PR | [#128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128) — Open / Draft / Unmerged |
 | HEAD | [開発ブランチの最新HEADを毎回GitHubで確認](https://github.com/ryomashibaba/MinecraftAIBuilder/commits/feature/b198zr1-protected-architectural-revision)（R98の初期実メッシュ検証対象は `9a2b5de9d8ba41a2b7ca4e626aa9d54ff4ffffdd`） |
-| 最新確認済み実装工程 | **R146：ユーザー提供の実Qwen R145 HOLD ZIP原因確定＝sawtoothを材料欄に誤使用。原文SHA保存、屋根材だけの透明HOST補正、モデル再推論0のオフライン真正B143 3D検証コードと回帰CI登録済み。R146 CI成功・補正後全3D成功は未確認。** |
-| 次に取り組む工程 | **R146の保存済み本物Qwen回答をオフライン再生して3D/独立監査の合否を確定し、もし次段階でHOLDならその二次原因を絞って修正。成功後は出力3Dの人間美術審査。** |
+| 最新確認済み実装工程 | **R147：R146起動時のRELATIONAL_INSTRUCTIONSのESM循環import TDZを特定。命令文を依存なしの別モジュールへ移動、R139パーサーを遅延importし、新Nodeプロセスの双方向実importテスト・Windows実起動プリフライトを導入。CI/再実行の実合格は未確認。** |
+| 次に取り組む工程 | **R147の実Node importテストの合否を確認し、ゼロ推論R146実Qwen原文を再生。起動後のB143生成・8設備/1直接接続の独立QA結果を取得し、次のHOLDだけを修正。** |
 | 施工・モデル | **2026-10-24 Qwen/Gemma実推論・Minecraft試験施工の包括許可あり（都度承認不要）。** 準備性と各種技術安全ゲートは別途必要。現行コードのNOT_PREPARED / 9 BLOCKEDは自動PASSではない |
 
 **最新情報への直リンク：** [ブランチの現在地](https://github.com/ryomashibaba/MinecraftAIBuilder/tree/feature/b198zr1-protected-architectural-revision) ／ [Actions一覧](https://github.com/ryomashibaba/MinecraftAIBuilder/actions) ／ [PR #128](https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128)
@@ -19,6 +19,15 @@
 
 
 
+
+## R147 — R146で判明した循環import起動障害の修正（2026-10-25 JST）
+- ユーザーは実Qwen原文の再利用を試したが、R146開始時に `ReferenceError: Cannot access 'RELATIONAL_INSTRUCTIONS' before initialization`（`scripts/r134-fresh-model-pilot.mjs:73`）でNode ESMが異常終了。これは**モデル回答に起因しないソフトウェア側の初期化バグ**であり、`R146_NO_REPORT` は処理の開始前に例外でレポートが作成されなかった二次症状。
+- 原因：`r134-fresh-model-pilot.mjs` がモジュール評価中に、`r139-relational-model.mjs` からimportした `RELATIONAL_INSTRUCTIONS` を同期参照。ところが `r139→r135→r134` の循環読み込みにより `r139` がまだ初期化されておらず、TDZ（未初期化のexport）例外が発生。
+- 修正：`scripts/r139-relational-instructions.mjs` を**ほかのモジュールをimportしない葉モジュール**として新設。両モジュールはここを参照し、`r139-relational-model.mjs` は従来の外部公開APIをre-export。さらに `r134-fresh-model-pilot.mjs` は `r139` パーサーをトップレベルで静的importせず、実モデル応答の解析が必要になったときだけ `await import('./r139-relational-model.mjs')` する。プロンプトのテキスト・original Qwen raw・semantic IRを変更しない。
+- `scripts/r147-esm-import-order.test.mjs` は別々の新しいNodeプロセスを立ち上げ、R134/R139/R141/R146の実ESM importと、順序を反転した複数importを実行。**`node --check` だけではこの実行時TDZを検出できない**ので `.github/workflows/b198g-quality.yml` で重い回帰QAより先に実テストとして配置。
+- Windows `scripts/r146-one-click-offline-replay.ps1` は`git pull --ff-only`後、出力フォルダ作成・再生の前に `node --input-type=module --eval "await import('./scripts/r146-replay-saved-qwen.mjs')"` で**実モジュール初期化**を確認し、`R147_MODULE_IMPORT_OK` を表示する。異常時は `R147_MODULE_IMPORT_PRECHECK_FAILED_NO_OUTPUT_CREATED` と表示し、曖昧な`R146_NO_REPORT`を避ける。
+- **確認状況**：R147ソース変更と回帰テストをGitHubへ保存。GitHub Actionsの新規実行結果は未確認、実ユーザーPCでの再実行結果もまだ未受領。従って修正後のR146完成3D成功・全設備利用性は未認証。次のアクションはCIの実結果を確認し、ユーザー側では `git pull --ff-only`→`.\RUN_R146_OFFLINE_REPLAY.cmd` のゼロQwen推論再生、次の`R146_STATUS`や`HOLD_REASON`を確認すること。
+- 常時`NOT_PREPARED`、9 BLOCKED、Minecraft書込0、Draft PR #128保護維持。既存Qwen生回答SHA-256 `d67dc624744b4745e8e8c228e20bde00ccd39c7b506d0ad82753f54f1db82591` を一切変えない。
 
 ## R146 — 実Qwen R145 HOLDの根本原因とゼロ再推論復旧（2026-10-25 JST）
 - **本物のQwen3:14b R145回答をユーザーから受領**：`r145-real-qwen-graph-20261025T054407418Z.zip`、R141_REPORT = `HOLD_REAL_LOCAL_GRAPH_OR_GEOMETRY`、真の下位停止理由 `R134_MULTIZONE_PLAN_CONTRACT`。モデル呼び出し1回、原文取得成功、3D/独立動線監査には未到達。
