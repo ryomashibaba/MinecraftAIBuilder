@@ -1,4 +1,12 @@
 # MinecraftAIBuilder — 最短AI再開入口
+
+## 最新現在地（R166、2026-10-25）
+- R165確定：HEAD `8dd18d4560412c618c491067a8c2073f0a990fbe`、source-only B198G品質CI [#40191931567](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40191931567) 成功（193テスト）。**未知用途3件の実Qwen/Gemma品質成功ではない**。
+- R166で既存の `RUN_R157_UNKNOWN_USE.cmd` が呼ぶ `scripts/r157-one-click-unknown-use.ps1` を改善。既存 `r157-unknown-use-*` の非模擬・topology・3ケースのR156マニフェストを発見した場合、**追加推論0回**で未作成のR157/R165監査のみ実行。既存原文とZIPを上書きしない。監査によるHOLD判定は維持。
+- 既存結果が無い場合はローカルOllamaの `/api/tags` から**実インストール済み**Qwen/Gemmaタグを確認して新規3用途を実行する。指定 `-Model` が未インストールなら事前HOLD。明示的な新規3回が必要な場合のみ `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/r157-one-click-unknown-use.ps1 -Fresh` を使用。
+- **R166でユーザーPC上の実モデル推論は未実施**。PowerShellランナーのWindows実機動作もまだ独立確認していない。Node/source-only CIの合格を実Ollamaや美術の合格と誤認しない。3用途の原文・真正B143・5方向図の結果を得てから共通生成器の具体的な品質改善を選ぶ。
+- ART HOLD / NOT_PREPARED / 9×BLOCKED / 空BuildPlan、Draft PR #128、既存原本とmain保護を維持。旧R148〜R165履歴は下記と工程文書を参照。
+
 更新：2026-10-25 JST。**毎日の追記禁止。履歴は [R148までの原記録](archive/AI_RESTART_HISTORY_THROUGH_R148_JA.md) とGit履歴で保持。**
 
 ## 正本
