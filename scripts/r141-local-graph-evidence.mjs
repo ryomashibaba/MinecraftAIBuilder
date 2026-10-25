@@ -134,7 +134,9 @@ export async function runR141GraphTrial({model=null,endpoint=
     intent,graphAudit:audit,
     graphDesign:read('R139_HOST_GRAPH_B143_SOURCE.json'),
     finalDesign:read('DERIVED_B143_SOURCE.json'),
-    finalCompiled:read('DERIVED_REAL_VOXELS.json')
+    finalCompiled:read('DERIVED_REAL_VOXELS.json'),
+    roomProgram:read('R139_HOST_ROOM_SECTOR_PROGRAM.json'),
+    featurePlacements:read('R139_HOST_GRAPH_EQUIPMENT_PLACEMENTS.json')
    });
    write(base,'R143_INDEPENDENT_VOXEL_AUDIT.json',independent);
    report.independentVoxelAuditStatus=independent.status;
