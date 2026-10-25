@@ -51,6 +51,8 @@ test('R141 fake Ollama creates actual source graph and evidence but NEVER says g
  assert.equal(r.compiledGraph3D,true);
  assert.equal(r.modelRequestedDirectPairs,2);
  assert.equal(r.sourceVerifiedDirectDoors,2);
+ assert.equal(r.modelRequestedEntryRoomId,'unique-zone-4');
+ assert.equal(r.sourceEntranceRoomVerified,true);
  assert.equal(r.spatialDecisionDemonstrated,true);
  assert.equal(r.modelSelectedRelations,false);
  assert.equal(r.sourceRoutes,'SOURCE_ROUTES_REACH_ALL_ZONES');
