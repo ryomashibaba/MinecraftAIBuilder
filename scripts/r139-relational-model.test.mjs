@@ -290,3 +290,22 @@ test('R155 fail-closed IR does not mutate or silently downgrade model roof selec
  assert.throws(()=>parseR139RelationalFurnishedReply(JSON.stringify(past),request,
   {allowVolumeComposition:true}),/R154_VOLUME_STRICT_INTENT_CONTRACT/);
 });
+
+
+test('R168: four-room R160 topology compiles REAL B143 and feature access without falsely claiming three-room high sections',()=>{
+ const model=reply();
+ model.architecture={schema:'minecraftaibuilder-r160-topology-ir-v1',
+  entryHierarchy:'emphasized',daylightStrategy:'even',
+  roofEdge:'fine',spatialTopology:'central-spine'};
+ const result=parseR139RelationalFurnishedReply(JSON.stringify(model),request,
+  {allowTopologyComposition:true});
+ assert.equal(result.architectural.roomSectionScope,
+  'FOUR_ROOMS_BASIC_ENVELOPE_NO_HIGHROOM_CLAIM');
+ assert.equal(result.architectural.integrated,null);
+ assert.equal(result.architectural.completed.program[0].zones.length,4);
+ assert.equal(result.architectural.completed.sourceRouteAudit.status,
+  'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(result.architectural.completed.sourceRouteAudit.featureAccess.length,4);
+ assert.equal(result.architectural.completed.worldWrites,0);
+ assert.deepEqual(result.architectural.completed.BuildPlan.operations,[]);
+});
