@@ -83,6 +83,11 @@ on:
       - '.github/workflows/b198g-quality.yml'
 permissions:
   contents: read
+# Cancel obsolete checks when successive source-only commits update the same
+# draft PR. Only its latest source SHA can provide an acceptance verdict.
+concurrency:
+  group: b198g-quality-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 jobs:
   original-source-geometry:
     runs-on: ubuntu-latest
