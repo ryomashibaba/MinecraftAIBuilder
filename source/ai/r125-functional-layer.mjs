@@ -16,7 +16,7 @@ const sha=x=>createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const hold=x=>{throw Error('R125_FEATURE_'+x);};
 const exact=(o,keys)=>o&&typeof o==='object'&&!Array.isArray(o)&&
  Object.keys(o).length===keys.length&&keys.every(x=>Object.hasOwn(o,x));
-const slug=x=>typeof x==='string'&&/^[a-z][a-z0-9-]{2,20}$/.test(x);
+const slug=x=>typeof x==='string'&&/^[a-z][a-z0-9-]{2,31}$/.test(x);
 const presets=Object.freeze({
  'work-surface':{size:[3,1,2],material:'wood'},
  'equipment-bank':{size:[3,2,1],material:'metal'},
@@ -95,7 +95,10 @@ function* candidatePositions(feature,zone,y){
  }
 }
 function asElements(feature,pos){
- const id='feature-'+feature.id;
+ // Preserve original legacy source IDs for short labels; deterministically
+ // shorten long user/model equipment IDs to fit B143's 40-char element budget.
+ // Semantic IDs remain unchanged in the intent, audit and placement records.
+ const id='feature-'+(feature.id.length>19?sha(feature.id).slice(0,16):feature.id);
  if(feature.detail!=='assembled')return [{
   id,shape:'box',mode:'add',material:pos.cfg.material,
   origin:[pos.x,pos.y,pos.z],size:pos.cfg.size
