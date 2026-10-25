@@ -38,6 +38,7 @@ const fakeLocal=(answer,inspect=()=>{})=>async(url,opts)=>{
  assert.equal(body.model,'qwen3:14b');
  assert.equal(body.max_tokens,
   !Object.hasOwn(answer,'architecture')?1750:
+   answer.architecture?.schema==='minecraftaibuilder-r154-volume-ir-v1'?2300:
    answer.architecture?.schema==='minecraftaibuilder-r152-envelope-intent-v1'?2050:1900);
  assert.equal(body.stream,false);
  assert.ok(body.messages[0].content.includes('entryFacingZoneId'));
@@ -177,4 +178,42 @@ test('R152 single synthetic provider response makes raised-section B143 with ori
   '--equipment','assembled','--topology','graph',
   '--architecture','massing','--out','r152-test']);
  assert.equal(opts.architectureMode,'massing');
+});
+
+test('R154 one local-shaped synthetic answer chooses TWO real roof volumes in a single graph response',async t=>{
+ const dir=tmp();t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));
+ const answer=reply();
+ answer.architecture={schema:'minecraftaibuilder-r154-volume-ir-v1',
+  entryHierarchy:'quiet',daylightStrategy:'even',roofEdge:'fine',
+  volumeHierarchy:'paired',arrivalSpace:'covered'};
+ const destination=path.join(dir,'r154-volume');
+ const result=await runR134FreshModel({model:'qwen3:14b',
+  brief,outDir:destination,topologyMode:'graph',equipmentMode:'assembled',
+  architectureMode:'volumes'},{
+  fetcher:fakeLocal(answer,body=>{
+   assert.ok(body.messages[0].content.includes('volumeHierarchy is single or paired'));
+   assert.ok(body.messages[0].content.includes('architecture is exactly one small object'));
+  })
+ });
+ assert.equal(result.status,'HOLD_TEST_DOUBLE_NOT_REAL_INFERENCE',result.reason);
+ assert.equal(result.modelCalls,1);
+ assert.equal(result.architectureIntentFromModel,false);
+ assert.equal(result.genuineVolumeCompositionSourceOnly,true);
+ assert.equal(result.sourceRoutes,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(result.equipmentCount,4);
+ const proof=JSON.parse(fs.readFileSync(
+  path.join(destination,'R154_HOST_ARCHITECTURE_EVIDENCE.json'),'utf8'));
+ assert.equal(proof.volumeProof.volumeCount,2);
+ assert.equal(proof.volumeProof.fullyAccessibleEquipment,4);
+ assert.ok(fs.existsSync(path.join(destination,'R154_MODEL_ARCHITECTURE_IR.json')));
+ assert.ok(fs.existsSync(path.join(destination,'index.html')));
+ assert.equal(result.worldWrites,0);
+ assert.deepEqual(result.gates,Array(9).fill('BLOCKED'));
+ const args=parseR134FreshArgs(['--model','qwen3:14b','--brief',brief,
+  '--equipment','assembled','--topology','graph','--architecture','volumes',
+  '--out','one-source-only-r154']);
+ assert.equal(args.architectureMode,'volumes');
+ assert.throws(()=>parseR134FreshArgs(['--model','qwen3:14b','--brief',brief,
+  '--architecture','volumes','--out','invalid']),
+  /R134_MODEL_ARCHITECTURE_REQUIRES_GRAPH_TOPOLOGY/);
 });

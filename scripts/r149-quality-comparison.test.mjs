@@ -32,6 +32,17 @@ test('real R146 pinned Qwen source -> two actual B143 3D scenes with proven unch
  assert.ok(bundle.pages.some(p=>p.file==='after-r149.html'));
  assert.ok(bundle.pages.some(p=>p.file==='after-r150.html'));
  assert.ok(bundle.pages.some(p=>p.file==='after-r152-host-study.html'));
+ assert.ok(bundle.pages.some(p=>p.file==='after-r154-host-study.html'));
+ assert.equal(e.fiveGenuineB143Viewers,true);
+ assert.equal(e.r154HostStudy.intentAuthorship,'HOST_RESEARCH_NOT_ORIGINAL_QWEN');
+ assert.equal(e.r154HostStudy.volumeProof.volumeCount,2);
+ assert.deepEqual(e.r154HostStudy.volumeProof.raised.map(x=>x.roofHeight),[10,9]);
+ assert.equal(e.r154HostStudy.volumeProof.immutabilityBelowRoof,true);
+ assert.equal(e.r154HostStudy.volumeProof.originalEquipmentCount,8);
+ assert.equal(e.r154HostStudy.reachedEquipment,8);
+ assert.equal(e.r154HostStudy.sourceRoutes,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(e.r154HostStudy.visualAssessment,'NOT_REVIEWED');
+ assert.notEqual(e.r154HostStudy.geometrySha256,e.r152HostStudy.geometrySha256);
  assert.equal(e.r152HostStudy.intentAuthorship,'HOST_RESEARCH_NOT_QWEN_MODEL_SELECTION');
  assert.equal(e.r152HostStudy.reachedEquipment,8);
  assert.equal(e.r152HostStudy.sourceRoutes,'SOURCE_ROUTES_REACH_ALL_ZONES');
@@ -58,6 +69,10 @@ test('no overwrite and real viewer/evidence source output, not a screenshot simu
  assert.ok(fs.readFileSync(path.join(dest,'after-r149.html'),'utf8').includes('<'));
  assert.ok(fs.readFileSync(path.join(dest,'after-r150.html'),'utf8').includes('<'));
  assert.ok(fs.readFileSync(path.join(dest,'R150_DERIVED_SOURCE.json'),'utf8').includes('r150-'));
+ assert.ok(fs.readFileSync(path.join(dest,'after-r154-host-study.html'),'utf8').includes('<'));
+ const r154=JSON.parse(fs.readFileSync(path.join(dest,'R154_HOST_GEOMETRY_EVIDENCE.json'),'utf8'));
+ assert.equal(r154.volumeCount,2);
+ assert.equal(r154.sourceRoutes,'SOURCE_ROUTES_REACH_ALL_ZONES');
  assert.equal(JSON.parse(fs.readFileSync(path.join(dest,'R149_EVIDENCE.json'))).enhancedSourceSha256,r.enhancedSourceSha256);
  assert.throws(()=>saveR149PairedComparison(dest),/NO_OVERWRITE/);
 });

@@ -175,3 +175,63 @@ test('R152 source geometry depends on shared semantic architecture choices, neve
  assert.ok(built.every(x=>x.modelReplyAuthenticity==='CALLER_PROVIDED_UNVERIFIED'));
  assert.ok(built.every(x=>x.worldWrites===0));
 });
+
+test('R154 model-selected genuine multi-height rooms and supported arrival stay functional in ONE reply',()=>{
+ const old=parseR139RelationalFurnishedReply(JSON.stringify(reply()),request);
+ const model=reply();
+ model.architecture={
+  schema:'minecraftaibuilder-r154-volume-ir-v1',
+  entryHierarchy:'quiet',daylightStrategy:'even',
+  roofEdge:'fine',volumeHierarchy:'paired',arrivalSpace:'covered'};
+ assert.throws(()=>parseR139RelationalFurnishedReply(JSON.stringify(model),request,
+  {allowArchitecturalMassing:true}),
+  /R149_EXPRESSION_MODEL_R152_SECTION_CONTRACT/);
+ const result=parseR139RelationalFurnishedReply(JSON.stringify(model),request,
+  {allowVolumeComposition:true});
+ assert.equal(result.architectural.volume.r154VolumeEvidence.volumeCount,2);
+ const proof=result.architectural.volume.r154VolumeEvidence;
+ assert.deepEqual(proof.raised.map(x=>x.roofHeight),[10,9]);
+ assert.ok(proof.portico);
+ assert.equal(proof.immutabilityBelowRoof,true);
+ assert.equal(proof.realHighVolumeInteriorAndRoof,true);
+ assert.equal(proof.sourceRoutes,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(proof.fullyAccessibleEquipment,4);
+ assert.equal(proof.authorship,'CALLER_ARCHITECTURE_IR_NOT_AUTHENTICATED');
+ assert.equal(result.featured.sourceSha256,old.featured.sourceSha256);
+ assert.equal(result.featured.geometrySha256,old.featured.geometrySha256);
+ assert.equal(result.architectural.completed.sourceRouteAudit.featureAccess.length,4);
+ assert.equal(result.architectural.completed.worldWrites,0);
+ assert.equal(result.architectural.completed.readiness,'NOT_PREPARED');
+ assert.deepEqual(result.architectural.completed.gates,Array(9).fill('BLOCKED'));
+ assert.deepEqual(result.architectural.completed.BuildPlan.operations,[]);
+ const simpler=reply();
+ simpler.architecture={...model.architecture,volumeHierarchy:'single',
+  arrivalSpace:'flush'};
+ const one=parseR139RelationalFurnishedReply(JSON.stringify(simpler),request,
+  {allowVolumeComposition:true});
+ assert.equal(one.architectural.volume.r154VolumeEvidence.volumeCount,1);
+ assert.equal(one.architectural.volume.r154VolumeEvidence.portico,null);
+ assert.notEqual(result.architectural.completed.geometrySha256,
+  one.architectural.completed.geometrySha256);
+});
+test('R154 input failures HOLD; existing baseline and model choices are never silently repaired',()=>{
+ for(const issue of [
+  {volumeHierarchy:'mock-third-floor'},
+  {arrivalSpace:'unbounded-courtyard'},
+  {roofEdge:'ornamental'},
+  {unexpected:true}
+ ]){
+  const raw=reply();
+  raw.architecture={schema:'minecraftaibuilder-r154-volume-ir-v1',
+   entryHierarchy:'quiet',daylightStrategy:'even',
+   roofEdge:'fine',volumeHierarchy:'paired',arrivalSpace:'covered',...issue};
+  assert.throws(()=>parseR139RelationalFurnishedReply(JSON.stringify(raw),request,
+   {allowVolumeComposition:true}),/R154_VOLUME_STRICT_INTENT_CONTRACT/);
+ }
+ const raw=reply();
+ raw.architecture={schema:'minecraftaibuilder-r154-volume-ir-v1',
+  entryHierarchy:'quiet',daylightStrategy:'even',
+  roofEdge:'fine',volumeHierarchy:'paired',arrivalSpace:'covered'};
+ assert.throws(()=>parseR139RelationalFurnishedReply(JSON.stringify(raw),request),
+  /R139_MODEL_FULL_REPLY_CONTRACT/);
+});

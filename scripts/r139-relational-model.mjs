@@ -20,6 +20,8 @@ import {deriveR149EnvelopeExpression,validateR151EnvelopeIntent,
  from '../source/ai/r149-architectural-expression.mjs';
 import {deriveR150FurnitureArticulation}
  from '../source/ai/r150-furniture-articulation.mjs';
+import {deriveR154VolumeComposition,validateR154VolumeIntent}
+ from '../source/ai/r154-volume-composition.mjs';
 
 const fail=x=>{throw Error('R139_MODEL_'+x);};
 const only=(v,fields)=>v!==null&&typeof v==='object'&&!Array.isArray(v)&&
@@ -31,7 +33,7 @@ export {RELATIONAL_INSTRUCTIONS} from './r139-relational-instructions.mjs';
 
 export function parseR139RelationalFurnishedReply(raw,request,
  {allowRoofMaterialCorrection=false,allowArchitecturalExpression=false,
-  allowArchitecturalMassing=false}={}){
+  allowArchitecturalMassing=false,allowVolumeComposition=false}={}){
  if(typeof raw!=='string'||raw.length<20||raw.length>22000)
   fail('MISSING_OR_OVERSIZED_MODEL_REPLY');
  let reply;
@@ -39,11 +41,12 @@ export function parseR139RelationalFurnishedReply(raw,request,
  const keys=['id','title','footprint','materials','layout','form',
   'objects','relations'];
  const expressive=allowArchitecturalExpression===true||
-  allowArchitecturalMassing===true;
+  allowArchitecturalMassing===true||allowVolumeComposition===true;
  if(!only(reply,expressive?[...keys,'architecture']:keys)||
   !only(reply.relations,['entryFacingZoneId','directAdjacencies']))
   fail('FULL_REPLY_CONTRACT');
- if(allowArchitecturalMassing)validateR152EnvelopeIntent(reply.architecture);
+ if(allowVolumeComposition)validateR154VolumeIntent(reply.architecture);
+ else if(allowArchitecturalMassing)validateR152EnvelopeIntent(reply.architecture);
  else if(expressive)validateR151EnvelopeIntent(reply.architecture);
  const repaired=allowRoofMaterialCorrection?
   recoverR146RoofProfileAsMaterial(raw,reply):{
@@ -83,9 +86,17 @@ export function parseR139RelationalFurnishedReply(raw,request,
   fail('FURNISHED_SOURCE_ROUTES');
  const architectural=expressive?(()=>{
   const envelope=deriveR149EnvelopeExpression(featured,{
-   plan:relational.plan,expressionIntent:architecture});
-  const completed=deriveR150FurnitureArticulation(envelope);
-  return {intent:structuredClone(architecture),envelope,completed,
+   plan:relational.plan,expressionIntent:allowVolumeComposition?{
+    schema:'minecraftaibuilder-r151-envelope-intent-v1',
+    entryHierarchy:architecture.entryHierarchy,
+    daylightStrategy:architecture.daylightStrategy,
+    roofEdge:architecture.roofEdge
+   }:architecture});
+  const volume=allowVolumeComposition?deriveR154VolumeComposition(envelope,{
+   intent:architecture,authorship:'CALLER_ARCHITECTURE_IR_NOT_AUTHENTICATED'
+  }):null;
+  const completed=deriveR150FurnitureArticulation(volume??envelope);
+  return {intent:structuredClone(architecture),envelope,volume,completed,
    intentAuthorship:'IN_THIS_SAME_MODEL_REPLY_NOT_HOST_INFERRED',
    geometryAuthorship:'HOST_DERIVED_FROM_BOUNDED_MODEL_SEMANTIC_IR',
    aestheticApproval:'NOT_REVIEWED'};
