@@ -38,6 +38,9 @@ on:
       - 'source/ai/r132-spatial-relations.mjs'
       - 'scripts/r132-spatial-comparison.mjs'
       - 'scripts/r132-spatial-comparison.test.mjs'
+      - 'scripts/r133-spatial-onepass.mjs'
+      - 'scripts/r133-spatial-onepass.test.mjs'
+      - 'scripts/fixtures/r133-shop-independent-goals.json'
       - 'scripts/r125-feature-model-pilot.mjs'
       - 'scripts/r125-feature-model-pilot.test.mjs'
       - 'source/ai/r125-functional-acceptance.mjs'
@@ -98,7 +101,9 @@ jobs:
           node --check scripts/r131-real-3d-comparison.test.mjs
           node --check source/ai/r132-spatial-relations.mjs
           node --check scripts/r132-spatial-comparison.mjs
-          node --check scripts/r132-spatial-comparison.test.mjs
+          node --check scripts/r132-spatial-comparison.test.mjs scripts/r133-spatial-onepass.test.mjs
+          node --check scripts/r133-spatial-onepass.mjs
+          node --check scripts/r133-spatial-onepass.test.mjs
           node --check scripts/r125-feature-model-pilot.mjs
           node --check scripts/r125-feature-model-pilot.test.mjs
           node --check source/ai/r125-functional-acceptance.mjs
