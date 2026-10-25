@@ -18,6 +18,13 @@ test('R172 unattended 3-use synthetic designs actually compile and preserve bloc
   assert.equal(c.audit.sourceRouteStatus,'SOURCE_ROUTES_REACH_ALL_ZONES');
   assert.equal(c.audit.rooms,4);
   assert.equal(c.audit.realLocalInference,false);
+  assert.ok(c.audit.actualSculptedHighestOccupiedY>
+   c.audit.actualBaselineHighestOccupiedY+1);
+  assert.ok(c.audit.realSculptedClerestoryWindows>=4);
+  assert.ok(c.audit.realSculptedClerestoryGlazingCells>=12);
+  assert.ok(c.sculpted.r170FourRoomVolumeEvidence.originalLowerFiveLevelsUnchanged);
+  assert.equal(c.sculpted.sourceRouteAudit.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert.deepEqual(c.sculpted.BuildPlan.operations,[]);
   assert.equal(c.audit.humanArtReview,'ART_HOLD');
   assert.equal(c.audit.worldWrites,0);
   assert.deepEqual(c.source.BuildPlan.operations,[]);
@@ -36,9 +43,13 @@ test('R172 single CI operation produces three interactive previews + 15 true vox
  assert.ok(fs.readFileSync(path.join(out,'index.html'),'utf8').includes('静的な合成入力のみ'));
  for(const id of ['home','shop','laboratory']){
   assert.ok(fs.existsSync(path.join(out,id+'.html')));
+  assert.ok(fs.existsSync(path.join(out,id+'-sculpted.html')));
   for(const view of ['front','rear','west','east','roof']){
    const svg=fs.readFileSync(path.join(out,id+'-'+view+'.svg'),'utf8');
    assert.ok(svg.startsWith('<svg'),id+' '+view);
+   const sculptedSvg=fs.readFileSync(path.join(out,
+    id+'-sculpted-'+view+'.svg'),'utf8');
+   assert.ok(sculptedSvg.startsWith('<svg'),id+' sculpted '+view);
   }
  }
  assert.throws(()=>saveR172Autoreview(out),/R172_AUTOMATED_QA_NEW_OUTPUT_DIR_REQUIRED/);
