@@ -69,7 +69,9 @@ export function buildR139SavedQwenRelationGallery(){
     geometrySha256:relation.geometrySha256,
     entryFacing:relation.entryFacingZoneEvidence,
     directDoors:relation.directAdjacencyDoorEvidence
-   }
+   },
+   roomProgram:relation.program,
+   featurePlacements:after.placements
   });
   if(independent.status!=='SOURCE_ROOM_GRAPH_VERIFIED')
    throw Error('R143_GALLERY_INDEPENDENT_SOURCE_ROOM_GRAPH_HOLD');
