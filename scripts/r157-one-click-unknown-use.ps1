@@ -125,6 +125,32 @@ try {
             Write-Host "R166_$($useId)_RESULT: HOLD_REPORT_UNREADABLE"
         }
     }
+    # R167: offline exploration of original genuine local replies (0 calls).
+    # The new folder and ZIP are separate from all R156/R157/R165 evidence.
+    $r167Archive = ''
+    if (Test-Path $studyFile) {
+        $completeRaw = @('home','shop','laboratory') | ForEach-Object {
+            Test-Path -LiteralPath (Join-Path $folder "$_/MODEL_RAW_ORIGINAL.txt")
+        }
+        if (@($completeRaw | Where-Object { $_ -eq $false }).Count -eq 0) {
+            $r167Folder = "$folder-r167-offline"
+            $r167Archive = "$r167Folder.zip"
+            if (-not (Test-Path $r167Folder)) {
+                & node scripts/r167-offline-replay.mjs --study $folder --out $r167Folder
+                $r167Exit = $LASTEXITCODE
+                if ($r167Exit -ne 0) {
+                    Write-Warning 'R167 offline host-derived geometry could not be generated; originals unchanged.'
+                }
+            } else {
+                Write-Host 'R167: existing derived review folder preserved.'
+            }
+            if ((Test-Path $r167Folder) -and -not (Test-Path $r167Archive)) {
+                Compress-Archive -Path $r167Folder -DestinationPath $r167Archive -CompressionLevel Optimal
+            }
+        } else {
+            Write-Host 'R167: original model replies incomplete; derived replay skipped.'
+        }
+    }
     # When an old ZIP already exists, preserve it even if extra reviews were
     # generated from the saved originals during this invocation.
     if ($newReviewFiles -and (Test-Path $archive)) {
@@ -195,6 +221,10 @@ try {
     Write-Host "REVIEW_HTML: $(Join-Path $repo (Join-Path $folder 'R157_COMPARE.html'))"
     Write-Host "REAL_3D_AUDIT_HTML: $(Join-Path $repo (Join-Path $folder 'R165_COMPARE.html'))"
     Write-Host "EVIDENCE_ZIP: $(Join-Path $repo $archive)"
+    if ($r167Archive -and (Test-Path $r167Archive)) {
+        Write-Host "R167_OFFLINE_EVIDENCE_ZIP: $(Join-Path $repo $r167Archive)"
+        Write-Host "R167_OFFLINE_REVIEW: $(Join-Path $repo (Join-Path $r167Folder 'R167_COMPARE.html'))"
+    }
     Write-Host 'Minecraft world operations: ZERO. ART HOLD.'
     if ($studyExit -ne 0 -or $reviewExit -ne 0 -or $independentExit -ne 0) {
         Write-Warning 'Partial evidence/HOLD preserved. No automatic model retries.'
