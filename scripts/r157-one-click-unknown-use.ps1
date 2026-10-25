@@ -1,6 +1,6 @@
 # R157 one-click local Qwen/Gemma genuine three-use study + strict provenance ZIP.
 # ALL inference is localhost via unchanged R134. No Minecraft/world writes.
-param([string]$Model = '', [switch]$Fresh)
+param([string]$Model = '', [switch]$Fresh, [switch]$ReuseOnly)
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $branch = 'feature/b198zr1-protected-architectural-revision'
@@ -20,6 +20,7 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'R157_HOLD_FF_ONLY_FAILED' }
     $head = (& git rev-parse HEAD).Trim()
     if ($LASTEXITCODE -ne 0) { throw 'R157_HOLD_UNKNOWN_HEAD' }
+    if ($Fresh -and $ReuseOnly) { throw 'R166_HOLD_INCOMPATIBLE_FRESH_AND_REUSE_ONLY' }
     # R166: preferentially inspect saved local model results (no new model calls).
     # -Fresh forces three fresh requests, -Model limits reuse to that exact tag.
     $existing = $null
@@ -43,6 +44,9 @@ try {
         }
     }
     $reusedStudy = $null -ne $existing
+    if ($ReuseOnly -and -not $reusedStudy) {
+        throw 'R166_HOLD_NO_REUSABLE_EVIDENCE_NO_MODEL_CALLS'
+    }
     if ($reusedStudy) {
         $folder = $existing.Name
         $archive = "$folder.zip"
