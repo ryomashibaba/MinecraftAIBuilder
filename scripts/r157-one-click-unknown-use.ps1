@@ -133,7 +133,7 @@ try {
             Test-Path -LiteralPath (Join-Path $folder "$_/MODEL_RAW_ORIGINAL.txt")
         }
         if (@($completeRaw | Where-Object { $_ -eq $false }).Count -eq 0) {
-            $r167Folder = "$folder-r167-offline"
+            $r167Folder = "$folder-r168-grid-offline"
             $r167Archive = "$r167Folder.zip"
             if (-not (Test-Path $r167Folder)) {
                 & node scripts/r167-offline-replay.mjs --study $folder --out $r167Folder
@@ -222,8 +222,8 @@ try {
     Write-Host "REAL_3D_AUDIT_HTML: $(Join-Path $repo (Join-Path $folder 'R165_COMPARE.html'))"
     Write-Host "EVIDENCE_ZIP: $(Join-Path $repo $archive)"
     if ($r167Archive -and (Test-Path $r167Archive)) {
-        Write-Host "R167_OFFLINE_EVIDENCE_ZIP: $(Join-Path $repo $r167Archive)"
-        Write-Host "R167_OFFLINE_REVIEW: $(Join-Path $repo (Join-Path $r167Folder 'R167_COMPARE.html'))"
+        Write-Host "R168_GRAPH_EVIDENCE_ZIP: $(Join-Path $repo $r167Archive)"
+        Write-Host "R168_GRAPH_REVIEW: $(Join-Path $repo (Join-Path $r167Folder 'R167_COMPARE.html'))"
     }
     Write-Host 'Minecraft world operations: ZERO. ART HOLD.'
     if ($studyExit -ne 0 -or $reviewExit -ne 0 -or $independentExit -ne 0) {
