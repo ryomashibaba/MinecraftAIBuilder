@@ -272,6 +272,13 @@ export function verifyCompiled(d,scene){
    scene?.readiness==='NOT_PREPARED'&&scene?.designOnly===true&&
    scene?.worldContacts===0&&scene?.worldCoordinates===null&&
    scene?.BuildPlan?.operations?.length===0&&
-   actual.primitives.length===scene.primitives?.length;
+   actual.primitives.length===scene.primitives?.length&&
+   // R165: the caller-supplied voxel payload can be altered while stale
+   // source/geometry hashes and length remain unchanged. Check EVERY
+   // coordinate/material/layer cell against the newly compiled source.
+   actual.primitives.every((cell,i)=>
+    Array.isArray(scene.primitives[i])&&
+    scene.primitives[i].length===cell.length&&
+    cell.every((value,j)=>value===scene.primitives[i][j]));
  }catch{return false;}
 }
