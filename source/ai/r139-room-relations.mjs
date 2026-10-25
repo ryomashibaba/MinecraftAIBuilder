@@ -65,7 +65,7 @@ export function deriveR139RelationalTopology(base,intent){
  const zoneIds=base.program[0].zones.map(z=>z.id);
  const valid=perms(zoneIds).filter(ids=>{
   const placement=new Map(ids.map((id,i)=>[id,sectors[i].physicalSector]));
-  return ['front-left','front-right'].includes(
+  return ['front-left','front-right','whole-right'].includes(
    placement.get(intent.entryFacingZoneId))&&
    intent.directAdjacencies.every(([a,b])=>
     physicalPair(placement.get(a),placement.get(b)));
