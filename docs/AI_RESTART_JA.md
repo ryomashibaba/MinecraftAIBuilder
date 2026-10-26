@@ -1,3 +1,11 @@
+## R181-A — CI失敗の修正と実ボクセル実体証明（2026-10-26 JST）
+
+- 初回R181 HEAD `37e06cb` の [品質CI #40303139202](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40303139202) は **FAIL**。original-source-geometryはPASS、既存R178 4/4・R180 3/3はPASS、R181の3テスト中1PASS/2FAIL。原因は第3（研究施設）合成ケースの南離れx=18が主棟幅12に対し `GALLERY_SPAN` の最低間隔6を満たさず距離5だったこと。
+- **境界条件を緩和せず**合成研究施設の南離れx=19へ修正。これにより宣言されたモデル入力と実接続廊下幅を守る。住宅・店舗ケースと全既存Qwen原本は未変更。
+- 追加のsourceQAとして、3つの明示ボリュームそれぞれの床・屋根・4外壁の内寄りサンプルセルが**実B143コンパイル後のボクセル**に存在することを検証。名前や`volumesInPhysicalB143:3`固定値だけを根拠としない。
+- 負例：2本の接続廊下の離れ側実ドアCUTをB143ソースから取り除き、再コンパイルしてR125既存の2幅グラフで離れ2室が本当に`UNREACHABLE_ZONE`になることを確認するテスト追加。ホストが部屋の接続を証拠なしに宣言しない。
+- **この修正のCI合格は結果確認まで未確定**。Qwen/Gemma推論0、実ゲーム内移動なし、美術判定はART HOLD、NOT_PREPARED/9 BLOCKED/BuildPlan空/worldWrites=worldContacts=0、Draft #128・main保護を維持。
+
 ## R181 — 3独立ボリュームと意味的な建築接続グラフ（2026-10-26 JST）
 
 - R180はHEAD `bfeabce`、B198G品質CI [#40301254962](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40301254962) **SUCCESS**。3用途の本物のB143合成図・回転モデルは生成したが、左右の直方体2本が見た目を支配するため美術は**ART HOLD / 未達**。

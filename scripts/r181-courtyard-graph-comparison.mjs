@@ -18,7 +18,7 @@ export const R181_SYNTHETIC_SETTINGS=[
  {mainWidth:10,north:{x:21,z:1,depth:14,roofY:11},
   south:{x:19,z:20,depth:11,roofY:9},roofY:13,links:[6,25]},
  {mainWidth:12,north:{x:21,z:3,depth:10,roofY:10},
-  south:{x:18,z:20,depth:11,roofY:13},roofY:11,links:[5,24]}
+  south:{x:19,z:20,depth:11,roofY:13},roofY:11,links:[5,24]}
 ];
 export function makeR181SyntheticReply(t,configuration){
  const r=makeR178SyntheticReply(t);
@@ -56,7 +56,7 @@ export function buildR181CampusComparisons(){
   const p=r.designOnlySource,w=p.r181GraphEvidence;
   if(!isSafe(r)||!isSafe(p)||!verifyCompiled(p.design,p.compiled)||
    p.design.elements.length>160||p.program[0].zones.length!==4||
-   w.volumesInPhysicalB143!==3||w.coveredLinks!==2||
+   w.volumesInPhysicalB143!==3||!w.modelDeclaredMassCoreVerified||w.coveredLinks!==2||
    w.modelRequestedIndoorDirectDoors!==1||
    !w.outdoorCourtReachableFromEntrance||!w.courtOpenToSky||
    p.placements.length!==reply.objects.length||

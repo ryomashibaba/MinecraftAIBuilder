@@ -215,6 +215,16 @@ export function parseR181CourtyardGraphReply(raw,request){
  for(let y=2;y<=14;y++)if(has(center,y,skyZ))
   fail('COURT_NOT_OPEN_TO_SKY');
  if(!has(center,1,skyZ))fail('COURT_NO_SUPPORT');
+ // Verify model-declared independent building masses against ACTUAL B143
+ // solids, not just names/elements. This does not certify their art quality.
+ for(const v of [main,front,rear]){
+  const {x,z,width,depth}=v.rect;
+  const coreX=x+2,coreZ=z+2;
+  if(!has(coreX,1,coreZ)||!has(coreX,v.roofY,coreZ)||
+   !has(x,2,z+2)||!has(x+width-1,2,z+2)||
+   !has(x+2,2,z)||!has(x+2,2,z+depth-1))
+   fail('MODEL_DECLARED_MASS_NOT_IN_PHYSICAL_VOXELS');
+ }
  const physical={schema:'minecraftaibuilder-r125-plan-to-b143-result-v1',
   spatialIRSchema:R181_SCHEMA,plan,design,compiled,
   program:[{level:0,splitAxis:'three-volumes-graph',
@@ -248,7 +258,7 @@ export function parseR181CourtyardGraphReply(raw,request){
   geometryAuthorship:'HOST_GEOMETRY_FROM_CALLER_R181_GRAPH',
   declaredVolumes:r.architecture.volumes,
   declaredLinks:r.architecture.links,
-  volumesInPhysicalB143:3,
+  volumesInPhysicalB143:3,modelDeclaredMassCoreVerified:true,
   modelRequestedIndoorDirectDoors:1,
   coveredLinks:2,
   outdoorCourtReachableFromEntrance:true,courtOpenToSky:true,

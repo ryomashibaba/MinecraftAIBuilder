@@ -10,7 +10,8 @@ import {makeR181SyntheticReply,R181_SYNTHETIC_SETTINGS,
  from './r181-courtyard-graph-comparison.mjs';
 import {parseR181CourtyardGraphReply}
  from '../source/ai/r181-courtyard-graph.mjs';
-import {verifyCompiled} from '../source/ai/b143-building-dsl.mjs';
+import {verifyCompiled,compileDesign} from '../source/ai/b143-building-dsl.mjs';
+import {auditR125SourceRoutes} from '../source/ai/r125-source-routes.mjs';
 const raw=x=>JSON.stringify(x);
 const request={naturalLanguageBrief:'Static synthetic test program'};
 const candidate=()=>makeR181SyntheticReply(R178_SYNTHETIC_CASES[0],R181_SYNTHETIC_SETTINGS[0]);
@@ -24,6 +25,7 @@ test('R181 independently verifies all three distinct physical compositions, room
   const p=c.result;
   assert.ok(verifyCompiled(p.design,p.compiled));
   assert.equal(p.r181GraphEvidence.volumesInPhysicalB143,3);
+  assert.equal(p.r181GraphEvidence.modelDeclaredMassCoreVerified,true);
   assert.equal(p.r181GraphEvidence.coveredLinks,2);
   assert.equal(p.r181GraphEvidence.modelRequestedIndoorDirectDoors,1);
   assert.equal(p.r181GraphEvidence.outdoorCourtReachableFromEntrance,true);
@@ -62,6 +64,26 @@ test('R181 source cannot fake model intent by silently moving masses, inferring 
  for(const mutate of cases){
   const invalid=structuredClone(base);mutate(invalid);
   assert.throws(()=>parse(invalid),/R181_COURTYARD_GRAPH_/);
+ }
+});
+test('R181 genuine enclosed satellite room walls require model-declared gallery doors',()=>{
+ const p=parse(candidate()).designOnlySource;
+ const design=structuredClone(p.design);
+ const doorIds=new Set(['gallery-north-pavilion-door','gallery-south-pavilion-door']);
+ assert.ok([...doorIds].every(id=>design.elements.some(e=>e.id===id&&e.mode==='cut')));
+ design.elements=design.elements.filter(e=>!doorIds.has(e.id));
+ const compiled=compileDesign(design);
+ assert.ok(verifyCompiled(design,compiled));
+ const audit=auditR125SourceRoutes({
+  ...p,schema:'minecraftaibuilder-r125-plan-to-b143-result-v1',
+  design,compiled,sourceSha256:compiled.sourceSha256,
+  geometrySha256:compiled.geometrySha256
+ });
+ assert.equal(audit.status,'HOLD_SOURCE_ROUTES');
+ for(const id of [candidate().architecture.volumes[1].roomIds[0],
+  candidate().architecture.volumes[2].roomIds[0]]){
+  assert.equal(audit.zones.find(z=>z.id===id).reachedFromEntrance,false);
+  assert.ok(audit.issues.includes('UNREACHABLE_ZONE_'+id));
  }
 });
 test('R181 writes a rotatable true B143 source viewer and all 15 real directional projections',t=>{
