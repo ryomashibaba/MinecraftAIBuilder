@@ -73,7 +73,7 @@ export function deriveR176GroundFootprint(base){
   const front=range.z[0]===2,rear=range.z[1]===d-3;
   if((west===east)||(front===rear)||zone.id===entryZone)continue;
   const sideX=west?'west':'east',sideZ=front?'front':'rear';
-  for(const sideLength of [6,5]){
+  for(const sideLength of [6,5,4]){
    const x0=west?0:w-sideLength,z0=front?0:d-sideLength;
    const x1=x0+sideLength-1,z1=z0+sideLength-1;
    const returnX=west?x1+1:x0-1,returnZ=front?z1+1:z0-1;
@@ -82,15 +82,18 @@ export function deriveR176GroundFootprint(base){
    const addZ={x:[Math.min(x0,returnX),Math.max(x1,returnX)],z:[returnZ,returnZ]};
    // No furnished equipment/semantic object may be pruned or blocked by
    // the void or either new enclosing return wall.
-   if(base.placements.some(p=>{
-    const r=rect(p.origin,p.size);
-    return overlaps(r,cut)||overlaps(r,addX)||overlaps(r,addZ);
-   }))continue;
+   // Only the actually demolished pocket is rejected before compilation.
+   // Newly rebuilt return walls are checked against the EXACT original
+   // furnishing voxels and route topology after B143 compilation; bounding
+   // boxes on return walls were overly conservative and rejected every
+   // legal corner in the R176 first CI.
+   if(base.placements.some(p=>overlaps(rect(p.origin,p.size),cut)))
+    continue;
    // Keep original front entrance and original partition-door openings.
    const protectedDoors=base.design.elements.filter(e=>
     e.id==='exterior-entrance'||e.id.startsWith('r168-door-'));
    if(protectedDoors.some(e=>e.shape==='box'&&
-    [cut,addX,addZ].some(region=>overlaps(rect(e.origin,e.size),region))))
+    overlaps(rect(e.origin,e.size),cut)))
     continue;
    candidates.push({zoneId:zone.id,weight:zone.relativeWeight,
     zonePurpose:zone.purpose,sideX,sideZ,size:sideLength,
