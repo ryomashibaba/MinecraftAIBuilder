@@ -1,3 +1,9 @@
+## R188-A — 初回新規テスト3/4PASS→無効IRケースのfixture誤参照修正（2026-10-26 JST）
+
+- 初回HEAD `add38c1` [B198G #40327928455](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40327928455) はr172-quick-review FAIL。新規R188テスト **3/4 PASS**：実B143の3本の全長公共回廊・横断2幅軸・元16段階段/室・設備・テラス採光維持・物理部材削除の負例・新旧2個の回転3D+10方向SVG+QA生成は通過。テスト「無効IR拒否」だけ`TypeError: Cannot set properties of undefined (setting 'roomId')`で停止。
+- 原因：R188合成入力の`base`自体がR187のJSON全体であり、`daylight`は`x.base.daylight`。テストに誤って`x.base.base.daylight`を書いていた。**試験の参照を1階層だけ修正**。製品のIR、実B143実装、経路証明、安全閾値はいっさい緩和しない。再CIがSUCCESSになるまではR188最終合格ではない。
+- 全てSTATIC SYNTHETIC／実LLM0、建築構造耐力・Minecraftプレイヤー実歩行未検証、ART HOLD、NOT_PREPARED、9 BLOCKED、空BuildPlan、WorldWrites/Contacts 0、Draft #128、main未マージ。
+
 ## R188 — 形だけの窓追加を停止し、2棟を貫通する公共回廊・横断軸と実正面量感を研究（2026-10-26 JST）
 
 - 起点R187 HEAD `22246d3`、[品質CI #40325544793](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40325544793) 2/2 SUCCESS。R187は西階段の視線3本、東上階の視線2本、16段階段、実1室/展示設備/屋外テラスへのR125ソース経路を獲得したが、**真正正面投影ではR186とほぼ同じ厚い無地の箱が支配的**。美術ART HOLD。

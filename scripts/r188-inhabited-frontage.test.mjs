@@ -50,7 +50,7 @@ test('R188 strictly accepts only the explicit source opt-in, rejects invalid var
  const edits=[
   x=>{x.schema='minecraft-build';},
   x=>{x.base.schema='r188-fake';},
-  x=>{x.base.base.daylight.roomId='unknown';},
+  x=>{x.base.daylight.roomId='unknown';},
   x=>{x.frontage.westArcade='decorative-line';},
   x=>{x.frontage.eastLoggia='painted-stripes';},
   x=>{x.frontage.upperSetback='flat-old-roof';},
