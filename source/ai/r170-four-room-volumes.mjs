@@ -115,22 +115,36 @@ export function deriveR170FourRoomVolumes(base,
   // Preserve the model's selected RIDGE/SAWTOOTH family: physically raised
   // rooftop steps per section, not a mere decorative façade label.
   if(profile!=='flat'){
+   // R174: adjacent equal-height roof slices compile to identical voxels
+   // as one B143 box; the old per-row format wasted element budget.
+   const spans=[];
    for(let z=zf+1;z<zb;z++){
     const distance=Math.min(z-zf,zb-z);
     const height=profile==='ridge'?
      (distance>=4?2:distance>=2?1:0):
      Math.min(2,(z-zf)%4);
-    if(height>0)addBox(design,'r170-profile-'+i+'-'+z,'add',
-     [xl,s.roofY+1,z],[xr-xl+1,height,1],roof.material);
+    if(height===0)continue;
+    const prev=spans.at(-1);
+    if(prev&&prev.height===height&&prev.z+prev.depth===z)
+     prev.depth++;
+    else spans.push({z,height,depth:1});
    }
+   for(const [j,span] of spans.entries())
+    addBox(design,'r170-profile-'+i+'-'+j,'add',
+     [xl,s.roofY+1,span.z],
+     [xr-xl+1,span.height,span.depth],roof.material);
   }
+
  }
  // R173 option: genuinely CUT the newly built upper wall and refill it
  // with colored glazing, rather than merely drawing rectangles on an SVG.
  // Use room ranges only. Never touch the model-selected doors, floor or
  // furnishings (all y<=5). Constrain windows to an exterior-facing side.
  let realClerestoryWindowCount=0;
+ let omittedOptionalClerestoryWindows=0;
+ const windowsPerRoom=Array(4).fill(0);
  if(sculpted){
+  const required=[],optional=[];
   for(const [i,section] of sections.entries()){
    const {x:[xl,xr],z:[zf,zb]}=section.perimeter;
    const winHeight=Math.min(4,section.roofY-7);
@@ -150,16 +164,29 @@ export function deriveR170FourRoomVolumes(base,
     size:[1,winHeight,longitudinal]});
    if(xr===w-2)windows.push({side:'east',origin:[xr,winY,winZ],
     size:[1,winHeight,longitudinal]});
-   for(const win of windows){
-    const name='r173-clerestory-'+i+'-'+win.side;
-    addBox(design,name+'-cut','cut',win.origin,win.size);
-    addBox(design,name+'-glass','add',win.origin,win.size,'glass');
-    realClerestoryWindowCount++;
-   }
+   // Keep one physical exterior glass window in EVERY room first.
+   // Optional second elevations are permitted only with spare B143 budget.
+   if(windows.length===0)fail('R174_NO_EXTERIOR_WINDOW_SIDE');
+   required.push({i,win:windows[0]});
+   optional.push(...windows.slice(1).map(win=>({i,win})));
   }
-  if(realClerestoryWindowCount<4)
+  // Each actual opening takes a CUT and a separate glass ADD element.
+  const capacity=Math.floor((160-design.elements.length)/2);
+  if(capacity<required.length)
+   fail('R174_MANDATORY_GLAZING_EXCEEDS_ELEMENT_BUDGET');
+  const chosen=[...required,...optional.slice(0,capacity-required.length)];
+  omittedOptionalClerestoryWindows=required.length+optional.length-chosen.length;
+  for(const {i,win} of chosen){
+   const name='r173-clerestory-'+i+'-'+win.side;
+   addBox(design,name+'-cut','cut',win.origin,win.size);
+   addBox(design,name+'-glass','add',win.origin,win.size,'glass');
+   windowsPerRoom[i]++;
+   realClerestoryWindowCount++;
+  }
+  if(realClerestoryWindowCount<4||windowsPerRoom.some(n=>n<1))
    fail('R173_NO_REAL_EXTERIOR_CLERESTORY');
  }
+
  if(design.elements.length>160)
   fail('B143_ELEMENT_BUDGET_EXCEEDED');
  const compiled=compileDesign(design);
@@ -215,6 +242,9 @@ export function deriveR170FourRoomVolumes(base,
    sourceOnly:true,hostArtStudyNotModelHeightChoice:true,
    studyStyle,sculptedVolumeVariant:sculpted,
    realExteriorClerestoryWindows:realClerestoryWindowCount,
+   realExteriorClerestoryWindowsPerRoom:windowsPerRoom,
+   omittedOptionalClerestoryWindows,
+   b143SourceElementCount:design.elements.length,
    derivedBuildingBoundsHeight:design.bounds.height,
    legacyRoofProfileRemovedFromDerivedOnly:legacyProfileIds,
    modelSelectedRoofFamilyPreserved:profile,

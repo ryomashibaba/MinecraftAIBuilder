@@ -21,6 +21,12 @@ test('R172 unattended 3-use synthetic designs actually compile and preserve bloc
   assert.ok(c.audit.actualSculptedHighestOccupiedY>
    c.audit.actualBaselineHighestOccupiedY+1);
   assert.ok(c.audit.realSculptedClerestoryWindows>=4);
+  assert.ok(c.source.design.elements.length<=160);
+  assert.ok(c.sculpted.design.elements.length<=160);
+  assert.equal(c.sculpted.r170FourRoomVolumeEvidence.b143SourceElementCount,
+   c.sculpted.design.elements.length);
+  assert.equal(c.sculpted.r170FourRoomVolumeEvidence.realExteriorClerestoryWindowsPerRoom.length,4);
+  assert.ok(c.sculpted.r170FourRoomVolumeEvidence.realExteriorClerestoryWindowsPerRoom.every(n=>n>=1));
   assert.ok(c.audit.realSculptedClerestoryGlazingCells>=12);
   assert.ok(c.sculpted.r170FourRoomVolumeEvidence.originalLowerFiveLevelsUnchanged);
   assert.equal(c.sculpted.sourceRouteAudit.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
