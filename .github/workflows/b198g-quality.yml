@@ -123,6 +123,10 @@ on:
       - 'scripts/r190-semantic-fixtures.mjs'
       - 'scripts/r190-semantic-massing.test.mjs'
       - 'scripts/r190-source-review.mjs'
+      - 'source/ai/r190-saved-qwen-bridge.mjs'
+      - 'scripts/r190-saved-qwen-host-completion.mjs'
+      - 'scripts/r190-saved-qwen-bridge.test.mjs'
+      - 'scripts/r190-qwen-compatibility-report.mjs'
       - 'scripts/r177-ground-intent.test.mjs'
       - 'source/ai/r160-topology-intent.mjs'
       - 'source/ai/r162-room-section-massing.mjs'
@@ -203,6 +207,19 @@ jobs:
           node --check scripts/r190-source-review.mjs
           node --test scripts/r190-semantic-massing.test.mjs
           node scripts/r190-source-review.mjs --out r190-semantic-source-review
+      - name: R190-E saved real Qwen semantics vs HOST completion QA
+        run: |
+          node --check source/ai/r190-saved-qwen-bridge.mjs
+          node --check scripts/r190-qwen-compatibility-report.mjs
+          node --test scripts/r190-saved-qwen-bridge.test.mjs
+          node scripts/r190-qwen-compatibility-report.mjs --out r190-saved-qwen-evidence
+      - name: Upload R190-E real archived Qwen fidelity and provenance report
+        uses: actions/upload-artifact@v4
+        with:
+          name: R190-E-ARCHIVED-REAL-QWEN-FOUR-SEMANTIC-FIDELITY
+          path: r190-saved-qwen-evidence/
+          retention-days: 14
+          if-no-files-found: error
       - name: Upload R190 fifteen B143 variants and seventy-five elevations
         uses: actions/upload-artifact@v4
         with:
