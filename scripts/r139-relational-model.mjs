@@ -38,6 +38,8 @@ import {deriveR163DaylitSections}
  from '../source/ai/r163-daylit-sections.mjs';
 import {deriveR170FourRoomVolumes}
  from '../source/ai/r170-four-room-volumes.mjs';
+import {deriveR176GroundFootprint}
+ from '../source/ai/r176-ground-footprint.mjs';
 import {validateR160TopologyIntent,r160ToR151}
  from '../source/ai/r160-topology-intent.mjs';
 
@@ -55,7 +57,8 @@ export function parseR139RelationalFurnishedReply(raw,request,
   allowRooflineComposition=false,allowSpatialBalanceComposition=false,
   allowFloorplanComposition=false,allowTopologyComposition=false,
   allowHostGridResearch=false,allowHostVolumeResearch=false,
-  allowHostSculpturalResearch=false,allowHostMassingResearch=false}={}){
+  allowHostSculpturalResearch=false,allowHostMassingResearch=false,
+  allowHostGroundFootprintResearch=false}={}){
  if(typeof raw!=='string'||raw.length<20||raw.length>22000)
   fail('MISSING_OR_OVERSIZED_MODEL_REPLY');
  let reply;
@@ -168,19 +171,28 @@ export function parseR139RelationalFurnishedReply(raw,request,
    {allowDecorativeDeferral:allowHostGridResearch===true});
   const hostFourRoomVolume=allowHostVolumeResearch===true&&
    allowTopologyComposition===true&&roomCount===4;
+  if(allowHostGroundFootprintResearch===true&&
+   (allowHostMassingResearch!==true||allowHostVolumeResearch!==true||
+    allowHostGridResearch!==true||allowTopologyComposition!==true))
+   fail('R176_REQUIRES_EXPLICIT_HOST_R175_RESEARCH');
   // R173 changes high-room geometry ONLY after the same R149/R150 verified
   // exterior and furnishings; all host intent is explicit and attributed.
-  const completed=highSectionEligible?
-   deriveR163DaylitSections(articulated):
-   hostFourRoomVolume?deriveR170FourRoomVolumes(articulated,{
+  const fourRoomVolume=hostFourRoomVolume?
+   deriveR170FourRoomVolumes(articulated,{
     studyStyle:allowHostMassingResearch===true?
      'R175_SETBACK_TERRACES':allowHostSculpturalResearch===true?
      'R173_SCULPTED_CLERESTORY':'R170_TERRACED_BASELINE'
-   }):articulated;
+   }):null;
+  const completed=highSectionEligible?
+   deriveR163DaylitSections(articulated):
+   fourRoomVolume?(allowHostGroundFootprintResearch===true?
+    deriveR176GroundFootprint(fourRoomVolume):fourRoomVolume):articulated;
   return {intent:structuredClone(architecture),envelope,volume,roofline,
    integrated,completed,
    roomSectionScope:highSectionEligible?
     'REAL_THREE_ROOM_SECTIONS_AND_CLERESTORY':
+    hostFourRoomVolume&&allowHostGroundFootprintResearch===true?
+     'FOUR_ROOMS_HOST_R176_ACTUAL_GROUND_FOOTPRINT_CORNER':
     hostFourRoomVolume&&allowHostMassingResearch===true?
      'FOUR_ROOMS_HOST_R175_ACTUAL_UPPER_SETBACK_TERRACES':
     hostFourRoomVolume&&allowHostSculpturalResearch===true?

@@ -5,6 +5,8 @@ import os from 'node:os';
 import path from 'node:path';
 import {buildR172Autoreview,saveR172Autoreview}
  from './r172-ci-autoreview.mjs';
+import {deriveR176GroundFootprint}
+ from '../source/ai/r176-ground-footprint.mjs';
 
 test('R172 unattended 3-use synthetic designs actually compile and preserve blocked world gates',()=>{
  const result=buildR172Autoreview();
@@ -23,6 +25,21 @@ test('R172 unattended 3-use synthetic designs actually compile and preserve bloc
   assert.ok(c.audit.realSculptedClerestoryWindows>=4);
   assert.ok(c.massed&&c.massed.r170FourRoomVolumeEvidence);
   assert.equal(c.audit.realUpperSetbackDecks.length,2);
+  assert.ok(c.outlined?.r176GroundFootprintEvidence);
+  assert.equal(c.audit.footprintHostAuthorship,'HOST_DESIGNED_NOT_MODEL_SELECTED');
+  assert.ok(c.audit.actualY1FloorCellsRemoved>=9);
+  assert.ok(c.audit.outlinedElementCount<=160);
+  assert.notEqual(c.audit.outlinedGeometrySha256,c.audit.massedGeometrySha256);
+  assert.equal(c.outlined.sourceRouteAudit.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert.ok(c.outlined.sourceRouteAudit.featureAccess.every(f=>f.reachableFromEntrance));
+  assert.deepEqual(c.outlined.gates,Array(9).fill('BLOCKED'));
+  assert.deepEqual(c.outlined.BuildPlan.operations,[]);
+  assert.equal(c.outlined.worldWrites,0);
+  assert.equal(c.outlined.r176GroundFootprintEvidence.unchangedFurnishingVoxelCells,true);
+  assert.throws(()=>deriveR176GroundFootprint(c.sculpted),
+   /R176_GROUND_FOOTPRINT_VERIFIED_R175_SOURCE_AND_BLOCKED_CONSTRUCTION_REQUIRED/);
+  assert.throws(()=>deriveR176GroundFootprint({...c.massed,readiness:'PREPARED'}),
+   /R176_GROUND_FOOTPRINT_VERIFIED_R175_SOURCE_AND_BLOCKED_CONSTRUCTION_REQUIRED/);
   assert.equal(c.audit.originalGroundFootprintChanged,false);
   assert.notEqual(c.massed.geometrySha256,c.sculpted.geometrySha256);
   assert.ok(c.audit.massedElementCount<=160);
@@ -61,6 +78,7 @@ test('R172 single CI operation produces three interactive previews + 15 true vox
   assert.ok(fs.existsSync(path.join(out,id+'.html')));
   assert.ok(fs.existsSync(path.join(out,id+'-sculpted.html')));
   assert.ok(fs.existsSync(path.join(out,id+'-massed.html')));
+  assert.ok(fs.existsSync(path.join(out,id+'-outlined.html')));
   for(const view of ['front','rear','west','east','roof']){
    const svg=fs.readFileSync(path.join(out,id+'-'+view+'.svg'),'utf8');
    assert.ok(svg.startsWith('<svg'),id+' '+view);
@@ -70,6 +88,9 @@ test('R172 single CI operation produces three interactive previews + 15 true vox
    const massedSvg=fs.readFileSync(path.join(out,
     id+'-massed-'+view+'.svg'),'utf8');
    assert.ok(massedSvg.startsWith('<svg'),id+' massed '+view);
+   const outlinedSvg=fs.readFileSync(path.join(out,
+    id+'-outlined-'+view+'.svg'),'utf8');
+   assert.ok(outlinedSvg.startsWith('<svg'),id+' outlined '+view);
   }
  }
  assert.throws(()=>saveR172Autoreview(out),/R172_AUTOMATED_QA_NEW_OUTPUT_DIR_REQUIRED/);

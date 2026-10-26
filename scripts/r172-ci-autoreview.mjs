@@ -76,6 +76,11 @@ export function buildR172Autoreview(){
    allowTopologyComposition:true,allowHostGridResearch:true,
    allowHostVolumeResearch:true,allowHostMassingResearch:true
   }).architectural?.completed;
+  const outlined=parseR139RelationalFurnishedReply(JSON.stringify(raw),request,{
+   allowTopologyComposition:true,allowHostGridResearch:true,
+   allowHostVolumeResearch:true,allowHostMassingResearch:true,
+   allowHostGroundFootprintResearch:true
+  }).architectural?.completed;
   if(!model||!verifyCompiled(model.design,model.compiled)||
    !safety(model)||!safety(r)||
    model.sourceRouteAudit?.status!=='SOURCE_ROUTES_REACH_ALL_ZONES'||
@@ -110,6 +115,21 @@ export function buildR172Autoreview(){
    massed.compiled.primitives.filter(p=>p[1]<=5).length!==
     variant.compiled.primitives.filter(p=>p[1]<=5).length)
    fail('R175_REAL_SETBACK_OR_PROTECTED_PROGRAM_'+t.id);
+  if(!outlined||!verifyCompiled(outlined.design,outlined.compiled)||
+   !safety(outlined)||
+   outlined.r176GroundFootprintEvidence?.groundFloorOutlineChanged!==true||
+   outlined.r176GroundFootprintEvidence.removedActualY1FloorCells<9||
+   !outlined.r176GroundFootprintEvidence.unchangedFurnishingVoxelCells||
+   !outlined.r176GroundFootprintEvidence.protectedOtherCellsUnchanged||
+   outlined.r176GroundFootprintEvidence.HOST_DESIGNED_NOT_MODEL_SELECTED!==true||
+   outlined.sourceRouteAudit.status!=='SOURCE_ROUTES_REACH_ALL_ZONES'||
+   outlined.sourceRouteAudit.zones.length!==4||
+   outlined.sourceRouteAudit.featureAccess.length!==t.objects.length||
+   !outlined.sourceRouteAudit.featureAccess.every(x=>x.reachableFromEntrance)||
+   outlined.geometrySha256===massed.geometrySha256||
+   outlined.compiled.primitives.filter(p=>p[1]===1).length>=
+    massed.compiled.primitives.filter(p=>p[1]===1).length)
+   fail('R176_GROUND_OUTLINE_OR_PROTECTED_MODEL_PROGRAM_'+t.id);
   const ymax=p=>Math.max(...p.compiled.primitives.map(v=>v[1]));
   const maxBaselineY=ymax(model),maxSculptedY=ymax(variant);
   if(maxSculptedY<=maxBaselineY+1)
@@ -117,7 +137,7 @@ export function buildR172Autoreview(){
   const highGlass=variant.compiled.primitives.filter(p=>p[1]>=6&&
    p[3]===3).length;
   if(highGlass<12)fail('REAL_CLERESTORY_VOXELS_MISSING_'+t.id);
-  return {id:t.id,use:t.use,source:model,sculpted:variant,massed,
+  return {id:t.id,use:t.use,source:model,sculpted:variant,massed,outlined,
    audit:{id:t.id,use:t.use,sourceSha256:model.sourceSha256,
     geometrySha256:model.geometrySha256,voxels:model.compiled.primitives.length,
     rooms:4,originalObjectsPreserved:t.objects.length,
@@ -143,6 +163,15 @@ export function buildR172Autoreview(){
     realUpperSetbackDecks:massed.r170FourRoomVolumeEvidence.upperSetbackDecks,
     massedWindowsPerRoom:massed.r170FourRoomVolumeEvidence.realExteriorClerestoryWindowsPerRoom,
     originalGroundFootprintChanged:false,
+    outlinedSourceSha256:outlined.sourceSha256,
+    outlinedGeometrySha256:outlined.geometrySha256,
+    outlinedVoxelCount:outlined.compiled.primitives.length,
+    outlinedElementCount:outlined.design.elements.length,
+    actualGroundCutout:outlined.r176GroundFootprintEvidence.cutBounds,
+    actualY1FloorCellsRemoved:outlined.r176GroundFootprintEvidence.removedActualY1FloorCells,
+    selectedHostCorner:outlined.r176GroundFootprintEvidence.courtAt,
+    footprintHostAuthorship:'HOST_DESIGNED_NOT_MODEL_SELECTED',
+    originalEntranceAndFurnishingsPreserved:true,
     freshModelCalls:0,realLocalInference:false,
     provenance:'SYNTHETIC_CI_FIXTURE_HOST_DERIVED_NOT_GENUINE_QWEN',
     humanArtReview:'ART_HOLD',readiness:'NOT_PREPARED',
@@ -172,11 +201,13 @@ function html(report){
   '<h3>基準 R170</h3><iframe loading="lazy" title="'+esc(c.use)+' R170" src="'+c.id+'.html"></iframe>'+
   '<h3>研究候補 R173</h3><iframe loading="lazy" title="'+esc(c.use)+' R173" src="'+c.id+'-sculpted.html"></iframe>'+
   '<h3>研究候補 R175 実屋根セットバック</h3><iframe loading="lazy" title="'+esc(c.use)+' R175" src="'+c.id+'-massed.html"></iframe>'+
+  '<h3>研究候補 R176 地上階輪郭の変更（HOST研究）</h3><iframe loading="lazy" title="'+esc(c.use)+' R176" src="'+c.id+'-outlined.html"></iframe>'+
   '<div class="elev">'+['front','rear','west','east','roof'].map(d=>
    '<figure><img src="'+c.id+'-'+d+'.svg" alt="'+esc(d)+
    '"><img src="'+c.id+'-sculpted-'+d+'.svg" alt="sculpted '+esc(d)+
    '"><img src="'+c.id+'-massed-'+d+'.svg" alt="R175 '+esc(d)+
-   '"><figcaption>'+esc(d)+' · R170 / R173 / R175</figcaption></figure>').join('')+'</div></section>'
+   '"><img src="'+c.id+'-outlined-'+d+'.svg" alt="R176 '+esc(d)+
+   '"><figcaption>'+esc(d)+' · R170 / R173 / R175 / R176</figcaption></figure>').join('')+'</div></section>'
  ).join('');
  return '<!doctype html><html lang="ja"><meta charset="utf-8">'+
  '<meta name="viewport" content="width=device-width,initial-scale=1">'+
@@ -202,13 +233,15 @@ export function saveR172Autoreview(out){
   path.dirname(fileURLToPath(import.meta.url)),
   '../source/ai/b143-viewer-template.html'),'utf8');
  const files=new Map();
- for(const {id,source,sculpted,massed} of r.cases){
+ for(const {id,source,sculpted,massed,outlined} of r.cases){
   files.set(id+'.html',renderB143Html(
    compileB143Gallery([source.design]),template));
   files.set(id+'-sculpted.html',renderB143Html(
    compileB143Gallery([sculpted.design]),template));
   files.set(id+'-massed.html',renderB143Html(
    compileB143Gallery([massed.design]),template));
+  files.set(id+'-outlined.html',renderB143Html(
+   compileB143Gallery([outlined.design]),template));
   for(const d of ['front','rear','west','east','roof']){
    files.set(id+'-'+d+'.svg',
     renderR164Elevation(source.compiled,source.design,d));
@@ -216,6 +249,8 @@ export function saveR172Autoreview(out){
     renderR164Elevation(sculpted.compiled,sculpted.design,d));
    files.set(id+'-massed-'+d+'.svg',
     renderR164Elevation(massed.compiled,massed.design,d));
+   files.set(id+'-outlined-'+d+'.svg',
+    renderR164Elevation(outlined.compiled,outlined.design,d));
   }
  }
  const {cases,...top}=r;
@@ -228,11 +263,11 @@ export function saveR172Autoreview(out){
  if(process.env.GITHUB_STEP_SUMMARY){
   const lines=['### R172 自動3用途・B143ソースレビュー',
    '**静的な合成入力のみ。実Qwen推論ではありません。ART HOLD / 施工禁止。**','',
-   '| 用途 | R170実ボクセル | R173実ボクセル | R175実ボクセル | 外部高窓 | 結果 |',
-   '|---|---:|---:|---:|---:|---|',...report.cases.map(c=>
+   '| 用途 | R170実ボクセル | R173実ボクセル | R175実ボクセル | R176実ボクセル | 地上階CUTセル | 結果 |',
+   '|---|---:|---:|---:|---:|---:|---|',...report.cases.map(c=>
     '| '+c.use+' | '+c.voxels+' | '+c.sculptedVoxelCount+
-    ' | '+c.massedVoxelCount+
-    ' | '+c.massedWindowsPerRoom.join('/')+' | ソースPASS / 美術HOLD |'),
+    ' | '+c.massedVoxelCount+' | '+c.outlinedVoxelCount+
+    ' | '+c.actualY1FloorCellsRemoved+' | ソースPASS / 美術HOLD |'),
     '', 'モデル推論0、Minecraft書込0。5方向画像と3Dは成果物 R172-CI-THREE-USE-SOURCE-3D を確認。',''];
   fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,lines.join('\n'));
  }
