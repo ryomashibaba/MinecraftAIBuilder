@@ -1,3 +1,12 @@
+## R179-A — R178実3D美術審査とモデル意図・屋外到達性修正（2026-10-26 JST）
+
+- R178基点 `acdb47a`、B198G [CI #40297455088](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40297455088) は **SUCCESS**。合成3用途のB143・回転3D・15方向図は [artifact #12638279659](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40297455088/artifacts/12638279659)。
+- 実測：住宅3,014 voxel / 50 elements、店舗2,856 / 54、研究施設3,623 / 58。各4室・家具4件・2棟内扉・入口から全室/全設備到達。**実LLM呼出0、Minecraft書込み0、ソースQAと美術合格は別**。
+- 美術審査：正面・東西側面・屋根の実B143図を確認。どの用途も細長い平行な2つの箱が主で、住宅・店舗の屋根平面はほぼ同型。中庭と2棟形式は単一矩形より構造的な前進だが、**ART HOLD / 美術FAIL**。次の主工程はモデルが指定する任意主要ボリューム/配置/外部空間を実幾何へ反映する構成研究であり、飾り付けに戻らない。
+- 発見した実装問題(1)：1棟分しか直接隣接をモデルが指定しなくても2棟内扉を作っていた。初期設計は各棟の前後室が直接接続することで初めてアクセス可能なので、**両棟の直接関係をモデルが明示した場合のみ受理し、その他はHOLD**。モデルが指定していないドアをホストが補わない。
+- 発見した実装問題(2)：中庭の支持床はチェックしても入口からその床への経路は未検証。R125既存の厳密な2幅ソース動線グラフで、入口から中庭まで別途到達性を検証。橋-中庭ドア削除の負例を追加。
+- 本修正のCIは結果確認まで**未合格**。実Qwen/Gemma未知用途、Minecraft実歩行、建築美術合格、一般化は未証明。 `ART HOLD` / `NOT_PREPARED` / 9`BLOCKED` / 空BuildPlan / worldWrites・worldContacts 0。Draft PR #128継続、main未マージ。
+
 ## R178 実バグ修正・CI進捗（2026-10-26 JST）
 
 - Draft PR #128 / ブランチ `feature/b198zr1-protected-architectural-revision` を継続。mainへマージしない。

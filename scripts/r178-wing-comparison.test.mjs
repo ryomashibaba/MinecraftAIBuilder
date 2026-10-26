@@ -8,7 +8,8 @@ import {makeR178SyntheticReply,buildR178WingComparisons,
  saveR178WingComparisons} from './r178-wing-comparison.mjs';
 import {parseR178CourtyardReply,validateR178WingReply}
  from '../source/ai/r178-wing-courtyard.mjs';
-import {verifyCompiled} from '../source/ai/b143-building-dsl.mjs';
+import {compileDesign,verifyCompiled} from '../source/ai/b143-building-dsl.mjs';
+import {auditR125SourceRoutes} from '../source/ai/r125-source-routes.mjs';
 const base={
  id:'r178-host-unit',title:'Physical courtyard office',
  footprint:{width:32,depth:32},
@@ -52,6 +53,7 @@ test('R178 independently builds two physical wings, a roofless usable court and 
   assert.equal(p.placements.length,4);
   assert.equal(p.r178WingEvidence.courtyardUnroofed,true);
   assert.equal(p.r178WingEvidence.courtWalkSourceSupported,true);
+  assert.equal(p.r178WingEvidence.courtyardReachedFromEntrance,true);
   assert.equal(audit.separatedRoomWings,2);
   assert.equal(audit.modelRequestedDirectDoors,2);
   assert.equal(audit.actualPhysicalSharedWallDoors,2);
@@ -87,6 +89,10 @@ test('R178 caller composition cannot be silently retargeted to fit an invalid ad
   correct.designOnlySource.originalPlanSha256);
  assert.equal(correct.designOnlySource.r178WingEvidence.geometryAuthorship,
   'HOST_COMPILED_FROM_EXPLICIT_WING_IR');
+ const missingPair=clone(base);
+ missingPair.relations.directAdjacencies=[['studio','quiet']];
+ assert.throws(()=>parse(missingPair),
+  /R178_WING_COURT_PILOT_EACH_WING_NEEDS_MODEL_DIRECT_DOOR/);
  const wrongPair=clone(base);
  wrongPair.relations.directAdjacencies=[['studio','library']];
  assert.throws(()=>parse(wrongPair),/R178_WING_COURT_DIRECT_MODEL_PAIR_MUST_SHARE_REAL_WING_WALL/);
@@ -106,6 +112,20 @@ test('R178 caller composition cannot be silently retargeted to fit an invalid ad
  const extra=clone(base);
  extra.architecture.worldCoordinates=[0,0,0];
  assert.throws(()=>parse(extra),/R178_WING_COURT_WING_COMPOSITION_IR/);
+});
+
+test('R178 detects an inaccessible outdoor court despite accessible indoor rooms',()=>{
+ const p=parse(base).designOnlySource;
+ const tampered=structuredClone(p.design);
+ tampered.elements=tampered.elements.filter(e=>e.id!=='bridge-court-door');
+ const compiled=compileDesign(tampered);
+ const [x,,z]=p.r178WingEvidence.coreCourtWitness;
+ const id='r178-public-courtyard';
+ const recheck=auditR125SourceRoutes({...p,design:tampered,compiled,
+  program:[{...p.program[0],zones:[...p.program[0].zones,
+   {id,range:{x:[x,x+1],z:[z,z]}}]}]});
+ assert.equal(recheck.zones.find(a=>a.id===id).reachedFromEntrance,false);
+ assert.ok(recheck.issues.includes('UNREACHABLE_ZONE_'+id));
 });
 
 test('R178 creates three source-only 3D previews and 15 true voxel elevations without overwriting',t=>{

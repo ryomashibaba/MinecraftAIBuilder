@@ -98,6 +98,10 @@ export function validateR178WingReply(raw,request){
    fail('DIRECT_MODEL_PAIR_MUST_SHARE_REAL_WING_WALL');
   requested.add(pair(...p));
  }
+ // There is no second declared passage to reach a rear room in this pilot.
+ // Require BOTH user/model-requested direct pairs; never add an unrequested door.
+ if(requested.size!==allowed.size)
+  fail('PILOT_EACH_WING_NEEDS_MODEL_DIRECT_DOOR');
  return {reply,plan,semantic};
 }
 
@@ -231,10 +235,22 @@ function makeBareSource(plan,arch,rel){
   sourceRoutes.zones.length!==4||
   !sourceRoutes.zones.every(q=>q.reachedFromEntrance&&q.reachedTwoWidePadCount>0))
   fail('TWO_WINGS_NOT_CONNECTED_FROM_REAL_ENTRANCE');
+ // Prove continuous two-wide route from the real entrance to the roofless
+ // outdoor court. A supported but isolated floor cell is not sufficient.
+ const courtyardId='r178-public-courtyard';
+ const outdoorRouteAudit=auditR125SourceRoutes({
+  ...physical,program:[{...physical.program[0],zones:[...zones,
+   {id:courtyardId,range:{x:[courtCenterX,courtCenterX+1],
+     z:[centerZ,centerZ]}}]}]
+ });
+ if(outdoorRouteAudit.status!=='SOURCE_ROUTES_REACH_ALL_ZONES'||
+  !outdoorRouteAudit.zones.some(z=>z.id===courtyardId&&z.reachedFromEntrance))
+  fail('COURTYARD_NOT_REACHABLE_FROM_REAL_ENTRANCE');
  return {...physical,sourceRouteAudit:sourceRoutes,
   r178Witness:{roofYs:{...arch.roofYs},
    bridgeEnd:arch.bridge,physicalDoorCount:2,
    courtyardUnroofed:true,courtWalkSourceSupported:true,
+   courtyardReachedFromEntrance:true,
    coreCourtWitness:[courtCenterX,2,centerZ],
    modelDirectPairsVerifiedAgainstPhysicalWingWall:true,
    wingRoomAssignment:{west:[...arch.westWing],east:[...arch.eastWing]}}};
