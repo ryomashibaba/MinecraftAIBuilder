@@ -72,6 +72,10 @@ export function buildR172Autoreview(){
    allowTopologyComposition:true,allowHostGridResearch:true,
    allowHostVolumeResearch:true,allowHostSculpturalResearch:true
   }).architectural?.completed;
+  const massed=parseR139RelationalFurnishedReply(JSON.stringify(raw),request,{
+   allowTopologyComposition:true,allowHostGridResearch:true,
+   allowHostVolumeResearch:true,allowHostMassingResearch:true
+  }).architectural?.completed;
   if(!model||!verifyCompiled(model.design,model.compiled)||
    !safety(model)||!safety(r)||
    model.sourceRouteAudit?.status!=='SOURCE_ROUTES_REACH_ALL_ZONES'||
@@ -94,6 +98,18 @@ export function buildR172Autoreview(){
    model.compiled.primitives.filter(p=>p[1]<=5).length!==
     variant.compiled.primitives.filter(p=>p[1]<=5).length)
    fail('SCULPTED_SOURCE_OR_ROOM_SAFETY_'+t.id);
+  if(!massed||!verifyCompiled(massed.design,massed.compiled)||
+   !safety(massed)||
+   massed.r170FourRoomVolumeEvidence?.upperSetbackDecks?.length!==2||
+   massed.r170FourRoomVolumeEvidence.originalGroundFootprintChanged!==false||
+   massed.r170FourRoomVolumeEvidence.realExteriorClerestoryWindowsPerRoom.some(n=>n<1)||
+   massed.sourceRouteAudit.status!=='SOURCE_ROUTES_REACH_ALL_ZONES'||
+   massed.sourceRouteAudit.featureAccess.length!==t.objects.length||
+   !massed.sourceRouteAudit.featureAccess.every(x=>x.reachableFromEntrance)||
+   massed.geometrySha256===variant.geometrySha256||
+   massed.compiled.primitives.filter(p=>p[1]<=5).length!==
+    variant.compiled.primitives.filter(p=>p[1]<=5).length)
+   fail('R175_REAL_SETBACK_OR_PROTECTED_PROGRAM_'+t.id);
   const ymax=p=>Math.max(...p.compiled.primitives.map(v=>v[1]));
   const maxBaselineY=ymax(model),maxSculptedY=ymax(variant);
   if(maxSculptedY<=maxBaselineY+1)
@@ -101,7 +117,7 @@ export function buildR172Autoreview(){
   const highGlass=variant.compiled.primitives.filter(p=>p[1]>=6&&
    p[3]===3).length;
   if(highGlass<12)fail('REAL_CLERESTORY_VOXELS_MISSING_'+t.id);
-  return {id:t.id,use:t.use,source:model,sculpted:variant,
+  return {id:t.id,use:t.use,source:model,sculpted:variant,massed,
    audit:{id:t.id,use:t.use,sourceSha256:model.sourceSha256,
     geometrySha256:model.geometrySha256,voxels:model.compiled.primitives.length,
     rooms:4,originalObjectsPreserved:t.objects.length,
@@ -119,6 +135,14 @@ export function buildR172Autoreview(){
     realSculptedClerestoryWindows:
      variant.r170FourRoomVolumeEvidence.realExteriorClerestoryWindows,
     sculptedHeights:variant.r170FourRoomVolumeEvidence.roomSections.map(q=>q.roofY),
+    massedSourceSha256:massed.sourceSha256,
+    massedGeometrySha256:massed.geometrySha256,
+    massedVoxelCount:massed.compiled.primitives.length,
+    massedElementCount:massed.design.elements.length,
+    R175_HOST_DERIVED_NOT_MODEL_SELECTED:true,
+    realUpperSetbackDecks:massed.r170FourRoomVolumeEvidence.upperSetbackDecks,
+    massedWindowsPerRoom:massed.r170FourRoomVolumeEvidence.realExteriorClerestoryWindowsPerRoom,
+    originalGroundFootprintChanged:false,
     freshModelCalls:0,realLocalInference:false,
     provenance:'SYNTHETIC_CI_FIXTURE_HOST_DERIVED_NOT_GENUINE_QWEN',
     humanArtReview:'ART_HOLD',readiness:'NOT_PREPARED',
@@ -147,10 +171,12 @@ function html(report){
    'セル。美術判定は未実施。</p>'+
   '<h3>基準 R170</h3><iframe loading="lazy" title="'+esc(c.use)+' R170" src="'+c.id+'.html"></iframe>'+
   '<h3>研究候補 R173</h3><iframe loading="lazy" title="'+esc(c.use)+' R173" src="'+c.id+'-sculpted.html"></iframe>'+
+  '<h3>研究候補 R175 実屋根セットバック</h3><iframe loading="lazy" title="'+esc(c.use)+' R175" src="'+c.id+'-massed.html"></iframe>'+
   '<div class="elev">'+['front','rear','west','east','roof'].map(d=>
    '<figure><img src="'+c.id+'-'+d+'.svg" alt="'+esc(d)+
    '"><img src="'+c.id+'-sculpted-'+d+'.svg" alt="sculpted '+esc(d)+
-   '"><figcaption>'+esc(d)+' · 上 R170 / 下 R173</figcaption></figure>').join('')+'</div></section>'
+   '"><img src="'+c.id+'-massed-'+d+'.svg" alt="R175 '+esc(d)+
+   '"><figcaption>'+esc(d)+' · R170 / R173 / R175</figcaption></figure>').join('')+'</div></section>'
  ).join('');
  return '<!doctype html><html lang="ja"><meta charset="utf-8">'+
  '<meta name="viewport" content="width=device-width,initial-scale=1">'+
@@ -176,16 +202,20 @@ export function saveR172Autoreview(out){
   path.dirname(fileURLToPath(import.meta.url)),
   '../source/ai/b143-viewer-template.html'),'utf8');
  const files=new Map();
- for(const {id,source,sculpted} of r.cases){
+ for(const {id,source,sculpted,massed} of r.cases){
   files.set(id+'.html',renderB143Html(
    compileB143Gallery([source.design]),template));
   files.set(id+'-sculpted.html',renderB143Html(
    compileB143Gallery([sculpted.design]),template));
+  files.set(id+'-massed.html',renderB143Html(
+   compileB143Gallery([massed.design]),template));
   for(const d of ['front','rear','west','east','roof']){
    files.set(id+'-'+d+'.svg',
     renderR164Elevation(source.compiled,source.design,d));
    files.set(id+'-sculpted-'+d+'.svg',
     renderR164Elevation(sculpted.compiled,sculpted.design,d));
+   files.set(id+'-massed-'+d+'.svg',
+    renderR164Elevation(massed.compiled,massed.design,d));
   }
  }
  const {cases,...top}=r;
@@ -198,11 +228,11 @@ export function saveR172Autoreview(out){
  if(process.env.GITHUB_STEP_SUMMARY){
   const lines=['### R172 自動3用途・B143ソースレビュー',
    '**静的な合成入力のみ。実Qwen推論ではありません。ART HOLD / 施工禁止。**','',
-   '| 用途 | R170実ボクセル | R173実ボクセル | 最上部Yの変化 | 外部高窓 | 結果 |',
-   '|---|---:|---:|---|---:|---|',...report.cases.map(c=>
+   '| 用途 | R170実ボクセル | R173実ボクセル | R175実ボクセル | 外部高窓 | 結果 |',
+   '|---|---:|---:|---:|---:|---|',...report.cases.map(c=>
     '| '+c.use+' | '+c.voxels+' | '+c.sculptedVoxelCount+
-    ' | '+c.actualBaselineHighestOccupiedY+' → '+c.actualSculptedHighestOccupiedY+
-    ' | '+c.realSculptedClerestoryWindows+' | ソースPASS / 美術HOLD |'),
+    ' | '+c.massedVoxelCount+
+    ' | '+c.massedWindowsPerRoom.join('/')+' | ソースPASS / 美術HOLD |'),
     '', 'モデル推論0、Minecraft書込0。5方向画像と3Dは成果物 R172-CI-THREE-USE-SOURCE-3D を確認。',''];
   fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,lines.join('\n'));
  }

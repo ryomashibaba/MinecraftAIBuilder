@@ -55,7 +55,7 @@ export function parseR139RelationalFurnishedReply(raw,request,
   allowRooflineComposition=false,allowSpatialBalanceComposition=false,
   allowFloorplanComposition=false,allowTopologyComposition=false,
   allowHostGridResearch=false,allowHostVolumeResearch=false,
-  allowHostSculpturalResearch=false}={}){
+  allowHostSculpturalResearch=false,allowHostMassingResearch=false}={}){
  if(typeof raw!=='string'||raw.length<20||raw.length>22000)
   fail('MISSING_OR_OVERSIZED_MODEL_REPLY');
  let reply;
@@ -173,13 +173,16 @@ export function parseR139RelationalFurnishedReply(raw,request,
   const completed=highSectionEligible?
    deriveR163DaylitSections(articulated):
    hostFourRoomVolume?deriveR170FourRoomVolumes(articulated,{
-    studyStyle:allowHostSculpturalResearch===true?
+    studyStyle:allowHostMassingResearch===true?
+     'R175_SETBACK_TERRACES':allowHostSculpturalResearch===true?
      'R173_SCULPTED_CLERESTORY':'R170_TERRACED_BASELINE'
    }):articulated;
   return {intent:structuredClone(architecture),envelope,volume,roofline,
    integrated,completed,
    roomSectionScope:highSectionEligible?
     'REAL_THREE_ROOM_SECTIONS_AND_CLERESTORY':
+    hostFourRoomVolume&&allowHostMassingResearch===true?
+     'FOUR_ROOMS_HOST_R175_ACTUAL_UPPER_SETBACK_TERRACES':
     hostFourRoomVolume&&allowHostSculpturalResearch===true?
      'FOUR_ROOMS_HOST_R173_REAL_HIGH_GLAZED_SCULPTED_VOLUMES':
     hostFourRoomVolume?

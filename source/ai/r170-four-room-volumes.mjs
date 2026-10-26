@@ -18,7 +18,8 @@ const addBox=(design,id,mode,origin,size,material)=>design.elements.push({
 });
 export function deriveR170FourRoomVolumes(base,
  {studyStyle='R170_TERRACED_BASELINE'}={}){
- const sculpted=studyStyle==='R173_SCULPTED_CLERESTORY';
+ const massed=studyStyle==='R175_SETBACK_TERRACES';
+ const sculpted=studyStyle==='R173_SCULPTED_CLERESTORY'||massed;
  if(!sculpted&&studyStyle!=='R170_TERRACED_BASELINE')
   fail('HOST_STUDY_STYLE_UNSUPPORTED');
  if(base?.schema!=='minecraftaibuilder-r125-featured-source-v1'||
@@ -171,7 +172,8 @@ export function deriveR170FourRoomVolumes(base,
    optional.push(...windows.slice(1).map(win=>({i,win})));
   }
   // Each actual opening takes a CUT and a separate glass ADD element.
-  const capacity=Math.floor((160-design.elements.length)/2);
+  // Reserve six B143 elements for two actual upper roof setbacks.
+  const capacity=Math.floor((160-design.elements.length-(massed?6:0))/2);
   if(capacity<required.length)
    fail('R174_MANDATORY_GLAZING_EXCEEDS_ELEMENT_BUDGET');
   const chosen=[...required,...optional.slice(0,capacity-required.length)];
@@ -187,6 +189,44 @@ export function deriveR170FourRoomVolumes(base,
    fail('R173_NO_REAL_EXTERIOR_CLERESTORY');
  }
 
+ // R175 changes actual UPPER volume occupancy, not a decorative label.
+ // Keep original model-selected floor, entry, equipment and lower windows.
+ const upperSetbackDecks=[];
+ if(massed){
+  for(const [i,s] of sections.entries()){
+   if(s.rank<2)continue;
+   const [xl,xr]=s.perimeter.x,[zf,zb]=s.perimeter.z;
+   const side=xl===1?'west':xr===w-2?'east':null;
+   const band=3,deckY=s.roofY-3;
+   if(!side||xr-xl<9||zb-zf<9||deckY<8)
+    fail('R175_UPPER_MASS_SETBACK_NOT_FIT');
+   const outerX=side==='west'?xl:xr-band+1;
+   const innerX=side==='west'?xl+band:xr-band;
+   const prefix='r173-clerestory-'+i+'-'+side;
+   const initial=design.elements.length;
+   design.elements=design.elements.filter(e=>e.id!==prefix+'-cut'&&
+    e.id!==prefix+'-glass');
+   const removed=initial-design.elements.length;
+   if(removed!==0&&removed!==2)fail('R175_OPTIONAL_WINDOW_PAIR');
+   if(removed===2){
+    windowsPerRoom[i]--;
+    realClerestoryWindowCount--;
+   }
+   // Physically remove high wall, glazing, roofing and roof profile.
+   addBox(design,'r175-upper-cut-'+i,'cut',
+    [outerX,deckY+1,zf],[band,design.bounds.height-deckY-1,zb-zf+1]);
+   // A lower roof plane and internal weather wall enclose the split volume.
+   addBox(design,'r175-deck-'+i,'add',
+    [outerX,deckY,zf],[band,1,zb-zf+1],roof.material);
+   addBox(design,'r175-inner-wall-'+i,'add',
+    [innerX,deckY+1,zf],[1,s.roofY-deckY,zb-zf+1],west.material);
+   upperSetbackDecks.push({zoneId:s.zoneId,rank:s.rank,side,
+    roofY:s.roofY,deckY,outerX,innerX,
+    witnessZ:Math.floor((zf+zb)/2),optionalSideWindowRemoved:removed===2});
+  }
+  if(upperSetbackDecks.length!==2||windowsPerRoom.some(n=>n<1))
+   fail('R175_DECK_OR_MANDATORY_ROOM_GLAZING');
+ }
  if(design.elements.length>160)
   fail('B143_ELEMENT_BUDGET_EXCEEDED');
  const compiled=compileDesign(design);
@@ -199,6 +239,13 @@ export function deriveR170FourRoomVolumes(base,
  if(sorted(before)!==sorted(after))
   fail('ORIGINAL_ROOMS_DOORS_FURNITURE_CHANGED');
  const occupied=new Set(compiled.primitives.map(k));
+ for(const t of upperSetbackDecks){
+  const {outerX,innerX,roofY,deckY,witnessZ}=t;
+  if(occupied.has([outerX,roofY,witnessZ].join(','))||
+   !occupied.has([outerX,deckY,witnessZ].join(','))||
+   !occupied.has([innerX,roofY,witnessZ].join(',')))
+   fail('R175_REAL_UPPER_SETBACK_NOT_COMPILED');
+ }
  let extraVoid=0;
  for(const s of sections){
   const [mx,mz]=s.clearanceWitness;
@@ -241,6 +288,8 @@ export function deriveR170FourRoomVolumes(base,
   r170FourRoomVolumeEvidence:{
    sourceOnly:true,hostArtStudyNotModelHeightChoice:true,
    studyStyle,sculptedVolumeVariant:sculpted,
+   R175_HOST_DERIVED_NOT_MODEL_SELECTED:massed,
+   upperSetbackDecks,originalGroundFootprintChanged:false,
    realExteriorClerestoryWindows:realClerestoryWindowCount,
    realExteriorClerestoryWindowsPerRoom:windowsPerRoom,
    omittedOptionalClerestoryWindows,

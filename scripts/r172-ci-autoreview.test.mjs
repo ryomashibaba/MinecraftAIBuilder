@@ -21,6 +21,16 @@ test('R172 unattended 3-use synthetic designs actually compile and preserve bloc
   assert.ok(c.audit.actualSculptedHighestOccupiedY>
    c.audit.actualBaselineHighestOccupiedY+1);
   assert.ok(c.audit.realSculptedClerestoryWindows>=4);
+  assert.ok(c.massed&&c.massed.r170FourRoomVolumeEvidence);
+  assert.equal(c.audit.realUpperSetbackDecks.length,2);
+  assert.equal(c.audit.originalGroundFootprintChanged,false);
+  assert.notEqual(c.massed.geometrySha256,c.sculpted.geometrySha256);
+  assert.ok(c.audit.massedElementCount<=160);
+  assert.ok(c.audit.massedWindowsPerRoom.every(n=>n>=1));
+  assert.deepEqual(c.massed.BuildPlan.operations,[]);
+  assert.deepEqual(c.massed.gates,Array(9).fill('BLOCKED'));
+  assert.equal(c.massed.worldWrites,0);
+  assert.equal(c.massed.sourceRouteAudit.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
   assert.ok(c.source.design.elements.length<=160);
   assert.ok(c.sculpted.design.elements.length<=160);
   assert.equal(c.sculpted.r170FourRoomVolumeEvidence.b143SourceElementCount,
@@ -50,12 +60,16 @@ test('R172 single CI operation produces three interactive previews + 15 true vox
  for(const id of ['home','shop','laboratory']){
   assert.ok(fs.existsSync(path.join(out,id+'.html')));
   assert.ok(fs.existsSync(path.join(out,id+'-sculpted.html')));
+  assert.ok(fs.existsSync(path.join(out,id+'-massed.html')));
   for(const view of ['front','rear','west','east','roof']){
    const svg=fs.readFileSync(path.join(out,id+'-'+view+'.svg'),'utf8');
    assert.ok(svg.startsWith('<svg'),id+' '+view);
    const sculptedSvg=fs.readFileSync(path.join(out,
     id+'-sculpted-'+view+'.svg'),'utf8');
    assert.ok(sculptedSvg.startsWith('<svg'),id+' sculpted '+view);
+   const massedSvg=fs.readFileSync(path.join(out,
+    id+'-massed-'+view+'.svg'),'utf8');
+   assert.ok(massedSvg.startsWith('<svg'),id+' massed '+view);
   }
  }
  assert.throws(()=>saveR172Autoreview(out),/R172_AUTOMATED_QA_NEW_OUTPUT_DIR_REQUIRED/);
