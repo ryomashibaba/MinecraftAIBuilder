@@ -116,6 +116,9 @@ on:
       - 'source/ai/r188-inhabited-frontage.mjs'
       - 'scripts/r188-inhabited-frontage-comparison.mjs'
       - 'scripts/r188-inhabited-frontage.test.mjs'
+      - 'source/ai/r189-major-massing.mjs'
+      - 'scripts/r189-major-massing-comparison.mjs'
+      - 'scripts/r189-major-massing.test.mjs'
       - 'scripts/r177-ground-intent.test.mjs'
       - 'source/ai/r160-topology-intent.mjs'
       - 'source/ai/r162-room-section-massing.mjs'
@@ -188,6 +191,7 @@ jobs:
           node --test scripts/r186-vertical-slice.test.mjs
           node --test scripts/r187-daylit-upper-court.test.mjs
           node --test scripts/r188-inhabited-frontage.test.mjs
+          node --test scripts/r189-major-massing.test.mjs
       - name: R178 independent wing-courtyard synthetic 3D preview
         run: |
           node --check source/ai/r178-wing-courtyard.mjs
@@ -305,6 +309,18 @@ jobs:
         with:
           name: R188-FUNCTIONAL-THREE-ARCADES-TRUE-FRONTAGE-3D
           path: r188-real-inhabited-frontage/
+          retention-days: 14
+          if-no-files-found: error
+      - name: R189 compile explicit four major building heights and protect R188 real rooms
+        run: |
+          node --check source/ai/r189-major-massing.mjs
+          node --check scripts/r189-major-massing-comparison.mjs
+          node scripts/r189-major-massing-comparison.mjs --out r189-major-volume-real-geometry
+      - name: Upload R189 four genuinely changed front and rear roofline B143 models
+        uses: actions/upload-artifact@v4
+        with:
+          name: R189-MAJOR-VOLUME-FRONT-REAR-HEIGHT-3D
+          path: r189-major-volume-real-geometry/
           retention-days: 14
           if-no-files-found: error
       - name: R172 quick automatic three-use 3D preview
@@ -430,6 +446,9 @@ jobs:
           node --check source/ai/r188-inhabited-frontage.mjs
           node --check scripts/r188-inhabited-frontage-comparison.mjs
           node --check scripts/r188-inhabited-frontage.test.mjs
+          node --check source/ai/r189-major-massing.mjs
+          node --check scripts/r189-major-massing-comparison.mjs
+          node --check scripts/r189-major-massing.test.mjs
           node --check source/ai/r160-topology-intent.mjs
           node --check source/ai/r162-room-section-massing.mjs
           node --check source/ai/r163-daylit-sections.mjs
