@@ -12,7 +12,7 @@ import {SCHEMA as B143,compileDesign,verifyCompiled}
 import {SCHEMA as R134,validateR134MultiZonePlan}
  from './r134-multi-zone-plan.mjs';
 import {validateR135SemanticObjects}
- from './r135-furnished-program.mjs';
+ from '../../scripts/r135-furnished-program.mjs';
 import {auditR125SourceRoutes}
  from './r125-source-routes.mjs';
 import {ASSEMBLED_SCHEMA,applyR125FeatureIntent}
