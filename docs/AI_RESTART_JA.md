@@ -1,5 +1,16 @@
 # MinecraftAIBuilder — 最短AI再開入口
 
+## R178: 4室グリッドから独立した「2棟＋屋外中庭＋接続通路」の実体積研究（2026-10-26）
+- R177の最新成功はHEAD `682228e`、B198G #40292705887（合成3用途）。R177は指示された切欠を正確にB143へ変換したが、実外観はR176と一致した。これ以上コーナーだけを変える改修を繰り返さない。
+- `source/ai/r178-wing-courtyard.mjs` はR139/R168の固定2×2グリッドを使わず、**独立した左右2棟、完全な実屋根と外壁、各棟の前後2室、2つの本物の内部直接ドア、屋根付き渡り廊下、屋根の無い中庭、接続可能な屋外歩行床**をソースから構成する。古いR168・R170・R177実装は触らない。
+- IR `minecraftaibuilder-r178-wing-court-ir-v1` は`westWing/eastWing`の室ID順序、`roofYs`西・東、`bridge`前後を入力として受け取る。部屋名や用途名に依存したテンプレート分岐なし。元LLMの`directAdjacencies`が物理的に隣接する棟内2室の実壁と一致しなければ**拒否して停止**し、橋越しの接続を「直接ドア」と偽らない。原屋根ファミリー`flat/ridge/sawtooth`も実B143屋根に反映する。
+- R125の既存**家具アセンブリ＋全室・全設備の2幅ソース動線**の検証をそのまま利用。B143 `compileDesign/verifyCompiled`、実ボクセルの吹き抜け確認、実入口、敷設された屋外歩行路、9 BLOCKED、空BuildPlan、worldWrites/worldContacts 0、NOT_PREPARED。Minecraft施工や実歩行は未承認・未検証。
+- 初期サポートは32付近×32付近、4室、東西2棟。**任意の棟数・中庭形態・敷地サイズ・階層まで自由化した汎用建築ではない**。今後はこの独立した幾何生成器を軸に一般化する。R178入力とモデル回答の真正性は`CALLER_PROVIDED_UNVERIFIED`。CI住宅・店舗・研究施設の3件は**完全合成**であり新規Qwen/Gemma呼出0。
+- CIは既存B198Gクイックジョブ内へ追加テスト＋3用途実B143回転3D×3、5方向SVG×15、および独立した監査JSONをartifact`R178-INDEPENDENT-THREE-USE-WING-COURT-3D`へ保存。元のR172の従来比較成果を維持、同じ成果物を上書きしない。
+- 效率面：一度の関連ファイル一括コミットと既存CIを再利用。1コミットで約59ワークフローが走る不要起動問題は未解消。無関係なワークフローを消去せず、今後は大規模追加の前にCIトリガー整理を優先。ユーザーのPowerShell/ZIP往復は求めない。
+- **新HEADの実CIで成功を確認するまでは合格とは言わない**。美術判定はART HOLD。
+
+
 ## R177: モデル応答IRによる明示的な地上輪郭設計（2026-10-26）
 - R176は `47413ee` でB198G品質CI成功、真正B143で住宅・店舗・研究施設の角地上床25/25/9セルを除去して3D＋投影図を保存。**合成fixture**、追加Qwen/Gemma推論なし、美術ART HOLD。
 - R177ではユーザー/将来のLLMが同一回答の`architecture`内で `minecraftaibuilder-r177-ground-outline-ir-v1` を指定可能にした。従来R160の5フィールド＋`groundShape:{kind:"open-corner-court",corner,spanX,spanZ}`のみを厳格受理。`corner`は前後×東西4角、`spanX/spanZ`は**それぞれ独立した3〜6セル**。旧R160入力もそのまま通る。

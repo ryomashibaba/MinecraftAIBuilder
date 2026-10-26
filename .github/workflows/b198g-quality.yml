@@ -87,6 +87,9 @@ on:
       - 'source/ai/r170-four-room-volumes.mjs'
       - 'source/ai/r176-ground-footprint.mjs'
       - 'source/ai/r177-ground-intent.mjs'
+      - 'source/ai/r178-wing-courtyard.mjs'
+      - 'scripts/r178-wing-comparison.mjs'
+      - 'scripts/r178-wing-comparison.test.mjs'
       - 'scripts/r177-ground-intent.test.mjs'
       - 'source/ai/r160-topology-intent.mjs'
       - 'source/ai/r162-room-section-massing.mjs'
@@ -149,6 +152,19 @@ jobs:
           node --check scripts/r172-ci-autoreview.mjs
           node --test scripts/r172-ci-autoreview.test.mjs
           node --test scripts/r177-ground-intent.test.mjs
+          node --test scripts/r178-wing-comparison.test.mjs
+      - name: R178 independent wing-courtyard synthetic 3D preview
+        run: |
+          node --check source/ai/r178-wing-courtyard.mjs
+          node --check scripts/r178-wing-comparison.mjs
+          node scripts/r178-wing-comparison.mjs --out r178-independent-wing-court
+      - name: Upload R178 independent physical wings and courtyard 3D evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: R178-INDEPENDENT-THREE-USE-WING-COURT-3D
+          path: r178-independent-wing-court/
+          retention-days: 14
+          if-no-files-found: error
       - name: R172 quick automatic three-use 3D preview
         run: node scripts/r172-ci-autoreview.mjs --out r172-auto-three-use-review
       - name: Upload R172 synthetic 3D and five-view comparison
@@ -243,6 +259,9 @@ jobs:
           node --check source/ai/r170-four-room-volumes.mjs
           node --check source/ai/r176-ground-footprint.mjs
           node --check source/ai/r177-ground-intent.mjs
+          node --check source/ai/r178-wing-courtyard.mjs
+          node --check scripts/r178-wing-comparison.mjs
+          node --check scripts/r178-wing-comparison.test.mjs
           node --check source/ai/r160-topology-intent.mjs
           node --check source/ai/r162-room-section-massing.mjs
           node --check source/ai/r163-daylit-sections.mjs
