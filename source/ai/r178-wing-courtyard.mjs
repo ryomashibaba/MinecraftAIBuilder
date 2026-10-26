@@ -19,7 +19,13 @@ import {ASSEMBLED_SCHEMA,applyR125FeatureIntent}
  from './r125-functional-layer.mjs';
 
 export const R178_SCHEMA='minecraftaibuilder-r178-wing-court-ir-v1';
-const sha=x=>createHash('sha256').update(x).digest('hex');
+// Raw model reply bytes must remain raw. Structured plan provenance is
+// canonicalized so equivalent JSON object key orders produce the same hash.
+const canonical=x=>Array.isArray(x)?x.map(canonical):
+ x!==null&&typeof x==='object'?
+ Object.fromEntries(Object.keys(x).sort().map(k=>[k,canonical(x[k])])):x;
+const sha=x=>createHash('sha256').update(
+ typeof x==='string'?x:JSON.stringify(canonical(x))).digest('hex');
 const fail=s=>{throw Error('R178_WING_COURT_'+s);};
 const exact=(x,ks)=>x!==null&&typeof x==='object'&&!Array.isArray(x)&&
  Object.keys(x).length===ks.length&&ks.every(k=>Object.hasOwn(x,k));

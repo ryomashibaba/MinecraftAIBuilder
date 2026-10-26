@@ -1,4 +1,5 @@
 import test from 'node:test';
+import {createHash} from 'node:crypto';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -73,6 +74,17 @@ test('R178 caller composition cannot be silently retargeted to fit an invalid ad
  assert.ok(correct.rawSourceString.includes('studio'));
  assert.equal(correct.modelAuthenticity,'CALLER_PROVIDED_UNVERIFIED');
  assert.ok(correct.originalRawSha256);
+ assert.equal(correct.originalRawSha256,
+  createHash('sha256').update(JSON.stringify(base)).digest('hex'));
+ assert.match(correct.designOnlySource.planSha256,/^[0-9a-f]{64}$/);
+ const sameReordered=clone(base);
+ sameReordered.architecture={
+  bridge:'front',roofYs:{east:12,west:9},
+  eastWing:['library','storage'],westWing:['studio','quiet'],
+  schema:'minecraftaibuilder-r178-wing-court-ir-v1'
+ };
+ assert.equal(parse(sameReordered).designOnlySource.planSha256,
+  correct.designOnlySource.planSha256);
  assert.equal(correct.designOnlySource.r178WingEvidence.geometryAuthorship,
   'HOST_COMPILED_FROM_EXPLICIT_WING_IR');
  const wrongPair=clone(base);
