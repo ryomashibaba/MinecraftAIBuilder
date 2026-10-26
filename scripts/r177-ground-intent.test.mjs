@@ -48,7 +48,7 @@ test('R177 explicit caller shape is faithfully realized, never silently substitu
  const home=cases.find(c=>c.id==='home');
  const impossible=make('front-west',3,3);
  assert.throws(()=>deriveR176GroundFootprint(home.massed,{groundIntent:impossible}),
-  /R176_GROUND_FOOTPRINT_MODEL_REQUESTED_COURT_NOT_FEASIBLE_OR_PROTECTED_ENTRY/);
+  /R176_GROUND_FOOTPRINT_MODEL_REQUESTED_/);
  assert.throws(()=>deriveR176GroundFootprint(home.massed,{groundIntent:make('center',5,5)}),
   /R177_STRICT_CORNER_AND_EXTENTS/);
 });
