@@ -98,6 +98,9 @@ on:
       - 'source/ai/r182-room-led-section.mjs'
       - 'scripts/r182-room-led-section-comparison.mjs'
       - 'scripts/r182-room-led-section.test.mjs'
+      - 'source/ai/r183-courtyard-negative-mass.mjs'
+      - 'scripts/r183-courtyard-void-comparison.mjs'
+      - 'scripts/r183-courtyard-void.test.mjs'
       - 'scripts/r177-ground-intent.test.mjs'
       - 'source/ai/r160-topology-intent.mjs'
       - 'source/ai/r162-room-section-massing.mjs'
@@ -164,6 +167,7 @@ jobs:
           node --test scripts/r180-variable-massing.test.mjs
           node --test scripts/r181-courtyard-graph.test.mjs
           node --test scripts/r182-room-led-section.test.mjs
+          node --test scripts/r183-courtyard-void.test.mjs
       - name: R178 independent wing-courtyard synthetic 3D preview
         run: |
           node --check source/ai/r178-wing-courtyard.mjs
@@ -209,6 +213,18 @@ jobs:
         with:
           name: R182-ROOM-LED-SECTION-R181-COMPARISON-3D
           path: r182-room-led-section/
+          retention-days: 14
+          if-no-files-found: error
+      - name: R183 real source-only carved courtyard mass 3-use comparison
+        run: |
+          node --check source/ai/r183-courtyard-negative-mass.mjs
+          node --check scripts/r183-courtyard-void-comparison.mjs
+          node scripts/r183-courtyard-void-comparison.mjs --out r183-negative-mass-source
+      - name: Upload R183 roof-void real B143 comparison
+        uses: actions/upload-artifact@v4
+        with:
+          name: R183-TRUE-NEGATIVE-MASS-THREE-USE-3D
+          path: r183-negative-mass-source/
           retention-days: 14
           if-no-files-found: error
       - name: R172 quick automatic three-use 3D preview
@@ -316,6 +332,9 @@ jobs:
           node --check source/ai/r182-room-led-section.mjs
           node --check scripts/r182-room-led-section-comparison.mjs
           node --check scripts/r182-room-led-section.test.mjs
+          node --check source/ai/r183-courtyard-negative-mass.mjs
+          node --check scripts/r183-courtyard-void-comparison.mjs
+          node --check scripts/r183-courtyard-void.test.mjs
           node --check source/ai/r160-topology-intent.mjs
           node --check source/ai/r162-room-section-massing.mjs
           node --check source/ai/r163-daylit-sections.mjs

@@ -1,3 +1,12 @@
+## R183 — 3棟の実屋根輪郭を欠き取って中庭と接続する独立研究（2026-10-26 JST）
+
+- 基点R182-A HEAD `158b613`、[品質CI #40308623315](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40308623315) **SUCCESS**。R182の部分屋根・高窓は実B143になったが、建物本体は箱型で美術は**ART HOLD**。安易な屋根積み増しを停止する。
+- R183は旧R181/182を変更しない**独立したopt-in研究**。新規IR `minecraftaibuilder-r183-courtyard-negative-mass-ir-v1` はモデル候補から `massingVoids.terraces: [{volumeId,roomId,rect:{x,z,width,depth},accessZ}]` を受ける。現時点の初期pilotは32x32、主棟後室＋前/後の別棟1室ずつに限定。各申告された凹部を室の意味・実体積に紐づけ、**屋根・外壁のB143高所セルを実際に削除**し、内部の閉鎖外壁/後退窓を再構築し、y=1支持床と中庭軸への2幅アクセス枝路を形成。
+- 生成結果は真正B143の`before/after`ボクセル差分で、宣言外の旧ソース素材・旧家具を変更していないこと、3箇所の屋根が本当に無いこと、旧4室と設備4件の到達性、**旧中庭＋3新テラス**の支持された2幅の連続到達性、別途残された屋内4室の到達性を確認する。家具と新屋外凹部が衝突する場合は**家具の自動移動をせず拒否**。物体名・用途名によるホストのデザイン分岐は入れない。
+- 住宅・店舗・研究施設の**静的合成3入力**を旧R181と新R183の同じプログラムで比較。成功時は回転HTML計6件、実5方向投影計30枚、監査JSONをB198Gの新artifactへ出力する。屋外動線遮断・無効IR等の負例を含む。**実Qwen/Gemma推論は0回**。3D現物の美術審査前にART PASSとはしない。
+- 限界：本pilotは明示した3棟・定型32×32の中庭を前提とし、任意建築輪郭や正真正銘の汎用用途・ゲーム内歩行の成功を証明しない。凹部を3個切っただけで建築的価値が不足する場合は引き続きART HOLD。建物の室構成と外部空間の質的な新研究を優先する。
+- 今回のCI結果を確認するまで実装・テストが成功したと宣言しない。Draft #128・main未マージ、ART HOLD、NOT_PREPARED、9ゲートBLOCKED、BuildPlan.operations=[]、constructionApproved=false、executionAllowed=false、worldWrites=worldContacts=0、原本保護。57ワークフロー/コミットは未解決のままCI消費を増やさないよう差分一括コミット。
+
 ## R182-A — 初回CIのIR有効幅違反を安全下限を緩めず修正（2026-10-26 JST）
 
 - [初回B198G CI #40308251441](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40308251441) の短時間ジョブはFAIL。R178/180/181の既存回帰はPASS、R182 4件中2件PASS・2件FAIL。現場ログの理由は `R182_ROOM_SECTION_SECTION_OUT_OF_BOUNDS`。
