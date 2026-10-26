@@ -27,7 +27,7 @@ const SYNTHETIC=Object.freeze([
    O('counter','kitchen','work-surface','near-right'),
    O('shelves','storage','storage-rack','far-left')],
   entry:'living',edges:[['living','sleeping'],['living','kitchen']],
-  ground:{corner:'rear-east',spanX:5,spanZ:5}},
+  ground:{corner:'rear-east',spanX:6,spanZ:6}},
  {id:'shop',use:'店舗',form:'flat',material:'concrete',
   zones:[Z('craftwork','Building products',4),Z('storefront','Customers browse',3),
    Z('inventory','Organized stock',2),Z('employee','Staff administration',1)],
@@ -36,7 +36,7 @@ const SYNTHETIC=Object.freeze([
    O('stockrack','inventory','storage-rack','far-left'),
    O('staffdesk','employee','work-surface','near-right')],
   entry:'storefront',edges:[['storefront','craftwork'],['storefront','inventory']],
-  ground:{corner:'rear-west',spanX:5,spanZ:5}},
+  ground:{corner:'rear-west',spanX:6,spanZ:6}},
  {id:'laboratory',use:'研究施設',form:'ridge',material:'stone',
   zones:[Z('observatory','Instrument observation',2),
    Z('analysis','Reviewing data',3),Z('storage','Storing instruments',1),
@@ -46,7 +46,7 @@ const SYNTHETIC=Object.freeze([
    O('storageunit','storage','storage-rack','far-left'),
    O('table','discussion','work-surface','near-right')],
   entry:'discussion',edges:[['observatory','analysis']],
-  ground:{corner:'front-east',spanX:3,spanZ:3} }
+  ground:{corner:'front-east',spanX:4,spanZ:4} }
 ]);
 const safety=p=>p?.readiness==='NOT_PREPARED'&&p.constructionApproved===false&&
  p.executionAllowed===false&&p.worldWrites===0&&p.worldContacts===0&&
