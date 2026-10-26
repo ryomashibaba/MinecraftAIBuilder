@@ -40,6 +40,8 @@ import {deriveR170FourRoomVolumes}
  from '../source/ai/r170-four-room-volumes.mjs';
 import {deriveR176GroundFootprint}
  from '../source/ai/r176-ground-footprint.mjs';
+import {validateR177GroundIntent,r177ToR160}
+ from '../source/ai/r177-ground-intent.mjs';
 import {validateR160TopologyIntent,r160ToR151}
  from '../source/ai/r160-topology-intent.mjs';
 
@@ -58,7 +60,8 @@ export function parseR139RelationalFurnishedReply(raw,request,
   allowFloorplanComposition=false,allowTopologyComposition=false,
   allowHostGridResearch=false,allowHostVolumeResearch=false,
   allowHostSculpturalResearch=false,allowHostMassingResearch=false,
-  allowHostGroundFootprintResearch=false}={}){
+  allowHostGroundFootprintResearch=false,
+  allowModelGroundShapeResearch=false}={}){
  if(typeof raw!=='string'||raw.length<20||raw.length>22000)
   fail('MISSING_OR_OVERSIZED_MODEL_REPLY');
  let reply;
@@ -72,7 +75,8 @@ export function parseR139RelationalFurnishedReply(raw,request,
  if(!only(reply,expressive?[...keys,'architecture']:keys)||
   !only(reply.relations,['entryFacingZoneId','directAdjacencies']))
   fail('FULL_REPLY_CONTRACT');
- if(allowTopologyComposition)validateR160TopologyIntent(reply.architecture);
+ if(allowModelGroundShapeResearch)validateR177GroundIntent(reply.architecture);
+ else if(allowTopologyComposition)validateR160TopologyIntent(reply.architecture);
  else if(allowFloorplanComposition)validateR159FloorplanIntent(reply.architecture);
  else if(allowSpatialBalanceComposition)validateR158SpatialBalanceIntent(reply.architecture);
  else if(allowRooflineComposition)validateR155RooflineIntent(reply.architecture);
@@ -141,7 +145,9 @@ export function parseR139RelationalFurnishedReply(raw,request,
     entryHierarchy:architecture.entryHierarchy,
     daylightStrategy:architecture.daylightStrategy,
     roofEdge:architecture.roofEdge
-   }:allowTopologyComposition?r160ToR151(architecture):architecture});
+   }:allowTopologyComposition?r160ToR151(
+    allowModelGroundShapeResearch?r177ToR160(architecture):architecture
+   ):architecture});
   const volume=(allowVolumeComposition||allowRooflineComposition||allowSpatialBalanceComposition||allowFloorplanComposition)?
    deriveR154VolumeComposition(envelope,{intent:(allowRooflineComposition||allowSpatialBalanceComposition||allowFloorplanComposition)?{
     schema:R154_VOLUME_SCHEMA,
@@ -171,7 +177,8 @@ export function parseR139RelationalFurnishedReply(raw,request,
    {allowDecorativeDeferral:allowHostGridResearch===true});
   const hostFourRoomVolume=allowHostVolumeResearch===true&&
    allowTopologyComposition===true&&roomCount===4;
-  if(allowHostGroundFootprintResearch===true&&
+  if((allowHostGroundFootprintResearch===true||
+    allowModelGroundShapeResearch===true)&&
    (allowHostMassingResearch!==true||allowHostVolumeResearch!==true||
     allowHostGridResearch!==true||allowTopologyComposition!==true))
    fail('R176_REQUIRES_EXPLICIT_HOST_R175_RESEARCH');
@@ -186,11 +193,15 @@ export function parseR139RelationalFurnishedReply(raw,request,
   const completed=highSectionEligible?
    deriveR163DaylitSections(articulated):
    fourRoomVolume?(allowHostGroundFootprintResearch===true?
-    deriveR176GroundFootprint(fourRoomVolume):fourRoomVolume):articulated;
+    deriveR176GroundFootprint(fourRoomVolume):allowModelGroundShapeResearch===true?
+    deriveR176GroundFootprint(fourRoomVolume,{groundIntent:architecture}):
+    fourRoomVolume):articulated;
   return {intent:structuredClone(architecture),envelope,volume,roofline,
    integrated,completed,
    roomSectionScope:highSectionEligible?
     'REAL_THREE_ROOM_SECTIONS_AND_CLERESTORY':
+    hostFourRoomVolume&&allowModelGroundShapeResearch===true?
+     'FOUR_ROOMS_R177_EXPLICIT_CALLER_GROUND_SHAPE_VERIFIED_B143':
     hostFourRoomVolume&&allowHostGroundFootprintResearch===true?
      'FOUR_ROOMS_HOST_R176_ACTUAL_GROUND_FOOTPRINT_CORNER':
     hostFourRoomVolume&&allowHostMassingResearch===true?
@@ -203,6 +214,8 @@ export function parseR139RelationalFurnishedReply(raw,request,
      'FOUR_ROOMS_BASIC_ENVELOPE_NO_HIGHROOM_CLAIM':
      'NOT_APPLICABLE',
    intentAuthorship:'IN_THIS_SAME_MODEL_REPLY_NOT_HOST_INFERRED',
+   groundShapeIntentOrigin:allowModelGroundShapeResearch?
+    'EXPLICIT_CALLER_REPLY_UNVERIFIED_NOT_HOST_INFERRED':null,
    geometryAuthorship:'HOST_DERIVED_FROM_BOUNDED_MODEL_SEMANTIC_IR',
    aestheticApproval:'NOT_REVIEWED'};
  })():null;
@@ -224,6 +237,8 @@ export function parseR139RelationalFurnishedReply(raw,request,
   derivedSourceSha256:featured.sourceSha256,
   derivedGeometrySha256:featured.geometrySha256,
   modelCallsDuringParsing:0,
+  r177ExplicitGroundShapeFromCaller:allowModelGroundShapeResearch?
+   structuredClone(architecture.groundShape):null,
   legacyStripFurnitureNotRequired:true,
   semanticEquipmentZoneCount:semantics.physicallyRepresentedZoneCount,
   hostGeneratedGeometry:true,

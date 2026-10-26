@@ -26,7 +26,8 @@ const SYNTHETIC=Object.freeze([
    O('bed','sleeping','seating','far-right'),
    O('counter','kitchen','work-surface','near-right'),
    O('shelves','storage','storage-rack','far-left')],
-  entry:'living',edges:[['living','sleeping'],['living','kitchen']]},
+  entry:'living',edges:[['living','sleeping'],['living','kitchen']],
+  ground:{corner:'rear-east',spanX:5,spanZ:5}},
  {id:'shop',use:'店舗',form:'flat',material:'concrete',
   zones:[Z('craftwork','Building products',4),Z('storefront','Customers browse',3),
    Z('inventory','Organized stock',2),Z('employee','Staff administration',1)],
@@ -34,7 +35,8 @@ const SYNTHETIC=Object.freeze([
    O('shelves','storefront','display-stand','far-right'),
    O('stockrack','inventory','storage-rack','far-left'),
    O('staffdesk','employee','work-surface','near-right')],
-  entry:'storefront',edges:[['storefront','craftwork'],['storefront','inventory']]},
+  entry:'storefront',edges:[['storefront','craftwork'],['storefront','inventory']],
+  ground:{corner:'rear-west',spanX:5,spanZ:5}},
  {id:'laboratory',use:'研究施設',form:'ridge',material:'stone',
   zones:[Z('observatory','Instrument observation',2),
    Z('analysis','Reviewing data',3),Z('storage','Storing instruments',1),
@@ -43,7 +45,8 @@ const SYNTHETIC=Object.freeze([
    O('console','analysis','work-surface','near-left'),
    O('storageunit','storage','storage-rack','far-left'),
    O('table','discussion','work-surface','near-right')],
-  entry:'discussion',edges:[['observatory','analysis']] }
+  entry:'discussion',edges:[['observatory','analysis']],
+  ground:{corner:'front-east',spanX:3,spanZ:3} }
 ]);
 const safety=p=>p?.readiness==='NOT_PREPARED'&&p.constructionApproved===false&&
  p.executionAllowed===false&&p.worldWrites===0&&p.worldContacts===0&&
@@ -80,6 +83,17 @@ export function buildR172Autoreview(){
    allowTopologyComposition:true,allowHostGridResearch:true,
    allowHostVolumeResearch:true,allowHostMassingResearch:true,
    allowHostGroundFootprintResearch:true
+  }).architectural?.completed;
+  // The R177 request is explicit in this synthetic caller reply, not
+  // invented by the geometry compiler. These are NOT actual LLM answers.
+  const groundRaw={...raw,architecture:{
+   ...raw.architecture,schema:'minecraftaibuilder-r177-ground-outline-ir-v1',
+   groundShape:{kind:'open-corner-court',...t.ground}
+  }};
+  const grounded=parseR139RelationalFurnishedReply(JSON.stringify(groundRaw),request,{
+   allowTopologyComposition:true,allowHostGridResearch:true,
+   allowHostVolumeResearch:true,allowHostMassingResearch:true,
+   allowModelGroundShapeResearch:true
   }).architectural?.completed;
   if(!model||!verifyCompiled(model.design,model.compiled)||
    !safety(model)||!safety(r)||
@@ -130,6 +144,20 @@ export function buildR172Autoreview(){
    outlined.compiled.primitives.filter(p=>p[1]===1).length>=
     massed.compiled.primitives.filter(p=>p[1]===1).length)
    fail('R176_GROUND_OUTLINE_OR_PROTECTED_MODEL_PROGRAM_'+t.id);
+  if(!grounded||!verifyCompiled(grounded.design,grounded.compiled)||
+   !safety(grounded)||
+   grounded.r176GroundFootprintEvidence?.exactCallerRequestRealized!==true||
+   grounded.r176GroundFootprintEvidence.CALLER_SPECIFIED_GROUND_OUTLINE_UNVERIFIED!==true||
+   grounded.r176GroundFootprintEvidence.HOST_DESIGNED_NOT_MODEL_SELECTED!==false||
+   grounded.r176GroundFootprintEvidence.courtAt!==t.ground.corner||
+   grounded.r176GroundFootprintEvidence.actualSpanX!==t.ground.spanX||
+   grounded.r176GroundFootprintEvidence.actualSpanZ!==t.ground.spanZ||
+   grounded.sourceRouteAudit.status!=='SOURCE_ROUTES_REACH_ALL_ZONES'||
+   grounded.sourceRouteAudit.featureAccess.length!==t.objects.length||
+   !grounded.sourceRouteAudit.featureAccess.every(x=>x.reachableFromEntrance)||
+   grounded.r176GroundFootprintEvidence.removedActualY1FloorCells<9||
+   grounded.design.elements.length>160)
+   fail('R177_EXACT_CALLER_GROUND_INTENT_NOT_PHYSICALLY_MET_'+t.id);
   const ymax=p=>Math.max(...p.compiled.primitives.map(v=>v[1]));
   const maxBaselineY=ymax(model),maxSculptedY=ymax(variant);
   if(maxSculptedY<=maxBaselineY+1)
@@ -137,7 +165,7 @@ export function buildR172Autoreview(){
   const highGlass=variant.compiled.primitives.filter(p=>p[1]>=6&&
    p[3]===3).length;
   if(highGlass<12)fail('REAL_CLERESTORY_VOXELS_MISSING_'+t.id);
-  return {id:t.id,use:t.use,source:model,sculpted:variant,massed,outlined,
+  return {id:t.id,use:t.use,source:model,sculpted:variant,massed,outlined,grounded,
    audit:{id:t.id,use:t.use,sourceSha256:model.sourceSha256,
     geometrySha256:model.geometrySha256,voxels:model.compiled.primitives.length,
     rooms:4,originalObjectsPreserved:t.objects.length,
@@ -172,6 +200,17 @@ export function buildR172Autoreview(){
     selectedHostCorner:outlined.r176GroundFootprintEvidence.courtAt,
     footprintHostAuthorship:'HOST_DESIGNED_NOT_MODEL_SELECTED',
     originalEntranceAndFurnishingsPreserved:true,
+    r177RequestedGroundShape:groundRaw.architecture.groundShape,
+    r177ActualGroundCorner:grounded.r176GroundFootprintEvidence.courtAt,
+    r177ActualSpanX:grounded.r176GroundFootprintEvidence.actualSpanX,
+    r177ActualSpanZ:grounded.r176GroundFootprintEvidence.actualSpanZ,
+    r177ActualFloorCellsCut:grounded.r176GroundFootprintEvidence.removedActualY1FloorCells,
+    r177SourceSha256:grounded.sourceSha256,
+    r177GeometrySha256:grounded.geometrySha256,
+    r177VoxelCount:grounded.compiled.primitives.length,
+    r177B143ElementCount:grounded.design.elements.length,
+    r177RequestHonoredWithoutHostSubstitution:true,
+    r177IntentAuthorship:'STATIC_SYNTHETIC_FIXTURE_NOT_GENUINE_MODEL_REPLY',
     freshModelCalls:0,realLocalInference:false,
     provenance:'SYNTHETIC_CI_FIXTURE_HOST_DERIVED_NOT_GENUINE_QWEN',
     humanArtReview:'ART_HOLD',readiness:'NOT_PREPARED',
@@ -202,12 +241,14 @@ function html(report){
   '<h3>研究候補 R173</h3><iframe loading="lazy" title="'+esc(c.use)+' R173" src="'+c.id+'-sculpted.html"></iframe>'+
   '<h3>研究候補 R175 実屋根セットバック</h3><iframe loading="lazy" title="'+esc(c.use)+' R175" src="'+c.id+'-massed.html"></iframe>'+
   '<h3>研究候補 R176 地上階輪郭の変更（HOST研究）</h3><iframe loading="lazy" title="'+esc(c.use)+' R176" src="'+c.id+'-outlined.html"></iframe>'+
+  '<h3>R177 明示IR指定による地上階輪郭（合成入力）</h3><iframe loading="lazy" title="'+esc(c.use)+' R177" src="'+c.id+'-grounded.html"></iframe>'+
   '<div class="elev">'+['front','rear','west','east','roof'].map(d=>
    '<figure><img src="'+c.id+'-'+d+'.svg" alt="'+esc(d)+
    '"><img src="'+c.id+'-sculpted-'+d+'.svg" alt="sculpted '+esc(d)+
    '"><img src="'+c.id+'-massed-'+d+'.svg" alt="R175 '+esc(d)+
    '"><img src="'+c.id+'-outlined-'+d+'.svg" alt="R176 '+esc(d)+
-   '"><figcaption>'+esc(d)+' · R170 / R173 / R175 / R176</figcaption></figure>').join('')+'</div></section>'
+   '"><img src="'+c.id+'-grounded-'+d+'.svg" alt="R177 '+esc(d)+
+   '"><figcaption>'+esc(d)+' · R170 / R173 / R175 / R176 / R177</figcaption></figure>').join('')+'</div></section>'
  ).join('');
  return '<!doctype html><html lang="ja"><meta charset="utf-8">'+
  '<meta name="viewport" content="width=device-width,initial-scale=1">'+
@@ -233,7 +274,7 @@ export function saveR172Autoreview(out){
   path.dirname(fileURLToPath(import.meta.url)),
   '../source/ai/b143-viewer-template.html'),'utf8');
  const files=new Map();
- for(const {id,source,sculpted,massed,outlined} of r.cases){
+ for(const {id,source,sculpted,massed,outlined,grounded} of r.cases){
   files.set(id+'.html',renderB143Html(
    compileB143Gallery([source.design]),template));
   files.set(id+'-sculpted.html',renderB143Html(
@@ -242,6 +283,8 @@ export function saveR172Autoreview(out){
    compileB143Gallery([massed.design]),template));
   files.set(id+'-outlined.html',renderB143Html(
    compileB143Gallery([outlined.design]),template));
+  files.set(id+'-grounded.html',renderB143Html(
+   compileB143Gallery([grounded.design]),template));
   for(const d of ['front','rear','west','east','roof']){
    files.set(id+'-'+d+'.svg',
     renderR164Elevation(source.compiled,source.design,d));
@@ -251,6 +294,8 @@ export function saveR172Autoreview(out){
     renderR164Elevation(massed.compiled,massed.design,d));
    files.set(id+'-outlined-'+d+'.svg',
     renderR164Elevation(outlined.compiled,outlined.design,d));
+   files.set(id+'-grounded-'+d+'.svg',
+    renderR164Elevation(grounded.compiled,grounded.design,d));
   }
  }
  const {cases,...top}=r;
@@ -263,11 +308,12 @@ export function saveR172Autoreview(out){
  if(process.env.GITHUB_STEP_SUMMARY){
   const lines=['### R172 自動3用途・B143ソースレビュー',
    '**静的な合成入力のみ。実Qwen推論ではありません。ART HOLD / 施工禁止。**','',
-   '| 用途 | R170実ボクセル | R173実ボクセル | R175実ボクセル | R176実ボクセル | 地上階CUTセル | 結果 |',
-   '|---|---:|---:|---:|---:|---:|---|',...report.cases.map(c=>
+   '| 用途 | R170実ボクセル | R173実ボクセル | R175実ボクセル | R176実ボクセル | R177実ボクセル | R177実切欠セル | 結果 |',
+   '|---|---:|---:|---:|---:|---:|---:|---|',...report.cases.map(c=>
     '| '+c.use+' | '+c.voxels+' | '+c.sculptedVoxelCount+
     ' | '+c.massedVoxelCount+' | '+c.outlinedVoxelCount+
-    ' | '+c.actualY1FloorCellsRemoved+' | ソースPASS / 美術HOLD |'),
+    ' | '+c.r177VoxelCount+' | '+c.r177ActualFloorCellsCut+
+    ' | ソースPASS / 美術HOLD |'),
     '', 'モデル推論0、Minecraft書込0。5方向画像と3Dは成果物 R172-CI-THREE-USE-SOURCE-3D を確認。',''];
   fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,lines.join('\n'));
  }

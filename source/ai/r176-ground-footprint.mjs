@@ -12,6 +12,7 @@
  */
 import {compileDesign,verifyCompiled} from './b143-building-dsl.mjs';
 import {auditR125SourceRoutes} from './r125-source-routes.mjs';
+import {validateR177GroundIntent} from './r177-ground-intent.mjs';
 
 const fail=reason=>{throw Error('R176_GROUND_FOOTPRINT_'+reason);};
 const key=p=>p.slice(0,3).join(',');
@@ -35,7 +36,11 @@ const safe=o=>o?.readiness==='NOT_PREPARED'&&
  o.BuildPlan?.operations?.length===0&&o.gates?.length===9&&
  o.gates.every(x=>x==='BLOCKED');
 
-export function deriveR176GroundFootprint(base){
+export function deriveR176GroundFootprint(base,{groundIntent=null}={}){
+ // R176 stays HOST-SELECTED. R177 instead enforces the EXACT caller-chosen
+ // shape (corner AND independent x/z spans) or rejects it without fallback.
+ if(groundIntent!==null)validateR177GroundIntent(groundIntent);
+ const selected=groundIntent?.groundShape??null;
  const evidence=base?.r170FourRoomVolumeEvidence;
  if(!base?.design||!base?.compiled||!verifyCompiled(base.design,base.compiled)||
   base.sourceSha256!==base.compiled.sourceSha256||
@@ -73,9 +78,12 @@ export function deriveR176GroundFootprint(base){
   const front=range.z[0]===2,rear=range.z[1]===d-3;
   if((west===east)||(front===rear)||zone.id===entryZone)continue;
   const sideX=west?'west':'east',sideZ=front?'front':'rear';
-  for(const sideLength of [6,5,4]){
-   const x0=west?0:w-sideLength,z0=front?0:d-sideLength;
-   const x1=x0+sideLength-1,z1=z0+sideLength-1;
+  if(selected&&selected.corner!==sideZ+'-'+sideX)continue;
+  const shapes=selected?[[selected.spanX,selected.spanZ]]:
+   [[6,6],[5,5],[4,4],[3,3]];
+  for(const [spanX,spanZ] of shapes){
+   const x0=west?0:w-spanX,z0=front?0:d-spanZ;
+   const x1=x0+spanX-1,z1=z0+spanZ-1;
    const returnX=west?x1+1:x0-1,returnZ=front?z1+1:z0-1;
    const cut={x:[x0,x1],z:[z0,z1]};
    const addX={x:[returnX,returnX],z:[Math.min(z0,returnZ),Math.max(z1,returnZ)]};
@@ -96,13 +104,16 @@ export function deriveR176GroundFootprint(base){
     overlaps(rect(e.origin,e.size),cut)))
     continue;
    candidates.push({zoneId:zone.id,weight:zone.relativeWeight,
-    zonePurpose:zone.purpose,sideX,sideZ,size:sideLength,
+    zonePurpose:zone.purpose,sideX,sideZ,size:spanX,
+    spanX,spanZ,area:spanX*spanZ,
     cut,addX,addZ,returnX,returnZ,roofY:s.roofY});
   }
  }
  candidates.sort((a,b)=>a.weight-b.weight||
-  b.size-a.size||a.zoneId.localeCompare(b.zoneId));
- if(candidates.length===0)fail('NO_UNOCCUPIED_CORNER_WITH_PROTECTED_ENTRY');
+  b.area-a.area||a.zoneId.localeCompare(b.zoneId));
+ if(candidates.length===0)fail(selected?
+  'MODEL_REQUESTED_COURT_NOT_FEASIBLE_OR_PROTECTED_ENTRY':
+  'NO_UNOCCUPIED_CORNER_WITH_PROTECTED_ENTRY');
  const baseMap=mapOf(base.compiled),rejections=[];
  for(const [index,c] of candidates.entries()){
   const design=structuredClone(base.design);
@@ -199,7 +210,8 @@ export function deriveR176GroundFootprint(base){
    BuildPlan:{operations:[]},worldContacts:0,worldWrites:0,
    r176GroundFootprintEvidence:{
     schema:'r176-true-open-corner-study-v1',
-    HOST_DESIGNED_NOT_MODEL_SELECTED:true,
+    HOST_DESIGNED_NOT_MODEL_SELECTED:selected===null,
+    CALLER_SPECIFIED_GROUND_OUTLINE_UNVERIFIED:selected!==null,
     sourceOnly:true,
     inheritedArchitecture:'R175_SETBACK_TERRACES',
     groundFloorOutlineChanged:true,
@@ -207,7 +219,14 @@ export function deriveR176GroundFootprint(base){
     chosenZonePurpose:c.zonePurpose,
     chosenModelWeight:c.weight,
     courtAt:c.sideZ+'-'+c.sideX,
-    cornerSize:c.size,removedActualY1FloorCells:removedSupport.length,
+    cornerSize:c.spanX===c.spanZ?c.spanX:null,
+    actualSpanX:c.spanX,actualSpanZ:c.spanZ,
+    requestedGroundShape:selected?structuredClone(selected):null,
+    exactCallerRequestRealized:selected!==null,
+    callerModelProvenance:selected?
+     'CALLER_REPLY_IR_UNVERIFIED_NOT_SYNTHETICALLY_INFERRED':
+     'HOST_DERIVED_RESEARCH_NOT_MODEL_CHOSEN',
+    removedActualY1FloorCells:removedSupport.length,
     cutBounds:{x:c.cut.x,z:c.cut.z,y:[1,h-1]},
     actualReturnWalls:[c.addX,c.addZ],
     sourceElements:design.elements.length,
@@ -222,5 +241,7 @@ export function deriveR176GroundFootprint(base){
     constructionApproved:false
    }};
  }
- fail('NO_CANDIDATE_SURVIVES_VOXEL_AND_ROUTE_QA_'+rejections.join('_').slice(0,180));
+ fail((selected?'MODEL_REQUESTED_GROUND_SHAPE_HOLD_':
+  'NO_CANDIDATE_SURVIVES_VOXEL_AND_ROUTE_QA_')+
+  rejections.join('_').slice(0,180));
 }
