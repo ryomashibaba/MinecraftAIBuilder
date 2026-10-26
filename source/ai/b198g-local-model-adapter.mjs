@@ -4,6 +4,7 @@
  * no wildcard URL, no remote HTTP, and no disguised keyword-based generator.
  * This function does not contact even localhost until directly invoked.
  */
+import {readR190ModelProposal} from './r190-model-proposal.mjs';
 import {readModelProposal} from './b198-natural-language-design.mjs';
 import {readR4PlannedProposal,R4_PLANNING_GUIDE}
  from './b198zr4-planned-source.mjs';
@@ -96,6 +97,73 @@ export function createB198GLocalModelAdapter({
    // A local provider is never a trusted source. Reuse the real strict adapter
    // grammar, and let B198A/B143 independently compile every proposed design.
    return plannedSourceMode?readR4PlannedProposal(raw):readModelProposal(raw);
+  }finally{clearTimeout(timer);}
+ };
+}
+
+/**
+ * R190-F uses the SAME local-only endpoint policy as B198G, but asks for a
+ * semantic plan (not raw host-designed voxels). No inference before invocation.
+ */
+export function createR190SemanticModelAdapter({
+ model,endpoint=DEFAULT_LOCAL_ENDPOINT,fetcher=fetch,timeoutMs=120000
+}={}){
+ if(typeof model!=='string'||!MODEL_RE.test(model))
+  refuse('EXPLICIT_MODEL_ID_REQUIRED');
+ const m=typeof endpoint==='string'?ENDPOINT_RE.exec(endpoint):null;
+ if(!m||Number(m[1])>65535||Number(m[1])<1)
+  refuse('ONLY_EXPLICIT_127_0_0_1_CHAT_COMPLETIONS_ALLOWED');
+ if(typeof fetcher!=='function'||!Number.isSafeInteger(timeoutMs)||
+   timeoutMs<1000||timeoutMs>900000)refuse('INVALID_LOCAL_OPTIONS');
+ const system=[
+  'You are an independent architect. Design from the user request, NOT a template.',
+  'R190 outputs ONE original semantic plan, NOT three independent concepts.',
+  'Return one JSON object with EXACT keys schema,semanticPlan,architecturalRationale,assumptions,unrepresentedRequirements.',
+  'schema=minecraftaibuilder-r190-model-proposal-v1.',
+  'semanticPlan schema=minecraftaibuilder-r190-semantic-space-v1.',
+  'semanticPlan exact fields schema,id,title,brief,site,entrySpaceId,spaces,materials; optional formIntent.',
+  'site exact width 24..80,depth 24..80,height 10..32; product <=500000.',
+  'spaces 2..6. Each exact id,purpose,width,depth,height,parentId,side,privacy; optional spatialRole.',
+  'Each room width and depth 7..22, height 7..site.height-2, privacy public/shared/private.',
+  'Root room entrySpaceId has parentId:null,side:null. Every other room must have an existing parentId and side north/south/east/west, connected without cycles.',
+  'Root is south-facing for an approach. Do not place a root child south.',
+  'Rooms must fit the site. Model independently decides room purpose, dimensions, parent, side, privacy, material and entrance.',
+  'spaces.spatialRole optionally enclosed/open-court; at most one open-court; at least two enclosed spaces.',
+  'Optional formIntent exact spaceId,face north/south/east/west,cornerInset 2..3; faceted ONE enclosed room only.',
+  'materials exact floor,wall,roof; each wood/stone/concrete/metal.',
+  'All ids lowercase hyphenated, 3..40 chars, leading letter. All textual fields plain strings.',
+  'Current compiler is SINGLE LEVEL and TREE DIRECT ADJACENCY only. There are NO upper levels, stairs, double-height void, independent roof profile, facade/window system, furniture, extra exterior doors or non-tree portals.',
+  'When the request needs an unsupported capability, put its ID into unrepresentedRequirements: multiple-levels,stairs,vertical-accessibility,double-height-void,non-tree-adjacency,multiple-exterior-entries,window-daylight-system,roof-profile-design,facade-system,equipment-furniture.',
+  'NEVER silently flatten a 2-story design or substitute decoration for actual rooms, stairs or openings.',
+  'architecturalRationale 10..1200 characters; assumptions array 0..12 plain strings each 3..250 characters; unrepresentedRequirements unique strings.',
+  'No Minecraft commands, world writes, construction approvals, coordinates from any prior building, markdown, or extra JSON fields.',
+  'An unsupported item causes HOLD with no source. Never claim real Minecraft walking or aesthetic success.'
+ ].join('\n');
+ return async function r190SourceRequest({prompt,requiredCapabilities=[]}={}){
+  if(typeof prompt!=='string'||prompt.length<8||prompt.length>8000)
+   refuse('INVALID_MODEL_REQUEST');
+  // Validate external explicit requirement labels BEFORE provider call.
+  // A synthetic invalid proposal has the same contract failure path.
+  // Parsing with an empty response is not suitable for this preflight.
+  if(!Array.isArray(requiredCapabilities)||requiredCapabilities.length>15)
+   refuse('INVALID_REQUIRED_CAPABILITIES');
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),timeoutMs);
+  try{
+   const res=await fetcher(endpoint,{method:'POST',redirect:'error',
+    signal:controller.signal,headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({model,stream:false,temperature:0.35,
+     response_format:{type:'json_object'},
+     messages:[{role:'system',content:system},
+      {role:'user',content:JSON.stringify({request:prompt,
+       requiredCapabilities,sourceOnly:true})}]})});
+   if(!res||res.ok!==true)refuse('LOCAL_HTTP_'+String(res?.status??'UNKNOWN'));
+   const data=await res.json();
+   if(!Array.isArray(data?.choices)||data.choices.length!==1)
+    refuse('INVALID_RESPONSE_CHOICES');
+   if(data.choices[0]?.finish_reason==='length')
+    refuse('TRUNCATED_MODEL_RESPONSE');
+   return readR190ModelProposal(data.choices[0]?.message?.content,
+    {requiredCapabilities});
   }finally{clearTimeout(timer);}
  };
 }

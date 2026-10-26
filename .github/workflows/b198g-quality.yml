@@ -127,6 +127,9 @@ on:
       - 'scripts/r190-saved-qwen-host-completion.mjs'
       - 'scripts/r190-saved-qwen-bridge.test.mjs'
       - 'scripts/r190-qwen-compatibility-report.mjs'
+      - 'source/ai/r190-model-proposal.mjs'
+      - 'scripts/r190-model-proposal.test.mjs'
+      - 'scripts/r190-local-semantic-run.mjs'
       - 'scripts/r177-ground-intent.test.mjs'
       - 'source/ai/r160-topology-intent.mjs'
       - 'source/ai/r162-room-section-massing.mjs'
@@ -213,6 +216,13 @@ jobs:
           node --check scripts/r190-qwen-compatibility-report.mjs
           node --test scripts/r190-saved-qwen-bridge.test.mjs
           node scripts/r190-qwen-compatibility-report.mjs --out r190-saved-qwen-evidence
+      - name: R190-F strict model-authored semantic proposal source-only contract
+        run: |
+          node --check source/ai/r190-model-proposal.mjs
+          node --check source/ai/b198g-local-model-adapter.mjs
+          node --check scripts/r190-local-semantic-run.mjs
+          node --check scripts/r190-model-proposal.test.mjs
+          node --test scripts/r190-model-proposal.test.mjs
       - name: Upload R190-E real archived Qwen fidelity and provenance report
         uses: actions/upload-artifact@v4
         with:
