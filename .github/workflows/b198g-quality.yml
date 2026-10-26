@@ -110,6 +110,9 @@ on:
       - 'source/ai/r186-vertical-public-slice.mjs'
       - 'scripts/r186-vertical-slice-comparison.mjs'
       - 'scripts/r186-vertical-slice.test.mjs'
+      - 'source/ai/r187-daylit-upper-court.mjs'
+      - 'scripts/r187-daylit-upper-court-comparison.mjs'
+      - 'scripts/r187-daylit-upper-court.test.mjs'
       - 'scripts/r177-ground-intent.test.mjs'
       - 'source/ai/r160-topology-intent.mjs'
       - 'source/ai/r162-room-section-massing.mjs'
@@ -180,6 +183,7 @@ jobs:
           node --test scripts/r184-composition-options.test.mjs
           node --test scripts/r185-public-experience.test.mjs
           node --test scripts/r186-vertical-slice.test.mjs
+          node --test scripts/r187-daylit-upper-court.test.mjs
       - name: R178 independent wing-courtyard synthetic 3D preview
         run: |
           node --check source/ai/r178-wing-courtyard.mjs
@@ -273,6 +277,18 @@ jobs:
         with:
           name: R186-SOURCE-ONLY-TRUE-STAIR-ENCLOSED-UPPER-ROOM-3D
           path: r186-real-two-level-slice/
+          retention-days: 14
+          if-no-files-found: error
+      - name: R187 compile genuine daylit stair atrium and source-reached roofless skycourt
+        run: |
+          node --check source/ai/r187-daylit-upper-court.mjs
+          node --check scripts/r187-daylit-upper-court-comparison.mjs
+          node scripts/r187-daylit-upper-court-comparison.mjs --out r187-daylit-upper-court-review
+      - name: Upload R187 source-only upper skycourt real geometry and 2-width access
+        uses: actions/upload-artifact@v4
+        with:
+          name: R187-DAYLIT-SKYCOURT-ROOM-STAIR-SOURCE-3D
+          path: r187-daylit-upper-court-review/
           retention-days: 14
           if-no-files-found: error
       - name: R172 quick automatic three-use 3D preview
@@ -392,6 +408,9 @@ jobs:
           node --check source/ai/r186-vertical-public-slice.mjs
           node --check scripts/r186-vertical-slice-comparison.mjs
           node --check scripts/r186-vertical-slice.test.mjs
+          node --check source/ai/r187-daylit-upper-court.mjs
+          node --check scripts/r187-daylit-upper-court-comparison.mjs
+          node --check scripts/r187-daylit-upper-court.test.mjs
           node --check source/ai/r160-topology-intent.mjs
           node --check source/ai/r162-room-section-massing.mjs
           node --check source/ai/r163-daylit-sections.mjs
