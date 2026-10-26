@@ -1,3 +1,12 @@
+## R182 — 室の用途と屋根断面の因果関係をもつ本物のB143建築実験（2026-10-26 JST）
+
+- 出発点R181-A HEAD `90f7ad3`、[公式CI #40305235245](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40305235245) **SUCCESS**。R181テスト4/4、R180 3/3、R178 4/4、original-source-geometry 成功。R181の実3Dでは主棟＋離れ2棟の配置は前進したものの、正面では単純な箱が並ぶだけで **ART HOLD**。
+- R182は箱の位置や棟数をもう一度変えるのではなく、**明示された部屋IDと実際の屋根断面を結びつける追加IR** `minecraftaibuilder-r182-room-led-section-v1` を新規opt-inで導入。3棟それぞれに `volumeId,raisedRoomId,highSide,breakZ,rise,insetX` を要求。二室主棟では本当に当該室側の天井を高くする必要がある。屋根段差、左右低層テラス、四面の高窓帯を**コンパイル後のボクセルで確認**。R181の4室、家具4件、中庭、2接続廊下は設計入力と幾何を継承。用途名に依存して仕上げや寸法を決めない。
+- R181の旧 `form.roofProfile` と二重になるため、`roofSections.supersedesLegacyRoofProfile=true` を**明示要求**し、屋根ソースを置き換える。無言でユーザーの屋根意図を上書きしない。実B143新旧の低層部の既存座標・素材は保護し、B143再コンパイル、R125で全室＋家具のサービス動線と入口→中庭の2幅ソース経路を検証する。出力は常時施工禁止のsource-only。
+- 静的合成3用途を同じR181敷地・室・家具・関係のままR182断面だけ変更して比較する。**各3用途の新旧実回転3D×6、5方向投影×30、QA JSON**をB198G独立artifactへ保存する。屋根の実ボクセル検証、元の安全状態・コーナー意図を保持し、未知の模型回答を成功と偽らない。美術判断は3Dを見てから行い、CI PASSと混同しない。
+- 限界：32×32・主棟＋2離れ・4室・2接続の固定pilot上の「3棟屋根断面」研究。現実の構造解析・雨仕舞い・階段・ゲーム内歩行・実Qwen/Gemma発案・任意形態・本格的な空間構成には未対応。ART HOLDを保持し、単純な箱が縦方向に増えただけなら不合格とする。
+- **R182 CIは結果確認前に成功と記載しない。** 安全はART HOLD、NOT_PREPARED、9×BLOCKED、BuildPlan.operations=[]、constructionApproved=false、executionAllowed=false、worldWrites=worldContacts=0、Draft #128、main保護、原本保持。57ワークフロー/コミット問題は未解決。変更をなるべく1コミットに集約。
+
 ## R181-A — CI失敗の修正と実ボクセル実体証明（2026-10-26 JST）
 
 - 初回R181 HEAD `37e06cb` の [品質CI #40303139202](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40303139202) は **FAIL**。original-source-geometryはPASS、既存R178 4/4・R180 3/3はPASS、R181の3テスト中1PASS/2FAIL。原因は第3（研究施設）合成ケースの南離れx=18が主棟幅12に対し `GALLERY_SPAN` の最低間隔6を満たさず距離5だったこと。
