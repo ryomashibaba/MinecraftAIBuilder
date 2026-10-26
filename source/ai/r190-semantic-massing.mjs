@@ -46,8 +46,10 @@ export function validateR190SemanticPlan(p){
  ok(Array.isArray(p.spaces)&&p.spaces.length>=2&&p.spaces.length<=6&&
   slug(p.entrySpaceId),'PROGRAM');
  const ids=new Set(),parents=new Map();
+ const fields=['id','purpose','width','depth','height','parentId','side','privacy'];
  for(const s of p.spaces){
-  ok(exact(s,['id','purpose','width','depth','height','parentId','side','privacy'])&&
+  ok((exact(s,fields)||exact(s,[...fields,'spatialRole']))&&
+   (s.spatialRole===undefined||['enclosed','open-court'].includes(s.spatialRole))&&
    slug(s.id)&&!ids.has(s.id)&&safeText(s.purpose,150)&&
    int(s.width,7,22)&&int(s.depth,7,22)&&
    int(s.height,7,p.site.height-2)&&
@@ -59,6 +61,9 @@ export function validateR190SemanticPlan(p){
   parents.set(s.id,s.parentId);
  }
  ok(ids.has(p.entrySpaceId),'MISSING_ENTRANCE_SPACE');
+ // Phase-C evidence permits one real open-air spatial void, not a faux CUT.
+ const courts=p.spaces.filter(s=>s.spatialRole==='open-court');
+ ok(courts.length<=1&&p.spaces.length-courts.length>=2,'COURT_BUDGET');
  for(const s of p.spaces){
   if(s.id===p.entrySpaceId)continue;
   ok(ids.has(s.parentId)&&s.parentId!==s.id,'PARENT_MISSING');
@@ -140,11 +145,14 @@ export function layoutR190SemanticPlan(p,{strategy='centered'}={}){
 }
 function sourceDesign(p,l){
  const elements=[];
+ const roles=new Map(p.spaces.map(s=>[s.id,s.spatialRole??'enclosed']));
  const box=(id,mode,material,origin,size)=>elements.push({
   id,shape:'box',mode,...(mode==='add'?{material}:{}),origin,size});
  for(const s of l.spaces){
   const tag=s.id;
   box(tag+'-floor','add',p.materials.floor,[s.x,1,s.z],[s.w,1,s.d]);
+  // An outdoor court is ground and sky, not a room carved out of a box.
+  if(roles.get(tag)==='open-court')continue;
   box(tag+'-west','add',p.materials.wall,[s.x,2,s.z],[1,s.h-2,s.d]);
   box(tag+'-east','add',p.materials.wall,[s.x+s.w-1,2,s.z],[1,s.h-2,s.d]);
   box(tag+'-south','add',p.materials.wall,[s.x+1,2,s.z],[s.w-2,s.h-2,1]);
@@ -158,7 +166,8 @@ function sourceDesign(p,l){
  }
  const entry=l.spaces.find(s=>s.id===p.entrySpaceId);
  const doorX=entry.x+Math.floor((entry.w-2)/2);
- box('entry-cut','cut',undefined,[doorX,2,entry.z],[2,3,1]);
+ if(roles.get(entry.id)!=='open-court')
+  box('entry-cut','cut',undefined,[doorX,2,entry.z],[2,3,1]);
  box('approach-floor','add',p.materials.floor,[doorX,1,entry.z-3],[2,1,3]);
  return {schema:B143,id:p.id,title:p.title,brief:p.brief,
   bounds:{width:p.site.width,height:p.site.height,depth:p.site.depth},
@@ -199,7 +208,21 @@ export function auditR190SourceRoutes(plan,layout,design,compiled){
   ok(portalAir.every(([a,b])=>!has(a,2,b)&&!has(a,3,b)),
    'PHYSICAL_DOOR_BLOCKED_'+v.a+'_'+v.b);
  }
+ // Prove source voxels really leave sky open across the courtyard's
+ // inhabitable inner area. Do not mistake a walkable covered hall for a court.
+ let skyColumns=0;
+ for(const s of plan.spaces.filter(s=>s.spatialRole==='open-court')){
+  const r=layout.spaces.find(x=>x.id===s.id);
+  for(let a=r.x+1;a<r.x+r.w-1;a++)
+   for(let b=r.z+1;b<r.z+r.d-1;b++){
+    for(let y=2;y<plan.site.height;y++)
+     ok(!has(a,y,b),'COURT_SKY_OBSTRUCTED_'+s.id);
+    skyColumns++;
+   }
+ }
  return {sourceWalkingPads:seen.size,
+  outdoorCourtCount:plan.spaces.filter(s=>s.spatialRole==='open-court').length,
+  verifiedOpenSkyColumns:skyColumns,
   entranceApproachTwoWide:true,allProgramSpacesReachable:true,witnesses,
   minecraftPlayerWalking:'NOT_TESTED',structuralEngineering:'NOT_TESTED'};
 }

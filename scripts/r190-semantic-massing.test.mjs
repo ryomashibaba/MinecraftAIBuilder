@@ -1,11 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {R190_SCHEMA,validateR190SemanticPlan,compileR190SemanticPlan,
- exploreR190SemanticPlan,R190_LAYOUT_STRATEGIES}
+ auditR190SourceRoutes,exploreR190SemanticPlan,R190_LAYOUT_STRATEGIES}
  from '../source/ai/r190-semantic-massing.mjs';
-import {verifyCompiled} from '../source/ai/b143-building-dsl.mjs';
+import {compileDesign,verifyCompiled} from '../source/ai/b143-building-dsl.mjs';
 
-import {R190_STATIC_SYNTHETIC_CASES as cases} from './r190-semantic-fixtures.mjs';
+import {R190_STATIC_SYNTHETIC_CASES as cases,
+ R190_COURT_STATIC_SYNTHETIC_CASE as court} from './r190-semantic-fixtures.mjs';
 
 test('R190 synthetic programs: B143 source, 2-wide access and safe world gates',()=>{
  const signatures=[];
@@ -91,4 +92,46 @@ test('R190 Phase B explores three distinct source placements per synthetic use',
  assert.equal(new Set(all).size,9);
  assert.throws(()=>compileR190SemanticPlan(cases[0],
   {layoutStrategy:'override-world'}),/R190_SEMANTIC_LAYOUT_STRATEGY/);
+});
+
+test('R190-C: a first-class court changes mass, true sky and connected usable rooms',()=>{
+ const saved=JSON.stringify(court),ex=exploreR190SemanticPlan(court);
+ assert.equal(JSON.stringify(court),saved);
+ assert.equal(ex.candidates.length,3);assert.equal(ex.actualLocalModelCalls,0);
+ const shapes=new Set();
+ for(const c of ex.candidates){
+  assert.ok(verifyCompiled(c.design,c.compiled));
+  assert.equal(c.audit.outdoorCourtCount,1);
+  assert.equal(c.audit.verifiedOpenSkyColumns,144);
+  assert.equal(c.audit.witnesses.length,4);
+  assert.equal(c.layout.portals.length,3);
+  assert.equal(c.audit.allProgramSpacesReachable,true);
+  assert.ok(c.audit.sourceWalkingPads>50);
+  assert.ok(!c.design.elements.some(e=>e.id==='arrival-roof'||e.id==='arrival-west'||e.id==='entry-cut'));
+  assert.equal(c.modelAuthorship,'CALLER_PROVIDED_IR_UNVERIFIED');
+  assert.equal(c.art,'ART_HOLD');assert.equal(c.readiness,'NOT_PREPARED');
+  assert.equal(c.constructionApproved,false);assert.equal(c.executionAllowed,false);
+  assert.deepEqual(c.gates,Array(9).fill('BLOCKED'));
+  assert.deepEqual(c.BuildPlan.operations,[]);
+  assert.equal(c.worldWrites,0);assert.equal(c.worldContacts,0);
+  shapes.add(c.compiled.geometrySha256);
+ }
+ assert.equal(shapes.size,3);
+});
+test('R190-C: invalid role or a covered court fails closed',()=>{
+ for(const role of ['world-write','build','arbitrary']){
+  const bad=structuredClone(court);bad.spaces[0].spatialRole=role;
+  assert.throws(()=>compileR190SemanticPlan(bad),/R190_SEMANTIC_SPACE/);
+ }
+ const tooMany=structuredClone(court);
+ tooMany.spaces[1].spatialRole='open-court';
+ assert.throws(()=>compileR190SemanticPlan(tooMany),/COURT_BUDGET/);
+ const c=compileR190SemanticPlan(court),pos=c.layout.spaces.find(s=>s.id==='arrival');
+ const modified=structuredClone(c.design);
+ modified.elements.push({id:'unauthorized-court-cover',shape:'box',mode:'add',
+  material:'concrete',origin:[pos.x+3,6,pos.z+3],size:[3,1,3]});
+ const compiled=compileDesign(modified);
+ assert.ok(verifyCompiled(modified,compiled));
+ assert.throws(()=>auditR190SourceRoutes(c.inputPlan,c.layout,modified,compiled),
+  /COURT_SKY_OBSTRUCTED_arrival/);
 });

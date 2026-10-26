@@ -23,3 +23,12 @@ const cases=[
   S('archives','Documentation storage',9,12,7,'commons','north','private')])
 ];
 export const R190_STATIC_SYNTHETIC_CASES=cases;
+
+/** Source-only semantic negative-volume trial, not an actual model response. */
+export const R190_COURT_STATIC_SYNTHETIC_CASE=common('r190-open-court',[
+ {...S('arrival','Unroofed shared arrival and daylight court',14,14,8,null,null,'public'),
+  spatialRole:'open-court'},
+ S('public-hall','Public teaching and community hall',18,14,10,'arrival','north','public'),
+ S('studio','Accessible production and work area',12,12,8,'arrival','east','shared'),
+ S('private-room','Private consultation and stock area',12,12,7,'arrival','west','private')
+]);
