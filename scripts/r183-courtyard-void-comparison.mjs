@@ -23,7 +23,7 @@ const fail=s=>{throw Error('R183_COMPARE_'+s);};
 export const R183_SYNTHETIC_TERRACES=[
  [
   {volumeId:'anchor',rect:{x:7,z:18,width:5,depth:6},accessZ:20},
-  {volumeId:'north',rect:{x:20,z:10,width:5,depth:4},accessZ:11},
+  {volumeId:'north',rect:{x:20,z:11,width:5,depth:3},accessZ:11},
   {volumeId:'south',rect:{x:18,z:21,width:5,depth:4},accessZ:22}
  ],
  [
@@ -38,7 +38,17 @@ export const R183_SYNTHETIC_TERRACES=[
  ]
 ];
 export function makeR183SyntheticReply(t,i){
- const old=makeR181SyntheticReply(t,R181_SYNTHETIC_SETTINGS[i]);
+ const fixture=structuredClone(t);
+ // This independent synthetic lab hypothesis explicitly requests a
+ // near-right instrument. The unchanged R181 baseline *for this test*
+ // receives the exact same new furniture request as R183. Do not claim
+ // byte-identical inputs to previously published R181 fixtures.
+ if(i===2){
+  const obj=fixture.objects.find(o=>o.id==='instrument');
+  if(obj?.corner!=='far-right')fail('LAB_FIXTURE_AUTHORED_CORNER');
+  obj.corner='near-right';
+ }
+ const old=makeR181SyntheticReply(fixture,R181_SYNTHETIC_SETTINGS[i]);
  // The old room layout and furniture are passed through unchanged.
  const terraces=R183_SYNTHETIC_TERRACES[i].map(t=>{
   const v=old.architecture.volumes.find(v=>v.id===t.volumeId);

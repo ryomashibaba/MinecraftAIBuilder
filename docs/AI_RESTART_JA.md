@@ -1,3 +1,9 @@
+## R183-A — CI失敗の起点を明確化した合成IR修正（2026-10-26 JST）
+
+- 初回HEAD `fc17464` のB198G品質CI [#40311574345](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40311574345) は新規R183 0/4、理由 `R183_COURTYARD_VOID_NORTH_REAR_COURT_GEOMETRY`。R181/182の旧回帰はPASS。初期住宅では北別棟の凹部z=10..13が、実廊下終端から要求する屋外奥行に違反した。
+- 制約の緩和は禁止。住宅の北別棟の**合成**凹部のみ z=11..13 にし、2幅アクセスz=11..12を維持。研究施設は設備の既存合成意図`far-right`が中庭側の予定凹部/後退外壁と衝突し得るため、R183の**独立合成比較実験では初めから**`instrument.corner=near-right`を明示して同じ意図を旧R181側・新R183側の**両方に渡す**。過去のR181本来の研究原本・fixtureは改変せず、過去のR181結果とbyte-identicalとは主張しない。
+- 変更は合成入力のみ。生成器に「家具を勝手に移す／窓を埋める／動線を捏造する」機能を追加しない。記録と負例によりこの比較条件を明示。新CIがPASSしていない限り、本物の3D生成と美術合格を宣言しない。安全状態ART HOLD/NOT_PREPARED/9 BLOCKED/BuildPlan.operations=[]/worldWrites=0等は保護。
+
 ## R183 — 3棟の実屋根輪郭を欠き取って中庭と接続する独立研究（2026-10-26 JST）
 
 - 基点R182-A HEAD `158b613`、[品質CI #40308623315](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40308623315) **SUCCESS**。R182の部分屋根・高窓は実B143になったが、建物本体は箱型で美術は**ART HOLD**。安易な屋根積み増しを停止する。

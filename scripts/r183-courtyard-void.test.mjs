@@ -67,6 +67,14 @@ test('R183 rejects moving caller furniture, unsupported graph, invalid pocket po
  }
 });
 
+test('R183 laboratory matching comparison explicitly records a changed synthetic equipment corner',()=>{
+ const input=makeR183SyntheticReply(R178_SYNTHETIC_CASES[2],2);
+ const rawOriginal=R178_SYNTHETIC_CASES[2].objects.find(o=>o.id==='instrument');
+ const rawNew=input.objects.find(o=>o.id==='instrument');
+ assert.equal(rawOriginal.corner,'far-right');
+ assert.equal(rawNew.corner,'near-right');
+ assert.equal(input.massingVoids.terraces.length,3);
+});
 test('R183 deleting actual courtyard spur must fail source route verification, not just a metadata flag',()=>{
  const p=parse(sample()).designOnlySource;
  const cut=structuredClone(p.design);
