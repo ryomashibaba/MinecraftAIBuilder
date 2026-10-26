@@ -157,7 +157,10 @@ export function parseR183CourtyardVoidReply(raw,request){
     [r.width,yRoof-2,1],wall);
   }
   const windowX=v===anchor?x0-1:x1+1,
-   windowZ=z0+1;
+   // North pocket meets an ORIGINAL rear facade at z1. Its two-cell
+   // recessed glass must stay entirely inside the new inner wall, not
+   // replace existing original outer-wall cells beyond the declared void.
+   windowZ=v===north?z0:z0+1;
   add(id+'-recessed-window-cut','cut',[windowX,3,windowZ],
    [1,2,2]);
   add(id+'-recessed-window-glass','add',[windowX,3,windowZ],

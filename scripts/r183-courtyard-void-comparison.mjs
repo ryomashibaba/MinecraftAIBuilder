@@ -32,7 +32,7 @@ export const R183_SYNTHETIC_TERRACES=[
   {volumeId:'south',rect:{x:19,z:20,width:4,depth:4},accessZ:21}
  ],
  [
-  {volumeId:'anchor',rect:{x:8,z:18,width:5,depth:6},accessZ:20},
+  {volumeId:'anchor',rect:{x:9,z:18,width:4,depth:6},accessZ:20},
   {volumeId:'north',rect:{x:21,z:10,width:3,depth:3},accessZ:10},
   {volumeId:'south',rect:{x:19,z:20,width:5,depth:4},accessZ:21}
  ]
