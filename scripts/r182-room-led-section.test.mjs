@@ -45,6 +45,13 @@ test('R182 retains byte-level model provenance and fail-closes on unrequested ro
  assert.equal(result.originalRawSha256,
   createHash('sha256').update(JSON.stringify(base)).digest('hex'));
  assert.equal(result.modelAuthenticity,'CALLER_PROVIDED_UNVERIFIED');
+ const shop=makeR182SyntheticReply(R178_SYNTHETIC_CASES[1],1);
+ const impossible=structuredClone(shop);
+ // A 10-cell-wide shop satellite with two-cell setbacks on both sides
+ // leaves only six cells for its raised room: deliberately fail closed.
+ impossible.roofSections.sections[1].insetX=2;
+ assert.throws(()=>parse(impossible),
+  /R182_ROOM_SECTION_SECTION_OUT_OF_BOUNDS/);
  const bad=[
   x=>{x.roofSections.supersedesLegacyRoofProfile=false;},
   x=>{x.roofSections.sections.pop();},

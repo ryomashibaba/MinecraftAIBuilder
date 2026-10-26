@@ -22,7 +22,7 @@ export const R182_SYNTHETIC_SECTION_CHOICES=[
   {volumeId:'north',room:'front',breakZ:7,rise:3,insetX:1},
   {volumeId:'south',room:'rear',breakZ:25,rise:3,insetX:2}],
  [{volumeId:'anchor',room:'front',breakZ:16,rise:2,insetX:1},
-  {volumeId:'north',room:'rear',breakZ:8,rise:3,insetX:2},
+  {volumeId:'north',room:'rear',breakZ:8,rise:3,insetX:1},
   {volumeId:'south',room:'front',breakZ:25,rise:3,insetX:1}],
  [{volumeId:'anchor',room:'rear',breakZ:16,rise:3,insetX:2},
   {volumeId:'north',room:'front',breakZ:7,rise:3,insetX:1},

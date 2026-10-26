@@ -1,3 +1,10 @@
+## R182-A — 初回CIのIR有効幅違反を安全下限を緩めず修正（2026-10-26 JST）
+
+- [初回B198G CI #40308251441](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40308251441) の短時間ジョブはFAIL。R178/180/181の既存回帰はPASS、R182 4件中2件PASS・2件FAIL。現場ログの理由は `R182_ROOM_SECTION_SECTION_OUT_OF_BOUNDS`。
+- 原因：合成店舗ケースの北別棟は幅10セル（x=21..30）だが、`insetX=2` 指定により上部実室幅が10-2*2=6セルとなり、新R182の**最小7セル**保護に違反。設計IRの制限は正しく動いている。エンジンの境界値・家具/経路/安全ゲートは**一切緩めない**。
+- 修正：合成店舗の北別棟のみ `insetX=1` にし有効幅8を明示する。追加負例として、同じ幅10のケースで`insetX=2`を与えたら必ず`SECTION_OUT_OF_BOUNDS`を投げることをテスト。モデルのサイズ意図を無断修正する実装は足さない。
+- R182-AのCIがSUCCESSになるまでは合格を宣言しない。成果物・美術判定未確認、ART HOLD、NOT_PREPARED、9 BLOCKED、BuildPlan.operations=[]、worldWrites/Contacts=0、実LLM0、Minecraft施工禁止、Draft #128継続。
+
 ## R182 — 室の用途と屋根断面の因果関係をもつ本物のB143建築実験（2026-10-26 JST）
 
 - 出発点R181-A HEAD `90f7ad3`、[公式CI #40305235245](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40305235245) **SUCCESS**。R181テスト4/4、R180 3/3、R178 4/4、original-source-geometry 成功。R181の実3Dでは主棟＋離れ2棟の配置は前進したものの、正面では単純な箱が並ぶだけで **ART HOLD**。
