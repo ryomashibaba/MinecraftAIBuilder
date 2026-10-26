@@ -154,10 +154,10 @@ export function auditR189TrueMassing(design,compiled,baseline,volumes){
  }
  // The 4 differentiated skyline sectors remain distinct: west low
  // frontage, west medium stair mass, east lowered entry and high rear.
- for(const [x,z,low,high] of [[8,10,6,10],[17,23,14,17],
+ for(const [x,z,low,high] of [[8,10,6,10],[8,30,13,15],
   [33,11,8,12],[39,37,18,21]]){
   const y=top(after,x,z);
-  if(y<low||y>high)fail('INTENDED_HIERARCHY_NOT_VISIBLE_IN_VOXELS');
+  if(y<low||y>high)fail('INTENDED_HIERARCHY_NOT_VISIBLE_IN_VOXELS_'+x+'_'+z+'_'+y);
  }
  return {schema:'r189-physical-height-massing-source-audit-v1',
   beforeVoxels:originalCellCount,afterVoxels:newCellCount,
