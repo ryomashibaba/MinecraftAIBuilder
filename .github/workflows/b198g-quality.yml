@@ -92,6 +92,9 @@ on:
       - 'scripts/r178-wing-comparison.test.mjs'
       - 'scripts/r180-variable-massing-comparison.mjs'
       - 'scripts/r180-variable-massing.test.mjs'
+      - 'source/ai/r181-courtyard-graph.mjs'
+      - 'scripts/r181-courtyard-graph-comparison.mjs'
+      - 'scripts/r181-courtyard-graph.test.mjs'
       - 'scripts/r177-ground-intent.test.mjs'
       - 'source/ai/r160-topology-intent.mjs'
       - 'source/ai/r162-room-section-massing.mjs'
@@ -156,6 +159,7 @@ jobs:
           node --test scripts/r177-ground-intent.test.mjs
           node --test scripts/r178-wing-comparison.test.mjs
           node --test scripts/r180-variable-massing.test.mjs
+          node --test scripts/r181-courtyard-graph.test.mjs
       - name: R178 independent wing-courtyard synthetic 3D preview
         run: |
           node --check source/ai/r178-wing-courtyard.mjs
@@ -177,6 +181,18 @@ jobs:
         with:
           name: R180-MATCHED-PROGRAM-WING-MASSING-3D
           path: r180-matched-program-massing/
+          retention-days: 14
+          if-no-files-found: error
+      - name: R181 three-volume source-only courtyard graph real B143
+        run: |
+          node --check source/ai/r181-courtyard-graph.mjs
+          node --check scripts/r181-courtyard-graph-comparison.mjs
+          node scripts/r181-courtyard-graph-comparison.mjs --out r181-three-volume-court
+      - name: Upload R181 source-only three-volume 3D and all views
+        uses: actions/upload-artifact@v4
+        with:
+          name: R181-THREE-VOLUME-COURTYARD-3D
+          path: r181-three-volume-court/
           retention-days: 14
           if-no-files-found: error
       - name: R172 quick automatic three-use 3D preview
@@ -278,6 +294,9 @@ jobs:
           node --check scripts/r178-wing-comparison.test.mjs
           node --check scripts/r180-variable-massing-comparison.mjs
           node --check scripts/r180-variable-massing.test.mjs
+          node --check source/ai/r181-courtyard-graph.mjs
+          node --check scripts/r181-courtyard-graph-comparison.mjs
+          node --check scripts/r181-courtyard-graph.test.mjs
           node --check source/ai/r160-topology-intent.mjs
           node --check source/ai/r162-room-section-massing.mjs
           node --check source/ai/r163-daylit-sections.mjs
