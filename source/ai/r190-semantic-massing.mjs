@@ -32,8 +32,8 @@ const SHIFT_ORDERS=Object.freeze({
 const palette=['wood','stone','concrete','metal'];
 
 export function validateR190SemanticPlan(p){
- ok(exact(p,['schema','id','title','brief','site','entrySpaceId','spaces','materials']),
-  'FIELDS');
+ const standard=['schema','id','title','brief','site','entrySpaceId','spaces','materials'];
+ ok(exact(p,standard)||(exact(p,[...standard,'formIntent'])),'FIELDS');
  ok(p.schema===R190_SCHEMA&&slug(p.id)&&safeText(p.title,100)&&
   safeText(p.brief,400),'IDENTITY');
  ok(exact(p.site,['width','depth','height'])&&
@@ -61,6 +61,20 @@ export function validateR190SemanticPlan(p){
   parents.set(s.id,s.parentId);
  }
  ok(ids.has(p.entrySpaceId),'MISSING_ENTRANCE_SPACE');
+ // Optional model/caller instruction to construct ONE real occupied wing
+ // with a faceted footprint. Never infer a form from a building-type name.
+ if(p.formIntent!==undefined){
+  const f=p.formIntent;
+  ok(exact(f,['spaceId','face','cornerInset'])&&
+   slug(f.spaceId)&&['north','south','east','west'].includes(f.face)&&
+   int(f.cornerInset,2,3),'FORM_INTENT');
+  const chosen=p.spaces.find(s=>s.id===f.spaceId);
+  ok(chosen&&chosen.spatialRole!=='open-court','FORM_SPACE');
+  const ns=['north','south'].includes(f.face);
+  ok((ns?chosen.width:chosen.depth)>=2*f.cornerInset+6&&
+   (ns?chosen.depth:chosen.width)>=f.cornerInset+5,
+   'FACET_CANNOT_FIT');
+ }
  // Phase-C evidence permits one real open-air spatial void, not a faux CUT.
  const courts=p.spaces.filter(s=>s.spatialRole==='open-court');
  ok(courts.length<=1&&p.spaces.length-courts.length>=2,'COURT_BUDGET');
@@ -148,11 +162,51 @@ function sourceDesign(p,l){
  const roles=new Map(p.spaces.map(s=>[s.id,s.spatialRole??'enclosed']));
  const box=(id,mode,material,origin,size)=>elements.push({
   id,shape:'box',mode,...(mode==='add'?{material}:{}),origin,size});
+ // A deliberately bounded first polygonal envelope: its physical floor,
+ // wall and roof use the SAME clipped footprint, rather than facade applique
+ // on six solid rectangular panels. Portal locations remain model/layout-led.
+ function facetedEnclosedSpace(s,f){
+  const ns=f.face==='south'||f.face==='north';
+  const span=ns?s.w:s.d,depth=ns?s.d:s.w,r=f.cornerInset;
+  const cell=(u,v)=>{
+   if(f.face==='south')return [s.x+u,s.z+v];
+   if(f.face==='north')return [s.x+u,s.z+s.d-1-v];
+   if(f.face==='west')return [s.x+v,s.z+u];
+   return [s.x+s.w-1-v,s.z+u];
+  };
+  const shapedBox=(id,material,y,hh,u,v,su,sv)=>{
+   const a=cell(u,v),b=cell(u+su-1,v+sv-1);
+   box(id,'add',material,
+    [Math.min(a[0],b[0]),y,Math.min(a[1],b[1])],
+    [Math.abs(a[0]-b[0])+1,hh,Math.abs(a[1]-b[1])+1]);
+  };
+  // Each strip is a physically occupied footprint, not a CUT of a legacy box.
+  for(let row=0;row<r;row++){
+   const inset=r-row,available=span-2*inset;
+   shapedBox(s.id+'-facet-floor-'+row,p.materials.floor,1,1,inset,row,available,1);
+   shapedBox(s.id+'-facet-roof-'+row,p.materials.roof,s.h,1,inset,row,available,1);
+   shapedBox(s.id+'-facet-wall-left-'+row,p.materials.wall,2,s.h-2,inset,row,1,1);
+   shapedBox(s.id+'-facet-wall-right-'+row,p.materials.wall,2,s.h-2,span-inset-1,row,1,1);
+  }
+  shapedBox(s.id+'-facet-floor-core',p.materials.floor,1,1,0,r,span,depth-r);
+  shapedBox(s.id+'-facet-roof-core',p.materials.roof,s.h,1,0,r,span,depth-r);
+  shapedBox(s.id+'-facet-wall-left-core',p.materials.wall,2,s.h-2,0,r,1,depth-r);
+  shapedBox(s.id+'-facet-wall-right-core',p.materials.wall,2,s.h-2,span-1,r,1,depth-r);
+  shapedBox(s.id+'-facet-front-wall',p.materials.wall,2,s.h-2,r,0,span-2*r,1);
+  shapedBox(s.id+'-facet-rear-wall',p.materials.wall,2,s.h-2,0,depth-1,span,1);
+ }
  for(const s of l.spaces){
   const tag=s.id;
   box(tag+'-floor','add',p.materials.floor,[s.x,1,s.z],[s.w,1,s.d]);
   // An outdoor court is ground and sky, not a room carved out of a box.
   if(roles.get(tag)==='open-court')continue;
+  if(p.formIntent?.spaceId===tag){
+   // Remove the legacy rectangular floor too; the faceted envelope owns
+   // the entire footprint, including supported circulation surfaces.
+   elements.pop();
+   facetedEnclosedSpace(s,p.formIntent);
+   continue;
+  }
   box(tag+'-west','add',p.materials.wall,[s.x,2,s.z],[1,s.h-2,s.d]);
   box(tag+'-east','add',p.materials.wall,[s.x+s.w-1,2,s.z],[1,s.h-2,s.d]);
   box(tag+'-south','add',p.materials.wall,[s.x+1,2,s.z],[s.w-2,s.h-2,1]);
@@ -220,7 +274,40 @@ export function auditR190SourceRoutes(plan,layout,design,compiled){
     skyColumns++;
    }
  }
+ // The facade's roof genuinely steps away from both corners, while the
+ // occupied inner field is still roofed and has supported two-block clearance.
+ // Audit the compiled geometry, never the planned element list alone.
+ let facetAudit=null;
+ if(plan.formIntent){
+  const f=plan.formIntent,s=layout.spaces.find(v=>v.id===f.spaceId);
+  const ns=f.face==='south'||f.face==='north';
+  const span=ns?s.w:s.d,depth=ns?s.d:s.w,r=f.cornerInset;
+  const cell=(u,v)=>{
+   if(f.face==='south')return [s.x+u,s.z+v];
+   if(f.face==='north')return [s.x+u,s.z+s.d-1-v];
+   if(f.face==='west')return [s.x+v,s.z+u];
+   return [s.x+s.w-1-v,s.z+u];
+  };
+  let occupiedRoof=0,realMissingCornerRoof=0;
+  for(let v=0;v<depth;v++)for(let u=0;u<span;u++){
+   const [x,z]=cell(u,v),inset=Math.max(0,r-v);
+   const belongs=u>=inset&&u<span-inset;
+   if(belongs){
+    ok(has(x,1,z)&&has(x,s.h,z),'FACET_SUPPORT_OR_ROOF_MISSING');
+    occupiedRoof++;
+   }else{
+    ok(!has(x,s.h,z),'FACET_NOT_TRULY_OPEN');
+    realMissingCornerRoof++;
+   }
+  }
+  ok(realMissingCornerRoof===r*(r+1),'FACET_SILHOUETTE');
+  facetAudit={spaceId:f.spaceId,face:f.face,cornerInset:r,
+   occupiedRoofColumns:occupiedRoof,
+   missingRoofCornerColumns:realMissingCornerRoof,
+   minecraftEnvelopeWeatherproofing:'NOT_TESTED'};
+ }
  return {sourceWalkingPads:seen.size,
+  facetedEnvelope:facetAudit,
   outdoorCourtCount:plan.spaces.filter(s=>s.spatialRole==='open-court').length,
   verifiedOpenSkyColumns:skyColumns,
   entranceApproachTwoWide:true,allProgramSpacesReachable:true,witnesses,

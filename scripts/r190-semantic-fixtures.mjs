@@ -32,3 +32,12 @@ export const R190_COURT_STATIC_SYNTHETIC_CASE=common('r190-open-court',[
  S('studio','Accessible production and work area',12,12,8,'arrival','east','shared'),
  S('private-room','Private consultation and stock area',12,12,7,'arrival','west','private')
 ]);
+
+/** Explicit synthetic form IR. The facade is an occupied, chamfered wing;
+ * this is not a Qwen/Gemma-produced alternative concept. */
+export const R190_FACETED_STATIC_SYNTHETIC_CASE=(()=>{
+ const p=structuredClone(R190_COURT_STATIC_SYNTHETIC_CASE);
+ p.id='r190-faceted-court';
+ p.formIntent={spaceId:'public-hall',face:'south',cornerInset:3};
+ return p;
+})();

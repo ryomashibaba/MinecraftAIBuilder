@@ -203,10 +203,10 @@ jobs:
           node --check scripts/r190-source-review.mjs
           node --test scripts/r190-semantic-massing.test.mjs
           node scripts/r190-source-review.mjs --out r190-semantic-source-review
-      - name: Upload R190 twelve B143 placements and sixty elevations
+      - name: Upload R190 fifteen B143 variants and seventy-five elevations
         uses: actions/upload-artifact@v4
         with:
-          name: R190-SEMANTIC-FOUR-PROGRAM-TWELVE-LAYOUT-3D
+          name: R190-SEMANTIC-FIVE-PROGRAM-FIFTEEN-VARIANT-3D
           path: r190-semantic-source-review/
           retention-days: 14
           if-no-files-found: error

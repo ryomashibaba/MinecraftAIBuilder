@@ -6,7 +6,8 @@ import {R190_SCHEMA,validateR190SemanticPlan,compileR190SemanticPlan,
 import {compileDesign,verifyCompiled} from '../source/ai/b143-building-dsl.mjs';
 
 import {R190_STATIC_SYNTHETIC_CASES as cases,
- R190_COURT_STATIC_SYNTHETIC_CASE as court} from './r190-semantic-fixtures.mjs';
+ R190_COURT_STATIC_SYNTHETIC_CASE as court,
+ R190_FACETED_STATIC_SYNTHETIC_CASE as faceted} from './r190-semantic-fixtures.mjs';
 
 test('R190 synthetic programs: B143 source, 2-wide access and safe world gates',()=>{
  const signatures=[];
@@ -134,4 +135,60 @@ test('R190-C: invalid role or a covered court fails closed',()=>{
  assert.ok(verifyCompiled(modified,compiled));
  assert.throws(()=>auditR190SourceRoutes(c.inputPlan,c.layout,modified,compiled),
   /COURT_SKY_OBSTRUCTED_arrival/);
+});
+
+test('R190-D: genuine model-selectable faceted envelope has real floor, roof, and routes',()=>{
+ const original=JSON.stringify(faceted),variants=exploreR190SemanticPlan(faceted);
+ assert.equal(JSON.stringify(faceted),original);
+ assert.equal(variants.candidates.length,3);
+ assert.equal(variants.actualLocalModelCalls,0);
+ assert.equal(variants.provenance,'CALLER_PROVIDED_IR_UNVERIFIED');
+ const shapes=new Set();
+ for(const c of variants.candidates){
+  assert.ok(verifyCompiled(c.design,c.compiled));
+  assert.equal(c.audit.allProgramSpacesReachable,true);
+  assert.equal(c.audit.outdoorCourtCount,1);
+  assert.equal(c.audit.verifiedOpenSkyColumns,144);
+  assert.equal(c.audit.witnesses.length,4);
+  assert.equal(c.audit.facetedEnvelope.spaceId,'public-hall');
+  assert.equal(c.audit.facetedEnvelope.face,'south');
+  assert.equal(c.audit.facetedEnvelope.missingRoofCornerColumns,12);
+  assert.ok(c.audit.facetedEnvelope.occupiedRoofColumns>100);
+  assert.ok(c.design.elements.some(e=>e.id==='public-hall-facet-roof-core'));
+  assert.ok(!c.design.elements.some(e=>e.id==='public-hall-roof'));
+  assert.equal(c.art,'ART_HOLD');
+  assert.equal(c.constructionApproved,false);
+  assert.equal(c.executionAllowed,false);
+  assert.equal(c.readiness,'NOT_PREPARED');
+  assert.deepEqual(c.gates,Array(9).fill('BLOCKED'));
+  assert.deepEqual(c.BuildPlan.operations,[]);
+  assert.equal(c.worldWrites,0);
+  assert.equal(c.worldContacts,0);
+  shapes.add(c.compiled.geometrySha256);
+ }
+ assert.equal(shapes.size,3);
+});
+test('R190-D: rejects unknown face, incompatible dimensions, and covered faceted void',()=>{
+ for(const face of ['north-west','/fill','around']){
+  const invalid=structuredClone(faceted);
+  invalid.formIntent.face=face;
+  assert.throws(()=>compileR190SemanticPlan(invalid),/FORM_INTENT/);
+ }
+ const invalid=structuredClone(faceted);
+ invalid.formIntent.spaceId='arrival';
+ assert.throws(()=>compileR190SemanticPlan(invalid),/FORM_SPACE/);
+ const small=structuredClone(faceted);
+ small.formIntent.cornerInset=3;
+ small.spaces.find(s=>s.id==='public-hall').width=10;
+ assert.throws(()=>compileR190SemanticPlan(small),/FACET_CANNOT_FIT/);
+ const built=compileR190SemanticPlan(faceted),
+  room=built.layout.spaces.find(s=>s.id==='public-hall');
+ const obstructed=structuredClone(built.design);
+ obstructed.elements.push({id:'hostile-facet-cover',shape:'box',
+  mode:'add',material:'metal',origin:[room.x,room.h,room.z],size:[3,1,1]});
+ const compiled=compileDesign(obstructed);
+ assert.ok(verifyCompiled(obstructed,compiled));
+ assert.throws(()=>auditR190SourceRoutes(
+  built.inputPlan,built.layout,obstructed,compiled),
+  /FACET_NOT_TRULY_OPEN/);
 });

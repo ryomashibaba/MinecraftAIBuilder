@@ -4,15 +4,17 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {exploreR190SemanticPlan} from '../source/ai/r190-semantic-massing.mjs';
 import {R190_STATIC_SYNTHETIC_CASES,
- R190_COURT_STATIC_SYNTHETIC_CASE} from './r190-semantic-fixtures.mjs';
+ R190_COURT_STATIC_SYNTHETIC_CASE,
+ R190_FACETED_STATIC_SYNTHETIC_CASE} from './r190-semantic-fixtures.mjs';
 import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
 import {renderR164Elevation} from './r164-exterior-audit.mjs';
 const fail=s=>{throw Error('R190_REVIEW_'+s);};
 const sides=['front','rear','west','east','roof'];
 export function buildR190SourceReview(){
- const programs=[...R190_STATIC_SYNTHETIC_CASES,R190_COURT_STATIC_SYNTHETIC_CASE];
+ const programs=[...R190_STATIC_SYNTHETIC_CASES,R190_COURT_STATIC_SYNTHETIC_CASE,
+  R190_FACETED_STATIC_SYNTHETIC_CASE];
  const cases=programs.flatMap(p=>exploreR190SemanticPlan(p).candidates);
- if(cases.length!==12||new Set(cases.map(c=>c.compiled.geometrySha256)).size!==12)
+ if(cases.length!==15||new Set(cases.map(c=>c.compiled.geometrySha256)).size!==15)
   fail('DISTINCT_SOURCE_GEOMETRY_REQUIRED');
  for(const c of cases){
   if(!c.audit.allProgramSpacesReachable||c.art!=='ART_HOLD'||
@@ -44,6 +46,7 @@ export function saveR190SourceReview(out){
    placementStrategy:c.layout.strategy,independentConcept:false,
    rooflessCourt:c.audit.outdoorCourtCount===1,
    verifiedOpenSkyColumns:c.audit.verifiedOpenSkyColumns,
+   facetedEnvelope:c.audit.facetedEnvelope,
    inputPlan:c.inputPlan,layout:c.layout,audit:c.audit,
    voxels:c.compiled.primitives.length,sourceSha256:c.compiled.sourceSha256,
    geometrySha256:c.compiled.geometrySha256,
@@ -54,13 +57,15 @@ export function saveR190SourceReview(out){
   '<style>body{font:15px/1.5 system-ui;margin:24px;background:#182532;'+
   'color:#eef3f8}article{padding:18px;margin:20px 0;background:#293e50}'+
   'iframe{width:100%;height:500px;border:0}img{width:19.5%}</style>'+
-  '<h1>R190 - four programs, three placements each including roofless courtyard</h1>'+
+  '<h1>R190 - five semantic programs, incl. roofless court and occupied faceted wing</h1>'+
   '<p>STATIC SYNTHETIC IR (not model-generated). Route checks are SOURCE-only. '+
   'ART HOLD. Placements are not independently designed concepts. No Minecraft walking, world writes, or art adoption.</p>'+
   result.cases.map(c=>'<article><h2>'+escape(c.inputPlan.id+' / '+c.layout.strategy)+'</h2><p>'+
    c.compiled.primitives.length+' genuine B143 voxels; '+
    c.audit.witnesses.length+' spaces reachable, '+
-   c.audit.verifiedOpenSkyColumns+' verified sky columns (source only)</p>'+
+   c.audit.verifiedOpenSkyColumns+' sky columns, '+
+   (c.audit.facetedEnvelope?.missingRoofCornerColumns??0)+
+   ' missing facet roof corners (source only)</p>'+
    '<iframe loading="lazy" src="'+stem(c)+'.html"></iframe>'+
    sides.map(v=>'<img loading="lazy" alt="'+v+'" src="'+stem(c)+'-'+v+'.svg">').join('')+
    '</article>').join(''));
@@ -70,8 +75,8 @@ export function saveR190SourceReview(out){
  if(process.env.GITHUB_STEP_SUMMARY)
   fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,
    '### R190 synthetic semantic source 3D comparison\n'+
-   'Twelve source-only B143 reviews, ART HOLD. NOT real model or Minecraft.\n');
- return {cases:result.cases.length,programs:4,layoutsPerProgram:3,
+   'Fifteen source-only B143 reviews, ART HOLD. NOT real model or Minecraft.\n');
+ return {cases:result.cases.length,programs:5,layoutsPerProgram:3,
   independentConcepts:false,sourceOnly:true,art:'ART_HOLD'};
 }
 if(process.argv[1]===fileURLToPath(import.meta.url)){
