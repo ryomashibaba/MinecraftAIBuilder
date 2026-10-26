@@ -121,7 +121,10 @@ test('R178 detects an inaccessible outdoor court despite accessible indoor rooms
  const compiled=compileDesign(tampered);
  const [x,,z]=p.r178WingEvidence.coreCourtWitness;
  const id='r178-public-courtyard';
- const recheck=auditR125SourceRoutes({...p,design:tampered,compiled,
+ const recheck=auditR125SourceRoutes({...p,
+  schema:'minecraftaibuilder-r125-plan-to-b143-result-v1',
+  design:tampered,compiled,
+  sourceSha256:compiled.sourceSha256,geometrySha256:compiled.geometrySha256,
   program:[{...p.program[0],zones:[...p.program[0].zones,
    {id,range:{x:[x,x+1],z:[z,z]}}]}]});
  assert.equal(recheck.zones.find(a=>a.id===id).reachedFromEntrance,false);
