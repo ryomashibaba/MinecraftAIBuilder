@@ -1,3 +1,14 @@
+## R186 — 空中横断型の初の二階接続・上階室・設備の一体化研究（2026-10-26 JST）
+
+- 基点：R185 HEAD `4dbe80f`、[品質CI #40319507121](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40319507121) **SUCCESS**。R185は下部の地上公共入口→屋根下広場の真の2幅支持通路を実証したが、空中横断型の上階利用と人間スケールの室機能は未証明。美術ART HOLD。
+- R186は旧R185の**空中横断案だけ**を対象に、新規opt-in `minecraftaibuilder-r186-two-level-source-slice-v1` を新設。R185の検証済みソース設計を変更せず、独立`R186`として後段ボクセル幾何を作る。元の抽象R184プログラムの集会用途を限定的に上階展示/集会室へ対応させるが、**建物全体の3機能を実装したとは主張しない**。
+- モデル入力が許されるのは厳格な `{schema,base, slice:{sourceHall:'west-civic-hall',ascent:'straight-stair',upperUseId:'assembly',upperFloorY:17,serviceRole:'display-stand'}}`。48x48の固定ソース研究に限り、幾何詳細は**ホストが仕様化した候補**。未知Qwen/Gemmaモデル自律設計ではなく実LLM呼出0。
+- 同じ真正B143ソース内で、西ホールの物理壁を切り欠き、y=1..16の**16段の幅3階段を実現**。2幅歩行パッドの支持床/頭上2空気を全16段で直接証明。階段頂部→x11..18の上階ランディング→旧空中橋の実床y=16→上階1室へ連続させる。
+- 上階1室（x21..29,z21..27,y17..20）には**四周壁／旧橋上の実屋根／正面の開口／2面ガラス／組立式展示設備1件**を配置。R125既存2幅ソースグラフで **1階入口から地下ではない地上公共空間＋上階y17の実室＋展示設備のサービスパッド**へ到達検証。以前の`not tested`を偽の室PASSに置き換えず、上記**1室・1設備だけ**機能ソース検証。
+- 回帰として、R185の公共中軸4幅x22..25,z7..38にある全実B143の支持床/通路y1..3のセル/素材が一切変化しないことをボクセル毎に検証。階段・ランディング・壁・設備を実ソースから消した負例を独立監査で拒否。R125はdy±1歩行パッド隣接をソースで検査するもので、**実Minecraftプレイヤー衝突・建築の耐力/安全・全用途の完成を証明しない**。
+- 新旧B143回転3D×2、5方向図×10、階段高さ図、QA JSONを独立B198G Artifactへ保存し、実3Dで建築美術を別途審査。**ART HOLD／ユーザー未採択**。
+- CI確認前にPASSと主張しない。Draft PR #128/main未マージ、NOT_PREPARED、9ゲートBLOCKED、BuildPlan.operations=[]、constructionApproved=false、executionAllowed=false、worldContacts=worldWrites=0。57 workflows/コミット重複問題は継続、安易なチェック削除を避け、一括コミットで進める。
+
 ## R185 — 建築の入口・人間スケール・屋外公共空間を実B143と経路で同時研究（2026-10-26 JST）
 
 - 基点：R184 HEAD `759da04`、[CI #40316667393](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40316667393) **SUCCESS**。実B143を3つの異なる全体構成へ分岐したが、円環＝無地の円筒、空中横断＝箱と平板、段状＝積層箱、いずれも美術ART HOLD。形の差分を増やすことと、高品質モダン建築を生成することは別。

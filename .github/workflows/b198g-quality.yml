@@ -107,6 +107,9 @@ on:
       - 'source/ai/r185-public-experience.mjs'
       - 'scripts/r185-public-experience-comparison.mjs'
       - 'scripts/r185-public-experience.test.mjs'
+      - 'source/ai/r186-vertical-public-slice.mjs'
+      - 'scripts/r186-vertical-slice-comparison.mjs'
+      - 'scripts/r186-vertical-slice.test.mjs'
       - 'scripts/r177-ground-intent.test.mjs'
       - 'source/ai/r160-topology-intent.mjs'
       - 'source/ai/r162-room-section-massing.mjs'
@@ -176,6 +179,7 @@ jobs:
           node --test scripts/r183-courtyard-void.test.mjs
           node --test scripts/r184-composition-options.test.mjs
           node --test scripts/r185-public-experience.test.mjs
+          node --test scripts/r186-vertical-slice.test.mjs
       - name: R178 independent wing-courtyard synthetic 3D preview
         run: |
           node --check source/ai/r178-wing-courtyard.mjs
@@ -257,6 +261,18 @@ jobs:
         with:
           name: R185-HUMAN-SCALE-ARRIVAL-TWO-ARCHITECTURAL-FORMS-3D
           path: r185-public-arrival-review/
+          retention-days: 14
+          if-no-files-found: error
+      - name: R186 assemble source-only upper gallery and true 16-step physical staircase
+        run: |
+          node --check source/ai/r186-vertical-public-slice.mjs
+          node --check scripts/r186-vertical-slice-comparison.mjs
+          node scripts/r186-vertical-slice-comparison.mjs --out r186-real-two-level-slice
+      - name: Upload R186 two-level real B143 and source room graph
+        uses: actions/upload-artifact@v4
+        with:
+          name: R186-SOURCE-ONLY-TRUE-STAIR-ENCLOSED-UPPER-ROOM-3D
+          path: r186-real-two-level-slice/
           retention-days: 14
           if-no-files-found: error
       - name: R172 quick automatic three-use 3D preview
@@ -373,6 +389,9 @@ jobs:
           node --check source/ai/r185-public-experience.mjs
           node --check scripts/r185-public-experience-comparison.mjs
           node --check scripts/r185-public-experience.test.mjs
+          node --check source/ai/r186-vertical-public-slice.mjs
+          node --check scripts/r186-vertical-slice-comparison.mjs
+          node --check scripts/r186-vertical-slice.test.mjs
           node --check source/ai/r160-topology-intent.mjs
           node --check source/ai/r162-room-section-massing.mjs
           node --check source/ai/r163-daylit-sections.mjs
