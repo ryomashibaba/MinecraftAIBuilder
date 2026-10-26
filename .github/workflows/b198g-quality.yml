@@ -113,6 +113,9 @@ on:
       - 'source/ai/r187-daylit-upper-court.mjs'
       - 'scripts/r187-daylit-upper-court-comparison.mjs'
       - 'scripts/r187-daylit-upper-court.test.mjs'
+      - 'source/ai/r188-inhabited-frontage.mjs'
+      - 'scripts/r188-inhabited-frontage-comparison.mjs'
+      - 'scripts/r188-inhabited-frontage.test.mjs'
       - 'scripts/r177-ground-intent.test.mjs'
       - 'source/ai/r160-topology-intent.mjs'
       - 'source/ai/r162-room-section-massing.mjs'
@@ -184,6 +187,7 @@ jobs:
           node --test scripts/r185-public-experience.test.mjs
           node --test scripts/r186-vertical-slice.test.mjs
           node --test scripts/r187-daylit-upper-court.test.mjs
+          node --test scripts/r188-inhabited-frontage.test.mjs
       - name: R178 independent wing-courtyard synthetic 3D preview
         run: |
           node --check source/ai/r178-wing-courtyard.mjs
@@ -289,6 +293,18 @@ jobs:
         with:
           name: R187-DAYLIT-SKYCOURT-ROOM-STAIR-SOURCE-3D
           path: r187-daylit-upper-court-review/
+          retention-days: 14
+          if-no-files-found: error
+      - name: R188 real public frontage and two-wide transverse ground network
+        run: |
+          node --check source/ai/r188-inhabited-frontage.mjs
+          node --check scripts/r188-inhabited-frontage-comparison.mjs
+          node scripts/r188-inhabited-frontage-comparison.mjs --out r188-real-inhabited-frontage
+      - name: Upload R188 functional real B143 architecture and three arcades
+        uses: actions/upload-artifact@v4
+        with:
+          name: R188-FUNCTIONAL-THREE-ARCADES-TRUE-FRONTAGE-3D
+          path: r188-real-inhabited-frontage/
           retention-days: 14
           if-no-files-found: error
       - name: R172 quick automatic three-use 3D preview
@@ -411,6 +427,9 @@ jobs:
           node --check source/ai/r187-daylit-upper-court.mjs
           node --check scripts/r187-daylit-upper-court-comparison.mjs
           node --check scripts/r187-daylit-upper-court.test.mjs
+          node --check source/ai/r188-inhabited-frontage.mjs
+          node --check scripts/r188-inhabited-frontage-comparison.mjs
+          node --check scripts/r188-inhabited-frontage.test.mjs
           node --check source/ai/r160-topology-intent.mjs
           node --check source/ai/r162-room-section-massing.mjs
           node --check source/ai/r163-daylit-sections.mjs
