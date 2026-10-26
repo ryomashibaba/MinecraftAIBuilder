@@ -196,7 +196,6 @@ jobs:
           node --test scripts/r187-daylit-upper-court.test.mjs
           node --test scripts/r188-inhabited-frontage.test.mjs
           node --test scripts/r189-major-massing.test.mjs
-          node --test scripts/r190-semantic-massing.test.mjs
       - name: R190 genuine B143 semantic room topology and source-route QA
         run: |
           node --check source/ai/r190-semantic-massing.mjs
@@ -204,10 +203,10 @@ jobs:
           node --check scripts/r190-source-review.mjs
           node --test scripts/r190-semantic-massing.test.mjs
           node scripts/r190-source-review.mjs --out r190-semantic-source-review
-      - name: Upload R190 three true B143 scenes and fifteen elevations
+      - name: Upload R190 nine B143 placements and forty-five elevations
         uses: actions/upload-artifact@v4
         with:
-          name: R190-SEMANTIC-SOURCE-THREE-3D-AND-ELEVATIONS
+          name: R190-SEMANTIC-THREE-PROGRAM-NINE-LAYOUT-3D
           path: r190-semantic-source-review/
           retention-days: 14
           if-no-files-found: error

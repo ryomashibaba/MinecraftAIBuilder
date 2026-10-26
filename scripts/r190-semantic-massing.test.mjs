@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {R190_SCHEMA,validateR190SemanticPlan,compileR190SemanticPlan}
+import {R190_SCHEMA,validateR190SemanticPlan,compileR190SemanticPlan,
+ exploreR190SemanticPlan,R190_LAYOUT_STRATEGIES}
  from '../source/ai/r190-semantic-massing.mjs';
 import {verifyCompiled} from '../source/ai/b143-building-dsl.mjs';
 
@@ -49,4 +50,45 @@ test('R190 rejects stale mutated compiled voxel source',()=>{
  const r=compileR190SemanticPlan(cases[0]);
  r.compiled.primitives=r.compiled.primitives.slice(1);
  assert.equal(verifyCompiled(r.design,r.compiled),false);
+});
+
+test('R190 Phase B explores three distinct source placements per synthetic use',()=>{
+ const all=[];
+ for(const plan of cases){
+  const before=JSON.stringify(plan),result=exploreR190SemanticPlan(plan);
+  assert.equal(JSON.stringify(plan),before);
+  assert.equal(result.conceptsIndependentlyDesigned,false);
+  assert.equal(result.actualLocalModelCalls,0);
+  assert.equal(result.provenance,'CALLER_PROVIDED_IR_UNVERIFIED');
+  assert.equal(result.art,'ART_HOLD');
+  assert.equal(result.candidates.length,3);
+  assert.deepEqual(result.candidates.map(x=>x.layout.strategy),R190_LAYOUT_STRATEGIES);
+  const layouts=new Set();
+  for(const c of result.candidates){
+   assert.equal(c.layout.sourcePlanSha256,result.inputSha256);
+   assert.ok(verifyCompiled(c.design,c.compiled));
+   assert.equal(c.audit.allProgramSpacesReachable,true);
+   assert.equal(c.layout.portals.length,plan.spaces.length-1);
+   for(const s of plan.spaces){
+    const a=c.layout.spaces.find(x=>x.id===s.id);
+    assert.deepEqual([a.w,a.d,a.h],[s.width,s.depth,s.height]);
+    assert.equal(a.parentId,s.parentId);
+    assert.equal(a.side,s.side);
+   }
+   const root=c.layout.spaces.find(s=>s.id===plan.entrySpaceId);
+   const fingerprint=c.layout.spaces.map(s=>
+    [s.id,s.x-root.x,s.z-root.z,s.w,s.d,s.h].join(':')).join('|');
+   assert.ok(!layouts.has(fingerprint));
+   layouts.add(fingerprint);
+   assert.equal(c.art,'ART_HOLD');
+   assert.equal(c.readiness,'NOT_PREPARED');
+   assert.deepEqual(c.gates,Array(9).fill('BLOCKED'));
+   assert.deepEqual(c.BuildPlan.operations,[]);
+   assert.equal(c.worldWrites,0);assert.equal(c.worldContacts,0);
+   all.push(c.compiled.geometrySha256);
+  }
+ }
+ assert.equal(new Set(all).size,9);
+ assert.throws(()=>compileR190SemanticPlan(cases[0],
+  {layoutStrategy:'override-world'}),/R190_SEMANTIC_LAYOUT_STRATEGY/);
 });

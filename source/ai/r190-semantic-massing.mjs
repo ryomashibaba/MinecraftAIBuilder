@@ -20,6 +20,15 @@ const safeText=(v,n)=>typeof v==='string'&&v.length>=3&&v.length<=n&&
 const hash=x=>createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const key=(x,y,z)=>[x,y,z].join(',');
 const DIR=['north','south','east','west'];
+// Geometry alternatives preserve model-supplied room sizes and relations.
+export const R190_LAYOUT_STRATEGIES=Object.freeze([
+ 'centered','negative-tangent','positive-tangent'
+]);
+const SHIFT_ORDERS=Object.freeze({
+ centered:[0,-2,2,-4,4,-6,6,-8,8,-10,10,-12,12],
+ 'negative-tangent':[-8,-6,-10,-4,-12,-2,0,2,4,6,8,10,12],
+ 'positive-tangent':[8,6,10,4,12,2,0,-2,-4,-6,-8,-10,-12]
+});
 const palette=['wood','stone','concrete','metal'];
 
 export function validateR190SemanticPlan(p){
@@ -84,8 +93,9 @@ function sharedPortal(a,b,side){
  if(hi-lo+1<2)return null;
  return {x:Math.floor((lo+hi-1)/2),z:side==='north'?a.z+a.d-1:a.z,axis:'z'};
 }
-export function layoutR190SemanticPlan(p){
+export function layoutR190SemanticPlan(p,{strategy='centered'}={}){
  validateR190SemanticPlan(p);
+ ok(R190_LAYOUT_STRATEGIES.includes(strategy),'LAYOUT_STRATEGY');
  const source=structuredClone(p),byId=new Map(source.spaces.map(s=>[s.id,s]));
  const root=byId.get(p.entrySpaceId);
  const placements=new Map([[root.id,{id:root.id,parentId:null,side:null,
@@ -102,7 +112,7 @@ export function layoutR190SemanticPlan(p){
     a.parentId.localeCompare(b.parentId)||a.id.localeCompare(b.id));
   for(const s of choices){
    const parent=placements.get(s.parentId);
-   for(const shift of [0,-2,2,-4,4,-6,6,-8,8,-10,10,-12,12]){
+   for(const shift of SHIFT_ORDERS[strategy]){
     const candidate=near(parent,s,s.side,shift);
     if(candidate.x<2||candidate.z<3||
      candidate.x+candidate.w>p.site.width-2||
@@ -125,7 +135,7 @@ export function layoutR190SemanticPlan(p){
   return false;
  }
  ok(solve(),'NO_FEASIBLE_SPATIAL_LAYOUT');
- return {spaces:source.spaces.map(s=>placements.get(s.id)),portals,
+ return {strategy,spaces:source.spaces.map(s=>placements.get(s.id)),portals,
   sourcePlanSha256:hash(source)};
 }
 function sourceDesign(p,l){
@@ -193,10 +203,11 @@ export function auditR190SourceRoutes(plan,layout,design,compiled){
   entranceApproachTwoWide:true,allProgramSpacesReachable:true,witnesses,
   minecraftPlayerWalking:'NOT_TESTED',structuralEngineering:'NOT_TESTED'};
 }
-export function compileR190SemanticPlan(raw){
+export function compileR190SemanticPlan(raw,{layoutStrategy='centered'}={}){
  const p=typeof raw==='string'?JSON.parse(raw):raw;
  validateR190SemanticPlan(p);
- const plan=structuredClone(p),layout=layoutR190SemanticPlan(plan);
+ ok(R190_LAYOUT_STRATEGIES.includes(layoutStrategy),'LAYOUT_STRATEGY');
+ const plan=structuredClone(p),layout=layoutR190SemanticPlan(plan,{strategy:layoutStrategy});
  const design=sourceDesign(plan,layout),compiled=compileDesign(design);
  const audit=auditR190SourceRoutes(plan,layout,design,compiled);
  return {schema:'minecraftaibuilder-r190-source-research-v1',
@@ -207,4 +218,39 @@ export function compileR190SemanticPlan(raw){
   executionAllowed:false,constructionApproved:false,
   gates:Array(9).fill('BLOCKED'),BuildPlan:{operations:[]},
   worldWrites:0,worldContacts:0};
+}
+
+/**
+ * Phase B exploratory placements, not independent design concepts.
+ * All candidates preserve the same semantic program; no model re-inference,
+ * aesthetics acceptance, Minecraft IO, or runtime execution is performed.
+ */
+export function exploreR190SemanticPlan(raw){
+ const plan=typeof raw==='string'?JSON.parse(raw):raw;
+ validateR190SemanticPlan(plan);
+ const candidates=[],fingerprints=new Set(),rejections=[];
+ for(const strategy of R190_LAYOUT_STRATEGIES){
+  let candidate;
+  try{candidate=compileR190SemanticPlan(plan,{layoutStrategy:strategy});}
+  catch(e){
+   if(String(e?.message)==='R190_SEMANTIC_NO_FEASIBLE_SPATIAL_LAYOUT'){
+    rejections.push({strategy,reason:'NO_FEASIBLE_SPATIAL_LAYOUT'});
+    continue;
+   }
+   throw e;
+  }
+  const root=candidate.layout.spaces.find(s=>s.id===plan.entrySpaceId);
+  const fingerprint=candidate.layout.spaces.map(s=>
+   [s.id,s.x-root.x,s.z-root.z,s.w,s.d,s.h].join(':')).join('|');
+  if(fingerprints.has(fingerprint)){
+   rejections.push({strategy,reason:'DUPLICATE_SPATIAL_LAYOUT'});
+   continue;
+  }
+  fingerprints.add(fingerprint);candidates.push(candidate);
+ }
+ ok(candidates.length>=2,'INSUFFICIENT_DISTINCT_LAYOUTS');
+ return {schema:'minecraftaibuilder-r190-placement-exploration-v1',
+  provenance:'CALLER_PROVIDED_IR_UNVERIFIED',art:'ART_HOLD',
+  conceptsIndependentlyDesigned:false,sourceOnly:true,
+  actualLocalModelCalls:0,inputSha256:hash(plan),candidates,rejections};
 }
