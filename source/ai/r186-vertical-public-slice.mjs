@@ -133,8 +133,13 @@ export function auditR186SourceSlice(design,compiled){
    if(has(x,y,28))fail('UPPER_ENTRY_IS_BLOCKED');
  if(!has(20,18,24)||!has(30,18,24))
   fail('ENVELOPE_GLAZING_MISSING');
- for(const [x,y,z] of [[27,17,23],[28,19,25],[27,19,24]])
-  if(!has(x,y,z))fail('MULTIPART_UPPER_DISPLAY_ABSENT');
+ // Check actual assembled wood foundation and *two distinct* glass
+ // members against the independently compiled B143 material indices.
+ // The upper-case is at z=23, NOT at z=24. Never relax route/access.
+ for(const [x,y,z,material] of [[27,17,23,4],[28,19,25,3],
+  [27,19,23,3]])
+  if(seen.get(key(x,y,z))!==material)
+   fail('MULTIPART_UPPER_DISPLAY_ABSENT');
  return {schema:'r186-two-level-B143-voxel-route-audit-v1',
   reachedAllRequestedZones:true,connectedTwoWideStairSteps:16,
   ascendingSupportedPads:padTrail,

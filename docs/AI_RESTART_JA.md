@@ -1,3 +1,9 @@
+## R186-A — 本物の組立設備の証拠座標を修正（2026-10-26 JST）
+
+- R186初回HEAD `d9e708f` の [B198G CI #40322576583](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40322576583) は新規R186 0/4、`R186_VERTICAL_SLICE_MULTIPART_UPPER_DISPLAY_ABSENT` でFAIL（R178〜R185の旧回帰PASS）。R186の厳密検証順序では、その前に**16段x2幅の支持/空気パッド・上階y17到達・R125 1階/上階2ゾーン/設備サービスパッド・室外壁屋根/実入口を全て通過**している。ただし正式なR186 PASSではない。
+- 原因は証拠側の単一セル座標誤り。組立上部展示のガラス部は `[27,18,23] size[2,2,1]` なので `(27,19,23)` は本物、`(27,19,24)` は空気。最後のチェック対象を実ソースに合わせ、加えて**木材材質ID=4とガラス材質ID=3**が該当3サンプルに現れることをコンパイル済みセルから厳密確認する。形状そのもの、設備位置、元のR185、階段/経路/安全ゲートは変更せず、証拠を実モデルと一致させた。
+- R186-AのCIは次回確認まで未合格。ART HOLD、施工禁止、NOT_PREPARED、9 BLOCKED、空BuildPlan、worldWrites/worldContacts=0、Draft #128、main未マージを維持。
+
 ## R186 — 空中横断型の初の二階接続・上階室・設備の一体化研究（2026-10-26 JST）
 
 - 基点：R185 HEAD `4dbe80f`、[品質CI #40319507121](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40319507121) **SUCCESS**。R185は下部の地上公共入口→屋根下広場の真の2幅支持通路を実証したが、空中横断型の上階利用と人間スケールの室機能は未証明。美術ART HOLD。
