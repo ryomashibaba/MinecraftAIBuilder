@@ -1,3 +1,13 @@
+## R178 実バグ修正・CI進捗（2026-10-26 JST）
+
+- Draft PR #128 / ブランチ `feature/b198zr1-protected-architectural-revision` を継続。mainへマージしない。
+- R178初回CI #40294876940: R172 2/2、R177 2/2、original-source-geometry PASS、R178 0/3 FAIL。根本原因はハッシュ関数に計画オブジェクトを渡した `ERR_INVALID_ARG_TYPE`。
+- R178 SHAを修正。raw JSON回答のSHAは元文字列からそのまま計算し、構造化計画だけ再帰的キー順正規化後にSHAを計算。返答の原文を改変せず、家具・動線・9ゲート検証を緩めない。
+- SHA修正のCI #40297083233: original-source-geometry SUCCESS。R178の「2棟・無屋根中庭・直接開口」および「3用途の3D＋15投影図出力」テストはPASS、3本中残る1本は新規テストが `planSha256` と `originalPlanSha256` を取り違えた**テスト参照ミス**。今回この参照を修正。後続CI確認前に全合格と記載しない。
+- 3用途は**合成モデル応答**であり、実Qwen/Gemma生成結果ではない。3D投影の**人間による美術判定は未実施**。2棟が建築美術的に十分とは言えず、`ART HOLD`。
+- `NOT_PREPARED`、9ゲート `BLOCKED`、空の `BuildPlan.operations`、`constructionApproved=false`、`executionAllowed=false`、`worldWrites=0`、`worldContacts=0` を維持。Minecraft施工なし。
+- CI #40297083233 はこの2ファイル変更だけでも57件のWorkflowを発火。重要安全テストを維持しつつ、R178の品質確定後に重複起動条件を監査する。
+
 # MinecraftAIBuilder — 最短AI再開入口
 
 ## R178: 4室グリッドから独立した「2棟＋屋外中庭＋接続通路」の実体積研究（2026-10-26）
