@@ -13,7 +13,7 @@ import {renderR164Elevation} from './r164-exterior-audit.mjs';
 const fail=s=>{throw Error('R178_COURTYARD_PILOT_'+s);};
 const space=(id,purpose,weight)=>({id,purpose,weight});
 const object=(id,zoneId,role,corner)=>({id,zoneId,role,corner});
-const FIXTURES=[
+export const R178_SYNTHETIC_CASES=[
  {id:'home',use:'住宅',material:'wood',roof:'flat',
   spaces:[space('living','Living and relaxing',4),
    space('sleeping','Rest and privacy',3),
@@ -68,7 +68,7 @@ const safe=p=>p?.readiness==='NOT_PREPARED'&&p?.worldWrites===0&&
  p?.constructionApproved===false&&p?.BuildPlan?.operations?.length===0&&
  p?.gates?.length===9&&p.gates.every(x=>x==='BLOCKED');
 export function buildR178WingComparisons(){
- const cases=FIXTURES.map(t=>{
+ const cases=R178_SYNTHETIC_CASES.map(t=>{
   const reply=makeR178SyntheticReply(t);
   const request={naturalLanguageBrief:
    'Static synthetic wing court source design for '+t.id};

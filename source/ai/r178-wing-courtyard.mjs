@@ -19,6 +19,7 @@ import {ASSEMBLED_SCHEMA,applyR125FeatureIntent}
  from './r125-functional-layer.mjs';
 
 export const R178_SCHEMA='minecraftaibuilder-r178-wing-court-ir-v1';
+export const R180_SCHEMA='minecraftaibuilder-r180-independent-massing-ir-v1';
 // Raw model reply bytes must remain raw. Structured plan provenance is
 // canonicalized so equivalent JSON object key orders produce the same hash.
 const canonical=x=>Array.isArray(x)?x.map(canonical):
@@ -52,6 +53,21 @@ export const R178_MODEL_INSTRUCTIONS=[
  'unsafe design choices, and never creates Minecraft build instructions.'
 ].join('\n');
 
+// Separate opt-in contract. Legacy R178 responses remain byte-for-byte valid.
+export const R180_MODEL_INSTRUCTIONS=[
+ 'R180 opt-in: use the existing R178 reply fields and relations, but set',
+ 'architecture.schema=minecraftaibuilder-r180-independent-massing-ir-v1.',
+ 'architecture has schema,westWing,eastWing,roofYs,bridge,wingExtents.',
+ 'wingExtents={west:{innerX,frontZ,rearZ},east:{innerX,frontZ,rearZ}}.',
+ 'Each integer explicitly locates one independent physical wing envelope.',
+ 'West innerX 10..12, east innerX footprint.width-13..width-11.',
+ 'frontZ 1..5, rearZ footprint.depth-8..depth-2.',
+ 'At least one dimension must differ from the R178 fixed envelopes.',
+ 'Both within-wing directAdjacencies must be model-declared.',
+ 'Unsupported geometry, blocked access or furniture means HOLD, not repair.',
+ 'No Minecraft build instructions or world locations.'
+].join('\n');
+
 export function validateR178WingReply(raw,request){
  if(typeof raw!=='string'||raw.length<20||raw.length>22000)
   fail('MISSING_OR_OVERSIZED_REPLY');
@@ -69,8 +85,11 @@ export function validateR178WingReply(raw,request){
  const semantic=validateR135SemanticObjects(reply.objects,
   plan.layout.spaces.map(s=>s.id));
  const arch=reply.architecture;
- if(!exact(arch,['schema','westWing','eastWing','roofYs','bridge'])||
-  arch.schema!==R178_SCHEMA||
+ const isR180=arch?.schema===R180_SCHEMA;
+ if(!exact(arch,isR180?
+  ['schema','westWing','eastWing','roofYs','bridge','wingExtents']:
+  ['schema','westWing','eastWing','roofYs','bridge'])||
+  ![R178_SCHEMA,R180_SCHEMA].includes(arch.schema)||
   !Array.isArray(arch.westWing)||arch.westWing.length!==2||
   !Array.isArray(arch.eastWing)||arch.eastWing.length!==2||
   !exact(arch.roofYs,['west','east'])||
@@ -79,6 +98,29 @@ export function validateR178WingReply(raw,request){
    Number.isSafeInteger(n)&&n>=8&&n<=13)||
   Math.abs(arch.roofYs.west-arch.roofYs.east)<2)
   fail('WING_COMPOSITION_IR');
+ if(isR180){
+  const ext=arch.wingExtents;
+  if(!exact(ext,['west','east'])||
+   !exact(ext.west,['innerX','frontZ','rearZ'])||
+   !exact(ext.east,['innerX','frontZ','rearZ']))
+   fail('R180_MASSING_FIELDS');
+  const {width:w,depth:d}=plan.footprint;
+  const limits={west:[10,12],east:[w-13,w-11]};
+  for(const side of ['west','east']){
+   const e=ext[side];
+   if(![e.innerX,e.frontZ,e.rearZ].every(Number.isSafeInteger)||
+    e.innerX<limits[side][0]||e.innerX>limits[side][1]||
+    e.frontZ<1||e.frontZ>5||
+    e.rearZ<d-8||e.rearZ>d-2)
+    fail('R180_MASSING_OUT_OF_BOUNDS');
+  }
+  if(ext.east.innerX-ext.west.innerX-1<6)
+   fail('R180_COURTYARD_GAP_TOO_NARROW');
+  if(ext.west.innerX===11&&ext.west.frontZ===1&&
+   ext.west.rearZ===d-2&&ext.east.innerX===w-12&&
+   ext.east.frontZ===1&&ext.east.rearZ===d-2)
+   fail('R180_MASSING_IDENTICAL_TO_R178');
+ }
  const zoneIds=plan.layout.spaces.map(s=>s.id);
  const chosen=[...arch.westWing,...arch.eastWing];
  if(chosen.some(x=>typeof x!=='string'||!zoneIds.includes(x))||
@@ -108,8 +150,13 @@ export function validateR178WingReply(raw,request){
 function makeBareSource(plan,arch,rel){
  const {width:w,depth:d}=plan.footprint;
  const {floor,wall,roof}=plan.materials;
- const west={start:1,end:11,roofY:arch.roofYs.west},
-  east={start:w-12,end:w-2,roofY:arch.roofYs.east};
+ const ext=arch.schema===R180_SCHEMA?arch.wingExtents:null;
+ const west={start:1,end:ext?.west.innerX??11,
+  frontZ:ext?.west.frontZ??1,rearZ:ext?.west.rearZ??d-2,
+  roofY:arch.roofYs.west},
+  east={start:ext?.east.innerX??w-12,end:w-2,
+   frontZ:ext?.east.frontZ??1,rearZ:ext?.east.rearZ??d-2,
+   roofY:arch.roofYs.east};
  const gapX=west.end+1,gapLength=east.start-gapX;
  if(gapLength<6||d<30)fail('COURTYARD_NOT_SPACIOUS');
  const splitZ=Math.floor(d/2),bridgeZ=arch.bridge==='front'?5:d-10;
@@ -120,34 +167,36 @@ function makeBareSource(plan,arch,rel){
  for(const [side,wing,ids] of [
   ['west',west,arch.westWing],['east',east,arch.eastWing]]){
   const x=wing.start,width=wing.end-x+1,roofY=wing.roofY;
-  add(side+'-floor','add',[x,1,1],[width,1,d-2],floor);
-  add(side+'-wall-out','add',[side==='west'?x:wing.end,2,1],
-   [1,roofY-2,d-2],wall);
-  add(side+'-wall-in','add',[side==='west'?wing.end:x,2,1],
-   [1,roofY-2,d-2],wall);
-  add(side+'-wall-front','add',[x+1,2,1],
+  const startZ=wing.frontZ,endZ=wing.rearZ,depth=endZ-startZ+1;
+  add(side+'-floor','add',[x,1,startZ],[width,1,depth],floor);
+  add(side+'-wall-out','add',[side==='west'?x:wing.end,2,startZ],
+   [1,roofY-2,depth],wall);
+  add(side+'-wall-in','add',[side==='west'?wing.end:x,2,startZ],
+   [1,roofY-2,depth],wall);
+  add(side+'-wall-front','add',[x+1,2,startZ],
    [width-2,roofY-2,1],wall);
-  add(side+'-wall-rear','add',[x+1,2,d-2],
+  add(side+'-wall-rear','add',[x+1,2,endZ],
    [width-2,roofY-2,1],wall);
   add(side+'-room-partition','add',[x+1,2,splitZ],
    [width-2,roofY-2,1],wall);
   add(side+'-real-direct-door','cut',[x+4,2,splitZ],[2,3,1]);
-  add(side+'-real-roof','add',[x,roofY,1],[width,1,d-2],roof);
+  add(side+'-real-roof','add',[x,roofY,startZ],[width,1,depth],roof);
   // Honor the original model-selected roof family in ACTUAL solids.
   // Separate low/crest bands create a tangible ridge, not a label in QA.
   if(plan.form.roofProfile==='ridge'){
-   add(side+'-ridge-slope','add',[x+2,roofY+1,1],
-    [width-4,1,d-2],roof);
-   add(side+'-ridge-crest','add',[x+4,roofY+2,1],
-    [width-8,1,d-2],roof);
+   add(side+'-ridge-slope','add',[x+2,roofY+1,startZ],
+    [width-4,1,depth],roof);
+   add(side+'-ridge-crest','add',[x+4,roofY+2,startZ],
+    [width-8,1,depth],roof);
   }else if(plan.form.roofProfile==='sawtooth'){
-   for(let z=3;z<d-3;z+=6){
+   for(let z=startZ+2;z<=endZ-2;z+=6){
     add(side+'-saw-'+z,'add',[x,roofY+1,z],
-     [width,1,Math.min(3,d-2-z)],roof);
+     [width,1,Math.min(3,endZ-z)],roof);
    }
   }
   for(const [n,id,z0,z1] of [
-   [0,ids[0],2,splitZ-1],[1,ids[1],splitZ+1,d-3]]){
+   [0,ids[0],startZ+1,splitZ-1],
+   [1,ids[1],splitZ+1,endZ-1]]){
    zones.push({id,
     purpose:plan.layout.spaces.find(q=>q.id===id).purpose,
     range:{x:[x+1,wing.end-1],z:[z0,z1]},
@@ -155,7 +204,7 @@ function makeBareSource(plan,arch,rel){
     physicalWing:side,physicalWingPosition:n===0?'front':'rear'});
   }
   // Real low windows in each room, never occupied by the front door.
-  for(const [label,z] of [['front',1],['rear',d-2]]){
+  for(const [label,z] of [['front',startZ],['rear',endZ]]){
    add(side+'-'+label+'-window-cut','cut',[x+1,3,z],[2,2,1]);
    add(side+'-'+label+'-window-glass','add',[x+1,3,z],
     [2,2,1],'glass');
@@ -178,8 +227,9 @@ function makeBareSource(plan,arch,rel){
   [gapLength,1,4],roof);
  const entranceSide=arch.westWing[0]===rel.entryFacingZoneId?
   'west':'east';
- const entryStart=entranceSide==='west'?west.start:east.start;
- add('exterior-entrance','cut',[entryStart+4,2,1],[2,3,1]);
+ const entryWing=entranceSide==='west'?west:east;
+ add('exterior-entrance','cut',
+  [entryWing.start+4,2,entryWing.frontZ],[2,3,1]);
  // Open the covered cross-wing passage at both actual interior walls.
  add('bridge-west-door','cut',[west.end,2,bridgeZ+1],[1,3,2]);
  add('bridge-east-door','cut',[east.start,2,bridgeZ+1],[1,3,2]);
@@ -248,6 +298,11 @@ function makeBareSource(plan,arch,rel){
   fail('COURTYARD_NOT_REACHABLE_FROM_REAL_ENTRANCE');
  return {...physical,sourceRouteAudit:sourceRoutes,
   r178Witness:{roofYs:{...arch.roofYs},
+   spatialIRSchema:arch.schema,
+   modelSelectedWingExtents:{
+    west:{innerX:west.end,frontZ:west.frontZ,rearZ:west.rearZ},
+    east:{innerX:east.start,frontZ:east.frontZ,rearZ:east.rearZ}
+   },
    bridgeEnd:arch.bridge,physicalDoorCount:2,
    courtyardUnroofed:true,courtWalkSourceSupported:true,
    courtyardReachedFromEntrance:true,
@@ -268,7 +323,9 @@ export function parseR178CourtyardReply(raw,request){
   ...bare.r178Witness,
   originalRawSha256,
   incomingReplyAuthorship:'CALLER_PROVIDED_UNVERIFIED',
-  geometryAuthorship:'HOST_COMPILED_FROM_EXPLICIT_WING_IR',
+  geometryAuthorship:reply.architecture.schema===R180_SCHEMA?
+   'HOST_COMPILED_FROM_EXPLICIT_R180_MASSING_IR':
+   'HOST_COMPILED_FROM_EXPLICIT_WING_IR',
   legacyR168FourRoomGridUsed:false,
   originalR134StripUsed:false,
   originalRoomCount:4,actualFurnishedObjects:featured.placements.length,

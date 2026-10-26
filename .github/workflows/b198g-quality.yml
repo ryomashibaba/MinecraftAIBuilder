@@ -90,6 +90,8 @@ on:
       - 'source/ai/r178-wing-courtyard.mjs'
       - 'scripts/r178-wing-comparison.mjs'
       - 'scripts/r178-wing-comparison.test.mjs'
+      - 'scripts/r180-variable-massing-comparison.mjs'
+      - 'scripts/r180-variable-massing.test.mjs'
       - 'scripts/r177-ground-intent.test.mjs'
       - 'source/ai/r160-topology-intent.mjs'
       - 'source/ai/r162-room-section-massing.mjs'
@@ -153,6 +155,7 @@ jobs:
           node --test scripts/r172-ci-autoreview.test.mjs
           node --test scripts/r177-ground-intent.test.mjs
           node --test scripts/r178-wing-comparison.test.mjs
+          node --test scripts/r180-variable-massing.test.mjs
       - name: R178 independent wing-courtyard synthetic 3D preview
         run: |
           node --check source/ai/r178-wing-courtyard.mjs
@@ -163,6 +166,17 @@ jobs:
         with:
           name: R178-INDEPENDENT-THREE-USE-WING-COURT-3D
           path: r178-independent-wing-court/
+          retention-days: 14
+          if-no-files-found: error
+      - name: R180 matched-program wing envelope geometry preview
+        run: |
+          node --check scripts/r180-variable-massing-comparison.mjs
+          node scripts/r180-variable-massing-comparison.mjs --out r180-matched-program-massing
+      - name: Upload R180 source-only massing versus R178 comparison
+        uses: actions/upload-artifact@v4
+        with:
+          name: R180-MATCHED-PROGRAM-WING-MASSING-3D
+          path: r180-matched-program-massing/
           retention-days: 14
           if-no-files-found: error
       - name: R172 quick automatic three-use 3D preview
@@ -262,6 +276,8 @@ jobs:
           node --check source/ai/r178-wing-courtyard.mjs
           node --check scripts/r178-wing-comparison.mjs
           node --check scripts/r178-wing-comparison.test.mjs
+          node --check scripts/r180-variable-massing-comparison.mjs
+          node --check scripts/r180-variable-massing.test.mjs
           node --check source/ai/r160-topology-intent.mjs
           node --check source/ai/r162-room-section-massing.mjs
           node --check source/ai/r163-daylit-sections.mjs

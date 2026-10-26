@@ -1,3 +1,11 @@
+## R180 — モデル明示による独立棟の幅・前後位置・奥行の研究（2026-10-26 JST）
+
+- R179-A のB198G CI [#40299394181](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40299394181) **SUCCESS**。R178の未指定棟内ドア拒否と入口→屋外中庭の2幅ルート立証を安全条件を緩めず完了。
+- 次工程R180は旧R178の構文・幾何・テストを残し、**新規opt-in IR** `minecraftaibuilder-r180-independent-massing-ir-v1` を追加。棟ごとの `wingExtents.west/east:{innerX,frontZ,rearZ}` をモデル入力として厳格に受理する。従来固定の前後外壁位置・幅・屋根・窓・入口・室内zゾーンを**実B143に反映**。無効寸法は勝手に補正せずHOLD。R180入力を実モデル生成と偽らない。
+- 同じ3用途・同じ室/家具/直接ドア/屋根選択に対してR178固定配置とR180独立寸法を比較する合成3ケースを用意。計6件の回転可能B143 HTML、30方向実ボクセル図、正本QA JSONを既存B198G CIの**独立artifact**に保存する。安全ゲート・2幅動線・家具到達・中庭到達・160要素上限はすべて保持。
+- 限界を明示：現在は依然2棟/4室、30〜32平面、z方向の棟のみ。任意棟数/方向・本物の都市水準の建築・実Qwen/Gemma未知用途・Minecraft実歩行・ユーザー美術PASSは**未実証**。R180は建築構成の自由度が実形状へ反映されるか検証するもの。複数の長方形を描いただけでART PASSとしない。
+- この変更のGitHub CI実行確認までは**未合格**。旧原本とmainを保護し、Draft #128、ART HOLD、NOT_PREPARED、9 BLOCKED、BuildPlan.operations=[]、constructionApproved=false、executionAllowed=false、worldWrites=worldContacts=0。使用量効率のため関係差分を1コミットにまとめ、CI過剰起動の監査は継続。
+
 ## R179-A — R178実3D美術審査とモデル意図・屋外到達性修正（2026-10-26 JST）
 
 - R178基点 `acdb47a`、B198G [CI #40297455088](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40297455088) は **SUCCESS**。合成3用途のB143・回転3D・15方向図は [artifact #12638279659](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40297455088/artifacts/12638279659)。
