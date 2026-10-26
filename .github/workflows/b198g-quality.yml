@@ -119,6 +119,10 @@ on:
       - 'source/ai/r189-major-massing.mjs'
       - 'scripts/r189-major-massing-comparison.mjs'
       - 'scripts/r189-major-massing.test.mjs'
+      - 'source/ai/r190-semantic-massing.mjs'
+      - 'scripts/r190-semantic-fixtures.mjs'
+      - 'scripts/r190-semantic-massing.test.mjs'
+      - 'scripts/r190-source-review.mjs'
       - 'scripts/r177-ground-intent.test.mjs'
       - 'source/ai/r160-topology-intent.mjs'
       - 'source/ai/r162-room-section-massing.mjs'
@@ -192,6 +196,21 @@ jobs:
           node --test scripts/r187-daylit-upper-court.test.mjs
           node --test scripts/r188-inhabited-frontage.test.mjs
           node --test scripts/r189-major-massing.test.mjs
+          node --test scripts/r190-semantic-massing.test.mjs
+      - name: R190 genuine B143 semantic room topology and source-route QA
+        run: |
+          node --check source/ai/r190-semantic-massing.mjs
+          node --check scripts/r190-semantic-fixtures.mjs
+          node --check scripts/r190-source-review.mjs
+          node --test scripts/r190-semantic-massing.test.mjs
+          node scripts/r190-source-review.mjs --out r190-semantic-source-review
+      - name: Upload R190 three true B143 scenes and fifteen elevations
+        uses: actions/upload-artifact@v4
+        with:
+          name: R190-SEMANTIC-SOURCE-THREE-3D-AND-ELEVATIONS
+          path: r190-semantic-source-review/
+          retention-days: 14
+          if-no-files-found: error
       - name: R178 independent wing-courtyard synthetic 3D preview
         run: |
           node --check source/ai/r178-wing-courtyard.mjs
