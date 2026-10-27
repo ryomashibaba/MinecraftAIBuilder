@@ -136,7 +136,16 @@ export async function runR190RStudy(args=[],{
  try{await modelRunner(options,{fetcher});}catch(e){caught=e}
  const c=capture(out);
  if(!c){if(caught)throw caught;fail('NO_SAVED_VERIFIED_MODEL_REPLY')}
- const r=c.receipt,reference=semanticEvidence(path.resolve(semanticEvidenceRoot),model);
+ const r=c.receipt;
+ let reference=semanticEvidence(path.resolve(semanticEvidenceRoot),model);
+ // R190-N may have been run in the user's earlier separate checkout.
+ // Read sibling evidence only (no copy, network, model request or mutation).
+ if(reference.status==='NO_VERIFIED_MATCHING_SEMANTIC_ORIGINAL'&&
+    semanticEvidenceRoot===EVIDENCE_ROOT){
+  const sibling=path.resolve(REPO_ROOT,'..',
+   'MinecraftAIBuilder-R190N','r190n-local-evidence');
+  reference=semanticEvidence(sibling,model);
+ }
  const report={schema:'minecraftaibuilder-r190r-direct-v1',
   directReviewStatus:r.status,originalDirectRawSha256:c.sha,
   frozenBriefSha256:PROMPT_SHA,modelRequested:model,

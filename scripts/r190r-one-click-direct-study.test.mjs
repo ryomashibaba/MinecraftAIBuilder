@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import {createHash} from 'node:crypto';
 import {parseR190RArgs,runR190RStudy} from './r190r-one-click-direct-study.mjs';
 import {STUDY_BRIEF} from './r190n-one-click-research.mjs';
 const raw=()=>JSON.stringify({design:{
@@ -125,4 +126,38 @@ test('R190-R CMD is consent-gated and source-only',()=>{
  assert.match(cmd,/git clone --depth 1 --single-branch --branch feature\/b198zr1-protected-architectural-revision/);
  assert.match(cmd,/node.exe "%runner%" %\*/);
  assert.doesNotMatch(cmd,/git pull|git reset|git checkout|ollama pull/i);
+});
+
+test('R190-R matches strictly hashed same-brief semantic evidence without upgrading its HOLD',async()=>{
+ const root=temporary(),sem=path.join(root,'semantic'),evidence=path.join(sem,'r190n-100-100');
+ fs.mkdirSync(evidence,{recursive:true});
+ const sha=x=>createHash('sha256').update(x,'utf8').digest('hex');
+ const prior='{"syntheticSemantic":"formal HOLD"}';
+ const safety={readiness:'NOT_PREPARED',constructionApproved:false,
+  executionAllowed:false,worldContacts:0,worldWrites:0,
+  gates:Array(9).fill('BLOCKED'),BuildPlan:{operations:[]}};
+ fs.writeFileSync(path.join(evidence,'R190_M_UNMODIFIED_MODEL_RESPONSE.txt'),prior);
+ fs.writeFileSync(path.join(evidence,'R190_M_ORIGINAL_BRIEF.txt'),STUDY_BRIEF);
+ fs.writeFileSync(path.join(evidence,'R190N_STUDY_MANIFEST.json'),JSON.stringify({
+  schema:'minecraftaibuilder-r190n-study-v1',
+  modelRequestedOrClaimed:'qwen3:14b',briefSha256:sha(STUDY_BRIEF),
+  originalRawSha256:sha(prior),...safety}));
+ fs.writeFileSync(path.join(evidence,'R190_M_EVIDENCE_RECEIPT.json'),JSON.stringify({
+  originalRawSha256:sha(prior),originalBriefSha256:sha(STUDY_BRIEF),
+  status:'HOLD_ORIGINAL_SEMANTIC_RESPONSE_REJECTED',
+  sourceKind:null,hostDeterminedRoomCoordinates:false,...safety}));
+ try{
+  const result=await runR190RStudy([],{evidenceRoot:path.join(root,'direct'),
+   semanticEvidenceRoot:sem,fetcher:fetchFor(raw()),
+   transport:'openai',timestamp:()=>201});
+  assert.equal(result.semanticComparison,'SAME_FROZEN_BRIEF_AND_CLAIMED_MODEL');
+  const comparison=JSON.parse(fs.readFileSync(path.join(result.directory,
+   'R190R_ROUTE_COMPARISON.json'),'utf8'));
+  assert.equal(comparison.semanticComparison.statusOfSemanticRoute,
+   'HOLD_ORIGINAL_SEMANTIC_RESPONSE_REJECTED');
+  assert.equal(comparison.semanticComparison.artReview,'ART_HOLD');
+  assert.equal(comparison.qualitySuperiority,'NOT_ESTABLISHED');
+  assert.equal(fs.readFileSync(path.join(evidence,
+   'R190_M_UNMODIFIED_MODEL_RESPONSE.txt'),'utf8'),prior);
+ }finally{fs.rmSync(root,{recursive:true,force:true})}
 });
