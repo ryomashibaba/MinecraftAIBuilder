@@ -192,3 +192,70 @@ test('R190-D: rejects unknown face, incompatible dimensions, and covered faceted
   built.inputPlan,built.layout,obstructed,compiled),
   /FACET_NOT_TRULY_OPEN/);
 });
+
+test('R190-K model-authored sawtooth roof builds real raised interior and solid gables',()=>{
+ const a=structuredClone(cases[1]),before=JSON.stringify(a);
+ a.roofFormIntent={spaceId:'showroom',profile:'sawtooth',axis:'x',rise:4,toothWidth:5};
+ const r=compileR190SemanticPlan(a),roof=r.audit.roofForm;
+ assert.equal(JSON.stringify(a),before);
+ assert.equal(r.design.elements.some(e=>e.id==='showroom-roof'),false);
+ assert.equal(r.design.elements.filter(e=>e.id.startsWith('showroom-roof-strip-')).length,17);
+ assert.equal(roof.profile,'sawtooth');
+ assert.equal(roof.achievedRise,4);
+ assert(roof.raisedOpenInteriorColumns>0);
+ assert.equal(roof.verifiedPhysicalEndGables,true);
+ assert(roof.sourceHeightProfile.some((v,i)=>i>0&&v<roof.sourceHeightProfile[i-1]));
+ assert.equal(r.audit.allProgramSpacesReachable,true);
+ assert.ok(verifyCompiled(r.design,r.compiled));
+ assert.equal(r.art,'ART_HOLD');assert.equal(r.minecraftPlayerWalking,'NOT_TESTED');
+ assert.equal(r.readiness,'NOT_PREPARED');
+ assert.deepEqual(r.gates,Array(9).fill('BLOCKED'));
+ assert.equal(r.worldContacts,0);assert.equal(r.worldWrites,0);
+ const altered=structuredClone(r.design);
+ const strip=altered.elements.find(e=>e.id==='showroom-roof-strip-3');
+ strip.origin[1]-=2;
+ assert.throws(()=>auditR190SourceRoutes(a,r.layout,altered,compileDesign(altered)),
+  /ROOF_PROFILE_MISSING|ROOF_NO_RAISED_INTERIOR_AIR/);
+});
+test('R190-K model-selected ridge and shed produce different genuine B143 silhouettes',()=>{
+ const shapes=[];
+ for(const profile of ['ridge','shed']){
+  const p=structuredClone(cases[2]);
+  p.roofFormIntent={spaceId:'analysis',profile,axis:'z',rise:3};
+  const r=compileR190SemanticPlan(p);
+  assert.equal(r.audit.roofForm.profile,profile);
+  assert.equal(r.audit.roofForm.achievedRise,3);
+  assert.equal(r.audit.roofForm.sourceHeightProfile.at(0),0);
+  assert.ok(r.audit.roofForm.raisedOpenInteriorColumns>0);
+  assert.equal(r.audit.allProgramSpacesReachable,true);
+  shapes.push(r.compiled.geometrySha256);
+ }
+ assert.equal(new Set(shapes).size,2);
+});
+test('R190-K invalid or inferred roof, roof leaks and shape injections HOLD',()=>{
+ for(const form of [
+  {spaceId:'showroom',profile:'sawtooth',axis:'x',rise:4},
+  {spaceId:'showroom',profile:'ridge',axis:'x',rise:4,toothWidth:5},
+  {spaceId:'showroom',profile:'world-write',axis:'x',rise:4},
+  {spaceId:'showroom',profile:'ridge',axis:'y',rise:4},
+  {spaceId:'showroom',profile:'sawtooth',axis:'x',rise:4,toothWidth:10},
+  {spaceId:'showroom',profile:'sawtooth',axis:'x',rise:4,toothWidth:8},
+  {spaceId:'showroom',profile:'ridge',axis:'x',rise:30},
+  {spaceId:'nonexistent',profile:'shed',axis:'x',rise:3}
+ ]){
+  const p=structuredClone(cases[1]);p.roofFormIntent=form;
+  assert.throws(()=>compileR190SemanticPlan(p),/R190_SEMANTIC_ROOF_/);
+ }
+ const cover=structuredClone(faceted);
+ cover.roofFormIntent={spaceId:'public-hall',profile:'shed',axis:'x',rise:2};
+ assert.throws(()=>compileR190SemanticPlan(cover),/ROOF_SPACE/);
+ const p=structuredClone(cases[1]);
+ p.roofFormIntent={spaceId:'showroom',profile:'ridge',axis:'x',rise:4};
+ const r=compileR190SemanticPlan(p);
+ const damaged=structuredClone(r.design);
+ damaged.elements.push({id:'invalid-underside-cover',shape:'box',mode:'add',
+  material:'metal',origin:[r.layout.spaces[0].x+7,10,r.layout.spaces[0].z+6],size:[1,1,1]});
+ const comp=compileDesign(damaged);
+ assert.throws(()=>auditR190SourceRoutes(p,r.layout,damaged,comp),
+  /ROOF_NO_RAISED_INTERIOR_AIR/);
+});

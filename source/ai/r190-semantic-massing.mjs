@@ -31,9 +31,27 @@ const SHIFT_ORDERS=Object.freeze({
 });
 const palette=['wood','stone','concrete','metal'];
 
+// Model-authored roof section, never chosen by a host typology lookup.
+// These relative voxel elevations are a deterministic geometric realization
+// of an explicitly selected profile, axis, rise, and (if needed) tooth width.
+export function r190RoofElevation(index,span,form){
+ ok(int(index,0,span-1)&&int(span,7,22),'ROOF_SPAN');
+ if(form.profile==='shed')return Math.floor(index*form.rise/(span-1));
+ if(form.profile==='ridge'){
+  const center=Math.floor((span-1)/2);
+  return Math.floor(Math.min(index,span-1-index)*form.rise/center);
+ }
+ if(form.profile==='sawtooth')
+  return Math.floor((index%form.toothWidth)*form.rise/(form.toothWidth-1));
+ fail('ROOF_PROFILE');
+}
+
+
 export function validateR190SemanticPlan(p){
  const standard=['schema','id','title','brief','site','entrySpaceId','spaces','materials'];
- ok(exact(p,standard)||(exact(p,[...standard,'formIntent'])),'FIELDS');
+ ok(Object.keys(p??{}).length>=standard.length&&
+  Object.keys(p??{}).every(k=>[...standard,'formIntent','roofFormIntent'].includes(k))&&
+  standard.every(k=>Object.hasOwn(p,k)),'FIELDS');
  ok(p.schema===R190_SCHEMA&&slug(p.id)&&safeText(p.title,100)&&
   safeText(p.brief,400),'IDENTITY');
  ok(exact(p.site,['width','depth','height'])&&
@@ -74,6 +92,25 @@ export function validateR190SemanticPlan(p){
   ok((ns?chosen.width:chosen.depth)>=2*f.cornerInset+6&&
    (ns?chosen.depth:chosen.width)>=f.cornerInset+5,
    'FACET_CANNOT_FIT');
+ }
+ // R190-K: opt-in, model-authored cross-section of ONE enclosed wing.
+ // It changes the weather envelope and usable height, not a roof applique.
+ if(p.roofFormIntent!==undefined){
+  const f=p.roofFormIntent;
+  const standardRoof=['spaceId','profile','axis','rise'];
+  ok((exact(f,standardRoof)||exact(f,[...standardRoof,'toothWidth']))&&
+   slug(f.spaceId)&&['ridge','shed','sawtooth'].includes(f.profile)&&
+   ['x','z'].includes(f.axis)&&int(f.rise,2,5)&&
+   (f.profile==='sawtooth'?
+    int(f.toothWidth,3,8):f.toothWidth===undefined),
+   'ROOF_FORM');
+  const space=p.spaces.find(s=>s.id===f.spaceId);
+  ok(space&&space.spatialRole!=='open-court'&&
+   p.formIntent?.spaceId!==space.id,'ROOF_SPACE');
+  const span=f.axis==='x'?space.width:space.depth;
+  ok(space.height+f.rise<p.site.height&&
+   (f.profile!=='sawtooth'||span>=2*f.toothWidth),
+   'ROOF_SECTION_CANNOT_FIT');
  }
  // Phase-C evidence permits one real open-air spatial void, not a faux CUT.
  const courts=p.spaces.filter(s=>s.spatialRole==='open-court');
@@ -195,6 +232,29 @@ function sourceDesign(p,l){
   shapedBox(s.id+'-facet-front-wall',p.materials.wall,2,s.h-2,r,0,span-2*r,1);
   shapedBox(s.id+'-facet-rear-wall',p.materials.wall,2,s.h-2,0,depth-1,span,1);
  }
+ // The MODEL selects the roof section. The host only translates it to
+ // individual, physical B143 roof strips and gable/perimeter infill.
+ // Unlike a solid mass cap, the ceiling below a raised strip is actual AIR.
+ function profiledRoof(s,f){
+  const alongX=f.axis==='x',span=alongX?s.w:s.d;
+  for(let i=0;i<span;i++){
+   const raise=r190RoofElevation(i,span,f),x=s.x+(alongX?i:0),
+    z=s.z+(alongX?0:i);
+   box(s.id+'-roof-strip-'+i,'add',p.materials.roof,
+    [x,s.h+raise,z],alongX?[1,1,s.d]:[s.w,1,1]);
+   if(raise===0)continue;
+   // Cap the profile at the two end facades: no triangular open holes.
+   const face=alongX?[1,raise,1]:[1,raise,1];
+   box(s.id+'-roof-gable-a-'+i,'add',p.materials.wall,
+    [x,s.h,z],face);
+   box(s.id+'-roof-gable-b-'+i,'add',p.materials.wall,
+    [alongX?x:s.x+s.w-1,s.h,alongX?s.z+s.d-1:z],face);
+   // An elevated side edge also needs a wall, e.g. high end of shed.
+   if(i===0||i===span-1)
+    box(s.id+'-roof-edge-'+i,'add',p.materials.wall,
+     [x,s.h,z],alongX?[1,raise,s.d]:[s.w,raise,1]);
+  }
+ }
  for(const s of l.spaces){
   const tag=s.id;
   box(tag+'-floor','add',p.materials.floor,[s.x,1,s.z],[s.w,1,s.d]);
@@ -212,7 +272,9 @@ function sourceDesign(p,l){
   box(tag+'-south','add',p.materials.wall,[s.x+1,2,s.z],[s.w-2,s.h-2,1]);
   box(tag+'-north','add',p.materials.wall,[s.x+1,2,s.z+s.d-1],
    [s.w-2,s.h-2,1]);
-  box(tag+'-roof','add',p.materials.roof,[s.x,s.h,s.z],[s.w,1,s.d]);
+  if(p.roofFormIntent?.spaceId===tag)
+   profiledRoof(s,p.roofFormIntent);
+  else box(tag+'-roof','add',p.materials.roof,[s.x,s.h,s.z],[s.w,1,s.d]);
  }
  for(const [i,v] of l.portals.entries()){
   box('adjacency-'+i,'cut',undefined,[v.x,2,v.z],
@@ -306,7 +368,44 @@ export function auditR190SourceRoutes(plan,layout,design,compiled){
    missingRoofCornerColumns:realMissingCornerRoof,
    minecraftEnvelopeWeatherproofing:'NOT_TESTED'};
  }
- return {sourceWalkingPads:seen.size,
+ // R190-K verifies ACTUAL finished B143 voxels for each authored roof
+ // strip, raised interior air, end gable seals, and the chosen silhouette.
+ let roofFormAudit=null;
+ if(plan.roofFormIntent){
+  const f=plan.roofFormIntent,s=layout.spaces.find(x=>x.id===f.spaceId),
+   alongX=f.axis==='x',span=alongX?s.w:s.d,
+   crossSpan=alongX?s.d:s.w,heights=[];
+  let raisedOpenInteriorColumns=0;
+  for(let i=0;i<span;i++){
+   const raise=r190RoofElevation(i,span,f),roofY=s.h+raise;
+   heights.push(raise);
+   for(let j=0;j<crossSpan;j++){
+    const x=s.x+(alongX?i:j),z=s.z+(alongX?j:i);
+    ok(has(x,roofY,z),'ROOF_PROFILE_MISSING_'+i+'_'+j);
+    if(raise>0&&(j===0||j===crossSpan-1))
+     for(let y=s.h;y<roofY;y++)
+      ok(has(x,y,z),'ROOF_GABLE_LEAK_'+i+'_'+j);
+    if(raise>0&&j>0&&j<crossSpan-1){
+     for(let y=s.h;y<roofY;y++)
+      ok(!has(x,y,z),'ROOF_NO_RAISED_INTERIOR_AIR_'+i+'_'+j);
+     raisedOpenInteriorColumns++;
+    }
+   }
+  }
+  ok(Math.min(...heights)===0&&Math.max(...heights)===f.rise,
+   'ROOF_RISE_NOT_REALIZED');
+  if(f.profile==='sawtooth')
+   ok(heights.some((y,i)=>i>0&&y<heights[i-1]),
+    'ROOF_SAWTOOTH_NOT_REAL');
+  roofFormAudit={spaceId:f.spaceId,profile:f.profile,
+   axis:f.axis,modelAuthoredRise:f.rise,toothWidth:f.toothWidth??null,
+   achievedRise:Math.max(...heights),roofSliceCount:heights.length,
+   sourceHeightProfile:heights,raisedOpenInteriorColumns,
+   verifiedPhysicalEndGables:true,
+   sourceModelAuthorship:'CALLER_PROVIDED_IR_UNVERIFIED',
+   actualMinecraftWeatherproofing:'NOT_TESTED'};
+ }
+ return {roofForm:roofFormAudit,sourceWalkingPads:seen.size,
   facetedEnvelope:facetAudit,
   outdoorCourtCount:plan.spaces.filter(s=>s.spatialRole==='open-court').length,
   verifiedOpenSkyColumns:skyColumns,

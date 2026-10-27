@@ -91,3 +91,34 @@ test('R190-F mocked LOCAL HTTP transport is not counted as verified real LLM',as
  await assert.rejects(()=>truncated({prompt:'A realistic cultural center building.'}),
   /TRUNCATED/);
 });
+
+test('R190-K explicit roof request is model-authored, physical and not silently substituted',()=>{
+ const p=base();
+ p.semanticPlan.roofFormIntent={spaceId:'showroom',profile:'sawtooth',
+  axis:'x',rise:4,toothWidth:5};
+ const r=readR190ModelProposal(JSON.stringify(p),{
+  requestText:'鋸歯状の屋根を持つ公共工房を設計してください'});
+ assert.equal(r.status,'SOURCE_VERIFIED_ART_HOLD');
+ assert.equal(r.sourceGenerated,true);
+ assert.equal(r.sourceResult.realSourceRouteAudit.roofForm.profile,'sawtooth');
+ assert.equal(r.modelChosenPaths.includes('semanticPlan.roofFormIntent'),true);
+ assert.equal(r.blockers.includes('roof-profile-design'),false);
+ assert.equal(r.sourceResult.realSourceRouteAudit.roofForm.achievedRise,4);
+ assert.equal(r.worldWrites,0);
+ let wrong=structuredClone(p);
+ wrong.semanticPlan.roofFormIntent.profile='ridge';
+ delete wrong.semanticPlan.roofFormIntent.toothWidth;
+ let h=readR190ModelProposal(JSON.stringify(wrong),{
+  requestText:'鋸歯状の屋根を持つ公共工房を設計してください'});
+ assert.equal(h.status,'HOLD_UNSATISFIED_EXPLICIT_ROOF_PROFILE');
+ assert.equal(h.expectedExplicitRoofProfile,'sawtooth');
+ assert.equal(h.sourceGenerated,false);
+ delete wrong.semanticPlan.roofFormIntent;
+ h=readR190ModelProposal(JSON.stringify(wrong),{
+  requiredCapabilities:['roof-profile-design']});
+ assert.equal(h.status,'HOLD_UNSATISFIED_EXPLICIT_ROOF_PROFILE');
+ assert.equal(h.sourceGenerated,false);
+ wrong.unrepresentedRequirements=['roof-profile-design'];
+ assert.throws(()=>readR190ModelProposal(JSON.stringify(wrong)),
+  /FALSE_UNREPRESENTABLE_SUPPORTED_CAPABILITY/);
+});

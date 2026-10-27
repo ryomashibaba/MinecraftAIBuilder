@@ -13,12 +13,12 @@ import {scanR190ExplicitBriefCapabilities,auditR190ExplicitProgram,
 export const R190_MODEL_PROPOSAL_SCHEMA='minecraftaibuilder-r190-model-proposal-v1';
 export const R190_SUPPORTED_CAPABILITIES=Object.freeze([
  'single-level-rooms','tree-adjacency','ground-entry','open-court',
- 'single-faceted-wing'
+ 'single-faceted-wing','roof-profile-design'
 ]);
 export const R190_UNSUPPORTED_CAPABILITIES=Object.freeze([
  'multiple-levels','stairs','vertical-accessibility','double-height-void',
  'non-tree-adjacency','multiple-exterior-entries','window-daylight-system',
- 'roof-profile-design','facade-system','equipment-furniture'
+ 'facade-system','equipment-furniture'
 ]);
 const known=new Set([...R190_SUPPORTED_CAPABILITIES,...R190_UNSUPPORTED_CAPABILITIES]);
 const unsupported=new Set(R190_UNSUPPORTED_CAPABILITIES);
@@ -54,8 +54,8 @@ export function readR190ModelProposal(raw,{
  const declared=capabilities(response.unrepresentedRequirements,10);
  check(declared.every(c=>unsupported.has(c)),
   'FALSE_UNREPRESENTABLE_SUPPORTED_CAPABILITY');
- // The existing IR is intentionally a single-level rooted adjacency tree.
- // Never infer extra floor, staircase, roof grammar, windows or cross-link.
+ // The existing IR remains single-level and tree-based; K adds one
+ // model-specified roof section, NOT inferred upper floors/windows/stairs.
  validateR190SemanticPlan(response.semanticPlan);
  check(response.semanticPlan.schema===R190_SCHEMA,'PLAN_SCHEMA');
  const independentlyDetectedBriefCapabilities=requestText===null?[]:
@@ -79,7 +79,8 @@ export function readR190ModelProposal(raw,{
   modelChosenPaths:[
    'semanticPlan.site','semanticPlan.entrySpaceId','semanticPlan.spaces',
    'semanticPlan.materials',
-   ...(response.semanticPlan.formIntent?['semanticPlan.formIntent']:[])
+   ...(response.semanticPlan.formIntent?['semanticPlan.formIntent']:[]),
+   ...(response.semanticPlan.roofFormIntent?['semanticPlan.roofFormIntent']:[])
   ],
   hostFilledRoomGeometry:false,hostFilledRoomTopology:false,
   modelIdentityCryptographicallyVerified:false,
@@ -93,6 +94,20 @@ export function readR190ModelProposal(raw,{
  if(blockers.length) return {...common,
   status:'HOLD_UNREPRESENTABLE_REQUIREMENTS',
   sourceGenerated:false,sourceResult:null};
+ // An explicit roof request must never be silently replaced by a flat roof
+ // or by a different roof profile. This is limited LITERAL checking, not a
+ // claim of full NL understanding; no host fills the missing shape.
+ const roofPrompt=independentlyDetectedBriefCapabilities
+  .find(v=>v.capability==='roof-profile-design')?.literalEvidence??'';
+ const explicitRoof=/鋸歯|sawtooth/i.test(roofPrompt)?'sawtooth':
+  /片流れ/i.test(roofPrompt)?'shed':
+   /切妻|gabled?/i.test(roofPrompt)?'ridge':null;
+ const roofRequired=requested.includes('roof-profile-design')||roofPrompt!=='';
+ const selectedRoof=response.semanticPlan.roofFormIntent?.profile??null;
+ if(roofRequired&&(!selectedRoof||(explicitRoof&&selectedRoof!==explicitRoof)))
+  return {...common,status:'HOLD_UNSATISFIED_EXPLICIT_ROOF_PROFILE',
+   expectedExplicitRoofProfile:explicitRoof,selectedRoofProfile:selectedRoof,
+   sourceGenerated:false,sourceResult:null};
  if(programAudit.issues.length)return {...common,
   status:'HOLD_UNSATISFIED_EXPLICIT_PROGRAM',
   sourceGenerated:false,sourceResult:null};
