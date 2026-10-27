@@ -158,3 +158,12 @@ test('S: explicit source option and native/local approval only',()=>{
  assert.deepEqual(parseR190SArgs(['--from','X']),{from:'X'});
  assert.throws(()=>parseR190SArgs(['--from','X','--from','Y']),/INVALID_ARGUMENT/);
 });
+
+test('S: launcher refuses stale source missing real-voxel comparison',()=>{
+ const cmd=fs.readFileSync(new URL('../RUN_R190S_REDESIGN.cmd',import.meta.url),'utf8');
+ assert.match(cmd,/r190t-source-comparison\.mjs/);
+ assert.match(cmd,/findstr \/C:"compareR190TSource"/);
+ assert.match(cmd,/if errorlevel 1 goto :outdated/);
+ assert.match(cmd,/Projects\\MinecraftAIBuilder/);
+ assert.doesNotMatch(cmd,/git pull|git reset|git checkout|ollama pull/i);
+});

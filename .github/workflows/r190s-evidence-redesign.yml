@@ -5,6 +5,7 @@ on:
     paths:
       - 'scripts/r190s-evidence-redesign.mjs'
       - 'scripts/r190s-evidence-redesign.test.mjs'
+      - 'RUN_R190S_REDESIGN.cmd'
       - 'scripts/r190t-source-comparison.mjs'
       - 'scripts/r190t-source-comparison.test.mjs'
       - '.github/workflows/r190s-evidence-redesign.yml'
@@ -12,6 +13,7 @@ on:
     paths:
       - 'scripts/r190s-evidence-redesign.mjs'
       - 'scripts/r190s-evidence-redesign.test.mjs'
+      - 'RUN_R190S_REDESIGN.cmd'
       - 'scripts/r190t-source-comparison.mjs'
       - 'scripts/r190t-source-comparison.test.mjs'
       - '.github/workflows/r190s-evidence-redesign.yml'

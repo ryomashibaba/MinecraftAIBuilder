@@ -22,7 +22,9 @@ git clone --depth 1 --single-branch --branch feature/b198zr1-protected-architect
 if errorlevel 1 goto :clonefailed
 if not exist "%runner%" goto :clonefailed
 :ready
-findstr /C:"R190-S: evidence-grounded" "%runner%" >nul 2>nul
+rem Require R190-T paired REAL B143 review, not an older R190-S checkout.
+if not exist "%source%\scripts\r190t-source-comparison.mjs" goto :outdated
+findstr /C:"compareR190TSource" "%runner%" >nul 2>nul
 if errorlevel 1 goto :outdated
 where node.exe >nul 2>nul
 if errorlevel 1 goto :nonode
