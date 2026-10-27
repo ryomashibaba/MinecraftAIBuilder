@@ -136,3 +136,18 @@ test('N: disconnected local Ollama does not invent raw model evidence or folder'
   assert.equal(fs.readdirSync(root).length,0);
  }finally{fs.rmSync(root,{recursive:true,force:true});}
 });
+
+test('N portable Windows launcher detects CMD-only download and never silently clones',()=>{
+ const cmd=fs.readFileSync(path.resolve(
+  path.dirname(new URL(import.meta.url).pathname),
+  '../RUN_R190N_REAL_MODEL.cmd'),'utf8');
+ assert.match(cmd,/if exist "%runner%" goto :ready/);
+ assert.match(cmd,/where git\.exe >nul 2>nul/);
+ assert.match(cmd,/choice \/C YN \/N \/M/);
+ assert.match(cmd,/if errorlevel 2 goto :declined/);
+ assert.match(cmd,/git clone --depth 1 --single-branch --branch feature\/b198zr1-protected-architectural-revision/);
+ assert.match(cmd,/if exist "%repository_dir%" goto :partial_repository/);
+ assert.match(cmd,/node\.exe "%runner%" %\*/);
+ assert.match(cmd,/No model request was made/);
+ assert.doesNotMatch(cmd,/git pull|git reset|git checkout|ollama pull|powershell\s+-Command/i);
+});
