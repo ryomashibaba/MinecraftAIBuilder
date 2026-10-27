@@ -6,6 +6,9 @@
 import {createHash} from 'node:crypto';
 import {R190_SCHEMA,validateR190SemanticPlan,compileR190SemanticPlan}
  from './r190-semantic-massing.mjs';
+import {scanR190ExplicitBriefCapabilities,auditR190ExplicitProgram,
+ verifyR190ProgramInCompiledSource}
+ from './r190-request-coverage.mjs';
 
 export const R190_MODEL_PROPOSAL_SCHEMA='minecraftaibuilder-r190-model-proposal-v1';
 export const R190_SUPPORTED_CAPABILITIES=Object.freeze([
@@ -36,7 +39,8 @@ function capabilities(list,limit){
  }
  return [...seen];
 }
-export function readR190ModelProposal(raw,{requiredCapabilities=[]}={}){
+export function readR190ModelProposal(raw,{
+ requiredCapabilities=[],requestText=null,acceptanceSpec=null}={}){
  check(typeof raw==='string'&&raw.length>=100&&raw.length<=50000,'RAW_BYTES');
  const requested=capabilities(requiredCapabilities,15);
  let response;
@@ -54,8 +58,13 @@ export function readR190ModelProposal(raw,{requiredCapabilities=[]}={}){
  // Never infer extra floor, staircase, roof grammar, windows or cross-link.
  validateR190SemanticPlan(response.semanticPlan);
  check(response.semanticPlan.schema===R190_SCHEMA,'PLAN_SCHEMA');
- const missing= requested.filter(c=>unsupported.has(c)&&!declared.includes(c));
+ const independentlyDetectedBriefCapabilities=requestText===null?[]:
+  scanR190ExplicitBriefCapabilities(requestText);
+ const detected=independentlyDetectedBriefCapabilities.map(x=>x.capability);
+ const missing= [...new Set([...requested,...detected])].filter(
+  c=>unsupported.has(c)&&!declared.includes(c));
  const blockers=[...new Set([...declared,...missing])];
+ const programAudit=auditR190ExplicitProgram(response.semanticPlan,acceptanceSpec);
  const common={
   schema:'minecraftaibuilder-r190-model-intent-audit-v1',
   responseSha256:hash(raw),
@@ -63,7 +72,11 @@ export function readR190ModelProposal(raw,{requiredCapabilities=[]}={}){
   declaredUnrepresented:declared,
   externallyRequiredCapabilities:requested,
   modelOmittedUnsupportedRequirements:missing,
-  blockers,modelChosenPaths:[
+  blockers,independentlyDetectedBriefCapabilities,
+  originalRequestIndependentlyAudited:requestText!==null,
+  userIntentCoverage:programAudit,
+  blockersAreCompleteNaturalLanguageAnalysis:false,
+  modelChosenPaths:[
    'semanticPlan.site','semanticPlan.entrySpaceId','semanticPlan.spaces',
    'semanticPlan.materials',
    ...(response.semanticPlan.formIntent?['semanticPlan.formIntent']:[])
@@ -80,12 +93,17 @@ export function readR190ModelProposal(raw,{requiredCapabilities=[]}={}){
  if(blockers.length) return {...common,
   status:'HOLD_UNREPRESENTABLE_REQUIREMENTS',
   sourceGenerated:false,sourceResult:null};
+ if(programAudit.issues.length)return {...common,
+  status:'HOLD_UNSATISFIED_EXPLICIT_PROGRAM',
+  sourceGenerated:false,sourceResult:null};
  // One solver placement is NOT an independent second architecture.
  const source=compileR190SemanticPlan(response.semanticPlan);
  check(source.worldWrites===0&&source.worldContacts===0&&
   source.gates.every(x=>x==='BLOCKED')&&
   source.BuildPlan.operations.length===0,'SOURCE_SAFETY');
- return {...common,status:'SOURCE_VERIFIED_ART_HOLD',
+ return {...common,
+  userIntentCoverage:verifyR190ProgramInCompiledSource(programAudit,source),
+  status:'SOURCE_VERIFIED_ART_HOLD',
   sourceGenerated:true,sourceResult:{
    layoutStrategy:source.layout.strategy,
    trueB143Voxels:source.compiled.primitives.length,

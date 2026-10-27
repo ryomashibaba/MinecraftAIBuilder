@@ -139,7 +139,8 @@ export function createR190SemanticModelAdapter({
   'No Minecraft commands, world writes, construction approvals, coordinates from any prior building, markdown, or extra JSON fields.',
   'An unsupported item causes HOLD with no source. Never claim real Minecraft walking or aesthetic success.'
  ].join('\n');
- return async function r190SourceRequest({prompt,requiredCapabilities=[]}={}){
+ return async function r190SourceRequest({prompt,requiredCapabilities=[],
+  acceptanceSpec=null}={}){
   if(typeof prompt!=='string'||prompt.length<8||prompt.length>8000)
    refuse('INVALID_MODEL_REQUEST');
   // Validate external explicit requirement labels BEFORE provider call.
@@ -163,7 +164,7 @@ export function createR190SemanticModelAdapter({
    if(data.choices[0]?.finish_reason==='length')
     refuse('TRUNCATED_MODEL_RESPONSE');
    return readR190ModelProposal(data.choices[0]?.message?.content,
-    {requiredCapabilities});
+    {requiredCapabilities,requestText:prompt,acceptanceSpec});
   }finally{clearTimeout(timer);}
  };
 }
