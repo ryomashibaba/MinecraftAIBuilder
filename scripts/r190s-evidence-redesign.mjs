@@ -12,6 +12,7 @@ import {compileDesign,verifyCompiled} from '../source/ai/b143-building-dsl.mjs';
 import {STUDY_BRIEF,REPO_ROOT} from './r190n-one-click-research.mjs';
 import {r190rEvidenceRoot} from './r190r-one-click-direct-study.mjs';
 import {runR190Local} from './r190-local-semantic-run.mjs';
+import {compareR190TSource,renderR190TPair} from './r190t-source-comparison.mjs';
 
 const sha=s=>createHash('sha256').update(s,'utf8').digest('hex');
 const ORIGINAL_BRIEF_SHA=sha(STUDY_BRIEF);
@@ -179,6 +180,69 @@ function capturedRedesign(dir,sourceSha,promptSha,model){
   return m;
  }catch{return null}
 }
+
+function writeR190TPairEvidence(original,dir,receipt,candidateRaw){
+ // Offline retrofit for old S output, zero inference and no mutation of raw.
+ const evidencePath=path.join(dir,'R190T_PAIR_EVIDENCE.json');
+ if(fs.existsSync(evidencePath)){
+  const result=json(dir,'R190T_PAIR_EVIDENCE.json');
+  if(result.schema!=='minecraftaibuilder-r190t-pair-evidence-v1'||
+     result.parentOriginalRawSha256!==original.rawSha256||
+     result.candidateOriginalRawSha256!==sha(candidateRaw)||!safe(result))
+   fail('PAIR_EVIDENCE_SHA_OR_SAFETY');
+  if(result.files?.some(name=>!fs.existsSync(path.join(dir,name))))
+   fail('PAIR_PREVIEW_MISSING');
+  return result;
+ }
+ const result={schema:'minecraftaibuilder-r190t-pair-evidence-v1',
+  parentOriginalRawSha256:original.rawSha256,
+  candidateOriginalRawSha256:sha(candidateRaw),
+  status:'CANDIDATE_B143_NOT_COMPARABLE',
+  genuineModelQualityImprovement:'NOT_ESTABLISHED',
+  originalB143Unmodified:true,candidateB143Unmodified:true,
+  actualMinecraftWalking:'NOT_TESTED',
+  originalHumanArtReview:'REJECT',candidateHumanArtReview:'ART_HOLD',
+  sourceOnly:true,modelCalls:0,files:[],observations:null,...security()};
+ const sourceComplete=receipt.schema==='minecraftaibuilder-r190-h-direct-b143-research-v1'||
+   (receipt.schema==='minecraftaibuilder-r190-j-capture-v1'&&
+    receipt.providerConfirmedComplete===true);
+ const expectedSha=receipt.sourceSha256??receipt.unapprovedGeometryEvidence?.sourceSha256;
+ const expectedGeometry=receipt.geometrySha256??receipt.unapprovedGeometryEvidence?.geometrySha256;
+ if(sourceComplete&&expectedSha&&expectedGeometry){
+  let candidate=null,compiled=null;
+  try{
+   candidate=JSON.parse(candidateRaw);
+   compiled=compileDesign(candidate.design);
+   if(!verifyCompiled(candidate.design,compiled))throw Error('INVALID_B143');
+  }catch{candidate=null;compiled=null}
+  if(candidate){
+   if(compiled.sourceSha256!==expectedSha||
+      compiled.geometrySha256!==expectedGeometry)fail('NEW_MODEL_SOURCE_SHA_MISMATCH');
+   const comparison=compareR190TSource({
+    beforeDesign:original.design,afterDesign:candidate.design,
+    beforePlan:original.spatialPlan,afterPlan:candidate.spatialPlan
+   });
+   const template=fs.readFileSync(path.join(REPO_ROOT,
+    'source/ai/b143-viewer-template.html'),'utf8');
+   const views=renderR190TPair(original.design,candidate.design,template);
+   if(views.sourceHashes[0]!==original.compiled.sourceSha256||
+      views.sourceHashes[1]!==compiled.sourceSha256)fail('VIEWER_SOURCE_SHA_MISMATCH');
+   const outputs=[
+    ['R190T_BEFORE_3D.html',views.beforeHtml],
+    ['R190T_AFTER_3D.html',views.afterHtml],
+    ['R190T_VISUAL_COMPARE.html',views.indexHtml]
+   ];
+   for(const [name,data] of outputs)
+    fs.writeFileSync(path.join(dir,name),data,{flag:'wx'});
+   result.files=outputs.map(x=>x[0]);
+   result.status=comparison.status;
+   result.observations=comparison;
+  }
+ }
+ fs.writeFileSync(evidencePath,JSON.stringify(result,null,2)+'\n',{flag:'wx'});
+ return result;
+}
+
 export function parseR190SArgs(args){
  if(args.length===1&&args[0]==='--help')return {help:true};
  const o={from:null};
@@ -213,10 +277,17 @@ export async function runR190SStudy(args=[],{
    const dir=path.join(root,name);
    if(!isOrdinaryFolder(dir))continue;
    const prior=capturedRedesign(dir,original.rawSha256,promptSha,original.model);
-   if(prior)return {status:prior.newModelStatus,reused:true,directory:dir,
-    modelCalls:0,originalRawSha256:prior.redesignOriginalRawSha256,
-    originalParentSha256:prior.parentOriginalRawSha256,quality:'NOT_ASSESSED',
-    worldContacts:0,worldWrites:0};
+   if(prior){
+    const receipt=fs.existsSync(path.join(dir,'R190_H_RECEIPT.json'))?
+     json(dir,'R190_H_RECEIPT.json'):json(dir,'R190_I_CAPTURE_RECEIPT.json');
+    const raw=file(dir,'R190_I_ORIGINAL_RESPONSE.txt');
+    const pair=writeR190TPairEvidence(original,dir,receipt,raw);
+    return {status:prior.newModelStatus,reused:true,directory:dir,
+     modelCalls:0,originalRawSha256:prior.redesignOriginalRawSha256,
+     originalParentSha256:prior.parentOriginalRawSha256,
+     beforeAfterStatus:pair.status,quality:'NOT_ASSESSED',
+     worldContacts:0,worldWrites:0};
+   }
   }
  }
  fs.mkdirSync(root,{recursive:true});
@@ -251,7 +322,9 @@ export async function runR190SStudy(args=[],{
   ...security()};
  fs.writeFileSync(path.join(out,'R190S_COMPARISON.json'),
   JSON.stringify(m,null,2)+'\n',{flag:'wx'});
+ const pair=writeR190TPairEvidence(original,out,r,newRaw);
  return {status:r.status,reused:false,directory:out,modelCalls:1,
+  beforeAfterStatus:pair.status,
   originalRawSha256:sha(newRaw),originalParentSha256:original.rawSha256,
   baselineCritique:critique,
   quality:'NOT_ASSESSED',humanArtReview:'ART_HOLD',

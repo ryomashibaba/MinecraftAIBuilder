@@ -5,11 +5,15 @@ on:
     paths:
       - 'scripts/r190s-evidence-redesign.mjs'
       - 'scripts/r190s-evidence-redesign.test.mjs'
+      - 'scripts/r190t-source-comparison.mjs'
+      - 'scripts/r190t-source-comparison.test.mjs'
       - '.github/workflows/r190s-evidence-redesign.yml'
   pull_request:
     paths:
       - 'scripts/r190s-evidence-redesign.mjs'
       - 'scripts/r190s-evidence-redesign.test.mjs'
+      - 'scripts/r190t-source-comparison.mjs'
+      - 'scripts/r190t-source-comparison.test.mjs'
       - '.github/workflows/r190s-evidence-redesign.yml'
 permissions:
   contents: read
@@ -22,5 +26,6 @@ jobs:
       - uses: actions/setup-node@v4
         with: {node-version: '22'}
       - run: node --check scripts/r190s-evidence-redesign.mjs
+      - run: node --test scripts/r190t-source-comparison.test.mjs
       - run: node --test scripts/r190s-evidence-redesign.test.mjs
       - run: node --test scripts/r190-h-architectural-route.test.mjs

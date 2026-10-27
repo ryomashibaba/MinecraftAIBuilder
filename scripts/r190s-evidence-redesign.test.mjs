@@ -109,6 +109,12 @@ test('S: one explicit FAKE redesign then replay without any new model request',a
   assert.equal(check.hostRepairedOrGeneratedGeometry,false);
   assert.equal(check.newModelCalls,1);
   assert.equal(check.qualitySuperiority,'NOT_ESTABLISHED');
+  const pair=JSON.parse(fs.readFileSync(path.join(first.directory,
+   'R190T_PAIR_EVIDENCE.json'),'utf8'));
+  assert.equal(pair.status,'NO_FINAL_VOXEL_CHANGE');
+  assert.equal(pair.genuineModelQualityImprovement,'NOT_ESTABLISHED');
+  assert.equal(pair.files.length,3);
+  assert.ok(fs.existsSync(path.join(first.directory,'R190T_VISUAL_COMPARE.html')));
   assert.equal(check.parentVoxelCritique.nearSolidHorizontalLayers.length,6);
   assert.notEqual(check.redesignPromptSha256,sha(STUDY_BRIEF));
   assert.equal(fs.readFileSync(path.join(src,'R190_I_ORIGINAL_RESPONSE.txt'),'utf8'),raw());
@@ -118,6 +124,7 @@ test('S: one explicit FAKE redesign then replay without any new model request',a
   assert.equal(second.reused,true);
   assert.equal(second.modelCalls,0);
   assert.equal(second.directory,first.directory);
+  assert.equal(second.beforeAfterStatus,'NO_FINAL_VOXEL_CHANGE');
  }finally{fs.rmSync(root,{recursive:true,force:true})}
 });
 test('S: malformed new provider JSON saved as HOLD; cannot pass architecture',async()=>{
@@ -133,6 +140,10 @@ test('S: malformed new provider JSON saved as HOLD; cannot pass architecture',as
   assert.equal(fs.readFileSync(path.join(one.directory,'R190_I_ORIGINAL_RESPONSE.txt'),'utf8'),
     '{"broken":true');
   assert.equal(one.worldWrites,0);
+  const pair=JSON.parse(fs.readFileSync(path.join(one.directory,
+   'R190T_PAIR_EVIDENCE.json'),'utf8'));
+  assert.equal(pair.status,'CANDIDATE_B143_NOT_COMPARABLE');
+  assert.deepEqual(pair.files,[]);
  }finally{fs.rmSync(root,{recursive:true,force:true})}
 });
 test('S: explicit source option and native/local approval only',()=>{
