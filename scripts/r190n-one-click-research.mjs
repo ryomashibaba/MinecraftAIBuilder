@@ -164,7 +164,7 @@ export async function runR190NStudy(args=[],{
   modelWasInLocalTagList:!opts.replay,
   replayOnly:!!opts.replay,
   actualNewModelRequests:opts.replay?0:1,
-  briefSha256:SHA(STUDY_BRIEF),specSha256,
+  briefSha256:SHA(STUDY_BRIEF),specSha256:specSha,
   originalRawSha256:receipt.originalRawSha256,
   strictIndependentProgramResult:receipt.independentBriefAcceptance,
   modelAuthoredB143:false,
