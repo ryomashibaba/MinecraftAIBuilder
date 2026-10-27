@@ -98,3 +98,45 @@ test('T: claimed rooms are measured as regions, never counted as certified rooms
  assert.equal(solidResult.modelDeclaredZoneStandableOverlap,0);
  assert.equal(hollowResult.modelDeclaredEntranceHorizontalAirToBoundaryProxy,true);
 });
+
+test('R190-V: two-wide passage measured without claiming genuine separate rooms',()=>{
+ const partitioned=passage=>{
+  const base=hollow();
+  return {...base,id:passage?'r190v-pass-through':'r190v-sealed-divider',elements:[
+   ...base.elements.filter(e=>e.id!=='door'),
+   {id:'separating-wall',shape:'box',mode:'add',material:'stone',
+    origin:[12,2,3],size:[1,6,18]},
+   {id:'outside-door',shape:'box',mode:'cut',origin:[7,2,2],size:[2,3,1]},
+   ...(passage?[{id:'door-between-regions',shape:'box',mode:'cut',
+    origin:[12,2,10],size:[1,3,2]}]:[])
+  ]};
+ };
+ const declared={entrance:[8,2,3],functionalZones:[
+  {id:'gallery',origin:[5,2,4],size:[8,4,16]},
+  {id:'repair',origin:[13,2,4],size:[7,4,16]}
+ ]};
+ const result=compareR190TSource({
+  beforeDesign:partitioned(false),afterDesign:partitioned(true),
+  beforePlan:declared,afterPlan:declared
+ });
+ const before=result.before.modelDeclaredZonePairCrossings[0];
+ const after=result.after.modelDeclaredZonePairCrossings[0];
+ assert.equal(result.before.modelDeclaredEntranceHorizontalAirToBoundaryProxy,true);
+ assert.equal(before.supportedCoveredReachableFaceCrossings,0);
+ assert.equal(before.contiguousTwoWideFaceCrossingProxy,false);
+ assert.ok(after.supportedCoveredReachableFaceCrossings>=2);
+ assert.equal(after.contiguousTwoWideFaceCrossingProxy,true);
+ assert.equal(after.entranceBoundaryLinkedTwoWideProxy,true);
+ assert.equal(after.separateRoomsCertified,false);
+ assert.equal(after.directRoomDoorCertified,false);
+ assert.equal(result.limitations.zoneFaceCrossingDoesNotProveSeparateRoomsOrActualDoors,true);
+ assert.equal(result.worldWrites,0);
+ const overlap=measureR190TSource(partitioned(true),{
+  entrance:[8,2,3],functionalZones:[
+   declared.functionalZones[0],
+   {id:'duplicate-area',origin:[10,2,4],size:[6,4,16]}
+  ]
+ }).modelDeclaredZonePairCrossings[0];
+ assert.equal(overlap.declaredVolumesOverlap,true);
+ assert.equal(overlap.contiguousTwoWideFaceCrossingProxy,false);
+});

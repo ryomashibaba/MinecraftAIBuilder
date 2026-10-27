@@ -110,6 +110,60 @@ export function measureR190TSource(design,spatialPlan=null){
    entranceReachable:reachable,
    roofCoveredEntranceReachableProxy:coveredReachable};
  });
+ // R190-V: observe actual voxel passages across MODEL-DECLARED region faces.
+ // Unpartitioned open-plan areas can also pass: this NEVER certifies rooms.
+ const region=zone=>{
+  const a=zone?.origin,b=zone?.size;
+  if(!Array.isArray(a)||!Array.isArray(b)||a.length!==3||b.length!==3||
+     !a.concat(b).every(Number.isSafeInteger)||
+     b.some(v=>v<1||v>128)||
+     a.some((v,i)=>v<0||v+b[i]>[w,h,d][i]))return null;
+  return {lo:a,hi:a.map((v,i)=>v+b[i]-1)};
+ };
+ const studied=declaredZones.slice(0,12);
+ const modelDeclaredZonePairCrossings=[];
+ const interiorWalk=(x,y,z)=>stand(x,y,z)&&
+  !!seen[position(x,y,z,w,d)]&&tops[z*w+x]>y+1;
+ for(let i=0;i<studied.length;i++)for(let j=i+1;j<studied.length;j++){
+  const a=region(studied[i]),b=region(studied[j]);
+  const record={regionA:String(studied[i]?.id??'').slice(0,60),
+   regionB:String(studied[j]?.id??'').slice(0,60),
+   validRegions:!!(a&&b),declaredVolumesOverlap:false,
+   supportedCoveredReachableFaceCrossings:0,
+   contiguousTwoWideFaceCrossingProxy:false,
+   entranceBoundaryLinkedTwoWideProxy:false,
+   separateRoomsCertified:false,directRoomDoorCertified:false};
+  if(!a||!b){modelDeclaredZonePairCrossings.push(record);continue}
+  const overlap=[0,1,2].every(k=>a.lo[k]<=b.hi[k]&&b.lo[k]<=a.hi[k]);
+  record.declaredVolumesOverlap=overlap;
+  if(overlap){modelDeclaredZonePairCrossings.push(record);continue}
+  const xFace=a.hi[0]+1===b.lo[0]||b.hi[0]+1===a.lo[0];
+  const zFace=a.hi[2]+1===b.lo[2]||b.hi[2]+1===a.lo[2];
+  const crossing=new Set();
+  const y0=Math.max(a.lo[1],b.lo[1]),y1=Math.min(a.hi[1],b.hi[1]);
+  if(xFace){
+   const ax=a.hi[0]+1===b.lo[0]?a.hi[0]:a.lo[0];
+   const bx=a.hi[0]+1===b.lo[0]?b.lo[0]:b.hi[0];
+   for(let y=y0;y<=y1;y++)
+    for(let z=Math.max(a.lo[2],b.lo[2]);z<=Math.min(a.hi[2],b.hi[2]);z++)
+     if(interiorWalk(ax,y,z)&&interiorWalk(bx,y,z))crossing.add(y+','+z);
+  }else if(zFace){
+   const az=a.hi[2]+1===b.lo[2]?a.hi[2]:a.lo[2];
+   const bz=a.hi[2]+1===b.lo[2]?b.lo[2]:b.hi[2];
+   for(let y=y0;y<=y1;y++)
+    for(let x=Math.max(a.lo[0],b.lo[0]);x<=Math.min(a.hi[0],b.hi[0]);x++)
+     if(interiorWalk(x,y,az)&&interiorWalk(x,y,bz))crossing.add(y+','+x);
+  }
+  record.supportedCoveredReachableFaceCrossings=crossing.size;
+  record.contiguousTwoWideFaceCrossingProxy=[...crossing].some(k=>{
+   const parts=k.split(',').map(Number);
+   return crossing.has(parts[0]+','+(parts[1]+1));
+  });
+  record.entranceBoundaryLinkedTwoWideProxy=
+   modelDeclaredEntranceHorizontalAirToBoundaryProxy&&
+   record.contiguousTwoWideFaceCrossingProxy;
+  modelDeclaredZonePairCrossings.push(record);
+ }
  return {sourceSha256:compiled.sourceSha256,
   compiledGeometrySha256:compiled.geometrySha256,
   finalPhysicalVoxelSha256:SHA(compiled.primitives.map(p=>p.slice(0,4))),
@@ -130,6 +184,7 @@ export function measureR190TSource(design,spatialPlan=null){
   modelDeclaredZoneCount:declaredZones.length,
   modelDeclaredZonesTruncated:declaredZones.length>12,
   modelDeclaredZoneSamples,modelDeclaredZoneStandableOverlap:zoneStandableOverlap,
+  modelDeclaredZonePairCrossings,
   topSurfaceDistinctHeights:[...new Set(tops)].filter(x=>x>=0).length};
 }
 export function compareR190TSource({beforeDesign,afterDesign,beforePlan=null,afterPlan=null}){
@@ -154,6 +209,7 @@ export function compareR190TSource({beforeDesign,afterDesign,beforePlan=null,aft
    roofCoveredIsProxyOnly:true,
    horizontalAirToBoundaryDoesNotProveExteriorGroundOrWalking:true,
    modelDeclaredZonesAreNotIndependentRoomAssignments:true,
+   zoneFaceCrossingDoesNotProveSeparateRoomsOrActualDoors:true,
    actualMinecraftWalking:'NOT_TESTED',
    humanArtReview:'ART_HOLD'},
   numericArchitecturalWinner:'NOT_ESTABLISHED',modelCalls:0,...safety()};
