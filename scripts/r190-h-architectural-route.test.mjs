@@ -139,8 +139,8 @@ test('I truncated JSON response is still preserved as a HOLD, not claimed as arc
   }),/R190_I_CAPTURED_HOLD/);
   assert.equal(fs.readFileSync(path.join(out,'R190_I_ORIGINAL_RESPONSE.txt'),'utf8'),
    '{"design":{"incomplete":true}');
-  assert.equal(JSON.parse(fs.readFileSync(path.join(out,'R190_I_CAPTURE_RECEIPT.json')).
-   sourceGenerated,false);
+  const receipt=JSON.parse(fs.readFileSync(path.join(out,'R190_I_CAPTURE_RECEIPT.json'),'utf8'));
+  assert.equal(receipt.sourceGenerated,false);
  }finally{fs.rmSync(root,{recursive:true,force:true});}
 });
 test('I reuses native localhost Ollama bridge and retains response bytes with no real model',async()=>{
