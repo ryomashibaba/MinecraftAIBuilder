@@ -28,7 +28,10 @@ test('T: hollow design has supported covered walkable voxels and valid entrance'
  assert.equal(c.status,'DIFFERENT_FINAL_VOXEL_GEOMETRY');
  assert.equal(c.before.modelDeclaredEntranceStandable,false);
  assert.equal(c.after.modelDeclaredEntranceStandable,true);
- assert.equal(c.before.twoBlockSupportedStandablePositions,0);
+ // The top of a filled cube is standable OUTDOORS; that is not a room.
+ assert.equal(c.before.roofCoveredStandableProxy,0);
+ assert.equal(c.before.roofCoveredReachableProxy,0);
+ assert.ok(c.after.roofCoveredStandableProxy>200);
  assert.ok(c.after.twoBlockSupportedStandablePositions>250);
  assert.ok(c.after.roofCoveredReachableProxy>100);
  assert.ok(c.deltas.denseLayerFraction<0);

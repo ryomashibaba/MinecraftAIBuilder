@@ -118,6 +118,10 @@ test('S: one explicit FAKE redesign then replay without any new model request',a
   assert.equal(check.parentVoxelCritique.nearSolidHorizontalLayers.length,6);
   assert.notEqual(check.redesignPromptSha256,sha(STUDY_BRIEF));
   assert.equal(fs.readFileSync(path.join(src,'R190_I_ORIGINAL_RESPONSE.txt'),'utf8'),raw());
+  // Simulate a saved R190-S result predating R190-T: independently
+  // backfill missing physical evidence without a second model request.
+  for(const name of pair.files)fs.rmSync(path.join(first.directory,name));
+  fs.rmSync(path.join(first.directory,'R190T_PAIR_EVIDENCE.json'));
   const second=await runR190SStudy(['--from',src],{
    evidenceRoot:result,transport:'openai',
    fetcher:()=>{throw Error('NO_NETWORK_ALLOWED_AFTER_CAPTURE')}});
@@ -125,6 +129,9 @@ test('S: one explicit FAKE redesign then replay without any new model request',a
   assert.equal(second.modelCalls,0);
   assert.equal(second.directory,first.directory);
   assert.equal(second.beforeAfterStatus,'NO_FINAL_VOXEL_CHANGE');
+  assert.ok(fs.existsSync(path.join(first.directory,'R190T_VISUAL_COMPARE.html')));
+  assert.equal(fs.readFileSync(path.join(src,
+   'R190_I_ORIGINAL_RESPONSE.txt'),'utf8'),raw());
  }finally{fs.rmSync(root,{recursive:true,force:true})}
 });
 test('S: malformed new provider JSON saved as HOLD; cannot pass architecture',async()=>{
