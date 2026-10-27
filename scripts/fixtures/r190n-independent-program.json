@@ -2,15 +2,15 @@
   "requiredProgram": [
     {
       "label": "public-exhibit",
-      "purposeFragment": "展示"
+      "purposeFragment": "展示室"
     },
     {
       "label": "hands-on-repair",
-      "purposeFragment": "修理"
+      "purposeFragment": "修理工房"
     },
     {
       "label": "materials-storage",
-      "purposeFragment": "保管"
+      "purposeFragment": "資材保管"
     }
   ],
   "requiredDirectConnections": [
