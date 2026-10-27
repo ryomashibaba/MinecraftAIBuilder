@@ -206,7 +206,7 @@ test('J preserves valid model B143 as genuinely compiled 3D when its own spatial
   assert.equal(receipt.unapprovedGeometryEvidence.humanArtReview,'ART_HOLD');
   assert.equal(receipt.unapprovedGeometryEvidence.independentUserRequestCoverage,false);
   assert.ok(receipt.unapprovedGeometryEvidence.trueB143Voxels>100);
-  assert.deepEqual(JSON.parse(fs.readFileSync(path.join(out,'R190_J_HOLD_MODEL_B143.json')),bad.design);
+  assert.deepEqual(JSON.parse(fs.readFileSync(path.join(out,'R190_J_HOLD_MODEL_B143.json'),'utf8')),bad.design);
   assert.match(fs.readFileSync(path.join(out,'R190_J_HOLD_B143_3D.html'),'utf8'),
    /r190-h-mock-building/);
   for(const side of ['front','rear','west','east','roof'])
