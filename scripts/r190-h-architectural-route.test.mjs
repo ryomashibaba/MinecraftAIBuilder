@@ -119,7 +119,7 @@ test('I captures rejected, unchanged source and request without constructing fal
   assert.equal(fs.readFileSync(path.join(out,'R190_I_ORIGINAL_RESPONSE.txt'),'utf8'),invalid);
   assert.equal(fs.readFileSync(path.join(out,'R190_I_ORIGINAL_BRIEF.txt'),'utf8'),options.prompt);
   const receipt=JSON.parse(fs.readFileSync(path.join(out,'R190_I_CAPTURE_RECEIPT.json')));
-  assert.equal(receipt.status,'HOLD_MODEL_RESPONSE_OR_SOURCE_INVALID');
+  assert.equal(receipt.status,'HOLD_MODEL_RESPONSE_OR_SPATIAL_REVIEW');
   assert.equal(receipt.sourceGenerated,false);
   assert.equal(receipt.rawProviderBytesPreserved,true);
   assert.deepEqual(receipt.gates,Array(9).fill('BLOCKED'));
