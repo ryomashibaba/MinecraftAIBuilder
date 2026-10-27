@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
-import {parseR190RArgs,runR190RStudy} from './r190r-one-click-direct-study.mjs';
+import {parseR190RArgs,runR190RStudy,r190rEvidenceRoot,R190R_STORAGE_POLICY} from './r190r-one-click-direct-study.mjs';
 import {STUDY_BRIEF} from './r190n-one-click-research.mjs';
 const raw=()=>JSON.stringify({design:{
  schema:'minecraftaibuilder-b143-building-dsl-v1',
@@ -32,6 +32,15 @@ const fetchFor=answer=>async(url,opts)=>{
   message:{content:answer}}]})};
 };
 const temporary=()=>fs.mkdtempSync(path.join(os.tmpdir(),'r190r-'));
+test('R190-R keeps output in the longstanding Windows project without exposing an absolute username',()=>{
+ assert.equal(R190R_STORAGE_POLICY,'R190R_CANONICAL_PROJECT_OUTPUT_V2');
+ assert.equal(r190rEvidenceRoot({platform:'win32',userProfile:'C:\\Users\\test',
+  sourceRoot:'D:\\separate-source'}), 'C:\\Users\\test\\Projects\\MinecraftAIBuilder\\r190r-local-evidence');
+ assert.equal(r190rEvidenceRoot({platform:'linux',sourceRoot:'/tmp/source'}),
+  '/tmp/source/r190r-local-evidence');
+ assert.throws(()=>r190rEvidenceRoot({platform:'win32',userProfile:''}),
+  /WINDOWS_USERPROFILE_REQUIRED/);
+});
 test('R190-R options and exact original Japanese prompt',()=>{
  assert.deepEqual(parseR190RArgs([]),{model:null,fresh:false});
  assert.equal(parseR190RArgs(['--fresh']).fresh,true);
@@ -126,6 +135,10 @@ test('R190-R CMD is consent-gated and source-only',()=>{
  assert.match(cmd,/git clone --depth 1 --single-branch --branch feature\/b198zr1-protected-architectural-revision/);
  assert.match(cmd,/node.exe "%runner%" %\*/);
  assert.doesNotMatch(cmd,/git pull|git reset|git checkout|ollama pull/i);
+ assert.match(cmd,/CANONICAL_PROJECT_OUTPUT_V2/);
+ assert.match(cmd,/Projects\\MinecraftAIBuilder/);
+ assert.match(cmd,/goto :outdated_checkout/);
+ assert.match(cmd,/canonical results/i);
 });
 
 test('R190-R matches strictly hashed same-brief semantic evidence without upgrading its HOLD',async()=>{

@@ -11,7 +11,23 @@ import {chooseR190NModel,STUDY_BRIEF,REPO_ROOT,EVIDENCE_ROOT}
  from './r190n-one-click-research.mjs';
 import {runR190Local} from './r190-local-semantic-run.mjs';
 
-export const R190R_ROOT=path.join(REPO_ROOT,'r190r-local-evidence');
+// R190R_CANONICAL_PROJECT_OUTPUT_V2: keep research evidence beside the user's
+// established Projects/MinecraftAIBuilder workspace, even if source lives in a
+// separately downloaded read-only checkout. Never call this a finished build.
+export const R190R_STORAGE_POLICY='R190R_CANONICAL_PROJECT_OUTPUT_V2';
+export function r190rEvidenceRoot({
+ platform=process.platform,userProfile=process.env.USERPROFILE,sourceRoot=REPO_ROOT
+}={}){
+ if(platform==='win32'){
+  if(typeof userProfile!=='string'||!userProfile.trim())
+   throw Error('R190R_WINDOWS_USERPROFILE_REQUIRED');
+  return path.win32.join(userProfile,'Projects','MinecraftAIBuilder',
+   'r190r-local-evidence');
+ }
+ return path.join(sourceRoot,'r190r-local-evidence');
+}
+export const R190R_ROOT=r190rEvidenceRoot();
+const R190R_LEGACY_ROOT=path.join(REPO_ROOT,'r190r-local-evidence');
 const SHA=v=>createHash('sha256').update(v,'utf8').digest('hex');
 const PROMPT_SHA=SHA(STUDY_BRIEF);
 const fail=x=>{throw Error('R190R_'+x)};
@@ -124,12 +140,26 @@ export async function runR190RStudy(args=[],{
     (opt.model!==null&&!MODEL.test(opt.model))||
     !['native','openai'].includes(transport))fail('INVALID_OPTIONS');
  const root=path.resolve(evidenceRoot);
+ const canonical=(process.platform==='win32'&&root===path.resolve(R190R_ROOT));
+ if(canonical){
+  const projectDir=path.dirname(root);
+  if(!fs.existsSync(projectDir)||!fs.lstatSync(projectDir).isDirectory()||
+     fs.lstatSync(projectDir).isSymbolicLink())
+   fail('CANONICAL_PROJECT_FOLDER_REQUIRED_NO_AUTO_REPLACEMENT');
+ }
+ if(fs.existsSync(root)&&fs.lstatSync(root).isSymbolicLink())
+  fail('REFUSE_EVIDENCE_ROOT_SYMLINK');
  if(!opt.fresh){
-  const cached=findCached(root,opt.model);
+  // Check current workspace first, then old source-checkout evidence. Do
+  // not rerun Ollama or silently move/delete old original model responses.
+  const cached=findCached(root,opt.model)||
+   (canonical?findCached(R190R_LEGACY_ROOT,opt.model):null);
   if(cached)return {status:cached.manifest.directReviewStatus,reused:true,
    directory:cached.directory,actualNewModelRequests:0,
    originalDirectRawSha256:cached.manifest.originalDirectRawSha256,
    modelRequested:cached.manifest.modelRequested,
+   legacyEvidenceNotMoved:canonical&&!cached.directory.startsWith(root+path.sep),
+   preferredCanonicalEvidenceRoot:root,
    humanArtReview:'ART_HOLD',worldContacts:0,worldWrites:0};
  }
  const model=await installedModel(fetcher,opt.model);
