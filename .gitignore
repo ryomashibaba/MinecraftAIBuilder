@@ -20,3 +20,6 @@ artifacts/
 b112-review-output/
 b113-review-output/
 coverage/
+
+# R190-N genuine local model originals never belong in Git history.
+/r190n-local-evidence/

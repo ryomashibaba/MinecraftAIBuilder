@@ -1,0 +1,22 @@
+{
+  "requiredProgram": [
+    {
+      "label": "public-exhibit",
+      "purposeFragment": "展示"
+    },
+    {
+      "label": "hands-on-repair",
+      "purposeFragment": "修理"
+    },
+    {
+      "label": "materials-storage",
+      "purposeFragment": "保管"
+    }
+  ],
+  "requiredDirectConnections": [
+    [
+      "public-exhibit",
+      "hands-on-repair"
+    ]
+  ]
+}
