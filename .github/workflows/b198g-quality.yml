@@ -135,6 +135,10 @@ on:
       - 'scripts/r190-h-architectural-route.test.mjs'
       - 'scripts/r190n-one-click-research.mjs'
       - 'scripts/r190n-one-click-research.test.mjs'
+      - 'source/ai/r190o-saved-model-forensics.mjs'
+      - 'scripts/r190o-offline-review.mjs'
+      - 'scripts/r190o-offline-review.test.mjs'
+      - 'RUN_R190O_OFFLINE_REVIEW.cmd'
       - 'scripts/fixtures/r190n-independent-program.json'
       - 'RUN_R190N_REAL_MODEL.cmd'
       - 'scripts/r177-ground-intent.test.mjs'
@@ -238,6 +242,10 @@ jobs:
           node --check scripts/r190n-one-click-research.mjs
           node --check scripts/r190n-one-click-research.test.mjs
           node --test scripts/r190n-one-click-research.test.mjs
+          node --check source/ai/r190o-saved-model-forensics.mjs
+          node --check scripts/r190o-offline-review.mjs
+          node --check scripts/r190o-offline-review.test.mjs
+          node --test scripts/r190o-offline-review.test.mjs
       - name: Upload R190-E real archived Qwen fidelity and provenance report
         uses: actions/upload-artifact@v4
         with:
