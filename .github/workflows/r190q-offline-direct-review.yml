@@ -1,0 +1,28 @@
+name: R190-Q Offline Independent Direct-B143 Review
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'scripts/r190q-offline-direct-review.mjs'
+      - 'scripts/r190q-offline-direct-review.test.mjs'
+      - '.github/workflows/r190q-offline-direct-review.yml'
+  pull_request:
+    paths:
+      - 'scripts/r190q-offline-direct-review.mjs'
+      - 'scripts/r190q-offline-direct-review.test.mjs'
+      - '.github/workflows/r190q-offline-direct-review.yml'
+permissions:
+  contents: read
+concurrency:
+  group: r190q-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  independent-source-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: node --check scripts/r190q-offline-direct-review.mjs
+      - run: node --test scripts/r190q-offline-direct-review.test.mjs
