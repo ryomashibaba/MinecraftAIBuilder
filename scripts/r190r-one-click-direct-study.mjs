@@ -52,11 +52,14 @@ function findCached(root,model){
  for(const n of fs.readdirSync(root).filter(x=>/^r190r-\d+-\d+$/.test(x)).sort().reverse()){
   const dir=path.join(root,n);
   try{
+   const stat=fs.lstatSync(dir);
+   if(!stat.isDirectory()||stat.isSymbolicLink())continue;
    const c=capture(dir),m=json(dir,'R190R_ROUTE_COMPARISON.json');
    if(c&&m.schema==='minecraftaibuilder-r190r-direct-v1'&&
       m.frozenBriefSha256===PROMPT_SHA&&
       m.originalDirectRawSha256===c.sha&&
       m.directReviewStatus===c.receipt.status&&
+      m.modelRequested===c.receipt.modelRequested&&
       isSafe(m)&&(model===null||model===m.modelRequested))
     return {directory:dir,manifest:m};
   }catch{}
@@ -68,11 +71,14 @@ function semanticEvidence(root,model){
   .filter(x=>/^r190n-\d+-\d+$/.test(x)).sort().reverse()){
   const dir=path.join(root,n);
   try{
+   const stat=fs.lstatSync(dir);
+   if(!stat.isDirectory()||stat.isSymbolicLink())continue;
    const m=json(dir,'R190N_STUDY_MANIFEST.json'),
     r=json(dir,'R190_M_EVIDENCE_RECEIPT.json'),
     raw=readEvidence(dir,'R190_M_UNMODIFIED_MODEL_RESPONSE.txt');
    if(m.schema==='minecraftaibuilder-r190n-study-v1'&&
-      m.modelRequestedOrClaimed===model&&m.briefSha256===PROMPT_SHA&&
+      m.modelRequestedOrClaimed===model&&r.modelRequestedOrClaimed===model&&
+      m.briefSha256===PROMPT_SHA&&
       m.originalRawSha256===SHA(raw)&&r.originalRawSha256===SHA(raw)&&
       r.originalBriefSha256===PROMPT_SHA&&
       readEvidence(dir,'R190_M_ORIGINAL_BRIEF.txt')===STUDY_BRIEF&&

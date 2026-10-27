@@ -25,3 +25,4 @@ jobs:
         with: {node-version: '22'}
       - run: node --check scripts/r190r-one-click-direct-study.mjs
       - run: node --test scripts/r190r-one-click-direct-study.test.mjs
+      - run: node --test scripts/r190-h-architectural-route.test.mjs

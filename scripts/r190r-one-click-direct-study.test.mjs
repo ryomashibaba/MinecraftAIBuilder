@@ -145,6 +145,7 @@ test('R190-R matches strictly hashed same-brief semantic evidence without upgrad
  fs.writeFileSync(path.join(evidence,'R190_M_EVIDENCE_RECEIPT.json'),JSON.stringify({
   originalRawSha256:sha(prior),originalBriefSha256:sha(STUDY_BRIEF),
   status:'HOLD_ORIGINAL_SEMANTIC_RESPONSE_REJECTED',
+  modelRequestedOrClaimed:'qwen3:14b',
   sourceKind:null,hostDeterminedRoomCoordinates:false,...safety}));
  try{
   const result=await runR190RStudy([],{evidenceRoot:path.join(root,'direct'),
