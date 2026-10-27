@@ -6,6 +6,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
 import http from 'node:http';
+import {R190_STATIC_SYNTHETIC_CASES} from './r190-semantic-fixtures.mjs';
 import {parseR190Arguments,runR190Local} from './r190-local-semantic-run.mjs';
 const fixture=()=>({
  design:{schema:'minecraftaibuilder-b143-building-dsl-v1',designOnly:true,
@@ -231,5 +232,110 @@ test('J never renders apparently complete B143 from provider-reported truncated 
   assert.equal(receipt.unapprovedGeometryEvidence.real3DFromModelSource,false);
   assert.equal(fs.existsSync(path.join(out,'R190_J_HOLD_B143_3D.html')),false);
   assert.equal(fs.readFileSync(path.join(out,'R190_I_ORIGINAL_RESPONSE.txt'),'utf8'),raw);
+ }finally{fs.rmSync(root,{recursive:true,force:true});}
+});
+
+const semanticFixture=()=>({
+ schema:'minecraftaibuilder-r190-model-proposal-v1',
+ semanticPlan:structuredClone(R190_STATIC_SYNTHETIC_CASES[1]),
+ architecturalRationale:'Synthetic model-shaped public workshop, not real AI inference.',
+ assumptions:['A flat site is assumed'],unrepresentedRequirements:[]
+});
+const semanticArgs=out=>['--model','mock-qwen','--prompt',
+ 'Design a community workshop with public entry and an accessible layout.',
+ '--out',out,'--mode','semantic'];
+test('M one mocked semantic provider reply saves immutable original and honest HOST-projected B143 3D',async()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'r190m-semantic-'));
+ const out=path.join(root,'evidence'),raw=JSON.stringify(semanticFixture());
+ let calls=0;
+ try{
+  const receipt=await runR190Local(parseR190Arguments(semanticArgs(out)),{
+   fetcher:async()=>{calls++;return {ok:true,json:async()=>({choices:[{
+    finish_reason:'stop',message:{content:raw}}]})};}
+  });
+  assert.equal(calls,1);
+  assert.equal(receipt.status,'SOURCE_VERIFIED_ART_HOLD');
+  assert.equal(receipt.hostDeterminedRoomCoordinates,true);
+  assert.equal(receipt.modelAuthoredB143,false);
+  assert.equal(receipt.sourceKind,'HOST_DETERMINISTIC_B143_FROM_MODEL_SEMANTIC_IR');
+  assert.equal(receipt.actualModelRequestsByRunner,1);
+  assert.equal(receipt.originalRawSha256,createHash('sha256').update(raw).digest('hex'));
+  assert.equal(fs.readFileSync(path.join(out,'R190_M_UNMODIFIED_MODEL_RESPONSE.txt'),'utf8'),raw);
+  assert.equal(receipt.independentBriefAcceptance,'NOT_SUPPLIED');
+  assert.ok(fs.readFileSync(path.join(out,
+   'R190_M_HOST_PROJECTED_REAL_B143_3D.html'),'utf8').includes('r190-shop'));
+  for(const side of ['front','rear','west','east','roof'])
+   assert.match(fs.readFileSync(path.join(out,'R190_M_HOST_PROJECTED_'+side+'.svg'),'utf8'),/<svg/);
+  assert.deepEqual(receipt.gates,Array(9).fill('BLOCKED'));
+  assert.deepEqual(receipt.BuildPlan.operations,[]);
+  assert.equal(receipt.worldContacts,0);assert.equal(receipt.worldWrites,0);
+ }finally{fs.rmSync(root,{recursive:true,force:true});}
+});
+test('M offline replay reuses saved original without connecting or retrying a model',async()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'r190m-replay-'));
+ const source=path.join(root,'original.txt'),out=path.join(root,'replayed');
+ const raw=JSON.stringify(semanticFixture());
+ fs.writeFileSync(source,raw);
+ let calls=0;
+ try{
+  const options=parseR190Arguments([...semanticArgs(out),'--replay',source]);
+  const receipt=await runR190Local(options,{fetcher:async()=>{calls++;throw Error('NO_NETWORK');}});
+  assert.equal(calls,0);assert.equal(receipt.replayWithoutModelCalls,true);
+  assert.equal(receipt.actualModelRequestsByRunner,0);
+  assert.equal(receipt.providerFinishReason,'UNKNOWN_ARCHIVED_SOURCE');
+  assert.equal(fs.readFileSync(path.join(out,'R190_M_UNMODIFIED_MODEL_RESPONSE.txt'),'utf8'),raw);
+  assert.equal(receipt.sourceGenerated,true);
+  assert.equal(receipt.modelIdentityCryptographicallyVerified,false);
+  assert.throws(()=>parseR190Arguments([...semanticArgs('./x'),
+   '--replay',source,'--mode','architectural-b143']),/R190_F_FLAG|R190_M_REPLAY/);
+ }finally{fs.rmSync(root,{recursive:true,force:true});}
+});
+test('M saved actual archived Qwen14B grammar cannot masquerade as R190 compliant architecture',async()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'r190m-archived-'));
+ const out=path.join(root,'hold'),file=path.resolve(
+  path.dirname(new URL(import.meta.url).pathname),
+  './fixtures/r146-user-qwen14b-20261025-raw.json');
+ const raw=fs.readFileSync(file,'utf8');
+ try{
+  await assert.rejects(()=>runR190Local(parseR190Arguments([...semanticArgs(out),
+   '--replay',file]),{fetcher:async()=>{throw Error('NO_NETWORK');}}),
+   /R190_M_CAPTURED_HOLD/);
+  const r=JSON.parse(fs.readFileSync(path.join(out,'R190_M_EVIDENCE_RECEIPT.json')));
+  assert.equal(r.status,'HOLD_ORIGINAL_SEMANTIC_RESPONSE_REJECTED');
+  assert.equal(r.sourceGenerated,false);
+  assert.equal(r.actualModelRequestsByRunner,0);
+  assert.equal(r.rawBytesPreserved,true);
+  assert.equal(r.originalRawSha256,createHash('sha256').update(raw).digest('hex'));
+  assert.equal(fs.readFileSync(path.join(out,'R190_M_UNMODIFIED_MODEL_RESPONSE.txt'),'utf8'),raw);
+  assert.equal(fs.existsSync(path.join(out,'R190_M_HOST_PROJECTED_REAL_B143_3D.html')),false);
+  assert.deepEqual(r.gates,Array(9).fill('BLOCKED'));
+  assert.equal(r.worldWrites,0);
+ }finally{fs.rmSync(root,{recursive:true,force:true});}
+});
+test('M truncated semantic response is captured and held, no invented 3D',async()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'r190m-truncated-'));
+ const out=path.join(root,'hold'),raw=JSON.stringify(semanticFixture());
+ try{
+  await assert.rejects(()=>runR190Local(parseR190Arguments(semanticArgs(out)),{
+   fetcher:async()=>({ok:true,json:async()=>({choices:[{
+    finish_reason:'length',message:{content:raw}}]})})
+  }),/R190_M_CAPTURED_HOLD/);
+  const r=JSON.parse(fs.readFileSync(path.join(out,'R190_M_EVIDENCE_RECEIPT.json')));
+  assert.equal(r.status,'HOLD_ORIGINAL_SEMANTIC_RESPONSE_REJECTED');
+  assert.equal(r.providerFinishReason,'length');
+  assert.equal(r.sourceGenerated,false);
+  assert.equal(fs.existsSync(path.join(out,'R190_M_HOST_PROJECTED_REAL_B143_3D.html')),false);
+ }finally{fs.rmSync(root,{recursive:true,force:true});}
+});
+test('M connection failure never creates fake evidence and output dirs never overwrite',async()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'r190m-fail-'));
+ const out=path.join(root,'not-created');
+ try{
+  await assert.rejects(()=>runR190Local(parseR190Arguments(semanticArgs(out)),{
+   fetcher:async()=>({ok:false,status:503})}),/LOCAL_HTTP_503/);
+  assert.equal(fs.existsSync(out),false);
+  assert.throws(()=>parseR190Arguments([...semanticArgs(out),
+   '--replay','old.txt','--endpoint','http://127.0.0.1:11434/v1/chat/completions']),
+   /R190_M_REPLAY_SEMANTIC_ONLY_NO_PROVIDER/);
  }finally{fs.rmSync(root,{recursive:true,force:true});}
 });

@@ -13,13 +13,15 @@ import {inspectR49GlobalConsistency} from '../source/ai/b198zr49-global-source-c
 import {createR190SemanticModelAdapter,createB198GLocalModelAdapter}
  from '../source/ai/b198g-local-model-adapter.mjs';
 import {reviewR4PlannedProposal} from '../source/ai/b198zr4-planned-source.mjs';
+import {readR190ModelProposal} from '../source/ai/r190-model-proposal.mjs';
+import {validateR190ProgramSpec} from '../source/ai/r190-request-coverage.mjs';
 import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
 import {renderR164Elevation} from './r164-exterior-audit.mjs';
-export const USAGE='--model MODEL --prompt REQUEST --out NEW_DIR [--mode semantic|architectural-b143] [--transport openai|native] [--endpoint http://127.0.0.1:11434/v1/chat/completions] [--required capability1,capability2] [--expect expectations.json]';
+export const USAGE='--model MODEL --prompt REQUEST --out NEW_DIR [--mode semantic|architectural-b143] [--transport openai|native] [--endpoint http://127.0.0.1:11434/v1/chat/completions] [--required capability1,capability2] [--expect expectations.json] [--replay saved-original-model-response.txt]';
 export function parseR190Arguments(args){
  if(args.length===1&&args[0]==='--help')return {help:true};
  if(!args.length||args.length%2!==0)throw Error('R190_F_ARGUMENTS '+USAGE);
- const out={},allowed=new Set(['--model','--prompt','--out','--mode','--transport','--endpoint','--required','--expect']);
+ const out={},allowed=new Set(['--model','--prompt','--out','--mode','--transport','--endpoint','--required','--expect','--replay']);
  for(let i=0;i<args.length;i+=2){
   const k=args[i],v=args[i+1];
   if(!allowed.has(k)||Object.hasOwn(out,k)||!v)throw Error('R190_F_FLAG_'+k);
@@ -32,13 +34,17 @@ export function parseR190Arguments(args){
   throw Error('R190_H_INVALID_MODE');
  if(mode==='architectural-b143'&&(out['--required']||out['--expect']))
   throw Error('R190_H_DIRECT_MODE_CANNOT_CERTIFY_R190_EXPECTATIONS');
+ if(out['--replay']&&(mode!=='semantic'||out['--endpoint']||
+  out['--transport']==='native'))
+  throw Error('R190_M_REPLAY_SEMANTIC_ONLY_NO_PROVIDER');
  const transport=out['--transport']??'openai';
  if(!['openai','native'].includes(transport)||(mode!=='architectural-b143'&&transport!=='openai'))
   throw Error('R190_I_INVALID_TRANSPORT_FOR_MODE');
  return {mode,transport,model:out['--model'],prompt:out['--prompt'],out:out['--out'],
   endpoint:out['--endpoint'],
   requiredCapabilities:out['--required']?out['--required'].split(','):[],
-  expectFile:out['--expect']??null};
+  expectFile:out['--expect']??null,
+  replayPath:out['--replay']??null};
 }
 /**
  * R190-H: use the already existing one-response R4 model-declared spatialPlan
@@ -232,31 +238,116 @@ export async function runR190Local(options,{fetcher=fetch}={}){
  if(!fs.existsSync(path.dirname(target)))throw Error('R190_F_PARENT_MISSING');
  if((options.mode??'semantic')==='architectural-b143')
   return runR190ArchitecturalB143(options,target,fetcher);
+ // R190-M: validate the independent expectation file BEFORE inference;
+ // one expensive model response is never wasted on an invalid audit spec.
  const acceptanceSpec=options.expectFile===null?null:
-  JSON.parse(fs.readFileSync(options.expectFile,'utf8'));
- const run=createR190SemanticModelAdapter({
-  model:options.model,fetcher,...(options.endpoint?{endpoint:options.endpoint}:{})
- });
- // One actual HTTP request only if the user explicitly executes this script.
- const audit=await run({prompt:options.prompt,
-  requiredCapabilities:options.requiredCapabilities,acceptanceSpec});
- if(audit.worldWrites!==0||audit.worldContacts!==0||
-  audit.gates.some(g=>g!=='BLOCKED')||audit.BuildPlan.operations.length)
-  throw Error('R190_F_UNSAFE_AUDIT');
+  validateR190ProgramSpec(JSON.parse(fs.readFileSync(options.expectFile,'utf8')));
+ const replay=typeof options.replayPath==='string';
+ let originalRaw=null,finishReason=null,providerResponses=0;
+ let audit=null,error=null;
+ if(replay){
+  const file=path.resolve(options.replayPath),stat=fs.statSync(file);
+  if(!stat.isFile()||stat.size<1||stat.size>120000)
+   throw Error('R190_M_REPLAY_FILE_SIZE');
+  originalRaw=fs.readFileSync(file,'utf8');
+  if(path.resolve(file)===target)throw Error('R190_M_INVALID_REPLAY_PATH');
+  try{
+   audit=readR190ModelProposal(originalRaw,{
+    requestText:options.prompt,requiredCapabilities:options.requiredCapabilities,
+    acceptanceSpec});
+  }catch(e){error=e;}
+ }else{
+  const run=createR190SemanticModelAdapter({
+   model:options.model,fetcher,
+   onRawModelResponse:(raw,{finishReason:reason}={})=>{
+    // Refuse conflicting provider captures; DO NOT rewrite model response.
+    if(originalRaw!==null&&originalRaw!==raw)
+     throw Error('R190_M_PROVIDER_RESPONSE_MISMATCH');
+    originalRaw=raw;finishReason=reason??null;providerResponses=1;
+   },
+   ...(options.endpoint?{endpoint:options.endpoint}:{})
+  });
+  try{
+   audit=await run({prompt:options.prompt,
+    requiredCapabilities:options.requiredCapabilities,acceptanceSpec});
+  }catch(e){error=e;}
+ }
+ // No provider response: no fabricated capture, no "model tried" receipt.
+ if(originalRaw===null){
+  if(error)throw error;
+  throw Error('R190_M_NO_ORIGINAL_TEXT');
+ }
+ if(Buffer.byteLength(originalRaw)>120000)
+  throw Error('R190_M_PROVIDER_RESPONSE_TOO_LARGE_NO_CAPTURE');
+ const safety={readiness:'NOT_PREPARED',constructionApproved:false,
+  executionAllowed:false,gates:Array(9).fill('BLOCKED'),
+  BuildPlan:{operations:[]},worldWrites:0,worldContacts:0};
+ if(audit&&(audit.worldWrites!==0||audit.worldContacts!==0||
+  audit.executionAllowed!==false||audit.constructionApproved!==false||
+  audit.readiness!=='NOT_PREPARED'||audit.gates.length!==9||
+  audit.gates.some(g=>g!=='BLOCKED')||audit.BuildPlan.operations.length))
+  throw Error('R190_M_UNSAFE_AUDIT');
+ const receipts={
+  schema:'minecraftaibuilder-r190-m-semantic-evidence-v1',
+  status:error?'HOLD_ORIGINAL_SEMANTIC_RESPONSE_REJECTED':audit.status,
+  rejectedReason:error?String(error.message??error).slice(0,180):null,
+  sourceGenerated:!!audit?.sourceGenerated,
+  sourceKind:audit?.sourceGenerated?'HOST_DETERMINISTIC_B143_FROM_MODEL_SEMANTIC_IR':null,
+  modelAuthoredB143:false,hostAuthoredRoomProgram:false,
+  hostDeterminedRoomCoordinates:!!audit?.sourceGenerated,
+  independentBriefAcceptance:acceptanceSpec?
+   audit?.userIntentCoverage?.status??'NOT_VERIFIED':'NOT_SUPPLIED',
+  rawBytesPreserved:true,originalRawSha256:sha256(originalRaw),
+  originalBriefSha256:sha256(options.prompt),
+  replayWithoutModelCalls:replay,actualModelRequestsByRunner:replay?0:1,
+  actualProviderResponsesObserved:replay?0:providerResponses,
+  providerFinishReason:replay?'UNKNOWN_ARCHIVED_SOURCE':finishReason,
+  modelRequestedOrClaimed:options.model,
+  modelIdentityCryptographicallyVerified:false,
+  sourceSha256:audit?.sourceResult?.sourceSha256??null,
+  geometrySha256:audit?.sourceResult?.geometrySha256??null,
+  sourceOnly:true,humanArtReview:'ART_HOLD',
+  minecraftWalking:'NOT_TESTED',independentNaturalLanguageCoverageCertified:false,
+  ...safety};
+ const files=new Map([
+  ['R190_M_UNMODIFIED_MODEL_RESPONSE.txt',originalRaw],
+  ['R190_M_ORIGINAL_BRIEF.txt',options.prompt]
+ ]);
+ if(audit){
+  files.set('R190_F_MODEL_INTENT_SOURCE_ONLY.json',
+   JSON.stringify(audit,null,2)+'\n');
+  if(audit.sourceGenerated){
+   const design=audit.sourceResult.B143Design,compiled=compileDesign(design);
+   if(!verifyCompiled(design,compiled)||
+    compiled.sourceSha256!==audit.sourceResult.sourceSha256||
+    compiled.geometrySha256!==audit.sourceResult.geometrySha256)
+    throw Error('R190_M_SEMANTIC_B143_FIDELITY_MISMATCH');
+   const gallery=compileB143Gallery([design]);
+   if(gallery.sourceHashes[0]!==compiled.sourceSha256||
+    gallery.geometryHashes[0]!==compiled.geometrySha256)
+    throw Error('R190_M_RENDERER_FIDELITY_MISMATCH');
+   const template=fs.readFileSync(path.resolve(
+    path.dirname(fileURLToPath(import.meta.url)),
+    '../source/ai/b143-viewer-template.html'),'utf8');
+   files.set('R190_M_HOST_PROJECTED_REAL_B143_3D.html',
+    renderB143Html(gallery,template));
+   files.set('R190_M_HOST_PROJECTED_B143.json',
+    JSON.stringify(design,null,2)+'\n');
+   for(const side of ['front','rear','west','east','roof'])
+    files.set('R190_M_HOST_PROJECTED_'+side+'.svg',
+     renderR164Elevation(compiled,design,side));
+  }
+ }
+ files.set('R190_M_EVIDENCE_RECEIPT.json',JSON.stringify(receipts,null,2)+'\n');
  fs.mkdirSync(target);
- fs.writeFileSync(path.join(target,'R190_F_MODEL_INTENT_SOURCE_ONLY.json'),
-  JSON.stringify(audit,null,2)+'\n',{flag:'wx'});
- const summary={status:audit.status,modelRequested:options.model,
-  localProviderResponses:1,modelIdentityCryptographicallyVerified:false,
-  realModelQualityNotCertified:true,
-  userIntentCoverage:audit.userIntentCoverage.status,
-  sourceGenerated:audit.sourceGenerated,
-  sourceSha256:audit.sourceResult?.sourceSha256??null,
-  humanArtReview:'ART_HOLD',minecraftWalking:'NOT_TESTED',
-  readiness:'NOT_PREPARED',worldWrites:0,worldContacts:0};
- fs.writeFileSync(path.join(target,'R190_F_RUN_RECEIPT.json'),
-  JSON.stringify(summary,null,2)+'\n',{flag:'wx'});
- return summary;
+ for(const [filename,content] of files)
+  fs.writeFileSync(path.join(target,filename),content,{flag:'wx'});
+ if(error){
+  // The user still owns exact original evidence and a clear HOLD receipt.
+  const e=Error('R190_M_CAPTURED_HOLD_'+String(error.message??error).slice(0,120));
+  e.code='R190_M_CAPTURED_HOLD';throw e;
+ }
+ return {destination:target,...receipts};
 }
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){
  runR190Local(parseR190Arguments(process.argv.slice(2)))

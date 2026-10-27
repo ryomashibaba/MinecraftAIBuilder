@@ -113,7 +113,8 @@ export function createB198GLocalModelAdapter({
  * semantic plan (not raw host-designed voxels). No inference before invocation.
  */
 export function createR190SemanticModelAdapter({
- model,endpoint=DEFAULT_LOCAL_ENDPOINT,fetcher=fetch,timeoutMs=120000
+ model,endpoint=DEFAULT_LOCAL_ENDPOINT,fetcher=fetch,timeoutMs=120000,
+ onRawModelResponse=null
 }={}){
  if(typeof model!=='string'||!MODEL_RE.test(model))
   refuse('EXPLICIT_MODEL_ID_REQUIRED');
@@ -122,6 +123,8 @@ export function createR190SemanticModelAdapter({
   refuse('ONLY_EXPLICIT_127_0_0_1_CHAT_COMPLETIONS_ALLOWED');
  if(typeof fetcher!=='function'||!Number.isSafeInteger(timeoutMs)||
    timeoutMs<1000||timeoutMs>900000)refuse('INVALID_LOCAL_OPTIONS');
+ if(onRawModelResponse!==null&&typeof onRawModelResponse!=='function')
+  refuse('INVALID_RAW_CAPTURE_CALLBACK');
  const system=[
   'You are an independent architect. Design from the user request, NOT a template.',
   'R190 outputs ONE original semantic plan, NOT three independent concepts.',
@@ -170,9 +173,14 @@ export function createR190SemanticModelAdapter({
    const data=await res.json();
    if(!Array.isArray(data?.choices)||data.choices.length!==1)
     refuse('INVALID_RESPONSE_CHOICES');
-   if(data.choices[0]?.finish_reason==='length')
+   const choice=data.choices[0],originalRaw=choice?.message?.content;
+   // Capture exact provider content BEFORE JSON and architectural validation.
+   // The callback never authorizes a second request or repairs its text.
+   if(onRawModelResponse&&typeof originalRaw==='string')
+    onRawModelResponse(originalRaw,{finishReason:choice.finish_reason??null});
+   if(choice?.finish_reason==='length')
     refuse('TRUNCATED_MODEL_RESPONSE');
-   return readR190ModelProposal(data.choices[0]?.message?.content,
+   return readR190ModelProposal(originalRaw,
     {requiredCapabilities,requestText:prompt,acceptanceSpec});
   }finally{clearTimeout(timer);}
  };
