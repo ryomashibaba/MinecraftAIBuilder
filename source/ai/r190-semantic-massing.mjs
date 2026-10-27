@@ -402,14 +402,14 @@ export function auditR190SourceRoutes(plan,layout,design,compiled){
       i>0?r190RoofElevation(i-1,span,f):raise,
       i<span-1?r190RoofElevation(i+1,span,f):raise);
      for(let y=s.h;y<roofY;y++){
-      const riserFace=y>s.h+lowerNeighbor;
+      const riserFace=i===0||i===span-1||y>s.h+lowerNeighbor;
       ok(has(x,y,z)===riserFace,
        'ROOF_SECTION_AIR_OR_STEP_SEAL_MISMATCH_'+i+'_'+j);
      }
      if(raise>lowerNeighbor+1)
       for(let y=s.h+lowerNeighbor+1;y<roofY;y++)
        ok(has(x,y,z),'ROOF_DROP_EXTERIOR_LEAK_'+i+'_'+j);
-     if(lowerNeighbor>=0)raisedOpenInteriorColumns++;
+     if(i>0&&i<span-1)raisedOpenInteriorColumns++;
     }
    }
   }
