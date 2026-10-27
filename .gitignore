@@ -23,3 +23,6 @@ coverage/
 
 # R190-N genuine local model originals never belong in Git history.
 /r190n-local-evidence/
+
+# R190-R direct-model originals are local-only; never publish provider text.
+/r190r-local-evidence/
