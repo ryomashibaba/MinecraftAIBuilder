@@ -98,7 +98,12 @@ export function diagnoseR190SGeometry({design,spatialPlan,compiled}){
   const [ax,ay,az]=zone.origin,[sx,sy,sz]=zone.size;
   for(let y=ay;y<ay+sy;y++)for(let z=az;z<az+sz;z++)
    for(let x=ax;x<ax+sx;x++)if(standable([x,y,z],2))stands++;
-  return {id:String(zone.id).slice(0,60),standablePositions:stands};
+  const minimumRequiredPositions=Number.isSafeInteger(zone.minimumReachablePositions)?
+   zone.minimumReachablePositions:null;
+  return {id:String(zone.id).slice(0,60),standablePositions:stands,
+   modelDeclaredMinimumPositions:minimumRequiredPositions,
+   belowModelDeclaredMinimum:minimumRequiredPositions===null?null:
+    stands<minimumRequiredPositions};
  });
  const entrance=Array.isArray(spatialPlan?.entrance)?spatialPlan.entrance:null;
  const tops=[...new Set(roof.values())].sort((a,b)=>a-b);
@@ -122,13 +127,13 @@ export function buildR190SRedesignPrompt(critique){
  if(critique?.schema!=='minecraftaibuilder-r190s-voxel-critique-v1')
   fail('NO_TRUSTED_CRITIQUE');
  const layers=critique.nearSolidHorizontalLayers.length,rooms=critique.modelDeclaredZoneSamples,
-  unusable=rooms.filter(z=>z.standablePositions===0).length;
+  shortfall=rooms.filter(z=>z.belowModelDeclaredMinimum===true).length;
  return [
   STUDY_BRIEF,
   '',
   '【別設計への明示的な再挑戦】以前の案は不採用です。元の形状や座標を写したり、ホストによる修理を前提にしたりせず、建築全体をあなた自身で最初から再構想してください。',
   '前案の実際のB143幾何をコンパイルして確認したところ、広い範囲を埋め尽くす水平層'+layers+
-   '段、実際に立てる位置が0の機能領域'+unusable+'/'+rooms.length+
+   '段、モデル自身が申告した立脚位置の最低数に満たない機能領域'+shortfall+'/'+rooms.length+
    '件、正しく立てると確認できない入口が'+(critique.modelDeclaredEntranceStandable?'0':'1')+
    '件ありました。これはモデルの文章説明とは独立した幾何検証です。',
   '新案は展示・修理・保管を別々の中空な実用空間として作り、外部から入口を実際に貫通させ、支持床上の立脚点と連続した通行経路を設けてください。展示から修理へ直接通れるようにしてください。部屋を無垢のboxで埋めたり、階段を立体空間のない板の内部に置いたりしてはいけません。',

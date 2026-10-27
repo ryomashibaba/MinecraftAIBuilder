@@ -73,11 +73,13 @@ test('S: real voxel sampling exposes solid layers without declaring finished arc
  assert.equal(critique.nearSolidHorizontalLayers.length,6);
  assert.equal(critique.modelDeclaredEntranceStandable,false);
  assert.ok(critique.modelDeclaredZoneSamples[0].standablePositions===0);
+ assert.equal(critique.modelDeclaredZoneSamples[0].belowModelDeclaredMinimum,true);
  assert.equal(critique.roofTopHeightLevels,1);
  assert.equal(critique.qualityImprovementCertified,false);
  const prompt=buildR190SRedesignPrompt(critique);
  assert.match(prompt,/最初から再構想/);
  assert.match(prompt,/鋸歯状/);
+ assert.match(prompt,/最低数に満たない機能領域/);
  assert.doesNotMatch(prompt,/origin:\s*\[/);
 });
 test('S: rejects a poisoned baseline before any model request',async()=>{

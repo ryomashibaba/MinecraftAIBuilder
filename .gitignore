@@ -26,3 +26,6 @@ coverage/
 
 # R190-R direct-model originals are local-only; never publish provider text.
 /r190r-local-evidence/
+
+# R190-S local model redesign source and unchanged original responses stay off GitHub.
+/r190s-local-evidence/
