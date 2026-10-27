@@ -215,7 +215,7 @@ test('R190-K model-authored sawtooth roof builds real raised interior and solid 
  const strip=altered.elements.find(e=>e.id==='showroom-roof-strip-3');
  strip.origin[1]-=2;
  assert.throws(()=>auditR190SourceRoutes(a,r.layout,altered,compileDesign(altered)),
-  /ROOF_PROFILE_MISSING|ROOF_NO_RAISED_INTERIOR_AIR/);
+  /ROOF_PROFILE_MISSING|ROOF_SECTION_AIR_OR_STEP_SEAL_MISMATCH/);
 });
 test('R190-K model-selected ridge and shed produce different genuine B143 silhouettes',()=>{
  const shapes=[];
@@ -239,7 +239,7 @@ test('R190-K invalid or inferred roof, roof leaks and shape injections HOLD',()=
   {spaceId:'showroom',profile:'world-write',axis:'x',rise:4},
   {spaceId:'showroom',profile:'ridge',axis:'y',rise:4},
   {spaceId:'showroom',profile:'sawtooth',axis:'x',rise:4,toothWidth:10},
-  {spaceId:'showroom',profile:'sawtooth',axis:'x',rise:4,toothWidth:8},
+  {spaceId:'showroom',profile:'sawtooth',axis:'x',rise:4,toothWidth:2},
   {spaceId:'showroom',profile:'ridge',axis:'x',rise:30},
   {spaceId:'nonexistent',profile:'shed',axis:'x',rise:3}
  ]){
@@ -257,5 +257,5 @@ test('R190-K invalid or inferred roof, roof leaks and shape injections HOLD',()=
   material:'metal',origin:[r.layout.spaces[0].x+7,10,r.layout.spaces[0].z+6],size:[1,1,1]});
  const comp=compileDesign(damaged);
  assert.throws(()=>auditR190SourceRoutes(p,r.layout,damaged,comp),
-  /ROOF_NO_RAISED_INTERIOR_AIR/);
+  /ROOF_SECTION_AIR_OR_STEP_SEAL_MISMATCH/);
 });

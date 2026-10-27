@@ -249,6 +249,18 @@ function sourceDesign(p,l){
     [x,s.h,z],face);
    box(s.id+'-roof-gable-b-'+i,'add',p.materials.wall,
     [alongX?x:s.x+s.w-1,s.h,alongX?s.z+s.d-1:z],face);
+   // A roof-to-roof height drop needs a physical vertical step face.
+   // Only the HIGH strip receives an infill, from one above the lower roof
+   // to immediately below its own roof slab. This is a real facade closure,
+   // not a generic solid infill of the whole high-ceiling interior.
+   const lowerNeighbor=Math.min(raise,
+    i>0?r190RoofElevation(i-1,span,f):raise,
+    i<span-1?r190RoofElevation(i+1,span,f):raise);
+   const wallHeight=raise-lowerNeighbor-1;
+   if(wallHeight>0)
+    box(s.id+'-roof-rise-seal-'+i,'add',p.materials.wall,
+     [x,s.h+lowerNeighbor+1,z],
+     alongX?[1,wallHeight,s.d]:[s.w,wallHeight,1]);
    // An elevated side edge also needs a wall, e.g. high end of shed.
    if(i===0||i===span-1)
     box(s.id+'-roof-edge-'+i,'add',p.materials.wall,
@@ -386,9 +398,18 @@ export function auditR190SourceRoutes(plan,layout,design,compiled){
      for(let y=s.h;y<roofY;y++)
       ok(has(x,y,z),'ROOF_GABLE_LEAK_'+i+'_'+j);
     if(raise>0&&j>0&&j<crossSpan-1){
-     for(let y=s.h;y<roofY;y++)
-      ok(!has(x,y,z),'ROOF_NO_RAISED_INTERIOR_AIR_'+i+'_'+j);
-     raisedOpenInteriorColumns++;
+     const lowerNeighbor=Math.min(raise,
+      i>0?r190RoofElevation(i-1,span,f):raise,
+      i<span-1?r190RoofElevation(i+1,span,f):raise);
+     for(let y=s.h;y<roofY;y++){
+      const riserFace=y>s.h+lowerNeighbor;
+      ok(has(x,y,z)===riserFace,
+       'ROOF_SECTION_AIR_OR_STEP_SEAL_MISMATCH_'+i+'_'+j);
+     }
+     if(raise>lowerNeighbor+1)
+      for(let y=s.h+lowerNeighbor+1;y<roofY;y++)
+       ok(has(x,y,z),'ROOF_DROP_EXTERIOR_LEAK_'+i+'_'+j);
+     if(lowerNeighbor>=0)raisedOpenInteriorColumns++;
     }
    }
   }
