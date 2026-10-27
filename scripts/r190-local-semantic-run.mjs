@@ -90,8 +90,8 @@ async function runR190ArchitecturalB143(options,target,fetcher){
  };
  // Save even a formal spatial HOLD for inspection; this is not construction.
  const outputs=new Map([
-  ['R190_H_MODEL_DESIGNED_B143.json',JSON.stringify(review.design,null,2)+'\\n'],
-  ['R190_H_MODEL_SPATIAL_PLAN.json',JSON.stringify(review.plan,null,2)+'\\n'],
+  ['R190_H_MODEL_DESIGNED_B143.json',JSON.stringify(review.design,null,2)+'\n'],
+  ['R190_H_MODEL_SPATIAL_PLAN.json',JSON.stringify(review.plan,null,2)+'\n'],
   ['R190_H_FORMAL_SOURCE_REVIEW.json',JSON.stringify({
    status:review.status,declaredPlanReview:review.declaredPlanReview,
    independentReview:review.independentReview,
@@ -99,8 +99,8 @@ async function runR190ArchitecturalB143(options,target,fetcher){
    modelExplanation:review.modelExplanation,
    modelAssumptions:review.modelAssumptions,
    sourceSha256:receipt.sourceSha256,geometrySha256:receipt.geometrySha256,
-   safety:review.safety},null,2)+'\\n'],
-  ['R190_H_RECEIPT.json',JSON.stringify(receipt,null,2)+'\\n'],
+   safety:review.safety},null,2)+'\n'],
+  ['R190_H_RECEIPT.json',JSON.stringify(receipt,null,2)+'\n'],
   ['R190_H_REAL_B143_3D.html',html]
  ]);
  for(const side of ['front','rear','west','east','roof'])
