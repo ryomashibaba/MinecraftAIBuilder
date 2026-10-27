@@ -133,6 +133,10 @@ on:
       - 'source/ai/r190-request-coverage.mjs'
       - 'scripts/r190-request-coverage.test.mjs'
       - 'scripts/r190-h-architectural-route.test.mjs'
+      - 'scripts/r190n-one-click-research.mjs'
+      - 'scripts/r190n-one-click-research.test.mjs'
+      - 'scripts/fixtures/r190n-independent-program.json'
+      - 'RUN_R190N_REAL_MODEL.cmd'
       - 'scripts/r177-ground-intent.test.mjs'
       - 'source/ai/r160-topology-intent.mjs'
       - 'source/ai/r162-room-section-massing.mjs'
@@ -231,6 +235,9 @@ jobs:
           node --test scripts/r190-request-coverage.test.mjs
           node --check scripts/r190-h-architectural-route.test.mjs
           node --test scripts/r190-h-architectural-route.test.mjs
+          node --check scripts/r190n-one-click-research.mjs
+          node --check scripts/r190n-one-click-research.test.mjs
+          node --test scripts/r190n-one-click-research.test.mjs
       - name: Upload R190-E real archived Qwen fidelity and provenance report
         uses: actions/upload-artifact@v4
         with:
