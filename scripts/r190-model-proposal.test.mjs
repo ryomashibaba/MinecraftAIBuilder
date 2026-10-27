@@ -122,3 +122,41 @@ test('R190-K explicit roof request is model-authored, physical and not silently 
  assert.throws(()=>readR190ModelProposal(JSON.stringify(wrong)),
   /FALSE_UNREPRESENTABLE_SUPPORTED_CAPABILITY/);
 });
+
+test('R190-L model directly requests a non-parent room link and source realizes it',()=>{
+ const p=base();
+ p.semanticPlan=structuredClone(R190_STATIC_SYNTHETIC_CASES[0]);
+ p.semanticPlan.id='r190-cross-program';
+ p.semanticPlan.entrySpaceId='arrival';
+ p.semanticPlan.spaces=[
+  {id:'arrival',purpose:'Public arrival',width:12,depth:12,height:8,
+   parentId:null,side:null,privacy:'public'},
+  {id:'making',purpose:'Workshop fabrication',width:12,depth:12,height:8,
+   parentId:'arrival',side:'east',privacy:'shared'},
+  {id:'storage',purpose:'Parts storage',width:12,depth:12,height:8,
+   parentId:'arrival',side:'north',privacy:'private'}
+ ];
+ p.semanticPlan.crossConnections=[['making','storage']];
+ const v=readR190ModelProposal(JSON.stringify(p),{
+  requiredCapabilities:['non-tree-adjacency'],
+  acceptanceSpec:{requiredProgram:[
+   {label:'making',purposeFragment:'Workshop fabrication'},
+   {label:'storage',purposeFragment:'Parts storage'}],
+   requiredDirectConnections:[['making','storage']]}
+ });
+ assert.equal(v.status,'SOURCE_VERIFIED_ART_HOLD');
+ assert.equal(v.userIntentCoverage.status,'VERIFIED_EXPLICIT_PROGRAM_IN_B143');
+ assert.equal(v.sourceResult.realSourceRouteAudit.nonTreePortalCount,1);
+ assert.equal(v.modelChosenPaths.includes('semanticPlan.crossConnections'),true);
+ assert.equal(v.sourceResult.realSourceRouteAudit.crossConnections[0].
+  realSourceAirVerified,true);
+ assert.equal(v.worldWrites,0);
+ const absent=structuredClone(p);delete absent.semanticPlan.crossConnections;
+ const hold=readR190ModelProposal(JSON.stringify(absent),{
+  requiredCapabilities:['non-tree-adjacency']});
+ assert.equal(hold.status,'HOLD_UNSATISFIED_EXPLICIT_NON_TREE_LINK');
+ assert.equal(hold.sourceGenerated,false);
+ absent.unrepresentedRequirements=['non-tree-adjacency'];
+ assert.throws(()=>readR190ModelProposal(JSON.stringify(absent)),
+  /FALSE_UNREPRESENTABLE_SUPPORTED_CAPABILITY/);
+});

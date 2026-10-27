@@ -13,11 +13,11 @@ import {scanR190ExplicitBriefCapabilities,auditR190ExplicitProgram,
 export const R190_MODEL_PROPOSAL_SCHEMA='minecraftaibuilder-r190-model-proposal-v1';
 export const R190_SUPPORTED_CAPABILITIES=Object.freeze([
  'single-level-rooms','tree-adjacency','ground-entry','open-court',
- 'single-faceted-wing','roof-profile-design'
+ 'single-faceted-wing','roof-profile-design','non-tree-adjacency'
 ]);
 export const R190_UNSUPPORTED_CAPABILITIES=Object.freeze([
  'multiple-levels','stairs','vertical-accessibility','double-height-void',
- 'non-tree-adjacency','multiple-exterior-entries','window-daylight-system',
+ 'multiple-exterior-entries','window-daylight-system',
  'facade-system','equipment-furniture'
 ]);
 const known=new Set([...R190_SUPPORTED_CAPABILITIES,...R190_UNSUPPORTED_CAPABILITIES]);
@@ -54,8 +54,8 @@ export function readR190ModelProposal(raw,{
  const declared=capabilities(response.unrepresentedRequirements,10);
  check(declared.every(c=>unsupported.has(c)),
   'FALSE_UNREPRESENTABLE_SUPPORTED_CAPABILITY');
- // The existing IR remains single-level and tree-based; K adds one
- // model-specified roof section, NOT inferred upper floors/windows/stairs.
+ // The R190 placement tree now allows MODEL-declared additional direct
+ // single-level room links, not inferred upper floors/windows/stairs.
  validateR190SemanticPlan(response.semanticPlan);
  check(response.semanticPlan.schema===R190_SCHEMA,'PLAN_SCHEMA');
  const independentlyDetectedBriefCapabilities=requestText===null?[]:
@@ -80,7 +80,8 @@ export function readR190ModelProposal(raw,{
    'semanticPlan.site','semanticPlan.entrySpaceId','semanticPlan.spaces',
    'semanticPlan.materials',
    ...(response.semanticPlan.formIntent?['semanticPlan.formIntent']:[]),
-   ...(response.semanticPlan.roofFormIntent?['semanticPlan.roofFormIntent']:[])
+   ...(response.semanticPlan.roofFormIntent?['semanticPlan.roofFormIntent']:[]),
+   ...(response.semanticPlan.crossConnections?['semanticPlan.crossConnections']:[])
   ],
   hostFilledRoomGeometry:false,hostFilledRoomTopology:false,
   modelIdentityCryptographicallyVerified:false,
@@ -107,6 +108,10 @@ export function readR190ModelProposal(raw,{
  if(roofRequired&&(!selectedRoof||(explicitRoof&&selectedRoof!==explicitRoof)))
   return {...common,status:'HOLD_UNSATISFIED_EXPLICIT_ROOF_PROFILE',
    expectedExplicitRoofProfile:explicitRoof,selectedRoofProfile:selectedRoof,
+   sourceGenerated:false,sourceResult:null};
+ if(requested.includes('non-tree-adjacency')&&
+  !(response.semanticPlan.crossConnections?.length>0))
+  return {...common,status:'HOLD_UNSATISFIED_EXPLICIT_NON_TREE_LINK',
    sourceGenerated:false,sourceResult:null};
  if(programAudit.issues.length)return {...common,
   status:'HOLD_UNSATISFIED_EXPLICIT_PROGRAM',

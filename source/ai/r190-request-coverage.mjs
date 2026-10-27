@@ -90,7 +90,9 @@ export function auditR190ExplicitProgram(plan,spec){
    issues.push({type:'UNRESOLVED_EDGE_ROOM',labels:[a,b]});continue;
   }
   const direct=plan.spaces.some(s=>
-   (s.id===ia&&s.parentId===ib)||(s.id===ib&&s.parentId===ia));
+   (s.id===ia&&s.parentId===ib)||(s.id===ib&&s.parentId===ia))||
+   (plan.crossConnections??[]).some(([a,b])=>
+    (a===ia&&b===ib)||(a===ib&&b===ia));
   if(!direct)issues.push({type:'MISSING_DIRECT_ADJACENCY',labels:[a,b]});
   else directConnections.push({labels:[a,b],modelIds:[ia,ib]});
  }

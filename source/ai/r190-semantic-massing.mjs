@@ -1,7 +1,8 @@
 /**
  * R190 semantic-space -> B143 source experiment. No typology dispatch, no
  * inherited R189 coordinates, no Minecraft command or world contact.
- * Input describes functional spaces and a rooted direct-adjacency tree.
+ * Input describes functional spaces, a rooted placement tree and optional
+ * additional MODEL-AUTHORED direct links between non-parent rooms.
  * The bounded placer solves local coordinates rather than selecting a
  * named building silhouette. Unplaceable requirements fail closed.
  */
@@ -50,7 +51,7 @@ export function r190RoofElevation(index,span,form){
 export function validateR190SemanticPlan(p){
  const standard=['schema','id','title','brief','site','entrySpaceId','spaces','materials'];
  ok(Object.keys(p??{}).length>=standard.length&&
-  Object.keys(p??{}).every(k=>[...standard,'formIntent','roofFormIntent'].includes(k))&&
+  Object.keys(p??{}).every(k=>[...standard,'formIntent','roofFormIntent','crossConnections'].includes(k))&&
   standard.every(k=>Object.hasOwn(p,k)),'FIELDS');
  ok(p.schema===R190_SCHEMA&&slug(p.id)&&safeText(p.title,100)&&
   safeText(p.brief,400),'IDENTITY');
@@ -124,6 +125,23 @@ export function validateR190SemanticPlan(p){
   while(at!==null){ok(!seen.has(at),'CYCLE');seen.add(at);at=parents.get(at);}
   ok(seen.has(p.entrySpaceId),'DISCONNECTED');
  }
+ // R190-L: explicit non-tree room links are part of the MODEL'S floor plan.
+ // They are not generated from typology/keywords or retrospectively guessed.
+ if(p.crossConnections!==undefined){
+  ok(Array.isArray(p.crossConnections)&&p.crossConnections.length>=1&&
+   p.crossConnections.length<=4,'CROSS_CONNECTIONS');
+  const seen=new Set();
+  for(const pair of p.crossConnections){
+   ok(Array.isArray(pair)&&pair.length===2&&
+    pair.every(id=>typeof id==='string'&&ids.has(id))&&
+    pair[0]!==pair[1],'CROSS_CONNECTION_PAIR');
+   const [a,b]=pair,key=[...pair].sort().join('|');
+   ok(!seen.has(key),'CROSS_CONNECTION_DUPLICATE');
+   seen.add(key);
+   ok(parents.get(a)!==b&&parents.get(b)!==a,
+    'CROSS_CONNECTION_IS_TREE_EDGE');
+  }
+ }
  return true;
 }
 const overlap=(a,b)=>Math.min(a[1],b[1])-Math.max(a[0],b[0])+1;
@@ -149,6 +167,22 @@ function sharedPortal(a,b,side){
  if(hi-lo+1<2)return null;
  return {x:Math.floor((lo+hi-1)/2),z:side==='north'?a.z+a.d-1:a.z,axis:'z'};
 }
+// A direct room link requires one TRUE shared wall plane, a two-wide opening
+// with corner clearance, and no physical overlap beyond that wall. The
+// caller's parent/child placement tree does not imply extra model link edges.
+export function r190SharedCrossPortal(a,b){
+ const ox=overlap([a.x,a.x+a.w-1],[b.x,b.x+b.w-1]);
+ const oz=overlap([a.z,a.z+a.d-1],[b.z,b.z+b.d-1]);
+ let portal=null;
+ if(ox===1&&oz>=4){
+  if(a.x+a.w-1===b.x)portal=sharedPortal(a,b,'east');
+  else if(b.x+b.w-1===a.x)portal=sharedPortal(a,b,'west');
+ }else if(oz===1&&ox>=4){
+  if(a.z+a.d-1===b.z)portal=sharedPortal(a,b,'north');
+  else if(b.z+b.d-1===a.z)portal=sharedPortal(a,b,'south');
+ }
+ return portal?{...portal,a:a.id,b:b.id,kind:'cross'}:null;
+}
 export function layoutR190SemanticPlan(p,{strategy='centered'}={}){
  validateR190SemanticPlan(p);
  ok(R190_LAYOUT_STRATEGIES.includes(strategy),'LAYOUT_STRATEGY');
@@ -158,6 +192,9 @@ export function layoutR190SemanticPlan(p,{strategy='centered'}={}){
   x:Math.floor((p.site.width-root.width)/2),
   z:Math.floor((p.site.depth-root.depth)/2),
   w:root.width,d:root.depth,h:root.height}]]);
+ const extra=source.crossConnections??[];
+ const edgeKeys=new Set(extra.map(p=>[...p].sort().join('|')));
+ const isCross=(a,b)=>edgeKeys.has([a,b].sort().join('|'));
  const portals=[],pending=new Set(source.spaces.filter(s=>s.id!==root.id).map(s=>s.id));
  // Stable bounded search; positions depend on relations and requirements,
  // not building-type names or a fixed prior building grid.
@@ -175,8 +212,14 @@ export function layoutR190SemanticPlan(p,{strategy='centered'}={}){
      candidate.z+candidate.d>p.site.depth-2)continue;
     const portal=sharedPortal(parent,candidate,s.side);
     if(!portal)continue;
+    // A non-tree pair may physically share ONE actual wall only when the
+    // model demanded that extra link. Otherwise preserve the old no-overlap
+    // rule. Fail this candidate if any already-placed required link cannot
+    // receive a real two-wide seam portal.
     if([...placements.values()].some(existing=>existing.id!==parent.id&&
-      intersects(existing,candidate)))continue;
+      (isCross(existing.id,candidate.id)?
+       !r190SharedCrossPortal(existing,candidate):
+       intersects(existing,candidate))))continue;
     const common=overlap([parent.x,parent.x+parent.w-1],
       [candidate.x,candidate.x+candidate.w-1])*
       overlap([parent.z,parent.z+parent.d-1],
@@ -191,7 +234,13 @@ export function layoutR190SemanticPlan(p,{strategy='centered'}={}){
   return false;
  }
  ok(solve(),'NO_FEASIBLE_SPATIAL_LAYOUT');
- return {strategy,spaces:source.spaces.map(s=>placements.get(s.id)),portals,
+ const crossPortals=extra.map(([a,b])=>{
+  const portal=r190SharedCrossPortal(placements.get(a),placements.get(b));
+  ok(portal!==null,'NON_TREE_PORTAL_MISSING');
+  return portal;
+ });
+ return {strategy,spaces:source.spaces.map(s=>placements.get(s.id)),
+  portals:[...portals,...crossPortals],
   sourcePlanSha256:hash(source)};
 }
 function sourceDesign(p,l){
@@ -336,6 +385,30 @@ export function auditR190SourceRoutes(plan,layout,design,compiled){
   ok(portalAir.every(([a,b])=>!has(a,2,b)&&!has(a,3,b)),
    'PHYSICAL_DOOR_BLOCKED_'+v.a+'_'+v.b);
  }
+ // Prove independently of a topology graph that each model-requested
+ // shortcut has two physically supported pads traversable from the entry.
+ const linkedPortals=layout.portals.filter(p=>p.kind==='cross');
+ ok(linkedPortals.length===(plan.crossConnections??[]).length,
+  'CROSS_PORTAL_COUNT');
+ const crossWitnesses=[];
+ for(const [a,b] of plan.crossConnections??[]){
+  const portal=linkedPortals.find(v=>
+   (v.a===a&&v.b===b)||(v.a===b&&v.b===a));
+  ok(portal!==undefined,'CROSS_PORTAL_NOT_REALIZED');
+  const physicallyExpected=r190SharedCrossPortal(
+   layout.spaces.find(s=>s.id===a),layout.spaces.find(s=>s.id===b));
+  ok(physicallyExpected!==null&&portal.x===physicallyExpected.x&&
+   portal.z===physicallyExpected.z&&portal.axis===physicallyExpected.axis,
+   'CROSS_PORTAL_NOT_DIRECT');
+  const pads=portal.axis==='x'?
+   [[portal.x-1,portal.z],[portal.x,portal.z]]:
+   [[portal.x,portal.z-1],[portal.x,portal.z]];
+  ok(pads.every(([px,pz])=>stand(px,pz)&&seen.has(px+','+pz)),
+   'CROSS_PORTAL_NOT_TWO_WIDE_REACHABLE');
+  crossWitnesses.push({modelSpaceIds:[a,b],seam:portal,
+   walkingPads:pads.map(([px,pz])=>[px,2,pz]),
+   realSourceAirVerified:true,sourceWalkingOnly:true});
+ }
  // Prove source voxels really leave sky open across the courtyard's
  // inhabitable inner area. Do not mistake a walkable covered hall for a court.
  let skyColumns=0;
@@ -426,7 +499,9 @@ export function auditR190SourceRoutes(plan,layout,design,compiled){
    sourceModelAuthorship:'CALLER_PROVIDED_IR_UNVERIFIED',
    actualMinecraftWeatherproofing:'NOT_TESTED'};
  }
- return {roofForm:roofFormAudit,sourceWalkingPads:seen.size,
+ return {crossConnections:crossWitnesses,nonTreePortalCount:crossWitnesses.length,
+  nonTreePhysicalWalkableTwoWide:true,
+  roofForm:roofFormAudit,sourceWalkingPads:seen.size,
   facetedEnvelope:facetAudit,
   outdoorCourtCount:plan.spaces.filter(s=>s.spatialRole==='open-court').length,
   verifiedOpenSkyColumns:skyColumns,

@@ -260,3 +260,72 @@ test('R190-K invalid or inferred roof, roof leaks and shape injections HOLD',()=
  assert.throws(()=>auditR190SourceRoutes(p,r.layout,damaged,comp),
   /ROOF_SECTION_AIR_OR_STEP_SEAL_MISMATCH/);
 });
+
+
+test('R190-L model-authored non-tree room links become real two-wide B143 passages',()=>{
+ const p=structuredClone(cases[0]);
+ p.id='r190-model-shortcut';
+ p.spaces=[
+  {id:'arrival',purpose:'Shared community arrival',width:12,depth:12,height:8,
+   parentId:null,side:null,privacy:'public'},
+  {id:'making',purpose:'Hands-on workshop',width:12,depth:12,height:8,
+   parentId:'arrival',side:'east',privacy:'shared'},
+  {id:'storage',purpose:'Materials staging area',width:12,depth:12,height:8,
+   parentId:'arrival',side:'north',privacy:'private'}
+ ];
+ p.entrySpaceId='arrival';
+ p.crossConnections=[['making','storage']];
+ const before=JSON.stringify(p),result=compileR190SemanticPlan(p);
+ assert.equal(JSON.stringify(p),before);
+ assert.equal(result.layout.portals.length,3);
+ assert.equal(result.audit.nonTreePortalCount,1);
+ assert.equal(result.audit.nonTreePhysicalWalkableTwoWide,true);
+ assert.equal(result.audit.crossConnections.length,1);
+ assert.equal(result.audit.allProgramSpacesReachable,true);
+ const real=result.layout.portals.find(x=>x.kind==='cross');
+ assert.ok(real);assert.deepEqual([real.a,real.b],['making','storage']);
+ assert.equal(result.audit.crossConnections[0].realSourceAirVerified,true);
+ assert.ok(verifyCompiled(result.design,result.compiled));
+ assert.equal(result.art,'ART_HOLD');
+ assert.equal(result.readiness,'NOT_PREPARED');
+ assert.deepEqual(result.gates,Array(9).fill('BLOCKED'));
+ assert.deepEqual(result.BuildPlan.operations,[]);
+ assert.equal(result.worldContacts,0);assert.equal(result.worldWrites,0);
+ const source=structuredClone(result.design);
+ const index=result.layout.portals.findIndex(x=>x.kind==='cross');
+ source.elements.splice(source.elements.findIndex(x=>x.id==='adjacency-'+index),1);
+ const tampered=compileDesign(source);
+ assert.throws(()=>auditR190SourceRoutes(p,result.layout,source,tampered),
+  /PHYSICAL_DOOR_BLOCKED|CROSS_PORTAL_NOT_TWO_WIDE_REACHABLE/);
+ const legacy=structuredClone(p);delete legacy.crossConnections;
+ const base=compileR190SemanticPlan(legacy);
+ assert.equal(base.layout.portals.length,2);
+ assert.notEqual(base.compiled.geometrySha256,result.compiled.geometrySha256);
+});
+test('R190-L impossible direct links and invalid/duplicated links fail closed',()=>{
+ const p=structuredClone(cases[0]);
+ p.id='r190-unreachable-shortcut';
+ p.entrySpaceId='arrival';
+ p.spaces=[
+  {id:'arrival',purpose:'Central arrival',width:12,depth:12,height:8,
+   parentId:null,side:null,privacy:'public'},
+  {id:'left-wing',purpose:'Western work area',width:12,depth:12,height:8,
+   parentId:'arrival',side:'west',privacy:'shared'},
+  {id:'right-wing',purpose:'Eastern work area',width:12,depth:12,height:8,
+   parentId:'arrival',side:'east',privacy:'shared'}
+ ];
+ p.crossConnections=[['left-wing','right-wing']];
+ assert.throws(()=>compileR190SemanticPlan(p),/NO_FEASIBLE_SPATIAL_LAYOUT/);
+ const parent=structuredClone(p);parent.crossConnections=[['arrival','left-wing']];
+ assert.throws(()=>compileR190SemanticPlan(parent),/CROSS_CONNECTION_IS_TREE_EDGE/);
+ const duplicate=structuredClone(p);
+ duplicate.crossConnections=[['left-wing','right-wing'],['right-wing','left-wing']];
+ assert.throws(()=>compileR190SemanticPlan(duplicate),/CROSS_CONNECTION_DUPLICATE/);
+ const unknown=structuredClone(p);unknown.crossConnections=[['left-wing','/fill']];
+ assert.throws(()=>compileR190SemanticPlan(unknown),/CROSS_CONNECTION_PAIR/);
+ const self=structuredClone(p);self.crossConnections=[['left-wing','left-wing']];
+ assert.throws(()=>compileR190SemanticPlan(self),/CROSS_CONNECTION_PAIR/);
+ const injected=structuredClone(p);injected.crossConnections=[['left-wing','right-wing']];
+ injected.worldCommand='/fill';
+ assert.throws(()=>compileR190SemanticPlan(injected),/R190_SEMANTIC_FIELDS/);
+});
