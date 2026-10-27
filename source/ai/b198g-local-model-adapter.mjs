@@ -40,7 +40,8 @@ const SYSTEM=[
 
 export function createB198GLocalModelAdapter({
  model,endpoint=DEFAULT_LOCAL_ENDPOINT,fetcher=fetch,timeoutMs=120000,
- plannedSourceMode=false,reasoningEffort=undefined,maxOutputTokens=undefined
+ plannedSourceMode=false,reasoningEffort=undefined,maxOutputTokens=undefined,
+ onRawModelResponse=null
 }={}){
  if(typeof model!=='string'||!MODEL_RE.test(model))
   refuse('EXPLICIT_MODEL_ID_REQUIRED');
@@ -49,6 +50,8 @@ export function createB198GLocalModelAdapter({
   refuse('ONLY_EXPLICIT_127_0_0_1_CHAT_COMPLETIONS_ALLOWED');
  if(typeof fetcher!=='function')refuse('INVALID_FETCHER');
  if(typeof plannedSourceMode!=='boolean')refuse('INVALID_PLANNED_MODE');
+ if(onRawModelResponse!==null&&typeof onRawModelResponse!=='function')
+  refuse('INVALID_RAW_CAPTURE_CALLBACK');
  if(!Number.isSafeInteger(timeoutMs)||timeoutMs<1000||timeoutMs>900000)
   refuse('TIMEOUT_BOUNDS');
  if(reasoningEffort!==undefined&&!['none','low','medium','high'].includes(reasoningEffort))
@@ -91,9 +94,13 @@ export function createB198GLocalModelAdapter({
    if(!Array.isArray(data?.choices)||data.choices.length!==1)
     refuse('INVALID_RESPONSE_CHOICES');
    const choice=data.choices[0],raw=choice.message?.content;
-   if(choice.finish_reason==='length')refuse('TRUNCATED_MODEL_RESPONSE');
    if(typeof raw!=='string'||raw.length<10||raw.length>60000)
     refuse('INVALID_MODEL_CONTENT');
+   // Preserve exact provider content BEFORE JSON/source checks or truncation HOLD.
+   // The callback can record rejected output for an offline review without
+   // generating a second expensive model response or changing source bytes.
+   if(onRawModelResponse)onRawModelResponse(raw);
+   if(choice.finish_reason==='length')refuse('TRUNCATED_MODEL_RESPONSE');
    // A local provider is never a trusted source. Reuse the real strict adapter
    // grammar, and let B198A/B143 independently compile every proposed design.
    return plannedSourceMode?readR4PlannedProposal(raw):readModelProposal(raw);

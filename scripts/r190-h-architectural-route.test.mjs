@@ -4,6 +4,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import {createHash} from 'node:crypto';
+import http from 'node:http';
 import {parseR190Arguments,runR190Local} from './r190-local-semantic-run.mjs';
 const fixture=()=>({
  design:{schema:'minecraftaibuilder-b143-building-dsl-v1',designOnly:true,
@@ -66,6 +68,12 @@ test('H one mocked local provider response produces unchanged model B143 and act
   assert.equal(receipt.independentAcceptanceReview,'NOT_SUPPLIED');
   assert.equal(receipt.modelIdentityCryptographicallyVerified,false);
   assert.equal(receipt.hostFilledGeometry,false);
+  assert.equal(receipt.rawProviderBytesPreserved,true);
+  assert.equal(receipt.transport,'openai');
+  const savedRaw=fs.readFileSync(path.join(out,'R190_I_ORIGINAL_RESPONSE.txt'),'utf8');
+  assert.equal(savedRaw,JSON.stringify(fixture()));
+  assert.equal(receipt.originalRawSha256,createHash('sha256').update(savedRaw).digest('hex'));
+  assert.equal(fs.readFileSync(path.join(out,'R190_I_ORIGINAL_BRIEF.txt'),'utf8'),options.prompt);
   assert.equal(receipt.humanArtReview,'ART_HOLD');
   assert.equal(receipt.minecraftWalking,'NOT_TESTED');
   assert.equal(receipt.readiness,'NOT_PREPARED');
@@ -94,4 +102,82 @@ test('H rejects transport errors without writing any 3D or pretending a model ru
    fetcher:async()=>({ok:false,status:503})}),/LOCAL_HTTP_503/);
   assert.equal(fs.existsSync(out),false);
  }finally{fs.rmSync(root,{recursive:true,force:true});}
+});
+
+test('I captures rejected, unchanged source and request without constructing false 3D',async()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'r190i-invalid-'));
+ const out=path.join(root,'hold');
+ const invalid='{"design": {"schema":"bad"}, "explanation":"present", "assumptions":[], "spatialPlan":{}}';
+ try{
+  let calls=0;
+  const options=parseR190Arguments(sampleArgs(out));
+  await assert.rejects(()=>runR190Local(options,{fetcher:async()=>{
+   calls++;return {ok:true,json:async()=>({choices:[{
+    finish_reason:'stop',message:{content:invalid}}]})};
+  }}),/R190_I_CAPTURED_HOLD_/);
+  assert.equal(calls,1);
+  assert.equal(fs.readFileSync(path.join(out,'R190_I_ORIGINAL_RESPONSE.txt'),'utf8'),invalid);
+  assert.equal(fs.readFileSync(path.join(out,'R190_I_ORIGINAL_BRIEF.txt'),'utf8'),options.prompt);
+  const receipt=JSON.parse(fs.readFileSync(path.join(out,'R190_I_CAPTURE_RECEIPT.json')));
+  assert.equal(receipt.status,'HOLD_MODEL_RESPONSE_OR_SOURCE_INVALID');
+  assert.equal(receipt.sourceGenerated,false);
+  assert.equal(receipt.rawProviderBytesPreserved,true);
+  assert.deepEqual(receipt.gates,Array(9).fill('BLOCKED'));
+  assert.deepEqual(receipt.BuildPlan.operations,[]);
+  assert.equal(receipt.worldWrites,0);
+  assert.equal(fs.existsSync(path.join(out,'R190_H_REAL_B143_3D.html')),false);
+ }finally{fs.rmSync(root,{recursive:true,force:true});}
+});
+test('I truncated JSON response is still preserved as a HOLD, not claimed as architecture',async()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'r190i-truncated-'));
+ const out=path.join(root,'hold');
+ try{
+  await assert.rejects(()=>runR190Local(parseR190Arguments(sampleArgs(out)),{
+   fetcher:async()=>({ok:true,json:async()=>({choices:[{
+    finish_reason:'length',message:{content:'{"design":{"incomplete":true}'}
+   }]})})
+  }),/R190_I_CAPTURED_HOLD/);
+  assert.equal(fs.readFileSync(path.join(out,'R190_I_ORIGINAL_RESPONSE.txt'),'utf8'),
+   '{"design":{"incomplete":true}');
+  assert.equal(JSON.parse(fs.readFileSync(path.join(out,'R190_I_CAPTURE_RECEIPT.json')).
+   sourceGenerated,false);
+ }finally{fs.rmSync(root,{recursive:true,force:true});}
+});
+test('I reuses native localhost Ollama bridge and retains response bytes with no real model',async()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'r190i-native-'));
+ const out=path.join(root,'building');
+ let calls=0,request=null;
+ const server=http.createServer(async(req,res)=>{
+  calls++;let raw='';for await(const ch of req)raw+=String(ch);
+  request=JSON.parse(raw);
+  res.writeHead(200,{'Content-Type':'application/json'});
+  res.end(JSON.stringify({done:true,done_reason:'stop',
+   message:{content:JSON.stringify(fixture())},eval_count:100,eval_duration:1200000000}));
+ });
+ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+ try{
+  const options=parseR190Arguments([...sampleArgs(out),
+   '--transport','native','--endpoint',
+   'http://127.0.0.1:'+server.address().port+'/v1/chat/completions']);
+  const receipt=await runR190Local(options);
+  assert.equal(calls,1);
+  assert.equal(request.think,false);
+  assert.equal(request.stream,false);
+  assert.equal(request.format,'json');
+  assert.equal(receipt.transport,'native');
+  assert.equal(receipt.rawProviderBytesPreserved,true);
+  assert.equal(receipt.nativeOllamaTelemetry.length,1);
+  assert.equal(receipt.status,'SOURCE_AND_DECLARED_SPATIAL_CLAIMS_FORMALLY_PASS');
+  assert.equal(fs.readFileSync(path.join(out,'R190_I_ORIGINAL_RESPONSE.txt'),'utf8'),
+   JSON.stringify(fixture()));
+  assert.equal(receipt.worldWrites,0);assert.equal(receipt.worldContacts,0);
+ }finally{await new Promise(resolve=>server.close(resolve));
+  fs.rmSync(root,{recursive:true,force:true});}
+});
+test('I rejects native transport for semantic mode and unexpected transport',()=>{
+ assert.throws(()=>parseR190Arguments(['--model','fake-model','--prompt',
+  'Some building brief','--out','./out','--transport','native']),
+  /INVALID_TRANSPORT_FOR_MODE/);
+ assert.throws(()=>parseR190Arguments([...sampleArgs('./out'),'--transport','remote']),
+  /INVALID_TRANSPORT_FOR_MODE/);
 });

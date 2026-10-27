@@ -6,16 +6,18 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {createHash} from 'node:crypto';
+import {createB198SNativeBridge} from '../source/ai/b198s-native-ollama-source.mjs';
 import {createR190SemanticModelAdapter,createB198GLocalModelAdapter}
  from '../source/ai/b198g-local-model-adapter.mjs';
 import {reviewR4PlannedProposal} from '../source/ai/b198zr4-planned-source.mjs';
 import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
 import {renderR164Elevation} from './r164-exterior-audit.mjs';
-export const USAGE='--model MODEL --prompt REQUEST --out NEW_DIR [--mode semantic|architectural-b143] [--endpoint http://127.0.0.1:11434/v1/chat/completions] [--required capability1,capability2] [--expect expectations.json]';
+export const USAGE='--model MODEL --prompt REQUEST --out NEW_DIR [--mode semantic|architectural-b143] [--transport openai|native] [--endpoint http://127.0.0.1:11434/v1/chat/completions] [--required capability1,capability2] [--expect expectations.json]';
 export function parseR190Arguments(args){
  if(args.length===1&&args[0]==='--help')return {help:true};
  if(!args.length||args.length%2!==0)throw Error('R190_F_ARGUMENTS '+USAGE);
- const out={},allowed=new Set(['--model','--prompt','--out','--mode','--endpoint','--required','--expect']);
+ const out={},allowed=new Set(['--model','--prompt','--out','--mode','--transport','--endpoint','--required','--expect']);
  for(let i=0;i<args.length;i+=2){
   const k=args[i],v=args[i+1];
   if(!allowed.has(k)||Object.hasOwn(out,k)||!v)throw Error('R190_F_FLAG_'+k);
@@ -28,7 +30,10 @@ export function parseR190Arguments(args){
   throw Error('R190_H_INVALID_MODE');
  if(mode==='architectural-b143'&&(out['--required']||out['--expect']))
   throw Error('R190_H_DIRECT_MODE_CANNOT_CERTIFY_R190_EXPECTATIONS');
- return {mode,model:out['--model'],prompt:out['--prompt'],out:out['--out'],
+ const transport=out['--transport']??'openai';
+ if(!['openai','native'].includes(transport)||(mode!=='architectural-b143'&&transport!=='openai'))
+  throw Error('R190_I_INVALID_TRANSPORT_FOR_MODE');
+ return {mode,transport,model:out['--model'],prompt:out['--prompt'],out:out['--out'],
   endpoint:out['--endpoint'],
   requiredCapabilities:out['--required']?out['--required'].split(','):[],
   expectFile:out['--expect']??null};
@@ -39,16 +44,61 @@ export function parseR190Arguments(args){
  * R190 tree IR. Provider identity, natural-language coverage and art quality
  * remain unverified. All files are local source-only research.
  */
+const sha256=value=>createHash('sha256').update(value,'utf8').digest('hex');
 async function runR190ArchitecturalB143(options,target,fetcher){
  if(options.expectFile!==null||options.requiredCapabilities.length)
   throw Error('R190_H_DIRECT_MODE_CANNOT_CERTIFY_R190_EXPECTATIONS');
+ // R190-I: capture the exact original response for an expensive LOCAL run.
+ // Reuse B198S rather than inventing another native Ollama transport.
+ let originalRaw=null;
+ const native=(options.transport==='native')?createB198SNativeBridge({
+  plannedSourceMode:true,
+  onModelResponse:({originalContent})=>{originalRaw=originalContent;}
+ }):null;
  const generator=createB198GLocalModelAdapter({
-  model:options.model,plannedSourceMode:true,fetcher,
+  model:options.model,plannedSourceMode:true,
+  fetcher:native?.fetcher??fetcher,
+  onRawModelResponse:raw=>{
+   if(originalRaw!==null&&originalRaw!==raw)
+    throw Error('R190_I_PROVIDER_RAW_MISMATCH');
+   originalRaw=raw;
+  },
   ...(options.endpoint?{endpoint:options.endpoint}:{})
  });
- const modelResponse=await generator({mode:'creation',prompt:options.prompt,
-  previousDesign:null,feedback:[],attempt:1,maxAttempts:1});
- const review=reviewR4PlannedProposal(modelResponse);
+ const originalRequestSha256=sha256(options.prompt);
+ let review;
+ try{
+  const modelResponse=await generator({mode:'creation',prompt:options.prompt,
+   previousDesign:null,feedback:[],attempt:1,maxAttempts:1});
+  review=reviewR4PlannedProposal(modelResponse);
+ }catch(error){
+  // A reply that failed parsing or compiling is still critical evidence:
+  // keep its unchanged bytes and the brief, never synthesize replacement 3D.
+  // Failed connections without model content must NOT fabricate a run record.
+  if(originalRaw!==null){
+   const code=String(error?.message??'REJECTED').slice(0,160);
+   const hold={schema:'minecraftaibuilder-r190-i-capture-v1',
+    status:'HOLD_MODEL_RESPONSE_OR_SOURCE_INVALID',
+    failureCode:code,modelRequested:options.model,
+    transport:options.transport??'openai',providerResponseObserved:true,
+    originalRawSha256:sha256(originalRaw),originalRequestSha256,
+    rawProviderBytesPreserved:true,sourceGenerated:false,
+    modelIdentityCryptographicallyVerified:false,
+    independentRequestCoverage:'NOT_CERTIFIED',
+    humanArtReview:'ART_HOLD',minecraftWalking:'NOT_TESTED',
+    readiness:'NOT_PREPARED',constructionApproved:false,
+    executionAllowed:false,gates:Array(9).fill('BLOCKED'),
+    BuildPlan:{operations:[]},worldWrites:0,worldContacts:0};
+   fs.mkdirSync(target);
+   fs.writeFileSync(path.join(target,'R190_I_ORIGINAL_RESPONSE.txt'),originalRaw,{flag:'wx'});
+   fs.writeFileSync(path.join(target,'R190_I_ORIGINAL_BRIEF.txt'),options.prompt,{flag:'wx'});
+   fs.writeFileSync(path.join(target,'R190_I_CAPTURE_RECEIPT.json'),
+    JSON.stringify(hold,null,2)+'\n',{flag:'wx'});
+   const rejected=Error('R190_I_CAPTURED_HOLD_'+code);
+   rejected.code='R190_I_CAPTURED_HOLD';throw rejected;
+  }
+  throw error;
+ }
  const safety=review.safety;
  if(safety.readiness!=='NOT_PREPARED'||safety.constructionApproved!==false||
   safety.executionAllowed!==false||safety.worldWrites!==0||
@@ -75,7 +125,10 @@ async function runR190ArchitecturalB143(options,target,fetcher){
   hostFilledGeometry:false,hostFilledTopology:false,
   hostModifiedModelSource:false,modelIdentityCryptographicallyVerified:false,
   actualModelCallsByThisResearchRunner:1,
-  localProviderResponses:1,rawProviderBytesPreserved:false,
+  localProviderResponses:1,rawProviderBytesPreserved:true,
+  originalRawSha256:sha256(originalRaw),originalRequestSha256,
+  transport:options.transport??'openai',
+  nativeOllamaTelemetry:native?.telemetry()??null,
   modelRequested:options.model,
   designIntent:review.plan.designIntent,
   massStrategy:review.plan.massStrategy,
@@ -88,8 +141,11 @@ async function runR190ArchitecturalB143(options,target,fetcher){
   executionAllowed:false,gates:Array(9).fill('BLOCKED'),
   BuildPlan:{operations:[]},worldWrites:0,worldContacts:0
  };
+ if(originalRaw===null)throw Error('R190_I_MISSING_ORIGINAL_RESPONSE');
  // Save even a formal spatial HOLD for inspection; this is not construction.
  const outputs=new Map([
+  ['R190_I_ORIGINAL_RESPONSE.txt',originalRaw],
+  ['R190_I_ORIGINAL_BRIEF.txt',options.prompt],
   ['R190_H_MODEL_DESIGNED_B143.json',JSON.stringify(review.design,null,2)+'\n'],
   ['R190_H_MODEL_SPATIAL_PLAN.json',JSON.stringify(review.plan,null,2)+'\n'],
   ['R190_H_FORMAL_SOURCE_REVIEW.json',JSON.stringify({
