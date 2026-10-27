@@ -329,3 +329,43 @@ test('R190-L impossible direct links and invalid/duplicated links fail closed',(
  injected.worldCommand='/fill';
  assert.throws(()=>compileR190SemanticPlan(injected),/R190_SEMANTIC_FIELDS/);
 });
+
+test('R190-P physical model-selected exterior glazing is real glass and does not alter old model geometry',()=>{
+ const plan=structuredClone(cases[1]);
+ plan.glazedOpenings=[{spaceId:'showroom',face:'south',offset:3,baseY:6,width:4,height:3}];
+ const snapshot=JSON.stringify(plan),r=compileR190SemanticPlan(plan);
+ assert.equal(JSON.stringify(plan),snapshot);
+ assert.ok(verifyCompiled(r.design,r.compiled));
+ assert.equal(r.compiled.stats.layerCounts.glass,12);
+ assert.equal(r.audit.realGlazingCells,12);
+ assert.equal(r.audit.glazedOpenings[0].daylightSimulation,'NOT_PERFORMED');
+ assert.equal(r.audit.allProgramSpacesReachable,true);
+ assert.equal(r.worldWrites,0);assert.equal(r.worldContacts,0);
+ assert.equal(r.readiness,'NOT_PREPARED');
+ const base=structuredClone(plan);delete base.glazedOpenings;
+ const old=compileR190SemanticPlan(base);
+ assert.equal(old.compiled.stats.layerCounts.glass,0);
+ assert.notEqual(old.compiled.geometrySha256,r.compiled.geometrySha256);
+});
+test('R190-P glazing fails closed for injected attributes and invalid windows',()=>{
+ const plan=structuredClone(cases[1]),good={
+  spaceId:'showroom',face:'south',offset:3,baseY:6,width:4,height:3
+ };
+ plan.glazedOpenings=[good];
+ assert.equal(validateR190SemanticPlan(plan),true);
+ const injected=structuredClone(plan);injected.glazedOpenings[0].command='/setblock';
+ assert.throws(()=>compileR190SemanticPlan(injected),/GLAZING_FIELDS/);
+ const corner=structuredClone(plan);corner.glazedOpenings[0].offset=0;
+ assert.throws(()=>compileR190SemanticPlan(corner),/GLAZING_OUT_OF_WALL/);
+ const door=structuredClone(plan);door.glazedOpenings[0].baseY=3;
+ assert.throws(()=>compileR190SemanticPlan(door),/GLAZING_OUT_OF_WALL/);
+ const duplicate=structuredClone(plan);duplicate.glazedOpenings.push(good);
+ assert.throws(()=>compileR190SemanticPlan(duplicate),/GLAZING_DUPLICATE/);
+ const wrongRoom=structuredClone(plan);wrongRoom.glazedOpenings[0].spaceId='missing-room';
+ assert.throws(()=>compileR190SemanticPlan(wrongRoom),/GLAZING_ROOM_UNSUPPORTED/);
+ const bogus=structuredClone(plan);bogus.glazedOpenings=[];
+ assert.throws(()=>compileR190SemanticPlan(bogus),/GLAZING_COUNT/);
+ const internal=structuredClone(plan);internal.glazedOpenings[0].face='north';
+ assert.throws(()=>compileR190SemanticPlan(internal),
+  /GLAZING_NOT_EXTERIOR|GLAZING_AIR_BLOCKED|GLAZING_NOT_REAL_CUT/);
+});

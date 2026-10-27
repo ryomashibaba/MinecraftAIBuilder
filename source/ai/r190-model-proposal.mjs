@@ -81,7 +81,8 @@ export function readR190ModelProposal(raw,{
    'semanticPlan.materials',
    ...(response.semanticPlan.formIntent?['semanticPlan.formIntent']:[]),
    ...(response.semanticPlan.roofFormIntent?['semanticPlan.roofFormIntent']:[]),
-   ...(response.semanticPlan.crossConnections?['semanticPlan.crossConnections']:[])
+   ...(response.semanticPlan.crossConnections?['semanticPlan.crossConnections']:[]),
+   ...(response.semanticPlan.glazedOpenings?['semanticPlan.glazedOpenings']:[])
   ],
   hostFilledRoomGeometry:false,hostFilledRoomTopology:false,
   modelIdentityCryptographicallyVerified:false,
