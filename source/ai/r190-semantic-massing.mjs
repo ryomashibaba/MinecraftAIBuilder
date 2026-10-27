@@ -51,7 +51,7 @@ export function r190RoofElevation(index,span,form){
 export function validateR190SemanticPlan(p){
  const standard=['schema','id','title','brief','site','entrySpaceId','spaces','materials'];
  ok(Object.keys(p??{}).length>=standard.length&&
-  Object.keys(p??{}).every(k=>[...standard,'formIntent','roofFormIntent','crossConnections'].includes(k))&&
+  Object.keys(p??{}).every(k=>[...standard,'formIntent','roofFormIntent','crossConnections','glazedOpenings'].includes(k))&&
   standard.every(k=>Object.hasOwn(p,k)),'FIELDS');
  ok(p.schema===R190_SCHEMA&&slug(p.id)&&safeText(p.title,100)&&
   safeText(p.brief,400),'IDENTITY');
@@ -140,6 +140,28 @@ export function validateR190SemanticPlan(p){
    seen.add(key);
    ok(parents.get(a)!==b&&parents.get(b)!==a,
     'CROSS_CONNECTION_IS_TREE_EDGE');
+  }
+ }
+ // R190-P opt-in, entirely authored glazing locations; no typology templates.
+ if(p.glazedOpenings!==undefined){
+  ok(Array.isArray(p.glazedOpenings)&&p.glazedOpenings.length>=1&&
+   p.glazedOpenings.length<=8,'GLAZING_COUNT');
+  const seen=new Set();
+  for(const g of p.glazedOpenings){
+   ok(exact(g,['spaceId','face','offset','baseY','width','height'])&&
+    slug(g.spaceId)&&DIR.includes(g.face)&&
+    int(g.width,2,6)&&int(g.height,2,4)&&
+    Number.isSafeInteger(g.offset)&&Number.isSafeInteger(g.baseY),
+    'GLAZING_FIELDS');
+   const r=p.spaces.find(s=>s.id===g.spaceId);
+   ok(r&&r.spatialRole!=='open-court'&&p.formIntent?.spaceId!==r.id,
+    'GLAZING_ROOM_UNSUPPORTED');
+   const span=['north','south'].includes(g.face)?r.width:r.depth;
+   ok(g.offset>=2&&g.offset+g.width<=span-2&&
+    g.baseY>=5&&g.baseY+g.height<=r.height-1,
+    'GLAZING_OUT_OF_WALL');
+   const key=[g.spaceId,g.face,g.offset,g.baseY,g.width,g.height].join(':');
+   ok(!seen.has(key),'GLAZING_DUPLICATE');seen.add(key);
   }
  }
  return true;
@@ -242,6 +264,20 @@ export function layoutR190SemanticPlan(p,{strategy='centered'}={}){
  return {strategy,spaces:source.spaces.map(s=>placements.get(s.id)),
   portals:[...portals,...crossPortals],
   sourcePlanSha256:hash(source)};
+}
+export function r190GlazingCells(room,g){
+ const cells=[];
+ for(let y=g.baseY;y<g.baseY+g.height;y++)
+  for(let u=g.offset;u<g.offset+g.width;u++){
+   const x=g.face==='west'?room.x:g.face==='east'?
+    room.x+room.w-1:room.x+u;
+   const z=g.face==='south'?room.z:g.face==='north'?
+    room.z+room.d-1:room.z+u;
+   const dx=g.face==='east'?1:g.face==='west'?-1:0;
+   const dz=g.face==='north'?1:g.face==='south'?-1:0;
+   cells.push({x,y,z,dx,dz});
+  }
+ return cells;
 }
 function sourceDesign(p,l){
  const elements=[];
@@ -346,6 +382,15 @@ function sourceDesign(p,l){
  if(roles.get(entry.id)!=='open-court')
   box('entry-cut','cut',undefined,[doorX,2,entry.z],[2,3,1]);
  box('approach-floor','add',p.materials.floor,[doorX,1,entry.z-3],[2,1,3]);
+ for(const [i,g] of (p.glazedOpenings??[]).entries()){
+  const room=l.spaces.find(s=>s.id===g.spaceId);
+  const first=r190GlazingCells(room,g)[0];
+  const along=['north','south'].includes(g.face);
+  const origin=[first.x,g.baseY,first.z];
+  const size=along?[g.width,g.height,1]:[1,g.height,g.width];
+  box('glazing-cut-'+i,'cut',undefined,origin,size);
+  box('glazing-glass-'+i,'add','glass',origin,size);
+ }
  return {schema:B143,id:p.id,title:p.title,brief:p.brief,
   bounds:{width:p.site.width,height:p.site.height,depth:p.site.depth},
   designOnly:true,elements};
@@ -408,6 +453,42 @@ export function auditR190SourceRoutes(plan,layout,design,compiled){
   crossWitnesses.push({modelSpaceIds:[a,b],seam:portal,
    walkingPads:pads.map(([px,pz])=>[px,2,pz]),
    realSourceAirVerified:true,sourceWalkingOnly:true});
+ }
+ // Verify actual external glass-filled apertures in the compiled voxel set.
+ // Exterior is judged against other room bounds, not merely empty voxels:
+ // an unglazed neighboring ROOM would otherwise look like outside air.
+ const glazed=[],materials=new Map(compiled.primitives.map(v=>
+  [key(v[0],v[1],v[2]),v[3]]));
+ for(const [i,g] of (plan.glazedOpenings??[]).entries()){
+  const room=layout.spaces.find(r=>r.id===g.spaceId),
+   cells=r190GlazingCells(room,g),along=['north','south'].includes(g.face);
+  const cut=compiled.stats.designOperations.find(v=>v.element==='glazing-cut-'+i);
+  const add=compiled.stats.designOperations.find(v=>v.element==='glazing-glass-'+i);
+  ok(cut?.removed===cells.length&&add?.added===cells.length,
+   'GLAZING_NOT_REAL_CUT');
+  for(const q of cells){
+   ok(materials.get(key(q.x,q.y,q.z))===3,'GLAZING_NOT_REAL_GLASS');
+   ok(!has(q.x+q.dx,q.y,q.z+q.dz)&&
+    !has(q.x-q.dx,q.y,q.z-q.dz),'GLAZING_AIR_BLOCKED');
+   ok(!layout.spaces.some(s=>s.id!==g.spaceId&&
+    q.x+q.dx>=s.x&&q.x+q.dx<s.x+s.w&&
+    q.z+q.dz>=s.z&&q.z+q.dz<s.z+s.d),
+    'GLAZING_NOT_EXTERIOR');
+   if(q.y===g.baseY)ok(has(q.x,q.y-1,q.z),'GLAZING_SILL_MISSING');
+   if(q.y===g.baseY+g.height-1)
+    ok(has(q.x,q.y+1,q.z),'GLAZING_HEADER_MISSING');
+   const u=along?q.x:q.z,low=(along?room.x:room.z)+g.offset;
+   if(u===low)
+    ok(has(q.x-(along?1:0),q.y,q.z-(along?0:1)),
+     'GLAZING_SIDE_FRAME_MISSING');
+   if(u===low+g.width-1)
+    ok(has(q.x+(along?1:0),q.y,q.z+(along?0:1)),
+     'GLAZING_SIDE_FRAME_MISSING');
+  }
+  glazed.push({spaceId:g.spaceId,face:g.face,
+   modelSelectedOffset:g.offset,modelSelectedBaseY:g.baseY,
+   width:g.width,height:g.height,realExteriorGlassCells:cells.length,
+   sourceAirBothSides:true,framed:true,daylightSimulation:'NOT_PERFORMED'});
  }
  // Prove source voxels really leave sky open across the courtyard's
  // inhabitable inner area. Do not mistake a walkable covered hall for a court.
@@ -499,7 +580,9 @@ export function auditR190SourceRoutes(plan,layout,design,compiled){
    sourceModelAuthorship:'CALLER_PROVIDED_IR_UNVERIFIED',
    actualMinecraftWeatherproofing:'NOT_TESTED'};
  }
- return {crossConnections:crossWitnesses,nonTreePortalCount:crossWitnesses.length,
+ return {glazedOpenings:glazed,realGlazingCells:glazed.reduce((a,v)=>a+v.realExteriorGlassCells,0),
+  daylightSimulation:'NOT_PERFORMED',
+  crossConnections:crossWitnesses,nonTreePortalCount:crossWitnesses.length,
   nonTreePhysicalWalkableTwoWide:true,
   roofForm:roofFormAudit,sourceWalkingPads:seen.size,
   facetedEnvelope:facetAudit,
