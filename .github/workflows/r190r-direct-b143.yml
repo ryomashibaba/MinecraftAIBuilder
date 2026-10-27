@@ -1,0 +1,27 @@
+name: R190-R Same-Brief Direct-B143 (FAKE ONLY)
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'scripts/r190r-one-click-direct-study.mjs'
+      - 'scripts/r190r-one-click-direct-study.test.mjs'
+      - 'RUN_R190R_DIRECT_B143.cmd'
+      - '.github/workflows/r190r-direct-b143.yml'
+  pull_request:
+    paths:
+      - 'scripts/r190r-one-click-direct-study.mjs'
+      - 'scripts/r190r-one-click-direct-study.test.mjs'
+      - 'RUN_R190R_DIRECT_B143.cmd'
+      - '.github/workflows/r190r-direct-b143.yml'
+permissions:
+  contents: read
+jobs:
+  fake-only-direct-source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: node --check scripts/r190r-one-click-direct-study.mjs
+      - run: node --test scripts/r190r-one-click-direct-study.test.mjs
