@@ -53,6 +53,63 @@ export function measureR190TSource(design,spatialPlan=null){
     if(!seen[p]){seen[p]=1;queue[next++]=p}
    }
  }
+
+ // A supported point inside a sealed cavity is NOT a usable entrance.
+ // This deliberately tests only the horizontal, two-high AIR topology.
+ // Ground outside local bounds is unknown: never call this avatar walking.
+ const clearAirPair=(x,y,z)=>x>=0&&x<w&&z>=0&&z<d&&y>=0&&y+1<h&&
+  !cells[position(x,y,z,w,d)]&&!cells[position(x,y+1,z,w,d)];
+ const entranceBoundaryAirProxy=()=>{
+  if(!validEntrance)return false;
+  const [ex,ey,ez]=entrance,visited=new Uint8Array(w*d),
+   pending=new Int32Array(w*d);
+  let head=0,tail=0;
+  const origin=ez*w+ex;visited[origin]=1;pending[tail++]=origin;
+  while(head<tail){
+   const at=pending[head++],x=at%w,z=Math.floor(at/w);
+   if(x===0||x===w-1||z===0||z===d-1)return true;
+   for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]]){
+    const nx=x+dx,nz=z+dz;
+    if(!clearAirPair(nx,ey,nz))continue;
+    const p=nz*w+nx;
+    if(!visited[p]){visited[p]=1;pending[tail++]=p}
+   }
+  }
+  return false;
+ };
+ const modelDeclaredEntranceHorizontalAirToBoundaryProxy=entranceBoundaryAirProxy();
+ // Regions are UNTRUSTED MODEL DECLARATIONS, not independently assigned rooms.
+ // Report observed floor/air inside them without certifying their names.
+ const declaredZones=Array.isArray(spatialPlan?.functionalZones)?
+  spatialPlan.functionalZones:[];
+ const memberships=new Uint8Array(cells.length);
+ let zoneStandableOverlap=0;
+ const modelDeclaredZoneSamples=declaredZones.slice(0,12).map(zone=>{
+  const origin=zone?.origin,size=zone?.size,id=String(zone?.id??'').slice(0,60);
+  if(!Array.isArray(origin)||!Array.isArray(size)||
+     origin.length!==3||size.length!==3||
+     !origin.concat(size).every(Number.isSafeInteger)||
+     size.some(v=>v<1||v>128)||
+     origin.some((v,i)=>v<0||v+size[i]>[w,h,d][i]))
+   return {id,validRegion:false,supportedStandable:0,
+    entranceReachable:0,roofCoveredEntranceReachableProxy:0};
+  const [ox,oy,oz]=origin,[sx,sy,sz]=size;
+  let supported=0,reachable=0,coveredReachable=0;
+  for(let y=oy;y<oy+sy;y++)for(let z=oz;z<oz+sz;z++)
+   for(let x=ox;x<ox+sx;x++){
+    if(!stand(x,y,z))continue;
+    supported++;
+    const p=position(x,y,z,w,d);
+    if(memberships[p]++)zoneStandableOverlap++;
+    if(seen[p]){
+     reachable++;
+     if(tops[z*w+x]>y+1)coveredReachable++;
+    }
+   }
+  return {id,validRegion:true,supportedStandable:supported,
+   entranceReachable:reachable,
+   roofCoveredEntranceReachableProxy:coveredReachable};
+ });
  return {sourceSha256:compiled.sourceSha256,
   compiledGeometrySha256:compiled.geometrySha256,
   finalPhysicalVoxelSha256:SHA(compiled.primitives.map(p=>p.slice(0,4))),
@@ -67,6 +124,12 @@ export function measureR190TSource(design,spatialPlan=null){
   modelDeclaredEntranceStandable:!!validEntrance,
   reachableFromModelDeclaredEntrance:next,
   roofCoveredReachableProxy:connectedCovered,
+  modelDeclaredEntranceHorizontalAirToBoundaryProxy,
+  entranceReachableWithBoundaryAirProxy:
+   modelDeclaredEntranceHorizontalAirToBoundaryProxy?next:0,
+  modelDeclaredZoneCount:declaredZones.length,
+  modelDeclaredZonesTruncated:declaredZones.length>12,
+  modelDeclaredZoneSamples,modelDeclaredZoneStandableOverlap:zoneStandableOverlap,
   topSurfaceDistinctHeights:[...new Set(tops)].filter(x=>x>=0).length};
 }
 export function compareR190TSource({beforeDesign,afterDesign,beforePlan=null,afterPlan=null}){
@@ -81,12 +144,17 @@ export function compareR190TSource({beforeDesign,afterDesign,beforePlan=null,aft
    twoBlockStandable:after.twoBlockSupportedStandablePositions-before.twoBlockSupportedStandablePositions,
    roofCoveredProxy:after.roofCoveredStandableProxy-before.roofCoveredStandableProxy,
    denseLayerFraction:Number((after.denseLayerFraction-before.denseLayerFraction).toFixed(5)),
-   entranceValidityChanged:before.modelDeclaredEntranceStandable!==after.modelDeclaredEntranceStandable
+   entranceValidityChanged:before.modelDeclaredEntranceStandable!==after.modelDeclaredEntranceStandable,
+   boundaryAirEscapeChanged:before.modelDeclaredEntranceHorizontalAirToBoundaryProxy!==
+    after.modelDeclaredEntranceHorizontalAirToBoundaryProxy
   },limitations:{
    nonidenticalDimensionsAndModelDeclaredProgramsMayLimitComparison:true,
    actualEnclosedRoomsNotVerified:true,exhibitToRepairConnectionNotVerified:true,
    sawtoothRoofNotVerified:true,architecturalOriginalityNotVerified:true,
-   roofCoveredIsProxyOnly:true,actualMinecraftWalking:'NOT_TESTED',
+   roofCoveredIsProxyOnly:true,
+   horizontalAirToBoundaryDoesNotProveExteriorGroundOrWalking:true,
+   modelDeclaredZonesAreNotIndependentRoomAssignments:true,
+   actualMinecraftWalking:'NOT_TESTED',
    humanArtReview:'ART_HOLD'},
   numericArchitecturalWinner:'NOT_ESTABLISHED',modelCalls:0,...safety()};
 }

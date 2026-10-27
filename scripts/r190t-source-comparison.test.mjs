@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {compareR190TSource,renderR190TPair} from './r190t-source-comparison.mjs';
+import {measureR190TSource,compareR190TSource,renderR190TPair} from './r190t-source-comparison.mjs';
 const common={schema:'minecraftaibuilder-b143-building-dsl-v1',
  id:'r190t-source-fixture',title:'Synthetic architecture study',
  brief:'Independent TEST source, not a Qwen result',designOnly:true,
@@ -61,4 +61,40 @@ test('T: invalid source never yields an invented voxel comparison',()=>{
  material:'stone',origin:[23,13,23],size:[2,2,2]});
  assert.throws(()=>compareR190TSource({beforeDesign:solid(),afterDesign:invalid}),
  /B143_/);
+});
+
+test('T: a standable sealed room cannot masquerade as an outside entrance',()=>{
+ const closed=hollow();
+ closed.elements=closed.elements.filter(e=>e.id!=='door');
+ const inner={entrance:[12,2,3]};
+ const pair=compareR190TSource({beforeDesign:closed,afterDesign:hollow(),
+  beforePlan:inner,afterPlan:inner});
+ assert.equal(pair.before.modelDeclaredEntranceStandable,true);
+ assert.ok(pair.before.reachableFromModelDeclaredEntrance>0);
+ assert.equal(pair.before.modelDeclaredEntranceHorizontalAirToBoundaryProxy,false);
+ assert.equal(pair.before.entranceReachableWithBoundaryAirProxy,0);
+ assert.equal(pair.after.modelDeclaredEntranceHorizontalAirToBoundaryProxy,true);
+ assert.ok(pair.after.entranceReachableWithBoundaryAirProxy>0);
+ assert.equal(pair.deltas.boundaryAirEscapeChanged,true);
+ assert.equal(pair.numericArchitecturalWinner,'NOT_ESTABLISHED');
+ assert.equal(pair.worldWrites,0);
+});
+test('T: claimed rooms are measured as regions, never counted as certified rooms',()=>{
+ const overlap={entrance:[12,2,3],functionalZones:[
+  {id:'exhibition',origin:[4,2,4],size:[6,3,6]},
+  {id:'workshop',origin:[6,2,6],size:[6,3,6]},
+  {id:'invalid-zone',origin:[200,2,6],size:[6,3,6]}
+ ]};
+ const hollowResult=measureR190TSource(hollow(),overlap);
+ assert.equal(hollowResult.modelDeclaredZoneCount,3);
+ assert.equal(hollowResult.modelDeclaredZoneSamples[0].validRegion,true);
+ assert.ok(hollowResult.modelDeclaredZoneSamples[0].supportedStandable>0);
+ assert.ok(hollowResult.modelDeclaredZoneSamples[0].entranceReachable>0);
+ assert.ok(hollowResult.modelDeclaredZoneSamples[0].roofCoveredEntranceReachableProxy>0);
+ assert.ok(hollowResult.modelDeclaredZoneStandableOverlap>0);
+ assert.equal(hollowResult.modelDeclaredZoneSamples[2].validRegion,false);
+ const solidResult=measureR190TSource(solid(),overlap);
+ assert.equal(solidResult.modelDeclaredZoneSamples[0].supportedStandable,0);
+ assert.equal(solidResult.modelDeclaredZoneStandableOverlap,0);
+ assert.equal(hollowResult.modelDeclaredEntranceHorizontalAirToBoundaryProxy,true);
 });
