@@ -181,3 +181,55 @@ test('I rejects native transport for semantic mode and unexpected transport',()=
  assert.throws(()=>parseR190Arguments([...sampleArgs('./out'),'--transport','remote']),
   /INVALID_TRANSPORT_FOR_MODE/);
 });
+
+test('J preserves valid model B143 as genuinely compiled 3D when its own spatial claims are invalid',async()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'r190j-b143-hold-'));
+ const out=path.join(root,'review');
+ const bad=fixture();bad.spatialPlan.entrance=[5,5,5];
+ const original=JSON.stringify(bad);
+ let calls=0;
+ try{
+  await assert.rejects(()=>runR190Local(parseR190Arguments(sampleArgs(out)),{
+   fetcher:async()=>{calls++;return {ok:true,json:async()=>({choices:[{
+    finish_reason:'stop',message:{content:original}
+   }]})};}
+  }),/R190_I_CAPTURED_HOLD/);
+  assert.equal(calls,1);
+  assert.equal(fs.readFileSync(path.join(out,'R190_I_ORIGINAL_RESPONSE.txt'),'utf8'),original);
+  const receipt=JSON.parse(fs.readFileSync(path.join(out,'R190_I_CAPTURE_RECEIPT.json')));
+  assert.equal(receipt.status,'HOLD_MODEL_RESPONSE_OR_SPATIAL_REVIEW');
+  assert.equal(receipt.providerConfirmedComplete,true);
+  assert.equal(receipt.sourceGenerated,false);
+  assert.equal(receipt.unapprovedGeometryEvidence.status,'COMPILED_B143_ONLY_R4_SPATIAL_HOLD');
+  assert.equal(receipt.unapprovedGeometryEvidence.real3DFromModelSource,true);
+  assert.equal(receipt.unapprovedGeometryEvidence.strictR4ReviewAccepted,false);
+  assert.equal(receipt.unapprovedGeometryEvidence.humanArtReview,'ART_HOLD');
+  assert.equal(receipt.unapprovedGeometryEvidence.independentUserRequestCoverage,false);
+  assert.ok(receipt.unapprovedGeometryEvidence.trueB143Voxels>100);
+  assert.deepEqual(JSON.parse(fs.readFileSync(path.join(out,'R190_J_HOLD_MODEL_B143.json')),bad.design);
+  assert.match(fs.readFileSync(path.join(out,'R190_J_HOLD_B143_3D.html'),'utf8'),
+   /r190-h-mock-building/);
+  for(const side of ['front','rear','west','east','roof'])
+   assert.match(fs.readFileSync(path.join(out,'R190_J_HOLD_'+side+'.svg'),'utf8'),/<svg/);
+  assert.ok(fs.existsSync(path.join(out,'R190_J_GLOBAL_DIAGNOSTIC.json')));
+  assert.deepEqual(receipt.gates,Array(9).fill('BLOCKED'));
+  assert.deepEqual(receipt.BuildPlan.operations,[]);
+  assert.equal(receipt.worldWrites,0);assert.equal(receipt.worldContacts,0);
+ }finally{fs.rmSync(root,{recursive:true,force:true});}
+});
+test('J never renders apparently complete B143 from provider-reported truncated answer',async()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'r190j-truncation-'));
+ const out=path.join(root,'review'),raw=JSON.stringify(fixture());
+ try{
+  await assert.rejects(()=>runR190Local(parseR190Arguments(sampleArgs(out)),{
+   fetcher:async()=>({ok:true,json:async()=>({choices:[{
+    finish_reason:'length',message:{content:raw}
+   }]})})
+  }),/R190_I_CAPTURED_HOLD/);
+  const receipt=JSON.parse(fs.readFileSync(path.join(out,'R190_I_CAPTURE_RECEIPT.json')));
+  assert.equal(receipt.providerConfirmedComplete,false);
+  assert.equal(receipt.unapprovedGeometryEvidence.real3DFromModelSource,false);
+  assert.equal(fs.existsSync(path.join(out,'R190_J_HOLD_B143_3D.html')),false);
+  assert.equal(fs.readFileSync(path.join(out,'R190_I_ORIGINAL_RESPONSE.txt'),'utf8'),raw);
+ }finally{fs.rmSync(root,{recursive:true,force:true});}
+});

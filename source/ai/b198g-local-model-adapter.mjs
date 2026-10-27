@@ -99,7 +99,7 @@ export function createB198GLocalModelAdapter({
    // Preserve exact provider content BEFORE JSON/source checks or truncation HOLD.
    // The callback can record rejected output for an offline review without
    // generating a second expensive model response or changing source bytes.
-   if(onRawModelResponse)onRawModelResponse(raw);
+   if(onRawModelResponse)onRawModelResponse(raw,{finishReason:choice.finish_reason??null});
    if(choice.finish_reason==='length')refuse('TRUNCATED_MODEL_RESPONSE');
    // A local provider is never a trusted source. Reuse the real strict adapter
    // grammar, and let B198A/B143 independently compile every proposed design.

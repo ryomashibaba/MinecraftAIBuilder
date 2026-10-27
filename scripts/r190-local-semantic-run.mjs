@@ -8,6 +8,8 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {createB198SNativeBridge} from '../source/ai/b198s-native-ollama-source.mjs';
+import {compileDesign,verifyCompiled} from '../source/ai/b143-building-dsl.mjs';
+import {inspectR49GlobalConsistency} from '../source/ai/b198zr49-global-source-consistency.mjs';
 import {createR190SemanticModelAdapter,createB198GLocalModelAdapter}
  from '../source/ai/b198g-local-model-adapter.mjs';
 import {reviewR4PlannedProposal} from '../source/ai/b198zr4-planned-source.mjs';
@@ -50,7 +52,7 @@ async function runR190ArchitecturalB143(options,target,fetcher){
   throw Error('R190_H_DIRECT_MODE_CANNOT_CERTIFY_R190_EXPECTATIONS');
  // R190-I: capture the exact original response for an expensive LOCAL run.
  // Reuse B198S rather than inventing another native Ollama transport.
- let originalRaw=null;
+ let originalRaw=null,providerFinishReason=null;
  const native=(options.transport==='native')?createB198SNativeBridge({
   plannedSourceMode:true,
   onModelResponse:({originalContent})=>{originalRaw=originalContent;}
@@ -58,10 +60,11 @@ async function runR190ArchitecturalB143(options,target,fetcher){
  const generator=createB198GLocalModelAdapter({
   model:options.model,plannedSourceMode:true,
   fetcher:native?.fetcher??fetcher,
-  onRawModelResponse:raw=>{
+  onRawModelResponse:(raw,{finishReason}={})=>{
    if(originalRaw!==null&&originalRaw!==raw)
     throw Error('R190_I_PROVIDER_RAW_MISMATCH');
    originalRaw=raw;
+   providerFinishReason=typeof finishReason==='string'?finishReason.slice(0,32):null;
   },
   ...(options.endpoint?{endpoint:options.endpoint}:{})
  });
@@ -77,12 +80,63 @@ async function runR190ArchitecturalB143(options,target,fetcher){
   // Failed connections without model content must NOT fabricate a run record.
   if(originalRaw!==null){
    const code=String(error?.message??'REJECTED').slice(0,160);
-   const hold={schema:'minecraftaibuilder-r190-i-capture-v1',
-    status:'HOLD_MODEL_RESPONSE_OR_SOURCE_INVALID',
+   // A defective self-declared R4 spatial plan does not automatically mean
+   // its model-authored B143 geometry is invalid. Preserve the source as-is
+   // and produce SOURCE-ONLY 3D for human investigation when and ONLY when
+   // the complete provider response passes strict B143 compilation.
+   const nativeComplete=native===null||native.telemetry().at(-1)?.complete===true;
+   const providerConfirmedComplete=providerFinishReason==='stop'&&nativeComplete;
+   let diagnostic;
+   try{diagnostic=inspectR49GlobalConsistency(originalRaw);}
+   catch{diagnostic={status:'HOLD_DIAGNOSTIC_UNAVAILABLE',modelCalls:0};}
+   let geometryEvidence=null,geometryFiles=new Map();
+   if(providerConfirmedComplete){
+    try{
+     const modelDesign=JSON.parse(originalRaw)?.design;
+     const compiled=compileDesign(modelDesign);
+     if(!verifyCompiled(modelDesign,compiled))
+      throw Error('R190_J_B143_SHA_MISMATCH');
+     const gallery=compileB143Gallery([modelDesign]);
+     if(gallery.sourceHashes[0]!==compiled.sourceSha256||
+        gallery.geometryHashes[0]!==compiled.geometrySha256)
+      throw Error('R190_J_GALLERY_MISMATCH');
+     const template=fs.readFileSync(path.resolve(
+      path.dirname(fileURLToPath(import.meta.url)),
+      '../source/ai/b143-viewer-template.html'),'utf8');
+     geometryFiles.set('R190_J_HOLD_B143_3D.html',
+      renderB143Html(gallery,template));
+     for(const side of ['front','rear','west','east','roof'])
+      geometryFiles.set('R190_J_HOLD_'+side+'.svg',
+       renderR164Elevation(compiled,modelDesign,side));
+     geometryFiles.set('R190_J_HOLD_MODEL_B143.json',
+      JSON.stringify(modelDesign,null,2)+'\n');
+     geometryEvidence={
+      status:'COMPILED_B143_ONLY_R4_SPATIAL_HOLD',
+      strictR4ReviewAccepted:false,sourceOnly:true,
+      modelSourceWasModified:false,
+      sourceSha256:compiled.sourceSha256,
+      geometrySha256:compiled.geometrySha256,
+      trueB143Voxels:compiled.primitives.length,
+      real3DFromModelSource:true,independentUserRequestCoverage:false,
+      humanArtReview:'ART_HOLD',minecraftWalking:'NOT_TESTED'
+     };
+    }catch{
+     geometryEvidence={status:'HOLD_B143_GEOMETRY_OR_VIEWER_INVALID',
+      strictR4ReviewAccepted:false,real3DFromModelSource:false,
+      humanArtReview:'ART_HOLD'};
+     geometryFiles.clear();
+    }
+   }else geometryEvidence={status:'HOLD_PROVIDER_RESPONSE_NOT_CONFIRMED_COMPLETE',
+    strictR4ReviewAccepted:false,real3DFromModelSource:false,
+    humanArtReview:'ART_HOLD'};
+   const hold={schema:'minecraftaibuilder-r190-j-capture-v1',
+    status:'HOLD_MODEL_RESPONSE_OR_SPATIAL_REVIEW',
     failureCode:code,modelRequested:options.model,
     transport:options.transport??'openai',providerResponseObserved:true,
+    providerFinishReason,providerConfirmedComplete,
     originalRawSha256:sha256(originalRaw),originalRequestSha256,
     rawProviderBytesPreserved:true,sourceGenerated:false,
+    unapprovedGeometryEvidence:geometryEvidence,
     modelIdentityCryptographicallyVerified:false,
     independentRequestCoverage:'NOT_CERTIFIED',
     humanArtReview:'ART_HOLD',minecraftWalking:'NOT_TESTED',
@@ -92,6 +146,10 @@ async function runR190ArchitecturalB143(options,target,fetcher){
    fs.mkdirSync(target);
    fs.writeFileSync(path.join(target,'R190_I_ORIGINAL_RESPONSE.txt'),originalRaw,{flag:'wx'});
    fs.writeFileSync(path.join(target,'R190_I_ORIGINAL_BRIEF.txt'),options.prompt,{flag:'wx'});
+   fs.writeFileSync(path.join(target,'R190_J_GLOBAL_DIAGNOSTIC.json'),
+    JSON.stringify(diagnostic,null,2)+'\n',{flag:'wx'});
+   for(const [name,value] of geometryFiles)
+    fs.writeFileSync(path.join(target,name),value,{flag:'wx'});
    fs.writeFileSync(path.join(target,'R190_I_CAPTURE_RECEIPT.json'),
     JSON.stringify(hold,null,2)+'\n',{flag:'wx'});
    const rejected=Error('R190_I_CAPTURED_HOLD_'+code);
