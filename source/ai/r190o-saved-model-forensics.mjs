@@ -180,9 +180,9 @@ export function exploreR190OCounterfactual(raw){
   }
  }
  try{validateR190SemanticPlan(shadow);}
- catch(e)return {original:inspection,changes,outcomes,previews,
+ catch(e){return {original:inspection,changes,outcomes,previews,
   counterfactualStatus:'HOLD_SHADOW_IR_INVALID',
-  counterfactualFailure:String(e?.message??e),shadowPlan:shadow};
+  counterfactualFailure:String(e?.message??e),shadowPlan:shadow};}
  for(const strategy of R190_LAYOUT_STRATEGIES){
   try{
    const candidate=compileR190SemanticPlan(shadow,{layoutStrategy:strategy});
