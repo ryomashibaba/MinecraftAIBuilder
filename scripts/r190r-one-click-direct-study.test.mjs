@@ -72,7 +72,7 @@ test('R190-R fake response compiles genuine B143, reuses verified original with 
 test('R190-R malformed provider reply saved as HOLD; never create fake 3D',async()=>{
  const root=temporary();let n=0;
  try{
-  const f=async(...args)=>{n++;return fetchFor('{BAD_JSON')(...args)};
+  const f=async(...args)=>{n++;return fetchFor('{"broken":true')(...args)};
   const a=await runR190RStudy([],{evidenceRoot:root,
    semanticEvidenceRoot:path.join(root,'none'),transport:'openai',
    fetcher:f,timestamp:()=>102});
@@ -80,7 +80,7 @@ test('R190-R malformed provider reply saved as HOLD; never create fake 3D',async
   assert.equal(a.previewAvailable,false);
   assert.equal(n,2);
   assert.equal(fs.readFileSync(path.join(a.directory,
-   'R190_I_ORIGINAL_RESPONSE.txt'),'utf8'),'{BAD_JSON');
+   'R190_I_ORIGINAL_RESPONSE.txt'),'utf8'),'{"broken":true');
   assert.equal(fs.existsSync(path.join(a.directory,'R190_H_REAL_B143_3D.html')),false);
   const b=await runR190RStudy([],{evidenceRoot:root,
    fetcher:()=>{throw Error('FORBIDDEN_NEW_MODEL_REQUEST')}});
