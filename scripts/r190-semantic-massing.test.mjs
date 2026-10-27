@@ -194,8 +194,9 @@ test('R190-D: rejects unknown face, incompatible dimensions, and covered faceted
 });
 
 test('R190-K model-authored sawtooth roof builds real raised interior and solid gables',()=>{
- const a=structuredClone(cases[1]),before=JSON.stringify(a);
+ const a=structuredClone(cases[1]);
  a.roofFormIntent={spaceId:'showroom',profile:'sawtooth',axis:'x',rise:4,toothWidth:5};
+ const before=JSON.stringify(a);
  const r=compileR190SemanticPlan(a),roof=r.audit.roofForm;
  assert.equal(JSON.stringify(a),before);
  assert.equal(r.design.elements.some(e=>e.id==='showroom-roof'),false);
