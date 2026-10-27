@@ -44,6 +44,20 @@ function runTest(change=()=>{}){
  assert.equal(result.worldContacts,0);
  assert.deepEqual(result.gates,Array(9).fill('BLOCKED'));
  assert.ok(fs.existsSync(path.join(home,'result','R190Q_OFFLINE_INDEPENDENT_REVIEW.json')));
+ const previewPath=path.join(home,'result','R190Q_ORIGINAL_DIRECT_B143_3D.html');
+ if(result.originalModelAuthoredB143Preview){
+  assert.ok(fs.existsSync(previewPath));
+  const html=fs.readFileSync(previewPath,'utf8');
+  assert.ok(html.includes(result.b143GeometrySha256));
+  assert.ok(html.includes(result.b143SourceSha256));
+  assert.equal(result.previewSourceSha256,result.b143SourceSha256);
+  assert.equal(result.previewMeansArtApproval,false);
+  for(const side of ['FRONT','REAR','WEST','EAST','ROOF']){
+   const svg=fs.readFileSync(path.join(home,'result',
+    'R190Q_ORIGINAL_DIRECT_'+side+'.svg'),'utf8');
+   assert.match(svg,/<svg /);
+  }
+ }else assert.equal(fs.existsSync(previewPath),false);
  assert.throws(()=>reviewSavedR190QDirect({rawFile,contractFile,
   out:path.join(home,'result')}),/R190Q_REFUSE_EXISTING_OUTPUT/);
  fs.rmSync(home,{recursive:true,force:true});
@@ -55,17 +69,20 @@ test('independent external contract passes separately; no model replay',()=>{
  assert.equal(r.independentReview.status,'FORMAL_GEOMETRY_AND_ROUTE_CONSTRAINTS_PASS');
  assert.equal(r.humanArtReview,'ART_HOLD');
  assert.equal(r.independentNaturalLanguageCoverageCertified,false);
+ assert.equal(r.originalModelAuthoredB143Preview,true);
 });
 test('independent unreachable destination cannot be self-certified',()=>{
  const r=runTest(c=>{c.destinations[0].point=[23,2,23]});
  assert.equal(r.status,'HOLD_SPATIAL_PLAN_OR_INDEPENDENT_CONTRACT');
  assert.equal(r.originalModelDeclaredReview.status,'FORMAL_GEOMETRY_AND_ROUTE_CONSTRAINTS_PASS');
  assert.equal(r.independentReview.status,'HOLD_FUNCTIONAL_CONTRACT_FAILURE');
+ assert.equal(r.originalModelAuthoredB143Preview,true);
 });
 test('wrong pinned source SHA fails closed without altering original',()=>{
  const r=runTest(c=>{c.sourceSha256='0'.repeat(64)});
  assert.equal(r.status,'HOLD_ORIGINAL_OR_INDEPENDENT_REVIEW_INVALID');
  assert.match(r.failureReason,/SOURCE_SHA_STALE/);
+ assert.equal(r.originalModelAuthoredB143Preview,false);
 });
 test('model-owned contract masquerading as independent one is blocked',()=>{
  const r=runTest(c=>{c.authorship='MODEL_DECLARED_UNVERIFIED'});

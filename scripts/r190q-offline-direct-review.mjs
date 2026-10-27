@@ -8,6 +8,8 @@ import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import {reviewR4PlannedProposal} from '../source/ai/b198zr4-planned-source.mjs';
+import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
+import {renderR164Elevation} from './r164-exterior-audit.mjs';
 const digest=s=>createHash('sha256').update(s).digest('hex');
 const safety=()=>({readiness:'NOT_PREPARED',constructionApproved:false,
  executionAllowed:false,worldContacts:0,worldWrites:0,
@@ -37,12 +39,32 @@ export function reviewSavedR190QDirect({rawFile,contractFile,out}={}){
   hostDesignedOrRepairedGeometry:false,humanArtReview:'ART_HOLD',
   realMinecraftWalking:'NOT_TESTED',...safety()};
  let result;
+ let previewFiles=[];
  try{
   const contract=JSON.parse(contractBytes);
   if(contract?.authorship!=='INDEPENDENT_REVIEW_DRAFT')
    refuse('INDEPENDENT_CONTRACT_REQUIRED');
   const review=reviewR4PlannedProposal(raw,{independentContract:contract});
+  // Preview is the model-declared ORIGINAL B143, even when a functional
+  // constraint fails. A valid source is not an approved building.
+  const gallery=compileB143Gallery([review.design]);
+  if(gallery.sourceHashes[0]!==review.compiled.sourceSha256||
+     gallery.geometryHashes[0]!==review.compiled.geometrySha256)
+   refuse('PREVIEW_SOURCE_MISMATCH');
+  const template=fs.readFileSync(path.resolve(
+   path.dirname(fileURLToPath(import.meta.url)),
+   '../source/ai/b143-viewer-template.html'),'utf8');
+  previewFiles=[
+   ['R190Q_ORIGINAL_DIRECT_B143_3D.html',renderB143Html(gallery,template)],
+   ['R190Q_ORIGINAL_DIRECT_B143.json',JSON.stringify(review.design,null,2)+'\n'],
+   ...['front','rear','west','east','roof'].map(side=>[
+    'R190Q_ORIGINAL_DIRECT_'+side.toUpperCase()+'.svg',
+    renderR164Elevation(review.compiled,review.design,side)])
+  ];
   result={...base,status:review.status,
+   originalModelAuthoredB143Preview:true,
+   previewMeansArtApproval:false,
+   previewSourceSha256:review.compiled.sourceSha256,
    originalModelDeclaredReview:review.declaredPlanReview,
    independentReview:review.independentReview,
    b143SourceSha256:review.compiled.sourceSha256,
@@ -53,7 +75,8 @@ export function reviewSavedR190QDirect({rawFile,contractFile,out}={}){
  }catch(e){
   // Preserve a failed provider response's original bytes in place. Nothing
   // is auto-normalized, re-sampled, or used to manufacture a passing model.
-  result={...base,status:'HOLD_ORIGINAL_OR_INDEPENDENT_REVIEW_INVALID',
+  result={...base,originalModelAuthoredB143Preview:false,
+   status:'HOLD_ORIGINAL_OR_INDEPENDENT_REVIEW_INVALID',
    failureReason:String(e?.message??e).slice(0,240),
    independentNaturalLanguageCoverageCertified:false,
    noClaimOfAestheticAcceptance:true};
@@ -61,6 +84,10 @@ export function reviewSavedR190QDirect({rawFile,contractFile,out}={}){
  fs.mkdirSync(target);
  fs.writeFileSync(path.join(target,'R190Q_OFFLINE_INDEPENDENT_REVIEW.json'),
   JSON.stringify(result,null,2)+'\n',{flag:'wx'});
+ for(const [name,contents] of previewFiles)
+  fs.writeFileSync(path.join(target,name),contents,{flag:'wx'});
+ if(digest(fs.readFileSync(rawPath,'utf8'))!==base.originalRawSha256)
+  refuse('ORIGINAL_CHANGED_DURING_REVIEW');
  return {outputDirectory:target,...result};
 }
 function parse(args){
