@@ -141,3 +141,14 @@ test('X: missing one real source stays HOLD and never manufactures evidence',()=
   assert.equal(r.status,'HOLD_SAVED_REAL_MODEL_RESULTS_MISSING');
  }finally{fs.rmSync(root,{recursive:true,force:true})}
 });
+
+test('X: an explicit destination with absent parent must never create directories',()=>{
+ const root=dir();
+ try{
+  const p=bundle(root);
+  const unknown=path.join(root,'nonexistent','report');
+  assert.throws(()=>compareR190XSaved({
+   from:p.b,s:p.s,w:p.w,out:unknown}),/R190X_OUTPUT_PARENT_MISSING/);
+  assert.equal(fs.existsSync(path.join(root,'nonexistent')),false);
+ }finally{fs.rmSync(root,{recursive:true,force:true})}
+});

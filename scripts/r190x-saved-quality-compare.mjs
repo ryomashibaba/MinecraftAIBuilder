@@ -164,6 +164,13 @@ export function compareR190XSaved({from=null,s=null,w=null,out=null}={}){
   BuildPlan:{operations:[]},worldContacts:0,worldWrites:0};
  const dest=path.resolve(out??path.join(R190X_ROOT,'r190x-'+Date.now()+'-'+process.pid));
  if(fs.existsSync(dest))error('OUTPUT_ALREADY_EXISTS');
+ // First-use one-click creates only a fresh evidence directory beneath the
+ // existing canonical project, NEVER another checkout or world directory.
+ if(!folder(path.dirname(dest))){
+  if(out!==null||!folder(path.dirname(R190X_ROOT)))
+   error('OUTPUT_PARENT_MISSING');
+  fs.mkdirSync(R190X_ROOT);
+ }
  if(!folder(path.dirname(dest)))error('OUTPUT_PARENT_MISSING');
  const template=read(path.resolve(path.dirname(fileURLToPath(import.meta.url)),
   '../source/ai'),'b143-viewer-template.html',150000);
