@@ -5,6 +5,9 @@ on:
     paths:
       - 'scripts/r190ab-structured-output-pilot.mjs'
       - 'scripts/r190ab-structured-output-pilot.test.mjs'
+      - 'source/ai/r190ab-semantic-contract.mjs'
+      - 'source/ai/r190-semantic-massing.mjs'
+      - 'scripts/r190-semantic-fixtures.mjs'
       - '.github/workflows/r190ab-structured-output-pilot.yml'
       - 'evidence/r190aa/pilot-01/MODEL_RESPONSE_ORIGINAL.txt'
 permissions:
