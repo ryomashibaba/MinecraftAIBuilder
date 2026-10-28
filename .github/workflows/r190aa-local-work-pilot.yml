@@ -6,11 +6,6 @@ on:
       - 'scripts/r190aa-local-work-pilot.mjs'
       - 'scripts/r190aa-local-work-pilot.test.mjs'
       - '.github/workflows/r190aa-local-work-pilot.yml'
-  pull_request:
-    paths:
-      - 'scripts/r190aa-local-work-pilot.mjs'
-      - 'scripts/r190aa-local-work-pilot.test.mjs'
-      - '.github/workflows/r190aa-local-work-pilot.yml'
 permissions:
   contents: read
 jobs:

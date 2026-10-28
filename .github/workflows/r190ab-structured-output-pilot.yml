@@ -7,12 +7,6 @@ on:
       - 'scripts/r190ab-structured-output-pilot.test.mjs'
       - '.github/workflows/r190ab-structured-output-pilot.yml'
       - 'evidence/r190aa/pilot-01/MODEL_RESPONSE_ORIGINAL.txt'
-  pull_request:
-    paths:
-      - 'scripts/r190ab-structured-output-pilot.mjs'
-      - 'scripts/r190ab-structured-output-pilot.test.mjs'
-      - '.github/workflows/r190ab-structured-output-pilot.yml'
-      - 'evidence/r190aa/pilot-01/MODEL_RESPONSE_ORIGINAL.txt'
 permissions:
   contents: read
 jobs:

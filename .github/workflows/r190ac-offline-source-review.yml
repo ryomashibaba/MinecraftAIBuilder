@@ -8,13 +8,6 @@ on:
       - 'evidence/r190aa/pilot-01/MODEL_RESPONSE_ORIGINAL.txt'
       - 'evidence/r190aa/pilot-01/AUDIT.json'
       - '.github/workflows/r190ac-offline-source-review.yml'
-  pull_request:
-    paths:
-      - 'scripts/r190ac-offline-source-review.mjs'
-      - 'scripts/r190ac-offline-source-review.test.mjs'
-      - 'evidence/r190aa/pilot-01/MODEL_RESPONSE_ORIGINAL.txt'
-      - 'evidence/r190aa/pilot-01/AUDIT.json'
-      - '.github/workflows/r190ac-offline-source-review.yml'
 permissions:
   contents: read
 jobs:
