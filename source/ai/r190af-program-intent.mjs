@@ -203,12 +203,60 @@ export function inspectR190AFIntent(raw){
     feasibleOffsetRange:dimensional?[minOffset,maxOffset]:null,
     feasibleBaseYRange:dimensional?[minBaseY,maxBaseY]:null});
   }
+  // Multiple singly feasible window proposals may compete for the same
+  // real wall voxels. Reject an overlapping proposal set BEFORE any
+  // permission-to-apply stage. A combination preview is STILL unapproved.
   report.multipleWindowCombinationCertified=false;
+  const selected=report.windowOptions.map(x=>x.proposedOnly);
+  report.jointWindowProposalAudit={status:intents.length>1?
+   'NOT_EVALUATED':'NOT_REQUIRED_SINGLE_OR_ZERO',
+   overlappingGlassCells:0,sourceProofOnly:true,
+   approved:false,worldWrites:0};
+  if(intents.length>1&&selected.every(Boolean)){
+   const occupiedGlass=new Set();let duplicates=0;
+   for(const g of selected){
+    const placed=layoutRooms.get(g.spaceId);
+    for(const q of r190GlazingCells(placed,g)){
+     const k=key(q.x,q.y,q.z);
+     if(occupiedGlass.has(k))duplicates++;
+     occupiedGlass.add(k);
+    }
+   }
+   if(duplicates>0){
+    report.jointWindowProposalAudit={
+     status:'HOLD_OVERLAPPING_WINDOW_CANDIDATES',
+     overlappingGlassCells:duplicates,sourceProofOnly:true,
+     approved:false,worldWrites:0};
+   }else{
+    try{
+     const trial=compileR190SemanticPlan({...model,glazedOpenings:selected});
+     const required=selected.reduce((n,g)=>n+g.width*g.height,0);
+     const valid=trial.audit.realGlazingCells===required&&
+      trial.audit.glazedOpenings.length===selected.length&&
+      trial.layout.spaces.every((s,i)=>{
+       const original=built.layout.spaces[i];
+       return s.id===original.id&&s.x===original.x&&s.z===original.z;
+      })&&trial.worldContacts===0&&trial.worldWrites===0;
+     report.jointWindowProposalAudit={
+      status:valid?'UNAPPROVED_COMBINED_SOURCE_VALID':
+       'HOLD_COMBINED_SOURCE_AUDIT_MISMATCH',
+      overlappingGlassCells:0,sourceProofOnly:true,approved:false,
+      glassCellsVerified:valid?required:0,worldWrites:0};
+    }catch{
+     report.jointWindowProposalAudit={
+      status:'HOLD_COMBINED_SOURCE_COMPILER_REJECTED',
+      overlappingGlassCells:0,sourceProofOnly:true,approved:false,
+      worldWrites:0};
+    }
+   }
+  }
   if(report.windowOptions.some(x=>x.status==='NO_FEASIBLE_COORDINATES')){
    report.status='HOLD_DAYLIGHT_INTENT_INFEASIBLE';
   }else if(report.windowOptions.some(x=>
    x.status==='NO_VERIFIED_EXTERIOR_WALL_OR_FRAME')){
    report.status='HOLD_DAYLIGHT_NO_VERIFIED_EXTERIOR';
+  }else if(report.jointWindowProposalAudit.status.startsWith('HOLD_')){
+   report.status='HOLD_DAYLIGHT_JOINT_PROPOSAL';
   }else{
    report.status=intents.length?'HOLD_WINDOW_PROPOSAL_REQUIRES_APPROVAL':
     'PROVISIONAL_SOURCE_ONLY_NO_ART_APPROVAL';

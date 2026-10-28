@@ -85,6 +85,15 @@ test('R44 ONE Windows CMD: no consent => no request; YES => one fake Qwen and si
    assert.equal(diagnostic.status,0,'DIAG_FAILED '+diagnostic.stderr);
    const info=JSON.parse(diagnostic.stdout);
    assert.equal(info.enumeratedFiles,37);
+   assert.equal(info.canonicalOverlayMatchCount,1);
+   // When Windows short (8.3) and expanded path aliases differ, the old
+   // Substring(base.Length+1) logic must be proven wrong, not normalized
+   // away by changing the expected count to 47.
+   if(info.rawBaseLength!==info.canonicalBaseLength){
+    assert.equal(info.legacyOverlayMatchCount,0);
+    assert.ok(info.inconsistentKeys.some(x=>
+     x.canonical==='source/ai/b198s-native-ollama-source.mjs'));
+   }
    assert.equal(info.modelCalls,0);assert.equal(info.worldWrites,0);
    console.error('R44_STAGE_PATH_PROOF',JSON.stringify(info));
   }

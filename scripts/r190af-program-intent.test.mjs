@@ -91,6 +91,24 @@ test('AF impossible entrance-door sill never becomes a proposed exterior window'
  assert.equal(r.sourcePreview.noAutomaticWindowPlacement,true);
  assert.equal(r.approvalRequiredForAnyWindow,true);
 });
+test('AF two individually feasible but overlapping windows are jointly HOLD',()=>{
+ const p=make();
+ p.daylightIntents=[
+  {spaceId:p.children[0].id,face:'north',width:3,height:2},
+  {spaceId:p.children[0].id,face:'north',width:3,height:2}
+ ];
+ const raw=JSON.stringify(p),r=inspectR190AFIntent(raw);
+ assert.equal(JSON.stringify(p),raw);
+ assert.equal(r.windowOptions.length,2);
+ assert(r.windowOptions.every(x=>x.status==='UNAPPROVED_PHYSICALLY_VERIFIED_CANDIDATE'));
+ assert.equal(r.status,'HOLD_DAYLIGHT_JOINT_PROPOSAL',r.error);
+ assert.equal(r.jointWindowProposalAudit.status,'HOLD_OVERLAPPING_WINDOW_CANDIDATES');
+ assert.equal(r.jointWindowProposalAudit.overlappingGlassCells,6);
+ assert.equal(r.jointWindowProposalAudit.approved,false);
+ assert.equal(r.multipleWindowCombinationCertified,false);
+ assert.equal(r.sourcePreview.geometryGeneratedWithoutDaylight,true);
+ assert.equal(r.modelCalls,0);assert.equal(r.worldWrites,0);
+});
 test('AF rejects redundant tree links and unknown relation without reinterpretation',()=>{
  const p=make();p.additionalPassages=[[p.root.id,p.children[0].id]];
  const a=inspectR190AFIntent(JSON.stringify(p));

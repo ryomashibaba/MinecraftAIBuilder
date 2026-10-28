@@ -29,3 +29,8 @@ A candidate on a shared room wall or on a removed entry sill is rejected.
 Several independent daylight intents are **not** jointly certified; every
 proposal still requires explicit future approval and a later combined check.
 The original no-glass architecture is the only persistent source preview.
+
+Multi-window proposals are checked as a set in memory. Overlapping real
+window voxels produce `HOLD_DAYLIGHT_JOINT_PROPOSAL`. A combined
+source-audit result never grants approval, changes the original
+no-glass B143 preview, or certifies actual Minecraft usability.
