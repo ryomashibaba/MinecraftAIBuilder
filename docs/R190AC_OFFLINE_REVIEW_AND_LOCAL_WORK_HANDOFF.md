@@ -33,3 +33,14 @@ node scripts/r190ac-offline-source-review.mjs --ab "C:\Users\ryoma\Projects\Mine
 R190-ACは「前回より良い建築」を決して自動認定しない。`winner=NOT_ESTABLISHED`、`ART HOLD`、Minecraft施工禁止、`NOT_PREPARED`、9ゲート`BLOCKED`を維持。旧pilot-01がB143不成立なので、旧案と新案の真正ボクセル差は直接比較できず、改善の因果認定もしない。
 
 当面の最優先は **R190-AA/AB/AC専用CI成功確認 → Windowsの差分保護 → 明示的に1件の実Qwen → 保存原文のR190-AC再審査**。大量実験・main変更・PRマージはしない。
+
+
+## 追加：R190-AB意味IR研究も独立監査（2026-10-28）
+
+R190-ABの `--contract semantic-space` は、既存R190意味IRから**ホストがB143を生成**する。原文は新しい別名の研究ディレクトリ `semantic-workshop-01` に保存し、`contract-01` の図書館原文に上書きしない。
+
+既存のR190-ACはこの新しい受領証を認識し、原文SHA、意味IRの真正コンパイル、宿主生成B143の一致、3Dビューア、5方向SVG、2幅の支持経路を**モデル推論0回**で独立再検証する。作者表示や計測値の改ざんもHOLD。モデルが3D形状を直接書いたことにしてはいけない。
+
+ただしR190共通変換器は**単層限定**で、二層図書館、立体市場、丘陵観測所、架橋空間などの要求はこの経路の能力を超える。単層の研究題材は `tidal-workshop` のみ。潮位対応・排水の実用性、用途充足、建築の独創性、実Minecraft歩行はいずれも未証明。モデルの課題が異なるため、図書館の旧pilotと「単純にどちらが美しいか」の因果比較は行わない。
+
+Windows側の未コミットR190-AA差分を保護し、GitHubの必要な新規ソースだけを安全に同期する。実Qwenの包括許可とは別に、ChatGPTのWorkでPCを操作する場合は事前にユーザーの許可が必要。ユーザーがPowerShellを手動実行する操作はWorkの遠隔操作ではない。
