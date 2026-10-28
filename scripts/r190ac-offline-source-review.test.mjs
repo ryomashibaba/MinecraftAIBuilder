@@ -12,6 +12,10 @@ import {inspectR190ABReply,R190AB_FORMAT} from './r190ab-structured-output-pilot
 import {compileDesign} from '../source/ai/b143-building-dsl.mjs';
 import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
 import {renderR164Elevation} from './r164-exterior-audit.mjs';
+import {inspectR190ABSemanticReply,R190AB_SEMANTIC_FORMAT_SHA256}
+ from '../source/ai/r190ab-semantic-contract.mjs';
+import {R190_STATIC_SYNTHETIC_CASES}
+ from './r190-semantic-fixtures.mjs';
 const sha=x=>createHash('sha256').update(x,'utf8').digest('hex');
 const here=path.dirname(fileURLToPath(import.meta.url));
 const baseline=path.resolve(here,'../evidence/r190aa/pilot-01');
@@ -139,5 +143,83 @@ test('AC valid fake geometry remeasures metrics and verifies the authentic 3D an
   fs.appendFileSync(viewerPath,'\n<!-- malicious change -->');
   assert.throws(()=>inspectSavedR190AC({abDir:dir,baselineDir:baseline}),
    /AB_VIEWER_EVIDENCE_MISMATCH/);
+ }finally{fs.rmSync(root,{recursive:true,force:true})}
+});
+
+const semanticFixture=()=>{
+ const p=structuredClone(R190_STATIC_SYNTHETIC_CASES[1]);
+ p.roofFormIntent={spaceId:p.entrySpaceId,profile:'shed',axis:'x',rise:2};
+ p.glazedOpenings=[{spaceId:p.entrySpaceId,face:'south',
+  offset:2,baseY:5,width:2,height:2}];
+ return JSON.stringify(p);
+};
+const semanticReceipt=(raw)=>{
+ const r=inspectR190ABSemanticReply(raw).report;
+ return {schema:'minecraftaibuilder-r190ab-semantic-study-v1',
+  contract:'semantic-space',sourceTask:'tidal-workshop',modelClaimed:'qwen3:14b',
+  b143Authorship:'HOST_DERIVED_FROM_MODEL_SEMANTIC_IR',
+  pilot01OriginalSha256:sha(old),
+  originalPromptSha256:sha('fake-workshop-prompt'),
+  schemaSha256:R190AB_SEMANTIC_FORMAT_SHA256,
+  providerDoneReason:'stop',providerCallsAttempted:1,
+  noAutomaticRetry:true,noHostGeometryRepair:true,response:r,...safe()};
+};
+const semanticSaved=(root,raw,receipt)=>{
+ const dir=saved(root,raw,receipt);
+ const attemptPath=path.join(dir,'R190AB_ATTEMPT.json');
+ const a=JSON.parse(fs.readFileSync(attemptPath,'utf8'));
+ a.contract='semantic-space';a.sourceTask='tidal-workshop';a.providerCallsAttempted=1;
+ fs.writeFileSync(attemptPath,JSON.stringify(a));
+ return dir;
+};
+test('AC verifies separately-authored semantic original and HOST source, not a model-built voxel',()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'r190ac-semantic-'));
+ try{
+  const raw=semanticFixture(),receipt=semanticReceipt(raw),dir=semanticSaved(root,raw,receipt);
+  const author=inspectR190ABSemanticReply(raw);
+  assert.equal(author.report.real3D,true);
+  fs.writeFileSync(path.join(dir,'HOST_DERIVED_B143_SOURCE.json'),
+   JSON.stringify(author.design,null,2)+'\n');
+  fs.writeFileSync(path.join(dir,'HOST_DERIVED_SOURCE_AUDIT.json'),
+   JSON.stringify({semanticPlanSha256:author.report.planSha256,
+    compilerSourceSha256:author.report.hostDerivedSourceSha256,
+    compilerGeometrySha256:author.report.hostDerivedGeometrySha256,
+    sourceRouteAudit:author.report.sourceRouteAudit,
+    modelDidNotAuthorB143:true,...safe()}));
+  const template=fs.readFileSync(path.resolve(here,'../source/ai/b143-viewer-template.html'),'utf8');
+  fs.writeFileSync(path.join(dir,'HOST_DERIVED_SOURCE_TRUE_3D.html'),
+   renderB143Html(compileB143Gallery([author.design]),template));
+  for(const side of ['front','rear','west','east','roof'])
+   fs.writeFileSync(path.join(dir,'HOST_DERIVED_'+side+'.svg'),
+    renderR164Elevation(author.compiled,author.design,side));
+  const proof=inspectSavedR190AC({abDir:dir,baselineDir:baseline});
+  assert.equal(proof.status,'HOST_DERIVED_SINGLE_LEVEL_SOURCE_PROXIES_PASS_ART_HOLD');
+  assert.equal(proof.modelCalls,0);
+  assert.equal(proof.originalModelAuthoredB143,false);
+  assert.equal(proof.modelAuthoredIR,true);
+  assert.equal(proof.sameTaskAsR190AAPilot01,false);
+  assert.equal(proof.actualSourceVoxelCount,author.report.hostDerivedVoxelCount);
+  assert.equal(proof.winner,'NOT_ESTABLISHED');
+  assert.equal(proof.worldWrites,0);
+  const before=fs.readFileSync(path.join(dir,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8');
+  fs.appendFileSync(path.join(dir,'HOST_DERIVED_west.svg'),'<!-- tampered -->');
+  assert.throws(()=>inspectSavedR190AC({abDir:dir,baselineDir:baseline}),
+   /SEMANTIC_ELEVATION_EVIDENCE_CHANGED_WEST/);
+  assert.equal(fs.readFileSync(path.join(dir,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8'),before);
+ }finally{fs.rmSync(root,{recursive:true,force:true})}
+});
+test('AC rejects a forged model-authorship claim or changed host-derived voxel receipt',()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'r190ac-semantic-'));
+ try{
+  const raw=semanticFixture(),receipt=semanticReceipt(raw),dir=semanticSaved(root,raw,receipt);
+  receipt.b143Authorship='MODEL_AUTHORED_B143';
+  fs.writeFileSync(path.join(dir,'R190AB_RESULT.json'),JSON.stringify(receipt));
+  assert.throws(()=>inspectSavedR190AC({abDir:dir,baselineDir:baseline}),
+   /SEMANTIC_PROVENANCE_OR_SAFETY/);
+  receipt.b143Authorship='HOST_DERIVED_FROM_MODEL_SEMANTIC_IR';
+  receipt.response.hostDerivedVoxelCount+=1;
+  fs.writeFileSync(path.join(dir,'R190AB_RESULT.json'),JSON.stringify(receipt));
+  assert.throws(()=>inspectSavedR190AC({abDir:dir,baselineDir:baseline}),
+   /SEMANTIC_RECOMPUTED_MODEL_IR_MISMATCH/);
  }finally{fs.rmSync(root,{recursive:true,force:true})}
 });
