@@ -170,7 +170,10 @@ export async function runR190AABatch(args=[],{
      evidence.status==='HOLD_UNTRUSTED_CAPTURE')break;
  }
  const summary={schema:'minecraftaibuilder-r190aa-batch-summary-v1',
-  status:results.length===o.count?'CAPTURED_ART_HOLD':'HOLD_INCOMPLETE_BATCH',
+  status:results.length===o.count&&results.every(r=>
+   typeof r.rawSha256==='string'&&/^[0-9a-f]{64}$/.test(r.rawSha256)&&
+   ['COMPILED_B143_ART_HOLD','HOLD_B143_NOT_COMPARABLE'].includes(r.status))?
+   'CAPTURED_ART_HOLD':'HOLD_INCOMPLETE_BATCH',
   modelRequested:o.model,caseResults:results,
   attemptedRequests:results.length,
   sourceOnly:true,actualMinecraftWalking:'NOT_TESTED',
