@@ -114,13 +114,21 @@ export function inspectSavedR190AC({abDir=defaultAB,baselineDir=priorDir}={}){
   fail('AB_RESULT_PROVENANCE_OR_SAFETY');
  const aa=inspectR190ABReply(aaRaw);
  const ab=inspectR190ABReply(abRaw,abResult.providerDoneReason);
- if(ab.report.status!==abResult.response.status||
+ const viewerFailed=abResult.response.status==='HOLD_SOURCE_VIEWER_FAILED'&&
+  ab.report.strictB143===true&&ab.report.real3D===true&&
+  abResult.response.real3D===false;
+ if((!viewerFailed&&ab.report.status!==abResult.response.status)||
   ab.report.strictB143!==abResult.response.strictB143||
   ab.report.declaredPlan!==abResult.response.declaredPlan||
-  ab.report.real3D!==abResult.response.real3D&&
-   abResult.response.status!=='HOLD_SOURCE_VIEWER_FAILED'||
+  (!viewerFailed&&ab.report.real3D!==abResult.response.real3D)||
   ab.report.geometrySha256!==abResult.response.geometrySha256)
   fail('AB_RECOMPUTED_RESULT_MISMATCH');
+ // A claimed successful 3D render must actually have left a stored viewer.
+ if(abResult.response.real3D===true){
+  const viewer=path.join(abDir,'MODEL_SOURCE_TRUE_3D.html');
+  if(!fs.existsSync(viewer)||read(viewer,3000000).length<100)
+   fail('AB_VIEWER_EVIDENCE_MISSING');
+ }
  const physical=ab.report.physical;
  const entry={
   validSupportedAir:physical?.modelDeclaredEntranceStandable??null,
