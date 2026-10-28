@@ -7,6 +7,8 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {diagnoseR190ADRaw} from '../source/ai/r190ad-semantic-diagnostics.mjs';
+import {R190AD_FORMAT_SHA256}
+ from '../source/ai/r190ad-expressive-semantic-contract.mjs';
 const sha=s=>createHash('sha256').update(s,'utf8').digest('hex');
 const fail=c=>{throw Error('R190AD_DIAGNOSE_'+c)};
 export function parseR190ADDiagnoseArgs(argv){
@@ -46,6 +48,7 @@ export function diagnoseSavedR190AD({studyDir,expectedSha256}){
     result.contract!=='semantic-space-expressive'||
     attempt.contract!=='semantic-space-expressive'||
     attempt.schemaSha256!==result.schemaSha256||
+    result.schemaSha256!==R190AD_FORMAT_SHA256||
     result.response?.formatSchemaSha256!==result.schemaSha256||
     result.originalPromptSha256!==attempt.promptSha256||
     result.modelClaimed!==attempt.modelRequested||
