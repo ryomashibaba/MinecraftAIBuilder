@@ -5,11 +5,13 @@ on:
     paths:
       - 'scripts/r190w-two-stage-study.mjs'
       - 'scripts/r190w-two-stage-study.test.mjs'
+      - 'RUN_R190W_TWO_STAGE.cmd'
       - '.github/workflows/r190w-model-plan-first.yml'
   pull_request:
     paths:
       - 'scripts/r190w-two-stage-study.mjs'
       - 'scripts/r190w-two-stage-study.test.mjs'
+      - 'RUN_R190W_TWO_STAGE.cmd'
       - '.github/workflows/r190w-model-plan-first.yml'
 permissions:
   contents: read

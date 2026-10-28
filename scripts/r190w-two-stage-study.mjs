@@ -71,8 +71,12 @@ export function inspectR190WPlan(raw){
 export function buildR190WFirstPrompt(negativePrompt){
  if(typeof negativePrompt!=='string'||negativePrompt.length<30||
   negativePrompt.length>8000)fail('BRIEF');
+ // The R190-S critique ends with a *one-response B143* instruction.
+ // This is the incompatible previous workflow, not a stage-one instruction.
+ const context=negativePrompt.split('\n').filter(line=>
+  !line.startsWith('必ずB143 designとspatialPlanを1回のJSON応答で返し')).join('\n');
  return [
-  negativePrompt,
+  context,
   '',
   '【今回は第1段階：建築プログラムの独立考案のみ】',
   'B143の形状・座標を今は書かないでください。用途を実際に使える空洞、床、出入り、室間の動線、立体構成、屋根と雨水処理を先にあなた自身で考えてください。',

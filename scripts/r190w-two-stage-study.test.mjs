@@ -71,6 +71,7 @@ test('W plan fields are program-only; no predetermined genre or coordinates',()=
  const p=inspectR190WPlan(plan());
  assert.equal(p.functionalSpaces.length,2);
  assert.doesNotMatch(buildR190WFirstPrompt('A genuine unique Japanese public building request with rooms'),/origin:\[/);
+ assert.doesNotMatch(buildR190WFirstPrompt('失敗の証拠です\n必ずB143 designとspatialPlanを1回のJSON応答で返してください。\n空間を検討'),/必ずB143 designとspatialPlan/);
  assert.match(buildR190WGeometryPrompt('Japanese original request',p),/B143/);
  assert.throws(()=>inspectR190WPlan('{}'),/PLAN_CONTRACT/);
  assert.deepEqual(parseR190WArgs(['--fresh']),{from:null,fresh:true});
@@ -119,4 +120,13 @@ test('W malformed plan is captured as HOLD and B143 is never requested',async()=
   assert.equal(fs.existsSync(path.join(result.directory,'b143-model-original')),false);
   assert.equal(result.worldContacts,0);
  }finally{fs.rmSync(root,{recursive:true,force:true})}
+});
+
+test('W Windows launcher checks canonical checkout, stale code and opt-in consent',()=>{
+ const cmd=fs.readFileSync(new URL('../RUN_R190W_TWO_STAGE.cmd',import.meta.url),'utf8');
+ assert.match(cmd,/Projects\\MinecraftAIBuilder/);
+ assert.match(cmd,/r190w-two-stage-study\.mjs/);
+ assert.match(cmd,/findstr \/C:"buildR190WGeometryPrompt"/);
+ assert.match(cmd,/choice \/C YN/);
+ assert.doesNotMatch(cmd,/git pull|git clone|git reset|ollama pull/i);
 });
