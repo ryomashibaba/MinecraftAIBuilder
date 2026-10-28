@@ -27,7 +27,8 @@ function expressiveEnclosed(){
  p.spaces=p.spaces.map(s=>({...s,spatialRole:'enclosed'}));
  p.formIntent={spaceId:'sleeping',face:'north',cornerInset:3};
  p.roofFormIntent={spaceId:'living',profile:'ridge',axis:'x',rise:3};
- p.glazedOpenings=[{spaceId:'living',face:'south',offset:3,baseY:5,width:3,height:2}];
+ // Keep this window's sill separate from the root entrance door (center cells 5-6).
+ p.glazedOpenings=[{spaceId:'living',face:'south',offset:2,baseY:5,width:2,height:2}];
  return p;
 }
 function expressiveDirect(){
@@ -97,6 +98,18 @@ test('AD permits model decision to omit court and omit extra links without fake 
  assert.equal(a.report.featureAudit.optionalCrossPortals,0);
  assert.ok(a.report.featureAudit.trueFacetedMissingRoofCorners>0);
  assert.equal(a.report.sourceRouteAudit.reachableRoomCount,4);
+});
+test('AD rejects a window whose sill overlaps the entrance door without repair',()=>{
+ const p=expressiveEnclosed();
+ p.glazedOpenings=[{spaceId:'living',face:'south',offset:3,baseY:5,width:3,height:2}];
+ const before=JSON.stringify(p),r=inspectR190ADReply(before);
+ assert.equal(JSON.stringify(p),before);
+ assert.equal(r.report.status,'HOLD_INVALID_EXPRESSIVE_PROGRAM');
+ assert.equal(r.report.hostSourceDerived,false);
+ assert.equal(r.report.real3D,false);
+ assert.match(r.report.error,/R190_SEMANTIC_GLAZING_ENTRY_DOOR_CONFLICT/);
+ assert.equal(r.design,null);
+ assert.equal(r.report.worldWrites,0);
 });
 test('AD direct non-tree link is an actual supported physical portal, not adjacency text',()=>{
  const p=expressiveDirect(),r=inspectR190ADReply(JSON.stringify(p));
