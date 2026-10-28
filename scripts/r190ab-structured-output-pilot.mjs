@@ -189,7 +189,8 @@ export async function runR190AB(args=[],{
   actualProviderConsumption:'UNKNOWN_UNTIL_CAPTURED',
   providerCallsAttempted:1,quality:'NOT_CERTIFIED',...safety()
  });
- let raw=null,reason=null,error=null;
+ let raw=null,reason=null,error=null,providerTelemetry=null;
+ const providerStartedMs=Date.now();
  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),180000);
  try{
   const response=await local('http://127.0.0.1:11434/api/chat',{
@@ -200,10 +201,20 @@ export async function runR190AB(args=[],{
   const j=await response.json();
   if(typeof j?.message?.content!=='string')throw Error('OLLAMA_CONTENT_MISSING');
   raw=j.message.content;reason=j.done_reason??null;
+  const boundedMetric=k=>Number.isSafeInteger(j[k])&&j[k]>=0?j[k]:null;
+  providerTelemetry={modelReported:typeof j.model==='string'?j.model.slice(0,140):null,
+   totalDurationNs:boundedMetric('total_duration'),
+   loadDurationNs:boundedMetric('load_duration'),
+   promptEvalCount:boundedMetric('prompt_eval_count'),
+   promptEvalDurationNs:boundedMetric('prompt_eval_duration'),
+   evalCount:boundedMetric('eval_count'),
+   evalDurationNs:boundedMetric('eval_duration'),
+   untrustedProviderReported:true};
   if(Buffer.byteLength(raw,'utf8')>120000)throw Error('RAW_TOO_LARGE');
   fs.writeFileSync(filename(dir,'MODEL_RESPONSE_ORIGINAL.txt'),raw,{flag:'wx'});
  }catch(e){error=String(e?.message??e).slice(0,180)}
  finally{clearTimeout(timer)}
+ const providerWallMilliseconds=Math.max(0,Date.now()-providerStartedMs);
  const parsed=raw!==null&&fs.existsSync(filename(dir,'MODEL_RESPONSE_ORIGINAL.txt'))?
   inspectR190ABReply(raw,reason):{report:{
    status:'HOLD_PROVIDER_NO_VERIFIED_RAW',originalRawSha256:null,
@@ -227,6 +238,7 @@ export async function runR190AB(args=[],{
  const result={schema:'minecraftaibuilder-r190ab-result-v1',
   study:o.study,modelClaimed:o.model,
   providerDoneReason:reason,providerError:error,providerCallsAttempted:1,
+  providerWallMilliseconds,providerTelemetry,
   originalPromptSha256:sha(prompt),schemaSha256:SCHEMA_HASH,
   pilot01OriginalSha256:'0bf706181bb2b7a30f8082f896a703c33749ba55f75d42010adba88f47c84f17',
   response:parsed.report,
