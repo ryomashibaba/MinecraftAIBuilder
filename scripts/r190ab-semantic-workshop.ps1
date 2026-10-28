@@ -48,7 +48,7 @@ try {
  & git status --short
  if ($LASTEXITCODE -ne 0) { throw "git status failed" }
  Write-Host "Fetching reviewed branch without pull/reset/checkout..."
- Git @("fetch","--no-tags","origin",$branch)
+ Git -Arguments @("fetch","--no-tags","origin",$branch)
  $revision = (& git rev-parse FETCH_HEAD).Trim()
  if ($LASTEXITCODE -ne 0 -or $revision -cnotmatch '^[0-9a-f]{40}$') {
   throw "FETCH_HEAD could not be pinned"
@@ -57,7 +57,7 @@ try {
  # A separate detached worktree avoids overwriting the user's two dirty AA
  # source files, obsolete local scripts, and prior model evidence.
  $work = Join-Path $env:TEMP ("MinecraftAIBuilder-R190AB-" + [guid]::NewGuid().ToString("N"))
- Git @("worktree","add","--detach",$work,$revision)
+ Git -Arguments @("worktree","add","--detach",$work,$revision)
  Push-Location -LiteralPath $work
  try {
   Write-Host "Run original-source regression suites before any model call..."
