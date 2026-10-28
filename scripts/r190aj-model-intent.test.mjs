@@ -23,6 +23,8 @@ test('AJ guide uses AF daylight intents and deliberately authored geometry',()=>
  assert.match(R190AJ_SYSTEM_GUIDE,/PURPOSE and PRIVACY fields are labels/);
  assert.match(R190AJ_SYSTEM_GUIDE,/parentId, side and optional additionalPassages/);
  assert.equal(preflightR190AJBrief(brief).unsupported.length,0);
+ assert(preflightR190AJBrief('鋸歯屋根の工房を必ず設ける公共建築').detected
+  .some(x=>x.capability==='roof-profile-design'));
 });
 test('AJ preserves original source and exposes metadata-only contrast',()=>{
  const original=raw(),r=reviewR190AJOriginal(original,{brief,maxLayoutVariantsPerStrategy:2});

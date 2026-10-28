@@ -18,7 +18,7 @@ const scanners=[
  {capability:'stairs',expression:/(?:階段|\bstair(?:case|way|s)?\b)/iu},
  {capability:'double-height-void',expression:/(?:吹き抜け|吹抜け|\bdouble[ -]height\b)/iu},
  {capability:'roof-profile-design',
-  expression:/(?:鋸歯状の?屋根|片流れ屋根|切妻屋根|\bsawtooth[ -]roof\b|\bgabled?[ -]roof\b)/iu}
+  expression:/(?:鋸歯(?:状)?の?屋根|片流れ屋根|切妻屋根|\bsawtooth[ -]roof\b|\bgabled?[ -]roof\b)/iu}
 ];
 export function scanR190ExplicitBriefCapabilities(prompt){
  check(typeof prompt==='string'&&prompt.length>=8&&prompt.length<=8000,

@@ -13,6 +13,7 @@ on:
       - 'scripts/r190aj-*'
       - 'source/ai/r190af-program-intent.mjs'
       - 'source/ai/r190-semantic-massing.mjs'
+      - 'source/ai/r190-request-coverage.mjs'
       - '.github/workflows/r44v2-r190ag-offline.yml'
   pull_request:
     paths:
@@ -26,6 +27,7 @@ on:
       - 'scripts/r190aj-*'
       - 'source/ai/r190af-program-intent.mjs'
       - 'source/ai/r190-semantic-massing.mjs'
+      - 'source/ai/r190-request-coverage.mjs'
       - '.github/workflows/r44v2-r190ag-offline.yml'
 permissions:
   contents: read
