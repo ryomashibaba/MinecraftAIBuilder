@@ -44,3 +44,34 @@ R190-ABの `--contract semantic-space` は、既存R190意味IRから**ホスト
 ただしR190共通変換器は**単層限定**で、二層図書館、立体市場、丘陵観測所、架橋空間などの要求はこの経路の能力を超える。単層の研究題材は `tidal-workshop` のみ。潮位対応・排水の実用性、用途充足、建築の独創性、実Minecraft歩行はいずれも未証明。モデルの課題が異なるため、図書館の旧pilotと「単純にどちらが美しいか」の因果比較は行わない。
 
 Windows側の未コミットR190-AA差分を保護し、GitHubの必要な新規ソースだけを安全に同期する。実Qwenの包括許可とは別に、ChatGPTのWorkでPCを操作する場合は事前にユーザーの許可が必要。ユーザーがPowerShellを手動実行する操作はWorkの遠隔操作ではない。
+
+## R190-AB 単層意味IRの安全なWindows実行（2026-10-28）
+
+以前の `MODULE_NOT_FOUND` や未コミット差分上書きを避けるため、`scripts/r190ab-semantic-workshop.ps1` を用意した。**通常の `git pull` や `git reset --hard` は使用しない。** スクリプトはユーザーがローカルPowerShellで起動するもので、Chat/Workから勝手にPCを操作しない。
+
+- 既存フォルダ `C:\Users\ryoma\Projects\MinecraftAIBuilder` の現在のブランチ・未コミット状況を読み取り、現ブランチが研究ブランチ以外なら停止する。
+- `git fetch` で対象HEADを取得し、Windows TEMP以下の**新規独立detached git worktree**でR190-AB/AC fake-onlyテストを実行。既存リポジトリの追跡ソースは変更しない。
+- 既定では `-Run` を省略するとテスト・preflightだけで終了し、実LLM呼出は0回。`-Run` を明記すると、**異なる新研究名につき最大1回**、ローカル `127.0.0.1` Ollamaに `qwen3:14b` `tidal-workshop` の単層意味IRを要求する。
+- 結果がHOLDであっても、`MODEL_RESPONSE_ORIGINAL.txt`、`R190AB_ATTEMPT.json`、`R190AB_RESULT.json` を含む保存ディレクトリを削除せず、`r190ab-local-evidence/semantic-workshop-01` に証拠を保存。転送後のSHAを全ファイル再検証。転送できなかった場合はtemp worktreeを維持して証拠喪失を防ぐ。既存の同名証拠があれば推論前にHOLD。
+- 続いてR190-ACは**0推論・読み取り専用**で原文とホストB143/HTML/SVGを照合。完了後の一時worktreeだけを削除する。
+- ただし、GitHubの巨大コードベースと一時worktreeに必要なディスク容量はゼロではない。通常のmain/PRマージ、R190-AA原文の編集、Minecraftワールド接触や施工はない。
+
+既存のローカルコピーに新規スクリプトがまだない場合、次を**canonicalリポジトリ直下のPowerShell**に貼り付ける。これはGitHub取得と一時ファイル実行だけであり、`git pull` や元ソースの上書きをしない。
+
+```powershell
+$branch = "feature/b198zr1-protected-architectural-revision"
+git fetch --no-tags origin $branch
+if ($LASTEXITCODE -ne 0) { throw "git fetch failed" }
+$script = Join-Path $env:TEMP "MinecraftAIBuilder-R190AB-semantic-workshop.ps1"
+git show "FETCH_HEAD:scripts/r190ab-semantic-workshop.ps1" |
+  Set-Content -LiteralPath $script -Encoding UTF8
+if ($LASTEXITCODE -ne 0) { throw "Could not retrieve study script" }
+# テストのみ、実Qwen0回
+& $script -Repository (Get-Location).Path
+# テストOKと出た後、ユーザーの操作で明示的に1回実推論する
+& $script -Run -Repository (Get-Location).Path
+```
+
+CLIの出力を確認し、`-Run` 前のテスト失敗時は実推論をしない。実行後に得られた証拠3ファイルと、真正B143ビューア・5方向SVGが生成された場合はその画像を美術・機能の両面で評価する。Qwenの実モデル名、トークン数、壁時間を保存するがモデル自己申告であり品質の保証ではない。
+
+**注意：** このWindows helper自体のローカル実機成功はまだ未確認。GitHub ActionsのPowerShell構文解析とfake-only Node回帰は、Windowsの実Ollama接続や実モデル建築品質の代替ではない。
