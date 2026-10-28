@@ -142,11 +142,16 @@ try {
   if ($runCode -ne 0) {
    Write-Warning "Model study returned HOLD/nonzero ($runCode); evidence kept."
   }
-  Write-Host "R190-AC saved comparison (read-only):"
-  & node scripts/r190ac-offline-source-review.mjs --ab $target
-  $reviewCode = $LASTEXITCODE
-  if ($reviewCode -ne 0) {
-   Write-Warning "AC review returned HOLD; see preserved original evidence."
+  if ($Expressive) {
+   Write-Host "R190-AD expressive audit is in its immutable result; R190-AC legacy reviewer is incompatible and is not run."
+   Write-Host "Independent art, live walking and weather checks remain HOLD."
+  } else {
+   Write-Host "R190-AC saved comparison (read-only):"
+   & node scripts/r190ac-offline-source-review.mjs --ab $target
+   $reviewCode = $LASTEXITCODE
+   if ($reviewCode -ne 0) {
+    Write-Warning "AC review returned HOLD; see preserved original evidence."
+   }
   }
   $preserveWorktree = $false
  }finally{ Pop-Location }
