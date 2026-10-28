@@ -81,4 +81,10 @@ test('Y Windows launcher requires explicit C/G/N and canonical checkout',()=>{
  assert.match(cmd,/--run-missing/);
  assert.match(cmd,/r190y-comparison-pilot\.mjs/);
  assert.doesNotMatch(cmd,/git clone|git pull|git reset|ollama pull|npm install/i);
+ // C must never inherit --run-missing from Windows command-line arguments.
+ assert.match(cmd,/if not "%~1"=="" goto :arguments/);
+ assert.match(cmd,/^node\.exe "%runner%"$/m);
+ assert.match(cmd,/^node\.exe "%runner%" --run-missing$/m);
+ assert.doesNotMatch(cmd,/node\.exe[^\r\n]*%\*/);
+ assert.match(cmd,/:arguments\r?\necho HOLD:/);
 });
