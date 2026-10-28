@@ -51,6 +51,6 @@ B143コンパイルが成立しないため、最終ボクセル数、空洞、�
 
 実験時のCAPTURED_ART_HOLDと終了コード0は、回答原文を捕捉したことだけを表す。個別結果はHOLD_B143_NOT_COMPARABLEであり、建築合格ではない。原文・受領証・集計等8ファイルのインベントリは同梱JSONに記録した。
 
-更新前の既存証拠156ファイルは実行後もSHA256一致。GitHubへのpush・main変更・PRマージなし。修正2ファイルは開発ブランチのローカル未コミット差分として残した。r190aa-local-evidenceはGit無視対象。原文・証拠をGitには追加していない。
+更新前の既存証拠156ファイルは実行後もSHA256一致。pilot-01のローカル原文と証拠フォルダは変更しておらず、r190aa-local-evidenceはGit無視対象のまま。修正2ファイルは開発ブランチのローカル未コミット差分として残した。実験完了後、依頼に基づいてこのレポート、監査JSON、保存原文のコピーだけを `evidence/r190aa/pilot-01/` に対象開発ブランチ経由で公開した。GitHub上の原文コピーはローカル保存原文と同じSHA256で、元ファイルは無変更。
 
 readiness=NOT_PREPARED、constructionApproved=false、executionAllowed=false、9 BLOCKED、BuildPlan.operations=[]、worldContacts=worldWrites=0 をmanifest・attempt・受領証・summaryで確認。再推論0件、ホスト幾何補修0件、Minecraft起動・接続・施工0件。
