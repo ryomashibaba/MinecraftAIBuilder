@@ -409,6 +409,39 @@ test('R190-P physical model-selected exterior glazing is real glass and does not
  assert.equal(old.compiled.stats.layerCounts.glass,0);
  assert.notEqual(old.compiled.geometrySha256,r.compiled.geometrySha256);
 });
+test('R190-P root-door glazing offset matrix distinguishes collisions from valid windows',()=>{
+ // The entrance occupies the centered two front-wall columns at y=2..4.
+ // A window starting at y=5 must have a solid sill at y=4. Windows at
+ // y=6 may safely overlap horizontally since their sill is above the door.
+ const base=structuredClone(cases[1]),root=base.spaces.find(s=>s.id===base.entrySpaceId);
+ const door=Math.floor((root.width-2)/2),windowWidth=2;
+ let invalid=0,valid=0;
+ for(let offset=2;offset<=root.width-windowWidth-2;offset++){
+  const plan=structuredClone(base);
+  plan.glazedOpenings=[{spaceId:root.id,face:'south',offset,
+   baseY:5,width:windowWidth,height:2}];
+  const overlaps=offset<door+2&&offset+windowWidth>door;
+  if(overlaps){
+   invalid++;
+   assert.throws(()=>compileR190SemanticPlan(plan),
+    /R190_SEMANTIC_GLAZING_ENTRY_DOOR_CONFLICT/);
+  }else{
+   valid++;
+   const out=compileR190SemanticPlan(plan);
+   assert.equal(out.audit.realGlazingCells,2*windowWidth);
+   assert.equal(out.audit.allProgramSpacesReachable,true);
+   assert.equal(out.worldContacts,0);
+   assert.equal(out.worldWrites,0);
+  }
+ }
+ assert.ok(invalid>=2&&valid>=4);
+ const safeAbove=structuredClone(base);
+ safeAbove.glazedOpenings=[{spaceId:root.id,face:'south',
+  offset:door,baseY:6,width:2,height:2}];
+ const out=compileR190SemanticPlan(safeAbove);
+ assert.equal(out.audit.realGlazingCells,4);
+ assert.equal(out.worldWrites,0);
+});
 test('R190-P glazing fails closed for injected attributes and invalid windows',()=>{
  const plan=structuredClone(cases[1]),good={
   spaceId:'showroom',face:'south',offset:3,baseY:6,width:4,height:3
