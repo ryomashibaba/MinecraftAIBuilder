@@ -44,6 +44,10 @@ test('AF daylight is an intent, not an auto-generated or certified window',()=>{
  assert.equal(r.windowOptions.length,1);
  assert.equal(r.windowOptions[0].proposedOnly.baseY,5);
  assert.equal(r.windowOptions[0].approvalRequired,true);
+ assert.equal(r.windowOptions[0].status,'UNAPPROVED_PHYSICALLY_VERIFIED_CANDIDATE');
+ assert.equal(r.windowOptions[0].independentlyAuditedGlassCells,6);
+ assert.equal(r.windowOptions[0].physicallyCheckedAgainstActualB143,true);
+ assert.equal(r.windowOptions[0].multipleWindowCombinationCertified,false);
  assert.equal(r.sourcePreview.geometryGeneratedWithoutDaylight,true);
  assert.equal(r.sourcePreview.noAutomaticWindowPlacement,true);
  assert.equal(r.modelCalls,0);assert.equal(r.worldWrites,0);
@@ -57,6 +61,26 @@ test('AF impossible daylight intent stays HOLD with explicit available ranges',(
  assert.equal(r.windowOptions[0].feasibleBaseYRange,null);
  assert.equal(r.sourcePreview.geometryGeneratedWithoutDaylight,true);
  assert.equal(r.constructionApproved,false);
+});
+test('AF shared parent-wall daylight cannot be mistaken for a real exterior opening',()=>{
+ const p=make();p.daylightIntents=[{spaceId:p.children[0].id,face:'south',
+  width:3,height:2}];
+ const r=inspectR190AFIntent(JSON.stringify(p));
+ assert.equal(r.status,'HOLD_DAYLIGHT_NO_VERIFIED_EXTERIOR',r.error);
+ assert.equal(r.windowOptions[0].status,'NO_VERIFIED_EXTERIOR_WALL_OR_FRAME');
+ assert.equal(r.windowOptions[0].proposedOnly,null);
+ assert.equal(r.windowOptions[0].independentlyAuditedGlassCells,0);
+ assert.equal(r.sourcePreview.geometryGeneratedWithoutDaylight,true);
+ assert.equal(r.worldWrites,0);
+});
+test('AF impossible entrance-door sill never becomes a proposed exterior window',()=>{
+ const p=make(R190_STATIC_SYNTHETIC_CASES[0]);
+ p.daylightIntents=[{spaceId:p.root.id,face:'south',width:6,height:2}];
+ const r=inspectR190AFIntent(JSON.stringify(p));
+ assert.equal(r.status,'HOLD_DAYLIGHT_NO_VERIFIED_EXTERIOR',r.error);
+ assert.equal(r.windowOptions[0].proposedOnly,null);
+ assert.equal(r.sourcePreview.noAutomaticWindowPlacement,true);
+ assert.equal(r.approvalRequiredForAnyWindow,true);
 });
 test('AF rejects redundant tree links and unknown relation without reinterpretation',()=>{
  const p=make();p.additionalPassages=[[p.root.id,p.children[0].id]];

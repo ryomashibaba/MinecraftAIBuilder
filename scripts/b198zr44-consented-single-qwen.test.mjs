@@ -99,6 +99,12 @@ test('R44 authorized mock runs once; exact R41 guide; immutable raw; offline eva
    'R44_FINAL_EVIDENCE_MANIFEST.json','index.html']){
    assert(fs.existsSync(path.join(r.folder,name)),name);
   }
+  const html=fs.readFileSync(path.join(r.folder,'index.html'),'utf8');
+  assert.match(html,/設計ソース由来の建築プレビュー（作者未認証）/);
+  assert.match(html,/R7 MODEL CANDIDATE/);
+  assert.match(html,/Minecraft Educationで建設済みではありません。/);
+  assert.doesNotMatch(html,/ChatGPTが設計した新規建築/);
+  assert.equal(r.capture.visualStatus,'WAITING_FOR_HUMAN_VISUAL_AND_SEMANTIC_REVIEW');
   const r43=JSON.parse(fs.readFileSync(path.join(r.folder,'R43_SPATIAL_SECTIONS.json'),'utf8'));
   assert.equal(r43.originalRawSha256,sha(original));
   assert.equal(r43.humanVisualApproval,false);

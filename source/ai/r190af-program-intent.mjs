@@ -9,7 +9,7 @@
  * Minecraft worlds are intentionally untouched.
  */
 import {createHash} from 'node:crypto';
-import {R190_SCHEMA,compileR190SemanticPlan} from './r190-semantic-massing.mjs';
+import {R190_SCHEMA,compileR190SemanticPlan,r190GlazingCells} from './r190-semantic-massing.mjs';
 const H=s=>createHash('sha256').update(s,'utf8').digest('hex');
 const field=(x,names)=>x!==null&&typeof x==='object'&&!Array.isArray(x)&&
  Object.keys(x).length===names.length&&names.every(k=>Object.hasOwn(x,k));
@@ -117,6 +117,34 @@ export function inspectR190AFIntent(raw){
    independentWalkingCertified:false,
    noAutomaticWindowPlacement:true
   };
+  // Check the *actual* pre-glazing B143 voxels and room geometry.
+  // This stage makes no persistent glass; each possible window is merely
+  // compiled in memory to prove that one option can be realized.
+  const layoutRooms=new Map(built.layout.spaces.map(s=>[s.id,s]));
+  const occupied=new Set(built.compiled.primitives.map(v=>
+   v[0]+','+v[1]+','+v[2]));
+  const key=(x,y,z)=>x+','+y+','+z;
+  const has=(x,y,z)=>occupied.has(key(x,y,z));
+  const physicalCandidate=(room,g)=>{
+   const along=['north','south'].includes(g.face);
+   const low=(along?room.x:room.z)+g.offset;
+   return r190GlazingCells(room,g).every(q=>{
+    if(!has(q.x,q.y,q.z)||
+       has(q.x+q.dx,q.y,q.z+q.dz)||
+       has(q.x-q.dx,q.y,q.z-q.dz))return false;
+    // A neighbor may have clear air behind its shared boundary; it is still
+    // not OUTDOORS. The exterior test uses actual placed room footprints.
+    if(built.layout.spaces.some(s=>s.id!==g.spaceId&&
+      q.x+q.dx>=s.x&&q.x+q.dx<s.x+s.w&&
+      q.z+q.dz>=s.z&&q.z+q.dz<s.z+s.d))return false;
+    if(q.y===g.baseY&&!has(q.x,q.y-1,q.z))return false;
+    if(q.y===g.baseY+g.height-1&&!has(q.x,q.y+1,q.z))return false;
+    const u=along?q.x:q.z;
+    if(u===low&&!has(q.x-(along?1:0),q.y,q.z-(along?0:1)))return false;
+    if(u===low+g.width-1&&!has(q.x+(along?1:0),q.y,q.z+(along?0:1)))return false;
+    return true;
+   });
+  };
   const intents=p.daylightIntents??[];
   for(let i=0;i<intents.length;i++){
    const request=intents[i],at='daylightIntents['+i+']';
@@ -130,21 +158,57 @@ export function inspectR190AFIntent(raw){
    const span=['north','south'].includes(request.face)?room.width:room.depth;
    const minOffset=2,maxOffset=span-2-request.width;
    const minBaseY=5,maxBaseY=room.height-1-request.height;
-   const feasible=maxOffset>=minOffset&&maxBaseY>=minBaseY;
-   const suggested=feasible?
-    {spaceId:request.spaceId,face:request.face,
-     offset:Math.floor((minOffset+maxOffset)/2),
-     baseY:minBaseY,width:request.width,height:request.height}:null;
+   const dimensional=maxOffset>=minOffset&&maxBaseY>=minBaseY;
+   let proposedOnly=null,independentlyAuditedGlassCells=0;
+   if(dimensional){
+    const placed=layoutRooms.get(room.id);
+    // Center-first deterministic ordering is only a candidate search,
+    // not a host decision to alter architecture or approve the window.
+    const mid=(minOffset+maxOffset)/2;
+    const offsets=Array.from({length:maxOffset-minOffset+1},
+     (_,i)=>minOffset+i).sort((a,b)=>Math.abs(a-mid)-Math.abs(b-mid)||a-b);
+    for(const offset of offsets){
+     for(let baseY=minBaseY;baseY<=maxBaseY;baseY++){
+      const g={spaceId:room.id,face:request.face,offset,baseY,
+       width:request.width,height:request.height};
+      if(!physicalCandidate(placed,g))continue;
+      try{
+       const trial=compileR190SemanticPlan({...model,glazedOpenings:[g]});
+       const glazing=trial.audit.glazedOpenings?.[0];
+       if(trial.audit.realGlazingCells!==g.width*g.height||
+          glazing?.realExteriorGlassCells!==g.width*g.height||
+          trial.worldWrites!==0||trial.worldContacts!==0||
+          trial.layout.spaces.some((s,j)=>{
+           const original=built.layout.spaces[j];
+           return s.id!==original.id||s.x!==original.x||s.z!==original.z;
+          }))continue;
+       proposedOnly=g;independentlyAuditedGlassCells=g.width*g.height;
+       break;
+      }catch{/* Another impossible in-memory geometry is NOT accepted. */}
+     }
+     if(proposedOnly)break;
+    }
+   }
    report.windowOptions.push({path:at,requestedIntent:copy(request),
-    status:feasible?'UNAPPROVED_COORDINATE_CANDIDATE':'NO_FEASIBLE_COORDINATES',
-    proposedOnly:suggested,
-    needsExteriorWallAndDoorReview:true,
+    status:!dimensional?'NO_FEASIBLE_COORDINATES':
+     proposedOnly?'UNAPPROVED_PHYSICALLY_VERIFIED_CANDIDATE':
+      'NO_VERIFIED_EXTERIOR_WALL_OR_FRAME',
+    proposedOnly,
+    independentlyAuditedGlassCells,
+    physicallyCheckedAgainstActualB143:dimensional,
+    ephemeralSingleWindowSourceAudit:proposedOnly!==null,
+    multipleWindowCombinationCertified:false,
+    original3DPreviewHasNoGlass:true,
     approvalRequired:true,
-    feasibleOffsetRange:feasible?[minOffset,maxOffset]:null,
-    feasibleBaseYRange:feasible?[minBaseY,maxBaseY]:null});
+    feasibleOffsetRange:dimensional?[minOffset,maxOffset]:null,
+    feasibleBaseYRange:dimensional?[minBaseY,maxBaseY]:null});
   }
+  report.multipleWindowCombinationCertified=false;
   if(report.windowOptions.some(x=>x.status==='NO_FEASIBLE_COORDINATES')){
    report.status='HOLD_DAYLIGHT_INTENT_INFEASIBLE';
+  }else if(report.windowOptions.some(x=>
+   x.status==='NO_VERIFIED_EXTERIOR_WALL_OR_FRAME')){
+   report.status='HOLD_DAYLIGHT_NO_VERIFIED_EXTERIOR';
   }else{
    report.status=intents.length?'HOLD_WINDOW_PROPOSAL_REQUIRES_APPROVAL':
     'PROVISIONAL_SOURCE_ONLY_NO_ART_APPROVAL';

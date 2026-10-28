@@ -41,11 +41,12 @@ export function writeR7OfflineVisualReview({
   gallery.scenes[0].geometrySha256===compiled.geometrySha256,
   'GALLERY_SHA_MISMATCH');
  let html=renderB143Html(gallery,fs.readFileSync(template,'utf8'));
- // This inherited viewer was originally authored for ChatGPT-designed demos.
- // Correct it for an UNAUTHENTICATED model-source preview, not real Qwen proof.
- yes(html.includes('ChatGPTが設計した新規建築'),'UNEXPECTED_VIEWER_LABEL');
- html=html.replace('ChatGPTが設計した新規建築',
-  'モデル出力候補（作者・意匠品質は未認証）');
+ // The shared B143 viewer template now labels designs as source-only
+ // and unauthenticated. Do not require the REMOVED old ChatGPT-author label.
+ // Treat missing safety disclaimers as fail-closed, never claim authorship.
+ yes(html.includes('設計ソース由来の建築プレビュー（作者未認証）')&&
+  html.includes('Minecraft Educationで建設済みではありません。')&&
+  !html.includes('ChatGPTが設計した新規建築'),'UNSAFE_OR_STALE_VIEWER_LABEL');
  html=html.replace('<a href="../">既存15棟の設計レビュー →</a>',
   '<span class="muted">完全オフライン表示・施工なし</span>');
  const opening=html.match(/<body\b[^>]*>/i)?.[0];

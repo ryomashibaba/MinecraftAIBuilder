@@ -17,3 +17,15 @@ The AF pilot is an independent, offline candidate study, **not** yet attached
 to the Ollama run workflow. An additional, model-approved selection contract
 and true exterior wall/door checks would be required before creating glazed
 3D evidence. Do not run a real Qwen trial on this stage.
+
+## R190-AF physical proposal proof
+
+A daylight intent is not enough to place glass. The offline host first verifies each
+candidate against the unglazed compiled voxel scene (wall, inner/outer air,
+real room footprints, sill/header and side frames). It then temporarily
+compiles that one proposed window in memory with the strict R190 glazing
+source audit and never writes or approves the temporary design.
+A candidate on a shared room wall or on a removed entry sill is rejected.
+Several independent daylight intents are **not** jointly certified; every
+proposal still requires explicit future approval and a later combined check.
+The original no-glass architecture is the only persistent source preview.
