@@ -1,0 +1,31 @@
+name: R190-AC Offline Original Source Review — ZERO MODEL CALLS
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'scripts/r190ac-offline-source-review.mjs'
+      - 'scripts/r190ac-offline-source-review.test.mjs'
+      - 'evidence/r190aa/pilot-01/MODEL_RESPONSE_ORIGINAL.txt'
+      - 'evidence/r190aa/pilot-01/AUDIT.json'
+      - '.github/workflows/r190ac-offline-source-review.yml'
+  pull_request:
+    paths:
+      - 'scripts/r190ac-offline-source-review.mjs'
+      - 'scripts/r190ac-offline-source-review.test.mjs'
+      - 'evidence/r190aa/pilot-01/MODEL_RESPONSE_ORIGINAL.txt'
+      - 'evidence/r190aa/pilot-01/AUDIT.json'
+      - '.github/workflows/r190ac-offline-source-review.yml'
+permissions:
+  contents: read
+jobs:
+  fake-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: node --check scripts/r190ac-offline-source-review.mjs
+      - run: node --check scripts/r190ac-offline-source-review.test.mjs
+      - run: node --test scripts/r190ac-offline-source-review.test.mjs
+      - run: node scripts/r190ac-offline-source-review.mjs --help
