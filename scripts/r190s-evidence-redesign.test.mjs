@@ -184,6 +184,32 @@ test('S: corrupted saved model original stops instead of another expensive reque
   assert.equal(tracker.count,1);
  }finally{fs.rmSync(root,{recursive:true,force:true})}
 });
+test('S: failed transport BEFORE raw capture preserves attempt and forbids automatic retry',async()=>{
+ const root=empty();let calls=0;
+ try{
+  const from=baseline(root),evidenceRoot=path.join(root,'out');
+  const failingRunner=async()=>{calls++;throw Error('SYNTHETIC_PROVIDER_TIMEOUT_BEFORE_RESPONSE')};
+  await assert.rejects(runR190SStudy(['--from',from],{
+   evidenceRoot,transport:'openai',timestamp:()=>311,
+   modelRunner:failingRunner}),/SYNTHETIC_PROVIDER_TIMEOUT_BEFORE_RESPONSE/);
+  assert.equal(calls,1);
+  const markers=fs.readdirSync(evidenceRoot).filter(x=>
+   /^r190s-attempt-\d+-\d+\.json$/.test(x));
+  assert.equal(markers.length,1);
+  const attempt=JSON.parse(fs.readFileSync(path.join(evidenceRoot,markers[0]),'utf8'));
+  assert.equal(attempt.parentOriginalRawSha256,sha(raw()));
+  assert.equal(attempt.maxPermittedModelRequests,1);
+  assert.equal(attempt.actualProviderConsumption,'UNKNOWN_UNTIL_CAPTURED');
+  assert.equal(attempt.readiness,'NOT_PREPARED');
+  assert.equal(attempt.worldWrites,0);
+  await assert.rejects(runR190SStudy(['--from',from],{
+   evidenceRoot,transport:'openai',modelRunner:failingRunner}),
+   /R190S_PRIOR_MODEL_ATTEMPT_WITHOUT_VERIFIED_RESULT_NO_RETRY/);
+  assert.equal(calls,1);
+  assert.equal(fs.readFileSync(path.join(from,
+   'R190_I_ORIGINAL_RESPONSE.txt'),'utf8'),raw());
+ }finally{fs.rmSync(root,{recursive:true,force:true})}
+});
 test('S: partial prior folder fails closed without model calls',async()=>{
  const root=empty();
  try{
