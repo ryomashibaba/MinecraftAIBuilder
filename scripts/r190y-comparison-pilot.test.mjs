@@ -67,6 +67,51 @@ test('Y no automatic retry and no W inference after a damaged S archive',async()
   assert.equal(compareCalls,0);
  }finally{fs.rmSync(root,{recursive:true,force:true})}
 });
+test('Y skips W entirely when S preserved raw is not compilable B143',async()=>{
+ const root=temp();let wCalls=0,comparisons=0;
+ try{
+  const from=path.join(root,'baseline'),s=path.join(root,'S');
+  [from,s].forEach(p=>fs.mkdirSync(p));
+  const out=await runR190YTrial(['--run-missing'],{
+   baseline:fakeBaseline(from),
+   runS:()=>({directory:s,status:'HOLD_INVALID_B143',modelCalls:1,
+    beforeAfterStatus:'CANDIDATE_B143_NOT_COMPARABLE'}),
+   runW:()=>{wCalls++;throw Error('W_MUST_NOT_RUN')},
+   compare:()=>{comparisons++;throw Error('X_MUST_NOT_RUN')}
+  });
+  assert.equal(out.status,'HOLD_S_B143_NOT_COMPARABLE');
+  assert.equal(out.modelCallsReportedByCompletedRunners,1);
+  assert.equal(out.additionalModelCallsAvoidedUpTo,2);
+  assert.equal(out.sourceS,s);
+  assert.equal(out.sourceW,null);
+  assert.equal(wCalls,0);
+  assert.equal(comparisons,0);
+  assert.equal(out.worldWrites,0);
+  assert.equal(out.constructionApproved,false);
+ }finally{fs.rmSync(root,{recursive:true,force:true})}
+});
+test('Y preserves W stage-one HOLD without attempting X or another model call',async()=>{
+ const root=temp();let comparisons=0;
+ try{
+  const from=path.join(root,'baseline'),s=path.join(root,'S'),
+   w=path.join(root,'W');
+  [from,s,w].forEach(p=>fs.mkdirSync(p));
+  const out=await runR190YTrial(['--run-missing'],{
+   baseline:fakeBaseline(from),
+   runS:()=>({directory:s,status:'HOLD_SPATIAL_REVIEW',modelCalls:1,
+    beforeAfterStatus:'DIFFERENT_FINAL_VOXEL_GEOMETRY'}),
+   runW:()=>({directory:w,status:'HOLD_STAGE1_OR_PROVIDER',modelCalls:1}),
+   compare:()=>{comparisons++;throw Error('INCOMPLETE_W_CANNOT_COMPARE')}
+  });
+  assert.equal(out.status,'HOLD_W_NOT_B143_COMPARABLE');
+  assert.equal(out.sourceS,s);
+  assert.equal(out.sourceW,w);
+  assert.equal(out.sourceWStatus,'HOLD_STAGE1_OR_PROVIDER');
+  assert.equal(out.modelCallsReportedByCompletedRunners,2);
+  assert.equal(comparisons,0);
+  assert.equal(out.worldContacts,0);
+ }finally{fs.rmSync(root,{recursive:true,force:true})}
+});
 test('Y unsafe or malformed arguments never authorize inference',()=>{
  assert.deepEqual(parseR190YArgs([]),{from:null,runMissing:false});
  assert.deepEqual(parseR190YArgs(['--from','C:\\existing']),
