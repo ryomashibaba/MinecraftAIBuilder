@@ -12,6 +12,9 @@ import {measureR190TSource} from './r190t-source-comparison.mjs';
 import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
 import {renderR164Elevation} from './r164-exterior-audit.mjs';
 import {R190AA_TASKS,buildR190AAPrompt} from './r190aa-local-work-pilot.mjs';
+import {R190AB_SEMANTIC_FORMAT,R190AB_SEMANTIC_FORMAT_SHA256,
+ R190AB_SEMANTIC_GUIDANCE,inspectR190ABSemanticReply}
+ from '../source/ai/r190ab-semantic-contract.mjs';
 
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../r190ab-local-evidence');
 const sha=s=>createHash('sha256').update(s,'utf8').digest('hex');
@@ -92,17 +95,18 @@ const filename=(root,p)=>path.join(root,p);
 const saveJson=(p,v)=>fs.writeFileSync(p,JSON.stringify(v,null,2)+'\n',{flag:'wx'});
 const read=p=>fs.readFileSync(p,'utf8');
 export function parseR190ABArgs(args){
- const opt={run:false,model:'qwen3:14b',study:'contract-01',task:'library'};
+ const opt={run:false,model:'qwen3:14b',study:'contract-01',task:'library',contract:'direct-b143'};
  if(args.length===1&&args[0]==='--help')return {help:true};
  const seen=new Set();
  for(let i=0;i<args.length;i++){
   if(args[i]==='--run'&&!opt.run){opt.run=true;continue}
   const key=args[i];
-  if(!['--model','--study','--task'].includes(key)||seen.has(key)||!args[i+1])fail('ARGUMENTS');
+  if(!['--model','--study','--task','--contract'].includes(key)||seen.has(key)||!args[i+1])fail('ARGUMENTS');
   seen.add(key);opt[key.slice(2)]=args[++i];
  }
  if(!MODEL.test(opt.model)||!ID.test(opt.study)||
-  !R190AA_TASKS.some(t=>t.id===opt.task))fail('UNSAFE_OPTIONS');
+  !R190AA_TASKS.some(t=>t.id===opt.task)||
+  !['direct-b143','semantic-space'].includes(opt.contract))fail('UNSAFE_OPTIONS');
  return opt;
 }
 export function inspectR190ABReply(raw,finishReason='stop'){
@@ -138,9 +142,10 @@ export async function runR190AB(args=[],{
  evidenceRoot=ROOT,fetcher=fetch
 }={}){
  const o=Array.isArray(args)?parseR190ABArgs(args):args;
- if(o?.help)return {help:'Offline by default. ONE local Qwen request with approved Work access: node scripts/r190ab-structured-output-pilot.mjs --run --study contract-01 --task library --model qwen3:14b'};
+ if(o?.help)return {help:'Offline by default. Direct B143: --run --study contract-01 --task library. Opt-in semantic IR (single-level only): --run --contract semantic-space --study semantic-workshop-01 --task tidal-workshop. Local Work access requires user approval.'};
  if(!o||typeof o.run!=='boolean'||!MODEL.test(o.model)||!ID.test(o.study)||
-  !R190AA_TASKS.some(t=>t.id===o.task))
+  !R190AA_TASKS.some(t=>t.id===o.task)||
+  !['direct-b143','semantic-space'].includes(o.contract))
   fail('OPTIONS');
  const root=path.resolve(evidenceRoot),dir=filename(root,o.study);
  if(!o.run){
@@ -150,6 +155,12 @@ export async function runR190AB(args=[],{
   return {status:'READ_ONLY',saved:JSON.parse(read(filename(dir,'R190AB_RESULT.json'))),
    modelCalls:0,...safety()};
  }
+ // The existing semantic geometry supports ONE LEVEL only. Refuse 2-level,
+ // hillside, bridge or vertical-market cases BEFORE a single model request.
+ // Workshop covers spatial roles and a model-selected roof, but cannot
+ // certify actual weather protection or tidal engineering.
+ if(o.contract==='semantic-space'&&o.task!=='tidal-workshop')
+  fail('SEMANTIC_SINGLE_LEVEL_TASK_UNSUPPORTED');
  if(fs.existsSync(root)){
   const st=fs.lstatSync(root);
   if(!st.isDirectory()||st.isSymbolicLink())fail('UNSAFE_EVIDENCE_ROOT');
@@ -165,8 +176,11 @@ export async function runR190AB(args=[],{
  const manifest=await tags.json();
  const installed=manifest?.models?.find(x=>x?.name===o.model);
  if(!installed)fail('LOCAL_MODEL_NOT_INSTALLED_NO_DOWNLOAD');
- const task=R190AA_TASKS.find(t=>t.id===o.task),prompt=buildR190AAPrompt(task);
- const system=[
+ const task=R190AA_TASKS.find(t=>t.id===o.task),
+  semantic=o.contract==='semantic-space',
+  prompt=semantic?task.brief:buildR190AAPrompt(task),
+  schemaHash=semantic?R190AB_SEMANTIC_FORMAT_SHA256:SCHEMA_HASH;
+ const directSystem=[
   'Design the original architecture yourself, not an existing template. Return ONLY JSON matching the supplied JSON Schema.',
   'This is one architecture response, not a control envelope. NEVER output attempt or maxAttempts.',
   'Choose the 3D masses, supported floors, real air-filled rooms, usable stairs, cut openings, and original roof yourself.',
@@ -176,18 +190,20 @@ export async function runR190AB(args=[],{
   'Use the ordered B143 add/cut operations. Later ADDs can refill prior cuts. SpatialPlan must describe final model-authored geometry.',
   'Do not self-certify beauty, walkability or construction; source-only research.'
  ].join('\n');
+ const system=semantic?R190AB_SEMANTIC_GUIDANCE:directSystem;
  fs.mkdirSync(root,{recursive:true});
  fs.mkdirSync(dir);
- const request={model:o.model,stream:false,format:R190AB_FORMAT,
+ const request={model:o.model,stream:false,
+  format:semantic?R190AB_SEMANTIC_FORMAT:R190AB_FORMAT,
   options:{temperature:0.35,num_predict:8192},
   messages:[{role:'system',content:system},{role:'user',content:prompt}]};
  // Save exactly which immutable request was attempted BEFORE network calls.
  const requestText=JSON.stringify(request);
  saveJson(filename(dir,'R190AB_ATTEMPT.json'),{
   schema:'minecraftaibuilder-r190ab-attempt-v1',
-  modelRequested:o.model,modelDigestClaimed:installed.digest??null,
+  contract:o.contract,modelRequested:o.model,modelDigestClaimed:installed.digest??null,
   sourceTask:task.id,promptSha256:sha(prompt),
-  schemaSha256:SCHEMA_HASH,requestSha256:sha(requestText),
+  schemaSha256:schemaHash,requestSha256:sha(requestText),
   actualProviderConsumption:'UNKNOWN_UNTIL_CAPTURED',
   providerCallsAttempted:1,quality:'NOT_CERTIFIED',...safety()
  });
@@ -218,30 +234,44 @@ export async function runR190AB(args=[],{
  finally{clearTimeout(timer)}
  const providerWallMilliseconds=Math.max(0,Date.now()-providerStartedMs);
  const parsed=raw!==null&&fs.existsSync(filename(dir,'MODEL_RESPONSE_ORIGINAL.txt'))?
-  inspectR190ABReply(raw,reason):{report:{
+  (semantic?inspectR190ABSemanticReply(raw,reason):inspectR190ABReply(raw,reason)):{report:{
    status:'HOLD_PROVIDER_NO_VERIFIED_RAW',originalRawSha256:null,
    bytes:null,strictB143:false,declaredPlan:false,real3D:false,
    physical:null,error,...safety()},design:null};
  if(parsed.design){
   try{
+   if(semantic){
+    fs.writeFileSync(filename(dir,'HOST_DERIVED_B143_SOURCE.json'),
+     JSON.stringify(parsed.design,null,2)+'\n',{flag:'wx'});
+    fs.writeFileSync(filename(dir,'HOST_DERIVED_SOURCE_AUDIT.json'),
+     JSON.stringify({semanticPlanSha256:parsed.report.planSha256,
+      compilerSourceSha256:parsed.report.hostDerivedSourceSha256,
+      compilerGeometrySha256:parsed.report.hostDerivedGeometrySha256,
+      sourceRouteAudit:parsed.report.sourceRouteAudit,
+      modelDidNotAuthorB143:true,minecraftWalking:'NOT_TESTED',
+      humanArtReview:'ART_HOLD',...safety()},null,2)+'\n',{flag:'wx'});
+   }
    const template=read(path.resolve(path.dirname(fileURLToPath(import.meta.url)),
     '../source/ai/b143-viewer-template.html'));
    const gallery=compileB143Gallery([parsed.design]);
-   fs.writeFileSync(filename(dir,'MODEL_SOURCE_TRUE_3D.html'),
+   fs.writeFileSync(filename(dir,semantic?'HOST_DERIVED_SOURCE_TRUE_3D.html':'MODEL_SOURCE_TRUE_3D.html'),
     renderB143Html(gallery,template),{flag:'wx'});
    const compiled=compileDesign(parsed.design);
    for(const side of ['front','rear','west','east','roof'])
-    fs.writeFileSync(filename(dir,'MODEL_'+side+'.svg'),
+    fs.writeFileSync(filename(dir,(semantic?'HOST_DERIVED_':'MODEL_')+side+'.svg'),
      renderR164Elevation(compiled,parsed.design,side),{flag:'wx'});
   }catch(e){parsed.report.real3D=false;
    parsed.report.status='HOLD_SOURCE_VIEWER_FAILED';
    parsed.report.error=String(e?.message??e).slice(0,180)}
  }
- const result={schema:'minecraftaibuilder-r190ab-result-v1',
-  study:o.study,sourceTask:task.id,modelClaimed:o.model,
+ const result={schema:semantic?'minecraftaibuilder-r190ab-semantic-study-v1':
+   'minecraftaibuilder-r190ab-result-v1',
+  study:o.study,contract:o.contract,sourceTask:task.id,modelClaimed:o.model,
+  b143Authorship:semantic?'HOST_DERIVED_FROM_MODEL_SEMANTIC_IR':
+    'MODEL_AUTHORED_UNVERIFIED',
   providerDoneReason:reason,providerError:error,providerCallsAttempted:1,
   providerWallMilliseconds,providerTelemetry,
-  originalPromptSha256:sha(prompt),schemaSha256:SCHEMA_HASH,
+  originalPromptSha256:sha(prompt),schemaSha256:schemaHash,
   pilot01OriginalSha256:'0bf706181bb2b7a30f8082f896a703c33749ba55f75d42010adba88f47c84f17',
   response:parsed.report,
   humanArtReview:'ART_HOLD',independentArtApproval:false,
