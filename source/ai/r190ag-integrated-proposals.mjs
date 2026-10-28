@@ -17,7 +17,7 @@ export function r190AGSemanticProjection(p){
  const model={schema:R190_SCHEMA,id:p.id,title:p.title,brief:p.brief,
   site:copy(p.site),entrySpaceId:p.root.id,materials:copy(p.materials),
   spaces:[{...copy(p.root),parentId:null,side:null},...copy(p.children)]};
- for(const k of ['entranceFace','formIntent','roofFormIntent'])if(Object.hasOwn(p,k))model[k]=copy(p[k]);
+ for(const k of ['entranceFace','formIntent','roofFormIntent','skyCourtIntent'])if(Object.hasOwn(p,k))model[k]=copy(p[k]);
  if(p.additionalPassages)model.crossConnections=copy(p.additionalPassages);
  return model;
 }

@@ -70,7 +70,7 @@ export function r190RoofElevation(index,span,form){
 export function validateR190SemanticPlan(p){
  const standard=['schema','id','title','brief','site','entrySpaceId','spaces','materials'];
  ok(Object.keys(p??{}).length>=standard.length&&
-  Object.keys(p??{}).every(k=>[...standard,'entranceFace','formIntent','roofFormIntent','crossConnections','glazedOpenings'].includes(k))&&
+  Object.keys(p??{}).every(k=>[...standard,'entranceFace','formIntent','roofFormIntent','skyCourtIntent','crossConnections','glazedOpenings'].includes(k))&&
   standard.every(k=>Object.hasOwn(p,k)),'FIELDS');
  ok(p.schema===R190_SCHEMA&&slug(p.id)&&safeText(p.title,100)&&
   safeText(p.brief,400),'IDENTITY');
@@ -135,6 +135,23 @@ export function validateR190SemanticPlan(p){
   ok(space.height+f.rise<p.site.height&&
    (f.profile!=='sawtooth'||span>=2*f.toothWidth),
    'ROOF_SECTION_CANNOT_FIT');
+ }
+ // R190-AN: one architect-selected interior, open-sky courtyard.
+ // It is a void in the roof generated natively, not a box later CUT.
+ // Neither a courtyard type nor its location is invented by the host.
+ if(p.skyCourtIntent!==undefined){
+  const v=p.skyCourtIntent;
+  ok(exact(v,['spaceId','offsetX','offsetZ','width','depth'])&&
+   slug(v.spaceId)&&int(v.width,4,14)&&int(v.depth,4,14)&&
+   Number.isSafeInteger(v.offsetX)&&Number.isSafeInteger(v.offsetZ),
+   'SKY_COURT_FIELDS');
+  const room=p.spaces.find(s=>s.id===v.spaceId);
+  ok(room&&room.spatialRole!=='open-court'&&
+   p.formIntent?.spaceId!==room.id&&
+   p.roofFormIntent?.spaceId!==room.id,'SKY_COURT_CONFLICT');
+  ok(v.offsetX>=2&&v.offsetZ>=2&&
+   v.offsetX+v.width<=room.width-2&&
+   v.offsetZ+v.depth<=room.depth-2,'SKY_COURT_EXTENTS');
  }
  // Phase-C evidence permits one real open-air spatial void, not a faux CUT.
  const courts=p.spaces.filter(s=>s.spatialRole==='open-court');
@@ -446,6 +463,21 @@ function sourceDesign(p,l){
    [s.w-2,s.h-2,1]);
   if(p.roofFormIntent?.spaceId===tag)
    profiledRoof(s,p.roofFormIntent);
+  else if(p.skyCourtIntent?.spaceId===tag){
+   const v=p.skyCourtIntent,roof=p.materials.roof;
+   // Four mutually disjoint strips form a ring from the outset.
+   // The uncovered void is genuine exterior sky; no roof CUT is made.
+   box(tag+'-court-roof-south','add',roof,
+    [s.x,s.h,s.z],[s.w,1,v.offsetZ]);
+   box(tag+'-court-roof-north','add',roof,
+    [s.x,s.h,s.z+v.offsetZ+v.depth],
+    [s.w,1,s.d-v.offsetZ-v.depth]);
+   box(tag+'-court-roof-west','add',roof,
+    [s.x,s.h,s.z+v.offsetZ],[v.offsetX,1,v.depth]);
+   box(tag+'-court-roof-east','add',roof,
+    [s.x+v.offsetX+v.width,s.h,s.z+v.offsetZ],
+    [s.w-v.offsetX-v.width,1,v.depth]);
+  }
   else box(tag+'-roof','add',p.materials.roof,[s.x,s.h,s.z],[s.w,1,s.d]);
  }
  for(const [i,v] of l.portals.entries()){
@@ -662,11 +694,41 @@ export function auditR190SourceRoutes(plan,layout,design,compiled){
    sourceModelAuthorship:'CALLER_PROVIDED_IR_UNVERIFIED',
    actualMinecraftWeatherproofing:'NOT_TESTED'};
  }
+ // Check that every author-chosen courtyard column is truly open to sky,
+ // surrounded by a roof ring, and retains its occupied walking floor.
+ let skyCourtAudit=null;
+ if(plan.skyCourtIntent){
+  const v=plan.skyCourtIntent,s=layout.spaces.find(x=>x.id===v.spaceId);
+  let openColumns=0,roofRingColumns=0;
+  for(let dx=0;dx<s.w;dx++)for(let dz=0;dz<s.d;dz++){
+   const x=s.x+dx,z=s.z+dz;
+   const court=dx>=v.offsetX&&dx<v.offsetX+v.width&&
+    dz>=v.offsetZ&&dz<v.offsetZ+v.depth;
+   if(court){
+    ok(has(x,1,z)&&!has(x,2,z)&&!has(x,3,z),
+     'SKY_COURT_UNSUPPORTED_OR_BLOCKED_FLOOR');
+    for(let y=s.h;y<plan.site.height;y++)
+     ok(!has(x,y,z),'SKY_COURT_NOT_OPEN_TO_SKY');
+    openColumns++;
+   }else{
+    ok(has(x,s.h,z),'SKY_COURT_ROOF_RING_MISSING');
+    roofRingColumns++;
+   }
+  }
+  ok(openColumns===v.width*v.depth&&
+    roofRingColumns===s.w*s.d-v.width*v.depth,
+   'SKY_COURT_COLUMN_COUNT');
+  skyCourtAudit={spaceId:v.spaceId,modelChosenOffset:[v.offsetX,v.offsetZ],
+   modelChosenSize:[v.width,v.depth],actualOpenSkyColumns:openColumns,
+   actualRoofRingColumns:roofRingColumns,supportedWalkableFloor:true,
+   sourceOpenSkyVerified:true,daylightSimulation:'NOT_PERFORMED',
+   weatherproofing:'NOT_CERTIFIED',humanAesthetics:'ART_HOLD'};
+ }
  return {glazedOpenings:glazed,realGlazingCells:glazed.reduce((a,v)=>a+v.realExteriorGlassCells,0),
   daylightSimulation:'NOT_PERFORMED',
   crossConnections:crossWitnesses,nonTreePortalCount:crossWitnesses.length,
   nonTreePhysicalWalkableTwoWide:true,
-  roofForm:roofFormAudit,sourceWalkingPads:seen.size,
+  roofForm:roofFormAudit,skyCourt:skyCourtAudit,sourceWalkingPads:seen.size,
   facetedEnvelope:facetAudit,
   outdoorCourtCount:plan.spaces.filter(s=>s.spatialRole==='open-court').length,
   verifiedOpenSkyColumns:skyColumns,

@@ -33,6 +33,8 @@ export const R190AJ_SYSTEM_GUIDE=[
  'Optional entranceFace north/south/east/west, MODEL chosen, defaults south if absent. No root child on the entranceFace. Generate real doorway and three-cell exterior landing in chosen direction.',
  'Optional formIntent exact spaceId,face,cornerInset 2..3, for one enclosed room.',
  'Optional roofFormIntent exact spaceId,profile ridge/shed/sawtooth,axis x/z,rise 2..5; sawtooth requires toothWidth 3..8. It cannot target a faceted room. room.height + rise < site.height.',
+ 'Optional skyCourtIntent exact spaceId,offsetX,offsetZ,width,depth. Select an enclosed room for a genuinely open-sky internal courtyard: width/depth 4..14, offsets >=2, offset+size <= room size-2. Cannot share a room with roofFormIntent/formIntent; this is an uncovered weather-exposed void, not glass or a second room.',
+ 'Only choose skyCourtIntent if it genuinely improves the architectural space and daylight concept. The host generates the four roof-ring strips, not a generic solid roof followed by a cut.',
  'Optional additionalPassages 1..3 non-tree ID pairs; never duplicate parent-child links. Each needs a REAL shared-wall two-wide entrance.',
  'Optional daylightIntents 1..5, EXACT spaceId,face,width,height, where face is north/south/east/west, width 2..6,height 2..4, only enclosed nonfaceted rooms.',
  'Never add offset or baseY to daylightIntents. A host may only propose unapproved feasible coordinates later.',

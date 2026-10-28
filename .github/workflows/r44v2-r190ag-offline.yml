@@ -13,6 +13,7 @@ on:
       - 'scripts/r190aj-*'
       - 'scripts/r190al-*'
       - 'scripts/r190am-*'
+      - 'scripts/r190an-*'
       - 'source/ai/r190af-program-intent.mjs'
       - 'source/ai/r190-semantic-massing.mjs'
       - 'source/ai/r190-request-coverage.mjs'
@@ -29,6 +30,7 @@ on:
       - 'scripts/r190aj-*'
       - 'scripts/r190al-*'
       - 'scripts/r190am-*'
+      - 'scripts/r190an-*'
       - 'source/ai/r190af-program-intent.mjs'
       - 'source/ai/r190-semantic-massing.mjs'
       - 'source/ai/r190-request-coverage.mjs'
@@ -50,7 +52,7 @@ jobs:
       - name: Prepare historical Git objects only; no installer or model execution
         run: git fetch --no-tags --depth=1 origin a0438d8fa2504564351f8ebafbe9ecc14575dc95 44108944d0d9b0f892d01729c3fa3c76d006fe55 539daac020143efe2f24f981727f8dc5d6beeb50
       - name: All subsequent installer and integration tests use local files only
-        run: node --test scripts/r44v2-offline-install.test.mjs scripts/r44-pinned-path-audit.test.mjs scripts/r190ag-integrated-proposals.test.mjs scripts/r190ah-meaning-audit.test.mjs scripts/r190aj-model-intent.test.mjs scripts/r190al-entrance-orientation.test.mjs scripts/r190al-entrance-visual-comparison.test.mjs scripts/r190am-author-layout.test.mjs scripts/r190af-program-intent.test.mjs scripts/r190-semantic-massing.test.mjs
+        run: node --test scripts/r44v2-offline-install.test.mjs scripts/r44-pinned-path-audit.test.mjs scripts/r190ag-integrated-proposals.test.mjs scripts/r190ah-meaning-audit.test.mjs scripts/r190aj-model-intent.test.mjs scripts/r190al-entrance-orientation.test.mjs scripts/r190al-entrance-visual-comparison.test.mjs scripts/r190am-author-layout.test.mjs scripts/r190an-sky-court.test.mjs scripts/r190af-program-intent.test.mjs scripts/r190-semantic-massing.test.mjs
       - name: Existing AB AD AE contracts and saved-original diagnostics (synthetic fake only)
         run: node --test scripts/r190ab-structured-output-pilot.test.mjs scripts/r190ab-saved-semantic-replay.test.mjs scripts/r190ad-expressive-semantic.test.mjs scripts/r190ad-saved-semantic-diagnose.test.mjs scripts/r190ae-flexible-semantic.test.mjs scripts/r190ae-saved-semantic-diagnose.test.mjs
       - name: Emit unapproved synthetic true 3D and five views, never infer a model
@@ -86,3 +88,12 @@ jobs:
         with:
           name: R190AM-LOCKED-MASSING-TRUE-B143-ART-HOLD
           path: r190am-massing-gallery/
+
+      - name: R190-AN native open-sky void massing B143 comparison
+        if: matrix.os == 'ubuntu-24.04'
+        run: node scripts/r190an-sky-court-gallery.mjs --out "$GITHUB_WORKSPACE/r190an-sky-court-gallery"
+      - uses: actions/upload-artifact@v4
+        if: matrix.os == 'ubuntu-24.04'
+        with:
+          name: R190AN-TRUE-B143-SKY-COURT-SYNTHETIC-ART-HOLD
+          path: r190an-sky-court-gallery/
