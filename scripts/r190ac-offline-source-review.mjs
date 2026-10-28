@@ -7,6 +7,8 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {inspectR190ABReply,R190AB_FORMAT} from './r190ab-structured-output-pilot.mjs';
+import {inspectR190ABSemanticReply,R190AB_SEMANTIC_FORMAT_SHA256}
+ from '../source/ai/r190ab-semantic-contract.mjs';
 import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
 import {compileDesign} from '../source/ai/b143-building-dsl.mjs';
 import {renderR164Elevation} from './r164-exterior-audit.mjs';
@@ -89,6 +91,92 @@ export function sourceStructureDiagnostics(raw){
    roomContinuityAndTrueRoofNotCertified:true},
   structuralComplianceCertified:false};
 }
+/** Model-authored IR is NOT model-authored voxels. Independently rebuild all
+ * B143 source artifacts from the IMMUTABLE model plan, read-only.
+ * This cannot compare the workshop to the old 2-level library as same task.
+ */
+function inspectSavedSemanticStudy({abDir,raw,result,attempt,oldRaw,oldAudit}){
+ const rawHash=sha(raw),oldHash=sha(oldRaw),
+  r=result?.response;
+ if(result.schema!=='minecraftaibuilder-r190ab-semantic-study-v1'||
+  result.contract!=='semantic-space'||attempt.contract!=='semantic-space'||
+  result.sourceTask!=='tidal-workshop'||attempt.sourceTask!==result.sourceTask||
+  result.pilot01OriginalSha256!==oldHash||
+  result.schemaSha256!==R190AB_SEMANTIC_FORMAT_SHA256||
+  attempt.schemaSha256!==result.schemaSha256||
+  r?.formatSchemaSha256!==result.schemaSha256||
+  r.originalRawSha256!==rawHash||
+  r.bytes!==Buffer.byteLength(raw,'utf8')||
+  result.originalPromptSha256!==attempt.promptSha256||
+  result.modelClaimed!==attempt.modelRequested||
+  result.providerCallsAttempted!==1||attempt.providerCallsAttempted!==1||
+  result.noAutomaticRetry!==true||result.noHostGeometryRepair!==true||
+  result.b143Authorship!=='HOST_DERIVED_FROM_MODEL_SEMANTIC_IR'||
+  r.modelAuthoredB143!==false||r.hostDeterminesExactVoxels!==true||
+  result.constructionApproved!==false||result.executionAllowed!==false||
+  result.worldContacts!==0||result.worldWrites!==0||
+  r.worldContacts!==0||r.worldWrites!==0||
+  result.gates?.length!==9||result.gates.some(x=>x!=='BLOCKED')||
+  result.BuildPlan?.operations?.length!==0)
+  fail('SEMANTIC_PROVENANCE_OR_SAFETY');
+ const actual=inspectR190ABSemanticReply(raw,result.providerDoneReason);
+ const parsed=actual.report;
+ const viewerFailed=r.status==='HOLD_SOURCE_VIEWER_FAILED'&&
+  parsed.real3D===true&&r.real3D===false;
+ if((!viewerFailed&&r.status!==parsed.status)||
+  r.hostSourceDerived!==parsed.hostSourceDerived||
+  r.semanticPlanValid!==parsed.semanticPlanValid||
+  (!viewerFailed&&r.real3D!==parsed.real3D)||
+  r.planSha256!==parsed.planSha256||
+  r.hostDerivedSourceSha256!==parsed.hostDerivedSourceSha256||
+  r.hostDerivedGeometrySha256!==parsed.hostDerivedGeometrySha256||
+  r.hostDerivedVoxelCount!==parsed.hostDerivedVoxelCount||
+  JSON.stringify(r.sourceRouteAudit??null)!==
+   JSON.stringify(parsed.sourceRouteAudit??null))
+  fail('SEMANTIC_RECOMPUTED_MODEL_IR_MISMATCH');
+ if(r.real3D){
+  if(!actual.design||!actual.compiled)
+   fail('SEMANTIC_B143_NOT_RECREATABLE');
+  const originalHost=JSON.parse(read(
+   path.join(abDir,'HOST_DERIVED_B143_SOURCE.json'),300000));
+  if(JSON.stringify(originalHost)!==JSON.stringify(actual.design))
+   fail('SEMANTIC_STORED_HOST_B143_CHANGED');
+  const evidence=JSON.parse(read(
+   path.join(abDir,'HOST_DERIVED_SOURCE_AUDIT.json'),100000));
+  if(evidence.modelDidNotAuthorB143!==true||
+   evidence.compilerSourceSha256!==parsed.hostDerivedSourceSha256||
+   evidence.compilerGeometrySha256!==parsed.hostDerivedGeometrySha256||
+   JSON.stringify(evidence.sourceRouteAudit)!==
+    JSON.stringify(parsed.sourceRouteAudit))
+   fail('SEMANTIC_STORED_ROUTE_PROOF_CHANGED');
+  const template=read(path.resolve(here,'../source/ai/b143-viewer-template.html'),4000000);
+  const trueHtml=renderB143Html(compileB143Gallery([actual.design]),template);
+  if(sha(read(path.join(abDir,'HOST_DERIVED_SOURCE_TRUE_3D.html'),20000000))!==
+   sha(trueHtml))fail('SEMANTIC_VIEWER_EVIDENCE_CHANGED');
+  for(const side of ['front','rear','west','east','roof']){
+   const svg=read(path.join(abDir,'HOST_DERIVED_'+side+'.svg'),3000000);
+   if(sha(svg)!==sha(renderR164Elevation(
+    actual.compiled,actual.design,side)))
+    fail('SEMANTIC_ELEVATION_EVIDENCE_CHANGED_'+side.toUpperCase());
+  }
+ }
+ return {schema:'minecraftaibuilder-r190ac-verified-host-semantic-study-v1',
+  status:r.status,modelCalls:0,originalRawSha256:rawHash,
+  baselineRawSha256:oldHash,modelNameClaimed:result.modelClaimed,
+  modelIdentityCryptographicallyVerified:false,
+  sameTaskAsR190AAPilot01:false,
+  originalModelAuthoredB143:false,modelAuthoredIR:true,
+  compilerDerivedB143SourceSha256:parsed.hostDerivedSourceSha256??null,
+  compilerDerivedGeometrySha256:parsed.hostDerivedGeometrySha256??null,
+  actualSourceVoxelCount:parsed.hostDerivedVoxelCount??null,
+  independentSourceRouteProof:parsed.sourceRouteAudit??null,
+  independentJapaneseRequirements:'NOT_CERTIFIED',
+  weatherAndTidalResponse:'NOT_TESTED',
+  additionalStoreyAndVerticalMovement:'UNSUPPORTED_BY_CURRENT_ENGINE',
+  aestheticQuality:'ART_HOLD',winner:'NOT_ESTABLISHED',
+  comparisonNotCausal:true,oldModel:oldAudit.selectedModel,
+  sourceUnmodified:true,noNewModelCalls:true,...safe()};
+}
 export function inspectSavedR190AC({abDir=defaultAB,baselineDir=priorDir}={}){
  if(!folder(abDir)||!folder(baselineDir))fail('MISSING_EVIDENCE_DIR');
  const abRaw=read(path.join(abDir,'MODEL_RESPONSE_ORIGINAL.txt')),
@@ -100,6 +188,9 @@ export function inspectSavedR190AC({abDir=defaultAB,baselineDir=priorDir}={}){
  if(oldHash!=='0bf706181bb2b7a30f8082f896a703c33749ba55f75d42010adba88f47c84f17'||
   aaAudit?.original?.sha256!==oldHash||aaAudit?.original?.bytes!==Buffer.byteLength(aaRaw))
   fail('AA_ORIGINAL_OR_AUDIT_CHANGED');
+ if(abResult?.contract==='semantic-space')return inspectSavedSemanticStudy({
+  abDir,raw:abRaw,result:abResult,attempt:abAttempt,oldRaw:aaRaw,oldAudit:aaAudit
+ });
  if(abResult?.schema!=='minecraftaibuilder-r190ab-result-v1'||
   abResult?.pilot01OriginalSha256!==oldHash||
   abResult?.response?.originalRawSha256!==sourceHash||
