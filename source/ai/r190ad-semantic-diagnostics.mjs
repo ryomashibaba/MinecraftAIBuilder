@@ -17,7 +17,8 @@ export function diagnoseR190ADRaw(raw){
   if(issues.length<100)issues.push({code,path,reason,...related});
  };
  const report={schema:'minecraftaibuilder-r190ad-offline-diagnostics-v1',
-  rawSha256:H(raw),rawBytes:Buffer.byteLength(raw,'utf8'),
+  rawSha256:typeof raw==='string'?H(raw):null,
+  rawBytes:typeof raw==='string'?Buffer.byteLength(raw,'utf8'):null,
   mode:'ADVISORY_MULTI_ISSUE_SOURCE_ONLY',modelCalls:0,
   originalUnmodified:true,sourceGeometryBuilt:false,
   errors:issues,completePhysicalFeasibilityCertified:false,
