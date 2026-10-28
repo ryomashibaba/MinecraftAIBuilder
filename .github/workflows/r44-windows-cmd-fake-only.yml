@@ -5,11 +5,15 @@ on:
     paths:
       - 'tools/r44-approved/**'
       - 'scripts/b198zr44-windows-one-click-fake.test.mjs'
+      - 'scripts/r44-pinned-path-audit.mjs'
+      - 'scripts/r44-pinned-path-audit.test.mjs'
       - '.github/workflows/r44-windows-cmd-fake-only.yml'
   pull_request:
     paths:
       - 'tools/r44-approved/**'
       - 'scripts/b198zr44-windows-one-click-fake.test.mjs'
+      - 'scripts/r44-pinned-path-audit.mjs'
+      - 'scripts/r44-pinned-path-audit.test.mjs'
       - '.github/workflows/r44-windows-cmd-fake-only.yml'
 permissions:
   contents: read
@@ -22,5 +26,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
+      - name: Verify pinned installer inventory with zero provider calls
+        run: node --test scripts/r44-pinned-path-audit.test.mjs
       - name: Fail closed unless a local in-process fake HTTP server pre-binds Ollama port
         run: node --test scripts/b198zr44-windows-one-click-fake.test.mjs

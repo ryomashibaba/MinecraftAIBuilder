@@ -41,7 +41,8 @@ jobs:
             scripts/b198j-circulation.test.mjs
   real-chromium-3d-studio:
     needs: [real-source-graph-and-regression]
-    runs-on: ubuntu-latest
+    # Keep Playwright 1.56.1 on supported Ubuntu 24.04 for browser QA only.
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
