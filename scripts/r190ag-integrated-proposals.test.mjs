@@ -6,7 +6,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {studyR190AG,r190AGSemanticProjection} from '../source/ai/r190ag-integrated-proposals.mjs';
 import {verifyCompiled} from '../source/ai/b143-building-dsl.mjs';
-import {r190GlazingCells,auditR190SourceRoutes} from '../source/ai/r190-semantic-massing.mjs';
+import {r190GlazingCells,auditR190SourceRoutes,compileR190SemanticPlan} from '../source/ai/r190-semantic-massing.mjs';
 import {jointWindowFixture,featuredFixture,plainFixtures} from './r190ag-synthetic-fixtures.mjs';
 import {writeR190AGComparison} from './r190ag-offline-comparison.mjs';
 import {compileDesign} from '../source/ai/b143-building-dsl.mjs';
@@ -169,4 +169,50 @@ test('AH contrastive audit exposes metadata-only purpose/privacy without changin
   'NOT_CERTIFIED');
  assert.equal(changed.report.alternatives[0].programMeaningAudit.functionalPrivacyCertified,false);
  checkSafe(original.report);checkSafe(changed.report);
+});
+
+test('bounded second solver layout preserves model-authored geometry requirements and source routes',()=>{
+ const p=jointWindowFixture(),raw=JSON.stringify(p),mapped=r190AGSemanticProjection(p);
+ const first=compileR190SemanticPlan(mapped,{layoutStrategy:'centered',layoutVariantIndex:0});
+ const second=compileR190SemanticPlan(mapped,{layoutStrategy:'centered',layoutVariantIndex:1});
+ assert.notDeepEqual(first.layout.spaces.map(s=>[s.x,s.z]),
+  second.layout.spaces.map(s=>[s.x,s.z]));
+ assert.equal(first.audit.allProgramSpacesReachable,true);
+ assert.equal(second.audit.allProgramSpacesReachable,true);
+ assert.equal(verifyCompiled(second.design,second.compiled),true);
+ const expanded=studyR190AG(raw,{maxLayoutVariantsPerStrategy:2});
+ assert.equal(expanded.report.maxLayoutVariantsPerStrategy,2);
+ assert.equal(expanded.report.layoutVariationCompleteness,'BOUNDED_NOT_EXHAUSTIVE');
+ assert(expanded.report.alternatives.some(x=>x.layoutVariantIndex===1&&x.baselineGeometrySha256));
+ assert(expanded.proposals.length>=studyR190AG(raw).proposals.length);
+ assert.equal(JSON.stringify(p),raw);
+ assert.deepEqual(expanded.report.alternatives.slice(0,1).map(x=>x.strategy),['centered']);
+ checkSafe(expanded.report);
+ assert.equal(studyR190AG(raw,{maxLayoutVariantsPerStrategy:5}).report.error,'R190AG_SEARCH_BUDGET');
+});
+
+test('authored public route rather than private transit creates different real source layout',()=>{
+ const p=plainFixtures()[0];
+ p.site={width:64,depth:64,height:24};
+ const room=(id,purpose,privacy,parentId,side)=>({
+  id,purpose,width:12,depth:12,height:8,privacy,spatialRole:'enclosed',
+  ...(parentId?{parentId,side}:{})
+ });
+ p.root=room('arrival','Entry hall','public');
+ p.children=[room('staff','Private service room','private','arrival','east'),
+  room('gallery','Public exhibition room','public','staff','east')];
+ const blocked=studyR190AG(JSON.stringify(p));
+ assert.equal(blocked.baseline.audit.allProgramSpacesReachable,true);
+ assert.deepEqual(blocked.report.alternatives[0].programMeaningAudit.publicSharedAccess.needsReview,['gallery']);
+ const revised=structuredClone(p);
+ revised.children[1].parentId='arrival';
+ revised.children[1].side='west';
+ const open=studyR190AG(JSON.stringify(revised));
+ assert.equal(open.baseline.audit.allProgramSpacesReachable,true);
+ assert.deepEqual(open.report.alternatives[0].programMeaningAudit.publicSharedAccess.needsReview,[]);
+ assert.notEqual(blocked.baseline.compiled.geometrySha256,open.baseline.compiled.geometrySha256);
+ assert.equal(verifyCompiled(open.baseline.design,open.baseline.compiled),true);
+ // This improvement is from an explicitly authored relation, not a host rewrite.
+ assert.deepEqual(p.children[1],room('gallery','Public exhibition room','public','staff','east'));
+ checkSafe(blocked.report);checkSafe(open.report);
 });

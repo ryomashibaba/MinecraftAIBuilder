@@ -215,9 +215,12 @@ export function r190SharedCrossPortal(a,b){
  }
  return portal?{...portal,a:a.id,b:b.id,kind:'cross'}:null;
 }
-export function layoutR190SemanticPlan(p,{strategy='centered'}={}){
+export function layoutR190SemanticPlan(p,{strategy='centered',layoutVariantIndex=0}={}){
  validateR190SemanticPlan(p);
  ok(R190_LAYOUT_STRATEGIES.includes(strategy),'LAYOUT_STRATEGY');
+ // Zero is the original deterministic first layout. Nonzero variants are
+ // bounded read-only research alternatives, never adopted as model choices.
+ ok(int(layoutVariantIndex,0,3),'LAYOUT_VARIANT_INDEX');
  const source=structuredClone(p),byId=new Map(source.spaces.map(s=>[s.id,s]));
  const root=byId.get(p.entrySpaceId);
  // Solve room relationships in relative coordinates first; placing the
@@ -240,14 +243,19 @@ export function layoutR190SemanticPlan(p,{strategy='centered'}={}){
  const portals=[],pending=new Set(source.spaces.filter(s=>s.id!==root.id).map(s=>s.id));
  // Stable bounded search; positions depend on relations and requirements,
  // not building-type names or a fixed prior building grid.
+ let completedLayouts=0,variantCandidateAttempts=0;
  function solve(){
-  if(!pending.size)return true;
+  if(!pending.size)return completedLayouts++===layoutVariantIndex;
   const choices=[...pending].map(id=>byId.get(id))
    .filter(s=>placements.has(s.parentId)).sort((a,b)=>
     a.parentId.localeCompare(b.parentId)||a.id.localeCompare(b.id));
   for(const s of choices){
    const parent=placements.get(s.parentId);
    for(const shift of SHIFT_ORDERS[strategy]){
+    // A non-first candidate must not turn pathological layouts into an
+    // unbounded search. The historical first-layout behavior is unchanged.
+    if(layoutVariantIndex>0&&++variantCandidateAttempts>20000)
+     fail('LAYOUT_VARIANT_BUDGET');
     const candidate=near(parent,s,s.side,shift);
     // Reject only if the whole layout cannot fit after a rigid shift.
     // Preserve one block at either X edge, one at the north Z edge,
@@ -276,7 +284,8 @@ export function layoutR190SemanticPlan(p,{strategy='centered'}={}){
   }
   return false;
  }
- ok(solve(),'NO_FEASIBLE_SPATIAL_LAYOUT');
+ if(!solve())fail(layoutVariantIndex>0&&completedLayouts>0?
+  'LAYOUT_VARIANT_UNAVAILABLE':'NO_FEASIBLE_SPATIAL_LAYOUT');
  const bounds=footprintBounds();
  const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
  const dx=clamp(Math.floor((p.site.width-root.width)/2),
@@ -627,11 +636,11 @@ export function auditR190SourceRoutes(plan,layout,design,compiled){
   entranceApproachTwoWide:true,allProgramSpacesReachable:true,witnesses,
   minecraftPlayerWalking:'NOT_TESTED',structuralEngineering:'NOT_TESTED'};
 }
-export function compileR190SemanticPlan(raw,{layoutStrategy='centered'}={}){
+export function compileR190SemanticPlan(raw,{layoutStrategy='centered',layoutVariantIndex=0}={}){
  const p=typeof raw==='string'?JSON.parse(raw):raw;
  validateR190SemanticPlan(p);
  ok(R190_LAYOUT_STRATEGIES.includes(layoutStrategy),'LAYOUT_STRATEGY');
- const plan=structuredClone(p),layout=layoutR190SemanticPlan(plan,{strategy:layoutStrategy});
+ const plan=structuredClone(p),layout=layoutR190SemanticPlan(plan,{strategy:layoutStrategy,layoutVariantIndex});
  const design=sourceDesign(plan,layout),compiled=compileDesign(design);
  const audit=auditR190SourceRoutes(plan,layout,design,compiled);
  return {schema:'minecraftaibuilder-r190-source-research-v1',

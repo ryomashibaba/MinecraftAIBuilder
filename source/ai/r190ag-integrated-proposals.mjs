@@ -54,17 +54,22 @@ const intersects=(a,b)=>{for(const k of a)if(b.has(k))return true;return false;}
 const geometricLayout=x=>{const {sourcePlanSha256,...geometry}=x.layout;return geometry;};
 const sameLayout=(a,b)=>json(geometricLayout(a))===json(geometricLayout(b));
 /** A proposal contains true source voxels but NEVER supersedes the baseline. */
-export function studyR190AG(raw,{maxSearchStates=5000,maxCompileAttempts=32}={}){
+export function studyR190AG(raw,{maxSearchStates=5000,maxCompileAttempts=32,
+ maxLayoutVariantsPerStrategy=1}={}){
  const report={schema:'minecraftaibuilder-r190ag-integrated-study-v1',
   status:'HOLD_INVALID_INTENT',originalRawSha256:typeof raw==='string'?sha(raw):null,
   originalUnmodified:true,provenance:'CALLER_IR_UNVERIFIED_NO_MODEL_INFERENCE',
   proposalAutoApplied:false,proposalApproved:false,modelAuthoredB143:false,
   independentJapaneseRequirements:'NOT_CERTIFIED',minecraftWalking:'NOT_TESTED',
   levels:1,verticalRoutes:'NOT_SUPPORTED',weatherPerformance:'NOT_TESTED',
-  alternatives:[],error:null,...safe()};
+  alternatives:[],maxLayoutVariantsPerStrategy,
+  layoutVariationCompleteness:'BOUNDED_NOT_EXHAUSTIVE',
+  error:null,...safe()};
  const result={report,baseline:null,proposals:[]};
  if(!Number.isSafeInteger(maxSearchStates)||maxSearchStates<1||maxSearchStates>5000||
-    !Number.isSafeInteger(maxCompileAttempts)||maxCompileAttempts<1||maxCompileAttempts>32){
+    !Number.isSafeInteger(maxCompileAttempts)||maxCompileAttempts<1||maxCompileAttempts>32||
+    !Number.isSafeInteger(maxLayoutVariantsPerStrategy)||
+    maxLayoutVariantsPerStrategy<1||maxLayoutVariantsPerStrategy>4){
   report.error='R190AG_SEARCH_BUDGET';return result;
  }
  // Reuse the frozen AF contract validation. Its provisional windows are
@@ -78,12 +83,21 @@ export function studyR190AG(raw,{maxSearchStates=5000,maxCompileAttempts=32}={})
  report.representationMapping={rootNullRelationsAdded:true,
   additionalPassagesRenamedToCrossConnections:true,authoredValuesChanged:[]};
  for(const strategy of R190_LAYOUT_STRATEGIES){
-  const entry={strategy,status:'HOLD_NO_JOINT_CANDIDATE',searchStates:0,
+  for(let layoutVariantIndex=0;layoutVariantIndex<maxLayoutVariantsPerStrategy;layoutVariantIndex++){
+  const entry={strategy,layoutVariantIndex,status:'HOLD_NO_JOINT_CANDIDATE',searchStates:0,
    compileAttempts:0,rejectedCompilations:[],candidateCounts:[],proposal:null};
   report.alternatives.push(entry);
   let baseline;
-  try{baseline=compileR190SemanticPlan(model,{layoutStrategy:strategy});}
-  catch(e){entry.status='HOLD_BASELINE_GEOMETRY';entry.error=e.message;continue;}
+  try{baseline=compileR190SemanticPlan(model,{layoutStrategy:strategy,layoutVariantIndex});}
+  catch(e){
+   if(layoutVariantIndex>0&&e.message==='R190_SEMANTIC_LAYOUT_VARIANT_UNAVAILABLE'){
+    entry.status='NO_MORE_SOLVER_LAYOUTS';break;
+   }
+   if(layoutVariantIndex>0&&e.message==='R190_SEMANTIC_LAYOUT_VARIANT_BUDGET'){
+    entry.status='HOLD_LAYOUT_VARIANT_BUDGET';break;
+   }
+   entry.status='HOLD_BASELINE_GEOMETRY';entry.error=e.message;continue;
+  }
   if(!result.baseline)result.baseline=baseline;
   entry.baselineGeometrySha256=baseline.compiled.geometrySha256;
   entry.programMeaningAudit=auditR190AHMeaning(model,baseline.layout,
@@ -102,7 +116,8 @@ export function studyR190AG(raw,{maxSearchStates=5000,maxCompileAttempts=32}={})
     entry.compileAttempts++;
     const windows=selected.map(s=>copy(s.g));
     try{
-     const trial=compileR190SemanticPlan({...model,glazedOpenings:windows},{layoutStrategy:strategy});
+     const trial=compileR190SemanticPlan({...model,glazedOpenings:windows},
+      {layoutStrategy:strategy,layoutVariantIndex});
      const required=intents.reduce((s,i)=>s+i.width*i.height,0);
      if(!sameLayout(baseline,trial)||!verifyCompiled(trial.design,trial.compiled)||
         trial.audit.realGlazingCells!==required||trial.audit.glazedOpenings.length!==intents.length||
@@ -143,7 +158,8 @@ export function studyR190AG(raw,{maxSearchStates=5000,maxCompileAttempts=32}={})
    roofForm:trial.audit.roofForm,facetedEnvelope:trial.audit.facetedEnvelope,
    outdoorCourtCount:trial.audit.outdoorCourtCount,nonTreePortalCount:trial.audit.nonTreePortalCount,
    independentUseAndArtEvaluation:'NOT_CERTIFIED_ART_HOLD'};
-  result.proposals.push({strategy,baseline,trial});
+  result.proposals.push({strategy,layoutVariantIndex,baseline,trial});
+  }
  }
  report.status=result.proposals.length?'HOLD_PROPOSALS_REQUIRE_SEPARATE_REVIEW':
   intents.length?'HOLD_NO_INTEGRATED_PROPOSAL':'PROVISIONAL_BASELINE_ONLY_ART_HOLD';
