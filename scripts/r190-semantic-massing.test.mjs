@@ -36,6 +36,68 @@ test('R190 synthetic programs: B143 source, 2-wide access and safe world gates',
  }
  assert.equal(new Set(signatures).size,3);
 });
+// Synthetic reconstruction of the room dimensions and relations reported in
+// semantic-workshop-01. This is NOT the archived Qwen raw response, and does
+// not certify that the earlier study succeeded under its original compiler.
+const recoveredWorkshopPlan=()=>({
+ schema:R190_SCHEMA,id:'coastal-workshop-placement-test',
+ title:'Bounded coastal workshop test',brief:'Synthetic source-only geometry regression',
+ site:{width:40,depth:30,height:20},entrySpaceId:'entry',
+ spaces:[
+  {id:'entry',purpose:'Public entrance',width:10,depth:10,height:7,
+   parentId:null,side:null,privacy:'public'},
+  {id:'exhibition',purpose:'Public exhibition',width:20,depth:15,height:15,
+   parentId:'entry',side:'north',privacy:'public'},
+  {id:'workshop',purpose:'Repair workshop',width:18,depth:12,height:8,
+   parentId:'exhibition',side:'east',privacy:'private'},
+  {id:'storage',purpose:'Material storage',width:12,depth:10,height:7,
+   parentId:'entry',side:'west',privacy:'private'}
+ ],
+ materials:{floor:'concrete',wall:'concrete',roof:'metal'},
+ roofFormIntent:{spaceId:'exhibition',profile:'ridge',axis:'x',rise:4},
+ glazedOpenings:[{spaceId:'exhibition',face:'north',offset:3,baseY:5,
+  width:5,height:4}]
+});
+test('R190 fits reconstructed bounded workshop by moving whole layout, not rooms',()=>{
+ const plan=recoveredWorkshopPlan(),original=JSON.stringify(plan);
+ const built=compileR190SemanticPlan(plan);
+ assert.equal(JSON.stringify(plan),original);
+ assert.equal(built.layout.sitePlacement.mode,'rigid-translation-of-model-spaces');
+ assert.equal(built.layout.sitePlacement.roomDimensionsModified,false);
+ assert.equal(built.layout.sitePlacement.roomRelationsModified,false);
+ assert.equal(built.layout.spaces.length,4);
+ assert.equal(built.layout.portals.length,3);
+ for(const s of plan.spaces){
+  const placed=built.layout.spaces.find(x=>x.id===s.id);
+  assert.deepEqual([placed.w,placed.d,placed.h],
+   [s.width,s.depth,s.height]);
+  assert.equal(placed.parentId,s.parentId);
+  assert.equal(placed.side,s.side);
+  assert.ok(placed.x>=1&&placed.x+placed.w<=plan.site.width-1);
+  assert.ok(placed.z>=0&&placed.z+placed.d<=plan.site.depth-1);
+ }
+ const entry=built.layout.spaces.find(x=>x.id==='entry');
+ assert.ok(entry.z>=3,'real approach extends three blocks south');
+ assert.ok(entry.x!==Math.floor((plan.site.width-entry.w)/2)||
+  entry.z!==Math.floor((plan.site.depth-entry.d)/2),
+  'a centered entrance was the incorrect hard constraint');
+ assert.equal(built.audit.allProgramSpacesReachable,true);
+ assert.equal(built.audit.witnesses.length,4);
+ assert.equal(built.audit.glazedOpenings.length,1);
+ assert.equal(built.audit.roofForm.profile,'ridge');
+ assert.equal(verifyCompiled(built.design,built.compiled),true);
+ assert.equal(built.worldWrites,0);
+ assert.equal(built.constructionApproved,false);
+ assert.deepEqual(built.gates,Array(9).fill('BLOCKED'));
+});
+test('R190 does not silently shrink rooms on a genuinely narrow fixed site',()=>{
+ const plan=recoveredWorkshopPlan();
+ plan.site.width=36;
+ assert.throws(()=>compileR190SemanticPlan(plan),/NO_FEASIBLE_SPATIAL_LAYOUT/);
+ assert.equal(plan.spaces[1].width,20);
+ assert.equal(plan.spaces[2].width,18);
+});
+
 test('R190 rejects cycles, infeasible plots, and untrusted world commands',()=>{
  const cyclic=structuredClone(cases[0]);
  cyclic.spaces[1].parentId='storage';
