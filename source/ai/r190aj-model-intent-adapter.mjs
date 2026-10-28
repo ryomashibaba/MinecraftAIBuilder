@@ -4,7 +4,10 @@
 import {createHash} from 'node:crypto';
 import {inspectR190AFIntent,R190AF_INTENT_SCHEMA} from './r190af-program-intent.mjs';
 import {studyR190AG} from './r190ag-integrated-proposals.mjs';
-import {scanR190ExplicitBriefCapabilities} from './r190-request-coverage.mjs';
+import {scanR190ExplicitBriefCapabilities,validateR190ProgramSpec,
+ auditR190ExplicitProgram,verifyR190ProgramInCompiledSource}
+ from './r190-request-coverage.mjs';
+import {r190AGSemanticProjection} from './r190ag-integrated-proposals.mjs';
 import {R190_UNSUPPORTED_CAPABILITIES} from './r190-model-proposal.mjs';
 
 const hash=s=>createHash('sha256').update(s,'utf8').digest('hex');
@@ -45,7 +48,9 @@ export function preflightR190AJBrief(brief){
  return {detected,unsupported,
   completeness:'LITERAL_ONLY_NOT_COMPLETE_NATURAL_LANGUAGE_UNDERSTANDING'};
 }
-export function reviewR190AJOriginal(raw,{brief=null,maxLayoutVariantsPerStrategy=1}={}){
+export function reviewR190AJOriginal(raw,{
+ brief=null,maxLayoutVariantsPerStrategy=1,acceptanceSpec=null
+}={}){
  if(!Number.isSafeInteger(maxLayoutVariantsPerStrategy)||
   maxLayoutVariantsPerStrategy<1||maxLayoutVariantsPerStrategy>4)fail('LAYOUT_BUDGET');
  const receipt={schema:'minecraftaibuilder-r190aj-source-review-v1',
@@ -54,6 +59,15 @@ export function reviewR190AJOriginal(raw,{brief=null,maxLayoutVariantsPerStrateg
   hostChangedSemanticFields:false,proposalAutoApplied:false,
   proposalApproved:false,geometryExpressesPurpose:'NOT_CERTIFIED',
   geometryExpressesPrivacy:'NOT_CERTIFIED',...safety()};
+ // Explicit independently supplied criteria are NEVER invented from the
+ // brief or transmitted to the model to coax a passing answer.
+ // Validate before any source compilation, so malformed specs fail closed.
+ const validatedSpec=validateR190ProgramSpec(acceptanceSpec);
+ receipt.acceptanceSpecSha256=validatedSpec===null?null:
+  hash(JSON.stringify(validatedSpec));
+ receipt.independentProgramReview={status:'NOT_SPECIFIED',
+  requirementsCount:0,independentlyVerified:false,
+  semanticIssues:[],sourceChecks:[]};
  const out={originalRaw:raw,receipt,af:null,ag:null};
  if(typeof raw!=='string'||Buffer.byteLength(raw,'utf8')>120000){
   receipt.reason='INVALID_RAW';return out;
@@ -78,7 +92,60 @@ export function reviewR190AJOriginal(raw,{brief=null,maxLayoutVariantsPerStrateg
    receipt.reason='EXPLICIT_CROSS_LINK_LOST';return out;
   }
  }
+ const independent= auditR190ExplicitProgram(
+  r190AGSemanticProjection(JSON.parse(raw)),validatedSpec);
+ receipt.independentProgramReview={
+  status:independent.status,
+  requirementsCount:independent.requirementsCount,
+  independentlyVerified:false,
+  semanticIssues:structuredClone(independent.issues),
+  matchedRooms:structuredClone(independent.matchedRooms),
+  sourceChecks:[]
+ };
+ if(independent.issues.length){
+  receipt.reason='MODEL_AUTHORED_PROGRAM_DOES_NOT_MEET_EXPLICIT_SPEC';
+  receipt.status='HOLD_UNSATISFIED_EXPLICIT_PROGRAM';
+  return out;
+ }
  const ag=studyR190AG(raw,{maxLayoutVariantsPerStrategy});out.ag=ag;
+ // When daylight intents exist, the no-glass baseline does NOT satisfy the
+ // complete source: only jointly verified glass trials may qualify.
+ const originalPlan=JSON.parse(raw);
+ const sourceCandidates=(originalPlan.daylightIntents?.length??0)>0?
+  ag.proposals.map(x=>({strategy:x.strategy,variant:x.layoutVariantIndex,
+   compiled:x.trial})):
+  ag.baseline?[{strategy:ag.baseline.layout.strategy,
+   variant:0,compiled:ag.baseline}]:[];
+ if(validatedSpec!==null){
+  const sourceChecks=sourceCandidates.map(candidate=>{
+   try{
+    const verified=verifyR190ProgramInCompiledSource(independent,
+     candidate.compiled);
+    return {strategy:candidate.strategy,variant:candidate.variant,
+     status:verified.status,
+     geometrySha256:candidate.compiled.compiled.geometrySha256,
+     matchedRooms:verified.matchedRooms,
+     directConnections:verified.directConnections};
+   }catch(error){
+    return {strategy:candidate.strategy,variant:candidate.variant,
+     status:'HOLD_PHYSICAL_PROGRAM_MISMATCH',
+     reason:String(error?.message??error).slice(0,160)};
+   }
+  });
+  const verified=sourceChecks.some(x=>x.status===
+   'VERIFIED_EXPLICIT_PROGRAM_IN_B143');
+  receipt.independentProgramReview={
+   ...receipt.independentProgramReview,sourceChecks,
+   status:verified?'VERIFIED_EXPLICIT_PROGRAM_IN_B143':
+    'HOLD_NO_COMPLETE_PHYSICAL_PROGRAM_PROOF',
+   independentlyVerified:verified
+  };
+  if(sourceCandidates.length&& !verified){
+   receipt.status='HOLD_EXPLICIT_PROGRAM_B143_MISMATCH';
+   receipt.reason='NO_COMPILATION_SATISFIED_INDEPENDENT_REQUIREMENTS';
+   return out;
+  }
+ }
  receipt.afStatus=af.status;receipt.agStatus=ag.report.status;
  receipt.unapprovedB143ProposalCount=ag.proposals.length;
  receipt.sourceGeometrySha256=af.sourcePreview.geometrySha256;
@@ -101,9 +168,13 @@ export function createR190AJLocalIntentAdapter({
  if(onRawModelResponse!==null&&typeof onRawModelResponse!=='function')fail('CALLBACK');
  if(!Number.isSafeInteger(timeoutMs)||timeoutMs<1000||timeoutMs>900000)fail('TIMEOUT');
  return async function requestOne({
-  brief,consentToOneModelCall=false,maxLayoutVariantsPerStrategy=1
+  brief,consentToOneModelCall=false,maxLayoutVariantsPerStrategy=1,
+  acceptanceSpec=null
  }={}){
   const check=preflightR190AJBrief(brief);
+  // External acceptance constraints are not model instructions.
+  // Refuse malformed requirements BEFORE the one consented provider request.
+  validateR190ProgramSpec(acceptanceSpec);
   if(!consentToOneModelCall)fail('NEW_CONSENT_REQUIRED');
   if(!Number.isSafeInteger(maxLayoutVariantsPerStrategy)||
    maxLayoutVariantsPerStrategy<1||maxLayoutVariantsPerStrategy>4)fail('LAYOUT_BUDGET');
@@ -130,7 +201,7 @@ export function createR190AJLocalIntentAdapter({
    if(choice.finish_reason==='length')return {originalRaw:raw,af:null,ag:null,receipt:{
     status:'HOLD_TRUNCATED_MODEL_RESPONSE',originalSha256:hash(raw),
     modelCallsInRequest:1,...safety()}};
-   const out=reviewR190AJOriginal(raw,{brief,maxLayoutVariantsPerStrategy});
+   const out=reviewR190AJOriginal(raw,{brief,maxLayoutVariantsPerStrategy,acceptanceSpec});
    out.receipt.modelCallsInRequest=1;
    out.receipt.transport='EXPLICIT_LOCAL_LOOPBACK_ONLY';
    return out;

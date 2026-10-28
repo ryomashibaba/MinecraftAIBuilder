@@ -110,3 +110,91 @@ test('AJ rejects malformed budgets, raw input and any world-write claims',()=>{
   safe(r.receipt);
  }
 });
+
+const validProgram=()=>({requiredProgram:[
+ {label:'arrival',purposeFragment:'Public display',privacy:'public'},
+ {label:'production',purposeFragment:'Workshop for making',privacy:'shared'},
+ {label:'receiving',purposeFragment:'Stock receiving',privacy:'private'}
+],requiredDirectConnections:[['arrival','production'],['production','receiving']]});
+test('AK independent author-supplied program is verified in actual B143 portals and voxels',()=>{
+ const spec=validProgram(),original=raw();
+ const result=reviewR190AJOriginal(original,{brief,acceptanceSpec:spec});
+ assert.equal(result.receipt.originalSha256,sha(original));
+ assert.equal(result.receipt.status,'PROVISIONAL_B143_NO_ART_APPROVAL');
+ assert.equal(result.receipt.independentProgramReview.status,
+  'VERIFIED_EXPLICIT_PROGRAM_IN_B143');
+ assert.equal(result.receipt.independentProgramReview.independentlyVerified,true);
+ assert.equal(result.receipt.independentProgramReview.requirementsCount,5);
+ assert.equal(result.receipt.independentProgramReview.sourceChecks.length,1);
+ const physical=result.receipt.independentProgramReview.sourceChecks[0];
+ assert.equal(physical.status,'VERIFIED_EXPLICIT_PROGRAM_IN_B143');
+ assert.equal(physical.directConnections.length,2);
+ assert(physical.directConnections.every(e=>e.compiledPortal));
+ assert.equal(result.receipt.proposalApproved,false);
+ assert.deepEqual(spec,validProgram());
+ safe(result.receipt);
+});
+test('AK catches missing purpose, mismatched privacy and absent direct adjacency',()=>{
+ const variants=[
+  p=>{p.children[1].purpose='Generic stock room';},
+  p=>{p.children[1].privacy='public';},
+  p=>{p.children[1].parentId='showroom';p.children[1].side='east';}
+ ];
+ for(const mutate of variants){
+  const p=sample();mutate(p);
+  const original=JSON.stringify(p);
+  const r=reviewR190AJOriginal(original,{brief,acceptanceSpec:validProgram()});
+  assert.equal(r.receipt.status,'HOLD_UNSATISFIED_EXPLICIT_PROGRAM');
+  assert.equal(r.receipt.independentProgramReview.status,'FAILED');
+  assert(r.receipt.independentProgramReview.semanticIssues.length>0);
+  assert.equal(r.ag,null,'No host rearrangement to hide missing model intent');
+  assert.equal(r.originalRaw,original);
+  safe(r.receipt);
+ }
+});
+test('AK checks only fully realized glass trials when daylight is requested',()=>{
+ const original=JSON.stringify(jointWindowFixture());
+ const spec={requiredProgram:[
+  {label:'arrival',purposeFragment:'Public display'},
+  {label:'production',purposeFragment:'Workshop for making'}
+ ],requiredDirectConnections:[['arrival','production']]};
+ const r=reviewR190AJOriginal(original,{brief,acceptanceSpec:spec});
+ assert.equal(r.receipt.status,'HOLD_UNAPPROVED_B143_PROPOSALS');
+ assert(r.ag.proposals.length>0);
+ assert.equal(r.receipt.independentProgramReview.status,
+  'VERIFIED_EXPLICIT_PROGRAM_IN_B143');
+ assert.equal(r.receipt.independentProgramReview.sourceChecks.length,r.ag.proposals.length);
+ assert(r.receipt.independentProgramReview.sourceChecks.every(x=>
+  x.status==='VERIFIED_EXPLICIT_PROGRAM_IN_B143'));
+ safe(r.receipt);
+});
+test('AK malformed independent acceptance constraints are blocked before model call',async()=>{
+ const invalid={requiredProgram:[{label:'arr',purposeFragment:'Public display'}],
+  requiredDirectConnections:[['arr','nonexistent']]};
+ let calls=0;
+ const run=createR190AJLocalIntentAdapter({model:'fake-qwen',
+  fetcher:async()=>{calls++;throw Error('provider should not be reached');}});
+ await assert.rejects(()=>run({brief,consentToOneModelCall:true,
+  acceptanceSpec:invalid}),/R190_REQUEST_COVERAGE_EDGE/);
+ assert.equal(calls,0);
+ assert.throws(()=>reviewR190AJOriginal(raw(),{acceptanceSpec:invalid}),
+  /R190_REQUEST_COVERAGE_EDGE/);
+});
+test('AK a consented FAKE call keeps acceptance spec out of model prompt',async()=>{
+ const spec=validProgram();let calls=0,observed=null;
+ const run=createR190AJLocalIntentAdapter({model:'mock-qwen',
+  fetcher:async(url,options)=>{
+   calls++;
+   observed=JSON.parse(options.body);
+   return {ok:true,json:async()=>({choices:[{finish_reason:'stop',
+    message:{content:raw()}}]})};
+  }});
+ const r=await run({brief,consentToOneModelCall:true,acceptanceSpec:spec});
+ assert.equal(calls,1);
+ assert(!JSON.stringify(observed).includes('purposeFragment'));
+ assert.equal(r.receipt.independentProgramReview.status,
+  'VERIFIED_EXPLICIT_PROGRAM_IN_B143');
+ assert.equal(r.receipt.modelCallsInRequest,1);
+ assert.equal(r.receipt.sourceAuthorUnverified,true);
+ safe(r.receipt);
+});

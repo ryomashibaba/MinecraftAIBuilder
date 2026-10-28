@@ -171,3 +171,30 @@ R190-AJ初回CIで発見した実際の不具合：従来の日本語リテラ�
 いない鋸歯屋根要求を暫定形状の成功として扱ってしまった。
 既存の共通スキャナーを最小限修正し「鋸歯屋根」「鋸歯状屋根」も
 検出する。自然言語完全理解ではなく、限定的な失敗抑止である。
+
+## R190-AK：独立した用途要求と真正B143物理接続の照合
+
+R190-AJは設計原文をAF→AGの真正3Dへ接続したが、ユーザーの
+「これらの部屋が必要・この部屋間は直接つなぐ」を、原文から独立した
+受入仕様で監査していなかった。既存の
+`validateR190ProgramSpec`、`auditR190ExplicitProgram`、
+`verifyR190ProgramInCompiledSource` を新契約を作らず再利用する。
+
+`reviewR190AJOriginal(raw,{brief,acceptanceSpec})` の
+`acceptanceSpec` は既存形式
+`{requiredProgram:[{label,purposeFragment,privacy?}],requiredDirectConnections:[[labelA,labelB]]}`。
+外部から明示された基準のみを使い、日本語の要求から勝手に部屋や
+受入基準を追加しない。原文・意味IR・ホスト配置・完成真正B143を分離する。
+
+設計原文が仕様に合わない場合は `HOLD_UNSATISFIED_EXPLICIT_PROGRAM`。
+合致した場合は、実際の部屋寸法・床アクセス・開口ポータルをB143で検証する。
+採光意図がある場合は、ガラス未実装の基準3Dを合格として扱わず、
+共同探索で成立した窓付き候補だけを物理検証する。
+`independentProgramReview` の `VERIFIED_EXPLICIT_PROGRAM_IN_B143`
+は、**外部で指定した限定的な用途文言・接続条件**の検証であり、
+自然言語全体の理解、建築品質、美術合格を意味しない。
+
+モデル呼び出しの前に外部受入仕様を検証し、入力不正なら呼び出さない。
+受入仕様はモデルへ渡さない（採点基準の漏洩を避ける）。
+実Qwen／Gemma実行なし、全て合成またはモック、原文自動修正なし。
+`ART_HOLD`、`NOT_PREPARED`、全ゲートBLOCKED、Minecraft接触・書込み0を維持。
