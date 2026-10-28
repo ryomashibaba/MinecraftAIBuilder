@@ -16,7 +16,7 @@ $allowedStudy = $Study -cmatch '^[a-z][a-z0-9-]{2,39}$'
 if (-not $allowedStudy -or $Study -eq "contract-01") {
  throw "Unsafe or reserved study name: $Study"
 }
-function Git([string[]]$Arguments) {
+function Invoke-CheckedGit([string[]]$Arguments) {
  & git @Arguments
  if ($LASTEXITCODE -ne 0) {
   throw "git command failed: $($Arguments -join ' ')"
@@ -48,7 +48,7 @@ try {
  & git status --short
  if ($LASTEXITCODE -ne 0) { throw "git status failed" }
  Write-Host "Fetching reviewed branch without pull/reset/checkout..."
- Git -Arguments @("fetch","--no-tags","origin",$branch)
+ Invoke-CheckedGit -Arguments @("fetch","--no-tags","origin",$branch)
  $revision = (& git rev-parse FETCH_HEAD).Trim()
  if ($LASTEXITCODE -ne 0 -or $revision -cnotmatch '^[0-9a-f]{40}$') {
   throw "FETCH_HEAD could not be pinned"
@@ -57,7 +57,7 @@ try {
  # A separate detached worktree avoids overwriting the user's two dirty AA
  # source files, obsolete local scripts, and prior model evidence.
  $work = Join-Path $env:TEMP ("MinecraftAIBuilder-R190AB-" + [guid]::NewGuid().ToString("N"))
- Git -Arguments @("worktree","add","--detach",$work,$revision)
+ Invoke-CheckedGit -Arguments @("worktree","add","--detach",$work,$revision)
  Push-Location -LiteralPath $work
  try {
   Write-Host "Run original-source regression suites before any model call..."
