@@ -142,6 +142,30 @@ test('AA rejects non-local endpoints and never downloads models',async()=>{
   assert.equal(result.worldContacts,0);
  }finally{fs.rmSync(root,{recursive:true,force:true})}
 });
+test('AA one-case missing raw cannot be reported captured despite full count',async()=>{
+ const root=temp(),evidenceRoot=path.join(root,'one'),calls=[];
+ try{
+  const result=await runR190AABatch(['--run','--count','1'],{
+   evidenceRoot,fetcher:localTags,modelRunner:async()=>{
+    calls.push('fake-provider-attempt');
+    throw Error('FAKE_NO_MODEL_ORIGINAL');
+   }});
+  assert.equal(calls.length,1);
+  assert.equal(result.attemptedRequests,1);
+  assert.equal(result.status,'HOLD_INCOMPLETE_BATCH');
+  assert.equal(result.caseResults[0].status,'HOLD_NO_PROVIDER_ORIGINAL');
+  assert.equal(result.caseResults[0].rawSha256,null);
+  assert.equal(result.independentArchitectureQualityCertified,false);
+  assert.equal(result.worldContacts,0);
+  assert.equal(result.worldWrites,0);
+  assert.ok(fs.existsSync(path.join(result.batchDirectory,'library.attempt.json')));
+  await assert.rejects(runR190AABatch(['--run','--count','1'],{
+   evidenceRoot,fetcher:async()=>{calls.push('forbidden-retry')},
+   modelRunner:async()=>{calls.push('forbidden-retry')}
+  }),/BATCH_ALREADY_EXISTS_NO_AUTOMATIC_RETRY/);
+  assert.equal(calls.length,1);
+ }finally{fs.rmSync(root,{recursive:true,force:true})}
+});
 test('AA absent Ollama model fails before creating any batch output',async()=>{
  const root=temp(),evidenceRoot=path.join(root,'evidence');
  try{
