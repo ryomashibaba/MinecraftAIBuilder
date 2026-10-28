@@ -6,6 +6,10 @@ import os from 'node:os';
 import path from 'node:path';
 import {R190AB_FORMAT,parseR190ABArgs,inspectR190ABReply,
  runR190AB} from './r190ab-structured-output-pilot.mjs';
+import {R190_STATIC_SYNTHETIC_CASES} from './r190-semantic-fixtures.mjs';
+import {R190AB_SEMANTIC_FORMAT,inspectR190ABSemanticReply}
+ from '../source/ai/r190ab-semantic-contract.mjs';
+import {compileDesign,verifyCompiled} from '../source/ai/b143-building-dsl.mjs';
 const temp=()=>fs.mkdtempSync(path.join(os.tmpdir(),'r190ab-fake-'));
 const sample=()=>JSON.stringify({
  design:{schema:'minecraftaibuilder-b143-building-dsl-v1',id:'library-test',
@@ -64,7 +68,7 @@ test('AB starts read-only, with explicit model and fresh study required',async()
   assert.equal(r.modelCalls,0);
   assert.equal(trace.length,0);
   assert.deepEqual(parseR190ABArgs([]),{
-   run:false,model:'qwen3:14b',study:'contract-01',task:'library'});
+   run:false,model:'qwen3:14b',study:'contract-01',task:'library',contract:'direct-b143'});
   assert.throws(()=>parseR190ABArgs(['--run','--run']),/ARGUMENTS/);
   assert.throws(()=>parseR190ABArgs(['--run','--study','../bad']),/UNSAFE_OPTIONS/);
   assert.throws(()=>parseR190ABArgs(['--task','arbitrary-unknown-type']),/UNSAFE_OPTIONS/);
@@ -202,5 +206,113 @@ test('AB rejects nonexistent local model, with zero model requests',async()=>{
   }),/LOCAL_MODEL_NOT_INSTALLED_NO_DOWNLOAD/);
   assert.equal(calls.length,1);
   assert.equal(fs.existsSync(path.join(root,'saved','contract-01')),false);
+ }finally{fs.rmSync(root,{recursive:true,force:true})}
+});
+
+const syntheticSemantic=()=>{
+ const p=structuredClone(R190_STATIC_SYNTHETIC_CASES[1]);
+ p.roofFormIntent={spaceId:'showroom',profile:'ridge',axis:'x',rise:2};
+ p.glazedOpenings=[{spaceId:'showroom',face:'south',
+  offset:3,baseY:5,width:2,height:2}];
+ return p;
+};
+const fakeSemanticFetch=(raw,calls)=>async(url,opt)=>{
+ calls.push({url,opt});
+ if(url.endsWith('/api/tags'))
+  return {ok:true,json:async()=>({models:[{name:'qwen3:14b',digest:'synthetic-local'}]})};
+ assert.equal(url,'http://127.0.0.1:11434/api/chat');
+ const body=JSON.parse(opt.body);
+ assert.equal(body.model,'qwen3:14b');
+ assert.equal(body.stream,false);
+ assert.equal(body.format.properties.schema.const,'minecraftaibuilder-r190-semantic-space-v1');
+ assert.equal(body.format.additionalProperties,false);
+ assert.equal(body.format.properties.spaces.minItems,3);
+ assert.ok(!Object.hasOwn(body.format.properties,'design'));
+ assert.equal(body.messages[1].content.includes('修理工房'),true);
+ return {ok:true,json:async()=>({done_reason:'stop',message:{content:raw},
+  model:'qwen3:14b',total_duration:8200000000,eval_count:450})};
+};
+test('semantic contract uses NO B143 coordinates and source is only HOST derived',()=>{
+ const f=R190AB_SEMANTIC_FORMAT;
+ assert.equal(f.properties.schema.const,'minecraftaibuilder-r190-semantic-space-v1');
+ assert.deepEqual(f.required,['schema','id','title','brief','site','entrySpaceId',
+  'spaces','materials','roofFormIntent','glazedOpenings']);
+ assert.equal(f.properties.roofFormIntent.additionalProperties,false);
+ assert.deepEqual(f.properties.spaces.items.properties.side.enum,
+  ['north','south','east','west',null]);
+ assert.equal(f.properties.site.properties.height.maximum,32);
+ const raw=JSON.stringify(syntheticSemantic());
+ const original=raw;
+ const z=inspectR190ABSemanticReply(raw);
+ assert.equal(raw,original);
+ assert.equal(z.report.status,'HOST_DERIVED_SINGLE_LEVEL_SOURCE_PROXIES_PASS_ART_HOLD');
+ assert.equal(z.report.modelAuthoredB143,false);
+ assert.equal(z.report.hostDeterminesExactVoxels,true);
+ assert.equal(z.report.hostSourceDerived,true);
+ assert.equal(z.report.semanticPlanValid,true);
+ assert.equal(z.report.sourceRouteAudit.reachableRoomCount,4);
+ assert.equal(z.report.sourceRouteAudit.allProgramSpacesReachable,true);
+ assert.ok(z.report.hostDerivedVoxelCount>1000);
+ assert.equal(z.report.boundary.twoLevelOrVerticalRoutes,'NOT_SUPPORTED');
+ assert.equal(verifyCompiled(z.design,z.compiled),true);
+ assert.equal(compileDesign(z.design).sourceSha256,z.report.hostDerivedSourceSha256);
+ assert.equal(z.report.worldWrites,0);
+});
+test('semantic failure: invalid room graph never repaired or treated as art',()=>{
+ const p=syntheticSemantic();
+ p.spaces[1].parentId='unknown-space';
+ const r=inspectR190ABSemanticReply(JSON.stringify(p));
+ assert.equal(r.report.hostSourceDerived,false);
+ assert.equal(r.report.real3D,false);
+ assert.equal(r.design,null);
+ assert.match(r.report.error,/R190_SEMANTIC_PARENT_MISSING/);
+ assert.equal(r.report.constructionApproved,false);
+ const invalid=inspectR190ABSemanticReply('{"invalid":true}');
+ assert.equal(invalid.report.status,'HOLD_INVALID_SEMANTIC_PROGRAM');
+});
+test('semantic mode refuses a two-level library BEFORE contacting Ollama',async()=>{
+ const root=temp(),calls=[];
+ try{
+  await assert.rejects(runR190AB(['--run','--contract','semantic-space','--task','library',
+   '--study','do-not-flatten'],{evidenceRoot:path.join(root,'data'),
+    fetcher:async()=>{calls.push('provider');throw Error('PROVIDER_SHOULD_NOT_RUN')}}),
+   /SEMANTIC_SINGLE_LEVEL_TASK_UNSUPPORTED/);
+  assert.deepEqual(calls,[]);
+  assert.equal(fs.existsSync(path.join(root,'data')),false);
+ }finally{fs.rmSync(root,{recursive:true,force:true})}
+});
+test('semantic mode archives original IR and different HASHED host-derived B143 plus 3D',async()=>{
+ const root=temp(),calls=[],raw=JSON.stringify(syntheticSemantic());
+ try{
+  const opts=['--run','--contract','semantic-space','--task','tidal-workshop',
+   '--study','semantic-workshop-01'];
+  const result=await runR190AB(opts,{
+   evidenceRoot:path.join(root,'saved'),fetcher:fakeSemanticFetch(raw,calls)
+  });
+  assert.equal(calls.length,2);
+  assert.equal(result.contract,'semantic-space');
+  assert.equal(result.providerCallsAttempted,1);
+  assert.equal(result.sourceTask,'tidal-workshop');
+  assert.equal(result.schema,'minecraftaibuilder-r190ab-semantic-study-v1');
+  assert.equal(result.b143Authorship,'HOST_DERIVED_FROM_MODEL_SEMANTIC_IR');
+  assert.equal(result.response.status,'HOST_DERIVED_SINGLE_LEVEL_SOURCE_PROXIES_PASS_ART_HOLD');
+  assert.equal(result.response.real3D,true);
+  assert.equal(result.response.modelAuthoredB143,false);
+  const dir=path.join(root,'saved','semantic-workshop-01');
+  assert.equal(fs.readFileSync(path.join(dir,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8'),raw);
+  const derived=JSON.parse(fs.readFileSync(path.join(dir,'HOST_DERIVED_B143_SOURCE.json'),'utf8'));
+  const compiled=compileDesign(derived);
+  assert.equal(compiled.sourceSha256,result.response.hostDerivedSourceSha256);
+  assert.ok(fs.existsSync(path.join(dir,'HOST_DERIVED_SOURCE_TRUE_3D.html')));
+  assert.ok(!fs.existsSync(path.join(dir,'MODEL_SOURCE_TRUE_3D.html')));
+  for(const side of ['front','rear','west','east','roof'])
+   assert.ok(fs.existsSync(path.join(dir,'HOST_DERIVED_'+side+'.svg')));
+  const proof=JSON.parse(fs.readFileSync(path.join(dir,'HOST_DERIVED_SOURCE_AUDIT.json'),'utf8'));
+  assert.equal(proof.modelDidNotAuthorB143,true);
+  assert.equal(proof.worldWrites,0);
+  await assert.rejects(runR190AB(opts,{evidenceRoot:path.join(root,'saved'),
+    fetcher:async()=>{calls.push('RETRY');throw Error('RETRY_FORBIDDEN')}}),
+    /PREVIOUS_STUDY_NO_AUTOMATIC_RETRY/);
+  assert.equal(calls.length,2);
  }finally{fs.rmSync(root,{recursive:true,force:true})}
 });
