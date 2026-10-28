@@ -316,3 +316,22 @@ test('semantic mode archives original IR and different HASHED host-derived B143 
   assert.equal(calls.length,2);
  }finally{fs.rmSync(root,{recursive:true,force:true})}
 });
+test('one generic semantic compiler works on three different fictional spatial programs',()=>{
+ const hashes=[];
+ for(const source of R190_STATIC_SYNTHETIC_CASES){
+  const p=structuredClone(source),entry=p.spaces.find(x=>x.id===p.entrySpaceId);
+  p.roofFormIntent={spaceId:entry.id,profile:'shed',axis:'x',rise:2};
+  p.glazedOpenings=[{spaceId:entry.id,face:'south',offset:2,
+   baseY:5,width:2,height:2}];
+  const raw=JSON.stringify(p),candidate=inspectR190ABSemanticReply(raw);
+  assert.equal(candidate.report.status,
+   'HOST_DERIVED_SINGLE_LEVEL_SOURCE_PROXIES_PASS_ART_HOLD',
+   candidate.report.error??p.id);
+  assert.equal(candidate.report.sourceRouteAudit.reachableRoomCount,p.spaces.length);
+  assert.equal(candidate.report.modelAuthoredB143,false);
+  assert.equal(candidate.report.hostSourceDerived,true);
+  assert.equal(candidate.report.worldContacts,0);
+  hashes.push(candidate.report.hostDerivedGeometrySha256);
+ }
+ assert.equal(new Set(hashes).size,3);
+});
