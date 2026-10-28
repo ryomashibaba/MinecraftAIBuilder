@@ -167,3 +167,33 @@ test('S: launcher refuses stale source missing real-voxel comparison',()=>{
  assert.match(cmd,/Projects\\MinecraftAIBuilder/);
  assert.doesNotMatch(cmd,/git pull|git reset|git checkout|ollama pull/i);
 });
+
+test('S: corrupted saved model original stops instead of another expensive request',async()=>{
+ const root=empty(),tracker={count:0};
+ try{
+  const from=baseline(root),evidenceRoot=path.join(root,'out');
+  const first=await runR190SStudy(['--from',from],{
+   evidenceRoot,transport:'openai',timestamp:()=>191,
+   fetcher:fakeFetch(raw(),tracker)});
+  assert.equal(tracker.count,1);
+  fs.appendFileSync(path.join(first.directory,'R190_I_ORIGINAL_RESPONSE.txt'),'TAMPERED');
+  await assert.rejects(runR190SStudy(['--from',from],{
+   evidenceRoot,transport:'openai',
+   fetcher:()=>{throw Error('PROVIDER_REUSE_FORBIDDEN')}}),
+   /R190S_PRIOR_EVIDENCE_TAMPERED_NO_AUTOMATIC_RETRY/);
+  assert.equal(tracker.count,1);
+ }finally{fs.rmSync(root,{recursive:true,force:true})}
+});
+test('S: partial prior folder fails closed without model calls',async()=>{
+ const root=empty();
+ try{
+  const from=baseline(root),evidenceRoot=path.join(root,'out');
+  fs.mkdirSync(path.join(evidenceRoot,'r190s-101-99'),{recursive:true});
+  fs.writeFileSync(path.join(evidenceRoot,'r190s-101-99',
+   'R190_I_ORIGINAL_RESPONSE.txt'),raw());
+  await assert.rejects(runR190SStudy(['--from',from],{
+   evidenceRoot,transport:'openai',
+   fetcher:()=>{throw Error('PROVIDER_MUST_NOT_RUN')}}),
+   /R190S_PRIOR_UNREADABLE_NO_AUTOMATIC_RETRY/);
+ }finally{fs.rmSync(root,{recursive:true,force:true})}
+});

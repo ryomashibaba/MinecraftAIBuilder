@@ -165,22 +165,34 @@ function chooseSource(explicit=null){
  fail('NO_VERIFIED_REJECTED_R190R_SOURCE_USE_FROM_DIR');
 }
 function capturedRedesign(dir,sourceSha,promptSha,model){
+ // A failed or interrupted study may already have consumed a real model call.
+ // Never interpret damaged/partial evidence as permission to call the model.
+ let m,r,raw,prompt;
  try{
-  const m=json(dir,'R190S_COMPARISON.json');
-  const r=fs.existsSync(path.join(dir,'R190_H_RECEIPT.json'))?
+  m=json(dir,'R190S_COMPARISON.json');
+  r=fs.existsSync(path.join(dir,'R190_H_RECEIPT.json'))?
    json(dir,'R190_H_RECEIPT.json'):json(dir,'R190_I_CAPTURE_RECEIPT.json');
-  const raw=file(dir,'R190_I_ORIGINAL_RESPONSE.txt');
-  const prompt=file(dir,'R190_I_ORIGINAL_BRIEF.txt',10000);
-  if(m.schema!=='minecraftaibuilder-r190s-redesign-v1'||
-   m.parentOriginalRawSha256!==sourceSha||
-   m.redesignPromptSha256!==promptSha||m.modelRequested!==model||
-   m.redesignOriginalRawSha256!==sha(raw)||
-   r.originalRawSha256!==sha(raw)||r.originalRequestSha256!==promptSha||
-   promptSha!==sha(prompt)||!safe(m)||!safe(r))return null;
-  return m;
- }catch{return null}
+  raw=file(dir,'R190_I_ORIGINAL_RESPONSE.txt');
+  prompt=file(dir,'R190_I_ORIGINAL_BRIEF.txt',10000);
+ }catch{fail('PRIOR_UNREADABLE_NO_AUTOMATIC_RETRY')}
+ if(m.schema!=='minecraftaibuilder-r190s-redesign-v1'||
+    !safe(m)||!safe(r)||r.rawProviderBytesPreserved!==true||
+    m.redesignOriginalRawSha256!==sha(raw)||
+    r.originalRawSha256!==sha(raw)||
+    r.originalRequestSha256!==sha(prompt)||
+    m.redesignPromptSha256!==sha(prompt)||
+    r.modelRequested!==m.modelRequested||
+    m.newModelStatus!==r.status||
+    m.parentOriginalUnmodified!==true||
+    m.hostRepairedOrGeneratedGeometry!==false)
+  fail('PRIOR_EVIDENCE_TAMPERED_NO_AUTOMATIC_RETRY');
+ // A separate, complete evidence chain may legitimately belong to a
+ // different baseline/model. Only fully verified unrelated runs are skipped.
+ if(m.parentOriginalRawSha256!==sourceSha||
+    m.redesignPromptSha256!==promptSha||m.modelRequested!==model)
+  return null;
+ return m;
 }
-
 function writeR190TPairEvidence(original,dir,receipt,candidateRaw){
  // Offline retrofit for old S output, zero inference and no mutation of raw.
  const evidencePath=path.join(dir,'R190T_PAIR_EVIDENCE.json');
@@ -275,7 +287,7 @@ export async function runR190SStudy(args=[],{
  if(isOrdinaryFolder(root)){
   for(const name of fs.readdirSync(root).filter(x=>/^r190s-\d+-\d+$/.test(x))){
    const dir=path.join(root,name);
-   if(!isOrdinaryFolder(dir))continue;
+   if(!isOrdinaryFolder(dir))fail('PRIOR_UNSAFE_FOLDER_NO_AUTOMATIC_RETRY');
    const prior=capturedRedesign(dir,original.rawSha256,promptSha,original.model);
    if(prior){
     const receipt=fs.existsSync(path.join(dir,'R190_H_RECEIPT.json'))?
