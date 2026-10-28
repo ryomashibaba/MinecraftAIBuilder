@@ -141,7 +141,9 @@ export function validateR190SemanticPlan(p){
  // Neither a courtyard type nor its location is invented by the host.
  if(p.skyCourtIntent!==undefined){
   const v=p.skyCourtIntent;
-  ok(exact(v,['spaceId','offsetX','offsetZ','width','depth'])&&
+  ok((exact(v,['spaceId','offsetX','offsetZ','width','depth'])||
+   exact(v,['spaceId','offsetX','offsetZ','width','depth','openFace']))&&
+   (v.openFace===undefined||DIR.includes(v.openFace))&&
    slug(v.spaceId)&&int(v.width,4,14)&&int(v.depth,4,14)&&
    Number.isSafeInteger(v.offsetX)&&Number.isSafeInteger(v.offsetZ),
    'SKY_COURT_FIELDS');
@@ -149,9 +151,29 @@ export function validateR190SemanticPlan(p){
   ok(room&&room.spatialRole!=='open-court'&&
    p.formIntent?.spaceId!==room.id&&
    p.roofFormIntent?.spaceId!==room.id,'SKY_COURT_CONFLICT');
-  ok(v.offsetX>=2&&v.offsetZ>=2&&
-   v.offsetX+v.width<=room.width-2&&
-   v.offsetZ+v.depth<=room.depth-2,'SKY_COURT_EXTENTS');
+  if(v.openFace===undefined){
+   ok(v.offsetX>=2&&v.offsetZ>=2&&
+    v.offsetX+v.width<=room.width-2&&
+    v.offsetZ+v.depth<=room.depth-2,'SKY_COURT_EXTENTS');
+  }else{
+   const dir=v.openFace;
+   const reaches=dir==='east'?v.offsetX+v.width===room.width:
+    dir==='west'?v.offsetX===0:dir==='north'?
+     v.offsetZ+v.depth===room.depth:v.offsetZ===0;
+   const margins=['east','west'].includes(dir)?
+    v.offsetZ>=2&&v.offsetZ+v.depth<=room.depth-2&&
+    (dir==='east'?v.offsetX>=2:v.offsetX+v.width<=room.width-2):
+    v.offsetX>=2&&v.offsetX+v.width<=room.width-2&&
+    (dir==='north'?v.offsetZ>=2:v.offsetZ+v.depth<=room.depth-2);
+   ok(reaches&&margins,'SKY_COURT_MOUTH_EXTENTS');
+   const opposite={north:'south',south:'north',east:'west',west:'east'};
+   ok(!(room.id===p.entrySpaceId&&dir===entranceFace(p))&&
+    !(room.parentId!==null&&room.side===opposite[dir])&&
+    !p.spaces.some(c=>c.parentId===room.id&&c.side===dir),
+    'SKY_COURT_MOUTH_PORTAL_CONFLICT');
+   ok(!(p.glazedOpenings??[]).some(g=>g.spaceId===room.id&&g.face===dir),
+    'SKY_COURT_MOUTH_GLAZING_CONFLICT');
+  }
  }
  // Phase-C evidence permits one real open-air spatial void, not a faux CUT.
  const courts=p.spaces.filter(s=>s.spatialRole==='open-court');
@@ -456,25 +478,41 @@ function sourceDesign(p,l){
    facetedEnclosedSpace(s,p.formIntent);
    continue;
   }
-  box(tag+'-west','add',p.materials.wall,[s.x,2,s.z],[1,s.h-2,s.d]);
-  box(tag+'-east','add',p.materials.wall,[s.x+s.w-1,2,s.z],[1,s.h-2,s.d]);
-  box(tag+'-south','add',p.materials.wall,[s.x+1,2,s.z],[s.w-2,s.h-2,1]);
-  box(tag+'-north','add',p.materials.wall,[s.x+1,2,s.z+s.d-1],
-   [s.w-2,s.h-2,1]);
+  const court=p.skyCourtIntent?.spaceId===tag?p.skyCourtIntent:null;
+  for(const face of ['west','east','south','north']){
+   const x=face==='west'?s.x:face==='east'?s.x+s.w-1:s.x+1;
+   const z=face==='south'?s.z:face==='north'?s.z+s.d-1:s.z;
+   if(court?.openFace!==face){
+    box(tag+'-'+face,'add',p.materials.wall,[x,2,z],
+     ['west','east'].includes(face)?[1,s.h-2,s.d]:[s.w-2,s.h-2,1]);
+   }else if(face==='west'||face==='east'){
+    box(tag+'-'+face+'-near','add',p.materials.wall,
+     [x,2,s.z],[1,s.h-2,court.offsetZ]);
+    box(tag+'-'+face+'-far','add',p.materials.wall,
+     [x,2,s.z+court.offsetZ+court.depth],
+     [1,s.h-2,s.d-court.offsetZ-court.depth]);
+   }else{
+    box(tag+'-'+face+'-left','add',p.materials.wall,
+     [s.x+1,2,z],[court.offsetX-1,s.h-2,1]);
+    box(tag+'-'+face+'-right','add',p.materials.wall,
+     [s.x+court.offsetX+court.width,2,z],
+     [s.w-court.offsetX-court.width-1,s.h-2,1]);
+   }
+  }
   if(p.roofFormIntent?.spaceId===tag)
    profiledRoof(s,p.roofFormIntent);
   else if(p.skyCourtIntent?.spaceId===tag){
    const v=p.skyCourtIntent,roof=p.materials.roof;
    // Four mutually disjoint strips form a ring from the outset.
    // The uncovered void is genuine exterior sky; no roof CUT is made.
-   box(tag+'-court-roof-south','add',roof,
+   if(v.offsetZ>0)box(tag+'-court-roof-south','add',roof,
     [s.x,s.h,s.z],[s.w,1,v.offsetZ]);
-   box(tag+'-court-roof-north','add',roof,
+   if(s.d-v.offsetZ-v.depth>0)box(tag+'-court-roof-north','add',roof,
     [s.x,s.h,s.z+v.offsetZ+v.depth],
     [s.w,1,s.d-v.offsetZ-v.depth]);
-   box(tag+'-court-roof-west','add',roof,
+   if(v.offsetX>0)box(tag+'-court-roof-west','add',roof,
     [s.x,s.h,s.z+v.offsetZ],[v.offsetX,1,v.depth]);
-   box(tag+'-court-roof-east','add',roof,
+   if(s.w-v.offsetX-v.width>0)box(tag+'-court-roof-east','add',roof,
     [s.x+v.offsetX+v.width,s.h,s.z+v.offsetZ],
     [s.w-v.offsetX-v.width,1,v.depth]);
   }
@@ -718,7 +756,28 @@ export function auditR190SourceRoutes(plan,layout,design,compiled){
   ok(openColumns===v.width*v.depth&&
     roofRingColumns===s.w*s.d-v.width*v.depth,
    'SKY_COURT_COLUMN_COUNT');
+  if(v.openFace){
+   const delta={north:[0,1],south:[0,-1],east:[1,0],west:[-1,0]}[v.openFace];
+   const mouth=[];
+   if(delta[0]){
+    const x=delta[0]>0?s.x+s.w-1:s.x;
+    for(let z=s.z+v.offsetZ;z<s.z+v.offsetZ+v.depth;z++)mouth.push([x,z]);
+   }else{
+    const z=delta[1]>0?s.z+s.d-1:s.z;
+    for(let x=s.x+v.offsetX;x<s.x+v.offsetX+v.width;x++)mouth.push([x,z]);
+   }
+   ok(mouth.length>=4,'SKY_COURT_MOUTH_WIDTH');
+   for(const [x,z] of mouth){
+    for(let y=2;y<s.h;y++)ok(!has(x,y,z),'SKY_COURT_MOUTH_BLOCKED');
+    const a=x+delta[0],b=z+delta[1];
+    ok(!layout.spaces.some(other=>other.id!==v.spaceId&&
+      a>=other.x&&a<other.x+other.w&&b>=other.z&&b<other.z+other.d),
+     'SKY_COURT_MOUTH_NOT_EXTERIOR');
+    ok(!has(a,2,b)&&!has(a,3,b),'SKY_COURT_MOUTH_OUTSIDE_BLOCKED');
+   }
+  }
   skyCourtAudit={spaceId:v.spaceId,modelChosenOffset:[v.offsetX,v.offsetZ],
+   openFace:v.openFace??null,
    modelChosenSize:[v.width,v.depth],actualOpenSkyColumns:openColumns,
    actualRoofRingColumns:roofRingColumns,supportedWalkableFloor:true,
    sourceOpenSkyVerified:true,daylightSimulation:'NOT_PERFORMED',
