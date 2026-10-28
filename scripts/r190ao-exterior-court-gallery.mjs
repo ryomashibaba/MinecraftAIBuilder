@@ -2,6 +2,7 @@
  * Actual B143 voxels, no Minecraft or model requests.
  */
 import fs from 'node:fs';
+import {createHash} from 'node:crypto';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {r190AMSyntheticPlan} from './r190am-author-layout-gallery.mjs';
@@ -17,6 +18,7 @@ const variants=[
 const views=['front','rear','west','east','roof'];
 const write=(file,content)=>fs.writeFileSync(file,content,{flag:'wx'});
 const json=(file,x)=>write(file,JSON.stringify(x,null,2)+'\n');
+const sha=s=>createHash('sha256').update(s,'utf8').digest('hex');
 export function r190AOSyntheticPlan(name){
  const v=variants.find(x=>x.name===name);
  if(!v)throw Error('R190AO_UNKNOWN_CASE');
@@ -54,9 +56,14 @@ export function writeR190AOGallery(out){
   if(!html.includes('<body>'))throw Error('R190AO_VIEWER_INVALID');
   write(path.join(out,v.name+'-REAL-B143.html'),
     html.replace('<body>','<body><aside style="padding:14px;background:#542917;color:white;font:16px system-ui">R190-AO SYNTHETIC / '+v.name+' / TRUE B143 / ART HOLD / NO LLM / NO CONSTRUCTION</aside>'));
-  for(const side of views)write(path.join(out,v.name+'-'+side+'.svg'),
-   renderR164Elevation(built.compiled,built.design,side));
+  const elevationSha256={};
+  for(const side of views){
+   const svg=renderR164Elevation(built.compiled,built.design,side);
+   write(path.join(out,v.name+'-'+side+'.svg'),svg);
+   elevationSha256[side]=sha(svg);
+  }
   scenes.push({name:v.name,wingShift:v.wingShift,court:v.court,
+   elevationSha256,
    provenance:'SYNTHETIC_NOT_MODEL_RESPONSE',
    geometrySha256:built.compiled.geometrySha256,
    sourceSha256:built.compiled.sourceSha256,
@@ -68,7 +75,14 @@ export function writeR190AOGallery(out){
  }
  if(new Set(scenes.map(x=>x.geometrySha256)).size!==3)
   throw Error('R190AO_NO_DISTINCT_SOURCE_GEOMETRY');
- json(path.join(out,'SUMMARY.json'),{schema:'minecraftaibuilder-r190an-synthetic-court-v1',
+ const difference=(a,b)=>views.filter(face=>
+   scenes[a].elevationSha256[face]!==scenes[b].elevationSha256[face]);
+ json(path.join(out,'SUMMARY.json'),{
+  schema:'minecraftaibuilder-r190ao-exterior-u-court-v1',
+  viewContrast:{containedToOpenEastChanged:difference(0,1),
+   openEastToShiftedWingChanged:difference(1,2),
+   notArtCertification:true,
+   onlyTheFirstPairAlsoChangesTheCourtPosition:true},
   provenance:'SYNTHETIC_NOT_REAL_MODEL',scenes,modelCalls:0,
   worldContacts:0,worldWrites:0,readiness:'NOT_PREPARED',
   constructionApproved:false,executionAllowed:false,

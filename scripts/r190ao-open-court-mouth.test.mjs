@@ -70,6 +70,10 @@ test('AO three synthetic B143 scenes, five true elevation views, no overwrite',(
    {count:3,uniqueGeometry:3,worldWrites:0,modelCalls:0,art:'ART_HOLD'});
   const r=JSON.parse(fs.readFileSync(path.join(out,'SUMMARY.json'),'utf8'));
   assert.equal(r.scenes.length,3);
+  assert.equal(r.schema,'minecraftaibuilder-r190ao-exterior-u-court-v1');
+  assert.deepEqual(r.viewContrast.containedToOpenEastChanged,['east','roof']);
+  assert.equal(r.viewContrast.notArtCertification,true);
+  assert(r.viewContrast.openEastToShiftedWingChanged.length>=2);
   assert.deepEqual(r.gates,Array(9).fill('BLOCKED'));
   for(const x of r.scenes){
    assert(fs.readFileSync(path.join(out,x.name+'-REAL-B143.html'),'utf8').includes('R190-AO SYNTHETIC'));
