@@ -78,7 +78,7 @@ function archived(output,model,prompt){
  const receipt=JSON.parse(file(path.join(output,rp),40000));
  if(!safeReceipt(receipt)||receipt.originalRawSha256!==rawSha256||
     receipt.originalRequestSha256!==sha(prompt)||receipt.modelRequested!==model||
-    file(path.join(output,'R190_I_ORIGINAL_BRIEF.txt',16000))!==prompt)
+    file(path.join(output,'R190_I_ORIGINAL_BRIEF.txt'),16000)!==prompt)
   fail('ORIGINAL_PROVENANCE_OR_SAFETY');
  let physical=null;
  if(receipt.schema==='minecraftaibuilder-r190-h-direct-b143-research-v1'||
