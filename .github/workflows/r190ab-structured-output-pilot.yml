@@ -11,6 +11,8 @@ on:
       - 'source/ai/r190ab-semantic-contract.mjs'
       - 'source/ai/r190ad-expressive-semantic-contract.mjs'
       - 'source/ai/r190ae-flexible-semantic-contract.mjs'
+      - 'source/ai/r190af-program-intent.mjs'
+      - 'scripts/r190af-program-intent.test.mjs'
       - 'scripts/r190ae-flexible-semantic.test.mjs'
       - 'scripts/r190ae-saved-semantic-diagnose.mjs'
       - 'scripts/r190ae-saved-semantic-diagnose.test.mjs'
@@ -43,6 +45,8 @@ jobs:
       - run: node --test scripts/r190ad-expressive-semantic.test.mjs
       - run: node --check source/ai/r190ae-flexible-semantic-contract.mjs
       - run: node --test scripts/r190ae-flexible-semantic.test.mjs
+      - run: node --check source/ai/r190af-program-intent.mjs
+      - run: node --test scripts/r190af-program-intent.test.mjs
       - run: node --check source/ai/r190ad-semantic-diagnostics.mjs
       - run: node --check scripts/r190ad-saved-semantic-diagnose.mjs
       - run: node --test scripts/r190ad-saved-semantic-diagnose.test.mjs
