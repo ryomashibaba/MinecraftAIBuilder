@@ -31,6 +31,17 @@ node scripts/r190ab-structured-output-pilot.mjs --run --study contract-01 --mode
 
 実験でOllamaが複雑なJSON Schemaを受け付けない、出力が空、モデルが失敗する場合はその1件をHOLDとして記録。スキーマ弱体化、同名再試行、原文を補修した3D生成はしない。
 
+## GitHub上のR190-AA集計修正とローカル差分の共存
+
+R190-AAのGitHub側でも、**実際の原文SHAを持たない1件だけの失敗をCAPTUREDとして数えない**変更と、その回帰テストを追加した。Windowsの未コミット2ファイルと修正目的が同じため、次にローカルWorkで同期する際は必ず差分同士を比較し、実装の重複・片方の改善の取りこぼしを避ける。
+
+1. まず `git status --short` と `git diff -- scripts/r190aa-local-work-pilot.mjs scripts/r190aa-local-work-pilot.test.mjs` で未コミット内容を読む。差分はローカルの既存証拠フォルダ外にも安全にバックアップする。
+2. `git fetch origin feature/b198zr1-protected-architectural-revision` は変更を作業ファイルに上書きしないが、`git pull`、`reset --hard`、`checkout -- <file>` はこの段階では実行しない。
+3. ローカル修正とGitHub修正を、差分とテスト結果で照合。両方の意味が同一なら重複適用せず、独自の追加修正があれば保護して手動統合する。
+4. GitHubのAAとAB専用ActionsがともにSUCCESSとなったことを確認し、ローカルの該当テストも実行してから、新しい実験を判断する。未解決の変更を破棄しない。
+
+R190-ABにはローカルOllamaが返す `total_duration`、`load_duration`、`prompt_eval_count`、`prompt_eval_duration`、`eval_count`、`eval_duration` を可能な範囲で保存する。単位はdurationがナノ秒、個数がトークン数。追加で測るprovider区間の壁時計時間とは区別し、Ollama申告値であることを明記する。ネイティブAPIの複合JSON Schema（特にoneOf）のローカル版での対応はまだ未実測のため、初回の失敗はHOLDとして保存し、勝手な再試行で隠さない。
+
 ## 制約と採用条件
 
 `readiness=NOT_PREPARED`、`constructionApproved=false`、`executionAllowed=false`、9 `BLOCKED`、空 `BuildPlan.operations`、worldContacts=worldWrites=0。正式美術採用0件、ART HOLD、Minecraft施工禁止。CIのfake-only成功は実Qwen品質合格を意味しない。
