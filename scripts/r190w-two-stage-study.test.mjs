@@ -165,3 +165,18 @@ test('W corrupted stage one cannot silently trigger new model usage',async()=>{
   assert.equal(calls.length,1);
  }finally{fs.rmSync(root,{recursive:true,force:true})}
 });
+
+test('W a broken previous receipt never causes an automatic new model request',async()=>{
+ const root=temp(),calls=[];
+ try{
+  const before=baseline(root),out=path.join(root,'runs');
+  const r=await runR190WStudy(['--from',before],{
+   evidenceRoot:out,timestamp:()=>888,
+   fetcher:provider([plan(),raw()],calls)});
+  fs.writeFileSync(path.join(r.directory,'R190W_RESULT.json'),'{BROKEN');
+  await assert.rejects(runR190WStudy(['--from',before],{
+   evidenceRoot:out,fetcher:()=>{throw Error('NO_NETWORK')}}),
+   /R190W_PRIOR_UNREADABLE_NO_AUTOMATIC_RETRY/);
+  assert.equal(calls.length,2);
+ }finally{fs.rmSync(root,{recursive:true,force:true})}
+});

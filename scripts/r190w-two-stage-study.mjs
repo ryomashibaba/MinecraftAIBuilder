@@ -199,13 +199,22 @@ function findPrior(root,original,promptHash,negativePrompt){
          'NO_NEW_VOXEL_GEOMETRY_ART_HOLD':'B143_COMPARABLE_ART_HOLD'))
       fail('PRIOR_COMPARISON_MISMATCH');
     }
+    // A rejected phase-two source is still immutable evidence.
+    if(result.stage2RawSha256!==undefined&&result.stage2RawSha256!==null){
+     const rawFile=path.join(dir,'b143-model-original','R190_I_ORIGINAL_RESPONSE.txt');
+     if(!fs.existsSync(rawFile)||sha(read(rawFile))!==result.stage2RawSha256)
+      fail('PRIOR_REJECTED_SOURCE_TAMPERED');
+    }
     return {status:result.status,reused:true,modelCalls:0,directory:dir,
      beforeAfterStatus:result.beforeAfterStatus??null,...secure()};
    }
    // Never repeat a partially completed real model call without --fresh.
    return {status:'HOLD_PARTIAL_RUN_NO_AUTOMATIC_RETRY',reused:true,
     modelCalls:0,directory:dir,...secure()};
-  }catch(e){if(String(e.message).startsWith('R190W_PRIOR_'))throw e}
+  }catch(e){
+   if(String(e?.message??'').startsWith('R190W_PRIOR_'))throw e;
+   fail('PRIOR_UNREADABLE_NO_AUTOMATIC_RETRY');
+  }
  }
  return null;
 }
