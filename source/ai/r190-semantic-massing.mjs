@@ -210,10 +210,20 @@ export function layoutR190SemanticPlan(p,{strategy='centered'}={}){
  ok(R190_LAYOUT_STRATEGIES.includes(strategy),'LAYOUT_STRATEGY');
  const source=structuredClone(p),byId=new Map(source.spaces.map(s=>[s.id,s]));
  const root=byId.get(p.entrySpaceId);
+ // Solve room relationships in relative coordinates first; placing the
+ // entrance at the site center is a preference, NOT a hard design constraint.
  const placements=new Map([[root.id,{id:root.id,parentId:null,side:null,
-  x:Math.floor((p.site.width-root.width)/2),
-  z:Math.floor((p.site.depth-root.depth)/2),
-  w:root.width,d:root.depth,h:root.height}]]);
+  x:0,z:0,w:root.width,d:root.depth,h:root.height}]]);
+ const footprintBounds=(candidate)=>{
+  const rooms=[...placements.values(),...(candidate?[candidate]:[])];
+  return {minX:Math.min(...rooms.map(s=>s.x)),
+   maxX:Math.max(...rooms.map(s=>s.x+s.w)),
+   // Entrance approach is three blocks south of the root, not a room.
+   minZ:Math.min(-3,...rooms.map(s=>s.z)),
+   maxZ:Math.max(...rooms.map(s=>s.z+s.d))};
+ };
+ const fitsSite=b=>b.maxX-b.minX<=p.site.width-2&&
+  b.maxZ-b.minZ<=p.site.depth-1;
  const extra=source.crossConnections??[];
  const edgeKeys=new Set(extra.map(p=>[...p].sort().join('|')));
  const isCross=(a,b)=>edgeKeys.has([a,b].sort().join('|'));
@@ -229,9 +239,10 @@ export function layoutR190SemanticPlan(p,{strategy='centered'}={}){
    const parent=placements.get(s.parentId);
    for(const shift of SHIFT_ORDERS[strategy]){
     const candidate=near(parent,s,s.side,shift);
-    if(candidate.x<2||candidate.z<3||
-     candidate.x+candidate.w>p.site.width-2||
-     candidate.z+candidate.d>p.site.depth-2)continue;
+    // Reject only if the whole layout cannot fit after a rigid shift.
+    // Preserve one block at either X edge, one at the north Z edge,
+    // and three entrance-approach cells to the south.
+    if(!fitsSite(footprintBounds(candidate)))continue;
     const portal=sharedPortal(parent,candidate,s.side);
     if(!portal)continue;
     // A non-tree pair may physically share ONE actual wall only when the
@@ -256,13 +267,28 @@ export function layoutR190SemanticPlan(p,{strategy='centered'}={}){
   return false;
  }
  ok(solve(),'NO_FEASIBLE_SPATIAL_LAYOUT');
+ const bounds=footprintBounds();
+ const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
+ const dx=clamp(Math.floor((p.site.width-root.width)/2),
+  1-bounds.minX,p.site.width-1-bounds.maxX);
+ const dz=clamp(Math.floor((p.site.depth-root.depth)/2),
+  -bounds.minZ,p.site.depth-1-bounds.maxZ);
  const crossPortals=extra.map(([a,b])=>{
   const portal=r190SharedCrossPortal(placements.get(a),placements.get(b));
   ok(portal!==null,'NON_TREE_PORTAL_MISSING');
   return portal;
  });
- return {strategy,spaces:source.spaces.map(s=>placements.get(s.id)),
-  portals:[...portals,...crossPortals],
+ return {strategy,spaces:source.spaces.map(s=>{
+   const room=placements.get(s.id);
+   return {...room,x:room.x+dx,z:room.z+dz};
+  }),
+  portals:[...portals,...crossPortals].map(v=>({
+   ...v,x:v.x+dx,z:v.z+dz
+  })),
+  sitePlacement:{mode:'rigid-translation-of-model-spaces',
+   rootOffset:[dx,dz],roomDimensionsModified:false,
+   roomRelationsModified:false,requiredEntranceApproachCells:3,
+   occupiedRelativeBounds:bounds},
   sourcePlanSha256:hash(source)};
 }
 export function r190GlazingCells(room,g){
