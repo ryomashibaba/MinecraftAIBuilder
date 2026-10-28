@@ -26,7 +26,9 @@ const bad=code=>{throw Error('R190AF_'+code)};
 const check=(ok,code)=>{if(!ok)bad(code)};
 const validRoom=(r,site,root)=>{
  const keys=root?rootFields:childFields;
- check(field(r,keys),'ROOM_SHAPE');
+ check(field(r,keys)||(!root&&field(r,[...keys,'tangentShift'])),'ROOM_SHAPE');
+ if(!root&&Object.hasOwn(r,'tangentShift'))
+  check(integer(r.tangentShift,-24,24),'TANGENT_SHIFT');
  check(slug(r.id)&&typeof r.purpose==='string'&&
   r.purpose.length>=3&&r.purpose.length<=150,'ROOM_IDENTITY');
  check(integer(r.width,7,22)&&integer(r.depth,7,22)&&

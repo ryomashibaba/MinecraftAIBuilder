@@ -86,7 +86,10 @@ export function validateR190SemanticPlan(p){
  const ids=new Set(),parents=new Map();
  const fields=['id','purpose','width','depth','height','parentId','side','privacy'];
  for(const s of p.spaces){
-  ok((exact(s,fields)||exact(s,[...fields,'spatialRole']))&&
+  ok(Object.keys(s??{}).every(k=>[...fields,'spatialRole','tangentShift'].includes(k))&&
+   fields.every(k=>Object.hasOwn(s??{},k))&&
+   (s.id!==p.entrySpaceId||s.tangentShift===undefined)&&
+   (s.tangentShift===undefined||int(s.tangentShift,-24,24))&&
    (s.spatialRole===undefined||['enclosed','open-court'].includes(s.spatialRole))&&
    slug(s.id)&&!ids.has(s.id)&&safeText(s.purpose,150)&&
    int(s.width,7,22)&&int(s.depth,7,22)&&
@@ -272,7 +275,9 @@ export function layoutR190SemanticPlan(p,{strategy='centered',layoutVariantIndex
     a.parentId.localeCompare(b.parentId)||a.id.localeCompare(b.id));
   for(const s of choices){
    const parent=placements.get(s.parentId);
-   for(const shift of SHIFT_ORDERS[strategy]){
+   // An authored wing position is binding. No silent substitute shift.
+   for(const shift of (s.tangentShift===undefined?
+    SHIFT_ORDERS[strategy]:[s.tangentShift])){
     // A non-first candidate must not turn pathological layouts into an
     // unbounded search. The historical first-layout behavior is unchanged.
     if(layoutVariantIndex>0&&++variantCandidateAttempts>20000)
@@ -313,6 +318,8 @@ export function layoutR190SemanticPlan(p,{strategy='centered',layoutVariantIndex
   1-bounds.minX,p.site.width-1-bounds.maxX);
  const dz=clamp(Math.floor((p.site.depth-root.depth)/2),
   -bounds.minZ,p.site.depth-1-bounds.maxZ);
+ const authorOffsets=source.spaces.filter(s=>Object.hasOwn(s,'tangentShift'))
+  .map(s=>({spaceId:s.id,tangentShift:s.tangentShift}));
  const crossPortals=extra.map(([a,b])=>{
   const portal=r190SharedCrossPortal(placements.get(a),placements.get(b));
   ok(portal!==null,'NON_TREE_PORTAL_MISSING');
@@ -329,7 +336,8 @@ export function layoutR190SemanticPlan(p,{strategy='centered',layoutVariantIndex
   sitePlacement:{mode:'rigid-translation-of-model-spaces',
    rootOffset:[dx,dz],roomDimensionsModified:false,
    roomRelationsModified:false,requiredEntranceApproachCells:3,
-   occupiedRelativeBounds:bounds},
+   occupiedRelativeBounds:bounds,
+   ...(authorOffsets.length?{authorLockedTangentialOffsets:authorOffsets}:{})},
   sourcePlanSha256:hash(source)};
 }
 export function r190GlazingCells(room,g){
