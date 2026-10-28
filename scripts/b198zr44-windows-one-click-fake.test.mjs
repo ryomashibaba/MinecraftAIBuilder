@@ -73,6 +73,21 @@ test('R44 ONE Windows CMD: no consent => no request; YES => one fake Qwen and si
   assert.equal(deny.code,2,(deny.stdout+'\n'+deny.stderr).slice(-1600));
   assert.equal(fake.calls.get,0);assert.equal(fake.calls.post,0);
   const first=await runCmd('YES',env);
+  if(first.code!==0){
+   // BEFORE the existing fail-closed assertion, inspect the isolated
+   // R24 stage. Never bypass the SHA-pinned historic installer.
+   const sourceDir=path.join(env.LOCALAPPDATA,'MinecraftAIBuilder',
+    'R24_Mini_44108944d0d9');
+   const diagnostic=spawnSync('powershell.exe',['-NoProfile',
+    '-ExecutionPolicy','Bypass','-File',path.join(repo,'scripts',
+     'r44-windows-stage-path-diagnostic.ps1'),'-Base',sourceDir],
+    {env,encoding:'utf8',timeout:20000});
+   assert.equal(diagnostic.status,0,'DIAG_FAILED '+diagnostic.stderr);
+   const info=JSON.parse(diagnostic.stdout);
+   assert.equal(info.enumeratedFiles,37);
+   assert.equal(info.modelCalls,0);assert.equal(info.worldWrites,0);
+   console.error('R44_STAGE_PATH_PROOF',JSON.stringify(info));
+  }
   assert.equal(first.code,0,(first.stdout+'\n'+first.stderr).slice(-7000));
   assert.equal(fake.calls.get,1);
   assert.equal(fake.calls.post,1);
