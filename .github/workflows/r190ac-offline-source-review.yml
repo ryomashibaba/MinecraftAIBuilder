@@ -5,6 +5,9 @@ on:
     paths:
       - 'scripts/r190ac-offline-source-review.mjs'
       - 'scripts/r190ac-offline-source-review.test.mjs'
+      - 'source/ai/r190ab-semantic-contract.mjs'
+      - 'source/ai/r190-semantic-massing.mjs'
+      - 'scripts/r190-semantic-fixtures.mjs'
       - 'evidence/r190aa/pilot-01/MODEL_RESPONSE_ORIGINAL.txt'
       - 'evidence/r190aa/pilot-01/AUDIT.json'
       - '.github/workflows/r190ac-offline-source-review.yml'

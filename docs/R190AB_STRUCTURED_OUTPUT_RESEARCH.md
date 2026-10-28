@@ -52,3 +52,34 @@ R190-ABにはローカルOllamaが返す `total_duration`、`load_duration`、`p
 `readiness=NOT_PREPARED`、`constructionApproved=false`、`executionAllowed=false`、9 `BLOCKED`、空 `BuildPlan.operations`、worldContacts=worldWrites=0。正式美術採用0件、ART HOLD、Minecraft施工禁止。CIのfake-only成功は実Qwen品質合格を意味しない。
 
 **正式な次の判断**：R190-ABで構文は改善しても、実室内・動線・非対称性・美しさが未改善なら、B143直接設計に依存する方式の限界として、モデル自体が空間プログラムから幾何まで一貫して生成する別方式の比較研究を優先する。
+
+
+## R190-AB actual one-response result, and the opt-in semantic-space route (2026-10-28)
+
+The user executed the existing \`contract-01\` direct B143 study locally on Qwen3:14b. Original **not committed**; keep Windows evidence intact. Receipt:
+- \`modelReported=qwen3:14b\`, \`providerDoneReason=stop\`, no provider error.
+- Model source SHA256 \`e39fe020e596dd759ed12a680f11e8824ce2e673d03636dfedb4dfff1cf2b50a\`, 2,826 UTF-8 bytes, wall 52,231 ms, 2,035 output tokens (provider-reported).
+- \`HOLD_INVALID_OUTPUT\`, \`B143_OUTSIDE_LOCAL_BOUNDS\`, no true 3D. Model mixed width/depth/height across B143 \`[x,y,z]\` and \`bounds\` fields. Its seven elements also did not encode real stair treads or usable stone-free rooms. **Never relabel as a JSON-schema-quality success.**
+- This result is independent of the R190-AA pilot-01 and must NEVER be overwritten, auto-fixed, repeated under the same study name, or treated as host-generated valid geometry.
+
+### Semantic architecture — same existing runner, no new runner
+
+The opt-in \`--contract semantic-space\` reuses the existing \`source/ai/r190-semantic-massing.mjs\`. The model authors a **short spatial plan**, including 3–6 real-space purposes/sizes/parent directions and an explicit model-chosen roof section plus exterior glazing. The HOST selects all actual coordinates, compiles B143 and independently tests supported two-wide source routes. Consequently this may resolve the coordinate-mixing class of error, but it cannot by itself prove a good architectural concept or quality.
+
+This compiler only supports a **single level**, and it cannot build a true multi-level library, hillside observatory, traversable bridge or stacked market. This pilot **refuses those tasks before any provider call** rather than silently flattening them. The first admissible task is \`tidal-workshop\`: three program functions can be spatially represented. Tidal engineering, rainwater management, real structural safety, and Minecraft walking remain \`NOT_TESTED\` and must not be certified.
+
+\`\`\`powershell
+# In an authorized local Work environment; preserve existing Windows modifications.
+node --test scripts/r190ab-structured-output-pilot.test.mjs
+node --test scripts/r190ac-offline-source-review.test.mjs
+
+# New unique study name; one Ollama request, no retry, NEVER reuse contract-01.
+node scripts/r190ab-structured-output-pilot.mjs --run --contract semantic-space --study semantic-workshop-01 --task tidal-workshop --model qwen3:14b
+
+# Only after saved original and result exist. This is READ-ONLY replay.
+node scripts/r190ac-offline-source-review.mjs --ab "$((Get-Location).Path)\r190ab-local-evidence\semantic-workshop-01"
+\`\`\`
+
+No new live Qwen run has occurred in GitHub/Chat. The code/tests/CI are **fake-only** until the explicit local one-case research generates and saves a real original. Preserve the original \`MODEL_RESPONSE_ORIGINAL.txt\`; \`HOST_DERIVED_B143_SOURCE.json\`, \`HOST_DERIVED_SOURCE_TRUE_3D.html\` and \`HOST_DERIVED_*.svg\` are labeled **HOST generated** and are never represented as direct model-authored B143.
+
+Selection criteria: observed exact compiled geometry, real two-wide source routes, room purpose coverage by an independent reviewer, qualitative original architecture beyond standard boxes, and human art review. A library-vs-workshop comparison changes both task and generation method, so **no numeric winner or causal improvement is established**. No Minecraft execution; nine blocked gates remain.
