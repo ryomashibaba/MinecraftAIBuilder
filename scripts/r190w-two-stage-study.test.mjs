@@ -84,7 +84,7 @@ test('W one fake two-response attempt saves exact raw and does not certify quali
    fetcher:provider([plan(),raw()],calls)});
   assert.equal(calls.length,2);
   assert.equal(result.modelCalls,2);
-  assert.equal(result.status,'B143_COMPARABLE_ART_HOLD');
+  assert.equal(result.status,'NO_NEW_VOXEL_GEOMETRY_ART_HOLD');
   assert.equal(result.beforeAfterStatus,'NO_FINAL_VOXEL_CHANGE');
   assert.equal(result.worldWrites,0);
   assert.equal(fs.readFileSync(path.join(result.directory,'R190W_PLAN_RAW.txt'),'utf8'),plan());
@@ -129,4 +129,39 @@ test('W Windows launcher checks canonical checkout, stale code and opt-in consen
  assert.match(cmd,/findstr \/C:"buildR190WGeometryPrompt"/);
  assert.match(cmd,/choice \/C YN/);
  assert.doesNotMatch(cmd,/git pull|git clone|git reset|ollama pull/i);
+});
+
+test('W stage two drops the stage-one no-B143 instruction, hashes original evidence',async()=>{
+ const root=temp(),calls=[];
+ try{
+  const before=baseline(root),r=await runR190WStudy(['--from',before],{
+   evidenceRoot:path.join(root,'runs'),timestamp:()=>880,
+   fetcher:provider([plan(),raw()],calls)});
+  assert.equal(r.modelCalls,2);
+  const prompt=fs.readFileSync(path.join(r.directory,'R190W_GEOMETRY_PROMPT.txt'),'utf8');
+  assert.doesNotMatch(prompt,/B143の形状・座標を今は書かない/);
+  const ledger=JSON.parse(fs.readFileSync(path.join(r.directory,'R190W_RESULT.json'),'utf8'));
+  assert.equal(ledger.stage2PromptSha256,sha(prompt));
+  const rawPath=path.join(r.directory,'b143-model-original','R190_I_ORIGINAL_RESPONSE.txt');
+  fs.appendFileSync(rawPath,' ');
+  await assert.rejects(runR190WStudy(['--from',before],{
+   evidenceRoot:path.join(root,'runs'),
+   fetcher:()=>{throw Error('NO_EXTRA_PROVIDER_REQUEST')}}),
+   /R190W_PRIOR_STAGE2_RECEIPT_MISMATCH/);
+  assert.equal(calls.length,2);
+ }finally{fs.rmSync(root,{recursive:true,force:true})}
+});
+test('W corrupted stage one cannot silently trigger new model usage',async()=>{
+ const root=temp(),calls=[];
+ try{
+  const before=baseline(root),out=path.join(root,'runs');
+  const r=await runR190WStudy(['--from',before],{
+   evidenceRoot:out,timestamp:()=>881,
+   fetcher:provider(['{"invalid":true}',raw()],calls)});
+  fs.appendFileSync(path.join(r.directory,'R190W_PLAN_RAW.txt'),'tamper');
+  await assert.rejects(runR190WStudy(['--from',before],{
+   evidenceRoot:out,fetcher:()=>{throw Error('NO_PROVIDER')}}),
+   /R190W_PRIOR_PLAN_TAMPERED/);
+  assert.equal(calls.length,1);
+ }finally{fs.rmSync(root,{recursive:true,force:true})}
 });

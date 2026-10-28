@@ -134,26 +134,71 @@ async function planRequest(model,prompt,fetcher){
   return {raw:choice.message.content,finishReason:choice.finish_reason};
  }finally{clearTimeout(timer)}
 }
-function findPrior(root,original,promptHash){
+function findPrior(root,original,promptHash,negativePrompt){
  if(!isDir(root))return null;
  for(const name of fs.readdirSync(root).filter(x=>/^r190w-\d+-\d+$/.test(x)).sort().reverse()){
   const dir=path.join(root,name);
   if(!isDir(dir))continue;
   try{
    const attempt=JSON.parse(read(path.join(dir,'R190W_ATTEMPT.json'),20000));
-   if(attempt.parentRawSha256!==original.rawSha256||
-    attempt.modelRequested!==original.model||attempt.planningPromptSha256!==promptHash||
-    !safe(attempt))continue;
+   if(attempt.parentRawSha256!==original.rawSha256)continue;
+   if(attempt.modelRequested!==original.model||
+      attempt.planningPromptSha256!==promptHash||!safe(attempt))
+    fail('PRIOR_BASELINE_OR_SAFETY');
+   if(sha(read(path.join(dir,'R190W_PLAN_PROMPT.txt'),15000))!==promptHash)
+    fail('PRIOR_PROMPT_CHANGED');
    const stage1=path.join(dir,'R190W_PLAN_RAW.txt');
    if(fs.existsSync(stage1)&&attempt.stage1RawSha256!==undefined&&
       sha(read(stage1,12000))!==attempt.stage1RawSha256)fail('PRIOR_SHA_MISMATCH');
    if(fs.existsSync(path.join(dir,'R190W_RESULT.json'))){
     const result=JSON.parse(read(path.join(dir,'R190W_RESULT.json'),20000));
     if(!safe(result)||result.parentRawSha256!==original.rawSha256||
+       result.modelRequested!==original.model||
        result.planningPromptSha256!==promptHash)fail('PRIOR_RESULT_MISMATCH');
     if(typeof result.stage1RawSha256==='string'&&
        (!fs.existsSync(stage1)||sha(read(stage1,12000))!==result.stage1RawSha256))
      fail('PRIOR_PLAN_TAMPERED');
+    if(result.modelCallsAttempted===2){
+     const rawPlan=read(stage1,12000);
+     if(!result.stage1RawSha256||
+        sha(rawPlan)!==result.stage1RawSha256)
+      fail('PRIOR_PLAN_SHA_MISSING');
+     const second=buildR190WGeometryPrompt(negativePrompt,
+      inspectR190WPlan(rawPlan));
+     if(read(path.join(dir,'R190W_GEOMETRY_PROMPT.txt'),15000)!==second||
+        result.stage2PromptSha256!==sha(second))
+      fail('PRIOR_STAGE2_PROMPT_MISMATCH');
+    }
+    if(result.beforeAfterStatus!==null){
+     const out=path.join(dir,'b143-model-original');
+     const raw=read(path.join(out,'R190_I_ORIGINAL_RESPONSE.txt'));
+     const receiptFile=fs.existsSync(path.join(out,'R190_H_RECEIPT.json'))?
+      'R190_H_RECEIPT.json':'R190_I_CAPTURE_RECEIPT.json';
+     const receipt=JSON.parse(read(path.join(out,receiptFile),40000));
+     const sourcePrompt=read(path.join(dir,'R190W_GEOMETRY_PROMPT.txt'),15000);
+     if(result.stage2RawSha256!==sha(raw)||!safe(receipt)||
+        receipt.modelRequested!==original.model||
+        receipt.originalRawSha256!==sha(raw)||
+        receipt.originalRequestSha256!==sha(sourcePrompt)||
+        read(path.join(out,'R190_I_ORIGINAL_BRIEF.txt'),15000)!==sourcePrompt)
+      fail('PRIOR_STAGE2_RECEIPT_MISMATCH');
+     const candidate=JSON.parse(raw),compiled=compileDesign(candidate.design);
+     if(!verifyCompiled(candidate.design,compiled)||
+        compiled.sourceSha256!==
+         (receipt.sourceSha256??receipt.unapprovedGeometryEvidence?.sourceSha256)||
+        compiled.geometrySha256!==
+         (receipt.geometrySha256??receipt.unapprovedGeometryEvidence?.geometrySha256))
+      fail('PRIOR_GEOMETRY_MISMATCH');
+     const stored=JSON.parse(read(path.join(dir,'R190W_PHYSICAL_COMPARISON.json'),60000));
+     const recomputed=compareR190TSource({
+      beforeDesign:original.design,afterDesign:candidate.design,
+      beforePlan:original.spatialPlan,afterPlan:candidate.spatialPlan});
+     if(JSON.stringify(stored)!==JSON.stringify(recomputed)||
+        recomputed.status!==result.beforeAfterStatus||
+        result.status!==(recomputed.samePhysicalVoxels?
+         'NO_NEW_VOXEL_GEOMETRY_ART_HOLD':'B143_COMPARABLE_ART_HOLD'))
+      fail('PRIOR_COMPARISON_MISMATCH');
+    }
     return {status:result.status,reused:true,modelCalls:0,directory:dir,
      beforeAfterStatus:result.beforeAfterStatus??null,...secure()};
    }
@@ -172,13 +217,14 @@ export async function runR190WStudy(args=[],{
  if(o?.help)return {help:'RUN_R190W_TWO_STAGE.cmd [--from SAVED_R190R_FOLDER] [--fresh] (two opt-in local model requests maximum)'};
  const original=chooseOriginal(o.from);
  const critique=diagnoseR190SGeometry(original);
- const first=buildR190WFirstPrompt(buildR190SRedesignPrompt(critique));
+ const negativePrompt=buildR190SRedesignPrompt(critique);
+ const first=buildR190WFirstPrompt(negativePrompt);
  const firstSha=sha(first),root=path.resolve(evidenceRoot);
  if(process.platform==='win32'&&root===path.resolve(R190W_ROOT)&&
   !isDir(path.dirname(root)))fail('CANONICAL_PROJECT_MISSING');
  if(fs.existsSync(root)&&!isDir(root))fail('UNSAFE_OUTPUT_ROOT');
  if(!o.fresh){
-  const prior=findPrior(root,original,firstSha);
+  const prior=findPrior(root,original,firstSha,negativePrompt);
   if(prior)return prior;
  }
  fs.mkdirSync(root,{recursive:true});
@@ -215,7 +261,17 @@ export async function runR190WStudy(args=[],{
   return {status:summary.status,reused:false,modelCalls,directory:dir,
    failure:stageError,...secure()};
  }
- const second=buildR190WGeometryPrompt(first,plan);
+ // Second stage must never inherit "do not write B143" from stage one.
+ let second;
+ try{second=buildR190WGeometryPrompt(negativePrompt,plan)}
+ catch(e){
+  summary.status='HOLD_STAGE2_PROMPT_BUDGET';
+  summary.failure=String(e?.message??e).slice(0,180);
+  json(path.join(dir,'R190W_RESULT.json'),summary);
+  return {status:summary.status,reused:false,modelCalls,directory:dir,
+   failure:summary.failure,...secure()};
+ }
+ summary.stage2PromptSha256=sha(second);
  write(path.join(dir,'R190W_GEOMETRY_PROMPT.txt'),second);
  modelCalls=2;summary.modelCallsAttempted=2;
  const out=path.join(dir,'b143-model-original');
@@ -260,7 +316,8 @@ export async function runR190WStudy(args=[],{
    write(path.join(dir,'R190W_VISUAL_COMPARE.html'),
     views.indexHtml.replaceAll('R190T_BEFORE_3D.html','R190W_BEFORE_3D.html')
      .replaceAll('R190T_AFTER_3D.html','R190W_AFTER_3D.html'));
-   summary.status='B143_COMPARABLE_ART_HOLD';
+   summary.status=pair.samePhysicalVoxels?
+    'NO_NEW_VOXEL_GEOMETRY_ART_HOLD':'B143_COMPARABLE_ART_HOLD';
    summary.beforeAfterStatus=pair.status;
    summary.modelArchitectureImprovementCertified=false;
   }catch(e){summary.stage2ComparisonFailure=String(e?.message??e).slice(0,160)}
