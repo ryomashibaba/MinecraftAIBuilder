@@ -50,3 +50,11 @@ jobs:
         with:
           name: R190AG-SYNTHETIC-ART-HOLD-${{ matrix.os }}
           path: r190ag-ci-comparison/
+      - name: R190-AI opt-in second solver layout to genuine B143 previews
+        if: matrix.os == 'ubuntu-24.04'
+        run: node scripts/r190ag-offline-comparison.mjs --synthetic --out "$GITHUB_WORKSPACE/r190ai-variant-comparison" --layout-variants 2
+      - uses: actions/upload-artifact@v4
+        if: matrix.os == 'ubuntu-24.04'
+        with:
+          name: R190AI-SYNTHETIC-SECOND-LAYOUT-ART-HOLD
+          path: r190ai-variant-comparison/

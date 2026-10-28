@@ -216,3 +216,31 @@ test('authored public route rather than private transit creates different real s
  assert.deepEqual(p.children[1],room('gallery','Public exhibition room','public','staff','east'));
  checkSafe(blocked.report);checkSafe(open.report);
 });
+
+test('expanded multi-layout comparison exports distinct unapproved B143 scenes and receipts',t=>{
+ const root=fs.realpathSync.native(fs.mkdtempSync(path.join(os.tmpdir(),'r190ai-export-')));
+ t.after(()=>{
+  assert.equal(path.dirname(root),fs.realpathSync.native(os.tmpdir()));
+  assert(path.basename(root).startsWith('r190ai-export-'));
+  fs.rmSync(root,{recursive:true,force:true});
+ });
+ const out=path.join(root,'new-unapproved');
+ const result=writeR190AGComparison(out,{maxLayoutVariantsPerStrategy:2});
+ assert.equal(result.maxLayoutVariantsPerStrategy,2);
+ const summary=JSON.parse(fs.readFileSync(path.join(out,'SUMMARY.json'),'utf8'));
+ assert.equal(summary.maxLayoutVariantsPerStrategy,2);
+ assert(summary.studies.some(s=>s.comparison.ag.alternatives.some(a=>
+  a.layoutVariantIndex===1&&a.baselineGeometrySha256)));
+ for(const s of summary.studies){
+  assert.equal(s.comparison.ag.proposalApproved,false);
+  for(const a of s.comparison.ag.alternatives.filter(a=>a.proposal)){
+   const tag=a.layoutVariantIndex>0?'-layout'+a.layoutVariantIndex:'';
+   const file=path.join(out,s.case,a.strategy+tag+'-UNAPPROVED-glass.b143.json');
+   const b143=JSON.parse(fs.readFileSync(file,'utf8'));
+   assert.equal(compileDesign(b143).geometrySha256,a.proposal.hostDerivedGeometrySha256);
+   assert(fs.statSync(file.replace('.b143.json','.html')).size>200);
+  }
+ }
+ assert.throws(()=>writeR190AGComparison(out,{maxLayoutVariantsPerStrategy:2}),
+  /NEW_ABSOLUTE_OUTPUT_REQUIRED/);
+});

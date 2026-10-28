@@ -12,7 +12,7 @@ import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
 import {renderR164Elevation} from './r164-exterior-audit.mjs';
 const write=(file,s)=>fs.writeFileSync(file,s,{flag:'wx'});
 const json=(file,v)=>write(file,JSON.stringify(v,null,2)+'\n');
-export function writeR190AGComparison(out){
+export function writeR190AGComparison(out,{maxLayoutVariantsPerStrategy=1}={}){
  if(!path.isAbsolute(out)||fs.existsSync(out)||!fs.statSync(path.dirname(out)).isDirectory())throw Error('R190AG_NEW_ABSOLUTE_OUTPUT_REQUIRED');
  const template=fs.readFileSync(new URL('../source/ai/b143-viewer-template.html',import.meta.url),'utf8');
  fs.mkdirSync(out);
@@ -20,7 +20,7 @@ export function writeR190AGComparison(out){
  const fixtures=[...plainFixtures(),jointWindowFixture(),featuredFixture()];
  for(const [i,p] of fixtures.entries()){
   const dir=path.join(out,'synthetic-'+i);fs.mkdirSync(dir);
-  const raw=JSON.stringify(p),r=studyR190AG(raw),semantic=JSON.stringify(r190AGSemanticProjection(p));
+  const raw=JSON.stringify(p),r=studyR190AG(raw,{maxLayoutVariantsPerStrategy}),semantic=JSON.stringify(r190AGSemanticProjection(p));
   const ab=inspectR190ABSemanticReply(semantic).report;
   const ad=inspectR190ADReply(semantic).report;
   const ae=inspectR190AEReply(semantic).report;
@@ -36,8 +36,10 @@ export function writeR190AGComparison(out){
   const scenes=[];
   if(r.baseline)scenes.push(['original-no-glass',r.baseline]);
   for(const proposal of r.proposals){
-   scenes.push([proposal.strategy+'-no-glass',proposal.baseline]);
-   scenes.push([proposal.strategy+'-UNAPPROVED-glass',proposal.trial]);
+   const variantTag=proposal.layoutVariantIndex>0?'-layout'+proposal.layoutVariantIndex:'';
+   const name=proposal.strategy+variantTag;
+   scenes.push([name+'-no-glass',proposal.baseline]);
+   scenes.push([name+'-UNAPPROVED-glass',proposal.trial]);
   }
   for(const [name,built] of scenes){
    // Exact B143 source and exact template. Never change the design for a view.
@@ -54,7 +56,8 @@ export function writeR190AGComparison(out){
   studies.push({case:'synthetic-'+i,proposalCount:r.proposals.length,comparison});
  }
  const summary={schema:'minecraftaibuilder-r190ag-synthetic-comparison-v1',
-  fixtureCount:studies.length,studies,modelCalls:0,worldContacts:0,worldWrites:0,
+  fixtureCount:studies.length,maxLayoutVariantsPerStrategy,studies,
+  modelCalls:0,worldContacts:0,worldWrites:0,
   art:'ART_HOLD',officialArtAdoptions:0,realModelCapability:'UNPROVEN',
   modelAuthoredB143:false,constructionApproved:false,executionAllowed:false,
   readiness:'NOT_PREPARED',gates:Array(9).fill('BLOCKED'),BuildPlan:{operations:[]}};
@@ -66,11 +69,17 @@ export function writeR190AGComparison(out){
   '<p>元の窓なし形状と、ホストが提案した未承認の窓付き形状を分けて表示します。配置候補は同じ部屋・寸法・親子方向・材料・選択された屋根と外形を保持します。各窓付き案は同じ配置の窓なし案と比較してください。</p>'+
   '<p>AB/AD/AEは同じ「窓座標なし」の構造投影を評価するため、必須フィールドの不足は契約差であり、モデルの優劣ではありません。詳細はSUMMARY.jsonの各判定・SHA・配置・提案履歴を参照してください。</p>'+
   '<p>3用途の窓なし基準例、複数窓＋鋸歯屋根、中庭＋外形加工＋屋根＋窓の5例です。真の3Dは生成ソースから、5方向図は同じコンパイル済みボクセルから出力しています。単層限定、採光量・耐候性・実機歩行は未検証です。</p><ul>'+links.join('')+'</ul></html>');
- return {fixtureCount:studies.length,proposalCounts:studies.map(s=>s.proposalCount),modelCalls:0,worldWrites:0,art:'ART_HOLD'};
+ return {fixtureCount:studies.length,maxLayoutVariantsPerStrategy,
+  proposalCounts:studies.map(s=>s.proposalCount),modelCalls:0,worldWrites:0,art:'ART_HOLD'};
 }
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){
  try{
-  const a=process.argv.slice(2);if(a.length!==3||a[0]!=='--synthetic'||a[1]!=='--out')throw Error('ARGS: --synthetic --out ABSOLUTE_NEW');
-  console.log(JSON.stringify(writeR190AGComparison(a[2]),null,2));
+  const a=process.argv.slice(2);
+  if(![3,5].includes(a.length)||a[0]!=='--synthetic'||a[1]!=='--out')
+   throw Error('ARGS: --synthetic --out ABSOLUTE_NEW [--layout-variants 1..4]');
+  if(a.length===5&&(a[3]!=='--layout-variants'||!/^[1-4]$/.test(a[4])))
+   throw Error('R190AI_LAYOUT_VARIANTS_EXPECT_1_TO_4');
+  const maxLayoutVariantsPerStrategy=a.length===5?Number(a[4]):1;
+  console.log(JSON.stringify(writeR190AGComparison(a[2],{maxLayoutVariantsPerStrategy}),null,2));
  }catch(e){console.error(String(e.message));process.exitCode=2;}
 }

@@ -127,3 +127,13 @@ R44 v2は専用Windows/Ubuntu CI成功の隔離技術として一区切りとし
 合成例の成功を実Qwenの自律的設計能力やART PASSとして扱わない。
 
 旧R44 v2は技術限定の成功で一区切りとし、旧CMDのFAILを消さない。
+
+### R190-AIの比較ビューア出力
+
+通常の5合成例・件数は維持し、追加候補を表示したい場合は
+`node scripts/r190ag-offline-comparison.mjs --synthetic --out ABSOLUTE_NEW --layout-variants 2`
+で実行する。JSON、HTML3D、5方向SVGに同じ配置の窓なし版を添付し、
+2件目以降のファイル名には `-layout1-` 等を含めて衝突を防ぐ。
+既存の成果フォルダへの上書きは禁止。CIではUbuntuのみ同オプションで
+生成し、専用の未承認・ART HOLD成果物として保存する。
+表示は原案の独立した著作性・実モデル能力・建築美術の採択を保証しない。
