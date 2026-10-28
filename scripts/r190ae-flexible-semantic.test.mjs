@@ -27,6 +27,7 @@ test('AE optional features are genuinely optional and schema independent',()=>{
   'minecraftaibuilder-r190ae-flexible-result-v1');
  assert.notEqual(R190AE_FORMAT_SHA256,R190AD_FORMAT_SHA256);
  assert.notEqual(R190AE_FORMAT_SHA256,R190AB_SEMANTIC_FORMAT_SHA256);
+ assert.equal(R190AE_FORMAT_SHA256,'9782c78ca363b2702236a1876412f3d22b572fdadce7c25a58ad5e8076eac0e1');
  assert.equal(parseR190ABArgs(['--contract','semantic-space-flexible',
   '--task','tidal-workshop','--study','flexible-workshop-01']).contract,'semantic-space-flexible');
 });
@@ -58,6 +59,10 @@ test('AE preserves real faceting, courtyard, sawtooth roof and glazing when chos
  assert.equal(r.report.worldContacts,0);
 });
 test('AE holds invalid constraints and does not silently repair absent features',()=>{
+ const two=plain();two.spaces=two.spaces.slice(0,2);
+ const count=inspectR190AEReply(JSON.stringify(two));
+ assert.equal(count.report.error,'FLEXIBLE_SPACE_COUNT');
+ assert.equal(count.report.real3D,false);
  const x=plain();x.glazedOpenings=[];
  const q=inspectR190AEReply(JSON.stringify(x));assert.equal(q.report.real3D,false);
  assert.match(q.report.error,/GLAZING_COUNT/);

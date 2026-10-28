@@ -12,11 +12,14 @@ const validId=x=>typeof x==='string'&&/^[a-z][a-z0-9-]{2,39}$/.test(x);
 const safety=()=>({readiness:'NOT_PREPARED',constructionApproved:false,
  executionAllowed:false,worldContacts:0,worldWrites:0,
  gates:Array(9).fill('BLOCKED'),BuildPlan:{operations:[]}});
-export function diagnoseR190ADRaw(raw){
+export function diagnoseR190ADRaw(raw){return diagnoseRaw(raw,false)}
+export function diagnoseR190AERaw(raw){return diagnoseRaw(raw,true)}
+function diagnoseRaw(raw,flexible){
  const issues=[],add=(code,path,reason,related={})=>{
   if(issues.length<100)issues.push({code,path,reason,...related});
  };
- const report={schema:'minecraftaibuilder-r190ad-offline-diagnostics-v1',
+ const report={schema:flexible?'minecraftaibuilder-r190ae-offline-diagnostics-v1':
+   'minecraftaibuilder-r190ad-offline-diagnostics-v1',
   rawSha256:typeof raw==='string'?H(raw):null,
   rawBytes:typeof raw==='string'?Buffer.byteLength(raw,'utf8'):null,
   mode:'ADVISORY_MULTI_ISSUE_SOURCE_ONLY',modelCalls:0,
@@ -47,7 +50,7 @@ export function diagnoseR190ADRaw(raw){
   add('SITE_VOLUME_OVER_BUDGET','site','Site volume exceeds 500000 cells');
  const spaces=Array.isArray(p.spaces)?p.spaces:[];
  if(spaces.length<3||spaces.length>6)
-  add('SPACE_COUNT_INVALID','spaces','AD requires 3 to 6 spaces');
+  add('SPACE_COUNT_INVALID','spaces','AD/AE requires 3 to 6 spaces');
  const ids=new Map(),valid=[];
  for(let i=0;i<spaces.length;i++){
   const path=`spaces[${i}]`,s=spaces[i];
@@ -75,15 +78,17 @@ export function diagnoseR190ADRaw(raw){
     add('ENTRY_RELATION_INVALID',path,'Root needs parentId:null and side:null');
   }else if(!validId(s.parentId)||!dirs.includes(s.side))
    add('ROOM_RELATION_INVALID',path,'Non-root room must have a parent and cardinal side');
-  valid.push(s);
+  valid.push({...s,index:i});
  }
  if(!ids.has(p.entrySpaceId))
   add('ENTRY_MISSING','entrySpaceId','Root space not found');
  const courts=valid.filter(s=>s.spatialRole==='open-court');
  if(courts.length>1)add('TOO_MANY_COURTS','spaces',
   'Current compiler supports at most one open-air court');
- if(valid.length-courts.length<3)
-  add('TOO_FEW_ENCLOSED','spaces','AD requires at least three enclosed rooms');
+ if(valid.length-courts.length<(flexible?2:3))
+  add('TOO_FEW_ENCLOSED','spaces',flexible?
+   'AE compiler requires at least two enclosed rooms':
+   'AD requires at least three enclosed rooms');
  for(const s of valid){
   if(s.id===p.entrySpaceId)continue;
   const path=`spaces[${s.index}]`;
@@ -113,9 +118,11 @@ export function diagnoseR190ADRaw(raw){
       limitation:'Necessary lower bound only; not an exhaustive layout proof'});
   }
  }
- if(!isObject(p.formIntent))
-  add('FORM_INTENT_MISSING','formIntent','AD requires a model-selected faceted wing');
- else{
+ if(!isObject(p.formIntent)&&(!flexible||Object.hasOwn(p,'formIntent')))
+  add('FORM_INTENT_MISSING','formIntent',flexible?
+   'Selected formIntent must be an object; omit when not selected':
+   'AD requires a model-selected faceted wing');
+ else if(isObject(p.formIntent)){
   const f=p.formIntent,s=ids.get(f.spaceId);
   if(!s)add('FORM_SPACE_MISSING','formIntent.spaceId','Selected space does not exist');
   else{
@@ -135,9 +142,11 @@ export function diagnoseR190ADRaw(raw){
   if(!dirs.includes(f.face)||!integer(f.cornerInset)||f.cornerInset<2||f.cornerInset>3)
    add('FORM_INTENT_INVALID','formIntent','Face must be cardinal and cornerInset 2 or 3');
  }
- if(!isObject(p.roofFormIntent))
-  add('ROOF_INTENT_MISSING','roofFormIntent','AD requires a chosen real roof');
- else{
+ if(!isObject(p.roofFormIntent)&&(!flexible||Object.hasOwn(p,'roofFormIntent')))
+  add('ROOF_INTENT_MISSING','roofFormIntent',flexible?
+   'Selected roofFormIntent must be an object; omit when not selected':
+   'AD requires a chosen real roof');
+ else if(isObject(p.roofFormIntent)){
   const f=p.roofFormIntent,s=ids.get(f.spaceId);
   if(!s)add('ROOF_SPACE_MISSING','roofFormIntent.spaceId','Selected space does not exist');
   else{
@@ -167,8 +176,9 @@ export function diagnoseR190ADRaw(raw){
    add('ROOF_INTENT_INVALID','roofFormIntent','Invalid roof profile, axis, rise or toothWidth');
  }
  const glazings=Array.isArray(p.glazedOpenings)?p.glazedOpenings:[];
- if(glazings.length<1||glazings.length>5)
-  add('GLAZING_COUNT_INVALID','glazedOpenings','AD requires 1 to 5 glazing sets');
+ if((!flexible||Object.hasOwn(p,'glazedOpenings'))&&
+    (!Array.isArray(p.glazedOpenings)||glazings.length<1||glazings.length>5))
+  add('GLAZING_COUNT_INVALID','glazedOpenings','Requires 1 to 5 glazing sets when selected');
  for(let i=0;i<glazings.length;i++){
   const g=glazings[i],at=`glazedOpenings[${i}]`;
   if(!isObject(g)){add('GLAZING_NOT_OBJECT',at,'Expected window object');continue}
@@ -194,7 +204,9 @@ export function diagnoseR190ADRaw(raw){
   if(integer(g.baseY)&&integer(g.height)&&integer(s.height)&&
      (g.baseY<5||g.baseY+g.height>s.height-1))
    add('GLAZING_OUTSIDE_ROOM_HEIGHT',at,'Glazing must fit within room wall',
-    {roomHeight:s.height,baseY:g.baseY,glazingHeight:g.height});
+    {roomHeight:s.height,baseY:g.baseY,glazingHeight:g.height,
+     minimumBaseY:5,maximumBaseY:s.height-1-g.height,
+     minimumRequiredRoomHeight:g.baseY+g.height+1});
   if(g.spaceId===p.entrySpaceId&&g.face==='south'&&g.baseY===5&&
       integer(g.offset)&&integer(g.width)&&integer(s.width)){
    const door=Math.floor((s.width-2)/2);
@@ -203,9 +215,12 @@ export function diagnoseR190ADRaw(raw){
      'Window bottom sill overlaps the actual three-block-high entrance door');
   }
  }
+ if(Object.hasOwn(p,'crossConnections')&&!Array.isArray(p.crossConnections))
+  add('CROSS_LINK_COUNT_INVALID','crossConnections','Expected a nonempty array if specified');
  if(Array.isArray(p.crossConnections)){
-  if(p.crossConnections.length<1||p.crossConnections.length>4)
-   add('CROSS_LINK_COUNT_INVALID','crossConnections','Requires 1 to 4 pairs if specified');
+  const maximum=flexible?3:4;
+  if(p.crossConnections.length<1||p.crossConnections.length>maximum)
+   add('CROSS_LINK_COUNT_INVALID','crossConnections',`Requires 1 to ${maximum} pairs if specified`);
   const seen=new Set();
   for(let i=0;i<p.crossConnections.length;i++){
    const v=p.crossConnections[i],at=`crossConnections[${i}]`;

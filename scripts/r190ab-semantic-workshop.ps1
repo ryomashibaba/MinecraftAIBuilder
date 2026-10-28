@@ -15,11 +15,14 @@ param(
 )
 $ErrorActionPreference = "Stop"
 if ($Run -and $Replay) { throw "-Run and -Replay are mutually exclusive" }
-if ($Flexible -and (-not $Run -or $Expressive -or $Diagnose -or $Replay)) {
- throw "-Flexible requires -Run without Expressive, Diagnose or Replay"
+if ($Flexible -and ((-not $Run -and -not $Diagnose) -or $Expressive -or $Replay)) {
+ throw "-Flexible requires either -Run or -Diagnose, without Expressive or Replay"
 }
-if ($Diagnose -and ($Run -or $Replay -or $Expressive -or $Flexible)) {
+if ($Diagnose -and ($Run -or $Replay -or $Expressive)) {
  throw "-Diagnose is strictly read-only; cannot combine with Run, Replay or Expressive"
+}
+if ($Diagnose -and $Flexible -and -not $PSBoundParameters.ContainsKey('DiagnosisSha')) {
+ throw "AE diagnosis requires explicit -DiagnosisSha; never use the historical AD hash"
 }
 if ($Diagnose -and $DiagnosisSha -cnotmatch '^[0-9a-f]{64}$') {
  throw "Diagnosis requires a full lowercase original SHA256"
@@ -96,11 +99,12 @@ try {
   if ($LASTEXITCODE -ne 0) { throw "AC regression FAILED. No inference." }
   Write-Host "AB+AC regression PASS at pinned revision $revision"
   if ($Diagnose) {
-   & node --test scripts/r190ad-saved-semantic-diagnose.test.mjs
-   if ($LASTEXITCODE -ne 0) { throw "Read-only AD diagnostic regression FAILED. No model inference." }
-   & node scripts/r190ad-saved-semantic-diagnose.mjs --study $target --expected-sha $DiagnosisSha
-   if ($LASTEXITCODE -ne 0) { throw "AD archived-original diagnosis failed closed." }
-   Write-Host "R190-AD read-only multi-issue diagnosis completed; original study unchanged."
+   $diagnostic = if ($Flexible) { "r190ae" } else { "r190ad" }
+   & node --test "scripts/$diagnostic-saved-semantic-diagnose.test.mjs"
+   if ($LASTEXITCODE -ne 0) { throw "$diagnostic read-only diagnostic regression FAILED. No model inference." }
+   & node "scripts/$diagnostic-saved-semantic-diagnose.mjs" --study $target --expected-sha $DiagnosisSha
+   if ($LASTEXITCODE -ne 0) { throw "$diagnostic archived-original diagnosis failed closed." }
+   Write-Host "$diagnostic read-only multi-issue diagnosis completed; original study unchanged."
    return
   }
   if ($Expressive -or $Flexible) {
@@ -171,7 +175,7 @@ try {
    Write-Warning "Model study returned HOLD/nonzero ($runCode); evidence kept."
   }
   if ($Expressive -or $Flexible) {
-   Write-Host "R190-AD expressive audit is in its immutable result; R190-AC legacy reviewer is incompatible and is not run."
+   Write-Host "$contract audit is in its immutable result; R190-AC legacy reviewer is incompatible and is not run."
    Write-Host "Independent art, live walking and weather checks remain HOLD."
   } else {
    Write-Host "R190-AC saved comparison (read-only):"

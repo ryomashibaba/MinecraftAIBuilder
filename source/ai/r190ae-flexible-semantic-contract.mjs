@@ -62,6 +62,7 @@ export const R190AE_GUIDANCE=[
  'A formIntent is OPTIONAL: choose a faceted enclosed wing only when this shape matters. A faceted room cannot also receive roofFormIntent or glazing.',
  'An open-court is OPTIONAL (at most one). Never put windows, a roof section or faceted enclosed envelope on an open-court. The remaining rooms must be enclosed.',
  'glazedOpenings is OPTIONAL and must be omitted when not selected. Windows must be on real exterior walls; keep them out of any entry doorway and shared wall.',
+ 'Window baseY is the source wall elevation, NOT an arbitrary world altitude. Require baseY>=5 and baseY+height<=target room.height-1; offset>=2 and offset+width<=wall span-2. If no window fits, omit glazedOpenings; never move or resize a room to hide a conflict.',
  'crossConnections is OPTIONAL and must be omitted when not selected. The parentId relationship ALREADY makes a direct link. Never duplicate tree edges.',
  'The entry root needs parentId:null and side:null. Other rooms need valid parent IDs and cardinal sides. Never attach a direct child south of the root because it needs an outside approach.',
  'Plan the entire north/south/east/west footprint including shared-wall overlaps, the exterior approach, and a one-cell perimeter. Do not make the solver guess impossible site constraints.',
@@ -86,6 +87,8 @@ export function inspectR190AEReply(raw,reason='stop'){
   if(plan?.schema!==R190_SCHEMA)throw Error('WRONG_SEMANTIC_SCHEMA');
   if(!Array.isArray(plan.spaces)||plan.spaces.some(s=>!Object.hasOwn(s,'spatialRole')))
    throw Error('MISSING_MODEL_SELECTED_SPATIAL_ROLES');
+  if(plan.spaces.length<3||plan.spaces.length>6)
+   throw Error('FLEXIBLE_SPACE_COUNT');
   // Absence of a feature is itself an authored decision, not a host fix.
   // Optional fields must never be silently populated after model output.
   if(plan.glazedOpenings!==undefined&&
