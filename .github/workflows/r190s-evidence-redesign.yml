@@ -8,6 +8,9 @@ on:
       - 'RUN_R190S_REDESIGN.cmd'
       - 'scripts/r190t-source-comparison.mjs'
       - 'scripts/r190t-source-comparison.test.mjs'
+      - 'scripts/r190x-saved-quality-compare.mjs'
+      - 'scripts/r190x-saved-quality-compare.test.mjs'
+      - 'RUN_R190X_COMPARE.cmd'
       - '.github/workflows/r190s-evidence-redesign.yml'
   pull_request:
     paths:
@@ -16,6 +19,9 @@ on:
       - 'RUN_R190S_REDESIGN.cmd'
       - 'scripts/r190t-source-comparison.mjs'
       - 'scripts/r190t-source-comparison.test.mjs'
+      - 'scripts/r190x-saved-quality-compare.mjs'
+      - 'scripts/r190x-saved-quality-compare.test.mjs'
+      - 'RUN_R190X_COMPARE.cmd'
       - '.github/workflows/r190s-evidence-redesign.yml'
 permissions:
   contents: read
@@ -30,4 +36,6 @@ jobs:
       - run: node --check scripts/r190s-evidence-redesign.mjs
       - run: node --test scripts/r190t-source-comparison.test.mjs
       - run: node --test scripts/r190s-evidence-redesign.test.mjs
+      - run: node --check scripts/r190x-saved-quality-compare.mjs
+      - run: node --test scripts/r190x-saved-quality-compare.test.mjs
       - run: node --test scripts/r190-h-architectural-route.test.mjs
