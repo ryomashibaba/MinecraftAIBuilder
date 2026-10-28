@@ -29,12 +29,22 @@ jobs:
         run: |
           $tokens = $null
           $issues = $null
-          [System.Management.Automation.Language.Parser]::ParseFile(
+          $ast = [System.Management.Automation.Language.Parser]::ParseFile(
             (Resolve-Path 'scripts/r190ab-semantic-workshop.ps1').Path,
-            [ref]$tokens, [ref]$issues) | Out-Null
+            [ref]$tokens, [ref]$issues)
           if ($issues.Count -gt 0) {
             $issues | Format-List | Out-String | Write-Error
             exit 1
           }
-          "Windows preflight PowerShell parsed successfully"
+          # Regression for Windows CallDepthOverflow: functions named Git
+          # shadow the external git executable case-insensitively.
+          $shadowingFunctions = @($ast.FindAll({
+            param($node)
+            $node -is [System.Management.Automation.Language.FunctionDefinitionAst] -and
+            $node.Name -ieq 'git'
+          }, $true))
+          if ($shadowingFunctions.Count -ne 0) {
+            throw 'Function Git shadows the native git executable and recurses'
+          }
+          "Windows preflight syntax and Git shadowing regression PASS"
 
