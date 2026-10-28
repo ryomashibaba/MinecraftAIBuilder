@@ -29,3 +29,6 @@ coverage/
 
 # R190-S local model redesign source and unchanged original responses stay off GitHub.
 /r190s-local-evidence/
+
+# R190-AA real local model response archives are never committed.
+/r190aa-local-evidence/
