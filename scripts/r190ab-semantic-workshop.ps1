@@ -5,12 +5,19 @@
 param(
  [switch]$Run,
  [switch]$Replay,
+ [switch]$Expressive,
  [string]$Repository = "",
- [string]$Study = "semantic-workshop-01",
+ [string]$Study = "",
  [string]$ExpectedSha = "61f01f9e43f4da60533367bf2304ac7a817ee51c7ee0d9508dca01a67544a8a0"
 )
 $ErrorActionPreference = "Stop"
 if ($Run -and $Replay) { throw "-Run and -Replay are mutually exclusive" }
+if ($Expressive -and (-not $Run -or $Replay)) {
+ throw "-Expressive requires -Run and must not be combined with -Replay"
+}
+if (-not $Study) {
+ $Study = if ($Expressive) { "expressive-workshop-01" } else { "semantic-workshop-01" }
+}
 if ($Replay -and $ExpectedSha -cnotmatch '^[0-9a-f]{64}$') {
  throw "Replay must pin the existing 64-digit original SHA256"
 }
@@ -98,8 +105,9 @@ try {
   if (Test-Path -LiteralPath $generated) {
    throw "Unexpected preexisting detached-worktree study"
   }
-  Write-Host "Requesting at most one local Qwen3:14b semantic-space reply..."
-  & node scripts/r190ab-structured-output-pilot.mjs --run --contract semantic-space --study $Study --task tidal-workshop --model qwen3:14b
+  $contract = if ($Expressive) { "semantic-space-expressive" } else { "semantic-space" }
+  Write-Host "Requesting at most one local Qwen3:14b response with $contract..."
+  & node scripts/r190ab-structured-output-pilot.mjs --run --contract $contract --study $Study --task tidal-workshop --model qwen3:14b
   $runCode = $LASTEXITCODE
   if (-not (Test-Path -LiteralPath $generated)) {
    throw "No saved response; Ollama preflight may have failed. Exit: $runCode"
