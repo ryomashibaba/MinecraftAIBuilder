@@ -1,0 +1,26 @@
+name: R190-W Model Program First — FAKE ONLY
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'scripts/r190w-two-stage-study.mjs'
+      - 'scripts/r190w-two-stage-study.test.mjs'
+      - '.github/workflows/r190w-model-plan-first.yml'
+  pull_request:
+    paths:
+      - 'scripts/r190w-two-stage-study.mjs'
+      - 'scripts/r190w-two-stage-study.test.mjs'
+      - '.github/workflows/r190w-model-plan-first.yml'
+permissions:
+  contents: read
+jobs:
+  fake-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: node --check scripts/r190w-two-stage-study.mjs
+      - run: node --test scripts/r190w-two-stage-study.test.mjs
+      - run: node --test scripts/r190t-source-comparison.test.mjs
