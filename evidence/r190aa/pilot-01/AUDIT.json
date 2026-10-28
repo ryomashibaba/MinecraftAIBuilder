@@ -1,0 +1,229 @@
+{
+  "schema": "r190aa-pilot-01-offline-audit-v1",
+  "auditedAtUtc": "2026-10-28T04:56:19.494Z",
+  "repository": "C:/Users/ryoma/Projects/MinecraftAIBuilder",
+  "head": "2cceb34dea0ed8f3264d53fff8ff5eaa622eaf3a",
+  "branch": "feature/b198zr1-protected-architectural-revision",
+  "status": "HOLD_B143_NOT_COMPARABLE",
+  "captureStatus": "CAPTURED_ART_HOLD",
+  "captureStatusMeaning": "Original captured only; does not certify geometry or architecture",
+  "actualProviderRequests": 1,
+  "observedCompleteProviderResponses": 1,
+  "automaticRetries": 0,
+  "selectedModel": "qwen3:14b",
+  "selectedModelDigest": "bdbd181c33f2ed1b31c972991882db3cf4d192569092138a7d29e973cd9debe8",
+  "modelIdentityCryptographicallyVerified": false,
+  "elapsedWallMilliseconds": 33784.9154,
+  "pureInferenceMilliseconds": null,
+  "tokenUsage": null,
+  "original": {
+    "path": "C:\\Users\\ryoma\\Projects\\MinecraftAIBuilder\\r190aa-local-evidence\\pilot-01\\library\\R190_I_ORIGINAL_RESPONSE.txt",
+    "bytes": 2581,
+    "sha256": "0bf706181bb2b7a30f8082f896a703c33749ba55f75d42010adba88f47c84f17",
+    "receiptAndSummaryHashesVerified": true
+  },
+  "prompt": {
+    "bytes": 1011,
+    "sha256": "6c1e65d2b698e2f919fa84ec29f2a87b51b0f55e942181689a0d8281691153a1",
+    "manifestAndAttemptAndReceiptVerified": true
+  },
+  "r4Error": "B198ZR4_EXPECTED_FOUR_KEYS",
+  "b143Error": "B143_SCHEMA_OR_MODE",
+  "syntaxIssues": [
+    {
+      "kind": "R4_EXTRA_TOP_LEVEL_KEYS",
+      "actual": [
+        "attempt",
+        "maxAttempts"
+      ]
+    },
+    {
+      "kind": "B143_SCHEMA_MISMATCH",
+      "actual": "b143",
+      "expected": "minecraftaibuilder-b143-building-dsl-v1"
+    },
+    {
+      "kind": "CUT_MATERIAL_MUST_BE_ABSENT",
+      "element": "light-well",
+      "actual": null
+    },
+    {
+      "kind": "CUT_MATERIAL_MUST_BE_ABSENT",
+      "element": "north-window",
+      "actual": null
+    },
+    {
+      "kind": "CUT_MATERIAL_MUST_BE_ABSENT",
+      "element": "south-window",
+      "actual": null
+    },
+    {
+      "kind": "STAIRCASE_AXIS_UNSUPPORTED",
+      "element": "staircase",
+      "actual": "y",
+      "allowed": [
+        "x",
+        "z"
+      ]
+    }
+  ],
+  "sourceDeclarations": {
+    "bounds": {
+      "width": 20,
+      "depth": 20,
+      "height": 16
+    },
+    "elements": 9,
+    "addElements": 6,
+    "cutElements": 3,
+    "shapes": {
+      "box": 8,
+      "staircase": 1
+    },
+    "pointChecks": [
+      {
+        "id": "entrance",
+        "point": [
+          10,
+          0,
+          10
+        ],
+        "declaredAddBoxesContainingPoint": [
+          "base",
+          "storage-floor"
+        ],
+        "finalVoxelStatus": "UNAVAILABLE_INVALID_B143_NO_REPAIR"
+      },
+      {
+        "id": "reading-room",
+        "point": [
+          10,
+          14,
+          10
+        ],
+        "declaredAddBoxesContainingPoint": [
+          "reading-room-floor"
+        ],
+        "finalVoxelStatus": "UNAVAILABLE_INVALID_B143_NO_REPAIR"
+      }
+    ],
+    "limitations": "Source arithmetic only; invalid B143 cannot establish final solids, cavities, circulation, roof performance or genuine 3D"
+  },
+  "compiledGeometry": {
+    "status": "UNAVAILABLE_INVALID_SOURCE",
+    "voxelCount": null,
+    "geometrySha256": null,
+    "interiorCavities": null,
+    "supportedStandingPositions": null,
+    "entranceReachability": null,
+    "roofCoverage": null,
+    "true3DGenerated": false,
+    "hostRepairPerformed": false
+  },
+  "evaluation": {
+    "rawCaptureFailures": 0,
+    "rawCaptureAttempts": 1,
+    "b143CompileFailures": 1,
+    "b143CompileAttempts": 1,
+    "sampleSize": 1,
+    "populationFailureRateEstablished": false,
+    "architectureQualityPassed": 0,
+    "humanArtReview": "ART_HOLD",
+    "formallyAdoptedArt": 0,
+    "expansion3to5": "HOLD_PENDING_OUTPUT_CONTRACT_IMPROVEMENT_AND_NEW_EXPLICIT_RUN_AUTHORIZATION",
+    "serialWallTimeProjectionSeconds": {
+      "three": 101.3547462,
+      "five": 168.924577
+    },
+    "projectionLimitation": "One failed cold-start sample; arithmetic only, not a measured batch or reliable forecast",
+    "nextHypotheses": [
+      "Make response schema and cut/staircase constraints easier to follow without choosing the building geometry",
+      "Separate request metadata from response output to reduce attempt/maxAttempts echo",
+      "On a separately authorized future run, require model-authored supported entrance and landings outside solid floor layers"
+    ]
+  },
+  "safety": {
+    "readiness": "NOT_PREPARED",
+    "constructionApproved": false,
+    "executionAllowed": false,
+    "gates": [
+      "BLOCKED",
+      "BLOCKED",
+      "BLOCKED",
+      "BLOCKED",
+      "BLOCKED",
+      "BLOCKED",
+      "BLOCKED",
+      "BLOCKED",
+      "BLOCKED"
+    ],
+    "BuildPlan": {
+      "operations": []
+    },
+    "worldContacts": 0,
+    "worldWrites": 0
+  },
+  "preservedExistingEvidenceFiles": 156,
+  "existingEvidenceHashesUnchanged": true,
+  "localCodeChanges": [
+    "scripts/r190aa-local-work-pilot.mjs: prevent missing/untrusted capture from receiving CAPTURED status",
+    "scripts/r190aa-local-work-pilot.test.mjs: exercise provider failure for counts 1 and 3"
+  ],
+  "tests": {
+    "requiredPilot": {
+      "passed": 7,
+      "failed": 0
+    },
+    "selectedB143CaptureHIJ": {
+      "passed": 9,
+      "failed": 0
+    },
+    "expandedArchitecturalFile": {
+      "passed": 13,
+      "failed": 1,
+      "failure": "Unrelated semantic fixture uses URL.pathname and becomes C:\\C:\\... on Windows; not modified"
+    }
+  },
+  "inventory": [
+    {
+      "path": "library/R190_I_CAPTURE_RECEIPT.json",
+      "bytes": 1268,
+      "sha256": "4facdcbe91abe3c6af29594c41619493e842af2eb01be4ca4c22d6712481a65d"
+    },
+    {
+      "path": "library/R190_I_ORIGINAL_BRIEF.txt",
+      "bytes": 1011,
+      "sha256": "6c1e65d2b698e2f919fa84ec29f2a87b51b0f55e942181689a0d8281691153a1"
+    },
+    {
+      "path": "library/R190_I_ORIGINAL_RESPONSE.txt",
+      "bytes": 2581,
+      "sha256": "0bf706181bb2b7a30f8082f896a703c33749ba55f75d42010adba88f47c84f17"
+    },
+    {
+      "path": "library/R190_J_GLOBAL_DIAGNOSTIC.json",
+      "bytes": 1486,
+      "sha256": "db9dd8dcae389669b939014ace290580aaaccbfb0ed75ffb5398acf356bb2ec2"
+    },
+    {
+      "path": "library.attempt.json",
+      "bytes": 611,
+      "sha256": "9ec2a111c713822bb97233eaaca9d6c39b3c9782858ad3a6278f344870a7afcb"
+    },
+    {
+      "path": "library.observation.json",
+      "bytes": 544,
+      "sha256": "6466e19957cca13eb3c7ecedddcad007195cfde1563b06bdd012f6c1e0a4fd3c"
+    },
+    {
+      "path": "R190AA_BATCH_MANIFEST.json",
+      "bytes": 918,
+      "sha256": "0b7efd22a95433008e60a353ac432c810dce5c3769da8cf0070739b266a3c9df"
+    },
+    {
+      "path": "R190AA_BATCH_SUMMARY.json",
+      "bytes": 1255,
+      "sha256": "837983a972ba234b88143ffbc6c1f8c38c7cb3f031a14d31806ee92d39d6f255"
+    }
+  ]
+}
