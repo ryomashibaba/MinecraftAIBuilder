@@ -9,6 +9,9 @@ import {createHash} from 'node:crypto';
 import {sourceStructureDiagnostics,inspectSavedR190AC,
  parseR190ACArgs} from './r190ac-offline-source-review.mjs';
 import {inspectR190ABReply,R190AB_FORMAT} from './r190ab-structured-output-pilot.mjs';
+import {compileDesign} from '../source/ai/b143-building-dsl.mjs';
+import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
+import {renderR164Elevation} from './r164-exterior-audit.mjs';
 const sha=x=>createHash('sha256').update(x,'utf8').digest('hex');
 const here=path.dirname(fileURLToPath(import.meta.url));
 const baseline=path.resolve(here,'../evidence/r190aa/pilot-01');
@@ -85,4 +88,56 @@ test('AC refuses unsafe arguments and non-read-only artifacts',()=>{
  assert.throws(()=>parseR190ACArgs(['--run']),/ARGS/);
  assert.equal(sourceStructureDiagnostics('not-json').jsonValid,false);
  assert.equal(sourceStructureDiagnostics('{}').jsonValid,true);
+});
+test('AC valid fake geometry remeasures metrics and verifies the authentic 3D and five elevations',()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'r190ac-valid-'));
+ const raw=JSON.stringify({
+  design:{schema:'minecraftaibuilder-b143-building-dsl-v1',
+   id:'fictional-source',title:'Fake design',brief:'Synthetic audit fixture',
+   bounds:{width:20,height:10,depth:20},designOnly:true,
+   elements:[
+    {id:'floor',mode:'add',shape:'box',origin:[2,1,2],size:[16,1,16],material:'stone'},
+    {id:'wall',mode:'add',shape:'box',origin:[2,2,2],size:[16,5,1],material:'wood'},
+    {id:'door',mode:'cut',shape:'box',origin:[8,2,2],size:[3,3,1]}
+   ]},
+  explanation:'Synthetic geometry only, not model quality.',
+  assumptions:[],
+  spatialPlan:{designIntent:'Synthetic audit demonstration',
+   massStrategy:'Floor, front wall and open entrance',
+   circulationStrategy:'An original mock entrance route',
+   entrance:[9,2,3],headroom:2,protectedVoids:[],
+   destinations:[{id:'point-a',point:[9,2,8],maximumPathSteps:35}],
+   functionalZones:[{id:'zone-a',origin:[6,2,5],size:[6,3,6],
+    minimumReachablePositions:5,minimumReachablePercent:5}]}
+ });
+ try{
+  const receipt=fakeResult(raw),dir=saved(root,raw,receipt);
+  const d=JSON.parse(raw).design;
+  const compiled=compileDesign(d);
+  const tpl=fs.readFileSync(path.resolve(here,'../source/ai/b143-viewer-template.html'),'utf8');
+  fs.writeFileSync(path.join(dir,'MODEL_SOURCE_TRUE_3D.html'),
+   renderB143Html(compileB143Gallery([d]),tpl));
+  for(const side of ['front','rear','west','east','roof'])
+   fs.writeFileSync(path.join(dir,'MODEL_'+side+'.svg'),
+    renderR164Elevation(compiled,d,side));
+  const review=inspectSavedR190AC({abDir:dir,baselineDir:baseline});
+  assert.equal(review.modelCalls,0);
+  assert.equal(review.geometry.newVoxelCount,receipt.response.physical.finalVoxelCount);
+  assert.equal(review.improvement.formatImproved,true);
+  assert.equal(review.improvement.architecturalImprovement,'NOT_ESTABLISHED');
+  assert.equal(review.improvement.winner,'NOT_ESTABLISHED');
+  assert.equal(review.humanArtReview,undefined);
+  // A forged metric cannot be accepted as an observed original-source fact.
+  receipt.response.physical.finalVoxelCount+=1;
+  fs.writeFileSync(path.join(dir,'R190AB_RESULT.json'),JSON.stringify(receipt));
+  assert.throws(()=>inspectSavedR190AC({abDir:dir,baselineDir:baseline}),
+   /AB_REPORTED_PHYSICAL_MEASUREMENTS_CHANGED/);
+  receipt.response.physical.finalVoxelCount-=1;
+  fs.writeFileSync(path.join(dir,'R190AB_RESULT.json'),JSON.stringify(receipt));
+  // A plausible HTML file is not authentic actual-source 3D evidence.
+  const viewerPath=path.join(dir,'MODEL_SOURCE_TRUE_3D.html');
+  fs.appendFileSync(viewerPath,'\n<!-- malicious change -->');
+  assert.throws(()=>inspectSavedR190AC({abDir:dir,baselineDir:baseline}),
+   /AB_VIEWER_EVIDENCE_MISMATCH/);
+ }finally{fs.rmSync(root,{recursive:true,force:true})}
 });
