@@ -306,7 +306,7 @@ export async function runR190SStudy(args=[],{
  // be no R190-S run directory at all. Preserve a durable attempt marker,
  // and never turn its absence of response into implicit retry permission.
  if(isOrdinaryFolder(root)){
-  for(const name of fs.readdirSync(root).filter(x=>/^r190s-attempt-\\d+-\\d+\\.json$/.test(x))){
+  for(const name of fs.readdirSync(root).filter(x=>/^r190s-attempt-\d+-\d+\.json$/.test(x))){
    let prior;
    try{prior=json(root,name)}catch{fail('PRIOR_ATTEMPT_UNREADABLE_NO_RETRY')}
    if(prior?.schema!=='minecraftaibuilder-r190s-attempt-v1'||
@@ -317,7 +317,7 @@ export async function runR190SStudy(args=[],{
       !MODEL.test(prior.modelRequested??'')||
       prior.maxPermittedModelRequests!==1||
       typeof prior.outputDirectoryName!=='string'||
-      !/^r190s-\\d+-\\d+$/.test(prior.outputDirectoryName))
+      !/^r190s-\d+-\d+$/.test(prior.outputDirectoryName))
     fail('PRIOR_ATTEMPT_UNTRUSTED_NO_RETRY');
    if(prior.parentOriginalRawSha256===original.rawSha256&&
       prior.redesignPromptSha256===promptSha&&
@@ -337,7 +337,7 @@ export async function runR190SStudy(args=[],{
    redesignPromptSha256:promptSha,modelRequested:original.model,
    maxPermittedModelRequests:1,outputDirectoryName:'r190s-'+id,
    actualProviderConsumption:'UNKNOWN_UNTIL_CAPTURED',
-   sourceOnly:true,...security()},null,2)+'\\n',{flag:'wx'});
+   sourceOnly:true,...security()},null,2)+'\n',{flag:'wx'});
  const options={mode:'architectural-b143',transport,model:original.model,
   prompt,out,requiredCapabilities:[],expectFile:null,replayPath:null};
  let error=null;
