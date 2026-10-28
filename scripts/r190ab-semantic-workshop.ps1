@@ -84,6 +84,10 @@ try {
   if ($LASTEXITCODE -ne 0) { throw "AC regression FAILED. No inference." }
   Write-Host "AB+AC regression PASS at pinned revision $revision"
   if ($Expressive) {
+   & node --test scripts/r190-semantic-massing.test.mjs
+   if ($LASTEXITCODE -ne 0) {
+    throw "Shared R190 source geometry regression FAILED. No Qwen inference."
+   }
    & node --test scripts/r190ad-expressive-semantic.test.mjs
    if ($LASTEXITCODE -ne 0) {
     throw "Expressive geometric/contract regression FAILED. No Qwen inference."
