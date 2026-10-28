@@ -18,6 +18,8 @@ import {R190AB_SEMANTIC_FORMAT,R190AB_SEMANTIC_FORMAT_SHA256,
 import {R190AD_FORMAT,R190AD_FORMAT_SHA256,
  R190AD_GUIDANCE,inspectR190ADReply}
  from '../source/ai/r190ad-expressive-semantic-contract.mjs';
+import {R190AE_FORMAT,R190AE_FORMAT_SHA256,R190AE_GUIDANCE,
+ inspectR190AEReply} from '../source/ai/r190ae-flexible-semantic-contract.mjs';
 
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../r190ab-local-evidence');
 const sha=s=>createHash('sha256').update(s,'utf8').digest('hex');
@@ -109,7 +111,7 @@ export function parseR190ABArgs(args){
  }
  if(!MODEL.test(opt.model)||!ID.test(opt.study)||
   !R190AA_TASKS.some(t=>t.id===opt.task)||
-  !['direct-b143','semantic-space','semantic-space-expressive'].includes(opt.contract))fail('UNSAFE_OPTIONS');
+  !['direct-b143','semantic-space','semantic-space-expressive','semantic-space-flexible'].includes(opt.contract))fail('UNSAFE_OPTIONS');
  return opt;
 }
 export function inspectR190ABReply(raw,finishReason='stop'){
@@ -145,10 +147,10 @@ export async function runR190AB(args=[],{
  evidenceRoot=ROOT,fetcher=fetch
 }={}){
  const o=Array.isArray(args)?parseR190ABArgs(args):args;
- if(o?.help)return {help:'Offline by default. Direct B143: --run --study contract-01 --task library. Legacy semantic IR: --run --contract semantic-space --study semantic-workshop-01 --task tidal-workshop. Expressive SINGLE-LEVEL: --run --contract semantic-space-expressive --study expressive-workshop-01 --task tidal-workshop. Local Work access requires user approval.'};
+ if(o?.help)return {help:'Offline by default. Direct B143: --run --study contract-01 --task library. Legacy semantic IR: --run --contract semantic-space --study semantic-workshop-01 --task tidal-workshop. Expressive SINGLE-LEVEL: --run --contract semantic-space-expressive --study expressive-workshop-01 --task tidal-workshop. Flexible: --run --contract semantic-space-flexible --study flexible-workshop-01 --task tidal-workshop. Local Work access requires user approval.'};
  if(!o||typeof o.run!=='boolean'||!MODEL.test(o.model)||!ID.test(o.study)||
   !R190AA_TASKS.some(t=>t.id===o.task)||
-  !['direct-b143','semantic-space','semantic-space-expressive'].includes(o.contract))
+  !['direct-b143','semantic-space','semantic-space-expressive','semantic-space-flexible'].includes(o.contract))
   fail('OPTIONS');
  const root=path.resolve(evidenceRoot),dir=filename(root,o.study);
  if(!o.run){
@@ -162,7 +164,7 @@ export async function runR190AB(args=[],{
  // hillside, bridge or vertical-market cases BEFORE a single model request.
  // Workshop covers spatial roles and a model-selected roof, but cannot
  // certify actual weather protection or tidal engineering.
- if(['semantic-space','semantic-space-expressive'].includes(o.contract)&&
+ if(['semantic-space','semantic-space-expressive','semantic-space-flexible'].includes(o.contract)&&
     o.task!=='tidal-workshop')
   fail('SEMANTIC_SINGLE_LEVEL_TASK_UNSUPPORTED');
  if(fs.existsSync(root)){
@@ -183,8 +185,10 @@ export async function runR190AB(args=[],{
  const task=R190AA_TASKS.find(t=>t.id===o.task),
   semantic=o.contract!=='direct-b143',
   expressive=o.contract==='semantic-space-expressive',
+  flexible=o.contract==='semantic-space-flexible',
   prompt=semantic?task.brief:buildR190AAPrompt(task),
-  schemaHash=expressive?R190AD_FORMAT_SHA256:
+  schemaHash=flexible?R190AE_FORMAT_SHA256:
+   expressive?R190AD_FORMAT_SHA256:
    semantic?R190AB_SEMANTIC_FORMAT_SHA256:SCHEMA_HASH;
  const directSystem=[
   'Design the original architecture yourself, not an existing template. Return ONLY JSON matching the supplied JSON Schema.',
@@ -196,12 +200,14 @@ export async function runR190AB(args=[],{
   'Use the ordered B143 add/cut operations. Later ADDs can refill prior cuts. SpatialPlan must describe final model-authored geometry.',
   'Do not self-certify beauty, walkability or construction; source-only research.'
  ].join('\n');
- const system=expressive?R190AD_GUIDANCE:
+ const system=flexible?R190AE_GUIDANCE:
+  expressive?R190AD_GUIDANCE:
   semantic?R190AB_SEMANTIC_GUIDANCE:directSystem;
  fs.mkdirSync(root,{recursive:true});
  fs.mkdirSync(dir);
  const request={model:o.model,stream:false,
-  format:expressive?R190AD_FORMAT:
+  format:flexible?R190AE_FORMAT:
+   expressive?R190AD_FORMAT:
    semantic?R190AB_SEMANTIC_FORMAT:R190AB_FORMAT,
   options:{temperature:0.35,num_predict:8192},
   messages:[{role:'system',content:system},{role:'user',content:prompt}]};
@@ -242,7 +248,8 @@ export async function runR190AB(args=[],{
  finally{clearTimeout(timer)}
  const providerWallMilliseconds=Math.max(0,Date.now()-providerStartedMs);
  const parsed=raw!==null&&fs.existsSync(filename(dir,'MODEL_RESPONSE_ORIGINAL.txt'))?
-  (expressive?inspectR190ADReply(raw,reason):
+  (flexible?inspectR190AEReply(raw,reason):
+   expressive?inspectR190ADReply(raw,reason):
    semantic?inspectR190ABSemanticReply(raw,reason):inspectR190ABReply(raw,reason)):{report:{
    status:'HOLD_PROVIDER_NO_VERIFIED_RAW',originalRawSha256:null,
    bytes:null,strictB143:false,declaredPlan:false,real3D:false,
@@ -273,7 +280,8 @@ export async function runR190AB(args=[],{
    parsed.report.status='HOLD_SOURCE_VIEWER_FAILED';
    parsed.report.error=String(e?.message??e).slice(0,180)}
  }
- const result={schema:expressive?'minecraftaibuilder-r190ad-expressive-study-v1':
+ const result={schema:flexible?'minecraftaibuilder-r190ae-flexible-study-v1':
+   expressive?'minecraftaibuilder-r190ad-expressive-study-v1':
    semantic?'minecraftaibuilder-r190ab-semantic-study-v1':
    'minecraftaibuilder-r190ab-result-v1',
   study:o.study,contract:o.contract,sourceTask:task.id,modelClaimed:o.model,

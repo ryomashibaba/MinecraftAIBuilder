@@ -43,7 +43,7 @@ export const R190AE_FORMAT=obj({
   obj({...roofBase,profile:{const:'shed'}}),
   obj({...roofBase,profile:{const:'sawtooth'},toothWidth:num(3,8)})
  ]},
- glazedOpenings:{type:'array',items:glazing,minItems:0,maxItems:5},
+ glazedOpenings:{type:'array',items:glazing,minItems:1,maxItems:5},
  crossConnections:{type:'array',items:{
   type:'array',items:slug,minItems:2,maxItems:2
  },minItems:1,maxItems:3}
@@ -61,8 +61,8 @@ export const R190AE_GUIDANCE=[
  'A roofFormIntent is OPTIONAL: only choose ridge, shed or sawtooth when relevant. If selected, room.height + roof rise must be STRICTLY LESS than site.height.',
  'A formIntent is OPTIONAL: choose a faceted enclosed wing only when this shape matters. A faceted room cannot also receive roofFormIntent or glazing.',
  'An open-court is OPTIONAL (at most one). Never put windows, a roof section or faceted enclosed envelope on an open-court. The remaining rooms must be enclosed.',
- 'glazedOpenings is OPTIONAL and may be omitted or empty. Windows must be on real exterior walls; keep them out of any entry doorway and shared wall.',
- 'crossConnections is OPTIONAL and may be omitted or empty. The parentId relationship ALREADY makes a direct link. Never duplicate tree edges.',
+ 'glazedOpenings is OPTIONAL and must be omitted when not selected. Windows must be on real exterior walls; keep them out of any entry doorway and shared wall.',
+ 'crossConnections is OPTIONAL and must be omitted when not selected. The parentId relationship ALREADY makes a direct link. Never duplicate tree edges.',
  'The entry root needs parentId:null and side:null. Other rooms need valid parent IDs and cardinal sides. Never attach a direct child south of the root because it needs an outside approach.',
  'Plan the entire north/south/east/west footprint including shared-wall overlaps, the exterior approach, and a one-cell perimeter. Do not make the solver guess impossible site constraints.',
  'Choose features based on the FUNCTIONAL Japanese requirement, not for a checklist. A plain box may compile but still FAIL quality or brief coverage.',

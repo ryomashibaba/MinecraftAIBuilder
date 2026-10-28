@@ -6,6 +6,7 @@ param(
  [switch]$Run,
  [switch]$Replay,
  [switch]$Expressive,
+ [switch]$Flexible,
  [switch]$Diagnose,
  [string]$Repository = "",
  [string]$Study = "",
@@ -14,7 +15,10 @@ param(
 )
 $ErrorActionPreference = "Stop"
 if ($Run -and $Replay) { throw "-Run and -Replay are mutually exclusive" }
-if ($Diagnose -and ($Run -or $Replay -or $Expressive)) {
+if ($Flexible -and (-not $Run -or $Expressive -or $Diagnose -or $Replay)) {
+ throw "-Flexible requires -Run without Expressive, Diagnose or Replay"
+}
+if ($Diagnose -and ($Run -or $Replay -or $Expressive -or $Flexible)) {
  throw "-Diagnose is strictly read-only; cannot combine with Run, Replay or Expressive"
 }
 if ($Diagnose -and $DiagnosisSha -cnotmatch '^[0-9a-f]{64}$') {
@@ -24,7 +28,7 @@ if ($Expressive -and (-not $Run -or $Replay)) {
  throw "-Expressive requires -Run and must not be combined with -Replay"
 }
 if (-not $Study) {
- $Study = if ($Expressive -or $Diagnose) { "expressive-workshop-01" } else { "semantic-workshop-01" }
+ $Study = if ($Flexible) { "flexible-workshop-01" } elseif ($Expressive -or $Diagnose) { "expressive-workshop-01" } else { "semantic-workshop-01" }
 }
 if ($Replay -and $ExpectedSha -cnotmatch '^[0-9a-f]{64}$') {
  throw "Replay must pin the existing 64-digit original SHA256"
@@ -99,7 +103,7 @@ try {
    Write-Host "R190-AD read-only multi-issue diagnosis completed; original study unchanged."
    return
   }
-  if ($Expressive) {
+  if ($Expressive -or $Flexible) {
    & node --test scripts/r190-semantic-massing.test.mjs
    if ($LASTEXITCODE -ne 0) {
     throw "Shared R190 source geometry regression FAILED. No Qwen inference."
@@ -108,7 +112,11 @@ try {
    if ($LASTEXITCODE -ne 0) {
     throw "Expressive geometric/contract regression FAILED. No Qwen inference."
    }
-   Write-Host "R190-AD expressive source regression PASS."
+   if ($Flexible) {
+    & node --test scripts/r190ae-flexible-semantic.test.mjs
+    if ($LASTEXITCODE -ne 0) { throw "R190-AE source regression FAILED. No Qwen inference." }
+   }
+   Write-Host "R190 optional-feature source regression PASS."
   }
   if ($Replay) {
    & node --test scripts/r190ab-saved-semantic-replay.test.mjs
@@ -132,7 +140,7 @@ try {
   if (Test-Path -LiteralPath $generated) {
    throw "Unexpected preexisting detached-worktree study"
   }
-  $contract = if ($Expressive) { "semantic-space-expressive" } else { "semantic-space" }
+  $contract = if ($Flexible) { "semantic-space-flexible" } elseif ($Expressive) { "semantic-space-expressive" } else { "semantic-space" }
   Write-Host "Requesting at most one local Qwen3:14b response with $contract..."
   & node scripts/r190ab-structured-output-pilot.mjs --run --contract $contract --study $Study --task tidal-workshop --model qwen3:14b
   $runCode = $LASTEXITCODE
@@ -162,7 +170,7 @@ try {
   if ($runCode -ne 0) {
    Write-Warning "Model study returned HOLD/nonzero ($runCode); evidence kept."
   }
-  if ($Expressive) {
+  if ($Expressive -or $Flexible) {
    Write-Host "R190-AD expressive audit is in its immutable result; R190-AC legacy reviewer is incompatible and is not run."
    Write-Host "Independent art, live walking and weather checks remain HOLD."
   } else {
