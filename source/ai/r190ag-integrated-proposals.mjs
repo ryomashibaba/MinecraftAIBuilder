@@ -17,7 +17,7 @@ export function r190AGSemanticProjection(p){
  const model={schema:R190_SCHEMA,id:p.id,title:p.title,brief:p.brief,
   site:copy(p.site),entrySpaceId:p.root.id,materials:copy(p.materials),
   spaces:[{...copy(p.root),parentId:null,side:null},...copy(p.children)]};
- for(const k of ['formIntent','roofFormIntent'])if(Object.hasOwn(p,k))model[k]=copy(p[k]);
+ for(const k of ['entranceFace','formIntent','roofFormIntent'])if(Object.hasOwn(p,k))model[k]=copy(p[k]);
  if(p.additionalPassages)model.crossConnections=copy(p.additionalPassages);
  return model;
 }
@@ -81,7 +81,8 @@ export function studyR190AG(raw,{maxSearchStates=5000,maxCompileAttempts=32,
  const p=JSON.parse(raw),model=r190AGSemanticProjection(p),intents=p.daylightIntents??[];
  report.preservedAuthoredProgramSha256=sha(json(p));
  report.representationMapping={rootNullRelationsAdded:true,
-  additionalPassagesRenamedToCrossConnections:true,authoredValuesChanged:[]};
+  additionalPassagesRenamedToCrossConnections:true,
+  entranceFacePreserved:true,authoredValuesChanged:[]};
  for(const strategy of R190_LAYOUT_STRATEGIES){
   for(let layoutVariantIndex=0;layoutVariantIndex<maxLayoutVariantsPerStrategy;layoutVariantIndex++){
   const entry={strategy,layoutVariantIndex,status:'HOLD_NO_JOINT_CANDIDATE',searchStates:0,

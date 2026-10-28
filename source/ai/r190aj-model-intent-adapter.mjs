@@ -29,6 +29,7 @@ export const R190AJ_SYSTEM_GUIDE=[
  'Every child has a known parent, no cycles, side north/south/east/west. No child immediately south of root.',
  'At most one real unroofed open-court, at least two enclosed rooms, all rooms must fit site.',
  'materials exact floor,wall,roof, values wood/stone/concrete/metal.',
+ 'Optional entranceFace north/south/east/west, MODEL chosen, defaults south if absent. No root child on the entranceFace. Generate real doorway and three-cell exterior landing in chosen direction.',
  'Optional formIntent exact spaceId,face,cornerInset 2..3, for one enclosed room.',
  'Optional roofFormIntent exact spaceId,profile ridge/shed/sawtooth,axis x/z,rise 2..5; sawtooth requires toothWidth 3..8. It cannot target a faceted room. room.height + rise < site.height.',
  'Optional additionalPassages 1..3 non-tree ID pairs; never duplicate parent-child links. Each needs a REAL shared-wall two-wide entrance.',

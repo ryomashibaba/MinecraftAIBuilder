@@ -78,6 +78,7 @@ export function readR190ModelProposal(raw,{
   blockersAreCompleteNaturalLanguageAnalysis:false,
   modelChosenPaths:[
    'semanticPlan.site','semanticPlan.entrySpaceId','semanticPlan.spaces',
+   ...(response.semanticPlan.entranceFace?['semanticPlan.entranceFace']:[]),
    'semanticPlan.materials',
    ...(response.semanticPlan.formIntent?['semanticPlan.formIntent']:[]),
    ...(response.semanticPlan.roofFormIntent?['semanticPlan.roofFormIntent']:[]),

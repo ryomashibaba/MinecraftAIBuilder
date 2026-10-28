@@ -55,9 +55,10 @@ export function inspectR190AFIntent(raw){
   check(p&&typeof p==='object'&&!Array.isArray(p)&&
    Object.keys(p).every(k=>['schema','id','title','brief','site',
     'root','children','materials','formIntent','roofFormIntent',
-    'additionalPassages','daylightIntents'].includes(k))&&
+    'additionalPassages','daylightIntents','entranceFace'].includes(k))&&
    ['schema','id','title','brief','site','root','children','materials']
     .every(k=>Object.hasOwn(p,k)),'FIELDS');
+  check(p.entranceFace===undefined||dirs.includes(p.entranceFace),'ENTRANCE_FACE');
   check(p.schema===R190AF_INTENT_SCHEMA&&slug(p.id)&&
    typeof p.title==='string'&&p.title.length>=3&&p.title.length<=100&&
    typeof p.brief==='string'&&p.brief.length>=3&&p.brief.length<=400,'IDENTITY');
@@ -102,6 +103,7 @@ export function inspectR190AFIntent(raw){
    spaces:all.map((r,i)=>({...copy(r),...(
     i===0?{parentId:null,side:null}:{})})),
    materials:copy(p.materials)};
+  if(p.entranceFace!==undefined)model.entranceFace=p.entranceFace;
   if(p.formIntent!==undefined)model.formIntent=copy(p.formIntent);
   if(p.roofFormIntent!==undefined)model.roofFormIntent=copy(p.roofFormIntent);
   if(edges.length)model.crossConnections=copy(edges);

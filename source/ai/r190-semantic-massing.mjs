@@ -21,6 +21,25 @@ const safeText=(v,n)=>typeof v==='string'&&v.length>=3&&v.length<=n&&
 const hash=x=>createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const key=(x,y,z)=>[x,y,z].join(',');
 const DIR=['north','south','east','west'];
+const entranceFace=p=>p.entranceFace??'south';
+function entranceApproach(r,face){
+ const x=r.x+Math.floor((r.w-2)/2),z=r.z+Math.floor((r.d-2)/2);
+ return face==='south'?{x,z:r.z-3,w:2,d:3}:
+  face==='north'?{x,z:r.z+r.d,w:2,d:3}:
+  face==='west'?{x:r.x-3,z,w:3,d:2}:
+  {x:r.x+r.w,z,w:3,d:2};
+}
+function entranceDoor(r,face){
+ const x=r.x+Math.floor((r.w-2)/2),z=r.z+Math.floor((r.d-2)/2);
+ return face==='south'?{origin:[x,2,r.z],size:[2,3,1]}:
+  face==='north'?{origin:[x,2,r.z+r.d-1],size:[2,3,1]}:
+  face==='west'?{origin:[r.x,2,z],size:[1,3,2]}:
+  {origin:[r.x+r.w-1,2,z],size:[1,3,2]};
+}
+function approachSeed(r,face){
+ const a=entranceApproach(r,face);
+ return ['south','north'].includes(face)?[a.x,a.z+1]:[a.x+1,a.z];
+}
 // Geometry alternatives preserve model-supplied room sizes and relations.
 export const R190_LAYOUT_STRATEGIES=Object.freeze([
  'centered','negative-tangent','positive-tangent'
@@ -51,7 +70,7 @@ export function r190RoofElevation(index,span,form){
 export function validateR190SemanticPlan(p){
  const standard=['schema','id','title','brief','site','entrySpaceId','spaces','materials'];
  ok(Object.keys(p??{}).length>=standard.length&&
-  Object.keys(p??{}).every(k=>[...standard,'formIntent','roofFormIntent','crossConnections','glazedOpenings'].includes(k))&&
+  Object.keys(p??{}).every(k=>[...standard,'entranceFace','formIntent','roofFormIntent','crossConnections','glazedOpenings'].includes(k))&&
   standard.every(k=>Object.hasOwn(p,k)),'FIELDS');
  ok(p.schema===R190_SCHEMA&&slug(p.id)&&safeText(p.title,100)&&
   safeText(p.brief,400),'IDENTITY');
@@ -80,6 +99,7 @@ export function validateR190SemanticPlan(p){
   parents.set(s.id,s.parentId);
  }
  ok(ids.has(p.entrySpaceId),'MISSING_ENTRANCE_SPACE');
+ ok(p.entranceFace===undefined||DIR.includes(p.entranceFace),'ENTRANCE_FACE');
  // Optional model/caller instruction to construct ONE real occupied wing
  // with a faceted footprint. Never infer a form from a building-type name.
  if(p.formIntent!==undefined){
@@ -119,8 +139,8 @@ export function validateR190SemanticPlan(p){
  for(const s of p.spaces){
   if(s.id===p.entrySpaceId)continue;
   ok(ids.has(s.parentId)&&s.parentId!==s.id,'PARENT_MISSING');
-  // A south-side child of the entry room would block the declared approach.
-  ok(!(s.parentId===p.entrySpaceId&&s.side==='south'),'ENTRY_COLLISION');
+  // Only the model-selected entry facade is reserved for the approach.
+  ok(!(s.parentId===p.entrySpaceId&&s.side===entranceFace(p)),'ENTRY_COLLISION');
   const seen=new Set([s.id]);let at=s.parentId;
   while(at!==null){ok(!seen.has(at),'CYCLE');seen.add(at);at=parents.get(at);}
   ok(seen.has(p.entrySpaceId),'DISCONNECTED');
@@ -165,8 +185,9 @@ export function validateR190SemanticPlan(p){
    // doorway's removed top cell for its physical bottom sill.
    // Reject the conflict BEFORE source voxel operations and auditing;
    // do not move the model-selected glazing or silently repair its intent.
-   if(g.spaceId===p.entrySpaceId&&g.face==='south'&&g.baseY===5){
-    const doorOffset=Math.floor((r.width-2)/2);
+   if(g.spaceId===p.entrySpaceId&&g.face===entranceFace(p)&&g.baseY===5){
+    const faceSpan=['north','south'].includes(g.face)?r.width:r.depth;
+    const doorOffset=Math.floor((faceSpan-2)/2);
     ok(g.offset+g.width<=doorOffset||g.offset>=doorOffset+2,
      'GLAZING_ENTRY_DOOR_CONFLICT');
    }
@@ -222,18 +243,18 @@ export function layoutR190SemanticPlan(p,{strategy='centered',layoutVariantIndex
  // bounded read-only research alternatives, never adopted as model choices.
  ok(int(layoutVariantIndex,0,3),'LAYOUT_VARIANT_INDEX');
  const source=structuredClone(p),byId=new Map(source.spaces.map(s=>[s.id,s]));
- const root=byId.get(p.entrySpaceId);
+ const root=byId.get(p.entrySpaceId),face=entranceFace(p);
+ const approach=entranceApproach({x:0,z:0,w:root.width,d:root.depth},face);
  // Solve room relationships in relative coordinates first; placing the
  // entrance at the site center is a preference, NOT a hard design constraint.
  const placements=new Map([[root.id,{id:root.id,parentId:null,side:null,
   x:0,z:0,w:root.width,d:root.depth,h:root.height}]]);
  const footprintBounds=(candidate)=>{
   const rooms=[...placements.values(),...(candidate?[candidate]:[])];
-  return {minX:Math.min(...rooms.map(s=>s.x)),
-   maxX:Math.max(...rooms.map(s=>s.x+s.w)),
-   // Entrance approach is three blocks south of the root, not a room.
-   minZ:Math.min(-3,...rooms.map(s=>s.z)),
-   maxZ:Math.max(...rooms.map(s=>s.z+s.d))};
+  return {minX:Math.min(approach.x,...rooms.map(s=>s.x)),
+   maxX:Math.max(approach.x+approach.w,...rooms.map(s=>s.x+s.w)),
+   minZ:Math.min(approach.z,...rooms.map(s=>s.z)),
+   maxZ:Math.max(approach.z+approach.d,...rooms.map(s=>s.z+s.d))};
  };
  const fitsSite=b=>b.maxX-b.minX<=p.site.width-2&&
   b.maxZ-b.minZ<=p.site.depth-1;
@@ -257,9 +278,9 @@ export function layoutR190SemanticPlan(p,{strategy='centered',layoutVariantIndex
     if(layoutVariantIndex>0&&++variantCandidateAttempts>20000)
      fail('LAYOUT_VARIANT_BUDGET');
     const candidate=near(parent,s,s.side,shift);
-    // Reject only if the whole layout cannot fit after a rigid shift.
-    // Preserve one block at either X edge, one at the north Z edge,
-    // and three entrance-approach cells to the south.
+    // Preserve the model-chosen exterior approach even if a remote child
+    // swings around the front of the root.
+    if(intersects(candidate,approach))continue;
     if(!fitsSite(footprintBounds(candidate)))continue;
     const portal=sharedPortal(parent,candidate,s.side);
     if(!portal)continue;
@@ -304,6 +325,7 @@ export function layoutR190SemanticPlan(p,{strategy='centered',layoutVariantIndex
   portals:[...portals,...crossPortals].map(v=>({
    ...v,x:v.x+dx,z:v.z+dz
   })),
+  entranceFace:face,
   sitePlacement:{mode:'rigid-translation-of-model-spaces',
    rootOffset:[dx,dz],roomDimensionsModified:false,
    roomRelationsModified:false,requiredEntranceApproachCells:3,
@@ -423,10 +445,12 @@ function sourceDesign(p,l){
    v.axis==='x'?[1,3,2]:[2,3,1]);
  }
  const entry=l.spaces.find(s=>s.id===p.entrySpaceId);
- const doorX=entry.x+Math.floor((entry.w-2)/2);
+ const door=entranceDoor(entry,entranceFace(p));
+ const outside=entranceApproach(entry,entranceFace(p));
  if(roles.get(entry.id)!=='open-court')
-  box('entry-cut','cut',undefined,[doorX,2,entry.z],[2,3,1]);
- box('approach-floor','add',p.materials.floor,[doorX,1,entry.z-3],[2,1,3]);
+  box('entry-cut','cut',undefined,door.origin,door.size);
+ box('approach-floor','add',p.materials.floor,
+  [outside.x,1,outside.z],[outside.w,1,outside.d]);
  for(const [i,g] of (p.glazedOpenings??[]).entries()){
   const room=l.spaces.find(s=>s.id===g.spaceId);
   const first=r190GlazingCells(room,g)[0];
@@ -450,8 +474,13 @@ export function auditR190SourceRoutes(plan,layout,design,compiled){
   [x,x+1].every(a=>[z,z+1].every(b=>has(a,1,b)&&
    !has(a,2,b)&&!has(a,3,b)));
  const entry=layout.spaces.find(s=>s.id===plan.entrySpaceId);
- const x=entry.x+Math.floor((entry.w-2)/2),z=entry.z-2;
+ const face=entranceFace(plan),outside=entranceApproach(entry,face);
+ const [x,z]=approachSeed(entry,face);
  ok(stand(x,z),'APPROACH_NOT_WALKABLE');
+ for(let u=outside.x;u<outside.x+outside.w;u++)
+  for(let v=outside.z;v<outside.z+outside.d;v++)
+   ok(has(u,1,v)&&!has(u,2,v)&&!has(u,3,v),
+    'APPROACH_CELL_BLOCKED');
  const queue=[[x,z]],seen=new Set([x+','+z]);
  for(let i=0;i<queue.length;i++){
   const [a,b]=queue[i];
@@ -633,7 +662,7 @@ export function auditR190SourceRoutes(plan,layout,design,compiled){
   facetedEnvelope:facetAudit,
   outdoorCourtCount:plan.spaces.filter(s=>s.spatialRole==='open-court').length,
   verifiedOpenSkyColumns:skyColumns,
-  entranceApproachTwoWide:true,allProgramSpacesReachable:true,witnesses,
+  entranceFace:face,entranceApproachTwoWide:true,allProgramSpacesReachable:true,witnesses,
   minecraftPlayerWalking:'NOT_TESTED',structuralEngineering:'NOT_TESTED'};
 }
 export function compileR190SemanticPlan(raw,{layoutStrategy='centered',layoutVariantIndex=0}={}){
