@@ -212,3 +212,13 @@ R190-AJは設計原文をAF→AGの真正3Dへ接続したが、ユーザーの
 AF→AG→AJと直接R190プロンプトのモデル著作入口方向を保持。
 未指定旧モデル設計の幾何は同じ。合成テストで4方向を比較する。
 ART HOLD、正式採用0、Minecraft施工禁止、新規Qwen推論0。
+
+## R190-AL 真正3D・5方向SVG 4例エビデンス
+
+専用CIのUbuntu段階で `scripts/r190al-entrance-visual-comparison.mjs` を
+実行し、Actions artifact `R190AL-FOUR-DIRECTION-TRUE-B143-ART-HOLD`
+に合成4案（各B143ソース、HTML真3D、5視点SVG、JSON/SHA）を収録。
+元の出力先が存在すれば絶対に上書きしない。
+北入口案は根室の子室を東へ変更した**別の合成モデル意図**であるため、
+4枚の見た目の全差分を入口の向きだけに帰属させない。
+合成例であって実Qwen能力・美術合格・実機歩行の証拠ではない。
