@@ -12,6 +12,8 @@ findstr /C:"runR190YTrial" "%runner%" >nul 2>nul
 if errorlevel 1 goto :outdated
 where node.exe >nul 2>nul
 if errorlevel 1 goto :nonode
+rem Interactive C/G/N choices are the ONLY permissions; never forward CLI flags.
+if not "%~1"=="" goto :arguments
 cd /d "%canonical%"
 echo MinecraftAIBuilder R190-Y: 1-click original-model comparison.
 echo C: compare archived R/S/W ONLY.  ZERO inference.
@@ -24,15 +26,19 @@ if errorlevel 3 goto :declined
 if errorlevel 2 goto :generate
 if errorlevel 1 goto :compare
 :generate
-node.exe "%runner%" --run-missing %*
+node.exe "%runner%" --run-missing
 goto :done
 :compare
-node.exe "%runner%" %*
+node.exe "%runner%"
 :done
 set "status=%ERRORLEVEL%"
 if not "%status%"=="0" echo HOLD: look at the error; no automatic retry.
 pause
 exit /b %status%
+:arguments
+echo HOLD: one-click launcher does not accept command-line arguments.
+echo Advanced --from selection: run the Node script directly.
+goto :failed
 :missing
 echo HOLD: existing canonical project folder not found; no replacement created.
 goto :failed
