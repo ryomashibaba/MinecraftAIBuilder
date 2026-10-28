@@ -52,6 +52,7 @@ const expectedCodes=[
  'SPACE_EXCEEDS_SITE_CLEARANCE','ENTRY_APPROACH_BLOCKED',
  'OPPOSITE_WINGS_DEPTH_EXCEEDS_SITE','FACET_TARGET_IS_OPEN_COURT',
  'ROOF_EXCEEDS_SITE_HEIGHT','GLAZING_TARGET_IS_OPEN_COURT',
+ 'GLAZING_ON_FACET_UNSUPPORTED',
  'CROSS_LINK_DUPLICATES_TREE'
 ];
 test('AD synthetic reproduction reports all eight independent constraint violations in one pass',()=>{
