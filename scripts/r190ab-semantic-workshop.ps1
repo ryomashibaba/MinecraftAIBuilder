@@ -6,17 +6,25 @@ param(
  [switch]$Run,
  [switch]$Replay,
  [switch]$Expressive,
+ [switch]$Diagnose,
  [string]$Repository = "",
  [string]$Study = "",
- [string]$ExpectedSha = "61f01f9e43f4da60533367bf2304ac7a817ee51c7ee0d9508dca01a67544a8a0"
+ [string]$ExpectedSha = "61f01f9e43f4da60533367bf2304ac7a817ee51c7ee0d9508dca01a67544a8a0",
+ [string]$DiagnosisSha = "f7499efd30644bf4f03fd05d094d06ff8a63baef5182bcc8c9196e2321b57505"
 )
 $ErrorActionPreference = "Stop"
 if ($Run -and $Replay) { throw "-Run and -Replay are mutually exclusive" }
+if ($Diagnose -and ($Run -or $Replay -or $Expressive)) {
+ throw "-Diagnose is strictly read-only; cannot combine with Run, Replay or Expressive"
+}
+if ($Diagnose -and $DiagnosisSha -cnotmatch '^[0-9a-f]{64}$') {
+ throw "Diagnosis requires a full lowercase original SHA256"
+}
 if ($Expressive -and (-not $Run -or $Replay)) {
  throw "-Expressive requires -Run and must not be combined with -Replay"
 }
 if (-not $Study) {
- $Study = if ($Expressive) { "expressive-workshop-01" } else { "semantic-workshop-01" }
+ $Study = if ($Expressive -or $Diagnose) { "expressive-workshop-01" } else { "semantic-workshop-01" }
 }
 if ($Replay -and $ExpectedSha -cnotmatch '^[0-9a-f]{64}$') {
  throw "Replay must pin the existing 64-digit original SHA256"
@@ -54,7 +62,7 @@ try {
  }
  $targetParent = Join-Path $repo "r190ab-local-evidence"
  $target = Join-Path $targetParent $Study
- if ($Replay) {
+ if ($Replay -or $Diagnose) {
   if (-not (Test-Path -LiteralPath $target)) {
    throw "No archived study to replay: $target"
   }
@@ -83,6 +91,14 @@ try {
   & node --test scripts/r190ac-offline-source-review.test.mjs
   if ($LASTEXITCODE -ne 0) { throw "AC regression FAILED. No inference." }
   Write-Host "AB+AC regression PASS at pinned revision $revision"
+  if ($Diagnose) {
+   & node --test scripts/r190ad-saved-semantic-diagnose.test.mjs
+   if ($LASTEXITCODE -ne 0) { throw "Read-only AD diagnostic regression FAILED. No model inference." }
+   & node scripts/r190ad-saved-semantic-diagnose.mjs --study $target --expected-sha $DiagnosisSha
+   if ($LASTEXITCODE -ne 0) { throw "AD archived-original diagnosis failed closed." }
+   Write-Host "R190-AD read-only multi-issue diagnosis completed; original study unchanged."
+   return
+  }
   if ($Expressive) {
    & node --test scripts/r190-semantic-massing.test.mjs
    if ($LASTEXITCODE -ne 0) {
