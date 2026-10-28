@@ -83,6 +83,13 @@ try {
   & node --test scripts/r190ac-offline-source-review.test.mjs
   if ($LASTEXITCODE -ne 0) { throw "AC regression FAILED. No inference." }
   Write-Host "AB+AC regression PASS at pinned revision $revision"
+  if ($Expressive) {
+   & node --test scripts/r190ad-expressive-semantic.test.mjs
+   if ($LASTEXITCODE -ne 0) {
+    throw "Expressive geometric/contract regression FAILED. No Qwen inference."
+   }
+   Write-Host "R190-AD expressive source regression PASS."
+  }
   if ($Replay) {
    & node --test scripts/r190ab-saved-semantic-replay.test.mjs
    if ($LASTEXITCODE -ne 0) { throw "Replay regression FAILED. No inference." }
