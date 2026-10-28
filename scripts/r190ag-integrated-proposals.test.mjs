@@ -149,3 +149,24 @@ test('exported synthetic 3D source matches proposal SHA and refuses overwrite',t
  assert.throws(()=>writeR190AGComparison(out),/NEW_ABSOLUTE_OUTPUT_REQUIRED/);
  assert.deepEqual(fs.readFileSync(path.join(out,'SUMMARY.json')),original);
 });
+
+
+test('AH contrastive audit exposes metadata-only purpose/privacy without changing real voxels',()=>{
+ const a=plainFixtures()[0],b=structuredClone(a);
+ b.root.purpose='Visitor-oriented interpretation hall';
+ b.root.privacy=a.root.privacy==='private'?'public':'private';
+ const original=studyR190AG(JSON.stringify(a));
+ const changed=studyR190AG(JSON.stringify(b));
+ assert(original.baseline&&changed.baseline);
+ assert.equal(original.baseline.compiled.geometrySha256,
+  changed.baseline.compiled.geometrySha256,
+  'Changing only purpose/privacy must not be mistaken for a physical design change');
+ assert.deepEqual(original.report.alternatives[0].programMeaningAudit.originalRoomPurposes[0],
+  {id:a.root.id,purpose:a.root.purpose});
+ assert.deepEqual(changed.report.alternatives[0].programMeaningAudit.originalRoomPurposes[0],
+  {id:b.root.id,purpose:b.root.purpose});
+ assert.equal(changed.report.alternatives[0].programMeaningAudit.geometryExpressesPurpose,
+  'NOT_CERTIFIED');
+ assert.equal(changed.report.alternatives[0].programMeaningAudit.functionalPrivacyCertified,false);
+ checkSafe(original.report);checkSafe(changed.report);
+});

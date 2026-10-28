@@ -1,6 +1,7 @@
 /** Offline integration of AF intent; no new model contract or adoption path. */
 import {createHash} from 'node:crypto';
 import {inspectR190AFIntent} from './r190af-program-intent.mjs';
+import {auditR190AHMeaning} from './r190ah-meaning-audit.mjs';
 import {R190_SCHEMA,R190_LAYOUT_STRATEGIES,compileR190SemanticPlan,
  r190GlazingCells} from './r190-semantic-massing.mjs';
 import {verifyCompiled} from './b143-building-dsl.mjs';
@@ -85,6 +86,8 @@ export function studyR190AG(raw,{maxSearchStates=5000,maxCompileAttempts=32}={})
   catch(e){entry.status='HOLD_BASELINE_GEOMETRY';entry.error=e.message;continue;}
   if(!result.baseline)result.baseline=baseline;
   entry.baselineGeometrySha256=baseline.compiled.geometrySha256;
+  entry.programMeaningAudit=auditR190AHMeaning(model,baseline.layout,
+   {sourceRoutesVerified:baseline.audit.allProgramSpacesReachable===true});
   entry.unapprovedHostPlacement={spaces:copy(baseline.layout.spaces),
    portals:copy(baseline.layout.portals),sitePlacement:copy(baseline.layout.sitePlacement),
    adopted:false,authoredRoomDimensionsOrRelationsChanged:false};
@@ -135,6 +138,8 @@ export function studyR190AG(raw,{maxSearchStates=5000,maxCompileAttempts=32}={})
    sourceGlassCells:required,allProgramSpacesReachable:true,
    originalBaselineOverwritten:false,authoredValuesChanged:[],
    geometryChange:'ONLY_REQUESTED_WINDOW_CELLS_WALL_TO_GLASS',
+   programMeaningAudit:auditR190AHMeaning(model,trial.layout,
+    {sourceRoutesVerified:trial.audit.allProgramSpacesReachable===true}),
    roofForm:trial.audit.roofForm,facetedEnvelope:trial.audit.facetedEnvelope,
    outdoorCourtCount:trial.audit.outdoorCourtCount,nonTreePortalCount:trial.audit.nonTreePortalCount,
    independentUseAndArtEvaluation:'NOT_CERTIFIED_ART_HOLD'};
