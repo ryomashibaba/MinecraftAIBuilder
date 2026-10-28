@@ -6,6 +6,8 @@ on:
       - 'scripts/r190ab-structured-output-pilot.mjs'
       - 'scripts/r190ab-structured-output-pilot.test.mjs'
       - 'scripts/r190ab-semantic-workshop.ps1'
+      - 'scripts/r190ab-saved-semantic-replay.mjs'
+      - 'scripts/r190ab-saved-semantic-replay.test.mjs'
       - 'source/ai/r190ab-semantic-contract.mjs'
       - 'source/ai/r190-semantic-massing.mjs'
       - 'scripts/r190-semantic-massing.test.mjs'
@@ -26,6 +28,8 @@ jobs:
       - run: node --check scripts/r190ab-structured-output-pilot.test.mjs
       - run: node --test scripts/r190ab-structured-output-pilot.test.mjs
       - run: node --test scripts/r190-semantic-massing.test.mjs
+      - run: node --check scripts/r190ab-saved-semantic-replay.mjs
+      - run: node --test scripts/r190ab-saved-semantic-replay.test.mjs
       - name: Parse Windows preflight script; no Qwen/model calls
         shell: pwsh
         run: |
