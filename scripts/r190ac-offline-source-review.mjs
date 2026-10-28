@@ -7,6 +7,9 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {inspectR190ABReply,R190AB_FORMAT} from './r190ab-structured-output-pilot.mjs';
+import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
+import {compileDesign} from '../source/ai/b143-building-dsl.mjs';
+import {renderR164Elevation} from './r164-exterior-audit.mjs';
 const here=path.dirname(fileURLToPath(import.meta.url));
 const priorDir=path.resolve(here,'../evidence/r190aa/pilot-01');
 const defaultAB=path.resolve(here,'../r190ab-local-evidence/contract-01');
@@ -123,11 +126,31 @@ export function inspectSavedR190AC({abDir=defaultAB,baselineDir=priorDir}={}){
   (!viewerFailed&&ab.report.real3D!==abResult.response.real3D)||
   ab.report.geometrySha256!==abResult.response.geometrySha256)
   fail('AB_RECOMPUTED_RESULT_MISMATCH');
- // A claimed successful 3D render must actually have left a stored viewer.
+ // Claimed geometry/route/roof numbers may not replace recomputed actual voxels.
+ if(JSON.stringify(ab.report.physical??null)!==
+    JSON.stringify(abResult.response.physical??null))
+  fail('AB_REPORTED_PHYSICAL_MEASUREMENTS_CHANGED');
+ // Independently regenerate images from ORIGINAL model-authored B143, not repairs.
+ // A placeholder HTML or forged screenshot must NOT count as true source 3D.
  if(abResult.response.real3D===true){
+  const design=ab.design;
+  if(!design)fail('AB_VIEWER_WITHOUT_COMPILED_MODEL');
+  let expectedHtml;
+  try{
+   const template=read(path.resolve(here,'../source/ai/b143-viewer-template.html'),4000000);
+   expectedHtml=renderB143Html(compileB143Gallery([design]),template);
+  }catch{fail('AB_INDEPENDENT_VIEWER_REBUILD_FAILED')}
   const viewer=path.join(abDir,'MODEL_SOURCE_TRUE_3D.html');
-  if(!fs.existsSync(viewer)||read(viewer,3000000).length<100)
-   fail('AB_VIEWER_EVIDENCE_MISSING');
+  if(!fs.existsSync(viewer)||
+   sha(read(viewer,20000000))!==sha(expectedHtml))
+   fail('AB_VIEWER_EVIDENCE_MISMATCH');
+  const compiled=compileDesign(design);
+  for(const side of ['front','rear','west','east','roof']){
+   const svg=path.join(abDir,'MODEL_'+side+'.svg');
+   if(!fs.existsSync(svg)||
+    sha(read(svg,3000000))!==sha(renderR164Elevation(compiled,design,side)))
+    fail('AB_ELEVATION_EVIDENCE_MISMATCH_'+side.toUpperCase());
+  }
  }
  const physical=ab.report.physical;
  const entry={
