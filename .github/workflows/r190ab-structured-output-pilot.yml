@@ -1,0 +1,28 @@
+name: R190-AB Structured JSON-Schema Local Qwen Pilot — FAKE ONLY
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'scripts/r190ab-structured-output-pilot.mjs'
+      - 'scripts/r190ab-structured-output-pilot.test.mjs'
+      - '.github/workflows/r190ab-structured-output-pilot.yml'
+      - 'evidence/r190aa/pilot-01/MODEL_RESPONSE_ORIGINAL.txt'
+  pull_request:
+    paths:
+      - 'scripts/r190ab-structured-output-pilot.mjs'
+      - 'scripts/r190ab-structured-output-pilot.test.mjs'
+      - '.github/workflows/r190ab-structured-output-pilot.yml'
+      - 'evidence/r190aa/pilot-01/MODEL_RESPONSE_ORIGINAL.txt'
+permissions:
+  contents: read
+jobs:
+  fake-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: node --check scripts/r190ab-structured-output-pilot.mjs
+      - run: node --check scripts/r190ab-structured-output-pilot.test.mjs
+      - run: node --test scripts/r190ab-structured-output-pilot.test.mjs
