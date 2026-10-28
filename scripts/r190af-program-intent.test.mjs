@@ -36,7 +36,7 @@ test('AF root cannot accidentally have side or parentId, even if null',()=>{
  }
 });
 test('AF daylight is an intent, not an auto-generated or certified window',()=>{
- const p=make();p.daylightIntents=[{spaceId:p.children[0].id,face:'east',
+ const p=make();p.daylightIntents=[{spaceId:p.children[0].id,face:'north',
   width:3,height:2}];
  const before=JSON.stringify(p),r=inspectR190AFIntent(before);
  assert.equal(JSON.stringify(p),before);
@@ -61,6 +61,15 @@ test('AF impossible daylight intent stays HOLD with explicit available ranges',(
  assert.equal(r.windowOptions[0].feasibleBaseYRange,null);
  assert.equal(r.sourcePreview.geometryGeneratedWithoutDaylight,true);
  assert.equal(r.constructionApproved,false);
+});
+test('AF inherited east-facade expectation is rejected when adjacent receiving occupies the source exterior',()=>{
+ const p=make();p.daylightIntents=[{spaceId:p.children[0].id,face:'east',
+  width:3,height:2}];
+ const r=inspectR190AFIntent(JSON.stringify(p));
+ assert.equal(r.status,'HOLD_DAYLIGHT_NO_VERIFIED_EXTERIOR',r.error);
+ assert.equal(r.windowOptions[0].status,'NO_VERIFIED_EXTERIOR_WALL_OR_FRAME');
+ assert.equal(r.windowOptions[0].proposedOnly,null);
+ assert.equal(r.worldContacts,0);
 });
 test('AF shared parent-wall daylight cannot be mistaken for a real exterior opening',()=>{
  const p=make();p.daylightIntents=[{spaceId:p.children[0].id,face:'south',
