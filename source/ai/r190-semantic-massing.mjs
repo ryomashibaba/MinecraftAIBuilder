@@ -160,6 +160,16 @@ export function validateR190SemanticPlan(p){
    ok(g.offset>=2&&g.offset+g.width<=span-2&&
     g.baseY>=5&&g.baseY+g.height<=r.height-1,
     'GLAZING_OUT_OF_WALL');
+   // A south-facing window on the entry room can legally be above the
+   // centered front door, but must not depend on the three-block-high
+   // doorway's removed top cell for its physical bottom sill.
+   // Reject the conflict BEFORE source voxel operations and auditing;
+   // do not move the model-selected glazing or silently repair its intent.
+   if(g.spaceId===p.entrySpaceId&&g.face==='south'&&g.baseY===5){
+    const doorOffset=Math.floor((r.width-2)/2);
+    ok(g.offset+g.width<=doorOffset||g.offset>=doorOffset+2,
+     'GLAZING_ENTRY_DOOR_CONFLICT');
+   }
    const key=[g.spaceId,g.face,g.offset,g.baseY,g.width,g.height].join(':');
    ok(!seen.has(key),'GLAZING_DUPLICATE');seen.add(key);
   }
