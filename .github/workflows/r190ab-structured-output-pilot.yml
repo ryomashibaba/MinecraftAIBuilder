@@ -9,6 +9,8 @@ on:
       - 'scripts/r190ab-saved-semantic-replay.mjs'
       - 'scripts/r190ab-saved-semantic-replay.test.mjs'
       - 'source/ai/r190ab-semantic-contract.mjs'
+      - 'source/ai/r190ad-expressive-semantic-contract.mjs'
+      - 'scripts/r190ad-expressive-semantic.test.mjs'
       - 'source/ai/r190-semantic-massing.mjs'
       - 'scripts/r190-semantic-massing.test.mjs'
       - 'scripts/r190-semantic-fixtures.mjs'
@@ -30,6 +32,8 @@ jobs:
       - run: node --test scripts/r190-semantic-massing.test.mjs
       - run: node --check scripts/r190ab-saved-semantic-replay.mjs
       - run: node --test scripts/r190ab-saved-semantic-replay.test.mjs
+      - run: node --check source/ai/r190ad-expressive-semantic-contract.mjs
+      - run: node --test scripts/r190ad-expressive-semantic.test.mjs
       - name: Parse Windows preflight script; no Qwen/model calls
         shell: pwsh
         run: |
