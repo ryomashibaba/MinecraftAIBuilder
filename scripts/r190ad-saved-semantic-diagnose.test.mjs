@@ -54,12 +54,12 @@ const expectedCodes=[
  'ROOF_EXCEEDS_SITE_HEIGHT','GLAZING_TARGET_IS_OPEN_COURT',
  'CROSS_LINK_DUPLICATES_TREE'
 ];
-test('AD synthetic reproduction reports seven independent issues in one pass',()=>{
+test('AD synthetic reproduction reports all eight independent constraint violations in one pass',()=>{
  const p=broken(),raw=JSON.stringify(p),saved=raw,r=diagnoseR190ADRaw(raw);
  assert.equal(raw,saved);assert.equal(JSON.stringify(p),saved);
  assert.equal(r.status,'SOURCE_ISSUES_FOUND_NO_GEOMETRY');
  assert.deepEqual(r.errors.map(x=>x.code).sort(),[...expectedCodes].sort());
- assert.equal(r.issueCount,7);
+ assert.equal(r.issueCount,8);
  assert.equal(r.errors.find(x=>x.code==='OPPOSITE_WINGS_DEPTH_EXCEEDS_SITE').minimumNecessaryDepth,26);
  assert.equal(r.errors.find(x=>x.code==='SPACE_EXCEEDS_SITE_CLEARANCE').maximum,10);
  assert.equal(r.noRepairAttempted,true);assert.equal(r.sourceGeometryBuilt,false);
@@ -123,7 +123,7 @@ test('AD archived-study diagnosis is read-only, SHA-pinned, provenance-checked',
   const x=makeStudy(root),before=fs.readdirSync(x.studyDir).map(n=>
    [n,H(fs.readFileSync(path.join(x.studyDir,n),'utf8'))]);
   const report=diagnoseSavedR190AD({studyDir:x.studyDir,expectedSha256:x.hash});
-  assert.equal(report.issueCount,7);
+  assert.equal(report.issueCount,8);
   assert.equal(report.preservedOriginalResult.status,'HOLD_INVALID_EXPRESSIVE_PROGRAM');
   assert.equal(report.preservedOriginalResult.error,'R190_SEMANTIC_SPACE');
   assert.equal(report.provenance.modelCallsByDiagnosis,0);
