@@ -88,6 +88,9 @@ test('AD pure diagnosis catches door/window, broken graph, malformed JSON and in
  const brokenJson=diagnoseR190ADRaw('{');
  assert.equal(brokenJson.status,'SOURCE_DIAGNOSIS_INCOMPLETE');
  assert.equal(brokenJson.errors[0].code,'MALFORMED_JSON');
+ const wrongType=diagnoseR190ADRaw(123);
+ assert.equal(wrongType.status,'SOURCE_DIAGNOSIS_INCOMPLETE');
+ assert.equal(wrongType.errors[0].code,'RAW_NOT_ACCEPTABLE');
 });
 function makeStudy(root){
  const studyDir=path.join(root,'preserved-evidence');
