@@ -49,7 +49,9 @@ const fakeFetch=(response,trace)=>async(url,options)=>{
  assert.ok(cut.every(x=>!Object.hasOwn(x.properties,'material')));
  assert.ok(!Object.hasOwn(request,'attempt')&&!Object.hasOwn(request,'maxAttempts'));
  assert.equal(request.stream,false);
- return {ok:true,json:async()=>({done_reason:'stop',message:{content:response}})};
+ return {ok:true,json:async()=>({done_reason:'stop',message:{content:response},
+  model:'qwen3:14b',total_duration:45100000000,load_duration:1200000000,
+  prompt_eval_count:820,eval_count:480,eval_duration:12000000000})};
 };
 test('AB starts read-only, with explicit model and fresh study required',async()=>{
  const root=temp(),trace=[];
@@ -100,6 +102,12 @@ test('AB one explicit fake request archives full raw unchanged; all output sourc
   assert.equal(calls.length,2);
   assert.equal(result.providerCallsAttempted,1);
   assert.equal(result.providerDoneReason,'stop');
+  assert.equal(result.providerTelemetry.modelReported,'qwen3:14b');
+  assert.equal(result.providerTelemetry.evalCount,480);
+  assert.equal(result.providerTelemetry.promptEvalCount,820);
+  assert.equal(result.providerTelemetry.totalDurationNs,45100000000);
+  assert.equal(result.providerTelemetry.untrustedProviderReported,true);
+  assert.ok(Number.isSafeInteger(result.providerWallMilliseconds));
   assert.equal(result.response.strictB143,true);
   assert.equal(result.response.declaredPlan,true);
   assert.equal(result.response.real3D,true);
