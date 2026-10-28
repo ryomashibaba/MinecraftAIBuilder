@@ -1,4 +1,4 @@
-/** R190-AD expressive semantic envelope: opt-in Qwen choices, not host templates.
+/** R190-AE optional semantic architecture: opt-in Qwen choices, not host templates.
  * R190-AB/AD schemas and their original hashes remain immutable.
  * B143 and exact voxels remain HOST-DERIVED, not model-authored.
  */
@@ -70,7 +70,7 @@ export const R190AE_GUIDANCE=[
 ].join('\n');
 /** Validation and compilation of untouched original text. Zero model calls. */
 export function inspectR190AEReply(raw,reason='stop'){
- const report={schema:'minecraftaibuilder-r190ae-expressive-result-v1',
+ const report={schema:'minecraftaibuilder-r190ae-flexible-result-v1',
   contract:'semantic-space-flexible',status:'HOLD_INVALID_FLEXIBLE_PROGRAM',
   originalRawSha256:H(raw),bytes:Buffer.byteLength(raw,'utf8'),
   formatSchemaSha256:R190AE_FORMAT_SHA256,exactModelRawUnmodified:true,

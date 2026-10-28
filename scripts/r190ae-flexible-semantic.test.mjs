@@ -23,6 +23,8 @@ test('AE optional features are genuinely optional and schema independent',()=>{
   ['schema','id','title','brief','site','entrySpaceId','spaces','materials']);
  assert.equal(R190AE_FORMAT.properties.glazedOpenings.minItems,1);
  assert.equal(R190AE_FORMAT.additionalProperties,false);
+ assert.equal(inspectR190AEReply(JSON.stringify(plain())).report.schema,
+  'minecraftaibuilder-r190ae-flexible-result-v1');
  assert.notEqual(R190AE_FORMAT_SHA256,R190AD_FORMAT_SHA256);
  assert.notEqual(R190AE_FORMAT_SHA256,R190AB_SEMANTIC_FORMAT_SHA256);
  assert.equal(parseR190ABArgs(['--contract','semantic-space-flexible',
