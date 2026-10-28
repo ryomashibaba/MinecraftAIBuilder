@@ -95,6 +95,20 @@ export async function runR190YTrial(args=[],{
  actualCalls+=s.modelCalls;
  if(typeof s.directory!=='string'||!directory(s.directory))
   fail('S_EVIDENCE_MISSING');
+ // R190-S may preserve a complete response that is not compilable B143.
+ // No three-source physical comparison is possible in that case; spending
+ // two more local requests on W would not repair S or make X comparable.
+ if(s.beforeAfterStatus==='CANDIDATE_B143_NOT_COMPARABLE')
+  return {schema:'minecraftaibuilder-r190y-pilot-v1',
+   status:'HOLD_S_B143_NOT_COMPARABLE',mode:'EXPLICIT_LOCAL_GENERATE_OR_REUSE',
+   baselineOriginalSha256:original.rawSha256,modelClaimed:original.model,
+   sourceS:s.directory,sourceSStatus:s.status,
+   sourceSComparison:s.beforeAfterStatus,sourceW:null,
+   modelCallsReportedByCompletedRunners:actualCalls,
+   modelCallUpperBound:3,additionalModelCallsAvoidedUpTo:2,
+   comparisonDirectory:null,comparisonFile:null,
+   causalWinnerCertified:false,quality:'NOT_CERTIFIED',
+   humanArtReview:'ART_HOLD',...blocked()};
  let w;
  try{
   w=await runW(['--from',originalPath],{fetcher});
@@ -107,6 +121,18 @@ export async function runR190YTrial(args=[],{
  actualCalls+=w.modelCalls;
  if(typeof w.directory!=='string'||!directory(w.directory))
   fail('W_EVIDENCE_MISSING');
+ // A failed or partial W remains useful original evidence. Preserve paths,
+ // reason and consumed-request count without pretending X could render it.
+ if(typeof w.status==='string'&&w.status.startsWith('HOLD'))
+  return {schema:'minecraftaibuilder-r190y-pilot-v1',
+   status:'HOLD_W_NOT_B143_COMPARABLE',mode:'EXPLICIT_LOCAL_GENERATE_OR_REUSE',
+   baselineOriginalSha256:original.rawSha256,modelClaimed:original.model,
+   sourceS:s.directory,sourceSStatus:s.status,
+   sourceW:w.directory,sourceWStatus:w.status,
+   modelCallsReportedByCompletedRunners:actualCalls,
+   modelCallUpperBound:3,comparisonDirectory:null,comparisonFile:null,
+   causalWinnerCertified:false,quality:'NOT_CERTIFIED',
+   humanArtReview:'ART_HOLD',...blocked()};
  // Never search for an unrelated latest model result: use exactly the
  // two directories returned for this baseline.
  const x=compare({from:originalPath,s:s.directory,w:w.directory});
