@@ -32,3 +32,6 @@ coverage/
 
 # R190-AA real local model response archives are never committed.
 /r190aa-local-evidence/
+
+# R190-AB local provider originals and genuine 3D never committed.
+/r190ab-local-evidence/
