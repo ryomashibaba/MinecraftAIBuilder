@@ -64,9 +64,12 @@ test('AB starts read-only, with explicit model and fresh study required',async()
   assert.equal(r.modelCalls,0);
   assert.equal(trace.length,0);
   assert.deepEqual(parseR190ABArgs([]),{
-   run:false,model:'qwen3:14b',study:'contract-01'});
+   run:false,model:'qwen3:14b',study:'contract-01',task:'library'});
   assert.throws(()=>parseR190ABArgs(['--run','--run']),/ARGUMENTS/);
   assert.throws(()=>parseR190ABArgs(['--run','--study','../bad']),/UNSAFE_OPTIONS/);
+  assert.throws(()=>parseR190ABArgs(['--task','arbitrary-unknown-type']),/UNSAFE_OPTIONS/);
+  assert.equal(parseR190ABArgs(['--task','tidal-workshop']).task,'tidal-workshop');
+  assert.equal(parseR190ABArgs(['--task','vertical-market']).task,'vertical-market');
   assert.throws(()=>parseR190ABArgs(['--run','--model','qwen3:14b',
    '--model','gemma']),/ARGUMENTS/);
  }finally{fs.rmSync(root,{recursive:true,force:true})}
@@ -101,6 +104,7 @@ test('AB one explicit fake request archives full raw unchanged; all output sourc
   });
   assert.equal(calls.length,2);
   assert.equal(result.providerCallsAttempted,1);
+  assert.equal(result.sourceTask,'library');
   assert.equal(result.providerDoneReason,'stop');
   assert.equal(result.providerTelemetry.modelReported,'qwen3:14b');
   assert.equal(result.providerTelemetry.evalCount,480);
@@ -169,6 +173,22 @@ test('AB transport failure leaves a durable marker; explicit repeat is blocked',
    evidenceRoot:path.join(root,'saved'),fetcher:async()=>{calls.push('retry')}
   }),/PREVIOUS_STUDY_NO_AUTOMATIC_RETRY/);
   assert.equal(calls.length,2);
+ }finally{fs.rmSync(root,{recursive:true,force:true})}
+});
+test('AB nonlibrary frozen Japanese task passes through the SAME runner with one fake model request',async()=>{
+ const root=temp(),calls=[];
+ try{
+  const output=await runR190AB(['--run','--study','workshop-candidate','--task','tidal-workshop'],{
+   evidenceRoot:path.join(root,'saved'),fetcher:fakeFetch('{"invalid":true}',calls)
+  });
+  assert.equal(calls.length,2);
+  assert.equal(output.sourceTask,'tidal-workshop');
+  assert.equal(output.response.status,'HOLD_INVALID_OUTPUT');
+  const attempt=JSON.parse(fs.readFileSync(path.join(root,'saved','workshop-candidate','R190AB_ATTEMPT.json'),'utf8'));
+  assert.equal(attempt.sourceTask,'tidal-workshop');
+  assert.equal(output.worldWrites,0);
+  assert.equal(output.humanArtReview,'ART_HOLD');
+  assert.ok(!fs.existsSync(path.join(root,'saved','workshop-candidate','MODEL_SOURCE_TRUE_3D.html')));
  }finally{fs.rmSync(root,{recursive:true,force:true})}
 });
 test('AB rejects nonexistent local model, with zero model requests',async()=>{

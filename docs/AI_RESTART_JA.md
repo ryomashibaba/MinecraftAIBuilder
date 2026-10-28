@@ -1,3 +1,15 @@
+# 2026-10-28 — 現在地（最小更新・以下は保存済み履歴）
+
+- 最新GitHub HEADは都度 `git rev-parse HEAD` で再確認。継続ブランチ `feature/b198zr1-protected-architectural-revision`、Draft PR #128 OPEN・未マージ。
+- R190-AA pilot-01 の実Qwen3:14b応答は公開済み原文SHA256 `0bf706181bb2b7a30f8082f896a703c33749ba55f75d42010adba88f47c84f17`、2,581バイト、B143 0/1、ART HOLD。入力形式だけでなく空間設計にも重大な不成立がある。真正3D未生成。
+- R190-AA/AB/ACのfake-only/オフライン専用ActionsはHEAD `5057ed48150836365727573a518c503669373c99` で全3件SUCCESS（建築成功を意味しない）。
+- **次の最優先は追加監査器ではない。** ローカルWindows Workの既存未コミット2ファイルを保護・整合し、ローカルのOllama `qwen3:14b` でR190-ABの構造化出力を **まず1件のみ**実行して原文を保管、R190-ACで再評価。その後、短い意味IR+共通3D生成器（既存B198I/R139等再利用）との真正建築品質比較へ進む。
+- 2026-10-24包括許可はローカルQwen/Gemma推論に適用されるが、WindowsローカルWork/Computer Useへのアクセス権は含まれず別途承認が必要。Minecraft施工は技術安全ゲート未完で引き続き禁止。main、凍結元、旧原文を変更せず、9 BLOCKED・WorldWrites0・ART HOLDを維持。
+- R190-ABは既存5種類の凍結日本語建築要求を `--task` で選択できるが、最初の旧pilot-01比較は `library` を指定。別用途の評価を図書館に固定せず、実モデル由来とホスト由来を分け、見た目を人間が審査する。
+- **中止基準：** 実モデルで同じ書式/空間不成立が続く場合はJSON直接生成への過度な最適化を停止し、意味設計IRを中心に切り替える。R番号増殖、模擬CI増殖、同じ建物の延々とした微修正を進捗としない。
+
+---
+
 ## R189-A — 初回CIのルーフライン証拠点を修正（2026-10-26 JST）
 
 - 初回HEAD `072a489`、[B198G #40330886348](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40330886348) は旧original-source-geometry **SUCCESS**、R178〜R188旧回帰PASS、R189新規0/4（`INTENDED_HIERARCHY_NOT_VISIBLE_IN_VOXELS`）。

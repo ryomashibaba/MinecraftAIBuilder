@@ -13,7 +13,7 @@ R190-ACは**保存された原文だけ**を比較するオフライン診断器
 1. `C:\Users\ryoma\Projects\MinecraftAIBuilder` の `git status --short` と `git diff` を確認。R190-AAのWindows上の未コミット2ファイル、pilot-01の研究証拠156ファイル、現在のローカル研究フォルダを保護する。上書き・reset・別クローン禁止。GitHub側のR190-AA集計修正との共通部分を照合してから安全に統合。
 2. GitHubの作業ブランチ `feature/b198zr1-protected-architectural-revision` と Draft PR #128、およびR190-AA/AB/ACの最新専用Actionsを確認。CIが実行待ちならPASSと報告せず、ローカルで `node --test` を実行して不足を区別。
 3. `node --test scripts/r190aa-local-work-pilot.test.mjs`、`node --test scripts/r190ab-structured-output-pilot.test.mjs`、`node --test scripts/r190ac-offline-source-review.test.mjs`。すべて模擬試験。保留の既知Windows fixture問題は別問題として記録する。
-4. 明示的な実Qwenの1件実験を実施する場合、`docs/R190AB_STRUCTURED_OUTPUT_RESEARCH.md` に従い、**新しい一意の研究名**で実施。既に同名の実験がある場合は勝手に別名で再実行しない。APIがJSON Schemaを拒否する場合もHOLDの証拠にする。
+4. 明示的な実Qwenの1件実験を実施する場合、`docs/R190AB_STRUCTURED_OUTPUT_RESEARCH.md` に従い、**新しい一意の研究名**で実施。初回は `--task library` を固定し、次の異用途では同じランナーの `--task tidal-workshop` 等を使用する。ローカルWork操作には事前にユーザーの許可を得る。Qwen/Gemma実推論自体は憲章で包括許可済み。既に同名の実験がある場合は勝手に別名で再実行しない。APIがJSON Schemaを拒否する場合もHOLDの証拠にする。
 5. R190-ABが原文・監査を完全保存した場合に限り、次の **ゼロ推論** 比較コマンドを実行。
 
 ```powershell

@@ -8,7 +8,7 @@ R190-AAのWindows側には `scripts/r190aa-local-work-pilot.mjs` と `*.test.mjs
 
 ## 今回の比較条件
 
-**R190-AB**では、元pilot-01と同じ日本語図書館課題・同じ `qwen3:14b` を使用し、OpenAI互換APIの一般JSONモードでなく、Ollamaのネイティブ `POST http://127.0.0.1:11434/api/chat` で `format: <JSON Schema>` を指定する。制約をモデルが満たすかは未実証であり、必ず現地検証する。
+**R190-AB初回比較**では、元pilot-01と同じ日本語図書館課題・同じ `qwen3:14b` を使用し、OpenAI互換APIの一般JSONモードでなく、Ollamaのネイティブ `POST http://127.0.0.1:11434/api/chat` で `format: <JSON Schema>` を指定する。制約をモデルが満たすかは未実証であり、必ず現地検証する。
 
 スキーマはB143の6形状（box, ellipsoid, cylinder, torus, beam, staircase）をサポート。ADD要素には必須material、CUTにはmaterialなし、staircaseはADD専用でaxis x/z。全ての返信トップレベルは `design/explanation/assumptions/spatialPlan` の4キーのみ。内部制御フィールド `attempt/maxAttempts` を要求ペイロードに含めない。位置・空間のアイデアはモデルが選択し、ホストは事後検証のみ。スキーマでは幾何の交差・動線・屋根の魅力までは保証しない。
 
@@ -19,17 +19,22 @@ R190-AAのWindows側には `scripts/r190aa-local-work-pilot.mjs` と `*.test.mjs
 1. 正規フォルダ `C:\Users\ryoma\Projects\MinecraftAIBuilder` で `git status --short`、ブランチ、HEAD、未コミットの2ファイルを確認する。未コミット変更は保持。GitHub側の新規研究ファイルを取り込むときに未コミット内容を上書きする恐れがある場合は止め、状況を報告。
 2. GitHubのR190-AB FAKE ONLY専用Actions結果を確認する。`node --test scripts/r190ab-structured-output-pilot.test.mjs` が通ったことを確認。
 3. 推論なし:`node scripts/r190ab-structured-output-pilot.mjs`。原文保存先は無視対象の `r190ab-local-evidence/`。
-4. **ユーザーが実Qwenの1件試行を明示許可した場合に限り**実行:
+4. **Qwen/Gemma実推論についてはプロジェクト憲章の包括許可の対象**。ただし**WindowsのローカルWorkアクセス自体には別途ユーザーの許可が必要**。許可されたWork環境で、事前安全確認後に1件だけ実行:
 
 ```powershell
 Set-Location "C:\Users\ryoma\Projects\MinecraftAIBuilder"
-node scripts/r190ab-structured-output-pilot.mjs --run --study contract-01 --model qwen3:14b
+node scripts/r190ab-structured-output-pilot.mjs --run --study contract-01 --task library --model qwen3:14b
 ```
 
 5. `r190ab-local-evidence/contract-01/`の `R190AB_ATTEMPT.json`、`MODEL_RESPONSE_ORIGINAL.txt`（取得できた場合）、`R190AB_RESULT.json`、コンパイル後のみ生成される真正B143 HTML/SVGを検証する。
 6. 旧pilot-01の原文と独立に比較する。**A: 構文適合性（厳格なソース）**、**B: 建築機能（空洞・到達・階段・屋根）**、**C: 美術魅力（人間評価）**に分けて判定し、1件のみで一般成功率を主張しない。
 
 実験でOllamaが複雑なJSON Schemaを受け付けない、出力が空、モデルが失敗する場合はその1件をHOLDとして記録。スキーマ弱体化、同名再試行、原文を補修した3D生成はしない。
+
+
+### 図書館以外の用途への拡張（同一の実装を再利用）
+
+同じランナーの `--task` は既存の凍結済み5件（`library`、`tidal-workshop`、`observatory`、`bridge-hall`、`vertical-market`）だけを受け付ける。未承認の新たな実験課題、同名再実行、自動再試行は不可。図書館との同一条件比較を一度確認してから、**別の初見用途**を新しい一意の研究名で、必要に応じて1件ずつ検証する。大量実行に進まない。結果のB143コンパイル合格は建築品質や汎用性の認定ではない。
 
 ## GitHub上のR190-AA集計修正とローカル差分の共存
 

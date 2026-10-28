@@ -92,16 +92,17 @@ const filename=(root,p)=>path.join(root,p);
 const saveJson=(p,v)=>fs.writeFileSync(p,JSON.stringify(v,null,2)+'\n',{flag:'wx'});
 const read=p=>fs.readFileSync(p,'utf8');
 export function parseR190ABArgs(args){
- const opt={run:false,model:'qwen3:14b',study:'contract-01'};
+ const opt={run:false,model:'qwen3:14b',study:'contract-01',task:'library'};
  if(args.length===1&&args[0]==='--help')return {help:true};
  const seen=new Set();
  for(let i=0;i<args.length;i++){
   if(args[i]==='--run'&&!opt.run){opt.run=true;continue}
   const key=args[i];
-  if(!['--model','--study'].includes(key)||seen.has(key)||!args[i+1])fail('ARGUMENTS');
+  if(!['--model','--study','--task'].includes(key)||seen.has(key)||!args[i+1])fail('ARGUMENTS');
   seen.add(key);opt[key.slice(2)]=args[++i];
  }
- if(!MODEL.test(opt.model)||!ID.test(opt.study))fail('UNSAFE_OPTIONS');
+ if(!MODEL.test(opt.model)||!ID.test(opt.study)||
+  !R190AA_TASKS.some(t=>t.id===opt.task))fail('UNSAFE_OPTIONS');
  return opt;
 }
 export function inspectR190ABReply(raw,finishReason='stop'){
@@ -137,8 +138,9 @@ export async function runR190AB(args=[],{
  evidenceRoot=ROOT,fetcher=fetch
 }={}){
  const o=Array.isArray(args)?parseR190ABArgs(args):args;
- if(o?.help)return {help:'By default offline only. ONE explicitly approved local Qwen request: node scripts/r190ab-structured-output-pilot.mjs --run --study contract-01 --model qwen3:14b'};
- if(!o||typeof o.run!=='boolean'||!MODEL.test(o.model)||!ID.test(o.study))
+ if(o?.help)return {help:'Offline by default. ONE local Qwen request with approved Work access: node scripts/r190ab-structured-output-pilot.mjs --run --study contract-01 --task library --model qwen3:14b'};
+ if(!o||typeof o.run!=='boolean'||!MODEL.test(o.model)||!ID.test(o.study)||
+  !R190AA_TASKS.some(t=>t.id===o.task))
   fail('OPTIONS');
  const root=path.resolve(evidenceRoot),dir=filename(root,o.study);
  if(!o.run){
@@ -163,7 +165,7 @@ export async function runR190AB(args=[],{
  const manifest=await tags.json();
  const installed=manifest?.models?.find(x=>x?.name===o.model);
  if(!installed)fail('LOCAL_MODEL_NOT_INSTALLED_NO_DOWNLOAD');
- const task=R190AA_TASKS[0],prompt=buildR190AAPrompt(task);
+ const task=R190AA_TASKS.find(t=>t.id===o.task),prompt=buildR190AAPrompt(task);
  const system=[
   'Design the original architecture yourself, not an existing template. Return ONLY JSON matching the supplied JSON Schema.',
   'This is one architecture response, not a control envelope. NEVER output attempt or maxAttempts.',
@@ -236,7 +238,7 @@ export async function runR190AB(args=[],{
    parsed.report.error=String(e?.message??e).slice(0,180)}
  }
  const result={schema:'minecraftaibuilder-r190ab-result-v1',
-  study:o.study,modelClaimed:o.model,
+  study:o.study,sourceTask:task.id,modelClaimed:o.model,
   providerDoneReason:reason,providerError:error,providerCallsAttempted:1,
   providerWallMilliseconds,providerTelemetry,
   originalPromptSha256:sha(prompt),schemaSha256:SCHEMA_HASH,
