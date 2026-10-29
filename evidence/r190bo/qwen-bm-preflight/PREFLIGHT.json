@@ -1,0 +1,157 @@
+{
+  "schema": "minecraftaibuilder-r190bo-preflight-v1",
+  "status": "OFFLINE_READY_AWAITING_SEPARATE_HUMAN_APPROVAL",
+  "endpoint": "http://127.0.0.1:11434/api/chat",
+  "model": "qwen3:14b",
+  "briefSha256": "bbd44cc9f28234055601b4055466e2f3564e7e4565d408432de4c4fab0aa277a",
+  "requestSha256": "49393557b34e9b3d61d2229c6cffcaa4732cc0d887c536be3ce11cb7a7df8f67",
+  "schemaSha256": "02947981e9857b993342e69c1550bf218853c051ec8003b21b2486427f017d8f",
+  "sourcePins": [
+    {
+      "file": "scripts/b143-gallery-core.mjs",
+      "sha256": "d18480819ba16179c0341dcf9d51713eceec5901fbd0d71cf851f8ba9d7b62f8"
+    },
+    {
+      "file": "scripts/r161-real-comparison.mjs",
+      "sha256": "3a8c11c8581dcadf6de84720b9e578807cf712764e42f5605788518582984277"
+    },
+    {
+      "file": "scripts/r162-room-section-comparison.mjs",
+      "sha256": "d30c0ef61d99bd641a061083ecb7a8ef1d9cdbcb87d930c602785de64a8332c8"
+    },
+    {
+      "file": "scripts/r163-daylight-comparison.mjs",
+      "sha256": "1bf2f01130f644238f94cb5006f2ee4d41f18e3fbc11098e4da5746bb059cf2c"
+    },
+    {
+      "file": "scripts/r164-exterior-audit.mjs",
+      "sha256": "a5d9e2aed0a7345cc87964287b279d60660232a84a2b565a6c055921ae3b34aa"
+    },
+    {
+      "file": "scripts/r190bc-design-first-section.mjs",
+      "sha256": "a45ff56512d1c3164367a2a9de8227085805bcc2ff6e16a09a9a115796007f5a"
+    },
+    {
+      "file": "scripts/r190bo-spatial-local.mjs",
+      "sha256": "45db24a3631ff4a6278a04d741659f2005137ae5bfa64551e2f456ebc033f11f"
+    },
+    {
+      "file": "source/ai/b143-building-dsl.mjs",
+      "sha256": "477c4306689d9fa62e91cefb30fa2ca877e934479f824585c5f71c7fdb56455d"
+    },
+    {
+      "file": "source/ai/b143-viewer-template.html",
+      "sha256": "9e65645955456d5ac12b67f494ad1fca9b32b4d1b67614c236265f63c8d2b8c6"
+    },
+    {
+      "file": "source/ai/b198-natural-language-design.mjs",
+      "sha256": "c8da65360cc805a18e0ca5115929ff62d6466e16f3ab7793d59c864a21217060"
+    },
+    {
+      "file": "source/ai/b198zr3-functional-review-contract.mjs",
+      "sha256": "7d595841b65c9c962eb9cb959c06d7f0922ffb35aa0cb862df56d4b0d51229d1"
+    },
+    {
+      "file": "source/ai/b198zr4-planned-source.mjs",
+      "sha256": "935643e27f04c8ffe6e1241111f73838a86eb14a7178b71002f04916defe5efe"
+    },
+    {
+      "file": "source/ai/r125-functional-layer.mjs",
+      "sha256": "01186a42187ad079e90c0036bf97c8cf6114d57221712fa0fceb5f0218e300ac"
+    },
+    {
+      "file": "source/ai/r125-source-routes.mjs",
+      "sha256": "1eb6830f4e4e254cf1d1e5a6d24a32c7989b3ca2a2c128fae7017c429d6c9705"
+    },
+    {
+      "file": "source/ai/r134-multi-zone-plan.mjs",
+      "sha256": "3c74c1a7e879e35012b5f4ed29ddc6212c4dae77124aa2f812492eecb653aff5"
+    },
+    {
+      "file": "source/ai/r138-branching-topology.mjs",
+      "sha256": "c18f05f0f7d949a5559cededa94240f1d4ea1ebf49f9cc0fbe25f505a64ca11d"
+    },
+    {
+      "file": "source/ai/r139-room-relations.mjs",
+      "sha256": "3bbf42a34f25abcd28f701fa0d260671c83730f012fc029ef6307bd3b5fbdf20"
+    },
+    {
+      "file": "source/ai/r149-architectural-expression.mjs",
+      "sha256": "029d6fdfa1b4e44cfbb4848d77a51cca423d710078e0aab486c865d63747862d"
+    },
+    {
+      "file": "source/ai/r150-furniture-articulation.mjs",
+      "sha256": "74733b069e281793f156f77369c0cd48b17f0e6d24cf1d835ea035860de41088"
+    },
+    {
+      "file": "source/ai/r160-side-gallery.mjs",
+      "sha256": "e0693371255f1b78d877bb1531df8ff375f1616e15500261a946d03f91e8a8a7"
+    },
+    {
+      "file": "source/ai/r162-room-section-massing.mjs",
+      "sha256": "8f76e53f1d93c33b75c941196e1c6a5e94d71ef2ecff785a1b1ed7fbeefd8fd6"
+    },
+    {
+      "file": "source/ai/r163-daylit-sections.mjs",
+      "sha256": "102b0669588e0d3ed1613af10a2ff6adfea77958287020cd260a7795770ba5ec"
+    },
+    {
+      "file": "source/ai/r164-envelope-continuity.mjs",
+      "sha256": "d3b170fba5270ac89668f0e1d3997517dab96fa51b5f581ce323eefafecddf39"
+    },
+    {
+      "file": "source/ai/r190bn-spatial-assembly.mjs",
+      "sha256": "588b704593b43cf179b5296d2ee1389553ca99a8d9b4146d0a3bddb99d1f7b8b"
+    },
+    {
+      "file": "source/ai/r190bo-spatial-model-contract.mjs",
+      "sha256": "25962d96401f5fdb6d7bce08804930bf3f5fde5049df571a622ee071bd78fe70"
+    }
+  ],
+  "bmComparison": {
+    "sameOriginalBrief": true,
+    "inventorySha256": "67d492e6357ef09f5e4682fa8f64e966461561e2ff96e601cf6963294166a545",
+    "originalA": "e54f2abf87d36e0957d8393c960d2fce8075862d00ea1ea736365121a4b6a469",
+    "originalB": "8e2590128e8bd932cddc2df595fcc01c3cbd660298cedd445431d0787bb90c86",
+    "oldSourcesModified": false,
+    "causalComparison": "NOT_CONTROLLED: new IR, native transport, schema and context differ from BM"
+  },
+  "approvalNonce": "fefe4127-bee1-46c8-84cd-7d0d1fb7f035",
+  "approvalPhrase": "R190BO-ONE-POST-49393557b34e9b3d61d2229c6cffcaa4732cc0d887c536be3ce11cb7a7df8f67-fefe4127-bee1-46c8-84cd-7d0d1fb7f035",
+  "approvalGranted": false,
+  "previousBMApprovalReusable": false,
+  "maximumPostRequests": 1,
+  "metadataRequests": 0,
+  "automaticRetries": 0,
+  "fallbacks": 0,
+  "plannedTimeoutMs": 900000,
+  "localModelInstalled": "NOT_QUERIED_OFFLINE",
+  "providerSchemaCompatibility": "NOT_TESTED_ON_REAL_OLLAMA",
+  "modelIdentityCryptographicallyVerified": false,
+  "networkRequests": 0,
+  "modelCalls": 0,
+  "requestBytes": 34742,
+  "mechanicalHashComputedByHost": true,
+  "designAuthorship": "MODEL_MUST_CHOOSE_PROGRAM_LAYOUT_LEVELS_MASSING_VOIDS_STAIRS_OPENINGS",
+  "readiness": "NOT_PREPARED",
+  "gates": [
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED"
+  ],
+  "BuildPlan": {
+    "operations": []
+  },
+  "constructionApproved": false,
+  "executionAllowed": false,
+  "worldContacts": 0,
+  "worldWrites": 0,
+  "art": "ART_HOLD",
+  "officialArtAdoptions": 0
+}

@@ -1,0 +1,95 @@
+{
+  "files": [
+    {
+      "file": "CAPTURE.json",
+      "bytes": 1891,
+      "sha256": "69b5b3af0f021302abb76ae148a28e7238afc94b15e2ecc66accd0756379dd06"
+    },
+    {
+      "file": "DERIVATION.json",
+      "bytes": 4995,
+      "sha256": "317582dfd665d8503a2cc56f83414a74a3b74ddc22968c2536ee980576fd73ee"
+    },
+    {
+      "file": "DERIVED_3D.html",
+      "bytes": 89074,
+      "sha256": "56881ce3f18e6834f9ec0efe39c7226ddaaaf2ba2a3696c772d76ea39d9ed239"
+    },
+    {
+      "file": "DERIVED_B143_PROPOSAL.json",
+      "bytes": 3406,
+      "sha256": "e72be3b1a18dd93dd686f57367d6ab1aedacb85f65da74f608f3d745635cc176"
+    },
+    {
+      "file": "DERIVED_east.svg",
+      "bytes": 19244,
+      "sha256": "b334d6a2c699ac91390fe7658b0e37febb6b20741408e2d73eede5ef9c697e0e"
+    },
+    {
+      "file": "DERIVED_front.svg",
+      "bytes": 48115,
+      "sha256": "905c69a73e0e8334d9a740c1984ec69b0829ab8d734177008a382bcf83ac2545"
+    },
+    {
+      "file": "DERIVED_rear.svg",
+      "bytes": 48114,
+      "sha256": "1b1f48758a5878a262c733e1d5040805a09c87fc2dc398c26817d76179a81b64"
+    },
+    {
+      "file": "DERIVED_roof.svg",
+      "bytes": 79235,
+      "sha256": "a2a4a026fcdca1c65d1217c6f485e2c2a34badf14e1ecd5c2933652467785282"
+    },
+    {
+      "file": "DERIVED_SECTION.json",
+      "bytes": 3709,
+      "sha256": "0e6f1dd66b7d30476357ad1a35211b0d1b0e7469214365db10a62e921f977031"
+    },
+    {
+      "file": "DERIVED_SECTION.svg",
+      "bytes": 725,
+      "sha256": "b92f3e4a215abb21b99be289ec22369a02d9daa10ee74e40a897e4c44d323ebd"
+    },
+    {
+      "file": "DERIVED_SPACE_SECTION_z13.svg",
+      "bytes": 13382,
+      "sha256": "a0176009c0b89d8f2de6d7c2645691a716b33aa8d2b4bc02cc6ba95147aadb82"
+    },
+    {
+      "file": "DERIVED_SPACE_SECTIONS.json",
+      "bytes": 11115,
+      "sha256": "8ed6069ae13cece7e6bb83fe94e1f130be8c61765f10ddcc41ced3edb8af87dc"
+    },
+    {
+      "file": "DERIVED_west.svg",
+      "bytes": 19244,
+      "sha256": "5042d22b31a10ccf48a061e2591c636d27cb3519c91f7553dfb2c5fd91d7b428"
+    },
+    {
+      "file": "FUNCTIONAL_REVIEW.json",
+      "bytes": 2377,
+      "sha256": "d44bd4535de025734b44a10e81ef23e1dd9569817d783ae6e26f9bf11df5525c"
+    },
+    {
+      "file": "HUMAN_REVIEW_TEMPLATE.json",
+      "bytes": 797,
+      "sha256": "f6a456acd5651c5dcce22b3c4ae21d3f17331f97d520376d3bcd346c166506e1"
+    },
+    {
+      "file": "MODEL_ORIGINAL.txt",
+      "bytes": 3372,
+      "sha256": "f3bfe7436d2e287f7a76324f1e93b87627da397e19b033274359b69401610084"
+    },
+    {
+      "file": "ORIGINAL_BRIEF.txt",
+      "bytes": 129,
+      "sha256": "3d23250c74b4047c06d23d59fb7b6adf254ccd27ed89c070d7fc33e5b8119c1d"
+    },
+    {
+      "file": "REVIEW_JA.md",
+      "bytes": 913,
+      "sha256": "cec434e7bacbf631e7066ddccf3e4e4c78eac2ca3b83904f960dc4baaba97538"
+    }
+  ],
+  "exactSavedBytes": true
+}

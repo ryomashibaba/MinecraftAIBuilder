@@ -1,0 +1,131 @@
+{
+
+"design": {
+  "schema": "minecraftaibuilder-b143-building-dsl-v1",
+  "id": "highrise-mixed-use-01",
+  "title": "High-Rise Mixed-Use Tower with Open Plazas and Office Zones",
+  "brief": "A 96-block-tall urban high-rise with two-story open plazas, office floors, and a rooftop restaurant.",
+  "bounds": {
+    "width": 64,
+    "depth": 32,
+    "height": 96
+  },
+  "elements": [
+    {
+      "id": "core-structure",
+      "mode": "add",
+      "shape": "box",
+      "origin": [0, 0, 0],
+      "size": [64, 96, 32],
+      "material": "concrete"
+    },
+    {
+      "id": "atrium-floor-1",
+      "mode": "cut",
+      "shape": "box",
+      "origin": [16, 0, 8],
+      "size": [32, 8, 16]
+    },
+    {
+      "id": "atrium-floor-2",
+      "mode": "cut",
+      "shape": "box",
+      "origin": [16, 8, 8],
+      "size": [32, 8, 16]
+    },
+    {
+      "id": "office-floor-3",
+      "mode": "add",
+      "shape": "box",
+      "origin": [8, 16, 8],
+      "size": [48, 8, 24],
+      "material": "concrete"
+    },
+    {
+      "id": "restaurant-roof",
+      "mode": "add",
+      "shape": "box",
+      "origin": [16, 88, 8],
+      "size": [32, 8, 16],
+      "material": "glass"
+    },
+    {
+      "id": "main-staircase",
+      "mode": "add",
+      "shape": "staircase",
+      "origin": [32, 0, 16],
+      "axis": "y",
+      "direction": 1,
+      "width": 4,
+      "steps": 96,
+      "treadDepth": 2
+    },
+    {
+      "id": "entrance-void",
+      "mode": "cut",
+      "shape": "box",
+      "origin": [32, 0, 16],
+      "size": [8, 4, 8]
+    },
+    {
+      "id": "roof-glass",
+      "mode": "add",
+      "shape": "box",
+      "origin": [0, 96, 0],
+      "size": [64, 1, 32],
+      "material": "glass"
+    }
+  ],
+  "designOnly": true
+},
+"explanation": "A 96-block-high mixed-use tower with two-story open plazas (floors 1-2), office floors (3-80), and a rooftop restaurant (floor 96). The central core uses concrete, with glass for the restaurant and roof. A staircase connects all floors, with cut voids for entrances and the atrium. The design prioritizes vertical circulation and open-air spaces.",
+"assumptions": [
+  "Flat, unobstructed site for vertical alignment",
+  "No external stairs required due to internal staircase",
+  "Concrete and glass materials are available in-game",
+  "Rooftop restaurant requires no additional structural support"
+],
+"spatialPlan": {
+  "designIntent": "A high-rise combining public open spaces, office functions, and a rooftop dining experience, emphasizing vertical connectivity and urban integration.",
+  "massStrategy": "Central concrete core with cut voids for atriums and entrances, glass roof for the restaurant, and modular office zones.",
+  "circulationStrategy": "Primary vertical movement via the central staircase; horizontal access to offices through corridor-like cut voids on floors 3-80. Rooftop access via elevator (not modeled) or staircase.",
+  "entrance": [32, 0, 16],
+  "headroom": 3,
+  "protectedVoids": [
+    {
+      "id": "atrium-1",
+      "origin": [16, 0, 8],
+      "size": [32, 8, 16],
+      "maxOccupiedCells": 0
+    },
+    {
+      "id": "atrium-2",
+      "origin": [16, 8, 8],
+      "size": [32, 8, 16],
+      "maxOccupiedCells": 0
+    }
+  ],
+  "destinations": [
+    {
+      "id": "restaurant",
+      "point": [32, 96, 16],
+      "maximumPathSteps": 120
+    }
+  ],
+  "functionalZones": [
+    {
+      "id": "atrium-zone",
+      "origin": [16, 0, 8],
+      "size": [32, 16, 16],
+      "minimumReachablePositions": [[32, 4, 16]],
+      "minimumReachablePercent": 100
+    },
+    {
+      "id": "office-zone",
+      "origin": [8, 16, 8],
+      "size": [48, 64, 24],
+      "minimumReachablePositions": [[24, 40, 16]],
+      "minimumReachablePercent": 100
+    }
+  ]
+} }

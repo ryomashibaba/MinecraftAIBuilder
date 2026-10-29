@@ -35,3 +35,6 @@ coverage/
 
 # R190-AB local provider originals and genuine 3D never committed.
 /r190ab-local-evidence/
+
+# Future BO originals and attempt locks remain local. Published BO study is synthetic only.
+/r190bo-local-evidence/

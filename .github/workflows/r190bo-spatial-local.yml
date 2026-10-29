@@ -1,0 +1,55 @@
+name: R190-BO Spatial Assembly local path — ZERO NETWORK TESTS
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'source/ai/r190b[n-o]-*'
+      - 'scripts/r190b[n-o]-*'
+      - 'scripts/fixtures/r190bn-*'
+      - 'RUN_R190BO_OFFLINE_PREFLIGHT.cmd'
+      - '.github/workflows/r190bo-spatial-local.yml'
+  pull_request:
+    paths:
+      - 'source/ai/r190b[n-o]-*'
+      - 'scripts/r190b[n-o]-*'
+      - 'scripts/fixtures/r190bn-*'
+      - 'RUN_R190BO_OFFLINE_PREFLIGHT.cmd'
+      - '.github/workflows/r190bo-spatial-local.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: New BN model contract, fake transport and real CLI regressions
+        env:
+          NODE_OPTIONS: --import=./scripts/r190bo-deny-network.mjs
+        run: node --test scripts/r190bo-spatial-local.test.mjs scripts/r190bn-spatial-assembly.test.mjs
+      - name: Existing immutable BM, provenance and comparison regressions
+        env:
+          NODE_OPTIONS: --import=./scripts/r190bo-deny-network.mjs
+        run: node --test scripts/r190bf-controlled-pair.test.mjs scripts/r190be-saved-design-comparison.test.mjs scripts/r190bg-source-anchored-review.test.mjs scripts/r190bj-failure-informed-prompt.test.mjs scripts/r190bk-evidence-stage-review.test.mjs
+      - name: Offline BM preparation and synthetic end-to-end evidence (NO model)
+        env:
+          NODE_OPTIONS: --import=./scripts/r190bo-deny-network.mjs
+        run: node scripts/r190bo-offline-study.mjs --out bo-ci-evidence
+      - name: Actual Windows offline CMD, no Ollama
+        if: runner.os == 'Windows'
+        shell: cmd
+        env:
+          NODE_OPTIONS: --import=./scripts/r190bo-deny-network.mjs
+        run: RUN_R190BO_OFFLINE_PREFLIGHT.cmd
+      - uses: actions/upload-artifact@v4
+        with:
+          name: R190BO-OFFLINE-NO-MODEL-${{ matrix.os }}
+          path: bo-ci-evidence
