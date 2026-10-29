@@ -5,6 +5,7 @@ on:
     paths:
       - 'scripts/r190bc-design-first-section.mjs'
       - 'scripts/r190bc-design-first-section.test.mjs'
+      - 'scripts/r190bc-offline-review.mjs'
       - 'source/ai/b143-building-dsl.mjs'
       - 'source/ai/b198zr4-planned-source.mjs'
       - '.github/workflows/r190bc-original-section.yml'
@@ -12,6 +13,7 @@ on:
     paths:
       - 'scripts/r190bc-design-first-section.mjs'
       - 'scripts/r190bc-design-first-section.test.mjs'
+      - 'scripts/r190bc-offline-review.mjs'
       - 'source/ai/b143-building-dsl.mjs'
       - 'source/ai/b198zr4-planned-source.mjs'
       - '.github/workflows/r190bc-original-section.yml'
@@ -32,6 +34,8 @@ jobs:
           node-version: '22'
       - name: Check original-only section reviewer
         run: node --check scripts/r190bc-design-first-section.mjs
+      - name: Check offline-only CLI
+        run: node --check scripts/r190bc-offline-review.mjs
       - name: Strict SOURCE synthetic + saved-input regression tests
         run: node --test scripts/r190bc-design-first-section.test.mjs
       - name: Preserve saved original R190-AA as HOLD (no fake geometry)
