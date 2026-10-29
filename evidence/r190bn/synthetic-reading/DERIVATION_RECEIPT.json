@@ -1,0 +1,252 @@
+{
+  "schema": "minecraftaibuilder-r190bn-derived-source-study-v1",
+  "status": "SOURCE_SPACE_AND_ROUTE_PROXIES_PRESENT_ART_HOLD",
+  "authorship": "SYNTHETIC_TEST_FIXTURE",
+  "originalInputSha256": "04a97ad267405b45c4c999564ac8313979ddea1192364f75e33a452ac4cec214",
+  "originalBriefSha256": "83e26bea1cb6c0ad3a836ea44623d690ddbeba4c59975e8cfd48584c31bf3b84",
+  "originalSourceUnmodified": true,
+  "sourceFormat": "minecraftaibuilder-r190bn-spatial-assembly-v1",
+  "outputAuthorship": "DETERMINISTIC_B143_FROM_AUTHOR_SPATIAL_ASSEMBLY",
+  "outputIsOriginalModelAuthoredB143": false,
+  "hostInventedGeometry": false,
+  "hostChoseLayoutOrLevels": false,
+  "hostRepairedSource": false,
+  "levels": [
+    {
+      "id": "lower-level",
+      "standingY": 1
+    },
+    {
+      "id": "upper-level",
+      "standingY": 9
+    }
+  ],
+  "programSpaces": [
+    {
+      "id": "lower-gallery",
+      "levelId": "lower-level",
+      "purpose": "展示のための下階空間",
+      "origin": [
+        3,
+        3
+      ],
+      "size": [
+        12,
+        24
+      ],
+      "clearHeight": 7,
+      "minimumReachablePositions": 230,
+      "minimumReachablePercent": 80
+    },
+    {
+      "id": "upper-reading",
+      "levelId": "upper-level",
+      "purpose": "閲覧のための上階空間",
+      "origin": [
+        3,
+        3
+      ],
+      "size": [
+        12,
+        24
+      ],
+      "clearHeight": 7,
+      "minimumReachablePositions": 230,
+      "minimumReachablePercent": 80
+    }
+  ],
+  "elementMapping": [
+    {
+      "elementId": "lower-envelope-skin",
+      "operationId": "lower-envelope",
+      "spaceId": "lower-gallery"
+    },
+    {
+      "elementId": "lower-envelope-floor",
+      "operationId": "lower-envelope",
+      "spaceId": "lower-gallery"
+    },
+    {
+      "elementId": "upper-envelope-skin",
+      "operationId": "upper-envelope",
+      "spaceId": "upper-reading"
+    },
+    {
+      "elementId": "upper-envelope-floor",
+      "operationId": "upper-envelope",
+      "spaceId": "upper-reading"
+    },
+    {
+      "elementId": "stair-core-skin",
+      "operationId": "stair-core-skin",
+      "spaceId": null
+    },
+    {
+      "elementId": "arrival-floor",
+      "operationId": "arrival-floor",
+      "spaceId": null
+    },
+    {
+      "elementId": "arrival-opening",
+      "operationId": "arrival-opening",
+      "spaceId": null
+    },
+    {
+      "elementId": "lower-core-portal",
+      "operationId": "lower-core-portal",
+      "spaceId": null
+    },
+    {
+      "elementId": "upper-core-portal",
+      "operationId": "upper-core-portal",
+      "spaceId": null
+    },
+    {
+      "elementId": "lower-landing",
+      "operationId": "lower-landing",
+      "spaceId": null
+    },
+    {
+      "elementId": "upper-landing",
+      "operationId": "upper-landing",
+      "spaceId": null
+    },
+    {
+      "elementId": "authored-flight",
+      "operationId": "authored-flight",
+      "spaceId": null
+    }
+  ],
+  "spaceEvidence": [
+    {
+      "id": "lower-gallery",
+      "purpose": "展示のための下階空間",
+      "levelId": "lower-level",
+      "standingY": 1,
+      "clearHeight": 7,
+      "obstructedAirCells": 0,
+      "unsupportedFloorCells": 0,
+      "declaredArea": 288,
+      "status": "SOURCE_FLOOR_AND_CLEAR_VOLUME_PRESENT"
+    },
+    {
+      "id": "upper-reading",
+      "purpose": "閲覧のための上階空間",
+      "levelId": "upper-level",
+      "standingY": 9,
+      "clearHeight": 7,
+      "obstructedAirCells": 0,
+      "unsupportedFloorCells": 0,
+      "declaredArea": 288,
+      "status": "SOURCE_FLOOR_AND_CLEAR_VOLUME_PRESENT"
+    }
+  ],
+  "functionalReview": {
+    "status": "SOURCE_AND_DECLARED_SPATIAL_CLAIMS_FORMALLY_PASS",
+    "evidence": {
+      "schema": "minecraftaibuilder-b198zr3-functional-review-evidence-v1",
+      "caseId": "unverified-model-plan",
+      "contractAuthorship": "MODEL_DECLARED_UNVERIFIED",
+      "pinnedSourceSha256": "f3843229acc2a06a88d2d1eacae3dfdab8651091c252561dd095db87cd5cf8dc",
+      "status": "FORMAL_GEOMETRY_AND_ROUTE_CONSTRAINTS_PASS",
+      "results": {
+        "protectedVoids": [
+          {
+            "id": "reading-air",
+            "occupied": 0,
+            "volume": 240,
+            "passed": true
+          }
+        ],
+        "destinations": [
+          {
+            "id": "upper-destination",
+            "reachable": true,
+            "shortestPathSteps": 46,
+            "maximumPathSteps": 150,
+            "passed": true
+          }
+        ],
+        "functionalZones": [
+          {
+            "id": "lower-gallery",
+            "regionVolume": 288,
+            "standable": 288,
+            "reachable": 288,
+            "percentOfRegion": 100,
+            "passed": true
+          },
+          {
+            "id": "upper-reading",
+            "regionVolume": 288,
+            "standable": 288,
+            "reachable": 288,
+            "percentOfRegion": 100,
+            "passed": true
+          }
+        ],
+        "abstractReachablePositions": 766
+      },
+      "unverified": {
+        "requestSemantics": true,
+        "architecturalQuality": true,
+        "modelGeneralization": true,
+        "minecraftBlockStates": true,
+        "minecraftActualWalking": true,
+        "humanApproval": true
+      },
+      "sourceOnly": true,
+      "modelCalls": 0,
+      "safety": {
+        "readiness": "NOT_PREPARED",
+        "constructionApproved": false,
+        "executionAllowed": false,
+        "worldContacts": 0,
+        "worldWrites": 0,
+        "gates": [
+          "BLOCKED",
+          "BLOCKED",
+          "BLOCKED",
+          "BLOCKED",
+          "BLOCKED",
+          "BLOCKED",
+          "BLOCKED",
+          "BLOCKED",
+          "BLOCKED"
+        ],
+        "BuildPlan": {
+          "operations": []
+        }
+      }
+    }
+  },
+  "derivedProposalSha256": "6ea83be92e87ccfb3e1c3ead3e0e3102dde692489998f9d0617bc8b83402da5a",
+  "sourceSha256": "f3843229acc2a06a88d2d1eacae3dfdab8651091c252561dd095db87cd5cf8dc",
+  "geometrySha256": "4cf737ec59d902946bc32bed5a390e1cadc66e3b7a03675401cfb36536f2dbea",
+  "architecturalQuality": "NOT_CERTIFIED",
+  "structuralEngineering": "NOT_CERTIFIED",
+  "minecraftWalking": "NOT_TESTED",
+  "routeScope": "Existing R4 supported single-cell standing graph; no two-wide/real avatar guarantee",
+  "readiness": "NOT_PREPARED",
+  "constructionApproved": false,
+  "executionAllowed": false,
+  "gates": [
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED"
+  ],
+  "BuildPlan": {
+    "operations": []
+  },
+  "worldContacts": 0,
+  "worldWrites": 0,
+  "modelCalls": 0,
+  "art": "ART_HOLD",
+  "officialArtAdoptions": 0
+}
