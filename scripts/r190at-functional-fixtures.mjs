@@ -79,7 +79,7 @@ export const R190AT_AUTHOR_CASES=[
    box('east-south-long-screen','concrete',[47,2,38],[22,19,3]),
    beam('west-high-diagonal-plane','metal',[9,16,21],[29,24,21],3),
    beam('west-opposing-swept-edge','metal',[12,17,41],[30,23,41],3),
-   beam('east-rising-tapered-plane','metal',[47,20,21],[67,29,21],3),
+   beam('east-rising-tapered-plane','metal',[47,20,21],[67,28,21],3),
    beam('east-returned-folded-spine','metal',[47,21,41],[66,24,41],3),
    box('west-planar-overlap','stone',[17,19,21],[12,3,7]),
    box('east-planar-overlap','stone',[53,23,21],[13,3,7]),

@@ -1,6 +1,8 @@
 /**
  * R190-AU: authored subtraction of the two walkable exterior bypasses.
- * These are deliberate negative spatial volumes, not hidden host modifications.
+ * Author adds a ground-level bypass and a real return door in a comparison
+ * reference, then explicitly closes both north and south crossings in AU.
+ * All author-defined negative volumes are source-only; no Minecraft contact.
  * The entire 12 x 14 sky court remains solid floor and open above.
  */
 import {R190AU_SCHEMA} from '../source/ai/r190au-mandatory-forum.mjs';
@@ -23,8 +25,21 @@ export const R190AU_AUTHOR_CASES=R190AT_AUTHOR_CASES.map((old,index)=>{
  design.functionalZones.find(z=>z.kind==='open-sky').size=[sky.size[0],sky.size[2]];
  // Both original walking bypasses are beside the y>=2 sky cut, at z23/24 and z39/40.
  // Only these authored ground strips are removed; roof/canyon supports remain intact.
+ // SOURCE-only, deliberately authorized counterfactual: a public northern
+ // perimeter bypass connected to a real door into the destination wing.
+ // The reference case retains it; the revised case removes its crossing floor.
+ design.parti.masses.push({
+  id:'author-exterior-bypass-ground',shape:'box',mode:'add',
+  material:'stone',origin:[6,0,17],size:[64,2,8]
+ });
+ design.parti.voids.push({
+  role:'passage',
+  intent:'Explicit exterior-to-east-gallery access opening, creating a genuine route around the sky forum in the comparison reference.',
+  geometry:{id:'author-east-return-door',shape:'box',mode:'cut',
+   origin:[60,2,23],size:[6,8,5]}
+ });
  design.parti.voids.push(
-  cut('south-forum-ground-threshold',[32,0,23],[12,2,2]),
+  cut('south-forum-ground-threshold',[32,0,17],[12,2,8]),
   cut('north-forum-ground-threshold',[32,0,39],[12,2,2])
  );
  return {schema:R190AU_SCHEMA,design,

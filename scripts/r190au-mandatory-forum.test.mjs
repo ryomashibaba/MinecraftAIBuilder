@@ -32,7 +32,7 @@ test('AU two authored non-pod designs require sky forum on every B143 2-wide rou
   assert.equal(s.art,'ART_HOLD');
  }
 });
-test('AU original unmodified AT still allows outdoor forum to be bypassed',()=>{
+test('AU genuine authored perimeter bypass reference can avoid the open sky forum',()=>{
  for(const original of R190AU_AUTHOR_CASES){
   const bypass=clone(original);
   bypass.design.parti.voids=bypass.design.parti.voids.filter(v=>v.role!=='spatial-relief');

@@ -35,6 +35,8 @@ export const R190AS_CO_DESIGNED_CASES=[
   whyThisVoid:'The public exposed sky separates opposing primary folded volumes and organizes their support footprints.'},
  [
   addBox('axial-path-base','stone',[6,0,27],[64,2,10]),
+  // The authored sky cleft is 12x14: the original narrow spine did not support its full floor.
+  addBox('entire-civic-sky-ground','stone',[32,0,25],[12,2,14]),
   addBox('west-north-footing','stone',[8,0,17],[11,2,10]),
   addBox('west-south-footing','stone',[8,0,37],[11,2,10]),
   addBox('east-north-footing','stone',[55,0,17],[12,2,10]),
@@ -63,6 +65,7 @@ export const R190AS_CO_DESIGNED_CASES=[
   whyThisVoid:'The deliberate sky opening organizes the northern and southern massing and reveals the inclined structural folds.'},
  [
   addBox('continuous-pedestrian-spine','stone',[6,0,27],[64,2,10]),
+  addBox('entire-civic-sky-ground','stone',[32,0,25],[12,2,14]),
   addBox('north-foothold-low','stone',[8,0,16],[24,2,11]),
   addBox('north-foothold-high','stone',[38,0,16],[18,2,11]),
   addBox('south-foothold-low','stone',[18,0,37],[19,2,11]),
