@@ -71,6 +71,7 @@ function html(manifest){
  '</head><body><h1>R190-BG｜真正B143を観察するための人間審査</h1>',
  '<aside><strong>美術採用ではありません：ART HOLD。</strong> 実モデルが作成した場合も人間が独立に評価します。機能・動線がHOLDでも有効なB143原形状は失敗例として批評できますが、使用可能な建築だとは認定しません。SOURCE PASS・写真・材質・数値差だけで高品質とは認定しません。階段のMinecraft歩行・構造強度・用途の成立は未認定です。既存のモデル名・ファイル名が画面に見える場合があり、厳密な盲検ではありません。写真・3Dは保存済み原形状だけです。</aside>',
  '<details><summary>評価対象のSHA256と技術判定</summary><pre id="info"></pre></details>',
+ '<p id="equivalence-warning" role="note"></p>',
  '<main>',
  ...ids.map(id=>'<section><h2>候補'+id+'</h2><p id="state-'+id+'"></p>'+
   '<iframe title="候補'+id+' 本物のB143 3D" src="'+id+'_3D.html" sandbox="allow-scripts"></iframe>'+
@@ -85,6 +86,7 @@ function html(manifest){
  '<p role="status" id="status" aria-live="polite"></p>',
  '<script>',
  'const manifest='+m+';',
+ 'if(manifest.comparisonStatus==="NO_PHYSICAL_CHANGE_ART_HOLD")document.getElementById("equivalence-warning").textContent="重要：両案の完成ボクセルは同一と判定されています。技術上の形状差は確認されていません。レビューでも「改善した」と推定しないでください。";',
  'document.getElementById("info").textContent=JSON.stringify({comparisonSha256:manifest.comparisonSha256,originalBriefSha256:manifest.originalBriefSha256,A:manifest.candidates.A,B:manifest.candidates.B,limitations:manifest.limitations},null,2);',
  'for(const id of ["A","B"])document.getElementById("state-"+id).textContent=manifest.candidates[id].status+" / geometry "+manifest.candidates[id].geometrySha256;',
  'function field(kind,id,index){return document.querySelector("[data-"+kind+"="+JSON.stringify(id+"-"+index)+"]");}',
@@ -99,6 +101,7 @@ function html(manifest){
  '   if(value===""&&(view||note))errors.push("項目 "+(i+1)+"、候補"+id+"は点数と根拠を同時に記入");',
  '   scores[id]={score:value===""?null:Number(value),evidenceView:view||null,observation:note||null};',
  '  }criteria.push({criterion:manifest.criterionLabels[i],A:scores.A,B:scores.B});}',
+ ' if(!criteria.some(c=>c.A.score!==null||c.B.score!==null))errors.push("少なくとも1件の観察・点数を入力してください");',
  ' if(errors.length){document.getElementById("status").textContent=errors.join("。");return;}',
  ' const receipt={schema:"minecraftaibuilder-r190bg-human-observations-v1",reviewManifestSha256:manifest.manifestSha256,comparisonSha256:manifest.comparisonSha256,originalBriefSha256:manifest.originalBriefSha256,reviewer,criteria,art:"ART_HOLD",officialArtAdoptions:0,architecturalQualityCertified:false,sourceOnly:true};',
  ' const data=JSON.stringify(receipt,null,2)+"\\n";',
@@ -214,6 +217,8 @@ export function validateR190BGObservations({reviewDir,observationsFile}){
    }
   }
  }
+ // Unscored template is not a recorded human observation.
+ if(filled===0)fail('NO_HUMAN_OBSERVATION');
  // Reviewers may leave some criteria blank; output never auto-promotes ART.
  for(const [name,hash] of Object.entries(m.evidenceViewSha256))
   if(H(file(dir,name))!==hash)fail('EVIDENCE_VIEW_TAMPERED');
