@@ -170,3 +170,26 @@ test('BF no implicit consent on CLI and no combined auto-call option',async()=>{
   assert.equal(fs.existsSync(c.aDir),false);
  }finally{fs.rmSync(c.root,{recursive:true,force:true})}
 });
+
+
+test('BH invalid complete B143 pair never manufactures a BG 3D reviewer',async()=>{
+ const c=env();try{
+  make(c);
+  const valid=async()=>({ok:true,json:async()=>({choices:[{
+   finish_reason:'stop',message:{content:syntheticOriginal()}}]})});
+  const invalid=async()=>({ok:true,json:async()=>({choices:[{
+   finish_reason:'stop',message:{content:'{"invalid":true}'}}]})});
+  await captureR190BFSide({protocolDir:c.protocolDir,preparedDir:c.preparedDir,
+   side:'A',outDir:c.aDir,approved:true},{fetcher:valid});
+  await captureR190BFSide({protocolDir:c.protocolDir,preparedDir:c.preparedDir,
+   side:'B',outDir:c.bDir,approved:true},{fetcher:invalid});
+  const result=compareR190BFPair(c);
+  assert.equal(result.comparisonStatus,'HOLD_SOURCE_PAIR_NOT_COMPARABLE');
+  assert.equal(result.humanReviewStatus,'HOLD_NO_VALID_B143_PAIR');
+  assert.equal(result.humanReviewRelativePath,null);
+  assert.equal(fs.existsSync(path.join(c.outDir,'R190BG_HUMAN_REVIEW')),false);
+  assert.equal(fs.existsSync(path.join(c.outDir,'B_3D.html')),false);
+  assert.equal(result.worldWrites,0);
+  assert.equal(result.officialArtAdoptions,0);
+ }finally{fs.rmSync(c.root,{recursive:true,force:true})}
+});
