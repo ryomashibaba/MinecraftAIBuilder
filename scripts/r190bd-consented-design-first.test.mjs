@@ -120,7 +120,7 @@ test('BD completed but invalid mock model original remains HOLD, never repaired'
    sourceDir:ctx.prepared,model:'gemma4:26b',outputDir:ctx.out,approved:true
   },{fetcher:async()=>({ok:true,json:async()=>({choices:[{
    finish_reason:'stop',message:{content:answer}}]})})});
-  assert.equal(r.status,'CAPTURED_SOURCE_ONLY_ART_HOLD');
+  assert.equal(r.status,'HOLD_MODEL_R4_SPATIAL_REVIEW');
   assert.equal(r.sourceSectionStatus,'HOLD_INVALID_ORIGINAL_R4_OR_B143');
   assert.equal(r.originalSourceGeometrySha256,null);
   assert.equal(fs.readFileSync(path.join(ctx.out,'model-original','R190_I_ORIGINAL_RESPONSE.txt'),'utf8'),answer);
