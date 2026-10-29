@@ -12,6 +12,7 @@ import {inspectR190BDPrepared} from './r190bd-consented-design-first.mjs';
 import {runR190Local} from './r190-local-semantic-run.mjs';
 import {compareR190BESaved} from './r190be-saved-design-comparison.mjs';
 import {createR190BGReview} from './r190bg-source-anchored-review.mjs';
+import {inspectR190BHArchivedOriginal} from './r190bh-actual-original-postmortem.mjs';
 
 export const R190BF_SCHEMA='minecraftaibuilder-r190bf-locked-pair-v1';
 const H=x=>createHash('sha256').update(x).digest('hex');
@@ -187,6 +188,35 @@ export function compareR190BFPair({protocolDir,preparedDir,aDir,bDir,outDir}){
  if(A.systemPromptHash!==B.systemPromptHash)fail('SYSTEM_PROMPT_DRIFT');
  const comparison=compareR190BESaved({prepared,baseline:path.join(a,'model-original'),
   candidate:path.join(b,'model-original'),out});
+ // Link the saved BF response bytes to BE results before any review is published.
+ const comparisonData=file(out,'R190BE_COMPARE.json',1000000);
+ const comparisonSha256=H(comparisonData);
+ if(comparison.originalBriefSha256!==manifest.briefSha256||
+    comparison.designFirstPromptSha256!==manifest.designPromptSha256||
+    comparison.A?.originalSha256!==A.sourceSha256||
+    comparison.B?.originalSha256!==B.sourceSha256)
+   fail('BE_SOURCE_CHAIN_DRIFT');
+ // Reuse the BH literal-source diagnosis ONLY on unusable B143, never repair.
+ // This remains useful even when BG cannot display a non-existent valid 3D.
+ const invalidSourceDiagnostics={};
+ for(const [id,root,sha] of [['A',a,A.sourceSha256],['B',b,B.sourceSha256]]){
+  if(comparison[id].status!=='HOLD_INVALID_B143')continue;
+  const raw=file(path.join(root,'model-original'),'R190_I_ORIGINAL_RESPONSE.txt');
+  if(H(raw)!==sha)fail('INVALID_SOURCE_SHA_DRIFT');
+  try{
+   const finding=inspectR190BHArchivedOriginal(raw,{expectedSha256:sha});
+   const name='R190BI_'+id+'_INVALID_SOURCE_DIAGNOSTIC.json';
+   const data=Buffer.from(JSON.stringify({...finding,studySide:id,
+    comparisonSha256,providerOriginIndependentlyVerified:false},null,2)+'\n');
+   fs.writeFileSync(path.join(out,name),data,{flag:'wx'});
+   invalidSourceDiagnostics[id]={file:name,sha256:H(data),
+    originalSha256:sha,status:finding.status,
+    literalFindingsCount:finding.literalFindings.length};
+  }catch(e){
+   invalidSourceDiagnostics[id]={status:'HOLD_DIAGNOSTIC_NOT_AVAILABLE',
+    originalSha256:sha,reason:String(e?.message??e).slice(0,160)};
+  }
+ }
  // A human-readable art review is useful even when a valid B143 has R4
  // functional HOLD. A missing/invalid B143 pair must never receive fake 3D.
  const reviewable=new Set(['SOURCE_REVIEW_AVAILABLE_ART_HOLD',
@@ -201,12 +231,18 @@ export function compareR190BFPair({protocolDir,preparedDir,aDir,bDir,outDir}){
   A,B,identicalSettingsRequested:true,
   sameModelClaimed:true,sameSystemPromptSha256:A.systemPromptHash,
   generationModelDigestVerified:false,providerSeedHonoredVerified:false,
+  savedComparisonReportSha256:comparisonSha256,
+  invalidSourceDiagnostics,
+  providerOriginIndependentlyVerified:false,
   result:'SOURCE_PAIR_COMPARE_ONLY_ART_HOLD',
   actualHumanArtImprovement:'NOT_ESTABLISHED',
   humanReviewStatus:review?'READY_FOR_UNSCORED_HUMAN_REVIEW':
     'HOLD_NO_VALID_B143_PAIR',
   humanReviewRelativePath:review?'R190BG_HUMAN_REVIEW/R190BG_REVIEW.html':null,
   humanReviewManifestSha256:review?.manifestSha256??null,
+  humanReviewManifestBytesVerified:review?
+   H(file(path.join(out,'R190BG_HUMAN_REVIEW'),
+    'R190BG_REVIEW_MANIFEST.json'))===review.manifestSha256:false,
   noModelRequestsByComparison:true,...safe()};
  fs.writeFileSync(path.join(out,'R190BF_CONTROLLED_PAIR.json'),
   JSON.stringify(evidence,null,2)+'\n',{flag:'wx'});

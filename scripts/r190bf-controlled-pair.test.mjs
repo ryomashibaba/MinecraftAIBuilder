@@ -79,6 +79,10 @@ test('BF two independently authorized mock captures have identical provider cont
   assert.equal(doc.actualHumanArtImprovement,'NOT_ESTABLISHED');
   assert.equal(doc.modelDigestVerified,undefined);
   assert.equal(doc.generationModelDigestVerified,false);
+  assert.deepEqual(doc.invalidSourceDiagnostics,{});
+  assert.equal(doc.savedComparisonReportSha256,
+   H(fs.readFileSync(path.join(c.outDir,'R190BE_COMPARE.json'))));
+  assert.equal(doc.humanReviewManifestBytesVerified,true);
   assert.equal(doc.worldContacts,0);
   assert.deepEqual(doc.BuildPlan.operations,[]);
   const comparison=JSON.parse(fs.readFileSync(path.join(c.outDir,'R190BE_COMPARE.json')));
@@ -187,6 +191,17 @@ test('BH invalid complete B143 pair never manufactures a BG 3D reviewer',async()
   assert.equal(result.comparisonStatus,'HOLD_SOURCE_PAIR_NOT_COMPARABLE');
   assert.equal(result.humanReviewStatus,'HOLD_NO_VALID_B143_PAIR');
   assert.equal(result.humanReviewRelativePath,null);
+  const diagPath=path.join(c.outDir,'R190BI_B_INVALID_SOURCE_DIAGNOSTIC.json');
+  const diag=JSON.parse(fs.readFileSync(diagPath));
+  assert.equal(diag.studySide,'B');
+  assert.equal(diag.originalSha256,H('{"invalid":true}'));
+  assert.equal(diag.sourceGeometryProduced,false);
+  assert.equal(diag.art,'ART_HOLD');
+  assert.equal(diag.literalFindings.some(x=>x.code==='MISSING_DESIGN_OBJECT'),true);
+  assert.equal(result.invalidSourceDiagnostics.B.sha256,
+   H(fs.readFileSync(diagPath)));
+  assert.equal(result.savedComparisonReportSha256,
+   H(fs.readFileSync(path.join(c.outDir,'R190BE_COMPARE.json'))));
   assert.equal(fs.existsSync(path.join(c.outDir,'R190BG_HUMAN_REVIEW')),false);
   assert.equal(fs.existsSync(path.join(c.outDir,'B_3D.html')),false);
   assert.equal(result.worldWrites,0);
