@@ -26,6 +26,9 @@ const voids=[
   geometry:cut('author-continuous-promenade',[7,2,29],[62,8,6])}
 ];
 const shared=[
+ // Author-provided joined civic section, truthfully CSG-cut by the full sky void.
+ // The unapproved original had a void cutting zero occupied cells (AQ contract FAIL).
+ box('civic-primary-composite-mass','concrete',[29,12,24],[18,4,16]),
  box('source-pedestrian-and-forum-ground','stone',[6,0,23],[64,2,18]),
  box('court-west-cliff-pier','concrete',[29,2,24],[3,23,16]),
  box('court-east-cliff-pier','concrete',[44,2,24],[3,25,16]),
