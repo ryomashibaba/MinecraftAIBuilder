@@ -18,30 +18,8 @@ const caseDir=()=>{
   expectedSha256:hash(Buffer.from(BRIEF))});
  return {base,original,prepared,out:path.join(base,'run')};
 };
-const syntheticOriginal=()=>JSON.stringify({
- design:{
-  schema:'minecraftaibuilder-b143-building-dsl-v1',
-  id:'r190bd-fake-only',title:'Synthetic test building not a model result',
-  brief:'Fully synthetic source for mock R4 tests, no independent design',
-  bounds:{width:24,height:16,depth:24},designOnly:true,
-  elements:[
-   {id:'supported-floor',shape:'box',mode:'add',material:'stone',
-    origin:[1,1,1],size:[22,1,22]},
-   {id:'canopy',shape:'box',mode:'add',material:'wood',
-    origin:[3,10,3],size:[8,1,10]}
-  ]
- },explanation:'This data is hard-coded for a provider mock only.',
- assumptions:[],
- spatialPlan:{
-  designIntent:'Synthetic test for a sheltered room and open pad.',
-  massStrategy:'A ground slab plus small elevated canopy tests geometry.',
-  circulationStrategy:'Supported walking along the unbroken flat ground.',
-  entrance:[4,2,4],headroom:2,protectedVoids:[],
-  destinations:[{id:'far-pad',point:[14,2,9],maximumPathSteps:40}],
-  functionalZones:[{id:'some-pad',origin:[4,2,4],size:[6,2,6],
-   minimumReachablePositions:5,minimumReachablePercent:70}]
- }
-});
+import {syntheticOriginal} from './fixtures/r190bd-mock-original.mjs';
+
 test('BD preflight: no Ollama, no filesystem write, no new model request',async()=>{
  const ctx=caseDir();let network=0,runner=0;
  try{
@@ -113,6 +91,18 @@ test('BD explicit one-shot mock runner saves original B143 plus SOURCE section, 
   assert.equal(n,1);
  }finally{fs.rmSync(ctx.base,{recursive:true,force:true});}
 });
+test('BD overclaimed two-level region stays R4 HOLD despite valid source section',async()=>{
+ const ctx=caseDir(),doc=JSON.parse(syntheticOriginal());
+ doc.spatialPlan.functionalZones[0].size[1]=2;
+ try{
+  const r=await runR190BDStudy({sourceDir:ctx.prepared,model:'qwen3:14b',
+   outputDir:ctx.out,approved:true},{fetcher:async()=>({ok:true,json:async()=>({
+    choices:[{finish_reason:'stop',message:{content:JSON.stringify(doc)}}]})})});
+  assert.equal(r.status,'HOLD_MODEL_R4_SPATIAL_REVIEW');
+  assert.equal(r.sourceSectionStatus,'SOURCE_SECTION_PROXIES_AVAILABLE_ART_HOLD');
+ }finally{fs.rmSync(ctx.base,{recursive:true,force:true});}
+});
+
 test('BD completed but invalid mock model original remains HOLD, never repaired',async()=>{
  const ctx=caseDir();const answer='{"wrong":"fields"}';
  try{

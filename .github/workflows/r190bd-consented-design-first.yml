@@ -5,6 +5,7 @@ on:
     paths:
       - 'scripts/r190bd-consented-design-first.mjs'
       - 'scripts/r190bd-consented-design-first.test.mjs'
+      - 'scripts/fixtures/r190bd-mock-original.mjs'
       - 'scripts/r190bc-design-first-section.mjs'
       - 'scripts/r190bc-offline-review.mjs'
       - 'scripts/r190-local-semantic-run.mjs'
@@ -13,6 +14,7 @@ on:
     paths:
       - 'scripts/r190bd-consented-design-first.mjs'
       - 'scripts/r190bd-consented-design-first.test.mjs'
+      - 'scripts/fixtures/r190bd-mock-original.mjs'
       - 'scripts/r190bc-design-first-section.mjs'
       - 'scripts/r190bc-offline-review.mjs'
       - 'scripts/r190-local-semantic-run.mjs'

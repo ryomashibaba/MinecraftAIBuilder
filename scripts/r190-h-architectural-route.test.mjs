@@ -6,6 +6,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
 import http from 'node:http';
+import {fileURLToPath} from 'node:url';
 import {R190_STATIC_SYNTHETIC_CASES} from './r190-semantic-fixtures.mjs';
 import {parseR190Arguments,runR190Local} from './r190-local-semantic-run.mjs';
 const fixture=()=>({
@@ -293,7 +294,7 @@ test('M offline replay reuses saved original without connecting or retrying a mo
 test('M saved actual archived Qwen14B grammar cannot masquerade as R190 compliant architecture',async()=>{
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'r190m-archived-'));
  const out=path.join(root,'hold'),file=path.resolve(
-  path.dirname(new URL(import.meta.url).pathname),
+  path.dirname(fileURLToPath(import.meta.url)),
   './fixtures/r146-user-qwen14b-20261025-raw.json');
  const raw=fs.readFileSync(file,'utf8');
  try{

@@ -11,6 +11,15 @@ import {buildR190BCDesignFirstPrompt,reviewR190BCOriginal,
 
 import * as CLI from './r190bc-offline-review.mjs';
 const hash=x=>createHash('sha256').update(x).digest('hex');
+async function checkFileSymlink(t,input,link,check){
+ await t.test('file symlink input is rejected',(st)=>{
+  try{fs.symlinkSync(input,link);}
+  catch(e){if(process.platform==='win32'&&['EPERM','EACCES'].includes(e.code)){
+   st.skip('Windows file symlink privilege unavailable; Linux still verifies rejection');return;
+  }throw e;}
+  check();
+ });
+}
 const box=(id,origin,size,material='stone')=>({
  id,shape:'box',mode:'add',material,origin,size});
 const example=()=>({
@@ -113,7 +122,7 @@ test('BC malformed saved original and SHA mismatch cannot be repaired into 3D',(
  assert.equal(bad.status,'HOLD_INVALID_ORIGINAL_R4_OR_B143');
  assert.equal(bad.geometrySha256,null);
 });
-test('BC fresh output, symlink denial, no changes to input, no model, safety',()=>{
+test('BC fresh output, symlink denial, no changes to input, no model, safety',async(t)=>{
  const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'r190bc-'));
  const file=path.join(tmp,'ORIGINAL.txt'),out=path.join(tmp,'report');
  const bytes=raw(example()),digest=hash(bytes);
@@ -130,13 +139,15 @@ test('BC fresh output, symlink denial, no changes to input, no model, safety',()
   assert.equal(hash(fs.readFileSync(file)),digest);
   assert.throws(()=>writeR190BCOriginalReview({originalPath:file,outDir:out,
    expectedSha256:digest}),/R190BC_FRESH_ABSOLUTE_PATHS/);
-  const link=path.join(tmp,'original-symlink');fs.symlinkSync(file,link);
+  const link=path.join(tmp,'original-symlink');
+  await checkFileSymlink(t,file,link,()=>{
   assert.throws(()=>writeR190BCOriginalReview({originalPath:link,
    outDir:path.join(tmp,'later'),expectedSha256:digest}),/R190BC_UNSAFE_ORIGINAL/);
+  });
  }finally{fs.rmSync(tmp,{recursive:true,force:true})}
 });
 
-test('BC offline-only CLI prepares hash-pinned model prompt without any inference',()=>{
+test('BC offline-only CLI prepares hash-pinned model prompt without any inference',async(t)=>{
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'r190bc-prompt-'));
  const {parseR190BCArgs,runR190BCOfflineArgs}=CLI;
  const input=path.join(root,'brief.txt'),out=path.join(root,'new');
@@ -159,9 +170,11 @@ test('BC offline-only CLI prepares hash-pinned model prompt without any inferenc
    /主要な質量/);
   assert.throws(()=>runR190BCOfflineArgs(['--brief',input,'--sha',sha,'--out',out]),
    /R190BC_CLI_FRESH_ABSOLUTE_PATHS/);
-  const link=path.join(root,'link.txt');fs.symlinkSync(input,link);
+  const link=path.join(root,'link.txt');
+  await checkFileSymlink(t,input,link,()=>{
   assert.throws(()=>runR190BCOfflineArgs(['--brief',link,'--sha',sha,
    '--out',path.join(root,'new-link')]),/R190BC_CLI_UNSAFE_BRIEF/);
+  });
  }finally{fs.rmSync(root,{recursive:true,force:true})}
 });
 test('BC offline CLI original review never reinterprets corrupt R4 as geometry',()=>{
