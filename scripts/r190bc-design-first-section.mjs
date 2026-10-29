@@ -88,6 +88,40 @@ export function reviewR190BCOriginal(raw,{expectedSha256}={}){
   for(let yy=y+headroom;yy<h;yy++)if(has(x,yy,z))return true;
   return false;
  };
+ // R190-BD: a floor may be physically usable yet unreachable from entry.
+ // Probe ONLY a continuous 2x2 same-height floor. Never treat this as stairs,
+ // avatar collision, external road or a guarantee of functioning rooms.
+ const entrance=proposal.spatialPlan.entrance;
+ const validEntry=integerTriple(entrance)&&entrance[0]>=0&&entrance[0]<w&&
+  entrance[2]>=0&&entrance[2]<d&&entrance[1]>0&&entrance[1]+headroom<=h;
+ const entryY=validEntry?entrance[1]:-1;
+ const padKey=(x,z)=>x+','+z,flatPads=new Set(),startPads=[];
+ if(validEntry)for(let x=0;x<w-1;x++)for(let z=0;z<d-1;z++){
+  let usable=true;
+  for(let dx=0;dx<2;dx++)for(let dz=0;dz<2;dz++)
+   if(!stand(x+dx,entryY,z+dz))usable=false;
+  if(!usable)continue;
+  const k=padKey(x,z);flatPads.add(k);
+  if(x<=entrance[0]&&entrance[0]<=x+1&&
+     z<=entrance[2]&&entrance[2]<=z+1)startPads.push(k);
+ }
+ const entryReachable=new Set(startPads),queue=[...startPads];
+ for(let i=0;i<queue.length;i++){
+  const [x,z]=queue[i].split(',').map(Number);
+  for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]]){
+   const k=padKey(x+dx,z+dz);
+   if(flatPads.has(k)&&!entryReachable.has(k)){
+    entryReachable.add(k);queue.push(k);
+   }
+  }
+ }
+ const flatEntryAudit={modelEntrance:validEntry?entrance:null,
+  entranceCandidateTwoWidePads:startPads.length,
+  sourceAllTwoWidePadsAtEntryHeight:flatPads.size,
+  reachableTwoWidePadsAtEntryHeight:entryReachable.size,
+  widthInBlocks:2,minimumAirHeightInBlocks:headroom,
+  onlySameHeightFlatPads:true,stairsAndVerticalCirculation:'NOT_CERTIFIED',
+  minecraftWalking:'NOT_TESTED'};
  const zones=proposal.spatialPlan.functionalZones.map(zone=>{
   const isRegion=integerTriple(zone.origin)&&integerTriple(zone.size)&&
     zone.size.every(n=>n>0)&&zone.origin.every((n,i)=>n>=0&&
@@ -96,7 +130,7 @@ export function reviewR190BCOriginal(raw,{expectedSha256}={}){
    sourceStatus:'HOLD_INVALID_MODEL_ZONE',twoWidePadCount:0,
    roofedPadCount:0,skyOpenPadCount:0,floorLevels:[]};
   const [ox,oy,oz]=zone.origin,[sx,sy,sz]=zone.size;
-  let pads=0,roofed=0,sky=0,partly=0;
+  let pads=0,roofed=0,sky=0,partly=0,connectedFromEntry=0;
   const levels=new Set();
   // A 2x2 standing footprint at the SAME floor elevation. This proxy
   // avoids accepting a one-cell shelf or a label inside a solid slab.
@@ -109,6 +143,7 @@ export function reviewR190BCOriginal(raw,{expectedSha256}={}){
     }
     if(!valid)continue;
     pads++;levels.add(y);
+    if(y===entryY&&entryReachable.has(padKey(x,z)))connectedFromEntry++;
     if(overhead===4)roofed++;
     else if(overhead===0)sky++;
     else partly++;
@@ -117,8 +152,10 @@ export function reviewR190BCOriginal(raw,{expectedSha256}={}){
    origin:zone.origin,size:zone.size,requiredHeadroom:headroom,
    twoWidePadCount:pads,roofedPadCount:roofed,skyOpenPadCount:sky,
    partlyRoofedPadCount:partly,floorLevels:[...levels].sort((a,b)=>a-b),
-   sourceStatus:pads?'SOURCE_CLEAR_SUPPORTED_TWO_WIDE_FOOTPRINT_FOUND':
-    'HOLD_NO_CLEAR_SUPPORTED_TWO_WIDE_FOOTPRINT',
+   flatEntranceReachableTwoWidePadCount:connectedFromEntry,
+   sourceStatus:!pads?'HOLD_NO_CLEAR_SUPPORTED_TWO_WIDE_FOOTPRINT':
+    !connectedFromEntry?'HOLD_TWO_WIDE_ZONE_NOT_REACHED_FROM_ENTRANCE':
+     'SOURCE_CLEAR_SUPPORTED_TWO_WIDE_FOOTPRINT_AND_FLAT_ENTRY_ROUTE',
    actualSeparateRoom:'NOT_CERTIFIED',
    overheadSolidsDoNotProveRoofOrWeatherproofing:true};
  });
@@ -132,16 +169,19 @@ export function reviewR190BCOriginal(raw,{expectedSha256}={}){
  for(let y=0;y<h;y++)for(let x=0;x<w;x++)if(has(x,y,z))
   solidSection.push([x,y]);
  const noSupportedZone=zones.some(q=>q.twoWidePadCount===0);
+ const disconnectedZone=zones.some(q=>!(q.flatEntranceReachableTwoWidePadCount>0));
  return {...common,status:noSupportedZone?
   'HOLD_MODEL_DECLARED_ZONE_SECTION_UNUSABLE':
+  disconnectedZone?'HOLD_MODEL_DECLARED_ZONE_ACCESS_UNPROVEN':
   'SOURCE_SECTION_PROXIES_AVAILABLE_ART_HOLD',
-  firstFailure:noSupportedZone?'MODEL_DECLARED_ZONE_LACKS_SUPPORTED_TWO_WIDE_SPACE':null,
+  firstFailure:noSupportedZone?'MODEL_DECLARED_ZONE_LACKS_SUPPORTED_TWO_WIDE_SPACE':
+   disconnectedZone?'MODEL_DECLARED_ZONE_NOT_CONNECTED_BY_FLAT_TWO_WIDE_SOURCE':null,
   sourceSha256:compiled.sourceSha256,
   geometrySha256:compiled.geometrySha256,
   modelDeclaredDesignIntent:proposal.spatialPlan.designIntent,
   modelDeclaredMassStrategy:proposal.spatialPlan.massStrategy,
   modelDeclaredCirculationStrategy:proposal.spatialPlan.circulationStrategy,
-  zoneEvidence:zones,
+  zoneEvidence:zones,flatEntranceRouteEvidence:flatEntryAudit,
   sectionEvidence:{axis:'x-y',fixedZ:z,width:w,height:h,
    finalSourceVoxelCount:compiled.primitives.length,
    occupiedCellsAtSlice:solidSection,
@@ -150,6 +190,7 @@ export function reviewR190BCOriginal(raw,{expectedSha256}={}){
    doesNotProveOverallArchitectureQuality:true},
   limitations:['No guarantee that roofed pads are independently enclosed rooms',
    'No independent program or aesthetic certification',
+   'A valid flat SOURCE route cannot certify multi-level stairs or access',
    'No load bearing analysis; no Minecraft avatar or world test']};
 }
 export function renderR190BCSectionSVG(result){
