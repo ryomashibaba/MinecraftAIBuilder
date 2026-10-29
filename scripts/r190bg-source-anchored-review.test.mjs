@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import {Script} from 'node:vm';
 import {createHash} from 'node:crypto';
 import {prepareR190BCOfflinePrompt} from './r190bc-offline-review.mjs';
 import {prepareR190BF,captureR190BFSide,compareR190BFPair}
@@ -63,6 +64,10 @@ test('BG composes actual-source gallery and offline human-form for valid saved p
   assert.match(html,/<iframe.*B_3D.html/);
   assert.match(html,/data-score="A-0"/);
   assert.match(html,/R190BG_HUMAN_OBSERVATIONS.json/);
+  const script=html.match(/<script>([\s\S]*?)<\/script>/)?.[1];
+  assert(script&&script.length>400);
+  assert.doesNotThrow(()=>new Script(script));
+  assert.match(html,/NO_PHYSICAL_CHANGE_ART_HOLD/);
   assert.match(html,/ART HOLD/);
   assert.doesNotMatch(html,/\bfetch\s*\(/);
   for(const side of ['A','B'])for(const view of
@@ -155,5 +160,16 @@ test('BG retains valid model B143 as critical evidence when its R4 circulation i
   assert.equal(fs.existsSync(path.join(c.outDir,'B_3D.html')),true);
   assert.equal(review.art,'ART_HOLD');
   assert.equal(review.officialArtAdoptions,0);
+ }finally{fs.rmSync(c.root,{recursive:true,force:true})}
+});
+
+
+test('BG empty review cannot masquerade as submitted human observation',async()=>{
+ const c=env();try{
+  await pair(c);const m=createR190BGReview(c),o=createUserObservation(m);
+  const p=path.join(c.root,'empty-observations.json');
+  fs.writeFileSync(p,JSON.stringify(o));
+  assert.throws(()=>validateR190BGObservations({
+   reviewDir:c.outDir,observationsFile:p}),/R190BG_NO_HUMAN_OBSERVATION/);
  }finally{fs.rmSync(c.root,{recursive:true,force:true})}
 });
