@@ -87,6 +87,17 @@ test('BF two independently authorized mock captures have identical provider cont
   assert.equal(comparison.modelCalls,0);
   assert.equal(fs.existsSync(path.join(c.outDir,'A_3D.html')),true);
   assert.equal(fs.existsSync(path.join(c.outDir,'B_3D.html')),true);
+  assert.equal(doc.humanReviewStatus,'READY_FOR_UNSCORED_HUMAN_REVIEW');
+  const child=path.join(c.outDir,'R190BG_HUMAN_REVIEW');
+  assert.equal(fs.existsSync(path.join(child,'R190BG_REVIEW.html')),true);
+  assert.deepEqual(fs.readFileSync(path.join(child,'A_3D.html')),
+   fs.readFileSync(path.join(c.outDir,'A_3D.html')));
+  assert.deepEqual(fs.readFileSync(path.join(child,'B_SECTION.json')),
+   fs.readFileSync(path.join(c.outDir,'B_SECTION.json')));
+  const receipt=JSON.parse(fs.readFileSync(
+   path.join(c.outDir,'R190BF_CONTROLLED_PAIR.json')));
+  assert.equal(receipt.humanReviewManifestSha256,doc.humanReviewManifestSha256);
+  assert.equal(receipt.officialArtAdoptions,0);
  }finally{fs.rmSync(c.root,{recursive:true,force:true})}
 });
 test('BF cannot silently invoke two requests in one run',async()=>{
