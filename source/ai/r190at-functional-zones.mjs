@@ -44,6 +44,17 @@ export function validateR190ATZones(q){
    z.origin[0]+z.size[0]<=bounds.width&&
    z.origin[1]+z.size[1]<=bounds.depth&&
    integer(z.headroom,5,9),'ZONE_FIELDS');
+  const authorSky=q.parti?.voids?.find(v=>v.role==='open-sky')?.geometry;
+  ok(authorSky?.shape==='box','AUTHORED_SKY_MISSING');
+  const [skyX,,skyZ]=authorSky.origin,[skyW,,skyD]=authorSky.size;
+  if(z.kind==='open-sky')
+   ok(z.origin[0]>=skyX&&z.origin[1]>=skyZ&&
+     z.origin[0]+z.size[0]<=skyX+skyW&&
+     z.origin[1]+z.size[1]<=skyZ+skyD,
+    'CIVIC_ZONE_OUTSIDE_AUTHORED_VOID');
+  else ok(z.origin[0]+z.size[0]<=skyX||z.origin[0]>=skyX+skyW||
+     z.origin[1]+z.size[1]<=skyZ||z.origin[1]>=skyZ+skyD,
+    'SHELTERED_ZONE_OVERLAPS_SKY');
   const a=anchors.get(z.anchorId);
   ok(a.x>=z.origin[0]&&a.x+1<z.origin[0]+z.size[0]&&
     a.z>=z.origin[1]&&a.z+1<z.origin[1]+z.size[1],
