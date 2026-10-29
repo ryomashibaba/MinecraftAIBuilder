@@ -36,10 +36,10 @@ const ids=['A','B'];
 const views=['3D.html','front.svg','rear.svg','west.svg','east.svg','roof.svg',
  'SECTION.svg','SECTION.json'];
 const criterionLabels=[
- '元の日本語依頼に対する用途・利用者の適合',
- '入口からの空間体験・実際に使える内部',
- '質量・空洞・屋根・床支持の美的な一貫性',
- '依頼に応じて生み出された独創性'
+ '元依頼の用途と利用者への適合',
+ '入口からの空間体験と使える内部',
+ '質量・空洞・屋根・支持の造形的一貫性',
+ '独創性と依頼に応じた設計判断'
 ];
 const escape=x=>String(x).replace(/[&<>"']/g,c=>({
  '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -69,7 +69,7 @@ function html(manifest){
  '<title>R190-BG 元形状を見て評価する — ART HOLD</title>',
  '<style>body{font:15px system-ui,sans-serif;line-height:1.5;margin:20px;background:#101b2c;color:#f3f5f8}a{color:#9dd4ff}h1,h2{margin:.6em 0}p{max-width:1000px}section{padding:12px}main{display:grid;grid-template-columns:1fr 1fr;gap:14px}iframe{width:100%;height:55vh;border:1px solid #71809a;background:#fafafa}table{width:100%;border-collapse:collapse}td,th{border:1px solid #617087;padding:8px;vertical-align:top}th{width:20%}td{width:40%}label{display:block;margin-bottom:7px}textarea,select,input{font:inherit;color:#111;background:#f5f6fa;border:1px solid #9ba9b9;border-radius:4px;padding:6px;width:100%;box-sizing:border-box}textarea{min-height:78px}button{background:#c2e3ff;border:0;border-radius:4px;padding:12px 18px;font:inherit;font-weight:bold;cursor:pointer}aside{border-left:3px solid #ffcf75;padding:10px;margin:14px 0;background:#263447}small{color:#b9c8dc}#status{white-space:pre-wrap} @media(max-width:850px){main{grid-template-columns:1fr}table,tbody,tr,td,th{display:block;width:100%;box-sizing:border-box}}</style>',
  '</head><body><h1>R190-BG｜真正B143を観察するための人間審査</h1>',
- '<aside><strong>美術採用ではありません：ART HOLD。</strong> 実モデルが作成した場合も人間が独立に評価します。SOURCE PASS・写真・材質・数値差だけで高品質とは認定しません。階段のMinecraft歩行・構造強度・用途の成立は未認定です。既存のモデル名・ファイル名が画面に見える場合があり、厳密な盲検ではありません。写真・3Dは保存済み原形状だけです。</aside>',
+ '<aside><strong>美術採用ではありません：ART HOLD。</strong> 実モデルが作成した場合も人間が独立に評価します。機能・動線がHOLDでも有効なB143原形状は失敗例として批評できますが、使用可能な建築だとは認定しません。SOURCE PASS・写真・材質・数値差だけで高品質とは認定しません。階段のMinecraft歩行・構造強度・用途の成立は未認定です。既存のモデル名・ファイル名が画面に見える場合があり、厳密な盲検ではありません。写真・3Dは保存済み原形状だけです。</aside>',
  '<details><summary>評価対象のSHA256と技術判定</summary><pre id="info"></pre></details>',
  '<main>',
  ...ids.map(id=>'<section><h2>候補'+id+'</h2><p id="state-'+id+'"></p>'+
@@ -123,12 +123,15 @@ export function createR190BGReview({comparisonDir,outDir}){
   report.A?.originalSha256!==template.A||report.B?.originalSha256!==template.B||
   !/^[0-9a-f]{64}$/.test(report.originalBriefSha256??'')||
   !['NO_PHYSICAL_CHANGE_ART_HOLD','SAVED_SOURCE_PAIR_AVAILABLE_ART_HOLD'].includes(report.status)||
-  report.A?.status!=='SOURCE_REVIEW_AVAILABLE_ART_HOLD'||
-  report.B?.status!=='SOURCE_REVIEW_AVAILABLE_ART_HOLD'||
+  !['SOURCE_REVIEW_AVAILABLE_ART_HOLD','HOLD_R4_SOURCE_REFERENCE_ONLY',
+    'HOLD_SECTION_SOURCE_REFERENCE_ONLY'].includes(report.A?.status)||
+  !['SOURCE_REVIEW_AVAILABLE_ART_HOLD','HOLD_R4_SOURCE_REFERENCE_ONLY',
+    'HOLD_SECTION_SOURCE_REFERENCE_ONLY'].includes(report.B?.status)||
   ![report.A?.geometrySha256,report.B?.geometrySha256].every(x=>
    /^[0-9a-f]{64}$/.test(x??''))||
   !Array.isArray(template.criteria)||template.criteria.length!==4||
-  !template.criteria.every(x=>x.scoreA===null&&x.scoreB===null)||
+  !template.criteria.every((x,i)=>x.criterion===criterionLabels[i]&&
+    x.scoreA===null&&x.scoreB===null)||
   report.winner!=='NOT_ESTABLISHED'||report.art!=='ART_HOLD'||report.modelCalls!==0||
   report.worldWrites!==0||report.worldContacts!==0)
   fail('SOURCE_PAIR_NOT_HUMAN_REVIEWABLE');
