@@ -9,6 +9,7 @@ import {buildR190BCDesignFirstPrompt,reviewR190BCOriginal,
  renderR190BCSectionSVG,writeR190BCOriginalReview}
  from './r190bc-design-first-section.mjs';
 
+import * as CLI from './r190bc-offline-review.mjs';
 const hash=x=>createHash('sha256').update(x).digest('hex');
 const box=(id,origin,size,material='stone')=>({
  id,shape:'box',mode:'add',material,origin,size});
@@ -133,4 +134,48 @@ test('BC fresh output, symlink denial, no changes to input, no model, safety',()
   assert.throws(()=>writeR190BCOriginalReview({originalPath:link,
    outDir:path.join(tmp,'later'),expectedSha256:digest}),/R190BC_UNSAFE_ORIGINAL/);
  }finally{fs.rmSync(tmp,{recursive:true,force:true})}
+});
+
+test('BC offline-only CLI prepares hash-pinned model prompt without any inference',()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'r190bc-prompt-'));
+ const {parseR190BCArgs,runR190BCOfflineArgs}=CLI;
+ const input=path.join(root,'brief.txt'),out=path.join(root,'new');
+ const brief='岩場の小型観測施設を独自の空間構成と安全な支持床で設計してください。';
+ fs.writeFileSync(input,brief);
+ const sha=hash(fs.readFileSync(input));
+ try{
+  assert.equal(parseR190BCArgs(['--help']).help,true);
+  assert.throws(()=>parseR190BCArgs(['--brief','a','--original','b','--out','c']),
+   /R190BC_CLI_FLAGS/);
+  assert.throws(()=>runR190BCOfflineArgs(['--brief',input,'--out',out,
+   '--sha','0'.repeat(64)]),/R190BC_CLI_BRIEF_SHA_MISMATCH/);
+  assert.equal(fs.existsSync(out),false);
+  const receipt=runR190BCOfflineArgs(['--brief',input,'--sha',sha,'--out',out]);
+  assert.equal(receipt.newModelRequests,0);
+  assert.equal(receipt.worldWrites,0);
+  assert.deepEqual(receipt.gates,Array(9).fill('BLOCKED'));
+  assert.equal(fs.readFileSync(path.join(out,'ORIGINAL_BRIEF.txt'),'utf8'),brief);
+  assert.match(fs.readFileSync(path.join(out,'DESIGN_FIRST_PROMPT.txt'),'utf8'),
+   /主要な質量/);
+  assert.throws(()=>runR190BCOfflineArgs(['--brief',input,'--sha',sha,'--out',out]),
+   /R190BC_CLI_FRESH_ABSOLUTE_PATHS/);
+  const link=path.join(root,'link.txt');fs.symlinkSync(input,link);
+  assert.throws(()=>runR190BCOfflineArgs(['--brief',link,'--sha',sha,
+   '--out',path.join(root,'new-link')]),/R190BC_CLI_UNSAFE_BRIEF/);
+ }finally{fs.rmSync(root,{recursive:true,force:true})}
+});
+test('BC offline CLI original review never reinterprets corrupt R4 as geometry',()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'r190bc-cli-review-'));
+ const input=path.join(root,'original.txt'),out=path.join(root,'new');
+ const bad='{"design":';
+ fs.writeFileSync(input,bad);
+ try{
+  const review=CLI.runR190BCOfflineArgs([
+   '--original',input,'--out',out,'--sha',hash(Buffer.from(bad))]);
+  assert.equal(review.status,'HOLD_INVALID_ORIGINAL_R4_OR_B143');
+  assert.equal(review.sectionEvidence,null);
+  assert.equal(review.modelCalls,0);
+  assert.deepEqual(fs.readdirSync(out).sort(),
+   ['R190BC_SECTION_AUDIT.json','R190BC_SOURCE_SECTION.svg']);
+ }finally{fs.rmSync(root,{recursive:true,force:true})}
 });
