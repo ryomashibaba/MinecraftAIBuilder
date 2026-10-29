@@ -55,6 +55,7 @@ test('AS fails when metadata omits required authored supports or links wrong env
  assert.throws(()=>validateR190ASCoDesign(q),/R190AS_SUPPORT_PAIRS/);
  const wrong=clone(R190AS_CO_DESIGNED_CASES[0]);
  wrong.structureIntent.supportPairs[0].envelopeId='east-cantilever-shell';
+ wrong.structureIntent.supportPairs[2].envelopeId='west-low-bonded-shell';
  assert.throws(()=>reviewR190ASCoDesign(wrong),/R190AS_SUPPORT_DOES_NOT_INTEGRATE_WITH_ENVELOPE/);
  const dup=clone(R190AS_CO_DESIGNED_CASES[0]);
  dup.structureIntent.supportPairs[0].supportId=dup.structureIntent.supportPairs[1].supportId;
