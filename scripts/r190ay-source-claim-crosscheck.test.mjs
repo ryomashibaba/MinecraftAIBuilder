@@ -75,6 +75,8 @@ test('AY a previously unsupported earlier add makes lightwell intersection INDET
  q.design.elements.splice(2,0,{id:'inside-void',shape:'box',mode:'add',
   material:'stone',origin:[9,4,9],size:[2,5,2]});
  result=reviewR190AYPreservedClaims(Buffer.from(JSON.stringify(q)));
+ assert.equal(result.strictB143CompileStatus,'NOT_EVALUATED_SOURCE_ONLY');
+ assert.equal(result.modelAuthorship,'NOT_ESTABLISHED');
  assert.equal(result.sourceClaims.lightwell.status,'PRIOR_DECLARED_BOXES_DO_INTERSECT');
  assert.equal(result.sourceClaims.lightwell.priorAddDeclaredIntersectionCells
   .find(x=>x.id==='inside-void').boxIntersectionCells,20);

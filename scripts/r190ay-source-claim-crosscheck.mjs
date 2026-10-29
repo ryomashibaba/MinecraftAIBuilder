@@ -124,6 +124,8 @@ export function reviewR190AYPreservedClaims(input,{expectedSha256}={}){
  if(!(input instanceof Uint8Array)||input.length<2||input.length>200000)
   fail('INVALID_ORIGINAL_BYTES');
  const digest=sha(input);
+ const knownPublishedR190AA=digest===
+  '0bf706181bb2b7a30f8082f896a703c33749ba55f75d42010adba88f47c84f17';
  if(expectedSha256!==undefined&&(!/^[a-f0-9]{64}$/.test(expectedSha256)||
     expectedSha256!==digest))fail('ORIGINAL_SHA_MISMATCH');
  let raw;
@@ -134,10 +136,16 @@ export function reviewR190AYPreservedClaims(input,{expectedSha256}={}){
  const witnessed=interpretSource(parsed);
  return {schema:R190AY_SCHEMA,
   originalSha256:digest,originalBytes:input.length,
-  sourceKind:'MODEL_RETURNED_INVALID_B143_DECLARATIONS',
-  provenance:'SAVED_CAPTURED_RESPONSE_NOT_CRYPTOGRAPHIC_MODEL_IDENTITY',
-  modelAuthorship:'PROVIDER_CLAIM_ONLY_NOT_CRYPTOGRAPHICALLY_VERIFIED',
-  strictB143CompileStatus:'HOLD_B143_SCHEMA_OR_MODE',
+  sourceKind:knownPublishedR190AA?
+   'PUBLISHED_R190AA_MODEL_DECLARATIONS_INVALID_B143':
+   'UNVERIFIED_SOURCE_DECLARATIONS_NOT_COMPILED',
+  provenance:knownPublishedR190AA?
+   'SAVED_CAPTURED_RESPONSE_NOT_CRYPTOGRAPHIC_MODEL_IDENTITY':
+   'NOT_A_PUBLISHED_CAPTURING_RECEIPT',
+  modelAuthorship:knownPublishedR190AA?
+   'PROVIDER_CLAIM_ONLY_NOT_CRYPTOGRAPHICALLY_VERIFIED':'NOT_ESTABLISHED',
+  strictB143CompileStatus:knownPublishedR190AA?
+   'HOLD_B143_SCHEMA_OR_MODE':'NOT_EVALUATED_SOURCE_ONLY',
   hasActualCompiledB143Geometry:false,sourceClaims:witnessed,
   evidenceLimit:'BOX_INTERSECTION_AND_OPERATION_ORDER_ONLY_NO_REPAIR_OR_VOXEL_COMPILATION',
   requirementCoverage:'NOT_CERTIFIED',
