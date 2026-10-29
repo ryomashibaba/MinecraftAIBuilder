@@ -46,6 +46,9 @@ test('BK equal synthetic B143 creates observation guide with no false architectu
   assert.equal(r.status,'NO_PHYSICAL_DIFFERENCE_ART_HOLD');
   assert.equal(r.humanReviewAvailable,true);
   assert.equal(r.humanReviewStatus,'NOT_RECORDED');
+  assert.equal(r.originalJapaneseBrief,brief);
+  assert.equal(r.verifiedOriginalBriefFileSha256,H(brief));
+  assert.equal(r.sourceViewHashesVerified,true);
   assert.equal(r.architecturalQualityImprovement,'NOT_ESTABLISHED');
   assert.equal(r.physicalChangeProven,false);
   assert.equal(r.modelCalls,0);assert.equal(r.worldWrites,0);
@@ -57,6 +60,10 @@ test('BK equal synthetic B143 creates observation guide with no false architectu
   assert.match(html,/R190BG_HUMAN_REVIEW\/R190BG_REVIEW.html/);
   assert.match(html,/A_3D.html/);assert.match(html,/B_3D.html/);
   assert.match(html,/ART HOLD/);
+  assert.match(html,/元の日本語依頼/);
+  assert.match(html,/A_front.svg/);
+  assert.match(html,/B_roof.svg/);
+  assert.match(html,/A_SECTION.svg/);
   assert.throws(()=>buildR190BKOffline({comparisonDir:c.compare}),
    /R190BK_FRESH_OUTPUT_REQUIRED/);
  }finally{fs.rmSync(c.root,{recursive:true,force:true})}
@@ -82,6 +89,30 @@ test('BK refuses tampered BE comparison evidence before any output',async()=>{
   fs.appendFileSync(path.join(c.compare,'R190BE_COMPARE.json'),' ');
   assert.throws(()=>buildR190BKOffline({comparisonDir:c.compare}),/R190BK_BF_BE_EVIDENCE_CHAIN/);
   assert.equal(fs.existsSync(path.join(c.compare,'R190BK_EVIDENCE')),false);
+ }finally{fs.rmSync(c.root,{recursive:true,force:true})}
+});
+test('BL rejects modified original request or any view before publication',async()=>{
+ for(const changed of ['R190BL_ORIGINAL_BRIEF.txt','A_3D.html',
+  'B_front.svg','A_SECTION.svg']){
+  const c=fixture();
+  try{
+   await createPair(c);
+   fs.appendFileSync(path.join(c.compare,changed),' ');
+   assert.throws(()=>buildR190BKOffline({comparisonDir:c.compare}),
+    /R190BK_(?:BRIEF_EVIDENCE_CHAIN|SOURCE_VIEW_TAMPERED_[AB])/);
+   assert.equal(fs.existsSync(path.join(c.compare,'R190BK_EVIDENCE')),false);
+  }finally{fs.rmSync(c.root,{recursive:true,force:true})}
+ }
+});
+test('BL does not show an invalid source as a 3D or generate an invented view hash',async()=>{
+ const c=fixture();
+ try{
+  await createPair(c,syntheticOriginal(),'{"invalid":true}');
+  const r=buildR190BKOffline({comparisonDir:c.compare});
+  assert.equal(r.B.source3D,null);
+  assert.deepEqual(r.B.viewLinks,[]);
+  assert.equal(r.A.viewLinks.length,6);
+  assert.equal(r.generated3DFromInvalidSource,false);
  }finally{fs.rmSync(c.root,{recursive:true,force:true})}
 });
 test('BK refuses tampered BG reviewer and invalid-source diagnostic',async()=>{

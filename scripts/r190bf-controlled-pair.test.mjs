@@ -79,6 +79,12 @@ test('BF two independently authorized mock captures have identical provider cont
   assert.equal(doc.actualHumanArtImprovement,'NOT_ESTABLISHED');
   assert.equal(doc.modelDigestVerified,undefined);
   assert.equal(doc.generationModelDigestVerified,false);
+  assert.equal(doc.originalBriefFile,'R190BL_ORIGINAL_BRIEF.txt');
+  assert.equal(doc.originalBriefFileSha256,H(REQUEST));
+  assert.equal(doc.savedSourceViewSha256['A_3D.html'],
+   H(fs.readFileSync(path.join(c.outDir,'A_3D.html'))));
+  assert.equal(doc.savedSourceViewSha256['B_SECTION.json'],
+   H(fs.readFileSync(path.join(c.outDir,'B_SECTION.json'))));
   assert.deepEqual(doc.invalidSourceDiagnostics,{});
   assert.equal(doc.savedComparisonReportSha256,
    H(fs.readFileSync(path.join(c.outDir,'R190BE_COMPARE.json'))));

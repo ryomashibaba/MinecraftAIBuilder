@@ -230,7 +230,26 @@ export function compareR190BFPair({protocolDir,preparedDir,aDir,bDir,outDir}){
    .includes(comparison.status);
  const review=canReview?createR190BGReview({comparisonDir:out,
   outDir:path.join(out,'R190BG_HUMAN_REVIEW'),allowNestedChild:true}):null;
+ // R190-BL: bind the original Japanese task and every BE source view to
+ // exact saved bytes before reporting. Do not reinterpret or repair geometry.
+ const originalBriefBytes=file(prepared,'ORIGINAL_BRIEF.txt',20000);
+ if(H(originalBriefBytes)!==manifest.briefSha256||
+    !originalBriefBytes.equals(Buffer.from(original,'utf8')))
+   fail('BL_BRIEF_SOURCE_DRIFT');
+ const originalBriefFile='R190BL_ORIGINAL_BRIEF.txt';
+ fs.writeFileSync(path.join(out,originalBriefFile),originalBriefBytes,{flag:'wx'});
+ const savedSourceViewSha256={};
+ const blViews=id=>[id+'_3D.html',...['front','rear','west','east','roof']
+  .map(side=>id+'_'+side+'.svg'),id+'_SECTION.svg',id+'_SECTION.json'];
+ for(const id of ['A','B']){
+  if(!['SOURCE_REVIEW_AVAILABLE_ART_HOLD','HOLD_R4_SOURCE_REFERENCE_ONLY',
+   'HOLD_SECTION_SOURCE_REFERENCE_ONLY'].includes(comparison[id].status))
+    continue;
+  for(const name of blViews(id))savedSourceViewSha256[name]=H(file(out,name,3000000));
+ }
  const evidence={schema:R190BF_SCHEMA,protocolSha256,
+  originalBriefFile,originalBriefFileSha256:H(originalBriefBytes),
+  savedSourceViewSha256,
   A,B,identicalSettingsRequested:true,
   sameModelClaimed:true,sameSystemPromptSha256:A.systemPromptHash,
   generationModelDigestVerified:false,providerSeedHonoredVerified:false,

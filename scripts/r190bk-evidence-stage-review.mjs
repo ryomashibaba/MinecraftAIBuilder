@@ -24,7 +24,7 @@ const safety=()=>({readiness:'NOT_PREPARED',constructionApproved:false,
  BuildPlan:{operations:[]},modelCalls:0,worldContacts:0,worldWrites:0,
  art:'ART_HOLD',officialArtAdoptions:0});
 function file(root,name,max=1200000){
- if(!directory(root)||!/^[A-Za-z0-9_-]+\.(?:json|html|svg)$/.test(name))
+ if(!directory(root)||!/^[A-Za-z0-9_-]+\.(?:json|html|svg|txt)$/.test(name))
   fail('FILE_PATH');
  const p=path.join(root,name),s=fs.lstatSync(p);
  if(!s.isFile()||s.isSymbolicLink()||s.size<2||s.size>max)
@@ -36,16 +36,24 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({
  '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const validSource=['SOURCE_REVIEW_AVAILABLE_ART_HOLD',
  'HOLD_R4_SOURCE_REFERENCE_ONLY','HOLD_SECTION_SOURCE_REFERENCE_ONLY'];
+const sourceViewFiles=id=>[id+'_3D.html',...['front','rear','west','east','roof']
+ .map(side=>id+'_'+side+'.svg'),id+'_SECTION.svg',id+'_SECTION.json'];
 function candidate(root,id,be,bf,beSha){
  const entry=be[id],finger=bf[id];
  if(!entry||!finger||!validHash(entry.originalSha256)||
     finger.sourceSha256!==entry.originalSha256)fail('SOURCE_LINK_'+id);
- let source3D=null,diagnostic=null;
+ let source3D=null,diagnostic=null,viewLinks=[];
  const has3D=validSource.includes(entry.status);
  if(has3D){
   if(!validHash(entry.geometrySha256))fail('VALID_GEOMETRY_SHA_'+id);
-  file(root,id+'_3D.html',3000000);
+  for(const name of sourceViewFiles(id)){
+   const expected=bf.savedSourceViewSha256?.[name];
+   if(!validHash(expected)||H(file(root,name,3000000))!==expected)
+     fail('SOURCE_VIEW_TAMPERED_'+id);
+  }
   source3D='../'+id+'_3D.html';
+  viewLinks=sourceViewFiles(id).filter(name=>name.endsWith('.svg'))
+   .map(name=>({file:name,href:'../'+name}));
  }else if(entry.status==='HOLD_INVALID_B143'){
   const record=bf.invalidSourceDiagnostics?.[id];
   if(!record||record.originalSha256!==entry.originalSha256)
@@ -66,7 +74,7 @@ function candidate(root,id,be,bf,beSha){
  }else if(entry.status!=='HOLD_PROVIDER_COMPLETION_UNPROVEN')
   fail('UNRECOGNIZED_SOURCE_STATUS_'+id);
  return {status:entry.status,originalSha256:entry.originalSha256,
-  geometrySha256:entry.geometrySha256??null,source3D,
+  geometrySha256:entry.geometrySha256??null,source3D,viewLinks,
   diagnostic,r4Status:entry.r4Status,sectionStatus:entry.sectionStatus,
   modelClaimed:entry.modelClaimed??null,providerIdentityVerified:false,
   constructionOrArtCertified:false};
@@ -79,8 +87,11 @@ function page(report){
    '<details><summary>原文上の失敗箇所</summary><ul>'+
     e.diagnostic.literalFindings.map(x=>'<li>'+esc(x.code)+' / '+esc(x.path)+'</li>').join('')+
     '</ul><a href="'+esc(e.diagnostic.report)+'">原文診断JSON</a></details>':'';
+  const other=e.viewLinks.length?'<p>元形状の五方向投影・断面：'+
+   e.viewLinks.map(v=>'<a href="'+esc(v.href)+'">'+esc(v.file)+'</a>').join(' / ')+
+   '</p>':'';
   return '<section><h2>候補'+id+'</h2><p>'+esc(e.status)+'</p><p>'+link+
-   '</p><dl><dt>モデル原文SHA</dt><dd>'+esc(e.originalSha256)+'</dd>'+
+   '</p>'+other+'<dl><dt>モデル原文SHA</dt><dd>'+esc(e.originalSha256)+'</dd>'+
    '<dt>R4機能判定</dt><dd>'+esc(e.r4Status)+'</dd>'+
    '<dt>断面・入口判定</dt><dd>'+esc(e.sectionStatus)+'</dd></dl>'+issues+'</section>';
  };
@@ -91,7 +102,11 @@ function page(report){
   '<h1>R190-BK｜モデル回答の有効性と建築品質の証拠</h1>'+
   '<aside>ART HOLD・正式採用0・施工禁止。保存原文の契約、真正3D、R4、断面と人間審査は別々の段階。モデル名、SHA、合成テストだけから建築の優劣を認定しない。未完成原文から見本の3Dを補完しない。</aside>'+
   '<p>候補Bの指示方式：'+esc(report.candidatePromptKind)+
-   '／状態：'+esc(report.status)+'</p><main>'+
+   '／状態：'+esc(report.status)+'</p>'+
+  '<details open><summary>元の日本語依頼（SHA照合済み）</summary><pre style="white-space:pre-wrap;overflow-wrap:anywhere">'+
+   esc(report.originalJapaneseBrief)+'</pre></details>'+
+  '<p>用途・利用者・必要な空間・入口・動線・屋根・外観を、この依頼に照らして人間が観察してください。'+
+   '原文の要求を機械的に採点したり、建物の形をホストが補ったりしません。</p><main>'+
   stage('A',report.A)+stage('B',report.B)+'</main>'+
   (report.humanReviewAvailable?
    '<p><a href="../R190BG_HUMAN_REVIEW/R190BG_REVIEW.html">元形状の人間審査画面へ</a></p>':
@@ -117,6 +132,14 @@ export function buildR190BKOffline({comparisonDir,observationsFile=null}){
     bf.generationModelDigestVerified!==false||
     be.winner!=='NOT_ESTABLISHED'||be.qualityImprovement!=='NOT_ESTABLISHED')
    fail('BF_BE_EVIDENCE_CHAIN');
+ // Independent review must retain the exact original task, not a summary.
+ if(bf.originalBriefFile!=='R190BL_ORIGINAL_BRIEF.txt')
+   fail('BRIEF_EVIDENCE_CHAIN');
+ const briefBytes=file(comparisonDir,bf.originalBriefFile,20000);
+ if(bf.originalBriefFileSha256!==H(briefBytes)||
+    H(briefBytes)!==be.originalBriefSha256)
+   fail('BRIEF_EVIDENCE_CHAIN');
+ const originalJapaneseBrief=new TextDecoder('utf-8',{fatal:true}).decode(briefBytes);
  const A=candidate(comparisonDir,'A',be,bf,beSha);
  const B=candidate(comparisonDir,'B',be,bf,beSha);
  const humanReviewAvailable=bf.humanReviewStatus==='READY_FOR_UNSCORED_HUMAN_REVIEW';
@@ -153,6 +176,9 @@ export function buildR190BKOffline({comparisonDir,observationsFile=null}){
   bfReportSha256:H(bfRaw),beReportSha256:beSha,
   protocolSha256:bf.protocolSha256,
   originalBriefSha256:be.originalBriefSha256,
+  originalJapaneseBrief,
+  verifiedOriginalBriefFileSha256:H(briefBytes),
+  sourceViewHashesVerified:true,
   physicalChangeProven:status==='SOURCE_PAIR_REVIEWABLE_ART_HOLD',
   A,B,humanReviewAvailable,humanReviewManifestSha256:manifestHash,
   humanReviewStatus,nextAction,
@@ -163,7 +189,11 @@ export function buildR190BKOffline({comparisonDir,observationsFile=null}){
   generated3DFromInvalidSource:false,...safety()};
  // No writes until all source and requested human receipt checks succeed.
  if(H(file(comparisonDir,'R190BF_CONTROLLED_PAIR.json'))!==H(bfRaw)||
-    H(file(comparisonDir,'R190BE_COMPARE.json'))!==beSha)
+    H(file(comparisonDir,'R190BE_COMPARE.json'))!==beSha||
+    H(file(comparisonDir,'R190BL_ORIGINAL_BRIEF.txt',20000))!==H(briefBytes)||
+    ['A','B'].some(id=>validSource.includes(be[id]?.status)&&
+     sourceViewFiles(id).some(name=>
+      H(file(comparisonDir,name,3000000))!==bf.savedSourceViewSha256[name])))
   fail('INPUT_CHANGED');
  fs.mkdirSync(out);
  fs.writeFileSync(path.join(out,'R190BK_EVIDENCE.json'),
