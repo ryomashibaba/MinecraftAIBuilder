@@ -11,6 +11,7 @@ import {createHash} from 'node:crypto';
 import {inspectR190BDPrepared} from './r190bd-consented-design-first.mjs';
 import {runR190Local} from './r190-local-semantic-run.mjs';
 import {compareR190BESaved} from './r190be-saved-design-comparison.mjs';
+import {createR190BGReview} from './r190bg-source-anchored-review.mjs';
 
 export const R190BF_SCHEMA='minecraftaibuilder-r190bf-locked-pair-v1';
 const H=x=>createHash('sha256').update(x).digest('hex');
@@ -186,12 +187,26 @@ export function compareR190BFPair({protocolDir,preparedDir,aDir,bDir,outDir}){
  if(A.systemPromptHash!==B.systemPromptHash)fail('SYSTEM_PROMPT_DRIFT');
  const comparison=compareR190BESaved({prepared,baseline:path.join(a,'model-original'),
   candidate:path.join(b,'model-original'),out});
+ // A human-readable art review is useful even when a valid B143 has R4
+ // functional HOLD. A missing/invalid B143 pair must never receive fake 3D.
+ const reviewable=new Set(['SOURCE_REVIEW_AVAILABLE_ART_HOLD',
+  'HOLD_R4_SOURCE_REFERENCE_ONLY','HOLD_SECTION_SOURCE_REFERENCE_ONLY']);
+ const canReview=reviewable.has(comparison.A.status)&&
+  reviewable.has(comparison.B.status)&&
+  ['NO_PHYSICAL_CHANGE_ART_HOLD','SAVED_SOURCE_PAIR_AVAILABLE_ART_HOLD']
+   .includes(comparison.status);
+ const review=canReview?createR190BGReview({comparisonDir:out,
+  outDir:path.join(out,'R190BG_HUMAN_REVIEW'),allowNestedChild:true}):null;
  const evidence={schema:R190BF_SCHEMA,protocolSha256,
   A,B,identicalSettingsRequested:true,
   sameModelClaimed:true,sameSystemPromptSha256:A.systemPromptHash,
   generationModelDigestVerified:false,providerSeedHonoredVerified:false,
   result:'SOURCE_PAIR_COMPARE_ONLY_ART_HOLD',
   actualHumanArtImprovement:'NOT_ESTABLISHED',
+  humanReviewStatus:review?'READY_FOR_UNSCORED_HUMAN_REVIEW':
+    'HOLD_NO_VALID_B143_PAIR',
+  humanReviewRelativePath:review?'R190BG_HUMAN_REVIEW/R190BG_REVIEW.html':null,
+  humanReviewManifestSha256:review?.manifestSha256??null,
   noModelRequestsByComparison:true,...safe()};
  fs.writeFileSync(path.join(out,'R190BF_CONTROLLED_PAIR.json'),
   JSON.stringify(evidence,null,2)+'\n',{flag:'wx'});
