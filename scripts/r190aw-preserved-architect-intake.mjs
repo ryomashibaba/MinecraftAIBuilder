@@ -42,9 +42,12 @@ function pathSafe(response,brief,out){
     fs.existsSync(result))fail('OUTPUT_NOT_FRESH');
  const parent=fs.realpathSync(path.dirname(result));
  if(!fs.statSync(parent).isDirectory())fail('OUTPUT_PARENT');
- const inputParents=inputs.map(x=>fs.realpathSync(path.dirname(x)));
- if(inputParents.some(x=>result===x||result.startsWith(x+path.sep)))
-  fail('OUTPUT_INSIDE_INPUT_DIRECTORY');
+ // Original inputs are regular files, never directories. A fresh output
+ // subfolder beside their files is safe and the expected low-friction usage.
+ // Only reject overlap with the ACTUAL input file paths and existing output.
+ // Do not reject merely because an input symlink's parent is the output parent.
+ if(inputs.some(x=>result===x||result.startsWith(x+path.sep)))
+  fail('OUTPUT_OVERLAPS_SOURCE_FILE');
 }
 const supported=[B143_SCHEMA,R190AQ_SCHEMA,R190AS_SCHEMA,R190AT_SCHEMA,R190AU_SCHEMA];
 function inspectRaw(raw){
