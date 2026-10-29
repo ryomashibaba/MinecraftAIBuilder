@@ -41,12 +41,24 @@ test('AT 2 authored architectural proposals have real shelter, forum, source cir
   assert.equal(s.art,'ART_HOLD');
  }
 });
-test('AT no silent fixes: open civic court occlusion must fail',()=>{
+test('AT authored skylight remains true when a mass is deliberately subtracted in SOURCE',()=>{
  const x=clone(R190AT_AUTHOR_CASES[0]);
  x.parti.masses.push({id:'fake-court-roof',shape:'box',mode:'add',
   material:'metal',origin:[34,15,27],size:[8,2,10]});
+ const r=reviewR190ATZones(x);
+ const sky=r.zones.find(z=>z.kind==='open-sky');
+ assert.equal(sky.verifiedOpenSkyCells,sky.sourceFloorCells);
+ assert.equal(r.structure.detachedVoxelCount,0);
+ const fake=r.source.compiled.stats.designOperations.find(op=>op.element==='fake-court-roof');
+ assert(fake.added>0);
+ const voidOperation=r.source.compiled.stats.designOperations.find(op=>op.element==='author-civic-sky-void');
+ assert(voidOperation.removed>=80);
+});
+test('AT weather shelter cannot be an occupied low slab',()=>{
+ const x=clone(R190AT_AUTHOR_CASES[0]);
+ x.parti.masses.find(m=>m.id==='west-public-roof').origin[1]=8;
  assert.throws(()=>reviewR190ATZones(x),
-  /R190AQ_SKY_IS_ACTUALLY_BLOCKED|R190AT_CIVIC_SKY_OCCLUDED/);
+  /R190AT_ZONE_LACKS_HEADROOM|R190AT_DETACHED_BUILDING_MASS/);
 });
 test('AT no silent fixes: sheltered space without roof is HOLD',()=>{
  const x=clone(R190AT_AUTHOR_CASES[0]);
