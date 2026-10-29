@@ -1,0 +1,35 @@
+name: R190-BF Locked A-B Controlled Study — NO REAL MODEL
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'scripts/r190bf-*'
+      - 'scripts/r190be-saved-design-comparison.mjs'
+      - 'scripts/r190bd-consented-design-first.mjs'
+      - 'scripts/r190bc-design-first-section.mjs'
+      - '.github/workflows/r190bf-locked-study.yml'
+  pull_request:
+    paths:
+      - 'scripts/r190bf-*'
+      - 'scripts/r190be-saved-design-comparison.mjs'
+      - 'scripts/r190bd-consented-design-first.mjs'
+      - 'scripts/r190bc-design-first-section.mjs'
+      - '.github/workflows/r190bf-locked-study.yml'
+permissions:
+  contents: read
+jobs:
+  synthetic-no-provider:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check scripts/r190bf-controlled-pair.mjs
+      - run: node --test scripts/r190bf-controlled-pair.test.mjs
+      - run: node --test scripts/r190be-saved-design-comparison.test.mjs
