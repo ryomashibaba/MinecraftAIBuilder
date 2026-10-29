@@ -65,6 +65,7 @@ async function runR190ArchitecturalB143(options,target,fetcher){
  }):null;
  const generator=createB198GLocalModelAdapter({
   model:options.model,plannedSourceMode:true,
+  ...(options.timeoutMs!==undefined?{timeoutMs:options.timeoutMs}:{}),
   fetcher:native?.fetcher??fetcher,
   onRawModelResponse:(raw,{finishReason}={})=>{
    if(originalRaw!==null&&originalRaw!==raw)

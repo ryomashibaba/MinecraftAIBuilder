@@ -120,7 +120,7 @@ export function parseR190BJArgs(argv){
    '--archived-original':'archivedOriginalPath','--archived-sha':'expectedOriginalSha256',
    '--out':'outDir'}[argv[i]];
   if(!k||Object.hasOwn(opts,k)||!argv[i+1])fail('FLAGS');
-  opts[k]=argv[++i];
+  opts[k]=argv[i+1];
  }
  if(Object.keys(opts).length!==5)fail('FLAGS');
  for(const k of ['briefPath','archivedOriginalPath','outDir'])

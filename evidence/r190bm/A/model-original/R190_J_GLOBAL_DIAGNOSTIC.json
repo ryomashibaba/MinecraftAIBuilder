@@ -1,0 +1,39 @@
+{
+  "schema": "minecraftaibuilder-b198zr49-global-consistency-audit-v1",
+  "originalRawSha256": "e54f2abf87d36e0957d8393c960d2fce8075862d00ea1ea736365121a4b6a469",
+  "unmodifiedOriginal": true,
+  "modelCalls": 0,
+  "worldContacts": 0,
+  "worldWrites": 0,
+  "modelQualityCertified": false,
+  "compilerPassCertified": false,
+  "physicalWalkabilityCertified": false,
+  "safety": {
+    "readiness": "NOT_PREPARED",
+    "constructionApproved": false,
+    "executionAllowed": false,
+    "worldContacts": 0,
+    "worldWrites": 0,
+    "gates": [
+      "BLOCKED",
+      "BLOCKED",
+      "BLOCKED",
+      "BLOCKED",
+      "BLOCKED",
+      "BLOCKED",
+      "BLOCKED",
+      "BLOCKED",
+      "BLOCKED"
+    ],
+    "BuildPlan": {
+      "operations": []
+    }
+  },
+  "status": "HOLD_MISSING_SOURCE_OR_BOUNDS",
+  "issues": [
+    {
+      "kind": "INVALID_SOURCE_ENVELOPE",
+      "count": 1
+    }
+  ]
+}

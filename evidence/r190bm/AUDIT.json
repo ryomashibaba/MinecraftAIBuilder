@@ -1,0 +1,116 @@
+{
+  "schema": "minecraftaibuilder-r190bm-offline-result-audit-v1",
+  "newInferenceRequests": 2,
+  "A": 1,
+  "B": 1,
+  "retries": 0,
+  "rows": [
+    {
+      "side": "A",
+      "originalSha256": "e54f2abf87d36e0957d8393c960d2fce8075862d00ea1ea736365121a4b6a469",
+      "requestSha256": "b542f523344390b24c6c7b5b1ccdc5aaf60a7d8bab7222ddd6aaba59e78efc63",
+      "httpResponseSha256": "78c8b5b17841b3e0027bc76a20ba28edbd63e2314f1ca976aed20163e740cb36",
+      "finishReason": "stop",
+      "usage": {
+        "prompt_tokens": 1321,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens": 1273,
+        "total_tokens": 2594
+      },
+      "httpElapsedMs": 65112.6444,
+      "firstFailure": "B143_SCHEMA_OR_MODE",
+      "runtime": {
+        "name": "qwen3:14b",
+        "model": "qwen3:14b",
+        "size": 11682688531,
+        "digest": "bdbd181c33f2ed1b31c972991882db3cf4d192569092138a7d29e973cd9debe8",
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "qwen3",
+          "families": [
+            "qwen3"
+          ],
+          "parameter_size": "14.8B",
+          "quantization_level": "Q4_K_M"
+        },
+        "expires_at": "2026-10-30T00:34:26.0721729+09:00",
+        "size_vram": 11682688531,
+        "context_length": 16384,
+        "runner": "llamacpp"
+      }
+    },
+    {
+      "side": "B",
+      "originalSha256": "8e2590128e8bd932cddc2df595fcc01c3cbd660298cedd445431d0787bb90c86",
+      "requestSha256": "97ef75f8eaf94acf5cbc604e547ac85db8f263231c9464f7fccb62ba1ab8c12a",
+      "httpResponseSha256": "b20c0f79f7e9e84b44a2e15b3fb0d922a21e1546182a6b13524cfa53bc9ca6d9",
+      "finishReason": "stop",
+      "usage": {
+        "prompt_tokens": 2161,
+        "prompt_tokens_details": {
+          "cached_tokens": 1278
+        },
+        "completion_tokens": 1902,
+        "total_tokens": 4063
+      },
+      "httpElapsedMs": 59143.0008,
+      "firstFailure": "B143_MATERIAL",
+      "runtime": {
+        "name": "qwen3:14b",
+        "model": "qwen3:14b",
+        "size": 11682688531,
+        "digest": "bdbd181c33f2ed1b31c972991882db3cf4d192569092138a7d29e973cd9debe8",
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "qwen3",
+          "families": [
+            "qwen3"
+          ],
+          "parameter_size": "14.8B",
+          "quantization_level": "Q4_K_M"
+        },
+        "expires_at": "2026-10-30T00:35:25.229872+09:00",
+        "size_vram": 11682688531,
+        "context_length": 16384,
+        "runner": "llamacpp"
+      }
+    }
+  ],
+  "strictB143Accepted": 0,
+  "true3DCount": 0,
+  "fiveDirectionProjectionSets": 0,
+  "sectionCount": 0,
+  "hostGeometryRepairs": 0,
+  "comparison": "HOLD_SOURCE_PAIR_NOT_COMPARABLE",
+  "architecturalImprovement": "NOT_ESTABLISHED",
+  "humanVisualReview": "NOT_PERFORMED_NO_VALID_B143",
+  "browserVisualVerification": "BLOCKED_FILE_URL_POLICY_NO_WORKAROUND",
+  "offlineTests": {
+    "total": 37,
+    "pass": 37,
+    "fail": 0
+  },
+  "readiness": "NOT_PREPARED",
+  "gates": [
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED"
+  ],
+  "BuildPlan": {
+    "operations": []
+  },
+  "worldContacts": 0,
+  "worldWrites": 0,
+  "art": "ART_HOLD",
+  "officialArtAdoptions": 0
+}

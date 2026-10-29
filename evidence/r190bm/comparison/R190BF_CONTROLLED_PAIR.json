@@ -1,0 +1,68 @@
+{
+  "schema": "minecraftaibuilder-r190bf-locked-pair-v1",
+  "protocolSha256": "b70b04fa056a68f095d89620ae05dba21eb529b03dd70621c1347d36fe5f37fe",
+  "originalBriefFile": "R190BL_ORIGINAL_BRIEF.txt",
+  "originalBriefFileSha256": "bbd44cc9f28234055601b4055466e2f3564e7e4565d408432de4c4fab0aa277a",
+  "savedSourceViewSha256": {},
+  "A": {
+    "sourceSha256": "e54f2abf87d36e0957d8393c960d2fce8075862d00ea1ea736365121a4b6a469",
+    "requestSha256": "b542f523344390b24c6c7b5b1ccdc5aaf60a7d8bab7222ddd6aaba59e78efc63",
+    "systemPromptHash": "40db54538c7afb939b99be1732be79b1709e0844cbdab8b8b15876184b311e26"
+  },
+  "B": {
+    "sourceSha256": "8e2590128e8bd932cddc2df595fcc01c3cbd660298cedd445431d0787bb90c86",
+    "requestSha256": "97ef75f8eaf94acf5cbc604e547ac85db8f263231c9464f7fccb62ba1ab8c12a",
+    "systemPromptHash": "40db54538c7afb939b99be1732be79b1709e0844cbdab8b8b15876184b311e26"
+  },
+  "identicalSettingsRequested": true,
+  "sameModelClaimed": true,
+  "sameSystemPromptSha256": "40db54538c7afb939b99be1732be79b1709e0844cbdab8b8b15876184b311e26",
+  "generationModelDigestVerified": false,
+  "providerSeedHonoredVerified": false,
+  "savedComparisonReportSha256": "559e9aaef2ef3078a047664775dee6f47ae07447b4e463a6f2a9ff313c875fdd",
+  "invalidSourceDiagnostics": {
+    "A": {
+      "file": "R190BI_A_INVALID_SOURCE_DIAGNOSTIC.json",
+      "sha256": "2ca94b6ea8ccd8aa8d9f0cc1105b197095735b565b3fed3abf222e8cdf148544",
+      "originalSha256": "e54f2abf87d36e0957d8393c960d2fce8075862d00ea1ea736365121a4b6a469",
+      "status": "HOLD_ARCHIVED_MODEL_CONTRACT_VIOLATIONS",
+      "literalFindingsCount": 5
+    },
+    "B": {
+      "file": "R190BI_B_INVALID_SOURCE_DIAGNOSTIC.json",
+      "sha256": "ab2d434cfbe6f92d739b4c398bcdd7aaab92cca4fa2ea3b71e464a7ba8768abc",
+      "originalSha256": "8e2590128e8bd932cddc2df595fcc01c3cbd660298cedd445431d0787bb90c86",
+      "status": "HOLD_ARCHIVED_MODEL_CONTRACT_VIOLATIONS",
+      "literalFindingsCount": 7
+    }
+  },
+  "providerOriginIndependentlyVerified": false,
+  "result": "SOURCE_PAIR_COMPARE_ONLY_ART_HOLD",
+  "actualHumanArtImprovement": "NOT_ESTABLISHED",
+  "humanReviewStatus": "HOLD_NO_VALID_B143_PAIR",
+  "humanReviewRelativePath": null,
+  "humanReviewManifestSha256": null,
+  "humanReviewManifestBytesVerified": false,
+  "noModelRequestsByComparison": true,
+  "readiness": "NOT_PREPARED",
+  "constructionApproved": false,
+  "executionAllowed": false,
+  "gates": [
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED"
+  ],
+  "BuildPlan": {
+    "operations": []
+  },
+  "worldContacts": 0,
+  "worldWrites": 0,
+  "art": "ART_HOLD",
+  "officialArtAdoptions": 0
+}

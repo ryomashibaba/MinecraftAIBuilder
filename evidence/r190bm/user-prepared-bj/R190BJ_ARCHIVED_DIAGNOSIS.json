@@ -1,0 +1,180 @@
+{
+  "schema": "minecraftaibuilder-r190bh-archived-original-forensic-v1",
+  "status": "HOLD_ARCHIVED_MODEL_CONTRACT_VIOLATIONS",
+  "originalSha256": "0bf706181bb2b7a30f8082f896a703c33749ba55f75d42010adba88f47c84f17",
+  "bytes": 2581,
+  "rawTopLevelKeys": [
+    "design",
+    "explanation",
+    "assumptions",
+    "spatialPlan",
+    "attempt",
+    "maxAttempts"
+  ],
+  "strictR4ParsingStatus": "HOLD_STRICT_R4_OR_B143",
+  "firstFailure": "B198ZR4_EXPECTED_FOUR_KEYS",
+  "checkedAgainstFullB143Schema": "minecraftaibuilder-b143-building-dsl-v1",
+  "literalFindings": [
+    {
+      "code": "TOP_LEVEL_CONTRACT_DRIFT",
+      "path": "/",
+      "observation": {
+        "extraKeys": [
+          "attempt",
+          "maxAttempts"
+        ],
+        "missingKeys": []
+      },
+      "provenFrom": "LITERAL_ARCHIVED_MODEL_JSON_ONLY",
+      "geometricConsequence": "NOT_CERTIFIED_WITH_INVALID_SOURCE",
+      "guidance": "Return exactly design, explanation, assumptions, spatialPlan as one response."
+    },
+    {
+      "code": "B143_SCHEMA_MISMATCH",
+      "path": "design.schema",
+      "observation": {
+        "observed": "b143",
+        "expected": "minecraftaibuilder-b143-building-dsl-v1"
+      },
+      "provenFrom": "LITERAL_ARCHIVED_MODEL_JSON_ONLY",
+      "geometricConsequence": "NOT_CERTIFIED_WITH_INVALID_SOURCE",
+      "guidance": "Use the required full B143 schema identifier."
+    },
+    {
+      "code": "CUT_HAS_FORBIDDEN_MATERIAL",
+      "path": "design.elements[3].material",
+      "observation": {
+        "id": "light-well",
+        "observed": null
+      },
+      "provenFrom": "LITERAL_ARCHIVED_MODEL_JSON_ONLY",
+      "geometricConsequence": "NOT_CERTIFIED_WITH_INVALID_SOURCE",
+      "guidance": "CUT elements must omit material entirely; do not represent cuts as solids."
+    },
+    {
+      "code": "STAIRCASE_UNSUPPORTED_AXIS",
+      "path": "design.elements[4].axis",
+      "observation": {
+        "id": "staircase",
+        "observed": "y",
+        "allowed": [
+          "x",
+          "z"
+        ]
+      },
+      "provenFrom": "LITERAL_ARCHIVED_MODEL_JSON_ONLY",
+      "geometricConsequence": "NOT_CERTIFIED_WITH_INVALID_SOURCE",
+      "guidance": "The model must independently author a supported x/z flight with real landings."
+    },
+    {
+      "code": "CUT_HAS_FORBIDDEN_MATERIAL",
+      "path": "design.elements[5].material",
+      "observation": {
+        "id": "north-window",
+        "observed": null
+      },
+      "provenFrom": "LITERAL_ARCHIVED_MODEL_JSON_ONLY",
+      "geometricConsequence": "NOT_CERTIFIED_WITH_INVALID_SOURCE",
+      "guidance": "CUT elements must omit material entirely; do not represent cuts as solids."
+    },
+    {
+      "code": "CUT_HAS_FORBIDDEN_MATERIAL",
+      "path": "design.elements[6].material",
+      "observation": {
+        "id": "south-window",
+        "observed": null
+      },
+      "provenFrom": "LITERAL_ARCHIVED_MODEL_JSON_ONLY",
+      "geometricConsequence": "NOT_CERTIFIED_WITH_INVALID_SOURCE",
+      "guidance": "CUT elements must omit material entirely; do not represent cuts as solids."
+    },
+    {
+      "code": "STANDING_POINT_INTERSECTS_LITERAL_ADD_BOX",
+      "path": "spatialPlan.entrance",
+      "observation": {
+        "point": [
+          10,
+          0,
+          10
+        ],
+        "authoredAddBoxIds": [
+          "base",
+          "storage-floor"
+        ]
+      },
+      "provenFrom": "LITERAL_ARCHIVED_MODEL_JSON_ONLY",
+      "geometricConsequence": "NOT_CERTIFIED_WITH_INVALID_SOURCE",
+      "guidance": "Verify final ADD/CUT voxels; a named landing cannot overlap a solid floor."
+    },
+    {
+      "code": "HEADROOM_EXTENDS_PAST_BOUNDS",
+      "path": "spatialPlan.destinations[0]",
+      "observation": {
+        "point": [
+          10,
+          14,
+          10
+        ],
+        "headroom": 3,
+        "height": 16
+      },
+      "provenFrom": "LITERAL_ARCHIVED_MODEL_JSON_ONLY",
+      "geometricConsequence": "NOT_CERTIFIED_WITH_INVALID_SOURCE",
+      "guidance": "Reserve enough air above each actual standing position."
+    },
+    {
+      "code": "STANDING_POINT_INTERSECTS_LITERAL_ADD_BOX",
+      "path": "spatialPlan.destinations[0]",
+      "observation": {
+        "point": [
+          10,
+          14,
+          10
+        ],
+        "authoredAddBoxIds": [
+          "reading-room-floor"
+        ]
+      },
+      "provenFrom": "LITERAL_ARCHIVED_MODEL_JSON_ONLY",
+      "geometricConsequence": "NOT_CERTIFIED_WITH_INVALID_SOURCE",
+      "guidance": "Verify final ADD/CUT voxels; a named landing cannot overlap a solid floor."
+    }
+  ],
+  "findingsCount": 9,
+  "sourceGeometryProduced": false,
+  "sourceWasRepaired": false,
+  "originalUnmodified": true,
+  "approximateGeometryNotInvented": true,
+  "modelIdentityCryptographicallyVerified": false,
+  "independentArchitecturalQualityReview": "NOT_PERFORMED",
+  "independentVisualArtReview": "NOT_PERFORMED",
+  "improvementCertified": false,
+  "scopeLimitations": [
+    "Overlaps are literal authored add boxes, not post-cut final voxels",
+    "Staircase source with unsupported axis is never rendered or auto-repaired",
+    "A parser failure alone cannot prove what valid final geometry would look like",
+    "This diagnosis is one archived answer, not evidence of a model family trend"
+  ],
+  "readiness": "NOT_PREPARED",
+  "constructionApproved": false,
+  "executionAllowed": false,
+  "gates": [
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED"
+  ],
+  "BuildPlan": {
+    "operations": []
+  },
+  "worldContacts": 0,
+  "worldWrites": 0,
+  "modelCalls": 0,
+  "art": "ART_HOLD",
+  "officialArtAdoptions": 0
+}

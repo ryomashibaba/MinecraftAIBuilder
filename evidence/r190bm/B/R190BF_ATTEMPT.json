@@ -1,0 +1,39 @@
+{
+  "schema": "minecraftaibuilder-r190bf-locked-pair-v1",
+  "side": "B",
+  "protocolSha256": "b70b04fa056a68f095d89620ae05dba21eb529b03dd70621c1347d36fe5f37fe",
+  "modelClaim": "qwen3:14b",
+  "temperatureRequested": 0.35,
+  "seedRequested": 23,
+  "maxTokensRequested": 16384,
+  "originalBriefSha256": "bbd44cc9f28234055601b4055466e2f3564e7e4565d408432de4c4fab0aa277a",
+  "actualPromptSha256": "f78511b4ab5a6624bd6ced41544d5ca467f06535fbcb8cb209ff9c2a9afd8185",
+  "modelDigestVerified": false,
+  "seedComplianceVerified": false,
+  "modelQuality": "NOT_ESTABLISHED",
+  "modelCallsPossible": 0,
+  "readiness": "NOT_PREPARED",
+  "constructionApproved": false,
+  "executionAllowed": false,
+  "gates": [
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED"
+  ],
+  "BuildPlan": {
+    "operations": []
+  },
+  "worldContacts": 0,
+  "worldWrites": 0,
+  "art": "ART_HOLD",
+  "officialArtAdoptions": 0,
+  "status": "ATTEMPT_RESERVED",
+  "possibleOneModelRequest": true,
+  "noAutoRetry": true
+}

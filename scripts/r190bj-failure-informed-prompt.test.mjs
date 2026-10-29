@@ -5,6 +5,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
+import {spawnSync} from 'node:child_process';
 import {prepareR190BJOffline,inspectR190BJPrepared,
  parseR190BJArgs,buildR190BJPrompt} from './r190bj-failure-informed-prompt.mjs';
 import {inspectR190BDPrepared} from './r190bd-consented-design-first.mjs';
@@ -117,4 +118,17 @@ test('BJ CLI cannot request a model, fix designs or authorize construction',()=>
  assert.deepEqual(parseR190BJArgs(['--help']),{help:true});
  assert.throws(()=>parseR190BJArgs(['--execute-model','true']),/R190BJ_FLAGS/);
  assert.throws(()=>buildR190BJPrompt('その場で建設してください',{}),/R190BJ_DIAGNOSIS/);
+});
+
+test('BJ documented full CLI prepares real archived failure offline',()=>{
+ const c=setup();try{
+  const result=spawnSync(process.execPath,[
+   fileURLToPath(new URL('./r190bj-failure-informed-prompt.mjs',import.meta.url)),
+   '--brief',c.briefPath,'--brief-sha',H(brief),
+   '--archived-original',fileURLToPath(archived),'--archived-sha',originalSha,
+   '--out',c.outDir],{encoding:'utf8'});
+  assert.equal(result.status,0,result.stderr);
+  assert.equal(JSON.parse(result.stdout).newModelRequests,0);
+  assert.equal(inspectR190BJPrepared(c.outDir).briefSha256,H(brief));
+ }finally{fs.rmSync(c.root,{recursive:true,force:true})}
 });
