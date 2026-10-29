@@ -141,3 +141,19 @@ test('BG refuses output under comparison source and bad CLI flags',()=>{
    comparisonDir:c.comparisonDir,outDir:path.join(c.comparisonDir,'review')}),/R190BG_OUTPUT_INSIDE_INPUT/);
  }finally{fs.rmSync(c.root,{recursive:true,force:true})}
 });
+
+
+test('BG retains valid model B143 as critical evidence when its R4 circulation is HOLD',async()=>{
+ const c=env();try{
+  const broken=JSON.parse(syntheticOriginal());
+  broken.spatialPlan.functionalZones[0].size[1]=2;
+  await pair(c,syntheticOriginal(),JSON.stringify(broken));
+  const review=createR190BGReview(c);
+  assert.equal(review.candidates.A.status,'SOURCE_REVIEW_AVAILABLE_ART_HOLD');
+  assert.equal(review.candidates.B.status,'HOLD_R4_SOURCE_REFERENCE_ONLY');
+  assert.equal(review.candidates.B.r4Status,'HOLD_SPATIAL_PLAN_OR_INDEPENDENT_CONTRACT');
+  assert.equal(fs.existsSync(path.join(c.outDir,'B_3D.html')),true);
+  assert.equal(review.art,'ART_HOLD');
+  assert.equal(review.officialArtAdoptions,0);
+ }finally{fs.rmSync(c.root,{recursive:true,force:true})}
+});
