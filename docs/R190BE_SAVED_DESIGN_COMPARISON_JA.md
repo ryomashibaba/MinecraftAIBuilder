@@ -55,3 +55,13 @@ node scripts/r190be-saved-design-comparison.mjs --prepared BC_PREPARED_DIR --bas
 ## 維持する状態
 
 `ART HOLD`、正式採用0。`NOT_PREPARED`、9 `BLOCKED`、`constructionApproved=false`、`executionAllowed=false`、`BuildPlan.operations=[]`、`worldContacts=worldWrites=0`。Minecraft施工・ワールド操作禁止。新規Qwen/Gemma推論は別途明示承認が必要。main変更、force push、マージ、Draft解除は行わない。
+
+## 完了後のCI確認（2026-10-29 20:05 JST）
+
+実装コミット`aede1757b931b238e15c1cb764f75b181b3f56db`の[BE専用CI #40862162861](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40862162861)は**Ubuntu／WindowsともSUCCESS、各49/49 PASS、SKIP 0**。ローカルで作成権限が不足した2つのリンク拒否サブテストも、GitHubの両OSでは実際に実行され成功した。
+
+両OSの30,131-byteの合成比較成果物を確認。Artifact IDはUbuntu `12891334366`、Windows `12891927504`。ZIP digestを含む機械可読記録は`evidence/r190be/CI_VERIFICATION.json`。原文の意味や美術品質の合格ではなく、BD・BC・H・T・BEの保存・拒否・比較経路の技術検証である。
+
+前回BD #40860737403のWindowsも模擬データの同じ過大申告で失敗したことをログで確認した。BE統合CIにはその修正と不適合例のHOLD維持を含む。
+
+リポジトリ全体のCIをALL GREENとは認定しない。BEとは別の既存R55 workflow定義の失敗（[#40862160789](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40862160789)）と、他系列の未完了チェックがある。今回は対象の建築比較経路と指定されたBD/BCを検証し、過去の配布・固定ソース系列の全面改修には広げない。

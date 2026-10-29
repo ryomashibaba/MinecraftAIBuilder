@@ -146,7 +146,7 @@ export function compareR190BESaved({prepared,baseline=null,candidate=null,out}){
    '<p>検証済みの完成B143がないため3Dはありません。</p>')+'</section>';
  outputs.set('R190BE_COMPARE.html','<!doctype html><html lang="ja"><meta charset="utf-8">'+
   '<meta name="viewport" content="width=device-width,initial-scale=1">'+
-  '<title>R190-BE 保存原文比較 — ART HOLD</title><style>'+ 
+  '<title>R190-BE 保存原文比較 — ART HOLD</title><style>'+
   'body{font:16px system-ui;background:#131c28;color:#eee;margin:24px;line-height:1.6}'+
   'a{color:#9fd4ff}main{display:grid;grid-template-columns:1fr 1fr;gap:20px}'+
   'iframe{width:100%;height:60vh;border:1px solid #789}pre{white-space:pre-wrap}'+
