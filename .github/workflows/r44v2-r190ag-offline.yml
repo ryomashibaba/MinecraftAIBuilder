@@ -29,6 +29,7 @@ on:
       - 'scripts/r190av-*'
       - 'scripts/r190aw-*'
       - 'scripts/r190ax-*'
+      - 'scripts/r190ay-*'
       - 'source/ai/r190af-program-intent.mjs'
       - 'source/ai/r190-semantic-massing.mjs'
       - 'source/ai/r190-request-coverage.mjs'
@@ -61,6 +62,7 @@ on:
       - 'scripts/r190av-*'
       - 'scripts/r190aw-*'
       - 'scripts/r190ax-*'
+      - 'scripts/r190ay-*'
       - 'source/ai/r190af-program-intent.mjs'
       - 'source/ai/r190-semantic-massing.mjs'
       - 'source/ai/r190-request-coverage.mjs'
@@ -82,7 +84,7 @@ jobs:
       - name: Prepare historical Git objects only; no installer or model execution
         run: git fetch --no-tags --depth=1 origin a0438d8fa2504564351f8ebafbe9ecc14575dc95 44108944d0d9b0f892d01729c3fa3c76d006fe55 539daac020143efe2f24f981727f8dc5d6beeb50
       - name: All subsequent installer and integration tests use local files only
-        run: node --test scripts/r44v2-offline-install.test.mjs scripts/r44-pinned-path-audit.test.mjs scripts/r190ag-integrated-proposals.test.mjs scripts/r190ah-meaning-audit.test.mjs scripts/r190aj-model-intent.test.mjs scripts/r190al-entrance-orientation.test.mjs scripts/r190al-entrance-visual-comparison.test.mjs scripts/r190am-author-layout.test.mjs scripts/r190an-sky-court.test.mjs scripts/r190ao-open-court-mouth.test.mjs scripts/r190ap-macro-contrast.test.mjs scripts/r190aq-architectural-parti.test.mjs scripts/r190ar-structure-audit.test.mjs scripts/r190as-integrated-architecture.test.mjs scripts/r190at-functional-zones.test.mjs scripts/r190au-mandatory-forum.test.mjs scripts/r190av-arcade.test.mjs scripts/r190aw-preserved-architect-intake.test.mjs scripts/r190ax-original-output-contract-study.test.mjs scripts/r190af-program-intent.test.mjs scripts/r190-semantic-massing.test.mjs
+        run: node --test scripts/r44v2-offline-install.test.mjs scripts/r44-pinned-path-audit.test.mjs scripts/r190ag-integrated-proposals.test.mjs scripts/r190ah-meaning-audit.test.mjs scripts/r190aj-model-intent.test.mjs scripts/r190al-entrance-orientation.test.mjs scripts/r190al-entrance-visual-comparison.test.mjs scripts/r190am-author-layout.test.mjs scripts/r190an-sky-court.test.mjs scripts/r190ao-open-court-mouth.test.mjs scripts/r190ap-macro-contrast.test.mjs scripts/r190aq-architectural-parti.test.mjs scripts/r190ar-structure-audit.test.mjs scripts/r190as-integrated-architecture.test.mjs scripts/r190at-functional-zones.test.mjs scripts/r190au-mandatory-forum.test.mjs scripts/r190av-arcade.test.mjs scripts/r190aw-preserved-architect-intake.test.mjs scripts/r190ax-original-output-contract-study.test.mjs scripts/r190ay-source-claim-crosscheck.test.mjs scripts/r190af-program-intent.test.mjs scripts/r190-semantic-massing.test.mjs
       - name: Existing AB AD AE contracts and saved-original diagnostics (synthetic fake only)
         run: node --test scripts/r190ab-structured-output-pilot.test.mjs scripts/r190ab-saved-semantic-replay.test.mjs scripts/r190ad-expressive-semantic.test.mjs scripts/r190ad-saved-semantic-diagnose.test.mjs scripts/r190ae-flexible-semantic.test.mjs scripts/r190ae-saved-semantic-diagnose.test.mjs
       - name: Emit unapproved synthetic true 3D and five views, never infer a model
@@ -212,3 +214,16 @@ jobs:
         with:
           name: R190AX-PRESERVED-R190AA-ONLY-DERIVED-DIAGNOSIS-NO-MODEL
           path: r190ax-contract-only/
+
+      - name: R190-AY offline original source-level architectural contradiction audit
+        if: matrix.os == 'ubuntu-24.04'
+        run: >
+          node scripts/r190ay-source-claim-crosscheck.mjs
+          --original "$GITHUB_WORKSPACE/evidence/r190aa/pilot-01/MODEL_RESPONSE_ORIGINAL.txt"
+          --out "$GITHUB_WORKSPACE/r190ay-readonly-claims"
+          --sha 0bf706181bb2b7a30f8082f896a703c33749ba55f75d42010adba88f47c84f17
+      - uses: actions/upload-artifact@v4
+        if: matrix.os == 'ubuntu-24.04'
+        with:
+          name: R190AY-REAL-QWEN-SOURCE-CLAIM-EVIDENCE-NO-3D-ART-HOLD
+          path: r190ay-readonly-claims/
