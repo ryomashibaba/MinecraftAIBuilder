@@ -1,0 +1,122 @@
+{
+  "schema": "r190bo-publication-content-audit-v1",
+  "userRequestedGitHubStorage": true,
+  "newRealModelCalls": 0,
+  "newPrivateModelOriginals": 0,
+  "allPublishedRawAndBriefFilesMatchExistingPublicGitObjects": true,
+  "remainingNewFiles": "Authored source code, schema, prompts generated only from those public bytes, synthetic derived geometry, test console transcripts and Japanese reports; no credentials or new private user/model data",
+  "results": [
+    {
+      "file": "unchanged-bm-A/MODEL_ORIGINAL.txt",
+      "existingPublicSource": "evidence/r190bm/A/model-original/R190_I_ORIGINAL_RESPONSE.txt",
+      "existingPublicCommit": "6f8b3ac3b292fa0b72ca8063c24bc966f5b56527",
+      "sha256": "e54f2abf87d36e0957d8393c960d2fce8075862d00ea1ea736365121a4b6a469",
+      "exactByteMatch": true
+    },
+    {
+      "file": "unchanged-bm-B/MODEL_ORIGINAL.txt",
+      "existingPublicSource": "evidence/r190bm/B/model-original/R190_I_ORIGINAL_RESPONSE.txt",
+      "existingPublicCommit": "6f8b3ac3b292fa0b72ca8063c24bc966f5b56527",
+      "sha256": "8e2590128e8bd932cddc2df595fcc01c3cbd660298cedd445431d0787bb90c86",
+      "exactByteMatch": true
+    },
+    {
+      "file": "synthetic-reading/derived/MODEL_ORIGINAL.txt",
+      "existingPublicSource": "evidence/r190bn/synthetic-reading/ORIGINAL_ASSEMBLY.json",
+      "existingPublicCommit": "6f8b3ac3b292fa0b72ca8063c24bc966f5b56527",
+      "sha256": "04a97ad267405b45c4c999564ac8313979ddea1192364f75e33a452ac4cec214",
+      "exactByteMatch": true
+    },
+    {
+      "file": "synthetic-concourse/derived/MODEL_ORIGINAL.txt",
+      "existingPublicSource": "evidence/r190bn/synthetic-concourse/ORIGINAL_ASSEMBLY.json",
+      "existingPublicCommit": "6f8b3ac3b292fa0b72ca8063c24bc966f5b56527",
+      "sha256": "f3bfe7436d2e287f7a76324f1e93b87627da397e19b033274359b69401610084",
+      "exactByteMatch": true
+    },
+    {
+      "file": "synthetic-reading/SYNTHETIC_ASSEMBLY.json",
+      "existingPublicSource": "evidence/r190bn/synthetic-reading/ORIGINAL_ASSEMBLY.json",
+      "existingPublicCommit": "6f8b3ac3b292fa0b72ca8063c24bc966f5b56527",
+      "sha256": "04a97ad267405b45c4c999564ac8313979ddea1192364f75e33a452ac4cec214",
+      "exactByteMatch": true
+    },
+    {
+      "file": "synthetic-concourse/SYNTHETIC_ASSEMBLY.json",
+      "existingPublicSource": "evidence/r190bn/synthetic-concourse/ORIGINAL_ASSEMBLY.json",
+      "existingPublicCommit": "6f8b3ac3b292fa0b72ca8063c24bc966f5b56527",
+      "sha256": "f3bfe7436d2e287f7a76324f1e93b87627da397e19b033274359b69401610084",
+      "exactByteMatch": true
+    },
+    {
+      "file": "qwen-bm-preflight/ORIGINAL_BRIEF.txt",
+      "existingPublicSource": "evidence/r190bm/USER_BRIEF.txt",
+      "existingPublicCommit": "6f8b3ac3b292fa0b72ca8063c24bc966f5b56527",
+      "sha256": "bbd44cc9f28234055601b4055466e2f3564e7e4565d408432de4c4fab0aa277a",
+      "exactByteMatch": true
+    },
+    {
+      "file": "gemma-bm-preflight/ORIGINAL_BRIEF.txt",
+      "existingPublicSource": "evidence/r190bm/USER_BRIEF.txt",
+      "existingPublicCommit": "6f8b3ac3b292fa0b72ca8063c24bc966f5b56527",
+      "sha256": "bbd44cc9f28234055601b4055466e2f3564e7e4565d408432de4c4fab0aa277a",
+      "exactByteMatch": true
+    },
+    {
+      "file": "unchanged-bm-A/ORIGINAL_BRIEF.txt",
+      "existingPublicSource": "evidence/r190bm/USER_BRIEF.txt",
+      "existingPublicCommit": "6f8b3ac3b292fa0b72ca8063c24bc966f5b56527",
+      "sha256": "bbd44cc9f28234055601b4055466e2f3564e7e4565d408432de4c4fab0aa277a",
+      "exactByteMatch": true
+    },
+    {
+      "file": "unchanged-bm-B/ORIGINAL_BRIEF.txt",
+      "existingPublicSource": "evidence/r190bm/USER_BRIEF.txt",
+      "existingPublicCommit": "6f8b3ac3b292fa0b72ca8063c24bc966f5b56527",
+      "sha256": "bbd44cc9f28234055601b4055466e2f3564e7e4565d408432de4c4fab0aa277a",
+      "exactByteMatch": true
+    },
+    {
+      "file": "synthetic-reading/derived/ORIGINAL_BRIEF.txt",
+      "existingPublicSource": "evidence/r190bn/synthetic-reading/ORIGINAL_BRIEF.txt",
+      "existingPublicCommit": "6f8b3ac3b292fa0b72ca8063c24bc966f5b56527",
+      "sha256": "83e26bea1cb6c0ad3a836ea44623d690ddbeba4c59975e8cfd48584c31bf3b84",
+      "exactByteMatch": true
+    },
+    {
+      "file": "synthetic-reading/prepared/ORIGINAL_BRIEF.txt",
+      "existingPublicSource": "evidence/r190bn/synthetic-reading/ORIGINAL_BRIEF.txt",
+      "existingPublicCommit": "6f8b3ac3b292fa0b72ca8063c24bc966f5b56527",
+      "sha256": "83e26bea1cb6c0ad3a836ea44623d690ddbeba4c59975e8cfd48584c31bf3b84",
+      "exactByteMatch": true
+    },
+    {
+      "file": "synthetic-reading/FIXTURE_BRIEF.txt",
+      "existingPublicSource": "evidence/r190bn/synthetic-reading/ORIGINAL_BRIEF.txt",
+      "existingPublicCommit": "6f8b3ac3b292fa0b72ca8063c24bc966f5b56527",
+      "sha256": "83e26bea1cb6c0ad3a836ea44623d690ddbeba4c59975e8cfd48584c31bf3b84",
+      "exactByteMatch": true
+    },
+    {
+      "file": "synthetic-concourse/derived/ORIGINAL_BRIEF.txt",
+      "existingPublicSource": "evidence/r190bn/synthetic-concourse/ORIGINAL_BRIEF.txt",
+      "existingPublicCommit": "6f8b3ac3b292fa0b72ca8063c24bc966f5b56527",
+      "sha256": "3d23250c74b4047c06d23d59fb7b6adf254ccd27ed89c070d7fc33e5b8119c1d",
+      "exactByteMatch": true
+    },
+    {
+      "file": "synthetic-concourse/prepared/ORIGINAL_BRIEF.txt",
+      "existingPublicSource": "evidence/r190bn/synthetic-concourse/ORIGINAL_BRIEF.txt",
+      "existingPublicCommit": "6f8b3ac3b292fa0b72ca8063c24bc966f5b56527",
+      "sha256": "3d23250c74b4047c06d23d59fb7b6adf254ccd27ed89c070d7fc33e5b8119c1d",
+      "exactByteMatch": true
+    },
+    {
+      "file": "synthetic-concourse/FIXTURE_BRIEF.txt",
+      "existingPublicSource": "evidence/r190bn/synthetic-concourse/ORIGINAL_BRIEF.txt",
+      "existingPublicCommit": "6f8b3ac3b292fa0b72ca8063c24bc966f5b56527",
+      "sha256": "3d23250c74b4047c06d23d59fb7b6adf254ccd27ed89c070d7fc33e5b8119c1d",
+      "exactByteMatch": true
+    }
+  ]
+}
