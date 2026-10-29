@@ -135,8 +135,13 @@ export async function runR190BDStudy(opts,{
   (receipt.schema==='minecraftaibuilder-r190-j-capture-v1'&&
    receipt.providerConfirmedComplete===true);
  const review=complete?reviewR190BCOriginal(raw,{expectedSha256:H(raw)}):null;
+ const verifiedR4=receipt.schema==='minecraftaibuilder-r190-h-direct-b143-research-v1'&&
+  receipt.status==='SOURCE_AND_DECLARED_SPATIAL_CLAIMS_FORMALLY_PASS';
  const report={...summary,
-  status:complete?'CAPTURED_SOURCE_ONLY_ART_HOLD':'HOLD_PROVIDER_COMPLETION_UNPROVEN',
+  status:!complete?'HOLD_PROVIDER_COMPLETION_UNPROVEN':
+   !verifiedR4?'HOLD_MODEL_R4_SPATIAL_REVIEW':
+   review?.status!=='SOURCE_SECTION_PROXIES_AVAILABLE_ART_HOLD'?
+    'HOLD_MODEL_SOURCE_SECTION_OR_ACCESS':'CAPTURED_SOURCE_ONLY_ART_HOLD',
   modelResponseAvailable:true,modelRawSha256:H(raw),
   modelReceiptStatus:receipt.status,providerResponseComplete:complete,
   sourceSectionStatus:review?.status??'NOT_RUN_INCOMPLETE_PROVIDER',
