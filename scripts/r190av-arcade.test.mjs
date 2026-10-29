@@ -27,6 +27,13 @@ test('AV open colonnade massing is author-provided, sky/route/ground prove physi
     z.verifiedOverheadRoofCells:z.verifiedOpenSkyCells,z.sourceFloorCells);
   }
   assert(verifyCompiled(s.source.source.design,s.source.source.compiled));
+  const realOps=s.source.source.compiled.stats.designOperations;
+  for(const id of ['author-east-return-door','author-civic-sky-void',
+   'south-forum-ground-threshold','north-forum-ground-threshold']){
+   const op=realOps.find(e=>e.element===id);
+   assert(op&&op.mode==='cut'&&op.removed>=8,
+    'Every authored opening must actually remove real B143 cells: '+id);
+  }
   assert.equal(s.modelCallsByReview,0);
   assert.equal(s.worldWrites,0);assert.equal(s.worldContacts,0);
   assert.equal(s.readiness,'NOT_PREPARED');

@@ -36,7 +36,7 @@ const second=[
  box('west-portico-recessed-b','stone',[20,2,37],[3,15,4]),
  box('east-portico-thick-a','stone',[47,2,23],[4,20,4]),
  box('east-portico-thick-b','stone',[65,2,36],[4,18,5]),
- box('east-portico-recessed-a','stone',[54,2,23],[3,20,4]),
+ box('east-portico-recessed-a','stone',[60,2,23],[4,20,4]),
  box('east-portico-recessed-b','stone',[59,2,37],[3,20,4]),
  beam('western-overhanging-shear','metal',[11,16,22],[29,27,22],3),
  beam('eastern-overhanging-shear','metal',[48,24,41],[67,19,41],3),
