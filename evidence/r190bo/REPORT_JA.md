@@ -66,7 +66,18 @@ temperature=0.35、seed=23、num_predict=16384、num_ctx=32768。最大待機15�
 
 ## GitHub検証
 
-専用workflow `r190bo-spatial-local.yml`を追加。Windows／Ubuntuの結果と保存コミットはCI完了後に追記する。
+専用workflow `r190bo-spatial-local.yml`の[実行 #40961560402](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40961560402)は**Windows／UbuntuともSUCCESS、2/2ジョブ成功**。検証対象コミットは`789e0926ea79dbab3dd121d7d86d7c987a5b76aa`、中核実装は`c76e2a7`。
+
+両OSでBO13＋BN9＋既存37＝**59/59 PASS**。両方とも無通信の研究成果物を生成・アップロードし、Windowsでは実CMDも成功。`CI_WINDOWS_UBUNTU.json`、`CI_WINDOWS_UBUNTU_LOG.txt`、`CI_ARTIFACTS.json`を保存した。コンソール記録だけ改行をLFにそろえた。モデル原文・元依頼bytesは変更していない。
+
+| GitHub保存済み成果物 | bytes | ZIP digest |
+|---|---:|---|
+| R190BO-OFFLINE-NO-MODEL-ubuntu-24.04 | 147480 | `sha256:106b6373066ea97de3c8aa8356136efae7cf83d54cbc33f77922e7d81c10ea74` |
+| R190BO-OFFLINE-NO-MODEL-windows-latest | 147472 | `sha256:cb6316a5b8a58b01c42a444444bdc310708f05414408a70dc9b9b4b6fc1cd707` |
+
+専用CIの成功を全体ALL GREENとは呼ばない。`CI_OVERALL_SNAPSHOT.json`の取得時点で81 workflow中15成功・1失敗・10実行中・55待機。失敗は今回変更していない既存`r55-future-source-preflight.yml`。全体CIの最終成功を主張しない。
+
+公開前に自動承認レビューで原文の公開範囲への懸念が出たため、`PUBLICATION_AUDIT.json`で16ファイルすべてを開始HEADの**既存公開済みGit blob bytes**と照合した。BM原文／原依頼とBN合成入力の完全一致、新規非公開モデル原文0を証明した後、通常pushが承認・完了した。新規実モデル原文を公開したものではない。
 
 ## 未達と次の判定
 
