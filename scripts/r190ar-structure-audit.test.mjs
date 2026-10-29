@@ -53,7 +53,7 @@ test('AR reject tampered source, changed safeguards, no implicit repair',()=>{
  const bad=structuredClone(studies[2]);bad.worldWrites=1;
  assert.throws(()=>auditR190ARStructuralContinuity(bad),/R190AR_SOURCE_SAFETY_BOUNDARY/);
  const source=structuredClone(R190AR_AUTHOR_SUPPORTED_TWIN);
- source.masses=source.masses.filter(m=>!m.id.includes('ground-rib'));
+ source.masses=source.masses.slice(0,-6); // all six authored ribs removed
  const incomplete=compileR190AQParti(source);
  const a=auditR190ARStructuralContinuity(incomplete);
  assert(a.detachedVoxelCount>0);
