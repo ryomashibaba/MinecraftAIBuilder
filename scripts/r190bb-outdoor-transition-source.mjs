@@ -17,7 +17,7 @@ const safety=()=>({readiness:'NOT_PREPARED',constructionApproved:false,
  modelCallsByReview:0,art:'ART_HOLD',officialArtAdoptions:0});
 function route(design,compiled,entrance){
  const {width:w,height:h,depth:d}=design.bounds;
- const [ex,y,ez]=entrance,vox=new Set(compiled.primitives.map(p=>p.join(',')));
+ const [ex,y,ez]=entrance,vox=new Set(compiled.primitives.map(p=>p[0]+','+p[1]+','+p[2]));
  const occupied=(x,yy,z)=>vox.has(x+','+yy+','+z);
  const pads=new Map(),starts=[];
  for(let x=0;x<w-1;x++)for(let z=0;z<d-1;z++){
