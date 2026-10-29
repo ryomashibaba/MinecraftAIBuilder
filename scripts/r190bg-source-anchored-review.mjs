@@ -112,10 +112,16 @@ function html(manifest){
  '</script></body></html>'
  ].join('\n');
 }
-export function createR190BGReview({comparisonDir,outDir}){
- if(typeof comparisonDir!=='string'||typeof outDir!=='string')fail('ARGUMENTS');
+export function createR190BGReview({comparisonDir,outDir,allowNestedChild=false}){
+ if(typeof comparisonDir!=='string'||typeof outDir!=='string'||
+    typeof allowNestedChild!=='boolean')fail('ARGUMENTS');
  const src=path.resolve(comparisonDir),out=path.resolve(outDir);
- guard(out,src);fresh(out);
+ // Only a fixed nested subdirectory is allowed to facilitate the BF
+ // one-call compare -> review workflow. Original BE files stay immutable.
+ const exactIntegratedChild=allowNestedChild&&
+  out===path.join(src,'R190BG_HUMAN_REVIEW');
+ if(!exactIntegratedChild)guard(out,src);
+ fresh(out);
  const reportBytes=file(src,'R190BE_COMPARE.json',1000000);
  const report=parse(reportBytes,'BE_COMPARISON');
  const templateBytes=file(src,'R190BE_HUMAN_REVIEW_TEMPLATE.json',80000);
