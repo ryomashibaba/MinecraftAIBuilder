@@ -179,3 +179,33 @@ test('BC offline CLI original review never reinterprets corrupt R4 as geometry',
    ['R190BC_SECTION_AUDIT.json','R190BC_SOURCE_SECTION.svg']);
  }finally{fs.rmSync(root,{recursive:true,force:true})}
 });
+
+
+test('BD regression: a supported two-wide room isolated by a real source-floor CUT is not accessible',()=>{
+ const fake=example();
+ fake.design.elements.push({id:'full-crossing-trench',shape:'box',mode:'cut',
+  origin:[12,0,1],size:[1,1,18]});
+ const input=raw(fake),before=hash(input);
+ const report=reviewR190BCOriginal(input,{expectedSha256:before});
+ assert.equal(report.status,'HOLD_MODEL_DECLARED_ZONE_ACCESS_UNPROVEN');
+ assert.equal(report.firstFailure,'MODEL_DECLARED_ZONE_NOT_CONNECTED_BY_FLAT_TWO_WIDE_SOURCE');
+ assert(report.zoneEvidence[1].twoWidePadCount>0);
+ assert.equal(report.zoneEvidence[1].flatEntranceReachableTwoWidePadCount,0);
+ assert(report.zoneEvidence[0].flatEntranceReachableTwoWidePadCount>0);
+ assert.equal(report.flatEntranceRouteEvidence.onlySameHeightFlatPads,true);
+ assert.equal(report.flatEntranceRouteEvidence.minecraftWalking,'NOT_TESTED');
+ assert.equal(hash(input),before);
+ assert.deepEqual(report.BuildPlan.operations,[]);
+ assert.equal(report.worldWrites,0);
+});
+test('BD regression: model declares usable room on unreachable upper level; no fake vertical route',()=>{
+ const fake=example();
+ fake.design.elements.push(box('upper-deck',[14,8,4],[6,1,8],'wood'));
+ fake.spatialPlan.functionalZones[1].origin=[14,9,4];
+ const report=reviewR190BCOriginal(raw(fake));
+ assert.equal(report.status,'HOLD_MODEL_DECLARED_ZONE_ACCESS_UNPROVEN');
+ assert(report.zoneEvidence[1].twoWidePadCount>0);
+ assert.deepEqual(report.zoneEvidence[1].floorLevels,[9]);
+ assert.equal(report.zoneEvidence[1].flatEntranceReachableTwoWidePadCount,0);
+ assert.equal(report.flatEntranceRouteEvidence.stairsAndVerticalCirculation,'NOT_CERTIFIED');
+});
