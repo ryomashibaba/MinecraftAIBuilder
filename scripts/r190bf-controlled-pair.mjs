@@ -49,7 +49,9 @@ function loadProtocol(protocolDir,preparedDir){
   m.maxTokens>16384||m.temperature!==0.35||m.endpoint!==endpoint||
   m.briefSha256!==p.briefSha256||m.designPromptSha256!==p.promptSha256||
   m.providerCallsAllowedPerSide!==1||m.sideA!=='EXACT_ORIGINAL_BRIEF'||
-  m.sideB!=='EXACT_BC_DESIGN_FIRST_PROMPT'||m.art!=='ART_HOLD'||
+  m.sideB!==(p.promptKind==='BJ_FAILURE_INFORMED'?
+   'EXACT_BJ_FAILURE_INFORMED_PROMPT':'EXACT_BC_DESIGN_FIRST_PROMPT')||
+  m.art!=='ART_HOLD'||
   m.worldWrites!==0||m.worldContacts!==0||m.constructionApproved!==false)
   fail('PROTOCOL_INVALID_OR_DRIFT');
  const original=new TextDecoder('utf-8',{fatal:true}).decode(
@@ -66,7 +68,8 @@ export function prepareR190BF({preparedDir,outDir,model,seed=23,maxTokens=8192})
  const p=inspectR190BDPrepared(prepared);
  const manifest={schema:R190BF_SCHEMA,model,temperature:0.35,seed,maxTokens,
   endpoint,briefSha256:p.briefSha256,designPromptSha256:p.promptSha256,
-  sideA:'EXACT_ORIGINAL_BRIEF',sideB:'EXACT_BC_DESIGN_FIRST_PROMPT',
+  sideA:'EXACT_ORIGINAL_BRIEF',sideB:p.promptKind==='BJ_FAILURE_INFORMED'?
+  'EXACT_BJ_FAILURE_INFORMED_PROMPT':'EXACT_BC_DESIGN_FIRST_PROMPT',
   providerCallsAllowedPerSide:1,providerVersionDigest:'NOT_VERIFIED',
   samplingSeedIsRequestedNotProofOfProviderCompliance:true,
   noAutoRetries:true,experimentQuality:'NOT_ESTABLISHED',

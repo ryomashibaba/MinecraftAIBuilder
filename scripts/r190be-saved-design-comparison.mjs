@@ -103,6 +103,7 @@ export function compareR190BESaved({prepared,baseline=null,candidate=null,out}){
    'HOLD_SOURCE_PAIR_NOT_COMPARABLE':pair.samePhysicalVoxels?
     'NO_PHYSICAL_CHANGE_ART_HOLD':'SAVED_SOURCE_PAIR_AVAILABLE_ART_HOLD',
   originalBriefSha256:source.briefSha256,designFirstPromptSha256:source.promptSha256,
+  candidatePromptKind:source.promptKind??'BC_DESIGN_FIRST',
   A:A.summary,B:B.summary,physicalComparison:pair,
   sameClaimedModel:A.summary.modelClaimed&&B.summary.modelClaimed?
    A.summary.modelClaimed===B.summary.modelClaimed:null,
@@ -153,7 +154,7 @@ export function compareR190BESaved({prepared,baseline=null,candidate=null,out}){
   '@media(max-width:850px){main{grid-template-columns:1fr}}</style>'+
   '<h1>保存原文の真正B143比較 — ART HOLD</h1><p>'+escape(report.status)+'</p>'+
   '<p>A＝元依頼の直接B143、B＝同じ元依頼＋BC設計先行。新規推論0、形状補修0。'+
-  '形式・動線・断面のHOLDは各案で維持します。数値差から美術の勝者を選びません。</p>'+
+  '形式・動線・断面のHOLDは各案で維持します。候補Bの指示案：'+escape(report.candidatePromptKind)+'。数値差から美術の勝者を選びません。</p>'+
   '<details><summary>元の日本語依頼</summary><pre>'+escape(brief)+'</pre></details>'+
   '<main>'+panel('A',A)+panel('B',B)+'</main>'+
   '<p>モデル名・予算・サンプリング等の生成条件は未確認。改善・因果・汎用性は未立証。</p>'+

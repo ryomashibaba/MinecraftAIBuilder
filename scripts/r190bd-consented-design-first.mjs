@@ -11,6 +11,7 @@ import {createHash} from 'node:crypto';
 import {buildR190BCDesignFirstPrompt,reviewR190BCOriginal,
  renderR190BCSectionSVG} from './r190bc-design-first-section.mjs';
 import {runR190Local} from './r190-local-semantic-run.mjs';
+import {inspectR190BJPrepared} from './r190bj-failure-informed-prompt.mjs';
 
 export const R190BD_SCHEMA='minecraftaibuilder-r190bd-consented-design-first-v1';
 const H=x=>createHash('sha256').update(x).digest('hex');
@@ -36,6 +37,8 @@ const expectedSafety=m=>m?.readiness==='NOT_PREPARED'&&
 export function inspectR190BDPrepared(sourceDir){
  if(typeof sourceDir!=='string'||!path.isAbsolute(sourceDir)||!dir(sourceDir))
   fail('PREPARED_DIRECTORY');
+ if(fs.existsSync(path.join(sourceDir,'R190BJ_PROMPT_RECEIPT.json')))
+  return inspectR190BJPrepared(sourceDir);
  const brief=readFile(sourceDir,'ORIGINAL_BRIEF.txt',20000);
  const prompt=readFile(sourceDir,'DESIGN_FIRST_PROMPT.txt',25000);
  const m=JSON.parse(readFile(sourceDir,'R190BC_PROMPT_RECEIPT.json',12000));
@@ -47,7 +50,8 @@ export function inspectR190BDPrepared(sourceDir){
  const briefString=new TextDecoder('utf-8',{fatal:true}).decode(brief);
  const exact=buildR190BCDesignFirstPrompt(briefString);
  if(!Buffer.from(exact,'utf8').equals(prompt))fail('PREPARED_PROMPT_MISMATCH');
- return {briefSha256:H(brief),promptSha256:H(prompt),prompt:exact};
+ return {briefSha256:H(brief),promptSha256:H(prompt),prompt:exact,
+  promptKind:'BC_DESIGN_FIRST'};
 }
 export function parseR190BDArgs(argv){
  if(argv.length===1&&argv[0]==='--help')return {help:true};

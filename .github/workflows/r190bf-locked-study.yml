@@ -4,6 +4,7 @@ on:
     branches: [feature/b198zr1-protected-architectural-revision]
     paths:
       - 'scripts/r190bf-*'
+      - 'scripts/r190bj-*'
       - 'scripts/r190be-saved-design-comparison.mjs'
       - 'scripts/r190bd-consented-design-first.mjs'
       - 'scripts/r190bc-design-first-section.mjs'
@@ -11,6 +12,7 @@ on:
   pull_request:
     paths:
       - 'scripts/r190bf-*'
+      - 'scripts/r190bj-*'
       - 'scripts/r190be-saved-design-comparison.mjs'
       - 'scripts/r190bd-consented-design-first.mjs'
       - 'scripts/r190bc-design-first-section.mjs'
@@ -32,4 +34,5 @@ jobs:
           node-version: '22'
       - run: node --check scripts/r190bf-controlled-pair.mjs
       - run: node --test scripts/r190bf-controlled-pair.test.mjs
+      - run: node --test scripts/r190bj-failure-informed-prompt.test.mjs
       - run: node --test scripts/r190be-saved-design-comparison.test.mjs
