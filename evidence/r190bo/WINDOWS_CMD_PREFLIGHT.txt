@@ -155,4 +155,3 @@
   "art": "ART_HOLD",
   "officialArtAdoptions": 0
 }
-
