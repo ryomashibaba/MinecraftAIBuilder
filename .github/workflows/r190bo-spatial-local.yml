@@ -51,6 +51,18 @@ jobs:
         env:
           NODE_OPTIONS: --import=./scripts/r190bo-deny-network.mjs
         run: RUN_R190BO_OFFLINE_PREFLIGHT.cmd
+      - name: Smoke-test real paired runner preflight without local-model transport
+        shell: pwsh
+        env:
+          NODE_OPTIONS: --import=./scripts/r190bo-deny-network.mjs
+        run: |
+          & ./scripts/r190bo-real-pair.ps1 -PrepareOnly -OutputRoot bo-real-pair-preflight
+          $report = Get-Content -LiteralPath bo-real-pair-preflight/RESULT_SUMMARY.json -Raw -Encoding UTF8 | ConvertFrom-Json
+          if ($report.modelResults.Count -ne 2 -or $report.automaticRetryCount -ne 0) { throw 'R190BO_PREFLIGHT_RUNNER_REPORT' }
+          foreach ($case in $report.modelResults) {
+            if ($case.status -ne 'PREFLIGHT_ONLY' -or $case.actualProviderRequests -ne 0) { throw 'R190BO_UNAUTHORIZED_INFERENCE' }
+          }
+          if (Test-Path bo-real-pair-preflight/qwen3-14b/capture) { throw 'R190BO_CAPTURE_BEFORE_AUTHORIZATION' }
       - uses: actions/upload-artifact@v4
         with:
           name: R190BO-OFFLINE-NO-MODEL-${{ matrix.os }}
