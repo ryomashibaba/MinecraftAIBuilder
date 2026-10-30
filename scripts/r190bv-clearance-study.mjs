@@ -11,7 +11,7 @@ const BRIEF_SHA='bbd44cc9f28234055601b4055466e2f3564e7e4565d408432de4c4fab0aa277
 const cases=[
  {label:'A_TWIN_ASCENT',path:'evidence/r190bu/RIFTED_CITY_A.json',
   raw:'31fecf6f8ab35175dd5181b0f25b5f9548f3674616188fbd3bd6d1b2746bb6aa',
-  geometry:'3159b3736491a8591bd2dccb9fb7e2df979bbf7e2df26d9fd940c24cb5adb875'},
+  geometry:'3159b3736491a8591bd2dccb9fb7e2df979bbf7ecdf26d9fd940c24cb5adb875'},
  {label:'B_FOLDED_SKYLINE',path:'evidence/r190bu/RIFTED_CITY_B.json',
   raw:'ed6dd69e921868742aa9ce2e7a1228c5c953872907a6e132aa8f78628b1f3831',
   geometry:'63979cc6883740232a636c3d729ddc874427df97aa3400cd76f44fb0432ac2ec'}
