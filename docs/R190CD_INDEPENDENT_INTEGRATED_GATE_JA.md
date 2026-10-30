@@ -81,3 +81,9 @@ node scripts/r190cd-offline-raw-review.mjs --brief ORIGINAL_BRIEF.txt --original
 
 ### SHA不一致時の旧HOLD契約維持
 - 追加した旧BO派生証拠照合のうち、レシートに記録された幾何SHAが再コンパイルと一致しない場合は、以前から存在したCDオフライン経路で**原文/元依頼を保存してHOLD、真正3Dなし**にする。証拠の改変（旧派生proposalや物理判定のすり替え）は受付前に拒否する。例外終了によって元SHA不一致時の診断証拠が消える回帰を避ける。今回のCI完了までは判定保留。
+
+## R190-CE：美術審査を進める真正8視点のオフライン資料（2026-10-31 JST）
+- 既存BO保存原文→BN/B143真正3D→CD検査の技術成立だけでは美術評価ができないため、保存CD最終voxelを読んで5方向の実正投影（front/rear/west/east/roof）と3種類の表面セル近似カメラ（oblique/ground/canyon）のSVG、比較HTML、出所SHAのJSONを出力する。追加建物生成・設計修復は一切なし。
+- 正投影5方向はstdlib Pythonで別実装から全voxelを再投影してすべての表示セル・色を検証。近似カメラ3枚はXMLの正当性・非空画像・SHAのみを確認する。内部歩行視点の認定や正確なレイトレーシングは行わない。
+- 新規 `scripts/r190ce-offline-study.mjs` は上下2用途と長い公共コンコースの既存合成元回答を、正規BO prepare/replay→CD→CEへ無通信で流し、Actions artifactにINDEX.html・2例のREVIEW.html・SVG16枚・元証拠を保存する。これはQwen/Gemma実推論結果ではなく `SYNTHETIC_TEST_FIXTURE`。作者原本やモデルnonce、Minecraft境界は変更しない。
+- 評価はあくまでART HOLD／機能HOLD／Minecraft歩行未試験。表示の生成成功を芸術的成功と呼ばず、生成した視点を人間が実際に見て批評し、原依頼と用途を独立に確認してから設計品質を評価する。新CIは完了確認まで判定保留。

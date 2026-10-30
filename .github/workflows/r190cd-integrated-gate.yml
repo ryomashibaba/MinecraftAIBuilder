@@ -5,11 +5,13 @@ on:
     paths:
       - 'source/ai/r190cd-*'
       - 'scripts/r190cd-*'
+      - 'scripts/r190ce-*'
       - '.github/workflows/r190cd-integrated-gate.yml'
   pull_request:
     paths:
       - 'source/ai/r190cd-*'
       - 'scripts/r190cd-*'
+      - 'scripts/r190ce-*'
       - '.github/workflows/r190cd-integrated-gate.yml'
   workflow_dispatch:
 permissions:
@@ -33,7 +35,7 @@ jobs:
       - name: Fail-closed independent quality gate with synthetic counterexamples
         env:
           NODE_OPTIONS: --import=./scripts/r190bo-deny-network.mjs
-        run: node --test scripts/r190cd-integrated-quality.test.mjs scripts/r190cd-bn.test.mjs scripts/r190cd-offline-raw-review.test.mjs scripts/r190cd-bo-capture-review.test.mjs
+        run: node --test scripts/r190cd-integrated-quality.test.mjs scripts/r190cd-bn.test.mjs scripts/r190cd-offline-raw-review.test.mjs scripts/r190cd-bo-capture-review.test.mjs scripts/r190ce-offline-study.test.mjs
       - name: Recompile FROZEN CC real voxels without changing source or author design
         env:
           NODE_OPTIONS: --import=./scripts/r190bo-deny-network.mjs
@@ -44,6 +46,12 @@ jobs:
         run: node scripts/r190cd-review.mjs --evidence cd-base-evidence --out cd-review
       - name: Independently recalculate physical space and author route limitations
         run: python scripts/r190cd-independent-verify.py cd-base-evidence cd-review
+      - name: Build actual eight-view synthetic-only review galleries
+        env:
+          NODE_OPTIONS: --import=./scripts/r190bo-deny-network.mjs
+        run: node scripts/r190ce-offline-study.mjs --out ce-review-evidence
+      - name: Independently reproject five exact voxel elevations and verify all eight SVG SHA
+        run: python scripts/r190ce-independent-verify.py ce-review-evidence
       - name: Preserve original geometry evidence plus independent negative scorecards
         if: always()
         uses: actions/upload-artifact@v4
@@ -52,4 +60,5 @@ jobs:
           path: |
             cd-base-evidence
             cd-review
+            ce-review-evidence
           if-no-files-found: warn
