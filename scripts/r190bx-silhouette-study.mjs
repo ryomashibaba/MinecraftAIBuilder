@@ -46,10 +46,19 @@ export function studyR190BX({out}){
  const dir=path.resolve(out);
  if(fs.existsSync(dir))throw Error('R190BX_FRESH_OUTPUT');
  fs.mkdirSync(dir);
+ const originalA=fs.readFileSync(path.join(root,'evidence/r190bx/SILHOUETTE_A.json'));
+ let originalRejection='UNEXPECTED_ACCEPTANCE';
+ try{validateDesign(JSON.parse(originalA))}catch(error){originalRejection=error.message;}
+ if(originalRejection!=='B143_OUTSIDE_LOCAL_BOUNDS')
+  throw Error('R190BX_ORIGINAL_A_FAILURE_NOT_REPRODUCED:'+originalRejection);
+ fs.writeFileSync(path.join(dir,'A_INITIAL_REJECTION.json'),json({
+  originalRawSHA256:sha(originalA),sourceFile:'evidence/r190bx/SILHOUETTE_A.json',
+  strictB143Failure:originalRejection,originalUnmodified:true,authorRevision:'SILHOUETTE_A2.json',
+  note:'Source-authored structural beams exceeded y=0 by one voxel; rejection is deliberate, no clamping or host auto repair.'}),{flag:'wx'});
  const template=fs.readFileSync(path.join(root,'source/ai/b143-viewer-template.html'),'utf8');
  const cases=[];
  for(const letter of ['A','B']){
-  const rel='evidence/r190bx/SILHOUETTE_'+letter+'.json';
+  const rel='evidence/r190bx/SILHOUETTE_'+(letter==='A'?'A2':letter)+'.json';
   const raw=fs.readFileSync(path.join(root,rel)),design=JSON.parse(raw);
   if(raw.length>25000)throw Error('R190BX_ORIGINAL_SIZE');
   validateDesign(design);
@@ -73,6 +82,8 @@ export function studyR190BX({out}){
  }
  const report={schema:'minecraftaibuilder-r190bx-sculpture-first-study-v1',
   source:'CHAT_AUTHOR_INDEPENDENT_B143_NOT_MODEL_GENERATED',
+  initialOriginalARejectionReproduced:originalRejection,
+  initialOriginalASHA256:sha(originalA),
   BM_OriginalBriefSHA256:briefSHA,protectedBUandBWOriginals:true,
   geomDifferent:cases[0].geometrySha256!==cases[1].geometrySha256,
   technicalGate:cases[0].geometrySha256!==cases[1].geometrySha256?
