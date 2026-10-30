@@ -16,7 +16,7 @@ function read(file,max){
  if(!st.isFile()||st.isSymbolicLink()||st.size<1||st.size>max)throw Error('R190CD_BAD_INPUT_FILE');
  return fs.readFileSync(file);
 }
-export function offlineRawReviewCD({briefFile,originalFile,out}={}){
+export function offlineRawReviewCD({briefFile,originalFile,out,requireBOGeometry=false,requiredBOGeometrySha256=null}={}){
  if([briefFile,originalFile,out].some(x=>typeof x!=='string'||!x)||
    fs.existsSync(out))throw Error('R190CD_FRESH_OUTPUT_REQUIRED');
  const brief=read(path.resolve(briefFile),20000),raw=read(path.resolve(originalFile),200000);
@@ -37,6 +37,11 @@ export function offlineRawReviewCD({briefFile,originalFile,out}={}){
  try{
   const derived=compileR190BNAssembly(raw,{originalBrief:brief,
     authorship:'UNVERIFIED_AUTHOR'});
+  // Never create derived 3D if the saved BO capture had no genuine recorded
+  // B143 geometry or its SHA contradicts independent BN recompilation.
+  if(requireBOGeometry&&(!/^[a-f0-9]{64}$/.test(requiredBOGeometrySha256??'')||
+    derived.geometrySha256!==requiredBOGeometrySha256))
+   throw Error('R190CD_BO_CAPTURE_PREVIOUS_GEOMETRY_MISSING_OR_MISMATCHED');
   const actual=auditR190CDFromBN({original:raw,originalBrief:brief,derived,
     origin:'OFFLINE_SAVED_AUTHOR_UNVERIFIED_NO_PROVIDER_CALL'});
   // Not a real model success, even if source and final voxel geometry are valid.

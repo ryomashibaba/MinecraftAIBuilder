@@ -68,3 +68,8 @@ node scripts/r190cd-offline-raw-review.mjs --brief ORIGINAL_BRIEF.txt --original
 - 独立ゲートの監査で、外部水平空気連通がない作者入口も保守的到達BFSの起点になり、閉じた部屋の到達セルを過大計上し得ることを発見。形状・原回答を変えず、**作者明示入口の2×2支持足元と境界からの同高度2×2×3水平空気連通の両方**が確認できる場合だけ到達起点にする。外部路面の支持、ドア操作、現実の歩行までは依然未試験。
 - 閉じた入口だけの負例と「有効な外部入口＋密閉された別入口」の混合負例を追加し、室内到達を誤認しない回帰を作成。複数の有効入口があるときの入口別到達数は**全起点の和集合**であり、入口別個別認定ではない旨を結果に明記。executionAllowed=false をCDと一括オフライン審査に明示。
 - この修正自体のWindows/Ubuntu専用CIは**本コミット時点未確認**。既存CI #41079427106（BN接続）／#41079857037（保存原文入口）は両方SUCCESSだが旧HEADの結果。最新HEADが通るまでは新修正をTECH PASS扱いしない。ART/機能/Minecraft施工は引き続きHOLD/REJECT・無承認推論0・世界接触0。
+
+## R190-CD BO保存レシートからの無通信・正本付き一括連携（2026-10-31 JST）
+- 新規 `scripts/r190cd-bo-capture-review.mjs` は既存BOの**保存済み** `CAPTURE.json`／`INVENTORY.json`／`MODEL_ORIGINAL.txt`／`ORIGINAL_BRIEF.txt` をread-only照合し、原依頼と原回答のbytes-SHA、manifest全ファイルのbyte数・SHA、未申告ファイル・シンボリックリンクを検査。旧BOの事前承認、sourcePins、通信・モデル契約、過去原本は変更しない。
+- 使用：`node scripts/r190cd-bo-capture-review.mjs --capture SAVED_BO_CAPTURE_DIR --out NEW_CD_REVIEW`（**新規出力のみ**）。BOの真正B143幾何SHAが保存済みの場合のみ、そのSHAと新たなBN厳密コンパイルのSHAが一致する場合に限ってCD最終voxel監査へ進む。SHAが無い・違う・原文不正なら**元bytesだけを保持してHOLD、偽3Dなし**。結果の `BO_CAPTURE_BINDING.json` は原本/manifest SHAと照合結果を記録するが、保存ファイルのLOCAL_PROVIDER申告だけではモデル著者の独立認証ではない。
+- 同じ専用CIに本物のBO `prepare`→`replay`→CD処理を追加（Qwen/Gemmaタグを用いた**異なる日本語依頼の合成fixture**）。原文変更・保存レシート改ざん・幾何SHAすり替え・元幾何証拠欠落・未申告ファイル・出力上書きの負例も追加。テストが通っても実Qwen/GemmaへのPOSTは0、建築ART/依頼忠実性/実歩行の成功0、施工0。**本変更のCIはコミット前時点で未実行・未認証**。

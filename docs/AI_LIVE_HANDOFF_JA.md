@@ -1,6 +1,6 @@
 # MinecraftAIBuilder — 新チャット用LIVE HANDOFF（2026-10-31 JST）
 
-> **最新追加（R190-CD入口到達のフェイルクローズ修正）**：独立ゲートに密閉作者入口でも内側への到達が計上され得る問題を発見。外部水平空気連通と支持足元の両方を要求するBFS起点へ改め、密閉入口単独＋混在入口の負例を追加。BN/BOの原設計・凍結原文・B143 geometry SHA・モデル権限は変更しない。**CI #41079427106と#41079857037は旧HEADでSUCCESS**。#41080022312、#41081372238と本更新後の最新CD専用CIは結果を必ず再照合し、完了まで新修正は**未認証**。詳細は `docs/R190CD_INDEPENDENT_INTEGRATED_GATE_JA.md`。ART/機能の合格0・推論POST0・施工0。**再開時はPR #128の現在HEADを先に取得し、このスナップショットを絶対最新扱いしない。**
+> **最新追加（R190-CD BO保存原文統合）**：旧HEAD [`c3d65d5`](https://github.com/ryomashibaba/MinecraftAIBuilder/commit/c3d65d53c6b9602f700d09a5fff21d1b29f433d6) の密閉入口修正CI [#41082309335](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41082309335) は **SUCCESS**。続いて `scripts/r190cd-bo-capture-review.mjs` を導入し、BO保存 `INVENTORY/CAPTURE/MODEL_ORIGINAL/ORIGINAL_BRIEF` の全ファイルSHA・バイト検証→BN/B143再コンパイル→元のBO幾何SHA固定→CDの独立品質ゲートを、**実モデル送信・世界通信0**で一括実施する。異用途の合成2例と改ざん・欠落負例を専用CIに追加。**本最新変更のWindows/Ubuntu CIはまだ未確認、旧CI成功を流用しない**。ART/実モデル自由設計/実歩行/施工は未合格。詳細 `docs/R190CD_INDEPENDENT_INTEGRATED_GATE_JA.md`。新チャットでは現在PR HEAD・最新CD CIを最初に確認。
 
 > **必読。** この文書は過去の長いChatGPT会話を丸ごと再読込しないためのGitHub上の軽量な正本。**新チャットでは最初にDraft PR #128の現在HEAD・変更差分・専用CIの結果を再確認**する。以下のコミットとCI状況は作成時点のスナップショット。勝手に次工程の成功を仮定しない。
 
@@ -8,10 +8,10 @@
 - Repo: `ryomashibaba/MinecraftAIBuilder`
 - 継続branch: `feature/b198zr1-protected-architectural-revision`
 - Draft PR: `https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128`。**Open/Draft、未merge**。
-- この文書作成直前の確認済みHEAD: `79fba2b9501e97a3c646eb3bbc846e2d81170567`。**本ドキュメントの追加でHEADが進む。これを絶対的な最新HEADとして固定しない**。
+- この更新の親HEAD: `c3d65d53c6b9602f700d09a5fff21d1b29f433d6`。**本更新でHEADは進む。必ずPR #128から現HEADを再取得する**。
 - 基幹引き継ぎ: `docs/AI_RESTART_JA.md`。最新CD詳細: `docs/R190CD_INDEPENDENT_INTEGRATED_GATE_JA.md`。ARTの負例根拠: `docs/R190CC_FIRST_ART_FUNCTION_AUDIT_JA.md`。
 - 初回CD検証 [Actions #41078728011](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41078728011) は**Windows/Ubuntu両SUCCESS**。
-- 新BN接続版CI [#41079427106](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41079427106)、保存済み原文一括入口追加版 [#41079857037](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41079857037)、最後のHEADでの [#41080022312](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41080022312) は**直近の確認時点では未完了・queued**。新しい機能をPASS扱いしない。Actionsの混雑なら、ジョブを増やさず本当に必要な結果だけ確認。
+- 旧CD専用CI [#41079427106](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41079427106)、[#41079857037](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41079857037)、[#41080022312](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41080022312)、[#41081372238](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41081372238)、密閉入口修正版 [#41082309335](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41082309335) は**全て完了SUCCESS**（それぞれ異なる旧HEAD）。BO保存レシート接続追加後の**新しい専用CIは未検証**。これを旧成功で代用禁止。
 - 専用CI成功を「全体CIすべて成功」「モデルが実設計成功」「完成建築」と言い換えない。並行する別系統の失敗CIも安易に同一の原因とはみなさない。
 
 ## 1. 最上位の目的
