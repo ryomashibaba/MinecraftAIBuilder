@@ -261,7 +261,7 @@ test('R190-BQ physical facts are measured from genuine two-level synthetic voxel
  checkInventory(out);
 });
 
-test('R190-BQ exact BM brief with only two real levels stays independent fidelity HOLD',t=>{
+test('R190-BQ exact BM brief with only two real levels is a top-level HOLD',t=>{
  const root=temp(t),q=twoLevelReadingProbe(),brief=verifyBM().brief;
  q.plan.originalBriefSha256=hashBO(brief);
  const prepared=path.join(root,'prepared'),original=path.join(root,'raw');
@@ -269,7 +269,8 @@ test('R190-BQ exact BM brief with only two real levels stays independent fidelit
  prepareBO({model:'qwen3:14b',out:prepared});
  const out=path.join(root,'out'),r=replayBO({prepared,original,out,origin:'SYNTHETIC_TEST_FIXTURE'});
  const bq=read(out,'PHYSICAL_PROGRAM_REVIEW.json');
- assert.equal(r.status,'SOURCE_SPACE_AND_ROUTE_PROXIES_PRESENT_ART_HOLD');
+ assert.equal(r.status,'HOLD_INDEPENDENT_HIGHRISE_LEVELS');
+ assert.equal(r.sourceTechnicalStatus,'SOURCE_SPACE_AND_ROUTE_PROXIES_PRESENT_ART_HOLD');
  assert.equal(bq.bmExactOriginalBrief,true);
  assert.equal(bq.minimumLevelPrerequisite,'HOLD_MISSING_THIRD_LEVEL');
  assert.equal(bq.mandatoryHumanChecks.length,6);
@@ -287,5 +288,25 @@ test('R190-BQ invalid model source produces no fabricated physical evidence or 3
  assert.equal(fs.existsSync(path.join(out,'PHYSICAL_PROGRAM_REVIEW.json')),false);
  assert.equal(fs.existsSync(path.join(out,'DERIVED_3D.html')),false);
  assert.match(fs.readFileSync(path.join(out,'REVIEW.html'),'utf8'),/監査不能/);
+ checkInventory(out);
+});
+
+
+test('R190-BQ insufficient high-rise levels => CLI exits 2 but retains genuine diagnostic 3D',t=>{
+ const root=temp(t),q=twoLevelReadingProbe(),brief=verifyBM().brief;
+ q.plan.originalBriefSha256=hashBO(brief);
+ const prepared=path.join(root,'prepared'),original=path.join(root,'raw'),out=path.join(root,'cli-out');
+ fs.writeFileSync(original,JSON.stringify(q.plan));
+ prepareBO({model:'qwen3:14b',out:prepared});
+ const child=spawnSync(process.execPath,[path.join(ROOT,'scripts/r190bo-spatial-local.mjs'),
+  'replay','--prepared',prepared,'--original',original,'--out',out],{encoding:'utf8'});
+ assert.equal(child.status,2,child.stderr);
+ const receipt=JSON.parse(child.stdout);
+ assert.equal(receipt.status,'HOLD_INDEPENDENT_HIGHRISE_LEVELS');
+ assert.equal(receipt.sourceTechnicalStatus,'SOURCE_SPACE_AND_ROUTE_PROXIES_PRESENT_ART_HOLD');
+ assert.equal(fs.existsSync(path.join(out,'DERIVED_3D.html')),true);
+ const page=fs.readFileSync(path.join(out,'REVIEW.html'),'utf8');
+ assert.match(page,/HOLD_INDEPENDENT_HIGHRISE_LEVELS/);
+ assert.match(page,/src="DERIVED_3D.html"/);
  checkInventory(out);
 });

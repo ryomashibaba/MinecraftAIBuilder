@@ -4,6 +4,7 @@ on:
     branches: [feature/b198zr1-protected-architectural-revision]
     paths:
       - 'source/ai/r190b[n-o]-*'
+      - 'source/ai/r190bq-*'
       - 'scripts/r190b[n-o]-*'
       - 'scripts/fixtures/r190bn-*'
       - 'RUN_R190BO_OFFLINE_PREFLIGHT.cmd'
@@ -11,6 +12,7 @@ on:
   pull_request:
     paths:
       - 'source/ai/r190b[n-o]-*'
+      - 'source/ai/r190bq-*'
       - 'scripts/r190b[n-o]-*'
       - 'scripts/fixtures/r190bn-*'
       - 'RUN_R190BO_OFFLINE_PREFLIGHT.cmd'

@@ -21,3 +21,6 @@ R190-BOのBN/R4はモデル申告の空間・到達閾値に対して技術代�
 B143/R4/旧BCの合否・ソース権限・実行予算・用途/部屋のモデル選択を変更しない。発想や外形、階、階段は引き続きモデルが選択する。固定建築形状を追加しない。
 
 R190-BO新形式の実Qwen/Gemma推論は、個別のexact request・UUID承認が無いので実施していない。Ollama通信0、Minecraft接触・施工0、NOT_PREPARED、9 BLOCKED、BuildPlan空、ART HOLD、正式美術採用0。main/原本/旧BM A/B未変更、既存Draft PR #128継続。
+
+## BQの追加フェイルクローズ
+BM高層ビルで最終ボクセルの実立脚階が3層未満のときは、`SOURCE`の技術成立を`sourceTechnicalStatus`に保持したまま、トップレベルの`status`を`HOLD_INDEPENDENT_HIGHRISE_LEVELS`へ変更。CLIは終了コード2。ただし真正B143が成立している場合、診断のための3DはHOLD明示で残す。新モジュール単独の変更でもBO専用CIが走るようActionsのパスフィルタに`r190bq-*`を追加。

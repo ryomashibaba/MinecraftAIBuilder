@@ -120,7 +120,8 @@ function emitReviewBO(dir,receipt){
  const exists=file=>fs.existsSync(path.join(dir,file));
  const link=(file,label)=>exists(file)?'<a href="'+file+'">'+escapeText(label)+'</a>':'';
  const derivedStatus=receipt.status==='SOURCE_SPACE_AND_ROUTE_PROXIES_PRESENT_ART_HOLD'||
-  receipt.status==='HOLD_DERIVED_SOURCE_FUNCTION';
+  receipt.status==='HOLD_DERIVED_SOURCE_FUNCTION'||
+  receipt.status==='HOLD_INDEPENDENT_HIGHRISE_LEVELS';
  const show3D=derivedStatus&&exists('DERIVED_3D.html')&&!!receipt.geometrySha256;
  const original=read(path.join(dir,'MODEL_ORIGINAL.txt'),200000).toString('utf8');
  const brief=read(path.join(dir,'ORIGINAL_BRIEF.txt'),20000).toString('utf8');
@@ -194,7 +195,10 @@ export function deriveBO({dir,raw,brief,origin,complete=true,provider=null}){
   write(dir,'PHYSICAL_PROGRAM_REVIEW.json',json(audit));
   receipt.independentProgramStatus=audit.result;
   receipt.minimumLevelPrerequisite=audit.minimumLevelPrerequisite;
-  receipt.status=result.status;receipt.geometrySha256=result.geometrySha256;
+  receipt.sourceTechnicalStatus=result.status;
+  receipt.status=audit.minimumLevelPrerequisite==='HOLD_MISSING_THIRD_LEVEL'?
+   'HOLD_INDEPENDENT_HIGHRISE_LEVELS':result.status;
+  receipt.geometrySha256=result.geometrySha256;
   receipt.sourceSha256=result.sourceSha256;
   receipt.outputAuthorship=result.outputAuthorship;
   receipt.technicalScope='BN full clear volume/support + R4 declared single-cell route; independent request/art not certified';
