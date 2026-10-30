@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {compileR190CB,SCHEMA} from '../source/ai/r190cb-architectural-circulation.mjs';
+import {verifyB143Payload,surfaceOnly} from './b143-gallery-core.mjs';
 const raw=()=>fs.readFileSync(new URL('../evidence/r190cb/RIFT_LANTERN.json',import.meta.url));
 const doc=()=>JSON.parse(raw());
 const run=d=>compileR190CB(Buffer.from(JSON.stringify(d)));
@@ -39,4 +40,19 @@ test('Impossible riser transition rejects without invented stair or automatic re
 test('Changing true mass design origin to unrelated BM request fails closed',()=>{
  const a=doc();a.architecture.originalBriefSha256='a'.repeat(64);
  assert.throws(()=>run(a),/R190CB_BRIEF/);
+});
+
+test('Viewer safety contract rejects omitted worldCoordinates and accepts explicit null',()=>{
+ const c=compileR190CB(raw()),surf=surfaceOnly({primitives:c.primitives});
+ const scene={surface:surf,layerNames:c.materialNames,sourceSha256:c.sourceSha256,
+  geometrySha256:c.geometrySha256,designOnly:true,readiness:'NOT_PREPARED',
+  worldContacts:0,worldCoordinates:null,BuildPlan:{operations:[]}};
+ const p={schema:'minecraftaibuilder-b143-gallery-v1',edition:'MINECRAFT_EDUCATION',
+  sourceHashes:[c.sourceSha256],geometryHashes:[c.geometrySha256],scenes:[scene],
+  safety:{constructionApproved:false,executionAllowed:false,
+  readiness:'NOT_PREPARED',worldCoordinates:null,worldContacts:0,minecraftWrites:0,
+  BuildPlan:{operations:[]},original15BuildingSafetyGates:'9 BLOCKED'}};
+ assert.equal(verifyB143Payload(p),true);
+ delete scene.worldCoordinates;
+ assert.equal(verifyB143Payload(p),false);
 });
