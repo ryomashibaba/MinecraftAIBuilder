@@ -1,3 +1,13 @@
+## R190-CA 新規実制作の起点（2026-10-30 JST）
+
+BZの初期SOURCE限定技術PASS（実行版）、A/BともART REJECT（巨大板・折り紙状集合）を踏まえ、CAでは使用可能な内部容積を意図して不規則な複数の実建築体積・作者指定水平床・立体的な公共空洞の同時設計へ変更。固定用途テンプレート・BOX後付け・装飾延命ではない。独立形式の研究サンプルであり、実Qwen/Gemma回答は含まない。
+
+CAに2独立原本（STRATIFIED CIVIC RIFT/ASCENDING PUBLIC ATRIUM）、決定論的source compiler、8真正視点、用途床+3セル空気の実測、独立Python投影/SHA/用途監査とWindows/Ubuntuの新専用CIを追加予定。**当該CAのCI・美術/機能/構造の判定は未認証。** BZ修正版CIも確認できるまでは未認証。詳細 `docs/R190CA_SPACE_MASS_RESEARCH_JA.md`。
+
+`main`/旧原本保護、Draft PR #128 Open/Draft、NOT_PREPARED/9 BLOCKED、BuildPlan空、worldContacts/worldWrites0、Qwen/Gemma新実POSTなし。CI成功数は美術向上ではない。
+
+---
+
 ## R190-BZ 第一次最終美術審査・証拠品質修正（2026-10-30 JST）
 
 **正式判定：初期SOURCE技術限定PASS、A/BともART REJECT、全体ART HOLD、正式採用0。**

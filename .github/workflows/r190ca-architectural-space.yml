@@ -1,0 +1,51 @@
+name: R190-CA authored inhabitable volumetric architecture and independent evidence
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'source/ai/r190ca-authored-space-mass.mjs'
+      - 'scripts/r190ca-*'
+      - 'evidence/r190ca/**'
+      - '.github/workflows/r190ca-architectural-space.yml'
+  pull_request:
+    paths:
+      - 'source/ai/r190ca-authored-space-mass.mjs'
+      - 'scripts/r190ca-*'
+      - 'evidence/r190ca/**'
+      - '.github/workflows/r190ca-architectural-space.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  independent-real-source:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - name: Fail-closed SOURCE author and negative regression
+        env:
+          NODE_OPTIONS: --import=./scripts/r190bo-deny-network.mjs
+        run: node --test scripts/r190ca-space.test.mjs
+      - name: Compile genuine authored space volumes and 8 actual voxel views per case
+        env:
+          NODE_OPTIONS: --import=./scripts/r190bo-deny-network.mjs
+        run: node scripts/r190ca-space-study.mjs --out ca-evidence
+      - name: Independent XML 16-view, exact 10 projection, program and SHA auditor
+        run: python scripts/r190ca-verify.py ca-evidence
+      - name: Preserve exact source, all voxels, 3D, 16 views and quantified functional HOLD
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: R190CA-AUTHORED-SPACE-${{ matrix.os }}
+          path: ca-evidence
+          if-no-files-found: warn
