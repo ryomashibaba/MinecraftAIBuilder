@@ -1,3 +1,11 @@
+# MinecraftAIBuilder — 最新のR190-BS V1→V2真正3D機能検証（2026-10-30 JST）
+
+- 元Qwen/Gemmaの原文は変更なし。GPTチャット独立サンプルCITY VEILを1案設計し、V1の空間/上下動線不合格を真正3DとR4で発見。V1 original archiveは保持。
+- 作者新案V2ではコア中空化、往復階段2レーン分離、踊り場拡幅、8階の空気干渉除去を試験。元高層ビル依頼への美術/規模/物理歩行の合格は未認定。
+- 依然としてR190-BOの実Qwen/Gemmaの新形式推論は未実施・個別承認が必要。Open/Draft PR #128、main保護、ART HOLD、正式採用0、NOT_PREPARED/9 BLOCKED/BuildPlan空、Minecraft接触0。
+
+---
+
 # MinecraftAIBuilder — 現行開発 R190-BR（2026-10-30 JST）
 
 - R190-BR：新Spatial Assemblyに対して native formatのフルSchema二重提示を避ける`native-only`候補を追加。従来の`repeated`が既定。両方式のschema/モデル自由度/実行制約は不変。通信0の要求サイズ比較を`STUDY.json`に記録。実モデル品質向上は未証明。
