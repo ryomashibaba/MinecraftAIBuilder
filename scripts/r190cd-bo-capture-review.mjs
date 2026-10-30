@@ -84,8 +84,13 @@ function verifyPriorBOArtifacts(verified){
  let derived;
  try{derived=compileR190BNAssembly(original,{originalBrief:brief,authorship:'UNVERIFIED_AUTHOR'});}
  catch{fail('ORIGINAL_CANNOT_REPRODUCE_PRIOR_GEOMETRY');}
- if(derived.geometrySha256!==receipt.geometrySha256||
-    receipt.sourceSha256!==derived.sourceSha256||
+ // Preserve fail-closed evidence: a prior BO geometry SHA mismatch yields the
+ // original bytes and HOLD report, never a derived 3D or unhandled exception.
+ if(derived.geometrySha256!==receipt.geometrySha256)
+  return {priorGeometry:'MISMATCH',
+   recount:'PRIOR_GEOMETRY_MISMATCH_KEPT_AS_HOLD_NO_DERIVED_VOXELS',
+   priorBOStatus:receipt.status};
+ if(receipt.sourceSha256!==derived.sourceSha256||
     receipt.sourceTechnicalStatus!==derived.status)
   fail('BO_RECEIPT_DERIVATION_CONTRADICTION');
  function saved(name){

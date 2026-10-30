@@ -78,3 +78,6 @@ node scripts/r190cd-offline-raw-review.mjs --brief ORIGINAL_BRIEF.txt --original
 - 旧保存BO `CAPTURE.json` の幾何SHAと元原文だけでなく、`DERIVED_B143_PROPOSAL.json`（同じ原文から無修復で再構築した設計全文）、`FUNCTIONAL_REVIEW.json`（BN空間/機能値）、`PHYSICAL_PROGRAM_REVIEW.json`（独立BQ計測値）を**同条件で再計算**し、逐語JSON構造一致を要求する。前のINVENTORYを後から再ハッシュしても異なる派生設計/機能報告は拒否。既存BOレシートの status/HOLD と申告originは保存するが、provider真正性を自動認証しない。
 - 幾何が本当に生成できる場合だけ `MANUAL_REVIEW_QUEUE.json` を作り、原日本語依頼SHA、BO元原文SHA、真正幾何SHA、作者主張用途、各用途の支持床+頭上空気/幅2到達、原作者の入口、保存済みBOビューのファイルSHA、未実証項目を記録。**既存5投影・HTML Viewerは真正8方向の撮影/内部の目視審査ではない**。美術・原依頼への適合は人間の視認と根拠照合までHOLD。合成fixtureをART/実Qwen設計合格と呼ばない。
 - ネットワーク防止条件（既存NODE_OPTIONS）、BOの承認nonce、mainと凍結原本、Minecraftワールド禁止は一切変更しない。今回変更の新CIは実行確認まで未判定。成功後も建築合格ではなく照合器限定合格。
+
+### SHA不一致時の旧HOLD契約維持
+- 追加した旧BO派生証拠照合のうち、レシートに記録された幾何SHAが再コンパイルと一致しない場合は、以前から存在したCDオフライン経路で**原文/元依頼を保存してHOLD、真正3Dなし**にする。証拠の改変（旧派生proposalや物理判定のすり替え）は受付前に拒否する。例外終了によって元SHA不一致時の診断証拠が消える回帰を避ける。今回のCI完了までは判定保留。

@@ -1,6 +1,6 @@
 # MinecraftAIBuilder — 新チャット用LIVE HANDOFF（2026-10-31 JST）
 
-> **最新追加（R190-CD BO保存済み派生証拠の独立照合）**：前HEAD [`23924eb`](https://github.com/ryomashibaba/MinecraftAIBuilder/commit/23924eb4b416083f35f27c0db89f4ec40d3a25a2) のBO capture→BN/B143→CD専用CI [#41128531573](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41128531573) は**Windows/Ubuntu SUCCESS**、2OSの証拠artifact保存済。新工程ではBO保存 `DERIVED_B143_PROPOSAL`／`FUNCTIONAL_REVIEW`／`PHYSICAL_PROGRAM_REVIEW` の元原回答に対する独立再計算一致を追加し、SHA付き `MANUAL_REVIEW_QUEUE.json` を作成。**5投影とViewerを真正8視点や美術PASSとは認めない**。改ざん負例を追加し、新HEAD CIは完了確認まで**未認証**。BO承認nonce、無承認Ollama POST禁止、Minecraft施工禁止、main・旧凍結原本保護を維持。再開時はPR #128現HEADと最新CD CIを先に調べる。
+> **最新追加（R190-CD BO保存済み派生証拠の独立照合）**：前HEAD [`23924eb`](https://github.com/ryomashibaba/MinecraftAIBuilder/commit/23924eb4b416083f35f27c0db89f4ec40d3a25a2) のBO capture→BN/B143→CD専用CI [#41128531573](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41128531573) は**Windows/Ubuntu SUCCESS**、2OSの証拠artifact保存済。新工程ではBO保存 `DERIVED_B143_PROPOSAL`／`FUNCTIONAL_REVIEW`／`PHYSICAL_PROGRAM_REVIEW` の元原回答に対する独立再計算一致を追加し、SHA付き `MANUAL_REVIEW_QUEUE.json` を作成。**5投影とViewerを真正8視点や美術PASSとは認めない**。改ざん負例を追加。旧幾何SHA不一致時に原文保存HOLDを残す回帰修正を実施し、最終HEAD CIは完了確認まで**未認証**。BO承認nonce、無承認Ollama POST禁止、Minecraft施工禁止、main・旧凍結原本保護を維持。再開時はPR #128現HEADと最新CD CIを先に調べる。
 
 > **必読。** この文書は過去の長いChatGPT会話を丸ごと再読込しないためのGitHub上の軽量な正本。**新チャットでは最初にDraft PR #128の現在HEAD・変更差分・専用CIの結果を再確認**する。以下のコミットとCI状況は作成時点のスナップショット。勝手に次工程の成功を仮定しない。
 
