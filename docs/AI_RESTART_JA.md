@@ -1,3 +1,13 @@
+## R190-CD 初回CI完了・BO/BN接続まで実装（2026-10-31 JST）
+
+初回[Actions #41078728011](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41078728011)はWindows／Ubuntu**両SUCCESS**（Node合成6/6、CC凍結2案真正voxelを再生成して負例品質判定、Python独立再集計PASS）。CC A68,921/B81,204ボクセルは不採用のまま、外部入口が未指定、保守的経路での到達認定0、CB旧作者ルート84上昇段が保守的な上下移動基準と不一致、天空レストラン床+空気8.9%。**CDの技術成功は「失敗作を勝手に成功扱いせず見抜く」こと。美術・用途・実MC歩行をPASSにしない**。
+
+CDの追加実装で真正BN/BOから同じ審査器に渡す`r190cd-bn-adapter.mjs`、2つの合成BN原本（上下展示/閲覧・横長コンコース）を使う回帰テスト、`r190cd-offline-raw-review.mjs`一括実行（保存済みsource+任意元依頼・通信0・原文固定・無効はHOLD＆偽3Dなし）を追加。B143本来の幾何SHAはdesign+voxels、CCはvoxels単体という差を保持して厳格照合。床y=0を含め、BNモデル指定の空間・入口・用途をホストが補正・推定しない。**追加統合CI #41079857037 は本記録時点でqueued／実行結果未確認**。
+
+この工程は新Qwen/Gemmaの実推論・新3D建築創作・Minecraft施工0。新たなモデル自由設計成功は依然**未実証**。旧BO exact SHA+UUID個別承認nonce契約、B143/BN/BQ/BV旧検査、全凍結原本、main、Draft PR #128維持。NOT_PREPARED／9 BLOCKED／BuildPlan空／worldContacts=worldWrites=0／ART採用0。詳細 `docs/R190CD_INDEPENDENT_INTEGRATED_GATE_JA.md`。
+
+---
+
 ## R190-CD 品質ゲート優先へ方針転換（2026-10-31 JST）
 
 R190-CCはWindows/Ubuntu CI限定TECH PASS、A/BともART/現用途REJECTで凍結。R190-CDは新造形器・手作り設計案を追加せず、BO（自由日本語→ローカルモデル）を本来の正規入口として保持したまま、最終SOURCE幾何から**明示入口・外部水平空気接続・2×2足元＆3セル頭上空間・各用途への保守的到達・CB作者経路と保守的移動の差・SHA・ART独立判定**を実測するモデル非依存の厳格品質ゲートを構築。既存CC A/B真正sourceを「不適合を正しく止める負例」として使い、新たなモデルPOST・Minecraft施工・自動建物補修はゼロ。技術CI成功でもART PASS・MC歩行認定はない。**新R190-CDのCI結果は実行まで未確認。** 詳細`docs/R190CD_INDEPENDENT_INTEGRATED_GATE_JA.md`。main・凍結原本保護、Draft PR #128維持、NOT_PREPARED／9 BLOCKED／BuildPlan空／worldContacts/worldWrites=0。
