@@ -1,3 +1,15 @@
+## R190-CB 技術進捗・真正8方向美術不採用（2026-10-30 JST）
+
+**SOURCEルート技術限定**：最初の[CI #41067774403](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41067774403)ではSOURCEテスト5/5成功／既存B143 VIEWER安全契約`worldCoordinates:null`欠落でワークフロー失敗。必須安全条件を緩めずにCB側を修正し、契約回帰テストを追加。修正[CI #41068043088](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41068043088)は**Ubuntu 6/6＋独立最終ボクセル経路・8SVG/5投影・SHA監査PASS**、Windows結果は未確認（逐次再確認すること）。作者明示267アンカー／84上昇／最終46,829真正ボクセル、原本SHA `041ac8905c697cb3eb347f8af3300d1ab470657edb8c841944eafdab7e8df353`、幾何SHA `28f4a93fa6dfeb4753375af0b9af68cdba8d9f1113e91096e9f3a41fb287ebdd`。
+
+**ART：REJECT、正式採用0**。初回の失敗CIの保存済み真正ボクセルから別プロセスで再作画した8方向を実見。全体は単純な先細りの帯付き高層体に留まり、東西側面の主殻反復、天空の空洞・クラウンの造形が弱い。細部装飾で延命せず、次CCでは規則的な多角柱補間への美術依存を捨て、主構成そのものを刷新。カメラ内空洞画像は視認不能のため美術根拠にしない。
+
+**FUNCTION/REAL MC/構造：HOLD**。作者指定の2×2床・3空気セルは全267地点で実セル上成立したが、上昇2セル水平の代理経路であり実Minecraft移動や地上入口・各室枝動線・落下安全・施工を認定しない。**詳細：`docs/R190CB_FIRST_ART_AUDIT_JA.md`**。
+
+旧原本とmain保護、Draft PR #128維持、NOT_PREPARED／9 BLOCKED／BuildPlan空／worldContacts=worldWrites=0／モデルPOST0／Minecraft施工禁止。技術CIが通っても美術REJECTを覆さない。
+
+---
+
 ## R190-CB 真正3Dと作者明示階段の一体造形研究（2026-10-30 JST）
 
 CA真正動線監査CI #41063515673はWindows／Ubuntu全工程SUCCESS（CAはART・FUNCTIONともREJECT維持）。これを受け、CB研究原本「RIFT LANTERN」を新規作成。ねじれた非対称の一体主塔＋切除公共空洞＋オフセット上部レストラン、6用途領域、作者明示267経路アンカー（84ブロック上昇）を**独立CB SOURCE**に入力。CA compiler依存による幾何とCBが作者明示の足元2×2・頭上3空気セルを生成し、別Pythonで真正ボクセル・SHA・実画像5投影を照合する。型式は未拡張のB143 VIEWER ONLY、モデル自由設計・実施工なし。**CB CI・美術・実移動は未認証**。詳細 `docs/R190CB_ARCHITECTURAL_CIRCULATION_JA.md`。
