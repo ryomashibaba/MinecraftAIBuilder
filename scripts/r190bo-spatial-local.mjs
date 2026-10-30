@@ -112,6 +112,47 @@ function inventoryBO(dir){
  }
  walk(dir);write(dir,'INVENTORY.json',json({files:files.sort((a,b)=>a.file.localeCompare(b.file)),exactSavedBytes:true}));
 }
+
+/** One local, source-anchored review entrypoint; no model, geometry or world operations. */
+function emitReviewBO(dir,receipt){
+ const escapeText=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const exists=file=>fs.existsSync(path.join(dir,file));
+ const link=(file,label)=>exists(file)?'<a href="'+file+'">'+escapeText(label)+'</a>':'';
+ const derivedStatus=receipt.status==='SOURCE_SPACE_AND_ROUTE_PROXIES_PRESENT_ART_HOLD'||
+  receipt.status==='HOLD_DERIVED_SOURCE_FUNCTION';
+ const show3D=derivedStatus&&exists('DERIVED_3D.html')&&!!receipt.geometrySha256;
+ const original=read(path.join(dir,'MODEL_ORIGINAL.txt'),200000).toString('utf8');
+ const brief=read(path.join(dir,'ORIGINAL_BRIEF.txt'),20000).toString('utf8');
+ const views=show3D?['front','rear','west','east','roof'].filter(side=>exists('DERIVED_'+side+'.svg'))
+  .map(side=>'<figure><a href="DERIVED_'+side+'.svg"><img loading="lazy" src="DERIVED_'+side+'.svg" alt="'+side+' exact projection"></a><figcaption>'+side+'</figcaption></figure>').join(''):'';
+ const links=[
+  ['MODEL_ORIGINAL.txt','変更なしの元回答'],['ORIGINAL_BRIEF.txt','元の日本語依頼'],
+  ['CAPTURE.json','出所・HOLD判定'],['DERIVATION.json','設計→幾何の対応'],
+  ['FUNCTIONAL_REVIEW.json','最終ボクセル機能検査'],['DERIVED_B143_PROPOSAL.json','派生B143'],
+  ['DERIVED_SECTION.svg','入口面・旧BC幅2限定断面'],
+  ['DERIVED_SPACE_SECTIONS.json','作者空間中央断面'],
+  ['HUMAN_REVIEW_TEMPLATE.json','未記入の人間審査項目']
+ ].map(([f,label])=>link(f,label)).filter(Boolean).concat(['<a href="INVENTORY.json">全ファイルSHA/bytes</a>']).join('　|　');
+ const html=[
+  '<!doctype html><html lang="ja"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">',
+  '<title>R190-BP 元回答と真正3Dの建築審査</title>',
+  '<style>body{font:15px/1.7 system-ui,sans-serif;margin:0;background:#101827;color:#eff4fb}main{max-width:1200px;margin:auto;padding:20px}h1{font-size:1.6rem}h2{font-size:1.1rem;margin-top:32px}a{color:#a9d5ff}pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:400px;overflow:auto;background:#1a2739;padding:16px;border-radius:8px}iframe{height:590px;width:100%;border:1px solid #526079;background:white}img{width:100%;height:auto;background:white}.views{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px}figure{margin:0}figcaption{padding:4px}.warning{border-left:4px solid #f4bf63;padding:10px 16px;background:#202a37}details{margin:18px 0}nav{overflow-wrap:anywhere}</style>',
+  '<main><h1>R190-BP｜原文・真正3D・5方向投影・機能の同時審査</h1>',
+  '<p class="warning">正式美術採用0 / ART HOLD / Minecraft施工0。技術検査が成立しても元依頼への忠実性・建築美術・実歩行は未認定。モデル原文と派生形状の著作者を混同しない。</p>',
+  '<p>出所：<strong>'+escapeText(receipt.origin)+'</strong>　結果：<strong>'+escapeText(receipt.status)+'</strong>　原文SHA256：<code>'+escapeText(receipt.originalRawSha256)+'</code></p>',
+  '<nav>'+links+'</nav><h2>1. 完成ボクセル3D</h2>',
+  show3D?'<p>モデルの空間数値からの決定論的B143派生。美術PASSではありません。<a href="DERIVED_3D.html">3Dを単独で開く</a></p><iframe title="厳格B143派生3D" src="DERIVED_3D.html"></iframe>':
+   '<p class="warning">真正3D未認定／表示不可。無効なモデル原文や途中失敗に代替建築を付けません。CAPTURE.jsonの拒否理由を確認してください。</p>',
+  show3D?'<h2>2. 同一完成形状の5方向投影</h2><div class="views">'+views+'</div>':'',
+  '<h2>3. 原依頼との照合（未採点）</h2><p>用途、階数、床と空気、連続上下動線、入口、開口、屋根、規模感、独創性を実際の日本語依頼と比較。新たな要求は後から追加しない。</p>',
+  '<details><summary>元の日本語依頼</summary><pre>'+escapeText(brief)+'</pre></details>',
+  '<details><summary>モデル原文（表示用にHTMLエスケープ。元ファイル無改変）</summary><pre>'+escapeText(original)+'</pre></details>',
+  '<h2>4. 審査範囲</h2><p>R4は単一セルの抽象経路、旧BCは同一高さ・幅2の限定経路。構造耐力・避難・実Minecraft歩行は未認証。SYNTHETICやSAVED_SOURCE_UNVERIFIEDは実モデル成功ではない。</p>',
+  '<p>World: NOT_PREPARED / 9 BLOCKED / BuildPlan.operations=[]。美術・依頼忠実性の判定は、手動レビュー記録が記入されるまでART HOLD。</p></main></html>'
+ ].join('\n');
+ write(dir,'REVIEW.html',html);
+}
+
 export function deriveBO({dir,raw,brief,origin,complete=true,provider=null}){
  // Save the exact decoded message.content BEFORE JSON/contract validation.
  write(dir,'MODEL_ORIGINAL.txt',raw);write(dir,'ORIGINAL_BRIEF.txt',brief);
@@ -193,6 +234,7 @@ export function deriveBO({dir,raw,brief,origin,complete=true,provider=null}){
   '断面の旧BCは同一高さの幅2経路に限定。多層R4の結果と別に保存しています。DERIVED_SPACE_SECTION_z*.svgは各作者空間の中央z面を機械選択した追加断面です。',
   '施工・Minecraft歩行・構造耐力は未検証。NOT_PREPARED、9 BLOCKED、BuildPlan空。',
   receipt.failure??'',''].join('\n'));
+ emitReviewBO(dir,receipt);
  return receipt;
 }
 export function replayBO({prepared,original,out,origin='SAVED_SOURCE_UNVERIFIED'}){
@@ -264,5 +306,7 @@ export async function cliBO(argv){
  return runBO({...common,approval:opts['--approval']});
 }
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){
- try{console.log(json(await cliBO(process.argv.slice(2))));}catch(error){console.error(error.message);process.exitCode=1;}
+ try{const result=await cliBO(process.argv.slice(2));console.log(json(result));
+ if(typeof result?.status==='string'&&result.status.startsWith('HOLD'))process.exitCode=2;
+}catch(error){console.error(error.message);process.exitCode=1;}
 }

@@ -202,3 +202,42 @@ test('actual CLI prepare/inspect/replay and rejected run work without a provider
  assert.equal(rejected.status,1);assert.match(rejected.stderr,/SEPARATE_HUMAN_APPROVAL/);
  assert.equal(fs.existsSync(path.join(root,'forbidden')),false);
 });
+
+
+test('R190-BP review links model evidence, genuine derived views and unreviewed art',t=>{
+ const {root,prepared,q}=setup(t),original=path.join(root,'raw'),out=path.join(root,'review');
+ fs.writeFileSync(original,q.original);
+ const r=replayBO({prepared,original,out,origin:'SYNTHETIC_TEST_FIXTURE'});
+ assert.equal(r.status,'SOURCE_SPACE_AND_ROUTE_PROXIES_PRESENT_ART_HOLD');
+ const html=fs.readFileSync(path.join(out,'REVIEW.html'),'utf8');
+ assert.match(html,/SYNTHETIC_TEST_FIXTURE/);
+ assert.match(html,/<iframe[^>]+src="DERIVED_3D\.html"/);
+ for(const side of ['front','rear','west','east','roof'])assert.ok(html.includes('DERIVED_'+side+'.svg'));
+ assert.ok(html.includes('HUMAN_REVIEW_TEMPLATE.json'));
+ assert.ok(html.includes(q.brief.toString('utf8')));
+ assert.equal(r.worldWrites,0);checkInventory(out);
+});
+
+test('R190-BP review escapes model-controlled HTML and does not show fake 3D',t=>{
+ const {root,prepared}=setup(t),original=path.join(root,'raw'),out=path.join(root,'review');
+ fs.writeFileSync(original,'</pre><script>alert("bad")</script>');
+ const r=replayBO({prepared,original,out});
+ assert.equal(r.status,'HOLD');
+ const html=fs.readFileSync(path.join(out,'REVIEW.html'),'utf8');
+ assert.match(html,/&lt;script&gt;/);
+ assert.doesNotMatch(html,/<script>/);
+ assert.doesNotMatch(html,/<iframe/);
+ assert.equal(fs.existsSync(path.join(out,'DERIVED_3D.html')),false);checkInventory(out);
+});
+
+test('R190-BP failed offline replay exits 2 and keeps full HOLD evidence',t=>{
+ const {root,prepared}=setup(t),raw=path.join(root,'invalid'),out=path.join(root,'replay');
+ fs.writeFileSync(raw,'{"not":"spatial-assembly"}');
+ const cmd=spawnSync(process.execPath,[path.join(ROOT,'scripts/r190bo-spatial-local.mjs'),
+  'replay','--prepared',prepared,'--original',raw,'--out',out],{encoding:'utf8'});
+ assert.equal(cmd.status,2,cmd.stderr);
+ assert.equal(JSON.parse(cmd.stdout).status,'HOLD');
+ assert.equal(fs.existsSync(path.join(out,'MODEL_ORIGINAL.txt')),true);
+ assert.equal(fs.existsSync(path.join(out,'REVIEW.html')),true);
+ assert.equal(fs.existsSync(path.join(out,'DERIVED_3D.html')),false);checkInventory(out);
+});

@@ -1,3 +1,12 @@
+# MinecraftAIBuilder — 現在地（2026-10-30 R190-BP）
+
+- 継続ブランチ `feature/b198zr1-protected-architectural-revision`、Draft PR #128 OPEN・未マージ。main/原本を保護。
+- R190-BP：BOの同一出力に原文・派生3D・投影・検査・未採点美術を示す `REVIEW.html` を追加。HOLDのCLI終了コードを非0に変更。実Qwen/Gemma新形式生成は依然として未実証／ART HOLD。
+- 次工程：現行HEAD/CIと原本SHAを確認し、新しいBO実推論の**個別承認を得てから**高層ビル原依頼で実験。原文/形状/人間美術を別々に判定。
+- Minecraftは NOT_PREPARED / 9 BLOCKED / BuildPlan空、世界接触・施工0。以下は改変しない過去記録。
+
+---
+
 # 2026-10-28 — 現在地（最小更新・以下は保存済み履歴）
 
 - 最新GitHub HEADは都度 `git rev-parse HEAD` で再確認。継続ブランチ `feature/b198zr1-protected-architectural-revision`、Draft PR #128 OPEN・未マージ。
