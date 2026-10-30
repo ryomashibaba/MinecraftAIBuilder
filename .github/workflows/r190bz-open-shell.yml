@@ -1,0 +1,46 @@
+name: R190-BZ discontinuous author-3D open shell source audit
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'source/ai/r190bz-open-shell.mjs'
+      - 'scripts/r190bz-*'
+      - 'evidence/r190bz/**'
+      - '.github/workflows/r190bz-open-shell.yml'
+  pull_request:
+    paths:
+      - 'source/ai/r190bz-open-shell.mjs'
+      - 'scripts/r190bz-*'
+      - 'evidence/r190bz/**'
+      - '.github/workflows/r190bz-open-shell.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  strict-open-shell-source:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Strict source and rejection regression (network forbidden)
+        env:
+          NODE_OPTIONS: --import=./scripts/r190bo-deny-network.mjs
+        run: node --test scripts/r190bz-open-shell.test.mjs
+      - name: Render actual source voxels, 3D, five elevations plus three spatial cameras
+        env:
+          NODE_OPTIONS: --import=./scripts/r190bo-deny-network.mjs
+        run: node scripts/r190bz-open-shell-study.mjs --out bz-evidence
+      - name: Archive untouched original, SHA, actual voxels, true projections and blocked gates
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: R190BZ-DISCONTINUOUS-SOURCE-${{ matrix.os }}
+          path: bz-evidence
+          if-no-files-found: warn
