@@ -1,3 +1,14 @@
+## R190-BZ 第一次最終美術審査・証拠品質修正（2026-10-30 JST）
+
+**正式判定：初期SOURCE技術限定PASS、A/BともART REJECT、全体ART HOLD、正式採用0。**
+初期専用CI [#41051881586](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41051881586) はWindows/Ubuntu各7/7成功、A 44,089/B 50,872真正ボクセル・保護空洞侵入0。実ボクセル8視点を取得して検査すると、初期ORTHO SVG10個のXML構文エラーと東西投影軸の誤りが判明。修正済みソースと独立XML／ボクセル投影照合器・回帰テストをGitHubへ保存。**修正後CIは別途確認が必要**。
+
+真正形状から独立再投影して視覚審査：Aは三段の巨大帆板、Bは斜めの巨大折り板の集合となり、都市高層建築としての連続した建築体験に不足。Aは6近傍1成分/Bは2成分だが、いずれも建築的まとまり・公共空間・実在オフィス・レストラン・上下動線が未成立。新形式によりBYの全高連続側壁は縮小したものの、美術的成功ではない。B143・BY・旧原本・mainは無改変、施工禁止／NOT_PREPARED／9 BLOCKED、実Qwen/Gemma新送信なし。
+
+**詳細正本：`docs/R190BZ_FIRST_ART_AND_EVIDENCE_AUDIT_JA.md`**。次はCIの修正確認と、板断片の追加・リボン装飾ではなく、建築の中身・主殻・公共空洞・都市入口を一体構成した根本設計へ進む。CI連鎖を減らすため複数変更を極力一括コミットする。
+
+---
+
 ## R190-BZ 開始 — 2026-10-30 JST（SOURCE実装済／CI・ART未確定）
 
 前工程R190-BYの大型側壁問題を受け、連続閉輪郭から離れた新SOURCE研究を開始した。作者定義の3Dパッチ（A SPLIT HORIZON/B CROSSWIND FOLD 各18パッチ）を独立の `source/ai/r190bz-open-shell.mjs` で決定論的に実ボクセル化する。原本は `evidence/r190bz/FORM_A.json`・`FORM_B.json`。8視点・3D・SHA・ボクセル・保護空洞の検査スクリプト、負例、Windows/Ubuntu CIを追加。
