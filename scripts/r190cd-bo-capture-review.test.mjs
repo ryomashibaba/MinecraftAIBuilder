@@ -114,3 +114,46 @@ test('Existing output is never overwritten and unlisted capture files are reject
  fs.mkdirSync(x.out);
  assert.throws(()=>reviewR190CDBOCapture(x),/R190CD_BO_CAPTURE_FRESH_OUTPUT_REQUIRED/);
 });
+
+test('Previous BO B143 proposal cannot be silently replaced after manifest rehash',t=>{
+ const x=fixture(t,twoLevelReadingProbe());
+ const file=path.join(x.capture,'DERIVED_B143_PROPOSAL.json'),proposal=read(file);
+ proposal.design.title='SWAPPED DISPLAY NOT MATCHING MODEL SOURCE';
+ fs.writeFileSync(file,JSON.stringify(proposal,null,2)+'\n');
+ rebalanceInventory(x.capture,'DERIVED_B143_PROPOSAL.json');
+ assert.throws(()=>reviewR190CDBOCapture(x),/R190CD_BO_CAPTURE_DERIVED_PROPOSAL_NOT_BOUND_TO_ORIGINAL/);
+ assert.equal(fs.existsSync(x.out),false);
+});
+test('Previously reported physical space counts must match independent BQ recomputation',t=>{
+ const x=fixture(t,longConcourseProbe());
+ const file=path.join(x.capture,'PHYSICAL_PROGRAM_REVIEW.json'),physical=read(file);
+ physical.spaces[0].supportedFloorCells=0;
+ fs.writeFileSync(file,JSON.stringify(physical,null,2)+'\n');
+ rebalanceInventory(x.capture,'PHYSICAL_PROGRAM_REVIEW.json');
+ assert.throws(()=>reviewR190CDBOCapture(x),/R190CD_BO_CAPTURE_PHYSICAL_REPORT_NOT_BOUND_TO_VOXELS/);
+ assert.equal(fs.existsSync(x.out),false);
+});
+test('Functional report cannot declare different source outcomes under a rewritten inventory',t=>{
+ const x=fixture(t,twoLevelReadingProbe());
+ const file=path.join(x.capture,'FUNCTIONAL_REVIEW.json'),functional=read(file);
+ functional.art='ART_PASS';
+ fs.writeFileSync(file,JSON.stringify(functional,null,2)+'\n');
+ rebalanceInventory(x.capture,'FUNCTIONAL_REVIEW.json');
+ assert.throws(()=>reviewR190CDBOCapture(x),/R190CD_BO_CAPTURE_FUNCTIONAL_REPORT_NOT_BOUND_TO_VOXELS/);
+ assert.equal(fs.existsSync(x.out),false);
+});
+test('Evidence-bound human review queue never grants art success from synthetics or saved viewer',t=>{
+ const x=fixture(t,longConcourseProbe(),'gemma4:26b');
+ const result=reviewR190CDBOCapture(x),queue=read(path.join(x.out,'MANUAL_REVIEW_QUEUE.json'));
+ assert.equal(queue.sourceOriginalSha256,H(x.probe.original));
+ assert.equal(queue.geometrySha256,result.geometrySha256);
+ assert.equal(queue.originalBOOriginClaim,'SYNTHETIC_TEST_FIXTURE');
+ assert.equal(queue.independentArtPass,false);
+ assert.equal(queue.independentFunctionalPass,false);
+ assert.equal(queue.reviewRequired.multiViewVisualReview,'MISSING_EIGHT_VIEW_AND_INTERIOR_VALIDATION');
+ assert.ok(queue.savedVisualEvidence.some(v=>v.file==='DERIVED_3D.html'));
+ assert.equal(queue.authoredPrograms.length,1);
+ assert.deepEqual(queue.gates,Array(9).fill('BLOCKED'));
+ assert.equal(queue.officialArtAdoptions,0);
+ assert.equal(queue.worldWrites,0);
+});

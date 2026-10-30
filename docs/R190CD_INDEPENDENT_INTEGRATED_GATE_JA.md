@@ -73,3 +73,8 @@ node scripts/r190cd-offline-raw-review.mjs --brief ORIGINAL_BRIEF.txt --original
 - 新規 `scripts/r190cd-bo-capture-review.mjs` は既存BOの**保存済み** `CAPTURE.json`／`INVENTORY.json`／`MODEL_ORIGINAL.txt`／`ORIGINAL_BRIEF.txt` をread-only照合し、原依頼と原回答のbytes-SHA、manifest全ファイルのbyte数・SHA、未申告ファイル・シンボリックリンクを検査。旧BOの事前承認、sourcePins、通信・モデル契約、過去原本は変更しない。
 - 使用：`node scripts/r190cd-bo-capture-review.mjs --capture SAVED_BO_CAPTURE_DIR --out NEW_CD_REVIEW`（**新規出力のみ**）。BOの真正B143幾何SHAが保存済みの場合のみ、そのSHAと新たなBN厳密コンパイルのSHAが一致する場合に限ってCD最終voxel監査へ進む。SHAが無い・違う・原文不正なら**元bytesだけを保持してHOLD、偽3Dなし**。結果の `BO_CAPTURE_BINDING.json` は原本/manifest SHAと照合結果を記録するが、保存ファイルのLOCAL_PROVIDER申告だけではモデル著者の独立認証ではない。
 - 同じ専用CIに本物のBO `prepare`→`replay`→CD処理を追加（Qwen/Gemmaタグを用いた**異なる日本語依頼の合成fixture**）。原文変更・保存レシート改ざん・幾何SHAすり替え・元幾何証拠欠落・未申告ファイル・出力上書きの負例も追加。テストが通っても実Qwen/GemmaへのPOSTは0、建築ART/依頼忠実性/実歩行の成功0、施工0。**本変更のCIはコミット前時点で未実行・未認証**。
+
+## R190-CD BO既存派生成果と設計証拠の別実装照合・人間審査パケット（2026-10-31 JST）
+- 旧保存BO `CAPTURE.json` の幾何SHAと元原文だけでなく、`DERIVED_B143_PROPOSAL.json`（同じ原文から無修復で再構築した設計全文）、`FUNCTIONAL_REVIEW.json`（BN空間/機能値）、`PHYSICAL_PROGRAM_REVIEW.json`（独立BQ計測値）を**同条件で再計算**し、逐語JSON構造一致を要求する。前のINVENTORYを後から再ハッシュしても異なる派生設計/機能報告は拒否。既存BOレシートの status/HOLD と申告originは保存するが、provider真正性を自動認証しない。
+- 幾何が本当に生成できる場合だけ `MANUAL_REVIEW_QUEUE.json` を作り、原日本語依頼SHA、BO元原文SHA、真正幾何SHA、作者主張用途、各用途の支持床+頭上空気/幅2到達、原作者の入口、保存済みBOビューのファイルSHA、未実証項目を記録。**既存5投影・HTML Viewerは真正8方向の撮影/内部の目視審査ではない**。美術・原依頼への適合は人間の視認と根拠照合までHOLD。合成fixtureをART/実Qwen設計合格と呼ばない。
+- ネットワーク防止条件（既存NODE_OPTIONS）、BOの承認nonce、mainと凍結原本、Minecraftワールド禁止は一切変更しない。今回変更の新CIは実行確認まで未判定。成功後も建築合格ではなく照合器限定合格。
