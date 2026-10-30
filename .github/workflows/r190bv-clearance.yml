@@ -1,0 +1,44 @@
+name: R190-BV frozen BU 2x2 clearance independent audit (NO MODEL)
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'source/ai/r190bv-*'
+      - 'scripts/r190bv-*'
+      - '.github/workflows/r190bv-clearance.yml'
+  pull_request:
+    paths:
+      - 'source/ai/r190bv-*'
+      - 'scripts/r190bv-*'
+      - '.github/workflows/r190bv-clearance.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Pure negative footprint tests (NO NETWORK)
+        env:
+          NODE_OPTIONS: --import=./scripts/r190bo-deny-network.mjs
+        run: node --test scripts/r190bv-clearance.test.mjs
+      - name: Exact frozen BU full geometry and wide corridor study
+        env:
+          NODE_OPTIONS: --import=./scripts/r190bo-deny-network.mjs
+        run: node scripts/r190bv-clearance-study.mjs --out bv-ci-evidence
+      - name: Preserve truthful holds, all evidence, and inventory
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: R190BV-FULL-VOXEL-WIDE-CLEARANCE-${{ matrix.os }}
+          path: bv-ci-evidence
+          if-no-files-found: warn

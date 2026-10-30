@@ -1,3 +1,12 @@
+# MinecraftAIBuilder — 最新R190-BV：真正BUを独立2×2連続通路検証（2026-10-30）
+
+- BU A/Bは旧Windows/Ubuntu専用CI #41014636860で2/2 SUCCESS、11層/20空間/8目的地の1セルR4経路PASSと2大空洞占有0を確認。原文SHAは保持。
+- しかし元のR4はプレーヤーの実幅を確認しない。BVで完成全ボクセルに対する保守的2×2四足支持・頭上3空気の別経路審査を新設。元1セルPASSと切り分けてHOLDを記録し、実Minecraft歩行のPASSを捏造しない。
+- 実投影はA/Bとも大きな平坦面、均質な橋の反復が主でART REJECT、全体ART HOLD。詳細: [R190-BV](R190BV_WIDE_WALKABILITY_AND_ART_JA.md)。
+- Chat作者の原案であり実Qwen/Gemma推論0、モデル原本無変更、Minecraft施工0、main不変、Draft PR #128維持。
+
+---
+
 # MinecraftAIBuilder — R190-BT 完全なCIと美術審査（2026-10-30 JST）
 
 - 最新設計研究V3A2/V3B2：Ubuntu/Windows CI両SUCCESS、SOURCE_MULTIPLE_MASSING_PASS。最終9立脚階、空気0障害/支持床欠落0、抽象経路5/5目的地・9/9用途空間。
