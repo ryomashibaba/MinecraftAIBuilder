@@ -36,7 +36,7 @@ jobs:
       - name: New BN model contract, fake transport and real CLI regressions
         env:
           NODE_OPTIONS: --import=./scripts/r190bo-deny-network.mjs
-        run: node --test scripts/r190bo-spatial-local.test.mjs scripts/r190bn-spatial-assembly.test.mjs
+        run: node --test scripts/r190bo-spatial-local.test.mjs scripts/r190bo-one-model-gate.test.mjs scripts/r190bn-spatial-assembly.test.mjs
       - name: Existing immutable BM, provenance and comparison regressions
         env:
           NODE_OPTIONS: --import=./scripts/r190bo-deny-network.mjs
