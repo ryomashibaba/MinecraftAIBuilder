@@ -47,3 +47,19 @@
 新しい`scripts/r190cd-bn.test.mjs`は旧BNの「下階展示＋上階閲覧」と「横長公共コンコース」という**2つの異なる合成作者入力**を実際にBN/B143へ再コンパイルしてCDで監査する。原本置換・設計/依頼SHA改変・最終セル改変は負例として拒否。これらは`SYNTHETIC_TEST_FIXTURE`で、AIが未知の依頼を自律設計した成功ではない。旧BOの利用承認ガード・既存実行入口・SOURCE pins・ネットワークAPIは改変しない。新CD専用CIで既存のCC不採用2案と併せて独立検査する。
 
 ---
+
+## オフライン一括実行入口（モデル送信0）
+
+`scripts/r190cd-offline-raw-review.mjs` を追加。保存済みの作者/モデル候補原文と任意の日本語依頼ファイルを**変更せず**受け、BN厳密コンパイラ→独立B143原本再検証→CD品質監査を1コマンドで実行する。
+
+```powershell
+node scripts/r190cd-offline-raw-review.mjs --brief ORIGINAL_BRIEF.txt --original SAVED_ORIGINAL.json --out NEW_CD_REVIEW
+```
+
+- 正しいBN sourceなら `UNALTERED_SOURCE.txt` / `ORIGINAL_BRIEF.txt` / `DERIVED_VOXELS.json` / `CD_SCORECARD.json` / `ASSESSMENT.json` を同一新規フォルダへ。**正式状態は常にHOLD**で、出所は`SAVED_SOURCE_UNVERIFIED`、現実のプロバイダ認証・自由設計成功ではない。
+- 不正JSON・BM旧形式・SHA誤り・設計不成立では、出力フォルダに**そのままの元原文・依頼bytesとHOLD原因のみ**。真正3Dや採択データを捏造しない。出力は新規のみ、上書き拒否。再試行で欠けた設計を埋めない。
+- Qwen/GemmaへのOllama POST、GET、モデル読み込み、ワールド接続なし。旧BOの申請承認nonce・sourcePins・公式成果物・端末コマンド・モデル設計方式を変更しない。
+- テストは実際にBNコンパイルする2種類の合成作者SOURCEと、不正元原文・不一致依頼SHAの負例。成功した合成テストをモデル成功と呼ばない。
+
+---
+
