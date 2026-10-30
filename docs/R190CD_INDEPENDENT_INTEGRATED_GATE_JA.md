@@ -37,3 +37,13 @@
 
 ## 不変ルール
 `main`・全BM/BY/BZ/CA/CB/CC原本は無変更。Draft PR #128を維持。外注なし。新Qwen/Gemma実POSTはBO exact SHA/UUIDに結び付けた個別承認なしに実施しない。ワールド・Minecraft接触0。設計SOURCEの勝手な構造修復・汎用要求の固定カテゴリ化は禁止。
+
+## 追加：本来のAI自由設計への接続（BN/BO read-only adapter）
+
+`source/ai/r190cd-bn-adapter.mjs` は`compileR190BNAssembly`の元Spatial Assemblyと既存真正B143結果を変えずに、`levels`→立脚Y、`spaces`→モデル指定空間ポリゴン、`entrance`→**モデルが本当に提示した入口**を品質ゲートへ接続する。異なる用途を固定の高層ビルテンプレートへ押し込まず、元の目的名・階と床の高さを保存。CBの階段ノード267点はこのBN/BO経路へ自動生成しない。BN作者が指定した`flight`の個数は記録するが、完成した通行ルートへ水増ししない。
+
+重要：**B143の幾何ハッシュは`SHA256(JSON.stringify({design,primitives}))`であり、CCの幾何ハッシュは`SHA256(JSON.stringify(primitives))`**。両方を同じと偽装するとBNの正しい真正元回答を誤拒否する。CDはそれぞれのハッシュ規則を独立検証し、B143では元の`verifyCompiled`を先に再実行。分析用のボクセル単独SHAを別記録する。BNの立脚Y=1に対応する床の高さY=0や、境界に接する作者領域も検査可能にした。モデルの目的説明文最大250文字を勝手に切らない。
+
+新しい`scripts/r190cd-bn.test.mjs`は旧BNの「下階展示＋上階閲覧」と「横長公共コンコース」という**2つの異なる合成作者入力**を実際にBN/B143へ再コンパイルしてCDで監査する。原本置換・設計/依頼SHA改変・最終セル改変は負例として拒否。これらは`SYNTHETIC_TEST_FIXTURE`で、AIが未知の依頼を自律設計した成功ではない。旧BOの利用承認ガード・既存実行入口・SOURCE pins・ネットワークAPIは改変しない。新CD専用CIで既存のCC不採用2案と併せて独立検査する。
+
+---
