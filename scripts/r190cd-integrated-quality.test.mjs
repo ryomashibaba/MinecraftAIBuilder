@@ -45,7 +45,34 @@ test('A blocked horizontal exterior window is not certified as an exterior doorw
  assert.equal(report.entrances[0].standable,true);
  assert.equal(report.entrances[0].exteriorHorizontalAirConnected,false);
  assert.ok(report.findings.includes('NO_CLEAR_AIR_CONNECTION_TO_EXTERIOR'));
+ assert.equal(report.conservative2x2ReachableAnchors,0);
+ assert.equal(report.entrances[0].conservativeReachableAnchors,0);
+ assert.equal(report.programs[0].conservativeTwoWideReachable,0);
+ assert.equal(report.executionAllowed,false);
 });
+test('A sealed secondary entrance never contributes reachability when another exterior entrance is valid',()=>{
+ const cells=slab([2]);
+ for(let y=3;y<6;y++){
+  for(let z=1;z<=8;z++){cells.add([3,y,z]);cells.add([9,y,z]);}
+  for(let x=3;x<=9;x++){cells.add([x,y,1]);cells.add([x,y,8]);}
+ }
+ const dedup=new Map([...cells].map(v=>[v.join(','),v]));
+ const report=auditR190CD(build(new Set(dedup.values()),{
+  entrances:[[0,3,2],[5,3,4]]
+ }));
+ assert.equal(report.entrances[0].exteriorHorizontalAirConnected,true);
+ assert.equal(report.entrances[1].standable,true);
+ assert.equal(report.entrances[1].exteriorHorizontalAirConnected,false);
+ assert.equal(report.entrances[1].conservativeReachableAnchors,0);
+ assert.equal(report.entrances[1].conservativeReachableAnchorsScope,'NOT_AN_ELIGIBLE_EXTERIOR_ROUTE_SEED');
+ assert.ok(report.conservative2x2ReachableAnchors>0);
+ assert.equal(report.programs[0].conservativeTwoWideReachable,0);
+ assert.ok(report.findings.includes('PROGRAM_UNREACHABLE_FROM_AUTHOR_ENTRANCE:public-interior'));
+ assert.deepEqual(report.BuildPlan.operations,[]);
+ assert.equal(report.worldContacts,0);
+ assert.equal(report.worldWrites,0);
+});
+
 test('A separate unsupported upper floor is not magically joined by room labels',()=>{
  const a=build(slab([2,9]),{programs:[
   {id:'hall',purpose:'ground public room',floorY:2,polygon:[[3,2],[7,2],[7,7],[3,7]]},

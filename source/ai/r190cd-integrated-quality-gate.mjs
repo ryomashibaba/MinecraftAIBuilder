@@ -103,9 +103,11 @@ export function auditR190CD({sourceRaw,compiled,bounds,programs,entrances=[],rou
   entry.horizontalExteriorAirAnchorCount=b;
  }
  // A conservative 2x2-support + 3-air route. No author shortcut and no
- // diagonal two-cell riser acceptance. Multiple valid authored entrances seed BFS.
+ // diagonal two-cell riser acceptance. Only entrances with BOTH supported
+ // standing room and an independently observed horizontal exterior air path
+ // seed the route; a sealed author entrance cannot grant interior reachability.
  for(const entry of entrancesAudit){
-  if(!entry.standable)continue;
+  if(!entry.standable||!entry.exteriorHorizontalAirConnected)continue;
   const [x,y,z]=entry.point,i=idx(x,y,z);
   if(distance[i]===-1){distance[i]=0;q[end++]=i;}
  }
@@ -127,7 +129,11 @@ export function auditR190CD({sourceRaw,compiled,bounds,programs,entrances=[],rou
   }
  }
  for(const entry of entrancesAudit){
-  entry.conservativeReachableAnchors=entry.standable?end:0;
+  // This number is a UNION count, not a falsely certified individual path.
+  const eligible=entry.standable&&entry.exteriorHorizontalAirConnected;
+  entry.conservativeReachableAnchors=eligible?end:0;
+  entry.conservativeReachableAnchorsScope=eligible?
+   'UNION_ACROSS_ELIGIBLE_AUTHOR_ENTRANCES':'NOT_AN_ELIGIBLE_EXTERIOR_ROUTE_SEED';
  }
  const ids=new Set();
  const spaces=programs.map(p=>{
@@ -215,5 +221,6 @@ export function auditR190CD({sourceRaw,compiled,bounds,programs,entrances=[],rou
   readiness:'NOT_PREPARED',gates:Array(9).fill('BLOCKED'),
   BuildPlan:{operations:[]},worldContacts:0,worldWrites:0,
   modelCalls:0,officialArtAdoptions:0,constructionApproved:false,
+  executionAllowed:false,
   realMinecraftWalkability:'NOT_TESTED',structure:'NOT_TESTED'};
 }

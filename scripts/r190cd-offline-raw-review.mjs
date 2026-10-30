@@ -30,6 +30,7 @@ export function offlineRawReviewCD({briefFile,originalFile,out}={}){
   changesToInput:0,automaticRepair:false,
   actualNetworkRequests:0,modelCalls:0,worldContacts:0,worldWrites:0,
   officialArtAdoptions:0,readiness:'NOT_PREPARED',
+  constructionApproved:false,executionAllowed:false,
   gates:Array(9).fill('BLOCKED'),BuildPlan:{operations:[]},
   realModelProvenance:'NOT_AUTHENTICATED',realMinecraftWalking:'NOT_TESTED',
   visualArt:'HUMAN_REVIEW_REQUIRED',status:'HOLD_INVALID_OR_UNVERIFIED_SOURCE'};
