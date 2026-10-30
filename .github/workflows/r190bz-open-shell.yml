@@ -29,14 +29,19 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
       - name: Strict source and rejection regression (network forbidden)
         env:
           NODE_OPTIONS: --import=./scripts/r190bo-deny-network.mjs
-        run: node --test scripts/r190bz-open-shell.test.mjs
+        run: node --test scripts/r190bz-open-shell.test.mjs scripts/r190bz-views.test.mjs
       - name: Render actual source voxels, 3D, five elevations plus three spatial cameras
         env:
           NODE_OPTIONS: --import=./scripts/r190bo-deny-network.mjs
         run: node scripts/r190bz-open-shell-study.mjs --out bz-evidence
+      - name: Independently parse 16 XML views and pixel-check 10 orthographic projections
+        run: python scripts/r190bz-validate-evidence.py bz-evidence
       - name: Archive untouched original, SHA, actual voxels, true projections and blocked gates
         if: always()
         uses: actions/upload-artifact@v4
