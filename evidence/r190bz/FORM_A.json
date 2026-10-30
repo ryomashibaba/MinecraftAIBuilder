@@ -1,0 +1,643 @@
+{
+  "schema": "minecraftaibuilder-r190bz-open-shell-v1",
+  "id": "r190bz-split-horizon-a",
+  "title": "SPLIT HORIZON — discontinuous twin cliffs",
+  "originalBriefSha256": "bbd44cc9f28234055601b4055466e2f3564e7e4565d408432de4c4fab0aa277a",
+  "bounds": {
+    "width": 96,
+    "height": 96,
+    "depth": 54
+  },
+  "intent": {
+    "architecturalIdea": "SPLIT HORIZON: 西の三層折れ殻と東の時間差で裂開する片持ち殻。前後で面がずれ、全高に連なる巨大側壁を意図的に持たず、都市の深い裂谷を形成する。",
+    "publicExperience": "地上では前後へ抜ける都市の谷と複数の見上げ視線をつくり、異なる高さで空中庭園に開く。建築機能・歩行・構造の成立はまだ主張しない。",
+    "nextReview": "真正ボクセルの正面・背面・東西・屋根・斜め遠景・地上見上げ・峡谷内部を比較し、主造形の改善を先に批判的審査する。"
+  },
+  "designOnly": true,
+  "patches": [
+    {
+      "id": "west-low-forward",
+      "material": "metal",
+      "thickness": 2,
+      "vertices": [
+        [
+          11,
+          5,
+          9
+        ],
+        [
+          35,
+          8,
+          16
+        ],
+        [
+          32,
+          31,
+          23
+        ],
+        [
+          13,
+          27,
+          34
+        ]
+      ]
+    },
+    {
+      "id": "west-low-aft",
+      "material": "concrete",
+      "thickness": 1,
+      "vertices": [
+        [
+          13,
+          5,
+          43
+        ],
+        [
+          36,
+          10,
+          39
+        ],
+        [
+          33,
+          30,
+          36
+        ],
+        [
+          9,
+          26,
+          48
+        ]
+      ]
+    },
+    {
+      "id": "west-low-shoulder",
+      "material": "metal",
+      "thickness": 1,
+      "vertices": [
+        [
+          11,
+          5,
+          9
+        ],
+        [
+          13,
+          5,
+          43
+        ],
+        [
+          9,
+          26,
+          48
+        ],
+        [
+          13,
+          27,
+          34
+        ]
+      ]
+    },
+    {
+      "id": "west-middle-forward",
+      "material": "concrete",
+      "thickness": 1,
+      "vertices": [
+        [
+          12,
+          40,
+          30
+        ],
+        [
+          38,
+          42,
+          18
+        ],
+        [
+          33,
+          61,
+          10
+        ],
+        [
+          8,
+          63,
+          22
+        ]
+      ]
+    },
+    {
+      "id": "west-middle-aft",
+      "material": "metal",
+      "thickness": 1,
+      "vertices": [
+        [
+          9,
+          39,
+          45
+        ],
+        [
+          34,
+          41,
+          43
+        ],
+        [
+          32,
+          59,
+          33
+        ],
+        [
+          15,
+          62,
+          44
+        ]
+      ]
+    },
+    {
+      "id": "west-middle-fold",
+      "material": "accent",
+      "thickness": 1,
+      "vertices": [
+        [
+          12,
+          40,
+          30
+        ],
+        [
+          9,
+          39,
+          45
+        ],
+        [
+          15,
+          62,
+          44
+        ],
+        [
+          8,
+          63,
+          22
+        ]
+      ]
+    },
+    {
+      "id": "west-high-front",
+      "material": "metal",
+      "thickness": 2,
+      "vertices": [
+        [
+          10,
+          70,
+          10
+        ],
+        [
+          35,
+          67,
+          23
+        ],
+        [
+          30,
+          92,
+          30
+        ],
+        [
+          14,
+          87,
+          43
+        ]
+      ]
+    },
+    {
+      "id": "west-high-back",
+      "material": "concrete",
+      "thickness": 1,
+      "vertices": [
+        [
+          13,
+          69,
+          44
+        ],
+        [
+          36,
+          68,
+          40
+        ],
+        [
+          31,
+          90,
+          32
+        ],
+        [
+          8,
+          91,
+          20
+        ]
+      ]
+    },
+    {
+      "id": "west-high-cut-edge",
+      "material": "accent",
+      "thickness": 1,
+      "vertices": [
+        [
+          10,
+          70,
+          10
+        ],
+        [
+          13,
+          69,
+          44
+        ],
+        [
+          8,
+          91,
+          20
+        ],
+        [
+          14,
+          87,
+          43
+        ]
+      ]
+    },
+    {
+      "id": "east-low-front",
+      "material": "metal",
+      "thickness": 2,
+      "vertices": [
+        [
+          60,
+          5,
+          15
+        ],
+        [
+          79,
+          8,
+          7
+        ],
+        [
+          85,
+          33,
+          24
+        ],
+        [
+          62,
+          27,
+          32
+        ]
+      ]
+    },
+    {
+      "id": "east-low-rear",
+      "material": "concrete",
+      "thickness": 1,
+      "vertices": [
+        [
+          63,
+          4,
+          45
+        ],
+        [
+          87,
+          7,
+          39
+        ],
+        [
+          83,
+          29,
+          31
+        ],
+        [
+          60,
+          29,
+          45
+        ]
+      ]
+    },
+    {
+      "id": "east-low-outer-fold",
+      "material": "metal",
+      "thickness": 1,
+      "vertices": [
+        [
+          79,
+          8,
+          7
+        ],
+        [
+          87,
+          7,
+          39
+        ],
+        [
+          83,
+          29,
+          31
+        ],
+        [
+          85,
+          33,
+          24
+        ]
+      ]
+    },
+    {
+      "id": "east-mid-front",
+      "material": "concrete",
+      "thickness": 1,
+      "vertices": [
+        [
+          63,
+          37,
+          8
+        ],
+        [
+          84,
+          39,
+          19
+        ],
+        [
+          88,
+          60,
+          38
+        ],
+        [
+          62,
+          56,
+          25
+        ]
+      ]
+    },
+    {
+      "id": "east-mid-rear",
+      "material": "metal",
+      "thickness": 1,
+      "vertices": [
+        [
+          60,
+          37,
+          46
+        ],
+        [
+          86,
+          36,
+          41
+        ],
+        [
+          80,
+          55,
+          31
+        ],
+        [
+          65,
+          60,
+          44
+        ]
+      ]
+    },
+    {
+      "id": "east-mid-slanted-edge",
+      "material": "accent",
+      "thickness": 1,
+      "vertices": [
+        [
+          63,
+          37,
+          8
+        ],
+        [
+          60,
+          37,
+          46
+        ],
+        [
+          65,
+          60,
+          44
+        ],
+        [
+          62,
+          56,
+          25
+        ]
+      ]
+    },
+    {
+      "id": "east-crown-front",
+      "material": "metal",
+      "thickness": 2,
+      "vertices": [
+        [
+          63,
+          70,
+          35
+        ],
+        [
+          87,
+          66,
+          15
+        ],
+        [
+          76,
+          92,
+          9
+        ],
+        [
+          58,
+          89,
+          27
+        ]
+      ]
+    },
+    {
+      "id": "east-crown-rear",
+      "material": "concrete",
+      "thickness": 1,
+      "vertices": [
+        [
+          60,
+          68,
+          47
+        ],
+        [
+          84,
+          67,
+          43
+        ],
+        [
+          82,
+          90,
+          32
+        ],
+        [
+          61,
+          92,
+          38
+        ]
+      ]
+    },
+    {
+      "id": "east-crown-shoulder",
+      "material": "accent",
+      "thickness": 1,
+      "vertices": [
+        [
+          87,
+          66,
+          15
+        ],
+        [
+          84,
+          67,
+          43
+        ],
+        [
+          82,
+          90,
+          32
+        ],
+        [
+          76,
+          92,
+          9
+        ]
+      ]
+    }
+  ],
+  "spines": [
+    {
+      "id": "west-spatial-backbone",
+      "material": "metal",
+      "radius": 2,
+      "path": [
+        [
+          19,
+          6,
+          12
+        ],
+        [
+          25,
+          25,
+          18
+        ],
+        [
+          15,
+          42,
+          28
+        ],
+        [
+          22,
+          60,
+          35
+        ],
+        [
+          16,
+          89,
+          42
+        ]
+      ]
+    },
+    {
+      "id": "east-spatial-backbone",
+      "material": "metal",
+      "radius": 2,
+      "path": [
+        [
+          72,
+          6,
+          42
+        ],
+        [
+          78,
+          26,
+          36
+        ],
+        [
+          69,
+          45,
+          26
+        ],
+        [
+          76,
+          65,
+          20
+        ],
+        [
+          70,
+          90,
+          10
+        ]
+      ]
+    },
+    {
+      "id": "high-overlook",
+      "material": "wood",
+      "radius": 2,
+      "path": [
+        [
+          35,
+          80,
+          26
+        ],
+        [
+          49,
+          82,
+          25
+        ],
+        [
+          61,
+          85,
+          22
+        ]
+      ]
+    },
+    {
+      "id": "urban-porch",
+      "material": "stone",
+      "radius": 1,
+      "path": [
+        [
+          36,
+          9,
+          21
+        ],
+        [
+          48,
+          11,
+          19
+        ],
+        [
+          59,
+          13,
+          24
+        ]
+      ]
+    }
+  ],
+  "protectedVoids": [
+    {
+      "id": "open-front-rift",
+      "origin": [
+        42,
+        21,
+        13
+      ],
+      "size": [
+        11,
+        40,
+        15
+      ]
+    },
+    {
+      "id": "open-rear-rift",
+      "origin": [
+        42,
+        21,
+        30
+      ],
+      "size": [
+        11,
+        40,
+        16
+      ]
+    }
+  ]
+}
