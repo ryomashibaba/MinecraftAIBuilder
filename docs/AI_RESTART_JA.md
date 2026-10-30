@@ -1,3 +1,11 @@
+## R190-BZ 開始 — 2026-10-30 JST（SOURCE実装済／CI・ART未確定）
+
+前工程R190-BYの大型側壁問題を受け、連続閉輪郭から離れた新SOURCE研究を開始した。作者定義の3Dパッチ（A SPLIT HORIZON/B CROSSWIND FOLD 各18パッチ）を独立の `source/ai/r190bz-open-shell.mjs` で決定論的に実ボクセル化する。原本は `evidence/r190bz/FORM_A.json`・`FORM_B.json`。8視点・3D・SHA・ボクセル・保護空洞の検査スクリプト、負例、Windows/Ubuntu CIを追加。
+
+**現時点では技術SOURCE CI結果は未確定、実3Dの独立ART審査も未実施。正式ART HOLD、採用0、用途・経路未試験。** この実装が美術成功を意味するとは扱わない。BY/B143・旧原本・mainは無改変。実Qwen/Gemma POST0、worldContacts/worldWrites0、9 BLOCKED、NOT_PREPARED、BuildPlan空。Draft PR #128はOpen/Draftを維持。詳細：`docs/R190BZ_DISCONTINUOUS_OPEN_SHELL_JA.md`。次に必ずActionsの真正3D・8視点を確認し、SOURCE・ARTを別判定する。
+
+---
+
 # R190-BY 最終審査（2026-10-30 JST）— 自由輪郭ロフト技術PASS・美術REJECT
 
 - 新`source/ai/r190by-freeform-loft.mjs`は作者の不規則な10点輪郭を左右各8高度で補間して最終SOURCEボクセル化。A/SUNRIFT 37,773セル、B/TIDAL FOLD 38,525セル。既存B143ネイティブのloft実装ではなく、描画Viewerのみ互換。
