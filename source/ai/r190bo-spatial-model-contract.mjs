@@ -66,7 +66,8 @@ export const SPATIAL_GUIDE=[
  '最終ボクセルの支持・空気・R4単一セル経路は技術代理検査のみ。原文忠実性・独創性・美術・構造耐力・実Minecraft歩行は認定されない。未成立はassumptionsへ。説明文やMarkdownはJSONの外へ出さない。'
 ].join('\n');
 
-export function buildSpatialRequest({brief,model,temperature=0.35,seed=23,maxTokens=16384,contextTokens=32768,schemaPrompt='repeated'}){
+export function buildSpatialRequest({brief,model,temperature=0.35,seed=23,maxTokens=16384,contextTokens=32768,schemaPrompt='repeated',think=undefined}){
+ if(think!==undefined&&typeof think!=='boolean')throw Error('R190BO_THINK_MODE');
  if(!['repeated','native-only'].includes(schemaPrompt))throw Error('R190BR_SCHEMA_PROMPT_MODE');
  if(!(brief instanceof Uint8Array)||brief.length<8||brief.length>20000)throw Error('R190BO_BRIEF_BYTES');
  const text=new TextDecoder('utf-8',{fatal:true}).decode(brief);
@@ -79,6 +80,7 @@ export function buildSpatialRequest({brief,model,temperature=0.35,seed=23,maxTok
  const body={model,stream:false,format:schema,options:{temperature,seed,num_predict:maxTokens,num_ctx:contextTokens},
   messages:[{role:'system',content:SPATIAL_GUIDE},
    {role:'user',content:'HOST_METADATA originalBriefSha256='+sha+'\n'+(schemaPrompt==='repeated'?'JSON Schema='+JSON.stringify(schema)+'\n':'')+'元依頼（原文）:\n'+text}]};
+ if(think!==undefined)body.think=think;
  const bytes=Buffer.from(JSON.stringify(body));
  if(bytes.length>64000)throw Error('R190BO_REQUEST_SIZE');
  return {bytes,briefSha256:sha,schema,body,schemaPrompt};

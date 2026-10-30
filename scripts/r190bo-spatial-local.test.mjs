@@ -371,3 +371,14 @@ test('R190-BR actual offline CLI supports opt-in native-only and preserves defau
   assert.equal(fs.existsSync(path.join(dir,'ATTEMPT_CONSUMED.json')),false);
  }
 });
+
+
+test('explicit disabled thinking survives prepare and integrity inspection without changing architectural freedom',t=>{
+ const root=temp(t),out=path.join(root,'prepared');
+ const p=prepareBO({model:'gemma4:26b',out,think:false,schemaPrompt:'native-only',maxTokens:16384,contextTokens:32768});
+ const b=JSON.parse(inspectBO(out).request);
+ assert.equal(b.think,false);assert.equal(p.think,false);assert.equal(b.options.num_predict,16384);
+ assert.equal(b.options.num_ctx,32768);assert.ok(!b.messages[1].content.includes('JSON Schema='));
+ assert.equal(b.format.properties.spaces.items.properties.purpose.const,undefined);
+ assert.throws(()=>buildSpatialRequest({brief:verifyBM().brief,model:'qwen3:14b',think:'false'}),/THINK_MODE/);
+});

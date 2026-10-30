@@ -14,9 +14,9 @@ import {auditR190BQ} from '../source/ai/r190bq-independent-physical-program.mjs'
 const H=b=>createHash('sha256').update(b).digest('hex');
 const J=o=>JSON.stringify(o,null,2)+'\n';
 const fail=x=>{throw Error('R190CD_BO_CAPTURE_'+x);};
-function readRegular(file,max){
+function readRegular(file,max,allowEmpty=false){
  const s=fs.lstatSync(file);
- if(!s.isFile()||s.isSymbolicLink()||s.size<1||s.size>max)fail('UNSAFE_OR_OVERSIZED_FILE');
+ if(!s.isFile()||s.isSymbolicLink()||(!allowEmpty&&s.size<1)||s.size>max)fail('UNSAFE_OR_OVERSIZED_FILE');
  return fs.readFileSync(file);
 }
 function namesIn(dir,prefix=''){
@@ -45,12 +45,12 @@ export function verifyR190CDBOCapture(capture){
   if(!f||typeof f.file!=='string'||!(/^[A-Za-z0-9._/-]+$/).test(f.file)||
      f.file.split('/').some(p=>p===''||p==='.'||p==='..')||
      f.file==='INVENTORY.json'||seen.has(f.file)||
-     !Number.isSafeInteger(f.bytes)||f.bytes<1||f.bytes>20000000||
+     !Number.isSafeInteger(f.bytes)||f.bytes<0||f.bytes>20000000||(f.bytes===0&&f.file!=='MODEL_ORIGINAL.txt')||
      typeof f.sha256!=='string'||!(/^[a-f0-9]{64}$/).test(f.sha256))
    fail('INVENTORY_ENTRY');
   seen.add(f.file);
   const file=path.join(dir,...f.file.split('/'));
-  const raw=readRegular(file,20000000);
+  const raw=readRegular(file,20000000,f.file==='MODEL_ORIGINAL.txt');
   if(raw.length!==f.bytes||H(raw)!==f.sha256)fail('INVENTORY_SHA_MISMATCH');
  }
  const actual=namesIn(dir),declared=[...seen].sort();
@@ -60,7 +60,7 @@ export function verifyR190CDBOCapture(capture){
  let receipt;
  const receiptBytes=readRegular(path.join(dir,'CAPTURE.json'),200000);
  try{receipt=JSON.parse(receiptBytes);}catch{fail('RECEIPT_JSON');}
- const original=readRegular(path.join(dir,'MODEL_ORIGINAL.txt'),200000);
+ const original=readRegular(path.join(dir,'MODEL_ORIGINAL.txt'),200000,true);
  const brief=readRegular(path.join(dir,'ORIGINAL_BRIEF.txt'),20000);
  if(!receipt||receipt.schema!=='minecraftaibuilder-r190bo-source-capture-v1'||
     !['LOCAL_PROVIDER','SAVED_SOURCE_UNVERIFIED','SYNTHETIC_TEST_FIXTURE'].includes(receipt.origin)||
@@ -80,7 +80,7 @@ function verifyPriorBOArtifacts(verified){
  const {dir,receipt}=verified;
  if(receipt.geometrySha256===undefined)return {priorGeometry:'ABSENT',recount:'NOT_APPLICABLE'};
  const brief=readRegular(path.join(dir,'ORIGINAL_BRIEF.txt'),20000);
- const original=readRegular(path.join(dir,'MODEL_ORIGINAL.txt'),200000);
+ const original=readRegular(path.join(dir,'MODEL_ORIGINAL.txt'),200000,true);
  let derived;
  try{derived=compileR190BNAssembly(original,{originalBrief:brief,authorship:'UNVERIFIED_AUTHOR'});}
  catch{fail('ORIGINAL_CANNOT_REPRODUCE_PRIOR_GEOMETRY');}

@@ -157,3 +157,15 @@ test('Evidence-bound human review queue never grants art success from synthetics
  assert.equal(queue.officialArtAdoptions,0);
  assert.equal(queue.worldWrites,0);
 });
+
+
+test('empty provider original stays intact and becomes HOLD without fabricated geometry',t=>{
+ const x=fixture(t,twoLevelReadingProbe(),'gemma4:26b',Buffer.from('invalid'));
+ const original=path.join(x.capture,'MODEL_ORIGINAL.txt');fs.writeFileSync(original,'');rebalanceInventory(x.capture,'MODEL_ORIGINAL.txt');
+ const file=path.join(x.capture,'CAPTURE.json'),receipt=read(file);receipt.originalRawSha256=H(Buffer.alloc(0));
+ fs.writeFileSync(file,JSON.stringify(receipt));rebalanceInventory(x.capture,'CAPTURE.json');
+ const result=reviewR190CDBOCapture(x);
+ assert.equal(result.status,'HOLD_INVALID_ORIGINAL_NO_DERIVED_3D');
+ assert.equal(fs.statSync(path.join(x.out,'UNALTERED_SOURCE.txt')).size,0);
+ assert.equal(fs.existsSync(path.join(x.out,'DERIVED_VOXELS.json')),false);
+});

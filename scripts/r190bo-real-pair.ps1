@@ -53,7 +53,7 @@ foreach ($model in $models) {
   $cdReview = Join-Path $dir 'cd-review'
   $visual = Join-Path $dir 'visual'
   # Same model-neutral settings for comparison, without fixing the design.
-  $prepOutput = & node $bo prepare --brief $briefPath --model $model --out $prepared --schema-prompt repeated --temperature 0.35 --seed 23 --max-tokens 8192 --context-tokens 16384 2>&1
+  $prepOutput = & node $bo prepare --brief $briefPath --model $model --out $prepared --schema-prompt native-only --think false --temperature 0.35 --seed 23 --max-tokens 16384 --context-tokens 32768 2>&1
   if ($LASTEXITCODE -ne 0) {
     throw ('R190BO_PREPARE_FAILED ' + $model + ': ' + ($prepOutput | Out-String))
   }

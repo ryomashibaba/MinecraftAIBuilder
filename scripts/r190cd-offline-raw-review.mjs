@@ -11,15 +11,15 @@ import {compileR190BNAssembly} from '../source/ai/r190bn-spatial-assembly.mjs';
 import {auditR190CDFromBN} from '../source/ai/r190cd-bn-adapter.mjs';
 const H=x=>createHash('sha256').update(x).digest('hex');
 const J=x=>JSON.stringify(x,null,2)+'\n';
-function read(file,max){
+function read(file,max,allowEmpty=false){
  const st=fs.lstatSync(file);
- if(!st.isFile()||st.isSymbolicLink()||st.size<1||st.size>max)throw Error('R190CD_BAD_INPUT_FILE');
+ if(!st.isFile()||st.isSymbolicLink()||(!allowEmpty&&st.size<1)||st.size>max)throw Error('R190CD_BAD_INPUT_FILE');
  return fs.readFileSync(file);
 }
 export function offlineRawReviewCD({briefFile,originalFile,out,requireBOGeometry=false,requiredBOGeometrySha256=null}={}){
  if([briefFile,originalFile,out].some(x=>typeof x!=='string'||!x)||
    fs.existsSync(out))throw Error('R190CD_FRESH_OUTPUT_REQUIRED');
- const brief=read(path.resolve(briefFile),20000),raw=read(path.resolve(originalFile),200000);
+ const brief=read(path.resolve(briefFile),20000),raw=read(path.resolve(originalFile),200000,true);
  if(!fs.existsSync(path.dirname(path.resolve(out))))throw Error('R190CD_PARENT_MISSING');
  fs.mkdirSync(out);
  fs.writeFileSync(path.join(out,'ORIGINAL_BRIEF.txt'),brief,{flag:'wx'});
