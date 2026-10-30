@@ -77,7 +77,7 @@ function viewer(c,p,template){
  const mn=[Infinity,Infinity,Infinity],mx=[-1,-1,-1];
  for(const q of v)for(let i=0;i<3;i++){mn[i]=Math.min(mn[i],q[i]);mx[i]=Math.max(mx[i],q[i]);}
  const scene={id:p.id,title:p.title,brief:'R190-BZ AUTHOR SOURCE ONLY — no functional or art certification',
-  typology:'open-3d-patches-independent-source',levels:0,
+  typology:'open-3d-patches-independent-source',levels:Math.floor(mx[1]/5)+1,
   layerNames:MATERIALS.map(v=>'BZ_'+v.toUpperCase()),surface:s,
   bounds:{minX:mn[0],minY:mn[1],minZ:mn[2],maxX:mx[0],maxY:mx[1],maxZ:mx[2]},
   sourceSha256:c.sourceSha256,geometrySha256:c.geometrySha256,
