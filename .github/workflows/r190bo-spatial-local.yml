@@ -63,6 +63,18 @@ jobs:
             if ($case.status -ne 'PREFLIGHT_ONLY' -or $case.actualProviderRequests -ne 0) { throw 'R190BO_UNAUTHORIZED_INFERENCE' }
           }
           if (Test-Path bo-real-pair-preflight/qwen3-14b/capture) { throw 'R190BO_CAPTURE_BEFORE_AUTHORIZATION' }
+      - name: Windows PowerShell 5.1 UTF-8 Japanese script preflight (NO MODEL CALLS)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        env:
+          NODE_OPTIONS: --import=./scripts/r190bo-deny-network.mjs
+        run: |
+          powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File .\scripts\r190bo-real-pair.ps1 -PrepareOnly -OutputRoot bo-real-pair-ps51
+          if ($LASTEXITCODE -ne 0) { throw 'R190BO_WINDOWS_POWERSHELL_51_PREFLIGHT_FAILED' }
+          $report = Get-Content -LiteralPath bo-real-pair-ps51/RESULT_SUMMARY.json -Raw -Encoding UTF8 | ConvertFrom-Json
+          if ($report.modelResults.Count -ne 2 -or $report.modelResults[0].actualProviderRequests -ne 0 -or $report.modelResults[1].actualProviderRequests -ne 0) {
+            throw 'R190BO_UNEXPECTED_POST_BEFORE_APPROVAL'
+          }
       - uses: actions/upload-artifact@v4
         with:
           name: R190BO-OFFLINE-NO-MODEL-${{ matrix.os }}

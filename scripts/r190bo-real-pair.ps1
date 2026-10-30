@@ -1,4 +1,4 @@
-# R190-BO genuine local-model experiment: one brief, two models, serial execution.
+﻿# R190-BO genuine local-model experiment: one brief, two models, serial execution.
 # No model request occurs in -PrepareOnly mode. Each POST requires separately
 # pasting the preflight's exact SHA+UUID consent phrase. Never pushes to GitHub.
 param(
