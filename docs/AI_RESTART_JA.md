@@ -1,3 +1,11 @@
+## R190-CB 真正3Dと作者明示階段の一体造形研究（2026-10-30 JST）
+
+CA真正動線監査CI #41063515673はWindows／Ubuntu全工程SUCCESS（CAはART・FUNCTIONともREJECT維持）。これを受け、CB研究原本「RIFT LANTERN」を新規作成。ねじれた非対称の一体主塔＋切除公共空洞＋オフセット上部レストラン、6用途領域、作者明示267経路アンカー（84ブロック上昇）を**独立CB SOURCE**に入力。CA compiler依存による幾何とCBが作者明示の足元2×2・頭上3空気セルを生成し、別Pythonで真正ボクセル・SHA・実画像5投影を照合する。型式は未拡張のB143 VIEWER ONLY、モデル自由設計・実施工なし。**CB CI・美術・実移動は未認証**。詳細 `docs/R190CB_ARCHITECTURAL_CIRCULATION_JA.md`。
+
+凍結BM/BY/BZ/CA原本、main無変更。Draft PR #128維持。NOT_PREPARED／9 BLOCKED／BuildPlan空／worldContacts=worldWrites=0／ART正式採用0。
+
+---
+
 ## R190-CA 第一次真正3D審査・独立経路監査（2026-10-30 JST）
 
 **技術限定PASS**：CA専用CI [#41060853546](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41060853546) Windows/Ubuntu両SUCCESS。実ボクセルA62,565/B45,568、立体切除A9,518/B11,342。修正版BZ CIも両OS SUCCESS。
