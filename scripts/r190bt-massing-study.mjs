@@ -65,14 +65,19 @@ export function studyR190BT({out}){
  const cases=[
   {name:'V2_BASELINE',file:'evidence/r190bs/CHAT_GPT_DESIGN_V2.json'},
   {name:'V3A_TERRACED',file:'evidence/r190bt/CITY_VEIL_V3A.json'},
-  {name:'V3B_INTERLOCK',file:'evidence/r190bt/CITY_VEIL_V3B.json'}
+  {name:'V3B_INTERLOCK_ORIGINAL_HOLD',file:'evidence/r190bt/CITY_VEIL_V3B.json'},
+  {name:'V3A2_OPEN_LANTERN',file:'evidence/r190bt/CITY_VEIL_V3A2.json'},
+  {name:'V3B2_INTERLOCK_REVISED',file:'evidence/r190bt/CITY_VEIL_V3B2.json'}
  ];
  const dir=path.resolve(out);if(fs.existsSync(dir))throw Error('R190BT_FRESH_OUTPUT_ONLY');
  fs.mkdirSync(dir);
  const results=cases.map(c=>({name:c.name,sourceFile:c.file,
   ...inspect(path.join(dir,c.name),load(c.file,brief),brief)}));
  const baseline=results[0];
- const v3=results.slice(1);
+ const v3=[results.find(x=>x.name==='V3A2_OPEN_LANTERN'),
+  results.find(x=>x.name==='V3B2_INTERLOCK_REVISED')];
+ const firstB=results.find(x=>x.name==='V3B_INTERLOCK_ORIGINAL_HOLD');
+ const originalBFailurePreserved=firstB.status==='HOLD'&&firstB.formalFailure==='B143_SHELL_TOO_THICK';
  const reports=results.map(x=>({name:x.name,sourceGeometrySha256:x.geometrySha256,
   technicalPass:x.technicalPass,footprints:x.sourcedFloorArea?.map(s=>s.floorArea),
   obstacleCells:x.sourcedFloorArea?.reduce((a,s)=>a+s.obstructedAir,0)}));
@@ -82,7 +87,9 @@ export function studyR190BT({out}){
   schema:'minecraftaibuilder-r190bt-massing-multiview-comparison-v1',
   exactBriefSha256:H(brief),cases:results,comparison:reports,
   materiallyDifferentOccupiedFootprints:changedMassing,
-  technicalGate: v3.every(x=>x.technicalPass)&&baseline.technicalPass&&changedMassing?
+  originalBFailurePreserved,olderAOriginalTechnicalPass:results[1].technicalPass,
+  technicalGate: v3.every(x=>x.technicalPass)&&baseline.technicalPass&&
+   originalBFailurePreserved&&results[1].technicalPass&&changedMassing?
    'SOURCE_MULTIPLE_MASSING_PASS':'HOLD_MASSING_OR_FUNCTION',
   artGate:'ART_HOLD_UNREVIEWED',manualArtPasses:0,
   limits:'Tests correct floor/air and abstract one-cell routes only, not art or Minecraft walking.',
@@ -97,7 +104,7 @@ export function studyR190BT({out}){
  fs.writeFileSync(path.join(dir,'COMPARE.html'),
   '<!doctype html><html lang="ja"><meta charset="utf-8">'+
   '<title>R190-BT source massing A/B review</title><style>body{font:15px/1.7 system-ui;margin:auto;max-width:1250px;padding:25px;background:#111b2a;color:#eaf4fc}a{color:#a8d8ff}table{border-collapse:collapse}td,th{padding:10px;border:1px solid #667}</style>'+
-  '<h1>R190-BT：同一原依頼・V2/V3A/V3Bの真正3D比較</h1>'+
+  '<h1>R190-BT：同一原依頼・V2 / V3A / 旧V3B失敗 / V3A2 / V3B2の真正3D比較</h1>'+
   '<p>全案チャットGPT作者、実Qwen/Gemma推論0。床/空気/抽象経路のPASSは美術PASSでない。ART HOLD、施工0。</p>'+
   '<table><thead><tr><th>独立案</th><th>技術状態</th><th>階別床面積</th><th>用途目的地</th><th>原文と立体図</th></tr></thead><tbody>'+rows+'</tbody></table>'+
   '<p>主要ボリュームの評価は実物の3Dとfront/rear/west/east/roofの同条件で人間が行う。</p></html>',

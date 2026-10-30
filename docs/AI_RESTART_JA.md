@@ -1,3 +1,11 @@
+# MinecraftAIBuilder — R190-BT V3A2/V3B2 比較（2026-10-30 JST）
+
+- V3A真正3D技術PASSだが、巨大金属階段コアが造形を支配しART REJECT。
+- 失敗V3B原本（B143_SHELL_TOO_THICK）を保護。V3A2ではコアを4柱リング骨格へ変更し、V3B2では作者が屋根半径を再設計。
+- V2/初期V3A/失敗V3B/修正版2案を同一BN/B143/R4と五投影で検査。Open/Draft PR #128・ART HOLD・正式採用0・Qwen/Gemma実推論0・Minecraft接触0。
+
+---
+
 # MinecraftAIBuilder — 最新のR190-BS V1→V2真正3D機能検証（2026-10-30 JST）
 
 - 元Qwen/Gemmaの原文は変更なし。GPTチャット独立サンプルCITY VEILを1案設計し、V1の空間/上下動線不合格を真正3DとR4で発見。V1 original archiveは保持。
