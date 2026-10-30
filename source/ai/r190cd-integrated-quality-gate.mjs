@@ -125,15 +125,15 @@ export function auditR190CD({sourceRaw,compiled,bounds,programs,entrances=[],rou
  const spaces=programs.map(p=>{
   if(!p||typeof p.id!=='string'||p.id.length<2||p.id.length>80||ids.has(p.id)||
     typeof p.purpose!=='string'||p.purpose.length<3||p.purpose.length>160||
-    !int(p.floorY,1,h-4)||!Array.isArray(p.polygon)||p.polygon.length<3||
+    !int(p.floorY,0,h-4)||!Array.isArray(p.polygon)||p.polygon.length<3||
     p.polygon.length>24||p.polygon.some(pt=>!Array.isArray(pt)||pt.length!==2||
-    pt.some((n,i)=>typeof n!=='number'||!Number.isFinite(n)||n<1||
-     n>[w-2,d-2][i])))bad('PROGRAM_FIELDS');
+    pt.some((n,i)=>typeof n!=='number'||!Number.isFinite(n)||n<0||
+     n>[w,d][i])))bad('PROGRAM_FIELDS');
   ids.add(p.id);
   const px=p.polygon,minx=Math.max(0,Math.floor(Math.min(...px.map(v=>v[0])))),
-   maxx=Math.min(w-2,Math.ceil(Math.max(...px.map(v=>v[0])))),
+   maxx=Math.min(w-1,Math.ceil(Math.max(...px.map(v=>v[0])))),
    minz=Math.max(0,Math.floor(Math.min(...px.map(v=>v[1])))),
-   maxz=Math.min(d-2,Math.ceil(Math.max(...px.map(v=>v[1]))));
+   maxz=Math.min(d-1,Math.ceil(Math.max(...px.map(v=>v[1]))));
   const fy=p.floorY;
   let requested=0,supportedClear=0,missingFloor=0,blockedAir=0,
    twoWideStandable=0,twoWideReachable=0;
