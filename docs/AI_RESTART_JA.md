@@ -1,3 +1,9 @@
+## R190-CD 品質ゲート優先へ方針転換（2026-10-31 JST）
+
+R190-CCはWindows/Ubuntu CI限定TECH PASS、A/BともART/現用途REJECTで凍結。R190-CDは新造形器・手作り設計案を追加せず、BO（自由日本語→ローカルモデル）を本来の正規入口として保持したまま、最終SOURCE幾何から**明示入口・外部水平空気接続・2×2足元＆3セル頭上空間・各用途への保守的到達・CB作者経路と保守的移動の差・SHA・ART独立判定**を実測するモデル非依存の厳格品質ゲートを構築。既存CC A/B真正sourceを「不適合を正しく止める負例」として使い、新たなモデルPOST・Minecraft施工・自動建物補修はゼロ。技術CI成功でもART PASS・MC歩行認定はない。**新R190-CDのCI結果は実行まで未確認。** 詳細`docs/R190CD_INDEPENDENT_INTEGRATED_GATE_JA.md`。main・凍結原本保護、Draft PR #128維持、NOT_PREPARED／9 BLOCKED／BuildPlan空／worldContacts/worldWrites=0。
+
+---
+
 ## R190-CC 16真正視点・機能不合格（2026-10-30 JST）
 
 [専用Actions #41074911692](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41074911692) Windows/Ubuntu両SUCCESS。真3DブーリアンA68,921/B81,204 voxel、実3D cut A68,135/B99,824、CB凍結267経路支持、16 XML・10独立投影・SHA一致。真正ボクセルの16視点を自ら取得して画像で検証。**ART A/BともREJECT**（Aは傾斜した巨大な塊＋大きな明色翼、Bは膨張した楕円・円弧の寄せ集め）。高層レストラン床＋3セル空気が両案26/292（8.90%）、上層オフィスA99/264、B17/264で**FUNCTION REJECT**。技術PASSは美術・用途合格に昇格しない。
