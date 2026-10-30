@@ -1,3 +1,13 @@
+## R190-CC 16真正視点・機能不合格（2026-10-30 JST）
+
+[専用Actions #41074911692](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41074911692) Windows/Ubuntu両SUCCESS。真3DブーリアンA68,921/B81,204 voxel、実3D cut A68,135/B99,824、CB凍結267経路支持、16 XML・10独立投影・SHA一致。真正ボクセルの16視点を自ら取得して画像で検証。**ART A/BともREJECT**（Aは傾斜した巨大な塊＋大きな明色翼、Bは膨張した楕円・円弧の寄せ集め）。高層レストラン床＋3セル空気が両案26/292（8.90%）、上層オフィスA99/264、B17/264で**FUNCTION REJECT**。技術PASSは美術・用途合格に昇格しない。
+
+**最重要の反省：巨大壁→巨大板→2塔/太塔→多角塔→有機塊と、表現力の実験が建築の美しさと用途を取り残した。** 次R190-CDは「形状生成器だけ先に作る」を止め、建築の空間プログラム・公共動線・一目で分かる外形を同時に設計し、さらに自由自然文→AI主体設計の正規目標へ接近する。ユーザーの特別承認なしに新たなQwen/Gemma POSTは不可。詳細 `docs/R190CC_FIRST_ART_FUNCTION_AUDIT_JA.md`。
+
+main・全凍結原本保護、Draft PR #128 Open/Draft、NOT_PREPARED/9 BLOCKED/BuildPlan空/worldContacts=worldWrites=0/正式ART採用0/施工禁止。
+
+---
+
 ## R190-CC 3Dブーリアン主殻の本格研究（2026-10-30 JST）
 
 前工程CBのWindows/Ubuntu CIは修正後両SUCCESS、46,829voxel・267作者明示アンカー／84上昇は技術限定PASS、ART REJECT。CCでは高さごとの2D八角輪郭を補間する構成をやめ、任意の方位に傾く3D超楕円体（各軸の中心・長さ・回転・指数を作者指定）を立体和集合・立体差集合で組み合わせ、外殻と内部実支持床を生成する新SOURCEを作成。A：SHEARED SKYLIGHT BASIN、B：TIDAL ARCHED RIFT。原BMとCB原本SHAを固定参照、CB階段267位置の実床・頭上空気はそのまま、B143はVIEWER ONLY。2案×8実視点・10投影独立照合・Windows/Ubuntu CIを新設。**CC CI・美術・実機歩行は未判定**、詳細 `docs/R190CC_3D_BOOLEAN_ARCHITECTURE_JA.md`。
