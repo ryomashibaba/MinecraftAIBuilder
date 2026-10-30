@@ -68,7 +68,7 @@ function reportOne(root,letter,edition,brief){
   r.sourceVoids?.length===2&&r.sourceVoids.every(x=>x.occupied===0&&x.passed)&&
   r.wideStripStatus==='SOURCE_DIRECTED_TWO_WIDE_STRIP_PROXY_PASS'&&
   r.wideStripDestinations===8&&r.wideStripSpaces===20&&
-  r.remainingBridges===9&&r.geometryDifferentFromBU;
+  r.remainingBridges===(edition==='3'?13:9)&&r.geometryDifferentFromBU;
  fs.writeFileSync(path.join(root,candidate+'_AUDIT.json'),J(r),{flag:'wx'});
  fs.writeFileSync(path.join(root,candidate+'_WIDE_STRIP.json'),J(wide),{flag:'wx'});
  return r;
@@ -79,10 +79,11 @@ export function studyR190BW({out}={}){
  const outdir=path.resolve(out);if(fs.existsSync(outdir))throw Error('R190BW_FRESH_OUTPUT_REQUIRED');
  fs.mkdirSync(outdir);
  const results=[reportOne(outdir,'A','',brief),reportOne(outdir,'B','',brief),
-  reportOne(outdir,'A','2',brief),reportOne(outdir,'B','2',brief)];
- const revised=results.slice(2);
+  reportOne(outdir,'A','2',brief),reportOne(outdir,'B','2',brief),
+  reportOne(outdir,'A','3',brief),reportOne(outdir,'B','3',brief)];
+ const revised=results.slice(4);
  const different=revised[0].finalGeometrySha256!==revised[1].finalGeometrySha256;
- const oldFailuresPreserved=results.slice(0,2).every(x=>!x.technicalPass&&
+ const oldFailuresPreserved=results.slice(0,4).every(x=>!x.technicalPass&&
   x.sourceStatus==='HOLD_DERIVED_SOURCE_FUNCTION'&&x.sourceReachableGoals===8&&
   x.sourceReachableSpaces===18&&x.wideStripDestinations===7&&x.wideStripSpaces===16);
  const result={schema:'minecraftaibuilder-r190bw-sculptural-revision-study-v1',
@@ -91,7 +92,7 @@ export function studyR190BW({out}={}){
   differentGeometryBetweenTwoAuthoredConcepts:different,
   initialFailuresReproduced:oldFailuresPreserved,caseResults:results,
   technicalGate:revised.every(x=>x.technicalPass)&&different&&oldFailuresPreserved?
-   'SOURCE_REVISED_MASSING_AND_WIDE_PROXY_PASS':'HOLD_SOURCE_REVISED_MASSING_OR_WIDE_PROXY',
+   'SOURCE_SELECTIVE_13_BRIDGES_AND_WIDE_PROXY_PASS':'HOLD_SOURCE_REVISED_MASSING_OR_WIDE_PROXY',
   artGate:'HOLD_PENDING_HUMAN_VISUAL_REVIEW',
   limitations:'Width-two strip proves neither turning radius nor real Minecraft walking; five projections do not certify beauty.',
   ...safe()};
@@ -103,8 +104,8 @@ export function studyR190BW({out}={}){
  fs.writeFileSync(path.join(outdir,'COMPARE.html'),
   '<!doctype html><html lang="ja"><meta charset="utf-8"><title>R190-BW True Source Architecture</title>'+
   '<style>body{font:16px/1.6 system-ui;background:#0e1826;color:#f0f4fc;margin:30px auto;max-width:1200px;padding:22px}td,th{border:1px solid #526178;padding:12px}a{color:#9ad8ff}table{border-collapse:collapse}</style>'+
-  '<h1>R190-BW　初稿失敗を保持したA2/B2真正3D再設計の比較</h1>'+
-  '<p>BUの原本不変。初稿A/Bの到達不能階を再現し、11層のコア横連絡床を作者が追加した別原本A2/B2の技術を検査。実Qwen/Gemma推論0・世界書込0・美術自動採用0。</p>'+
+  '<h1>R190-BW　初稿A/BとA2/B2の再現HOLD・A3/B3作者再設計</h1>'+
+  '<p>BU原文は不変。9橋構成で失敗した初稿とA2/B2を再現し、13橋を選択したA3/B3の真正3D、保護空洞、BV幅2経路を独立審査。実Qwen/Gemma推論0、世界書込0、美術自動採用0。</p>'+
   '<table><tr><th>原本</th><th>ソース</th><th>1セルR4目的地</th><th>幅2ストリップ</th><th>各階から選んだ橋</th><th>本物の形状</th></tr>'+rows+'</table>'+
   '<p>中央巨大空洞占有0かつ20用途空間成立を厳格検査。美術は同条件五方向投影を見た後に独立判定。</p></html>',{flag:'wx'});
  return result;
@@ -117,6 +118,6 @@ if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.ur
    goals:x.sourceReachableGoals,spaces:x.sourceReachableSpaces,
    wideGoals:x.wideStripDestinations,wideSpaces:x.wideStripSpaces,
    voids:x.sourceVoids,bridges:x.remainingBridges}))}));
-  if(r.technicalGate!=='SOURCE_REVISED_MASSING_AND_WIDE_PROXY_PASS')process.exitCode=2;
+  if(r.technicalGate!=='SOURCE_SELECTIVE_13_BRIDGES_AND_WIDE_PROXY_PASS')process.exitCode=2;
  }catch(error){console.error(error.stack??String(error));process.exitCode=1;}
 }
