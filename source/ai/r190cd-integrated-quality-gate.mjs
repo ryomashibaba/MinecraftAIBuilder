@@ -24,7 +24,15 @@ export function auditR190CD({sourceRaw,compiled,bounds,programs,entrances=[],rou
  if(!Array.isArray(programs)||programs.length===0||programs.length>32||
     !Array.isArray(entrances)||entrances.length>12||
     !Array.isArray(routeNodes)||routeNodes.length>400)bad('PROGRAM');
- if(compiled.geometrySha256!==hash(JSON.stringify(compiled.primitives)))bad('GEOMETRY_SHA');
+ const primitiveVoxelSha256=hash(JSON.stringify(compiled.primitives));
+ if(compiled.geometryHashKind==='B143_DESIGN_AND_VOXELS'){
+  if(!compiled.b143Design||
+   compiled.geometrySha256!==hash(JSON.stringify({
+    design:compiled.b143Design,primitives:compiled.primitives
+   })))bad('B143_GEOMETRY_SHA');
+ }else if(compiled.geometryHashKind===undefined){
+  if(compiled.geometrySha256!==primitiveVoxelSha256)bad('GEOMETRY_SHA');
+ }else bad('GEOMETRY_HASH_KIND');
  if(compiled.bounds&&(JSON.stringify(compiled.bounds)!==JSON.stringify(bounds)))bad('BOUND_PROVENANCE');
  const volume=w*h*d,wh=w*d,surface=new Uint8Array(volume),idx=(x,y,z)=>(y*d+z)*w+x;
  for(const p of compiled.primitives){
@@ -191,7 +199,7 @@ export function auditR190CD({sourceRaw,compiled,bounds,programs,entrances=[],rou
   yMin=Math.min(...compiled.primitives.map(v=>v[1])),
   yMax=Math.max(...compiled.primitives.map(v=>v[1]));
  return {schema:R190CD_SCHEMA,origin,rawSourceSha256:hash(sourceRaw),
-  geometrySha256:compiled.geometrySha256,voxelCount:compiled.primitives.length,
+  geometrySha256:compiled.geometrySha256,primitiveVoxelSha256,voxelCount:compiled.primitives.length,
   bounds,observedOccupiedExtent:{x:[wMin,wMax],y:[yMin,yMax],z:[zMin,zMax]},
   methodology:'REAL_VOXELS_NO_GEOMETRY_REPAIR_OR_MODEL_RESPONSE',
   entrances:entrancesAudit,programs:spaces,
