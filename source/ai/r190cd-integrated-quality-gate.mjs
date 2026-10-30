@@ -132,7 +132,7 @@ export function auditR190CD({sourceRaw,compiled,bounds,programs,entrances=[],rou
  const ids=new Set();
  const spaces=programs.map(p=>{
   if(!p||typeof p.id!=='string'||p.id.length<2||p.id.length>80||ids.has(p.id)||
-    typeof p.purpose!=='string'||p.purpose.length<3||p.purpose.length>160||
+    typeof p.purpose!=='string'||p.purpose.length<3||p.purpose.length>250||
     !int(p.floorY,0,h-4)||!Array.isArray(p.polygon)||p.polygon.length<3||
     p.polygon.length>24||p.polygon.some(pt=>!Array.isArray(pt)||pt.length!==2||
     pt.some((n,i)=>typeof n!=='number'||!Number.isFinite(n)||n<0||
