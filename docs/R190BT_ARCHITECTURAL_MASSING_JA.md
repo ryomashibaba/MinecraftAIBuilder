@@ -25,3 +25,9 @@ V3AをV2と同条件の正面・側面・屋根の真正投影で比較し、段
 - CITY_VEIL_V3B2.json：失敗したV3B原本を保持して、作者が屋根楕円Y半径1→2、中心Y73→75を独立修正。これは実Qwen/Gemma原回答の自動補修ではない。
 
 比較CIはV2/初期V3A/失敗V3B/V3A2/V3B2の5ソースを一括処理。旧V3Bの既知失敗が再現されることも検査する。正式美術採用0、用途忠実性NOT_CERTIFIED、実モデル推論0、Minecraft施工0。
+
+## R190-BT 最終CI・美術ゲート（2026-10-30）
+
+正式専用CI https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41008397550 はWindows/Ubuntu両方SUCCESS。V3A2/V3B2は全階支持床/空気0障害、5/5目的地と9/9用途空間が抽象到達、V3B初稿の B143_SHELL_TOO_THICK も意図どおりHOLD。`SOURCE_MULTIPLE_MASSING_PASS`。
+
+同条件の実B143正面/側面/屋根を目視比較し、美術判定はいずれもART REJECT。V3A2は厚い側壁を開いたものの階段グリッドが繰返しを支配、V3B2は巨大な白いコアが支配。正式採用0、全体ART HOLD。批判・証拠・次の根本設計方針は [R190BT_ART_REVIEW_JA.md](R190BT_ART_REVIEW_JA.md) に保存。

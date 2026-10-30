@@ -1,3 +1,12 @@
+# MinecraftAIBuilder — R190-BT 完全なCIと美術審査（2026-10-30 JST）
+
+- 最新設計研究V3A2/V3B2：Ubuntu/Windows CI両SUCCESS、SOURCE_MULTIPLE_MASSING_PASS。最終9立脚階、空気0障害/支持床欠落0、抽象経路5/5目的地・9/9用途空間。
+- 公式美術審査ART REJECT（A2の階段グリッド反復、B2の巨大白色コア）。正式採用0、全体ART HOLD。[独立美術レビュー](R190BT_ART_REVIEW_JA.md)。
+- 次R190-BUは格子の追加でなく、主空洞・二つの大きな構成体・公共の架橋と高層用途が一体となる大胆な新3D構成へ。ユーザーの用途依頼には忠実に、旧V3A2の外形には拘束されない。
+- Qwen/Gemma新形式実推論0、実Minecraft接触0、NOT_PREPARED/9 BLOCKED/BuildPlan空、main/過去のBM原本不変。Open/Draft PR #128。
+
+---
+
 # MinecraftAIBuilder — R190-BT V3A2/V3B2 比較（2026-10-30 JST）
 
 - V3A真正3D技術PASSだが、巨大金属階段コアが造形を支配しART REJECT。
