@@ -36,7 +36,7 @@ export function studyR190CB(out){
  stats:{voxels:v.length,renderedSurfaceCells:surf.length,conceptRooms:0,
  actualPlayerMovement:'NOT_CERTIFIED',structuralSafety:'NOT_CERTIFIED'},
  targetEdition:'MINECRAFT_EDUCATION',readiness:'NOT_PREPARED',worldContacts:0,
- designOnly:true,BuildPlan:{operations:[]}};
+ worldCoordinates:null,designOnly:true,BuildPlan:{operations:[]}};
  const template=fs.readFileSync(path.join(ROOT,'source/ai/b143-viewer-template.html'),'utf8');
  const viewer={schema:'minecraftaibuilder-b143-gallery-v1',edition:'MINECRAFT_EDUCATION',
   sourceHashes:[c.sourceSha256],geometryHashes:[c.geometrySha256],scenes:[scene],
