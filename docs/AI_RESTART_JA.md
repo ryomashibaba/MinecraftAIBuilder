@@ -1,3 +1,12 @@
+# R190-BY 最終審査（2026-10-30 JST）— 自由輪郭ロフト技術PASS・美術REJECT
+
+- 新`source/ai/r190by-freeform-loft.mjs`は作者の不規則な10点輪郭を左右各8高度で補間して最終SOURCEボクセル化。A/SUNRIFT 37,773セル、B/TIDAL FOLD 38,525セル。既存B143ネイティブのloft実装ではなく、描画Viewerのみ互換。
+- [専用CI #41047622898](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41047622898) Windows/Ubuntu両SUCCESS、各6/6負例/正例テストPASS。保護前空洞6292、後空洞5148セルは両案とも最終占有0。元BM原文・過去原本は保存。
+- 真正front/rear/west/east/roof投影の独立美術審査はA/Bとも**ART REJECT、全体ART HOLD**。正面のくびれは進歩したが、側面が巨大平面壁。実ボクセルY5..90でZ幅40以上の行はA63/86、B76/86。次R190-BZは前後にも大きな空間切れ目・斜め主殻・地上見上げ視点の構成に再設計する。[詳細](R190BY_FINAL_ART_JA.md)。
+- 現状は自由形状SOURCEのみ。実Qwen/Gemma0、Minecraft施工0、建築用途・階段・R4/BV移動認定なし、main不変、Draft PR #128 Open。
+
+---
+
 # R190-BX：彫刻先行の2案を真正B143と5視点で検証（2026-10-30 JST）
 
 - 最新：[R190BX最終美術判定](R190BX_FINAL_ART_JA.md)。A初稿は斜材Y=-1越境でB143_REJECT、原本保存のまま作者別改訂A2を制作。Bは独立の一体アーチ型主殻。
