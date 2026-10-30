@@ -1,3 +1,12 @@
+# R190-BX：彫刻先行の2案を真正B143と5視点で検証（2026-10-30 JST）
+
+- 最新：[R190BX最終美術判定](R190BX_FINAL_ART_JA.md)。A初稿は斜材Y=-1越境でB143_REJECT、原本保存のまま作者別改訂A2を制作。Bは独立の一体アーチ型主殻。
+- [専用CI #41044726835](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41044726835) Windows/Ubuntu両SUCCESS。A2実45,316voxel、B実40,693voxel、前後保護空洞占有0、真正3D・5投影・出所とSHAを保存。ただし2案は「彫刻研究」で居室/動線は未検証。
+- 実5方向を確認しA2は重なり楕円塊、Bは長方形を抜いた大きな楕円門に見えるため**ART REJECT／全体ART HOLD**。正式採用0。次BYでは基本プリミティブ増量を止め、作者指定の不規則断面loft/contour skinの表現・真正3D研究から始める。未実装を完成扱いしない。
+- 実ローカルQwen/Gemma新推論0、Minecraft接触/施工0、main/過去原本不変、Draft PR #128 open。
+
+---
+
 # R190-BW — 技術を維持しつつ美術REJECT、次は大空洞と外殻の一体先行設計（2026-10-30）
 
 - BW A/B/A2/B2はsource機能HOLDを再現、別原本A3/B3は空中橋13本で本物のBN/B143とR4/BV2幅の11層・20室・8目的地、空洞0占有をWindows・Ubuntu両OSのCIで技術限定PASS。
