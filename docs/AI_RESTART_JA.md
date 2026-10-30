@@ -1,3 +1,11 @@
+## R190-CC 3Dブーリアン主殻の本格研究（2026-10-30 JST）
+
+前工程CBのWindows/Ubuntu CIは修正後両SUCCESS、46,829voxel・267作者明示アンカー／84上昇は技術限定PASS、ART REJECT。CCでは高さごとの2D八角輪郭を補間する構成をやめ、任意の方位に傾く3D超楕円体（各軸の中心・長さ・回転・指数を作者指定）を立体和集合・立体差集合で組み合わせ、外殻と内部実支持床を生成する新SOURCEを作成。A：SHEARED SKYLIGHT BASIN、B：TIDAL ARCHED RIFT。原BMとCB原本SHAを固定参照、CB階段267位置の実床・頭上空気はそのまま、B143はVIEWER ONLY。2案×8実視点・10投影独立照合・Windows/Ubuntu CIを新設。**CC CI・美術・実機歩行は未判定**、詳細 `docs/R190CC_3D_BOOLEAN_ARCHITECTURE_JA.md`。
+
+設計者ChatGPTの研究SOURCE≠Qwen/Gemma自律生成。技術成功を美術合格に昇格禁止。main・旧原本不変、Draft PR #128維持、NOT_PREPARED/9 BLOCKED/BuildPlan空/世界接触・書込0、モデルPOST0、施工禁止。
+
+---
+
 ## R190-CB 技術進捗・真正8方向美術不採用（2026-10-30 JST）
 
 **SOURCEルート技術限定**：最初の[CI #41067774403](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41067774403)ではSOURCEテスト5/5成功／既存B143 VIEWER安全契約`worldCoordinates:null`欠落でワークフロー失敗。必須安全条件を緩めずにCB側を修正し、契約回帰テストを追加。修正[CI #41068043088](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41068043088)は**Ubuntu 6/6＋独立最終ボクセル経路・8SVG/5投影・SHA監査PASS**、Windows結果は未確認（逐次再確認すること）。作者明示267アンカー／84上昇／最終46,829真正ボクセル、原本SHA `041ac8905c697cb3eb347f8af3300d1ab470657edb8c841944eafdab7e8df353`、幾何SHA `28f4a93fa6dfeb4753375af0b9af68cdba8d9f1113e91096e9f3a41fb287ebdd`。
