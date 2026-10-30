@@ -30,7 +30,7 @@ jobs:
       - name: Pure negative footprint tests (NO NETWORK)
         env:
           NODE_OPTIONS: --import=./scripts/r190bo-deny-network.mjs
-        run: node --test scripts/r190bv-clearance.test.mjs
+        run: node --test scripts/r190bv-clearance.test.mjs scripts/r190bv-directed-strip.test.mjs
       - name: Exact frozen BU full geometry and wide corridor study
         env:
           NODE_OPTIONS: --import=./scripts/r190bo-deny-network.mjs

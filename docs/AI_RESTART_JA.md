@@ -1,3 +1,11 @@
+# R190-BV 補強：階段を誤検知しない2セル幅ストリップ（2026-10-30）
+
+- 最初の全4足元支持2×2基準では、BU A/Bとも入口OKだが上階に到達できず1/8目的地・1/20空間のHOLD。これは一般的な段差上昇を幾何的に拒否する厳しい規則の副作用がある。
+- 別に進行方向の横並び2セルと頭上3セル空気が連続する directed strip 基準を追加し、実幅2の階段踏面をテスト。2つの測定は別結果。どちらもMinecraft実歩行の保証ではない。
+- 対象BU原本は凍結、Art REJECT/HOLD、Ollama新推論0、Minecraft施工0。[BV詳細](R190BV_WIDE_WALKABILITY_AND_ART_JA.md)
+
+---
+
 # MinecraftAIBuilder — 最新R190-BV：真正BUを独立2×2連続通路検証（2026-10-30）
 
 - BU A/Bは旧Windows/Ubuntu専用CI #41014636860で2/2 SUCCESS、11層/20空間/8目的地の1セルR4経路PASSと2大空洞占有0を確認。原文SHAは保持。

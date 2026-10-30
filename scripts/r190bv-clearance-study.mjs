@@ -5,6 +5,7 @@ import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {compileR190BNAssembly} from '../source/ai/r190bn-spatial-assembly.mjs';
 import {auditR190BV} from '../source/ai/r190bv-contiguous-clearance.mjs';
+import {auditR190BVStrip} from '../source/ai/r190bv-directed-strip.mjs';
 const ROOT=fileURLToPath(new URL('../',import.meta.url));
 const SHA=x=>createHash('sha256').update(x).digest('hex'),J=x=>JSON.stringify(x,null,2)+'\n';
 const BRIEF_SHA='bbd44cc9f28234055601b4055466e2f3564e7e4565d408432de4c4fab0aa277a';
@@ -28,10 +29,13 @@ function inspect(c,brief){
  const evidence=auditR190BV({compiled:derived.compiled,bounds:plan.bounds,
   entrance:plan.entrance,destinations:plan.destinations,
   spaces:plan.spaces,levels:plan.levels,headroom:plan.headroom});
- if(evidence.geometrySha256!==derived.geometrySha256)
+ const strip=auditR190BVStrip({compiled:derived.compiled,bounds:plan.bounds,
+  entrance:plan.entrance,destinations:plan.destinations,
+  spaces:plan.spaces,levels:plan.levels,headroom:plan.headroom});
+ if(evidence.geometrySha256!==derived.geometrySha256||strip.geometrySha256!==derived.geometrySha256)
   throw Error('R190BV_AUDIT_GEOMETRY_MISMATCH');
  return {case:c.label,originalFile:c.path,originalSha256:SHA(raw),
-  sourceTechnicalGate:derived.status,wide:evidence};
+  sourceTechnicalGate:derived.status,wide:evidence,strip};
 }
 const safe=()=>({readiness:'NOT_PREPARED',gates:Array(9).fill('BLOCKED'),
  BuildPlan:{operations:[]},constructionApproved:false,executionAllowed:false,
@@ -49,8 +53,14 @@ export function studyR190BV({out}={}){
   previousSingleCellStatus:'SOURCE_RIFT_VOID_AND_FUNCTION_PASS',
   newWideStatus:evidence.every(r=>r.wide.status==='SOURCE_CONSERVATIVE_2X2_ROUTE_PASS')?
    'SOURCE_CONSERVATIVE_2X2_ROUTE_PASS':'HOLD_CONSERVATIVE_2X2_ROUTE',
+  newStripStatus:evidence.every(r=>r.strip.status==='SOURCE_DIRECTED_TWO_WIDE_STRIP_PROXY_PASS')?
+   'SOURCE_DIRECTED_TWO_WIDE_STRIP_PROXY_PASS':'HOLD_DIRECTED_TWO_WIDE_STRIP_PROXY',
   cases:evidence.map(r=>({name:r.case,geometrySha256:r.wide.geometrySha256,
    status:r.wide.status,entry:r.wide.entry,
+   stripStatus:r.strip.status,stripEntry:r.strip.entry,
+   stripPassedGoals:r.strip.destinations.filter(v=>v.passed).length,
+   stripPassedSpaces:r.strip.spaces.filter(v=>v.passed).length,
+   stripNonzeroHeightEdges:r.strip.nonzeroHeightEdges,
    passedDestinations:r.wide.destinations.filter(v=>v.passed).length,
    destinationCount:r.wide.destinations.length,
    passedSpaces:r.wide.spaces.filter(v=>v.passed).length,
@@ -69,7 +79,7 @@ export function studyR190BV({out}={}){
   '<!doctype html><html lang="ja"><meta charset="utf-8"><title>R190-BV</title>'+
   '<style>body{font:16px/1.7 system-ui;background:#111e2d;color:#ebf5ff;margin:30px auto;max-width:1100px;padding:15px}a{color:#9df}td,th{padding:12px;border:1px solid #456}table{border-collapse:collapse}</style>'+
   '<h1>R190-BV：真正B143の2×2経路監査</h1><p>旧R4の1セルPASSとは別の保守的ゲート。ART REJECT/全体HOLD。Qwen/Gemma実推論・世界施工0。</p>'+
-  '<table><tr><th>独立原本</th><th>2×2経路</th><th>目的地</th><th>空間</th><th>詳細</th></tr>'+rows+'</table>'+
+  '<table><tr><th>独立原本</th><th>厳格2×2経路</th><th>目的地</th><th>空間</th><th>詳細</th></tr>'+rows+'</table>'+
   '<p>厳しい検査でHOLDでも実Minecraft歩行不可能と断定しない。<a href="STUDY.json">全体状態</a></p></html>',
   {flag:'wx'});
  const files=fs.readdirSync(dir).filter(x=>x!=='INVENTORY.json').sort().map(file=>{
@@ -82,7 +92,7 @@ if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.ur
  try{
   if(process.argv.length!==4||process.argv[2]!=='--out')throw Error('R190BV_CLI');
   const r=studyR190BV({out:process.argv[3]});
-  console.log(J({wideStatus:r.newWideStatus,cases:r.cases,art:r.artGate,
+  console.log(J({wideStatus:r.newWideStatus,stripStatus:r.newStripStatus,cases:r.cases,art:r.artGate,
    noModelInference:true,noWorldOperation:true}));
   if(!r.cases.every(x=>x.destinationCount===8&&x.spaceCount===20))process.exitCode=2;
  }catch(e){console.error(e.stack??String(e));process.exitCode=1;}
