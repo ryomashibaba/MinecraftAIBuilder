@@ -241,3 +241,51 @@ test('R190-BP failed offline replay exits 2 and keeps full HOLD evidence',t=>{
  assert.equal(fs.existsSync(path.join(out,'REVIEW.html')),true);
  assert.equal(fs.existsSync(path.join(out,'DERIVED_3D.html')),false);checkInventory(out);
 });
+
+
+test('R190-BQ physical facts are measured from genuine two-level synthetic voxels',t=>{
+ const {root,prepared,q}=setup(t),original=path.join(root,'raw'),out=path.join(root,'out');
+ fs.writeFileSync(original,q.original);
+ const r=replayBO({prepared,original,out,origin:'SYNTHETIC_TEST_FIXTURE'});
+ const bq=read(out,'PHYSICAL_PROGRAM_REVIEW.json');
+ assert.equal(r.status,'SOURCE_SPACE_AND_ROUTE_PROXIES_PRESENT_ART_HOLD');
+ assert.equal(bq.source,'INDEPENDENT_RECOUNT_OF_FINAL_B143_VOXELS');
+ assert.deepEqual(bq.physicalLevels,[1,9]);
+ assert.deepEqual(bq.spaces.map(s=>s.floorAreaCells),[288,288]);
+ assert.deepEqual(bq.spaces.map(s=>s.missingSupportCells),[0,0]);
+ assert.deepEqual(bq.spaces.map(s=>s.obstructedAirCells),[0,0]);
+ assert.equal(bq.bmExactOriginalBrief,false);
+ assert.equal(bq.independentRequestFidelity,'NOT_CERTIFIED');
+ assert.match(fs.readFileSync(path.join(out,'REVIEW.html'),'utf8'),/PHYSICAL_PROGRAM_REVIEW.json/);
+ assert.equal(r.worldWrites,0);
+ checkInventory(out);
+});
+
+test('R190-BQ exact BM brief with only two real levels stays independent fidelity HOLD',t=>{
+ const root=temp(t),q=twoLevelReadingProbe(),brief=verifyBM().brief;
+ q.plan.originalBriefSha256=hashBO(brief);
+ const prepared=path.join(root,'prepared'),original=path.join(root,'raw');
+ fs.writeFileSync(original,JSON.stringify(q.plan));
+ prepareBO({model:'qwen3:14b',out:prepared});
+ const out=path.join(root,'out'),r=replayBO({prepared,original,out,origin:'SYNTHETIC_TEST_FIXTURE'});
+ const bq=read(out,'PHYSICAL_PROGRAM_REVIEW.json');
+ assert.equal(r.status,'SOURCE_SPACE_AND_ROUTE_PROXIES_PRESENT_ART_HOLD');
+ assert.equal(bq.bmExactOriginalBrief,true);
+ assert.equal(bq.minimumLevelPrerequisite,'HOLD_MISSING_THIRD_LEVEL');
+ assert.equal(bq.mandatoryHumanChecks.length,6);
+ assert.ok(bq.mandatoryHumanChecks.every(c=>!c.automaticPass));
+ assert.equal(r.independentProgramStatus,'HOLD_HUMAN_INDEPENDENT_BRIEF_REVIEW');
+ assert.equal(fs.existsSync(path.join(out,'DERIVED_3D.html')),true);
+ checkInventory(out);
+});
+
+test('R190-BQ invalid model source produces no fabricated physical evidence or 3D',t=>{
+ const {root,prepared}=setup(t),original=path.join(root,'raw'),out=path.join(root,'out');
+ fs.writeFileSync(original,'{"not":"real-design"}');
+ const r=replayBO({prepared,original,out});
+ assert.equal(r.status,'HOLD');
+ assert.equal(fs.existsSync(path.join(out,'PHYSICAL_PROGRAM_REVIEW.json')),false);
+ assert.equal(fs.existsSync(path.join(out,'DERIVED_3D.html')),false);
+ assert.match(fs.readFileSync(path.join(out,'REVIEW.html'),'utf8'),/監査不能/);
+ checkInventory(out);
+});

@@ -7,6 +7,7 @@ import {fileURLToPath} from 'node:url';
 import {randomUUID} from 'node:crypto';
 import {buildSpatialRequest,hashBO} from '../source/ai/r190bo-spatial-model-contract.mjs';
 import {compileR190BNAssembly} from '../source/ai/r190bn-spatial-assembly.mjs';
+import {auditR190BQ} from '../source/ai/r190bq-independent-physical-program.mjs';
 import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
 import {renderR164Elevation} from './r164-exterior-audit.mjs';
 import {reviewR190BCOriginal,renderR190BCSectionSVG} from './r190bc-design-first-section.mjs';
@@ -125,13 +126,30 @@ function emitReviewBO(dir,receipt){
  const brief=read(path.join(dir,'ORIGINAL_BRIEF.txt'),20000).toString('utf8');
  const views=show3D?['front','rear','west','east','roof'].filter(side=>exists('DERIVED_'+side+'.svg'))
   .map(side=>'<figure><a href="DERIVED_'+side+'.svg"><img loading="lazy" src="DERIVED_'+side+'.svg" alt="'+side+' exact projection"></a><figcaption>'+side+'</figcaption></figure>').join(''):'';
+ const bqPath=path.join(dir,'PHYSICAL_PROGRAM_REVIEW.json');
+ const bq=fs.existsSync(bqPath)?JSON.parse(read(bqPath)):null;
+ const bqTable=bq?'<h2>3. 独立した最終ボクセル空間監査</h2>'+
+  '<p class="warning">原依頼忠実性はHOLD。用途名はモデルの自己申告です。実立脚Y・支持床と空気のみ最終B143で再計測。</p>'+
+  '<p>実際の空間の立脚Y：'+bq.physicalLevels.map(v=>escapeText(v)).join(', ')+
+  '／高層ビル最低階数の前提：'+escapeText(bq.minimumLevelPrerequisite)+'</p>'+
+  '<table style="width:100%;border-collapse:collapse"><thead><tr><th>宣言された用途</th><th>立脚Y</th><th>床面積</th><th>支持床</th><th>空気</th></tr></thead><tbody>'+
+  bq.spaces.map(s=>'<tr>'+[
+   s.id+' / '+s.sourceDeclaredPurpose,s.standingY,s.floorAreaCells,
+   s.supportedFloorCells+'/'+s.floorAreaCells,s.verifiedAirCells+'/'+s.airVolumeCells
+  ].map(v=>'<td style="border:1px solid #526079;padding:7px;overflow-wrap:anywhere">'+
+   escapeText(v)+'</td>').join('')+'</tr>').join('')+'</tbody></table>'+
+  '<h3>未認定の依頼条件</h3><ul>'+bq.mandatoryHumanChecks.map(c=>
+   '<li>'+escapeText(c.question)+'：人間の審査待ち</li>').join('')+'</ul>':
+  '<h2>3. 独立した最終ボクセル空間監査</h2>'+
+  '<p class="warning">最終B143形状が成立しないため監査不能。依頼適合を推定しません。</p>';
  const links=[
   ['MODEL_ORIGINAL.txt','変更なしの元回答'],['ORIGINAL_BRIEF.txt','元の日本語依頼'],
   ['CAPTURE.json','出所・HOLD判定'],['DERIVATION.json','設計→幾何の対応'],
   ['FUNCTIONAL_REVIEW.json','最終ボクセル機能検査'],['DERIVED_B143_PROPOSAL.json','派生B143'],
   ['DERIVED_SECTION.svg','入口面・旧BC幅2限定断面'],
   ['DERIVED_SPACE_SECTIONS.json','作者空間中央断面'],
-  ['HUMAN_REVIEW_TEMPLATE.json','未記入の人間審査項目']
+  ['HUMAN_REVIEW_TEMPLATE.json','未記入の人間審査項目'],
+  ['PHYSICAL_PROGRAM_REVIEW.json','R190-BQ 完成ボクセル独立監査']
  ].map(([f,label])=>link(f,label)).filter(Boolean).concat(['<a href="INVENTORY.json">全ファイルSHA/bytes</a>']).join('　|　');
  const html=[
   '<!doctype html><html lang="ja"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">',
@@ -144,10 +162,11 @@ function emitReviewBO(dir,receipt){
   show3D?'<p>モデルの空間数値からの決定論的B143派生。美術PASSではありません。<a href="DERIVED_3D.html">3Dを単独で開く</a></p><iframe title="厳格B143派生3D" src="DERIVED_3D.html"></iframe>':
    '<p class="warning">真正3D未認定／表示不可。無効なモデル原文や途中失敗に代替建築を付けません。CAPTURE.jsonの拒否理由を確認してください。</p>',
   show3D?'<h2>2. 同一完成形状の5方向投影</h2><div class="views">'+views+'</div>':'',
-  '<h2>3. 原依頼との照合（未採点）</h2><p>用途、階数、床と空気、連続上下動線、入口、開口、屋根、規模感、独創性を実際の日本語依頼と比較。新たな要求は後から追加しない。</p>',
+  bqTable,
+  '<h2>4. 原依頼との照合（未採点）</h2><p>用途、階数、床と空気、連続上下動線、入口、開口、屋根、規模感、独創性を実際の日本語依頼と比較。新たな要求は後から追加しない。</p>',
   '<details><summary>元の日本語依頼</summary><pre>'+escapeText(brief)+'</pre></details>',
   '<details><summary>モデル原文（表示用にHTMLエスケープ。元ファイル無改変）</summary><pre>'+escapeText(original)+'</pre></details>',
-  '<h2>4. 審査範囲</h2><p>R4は単一セルの抽象経路、旧BCは同一高さ・幅2の限定経路。構造耐力・避難・実Minecraft歩行は未認証。SYNTHETICやSAVED_SOURCE_UNVERIFIEDは実モデル成功ではない。</p>',
+  '<h2>5. 審査範囲</h2><p>R4は単一セルの抽象経路、旧BCは同一高さ・幅2の限定経路。構造耐力・避難・実Minecraft歩行は未認証。SYNTHETICやSAVED_SOURCE_UNVERIFIEDは実モデル成功ではない。</p>',
   '<p>World: NOT_PREPARED / 9 BLOCKED / BuildPlan.operations=[]。美術・依頼忠実性の判定は、手動レビュー記録が記入されるまでART HOLD。</p></main></html>'
  ].join('\n');
  write(dir,'REVIEW.html',html);
@@ -170,6 +189,11 @@ export function deriveBO({dir,raw,brief,origin,complete=true,provider=null}){
   const result=compileR190BNAssembly(raw,{originalBrief:brief,
    authorship:origin==='SYNTHETIC_TEST_FIXTURE'?'SYNTHETIC_TEST_FIXTURE':'MODEL_ORIGINAL_UNVERIFIED'});
   const {proposal,compiled,...derivation}=result;
+  const audit=auditR190BQ({originalBrief:brief,raw,compiled,programSpaces:result.programSpaces,
+   levels:result.levels,geometrySha256:result.geometrySha256,origin});
+  write(dir,'PHYSICAL_PROGRAM_REVIEW.json',json(audit));
+  receipt.independentProgramStatus=audit.result;
+  receipt.minimumLevelPrerequisite=audit.minimumLevelPrerequisite;
   receipt.status=result.status;receipt.geometrySha256=result.geometrySha256;
   receipt.sourceSha256=result.sourceSha256;
   receipt.outputAuthorship=result.outputAuthorship;
@@ -228,6 +252,7 @@ export function deriveBO({dir,raw,brief,origin,complete=true,provider=null}){
   '# R190-BO 原文と派生成果物',
   '状態：'+receipt.status+'。出所：'+origin+'。ART HOLD。',
   'MODEL_ORIGINAL.txt は原文。DERIVED_*はBN数値を既存B143へ機械変換した派生物です。',
+  'PHYSICAL_PROGRAM_REVIEW.jsonは完成ボクセルの床・空気・実立脚階を再計測。依頼忠実性は自動PASSにしません。',
   'DERIVATION.jsonはoperation/space→B143対応、FUNCTIONAL_REVIEW.jsonは最終空気・支持床とモデル申告のR4経路検査。',
   '原文が不適合・切断ならHOLD。原文の補修・再試行・代替建物はありません。',
   '真正3Dや技術代理検査の成立は、依頼忠実性・用途適合・独創性・美術PASSではありません。',

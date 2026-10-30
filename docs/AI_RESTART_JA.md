@@ -1,3 +1,11 @@
+# MinecraftAIBuilder — 2026-10-30 R190-BQ 現在地
+
+- R190-BQ：完成B143の実立脚Y・支持床・空気を独立再監査。高層ビルの用途を自己申告ラベルのみで合格にせず、人間審査HOLDを維持。
+- [詳細](R190BQ_INDEPENDENT_PHYSICAL_PROGRAM_JA.md)。新形式の実Qwen/Gemma推論は未実施。次工程の実モデル推論にはR190-BOのexact requestと固有UUIDに対する個別承認とローカルOllama環境が必要。
+- GitHub HEAD/CIは実行時照合する。既存Open/Draft PR #128・ブランチ維持、main/既存原本未改変、ART HOLD、Minecraft 9 BLOCKED/BuildPlan空/世界接触0。
+
+---
+
 # MinecraftAIBuilder — 現在地（2026-10-30 R190-BP）
 
 - 継続ブランチ `feature/b198zr1-protected-architectural-revision`、Draft PR #128 OPEN・未マージ。main/原本を保護。
