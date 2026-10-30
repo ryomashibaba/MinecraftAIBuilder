@@ -15,12 +15,12 @@ const safe=()=>({readiness:'NOT_PREPARED',gates:Array(9).fill('BLOCKED'),
  BuildPlan:{operations:[]},constructionApproved:false,executionAllowed:false,
  worldContacts:0,worldWrites:0,modelCalls:0,networkRequests:0,
  functionGate:'NOT_TESTED',artGate:'ART_HOLD',officialArtAdoptions:0});
-function elevation(c,side){
+export function elevationR190BZ(c,side){
  const {width:w,height:h,depth:d}=c.bounds,hori=side==='roof'?w:
   ['front','rear'].includes(side)?w:d,vert=side==='roof'?d:h;
  const map=new Map(c.primitives.map(v=>[v.slice(0,3).join(','),v[3]]));
  const pix=6,out=['<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-label="R190-BZ true occupied voxels '+
-  side+'" view" viewBox="0 0 '+hori*pix+' '+vert*pix+'"><rect width="100%" height="100%" fill="#14202e"/>'];
+  side+' view" viewBox="0 0 '+hori*pix+' '+vert*pix+'"><rect width="100%" height="100%" fill="#14202e"/>'];
  for(let v=0;v<vert;v++)for(let u=0;u<hori;u++){
   let m;
   if(side==='roof'){
@@ -28,7 +28,7 @@ function elevation(c,side){
   }else{
    for(let step=0;step<(['front','rear'].includes(side)?d:w);step++){
     const x=['front','rear'].includes(side)?u:side==='west'?step:w-1-step;
-    const z=side==='front'?step:side==='rear'?d-1-step:v;
+    const z=side==='front'?step:side==='rear'?d-1-step:u;
     const q=map.get(x+','+(h-1-v)+','+z);if(q!==undefined){m=q;break;}
    }
   }
@@ -41,11 +41,11 @@ const minus=(a,b)=>a.map((v,i)=>v-b[i]);
 const dot=(a,b)=>a.reduce((s,v,i)=>s+v*b[i],0);
 const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
 const norm=a=>{const n=Math.hypot(...a);if(n<1e-9)throw Error('R190BZ_CAMERA_DEGENERATE');return a.map(v=>v/n)};
-function perspective(c,side){
+export function perspectiveR190BZ(c,side){
  const {width:w,height:h,depth:d}=c.bounds;
  const target=[w/2,h*.54,d/2];
  const eye=side==='oblique'?[w*1.65,h*1.52,-d*2.3]:
-  side==='ground'?[w*.49,5,-d*1.55]:[w*.5,16,-d*.24];
+  side==='ground'?[w*.49,5,-d*1.55]:[w*.5,16,d*.3];
  const look=side==='ground'?[w*.5,h*.61,d*.5]:
   side==='canyon'?[w*.5,h*.75,d*.6]:target;
  const forward=norm(minus(look,eye)),right=norm(cross(forward,[0,1,0]));
@@ -119,9 +119,9 @@ export function studyR190BZ({out}={}){
    originalRawSha256:c.originalRawSha256,geometrySha256:c.geometrySha256,primitives:c.primitives}),{flag:'wx'});
   fs.writeFileSync(path.join(folder,'VIEWER_3D.html'),display.html,{flag:'wx'});
   for(const side of ['front','rear','west','east','roof'])
-   fs.writeFileSync(path.join(folder,'VIEW_'+side+'.svg'),elevation(c,side),{flag:'wx'});
+   fs.writeFileSync(path.join(folder,'VIEW_'+side+'.svg'),elevationR190BZ(c,side),{flag:'wx'});
   for(const side of ['oblique','ground','canyon'])
-   fs.writeFileSync(path.join(folder,'VIEW_'+side+'.svg'),perspective(c,side),{flag:'wx'});
+   fs.writeFileSync(path.join(folder,'VIEW_'+side+'.svg'),perspectiveR190BZ(c,side),{flag:'wx'});
   const audit={kind,filename,source:'SEPARATE_R190BZ_OPEN_PATCH_COMPILER_NOT_B143_NATIVE',
    author:'CHAT_GPT_6_RESEARCH_SAMPLE_NOT_QWEN_OR_GEMMA',
    rawSha256:c.originalRawSha256,geometrySha256:c.geometrySha256,
