@@ -24,9 +24,9 @@ def projection(cells,view,h):
     return {k:v[1] for k,v in depth.items()}
 def inspect(d):
     cd=d/"cd"; visual=d/"visual"
-    score=json.loads((cd/"CD_SCORECARD.json").read_text())
-    vox=json.loads((cd/"DERIVED_VOXELS.json").read_text())
-    audit=json.loads((visual/"VISUAL_EVIDENCE.json").read_text())
+    score=json.loads((cd/"CD_SCORECARD.json").read_text(encoding="utf-8"))
+    vox=json.loads((cd/"DERIVED_VOXELS.json").read_text(encoding="utf-8"))
+    audit=json.loads((visual/"VISUAL_EVIDENCE.json").read_text(encoding="utf-8"))
     cells=vox["primitives"]
     actual=hashlib.sha256(json.dumps(cells,separators=(",",":"),ensure_ascii=False).encode()).hexdigest()
     req(actual==audit["rawVoxelOnlySha256"]==score["primitiveVoxelSha256"],"VOXEL_SHA")
@@ -64,7 +64,7 @@ def inspect(d):
 if __name__=="__main__":
     if len(sys.argv)!=2:raise SystemExit("Usage: python scripts/r190ce-independent-verify.py CE_DIR")
     root=pathlib.Path(sys.argv[1])
-    result=json.loads((root/"STUDY.json").read_text())
+    result=json.loads((root/"STUDY.json").read_text(encoding="utf-8"))
     req(result["modelCalls"]==result["worldWrites"]==0,"STUDY_ZERO_IO")
     cases={n:inspect(root/n) for n in ("READING_TWO_LEVELS","PUBLIC_CONCOURSE")}
     req(len(result["cases"])==2 and result["humanArtDecision"]=="ART_HOLD","STUDY_ART")
