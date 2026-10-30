@@ -42,6 +42,8 @@ jobs:
         run: node scripts/r190ca-space-study.mjs --out ca-evidence
       - name: Independent XML 16-view, exact 10 projection, program and SHA auditor
         run: python scripts/r190ca-verify.py ca-evidence
+      - name: Two-wide clearance and independent path from first public hall (expect functional rejection)
+        run: python scripts/r190ca-navigation-audit.py ca-evidence
       - name: Preserve exact source, all voxels, 3D, 16 views and quantified functional HOLD
         if: always()
         uses: actions/upload-artifact@v4

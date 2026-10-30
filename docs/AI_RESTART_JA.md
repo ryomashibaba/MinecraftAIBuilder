@@ -1,3 +1,15 @@
+## R190-CA 第一次真正3D審査・独立経路監査（2026-10-30 JST）
+
+**技術限定PASS**：CA専用CI [#41060853546](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41060853546) Windows/Ubuntu両SUCCESS。実ボクセルA62,565/B45,568、立体切除A9,518/B11,342。修正版BZ CIも両OS SUCCESS。
+
+**ART：A/BともREJECT**。取得した16視点画像を真正SOURCEから確認。Aは凡庸な平行2塔、Bは段状の太塔へ退行。内部支持床は確かに実在するものの、美術品質を最優先に再設計。
+
+**FUNCTION：現CA両案REJECT**。Bは最上層付近のオフィス候補238/238セルで頭上空間が遮蔽、別途独立して計算した2×2足元＋3空気セルの代理経路では第一公共ホールから他の上層機能に到達0。これは真Minecraft歩行合格の反証としては代理検査であり、モデルの特性・未実装階段/梯子等による限界を明示する。新しい独立経路監査`scripts/r190ca-navigation-audit.py`はSOURCEを変えずCI証拠を増強する。今回追加のCI再実行結果は未検証として扱う。
+
+**全根拠と次工程のCB設計契約：`docs/R190CA_FIRST_ART_FUNCTION_REVIEW_JA.md`**。旧原本・main無変更、Draft PR #128維持、正式ART採用0、実Qwen/Gemma新POST0、NOT_PREPARED／9 BLOCKED／BuildPlan空／worldContacts=worldWrites=0、Minecraft施工禁止。
+
+---
+
 ## R190-CA 新規実制作の起点（2026-10-30 JST）
 
 BZの初期SOURCE限定技術PASS（実行版）、A/BともART REJECT（巨大板・折り紙状集合）を踏まえ、CAでは使用可能な内部容積を意図して不規則な複数の実建築体積・作者指定水平床・立体的な公共空洞の同時設計へ変更。固定用途テンプレート・BOX後付け・装飾延命ではない。独立形式の研究サンプルであり、実Qwen/Gemma回答は含まない。
