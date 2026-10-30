@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {prepareBO,replayBO,verifyBM} from './r190bo-spatial-local.mjs';
+import {buildSpatialRequest,hashBO} from '../source/ai/r190bo-spatial-model-contract.mjs';
 import {twoLevelReadingProbe,longConcourseProbe} from './fixtures/r190bn-spatial-assemblies.mjs';
 const ROOT=fileURLToPath(new URL('../',import.meta.url));
 export function offlineStudyBO(out){
@@ -35,12 +36,30 @@ export function offlineStudyBO(out){
    originalRawSha256:r.originalRawSha256,geometrySha256:r.geometrySha256,
    art:r.art,requestFidelity:r.independentRequestFidelity});
  }
+ const r190brComparison=['qwen3:14b','gemma4:26b'].map(model=>{
+  const old=buildSpatialRequest({brief:before.brief,model,schemaPrompt:'repeated'});
+  const compact=buildSpatialRequest({brief:before.brief,model,schemaPrompt:'native-only'});
+  const sameNativeFormat=JSON.stringify(old.schema)===JSON.stringify(compact.schema);
+  const exactBriefPreserved=[old,compact].every(x=>x.body.messages[1].content.endsWith(before.brief.toString('utf8')));
+  if(!sameNativeFormat||!exactBriefPreserved||old.briefSha256!==compact.briefSha256)
+   throw Error('R190BR_COMPARISON_INTEGRITY');
+  return {model,briefSha256:old.briefSha256,schemaSha256:hashBO(JSON.stringify(old.schema)),
+   repeatedRequestSha256:hashBO(old.bytes),nativeOnlyRequestSha256:hashBO(compact.bytes),
+   repeatedWireBytes:old.bytes.length,nativeOnlyWireBytes:compact.bytes.length,
+   repeatedUserMessageBytes:Buffer.byteLength(old.body.messages[1].content),
+   nativeOnlyUserMessageBytes:Buffer.byteLength(compact.body.messages[1].content),
+   savedWireBytes:old.bytes.length-compact.bytes.length,
+   savedUserMessageBytes:Buffer.byteLength(old.body.messages[1].content)-
+    Buffer.byteLength(compact.body.messages[1].content),
+   sameNativeFormat,exactBriefPreserved,modelCalls:0,realModelOutcome:'NOT_TESTED'};
+ });
  const after=verifyBM();if(before.inventorySha256!==after.inventorySha256)throw Error('BM changed');
  const report={schema:'minecraftaibuilder-r190bo-offline-study-v1',
   newRealModelCalls:0,ollamaContacts:0,networkRequests:0,metadataReads:0,
   technicalResult:'OFFLINE_PATH_VALIDATED_WITH_SYNTHETIC_FIXTURES_ONLY',
   realModelSpatialAssemblySuccess:'NOT_TESTED_AWAITING_SEPARATE_APPROVAL',
   bmInventoryUnchanged:before.inventorySha256===after.inventorySha256,preparations,baselines,synthetic,
+  r190brNativeSchemaDeduplication:r190brComparison,
   sameBriefCausalImprovement:'NOT_ESTABLISHED',art:'ART_HOLD',officialArtAdoptions:0,
   worldContacts:0,worldWrites:0,readiness:'NOT_PREPARED',gates:Array(9).fill('BLOCKED'),
   BuildPlan:{operations:[]},constructionApproved:false,executionAllowed:false};

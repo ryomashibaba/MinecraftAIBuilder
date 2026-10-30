@@ -310,3 +310,64 @@ test('R190-BQ insufficient high-rise levels => CLI exits 2 but retains genuine d
  assert.match(page,/src="DERIVED_3D.html"/);
  checkInventory(out);
 });
+
+
+test('R190-BR compact prompt omits redundant schema but not native grammar or model authorship',()=>{
+ for(const model of ['qwen3:14b','gemma4:26b']){
+  const brief=verifyBM().brief;
+  const old=buildSpatialRequest({brief,model,schemaPrompt:'repeated'});
+  const compact=buildSpatialRequest({brief,model,schemaPrompt:'native-only'});
+  assert.deepEqual(compact.body.format,old.body.format);
+  assert.deepEqual(compact.body.options,old.body.options);
+  assert.deepEqual(compact.body.messages[0],old.body.messages[0]);
+  assert.equal(compact.body.messages[1].content.endsWith(brief.toString('utf8')),true);
+  assert.equal(compact.body.messages[1].content.includes('JSON Schema='),false);
+  assert.equal(old.body.messages[1].content.includes('JSON Schema='),true);
+  assert.ok(old.bytes.length-compact.bytes.length>4500);
+  assert.ok(compact.bytes.length<old.bytes.length*.75);
+  assert.notEqual(hashBO(compact.bytes),hashBO(old.bytes));
+ }
+ assert.throws(()=>buildSpatialRequest({brief:verifyBM().brief,model:'qwen3:14b',schemaPrompt:'auto'}),/R190BR_SCHEMA_PROMPT_MODE/);
+});
+
+test('R190-BR native-only preflight is SHA-pinned and cannot borrow old mode approval',async t=>{
+ const root=temp(t),old=path.join(root,'old'),next=path.join(root,'next');
+ const before=prepareBO({model:'qwen3:14b',out:old,schemaPrompt:'repeated'});
+ const after=prepareBO({model:'qwen3:14b',out:next,schemaPrompt:'native-only'});
+ assert.equal(after.schemaPrompt,'native-only');
+ const verified=inspectBO(next);
+ assert.equal(verified.p.userMessageBytes,Buffer.byteLength(JSON.parse(verified.request).messages[1].content));
+ assert.notEqual(after.requestSha256,before.requestSha256);
+ assert.notEqual(after.approvalPhrase,before.approvalPhrase);
+ let calls=0;
+ await assert.rejects(runBO({prepared:next,approval:before.approvalPhrase,out:path.join(root,'forbidden')},
+  {transport:async()=>{calls++;throw Error('forbidden');}}),/SEPARATE_HUMAN_APPROVAL_REQUIRED/);
+ assert.equal(calls,0);
+ assert.equal(fs.existsSync(path.join(next,'ATTEMPT_CONSUMED.json')),false);
+});
+
+test('R190-BR tampered compact prompt metadata fails before network',async t=>{
+ const root=temp(t),next=path.join(root,'native');
+ const p=prepareBO({model:'qwen3:14b',out:next,schemaPrompt:'native-only'});
+ const data=read(next,'PREFLIGHT.json');data.userMessageBytes++;
+ fs.writeFileSync(path.join(next,'PREFLIGHT.json'),JSON.stringify(data,null,2));
+ let calls=0;
+ await assert.rejects(runBO({prepared:next,approval:p.approvalPhrase,out:path.join(root,'forbidden')},
+  {transport:async()=>{calls++;}}),/PREFLIGHT_INTEGRITY/);
+ assert.equal(calls,0);
+});
+
+test('R190-BR actual offline CLI supports opt-in native-only and preserves default repeated',t=>{
+ const root=temp(t),entry=path.join(ROOT,'scripts/r190bo-spatial-local.mjs');
+ for(const mode of ['repeated','native-only']){
+  const dir=path.join(root,mode),cli=['prepare','--model','gemma4:26b','--out',dir,
+   ...(mode==='native-only'?['--schema-prompt','native-only']:[])];
+  const command=spawnSync(process.execPath,[entry,...cli],{encoding:'utf8'});
+  assert.equal(command.status,0,command.stderr);
+  assert.equal(JSON.parse(command.stdout).schemaPrompt,mode);
+  const inspect=spawnSync(process.execPath,[entry,'inspect','--prepared',dir],{encoding:'utf8'});
+  assert.equal(inspect.status,0,inspect.stderr);
+  assert.equal(JSON.parse(inspect.stdout).schemaPrompt,mode);
+  assert.equal(fs.existsSync(path.join(dir,'ATTEMPT_CONSUMED.json')),false);
+ }
+});

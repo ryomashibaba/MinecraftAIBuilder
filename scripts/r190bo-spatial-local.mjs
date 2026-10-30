@@ -62,6 +62,7 @@ export function prepareBO({briefFile,model,out,...budgets}){
  const approvalPhrase='R190BO-ONE-POST-'+requestSha256+'-'+approvalNonce;
  const preflight={schema:'minecraftaibuilder-r190bo-preflight-v1',status:'OFFLINE_READY_AWAITING_SEPARATE_HUMAN_APPROVAL',
   endpoint:BO_ENDPOINT,model,briefSha256:request.briefSha256,requestSha256,
+  schemaPrompt:request.schemaPrompt,userMessageBytes:Buffer.byteLength(request.body.messages[1].content),
   schemaSha256:hashBO(JSON.stringify(request.schema)),sourcePins:sourcePins(),
   bmComparison:{sameOriginalBrief:hashBO(brief)===hashBO(bm.brief),inventorySha256:bm.inventorySha256,
    originalA:bm.originalA,originalB:bm.originalB,oldSourcesModified:false,
@@ -80,6 +81,8 @@ export function prepareBO({briefFile,model,out,...budgets}){
   '状態：別途の人間の個別承認待ち。まだ実Ollamaへは一切接続していません。',
   'モデル：'+model+'。送信先：'+BO_ENDPOINT+'。POST最大1、GET 0、自動再試行0。',
   '元依頼SHA256：'+preflight.briefSha256+'。リクエストSHA256：'+requestSha256+'。',
+  'Schema提示方式：'+request.schemaPrompt+'（repeated=既存二重提示、native-only=完全Schemaはnative formatのみ）。',
+  'どちらも型、設計自由度、安全条件は同一。新モードの実モデル遵守率・美術の改善は未検証。',
   '元依頼・EXACT_REQUEST.json・OUTPUT_SCHEMA.jsonを確認してから個別承認してください。',
   '失敗や通信エラーでも同じ準備の試行ロックは消費され、再実行できません。再生成した準備も新たな承認が必要です。',
   'BM比較は同じ依頼を使う記述的研究です。IR・転送方式・型制約・contextの差があり、因果的優劣は認定しません。',
@@ -92,8 +95,10 @@ export function inspectBO(prepared){
  const brief=read(path.join(dir,'ORIGINAL_BRIEF.txt'),20000),request=read(path.join(dir,'EXACT_REQUEST.json'),64000);
  const body=JSON.parse(request);
  const rebuilt=buildSpatialRequest({brief,model:p.model,temperature:body.options?.temperature,
-  seed:body.options?.seed,maxTokens:body.options?.num_predict,contextTokens:body.options?.num_ctx});
- if(p.endpoint!==BO_ENDPOINT||p.schema!=='minecraftaibuilder-r190bo-preflight-v1'||
+  seed:body.options?.seed,maxTokens:body.options?.num_predict,contextTokens:body.options?.num_ctx,schemaPrompt:p.schemaPrompt});
+ if(!['repeated','native-only'].includes(p.schemaPrompt)||
+  p.userMessageBytes!==Buffer.byteLength(rebuilt.body.messages[1].content)||
+  p.endpoint!==BO_ENDPOINT||p.schema!=='minecraftaibuilder-r190bo-preflight-v1'||
   hashBO(brief)!==p.briefSha256||hashBO(request)!==p.requestSha256||!request.equals(rebuilt.bytes)||
   p.schemaSha256!==hashBO(JSON.stringify(rebuilt.schema))||
   !read(path.join(dir,'OUTPUT_SCHEMA.json')).equals(Buffer.from(json(rebuilt.schema)))||
@@ -311,7 +316,7 @@ export async function runBO({prepared,approval,out},{transport=fetch}={}){
 
 export async function cliBO(argv){
  const [mode,...args]=argv,opts={};
- const allowed={prepare:['--brief','--model','--out','--temperature','--seed','--max-tokens','--context-tokens'],
+ const allowed={prepare:['--brief','--model','--out','--temperature','--seed','--max-tokens','--context-tokens','--schema-prompt'],
   inspect:['--prepared'],replay:['--prepared','--original','--out'],run:['--prepared','--approval','--out']}[mode];
  if(!allowed||args.length%2)fail('CLI_USAGE: prepare|inspect|replay|run with named pairs');
  for(let i=0;i<args.length;i+=2){
@@ -324,7 +329,7 @@ export async function cliBO(argv){
  if(mode==='prepare'){
   const budgets={};for(const [flag,key] of [['--temperature','temperature'],['--seed','seed'],['--max-tokens','maxTokens'],['--context-tokens','contextTokens']])
    if(opts[flag]!==undefined)budgets[key]=Number(opts[flag]);
-  return prepareBO({briefFile:opts['--brief'],model:opts['--model'],out:opts['--out'],...budgets});
+  return prepareBO({briefFile:opts['--brief'],model:opts['--model'],out:opts['--out'],...(opts['--schema-prompt']?{schemaPrompt:opts['--schema-prompt']}:{}),...budgets});
  }
  if(mode==='inspect'){
   const r=inspectBO(opts['--prepared']);

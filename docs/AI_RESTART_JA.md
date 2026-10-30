@@ -1,3 +1,11 @@
+# MinecraftAIBuilder — 現行開発 R190-BR（2026-10-30 JST）
+
+- R190-BR：新Spatial Assemblyに対して native formatのフルSchema二重提示を避ける`native-only`候補を追加。従来の`repeated`が既定。両方式のschema/モデル自由度/実行制約は不変。通信0の要求サイズ比較を`STUDY.json`に記録。実モデル品質向上は未証明。
+- [詳細](R190BR_NATIVE_SCHEMA_PROMPT_COMPARISON_JA.md)。R190-BQ独立ボクセル用途監査を維持。高層ビル用途不足のHOLD、ART HOLD、正式美術採用0、実Ollama新推論0。
+- ローカルでの実Qwen/Gemma送信には新しいexact request SHA＋個別UUID承認が必要。mainや凍結原本の変更・Minecraft接触・施工は不可。既存Draft PR #128継続。
+
+---
+
 # MinecraftAIBuilder — 2026-10-30 R190-BQ 現在地
 
 - R190-BQ：完成B143の実立脚Y・支持床・空気を独立再監査。高層ビルの用途を自己申告ラベルのみで合格にせず、人間審査HOLDを維持。
