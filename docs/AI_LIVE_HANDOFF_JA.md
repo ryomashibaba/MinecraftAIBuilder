@@ -1,6 +1,6 @@
 # MinecraftAIBuilder — 新チャット用LIVE HANDOFF（2026-10-31 JST）
 
-> **最新追加（Compact ArchitecturePlan v1 の意味設計契約）**：実Qwen3:14bの最新報告は42秒／HTTP200／stop／2101 tokens、JSONは構文成立するも `R190BN_LEVEL`、上階y=9に対して全高8、実階段操作なし、外部入口・空洞などにも設計不整合、真正3D 0。原モデル生回答はユーザーPCに非公開保管、GitHubへ新規持込なし。正式戦略v2へ立ち返り `docs/R190_ARCHITECTUREPLAN_VERTICAL_SLICE_JA.md` にモデル／コンパイラの責任境界・短いIR→BN/B143→CD/CEの詳細条件と失敗時HOLDを固定した。 `source/ai/r190bn-compact-architecture-plan.mjs` は用途・階・ゾーン・作者選択階段／外形／屋根／開口を**座標なしで厳格検証**し、階の立脚高さだけを作者選択の階高から算術算定。検証器は `geometryCompiled=false`、ART HOLD、9 BLOCKED、world0。**新IRから真正3Dへの配置・幾何ソルバーは次の工程であり、この段階では未実装、実モデル再送も0。** 旧ソース・main・凍結証拠を変更しない。新CI結果は最新HEADで別途確認する。
+> **最新追加（Compact ArchitecturePlan→BN/B143 真正3Dの最初の狭い縦貫）**：契約検証を越え、`source/ai/r190bn-compact-to-bn.mjs` に作者入力の階高/2階/1室ずつ/材質/作者選択straight-east階段・矩形系外形・平屋根からBN enclosure/flight/入口/上下室ポータル/窓を決定論的に構築し、既存BN/B143を通す初期変換器を追加。**螺旋・自由曲面・折返し・その他側面・異なる屋根などは勝手な箱/直線置換をせずHOLD。** 間口/室/階段の寸法が収まらなければHOLD。B143最終占有から支持床・上階空気・入口空気・flight・上下到達を検査。合成2用途の実3D・不成立を確認するオフラインCIを追加。これは汎用完成でも美術PASSでも実Qwen成功でもない。main・凍結原本は保護、MC施工0、9 BLOCKED、ART HOLD維持。新CIは合格確認まで未認証。
 
 > **必読。** この文書は過去の長いChatGPT会話を丸ごと再読込しないためのGitHub上の軽量な正本。**新チャットでは最初にDraft PR #128の現在HEAD・変更差分・専用CIの結果を再確認**する。以下のコミットとCI状況は作成時点のスナップショット。勝手に次工程の成功を仮定しない。
 
