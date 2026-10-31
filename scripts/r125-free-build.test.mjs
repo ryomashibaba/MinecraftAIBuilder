@@ -53,3 +53,51 @@ test('unverified or failed model export is HOLD and is not fabricated as a build
   assert.equal(result.worldWrites,0);
  }finally{fs.rmSync(root,{recursive:true,force:true});}
 });
+
+test('REAL saved ArchitecturePlan produces true 3-material MakeCode without any LLM or world call',async()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'r125-free-build-real-'));
+ const plan={schema:'minecraftaibuilder-r125-architecture-plan-v1',id:'reader-station',
+  title:'Reading and storage house',brief:'One-storey reading room with storage, door and windows',
+  footprint:{width:18,depth:18},
+  levels:[{splitAxis:'x',splitPercent:50,spaces:[
+   {id:'reading-area',purpose:'Reading tables and circulation area'},
+   {id:'storage-zone',purpose:'Book and document storage area'}]}],
+  materials:{floor:'wood',wall:'stone',roof:'wood'}};
+ try{
+  const input=path.join(root,'SOURCE_ARCHITECTURE_PLAN.json');
+  fs.writeFileSync(input,JSON.stringify(plan)+'\n');
+  const status=await runFreeBuild({model:'qwen3:14b',prompt:null,plan:input,outRoot:path.join(root,'outputs')});
+  assert.equal(status.status,'MAKECODE_READY_HUMAN_REVIEW_REQUIRED');
+  assert.equal(status.worldWrites,0);
+  assert(status.plannedVoxelCount>400);
+  assert(status.plannedBlockCounts.oak_planks>0);
+  assert(status.plannedBlockCounts.stone>0);
+  assert(status.plannedBlockCounts.glass>0);
+  assert.equal(fs.existsSync(status.makecode),true);
+  const code=fs.readFileSync(status.makecode,'utf8');
+  assert.match(code,/blocks\.blockByName\("oak_planks"\)/);
+  assert.match(code,/player\.onChat\("mabbuild"/);
+  assert.match(code,/player\.onChat\("mabverify"/);
+  assert.equal(createHash('sha256').update(code).digest('hex'),status.makecodeSourceSha256);
+  const req=JSON.parse(fs.readFileSync(path.join(status.output,'REQUEST.json'),'utf8'));
+  assert.equal(req.mode,'SAVED_PLAN');
+ }finally{fs.rmSync(root,{recursive:true,force:true});}
+});
+test('REAL saved plan requesting unverified metal roof is held, never substituted',async()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'r125-free-build-metal-'));
+ const plan={schema:'minecraftaibuilder-r125-architecture-plan-v1',id:'metal-station',
+  title:'Metal roof station',brief:'Tiny generic station with explicitly required metal roof',
+  footprint:{width:18,depth:18},
+  levels:[{splitAxis:'z',splitPercent:40,spaces:[
+   {id:'customer-zone',purpose:'Waiting area for guests'},
+   {id:'service-zone',purpose:'Service counter and equipment'}]}],
+  materials:{floor:'stone',wall:'stone',roof:'metal'}};
+ try{
+  const input=path.join(root,'ORIGINAL.json');fs.writeFileSync(input,JSON.stringify(plan));
+  const status=await runFreeBuild({model:'qwen3:14b',prompt:null,plan:input,outRoot:path.join(root,'outputs')});
+  assert.equal(status.status,'HOLD');
+  assert.equal(status.worldWrites,0);
+  const logs=fs.readFileSync(path.join(status.output,'RUN_LOG.txt'),'utf8');
+  assert.match(logs,/UNVERIFIED_MATERIAL_METAL/);
+ }finally{fs.rmSync(root,{recursive:true,force:true});}
+});
