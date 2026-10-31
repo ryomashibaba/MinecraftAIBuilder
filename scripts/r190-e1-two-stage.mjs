@@ -55,13 +55,16 @@ const STAGE_B_SYSTEM=[
  'No extra keys. No model explanation. No Minecraft commands.'
 ].join('\n');
 
-export async function requestLocalModel({model,system,user,onAttempt}){
+export async function requestLocalModel({model,system,user,onAttempt,maxTokens=2800,timeoutMs=180000}){
+ if(!Number.isSafeInteger(maxTokens)||maxTokens<400||maxTokens>8000||
+  !Number.isSafeInteger(timeoutMs)||timeoutMs<10000||timeoutMs>600000)
+  throw Error('E1_TWO_STAGE_REQUEST_LIMITS');
  const ready=await preflightR125Ollama({model,endpoint:ENDPOINT,fetcher:fetch});
  if(ready.status!=='LOCAL_MODEL_LISTED')throw Error('E1_TWO_STAGE_LOCAL_MODEL_NOT_LISTED');
  const body={model,stream:false,temperature:0.45,reasoning_effort:'none',
-  max_tokens:2800,response_format:{type:'json_object'},
+  max_tokens:maxTokens,response_format:{type:'json_object'},
   messages:[{role:'system',content:system},{role:'user',content:user}]};
- const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),180000);
+ const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),timeoutMs);
  let response;
  try{
   onAttempt();
