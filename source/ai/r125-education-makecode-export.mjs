@@ -37,7 +37,9 @@ function resolvePalette(scene,profile,legacy){
   const blockName=KNOWN[material]??blocks[material]?.blockName??(legacy?'stone':null);
   if(!blockName)fail('UNVERIFIED_MATERIAL_'+material.toUpperCase());
   if(!validName(blockName))fail('BAD_BLOCK_NAME');
-  if(!legacy&&materialMapping.includes(blockName))fail('MATERIAL_COLLISION');
+  if(!legacy&&(materialMapping.includes(blockName)||
+   (!Object.hasOwn(KNOWN,material)&&Object.values(KNOWN).includes(blockName))))
+   fail('MATERIAL_COLLISION');
   materialMapping[i]=blockName;
   blockCounts[blockName]=(blockCounts[blockName]??0)+count;
   used.push({id:i,material,blockName,plannedCount:count});

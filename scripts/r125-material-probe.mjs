@@ -20,7 +20,7 @@ export function makeMaterialProbe(blockName){
   '    }',
   '    let chosen = blocks.blockByName('+JSON.stringify(blockName)+')',
   '    blocks.fill(chosen, target, target, FillOperation.Keep)',
-  '    if (blocks.testForBlock(chosen,target)) player.say("PROBE MATCH: '+blockName+'")',
+  '    if (!blocks.testForBlock(AIR,target) && blocks.testForBlock(chosen,target)) player.say("PROBE MATCH: '+blockName+'")',
   '    else player.say("HOLD: unexpected block, restore copied world.")',
   '})'
  ].join('\n')+'\n';

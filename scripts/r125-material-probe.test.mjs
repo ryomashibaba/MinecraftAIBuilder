@@ -33,3 +33,16 @@ test('unknown block name produces no world write',()=>{
  assert.throws(()=>handlers.mabprobe(),/UNKNOWN/);
  assert.equal(writes,0);
 });
+
+test('candidate resolving to AIR must not produce false positive match',()=>{
+ const handlers={},said=[];
+ const player={position:()=>({x:0,y:0,z:0}),onChat:(n,f)=>handlers[n]=f,say:s=>said.push(s)};
+ const blocks={blockByName:()=> 'air',testForBlock:(b,p)=>b==='air'&&p.y===0,
+  fill:()=>{}};
+ vm.runInNewContext(makeMaterialProbe('oak_planks').code,{player,blocks,AIR:'air',
+  FillOperation:{Keep:0},pos:(x,y,z)=>({x,y,z}),
+  positions:{add:(a,b)=>({x:a.x+b.x,y:a.y+b.y,z:a.z+b.z})}});
+ handlers.mabprobe();
+ assert.equal(said.some(s=>s.includes('PROBE MATCH')),false);
+ assert(said.some(s=>s.includes('HOLD')));
+});
