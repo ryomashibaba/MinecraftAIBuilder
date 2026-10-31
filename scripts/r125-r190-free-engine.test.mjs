@@ -105,7 +105,8 @@ test('SYNTHETIC two model-chosen roof sections produce two independently audited
 test('duplicate, conflicting and unfit roof sections fail closed, with no model repair',()=>{
  const paletteData=JSON.parse(fs.readFileSync(palette,'utf8'));
  for(const [edit,reason] of [
-  [p=>p.roofFormIntents.push({...p.roofFormIntents[0]}),'DUPLICATE_ROOF_SPACE'],
+  [p=>p.roofFormIntents[1]={...p.roofFormIntents[0]},'DUPLICATE_ROOF_SPACE'],
+  [p=>p.roofFormIntents.push({...p.roofFormIntents[0]}),'ROOF_FORM_INTENTS'],
   [p=>p.roofFormIntent={...p.roofFormIntents[0]},'ROOF_FORM_INTENTS'],
   [p=>p.roofFormIntents[1].rise=9,'ROOF_FORM'],
   [p=>p.roofFormIntents[1].spaceId='missing-space','ROOF_SPACE']
