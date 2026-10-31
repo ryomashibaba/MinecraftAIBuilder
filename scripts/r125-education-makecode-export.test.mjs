@@ -44,7 +44,7 @@ test('same source/geometry has deterministic export and tampered source is rejec
  const a=exportB143EducationMakeCode({design:d,scene,legacyStoneFallback:true}),b=exportB143EducationMakeCode({design:d,scene,legacyStoneFallback:true});
  assert.equal(a.makecodeSourceSha256,b.makecodeSourceSha256);
  const bad=structuredClone(scene);bad.primitives[0][3]=99;
- assert.throws(()=>exportB143EducationMakeCode({design:d,scene,legacyStoneFallback:true:bad}),/SOURCE_GEOMETRY_SHA_MISMATCH/);
+ assert.throws(()=>exportB143EducationMakeCode({design:d,scene:bad,legacyStoneFallback:true}),/SOURCE_GEOMETRY_SHA_MISMATCH/);
  assert.throws(()=>exportB143EducationMakeCode({design:d,scene,legacyStoneFallback:true,originOffset:[0,0,0]}),/ORIGIN_OFFSET/);
 });
 test('grounding a raised source preserves its geometry while placing its lowest layer at ground level',()=>{
@@ -59,7 +59,7 @@ test('grounding a raised source preserves its geometry while placing its lowest 
  assert.equal(packet.geometrySha256,scene.geometrySha256);
 });
 test('a second chat cannot move the anchor or start a build during preflight',()=>{
- const code=exportB143EducationMakeCode({design:d,scene,legacyStoneFallback:true:compileDesign(d)}).code
+ const code=exportB143EducationMakeCode({design:d,scene:compileDesign(d),legacyStoneFallback:true}).code
   .replace(/: number\[\]\[\]|: number\[\]|: string\[\]|: number|: Position/g,'');
  const handlers={}, messages=[], fills=[];
  let playerX=0, attempted=false;
