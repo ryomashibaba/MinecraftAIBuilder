@@ -11,6 +11,9 @@ on:
       - 'evidence/r190aa/pilot-01/MODEL_RESPONSE_ORIGINAL.txt'
       - 'evidence/r190aa/pilot-01/AUDIT.json'
       - '.github/workflows/r190ac-offline-source-review.yml'
+      - 'scripts/r125-r190-free-engine.mjs'
+      - 'scripts/r125-r190-free-engine.test.mjs'
+      - 'scripts/r125-free-build.mjs'
 permissions:
   contents: read
 jobs:
@@ -25,3 +28,9 @@ jobs:
       - run: node --check scripts/r190ac-offline-source-review.test.mjs
       - run: node --test scripts/r190ac-offline-source-review.test.mjs
       - run: node scripts/r190ac-offline-source-review.mjs --help
+      - name: R125 legacy and opt-in R190 to Education strict offline integration
+        run: |
+          node --check scripts/r125-r190-free-engine.mjs
+          node --check scripts/r125-r190-free-engine.test.mjs
+          node --check scripts/r125-free-build.mjs
+          node --test scripts/r125-free-build.test.mjs scripts/r125-r190-free-engine.test.mjs
