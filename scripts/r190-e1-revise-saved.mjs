@@ -12,6 +12,7 @@ import {auditR190E1SavedTwoStage,locateLatestTwoStage} from './r190-e1-stage-a-a
 import {r190E1WindowSlotCandidates,diagnoseR190E1Plan} from './r190-e1-diagnose.mjs';
 import {requestLocalModel,parseStageA,selectWindow,originalSceneOccupancySha} from './r190-e1-two-stage.mjs';
 import {runR190FreeEngine,R190_E1_STUDY_BRIEFS,r190E1MassingSignature} from './r125-r190-free-engine.mjs';
+import {openE1ResultFolder} from './r190-e1-open-result-folder.mjs';
 
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const OUT=path.join(path.dirname(ROOT),'MinecraftAIBuilder-E1-Outputs');
@@ -186,6 +187,8 @@ if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.ur
  const args=opt.length===0?{}:opt.length===1?{savedRunDir:opt[0]}:null;
  if(!args){console.error('Usage: node scripts/r190-e1-revise-saved.mjs [previous E1-two-stage-folder]');process.exitCode=2;}
  else runR190E1ReviseSaved(args).then(r=>{
+  const opened=openE1ResultFolder(path.join(r.dir,'E1_REVISION_REPORT.json'));
+  if(opened.attempted)console.log('E1 result folder opening: '+opened.folder);
   if(r.status!=='THREE_SOURCE_READY_ART_HOLD')process.exitCode=2;
  }).catch(e=>{console.error(reason(e));process.exitCode=2;});
 }

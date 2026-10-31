@@ -12,6 +12,7 @@ import {preflightR125Ollama} from './r125-pilot.mjs';
 import {R190_SCHEMA,validateR190SemanticPlan} from '../source/ai/r190-semantic-massing.mjs';
 import {r190E1WindowSlotCandidates,diagnoseR190E1Plan} from './r190-e1-diagnose.mjs';
 import {runR190FreeEngine,R190_E1_STUDY_BRIEFS,r190E1MassingSignature} from './r125-r190-free-engine.mjs';
+import {openE1ResultFolder} from './r190-e1-open-result-folder.mjs';
 
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const OUTPUT_ROOT=path.join(path.dirname(ROOT),'MinecraftAIBuilder-E1-Outputs');
@@ -231,6 +232,8 @@ export async function runR190E1TwoStageStudy({
 
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){
  runR190E1TwoStageStudy().then(s=>{
+  const opened=openE1ResultFolder(path.join(s.dir,'E1_TWO_STAGE_REPORT.json'));
+  if(opened.attempted)console.log('E1 result folder opening: '+opened.folder);
   if(s.status!=='THREE_SOURCE_READY_ART_HOLD')process.exitCode=2;
  }).catch(e=>{console.error(errorString(e));process.exitCode=2;});
 }

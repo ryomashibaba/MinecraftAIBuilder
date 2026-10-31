@@ -20,6 +20,8 @@ on:
       - 'scripts/r190-e1-stage-a-audit.test.mjs'
       - 'scripts/r190-e1-revise-saved.mjs'
       - 'scripts/r190-e1-revise-saved.test.mjs'
+      - 'scripts/r190-e1-open-result-folder.mjs'
+      - 'scripts/r190-e1-open-result-folder.test.mjs'
       - 'RUN_R125_FREE_BUILD.cmd'
       - 'scripts/r125-free-build.mjs'
 permissions:
@@ -47,5 +49,7 @@ jobs:
           node --check scripts/r190-e1-stage-a-audit.test.mjs
           node --check scripts/r190-e1-revise-saved.mjs
           node --check scripts/r190-e1-revise-saved.test.mjs
+          node --check scripts/r190-e1-open-result-folder.mjs
+          node --check scripts/r190-e1-open-result-folder.test.mjs
           node --check scripts/r125-free-build.mjs
-          node --test scripts/r125-free-build.test.mjs scripts/r125-r190-free-engine.test.mjs scripts/r190-e1-two-stage.test.mjs scripts/r190-e1-stage-a-audit.test.mjs scripts/r190-e1-revise-saved.test.mjs
+          node --test scripts/r125-free-build.test.mjs scripts/r125-r190-free-engine.test.mjs scripts/r190-e1-two-stage.test.mjs scripts/r190-e1-stage-a-audit.test.mjs scripts/r190-e1-revise-saved.test.mjs scripts/r190-e1-open-result-folder.test.mjs

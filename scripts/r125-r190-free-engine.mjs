@@ -14,6 +14,7 @@ import {verifyCompiled} from '../source/ai/b143-building-dsl.mjs';
 import {exportB143EducationMakeCode} from '../source/ai/r125-education-makecode-export.mjs';
 import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
 import {fileURLToPath} from 'node:url';
+import {openE1ResultFolder} from './r190-e1-open-result-folder.mjs';
 
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const endpoint='http://127.0.0.1:11434/v1/chat/completions';
@@ -345,6 +346,12 @@ async function main(argv){
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){
  const study=process.argv.length===3&&process.argv[2]==='--study-three';
  const task=study?runR190E1ThreeUseStudy():main(process.argv.slice(2));
- task.then(r=>{if(study&&r.status!=='THREE_DISTINCT_SOURCE_MASSING_PROXIES_ART_HOLD')process.exitCode=2;})
+ task.then(r=>{
+  if(study){
+   const opened=openE1ResultFolder(path.join(r.dir,'E1_STUDY_REPORT.json'));
+   if(opened.attempted)console.log('E1 result folder opening: '+opened.folder);
+   if(r.status!=='THREE_DISTINCT_SOURCE_MASSING_PROXIES_ART_HOLD')process.exitCode=2;
+  }
+ })
   .catch(e=>{console.error(String(e?.message??e));process.exitCode=2;});
 }
