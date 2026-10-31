@@ -3,7 +3,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import {randomBytes} from 'node:crypto';
+import {randomBytes,createHash} from 'node:crypto';
 import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {createInterface} from 'node:readline/promises';
@@ -55,7 +55,7 @@ export async function runFreeBuild(opts,{child=spawnSync}={}){
  const reportFile=fs.existsSync(planReport)?planReport:reportPath;
  if(result.error||result.status!==0||!fs.existsSync(reportFile)){
   const status={status:'HOLD',reason:result.error?.message??('Model or exporter did not produce an approved code; exit='+result.status),
-   output:runDir,worldWrites:0,modelAttempts:opts.plan?0:1};
+   output:runDir,worldWrites:0,modelRequestsAllowed:opts.plan?0:1};
   fs.writeFileSync(path.join(runDir,'RESULT.json'),JSON.stringify(status,null,2)+'\n',{flag:'wx'});
   console.error('HOLD. Review '+path.join(runDir,'RUN_LOG.txt'));
   return status;
@@ -63,8 +63,10 @@ export async function runFreeBuild(opts,{child=spawnSync}={}){
  const report=JSON.parse(fs.readFileSync(reportFile,'utf8'));
  const ts=path.join(path.dirname(reportFile),'MAKECODE_EDUCATION.ts');
  const counts=report.plannedBlockCounts;
+ const actualCodeSha=fs.existsSync(ts)?createHash('sha256').update(fs.readFileSync(ts)).digest('hex'):null;
  if(!fs.existsSync(ts)||report.worldWrites!==0||report.programExecuted!==false||
   report.materialMode!=='STRICT_USER_ATTESTED'||!report.verifiedPaletteSha256||
+  actualCodeSha!==report.makecodeSourceSha256||
   !counts||Object.values(counts).reduce((a,b)=>a+b,0)!==report.plannedVoxelCount){
   const status={status:'HOLD_OFFLINE_REPORT',output:runDir,worldWrites:0};
   fs.writeFileSync(path.join(runDir,'RESULT.json'),JSON.stringify(status,null,2)+'\n',{flag:'wx'});
