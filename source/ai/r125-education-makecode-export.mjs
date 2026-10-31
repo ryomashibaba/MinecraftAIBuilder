@@ -45,16 +45,18 @@ export function compactB143Cuboids(scene,{maxCuboids=2500}={}){
  return cuboids;
 }
 
-export function exportB143EducationMakeCode({design,scene,originOffset=[8,0,8],provenance='UNVERIFIED_DESIGN'}={}){
+export function exportB143EducationMakeCode({design,scene,originOffset=[8,0,8],provenance='UNVERIFIED_DESIGN',groundLowestLayer=false}={}){
  if(!design||!scene||!verifyCompiled(design,scene))fail('SOURCE_GEOMETRY_SHA_MISMATCH');
  if(!['UNVERIFIED_DESIGN','SYNTHETIC_TEST_FIXTURE','LOCAL_MODEL_CAPTURE','USER_AUTHORED'].includes(provenance))
   fail('PROVENANCE');
  if(!Array.isArray(originOffset)||originOffset.length!==3||
   !originOffset.every((v,i)=>int(v,i===1?0:5,i===1?10:64)))fail('ORIGIN_OFFSET');
- const b=design.bounds;
+ if(typeof groundLowestLayer!=='boolean')fail('GROUND_OPTION');
+ const baseY=groundLowestLayer?Math.min(...scene.primitives.map(p=>p[1])):0;
+ const b={...design.bounds,height:design.bounds.height-baseY};
  if([b.width,b.height,b.depth].some(n=>!int(n,1,128))||
     b.width*b.height*b.depth>40000||scene.primitives.length>20000)fail('PILOT_SIZE');
- const cuboids=compactB143Cuboids(scene);
+ const cuboids=compactB143Cuboids(scene).map(([x,y,z,X,Y,Z,m])=>[x,y-baseY,z,X,Y-baseY,Z,m]);
  const lines=[
  '// Auto-generated B143 voxels. Not a live bridge. Test-world COPY ONLY.',
  '// In Education: press C -> Code Builder -> MakeCode JavaScript -> paste -> Run.',
@@ -134,6 +136,7 @@ export function exportB143EducationMakeCode({design,scene,originOffset=[8,0,8],p
   sourceSha256:scene.sourceSha256,geometrySha256:scene.geometrySha256,
   makecodeSourceSha256:sha(Buffer.from(code)),bounds:structuredClone(b),
   plannedVoxelCount:scene.primitives.length,plannedCuboids:cuboids.length,
+  sourceVerticalOffset:-baseY,
   materialMapping:MATERIAL_NAMES,materialWarning:'pilot maps all materials except glass to stone; exact palette not certified',
   actualEducationExecution:'NOT_TESTED',requiresUserPasteAndExplicitChat:true,
   backupVerifiedByProgram:false,worldIdentityVerifiedByProgram:false,
@@ -141,3 +144,4 @@ export function exportB143EducationMakeCode({design,scene,originOffset=[8,0,8],p
   BuildPlan:{operations:[]},gates:Array(9).fill('BLOCKED'),
   constructionApproved:false,art:'ART_HOLD',code};
 }
+
