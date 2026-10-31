@@ -14,7 +14,7 @@ function read(p,max=200000){
  return fs.readFileSync(p);
 }
 const J=o=>JSON.stringify(o,null,2)+'\n';
-export function offlineEducationExport({designFile,compactFile,briefFile,out,provenance='UNVERIFIED_DESIGN'}={}){
+export function offlineEducationExport({designFile,compactFile,briefFile,out,provenance='UNVERIFIED_DESIGN',paletteFile=null}={}){
  if(typeof out!=='string'||!out||fs.existsSync(out)||!fs.existsSync(path.dirname(path.resolve(out))))
   reject('FRESH_OUTPUT');
  if(Boolean(designFile)===Boolean(compactFile))reject('ONE_INPUT_MODE');
@@ -38,7 +38,8 @@ export function offlineEducationExport({designFile,compactFile,briefFile,out,pro
   design=derived.derived.proposal.design;
   scene=derived.derived.compiled;
  }
- const exported=exportB143EducationMakeCode({design,scene,provenance});
+ const verifiedPalette=paletteFile?JSON.parse(read(path.resolve(paletteFile),20000).toString('utf8')):null;
+ const exported=exportB143EducationMakeCode({design,scene,provenance,verifiedPalette});
  fs.mkdirSync(out);
  fs.writeFileSync(path.join(out,'MAKECODE_EDUCATION.ts'),exported.code,{flag:'wx'});
  const {code,...metadata}=exported;
@@ -62,12 +63,12 @@ if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.ur
  try{
   const args=process.argv.slice(2),opts={};
   for(let i=0;i<args.length;i+=2){
-   if(!['--design','--compact','--brief','--out','--provenance'].includes(args[i])||
+   if(!['--design','--compact','--brief','--out','--provenance','--palette'].includes(args[i])||
     !args[i+1]||Object.hasOwn(opts,args[i]))reject('ARGUMENTS');
    opts[args[i]]=args[i+1];
   }
   const result=offlineEducationExport({designFile:opts['--design'],compactFile:opts['--compact'],
-   briefFile:opts['--brief'],out:opts['--out'],provenance:opts['--provenance']});
+   briefFile:opts['--brief'],out:opts['--out'],provenance:opts['--provenance'],paletteFile:opts['--palette']});
   console.log(J(result));if(result.status==='HOLD')process.exitCode=2;
  }catch(e){console.error(e.message);process.exitCode=1;}
 }

@@ -22,7 +22,7 @@ export function makePilotDemo({out}={}){
  if(typeof out!=='string'||!out||fs.existsSync(out)||!fs.existsSync(path.dirname(path.resolve(out))))
   throw Error('R125_PILOT_FRESH_OUTPUT_REQUIRED');
  const scene=compileDesign(SIMPLE_HOUSE);
- const packet=exportB143EducationMakeCode({design:SIMPLE_HOUSE,scene,provenance:'SYNTHETIC_TEST_FIXTURE'});
+ const packet=exportB143EducationMakeCode({design:SIMPLE_HOUSE,scene,provenance:'SYNTHETIC_TEST_FIXTURE',legacyStoneFallback:true});
  const {code,...report}=packet;
  fs.mkdirSync(out);
  fs.writeFileSync(path.join(out,'MAKECODE_EDUCATION.ts'),code,{flag:'wx'});

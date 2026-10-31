@@ -1,12 +1,50 @@
 /** Pure B143 -> Minecraft Education MakeCode pilot exporter. Never opens a world. */
 import {createHash} from 'node:crypto';
-import {verifyCompiled} from './b143-building-dsl.mjs';
+import {verifyCompiled,MATERIALS} from './b143-building-dsl.mjs';
 const sha=b=>createHash('sha256').update(b).digest('hex');
 const fail=x=>{throw Error('R125_EDUCATION_EXPORT_'+x)};
 const key=(x,y,z)=>x+','+y+','+z;
-// Education rejected `planks` during startup, even when the material was unused.
-// Keep the pilot palette conservative until additional names are verified in-game.
-const MATERIAL_NAMES=['stone','stone','stone','glass','stone','stone','stone'];
+// Only stone/glass were observed in the protected Education v26.33 pilot.
+// A new block name must have independent user-attested in-game evidence.
+const KNOWN=Object.freeze({stone:'stone',glass:'glass'});
+const validName=s=>typeof s==='string'&&/^[a-z][a-z0-9_]{1,63}$/.test(s);
+function resolvePalette(scene,profile,legacy){
+ if(typeof legacy!=='boolean'||(legacy&&profile!==null))fail('PALETTE_MODE');
+ let blocks={};
+ if(profile!==null){
+  if(!profile||typeof profile!=='object'||Array.isArray(profile)||
+   Object.keys(profile).sort().join(',')!=='blocks,edition,schema,version'||
+   profile.schema!=='r125-education-user-verified-palette-v1'||
+   profile.edition!=='Minecraft Education'||profile.version!=='26.33'||
+   !profile.blocks||typeof profile.blocks!=='object'||Array.isArray(profile.blocks))
+   fail('PALETTE_PROFILE');
+  blocks=profile.blocks;
+  for(const [material,rec] of Object.entries(blocks)){
+   if(!MATERIALS.includes(material)||Object.hasOwn(KNOWN,material)||
+    !rec||typeof rec!=='object'||Array.isArray(rec)||
+    Object.keys(rec).sort().join(',')!=='blockName,evidence'||
+    !validName(rec.blockName)||typeof rec.evidence!=='string'||
+    rec.evidence.trim().length<8||rec.evidence.length>300)
+    fail('PALETTE_ENTRY');
+  }
+ }
+ const materialCounts=Object.fromEntries(MATERIALS.map(n=>[n,0]));
+ for(const row of scene.primitives)materialCounts[MATERIALS[row[3]]]++;
+ const materialMapping=Array(MATERIALS.length).fill(null);
+ const blockCounts={},used=[];
+ for(let i=0;i<MATERIALS.length;i++){
+  const material=MATERIALS[i],count=materialCounts[material];if(!count)continue;
+  const blockName=KNOWN[material]??blocks[material]?.blockName??(legacy?'stone':null);
+  if(!blockName)fail('UNVERIFIED_MATERIAL_'+material.toUpperCase());
+  if(!validName(blockName))fail('BAD_BLOCK_NAME');
+  if(!legacy&&materialMapping.includes(blockName))fail('MATERIAL_COLLISION');
+  materialMapping[i]=blockName;
+  blockCounts[blockName]=(blockCounts[blockName]??0)+count;
+  used.push({id:i,material,blockName,plannedCount:count});
+ }
+ return {materialCounts,materialMapping,blockCounts,used,
+  profileSha256:profile?sha(Buffer.from(JSON.stringify(profile))):null};
+}
 const int=(x,a,b)=>Number.isSafeInteger(x)&&x>=a&&x<=b;
 
 export function compactB143Cuboids(scene,{maxCuboids=2500}={}){
@@ -45,7 +83,7 @@ export function compactB143Cuboids(scene,{maxCuboids=2500}={}){
  return cuboids;
 }
 
-export function exportB143EducationMakeCode({design,scene,originOffset=[8,0,8],provenance='UNVERIFIED_DESIGN',groundLowestLayer=false}={}){
+export function exportB143EducationMakeCode({design,scene,originOffset=[8,0,8],provenance='UNVERIFIED_DESIGN',groundLowestLayer=false,verifiedPalette=null,legacyStoneFallback=false}={}){
  if(!design||!scene||!verifyCompiled(design,scene))fail('SOURCE_GEOMETRY_SHA_MISMATCH');
  if(!['UNVERIFIED_DESIGN','SYNTHETIC_TEST_FIXTURE','LOCAL_MODEL_CAPTURE','USER_AUTHORED'].includes(provenance))
   fail('PROVENANCE');
@@ -57,6 +95,8 @@ export function exportB143EducationMakeCode({design,scene,originOffset=[8,0,8],p
  if([b.width,b.height,b.depth].some(n=>!int(n,1,128))||
     b.width*b.height*b.depth>40000||scene.primitives.length>20000)fail('PILOT_SIZE');
  const cuboids=compactB143Cuboids(scene).map(([x,y,z,X,Y,Z,m])=>[x,y-baseY,z,X,Y-baseY,Z,m]);
+ const palette=resolvePalette(scene,verifiedPalette,legacyStoneFallback);
+ const expectedCounts=MATERIALS.map(n=>palette.materialCounts[n]);
  const lines=[
  '// Auto-generated B143 voxels. Not a live bridge. Test-world COPY ONLY.',
  '// In Education: press C -> Code Builder -> MakeCode JavaScript -> paste -> Run.',
@@ -67,11 +107,9 @@ export function exportB143EducationMakeCode({design,scene,originOffset=[8,0,8],p
  'let mabBuilt = false',
  'let mabBusy = false',
  'let mabRows: number[][] = '+JSON.stringify(cuboids),
- 'let mabMaterialNames: string[] = '+JSON.stringify(MATERIAL_NAMES),
  'let mabMaterials: number[] = []',
- 'for (let i = 0; i < mabMaterialNames.length; i++) {',
- '    mabMaterials.push(blocks.blockByName(mabMaterialNames[i]))',
- '}',
+ 'let mabExpectedCounts: number[] = '+JSON.stringify(expectedCounts),
+ ...palette.used.map(m=>'mabMaterials['+m.id+'] = blocks.blockByName('+JSON.stringify(m.blockName)+')'),
  'function mabAt(x: number, y: number, z: number): Position {',
  '    return positions.add(mabAnchor, pos('+originOffset[0]+'+x,'+originOffset[1]+'+y,'+originOffset[2]+'+z))',
  '}',
@@ -114,19 +152,23 @@ export function exportB143EducationMakeCode({design,scene,originOffset=[8,0,8],p
  '    if (mabBusy || !mabBuilt) { player.say("HOLD: busy or no build attempted."); return }',
  '    mabBusy = true',
  '    let mismatch = 0',
+ '    let matchedCounts: number[] = [0,0,0,0,0,0,0]',
  '    for (let i = 0; i < mabRows.length; i++) {',
  '        let r = mabRows[i]',
  '        for (let y = r[1]; y <= r[4]; y++) {',
  '            for (let z = r[2]; z <= r[5]; z++) {',
  '                for (let x = r[0]; x <= r[3]; x++) {',
- '                    if (!blocks.testForBlock(mabMaterials[r[6]], mabAt(x,y,z))) mismatch++',
+ '                    if (blocks.testForBlock(mabMaterials[r[6]], mabAt(x,y,z))) matchedCounts[r[6]]++',
+ '                    else mismatch++',
  '                }',
  '            }',
  '        }',
  '    }',
  '    mabBusy = false',
- '    if (mismatch == 0) player.say("Expected blocks match. Inspect entrances/stairs yourself.")',
- '    else player.say("HOLD: " + mismatch + " mismatches. Restore world backup.")',
+ '    let countMismatch = 0',
+ '    for (let m = 0; m < 7; m++) if (matchedCounts[m] != mabExpectedCounts[m]) countMismatch++',
+ '    if (mismatch == 0 && countMismatch == 0) player.say("Positions and material counts match. Inspect air/entrances/rooms.")',
+ '    else player.say("HOLD: " + mismatch + " positions, " + countMismatch + " material counts mismatch. Restore world backup.")',
  '})'
  ];
  const code=lines.join('\n')+'\n';
@@ -137,7 +179,13 @@ export function exportB143EducationMakeCode({design,scene,originOffset=[8,0,8],p
   makecodeSourceSha256:sha(Buffer.from(code)),bounds:structuredClone(b),
   plannedVoxelCount:scene.primitives.length,plannedCuboids:cuboids.length,
   sourceVerticalOffset:-baseY,
-  materialMapping:MATERIAL_NAMES,materialWarning:'pilot maps all materials except glass to stone; exact palette not certified',
+  materialMapping:palette.materialMapping,plannedMaterialCounts:palette.materialCounts,
+  plannedBlockCounts:palette.blockCounts,usedMaterials:palette.used,
+  verifiedPaletteSha256:palette.profileSha256,
+  materialMode:legacyStoneFallback?'EXPLICIT_LEGACY_STONE_FALLBACK':'STRICT_USER_ATTESTED',
+  materialWarning:legacyStoneFallback?
+   'EXPLICIT LEGACY ONLY: materials collapse to stone. Not a faithful multi-material build.':
+   'Extra materials are user-attested, not software-certified in game',
   actualEducationExecution:'NOT_TESTED',requiresUserPasteAndExplicitChat:true,
   backupVerifiedByProgram:false,worldIdentityVerifiedByProgram:false,
   worldContacts:0,worldWrites:0,programExecuted:false,readiness:'NOT_PREPARED',
