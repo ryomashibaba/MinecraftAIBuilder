@@ -13,6 +13,10 @@ on:
       - '.github/workflows/r190ac-offline-source-review.yml'
       - 'scripts/r125-r190-free-engine.mjs'
       - 'scripts/r125-r190-free-engine.test.mjs'
+      - 'scripts/r190-e1-diagnose.mjs'
+      - 'scripts/r190-e1-two-stage.mjs'
+      - 'scripts/r190-e1-two-stage.test.mjs'
+      - 'RUN_R125_FREE_BUILD.cmd'
       - 'scripts/r125-free-build.mjs'
 permissions:
   contents: read
@@ -32,5 +36,8 @@ jobs:
         run: |
           node --check scripts/r125-r190-free-engine.mjs
           node --check scripts/r125-r190-free-engine.test.mjs
+          node --check scripts/r190-e1-diagnose.mjs
+          node --check scripts/r190-e1-two-stage.mjs
+          node --check scripts/r190-e1-two-stage.test.mjs
           node --check scripts/r125-free-build.mjs
-          node --test scripts/r125-free-build.test.mjs scripts/r125-r190-free-engine.test.mjs
+          node --test scripts/r125-free-build.test.mjs scripts/r125-r190-free-engine.test.mjs scripts/r190-e1-two-stage.test.mjs
