@@ -1,3 +1,15 @@
+## S0→S1：R190汎用マス構成の既存R125自由施工入口への接続（2026-10-31 JST）
+
+単純な矩形二分割を繰り返すR125の主形状表現を拡張するため、既存R190の意味空間生成器 `r190-semantic-massing.mjs` を**既存自由建築入口のオプトインモード**として接続した。独立コード `scripts/r125-r190-free-engine.mjs` は、`node scripts/r125-free-build.mjs --engine r190 --prompt "日本語の自由建築依頼"` または保存済みR190設計の `--engine r190 --plan <ファイル>` で選択できる。既存`r125`モードは既定として保護し、古いQwen原本・B143凍結原本は変えない。
+
+R190にはモデル指定の複数用途空間、異なる寸法・高さ、接続する実体積、明示的窓、任意の屋根断面等を表す能力があり、作者の意図をホストが用途固定テンプレートに変換しない。B143の実ボクセル・ソース経路監査・既存Education exporter・実機検証済み素材パレットを共用。未対応素材/モデル指定窓なし/動線不成立/上限超過は**HOLD**、石への暗黙の代用はない。新モデルリクエスト全文、原応答、SHA、ソース、MakeCode、3Dレビューを別々に保存。新たなMinecraftへの自動書込なし、旧`mabbuild/mabverify`の手動・試験ワールド安全契約を維持。
+
+実装コミットには独立合成テストと、既存`r190ac-offline-source-review.yml`へ追加したR125/R190回帰が含まれる。[CI対象Run #41186896014](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41186896014) は本記録時点で**queued／結果未確認**。**モデル実Qwen/Gemma新規POST0、自由建築の実機施工0、C美術NOT_REVIEWED、D実歩行NOT_TESTED、Eモデル汎用性NOT_TESTED**。古いR190合成テストから本物のモデル成功を主張しない。
+
+**次**：新CI結果を見て必要なら修正 → Qwen3:14Bで異なる3用途（優先1件はモダン建築）を1回ずつ実推論して元回答を保護 → 実3Dの主形状/入口/室内経路を比較 → 採用候補1件を新規バックアップ済み試験世界へ施工・美術/用途を人間評価。数値TECH PASSをART・実Minecraft PASSに昇格させない。
+
+---
+
 ## R190-CD 初回CI完了・BO/BN接続まで実装（2026-10-31 JST）
 
 初回[Actions #41078728011](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41078728011)はWindows／Ubuntu**両SUCCESS**（Node合成6/6、CC凍結2案真正voxelを再生成して負例品質判定、Python独立再集計PASS）。CC A68,921/B81,204ボクセルは不採用のまま、外部入口が未指定、保守的経路での到達認定0、CB旧作者ルート84上昇段が保守的な上下移動基準と不一致、天空レストラン床+空気8.9%。**CDの技術成功は「失敗作を勝手に成功扱いせず見抜く」こと。美術・用途・実MC歩行をPASSにしない**。
