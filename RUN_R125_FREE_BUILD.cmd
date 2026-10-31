@@ -10,6 +10,10 @@ if errorlevel 1 (
 )
 echo MinecraftAIBuilder R125 - Japanese local LLM to Education MakeCode
 echo This tool never edits a Minecraft world.
+if /i "%~1"=="study-art-revise" (
+  echo E1: SHA-verified correction of the latest failed research-lab ART proposal
+  node scripts\r190-e1-art-candidate.mjs --revise-latest
+) else (
 if /i "%~1"=="study-art" (
   echo E1: SHA-locked research-lab art revision and original-vs-candidate B143 comparison
   node scripts\r190-e1-art-candidate.mjs
@@ -24,6 +28,7 @@ if /i "%~1"=="study-two-stage" (
   ) else (
     node scripts\r125-free-build.mjs
   )
+)
 )
 )
 set "RESULT=%ERRORLEVEL%"
