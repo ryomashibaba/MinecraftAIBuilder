@@ -8,7 +8,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
-import {validR190Purpose} from '../source/ai/r190-semantic-massing.mjs';
+import {validR190Purpose,validateR190SemanticPlan,layoutR190SemanticPlan,r190GlazingCells} from '../source/ai/r190-semantic-massing.mjs';
 
 const idOk=s=>typeof s==='string'&&/^[a-z][a-z0-9-]{2,39}$/.test(s);
 const textOk=(s,n)=>typeof s==='string'&&s.length>=3&&s.length<=n&&
@@ -83,6 +83,27 @@ export function diagnoseR190E1Plan(plan){
      'faceted formIntent and roofForm cannot be assigned to the same room');
   }
  }
+ // Full input window bounds: expose the constraints rejected under
+ // R190_SEMANTIC_GLAZING_OUT_OF_WALL without mutating any model fields.
+ for(const [i,g] of (Array.isArray(plan.glazedOpenings)?plan.glazedOpenings:[]).entries()){
+  if(!g||typeof g!=='object')continue;
+  const r=plan.spaces.find(s=>s?.id===g.spaceId);
+  if(!r||!faces.includes(g.face))continue;
+  const span=['north','south'].includes(g.face)?r.width:r.depth;
+  const widthGood=int(g.width,2,6),heightGood=int(g.height,2,4);
+  if(!widthGood||!heightGood||!Number.isSafeInteger(g.offset)||
+    !Number.isSafeInteger(g.baseY))continue;
+  if(!(g.offset>=2&&g.offset+g.width<=span-2))
+   issue(issues,'glazedOpenings['+i+']','GLAZING_OUT_OF_WALL_HORIZONTAL',
+    {spaceId:g.spaceId,face:g.face,wallSpan:span,offset:g.offset,
+     width:g.width,lastColumn:g.offset+g.width-1},
+    {minOffset:2,maxOffset:span-2-g.width});
+  if(!(g.baseY>=5&&g.baseY+g.height<=r.height-1))
+   issue(issues,'glazedOpenings['+i+']','GLAZING_OUT_OF_WALL_VERTICAL',
+    {spaceId:g.spaceId,roomHeight:r.height,baseY:g.baseY,height:g.height,
+     upperExclusive:g.baseY+g.height},
+    {minBaseY:5,maxBaseY:r.height-1-g.height});
+ }
  const f=plan.entranceFace??'south';
  const entry=plan.spaces.find(s=>s?.id===plan.entrySpaceId);
  for(const [i,g] of (Array.isArray(plan.glazedOpenings)?plan.glazedOpenings:[]).entries()){
@@ -97,8 +118,86 @@ export function diagnoseR190E1Plan(plan){
     {spaceId:g.spaceId,face:g.face,window:[g.offset,g.offset+g.width-1],door:[offset,offset+1],baseY:g.baseY},
     'window must not overlap the entry doorway interval on the entry face at baseY=5');
  }
+ // Only geometrically valid original plans can be laid out. A successful
+ // layout is read-only and contains the authentic deterministic room positions.
+ // No model retry, host-side selection or world contact.
+ try{
+  validateR190SemanticPlan(plan);
+  const layout=layoutR190SemanticPlan(plan);
+  for(const [i,g] of (Array.isArray(plan.glazedOpenings)?plan.glazedOpenings:[]).entries()){
+   const room=layout.spaces.find(s=>s.id===g.spaceId);
+   if(!room)continue;
+   const cells=r190GlazingCells(room,g);
+   const conflicts=new Map();
+   for(const cell of cells){
+    const externalX=cell.x+cell.dx,externalZ=cell.z+cell.dz;
+    for(const other of layout.spaces){
+     if(other.id===g.spaceId)continue;
+     if(externalX>=other.x&&externalX<other.x+other.w&&
+       externalZ>=other.z&&externalZ<other.z+other.d){
+      if(!conflicts.has(other.id))
+       conflicts.set(other.id,{blockingRoomId:other.id,
+        blockingRoomBounds:{x:other.x,z:other.z,width:other.w,depth:other.d},
+        firstBlockedOutsideCell:{x:externalX,z:externalZ}});
+     }
+    }
+   }
+   if(conflicts.size)issue(issues,'glazedOpenings['+i+']','GLAZING_NOT_EXTERIOR',
+    {window:{spaceId:g.spaceId,face:g.face,offset:g.offset,width:g.width},
+     blockers:[...conflicts.values()]},
+    'window must face exterior air beyond the authored room layout');
+  }
+ }catch{
+  // Previously reported invalid input or no feasible placement: no
+  // speculative exterior geometry is claimed.
+ }
  return issues;
 }
+
+/** Read-only geometric choices; a model must independently select a slot.
+ * Slots are spatially screened, NOT a promise of a successful B143 build.
+ * This is a future two-stage authoring primitive, not auto-repair.
+ */
+export function r190E1WindowSlotCandidates(plan,{maxSlots=120}={}){
+ const copy=structuredClone(plan);
+ delete copy.glazedOpenings;
+ // fail closed on invalid authored geometry; do not adjust its walls or roofs.
+ validateR190SemanticPlan(copy);
+ const layout=layoutR190SemanticPlan(copy);
+ const slots=[];
+ for(const s of copy.spaces){
+  const room=layout.spaces.find(r=>r.id===s.id);
+  if(!room||s.spatialRole==='open-court'||copy.formIntent?.spaceId===s.id||s.height<8)
+   continue;
+  for(const face of faces){
+   // E1 window study scope: reserve the model-chosen entrance face.
+   if(s.id===copy.entrySpaceId&&face===(copy.entranceFace??'south'))continue;
+   const span=['north','south'].includes(face)?s.width:s.depth;
+   for(const width of [2,3,4]){
+    for(let offset=2;offset+width<=span-2;offset++){
+     const slot={spaceId:s.id,face,offset,baseY:5,width,height:2};
+     const cells=r190GlazingCells(room,slot);
+     if(cells.some(c=>layout.spaces.some(other=>other.id!==s.id&&
+       c.x+c.dx>=other.x&&c.x+c.dx<other.x+other.w&&
+       c.z+c.dz>=other.z&&c.z+c.dz<other.z+other.d)))continue;
+     slots.push({slotId:'win-'+String(slots.length+1).padStart(4,'0'),
+      ...slot});
+    }
+   }
+  }
+ }
+ const all=slots.length;
+ // Deterministic sampling across the full space of eligible real faces,
+ // rather than proposing a single default template window.
+ const selected=all>maxSlots?
+  Array.from({length:maxSlots},(_,i)=>slots[Math.floor(i*(all-1)/(maxSlots-1))]):
+  slots;
+ return {schema:'r190-e1-read-only-window-catalog-v1',
+  authorship:'MODEL_MUST_SELECT_SLOTS',readOnly:true,modelRequests:0,
+  worldWrites:0,totalPossibleSlots:all,slots:selected,
+  limitNote:all>maxSlots?'Representative deterministic sample; not exhaustive':null};
+}
+
 export function diagnoseR190E1SavedDirectory(directory){
  if(typeof directory!=='string'||!path.isAbsolute(directory))throw Error('E1_DIAG_ABSOLUTE_DIRECTORY_REQUIRED');
  const summaryPath=path.join(directory,'E1_STUDY_REPORT.json');

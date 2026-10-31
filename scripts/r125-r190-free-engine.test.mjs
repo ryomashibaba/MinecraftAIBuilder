@@ -10,7 +10,7 @@ import {compileR190FreePlan,runR190FreeEngine,runR190E1ThreeUseStudy,R190_E1_STU
 import {parseFreeBuildArgs,runFreeBuild} from './r125-free-build.mjs';
 import {R190_STATIC_SYNTHETIC_CASES} from './r190-semantic-fixtures.mjs';
 import {validR190Purpose} from '../source/ai/r190-semantic-massing.mjs';
-import {diagnoseR190E1Plan,diagnoseR190E1SavedDirectory} from './r190-e1-diagnose.mjs';
+import {diagnoseR190E1Plan,diagnoseR190E1SavedDirectory,r190E1WindowSlotCandidates} from './r190-e1-diagnose.mjs';
 
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const palette=path.join(ROOT,'configs','r125-education-verified-palette-v26.33.json');
@@ -309,4 +309,26 @@ test('E1 window-safety instruction is study-only, never edits model output or ge
  assert.match(R190_E1_STUDY_WINDOW_SAFETY,/not physically shared/);
  assert.match(R190_E1_STUDY_WINDOW_SAFETY,/same room as formIntent/);
  assert.doesNotMatch(R190_FREE_SYSTEM_PROMPT,/E1 architecture experiment/);
+});
+
+test('E1 geometry diagnoses independent horizontal/vertical window bounds',()=>{
+ const plan=synthetic();
+ plan.glazedOpenings=[{spaceId:plan.entrySpaceId,face:'north',offset:plan.spaces[0].width-3,
+  baseY:plan.spaces[0].height-2,width:4,height:3}];
+ const raw=JSON.stringify(plan),d=diagnoseR190E1Plan(plan);
+ assert(d.some(x=>x.rule==='GLAZING_OUT_OF_WALL_HORIZONTAL'&&x.actual.spaceId===plan.entrySpaceId));
+ assert(d.some(x=>x.rule==='GLAZING_OUT_OF_WALL_VERTICAL'&&x.actual.upperExclusive>plan.spaces[0].height-1));
+ assert.equal(JSON.stringify(plan),raw);
+});
+
+test('E1 window catalog is read-only and excludes entry facade & shared-room air',()=>{
+ const plan=synthetic();delete plan.glazedOpenings;
+ const raw=JSON.stringify(plan);
+ const cat=r190E1WindowSlotCandidates(plan,{maxSlots:120});
+ assert.equal(cat.worldWrites,0);
+ assert.equal(cat.modelRequests,0);
+ assert(cat.totalPossibleSlots>0);
+ assert(cat.slots.every(s=>s.spaceId!==plan.entrySpaceId||s.face!=='south'));
+ assert(cat.slots.every(s=>s.offset>=2));
+ assert.equal(JSON.stringify(plan),raw);
 });
