@@ -121,3 +121,56 @@ test('Model setup failure cannot be reported as a successful real model call',as
   assert(!fs.existsSync(path.join(r.dir,'QWEN_E2_ORIGINAL.txt')));
  }finally{fs.rmSync(root,{force:true,recursive:true});}
 });
+
+test('Single E2 handoff reproduces original and SHA without model calls or Minecraft writes',async()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'e2-chat-handoff-'));
+ try{
+  const original=JSON.stringify(e2SyntheticResearchFacility());
+  const r=await runE2QwenStudy({outRoot:root},{
+   request:async({onAttempt,onRaw})=>{onAttempt();onRaw(original,{finishReason:'stop'});return {raw:original};}
+  });
+  const h=JSON.parse(fs.readFileSync(path.join(r.dir,'E2_CHAT_HANDOFF.json'),'utf8'));
+  assert.equal(h.schema,'minecraftaibuilder-e2-chat-handoff-v1');
+  assert.equal(h.originalModelText,original);
+  assert.equal(h.originalModelSha256,sha(original));
+  assert.equal(h.originalVerified,true);
+  assert.equal(h.originalStillSavedSeparately,true);
+  assert.equal(h.report.status,'SOURCE_READY_ART_HOLD');
+  assert.equal(h.report.modelRequests,0);
+  assert.equal(h.noNewModelCallsForHandoff,true);
+  assert.equal(h.noMinecraftIO,true);
+  assert.equal(fs.readFileSync(path.join(r.dir,'QWEN_E2_ORIGINAL.txt'),'utf8'),original);
+ }finally{fs.rmSync(root,{recursive:true,force:true});}
+});
+test('Malformed model reply remains exact and independently diagnosed in handoff',async()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'e2-chat-partial-'));
+ const raw='{"schema":"minecraftaibuilder-e2-authored-architecture-v1","sourceDesign":';
+ let count=0;
+ try{
+  const r=await runE2QwenStudy({outRoot:root},{
+   request:async({onAttempt,onRaw})=>{onAttempt();count++;onRaw(raw,{finishReason:'stop'});return {raw};}
+  });
+  const h=JSON.parse(fs.readFileSync(path.join(r.dir,'E2_CHAT_HANDOFF.json'),'utf8'));
+  assert.equal(count,1);
+  assert.equal(h.originalModelText,raw);
+  assert.equal(h.originalVerified,true);
+  assert.equal(h.report.status,'SOURCE_HOLD');
+  assert(h.report.validationIssues.some(x=>x.code==='JSON_PARSE_HOLD'));
+  assert.equal(h.report.automaticRetries,0);
+  assert.equal(h.report.worldWrites,0);
+ }finally{fs.rmSync(root,{recursive:true,force:true});}
+});
+test('Preflight failure creates handoff without inventing model text',async()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'e2-chat-no-model-'));
+ try{
+  const r=await runE2QwenStudy({outRoot:root},{
+   request:async()=>{throw Error('E1_TWO_STAGE_LOCAL_MODEL_NOT_LISTED');}
+  });
+  const h=JSON.parse(fs.readFileSync(path.join(r.dir,'E2_CHAT_HANDOFF.json'),'utf8'));
+  assert.equal(h.originalPresent,false);
+  assert.equal(h.originalModelText,null);
+  assert.equal(h.originalVerified,false);
+  assert.equal(h.report.modelRequests,0);
+  assert.equal(h.report.worldWrites,0);
+ }finally{fs.rmSync(root,{recursive:true,force:true});}
+});

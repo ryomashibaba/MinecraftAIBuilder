@@ -130,8 +130,28 @@ export async function runE2QwenStudy({
    report.glazedOpenings=built.glazedOpenings;
    report.viewerRelativePath=path.relative(directory,path.join(built.dir,'index.html'));
   }
- }catch(e){report.reason=error(e);}
+ }catch(e){
+  report.reason=error(e);
+  if(rawCaptured!==null&&report.validationIssues===undefined){
+   try{report.validationIssues=diagnoseE2AuthoredPlan(JSON.parse(rawCaptured)).issues;}
+   catch(d){report.validationIssues=[{code:'JSON_PARSE_HOLD',path:'root',
+    actual:error(d).slice(0,180),expected:'one complete JSON object'}];}
+  }
+ }
  save(directory,'E2_QWEN_REPORT.json',report);
+ // Single upload artifact, preserving the original raw response byte-for-byte
+ // as a JSON string; it does not replace or modify QWEN_E2_ORIGINAL.txt.
+ const handoff={
+  schema:'minecraftaibuilder-e2-chat-handoff-v1',
+  report,originalModelText:rawCaptured,
+  originalModelSha256:rawCaptured===null?null:sha(rawCaptured),
+  originalPresent:rawCaptured!==null,
+  originalVerified:rawCaptured!==null&&sha(rawCaptured)===report.modelOriginalSha256,
+  originalStillSavedSeparately:rawCaptured!==null&&fs.existsSync(rawFile),
+  noNewModelCallsForHandoff:true,noMinecraftIO:true
+ };
+ save(directory,'E2_CHAT_HANDOFF.json',handoff);
+ console.log('Upload this one result file: '+path.join(directory,'E2_CHAT_HANDOFF.json'));
  console.log('E2 Qwen study saved: '+path.join(directory,'E2_QWEN_REPORT.json'));
  console.log('E2 status: '+report.status+'; source: '+(report.sourceReady?'READY':'HOLD')+
   '; real model requests: '+report.modelRequests);
