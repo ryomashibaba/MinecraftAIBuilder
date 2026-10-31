@@ -8,6 +8,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
+import {validR190Purpose} from '../source/ai/r190-semantic-massing.mjs';
 
 const idOk=s=>typeof s==='string'&&/^[a-z][a-z0-9-]{2,39}$/.test(s);
 const textOk=(s,n)=>typeof s==='string'&&s.length>=3&&s.length<=n&&
@@ -44,7 +45,7 @@ export function diagnoseR190E1Plan(plan){
   if(!idOk(s.id))issue(issues,at+'.id','SPACE_ID',s.id,'kebab-case: lowercase letters, digits, hyphens, 3..40');
   if(idSet.has(s.id))issue(issues,at+'.id','SPACE_DUPLICATE_ID',s.id,'unique ID');
   idSet.add(s.id);
-  if(!textOk(s.purpose,150))issue(issues,at+'.purpose','SPACE_PURPOSE',s.purpose,'3..150 printable chars');
+  if(!validR190Purpose(s.purpose))issue(issues,at+'.purpose','SPACE_PURPOSE',s.purpose,'3..150 printable chars, or exactly two Japanese-script chars');
   for(const k of ['width','depth'])if(!int(s[k],7,22))
    issue(issues,at+'.'+k,'SPACE_DIMENSION',s[k],'integer 7..22');
   if(!validSite)issue(issues,at+'.height','SITE_HEIGHT_UNVERIFIABLE',s.height,'valid site.height needed');

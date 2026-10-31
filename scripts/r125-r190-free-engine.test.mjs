@@ -9,6 +9,7 @@ import {compileR190FreePlan,runR190FreeEngine,runR190E1ThreeUseStudy,R190_E1_STU
  from './r125-r190-free-engine.mjs';
 import {parseFreeBuildArgs,runFreeBuild} from './r125-free-build.mjs';
 import {R190_STATIC_SYNTHETIC_CASES} from './r190-semantic-fixtures.mjs';
+import {validR190Purpose} from '../source/ai/r190-semantic-massing.mjs';
 import {diagnoseR190E1Plan,diagnoseR190E1SavedDirectory} from './r190-e1-diagnose.mjs';
 
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
@@ -243,4 +244,45 @@ test('E1 report reader checks original SHA and writes no files or repaired plan'
   assert.deepEqual(fs.readdirSync(modelDir),before);
   assert.equal(fs.readFileSync(path.join(modelDir,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8'),raw);
  }finally{fs.rmSync(temp,{force:true,recursive:true});}
+});
+
+test('Natural two-character Japanese room purposes accepted, short ASCII or malformed rejected',()=>{
+ const paletteData=JSON.parse(fs.readFileSync(palette,'utf8'));
+ for(const purpose of ['居間','物置','受付']){
+  const p=synthetic();p.spaces[0].purpose=purpose;
+  assert.equal(validR190Purpose(purpose),true);
+  assert.doesNotThrow(()=>compileR190FreePlan(p,{palette:paletteData,provenance:'SYNTHETIC_TEST_FIXTURE'}));
+  assert.equal(diagnoseR190E1Plan(p).some(x=>x.rule==='SPACE_PURPOSE'),false);
+ }
+ for(const purpose of ['a','ab','12','<script>','']){
+  const p=synthetic();p.spaces[0].purpose=purpose;
+  assert.equal(validR190Purpose(purpose),false);
+  assert.throws(()=>compileR190FreePlan(p,{palette:paletteData}),/R190_SEMANTIC_SPACE/);
+ }
+});
+
+test('Diagnostic preserves unsafe 6-wide storage and overlap of centered entry door',()=>{
+ const p=synthetic(),e=p.spaces.find(s=>s.id===p.entrySpaceId);
+ p.spaces[2].depth=6;
+ const door=Math.floor((e.width-2)/2);
+ p.glazedOpenings=[{spaceId:e.id,face:'south',offset:door-3,baseY:5,width:4,height:2}];
+ const before=JSON.stringify(p),issues=diagnoseR190E1Plan(p);
+ assert(issues.some(x=>x.rule==='SPACE_DIMENSION'&&x.where.includes('.depth')));
+ assert(issues.some(x=>x.rule==='GLAZING_ENTRY_DOOR_CONFLICT'));
+ assert.equal(JSON.stringify(p),before);
+});
+
+test('Saved R190 HOLD includes field diagnoses while original JSON remains unchanged',async()=>{
+ const temp=fs.mkdtempSync(path.join(os.tmpdir(),'r190-e1-hold-details-'));
+ try{
+  const p=synthetic();p.spaces[0].purpose='a';
+  const raw=JSON.stringify(p),saved=path.join(temp,'original.json');
+  fs.writeFileSync(saved,raw);
+  const report=await runR190FreeEngine({planFile:saved,outDir:path.join(temp,'out'),paletteFile:palette});
+  assert.equal(report.status,'HOLD');
+  assert.equal(report.modelRequests,0);
+  assert.equal(report.worldWrites,0);
+  assert(report.validationIssues.some(x=>x.rule==='SPACE_PURPOSE'));
+  assert.equal(fs.readFileSync(path.join(temp,'out','model','SAVED_PLAN_ORIGINAL.txt'),'utf8'),raw);
+ }finally{fs.rmSync(temp,{recursive:true,force:true});}
 });

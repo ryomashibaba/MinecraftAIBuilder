@@ -18,6 +18,10 @@ const int=(v,a,b)=>Number.isSafeInteger(v)&&v>=a&&v<=b;
 const slug=v=>typeof v==='string'&&/^[a-z][a-z0-9-]{2,39}$/.test(v);
 const safeText=(v,n)=>typeof v==='string'&&v.length>=3&&v.length<=n&&
  !/[\u0000-\u001f<>]/.test(v);
+// Natural Japanese labels such as 居間, 物置, 受付 are meaningful even at 2 chars.
+// All identifiers and other text contracts remain strict.
+export const validR190Purpose=v=>safeText(v,150)||
+ (typeof v==='string'&&/^[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]{2}$/u.test(v));
 const hash=x=>createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const key=(x,y,z)=>[x,y,z].join(',');
 const DIR=['north','south','east','west'];
@@ -91,7 +95,7 @@ export function validateR190SemanticPlan(p){
    (s.id!==p.entrySpaceId||s.tangentShift===undefined)&&
    (s.tangentShift===undefined||int(s.tangentShift,-24,24))&&
    (s.spatialRole===undefined||['enclosed','open-court'].includes(s.spatialRole))&&
-   slug(s.id)&&!ids.has(s.id)&&safeText(s.purpose,150)&&
+   slug(s.id)&&!ids.has(s.id)&&validR190Purpose(s.purpose)&&
    int(s.width,7,22)&&int(s.depth,7,22)&&
    int(s.height,7,p.site.height-2)&&
    ['public','shared','private'].includes(s.privacy),'SPACE');

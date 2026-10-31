@@ -9,6 +9,7 @@ import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {preflightR125Ollama} from './r125-pilot.mjs';
 import {R190_SCHEMA,compileR190SemanticPlan} from '../source/ai/r190-semantic-massing.mjs';
+import {diagnoseR190E1Plan} from './r190-e1-diagnose.mjs';
 import {verifyCompiled} from '../source/ai/b143-building-dsl.mjs';
 import {exportB143EducationMakeCode} from '../source/ai/r125-education-makecode-export.mjs';
 import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
@@ -24,16 +25,16 @@ const SYSTEM=[
  'schema: '+R190_SCHEMA+'; required keys: schema,id,title,brief,site,entrySpaceId,spaces,materials.',
  'CRITICAL IDENTIFIERS: every id, every space.id, entrySpaceId, parentId and referenced spaceId must be ASCII kebab-case matching ^[a-z][a-z0-9-]{2,39}$. NO underscores (_), spaces, Japanese characters or camelCase in identifiers. Use hyphens instead of underscores. These strings must match references exactly; titles, briefs and purposes may be in Japanese.',
  'site is {width,depth,height}, choose practical dimensions about 36..52,36..52,12..16; 16<=width/depth<=80; 10<=height<=32; site volume <= 40000 for the initial Education export.',
- 'spaces: 2..4 FUNCTIONALLY DIFFERENT rooms of genuinely different sizes, heights and connected horizontal arrangement; choose their purposes and positions, not based on building type templates.',
- 'Each space has EXACT keys id,purpose,width,depth,height,parentId,side,privacy. Every room height MUST be an INTEGER >=7 and <=site.height-2 (even storage). Every width/depth is 7..22. Do not put a roof on any room if room.height+roof.rise >= site.height.',
+ 'spaces: 2..4 FUNCTIONALLY DIFFERENT rooms of genuinely different sizes, heights and connected horizontal arrangement; choose purposes and room positions, not building templates. Japanese purpose labels such as 居間, 物置, 受付 are valid even with two Japanese characters. Identifiers must still use ASCII kebab-case.',
+ 'Each space has EXACT keys id,purpose,width,depth,height,parentId,side,privacy. EACH room height MUST be integer 7..site.height-2 and EACH width AND depth separately MUST be integer 7..22, INCLUDING storage. Never use width=6 or depth=6. Smallest footprint width=7,depth=7. Every roof requires room.height+roof.rise < site.height.',
  'First space is the entrance room: parentId=null,side=null,privacy normally public or shared; its id exactly equals entrySpaceId. All other rooms connect with parentId=an earlier room id, side north/south/east/west. A child placed east of its parent shares the child WEST wall and parent EAST wall; those shared faces are NOT exterior.',
  'entrySpaceId is the first space id. Avoid placing a child on the entrance face (default south). privacy=public/shared/private.',
  'Materials are EXACT {floor,wall,roof}; choose only stone or wood for each until new Minecraft materials are verified. These map via the existing verified palette.',
- 'Required glazedOpenings: 1..4 {spaceId,face,offset,baseY,width,height}. Face north/south/east/west; offset >=2 with offset+width <= room wall length-2; width 2..4, baseY=5,height=2, room height >=8. EVERY glass window must face actual open air outside ALL rooms, not a touching room, including parent/child SHARED WALLS. If child.side=east, child west face is SHARED and a window there is INVALID; choose another truly exterior face. Never put a window on a faceted room or directly over the center entrance door.',
+ 'Required glazedOpenings: 1..4 {spaceId,face,offset,baseY,width,height}. Face north/south/east/west; width 2..4, baseY=5,height=2; room height>=8; offset>=2, offset+width<=wallLength-2. ALL windows face external open air, NOT touching parent/child SHARED WALLS. On the entrySpaceId entranceFace, centered door occupies offsets doorOffset=floor((wallLength-2)/2) and doorOffset+1. A window with baseY=5 and columns offset..offset+width-1 MUST NOT intersect either door column. Prefer another genuinely exterior facade instead of placing entry-front windows. Never place glazing on a faceted room.',
  'Optional roofFormIntents: 1..2 items {spaceId,profile,axis,rise}, profile ridge or shed, axis x/z, rise 2..3; each spaceId is different and must refer to enclosed rooms. Every room.height+rise must be STRICTLY LESS than site.height. Do not use roofFormIntent together with roofFormIntents. Avoid adding roof if uncertain about clearance.',
  'Optional formIntent {spaceId,face,cornerInset} with cornerInset 2..3 for a real faceted main volume. CRITICAL: a formIntent spaceId CANNOT also appear in roofFormIntents or roofFormIntent; faceted room CANNOT have any glazedOpenings. Choose one form treatment per space, not overlapping decorations.',
  'Optional entranceFace north/south/east/west, optional skyCourtIntent, optional spatialRole=open-court on a non-entry room only if explicitly desired; do not add unsupported keys.',
- 'Before answering, privately check every required field, all identifier regexes (NO underscores), every room height >=7, room/roof site clearance, parent/child shared walls vs exterior windows, and roof/facet mutual exclusion. If a design breaks a rule, DESIGN IT DIFFERENTLY yourself before responding; do not ask the host to edit JSON. Model chooses actual massing, function and openings; do NOT copy a standard building template. Output ONLY the one final JSON object; no commands or code.'
+ 'Before answering, privately check all required fields, identifiers (NO underscores), every room width>=7, depth>=7 and height>=7, roof clearance, windows vs outside air, doorOffset/entrance-window overlap, and roof/facet conflict. If incompatible, DESIGN IT DIFFERENTLY before responding; do not ask host to alter JSON. Model authors individual massing, function and openings; do NOT copy a standard template. Output ONLY the one final JSON object; no commands or code.'
 ].join('\n');
 export const R190_FREE_SYSTEM_PROMPT=SYSTEM;
 const save=(dir,name,data)=>fs.writeFileSync(path.join(dir,name),
@@ -136,6 +137,10 @@ export async function runR190FreeEngine({
   return report;
  }catch(e){
   report.reason=String(e?.message??e).slice(0,500);
+  if(typeof raw==='string'){
+   try{report.validationIssues=diagnoseR190E1Plan(JSON.parse(raw));}
+   catch{report.validationIssues=[];}
+  }
   return report;
  }finally{
   save(modelDir,'R190_ENGINE_REPORT.json',report);
@@ -236,7 +241,8 @@ export async function runR190E1ThreeUseStudy({
    modelRequests:report.modelRequests??0,
    sourceCompiled,originalResponseSha256:report.originalResponseSha256??null,
    sourceSha256:report.sourceSha256??null,geometrySha256:report.geometrySha256??null,
-   shapeSignature,occupancySha256,features,output:target,worldWrites:0,
+   shapeSignature,occupancySha256,features,
+   validationIssues:report.validationIssues??[],output:target,worldWrites:0,
    art:'NOT_REVIEWED',minecraftWalking:'NOT_TESTED'});
   writeProgress();
   if(/LOCAL_MODEL_NOT_LISTED|MODEL_NOT_LISTED|MODEL_UNAVAILABLE/.test(reason??''))localUnavailable=true;
