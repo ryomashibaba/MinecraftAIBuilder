@@ -332,3 +332,17 @@ test('E1 window catalog is read-only and excludes entry facade & shared-room air
  assert(cat.slots.every(s=>s.offset>=2));
  assert.equal(JSON.stringify(plan),raw);
 });
+
+test('E1 B143-backed window source preflight passes once for valid unchanged authored geometry',()=>{
+ const plan=synthetic();
+ const original=JSON.stringify(plan);
+ const catalog=r190E1WindowSlotCandidates(plan,{maxSlots:6,verifySource:true});
+ assert.equal(catalog.sourcePreflight.status,'PASS');
+ assert.equal(catalog.sourceChecked,true);
+ assert.equal(catalog.testedRepresentativeSlots,6);
+ assert.equal(catalog.verifiedWindowSlots+
+  Object.values(catalog.rejectedSourceReasonCounts).reduce((a,b)=>a+b,0),6);
+ assert.equal(catalog.modelRequests,0);
+ assert.equal(catalog.worldWrites,0);
+ assert.equal(JSON.stringify(plan),original);
+});
