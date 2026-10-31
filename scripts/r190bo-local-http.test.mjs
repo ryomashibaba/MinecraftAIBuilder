@@ -45,7 +45,7 @@ test('header expiry is a bounded HOLD-classified error; no built-in retry',async
 });
 test('fail closed for non-local endpoint and expose only bounded transport cause',async()=>{
  let calls=0;
- await assert.rejects(postLocalOllama('http://example.com/',opts(),{
+ assert.throws(()=>postLocalOllama('http://example.com/',opts(),{
   requestImpl:()=>{calls++;throw Error('UNSAFE')}}),/Only one exact localhost/);
  assert.equal(calls,0);
  assert.deepEqual(transportErrorFacts(Object.assign(new Error('fetch failed'),{
