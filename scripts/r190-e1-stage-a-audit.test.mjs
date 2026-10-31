@@ -4,8 +4,9 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
-import {auditR190E1SavedTwoStage,locateLatestTwoStage} from './r190-e1-stage-a-audit.mjs';
+import {auditR190E1SavedTwoStage,locateLatestTwoStage,explainR190E1WindowGeometry} from './r190-e1-stage-a-audit.mjs';
 import {R190_STATIC_SYNTHETIC_CASES} from './r190-semantic-fixtures.mjs';
+import {layoutR190SemanticPlan} from '../source/ai/r190-semantic-massing.mjs';
 const sha=s=>createHash('sha256').update(s).digest('hex');
 function fixtures(){
  const p=structuredClone(R190_STATIC_SYNTHETIC_CASES[0]);
@@ -62,4 +63,19 @@ test('Offline audit proves valid source-window availability from original dimens
    Object.values(a.windowCatalog.sourceRejectionCounts).reduce((x,y)=>x+y,0),6);
   assert.equal(report.newModelRequests,0);
  }finally{fs.rmSync(root,{recursive:true,force:true});}
+});
+
+test('E1 lab-style zero-window geometry explains room-height eligibility without changing AI plan',()=>{
+ const p=fixtures();
+ p.spaces=p.spaces.map(s=>({...s,height:7}));
+ const before=JSON.stringify(p);
+ const layout=layoutR190SemanticPlan(p);
+ const result=explainR190E1WindowGeometry(p,layout);
+ assert.equal(result.totalEligible,0);
+ assert(result.rooms.every(x=>x.precondition==='ROOM_HEIGHT_BELOW_8'));
+ assert.equal(JSON.stringify(p),before);
+ const q=fixtures();
+ const available=explainR190E1WindowGeometry(q,layoutR190SemanticPlan(q));
+ assert(available.totalEligible>0);
+ assert.equal(available.worldWrites,0);
 });
