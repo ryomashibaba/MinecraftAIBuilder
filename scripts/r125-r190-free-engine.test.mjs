@@ -79,6 +79,49 @@ test('unverified materials and implicit/no windows are HOLD, never silently repa
  assert.throws(()=>compileR190FreePlan(missing,{palette:verified}),/EXPLICIT_MODEL_WINDOWS_REQUIRED/);
 });
 
+test('SYNTHETIC two model-chosen roof sections produce two independently audited physical volumes',()=>{
+ const p=synthetic(),base=compileR190FreePlan(p,{
+  palette:JSON.parse(fs.readFileSync(palette,'utf8')),provenance:'SYNTHETIC_TEST_FIXTURE'
+ });
+ p.roofFormIntents=[
+  {spaceId:'living',profile:'ridge',axis:'x',rise:2},
+  {spaceId:'cooking',profile:'shed',axis:'z',rise:3}
+ ];
+ const before=JSON.stringify(p);
+ const {result,packet}=compileR190FreePlan(p,{
+  palette:JSON.parse(fs.readFileSync(palette,'utf8')),provenance:'SYNTHETIC_TEST_FIXTURE'
+ });
+ assert.equal(JSON.stringify(p),before);
+ assert.deepEqual(result.audit.roofForms.map(r=>[r.spaceId,r.profile,r.achievedRise]),
+  [['living','ridge',2],['cooking','shed',3]]);
+ assert.equal(result.audit.roofForms.every(r=>r.raisedOpenInteriorColumns>0),true);
+ assert.notEqual(result.compiled.geometrySha256,base.result.compiled.geometrySha256);
+ assert.equal(result.audit.allProgramSpacesReachable,true);
+ assert.equal(packet.worldWrites,0);
+ assert.equal(packet.programExecuted,false);
+ assert.equal(result.art,'ART_HOLD');
+});
+
+test('duplicate, conflicting and unfit roof sections fail closed, with no model repair',()=>{
+ const paletteData=JSON.parse(fs.readFileSync(palette,'utf8'));
+ for(const [edit,reason] of [
+  [p=>p.roofFormIntents.push({...p.roofFormIntents[0]}),'DUPLICATE_ROOF_SPACE'],
+  [p=>p.roofFormIntent={...p.roofFormIntents[0]},'ROOF_FORM_INTENTS'],
+  [p=>p.roofFormIntents[1].rise=9,'ROOF_FORM'],
+  [p=>p.roofFormIntents[1].spaceId='missing-space','ROOF_SPACE']
+ ]){
+  const p=synthetic();
+  p.roofFormIntents=[
+   {spaceId:'living',profile:'ridge',axis:'x',rise:2},
+   {spaceId:'cooking',profile:'shed',axis:'z',rise:3}
+  ];
+  edit(p);
+  assert.throws(()=>compileR190FreePlan(p,{
+   palette:paletteData,provenance:'SYNTHETIC_TEST_FIXTURE'
+  }),new RegExp('R190_SEMANTIC_'+reason));
+ }
+});
+
 test('legacy free-build option still passes original R125 exporter for old saved plans',async()=>{
  const options=parseFreeBuildArgs(['--engine','r125','--model','qwen3:14b','--prompt','日本語で自由な花屋を新規設計']);
  assert.equal(options.engine,'r125');

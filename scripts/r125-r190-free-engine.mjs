@@ -30,7 +30,7 @@ const SYSTEM=[
  'entrySpaceId is the first space id. Avoid placing a child on the entrance face (default south). privacy=public/shared/private.',
  'Materials are EXACT {floor,wall,roof}; choose only stone or wood for each until new Minecraft materials are verified. These map via the existing verified palette.',
  'Required glazedOpenings is an array of 1..4 {spaceId,face,offset,baseY,width,height}; faces north/south/east/west, offset 2.., width 2..4, baseY 5, height 2; place in an OUTSIDE face on a room at least 8 blocks tall, avoid parent/child shared wall and entrance door.',
- 'Optional roofFormIntent {spaceId,profile,axis,rise}, choose ridge or shed, axis x/z, rise 2..3; only if the roof fits the site height.',
+ 'Optional roofFormIntents: 1..2 items {spaceId,profile,axis,rise} on DIFFERENT enclosed rooms, profile ridge or shed, axis x/z, rise 2..3. Each raised roof must fit the site height. Legacy singular roofFormIntent is also supported, but never supply both keys.',
  'Optional formIntent {spaceId,face,cornerInset} with cornerInset 2..3 for a meaningful real faceted volume, not facade ornaments; do not place glazedOpenings on the same space.',
  'Optional entranceFace north/south/east/west, optional skyCourtIntent, optional spatialRole=open-court on a non-entry room only if explicitly desired; do not add unsupported keys.',
  'Model chooses massing, function, envelopes and explicit windows. No absolute voxel coordinates, no commands, no scripts. If a requirement is not representable, do not silently claim it has been satisfied.'

@@ -70,7 +70,7 @@ export function r190RoofElevation(index,span,form){
 export function validateR190SemanticPlan(p){
  const standard=['schema','id','title','brief','site','entrySpaceId','spaces','materials'];
  ok(Object.keys(p??{}).length>=standard.length&&
-  Object.keys(p??{}).every(k=>[...standard,'entranceFace','formIntent','roofFormIntent','skyCourtIntent','crossConnections','glazedOpenings'].includes(k))&&
+  Object.keys(p??{}).every(k=>[...standard,'entranceFace','formIntent','roofFormIntent','roofFormIntents','skyCourtIntent','crossConnections','glazedOpenings'].includes(k))&&
   standard.every(k=>Object.hasOwn(p,k)),'FIELDS');
  ok(p.schema===R190_SCHEMA&&slug(p.id)&&safeText(p.title,100)&&
   safeText(p.brief,400),'IDENTITY');
@@ -117,10 +117,15 @@ export function validateR190SemanticPlan(p){
    (ns?chosen.depth:chosen.width)>=f.cornerInset+5,
    'FACET_CANNOT_FIT');
  }
- // R190-K: opt-in, model-authored cross-section of ONE enclosed wing.
- // It changes the weather envelope and usable height, not a roof applique.
- if(p.roofFormIntent!==undefined){
-  const f=p.roofFormIntent;
+ // Model-authored roof sections (one legacy or up to two new independent wings).
+ // These are genuine raised interior volumes, not ornamental roof appliques.
+ // Original single-roof IR remains byte-for-byte accepted and unchanged.
+ if(p.roofFormIntents!==undefined)
+  ok(p.roofFormIntent===undefined&&Array.isArray(p.roofFormIntents)&&
+   p.roofFormIntents.length>=1&&p.roofFormIntents.length<=2,'ROOF_FORM_INTENTS');
+ const roofForms=p.roofFormIntents??(p.roofFormIntent===undefined?[]:[p.roofFormIntent]);
+ const roofSpaces=new Set();
+ for(const f of roofForms){
   const standardRoof=['spaceId','profile','axis','rise'];
   ok((exact(f,standardRoof)||exact(f,[...standardRoof,'toothWidth']))&&
    slug(f.spaceId)&&['ridge','shed','sawtooth'].includes(f.profile)&&
@@ -131,6 +136,8 @@ export function validateR190SemanticPlan(p){
   const space=p.spaces.find(s=>s.id===f.spaceId);
   ok(space&&space.spatialRole!=='open-court'&&
    p.formIntent?.spaceId!==space.id,'ROOF_SPACE');
+  ok(!roofSpaces.has(f.spaceId),'DUPLICATE_ROOF_SPACE');
+  roofSpaces.add(f.spaceId);
   const span=f.axis==='x'?space.width:space.depth;
   ok(space.height+f.rise<p.site.height&&
    (f.profile!=='sawtooth'||span>=2*f.toothWidth),
@@ -150,7 +157,7 @@ export function validateR190SemanticPlan(p){
   const room=p.spaces.find(s=>s.id===v.spaceId);
   ok(room&&room.spatialRole!=='open-court'&&
    p.formIntent?.spaceId!==room.id&&
-   p.roofFormIntent?.spaceId!==room.id,'SKY_COURT_CONFLICT');
+   !roofSpaces.has(room.id),'SKY_COURT_CONFLICT');
   if(v.openFace===undefined){
    ok(v.offsetX>=2&&v.offsetZ>=2&&
     v.offsetX+v.width<=room.width-2&&
@@ -396,6 +403,8 @@ export function r190GlazingCells(room,g){
 function sourceDesign(p,l){
  const elements=[];
  const roles=new Map(p.spaces.map(s=>[s.id,s.spatialRole??'enclosed']));
+ const authoredRoofs=new Map((p.roofFormIntents??
+  (p.roofFormIntent?[p.roofFormIntent]:[])).map(f=>[f.spaceId,f]));
  const box=(id,mode,material,origin,size)=>elements.push({
   id,shape:'box',mode,...(mode==='add'?{material}:{}),origin,size});
  // A deliberately bounded first polygonal envelope: its physical floor,
@@ -499,8 +508,8 @@ function sourceDesign(p,l){
      [s.w-court.offsetX-court.width-1,s.h-2,1]);
    }
   }
-  if(p.roofFormIntent?.spaceId===tag)
-   profiledRoof(s,p.roofFormIntent);
+  if(authoredRoofs.has(tag))
+   profiledRoof(s,authoredRoofs.get(tag));
   else if(p.skyCourtIntent?.spaceId===tag){
    const v=p.skyCourtIntent,roof=p.materials.roof;
    // Four mutually disjoint strips form a ring from the outset.
@@ -688,9 +697,10 @@ export function auditR190SourceRoutes(plan,layout,design,compiled){
  }
  // R190-K verifies ACTUAL finished B143 voxels for each authored roof
  // strip, raised interior air, end gable seals, and the chosen silhouette.
- let roofFormAudit=null;
- if(plan.roofFormIntent){
-  const f=plan.roofFormIntent,s=layout.spaces.find(x=>x.id===f.spaceId),
+ const roofFormAudits=[];
+ for(const f of (plan.roofFormIntents??
+  (plan.roofFormIntent?[plan.roofFormIntent]:[]))){
+  const s=layout.spaces.find(x=>x.id===f.spaceId),
    alongX=f.axis==='x',span=alongX?s.w:s.d,
    crossSpan=alongX?s.d:s.w,heights=[];
   let raisedOpenInteriorColumns=0;
@@ -724,14 +734,15 @@ export function auditR190SourceRoutes(plan,layout,design,compiled){
   if(f.profile==='sawtooth')
    ok(heights.some((y,i)=>i>0&&y<heights[i-1]),
     'ROOF_SAWTOOTH_NOT_REAL');
-  roofFormAudit={spaceId:f.spaceId,profile:f.profile,
+  roofFormAudits.push({spaceId:f.spaceId,profile:f.profile,
    axis:f.axis,modelAuthoredRise:f.rise,toothWidth:f.toothWidth??null,
    achievedRise:Math.max(...heights),roofSliceCount:heights.length,
    sourceHeightProfile:heights,raisedOpenInteriorColumns,
    verifiedPhysicalEndGables:true,
    sourceModelAuthorship:'CALLER_PROVIDED_IR_UNVERIFIED',
-   actualMinecraftWeatherproofing:'NOT_TESTED'};
+   actualMinecraftWeatherproofing:'NOT_TESTED'});
  }
+ const roofFormAudit=roofFormAudits[0]??null;
  // Check that every author-chosen courtyard column is truly open to sky,
  // surrounded by a roof ring, and retains its occupied walking floor.
  let skyCourtAudit=null;
@@ -787,7 +798,8 @@ export function auditR190SourceRoutes(plan,layout,design,compiled){
   daylightSimulation:'NOT_PERFORMED',
   crossConnections:crossWitnesses,nonTreePortalCount:crossWitnesses.length,
   nonTreePhysicalWalkableTwoWide:true,
-  roofForm:roofFormAudit,skyCourt:skyCourtAudit,sourceWalkingPads:seen.size,
+  roofForm:roofFormAudit,roofForms:roofFormAudits,
+  skyCourt:skyCourtAudit,sourceWalkingPads:seen.size,
   facetedEnvelope:facetAudit,
   outdoorCourtCount:plan.spaces.filter(s=>s.spatialRole==='open-court').length,
   verifiedOpenSkyColumns:skyColumns,
