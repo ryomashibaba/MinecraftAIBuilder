@@ -62,7 +62,7 @@ test('E2 rejects extra undeclared fields and never repairs a model plan',()=>{
 test('E2 source witness requires a truly roofed inner 2x2 pad',()=>{
  const p=e2SyntheticResearchFacility();
  p.sourceDesign.elements.push({id:'model-cut-roof-above-lab',shape:'box',
-  mode:'cut',origin:[20,9,14],size:[2,4,2]});
+  mode:'cut',origin:[20,9,14],size:[2,5,2]});
  assert.throws(()=>compileE2Architecture(p),/E2_PROGRAM_WITNESS_NO_ROOF_science-lab/);
 });
 
