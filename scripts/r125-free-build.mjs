@@ -9,32 +9,34 @@ import {fileURLToPath} from 'node:url';
 import {createInterface} from 'node:readline/promises';
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const PALETTE=path.join(ROOT,'configs','r125-education-verified-palette-v26.33.json');
-const script=path.join(ROOT,'scripts','r125-japanese-makecode.mjs');
+const scriptFor=engine=>path.join(ROOT,'scripts',engine==='r190'?'r125-r190-free-engine.mjs':'r125-japanese-makecode.mjs');
 const MODEL=/^[A-Za-z0-9._:/-]{2,140}$/;
 const warn='R125: one/two floors, 16-32 block plan, two spaces per level. '
  +'Supported structural materials: stone and oak_planks; windows: glass. '
  +'Unsupported materials or unverifiable shapes are HOLD, not silently replaced.';
 export function parseFreeBuildArgs(args){
  if(!Array.isArray(args)||args.length%2!==0)throw Error('R125_FREE_BUILD_ARGS');
- const opts={model:'qwen3:14b',prompt:null,plan:null,outRoot:null};
+ const opts={model:'qwen3:14b',prompt:null,plan:null,outRoot:null,engine:'r125'};
  for(let i=0;i<args.length;i+=2){
   const name=args[i],value=args[i+1];
-  if(!['--prompt','--model','--plan','--out-root'].includes(name)||
+  if(!['--prompt','--model','--plan','--out-root','--engine'].includes(name)||
    typeof value!=='string'||!value.trim())throw Error('R125_FREE_BUILD_ARG_'+name);
-  const key={'--prompt':'prompt','--model':'model','--plan':'plan','--out-root':'outRoot'}[name];
+  const key={'--prompt':'prompt','--model':'model','--plan':'plan','--out-root':'outRoot','--engine':'engine'}[name];
   if((key==='prompt'&&opts.prompt!==null)||(key==='plan'&&opts.plan!==null)||
-   (key==='model'&&opts.model!=='qwen3:14b')||(key==='outRoot'&&opts.outRoot!==null))
+   (key==='model'&&opts.model!=='qwen3:14b')||(key==='outRoot'&&opts.outRoot!==null)||(key==='engine'&&opts.engine!=='r125'))
    throw Error('R125_FREE_BUILD_DUPLICATE');
   opts[key]=value;
  }
  if(!MODEL.test(opts.model))throw Error('R125_FREE_BUILD_MODEL');
+ if(!['r125','r190'].includes(opts.engine))throw Error('R125_FREE_BUILD_ENGINE');
  if(opts.prompt!==null&&opts.plan!==null)throw Error('R125_FREE_BUILD_EXCLUSIVE');
  if(opts.prompt!==null&&(opts.prompt.trim().length<8||opts.prompt.length>4000))
   throw Error('R125_FREE_BUILD_PROMPT_LENGTH');
  return opts;
 }
 export async function runFreeBuild(opts,{child=spawnSync}={}){
- if(!fs.existsSync(PALETTE)||!fs.existsSync(script))throw Error('R125_FREE_BUILD_INSTALL_INCOMPLETE');
+ const engine=opts.engine??'r125',script=scriptFor(engine);
+ if(!['r125','r190'].includes(engine)||!fs.existsSync(PALETTE)||!fs.existsSync(script))throw Error('R125_FREE_BUILD_INSTALL_INCOMPLETE');
  const root=opts.outRoot?path.resolve(opts.outRoot):path.join(path.dirname(ROOT),'MinecraftAIBuilder-FreeBuild-Outputs');
  fs.mkdirSync(root,{recursive:true});
  const runDir=path.join(root,new Date().toISOString().replace(/[:.]/g,'-')+'-'+randomBytes(4).toString('hex'));
@@ -43,8 +45,8 @@ export async function runFreeBuild(opts,{child=spawnSync}={}){
  const materialConstraint='\n\n【Education v26.33試験素材制約】床・壁・屋根は、依頼で特定素材が指定されていない場合のみ、検証済みのwoodとstoneからAI自身が選択すること。窓はglass。依頼で他の素材が必須なら、代用や無断の意味変更をせず、JSONでstatus=HOLD_UNSUPPORTED_MATERIALを返すこと（通常計画とは別扱いになる）。設計用途と各空間の使い方は原依頼に従うこと。';
  const effectivePrompt=opts.plan?null:opts.prompt+materialConstraint;
  if(!opts.plan&&effectivePrompt.length>4000)throw Error('R125_FREE_BUILD_PROMPT_WITH_CONSTRAINT_TOO_LONG');
- const request=opts.plan?{mode:'SAVED_PLAN',plan:path.resolve(opts.plan)}:
-  {mode:'ONE_LOCAL_OLLAMA_REQUEST',model:opts.model,originalPrompt:opts.prompt,
+ const request=opts.plan?{mode:'SAVED_PLAN',engine,plan:path.resolve(opts.plan)}:
+  {mode:'ONE_LOCAL_OLLAMA_REQUEST',engine,model:opts.model,originalPrompt:opts.prompt,
    materialConstraint,sourcePrompt:effectivePrompt};
  fs.writeFileSync(path.join(runDir,'REQUEST.json'),JSON.stringify(request,null,2)+'\n',{flag:'wx'});
  const args=[script,'--out',destination,'--palette',PALETTE];
@@ -93,6 +95,7 @@ export async function runFreeBuild(opts,{child=spawnSync}={}){
 async function main(){
  const opts=parseFreeBuildArgs(process.argv.slice(2));
  console.log(warn);
+ console.log('Design engine: '+opts.engine+' (r190 is opt-in original multi-volume source).');
  if(!opts.prompt&&!opts.plan){
   const rl=createInterface({input:process.stdin,output:process.stdout});
   try{opts.prompt=(await rl.question('建てたい建物を日本語で入力してください: ')).trim();}
