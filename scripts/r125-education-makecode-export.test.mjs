@@ -47,6 +47,17 @@ test('same source/geometry has deterministic export and tampered source is rejec
  assert.throws(()=>exportB143EducationMakeCode({design:d,scene:bad}),/SOURCE_GEOMETRY_SHA_MISMATCH/);
  assert.throws(()=>exportB143EducationMakeCode({design:d,scene,originOffset:[0,0,0]}),/ORIGIN_OFFSET/);
 });
+test('grounding a raised source preserves its geometry while placing its lowest layer at ground level',()=>{
+ const raised=structuredClone(d);
+ for(const element of raised.elements) element.origin[1]++;
+ const scene=compileDesign(raised);
+ const packet=exportB143EducationMakeCode({design:raised,scene,groundLowestLayer:true});
+ assert.equal(packet.sourceVerticalOffset,-1);
+ assert.equal(packet.bounds.height,raised.bounds.height-1);
+ const rows=JSON.parse(packet.code.match(/let mabRows: number\[\]\[\] = (.*)/)[1]);
+ assert.equal(Math.min(...rows.map(row=>row[1])),0);
+ assert.equal(packet.geometrySha256,scene.geometrySha256);
+});
 test('a second chat cannot move the anchor or start a build during preflight',()=>{
  const code=exportB143EducationMakeCode({design:d,scene:compileDesign(d)}).code
   .replace(/: number\[\]\[\]|: number\[\]|: string\[\]|: number|: Position/g,'');
@@ -74,3 +85,4 @@ test('existing BN genuinely compiled multi-storey scene exports without making a
  assert(x.plannedCuboids>10);assert(x.code.length<180000);
  assert.equal(x.programExecuted,false);
 });
+
