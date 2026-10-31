@@ -1,6 +1,6 @@
 # MinecraftAIBuilder — 新チャット用LIVE HANDOFF（2026-10-31 JST）
 
-> **最新追加（Compact ArchitecturePlan→BN/B143 真正3Dの最初の狭い縦貫）**：契約検証を越え、`source/ai/r190bn-compact-to-bn.mjs` に作者入力の階高/2階/1室ずつ/材質/作者選択straight-east階段・矩形系外形・平屋根からBN enclosure/flight/入口/上下室ポータル/窓を決定論的に構築し、既存BN/B143を通す初期変換器を追加。**螺旋・自由曲面・折返し・その他側面・異なる屋根などは勝手な箱/直線置換をせずHOLD。** 間口/室/階段の寸法が収まらなければHOLD。B143最終占有から支持床・上階空気・入口空気・flight・上下到達を検査。合成2用途の実3D・不成立を確認するオフラインCIを追加。これは汎用完成でも美術PASSでも実Qwen成功でもない。main・凍結原本は保護、MC施工0、9 BLOCKED、ART HOLD維持。新CIは合格確認まで未認証。
+> **最新方針：Minecraft Education内に自由な希望建築を簡易でも実際に作るMVPを最優先。** 美術改善を一時後回しにし、モデル自由入力→短いArchitecturePlan→既存BN/B143ボクセル→ゲームへの安全な施工を最短で接続する。最初のBridgeとして `source/ai/r125-education-makecode-export.mjs`（厳格にSHA検証済みB143 sceneをcuboidへ圧縮し、MakeCode Static TypeScript生成）と`scripts/r125-export-education-pilot.mjs`（--design / --compact --brief → 出力ディレクトリ）を新規追加。**これはゲーム自動接続ではない**。出力プログラムはコピー済み平坦試験ワールドのMakeCodeに手動貼付、mabset→mabbuild明示実行で初めてWorldWrite。エリア全AIR事前検査・支持地面の有無・Keepのみで既存セルを置換せず、mabverifyで配置一致を点検。ワールドID・バックアップ・教育版でのコンパイル・実動作はまだ未検証。正式なゲーム内施工成功は**0件**。元ソースBuildPlanは空/9 BLOCKED/ART HOLD維持、原モデル回答とmainを触らない。実ワールド書込み許可はユーザー操作と別の確実な技術的事前確認後だけ。
 
 > **必読。** この文書は過去の長いChatGPT会話を丸ごと再読込しないためのGitHub上の軽量な正本。**新チャットでは最初にDraft PR #128の現在HEAD・変更差分・専用CIの結果を再確認**する。以下のコミットとCI状況は作成時点のスナップショット。勝手に次工程の成功を仮定しない。
 
