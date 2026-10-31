@@ -141,6 +141,101 @@ export async function runR190FreeEngine({
  }
 }
 
+
+/** E1 one-session, three real local requests. No template architecture or
+ * silent repair; each original model answer is retained by runR190FreeEngine.
+ * The comparison is a SOURCE-ONLY diversity proxy, NEVER an ART pass.
+ */
+export const R190_E1_STUDY_BRIEFS=Object.freeze([
+ {id:'modern-home',brief:'日本語の依頼：現代的な小規模住宅を設計してください。居間、静かな作業空間、日常的な動線を備え、部屋と外形の関係を考え、単純な箱の繰り返しを避けてください。用途と実際の入口・採光を最優先し、自分で形状・屋根の断面を選んでください。'},
+ {id:'flower-shop',brief:'日本語の依頼：小さな花屋を設計してください。買い物客用の展示空間、花を扱う作業場所、補充・保管の動線を備え、街から店の用途が伝わる個性的な入口と外形を自分で選んでください。'},
+ {id:'research-lab',brief:'日本語の依頼：小さな研究・試作施設を設計してください。受付・共同作業室・静かな実験場所の用途を分け、外部からの見え方と室内移動を一体で考え、用途にふさわしい立体構成を自分で選んでください。'}
+]);
+function r190E1MassingSignature(plan){
+ return JSON.stringify({
+  rooms:plan.spaces.map(s=>[s.width,s.depth,s.height,s.parentId===null?'entry':s.side,
+   s.privacy,s.spatialRole??'enclosed',s.tangentShift??null]),
+  entryFace:plan.entranceFace??'south',
+  form:plan.formIntent??null,roof:plan.roofFormIntents??(plan.roofFormIntent?[plan.roofFormIntent]:[]),
+  courtyard:plan.skyCourtIntent??null,
+  crossConnections:plan.crossConnections??[]
+ });
+}
+export async function runR190E1ThreeUseStudy({
+ model='qwen3:14b',outRoot=path.join(path.dirname(ROOT),'MinecraftAIBuilder-E1-Outputs'),
+ paletteFile=path.join(ROOT,'configs','r125-education-verified-palette-v26.33.json')
+}={}, {single=runR190FreeEngine}={}){
+ if(!modelName.test(model)||typeof single!=='function')fail('E1_BAD_CONFIGURATION');
+ fs.mkdirSync(outRoot,{recursive:true});
+ const dir=fs.mkdtempSync(path.join(path.resolve(outRoot),'E1-three-use-'));
+ const synthetic=single!==runR190FreeEngine;
+ const rows=[];
+ save(dir,'E1_REQUESTS.json',{schema:'r190-e1-three-use-requests-v1',model,
+  provenance:synthetic?'SYNTHETIC_TEST_DOUBLE':'REAL_LOCAL_MODEL_ATTEMPT',
+  requests:R190_E1_STUDY_BRIEFS});
+ const writeProgress=()=>fs.writeFileSync(path.join(dir,'E1_PROGRESS.json'),
+  JSON.stringify({rows,synthetic,worldWrites:0},null,2)+'\n');
+ let localUnavailable=false;
+ for(const item of R190_E1_STUDY_BRIEFS){
+  if(localUnavailable){
+   rows.push({id:item.id,status:'SKIPPED_LOCAL_MODEL_NOT_AVAILABLE',modelRequests:0,
+    sourceCompiled:false,worldWrites:0});writeProgress();continue;
+  }
+  const target=path.join(dir,item.id);
+  let report;
+  try{report=await single({prompt:item.brief,model,outDir:target,paletteFile});}
+  catch(e){report={status:'HOLD_STUDY_RUN_EXCEPTION',reason:String(e?.message??e),
+   modelRequests:0,worldWrites:0};}
+  let sourceCompiled=false,shapeSignature=null,features=null,reason=report.reason??null;
+  if(report.status==='SOURCE_AND_MAKECODE_READY_HUMAN_REVIEW_REQUIRED'&&
+   report.worldWrites===0&&report.modelRequests===1&&
+   typeof report.originalResponseSha256==='string'&&
+   typeof report.geometrySha256==='string'){
+   try{
+    const plan=JSON.parse(fs.readFileSync(path.join(target,'model','ARCHITECTURE_PLAN.json'),'utf8'));
+    const source=JSON.parse(fs.readFileSync(path.join(target,'model','B143_SOURCE.json'),'utf8'));
+    if(plan.schema!==R190_SCHEMA||source.designOnly!==true)fail('E1_SOURCE_EVIDENCE_INCOMPLETE');
+    sourceCompiled=true;shapeSignature=r190E1MassingSignature(plan);
+    features={roomCount:plan.spaces.length,
+     roomDimensions:plan.spaces.map(x=>({width:x.width,depth:x.depth,height:x.height})),
+     roofSections:plan.roofFormIntents??(plan.roofFormIntent?[plan.roofFormIntent]:[]),
+     facetedForm:plan.formIntent??null,openCourtSpaces:plan.spaces.filter(x=>x.spatialRole==='open-court').length,
+     skyCourt:plan.skyCourtIntent??null};
+   }catch(e){reason='SOURCE_EVIDENCE_INVALID: '+String(e?.message??e);}
+  }
+  rows.push({id:item.id,status:sourceCompiled?'SOURCE_READY_ART_HOLD':
+   'HOLD_OR_INCOMPLETE_SOURCE',engineStatus:report.status,reason,
+   modelRequests:report.modelRequests??0,
+   sourceCompiled,originalResponseSha256:report.originalResponseSha256??null,
+   sourceSha256:report.sourceSha256??null,geometrySha256:report.geometrySha256??null,
+   shapeSignature,features,output:target,worldWrites:0,
+   art:'NOT_REVIEWED',minecraftWalking:'NOT_TESTED'});
+  writeProgress();
+  if(/LOCAL_MODEL_NOT_LISTED|MODEL_NOT_LISTED|MODEL_UNAVAILABLE/.test(reason??''))localUnavailable=true;
+ }
+ const compiled=rows.filter(x=>x.sourceCompiled);
+ const distinct=new Set(compiled.map(x=>x.shapeSignature)).size;
+ const summary={schema:'r190-e1-three-use-source-comparison-v1',
+  provenance:synthetic?'SYNTHETIC_TEST_DOUBLE_NOT_REAL_MODEL':'REAL_LOCAL_MODEL_ATTEMPTS',
+  model,requestedUseCount:3,realModelRequests:synthetic?0:rows.reduce((n,r)=>n+r.modelRequests,0),
+  sourceCompiledCount:compiled.length,distinctMassingSignatureCount:distinct,
+  status:synthetic?'TEST_DOUBLE_ONLY':compiled.length!==3?'SOURCE_INCOMPLETE_HOLD':
+   distinct!==3?'DUPLICATE_MASSING_PROXY_REVIEW_REQUIRED':'THREE_DISTINCT_SOURCE_MASSING_PROXIES_ART_HOLD',
+  shapeDiversityIsOnlyProxy:true,humanArt:'NOT_REVIEWED',actualMinecraftBuild:'NOT_ATTEMPTED',
+  actualPlayerWalking:'NOT_TESTED',constructionApproved:false,worldWrites:0,
+  rows};
+ save(dir,'E1_STUDY_REPORT.json',summary);
+ save(dir,'E1_REVIEW.md','# MinecraftAIBuilder E1 — 3用途の真正3D比較（一次資料）\n\n'
+  +'判定: '+summary.status+'。これは作品美術・Minecraft実歩行・汎用性能の合格ではありません。\n\n'
+  +rows.map(r=>'- '+r.id+': '+r.status+' / source='+String(r.sourceSha256)
+   +' / geometry='+String(r.geometrySha256)+' / reason='+String(r.reason)).join('\n')
+  +'\n\n各用途の model/MODEL_RESPONSE_ORIGINAL.txt（原文）と model/index.html（3D）を独立に確認。'
+  +' 入口・床・室内経路・開口を確認してから美術を人間が評価してください。\n');
+ console.log('E1 study saved: '+path.join(dir,'E1_STUDY_REPORT.json'));
+ console.log('E1 status: '+summary.status+'; model requests: '+summary.realModelRequests);
+ return {dir,...summary};
+}
+
 async function main(argv){
  const opts={};
  for(let i=0;i<argv.length;i+=2){
@@ -155,5 +250,8 @@ async function main(argv){
  if(report.status!=='SOURCE_AND_MAKECODE_READY_HUMAN_REVIEW_REQUIRED')process.exitCode=2;
 }
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){
- main(process.argv.slice(2)).catch(e=>{console.error(String(e?.message??e));process.exitCode=2;});
+ const study=process.argv.length===3&&process.argv[2]==='--study-three';
+ const task=study?runR190E1ThreeUseStudy():main(process.argv.slice(2));
+ task.then(r=>{if(study&&r.status!=='THREE_DISTINCT_SOURCE_MASSING_PROXIES_ART_HOLD')process.exitCode=2;})
+  .catch(e=>{console.error(String(e?.message??e));process.exitCode=2;});
 }

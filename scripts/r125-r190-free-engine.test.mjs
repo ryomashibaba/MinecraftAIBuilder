@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
-import {compileR190FreePlan,runR190FreeEngine}
+import {compileR190FreePlan,runR190FreeEngine,runR190E1ThreeUseStudy,R190_E1_STUDY_BRIEFS}
  from './r125-r190-free-engine.mjs';
 import {parseFreeBuildArgs,runFreeBuild} from './r125-free-build.mjs';
 import {R190_STATIC_SYNTHETIC_CASES} from './r190-semantic-fixtures.mjs';
@@ -125,4 +125,45 @@ test('duplicate, conflicting and unfit roof sections fail closed, with no model 
 test('legacy free-build option still passes original R125 exporter for old saved plans',async()=>{
  const options=parseFreeBuildArgs(['--engine','r125','--model','qwen3:14b','--prompt','日本語で自由な花屋を新規設計']);
  assert.equal(options.engine,'r125');
+});
+
+test('E1 three-use runner uses three separate immutable source requests; fake never becomes real',async()=>{
+ const temp=fs.mkdtempSync(path.join(os.tmpdir(),'r190-e1-study-'));
+ let count=0;
+ try{
+  const result=await runR190E1ThreeUseStudy({outRoot:temp},{
+   single:async({prompt,outDir})=>{
+    assert(R190_E1_STUDY_BRIEFS.some(x=>x.brief===prompt));
+    count++;fs.mkdirSync(path.join(outDir,'model'),{recursive:true});
+    const plan=synthetic();
+    plan.spaces[0].width+=count;
+    fs.writeFileSync(path.join(outDir,'model','ARCHITECTURE_PLAN.json'),JSON.stringify(plan));
+    fs.writeFileSync(path.join(outDir,'model','B143_SOURCE.json'),JSON.stringify({designOnly:true}));
+    return {status:'SOURCE_AND_MAKECODE_READY_HUMAN_REVIEW_REQUIRED',
+     modelRequests:1,worldWrites:0,originalResponseSha256:sha(prompt),
+     sourceSha256:sha('source'+count),geometrySha256:sha('geometry'+count)};
+   }});
+  assert.equal(count,3);
+  assert.equal(result.status,'TEST_DOUBLE_ONLY');
+  assert.equal(result.realModelRequests,0);
+  assert.equal(result.sourceCompiledCount,3);
+  assert.equal(result.distinctMassingSignatureCount,3);
+  assert.equal(result.worldWrites,0);
+  assert.equal(fs.existsSync(path.join(result.dir,'E1_REVIEW.md')),true);
+ }finally{fs.rmSync(temp,{recursive:true,force:true});}
+});
+
+test('E1 local unavailability skips remaining requests without faking source geometry',async()=>{
+ const temp=fs.mkdtempSync(path.join(os.tmpdir(),'r190-e1-offline-'));let count=0;
+ try{
+  const result=await runR190E1ThreeUseStudy({outRoot:temp},{
+   single:async()=>{count++;return {status:'HOLD',reason:'R125_R190_LOCAL_MODEL_NOT_LISTED',
+    modelRequests:0,worldWrites:0};}});
+  assert.equal(count,1);
+  assert.equal(result.status,'TEST_DOUBLE_ONLY');
+  assert.equal(result.sourceCompiledCount,0);
+  assert.deepEqual(result.rows.slice(1).map(r=>r.status),
+   ['SKIPPED_LOCAL_MODEL_NOT_AVAILABLE','SKIPPED_LOCAL_MODEL_NOT_AVAILABLE']);
+  assert.equal(result.worldWrites,0);
+ }finally{fs.rmSync(temp,{recursive:true,force:true});}
 });
