@@ -55,7 +55,8 @@ const STAGE_B_SYSTEM=[
  'No extra keys. No model explanation. No Minecraft commands.'
 ].join('\n');
 
-export async function requestLocalModel({model,system,user,onAttempt,maxTokens=2800,timeoutMs=180000}){
+export async function requestLocalModel({model,system,user,onAttempt,maxTokens=2800,timeoutMs=180000,onRaw=null}){
+ if(onRaw!==null&&typeof onRaw!=='function')throw Error('E1_TWO_STAGE_RAW_CAPTURE_CALLBACK');
  if(!Number.isSafeInteger(maxTokens)||maxTokens<400||maxTokens>8000||
   !Number.isSafeInteger(timeoutMs)||timeoutMs<10000||timeoutMs>600000)
   throw Error('E1_TWO_STAGE_REQUEST_LIMITS');
@@ -76,9 +77,12 @@ export async function requestLocalModel({model,system,user,onAttempt,maxTokens=2
  const text=await response.text();
  if(text.length>250000)throw Error('E1_TWO_STAGE_HTTP_SIZE');
  const json=JSON.parse(text);
+ const raw=json.choices?.[0]?.message?.content;
+ // Preserve the actual partial text when a long E2 design is truncated;
+ // this callback does not change the old E1 request behavior by default.
+ if(typeof raw==='string'&&onRaw)onRaw(raw,{finishReason:json.choices?.[0]?.finish_reason});
  if(json.choices?.length!==1||json.choices[0]?.finish_reason==='length')
   throw Error('E1_TWO_STAGE_TRUNCATED');
- const raw=json.choices[0]?.message?.content;
  if(typeof raw!=='string'||raw.length<20||raw.length>30000)
   throw Error('E1_TWO_STAGE_MODEL_ORIGINAL_MISSING');
  return {raw,requestBody:body};
