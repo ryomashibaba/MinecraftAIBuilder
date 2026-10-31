@@ -42,8 +42,8 @@ test('SYNTHETIC R190 distinct connected volumes -> B143 -> audited strict 3-mate
  assert.ok(packet.plannedBlockCounts.stone>0);
  assert.ok(packet.plannedBlockCounts.oak_planks>0);
  assert.ok(packet.plannedBlockCounts.glass>0);
- assert.match(packet.code,/player.onChat\\("mabbuild"/);
- assert.match(packet.code,/player.onChat\\("mabverify"/);
+ assert.match(packet.code,/player\.onChat\("mabbuild"/);
+ assert.match(packet.code,/player\.onChat\("mabverify"/);
  assert.equal(packet.worldWrites,0);
  assert.equal(packet.constructionApproved,false);
 });
