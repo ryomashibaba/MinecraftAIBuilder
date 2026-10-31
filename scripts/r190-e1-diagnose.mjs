@@ -193,6 +193,7 @@ export function r190E1WindowSlotCandidates(plan,{maxSlots=120,verifySource=false
  const selected=all>maxSlots?
   Array.from({length:maxSlots},(_,i)=>slots[Math.floor(i*(all-1)/Math.max(1,maxSlots-1))]):
   slots;
+ const rejectReasons={},rejectExamples=[];
  const verified=verifySource?selected.filter(slot=>{
   try{
    const candidate={...copy,glazedOpenings:[{
@@ -200,15 +201,29 @@ export function r190E1WindowSlotCandidates(plan,{maxSlots=120,verifySource=false
     baseY:slot.baseY,width:slot.width,height:slot.height
    }]};
    const compiled=compileR190SemanticPlan(candidate);
-   return compiled.audit?.glazedOpenings?.length===1&&compiled.worldWrites===0;
-  }catch{return false;}
+   if(compiled.audit?.glazedOpenings?.length===1&&compiled.worldWrites===0)
+    return true;
+   const reason='SOURCE_AUDIT_INCOMPLETE';
+   rejectReasons[reason]=(rejectReasons[reason]??0)+1;
+   if(rejectExamples.length<8)rejectExamples.push({slotId:slot.slotId,
+    spaceId:slot.spaceId,face:slot.face,reason});
+  }catch(e){
+   const reason=String(e?.message??e).slice(0,140);
+   rejectReasons[reason]=(rejectReasons[reason]??0)+1;
+   if(rejectExamples.length<8)rejectExamples.push({slotId:slot.slotId,
+    spaceId:slot.spaceId,face:slot.face,reason});
+  }
+  return false;
  }):selected;
  return {schema:'r190-e1-read-only-window-catalog-v1',
   authorship:'MODEL_MUST_SELECT_SLOTS',readOnly:true,modelRequests:0,
   worldWrites:0,totalPossibleSlots:all,
   sourceChecked:verifySource,slots:verified,
   testedRepresentativeSlots:selected.length,verifiedWindowSlots:verified.length,
-  limitNote:all>maxSlots?'Representative deterministic sample; not exhaustive':null};
+  rejectedSourceReasonCounts:rejectReasons,
+  rejectedSourceExamples:rejectExamples,
+  exhaustiveSourceWindowCheck:verifySource&&all<=maxSlots,
+  limitNote:all>maxSlots?'Representative deterministic sample; zero certified sampled slots DOES NOT prove no possible windows':null};
 }
 
 export function diagnoseR190E1SavedDirectory(directory){
