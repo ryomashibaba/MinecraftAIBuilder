@@ -132,8 +132,10 @@ test('Explicit saved failed ART original receives verified roof diagnostics, the
     assert.equal(stage,'ART_A');onAttempt();
     const p=structuredClone(base.plan);delete p.glazedOpenings;
     p.spaces[0].width+=2;
-    p.formIntent={spaceId:p.spaces[2].id,face:'north',cornerInset:2};
-    p.roofFormIntents=[{spaceId:p.spaces[2].id,profile:'ridge',axis:'x',rise:2,toothWidth:3}];
+    // Deliberately valid facet dimensions on the SECOND room, so the
+    // intended roof contract error is the first strict failure, not FACET_CANNOT_FIT.
+    p.formIntent={spaceId:p.spaces[1].id,face:'north',cornerInset:2};
+    p.roofFormIntents=[{spaceId:p.spaces[1].id,profile:'ridge',axis:'x',rise:2,toothWidth:3}];
     return {raw:JSON.stringify(p)};
    }});
   assert.equal(failed.row.reason,'R190_SEMANTIC_ROOF_FORM');
