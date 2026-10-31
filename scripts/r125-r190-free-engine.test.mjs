@@ -195,7 +195,7 @@ test('first real E1 HOLD feedback is reflected in prospective Qwen contract, wit
  const s=R190_FREE_SYSTEM_PROMPT;
  assert.match(s,/NO underscores/);
  assert.match(s,/\^\[a-z\]\[a-z0-9-\]\{2,39\}/);
- assert.match(s,/Every room height MUST/);
+ assert.match(s,/EACH room height MUST/);
  assert.match(s,/SHARED WALLS/);
  assert.match(s,/formIntent spaceId CANNOT also appear/);
  assert.match(s,/one final JSON object/);
