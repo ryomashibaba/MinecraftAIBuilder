@@ -9,6 +9,7 @@ import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {requestLocalModel} from './r190-e1-two-stage.mjs';
 import {runE2SavedSource} from './r190-e2-offline-source.mjs';
+import {diagnoseE2AuthoredPlan} from '../source/ai/r190-e2-diagnose.mjs';
 import {openE1ResultFolder} from './r190-e1-open-result-folder.mjs';
 
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
@@ -107,6 +108,36 @@ export async function runE2QwenStudy({
   if(built.status!=='SOURCE_READY_ART_HOLD'){
    report.reason=built.reason??'E2_QWEN_SOURCE_HOLD';
    report.sourceDetail=built.status;
+   // Informational diagnosis is independent of the strict source verdict.
+   try{report.validationIssues=diagnoseE2AuthoredPlan(JSON.parse(answer.raw)).issues;}
+   catch(e){report.validationIssues=[{code:'JSON_PARSE_HOLD',path:'
+  }else{
+   report.sourceReady=true;
+   report.status='SOURCE_READY_ART_HOLD';
+   report.modelAuthoredGeometry=synthetic?'SYNTHETIC_FIXTURE_ONLY':
+    'LOCAL_MODEL_ORIGINAL_SOURCE_VERIFIED_NOT_ART_ACCEPTED';
+   report.sourceSha256=built.sourceSha256;
+   report.geometrySha256=built.geometrySha256;
+   report.sourceVoxelCount=built.sourceVoxelCount;
+   report.programSpaces=built.programSpaces;
+   report.glazedOpenings=built.glazedOpenings;
+   report.viewerRelativePath=path.relative(directory,path.join(built.dir,'index.html'));
+  }
+ }catch(e){report.reason=error(e);}
+ save(directory,'E2_QWEN_REPORT.json',report);
+ console.log('E2 Qwen study saved: '+path.join(directory,'E2_QWEN_REPORT.json'));
+ console.log('E2 status: '+report.status+'; source: '+(report.sourceReady?'READY':'HOLD')+
+  '; real model requests: '+report.modelRequests);
+ return {dir:directory,...report};
+}
+if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){
+ runE2QwenStudy().then(r=>{
+  const opened=openE1ResultFolder(path.join(r.dir,'E2_QWEN_REPORT.json'));
+  if(opened.attempted)console.log('E2 result folder opening: '+opened.folder);
+  if(!r.sourceReady)process.exitCode=2;
+ }).catch(e=>{console.error(error(e));process.exitCode=2;});
+}
+,actual:String(e?.message??e).slice(0,180),expected:'valid JSON'}];}
   }else{
    report.sourceReady=true;
    report.status='SOURCE_READY_ART_HOLD';

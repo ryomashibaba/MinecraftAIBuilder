@@ -10,6 +10,10 @@ if errorlevel 1 (
 )
 echo MinecraftAIBuilder R125 - Japanese local LLM to Education MakeCode
 echo This tool never edits a Minecraft world.
+if /i "%~1"=="study-e2-diagnose" (
+  echo E2: diagnose the latest ORIGINAL Qwen 3D source, no model calls
+  node scripts\r190-e2-saved-diagnose.mjs --latest
+) else (
 if /i "%~1"=="study-e2" (
   echo E2: one local Qwen-authored freeform 3D building; SOURCE-only review
   node scripts\r190-e2-qwen-study.mjs
@@ -32,6 +36,7 @@ if /i "%~1"=="study-two-stage" (
   ) else (
     node scripts\r125-free-build.mjs
   )
+)
 )
 )
 )

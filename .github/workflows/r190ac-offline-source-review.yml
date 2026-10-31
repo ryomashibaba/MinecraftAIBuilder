@@ -31,6 +31,9 @@ on:
       - 'scripts/r190-e2-offline-source.test.mjs'
       - 'scripts/r190-e2-qwen-study.mjs'
       - 'scripts/r190-e2-qwen-study.test.mjs'
+      - 'source/ai/r190-e2-diagnose.mjs'
+      - 'scripts/r190-e2-saved-diagnose.mjs'
+      - 'scripts/r190-e2-saved-diagnose.test.mjs'
       - 'scripts/r190-e1-two-stage.mjs'
       - 'RUN_R125_FREE_BUILD.cmd'
       - 'RUN_R125_FREE_BUILD.cmd'
@@ -71,5 +74,8 @@ jobs:
           node --check scripts/r190-e2-offline-source.test.mjs
           node --check scripts/r190-e2-qwen-study.mjs
           node --check scripts/r190-e2-qwen-study.test.mjs
+          node --check source/ai/r190-e2-diagnose.mjs
+          node --check scripts/r190-e2-saved-diagnose.mjs
+          node --check scripts/r190-e2-saved-diagnose.test.mjs
           node --check scripts/r125-free-build.mjs
-          node --test scripts/r125-free-build.test.mjs scripts/r125-r190-free-engine.test.mjs scripts/r190-e1-two-stage.test.mjs scripts/r190-e1-stage-a-audit.test.mjs scripts/r190-e1-revise-saved.test.mjs scripts/r190-e1-open-result-folder.test.mjs scripts/r190-e1-art-candidate.test.mjs scripts/r190-e2-architecture.test.mjs scripts/r190-e2-offline-source.test.mjs scripts/r190-e2-qwen-study.test.mjs
+          node --test scripts/r125-free-build.test.mjs scripts/r125-r190-free-engine.test.mjs scripts/r190-e1-two-stage.test.mjs scripts/r190-e1-stage-a-audit.test.mjs scripts/r190-e1-revise-saved.test.mjs scripts/r190-e1-open-result-folder.test.mjs scripts/r190-e1-art-candidate.test.mjs scripts/r190-e2-architecture.test.mjs scripts/r190-e2-offline-source.test.mjs scripts/r190-e2-qwen-study.test.mjs scripts/r190-e2-saved-diagnose.test.mjs
