@@ -1,0 +1,21 @@
+name: R190-AA Local Work Independent-Architecture Pilot — FAKE ONLY
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'scripts/r190aa-local-work-pilot.mjs'
+      - 'scripts/r190aa-local-work-pilot.test.mjs'
+      - '.github/workflows/r190aa-local-work-pilot.yml'
+permissions:
+  contents: read
+jobs:
+  fake-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: node --check scripts/r190aa-local-work-pilot.mjs
+      - run: node --check scripts/r190aa-local-work-pilot.test.mjs
+      - run: node --test scripts/r190aa-local-work-pilot.test.mjs

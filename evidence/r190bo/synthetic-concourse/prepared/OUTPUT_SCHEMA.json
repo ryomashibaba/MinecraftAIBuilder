@@ -1,0 +1,1399 @@
+{
+  "type": "object",
+  "properties": {
+    "schema": {
+      "const": "minecraftaibuilder-r190bn-spatial-assembly-v1"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{2,47}$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "pattern": "^[^\\u0000-\\u001f<>]*$"
+    },
+    "brief": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500,
+      "pattern": "^[^\\u0000-\\u001f<>]*$"
+    },
+    "originalBriefSha256": {
+      "const": "3d23250c74b4047c06d23d59fb7b6adf254ccd27ed89c070d7fc33e5b8119c1d"
+    },
+    "bounds": {
+      "type": "object",
+      "properties": {
+        "width": {
+          "type": "integer",
+          "minimum": 8,
+          "maximum": 128
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 8,
+          "maximum": 96
+        },
+        "depth": {
+          "type": "integer",
+          "minimum": 8,
+          "maximum": 128
+        }
+      },
+      "required": [
+        "width",
+        "height",
+        "depth"
+      ],
+      "additionalProperties": false
+    },
+    "intent": {
+      "type": "object",
+      "properties": {
+        "use": {
+          "type": "string",
+          "minLength": 8,
+          "maxLength": 350,
+          "pattern": "^[^\\u0000-\\u001f<>]*$"
+        },
+        "experience": {
+          "type": "string",
+          "minLength": 8,
+          "maxLength": 350,
+          "pattern": "^[^\\u0000-\\u001f<>]*$"
+        },
+        "massing": {
+          "type": "string",
+          "minLength": 8,
+          "maxLength": 350,
+          "pattern": "^[^\\u0000-\\u001f<>]*$"
+        },
+        "circulation": {
+          "type": "string",
+          "minLength": 8,
+          "maxLength": 350,
+          "pattern": "^[^\\u0000-\\u001f<>]*$"
+        }
+      },
+      "required": [
+        "use",
+        "experience",
+        "massing",
+        "circulation"
+      ],
+      "additionalProperties": false
+    },
+    "levels": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{2,23}$"
+          },
+          "standingY": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 94
+          }
+        },
+        "required": [
+          "id",
+          "standingY"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1,
+      "maxItems": 32
+    },
+    "spaces": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{2,23}$"
+          },
+          "levelId": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{2,23}$"
+          },
+          "purpose": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 250,
+            "pattern": "^[^\\u0000-\\u001f<>]*$"
+          },
+          "origin": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 127
+            },
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "size": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 2,
+              "maximum": 128
+            },
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "clearHeight": {
+            "type": "integer",
+            "minimum": 2,
+            "maximum": 95
+          },
+          "minimumReachablePositions": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 16384
+          },
+          "minimumReachablePercent": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          }
+        },
+        "required": [
+          "id",
+          "levelId",
+          "purpose",
+          "origin",
+          "size",
+          "clearHeight",
+          "minimumReachablePositions",
+          "minimumReachablePercent"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1,
+      "maxItems": 24
+    },
+    "operations": {
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "enclosure"
+              },
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]{2,23}$"
+              },
+              "spaceId": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]{2,23}$"
+              },
+              "thickness": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 4
+              },
+              "materials": {
+                "type": "object",
+                "properties": {
+                  "floor": {
+                    "type": "string",
+                    "enum": [
+                      "stone",
+                      "concrete",
+                      "metal",
+                      "glass",
+                      "wood",
+                      "glow",
+                      "accent"
+                    ]
+                  },
+                  "wall": {
+                    "type": "string",
+                    "enum": [
+                      "stone",
+                      "concrete",
+                      "metal",
+                      "glass",
+                      "wood",
+                      "glow",
+                      "accent"
+                    ]
+                  },
+                  "roof": {
+                    "type": "string",
+                    "enum": [
+                      "stone",
+                      "concrete",
+                      "metal",
+                      "glass",
+                      "wood",
+                      "glow",
+                      "accent"
+                    ]
+                  }
+                },
+                "required": [
+                  "floor",
+                  "wall",
+                  "roof"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "kind",
+              "id",
+              "spaceId",
+              "thickness",
+              "materials"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "flight"
+              },
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]{2,23}$"
+              },
+              "fromLevelId": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]{2,23}$"
+              },
+              "toLevelId": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9-]{2,23}$"
+              },
+              "start": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 127
+                },
+                "minItems": 2,
+                "maxItems": 2
+              },
+              "end": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 127
+                },
+                "minItems": 2,
+                "maxItems": 2
+              },
+              "width": {
+                "type": "integer",
+                "minimum": 2,
+                "maximum": 12
+              },
+              "treadDepth": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 3
+              },
+              "material": {
+                "type": "string",
+                "enum": [
+                  "stone",
+                  "concrete",
+                  "metal",
+                  "glass",
+                  "wood",
+                  "glow",
+                  "accent"
+                ]
+              }
+            },
+            "required": [
+              "kind",
+              "id",
+              "fromLevelId",
+              "toLevelId",
+              "start",
+              "end",
+              "width",
+              "treadDepth",
+              "material"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "const": "primitive"
+              },
+              "element": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z][a-zA-Z0-9_-]{0,39}$"
+                      },
+                      "shape": {
+                        "const": "box"
+                      },
+                      "mode": {
+                        "const": "add"
+                      },
+                      "material": {
+                        "type": "string",
+                        "enum": [
+                          "stone",
+                          "concrete",
+                          "metal",
+                          "glass",
+                          "wood",
+                          "glow",
+                          "accent"
+                        ]
+                      },
+                      "origin": {
+                        "type": "array",
+                        "items": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 128
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                      },
+                      "size": {
+                        "type": "array",
+                        "items": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 128
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                      },
+                      "repeat": {
+                        "type": "object",
+                        "properties": {
+                          "count": {
+                            "type": "integer",
+                            "minimum": 2,
+                            "maximum": 32
+                          },
+                          "offset": {
+                            "type": "array",
+                            "items": {
+                              "type": "integer",
+                              "minimum": -128,
+                              "maximum": 128
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          }
+                        },
+                        "required": [
+                          "count",
+                          "offset"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "shell": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 4
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "shape",
+                      "mode",
+                      "material",
+                      "origin",
+                      "size"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z][a-zA-Z0-9_-]{0,39}$"
+                      },
+                      "shape": {
+                        "const": "box"
+                      },
+                      "mode": {
+                        "const": "cut"
+                      },
+                      "origin": {
+                        "type": "array",
+                        "items": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 128
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                      },
+                      "size": {
+                        "type": "array",
+                        "items": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 128
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                      },
+                      "repeat": {
+                        "type": "object",
+                        "properties": {
+                          "count": {
+                            "type": "integer",
+                            "minimum": 2,
+                            "maximum": 32
+                          },
+                          "offset": {
+                            "type": "array",
+                            "items": {
+                              "type": "integer",
+                              "minimum": -128,
+                              "maximum": 128
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          }
+                        },
+                        "required": [
+                          "count",
+                          "offset"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "shape",
+                      "mode",
+                      "origin",
+                      "size"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z][a-zA-Z0-9_-]{0,39}$"
+                      },
+                      "shape": {
+                        "const": "ellipsoid"
+                      },
+                      "mode": {
+                        "const": "add"
+                      },
+                      "material": {
+                        "type": "string",
+                        "enum": [
+                          "stone",
+                          "concrete",
+                          "metal",
+                          "glass",
+                          "wood",
+                          "glow",
+                          "accent"
+                        ]
+                      },
+                      "center": {
+                        "type": "array",
+                        "items": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 128
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                      },
+                      "radii": {
+                        "type": "array",
+                        "items": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 64
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                      },
+                      "repeat": {
+                        "type": "object",
+                        "properties": {
+                          "count": {
+                            "type": "integer",
+                            "minimum": 2,
+                            "maximum": 32
+                          },
+                          "offset": {
+                            "type": "array",
+                            "items": {
+                              "type": "integer",
+                              "minimum": -128,
+                              "maximum": 128
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          }
+                        },
+                        "required": [
+                          "count",
+                          "offset"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "shell": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 4
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "shape",
+                      "mode",
+                      "material",
+                      "center",
+                      "radii"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z][a-zA-Z0-9_-]{0,39}$"
+                      },
+                      "shape": {
+                        "const": "ellipsoid"
+                      },
+                      "mode": {
+                        "const": "cut"
+                      },
+                      "center": {
+                        "type": "array",
+                        "items": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 128
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                      },
+                      "radii": {
+                        "type": "array",
+                        "items": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 64
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                      },
+                      "repeat": {
+                        "type": "object",
+                        "properties": {
+                          "count": {
+                            "type": "integer",
+                            "minimum": 2,
+                            "maximum": 32
+                          },
+                          "offset": {
+                            "type": "array",
+                            "items": {
+                              "type": "integer",
+                              "minimum": -128,
+                              "maximum": 128
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          }
+                        },
+                        "required": [
+                          "count",
+                          "offset"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "shape",
+                      "mode",
+                      "center",
+                      "radii"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z][a-zA-Z0-9_-]{0,39}$"
+                      },
+                      "shape": {
+                        "const": "cylinder"
+                      },
+                      "mode": {
+                        "const": "add"
+                      },
+                      "material": {
+                        "type": "string",
+                        "enum": [
+                          "stone",
+                          "concrete",
+                          "metal",
+                          "glass",
+                          "wood",
+                          "glow",
+                          "accent"
+                        ]
+                      },
+                      "origin": {
+                        "type": "array",
+                        "items": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 128
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                      },
+                      "axis": {
+                        "enum": [
+                          "x",
+                          "y",
+                          "z"
+                        ]
+                      },
+                      "radius": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 64
+                      },
+                      "length": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 128
+                      },
+                      "repeat": {
+                        "type": "object",
+                        "properties": {
+                          "count": {
+                            "type": "integer",
+                            "minimum": 2,
+                            "maximum": 32
+                          },
+                          "offset": {
+                            "type": "array",
+                            "items": {
+                              "type": "integer",
+                              "minimum": -128,
+                              "maximum": 128
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          }
+                        },
+                        "required": [
+                          "count",
+                          "offset"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "shell": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 4
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "shape",
+                      "mode",
+                      "material",
+                      "origin",
+                      "axis",
+                      "radius",
+                      "length"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z][a-zA-Z0-9_-]{0,39}$"
+                      },
+                      "shape": {
+                        "const": "cylinder"
+                      },
+                      "mode": {
+                        "const": "cut"
+                      },
+                      "origin": {
+                        "type": "array",
+                        "items": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 128
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                      },
+                      "axis": {
+                        "enum": [
+                          "x",
+                          "y",
+                          "z"
+                        ]
+                      },
+                      "radius": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 64
+                      },
+                      "length": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 128
+                      },
+                      "repeat": {
+                        "type": "object",
+                        "properties": {
+                          "count": {
+                            "type": "integer",
+                            "minimum": 2,
+                            "maximum": 32
+                          },
+                          "offset": {
+                            "type": "array",
+                            "items": {
+                              "type": "integer",
+                              "minimum": -128,
+                              "maximum": 128
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          }
+                        },
+                        "required": [
+                          "count",
+                          "offset"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "shape",
+                      "mode",
+                      "origin",
+                      "axis",
+                      "radius",
+                      "length"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z][a-zA-Z0-9_-]{0,39}$"
+                      },
+                      "shape": {
+                        "const": "torus"
+                      },
+                      "mode": {
+                        "const": "add"
+                      },
+                      "material": {
+                        "type": "string",
+                        "enum": [
+                          "stone",
+                          "concrete",
+                          "metal",
+                          "glass",
+                          "wood",
+                          "glow",
+                          "accent"
+                        ]
+                      },
+                      "center": {
+                        "type": "array",
+                        "items": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 128
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                      },
+                      "axis": {
+                        "enum": [
+                          "x",
+                          "y",
+                          "z"
+                        ]
+                      },
+                      "majorRadius": {
+                        "type": "integer",
+                        "minimum": 3,
+                        "maximum": 45
+                      },
+                      "tubeRadius": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9
+                      },
+                      "repeat": {
+                        "type": "object",
+                        "properties": {
+                          "count": {
+                            "type": "integer",
+                            "minimum": 2,
+                            "maximum": 32
+                          },
+                          "offset": {
+                            "type": "array",
+                            "items": {
+                              "type": "integer",
+                              "minimum": -128,
+                              "maximum": 128
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          }
+                        },
+                        "required": [
+                          "count",
+                          "offset"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "shell": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 4
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "shape",
+                      "mode",
+                      "material",
+                      "center",
+                      "axis",
+                      "majorRadius",
+                      "tubeRadius"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z][a-zA-Z0-9_-]{0,39}$"
+                      },
+                      "shape": {
+                        "const": "torus"
+                      },
+                      "mode": {
+                        "const": "cut"
+                      },
+                      "center": {
+                        "type": "array",
+                        "items": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 128
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                      },
+                      "axis": {
+                        "enum": [
+                          "x",
+                          "y",
+                          "z"
+                        ]
+                      },
+                      "majorRadius": {
+                        "type": "integer",
+                        "minimum": 3,
+                        "maximum": 45
+                      },
+                      "tubeRadius": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9
+                      },
+                      "repeat": {
+                        "type": "object",
+                        "properties": {
+                          "count": {
+                            "type": "integer",
+                            "minimum": 2,
+                            "maximum": 32
+                          },
+                          "offset": {
+                            "type": "array",
+                            "items": {
+                              "type": "integer",
+                              "minimum": -128,
+                              "maximum": 128
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          }
+                        },
+                        "required": [
+                          "count",
+                          "offset"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "shape",
+                      "mode",
+                      "center",
+                      "axis",
+                      "majorRadius",
+                      "tubeRadius"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z][a-zA-Z0-9_-]{0,39}$"
+                      },
+                      "shape": {
+                        "const": "beam"
+                      },
+                      "mode": {
+                        "const": "add"
+                      },
+                      "material": {
+                        "type": "string",
+                        "enum": [
+                          "stone",
+                          "concrete",
+                          "metal",
+                          "glass",
+                          "wood",
+                          "glow",
+                          "accent"
+                        ]
+                      },
+                      "start": {
+                        "type": "array",
+                        "items": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 128
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                      },
+                      "end": {
+                        "type": "array",
+                        "items": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 128
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                      },
+                      "thickness": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 3
+                      },
+                      "repeat": {
+                        "type": "object",
+                        "properties": {
+                          "count": {
+                            "type": "integer",
+                            "minimum": 2,
+                            "maximum": 32
+                          },
+                          "offset": {
+                            "type": "array",
+                            "items": {
+                              "type": "integer",
+                              "minimum": -128,
+                              "maximum": 128
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          }
+                        },
+                        "required": [
+                          "count",
+                          "offset"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "shape",
+                      "mode",
+                      "material",
+                      "start",
+                      "end",
+                      "thickness"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z][a-zA-Z0-9_-]{0,39}$"
+                      },
+                      "shape": {
+                        "const": "beam"
+                      },
+                      "mode": {
+                        "const": "cut"
+                      },
+                      "start": {
+                        "type": "array",
+                        "items": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 128
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                      },
+                      "end": {
+                        "type": "array",
+                        "items": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 128
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                      },
+                      "thickness": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 3
+                      },
+                      "repeat": {
+                        "type": "object",
+                        "properties": {
+                          "count": {
+                            "type": "integer",
+                            "minimum": 2,
+                            "maximum": 32
+                          },
+                          "offset": {
+                            "type": "array",
+                            "items": {
+                              "type": "integer",
+                              "minimum": -128,
+                              "maximum": 128
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          }
+                        },
+                        "required": [
+                          "count",
+                          "offset"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "shape",
+                      "mode",
+                      "start",
+                      "end",
+                      "thickness"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[a-zA-Z][a-zA-Z0-9_-]{0,39}$"
+                      },
+                      "shape": {
+                        "const": "staircase"
+                      },
+                      "mode": {
+                        "const": "add"
+                      },
+                      "material": {
+                        "type": "string",
+                        "enum": [
+                          "stone",
+                          "concrete",
+                          "metal",
+                          "glass",
+                          "wood",
+                          "glow",
+                          "accent"
+                        ]
+                      },
+                      "origin": {
+                        "type": "array",
+                        "items": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 128
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                      },
+                      "axis": {
+                        "enum": [
+                          "x",
+                          "z"
+                        ]
+                      },
+                      "direction": {
+                        "enum": [
+                          -1,
+                          1
+                        ]
+                      },
+                      "width": {
+                        "type": "integer",
+                        "minimum": 2,
+                        "maximum": 12
+                      },
+                      "steps": {
+                        "type": "integer",
+                        "minimum": 2,
+                        "maximum": 32
+                      },
+                      "treadDepth": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 3
+                      },
+                      "repeat": {
+                        "type": "object",
+                        "properties": {
+                          "count": {
+                            "type": "integer",
+                            "minimum": 2,
+                            "maximum": 32
+                          },
+                          "offset": {
+                            "type": "array",
+                            "items": {
+                              "type": "integer",
+                              "minimum": -128,
+                              "maximum": 128
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          }
+                        },
+                        "required": [
+                          "count",
+                          "offset"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "shape",
+                      "mode",
+                      "material",
+                      "origin",
+                      "axis",
+                      "direction",
+                      "width",
+                      "steps",
+                      "treadDepth"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              }
+            },
+            "required": [
+              "kind",
+              "element"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      },
+      "minItems": 1,
+      "maxItems": 160
+    },
+    "entrance": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 127
+      },
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "headroom": {
+      "type": "integer",
+      "minimum": 2,
+      "maximum": 3
+    },
+    "destinations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{2,23}$"
+          },
+          "point": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 127
+            },
+            "minItems": 3,
+            "maxItems": 3
+          },
+          "maximumPathSteps": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 500000
+          }
+        },
+        "required": [
+          "id",
+          "point",
+          "maximumPathSteps"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1,
+      "maxItems": 48
+    },
+    "protectedVoids": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{2,23}$"
+          },
+          "origin": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 127
+            },
+            "minItems": 3,
+            "maxItems": 3
+          },
+          "size": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 128
+            },
+            "minItems": 3,
+            "maxItems": 3
+          },
+          "maxOccupiedCells": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 500000
+          }
+        },
+        "required": [
+          "id",
+          "origin",
+          "size",
+          "maxOccupiedCells"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 0,
+      "maxItems": 16
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 0,
+        "maxLength": 250,
+        "pattern": "^[^\\u0000-\\u001f<>]*$"
+      },
+      "minItems": 0,
+      "maxItems": 12
+    }
+  },
+  "required": [
+    "schema",
+    "id",
+    "title",
+    "brief",
+    "originalBriefSha256",
+    "bounds",
+    "intent",
+    "levels",
+    "spaces",
+    "operations",
+    "entrance",
+    "headroom",
+    "destinations",
+    "protectedVoids",
+    "assumptions"
+  ],
+  "additionalProperties": false
+}

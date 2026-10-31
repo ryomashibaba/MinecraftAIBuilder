@@ -11,6 +11,22 @@ import {createHash} from 'node:crypto';
 import {performance} from 'node:perf_hooks';
 import {prepareCapturedModelSource}
  from './b198u-bounds-only-repair.mjs';
+import {R2_FREEFORM_QUALITY_GUIDE}
+ from './b198zr2-generic-quality-guide.mjs';
+import {R4_PLANNING_GUIDE}
+ from './b198zr4-planned-source.mjs';
+import {R11_COMPACT_GUIDE,R11_GUIDE_SHA256}
+ from './b198zr11-compact-r4-output.mjs';
+import {R21_FUTURE_GUIDE,R21_FUTURE_GUIDE_SHA256}
+ from './b198zr21-future-architecture-guide.mjs';
+import {R41_DRAFT_GUIDE,GUIDE_SHA256 as R41_GUIDE_SHA256}
+ from './b198zr41-architecture-authoring-candidate.mjs';
+import {R46_GUIDE,GUIDE_SHA256 as R46_GUIDE_SHA256}
+ from './b198zr46-corrected-architecture-guide.mjs';
+import {R47_JSON_SCHEMA,R47_JSON_SCHEMA_SHA256}
+ from './b198zr47-json-schema-format-gate.mjs';
+import {R50_ARCHITECTURE_GUIDE,R50_GUIDE_SHA256}
+ from './b198zr50-program-first-architecture-guide.mjs';
 
 export const SCHEMA='minecraftaibuilder-b198s-native-single-source-json-v1';
 const ENDPOINT=/^http:\/\/127\.0\.0\.1:(\d{2,5})\/v1\/chat\/completions$/;
@@ -56,6 +72,12 @@ const STRUCTURAL_GUIDE=[
  'For cylinder use origin:[x,y,z],axis:"x"/"y"/"z",radius,length.',
  'For torus use center:[x,y,z],axis,majorRadius,tubeRadius.',
  'For beam use start:[x,y,z],end:[x,y,z],thickness 1..3.',
+ 'For a straight flight of stairs use ONE staircase element: origin:[x,y,z], axis:"x"/"z", direction:1/-1, width:2..12, steps:2..32, treadDepth:1..3. Rising height is one voxel per step.',
+ 'staircase is a supported solid stepped wedge, not a Minecraft stair block. Ensure an open 2-voxel headroom and actually connected level landings; it does NOT prove avatar walkability.',
+ 'Never emit dozens of individually enumerated stair boxes when one staircase element expresses the same design. Preserve token budget for original building mass, functional rooms and circulation.',
+ 'Any add/cut source element can use optional repeat:{count:2..32,offset:[dx,dy,dz]} for a line of translated copies; offset integers -128..128, not [0,0,0]; ALL copies must stay inside design.bounds.',
+ 'Use repeat only when the same authored design feature truly appears at constant spacing (columns, ribs, facade modules, roof beams, window voids). A repetition is not an automatic building template, and must not replace distinct functional spaces.',
+ 'One source element with repeat is far shorter than 20 numbered nearly identical items. Preserve output budget for original massing, supported floor connections, public use and genuine circulation.',
  'Do not include fields of unrelated shapes, invented types, or Minecraft commands.',
  'All coordinates integer, nonnegative and inside bounds. Include genuine supported floors and cleared two-block headroom.',
  'Check every shape extent before finalizing bounds: box ends origin+size-1; ellipsoid center+radius; cylinder and torus also need transverse radius; beam thickness adds padding.',
@@ -68,8 +90,10 @@ const STRUCTURAL_GUIDE=[
 
 export function createB198SNativeBridge({
  numPredict=3072,numCtx=6144,keepAlive='10m',
- transport=http,addArchitectureGuide=true,
- onModelResponse=null
+ transport=http,addArchitectureGuide=true,plannedSourceMode=false,
+ compactPlannedGuide=false,r22QualityGuide=false,
+ r44SpaceGuide=false,r46CorrectedGuide=false,
+ r47SchemaFormat=false,r50ProgramFirstGuide=false,onModelResponse=null
 }={}){
  if(!Number.isSafeInteger(numPredict)||numPredict<512||numPredict>4096)
   throw fail('OUTPUT_TOKENS_512_TO_4096');
@@ -78,6 +102,37 @@ export function createB198SNativeBridge({
  if(numPredict>numCtx-2048)throw fail('INSUFFICIENT_CONTEXT_ROOM');
  if(keepAlive!=='10m'&&keepAlive!=='5m')throw fail('KEEP_ALIVE_INVALID');
  if(typeof transport?.request!=='function')throw fail('TRANSPORT_REQUIRED');
+ if(typeof plannedSourceMode!=='boolean')throw fail('PLANNED_MODE_INVALID');
+ if(typeof compactPlannedGuide!=='boolean'||
+  (compactPlannedGuide&&!plannedSourceMode)||
+  (compactPlannedGuide&&!addArchitectureGuide))
+  throw fail('R11_COMPACT_REQUIRES_PLANNED_MODE_AND_GUIDE');
+ // Future R22 opt-in is separately named; the frozen R11 request path
+ // remains byte-identical and this does not authorize a model invocation.
+ if(typeof r22QualityGuide!=='boolean'||
+   (r22QualityGuide&&!plannedSourceMode)||
+   (r22QualityGuide&&!addArchitectureGuide)||
+   (r22QualityGuide&&compactPlannedGuide))
+  throw fail('R22_QUALITY_REQUIRES_DISTINCT_PLANNED_GUIDE');
+ if(typeof r44SpaceGuide!=='boolean'||
+  (r44SpaceGuide&&(!plannedSourceMode||!addArchitectureGuide||
+   compactPlannedGuide||r22QualityGuide)))
+  throw fail('R44_SPACE_GUIDE_REQUIRES_EXCLUSIVE_PLANNED_MODE');
+ if(typeof r46CorrectedGuide!=='boolean'||
+  (r46CorrectedGuide&&(!plannedSourceMode||!addArchitectureGuide||
+   compactPlannedGuide||r22QualityGuide||r44SpaceGuide)))
+  throw fail('R46_GUIDE_REQUIRES_EXCLUSIVE_PLANNED_MODE');
+ if(r44SpaceGuide&&r46CorrectedGuide)
+  throw fail('R44_R46_EXCLUSIVE_GUIDES');
+ if(typeof r47SchemaFormat!=='boolean'||
+  (r47SchemaFormat&&(!plannedSourceMode||!addArchitectureGuide||
+   compactPlannedGuide||r22QualityGuide||r44SpaceGuide||r46CorrectedGuide)))
+  throw fail('R47_SCHEMA_REQUIRES_EXCLUSIVE_PLANNED_MODE');
+ if(typeof r50ProgramFirstGuide!=='boolean'||
+  (r50ProgramFirstGuide&&(!plannedSourceMode||!addArchitectureGuide||
+    compactPlannedGuide||r22QualityGuide||r44SpaceGuide||
+    r46CorrectedGuide||r47SchemaFormat)))
+  throw fail('R50_PROGRAM_GUIDE_REQUIRES_EXCLUSIVE_PLANNED_MODE');
  if(onModelResponse!==null&&typeof onModelResponse!=='function')
   throw fail('EVIDENCE_PERSISTENCE_CALLBACK_REQUIRED');
  const entries=[];
@@ -104,9 +159,34 @@ export function createB198SNativeBridge({
    return Promise.reject(fail('UNSAFE_MODEL_REQUEST'));
   }
   const messages=payload.messages.map(x=>({role:x.role,content:x.content}));
-  if(addArchitectureGuide)messages[0].content+='\n'+STRUCTURAL_GUIDE;
+  if(r50ProgramFirstGuide){
+   messages[0].content=R50_ARCHITECTURE_GUIDE;
+  }else if(r47SchemaFormat){
+   // Future *fresh-consent* mode only; never enabled by R46 or R44.
+   messages[0].content=R46_GUIDE+
+    '\nNative Ollama format uses a strict JSON Schema. Respect exactly the allowed bounds fields and staircase steps <=32; do not waste output tokens on extra properties. Prioritize genuinely hollow, supported, accessible and original architecture.';
+  }else if(r46CorrectedGuide){
+   messages[0].content=R46_GUIDE;
+  }else if(r44SpaceGuide){
+   // R44 opt-in only; legacy R11/R21/R23 behavior remains unchanged.
+   messages[0].content=R41_DRAFT_GUIDE;
+  }else if(r22QualityGuide){
+   // R22 is future-consent-only; no automatic changes to R11 or legacy.
+   // R21's corrective guide is pinned as ONE system message rather than
+   // stacked twice on top of B198G's already verbose default guide.
+   messages[0].content=R21_FUTURE_GUIDE;
+  }else if(compactPlannedGuide){
+   // Opt-in R11 collapses duplicate system instructions into one complete,
+   // concise contract. The frozen natural-language c01 task is unchanged.
+   messages[0].content=R11_COMPACT_GUIDE;
+  }else if(addArchitectureGuide)messages[0].content+='\n'+(plannedSourceMode?
+   STRUCTURAL_GUIDE.replace('The ONLY outer keys are design, explanation, assumptions.',
+    'The ONLY outer keys are design, explanation, assumptions, spatialPlan.')+
+    '\n'+R4_PLANNING_GUIDE:STRUCTURAL_GUIDE)+
+   '\n'+R2_FREEFORM_QUALITY_GUIDE;
   const native={
-   model:payload.model,messages,stream:false,format:'json',think:false,
+   model:payload.model,messages,stream:false,
+   format:(r47SchemaFormat||r50ProgramFirstGuide)?R47_JSON_SCHEMA:'json',think:false,
    keep_alive:keepAlive,
    options:{num_predict:numPredict,num_ctx:numCtx,temperature:0.35}
   };
@@ -175,7 +255,13 @@ export function createB198SNativeBridge({
      // title/brief characters can be trimmed with SHA and explicit disclosure.
      let normalized;
      try{
-      normalized=prepareCapturedModelSource(content);
+      // R4's four-key original is primary evidence: never silently modify it.
+      // Legacy three-key mode keeps bounded metadata/bounds repair unchanged.
+      normalized=plannedSourceMode?{
+       content,
+       metadataRepair:{applied:false,status:'R4_UNMODIFIED_ORIGINAL'},
+       boundsRepair:{applied:false,status:'R4_UNMODIFIED_ORIGINAL'}
+      }:prepareCapturedModelSource(content);
       // Write the FULL ORIGINAL response before strict source validation.
       // Invalid geometry remains evidence; user need not spend another
       // local 27B inference just to recover the model-authored payload.
@@ -225,6 +311,22 @@ export function createB198SNativeBridge({
   requestBudget:{numPredict,numCtx,keepAlive,thinkingOffRequested:true,
    thinkingOffIndependentlyVerified:false,
    nativeOllamaSourceOnly:true,
+   r4PlannedSourceOptIn:plannedSourceMode,
+   r11CompactOutputProfileOptIn:compactPlannedGuide,
+   r11CompactGuideSha256:compactPlannedGuide?R11_GUIDE_SHA256:null,
+   r22QualityOutputProfileOptIn:r22QualityGuide,
+   r22QualityGuideSha256:r22QualityGuide?R21_FUTURE_GUIDE_SHA256:null,
+   r44SpaceGuideProfileOptIn:r44SpaceGuide,
+   r44SpaceGuideSha256:r44SpaceGuide?R41_GUIDE_SHA256:null,
+   r46CorrectedGuideProfileOptIn:r46CorrectedGuide,
+   r46CorrectedGuideSha256:r46CorrectedGuide?R46_GUIDE_SHA256:null,
+   r47SchemaFormatOptIn:r47SchemaFormat,
+   r47SchemaFormatSha256:r47SchemaFormat?R47_JSON_SCHEMA_SHA256:null,
+   r50ProgramFirstProfileOptIn:r50ProgramFirstGuide,
+   r50ProgramFirstGuideSha256:r50ProgramFirstGuide?R50_GUIDE_SHA256:null,
+   r50StructuredJsonSchemaSha256:r50ProgramFirstGuide?R47_JSON_SCHEMA_SHA256:null,
+   r4OriginalReturnedUnmodified:true,
+   fourKeyR4RequiresIndependentReview:true,
     boundedMetadataRepairEnabled:true,
     geometryRepairNeverAutomatic:true,
     declaredBoundsExpansionOnlyIfNoGeometryChanges:true,

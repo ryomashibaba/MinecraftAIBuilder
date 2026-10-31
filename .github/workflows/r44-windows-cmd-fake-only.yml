@@ -1,0 +1,38 @@
+name: R44 Actual Windows CMD — Prebound Fake Ollama Only
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'tools/r44-approved/**'
+      - 'scripts/b198zr44-windows-one-click-fake.test.mjs'
+      - 'scripts/r44-pinned-path-audit.mjs'
+      - 'scripts/r44-pinned-path-audit.test.mjs'
+      - 'scripts/r44-windows-stage-path-diagnostic.ps1'
+      - 'scripts/r44-windows-stage-path-diagnostic.test.mjs'
+      - '.github/workflows/r44-windows-cmd-fake-only.yml'
+  pull_request:
+    paths:
+      - 'tools/r44-approved/**'
+      - 'scripts/b198zr44-windows-one-click-fake.test.mjs'
+      - 'scripts/r44-pinned-path-audit.mjs'
+      - 'scripts/r44-pinned-path-audit.test.mjs'
+      - 'scripts/r44-windows-stage-path-diagnostic.ps1'
+      - 'scripts/r44-windows-stage-path-diagnostic.test.mjs'
+      - '.github/workflows/r44-windows-cmd-fake-only.yml'
+permissions:
+  contents: read
+jobs:
+  actual-cmd-with-fake-provider-only:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify pinned installer inventory with zero provider calls
+        run: node --test scripts/r44-pinned-path-audit.test.mjs
+      - name: Verify Windows PowerShell path-alias diagnostics (fake only)
+        run: node --test scripts/r44-windows-stage-path-diagnostic.test.mjs
+      - name: Fail closed unless a local in-process fake HTTP server pre-binds Ollama port
+        run: node --test scripts/b198zr44-windows-one-click-fake.test.mjs

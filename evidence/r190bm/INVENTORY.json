@@ -1,0 +1,225 @@
+{
+  "schema": "minecraftaibuilder-r190bm-published-evidence-inventory-v1",
+  "files": [
+    {
+      "file": "A/BM_HTTP_RECEIPT.json",
+      "bytes": 348,
+      "sha256": "e80759be337c2836b3707cb38d2a5748b0474abb5c0fd1786c7df06b06483708"
+    },
+    {
+      "file": "A/BM_RUNTIME_AFTER.json",
+      "bytes": 675,
+      "sha256": "aad94f5c100fb29ab49ea4ee043771963f7d7f667965a155cf523aa36079e280"
+    },
+    {
+      "file": "A/PROVIDER_HTTP_RESPONSE.json",
+      "bytes": 4831,
+      "sha256": "78c8b5b17841b3e0027bc76a20ba28edbd63e2314f1ca976aed20163e740cb36"
+    },
+    {
+      "file": "A/R190BF_ATTEMPT.json",
+      "bytes": 1063,
+      "sha256": "654813085fb40ac5f285a695fe8524cc68b46ed602a222312327190140ff9a18"
+    },
+    {
+      "file": "A/R190BF_CAPTURE.json",
+      "bytes": 1757,
+      "sha256": "b5959d65ae7401e16d950808740663b865acb4643422f2a89de8e93a91084539"
+    },
+    {
+      "file": "A/R190BF_EXACT_REQUEST.json",
+      "bytes": 6196,
+      "sha256": "b542f523344390b24c6c7b5b1ccdc5aaf60a7d8bab7222ddd6aaba59e78efc63"
+    },
+    {
+      "file": "A/model-original/R190_I_CAPTURE_RECEIPT.json",
+      "bytes": 1261,
+      "sha256": "3a12204997d91a5db9d4a9559cf2ca28426323583fb1e5841df5ab97965c9e6a"
+    },
+    {
+      "file": "A/model-original/R190_I_ORIGINAL_BRIEF.txt",
+      "bytes": 212,
+      "sha256": "bbd44cc9f28234055601b4055466e2f3564e7e4565d408432de4c4fab0aa277a"
+    },
+    {
+      "file": "A/model-original/R190_I_ORIGINAL_RESPONSE.txt",
+      "bytes": 2492,
+      "sha256": "e54f2abf87d36e0957d8393c960d2fce8075862d00ea1ea736365121a4b6a469"
+    },
+    {
+      "file": "A/model-original/R190_J_GLOBAL_DIAGNOSTIC.json",
+      "bytes": 885,
+      "sha256": "1ef7e85ea8996ff9ea87a72dd3c0742dd0afd54270002ed7ba3fa083440b610e"
+    },
+    {
+      "file": "AUDIT.json",
+      "bytes": 3347,
+      "sha256": "c9e8be085e61600a5dd245c8ed1b6fe48a627ab2fc1a5457e2f808b3c1e967ab"
+    },
+    {
+      "file": "B/BM_HTTP_RECEIPT.json",
+      "bytes": 348,
+      "sha256": "9b13103ed3e316ecf40b09d6b5351ea6afb4b1ad73668673a68f6fb4c2e789a7"
+    },
+    {
+      "file": "B/BM_RUNTIME_AFTER.json",
+      "bytes": 674,
+      "sha256": "c8eca5c2b1979553712713d7e51f6141f7a12966db40c1766b713a351a78dc5c"
+    },
+    {
+      "file": "B/PROVIDER_HTTP_RESPONSE.json",
+      "bytes": 7555,
+      "sha256": "b20c0f79f7e9e84b44a2e15b3fb0d922a21e1546182a6b13524cfa53bc9ca6d9"
+    },
+    {
+      "file": "B/R190BF_ATTEMPT.json",
+      "bytes": 1063,
+      "sha256": "ffdc4ba4a9b9dec1dc41976c621f45bd23d91376439bec62de3002d897a1cf6b"
+    },
+    {
+      "file": "B/R190BF_CAPTURE.json",
+      "bytes": 1751,
+      "sha256": "3cb39842defb7aaec4190e28be71520e35657b35be67ef4e5c9eed9e0e2f1733"
+    },
+    {
+      "file": "B/R190BF_EXACT_REQUEST.json",
+      "bytes": 9448,
+      "sha256": "97ef75f8eaf94acf5cbc604e547ac85db8f263231c9464f7fccb62ba1ab8c12a"
+    },
+    {
+      "file": "B/model-original/R190_I_CAPTURE_RECEIPT.json",
+      "bytes": 1255,
+      "sha256": "ef61b836f4f273534eb3c7cb371e430d913876fc7f847377ce7662352a4ddee7"
+    },
+    {
+      "file": "B/model-original/R190_I_ORIGINAL_BRIEF.txt",
+      "bytes": 3418,
+      "sha256": "f78511b4ab5a6624bd6ced41544d5ca467f06535fbcb8cb209ff9c2a9afd8185"
+    },
+    {
+      "file": "B/model-original/R190_I_ORIGINAL_RESPONSE.txt",
+      "bytes": 3706,
+      "sha256": "8e2590128e8bd932cddc2df595fcc01c3cbd660298cedd445431d0787bb90c86"
+    },
+    {
+      "file": "B/model-original/R190_J_GLOBAL_DIAGNOSTIC.json",
+      "bytes": 2016,
+      "sha256": "09e473e64243b1ece8185cd4a3e0b5a9510e4e00e78064a8ab7a6b4ac55a23ca"
+    },
+    {
+      "file": "BM_EXECUTION.json",
+      "bytes": 1027,
+      "sha256": "1a162b8dbf8880028979773063f3a1d18b5246624a51fb907a65180f4ba9dd88"
+    },
+    {
+      "file": "BM_RUNTIME_BEFORE.json",
+      "bytes": 3850,
+      "sha256": "79e922ceeda865bb8e73de9922547d0199e794abae22f4a2677cb9f9067b2540"
+    },
+    {
+      "file": "LOCAL_ENVIRONMENT.json",
+      "bytes": 35607,
+      "sha256": "86b1e4940f7dde9e1344050e368d04730848121321fea382ac7f70bbd98c905d"
+    },
+    {
+      "file": "OFFLINE_TESTS_AFTER_FIX.txt",
+      "bytes": 3521,
+      "sha256": "b2bdab3c2213b75b57f981336a478083efa23f54e4d537aa3013a4992a6c5c2c"
+    },
+    {
+      "file": "REAL_EXECUTION_OUTPUT.txt",
+      "bytes": 1283,
+      "sha256": "3e7bf9971284db9c46a1ce8c165357956f8adaaea0c90705fe7fa82952216ee7"
+    },
+    {
+      "file": "REPORT_JA.md",
+      "bytes": 12059,
+      "sha256": "73be22998660002e03c91ebf6adae44c1fa5362a3751708dd5c58f9b2e8c5844"
+    },
+    {
+      "file": "USER_BRIEF.txt",
+      "bytes": 212,
+      "sha256": "bbd44cc9f28234055601b4055466e2f3564e7e4565d408432de4c4fab0aa277a"
+    },
+    {
+      "file": "comparison/R190BE_COMPARE.html",
+      "bytes": 1659,
+      "sha256": "e8bf93a38ec030d9c3cce7cbd7fc73318cb16cdf20277e1739bd8d34e45d9ec7"
+    },
+    {
+      "file": "comparison/R190BE_COMPARE.json",
+      "bytes": 2652,
+      "sha256": "559e9aaef2ef3078a047664775dee6f47ae07447b4e463a6f2a9ff313c875fdd"
+    },
+    {
+      "file": "comparison/R190BE_HUMAN_REVIEW_TEMPLATE.json",
+      "bytes": 1240,
+      "sha256": "be1740d9d9d3b2a9d83d2ca12b3e75872dccfb142518e33c2fff1003fe87fcc3"
+    },
+    {
+      "file": "comparison/R190BF_CONTROLLED_PAIR.json",
+      "bytes": 2689,
+      "sha256": "67dd41c69217bcdc00968974771eafbaa5913ede48d6efe4dfd3f9e47d6968f3"
+    },
+    {
+      "file": "comparison/R190BI_A_INVALID_SOURCE_DIAGNOSTIC.json",
+      "bytes": 4167,
+      "sha256": "2ca94b6ea8ccd8aa8d9f0cc1105b197095735b565b3fed3abf222e8cdf148544"
+    },
+    {
+      "file": "comparison/R190BI_B_INVALID_SOURCE_DIAGNOSTIC.json",
+      "bytes": 5092,
+      "sha256": "ab2d434cfbe6f92d739b4c398bcdd7aaab92cca4fa2ea3b71e464a7ba8768abc"
+    },
+    {
+      "file": "comparison/R190BK_EVIDENCE/R190BK_EVIDENCE.json",
+      "bytes": 4632,
+      "sha256": "0605f21978ed1c50bab46f75fc0f4b8eb10d0001171b9d1dd0788359309863a7"
+    },
+    {
+      "file": "comparison/R190BK_EVIDENCE/R190BK_REVIEW.html",
+      "bytes": 4148,
+      "sha256": "ed290ac29dee311be77296b81e7d17f4d7a126ba167d80b74e39e0f2a45f6c29"
+    },
+    {
+      "file": "comparison/R190BL_ORIGINAL_BRIEF.txt",
+      "bytes": 212,
+      "sha256": "bbd44cc9f28234055601b4055466e2f3564e7e4565d408432de4c4fab0aa277a"
+    },
+    {
+      "file": "user-prepared-bj/DESIGN_FIRST_PROMPT.txt",
+      "bytes": 3418,
+      "sha256": "f78511b4ab5a6624bd6ced41544d5ca467f06535fbcb8cb209ff9c2a9afd8185"
+    },
+    {
+      "file": "user-prepared-bj/ORIGINAL_BRIEF.txt",
+      "bytes": 212,
+      "sha256": "bbd44cc9f28234055601b4055466e2f3564e7e4565d408432de4c4fab0aa277a"
+    },
+    {
+      "file": "user-prepared-bj/R190BJ_ARCHIVED_DIAGNOSIS.json",
+      "bytes": 5656,
+      "sha256": "417f65ff5f9d578250562a1ac648e64d2f18190842cd44f73bcbede07a82c13e"
+    },
+    {
+      "file": "user-prepared-bj/R190BJ_ARCHIVED_ORIGINAL.txt",
+      "bytes": 2581,
+      "sha256": "0bf706181bb2b7a30f8082f896a703c33749ba55f75d42010adba88f47c84f17"
+    },
+    {
+      "file": "user-prepared-bj/R190BJ_PROMPT_RECEIPT.json",
+      "bytes": 1346,
+      "sha256": "2fc952d0754116d7cb2b767cf7556af97c38eefe41155f2def8b7fe038f85daf"
+    },
+    {
+      "file": "user-protocol/R190BF_PROTOCOL.json",
+      "bytes": 1082,
+      "sha256": "b70b04fa056a68f095d89620ae05dba21eb529b03dd70621c1347d36fe5f37fe"
+    }
+  ],
+  "excludes": [
+    "Unsubmitted library proposal and its preflight artifacts",
+    "INVENTORY.json itself"
+  ],
+  "inferenceCallsByAudit": 0
+}

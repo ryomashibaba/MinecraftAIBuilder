@@ -1,0 +1,32 @@
+name: R12 Mini Read-Only Installer and Offline QA
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'tools/r12-mini/**'
+      - 'scripts/b198zr12-local-offline-qa.mjs'
+      - 'scripts/b198zr12-windows-installer-smoke.ps1'
+      - '.github/workflows/r12-mini-offline-windows.yml'
+  pull_request:
+    paths:
+      - 'tools/r12-mini/**'
+      - 'scripts/b198zr12-local-offline-qa.mjs'
+      - 'scripts/b198zr12-windows-installer-smoke.ps1'
+      - '.github/workflows/r12-mini-offline-windows.yml'
+permissions:
+  contents: read
+jobs:
+  actual-windows-mini-offline-only:
+    runs-on: windows-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: No-model source-only functional QA
+        shell: pwsh
+        run: node scripts/b198zr12-local-offline-qa.mjs
+      - name: Real Windows PowerShell installation, repeat verification, and tamper rejection
+        shell: powershell
+        run: ./scripts/b198zr12-windows-installer-smoke.ps1

@@ -1,0 +1,23 @@
+{
+  "status": "UNREVIEWED_ART_HOLD",
+  "originalBriefSha256": "bbd44cc9f28234055601b4055466e2f3564e7e4565d408432de4c4fab0aa277a",
+  "originalRawSha256": "e54f2abf87d36e0957d8393c960d2fce8075862d00ea1ea736365121a4b6a469",
+  "derivedGeometrySha256": null,
+  "reviewer": null,
+  "requestFidelity": {
+    "use": null,
+    "spaceProgram": null,
+    "floorHeights": null,
+    "upperFloorAccess": null,
+    "scale": null,
+    "omissions": null
+  },
+  "art": {
+    "originality": null,
+    "exteriorComposition": null,
+    "spatialExperience": null,
+    "decision": "ART_HOLD"
+  },
+  "evidenceRequired": "Cite original Japanese words, source IDs and exact derived views; no invented review or model success",
+  "constructionApproved": false
+}

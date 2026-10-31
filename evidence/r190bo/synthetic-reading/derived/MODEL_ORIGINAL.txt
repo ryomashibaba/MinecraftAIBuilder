@@ -1,0 +1,270 @@
+{
+  "schema": "minecraftaibuilder-r190bn-spatial-assembly-v1",
+  "id": "bn-synthetic-reading",
+  "title": "SYNTHETIC OFFLINE — bn-synthetic-reading",
+  "brief": "合成検証：下階の展示と上階の閲覧空間を、屋内の階段と踊り場で結ぶ。実モデル設計ではない。",
+  "originalBriefSha256": "83e26bea1cb6c0ad3a836ea44623d690ddbeba4c59975e8cfd48584c31bf3b84",
+  "bounds": {
+    "width": 28,
+    "height": 24,
+    "depth": 34
+  },
+  "intent": {
+    "use": "Synthetic usable spaces for an offline translation study.",
+    "experience": "Synthetic authored space and circulation, not AI aesthetic improvement.",
+    "massing": "Author chooses all levels, exact voids, envelopes and primitive shapes.",
+    "circulation": "Author specifies every opening, stair flight and landing. No host solver."
+  },
+  "levels": [
+    {
+      "id": "lower-level",
+      "standingY": 1
+    },
+    {
+      "id": "upper-level",
+      "standingY": 9
+    }
+  ],
+  "spaces": [
+    {
+      "id": "lower-gallery",
+      "levelId": "lower-level",
+      "purpose": "展示のための下階空間",
+      "origin": [
+        3,
+        3
+      ],
+      "size": [
+        12,
+        24
+      ],
+      "clearHeight": 7,
+      "minimumReachablePositions": 230,
+      "minimumReachablePercent": 80
+    },
+    {
+      "id": "upper-reading",
+      "levelId": "upper-level",
+      "purpose": "閲覧のための上階空間",
+      "origin": [
+        3,
+        3
+      ],
+      "size": [
+        12,
+        24
+      ],
+      "clearHeight": 7,
+      "minimumReachablePositions": 230,
+      "minimumReachablePercent": 80
+    }
+  ],
+  "operations": [
+    {
+      "kind": "enclosure",
+      "id": "lower-envelope",
+      "spaceId": "lower-gallery",
+      "thickness": 1,
+      "materials": {
+        "floor": "wood",
+        "wall": "concrete",
+        "roof": "concrete"
+      }
+    },
+    {
+      "kind": "enclosure",
+      "id": "upper-envelope",
+      "spaceId": "upper-reading",
+      "thickness": 1,
+      "materials": {
+        "floor": "wood",
+        "wall": "concrete",
+        "roof": "concrete"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "stair-core-skin",
+        "shape": "box",
+        "mode": "add",
+        "material": "metal",
+        "origin": [
+          16,
+          0,
+          2
+        ],
+        "size": [
+          8,
+          18,
+          26
+        ],
+        "shell": 1
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "arrival-floor",
+        "mode": "add",
+        "shape": "box",
+        "origin": [
+          5,
+          0,
+          0
+        ],
+        "size": [
+          4,
+          1,
+          4
+        ],
+        "material": "stone"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "arrival-opening",
+        "mode": "cut",
+        "shape": "box",
+        "origin": [
+          6,
+          1,
+          2
+        ],
+        "size": [
+          2,
+          3,
+          1
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "lower-core-portal",
+        "mode": "cut",
+        "shape": "box",
+        "origin": [
+          15,
+          1,
+          4
+        ],
+        "size": [
+          2,
+          3,
+          3
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "upper-core-portal",
+        "mode": "cut",
+        "shape": "box",
+        "origin": [
+          15,
+          9,
+          20
+        ],
+        "size": [
+          2,
+          3,
+          3
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "lower-landing",
+        "mode": "add",
+        "shape": "box",
+        "origin": [
+          15,
+          0,
+          3
+        ],
+        "size": [
+          8,
+          1,
+          5
+        ],
+        "material": "stone"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "upper-landing",
+        "mode": "add",
+        "shape": "box",
+        "origin": [
+          15,
+          8,
+          19
+        ],
+        "size": [
+          8,
+          1,
+          5
+        ],
+        "material": "stone"
+      }
+    },
+    {
+      "kind": "flight",
+      "id": "authored-flight",
+      "fromLevelId": "lower-level",
+      "toLevelId": "upper-level",
+      "start": [
+        18,
+        3
+      ],
+      "end": [
+        18,
+        20
+      ],
+      "width": 3,
+      "treadDepth": 2,
+      "material": "stone"
+    }
+  ],
+  "entrance": [
+    6,
+    1,
+    1
+  ],
+  "headroom": 3,
+  "destinations": [
+    {
+      "id": "upper-destination",
+      "point": [
+        5,
+        9,
+        22
+      ],
+      "maximumPathSteps": 150
+    }
+  ],
+  "protectedVoids": [
+    {
+      "id": "reading-air",
+      "origin": [
+        4,
+        9,
+        5
+      ],
+      "size": [
+        8,
+        3,
+        10
+      ],
+      "maxOccupiedCells": 0
+    }
+  ],
+  "assumptions": [
+    "SYNTHETIC_TEST_FIXTURE; no model inference or artistic approval"
+  ]
+}

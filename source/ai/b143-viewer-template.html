@@ -36,12 +36,12 @@ canvas:active{cursor:grabbing}.canvas-label{position:absolute;left:20px;top:18px
 <header><div><div class="sup">B143 / UNIVERSAL AI DESIGN</div><h1>MinecraftAIBuilder — AI Architecture Studio</h1></div>
 <a href="../">既存15棟の設計レビュー →</a></header>
 <div class="layout"><aside>
-<h2>ChatGPTが設計した新規建築</h2>
-<div class="muted" style="font-size:.86rem">固定の住宅・ホテル・集合住宅・オフィス・図書館カテゴリに依存しない建築データの実証。</div>
+<h2>設計ソース由来の建築プレビュー（作者未認証）</h2>
+<div class="muted" style="font-size:.86rem">このHTMLだけではモデル・作者の身元は証明できません。モデルの設計とホストによる補完・修正を区別してください。</div>
 <label for="building">建築を選択</label><select id="building"></select>
 <div id="description" class="info"></div><div id="stats"></div>
 <h2 style="margin-top:20px">表示設定</h2>
-<label for="floor">表示する上限階 <strong id="floorValue">全階</strong></label>
+<label for="floor">表示する上限高さ帯 <strong id="floorValue">全階</strong></label>
 <input type="range" id="floor" min="0" max="1" value="1">
 <div class="toggle"><input id="allFloors" type="checkbox" checked><label for="allFloors">全階表示</label></div>
 <div id="materialToggles"></div>
@@ -83,7 +83,7 @@ function setScene(){
  }
  updateFloor();drawSoon();
 }
-function updateFloor(){el("floorValue").textContent=all.checked?"全階":String(Number(floor.value)+1)+"階まで";}
+function updateFloor(){el("floorValue").textContent=all.checked?"全階":String(Number(floor.value)+1)+"帯まで";}
 function drawSoon(){if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;draw();});}
 function draw(){
  const dpr=Math.min(2,window.devicePixelRatio||1),w=Math.max(canvas.clientWidth,250),h=Math.max(canvas.clientHeight,250);
@@ -121,7 +121,7 @@ function draw(){
  }
  ctx.globalAlpha=1;
  el("meta").textContent="表示: "+active.length.toLocaleString()+" / "+s.surface.length.toLocaleString()+
-  " 表面セル、"+painted.toLocaleString()+" 面｜モデル SHA256: "+s.geometrySha256.slice(0,16)+
+  " 表面セル、"+painted.toLocaleString()+" 面｜形状 SHA256: "+s.geometrySha256.slice(0,16)+
   "…｜表示は設計上のローカル座標。実ワールドの座標・施工データではありません。";
 }
 select.addEventListener("change",()=>{index=Number(select.value);setScene();});

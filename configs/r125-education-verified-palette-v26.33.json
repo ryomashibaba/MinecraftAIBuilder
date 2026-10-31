@@ -1,0 +1,11 @@
+{
+  "schema": "r125-education-user-verified-palette-v1",
+  "edition": "Minecraft Education",
+  "version": "26.33",
+  "blocks": {
+    "wood": {
+      "blockName": "oak_planks",
+      "evidence": "2026-10-31 user report: copied-world mabprobe PROBE MATCH and visually confirmed oak-plank block; screenshot in chat"
+    }
+  }
+}

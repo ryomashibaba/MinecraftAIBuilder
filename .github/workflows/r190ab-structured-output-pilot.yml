@@ -1,0 +1,87 @@
+name: R190-AB Structured JSON-Schema Local Qwen Pilot — FAKE ONLY
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'scripts/r190ab-structured-output-pilot.mjs'
+      - 'scripts/r190ab-structured-output-pilot.test.mjs'
+      - 'scripts/r190ab-semantic-workshop.ps1'
+      - 'scripts/r190ab-saved-semantic-replay.mjs'
+      - 'scripts/r190ab-saved-semantic-replay.test.mjs'
+      - 'source/ai/r190ab-semantic-contract.mjs'
+      - 'source/ai/r190ad-expressive-semantic-contract.mjs'
+      - 'source/ai/r190ae-flexible-semantic-contract.mjs'
+      - 'source/ai/r190af-program-intent.mjs'
+      - 'scripts/r190af-program-intent.test.mjs'
+      - 'scripts/r190ae-flexible-semantic.test.mjs'
+      - 'scripts/r190ae-saved-semantic-diagnose.mjs'
+      - 'scripts/r190ae-saved-semantic-diagnose.test.mjs'
+      - 'scripts/r190ad-expressive-semantic.test.mjs'
+      - 'source/ai/r190ad-semantic-diagnostics.mjs'
+      - 'scripts/r190ad-saved-semantic-diagnose.mjs'
+      - 'scripts/r190ad-saved-semantic-diagnose.test.mjs'
+      - 'source/ai/r190-semantic-massing.mjs'
+      - 'scripts/r190-semantic-massing.test.mjs'
+      - 'scripts/r190-semantic-fixtures.mjs'
+      - '.github/workflows/r190ab-structured-output-pilot.yml'
+      - 'evidence/r190aa/pilot-01/MODEL_RESPONSE_ORIGINAL.txt'
+permissions:
+  contents: read
+jobs:
+  fake-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: node --check scripts/r190ab-structured-output-pilot.mjs
+      - run: node --check scripts/r190ab-structured-output-pilot.test.mjs
+      - run: node --test scripts/r190ab-structured-output-pilot.test.mjs
+      - run: node --test scripts/r190-semantic-massing.test.mjs
+      - run: node --check scripts/r190ab-saved-semantic-replay.mjs
+      - run: node --test scripts/r190ab-saved-semantic-replay.test.mjs
+      - run: node --check source/ai/r190ad-expressive-semantic-contract.mjs
+      - run: node --test scripts/r190ad-expressive-semantic.test.mjs
+      - run: node --check source/ai/r190ae-flexible-semantic-contract.mjs
+      - run: node --test scripts/r190ae-flexible-semantic.test.mjs
+      - run: node --check source/ai/r190af-program-intent.mjs
+      - run: node --test scripts/r190af-program-intent.test.mjs
+      - run: node --check source/ai/r190ad-semantic-diagnostics.mjs
+      - run: node --check scripts/r190ad-saved-semantic-diagnose.mjs
+      - run: node --test scripts/r190ad-saved-semantic-diagnose.test.mjs
+      - run: node --check scripts/r190ae-saved-semantic-diagnose.mjs
+      - run: node --test scripts/r190ae-saved-semantic-diagnose.test.mjs
+      - name: Parse Windows preflight script; no Qwen/model calls
+        shell: pwsh
+        run: |
+          $tokens = $null
+          $issues = $null
+          $ast = [System.Management.Automation.Language.Parser]::ParseFile(
+            (Resolve-Path 'scripts/r190ab-semantic-workshop.ps1').Path,
+            [ref]$tokens, [ref]$issues)
+          if ($issues.Count -gt 0) {
+            $issues | Format-List | Out-String | Write-Error
+            exit 1
+          }
+          # Regression for Windows CallDepthOverflow: functions named Git
+          # shadow the external git executable case-insensitively.
+          $shadowingFunctions = @($ast.FindAll({
+            param($node)
+            $node -is [System.Management.Automation.Language.FunctionDefinitionAst] -and
+            $node.Name -ieq 'git'
+          }, $true))
+          if ($shadowingFunctions.Count -ne 0) {
+            throw 'Function Git shadows the native git executable and recurses'
+          }
+          "Windows preflight syntax and Git shadowing regression PASS"
+  windows-offline-diagnosis:
+    runs-on: windows-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Saved synthetic AE original audit; no provider or world
+        run: node --test scripts/r190ae-saved-semantic-diagnose.test.mjs scripts/r190ae-flexible-semantic.test.mjs scripts/r190ad-saved-semantic-diagnose.test.mjs
+

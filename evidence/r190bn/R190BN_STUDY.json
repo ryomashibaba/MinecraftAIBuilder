@@ -1,0 +1,377 @@
+{
+  "schema": "r190bn-offline-design-study-v1",
+  "newModelCalls": 0,
+  "unchangedOfficialBM": [
+    {
+      "side": "A",
+      "originalSha256": "e54f2abf87d36e0957d8393c960d2fce8075862d00ea1ea736365121a4b6a469",
+      "firstFailure": "B143_SCHEMA_OR_MODE",
+      "originalUnmodified": true,
+      "repaired": false,
+      "source3DGenerated": false,
+      "declaredBounds": {
+        "width": 64,
+        "depth": 64,
+        "height": 128
+      }
+    },
+    {
+      "side": "B",
+      "originalSha256": "8e2590128e8bd932cddc2df595fcc01c3cbd660298cedd445431d0787bb90c86",
+      "firstFailure": "B143_MATERIAL",
+      "originalUnmodified": true,
+      "repaired": false,
+      "source3DGenerated": false,
+      "declaredBounds": {
+        "width": 64,
+        "depth": 32,
+        "height": 96
+      }
+    }
+  ],
+  "capacity": {
+    "schema": "r190bn-capacity-study-v1",
+    "provenance": "SYNTHETIC_COMPILER_PROBES_NOT_MODEL_DESIGNS",
+    "unchangedLimits": {
+      "height": 96,
+      "maxOccupiedCellsIncludingIntermediate": 160000,
+      "boundsVolume": 500000,
+      "elements": 160,
+      "work": 1750000,
+      "straightFlightSteps": 32
+    },
+    "results": [
+      {
+        "id": "solid-then-cut",
+        "bounds": {
+          "width": 64,
+          "height": 96,
+          "depth": 32
+        },
+        "status": "HOLD",
+        "failure": "B143_VOXEL_BUDGET",
+        "voxels": null
+      },
+      {
+        "id": "direct-shell",
+        "bounds": {
+          "width": 64,
+          "height": 96,
+          "depth": 32
+        },
+        "status": "COMPILED_SOURCE_ONLY",
+        "voxels": 21768,
+        "physicalCellsSha256": "7d9a34c735e423281960e2e1e3207e62d3ecd5ce4f906577480c6a9dcb80def5"
+      },
+      {
+        "id": "explicit-six-surfaces",
+        "bounds": {
+          "width": 64,
+          "height": 96,
+          "depth": 32
+        },
+        "status": "COMPILED_SOURCE_ONLY",
+        "voxels": 21768,
+        "physicalCellsSha256": "7d9a34c735e423281960e2e1e3207e62d3ecd5ce4f906577480c6a9dcb80def5"
+      },
+      {
+        "id": "shell-with-23-floors",
+        "bounds": {
+          "width": 64,
+          "height": 96,
+          "depth": 32
+        },
+        "status": "COMPILED_SOURCE_ONLY",
+        "voxels": 62688,
+        "physicalCellsSha256": "10ca6cc601b508b9a019e2bb2e536aa2d2dbc19643b26f4b1007aed1be72fcd2"
+      },
+      {
+        "id": "wide-25-floors",
+        "bounds": {
+          "width": 128,
+          "height": 96,
+          "depth": 40
+        },
+        "status": "COMPILED_SOURCE_ONLY",
+        "voxels": 156360,
+        "physicalCellsSha256": "e4b14dd97fb2a3037b15697bc00cfb626282f63753e60de54f4228c2ee0e04de"
+      },
+      {
+        "id": "wide-26-floors",
+        "bounds": {
+          "width": 128,
+          "height": 96,
+          "depth": 40
+        },
+        "status": "HOLD",
+        "failure": "B143_VOXEL_BUDGET",
+        "voxels": null
+      },
+      {
+        "id": "height-128",
+        "bounds": {
+          "width": 32,
+          "height": 128,
+          "depth": 32
+        },
+        "status": "HOLD",
+        "failure": "B143_BOUNDS",
+        "voxels": null
+      }
+    ],
+    "exactShellVsSurfacesEqual": true,
+    "solidCutAlgebraicFinalCells": 21768,
+    "wide25AlgebraicCells": 156360,
+    "wide26AlgebraicCells": 161148,
+    "actualArchitecturalFloorsOrUsabilityCertified": false,
+    "newModelCalls": 0,
+    "worldContacts": 0,
+    "worldWrites": 0
+  },
+  "syntheticStudies": [
+    {
+      "name": "synthetic-reading",
+      "authorship": "SYNTHETIC_TEST_FIXTURE",
+      "status": "SOURCE_SPACE_AND_ROUTE_PROXIES_PRESENT_ART_HOLD",
+      "originalInputSha256": "04a97ad267405b45c4c999564ac8313979ddea1192364f75e33a452ac4cec214",
+      "sourceSha256": "f3843229acc2a06a88d2d1eacae3dfdab8651091c252561dd095db87cd5cf8dc",
+      "geometrySha256": "4cf737ec59d902946bc32bed5a390e1cadc66e3b7a03675401cfb36536f2dbea",
+      "voxels": 3802,
+      "authoredLevels": [
+        {
+          "id": "lower-level",
+          "standingY": 1
+        },
+        {
+          "id": "upper-level",
+          "standingY": 9
+        }
+      ],
+      "spaceEvidence": [
+        {
+          "id": "lower-gallery",
+          "purpose": "展示のための下階空間",
+          "levelId": "lower-level",
+          "standingY": 1,
+          "clearHeight": 7,
+          "obstructedAirCells": 0,
+          "unsupportedFloorCells": 0,
+          "declaredArea": 288,
+          "status": "SOURCE_FLOOR_AND_CLEAR_VOLUME_PRESENT"
+        },
+        {
+          "id": "upper-reading",
+          "purpose": "閲覧のための上階空間",
+          "levelId": "upper-level",
+          "standingY": 9,
+          "clearHeight": 7,
+          "obstructedAirCells": 0,
+          "unsupportedFloorCells": 0,
+          "declaredArea": 288,
+          "status": "SOURCE_FLOOR_AND_CLEAR_VOLUME_PRESENT"
+        }
+      ],
+      "functionalReview": {
+        "status": "SOURCE_AND_DECLARED_SPATIAL_CLAIMS_FORMALLY_PASS",
+        "evidence": {
+          "schema": "minecraftaibuilder-b198zr3-functional-review-evidence-v1",
+          "caseId": "unverified-model-plan",
+          "contractAuthorship": "MODEL_DECLARED_UNVERIFIED",
+          "pinnedSourceSha256": "f3843229acc2a06a88d2d1eacae3dfdab8651091c252561dd095db87cd5cf8dc",
+          "status": "FORMAL_GEOMETRY_AND_ROUTE_CONSTRAINTS_PASS",
+          "results": {
+            "protectedVoids": [
+              {
+                "id": "reading-air",
+                "occupied": 0,
+                "volume": 240,
+                "passed": true
+              }
+            ],
+            "destinations": [
+              {
+                "id": "upper-destination",
+                "reachable": true,
+                "shortestPathSteps": 46,
+                "maximumPathSteps": 150,
+                "passed": true
+              }
+            ],
+            "functionalZones": [
+              {
+                "id": "lower-gallery",
+                "regionVolume": 288,
+                "standable": 288,
+                "reachable": 288,
+                "percentOfRegion": 100,
+                "passed": true
+              },
+              {
+                "id": "upper-reading",
+                "regionVolume": 288,
+                "standable": 288,
+                "reachable": 288,
+                "percentOfRegion": 100,
+                "passed": true
+              }
+            ],
+            "abstractReachablePositions": 766
+          },
+          "unverified": {
+            "requestSemantics": true,
+            "architecturalQuality": true,
+            "modelGeneralization": true,
+            "minecraftBlockStates": true,
+            "minecraftActualWalking": true,
+            "humanApproval": true
+          },
+          "sourceOnly": true,
+          "modelCalls": 0,
+          "safety": {
+            "readiness": "NOT_PREPARED",
+            "constructionApproved": false,
+            "executionAllowed": false,
+            "worldContacts": 0,
+            "worldWrites": 0,
+            "gates": [
+              "BLOCKED",
+              "BLOCKED",
+              "BLOCKED",
+              "BLOCKED",
+              "BLOCKED",
+              "BLOCKED",
+              "BLOCKED",
+              "BLOCKED",
+              "BLOCKED"
+            ],
+            "BuildPlan": {
+              "operations": []
+            }
+          }
+        }
+      },
+      "legacySectionStatus": "HOLD_MODEL_DECLARED_ZONE_ACCESS_UNPROVEN",
+      "legacySectionLimitation": "BC is a same-height two-wide proxy; upper levels are not re-labelled as flat-reachable."
+    },
+    {
+      "name": "synthetic-concourse",
+      "authorship": "SYNTHETIC_TEST_FIXTURE",
+      "status": "SOURCE_SPACE_AND_ROUTE_PROXIES_PRESENT_ART_HOLD",
+      "originalInputSha256": "f3bfe7436d2e287f7a76324f1e93b87627da397e19b033274359b69401610084",
+      "sourceSha256": "aeb95e2df65cb67a67a796f771ba81bda22b06dd256a615bb49e0da7a906bace",
+      "geometrySha256": "5d76a26bdb61962deea388c4435bb6093ae7c537ed01d6454eca1025a6c8e0e6",
+      "voxels": 5507,
+      "authoredLevels": [
+        {
+          "id": "public-level",
+          "standingY": 1
+        }
+      ],
+      "spaceEvidence": [
+        {
+          "id": "public-concourse",
+          "purpose": "長い通過・滞在のための空間",
+          "levelId": "public-level",
+          "standingY": 1,
+          "clearHeight": 8,
+          "obstructedAirCells": 0,
+          "unsupportedFloorCells": 0,
+          "declaredArea": 1160,
+          "status": "SOURCE_FLOOR_AND_CLEAR_VOLUME_PRESENT"
+        }
+      ],
+      "functionalReview": {
+        "status": "SOURCE_AND_DECLARED_SPATIAL_CLAIMS_FORMALLY_PASS",
+        "evidence": {
+          "schema": "minecraftaibuilder-b198zr3-functional-review-evidence-v1",
+          "caseId": "unverified-model-plan",
+          "contractAuthorship": "MODEL_DECLARED_UNVERIFIED",
+          "pinnedSourceSha256": "aeb95e2df65cb67a67a796f771ba81bda22b06dd256a615bb49e0da7a906bace",
+          "status": "FORMAL_GEOMETRY_AND_ROUTE_CONSTRAINTS_PASS",
+          "results": {
+            "protectedVoids": [],
+            "destinations": [
+              {
+                "id": "far-destination",
+                "reachable": true,
+                "shortestPathSteps": 68,
+                "maximumPathSteps": 200,
+                "passed": true
+              }
+            ],
+            "functionalZones": [
+              {
+                "id": "public-concourse",
+                "regionVolume": 1160,
+                "standable": 1160,
+                "reachable": 1160,
+                "percentOfRegion": 100,
+                "passed": true
+              }
+            ],
+            "abstractReachablePositions": 1176
+          },
+          "unverified": {
+            "requestSemantics": true,
+            "architecturalQuality": true,
+            "modelGeneralization": true,
+            "minecraftBlockStates": true,
+            "minecraftActualWalking": true,
+            "humanApproval": true
+          },
+          "sourceOnly": true,
+          "modelCalls": 0,
+          "safety": {
+            "readiness": "NOT_PREPARED",
+            "constructionApproved": false,
+            "executionAllowed": false,
+            "worldContacts": 0,
+            "worldWrites": 0,
+            "gates": [
+              "BLOCKED",
+              "BLOCKED",
+              "BLOCKED",
+              "BLOCKED",
+              "BLOCKED",
+              "BLOCKED",
+              "BLOCKED",
+              "BLOCKED",
+              "BLOCKED"
+            ],
+            "BuildPlan": {
+              "operations": []
+            }
+          }
+        }
+      },
+      "legacySectionStatus": "SOURCE_SECTION_PROXIES_AVAILABLE_ART_HOLD",
+      "legacySectionLimitation": "BC is a same-height two-wide proxy; upper levels are not re-labelled as flat-reachable."
+    }
+  ],
+  "bmArchitectureImprovement": "NOT_ESTABLISHED",
+  "newIRModelDesignQuality": "NOT_TESTED",
+  "sourceConversion": "AUTHOR_DIMENSIONS_AND_LEVELS_TO_DETERMINISTIC_SURFACES",
+  "safety": {
+    "readiness": "NOT_PREPARED",
+    "constructionApproved": false,
+    "executionAllowed": false,
+    "gates": [
+      "BLOCKED",
+      "BLOCKED",
+      "BLOCKED",
+      "BLOCKED",
+      "BLOCKED",
+      "BLOCKED",
+      "BLOCKED",
+      "BLOCKED",
+      "BLOCKED"
+    ],
+    "BuildPlan": {
+      "operations": []
+    },
+    "worldContacts": 0,
+    "worldWrites": 0,
+    "art": "ART_HOLD",
+    "officialArtAdoptions": 0
+  }
+}

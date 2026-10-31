@@ -1,0 +1,84 @@
+name: R190-AC Offline Original Source Review — ZERO MODEL CALLS
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'scripts/r190ac-offline-source-review.mjs'
+      - 'scripts/r190ac-offline-source-review.test.mjs'
+      - 'source/ai/r190ab-semantic-contract.mjs'
+      - 'source/ai/r190-semantic-massing.mjs'
+      - 'scripts/r190-semantic-fixtures.mjs'
+      - 'evidence/r190aa/pilot-01/MODEL_RESPONSE_ORIGINAL.txt'
+      - 'evidence/r190aa/pilot-01/AUDIT.json'
+      - '.github/workflows/r190ac-offline-source-review.yml'
+      - 'scripts/r125-r190-free-engine.mjs'
+      - 'scripts/r125-r190-free-engine.test.mjs'
+      - 'scripts/r190-e1-diagnose.mjs'
+      - 'scripts/r190-e1-two-stage.mjs'
+      - 'scripts/r190-e1-two-stage.test.mjs'
+      - 'scripts/r190-e1-stage-a-audit.mjs'
+      - 'scripts/r190-e1-stage-a-audit.test.mjs'
+      - 'scripts/r190-e1-revise-saved.mjs'
+      - 'scripts/r190-e1-revise-saved.test.mjs'
+      - 'scripts/r190-e1-open-result-folder.mjs'
+      - 'scripts/r190-e1-open-result-folder.test.mjs'
+      - 'scripts/r190-e1-art-candidate.mjs'
+      - 'scripts/r190-e1-art-candidate.test.mjs'
+      - 'source/ai/r190-e2-architecture.mjs'
+      - 'scripts/r190-e2-synthetic-fixture.mjs'
+      - 'scripts/r190-e2-architecture.test.mjs'
+      - 'scripts/r190-e2-offline-source.mjs'
+      - 'scripts/r190-e2-offline-source.test.mjs'
+      - 'scripts/r190-e2-qwen-study.mjs'
+      - 'scripts/r190-e2-qwen-study.test.mjs'
+      - 'source/ai/r190-e2-diagnose.mjs'
+      - 'scripts/r190-e2-saved-diagnose.mjs'
+      - 'scripts/r190-e2-saved-diagnose.test.mjs'
+      - 'RUN_E2_NEXT_SAFE.cmd'
+      - 'scripts/r190-e2-next-safe.test.mjs'
+      - 'scripts/r190-e1-two-stage.mjs'
+      - 'RUN_R125_FREE_BUILD.cmd'
+      - 'RUN_R125_FREE_BUILD.cmd'
+      - 'scripts/r125-free-build.mjs'
+permissions:
+  contents: read
+jobs:
+  fake-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: node --check scripts/r190ac-offline-source-review.mjs
+      - run: node --check scripts/r190ac-offline-source-review.test.mjs
+      - run: node --test scripts/r190ac-offline-source-review.test.mjs
+      - run: node scripts/r190ac-offline-source-review.mjs --help
+      - name: R125 legacy and opt-in R190 to Education strict offline integration
+        run: |
+          node --check scripts/r125-r190-free-engine.mjs
+          node --check scripts/r125-r190-free-engine.test.mjs
+          node --check scripts/r190-e1-diagnose.mjs
+          node --check scripts/r190-e1-two-stage.mjs
+          node --check scripts/r190-e1-two-stage.test.mjs
+          node --check scripts/r190-e1-stage-a-audit.mjs
+          node --check scripts/r190-e1-stage-a-audit.test.mjs
+          node --check scripts/r190-e1-revise-saved.mjs
+          node --check scripts/r190-e1-revise-saved.test.mjs
+          node --check scripts/r190-e1-open-result-folder.mjs
+          node --check scripts/r190-e1-open-result-folder.test.mjs
+          node --check scripts/r190-e1-art-candidate.mjs
+          node --check scripts/r190-e1-art-candidate.test.mjs
+          node --check source/ai/r190-e2-architecture.mjs
+          node --check scripts/r190-e2-synthetic-fixture.mjs
+          node --check scripts/r190-e2-architecture.test.mjs
+          node --check scripts/r190-e2-offline-source.mjs
+          node --check scripts/r190-e2-offline-source.test.mjs
+          node --check scripts/r190-e2-qwen-study.mjs
+          node --check scripts/r190-e2-qwen-study.test.mjs
+          node --check source/ai/r190-e2-diagnose.mjs
+          node --check scripts/r190-e2-saved-diagnose.mjs
+          node --check scripts/r190-e2-saved-diagnose.test.mjs
+          node --check scripts/r190-e2-next-safe.test.mjs
+          node --check scripts/r125-free-build.mjs
+          node --test scripts/r125-free-build.test.mjs scripts/r125-r190-free-engine.test.mjs scripts/r190-e1-two-stage.test.mjs scripts/r190-e1-stage-a-audit.test.mjs scripts/r190-e1-revise-saved.test.mjs scripts/r190-e1-open-result-folder.test.mjs scripts/r190-e1-art-candidate.test.mjs scripts/r190-e2-architecture.test.mjs scripts/r190-e2-offline-source.test.mjs scripts/r190-e2-qwen-study.test.mjs scripts/r190-e2-saved-diagnose.test.mjs scripts/r190-e2-next-safe.test.mjs

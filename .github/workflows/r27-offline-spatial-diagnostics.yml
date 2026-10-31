@@ -1,0 +1,29 @@
+name: R27 Offline Spatial Diagnostics
+on:
+  push:
+    branches:
+      - feature/b198zr1-protected-architectural-revision
+    paths:
+      - 'scripts/b198zr27-space-connectivity-offline*'
+      - '.github/workflows/r27-offline-spatial-diagnostics.yml'
+  pull_request:
+    paths:
+      - 'scripts/b198zr27-space-connectivity-offline*'
+      - '.github/workflows/r27-offline-spatial-diagnostics.yml'
+permissions:
+  contents: read
+jobs:
+  r27-synthetic-offline-only:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: No model calls, no Minecraft world operations
+        run: node --test scripts/b198zr27-space-connectivity-offline.test.mjs

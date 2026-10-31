@@ -1,0 +1,30 @@
+name: R30 Generalized Space Guide Offline
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'source/ai/b198zr30-generalized-space-guide.mjs'
+      - 'scripts/b198zr30-generalized-space-guide.test.mjs'
+      - '.github/workflows/r30-generalized-space-guide-offline.yml'
+  pull_request:
+    paths:
+      - 'source/ai/b198zr30-generalized-space-guide.mjs'
+      - 'scripts/b198zr30-generalized-space-guide.test.mjs'
+      - '.github/workflows/r30-generalized-space-guide-offline.yml'
+permissions:
+  contents: read
+jobs:
+  r30-guidance-synthetic-only:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify immutable profiles and future-only R30 audit, without model or Minecraft
+        run: node --test scripts/b198zr30-generalized-space-guide.test.mjs

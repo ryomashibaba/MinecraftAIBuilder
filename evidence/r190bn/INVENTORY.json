@@ -1,0 +1,186 @@
+{
+  "schema": "r190bn-final-source-artifacts-v1",
+  "files": [
+    {
+      "file": "AUDIT.json",
+      "bytes": 1347,
+      "sha256": "1ebbc9e802dbd273abc9e0b1c59f389a48d317d673e7b074c1b241ec1f04b801"
+    },
+    {
+      "file": "EXECUTION.txt",
+      "bytes": 2941,
+      "sha256": "51920098048dc6aa2604ed85125cdd42153639744183e2e9aabc8a8ae3fbe8b6"
+    },
+    {
+      "file": "PROJECTION_CONTACT_SHEET.png",
+      "bytes": 40105,
+      "sha256": "a82087bc35e85f1d3aafd5020862317372519795e481562c8ad46a070b4ded9d"
+    },
+    {
+      "file": "R190BN_COMPARE.html",
+      "bytes": 3973,
+      "sha256": "16924e275e1465323162719b81e752fcff8a7850f4d141d91dbef5633d64daf7"
+    },
+    {
+      "file": "R190BN_STUDY.json",
+      "bytes": 11415,
+      "sha256": "ee7f311ff95d635e5ec0fcc298bccb95c17d29f87fbfc712e999d2fd1232179c"
+    },
+    {
+      "file": "REPORT_JA.md",
+      "bytes": 14551,
+      "sha256": "616811a4a7ed7e53ce27b742f2c1a257cf34fcd601be078c439d2362b26dfceb"
+    },
+    {
+      "file": "synthetic-concourse/DERIVATION_RECEIPT.json",
+      "bytes": 4995,
+      "sha256": "317582dfd665d8503a2cc56f83414a74a3b74ddc22968c2536ee980576fd73ee"
+    },
+    {
+      "file": "synthetic-concourse/DERIVED_B143_PROPOSAL.json",
+      "bytes": 3406,
+      "sha256": "e72be3b1a18dd93dd686f57367d6ab1aedacb85f65da74f608f3d745635cc176"
+    },
+    {
+      "file": "synthetic-concourse/east.svg",
+      "bytes": 19244,
+      "sha256": "b334d6a2c699ac91390fe7658b0e37febb6b20741408e2d73eede5ef9c697e0e"
+    },
+    {
+      "file": "synthetic-concourse/front.svg",
+      "bytes": 48115,
+      "sha256": "905c69a73e0e8334d9a740c1984ec69b0829ab8d734177008a382bcf83ac2545"
+    },
+    {
+      "file": "synthetic-concourse/INSPECTION_PLANE.json",
+      "bytes": 7337,
+      "sha256": "49374bee1133e7dc332fd67cd2064d54049f6de0c4c8af61789ee4f40950dd65"
+    },
+    {
+      "file": "synthetic-concourse/INSPECTION_SECTION.svg",
+      "bytes": 14046,
+      "sha256": "61ad14f1840048b095a852af71bc27d001c00f5ef0ba51dd7438332f40ff6b59"
+    },
+    {
+      "file": "synthetic-concourse/ORIGINAL_ASSEMBLY.json",
+      "bytes": 3372,
+      "sha256": "f3bfe7436d2e287f7a76324f1e93b87627da397e19b033274359b69401610084"
+    },
+    {
+      "file": "synthetic-concourse/ORIGINAL_BRIEF.txt",
+      "bytes": 129,
+      "sha256": "3d23250c74b4047c06d23d59fb7b6adf254ccd27ed89c070d7fc33e5b8119c1d"
+    },
+    {
+      "file": "synthetic-concourse/rear.svg",
+      "bytes": 48114,
+      "sha256": "1b1f48758a5878a262c733e1d5040805a09c87fc2dc398c26817d76179a81b64"
+    },
+    {
+      "file": "synthetic-concourse/roof.svg",
+      "bytes": 79235,
+      "sha256": "a2a4a026fcdca1c65d1217c6f485e2c2a34badf14e1ecd5c2933652467785282"
+    },
+    {
+      "file": "synthetic-concourse/SECTION.json",
+      "bytes": 3571,
+      "sha256": "aee2de57b2eea4132a4777db6b8a4b1d8fcba4ca9580a7957e3be826575a9455"
+    },
+    {
+      "file": "synthetic-concourse/SECTION.svg",
+      "bytes": 726,
+      "sha256": "7c3481ca1eb3276904523b6051292ef65f5a2111f8be78cc82aa99a807b481e2"
+    },
+    {
+      "file": "synthetic-concourse/SOURCE_3D.html",
+      "bytes": 88769,
+      "sha256": "40eda5cc6739e7d87a206b9f1392ae480e52409544d77935794f79c6af03e1b5"
+    },
+    {
+      "file": "synthetic-concourse/west.svg",
+      "bytes": 19244,
+      "sha256": "5042d22b31a10ccf48a061e2591c636d27cb3519c91f7553dfb2c5fd91d7b428"
+    },
+    {
+      "file": "synthetic-reading/DERIVATION_RECEIPT.json",
+      "bytes": 6648,
+      "sha256": "c994ff773df26700365b220efe2bbc667065327819ad385b48358207930b6aa0"
+    },
+    {
+      "file": "synthetic-reading/DERIVED_B143_PROPOSAL.json",
+      "bytes": 5258,
+      "sha256": "f9d41d8a5234831ca14fbcb2837eb343c9eb643f163438df44bbdaa904ab9b4c"
+    },
+    {
+      "file": "synthetic-reading/east.svg",
+      "bytes": 27565,
+      "sha256": "25077a1ccf02df6ae8ea8f58dc909249366c13fd5a69d4078fde66c928f69e4d"
+    },
+    {
+      "file": "synthetic-reading/front.svg",
+      "bytes": 22426,
+      "sha256": "c841df309d9d319168e595c20bb6021bafb1d79beb6e9d4c0c927e445aa3d550"
+    },
+    {
+      "file": "synthetic-reading/INSPECTION_PLANE.json",
+      "bytes": 4275,
+      "sha256": "16bdbc58202aa34c854b71394e87210bcaa1de69e9aad4002326c848dff08178"
+    },
+    {
+      "file": "synthetic-reading/INSPECTION_SECTION.svg",
+      "bytes": 8116,
+      "sha256": "bc0a344d235c089fae75b365454043b693e351b5d7ce8f99d3950f369038f707"
+    },
+    {
+      "file": "synthetic-reading/ORIGINAL_ASSEMBLY.json",
+      "bytes": 5063,
+      "sha256": "04a97ad267405b45c4c999564ac8313979ddea1192364f75e33a452ac4cec214"
+    },
+    {
+      "file": "synthetic-reading/ORIGINAL_BRIEF.txt",
+      "bytes": 132,
+      "sha256": "83e26bea1cb6c0ad3a836ea44623d690ddbeba4c59975e8cfd48584c31bf3b84"
+    },
+    {
+      "file": "synthetic-reading/rear.svg",
+      "bytes": 22425,
+      "sha256": "c471dda5448ca0c913d8aa61e477b6b4b1d46bb7f8580b6aa183a7d5c403ecf2"
+    },
+    {
+      "file": "synthetic-reading/roof.svg",
+      "bytes": 33891,
+      "sha256": "b629a65f1cde802f7c1031b0cea1b0e5b60691890bc7a25800451efa9d6b666f"
+    },
+    {
+      "file": "synthetic-reading/SECTION.json",
+      "bytes": 4111,
+      "sha256": "8779eec42cb58427aabc44966adeefb6549294488cffc11c8d0130aa42fa926c"
+    },
+    {
+      "file": "synthetic-reading/SECTION.svg",
+      "bytes": 547,
+      "sha256": "98cd19ca68cc018d20b4e26d9ba297bff488782996b70173e64cd7d6ae5788d5"
+    },
+    {
+      "file": "synthetic-reading/SOURCE_3D.html",
+      "bytes": 64138,
+      "sha256": "f8a5808a0a12e9cb3447ae2f6061da2447e77209aaa0169df94cab0cd793855e"
+    },
+    {
+      "file": "synthetic-reading/west.svg",
+      "bytes": 27565,
+      "sha256": "680a6e4abb29efdd7e035e6efb92ab9e34b79d6d0f784331c69e0a2035197346"
+    },
+    {
+      "file": "TEST_RESULTS.txt",
+      "bytes": 4406,
+      "sha256": "b6420e5ffd89eaae12b5caa33907a6bc04b8d30ec99fe24a8a04d11cc11c41af"
+    }
+  ],
+  "excludes": [
+    "INVENTORY.json itself"
+  ],
+  "newModelCalls": 0,
+  "worldContacts": 0,
+  "worldWrites": 0
+}

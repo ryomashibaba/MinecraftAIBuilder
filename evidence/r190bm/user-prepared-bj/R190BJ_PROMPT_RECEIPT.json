@@ -1,0 +1,44 @@
+{
+  "schema": "minecraftaibuilder-r190bj-failure-informed-prepared-v1",
+  "variant": "BJ_FAILURE_INFORMED",
+  "originalBriefSha256": "bbd44cc9f28234055601b4055466e2f3564e7e4565d408432de4c4fab0aa277a",
+  "modelRequestPromptSha256": "f78511b4ab5a6624bd6ced41544d5ca467f06535fbcb8cb209ff9c2a9afd8185",
+  "archivedOriginalSha256": "0bf706181bb2b7a30f8082f896a703c33749ba55f75d42010adba88f47c84f17",
+  "archivedDiagnosisSha256": "417f65ff5f9d578250562a1ac648e64d2f18190842cd44f73bcbede07a82c13e",
+  "observedFailureCodes": [
+    "B143_SCHEMA_MISMATCH",
+    "CUT_HAS_FORBIDDEN_MATERIAL",
+    "HEADROOM_EXTENDS_PAST_BOUNDS",
+    "STAIRCASE_UNSUPPORTED_AXIS",
+    "STANDING_POINT_INTERSECTS_LITERAL_ADD_BOX",
+    "TOP_LEVEL_CONTRACT_DRIFT"
+  ],
+  "originalUnmodified": true,
+  "sourceOnly": true,
+  "originalModelIdentityIndependentlyVerified": false,
+  "hostGeneratedGeometry": false,
+  "newModelRequests": 0,
+  "architecturalQuality": "NOT_CERTIFIED",
+  "readiness": "NOT_PREPARED",
+  "constructionApproved": false,
+  "executionAllowed": false,
+  "gates": [
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED"
+  ],
+  "BuildPlan": {
+    "operations": []
+  },
+  "worldContacts": 0,
+  "worldWrites": 0,
+  "modelCalls": 0,
+  "art": "ART_HOLD",
+  "officialArtAdoptions": 0
+}

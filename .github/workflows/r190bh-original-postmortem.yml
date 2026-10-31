@@ -1,0 +1,50 @@
+name: R190-BH Real Original Failure + One-call Review — OFFLINE
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'scripts/r190bh-*'
+      - 'scripts/r190bf-controlled-pair.mjs'
+      - 'scripts/r190bf-controlled-pair.test.mjs'
+      - 'scripts/r190bg-source-anchored-review.mjs'
+      - 'scripts/r190bg-source-anchored-review.test.mjs'
+      - 'evidence/r190aa/pilot-01/MODEL_RESPONSE_ORIGINAL.txt'
+      - '.github/workflows/r190bh-original-postmortem.yml'
+  pull_request:
+    paths:
+      - 'scripts/r190bh-*'
+      - 'scripts/r190bf-controlled-pair.mjs'
+      - 'scripts/r190bf-controlled-pair.test.mjs'
+      - 'scripts/r190bg-source-anchored-review.mjs'
+      - 'scripts/r190bg-source-anchored-review.test.mjs'
+      - 'evidence/r190aa/pilot-01/MODEL_RESPONSE_ORIGINAL.txt'
+      - '.github/workflows/r190bh-original-postmortem.yml'
+permissions:
+  contents: read
+jobs:
+  source-evidence:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check original-only postmortem
+        run: node --check scripts/r190bh-actual-original-postmortem.mjs
+      - name: Original model evidence and all integration regressions
+        run: node --test scripts/r190bh-actual-original-postmortem.test.mjs scripts/r190bf-controlled-pair.test.mjs scripts/r190bg-source-anchored-review.test.mjs
+      - name: Audit REAL saved original SHA without generation
+        shell: bash
+        run: |
+          mkdir -p r190bh-original-evidence
+          node scripts/r190bh-actual-original-postmortem.mjs --original evidence/r190aa/pilot-01/MODEL_RESPONSE_ORIGINAL.txt --sha 0bf706181bb2b7a30f8082f896a703c33749ba55f75d42010adba88f47c84f17 --out r190bh-original-evidence/review
+      - uses: actions/upload-artifact@v4
+        with:
+          name: R190BH-ACTUAL-SAVED-ORIGINAL-NO-MODEL-${{ matrix.os }}
+          path: r190bh-original-evidence/review/
+          if-no-files-found: error

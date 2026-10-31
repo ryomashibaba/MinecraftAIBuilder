@@ -1,0 +1,28 @@
+name: R190-Y Consented Local R-S-W Comparison — FAKE ONLY
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'scripts/r190y-comparison-pilot.mjs'
+      - 'scripts/r190y-comparison-pilot.test.mjs'
+      - 'RUN_R190Y_COMPARE_ALL.cmd'
+      - '.github/workflows/r190y-consented-comparison.yml'
+  pull_request:
+    paths:
+      - 'scripts/r190y-comparison-pilot.mjs'
+      - 'scripts/r190y-comparison-pilot.test.mjs'
+      - 'RUN_R190Y_COMPARE_ALL.cmd'
+      - '.github/workflows/r190y-consented-comparison.yml'
+permissions:
+  contents: read
+jobs:
+  fake-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: node --check scripts/r190y-comparison-pilot.mjs
+      - run: node --test scripts/r190y-comparison-pilot.test.mjs
+      - run: node --test scripts/r190x-saved-quality-compare.test.mjs

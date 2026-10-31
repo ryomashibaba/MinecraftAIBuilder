@@ -47,7 +47,8 @@ jobs:
           if-no-files-found: warn
   real-browser-studio:
     needs: [versioned-design-safety]
-    runs-on: ubuntu-latest
+    # Playwright 1.56.1 cannot install on Ubuntu 26.04; pin browser-only QA.
+    runs-on: ubuntu-24.04
     timeout-minutes: 18
     steps:
       - uses: actions/checkout@v4

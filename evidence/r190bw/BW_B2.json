@@ -1,0 +1,3083 @@
+{
+  "schema": "minecraftaibuilder-r190bn-spatial-assembly-v1",
+  "id": "bw-b2-civic-core-galleries",
+  "title": "R190-BW B2 — folded terraces with continuous landing galleries",
+  "brief": "大きめの都会の高層ビル。独立する2つの大広間、3階以上のオフィス、最上階の都市眺望レストラン。中空を貫く二翼と橋。",
+  "originalBriefSha256": "bbd44cc9f28234055601b4055466e2f3564e7e4565d408432de4c4fab0aa277a",
+  "bounds": {
+    "width": 90,
+    "height": 96,
+    "depth": 54
+  },
+  "intent": {
+    "use": "二つの大広間から11階の展望レストランまで用途を保ち、通しの巨大中空を核に据える研究案。",
+    "experience": "上下のフロアが大きく出入りする二翼を、交互に現れる橋と背後の空中テラスが一つの動線に結ぶ。",
+    "massing": "前後に深さの違う二翼、交互の高層テラスと反対方向に伸びる大斜材で都市空洞を外側から包む。",
+    "circulation": "二翼の確実な接続のため各階に少なくとも一本の広い連絡橋を維持し、主空洞は埋めずに前後位置を変えて配置する。"
+  },
+  "levels": [
+    {
+      "id": "floor-01",
+      "standingY": 1
+    },
+    {
+      "id": "floor-02",
+      "standingY": 9
+    },
+    {
+      "id": "floor-03",
+      "standingY": 17
+    },
+    {
+      "id": "floor-04",
+      "standingY": 25
+    },
+    {
+      "id": "floor-05",
+      "standingY": 33
+    },
+    {
+      "id": "floor-06",
+      "standingY": 41
+    },
+    {
+      "id": "floor-07",
+      "standingY": 49
+    },
+    {
+      "id": "floor-08",
+      "standingY": 57
+    },
+    {
+      "id": "floor-09",
+      "standingY": 65
+    },
+    {
+      "id": "floor-10",
+      "standingY": 73
+    },
+    {
+      "id": "floor-11",
+      "standingY": 81
+    }
+  ],
+  "spaces": [
+    {
+      "id": "civic-hall-1",
+      "levelId": "floor-01",
+      "purpose": "地上階の都市大広間と公共待合",
+      "origin": [
+        3,
+        5
+      ],
+      "size": [
+        24,
+        38
+      ],
+      "clearHeight": 7,
+      "minimumReachablePositions": 684,
+      "minimumReachablePercent": 75
+    },
+    {
+      "id": "civic-hall-2",
+      "levelId": "floor-02",
+      "purpose": "二階の独立した大広間、休憩と展示",
+      "origin": [
+        3,
+        5
+      ],
+      "size": [
+        24,
+        38
+      ],
+      "clearHeight": 7,
+      "minimumReachablePositions": 684,
+      "minimumReachablePercent": 75
+    },
+    {
+      "id": "office-west-3",
+      "levelId": "floor-03",
+      "purpose": "オフィス3階の西翼、交流と執務",
+      "origin": [
+        3,
+        6
+      ],
+      "size": [
+        24,
+        36
+      ],
+      "clearHeight": 7,
+      "minimumReachablePositions": 501,
+      "minimumReachablePercent": 58
+    },
+    {
+      "id": "office-east-3",
+      "levelId": "floor-03",
+      "purpose": "オフィス3階の東翼、共同作業と会議",
+      "origin": [
+        52,
+        6
+      ],
+      "size": [
+        26,
+        26
+      ],
+      "clearHeight": 7,
+      "minimumReachablePositions": 392,
+      "minimumReachablePercent": 58
+    },
+    {
+      "id": "office-west-4",
+      "levelId": "floor-04",
+      "purpose": "オフィス4階の西翼、交流と執務",
+      "origin": [
+        8,
+        6
+      ],
+      "size": [
+        19,
+        26
+      ],
+      "clearHeight": 7,
+      "minimumReachablePositions": 286,
+      "minimumReachablePercent": 58
+    },
+    {
+      "id": "office-east-4",
+      "levelId": "floor-04",
+      "purpose": "オフィス4階の東翼、共同作業と会議",
+      "origin": [
+        52,
+        6
+      ],
+      "size": [
+        24,
+        36
+      ],
+      "clearHeight": 7,
+      "minimumReachablePositions": 501,
+      "minimumReachablePercent": 58
+    },
+    {
+      "id": "office-west-5",
+      "levelId": "floor-05",
+      "purpose": "オフィス5階の西翼、交流と執務",
+      "origin": [
+        14,
+        6
+      ],
+      "size": [
+        13,
+        33
+      ],
+      "clearHeight": 7,
+      "minimumReachablePositions": 248,
+      "minimumReachablePercent": 58
+    },
+    {
+      "id": "office-east-5",
+      "levelId": "floor-05",
+      "purpose": "オフィス5階の東翼、共同作業と会議",
+      "origin": [
+        52,
+        6
+      ],
+      "size": [
+        16,
+        24
+      ],
+      "clearHeight": 7,
+      "minimumReachablePositions": 222,
+      "minimumReachablePercent": 58
+    },
+    {
+      "id": "office-west-6",
+      "levelId": "floor-06",
+      "purpose": "オフィス6階の西翼、交流と執務",
+      "origin": [
+        15,
+        6
+      ],
+      "size": [
+        12,
+        24
+      ],
+      "clearHeight": 7,
+      "minimumReachablePositions": 167,
+      "minimumReachablePercent": 58
+    },
+    {
+      "id": "office-east-6",
+      "levelId": "floor-06",
+      "purpose": "オフィス6階の東翼、共同作業と会議",
+      "origin": [
+        52,
+        6
+      ],
+      "size": [
+        14,
+        35
+      ],
+      "clearHeight": 7,
+      "minimumReachablePositions": 284,
+      "minimumReachablePercent": 58
+    },
+    {
+      "id": "office-west-7",
+      "levelId": "floor-07",
+      "purpose": "オフィス7階の西翼、交流と執務",
+      "origin": [
+        11,
+        6
+      ],
+      "size": [
+        16,
+        35
+      ],
+      "clearHeight": 7,
+      "minimumReachablePositions": 324,
+      "minimumReachablePercent": 58
+    },
+    {
+      "id": "office-east-7",
+      "levelId": "floor-07",
+      "purpose": "オフィス7階の東翼、共同作業と会議",
+      "origin": [
+        52,
+        6
+      ],
+      "size": [
+        20,
+        28
+      ],
+      "clearHeight": 7,
+      "minimumReachablePositions": 324,
+      "minimumReachablePercent": 58
+    },
+    {
+      "id": "office-west-8",
+      "levelId": "floor-08",
+      "purpose": "オフィス8階の西翼、交流と執務",
+      "origin": [
+        6,
+        6
+      ],
+      "size": [
+        21,
+        29
+      ],
+      "clearHeight": 7,
+      "minimumReachablePositions": 353,
+      "minimumReachablePercent": 58
+    },
+    {
+      "id": "office-east-8",
+      "levelId": "floor-08",
+      "purpose": "オフィス8階の東翼、共同作業と会議",
+      "origin": [
+        52,
+        6
+      ],
+      "size": [
+        25,
+        34
+      ],
+      "clearHeight": 7,
+      "minimumReachablePositions": 492,
+      "minimumReachablePercent": 58
+    },
+    {
+      "id": "office-west-9",
+      "levelId": "floor-09",
+      "purpose": "オフィス9階の西翼、交流と執務",
+      "origin": [
+        5,
+        6
+      ],
+      "size": [
+        22,
+        25
+      ],
+      "clearHeight": 7,
+      "minimumReachablePositions": 319,
+      "minimumReachablePercent": 58
+    },
+    {
+      "id": "office-east-9",
+      "levelId": "floor-09",
+      "purpose": "オフィス9階の東翼、共同作業と会議",
+      "origin": [
+        52,
+        6
+      ],
+      "size": [
+        23,
+        36
+      ],
+      "clearHeight": 7,
+      "minimumReachablePositions": 480,
+      "minimumReachablePercent": 58
+    },
+    {
+      "id": "office-west-10",
+      "levelId": "floor-10",
+      "purpose": "オフィス10階の西翼、交流と執務",
+      "origin": [
+        9,
+        6
+      ],
+      "size": [
+        18,
+        36
+      ],
+      "clearHeight": 7,
+      "minimumReachablePositions": 375,
+      "minimumReachablePercent": 58
+    },
+    {
+      "id": "office-east-10",
+      "levelId": "floor-10",
+      "purpose": "オフィス10階の東翼、共同作業と会議",
+      "origin": [
+        52,
+        6
+      ],
+      "size": [
+        19,
+        24
+      ],
+      "clearHeight": 7,
+      "minimumReachablePositions": 264,
+      "minimumReachablePercent": 58
+    },
+    {
+      "id": "sky-gallery",
+      "levelId": "floor-11",
+      "purpose": "最高階の展望ギャラリー、レストランの前室",
+      "origin": [
+        8,
+        6
+      ],
+      "size": [
+        19,
+        31
+      ],
+      "clearHeight": 7,
+      "minimumReachablePositions": 323,
+      "minimumReachablePercent": 55
+    },
+    {
+      "id": "sky-restaurant",
+      "levelId": "floor-11",
+      "purpose": "最上階の展望レストラン、都市景観を鑑賞",
+      "origin": [
+        52,
+        6
+      ],
+      "size": [
+        24,
+        34
+      ],
+      "clearHeight": 7,
+      "minimumReachablePositions": 505,
+      "minimumReachablePercent": 62
+    }
+  ],
+  "operations": [
+    {
+      "kind": "enclosure",
+      "id": "skin-civic-hall-1",
+      "spaceId": "civic-hall-1",
+      "thickness": 1,
+      "materials": {
+        "floor": "stone",
+        "wall": "glass",
+        "roof": "metal"
+      }
+    },
+    {
+      "kind": "enclosure",
+      "id": "skin-civic-hall-2",
+      "spaceId": "civic-hall-2",
+      "thickness": 1,
+      "materials": {
+        "floor": "stone",
+        "wall": "glass",
+        "roof": "metal"
+      }
+    },
+    {
+      "kind": "enclosure",
+      "id": "skin-office-west-3",
+      "spaceId": "office-west-3",
+      "thickness": 1,
+      "materials": {
+        "floor": "metal",
+        "wall": "metal",
+        "roof": "metal"
+      }
+    },
+    {
+      "kind": "enclosure",
+      "id": "skin-office-east-3",
+      "spaceId": "office-east-3",
+      "thickness": 1,
+      "materials": {
+        "floor": "glass",
+        "wall": "glass",
+        "roof": "glass"
+      }
+    },
+    {
+      "kind": "enclosure",
+      "id": "skin-office-west-4",
+      "spaceId": "office-west-4",
+      "thickness": 1,
+      "materials": {
+        "floor": "metal",
+        "wall": "metal",
+        "roof": "metal"
+      }
+    },
+    {
+      "kind": "enclosure",
+      "id": "skin-office-east-4",
+      "spaceId": "office-east-4",
+      "thickness": 1,
+      "materials": {
+        "floor": "glass",
+        "wall": "glass",
+        "roof": "glass"
+      }
+    },
+    {
+      "kind": "enclosure",
+      "id": "skin-office-west-5",
+      "spaceId": "office-west-5",
+      "thickness": 1,
+      "materials": {
+        "floor": "metal",
+        "wall": "metal",
+        "roof": "metal"
+      }
+    },
+    {
+      "kind": "enclosure",
+      "id": "skin-office-east-5",
+      "spaceId": "office-east-5",
+      "thickness": 1,
+      "materials": {
+        "floor": "glass",
+        "wall": "glass",
+        "roof": "glass"
+      }
+    },
+    {
+      "kind": "enclosure",
+      "id": "skin-office-west-6",
+      "spaceId": "office-west-6",
+      "thickness": 1,
+      "materials": {
+        "floor": "metal",
+        "wall": "metal",
+        "roof": "metal"
+      }
+    },
+    {
+      "kind": "enclosure",
+      "id": "skin-office-east-6",
+      "spaceId": "office-east-6",
+      "thickness": 1,
+      "materials": {
+        "floor": "glass",
+        "wall": "glass",
+        "roof": "glass"
+      }
+    },
+    {
+      "kind": "enclosure",
+      "id": "skin-office-west-7",
+      "spaceId": "office-west-7",
+      "thickness": 1,
+      "materials": {
+        "floor": "metal",
+        "wall": "metal",
+        "roof": "metal"
+      }
+    },
+    {
+      "kind": "enclosure",
+      "id": "skin-office-east-7",
+      "spaceId": "office-east-7",
+      "thickness": 1,
+      "materials": {
+        "floor": "glass",
+        "wall": "glass",
+        "roof": "glass"
+      }
+    },
+    {
+      "kind": "enclosure",
+      "id": "skin-office-west-8",
+      "spaceId": "office-west-8",
+      "thickness": 1,
+      "materials": {
+        "floor": "metal",
+        "wall": "metal",
+        "roof": "metal"
+      }
+    },
+    {
+      "kind": "enclosure",
+      "id": "skin-office-east-8",
+      "spaceId": "office-east-8",
+      "thickness": 1,
+      "materials": {
+        "floor": "glass",
+        "wall": "glass",
+        "roof": "glass"
+      }
+    },
+    {
+      "kind": "enclosure",
+      "id": "skin-office-west-9",
+      "spaceId": "office-west-9",
+      "thickness": 1,
+      "materials": {
+        "floor": "metal",
+        "wall": "metal",
+        "roof": "metal"
+      }
+    },
+    {
+      "kind": "enclosure",
+      "id": "skin-office-east-9",
+      "spaceId": "office-east-9",
+      "thickness": 1,
+      "materials": {
+        "floor": "glass",
+        "wall": "glass",
+        "roof": "glass"
+      }
+    },
+    {
+      "kind": "enclosure",
+      "id": "skin-office-west-10",
+      "spaceId": "office-west-10",
+      "thickness": 1,
+      "materials": {
+        "floor": "metal",
+        "wall": "metal",
+        "roof": "metal"
+      }
+    },
+    {
+      "kind": "enclosure",
+      "id": "skin-office-east-10",
+      "spaceId": "office-east-10",
+      "thickness": 1,
+      "materials": {
+        "floor": "glass",
+        "wall": "glass",
+        "roof": "glass"
+      }
+    },
+    {
+      "kind": "enclosure",
+      "id": "skin-sky-gallery",
+      "spaceId": "sky-gallery",
+      "thickness": 1,
+      "materials": {
+        "floor": "glass",
+        "wall": "glass",
+        "roof": "glass"
+      }
+    },
+    {
+      "kind": "enclosure",
+      "id": "skin-sky-restaurant",
+      "spaceId": "sky-restaurant",
+      "thickness": 1,
+      "materials": {
+        "floor": "glass",
+        "wall": "glass",
+        "roof": "glass"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-pier-wl",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          27,
+          0,
+          4
+        ],
+        "size": [
+          1,
+          90,
+          1
+        ],
+        "material": "metal"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-pier-el",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          36,
+          0,
+          4
+        ],
+        "size": [
+          1,
+          90,
+          1
+        ],
+        "material": "metal"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-pier-wr",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          27,
+          0,
+          31
+        ],
+        "size": [
+          1,
+          90,
+          1
+        ],
+        "material": "metal"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-pier-er",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          36,
+          0,
+          31
+        ],
+        "size": [
+          1,
+          90,
+          1
+        ],
+        "material": "metal"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-ring-north-1",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          27,
+          0,
+          4
+        ],
+        "size": [
+          10,
+          1,
+          1
+        ],
+        "material": "metal"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-ring-south-1",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          27,
+          0,
+          31
+        ],
+        "size": [
+          10,
+          1,
+          1
+        ],
+        "material": "metal"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-ring-north-2",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          27,
+          8,
+          4
+        ],
+        "size": [
+          10,
+          1,
+          1
+        ],
+        "material": "metal"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-ring-south-2",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          27,
+          8,
+          31
+        ],
+        "size": [
+          10,
+          1,
+          1
+        ],
+        "material": "metal"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-ring-north-3",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          27,
+          16,
+          4
+        ],
+        "size": [
+          10,
+          1,
+          1
+        ],
+        "material": "metal"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-ring-south-3",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          27,
+          16,
+          31
+        ],
+        "size": [
+          10,
+          1,
+          1
+        ],
+        "material": "metal"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-ring-north-4",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          27,
+          24,
+          4
+        ],
+        "size": [
+          10,
+          1,
+          1
+        ],
+        "material": "metal"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-ring-south-4",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          27,
+          24,
+          31
+        ],
+        "size": [
+          10,
+          1,
+          1
+        ],
+        "material": "metal"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-ring-north-5",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          27,
+          32,
+          4
+        ],
+        "size": [
+          10,
+          1,
+          1
+        ],
+        "material": "metal"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-ring-south-5",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          27,
+          32,
+          31
+        ],
+        "size": [
+          10,
+          1,
+          1
+        ],
+        "material": "metal"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-ring-north-6",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          27,
+          40,
+          4
+        ],
+        "size": [
+          10,
+          1,
+          1
+        ],
+        "material": "metal"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-ring-south-6",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          27,
+          40,
+          31
+        ],
+        "size": [
+          10,
+          1,
+          1
+        ],
+        "material": "metal"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-ring-north-7",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          27,
+          48,
+          4
+        ],
+        "size": [
+          10,
+          1,
+          1
+        ],
+        "material": "metal"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-ring-south-7",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          27,
+          48,
+          31
+        ],
+        "size": [
+          10,
+          1,
+          1
+        ],
+        "material": "metal"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-ring-north-8",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          27,
+          56,
+          4
+        ],
+        "size": [
+          10,
+          1,
+          1
+        ],
+        "material": "metal"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-ring-south-8",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          27,
+          56,
+          31
+        ],
+        "size": [
+          10,
+          1,
+          1
+        ],
+        "material": "metal"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-ring-north-9",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          27,
+          64,
+          4
+        ],
+        "size": [
+          10,
+          1,
+          1
+        ],
+        "material": "metal"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-ring-south-9",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          27,
+          64,
+          31
+        ],
+        "size": [
+          10,
+          1,
+          1
+        ],
+        "material": "metal"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-ring-north-10",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          27,
+          72,
+          4
+        ],
+        "size": [
+          10,
+          1,
+          1
+        ],
+        "material": "metal"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-ring-south-10",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          27,
+          72,
+          31
+        ],
+        "size": [
+          10,
+          1,
+          1
+        ],
+        "material": "metal"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-ring-north-11",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          27,
+          80,
+          4
+        ],
+        "size": [
+          10,
+          1,
+          1
+        ],
+        "material": "metal"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-ring-south-11",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          27,
+          80,
+          31
+        ],
+        "size": [
+          10,
+          1,
+          1
+        ],
+        "material": "metal"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "east-wing-pier-n-left",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          50,
+          0,
+          3
+        ],
+        "size": [
+          1,
+          90,
+          1
+        ],
+        "material": "metal"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "east-wing-pier-n-right",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          81,
+          0,
+          3
+        ],
+        "size": [
+          1,
+          90,
+          1
+        ],
+        "material": "metal"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "east-wing-pier-s-left",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          50,
+          0,
+          43
+        ],
+        "size": [
+          1,
+          90,
+          1
+        ],
+        "material": "metal"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "east-wing-pier-s-right",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          81,
+          0,
+          43
+        ],
+        "size": [
+          1,
+          90,
+          1
+        ],
+        "material": "metal"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "left-portal-north-1",
+        "shape": "box",
+        "mode": "cut",
+        "origin": [
+          26,
+          1,
+          6
+        ],
+        "size": [
+          2,
+          3,
+          3
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-landing-north-1",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          25,
+          0,
+          6
+        ],
+        "size": [
+          11,
+          1,
+          3
+        ],
+        "material": "stone"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "left-portal-south-1",
+        "shape": "box",
+        "mode": "cut",
+        "origin": [
+          26,
+          1,
+          22
+        ],
+        "size": [
+          2,
+          3,
+          3
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-landing-south-1",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          25,
+          0,
+          22
+        ],
+        "size": [
+          11,
+          1,
+          3
+        ],
+        "material": "stone"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "left-portal-north-2",
+        "shape": "box",
+        "mode": "cut",
+        "origin": [
+          26,
+          9,
+          6
+        ],
+        "size": [
+          2,
+          3,
+          3
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-landing-north-2",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          25,
+          8,
+          6
+        ],
+        "size": [
+          11,
+          1,
+          3
+        ],
+        "material": "stone"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "left-portal-south-2",
+        "shape": "box",
+        "mode": "cut",
+        "origin": [
+          26,
+          9,
+          22
+        ],
+        "size": [
+          2,
+          3,
+          3
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-landing-south-2",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          25,
+          8,
+          22
+        ],
+        "size": [
+          11,
+          1,
+          3
+        ],
+        "material": "stone"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "left-portal-north-3",
+        "shape": "box",
+        "mode": "cut",
+        "origin": [
+          26,
+          17,
+          6
+        ],
+        "size": [
+          2,
+          3,
+          3
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-landing-north-3",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          25,
+          16,
+          6
+        ],
+        "size": [
+          11,
+          1,
+          3
+        ],
+        "material": "stone"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "left-portal-south-3",
+        "shape": "box",
+        "mode": "cut",
+        "origin": [
+          26,
+          17,
+          22
+        ],
+        "size": [
+          2,
+          3,
+          3
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "skybridge-south-3",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          35,
+          16,
+          22
+        ],
+        "size": [
+          18,
+          1,
+          3
+        ],
+        "material": "stone"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "right-portal-south-3",
+        "shape": "box",
+        "mode": "cut",
+        "origin": [
+          51,
+          17,
+          22
+        ],
+        "size": [
+          2,
+          3,
+          3
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-landing-south-3",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          25,
+          16,
+          22
+        ],
+        "size": [
+          11,
+          1,
+          3
+        ],
+        "material": "stone"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "left-portal-north-4",
+        "shape": "box",
+        "mode": "cut",
+        "origin": [
+          26,
+          25,
+          6
+        ],
+        "size": [
+          2,
+          3,
+          3
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "skybridge-north-4",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          35,
+          24,
+          6
+        ],
+        "size": [
+          18,
+          1,
+          3
+        ],
+        "material": "metal"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "right-portal-north-4",
+        "shape": "box",
+        "mode": "cut",
+        "origin": [
+          51,
+          25,
+          6
+        ],
+        "size": [
+          2,
+          3,
+          3
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-landing-north-4",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          25,
+          24,
+          6
+        ],
+        "size": [
+          11,
+          1,
+          3
+        ],
+        "material": "stone"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "left-portal-south-4",
+        "shape": "box",
+        "mode": "cut",
+        "origin": [
+          26,
+          25,
+          22
+        ],
+        "size": [
+          2,
+          3,
+          3
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-landing-south-4",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          25,
+          24,
+          22
+        ],
+        "size": [
+          11,
+          1,
+          3
+        ],
+        "material": "stone"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "left-portal-north-5",
+        "shape": "box",
+        "mode": "cut",
+        "origin": [
+          26,
+          33,
+          6
+        ],
+        "size": [
+          2,
+          3,
+          3
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "skybridge-north-5",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          35,
+          32,
+          6
+        ],
+        "size": [
+          18,
+          1,
+          3
+        ],
+        "material": "stone"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "right-portal-north-5",
+        "shape": "box",
+        "mode": "cut",
+        "origin": [
+          51,
+          33,
+          6
+        ],
+        "size": [
+          2,
+          3,
+          3
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-landing-north-5",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          25,
+          32,
+          6
+        ],
+        "size": [
+          11,
+          1,
+          3
+        ],
+        "material": "stone"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "left-portal-south-5",
+        "shape": "box",
+        "mode": "cut",
+        "origin": [
+          26,
+          33,
+          22
+        ],
+        "size": [
+          2,
+          3,
+          3
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-landing-south-5",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          25,
+          32,
+          22
+        ],
+        "size": [
+          11,
+          1,
+          3
+        ],
+        "material": "stone"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "left-portal-north-6",
+        "shape": "box",
+        "mode": "cut",
+        "origin": [
+          26,
+          41,
+          6
+        ],
+        "size": [
+          2,
+          3,
+          3
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-landing-north-6",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          25,
+          40,
+          6
+        ],
+        "size": [
+          11,
+          1,
+          3
+        ],
+        "material": "stone"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "left-portal-south-6",
+        "shape": "box",
+        "mode": "cut",
+        "origin": [
+          26,
+          41,
+          22
+        ],
+        "size": [
+          2,
+          3,
+          3
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "skybridge-south-6",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          35,
+          40,
+          22
+        ],
+        "size": [
+          18,
+          1,
+          3
+        ],
+        "material": "metal"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "right-portal-south-6",
+        "shape": "box",
+        "mode": "cut",
+        "origin": [
+          51,
+          41,
+          22
+        ],
+        "size": [
+          2,
+          3,
+          3
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-landing-south-6",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          25,
+          40,
+          22
+        ],
+        "size": [
+          11,
+          1,
+          3
+        ],
+        "material": "stone"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "left-portal-north-7",
+        "shape": "box",
+        "mode": "cut",
+        "origin": [
+          26,
+          49,
+          6
+        ],
+        "size": [
+          2,
+          3,
+          3
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "skybridge-north-7",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          35,
+          48,
+          6
+        ],
+        "size": [
+          18,
+          1,
+          3
+        ],
+        "material": "stone"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "right-portal-north-7",
+        "shape": "box",
+        "mode": "cut",
+        "origin": [
+          51,
+          49,
+          6
+        ],
+        "size": [
+          2,
+          3,
+          3
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-landing-north-7",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          25,
+          48,
+          6
+        ],
+        "size": [
+          11,
+          1,
+          3
+        ],
+        "material": "stone"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "left-portal-south-7",
+        "shape": "box",
+        "mode": "cut",
+        "origin": [
+          26,
+          49,
+          22
+        ],
+        "size": [
+          2,
+          3,
+          3
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-landing-south-7",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          25,
+          48,
+          22
+        ],
+        "size": [
+          11,
+          1,
+          3
+        ],
+        "material": "stone"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "left-portal-north-8",
+        "shape": "box",
+        "mode": "cut",
+        "origin": [
+          26,
+          57,
+          6
+        ],
+        "size": [
+          2,
+          3,
+          3
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-landing-north-8",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          25,
+          56,
+          6
+        ],
+        "size": [
+          11,
+          1,
+          3
+        ],
+        "material": "stone"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "left-portal-south-8",
+        "shape": "box",
+        "mode": "cut",
+        "origin": [
+          26,
+          57,
+          22
+        ],
+        "size": [
+          2,
+          3,
+          3
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "skybridge-south-8",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          35,
+          56,
+          22
+        ],
+        "size": [
+          18,
+          1,
+          3
+        ],
+        "material": "metal"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "right-portal-south-8",
+        "shape": "box",
+        "mode": "cut",
+        "origin": [
+          51,
+          57,
+          22
+        ],
+        "size": [
+          2,
+          3,
+          3
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-landing-south-8",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          25,
+          56,
+          22
+        ],
+        "size": [
+          11,
+          1,
+          3
+        ],
+        "material": "stone"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "left-portal-north-9",
+        "shape": "box",
+        "mode": "cut",
+        "origin": [
+          26,
+          65,
+          6
+        ],
+        "size": [
+          2,
+          3,
+          3
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-landing-north-9",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          25,
+          64,
+          6
+        ],
+        "size": [
+          11,
+          1,
+          3
+        ],
+        "material": "stone"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "left-portal-south-9",
+        "shape": "box",
+        "mode": "cut",
+        "origin": [
+          26,
+          65,
+          22
+        ],
+        "size": [
+          2,
+          3,
+          3
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "skybridge-south-9",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          35,
+          64,
+          22
+        ],
+        "size": [
+          18,
+          1,
+          3
+        ],
+        "material": "stone"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "right-portal-south-9",
+        "shape": "box",
+        "mode": "cut",
+        "origin": [
+          51,
+          65,
+          22
+        ],
+        "size": [
+          2,
+          3,
+          3
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-landing-south-9",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          25,
+          64,
+          22
+        ],
+        "size": [
+          11,
+          1,
+          3
+        ],
+        "material": "stone"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "left-portal-north-10",
+        "shape": "box",
+        "mode": "cut",
+        "origin": [
+          26,
+          73,
+          6
+        ],
+        "size": [
+          2,
+          3,
+          3
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "skybridge-north-10",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          35,
+          72,
+          6
+        ],
+        "size": [
+          18,
+          1,
+          3
+        ],
+        "material": "metal"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "right-portal-north-10",
+        "shape": "box",
+        "mode": "cut",
+        "origin": [
+          51,
+          73,
+          6
+        ],
+        "size": [
+          2,
+          3,
+          3
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-landing-north-10",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          25,
+          72,
+          6
+        ],
+        "size": [
+          11,
+          1,
+          3
+        ],
+        "material": "stone"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "left-portal-south-10",
+        "shape": "box",
+        "mode": "cut",
+        "origin": [
+          26,
+          73,
+          22
+        ],
+        "size": [
+          2,
+          3,
+          3
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-landing-south-10",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          25,
+          72,
+          22
+        ],
+        "size": [
+          11,
+          1,
+          3
+        ],
+        "material": "stone"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "left-portal-north-11",
+        "shape": "box",
+        "mode": "cut",
+        "origin": [
+          26,
+          81,
+          6
+        ],
+        "size": [
+          2,
+          3,
+          3
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-landing-north-11",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          25,
+          80,
+          6
+        ],
+        "size": [
+          11,
+          1,
+          3
+        ],
+        "material": "stone"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "left-portal-south-11",
+        "shape": "box",
+        "mode": "cut",
+        "origin": [
+          26,
+          81,
+          22
+        ],
+        "size": [
+          2,
+          3,
+          3
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "skybridge-south-11",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          35,
+          80,
+          22
+        ],
+        "size": [
+          18,
+          1,
+          3
+        ],
+        "material": "stone"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "right-portal-south-11",
+        "shape": "box",
+        "mode": "cut",
+        "origin": [
+          51,
+          81,
+          22
+        ],
+        "size": [
+          2,
+          3,
+          3
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "core-landing-south-11",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          25,
+          80,
+          22
+        ],
+        "size": [
+          11,
+          1,
+          3
+        ],
+        "material": "stone"
+      }
+    },
+    {
+      "kind": "flight",
+      "id": "stair-flight-1",
+      "fromLevelId": "floor-01",
+      "toLevelId": "floor-02",
+      "start": [
+        29,
+        6
+      ],
+      "end": [
+        29,
+        23
+      ],
+      "width": 3,
+      "treadDepth": 2,
+      "material": "stone"
+    },
+    {
+      "kind": "flight",
+      "id": "stair-flight-2",
+      "fromLevelId": "floor-02",
+      "toLevelId": "floor-03",
+      "start": [
+        33,
+        23
+      ],
+      "end": [
+        33,
+        6
+      ],
+      "width": 3,
+      "treadDepth": 2,
+      "material": "stone"
+    },
+    {
+      "kind": "flight",
+      "id": "stair-flight-3",
+      "fromLevelId": "floor-03",
+      "toLevelId": "floor-04",
+      "start": [
+        29,
+        6
+      ],
+      "end": [
+        29,
+        23
+      ],
+      "width": 3,
+      "treadDepth": 2,
+      "material": "stone"
+    },
+    {
+      "kind": "flight",
+      "id": "stair-flight-4",
+      "fromLevelId": "floor-04",
+      "toLevelId": "floor-05",
+      "start": [
+        33,
+        23
+      ],
+      "end": [
+        33,
+        6
+      ],
+      "width": 3,
+      "treadDepth": 2,
+      "material": "stone"
+    },
+    {
+      "kind": "flight",
+      "id": "stair-flight-5",
+      "fromLevelId": "floor-05",
+      "toLevelId": "floor-06",
+      "start": [
+        29,
+        6
+      ],
+      "end": [
+        29,
+        23
+      ],
+      "width": 3,
+      "treadDepth": 2,
+      "material": "stone"
+    },
+    {
+      "kind": "flight",
+      "id": "stair-flight-6",
+      "fromLevelId": "floor-06",
+      "toLevelId": "floor-07",
+      "start": [
+        33,
+        23
+      ],
+      "end": [
+        33,
+        6
+      ],
+      "width": 3,
+      "treadDepth": 2,
+      "material": "stone"
+    },
+    {
+      "kind": "flight",
+      "id": "stair-flight-7",
+      "fromLevelId": "floor-07",
+      "toLevelId": "floor-08",
+      "start": [
+        29,
+        6
+      ],
+      "end": [
+        29,
+        23
+      ],
+      "width": 3,
+      "treadDepth": 2,
+      "material": "stone"
+    },
+    {
+      "kind": "flight",
+      "id": "stair-flight-8",
+      "fromLevelId": "floor-08",
+      "toLevelId": "floor-09",
+      "start": [
+        33,
+        23
+      ],
+      "end": [
+        33,
+        6
+      ],
+      "width": 3,
+      "treadDepth": 2,
+      "material": "stone"
+    },
+    {
+      "kind": "flight",
+      "id": "stair-flight-9",
+      "fromLevelId": "floor-09",
+      "toLevelId": "floor-10",
+      "start": [
+        29,
+        6
+      ],
+      "end": [
+        29,
+        23
+      ],
+      "width": 3,
+      "treadDepth": 2,
+      "material": "stone"
+    },
+    {
+      "kind": "flight",
+      "id": "stair-flight-10",
+      "fromLevelId": "floor-10",
+      "toLevelId": "floor-11",
+      "start": [
+        33,
+        23
+      ],
+      "end": [
+        33,
+        6
+      ],
+      "width": 3,
+      "treadDepth": 2,
+      "material": "stone"
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "public-arrival-slab",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          8,
+          0,
+          0
+        ],
+        "size": [
+          7,
+          1,
+          5
+        ],
+        "material": "stone"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "public-street-entrance",
+        "shape": "box",
+        "mode": "cut",
+        "origin": [
+          9,
+          1,
+          4
+        ],
+        "size": [
+          4,
+          4,
+          1
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "bw-b04-skydeck",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          10,
+          24,
+          33
+        ],
+        "size": [
+          16,
+          1,
+          6
+        ],
+        "material": "wood"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "bw-b04-skydoor",
+        "shape": "box",
+        "mode": "cut",
+        "origin": [
+          11,
+          25,
+          32
+        ],
+        "size": [
+          3,
+          3,
+          1
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "bw-b07-skydeck",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          13,
+          48,
+          42
+        ],
+        "size": [
+          13,
+          1,
+          6
+        ],
+        "material": "stone"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "bw-b07-skydoor",
+        "shape": "box",
+        "mode": "cut",
+        "origin": [
+          14,
+          49,
+          41
+        ],
+        "size": [
+          3,
+          3,
+          1
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "bw-b05e-skydeck",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          54,
+          32,
+          31
+        ],
+        "size": [
+          13,
+          1,
+          6
+        ],
+        "material": "wood"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "bw-b05e-skydoor",
+        "shape": "box",
+        "mode": "cut",
+        "origin": [
+          55,
+          33,
+          30
+        ],
+        "size": [
+          3,
+          3,
+          1
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "bw-b09e-skydeck",
+        "shape": "box",
+        "mode": "add",
+        "origin": [
+          54,
+          64,
+          43
+        ],
+        "size": [
+          18,
+          1,
+          6
+        ],
+        "material": "stone"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "bw-b09e-skydoor",
+        "shape": "box",
+        "mode": "cut",
+        "origin": [
+          55,
+          65,
+          42
+        ],
+        "size": [
+          3,
+          3,
+          1
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "bw-folded-west-rib",
+        "shape": "beam",
+        "mode": "add",
+        "start": [
+          2,
+          9,
+          45
+        ],
+        "end": [
+          26,
+          76,
+          45
+        ],
+        "material": "metal",
+        "thickness": 2
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "bw-folded-east-rib",
+        "shape": "beam",
+        "mode": "add",
+        "start": [
+          82,
+          6,
+          45
+        ],
+        "end": [
+          68,
+          89,
+          45
+        ],
+        "material": "accent",
+        "thickness": 2
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "bw-folded-top-bridge",
+        "shape": "beam",
+        "mode": "add",
+        "start": [
+          22,
+          90,
+          45
+        ],
+        "end": [
+          68,
+          90,
+          45
+        ],
+        "material": "metal",
+        "thickness": 2
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "bw-top-pavilion-ring",
+        "shape": "torus",
+        "mode": "add",
+        "center": [
+          65,
+          91,
+          25
+        ],
+        "axis": "y",
+        "majorRadius": 14,
+        "tubeRadius": 2,
+        "material": "accent"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "bw-core-cross-gallery-floor-01",
+        "shape": "box",
+        "mode": "add",
+        "material": "stone",
+        "origin": [
+          27,
+          0,
+          6
+        ],
+        "size": [
+          3,
+          1,
+          19
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "bw-core-cross-gallery-floor-02",
+        "shape": "box",
+        "mode": "add",
+        "material": "stone",
+        "origin": [
+          27,
+          8,
+          6
+        ],
+        "size": [
+          3,
+          1,
+          19
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "bw-core-cross-gallery-floor-03",
+        "shape": "box",
+        "mode": "add",
+        "material": "stone",
+        "origin": [
+          27,
+          16,
+          6
+        ],
+        "size": [
+          3,
+          1,
+          19
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "bw-core-cross-gallery-floor-04",
+        "shape": "box",
+        "mode": "add",
+        "material": "stone",
+        "origin": [
+          27,
+          24,
+          6
+        ],
+        "size": [
+          3,
+          1,
+          19
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "bw-core-cross-gallery-floor-05",
+        "shape": "box",
+        "mode": "add",
+        "material": "stone",
+        "origin": [
+          27,
+          32,
+          6
+        ],
+        "size": [
+          3,
+          1,
+          19
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "bw-core-cross-gallery-floor-06",
+        "shape": "box",
+        "mode": "add",
+        "material": "stone",
+        "origin": [
+          27,
+          40,
+          6
+        ],
+        "size": [
+          3,
+          1,
+          19
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "bw-core-cross-gallery-floor-07",
+        "shape": "box",
+        "mode": "add",
+        "material": "stone",
+        "origin": [
+          27,
+          48,
+          6
+        ],
+        "size": [
+          3,
+          1,
+          19
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "bw-core-cross-gallery-floor-08",
+        "shape": "box",
+        "mode": "add",
+        "material": "stone",
+        "origin": [
+          27,
+          56,
+          6
+        ],
+        "size": [
+          3,
+          1,
+          19
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "bw-core-cross-gallery-floor-09",
+        "shape": "box",
+        "mode": "add",
+        "material": "stone",
+        "origin": [
+          27,
+          64,
+          6
+        ],
+        "size": [
+          3,
+          1,
+          19
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "bw-core-cross-gallery-floor-10",
+        "shape": "box",
+        "mode": "add",
+        "material": "stone",
+        "origin": [
+          27,
+          72,
+          6
+        ],
+        "size": [
+          3,
+          1,
+          19
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "bw-core-cross-gallery-floor-11",
+        "shape": "box",
+        "mode": "add",
+        "material": "stone",
+        "origin": [
+          27,
+          80,
+          6
+        ],
+        "size": [
+          3,
+          1,
+          19
+        ]
+      }
+    }
+  ],
+  "entrance": [
+    10,
+    1,
+    3
+  ],
+  "headroom": 3,
+  "destinations": [
+    {
+      "id": "ground-hall-destination",
+      "point": [
+        12,
+        1,
+        17
+      ],
+      "maximumPathSteps": 200
+    },
+    {
+      "id": "upper-hall-destination",
+      "point": [
+        12,
+        9,
+        17
+      ],
+      "maximumPathSteps": 280
+    },
+    {
+      "id": "west-office-3",
+      "point": [
+        20,
+        17,
+        17
+      ],
+      "maximumPathSteps": 280
+    },
+    {
+      "id": "east-office-3",
+      "point": [
+        58,
+        17,
+        17
+      ],
+      "maximumPathSteps": 350
+    },
+    {
+      "id": "east-office-7",
+      "point": [
+        58,
+        49,
+        17
+      ],
+      "maximumPathSteps": 700
+    },
+    {
+      "id": "west-office-9",
+      "point": [
+        20,
+        65,
+        17
+      ],
+      "maximumPathSteps": 800
+    },
+    {
+      "id": "sky-gallery-goal",
+      "point": [
+        20,
+        81,
+        17
+      ],
+      "maximumPathSteps": 900
+    },
+    {
+      "id": "restaurant-goal",
+      "point": [
+        58,
+        81,
+        17
+      ],
+      "maximumPathSteps": 1000
+    }
+  ],
+  "protectedVoids": [
+    {
+      "id": "civic-rift-main",
+      "origin": [
+        37,
+        17,
+        9
+      ],
+      "size": [
+        14,
+        63,
+        13
+      ],
+      "maxOccupiedCells": 0
+    },
+    {
+      "id": "civic-rift-secondary",
+      "origin": [
+        37,
+        17,
+        25
+      ],
+      "size": [
+        14,
+        63,
+        10
+      ],
+      "maxOccupiedCells": 0
+    }
+  ],
+  "assumptions": [
+    "CHAT_GPT_6_AUTHORED_NOT_QWEN_GEMMA_OR_LOCAL_PROVIDER; no local LLM call.",
+    "This is a separately preserved ChatGPT-authored BW A2/B2 design revision, not a silent host repair and not an autonomous provider result.",
+    "The earlier BW A/B failed real functional inspection and must remain archived. Every level now has a source-declared two-lane horizontal core gallery.",
+    "The prior large background ellipsoid was removed due visual art rejection, not accepted as a beautiful building.",
+    "Qwen/Gemma actual source design, real Minecraft walking and artistic approval remain NOT TESTED, all world gates BLOCKED."
+  ]
+}

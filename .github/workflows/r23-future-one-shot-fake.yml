@@ -1,0 +1,35 @@
+name: R23 Separate Consent One-shot — Offline Fake Ollama
+on:
+  push:
+    branches:
+      - feature/b198zr1-protected-architectural-revision
+    paths:
+      - 'scripts/b198zr6-authorized-single-r4-capture.mjs'
+      - 'scripts/b198zr23-future-one-shot*'
+      - 'source/ai/b198s-native-ollama-source.mjs'
+      - '.github/workflows/r23-future-one-shot-fake.yml'
+  pull_request:
+    paths:
+      - 'scripts/b198zr6-authorized-single-r4-capture.mjs'
+      - 'scripts/b198zr23-future-one-shot*'
+      - 'source/ai/b198s-native-ollama-source.mjs'
+      - '.github/workflows/r23-future-one-shot-fake.yml'
+permissions:
+  contents: read
+jobs:
+  source-only-fake-model:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Fake ephemeral 127.0.0.1 ONLY; NO live inference or Minecraft
+        run: node --test scripts/b198zr23-future-one-shot.test.mjs
+      - name: Old R6 mock regression must not break
+        run: node --test scripts/b198zr6-authorized-single-r4-capture.test.mjs

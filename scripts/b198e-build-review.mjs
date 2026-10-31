@@ -80,7 +80,7 @@ export function buildB198EPreview({dir=path.join(root,'b198e-evidence')}={}){
  '</script>'
  ].join('\n');
  const html=renderB143Html(gallery,template)
-  .replace('<h2>ChatGPTが設計した新規建築</h2>',
+  .replace('<h2>設計ソース由来の建築プレビュー（作者未認証）</h2>',
    warnings+choices+humanUI.panel+'<h2>元のB143コンパイラで検証した3D設計</h2>')
   .replace('</body>',browserJs+humanUI.script+'</body>');
  fs.mkdirSync(dir,{recursive:true});
