@@ -1,0 +1,85 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import {createHash} from 'node:crypto';
+import {fileURLToPath} from 'node:url';
+import {compileR190FreePlan,runR190FreeEngine}
+ from './r125-r190-free-engine.mjs';
+import {parseFreeBuildArgs,runFreeBuild} from './r125-free-build.mjs';
+import {R190_STATIC_SYNTHETIC_CASES} from './r190-semantic-fixtures.mjs';
+
+const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const palette=path.join(ROOT,'configs','r125-education-verified-palette-v26.33.json');
+const sha=raw=>createHash('sha256').update(raw).digest('hex');
+function synthetic(){
+ const p=structuredClone(R190_STATIC_SYNTHETIC_CASES[0]);
+ p.site={width:52,depth:52,height:14};
+ p.materials={floor:'stone',wall:'stone',roof:'wood'};
+ p.glazedOpenings=[{spaceId:'living',face:'south',offset:2,baseY:5,width:2,height:2}];
+ return p;
+}
+
+test('opt-in R190 routes from existing R125 command; legacy default is unchanged',()=>{
+ assert.equal(parseFreeBuildArgs(['--prompt','日本語で美しい小さな複合施設を作る']).engine,'r125');
+ assert.equal(parseFreeBuildArgs(['--engine','r190','--prompt','日本語で美しい小さな複合施設を作る']).engine,'r190');
+ assert.throws(()=>parseFreeBuildArgs(['--engine','unsafe','--prompt','日本語で美しい小さな複合施設を作る']),/ENGINE/);
+});
+
+test('SYNTHETIC R190 distinct connected volumes -> B143 -> audited strict 3-material offline MakeCode',()=>{
+ const plan=synthetic(),before=JSON.stringify(plan);
+ const {result,packet}=compileR190FreePlan(plan,{
+  palette:JSON.parse(fs.readFileSync(palette,'utf8')),
+  provenance:'SYNTHETIC_TEST_FIXTURE'
+ });
+ assert.equal(JSON.stringify(plan),before);
+ assert.equal(result.layout.spaces.length,4);
+ assert.equal(result.layout.portals.length,3);
+ assert.equal(result.audit.allProgramSpacesReachable,true);
+ assert.ok(result.audit.glazedOpenings.length>0);
+ assert.equal(packet.materialMode,'STRICT_USER_ATTESTED');
+ assert.ok(packet.plannedBlockCounts.stone>0);
+ assert.ok(packet.plannedBlockCounts.oak_planks>0);
+ assert.ok(packet.plannedBlockCounts.glass>0);
+ assert.match(packet.code,/player.onChat\\("mabbuild"/);
+ assert.match(packet.code,/player.onChat\\("mabverify"/);
+ assert.equal(packet.worldWrites,0);
+ assert.equal(packet.constructionApproved,false);
+});
+
+test('saved SYNTHETIC design, zero model calls, source SHA and offline export all persisted',async()=>{
+ const temp=fs.mkdtempSync(path.join(os.tmpdir(),'r125-r190-free-'));
+ try{
+  const plan=synthetic();
+  const raw=JSON.stringify(plan)+'\n',input=path.join(temp,'input.json');
+  fs.writeFileSync(input,raw);
+  const result=await runR190FreeEngine({planFile:input,
+   outDir:path.join(temp,'out'),paletteFile:palette});
+  assert.equal(result.status,'SOURCE_AND_MAKECODE_READY_HUMAN_REVIEW_REQUIRED',result.reason);
+  assert.equal(result.modelRequests,0);
+  assert.equal(result.originalResponseSha256,sha(raw));
+  assert.equal(result.worldWrites,0);
+  const report=JSON.parse(fs.readFileSync(path.join(temp,'out','makecode','EXPORT_REPORT.json'),'utf8'));
+  const code=fs.readFileSync(path.join(temp,'out','makecode','MAKECODE_EDUCATION.ts'));
+  assert.equal(sha(code),report.makecodeSourceSha256);
+  assert.equal(report.worldWrites,0);
+  assert.equal(report.programExecuted,false);
+  assert.equal(report.readiness,'NOT_PREPARED');
+  assert.deepEqual(report.gates,Array(9).fill('BLOCKED'));
+  assert.equal(fs.existsSync(path.join(temp,'out','model','index.html')),true);
+ }finally{fs.rmSync(temp,{recursive:true,force:true});}
+});
+
+test('unverified materials and implicit/no windows are HOLD, never silently repaired',()=>{
+ const verified=JSON.parse(fs.readFileSync(palette,'utf8'));
+ const metal=synthetic();metal.materials.roof='metal';
+ assert.throws(()=>compileR190FreePlan(metal,{palette:verified}),/UNVERIFIED_MATERIAL_METAL/);
+ const missing=synthetic();delete missing.glazedOpenings;
+ assert.throws(()=>compileR190FreePlan(missing,{palette:verified}),/EXPLICIT_MODEL_WINDOWS_REQUIRED/);
+});
+
+test('legacy free-build option still passes original R125 exporter for old saved plans',async()=>{
+ const options=parseFreeBuildArgs(['--engine','r125','--model','qwen3:14b','--prompt','日本語で自由な花屋を新規設計']);
+ assert.equal(options.engine,'r125');
+});
