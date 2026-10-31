@@ -4,7 +4,8 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
-import {runR190E1ArtCandidate,loadVerifiedE1ArtBaseline,locateLatestE1ArtBaseline} from './r190-e1-art-candidate.mjs';
+import {runR190E1ArtCandidate,loadVerifiedE1ArtBaseline,locateLatestE1ArtBaseline,loadVerifiedE1FailedArt,locateLatestE1FailedArt} from './r190-e1-art-candidate.mjs';
+import {diagnoseR190E1Plan} from './r190-e1-diagnose.mjs';
 import {runR190FreeEngine} from './r125-r190-free-engine.mjs';
 import {R190_STATIC_SYNTHETIC_CASES} from './r190-semantic-fixtures.mjs';
 
@@ -119,5 +120,82 @@ test('Tampered baseline original SHA fails before any model request or new direc
    /E1_ART_BASELINE_PLAN_SHA_MISMATCH/);
   assert.equal(called,0);
   assert.equal(fs.readdirSync(temp).filter(x=>x.startsWith('E1-art-review-')).length,0);
+ }finally{fs.rmSync(temp,{recursive:true,force:true});}
+});
+
+test('Explicit saved failed ART original receives verified roof diagnostics, then Qwen authors a new, source-ready alternative',async()=>{
+ const temp=fs.mkdtempSync(path.join(os.tmpdir(),'e1-art-saved-roof-'));
+ try{
+  const base=await frozenBaseline(temp);
+  const failed=await runR190E1ArtCandidate({baselineDir:base.dir,outRoot:temp,paletteFile:palette,maxWindowSlots:8},{
+   request:async({stage,onAttempt})=>{
+    assert.equal(stage,'ART_A');onAttempt();
+    const p=structuredClone(base.plan);delete p.glazedOpenings;
+    p.spaces[0].width+=2;
+    p.formIntent={spaceId:p.spaces[2].id,face:'north',cornerInset:2};
+    p.roofFormIntents=[{spaceId:p.spaces[2].id,profile:'ridge',axis:'x',rise:2,toothWidth:3}];
+    return {raw:JSON.stringify(p)};
+   }});
+  assert.equal(failed.row.reason,'R190_SEMANTIC_ROOF_FORM');
+  assert.equal(failed.realModelRequests,0);
+  assert.equal(failed.candidateSourceReady,false);
+  assert.equal(locateLatestE1FailedArt(temp),failed.dir);
+  const previous=loadVerifiedE1FailedArt(failed.dir,loadVerifiedE1ArtBaseline(base.dir));
+  assert.equal(previous.cause,'R190_SEMANTIC_ROOF_FORM');
+  assert(previous.issues.some(x=>x.rule==='ROOF_UNRECOGNIZED_FIELD'));
+  assert(previous.issues.some(x=>x.rule==='ROOF_FORM_FACET_CONFLICT'));
+  let calls=0;
+  const improved=await runR190E1ArtCandidate({baselineDir:base.dir,
+   failedCandidateDir:failed.dir,outRoot:temp,paletteFile:palette,maxWindowSlots:8},{
+    request:async({stage,user,onAttempt,slots})=>{
+     onAttempt();calls++;
+     if(stage==='ART_A'){
+      assert.match(user,/ROOF_UNRECOGNIZED_FIELD/);
+      assert.match(user,/ROOF_FORM_FACET_CONFLICT/);
+      assert.match(user,/roofFormIntents/);
+      const p=structuredClone(base.plan);
+      delete p.glazedOpenings;
+      p.id='revised-art-research-design';
+      p.spaces[0].width+=3;
+      return {raw:JSON.stringify(p)};
+     }
+     assert.equal(stage,'ART_B');assert(slots.length>0);
+     return {raw:JSON.stringify({selectedWindowSlotIds:[slots[0].slotId]})};
+    }});
+  assert.equal(calls,2);
+  assert.equal(improved.realModelRequests,0);
+  assert.equal(improved.explicitSavedRevision,true);
+  assert.equal(improved.priorFailedModelOriginalSha256,previous.priorOriginalSha256);
+  assert.equal(improved.candidateSourceReady,true);
+  assert.equal(improved.humanArt,'NOT_REVIEWED');
+  assert.equal(improved.worldWrites,0);
+  const compare=fs.readFileSync(path.join(improved.dir,'ART_SIDE_BY_SIDE.html'),'utf8');
+  assert.match(compare,new RegExp(base.row.sourceSha256));
+  assert(fs.existsSync(path.join(failed.dir,'candidate','MODEL_ART_A_ORIGINAL.txt')));
+ }finally{fs.rmSync(temp,{recursive:true,force:true});}
+});
+
+test('Tampered previous ART original fails before another model request or generated directory',async()=>{
+ const temp=fs.mkdtempSync(path.join(os.tmpdir(),'e1-art-rework-tamper-'));
+ try{
+  const base=await frozenBaseline(temp);
+  const failed=await runR190E1ArtCandidate({baselineDir:base.dir,outRoot:temp,paletteFile:palette,maxWindowSlots:4},{
+   request:async({stage,onAttempt})=>{
+    assert.equal(stage,'ART_A');onAttempt();
+    const p=structuredClone(base.plan);delete p.glazedOpenings;
+    p.spaces[0].width+=2;
+    p.roofFormIntent={spaceId:p.spaces[2].id,profile:'ridge',axis:'z',rise:2,toothWidth:5};
+    return {raw:JSON.stringify(p)};
+   }});
+  const source=path.join(failed.dir,'candidate','MODEL_ART_A_ORIGINAL.txt');
+  fs.appendFileSync(source,' ');
+  const before=fs.readdirSync(temp).filter(x=>x.startsWith('E1-art-review-')).length;
+  let calls=0;
+  await assert.rejects(()=>runR190E1ArtCandidate({baselineDir:base.dir,
+   failedCandidateDir:failed.dir,outRoot:temp,paletteFile:palette},{
+    request:async()=>{calls++;throw Error('Should not reach Qwen');}
+   }),/E1_ART_REWORK_PRIOR_MODEL_ORIGINAL_SHA_MISMATCH/);
+  assert.equal(calls,0);
+  assert.equal(fs.readdirSync(temp).filter(x=>x.startsWith('E1-art-review-')).length,before);
  }finally{fs.rmSync(temp,{recursive:true,force:true});}
 });
