@@ -24,14 +24,14 @@ const SYSTEM=[
  'schema: '+R190_SCHEMA+'; required keys: schema,id,title,brief,site,entrySpaceId,spaces,materials.',
  'id is a lowercase slug (3-40 characters); title,brief are meaningful text.',
  'site is {width,depth,height}, choose practical dimensions about 36..52,36..52,12..16; 16<=width/depth<=80; 10<=height<=32; site volume <= 40000 for the initial Education export.',
- 'spaces: 2..4 FUNCTIONALLY DIFFERENT rooms of genuinely different sizes and elevations; choose their purposes and positions, not based on building type templates.',
+ 'spaces: 2..4 FUNCTIONALLY DIFFERENT rooms of genuinely different sizes, heights and connected horizontal arrangement; choose their purposes and positions, not based on building type templates.',
  'Each space has EXACT keys id,purpose,width,depth,height,parentId,side,privacy; widths/depths 7..22, heights 7..site.height-2.',
  'First space is the entrance room: parentId=null,side=null. All others form a connected tree with parentId an earlier room id and side north/south/east/west.',
  'entrySpaceId is the first space id. Avoid placing a child on the entrance face (default south). privacy=public/shared/private.',
  'Materials are EXACT {floor,wall,roof}; choose only stone or wood for each until new Minecraft materials are verified. These map via the existing verified palette.',
- 'Required glazedOpenings is an array of 1..4 {spaceId,face,offset,baseY,width,height}; faces north/south/east/west, offset 2.., width 2..4, baseY 5, height 2; place in an OUTSIDE face, avoid parent/child shared wall and entrance door.',
+ 'Required glazedOpenings is an array of 1..4 {spaceId,face,offset,baseY,width,height}; faces north/south/east/west, offset 2.., width 2..4, baseY 5, height 2; place in an OUTSIDE face on a room at least 8 blocks tall, avoid parent/child shared wall and entrance door.',
  'Optional roofFormIntent {spaceId,profile,axis,rise}, choose ridge or shed, axis x/z, rise 2..3; only if the roof fits the site height.',
- 'Optional formIntent {spaceId,face,cornerInset} with cornerInset 2..3 for a meaningful real faceted volume, not facade ornaments.',
+ 'Optional formIntent {spaceId,face,cornerInset} with cornerInset 2..3 for a meaningful real faceted volume, not facade ornaments; do not place glazedOpenings on the same space.',
  'Optional entranceFace north/south/east/west, optional skyCourtIntent, optional spatialRole=open-court on a non-entry room only if explicitly desired; do not add unsupported keys.',
  'Model chooses massing, function, envelopes and explicit windows. No absolute voxel coordinates, no commands, no scripts. If a requirement is not representable, do not silently claim it has been satisfied.'
 ].join('\n');
@@ -83,17 +83,20 @@ export async function runR190FreeEngine({
   }else{
    if(typeof prompt!=='string'||prompt.length<8||prompt.length>4000)
     fail('PROMPT_LENGTH');
+   if(fetcher!==fetch)fail('TEST_DOUBLE_CANNOT_CLAIM_REAL_MODEL');
    const available=await preflightR125Ollama({model,endpoint,fetcher});
    if(available.status!=='LOCAL_MODEL_LISTED')fail('LOCAL_MODEL_NOT_LISTED');
+   const requestBody={model,stream:false,temperature:0.5,
+    reasoning_effort:'none',max_tokens:2600,response_format:{type:'json_object'},
+    messages:[{role:'system',content:SYSTEM},{role:'user',content:prompt}]};
+   save(modelDir,'MODEL_REQUEST.json',{endpoint,requestBody});
    const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),180000);
    let response;
    try{
     report.modelRequests=1;
     response=await fetcher(endpoint,{method:'POST',redirect:'error',
      signal:controller.signal,headers:{'Content-Type':'application/json'},
-     body:JSON.stringify({model,stream:false,temperature:0.5,
-      reasoning_effort:'none',max_tokens:2600,response_format:{type:'json_object'},
-      messages:[{role:'system',content:SYSTEM},{role:'user',content:prompt}]})});
+     body:JSON.stringify(requestBody)});
    }finally{clearTimeout(timeout);}
    if(!response?.ok)fail('MODEL_HTTP_'+String(response?.status));
    const body=await response.text();
