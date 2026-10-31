@@ -68,11 +68,42 @@ export function diagnoseR190E1Plan(plan){
  // This is diagnostic only: never mutate the model-selected roof or form.
  const roofForms=plan.roofFormIntents??(
   plan.roofFormIntent===undefined?[]:[plan.roofFormIntent]);
+ if(plan.roofFormIntents!==undefined&&plan.roofFormIntent!==undefined)
+  issue(issues,'roofFormIntents','ROOF_SINGLE_AND_PLURAL_CONFLICT',true,
+   'choose only one roofFormIntent or roofFormIntents');
+ if(plan.roofFormIntents!==undefined&&
+   (!Array.isArray(plan.roofFormIntents)||plan.roofFormIntents.length<1||plan.roofFormIntents.length>2))
+  issue(issues,'roofFormIntents','ROOF_COLLECTION_COUNT',
+   Array.isArray(plan.roofFormIntents)?plan.roofFormIntents.length:typeof plan.roofFormIntents,
+   'array of one or two roof forms');
  if(Array.isArray(roofForms)){
   for(const [i,f] of roofForms.entries()){
    if(!f||typeof f!=='object')continue;
    const prefix=plan.roofFormIntents===undefined?'roofFormIntent':'roofFormIntents['+i+']';
+   const base=['spaceId','profile','axis','rise'];
+   const expected=f.profile==='sawtooth'?[...base,'toothWidth']:base;
+   for(const key of base)if(!Object.hasOwn(f,key))
+    issue(issues,prefix+'.'+key,'ROOF_REQUIRED_FIELD',undefined,'required');
+   for(const key of Object.keys(f))if(!expected.includes(key))
+    issue(issues,prefix+'.'+key,'ROOF_UNRECOGNIZED_FIELD',f[key],'not allowed for this profile');
+   if(!['ridge','shed','sawtooth'].includes(f.profile))
+    issue(issues,prefix+'.profile','ROOF_PROFILE_INVALID',f.profile,'ridge, shed, sawtooth');
+   if(!['x','z'].includes(f.axis))
+    issue(issues,prefix+'.axis','ROOF_AXIS_INVALID',f.axis,'x or z');
+   if(!int(f.rise,2,5))
+    issue(issues,prefix+'.rise','ROOF_RISE_INVALID',f.rise,'integer 2..5');
+   if(f.profile==='sawtooth'&&!int(f.toothWidth,3,8))
+    issue(issues,prefix+'.toothWidth','ROOF_TOOTH_WIDTH_INVALID',f.toothWidth,'integer 3..8');
    const room=plan.spaces.find(s=>s?.id===f.spaceId);
+   if(room&&int(f.rise,2,5)&&room.height+f.rise>=plan.site?.height)
+    issue(issues,prefix+'.rise','ROOF_SITE_CLEARANCE',f.rise,
+     'room.height + rise must be less than site.height');
+   if(room&&f.profile==='sawtooth'&&int(f.toothWidth,3,8)){
+    const span=f.axis==='x'?room.width:f.axis==='z'?room.depth:undefined;
+    if(typeof span==='number'&&span<2*f.toothWidth)
+     issue(issues,prefix+'.toothWidth','ROOF_SAWTOOTH_SPAN',f.toothWidth,
+      'selected roof axis span must be at least 2 * toothWidth');
+   }
    if(!room)issue(issues,prefix+'.spaceId','ROOF_SPACE_NOT_FOUND',f.spaceId,
     'must refer to a room in spaces[]');
    else if(room.spatialRole==='open-court')
