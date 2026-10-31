@@ -15,7 +15,7 @@ export function e2SyntheticResearchFacility(){
     {id:'entrance-path',shape:'box',mode:'add',material:'stone',
      origin:[15,1,0],size:[2,1,9]},
     {id:'partition',shape:'box',mode:'add',material:'wood',
-     origin:[17,2,9],size:[1,6,15]},
+     origin:[17,2,9],size:[1,6,16]},
     {id:'entrance-door-cut',shape:'box',mode:'cut',
      origin:[15,2,8],size:[2,3,1]},
     {id:'internal-door-cut',shape:'box',mode:'cut',
