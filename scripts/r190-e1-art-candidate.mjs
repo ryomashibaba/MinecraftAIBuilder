@@ -275,7 +275,10 @@ export async function runR190E1ArtCandidate({
   row.windowCatalog={geometricallyPossible:catalog.totalPossibleSlots,
    sourceTested:catalog.testedRepresentativeSlots,
    certified:catalog.slots.length,
+   sourcePreflight:catalog.sourcePreflight,
    rejectionCounts:catalog.rejectedSourceReasonCounts};
+  if(catalog.sourcePreflight?.status==='HOLD')
+   throw Error('E1_ART_BASE_GEOMETRY_HOLD_'+catalog.sourcePreflight.reason);
   if(!catalog.slots.length)throw Error('E1_ART_NO_CERTIFIED_WINDOWS');
   const userB='Your revised architecture:\n'+JSON.stringify(proposal)+
    '\nExternal source-certified window choices:\n'+JSON.stringify(catalog.slots)+

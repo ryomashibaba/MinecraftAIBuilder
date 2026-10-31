@@ -121,7 +121,10 @@ export async function runR190E1ReviseSaved({
    row.windowCatalog={totalPossibleSlots:catalog.totalPossibleSlots,
     testedRepresentativeSlots:catalog.testedRepresentativeSlots,
     certified:catalog.slots.length,
+    sourcePreflight:catalog.sourcePreflight,
     sourceRejectionCounts:catalog.rejectedSourceReasonCounts};
+   if(catalog.sourcePreflight?.status==='HOLD')
+    throw Error('E1_REVISION_BASE_GEOMETRY_HOLD_'+catalog.sourcePreflight.reason);
    if(!catalog.slots.length)throw Error('E1_REVISION_NO_CERTIFIED_WINDOWS');
    // Model chooses one certified slot. No host default window.
    const userB='Original building brief:\n'+item.brief+

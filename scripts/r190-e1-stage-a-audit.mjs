@@ -105,11 +105,13 @@ export function auditR190E1SavedTwoStage(folder,{maxWindowSlots=36}={}){
    result.windowCatalog={totalPossibleSlots:catalog.totalPossibleSlots,
     testedRepresentativeSlots:catalog.testedRepresentativeSlots,
     certifiedSlots:catalog.slots.length,
+    sourcePreflight:catalog.sourcePreflight,
     fullCoverage:catalog.exhaustiveSourceWindowCheck,
     sourceRejectionCounts:catalog.rejectedSourceReasonCounts,
     sourceRejectionExamples:catalog.rejectedSourceExamples,
     limitNote:catalog.limitNote};
-   result.reason=catalog.slots.length?'SOURCE_CERTIFIED_SLOTS_FOUND':
+   result.reason=catalog.sourcePreflight?.status==='HOLD'?
+    'BASE_3D_SOURCE_HOLD':catalog.slots.length?'SOURCE_CERTIFIED_SLOTS_FOUND':
     catalog.totalPossibleSlots===0?'NO_GEOMETRIC_CANDIDATES':
     catalog.exhaustiveSourceWindowCheck?'ALL_TESTED_SOURCE_REJECTED':
     'SAMPLED_SOURCE_REJECTED_FULL_SPACE_UNKNOWN';
@@ -149,6 +151,9 @@ function main(args){
    console.log('  window catalog: geometric='+c.totalPossibleSlots+
     ', tested='+c.testedRepresentativeSlots+', certified='+c.certifiedSlots+
     ', exhaustive='+c.fullCoverage);
+   if(c.sourcePreflight?.status==='HOLD')
+    console.log('  authored-base-3D preflight HOLD: '+c.sourcePreflight.reason+
+     '; no windows SOURCE tested');
    console.log('  window rejection reasons: '+JSON.stringify(c.sourceRejectionCounts));
    if(c.sourceRejectionExamples?.length)
     console.log('  first examples: '+JSON.stringify(c.sourceRejectionExamples.slice(0,3)));

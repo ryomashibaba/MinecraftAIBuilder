@@ -153,6 +153,9 @@ export async function runR190E1TwoStageStudy({
    const catalog=r190E1WindowSlotCandidates(plan,{maxSlots:maxWindowSlots,verifySource:true});
    write(target,'WINDOW_CATALOG.json',catalog);
    row.certifiedWindowSlots=catalog.slots.length;
+   row.sourcePreflight=catalog.sourcePreflight;
+   if(catalog.sourcePreflight?.status==='HOLD')
+    throw Error('E1_TWO_STAGE_BASE_GEOMETRY_HOLD_'+catalog.sourcePreflight.reason);
    if(!catalog.slots.length)throw Error('E1_TWO_STAGE_NO_CERTIFIED_WINDOWS');
    // Stage B is new, explicit model authorship of exactly one certified window.
    const userB=item.brief+'\nOwn semantic plan:\n'+JSON.stringify(plan)+
