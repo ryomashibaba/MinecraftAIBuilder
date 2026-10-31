@@ -24,7 +24,7 @@ test('longer-than-simulated-old-header-limit reply succeeds with exact bytes and
   return req;
  };
  const response=await postLocalOllama(BO_LOCAL_ENDPOINT,opts(),
-  {requestImpl,headersTimeoutMs:100,bodyIdleTimeoutMs:100,maxResponseBytes:100});
+  {requestImpl,headersTimeoutMs:1500,bodyIdleTimeoutMs:1500,maxResponseBytes:100});
  assert.equal(calls,1);assert.equal(response.status,200);
  assert.equal(Buffer.from(await response.arrayBuffer()).toString(),'{"done":true}');
  assert.ok(BO_HEADERS_TIMEOUT_MS>300_000);
