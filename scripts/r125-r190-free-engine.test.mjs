@@ -9,6 +9,7 @@ import {compileR190FreePlan,runR190FreeEngine,runR190E1ThreeUseStudy,R190_E1_STU
  from './r125-r190-free-engine.mjs';
 import {parseFreeBuildArgs,runFreeBuild} from './r125-free-build.mjs';
 import {R190_STATIC_SYNTHETIC_CASES} from './r190-semantic-fixtures.mjs';
+import {diagnoseR190E1Plan,diagnoseR190E1SavedDirectory} from './r190-e1-diagnose.mjs';
 
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const palette=path.join(ROOT,'configs','r125-education-verified-palette-v26.33.json');
@@ -203,4 +204,43 @@ test('first real E1 HOLD feedback is reflected in prospective Qwen contract, wit
   palette:JSON.parse(fs.readFileSync(palette,'utf8'))
  }),/R190_SEMANTIC_IDENTITY/);
  assert.equal(p.id,'research_lab'); // no host correction
+});
+
+test('E1 read-only original diagnostics pinpoint room field and entry-door glazing without changing source',()=>{
+ const p=synthetic();const raw=JSON.stringify(p);
+ p.spaces[0].height=6;
+ p.spaces[1].extraInvented='incorrect';
+ const entry=p.spaces[0],span=entry.width,door=Math.floor((span-2)/2);
+ p.glazedOpenings=[{spaceId:p.entrySpaceId,face:'south',offset:door,baseY:5,width:2,height:2}];
+ const before=JSON.stringify(p),errors=diagnoseR190E1Plan(p);
+ assert(errors.some(x=>x.rule==='SPACE_HEIGHT'&&x.where.includes('spaces[0]')));
+ assert(errors.some(x=>x.rule==='SPACE_UNEXPECTED_FIELD'&&x.where.includes('extraInvented')));
+ assert(errors.some(x=>x.rule==='GLAZING_ENTRY_DOOR_CONFLICT'&&x.actual.door[0]===door));
+ assert.equal(JSON.stringify(p),before);
+ assert.notEqual(raw,before);
+});
+
+test('E1 report reader checks original SHA and writes no files or repaired plan',()=>{
+ const temp=fs.mkdtempSync(path.join(os.tmpdir(),'e1-diag-'));
+ try{
+  const p=synthetic();p.spaces[1].height=6;const raw=JSON.stringify(p);
+  const modelDir=path.join(temp,'modern-home','model');
+  fs.mkdirSync(modelDir,{recursive:true});
+  fs.writeFileSync(path.join(modelDir,'MODEL_RESPONSE_ORIGINAL.txt'),raw);
+  const report={schema:'r190-e1-three-use-source-comparison-v1',sourceCompiledCount:0,
+   rows:[
+    {id:'modern-home',reason:'R190_SEMANTIC_SPACE',originalResponseSha256:sha(raw)},
+    {id:'flower-shop',reason:'R190_SEMANTIC_GLAZING_ENTRY_DOOR_CONFLICT'},
+    {id:'research-lab',reason:'R190_SEMANTIC_SPACE'}
+   ]};
+  fs.writeFileSync(path.join(temp,'E1_STUDY_REPORT.json'),JSON.stringify(report));
+  const before=fs.readdirSync(modelDir),result=diagnoseR190E1SavedDirectory(temp);
+  assert.equal(result.modelRequests,0);
+  assert.equal(result.worldWrites,0);
+  assert.equal(result.rows[0].originalSha256Verified,true);
+  assert(result.rows[0].issues.some(x=>x.rule==='SPACE_HEIGHT'));
+  assert.equal(result.rows[1].rawAvailable,false);
+  assert.deepEqual(fs.readdirSync(modelDir),before);
+  assert.equal(fs.readFileSync(path.join(modelDir,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8'),raw);
+ }finally{fs.rmSync(temp,{force:true,recursive:true});}
 });
