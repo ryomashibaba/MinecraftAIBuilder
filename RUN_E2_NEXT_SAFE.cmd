@@ -13,7 +13,7 @@ set "CURRENT_BRANCH="
 for /f "delims=" %%B in ('git branch --show-current 2^>nul') do set "CURRENT_BRANCH=%%B"
 if /i not "%CURRENT_BRANCH%"=="%EXPECTED_BRANCH%" goto stop
 set "DIRTY="
-for /f "delims=" %%L in ('git status --porcelain --untracked-files=normal 2^>nul') do set "DIRTY=1"
+for /f "delims=" %%L in ('git status --porcelain --untracked-files=no 2^>nul') do set "DIRTY=1"
 if defined DIRTY goto stop
 git fetch origin "%EXPECTED_BRANCH%"
 if errorlevel 1 goto stop

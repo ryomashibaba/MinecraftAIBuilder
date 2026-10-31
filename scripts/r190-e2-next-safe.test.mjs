@@ -12,6 +12,7 @@ test('E2 Windows launcher enforces branch, clean tree, safe sync, offline tests 
  assert(branch<clean&&clean<ff&&ff<test&&test<model);
  assert.equal(cmd.split('node scripts\\r190-e2-qwen-study.mjs').length-1,1);
  assert(cmd.includes('E2_CHAT_HANDOFF.json'));
+ assert(cmd.includes('git status --porcelain --untracked-files=no'));
  assert(!cmd.includes('git reset --hard'));
  assert(!cmd.includes('git push'));
  assert(!cmd.includes('mabbuild'));
