@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
-import {compileR190FreePlan,runR190FreeEngine,runR190E1ThreeUseStudy,R190_E1_STUDY_BRIEFS,r190E1MassingSignature}
+import {compileR190FreePlan,runR190FreeEngine,runR190E1ThreeUseStudy,R190_E1_STUDY_BRIEFS,r190E1MassingSignature,R190_FREE_SYSTEM_PROMPT}
  from './r125-r190-free-engine.mjs';
 import {parseFreeBuildArgs,runFreeBuild} from './r125-free-build.mjs';
 import {R190_STATIC_SYNTHETIC_CASES} from './r190-semantic-fixtures.mjs';
@@ -187,4 +187,20 @@ test('E1 signature treats renamed rooms, new prose and material palette as same 
  q.entrySpaceId=ids.get(p.entrySpaceId);
  q.glazedOpenings=q.glazedOpenings.map(g=>({...g,spaceId:ids.get(g.spaceId)}));
  assert.equal(r190E1MassingSignature(p),r190E1MassingSignature(q));
+});
+
+test('first real E1 HOLD feedback is reflected in prospective Qwen contract, without repairing responses',()=>{
+ const s=R190_FREE_SYSTEM_PROMPT;
+ assert.match(s,/NO underscores/);
+ assert.match(s,/\^\[a-z\]\[a-z0-9-\]\{2,39\}/);
+ assert.match(s,/Every room height MUST/);
+ assert.match(s,/SHARED WALLS/);
+ assert.match(s,/formIntent spaceId CANNOT also appear/);
+ assert.match(s,/one final JSON object/);
+ const p=synthetic();
+ p.id='research_lab';
+ assert.throws(()=>compileR190FreePlan(p,{
+  palette:JSON.parse(fs.readFileSync(palette,'utf8'))
+ }),/R190_SEMANTIC_IDENTITY/);
+ assert.equal(p.id,'research_lab'); // no host correction
 });
