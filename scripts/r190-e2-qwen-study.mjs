@@ -28,6 +28,9 @@ export const E2_QWEN_SYSTEM=Object.freeze([
  'sourceDesign fields: schema,id,title,brief,designOnly,bounds,elements.',
  'sourceDesign.schema="minecraftaibuilder-b143-building-dsl-v1", designOnly=true; id is lowercase ASCII kebab-case length 3..48.',
  'bounds={width,height,depth}, choose roughly width/depth 28..44, height 12..18, all coordinates are LOCAL integer voxel coordinates [x,y,z] within 0..bounds-1.',
+ 'CRITICAL COORDINATE TYPES: sourceDesign element origin is [x,y,z] (3 integers); programSpaces.zone is [x,z,width,depth] (4 integers); programSpaces.witness, entrance.approachPad and entrance.arrivalPad are EACH [x,z] (exactly 2 integers). Never use [x,y,z,width,depth] for a pad.',
+ 'For EVERY program zone, check 0<=x, 0<=z, width>=4, depth>=4, x+width<=bounds.width and z+depth<=bounds.depth. A witness [wx,wz] is inside the zone only if x<=wx, z<=wz, wx+2<=x+width and wz+2<=z+depth.',
+ 'Treat zone width/depth as lengths, not ending coordinates. The X,Z pairs in pads mark the lower corner of a 2x2 supported standing area; there is NO y, width or depth field inside pad arrays.'
  'elements: ordered 8..35 fully authored B143 primitives. Each element has id,shape,mode and applicable fields. Use no arbitrary metadata, world coordinates, scripts or unsupported operations.',
  'BOX add: {id,shape:"box",mode:"add",material:"stone"|"wood"|"glass",origin:[x,y,z],size:[w,h,d]}, optionally shell:1 for hollow floor+walls+roof of one continuous envelope. BOX cut: {id,shape:"box",mode:"cut",origin:[x,y,z],size:[w,h,d]}, NO material.',
  'Other genuine shape option: cylinder add with material and origin:[x,y,z],axis:"x"|"y"|"z",radius integer>=1,length integer>=1; ellipsoid add with center:[x,y,z],radii:[rx,ry,rz]; or beam add with start,end,thickness. All domains strictly within bounds. Only choose curved shapes which have meaningful roof/entry structure.',
@@ -36,12 +39,15 @@ export const E2_QWEN_SYSTEM=Object.freeze([
  'programSpaces: 2..4 entries, each EXACTLY {id,purpose,zone,witness}. id ASCII lowercase kebab-case. purpose meaningful Japanese. zone=[x,z,width,depth] within bounds, width/depth>=4. witness=[x,z] is the LOWER LEFT of real 2x2 walkable floor inside that zone.',
  'Do not generate a wall or partition across the only route between entrance and rooms. If you generate a partition, you MUST CUT a 2-block-wide real opening through it with free y=2 and y=3.',
  'entrance EXACTLY {spaceId,face,approachPad,arrivalPad}. spaceId refers to entrance programSpace. face north/south/east/west. approachPad is 2x2 real floor at site BOUNDARY: south=>z=0, north=>z=bounds.depth-2, west=>x=0,east=>x=bounds.width-2. arrivalPad is 2x2 walkable inside entrance programSpace.',
+ 'ENTRANCE CHECK: both approachPad and arrivalPad must each have length 2 and contain only [x,z]; they are NOT [x,y,z,w,d] cuboids. Both pads must fit entirely in the bounds. The approachPad lies at the declared boundary; the arrivalPad lies inside the declared entrance zone.'
  'A continuous 2x2 floor path must physically connect approachPad at boundary to arrivalPad and EVERY programSpace witness. For a 2-block-wide path, no walls at either y=2 or y=3 at ANY intermediate pad.',
  'glazedOpenings: 1..3 entries EXACTLY {spaceId,face,origin,width,height}. origin=[x,y,z], width 2..8, height 2..4. Glass begins y>=3 and fits fully within source bounds. Both inner and outer adjacent cells must be AIR at each glass voxel.',
+ 'WINDOW DIMENSION CHECK: each declared glazedOpening must have width>=2 (a single-block-wide window is INVALID) and height>=2. The width and height describe the same real glass voxels explicitly authored in sourceDesign.elements; no host-provided fallback glass exists.'
  'A window on south/north runs along X; on east/west along Z. Use real glass element whose voxels exactly match window rectangle, preserve real stone or wood sill at y-1 and header at y+height, and ensure exterior ray towards site boundary is clear of all solids.',
  'Window must face outside air, with its interior-adjacent cells within its referenced programSpace zone. Avoid glazing a shared wall between two wings.',
  'Use only reliable B143 material names stone,wood,glass for this first bounded source trial. This is NOT a claim of full Minecraft Education palette support.',
  'Never output unsupported fields, dangling references, inaccessible rooms, floating roofs, fake windows, spatially impossible cuts, or arbitrary exterior ornaments. Validate all element positions and B143 domain bounds mentally before final JSON.',
+ 'FINAL SELF-CHECK BEFORE RESPONSE: check every array has its exact required length, every zone and 2x2 pad fits source bounds, entrance coordinates match its boundary face, window width is 2..8, and the authored solid/cut/glass primitives physically support those declarations. Correct your OWN design in the draft before returning the single answer; the host will neither infer nor repair it. You are free to invent the architecture and its coordinates.'
  'Return ONLY the single complete model-authored E2 JSON object.'
 ].join('\n'));
 

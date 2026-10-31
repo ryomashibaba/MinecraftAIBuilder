@@ -87,3 +87,30 @@ test('Hash-tampered original is refused before creating output or model calls',(
   assert.equal(fs.readdirSync(root).filter(x=>x.startsWith('E2-diagnosis-')).length,0);
  }finally{fs.rmSync(root,{recursive:true,force:true});}
 });
+
+test('Observed E2 Qwen failure classes are all reported together; invalid source is never compiled or repaired',()=>{
+ const p=e2SyntheticResearchFacility();
+ const originalBounds=structuredClone(p.sourceDesign.bounds);
+ p.programSpaces[0].zone=[0,originalBounds.depth-2,16,4];
+ p.programSpaces[0].witness=[2,20];
+ p.entrance.approachPad=[12,0,22,2,2];
+ p.entrance.arrivalPad=[12,2,22,2,2];
+ p.glazedOpenings[0].width=1;
+ p.glazedOpenings.push({
+  ...p.glazedOpenings[0],origin:[14,4,8],width:1
+ });
+ const frozen=JSON.stringify(p);
+ const result=diagnoseE2AuthoredPlan(p);
+ const byCode=result.issues.map(x=>x.code);
+ for(const code of ['PROGRAM_ZONE_Z','PROGRAM_ZONE_DEPTH',
+  'PROGRAM_WITNESS_ZONE','ENTRANCE_PAD_FORMAT','GLAZING_WIDTH'])
+  assert(byCode.includes(code),'missing observed failure class: '+code);
+ assert.equal(byCode.filter(x=>x==='ENTRANCE_PAD_FORMAT').length,2);
+ assert.equal(byCode.filter(x=>x==='GLAZING_WIDTH').length,2);
+ assert.equal(result.sourceAudit,'SKIPPED_INVALID_INPUT');
+ assert.equal(result.canonicalValidator,'UNCHANGED');
+ assert.equal(result.modelRequests,0);
+ assert.equal(result.worldWrites,0);
+ assert.equal(result.fixesApplied,0);
+ assert.equal(JSON.stringify(p),frozen);
+});

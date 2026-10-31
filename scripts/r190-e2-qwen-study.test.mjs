@@ -7,6 +7,21 @@ import {createHash} from 'node:crypto';
 import {runE2QwenStudy,E2_QWEN_SYSTEM} from './r190-e2-qwen-study.mjs';
 import {e2SyntheticResearchFacility} from './r190-e2-synthetic-fixture.mjs';
 const sha=x=>createHash('sha256').update(x).digest('hex');
+test('E2 prompt explicitly distinguishes 2D pad arrays, 3D solids and 4D zones without inserting templates',()=>{
+ const s=E2_QWEN_SYSTEM;
+ for(const v of [
+  'sourceDesign element origin is [x,y,z] (3 integers)',
+  'programSpaces.zone is [x,z,width,depth] (4 integers)',
+  'entrance.approachPad and entrance.arrivalPad are EACH [x,z] (exactly 2 integers)',
+  'x+width<=bounds.width and z+depth<=bounds.depth',
+  'wx+2<=x+width and wz+2<=z+depth',
+  'they are NOT [x,y,z,w,d] cuboids',
+  'a single-block-wide window is INVALID',
+  'the host will neither infer nor repair it'
+ ])assert(s.includes(v),'missing precise author contract: '+v);
+ assert(s.includes('You are free to invent the architecture'));
+ assert(s.includes('Return precisely ONE JSON object'));
+});
 
 test('One model-authored E2 source response is preserved and verified as genuine B143, ART stays HOLD',async()=>{
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'e2-qwen-good-'));
