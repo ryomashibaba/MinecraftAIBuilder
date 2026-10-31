@@ -2,6 +2,8 @@
 
 > 初回施工の継続: MakeCodeの敷地確認・施工・照合中に別チャットで原点変更や重複施工が起きないようbusyガードを追加。公式資料で座標加算とKeepを確認したが、Education内でのコンパイル・API動作・実施工は未確認。MCP接続確認は `fetch failed`。専用試験ワールドの特定、バックアップ、範囲と権限の確認を済ませてから初回施工する。合成家屋はAI設計ではない。
 
+> 実機追記: Education v26.33で既存 `minecraftaibuildertest` を確認し、アプリのコピー機能で `minecraftaibuildertest のコピー` を作成して開いた。元ワールドは残存。コピー内にも既存建築あり、施工範囲未確認。Code Builderで新規プロジェクトを作成したが「新しいプロジェクトを作成しています…」から進まず、閉じて開き直しても同状態。コード貼付・コンパイル・施工は未実施。コピー側で空き地と権限を確かめ、MakeCodeを復旧してから継続する。
+
 > **最新方針：Minecraft Education内に自由な希望建築を簡易でも実際に作るMVPを最優先。** 美術改善を一時後回しにし、モデル自由入力→短いArchitecturePlan→既存BN/B143ボクセル→ゲームへの安全な施工を最短で接続する。最初のBridgeとして `source/ai/r125-education-makecode-export.mjs`（厳格にSHA検証済みB143 sceneをcuboidへ圧縮し、MakeCode Static TypeScript生成）と`scripts/r125-export-education-pilot.mjs`（--design / --compact --brief → 出力ディレクトリ）を新規追加。**これはゲーム自動接続ではない**。出力プログラムはコピー済み平坦試験ワールドのMakeCodeに手動貼付、mabset→mabbuild明示実行で初めてWorldWrite。エリア全AIR事前検査・支持地面の有無・Keepのみで既存セルを置換せず、mabverifyで配置一致を点検。ワールドID・バックアップ・教育版でのコンパイル・実動作はまだ未検証。正式なゲーム内施工成功は**0件**。元ソースBuildPlanは空/9 BLOCKED/ART HOLD維持、原モデル回答とmainを触らない。実ワールド書込み許可はユーザー操作と別の確実な技術的事前確認後だけ。
 
 > **必読。** この文書は過去の長いChatGPT会話を丸ごと再読込しないためのGitHub上の軽量な正本。**新チャットでは最初にDraft PR #128の現在HEAD・変更差分・専用CIの結果を再確認**する。以下のコミットとCI状況は作成時点のスナップショット。勝手に次工程の成功を仮定しない。
