@@ -104,7 +104,9 @@ function originalSceneOccupancySha(scene){
  const cells=scene?.primitives;
  if(!Array.isArray(cells)||cells.length<1||cells.length>160000)
   throw Error('E1_TWO_STAGE_SCENE_INVALID');
- const min=[0,1,2].map(i=>Math.min(...cells.map(v=>v[i])));
+ const min=[Infinity,Infinity,Infinity];
+ for(const cell of cells)for(let k=0;k<3;k++)
+  min[k]=Math.min(min[k],cell[k]);
  return sha(cells.map(c=>[c[0]-min[0],c[1]-min[1],c[2]-min[2]].join(','))
   .sort().join('|'));
 }
