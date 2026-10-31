@@ -11,7 +11,7 @@ import {exportB143EducationMakeCode} from '../source/ai/r125-education-makecode-
 export function exportSavedPlan(planFile, outDir, provenance='UNVERIFIED_DESIGN') {
  const plan=JSON.parse(fs.readFileSync(planFile,'utf8'));
  const product=compileArchitecturePlan(plan);
- const packet=exportB143EducationMakeCode({design:product.design,scene:product.compiled,provenance});
+ const packet=exportB143EducationMakeCode({design:product.design,scene:product.compiled,provenance,groundLowestLayer:true});
  fs.mkdirSync(outDir);
  const {code,...report}=packet;
  fs.writeFileSync(path.join(outDir,'B143_SOURCE.json'),JSON.stringify(product.design,null,2)+'\n',{flag:'wx'});
