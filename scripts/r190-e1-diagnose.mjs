@@ -224,6 +224,29 @@ export function r190E1WindowSlotCandidates(plan,{maxSlots=120,verifySource=false
  const selected=all>maxSlots?
   Array.from({length:maxSlots},(_,i)=>slots[Math.floor(i*(all-1)/Math.max(1,maxSlots-1))]):
   slots;
+ // Global geometry must pass BEFORE a window can be certified.
+ // Otherwise 36+ windows can all fail with the SAME unrelated facade/roof
+ // failure; never claim these were window placement failures.
+ let sourcePreflight={status:'NOT_CHECKED',reason:null};
+ if(verifySource){
+  try{
+   const core=compileR190SemanticPlan(copy);
+   if(core.worldWrites!==0||core.constructionApproved!==false)
+    throw Error('E1_SOURCE_PRECHECK_SAFETY');
+   sourcePreflight={status:'PASS',reason:null,
+    sourceSha256:core.compiled.sourceSha256,
+    geometrySha256:core.compiled.geometrySha256};
+  }catch(e){
+   sourcePreflight={status:'HOLD',reason:String(e?.message??e).slice(0,140)};
+   return {schema:'r190-e1-read-only-window-catalog-v1',
+    authorship:'MODEL_MUST_SELECT_SLOTS',readOnly:true,modelRequests:0,worldWrites:0,
+    totalPossibleSlots:all,sourceChecked:true,sourcePreflight,
+    slots:[],testedRepresentativeSlots:0,verifiedWindowSlots:0,
+    rejectedSourceReasonCounts:{},rejectedSourceExamples:[],
+    exhaustiveSourceWindowCheck:false,
+    limitNote:'Base authored 3D failed independent SOURCE audit before glazing. No windows tested; correct authored massing first, not a window error.'};
+  }
+ }
  const rejectReasons={},rejectExamples=[];
  const verified=verifySource?selected.filter(slot=>{
   try{
@@ -249,7 +272,7 @@ export function r190E1WindowSlotCandidates(plan,{maxSlots=120,verifySource=false
  return {schema:'r190-e1-read-only-window-catalog-v1',
   authorship:'MODEL_MUST_SELECT_SLOTS',readOnly:true,modelRequests:0,
   worldWrites:0,totalPossibleSlots:all,
-  sourceChecked:verifySource,slots:verified,
+  sourceChecked:verifySource,sourcePreflight,slots:verified,
   testedRepresentativeSlots:selected.length,verifiedWindowSlots:verified.length,
   rejectedSourceReasonCounts:rejectReasons,
   rejectedSourceExamples:rejectExamples,
