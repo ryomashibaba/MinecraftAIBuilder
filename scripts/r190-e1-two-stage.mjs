@@ -54,7 +54,7 @@ const STAGE_B_SYSTEM=[
  'No extra keys. No model explanation. No Minecraft commands.'
 ].join('\n');
 
-async function requestLocalModel({model,system,user,onAttempt}){
+export async function requestLocalModel({model,system,user,onAttempt}){
  const ready=await preflightR125Ollama({model,endpoint:ENDPOINT,fetcher:fetch});
  if(ready.status!=='LOCAL_MODEL_LISTED')throw Error('E1_TWO_STAGE_LOCAL_MODEL_NOT_LISTED');
  const body={model,stream:false,temperature:0.45,reasoning_effort:'none',
@@ -79,7 +79,7 @@ async function requestLocalModel({model,system,user,onAttempt}){
   throw Error('E1_TWO_STAGE_MODEL_ORIGINAL_MISSING');
  return {raw,requestBody:body};
 }
-function parseStageA(raw){
+export function parseStageA(raw){
  const plan=JSON.parse(raw);
  if(!plan||typeof plan!=='object'||Array.isArray(plan)||
   Object.hasOwn(plan,'glazedOpenings'))
@@ -87,7 +87,7 @@ function parseStageA(raw){
  validateR190SemanticPlan(plan);
  return plan;
 }
-function selectWindow(raw,catalog){
+export function selectWindow(raw,catalog){
  const answer=JSON.parse(raw);
  if(!answer||typeof answer!=='object'||Array.isArray(answer)||
   Object.keys(answer).length!==1||
@@ -100,7 +100,7 @@ function selectWindow(raw,catalog){
  return {spaceId:slot.spaceId,face:slot.face,offset:slot.offset,
   baseY:slot.baseY,width:slot.width,height:slot.height};
 }
-function originalSceneOccupancySha(scene){
+export function originalSceneOccupancySha(scene){
  const cells=scene?.primitives;
  if(!Array.isArray(cells)||cells.length<1||cells.length>160000)
   throw Error('E1_TWO_STAGE_SCENE_INVALID');
