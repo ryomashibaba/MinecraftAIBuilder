@@ -8,7 +8,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
-import {validR190Purpose,validateR190SemanticPlan,layoutR190SemanticPlan,r190GlazingCells} from '../source/ai/r190-semantic-massing.mjs';
+import {validR190Purpose,validateR190SemanticPlan,layoutR190SemanticPlan,r190GlazingCells,compileR190SemanticPlan} from '../source/ai/r190-semantic-massing.mjs';
 
 const idOk=s=>typeof s==='string'&&/^[a-z][a-z0-9-]{2,39}$/.test(s);
 const textOk=(s,n)=>typeof s==='string'&&s.length>=3&&s.length<=n&&
@@ -158,7 +158,8 @@ export function diagnoseR190E1Plan(plan){
  * Slots are spatially screened, NOT a promise of a successful B143 build.
  * This is a future two-stage authoring primitive, not auto-repair.
  */
-export function r190E1WindowSlotCandidates(plan,{maxSlots=120}={}){
+export function r190E1WindowSlotCandidates(plan,{maxSlots=120,verifySource=false}={}){
+ if(!int(maxSlots,1,120)||typeof verifySource!=='boolean')throw Error('E1_WINDOW_CATALOG_ARGUMENTS');
  const copy=structuredClone(plan);
  delete copy.glazedOpenings;
  // fail closed on invalid authored geometry; do not adjust its walls or roofs.
@@ -190,11 +191,23 @@ export function r190E1WindowSlotCandidates(plan,{maxSlots=120}={}){
  // Deterministic sampling across the full space of eligible real faces,
  // rather than proposing a single default template window.
  const selected=all>maxSlots?
-  Array.from({length:maxSlots},(_,i)=>slots[Math.floor(i*(all-1)/(maxSlots-1))]):
+  Array.from({length:maxSlots},(_,i)=>slots[Math.floor(i*(all-1)/Math.max(1,maxSlots-1))]):
   slots;
+ const verified=verifySource?selected.filter(slot=>{
+  try{
+   const candidate={...copy,glazedOpenings:[{
+    spaceId:slot.spaceId,face:slot.face,offset:slot.offset,
+    baseY:slot.baseY,width:slot.width,height:slot.height
+   }]};
+   const compiled=compileR190SemanticPlan(candidate);
+   return compiled.audit?.glazedOpenings?.length===1&&compiled.worldWrites===0;
+  }catch{return false;}
+ }):selected;
  return {schema:'r190-e1-read-only-window-catalog-v1',
   authorship:'MODEL_MUST_SELECT_SLOTS',readOnly:true,modelRequests:0,
-  worldWrites:0,totalPossibleSlots:all,slots:selected,
+  worldWrites:0,totalPossibleSlots:all,
+  sourceChecked:verifySource,slots:verified,
+  testedRepresentativeSlots:selected.length,verifiedWindowSlots:verified.length,
   limitNote:all>maxSlots?'Representative deterministic sample; not exhaustive':null};
 }
 
