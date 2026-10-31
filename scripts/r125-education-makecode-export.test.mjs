@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import vm from 'node:vm';
 import {compileDesign} from '../source/ai/b143-building-dsl.mjs';
 import {compactB143Cuboids,exportB143EducationMakeCode} from '../source/ai/r125-education-makecode-export.mjs';
 import {compileR190BNAssembly} from '../source/ai/r190bn-spatial-assembly.mjs';
@@ -45,6 +46,24 @@ test('same source/geometry has deterministic export and tampered source is rejec
  const bad=structuredClone(scene);bad.primitives[0][3]=99;
  assert.throws(()=>exportB143EducationMakeCode({design:d,scene:bad}),/SOURCE_GEOMETRY_SHA_MISMATCH/);
  assert.throws(()=>exportB143EducationMakeCode({design:d,scene,originOffset:[0,0,0]}),/ORIGIN_OFFSET/);
+});
+test('a second chat cannot move the anchor or start a build during preflight',()=>{
+ const code=exportB143EducationMakeCode({design:d,scene:compileDesign(d)}).code
+  .replace(/: number\[\]\[\]|: number\[\]|: string\[\]|: number|: Position/g,'');
+ const handlers={}, messages=[], fills=[];
+ let playerX=0, attempted=false;
+ const player={position:()=>({x:playerX,y:0,z:0}),onChat:(name,fn)=>{handlers[name]=fn},say:s=>messages.push(s)};
+ const blocks={blockByName:s=>s,testForBlock:(_block,p)=>{
+  if(!attempted){attempted=true;playerX=100;handlers.mabset();handlers.mabbuild();}
+  return p.y>=0;
+ },fill:(_block,a,b)=>fills.push([a,b])};
+ vm.runInNewContext(code,{player,blocks,AIR:'air',FillOperation:{Keep:0},
+  pos:(x,y,z)=>({x,y,z}),positions:{add:(a,b)=>({x:a.x+b.x,y:a.y+b.y,z:a.z+b.z})}});
+ handlers.mabset();handlers.mabbuild();
+ assert(fills.length>0);
+ assert(fills.every(([a,b])=>a.x<100&&b.x<100));
+ assert(messages.some(s=>s.includes('operation in progress')));
+ assert(messages.some(s=>s.includes('busy, not set, or already attempted')));
 });
 test('existing BN genuinely compiled multi-storey scene exports without making a world claim',()=>{
  const q=twoLevelReadingProbe();
