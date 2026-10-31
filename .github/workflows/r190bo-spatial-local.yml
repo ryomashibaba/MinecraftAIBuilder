@@ -36,6 +36,7 @@ jobs:
       - name: New BN model contract, fake transport and real CLI regressions
         env:
           NODE_OPTIONS: --import=./scripts/r190bo-deny-network.mjs
+          R190_COMPACT_ARTIFACT_DIR: r190-compact-demo
         run: node --test scripts/r190bo-local-http.test.mjs scripts/r190bo-spatial-local.test.mjs scripts/r190bo-one-model-gate.test.mjs scripts/r190bn-spatial-assembly.test.mjs scripts/r190bn-compact-architecture-plan.test.mjs scripts/r190bn-compact-to-bn.test.mjs
       - name: Existing immutable BM, provenance and comparison regressions
         env:
@@ -78,4 +79,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: R190BO-OFFLINE-NO-MODEL-${{ matrix.os }}
-          path: bo-ci-evidence
+          path: |
+            bo-ci-evidence
+            r190-compact-demo

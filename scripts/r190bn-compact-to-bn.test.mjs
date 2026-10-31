@@ -1,6 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
+import fs from 'node:fs';
+import path from 'node:path';
+import {elevationR190BZ,perspectiveR190BZ} from './r190bz-open-shell-study.mjs';
 import {ARCHITECTURE_PLAN_SCHEMA} from '../source/ai/r190bn-compact-architecture-plan.mjs';
 import {compileCompactArchitecturePlan} from '../source/ai/r190bn-compact-to-bn.mjs';
 const brief=Buffer.from('Create a community atelier with public exhibition below and a studio above, real outside entry and a usable staircase.');
@@ -75,3 +78,39 @@ test('invalid plan is HOLD without fabricated source or author-labelled reconstr
  assert.equal(r.geometryCompiled,false);
  assert.equal(r.BNSource,undefined);
 });
+
+/** Only CI explicitly sets this. Synthetic reference evidence, NOT real model ART. */
+if(process.env.R190_COMPACT_ARTIFACT_DIR){
+ const target=path.resolve(process.env.R190_COMPACT_ARTIFACT_DIR);
+ if(fs.existsSync(target)||!fs.existsSync(path.dirname(target)))throw Error('FRESH_CI_GALLERY_OUTPUT_REQUIRED');
+ const result=compileCompactArchitecturePlan(plan(),{originalBrief:brief,authorship:'SYNTHETIC_TEST_FIXTURE'});
+ if(result.status!=='SOURCE_TWO_LEVEL_VOXEL_ROUTE_PROXIES_ART_HOLD')
+  throw Error('REAL_VOXEL_COMPACT_DEMO_NOT_READY: '+result.reason);
+ fs.mkdirSync(target);
+ const bounds=result.BNSource.bounds,scene={bounds,primitives:result.derived.compiled.primitives};
+ const names=['front','rear','west','east','roof','oblique','ground','canyon'];
+ const views=[];
+ for(const name of names){
+  const svg=['oblique','ground','canyon'].includes(name)?
+   perspectiveR190BZ(scene,name):elevationR190BZ(scene,name);
+  const file=name+'.svg';
+  fs.writeFileSync(path.join(target,file),svg,{flag:'wx'});
+  views.push({name,file,sha256:H(Buffer.from(svg)),type:['oblique','ground','canyon'].includes(name)?
+    'APPROXIMATE_SPLAT_VIEW':'EXACT_ORTHOGRAPHIC_OCCUPANCY_PROJECTION'});
+ }
+ const evidence={schema:'minecraftaibuilder-compact-geometry-review-v1',
+  provenance:'SYNTHETIC_TEST_FIXTURE_NOT_REAL_MODEL',
+  sourcePlanSha256:result.originalInputSha256,
+  derivedSourceSha256:result.sourceSha256,voxelGeometrySha256:result.geometrySha256,
+  voxelCount:scene.primitives.length,modelCalls:0,worldWrites:0,
+  actualTwoStoryStaircase:true,physicalProxy:result.evidence,views,
+  artworkReview:'ART_HOLD_NOT_HUMAN_APPROVED',minecraftPlayerWalking:'NOT_TESTED',
+  readiness:'NOT_PREPARED',gates:Array(9).fill('BLOCKED'),BuildPlan:{operations:[]}};
+ fs.writeFileSync(path.join(target,'EVIDENCE.json'),JSON.stringify(evidence,null,2)+'\n',{flag:'wx'});
+ const safeNames=names.map(n=>'<figure><img loading="lazy" src="'+n+'.svg" alt="'+n+' true voxel view" /><figcaption>'+n+'</figcaption></figure>').join('\n');
+ fs.writeFileSync(path.join(target,'REVIEW.html'),
+  '<!doctype html><html lang="ja"><meta charset="utf-8"><title>Compact IR genuine B143 review — synthetic</title>'+
+  '<style>body{background:#172232;color:#f7f8fa;font:16px system-ui;margin:24px}main{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:20px}figure{margin:0}img{width:100%;background:#14202e}figcaption{padding:6px}</style>'+
+  '<h1>合成設計入力 → 真正B143 8視点</h1><p>実Qwen/Gemmaの成果物ではありません。ART HOLD / MC施工0。</p><main>'+
+  safeNames+'</main></html>',{flag:'wx'});
+}
