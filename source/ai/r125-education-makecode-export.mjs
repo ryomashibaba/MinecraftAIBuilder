@@ -4,7 +4,9 @@ import {verifyCompiled} from './b143-building-dsl.mjs';
 const sha=b=>createHash('sha256').update(b).digest('hex');
 const fail=x=>{throw Error('R125_EDUCATION_EXPORT_'+x)};
 const key=(x,y,z)=>x+','+y+','+z;
-const MATERIAL_NAMES=['stone','stone','iron_block','glass','planks','glowstone','gold_block'];
+// Education rejected `planks` during startup, even when the material was unused.
+// Keep the pilot palette conservative until additional names are verified in-game.
+const MATERIAL_NAMES=['stone','stone','stone','glass','stone','stone','stone'];
 const int=(x,a,b)=>Number.isSafeInteger(x)&&x>=a&&x<=b;
 
 export function compactB143Cuboids(scene,{maxCuboids=2500}={}){
@@ -132,7 +134,7 @@ export function exportB143EducationMakeCode({design,scene,originOffset=[8,0,8],p
   sourceSha256:scene.sourceSha256,geometrySha256:scene.geometrySha256,
   makecodeSourceSha256:sha(Buffer.from(code)),bounds:structuredClone(b),
   plannedVoxelCount:scene.primitives.length,plannedCuboids:cuboids.length,
-  materialMapping:MATERIAL_NAMES,materialWarning:'concrete mapped to stone; exact palette not certified',
+  materialMapping:MATERIAL_NAMES,materialWarning:'pilot maps all materials except glass to stone; exact palette not certified',
   actualEducationExecution:'NOT_TESTED',requiresUserPasteAndExplicitChat:true,
   backupVerifiedByProgram:false,worldIdentityVerifiedByProgram:false,
   worldContacts:0,worldWrites:0,programExecuted:false,readiness:'NOT_PREPARED',
