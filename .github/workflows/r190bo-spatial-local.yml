@@ -46,6 +46,10 @@ jobs:
         env:
           NODE_OPTIONS: --import=./scripts/r190bo-deny-network.mjs
         run: node scripts/r190bo-offline-study.mjs --out bo-ci-evidence
+      - name: Generate real B143-to-MakeCode trial file (NO world contact)
+        env:
+          NODE_OPTIONS: --import=./scripts/r190bo-deny-network.mjs
+        run: node scripts/r125-education-makecode-demo.mjs --out r125-education-demo
       - name: Actual Windows offline CMD, no Ollama
         if: runner.os == 'Windows'
         shell: cmd
@@ -82,3 +86,4 @@ jobs:
           path: |
             bo-ci-evidence
             r190-compact-demo
+            r125-education-demo
