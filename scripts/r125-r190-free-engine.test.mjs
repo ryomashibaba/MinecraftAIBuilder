@@ -154,6 +154,11 @@ test('E1 three-use runner uses three separate immutable source requests; fake ne
   assert.equal(result.distinctVoxelOccupancyCount,3);
   assert.equal(result.worldWrites,0);
   assert.equal(fs.existsSync(path.join(result.dir,'E1_REVIEW.md')),true);
+  const page=fs.readFileSync(path.join(result.dir,'E1_REVIEW.html'),'utf8');
+  assert.match(page,/modern-home\/model\/index\.html/);
+  assert.match(page,/flower-shop\/model\/index\.html/);
+  assert.match(page,/research-lab\/model\/index\.html/);
+  assert.match(page,/TEST_DOUBLE_ONLY/);
  }finally{fs.rmSync(temp,{recursive:true,force:true});}
 });
 

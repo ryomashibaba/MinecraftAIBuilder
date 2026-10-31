@@ -240,6 +240,51 @@ export async function runR190E1ThreeUseStudy({
   writeProgress();
   if(/LOCAL_MODEL_NOT_LISTED|MODEL_NOT_LISTED|MODEL_UNAVAILABLE/.test(reason??''))localUnavailable=true;
  }
+/** Standalone offline side-by-side 3D inspection. Escaped diagnostic text,
+ * no external resources or Minecraft access. Not an automatic ART decision.
+ */
+function r190E1ReviewHtml(rows,summary){
+ const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({
+  '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+ })[c]);
+ const cards=rows.map(row=>{
+  const title=R190_E1_STUDY_BRIEFS.find(x=>x.id===row.id)?.id??row.id;
+  const dir=encodeURIComponent(row.id);
+  const view=row.sourceCompiled?
+   '<iframe loading="lazy" title="'+esc(title)+' genuine 3D" src="'+dir+
+    '/model/index.html"></iframe>'+
+   '<p><a href="'+dir+'/model/index.html" target="_blank" rel="noopener">3Dビューアを開く</a></p>':
+   '<div class="hold">生成した真正3Dなし — HOLD</div>';
+  const roomCount=row.features?.roomCount??'–',
+   roofs=row.features?.roofSections?.length??'–';
+  return '<article><h2>'+esc(title)+'</h2>'+view+
+   '<p>状態: <strong>'+esc(row.status)+'</strong></p>'+
+   '<p>用途空間: '+esc(roomCount)+' / 屋根断面: '+esc(roofs)+'</p>'+
+   '<p>原応答 SHA: <code>'+esc(row.originalResponseSha256)+'</code></p>'+
+   '<p>幾何 SHA: <code>'+esc(row.geometrySha256)+'</code></p>'+
+   '<p>占有形状 SHA: <code>'+esc(row.occupancySha256)+'</code></p>'+
+   '<p>HOLD理由: '+esc(row.reason??'なし')+'</p></article>';
+ }).join('\n');
+ return '<!doctype html><html lang="ja"><head><meta charset="utf-8">'+
+ '<meta name="viewport" content="width=device-width,initial-scale=1">'+
+ '<title>MinecraftAIBuilder E1 — 3建築比較</title>'+
+ '<style>body{background:#101820;color:#f1f5f8;font:15px/1.5 system-ui;margin:22px}'+
+ 'header{max-width:1200px;margin:auto auto 22px}h1{font-size:1.6rem;margin-bottom:6px}'+
+ 'main{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}'+
+ 'article{background:#1b2834;border:1px solid #405669;border-radius:12px;padding:14px;min-width:0}'+
+ 'h2{font-size:1.1rem;margin:0 0 12px}iframe{width:100%;height:340px;border:0;background:#253748}'+
+ 'code{font-size:11px;overflow-wrap:anywhere}p{overflow-wrap:anywhere}a{color:#9cdbff}'+
+ '.hold{height:340px;display:grid;place-items:center;background:#303641}'+
+ 'footer{margin-top:24px;max-width:1100px;color:#c6d2dd}</style></head><body>'+
+ '<header><h1>E1 — 本物の3D形状による3用途比較</h1>'+
+ '<p>比較状態: '+esc(summary.status)+'。形状の相違は美術合格ではありません。'+
+ '全件モデル原文・実空間・外観を独立評価してください。</p>'+
+ '<p>真正SOURCE件数 '+esc(summary.sourceCompiledCount)+'/3、'+
+ '異なる占有形状 '+esc(summary.distinctVoxelOccupancyCount)+'/3。</p></header>'+
+ '<main>'+cards+'</main>'+
+ '<footer>注意：ARTは未審査、Minecraft実歩行・実施工は未実施。'+
+ '合成テストダブルの成果を実モデル生成と混同しないでください。</footer></body></html>';
+}
  const compiled=rows.filter(x=>x.sourceCompiled);
  const distinct=new Set(compiled.map(x=>x.shapeSignature)).size;
  const summary={schema:'r190-e1-three-use-source-comparison-v1',
@@ -253,6 +298,7 @@ export async function runR190E1ThreeUseStudy({
   actualPlayerWalking:'NOT_TESTED',constructionApproved:false,worldWrites:0,
   rows};
  save(dir,'E1_STUDY_REPORT.json',summary);
+ save(dir,'E1_REVIEW.html',r190E1ReviewHtml(rows,summary));
  save(dir,'E1_REVIEW.md','# MinecraftAIBuilder E1 — 3用途の真正3D比較（一次資料）\n\n'
   +'判定: '+summary.status+'。これは作品美術・Minecraft実歩行・汎用性能の合格ではありません。\n\n'
   +rows.map(r=>'- '+r.id+': '+r.status+' / source='+String(r.sourceSha256)
