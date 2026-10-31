@@ -11,6 +11,9 @@ on:
       - 'source/ai/r125-education-makecode-export.mjs'
       - 'scripts/r125-*makecode*.mjs'
       - 'scripts/r125-material-probe*.mjs'
+      - 'scripts/r125-free-build*.mjs'
+      - 'RUN_R125_FREE_BUILD.cmd'
+      - 'configs/r125-education-verified-palette-v26.33.json'
       - 'scripts/r125-export-education-pilot.mjs'
       - '.github/workflows/r190bo-spatial-local.yml'
   pull_request:
@@ -23,6 +26,9 @@ on:
       - 'source/ai/r125-education-makecode-export.mjs'
       - 'scripts/r125-*makecode*.mjs'
       - 'scripts/r125-material-probe*.mjs'
+      - 'scripts/r125-free-build*.mjs'
+      - 'RUN_R125_FREE_BUILD.cmd'
+      - 'configs/r125-education-verified-palette-v26.33.json'
       - 'scripts/r125-export-education-pilot.mjs'
       - '.github/workflows/r190bo-spatial-local.yml'
   workflow_dispatch:
@@ -45,7 +51,7 @@ jobs:
         env:
           NODE_OPTIONS: --import=./scripts/r190bo-deny-network.mjs
           R190_COMPACT_ARTIFACT_DIR: r190-compact-demo
-        run: node --test scripts/r190bo-local-http.test.mjs scripts/r190bo-spatial-local.test.mjs scripts/r190bo-one-model-gate.test.mjs scripts/r190bn-spatial-assembly.test.mjs scripts/r190bn-compact-architecture-plan.test.mjs scripts/r190bn-compact-to-bn.test.mjs scripts/r125-education-makecode-export.test.mjs scripts/r125-material-probe.test.mjs
+        run: node --test scripts/r190bo-local-http.test.mjs scripts/r190bo-spatial-local.test.mjs scripts/r190bo-one-model-gate.test.mjs scripts/r190bn-spatial-assembly.test.mjs scripts/r190bn-compact-architecture-plan.test.mjs scripts/r190bn-compact-to-bn.test.mjs scripts/r125-education-makecode-export.test.mjs scripts/r125-material-probe.test.mjs scripts/r125-free-build.test.mjs
       - name: Existing immutable BM, provenance and comparison regressions
         env:
           NODE_OPTIONS: --import=./scripts/r190bo-deny-network.mjs
