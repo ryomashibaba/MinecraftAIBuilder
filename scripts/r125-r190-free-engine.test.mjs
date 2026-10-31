@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
-import {compileR190FreePlan,runR190FreeEngine,runR190E1ThreeUseStudy,R190_E1_STUDY_BRIEFS}
+import {compileR190FreePlan,runR190FreeEngine,runR190E1ThreeUseStudy,R190_E1_STUDY_BRIEFS,r190E1MassingSignature}
  from './r125-r190-free-engine.mjs';
 import {parseFreeBuildArgs,runFreeBuild} from './r125-free-build.mjs';
 import {R190_STATIC_SYNTHETIC_CASES} from './r190-semantic-fixtures.mjs';
@@ -139,6 +139,9 @@ test('E1 three-use runner uses three separate immutable source requests; fake ne
     plan.spaces[0].width+=count;
     fs.writeFileSync(path.join(outDir,'model','ARCHITECTURE_PLAN.json'),JSON.stringify(plan));
     fs.writeFileSync(path.join(outDir,'model','B143_SOURCE.json'),JSON.stringify({designOnly:true}));
+    fs.writeFileSync(path.join(outDir,'model','B143_SCENE.json'),JSON.stringify({
+     primitives:Array.from({length:count+1},(_,i)=>[i,1,1,'stone'])
+    }));
     return {status:'SOURCE_AND_MAKECODE_READY_HUMAN_REVIEW_REQUIRED',
      modelRequests:1,worldWrites:0,originalResponseSha256:sha(prompt),
      sourceSha256:sha('source'+count),geometrySha256:sha('geometry'+count)};
@@ -148,6 +151,7 @@ test('E1 three-use runner uses three separate immutable source requests; fake ne
   assert.equal(result.realModelRequests,0);
   assert.equal(result.sourceCompiledCount,3);
   assert.equal(result.distinctMassingSignatureCount,3);
+  assert.equal(result.distinctVoxelOccupancyCount,3);
   assert.equal(result.worldWrites,0);
   assert.equal(fs.existsSync(path.join(result.dir,'E1_REVIEW.md')),true);
  }finally{fs.rmSync(temp,{recursive:true,force:true});}
@@ -166,4 +170,15 @@ test('E1 local unavailability skips remaining requests without faking source geo
    ['SKIPPED_LOCAL_MODEL_NOT_AVAILABLE','SKIPPED_LOCAL_MODEL_NOT_AVAILABLE']);
   assert.equal(result.worldWrites,0);
  }finally{fs.rmSync(temp,{recursive:true,force:true});}
+});
+
+test('E1 signature treats renamed rooms, new prose and material palette as same massing',()=>{
+ const p=synthetic(),q=structuredClone(p),ids=new Map(q.spaces.map((s,i)=>[s.id,'space-renamed-'+i]));
+ q.id='another-name';q.title='Different words';q.brief='Different prose and uses';
+ q.materials={floor:'wood',wall:'wood',roof:'stone'};
+ q.spaces=q.spaces.map(s=>({...s,id:ids.get(s.id),
+  parentId:s.parentId===null?null:ids.get(s.parentId),purpose:'Different room label'}));
+ q.entrySpaceId=ids.get(p.entrySpaceId);
+ q.glazedOpenings=q.glazedOpenings.map(g=>({...g,spaceId:ids.get(g.spaceId)}));
+ assert.equal(r190E1MassingSignature(p),r190E1MassingSignature(q));
 });

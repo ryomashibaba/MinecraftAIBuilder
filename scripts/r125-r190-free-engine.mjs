@@ -151,15 +151,38 @@ export const R190_E1_STUDY_BRIEFS=Object.freeze([
  {id:'flower-shop',brief:'日本語の依頼：小さな花屋を設計してください。買い物客用の展示空間、花を扱う作業場所、補充・保管の動線を備え、街から店の用途が伝わる個性的な入口と外形を自分で選んでください。'},
  {id:'research-lab',brief:'日本語の依頼：小さな研究・試作施設を設計してください。受付・共同作業室・静かな実験場所の用途を分け、外部からの見え方と室内移動を一体で考え、用途にふさわしい立体構成を自分で選んでください。'}
 ]);
-function r190E1MassingSignature(plan){
+/** Ignore typology words, room identifiers, materials: these do not
+ * alone constitute different architecture. Normalise semantic graph refs.
+ */
+export function r190E1MassingSignature(plan){
+ const byId=new Map(plan.spaces.map((s,i)=>[s.id,i]));
+ const ix=id=>byId.get(id),f=plan.formIntent,c=plan.skyCourtIntent;
+ const roofs=plan.roofFormIntents??(plan.roofFormIntent?[plan.roofFormIntent]:[]);
  return JSON.stringify({
-  rooms:plan.spaces.map(s=>[s.width,s.depth,s.height,s.parentId===null?'entry':s.side,
-   s.privacy,s.spatialRole??'enclosed',s.tangentShift??null]),
+  rooms:plan.spaces.map(s=>[s.width,s.depth,s.height,
+   s.parentId===null?null:ix(s.parentId),s.side,
+   s.spatialRole??'enclosed',s.tangentShift??null]),
   entryFace:plan.entranceFace??'south',
-  form:plan.formIntent??null,roof:plan.roofFormIntents??(plan.roofFormIntent?[plan.roofFormIntent]:[]),
-  courtyard:plan.skyCourtIntent??null,
-  crossConnections:plan.crossConnections??[]
+  form:f?[ix(f.spaceId),f.face,f.cornerInset]:null,
+  roofs:roofs.map(x=>[ix(x.spaceId),x.profile,x.axis,x.rise,x.toothWidth??null])
+   .sort((x,y)=>x[0]-y[0]),
+  court:c?[ix(c.spaceId),c.offsetX,c.offsetZ,c.width,c.depth,c.openFace??null]:null,
+  links:(plan.crossConnections??[]).map(([x,y])=>[ix(x),ix(y)]
+   .sort((m,n)=>m-n).join(':')).sort()
  });
+}
+/** Translation- and material-independent SHA of REAL B143 occupied cells.
+ * This captures actual geometry but is still NOT a visual quality judgment.
+ */
+function r190E1OccupancySha(scene){
+ const vox=scene?.primitives;
+ if(!Array.isArray(vox)||!vox.length||vox.length>160000||
+  !vox.every(v=>Array.isArray(v)&&v.length>=3&&
+   v.slice(0,3).every(Number.isSafeInteger)))fail('E1_INVALID_VOXEL_SCENE');
+ let minX=Infinity,minY=Infinity,minZ=Infinity;
+ for(const cell of vox){minX=Math.min(minX,cell[0]);minY=Math.min(minY,cell[1]);minZ=Math.min(minZ,cell[2]);}
+ return sha(vox.map(c=>[c[0]-minX,c[1]-minY,c[2]-minZ].join(','))
+  .sort().join('|'));
 }
 export async function runR190E1ThreeUseStudy({
  model='qwen3:14b',outRoot=path.join(path.dirname(ROOT),'MinecraftAIBuilder-E1-Outputs'),
@@ -186,7 +209,7 @@ export async function runR190E1ThreeUseStudy({
   try{report=await single({prompt:item.brief,model,outDir:target,paletteFile});}
   catch(e){report={status:'HOLD_STUDY_RUN_EXCEPTION',reason:String(e?.message??e),
    modelRequests:0,worldWrites:0};}
-  let sourceCompiled=false,shapeSignature=null,features=null,reason=report.reason??null;
+  let sourceCompiled=false,shapeSignature=null,occupancySha256=null,features=null,reason=report.reason??null;
   if(report.status==='SOURCE_AND_MAKECODE_READY_HUMAN_REVIEW_REQUIRED'&&
    report.worldWrites===0&&report.modelRequests===1&&
    typeof report.originalResponseSha256==='string'&&
@@ -194,21 +217,25 @@ export async function runR190E1ThreeUseStudy({
    try{
     const plan=JSON.parse(fs.readFileSync(path.join(target,'model','ARCHITECTURE_PLAN.json'),'utf8'));
     const source=JSON.parse(fs.readFileSync(path.join(target,'model','B143_SOURCE.json'),'utf8'));
+    const scene=JSON.parse(fs.readFileSync(path.join(target,'model','B143_SCENE.json'),'utf8'));
     if(plan.schema!==R190_SCHEMA||source.designOnly!==true)fail('E1_SOURCE_EVIDENCE_INCOMPLETE');
-    sourceCompiled=true;shapeSignature=r190E1MassingSignature(plan);
+    shapeSignature=r190E1MassingSignature(plan);
+    occupancySha256=r190E1OccupancySha(scene);
+    sourceCompiled=true;
     features={roomCount:plan.spaces.length,
      roomDimensions:plan.spaces.map(x=>({width:x.width,depth:x.depth,height:x.height})),
      roofSections:plan.roofFormIntents??(plan.roofFormIntent?[plan.roofFormIntent]:[]),
      facetedForm:plan.formIntent??null,openCourtSpaces:plan.spaces.filter(x=>x.spatialRole==='open-court').length,
      skyCourt:plan.skyCourtIntent??null};
-   }catch(e){reason='SOURCE_EVIDENCE_INVALID: '+String(e?.message??e);}
+   }catch(e){sourceCompiled=false;shapeSignature=null;occupancySha256=null;
+    features=null;reason='SOURCE_EVIDENCE_INVALID: '+String(e?.message??e);}
   }
   rows.push({id:item.id,status:sourceCompiled?'SOURCE_READY_ART_HOLD':
    'HOLD_OR_INCOMPLETE_SOURCE',engineStatus:report.status,reason,
    modelRequests:report.modelRequests??0,
    sourceCompiled,originalResponseSha256:report.originalResponseSha256??null,
    sourceSha256:report.sourceSha256??null,geometrySha256:report.geometrySha256??null,
-   shapeSignature,features,output:target,worldWrites:0,
+   shapeSignature,occupancySha256,features,output:target,worldWrites:0,
    art:'NOT_REVIEWED',minecraftWalking:'NOT_TESTED'});
   writeProgress();
   if(/LOCAL_MODEL_NOT_LISTED|MODEL_NOT_LISTED|MODEL_UNAVAILABLE/.test(reason??''))localUnavailable=true;
@@ -219,6 +246,7 @@ export async function runR190E1ThreeUseStudy({
   provenance:synthetic?'SYNTHETIC_TEST_DOUBLE_NOT_REAL_MODEL':'REAL_LOCAL_MODEL_ATTEMPTS',
   model,requestedUseCount:3,realModelRequests:synthetic?0:rows.reduce((n,r)=>n+r.modelRequests,0),
   sourceCompiledCount:compiled.length,distinctMassingSignatureCount:distinct,
+  distinctVoxelOccupancyCount:new Set(compiled.map(x=>x.occupancySha256)).size,
   status:synthetic?'TEST_DOUBLE_ONLY':compiled.length!==3?'SOURCE_INCOMPLETE_HOLD':
    distinct!==3?'DUPLICATE_MASSING_PROXY_REVIEW_REQUIRED':'THREE_DISTINCT_SOURCE_MASSING_PROXIES_ART_HOLD',
   shapeDiversityIsOnlyProxy:true,humanArt:'NOT_REVIEWED',actualMinecraftBuild:'NOT_ATTEMPTED',
