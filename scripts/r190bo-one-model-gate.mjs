@@ -6,6 +6,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {inspectBO,runBO} from './r190bo-spatial-local.mjs';
+import {postLocalOllama} from './r190bo-local-http.mjs';
 import {reviewR190CDBOCapture} from './r190cd-bo-capture-review.mjs';
 import {renderR190CE} from './r190ce-offline-visual-evidence.mjs';
 
@@ -21,7 +22,7 @@ export function inspectOneModel(prepared){
   next:'SEPARATE_EXPLICIT_HUMAN_APPROVAL_REQUIRED'};
 }
 
-export async function runOneModel({prepared,approval,out},{transport=fetch}={}){
+export async function runOneModel({prepared,approval,out},{transport=postLocalOllama}={}){
  const checked=inspectOneModel(prepared);
  if(checked.attemptConsumed)fail('ATTEMPT_ALREADY_CONSUMED');
  const {p}=inspectBO(prepared);

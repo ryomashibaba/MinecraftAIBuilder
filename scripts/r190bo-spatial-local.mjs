@@ -5,6 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {randomUUID} from 'node:crypto';
+import {BO_LOCAL_ENDPOINT,BO_TOTAL_TIMEOUT_MS,BO_HEADERS_TIMEOUT_MS,BO_BODY_IDLE_TIMEOUT_MS,postLocalOllama,transportErrorFacts} from './r190bo-local-http.mjs';
 import {buildSpatialRequest,hashBO} from '../source/ai/r190bo-spatial-model-contract.mjs';
 import {compileR190BNAssembly} from '../source/ai/r190bn-spatial-assembly.mjs';
 import {auditR190BQ} from '../source/ai/r190bq-independent-physical-program.mjs';
@@ -13,7 +14,7 @@ import {renderR164Elevation} from './r164-exterior-audit.mjs';
 import {reviewR190BCOriginal,renderR190BCSectionSVG} from './r190bc-design-first-section.mjs';
 
 const ROOT=fileURLToPath(new URL('../',import.meta.url));
-export const BO_ENDPOINT='http://127.0.0.1:11434/api/chat';
+export const BO_ENDPOINT=BO_LOCAL_ENDPOINT;
 const fail=code=>{throw Error('R190BO_'+code)};
 const json=x=>JSON.stringify(x,null,2)+'\n';
 const write=(dir,name,bytes)=>fs.writeFileSync(path.join(dir,name),bytes,{flag:'wx'});
@@ -69,7 +70,8 @@ export function prepareBO({briefFile,model,out,...budgets}){
    causalComparison:'NOT_CONTROLLED: new IR, native transport, schema and context differ from BM'},
   approvalNonce,approvalPhrase,approvalGranted:false,previousBMApprovalReusable:false,
   maximumPostRequests:1,metadataRequests:0,automaticRetries:0,fallbacks:0,
-  plannedTimeoutMs:900000,localModelInstalled:'NOT_QUERIED_OFFLINE',providerSchemaCompatibility:'NOT_TESTED_ON_REAL_OLLAMA',
+  plannedTimeoutMs:BO_TOTAL_TIMEOUT_MS,plannedHeadersTimeoutMs:BO_HEADERS_TIMEOUT_MS,
+  plannedBodyIdleTimeoutMs:BO_BODY_IDLE_TIMEOUT_MS,localModelInstalled:'NOT_QUERIED_OFFLINE',providerSchemaCompatibility:'NOT_TESTED_ON_REAL_OLLAMA',
   modelIdentityCryptographicallyVerified:false,networkRequests:0,modelCalls:0,
   requestBytes:request.bytes.length,mechanicalHashComputedByHost:true,
   designAuthorship:'MODEL_MUST_CHOOSE_PROGRAM_LAYOUT_LEVELS_MASSING_VOIDS_STAIRS_OPENINGS',...safety()};
@@ -277,7 +279,7 @@ export function replayBO({prepared,original,out,origin='SAVED_SOURCE_UNVERIFIED'
  const {brief}=inspectBO(prepared),raw=read(path.resolve(original),200000),dir=path.resolve(out);
  fresh(dir);const r=deriveBO({dir,raw,brief,origin});inventoryBO(dir);return r;
 }
-export async function runBO({prepared,approval,out},{transport=fetch}={}){
+export async function runBO({prepared,approval,out},{transport=postLocalOllama}={}){
  const {dir,p,brief,request}=inspectBO(prepared);
  // Possession of a preflight is NOT approval; caller must supply a NEW human grant.
  if(approval!==p.approvalPhrase)fail('SEPARATE_HUMAN_APPROVAL_REQUIRED');
@@ -294,7 +296,7 @@ export async function runBO({prepared,approval,out},{transport=fetch}={}){
  try{
   requestCount++;
   const response=await transport(BO_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},
-   body:request,redirect:'error',signal:AbortSignal.timeout(900000)});
+   body:request,redirect:'error',signal:AbortSignal.timeout(BO_TOTAL_TIMEOUT_MS)});
   const bytes=Buffer.from(await response.arrayBuffer());
   write(target,'PROVIDER_HTTP_BODY.json',bytes);
   let body;try{body=JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(bytes));}catch{fail('INVALID_PROVIDER_HTTP_JSON');}
@@ -309,7 +311,8 @@ export async function runBO({prepared,approval,out},{transport=fetch}={}){
   inventoryBO(target);return r;
  }catch(error){
   write(target,'TRANSPORT_HOLD.json',json({status:'HOLD',failure:String(error.message),requestCount,
-   startedAt,finishedAt:new Date().toISOString(),automaticRetries:0,attemptConsumed:true,
+   startedAt,finishedAt:new Date().toISOString(),elapsedMs:Date.now()-Date.parse(startedAt),
+   errorFacts:transportErrorFacts(error),automaticRetries:0,attemptConsumed:true,
    noModelOriginalInvented:!fs.existsSync(path.join(target,'MODEL_ORIGINAL.txt')),...safety()}));
   inventoryBO(target);return {status:'HOLD',failure:String(error.message),requestCount};
  }
