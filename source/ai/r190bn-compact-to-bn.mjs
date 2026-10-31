@@ -17,7 +17,6 @@ const fail=s=>{throw Error('R190_ARCHCOMP_'+s)};
 const box=(id,mode,origin,size,material)=>({kind:'primitive',element:{
  id,shape:'box',mode,origin,size,...(mode==='add'?{material}:{})}});
 const skin=(id,spaceId,materials)=>({kind:'enclosure',id,spaceId,thickness:1,materials});
-const cell=(r,x,y,z)=>r.compiled.primitives.some(p=>p[0]===x&&p[1]===y&&p[2]===z);
 const occupiedLookup=r=>new Set(r.compiled.primitives.map(p=>p.slice(0,3).join(',')));
 const K=(x,y,z)=>x+','+y+','+z;
 
@@ -33,7 +32,8 @@ export function compileCompactArchitecturePlan(p,{originalBrief,authorship='UNVE
   authorship,sourceOriginalUnchanged:true};
  if(p.stories.length!==2||p.stories.some(s=>s.spaces.length!==1))
   return no('FIRST_SLICE_ONLY_TWO_STORIES_ONE_ROOM_EACH',sourceMeta);
- if(p.adjacency.some(a=>a.relation!=='visual'))return no('CROSS_STORY_ONLY_VISUAL_RELATION',sourceMeta);
+ if(p.adjacency.length!==0)return no('UNSUPPORTED_AUTHORED_ADJACENCY',sourceMeta);
+ if(p.entry.face!=='south')return no('UNSUPPORTED_AUTHORED_ENTRY_FACE',{...sourceMeta,authorEntryFace:p.entry.face});
  if(p.verticalLinks.length!==1)return no('SINGLE_VERTICAL_LINK_ONLY',sourceMeta);
  const v=p.verticalLinks[0];
  if(v.kind!=='straight'||v.side!=='east')
@@ -81,7 +81,7 @@ export function compileCompactArchitecturePlan(p,{originalBrief,authorship='UNVE
  ];
  for(const [i,o] of p.openings.entries()){
   const room=o.spaceId===a.id?lower:upper;
-  if(o.face==='east'||o.pattern==='ribbon'||o.pattern==='clerestory')
+  if(o.role==='ventilation'||o.face==='east'||o.pattern==='ribbon'||o.pattern==='clerestory')
    return no('UNSUPPORTED_AUTHORED_GLAZING',{...sourceMeta,index:i,authoredOpening:o});
   const y=room.y+2,hh=o.pattern==='tall'?3:2;
   if(y+hh>room.y+room.h)return no('WINDOW_CANNOT_FIT_CLEAR_HEIGHT',{...sourceMeta,index:i});

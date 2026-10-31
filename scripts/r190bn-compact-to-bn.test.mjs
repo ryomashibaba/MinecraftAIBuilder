@@ -11,7 +11,7 @@ const plan=()=>({
  stories:[
   {id:'public-floor',clearHeight:6,spaces:[{id:'public-hall',purpose:'Public exhibition and gathering',width:14,depth:18,privacy:'public'}]},
   {id:'quiet-floor',clearHeight:6,spaces:[{id:'quiet-studio',purpose:'Quiet upper workshop and design',width:12,depth:16,privacy:'private'}]}
- ],adjacency:[{a:'public-hall',b:'quiet-studio',relation:'visual'}],
+ ],adjacency:[],
  entry:{spaceId:'public-hall',face:'south'},
  verticalLinks:[{fromStory:'public-floor',toStory:'quiet-floor',
   fromSpace:'public-hall',toSpace:'quiet-studio',kind:'straight',side:'east',width:3}],
@@ -56,7 +56,10 @@ test('spiral stairs and curved mass never become silent rectangular/straight rep
   [p=>p.massing.forms[0].kind='curved','UNSUPPORTED_AUTHORED_MASSING'],
   [p=>p.roof.kind='shed','UNSUPPORTED_AUTHORED_ROOF'],
   [p=>p.stories[1].spaces[0].width=25,'UNSUPPORTED_UPPER_OVERHANG'],
-  [p=>p.unmetRequirements=['spiral-stairs'],'AUTHOR_DECLARED_UNMET_REQUIREMENTS']
+  [p=>p.unmetRequirements=['spiral-stairs'],'AUTHOR_DECLARED_UNMET_REQUIREMENTS'],
+  [p=>p.entry.face='north','UNSUPPORTED_AUTHORED_ENTRY_FACE'],
+  [p=>p.adjacency=[{a:'public-hall',b:'quiet-studio',relation:'visual'}],'UNSUPPORTED_AUTHORED_ADJACENCY'],
+  [p=>p.openings[0].role='ventilation','UNSUPPORTED_AUTHORED_GLAZING']
  ]){
   const p=plan();mutate(p);
   const r=compileCompactArchitecturePlan(p,{originalBrief:brief});
