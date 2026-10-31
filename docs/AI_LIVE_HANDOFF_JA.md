@@ -1,6 +1,6 @@
 # MinecraftAIBuilder — 新チャット用LIVE HANDOFF（2026-10-31 JST）
 
-> **最新追加（BO既存準備の段階実証ゲート）**：実験準備済みの個別 `PREFLIGHT.json` を**再生成せず** SHA／原依頼／sourcePinsで再検証し、Qwenだけを個別承認後に最大1 POSTして、その結果の原本・BO/BN/B143・CD・CEを**ローカル保存のみ**で処理する `scripts/r190bo-one-model-gate.mjs` を追加。CLIは `inspect --prepared EXISTING_PREFLIGHT`（通信0、承認フレーズ表示不要）または `run --prepared ... --approval <当該SHA+nonceの明示承認> --out NEW_PRIVATE_DIR`。**Gemmaは絶対に同時自動実行しない**。HOLDならその原因を独立評価してから次のモデルを判断。Work実測：旧8192上限でQwen/Gemmaともlength、Gemma最終回答0 bytes。最新 [`ae8e0ae3`](https://github.com/ryomashibaba/MinecraftAIBuilder/commit/ae8e0ae3b1a6c961f0d5e2d99c70ab60e006a349) にて think:false/native-only/16384/32768およびCD空原文HOLD修正済み、BO/CD CIともWindows/Ubuntu SUCCESS。新しい個別準備はユーザーPC内にあり公開GitHubには存在せず、**この追加コミットで実推論は実行しない**。新CIと実Ollama結果は完了確認まで未認証、ART HOLD、NOT_PREPARED、9 BLOCKED、MC書込0。
+> **最新追加（Compact ArchitecturePlan v1 の意味設計契約）**：実Qwen3:14bの最新報告は42秒／HTTP200／stop／2101 tokens、JSONは構文成立するも `R190BN_LEVEL`、上階y=9に対して全高8、実階段操作なし、外部入口・空洞などにも設計不整合、真正3D 0。原モデル生回答はユーザーPCに非公開保管、GitHubへ新規持込なし。正式戦略v2へ立ち返り `docs/R190_ARCHITECTUREPLAN_VERTICAL_SLICE_JA.md` にモデル／コンパイラの責任境界・短いIR→BN/B143→CD/CEの詳細条件と失敗時HOLDを固定した。 `source/ai/r190bn-compact-architecture-plan.mjs` は用途・階・ゾーン・作者選択階段／外形／屋根／開口を**座標なしで厳格検証**し、階の立脚高さだけを作者選択の階高から算術算定。検証器は `geometryCompiled=false`、ART HOLD、9 BLOCKED、world0。**新IRから真正3Dへの配置・幾何ソルバーは次の工程であり、この段階では未実装、実モデル再送も0。** 旧ソース・main・凍結証拠を変更しない。新CI結果は最新HEADで別途確認する。
 
 > **必読。** この文書は過去の長いChatGPT会話を丸ごと再読込しないためのGitHub上の軽量な正本。**新チャットでは最初にDraft PR #128の現在HEAD・変更差分・専用CIの結果を再確認**する。以下のコミットとCI状況は作成時点のスナップショット。勝手に次工程の成功を仮定しない。
 
@@ -8,7 +8,7 @@
 - Repo: `ryomashibaba/MinecraftAIBuilder`
 - 継続branch: `feature/b198zr1-protected-architectural-revision`
 - Draft PR: `https://github.com/ryomashibaba/MinecraftAIBuilder/pull/128`。**Open/Draft、未merge**。
-- この更新の親HEAD: `ae8e0ae3b1a6c961f0d5e2d99c70ab60e006a349`。PR #128の最新HEADを毎回確認する。
+- この更新の親HEAD: `f7dfc893f1ff547663a7739541271248b165024d`。PR #128最新HEADを毎回確認する。
 - 基幹引き継ぎ: `docs/AI_RESTART_JA.md`。最新CD詳細: `docs/R190CD_INDEPENDENT_INTEGRATED_GATE_JA.md`。ARTの負例根拠: `docs/R190CC_FIRST_ART_FUNCTION_AUDIT_JA.md`。
 - 初回CD検証 [Actions #41078728011](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41078728011) は**Windows/Ubuntu両SUCCESS**。
 - 旧CD専用CI [#41079427106](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41079427106)、[#41079857037](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41079857037)、[#41080022312](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41080022312)、[#41081372238](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41081372238)、密閉入口修正版 [#41082309335](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41082309335) は**全て完了SUCCESS**（それぞれ異なる旧HEAD）。BO保存レシート接続CI [#41128531573](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41128531573) もWindows/Ubuntu **SUCCESS**。今回の派生証拠独立照合CIは未検証であり、既存成功で代用禁止。
