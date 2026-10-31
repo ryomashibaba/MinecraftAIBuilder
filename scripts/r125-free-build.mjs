@@ -40,7 +40,7 @@ export async function runFreeBuild(opts,{child=spawnSync}={}){
  const runDir=path.join(root,new Date().toISOString().replace(/[:.]/g,'-')+'-'+randomBytes(4).toString('hex'));
  fs.mkdirSync(runDir,{recursive:false});
  const destination=path.join(runDir,'generated');
- const materialConstraint='\\n\\n【Education v26.33試験素材制約】床・壁・屋根は、依頼で特定素材が指定されていない場合のみ、検証済みのwoodとstoneからAI自身が選択すること。窓はglass。依頼で他の素材が必須なら、代用や無断の意味変更をせず、JSONでstatus=HOLD_UNSUPPORTED_MATERIALを返すこと（通常計画とは別扱いになる）。設計用途と各空間の使い方は原依頼に従うこと。';
+ const materialConstraint='\n\n【Education v26.33試験素材制約】床・壁・屋根は、依頼で特定素材が指定されていない場合のみ、検証済みのwoodとstoneからAI自身が選択すること。窓はglass。依頼で他の素材が必須なら、代用や無断の意味変更をせず、JSONでstatus=HOLD_UNSUPPORTED_MATERIALを返すこと（通常計画とは別扱いになる）。設計用途と各空間の使い方は原依頼に従うこと。';
  const effectivePrompt=opts.plan?null:opts.prompt+materialConstraint;
  if(!opts.plan&&effectivePrompt.length>4000)throw Error('R125_FREE_BUILD_PROMPT_WITH_CONSTRAINT_TOO_LONG');
  const request=opts.plan?{mode:'SAVED_PLAN',plan:path.resolve(opts.plan)}:
