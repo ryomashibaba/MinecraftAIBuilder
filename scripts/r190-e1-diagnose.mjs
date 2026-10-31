@@ -64,6 +64,25 @@ export function diagnoseR190E1Plan(plan){
   if(s.id!==plan.entrySpaceId&&(!idOk(s.parentId)||!faces.includes(s.side)))
    issue(issues,at,'SPACE_CHILD_RELATION',[s.parentId,s.side],'valid parent id and north/south/east/west');
  }
+ // Report the root cause hidden by the validator's umbrella ROOF_SPACE code.
+ // This is diagnostic only: never mutate the model-selected roof or form.
+ const roofForms=plan.roofFormIntents??(
+  plan.roofFormIntent===undefined?[]:[plan.roofFormIntent]);
+ if(Array.isArray(roofForms)){
+  for(const [i,f] of roofForms.entries()){
+   if(!f||typeof f!=='object')continue;
+   const prefix=plan.roofFormIntents===undefined?'roofFormIntent':'roofFormIntents['+i+']';
+   const room=plan.spaces.find(s=>s?.id===f.spaceId);
+   if(!room)issue(issues,prefix+'.spaceId','ROOF_SPACE_NOT_FOUND',f.spaceId,
+    'must refer to a room in spaces[]');
+   else if(room.spatialRole==='open-court')
+    issue(issues,prefix+'.spaceId','ROOF_OPEN_COURT_CONFLICT',f.spaceId,
+     'roofed room cannot have spatialRole=open-court');
+   else if(plan.formIntent?.spaceId===f.spaceId)
+    issue(issues,prefix+'.spaceId','ROOF_FORM_FACET_CONFLICT',f.spaceId,
+     'faceted formIntent and roofForm cannot be assigned to the same room');
+  }
+ }
  const f=plan.entranceFace??'south';
  const entry=plan.spaces.find(s=>s?.id===plan.entrySpaceId);
  for(const [i,g] of (Array.isArray(plan.glazedOpenings)?plan.glazedOpenings:[]).entries()){

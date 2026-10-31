@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
-import {compileR190FreePlan,runR190FreeEngine,runR190E1ThreeUseStudy,R190_E1_STUDY_BRIEFS,r190E1MassingSignature,R190_FREE_SYSTEM_PROMPT}
+import {compileR190FreePlan,runR190FreeEngine,runR190E1ThreeUseStudy,R190_E1_STUDY_BRIEFS,R190_E1_STUDY_WINDOW_SAFETY,r190E1MassingSignature,R190_FREE_SYSTEM_PROMPT}
  from './r125-r190-free-engine.mjs';
 import {parseFreeBuildArgs,runFreeBuild} from './r125-free-build.mjs';
 import {R190_STATIC_SYNTHETIC_CASES} from './r190-semantic-fixtures.mjs';
@@ -136,7 +136,8 @@ test('E1 three-use runner uses three separate immutable source requests; fake ne
  try{
   const result=await runR190E1ThreeUseStudy({outRoot:temp},{
    single:async({prompt,outDir})=>{
-    assert(R190_E1_STUDY_BRIEFS.some(x=>x.brief===prompt));
+    assert(R190_E1_STUDY_BRIEFS.some(x=>prompt.startsWith(x.brief+'\n')));
+    assert(prompt.endsWith(R190_E1_STUDY_WINDOW_SAFETY));
     count++;fs.mkdirSync(path.join(outDir,'model'),{recursive:true});
     const plan=synthetic();
     plan.spaces[0].width+=count;
@@ -285,4 +286,27 @@ test('Saved R190 HOLD includes field diagnoses while original JSON remains uncha
   assert(report.validationIssues.some(x=>x.rule==='SPACE_PURPOSE'));
   assert.equal(fs.readFileSync(path.join(temp,'out','model','SAVED_PLAN_ORIGINAL.txt'),'utf8'),raw);
  }finally{fs.rmSync(temp,{recursive:true,force:true});}
+});
+
+test('E1 exposes roof-space underlying reason without silently touching authored intent',()=>{
+ const p=synthetic();
+ p.roofFormIntent={spaceId:'living',profile:'ridge',axis:'x',rise:2};
+ p.formIntent={spaceId:'living',face:'north',cornerInset:2};
+ const before=JSON.stringify(p);
+ const issues=diagnoseR190E1Plan(p);
+ assert(issues.some(x=>x.rule==='ROOF_FORM_FACET_CONFLICT'));
+ assert.equal(JSON.stringify(p),before);
+ delete p.formIntent;
+ p.roofFormIntent.spaceId='no-such-room';
+ assert(diagnoseR190E1Plan(p).some(x=>x.rule==='ROOF_SPACE_NOT_FOUND'));
+ p.roofFormIntent.spaceId='living';
+ p.spaces[0].spatialRole='open-court';
+ assert(diagnoseR190E1Plan(p).some(x=>x.rule==='ROOF_OPEN_COURT_CONFLICT'));
+});
+
+test('E1 window-safety instruction is study-only, never edits model output or general R190',()=>{
+ assert.match(R190_E1_STUDY_WINDOW_SAFETY,/do NOT put any glazedOpenings/);
+ assert.match(R190_E1_STUDY_WINDOW_SAFETY,/not physically shared/);
+ assert.match(R190_E1_STUDY_WINDOW_SAFETY,/same room as formIntent/);
+ assert.doesNotMatch(R190_FREE_SYSTEM_PROMPT,/E1 architecture experiment/);
 });

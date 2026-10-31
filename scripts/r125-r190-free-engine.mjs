@@ -152,6 +152,18 @@ export async function runR190FreeEngine({
  * silent repair; each original model answer is retained by runR190FreeEngine.
  * The comparison is a SOURCE-ONLY diversity proxy, NEVER an ART pass.
  */
+// E1-specific scope: the model still selects all rooms, shapes and exterior
+// windows, but this first offline experiment avoids the repeatedly failed
+// front-door/window co-location. The general R190 design contract is unchanged.
+export const R190_E1_STUDY_WINDOW_SAFETY=
+ 'E1 architecture experiment: Author exterior windows, but do NOT put any glazedOpenings '+
+ 'on the ENTRANCE ROOM entrySpaceId with face equal to entranceFace (default south). '+
+ 'Prefer a SIDE or REAR exterior wall, on the entrance room or another room, '+
+ 'which is not physically shared with another room. A front facade window can be '+
+ 'a valid future design choice, but avoid it in this bounded E1 experiment. '+
+ 'If you use roofFormIntent or roofFormIntents, its room must exist and may NOT '+
+ 'be the same room as formIntent or any open-court room. Do not drop mandatory windows. '+
+ 'Build an original three-dimensional functional design; no standard templates.';
 export const R190_E1_STUDY_BRIEFS=Object.freeze([
  {id:'modern-home',brief:'日本語の依頼：現代的な小規模住宅を設計してください。居間、静かな作業空間、日常的な動線を備え、部屋と外形の関係を考え、単純な箱の繰り返しを避けてください。用途と実際の入口・採光を最優先し、自分で形状・屋根の断面を選んでください。'},
  {id:'flower-shop',brief:'日本語の依頼：小さな花屋を設計してください。買い物客用の展示空間、花を扱う作業場所、補充・保管の動線を備え、街から店の用途が伝わる個性的な入口と外形を自分で選んでください。'},
@@ -212,7 +224,7 @@ export async function runR190E1ThreeUseStudy({
   }
   const target=path.join(dir,item.id);
   let report;
-  try{report=await single({prompt:item.brief,model,outDir:target,paletteFile});}
+  try{report=await single({prompt:item.brief+'\n'+R190_E1_STUDY_WINDOW_SAFETY,model,outDir:target,paletteFile});}
   catch(e){report={status:'HOLD_STUDY_RUN_EXCEPTION',reason:String(e?.message??e),
    modelRequests:0,worldWrites:0};}
   let sourceCompiled=false,shapeSignature=null,occupancySha256=null,features=null,reason=report.reason??null;
