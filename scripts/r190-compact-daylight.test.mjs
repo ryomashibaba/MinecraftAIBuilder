@@ -83,7 +83,7 @@ test('independent SOURCE room floor evidence retains original model, geometry an
  assert.match(svg,/data-kind="reachable-pad"/);
  assert.match(svg,/data-kind="entry-witness"/);
  assert(svg.includes(report.geometrySha256));
- assert.doesNotMatch(svg,/<script|<foreignObject|https?:/i);
+ assert.doesNotMatch(svg,/<script|<foreignObject|\s(?:href|src)\s*=|url\s*\(/i);
  assert.equal(renderR190CompactAccessMapSvg(windowed.current),svg);
  assert.equal(report.constructionApproved,false);
  assert.equal(JSON.stringify(base.hostDerivedPlan),original);
