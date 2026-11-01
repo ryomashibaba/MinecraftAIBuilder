@@ -1,3 +1,11 @@
+## 2026-11-02 遠隔スマホ閲覧へ移行 — 既存公開Qwen住宅のGitHub Pages統合
+
+- **ローカルPC操作禁止/不要の継続方針**。ユーザーは外出中でWindows・ローカルQwenを操作できない。今後のSOURCE研究はGitHub上の保管済み資料とActionsで実行する。ローカル実行の要求や結果の捏造をしない。
+- 旧B143 Pages CIの `B148_DEFAULT_MODEL_HOOK` 回帰失敗はスマホボタン登録で末尾 `setScene();\n</script>` が崩れたため。操作ボタンを維持したまま末尾を修正し `f083e6b3076c1aba4f71217148752baafbfc6e94` に保存。旧CI run `41354986223` による原因実証済み。**修正後のPagesジョブ完走/デプロイは別途確認**。
+- 既存公開資料 `scripts/fixtures/r125-qwen14b-residential-2024a.json`（本物Qwen3:14Bの過去保存済み意味設計、モデル入力プランSHA256 `46aed429e795f2622cd8c49d8eb8f1153af20d5d958abf2f5f99020e909ce271`）に限定して、既存の `scripts/r125-expression-gallery.mjs` をB143 Pagesビルド中に実行し `b142-site-output/qwen-reference/index.html` を生成する工程を `.github/workflows/b143.yml` に追加（`4ed145a8891c4b60b6ddbcb995a7a426b5968dae`）。HTMLはスマホ対応の真正B143、Aは元Qwen意味設計、B〜Eはホスト派生の形状研究で「新たなモデル応答」と偽装しない。生成時に原文SHA、モデル出所、5真正SOURCE、9 BLOCKED、世界書込0を検査し、失敗時は既存Pagesに配信しない。
+- **プライバシー境界**：今回チャットに添付されたR190住宅大窓 `index(8).html`（幾何SHA `1475bb3796d1b1b9cc216e736a6355f55a7f161f343e35f1dfbf5cfe05e44f10`）および住宅/花屋/研究所3用途の個別原文を**公開GitHubリポジトリ/GitHub Pagesへアップロードしない**。今回のクラウド閲覧追加は既に公開されていた別世代のQwen住宅である。ユーザー添付3Dは会話内の単一HTMLとして保持。
+- **確認が必要な点**：Actions run `41359608164` の最終結果、b143-site/desktop/mobile Chromium QA、Pagesデプロイ先の実URL。単に設定しただけで「公開された」「5形状の実測成功」を断定しない。これらの結果に応じて既存ビルド不具合を直す。ART HOLD、Minecraft歩行NOT_TESTED、施工NOT_PREPARED/9 BLOCKED、BuildPlan空、main及びPR #128 Draft保護。
+
 ## 2026-11-02 R190 採光意図と真正B143窓を結ぶ再生証拠（SOURCE限定）
 
 - **新実装**：保存済み真正モデル原文の `--replay-latest` で、モデルが daylightIntent を記述していた場合は、各室の希望方角・採光量とHOSTが安全確認して実際に配置したB143窓の位置・寸法を対照する。`DAYLIGHT_INTENT_RECEIPT.json` を個別保存し、`WINDOW_RESEARCH_REPORT.json` と3D比較HTMLに出所・希望達成／HOST逸脱／未実現を表示。AIが意図を指定していない旧Qwen原本は明示的に `HOST_DERIVED_NOT_MODEL` と記録し、モデルの功績に偽装しない。
