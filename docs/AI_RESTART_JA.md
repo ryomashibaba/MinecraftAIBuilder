@@ -1,3 +1,9 @@
+## 2026-11-02 R190 CI調査：旧SVGテストの誤検出を修正
+
+- GitHub Actions R190-AC run `41352155075`（途中コード `2fc6aba`）は150テスト中149 PASS / 1 FAIL。**失敗はSVGに必要な正規の `xmlns="http://www.w3.org/2000/svg"` を、旧テストの `https?:` 禁止正規表現が外部URLと誤認したテスト実装ミス**。当該ログで新しい「HOST expanded real-glass candidate preserves model, original scene and safety」単体テストは個別PASS。
+- この誤検出は `d3ad62754a9a002cd2124e0a1c8982920a51328b` で、外部リソース参照 `href/src` や `url(` と危険要素を検出しつつ、必要なXML名前空間URLは認めるテストへ修正。**この修正後HEADの全CI PASSはまだ確認していない。** Education-firstを含め現在のrun状況を確認してから完了とする。
+- 既存実Qwen(4)の3/3、11室688/688接続、窓8は独立のユーザー実測であり、今回追加の大窓3D別案（HOST派生）の生成結果と混同しない。
+
 ## 2026-11-02 実Qwen保存済み3用途のSOURCE床実測 → 外観別案に進行
 
 - **ユーザー実行の真正証拠**：`E1_COMPACT_REPLAY_REPORT(4).json` とChrome画面、保存先 `C:\\Users\\ryoma\\Projects\\MinecraftAIBuilder-E1-Outputs\\R190-COMPACT-REPLAY-HBEKJI`。住宅・花屋・研究施設の真正SOURCE 3/3、窓付きSOURCE 3/3、研究外殻MakeCode 3/3、実窓3/3/2計8。モデル再要求0、worldContacts=worldWrites=0、ART HOLD、実歩行NOT_TESTED。
