@@ -89,8 +89,11 @@ test('R190 compact preserved study replay preserves original hashes, zero model 
   const prev=await runR190CompactThreeUse({outRoot:root},{
    request:async({onAttempt,onRaw})=>{
     onAttempt();
-    const raw=JSON.stringify(program(['home','store','lab'][i],
-     ['ridge','sky-court','facet'][i++]));
+    const fixture=program(['home','store','lab'][i],
+     ['ridge','sky-court','facet'][i++]);
+    if(i===1)fixture.daylightIntent=[
+     {spaceId:'entry',preferredFace:'west',scale:'balanced'}];
+    const raw=JSON.stringify(fixture);
     onRaw(raw);return {raw};
    }
   });
@@ -102,6 +105,9 @@ test('R190 compact preserved study replay preserves original hashes, zero model 
   assert.equal(result.makecode,'SHELL_RESEARCH_ONLY_NOT_APPROVED');
   assert.equal(result.shellPacketCount,3);
   assert.equal(result.windowCandidateCount,3);
+  assert.equal(result.rows[0].windowResearch.daylightIntentReceipt.requestedCount,1);
+  assert.equal(result.rows[1].windowResearch.daylightIntentReceipt.requestedCount,0);
+  assert.equal(result.rows[2].windowResearch.daylightIntentReceipt.requestedCount,0);
   assert(result.largerGlazingCandidateCount>=1);
   assert(result.largerGlazingCandidateCount<=3);
   assert(result.rows.every(x=>x.expandedGlazingResearch.status===
@@ -118,6 +124,12 @@ test('R190 compact preserved study replay preserves original hashes, zero model 
   assert(result.rows.every(r=>r.sourceCompiled&&r.modelRequests===0&&
    r.educationExport.status==='OFFLINE_SHELL_RESEARCH_PACKET_ONLY'));
   for(const row of result.rows){
+   const receipt=JSON.parse(fs.readFileSync(path.join(result.dir,row.id,
+    'WINDOWS_HOST_DERIVED_RESEARCH_ONLY','DAYLIGHT_INTENT_RECEIPT.json'),'utf8'));
+   const wr=JSON.parse(fs.readFileSync(row.windowResearch.report,'utf8'));
+   assert.equal(wr.author,receipt.author);
+   assert.deepEqual(wr.daylightIntentReceipt,receipt);
+   assert.equal(receipt.worldWrites,0);
    const roomEvidence=JSON.parse(fs.readFileSync(path.join(result.dir,row.id,
     'WINDOWS_HOST_DERIVED_RESEARCH_ONLY','ROOM_SOURCE_FLOOR_REVIEW.json'),'utf8'));
    assert.equal(roomEvidence.schema,'r190-compact-interior-source-evidence-v1');
@@ -151,6 +163,9 @@ test('R190 compact preserved study replay preserves original hashes, zero model 
   assert.deepEqual(fs.readFileSync(path.join(prev.dir,'E1_COMPACT_REPORT.json')),before);
   assert(fs.readFileSync(path.join(result.dir,'E1_COMPACT_REPLAY_REVIEW.html'),'utf8')
    .includes('HOST派生・窓付き研究案'));
+  const page=fs.readFileSync(path.join(result.dir,'E1_COMPACT_REPLAY_REVIEW.html'),'utf8');
+  assert(page.includes('AI採光希望と真正B143窓'));
+  assert(page.includes('AI採光希望：未指定'));
   for(const row of result.rows){
    assert(fs.existsSync(path.join(result.dir,row.viewer)));
   }

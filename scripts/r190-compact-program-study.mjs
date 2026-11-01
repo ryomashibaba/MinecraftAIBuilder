@@ -11,7 +11,7 @@ import {createHash} from 'node:crypto';
 import {requestLocalModel} from './r190-e1-two-stage.mjs';
 import {openE1ResultFolder} from './r190-e1-open-result-folder.mjs';
 import {R190_E1_STUDY_BRIEFS} from './r125-r190-free-engine.mjs';
-import {R190_COMPACT_SCHEMA,compileR190CompactProgram}
+import {R190_COMPACT_SCHEMA,compileR190CompactProgram,inspectR190CompactProgram}
  from '../source/ai/r190-compact-program.mjs';
 import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
 import {verifyCompiled} from '../source/ai/b143-building-dsl.mjs';
@@ -25,6 +25,65 @@ const sha=x=>createHash('sha256').update(x).digest('hex');
 const save=(p,x)=>fs.writeFileSync(p,typeof x==='string'?x:JSON.stringify(x,null,2)+'\n',{flag:'wx'});
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({
  '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function makeDaylightReceipt(base,v){
+ const canonical=inspectR190CompactProgram(base.modelProgram);
+ if(sha(JSON.stringify(canonical))!==base.originalProgramSha256||
+  v.originalSourceSha256!==base.built.compiled.sourceSha256||
+  v.derivedSourceSha256!==v.current.compiled.sourceSha256||
+  JSON.stringify(v.plan)!==JSON.stringify(v.current.inputPlan)||
+  !verifyCompiled(v.current.design,v.current.compiled))
+  throw Error('DAYLIGHT_MODEL_AND_SOURCE_RECEIPT_MISMATCH');
+ const wishes=canonical.daylightIntent??[];
+ if(v.applied.length!==v.plan.glazedOpenings.length||
+  !v.plan.glazedOpenings.every((p,i)=>['spaceId','face','width','height','offset','baseY']
+   .every(k=>p[k]===v.applied[i][k])))
+  throw Error('DAYLIGHT_WINDOW_RECEIPT_MISMATCH');
+ const entries=wishes.map(w=>{
+  const g=v.applied.find(x=>x.spaceId===w.spaceId);
+  const skipped=v.skipped.find(x=>x.spaceId===w.spaceId);
+  if(Boolean(g)===Boolean(skipped))throw Error('DAYLIGHT_UNACCOUNTED_INTENT');
+  if(!g)return {spaceId:w.spaceId,wish:w,actual:null,
+   status:'NOT_REALIZED',reason:skipped.reason};
+  const faceMatched=g.face===w.preferredFace;
+  const scaleMatched=w.scale==='generous'?g.width===4&&g.height===3:
+   w.scale==='balanced'?g.width>=3&&g.height>=2:
+   g.width===2&&g.height===2;
+  if(g.authorship!=='MODEL_DAYLIGHT_INTENT_HOST_GEOMETRY'||
+   JSON.stringify(g.modelDaylightIntent)!==JSON.stringify(w)||
+   g.requestedFaceSatisfied!==faceMatched||
+   g.requestedScaleSatisfied!==scaleMatched)
+   throw Error('DAYLIGHT_FORGED_MODEL_INTENT');
+  return {spaceId:w.spaceId,wish:w,
+   actual:{face:g.face,width:g.width,height:g.height,
+    offset:g.offset,baseY:g.baseY},faceMatched,scaleMatched,
+   status:faceMatched&&scaleMatched?'FULFILLED':'HOST_DEVIATION'};
+ });
+ for(const g of v.applied)if(!wishes.some(w=>w.spaceId===g.spaceId)&&
+  (g.authorship!=='HOST_DERIVED_MINIMUM_DAYLIGHT'||g.modelDaylightIntent!==undefined))
+  throw Error('DAYLIGHT_FORGED_HOST_INTENT');
+ return {schema:'r190-daylight-intent-receipt-v1',
+  author:wishes.length?'MODEL_GOALS_HOST_RESOLVED_WINDOWS':'HOST_DERIVED_NOT_MODEL',
+  originalProgramSha256:base.originalProgramSha256,
+  derivedSourceSha256:v.derivedSourceSha256,requestedCount:wishes.length,
+  fulfilledCount:entries.filter(e=>e.status==='FULFILLED').length,
+  deviatedCount:entries.filter(e=>e.status==='HOST_DEVIATION').length,
+  unrealizedCount:entries.filter(e=>e.status==='NOT_REALIZED').length,
+  entries,modelCalls:0,worldWrites:0,constructionApproved:false,
+  art:'NOT_REVIEWED',minecraftWalking:'NOT_TESTED'};
+}
+function daylightReceiptHtml(row){
+ const r=row.windowResearch?.daylightIntentReceipt;
+ if(!r)return '<p>AI採光希望の照合：HOLD</p>';
+ if(!r.requestedCount)return '<p>AI採光希望：未指定（窓はHOST派生）。</p>';
+ return '<section><h3>AI採光希望と真正B143窓</h3><ul>'+
+  r.entries.map(e=>'<li>'+esc(e.spaceId)+'：希望'+esc(e.wish.preferredFace)+
+   '/'+esc(e.wish.scale)+' → '+(e.actual?
+   esc(e.actual.face)+'/'+esc(e.actual.width)+'×'+esc(e.actual.height):'窓なし')+
+   '（'+esc(e.status)+'）</li>').join('')+
+  '</ul><p>SOURCE照合のみ。美術/実歩行はNOT_TESTED。</p></section>';
+}
+
 export const R190_COMPACT_SYSTEM=[
  'You are an independent architect. Author a short functional and architectural program, NOT numeric geometry or Minecraft commands.',
  'Return exactly ONE JSON object with schema='+R190_COMPACT_SCHEMA+' and EXACT top-level keys schema,id,title,brief,entranceFace,spaces,materials, plus OPTIONAL daylightIntent.',
@@ -313,10 +372,13 @@ export function replayR190CompactSaved({previousDir,outRoot=null}={}){
    save(path.join(target,'B143_SOURCE.json'),v.current.design);
    save(path.join(target,'B143_SCENE.json'),v.current.compiled);
    const interior=auditR190CompactInteriorEvidence(v.current);
+   const daylightReceipt=makeDaylightReceipt(x,v);
+   save(path.join(target,'DAYLIGHT_INTENT_RECEIPT.json'),daylightReceipt);
    save(path.join(target,'ROOM_SOURCE_FLOOR_REVIEW.json'),interior);
    save(path.join(target,'SOURCE_FLOOR_ACCESS_MAP.svg'),
     renderR190CompactAccessMapSvg(v.current));
-   const record={status:v.status,author:'HOST_DERIVED_NOT_MODEL',
+   const record={status:v.status,author:daylightReceipt.author,
+    daylightIntentReceipt:daylightReceipt,
     originalModelProgramSha256:sha(original),
     originalSourceSha256:sourceSha256,originalGeometrySha256:geometrySha256,
     derivedSourceSha256:v.current.compiled.sourceSha256,
@@ -344,11 +406,12 @@ export function replayR190CompactSaved({previousDir,outRoot=null}={}){
     makecodeStatus='OFFLINE_RESEARCH_ONLY';
    }catch(e){makecodeStatus='HOLD';makecodeReason=String(e?.message??e).slice(0,350);}
    save(path.join(target,'READ_FIRST_JA.txt'),
-    'Qwenの原設計は未変更。窓だけホストが決定した別案です。\n'+
+    'モデル原文は未変更。AIの採光希望があっても実窓座標と形状はHOSTが検証して決定します。\n'+
     '窓の真正3DとSOURCE動線のみ検証済み。ART/実歩行/ワールドIDは未確認。\n'+
     'MakeCodeはバックアップ済みの試験ワールドで明示操作が必要です。\n');
    windowResearch={status:v.status,output:path.join(target,'index.html'),
     report:path.join(target,'WINDOW_RESEARCH_REPORT.json'),
+    daylightIntentReceipt:daylightReceipt,
     numberOfRealWindows:v.applied.length,makecodeStatus,makecodeReason,
     clearRoomFloorCells:interior.rooms.map(r=>({id:r.spaceId,
      clearCells:r.supportedClearFloorCells,pads2x2:r.twoByTwoSupportedClearPads,
@@ -457,6 +520,7 @@ export function replayR190CompactSaved({previousDir,outRoot=null}={}){
    esc(x.expandedGlazingResearch.originalGlassCells)+'→'+
    esc(x.expandedGlazingResearch.expandedGlassCells)+'セル)</p>':
    '<p>大窓の別案: '+esc(x.expandedGlazingResearch.status)+'</p>')+
+  daylightReceiptHtml(x)+
   '<p>SOURCE状態: '+esc(x.status)+' / 窓: '+esc(x.windowResearch.status)+'</p>'+
   '<p>各室SOURCE床セルと2×2床候補（実歩行認証ではない）: '+
    esc(JSON.stringify(x.windowResearch.clearRoomFloorCells??'未測定'))+'</p>'+
