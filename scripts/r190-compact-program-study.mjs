@@ -15,6 +15,7 @@ import {R190_COMPACT_SCHEMA,compileR190CompactProgram}
  from '../source/ai/r190-compact-program.mjs';
 import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
 import {verifyCompiled} from '../source/ai/b143-building-dsl.mjs';
+import {deriveR190CompactMinimumWindows} from '../source/ai/r190-compact-daylight.mjs';
 import {exportB143EducationMakeCode} from '../source/ai/r125-education-makecode-export.mjs';
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const sha=x=>createHash('sha256').update(x).digest('hex');
@@ -225,7 +226,8 @@ export function replayR190CompactSaved({previousDir,outRoot=null}={}){
   const row=priorRows.get(item.id),original=originals.get(item.id);
   let sourceCompiled=false,reason=null,diagnostics=null,
    sourceSha256=null,geometrySha256=null,viewer=null,hostResolution=null,
-   educationExport={status:'NOT_ATTEMPTED_SOURCE_HOLD'};
+   educationExport={status:'NOT_ATTEMPTED_SOURCE_HOLD'},
+   windowResearch={status:'NOT_ATTEMPTED_SOURCE_HOLD'};
   try{
    const x=compileR190CompactProgram(original.toString('utf8'));
    sourceSha256=x.built.compiled.sourceSha256;
@@ -288,6 +290,61 @@ export function replayR190CompactSaved({previousDir,outRoot=null}={}){
     educationExport={status:'HOLD_NO_SHELL_PACKET',
      reason:String(e?.message??e).slice(0,400),worldWrites:0};
    }
+  // Optional host-origin glazing study: never edit the frozen Qwen source
+  // or the original 3D/MakeCode shell. Separate source SHA and output dir.
+  try{
+   const v=deriveR190CompactMinimumWindows(x);
+   if(v.status!=='HOST_DERIVED_WINDOWS_SOURCE_ART_HOLD')
+    throw Error(v.reason??'NO_VERIFIED_WINDOW');
+   if(v.originalGeometrySha256!==geometrySha256||
+    v.originalSourceSha256!==sourceSha256||
+    !verifyCompiled(v.current.design,v.current.compiled))
+    throw Error('WINDOW_PROVENANCE_MISMATCH');
+   const target=path.join(dir,item.id,'WINDOWS_HOST_DERIVED_RESEARCH_ONLY');
+   fs.mkdirSync(target,{recursive:true});
+   save(path.join(target,'index.html'),
+    renderB143Html(compileB143Gallery([v.current.design]),template));
+   save(path.join(target,'HOST_DERIVED_PLAN.json'),v.plan);
+   save(path.join(target,'B143_SOURCE.json'),v.current.design);
+   save(path.join(target,'B143_SCENE.json'),v.current.compiled);
+   const record={status:v.status,author:'HOST_DERIVED_NOT_MODEL',
+    originalModelProgramSha256:sha(original),
+    originalSourceSha256:sourceSha256,originalGeometrySha256:geometrySha256,
+    derivedSourceSha256:v.current.compiled.sourceSha256,
+    derivedGeometrySha256:v.current.compiled.geometrySha256,
+    applied:v.applied,skipped:v.skipped,numberOfRealWindows:v.applied.length,
+    modelCalls:0,worldWrites:0,art:'NOT_REVIEWED',
+    minecraftWalking:'NOT_TESTED',constructionApproved:false};
+   save(path.join(target,'WINDOW_RESEARCH_REPORT.json'),record);
+   let makecodeStatus='NOT_EXPORTED',makecodeReason=null;
+   try{
+    const palette=JSON.parse(fs.readFileSync(path.join(ROOT,'configs',
+     'r125-education-verified-palette-v26.33.json'),'utf8'));
+    const makecode=exportB143EducationMakeCode({
+     design:v.current.design,scene:v.current.compiled,
+     verifiedPalette:palette,provenance:'LOCAL_MODEL_CAPTURE',
+     tightVoxelEnvelope:true,groundLowestLayer:true});
+    if(makecode.geometrySha256!==v.current.compiled.geometrySha256||
+     makecode.worldWrites!==0||makecode.constructionApproved!==false)
+     throw Error('WINDOW_EXPORT_PROVENANCE_MISMATCH');
+    save(path.join(target,'MAKECODE_WINDOWS_RESEARCH_ONLY.ts'),makecode.code);
+    const {code,...meta}=makecode;
+    save(path.join(target,'WINDOW_MAKECODE_REPORT.json'),{
+     ...meta,researchStage:'HOST_WINDOWS_UNCERTIFIED',
+     originalModelProgramSha256:sha(original)});
+    makecodeStatus='OFFLINE_RESEARCH_ONLY';
+   }catch(e){makecodeStatus='HOLD';makecodeReason=String(e?.message??e).slice(0,350);}
+   save(path.join(target,'READ_FIRST_JA.txt'),
+    'Qwenの原設計は未変更。窓だけホストが決定した別案です。\n'+
+    '窓の真正3DとSOURCE動線のみ検証済み。ART/実歩行/ワールドIDは未確認。\n'+
+    'MakeCodeはバックアップ済みの試験ワールドで明示操作が必要です。\n');
+   windowResearch={status:v.status,output:path.join(target,'index.html'),
+    report:path.join(target,'WINDOW_RESEARCH_REPORT.json'),
+    numberOfRealWindows:v.applied.length,makecodeStatus,makecodeReason,worldWrites:0};
+  }catch(e){
+   windowResearch={status:'HOLD_NO_VERIFIED_WINDOWS',
+    reason:String(e?.message??e).slice(0,350),worldWrites:0};
+  }
   }catch(e){
    reason=String(e?.message??e).slice(0,900);
    diagnostics=e?.diagnostics??null;
@@ -295,7 +352,7 @@ export function replayR190CompactSaved({previousDir,outRoot=null}={}){
   rows.push({id:item.id,originalSourceCompiled:row.sourceCompiled,
    status:sourceCompiled?'REPLAY_SOURCE_VALID_ART_HOLD':'REPLAY_SOURCE_HOLD',
    sourceCompiled,reason,diagnostics,originalResponseSha256:sha(original),
-   sourceSha256,geometrySha256,viewer,hostResolution,educationExport,modelRequests:0,
+   sourceSha256,geometrySha256,viewer,hostResolution,educationExport,windowResearch,modelRequests:0,
    provenance:'SAVED_MODEL_PROGRAM_READ_ONLY_REPLAY',
    art:'NOT_REVIEWED',worldWrites:0});
  }
@@ -309,12 +366,14 @@ export function replayR190CompactSaved({previousDir,outRoot=null}={}){
  const count=rows.filter(x=>x.sourceCompiled).length;
  const shellPacketCount=rows.filter(x=>
   x.educationExport.status==='OFFLINE_SHELL_RESEARCH_PACKET_ONLY').length;
+ const windowCandidateCount=rows.filter(x=>x.windowResearch.status===
+  'HOST_DERIVED_WINDOWS_SOURCE_ART_HOLD').length;
  const report={schema:'r190-compact-readonly-replay-v1',
   previousReportSha256:sha(sourceReport),previousProvenance:prior.provenance,
   localModelRequests:0,sourceCompiledCount:count,requestedUseCount:3,
   status:count===3?'THREE_SOURCE_REPLAY_CANDIDATES_ART_HOLD':'SOURCE_REPLAY_INCOMPLETE_HOLD',
   makecode:'SHELL_RESEARCH_ONLY_NOT_APPROVED',
-  shellPacketCount,minecraftWalking:'NOT_TESTED',
+  shellPacketCount,windowCandidateCount,minecraftWalking:'NOT_TESTED',
   constructionApproved:false,worldContacts:0,worldWrites:0,
   art:'NOT_REVIEWED',rows};
  save(path.join(dir,'E1_COMPACT_REPLAY_REPORT.json'),report);
@@ -325,6 +384,9 @@ export function replayR190CompactSaved({previousDir,outRoot=null}={}){
    '<div class="hold">SOURCE HOLD — 3Dなし</div>')+
   '<p>今回: '+esc(x.status)+'</p><p>理由: '+esc(x.reason??'なし')+'</p>'+
   '<p>教育版の外殻研究: '+esc(x.educationExport.status)+'</p>'+
+  '<p>ホスト設計・窓付き別案: '+esc(x.windowResearch.status)+'</p>'+
+  (x.windowResearch.output?'<p><a target="_blank" rel="noopener" href="'+
+   encodeURIComponent(x.id)+'/WINDOWS_HOST_DERIVED_RESEARCH_ONLY/index.html">窓付き真正3D</a></p>':'')+
   (x.educationExport.output?
    '<p><a href="'+encodeURIComponent(x.id)+
    '/EDUCATION_SHELL_RESEARCH_ONLY/READ_FIRST_JA.txt">安全説明と外殻出力</a></p>':'')+

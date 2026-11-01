@@ -93,6 +93,9 @@ test('R190 compact preserved study replay preserves original hashes, zero model 
   assert.equal(result.worldWrites,0);
   assert.equal(result.makecode,'SHELL_RESEARCH_ONLY_NOT_APPROVED');
   assert.equal(result.shellPacketCount,3);
+  assert.equal(result.windowCandidateCount,3);
+  assert(result.rows.every(r=>r.windowResearch.status==='HOST_DERIVED_WINDOWS_SOURCE_ART_HOLD'&&
+   r.windowResearch.numberOfRealWindows>=1&&r.windowResearch.worldWrites===0));
   assert(result.rows.every(r=>r.sourceCompiled&&r.modelRequests===0&&
    r.educationExport.status==='OFFLINE_SHELL_RESEARCH_PACKET_ONLY'));
   for(const row of result.rows){
