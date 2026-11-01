@@ -1,6 +1,6 @@
 /**
  * R125 offline artistic comparison for the exact saved real Qwen 14B plan.
- * Three variants are deterministic COMPILER-PARAMETER demonstrations,
+ * Four variants are deterministic COMPILER-PARAMETER demonstrations,
  * NOT additional real LLM outputs. No remote services or world commands.
  */
 import fs from 'node:fs';
@@ -34,8 +34,33 @@ const CHOICES=[
   id:'lumina-ridge-cross',
   expression:{setbackSide:'none',setbackDepth:0,
    roofProfile:'ridge',roofAxis:'z',facadeLanguage:'fins'},
-  provenance:'COMPILER_FORM_DEMONSTRATION_NOT_NEW_MODEL_OUTPUT'}
+  provenance:'COMPILER_FORM_DEMONSTRATION_NOT_NEW_MODEL_OUTPUT'},
+ {label:'E: Same ridge · true interior roof volume',
+  id:'lumina-loft-roof',
+  expression:{setbackSide:'none',setbackDepth:0,
+   roofProfile:'ridge',roofAxis:'z',facadeLanguage:'fins',
+   roofVolume:'raised'},
+  provenance:'HOST_DERIVED_NOT_ADDITIONAL_QWEN_RESPONSE'}
 ];
+
+// A single roof-axis section: each displayed cell is an occupied voxel
+// from the final B143 compiled SOURCE, never an artist's simulated outline.
+function renderSourceRoofSlice(product,caption){
+ const {width:w,depth:d}=product.plan.footprint;
+ const top=1+5*product.plan.levels.length,cutX=Math.floor(w/2);
+ const occupied=new Set(product.compiled.primitives.filter(v=>v[0]===cutX)
+  .map(v=>v[1]+','+v[2]));
+ const squares=[];
+ for(let y=top-2;y<=top+5;y++)for(let z=1;z<d-1;z++)
+  if(occupied.has(y+','+z))
+   squares.push('<rect x="'+(10+(z-1)*11)+'" y="'+(10+(top+5-y)*11)+
+    '" width="11" height="11" fill="#486e87"/>');
+ const width=20+(d-2)*11,height=108;
+ return '<figure><figcaption>'+caption+'</figcaption>'+
+  '<svg role="img" aria-label="'+caption+' B143 final voxel section" '+
+  'viewBox="0 0 '+width+' '+height+'" style="width:100%;max-width:500px;background:#eaf1f6">'+
+  '<title>'+caption+' genuine SOURCE only</title>'+squares.join('')+'</svg></figure>';
+}
 
 export function buildR125ExpressionComparison(){
  const original=JSON.parse(fs.readFileSync(PLAN,'utf8'));
@@ -43,7 +68,7 @@ export function buildR125ExpressionComparison(){
  if(baseline.planSha256!==PINNED||
   baseline.compiled.primitives.length!==2620)
   fail('SAVED_REAL_QWEN_REFERENCE_DRIFT');
- const sources=[],rows=[],plans=[];
+ const sources=[],rows=[],plans=[],products=[];
  for(const choice of CHOICES){
   const p=structuredClone(original);
   if(choice.expression){
@@ -56,6 +81,7 @@ export function buildR125ExpressionComparison(){
   const qa=critiqueArchitecture({design:r.design,compiled:r.compiled});
   const programRisk=assessR125ProgramGeometry(r,qa);
   sources.push(r.design);
+  products.push(r);
   plans.push(p);
   rows.push({
    label:choice.label,id:p.id,provenance:choice.provenance,
@@ -73,10 +99,46 @@ export function buildR125ExpressionComparison(){
    humanAestheticReview:'NOT_REVIEWED',worldWrites:0
   });
  }
+ // D and E have identical spatial programs and all non-roof geometry intent.
+ // They differ only in the opt-in raised roof, NEVER in the real Qwen original.
+ const old=products[3],raised=products[4],top=1+5*old.plan.levels.length;
+ const before=new Set(old.compiled.primitives.map(v=>v.slice(0,3).join(',')));
+ const after=new Set(raised.compiled.primitives.map(v=>v.slice(0,3).join(',')));
+ let clearedCeilingCells=0,raisedAirColumns=0;
+ const {width:w,depth:d}=old.plan.footprint;
+ for(let x=2;x<w-2;x++)for(let z=2;z<d-2;z++){
+  const k=x+','+top+','+z;
+  if(before.has(k)&&!after.has(k))clearedCeilingCells++;
+  if(!after.has(k)&&!after.has(x+','+(top+1)+','+z))
+   raisedAirColumns++;
+ }
+ const a={...old.plan.expression},b={...raised.plan.expression};
+ delete b.roofVolume;
+ if(JSON.stringify(a)!==JSON.stringify(b)||
+  JSON.stringify(old.plan.levels)!==JSON.stringify(raised.plan.levels)||
+  clearedCeilingCells<=0||raisedAirColumns<=0)
+  fail('REAL_INTERIOR_VOLUME_NOT_PROVEN');
+ const roofSectionEvidence={
+  schema:'r125-source-roof-section-v1',oldSceneIndex:3,raisedSceneIndex:4,
+  oldSourceSha256:old.sourceSha256,raisedSourceSha256:raised.sourceSha256,
+  formerCeilingY:top,clearedFormerCeilingCells:clearedCeilingCells,
+  raisedAirColumns,source:'FINAL_B143_VOXELS',
+  provenance:'HOST_DERIVED_VARIANTS_NOT_NEW_QWEN_OUTPUT',
+  humanArt:'NOT_REVIEWED',minecraftWalking:'NOT_TESTED',worldWrites:0
+ };
  const payload=compileB143Gallery(sources);
  const template=fs.readFileSync(path.join(ROOT,'source/ai/b143-viewer-template.html'),'utf8');
- const html=renderB143Html(payload,template);
- if(new Set(rows.map(x=>x.geometrySha256)).size!==4)
+ const baseHtml=renderB143Html(payload,template);
+ if(baseHtml.split('</body>').length!==2)fail('SECTION_HTML_SLOT');
+ const section='<section id="source-roof-section" style="padding:20px;margin:20px auto;max-width:1020px;background:#f5f8fb;color:#142b3c">'+
+  '<h2>TRUE B143 SOURCE: decorative roof vs interior roof</h2>'+
+  '<p>Saved Qwen plan, two HOST-derived alternatives; dark = real solids, light = air. '+
+  clearedCeilingCells+' former ceiling voxels now air; ART / game walking NOT REVIEWED.</p>'+
+  '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px">'+
+  renderSourceRoofSlice(old,'D: legacy decorative ridge')+
+  renderSourceRoofSlice(raised,'E: raised interior ridge')+'</div></section>';
+ const html=baseHtml.replace('</body>',section+'</body>');
+ if(new Set(rows.map(x=>x.geometrySha256)).size!==5)
   fail('NO_DISTINCT_REAL_GEOMETRY');
  const report={
   schema:'r125-expression-visual-comparison-v1',
@@ -84,7 +146,7 @@ export function buildR125ExpressionComparison(){
   exactOriginalPlanSha256:PINNED,
   originalPlanNeverEdited:true,
   prototypesNotNewModelOutputs:true,
-  scenes:rows,
+  scenes:rows,roofSectionEvidence,
   sourceOnly:true,worldContact:false,worldWrites:0,
   constructionApproved:false,executionAllowed:false,
   gates:Array(9).fill('BLOCKED')

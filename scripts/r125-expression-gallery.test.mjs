@@ -5,9 +5,9 @@ import os from 'node:os';
 import path from 'node:path';
 import {buildR125ExpressionComparison,saveR125ExpressionComparison}
  from './r125-expression-gallery.mjs';
-test('same real Qwen plan baseline plus 3 source-distinct generative form demonstrators',()=>{
+test('same real Qwen plan baseline plus 4 source-distinct generative form demonstrators',()=>{
  const r=buildR125ExpressionComparison();
- assert.equal(r.report.scenes.length,4);
+ assert.equal(r.report.scenes.length,5);
  assert.equal(r.report.scenes[0].voxels,2620);
  assert.equal(r.report.scenes[0].sourceSha256,
   '4ca2edf2eb066f2f0eecd7dfdc4a710a1e69bc7196c5f85c65483caaa0d9fbd1');
@@ -17,7 +17,13 @@ test('same real Qwen plan baseline plus 3 source-distinct generative form demons
  assert.equal(r.report.scenes.every(s=>s.actualB143SourceVerified),true);
  assert.equal(r.report.scenes.every(s=>!s.newLLMInvocation),true);
  assert.equal(r.report.scenes.every(s=>s.worldWrites===0),true);
- assert.equal(new Set(r.report.scenes.map(s=>s.geometrySha256)).size,4);
+ assert.equal(new Set(r.report.scenes.map(s=>s.geometrySha256)).size,5);
+ assert.equal(r.report.scenes[4].provenance,'HOST_DERIVED_NOT_ADDITIONAL_QWEN_RESPONSE');
+ assert.equal(r.report.roofSectionEvidence.source,'FINAL_B143_VOXELS');
+ assert.ok(r.report.roofSectionEvidence.clearedFormerCeilingCells>0);
+ assert.ok(r.report.roofSectionEvidence.raisedAirColumns>0);
+ assert.equal(r.report.roofSectionEvidence.humanArt,'NOT_REVIEWED');
+ assert.equal(r.html.includes('TRUE B143 SOURCE: decorative roof vs interior roof'),true);
  assert.equal(r.html.includes('__B143_GALLERY_JSON__'),false);
  assert.ok(r.html.includes('minecraftaibuilder-b143-gallery-v1'));
  assert.equal(r.report.constructionApproved,false);
@@ -28,10 +34,13 @@ test('offline gallery output is collision-safe, contains one interactive HTML',t
  t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));
  const out=path.join(dir,'comparison');
  const report=saveR125ExpressionComparison(out);
- assert.equal(report.scenes.length,4);
+ assert.equal(report.scenes.length,5);
  assert.equal(fs.existsSync(path.join(out,'index.html')),true);
  assert.equal(fs.existsSync(path.join(out,'ARCHITECTURE_PLANS.json')),true);
  const saved=JSON.parse(fs.readFileSync(path.join(out,'R125_EXPRESSION_COMPARISON.json'),'utf8'));
+ assert.equal(saved.roofSectionEvidence.oldSourceSha256,saved.scenes[3].sourceSha256);
+ assert.equal(saved.roofSectionEvidence.raisedSourceSha256,saved.scenes[4].sourceSha256);
+ assert.equal(saved.roofSectionEvidence.worldWrites,0);
  assert.equal(saved.exactOriginalPlanSha256,
   '46aed429e795f2622cd8c49d8eb8f1153af20d5d958abf2f5f99020e909ce271');
  assert.throws(()=>saveR125ExpressionComparison(out),/OUTPUT_ALREADY_EXISTS/);
