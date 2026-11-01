@@ -49,6 +49,14 @@ test('R190 compact one-request study: 3 independent model programs, real voxels,
   assert(result.rows.every(x=>x.sourceCompiled&&x.features.occupiedVoxelCount>100));
   for(const r of result.rows){
    assert(fs.existsSync(path.join(r.output,'model','index.html')));
+   const standaloneViewer=fs.readFileSync(path.join(r.output,'model','index.html'),'utf8');
+   assert.match(standaloneViewer,/id="mobileZoomIn"/);
+   assert.match(standaloneViewer,/id="mobileZoomOut"/);
+   assert.match(standaloneViewer,/id="mobileCut"/);
+   assert.match(standaloneViewer,/id="mobileReset"/);
+   assert.match(standaloneViewer,/mobileZoomIn"\)\.addEventListener/);
+   assert.match(standaloneViewer,/touch-action:none/);
+   assert.doesNotMatch(standaloneViewer,/<script[^>]+src=/i);
    assert(fs.existsSync(path.join(r.output,'model','MODEL_RESPONSE_ORIGINAL.txt')));
    assert(fs.existsSync(path.join(r.output,'model','HOST_RESOLUTION.json')));
    assert(!fs.existsSync(path.join(r.output,'makecode')));
