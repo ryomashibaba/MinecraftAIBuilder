@@ -93,6 +93,81 @@ export function deriveR190CompactMinimumWindows(base){
   constructionApproved:false,plan,current};
 }
 
+
+/**
+ * Separate HOST-led glazing-size study on top of minimum real windows.
+ * Frozen MODEL program, old source and minimum-window scene are immutable.
+ * Not a claim of Qwen-designed windows, aesthetics or world walkability.
+ */
+export function deriveR190CompactExpandedGlazingVariant(base){
+ if(base?.status!=='HOST_DERIVED_WINDOWS_SOURCE_ART_HOLD'||
+  !base.plan||!base.current||
+  !verifyCompiled(base.current.design,base.current.compiled)||
+  base.current.worldWrites!==0||base.current.constructionApproved!==false||
+  JSON.stringify(base.plan)!==JSON.stringify(base.current.inputPlan)||
+  !Array.isArray(base.plan.glazedOpenings)||!base.plan.glazedOpenings.length)
+  fail('GLAZING_VARIANT_BASE_INVALID');
+ auditR190CompactInteriorEvidence(base.current);
+ const frozen=JSON.stringify(base.plan),plan=structuredClone(base.plan);
+ const accepted=[],skipped=[];let current=base.current,attemptedCandidates=0;
+ for(let i=0;i<plan.glazedOpenings.length;i++){
+  const old=plan.glazedOpenings[i];
+  const room=plan.spaces.find(r=>r.id===old.spaceId);
+  if(!room)fail('GLAZING_VARIANT_ROOM');
+  let found=false;const rejected={};
+  for(const [width,height] of [[4,3],[4,2],[3,3],[3,2]]){
+   if(found)break;
+   if(width*height<=old.width*old.height)continue;
+   const offset=Math.max(2,old.offset-Math.floor((width-old.width)/2));
+   if(offset+width>dimension(room,old.face)-2||
+    old.baseY+height>room.height-1)continue;
+   const replacement={...old,width,height,offset};
+   const candidate=structuredClone(plan);
+   candidate.glazedOpenings[i]=replacement;
+   attemptedCandidates++;
+   try{
+    const b=compileR190SemanticPlan(candidate);
+    const glass=candidate.glazedOpenings.reduce((n,g)=>n+g.width*g.height,0);
+    if(!verifyCompiled(b.design,b.compiled)||
+     !b.audit.allProgramSpacesReachable||b.audit.realGlazingCells<glass||
+     b.worldContacts!==0||b.worldWrites!==0||
+     b.constructionApproved!==false||b.executionAllowed!==false||
+     b.BuildPlan.operations.length!==0||
+     b.gates.length!==9||b.gates.some(g=>g!=='BLOCKED'))
+     throw Error('GLAZING_VARIANT_SOURCE_INVALID');
+    auditR190CompactInteriorEvidence(b);
+    plan.glazedOpenings[i]=replacement;current=b;found=true;
+    accepted.push({spaceId:old.spaceId,face:old.face,
+     previous:{width:old.width,height:old.height,offset:old.offset},
+     expanded:{width,height,offset},authorship:'HOST_DERIVED_NOT_MODEL'});
+   }catch(e){
+    const key=String(e?.message??e).slice(0,100);
+    rejected[key]=(rejected[key]??0)+1;
+   }
+  }
+  if(!found)skipped.push({spaceId:old.spaceId,rejectedReasons:rejected});
+ }
+ if(JSON.stringify(base.plan)!==frozen)fail('GLAZING_VARIANT_MUTATED_BASE');
+ const oldCells=base.plan.glazedOpenings.reduce((n,g)=>n+g.width*g.height,0);
+ const newCells=plan.glazedOpenings.reduce((n,g)=>n+g.width*g.height,0);
+ const safety={modelCalls:0,worldContacts:0,worldWrites:0,
+  constructionApproved:false,art:'NOT_REVIEWED',minecraftWalking:'NOT_TESTED',
+  modelOriginalUnaffected:true};
+ if(!accepted.length||newCells<=oldCells)
+  return {...safety,status:'GLAZING_VARIANT_HOLD',reason:'NO_SAFE_ENLARGEMENT',
+   attemptedCandidates,accepted,skipped};
+ if(current.compiled.geometrySha256===base.current.compiled.geometrySha256)
+  fail('GLAZING_VARIANT_UNCHANGED');
+ return {...safety,status:'HOST_DERIVED_LARGER_WINDOWS_ART_HOLD',
+  authorship:'HOST_DERIVED_GLAZING_SIZE_NOT_QWEN',
+  minimumWindowSourceSha256:base.current.compiled.sourceSha256,
+  minimumWindowGeometrySha256:base.current.compiled.geometrySha256,
+  expandedSourceSha256:current.compiled.sourceSha256,
+  expandedGeometrySha256:current.compiled.geometrySha256,
+  originalGlassCells:oldCells,expandedGlassCells:newCells,
+  attemptedCandidates,accepted,skipped,plan,current};
+}
+
 /** Read-only evidence of actual B143 clear supporting floor, not game walking. */
 export function auditR190CompactInteriorEvidence(built){
  if(built?.schema!=='minecraftaibuilder-r190-source-research-v1'||
