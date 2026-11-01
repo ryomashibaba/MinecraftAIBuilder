@@ -9,6 +9,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {requestLocalModel} from './r190-e1-two-stage.mjs';
+import {openE1ResultFolder} from './r190-e1-open-result-folder.mjs';
 import {R190_E1_STUDY_BRIEFS} from './r125-r190-free-engine.mjs';
 import {R190_COMPACT_SCHEMA,compileR190CompactProgram}
  from '../source/ai/r190-compact-program.mjs';
@@ -160,6 +161,8 @@ if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.ur
   console.log('REPLAY_REPORT:',path.join(result.dir,'E1_COMPACT_REPLAY_REPORT.json'));
   console.log('REPLAY_VIEW:',path.join(result.dir,'E1_COMPACT_REPLAY_REVIEW.html'));
   console.log('SOURCE:',result.sourceCompiledCount,'/3; localModelRequests:0');
+  // GUI convenience only. Never run from a library call, CI test, or the model.
+  openE1ResultFolder(path.join(result.dir,'E1_COMPACT_REPLAY_REPORT.json'));
  }else if(process.argv.length!==3||process.argv[2]!=='--study-three'){
   console.error('Usage: node scripts/r190-compact-program-study.mjs --study-three');
   process.exitCode=2;
@@ -168,6 +171,7 @@ if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.ur
    console.log('REPORT:',path.join(r.dir,'E1_COMPACT_REPORT.json'));
    console.log('REVIEW:',path.join(r.dir,'E1_COMPACT_REVIEW.html'));
    console.log('SOURCE:',r.sourceCompiledCount,'/3; realCalls:',r.modelRequests);
+   openE1ResultFolder(path.join(r.dir,'E1_COMPACT_REPORT.json'));
    if(!r.status.startsWith('THREE_'))process.exitCode=2;
   }).catch(e=>{console.error(String(e?.message??e));process.exitCode=2;});
  }
