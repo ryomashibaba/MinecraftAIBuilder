@@ -40,6 +40,25 @@ export function diagnoseE2AuthoredPlan(plan){
  const validBounds=int(w,8,100000)&&int(d,8,100000)&&int(h,5,100000);
  if(!validBounds)add('BOUNDS_UNAVAILABLE','sourceDesign.bounds',bounds,
   'valid integer B143 width, depth, height before zone arithmetic');
+ // Independent, read-only B143 box extent audit. Report ALL offending source
+ // elements even if the strict B143 validator stopped at the very first.
+ // End coordinates are exclusive; no source normalization or geometry repair.
+ if(validBounds&&Array.isArray(design?.elements)){
+  for(const [i,e] of design.elements.entries()){
+   if(e?.shape!=='box'||!Array.isArray(e.origin)||!Array.isArray(e.size)||
+    e.origin.length!==3||e.size.length!==3||
+    !e.origin.every(Number.isSafeInteger)||!e.size.every(Number.isSafeInteger))
+    continue;
+   const end=e.origin.map((v,axis)=>v+e.size[axis]);
+   const site=[w,h,d],outside=e.origin.some((v,axis)=>
+    v<0||e.size[axis]<1||end[axis]>site[axis]);
+   if(outside)add('B143_BOX_OUTSIDE_LOCAL_BOUNDS',
+    'sourceDesign.elements['+i+']',
+    {id:e.id,origin:e.origin,size:e.size,endExclusive:end},
+    {bounds:[w,h,d],rule:'0<=origin AND origin+size<=bounds'});
+  }
+ }
+
  const spaces=plan.programSpaces;
  const spaceIds=new Set();
  if(!Array.isArray(spaces)||spaces.length<2||spaces.length>6)

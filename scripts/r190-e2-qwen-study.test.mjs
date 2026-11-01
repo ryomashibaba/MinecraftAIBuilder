@@ -174,3 +174,18 @@ test('Preflight failure creates handoff without inventing model text',async()=>{
   assert.equal(h.report.worldWrites,0);
  }finally{fs.rmSync(root,{recursive:true,force:true});}
 });
+
+test('E2 authored contract v3 counters observed overflow, false arrival and blocked glass without hardcoding geometry',()=>{
+ const s=E2_QWEN_SYSTEM;
+ for(const fragment of [
+  'ordered 8..28 fully authored B143 primitives',
+  'x+sx<=bounds.width, y+sy<=bounds.height, z+sz<=bounds.depth',
+  'when bounds.depth=28, a 2-deep wall may start at z=26 but NOT z=28',
+  'A doorway cut in a zone wall does NOT automatically make its threshold an interior arrivalPad',
+  'do not label a Z-oriented glass wall as east/west',
+  'do not put glass on top of an entrance cut',
+  'Invent original architecture rather than copying previous nested rectangular layouts'
+ ])assert(s.includes(fragment),'missing v3 real-model failure contract: '+fragment);
+ assert(s.includes('YOU must author ALL solids'));
+ assert(s.includes('host will neither infer nor repair it'));
+});

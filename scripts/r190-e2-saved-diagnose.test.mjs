@@ -114,3 +114,39 @@ test('Observed E2 Qwen failure classes are all reported together; invalid source
  assert.equal(result.fixesApplied,0);
  assert.equal(JSON.stringify(p),frozen);
 });
+
+test('Second real Qwen HOLD class: independent 3-box bound diagnostics survive fail-fast B143, plus arrival-zone error',()=>{
+ const p=e2SyntheticResearchFacility();
+ p.sourceDesign.bounds={width:32,height:16,depth:28};
+ // These are minimal derived failure patterns, not the user's raw model text.
+ const offenders=[
+  {id:'workshop-wall-north',shape:'box',mode:'add',material:'stone',
+   origin:[0,1,28],size:[8,14,2]},
+  {id:'quiet-research-wall-north',shape:'box',mode:'add',material:'stone',
+   origin:[24,1,28],size:[8,14,2]},
+  {id:'quiet-research-wall-east',shape:'box',mode:'add',material:'stone',
+   origin:[32,1,14],size:[2,14,14]}
+ ];
+ p.sourceDesign.elements.push(...offenders);
+ p.entrance.spaceId='reception';
+ p.programSpaces[0].id='reception';
+ p.programSpaces[0].zone=[8,8,16,12];
+ p.entrance.arrivalPad=[12,20];
+ const original=JSON.stringify(p);
+ const diag=diagnoseE2AuthoredPlan(p);
+ const out=diag.issues.filter(x=>x.code==='B143_BOX_OUTSIDE_LOCAL_BOUNDS');
+ assert.equal(out.length,3);
+ assert.deepEqual(out.map(x=>x.actual.id),offenders.map(x=>x.id));
+ for(const x of out){
+  assert(x.actual.endExclusive.some((n,i)=>n>x.expected.bounds[i]));
+  assert(x.path.startsWith('sourceDesign.elements['));
+ }
+ assert(diag.issues.some(x=>x.code==='B143_VALIDATION'&&
+  x.actual==='B143_OUTSIDE_LOCAL_BOUNDS'));
+ assert(diag.issues.some(x=>x.code==='ENTRANCE_ARRIVAL_ZONE'));
+ assert.equal(diag.sourceAudit,'SKIPPED_INVALID_INPUT');
+ assert.equal(diag.fixesApplied,0);
+ assert.equal(diag.modelRequests,0);
+ assert.equal(diag.worldWrites,0);
+ assert.equal(JSON.stringify(p),original);
+});
