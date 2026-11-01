@@ -66,12 +66,23 @@ test('independent SOURCE room floor evidence retains original model, geometry an
  assert.equal(report.rooms.length,3);
  assert(report.rooms.every(x=>x.supportedClearFloorCells>0&&
   x.twoByTwoSupportedClearPads>0&&x.clearFloorFraction<=1&&
+  x.reachableTwoWidePadsFromEntrance>=1&&
+  x.reachableTwoWidePadsFromEntrance<=x.twoByTwoSupportedClearPads&&
+  x.disconnectedTwoWidePads===x.twoByTwoSupportedClearPads-x.reachableTwoWidePadsFromEntrance&&
+  x.reachableTwoWidePadFraction>0&&x.reachableTwoWidePadFraction<=1&&
   x.connectedEntranceWitness.length===3));
+ assert.equal(report.sourceRouteIndependentlyRechecked,true);
+ assert.deepEqual(report.roomsWithDisconnectedTwoWidePads,
+  report.rooms.filter(x=>x.disconnectedTwoWidePads>0).map(x=>x.spaceId));
  assert.equal(report.actualMinecraftWalking,'NOT_TESTED');
  assert.equal(report.worldWrites,0);
  assert.equal(report.constructionApproved,false);
  assert.equal(JSON.stringify(base.hostDerivedPlan),original);
  assert.equal(JSON.stringify(windowed.current.compiled),scene);
+ const fakeRoute=structuredClone(windowed.current);
+ fakeRoute.audit.witnesses[0].reachableTwoWideSourceCell=[0,2,0];
+ assert.throws(()=>auditR190CompactInteriorEvidence(fakeRoute),
+  /INTERIOR_ROUTE_RECEIPT_MISMATCH/);
  const broken=structuredClone(windowed.current);
  broken.compiled.primitives.pop();
  assert.throws(()=>auditR190CompactInteriorEvidence(broken),/INTERIOR_UNVERIFIED_SOURCE/);
