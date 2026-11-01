@@ -124,7 +124,9 @@ export async function runR190CompactThreeUse({
   constructionApproved:false,rows};
  save(path.join(dir,'E1_COMPACT_REPORT.json'),report);
  const cards=rows.map(r=>'<article><h2>'+esc(r.id)+'</h2>'+
-  (r.sourceCompiled?'<iframe loading="lazy" title="'+esc(r.id)+
+  (r.sourceCompiled?'<a target="_blank" rel="noopener" href="'+encodeURIComponent(r.id)+
+   '/model/index.html">3Dを別タブで開き、回転・拡大して美術確認</a>'+
+   '<iframe loading="lazy" title="'+esc(r.id)+
    '" src="'+encodeURIComponent(r.id)+'/model/index.html"></iframe>':
    '<div class="hold">SOURCE HOLD — 3D not generated</div>')+
   '<p>'+esc(r.status)+' / '+esc(r.reason??'No source error')+'</p>'+
@@ -136,7 +138,7 @@ export async function runR190CompactThreeUse({
   '<style>body{font:15px system-ui;background:#101c29;color:#eef4fa;margin:20px}'+
   'main{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:14px}'+
   'article{background:#1c3043;border-radius:10px;padding:14px;overflow-wrap:anywhere}'+
-  'iframe,.hold{height:320px;width:100%;border:0;background:#334255}'+
+  'a{color:#96dfff;display:block;margin:8px 0}iframe,.hold{height:360px;width:100%;border:0;background:#334255}'+
   '.hold{display:grid;place-items:center}</style>'+
   '<h1>Independent compact model programs — real B143 review</h1>'+
   '<p>MODEL authored program; HOST derived dimensions/sides. '+esc(ok.length)+
@@ -145,7 +147,20 @@ export async function runR190CompactThreeUse({
  return {dir,...report};
 }
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){
- if(process.argv.length!==3||process.argv[2]!=='--study-three'){
+ if(process.argv.length===3&&process.argv[2]==='--replay-latest'){
+  const root=path.join(path.dirname(ROOT),'MinecraftAIBuilder-E1-Outputs');
+  const previous=fs.readdirSync(root,{withFileTypes:true})
+   .filter(x=>x.isDirectory()&&x.name.startsWith('E1-compact-')&&
+     fs.existsSync(path.join(root,x.name,'E1_COMPACT_REPORT.json')))
+   .map(x=>({dir:path.join(root,x.name),
+     time:fs.statSync(path.join(root,x.name,'E1_COMPACT_REPORT.json')).mtimeMs}))
+   .sort((a,b)=>b.time-a.time)[0]?.dir;
+  if(!previous)throw Error('NO_SAVED_COMPACT_STUDY');
+  const result=replayR190CompactSaved({previousDir:previous});
+  console.log('REPLAY_REPORT:',path.join(result.dir,'E1_COMPACT_REPLAY_REPORT.json'));
+  console.log('REPLAY_VIEW:',path.join(result.dir,'E1_COMPACT_REPLAY_REVIEW.html'));
+  console.log('SOURCE:',result.sourceCompiledCount,'/3; localModelRequests:0');
+ }else if(process.argv.length!==3||process.argv[2]!=='--study-three'){
   console.error('Usage: node scripts/r190-compact-program-study.mjs --study-three');
   process.exitCode=2;
  }else{
@@ -156,4 +171,114 @@ if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.ur
    if(!r.status.startsWith('THREE_'))process.exitCode=2;
   }).catch(e=>{console.error(String(e?.message??e));process.exitCode=2;});
  }
+}
+
+/**
+ * NO-MODEL replay from preserved real/synthetic compact model outputs.
+ * Verifies every original byte SHA before invoking the deterministic compiler.
+ * Reuses the existing B143 viewer without touching original study directory.
+ */
+export function replayR190CompactSaved({previousDir,outRoot=null}={}){
+ if(typeof previousDir!=='string'||previousDir.length<1)
+  throw Error('R190_COMPACT_REPLAY_INPUT');
+ const previous=path.resolve(previousDir);
+ const sourceReport=fs.readFileSync(path.join(previous,'E1_COMPACT_REPORT.json'));
+ const prior=JSON.parse(sourceReport.toString('utf8'));
+ if(prior.schema!=='r190-e1-compact-program-three-use-v1'||
+  !['SYNTHETIC_TEST_DOUBLE_NOT_REAL_MODEL','REAL_LOCAL_MODEL_ATTEMPTS'].includes(prior.provenance)||
+  prior.requestedUseCount!==3||!Array.isArray(prior.rows)||prior.rows.length!==3)
+  throw Error('R190_COMPACT_REPLAY_UNTRUSTED_REPORT');
+ const originals=new Map(),priorRows=new Map();
+ // Validate all previous model answers and their hashes before creating a new output.
+ for(const item of R190_E1_STUDY_BRIEFS){
+  const row=prior.rows.find(x=>x.id===item.id);
+  if(!row||priorRows.has(item.id)||row.output!==path.join(previous,item.id)||
+   !/^[a-f0-9]{64}$/.test(row.originalResponseSha256??''))
+   throw Error('R190_COMPACT_REPLAY_UNTRUSTED_ROW');
+  const original=fs.readFileSync(path.join(previous,item.id,'model',
+   'MODEL_RESPONSE_ORIGINAL.txt'));
+  if(sha(original)!==row.originalResponseSha256)
+   throw Error('R190_COMPACT_REPLAY_ORIGINAL_SHA_MISMATCH');
+  if(row.sourceCompiled){
+   const model=path.join(previous,item.id,'model');
+   const oldSource=JSON.parse(fs.readFileSync(path.join(model,'B143_SOURCE.json')));
+   const oldScene=JSON.parse(fs.readFileSync(path.join(model,'B143_SCENE.json')));
+   if(!verifyCompiled(oldSource,oldScene)||
+    oldScene.sourceSha256!==row.sourceSha256||
+    oldScene.geometrySha256!==row.geometrySha256)
+    throw Error('R190_COMPACT_REPLAY_PRIOR_3D_INVALID');
+  }
+  originals.set(item.id,original);
+  priorRows.set(item.id,row);
+ }
+ const root=path.resolve(outRoot??path.dirname(previous));
+ fs.mkdirSync(root,{recursive:true});
+ const dir=fs.mkdtempSync(path.join(root,'R190-COMPACT-REPLAY-'));
+ const template=fs.readFileSync(path.join(ROOT,'source/ai/b143-viewer-template.html'),'utf8');
+ const rows=[];
+ for(const item of R190_E1_STUDY_BRIEFS){
+  const row=priorRows.get(item.id),original=originals.get(item.id);
+  let sourceCompiled=false,reason=null,diagnostics=null,
+   sourceSha256=null,geometrySha256=null,viewer=null,hostResolution=null;
+  try{
+   const x=compileR190CompactProgram(original.toString('utf8'));
+   sourceSha256=x.built.compiled.sourceSha256;
+   geometrySha256=x.built.compiled.geometrySha256;
+   if(row.sourceCompiled&&
+    (sourceSha256!==row.sourceSha256||geometrySha256!==row.geometrySha256))
+    throw Error('PREVIOUSLY_PASSED_GEOMETRY_CHANGED_REQUIRES_REVIEW');
+   sourceCompiled=true;
+   hostResolution=x.hostResolution;
+   const folder=path.join(dir,item.id,'model');
+   fs.mkdirSync(folder,{recursive:true});
+   const gallery=compileB143Gallery([x.built.design]);
+   save(path.join(folder,'index.html'),renderB143Html(gallery,template));
+   save(path.join(folder,'HOST_RESOLUTION.json'),hostResolution);
+   viewer=item.id+'/model/index.html';
+  }catch(e){
+   reason=String(e?.message??e).slice(0,900);
+   diagnostics=e?.diagnostics??null;
+  }
+  rows.push({id:item.id,originalSourceCompiled:row.sourceCompiled,
+   status:sourceCompiled?'REPLAY_SOURCE_VALID_ART_HOLD':'REPLAY_SOURCE_HOLD',
+   sourceCompiled,reason,diagnostics,originalResponseSha256:sha(original),
+   sourceSha256,geometrySha256,viewer,hostResolution,modelRequests:0,
+   provenance:'SAVED_MODEL_PROGRAM_READ_ONLY_REPLAY',
+   art:'NOT_REVIEWED',worldWrites:0});
+ }
+ if(sha(fs.readFileSync(path.join(previous,'E1_COMPACT_REPORT.json')))!==sha(sourceReport))
+  throw Error('R190_COMPACT_REPLAY_PRIOR_REPORT_MODIFIED');
+ for(const item of R190_E1_STUDY_BRIEFS){
+  const original=fs.readFileSync(path.join(previous,item.id,'model','MODEL_RESPONSE_ORIGINAL.txt'));
+  if(sha(original)!==sha(originals.get(item.id)))
+   throw Error('R190_COMPACT_REPLAY_ORIGINAL_CHANGED');
+ }
+ const count=rows.filter(x=>x.sourceCompiled).length;
+ const report={schema:'r190-compact-readonly-replay-v1',
+  previousReportSha256:sha(sourceReport),previousProvenance:prior.provenance,
+  localModelRequests:0,sourceCompiledCount:count,requestedUseCount:3,
+  status:count===3?'THREE_SOURCE_REPLAY_CANDIDATES_ART_HOLD':'SOURCE_REPLAY_INCOMPLETE_HOLD',
+  makecode:'NOT_GENERATED',minecraftWalking:'NOT_TESTED',
+  constructionApproved:false,worldContacts:0,worldWrites:0,
+  art:'NOT_REVIEWED',rows};
+ save(path.join(dir,'E1_COMPACT_REPLAY_REPORT.json'),report);
+ const cards=rows.map(x=>'<article><h2>'+esc(x.id)+'</h2>'+
+  (x.viewer?'<p><a target="_blank" rel="noopener" href="'+
+   x.viewer+'">真正3Dを別タブで開いて外観を確認</a></p>'+
+   '<iframe loading="lazy" src="'+x.viewer+'"></iframe>':
+   '<div class="hold">SOURCE HOLD — 3Dなし</div>')+
+  '<p>今回: '+esc(x.status)+'</p><p>理由: '+esc(x.reason??'なし')+'</p>'+
+  '<p>候補失敗集計: '+esc(JSON.stringify(x.diagnostics?.allReasons??{}))+'</p>'+
+  '<p>AI原文 SHA: '+esc(x.originalResponseSha256)+'</p></article>').join('');
+ save(path.join(dir,'E1_COMPACT_REPLAY_REVIEW.html'),
+  '<!doctype html><html lang="ja"><meta charset="utf-8"><title>R190 3用途保存済み原文再検証</title>'+
+  '<style>body{font:15px system-ui;background:#102030;color:#edf4fa;margin:20px}'+
+  'a{color:#a5e6ff}main{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:14px}'+
+  'article{padding:14px;background:#1c3547;border-radius:10px;overflow-wrap:anywhere}'+
+  'iframe,.hold{height:400px;width:100%;border:0;background:#2d4052}'+
+  '.hold{display:grid;place-items:center}</style>'+
+  '<h1>同一Qwen原文・新しい配置エンジンの再検証</h1>'+
+  '<p>真正SOURCE '+count+'/3。モデル再要求0、原文変更0、Minecraft書込0。ART未評価。</p>'+
+  '<main>'+cards+'</main>');
+ return {dir,...report};
 }

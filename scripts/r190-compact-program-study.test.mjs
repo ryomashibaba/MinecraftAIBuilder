@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {runR190CompactThreeUse,R190_COMPACT_SYSTEM}
+import {runR190CompactThreeUse,replayR190CompactSaved,R190_COMPACT_SYSTEM}
  from './r190-compact-program-study.mjs';
 import {R190_COMPACT_SCHEMA} from '../source/ai/r190-compact-program.mjs';
 function program(id,form){
@@ -71,5 +71,51 @@ test('R190 compact invalid output stays HOLD instead of host correcting the auth
   assert.equal(result.status,'TEST_DOUBLE_ONLY');
   assert(result.rows.every(x=>x.status==='HOLD'&&!x.sourceCompiled));
   assert.equal(result.worldWrites,0);
+ }finally{fs.rmSync(root,{recursive:true,force:true});}
+});
+
+test('R190 compact preserved study replay preserves original hashes, zero model requests and real viewer',async()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'r190-compact-replay-'));
+ try{
+  let i=0;
+  const prev=await runR190CompactThreeUse({outRoot:root},{
+   request:async({onAttempt,onRaw})=>{
+    onAttempt();
+    const raw=JSON.stringify(program(['home','store','lab'][i],
+     ['ridge','sky-court','facet'][i++]));
+    onRaw(raw);return {raw};
+   }
+  });
+  const before=fs.readFileSync(path.join(prev.dir,'E1_COMPACT_REPORT.json'));
+  const result=replayR190CompactSaved({previousDir:prev.dir});
+  assert.equal(result.sourceCompiledCount,3);
+  assert.equal(result.localModelRequests,0);
+  assert.equal(result.worldWrites,0);
+  assert(result.rows.every(r=>r.sourceCompiled&&r.modelRequests===0));
+  assert.deepEqual(fs.readFileSync(path.join(prev.dir,'E1_COMPACT_REPORT.json')),before);
+  assert(fs.readFileSync(path.join(result.dir,'E1_COMPACT_REPLAY_REVIEW.html'),'utf8')
+   .includes('別タブ'));
+  for(const row of result.rows){
+   assert(fs.existsSync(path.join(result.dir,row.viewer)));
+  }
+ }finally{fs.rmSync(root,{recursive:true,force:true});}
+});
+test('R190 compact replay rejects tampered archived model response before writing replay',async()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'r190-compact-replay-bad-'));
+ try{
+  let i=0;
+  const prev=await runR190CompactThreeUse({outRoot:root},{
+   request:async({onAttempt,onRaw})=>{
+    onAttempt();
+    const raw=JSON.stringify(program(['home','store','lab'][i],
+     ['ridge','sky-court','facet'][i++]));
+    onRaw(raw);return {raw};
+   }
+  });
+  const file=path.join(prev.dir,'flower-shop','model','MODEL_RESPONSE_ORIGINAL.txt');
+  fs.appendFileSync(file,' ');
+  assert.throws(()=>replayR190CompactSaved({previousDir:prev.dir}),
+   /ORIGINAL_SHA_MISMATCH/);
+  assert.equal(fs.readdirSync(root).some(x=>x.startsWith('R190-COMPACT-REPLAY-')),false);
  }finally{fs.rmSync(root,{recursive:true,force:true});}
 });
