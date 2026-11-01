@@ -109,6 +109,10 @@ test('R190 compact preserved study replay preserves original hashes, zero model 
     'WINDOWS_HOST_DERIVED_RESEARCH_ONLY','ROOM_SOURCE_FLOOR_REVIEW.json'),'utf8'));
    assert.equal(roomEvidence.schema,'r190-compact-interior-source-evidence-v1');
    assert.equal(roomEvidence.worldWrites,0);
+   const map=fs.readFileSync(path.join(result.dir,row.id,
+    'WINDOWS_HOST_DERIVED_RESEARCH_ONLY','SOURCE_FLOOR_ACCESS_MAP.svg'),'utf8');
+   assert.match(map,/data-kind="reachable-pad"/);
+   assert(map.includes(roomEvidence.geometrySha256));
    assert(roomEvidence.rooms.every(x=>x.twoByTwoSupportedClearPads>0));
    const meta=JSON.parse(fs.readFileSync(row.educationExport.report,'utf8'));
    const source=fs.readFileSync(row.educationExport.output,'utf8');

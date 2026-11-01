@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {compileR190CompactProgram,R190_COMPACT_SCHEMA}
  from '../source/ai/r190-compact-program.mjs';
-import {deriveR190CompactMinimumWindows,auditR190CompactInteriorEvidence}
+import {deriveR190CompactMinimumWindows,auditR190CompactInteriorEvidence,
+ renderR190CompactAccessMapSvg}
  from '../source/ai/r190-compact-daylight.mjs';
 import {verifyCompiled} from '../source/ai/b143-building-dsl.mjs';
 function sample(id,forms){
@@ -76,6 +77,13 @@ test('independent SOURCE room floor evidence retains original model, geometry an
   report.rooms.filter(x=>x.disconnectedTwoWidePads>0).map(x=>x.spaceId));
  assert.equal(report.actualMinecraftWalking,'NOT_TESTED');
  assert.equal(report.worldWrites,0);
+ const svg=renderR190CompactAccessMapSvg(windowed.current);
+ assert.match(svg,/^<svg /);
+ assert.match(svg,/data-kind="reachable-pad"/);
+ assert.match(svg,/data-kind="entry-witness"/);
+ assert(svg.includes(report.geometrySha256));
+ assert.doesNotMatch(svg,/<script|<foreignObject|https?:/i);
+ assert.equal(renderR190CompactAccessMapSvg(windowed.current),svg);
  assert.equal(report.constructionApproved,false);
  assert.equal(JSON.stringify(base.hostDerivedPlan),original);
  assert.equal(JSON.stringify(windowed.current.compiled),scene);

@@ -165,3 +165,70 @@ export function auditR190CompactInteriorEvidence(built){
   modelCalls:0,worldContacts:0,worldWrites:0,constructionApproved:false,
   readiness:'NOT_PREPARED',art:'NOT_REVIEWED',actualMinecraftWalking:'NOT_TESTED'};
 }
+
+/** Read-only local 2x2 floor-pad map derived from genuine B143 voxels. */
+export function renderR190CompactAccessMapSvg(built){
+ const audit=auditR190CompactInteriorEvidence(built),rooms=built.layout.spaces;
+ const voxels=new Set(built.compiled.primitives.map(v=>v[0]+','+v[1]+','+v[2]));
+ const has=(x,y,z)=>voxels.has(x+','+y+','+z);
+ const floor=(x,z)=>has(x,1,z)&&!has(x,2,z)&&!has(x,3,z);
+ const {width,depth}=built.inputPlan.site;
+ const pad=(x,z)=>x>=0&&z>=0&&x+1<width&&z+1<depth&&
+  [0,1].every(dx=>[0,1].every(dz=>floor(x+dx,z+dz)));
+ const a=audit.rooms.find(r=>r.spaceId===built.inputPlan.entrySpaceId)?.connectedEntranceWitness;
+ if(!a||!pad(a[0],a[2]))fail('MAP_ENTRY_INVALID');
+ const q=[[a[0],a[2]]],seen=new Set([a[0]+','+a[2]]);
+ for(let i=0;i<q.length;i++){
+  const [x,z]=q[i];
+  for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]]){
+   const u=x+dx,v=z+dz,k=u+','+v;
+   if(!seen.has(k)&&pad(u,v)){seen.add(k);q.push([u,v]);}
+  }
+ }
+ const minX=Math.max(0,Math.min(...rooms.map(r=>r.x))-2);
+ const minZ=Math.max(0,Math.min(...rooms.map(r=>r.z))-2);
+ const maxX=Math.min(width-1,Math.max(...rooms.map(r=>r.x+r.w-1))+2);
+ const maxZ=Math.min(depth-1,Math.max(...rooms.map(r=>r.z+r.d-1))+2);
+ const s=8,px=x=>10+(x-minX)*s,pz=z=>58+(z-minZ)*s;
+ const H=(maxZ-minZ+1)*s,W=(maxX-minX+1)*s;
+ const esc=x=>String(x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;',
+  '>':'&gt;','"':'&quot;',"'":'&apos;'}[c]));
+ const tile=(x,z,color,kind)=>'<rect data-kind="'+kind+'" x="'+px(x)+
+  '" y="'+pz(z)+'" width="'+s+'" height="'+s+'" fill="'+color+'"/>';
+ const svg=['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+
+  (W+20)+' '+(H+122)+'" role="img">',
+  '<title>B143 SOURCE 2-wide floor pads — Minecraft walking NOT TESTED</title>',
+  '<rect width="100%" height="100%" fill="#102334"/>',
+  '<text x="10" y="23" fill="white" font-size="13">実SOURCE床の連続到達</text>',
+  '<text x="10" y="42" fill="#ffd3b0" font-size="10">実歩行・家具・美術・施工は未認定</text>'];
+ for(let z=minZ;z<=maxZ;z++)for(let x=minX;x<=maxX;x++)
+  if(has(x,1,z))svg.push(tile(x,z,floor(x,z)?'#486579':'#314052','floor'));
+ const roomCounts=new Map(rooms.map(r=>[r.id,[0,0]]));
+ for(let z=minZ;z<=maxZ;z++)for(let x=minX;x<=maxX;x++){
+  if(!pad(x,z))continue;
+  const reached=seen.has(x+','+z);
+  svg.push(tile(x,z,reached?'#4ddcb0':'#ffab76',
+   reached?'reachable-pad':'disconnected-pad'));
+  for(const r of rooms)if(x>=r.x+1&&x+1<=r.x+r.w-2&&z>=r.z+1&&z+1<=r.z+r.d-2){
+   const c=roomCounts.get(r.id);c[0]++;if(reached)c[1]++;
+  }
+ }
+ for(const r of audit.rooms){
+  const c=roomCounts.get(r.spaceId);
+  if(!c||c[0]!==r.twoByTwoSupportedClearPads||
+   c[1]!==r.reachableTwoWidePadsFromEntrance)fail('MAP_REPORT_MISMATCH');
+ }
+ for(const r of rooms){
+  svg.push('<rect x="'+px(r.x)+'" y="'+pz(r.z)+'" width="'+(r.w*s)+
+   '" height="'+(r.d*s)+'" fill="none" stroke="#f8d7a0" stroke-width="2"/>');
+  svg.push('<text x="'+(px(r.x)+4)+'" y="'+(pz(r.z)+12)+
+   '" font-size="10" fill="white">'+esc(r.id)+'</text>');
+ }
+ svg.push('<rect data-kind="entry-witness" x="'+px(a[0])+'" y="'+pz(a[2])+
+  '" width="'+s+'" height="'+s+'" fill="none" stroke="white" stroke-width="2"/>');
+ svg.push('<text x="10" y="'+(H+80)+'" fill="#4ddcb0" font-size="10">■ 入口に接続した2幅床候補</text>');
+ svg.push('<text x="10" y="'+(H+100)+'" fill="#ffab76" font-size="10">■ 孤立した2幅床候補</text>');
+ svg.push('<desc>geometrySha256:'+esc(audit.geometrySha256)+
+  ' worldWrites:0 constructionApproved:false</desc></svg>');
+ return svg.join('\n')+'\n';
+}

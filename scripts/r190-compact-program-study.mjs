@@ -15,7 +15,8 @@ import {R190_COMPACT_SCHEMA,compileR190CompactProgram}
  from '../source/ai/r190-compact-program.mjs';
 import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
 import {verifyCompiled} from '../source/ai/b143-building-dsl.mjs';
-import {deriveR190CompactMinimumWindows,auditR190CompactInteriorEvidence}
+import {deriveR190CompactMinimumWindows,auditR190CompactInteriorEvidence,
+ renderR190CompactAccessMapSvg}
  from '../source/ai/r190-compact-daylight.mjs';
 import {exportB143EducationMakeCode} from '../source/ai/r125-education-makecode-export.mjs';
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
@@ -310,6 +311,8 @@ export function replayR190CompactSaved({previousDir,outRoot=null}={}){
    save(path.join(target,'B143_SCENE.json'),v.current.compiled);
    const interior=auditR190CompactInteriorEvidence(v.current);
    save(path.join(target,'ROOM_SOURCE_FLOOR_REVIEW.json'),interior);
+   save(path.join(target,'SOURCE_FLOOR_ACCESS_MAP.svg'),
+    renderR190CompactAccessMapSvg(v.current));
    const record={status:v.status,author:'HOST_DERIVED_NOT_MODEL',
     originalModelProgramSha256:sha(original),
     originalSourceSha256:sourceSha256,originalGeometrySha256:geometrySha256,
@@ -402,6 +405,8 @@ export function replayR190CompactSaved({previousDir,outRoot=null}={}){
    esc(JSON.stringify(x.windowResearch.clearRoomFloorCells??'未測定'))+'</p>'+
   (x.windowResearch.output?'<p><a href="'+encodeURIComponent(x.id)+
    '/WINDOWS_HOST_DERIVED_RESEARCH_ONLY/ROOM_SOURCE_FLOOR_REVIEW.json">実ボクセル室内床の詳細</a></p>':'')+
+  (x.windowResearch.output?'<p><a href="'+encodeURIComponent(x.id)+
+   '/WINDOWS_HOST_DERIVED_RESEARCH_ONLY/SOURCE_FLOOR_ACCESS_MAP.svg">入口からの連続床マップ</a></p>':'')+
   '<p>教育版の外殻研究: '+esc(x.educationExport.status)+'</p>'+
   (x.educationExport.output?
    '<p><a href="'+encodeURIComponent(x.id)+
