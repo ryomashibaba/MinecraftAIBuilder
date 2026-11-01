@@ -464,3 +464,66 @@ test('R190-P glazing fails closed for injected attributes and invalid windows',(
  assert.throws(()=>compileR190SemanticPlan(internal),
   /GLAZING_NOT_EXTERIOR|GLAZING_AIR_BLOCKED|GLAZING_NOT_REAL_CUT/);
 });
+
+/** Source-only reconstruction of a facet sharing a taller parent-room wall.
+ * This is a synthetic regression, not the model's original response. */
+function facetSeamFixture(kind){
+ const p={schema:R190_SCHEMA,id:'r190-facet-seam-'+kind,
+  title:'Shared seam audit fixture',brief:'Synthetic model-intent geometry regression case',
+  site:{width:40,depth:32,height:16},entrySpaceId:'entry-hall-001',
+  spaces:[
+   {id:'entry-hall-001',purpose:'entry',width:12,depth:8,height:10,parentId:null,side:null,privacy:'public'},
+   {id:'studio-001',purpose:'studio',width:20,depth:16,height:12,parentId:'entry-hall-001',side:'north',privacy:'private'},
+   {id:'gallery-001',purpose:'gallery',width:16,depth:14,height:12,parentId:'entry-hall-001',side:'east',privacy:'shared'},
+   {id:'courtyard-001',purpose:'open-court',width:14,depth:12,height:8,parentId:'gallery-001',side:'south',privacy:'public'}
+  ],
+  materials:{floor:'wood',wall:'stone',roof:'wood'},entranceFace:'south',
+  roofFormIntents:[{spaceId:'studio-001',profile:'shed',axis:'z',rise:2}],
+  formIntent:{spaceId:'courtyard-001',face:'north',cornerInset:3}};
+ if(kind==='A')p.skyCourtIntent={spaceId:'gallery-001',offsetX:2,offsetZ:2,width:10,depth:6};
+ else p.roofFormIntents.push({spaceId:'gallery-001',profile:'ridge',axis:'x',rise:3});
+ return p;
+}
+
+test('R190 facet parent seam: A/B physical B143 and distinct shared vs true-open cells',()=>{
+ const shapes=new Set();
+ for(const kind of ['A','B']){
+  const plan=facetSeamFixture(kind),original=JSON.stringify(plan);
+  const built=compileR190SemanticPlan(plan);
+  assert.equal(JSON.stringify(plan),original);
+  assert(verifyCompiled(built.design,built.compiled));
+  assert.equal(built.audit.allProgramSpacesReachable,true);
+  assert.equal(built.audit.facetedEnvelope.sharedWallCornerColumns,6);
+  assert.equal(built.audit.facetedEnvelope.openSkyCornerColumns,6);
+  assert.equal(built.audit.facetedEnvelope.missingRoofCornerColumns,12);
+  assert.equal(built.audit.outdoorCourtCount,0,
+   'purpose alone does not create a physical outdoor court');
+  assert.equal(built.readiness,'NOT_PREPARED');
+  assert.equal(built.executionAllowed,false);
+  assert.equal(built.constructionApproved,false);
+  assert.deepEqual(built.gates,Array(9).fill('BLOCKED'));
+  assert.deepEqual(built.BuildPlan.operations,[]);
+  assert.equal(built.worldContacts,0);assert.equal(built.worldWrites,0);
+  shapes.add(built.compiled.geometrySha256);
+ }
+ assert.equal(shapes.size,2);
+});
+
+test('R190 facet seam never excuses a fake parent wall or covered exterior corner',()=>{
+ const built=compileR190SemanticPlan(facetSeamFixture('A'));
+ const room=built.layout.spaces.find(s=>s.id==='courtyard-001');
+ const attacks=[
+  {name:'replaced-parent-wall',pos:[room.x,room.h,room.z+room.d-1],
+   expected:/FACET_SHARED_WALL_NOT_CONTINUOUS/},
+  {name:'blocked-outside-corner',pos:[room.x,room.h,room.z+room.d-2],
+   expected:/FACET_NOT_TRULY_OPEN/}
+ ];
+ for(const a of attacks){
+  const design=structuredClone(built.design);
+  design.elements.push({id:a.name,shape:'box',mode:'add',material:'metal',
+   origin:a.pos,size:[1,1,1]});
+  const voxels=compileDesign(design);
+  assert(verifyCompiled(design,voxels));
+  assert.throws(()=>auditR190SourceRoutes(built.inputPlan,built.layout,design,voxels),a.expected);
+ }
+});

@@ -681,7 +681,15 @@ export function auditR190SourceRoutes(plan,layout,design,compiled){
    if(f.face==='west')return [s.x+v,s.z+u];
    return [s.x+s.w-1-v,s.z+u];
   };
-  let occupiedRoof=0,realMissingCornerRoof=0;
+  // A parent room may have a real wall at the child's faceted corner
+  // on their shared plane. It is not the child's own missing roof slab.
+  const authored=plan.spaces.find(v=>v.id===f.spaceId);
+  const parent=layout.spaces.find(v=>v.id===authored?.parentId);
+  const facingParent=parent!==undefined&&
+   ({north:'south',south:'north',east:'west',west:'east'}[authored.side]===f.face);
+  const materialAt=new Map(compiled.primitives.map(v=>[key(v[0],v[1],v[2]),v[3]]));
+  const wallIndex=compiled.layerNames.indexOf('B143_'+plan.materials.wall.toUpperCase());
+  let occupiedRoof=0,realMissingCornerRoof=0,openSkyCornerColumns=0,sharedWallCornerColumns=0;
   for(let v=0;v<depth;v++)for(let u=0;u<span;u++){
    const [x,z]=cell(u,v),inset=Math.max(0,r-v);
    const belongs=u>=inset&&u<span-inset;
@@ -689,14 +697,35 @@ export function auditR190SourceRoutes(plan,layout,design,compiled){
     ok(has(x,1,z)&&has(x,s.h,z),'FACET_SUPPORT_OR_ROOF_MISSING');
     occupiedRoof++;
    }else{
-    ok(!has(x,s.h,z),'FACET_NOT_TRULY_OPEN');
+    const insideParent=parent&&x>=parent.x&&x<parent.x+parent.w&&
+     z>=parent.z&&z<parent.z+parent.d;
+    const onSharedPlane=facingParent&&v===0&&insideParent&&
+     (authored.side==='south'?z===parent.z:
+      authored.side==='north'?z===parent.z+parent.d-1:
+      authored.side==='east'?x===parent.x+parent.w-1:
+      x===parent.x);
+    if(onSharedPlane&&has(x,s.h,z)){
+     // Only an actual uninterrupted parent wall qualifies: a misplaced
+     // roof, glass, or other obstruction still fails closed.
+     ok(parent.h>=s.h+2&&wallIndex>=0&&
+      [s.h-1,s.h,s.h+1].every(y=>
+       materialAt.get(key(x,y,z))===wallIndex),
+      'FACET_SHARED_WALL_NOT_CONTINUOUS');
+     sharedWallCornerColumns++;
+    }else{
+     ok(!has(x,s.h,z),'FACET_NOT_TRULY_OPEN');
+     openSkyCornerColumns++;
+    }
     realMissingCornerRoof++;
    }
   }
-  ok(realMissingCornerRoof===r*(r+1),'FACET_SILHOUETTE');
+  ok(realMissingCornerRoof===r*(r+1)&&
+   openSkyCornerColumns+sharedWallCornerColumns===realMissingCornerRoof,
+   'FACET_SILHOUETTE');
   facetAudit={spaceId:f.spaceId,face:f.face,cornerInset:r,
    occupiedRoofColumns:occupiedRoof,
    missingRoofCornerColumns:realMissingCornerRoof,
+   openSkyCornerColumns,sharedWallCornerColumns,
    minecraftEnvelopeWeatherproofing:'NOT_TESTED'};
  }
  // R190-K verifies ACTUAL finished B143 voxels for each authored roof
