@@ -6,7 +6,7 @@
  * B143 apertures through the existing full semantic source + circulation QA.
  * These are NOT model-authored window decisions or an ART/World approval.
  */
-import {compileR190SemanticPlan} from './r190-semantic-massing.mjs';
+import {compileR190SemanticPlan,auditR190SourceRoutes} from './r190-semantic-massing.mjs';
 import {verifyCompiled} from './b143-building-dsl.mjs';
 const fail=code=>{throw Error('R190_COMPACT_DAYLIGHT_'+code);};
 const faces=['north','east','west','south'];
@@ -104,14 +104,38 @@ export function auditR190CompactInteriorEvidence(built){
  const cells=new Set(built.compiled.primitives.map(v=>v[0]+','+v[1]+','+v[2]));
  const has=(x,y,z)=>cells.has(x+','+y+','+z);
  const clear=(x,z)=>has(x,1,z)&&!has(x,2,z)&&!has(x,3,z);
+ // Recompute the authoritative outdoor-to-room route from true final voxels.
+ // Do not trust the cached receipt or count isolated 2-wide pads as usable.
+ const independentlyAudited=auditR190SourceRoutes(
+  built.inputPlan,built.layout,built.design,built.compiled);
+ if(!independentlyAudited.allProgramSpacesReachable||
+  JSON.stringify(independentlyAudited.witnesses)!==JSON.stringify(built.audit.witnesses))
+  fail('INTERIOR_ROUTE_RECEIPT_MISMATCH');
+ const witness=independentlyAudited.witnesses.find(
+  w=>w.id===built.inputPlan.entrySpaceId)?.reachableTwoWideSourceCell;
+ if(!witness)fail('INTERIOR_ENTRY_WITNESS_MISSING');
+ const {width,depth}=built.inputPlan.site;
+ const stand=(x,z)=>x>=0&&z>=0&&x+1<width&&z+1<depth&&
+  [0,1].every(dx=>[0,1].every(dz=>clear(x+dx,z+dz)));
+ const queue=[[witness[0],witness[2]]];
+ const seen=new Set([queue[0].join(',')]);
+ for(let i=0;i<queue.length;i++){
+  const [x,z]=queue[i];
+  for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]]){
+   const nx=x+dx,nz=z+dz,key=nx+','+nz;
+   if(!seen.has(key)&&stand(nx,nz)){seen.add(key);queue.push([nx,nz]);}
+  }
+ }
  const rooms=built.layout.spaces.map(r=>{
   const x0=r.x+1,x1=r.x+r.w-2,z0=r.z+1,z1=r.z+r.d-2;
   if(x1<x0||z1<z0)fail('INTERIOR_BOUNDS');
-  let supportedClearFloorCells=0,twoByTwoSupportedClearPads=0;
+  let supportedClearFloorCells=0,twoByTwoSupportedClearPads=0,reachableTwoWidePads=0;
   for(let x=x0;x<=x1;x++)for(let z=z0;z<=z1;z++){
    if(clear(x,z))supportedClearFloorCells++;
-   if(x<x1&&z<z1&&[0,1].every(dx=>[0,1].every(dz=>clear(x+dx,z+dz))))
+   if(x<x1&&z<z1&&stand(x,z)){
     twoByTwoSupportedClearPads++;
+    if(seen.has(x+','+z))reachableTwoWidePads++;
+   }
   }
   const witness=built.audit.witnesses.find(w=>w.id===r.id)?.reachableTwoWideSourceCell;
   if(!Array.isArray(witness)||witness.length!==3||witness[1]!==2||
@@ -122,6 +146,10 @@ export function auditR190CompactInteriorEvidence(built){
   return {spaceId:r.id,spatialRole:r.spatialRole??'enclosed',
    hostResolvedDimensions:[r.w,r.h,r.d],interiorFootprintCells,
    supportedClearFloorCells,twoByTwoSupportedClearPads,
+   reachableTwoWidePadsFromEntrance:reachableTwoWidePads,
+   disconnectedTwoWidePads:twoByTwoSupportedClearPads-reachableTwoWidePads,
+   reachableTwoWidePadFraction:twoByTwoSupportedClearPads===0?0:
+    Number((reachableTwoWidePads/twoByTwoSupportedClearPads).toFixed(4)),
    clearFloorFraction:Number((supportedClearFloorCells/interiorFootprintCells).toFixed(4)),
    connectedEntranceWitness:witness,
    furniture:'NOT_GENERATED',actualMinecraftWalking:'NOT_TESTED'};
@@ -130,7 +158,10 @@ export function auditR190CompactInteriorEvidence(built){
   sourceSha256:built.compiled.sourceSha256,geometrySha256:built.compiled.geometrySha256,
   status:'MEASURED_SOURCE_ONLY_NO_FUNCTION_OR_ART_APPROVAL',
   rooms,allRoomsHaveSourceEntranceWitness:true,
-  note:'2 air cells over supporting floor; independent room pad count is not game physics or furnishing proof',
+  roomsWithDisconnectedTwoWidePads:rooms.filter(x=>x.disconnectedTwoWidePads>0).map(x=>x.spaceId),
+  allRoomTwoWidePadsReachableFromEntrance:rooms.every(x=>x.disconnectedTwoWidePads===0),
+  sourceRouteIndependentlyRechecked:true,
+  note:'Source-only, two air cells over floor. Reachability is a 2-wide horizontal proxy, not actual Minecraft walking, furniture usability, or ART approval.',
   modelCalls:0,worldContacts:0,worldWrites:0,constructionApproved:false,
   readiness:'NOT_PREPARED',art:'NOT_REVIEWED',actualMinecraftWalking:'NOT_TESTED'};
 }
