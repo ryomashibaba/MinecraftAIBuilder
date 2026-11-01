@@ -1,3 +1,10 @@
+## 2026-11-02 追補 — 真正B143 SOURCE室内アクセスの可視化（実装保存、CI判定待ち）
+
+- 保存済み実Qwenの住宅・花屋・研究施設を、元原文に再問い合わせせず比較する現行 `replayR190CompactSaved` に、各室の2×2支持床候補の連続性を**真正最終B143ボクセルから図示するSVG** `SOURCE_FLOOR_ACCESS_MAP.svg` を追加した。入口へ連結する床は緑、孤立した床候補は橙、支持床は灰、部屋輪郭と入口実証点を表示。もとの回転3D比較HTMLからマップへ移動できる。出所・source SHA・geometry SHAの整合を再監査し、室別数値との相違はHOLDにする。建物別のハードコード・モデル原文改変・新規モデル推論なし。
+- 実装コミット `8fd3fbf1969dac1350fdd705dd54e915c8d41d69`、継続ブランチ `feature/b198zr1-protected-architectural-revision`、PR #128 Open/Draft。変更は `source/ai/r190-compact-daylight.mjs`、`scripts/r190-compact-program-study.mjs` と対応テストのみ。既存原本・main・教育実機ワールド未変更。
+- **検証境界**：この追補時点の新コミット専用R190-AC、Education-first CIは判定待ち。既存実Qwen3棟の新SVGはその保存済みWindows原文がここで実行できないため未生成・未観察。既存 `E1_COMPACT_REPLAY_REPORT(3).json` は以前のSOURCE3/3・窓研究3/3の実証で、新SVGや実歩行の実証ではない。新機能をSOURCE限定とし、ART HOLD/実歩行NOT_TESTED/BuildPlan空/NOT_PREPARED/9 BLOCKED/WorldWrites0を維持。
+- **続く優先工程**：CIの成否を確認し、失敗なら実原因のみ修正。保存済み実Qwen原本のPCから `node scripts/r190-compact-program-study.mjs --replay-latest` を一度だけ実行して、3棟のSVG・数値・窓付き真正3Dの結果を比較。孤立領域があれば共通配置/ドア/内装設計で改善。試験ワールドの識別・バックアップ・空き範囲・復元・命令制約が整うまで施工禁止。全工程でmain/凍結原本を保護し、WorkやPC操作に別の許可なく踏み込まない。
+
 ## 2026-11-02 入口から各室までのSOURCE 2幅床到達率（コード実装済・CI確定待ち）
 
 - **新コードの事実**：R190 compactの既存 `auditR190CompactInteriorEvidence` に、真正最終B143ボクセルと入口からの2幅床BFSに基づく `reachableTwoWidePadsFromEntrance`、`disconnectedTwoWidePads`、`reachableTwoWidePadFraction` を追加。保存されたsource-route witnessを独立再計算と照合して食い違いはHOLD。3用途の `--replay-latest` が出す `ROOM_SOURCE_FLOOR_REVIEW.json` と比較HTMLに室別計測を表示し、既存テストに整合/改ざん拒否を追加。**R190 compactに限定したSOURCE上の改善**であり、R125の主経路・既存Qwen原文・B143原本・mainに変更なし。
