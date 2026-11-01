@@ -33,7 +33,7 @@ const SYSTEM=[
  'Materials are EXACT {floor,wall,roof}; choose only stone or wood for each until new Minecraft materials are verified. These map via the existing verified palette.',
  'Required glazedOpenings: 1..4 {spaceId,face,offset,baseY,width,height}. Face north/south/east/west; width 2..4, baseY=5,height=2; room height>=8; offset>=2, offset+width<=wallLength-2. ALL windows face external open air, NOT touching parent/child SHARED WALLS. On the entrySpaceId entranceFace, centered door occupies offsets doorOffset=floor((wallLength-2)/2) and doorOffset+1. A window with baseY=5 and columns offset..offset+width-1 MUST NOT intersect either door column. Prefer another genuinely exterior facade instead of placing entry-front windows. Never place glazing on a faceted room.',
  'Optional roofFormIntents: 1..2 items {spaceId,profile,axis,rise}, profile ridge or shed, axis x/z, rise 2..3; each spaceId is different and must refer to enclosed rooms. Every room.height+rise must be STRICTLY LESS than site.height. Do not use roofFormIntent together with roofFormIntents. Avoid adding roof if uncertain about clearance.',
- 'Optional formIntent {spaceId,face,cornerInset} with cornerInset 2..3 for a real faceted main volume. CRITICAL: a formIntent spaceId CANNOT also appear in roofFormIntents or roofFormIntent; faceted room CANNOT have any glazedOpenings. Choose one form treatment per space, not overlapping decorations.',
+ 'Optional formIntent {spaceId,face,cornerInset} for ONE real faceted enclosed volume; OR formIntents array with 1..2 such objects on DIFFERENT enclosed rooms. Never use both. Faceting clips the actual occupied floor/wall/roof, not decorations. Do not combine any faceted room with a roofFormIntent, skyCourtIntent or glazedOpenings. Optional, only when it serves the architecture.',
  'Optional entranceFace north/south/east/west, optional skyCourtIntent, optional spatialRole=open-court on a non-entry room only if explicitly desired; do not add unsupported keys.',
  'Before answering, privately check all required fields, identifiers (NO underscores), every room width>=7, depth>=7 and height>=7, roof clearance, windows vs outside air, doorOffset/entrance-window overlap, and roof/facet conflict. If incompatible, DESIGN IT DIFFERENTLY before responding; do not ask host to alter JSON. Model authors individual massing, function and openings; do NOT copy a standard template. Output ONLY the one final JSON object; no commands or code.'
 ].join('\n');
@@ -46,7 +46,7 @@ const MASSING_SYSTEM=[
  'First room is entrySpaceId with parentId=null,side=null. Other rooms use prior parentId and side north/south/east/west. Each width/depth 7..22 and height 7..site.height-2. privacy public/shared/private. No room directly attached on entranceFace (default south).',
  'Materials exactly floor,wall,roof chosen from wood or stone. Optional entranceFace north/south/east/west.',
  'Optional roofFormIntents: 1..2 items {spaceId,profile,axis,rise}, profile ridge/shed, axis x/z,rise 2..3, room.height+rise < site.height.',
- 'Optional formIntent={spaceId,face,cornerInset} for a real non-rectangular enclosed volume; face north/south/east/west and cornerInset 2..3. Do not put a roofFormIntent on the same space.',
+ 'Optional formIntent={spaceId,face,cornerInset} for one nonrectangular enclosed wing, OR formIntents array with 1..2 such objects on DISTINCT spaces, never both. Face north/south/east/west, cornerInset 2..3. These create physical clipped volumes, not trim. Never place roofFormIntent, skyCourtIntent or glazing on a faceted wing.',
  'Optional skyCourtIntent={spaceId,offsetX,offsetZ,width,depth} for a real open-sky roof void. width/depth 4..14, margins >=2, not in a faceted or profiled-roof room. Optional openFace touches the actual exterior edge, leaves two-block lateral margins, and avoids doors.',
  'CRITICAL: skyCourtIntent.spaceId MUST name an existing enclosed room different from formIntent.spaceId AND from every roofFormIntents[].spaceId. It must NEVER name a spatialRole=open-court room. When no compatible room exists, omit skyCourtIntent; do not invent a workaround.',
  'Optional one non-entry space may specify spatialRole=open-court for a roofless connected exterior space.',
@@ -216,6 +216,7 @@ export const R190_E1_STUDY_BRIEFS=Object.freeze([
 export function r190E1MassingSignature(plan){
  const byId=new Map(plan.spaces.map((s,i)=>[s.id,i]));
  const ix=id=>byId.get(id),f=plan.formIntent,c=plan.skyCourtIntent;
+ const forms=plan.formIntents??(f?[f]:[]);
  const roofs=plan.roofFormIntents??(plan.roofFormIntent?[plan.roofFormIntent]:[]);
  return JSON.stringify({
   rooms:plan.spaces.map(s=>[s.width,s.depth,s.height,
@@ -223,6 +224,8 @@ export function r190E1MassingSignature(plan){
    s.spatialRole??'enclosed',s.tangentShift??null]),
   entryFace:plan.entranceFace??'south',
   form:f?[ix(f.spaceId),f.face,f.cornerInset]:null,
+  ...(plan.formIntents===undefined?{}:{forms:forms.map(v=>
+   [ix(v.spaceId),v.face,v.cornerInset]).sort((a,b)=>a[0]-b[0])}),
   roofs:roofs.map(x=>[ix(x.spaceId),x.profile,x.axis,x.rise,x.toothWidth??null])
    .sort((x,y)=>x[0]-y[0]),
   court:c?[ix(c.spaceId),c.offsetX,c.offsetZ,c.width,c.depth,c.openFace??null]:null,

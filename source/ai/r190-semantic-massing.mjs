@@ -74,7 +74,7 @@ export function r190RoofElevation(index,span,form){
 export function validateR190SemanticPlan(p){
  const standard=['schema','id','title','brief','site','entrySpaceId','spaces','materials'];
  ok(Object.keys(p??{}).length>=standard.length&&
-  Object.keys(p??{}).every(k=>[...standard,'entranceFace','formIntent','roofFormIntent','roofFormIntents','skyCourtIntent','crossConnections','glazedOpenings'].includes(k))&&
+  Object.keys(p??{}).every(k=>[...standard,'entranceFace','formIntent','formIntents','roofFormIntent','roofFormIntents','skyCourtIntent','crossConnections','glazedOpenings'].includes(k))&&
   standard.every(k=>Object.hasOwn(p,k)),'FIELDS');
  ok(p.schema===R190_SCHEMA&&slug(p.id)&&safeText(p.title,100)&&
   safeText(p.brief,400),'IDENTITY');
@@ -107,19 +107,23 @@ export function validateR190SemanticPlan(p){
  }
  ok(ids.has(p.entrySpaceId),'MISSING_ENTRANCE_SPACE');
  ok(p.entranceFace===undefined||DIR.includes(p.entranceFace),'ENTRANCE_FACE');
- // Optional model/caller instruction to construct ONE real occupied wing
- // with a faceted footprint. Never infer a form from a building-type name.
- if(p.formIntent!==undefined){
-  const f=p.formIntent;
-  ok(exact(f,['spaceId','face','cornerInset'])&&
-   slug(f.spaceId)&&['north','south','east','west'].includes(f.face)&&
-   int(f.cornerInset,2,3),'FORM_INTENT');
-  const chosen=p.spaces.find(s=>s.id===f.spaceId);
-  ok(chosen&&chosen.spatialRole!=='open-court','FORM_SPACE');
+ // Two independent AI-selected REAL faceted physical wings (opt-in).
+ // Legacy single formIntent is preserved unchanged in geometry.
+ if(p.formIntents!==undefined)
+  ok(p.formIntent===undefined&&Array.isArray(p.formIntents)&&
+   p.formIntents.length>=1&&p.formIntents.length<=2,'FORM_INTENTS');
+ const forms=p.formIntents??(p.formIntent?[p.formIntent]:[]);
+ const formSpaces=new Set();
+ for(const f of forms){
+  ok(exact(f,['spaceId','face','cornerInset'])&&slug(f.spaceId)&&
+   DIR.includes(f.face)&&int(f.cornerInset,2,3),'FORM_INTENT');
+  const space=p.spaces.find(s=>s.id===f.spaceId);
+  ok(space&&space.spatialRole!=='open-court','FORM_SPACE');
+  ok(!formSpaces.has(f.spaceId),'DUPLICATE_FORM_SPACE');
+  formSpaces.add(f.spaceId);
   const ns=['north','south'].includes(f.face);
-  ok((ns?chosen.width:chosen.depth)>=2*f.cornerInset+6&&
-   (ns?chosen.depth:chosen.width)>=f.cornerInset+5,
-   'FACET_CANNOT_FIT');
+  ok((ns?space.width:space.depth)>=2*f.cornerInset+6&&
+   (ns?space.depth:space.width)>=f.cornerInset+5,'FACET_CANNOT_FIT');
  }
  // Model-authored roof sections (one legacy or up to two new independent wings).
  // These are genuine raised interior volumes, not ornamental roof appliques.
@@ -139,7 +143,7 @@ export function validateR190SemanticPlan(p){
    'ROOF_FORM');
   const space=p.spaces.find(s=>s.id===f.spaceId);
   ok(space&&space.spatialRole!=='open-court'&&
-   p.formIntent?.spaceId!==space.id,'ROOF_SPACE');
+   !formSpaces.has(space.id),'ROOF_SPACE');
   ok(!roofSpaces.has(f.spaceId),'DUPLICATE_ROOF_SPACE');
   roofSpaces.add(f.spaceId);
   const span=f.axis==='x'?space.width:space.depth;
@@ -160,7 +164,7 @@ export function validateR190SemanticPlan(p){
    'SKY_COURT_FIELDS');
   const room=p.spaces.find(s=>s.id===v.spaceId);
   ok(room&&room.spatialRole!=='open-court'&&
-   p.formIntent?.spaceId!==room.id&&
+   !formSpaces.has(room.id)&&
    !roofSpaces.has(room.id),'SKY_COURT_CONFLICT');
   if(v.openFace===undefined){
    ok(v.offsetX>=2&&v.offsetZ>=2&&
@@ -227,7 +231,7 @@ export function validateR190SemanticPlan(p){
     Number.isSafeInteger(g.offset)&&Number.isSafeInteger(g.baseY),
     'GLAZING_FIELDS');
    const r=p.spaces.find(s=>s.id===g.spaceId);
-   ok(r&&r.spatialRole!=='open-court'&&p.formIntent?.spaceId!==r.id,
+   ok(r&&r.spatialRole!=='open-court'&&!formSpaces.has(r.id),
     'GLAZING_ROOM_UNSUPPORTED');
    const span=['north','south'].includes(g.face)?r.width:r.depth;
    ok(g.offset>=2&&g.offset+g.width<=span-2&&
@@ -407,6 +411,8 @@ export function r190GlazingCells(room,g){
 function sourceDesign(p,l){
  const elements=[];
  const roles=new Map(p.spaces.map(s=>[s.id,s.spatialRole??'enclosed']));
+ const authoredFacets=new Map((p.formIntents??
+  (p.formIntent?[p.formIntent]:[])).map(f=>[f.spaceId,f]));
  const authoredRoofs=new Map((p.roofFormIntents??
   (p.roofFormIntent?[p.roofFormIntent]:[])).map(f=>[f.spaceId,f]));
  const box=(id,mode,material,origin,size)=>elements.push({
@@ -484,11 +490,11 @@ function sourceDesign(p,l){
   box(tag+'-floor','add',p.materials.floor,[s.x,1,s.z],[s.w,1,s.d]);
   // An outdoor court is ground and sky, not a room carved out of a box.
   if(roles.get(tag)==='open-court')continue;
-  if(p.formIntent?.spaceId===tag){
+  if(authoredFacets.has(tag)){
    // Remove the legacy rectangular floor too; the faceted envelope owns
    // the entire footprint, including supported circulation surfaces.
    elements.pop();
-   facetedEnclosedSpace(s,p.formIntent);
+   facetedEnclosedSpace(s,authoredFacets.get(tag));
    continue;
   }
   const court=p.skyCourtIntent?.spaceId===tag?p.skyCourtIntent:null;
@@ -671,8 +677,10 @@ export function auditR190SourceRoutes(plan,layout,design,compiled){
  // occupied inner field is still roofed and has supported two-block clearance.
  // Audit the compiled geometry, never the planned element list alone.
  let facetAudit=null;
- if(plan.formIntent){
-  const f=plan.formIntent,s=layout.spaces.find(v=>v.id===f.spaceId);
+ const facetAudits=[];
+ for(const f of (plan.formIntents??
+  (plan.formIntent?[plan.formIntent]:[]))){
+  const s=layout.spaces.find(v=>v.id===f.spaceId);
   const ns=f.face==='south'||f.face==='north';
   const span=ns?s.w:s.d,depth=ns?s.d:s.w,r=f.cornerInset;
   const cell=(u,v)=>{
@@ -727,6 +735,7 @@ export function auditR190SourceRoutes(plan,layout,design,compiled){
    missingRoofCornerColumns:realMissingCornerRoof,
    openSkyCornerColumns,sharedWallCornerColumns,
    minecraftEnvelopeWeatherproofing:'NOT_TESTED'};
+  facetAudits.push(facetAudit);
  }
  // R190-K verifies ACTUAL finished B143 voxels for each authored roof
  // strip, raised interior air, end gable seals, and the chosen silhouette.
@@ -833,7 +842,8 @@ export function auditR190SourceRoutes(plan,layout,design,compiled){
   nonTreePhysicalWalkableTwoWide:true,
   roofForm:roofFormAudit,roofForms:roofFormAudits,
   skyCourt:skyCourtAudit,sourceWalkingPads:seen.size,
-  facetedEnvelope:facetAudit,
+  facetedEnvelope:facetAudits[0]??null,
+  ...(plan.formIntents===undefined?{}:{facetedEnvelopes:facetAudits}),
   outdoorCourtCount:plan.spaces.filter(s=>s.spatialRole==='open-court').length,
   verifiedOpenSkyColumns:skyColumns,
   entranceFace:face,entranceApproachTwoWide:true,allProgramSpacesReachable:true,witnesses,

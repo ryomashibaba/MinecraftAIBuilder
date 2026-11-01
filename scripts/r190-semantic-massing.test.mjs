@@ -527,3 +527,56 @@ test('R190 facet seam never excuses a fake parent wall or covered exterior corne
   assert.throws(()=>auditR190SourceRoutes(built.inputPlan,built.layout,design,voxels),a.expected);
  }
 });
+ 
+test('R190 opt-in two physical faceted wings work across home, shop and lab programs',()=>{
+ const pairs=[
+  [{spaceId:'sleeping',face:'north',cornerInset:2},
+   {spaceId:'cooking',face:'east',cornerInset:2}],
+  [{spaceId:'workshop',face:'north',cornerInset:2},
+   {spaceId:'receiving',face:'east',cornerInset:2}],
+  [{spaceId:'analysis',face:'west',cornerInset:2},
+   {spaceId:'wetlab',face:'north',cornerInset:2}]
+ ];
+ for(const [i,base] of cases.entries()){
+  const plan=structuredClone(base);plan.formIntents=pairs[i];
+  const frozen=JSON.stringify(plan);
+  const plain=compileR190SemanticPlan(base),result=compileR190SemanticPlan(plan);
+  assert.equal(JSON.stringify(plan),frozen);
+  assert(verifyCompiled(result.design,result.compiled));
+  assert(result.audit.allProgramSpacesReachable);
+  assert.equal(result.audit.facetedEnvelopes.length,2);
+  assert.deepEqual(result.audit.facetedEnvelopes.map(a=>a.spaceId),
+   pairs[i].map(x=>x.spaceId));
+  assert(result.audit.facetedEnvelopes.every(a=>
+   a.missingRoofCornerColumns===6&&a.occupiedRoofColumns>30));
+  assert.notEqual(result.compiled.geometrySha256,plain.compiled.geometrySha256);
+  assert.deepEqual(result.gates,Array(9).fill('BLOCKED'));
+  assert.deepEqual(result.BuildPlan.operations,[]);
+  assert.equal(result.worldWrites,0);assert.equal(result.worldContacts,0);
+  assert.equal(result.executionAllowed,false);
+  assert.equal(result.constructionApproved,false);
+  assert.equal(result.art,'ART_HOLD');
+ }
+});
+test('R190 multi-facet rejects unsupported collisions and keeps legacy syntax',()=>{
+ const old=structuredClone(cases[0]);
+ old.formIntent={spaceId:'sleeping',face:'north',cornerInset:2};
+ assert.equal(compileR190SemanticPlan(old).audit.facetedEnvelope.spaceId,'sleeping');
+ const both=structuredClone(old);both.formIntents=[{spaceId:'cooking',face:'east',cornerInset:2}];
+ assert.throws(()=>compileR190SemanticPlan(both),/FORM_INTENTS/);
+ const duplicate=structuredClone(cases[0]);duplicate.formIntents=[old.formIntent,old.formIntent];
+ assert.throws(()=>compileR190SemanticPlan(duplicate),/DUPLICATE_FORM_SPACE/);
+ const tooMany=structuredClone(cases[0]);tooMany.formIntents=[
+  old.formIntent,{spaceId:'cooking',face:'east',cornerInset:2},
+  {spaceId:'storage',face:'north',cornerInset:2}];
+ assert.throws(()=>compileR190SemanticPlan(tooMany),/FORM_INTENTS/);
+ const badRoom=structuredClone(cases[0]);
+ badRoom.formIntents=[{spaceId:'missing-room',face:'north',cornerInset:2}];
+ assert.throws(()=>compileR190SemanticPlan(badRoom),/FORM_SPACE/);
+ const clash=structuredClone(cases[0]);clash.formIntents=[old.formIntent];
+ clash.roofFormIntent={spaceId:'sleeping',profile:'ridge',axis:'x',rise:2};
+ assert.throws(()=>compileR190SemanticPlan(clash),/ROOF_SPACE/);
+ const glass=structuredClone(cases[0]);glass.formIntents=[old.formIntent];
+ glass.glazedOpenings=[{spaceId:'sleeping',face:'north',offset:2,baseY:5,width:2,height:2}];
+ assert.throws(()=>compileR190SemanticPlan(glass),/GLAZING_ROOM_UNSUPPORTED/);
+});
