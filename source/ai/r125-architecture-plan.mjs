@@ -15,7 +15,7 @@ const check=(v,code)=>{if(!v)refuse(code);};
 const keys=(v,names)=>v!==null&&typeof v==='object'&&!Array.isArray(v)&&
  Object.keys(v).length===names.length&&names.every(k=>Object.hasOwn(v,k));
 const slug=s=>typeof s==='string'&&/^[a-z][a-z0-9-]{2,39}$/.test(s);
-const text=s=>typeof s==='string'&&s.length>=3&&s.length<=180&&
+const text=(s,max=180)=>typeof s==='string'&&s.length>=3&&s.length<=max&&
  !/[\u0000-\u001f<>]/.test(s);
 const integer=(v,a,b)=>Number.isSafeInteger(v)&&v>=a&&v<=b;
 export function validateArchitecturePlan(p){
@@ -24,7 +24,9 @@ export function validateArchitecturePlan(p){
  check(keys(p,expressive?[...standard,'expression']:standard),
   'TOP_LEVEL_FIELDS');
  check(p.schema===SCHEMA,'SCHEMA');
- check(slug(p.id)&&text(p.title)&&text(p.brief),'IDENTITY');
+ // B143 permits up to 500 characters of brief; keep title and room-purpose
+ // bounds unchanged so a valid model-authored design is never silently edited.
+ check(slug(p.id)&&text(p.title)&&text(p.brief,500),'IDENTITY');
  check(keys(p.footprint,['width','depth'])&&
   integer(p.footprint.width,16,32)&&integer(p.footprint.depth,16,32),
   'FOOTPRINT_BOUNDS');

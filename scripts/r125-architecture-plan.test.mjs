@@ -1,4 +1,8 @@
 import test from 'node:test';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import {createHash} from 'node:crypto';
 import assert from 'node:assert/strict';
 import {SCHEMA,validateArchitecturePlan,compileArchitecturePlan,
  auditArchitecturePlanCirculation,assessR125ProgramGeometry}
@@ -6,6 +10,7 @@ import {SCHEMA,validateArchitecturePlan,compileArchitecturePlan,
 import {verifyCompiled,compileDesign} from '../source/ai/b143-building-dsl.mjs';
 import {auditR125SourceRoutes} from '../source/ai/r125-source-routes.mjs';
 import {critiqueArchitecture} from '../source/ai/b198c-spatial-critic.mjs';
+import {exportSavedPlan} from './r125-japanese-makecode.mjs';
 
 const plan=(id,axes=['x'],spaces=['family room','kitchen'])=>({
  schema:SCHEMA,id,title:'An original small building',
@@ -276,4 +281,67 @@ test('corner recess fails closed on malformed size and unsupported massing combi
   {...expression,setbackSide:'rear',setbackDepth:3}
  ])assert.throws(()=>compileArchitecturePlan({...base,expression:candidate}),
   /R125_PLAN_EXPRESSION_(CORNER_CUT|CORNER_CONFLICT|SETBACK)/);
+});
+
+
+test('unaltered Nov-1 Qwen 14B 203-character brief compiles to real L-corner SOURCE and safe MakeCode',()=>{
+ const fixture=new URL('../evidence/r125-real-l-corner-20261101/MODEL_RESPONSE_ORIGINAL.txt',import.meta.url);
+ const raw=fs.readFileSync(fixture,'utf8');
+ assert.equal(createHash('sha256').update(raw).digest('hex'),
+  '69067e84ced5633e2f7d3973b28a651e472aea1b3753934f456645ed6fc4c5e2');
+ const original=JSON.parse(raw),snapshot=structuredClone(original);
+ assert.equal(original.brief.length,203);
+ assert.equal(validateArchitecturePlan(original),true);
+ const compiled=compileArchitecturePlan(original,{entrancePlacement:'source-accessible'});
+ assert.equal(verifyCompiled(compiled.design,compiled.compiled),true);
+ assert.equal(compiled.planSha256,
+  'e9a9a62c4bd55284d62d96b0352fd5bc6b5059e72921ce6a1954b86ef63e36d8');
+ const cells=voxels(compiled.compiled);
+ assert.equal(includes(cells,22,1,22),false); // L-shaped floor void
+ assert.equal(includes(cells,22,6,22),false); // matching L-shaped roof void
+ assert.equal(includes(cells,18,2,21),true); // actual re-entrant wall
+ assert.equal(includes(cells,21,2,18),true);
+ assert.equal(includes(cells,18,3,20),true); // re-entrant glass
+ assert.equal(includes(cells,20,3,18),true);
+ assert.equal(auditArchitecturePlanCirculation(compiled).status,
+  'SOURCE_CLEARANCE_PROBES_PASS');
+ const sourceRoutes=auditR125SourceRoutes(compiled);
+ assert.equal(sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES',
+  JSON.stringify(sourceRoutes.issues));
+ assert.deepEqual(sourceRoutes.zones.map(z=>z.id).sort(),
+  ['retail-area','staff-workroom'].sort());
+ assert(sourceRoutes.zones.every(z=>z.reachedFromEntrance));
+ assert.deepEqual(original,snapshot);
+ const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'r125-real-corner-qwen-'));
+ try{
+  const palette=new URL('../configs/r125-education-verified-palette-v26.33.json',import.meta.url);
+  const output=path.join(tmp,'makecode');
+  const report=exportSavedPlan(fixture,output,'PRESERVED_LOCAL_QWEN_MODEL_RESPONSE',palette);
+  assert.equal(report.worldWrites,0);
+  assert.equal(report.programExecuted,false);
+  assert.equal(report.materialMode,'STRICT_USER_ATTESTED');
+  assert.equal(report.sourceSha256,compiled.sourceSha256);
+  assert.equal(report.geometrySha256,compiled.geometrySha256);
+  assert(report.plannedVoxelCount>0);
+  assert(report.plannedBlockCounts.oak_planks>0);
+  assert(report.plannedBlockCounts.stone>0);
+  assert(report.plannedBlockCounts.glass>0);
+  const walk=JSON.parse(fs.readFileSync(path.join(output,'SOURCE_WALKABILITY_REVIEW.json'),'utf8'));
+  assert.equal(walk.status,'SOURCE_ROUTE_CANDIDATE');
+  assert.equal(walk.actualInGameWalking,'NOT_TESTED');
+  const code=fs.readFileSync(path.join(output,'MAKECODE_EDUCATION.ts'),'utf8');
+  assert.match(code,/player\\.onChat\\(\"mabbuild\"/);
+ }finally{fs.rmSync(tmp,{recursive:true,force:true});}
+});
+test('R125 explanatory brief shares B143 500-char bound but title and space are still strict',()=>{
+ const base=plan('brief-limit-check');
+ assert.equal(validateArchitecturePlan({...base,brief:'a'.repeat(500)}),true);
+ for(const candidate of [
+  {...base,brief:'a'.repeat(501)},
+  {...base,brief:'Two lines\\nwhich are rejected'},
+  {...base,title:'a'.repeat(181)},
+  {...base,levels:[{...base.levels[0],spaces:[
+   {...base.levels[0].spaces[0],purpose:'a'.repeat(181)},
+   base.levels[0].spaces[1]]}]}
+ ])assert.throws(()=>validateArchitecturePlan(candidate),/R125_PLAN_/);
 });
