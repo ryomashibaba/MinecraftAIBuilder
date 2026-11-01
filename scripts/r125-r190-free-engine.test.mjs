@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
-import {compileR190FreePlan,runR190FreeEngine,runR190E1ThreeUseStudy,R190_E1_STUDY_BRIEFS,R190_E1_STUDY_WINDOW_SAFETY,r190E1MassingSignature,R190_FREE_SYSTEM_PROMPT}
+import {compileR190FreePlan,runR190FreeEngine,runR190E1ThreeUseStudy,R190_E1_STUDY_BRIEFS,R190_E1_STUDY_WINDOW_SAFETY,r190E1MassingSignature,R190_FREE_SYSTEM_PROMPT,R190_MASSING_SYSTEM_PROMPT}
  from './r125-r190-free-engine.mjs';
 import {parseFreeBuildArgs,runFreeBuild} from './r125-free-build.mjs';
 import {R190_STATIC_SYNTHETIC_CASES} from './r190-semantic-fixtures.mjs';
@@ -350,4 +350,41 @@ test('E1 B143-backed window source preflight passes once for valid unchanged aut
  assert.equal(catalog.modelRequests,0);
  assert.equal(catalog.worldWrites,0);
  assert.equal(JSON.stringify(plan),original);
+});
+
+test('opt-in one-call design-first source preview preserves original and writes no Minecraft code',async()=>{
+ const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'r190-massing-preview-'));
+ try{
+  const plan=synthetic();delete plan.glazedOpenings;
+  const original=JSON.stringify(plan),source=path.join(tmp,'MODEL_RESPONSE_ORIGINAL.txt');
+  fs.writeFileSync(source,original);
+  const output=path.join(tmp,'source-preview');
+  const r=await runR190FreeEngine({planFile:source,outDir:output,paletteFile:palette,massingOnly:true});
+  assert.equal(r.status,'SOURCE_MASSING_ART_HOLD',r.reason);
+  assert.equal(r.modelRequests,0);assert.equal(r.worldWrites,0);
+  assert.equal(r.windows,'DEFERRED');assert.equal(r.makecode,'NOT_GENERATED');
+  assert.equal(r.roomCount,plan.spaces.length);
+  assert(r.plannedVoxelCount>0);
+  assert(fs.existsSync(path.join(output,'model','index.html')));
+  assert(fs.existsSync(path.join(output,'model','B143_SCENE.json')));
+  assert(!fs.existsSync(path.join(output,'makecode')));
+  assert.equal(fs.readFileSync(source,'utf8'),original);
+ }finally{fs.rmSync(tmp,{recursive:true,force:true});}
+});
+test('design-first refuses premature glazing and never repairs model-authored plan',async()=>{
+ const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'r190-massing-reject-'));
+ try{
+  const original=JSON.stringify(synthetic()),source=path.join(tmp,'ORIGINAL.txt');
+  fs.writeFileSync(source,original);
+  const output=path.join(tmp,'rejected');
+  const r=await runR190FreeEngine({planFile:source,outDir:output,paletteFile:palette,massingOnly:true});
+  assert.equal(r.status,'HOLD');assert.match(r.reason,/MASSING_GLAZING_NOT_ALLOWED/);
+  assert.equal(r.worldWrites,0);
+  assert(!fs.existsSync(path.join(output,'makecode')));
+  assert.equal(fs.readFileSync(source,'utf8'),original);
+ }finally{fs.rmSync(tmp,{recursive:true,force:true});}
+});
+test('autonomous massing prompt offers real existing geometry rather than one fixed aesthetic style',()=>{
+ for(const phrase of ['formIntent','skyCourtIntent','spatialRole=open-court','NO glazedOpenings','OPTIONAL'])
+  assert(R190_MASSING_SYSTEM_PROMPT.includes(phrase));
 });
