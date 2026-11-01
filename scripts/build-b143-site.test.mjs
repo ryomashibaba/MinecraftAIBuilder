@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {compileDesign,validateDesign,verifyCompiled,SCHEMA} from '../source/ai/b143-building-dsl.mjs';
 import {compileB143Gallery,verifyB143Payload,renderB143Html,extendB142Root,readDesigns} from './build-b143-site.mjs';
+import {sectionCapsOnly,surfaceOnly} from './b143-gallery-core.mjs';
 
 const minimal=()=>({schema:SCHEMA,id:'new-mars-workshop',
  title:'火星の研究アトリエ',brief:'カテゴリーを定義せずChatGPTが設計する新しい建物',
@@ -79,4 +80,37 @@ test('construction approval mutation prevents B143 publication',()=>{
  const p=compileB143Gallery(readDesigns());
  p.safety.constructionApproved=true;
  assert.equal(verifyB143Payload(p),false);
+});
+
+test('true multi-band architectural cutaway reveals previously hidden REAL B143 core voxels',()=>{
+ const d={schema:SCHEMA,id:'genuine-cutaway-block',title:'Actual source section',
+  brief:'Solid source fixture proving hidden cut-plane cells are revealed.',
+  bounds:{width:18,height:18,depth:18},designOnly:true,
+  elements:[{id:'mass',shape:'box',mode:'add',material:'stone',
+   origin:[2,1,2],size:[12,12,12]}]};
+ const compiled=compileDesign(d),original=JSON.stringify(compiled);
+ const p=compileB143Gallery([d]),scene=p.scenes[0];
+ assert.equal(verifyB143Payload(p),true);
+ assert(scene.levels>=3);
+ assert(!scene.surface.some(v=>v[0]===7&&v[1]===4&&v[2]===7));
+ assert(!scene.surface.some(v=>v[0]===7&&v[1]===9&&v[2]===7));
+ assert(scene.sectionCaps.some(v=>v[0]===7&&v[1]===4&&v[2]===7&&v[4]===0));
+ assert(scene.sectionCaps.some(v=>v[0]===7&&v[1]===9&&v[2]===7&&v[4]===1));
+ assert.equal(scene.sectionCaps.length,sectionCapsOnly(compiled,surfaceOnly(compiled)).length);
+ assert.equal(scene.sectionCaps.length,scene.stats.trueSectionRevealedCells);
+ const fullSurface=new Set(scene.surface.map(v=>v.slice(0,3).join(',')));
+ assert(scene.sectionCaps.every(v=>!fullSurface.has(v.slice(0,3).join(','))));
+ assert.equal(JSON.stringify(compiled),original);
+ assert.equal(p.safety.minecraftWrites,0);
+ assert.deepEqual(p.safety.BuildPlan.operations,[]);
+ const html=renderB143Html(p,fs.readFileSync(
+  new URL('../source/ai/b143-viewer-template.html',import.meta.url),'utf8'));
+ assert(html.includes('元SOURCEの内部セルを追加表示'));
+ assert(!html.includes('__B143_GALLERY_JSON__'));
+ const forged=structuredClone(p);
+ forged.scenes[0].sectionCaps[0][1]=3;
+ assert.equal(verifyB143Payload(forged),false);
+ const old=structuredClone(p);
+ delete old.scenes[0].sectionCaps;
+ assert.equal(verifyB143Payload(old),true); // archived HTML remains readable
 });

@@ -8,6 +8,22 @@ export function surfaceOnly(scene){
  return scene.primitives.filter(p=>sides.some(([dx,dy,dz])=>
   !occupied.has((p[0]+dx)+','+(p[1]+dy)+','+(p[2]+dz))));
 }
+/** Additional genuine cross-section caps omitted by whole-building surface culling.
+ * Every cap is an existing FINAL B143 voxel, never inferred or filled in.
+ * No extra voxels are placed in the Minecraft world. */
+export function sectionCapsOnly(scene,outerSurface=surfaceOnly(scene)){
+ const outside=new Set(outerSurface.map(p=>p[0]+','+p[1]+','+p[2]));
+ const occupied=new Set(scene.primitives.map(p=>p[0]+','+p[1]+','+p[2]));
+ return scene.primitives.filter(p=>{
+  const [x,y,z,,,,]=p;
+  // Only interior voxels exposed by removing all higher 5-cell bands.
+  // Each source voxel belongs to at most one cut-plane, so the payload is
+  // bounded by scene.primitives.length even for tall/complex architecture.
+  if(p[4]>=scene.levels-1||y%5!==4)return false;
+  const key=x+','+y+','+z;
+  return !outside.has(key)&&occupied.has(x+','+(y+1)+','+z);
+ });
+}
 export function compileB143Gallery(documents,{auditCompiled=null}={}){
  ensure(Array.isArray(documents)&&documents.length>0&&documents.length<=24,'GALLERY_COUNT');
  ensure(auditCompiled===null||typeof auditCompiled==='function','INVALID_AUDITOR');
@@ -19,11 +35,14 @@ export function compileB143Gallery(documents,{auditCompiled=null}={}){
   ensure(verifyCompiled(d,result),'NONDETERMINISTIC_COMPILATION');
   sourceHashes.push(result.sourceSha256);geometryHashes.push(result.geometrySha256);
   const {primitives,...meta}=result;
-  const surface=surfaceOnly(result);
+  const surface=surfaceOnly(result),sectionCaps=sectionCapsOnly(result,surface);
   ensure(surface.length>50&&surface.length<=primitives.length,'EMPTY_SURFACE');
+  ensure(sectionCaps.length<=primitives.length-surface.length,'CUTAWAY_CAP_BUDGET');
   const extraAudit=auditCompiled===null?{}:{
    topologyReview:auditCompiled(result)};
-  return {...meta,...extraAudit,surface,stats:{...result.stats,renderedSurfaceCells:surface.length}};
+  return {...meta,...extraAudit,surface,sectionCaps,
+   stats:{...result.stats,renderedSurfaceCells:surface.length,
+    trueSectionRevealedCells:sectionCaps.length}};
  });
  ensure(new Set(geometryHashes).size===documents.length,'DUPLICATE_GEOMETRIES');
  return {schema:'minecraftaibuilder-b143-gallery-v1',edition:'MINECRAFT_EDUCATION',
@@ -47,7 +66,16 @@ export function verifyB143Payload(p){
    s.sourceSha256===p.sourceHashes[i]&&s.geometrySha256===p.geometryHashes[i]&&
    Array.isArray(s.surface)&&s.surface.length>50&&
    s.surface.every(x=>Array.isArray(x)&&x.length===5&&
-    x.every(Number.isSafeInteger)&&x[3]>=0&&x[3]<s.layerNames.length));
+    x.every(Number.isSafeInteger)&&x[3]>=0&&x[3]<s.layerNames.length)&&
+   // Backward-compatible with verified archived galleries that predate
+   // section caps; new ones are strict source-derived review evidence.
+   (s.sectionCaps===undefined||(
+    Array.isArray(s.sectionCaps)&&
+    s.sectionCaps.length<=s.stats.voxels-s.surface.length&&
+    s.stats.trueSectionRevealedCells===s.sectionCaps.length&&
+    s.sectionCaps.every(x=>Array.isArray(x)&&x.length===5&&
+     x.every(Number.isSafeInteger)&&x[3]>=0&&x[3]<s.layerNames.length&&
+     x[4]===Math.floor(x[1]/5)&&x[1]%5===4&&x[4]<s.levels-1))) );
 }
 export function renderB143Html(payload,template){
  ensure(verifyB143Payload(payload),'UNSAFE_PAYLOAD');
