@@ -110,7 +110,14 @@ export function compileR190CompactProgram(raw){
  const p=inspectR190CompactProgram(raw);
  const immutable=JSON.stringify(p);
  const children=p.spaces.slice(1);
- const choices=children.map(s=>[s.preferredSide,...dirs.filter(d=>d!==s.preferredSide)]);
+ // The authored side is a preference, but the root's exterior entrance
+ // approach is a hard safety corridor. Never ask the semantic compiler to
+ // accept a child over the entrance door.
+ const choices=children.map(s=>
+  [s.preferredSide,...dirs.filter(d=>d!==s.preferredSide)]
+   .filter(d=>s.parentId!==p.spaces[0].id||d!==p.entranceFace));
+ const excludedEntrySideBranches=children.filter(s=>
+  s.parentId===p.spaces[0].id).length;
  const combinations=[];
  function enumerate(index,chosen,changes){
   if(index===choices.length){
@@ -124,7 +131,8 @@ export function compileR190CompactProgram(raw){
  }
  enumerate(0,[],0);
  combinations.sort((a,b)=>a.changes-b.changes);
- let lastError=null,attempts=0;
+ const rejected=new Map();
+ let attempts=0;
  for(const c of combinations){
   const plan=derive(p,c.sides);
   attempts++;
@@ -141,13 +149,28 @@ export function compileR190CompactProgram(raw){
     originalProgramSha256:H(Buffer.from(immutable)),
     modelProgram:structuredClone(p),hostDerivedPlan:plan,
     hostResolution:{...resolution,attemptedPlacements:attempts,
+     excludedRootEntranceSides:excludedEntrySideBranches,
+     examinedCandidateCount:combinations.length,
+     rejectedReasons:Object.fromEntries(rejected),
      relativeSideDeviations:children.flatMap((s,i)=>
       c.sides[i]===s.preferredSide?[]:[{
        spaceId:s.id,preferredSide:s.preferredSide,resolvedSide:c.sides[i]}]),
      modelRoomDimensionsPreservedAsNumbers:false,
      modelRelationsPreserved:true,modelSelectedShapeTypesPreserved:true},
     built};
-  }catch(e){lastError=String(e?.message??e);}
+  }catch(e){
+   const reason=String(e?.message??e).replace(/[^A-Z0-9_]/g,'_').slice(0,100);
+   rejected.set(reason,(rejected.get(reason)??0)+1);
+  }
  }
- fail('NO_CONSTRAINT_SOLUTION_'+String(lastError??'UNKNOWN').slice(0,130));
+ // Report ALL independent failure classes, not merely the final attempted
+ // branch, which previously gave misleading ENTRY_COLLISION diagnoses.
+ const reasons=[...rejected.entries()].sort((a,b)=>b[1]-a[1]||
+  a[0].localeCompare(b[0]));
+ const error=new Error('R190_COMPACT_NO_CONSTRAINT_SOLUTION_'+
+  reasons.slice(0,5).map(([name,count])=>name+'_'+count).join('__'));
+ error.diagnostics={totalCandidates:combinations.length,
+  attemptedPlacements:attempts,excludedRootEntranceSides:excludedEntrySideBranches,
+  allReasons:Object.fromEntries(reasons)};
+ throw error;
 }
