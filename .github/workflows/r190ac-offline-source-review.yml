@@ -7,6 +7,7 @@ on:
       - 'scripts/r190ac-offline-source-review.test.mjs'
       - 'source/ai/r190ab-semantic-contract.mjs'
       - 'source/ai/r190-semantic-massing.mjs'
+      - 'source/ai/r190-compact-program.mjs'
       - 'scripts/r190-semantic-fixtures.mjs'
       - 'evidence/r190aa/pilot-01/MODEL_RESPONSE_ORIGINAL.txt'
       - 'evidence/r190aa/pilot-01/AUDIT.json'
@@ -15,6 +16,7 @@ on:
       - 'scripts/r125-r190-free-engine.test.mjs'
       - 'scripts/r190-e1-revise-study.mjs'
       - 'scripts/r190-e1-revise-study.test.mjs'
+      - 'scripts/r190-compact-program.test.mjs'
       - 'scripts/r190-e1-diagnose.mjs'
       - 'scripts/r190-e1-two-stage.mjs'
       - 'scripts/r190-e1-two-stage.test.mjs'
@@ -71,6 +73,8 @@ jobs:
           node --check scripts/r125-r190-free-engine.test.mjs
           node --check scripts/r190-e1-revise-study.mjs
           node --check scripts/r190-e1-revise-study.test.mjs
+          node --check source/ai/r190-compact-program.mjs
+          node --check scripts/r190-compact-program.test.mjs
           node --check scripts/r190-e1-diagnose.mjs
           node --check scripts/r190-e1-two-stage.mjs
           node --check scripts/r190-e1-two-stage.test.mjs
@@ -99,4 +103,4 @@ jobs:
           node --check scripts/r125-material-probe.test.mjs
           node --check scripts/r125-architecture-plan.test.mjs
           node --check scripts/r125-real-plan-replay.test.mjs
-          node --test scripts/r125-material-probe.test.mjs scripts/r125-architecture-plan.test.mjs scripts/r125-real-plan-replay.test.mjs scripts/r125-free-build.test.mjs scripts/r125-r190-free-engine.test.mjs scripts/r190-e1-revise-study.test.mjs scripts/r190-e1-two-stage.test.mjs scripts/r190-e1-stage-a-audit.test.mjs scripts/r190-e1-revise-saved.test.mjs scripts/r190-e1-open-result-folder.test.mjs scripts/r190-e1-art-candidate.test.mjs scripts/r190-e2-architecture.test.mjs scripts/r190-e2-offline-source.test.mjs scripts/r190-e2-qwen-study.test.mjs scripts/r190-e2-saved-diagnose.test.mjs scripts/r190-e2-next-safe.test.mjs
+          node --test scripts/r125-material-probe.test.mjs scripts/r125-architecture-plan.test.mjs scripts/r125-real-plan-replay.test.mjs scripts/r125-free-build.test.mjs scripts/r125-r190-free-engine.test.mjs scripts/r190-e1-revise-study.test.mjs scripts/r190-compact-program.test.mjs scripts/r190-e1-two-stage.test.mjs scripts/r190-e1-stage-a-audit.test.mjs scripts/r190-e1-revise-saved.test.mjs scripts/r190-e1-open-result-folder.test.mjs scripts/r190-e1-art-candidate.test.mjs scripts/r190-e2-architecture.test.mjs scripts/r190-e2-offline-source.test.mjs scripts/r190-e2-qwen-study.test.mjs scripts/r190-e2-saved-diagnose.test.mjs scripts/r190-e2-next-safe.test.mjs
