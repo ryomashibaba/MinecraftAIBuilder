@@ -31,6 +31,20 @@ canvas:active{cursor:grabbing}.canvas-label{position:absolute;left:20px;top:18px
 .legend{display:flex;gap:14px;flex-wrap:wrap;margin:13px 0;font-size:.8rem;color:#c4d9e8}
 .dot{display:inline-block;border-radius:3px;width:11px;height:11px;margin-right:5px}
 @media(max-width:800px){.layout{grid-template-columns:1fr}aside{border-right:0;border-bottom:1px solid #38566e}.canvas-shell{height:55vh;min-height:320px}}
+/* B143 mobile source viewer — camera controls only; never changes SOURCE voxels. */
+.mobile-tools{position:absolute;right:10px;bottom:10px;display:flex;gap:6px;align-items:center;
+ background:#081825df;padding:6px;border:1px solid #45677c;border-radius:12px}
+.mobile-tools button{min-width:41px;width:auto;height:42px;padding:5px 10px;border-radius:8px;font-size:1rem;font-weight:700}
+.mobile-tools button:active{background:#216175}
+@media(max-width:800px){
+ header{padding:12px 14px}header h1{font-size:1.02rem}header a{font-size:.68rem}
+ .layout{display:flex;flex-direction:column}
+ main{order:0;padding:10px}aside{order:1;padding:16px;border-top:1px solid #38566e;border-right:0}
+ .canvas-shell{height:calc(100svh - 154px);min-height:350px;border-radius:14px}
+ .canvas-label{top:12px;left:12px;max-width:calc(100% - 24px);font-size:.73rem}
+ .legend{gap:9px;margin:8px 0}.mobile-tools{right:9px;bottom:9px}
+ #meta{font-size:.72rem;overflow-wrap:anywhere}
+}
 </style></head>
 <body>
 <header><div><div class="sup">B143 / UNIVERSAL AI DESIGN</div><h1>MinecraftAIBuilder — AI Architecture Studio</h1></div>
@@ -49,7 +63,13 @@ canvas:active{cursor:grabbing}.canvas-label{position:absolute;left:20px;top:18px
 <div class="info warn"><strong>これは設計プレビューです。</strong> Minecraft Educationで建設済みではありません。強度・動線・支持材・屋根の完成・実ブロック互換性は未認証。施工はNOT_PREPARED、9ゲートBLOCKEDのままです。</div>
 </aside><main>
 <div class="canvas-shell"><canvas id="view" aria-label="自由回転可能なMinecraft建築の概念3Dモデル"></canvas>
-<div class="canvas-label"><div id="sceneTitle"></div><span class="muted">ドラッグ：回転　ホイール：ズーム</span></div></div>
+<div class="canvas-label"><div id="sceneTitle"></div><span class="muted">ドラッグ：回転 · ボタン：拡大/断面</span></div>
+<div class="mobile-tools" aria-label="3D視点操作">
+<button type="button" id="mobileZoomIn" aria-label="拡大">＋</button>
+<button type="button" id="mobileZoomOut" aria-label="縮小">－</button>
+<button type="button" id="mobileCut" aria-label="断面表示">断面</button>
+<button type="button" id="mobileReset" aria-label="視点リセット">↺</button>
+</div></div>
 <div class="legend" id="legend"></div><div id="meta"></div></main></div>
 <script>
 "use strict";
@@ -136,4 +156,9 @@ canvas.addEventListener("pointercancel",()=>pressed=false);
 canvas.addEventListener("wheel",e=>{e.preventDefault();zoom=Math.max(.3,Math.min(5,zoom*Math.exp(-e.deltaY*.001)));drawSoon();},{passive:false});
 window.addEventListener("resize",drawSoon);
 setScene();
+// Offline mobile camera controls. No network, no scene/voxel mutations.
+el("mobileZoomIn").addEventListener("click",()=>{zoom=Math.min(5,zoom*1.24);drawSoon();});
+el("mobileZoomOut").addEventListener("click",()=>{zoom=Math.max(.3,zoom/1.24);drawSoon();});
+el("mobileCut").addEventListener("click",()=>el("cutaway").click());
+el("mobileReset").addEventListener("click",()=>el("reset").click());
 </script></body></html>
