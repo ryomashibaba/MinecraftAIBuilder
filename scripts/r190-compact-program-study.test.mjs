@@ -94,11 +94,17 @@ test('R190 compact preserved study replay preserves original hashes, zero model 
   assert.equal(result.makecode,'SHELL_RESEARCH_ONLY_NOT_APPROVED');
   assert.equal(result.shellPacketCount,3);
   assert.equal(result.windowCandidateCount,3);
+  assert(result.rows.every(r=>r.windowResearch.clearRoomFloorCells?.length===3));
   assert(result.rows.every(r=>r.windowResearch.status==='HOST_DERIVED_WINDOWS_SOURCE_ART_HOLD'&&
    r.windowResearch.numberOfRealWindows>=1&&r.windowResearch.worldWrites===0));
   assert(result.rows.every(r=>r.sourceCompiled&&r.modelRequests===0&&
    r.educationExport.status==='OFFLINE_SHELL_RESEARCH_PACKET_ONLY'));
   for(const row of result.rows){
+   const roomEvidence=JSON.parse(fs.readFileSync(path.join(result.dir,row.id,
+    'WINDOWS_HOST_DERIVED_RESEARCH_ONLY','ROOM_SOURCE_FLOOR_REVIEW.json'),'utf8'));
+   assert.equal(roomEvidence.schema,'r190-compact-interior-source-evidence-v1');
+   assert.equal(roomEvidence.worldWrites,0);
+   assert(roomEvidence.rooms.every(x=>x.twoByTwoSupportedClearPads>0));
    const meta=JSON.parse(fs.readFileSync(row.educationExport.report,'utf8'));
    const source=fs.readFileSync(row.educationExport.output,'utf8');
    assert.equal(meta.worldWrites,0);
@@ -112,7 +118,7 @@ test('R190 compact preserved study replay preserves original hashes, zero model 
   }
   assert.deepEqual(fs.readFileSync(path.join(prev.dir,'E1_COMPACT_REPORT.json')),before);
   assert(fs.readFileSync(path.join(result.dir,'E1_COMPACT_REPLAY_REVIEW.html'),'utf8')
-   .includes('別タブ'));
+   .includes('HOST派生・窓付き研究案'));
   for(const row of result.rows){
    assert(fs.existsSync(path.join(result.dir,row.viewer)));
   }

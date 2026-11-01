@@ -1,3 +1,7 @@
+## 2026-11-01 続工程 — 室内SOURCE床計測＋元/窓付き3D比較
+
+保存済み実Qwen3用途を再要求せず、replay-latestで実ボクセルの各室支持床・頭上2セル空気・2×2床候補を室別記録する。モデル元外殻とHOST窓付き別案の真正3Dを並べる。新報告ROOM_SOURCE_FLOOR_REVIEW.jsonはSOURCE計測だけであり、家具、ART、実歩行、採光、ワールド安全、施工許可を認定しない。安全初期値と原本を維持。CIおよび実3用途の保存済み再生は別途検証する。次はこの比較から共通の機能欠陥を特定して実用改善する。
+
 ## 2026-11-01 再開の現在地 — 実Qwen 3用途SOURCE/窓派生/教育外殻 3/3
 
 **新しいチャットはこのGitHub正本から再開する。PDF/ZIP/引き継ぎMarkdownを毎回生成したり、ユーザーに貼り直させない。** 最初に本ファイル、`docs/AI_PROJECT_CHARTER_JA.md`、`docs/PROJECT_STRATEGY_V2_JA.md`、必要に応じて`docs/R125_THIN_VERTICAL_SLICE_PLAN_JA.md`、続いてPR #128のHEADと関連CIを確認する。記述済みの旧コミット/古いCI結果を最新と混同しない。新チャットでは「MinecraftAIBuilderをGitHub正本から引き継いで、次工程へ進めて」だけでよい。GitHubの未反映のローカル実測証拠があるときだけ追加ファイルを受け取る。

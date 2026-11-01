@@ -15,7 +15,8 @@ import {R190_COMPACT_SCHEMA,compileR190CompactProgram}
  from '../source/ai/r190-compact-program.mjs';
 import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
 import {verifyCompiled} from '../source/ai/b143-building-dsl.mjs';
-import {deriveR190CompactMinimumWindows} from '../source/ai/r190-compact-daylight.mjs';
+import {deriveR190CompactMinimumWindows,auditR190CompactInteriorEvidence}
+ from '../source/ai/r190-compact-daylight.mjs';
 import {exportB143EducationMakeCode} from '../source/ai/r125-education-makecode-export.mjs';
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const sha=x=>createHash('sha256').update(x).digest('hex');
@@ -307,6 +308,8 @@ export function replayR190CompactSaved({previousDir,outRoot=null}={}){
    save(path.join(target,'HOST_DERIVED_PLAN.json'),v.plan);
    save(path.join(target,'B143_SOURCE.json'),v.current.design);
    save(path.join(target,'B143_SCENE.json'),v.current.compiled);
+   const interior=auditR190CompactInteriorEvidence(v.current);
+   save(path.join(target,'ROOM_SOURCE_FLOOR_REVIEW.json'),interior);
    const record={status:v.status,author:'HOST_DERIVED_NOT_MODEL',
     originalModelProgramSha256:sha(original),
     originalSourceSha256:sourceSha256,originalGeometrySha256:geometrySha256,
@@ -340,7 +343,10 @@ export function replayR190CompactSaved({previousDir,outRoot=null}={}){
     'MakeCodeはバックアップ済みの試験ワールドで明示操作が必要です。\n');
    windowResearch={status:v.status,output:path.join(target,'index.html'),
     report:path.join(target,'WINDOW_RESEARCH_REPORT.json'),
-    numberOfRealWindows:v.applied.length,makecodeStatus,makecodeReason,worldWrites:0};
+    numberOfRealWindows:v.applied.length,makecodeStatus,makecodeReason,
+    clearRoomFloorCells:interior.rooms.map(r=>({id:r.spaceId,
+     clearCells:r.supportedClearFloorCells,pads2x2:r.twoByTwoSupportedClearPads})),
+    worldWrites:0};
   }catch(e){
    windowResearch={status:'HOLD_NO_VERIFIED_WINDOWS',
     reason:String(e?.message??e).slice(0,350),worldWrites:0};
@@ -378,29 +384,39 @@ export function replayR190CompactSaved({previousDir,outRoot=null}={}){
   art:'NOT_REVIEWED',rows};
  save(path.join(dir,'E1_COMPACT_REPLAY_REPORT.json'),report);
  const cards=rows.map(x=>'<article><h2>'+esc(x.id)+'</h2>'+
-  (x.viewer?'<p><a target="_blank" rel="noopener" href="'+
-   x.viewer+'">真正3Dを別タブで開いて外観を確認</a></p>'+
-   '<iframe loading="lazy" src="'+x.viewer+'"></iframe>':
-   '<div class="hold">SOURCE HOLD — 3Dなし</div>')+
-  '<p>今回: '+esc(x.status)+'</p><p>理由: '+esc(x.reason??'なし')+'</p>'+
+  '<div class="views"><section><h3>Qwen原設計の外殻</h3>'+
+  (x.viewer?'<a target="_blank" rel="noopener" href="'+x.viewer+
+   '">元の真正3Dを開く</a><iframe title="元の外殻" loading="lazy" src="'+x.viewer+'"></iframe>':
+   '<div class="hold">SOURCE HOLD — 3Dなし</div>')+'</section>'+
+  '<section><h3>HOST派生・窓付き研究案</h3>'+
+  (x.windowResearch.output?'<a target="_blank" rel="noopener" href="'+
+   encodeURIComponent(x.id)+'/WINDOWS_HOST_DERIVED_RESEARCH_ONLY/index.html">窓付き真正3Dを開く</a>'+
+   '<iframe title="窓付き研究案" loading="lazy" src="'+encodeURIComponent(x.id)+
+   '/WINDOWS_HOST_DERIVED_RESEARCH_ONLY/index.html"></iframe>':
+   '<div class="hold">窓付き案 HOLD</div>')+'</section></div>'+
+  '<p>SOURCE状態: '+esc(x.status)+' / 窓: '+esc(x.windowResearch.status)+'</p>'+
+  '<p>各室SOURCE床セルと2×2床候補（実歩行認証ではない）: '+
+   esc(JSON.stringify(x.windowResearch.clearRoomFloorCells??'未測定'))+'</p>'+
+  (x.windowResearch.output?'<p><a href="'+encodeURIComponent(x.id)+
+   '/WINDOWS_HOST_DERIVED_RESEARCH_ONLY/ROOM_SOURCE_FLOOR_REVIEW.json">実ボクセル室内床の詳細</a></p>':'')+
   '<p>教育版の外殻研究: '+esc(x.educationExport.status)+'</p>'+
-  '<p>ホスト設計・窓付き別案: '+esc(x.windowResearch.status)+'</p>'+
-  (x.windowResearch.output?'<p><a target="_blank" rel="noopener" href="'+
-   encodeURIComponent(x.id)+'/WINDOWS_HOST_DERIVED_RESEARCH_ONLY/index.html">窓付き真正3D</a></p>':'')+
   (x.educationExport.output?
    '<p><a href="'+encodeURIComponent(x.id)+
    '/EDUCATION_SHELL_RESEARCH_ONLY/READ_FIRST_JA.txt">安全説明と外殻出力</a></p>':'')+
+  '<p>理由: '+esc(x.reason??'なし')+'</p>'+
   '<p>候補失敗集計: '+esc(JSON.stringify(x.diagnostics?.allReasons??{}))+'</p>'+
   '<p>AI原文 SHA: '+esc(x.originalResponseSha256)+'</p></article>').join('');
  save(path.join(dir,'E1_COMPACT_REPLAY_REVIEW.html'),
   '<!doctype html><html lang="ja"><meta charset="utf-8"><title>R190 3用途保存済み原文再検証</title>'+
   '<style>body{font:15px system-ui;background:#102030;color:#edf4fa;margin:20px}'+
-  'a{color:#a5e6ff}main{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:14px}'+
+  'a{color:#a5e6ff}main{display:grid;grid-template-columns:1fr;gap:14px}'+
+  '.views{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px}'+
+  'h3{font-size:16px;margin:8px 0}section{min-width:0}'+
   'article{padding:14px;background:#1c3547;border-radius:10px;overflow-wrap:anywhere}'+
   'iframe,.hold{height:400px;width:100%;border:0;background:#2d4052}'+
   '.hold{display:grid;place-items:center}</style>'+
   '<h1>同一Qwen原文・新しい配置エンジンの再検証</h1>'+
-  '<p>真正SOURCE '+count+'/3。モデル再要求0、原文変更0、Minecraft書込0。ART未評価。</p>'+
+  '<p>真正SOURCE '+count+'/3。元の外殻と窓付き別案を回転比較できます。床計測は実歩行・家具・美術の認定ではありません。モデル再要求0、原文変更0、Minecraft書込0。</p>'+
   '<main>'+cards+'</main>');
  return {dir,...report};
 }

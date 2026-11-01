@@ -92,3 +92,45 @@ export function deriveR190CompactMinimumWindows(base){
   art:'NOT_REVIEWED',minecraftWalking:'NOT_TESTED',
   constructionApproved:false,plan,current};
 }
+
+/** Read-only evidence of actual B143 clear supporting floor, not game walking. */
+export function auditR190CompactInteriorEvidence(built){
+ if(built?.schema!=='minecraftaibuilder-r190-source-research-v1'||
+  !Array.isArray(built.layout?.spaces)||!built.layout.spaces.length||
+  !Array.isArray(built.audit?.witnesses)||
+  !verifyCompiled(built.design,built.compiled)||
+  built.worldWrites!==0||built.constructionApproved!==false)
+  fail('INTERIOR_UNVERIFIED_SOURCE');
+ const cells=new Set(built.compiled.primitives.map(v=>v[0]+','+v[1]+','+v[2]));
+ const has=(x,y,z)=>cells.has(x+','+y+','+z);
+ const clear=(x,z)=>has(x,1,z)&&!has(x,2,z)&&!has(x,3,z);
+ const rooms=built.layout.spaces.map(r=>{
+  const x0=r.x+1,x1=r.x+r.w-2,z0=r.z+1,z1=r.z+r.d-2;
+  if(x1<x0||z1<z0)fail('INTERIOR_BOUNDS');
+  let supportedClearFloorCells=0,twoByTwoSupportedClearPads=0;
+  for(let x=x0;x<=x1;x++)for(let z=z0;z<=z1;z++){
+   if(clear(x,z))supportedClearFloorCells++;
+   if(x<x1&&z<z1&&[0,1].every(dx=>[0,1].every(dz=>clear(x+dx,z+dz))))
+    twoByTwoSupportedClearPads++;
+  }
+  const witness=built.audit.witnesses.find(w=>w.id===r.id)?.reachableTwoWideSourceCell;
+  if(!Array.isArray(witness)||witness.length!==3||witness[1]!==2||
+   witness[0]<x0||witness[0]+1>x1||witness[2]<z0||witness[2]+1>z1||
+   ![0,1].every(dx=>[0,1].every(dz=>clear(witness[0]+dx,witness[2]+dz))))
+   fail('INTERIOR_WITNESS_MISMATCH');
+  const interiorFootprintCells=(x1-x0+1)*(z1-z0+1);
+  return {spaceId:r.id,spatialRole:r.spatialRole??'enclosed',
+   hostResolvedDimensions:[r.w,r.h,r.d],interiorFootprintCells,
+   supportedClearFloorCells,twoByTwoSupportedClearPads,
+   clearFloorFraction:Number((supportedClearFloorCells/interiorFootprintCells).toFixed(4)),
+   connectedEntranceWitness:witness,
+   furniture:'NOT_GENERATED',actualMinecraftWalking:'NOT_TESTED'};
+ });
+ return {schema:'r190-compact-interior-source-evidence-v1',
+  sourceSha256:built.compiled.sourceSha256,geometrySha256:built.compiled.geometrySha256,
+  status:'MEASURED_SOURCE_ONLY_NO_FUNCTION_OR_ART_APPROVAL',
+  rooms,allRoomsHaveSourceEntranceWitness:true,
+  note:'2 air cells over supporting floor; independent room pad count is not game physics or furnishing proof',
+  modelCalls:0,worldContacts:0,worldWrites:0,constructionApproved:false,
+  readiness:'NOT_PREPARED',art:'NOT_REVIEWED',actualMinecraftWalking:'NOT_TESTED'};
+}

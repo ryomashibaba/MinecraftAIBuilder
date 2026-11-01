@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {compileR190CompactProgram,R190_COMPACT_SCHEMA}
  from '../source/ai/r190-compact-program.mjs';
-import {deriveR190CompactMinimumWindows}
+import {deriveR190CompactMinimumWindows,auditR190CompactInteriorEvidence}
  from '../source/ai/r190-compact-daylight.mjs';
 import {verifyCompiled} from '../source/ai/b143-building-dsl.mjs';
 function sample(id,forms){
@@ -52,4 +52,27 @@ test('daylight refuses unverifiable old source or pre-existing window changes',(
  duplicate.hostDerivedPlan.glazedOpenings=[{
   spaceId:'entrance',face:'west',offset:3,baseY:5,width:2,height:2}];
  assert.throws(()=>deriveR190CompactMinimumWindows(duplicate),/BASE_ALREADY_HAS_WINDOWS/);
+});
+
+test('independent SOURCE room floor evidence retains original model, geometry and safety state',()=>{
+ const base=compileR190CompactProgram(sample('r190-measured-floor',['sky-court','plain']));
+ const original=JSON.stringify(base.hostDerivedPlan);
+ const windowed=deriveR190CompactMinimumWindows(base);
+ assert.equal(windowed.status,'HOST_DERIVED_WINDOWS_SOURCE_ART_HOLD');
+ const scene=JSON.stringify(windowed.current.compiled);
+ const report=auditR190CompactInteriorEvidence(windowed.current);
+ assert.equal(report.geometrySha256,windowed.derivedGeometrySha256);
+ assert.equal(report.status,'MEASURED_SOURCE_ONLY_NO_FUNCTION_OR_ART_APPROVAL');
+ assert.equal(report.rooms.length,3);
+ assert(report.rooms.every(x=>x.supportedClearFloorCells>0&&
+  x.twoByTwoSupportedClearPads>0&&x.clearFloorFraction<=1&&
+  x.connectedEntranceWitness.length===3));
+ assert.equal(report.actualMinecraftWalking,'NOT_TESTED');
+ assert.equal(report.worldWrites,0);
+ assert.equal(report.constructionApproved,false);
+ assert.equal(JSON.stringify(base.hostDerivedPlan),original);
+ assert.equal(JSON.stringify(windowed.current.compiled),scene);
+ const broken=structuredClone(windowed.current);
+ broken.compiled.primitives.pop();
+ assert.throws(()=>auditR190CompactInteriorEvidence(broken),/INTERIOR_UNVERIFIED_SOURCE/);
 });
