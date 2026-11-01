@@ -90,7 +90,10 @@ function batchHarness(names,{occupiedAt=null,badName=null,alias=false}={}){
   fill:(name,p)=>{fills.push({name,x:p.x,y:p.y,z:p.z});
    materialAt.set([p.x,p.y,p.z].join(','),name);}
  };
- vm.runInNewContext(makeMaterialBatchProbe(names).code,{
+ // MakeCode accepts Static TypeScript, while Node vm parses JavaScript only.
+ const simulatedJs=makeMaterialBatchProbe(names).code.replace(
+  /: string\[\]|: number\[\]|: number|: Position/g,'');
+ vm.runInNewContext(simulatedJs,{
   player,blocks,AIR:'air',FillOperation:{Keep:0},
   pos:(x,y,z)=>({x,y,z}),
   positions:{add:(a,b)=>({x:a.x+b.x,y:a.y+b.y,z:a.z+b.z})}
