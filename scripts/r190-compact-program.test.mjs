@@ -55,3 +55,18 @@ test('R190 compact fails closed on unknown fields and parent cycles, not false a
  const x=structuredClone(p);x.spaces[0].form='open-court';
  assert.throws(()=>compileR190CompactProgram(x),/ENTRANCE_MUST_BE_ENCLOSED/);
 });
+
+test('R190 compact never puts a child on the root entrance when preferred sides conflict',()=>{
+ const p=base('r190-root-entrance-regression',['plain','ridge','plain']);
+ p.spaces[1].preferredSide='south';
+ p.spaces[2].preferredSide='south';
+ const original=JSON.stringify(p);
+ const result=compileR190CompactProgram(p);
+ assert.equal(JSON.stringify(p),original);
+ assert(result.hostResolution.excludedRootEntranceSides>=2);
+ assert(result.hostResolution.relativeSideDeviations.length>=2);
+ for(const s of result.hostDerivedPlan.spaces.slice(1))
+  if(s.parentId===p.spaces[0].id)assert.notEqual(s.side,p.entranceFace);
+ assert.equal(result.built.worldWrites,0);
+ assert.equal(result.built.audit.allProgramSpacesReachable,true);
+});
