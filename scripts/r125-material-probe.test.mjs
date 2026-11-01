@@ -71,7 +71,7 @@ test('batch contract rejects unsafe, duplicates, or more than eight blocks',()=>
   Array(9).fill('stone'),['stone','minecraft:command_block']])
   assert.throws(()=>makeMaterialBatchProbe(names),/BATCH_CONTRACT/);
 });
-function batchHarness(names,{occupiedAt=null,badName=null,alias=false}={}){
+function batchHarness(names,{occupiedAt=null,badName=null,airName=null,alias=false}={}){
  const handlers={},messages=[],fills=[],materialAt=new Map(),calls=[];
  const player={position:()=>({x:50,y:70,z:50}),
   onChat:(name,handler)=>handlers[name]=handler,say:s=>messages.push(s)};
@@ -79,6 +79,7 @@ function batchHarness(names,{occupiedAt=null,badName=null,alias=false}={}){
   blockByName:name=>{
    calls.push(name);
    if(name===badName)throw Error('UNSUPPORTED_BLOCK_NAME');
+   if(name===airName)return 'air';
    return alias?'stone':name;
   },
   testForBlock:(name,p)=>{
@@ -127,9 +128,30 @@ test('mb all-or-nothing: unsupported name fails before first world write',()=>{
  assert.equal(p.fills.length,0);
  assert.equal(p.calls.length,2);
 });
-test('mb rejects silent alias to a previously resolved block before writing',()=>{
+test('mb skips duplicate alias and tests only the first independently resolved block',()=>{
  const p=batchHarness(['gray_concrete','black_concrete'],{alias:true});
  p.handlers.mb();
+ assert.equal(p.fills.length,1);
+ assert.equal(p.fills[0].name,'stone');
+ assert(p.messages.some(x=>x.includes('SKIP duplicate ID')));
+ assert(p.messages.some(x=>x.includes('1 skipped')));
+});
+test('mb unknown block returning AIR is skipped; valid items on BOTH sides still test',()=>{
+ const p=batchHarness(['gray_concrete','stone_bricks','birch_planks'],{airName:'stone_bricks'});
+ p.handlers.mb();
+ assert.equal(p.calls.length,3);
+ assert.deepEqual(p.fills.map(x=>x.name),['gray_concrete','birch_planks']);
+ assert.deepEqual(p.fills.map(x=>x.x),[58,62]);
+ assert(p.messages.some(x=>x.includes('MB SKIP invalid/AIR: stone_bricks')));
+ assert(p.messages.some(x=>x.includes('2/3 matching; 1 skipped')));
+});
+test('mb all unknown AIR identifiers cause zero world writes',()=>{
+ const p=batchHarness(['stone_bricks'],{airName:'stone_bricks'});
+ p.handlers.mb();
  assert.equal(p.fills.length,0);
- assert(p.messages.some(x=>x.includes('duplicate block ID')));
+ assert(p.messages.some(x=>x.includes('no valid IDs; zero writes')));
+});
+test('new default uses Bedrock legacy stonebrick candidate, not proven material',()=>{
+ assert(DEFAULT_MATERIAL_BATCH.includes('stonebrick'));
+ assert(!DEFAULT_MATERIAL_BATCH.includes('stone_bricks'));
 });

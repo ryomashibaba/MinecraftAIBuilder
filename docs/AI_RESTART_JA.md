@@ -1,3 +1,11 @@
+## 2026-11-01 `mb` 実機初回エラー修正：stone_bricks未認識
+
+ユーザー実機スクリーンショットで8素材バッチの `mb` 実行時に `stone_bricks` が「このブロックはわかりません」と表示され、既存バッチは `MB HOLD: AIR/invalid at stone_bricks; zero writes` で正常に施工前停止。**8候補中、他7件も未検証**。これを全候補失敗扱いにせず、未知名がAIRへ解決される場合はその候補だけ `MB SKIP invalid/AIR`、残る候補の照合を続行する。全ての対象地点の空き/支持床は先に確認する。全て無効ならzero writes、重複IDもSKIP（同じブロックの別名かもしれず採用しない）。`blocks.blockByName` 自体の例外は全対象の名前解決段階で書込0のまま停止。MakeCodeの例外捕捉・ブロックID補正は実施しない。
+
+既知の未認識 `stone_bricks` は、Bedrock系旧別名 `stonebrick` に変更して**あくまで新規試験候補**とする。公式MakeCode文書は `blockByName` がゲームのコード名を使うと記載するが、端末/版での受理は個別実機証拠優先。`stonebrick` の実機成功はまだ確認されていない。`white_concrete` の既存ユーザー画面検証成功は維持。既存の建築原本/PR Draft/main/安全境界を変えない。
+
+---
+
 ## 2026-11-01 Minecraft Education: white_concrete実機証拠・8候補一括素材試験
 
 ユーザー実機画像でMakeCode `mabprobe` → `PROBE MATCH: white_concrete` と白いコンクリート1ブロックの現物を確認。厳格素材パレットに `concrete → white_concrete` を**白色をホスト既定とした色選択**と区別して追加。AI原設計の `roof:'concrete'` 自体は変更しない。既存 `stone,glass,oak_planks` の素材契約を維持。

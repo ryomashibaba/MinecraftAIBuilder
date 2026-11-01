@@ -5,7 +5,7 @@ import {fileURLToPath} from 'node:url';
 const fail=x=>{throw Error('R125_PROBE_'+x)};
 export const DEFAULT_MATERIAL_BATCH=Object.freeze([
  'gray_concrete','light_gray_concrete','black_concrete','red_concrete',
- 'blue_concrete','spruce_planks','birch_planks','stone_bricks'
+ 'blue_concrete','spruce_planks','birch_planks','stonebrick'
 ]);
 const validName=name=>typeof name==='string'&&/^[a-z][a-z0-9_]{1,63}$/.test(name)&&
  !['air','water','lava','fire','tnt','command_block'].includes(name);
@@ -36,8 +36,9 @@ export function makeMaterialProbe(blockName){
 
 // One batch command can screen multiple independent candidates. All targets
 // and ALL material identifiers are checked before the first world write.
-// MakeCode does not reliably recover from a bad blockByName using try/catch,
-// so a bad candidate fails closed rather than performing partial guessing.
+// An unknown ID that resolves to AIR is individually SKIPPED; the rest can
+// still be tested in this one shot. If blockByName itself throws, execution
+// ends BEFORE any write; no speculative try/catch or material substitutes.
 export function makeMaterialBatchProbe(names=DEFAULT_MATERIAL_BATCH){
  if(!Array.isArray(names)||names.length<1||names.length>8||
   names.some(name=>!validName(name))||new Set(names).size!==names.length)
@@ -66,32 +67,43 @@ export function makeMaterialBatchProbe(names=DEFAULT_MATERIAL_BATCH){
   '        }',
   '    }',
   '    let mabResolved: number[] = []',
+  '    let mabIndices: number[] = []',
+  '    let skipped = 0',
   '    player.say("MB space OK. Resolving ALL block names before writing.")',
   '    for (let i = 0; i < mabBatchNames.length; i++) {',
   '        let chosen = blocks.blockByName(mabBatchNames[i])',
   '        if (blocks.testForBlock(chosen, mabBatchAt(i))) {',
-  '            player.say("MB HOLD: AIR/invalid at " + mabBatchNames[i] + "; zero writes."); return',
+  '            skipped++',
+  '            player.say("MB SKIP invalid/AIR: " + mabBatchNames[i])',
+  '            continue',
   '        }',
+  '        let duplicate = false',
   '        for (let j = 0; j < mabResolved.length; j++) {',
-  '            if (chosen == mabResolved[j]) {',
-  '                player.say("MB HOLD: duplicate block ID for " + mabBatchNames[i] + "; zero writes."); return',
-  '            }',
+  '            if (chosen == mabResolved[j]) duplicate = true',
+  '        }',
+  '        if (duplicate) {',
+  '            skipped++',
+  '            player.say("MB SKIP duplicate ID: " + mabBatchNames[i])',
+  '            continue',
   '        }',
   '        mabResolved.push(chosen)',
+  '        mabIndices.push(i)',
   '    }',
-  '    player.say("MB resolved '+names.length+' names. Placing one block each.")',
+  '    if (mabIndices.length == 0) { player.say("MB HOLD: no valid IDs; zero writes."); return }',
+  '    player.say("MB resolved " + mabIndices.length + "/" + mabBatchNames.length + " IDs; placing only eligible candidates.")',
   '    let matched = 0',
-  '    for (let i = 0; i < mabBatchNames.length; i++) {',
+  '    for (let k = 0; k < mabIndices.length; k++) {',
+  '        let i = mabIndices[k]',
   '        let target = mabBatchAt(i)',
-  '        blocks.fill(mabResolved[i], target, target, FillOperation.Keep)',
-  '        if (!blocks.testForBlock(AIR, target) && blocks.testForBlock(mabResolved[i], target)) {',
+  '        blocks.fill(mabResolved[k], target, target, FillOperation.Keep)',
+  '        if (!blocks.testForBlock(AIR, target) && blocks.testForBlock(mabResolved[k], target)) {',
   '            matched++',
   '            player.say("MB MATCH " + (i + 1) + "/" + mabBatchNames.length + ": " + mabBatchNames[i])',
   '        } else {',
   '            player.say("MB HOLD " + (i + 1) + ": " + mabBatchNames[i] + "; restore world copy.")',
   '        }',
   '    }',
-  '    player.say("MB " + matched + "/" + mabBatchNames.length + " matching; inspect each visually before approving.")',
+  '    player.say("MB " + matched + "/" + mabBatchNames.length + " matching; " + skipped + " skipped. Inspect every match visually.")',
   '})'
  ].join('\n')+'\n';
  return {code,blockNames:[...names],status:'OFFLINE_ONLY',worldWrites:0,
