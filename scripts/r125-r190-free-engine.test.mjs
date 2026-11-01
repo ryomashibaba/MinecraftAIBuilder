@@ -432,3 +432,59 @@ test('sky court HOLD on saved authored plan reports actionable issue and zero wr
   assert(!fs.existsSync(path.join(output,'makecode')));
  }finally{fs.rmSync(tmp,{recursive:true,force:true});}
 });
+
+test('E1 massing first: 3 independent prompts and comparison without windows or MakeCode',async()=>{
+ const temp=fs.mkdtempSync(path.join(os.tmpdir(),'r190-e1-massing-first-'));
+ let count=0;
+ try{
+  const result=await runR190E1ThreeUseStudy({outRoot:temp,massingOnly:true},{
+   single:async({prompt,massingOnly,outDir})=>{
+    assert.equal(massingOnly,true);
+    assert(R190_E1_STUDY_BRIEFS.some(x=>x.brief===prompt));
+    count++;fs.mkdirSync(path.join(outDir,'model'),{recursive:true});
+    const plan=synthetic();delete plan.glazedOpenings;
+    plan.spaces[0].width+=count;
+    if(count===1)plan.formIntents=[
+     {spaceId:'sleeping',face:'north',cornerInset:2},
+     {spaceId:'cooking',face:'east',cornerInset:2}];
+    fs.writeFileSync(path.join(outDir,'model','ARCHITECTURE_PLAN.json'),JSON.stringify(plan));
+    fs.writeFileSync(path.join(outDir,'model','B143_SOURCE.json'),JSON.stringify({designOnly:true}));
+    fs.writeFileSync(path.join(outDir,'model','B143_SCENE.json'),JSON.stringify({
+     primitives:Array.from({length:count+1},(_,i)=>[i,1,1,0])
+    }));
+    return {status:'SOURCE_MASSING_ART_HOLD',modelRequests:1,worldWrites:0,
+     originalResponseSha256:sha(prompt),sourceSha256:sha('source'+count),
+     geometrySha256:sha('geometry'+count),windows:'DEFERRED',makecode:'NOT_GENERATED'};
+   }
+  });
+  assert.equal(count,3);
+  assert.equal(result.status,'TEST_DOUBLE_ONLY');
+  assert.equal(result.realModelRequests,0);
+  assert.equal(result.studyMode,'MASSING_ONLY_WINDOWS_DEFERRED');
+  assert.equal(result.makecode,'NOT_GENERATED');
+  assert.equal(result.sourceCompiledCount,3);
+  assert.equal(result.distinctMassingSignatureCount,3);
+  assert.equal(result.rows[0].features.facetedForms.length,2);
+  assert(result.rows.every(r=>r.windows==='DEFERRED'&&r.makecode==='NOT_GENERATED'));
+  assert.equal(result.worldWrites,0);
+  const html=fs.readFileSync(path.join(result.dir,'E1_REVIEW.html'),'utf8');
+  assert.match(html,/非矩形の実区画/);
+  assert.match(html,/MASSING_ONLY_WINDOWS_DEFERRED/);
+  const req=JSON.parse(fs.readFileSync(path.join(result.dir,'E1_REQUESTS.json'),'utf8'));
+  assert.equal(req.studyMode,'MASSING_ONLY_WINDOWS_DEFERRED');
+ }finally{fs.rmSync(temp,{recursive:true,force:true});}
+});
+
+test('E1 massing first: missing or truncated model response never claims source',async()=>{
+ const temp=fs.mkdtempSync(path.join(os.tmpdir(),'r190-e1-massing-hold-'));
+ try{
+  const result=await runR190E1ThreeUseStudy({outRoot:temp,massingOnly:true},{
+   single:async()=>({status:'HOLD',reason:'MODEL_TRUNCATED',modelRequests:1,worldWrites:0})
+  });
+  assert.equal(result.sourceCompiledCount,0);
+  assert.equal(result.status,'TEST_DOUBLE_ONLY');
+  assert(result.rows.every(r=>!r.sourceCompiled&&r.windows==='DEFERRED'&&r.makecode==='NOT_GENERATED'));
+  assert.equal(result.actualMinecraftBuild,'NOT_ATTEMPTED');
+  assert.equal(result.worldWrites,0);
+ }finally{fs.rmSync(temp,{recursive:true,force:true});}
+});

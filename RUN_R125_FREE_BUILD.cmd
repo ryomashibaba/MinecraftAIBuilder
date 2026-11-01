@@ -10,6 +10,11 @@ if errorlevel 1 (
 )
 echo MinecraftAIBuilder R125 - Japanese local LLM to Education MakeCode
 echo This tool never edits a Minecraft world.
+if /i "%~1"=="study-three-massing" (
+  echo Three local AI massing concepts, windows deferred, no world writes.
+  node scripts\r125-r190-free-engine.mjs --study-three-massing
+  goto result
+)
 if /i "%~1"=="study-e2-diagnose" (
   echo E2: diagnose the latest ORIGINAL Qwen 3D source, no model calls
   node scripts\r190-e2-saved-diagnose.mjs --latest
@@ -41,6 +46,7 @@ if /i "%~1"=="study-two-stage" (
 )
 )
 )
+:result
 set "RESULT=%ERRORLEVEL%"
 echo.
 if not "%RESULT%"=="0" echo HOLD: review the output and the model/error log.

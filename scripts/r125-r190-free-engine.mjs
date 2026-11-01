@@ -248,15 +248,18 @@ function r190E1OccupancySha(scene){
 }
 export async function runR190E1ThreeUseStudy({
  model='qwen3:14b',outRoot=path.join(path.dirname(ROOT),'MinecraftAIBuilder-E1-Outputs'),
- paletteFile=path.join(ROOT,'configs','r125-education-verified-palette-v26.33.json')
+ paletteFile=path.join(ROOT,'configs','r125-education-verified-palette-v26.33.json'),
+ massingOnly=false
 }={}, {single=runR190FreeEngine}={}){
- if(!modelName.test(model)||typeof single!=='function')fail('E1_BAD_CONFIGURATION');
+ if(!modelName.test(model)||typeof single!=='function'||
+   typeof massingOnly!=='boolean')fail('E1_BAD_CONFIGURATION');
  fs.mkdirSync(outRoot,{recursive:true});
  const dir=fs.mkdtempSync(path.join(path.resolve(outRoot),'E1-three-use-'));
  const synthetic=single!==runR190FreeEngine;
  const rows=[];
  save(dir,'E1_REQUESTS.json',{schema:'r190-e1-three-use-requests-v1',model,
   provenance:synthetic?'SYNTHETIC_TEST_DOUBLE':'REAL_LOCAL_MODEL_ATTEMPT',
+  studyMode:massingOnly?'MASSING_ONLY_WINDOWS_DEFERRED':'COMPLETE_SOURCE_WITH_WINDOWS',
   requests:R190_E1_STUDY_BRIEFS});
  const writeProgress=()=>fs.writeFileSync(path.join(dir,'E1_PROGRESS.json'),
   JSON.stringify({rows,synthetic,worldWrites:0},null,2)+'\n');
@@ -268,11 +271,15 @@ export async function runR190E1ThreeUseStudy({
   }
   const target=path.join(dir,item.id);
   let report;
-  try{report=await single({prompt:item.brief+'\n'+R190_E1_STUDY_WINDOW_SAFETY,model,outDir:target,paletteFile});}
+  try{report=await single({prompt:massingOnly?item.brief:
+   item.brief+'\n'+R190_E1_STUDY_WINDOW_SAFETY,
+   model,outDir:target,paletteFile,massingOnly});}
   catch(e){report={status:'HOLD_STUDY_RUN_EXCEPTION',reason:String(e?.message??e),
    modelRequests:0,worldWrites:0};}
   let sourceCompiled=false,shapeSignature=null,occupancySha256=null,features=null,reason=report.reason??null;
-  if(report.status==='SOURCE_AND_MAKECODE_READY_HUMAN_REVIEW_REQUIRED'&&
+  if(report.status===(massingOnly?'SOURCE_MASSING_ART_HOLD':
+    'SOURCE_AND_MAKECODE_READY_HUMAN_REVIEW_REQUIRED')&&
+   (!massingOnly||(report.windows==='DEFERRED'&&report.makecode==='NOT_GENERATED'))&&
    report.worldWrites===0&&report.modelRequests===1&&
    typeof report.originalResponseSha256==='string'&&
    typeof report.geometrySha256==='string'){
@@ -281,13 +288,23 @@ export async function runR190E1ThreeUseStudy({
     const source=JSON.parse(fs.readFileSync(path.join(target,'model','B143_SOURCE.json'),'utf8'));
     const scene=JSON.parse(fs.readFileSync(path.join(target,'model','B143_SCENE.json'),'utf8'));
     if(plan.schema!==R190_SCHEMA||source.designOnly!==true)fail('E1_SOURCE_EVIDENCE_INCOMPLETE');
+    if(!synthetic){
+     const original=fs.readFileSync(path.join(target,'model','MODEL_RESPONSE_ORIGINAL.txt'));
+     if(sha(original)!==report.originalResponseSha256||
+       JSON.stringify(JSON.parse(original.toString('utf8')))!==JSON.stringify(plan)||
+       scene.sourceSha256!==report.sourceSha256||
+       scene.geometrySha256!==report.geometrySha256||
+       !verifyCompiled(source,scene))fail('E1_SOURCE_PROVENANCE_OR_SHA_MISMATCH');
+    }
     shapeSignature=r190E1MassingSignature(plan);
     occupancySha256=r190E1OccupancySha(scene);
     sourceCompiled=true;
     features={roomCount:plan.spaces.length,
      roomDimensions:plan.spaces.map(x=>({width:x.width,depth:x.depth,height:x.height})),
      roofSections:plan.roofFormIntents??(plan.roofFormIntent?[plan.roofFormIntent]:[]),
-     facetedForm:plan.formIntent??null,openCourtSpaces:plan.spaces.filter(x=>x.spatialRole==='open-court').length,
+     facetedForm:plan.formIntent??null,
+     facetedForms:plan.formIntents??(plan.formIntent?[plan.formIntent]:[]),
+     openCourtSpaces:plan.spaces.filter(x=>x.spatialRole==='open-court').length,
      skyCourt:plan.skyCourtIntent??null};
    }catch(e){sourceCompiled=false;shapeSignature=null;occupancySha256=null;
     features=null;reason='SOURCE_EVIDENCE_INVALID: '+String(e?.message??e);}
@@ -298,6 +315,8 @@ export async function runR190E1ThreeUseStudy({
    sourceCompiled,originalResponseSha256:report.originalResponseSha256??null,
    sourceSha256:report.sourceSha256??null,geometrySha256:report.geometrySha256??null,
    shapeSignature,occupancySha256,features,
+   windows:massingOnly?'DEFERRED':(sourceCompiled?'MODEL_AUTHORED_SOURCE':'HOLD'),
+   makecode:massingOnly?'NOT_GENERATED':(sourceCompiled?'EXPORTED_NOT_EXECUTED':'HOLD'),
    validationIssues:report.validationIssues??[],output:target,worldWrites:0,
    art:'NOT_REVIEWED',minecraftWalking:'NOT_TESTED'});
   writeProgress();
@@ -319,10 +338,13 @@ function r190E1ReviewHtml(rows,summary){
    '<p><a href="'+dir+'/model/index.html" target="_blank" rel="noopener">3Dビューアを開く</a></p>':
    '<div class="hold">生成した真正3Dなし — HOLD</div>';
   const roomCount=row.features?.roomCount??'–',
-   roofs=row.features?.roofSections?.length??'–';
+   roofs=row.features?.roofSections?.length??'–',
+   facets=row.features?.facetedForms?.length??'–',
+   courts=row.features?.openCourtSpaces??'–';
   return '<article><h2>'+esc(title)+'</h2>'+view+
    '<p>状態: <strong>'+esc(row.status)+'</strong></p>'+
-   '<p>用途空間: '+esc(roomCount)+' / 屋根断面: '+esc(roofs)+'</p>'+
+   '<p>用途空間: '+esc(roomCount)+' / 屋根断面: '+esc(roofs)+
+    ' / 非矩形の実区画: '+esc(facets)+' / 屋外区画: '+esc(courts)+'</p>'+
    '<p>原応答 SHA: <code>'+esc(row.originalResponseSha256)+'</code></p>'+
    '<p>幾何 SHA: <code>'+esc(row.geometrySha256)+'</code></p>'+
    '<p>占有形状 SHA: <code>'+esc(row.occupancySha256)+'</code></p>'+
@@ -340,18 +362,22 @@ function r190E1ReviewHtml(rows,summary){
  '.hold{height:340px;display:grid;place-items:center;background:#303641}'+
  'footer{margin-top:24px;max-width:1100px;color:#c6d2dd}</style></head><body>'+
  '<header><h1>E1 — 本物の3D形状による3用途比較</h1>'+
- '<p>比較状態: '+esc(summary.status)+'。形状の相違は美術合格ではありません。'+
+ '<p>段階: '+esc(summary.studyMode)+'。比較状態: '+esc(summary.status)+
+ '。形状の相違は美術合格ではありません。'+
  '全件モデル原文・実空間・外観を独立評価してください。</p>'+
  '<p>真正SOURCE件数 '+esc(summary.sourceCompiledCount)+'/3、'+
  '異なる占有形状 '+esc(summary.distinctVoxelOccupancyCount)+'/3。</p></header>'+
  '<main>'+cards+'</main>'+
  '<footer>注意：ARTは未審査、Minecraft実歩行・実施工は未実施。'+
+ 'MASSING_ONLY_WINDOWS_DEFERREDでは窓とMakeCodeは生成されません。'+
  '合成テストダブルの成果を実モデル生成と混同しないでください。</footer></body></html>';
 }
  const compiled=rows.filter(x=>x.sourceCompiled);
  const distinct=new Set(compiled.map(x=>x.shapeSignature)).size;
  const summary={schema:'r190-e1-three-use-source-comparison-v1',
   provenance:synthetic?'SYNTHETIC_TEST_DOUBLE_NOT_REAL_MODEL':'REAL_LOCAL_MODEL_ATTEMPTS',
+  studyMode:massingOnly?'MASSING_ONLY_WINDOWS_DEFERRED':'COMPLETE_SOURCE_WITH_WINDOWS',
+  makecode:massingOnly?'NOT_GENERATED':'PER_SOURCE_ONLY_NOT_EXECUTED',
   model,requestedUseCount:3,realModelRequests:synthetic?0:rows.reduce((n,r)=>n+r.modelRequests,0),
   sourceCompiledCount:compiled.length,distinctMassingSignatureCount:distinct,
   distinctVoxelOccupancyCount:new Set(compiled.map(x=>x.occupancySha256)).size,
@@ -363,7 +389,8 @@ function r190E1ReviewHtml(rows,summary){
  save(dir,'E1_STUDY_REPORT.json',summary);
  save(dir,'E1_REVIEW.html',r190E1ReviewHtml(rows,summary));
  save(dir,'E1_REVIEW.md','# MinecraftAIBuilder E1 — 3用途の真正3D比較（一次資料）\n\n'
-  +'判定: '+summary.status+'。これは作品美術・Minecraft実歩行・汎用性能の合格ではありません。\n\n'
+  +'段階: '+summary.studyMode+' / 判定: '+summary.status+
+   '。これは作品美術・Minecraft実歩行・汎用性能の合格ではありません。\n\n'
   +rows.map(r=>'- '+r.id+': '+r.status+' / source='+String(r.sourceSha256)
    +' / geometry='+String(r.geometrySha256)+' / reason='+String(r.reason)).join('\n')
   +'\n\n各用途の model/MODEL_RESPONSE_ORIGINAL.txt（原文）と model/index.html（3D）を独立に確認。'
@@ -392,8 +419,11 @@ async function main(argv){
  if(!['SOURCE_AND_MAKECODE_READY_HUMAN_REVIEW_REQUIRED','SOURCE_MASSING_ART_HOLD'].includes(report.status))process.exitCode=2;
 }
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){
- const study=process.argv.length===3&&process.argv[2]==='--study-three';
- const task=study?runR190E1ThreeUseStudy():main(process.argv.slice(2));
+ const study=process.argv.length===3&&
+  ['--study-three','--study-three-massing'].includes(process.argv[2]);
+ const massing=study&&process.argv[2]==='--study-three-massing';
+ const task=study?runR190E1ThreeUseStudy({massingOnly:massing}):
+  main(process.argv.slice(2));
  task.then(r=>{
   if(study){
    const opened=openE1ResultFolder(path.join(r.dir,'E1_STUDY_REPORT.json'));
