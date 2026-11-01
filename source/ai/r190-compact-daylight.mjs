@@ -6,6 +6,8 @@
  * B143 apertures through the existing full semantic source + circulation QA.
  * These are NOT model-authored window decisions or an ART/World approval.
  */
+import {createHash} from 'node:crypto';
+import {inspectR190CompactProgram} from './r190-compact-program.mjs';
 import {compileR190SemanticPlan,auditR190SourceRoutes} from './r190-semantic-massing.mjs';
 import {verifyCompiled} from './b143-building-dsl.mjs';
 const fail=code=>{throw Error('R190_COMPACT_DAYLIGHT_'+code);};
@@ -21,6 +23,13 @@ export function deriveR190CompactMinimumWindows(base){
   !base.hostDerivedPlan||!base.built||!verifyCompiled(base.built.design,base.built.compiled)||
   base.built.worldWrites!==0||base.built.constructionApproved!==false)
   fail('BASE_NOT_VERIFIED');
+ // SOURCE author attribution must match the immutable original model program.
+ const canonical=JSON.stringify(inspectR190CompactProgram(base.modelProgram));
+ if(createHash('sha256').update(canonical).digest('hex')!==
+    base.originalProgramSha256)
+  fail('MODEL_INTENT_PROVENANCE_MISMATCH');
+ if(JSON.stringify(base.hostDerivedPlan)!==JSON.stringify(base.built.inputPlan))
+  fail('BASE_PLAN_RECEIPT_MISMATCH');
  const original=JSON.stringify(base.hostDerivedPlan);
  if(base.hostDerivedPlan.glazedOpenings!==undefined)fail('BASE_ALREADY_HAS_WINDOWS');
  const plan=structuredClone(base.hostDerivedPlan),applied=[],skipped=[];
@@ -28,12 +37,13 @@ export function deriveR190CompactMinimumWindows(base){
  for(const s of plan.spaces){
   const authored=base.modelProgram.spaces.find(r=>r.id===s.id);
   if(!authored)fail('ROOM_AUTHORSHIP_MISSING');
+  const intent=base.modelProgram.daylightIntent?.find(x=>x.spaceId===s.id);
   if(s.spatialRole==='open-court'||authored.form==='facet'){
    skipped.push({spaceId:s.id,reason:authored.form==='facet'?
-    'FACET_NOT_SUPPORTED_FOR_GLAZING':'OPEN_COURT_NO_ENCLOSED_WALL'});
+    'FACET_NOT_SUPPORTED_FOR_GLAZING':'OPEN_COURT_NO_ENCLOSED_WALL',
+    ...(intent?{modelDaylightIntent:structuredClone(intent)}:{})});
    continue;
   }
-  const intent=base.modelProgram.daylightIntent?.find(x=>x.spaceId===s.id);
   const faceOrder=intent?[intent.preferredFace,...faces.filter(x=>x!==intent.preferredFace)]:faces;
   const sizeOrder=intent?.scale==='generous'?
    [[4,3],[4,2],[3,3],[3,2],[2,2]]:

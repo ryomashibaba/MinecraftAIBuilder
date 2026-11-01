@@ -146,3 +146,15 @@ test('MODEL daylight size and preferred face become genuine checked B143 windows
  assert(interior.rooms.every(x=>x.reachableTwoWidePadsFromEntrance>0));
  assert.equal(interior.actualMinecraftWalking,'NOT_TESTED');
 });
+
+test('R190 model daylight authorship hash and source-plan receipt are not forgeable',()=>{
+ const original=compileR190CompactProgram(sample('r190-daylight-authentication',['plain','plain']));
+ const forged=structuredClone(original);
+ forged.modelProgram.daylightIntent=[{spaceId:'entrance',preferredFace:'north',scale:'generous'}];
+ assert.throws(()=>deriveR190CompactMinimumWindows(forged),
+  /MODEL_INTENT_PROVENANCE_MISMATCH/);
+ const substituted=structuredClone(original);
+ substituted.hostDerivedPlan.spaces[0].width+=1;
+ assert.throws(()=>deriveR190CompactMinimumWindows(substituted),
+  /BASE_PLAN_RECEIPT_MISMATCH/);
+});
