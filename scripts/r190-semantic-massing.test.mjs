@@ -468,7 +468,7 @@ test('R190-P glazing fails closed for injected attributes and invalid windows',(
 /** Source-only reconstruction of a facet sharing a taller parent-room wall.
  * This is a synthetic regression, not the model's original response. */
 function facetSeamFixture(kind){
- const p={schema:R190_SCHEMA,id:'r190-facet-seam-'+kind,
+ const p={schema:R190_SCHEMA,id:'r190-facet-seam-'+kind.toLowerCase(),
   title:'Shared seam audit fixture',brief:'Synthetic model-intent geometry regression case',
   site:{width:40,depth:32,height:16},entrySpaceId:'entry-hall-001',
   spaces:[
