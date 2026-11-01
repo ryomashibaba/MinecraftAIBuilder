@@ -10,6 +10,11 @@ if errorlevel 1 (
 )
 echo MinecraftAIBuilder R125 - Japanese local LLM to Education MakeCode
 echo This tool never edits a Minecraft world.
+if /i "%~1"=="study-three-compact" (
+  echo Qwen compact architectural programs to R190 B143, no world writes.
+  node scripts\r190-compact-program-study.mjs --study-three
+  goto result
+)
 if /i "%~1"=="study-three-massing" (
   echo Three local AI massing concepts, windows deferred, no world writes.
   node scripts\r125-r190-free-engine.mjs --study-three-massing
