@@ -52,7 +52,9 @@ export async function runFreeBuild(opts,{child=spawnSync}={}){
  const args=[script,'--out',destination,'--palette',PALETTE];
  if(opts.plan)args.push('--plan',path.resolve(opts.plan));
  else args.push('--prompt',effectivePrompt,'--model',opts.model);
- console.log('Starting one local request. No Minecraft contact and no automatic retries.');
+ console.log(opts.plan?
+  'Saved ArchitecturePlan replay (no local Qwen request, no Minecraft contact).':
+  'One local Qwen request (no automatic retries or Minecraft contact).');
  const result=child(process.execPath,args,{cwd:ROOT,encoding:'utf8',windowsHide:true,maxBuffer:1024*1024*4});
  const log=String(result.stdout??'')+'\n'+String(result.stderr??'');
  fs.writeFileSync(path.join(runDir,'RUN_LOG.txt'),log,{flag:'wx'});
@@ -60,8 +62,12 @@ export async function runFreeBuild(opts,{child=spawnSync}={}){
  const planReport=path.join(destination,'EXPORT_REPORT.json');
  const reportFile=fs.existsSync(planReport)?planReport:reportPath;
  if(result.error||result.status!==0||!fs.existsSync(reportFile)){
-  const status={status:'HOLD',reason:result.error?.message??('Model or exporter did not produce an approved code; exit='+result.status),
-   output:runDir,worldWrites:0,modelRequestsAllowed:opts.plan?0:1};
+  // Preserve specific fail-closed exporter cause from already-saved child log.
+  // This is diagnostic text only: never disable the strict material check.
+  const exportCode=log.match(/R125_EDUCATION_EXPORT_[A-Z_]+/)?.[0]??null;
+  const status={status:'HOLD',reason:exportCode??result.error?.message??
+   ('Model or exporter did not produce an approved code; exit='+result.status),
+   errorCode:exportCode,output:runDir,worldWrites:0,modelRequestsAllowed:opts.plan?0:1};
   fs.writeFileSync(path.join(runDir,'RESULT.json'),JSON.stringify(status,null,2)+'\n',{flag:'wx'});
   console.error('HOLD. Review '+path.join(runDir,'RUN_LOG.txt'));
   return status;

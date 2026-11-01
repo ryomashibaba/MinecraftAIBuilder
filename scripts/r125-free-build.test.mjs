@@ -114,8 +114,9 @@ test('REAL saved plan requesting unverified metal roof is held, never substitute
   const input=path.join(root,'ORIGINAL.json');fs.writeFileSync(input,JSON.stringify(plan));
   const status=await runFreeBuild({model:'qwen3:14b',prompt:null,plan:input,outRoot:path.join(root,'outputs')});
   assert.equal(status.status,'HOLD');
+  assert.equal(status.reason,'R125_EDUCATION_EXPORT_UNVERIFIED_MATERIAL_METAL');
+  assert.equal(status.errorCode,'R125_EDUCATION_EXPORT_UNVERIFIED_MATERIAL_METAL');
   assert.equal(status.worldWrites,0);
-  assert.equal(status.status,'HOLD');
   assert.equal(fs.existsSync(status.makecode??''),false);
   const logs=fs.readFileSync(path.join(status.output,'RUN_LOG.txt'),'utf8');
   assert.match(logs,/UNVERIFIED_MATERIAL_METAL/);
