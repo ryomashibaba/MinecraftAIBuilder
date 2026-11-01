@@ -1,3 +1,11 @@
+## 2026-11-02 R190: モデル指定の採光・眺望意図（実装済み、CIは未確定）
+
+- **目的**：保存済み実QwenのR190コンパクト3用途・11室688/688 SOURCE床接続実測を維持し、窓の方角・採光量をAIの定性的建築意図としても選べるようにする。既存3棟のSOURCE実測は新機能の検証ではない。
+- **実装**：任意の daylightIntent に spaceId / preferredFace / scale（modest, balanced, generous）を指定できる。モデルが部屋と希望方角・採光の強さを選び、ホストが座標と真正B143窓を安全ゲート内で解決。希望方角/規模を達成できたかの記録を保持し、達成不能な選択も隠さない。旧原文には項目がないため、従来の2×2小窓経路は維持。
+- **証拠保護**：元のMODELプログラムSHAとモデル意図を照合し、差し替えたホスト原案や捏造されたAIの窓意図をHOLDで拒否。変更コードと回帰テストを継続ブランチに保存：コミット a91821ae16a064f8858a7235dd15ce7471d462ef / 9e5e23e0bbfe09aed034e2b16364eb010e509c2e。凍結Qwen原文、main、旧B143 SHA、Minecraftワールドは未変更。
+- **検証境界**：変更5ファイルのJavaScript簡易構文解析は成功。コミット後のEducation-first / R190-AC CI、実モデル新仕様での実際の応答、3D美術審査、実歩行はまだ未確認。既存の3/3・688/688は旧設計のSOURCE計測である。
+- **次工程**：最新PR HEADとCIの最終結果を確認。保存済みQwen3用途は再推論0の replay-latest で小窓/大窓の真正3Dを比較。新しい採光意図は新規の真正モデル応答で初めて評価し、MODEL/HOST/ART/Dを混同しない。ART HOLD、NOT_PREPARED、BuildPlan空、9 BLOCKED、world0、main保護、PR Open/Draftを維持。
+
 ## 2026-11-02 R190 CI調査：旧SVGテストの誤検出を修正
 
 - GitHub Actions R190-AC run `41352155075`（途中コード `2fc6aba`）は150テスト中149 PASS / 1 FAIL。**失敗はSVGに必要な正規の `xmlns="http://www.w3.org/2000/svg"` を、旧テストの `https?:` 禁止正規表現が外部URLと誤認したテスト実装ミス**。当該ログで新しい「HOST expanded real-glass candidate preserves model, original scene and safety」単体テストは個別PASS。
