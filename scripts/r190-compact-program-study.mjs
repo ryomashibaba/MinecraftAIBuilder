@@ -345,7 +345,10 @@ export function replayR190CompactSaved({previousDir,outRoot=null}={}){
     report:path.join(target,'WINDOW_RESEARCH_REPORT.json'),
     numberOfRealWindows:v.applied.length,makecodeStatus,makecodeReason,
     clearRoomFloorCells:interior.rooms.map(r=>({id:r.spaceId,
-     clearCells:r.supportedClearFloorCells,pads2x2:r.twoByTwoSupportedClearPads})),
+     clearCells:r.supportedClearFloorCells,pads2x2:r.twoByTwoSupportedClearPads,
+     padsReachableFromEntrance:r.reachableTwoWidePadsFromEntrance,
+     disconnectedPads:r.disconnectedTwoWidePads,
+     reachablePadFraction:r.reachableTwoWidePadFraction})),
     worldWrites:0};
   }catch(e){
    windowResearch={status:'HOLD_NO_VERIFIED_WINDOWS',
