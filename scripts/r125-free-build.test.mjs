@@ -101,8 +101,8 @@ test('REAL saved ArchitecturePlan produces true 3-material MakeCode without any 
   assert.equal(req.mode,'SAVED_PLAN');
  }finally{fs.rmSync(root,{recursive:true,force:true});}
 });
-test('REAL saved plan requesting unverified metal roof is held, never substituted',async()=>{
- const root=fs.mkdtempSync(path.join(os.tmpdir(),'r125-free-build-metal-'));
+test('user-attested iron_block supports genuine B143 metal roof without a model request',async()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'r125-metal-proven-'));
  const plan={schema:'minecraftaibuilder-r125-architecture-plan-v1',id:'metal-station',
   title:'Metal roof station',brief:'Tiny generic station with explicitly required metal roof',
   footprint:{width:18,depth:18},
@@ -113,13 +113,73 @@ test('REAL saved plan requesting unverified metal roof is held, never substitute
  try{
   const input=path.join(root,'ORIGINAL.json');fs.writeFileSync(input,JSON.stringify(plan));
   const status=await runFreeBuild({model:'qwen3:14b',prompt:null,plan:input,outRoot:path.join(root,'outputs')});
-  assert.equal(status.status,'HOLD');
-  assert.equal(status.reason,'R125_EDUCATION_EXPORT_UNVERIFIED_MATERIAL_METAL');
-  assert.equal(status.errorCode,'R125_EDUCATION_EXPORT_UNVERIFIED_MATERIAL_METAL');
+  assert.equal(status.status,'MAKECODE_READY_HUMAN_REVIEW_REQUIRED');
   assert.equal(status.worldWrites,0);
-  assert.equal(fs.existsSync(status.makecode??''),false);
-  const logs=fs.readFileSync(path.join(status.output,'RUN_LOG.txt'),'utf8');
-  assert.match(logs,/UNVERIFIED_MATERIAL_METAL/);
+  assert.equal(status.sourceWalkability,'SOURCE_ROUTE_CANDIDATE');
+  assert((status.plannedBlockCounts.iron_block??0)>0);
+  const report=JSON.parse(fs.readFileSync(path.join(path.dirname(status.makecode),'EXPORT_REPORT.json'),'utf8'));
+  assert.equal(report.materialMode,'STRICT_USER_ATTESTED');
+  assert.equal(report.actualEducationExecution,'NOT_TESTED');
+  assert.equal(report.constructionApproved,false);
+  assert(report.usedMaterials.some(x=>x.material==='metal'&&x.blockName==='iron_block'));
+  const code=fs.readFileSync(status.makecode,'utf8');
+  assert.match(code,/blocks\\.blockByName\\("iron_block"\\)/);
+  assert.equal(createHash('sha256').update(code).digest('hex'),status.makecodeSourceSha256);
+  assert.deepEqual(JSON.parse(fs.readFileSync(input,'utf8')),plan);
+ }finally{fs.rmSync(root,{recursive:true,force:true});}
+});
+test('R125 saved one-storey retail screen uses iron_block and verified materials without changing AI plan',async()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'r125-iron-screen-proven-'));
+ const plan={schema:'minecraftaibuilder-r125-architecture-plan-v1',id:'store-with-screen',
+  title:'Retail store with employee back area',brief:'Model authored a functional shop and an external metal screen',
+  footprint:{width:24,depth:28},
+  levels:[{splitAxis:'x',splitPercent:50,spaces:[
+   {id:'front-retail-space',purpose:'Customer retail zone'},
+   {id:'back-employee-space',purpose:'Staff work area'}]}],
+  materials:{floor:'wood',wall:'stone',roof:'concrete'},
+  expression:{setbackSide:'none',setbackDepth:0,roofProfile:'flat',roofAxis:'x',facadeLanguage:'screen'}};
+ try{
+  const input=path.join(root,'SOURCE_ARCHITECTURE_PLAN.json');
+  fs.writeFileSync(input,JSON.stringify(plan)+'\\n');
+  const result=await runFreeBuild({model:'qwen3:14b',prompt:null,plan:input,
+   outRoot:path.join(root,'outputs')});
+  assert.equal(result.status,'MAKECODE_READY_HUMAN_REVIEW_REQUIRED');
+  assert.equal(result.sourceWalkability,'SOURCE_ROUTE_CANDIDATE');
+  assert.equal(result.worldWrites,0);
+  assert.equal(result.actualMinecraftWalking,'NOT_TESTED');
+  assert.equal(result.humanArt,'NOT_REVIEWED');
+  for(const name of ['iron_block','white_concrete','oak_planks','stone','glass'])
+   assert((result.plannedBlockCounts[name]??0)>0,'Missing genuine material '+name);
+  const review=JSON.parse(fs.readFileSync(result.sourceWalkabilityReview,'utf8'));
+  assert.equal(review.routes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert(review.routes.zones.every(zone=>zone.reachedFromEntrance));
+  assert.equal(review.routes.zones.length,2);
+  const exportReport=JSON.parse(fs.readFileSync(path.join(path.dirname(result.makecode),'EXPORT_REPORT.json'),'utf8'));
+  assert.equal(Object.values(exportReport.plannedBlockCounts).reduce((a,b)=>a+b,0),result.plannedVoxelCount);
+  assert.equal(exportReport.actualEducationExecution,'NOT_TESTED');
+  assert.equal(exportReport.worldWrites,0);
+  assert.equal(exportReport.art,'ART_HOLD');
+  assert.deepEqual(JSON.parse(fs.readFileSync(input,'utf8')),plan);
+ }finally{fs.rmSync(root,{recursive:true,force:true});}
+});
+test('strict palette still HOLDs an unverified accent despite iron_block and concrete being known',async()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'r125-unverified-accent-'));
+ const plan={schema:'minecraftaibuilder-r125-architecture-plan-v1',id:'accent-shop',
+  title:'Shop with expressive fins',brief:'Shop with visible facade fins and two rooms',
+  footprint:{width:24,depth:28},
+  levels:[{splitAxis:'x',splitPercent:50,spaces:[
+   {id:'front-shop',purpose:'Customer retail area'},
+   {id:'back-office',purpose:'Staff work area'}]}],
+  materials:{floor:'wood',wall:'stone',roof:'concrete'},
+  expression:{setbackSide:'none',setbackDepth:0,roofProfile:'flat',roofAxis:'x',facadeLanguage:'fins'}};
+ try{
+  const input=path.join(root,'PLAN.json');fs.writeFileSync(input,JSON.stringify(plan));
+  const result=await runFreeBuild({model:'qwen3:14b',prompt:null,plan:input,
+   outRoot:path.join(root,'outputs')});
+  assert.equal(result.status,'HOLD');
+  assert.equal(result.errorCode,'R125_EDUCATION_EXPORT_UNVERIFIED_MATERIAL_ACCENT');
+  assert.equal(result.worldWrites,0);
+  assert.equal(result.modelRequestsAllowed,0);
  }finally{fs.rmSync(root,{recursive:true,force:true});}
 });
 

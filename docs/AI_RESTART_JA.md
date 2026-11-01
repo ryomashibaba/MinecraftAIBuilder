@@ -1,3 +1,13 @@
+## 2026-11-01 `iron_block` 実機成功 → metal素材の安全登録
+
+ユーザーがMinecraft Education v26.33の試験ワールドスクリーンショットを提供。MakeCode短縮コマンド `mb` に対して `PROBE MATCH: iron_block` と実際に設置された鉄ブロックが視認できる。登録するのは `metal → iron_block` の**既定ブロック表現**。モデルが特定の鉄素材を指名したわけではなく、外装 `screen` を鉄ブロックで表現するだけで意匠/見通し/通行を保証しない。これまでと同様、モデル作成元のArchitecturePlanは未変更。先の `white_concrete` 登録に続き、`wood/stone/concrete/metal/glass` で構成される生成物を厳格素材パレットのもとで出力可能にする。
+
+既存R125自由建築ランナーから**モデル呼出ゼロ**の保存済みプランを実コンパイルする回帰テスト：metal屋根と、モデル意図 `expression.facadeLanguage=screen` の外装金属スクリーンを含む平屋店舗。SOURCE入口→両部屋と素材数/出力ハッシュを独立に確認。ただしCIは合成のテストプランであり**ユーザー自身の10/24 933ボクセル原本の実コンパイル、Minecraft実施工・室内歩行、ART審査の成功は未確認**。未検証accentは引き続きHOLD。テスト用のworldWrites0、9 BLOCKED、NOT_PREPAREDと人間承認境界は維持。
+
+**次の実験**：独立Windowsクローンを安全に最新化した上で、既存 `C:\\Users\\ryoma\\Projects\\MinecraftAIBuilder\\r125-multiuse-20261024-233958\\entry-shop\\ARCHITECTURE_PLAN.json` を `--plan` から直接再出力、SOURCE_ROUTE_CANDIDATE、各実証素材の内訳、SHA一致を確認。元原本と既存ワールドは自動書込なし。合格後は新しいバックアップ済み試験ワールドの安全な空き領域でのみMakeCodeの `mabset` / `mabbuild` / `mabverify` を人間が実行し、入口/売場/バックヤードの通行を観察する。main不変更、PR Draft継続。
+
+---
+
 ## 2026-11-01 `mb` 実機初回エラー修正：stone_bricks未認識
 
 ユーザー実機スクリーンショットで8素材バッチの `mb` 実行時に `stone_bricks` が「このブロックはわかりません」と表示され、既存バッチは `MB HOLD: AIR/invalid at stone_bricks; zero writes` で正常に施工前停止。**8候補中、他7件も未検証**。これを全候補失敗扱いにせず、未知名がAIRへ解決される場合はその候補だけ `MB SKIP invalid/AIR`、残る候補の照合を続行する。全ての対象地点の空き/支持床は先に確認する。全て無効ならzero writes、重複IDもSKIP（同じブロックの別名かもしれず採用しない）。`blocks.blockByName` 自体の例外は全対象の名前解決段階で書込0のまま停止。MakeCodeの例外捕捉・ブロックID補正は実施しない。
