@@ -330,7 +330,7 @@ test('unaltered Nov-1 Qwen 14B 203-character brief compiles to real L-corner SOU
   assert.equal(walk.status,'SOURCE_ROUTE_CANDIDATE');
   assert.equal(walk.actualInGameWalking,'NOT_TESTED');
   const code=fs.readFileSync(path.join(output,'MAKECODE_EDUCATION.ts'),'utf8');
-  assert.match(code,/player\\.onChat\\(\"mabbuild\"/);
+  assert.match(code,/player\.onChat\("mabbuild"/);
  }finally{fs.rmSync(tmp,{recursive:true,force:true});}
 });
 test('R125 explanatory brief shares B143 500-char bound but title and space are still strict',()=>{
@@ -338,7 +338,7 @@ test('R125 explanatory brief shares B143 500-char bound but title and space are 
  assert.equal(validateArchitecturePlan({...base,brief:'a'.repeat(500)}),true);
  for(const candidate of [
   {...base,brief:'a'.repeat(501)},
-  {...base,brief:'Two lines\\nwhich are rejected'},
+  {...base,brief:'Two lines\nwhich are rejected'},
   {...base,title:'a'.repeat(181)},
   {...base,levels:[{...base.levels[0],spaces:[
    {...base.levels[0].spaces[0],purpose:'a'.repeat(181)},
