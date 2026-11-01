@@ -11,7 +11,10 @@ import {exportB143EducationMakeCode} from '../source/ai/r125-education-makecode-
 
 export function exportSavedPlan(planFile, outDir, provenance='UNVERIFIED_DESIGN',paletteFile=null) {
  const plan=JSON.parse(fs.readFileSync(planFile,'utf8'));
- const product=compileArchitecturePlan(plan);
+ // Geometry is host-derived from the unmodified AI plan. New practical
+ // exports use the opt-in source-accessible entrance; frozen legacy hashes
+ // remain reproducible via compileArchitecturePlan(plan) without options.
+ const product=compileArchitecturePlan(plan,{entrancePlacement:'source-accessible'});
  // Reuse two EXISTING voxel-derived audits. Source pass means only an
  // offline clearance candidate, never in-game walking certification.
  const circulation=auditArchitecturePlanCirculation(product);
@@ -21,6 +24,7 @@ export function exportSavedPlan(planFile, outDir, provenance='UNVERIFIED_DESIGN'
   sourceSha256:product.sourceSha256,
   geometrySha256:product.geometrySha256,
   planSha256:product.planSha256,
+  hostSourceCompilerMode:'R125_SOURCE_ACCESSIBLE_ENTRANCE_FROM_MODEL_SPLIT_AXIS',
   status:circulation.status==='SOURCE_CLEARANCE_PROBES_PASS'&&
    routes.status==='SOURCE_ROUTES_REACH_ALL_ZONES'?
    'SOURCE_ROUTE_CANDIDATE':'HOLD_SOURCE_WALKABILITY',

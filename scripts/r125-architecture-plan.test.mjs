@@ -200,3 +200,31 @@ test('program risk cannot be masked using an unrelated roof surface',()=>{
  assert.throws(()=>assessR125ProgramGeometry(r,
   {...c,sourceSha256:'0'.repeat(64)}),/R125_PLAN_UNTRUSTED_CRITIQUE/);
 });
+
+test('opt-in practical source entrance is clear of x-partition while all historical B143 SHA inputs remain unchanged',()=>{
+ const original=plan('practical-flower-shop',['x'],['sales','staff preparation']);
+ original.footprint={width:18,depth:18};
+ const snapshot=JSON.stringify(original);
+ const legacy=compileArchitecturePlan(original);
+ const practical=compileArchitecturePlan(original,{entrancePlacement:'source-accessible'});
+ const legacyDoor=legacy.design.elements.find(x=>x.id==='exterior-entrance');
+ const practicalDoor=practical.design.elements.find(x=>x.id==='exterior-entrance');
+ const divider=practical.program[0].splitCoordinate;
+ assert.equal(practicalDoor.origin[0],divider+2);
+ assert.equal(legacyDoor.origin[0],Math.floor(original.footprint.width/2)-1);
+ assert.equal(practical.planSha256,legacy.planSha256);
+ assert.notEqual(practical.sourceSha256,legacy.sourceSha256);
+ assert.equal(verifyCompiled(practical.design,practical.compiled),true);
+ assert.equal(auditArchitecturePlanCirculation(practical).status,'SOURCE_CLEARANCE_PROBES_PASS');
+ assert.equal(JSON.stringify(original),snapshot);
+ assert.equal(practical.worldWrites,0);
+ assert.throws(()=>compileArchitecturePlan(original,{entrancePlacement:'unsafe'}),/R125_PLAN_ENTRANCE_PLACEMENT_MODE/);
+});
+test('a south entry for z partition needs no source-accessible coordinate change',()=>{
+ const original=plan('practical-research-lab',['z'],['experiment','records']);
+ const old=compileArchitecturePlan(original);
+ const practical=compileArchitecturePlan(original,{entrancePlacement:'source-accessible'});
+ assert.equal(practical.sourceSha256,old.sourceSha256);
+ assert.equal(practical.geometrySha256,old.geometrySha256);
+ assert.equal(practical.planSha256,old.planSha256);
+});

@@ -61,10 +61,12 @@ export function validateArchitecturePlan(p){
  }
  return true;
 }
-export function compileArchitecturePlan(plan){
+export function compileArchitecturePlan(plan,{entrancePlacement='legacy'}={}){
  validateArchitecturePlan(plan);
+ check(['legacy','source-accessible'].includes(entrancePlacement),
+  'ENTRANCE_PLACEMENT_MODE');
  const original=structuredClone(plan);
- if(original.expression)return compileExpressiveArchitecturePlan(original);
+ if(original.expression)return compileExpressiveArchitecturePlan(original,{entrancePlacement});
  const {width:w,depth:d}=original.footprint;
  const count=original.levels.length;
  const floor=original.materials.floor,wall=original.materials.wall,
@@ -100,8 +102,14 @@ export function compileArchitecturePlan(plan){
    box(tag+'-inside-door','cut',null,[3,base+1,split],[2,3,1]);
   }
   // External ground-level opening, without inventing a world landing.
-  if(l===0)box('exterior-entrance','cut',null,
-   [Math.floor(w/2)-1,base+1,1],[2,3,1]);
+  if(l===0){
+   // New practical exports opt into a generic geometry rule: avoid the
+   // x-axis dividing wall just behind the formerly centered exterior door.
+   // Legacy compilation remains byte-identical for frozen original hashes.
+   const entryX=entrancePlacement==='source-accessible'&&axis==='x'?
+    split+2:Math.floor(w/2)-1;
+   box('exterior-entrance','cut',null,[entryX,base+1,1],[2,3,1]);
+  }
   // True glazing is cut through an external wall THEN filled with glass.
   const windows=[
    {id:'front',at:[3,base+2,1],size:[2,2,1]},
@@ -258,7 +266,7 @@ export function auditArchitecturePlanCirculation(product){
  * identically without expression; do NOT change the old pinned Qwen 14B 2620-
  * voxel result or its source digest. No typology-specific templates.
  */
-function compileExpressiveArchitecturePlan(original){
+function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy'}={}){
  const {width:w,depth:d}=original.footprint;
  const count=original.levels.length;
  const {setbackSide,setbackDepth,roofProfile,roofAxis,facadeLanguage}=original.expression;
@@ -295,7 +303,8 @@ function compileExpressiveArchitecturePlan(original){
   }
   if(l===0)
    box('exterior-entrance','cut',null,
-    [Math.floor(w/2)-1,y,z0],[2,3,1]);
+    [entrancePlacement==='source-accessible'&&axis==='x'?
+     split+2:Math.floor(w/2)-1,y,z0],[2,3,1]);
   // A setback makes a real second-floor terrace. It must not be separated
   // from the interior by an uninterrupted exterior wall. Cut a 2-wide door
   // at upper-floor standing height without changing the 1st-floor envelope.
