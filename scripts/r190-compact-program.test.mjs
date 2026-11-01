@@ -70,3 +70,27 @@ test('R190 compact never puts a child on the root entrance when preferred sides 
  assert.equal(result.built.worldWrites,0);
  assert.equal(result.built.audit.allProgramSpacesReachable,true);
 });
+
+test('optional Qwen-authored daylight intent is strictly validated and leaves frozen source untouched',()=>{
+ const p=base('r190-daylight-model',['plain','plain','plain']);
+ p.daylightIntent=[{spaceId:'creative-room',preferredFace:'north',scale:'generous'},
+  {spaceId:'entrance',preferredFace:'west',scale:'balanced'}];
+ const frozen=structuredClone(p),r=compileR190CompactProgram(p);
+ assert.equal(r.status,'COMPILED_SOURCE_ONLY_ART_HOLD');
+ assert.deepEqual(r.modelProgram.daylightIntent,p.daylightIntent);
+ assert.equal(r.hostDerivedPlan.glazedOpenings,undefined);
+ assert.equal(r.built.audit.allProgramSpacesReachable,true);
+ assert.equal(r.built.worldWrites,0);
+ assert.deepEqual(r.built.gates,Array(9).fill('BLOCKED'));
+ assert.deepEqual(p,frozen);
+ const invalid=[
+  [{spaceId:'creative-room',preferredFace:'north',scale:'huge'}],
+  [{spaceId:'creative-room',preferredFace:'north',scale:'generous'},
+   {spaceId:'creative-room',preferredFace:'west',scale:'modest'}],
+  [{spaceId:'ghost-room',preferredFace:'west',scale:'modest'}],
+  [{spaceId:'entrance',preferredFace:'up',scale:'balanced'}]
+ ];
+ for(const daylightIntent of invalid)
+  assert.throws(()=>compileR190CompactProgram({...p,daylightIntent}),
+   /R190_COMPACT_DAYLIGHT_INTENT_FIELDS/);
+});

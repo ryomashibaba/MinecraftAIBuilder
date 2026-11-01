@@ -121,3 +121,28 @@ test('HOST expanded real-glass candidate preserves model, original scene and saf
  assert.throws(()=>deriveR190CompactExpandedGlazingVariant(corrupted),
   /GLAZING_VARIANT_BASE_INVALID/);
 });
+
+test('MODEL daylight size and preferred face become genuine checked B143 windows, not decorative paint',()=>{
+ const p=sample('r190-authored-facade',['plain','plain']);
+ p.daylightIntent=[{spaceId:'entrance',preferredFace:'west',scale:'balanced'},
+  {spaceId:'large-room',preferredFace:'north',scale:'generous'}];
+ const frozen=JSON.stringify(p),base=compileR190CompactProgram(p);
+ const windows=deriveR190CompactMinimumWindows(base);
+ assert.equal(windows.status,'HOST_DERIVED_WINDOWS_SOURCE_ART_HOLD');
+ assert.equal(JSON.stringify(p),frozen);
+ assert.equal(windows.originalGeometrySha256,base.built.compiled.geometrySha256);
+ const authored=windows.applied.filter(x=>x.modelDaylightIntent);
+ assert.equal(authored.length,2);
+ assert(authored.every(x=>x.authorship==='MODEL_DAYLIGHT_INTENT_HOST_GEOMETRY'));
+ assert(authored.every(x=>typeof x.requestedFaceSatisfied==='boolean'&&
+  typeof x.requestedScaleSatisfied==='boolean'));
+ assert(authored.some(x=>x.width*x.height>4));
+ assert.equal(windows.plan.glazedOpenings.length,windows.applied.length);
+ assert(verifyCompiled(windows.current.design,windows.current.compiled));
+ assert(windows.current.audit.allProgramSpacesReachable);
+ assert.equal(windows.current.worldWrites,0);
+ assert.deepEqual(windows.current.gates,Array(9).fill('BLOCKED'));
+ const interior=auditR190CompactInteriorEvidence(windows.current);
+ assert(interior.rooms.every(x=>x.reachableTwoWidePadsFromEntrance>0));
+ assert.equal(interior.actualMinecraftWalking,'NOT_TESTED');
+});

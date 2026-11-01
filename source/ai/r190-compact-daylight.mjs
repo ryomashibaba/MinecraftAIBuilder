@@ -33,44 +33,62 @@ export function deriveR190CompactMinimumWindows(base){
     'FACET_NOT_SUPPORTED_FOR_GLAZING':'OPEN_COURT_NO_ENCLOSED_WALL'});
    continue;
   }
+  const intent=base.modelProgram.daylightIntent?.find(x=>x.spaceId===s.id);
+  const faceOrder=intent?[intent.preferredFace,...faces.filter(x=>x!==intent.preferredFace)]:faces;
+  const sizeOrder=intent?.scale==='generous'?
+   [[4,3],[4,2],[3,3],[3,2],[2,2]]:
+   intent?.scale==='balanced'?[[3,2],[2,2]]:[[2,2]];
   const rejected=new Map();
   let found=null,accepted=null;
-  for(const face of faces){
+  for(const face of faceOrder){
    if(found)break;
    const span=dimension(s,face);
-   for(const offset of offsets(span)){
+   for(const [width,height] of sizeOrder){
     if(found)break;
-    for(const baseY of [5,6]){
-     if(baseY+2>s.height-1)continue;
-     const request={spaceId:s.id,face,offset,baseY,width:2,height:2};
-     const next=structuredClone(plan);
-     next.glazedOpenings=[...(plan.glazedOpenings??[]),request];
-     candidateTests++;
-     try{
-      const compiled=compileR190SemanticPlan(next);
-      if(!verifyCompiled(compiled.design,compiled.compiled)||
-       !compiled.audit.allProgramSpacesReachable||
-       compiled.audit.realGlazingCells<2*2*(applied.length+1)||
-       compiled.worldWrites!==0||compiled.worldContacts!==0||
-       compiled.constructionApproved!==false||
-       compiled.BuildPlan.operations.length!==0||
-       compiled.gates.length!==9||
-       compiled.gates.some(g=>g!=='BLOCKED'))fail('NEW_SOURCE_INVALID');
-      found=request;accepted=compiled;
-      break;
-     }catch(e){
-      const name=String(e?.message??e).slice(0,100);
-      rejected.set(name,(rejected.get(name)??0)+1);
+    for(const offset of offsets(span,width)){
+     if(found)break;
+     for(const baseY of [5,6]){
+      if(baseY+height>s.height-1)continue;
+      const request={spaceId:s.id,face,offset,baseY,width,height};
+      const next=structuredClone(plan);
+      next.glazedOpenings=[...(plan.glazedOpenings??[]),request];
+      candidateTests++;
+      try{
+       const compiled=compileR190SemanticPlan(next);
+       const requiredGlass=next.glazedOpenings.reduce((n,g)=>n+g.width*g.height,0);
+       if(!verifyCompiled(compiled.design,compiled.compiled)||
+        !compiled.audit.allProgramSpacesReachable||
+        compiled.audit.realGlazingCells<requiredGlass||
+        compiled.worldWrites!==0||compiled.worldContacts!==0||
+        compiled.constructionApproved!==false||
+        compiled.BuildPlan.operations.length!==0||
+        compiled.gates.length!==9||
+        compiled.gates.some(g=>g!=='BLOCKED'))fail('NEW_SOURCE_INVALID');
+       found=request;accepted=compiled;
+       break;
+      }catch(e){
+       const name=String(e?.message??e).slice(0,100);
+       rejected.set(name,(rejected.get(name)??0)+1);
+      }
      }
     }
    }
   }
   if(found){
    plan.glazedOpenings=[...(plan.glazedOpenings??[]),found];
-   applied.push({...found,authorship:'HOST_DERIVED_MINIMUM_DAYLIGHT',
+   applied.push({...found,
+    authorship:intent?'MODEL_DAYLIGHT_INTENT_HOST_GEOMETRY':
+     'HOST_DERIVED_MINIMUM_DAYLIGHT',
+    ...(intent?{modelDaylightIntent:structuredClone(intent),
+     requestedFaceSatisfied:found.face===intent.preferredFace,
+     requestedScaleSatisfied:intent.scale==='generous'?
+      found.width===4&&found.height===3:
+      intent.scale==='balanced'?found.width>=3&&found.height>=2:
+      found.width===2&&found.height===2}:{}),
     acceptedUnder:'FULL_R190_SOURCE_AND_CIRCULATION_QA'});
    current=accepted;
   }else skipped.push({spaceId:s.id,reason:'NO_VERIFIED_EXTERIOR_WINDOW',
+   ...(intent?{modelDaylightIntent:structuredClone(intent)}:{}),
    rejectedReasons:Object.fromEntries(rejected)});
  }
  if(JSON.stringify(base.hostDerivedPlan)!==original)fail('BASE_MUTATED');

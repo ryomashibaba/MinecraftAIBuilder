@@ -32,7 +32,8 @@ const resolution={source:'HOST_DETERMINISTIC_GEOMETRY_NOT_MODEL_COORDINATES',
  envelope:'host capacity 80x80x22, not a model-declared real site'};
 export function inspectR190CompactProgram(program){
  const p=typeof program==='string'?JSON.parse(program):program;
- ok(exact(p,['schema','id','title','brief','entranceFace','spaces','materials'])&&
+ ok(exact(p,['schema','id','title','brief','entranceFace','spaces','materials',
+   ...(Object.hasOwn(p??{},'daylightIntent')?['daylightIntent']:[])])&&
   p.schema===R190_COMPACT_SCHEMA&&slug(p.id)&&txt(p.title,100)&&txt(p.brief,400)&&
   dirs.includes(p.entranceFace),'IDENTITY');
  ok(Array.isArray(p.spaces)&&p.spaces.length>=2&&p.spaces.length<=4,'ROOM_COUNT');
@@ -59,6 +60,20 @@ export function inspectR190CompactProgram(program){
  ok(p.spaces.filter(x=>x.form==='sky-court').length<=1,'SKY_COURT_BUDGET');
  ok(p.spaces.filter(x=>x.form==='open-court').length<=1,'OPEN_COURT_BUDGET');
  ok(p.spaces[0].form!=='open-court','ENTRANCE_MUST_BE_ENCLOSED');
+ // New optional MODEL intent, without numeric B143 geometry or source writes.
+ if(Object.hasOwn(p,'daylightIntent')){
+  ok(Array.isArray(p.daylightIntent)&&p.daylightIntent.length>=1&&
+   p.daylightIntent.length<=p.spaces.length,'DAYLIGHT_INTENT_COUNT');
+  const claimed=new Set();
+  for(const choice of p.daylightIntent){
+   ok(exact(choice,['spaceId','preferredFace','scale'])&&
+    ids.has(choice.spaceId)&&!claimed.has(choice.spaceId)&&
+    dirs.includes(choice.preferredFace)&&
+    ['modest','balanced','generous'].includes(choice.scale),
+    'DAYLIGHT_INTENT_FIELDS');
+   claimed.add(choice.spaceId);
+  }
+ }
  return structuredClone(p);
 }
 function chooseFacetFace(space,rooms,entranceFace){

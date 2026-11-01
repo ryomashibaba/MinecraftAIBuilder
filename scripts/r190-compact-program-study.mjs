@@ -27,7 +27,7 @@ const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({
  '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export const R190_COMPACT_SYSTEM=[
  'You are an independent architect. Author a short functional and architectural program, NOT numeric geometry or Minecraft commands.',
- 'Return exactly ONE JSON object with schema='+R190_COMPACT_SCHEMA+' and EXACT top-level keys schema,id,title,brief,entranceFace,spaces,materials.',
+ 'Return exactly ONE JSON object with schema='+R190_COMPACT_SCHEMA+' and EXACT top-level keys schema,id,title,brief,entranceFace,spaces,materials, plus OPTIONAL daylightIntent.',
  'id and space ids must match ASCII lowercase kebab-case ^[a-z][a-z0-9-]{2,39}$. Titles, purpose and brief are free descriptive text.',
  'entranceFace: north/south/east/west. materials has exactly floor,wall,roof each chosen from wood,stone,concrete,metal.',
  'spaces MUST contain 2..4 independently meaningful connected areas, each with EXACT keys:',
@@ -38,6 +38,7 @@ export const R190_COMPACT_SYSTEM=[
  'privacy=public/shared/private. form=plain/facet/ridge/shed/sky-court/open-court. Select form to serve actual function and daylight, never as random decoration.',
  'There may be at most 2 facet, 2 ridge-or-shed, 1 sky-court, and 1 open-court rooms. The entrance cannot be open-court.',
  'One room may have ONE form only; this prevents roof/facet/courtyard conflicts. No glazedOpenings, roofFormIntents, formIntents, site coordinates, commands, code or BuildPlan in the response.',
+ 'OPTIONAL daylightIntent is a list of distinct rooms each with EXACT {spaceId,preferredFace,scale}. preferredFace=north/east/west/south; scale=modest/balanced/generous. You choose the functional daylight/view intention, NOT window pixel dimensions. The HOST tests actual exterior openings and reports any deviation. Avoid fixed building-type templates.',
  'Give a functional, memorable, coherent building with entrance and meaningful relation between spaces, rather than a fixed house/shop/lab template.',
  'The output is a design PROGRAM, not finished architecture. Return JSON only.'
 ].join('\n');
