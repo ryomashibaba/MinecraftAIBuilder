@@ -1,3 +1,13 @@
+## 2026-11-01 R190 3用途：外殻3/3を実測し、窓付きHOST派生の真正SOURCE研究へ
+
+- ユーザー提出 `E1_COMPACT_REPLAY_REPORT(2).json`：**SOURCE 3/3、外殻MakeCode研究パケット3/3、ローカルQwen再要求0**。住宅2140 voxels／47 cuboids（26×12×29）、花屋1802／45（25×10×33）、研究施設1400／42（16×12×30）。すべてSTRICT_USER_ATTESTED、WorldWrites 0。施工・Minecraft実歩行・窓・美術は**まだ未実施／未認証**。
+- R190共通窓研究を実装：`source/ai/r190-compact-daylight.mjs` は**AI設計プログラムと保存済み外殻SOURCEのSHAを保護**し、モデルが決めていない窓をHOST派生として別B143 SOURCE／真正GLASS／循環監査で検証する。勝手に「AIが窓を指定した」としない。適法候補なしは派生案のみHOLD。
+- `scripts/r190-compact-program-study.mjs --replay-latest` が従来の外殻と別に各用途の `WINDOWS_HOST_DERIVED_RESEARCH_ONLY/` に窓付き3Dと出力研究パケットを作成。実環境での候補成立数はユーザーPCでの再生結果待ち。バックアップ/WorldID確認のない本番施工なし。
+- 変更コミット `48ef05c76b1e` のR190-AC CIは**141件PASS／失敗0**（実Qwen原文への新実行を含まない）。R55の既知CI失敗と、未完の総合QAは分離記録。PR #128 Draft・main保護を継続。
+- 次工程は**3棟の窓付き再生結果を確認→外観・室内の人間美術評価→最低限の内装/入口歩行証拠→識別・バックアップ済みの教育版試験ワールドで施工**。複数用途の一般解として改修し、個別物件に固執しない。
+
+---
+
 ## 2026-11-01 R190実Qwen 3用途SOURCE 3/3 → R125教育版の外殻研究出力を接続
 
 - **実モデルの確認済み範囲**：ユーザー提出 `E1_COMPACT_REPLAY_REPORT(1).json` では、保存済みQwen3:14Bの住宅・花屋・研究施設がSOURCE 3/3。原文再推論0回・世界書込0回。花屋は27候補目で成立し、モデルの希望した隣接方向2箇所をホストが変更（記録済）。**外観ART、窓、室内、Minecraft実歩行・施工は未認証**。
