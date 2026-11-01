@@ -191,3 +191,62 @@ test('A fully valid synthetic original has no static glass pad or axes candidate
  assert(!r.issues.some(x=>x.code.endsWith('_CANDIDATE')));
  assert.equal(r.sourceAudit,'SOURCE_WITNESS_READY_ART_HOLD');
 });
+
+test('Third real Qwen HOLD: exactly four shell-on-one-voxel-floor mistakes independently diagnosed',()=>{
+ const p=e2SyntheticResearchFacility();
+ const floorIds=['floor-main','floor-reception','floor-workshop','floor-quiet'];
+ const rectangles=[[0,1,0,32,1,24],[12,1,2,8,1,6],
+  [4,1,10,10,1,6],[18,1,10,8,1,6]];
+ p.sourceDesign.bounds={width:32,height:16,depth:24};
+ p.sourceDesign.elements.push(...floorIds.map((id,i)=>({
+  id,shape:'box',mode:'add',material:'stone',shell:1,
+  origin:rectangles[i].slice(0,3),size:rectangles[i].slice(3)
+ })));
+ const frozen=JSON.stringify(p);
+ const r=diagnoseE2AuthoredPlan(p);
+ const issues=r.issues.filter(x=>x.code==='B143_BOX_SHELL_TOO_THICK');
+ assert.equal(issues.length,4);
+ assert.deepEqual(issues.map(x=>x.actual.id),floorIds);
+ assert(issues.every(x=>x.actual.size[1]===1&&x.actual.shell===1));
+ assert(r.issues.some(x=>x.code==='B143_VALIDATION'&&
+  x.actual==='B143_SHELL_TOO_THICK'));
+ assert.equal(r.sourceAudit,'SKIPPED_INVALID_INPUT');
+ assert.equal(r.fixesApplied,0);
+ assert.equal(r.modelRequests,0);
+ assert.equal(r.worldWrites,0);
+ assert.equal(JSON.stringify(p),frozen);
+});
+test('Third real Qwen remaining source hazards are diagnosed from authored boxes, never repaired',()=>{
+ const p=e2SyntheticResearchFacility();
+ p.sourceDesign.elements.push(
+  {id:'column-workshop',shape:'box',mode:'add',material:'stone',
+   origin:[20,2,14],size:[2,12,2]},
+  {id:'window-before-door-cut',shape:'box',mode:'add',material:'glass',
+   origin:[11,4,8],size:[2,2,1]},
+  {id:'door-cut-after-glass',shape:'box',mode:'cut',
+   origin:[11,3,8],size:[2,3,1]});
+ // This witness is inside science-lab and coincides with the new column.
+ p.programSpaces[1].witness=[20,14];
+ const frozen=JSON.stringify(p);
+ const r=diagnoseE2AuthoredPlan(p);
+ assert(r.issues.some(x=>x.code==='PROGRAM_WITNESS_SOLID_BOX_OVERLAP_CANDIDATE'&&
+  x.actual.elementId==='column-workshop'&&
+  x.actual.spaceId==='science-lab'));
+ assert(r.issues.some(x=>x.code==='GLAZING_LATER_CUT_OVERLAP_CANDIDATE'&&
+  x.actual.glassElementId==='window-before-door-cut'&&
+  x.actual.laterCutElementId==='door-cut-after-glass'));
+ assert.equal(r.sourceAudit,'SKIPPED_INVALID_INPUT');
+ assert.equal(r.fixesApplied,0);
+ assert.equal(r.worldWrites,0);
+ assert.equal(r.modelRequests,0);
+ assert.equal(JSON.stringify(p),frozen);
+});
+test('Static hazards do not falsely reject the untouched valid E2 fixture',()=>{
+ const p=e2SyntheticResearchFacility();
+ const r=diagnoseE2AuthoredPlan(p);
+ assert(!r.issues.some(x=>[
+  'B143_BOX_SHELL_TOO_THICK',
+  'PROGRAM_WITNESS_SOLID_BOX_OVERLAP_CANDIDATE',
+  'GLAZING_LATER_CUT_OVERLAP_CANDIDATE'].includes(x.code)));
+ assert.equal(r.sourceAudit,'SOURCE_WITNESS_READY_ART_HOLD');
+});

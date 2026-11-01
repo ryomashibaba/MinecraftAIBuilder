@@ -189,3 +189,16 @@ test('E2 authored contract v3 counters observed overflow, false arrival and bloc
  assert(s.includes('YOU must author ALL solids'));
  assert(s.includes('host will neither infer nor repair it'));
 });
+
+test('E2 source author contract explicitly prohibits third real Qwen floor shell and boundary-window faults',()=>{
+ const s=E2_QWEN_SYSTEM;
+ for(const fragment of [
+  'A floor of height 1 is a SOLID box with NO shell field',
+  'width, height AND depth are EACH >=3',
+  'For south window z=0 is INVALID',
+  'all dimensions of a shell:1 hollow volume are >=3',
+  'every glass addition must come AFTER all door/window cuts',
+  'program zone and 2x2 pad stays free of pillars at y=2,3'
+ ])assert(s.includes(fragment),'authoring contract missing: '+fragment);
+ assert(s.includes('YOU must author ALL solids'));
+});

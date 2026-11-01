@@ -61,3 +61,15 @@
 敷地外形状で厳格B143が停止した場合でも、**原本に存在する箱形状の静的な局所配列だけ**を検査する。受付到着 `[12,20]` の2×2領域のy=3に `reception-window-1` のglass ADDが重なるため、`ENTRANCE_GLASS_PAD_OVERLAP_CANDIDATE` を新設。同一原点の宣言された窓とガラスBOXの軸・厚みが不一致な場合は `GLAZING_GLASS_BOX_AXES_CANDIDATE` として、受付northの期待 `[4,4,1]` 対実際 `[4,4,2]`、西/東窓の期待 `[1,4,4]` 対実際 `[4,4,2]` の3件を独立に確認する。
 
 これらは**完全な最終voxel検査ではなく、静的候補**。後続cut・非box形状が作る最終状態や外観の良否は証明しない。SOURCEの正式判定は変更しない。候補を合格扱いせず、不正な著作物も自動修正しない。今後の実モデルHOLDレポートには他の診断と同時掲載される。
+
+## 第3回実Qwen原本：SHELL_TOO_THICK およびSOURCE候補検出（2026-11-01 JST）
+
+受領した `E2_CHAT_HANDOFF(2).json` はモデル `qwen3:14b`、実送信1回、`finishReason=stop`、原文SHA256 `8cf6be20c47c933481fceaeb7312a4278470e48d48f2a22a84880fa6183f9bca` が再計算一致。敷地 `32x16x24`、モデルが著作したBOX 24要素、用途空間3件。SOURCE_HOLD理由は `B143_SHELL_TOO_THICK`。原本を変更していない。
+
+`floor-main`, `floor-reception`, `floor-workshop`, `floor-quiet` の4件はいずれも `size.y=1` の床に `shell:1` を設定したため、B143の `size.y > 2*shell` 条件を満たさない。その他、入口接近padとwindow-entranceのガラス重複、敷地南端z0のガラス窓、east窓2件の厚みと軸違反が前回改良診断で検出済み。
+
+独立の静的原文比較では、共同製作スペース `witness=[8,12]` に `column-workshop` の不透明立体が重なる。また `window-workshop` と `window-quiet` の後続ドアCUTが両glass原点と重なる。これらは**物理SOURCEの最終占有証拠ではない静的候補**としてのみ扱う。
+
+診断を拡張し、上の4件の殻厚構文違反・witnessと後段追加不透明BOXの重複・窓glassと後段CUTの重複を一回に列挙する。E2著作モデルには1段床/屋根へshell禁止、3軸全て>=3の中空化、外側空気が通る敷地内セットバックの窓、内外歩行位置の無障害、glassは最後、を説明する。モデルの原文を修復する機能は追加しない。
+
+連続した実Qwen建築生成3件はいずれも厳格SOURCE_HOLD。プロンプトを追加するだけでは自由幾何著作のSOURCE成立を保証できない。次段階では、検証可能なモデル著作空間表現の再設計を比較検討することが優先。合成CIは実モデル成功・建築美術合格を意味しない。

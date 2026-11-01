@@ -56,6 +56,11 @@ export function diagnoseE2AuthoredPlan(plan){
     'sourceDesign.elements['+i+']',
     {id:e.id,origin:e.origin,size:e.size,endExclusive:end},
     {bounds:[w,h,d],rule:'0<=origin AND origin+size<=bounds'});
+   if(Number.isSafeInteger(e.shell)&&e.shell>0&&
+    e.size.some(length=>length<=e.shell*2))
+    add('B143_BOX_SHELL_TOO_THICK','sourceDesign.elements['+i+'].shell',
+     {id:e.id,shell:e.shell,size:e.size},
+     'shell>0 requires EVERY box size dimension strictly greater than 2*shell; a one-voxel floor must NOT have shell');
   }
  }
 
@@ -106,6 +111,49 @@ export function diagnoseE2AuthoredPlan(plan){
    e.size.length===3&&e.size.every(v=>Number.isSafeInteger(v)&&v>=1)?
    [{id:e.id,index:i,origin:e.origin,size:e.size}]:[]):[];
  const intersect=(a0,a1,b0,b1)=>a0<b1&&b0<a1;
+ // These are only source-order and AABB indicators. Shell interiors,
+ // subsequent CUT, non-box shapes and all final voxels need canonical review.
+ // Do not use these signals as proof of actual walkability or source validity.
+ const solidBoxes=Array.isArray(design?.elements)?
+  design.elements.flatMap((e,i)=>e?.shape==='box'&&e.mode==='add'&&
+   !e.shell&&e.material!=='glass'&&Array.isArray(e.origin)&&
+   Array.isArray(e.size)&&e.origin.length===3&&e.size.length===3&&
+   [...e.origin,...e.size].every(Number.isSafeInteger)&&
+   e.size.every(n=>n>=1)?
+   [{id:e.id,index:i,origin:e.origin,size:e.size}]:[]):[];
+ if(Array.isArray(spaces))for(const [i,s] of spaces.entries()){
+  const pad=s?.witness;
+  if(!Array.isArray(pad)||pad.length!==2||!pad.every(Number.isSafeInteger))continue;
+  for(const solid of solidBoxes){
+   const [x,y,z]=solid.origin,[w,h,d]=solid.size;
+   if(intersect(x,x+w,pad[0],pad[0]+2)&&
+    intersect(y,y+h,2,4)&&intersect(z,z+d,pad[1],pad[1]+2))
+    add('PROGRAM_WITNESS_SOLID_BOX_OVERLAP_CANDIDATE',
+     'programSpaces['+i+'].witness',
+     {spaceId:s.id,pad,elementId:solid.id,elementIndex:solid.index},
+     '2x2 witness at y=2,3 must contain AIR; any later cuts may change final occupancy');
+  }
+ }
+ // Model-authored glass may be erased by a subsequent BOX cut. Flag each
+ // matching geometric overlap once; physical voxels are deliberately NOT
+ // compiled for an already invalid source.
+ if(Array.isArray(design?.elements))for(const glass of glassBoxes){
+  const [gx,gy,gz]=glass.origin,[gw,gh,gd]=glass.size;
+  for(let i=glass.index+1;i<design.elements.length;i++){
+   const e=design.elements[i];
+   if(e?.shape!=='box'||e.mode!=='cut'||!Array.isArray(e.origin)||
+    !Array.isArray(e.size)||e.origin.length!==3||e.size.length!==3||
+    ![...e.origin,...e.size].every(Number.isSafeInteger)||
+    !e.size.every(v=>v>=1))continue;
+   if(intersect(gx,gx+gw,e.origin[0],e.origin[0]+e.size[0])&&
+    intersect(gy,gy+gh,e.origin[1],e.origin[1]+e.size[1])&&
+    intersect(gz,gz+gd,e.origin[2],e.origin[2]+e.size[2]))
+    add('GLAZING_LATER_CUT_OVERLAP_CANDIDATE',
+     'sourceDesign.elements['+glass.index+']',
+     {glassElementId:glass.id,laterCutElementId:e.id,laterCutIndex:i},
+     'A later cut overlaps model-authored glass; actual source occupancy needs canonical audit');
+  }
+ }
  const entrance=plan.entrance;
  if(required(entrance,['spaceId','face','approachPad','arrivalPad'],'entrance')){
   if(!spaceIds.has(entrance.spaceId))add('ENTRANCE_SPACE_REFERENCE','entrance.spaceId',entrance.spaceId,'existing programSpaces[].id');
