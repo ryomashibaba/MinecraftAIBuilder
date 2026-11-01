@@ -1,12 +1,15 @@
-## 2026-11-01 R190 3用途：外殻3/3を実測し、窓付きHOST派生の真正SOURCE研究へ
+## 2026-11-01 再開の現在地 — 実Qwen 3用途SOURCE/窓派生/教育外殻 3/3
 
-- ユーザー提出 `E1_COMPACT_REPLAY_REPORT(2).json`：**SOURCE 3/3、外殻MakeCode研究パケット3/3、ローカルQwen再要求0**。住宅2140 voxels／47 cuboids（26×12×29）、花屋1802／45（25×10×33）、研究施設1400／42（16×12×30）。すべてSTRICT_USER_ATTESTED、WorldWrites 0。施工・Minecraft実歩行・窓・美術は**まだ未実施／未認証**。
-- R190共通窓研究を実装：`source/ai/r190-compact-daylight.mjs` は**AI設計プログラムと保存済み外殻SOURCEのSHAを保護**し、モデルが決めていない窓をHOST派生として別B143 SOURCE／真正GLASS／循環監査で検証する。勝手に「AIが窓を指定した」としない。適法候補なしは派生案のみHOLD。
-- `scripts/r190-compact-program-study.mjs --replay-latest` が従来の外殻と別に各用途の `WINDOWS_HOST_DERIVED_RESEARCH_ONLY/` に窓付き3Dと出力研究パケットを作成。実環境での候補成立数はユーザーPCでの再生結果待ち。バックアップ/WorldID確認のない本番施工なし。
-- 変更コミット `48ef05c76b1e` のR190-AC CIは**141件PASS／失敗0**（実Qwen原文への新実行を含まない）。R55の既知CI失敗と、未完の総合QAは分離記録。PR #128 Draft・main保護を継続。
-- 次工程は**3棟の窓付き再生結果を確認→外観・室内の人間美術評価→最低限の内装/入口歩行証拠→識別・バックアップ済みの教育版試験ワールドで施工**。複数用途の一般解として改修し、個別物件に固執しない。
+**新しいチャットはこのGitHub正本から再開する。PDF/ZIP/引き継ぎMarkdownを毎回生成したり、ユーザーに貼り直させない。** 最初に本ファイル、`docs/AI_PROJECT_CHARTER_JA.md`、`docs/PROJECT_STRATEGY_V2_JA.md`、必要に応じて`docs/R125_THIN_VERTICAL_SLICE_PLAN_JA.md`、続いてPR #128のHEADと関連CIを確認する。記述済みの旧コミット/古いCI結果を最新と混同しない。新チャットでは「MinecraftAIBuilderをGitHub正本から引き継いで、次工程へ進めて」だけでよい。GitHubの未反映のローカル実測証拠があるときだけ追加ファイルを受け取る。
 
----
+- **最新のユーザー実測**：`E1_COMPACT_REPLAY_REPORT(3).json`（2026-11-01）。保存済みQwen3:14Bの住宅・花屋・研究施設が真正B143 SOURCE **3/3**、STRICT_USER_ATTESTEDのMinecraft Education用研究外殻MakeCode **3/3**、HOST派生の実ガラス窓付きSOURCE **3/3**（住宅3、花屋3、研究施設2＝**計8窓**）。Qwen再要求0、元原文の書換0、WorldContacts/WorldWrites 0。窓付きのMakeCode研究出力も3棟とも`OFFLINE_RESEARCH_ONLY`だが、施工許可や実行済みを意味しない。
+- 外殻研究パケット：住宅2140ボクセル/47直方体（26×12×29）、花屋1802/45（25×10×33）、研究施設1400/42（16×12×30）。モデルは用途・部屋関係・外形種類を決定。ホストが実寸・配置と**窓の位置/寸法**を決定し、作者を区別。花屋は保存済み同一原文の配置探索27候補目で成立（希望方角2か所を変更）。研究施設は2候補目（1か所変更）。SOURCEのSHAとモデル原文は保護。
+- **ユーザー提供2視点スクリーンショットの美術所見**：3棟とも非矩形などの差はあるが、外観は直方体の集合に近く、住宅/花屋/研究施設の機能と建築表現の個性が十分には読み取れない。現時点の目標建築品質には未達（**ART HOLD、暫定的にはREJECT寄り**）。画像は基本外殻ビューであり、ホスト派生窓付き外観の十分な複数視点審査ではない。窓付き生成が成功しても美術PASSではない。
+- **実施工は未達**：今回の3棟のMinecraft実設置、入口から各室への実歩行・利用、内装・家具、外観の美術承認、採光の実測は未実施。9 BLOCKED/BuildPlan空/NOT_PREPAREDの安全デフォルトを維持。AIモデル実行と安全な試験ワールド施工はユーザーが包括許可済みだが、技術的なワールド識別・バックアップ・場所/範囲保護・復元・明示した実行手順が整うまで書込禁止。
+- **GitHub正本**：`ryomashibaba/MinecraftAIBuilder`、`feature/b198zr1-protected-architectural-revision`、Draft PR #128（Open）。現行コードは`source/ai/r190-compact-program.mjs`、`source/ai/r190-compact-daylight.mjs`、`scripts/r190-compact-program-study.mjs`、`source/ai/r125-education-makecode-export.mjs`。`--replay-latest` は再推論なしで保存済み原文を検証し、既存外殻・窓付き別案・研究用MakeCodeを出力し結果フォルダをエクスプローラーで自動表示する。main／凍結原本／旧ワールドは変更しない。
+- **直近優先工程**：テスト増殖や3/3 SOURCE達成の繰返しでなく、(1) 窓付き真正3Dを複数視点で人間が美術審査、(2) 入口・内装・各室アクセスを共通IR/実3Dで実用化し、(3) バックアップ済みの明示されたEducation試験ワールドで1棟を限定施工して実際に歩く。続いて他2用途とMac 8GB/2B級の実モデルを検証。特定の建築を人手テンプレートに固定しない。
+- **GitHub CIの区別**：現在HEAD・チェック名・日時を毎回再確認。2026-11-01のコード段階ではR190-AC 141件PASS等のオフライン検証あり。ただし統合CIには失敗/キャンセル/待機もあり、全CI成功でも建築美術・実ワールド施工の認証でもない。最新実測や未実行を推測で上書きしない。
+
 
 ## 2026-11-01 R190実Qwen 3用途SOURCE 3/3 → R125教育版の外殻研究出力を接続
 
