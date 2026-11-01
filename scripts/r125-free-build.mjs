@@ -71,7 +71,7 @@ export async function runFreeBuild(opts,{child=spawnSync}={}){
  const counts=report.plannedBlockCounts;
  // Only the R125 two-zone engine emits this audit; the opt-in R190 route
  // retains its own independent SOURCE/room-reachability requirements.
- const sourceReviewFile=path.join(destination,engine==='r125'?'makecode':'makecode',
+ const sourceReviewFile=path.join(path.dirname(reportFile),
   'SOURCE_WALKABILITY_REVIEW.json');
  let sourceReview=null;
  if(engine==='r125'&&fs.existsSync(sourceReviewFile)){
