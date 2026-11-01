@@ -1,3 +1,11 @@
+## 2026-11-02 実Qwen保存済み3用途のSOURCE床実測 → 外観別案に進行
+
+- **ユーザー実行の真正証拠**：`E1_COMPACT_REPLAY_REPORT(4).json` とChrome画面、保存先 `C:\\Users\\ryoma\\Projects\\MinecraftAIBuilder-E1-Outputs\\R190-COMPACT-REPLAY-HBEKJI`。住宅・花屋・研究施設の真正SOURCE 3/3、窓付きSOURCE 3/3、研究外殻MakeCode 3/3、実窓3/3/2計8。モデル再要求0、worldContacts=worldWrites=0、ART HOLD、実歩行NOT_TESTED。
+- **入口からの2×2支持床**：住宅4室 36/36＋104/104＋47/47＋104/104＝291/291、花屋4室 47/47＋104/104＋36/36＋36/36＝223/223、研究施設3室 36/36＋102/102＋36/36＝174/174。**合計11室688/688、孤立0**。2×2床の候補位置数であり、Minecraft物理歩行・内装機能・人間のART審査ではない。完成度をSOURCEの数字で偽装しない。
+- **スクリーンショット美術判定**：住宅は部屋のボリュームと外形に違いはあるが、単調なブロック外皮と小さい窓で用途・品質が十分に読み取れない。ART HOLDを継続。正本原文SHAは不変。
+- **次の実装**：既存の元外殻/小窓3Dと別に、`deriveR190CompactExpandedGlazingVariant` を導入。B143真正幾何・室内床ルートを毎候補再検証し、窓の幅/高さだけをHOST側が変える独立大窓研究案を出す。保存済み3用途の再生結果に `HOST_LARGER_GLAZING_RESEARCH_ONLY` の真正3Dとガラスセル数・作者証拠を追加する。関連コミット `0216891`（生成器）、`2fc6aba`（単体テスト）、`49dc169`（3用途接続）、`5786df7`（再生テスト）、`0e8ce0a`（文書改行修正）。**新しい大窓3DはユーザーPCで未再生・人間ART未審査。コミット/テスト記述はCI成功の主張ではない**。
+- 次は現在HEADのR190-ACとEducation-first CIを照合して、保存済み3用途 `--replay-latest` を再推論0回で再生し、小窓と大窓を同一角度で美術比較。安全条件（main/PR Draft/凍結原文/ワールド未変更、NOT_PREPARED/9 BLOCKED/BuildPlan空）を維持する。ユーザー操作を最小化し、既存専用Git cloneを`git pull --ff-only`で同期すればよい。
+
 ## 2026-11-02 追補 — 真正B143 SOURCE室内アクセスの可視化（実装保存、CI判定待ち）
 
 - 保存済み実Qwenの住宅・花屋・研究施設を、元原文に再問い合わせせず比較する現行 `replayR190CompactSaved` に、各室の2×2支持床候補の連続性を**真正最終B143ボクセルから図示するSVG** `SOURCE_FLOOR_ACCESS_MAP.svg` を追加した。入口へ連結する床は緑、孤立した床候補は橙、支持床は灰、部屋輪郭と入口実証点を表示。もとの回転3D比較HTMLからマップへ移動できる。出所・source SHA・geometry SHAの整合を再監査し、室別数値との相違はHOLDにする。建物別のハードコード・モデル原文改変・新規モデル推論なし。
