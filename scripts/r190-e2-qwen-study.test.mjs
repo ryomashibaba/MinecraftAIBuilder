@@ -183,7 +183,7 @@ test('E2 authored contract v3 counters observed overflow, false arrival and bloc
   'when bounds.depth=28, a 2-deep wall may start at z=26 but NOT z=28',
   'A doorway cut in a zone wall does NOT automatically make its threshold an interior arrivalPad',
   'do not label a Z-oriented glass wall as east/west',
-  'do not put glass on top of an entrance cut',
+  'Do not put glass on top of an entrance cut',
   'Invent original architecture rather than copying previous nested rectangular layouts'
  ])assert(s.includes(fragment),'missing v3 real-model failure contract: '+fragment);
  assert(s.includes('YOU must author ALL solids'));

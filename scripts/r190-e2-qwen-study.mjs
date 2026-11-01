@@ -52,6 +52,7 @@ export const E2_QWEN_SYSTEM=Object.freeze([
  'Use only reliable B143 material names stone,wood,glass for this first bounded source trial. This is NOT a claim of full Minecraft Education palette support.',
  'Never output unsupported fields, dangling references, inaccessible rooms, floating roofs, fake windows, spatially impossible cuts, or arbitrary exterior ornaments. Validate all element positions and B143 domain bounds mentally before final JSON.',
  'FINAL SELF-CHECK BEFORE RESPONSE: count B143 elements (at most 28 in this requested study); check for EVERY box that x+sx, y+sy, z+sz do not exceed bounds; check every program zone and 2x2 pad, especially the reception arrival; check entrance-face boundary, no glass in the arrival/circulation path, window axis and one-thick glass with free inner/outer air, width 2..8, and real roof/floor. Correct your OWN design before returning the single answer; the host will neither infer nor repair it. Invent original architecture rather than copying previous nested rectangular layouts.',
+ 'You are free to invent the architecture and its authored B143 geometry; do not copy example forms or hard-coded templates.',
  'Return ONLY the single complete model-authored E2 JSON object.'
 ].join('\n'));
 
