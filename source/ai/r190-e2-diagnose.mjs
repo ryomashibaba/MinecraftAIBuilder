@@ -96,6 +96,16 @@ export function diagnoseE2AuthoredPlan(plan){
      '2x2 floor pad inside authored zone '+JSON.stringify(z));
   }
  }
+ // Static collision candidates, not a voxel simulation: finding one does
+ // not assert that a later cut, non-box operation or model-specific operation
+ // did not alter final occupancy. The strict physical SOURCE gate is separate.
+ const glassBoxes=Array.isArray(design?.elements)?
+  design.elements.flatMap((e,i)=>e?.shape==='box'&&e.mode==='add'&&
+   e.material==='glass'&&Array.isArray(e.origin)&&e.origin.length===3&&
+   e.origin.every(Number.isSafeInteger)&&Array.isArray(e.size)&&
+   e.size.length===3&&e.size.every(v=>Number.isSafeInteger(v)&&v>=1)?
+   [{id:e.id,index:i,origin:e.origin,size:e.size}]:[]):[];
+ const intersect=(a0,a1,b0,b1)=>a0<b1&&b0<a1;
  const entrance=plan.entrance;
  if(required(entrance,['spaceId','face','approachPad','arrivalPad'],'entrance')){
   if(!spaceIds.has(entrance.spaceId))add('ENTRANCE_SPACE_REFERENCE','entrance.spaceId',entrance.spaceId,'existing programSpaces[].id');
@@ -115,6 +125,21 @@ export function diagnoseE2AuthoredPlan(plan){
      (entrance.face==='west'&&approach[0]===0)||
      (entrance.face==='east'&&approach[0]===w-2)))
    add('ENTRANCE_BOUNDARY','entrance.approachPad',approach,'2x2 pad touches declared site face');
+  // A later ADD glass box can refill an already-cut doorway. Flag direct
+  // overlap with the declared 2x2 standing area even on a SOURCE_HOLD plan.
+  for(const field of ['approachPad','arrivalPad']){
+   const pad=entrance[field];
+   if(!Array.isArray(pad)||pad.length!==2||!pad.every(Number.isSafeInteger))
+    continue;
+   for(const g of glassBoxes){
+    const [gx,gy,gz]=g.origin,[sx,sy,sz]=g.size;
+    if(intersect(gx,gx+sx,pad[0],pad[0]+2)&&
+     intersect(gy,gy+sy,2,4)&&intersect(gz,gz+sz,pad[1],pad[1]+2))
+     add('ENTRANCE_GLASS_PAD_OVERLAP_CANDIDATE','entrance.'+field,
+      {pad,glassElementId:g.id,glassElementIndex:g.index},
+      'No source ADD glass should overlap the standing pad at y=2,3; strict final compiled voxel audit remains authoritative');
+   }
+  }
   const target=Array.isArray(spaces)?spaces.find(x=>x?.id===entrance.spaceId):null;
   const a=entrance.arrivalPad,z=target?.zone;
   if(Array.isArray(a)&&a.length===2&&a.every(Number.isSafeInteger)&&
@@ -136,6 +161,22 @@ export function diagnoseE2AuthoredPlan(plan){
    add('GLAZING_ORIGIN',base+'.origin',g.origin,'integer [x,y,z]');
   if(!int(g.width,2,8))add('GLAZING_WIDTH',base+'.width',g.width,'integer 2..8');
   if(!int(g.height,2,4))add('GLAZING_HEIGHT',base+'.height',g.height,'integer 2..4');
+  // This checks only matching-origin glass boxes. It neither infers an
+  // undeclared source element nor mutates the author's geometry.
+  if(Array.isArray(g.origin)&&g.origin.length===3&&
+   g.origin.every(Number.isSafeInteger)&&int(g.width,2,8)&&
+   int(g.height,2,4)&&faces.includes(g.face)){
+   const ns=g.face==='north'||g.face==='south';
+   const expectedSize=ns?[g.width,g.height,1]:[1,g.height,g.width];
+   for(const box of glassBoxes){
+    if(!box.origin.every((v,k)=>v===g.origin[k]))continue;
+    if(!box.size.every((v,k)=>v===expectedSize[k]))
+     add('GLAZING_GLASS_BOX_AXES_CANDIDATE',base,
+      {glassElementId:box.id,size:box.size,face:g.face},
+      {exactOrigin:g.origin,expectedSize,
+       note:'Only same-origin declared glass box compared; strict compiled glass, inside/outside air and source audit remain authoritative'});
+   }
+  }
   if(validBounds&&Array.isArray(g.origin)&&g.origin.length===3&&g.origin.every(Number.isSafeInteger)&&
    int(g.width,2,8)&&int(g.height,2,4)&&faces.includes(g.face)){
    const [x,y,z]=g.origin,ns=g.face==='north'||g.face==='south';

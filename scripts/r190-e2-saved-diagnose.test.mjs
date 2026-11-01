@@ -150,3 +150,44 @@ test('Second real Qwen HOLD class: independent 3-box bound diagnostics survive f
  assert.equal(diag.worldWrites,0);
  assert.equal(JSON.stringify(p),original);
 });
+
+test('Observed second Qwen authored glass blocks the declared reception 2x2 pad and mismatches 3 window axes',()=>{
+ const p=e2SyntheticResearchFacility();
+ p.sourceDesign.bounds={width:32,height:16,depth:28};
+ // Compact geometry patterns extracted from the genuine Qwen handoff.
+ p.programSpaces[0].id='reception';
+ p.programSpaces[0].zone=[8,8,16,12];
+ p.entrance.spaceId='reception';
+ p.entrance.face='north';
+ p.entrance.approachPad=[12,26];
+ p.entrance.arrivalPad=[12,20];
+ p.glazedOpenings=[
+  {spaceId:'reception',face:'north',origin:[12,3,20],width:4,height:4},
+  {spaceId:'science-lab',face:'west',origin:[2,3,14],width:4,height:4},
+  {spaceId:'reception',face:'east',origin:[26,3,14],width:4,height:4}
+ ];
+ p.sourceDesign.elements.push(
+  {id:'reception-window-1',shape:'box',mode:'add',material:'glass',origin:[12,3,20],size:[4,4,2]},
+  {id:'workshop-window-1',shape:'box',mode:'add',material:'glass',origin:[2,3,14],size:[4,4,2]},
+  {id:'quiet-window-1',shape:'box',mode:'add',material:'glass',origin:[26,3,14],size:[4,4,2]});
+ const original=JSON.stringify(p);
+ const r=diagnoseE2AuthoredPlan(p);
+ const pad=r.issues.filter(x=>x.code==='ENTRANCE_GLASS_PAD_OVERLAP_CANDIDATE');
+ const axis=r.issues.filter(x=>x.code==='GLAZING_GLASS_BOX_AXES_CANDIDATE');
+ assert.equal(pad.length,1);
+ assert.equal(pad[0].actual.glassElementId,'reception-window-1');
+ assert.equal(pad[0].path,'entrance.arrivalPad');
+ assert.equal(axis.length,3);
+ assert.deepEqual(axis.map(x=>x.expected.expectedSize),[[4,4,1],[1,4,4],[1,4,4]]);
+ assert.equal(r.sourceAudit,'SKIPPED_INVALID_INPUT');
+ assert.equal(r.fixesApplied,0);
+ assert.equal(r.worldWrites,0);
+ assert.equal(r.modelRequests,0);
+ assert.equal(JSON.stringify(p),original);
+});
+test('A fully valid synthetic original has no static glass pad or axes candidates',()=>{
+ const p=e2SyntheticResearchFacility();
+ const r=diagnoseE2AuthoredPlan(p);
+ assert(!r.issues.some(x=>x.code.endsWith('_CANDIDATE')));
+ assert.equal(r.sourceAudit,'SOURCE_WITNESS_READY_ART_HOLD');
+});
