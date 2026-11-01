@@ -6,6 +6,10 @@
     "wood": {
       "blockName": "oak_planks",
       "evidence": "2026-10-31 user report: copied-world mabprobe PROBE MATCH and visually confirmed oak-plank block; screenshot in chat"
+    },
+    "concrete": {
+      "blockName": "white_concrete",
+      "evidence": "2026-11-01 user screenshot of Minecraft Education: chat PROBE MATCH white_concrete and visibly placed white concrete block; concrete color is host default, not AI-authored"
     }
   }
 }

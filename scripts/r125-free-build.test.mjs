@@ -144,3 +144,29 @@ test('R125 produces no construction-ready status when mandatory source walkabili
   assert.equal(status.worldWrites,0);
  }finally{fs.rmSync(root,{recursive:true,force:true});}
 });
+
+test('verified white_concrete supports AI-authored generic concrete roof without modifying plan',async()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'r125-white-concrete-proven-'));
+ const plan={schema:'minecraftaibuilder-r125-architecture-plan-v1',id:'stone-wood-concrete-store',
+  title:'Retail and employee rooms',brief:'Generic independent model-authored materials proof',
+  footprint:{width:18,depth:18},levels:[{splitAxis:'x',splitPercent:50,
+   spaces:[{id:'shop-front',purpose:'Front retail sales'},
+    {id:'shop-back',purpose:'Employee storage'}]}],
+  materials:{floor:'wood',wall:'stone',roof:'concrete'}};
+ try{
+  const source=path.join(root,'PLAN.json');
+  fs.writeFileSync(source,JSON.stringify(plan));
+  const result=await runFreeBuild({model:'qwen3:14b',prompt:null,plan:source,
+   outRoot:path.join(root,'outputs')});
+  assert.equal(result.status,'MAKECODE_READY_HUMAN_REVIEW_REQUIRED');
+  assert.equal(result.worldWrites,0);
+  assert.equal(result.sourceWalkability,'SOURCE_ROUTE_CANDIDATE');
+  assert((result.plannedBlockCounts.white_concrete??0)>0);
+  assert((result.plannedBlockCounts.oak_planks??0)>0);
+  assert((result.plannedBlockCounts.stone??0)>0);
+  const code=fs.readFileSync(result.makecode,'utf8');
+  assert.match(code,/blocks\.blockByName\("white_concrete"\)/);
+  assert.match(code,/blocks\.blockByName\("oak_planks"\)/);
+  assert.deepEqual(JSON.parse(fs.readFileSync(source,'utf8')),plan);
+ }finally{fs.rmSync(root,{recursive:true,force:true});}
+});
