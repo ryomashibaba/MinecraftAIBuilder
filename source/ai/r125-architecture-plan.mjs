@@ -36,7 +36,9 @@ export function validateArchitecturePlan(p){
   'MATERIAL_PALETTE');
  if(expressive){
   const e=p.expression;
-  check(keys(e,['setbackSide','setbackDepth','roofProfile','roofAxis','facadeLanguage']),
+  check(keys(e,Object.hasOwn(e,'rearCornerCut')?
+   ['setbackSide','setbackDepth','roofProfile','roofAxis','facadeLanguage','rearCornerCut']:
+   ['setbackSide','setbackDepth','roofProfile','roofAxis','facadeLanguage']),
    'EXPRESSION_FIELDS');
   check(['none','east','rear'].includes(e.setbackSide)&&
    ((e.setbackSide==='none'&&e.setbackDepth===0)||
@@ -46,6 +48,15 @@ export function validateArchitecturePlan(p){
    ['x','z'].includes(e.roofAxis)&&
    ['plain','fins','screen'].includes(e.facadeLanguage),
    'EXPRESSION_STYLE');
+  if(Object.hasOwn(e,'rearCornerCut')){
+   check(keys(e.rearCornerCut,['width','depth'])&&
+    integer(e.rearCornerCut.width,3,5)&&integer(e.rearCornerCut.depth,3,5),
+    'EXPRESSION_CORNER_CUT');
+   // A full-height recess cannot share the current upper setback or
+   // raised roof profiles without compromising the enclosing envelope.
+   check(e.setbackSide==='none'&&e.roofProfile==='flat',
+    'EXPRESSION_CORNER_CONFLICT');
+  }
  }
  const seen=new Set();
  for(const level of p.levels){
@@ -269,7 +280,8 @@ export function auditArchitecturePlanCirculation(product){
 function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy'}={}){
  const {width:w,depth:d}=original.footprint;
  const count=original.levels.length;
- const {setbackSide,setbackDepth,roofProfile,roofAxis,facadeLanguage}=original.expression;
+ const {setbackSide,setbackDepth,roofProfile,roofAxis,facadeLanguage,
+  rearCornerCut}=original.expression;
  const {floor,wall,roof}=original.materials,elements=[],program=[];
  const box=(id,mode,material,origin,size)=>elements.push({
   id,shape:'box',mode,...(mode==='add'?{material}:{}),origin,size});
@@ -336,6 +348,12 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy'}
   const [first,second]=level.spaces;
   program.push({level:l,splitAxis:axis,requestedPercent:level.splitPercent,
    splitCoordinate:split,standingFloorY:y,
+   // The space ranges below are bounding boxes; the real occupied region
+   // excludes this model-authored open-air corner. SOURCE audits use voxels.
+   ...(rearCornerCut?{openAirRecess:{
+    x:[w-1-rearCornerCut.width,w-2],
+    z:[d-1-rearCornerCut.depth,d-2]
+   }}:{}),
    zones:axis==='x'?[
     {id:first.id,purpose:first.purpose,range:{x:[x0+1,split-1],z:[z0+1,z1-1]}},
     {id:second.id,purpose:second.purpose,range:{x:[split+1,x1-1],z:[z0+1,z1-1]}}
@@ -366,6 +384,32 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy'}
     [1,height,upper.z1-upper.z0+1]:
     [upper.x1-upper.x0+1,height,1];
    box('roof-profile-'+pos,'add',roof,origin,size);
+  }
+ }
+ // An opt-in model-selected full-height recess forms a true L-shaped floor,
+ // matching roof, and re-entrant walls. Do not silently replace missing
+ // floor voxels with a decorative notch on an otherwise rectangular shell.
+ if(rearCornerCut){
+  const xCut=w-1-rearCornerCut.width;
+  const zCut=d-1-rearCornerCut.depth;
+  box('rear-corner-void','cut',null,[xCut,1,zCut],
+   [rearCornerCut.width,top+1,rearCornerCut.depth]);
+  for(let l=0;l<count;l++){
+   const y=2+5*l,tag='l'+l;
+   box(tag+'-recess-east-wall','add',wall,
+    [xCut-1,y,zCut],[1,4,rearCornerCut.depth]);
+   box(tag+'-recess-rear-wall','add',wall,
+    [xCut,y,zCut-1],[rearCornerCut.width,4,1]);
+   // Restore daylight on both re-entrant faces after old rear/east
+   // window voxels were removed with the former external corner.
+   box(tag+'-recess-east-window-cut','cut',null,
+    [xCut-1,y+1,zCut+1],[1,2,2]);
+   box(tag+'-recess-east-window-glass','add','glass',
+    [xCut-1,y+1,zCut+1],[1,2,2]);
+   box(tag+'-recess-rear-window-cut','cut',null,
+    [xCut+1,y+1,zCut-1],[2,2,1]);
+   box(tag+'-recess-rear-window-glass','add','glass',
+    [xCut+1,y+1,zCut-1],[2,2,1]);
   }
  }
  // The upper floor is an occupied terrace plate beyond the upper envelope;

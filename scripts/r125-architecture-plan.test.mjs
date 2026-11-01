@@ -4,6 +4,7 @@ import {SCHEMA,validateArchitecturePlan,compileArchitecturePlan,
  auditArchitecturePlanCirculation,assessR125ProgramGeometry}
  from '../source/ai/r125-architecture-plan.mjs';
 import {verifyCompiled,compileDesign} from '../source/ai/b143-building-dsl.mjs';
+import {auditR125SourceRoutes} from '../source/ai/r125-source-routes.mjs';
 import {critiqueArchitecture} from '../source/ai/b198c-spatial-critic.mjs';
 
 const plan=(id,axes=['x'],spaces=['family room','kitchen'])=>({
@@ -227,4 +228,52 @@ test('a south entry for z partition needs no source-accessible coordinate change
  assert.equal(practical.sourceSha256,old.sourceSha256);
  assert.equal(practical.geometrySha256,old.geometrySha256);
  assert.equal(practical.planSha256,old.planSha256);
+});
+
+
+test('opt-in model-authored corner recess removes real floor and roof, encloses both re-entrant faces, and preserves SOURCE paths',()=>{
+ for(const axes of [['x'],['x','z']]){
+  const base=plan('corner-recess-'+axes.length,axes,['flexible studio','support room']);
+  base.footprint={width:24,depth:28};
+  const original=structuredClone(base);
+  const expression={setbackSide:'none',setbackDepth:0,
+   roofProfile:'flat',roofAxis:'x',facadeLanguage:'plain',
+   rearCornerCut:{width:5,depth:4}};
+  const built=compileArchitecturePlan({...base,expression},
+   {entrancePlacement:'source-accessible'});
+  const v=voxels(built.compiled);
+  const xCut=18,zCut=23;
+  assert.equal(verifyCompiled(built.design,built.compiled),true);
+  assert.equal(includes(v,22,1,26),false); // full-height open-air recess
+  assert.equal(includes(v,22,6,26),false); // removed roof or upper floor
+  assert.equal(includes(v,xCut-1,2,zCut+3),true); // enclosing recessed wall
+  assert.equal(includes(v,xCut+4,2,zCut-1),true);
+  assert.equal(includes(v,xCut-1,3,zCut+1),true); // real recessed glazing
+  assert.equal(includes(v,xCut+1,3,zCut-1),true);
+  assert.equal(includes(v,6,1,6),true); // functional interior floor remains
+  assert.deepEqual(built.program[0].openAirRecess,
+   {x:[18,22],z:[23,26]});
+  assert.equal(auditArchitecturePlanCirculation(built).status,
+   'SOURCE_CLEARANCE_PROBES_PASS');
+  const routes=auditR125SourceRoutes(built);
+  assert.equal(routes.status,'SOURCE_ROUTES_REACH_ALL_ZONES',
+   JSON.stringify(routes.issues));
+  assert.equal(built.worldWrites,0);
+  assert(built.gates.every(x=>x==='BLOCKED'));
+  assert.deepEqual(base,original); // authored input not mutated
+ }
+});
+test('corner recess fails closed on malformed size and unsupported massing combinations',()=>{
+ const base=plan('bounded-corner',['x']);
+ const expression={setbackSide:'none',setbackDepth:0,
+  roofProfile:'flat',roofAxis:'x',facadeLanguage:'plain',
+  rearCornerCut:{width:4,depth:5}};
+ for(const candidate of [
+  {...expression,rearCornerCut:{width:2,depth:4}},
+  {...expression,rearCornerCut:{width:6,depth:4}},
+  {...expression,rearCornerCut:{width:4,depth:5,script:'bad'}},
+  {...expression,roofProfile:'ridge'},
+  {...expression,setbackSide:'rear',setbackDepth:3}
+ ])assert.throws(()=>compileArchitecturePlan({...base,expression:candidate}),
+  /R125_PLAN_EXPRESSION_(CORNER_CUT|CORNER_CONFLICT|SETBACK)/);
 });

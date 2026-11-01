@@ -32,9 +32,10 @@ const SYSTEM=[
  'Generic building geometry will safely compile actual 3D floor supports, doors, glazing, internal doors, stairs, roof and air space.',
  'Your job is only concept, original functions, level-to-level zoning, footprint and palette. Do not pretend to certify walking or Minecraft building.',
  'For multi-use buildings, change real functional program and orientation, not only title. Do not copy fixed sample room names.',
- 'OPTIONAL expression must have EXACT fields setbackSide,setbackDepth,roofProfile,roofAxis,facadeLanguage.',
+ 'OPTIONAL expression must include setbackSide,setbackDepth,roofProfile,roofAxis,facadeLanguage, plus OPTIONAL rearCornerCut object with EXACT fields width,depth.',
  'setbackSide is "none", "east", or "rear"; setbackDepth must be 0 for none, otherwise 2,3,4 and ONLY when there are 2 levels.',
  'roofProfile is flat,ridge,sawtooth; roofAxis is x or z; facadeLanguage is plain,fins,screen.',
+ 'If your architectural concept benefits from a TRUE L-shaped mass and open-air rear-right corner, choose rearCornerCut:{width:3..5,depth:3..5} (integers). This removes real floors, wall and roof at that corner and creates two enclosing glazed faces. It is ONLY allowed with setbackSide:none, setbackDepth:0, roofProfile:flat.',
  'Choose an independent, striking yet functional architectural silhouette; expressed roof and upper setback must serve your spatial concept. Do not add arbitrary scripts or coordinates.'
 ].join('\n');
 const blank=()=>({
