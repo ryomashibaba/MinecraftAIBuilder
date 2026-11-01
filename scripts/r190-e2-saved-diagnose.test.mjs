@@ -197,7 +197,7 @@ test('Third real Qwen HOLD: exactly four shell-on-one-voxel-floor mistakes indep
  const floorIds=['floor-main','floor-reception','floor-workshop','floor-quiet'];
  const rectangles=[[0,1,0,32,1,24],[12,1,2,8,1,6],
   [4,1,10,10,1,6],[18,1,10,8,1,6]];
- p.sourceDesign.bounds={width:32,height:16,depth:24};
+ // Keep the valid fixture's original site bounds: the test isolates shell errors.
  p.sourceDesign.elements.push(...floorIds.map((id,i)=>({
   id,shape:'box',mode:'add',material:'stone',shell:1,
   origin:rectangles[i].slice(0,3),size:rectangles[i].slice(3)
