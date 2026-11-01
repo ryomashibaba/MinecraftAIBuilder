@@ -15,6 +15,7 @@ import {R190_COMPACT_SCHEMA,compileR190CompactProgram}
  from '../source/ai/r190-compact-program.mjs';
 import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
 import {verifyCompiled} from '../source/ai/b143-building-dsl.mjs';
+import {exportB143EducationMakeCode} from '../source/ai/r125-education-makecode-export.mjs';
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const sha=x=>createHash('sha256').update(x).digest('hex');
 const save=(p,x)=>fs.writeFileSync(p,typeof x==='string'?x:JSON.stringify(x,null,2)+'\n',{flag:'wx'});
@@ -223,7 +224,8 @@ export function replayR190CompactSaved({previousDir,outRoot=null}={}){
  for(const item of R190_E1_STUDY_BRIEFS){
   const row=priorRows.get(item.id),original=originals.get(item.id);
   let sourceCompiled=false,reason=null,diagnostics=null,
-   sourceSha256=null,geometrySha256=null,viewer=null,hostResolution=null;
+   sourceSha256=null,geometrySha256=null,viewer=null,hostResolution=null,
+   educationExport={status:'NOT_ATTEMPTED_SOURCE_HOLD'};
   try{
    const x=compileR190CompactProgram(original.toString('utf8'));
    sourceSha256=x.built.compiled.sourceSha256;
@@ -239,6 +241,53 @@ export function replayR190CompactSaved({previousDir,outRoot=null}={}){
    save(path.join(folder,'index.html'),renderB143Html(gallery,template));
    save(path.join(folder,'HOST_RESOLUTION.json'),hostResolution);
    viewer=item.id+'/model/index.html';
+   // Separate, strict palette-only Minecraft Education SHELL research packet.
+   // This does NOT certify windows, interiors, world identity or actual walking.
+   // Failure must not invalidate a valid design/source.
+   try{
+    const palette=JSON.parse(fs.readFileSync(path.join(ROOT,'configs',
+     'r125-education-verified-palette-v26.33.json'),'utf8'));
+    const packet=exportB143EducationMakeCode({
+     design:x.built.design,scene:x.built.compiled,
+     verifiedPalette:palette,provenance:'LOCAL_MODEL_CAPTURE',
+     tightVoxelEnvelope:true,groundLowestLayer:true
+    });
+    if(packet.sourceSha256!==sourceSha256||
+     packet.geometrySha256!==geometrySha256||
+     packet.worldWrites!==0||packet.programExecuted!==false||
+     packet.constructionApproved!==false||
+     packet.BuildPlan.operations.length!==0)
+     throw Error('SHELL_PROVENANCE_OR_SAFETY_MISMATCH');
+    const shell=path.join(dir,item.id,'EDUCATION_SHELL_RESEARCH_ONLY');
+    fs.mkdirSync(shell,{recursive:true});
+    save(path.join(shell,'MAKECODE_EDUCATION.ts'),packet.code);
+    const {code,...meta}=packet;
+    const exportRecord={...meta,
+     researchStage:'UNFINISHED_SHELL_NO_WINDOWS_OR_ART_APPROVAL',
+     originalModelProgramSha256:sha(original),
+     humanMinecraftBuild:'NOT_EXECUTED',
+     worldIdentity:'NOT_VERIFIED',
+     constructionApproved:false,worldWrites:0,
+     readiness:'NOT_PREPARED',
+     BuildPlan:{operations:[]},
+     gates:Array(9).fill('BLOCKED')};
+    save(path.join(shell,'SHELL_EXPORT_REPORT.json'),exportRecord);
+    save(path.join(shell,'READ_FIRST_JA.txt'),
+     '研究用の建物外殻だけです。窓・室内・建築美術・実歩行は未検証。\n'+
+     'Minecraftへの自動施工・ワールドID/バックアップの自動確認は行われません。\n'+
+     'もし試験する場合も、バックアップ済みの空き試験ワールドだけで\n'+
+     'Code Builderに貼り付け、mabset→mabbuild→mabverifyを人間が実行します。\n'+
+     '新たな本番施工・MVP完成と認定しないでください。\n');
+    educationExport={status:'OFFLINE_SHELL_RESEARCH_PACKET_ONLY',
+     output:path.join(shell,'MAKECODE_EDUCATION.ts'),
+     report:path.join(shell,'SHELL_EXPORT_REPORT.json'),
+     cuboids:packet.plannedCuboids,voxels:packet.plannedVoxelCount,
+     bounds:packet.bounds,materialMode:packet.materialMode,
+     worldWrites:0,windows:'NOT_VERIFIED',minecraftWalking:'NOT_TESTED'};
+   }catch(e){
+    educationExport={status:'HOLD_NO_SHELL_PACKET',
+     reason:String(e?.message??e).slice(0,400),worldWrites:0};
+   }
   }catch(e){
    reason=String(e?.message??e).slice(0,900);
    diagnostics=e?.diagnostics??null;
@@ -246,7 +295,7 @@ export function replayR190CompactSaved({previousDir,outRoot=null}={}){
   rows.push({id:item.id,originalSourceCompiled:row.sourceCompiled,
    status:sourceCompiled?'REPLAY_SOURCE_VALID_ART_HOLD':'REPLAY_SOURCE_HOLD',
    sourceCompiled,reason,diagnostics,originalResponseSha256:sha(original),
-   sourceSha256,geometrySha256,viewer,hostResolution,modelRequests:0,
+   sourceSha256,geometrySha256,viewer,hostResolution,educationExport,modelRequests:0,
    provenance:'SAVED_MODEL_PROGRAM_READ_ONLY_REPLAY',
    art:'NOT_REVIEWED',worldWrites:0});
  }
@@ -258,11 +307,14 @@ export function replayR190CompactSaved({previousDir,outRoot=null}={}){
    throw Error('R190_COMPACT_REPLAY_ORIGINAL_CHANGED');
  }
  const count=rows.filter(x=>x.sourceCompiled).length;
+ const shellPacketCount=rows.filter(x=>
+  x.educationExport.status==='OFFLINE_SHELL_RESEARCH_PACKET_ONLY').length;
  const report={schema:'r190-compact-readonly-replay-v1',
   previousReportSha256:sha(sourceReport),previousProvenance:prior.provenance,
   localModelRequests:0,sourceCompiledCount:count,requestedUseCount:3,
   status:count===3?'THREE_SOURCE_REPLAY_CANDIDATES_ART_HOLD':'SOURCE_REPLAY_INCOMPLETE_HOLD',
-  makecode:'NOT_GENERATED',minecraftWalking:'NOT_TESTED',
+  makecode:'SHELL_RESEARCH_ONLY_NOT_APPROVED',
+  shellPacketCount,minecraftWalking:'NOT_TESTED',
   constructionApproved:false,worldContacts:0,worldWrites:0,
   art:'NOT_REVIEWED',rows};
  save(path.join(dir,'E1_COMPACT_REPLAY_REPORT.json'),report);
@@ -272,6 +324,10 @@ export function replayR190CompactSaved({previousDir,outRoot=null}={}){
    '<iframe loading="lazy" src="'+x.viewer+'"></iframe>':
    '<div class="hold">SOURCE HOLD — 3Dなし</div>')+
   '<p>今回: '+esc(x.status)+'</p><p>理由: '+esc(x.reason??'なし')+'</p>'+
+  '<p>教育版の外殻研究: '+esc(x.educationExport.status)+'</p>'+
+  (x.educationExport.output?
+   '<p><a href="'+encodeURIComponent(x.id)+
+   '/EDUCATION_SHELL_RESEARCH_ONLY/READ_FIRST_JA.txt">安全説明と外殻出力</a></p>':'')+
   '<p>候補失敗集計: '+esc(JSON.stringify(x.diagnostics?.allReasons??{}))+'</p>'+
   '<p>AI原文 SHA: '+esc(x.originalResponseSha256)+'</p></article>').join('');
  save(path.join(dir,'E1_COMPACT_REPLAY_REVIEW.html'),

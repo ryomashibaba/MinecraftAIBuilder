@@ -108,3 +108,36 @@ test('verified profile preserves source material identities and per-material cou
  assert.throws(()=>exportB143EducationMakeCode({design:d,scene,verifiedPalette:{
   ...verifiedPalette,blocks:{wood:{blockName:'stone',evidence:'copy world test PASS'}}}}),/MATERIAL_COLLISION/);
 });
+
+test('large B143 canvas exports exact occupied envelope while retaining original SHA',()=>{
+ const big=structuredClone(d);
+ big.bounds={width:80,height:22,depth:80};
+ for(const e of big.elements)e.origin=[e.origin[0]+31,e.origin[1]+1,e.origin[2]+36];
+ const scene=compileDesign(big),locked=structuredClone(scene);
+ assert.throws(()=>exportB143EducationMakeCode({design:big,scene,
+  groundLowestLayer:true,legacyStoneFallback:true}),/PILOT_SIZE/);
+ const out=exportB143EducationMakeCode({design:big,scene,
+  groundLowestLayer:true,tightVoxelEnvelope:true,legacyStoneFallback:true});
+ assert.equal(out.geometrySha256,scene.geometrySha256);
+ assert.equal(out.sourceSha256,scene.sourceSha256);
+ assert.equal(out.envelopeTranslation,'EXACT_OCCUPIED_B143_VOXELS_ONLY');
+ assert.deepEqual(out.sourceHorizontalOffset,[-32,-37]);
+ assert.equal(out.sourceVerticalOffset,-1);
+ assert.equal(out.bounds.width,9);
+ assert.equal(out.bounds.depth,8);
+ assert.equal(out.bounds.height,5);
+ const rows=JSON.parse(out.code.match(/let mabRows: number\[\]\[\] = (.*)/)[1]);
+ assert(rows.every(r=>r[0]>=0&&r[2]>=0&&r[3]<out.bounds.width&&
+  r[5]<out.bounds.depth&&r[1]>=0&&r[4]<out.bounds.height));
+ assert.equal(rows.reduce((n,r)=>n+(r[3]-r[0]+1)*(r[4]-r[1]+1)*(r[5]-r[2]+1),0),
+  scene.primitives.length);
+ assert.deepEqual(scene,locked);
+ assert.equal(out.worldWrites,0);
+ assert.equal(out.constructionApproved,false);
+ assert.equal(out.actualEducationExecution,'NOT_TESTED');
+ assert.deepEqual(out.BuildPlan.operations,[]);
+});
+test('opt-in tight envelope requires grounding to protect support preflight',()=>{
+ assert.throws(()=>exportB143EducationMakeCode({design:d,scene:compileDesign(d),
+  tightVoxelEnvelope:true,legacyStoneFallback:true}),/GROUND_OPTION/);
+});

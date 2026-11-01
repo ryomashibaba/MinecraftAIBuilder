@@ -91,7 +91,22 @@ test('R190 compact preserved study replay preserves original hashes, zero model 
   assert.equal(result.sourceCompiledCount,3);
   assert.equal(result.localModelRequests,0);
   assert.equal(result.worldWrites,0);
-  assert(result.rows.every(r=>r.sourceCompiled&&r.modelRequests===0));
+  assert.equal(result.makecode,'SHELL_RESEARCH_ONLY_NOT_APPROVED');
+  assert.equal(result.shellPacketCount,3);
+  assert(result.rows.every(r=>r.sourceCompiled&&r.modelRequests===0&&
+   r.educationExport.status==='OFFLINE_SHELL_RESEARCH_PACKET_ONLY'));
+  for(const row of result.rows){
+   const meta=JSON.parse(fs.readFileSync(row.educationExport.report,'utf8'));
+   const source=fs.readFileSync(row.educationExport.output,'utf8');
+   assert.equal(meta.worldWrites,0);
+   assert.equal(meta.constructionApproved,false);
+   assert.deepEqual(meta.BuildPlan.operations,[]);
+   assert.equal(meta.researchStage,'UNFINISHED_SHELL_NO_WINDOWS_OR_ART_APPROVAL');
+   assert.match(source,/FillOperation.Keep/);
+   assert.doesNotMatch(source,/FillOperation.Replace/);
+   assert(row.educationExport.bounds.width*row.educationExport.bounds.height*
+    row.educationExport.bounds.depth<=40000);
+  }
   assert.deepEqual(fs.readFileSync(path.join(prev.dir,'E1_COMPACT_REPORT.json')),before);
   assert(fs.readFileSync(path.join(result.dir,'E1_COMPACT_REPLAY_REVIEW.html'),'utf8')
    .includes('別タブ'));

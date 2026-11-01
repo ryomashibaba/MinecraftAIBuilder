@@ -85,18 +85,27 @@ export function compactB143Cuboids(scene,{maxCuboids=2500}={}){
  return cuboids;
 }
 
-export function exportB143EducationMakeCode({design,scene,originOffset=[8,0,8],provenance='UNVERIFIED_DESIGN',groundLowestLayer=false,verifiedPalette=null,legacyStoneFallback=false}={}){
+export function exportB143EducationMakeCode({design,scene,originOffset=[8,0,8],provenance='UNVERIFIED_DESIGN',groundLowestLayer=false,tightVoxelEnvelope=false,verifiedPalette=null,legacyStoneFallback=false}={}){
  if(!design||!scene||!verifyCompiled(design,scene))fail('SOURCE_GEOMETRY_SHA_MISMATCH');
  if(!['UNVERIFIED_DESIGN','SYNTHETIC_TEST_FIXTURE','LOCAL_MODEL_CAPTURE','USER_AUTHORED'].includes(provenance))
   fail('PROVENANCE');
  if(!Array.isArray(originOffset)||originOffset.length!==3||
   !originOffset.every((v,i)=>int(v,i===1?0:5,i===1?10:64)))fail('ORIGIN_OFFSET');
- if(typeof groundLowestLayer!=='boolean')fail('GROUND_OPTION');
- const baseY=groundLowestLayer?Math.min(...scene.primitives.map(p=>p[1])):0;
- const b={...design.bounds,height:design.bounds.height-baseY};
+ if(typeof groundLowestLayer!=='boolean'||typeof tightVoxelEnvelope!=='boolean'||
+  (tightVoxelEnvelope&&!groundLowestLayer))fail('GROUND_OPTION');
+ // Translate exact occupied source voxels, leaving B143 geometry and source
+ // SHA immutable. This shrinks the preflight volume, not the architecture.
+ const minX=tightVoxelEnvelope?Math.min(...scene.primitives.map(v=>v[0])):0;
+ const minZ=tightVoxelEnvelope?Math.min(...scene.primitives.map(v=>v[2])):0;
+ const baseY=groundLowestLayer?Math.min(...scene.primitives.map(v=>v[1])):0;
+ const maxX=tightVoxelEnvelope?Math.max(...scene.primitives.map(v=>v[0])):design.bounds.width-1;
+ const maxY=tightVoxelEnvelope?Math.max(...scene.primitives.map(v=>v[1])):design.bounds.height-1;
+ const maxZ=tightVoxelEnvelope?Math.max(...scene.primitives.map(v=>v[2])):design.bounds.depth-1;
+ const b={width:maxX-minX+1,height:maxY-baseY+1,depth:maxZ-minZ+1};
  if([b.width,b.height,b.depth].some(n=>!int(n,1,128))||
     b.width*b.height*b.depth>40000||scene.primitives.length>20000)fail('PILOT_SIZE');
- const cuboids=compactB143Cuboids(scene).map(([x,y,z,X,Y,Z,m])=>[x,y-baseY,z,X,Y-baseY,Z,m]);
+ const cuboids=compactB143Cuboids(scene).map(([x,y,z,X,Y,Z,m])=>
+  [x-minX,y-baseY,z-minZ,X-minX,Y-baseY,Z-minZ,m]);
  const palette=resolvePalette(scene,verifiedPalette,legacyStoneFallback);
  const expectedCounts=MATERIALS.map(n=>palette.materialCounts[n]);
  const lines=[
@@ -184,6 +193,9 @@ export function exportB143EducationMakeCode({design,scene,originOffset=[8,0,8],p
   makecodeSourceSha256:sha(Buffer.from(code)),bounds:structuredClone(b),
   plannedVoxelCount:scene.primitives.length,plannedCuboids:cuboids.length,
   sourceVerticalOffset:-baseY,
+  ...(tightVoxelEnvelope?{sourceHorizontalOffset:[-minX,-minZ],
+   envelopeTranslation:'EXACT_OCCUPIED_B143_VOXELS_ONLY',
+   originalDesignBounds:structuredClone(design.bounds)}:{}),
   materialMapping:palette.materialMapping,plannedMaterialCounts:palette.materialCounts,
   plannedBlockCounts:palette.blockCounts,usedMaterials:palette.used,
   verifiedPaletteSha256:palette.profileSha256,
