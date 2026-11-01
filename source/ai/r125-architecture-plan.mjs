@@ -51,7 +51,10 @@ export function validateArchitecturePlan(p){
    ['plain','fins','screen'].includes(e.facadeLanguage),
    'EXPRESSION_STYLE');
   if(Object.hasOwn(e,'rearCornerCut')){
-   check(keys(e.rearCornerCut,['width','depth'])&&
+   check((keys(e.rearCornerCut,['width','depth'])||
+    keys(e.rearCornerCut,['width','depth','side']))&&
+    (e.rearCornerCut.side===undefined||
+     ['east','west'].includes(e.rearCornerCut.side))&&
     integer(e.rearCornerCut.width,3,5)&&integer(e.rearCornerCut.depth,3,5),
     'EXPRESSION_CORNER_CUT');
    // A full-height recess cannot share the current upper setback or
@@ -353,7 +356,8 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy'}
    // The space ranges below are bounding boxes; the real occupied region
    // excludes this model-authored open-air corner. SOURCE audits use voxels.
    ...(rearCornerCut?{openAirRecess:{
-    x:[w-1-rearCornerCut.width,w-2],
+    x:[rearCornerCut.side==='west'?1:w-1-rearCornerCut.width,
+     rearCornerCut.side==='west'?rearCornerCut.width:w-2],
     z:[d-1-rearCornerCut.depth,d-2]
    }}:{}),
    zones:axis==='x'?[
@@ -392,22 +396,24 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy'}
  // matching roof, and re-entrant walls. Do not silently replace missing
  // floor voxels with a decorative notch on an otherwise rectangular shell.
  if(rearCornerCut){
-  const xCut=w-1-rearCornerCut.width;
+  const westCut=rearCornerCut.side==='west';
+  const xCut=westCut?1:w-1-rearCornerCut.width;
   const zCut=d-1-rearCornerCut.depth;
   box('rear-corner-void','cut',null,[xCut,1,zCut],
    [rearCornerCut.width,top+1,rearCornerCut.depth]);
   for(let l=0;l<count;l++){
    const y=2+5*l,tag='l'+l;
-   box(tag+'-recess-east-wall','add',wall,
-    [xCut-1,y,zCut],[1,4,rearCornerCut.depth]);
+   box(tag+(westCut?'-recess-west-wall':'-recess-east-wall'),'add',wall,
+   [westCut?xCut+rearCornerCut.width:xCut-1,y,zCut],
+   [1,4,rearCornerCut.depth]);
    box(tag+'-recess-rear-wall','add',wall,
     [xCut,y,zCut-1],[rearCornerCut.width,4,1]);
    // Restore daylight on both re-entrant faces after old rear/east
    // window voxels were removed with the former external corner.
-   box(tag+'-recess-east-window-cut','cut',null,
-    [xCut-1,y+1,zCut+1],[1,2,2]);
-   box(tag+'-recess-east-window-glass','add','glass',
-    [xCut-1,y+1,zCut+1],[1,2,2]);
+   box(tag+(westCut?'-recess-west-window-cut':'-recess-east-window-cut'),'cut',null,
+   [westCut?xCut+rearCornerCut.width:xCut-1,y+1,zCut+1],[1,2,2]);
+  box(tag+(westCut?'-recess-west-window-glass':'-recess-east-window-glass'),'add','glass',
+   [westCut?xCut+rearCornerCut.width:xCut-1,y+1,zCut+1],[1,2,2]);
    box(tag+'-recess-rear-window-cut','cut',null,
     [xCut+1,y+1,zCut-1],[2,2,1]);
    box(tag+'-recess-rear-window-glass','add','glass',

@@ -345,3 +345,49 @@ test('R125 explanatory brief shares B143 500-char bound but title and space are 
    base.levels[0].spaces[1]]}]}
  ])assert.throws(()=>validateArchitecturePlan(candidate),/R125_PLAN_/);
 });
+
+// Optional model-authored LEFT rear recess changes the occupied floor plan,
+// roof void, and both enclosing walls; old right-rear sources remain pinned.
+test('west/rear massing choice mirrors TRUE L floor/roof while retaining real circulation',()=>{
+ const base=plan('mirrored-rear-court',['x','z'],['daily gathering','private workshop']);
+ base.footprint={width:24,depth:28};
+ const initial=structuredClone(base);
+ const expression={setbackSide:'none',setbackDepth:0,
+  roofProfile:'flat',roofAxis:'x',facadeLanguage:'plain',
+  rearCornerCut:{width:5,depth:4}};
+ const east=compileArchitecturePlan({...base,expression},
+  {entrancePlacement:'source-accessible'});
+ const explicitlyEast=compileArchitecturePlan({...base,expression:{...expression,
+  rearCornerCut:{width:5,depth:4,side:'east'}}},
+  {entrancePlacement:'source-accessible'});
+ const west=compileArchitecturePlan({...base,expression:{...expression,
+  rearCornerCut:{width:5,depth:4,side:'west'}}},
+  {entrancePlacement:'source-accessible'});
+ const v=voxels(west.compiled);
+ assert.equal(east.geometrySha256,explicitlyEast.geometrySha256);
+ assert.notEqual(east.geometrySha256,west.geometrySha256);
+ assert.equal(verifyCompiled(west.design,west.compiled),true);
+ assert.deepEqual(west.program[0].openAirRecess,{x:[1,5],z:[23,26]});
+ assert.equal(includes(v,2,1,25),false); // LEFT rear floor removed
+ assert.equal(includes(v,2,11,25),false); // LEFT rear upper roof removed
+ assert.equal(includes(v,6,2,25),true); // real re-entrant side wall
+ assert.equal(includes(v,4,2,22),true); // real re-entrant back wall
+ assert.equal(includes(v,6,3,24),true); // source glass, not just facade paint
+ assert.equal(includes(v,2,3,22),true); // other glazed re-entrant face
+ assert.equal(includes(v,6,1,6),true); // functional interior retained
+ assert.equal(auditArchitecturePlanCirculation(west).status,
+  'SOURCE_CLEARANCE_PROBES_PASS');
+ assert.equal(auditR125SourceRoutes(west).status,
+  'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(west.worldWrites,0);
+ assert(west.gates.every(x=>x==='BLOCKED'));
+ assert.deepEqual(base,initial);
+});
+
+test('invalid AI-selected rear-corner side fails closed',()=>{
+ const p=plan('side-validation');
+ p.expression={setbackSide:'none',setbackDepth:0,
+  roofProfile:'flat',roofAxis:'x',facadeLanguage:'plain',
+  rearCornerCut:{width:4,depth:4,side:'up'}};
+ assert.throws(()=>compileArchitecturePlan(p),/R125_PLAN_EXPRESSION_CORNER_CUT/);
+});
