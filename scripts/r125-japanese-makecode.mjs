@@ -5,15 +5,39 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {runR125SemanticPilot} from './r125-semantic-pilot.mjs';
-import {compileArchitecturePlan} from '../source/ai/r125-architecture-plan.mjs';
+import {compileArchitecturePlan,auditArchitecturePlanCirculation} from '../source/ai/r125-architecture-plan.mjs';
+import {auditR125SourceRoutes} from '../source/ai/r125-source-routes.mjs';
 import {exportB143EducationMakeCode} from '../source/ai/r125-education-makecode-export.mjs';
 
 export function exportSavedPlan(planFile, outDir, provenance='UNVERIFIED_DESIGN',paletteFile=null) {
  const plan=JSON.parse(fs.readFileSync(planFile,'utf8'));
  const product=compileArchitecturePlan(plan);
+ // Reuse two EXISTING voxel-derived audits. Source pass means only an
+ // offline clearance candidate, never in-game walking certification.
+ const circulation=auditArchitecturePlanCirculation(product);
+ const routes=auditR125SourceRoutes(product);
+ const walkability={
+  schema:'minecraftaibuilder-r125-practical-source-review-v1',
+  sourceSha256:product.sourceSha256,
+  geometrySha256:product.geometrySha256,
+  planSha256:product.planSha256,
+  status:circulation.status==='SOURCE_CLEARANCE_PROBES_PASS'&&
+   routes.status==='SOURCE_ROUTES_REACH_ALL_ZONES'?
+   'SOURCE_ROUTE_CANDIDATE':'HOLD_SOURCE_WALKABILITY',
+  circulation,routes,modelCallsForReview:0,
+  requiresInGameEntranceAndRoomWalk:true,
+  actualInGameWalking:'NOT_TESTED',art:'NOT_REVIEWED',
+  worldWrites:0,worldContacts:0
+ };
+ fs.mkdirSync(outDir);
+ fs.writeFileSync(path.join(outDir,'SOURCE_WALKABILITY_REVIEW.json'),
+  JSON.stringify(walkability,null,2)+'\n',{flag:'wx'});
+ if(walkability.status!=='SOURCE_ROUTE_CANDIDATE')
+  return {status:'HOLD_SOURCE_WALKABILITY',
+   reason:'R125_SOURCE_WALKABILITY_NOT_VERIFIED',
+   sourceSha256:product.sourceSha256,worldWrites:0,programExecuted:false};
  const verifiedPalette=paletteFile?JSON.parse(fs.readFileSync(paletteFile,'utf8')):null;
  const packet=exportB143EducationMakeCode({design:product.design,scene:product.compiled,provenance,groundLowestLayer:true,verifiedPalette});
- fs.mkdirSync(outDir);
  const {code,...report}=packet;
  fs.writeFileSync(path.join(outDir,'B143_SOURCE.json'),JSON.stringify(product.design,null,2)+'\n',{flag:'wx'});
  fs.writeFileSync(path.join(outDir,'MAKECODE_EDUCATION.ts'),code,{flag:'wx'});

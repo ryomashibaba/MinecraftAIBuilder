@@ -1,3 +1,13 @@
+## 最優先：R125実用化ルートへ再集中（2026-11-01 JST）
+
+正式方針は `docs/PROJECT_STRATEGY_V2_JA.md` の最短縦貫。E2実モデルの直接B143 3試験は全件SOURCE_HOLDなので**主工程から凍結・研究へ移した**。E2原文、実失敗証拠、各独立診断を保護し、再推論や新しい中間言語の開発をデフォルトにしない。
+
+今回の実装：既存R125の `auditArchitecturePlanCirculation` と `auditR125SourceRoutes` を日本語依頼・保存済みArchitecturePlanのMakeCode出力前に接続。 `SOURCE_WALKABILITY_REVIEW.json` が生成され、どちらかHOLDならMakeCodeを生成しない。既存の検証済Education素材パレット（石・glass・ユーザー実証済oak_planks）、source SHA、原本、実ワールド書込0を維持。**SOURCE通路候補と実際のMinecraft歩行は別判定**。
+
+直近の次工程は既存花屋の保存済みArchitecturePlanを**再推論0回**でR125に再投入してSOURCE歩行監査・検証済素材・MakeCodeを確かめ、元ワールドと混ぜずにバックアップ済み試験世界で入口/売場/作業室の歩行を確認すること。保存原本のパスが判明しなければ無断で別設計を作らない。次に住宅/研究施設で汎用性を確認、必要に応じて本物の外観品質を改良する。リアルな施工・歩行の新実績は今回未取得。PR #128 Draft、main保護。
+
+---
+
 ## E1比較ビュー拡張（2026-10-31 JST、実モデル未実行）
 
 3件一括結果のHTMLを追加（`E1_REVIEW.html`）。用途別の真正3Dビューアを同時に表示し、原本・幾何・最終占有形状SHA、失敗理由を比較。これは機械美術認定ではなく人間が作品の品質を審査するためのローカル閲覧物。HTMLは外部通信なし・診断文字列をescape。旧単件生成や試験ワールドには触れない。

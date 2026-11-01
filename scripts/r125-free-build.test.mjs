@@ -30,6 +30,13 @@ test('one model handoff creates fresh evidence but no Minecraft operation (synth
     const code='// SYNTHETIC OFFLINE UNIT TEST ONLY\n';
     const codeSha=createHash('sha256').update(code).digest('hex');
     fs.writeFileSync(path.join(output,'makecode','MAKECODE_EDUCATION.ts'),code);
+    fs.writeFileSync(path.join(output,'makecode','SOURCE_WALKABILITY_REVIEW.json'),JSON.stringify({
+     schema:'minecraftaibuilder-r125-practical-source-review-v1',
+     status:'SOURCE_ROUTE_CANDIDATE',sourceSha256:'fake-source',geometrySha256:'fake-geometry',
+     circulation:{status:'SOURCE_CLEARANCE_PROBES_PASS'},
+     routes:{status:'SOURCE_ROUTES_REACH_ALL_ZONES'},
+     worldWrites:0,actualInGameWalking:'NOT_TESTED'
+    }));
     fs.writeFileSync(path.join(output,'makecode','EXPORT_REPORT.json'),JSON.stringify({
      worldWrites:0,programExecuted:false,materialMode:'STRICT_USER_ATTESTED',
      verifiedPaletteSha256:'synthetic-palette-sha',plannedBlockCounts:{stone:2},
@@ -40,6 +47,9 @@ test('one model handoff creates fresh evidence but no Minecraft operation (synth
    }});
   assert.equal(called,1);assert.equal(status.status,'MAKECODE_READY_HUMAN_REVIEW_REQUIRED');
   assert.equal(status.worldWrites,0);
+  assert.equal(status.sourceWalkability,'SOURCE_ROUTE_CANDIDATE');
+  assert.equal(status.actualMinecraftWalking,'NOT_TESTED');
+  assert.equal(fs.existsSync(status.sourceWalkabilityReview),true);
   assert.equal(fs.existsSync(status.makecode),true);
   assert.equal(JSON.parse(fs.readFileSync(path.join(status.output,'REQUEST.json'))).mode,'ONE_LOCAL_OLLAMA_REQUEST');
  }finally{fs.rmSync(root,{recursive:true,force:true});}
@@ -74,6 +84,14 @@ test('REAL saved ArchitecturePlan produces true 3-material MakeCode without any 
   assert(status.plannedBlockCounts.stone>0);
   assert(status.plannedBlockCounts.glass>0);
   assert.equal(fs.existsSync(status.makecode),true);
+  const sourceReview=JSON.parse(fs.readFileSync(status.sourceWalkabilityReview,'utf8'));
+  assert.equal(sourceReview.status,'SOURCE_ROUTE_CANDIDATE');
+  assert.equal(sourceReview.circulation.status,'SOURCE_CLEARANCE_PROBES_PASS');
+  assert.equal(sourceReview.routes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert.equal(sourceReview.routes.zones.length,2);
+  assert(sourceReview.routes.zones.every(z=>z.reachedFromEntrance===true));
+  assert.equal(sourceReview.actualInGameWalking,'NOT_TESTED');
+  assert.equal(sourceReview.worldWrites,0);
   const code=fs.readFileSync(status.makecode,'utf8');
   assert.match(code,/blocks\.blockByName\("oak_planks"\)/);
   assert.match(code,/player\.onChat\("mabbuild"/);
@@ -97,7 +115,31 @@ test('REAL saved plan requesting unverified metal roof is held, never substitute
   const status=await runFreeBuild({model:'qwen3:14b',prompt:null,plan:input,outRoot:path.join(root,'outputs')});
   assert.equal(status.status,'HOLD');
   assert.equal(status.worldWrites,0);
+  assert.equal(status.status,'HOLD');
+  assert.equal(fs.existsSync(status.makecode??''),false);
   const logs=fs.readFileSync(path.join(status.output,'RUN_LOG.txt'),'utf8');
   assert.match(logs,/UNVERIFIED_MATERIAL_METAL/);
+ }finally{fs.rmSync(root,{recursive:true,force:true});}
+});
+
+test('R125 produces no construction-ready status when mandatory source walkability review is missing',async()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'r125-missing-source-review-'));
+ try{
+  const status=await runFreeBuild({model:'qwen3:14b',prompt:'未知用途でも部屋に入れる建物',outRoot:root},{
+   child:(node,args)=>{
+    const dir=args[args.indexOf('--out')+1],target=path.join(dir,'makecode');
+    fs.mkdirSync(target,{recursive:true});
+    const code='// NO AUDIT, NEVER RECOMMEND BUILD\n';
+    fs.writeFileSync(path.join(target,'MAKECODE_EDUCATION.ts'),code);
+    fs.writeFileSync(path.join(target,'EXPORT_REPORT.json'),JSON.stringify({
+     worldWrites:0,programExecuted:false,materialMode:'STRICT_USER_ATTESTED',
+     verifiedPaletteSha256:'synthetic',plannedBlockCounts:{stone:1},
+     plannedVoxelCount:1,makecodeSourceSha256:createHash('sha256').update(code).digest('hex'),
+     sourceSha256:'unreviewed',geometrySha256:'unreviewed'
+    }));
+    return {status:0,stdout:'synthetic missing review'};
+   }});
+  assert.equal(status.status,'HOLD_OFFLINE_REPORT');
+  assert.equal(status.worldWrites,0);
  }finally{fs.rmSync(root,{recursive:true,force:true});}
 });

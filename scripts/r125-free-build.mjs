@@ -69,8 +69,25 @@ export async function runFreeBuild(opts,{child=spawnSync}={}){
  const report=JSON.parse(fs.readFileSync(reportFile,'utf8'));
  const ts=path.join(path.dirname(reportFile),'MAKECODE_EDUCATION.ts');
  const counts=report.plannedBlockCounts;
+ // Only the R125 two-zone engine emits this audit; the opt-in R190 route
+ // retains its own independent SOURCE/room-reachability requirements.
+ const sourceReviewFile=path.join(destination,engine==='r125'?'makecode':'makecode',
+  'SOURCE_WALKABILITY_REVIEW.json');
+ let sourceReview=null;
+ if(engine==='r125'&&fs.existsSync(sourceReviewFile)){
+  try{sourceReview=JSON.parse(fs.readFileSync(sourceReviewFile,'utf8'));}
+  catch{sourceReview=null;}
+ }
+ const sourceReviewOkay=engine!=='r125'||(
+  sourceReview?.schema==='minecraftaibuilder-r125-practical-source-review-v1'&&
+  sourceReview.status==='SOURCE_ROUTE_CANDIDATE'&&
+  sourceReview.sourceSha256===report.sourceSha256&&
+  sourceReview.geometrySha256===report.geometrySha256&&
+  sourceReview.circulation?.status==='SOURCE_CLEARANCE_PROBES_PASS'&&
+  sourceReview.routes?.status==='SOURCE_ROUTES_REACH_ALL_ZONES'&&
+  sourceReview.worldWrites===0&&sourceReview.actualInGameWalking==='NOT_TESTED');
  const actualCodeSha=fs.existsSync(ts)?createHash('sha256').update(fs.readFileSync(ts)).digest('hex'):null;
- if(!fs.existsSync(ts)||report.worldWrites!==0||report.programExecuted!==false||
+ if(!sourceReviewOkay||!fs.existsSync(ts)||report.worldWrites!==0||report.programExecuted!==false||
   report.materialMode!=='STRICT_USER_ATTESTED'||!report.verifiedPaletteSha256||
   actualCodeSha!==report.makecodeSourceSha256||
   !counts||Object.values(counts).reduce((a,b)=>a+b,0)!==report.plannedVoxelCount){
@@ -83,10 +100,15 @@ export async function runFreeBuild(opts,{child=spawnSync}={}){
   output:runDir,makecode:ts,plannedVoxelCount:report.plannedVoxelCount,
   plannedBlockCounts:counts,sourceSha256:report.sourceSha256,
   geometrySha256:report.geometrySha256,makecodeSourceSha256:report.makecodeSourceSha256,
+  sourceWalkability:engine==='r125'?sourceReview.status:'ENGINE_SOURCE_GATE_SEPARATE',
+  sourceWalkabilityReview:engine==='r125'?sourceReviewFile:null,
+  actualMinecraftWalking:'NOT_TESTED',humanArt:'NOT_REVIEWED',
   worldWrites:0,actualWorldBuild:'NOT_ATTEMPTED_BY_THIS_TOOL'};
  fs.writeFileSync(path.join(runDir,'RESULT.json'),JSON.stringify(status,null,2)+'\n',{flag:'wx'});
  console.log('MakeCode prepared (not built): '+ts);
  console.log('Planned materials: '+JSON.stringify(counts));
+ console.log('SOURCE review: '+status.sourceWalkability+
+  ' (in-game walking remains NOT_TESTED).');
  console.log('Review saved design and site. ONLY a new backed-up test-world copy.');
  console.log('Then paste code, run mabset, inspect area, run mabbuild ONCE.');
  console.log('Wait for "Placing attempted" before mabverify; check entrance/rooms separately.');
