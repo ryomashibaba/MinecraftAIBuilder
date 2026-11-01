@@ -80,10 +80,22 @@ export function compileR190FreePlan(plan,{palette,provenance='UNVERIFIED_DESIGN'
 }
 
 export async function runR190FreeEngine({
- prompt=null,model='qwen3:14b',planFile=null,outDir,paletteFile,massingOnly=false
+ prompt=null,model='qwen3:14b',planFile=null,outDir,paletteFile,massingOnly=false,
+ revisionContext=null
 }={}, {fetcher=fetch}={}){
  if(!outDir||!paletteFile||typeof fetcher!=='function'||
    (!!planFile===!!prompt)||!modelName.test(model)||typeof massingOnly!=='boolean')fail('INPUT');
+ if(revisionContext!==null){
+  if(planFile||!massingOnly||typeof revisionContext!=='object'||
+   typeof revisionContext.priorOriginal!=='string'||
+   revisionContext.priorOriginal.length>30000||revisionContext.priorOriginal.length<20||
+   !/^[a-f0-9]{64}$/.test(revisionContext.priorSha256??'')||
+   sha(Buffer.from(revisionContext.priorOriginal))!==revisionContext.priorSha256||
+   typeof revisionContext.reason!=='string'||revisionContext.reason.length>500||
+   !Array.isArray(revisionContext.issues)||revisionContext.issues.length>20)
+   fail('REVISION_SOURCE_INVALID');
+  JSON.parse(revisionContext.priorOriginal);
+ }
  if(fs.existsSync(outDir))fail('OUTPUT_MUST_BE_NEW');
  fs.mkdirSync(outDir,{recursive:false});
  const modelDir=path.join(outDir,'model'),codeDir=path.join(outDir,'makecode');
@@ -107,9 +119,32 @@ export async function runR190FreeEngine({
    if(fetcher!==fetch)fail('TEST_DOUBLE_CANNOT_CLAIM_REAL_MODEL');
    const available=await preflightR125Ollama({model,endpoint,fetcher});
    if(available.status!=='LOCAL_MODEL_LISTED')fail('LOCAL_MODEL_NOT_LISTED');
-   const requestBody={model,stream:false,temperature:0.5,
-    reasoning_effort:'none',max_tokens:2600,response_format:{type:'json_object'},
-    messages:[{role:'system',content:massingOnly?MASSING_SYSTEM:SYSTEM},{role:'user',content:prompt}]};
+   const messages=[{role:'system',content:massingOnly?MASSING_SYSTEM:SYSTEM},
+    {role:'user',content:prompt}];
+   if(revisionContext!==null){
+    const feedback='Your previous architectural design failed the strict compiler. '+
+     'YOU are the architect: revise only what is necessary for feasibility while retaining '+
+     'functional spaces, the distinctive architectural concept and useful exterior form. '+
+     'The host MUST NOT alter your design. Each room width AND depth >=7 and <=22, including storage. '+
+     'A skyCourtIntent, roofFormIntent and formIntent MUST use separate spaceIds; '+
+     'a skyCourtIntent cannot coexist with any profiled roof in its room. '+
+     'For a faceted north/south face require width >= 2*cornerInset+6, depth >= cornerInset+5; '+
+     'for east/west require depth >= 2*cornerInset+6, width >= cornerInset+5. '+
+     'A dimension, room or feature can be thoughtfully redesigned; do not flatten creativity. '+
+     'Do NOT emit glazedOpenings in massing-only design. '+
+     'Failure: '+revisionContext.reason+'. More diagnostics: '+
+     JSON.stringify(revisionContext.issues).slice(0,1800)+
+     '. Return one COMPLETE revised JSON; this is the single permitted second attempt.';
+    messages.push({role:'assistant',content:revisionContext.priorOriginal},
+     {role:'user',content:feedback});
+    save(modelDir,'MODEL_REVISION_LINEAGE.json',{
+     stage:'SECOND_MODEL_AUTHORED_ATTEMPT',
+     priorOriginalSha256:revisionContext.priorSha256,
+     priorReason:revisionContext.reason,issues:revisionContext.issues,
+     hostChangedPriorDesign:false,worldWrites:0});
+   }
+   const requestBody={model,stream:false,temperature:revisionContext?0.35:0.5,
+    reasoning_effort:'none',max_tokens:2600,response_format:{type:'json_object'},messages};
    save(modelDir,'MODEL_REQUEST.json',{endpoint,requestBody});
    const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),180000);
    let response;
@@ -131,6 +166,10 @@ export async function runR190FreeEngine({
    save(modelDir,'MODEL_RESPONSE_ORIGINAL.txt',raw);
   }
   report.originalResponseSha256=sha(Buffer.from(raw));
+  if(revisionContext!==null){
+   report.attemptNumber=2;
+   report.priorOriginalSha256=revisionContext.priorSha256;
+  }
   const plan=JSON.parse(raw);
   if(massingOnly){
    if(Object.hasOwn(plan,'glazedOpenings'))fail('MASSING_GLAZING_NOT_ALLOWED');
