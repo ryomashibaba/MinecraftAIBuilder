@@ -385,9 +385,9 @@ export function replayR190CompactSaved({previousDir,outRoot=null}={}){
      constructionApproved:false,art:'NOT_REVIEWED',
      minecraftWalking:'NOT_TESTED'});
     save(path.join(folder,'READ_FIRST_JA.txt'),
-     '大窓はホストが試した独立意匠案です。Qwen自身の窓設計ではありません。\\n'+
-     '元外殻・小窓案は変更していません。Minecraft施工も実歩行も未実行です。\\n'+
-     'SOURCE PASSでも建築美術はART HOLDです。\\n');
+     '大窓はホストが試した独立意匠案です。Qwen自身の窓設計ではありません。\n'+
+     '元外殻・小窓案は変更していません。Minecraft施工も実歩行も未実行です。\n'+
+     'SOURCE PASSでも建築美術はART HOLDです。\n');
     expandedGlazingResearch={status:large.status,
      viewer:item.id+'/HOST_LARGER_GLAZING_RESEARCH_ONLY/index.html',
      originalGlassCells:large.originalGlassCells,
