@@ -15,7 +15,8 @@ import {R190_COMPACT_SCHEMA,compileR190CompactProgram}
  from '../source/ai/r190-compact-program.mjs';
 import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
 import {verifyCompiled} from '../source/ai/b143-building-dsl.mjs';
-import {deriveR190CompactMinimumWindows,auditR190CompactInteriorEvidence,
+import {deriveR190CompactMinimumWindows,deriveR190CompactExpandedGlazingVariant,
+ auditR190CompactInteriorEvidence,
  renderR190CompactAccessMapSvg}
  from '../source/ai/r190-compact-daylight.mjs';
 import {exportB143EducationMakeCode} from '../source/ai/r125-education-makecode-export.mjs';
@@ -229,7 +230,8 @@ export function replayR190CompactSaved({previousDir,outRoot=null}={}){
   let sourceCompiled=false,reason=null,diagnostics=null,
    sourceSha256=null,geometrySha256=null,viewer=null,hostResolution=null,
    educationExport={status:'NOT_ATTEMPTED_SOURCE_HOLD'},
-   windowResearch={status:'NOT_ATTEMPTED_SOURCE_HOLD'};
+   windowResearch={status:'NOT_ATTEMPTED_SOURCE_HOLD'},
+   expandedGlazingResearch={status:'NOT_ATTEMPTED_SOURCE_HOLD'};
   try{
    const x=compileR190CompactProgram(original.toString('utf8'));
    sourceSha256=x.built.compiled.sourceSha256;
@@ -353,6 +355,49 @@ export function replayR190CompactSaved({previousDir,outRoot=null}={}){
      disconnectedPads:r.disconnectedTwoWidePads,
      reachablePadFraction:r.reachableTwoWidePadFraction})),
     worldWrites:0};
+   // Compare an additional, explicitly HOST-created enlarged-glass option.
+   // It never overwrites either the model or minimum-window result.
+   try{
+    const large=deriveR190CompactExpandedGlazingVariant(v);
+    if(large.status!=='HOST_DERIVED_LARGER_WINDOWS_ART_HOLD')
+     throw Error(large.reason??'NO_SAFE_ENLARGEMENT');
+    if(large.minimumWindowSourceSha256!==v.current.compiled.sourceSha256||
+     !verifyCompiled(large.current.design,large.current.compiled))
+     throw Error('LARGE_GLAZING_SOURCE_MISMATCH');
+    const folder=path.join(dir,item.id,'HOST_LARGER_GLAZING_RESEARCH_ONLY');
+    fs.mkdirSync(folder,{recursive:true});
+    save(path.join(folder,'index.html'),
+     renderB143Html(compileB143Gallery([large.current.design]),template));
+    save(path.join(folder,'B143_SOURCE.json'),large.current.design);
+    save(path.join(folder,'B143_SCENE.json'),large.current.compiled);
+    save(path.join(folder,'GLAZING_RESEARCH_REPORT.json'),{
+     status:large.status,authorship:large.authorship,
+     originalModelResponseSha256:sha(original),
+     modelOriginalSourceSha256:sourceSha256,
+     minimumWindowSourceSha256:large.minimumWindowSourceSha256,
+     expandedSourceSha256:large.expandedSourceSha256,
+     expandedGeometrySha256:large.expandedGeometrySha256,
+     originalGlassCells:large.originalGlassCells,
+     expandedGlassCells:large.expandedGlassCells,
+     accepted:large.accepted,skipped:large.skipped,
+     attemptedCandidates:large.attemptedCandidates,
+     modelCalls:0,worldContacts:0,worldWrites:0,
+     constructionApproved:false,art:'NOT_REVIEWED',
+     minecraftWalking:'NOT_TESTED'});
+    save(path.join(folder,'READ_FIRST_JA.txt'),
+     '大窓はホストが試した独立意匠案です。Qwen自身の窓設計ではありません。\\n'+
+     '元外殻・小窓案は変更していません。Minecraft施工も実歩行も未実行です。\\n'+
+     'SOURCE PASSでも建築美術はART HOLDです。\\n');
+    expandedGlazingResearch={status:large.status,
+     viewer:item.id+'/HOST_LARGER_GLAZING_RESEARCH_ONLY/index.html',
+     originalGlassCells:large.originalGlassCells,
+     expandedGlassCells:large.expandedGlassCells,
+     enlargedWindows:large.accepted.length,
+     modelCalls:0,worldWrites:0};
+   }catch(e){
+    expandedGlazingResearch={status:'HOLD_NO_SAFE_LARGE_WINDOW',
+     reason:String(e?.message??e).slice(0,350),modelCalls:0,worldWrites:0};
+   }
   }catch(e){
    windowResearch={status:'HOLD_NO_VERIFIED_WINDOWS',
     reason:String(e?.message??e).slice(0,350),worldWrites:0};
@@ -364,7 +409,8 @@ export function replayR190CompactSaved({previousDir,outRoot=null}={}){
   rows.push({id:item.id,originalSourceCompiled:row.sourceCompiled,
    status:sourceCompiled?'REPLAY_SOURCE_VALID_ART_HOLD':'REPLAY_SOURCE_HOLD',
    sourceCompiled,reason,diagnostics,originalResponseSha256:sha(original),
-   sourceSha256,geometrySha256,viewer,hostResolution,educationExport,windowResearch,modelRequests:0,
+   sourceSha256,geometrySha256,viewer,hostResolution,educationExport,windowResearch,
+   expandedGlazingResearch,modelRequests:0,
    provenance:'SAVED_MODEL_PROGRAM_READ_ONLY_REPLAY',
    art:'NOT_REVIEWED',worldWrites:0});
  }
@@ -385,7 +431,10 @@ export function replayR190CompactSaved({previousDir,outRoot=null}={}){
   localModelRequests:0,sourceCompiledCount:count,requestedUseCount:3,
   status:count===3?'THREE_SOURCE_REPLAY_CANDIDATES_ART_HOLD':'SOURCE_REPLAY_INCOMPLETE_HOLD',
   makecode:'SHELL_RESEARCH_ONLY_NOT_APPROVED',
-  shellPacketCount,windowCandidateCount,minecraftWalking:'NOT_TESTED',
+  shellPacketCount,windowCandidateCount,
+  largerGlazingCandidateCount:rows.filter(r=>r.expandedGlazingResearch.status===
+   'HOST_DERIVED_LARGER_WINDOWS_ART_HOLD').length,
+  minecraftWalking:'NOT_TESTED',
   constructionApproved:false,worldContacts:0,worldWrites:0,
   art:'NOT_REVIEWED',rows};
  save(path.join(dir,'E1_COMPACT_REPLAY_REPORT.json'),report);
@@ -400,6 +449,13 @@ export function replayR190CompactSaved({previousDir,outRoot=null}={}){
    '<iframe title="窓付き研究案" loading="lazy" src="'+encodeURIComponent(x.id)+
    '/WINDOWS_HOST_DERIVED_RESEARCH_ONLY/index.html"></iframe>':
    '<div class="hold">窓付き案 HOLD</div>')+'</section></div>'+
+  (x.expandedGlazingResearch.viewer?
+   '<p><a target="_blank" rel="noopener" href="'+
+   encodeURIComponent(x.id)+'/HOST_LARGER_GLAZING_RESEARCH_ONLY/index.html">'+
+   '別案：実ガラス窓を大きくした3D外観を比較</a> ('+
+   esc(x.expandedGlazingResearch.originalGlassCells)+'→'+
+   esc(x.expandedGlazingResearch.expandedGlassCells)+'セル)</p>':
+   '<p>大窓の別案: '+esc(x.expandedGlazingResearch.status)+'</p>')+
   '<p>SOURCE状態: '+esc(x.status)+' / 窓: '+esc(x.windowResearch.status)+'</p>'+
   '<p>各室SOURCE床セルと2×2床候補（実歩行認証ではない）: '+
    esc(JSON.stringify(x.windowResearch.clearRoomFloorCells??'未測定'))+'</p>'+
