@@ -1,3 +1,10 @@
+## 2026-11-02 入口から各室までのSOURCE 2幅床到達率（コード実装済・CI確定待ち）
+
+- **新コードの事実**：R190 compactの既存 `auditR190CompactInteriorEvidence` に、真正最終B143ボクセルと入口からの2幅床BFSに基づく `reachableTwoWidePadsFromEntrance`、`disconnectedTwoWidePads`、`reachableTwoWidePadFraction` を追加。保存されたsource-route witnessを独立再計算と照合して食い違いはHOLD。3用途の `--replay-latest` が出す `ROOM_SOURCE_FLOOR_REVIEW.json` と比較HTMLに室別計測を表示し、既存テストに整合/改ざん拒否を追加。**R190 compactに限定したSOURCE上の改善**であり、R125の主経路・既存Qwen原文・B143原本・mainに変更なし。
+- **GitHub保存**：`feature/b198zr1-protected-architectural-revision` / Draft PR #128に関連コミット `28b6c64`、`82bd098`、`944c408` を保存。これらを現在HEADそのものと混同しない。関連CIでは前HEAD `82bd098` のR190 compact新テストは通過した一方、R125の古い `r125-semantic-pilot.mjs` 文字列クォート破損による6失敗が観測され、後続 `8c6d845` で文字列修正された。**後続HEADの全CI PASS・保存済みQwen3棟での新計測値・Minecraft実歩行は未確認。** R55等の別CI失敗も個別に区別する。
+- **必ず続ける工程**：最新PR HEADとR190-AC/Education-first CIの結果を先に確認する。保存済み実Qwen住宅・花屋・研究施設の `--replay-latest` をPCで再推論0のまま実行し、入口からつながらない室内床・家具/室用途・窓の3D見た目を現物で比較。必要ならR125の最短自然文→本物B143→検証済素材MakeCodeへ、建物固有テンプレートではない共通機能修正を施す。その後、対象ワールド識別・別バックアップ・安全な空き領域・復元を確認したMinecraft Education試験ワールドだけで実際に入口/室内を人間が歩く。CI成功をART/実世界PASSに昇格しない。
+- **不変**：ART HOLD、正式採用0、実Qwen元原文の改変0、NOT_PREPARED/9 BLOCKED/BuildPlan空、ワールド接触・書込0（この工程）、main変更/merge/force push禁止。Work・ユーザーPC操作は別途事前承認制。ZIP・長文再提出不要。
+
 ## 2026-11-01 続工程 — 室内SOURCE床計測＋元/窓付き3D比較
 
 保存済み実Qwen3用途を再要求せず、replay-latestで実ボクセルの各室支持床・頭上2セル空気・2×2床候補を室別記録する。モデル元外殻とHOST窓付き別案の真正3Dを並べる。新報告ROOM_SOURCE_FLOOR_REVIEW.jsonはSOURCE計測だけであり、家具、ART、実歩行、採光、ワールド安全、施工許可を認定しない。安全初期値と原本を維持。CIおよび実3用途の保存済み再生は別途検証する。次はこの比較から共通の機能欠陥を特定して実用改善する。
