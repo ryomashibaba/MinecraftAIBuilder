@@ -1,3 +1,10 @@
+## 2026-11-02 R190 採光意図と真正B143窓を結ぶ再生証拠（SOURCE限定）
+
+- **新実装**：保存済み真正モデル原文の `--replay-latest` で、モデルが daylightIntent を記述していた場合は、各室の希望方角・採光量とHOSTが安全確認して実際に配置したB143窓の位置・寸法を対照する。`DAYLIGHT_INTENT_RECEIPT.json` を個別保存し、`WINDOW_RESEARCH_REPORT.json` と3D比較HTMLに出所・希望達成／HOST逸脱／未実現を表示。AIが意図を指定していない旧Qwen原本は明示的に `HOST_DERIVED_NOT_MODEL` と記録し、モデルの功績に偽装しない。
+- **真正性・安全**：元モデルprogram SHAとB143 SOURCE・geometryの整合、窓の最終配置、希望達成の証拠を独立照合。偽造した希望達成・窓配置・原本整合をHOLD拒否。MODEL/HOST/ART/実歩行を分離し、NOT_PREPARED/9 BLOCKED/BuildPlan空・WorldWrites0継続。新コミット `733c5aab52188a75ff06f936281b4218858d7d2d`（`scripts/r190-compact-program-study.mjs` とテスト）。
+- **検証済み境界**：変更JS構文解析PASS。隔離の真正B143ロジック合成3室実行で、旧形式は指定0件でHOSTのみ、新形式は希望2件・充足2件（西3×2、北4×3）、他室の動線とWorldWrites0を確認。モデル作者の希望達成を偽装した入力はHOLD。隔離実行のSHA処理は検証用の代替実装のため、**正式Node CI・暗号学的SHAの実行合格ではない**。
+- **未達・次工程**：最新HEADのEducation-first/R190-AC CIの実行完走、実Qwen新採光形式へのモデル応答、保存済みWindows原本での大窓再生、美術C、Minecraft歩行Dは未確認。既存3用途・11室688/688は旧仕様のSOURCE実測。次はCIを確認して新3DのSOURCE／人間美術レビューを行い、用途と外観・室内が本当に一体化したか判定。再推論・ワールド書込・Work移行を勝手に実施しない。
+
 ## 2026-11-02 スマホから真正B143 3D閲覧（ローカル操作なし）
 
 - ユーザーは外出中で今後PC/PowerShellのローカル操作不可。**PCに依存する `--replay-latest` の再実行を要求しない**。モデルがローカルPC上のみなら新たな真正Qwen推論は遠隔実行できない。既存保存済み設計のソース査読・GitHub研究コード改修は継続できる。
