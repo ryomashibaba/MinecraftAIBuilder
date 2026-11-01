@@ -47,6 +47,8 @@ on:
       - 'scripts/r125-japanese-makecode.mjs'
       - 'source/ai/r125-source-routes.mjs'
       - 'source/ai/r125-architecture-plan.mjs'
+      - 'scripts/r125-architecture-plan.test.mjs'
+      - 'evidence/r125-real-l-corner-20261101/MODEL_RESPONSE_ORIGINAL.txt'
 permissions:
   contents: read
 jobs:
