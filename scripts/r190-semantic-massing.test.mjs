@@ -580,3 +580,39 @@ test('R190 multi-facet rejects unsupported collisions and keeps legacy syntax',(
  glass.glazedOpenings=[{spaceId:'sleeping',face:'north',offset:2,baseY:5,width:2,height:2}];
  assert.throws(()=>compileR190SemanticPlan(glass),/GLAZING_ROOM_UNSUPPORTED/);
 });
+
+test('R190 long semantic room identifiers compile to strict B143 element IDs without model edits',()=>{
+ const input=structuredClone(cases[0]);
+ const originalRoom='storage',longRoom='flower-display-'+('x'.repeat(22));
+ assert(longRoom.length<=39);
+ input.spaces.find(s=>s.id===originalRoom).id=longRoom;
+ const untouched=JSON.stringify(input);
+ const a=compileR190SemanticPlan(input);
+ const b=compileR190SemanticPlan(input);
+ assert.equal(JSON.stringify(input),untouched);
+ assert.equal(a.audit.allProgramSpacesReachable,true);
+ assert.equal(verifyCompiled(a.design,a.compiled),true);
+ assert.equal(a.compiled.sourceSha256,b.compiled.sourceSha256);
+ assert.equal(a.compiled.geometrySha256,b.compiled.geometrySha256);
+ assert(a.design.elements.some(e=>e.id.startsWith('flower-display-')&&
+  /^[a-f0-9]{16}$/.test(e.id.slice(-16))));
+ assert(a.design.elements.every(e=>e.id.length<=40&&
+  /^[a-zA-Z][a-zA-Z0-9_-]{0,39}$/.test(e.id)));
+ assert.equal(new Set(a.design.elements.map(e=>e.id)).size,a.design.elements.length);
+ assert.equal(a.worldWrites,0);
+ assert.equal(a.worldContacts,0);
+ assert.equal(a.constructionApproved,false);
+ assert.equal(a.executionAllowed,false);
+ assert.deepEqual(a.gates,Array(9).fill('BLOCKED'));
+ assert.deepEqual(a.BuildPlan.operations,[]);
+});
+
+test('R190 short generated element IDs retain legacy labels and deterministic hashes',()=>{
+ const base=structuredClone(cases[0]);
+ const result=compileR190SemanticPlan(base);
+ assert(result.design.elements.some(e=>e.id==='living-floor'));
+ assert(result.design.elements.some(e=>e.id==='storage-floor'));
+ assert(result.design.elements.every(e=>e.id.length<=40));
+ assert.equal(result.compiled.geometrySha256,
+  compileR190SemanticPlan(base).compiled.geometrySha256);
+});

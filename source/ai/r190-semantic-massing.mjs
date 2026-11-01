@@ -415,8 +415,23 @@ function sourceDesign(p,l){
   (p.formIntent?[p.formIntent]:[])).map(f=>[f.spaceId,f]));
  const authoredRoofs=new Map((p.roofFormIntents??
   (p.roofFormIntent?[p.roofFormIntent]:[])).map(f=>[f.spaceId,f]));
+ // B143 allows at most 40 characters per element ID. A valid semantic
+ // room ID can be 39 characters, so generated suffixes may exceed that.
+ // Shorten ONLY host-generated overlength identifiers, never room IDs or
+ // model-authored plans. For already-valid IDs, preserve legacy SHA exactly.
+ const elementIds=new Set();
+ const elementId=sourceId=>{
+  const id=sourceId.length<=40?sourceId:
+   sourceId.slice(0,18)+'-'+createHash('sha256')
+    .update(sourceId).digest('hex').slice(0,16);
+  ok(/^[a-zA-Z][a-zA-Z0-9_-]{0,39}$/.test(id)&&
+   !elementIds.has(id),'B143_GENERATED_ELEMENT_ID_COLLISION');
+  elementIds.add(id);
+  return id;
+ };
  const box=(id,mode,material,origin,size)=>elements.push({
-  id,shape:'box',mode,...(mode==='add'?{material}:{}),origin,size});
+  id:elementId(id),shape:'box',mode,
+  ...(mode==='add'?{material}:{}),origin,size});
  // A deliberately bounded first polygonal envelope: its physical floor,
  // wall and roof use the SAME clipped footprint, rather than facade applique
  // on six solid rectangular panels. Portal locations remain model/layout-led.
