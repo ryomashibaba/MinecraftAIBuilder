@@ -44,9 +44,9 @@ export function validateArchitecturePlan(p){
   'MATERIAL_PALETTE');
  if(expressive){
   const e=p.expression;
-  check(keys(e,Object.hasOwn(e,'rearCornerCut')?
-   ['setbackSide','setbackDepth','roofProfile','roofAxis','facadeLanguage','rearCornerCut']:
-   ['setbackSide','setbackDepth','roofProfile','roofAxis','facadeLanguage']),
+  check(keys(e,['setbackSide','setbackDepth','roofProfile','roofAxis',
+   'facadeLanguage',...(Object.hasOwn(e,'rearCornerCut')?['rearCornerCut']:[]),
+   ...(Object.hasOwn(e,'roofVolume')?['roofVolume']:[])]),
    'EXPRESSION_FIELDS');
   check(['none','east','rear'].includes(e.setbackSide)&&
    ((e.setbackSide==='none'&&e.setbackDepth===0)||
@@ -56,6 +56,10 @@ export function validateArchitecturePlan(p){
    ['x','z'].includes(e.roofAxis)&&
    ['plain','fins','screen'].includes(e.facadeLanguage),
    'EXPRESSION_STYLE');
+  // Explicit opt-in preserves the original B143 roof source for old plans.
+  check(e.roofVolume===undefined||
+   (e.roofVolume==='raised'&&e.roofProfile==='ridge'),
+   'EXPRESSION_ROOF_VOLUME');
   if(Object.hasOwn(e,'rearCornerCut')){
    check((keys(e.rearCornerCut,['width','depth'])||
     keys(e.rearCornerCut,['width','depth','side']))&&
@@ -387,7 +391,8 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy'}
    width:2,steps:5,treadDepth:1});
  }
  const upper=envelope(count-1),top=1+5*count;
- box('roof-base','add',roof,[upper.x0,top,upper.z0],
+ const raisedRoof=original.expression.roofVolume==='raised';
+ if(!raisedRoof)box('roof-base','add',roof,[upper.x0,top,upper.z0],
   [upper.x1-upper.x0+1,1,upper.z1-upper.z0+1]);
  if(roofProfile!=='flat'){
   const span=roofAxis==='x'?upper.x1-upper.x0+1:upper.z1-upper.z0+1;
@@ -395,6 +400,28 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy'}
    const height=roofProfile==='ridge'?
     Math.min(3,Math.floor(Math.min(pos,span-1-pos)/2)):
     (pos%6===0?0:Math.ceil((pos%6)/2));
+   if(raisedRoof){
+    // TRUE raised volume: continuous pitched roof is the interior ceiling,
+    // with actual air underneath instead of a solid flat base at top.
+    const origin=roofAxis==='x'?
+     [upper.x0+pos,top+height,upper.z0]:
+     [upper.x0,top+height,upper.z0+pos];
+    const size=roofAxis==='x'?
+     [1,1,upper.z1-upper.z0+1]:
+     [upper.x1-upper.x0+1,1,1];
+    box('roof-raised-skin-'+pos,'add',roof,origin,size);
+    if(height>0){
+     // A source-enclosed eave on BOTH long sides of this strip.
+     const a=roofAxis==='x'?
+      [upper.x0+pos,top,upper.z0]:[upper.x0,top,upper.z0+pos];
+     const b=roofAxis==='x'?
+      [upper.x0+pos,top,upper.z1]:[upper.x1,top,upper.z0+pos];
+     box('roof-raised-eave-a-'+pos,'add',wall,a,[1,height,1]);
+     box('roof-raised-eave-b-'+pos,'add',wall,b,[1,height,1]);
+    }
+    continue;
+   }
+   // Non-opt-in expressive roofs preserve their exact historical geometry.
    if(height<1)continue;
    const origin=roofAxis==='x'?
     [upper.x0+pos,top+1,upper.z0]:[upper.x0,top+1,upper.z0+pos];

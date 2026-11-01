@@ -440,3 +440,54 @@ test('rear z-zone cannot be misrepresented as a direct front entrance',()=>{
   {entrancePlacement:'source-accessible'});
  assert.equal(auditR125SourceRoutes(p).status,'SOURCE_ROUTES_REACH_ALL_ZONES');
 });
+
+test('model-opted ridge changes TRUE indoor volume, with both source-enclosed eaves',()=>{
+ const base=plan('roof-volume-studio',['x'],['creation hall','work storage']);
+ base.footprint={width:24,depth:28};
+ const expression={setbackSide:'none',setbackDepth:0,
+  roofProfile:'ridge',roofAxis:'x',facadeLanguage:'plain'};
+ const old=compileArchitecturePlan({...base,expression});
+ const raised=compileArchitecturePlan({...base,expression:{...expression,roofVolume:'raised'}},
+  {entrancePlacement:'source-accessible'});
+ const vox=voxels(raised.compiled),legacy=voxels(old.compiled);
+ const top=6,x=12,z=12; // 3-block ridge above the old flat ceiling
+ assert.equal(includes(legacy,x,top,z),true);
+ assert.equal(includes(vox,x,top,z),false);
+ assert.equal(includes(vox,x,top+1,z),false);
+ assert.equal(includes(vox,x,top+2,z),false);
+ assert.equal(includes(vox,x,top+3,z),true);
+ assert.equal(includes(vox,x,top,1),true);
+ assert.equal(includes(vox,x,top+2,1),true);
+ assert.equal(includes(vox,x,top,26),true);
+ assert.equal(includes(vox,1,top,z),true);
+ assert(!raised.design.elements.some(e=>e.id==='roof-base'));
+ assert.equal(verifyCompiled(raised.design,raised.compiled),true);
+ assert.notEqual(raised.geometrySha256,old.geometrySha256);
+ assert.equal(auditArchitecturePlanCirculation(raised).status,'SOURCE_CLEARANCE_PROBES_PASS');
+ assert.equal(auditR125SourceRoutes(raised).status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.deepEqual(raised.gates,Array(9).fill('BLOCKED'));
+ assert.equal(raised.worldWrites,0);
+ assert.equal(raised.inGameWalking,'NOT_TESTED');
+});
+
+test('roof volume supports z-axis two-level setback and rejects invalid forms',()=>{
+ const base=plan('upper-loft-lab',['x','z'],['public work','private research']);
+ base.footprint={width:24,depth:28};
+ const expression={setbackSide:'east',setbackDepth:3,
+  roofProfile:'ridge',roofAxis:'z',facadeLanguage:'plain',roofVolume:'raised'};
+ const raised=compileArchitecturePlan({...base,expression},
+  {entrancePlacement:'source-accessible'});
+ const vox=voxels(raised.compiled),top=11;
+ assert.equal(includes(vox,10,top,12),false);
+ assert.equal(includes(vox,10,top+3,12),true);
+ assert.equal(includes(vox,1,top+2,12),true);
+ assert.equal(includes(vox,19,top+2,12),true);
+ assert.equal(auditArchitecturePlanCirculation(raised).status,'SOURCE_CLEARANCE_PROBES_PASS');
+ assert.equal(auditR125SourceRoutes(raised).status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ for(const invalid of ['flat','sawtooth']){
+  assert.throws(()=>compileArchitecturePlan({...base,expression:{
+   ...expression,roofProfile:invalid}}),/R125_PLAN_EXPRESSION_ROOF_VOLUME/);
+ }
+ assert.throws(()=>compileArchitecturePlan({...base,expression:{
+  ...expression,roofVolume:'imaginary'}}),/R125_PLAN_EXPRESSION_ROOF_VOLUME/);
+});
