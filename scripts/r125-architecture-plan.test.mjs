@@ -316,7 +316,7 @@ test('unaltered Nov-1 Qwen 14B 203-character brief compiles to real L-corner SOU
  try{
   const palette=new URL('../configs/r125-education-verified-palette-v26.33.json',import.meta.url);
   const output=path.join(tmp,'makecode');
-  const report=exportSavedPlan(fixture,output,'PRESERVED_LOCAL_QWEN_MODEL_RESPONSE',palette);
+  const report=exportSavedPlan(fixture,output,'UNVERIFIED_DESIGN',palette);
   assert.equal(report.worldWrites,0);
   assert.equal(report.programExecuted,false);
   assert.equal(report.materialMode,'STRICT_USER_ATTESTED');
