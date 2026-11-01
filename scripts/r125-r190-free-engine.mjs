@@ -37,6 +37,23 @@ const SYSTEM=[
  'Optional entranceFace north/south/east/west, optional skyCourtIntent, optional spatialRole=open-court on a non-entry room only if explicitly desired; do not add unsupported keys.',
  'Before answering, privately check all required fields, identifiers (NO underscores), every room width>=7, depth>=7 and height>=7, roof clearance, windows vs outside air, doorOffset/entrance-window overlap, and roof/facet conflict. If incompatible, DESIGN IT DIFFERENTLY before responding; do not ask host to alter JSON. Model authors individual massing, function and openings; do NOT copy a standard template. Output ONLY the one final JSON object; no commands or code.'
 ].join('\n');
+// Optional design-first trial: let the model propose real massing before
+// requesting precise windows or creating Minecraft construction commands.
+const MASSING_SYSTEM=[
+ 'You are an independent architect, not a block decorator. Design a memorable, functional building with a coherent main space, entrance and useful exterior relationship.',
+ 'Return one JSON plan with schema='+R190_SCHEMA+' and exact required keys schema,id,title,brief,site,entrySpaceId,spaces,materials. ASCII kebab-case IDs, no underscores.',
+ 'Site {width,depth,height}: width/depth 36..52,height 12..18,volume <=40000. 2..4 connected functional rooms, each with id,purpose,width,depth,height,parentId,side,privacy.',
+ 'First room is entrySpaceId with parentId=null,side=null. Other rooms use prior parentId and side north/south/east/west. Each width/depth 7..22 and height 7..site.height-2. privacy public/shared/private. No room directly attached on entranceFace (default south).',
+ 'Materials exactly floor,wall,roof chosen from wood or stone. Optional entranceFace north/south/east/west.',
+ 'Optional roofFormIntents: 1..2 items {spaceId,profile,axis,rise}, profile ridge/shed, axis x/z,rise 2..3, room.height+rise < site.height.',
+ 'Optional formIntent={spaceId,face,cornerInset} for a real non-rectangular enclosed volume; face north/south/east/west and cornerInset 2..3. Do not put a roofFormIntent on the same space.',
+ 'Optional skyCourtIntent={spaceId,offsetX,offsetZ,width,depth} for a real open-sky roof void. width/depth 4..14, margins >=2, not in a faceted or profiled-roof room. Optional openFace touches the actual exterior edge, leaves two-block lateral margins, and avoids doors.',
+ 'Optional one non-entry space may specify spatialRole=open-court for a roofless connected exterior space.',
+ 'These options are OPTIONAL, not a required shape. Use only architecturally meaningful volumes, not fake trim, decorations or a fixed template.',
+ 'NO glazedOpenings key in this phase. A later model stage can select source-verified windows only after human ART review. No voxel positions, code or commands.',
+ 'Check all room IDs, dimensions, parent relations, available height and geometry conflicts. Return only a JSON object.'
+].join('\n');
+export const R190_MASSING_SYSTEM_PROMPT=MASSING_SYSTEM;
 export const R190_FREE_SYSTEM_PROMPT=SYSTEM;
 const save=(dir,name,data)=>fs.writeFileSync(path.join(dir,name),
  typeof data==='string'?data:JSON.stringify(data,null,2)+'\n',{flag:'wx'});
@@ -62,10 +79,10 @@ export function compileR190FreePlan(plan,{palette,provenance='UNVERIFIED_DESIGN'
 }
 
 export async function runR190FreeEngine({
- prompt=null,model='qwen3:14b',planFile=null,outDir,paletteFile
+ prompt=null,model='qwen3:14b',planFile=null,outDir,paletteFile,massingOnly=false
 }={}, {fetcher=fetch}={}){
  if(!outDir||!paletteFile||typeof fetcher!=='function'||
-   (!!planFile===!!prompt)||!modelName.test(model))fail('INPUT');
+   (!!planFile===!!prompt)||!modelName.test(model)||typeof massingOnly!=='boolean')fail('INPUT');
  if(fs.existsSync(outDir))fail('OUTPUT_MUST_BE_NEW');
  fs.mkdirSync(outDir,{recursive:false});
  const modelDir=path.join(outDir,'model'),codeDir=path.join(outDir,'makecode');
@@ -91,7 +108,7 @@ export async function runR190FreeEngine({
    if(available.status!=='LOCAL_MODEL_LISTED')fail('LOCAL_MODEL_NOT_LISTED');
    const requestBody={model,stream:false,temperature:0.5,
     reasoning_effort:'none',max_tokens:2600,response_format:{type:'json_object'},
-    messages:[{role:'system',content:SYSTEM},{role:'user',content:prompt}]};
+    messages:[{role:'system',content:massingOnly?MASSING_SYSTEM:SYSTEM},{role:'user',content:prompt}]};
    save(modelDir,'MODEL_REQUEST.json',{endpoint,requestBody});
    const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),180000);
    let response;
@@ -114,6 +131,28 @@ export async function runR190FreeEngine({
   }
   report.originalResponseSha256=sha(Buffer.from(raw));
   const plan=JSON.parse(raw);
+  if(massingOnly){
+   if(Object.hasOwn(plan,'glazedOpenings'))fail('MASSING_GLAZING_NOT_ALLOWED');
+   const built=compileR190SemanticPlan(plan);
+   if(built.audit?.allProgramSpacesReachable!==true||built.worldWrites!==0||
+      built.constructionApproved!==false||!verifyCompiled(built.design,built.compiled))
+    fail('MASSING_SOURCE_REJECT');
+   save(modelDir,'ARCHITECTURE_PLAN.json',built.inputPlan);
+   save(modelDir,'B143_SOURCE.json',built.design);
+   save(modelDir,'B143_SCENE.json',built.compiled);
+   save(modelDir,'R190_SOURCE_ROUTE_AUDIT.json',built.audit);
+   const gallery=compileB143Gallery([built.design]);
+   const template=fs.readFileSync(path.join(ROOT,'source/ai/b143-viewer-template.html'),'utf8');
+   save(modelDir,'index.html',renderB143Html(gallery,template));
+   report.status='SOURCE_MASSING_ART_HOLD';
+   report.sourceSha256=built.compiled.sourceSha256;
+   report.geometrySha256=built.compiled.geometrySha256;
+   report.plannedVoxelCount=built.compiled.primitives.length;
+   report.roomCount=built.layout.spaces.length;
+   report.modelAuthorship=planFile?'SAVED_PLAN_UNVERIFIED':'MODEL_RESPONSE_CAPTURED';
+   report.windows='DEFERRED';report.makecode='NOT_GENERATED';
+   return report;
+  }
   const palette=JSON.parse(fs.readFileSync(paletteFile,'utf8'));
   const {result,packet,modelPlanSha256}=compileR190FreePlan(plan,{palette,provenance});
   fs.mkdirSync(codeDir);
@@ -331,17 +370,22 @@ function r190E1ReviewHtml(rows,summary){
 }
 
 async function main(argv){
- const opts={};
- for(let i=0;i<argv.length;i+=2){
+ const opts={};let massingOnly=false;
+ for(let i=0;i<argv.length;){
+  if(argv[i]==='--massing-only'){
+   if(massingOnly)fail('DUPLICATE_FLAG');
+   massingOnly=true;i++;continue;
+  }
   if(!['--out','--palette','--prompt','--model','--plan'].includes(argv[i])||
      !argv[i+1]||Object.hasOwn(opts,argv[i]))fail('ARGS');
-  opts[argv[i]]=argv[i+1];
+  opts[argv[i]]=argv[i+1];i+=2;
  }
  const report=await runR190FreeEngine({outDir:opts['--out'],
-  paletteFile:opts['--palette'],prompt:opts['--prompt']??null,
-  planFile:opts['--plan']??null,model:opts['--model']??'qwen3:14b'});
+  paletteFile:opts['--palette']??(massingOnly?path.join(ROOT,'configs','r125-education-verified-palette-v26.33.json'):undefined),
+  prompt:opts['--prompt']??null,planFile:opts['--plan']??null,
+  model:opts['--model']??'qwen3:14b',massingOnly});
  console.log(JSON.stringify(report));
- if(report.status!=='SOURCE_AND_MAKECODE_READY_HUMAN_REVIEW_REQUIRED')process.exitCode=2;
+ if(!['SOURCE_AND_MAKECODE_READY_HUMAN_REVIEW_REQUIRED','SOURCE_MASSING_ART_HOLD'].includes(report.status))process.exitCode=2;
 }
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){
  const study=process.argv.length===3&&process.argv[2]==='--study-three';
