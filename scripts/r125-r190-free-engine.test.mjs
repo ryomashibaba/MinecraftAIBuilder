@@ -388,3 +388,47 @@ test('autonomous massing prompt offers real existing geometry rather than one fi
  for(const phrase of ['formIntent','skyCourtIntent','spatialRole=open-court','NO glazedOpenings','OPTIONAL'])
   assert(R190_MASSING_SYSTEM_PROMPT.includes(phrase));
 });
+
+test('saved-model sky court conflict is independently diagnosed, no geometry repair',()=>{
+ const p=synthetic();delete p.glazedOpenings;
+ const room=p.spaces[0].id;
+ p.skyCourtIntent={spaceId:room,offsetX:2,offsetZ:2,width:4,depth:4};
+ p.roofFormIntents=[{spaceId:room,profile:'ridge',axis:'x',rise:2}];
+ const unchanged=JSON.stringify(p);
+ const issues=diagnoseR190E1Plan(p);
+ const problem=issues.find(x=>x.rule==='SKY_COURT_ROOF_PROFILE_CONFLICT');
+ assert(problem);
+ assert.equal(problem.actual.spaceId,room);
+ assert.deepEqual(problem.actual.roofFormIntents,p.roofFormIntents);
+ assert.equal(JSON.stringify(p),unchanged);
+ const q=structuredClone(p);delete q.roofFormIntents;
+ q.formIntent={spaceId:room,face:'north',cornerInset:2};
+ assert(diagnoseR190E1Plan(q).some(x=>x.rule==='SKY_COURT_FACET_CONFLICT'));
+ const r=structuredClone(p);delete r.roofFormIntents;
+ r.spaces[0].spatialRole='open-court';
+ assert(diagnoseR190E1Plan(r).some(x=>x.rule==='SKY_COURT_OPEN_ROOM_CONFLICT'));
+ const z=structuredClone(p);delete z.roofFormIntents;
+ z.skyCourtIntent.spaceId='does-not-exist';
+ assert(diagnoseR190E1Plan(z).some(x=>x.rule==='SKY_COURT_ROOM_MISSING'));
+});
+test('sky court HOLD on saved authored plan reports actionable issue and zero writes',async()=>{
+ const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'massing-court-hold-'));
+ try{
+  const p=synthetic();delete p.glazedOpenings;
+  const id=p.spaces[0].id;
+  p.skyCourtIntent={spaceId:id,offsetX:2,offsetZ:2,width:4,depth:4};
+  p.roofFormIntents=[{spaceId:id,profile:'ridge',axis:'x',rise:2}];
+  const original=JSON.stringify(p),source=path.join(tmp,'original.txt');
+  fs.writeFileSync(source,original);
+  const output=path.join(tmp,'report');
+  const result=await runR190FreeEngine({planFile:source,outDir:output,
+    paletteFile:palette,massingOnly:true});
+  assert.equal(result.status,'HOLD');
+  assert.match(result.reason,/R190_SEMANTIC_SKY_COURT_CONFLICT/);
+  assert(result.validationIssues.some(x=>x.rule==='SKY_COURT_ROOF_PROFILE_CONFLICT'));
+  assert.equal(result.modelRequests,0);
+  assert.equal(result.worldWrites,0);
+  assert.equal(fs.readFileSync(source,'utf8'),original);
+  assert(!fs.existsSync(path.join(output,'makecode')));
+ }finally{fs.rmSync(tmp,{recursive:true,force:true});}
+});

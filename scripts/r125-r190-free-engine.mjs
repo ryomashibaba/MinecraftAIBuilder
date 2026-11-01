@@ -48,6 +48,7 @@ const MASSING_SYSTEM=[
  'Optional roofFormIntents: 1..2 items {spaceId,profile,axis,rise}, profile ridge/shed, axis x/z,rise 2..3, room.height+rise < site.height.',
  'Optional formIntent={spaceId,face,cornerInset} for a real non-rectangular enclosed volume; face north/south/east/west and cornerInset 2..3. Do not put a roofFormIntent on the same space.',
  'Optional skyCourtIntent={spaceId,offsetX,offsetZ,width,depth} for a real open-sky roof void. width/depth 4..14, margins >=2, not in a faceted or profiled-roof room. Optional openFace touches the actual exterior edge, leaves two-block lateral margins, and avoids doors.',
+ 'CRITICAL: skyCourtIntent.spaceId MUST name an existing enclosed room different from formIntent.spaceId AND from every roofFormIntents[].spaceId. It must NEVER name a spatialRole=open-court room. When no compatible room exists, omit skyCourtIntent; do not invent a workaround.',
  'Optional one non-entry space may specify spatialRole=open-court for a roofless connected exterior space.',
  'These options are OPTIONAL, not a required shape. Use only architecturally meaningful volumes, not fake trim, decorations or a fixed template.',
  'NO glazedOpenings key in this phase. A later model stage can select source-verified windows only after human ART review. No voxel positions, code or commands.',

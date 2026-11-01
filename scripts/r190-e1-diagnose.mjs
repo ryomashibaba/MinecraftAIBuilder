@@ -114,6 +114,35 @@ export function diagnoseR190E1Plan(plan){
      'faceted formIntent and roofForm cannot be assigned to the same room');
   }
  }
+ // Diagnostic only: a roof void needs one EXISTING, ENCLOSED room whose
+ // geometry is not simultaneously faceted or roof-profiled. Never repair.
+ if(plan.skyCourtIntent!==undefined){
+  const v=plan.skyCourtIntent;
+  if(!v||typeof v!=='object'||Array.isArray(v)){
+   issue(issues,'skyCourtIntent','SKY_COURT_FIELDS',typeof v,
+    'one object with spaceId, offsetX, offsetZ, width, depth, optional openFace');
+  }else{
+   const room=plan.spaces.find(s=>s?.id===v.spaceId);
+   if(!room)issue(issues,'skyCourtIntent.spaceId','SKY_COURT_ROOM_MISSING',
+    v.spaceId,'existing enclosed room ID');
+   else{
+    if(room.spatialRole==='open-court')
+     issue(issues,'skyCourtIntent.spaceId','SKY_COURT_OPEN_ROOM_CONFLICT',
+      {spaceId:v.spaceId,spatialRole:room.spatialRole},
+      'choose an enclosed room, not an outdoor open-court room');
+    if(plan.formIntent?.spaceId===v.spaceId)
+     issue(issues,'skyCourtIntent.spaceId','SKY_COURT_FACET_CONFLICT',
+      {spaceId:v.spaceId,formIntent:plan.formIntent},
+      'a faceted room cannot also contain a sky courtyard');
+    const profiled=Array.isArray(roofForms)?
+      roofForms.filter(f=>f?.spaceId===v.spaceId):[];
+    if(profiled.length)
+     issue(issues,'skyCourtIntent.spaceId','SKY_COURT_ROOF_PROFILE_CONFLICT',
+      {spaceId:v.spaceId,roofFormIntents:profiled},
+      'a profiled-roof room cannot also contain a sky courtyard');
+   }
+  }
+ }
  // Full input window bounds: expose the constraints rejected under
  // R190_SEMANTIC_GLAZING_OUT_OF_WALL without mutating any model fields.
  for(const [i,g] of (Array.isArray(plan.glazedOpenings)?plan.glazedOpenings:[]).entries()){
