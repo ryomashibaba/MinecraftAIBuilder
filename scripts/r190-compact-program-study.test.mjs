@@ -94,6 +94,11 @@ test('R190 compact preserved study replay preserves original hashes, zero model 
   assert.equal(result.makecode,'SHELL_RESEARCH_ONLY_NOT_APPROVED');
   assert.equal(result.shellPacketCount,3);
   assert.equal(result.windowCandidateCount,3);
+  assert(result.largerGlazingCandidateCount>=1);
+  assert(result.largerGlazingCandidateCount<=3);
+  assert(result.rows.every(x=>x.expandedGlazingResearch.status===
+   'HOST_DERIVED_LARGER_WINDOWS_ART_HOLD'||
+   x.expandedGlazingResearch.status==='HOLD_NO_SAFE_LARGE_WINDOW'));
   assert(result.rows.every(r=>r.windowResearch.clearRoomFloorCells?.length===3&&
    r.windowResearch.clearRoomFloorCells.every(x=>
     Number.isInteger(x.padsReachableFromEntrance)&&
@@ -109,6 +114,16 @@ test('R190 compact preserved study replay preserves original hashes, zero model 
     'WINDOWS_HOST_DERIVED_RESEARCH_ONLY','ROOM_SOURCE_FLOOR_REVIEW.json'),'utf8'));
    assert.equal(roomEvidence.schema,'r190-compact-interior-source-evidence-v1');
    assert.equal(roomEvidence.worldWrites,0);
+   if(row.expandedGlazingResearch.viewer){
+    const folder=path.join(result.dir,row.id,'HOST_LARGER_GLAZING_RESEARCH_ONLY');
+    const report=JSON.parse(fs.readFileSync(path.join(folder,'GLAZING_RESEARCH_REPORT.json'),'utf8'));
+    assert.equal(report.worldWrites,0);
+    assert.equal(report.modelCalls,0);
+    assert.equal(report.constructionApproved,false);
+    assert(report.expandedGlassCells>report.originalGlassCells);
+    assert(fs.existsSync(path.join(folder,'index.html')));
+    assert(fs.existsSync(path.join(folder,'B143_SCENE.json')));
+   }
    const map=fs.readFileSync(path.join(result.dir,row.id,
     'WINDOWS_HOST_DERIVED_RESEARCH_ONLY','SOURCE_FLOOR_ACCESS_MAP.svg'),'utf8');
    assert.match(map,/data-kind="reachable-pad"/);
