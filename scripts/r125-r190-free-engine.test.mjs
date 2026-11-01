@@ -73,10 +73,15 @@ test('saved SYNTHETIC design, zero model calls, source SHA and offline export al
  }finally{fs.rmSync(temp,{recursive:true,force:true});}
 });
 
-test('unverified materials and implicit/no windows are HOLD, never silently repaired',()=>{
+test('attested metal roof works, unverified metal still HOLDs, and model windows remain mandatory',()=>{
  const verified=JSON.parse(fs.readFileSync(palette,'utf8'));
  const metal=synthetic();metal.materials.roof='metal';
- assert.throws(()=>compileR190FreePlan(metal,{palette:verified}),/UNVERIFIED_MATERIAL_METAL/);
+ const {packet}=compileR190FreePlan(metal,{palette:verified});
+ assert((packet.plannedBlockCounts.iron_block??0)>0);
+ assert.equal(packet.worldWrites,0);
+ assert.equal(packet.programExecuted,false);
+ const withoutMetal=structuredClone(verified);delete withoutMetal.blocks.metal;
+ assert.throws(()=>compileR190FreePlan(metal,{palette:withoutMetal}),/UNVERIFIED_MATERIAL_METAL/);
  const missing=synthetic();delete missing.glazedOpenings;
  assert.throws(()=>compileR190FreePlan(missing,{palette:verified}),/EXPLICIT_MODEL_WINDOWS_REQUIRED/);
 });

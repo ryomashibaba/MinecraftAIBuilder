@@ -123,7 +123,7 @@ test('user-attested iron_block supports genuine B143 metal roof without a model 
   assert.equal(report.constructionApproved,false);
   assert(report.usedMaterials.some(x=>x.material==='metal'&&x.blockName==='iron_block'));
   const code=fs.readFileSync(status.makecode,'utf8');
-  assert.match(code,/blocks\\.blockByName\\("iron_block"\\)/);
+  assert.match(code,/blocks\.blockByName\("iron_block"\)/);
   assert.equal(createHash('sha256').update(code).digest('hex'),status.makecodeSourceSha256);
   assert.deepEqual(JSON.parse(fs.readFileSync(input,'utf8')),plan);
  }finally{fs.rmSync(root,{recursive:true,force:true});}
@@ -140,7 +140,7 @@ test('R125 saved one-storey retail screen uses iron_block and verified materials
   expression:{setbackSide:'none',setbackDepth:0,roofProfile:'flat',roofAxis:'x',facadeLanguage:'screen'}};
  try{
   const input=path.join(root,'SOURCE_ARCHITECTURE_PLAN.json');
-  fs.writeFileSync(input,JSON.stringify(plan)+'\\n');
+  fs.writeFileSync(input,JSON.stringify(plan));
   const result=await runFreeBuild({model:'qwen3:14b',prompt:null,plan:input,
    outRoot:path.join(root,'outputs')});
   assert.equal(result.status,'MAKECODE_READY_HUMAN_REVIEW_REQUIRED');
