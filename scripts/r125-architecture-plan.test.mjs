@@ -391,3 +391,52 @@ test('invalid AI-selected rear-corner side fails closed',()=>{
   rearCornerCut:{width:4,depth:4,side:'up'}};
  assert.throws(()=>compileArchitecturePlan(p),/R125_PLAN_EXPRESSION_CORNER_CUT/);
 });
+
+test('model-selected ground entry zone changes real doorway while keeping routes',()=>{
+ const base=plan('two-zone-entrance',['x'],['visitor hall','storage room']);
+ const snapshot=structuredClone(base);
+ const old=compileArchitecturePlan(base,{entrancePlacement:'source-accessible'});
+ const first=compileArchitecturePlan({...base,entryZone:'first'},{entrancePlacement:'source-accessible'});
+ const second=compileArchitecturePlan({...base,entryZone:'second'},{entrancePlacement:'source-accessible'});
+ const door=r=>r.design.elements.find(e=>e.id==='exterior-entrance').origin[0];
+ assert.equal(door(first),first.program[0].splitCoordinate-2);
+ assert.equal(door(second),second.program[0].splitCoordinate+2);
+ assert.equal(old.geometrySha256,second.geometrySha256);
+ assert.notEqual(first.geometrySha256,second.geometrySha256);
+ for(const p of [first,second]){
+  assert.equal(verifyCompiled(p.design,p.compiled),true);
+  assert.equal(auditArchitecturePlanCirculation(p).status,'SOURCE_CLEARANCE_PROBES_PASS');
+  assert.equal(auditR125SourceRoutes(p).status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert.deepEqual(p.gates,Array(9).fill('BLOCKED'));
+  assert.equal(p.worldWrites,0);
+ }
+ assert.deepEqual(base,snapshot);
+});
+
+test('small expressive first-zone front entry is not re-filled with HOST glass',()=>{
+ const p=plan('small-front-entry',['x'],['public hall','support room']);
+ p.footprint={width:16,depth:18};p.levels[0].splitPercent=40;
+ p.entryZone='first';
+ p.expression={setbackSide:'none',setbackDepth:0,
+  roofProfile:'flat',roofAxis:'x',facadeLanguage:'plain'};
+ const r=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+ const e=r.design.elements.find(e=>e.id==='exterior-entrance');
+ assert.equal(e.origin[0],r.program[0].splitCoordinate-2);
+ assert(!r.design.elements.some(x=>x.id==='l0-window-front-glass'));
+ const v=voxels(r.compiled);
+ for(let x=e.origin[0];x<e.origin[0]+2;x++)
+  for(let y=e.origin[1];y<e.origin[1]+3;y++)
+   assert.equal(includes(v,x,y,1),false);
+ assert.equal(auditR125SourceRoutes(r).status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+});
+
+test('rear z-zone cannot be misrepresented as a direct front entrance',()=>{
+ for(const invalid of ['third',null,0])
+  assert.throws(()=>compileArchitecturePlan({...plan('bad-entry'),entryZone:invalid}),
+   /R125_PLAN_ENTRY_ZONE_FRONT_ACCESS/);
+ assert.throws(()=>compileArchitecturePlan({...plan('back-zone',['z']),entryZone:'second'}),
+  /R125_PLAN_ENTRY_ZONE_FRONT_ACCESS/);
+ const p=compileArchitecturePlan({...plan('front-zone',['z']),entryZone:'first'},
+  {entrancePlacement:'source-accessible'});
+ assert.equal(auditR125SourceRoutes(p).status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+});

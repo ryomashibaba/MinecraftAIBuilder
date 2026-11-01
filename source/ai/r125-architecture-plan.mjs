@@ -18,10 +18,16 @@ const slug=s=>typeof s==='string'&&/^[a-z][a-z0-9-]{2,39}$/.test(s);
 const text=(s,max=180)=>typeof s==='string'&&s.length>=3&&s.length<=max&&
  !/[\u0000-\u001f<>]/.test(s);
 const integer=(v,a,b)=>Number.isSafeInteger(v)&&v>=a&&v<=b;
+// AI chooses the program-facing zone; HOST computes the opening.
+const groundEntryX=(axis,split,width,placement,zone)=>
+ axis==='x'&&(zone!==undefined||placement==='source-accessible')?
+  (zone==='first'?split-2:split+2):Math.floor(width/2)-1;
 export function validateArchitecturePlan(p){
  const standard=['schema','id','title','brief','footprint','levels','materials'];
  const expressive=Object.hasOwn(p??{},'expression');
- check(keys(p,expressive?[...standard,'expression']:standard),
+ const entrySpecified=Object.hasOwn(p??{},'entryZone');
+ check(keys(p,[...standard,...(expressive?['expression']:[]),
+  ...(entrySpecified?['entryZone']:[])]),
   'TOP_LEVEL_FIELDS');
  check(p.schema===SCHEMA,'SCHEMA');
  // B143 permits up to 500 characters of brief; keep title and room-purpose
@@ -75,6 +81,10 @@ export function validateArchitecturePlan(p){
    seen.add(space.id);
   }
  }
+ // Only the first z-split zone touches the front facade; no fake back entry.
+ check(!entrySpecified||(['first','second'].includes(p.entryZone)&&
+  (p.levels[0].splitAxis==='x'||p.entryZone==='first')),
+  'ENTRY_ZONE_FRONT_ACCESS');
  return true;
 }
 export function compileArchitecturePlan(plan,{entrancePlacement='legacy'}={}){
@@ -122,8 +132,7 @@ export function compileArchitecturePlan(plan,{entrancePlacement='legacy'}={}){
    // New practical exports opt into a generic geometry rule: avoid the
    // x-axis dividing wall just behind the formerly centered exterior door.
    // Legacy compilation remains byte-identical for frozen original hashes.
-   const entryX=entrancePlacement==='source-accessible'&&axis==='x'?
-    split+2:Math.floor(w/2)-1;
+   const entryX=groundEntryX(axis,split,w,entrancePlacement,original.entryZone);
    box('exterior-entrance','cut',null,[entryX,base+1,1],[2,3,1]);
   }
   // True glazing is cut through an external wall THEN filled with glass.
@@ -320,8 +329,7 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy'}
   }
   if(l===0)
    box('exterior-entrance','cut',null,
-    [entrancePlacement==='source-accessible'&&axis==='x'?
-     split+2:Math.floor(w/2)-1,y,z0],[2,3,1]);
+    [groundEntryX(axis,split,w,entrancePlacement,original.entryZone),y,z0],[2,3,1]);
   // A setback makes a real second-floor terrace. It must not be separated
   // from the interior by an uninterrupted exterior wall. Cut a 2-wide door
   // at upper-floor standing height without changing the 1st-floor envelope.
@@ -338,6 +346,10 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy'}
    ['east',[x1,y+1,z1-3],[1,2,2]]
   ];
   for(const [name,at,size] of windows){
+   // HOST windows must not fill an AI-selected first-zone entry opening.
+   const entryX=groundEntryX(axis,split,w,entrancePlacement,original.entryZone);
+   if(l===0&&original.entryZone==='first'&&name==='front'&&
+    entryX<=at[0]+size[0]-1&&entryX+1>=at[0])continue;
    box(tag+'-window-'+name+'-cut','cut',null,at,size);
    box(tag+'-window-'+name+'-glass','add','glass',at,size);
   }
