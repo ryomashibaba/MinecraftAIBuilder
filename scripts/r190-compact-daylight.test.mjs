@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {compileR190CompactProgram,R190_COMPACT_SCHEMA}
  from '../source/ai/r190-compact-program.mjs';
-import {deriveR190CompactMinimumWindows,auditR190CompactInteriorEvidence,
+import {deriveR190CompactMinimumWindows,deriveR190CompactExpandedGlazingVariant,
+ auditR190CompactInteriorEvidence,
  renderR190CompactAccessMapSvg}
  from '../source/ai/r190-compact-daylight.mjs';
 import {verifyCompiled} from '../source/ai/b143-building-dsl.mjs';
@@ -94,4 +95,29 @@ test('independent SOURCE room floor evidence retains original model, geometry an
  const broken=structuredClone(windowed.current);
  broken.compiled.primitives.pop();
  assert.throws(()=>auditR190CompactInteriorEvidence(broken),/INTERIOR_UNVERIFIED_SOURCE/);
+});
+
+test('HOST expanded real-glass candidate preserves model, original scene and safety',()=>{
+ const program=sample('r190-glazing-expanded',['plain','ridge']);
+ const frozen=JSON.stringify(program),base=compileR190CompactProgram(program);
+ const minimum=deriveR190CompactMinimumWindows(base);
+ const oldScene=JSON.stringify(minimum.current.compiled);
+ const oldPlan=JSON.stringify(minimum.plan);
+ const variant=deriveR190CompactExpandedGlazingVariant(minimum);
+ assert.equal(variant.status,'HOST_DERIVED_LARGER_WINDOWS_ART_HOLD');
+ assert(variant.expandedGlassCells>variant.originalGlassCells);
+ assert.notEqual(variant.expandedGeometrySha256,variant.minimumWindowGeometrySha256);
+ assert.equal(variant.modelCalls,0);
+ assert.equal(variant.worldWrites,0);
+ assert.equal(variant.constructionApproved,false);
+ assert(variant.accepted.every(x=>x.authorship==='HOST_DERIVED_NOT_MODEL'));
+ assert(verifyCompiled(variant.current.design,variant.current.compiled));
+ assert(variant.current.audit.allProgramSpacesReachable);
+ assert.equal(JSON.stringify(program),frozen);
+ assert.equal(JSON.stringify(minimum.plan),oldPlan);
+ assert.equal(JSON.stringify(minimum.current.compiled),oldScene);
+ const corrupted=structuredClone(minimum);
+ corrupted.current.compiled.primitives.pop();
+ assert.throws(()=>deriveR190CompactExpandedGlazingVariant(corrupted),
+  /GLAZING_VARIANT_BASE_INVALID/);
 });
