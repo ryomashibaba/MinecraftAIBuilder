@@ -194,3 +194,45 @@ test('explicit roof profile cannot silently be substituted, CLI rooftop constrai
  assert.throws(()=>parseR125SemanticArgs(['--model','qwen3:14b','--out','new-dir',
   '--require-usable-roof-volume','--require-usable-roof-volume']),/INVALID_ARGUMENT/);
 });
+
+test('truncated provider completion preserves partial original without fabricating a B143 scene',async t=>{
+ const root=temp();t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
+ const raw='{"schema":"minecraftaibuilder-r125-arch';
+ let posts=0;
+ const fetcher=async(url,opts)=>{
+  if(opts.method==='GET')return tags(url,opts);
+  posts++;
+  return {ok:true,text:async()=>JSON.stringify({choices:[
+   {message:{content:raw},finish_reason:'length'}]})};
+ };
+ const dir=path.join(root,'truncated');
+ const r=await runR125SemanticPilot({model:'qwen3:14b',outDir:dir},{fetcher});
+ assert.equal(posts,1);
+ assert.equal(r.modelCalls,1);
+ assert.equal(r.status,'HOLD_SEMANTIC_PLAN');
+ assert.equal(r.providerFinishReason,'length');
+ assert.match(r.reason,/MODEL_OUTPUT_TRUNCATED_OR_CHOICES/);
+ assert.equal(r.originalRawCaptured,true);
+ assert.equal(fs.readFileSync(path.join(dir,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8'),raw);
+ assert.equal(fs.existsSync(path.join(dir,'ARCHITECTURE_PLAN.json')),false);
+ assert.equal(fs.existsSync(path.join(dir,'B143_SCENE.json')),false);
+ assert.deepEqual(r.world.BuildPlan.operations,[]);
+ assert.deepEqual(r.world.gates,Array(9).fill('BLOCKED'));
+ assert.equal(r.world.worldWrites,0);
+});
+
+test('non-stop provider finish reason is preserved but cannot be promoted to a model design',async t=>{
+ const root=temp();t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
+ const raw=JSON.stringify(design());
+ const fetcher=async(url,opts)=>opts.method==='GET'?tags(url,opts):
+  {ok:true,text:async()=>JSON.stringify({choices:[
+   {message:{content:raw},finish_reason:'tool_calls'}]})};
+ const dir=path.join(root,'nonstop');
+ const r=await runR125SemanticPilot({model:'qwen3:14b',outDir:dir},{fetcher});
+ assert.equal(r.status,'HOLD_SEMANTIC_PLAN');
+ assert.equal(r.providerFinishReason,'tool_calls');
+ assert.match(r.reason,/MODEL_OUTPUT_INCOMPLETE_FINISH_REASON/);
+ assert.equal(fs.readFileSync(path.join(dir,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8'),raw);
+ assert.equal(fs.existsSync(path.join(dir,'B143_SOURCE.json')),false);
+ assert.equal(r.world.worldWrites,0);
+});
