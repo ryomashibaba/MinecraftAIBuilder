@@ -34,6 +34,20 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Parse real Windows PowerShell launcher before any Windows handoff
+        shell: pwsh
+        run: |
+          $tokens = $null
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile(
+            (Resolve-Path 'scripts/r125-live-safe-worktree.ps1').Path,
+            [ref]$tokens, [ref]$errors
+          ) | Out-Null
+          if ($errors.Count -gt 0) {
+            $errors | ForEach-Object { Write-Error $_.ToString() }
+            throw "R125_POWERSHELL_PARSER_FAILED"
+          }
+          Write-Host 'R125_POWERSHELL_PARSER_PASS (no model calls/world writes)'
       - name: Test intact old Qwen 2620 reference and opt-in C repair
         run: |
           node --check source/ai/r125-architecture-plan.mjs
