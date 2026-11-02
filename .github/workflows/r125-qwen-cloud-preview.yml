@@ -23,7 +23,9 @@ concurrency:
 
 jobs:
   verified-mobile-gallery:
-    runs-on: ubuntu-latest
+    # Playwright 1.56.1 cannot install Chromium dependencies on ubuntu26.04.
+    # Pin the OS image instead of using a floating ubuntu-latest tag.
+    runs-on: ubuntu-24.04
     timeout-minutes: 18
     steps:
       - uses: actions/checkout@v4
