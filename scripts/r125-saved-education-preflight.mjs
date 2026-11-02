@@ -55,10 +55,47 @@ export function reviewEducationCandidate(product,palette,{provenance='UNVERIFIED
   sourceRoutes:routes,exported};
 }
 /**
+ * A requested retail program must be physically represented by two different
+ * MODEL-AUTHORED semantic zones. Text-only evidence is intentionally weak:
+ * this cannot attest fixtures, visual quality, or real customer usage.
+ * Never silently substitute room names or HOST-invented programs.
+ */
+export function assessR125RequestedUseCase(plan,useCase='generic'){
+ if(!['generic','retail'].includes(useCase))fail('UNKNOWN_USE_CASE');
+ if(useCase==='generic')return {
+  schema:'r125-use-case-intent-v1',requestedUseCase:'generic',
+  status:'NOT_SPECIFICALLY_AUDITED',humanReviewRequired:true};
+ if(!Array.isArray(plan?.levels)||plan.levels.length!==1||
+    !Array.isArray(plan.levels[0]?.spaces)||
+    plan.levels[0].spaces.length!==2)
+  return {schema:'r125-use-case-intent-v1',requestedUseCase:'retail',
+   status:'HOLD_RETAIL_REQUIRES_TWO_FUNCTIONS_ON_ONE_LEVEL',
+   humanReviewRequired:true};
+ const zones=plan.levels[0].spaces.map(z=>({
+  id:z.id,description:String(z.purpose??'').normalize('NFKC')}));
+ const sales=/売場|売り場|販売|接客|レジ|陳列|商品|買い物|店頭|ショールーム|\b(?:retail|sales|selling|customer|shopping|display|checkout|showroom|merchandise|counter)\b/i;
+ const stock=/倉庫|収納|在庫|保管|バックヤード|仕入|荷捌|梱包|配送|\b(?:storage|stockroom|stock|inventory|backroom|staff|receiving|warehouse|packing|supplies)\b/i;
+ const publicZones=zones.filter(x=>sales.test(x.description));
+ const backZones=zones.filter(x=>stock.test(x.description));
+ const assignments=publicZones.flatMap(a=>backZones.filter(b=>b.id!==a.id)
+  .map(b=>({publicZoneId:a.id,backZoneId:b.id})));
+ return {
+  schema:'r125-use-case-intent-v1',requestedUseCase:'retail',
+  status:assignments.length===1?'SOURCE_TEXT_SUPPORTS_TWO_RETAIL_FUNCTIONS':
+   'HOLD_RETAIL_MODEL_PROGRAM_NOT_DISTINCT',
+  publicZoneId:assignments.length===1?assignments[0].publicZoneId:null,
+  backZoneId:assignments.length===1?assignments[0].backZoneId:null,
+  checkedField:'MODEL_AUTHORED_LEVEL_0_SPACES_PURPOSE',
+  noHostPurposeSubstitution:true,
+  doesNotVerifyPhysicalFixtures:true,
+  humanReviewRequired:true
+ };
+}
+/**
  * Actual saved-model entry: fail closed without creating an output on
  * test-double, tampering, missing routes, unknown material, or parent paths.
  */
-export function prepareSavedR125Education({studyDir,outDir,paletteFile=DEFAULT_PALETTE}={}){
+export function prepareSavedR125Education({studyDir,outDir,paletteFile=DEFAULT_PALETTE,requestedUseCase='generic'}={}){
  if(!path.isAbsolute(studyDir??'')||!path.isAbsolute(outDir??'')||
     !path.isAbsolute(paletteFile??''))fail('ABSOLUTE_PATHS_REQUIRED');
  const source=fs.realpathSync(studyDir);
@@ -74,6 +111,16 @@ export function prepareSavedR125Education({studyDir,outDir,paletteFile=DEFAULT_P
     verified.provenance!=='LOCAL_MODEL_RUN_REPORTED_NOT_INDEPENDENTLY_ATTESTED')
   fail('SAVED_MODEL_SOURCE_REVIEW_NOT_ELIGIBLE');
  const plan=readJsonFile(path.join(source,'ARCHITECTURE_PLAN.json'));
+ const intent=assessR125RequestedUseCase(plan,requestedUseCase);
+ if(requestedUseCase==='retail'){
+  const evidence=readJsonFile(path.join(source,'R125_SEMANTIC_REPORT.json'));
+  if(!/(?:店舗|店|販売|shop|retail)/i.test(evidence.prompt??''))
+   fail('RETAIL_NOT_IN_ORIGINAL_PROMPT');
+ }
+ if(intent.status.startsWith('HOLD'))
+  return {schema:'r125-private-education-source-preflight-v1',
+   status:'HOLD_REQUESTED_USE_CASE',requestedUseCase,
+   independentIntentEvidence:intent,writtenFiles:0,...safety()};
  const product=compileArchitecturePlan(plan);
  if(product.planSha256!==verified.planSha256||
     product.sourceSha256!==verified.sourceSha256||
@@ -95,6 +142,7 @@ export function prepareSavedR125Education({studyDir,outDir,paletteFile=DEFAULT_P
   modelOriginalSha256:verified.originalRawSha256,
   sourceSha256:product.sourceSha256,geometrySha256:product.geometrySha256,
   entranceRoutes:route.status,zoneAccess:route.zones,
+  requestedUseCase,independentIntentEvidence:intent,
   materialMode:metadata.materialMode,usedMaterials:metadata.usedMaterials,
   plannedVoxels:metadata.plannedVoxelCount,
   plannedCuboids:metadata.plannedCuboids,
@@ -107,7 +155,8 @@ export function prepareSavedR125Education({studyDir,outDir,paletteFile=DEFAULT_P
   ...safety()
  };
  const instructions=[
-  'R125 実Qwen研究施設 — Minecraft Education 施工候補 (安全ゲート未準備)',
+  requestedUseCase==='retail'?'R125 実Qwen店舗 — Minecraft Education 施工候補 (世界ゲート未準備)':
+   'R125 実Qwen研究施設 — Minecraft Education 施工候補 (世界ゲート未準備)',
   'このフォルダはオフラインで作成した SOURCE / MakeCode データのみ。',
   'Minecraft Educationには一切接続していません。ワールドへの実施工は未実施です。',
   '',
@@ -116,7 +165,7 @@ export function prepareSavedR125Education({studyDir,outDir,paletteFile=DEFAULT_P
   '2. 元の試験ワールドをコピーし、別名・復元方法を記録する。',
   '3. 既存建築を避けた平坦・空の施工範囲と周辺安全を確認する。',
   '4. 使用材・ブロック名称と使用個数を EXPORT_REPORT.json で確認する。',
-  '5. 建物入口と2室・内部空間の通行を、事前に SOURCE_REPORT.json の',
+  '5. 建物入口と2室・内部空間の通行・店舗なら売場とバックヤードの役割を、SOURCE_REPORT.json の',
   '   zoneAccess と本物の3Dレビューで確認する。',
   '6. MakeCodeプログラムは、事前の空気/床材検査とFillOperation.Keepを行うが、',
   '   ワールドID・バックアップの真偽・復元可能性は検証できない。',
@@ -142,10 +191,12 @@ export function prepareSavedR125Education({studyDir,outDir,paletteFile=DEFAULT_P
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){
  try{
   const argv=process.argv.slice(2);
-  if(argv.length!==4||argv[0]!=='--study'||argv[2]!=='--out')
+  if(![4,6].includes(argv.length)||argv[0]!=='--study'||argv[2]!=='--out'||
+    (argv.length===6&&(argv[4]!=='--usecase'||argv[5]!=='retail')))
    fail('USAGE_--study_ABSOLUTE_PRIVATE_STUDY_--out_FRESH_SIBLING');
   const result=prepareSavedR125Education({
-   studyDir:argv[1],outDir:argv[3]});
+   studyDir:argv[1],outDir:argv[3],
+   requestedUseCase:argv.length===6?'retail':'generic'});
   console.log(JSON.stringify(result,null,2));
   if(result.status!=='OFFLINE_MAKECODE_CANDIDATE_WORLD_GATE_BLOCKED')
    process.exitCode=2;
