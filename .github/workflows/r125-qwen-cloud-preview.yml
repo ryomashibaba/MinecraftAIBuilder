@@ -7,6 +7,7 @@ on:
       - '.github/workflows/r125-qwen-cloud-preview.yml'
       - 'scripts/r125-expression-gallery.mjs'
       - 'scripts/r125-expression-gallery.test.mjs'
+      - 'scripts/r125-qwen-cloud-mobile-qa.mjs'
       - 'scripts/fixtures/r125-qwen14b-residential-2024a.json'
       - 'scripts/b143-gallery-core.mjs'
       - 'source/ai/b143-viewer-template.html'
@@ -23,7 +24,7 @@ concurrency:
 jobs:
   verified-mobile-gallery:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 18
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -65,6 +66,14 @@ jobs:
           assert(!/<script[^>]+src\s*=/i.test(html),'EXTERNAL_JS');
           console.log('R125_PUBLIC_QWEN_CLOUD_PREVIEW_SOURCE_ONLY_PASS: 5 real geometry scenes, zero model calls, zero world writes');
           NODE
+      - name: Install pinned browser QA dependencies (no repository lockfile update)
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Actual Chromium mobile and desktop SOURCE interaction check
+        env:
+          PREVIEW_DIR: ${{ runner.temp }}/r125-public-qwen-preview
+        run: node scripts/r125-qwen-cloud-mobile-qa.mjs
       - name: Record evidence and review entry
         run: |
           echo '## Cloud-only, no local PC or remote LLM' >> "$GITHUB_STEP_SUMMARY"
