@@ -4,8 +4,10 @@
 # no public model evidence, no Minecraft world writes, no automatic retry.
 param(
   [string]$Repository = (Join-Path $env:USERPROFILE "Projects\MinecraftAIBuilder"),
-  [switch]$CheckOnly
+  [switch]$CheckOnly,
+  [switch]$ReviewLatest
 )
+if ($CheckOnly -and $ReviewLatest) { throw 'HOLD_INCOMPATIBLE_MODES' }
 $ErrorActionPreference = "Stop"
 $branch = "feature/b198zr1-protected-architectural-revision"
 $work = $null
@@ -58,7 +60,21 @@ try {
     & node --test scripts/r125-roof-interior-study.test.mjs
     if ($LASTEXITCODE -ne 0) { throw "HOLD_ROOF_REGRESSION" }
 
-    if ($CheckOnly) {
+    & node --test scripts/r125-saved-semantic-review.test.mjs
+    if ($LASTEXITCODE -ne 0) { throw "HOLD_PRIVATE_REVIEW_REGRESSION" }
+    if ($ReviewLatest) {
+      $privateRoot = Join-Path $env:USERPROFILE "Documents\MAB_Private_Runs"
+      if (-not (Test-Path -LiteralPath $privateRoot)) { throw "HOLD_PRIVATE_RUNS_NOT_FOUND" }
+      $previous = Get-ChildItem -LiteralPath $privateRoot -Directory -Filter "r125-lab-*" |
+        Sort-Object LastWriteTime -Descending | Select-Object -First 1
+      if (-not $previous) { throw "HOLD_NO_SAVED_R125_RUN" }
+      $reportFile = Join-Path $previous.FullName "R125_SEMANTIC_REPORT.json"
+      if (-not (Test-Path -LiteralPath $reportFile)) { throw "HOLD_LATEST_RUN_MISSING_REPORT" }
+      Write-Host "READ-ONLY source replay (0 Ollama requests): $($previous.FullName)"
+      & node scripts/r125-saved-semantic-review.mjs --study $previous.FullName
+      if ($LASTEXITCODE -ne 0) { throw "HOLD_PRIVATE_REVIEW" }
+      $out = $previous.FullName
+    } elseif ($CheckOnly) {
       Write-Host "CHECK_ONLY_PASS: no model call, no model output, no world writes."
     } else {
       # The private location is OUTSIDE GitHub and the original checkout.
