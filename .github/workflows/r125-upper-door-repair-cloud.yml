@@ -19,6 +19,7 @@ on:
       - 'configs/r125-education-verified-palette-v26.33.json'
       - 'scripts/r125-live-safe-worktree.ps1'
       - 'scripts/r125-education-world-inventory.ps1'
+      - 'scripts/r125-education-backup-and-candidate-check.ps1'
       - '.github/workflows/r125-upper-door-repair-cloud.yml'
   workflow_dispatch:
 permissions:
@@ -57,6 +58,16 @@ jobs:
           if ($inventoryErrors.Count -gt 0) {
             $inventoryErrors | ForEach-Object { Write-Error $_.ToString() }
             throw "R125_WORLD_INVENTORY_POWERSHELL_PARSER_FAILED"
+          }
+          $backupTokens = $null
+          $backupErrors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile(
+            (Resolve-Path 'scripts/r125-education-backup-and-candidate-check.ps1').Path,
+            [ref]$backupTokens, [ref]$backupErrors
+          ) | Out-Null
+          if ($backupErrors.Count -gt 0) {
+            $backupErrors | ForEach-Object { Write-Error $_.ToString() }
+            throw "R125_BACKUP_AND_CANDIDATE_PARSER_FAILED"
           }
           Write-Host 'R125_POWERSHELL_PARSER_PASS (no model calls/world writes)'
       - name: Test read-only world inventory on synthetic file fixture
