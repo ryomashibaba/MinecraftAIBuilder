@@ -26,7 +26,7 @@ function Read-ZipEntry([System.IO.Compression.ZipArchiveEntry]$Entry,[int]$Limit
  }
  $stream = $Entry.Open()
  try {
-  $reader = New-Object System.IO.StreamReader($stream,([Text.Encoding]::UTF8),$true,1024,$true)
+  $reader = [System.IO.StreamReader]::new($stream,[Text.Encoding]::UTF8,$true,1024,$true)
   try { return $reader.ReadToEnd() } finally { $reader.Dispose() }
  } finally { $stream.Dispose() }
 }
