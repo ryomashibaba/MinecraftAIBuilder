@@ -1,3 +1,10 @@
+## 2026-11-02 R125 共通屋根SOURCE 3用途 実CI結果と統合回帰補修
+
+- 保存HEAD `ef8bba00` のR125専用Actions #41431741878（`verified-source-repair`）は **SUCCESS**。artifact #13133983811 の `roof-interior/ROOF_INTERIOR_SOURCE_REPORT.json` と6真正B143 HTMLを取得して照合した。
+- 完成ボクセルの追加天井空気セル：合成住宅400（高天井2×2候補76）、合成店舗252（同51）、合成研究施設374（同63）。屋根端・終端・急な段差の未閉鎖セルは各0、プログラム床SOURCE問題は前後とも各0。**いずれも実Qwen新応答ではなく合成パラメータ研究**。実ワールドの耐候・歩行・美術は未検証。
+- 同HEADのR190-AC #41431741903 は **154/155、FAIL 1**。原因は既存 `scripts/r125-architecture-plan.test.mjs` の「sawtooth+raisedは不正」という歴史的拒否期待値が、新たな明示opt-in許可に更新されていなかったこと。安全チェックの緩和ではなく、sawtoothを真正source・追加閉鎖とWorld0で検証し、flatとimaginaryの不正拒否を維持するテストへ更新した。
+- この補修コミットのR125/R190-AC/Education-first最終結果は**コミット後に別途検査**。作業中の未完CIを成功と記載しない。mainと元Qwen/凍結A〜E/既存C/既存ridge raisedの幾何SHAは保護、PR #128 Draft維持、施工9 BLOCKED。
+
 ## 2026-11-02 R125 共通屋根の「外形だけ」から真正内部容積へ（SOURCE研究）
 
 - 直前コミット `b14d42de` のR190-AC 155/155、R125屋根SOURCE検査、Education-first QAはSUCCESS。PR #128 Open/Draft、main未変更。

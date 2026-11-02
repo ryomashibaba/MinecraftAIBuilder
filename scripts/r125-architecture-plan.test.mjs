@@ -484,10 +484,19 @@ test('roof volume supports z-axis two-level setback and rejects invalid forms',(
  assert.equal(includes(vox,19,top+2,12),true);
  assert.equal(auditArchitecturePlanCirculation(raised).status,'SOURCE_CLEARANCE_PROBES_PASS');
  assert.equal(auditR125SourceRoutes(raised).status,'SOURCE_ROUTES_REACH_ALL_ZONES');
- for(const invalid of ['flat','sawtooth']){
-  assert.throws(()=>compileArchitecturePlan({...base,expression:{
-   ...expression,roofProfile:invalid}}),/R125_PLAN_EXPRESSION_ROOF_VOLUME/);
- }
+ // Sawtooth is a new explicitly opt-in real roof-volume form; it must
+ // compile to genuine B143 cells. Unsupported flat/imaginary still fail.
+ const sawtooth=compileArchitecturePlan({...base,expression:{
+  ...expression,roofProfile:'sawtooth'}},
+  {entrancePlacement:'source-accessible'});
+ assert.equal(verifyCompiled(sawtooth.design,sawtooth.compiled),true);
+ assert(!sawtooth.design.elements.some(e=>e.id==='roof-base'));
+ assert(sawtooth.design.elements.some(e=>e.id.startsWith('roof-raised-step-closure-')));
+ assert.notEqual(sawtooth.geometrySha256,raised.geometrySha256);
+ assert.equal(sawtooth.worldWrites,0);
+ assert.deepEqual(sawtooth.gates,Array(9).fill('BLOCKED'));
+ assert.throws(()=>compileArchitecturePlan({...base,expression:{
+  ...expression,roofProfile:'flat'}}),/R125_PLAN_EXPRESSION_ROOF_VOLUME/);
  assert.throws(()=>compileArchitecturePlan({...base,expression:{
   ...expression,roofVolume:'imaginary'}}),/R125_PLAN_EXPRESSION_ROOF_VOLUME/);
 });
