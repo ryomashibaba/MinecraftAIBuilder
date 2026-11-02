@@ -1,3 +1,14 @@
+## 2026-11-02 R125 実Qwen C案の2階SOURCE分断を修復（Cloud PASS・別案を保護）
+
+- **調査事実**：保存済み公開Qwen14B元意味設計 `scripts/fixtures/r125-qwen14b-residential-2024a.json`（原SHA `46aed429e795f2622cd8c49d8eb8f1153af20d5d958abf2f5f99020e909ce271`）からのHOST派生C案の2階 `standingY=7` は、2×2支持床372候補が276と96の**2領域**に分断されていた。階段シャフト `x=3..4,z=3..7` に内部扉 `x=3..4,z=9` が近すぎ、連続する2幅床候補が途切れるとSOURCEの座標から特定。Minecraft物理歩行ではない。
+- **修正方針**：元A〜E案、実Qwen原文、既存の `compileArchitecturePlan` 既定動作は**一切変更しない**。`upperDoorPlacement:'stair-clear'` を明示した場合だけ、上階z軸仕切り扉をシャフトから余裕を取った位置へ配置。建物名や用途で条件分岐しない共通HOST修復規則、デフォルト `legacy` を維持。
+- **GitHub保存**： `source/ai/r125-architecture-plan.mjs` にopt-in規則、`scripts/r125-upper-door-repair-study.mjs` とテスト、`.github/workflows/r125-upper-door-repair-cloud.yml` を同一コミット `5c86807f8ab7f167e240a590393b7785653e25b6` に保存。GitHub Actions `41422419862` の `verified-source-repair` は**SUCCESS**。成果物 `R125-C-Upper-Floor-Verified-Repair-Study` / artifact ID `13130078070` に旧案と修復案の真正B143単独HTMLおよび独立SOURCE評価JSONを保存。
+- **独立実測値**：旧C `geometrySha256=4d4c1b19196e14b8aaa99edc53c94d1511ef8e3e622675883f302658a334a5dc`、2階372候補が2領域（最大276、最大比0.7419）→ 修復案 `geometrySha256=54b3f91c206982f8a8288dbafc6dee51947813b8115192f451f92c35a00c8dbc`、**1領域372/372**。モデルから出された意味計画の `planSha256=9d32de7181ae9ba9b7953102055e10e53c01ea6b1011b2681b6043f9eab2cbcc` は旧/新で一致。SOURCEプログラム床のHOLDは修復後解消。
+- **残る不合格**：修復案にも `standingY=13`（4領域）、`standingY=14`（3領域）で外側屋根由来のSOURCE断片化警告。美術審査 `ART HOLD/NOT_REVIEWED`、Minecraft歩行 `NOT_TESTED`。正式採用、施工、完成認定はしない。
+- **閲覧・品質検証**：クラウドartifactの `legacy/index.html` と `stair-clear/index.html` を実際に取得し、それぞれ真正ボクセルと独立の形状SHAを含むことを確認。2つの元ビューを単一ファイルに埋め込んだ `MinecraftAIBuilder_R125_C_2階床_修復前後3D比較.html`（約140KB）をChatGPTから提供。ローカルPC操作不要。Chromium 420×900で両iframe計3,067表面ボクセルずつ描画、＋ボタン・視点リセット・比較切替が成功、JS例外0。表示画像 `R125_C_修復前後_スマホ比較.png`。これはChatGPT隔離ブラウザの表示確認であり、iPhone実機・Minecraft実歩行ではない。
+- **次に進む工程**：屋根断片化の解決は、現在のC屋根 sawtooth の元形状SHAを維持したうえで、屋根頂部の局所構造/外皮連結を真正B143に基づくHOST別案として研究。構造の見せかけ補完や既存Cの上書きは禁止。幾何の屋根だけの連結性を改善しても、人間美術とワールド物理は別ゲート。
+- **不変**：main未変更、Draft PR #128 Open、モデル呼び出し0、ユーザーPC操作0、ワールド接触/書込0、BuildPlan空、NOT_PREPARED、9 BLOCKED、非公開R190原本の公開0。
+
 ## 2026-11-02 13:42 JST以降 — クラウドChromium QA復旧・建築SOURCE不良の明示
 
 - **失敗の原因・修正**：GitHub Actions run 41379919641 の失敗はUbuntu 26.04上でPlaywright 1.56.1のChromiumがインストールできなかったため。先行の2件の生成テストおよびSOURCE照合はPASS。Ubuntu 24.04に固定（commit 433a421ff5cfb78eeea81b42ba53598563f9ad06）し、run 41389992699 はSUCCESS。MOBILE_420/DESKTOP_1280の本物のChromiumはCanvas描画（62997/149551非背景ピクセル）とモデル切替・拡大・縮小・断面・視点リセット、JS例外0・外部通信0でPASS。artifact 13116733901保存。
