@@ -87,6 +87,36 @@ jobs:
           $after = (Get-FileHash (Join-Path $world 'level.dat') -Algorithm SHA256).Hash
           if ($before -ne $after) { throw "R125_WORLD_INVENTORY_CHANGED_WORLD_DATA" }
           Write-Host 'R125_WORLD_INVENTORY_READONLY_TEST_PASS'
+      - name: Regression - Windows PowerShell 5.1 Unicode world-name gate (read only)
+        shell: pwsh
+        run: |
+          # A UTF-8/no-BOM .ps1 is decoded using the ANSI code page by Windows
+          # PowerShell 5.1. Forbid non-ASCII literals in this critical script.
+          $script = 'scripts/r125-education-backup-and-candidate-check.ps1'
+          $scriptText = [IO.File]::ReadAllText((Resolve-Path $script).Path)
+          if ($scriptText -match '[^\x00-\x7F]') {
+            throw 'R125_WINPS51_NON_ASCII_SCRIPT_RISK'
+          }
+          $fakeApp = Join-Path $env:RUNNER_TEMP 'r125-fake-localappdata'
+          $root = Join-Path $fakeApp 'Packages/Microsoft.MinecraftEducationEdition_8wekyb3d8bbwe/LocalState/games/com.mojang/minecraftWorlds'
+          $world = Join-Path $root 'FAKE_TEST_ONLY_WORLD'
+          New-Item -ItemType Directory -Force -Path $world | Out-Null
+          $expectedName = 'minecraftaibuildertest ' +
+            [char]0x306e + [char]0x30b3 + [char]0x30d4 + [char]0x30fc
+          [IO.File]::WriteAllText((Join-Path $world 'levelname.txt'), $expectedName, [Text.Encoding]::UTF8)
+          [IO.File]::WriteAllBytes((Join-Path $world 'level.dat'), [byte[]](1..128))
+          $before = (Get-FileHash (Join-Path $world 'level.dat') -Algorithm SHA256).Hash
+          $env:LOCALAPPDATA = $fakeApp
+          $missingBackup = Join-Path $fakeApp 'intentionally-absent.mcworld'
+          $result = & pwsh -NoProfile -File $script -BackupFile $missingBackup -NoFolderOpen 2>&1 | Out-String
+          if ($LASTEXITCODE -eq 0 -or
+              $result -notmatch 'HOLD_R125_WORLD_GATE_EXPORTED_BACKUP_NOT_FOUND' -or
+              $result -match 'WORLD_NAME_NOT_UNIQUE') {
+            throw ('R125_WINPS51_UNICODE_WORLD_NAME_REGRESSION: ' + $result)
+          }
+          $after = (Get-FileHash (Join-Path $world 'level.dat') -Algorithm SHA256).Hash
+          if ($before -ne $after) { throw 'R125_WORLD_GATE_TOUCHED_TEST_WORLD' }
+          Write-Host 'R125_WINPS51_ASCII_SOURCE_UNICODE_NAME_READONLY_PASS'
       - name: Test intact old Qwen 2620 reference and opt-in C repair
         run: |
           node --check source/ai/r125-architecture-plan.mjs
