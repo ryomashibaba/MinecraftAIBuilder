@@ -137,7 +137,46 @@ export function buildR125ExpressionComparison(){
   '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px">'+
   renderSourceRoofSlice(old,'D: legacy decorative ridge')+
   renderSourceRoofSlice(raised,'E: raised interior ridge')+'</div></section>';
- const html=baseHtml.replace('</body>',section+'</body>');
+
+ // Read-only review facts follow the selected real B143 scene. This never
+ // certifies Minecraft walking or author attribution beyond saved evidence.
+ const reviewFacts=rows.map(x=>({
+  sceneId:x.id,provenance:x.provenance,programFloors:x.programFloors,
+  programFloorIssues:x.programFloorIssues.map(z=>z.code+' @ Y='+z.standingY),
+  exteriorAdvisories:x.nonProgramExteriorAdvisories.map(z=>z.code+' @ Y='+z.standingY),
+  highRiskIds:x.highRiskIds,
+  sourceCirculation:x.sourceCirculation,
+  actualMinecraftWalking:'NOT_TESTED',humanAestheticReview:'NOT_REVIEWED'
+ }));
+ const reviewPanel='<section id="r125-source-review" aria-live="polite" '+
+  'style="padding:12px;border:1px solid #426079;border-radius:10px;background:#132b3c;margin-top:16px;line-height:1.5">'+
+  '<h2 style="font-size:1rem">選択案のSOURCE品質と作者</h2>'+
+  '<p id="r125-review-status"></p><p id="r125-review-provenance"></p>'+
+  '<p id="r125-review-faults"></p>'+
+  '<p style="font-size:.76rem;color:#b5cfdf">ART HOLD／Minecraft歩行 NOT_TESTED／施工不可。'+
+  'モデルの意味設計とホストの幾何・改変を混同しません。</p></section>';
+ const safeFacts=JSON.stringify(reviewFacts).replaceAll('<','\\u003c');
+ const bindFacts='<script>(function(){const facts='+safeFacts+';'+
+  'const select=document.getElementById("building");'+
+  'const status=document.getElementById("r125-review-status");'+
+  'const provenance=document.getElementById("r125-review-provenance");'+
+  'const faults=document.getElementById("r125-review-faults");'+
+  'function show(){const f=facts[Number(select.value)];if(!f)return;'+
+   'const blocked=f.programFloors==="HOLD_PROGRAM_FLOORS";'+
+   'status.style.color=blocked?"#ffac88":"#abebd3";'+
+   'status.textContent=blocked?"SOURCE HOLD — プログラム床の連結不良":'+
+    '(f.programFloors==="PROGRAM_FLOORS_CLEAR"?"プログラム床のSOURCE検査：指摘なし":'+
+    '"プログラム床は成立／外部屋根のSOURCE確認要");'+
+   'provenance.textContent=f.provenance==="ACTUAL_QWEN14B_ORIGINAL_SEMANTIC_PLAN"?'+
+    '"作者：保存済み実Qwenの意味設計。最終ボクセルはホスト生成。":'+
+    '"作者：Qwenの元プログラムを再利用したHOST派生形状（新モデル出力ではありません）。";'+
+   'faults.textContent="プログラム床："+(f.programFloorIssues.join("、")||"指摘なし")+'+
+    '" ／ 外部SOURCE："+(f.exteriorAdvisories.join("、")||"指摘なし")+'+
+    '" ／ 監査HIGH："+(f.highRiskIds.join("、")||"なし");'+
+  '}select.addEventListener("change",show);show();})();</script>';
+ let html=baseHtml.replace('<h2 style="margin-top:20px">表示設定</h2>',
+  reviewPanel+'<h2 style="margin-top:20px">表示設定</h2>');
+ html=html.replace('</body>',section+bindFacts+'</body>');
  if(new Set(rows.map(x=>x.geometrySha256)).size!==5)
   fail('NO_DISTINCT_REAL_GEOMETRY');
  const report={
