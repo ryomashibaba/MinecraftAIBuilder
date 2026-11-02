@@ -69,6 +69,85 @@ try {
       $privateRoot = Join-Path $env:USERPROFILE "Documents\MAB_Private_Runs"
       if (-not (Test-Path -LiteralPath $privateRoot)) { throw "HOLD_PRIVATE_RUNS_NOT_FOUND" }
       $previous = Get-ChildItem -LiteralPath $privateRoot -Directory -Filter "r125-lab-*" |
+        Where-Object { $_.Name -cmatch '^r125-lab-[0-9]{8}-[0-9]{6}-[0-9a-f]{8}
+      if (-not $previous) { throw "HOLD_NO_SAVED_R125_RUN" }
+      $reportFile = Join-Path $previous.FullName "R125_SEMANTIC_REPORT.json"
+      if (-not (Test-Path -LiteralPath $reportFile)) { throw "HOLD_LATEST_RUN_MISSING_REPORT" }
+      if ($PrepareLatest) {
+        $sibling = Join-Path $privateRoot ($previous.Name + "-education-preflight-" + $revision.Substring(0,12))
+        if (Test-Path -LiteralPath $sibling) { throw "HOLD_PREFLIGHT_OUTPUT_ALREADY_EXISTS" }
+        Write-Host "OFFLINE SOURCE route + strict material preflight (NO Ollama/Minecraft writes):"
+        & node scripts/r125-saved-education-preflight.mjs --study $previous.FullName --out $sibling
+        if ($LASTEXITCODE -ne 0) { throw "HOLD_EDUCATION_PREFLIGHT" }
+        $out = $sibling
+      } else {
+        Write-Host "READ-ONLY source replay (0 Ollama requests): $($previous.FullName)"
+        & node scripts/r125-saved-semantic-review.mjs --study $previous.FullName
+        if ($LASTEXITCODE -ne 0) { throw "HOLD_PRIVATE_REVIEW" }
+        $out = $previous.FullName
+      }
+    } elseif ($CheckOnly) {
+      Write-Host "CHECK_ONLY_PASS: no model call, no model output, no world writes."
+    } else {
+      # The private location is OUTSIDE GitHub and the original checkout.
+      $privateRoot = Join-Path $env:USERPROFILE "Documents\MAB_Private_Runs"
+      New-Item -ItemType Directory -Path $privateRoot -Force | Out-Null
+      $suffix = [guid]::NewGuid().ToString("N").Substring(0,8)
+      $out = Join-Path $privateRoot ("r125-lab-" + (Get-Date -Format "yyyyMMdd-HHmmss") + "-" + $suffix)
+      if (Test-Path -LiteralPath $out) { throw "HOLD_OUTPUT_ALREADY_EXISTS" }
+      $prompt = "小さな平屋の研究施設を独自に設計してください。外部入口、実験室と観測記録室、窓、十分な支持床と内部動線を設けてください。鋸歯状屋根の下には実際に使える高天井の空間を確保してください。店舗や住宅の使い回しではなく、用途に即した独創的な設計にしてください。"
+      Write-Host "Requesting ONE real qwen3:14b local Ollama answer. No retries."
+      & node scripts/r125-semantic-pilot.mjs --model "qwen3:14b" --out $out --prompt $prompt --require-usable-roof-volume
+      $modelExitCode = $LASTEXITCODE
+      $reportPath = Join-Path $out "R125_SEMANTIC_REPORT.json"
+      if (Test-Path -LiteralPath $reportPath) {
+        $r = Get-Content -LiteralPath $reportPath -Raw -Encoding UTF8 | ConvertFrom-Json
+        [pscustomobject]@{
+          gitRevision = $revision
+          model = $r.model
+          status = $r.status
+          reason = $r.reason
+          providerFinishReason = $r.providerFinishReason
+          modelCalls = $r.modelCalls
+          originalRawCaptured = $r.originalRawCaptured
+          sourceCirculationStatus = $r.sourceCirculationStatus
+          programFloorStatus = $r.programFloorStatus
+          roofSourceEvidencePresent = ($null -ne $r.roofInteriorSourceEvidence)
+          sourceSha256 = $r.sourceSha256
+          geometrySha256 = $r.geometrySha256
+          worldWrites = $r.world.worldWrites
+          exitCode = $modelExitCode
+          outputFolder = $out
+        } | ConvertTo-Json -Depth 5
+        if ($modelExitCode -ne 0) {
+          Write-Warning "Model returned HOLD. Original evidence is preserved, not repaired or retried."
+        }
+      } else {
+        Write-Warning "No R125 report found; inspect model startup diagnostics. No retry was made."
+      }
+    }
+  } finally {
+    Pop-Location
+  }
+} finally {
+  if ($added -and $work -and (Test-Path -LiteralPath $work)) {
+    & git worktree remove -- $work
+    if ($LASTEXITCODE -ne 0) {
+      Write-Warning "Temporary worktree retained because Git found changes: $work"
+    }
+  }
+  Pop-Location
+  if ($out -and (Test-Path -LiteralPath $out)) {
+    try { Invoke-Item -LiteralPath $out }
+    catch { Write-Warning "Open the preserved evidence folder manually: $out" }
+    $viewer = Join-Path $out "index.html"
+    if (Test-Path -LiteralPath $viewer) {
+      try { Invoke-Item -LiteralPath $viewer }
+      catch { Write-Warning "Viewer was saved but could not be opened: $viewer" }
+    }
+  }
+} -and
+          (Test-Path -LiteralPath (Join-Path $_.FullName "R125_SEMANTIC_REPORT.json")) } |
         Sort-Object LastWriteTime -Descending | Select-Object -First 1
       if (-not $previous) { throw "HOLD_NO_SAVED_R125_RUN" }
       $reportFile = Join-Path $previous.FullName "R125_SEMANTIC_REPORT.json"
