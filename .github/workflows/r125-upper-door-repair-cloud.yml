@@ -18,6 +18,7 @@ on:
       - 'source/ai/r125-education-makecode-export.mjs'
       - 'configs/r125-education-verified-palette-v26.33.json'
       - 'scripts/r125-live-safe-worktree.ps1'
+      - 'scripts/r125-education-world-inventory.ps1'
       - '.github/workflows/r125-upper-door-repair-cloud.yml'
   workflow_dispatch:
 permissions:
@@ -47,7 +48,34 @@ jobs:
             $errors | ForEach-Object { Write-Error $_.ToString() }
             throw "R125_POWERSHELL_PARSER_FAILED"
           }
+          $inventoryTokens = $null
+          $inventoryErrors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile(
+            (Resolve-Path 'scripts/r125-education-world-inventory.ps1').Path,
+            [ref]$inventoryTokens, [ref]$inventoryErrors
+          ) | Out-Null
+          if ($inventoryErrors.Count -gt 0) {
+            $inventoryErrors | ForEach-Object { Write-Error $_.ToString() }
+            throw "R125_WORLD_INVENTORY_POWERSHELL_PARSER_FAILED"
+          }
           Write-Host 'R125_POWERSHELL_PARSER_PASS (no model calls/world writes)'
+      - name: Test read-only world inventory on synthetic file fixture
+        shell: pwsh
+        run: |
+          $root = Join-Path $env:RUNNER_TEMP 'mab-world-inventory-fixture'
+          $world = Join-Path $root 'synthetic-world-01'
+          New-Item -ItemType Directory -Force -Path $world | Out-Null
+          [IO.File]::WriteAllText((Join-Path $world 'levelname.txt'), 'SOURCE_TEST_WORLD')
+          [IO.File]::WriteAllText((Join-Path $world 'level.dat'), 'TEST_ONLY_NOT_A_REAL_WORLD')
+          $before = (Get-FileHash (Join-Path $world 'level.dat') -Algorithm SHA256).Hash
+          $output = & pwsh -NoProfile -File 'scripts/r125-education-world-inventory.ps1' -WorldRoots $root | Out-String
+          if ($LASTEXITCODE -ne 0 -or $output -notmatch 'SOURCE_TEST_WORLD' -or
+              $output -notmatch 'zero world writes') {
+            throw "R125_WORLD_INVENTORY_TEST_FAILED"
+          }
+          $after = (Get-FileHash (Join-Path $world 'level.dat') -Algorithm SHA256).Hash
+          if ($before -ne $after) { throw "R125_WORLD_INVENTORY_CHANGED_WORLD_DATA" }
+          Write-Host 'R125_WORLD_INVENTORY_READONLY_TEST_PASS'
       - name: Test intact old Qwen 2620 reference and opt-in C repair
         run: |
           node --check source/ai/r125-architecture-plan.mjs
