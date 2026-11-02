@@ -4,10 +4,17 @@
 param(
  [string]$BackupFile = "",
  [string]$CandidateFolder = "",
- [string]$WorldName = "minecraftaibuildertest のコピー",
+ [string]$WorldName = "",
  [switch]$NoFolderOpen
 )
 $ErrorActionPreference = "Stop"
+# Windows PowerShell 5.1 decodes UTF-8 without a BOM as an ANSI code page.
+# This script is ASCII-only; assemble the exact user-confirmed Unicode name
+# at runtime so download encoding cannot silently change the selected world.
+if ([string]::IsNullOrWhiteSpace($WorldName)) {
+ $WorldName = "minecraftaibuildertest " +
+   [char]0x306e + [char]0x30b3 + [char]0x30d4 + [char]0x30fc
+}
 function Stop-Hold([string]$Code) { throw ("HOLD_R125_WORLD_GATE_" + $Code) }
 function IsLinked($item) {
  return ($null -ne $item -and ($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0)
