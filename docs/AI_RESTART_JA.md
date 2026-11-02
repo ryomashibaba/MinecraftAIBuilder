@@ -1,3 +1,10 @@
+## 2026-11-02 GitHub固定入口・帰宅後のPC実推論再開準備
+
+- 最新の固定入口としてルート [START_HERE.md](../START_HERE.md) を作成し、[完全統合引き継ぎ](MINECRAFT_AI_BUILDER_COMPLETE_HANDOFF_20261102_JA.md)へ接続。将来の新チャットは短文1つでGitHubの研究ブランチ・憲章・戦略・原本・現状・失敗を再取得する。毎日同じ長文/ZIPを要求しない。
+- この文書更新直前のHEADは `cf970b9a4bc49e0f2cdce4cf82bdabcfbcb10d3e`、Draft PR #128 Open/Draft/Unmerged。専用R125 run 41438390065は12/12 PASS、Education-first run 41438398935 SUCCESS。これはSOURCE/TEST DOUBLEの結果であり、最新機能の実QwenやMinecraft実歩行のPASSではない。
+- ユーザーは2026-11-02に帰宅しPC操作可能になった。2026-11-01時点の「ローカル操作不可」は解消。次の一手はGit/Node/Ollamaの読み取り照合から始め、既存 `scripts/r125-semantic-pilot.mjs` で **本物の一回のQwen3:14B推論**、元回答の非公開保管、屋根意図→B143実高天井＋室内動線のSOURCEチェックを行う。並行して既存花屋のEducation試験ワールド内の入口/2用途室の実歩行・材料の問題を優先。ガード未通過の施工禁止、Work/Computer Use別承認、主工程の失敗と未認証はHOLD。
+- 旧履歴はこのファイル以下とGitHub原本を保持している。新しい工程を無限追加せず、端から端までの完成度を毎回最優先する。
+
 ## 2026-11-02 R125モデル自身の屋根意図を真正内部容積へ接続（SOURCE ONLY）
 
 - 起点HEAD `f7499ad0` の3本のCIは R125 #41432515496、Education-first #41432526839、B198Z-R1 #41432527154、すべて **SUCCESS**。前工程の合成3用途・支持床から屋根下の2×2垂直空気SOURCE検証は成立。

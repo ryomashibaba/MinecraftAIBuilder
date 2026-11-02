@@ -3,6 +3,7 @@
 **自然言語 → ローカルLLMによる建築設計 → 本物の3D形状 → 検証 → Minecraft Education試験施工** を目指す既存プロジェクト。Minecraft Java版への対応は後段。
 
 ## 今の正式な入口
+- **[START_HERE.md](START_HERE.md)** — 新チャット・新開発者の統一入口。リンクされた[完全統合引き継ぎ](docs/MINECRAFT_AI_BUILDER_COMPLETE_HANDOFF_20261102_JA.md)を最初に読む。
 - [戦略 v2 — 最短実用化・小型LLM共通エンジン](docs/PROJECT_STRATEGY_V2_JA.md) — 開発思想、既存資産、実測指標、安全、段階別通過条件。
 - [R125 最短の縦貫MVP実装計画](docs/R125_THIN_VERTICAL_SLICE_PLAN_JA.md) — 具体的な最初のタスクと不合格時の扱い。
 - [AI_PROJECT_CHARTER_JA.md](docs/AI_PROJECT_CHARTER_JA.md) — 長期間変えない約束と許可境界。
