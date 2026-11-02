@@ -147,14 +147,24 @@ export async function runR125SemanticPilot({model,outDir,prompt=PROMPT,
    if(body.length>250000)fail('MODEL_HTTP_TOO_LARGE');
    let parsed;
    try{parsed=JSON.parse(body);}catch{fail('MODEL_HTTP_INVALID_JSON');}
-   if(parsed?.choices?.length!==1||
-    parsed.choices[0]?.finish_reason==='length')
+   if(parsed?.choices?.length!==1)
     fail('MODEL_OUTPUT_TRUNCATED_OR_CHOICES');
-   const raw=parsed.choices[0]?.message?.content;
+   const choice=parsed.choices[0];
+   report.providerFinishReason=typeof choice.finish_reason==='string'?
+    choice.finish_reason:null;
+   const raw=choice?.message?.content;
+   // Preserve the exact partial text before rejecting a truncated response.
+   // A saved fragment is diagnostic evidence, NEVER a valid model design.
+   if(typeof raw==='string'&&raw.length>0&&raw.length<=15000){
+    put('MODEL_RESPONSE_ORIGINAL.txt',raw);
+    report.originalRawCaptured=true;
+   }
+   if(choice?.finish_reason==='length')
+    fail('MODEL_OUTPUT_TRUNCATED_OR_CHOICES');
+   if(choice?.finish_reason!=='stop')
+    fail('MODEL_OUTPUT_INCOMPLETE_FINISH_REASON');
    if(typeof raw!=='string'||raw.length<20||raw.length>15000)
     fail('RAW_PLAN_MISSING_OR_OVERSIZE');
-   put('MODEL_RESPONSE_ORIGINAL.txt',raw);
-   report.originalRawCaptured=true;
    let plan;
    try{plan=JSON.parse(raw);}catch{fail('PLAN_NOT_JSON');}
    report.modelSelectedRoof=plan?.expression?{
