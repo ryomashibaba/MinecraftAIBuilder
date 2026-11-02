@@ -26,6 +26,14 @@ test('same real Qwen plan baseline plus 4 source-distinct generative form demons
  assert.equal(r.html.includes('TRUE B143 SOURCE: decorative roof vs interior roof'),true);
  assert.equal(r.html.includes('__B143_GALLERY_JSON__'),false);
  assert.ok(r.html.includes('minecraftaibuilder-b143-gallery-v1'));
+ assert.ok(r.html.includes('id="r125-source-review"'));
+ assert.ok(r.html.includes('id="r125-review-status"'));
+ assert.ok(r.html.includes('SOURCE HOLD — プログラム床の連結不良'));
+ assert.ok(r.html.includes('HOLD_PROGRAM_FLOORS'));
+ assert.ok(r.html.includes('ACTUAL_QWEN14B_ORIGINAL_SEMANTIC_PLAN'));
+ assert.ok(r.html.includes('HOST派生形状'));
+ assert.ok(r.report.scenes[2].programFloorIssues.some(x=>x.code==='FRAGMENTED_PROGRAM_FLOOR'));
+ assert.equal(r.report.scenes[0].programFloorIssues.length,0);
  assert.equal(r.report.constructionApproved,false);
  assert.deepEqual(r.report.gates,Array(9).fill('BLOCKED'));
 });

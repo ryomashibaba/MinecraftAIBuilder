@@ -49,6 +49,20 @@ try{
   await page.locator('#mobileReset').click();
   await page.locator('#building').selectOption('4');
   if(!(await page.locator('#sceneTitle').innerText()).includes('E:'))fail(name+'_VARIANT_CHANGE');
+  if(!(await page.locator('#r125-review-provenance').innerText()).includes('HOST派生形状'))
+   fail(name+'_HOST_AUTHORSHIP_NOT_VISIBLE');
+  await page.locator('#building').selectOption('2');
+  await page.waitForFunction(()=>
+   document.querySelector('#r125-review-status')?.textContent.includes('SOURCE HOLD'));
+  const warning=await page.locator('#r125-review-faults').innerText();
+  if(!warning.includes('FRAGMENTED_PROGRAM_FLOOR')||!warning.includes('Y=7'))
+   fail(name+'_BROKEN_PROGRAM_FLOOR_NOT_DISCLOSED');
+  await page.locator('#building').selectOption('0');
+  await page.waitForFunction(()=>
+   document.querySelector('#r125-review-provenance')?.textContent.includes('保存済み実Qwen'));
+  if((await page.locator('#r125-review-status').innerText()).includes('SOURCE HOLD'))
+   fail(name+'_BASELINE_MISLABELED');
+
   await page.screenshot({path:path.join(dir,name+'_SOURCE_RENDER.png'),fullPage:true});
   if(errors.length||requests.length)fail(name+'_JS_OR_EXTERNAL_NETWORK_'+JSON.stringify({errors,requests}));
   await context.close();
