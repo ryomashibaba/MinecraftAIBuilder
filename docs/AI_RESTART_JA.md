@@ -1,3 +1,12 @@
+## 2026-11-02 R125クラウド5棟QA成功、真正単一HTML抽出、Chromium回帰検査へ
+
+- **確定済みの実行事実**：GitHub Actions run `41374756553` は `success`、`verified-mobile-gallery` も成功。Actions artifact ID `13111215231` / `R125-Public-Qwen-5-Scene-Mobile-3D` が約53KBのZIPとしてGitHubに存在（期限2026-11-23 UTC）。ZIP実体をChatGPT側で取得、`index.html` は246830 bytes、モデル原本SHA `46aed429e795f2622cd8c49d8eb8f1153af20d5d958abf2f5f99020e909ce271` のみ。A=保存済み真正Qwen3:14B住宅意味設計2620ボクセル、B=3385、C=3209、D=3838、E=2758のホスト派生4案。モデル呼び出し0・世界書込0・9ゲートBLOCKED・Minecraft歩行未実証。
+- **ユーザーへの直接成果**：ZIP解凍なしで開ける単一ファイル `MinecraftAIBuilder_R125_Cloud_Qwen_5models_3D.html` をChatGPTのsandboxファイルとして提供。GitHub Pagesの公開デプロイとは区別する。オリジナルのHTMLをバイト列のまま抽出し、Qwen原文/幾何を改変しない。
+- **追加実測**：このHTMLをPlaywright/Python+Chromiumで `set_content` した420×900pxのスマホ幅で確認。Canvas 398×744 / 背景以外描画ピクセル63018、5案選択、断面切替（2619→1935表示）・ズーム・視点リセット・E案への選択成功、JS page errors=0。実ブラウザ検証はChatGPT隔離環境内であり、スマートフォン実端末やMinecraft実機での合格ではない。表示証拠 `R125_Cloud_Qwen_Mobile_Proof.png` も会話内で保存。
+- **クラウド側への恒久化**：`scripts/r125-qwen-cloud-mobile-qa.mjs` を `89984fc8` で追加。GitHub Actionsを改修（`fa4a3390`, `03781fe6`, `18d227e7`）、ピン留めPlaywright 1.56.1による420pxモバイル+1280pxPCの本物Chromium Canvas検査、操作、ネットワーク通信0、エラー0、撮影PNGを同じartifactに含める。アニメーションフレーム同期待ちと短時間連続更新の新旧run重複キャンセル対策を入れた。
+- **正確性の境界**：新Chromium QAを有効にしたHEADのGitHub CIはこの記載時点で未完走。run `41379919641` が待機中。先行runの成功を新検査後の成功と偽らない。既存B143 Pagesの重いパイプラインは以前CANCELLEDで配信確証なし。R190最新3用途非公開原本は公開GitHubへ一切載せない。
+- **固定**：main変更なし、Draft PR #128維持、local Windows不要、MODELとHOST分離、ART HOLD、Minecraft歩行NOT_TESTED、NOT_PREPARED/9 BLOCKED/BuildPlan空/WorldWrites0。
+
 ## 2026-11-02 ローカル不要の軽量CIで公開済みQwen真正3Dを生成（実装保存・実行結果待ち）
 
 - 現地のWindows操作は不可。既存ユーザー添付 `R190` 住宅・花屋・研究施設のモデル原文/3Dを**公開リポジトリへ保存しない**。すでに公開されていた `scripts/fixtures/r125-qwen14b-residential-2024a.json` のみを材料にする。
