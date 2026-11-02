@@ -44,7 +44,8 @@ try{
   await page.locator('#mobileZoomIn').click();
   await page.locator('#mobileZoomOut').click();
   await page.locator('#mobileCut').click();
-  if(!(await page.locator('#meta').innerText()).includes('断面'))fail(name+'_CUTAWAY');
+  await page.waitForFunction(()=>document.querySelector('#meta')?.textContent.includes('断面'));
+
   await page.locator('#mobileReset').click();
   await page.locator('#building').selectOption('4');
   if(!(await page.locator('#sceneTitle').innerText()).includes('E:'))fail(name+'_VARIANT_CHANGE');
