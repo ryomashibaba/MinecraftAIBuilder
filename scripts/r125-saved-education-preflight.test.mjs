@@ -6,7 +6,7 @@ import path from 'node:path';
 import {SCHEMA,compileArchitecturePlan} from '../source/ai/r125-architecture-plan.mjs';
 import {compileDesign} from '../source/ai/b143-building-dsl.mjs';
 import {runR125SemanticPilot} from './r125-semantic-pilot.mjs';
-import {reviewEducationCandidate,prepareSavedR125Education}
+import {reviewEducationCandidate,prepareSavedR125Education,assessR125RequestedUseCase}
  from './r125-saved-education-preflight.mjs';
 
 const palette={
@@ -82,4 +82,40 @@ test('untrusted TEST DOUBLE private source cannot be promoted into a real-model 
  }),/SAVED_MODEL_SOURCE_REVIEW_NOT_ELIGIBLE/);
  assert.equal(fs.existsSync(out),false);
  assert.equal(fs.readFileSync(path.join(dir,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8'),raw);
+});
+
+test('new retail requires model-authored public storefront AND distinct stock service room',()=>{
+ const shop=modelPlan();
+ shop.title='Fresh Market Storefront';
+ shop.brief='A practical two-zone retail store';
+ shop.levels[0].spaces=[
+  {id:'shop-front',purpose:'Customer-facing sales and checkout counter'},
+  {id:'back-storage',purpose:'Staff stockroom for inventory and receiving'}
+ ];
+ const result=assessR125RequestedUseCase(shop,'retail');
+ assert.equal(result.status,'SOURCE_TEXT_SUPPORTS_TWO_RETAIL_FUNCTIONS');
+ assert.equal(result.publicZoneId,'shop-front');
+ assert.equal(result.backZoneId,'back-storage');
+ assert.equal(result.humanReviewRequired,true);
+ const same=structuredClone(shop);
+ same.levels[0].spaces[1].purpose='Additional sales floor for customers';
+ assert.equal(assessR125RequestedUseCase(same,'retail').status,
+  'HOLD_RETAIL_MODEL_PROGRAM_NOT_DISTINCT');
+ const mislabeled=structuredClone(shop);
+ mislabeled.levels[0].spaces=[
+  {id:'shop-front',purpose:'Research experiments and observations'},
+  {id:'back-storage',purpose:'Computer analysis and instrument measurements'}
+ ];
+ assert.equal(assessR125RequestedUseCase(mislabeled,'retail').status,
+  'HOLD_RETAIL_MODEL_PROGRAM_NOT_DISTINCT');
+});
+test('retail does not pretend two-storey retail can be certified by single-floor test',()=>{
+ const shop=modelPlan();
+ shop.levels.push(structuredClone(shop.levels[0]));
+ assert.equal(assessR125RequestedUseCase(shop,'retail').status,
+  'HOLD_RETAIL_REQUIRES_TWO_FUNCTIONS_ON_ONE_LEVEL');
+ assert.equal(assessR125RequestedUseCase(shop,'generic').status,
+  'NOT_SPECIFICALLY_AUDITED');
+ assert.throws(()=>assessR125RequestedUseCase(shop,'other'),
+  /UNKNOWN_USE_CASE/);
 });
