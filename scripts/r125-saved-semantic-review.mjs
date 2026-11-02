@@ -30,7 +30,8 @@ export function reviewSavedR125(studyDir){
  const dir=fs.realpathSync(studyDir);
  if(!fs.statSync(dir).isDirectory())hold('NOT_A_DIRECTORY');
  const report=json(dir,'R125_SEMANTIC_REPORT.json');
- const raw=read(dir,'MODEL_RESPONSE_ORIGINAL.txt',15000);
+ // Pilot limits JS characters, not UTF-8 bytes; allow multibyte Japanese safely.
+ const raw=read(dir,'MODEL_RESPONSE_ORIGINAL.txt',60000);
  const plan=JSON.parse(raw);
  if(report.schema!=='r125-real-semantic-pilot-v1'||
     !['SOURCE_AND_3D_READY_HUMAN_REVIEW_REQUIRED','HOLD_TEST_DOUBLE_NOT_REAL_INFERENCE'].includes(report.status)||
