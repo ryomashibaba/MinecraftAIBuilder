@@ -1,3 +1,12 @@
+## 2026-11-02 R125 共通屋根の「外形だけ」から真正内部容積へ（SOURCE研究）
+
+- 直前コミット `b14d42de` のR190-AC 155/155、R125屋根SOURCE検査、Education-first QAはSUCCESS。PR #128 Open/Draft、main未変更。
+- 既存 `ArchitecturePlan.expression.roofVolume:'raised'` の明示指定が有効な場合だけ、新たに `roofProfile:'sawtooth'` を許可する。従来の飾り屋根（未指定）、既存のridge raised、保存済み実Qwen A〜EとC階段修正の原文/幾何は変更しない。
+- 屋根を持ち上げた際に失われる外皮の屋根段差および終端の開口を、実壁材によるボクセル閉鎖として追加。屋根下の実空気の2セル縦長列・2×2隣接列を、B143最終ボクセルから再測定する。雨水耐性・Minecraft実歩行を保証しない。
+- 用途に依存しない共通コンパイラの評価として、公開済みQwen14B元住宅から派生した**合成**住宅／1階店舗／2階研究室の3プログラムを独立SOURCE比較。新しいモデル推論ではない。専用 `scripts/r125-roof-interior-study.mjs`、テスト、既存R125 CIとartifactを再利用し、異なる用途に同じ共通能力を使う。各検査はレポートにSOURCE/geometry SHA、屋根実空気セル、2幅列、外皮連結候補、プログラム床のHOLD、作者識別を記録する。
+- **CI判定**は当該コミットのGitHub Actions終了後に確認。テストSUCCESSを美術・実Minecraft機能・防水の認定に昇格させない。ART HOLD、WorldWrites0/9 BLOCKED/BuildPlan空/NOT_PREPARED、原本公開境界を維持。
+- **次**：真正形状の比較HTMLを人間の複数視点で審査し、屋根内部の使いやすさ/床からの到達/採光と、安全な試験ワールド施工の距離を評価。モデル由来の屋根設計とHOST派生を取り違えず、小型Macの短い意味IRという基本目標を維持する。
+
 ## 2026-11-02 R125 真正3D屋根断面の実測 / R190-AC 1件の回帰原因修正
 
 - **ローカル不要の本物の検証資料**：前HEAD `cefc770e` の GitHub Actions R125 #41424133813 は SUCCESS。artifact #13130813426 に保存された legacy / stair-clear の真正B143 HTML と `REPAIR_SOURCE_REPORT.json` を取得。ChatGPT隔離Chromiumに両HTMLを実際に読み込んだ（PC幅1100、ページJS例外0、Canvas実表示を確認）。これは Minecraft実機やiPhone実機ではない。

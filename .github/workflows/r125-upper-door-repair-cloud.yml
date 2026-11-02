@@ -6,6 +6,8 @@ on:
       - 'source/ai/r125-architecture-plan.mjs'
       - 'scripts/r125-upper-door-repair-study.mjs'
       - 'scripts/r125-upper-door-repair-study.test.mjs'
+      - 'scripts/r125-roof-interior-study.mjs'
+      - 'scripts/r125-roof-interior-study.test.mjs'
       - '.github/workflows/r125-upper-door-repair-cloud.yml'
   workflow_dispatch:
 permissions:
@@ -26,14 +28,17 @@ jobs:
         run: |
           node --check source/ai/r125-architecture-plan.mjs
           node --check scripts/r125-upper-door-repair-study.mjs
-          node --test scripts/r125-expression-gallery.test.mjs scripts/r125-upper-door-repair-study.test.mjs
+          node --check scripts/r125-roof-interior-study.mjs
+          node --test scripts/r125-expression-gallery.test.mjs scripts/r125-upper-door-repair-study.test.mjs scripts/r125-roof-interior-study.test.mjs
       - name: Real-source 2-width component comparison, no model/world
         run: |
           node scripts/r125-upper-door-repair-study.mjs --out "$RUNNER_TEMP/r125-door-repair"
+          node scripts/r125-roof-interior-study.mjs --out "$RUNNER_TEMP/r125-door-repair/roof-interior"
       - name: Report SOURCE proof without claiming actual Minecraft walking
         run: |
           echo '## R125 real Qwen saved geometry — opt-in HOST repair' >> "$GITHUB_STEP_SUMMARY"
           echo 'Original C: 2 disconnected floor regions at standing Y7; separate repaired C: required one region.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Raised sawtooth roof: source-only comparison across synthetic residential, retail and lab programs; human art NOT REVIEWED.' >> "$GITHUB_STEP_SUMMARY"
           echo 'Research only, original Qwen and A–E unchanged, ART HOLD, Minecraft walking NOT TESTED, WorldWrites0, 9 BLOCKED.' >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
         with:

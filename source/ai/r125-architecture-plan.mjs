@@ -58,7 +58,7 @@ export function validateArchitecturePlan(p){
    'EXPRESSION_STYLE');
   // Explicit opt-in preserves the original B143 roof source for old plans.
   check(e.roofVolume===undefined||
-   (e.roofVolume==='raised'&&e.roofProfile==='ridge'),
+   (e.roofVolume==='raised'&&['ridge','sawtooth'].includes(e.roofProfile)),
    'EXPRESSION_ROOF_VOLUME');
   if(Object.hasOwn(e,'rearCornerCut')){
    check((keys(e.rearCornerCut,['width','depth'])||
@@ -433,6 +433,38 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
       [upper.x0+pos,top,upper.z1]:[upper.x1,top,upper.z0+pos];
      box('roof-raised-eave-a-'+pos,'add',wall,a,[1,height,1]);
      box('roof-raised-eave-b-'+pos,'add',wall,b,[1,height,1]);
+    }
+    // At a sawtooth reset, the adjacent high/low skins are separated
+    // by two or more Y cells. Close the exposed vertical step using the
+    // real HOST wall material, never by silently restoring the flat cap.
+    // Ridge rises by <=1 and retains its frozen historical SOURCE.
+    if(pos>0){
+     const p=pos-1;
+     const previous=roofProfile==='ridge'?
+      Math.min(3,Math.floor(Math.min(p,span-1-p)/2)):
+      (p%6===0?0:Math.ceil((p%6)/2));
+     const rise=Math.abs(height-previous);
+     if(rise>1){
+      const highPos=height>previous?pos:p;
+      const y=top+Math.min(height,previous)+1;
+      const origin=roofAxis==='x'?
+       [upper.x0+highPos,y,upper.z0]:
+       [upper.x0,y,upper.z0+highPos];
+      const size=roofAxis==='x'?
+       [1,rise-1,upper.z1-upper.z0+1]:
+       [upper.x1-upper.x0+1,rise-1,1];
+      box('roof-raised-step-closure-'+pos,'add',wall,origin,size);
+     }
+    }
+    // A nonzero final sawtooth strip has an otherwise open end gable.
+    // This is on the outermost perimeter strip, not an occupied room slab.
+    if(pos===span-1&&height>0){
+     const end=roofAxis==='x'?
+      [upper.x1,top,upper.z0]:[upper.x0,top,upper.z1];
+     const size=roofAxis==='x'?
+      [1,height,upper.z1-upper.z0+1]:
+      [upper.x1-upper.x0+1,height,1];
+     box('roof-raised-terminal-gable','add',wall,end,size);
     }
     continue;
    }
