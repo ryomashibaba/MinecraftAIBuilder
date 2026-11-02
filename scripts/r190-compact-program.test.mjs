@@ -94,3 +94,38 @@ test('optional Qwen-authored daylight intent is strictly validated and leaves fr
   assert.throws(()=>compileR190CompactProgram({...p,daylightIntent}),
    /R190_COMPACT_DAYLIGHT_INTENT_FIELDS/);
 });
+
+test('model-authored entrance canopy creates real attached shelter over safely traversable entry',()=>{
+ for(const face of ['south','north','west','east']){
+  const original=base('r190-entry-canopy-'+face,['plain','plain','plain']);
+  original.entranceFace=face;
+  original.arrivalIntent={form:'sheltered',projection:'deep',span:'wide'};
+  const frozen=JSON.stringify(original);
+  const scene=compileR190CompactProgram(original);
+  const audit=scene.built.audit.entranceCanopy;
+  assert.equal(JSON.stringify(original),frozen);
+  assert.equal(audit.status,'SOURCE_ATTACHED_SHELTER_OVER_WALKABLE_DOOR');
+  assert.equal(audit.realRoofCells,12);
+  assert.equal(audit.wallAttachmentCells,2);
+  assert.equal(scene.built.audit.entranceApproachTwoWide,true);
+  assert.equal(scene.built.audit.allProgramSpacesReachable,true);
+  assert(verifyCompiled(scene.built.design,scene.built.compiled));
+  assert.equal(scene.built.worldWrites,0);
+  assert.deepEqual(scene.built.gates,Array(9).fill('BLOCKED'));
+  const old=structuredClone(original);delete old.arrivalIntent;
+  const baseline=compileR190CompactProgram(old);
+  assert.equal(baseline.built.audit.entranceCanopy,null);
+  assert.notEqual(scene.built.compiled.geometrySha256,baseline.built.compiled.geometrySha256);
+ }
+});
+test('no decorative or unsafe arrival intent enters B143',()=>{
+ const p=base('r190-canopy-reject');
+ for(const arrivalIntent of [
+  {form:'floating',projection:'deep',span:'wide'},
+  {form:'sheltered',projection:'huge',span:'door'},
+  {form:'sheltered',projection:'compact',span:'full'},
+  {form:'sheltered',span:'door'},
+  {form:'sheltered',projection:'deep',span:'door',worldCommand:'/fill'}])
+  assert.throws(()=>compileR190CompactProgram({...p,arrivalIntent}),
+   /R190_COMPACT_ARRIVAL_INTENT/);
+});

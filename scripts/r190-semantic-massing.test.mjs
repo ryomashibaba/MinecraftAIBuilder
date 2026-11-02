@@ -616,3 +616,20 @@ test('R190 short generated element IDs retain legacy labels and deterministic ha
  assert.equal(result.compiled.geometrySha256,
   compileR190SemanticPlan(base).compiled.geometrySha256);
 });
+
+test('semantic source rejects fake porch intents and verifies real sheltered entry',()=>{
+ const plan=recoveredWorkshopPlan(),baseline=compileR190SemanticPlan(plan);
+ assert.equal(baseline.audit.entranceCanopy,null);
+ plan.entranceCanopyIntent={projection:3,overhang:1};
+ const r=compileR190SemanticPlan(plan);
+ assert.equal(r.audit.entranceCanopy.realRoofCells,12);
+ assert.equal(r.audit.entranceCanopy.wallAttachmentCells,2);
+ assert.equal(r.audit.allProgramSpacesReachable,true);
+ assert(verifyCompiled(r.design,r.compiled));
+ assert.notEqual(baseline.compiled.geometrySha256,r.compiled.geometrySha256);
+ assert.equal(r.worldWrites,0);
+ assert.deepEqual(r.gates,Array(9).fill('BLOCKED'));
+ const fake=structuredClone(plan);
+ fake.entranceCanopyIntent={projection:5,overhang:2};
+ assert.throws(()=>compileR190SemanticPlan(fake),/ENTRANCE_CANOPY_INTENT/);
+});

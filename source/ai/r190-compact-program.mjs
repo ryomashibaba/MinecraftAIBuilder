@@ -33,7 +33,8 @@ const resolution={source:'HOST_DETERMINISTIC_GEOMETRY_NOT_MODEL_COORDINATES',
 export function inspectR190CompactProgram(program){
  const p=typeof program==='string'?JSON.parse(program):program;
  ok(exact(p,['schema','id','title','brief','entranceFace','spaces','materials',
-   ...(Object.hasOwn(p??{},'daylightIntent')?['daylightIntent']:[])])&&
+   ...(Object.hasOwn(p??{},'daylightIntent')?['daylightIntent']:[]),
+   ...(Object.hasOwn(p??{},'arrivalIntent')?['arrivalIntent']:[])])&&
   p.schema===R190_COMPACT_SCHEMA&&slug(p.id)&&txt(p.title,100)&&txt(p.brief,400)&&
   dirs.includes(p.entranceFace),'IDENTITY');
  ok(Array.isArray(p.spaces)&&p.spaces.length>=2&&p.spaces.length<=4,'ROOM_COUNT');
@@ -60,6 +61,12 @@ export function inspectR190CompactProgram(program){
  ok(p.spaces.filter(x=>x.form==='sky-court').length<=1,'SKY_COURT_BUDGET');
  ok(p.spaces.filter(x=>x.form==='open-court').length<=1,'OPEN_COURT_BUDGET');
  ok(p.spaces[0].form!=='open-court','ENTRANCE_MUST_BE_ENCLOSED');
+ // Optional MODEL-selected sheltered threshold, without numeric authoring.
+ if(Object.hasOwn(p,'arrivalIntent'))
+  ok(exact(p.arrivalIntent,['form','projection','span'])&&
+   p.arrivalIntent.form==='sheltered'&&
+   ['compact','deep'].includes(p.arrivalIntent.projection)&&
+   ['door','wide'].includes(p.arrivalIntent.span),'ARRIVAL_INTENT');
  // New optional MODEL intent, without numeric B143 geometry or source writes.
  if(Object.hasOwn(p,'daylightIntent')){
   ok(Array.isArray(p.daylightIntent)&&p.daylightIntent.length>=1&&
@@ -98,6 +105,9 @@ function derive(p,sides){
  const plan={schema:R190_SCHEMA,id:p.id,title:p.title,brief:p.brief,
   site:{width:80,depth:80,height:22},entrySpaceId:p.spaces[0].id,
   entranceFace:p.entranceFace,spaces:dims,materials:structuredClone(p.materials)};
+ if(p.arrivalIntent)plan.entranceCanopyIntent={
+  projection:p.arrivalIntent.projection==='deep'?3:2,
+  overhang:p.arrivalIntent.span==='wide'?1:0};
  const roofs=[],facets=[];
  for(const [i,s] of p.spaces.entries()){
   if(s.form==='facet'){

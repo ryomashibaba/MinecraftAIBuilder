@@ -40,6 +40,16 @@ function entranceDoor(r,face){
   face==='west'?{origin:[r.x,2,z],size:[1,3,2]}:
   {origin:[r.x+r.w-1,2,z],size:[1,3,2]};
 }
+function entranceCanopy(r,face,intent){
+ const a=entranceApproach(r,face),side=intent.overhang;
+ if(face==='south')return {origin:[a.x-side,5,a.z+a.d-intent.projection],
+  size:[a.w+2*side,1,intent.projection]};
+ if(face==='north')return {origin:[a.x-side,5,a.z],
+  size:[a.w+2*side,1,intent.projection]};
+ if(face==='west')return {origin:[a.x+a.w-intent.projection,5,a.z-side],
+  size:[intent.projection,1,a.d+2*side]};
+ return {origin:[a.x,5,a.z-side],size:[intent.projection,1,a.d+2*side]};
+}
 function approachSeed(r,face){
  const a=entranceApproach(r,face);
  return ['south','north'].includes(face)?[a.x,a.z+1]:[a.x+1,a.z];
@@ -74,7 +84,7 @@ export function r190RoofElevation(index,span,form){
 export function validateR190SemanticPlan(p){
  const standard=['schema','id','title','brief','site','entrySpaceId','spaces','materials'];
  ok(Object.keys(p??{}).length>=standard.length&&
-  Object.keys(p??{}).every(k=>[...standard,'entranceFace','formIntent','formIntents','roofFormIntent','roofFormIntents','skyCourtIntent','crossConnections','glazedOpenings'].includes(k))&&
+  Object.keys(p??{}).every(k=>[...standard,'entranceFace','formIntent','formIntents','roofFormIntent','roofFormIntents','skyCourtIntent','crossConnections','glazedOpenings','entranceCanopyIntent'].includes(k))&&
   standard.every(k=>Object.hasOwn(p,k)),'FIELDS');
  ok(p.schema===R190_SCHEMA&&slug(p.id)&&safeText(p.title,100)&&
   safeText(p.brief,400),'IDENTITY');
@@ -107,6 +117,10 @@ export function validateR190SemanticPlan(p){
  }
  ok(ids.has(p.entrySpaceId),'MISSING_ENTRANCE_SPACE');
  ok(p.entranceFace===undefined||DIR.includes(p.entranceFace),'ENTRANCE_FACE');
+ if(p.entranceCanopyIntent!==undefined)
+  ok(exact(p.entranceCanopyIntent,['projection','overhang'])&&
+   int(p.entranceCanopyIntent.projection,2,3)&&
+   int(p.entranceCanopyIntent.overhang,0,1),'ENTRANCE_CANOPY_INTENT');
  // Two independent AI-selected REAL faceted physical wings (opt-in).
  // Legacy single formIntent is preserved unchanged in geometry.
  if(p.formIntents!==undefined)
@@ -563,6 +577,10 @@ function sourceDesign(p,l){
   box('entry-cut','cut',undefined,door.origin,door.size);
  box('approach-floor','add',p.materials.floor,
   [outside.x,1,outside.z],[outside.w,1,outside.d]);
+ if(p.entranceCanopyIntent){
+  const roof=entranceCanopy(entry,entranceFace(p),p.entranceCanopyIntent);
+  box('arrival-canopy','add',p.materials.roof,roof.origin,roof.size);
+ }
  for(const [i,g] of (p.glazedOpenings??[]).entries()){
   const room=l.spaces.find(s=>s.id===g.spaceId);
   const first=r190GlazingCells(room,g)[0];
@@ -600,6 +618,32 @@ export function auditR190SourceRoutes(plan,layout,design,compiled){
    const u=a+dx,v=b+dz,k=u+','+v;
    if(!seen.has(k)&&stand(u,v)){seen.add(k);queue.push([u,v]);}
   }
+ }
+ let entranceCanopyAudit=null;
+ if(plan.entranceCanopyIntent){
+  const roof=entranceCanopy(entry,face,plan.entranceCanopyIntent);
+  const [ox,oy,oz]=roof.origin,[sx,sy,sz]=roof.size;
+  const mats=new Map(compiled.primitives.map(v=>[key(v[0],v[1],v[2]),v[3]]));
+  const roofIndex=compiled.layerNames.indexOf('B143_'+plan.materials.roof.toUpperCase());
+  ok(oy===5&&sy===1&&roofIndex>=0,'CANOPY_MATERIAL_OR_HEIGHT');
+  for(let xx=ox;xx<ox+sx;xx++)for(let zz=oz;zz<oz+sz;zz++){
+   ok(mats.get(key(xx,5,zz))===roofIndex,'CANOPY_PHYSICAL_ROOF_MISSING');
+   for(let yy=2;yy<=4;yy++)ok(!has(xx,yy,zz),'CANOPY_HEADROOM_BLOCKED');
+   ok(!layout.spaces.some(v=>v.id!==entry.id&&
+    xx>=v.x&&xx<v.x+v.w&&zz>=v.z&&zz<v.z+v.d),
+    'CANOPY_OVERLAPS_OTHER_ROOM');
+  }
+  const ns=face==='north'||face==='south';
+  const wallX=ns?outside.x:entry.x+(face==='east'?entry.w-1:0);
+  const wallZ=ns?entry.z+(face==='north'?entry.d-1:0):outside.z;
+  for(let i=0;i<2;i++)
+   ok(has(wallX+(ns?i:0),5,wallZ+(ns?0:i)),
+    'CANOPY_NOT_ATTACHED_TO_DOOR_WALL');
+  entranceCanopyAudit={status:'SOURCE_ATTACHED_SHELTER_OVER_WALKABLE_DOOR',
+   entranceFace:face,roofOrigin:roof.origin,roofSize:roof.size,
+   realRoofCells:sx*sz,clearHeadroomBelow:true,wallAttachmentCells:2,
+   modelAuthorship:'CALLER_PROVIDED_IR_UNVERIFIED',
+   humanArt:'NOT_REVIEWED',minecraftWalking:'NOT_TESTED'};
  }
  const witnesses=[];
  for(const room of layout.spaces){
@@ -861,7 +905,8 @@ export function auditR190SourceRoutes(plan,layout,design,compiled){
   ...(plan.formIntents===undefined?{}:{facetedEnvelopes:facetAudits}),
   outdoorCourtCount:plan.spaces.filter(s=>s.spatialRole==='open-court').length,
   verifiedOpenSkyColumns:skyColumns,
-  entranceFace:face,entranceApproachTwoWide:true,allProgramSpacesReachable:true,witnesses,
+  entranceFace:face,entranceApproachTwoWide:true,entranceCanopy:entranceCanopyAudit,
+  allProgramSpacesReachable:true,witnesses,
   minecraftPlayerWalking:'NOT_TESTED',structuralEngineering:'NOT_TESTED'};
 }
 export function compileR190SemanticPlan(raw,{layoutStrategy='centered',layoutVariantIndex=0}={}){
