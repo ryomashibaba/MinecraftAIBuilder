@@ -4,6 +4,13 @@
 
 > **最初に行うこと**：このファイル → [完全統合引き継ぎ](docs/MINECRAFT_AI_BUILDER_COMPLETE_HANDOFF_20261102_JA.md) → [固定憲章](docs/AI_PROJECT_CHARTER_JA.md) → [正式戦略](docs/PROJECT_STRATEGY_V2_JA.md) → [最短MVP](docs/R125_THIN_VERTICAL_SLICE_PLAN_JA.md) → [時系列の詳細な研究・失敗記録](docs/AI_RESTART_JA.md) を読む。指示の優先順位は「ユーザーの最新指示／固定憲章と戦略 ＞ 実コードと実CI ＞ 履歴文書の過去時点の記述」。
 
+## 2026-11-02 深夜の最新実機結果（引継ぎ更新）
+
+- **本物のWindows上のローカルQwen3:14B（提供元独立認証は未取得）→ 短いArchitecturePlan → 真正B143 2,089ボクセル → SOURCE入口と2室到達 → 62直方体のMakeCode → ユーザーのMinecraft Education試験ワールド内に実建築の出現**まで、ユーザー実行ログ・ゲーム画面で確認。
+- **9層の安全事前検査PASS、`Placing attempted` 表示、鋸歯状屋根・外壁・ガラスの実物写真あり**。ただし `mabverify` の**最終結果は未提供**、2,089セルのゲーム内完全一致は未確認。入口と実験室・観測記録室の現物歩行も未検証。**ART HOLD**。
+- 保存済み実Qwen原文はプライベート。ユーザーのワールド画像・ゲーム内座標は公開GitHubに置かない。**`mabbuild` を再実行しない**。
+- [詳細・SHA・独立A/B/C/D/E判定・次の証拠](docs/R125_LIVE_QWEN_EDUCATION_REAL_PLACEMENT_20261102_JA.md)を参照。以下の時点固定の旧研究状態より、この実機結果とGitHub最新HEAD・CIを優先して判断する。
+
 ## 1. GitHubの正本と保護境界
 
 - Repository: `ryomashibaba/MinecraftAIBuilder`、研究ブランチ `feature/b198zr1-protected-architectural-revision`。
