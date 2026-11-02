@@ -9,6 +9,15 @@ test('actual saved Qwen C floor repaired without altering old-source model or or
  assert.equal(r.legacyC.secondLevel.componentCount,2);
  assert.equal(r.repairedC.secondLevel.componentCount,1);
  assert.equal(r.repairedC.programFloorIssues.length,0);
+ assert.equal(r.repairedC.programFloorStatus,'PROGRAM_FLOORS_CLEAR_EXTERIOR_REVIEW_REQUIRED');
+ assert.deepEqual(r.repairedC.exteriorWarnings.map(x=>x.standingY),[13,14]);
+ assert(r.repairedC.exteriorWarnings.every(x=>
+  x.classification==='ROOF_ONLY_NONPROGRAM_SURFACE'&&
+  x.roofOnlySourceEvidence&&x.thisDoesNotProveTraversableRoof));
+ assert.equal(r.roofReview.roofOnlyWarningCount,2);
+ assert.equal(r.roofReview.nonRoofWarningCount,0);
+ assert.equal(r.roofReview.geometryRepairPerformed,false);
+ assert.equal(r.roofReview.humanArt,'NOT_REVIEWED');
  assert.equal(r.legacyC.planSha256,r.repairedC.planSha256);
  assert.notEqual(r.legacyC.sourceSha256,r.repairedC.sourceSha256);
  assert.notEqual(r.legacyC.geometrySha256,r.repairedC.geometrySha256);
@@ -20,6 +29,7 @@ test('actual saved Qwen C floor repaired without altering old-source model or or
  assert(s.originalHtml.includes('minecraftaibuilder-b143-gallery-v1'));
  assert(s.repairedHtml.includes('minecraftaibuilder-b143-gallery-v1'));
  assert(s.compareHtml.includes('HOST派生研究'));
+ assert(s.compareHtml.includes('屋根自体は変更していない'));
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'r125-door-repair-'));
  t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
  const out=path.join(root,'result'),saved=saveR125UpperDoorRepair(out);

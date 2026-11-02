@@ -1,3 +1,11 @@
+## 2026-11-02 R125 屋根警告のSOURCE帰属を明確化（形状は変更しない）
+
+- **課題**：C案の上階扉を直した後も B198C は standingY=13/14 の分断を HIGH と表示するが、これを直ちに「居室床不通」や「屋根の危険」と断定できない。人間が屋根を歩けるという主張もできない。
+- **実装**：真正最終B143ボクセルに基づき、設計中の屋根以外の追加要素が達する最高Yと、当該 standingY-1 の実支持セルを突き合わせて、プログラム床以外の警告を `ROOF_ONLY_NONPROGRAM_SURFACE` / `UNRESOLVED_NONPROGRAM_SURFACE` に区別する。検証不能な要素は屋根と決めつけない。既存の HIGH 所見、プログラム床のFAIL/HOLD、屋根の人間審査は維持し、警告を消すのではなく意味を明示する。
+- **変更範囲**：`source/ai/r125-architecture-plan.mjs` の評価結果への分類追記、既存の `scripts/r125-upper-door-repair-study.mjs` の比較レポートとHTML、対応テスト。既存R125修復Cloud CIを再利用し、新workflow/建築テンプレートは増やさない。
+- **残る次工程**：クラウドテストで真のY13/14分類とSHA非退行を検査し、修復案の真正B143複数視点を美術・屋根断面として審査する。警告を消すためだけの不要な形状詰め込みはしない。ARTはHOLD、実Minecraft歩行未確認、試験施工禁止。
+- **保護**：公開済みQwen14B原文、元A〜E幾何、従来C、別案Cの形状SHAとデフォルト実装は不変。新しいモデルPOST0、Minecraft worldContacts/worldWrites0、BuildPlan空、9 BLOCKED、NOT_PREPARED、main不変更、PR #128 Open/Draft。
+
 ## 2026-11-02 R125 実Qwen C案の2階SOURCE分断を修復（Cloud PASS・別案を保護）
 
 - **調査事実**：保存済み公開Qwen14B元意味設計 `scripts/fixtures/r125-qwen14b-residential-2024a.json`（原SHA `46aed429e795f2622cd8c49d8eb8f1153af20d5d958abf2f5f99020e909ce271`）からのHOST派生C案の2階 `standingY=7` は、2×2支持床372候補が276と96の**2領域**に分断されていた。階段シャフト `x=3..4,z=3..7` に内部扉 `x=3..4,z=9` が近すぎ、連続する2幅床候補が途切れるとSOURCEの座標から特定。Minecraft物理歩行ではない。

@@ -510,6 +510,17 @@ export function assessR125ProgramGeometry(product,critique){
  const levels=new Set(product.program.map(x=>x.standingFloorY));
  const programFloorIssues=[];
  const exteriorSurfaceAdvisories=[];
+ // The B198C floor scanner sees roof strips too. Distinguish a surface
+ // supported only ABOVE all non-roof structural elements from a real
+ // program-floor problem, using verified FINAL B143 voxels (not labels).
+ const nonRoofTop=Math.max(-1,...product.design.elements
+  .filter(e=>e.mode==='add'&&!e.id.startsWith('roof-'))
+  .map(e=>e.shape==='box'?
+   e.origin[1]+e.size[1]-1:e.shape==='staircase'?
+    e.origin[1]+e.steps-1:Infinity));
+ const sourceSupportYs=new Set(product.compiled.primitives.map(p=>p[1]));
+ const roofElementsPresent=product.design.elements.some(e=>
+  e.mode==='add'&&e.id.startsWith('roof-'));
  const reports=critique.objectiveAudit.elevationConnectivity;
  for(const y of levels){
   const row=reports.find(x=>x.standingY===y);
@@ -529,9 +540,18 @@ export function assessR125ProgramGeometry(product,critique){
   for(const x of relevant)programFloorIssues.push({
    code:'FRAGMENTED_PROGRAM_FLOOR',standingY:x.standingY,
    componentCount:x.componentCount});
-  for(const x of exterior)exteriorSurfaceAdvisories.push({
-   code:'NONPROGRAM_SURFACE_FRAGMENTATION',
-   standingY:x.standingY,componentCount:x.componentCount});
+  for(const x of exterior){
+   const supportY=x.standingY-1;
+   const roofOnly=roofElementsPresent&&Number.isFinite(nonRoofTop)&&
+    supportY>nonRoofTop&&sourceSupportYs.has(supportY);
+   exteriorSurfaceAdvisories.push({
+    code:'NONPROGRAM_SURFACE_FRAGMENTATION',
+    standingY:x.standingY,componentCount:x.componentCount,
+    classification:roofOnly?'ROOF_ONLY_NONPROGRAM_SURFACE':
+     'UNRESOLVED_NONPROGRAM_SURFACE',
+    roofOnlySourceEvidence:roofOnly,
+    thisDoesNotProveTraversableRoof:true});
+  }
  }
  return {schema:'r125-program-floor-risk-v1',
   sourceSha256:product.sourceSha256,geometrySha256:product.geometrySha256,

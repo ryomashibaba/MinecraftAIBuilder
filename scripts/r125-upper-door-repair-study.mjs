@@ -57,12 +57,21 @@ export function studyR125UpperDoorRepair(){
   authorship:'HOST_GEOMETRY_RESEARCH_NOT_NEW_MODEL_OUTPUT',
   legacyC:{planSha256:before.planSha256,sourceSha256:before.sourceSha256,
    geometrySha256:before.geometrySha256,
-   programFloorStatus:oldRisk.status,secondLevel:oldElevation},
+   programFloorStatus:oldRisk.status,secondLevel:oldElevation,
+   exteriorWarnings:oldRisk.exteriorSurfaceAdvisories},
   repairedC:{planSha256:after.planSha256,sourceSha256:after.sourceSha256,
    geometrySha256:after.geometrySha256,
    programFloorStatus:newRisk.status,secondLevel:newElevation,
    programFloorIssues:newRisk.programFloorIssues,
    exteriorWarnings:newRisk.exteriorSurfaceAdvisories},
+  roofReview:{classificationDerivedFrom:'VERIFIED_FINAL_B143_VOXELS',
+   roofOnlyWarningCount:newRisk.exteriorSurfaceAdvisories.filter(x=>
+    x.classification==='ROOF_ONLY_NONPROGRAM_SURFACE').length,
+   nonRoofWarningCount:newRisk.exteriorSurfaceAdvisories.filter(x=>
+    x.classification!=='ROOF_ONLY_NONPROGRAM_SURFACE').length,
+   geometryRepairPerformed:false,
+   assessment:'NONPROGRAM_ROOF_WARNING_IS_NOT_A_PROGRAM_FLOOR_FAILURE',
+   humanArt:'NOT_REVIEWED',roofWalkability:'NOT_TESTED'},
   sourceOnly:true,modelCalls:0,worldContacts:0,worldWrites:0,
   constructionApproved:false,readiness:'NOT_PREPARED',
   BuildPlan:{operations:[]},gates:Array(9).fill('BLOCKED'),
@@ -77,6 +86,8 @@ export function studyR125UpperDoorRepair(){
   '<header><h1>真正SOURCEで2幅床を比較する研究</h1>'+
   '<p>左：旧C（2階で2領域）。右：共通の階段シャフト回避規則で扉を移動（2階で1領域）。</p>'+
   '<p>変更はHOSTのみ。Qwen原文は不変、ART HOLD、ゲーム歩行未確認、Minecraft施工禁止。</p>'+
+  '<p>2階の居室床は修復案で連結。屋根の高さ別2幅床警告は実B143ボクセルで別分類し、'+
+  '居室床の不通や屋根歩行の合否と混同しない。屋根自体は変更していない。</p>'+
   '<a href="REPAIR_SOURCE_REPORT.json">幾何SHA・2幅床の独立照合を読む</a></header>'+
   '<main><section><h2>旧C — SOURCE HOLD</h2><iframe title="従来Cの真正ボクセル" src="legacy/index.html"></iframe></section>'+
   '<section><h2>修復案 — HOST派生研究</h2><iframe title="修復案の真正ボクセル" src="stair-clear/index.html"></iframe></section></main></body></html>';
