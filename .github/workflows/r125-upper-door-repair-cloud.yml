@@ -1,0 +1,43 @@
+name: R125 Saved Qwen C Upper-Floor Door Repair — SOURCE ONLY
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'source/ai/r125-architecture-plan.mjs'
+      - 'scripts/r125-upper-door-repair-study.mjs'
+      - 'scripts/r125-upper-door-repair-study.test.mjs'
+      - '.github/workflows/r125-upper-door-repair-cloud.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: r125-door-repair-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verified-source-repair:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test intact old Qwen 2620 reference and opt-in C repair
+        run: |
+          node --check source/ai/r125-architecture-plan.mjs
+          node --check scripts/r125-upper-door-repair-study.mjs
+          node --test scripts/r125-expression-gallery.test.mjs scripts/r125-upper-door-repair-study.test.mjs
+      - name: Real-source 2-width component comparison, no model/world
+        run: |
+          node scripts/r125-upper-door-repair-study.mjs --out "$RUNNER_TEMP/r125-door-repair"
+      - name: Report SOURCE proof without claiming actual Minecraft walking
+        run: |
+          echo '## R125 real Qwen saved geometry — opt-in HOST repair' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Original C: 2 disconnected floor regions at standing Y7; separate repaired C: required one region.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Research only, original Qwen and A–E unchanged, ART HOLD, Minecraft walking NOT TESTED, WorldWrites0, 9 BLOCKED.' >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: R125-C-Upper-Floor-Verified-Repair-Study
+          path: ${{ runner.temp }}/r125-door-repair/
+          if-no-files-found: error
+          retention-days: 21

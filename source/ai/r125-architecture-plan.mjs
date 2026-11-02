@@ -91,12 +91,19 @@ export function validateArchitecturePlan(p){
   'ENTRY_ZONE_FRONT_ACCESS');
  return true;
 }
-export function compileArchitecturePlan(plan,{entrancePlacement='legacy'}={}){
+export function compileArchitecturePlan(plan,{
+ entrancePlacement='legacy',upperDoorPlacement='legacy'
+}={}){
  validateArchitecturePlan(plan);
  check(['legacy','source-accessible'].includes(entrancePlacement),
   'ENTRANCE_PLACEMENT_MODE');
+ // Opt-in HOST research only. Old callers retain byte-for-byte geometry.
+ check(['legacy','stair-clear'].includes(upperDoorPlacement),
+  'UPPER_DOOR_PLACEMENT_MODE');
+ check(upperDoorPlacement==='legacy'||Boolean(plan.expression),
+  'UPPER_DOOR_REQUIRES_EXPRESSION');
  const original=structuredClone(plan);
- if(original.expression)return compileExpressiveArchitecturePlan(original,{entrancePlacement});
+ if(original.expression)return compileExpressiveArchitecturePlan(original,{entrancePlacement,upperDoorPlacement});
  const {width:w,depth:d}=original.footprint;
  const count=original.levels.length;
  const floor=original.materials.floor,wall=original.materials.wall,
@@ -295,7 +302,7 @@ export function auditArchitecturePlanCirculation(product){
  * identically without expression; do NOT change the old pinned Qwen 14B 2620-
  * voxel result or its source digest. No typology-specific templates.
  */
-function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy'}={}){
+function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',upperDoorPlacement='legacy'}={}){
  const {width:w,depth:d}=original.footprint;
  const count=original.levels.length;
  const {setbackSide,setbackDepth,roofProfile,roofAxis,facadeLanguage,
@@ -329,7 +336,15 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy'}
     [split,y,Math.floor((z0+z1)/2)-1],[1,3,2]);
   }else{
    box(tag+'-divider','add',wall,[x0+1,y,split],[x1-x0-1,4,1]);
-   box(tag+'-internal-door','cut',null,[x0+2,y,split],[2,3,1]);
+   // At upper level, the legacy x0+2 doorway can align with the
+    // first-floor stair-shaft void (x=3..4,z=3..7) and disconnect
+    // the TWO-WIDE supported walkway at the split wall. Opt-in
+    // generic rule sets it beyond the shaft with 2-cell clearance.
+    // This is HOST research; no change to the Qwen-authored program.
+    const doorX=l===1&&upperDoorPlacement==='stair-clear'?
+     Math.max(x0+2,Math.min(x1-3,3+2+2)):
+     x0+2;
+    box(tag+'-internal-door','cut',null,[doorX,y,split],[2,3,1]);
   }
   if(l===0)
    box('exterior-entrance','cut',null,
