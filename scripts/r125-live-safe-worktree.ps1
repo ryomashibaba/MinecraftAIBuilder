@@ -5,9 +5,10 @@
 param(
   [string]$Repository = (Join-Path $env:USERPROFILE "Projects\MinecraftAIBuilder"),
   [switch]$CheckOnly,
-  [switch]$ReviewLatest
+  [switch]$ReviewLatest,
+  [switch]$PrepareLatest
 )
-if ($CheckOnly -and $ReviewLatest) { throw 'HOLD_INCOMPATIBLE_MODES' }
+if ((@($CheckOnly, $ReviewLatest, $PrepareLatest) | Where-Object { $_ }).Count -gt 1) { throw 'HOLD_INCOMPATIBLE_MODES' }
 $ErrorActionPreference = "Stop"
 $branch = "feature/b198zr1-protected-architectural-revision"
 $work = $null
@@ -62,7 +63,9 @@ try {
 
     & node --test scripts/r125-saved-semantic-review.test.mjs
     if ($LASTEXITCODE -ne 0) { throw "HOLD_PRIVATE_REVIEW_REGRESSION" }
-    if ($ReviewLatest) {
+    & node --test scripts/r125-saved-education-preflight.test.mjs
+    if ($LASTEXITCODE -ne 0) { throw "HOLD_EDUCATION_PREFLIGHT_REGRESSION" }
+    if ($ReviewLatest -or $PrepareLatest) {
       $privateRoot = Join-Path $env:USERPROFILE "Documents\MAB_Private_Runs"
       if (-not (Test-Path -LiteralPath $privateRoot)) { throw "HOLD_PRIVATE_RUNS_NOT_FOUND" }
       $previous = Get-ChildItem -LiteralPath $privateRoot -Directory -Filter "r125-lab-*" |
@@ -70,10 +73,19 @@ try {
       if (-not $previous) { throw "HOLD_NO_SAVED_R125_RUN" }
       $reportFile = Join-Path $previous.FullName "R125_SEMANTIC_REPORT.json"
       if (-not (Test-Path -LiteralPath $reportFile)) { throw "HOLD_LATEST_RUN_MISSING_REPORT" }
-      Write-Host "READ-ONLY source replay (0 Ollama requests): $($previous.FullName)"
-      & node scripts/r125-saved-semantic-review.mjs --study $previous.FullName
-      if ($LASTEXITCODE -ne 0) { throw "HOLD_PRIVATE_REVIEW" }
-      $out = $previous.FullName
+      if ($PrepareLatest) {
+        $sibling = Join-Path $privateRoot ($previous.Name + "-education-preflight-" + $revision.Substring(0,12))
+        if (Test-Path -LiteralPath $sibling) { throw "HOLD_PREFLIGHT_OUTPUT_ALREADY_EXISTS" }
+        Write-Host "OFFLINE SOURCE route + strict material preflight (NO Ollama/Minecraft writes):"
+        & node scripts/r125-saved-education-preflight.mjs --study $previous.FullName --out $sibling
+        if ($LASTEXITCODE -ne 0) { throw "HOLD_EDUCATION_PREFLIGHT" }
+        $out = $sibling
+      } else {
+        Write-Host "READ-ONLY source replay (0 Ollama requests): $($previous.FullName)"
+        & node scripts/r125-saved-semantic-review.mjs --study $previous.FullName
+        if ($LASTEXITCODE -ne 0) { throw "HOLD_PRIVATE_REVIEW" }
+        $out = $previous.FullName
+      }
     } elseif ($CheckOnly) {
       Write-Host "CHECK_ONLY_PASS: no model call, no model output, no world writes."
     } else {
