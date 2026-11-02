@@ -1,3 +1,12 @@
+## 2026-11-02 13:42 JST以降 — クラウドChromium QA復旧・建築SOURCE不良の明示
+
+- **失敗の原因・修正**：GitHub Actions run 41379919641 の失敗はUbuntu 26.04上でPlaywright 1.56.1のChromiumがインストールできなかったため。先行の2件の生成テストおよびSOURCE照合はPASS。Ubuntu 24.04に固定（commit 433a421ff5cfb78eeea81b42ba53598563f9ad06）し、run 41389992699 はSUCCESS。MOBILE_420/DESKTOP_1280の本物のChromiumはCanvas描画（62997/149551非背景ピクセル）とモデル切替・拡大・縮小・断面・視点リセット、JS例外0・外部通信0でPASS。artifact 13116733901保存。
+- **建築品質の実測問題を表示**：保存済み実Qwen14Bの意味設計から生成した5案を調べると、C案の2階（standingY=7）でFRAGMENTED_PROGRAM_FLOORが発生し、PROGRAM_FLOORS=HOLD。AはPROGRAM床の問題なし、B/D/EはPROGRAM床は問題なしだが外部屋根のSOURCE断片化の注意あり。いずれも美術・Minecraft物理歩行は未証明。5案中B–Eはホスト派生で追加モデル応答ではない。
+- **実装**：scripts/r125-expression-gallery.mjsに選択案連動のSOURCE品質/プログラム床連結/外部幾何注意/MODELとHOSTの作者情報を追加（commit 7aba148e1d5f3e411811f4c67e88d00529996201）。SOURCE HOLD状態を隠さず、動線不良を建築として合格と表示しない。元のQwen設計・形状・プライバシーは変更しない。
+- **自動ブラウザ再検査**：scripts/r125-expression-gallery.test.mjsとscripts/r125-qwen-cloud-mobile-qa.mjsに選択案作者情報、C案床HOLD警告、A案元モデルの出所、E案HOST出所を実際のChromiumで確認するテストを追加（commit f206a4ceeebf3843efb5ba1690a3704f81855200）。GitHub Actions run 41390393492がSUCCESS（テスト2/2、MOBILE_420とDESKTOP_1280両方PASS、外部通信0、worldWrites0）。
+- **成果物**：artifact ID 13117111708に、B143 5案の正本HTML、SOURCE評価JSON、スマホ/PCスクリーンショット2枚を保存。ChatGPTで単一HTML MinecraftAIBuilder_R125_5models_品質審査付き3D.html（250956 bytes）をユーザーに提供。HTMLのSHA-256は803cd866720123c0bc4b77d412584ead3bc7e1cb0c631e340e06d5bcc2d7d8bf。ローカルPC/Node操作不要。
+- **残りの課題**：直接開けるGitHub Pagesの新URLは未確認。C案PROGRAM床分断の根本原因を調査し、建物固有の見せかけ修正でなく共通B143問題として修復研究する。実Qwenの直近R190住宅・花屋・研究施設の非公開原本は公開GitHubに載せない。ART HOLD、実歩行NOT_TESTED、NOT_PREPARED、BuildPlan空、9 BLOCKED、worldWrites0、main未変更・PR #128 Open/Draftを維持。
+
 ## 2026-11-02 R125クラウド5棟QA成功、真正単一HTML抽出、Chromium回帰検査へ
 
 - **確定済みの実行事実**：GitHub Actions run `41374756553` は `success`、`verified-mobile-gallery` も成功。Actions artifact ID `13111215231` / `R125-Public-Qwen-5-Scene-Mobile-3D` が約53KBのZIPとしてGitHubに存在（期限2026-11-23 UTC）。ZIP実体をChatGPT側で取得、`index.html` は246830 bytes、モデル原本SHA `46aed429e795f2622cd8c49d8eb8f1153af20d5d958abf2f5f99020e909ce271` のみ。A=保存済み真正Qwen3:14B住宅意味設計2620ボクセル、B=3385、C=3209、D=3838、E=2758のホスト派生4案。モデル呼び出し0・世界書込0・9ゲートBLOCKED・Minecraft歩行未実証。
