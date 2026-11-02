@@ -17,6 +17,14 @@ test('actual saved Qwen C floor repaired without altering old-source model or or
  assert.equal(r.roofReview.roofOnlyWarningCount,2);
  assert.equal(r.roofReview.nonRoofWarningCount,0);
  assert.equal(r.roofReview.geometryRepairPerformed,false);
+ assert.equal(r.roofVolumeEvidence.source,'VERIFIED_FINAL_B143_VOXELS');
+ assert.equal(r.roofVolumeEvidence.roofBaseArea,484);
+ assert.equal(r.roofVolumeEvidence.verifiedSolidCapCells,484);
+ assert.equal(r.roofVolumeEvidence.additionalRoofSolidCellsAboveCap,682);
+ assert.equal(r.roofVolumeEvidence.capFullyClosedAcrossUpperEnvelope,true);
+ assert.equal(r.roofVolumeEvidence.additionalInteriorVolumeOpenedByRoofProfile,false);
+ assert.equal(r.roofVolumeEvidence.classification,
+  'DECORATIVE_PROFILE_ABOVE_SOLID_CEILING');
  assert.equal(r.roofReview.humanArt,'NOT_REVIEWED');
  assert.equal(r.legacyC.planSha256,r.repairedC.planSha256);
  assert.notEqual(r.legacyC.sourceSha256,r.repairedC.sourceSha256);
@@ -30,6 +38,7 @@ test('actual saved Qwen C floor repaired without altering old-source model or or
  assert(s.repairedHtml.includes('minecraftaibuilder-b143-gallery-v1'));
  assert(s.compareHtml.includes('HOST派生研究'));
  assert(s.compareHtml.includes('屋根自体は変更していない'));
+ assert(s.compareHtml.includes('屋根板484/484セル'));
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'r125-door-repair-'));
  t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
  const out=path.join(root,'result'),saved=saveR125UpperDoorRepair(out);

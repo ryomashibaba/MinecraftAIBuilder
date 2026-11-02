@@ -31,6 +31,34 @@ export function studyR125UpperDoorRepair(){
  if(before.geometrySha256!=='4d4c1b19196e14b8aaa99edc53c94d1511ef8e3e622675883f302658a334a5dc')
   fail('LEGACY_C_GEOMETRY_DRIFT');
  if(after.geometrySha256===before.geometrySha256)fail('NO_REAL_GEOMETRY_CHANGE');
+ // ACTUAL final-voxel cross-section. A solid cap under raised sawtooth
+ // blocks any additional room volume from the roof profile. This is NOT
+ // an assessment of roof weather sealing or actual player walking.
+ const roofBase=after.design.elements.find(x=>x.id==='roof-base');
+ if(!roofBase||roofBase.shape!=='box'||roofBase.mode!=='add'||
+  roofBase.size[1]!==1)fail('ROOF_CAP_NOT_EXPECTED');
+ const [x0,topY,z0]=roofBase.origin;
+ const [dx,,dz]=roofBase.size;
+ const filled=new Set(after.compiled.primitives.map(v=>
+  v[0]+','+v[1]+','+v[2]));
+ let solidCapCells=0;
+ for(let x=x0;x<x0+dx;x++)for(let z=z0;z<z0+dz;z++)
+  if(filled.has(x+','+topY+','+z))solidCapCells++;
+ const aboveCapCells=after.compiled.primitives.filter(v=>
+  v[0]>=x0&&v[0]<x0+dx&&v[2]>=z0&&v[2]<z0+dz&&v[1]>topY).length;
+ const capCells=dx*dz;
+ if(capCells!==484||solidCapCells!==capCells||aboveCapCells!==682)
+  fail('FROZEN_REAL_ROOF_EVIDENCE_DRIFT');
+ const roofVolumeEvidence={
+  source:'VERIFIED_FINAL_B143_VOXELS',roofBaseY:topY,
+  roofBaseArea:capCells,verifiedSolidCapCells:solidCapCells,
+  additionalRoofSolidCellsAboveCap:aboveCapCells,
+  capFullyClosedAcrossUpperEnvelope:solidCapCells===capCells,
+  additionalInteriorVolumeOpenedByRoofProfile:false,
+  classification:'DECORATIVE_PROFILE_ABOVE_SOLID_CEILING',
+  realWeatherSealing:'NOT_TESTED',actualPlayerRoofAccess:'NOT_TESTED',
+  notArchitecturalArtCertification:true
+ };
  const oldAudit=critiqueArchitecture({design:before.design,compiled:before.compiled});
  const newAudit=critiqueArchitecture({design:after.design,compiled:after.compiled});
  const oldRisk=assessR125ProgramGeometry(before,oldAudit);
@@ -64,6 +92,7 @@ export function studyR125UpperDoorRepair(){
    programFloorStatus:newRisk.status,secondLevel:newElevation,
    programFloorIssues:newRisk.programFloorIssues,
    exteriorWarnings:newRisk.exteriorSurfaceAdvisories},
+  roofVolumeEvidence,
   roofReview:{classificationDerivedFrom:'VERIFIED_FINAL_B143_VOXELS',
    roofOnlyWarningCount:newRisk.exteriorSurfaceAdvisories.filter(x=>
     x.classification==='ROOF_ONLY_NONPROGRAM_SURFACE').length,
@@ -86,6 +115,8 @@ export function studyR125UpperDoorRepair(){
   '<header><h1>真正SOURCEで2幅床を比較する研究</h1>'+
   '<p>左：旧C（2階で2領域）。右：共通の階段シャフト回避規則で扉を移動（2階で1領域）。</p>'+
   '<p>変更はHOSTのみ。Qwen原文は不変、ART HOLD、ゲーム歩行未確認、Minecraft施工禁止。</p>'+
+  '<p>屋根断面のSOURCE調査：上階の屋根板484/484セルが残り、その上に屋根輪郭682セル。'+
+  '屋根の段差は居室の天井を高くしていない。美術/耐候性/歩行の合格ではない。</p>'+
   '<p>2階の居室床は修復案で連結。屋根の高さ別2幅床警告は実B143ボクセルで別分類し、'+
   '居室床の不通や屋根歩行の合否と混同しない。屋根自体は変更していない。</p>'+
   '<a href="REPAIR_SOURCE_REPORT.json">幾何SHA・2幅床の独立照合を読む</a></header>'+

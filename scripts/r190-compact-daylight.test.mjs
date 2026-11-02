@@ -53,7 +53,16 @@ test('daylight refuses unverifiable old source or pre-existing window changes',(
  const duplicate=structuredClone(base);
  duplicate.hostDerivedPlan.glazedOpenings=[{
   spaceId:'entrance',face:'west',offset:3,baseY:5,width:2,height:2}];
- assert.throws(()=>deriveR190CompactMinimumWindows(duplicate),/BASE_ALREADY_HAS_WINDOWS/);
+ // A forged HOST plan must fail the immutable receipt check FIRST, even
+ // when it includes a prohibited window. Do not weaken the safety ordering.
+ assert.throws(()=>deriveR190CompactMinimumWindows(duplicate),
+  /BASE_PLAN_RECEIPT_MISMATCH/);
+ // If the two HOST plan receipts agree, the independent pre-existing-
+ // glazing prohibition still rejects the injected opening.
+ const forgedMatchingReceipt=structuredClone(duplicate);
+ forgedMatchingReceipt.built.inputPlan=structuredClone(duplicate.hostDerivedPlan);
+ assert.throws(()=>deriveR190CompactMinimumWindows(forgedMatchingReceipt),
+  /BASE_ALREADY_HAS_WINDOWS/);
 });
 
 test('independent SOURCE room floor evidence retains original model, geometry and safety state',()=>{

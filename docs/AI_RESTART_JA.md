@@ -1,3 +1,12 @@
+## 2026-11-02 R125 真正3D屋根断面の実測 / R190-AC 1件の回帰原因修正
+
+- **ローカル不要の本物の検証資料**：前HEAD `cefc770e` の GitHub Actions R125 #41424133813 は SUCCESS。artifact #13130813426 に保存された legacy / stair-clear の真正B143 HTML と `REPAIR_SOURCE_REPORT.json` を取得。ChatGPT隔離Chromiumに両HTMLを実際に読み込んだ（PC幅1100、ページJS例外0、Canvas実表示を確認）。これは Minecraft実機やiPhone実機ではない。
+- **実形状の所見**：C案の屋根は sawtooth の外形を示すが、flat roof-base が上階の屋根下全面に残る。真正B143ボクセルで上階の屋根板 **484/484**、さらに屋根板の上に **682**セルのソリッド輪郭がある。従ってプロフィールは**内側に連続する高天井を開いていない**（`DECORATIVE_PROFILE_ABOVE_SOLID_CEILING`）。モデル自体の成果ではなくHOST C案の問題。外皮が防水か、人が屋上へ行けるか、実際に歩けるか、美術合格かは別のHOLD。空洞を装飾だけで「広い室内」と表示しない。
+- **実装**：既存 `scripts/r125-upper-door-repair-study.mjs` の最終ボクセル監査に屋根板と上側輪郭の真正占有測定を追加し、3D比較HTMLと `REPAIR_SOURCE_REPORT.json` へ出力。期待している既知Cの数が変わった場合はSOURCE_DRIFT相当で検査FAILし、過去のSHAや設計を自動修正しない。既存CIとテストを再利用し、新しい3D生成器/ワークフローを増やさない。
+- **R190-ACの原因**：`cefc770e` CI #41424134150 で **155中154 PASS、失敗1件**。 `scripts/r190-compact-daylight.test.mjs` の negative test が HOST計画に外部窓を加えて改竄した場合、正しい優先拒否 `BASE_PLAN_RECEIPT_MISMATCH` に対し `BASE_ALREADY_HAS_WINDOWS` を期待していた。検証関数の安全な順序は不変。改竄を先に拒否する期待値へ訂正するとともに、HOST二重レシートを合わせた負例でも既存窓禁止を別途確認する。
+- **優先順位の判断**：Cの扉修復後は同じ住宅への個別屋根改修を続けない。屋根形態と内側の使用空間を同時に変える**用途非依存の共通屋根意味IR**を、住宅・店舗・小研究施設での再利用を条件に次工程で検討する。上記の数値は一例に限定し、Mac小型LLM対応・実用途・Education実施工への最短経路を優先する。
+- **安全不変**：既存Qwen原文、元A-E、旧C、修復CのSOURCE/geometry SHA不変、MODEL新POST 0、WorldContacts/WorldWrites0、main不変更、PR #128 Open/Draft、NOT_PREPARED/9 BLOCKED/BuildPlan空、ART HOLD、Minecraft実歩行 NOT_TESTED。
+
 ## 2026-11-02 R125 屋根警告のSOURCE帰属を明確化（形状は変更しない）
 
 - **課題**：C案の上階扉を直した後も B198C は standingY=13/14 の分断を HIGH と表示するが、これを直ちに「居室床不通」や「屋根の危険」と断定できない。人間が屋根を歩けるという主張もできない。
