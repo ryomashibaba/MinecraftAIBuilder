@@ -1,3 +1,11 @@
+## 2026-11-02 ローカル不要の軽量CIで公開済みQwen真正3Dを生成（実装保存・実行結果待ち）
+
+- 現地のWindows操作は不可。既存ユーザー添付 `R190` 住宅・花屋・研究施設のモデル原文/3Dを**公開リポジトリへ保存しない**。すでに公開されていた `scripts/fixtures/r125-qwen14b-residential-2024a.json` のみを材料にする。
+- 既存B143 Pagesは巨大B167の検証経路に巻き込まれ、push run `41359773171` がcancelled。最新HEAD `dce4ccca` のEducation-first QA `41359778946` はSUCCESS。ただしPagesや直URLの新配信を未確認。キャンセル済みPages検証を再実行したが再度CANCELLED（連続更新とconcurrency）、成功とみなさない。
+- **新しい独立した軽量クラウド工程**：`.github/workflows/r125-qwen-cloud-preview.yml` を研究ブランチに追加（コミット `3d7da772d9879ca03c466a2a97abe646fec754e0`）。GitHub ActionsのUbuntu+Node 22で公開済み元Qwen設計の真正B143 5モデル（A=実モデルの元意味設計、B〜E=HOST派生の比較用構造）を再生成する。固定元プランSHA・5つの違うgeometry SHA・モデルとホストの作者区別・WorldWrites0/9 BLOCKED/施工禁止・モバイルCanvas操作・単一HTMLを検査。モデル呼出・PC操作・Minecraft書込み・Pagesへの公開デプロイをしない。合格時のみ21日保持の `R125-Public-Qwen-5-Scene-Mobile-3D` Actions artifact を登録する。
+- **現在地**：初回GitHub Actions run `41374756553` は作成され実行待機。実行成功/HTML成果物の存在/Pages公開は未確認。ユーザーには前回の添付された真正R190住宅大窓のローカル操作不要な単一HTMLプレビューをすでに提供済み。次はこのrunの最終結果を見て必要なら実原因を修正し、個別の閲覧URLまたはActions成果物の操作を減らす。main、Draft PR #128、凍結Qwen/旧Sourceを保護する。
+- SOURCE≠ART/実際のゲームの歩行。ART HOLD、minecraftWalking NOT_TESTED、NOT_PREPARED・BuildPlan空・9 BLOCKEDを維持。
+
 ## 2026-11-02 遠隔スマホ閲覧へ移行 — 既存公開Qwen住宅のGitHub Pages統合
 
 - **ローカルPC操作禁止/不要の継続方針**。ユーザーは外出中でWindows・ローカルQwenを操作できない。今後のSOURCE研究はGitHub上の保管済み資料とActionsで実行する。ローカル実行の要求や結果の捏造をしない。
