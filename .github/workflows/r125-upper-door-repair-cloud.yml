@@ -108,11 +108,17 @@ jobs:
           $before = (Get-FileHash (Join-Path $world 'level.dat') -Algorithm SHA256).Hash
           $env:LOCALAPPDATA = $fakeApp
           $missingBackup = Join-Path $fakeApp 'intentionally-absent.mcworld'
-          $result = & pwsh -NoProfile -File $script -BackupFile $missingBackup -NoFolderOpen 2>&1 | Out-String
-          if ($LASTEXITCODE -eq 0 -or
-              $result -notmatch 'HOLD_R125_WORLD_GATE_EXPORTED_BACKUP_NOT_FOUND' -or
-              $result -match 'WORLD_NAME_NOT_UNIQUE') {
-            throw ('R125_WINPS51_UNICODE_WORLD_NAME_REGRESSION: ' + $result)
+          # Expected fail-closed gate: use a PowerShell catch instead of
+          # a native child pwsh exit=1, which GitHub's pwsh shell treats as
+          # an unhandled native-command error before an assertion can run.
+          $observed = $null
+          try {
+            & $script -BackupFile $missingBackup -NoFolderOpen | Out-Null
+          } catch {
+            $observed = $_.Exception.Message
+          }
+          if ($observed -cne 'HOLD_R125_WORLD_GATE_EXPORTED_BACKUP_NOT_FOUND') {
+            throw ('R125_WINPS51_UNICODE_WORLD_NAME_REGRESSION: ' + $observed)
           }
           $after = (Get-FileHash (Join-Path $world 'level.dat') -Algorithm SHA256).Hash
           if ($before -ne $after) { throw 'R125_WORLD_GATE_TOUCHED_TEST_WORLD' }
