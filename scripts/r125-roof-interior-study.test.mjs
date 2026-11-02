@@ -28,6 +28,9 @@ test('same generic raised-roof compiler opens real interior air in three differe
   assert(c.roof.newCeilingAirCells>0);
   assert(c.roof.highAirColumns>0);
   assert(c.roof.twoWideHighRoofPads>0);
+  assert(c.roof.verticallyConnectedTwoWideRoofPads>0);
+  assert(c.roof.verticallyConnectedTwoWideRoofPads<=
+   c.roof.twoWideHighRoofPads);
   assert.equal(c.roof.unclosedEaveOrEndCells,0);
   assert.equal(c.roof.unclosedStepCells,0);
   assert.equal(c.art,'NOT_REVIEWED');

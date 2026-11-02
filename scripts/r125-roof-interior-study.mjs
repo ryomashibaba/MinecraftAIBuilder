@@ -65,12 +65,27 @@ function inspectRoofAir(before,after){
  const has=(x,y,z)=>occupied.has(key(x,y,z));
  const air=(x,z)=>!has(x,top,z)&&!has(x,top+1,z);
  let newCeilingAirCells=0,highAirColumns=0,twoWideHighRoofPads=0;
+ let verticallyConnectedTwoWideRoofPads=0;
+ const upperStandingY=2+5*(plan.levels.length-1);
+ // A real 2x2 supported pad under the entire upper headroom column,
+ // verified from FINAL B143 cells. This is still not player physics.
+ const verticalPad=(x,z)=>{
+  for(let dx=0;dx<2;dx++)for(let dz=0;dz<2;dz++){
+   const xx=x+dx,zz=z+dz;
+   if(!has(xx,upperStandingY-1,zz))return false;
+   for(let y=upperStandingY;y<=top+1;y++)
+    if(has(xx,y,zz))return false;
+  }
+  return true;
+ };
  for(let x=minX+1;x<maxX;x++)for(let z=minZ+1;z<maxZ;z++){
   if(older.has(key(x,top,z))&&!has(x,top,z))newCeilingAirCells++;
   if(air(x,z))highAirColumns++;
   if(x+1<maxX&&z+1<maxZ&&
-   air(x,z)&&air(x+1,z)&&air(x,z+1)&&air(x+1,z+1))
+   air(x,z)&&air(x+1,z)&&air(x,z+1)&&air(x+1,z+1)){
    twoWideHighRoofPads++;
+   if(verticalPad(x,z))verticallyConnectedTwoWideRoofPads++;
+  }
  }
  // Every perimeter strip is checked against the actual compiled source.
  // No virtual filling of missing voxels, and no "watertight" certification.
@@ -107,6 +122,7 @@ function inspectRoofAir(before,after){
   roofAxis:axis,topY:top,skinStripCount:skins.length,
   flatRoofBaseRetained:roofBase,
   newCeilingAirCells,highAirColumns,twoWideHighRoofPads,
+  verticallyConnectedTwoWideRoofPads,upperStandingY,
   unclosedEaveOrEndCells,unclosedStepCells,
   interiorOccupiedFloorConnectivity:'SEPARATELY_AUDITED',
   trueWorldWaterproofing:'NOT_TESTED',actualMinecraftWalking:'NOT_TESTED'};
@@ -136,6 +152,7 @@ export function studyR125RoofInterior(){
   const roof=inspectRoofAir(before,after);
   if(roof.flatRoofBaseRetained||roof.newCeilingAirCells<1||
    roof.highAirColumns<1||roof.twoWideHighRoofPads<1||
+   roof.verticallyConnectedTwoWideRoofPads<1||
    roof.unclosedEaveOrEndCells!==0||roof.unclosedStepCells!==0)
    fail('NO_VERIFIED_ENCLOSED_INTERIOR_'+source.id);
   for(const p of [before,after])
