@@ -4,12 +4,13 @@
 
 > **最初に行うこと**：このファイル → [完全統合引き継ぎ](docs/MINECRAFT_AI_BUILDER_COMPLETE_HANDOFF_20261102_JA.md) → [固定憲章](docs/AI_PROJECT_CHARTER_JA.md) → [正式戦略](docs/PROJECT_STRATEGY_V2_JA.md) → [最短MVP](docs/R125_THIN_VERTICAL_SLICE_PLAN_JA.md) → [時系列の詳細な研究・失敗記録](docs/AI_RESTART_JA.md) を読む。指示の優先順位は「ユーザーの最新指示／固定憲章と戦略 ＞ 実コードと実CI ＞ 履歴文書の過去時点の記述」。
 
-## 2026-11-02 深夜の最新実機結果（引継ぎ更新）
+## 2026-11-02 23時台：**実Qwen→Education施工→2室実歩行**まで到達
 
-- **本物のWindows上のローカルQwen3:14B（提供元独立認証は未取得）→ 短いArchitecturePlan → 真正B143 2,089ボクセル → SOURCE入口と2室到達 → 62直方体のMakeCode → ユーザーのMinecraft Education試験ワールド内に実建築の出現**まで、ユーザー実行ログ・ゲーム画面で確認。
-- **9層の安全事前検査PASS、`Placing attempted` 表示、鋸歯状屋根・外壁・ガラスの実物写真あり**。ただし `mabverify` の**最終結果は未提供**、2,089セルのゲーム内完全一致は未確認。入口と実験室・観測記録室の現物歩行も未検証。**ART HOLD**。
-- 保存済み実Qwen原文はプライベート。ユーザーのワールド画像・ゲーム内座標は公開GitHubに置かない。**`mabbuild` を再実行しない**。
-- [詳細・SHA・独立A/B/C/D/E判定・次の証拠](docs/R125_LIVE_QWEN_EDUCATION_REAL_PLACEMENT_20261102_JA.md)を参照。以下の時点固定の旧研究状態より、この実機結果とGitHub最新HEAD・CIを優先して判断する。
+- **実Windows/Ollamaで`qwen3:14b` 1応答 → 短いArchitecturePlan → 真正B143 2,089セル → SOURCE 2機能室到達 → 厳格3素材（白コンクリート660・鉄ブロック1413・ガラス16）で62直方体MakeCode → Minecraft Education内の現物建築**まで実証。
+- ユーザーのゲーム画面に `mabset`、9層の敷地安全検査PASS、`Placing attempted`、鋸歯状屋根のある実際の外観。**ユーザーはさらに `mabverify` の `Positions and material counts match.` を確認し、実験室と観測記録室の両方へ実際に入れたと報告。** この2項目はチャットによるユーザー実機報告であり、新規の結果スクリーンショット/歩行動画は未提出。
+- 正式ラベル **`EDUCATION_REAL_WORLD_2089_CELLS_USER_VERIFIED_AND_TWO_ROOMS_WALKABLE`**。これは**一棟の縦貫MVP実証**であり、ユーザー人間ART判定、実機の高天井体験、室内設備の機能性、復元試験、他用途の実機実証、小型2Bモデルは未認証。
+- **`mabbuild` の再実行禁止**。次は人間ART・実高天井の実機観察を必要に応じて確認し、既存汎用コンパイラを使って未実証用途の**店舗と二階住宅**へ展開。研究施設の現物を模擬テストで置換しない。
+- [最新詳細・原本SHA・A/B/C/D/E分離](docs/R125_LIVE_QWEN_EDUCATION_REAL_PLACEMENT_20261102_JA.md)。非公開Qwen生回答とユーザーのワールドデータ・座標は公開しない。以下の古い日付の状態より最新実機ログと現在HEAD/CIが優先。
 
 ## 1. GitHubの正本と保護境界
 
@@ -24,13 +25,12 @@
 
 初期実証は **小二階建て住宅／入口付き店舗／小研究施設** の異なる3用途。特定建物のラベル替え、箱の装飾、形だけの階段・空洞、固定テンプレートを禁止。大規模な将来構想より、動く**最小の縦貫成果**を先に作る。基本モードは将来 **8GB Apple Silicon Mac + 2B級4bit** を目標とし、大規模27Bモデルへの必須依存を避ける。
 
-## 3. 今の真の状態と最優先工程
+## 3. 現在の真正な到達点と最優先工程
 
-- 2026-11-02の `cf970b9a` で `scripts/r125-semantic-pilot.mjs` に **モデル自身が選んだ ridge/sawtooth 屋根の raised 実高天井**をSOURCE監査する機能を追加。プロンプトで要求した屋根の不一致はHOLD。**公開CIはTEST DOUBLE、まだこの新機能の実Qwen推論PASSではない**。
-- 確認済みCI: R125 run [41438390065](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41438390065) **12/12 PASS**、Education-first run [41438398935](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41438398935) **SUCCESS**。CI外の美術・Minecraft実歩行・汎用AI品質は別。
-- 3用途の **HOST派生合成** raised sawtooth では屋根板下の新たな実空気セル 住宅400／店舗252／研究施設374、2幅上部空間候補 76／51／63。実Qwenが3棟を新規設計した数字ではない。
-- **ユーザーは帰宅し、2026-11-02現在 Windows PC を操作可能**。以前の「外出中のためローカル操作不可」は解除。ただしChatGPTが勝手にPCへアクセスできるわけではない。ローカルWork/Computer Use は別途ユーザーの事前承認が必要。
-- **次の一手**：既存Qwen3:14B + Ollamaの実動作と、ローカルGit作業木を読み取りで確認。問題がなければ既存 `r125-semantic-pilot.mjs` で **1件の本物の短いモデル応答**を保存し、要求した屋根・入口・機能室・SOURCE床動線・元応答・真のB143を検証。失敗は元回答のままHOLD。過去の保存済み花屋の世界内歩行/既存MakeCode経路を優先的に再利用し、異なる残り2用途へ展開。無目的な追加CI/IRは増やさない。
+- **研究施設の実Qwen 1呼出し・B143 2,089セル・実機施工・MakeCode材料/位置一致・人による2室の実歩行は一件成功。** ユーザーの実機報告と画面の証拠区分を守る。屋根下新空気476セル・2幅縦連続75箇所はSOURCE検査であり、実機の高天井を見た証拠ではない。
+- **SOURCE/3D/実機Dは限定PASS、C ARTはHOLD**。室内の設備実用性、モデルの完全自由形状設計、他2用途のMinecraft実機、将来2B Macは未完。出所は`DECLARED_LOCAL_LOOPBACK_NOT_INDEPENDENTLY_VERIFIED`のまま、偽の独立認証を主張しない。
+- 保存済み既存研究施設を**再施工・再推論しない**。ユーザーのPCでの結果は保護し、可能なら実機での屋根下空間・各室の使い勝手を目視確認。次に既存`r125-semantic-pilot.mjs`、SOURCE経路/床/屋根監査、厳格材MakeCode経路を**別用途の店舗と二階住宅**へ再利用し、規格箱のラベル替えにしない。
+- 既存の旧Qwen2620セル原本、失敗証拠、非公開のローカル結果、ユーザーのワールドは不変。開発作業は研究ブランチのみ。毎回現HEAD・CIを再取得する。
 
 ## 4. 安全・出所・履歴
 
