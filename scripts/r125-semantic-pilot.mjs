@@ -12,6 +12,7 @@ import {compileArchitecturePlan,auditArchitecturePlanCirculation,
 import {preflightR125Ollama} from './r125-pilot.mjs';
 import {critiqueArchitecture} from '../source/ai/b198c-spatial-critic.mjs';
 import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
+import {inspectRoofAir} from './r125-roof-interior-study.mjs';
 
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const LOOPBACK=/^http:\/\/127\.0\.0\.1:(\d{2,5})\/v1\/chat\/completions$/;
@@ -36,10 +37,24 @@ const SYSTEM=[
  'OPTIONAL expression must include setbackSide,setbackDepth,roofProfile,roofAxis,facadeLanguage, plus OPTIONAL roofVolume and OPTIONAL rearCornerCut object with width,depth and OPTIONAL side ("east" or "west").',
  'setbackSide is "none", "east", or "rear"; setbackDepth must be 0 for none, otherwise 2,3,4 and ONLY when there are 2 levels.',
  'roofProfile is flat,ridge,sawtooth; roofAxis is x or z; facadeLanguage is plain,fins,screen.',
- 'OPTIONAL roofVolume:"raised" is permitted ONLY for roofProfile:"ridge". Choose when a pitched roof should enclose real higher interior ceiling/air space, not a solid decorative structure above a flat ceiling. HOST computes the roof and sealed eaves.',
+ 'OPTIONAL roofVolume:"raised" is permitted for roofProfile:"ridge" OR "sawtooth" only. Choose when the chosen pitched roof must create genuinely taller usable interior air instead of decorative solid geometry above a flat ceiling. HOST computes the safe stepped outer skin, eaves and source air clearances.',
  'If your concept benefits from a TRUE L-shaped mass and open-air rear corner, choose rearCornerCut:{width:3..5,depth:3..5,side:"east"|"west"} (integer dimensions, side optional, default east). Decide which rear corner is removed; the compiler removes real floors and roof and encloses the new glazed faces. ONLY with setbackSide:none, setbackDepth:0, roofProfile:flat.',
  'Choose an independent, striking yet functional architectural silhouette; expressed roof and upper setback must serve your spatial concept. Do not add arbitrary scripts or coordinates.'
 ].join('\n');
+/** Independent literal user-roof constraints, NOT general Japanese understanding.
+ * Never turn a generic request for a roof into a model-authored roof intention.
+ */
+export function explicitR125RoofRequest(prompt,requireUsableRoofVolume=false){
+ if(typeof prompt!=='string'||typeof requireUsableRoofVolume!=='boolean')
+  fail('ROOF_REQUEST_INPUT');
+ const profile=/鋸歯|sawtooth/i.test(prompt)?'sawtooth':
+  /切妻|gabled?|\bridge\b/i.test(prompt)?'ridge':null;
+ const explicitHigh=/高天井|屋根裏空間|屋根下の空間|vaulted ceiling|raised roof|usable roof volume/i.test(prompt);
+ return {profile,usableInteriorRequired:requireUsableRoofVolume||explicitHigh,
+  basis:requireUsableRoofVolume?'EXPLICIT_CLI_REQUIREMENT':
+   explicitHigh?'EXPLICIT_TEXT_KEYWORD':'NOT_REQUIRED',
+  literalKeywordsNotCompleteNaturalLanguageReview:true};
+}
 const blank=()=>({
  readiness:'NOT_PREPARED',constructionApproved:false,executionAllowed:false,
  worldContacts:0,worldWrites:0,gates:Array(9).fill('BLOCKED'),
@@ -49,7 +64,12 @@ export function parseR125SemanticArgs(argv){
  if(argv.length===1&&argv[0]==='--help')return {help:true};
  const opts={},allowed=new Set(['--model','--out','--prompt','--endpoint']);
  for(let i=0;i<argv.length;i++){
-  const flag=argv[i],value=argv[++i];
+  const flag=argv[i];
+  if(flag==='--require-usable-roof-volume'){
+   if(Object.hasOwn(opts,flag))fail('INVALID_ARGUMENT_'+flag);
+   opts[flag]=true;continue;
+  }
+  const value=argv[++i];
   if(!allowed.has(flag)||Object.hasOwn(opts,flag)||!value||value.startsWith('--'))
    fail('INVALID_ARGUMENT_'+flag);
   opts[flag]=value;
@@ -62,19 +82,22 @@ export function parseR125SemanticArgs(argv){
  const prompt=opts['--prompt']??PROMPT;
  if(typeof prompt!=='string'||prompt.length<8||prompt.length>4000)
   fail('PROMPT_LENGTH');
- return {model:opts['--model'],outDir:path.resolve(opts['--out']),prompt,endpoint};
+ return {model:opts['--model'],outDir:path.resolve(opts['--out']),prompt,endpoint,
+  requireUsableRoofVolume:opts['--require-usable-roof-volume']===true};
 }
 export async function runR125SemanticPilot({model,outDir,prompt=PROMPT,
- endpoint='http://127.0.0.1:11434/v1/chat/completions'}={},
+ endpoint='http://127.0.0.1:11434/v1/chat/completions',
+ requireUsableRoofVolume=false}={},
  {fetcher=fetch,timeoutMs=120000}={}){
  if(!MODEL.test(model??'')||typeof outDir!=='string'||!outDir.trim()||
   typeof prompt!=='string'||prompt.length<8||prompt.length>4000||
   !Number.isSafeInteger(timeoutMs)||timeoutMs<1000||timeoutMs>300000||
-  typeof fetcher!=='function')fail('BAD_INPUT');
+  typeof fetcher!=='function'||typeof requireUsableRoofVolume!=='boolean')fail('BAD_INPUT');
  const match=LOOPBACK.exec(endpoint);
  if(!match||Number(match[1])>65535||Number(match[1])<1)
   fail('LOOPBACK_ONLY');
  if(fs.existsSync(outDir))fail('OUTPUT_ALREADY_EXISTS');
+ const roofRequest=explicitR125RoofRequest(prompt,requireUsableRoofVolume);
  const dir=path.resolve(outDir),start=Date.now();
  fs.mkdirSync(dir,{recursive:false});
  const report={
@@ -88,11 +111,12 @@ export async function runR125SemanticPilot({model,outDir,prompt=PROMPT,
   sourceCirculationStatus:'NOT_TESTED',sourceCirculationFindings:null,
   programFloorStatus:'NOT_TESTED',programFloorIssues:null,
   nonProgramExteriorAdvisories:null,
+  roofRequest,modelSelectedRoof:null,roofInteriorSourceEvidence:null,
   semanticMatch:'NOT_REVIEWED',humanArt:'NOT_REVIEWED',
   architectureProgramUsability:'NOT_TESTED_IN_MINECRAFT',world:blank()
  };
  const put=(name,value)=>file(dir,name,value);
- put('REQUEST.json',{model,prompt,endpoint,
+ put('REQUEST.json',{model,prompt,endpoint,roofRequest,
   inference:'ONE_REAL_LOCAL_REQUEST_OR_HOLD',
   requestProtocol:'OPENAI_COMPATIBLE_JSON_OBJECT',
   ...{timeoutMs,maxOutputTokens:1536,reasoningEffort:'none'}});
@@ -112,7 +136,9 @@ export async function runR125SemanticPilot({model,outDir,prompt=PROMPT,
     body:JSON.stringify({model,stream:false,temperature:0.4,
      reasoning_effort:'none',max_tokens:1536,
      response_format:{type:'json_object'},
-     messages:[{role:'system',content:SYSTEM},
+     messages:[{role:'system',content:SYSTEM+
+      (roofRequest.usableInteriorRequired?'\\nREQUIRED: Return expression with roofVolume:"raised" and roofProfile "ridge" or "sawtooth". Do not omit it or relabel a decorative flat cap.':'')+
+      (roofRequest.profile?'\\nREQUIRED model-selected roofProfile: '+roofRequest.profile+'.':'')},
       {role:'user',content:prompt}]})
    });
    if(!response||response.ok!==true)
@@ -131,7 +157,41 @@ export async function runR125SemanticPilot({model,outDir,prompt=PROMPT,
    report.originalRawCaptured=true;
    let plan;
    try{plan=JSON.parse(raw);}catch{fail('PLAN_NOT_JSON');}
+   report.modelSelectedRoof=plan?.expression?{
+    profile:plan.expression.roofProfile??null,
+    axis:plan.expression.roofAxis??null,
+    volume:plan.expression.roofVolume??'DECORATIVE_FLAT_CAP'
+   }:null;
+   if(roofRequest.profile&&plan?.expression?.roofProfile!==roofRequest.profile)
+    fail('MODEL_DID_NOT_DESIGN_REQUESTED_ROOF_PROFILE');
+   if(roofRequest.usableInteriorRequired&&
+    plan?.expression?.roofVolume!=='raised')
+    fail('MODEL_DID_NOT_DESIGN_REQUIRED_REAL_ROOF_VOLUME');
+   // True geometry must come from the original model-authored plan unchanged.
    const product=compileArchitecturePlan(plan);
+   if(plan.expression?.roofVolume==='raised'){
+    // A separate HOST counterfactual only measures what the model roof changes;
+    // it is NEVER promoted as a second AI-designed candidate.
+    const baselinePlan=structuredClone(plan);
+    delete baselinePlan.expression.roofVolume;
+    const decorative=compileArchitecturePlan(baselinePlan);
+    const audit=inspectRoofAir(decorative,product);
+    if(audit.flatRoofBaseRetained||audit.newCeilingAirCells<=0||
+     audit.highAirColumns<=0||audit.twoWideHighRoofPads<=0||
+     audit.verticallyConnectedTwoWideRoofPads<=0||
+     audit.unclosedEaveOrEndCells!==0||audit.unclosedStepCells!==0)
+     fail('MODEL_ROOF_HAS_NO_VERIFIED_SUPPORTED_HIGH_INTERIOR');
+    report.roofInteriorSourceEvidence={
+     ...audit,modelPlanSha256:product.planSha256,
+     actualModelPlanGeometrySha256:product.geometrySha256,
+     hostCounterfactualDecorativeGeometrySha256:decorative.geometrySha256,
+     actualAuthorship:'MODEL_CHOSE_ROOF_INTENT_HOST_BUILT_GEOMETRY',
+     comparisonAuthorship:'HOST_ONLY_NOT_SECOND_MODEL_OUTPUT',
+     humanArt:'NOT_REVIEWED',minecraftWalking:'NOT_TESTED',
+     constructionApproved:false,worldWrites:0};
+    put('R125_MODEL_ROOF_INTERIOR_SOURCE_EVIDENCE.json',
+     report.roofInteriorSourceEvidence);
+   }
    const critique=critiqueArchitecture({
     design:product.design,compiled:product.compiled});
    const circulation=auditArchitecturePlanCirculation(product);
@@ -178,7 +238,7 @@ export async function runR125SemanticPilot({model,outDir,prompt=PROMPT,
 if(process.argv[1]===fileURLToPath(import.meta.url)){
  try{
   const args=parseR125SemanticArgs(process.argv.slice(2));
-  if(args.help)console.log('node scripts/r125-semantic-pilot.mjs --model qwen3:14b --out NEW_DIR [--prompt "NEW REQUEST"] (LOCAL ONLY, NO MINECRAFT WRITES)');
+  if(args.help)console.log('node scripts/r125-semantic-pilot.mjs --model qwen3:14b --out NEW_DIR [--prompt "NEW REQUEST"] [--require-usable-roof-volume] (LOCAL ONLY, NO MINECRAFT WRITES)');
   else{
    const r=await runR125SemanticPilot(args);
    console.log(JSON.stringify({status:r.status,reason:r.reason??null,

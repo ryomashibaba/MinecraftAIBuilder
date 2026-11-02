@@ -117,3 +117,80 @@ test('invalid endpoint, nonempty existing directory, bad CLI rejected',async t=>
  await assert.rejects(()=>runR125SemanticPilot({model:'qwen3:14b',outDir:root}),
  /OUTPUT_ALREADY_EXISTS/);
 });
+
+test('model-authored raised sawtooth gives measured source interior without confusing TEST_DOUBLE for real model',async t=>{
+ const root=temp();t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
+ const chosen={...design(),expression:{setbackSide:'none',setbackDepth:0,
+  roofProfile:'sawtooth',roofAxis:'x',facadeLanguage:'plain',
+  roofVolume:'raised'}};
+ const raw=JSON.stringify(chosen);
+ const fetcher=async(url,opts)=>{
+  if(opts.method==='GET')return tags(url,opts);
+  const body=JSON.parse(opts.body);
+  assert.match(body.messages[0].content,/sawtooth/);
+  assert.match(body.messages[0].content,/REQUIRED/);
+  return {ok:true,text:async()=>JSON.stringify({choices:[
+   {message:{content:raw},finish_reason:'stop'}]})};
+ };
+ const dir=path.join(root,'real-roof');
+ const result=await runR125SemanticPilot({model:'qwen3:14b',
+  prompt:'鋸歯状の高天井の研究施設を独自に設計してほしい',
+  requireUsableRoofVolume:true,outDir:dir},{fetcher});
+ assert.equal(result.status,'HOLD_TEST_DOUBLE_NOT_REAL_INFERENCE');
+ assert.equal(result.originalRawCaptured,true);
+ assert.equal(fs.readFileSync(path.join(dir,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8'),raw);
+ assert.equal(result.modelSelectedRoof.profile,'sawtooth');
+ assert.equal(result.modelSelectedRoof.volume,'raised');
+ assert.equal(result.roofRequest.basis,'EXPLICIT_CLI_REQUIREMENT');
+ const e=result.roofInteriorSourceEvidence;
+ assert.equal(e.actualAuthorship,'MODEL_CHOSE_ROOF_INTENT_HOST_BUILT_GEOMETRY');
+ assert.equal(e.comparisonAuthorship,'HOST_ONLY_NOT_SECOND_MODEL_OUTPUT');
+ assert(e.verticallyConnectedTwoWideRoofPads>0);
+ assert(e.newCeilingAirCells>0);
+ assert.equal(e.unclosedEaveOrEndCells,0);
+ assert.equal(e.unclosedStepCells,0);
+ assert.notEqual(e.actualModelPlanGeometrySha256,e.hostCounterfactualDecorativeGeometrySha256);
+ assert.equal(result.world.worldWrites,0);
+ assert.deepEqual(result.world.gates,Array(9).fill('BLOCKED'));
+ assert(fs.existsSync(path.join(dir,'index.html')));
+});
+
+test('model failure to author explicitly required real roof is HOLD preserving unmodified raw',async t=>{
+ const root=temp();t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
+ const p={...design(),expression:{setbackSide:'none',setbackDepth:0,
+  roofProfile:'sawtooth',roofAxis:'x',facadeLanguage:'plain'}};
+ const raw=JSON.stringify(p);
+ const fetcher=async(url,opts)=>opts.method==='GET'?tags(url,opts):
+  {ok:true,text:async()=>JSON.stringify({choices:[
+   {message:{content:raw},finish_reason:'stop'}]})};
+ const dir=path.join(root,'reject');
+ const r=await runR125SemanticPilot({model:'qwen3:14b',outDir:dir,
+  prompt:'高天井の小研究所を鋸歯状屋根で設計してください'},{fetcher});
+ assert.equal(r.status,'HOLD_SEMANTIC_PLAN');
+ assert.match(r.reason,/MODEL_DID_NOT_DESIGN_REQUIRED_REAL_ROOF_VOLUME/);
+ assert.equal(r.roofRequest.basis,'EXPLICIT_TEXT_KEYWORD');
+ assert.equal(fs.readFileSync(path.join(dir,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8'),raw);
+ assert.equal(fs.existsSync(path.join(dir,'B143_SCENE.json')),false);
+ assert.equal(r.world.worldWrites,0);
+});
+
+test('explicit roof profile cannot silently be substituted, CLI rooftop constraint cannot be duplicated',async t=>{
+ const root=temp();t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
+ const p={...design(),expression:{setbackSide:'none',setbackDepth:0,
+  roofProfile:'ridge',roofAxis:'z',facadeLanguage:'plain',roofVolume:'raised'}};
+ const raw=JSON.stringify(p);
+ const fetcher=async(url,opts)=>opts.method==='GET'?tags(url,opts):
+  {ok:true,text:async()=>JSON.stringify({choices:[
+   {message:{content:raw},finish_reason:'stop'}]})};
+ const r=await runR125SemanticPilot({model:'qwen3:14b',
+  prompt:'鋸歯状屋根の高天井を作ってください',outDir:path.join(root,'mismatch')},
+  {fetcher});
+ assert.equal(r.status,'HOLD_SEMANTIC_PLAN');
+ assert.match(r.reason,/MODEL_DID_NOT_DESIGN_REQUESTED_ROOF_PROFILE/);
+ assert.equal(r.world.worldWrites,0);
+ const args=parseR125SemanticArgs(['--model','qwen3:14b','--out','new-dir',
+  '--require-usable-roof-volume']);
+ assert.equal(args.requireUsableRoofVolume,true);
+ assert.throws(()=>parseR125SemanticArgs(['--model','qwen3:14b','--out','new-dir',
+  '--require-usable-roof-volume','--require-usable-roof-volume']),/INVALID_ARGUMENT/);
+});

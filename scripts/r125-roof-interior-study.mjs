@@ -50,7 +50,7 @@ function syntheticCases(seed){
   roofProfile:'sawtooth',roofAxis:'z',facadeLanguage:'plain'};
  return [house,store,lab];
 }
-function inspectRoofAir(before,after){
+export function inspectRoofAir(before,after){
  const {design,compiled,plan}=after;
  const top=1+5*plan.levels.length;
  const skins=design.elements.filter(e=>e.id.startsWith('roof-raised-skin-'));
