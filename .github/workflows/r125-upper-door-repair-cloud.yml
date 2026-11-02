@@ -10,6 +10,9 @@ on:
       - 'scripts/r125-roof-interior-study.test.mjs'
       - 'scripts/r125-semantic-pilot.mjs'
       - 'scripts/r125-semantic-pilot.test.mjs'
+      - 'scripts/r125-saved-semantic-review.mjs'
+      - 'scripts/r125-saved-semantic-review.test.mjs'
+      - 'scripts/r125-live-safe-worktree.ps1'
       - '.github/workflows/r125-upper-door-repair-cloud.yml'
   workflow_dispatch:
 permissions:
@@ -32,7 +35,8 @@ jobs:
           node --check scripts/r125-upper-door-repair-study.mjs
           node --check scripts/r125-roof-interior-study.mjs
           node --check scripts/r125-semantic-pilot.mjs
-          node --test scripts/r125-expression-gallery.test.mjs scripts/r125-upper-door-repair-study.test.mjs scripts/r125-roof-interior-study.test.mjs scripts/r125-semantic-pilot.test.mjs
+          node --check scripts/r125-saved-semantic-review.mjs
+          node --test scripts/r125-expression-gallery.test.mjs scripts/r125-upper-door-repair-study.test.mjs scripts/r125-roof-interior-study.test.mjs scripts/r125-semantic-pilot.test.mjs scripts/r125-saved-semantic-review.test.mjs
       - name: Real-source 2-width component comparison, no model/world
         run: |
           node scripts/r125-upper-door-repair-study.mjs --out "$RUNNER_TEMP/r125-door-repair"
