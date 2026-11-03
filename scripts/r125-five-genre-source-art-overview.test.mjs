@@ -73,7 +73,7 @@ test('missing case shows correct partial 4/5, never a fabricated five-source cla
   ...report,status:'HOLD_FAILED_ONLY_HOME'}).png);
  assert.equal(png.meta.sourceReadyCount,4);
  assert.equal(png.meta.cases[0].finalPresent,false);
- assert.equal(png.meta.cases[0].finalV3GeometrySha256,examples[0].finalGeometrySha256);
+ assert.equal(png.meta.cases[0].finalV3GeometrySha256,null);
 });
 test('source overview refuses world-write, genre substitution and malformed materials',()=>{
  assert.throws(()=>renderFiveGenreSourceEvidence(examples,{...report,worldWrites:1}),
