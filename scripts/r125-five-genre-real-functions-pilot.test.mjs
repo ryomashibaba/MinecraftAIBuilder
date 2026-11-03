@@ -95,7 +95,7 @@ function fakeModel({invalidCase=-1}={}){
    rooms:original.rooms.map((r,j)=>({
     roomId:r.id,
     fixture:{kind:['counter','worktable','bench','display','storage'][(i+j)%5],
-     material:j?'stone':'wood',side:j?'east':'west',offset:0,
+     material:j?'stone':'wood',side:j?childSide:'north',offset:0,
      purpose:'Useful equipment for '+r.id},
     opening:{side:j?'south':childSide==='south'?'west':'south',
      offset:0,width:4,height:2}
