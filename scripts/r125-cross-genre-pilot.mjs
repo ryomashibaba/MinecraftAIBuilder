@@ -38,7 +38,7 @@ const SYSTEM=[
  'materials EXACT keys floor,wall,roof. floor wood|stone|concrete; wall concrete|stone|wood|metal; roof stone|metal|wood|concrete.',
  'rooms: 2..5 functional rooms in parent-before-child order.',
  'Each room EXACT keys id,purpose,width,depth,roofY plus attach for non-root only.',
- 'room width/depth integers 7..14, roofY integer 6..10.',
+ 'room width/depth integers 6..14, roofY integer 6..10.',
  'Every non-root attach EXACT keys to,side,shift; to is a preceding room id;',
  'side east|west|north|south; shift integer -3..3.',
  'The HOST aligns the connected rooms with a shared two-wide doorway. Avoid collisions, narrow overlaps, blocking north entrance of first room.',
