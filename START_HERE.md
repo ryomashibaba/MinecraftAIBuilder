@@ -1,5 +1,11 @@
 # MinecraftAIBuilder — START HERE（新チャット・AI開発者の統一入口）
 
+## 2026-11-03 V4E五方向真B143のCI実行・予備ART監査確定
+
+- 前工程CI [#41646265050](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41646265050) は `completed/success`。新ギャラリー工程 [#41647673833](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41647673833) も **Linux/Windows completed/success**。Artifact ID `13235393646`、取得ZIP SHA256とGitHub digest一致 `35ef614f54447444a5bb7cc6f4389b45ebddbd9eac79ad691af8a9c3c7af515f`。実合成B143 5,533 voxel、実ガラス36＋両面AIR各36。回転3D＋5方向SVGを実見。
+- [独立予備ART監査](docs/R125_V4E_FIRST_ACTUAL_B143_ART_AUDIT_20261103_JA.md)：箱型の主外殻・弱い公共入口・単調な両側面のため**予備ART REJECT**。ただし人間正式ART認定はなし、全体 ART HOLD。技術合格≠美術合格。実Qwen新V4E試験0、世界書込0。
+- 次は一棟の小窓/配色修理を停止。真Qwen1件のオリジナル設計評価にはローカル接続が必要。長期はAUTHORの主輪郭・断面・公共動線を汎用IRから共著作できる能力へ戻る。従来V4D/R125 Education成功、main、Draft PR #128、9 BLOCKED、Work事前承認を保護。
+
 ## 2026-11-03 V4E真正B143・五方向審査資料の一括出力（合成SOURCEのみ）
 
 - 既存V4Eの見た目をCIテスト数だけで評価しないため、単一の**合成AUTHOR入力**から最終B143実voxelで5方向（屋根/北/南/西/東）の正投影SVGと回転可能な既存B143 3D viewer、幾何SHA・窓両面AIR・9 BLOCKEDのSOURCEレポートを同時生成する読取専用工程を実装。既存のR125-V4D workflowに1つのART HOLD artifactとして結線。新実LLM呼出0、Minecraft世界接触0。合成の建築美術・実モデル汎化は**未認定**。
