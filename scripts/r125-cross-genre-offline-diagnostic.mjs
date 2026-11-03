@@ -10,8 +10,10 @@ import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import {compileSpatialComposition,SCHEMA} from '../source/ai/r125-spatial-composition.mjs';
 import {GENRES} from './r125-cross-genre-pilot.mjs';
+import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
 
 const sha=s=>createHash('sha256').update(s).digest('hex');
+const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const fail=why=>{throw Error('R125_SAVED_GENRE_DIAGNOSTIC_'+why)};
 const isObj=o=>o!==null&&typeof o==='object'&&!Array.isArray(o);
 const slug=s=>typeof s==='string'&&/^[a-z][a-z0-9-]{2,39}$/.test(s);
@@ -96,7 +98,7 @@ export function diagnoseSavedGenreBatch({studyDir,outDir}={}){
   original.modelCalls!==5||!Array.isArray(original.cases)||
   original.cases.length!==GENRES.length)
   fail('ORIGINAL_REPORT_NOT_ELIGIBLE');
- const checked=[];
+ const checked=[],recovered=[];
  for(const [i,g] of GENRES.entries()){
   const saved=original.cases[i],folder=path.join(study,'cases',g.id);
   if(saved?.id!==g.id||saved.genre!==g.genre||!isChild(study,folder))
@@ -127,8 +129,10 @@ export function diagnoseSavedGenreBatch({studyDir,outDir}={}){
        'MATCHED_SAVED_GEOMETRY':'SOURCE_NEW_OR_OLD_NO_MATCH';
       if(saved.geometrySha256&&row.sourceReplay!=='MATCHED_SAVED_GEOMETRY')
        row.issues.push({path:'source',code:'SAVED_GEOMETRY_DRIFT'});
-      if(!saved.geometrySha256)
+      if(!saved.geometrySha256){
        row.sourceReplay='OFFLINE_SOURCE_NOW_COMPILED_NOT_ORIGINAL_QWEN_RETRY';
+       recovered.push({id:g.id,genre:g.genre,product});
+      }
      }catch(e){
       row.sourceReplay='HOLD_ORIGINAL_SOURCE';
       row.issues.push({path:'source',code:'SOURCE_COMPILER_HOLD',
@@ -147,13 +151,36 @@ export function diagnoseSavedGenreBatch({studyDir,outDir}={}){
    const k=i.code;a[k]=(a[k]??0)+1;return a},{}))
    .map(([code,caseCount])=>({code,issueCount:caseCount})),
   originalCompiledCount:original.analysis?.sourceCompiled,
+  recoveredSourceCandidates:recovered.map(({id,genre,product})=>({
+   id,genre,sourceSha256:product.sourceSha256,geometrySha256:product.geometrySha256,
+   occupiedCells:product.compiled.primitives.length,
+   sourceRoutes:product.sourceRoutes.status,
+   reviewHtml:'recovered-'+id+'/index.html',
+   sourceAuthorship:'SAVED_QWEN_ORIGINAL_OFFLINE_REPLAY_WITH_SHARED_6_TO_14_ROOM_RULES',
+   originalFailureStillRecorded:true,humanArt:'NOT_REVIEWED',
+   minecraftWalking:'NOT_TESTED',worldWrites:0
+  })),
   inspectedCases:checked.length,reInferenceCalls:0,
   originalModelCalls:original.modelCalls,
   status:'OFFLINE_DIAGNOSTIC_COMPLETE_EXISTING_HOLD_PRESERVED',
   worldContacts:0,worldWrites:0,readiness:'NOT_PREPARED',
   BuildPlan:{operations:[]},gates:Array(9).fill('BLOCKED'),
   humanArt:'NOT_REVIEWED',minecraftWalking:'NOT_TESTED'};
+ // Prepare new review(s) in memory first; never modify the original study.
+ const template=recovered.length?fs.readFileSync(
+  path.join(ROOT,'source/ai/b143-viewer-template.html'),'utf8'):null;
+ const previews=recovered.map(({id,product})=>({id,product,
+  html:renderB143Html(compileB143Gallery([product.design]),template)}));
  fs.mkdirSync(out);
+ for(const {id,product,html} of previews){
+  const target=path.join(out,'recovered-'+id);
+  fs.mkdirSync(target);
+  fs.writeFileSync(path.join(target,'index.html'),html,{flag:'wx'});
+  fs.writeFileSync(path.join(target,'B143_SOURCE.json'),
+   JSON.stringify(product.design,null,2)+'\n',{flag:'wx'});
+  fs.writeFileSync(path.join(target,'SOURCE_ROUTES.json'),
+   JSON.stringify(product.sourceRoutes,null,2)+'\n',{flag:'wx'});
+ }
  fs.writeFileSync(path.join(out,'DIAGNOSTIC_REPORT.json'),
   JSON.stringify(report,null,2)+'\n',{flag:'wx'});
  return {...report,outputFolder:out};
