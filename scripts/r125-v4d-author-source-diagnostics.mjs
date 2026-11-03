@@ -10,11 +10,13 @@ import {RELATIVE_SCHEMA} from '../source/ai/r125-v4d-relative-author-ir.mjs';
 import {RANKED_SCHEMA} from '../source/ai/r125-v4e-ranked-exterior-ir.mjs';
 import {SECTIONED_SCHEMA} from '../source/ai/r125-v4e-sectioned-author-ir.mjs';
 import {MASSING_SCHEMA} from '../source/ai/r125-v4e-massing-author-ir.mjs';
+import {WING_SCHEMA} from '../source/ai/r125-v4e-wing-author-ir.mjs';
 
 export const DIAGNOSTIC_SCHEMA='minecraftaibuilder-v4d-private-model-structural-diagnostic-v1';
 const ROOT_COMPACT=['schema','id','title','brief','materials','spaces'];
 const ROOT_SECTIONED=[...ROOT_COMPACT,'section'];
 const ROOT_MASSING=[...ROOT_COMPACT,'massing'];
+const ROOT_WING=[...ROOT_COMPACT,'massing','wing'];
 const ROOT_DETAILED=['schema','id','title','brief','materials','spaces','entry','extraLinks'];
 const SPACE_COMPACT=['id','purpose','kind','width','depth','roof','height','facade','windowSide','feature','featureMaterial','attach'];
 const SPACE_RANKED=['id','purpose','kind','width','depth','roof','height','facade','windowPriority','feature','featureMaterial','attach'];
@@ -57,17 +59,17 @@ function safeProse(value){return typeof value==='string'&&value.length>=3&&value
 const opposite={east:'west',west:'east',south:'north',north:'south'};
 const dirs=['north','south','east','west'];
 export function diagnosePrivateV4DAuthor(author,contract){
- if(![COMPACT_SCHEMA,RELATIVE_SCHEMA,RANKED_SCHEMA,SECTIONED_SCHEMA,MASSING_SCHEMA].includes(contract))
+ if(![COMPACT_SCHEMA,RELATIVE_SCHEMA,RANKED_SCHEMA,SECTIONED_SCHEMA,MASSING_SCHEMA,WING_SCHEMA].includes(contract))
   throw Error('V4D_DIAG_UNRECOGNIZED_CONTRACT');
  const r=blank(contract);
  if(!record(author)){
   add(r,'TOP_LEVEL_NOT_OBJECT');return r;
  }
  const compact=contract===COMPACT_SCHEMA,sectioned=contract===SECTIONED_SCHEMA,
- massing=contract===MASSING_SCHEMA,
- ranked=contract===RANKED_SCHEMA||sectioned||massing;
+ massing=contract===MASSING_SCHEMA,winged=contract===WING_SCHEMA,
+ ranked=contract===RANKED_SCHEMA||sectioned||massing||winged;
  const top=keyCounts(author,sectioned?ROOT_SECTIONED:
-  massing?ROOT_MASSING:(compact||ranked)?ROOT_COMPACT:ROOT_DETAILED);
+  winged?ROOT_WING:massing?ROOT_MASSING:(compact||ranked)?ROOT_COMPACT:ROOT_DETAILED);
  r.missingTopLevelKeyCount=top.missing;
  r.unexpectedTopLevelKeyCount=top.unexpected;
  if(top.missing||top.unexpected)add(r,'TOP_LEVEL_FIELDS');
@@ -217,7 +219,7 @@ export function diagnosePrivateV4DAuthor(author,contract){
     add(r,'SECTION_ROOM_NOT_COVERED');
   }
  }
- if(massing){
+ if(massing||winged){
   const v=author.massing;
   if(!record(v)||keyCounts(v,['spaceId','corner','cutWidth','cutDepth','publicAccessSide']).missing||
    keyCounts(v,['spaceId','corner','cutWidth','cutDepth','publicAccessSide']).unexpected)
@@ -228,6 +230,20 @@ export function diagnosePrivateV4DAuthor(author,contract){
    if(!['X','Z'].includes(v.publicAccessSide))add(r,'PRIMARY_MASSING_PORTAL_SIDE_INVALID');
    if(!author.spaces.some(x=>record(x)&&x.id===v.spaceId&&x.kind==='covered'))
     add(r,'PRIMARY_MASSING_ROOM_NOT_COVERED');
+  }
+ }
+ if(winged){
+  const w=author.wing,expected=['spaceId','side','start','span','reach','roofY','purpose'];
+  if(!record(w)||keyCounts(w,expected).missing||keyCounts(w,expected).unexpected)
+   add(r,'EXTERIOR_WING_AUTHOR_FIELDS');
+  else {
+   if(!dirs.includes(w.side))add(r,'EXTERIOR_WING_SIDE_INVALID');
+   if(!between(w.start,3,12)||!between(w.span,10,18)||
+    !between(w.reach,6,9)||!between(w.roofY,8,9))
+    add(r,'EXTERIOR_WING_DIMENSIONS_INVALID');
+   if(!safeProse(w.purpose))add(r,'EXTERIOR_WING_PURPOSE_INVALID');
+   if(!author.spaces.some(x=>record(x)&&x.id===w.spaceId&&x.kind==='covered'))
+    add(r,'EXTERIOR_WING_ROOM_NOT_COVERED');
   }
  }
  // Check linked wall window directions after reading ALL attachments.
@@ -248,7 +264,7 @@ export function diagnosePrivateV4DAuthor(author,contract){
  return r;
 }
 export function diagnosePrivateV4DInvalidJSON(contract){
- if(![COMPACT_SCHEMA,RELATIVE_SCHEMA,RANKED_SCHEMA,SECTIONED_SCHEMA,MASSING_SCHEMA].includes(contract))
+ if(![COMPACT_SCHEMA,RELATIVE_SCHEMA,RANKED_SCHEMA,SECTIONED_SCHEMA,MASSING_SCHEMA,WING_SCHEMA].includes(contract))
   throw Error('V4D_DIAG_UNRECOGNIZED_CONTRACT');
  const report=blank(contract,'INVALID_JSON');
  add(report,'ORIGINAL_RESPONSE_NOT_JSON');

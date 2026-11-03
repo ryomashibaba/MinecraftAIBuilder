@@ -1,5 +1,11 @@
 # MinecraftAIBuilder — START HERE（新チャット・AI開発者の統一入口）
 
+## 2026-11-04 実ローカルQwen用の非既定1応答AUTHORウイング経路
+
+- `scripts/r125-v4d-local-architect.mjs --authored-wing` と既存隔離1クリック `scripts/r125-v4e-one-click-ranked-trial.cmd --wing` を追加。人間の要望→ローカル単発モデル1POST→完全AUTHOR JSON（用途・マス・外部翼）→本物のB143と実験的屋根外形・2幅SOURCE歩行監査→PRIVATE五方向/変更前後/3D→原文SHA再検証オフライン再診断という経路。旧既定・`--massing`/`--sectioned`不変更、リトライやクラウド有料API利用なし。
+- 新AUTHOR形式にPRIVATEの安全な診断コードと共有最小JSONを対応させる。原文や個別の建物プランをGitHubに送らない。CIのHTTPテストダブルを本物Qwenとして認定せず、実Qwen試行は未実施。正式美術ARTはHOLD、世界書き込み0/9ゲートBLOCKED、main・実機成功経路・PR#128 Draft保全。
+
+
 ## 2026-11-04 全体建築＋主棟切欠き＋外部公共ウイングを同じ1回答で著作する新AUTHOR契約
 
 - `source/ai/r125-v4e-wing-author-ir.mjs`：厳密な1 JSONに空間機能、元のRANKED全体設計、吹抜けmassing、外へ拡張する有用なwingを同時著作。HOSTが用途別に形状を移動・修正せず、真正B143と玄関からの2幅アクセスおよび9 BLOCKEDを証明できる場合のみSOURCEを成立させる。既存V4D/旧V4E契約やEducation実機成功パスは変更しない。実Qwenからの新しい推論は未実施、ARTはHOLD。

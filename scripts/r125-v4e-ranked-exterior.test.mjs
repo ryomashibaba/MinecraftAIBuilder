@@ -663,3 +663,67 @@ test('one-response author owns full functional architecture, massing and TRUE ne
  }
  assert(WING_SYSTEM_PROMPT.includes('wing EXACT'));
 });
+
+test('one original FULL WING model response: 1 fake POST, private art comparison and SHA-checked offline replay, zero world writes',async()=>{
+ const {WING_SCHEMA}=await import('../source/ai/r125-v4e-wing-author-ir.mjs');
+ const {syntheticFiveGenreAuthorCases}=await import('./r125-v4e-cross-genre-source-study.mjs');
+ const {parseV4DLocalAuthorArgs,runV4DLocalAuthor}=await import('./r125-v4d-local-architect.mjs');
+ const {replayPrivateV4D}=await import('./r125-v4d-replay-private.mjs');
+ const {diagnosePrivateV4DAuthor}=await import('./r125-v4d-author-source-diagnostics.mjs');
+ const fs=await import('node:fs'),os=await import('node:os'),path=await import('node:path');
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'mab-wing-private-'));
+ const study=path.join(root,'study'),replay=path.join(root,'replay');
+ const sample=syntheticFiveGenreAuthorCases()[0];
+ const answer={...structuredClone(sample.source),schema:WING_SCHEMA,
+  massing:structuredClone(sample.authoredMassing),wing:structuredClone(sample.authoredWing)};
+ const raw=JSON.stringify(answer),requests=[];
+ const fetcher=async(url,opt)=>{
+  requests.push(opt?.method);
+  if(opt?.method==='GET')
+   return {ok:true,status:200,text:async()=>JSON.stringify({models:[{name:'qwen3:14b'}]})};
+  if(opt?.method==='POST')
+   return {ok:true,status:200,text:async()=>JSON.stringify({
+    model:'qwen3:14b',choices:[{finish_reason:'stop',message:{content:raw}}]})};
+  throw Error('UNEXPECTED_INJECTED_HTTP');
+ };
+ try{
+  const parsed=parseV4DLocalAuthorArgs(['--authored-wing','--model','qwen3:14b',
+   '--out',study,'--prompt','Author a public building with an actual exterior shaded wing.']);
+  assert.equal(parsed.authorWing,true);
+  assert.throws(()=>parseV4DLocalAuthorArgs(['--authored-wing','--authored-massing',
+   '--model','qwen3:14b','--out',study]),/ONLY_ONE_AUTHOR_MODE/);
+  const result=await runV4DLocalAuthor(parsed,{fetcher,timeoutMs:15000});
+  assert.equal(result.status,'HOLD_TEST_DOUBLE_NOT_REAL_MODEL',result.reason);
+  assert.equal(result.authorContract,WING_SCHEMA);
+  assert.equal(result.sourceRoutesStatus,'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert.equal(result.worldWrites,0);
+  assert.equal(requests.filter(m=>m==='POST').length,1);
+  assert.deepEqual(JSON.parse(fs.readFileSync(path.join(study,'AUTHOR_INTENT_ORIGINAL.json'),'utf8')),answer);
+  assert.equal(fs.readFileSync(path.join(study,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8'),raw);
+  const art=JSON.parse(fs.readFileSync(path.join(study,'PRIVATE_B143_WING_ART_HOLD_COMPARISON.json'),'utf8'));
+  assert(art.actuallyAddedCells>84);
+  assert.equal(art.wingSourceWitness.actualSupportedWingFloorCells,84);
+  assert(art.projectedVisibilityAudit.views.find(v=>v.face==='roof').silhouetteChangedCells>=84);
+  assert.equal(art.extraModelRequests,0);
+  assert.equal(art.humanArchitecturalArt,'NOT_REVIEWED');
+  for(const file of ['PRIVATE_B143_WING_VISIBILITY_DELTA.svg',
+   'FINAL_EXTERIOR_WING_FIVE_VIEWS_PRIVATE.svg','AUTHORED_EXTERIOR_WING_SOURCE.json'])
+   assert(fs.existsSync(path.join(study,file)));
+  const share=JSON.parse(fs.readFileSync(path.join(study,'REVIEW_SUMMARY_SHAREABLE.json'),'utf8'));
+  assert.equal(share.authorContract,WING_SCHEMA);
+  assert.equal(share.rawModelTextIncluded,false);
+  assert.equal(share.explicitlyInjectedTestResponse,true);
+  assert.equal(share.sourceCandidateVerified,true);
+  assert.equal(diagnosePrivateV4DAuthor(answer,WING_SCHEMA).issues.length,0);
+  const n=requests.length,rr=replayPrivateV4D(study,replay);
+  assert.equal(requests.length,n);
+  assert.equal(rr.status,'HOLD_TEST_DOUBLE_REPLAY_ONLY');
+  assert.equal(rr.originalCompilerHashesMatch,true);
+  assert.equal(rr.additionalModelCalls,0);
+  assert.equal(rr.worldWrites,0);
+  assert(!fs.existsSync(path.join(replay,'MODEL_RESPONSE_ORIGINAL.txt')));
+  const invalid=structuredClone(answer);invalid.wing.roofY=40;
+  assert(diagnosePrivateV4DAuthor(invalid,WING_SCHEMA).issues
+   .some(i=>i.code==='EXTERIOR_WING_DIMENSIONS_INVALID'));
+ }finally{fs.rmSync(root,{recursive:true,force:true});}
+});
