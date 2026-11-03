@@ -44,7 +44,7 @@
   "branch": "research/free-autonomy-pilot-20261104",
   "model": "ollama/qwen3:14b",
   "tasks": ["既存原作証拠に基づく小さな未解決課題を解析して修正", "既存の独立テストを増強", "研究ブランチ上で非退行を再検証"],
-  "checks": [["npm", "run", "typecheck"], ["npm", "test", "--", "--run"]],
+  "checks": [["npm", "run", "typecheck"], ["npm", "test"]],
   "allowed_prefixes": ["src", "scripts", "tools"],
   "state_dir": "C:/FreeAutonomyPrivate/TPS-20261104",
   "max_cycles": 12,
@@ -56,4 +56,4 @@
 
 ## 現時点の証拠
 
-`python -m unittest -v test_solo_agent.py` のLinux/Python 3.11ローカル隔離Fake CLI試験8件はPASS。**Fake CLIであり実LLMのコード生成成功数は0件、Windows実機無人運転は0件**。SOURCEテスト成功後コミット・origin/branch/paths/モデル制限・再開の限定動作を確認しただけ。Strata A33の真正推論・長時間運転HOLDは維持。
+`python -m unittest -v test_solo_agent.py` のLinux/Python 3.13.5ローカル隔離Fake CLI試験8件はPASS。**Fake CLIであり実LLMのコード生成成功数は0件、Windows実機無人運転は0件**。SOURCEテスト成功後コミット・origin/branch/paths/モデル制限・再開の限定動作を確認しただけ。Strata A33の真正推論・長時間運転HOLDは維持。
