@@ -90,6 +90,22 @@ def check_paths(p: Path, paths: list[str], allowed: list[str]) -> None:
             raise Hold(f"SYMLINK_OR_ESCAPE: {name}")
 
 
+def snapshot_candidate(workspace: Path, paths: list[str]) -> dict[str, str]:
+    """SHA256 of exact source bytes, recording deletions separately."""
+    result = {}
+    for name in paths:
+        target = workspace / name
+        if target.is_symlink():
+            raise Hold("CANDIDATE_SYMLINK_REFUSED")
+        if not target.exists():
+            result[name] = "DELETED"
+        elif target.is_file():
+            result[name] = hashlib.sha256(target.read_bytes()).hexdigest()
+        else:
+            raise Hold("CANDIDATE_NOT_REGULAR_FILE")
+    return result
+
+
 @contextlib.contextmanager
 def single_agent_lock():
     base = Path(os.environ.get("LOCALAPPDATA") or Path.home()) / "FreeAutonomySolo"
@@ -274,6 +290,8 @@ def execute(cfg: dict, *, push: bool, sandbox_attested: bool) -> dict:
                         raise Hold("AGENT_MUTATED_GIT_HISTORY")
                     changed = changed_files(p)
                     check_paths(p, changed, cfg["allowed_prefixes"])
+                    # Capture candidate bytes: QA may not rewrite the version we commit.
+                    before_qa = snapshot_candidate(p, changed)
                     failing = []
                     for j, cmd in enumerate(cfg["checks"]):
                         rc, out = run_in_docker(cfg, cmd, p, cfg["check_timeout_seconds"],
@@ -288,6 +306,10 @@ def execute(cfg: dict, *, push: bool, sandbox_attested: bool) -> dict:
                     verify_repo(cfg)  # Tests cannot silently redirect Git push.
                     if git(p, "rev-parse", "HEAD") != state["last_head"]:
                         raise Hold("QA_MUTATED_GIT_HISTORY")
+                    after_qa = changed_files(p)
+                    check_paths(p, after_qa, cfg["allowed_prefixes"])
+                    if after_qa != changed or snapshot_candidate(p, after_qa) != before_qa:
+                        raise Hold("QA_MUTATED_SOURCE_AFTER_CHECK")
                     # Commit only explicitly approved paths; refuse pre-staged surprises.
                     git(p, "reset", "--quiet")
                     git(p, "add", "--", *changed)
