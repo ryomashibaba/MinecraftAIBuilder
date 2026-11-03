@@ -1,0 +1,27 @@
+name: MAB OpenCode V2 - Free Public Audit Static
+on:
+  push:
+    branches:
+      - research/opencode-v2-readonly-pilot-20261103
+    paths:
+      - scripts/opencode-v2-free-public-audit.py
+      - .github/workflows/opencode-v2-free-public-audit.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  static-no-provider:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Syntax-check without provider use
+        run: python -m py_compile scripts/opencode-v2-free-public-audit.py
+      - name: Offline policy + catalog parser tests
+        run: python -B scripts/opencode-v2-free-public-audit.py --self-test
