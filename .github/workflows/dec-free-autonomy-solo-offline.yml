@@ -57,3 +57,20 @@ jobs:
         run: python3 tools/free-autonomy-solo/opencode_native_probe.py
       - name: Explicit HOLD boundary
         run: echo 'CLI process launch only. Model generation, Windows isolation and autonomy are not verified.'
+
+  genuine-free-model-once-ephemeral:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Pull the fixed OpenCode CLI container (no credentials)
+        run: docker pull ghcr.io/anomalyco/opencode:2.0.0
+      - name: One signed-out FREE model coding attempt on disposable public fixture
+        run: python3 tools/free-autonomy-solo/free_model_real_once.py
+      - name: Preserve limited evidence scope
+        if: always()
+        run: |
+          echo 'Real FREE-model call attempt once; no paid API credentials.'
+          echo 'No Windows, original project editing or long-running autonomous development attested.'
