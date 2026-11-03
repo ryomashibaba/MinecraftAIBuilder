@@ -21,10 +21,10 @@ jobs:
         with:
           persist-credentials: false
       - name: Python syntax check
-        run: python3 -m py_compile tools/free-autonomy-solo/solo_agent.py
+        run: python3 -m py_compile tools/free-autonomy-solo/solo_agent.py tools/free-autonomy-solo/docker_sandbox.py
       - name: Isolated fake OpenCode CLI safety regression
-        run: python3 -m unittest discover -v -s tools/free-autonomy-solo -p 'test_solo_agent.py'
+        run: python3 -m unittest discover -v -s tools/free-autonomy-solo -p 'test_*.py'
       - name: Evidence limitations
         run: |
-          echo 'FAKE CLI / SOURCE supervisor only.'
+          echo 'FAKE CLI / Docker command-builder contract / SOURCE supervisor only.'
           echo 'Real OpenCode model, Windows, OS sandbox, GitHub push, ART, Minecraft and full-match fidelity remain unverified.'
