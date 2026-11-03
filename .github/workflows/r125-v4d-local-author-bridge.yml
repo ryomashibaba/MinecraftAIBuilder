@@ -166,6 +166,9 @@ jobs:
               throw "V4D_FAKE_PRIVATE_RAW_MISSING"
             }
             Write-Host "PASS: Windows one-click --run-once, exactly ONE FAKE localhost POST, automatic 0-call SOURCE diagnostics, zero world writes."
+            # The explicit HOLD exit 2 was EXPECTED and verified above. Do not
+            # let its residual native code fail the successful CI contract.
+            $global:LASTEXITCODE = 0
           } finally {
             Stop-Process -Id $server.Id -Force -ErrorAction SilentlyContinue
           }
