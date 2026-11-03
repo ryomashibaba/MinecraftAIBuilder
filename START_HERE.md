@@ -1,6 +1,16 @@
 # MinecraftAIBuilder — START HERE（新チャット・AI開発者の統一入口）
 
-**2026-11-02 JST 更新。長文プロンプト・ZIP交換なしで、GitHub正本を読み込んで既存開発を継続する。**
+**2026-11-03 JST 統合正本更新。新チャットではGitHubから最新HEADを照合して継続する。長文プロンプト・ZIP交換は不要。**
+
+## 2026-11-03 完全統合引き継ぎ正本 — 新チャットはここから
+
+**最新の完全引き継ぎ：[2026-11-03 V4D入口・完全統合版](docs/MINECRAFT_AI_BUILDER_COMPLETE_HANDOFF_20261103_V4D_JA.md)**。新チャットではこの文書と[固定憲章](docs/AI_PROJECT_CHARTER_JA.md)、[戦略v2](docs/PROJECT_STRATEGY_V2_JA.md)、[旧11月2日完全統合](docs/MINECRAFT_AI_BUILDER_COMPLETE_HANDOFF_20261102_JA.md)を読み、最新PR HEADとCIをその都度確認する。過去の長文・ZIP貼付は不要。
+
+- 直近の真実：**V3保存済み実Qwen 5/5 SOURCE候補（ART全件HOLD）。V4B合成5件 SOURCE PASS／ART 5/5 REJECT。V4C合成3件 SOURCE PASS／ART 3/3 REJECT。V4A/B/Cでの新Qwen推論0・Minecraft施工0。**
+- 正式V4C専用CIは [#41596939516](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41596939516) SUCCESS（コードHEAD `09efa64d`）。後続は文書更新が中心であり、独立の全CIや実機/美術の全成功を意味しない。
+- **次はV4D**：用途別完成テンプレートや小さな中庭/色変更を繰り返さず、作者が建築の主要輪郭・立面段差・半屋外公共経路・内部空洞の関係を明示する共通IRの最小設計→真正B143/安全検証→実3D/ART検証。美術品質が不十分なまま実Qwen新推論を大量に消費しない。
+- 固定：R125→B143→Educationの既存実機成功経路を保護。研究ブランチ `feature/b198zr1-protected-architectural-revision`、Draft PR #128 Open/Unmerged、main/凍結原本非変更、`NOT_PREPARED`・9 BLOCKED・BuildPlan空のフェイルクローズ、Work/Computer Use事前承認制。Qwenローカル推論と技術ゲートを満たした試験施工は既存包括許可の範囲。
+- 引き継ぎ用の短文：「MinecraftAIBuilderをGitHubのSTART_HEREと2026年11月3日の完全統合引き継ぎから継承し、最新HEAD/CIと固定方針を照合してV4Dの次工程を実装・検証・研究ブランチに保存して。」
 
 ## 2026-11-03 最新確定：V4C真正B143 CI PASS／ART REJECT 3/3
 
