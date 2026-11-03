@@ -333,3 +333,47 @@ test('V4E SOUTH corners author true exposed faces and reject parent-linked sides
   spaceId:'learning',corner:'SS',recessDepth:6
  }),/R125_V4E_SECTION_AUTHOR_SECTION_CONTRACT/);
 });
+
+
+test('V4E common-engine loggia gets a genuine TWO-wide source-connected interior portal across all five genres',async()=>{
+ const {compileAuthoredLoggiaPassage}
+  =await import('../source/ai/r125-v4e-authored-loggia-passage.mjs');
+ const {syntheticFiveGenreAuthorCases}
+  =await import('./r125-v4e-cross-genre-source-study.mjs');
+ const samples=syntheticFiveGenreAuthorCases();
+ const frozen=structuredClone(samples);
+ for(const s of samples){
+  const actual=compileAuthoredLoggiaPassage(s.source,s.authoredSection);
+  assert.notEqual(actual.initialLoggiaGeometrySha256,actual.finalGeometrySha256);
+  assert.equal(actual.sourcePassageWitness.physicallyOpenedDiagonalWallCells,6);
+  assert.equal(actual.sourcePassageWitness.twoWideInteriorToLoggiaConnected,true);
+  assert(actual.sourcePassageWitness.sourcePadsReached>10);
+  assert(actual.sourcePassageWitness.originalFunctionalVoxelsPreserved>0);
+  assert.equal(actual.sourcePassageWitness.finalGlazing.verifiedPanelGlassCells,36);
+  assert.equal(actual.sectionedRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert.equal(actual.worldWrites,0);
+  assert.equal(actual.humanArt,'NOT_REVIEWED');
+  assert.deepEqual(actual.gates,Array(9).fill('BLOCKED'));
+  assert.deepEqual(actual.BuildPlan.operations,[]);
+ }
+ assert.deepEqual(samples,frozen);
+});
+test('V4E walking passage keeps SOUTH authored corners, refuses blocked/shared original author decisions',async()=>{
+ const {compileAuthoredLoggiaPassage}
+  =await import('../source/ai/r125-v4e-authored-loggia-passage.mjs');
+ const {syntheticFiveGenreAuthorCases}
+  =await import('./r125-v4e-cross-genre-source-study.mjs');
+ const samples=syntheticFiveGenreAuthorCases();
+ const sw=compileAuthoredLoggiaPassage(samples[0].source,{
+  spaceId:'learning',corner:'SW',recessDepth:6});
+ const se=compileAuthoredLoggiaPassage(samples[1].source,{
+  spaceId:'learning',corner:'SE',recessDepth:6});
+ for(const result of [sw,se]){
+  assert(result.sourcePassageWitness.twoWideInteriorToLoggiaConnected);
+  assert(result.sourcePassageWitness.sourcePadsReached>10);
+  assert.equal(result.worldWrites,0);
+ }
+ assert.throws(()=>compileAuthoredLoggiaPassage(samples[0].source,{
+  spaceId:'welcome',corner:'NW',recessDepth:6
+ }),/R125_V4E_SECTION_RECESS_ON_SHARED_WALL/);
+});
