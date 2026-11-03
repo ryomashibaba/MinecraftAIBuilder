@@ -42,7 +42,7 @@ function checkAuthorSelection(plan,section){
  }
  if(n.id===plan.entry.nodeId){
   const entry=plan.entry;
-  if(section.corner==='NW'&&entry.offset<r+2||
+  if(section.corner==='NW'&&entry.offset<r+1||
      section.corner==='NE'&&entry.offset+4>n.width-r-2)
    fail('RECESS_CLASHES_ENTRANCE');
  }
