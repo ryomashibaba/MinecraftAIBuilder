@@ -13,6 +13,8 @@ import subprocess
 import sys
 import time
 
+from docker_sandbox import DockerPolicy, SandboxHold, docker_exec, docker_preflight
+
 PROJECTS = {
     "minecraftaibuilder": "ryomashibaba/MinecraftAIBuilder",
     "browser-ink-tps": "ryomashibaba/browser-ink-tps",
@@ -164,14 +166,35 @@ def validate(cfg: dict) -> None:
     model = cfg["model"]
     if not isinstance(model, str) or not (model.startswith("ollama/") or (model.startswith("opencode/") and model.endswith("-free"))):
         raise Hold("ONLY_EXPLICIT_LOCAL_OR_FREE_MODEL")
+    if cfg.get("sandbox_runtime") != "docker":
+        raise Hold("DOCKER_RUNTIME_REQUIRED_FOR_UNATTENDED_EXECUTION")
+    try:
+        DockerPolicy.from_config(cfg)
+    except SandboxHold as ex:
+        raise Hold(str(ex)) from ex
     for key, default, limit in [("max_cycles", 12, 10000), ("per_task_attempts", 3, 10), ("agent_timeout_seconds", 1800, 86400), ("check_timeout_seconds", 600, 3600), ("max_minutes", 720, 10080)]:
         value = cfg.setdefault(key, default)
         if type(value) is not int or not (1 <= value <= limit):
             raise Hold(f"BAD_LIMIT_{key}")
 
 
+def run_in_docker(cfg: dict, command: list[str], cwd: Path, timeout: int, log: Path, *, agent: bool) -> tuple[int, str]:
+    try:
+        policy = DockerPolicy.from_config(cfg)
+        return docker_exec(policy, cwd, agent=agent, command=command,
+                           cidfile=log.with_suffix(".container-id"), timeout=timeout, log=log)
+    except SandboxHold as ex:
+        raise Hold(str(ex)) from ex
+
+
 def execute(cfg: dict, *, push: bool, sandbox_attested: bool) -> dict:
     validate(cfg)
+    if not sandbox_attested:
+        raise Hold("DOCKER_RUNTIME_NOT_ACKNOWLEDGED")
+    try:
+        docker_preflight(DockerPolicy.from_config(cfg))
+    except SandboxHold as ex:
+        raise Hold(str(ex)) from ex
     p = verify_repo(cfg)
     state_dir = Path(cfg["state_dir"]).expanduser().resolve()
     if state_dir == p or p in state_dir.parents or state_dir in p.parents:
@@ -193,8 +216,6 @@ def execute(cfg: dict, *, push: bool, sandbox_attested: bool) -> dict:
         write_atomic(state_path, state)
     if state.get("last_head") != git(p, "rev-parse", "HEAD"):
         raise Hold("GIT_HISTORY_CHANGED_OUTSIDE_SUPERVISOR")
-    if not sandbox_attested:
-        raise Hold("OS_SANDBOX_NOT_ATTESTED: git clone isolation alone cannot confine agent shell commands")
     deadline = time.monotonic() + cfg["max_minutes"] * 60
     with single_agent_lock():
         # A prior successful commit is not considered remotely saved until push succeeds.
@@ -240,9 +261,9 @@ def execute(cfg: dict, *, push: bool, sandbox_attested: bool) -> dict:
                           "You may inspect and edit within approved project subfolders. Avoid destructive commands. "
                           f"Task: {task}\nRecent committed steps: {previous}\nFailure feedback from independent check: {feedback[-1800:]}" )
                 try:
-                    rc, tail = run_cmd(["opencode", "run", "--auto", "--model", cfg["model"], prompt],
+                    rc, tail = run_in_docker(cfg, ["opencode", "run", "--auto", "--model", cfg["model"], prompt],
                                        p, min(cfg["agent_timeout_seconds"], max(1, int(deadline - time.monotonic()))),
-                                       state_dir / f"agent_{cycle:04}.private.log")
+                                       state_dir / f"agent_{cycle:04}.private.log", agent=True)
                     if rc != 0:
                         feedback = f"AGENT_EXIT_{rc}: {tail}"
                         state["outcomes"].append({"cycle": cycle, "status": "AGENT_FAILED", "exit": rc})
@@ -255,8 +276,8 @@ def execute(cfg: dict, *, push: bool, sandbox_attested: bool) -> dict:
                     check_paths(p, changed, cfg["allowed_prefixes"])
                     failing = []
                     for j, cmd in enumerate(cfg["checks"]):
-                        rc, out = run_cmd(cmd, p, cfg["check_timeout_seconds"],
-                                          state_dir / f"qa_{cycle:04}_{j}.private.log")
+                        rc, out = run_in_docker(cfg, cmd, p, cfg["check_timeout_seconds"],
+                                          state_dir / f"qa_{cycle:04}_{j}.private.log", agent=False)
                         if rc:
                             failing.append(f"CHECK_{j}_EXIT_{rc}: {out}")
                     if failing:
@@ -318,7 +339,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--config", required=True, type=Path)
     ap.add_argument("--push", action="store_true", help="Push only exact research branch; opt-in")
-    ap.add_argument("--sandbox-attested", action="store_true", help="Operator has independently verified OS process/network/filesystem containment")
+    ap.add_argument("--sandbox-attested", action="store_true", help="Acknowledge Docker-only sandbox requirement; not proof of isolation")
     args = ap.parse_args()
     try:
         cfg = json.loads(args.config.read_text(encoding="utf-8"))
