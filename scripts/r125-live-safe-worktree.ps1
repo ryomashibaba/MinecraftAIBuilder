@@ -17,6 +17,7 @@ $work = $null
 $added = $false
 $out = $null
 $reviewViewer = $null
+$runHold = $false
 
 if (-not (Test-Path -LiteralPath (Join-Path $Repository ".git"))) {
   throw "HOLD_REPOSITORY_NOT_FOUND: $Repository"
@@ -136,6 +137,7 @@ try {
           outputFolder = $out
         } | ConvertTo-Json -Depth 5
         if ($modelExitCode -ne 0) {
+          $runHold = $true
           Write-Warning "Model returned HOLD. Original evidence is preserved, not repaired or retried."
         } elseif ($UseCase -eq 'Retail') {
           $reviewViewer = Join-Path $out "index.html"
@@ -144,6 +146,7 @@ try {
           Write-Host "Checking NEW model-authored retail roles, TRUE source routes, 3D and strict v26.33 materials (NO WORLD writes)..."
           & node scripts/r125-saved-education-preflight.mjs --study $out --out $pilot --usecase retail
           if ($LASTEXITCODE -ne 0) {
+            $runHold = $true
             Write-Warning "RETAIL_HOLD: Keep original Qwen and 3D study intact. No MakeCode candidate can be used."
           } else {
             $out = $pilot
@@ -151,6 +154,7 @@ try {
           }
         }
       } else {
+        $runHold = $true
         Write-Warning "No R125 report found; inspect model startup diagnostics. No retry was made."
       }
     }
@@ -178,4 +182,10 @@ try {
       catch { Write-Warning "Retail viewer preserved: $reviewViewer" }
     }
   }
+}
+
+# Do not report a model/preflight HOLD as a successful launcher invocation.
+# Cleanup and automatic evidence-folder opening above must still run first.
+if ($runHold) {
+  throw "R125_RUN_HOLD: Inspect the preserved evidence folder. No automatic retry or Minecraft world write occurred."
 }
