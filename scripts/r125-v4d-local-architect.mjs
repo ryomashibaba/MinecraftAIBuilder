@@ -61,7 +61,7 @@ export function parseV4DLocalAuthorArgs(argv){
  for(let i=0;i<argv.length;i++){
   const k=argv[i];
   if(k==='--compact'||k==='--ranked-windows'){
-   if(Object.hasOwn(opt,k))fail('DUPLICATE_AUTHOR_MODE');
+   if(Object.hasOwn(opt,k))fail(k==='--compact'?'DUPLICATE_COMPACT':'DUPLICATE_RANKED_WINDOWS');
    opt[k]=true;continue;
   }
   const v=argv[++i];
