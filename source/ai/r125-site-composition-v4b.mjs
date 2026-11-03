@@ -27,7 +27,7 @@ const intersects=(a,b)=>a.origin.every((n,i)=>n<b.origin[i]+b.size[i]&&b.origin[
 const box=(id,mode,origin,size,material)=>({
  id,shape:'box',mode,...(mode==='add'?{material}:{}),origin,size
 });
-const key=(x,y,z)=>x+','+y+','+z';
+const key=(x,y,z)=>x+','+y+','+z;
 
 export function validateAuthoredSiteV4B(plan){
  if(!exact(plan,['schema','id','title','brief','materials','masses','links','approach','court','glazing'])||
