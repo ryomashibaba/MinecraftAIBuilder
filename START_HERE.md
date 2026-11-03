@@ -2,6 +2,13 @@
 
 **2026-11-02 JST 更新。長文プロンプト・ZIP交換なしで、GitHub正本を読み込んで既存開発を継続する。**
 
+## 2026-11-03 最新：V3本物5ジャンル4/5成功、住宅1件だけを再試験（部分成功凍結）
+
+- **ユーザー提出の最新実Qwenレポート `FUNCTIONAL_FACADE_REPORT.json` が正本**。Model `qwen3:14b`、modelCalls5、`testInjectionPresent=false`、SOURCE成立4/5、Minecraft書込0。成功は独立店舗（動線2/2、追加ガラス8セル・設備8セル）、研究施設（4/4、24・13）、小美術館（4/4、24・14）、小駅舎（3/3、16・9）。**住宅HOMEだけ `R125_FUNCTIONAL_TOP_LEVEL` で技術HOLD**。この集計から具体的な不正フィールドは未特定であり、原Qwen原文を見ずに推測で修正しない。5棟すべて美術ART HOLD。
+- **正式追加方針：部分成功凍結＋失敗ケースのみ再試験**。成功4棟のQwen生回答・実B143・SOURCEとSHAを厳格再計算し**再モデル呼出0**。住宅の旧原文だけSHA保護で診断し、必要な新モデル要求は**HOME1件だけ、追加推論最大1回**。成功/失敗どちらも旧結果は上書きせず新しい私人フォルダへ保存。全5ジャンルの新旧SOURCE比較を作る。Genre専用の手修正、勝手なJSON正規化、無限再試行禁止。
+- **実装保存**：`scripts/r125-v3-failed-only-home-recovery.mjs`、`scripts/r125-v3-failed-only-home-recovery.test.mjs`、既存ランチャー新オプション `-UseCase CrossGenre -RecoverHomeOnly`。ランチャーは提出済み4/5原本のSHA `c661150f153945cb062bf1898d7b93c2798b9d2ad96fa9544fb0a0cd49cf50a0` に完全一致する実行だけ選ぶ。診断結果は `FAILED_ONLY_RECOVERY_REPORT.json`、`cases/home/ORIGINAL_HOME_IR_DIAGNOSTIC.json`、比較 `index.html`。**新HOMEはまだ実際に再推論されていない**。
+- 詳細：[R125 V3 4棟SOURCE凍結・HOMEだけの回復手順](docs/R125_V3_FAILED_ONLY_FROZEN_FOUR_HOME_RECOVERY_20261103_JA.md)。旧R125のEducation実機成果・5件の元空間/屋根原文・main・Draft PR #128・9 BLOCKED・BuildPlan空・Minecraft施工禁止・Work事前承認方針は変更しない。**正式Node CIの完走未確認をPASSと呼ばない**。
+
 ## 2026-11-03 V3実Qwen試験前の最終汎用SOURCE事前監査（次工程）
 
 - V3では追加のローカルQwenへの5回の機能・採光設計指示の前に、すでにSHA固定した元5件の空間設計と屋根5件を再使用する。GitHub Actionsは待機中のため、**正式CIが通ったとは主張しない**。
