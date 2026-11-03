@@ -1,5 +1,11 @@
 # MinecraftAIBuilder — START HERE（新チャット・AI開発者の統一入口）
 
+## 2026-11-03 V4D小型LLM向け短縮AUTHOR IR：既存実モデル経路への追加（CI未確認）
+
+- 既存詳細AUTHOR IRは変更・廃止しない。**小型2B/4Bでも自分で用途・相対接続・屋根の形式/高さ・開口方向・公共庭・設備の意味を決定**できるよう、オプトインの `source/ai/r125-v4d-compact-model-ir.mjs` を追加。従来多数の数値フィールドが必要だった外窓寸法・受付入口・開口オフセット・設備サイズ・庇などは、ジャンル/室名ではなく**全用途共通で固定された機械的換算規則**によって詳細IRへ変換し、その後は既存の厳格な相対配置→共通B143→SOURCE/9 BLOCKEDを通す。モデルの場所選択・接続衝突は補修せずHOLD。
+- 既存 `scripts/r125-v4d-local-architect.mjs` に明示 `--compact` オプションを追加。旧詳細モードはデフォルトのまま維持、実モデルへのPOSTは最大1回・原文PRIVATE保存・非課金/ローカル限定・世界書込0。**2B Mac 8GB実測0、実Qwen新生成0、合成SOURCE CIは未確認**。[実モデルブリッジ/短縮IRの差分と境界](docs/R125_V4D_LOCAL_REAL_AUTHOR_BRIDGE_20261103_JA.md)。
+- 過去SOURCE CI PASS・独立ART REJECT・保存Qwen原文/凍結Education成功・main保護、PR #128 Draft、Work個別承認維持。CIが通っても2Bの品質や建築美術は認定しない。
+
 ## 2026-11-03 V4D実LLM設計IRブリッジ：専用CI 8/8 PASS／実モデル著作は未実行
 
 - **実装済：** 本物のOllamaモデルが建築の用途・相対配置・屋根・外皮・公開庭・機能設備を短いAUTHOR IRとして選び、HOSTは同じ凍結済みSOURCEエンジンへ無修正で翻訳する。相対IR `source/ai/r125-v4d-relative-author-ir.mjs` → 元 `r125-v4d-authored-topology.mjs` → `r125-v4d-envelope-integration.mjs` → 真正B143/二幅SOURCE動線/設備サービス位置。genre別テンプレートやモデル失敗の自動修復なし。

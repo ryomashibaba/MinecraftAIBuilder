@@ -1,4 +1,9 @@
 import test from 'node:test';
+import {makeV4DCompactSynthetic}
+ from './r125-v4d-compact-model-fixture.mjs';
+import {COMPACT_SCHEMA,COMPACT_SYSTEM_PROMPT,
+ translateCompactModelIntent,compileCompactModelIntent}
+ from '../source/ai/r125-v4d-compact-model-ir.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -182,4 +187,121 @@ test('reject remote or unapproved endpoint, bad flags, repo output and existing 
   },{fetcher:f.fetcher}),/PRIVATE_OUTPUT_MUST_BE_NEW_DIR/);
   assert.equal(f.calls.length,0);
  }finally{tmp.clean();}
+});
+
+test('compact small-model IR retains AUTHORED space topology while mechanically normalizing dimensions',()=>{
+ const original=makeV4DCompactSynthetic(),snap=structuredClone(original);
+ const translated=translateCompactModelIntent(original);
+ assert.deepEqual(original,snap);
+ assert.equal(translated.compactAuthorOriginal.schema,COMPACT_SCHEMA);
+ assert(translated.expandedMechanicalIR.spaces.length===3);
+ assert(JSON.stringify(original).length<
+  JSON.stringify(translated.expandedMechanicalIR).length);
+ assert.equal(translated.normalization.madeGenreSpecificChoices,false);
+ assert.equal(translated.normalization.modelSizeOrMacMemoryTested,false);
+ assert.equal(translated.expandedMechanicalIR.spaces[1].attach.side,'west');
+ assert.equal(translated.expandedMechanicalIR.spaces[2].shelter.edge,'north');
+ const finished=compileCompactModelIntent(original);
+ assert.equal(finished.b143.sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(finished.b143.sourceRoutes.zones.length,3);
+ assert.equal(finished.b143.sourceRoutes.featureAccess.length,3);
+ assert(finished.b143.sourceRoutes.zones.every(x=>x.reachedFromEntrance));
+ assert(finished.b143.sourceRoutes.featureAccess.every(x=>x.reachableFromEntrance));
+ assert(finished.b143.compiled.primitives.length>3000);
+ assert(finished.b143.sourceProof.originalRoofWallMissingCells>100);
+ assert.equal(finished.sourceProvenance,'COMPACT_AUTHOR_USER_OR_LLM_UNATTESTED');
+ assert.equal(finished.modelIdentity,'NOT_ATTESTED');
+ assert.equal(finished.art,'NOT_REVIEWED');
+ assert.equal(finished.worldWrites,0);
+ assert.deepEqual(finished.gates,Array(9).fill('BLOCKED'));
+});
+test('compact author-chosen height materially changes final voxels, no geometry template by name',()=>{
+ const p=makeV4DCompactSynthetic(),q=structuredClone(p);
+ q.spaces[0].height='high';
+ const first=compileCompactModelIntent(p),second=compileCompactModelIntent(q);
+ assert.notEqual(first.b143.geometrySha256,second.b143.geometrySha256);
+ assert.notEqual(first.compactAuthorSha256,second.compactAuthorSha256);
+});
+test('compact invalid model designs stay REJECTED rather than host auto-correcting them',()=>{
+ const p=makeV4DCompactSynthetic(),frozen=JSON.stringify(p);
+ const mutations=[
+  x=>x.schema='some-other-schema',
+  x=>x.worldWrites=1,
+  x=>x.spaces.pop(),
+  x=>x.spaces[0].windowSide='north',
+  x=>x.spaces[0].roof='arch',
+  x=>x.spaces[0].height='tower',
+  x=>x.spaces[1].attach.to='not-yet-authored',
+  x=>x.spaces[1].attach.side='diagonal',
+  x=>x.spaces[1].attach.shift=20,
+  x=>x.spaces[1].windowSide='east',
+  x=>x.spaces[2].attach.to='learning',
+  x=>x.spaces[2].roof='ridgeX',
+  x=>x.spaces[2].windowSide='none',
+  x=>x.materials.roof='explosive',
+  x=>x.spaces[0].featureMaterial='lava'
+ ];
+ for(const mutation of mutations){
+  const candidate=structuredClone(p);
+  mutation(candidate);
+  assert.throws(()=>compileCompactModelIntent(candidate),
+   /R125_V4D_COMPACT_|R125_V4D_RELATIVE_|R125_V4D_GRAPH_|R125_V4D_INTEGRITY_/);
+ }
+ assert.equal(JSON.stringify(p),frozen);
+});
+test('ONE compact LOCAL model path reaches real B143 but injected transport never counts as Qwen success',async()=>{
+ const p=makeV4DCompactSynthetic(),f=fakeOllama({raw:JSON.stringify(p)}),temp=sandbox();
+ try{
+  const args=parseV4DLocalAuthorArgs(['--model','qwen3:14b',
+   '--out',temp.out,'--compact']);
+  assert.equal(args.compact,true);
+  const result=await runV4DLocalAuthor({
+   ...args,prompt:'Create a meaningful public learning hall and an open civic garden.'
+  },{fetcher:f.fetcher,timeoutMs:15000});
+  assert.equal(result.status,'HOLD_TEST_DOUBLE_NOT_REAL_MODEL',result.reason);
+  assert.equal(result.authorContract,COMPACT_SCHEMA);
+  assert.equal(result.modelCalls,1);
+  assert.equal(result.modelNameCryptographicallyAttested,false);
+  assert(result.rawCaptured);
+  assert.equal(result.sourceRoutesStatus,'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert(result.actualB143VoxelCount>3000);
+  assert.equal(f.calls.filter(x=>x.method==='POST').length,1);
+  assert.equal(f.calls.filter(x=>x.method==='GET').length,1);
+  const posted=JSON.parse(f.calls.find(x=>x.method==='POST').body);
+  assert(posted.messages[0].content.includes(COMPACT_SCHEMA));
+  assert(posted.messages[0].content.includes('mechanical dimensions'));
+  assert(COMPACT_SYSTEM_PROMPT.includes(COMPACT_SCHEMA));
+  assert.equal(fs.readFileSync(path.join(temp.out,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8'),
+   JSON.stringify(p));
+  assert(fs.existsSync(path.join(temp.out,'MECHANICALLY_EXPANDED_AUTHOR_IR.json')));
+  assert(fs.existsSync(path.join(temp.out,'GENERIC_MECHANICAL_NORMALIZATION.json')));
+  assert(fs.existsSync(path.join(temp.out,'TRUE_B143_SOURCE.json')));
+  assert(fs.existsSync(path.join(temp.out,'index.html')));
+  assert.equal(result.worldWrites,0);
+ }finally{temp.clean();}
+});
+test('one compact malformed model response is preserved verbatim but not compiled or retried',async()=>{
+ const p=makeV4DCompactSynthetic(),temp=sandbox();
+ p.spaces[1].attach.to='ghost-parent';
+ const raw=JSON.stringify(p),f=fakeOllama({raw});
+ try{
+  const r=await runV4DLocalAuthor({
+   model:'qwen3:14b',outDir:temp.out,compact:true,
+   prompt:'Create an original public architecture with working spatial relations.'
+  },{fetcher:f.fetcher,timeoutMs:15000});
+  assert.equal(r.status,'HOLD_MODEL_OR_SOURCE_INVALID_NO_REPAIR');
+  assert.equal(r.authorContract,COMPACT_SCHEMA);
+  assert.equal(r.modelCalls,1);
+  assert.equal(f.calls.filter(x=>x.method==='POST').length,1);
+  assert.equal(fs.readFileSync(path.join(temp.out,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8'),
+   raw);
+  assert(!fs.existsSync(path.join(temp.out,'TRUE_B143_SOURCE.json')));
+ }finally{temp.clean();}
+});
+test('compact flag can be selected only once, full legacy mode stays default',()=>{
+ const args=parseV4DLocalAuthorArgs(['--model','qwen3:14b','--out','new-private-dir']);
+ assert.equal(args.compact,false);
+ assert.throws(()=>parseV4DLocalAuthorArgs([
+  '--model','qwen3:14b','--out','new-private-dir','--compact','--compact'
+ ]),/DUPLICATE_COMPACT/);
 });

@@ -40,3 +40,20 @@ node .\scripts\r125-v4d-local-architect.mjs --model "qwen3:14b" --out $out --pro
 - GitHubのActions実行者には実Ollama権限もローカルPCへの操作経路もない。今回の実モデル `qwen3:14b` POST **0回**、実Qwen3:14Bの建築生成成功数 **0件**、新Education施工 **0件**。モデルが多様な未知用途で綺麗な建築を著作できるかは**わからない**。実機Mac 8GB/2Bでの速度とIR完走も未測定。
 - 次の段階はGitHubの合成案を増やすことではなく、ユーザーの許可済み**隔離ローカル環境が操作可能な時だけ**1件を実Ollamaで実行し、原文のSHA・失敗理由・SOURCE真正3D・美術判定を分離する。実モデルの失敗は追加無断再POSTしない。ローカル操作不能時は、安全な静的コード検証以上を「実機成功」と言わない。
 - 合否はSOURCE PASS（CIの合成試験に限定）／新モデルART NOT_REVIEWED／元ART HOLD・REJECT履歴維持／WorldWrites0。旧main、Draft PR #128、R125 Education成功原本、PRIVATEモデル応答は全保持。
+
+## 2026-11-03 追加工程：2B/4B向け短縮AUTHOR IR（専用CI未確認）
+
+旧詳細モードは10個以上のフィールドを各用途ノードに要求し、外窓の寸法・庇の高さ・設備オフセットまでモデル自身が数値で生成する必要があった。これは**小型モデルの制約として重大だが、実モデルにおける失敗率は未測定**。既存詳細IRは保持し、オプション `--compact` で `minecraftaibuilder-r125-v4d-compact-spatial-intent-v1` を受け取る。
+
+短縮IRの作者の責任は、3〜5用途の目的、1つ以上の公開空庭、親子相対接続、部屋規模、屋根 `ridgeX|ridgeZ|shedX|shedZ`、高さの `low|medium|high`、壁/ガラス、外窓の方向、用途設備の意味と素材。HOSTはジャンル名では形状を選ばず、**全用途共通の機械的寸法**だけを `source/ai/r125-v4d-compact-model-ir.mjs` で展開する。具体的には屋根峰の%50・高さの3段階、4幅開口の断面、入口オフセット7、屋外庇深4、単一外窓幅6/高さ3、設備3x2x2。モデルが選ばなかった寸法はHOST既定値であることを `GENERIC_MECHANICAL_NORMALIZATION.json` に明示して保存。これをモデルが全て自由に設計したと主張しない。
+
+元の短縮IR・SHAと機械展開後の詳細IR・SHAを**両方**保存し、SOURCE真正B143の改変防止/原文凍結を検査。旧通常モードの意匠とSOURCE安全ゲートは不変更。3用途の差・建築美術・3D公共体験・実Minecraft施工・2B/4B実機成功は独立未検証。固定の家/店舗テンプレートや人工物そのものを作者に代わって創作するHOSTにはしない。
+
+実行可能時の任意のローカル1回試験例（既に安全な研究ブランチにcheckoutされている隔離作業コピーのみ）：
+
+```powershell
+$out = Join-Path ([Environment]::GetFolderPath('MyDocuments')) ('MAB_V4D_CompactPrivate_' + (Get-Date -Format 'yyyyMMdd_HHmmss'))
+node .\scripts\r125-v4d-local-architect.mjs --compact --model 'qwen3:14b' --out $out --prompt '未知の公共文化施設を独自に構想し、屋内の用途室と屋外の公開庭を機能的につなぐ建物にしてください。'
+```
+
+実行経路自体は変更済みだが、GitHubのCI完走まではSOURCE PASSを宣言しない。実LLM試行はユーザーPC/個別のローカルモデルサーバーへのアクセスが必要であり、今のクラウドAIの研究コード保存だけでは実行できない。
