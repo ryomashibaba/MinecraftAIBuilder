@@ -11,10 +11,11 @@ param(
   [switch]$CompareCrossGenreLatest,
   [switch]$StudyEnvelopeLatest,
   [switch]$StudyFunctionsLatest,
+  [switch]$RecoverHomeOnly,
   [ValidateSet('Lab','Retail','CrossGenre')][string]$UseCase = 'Lab'
 )
-if ((@($CheckOnly, $ReviewLatest, $PrepareLatest, $DiagnoseCrossGenreLatest, $CompareCrossGenreLatest, $StudyEnvelopeLatest, $StudyFunctionsLatest) | Where-Object { $_ }).Count -gt 1) { throw 'HOLD_INCOMPATIBLE_MODES' }
-if (($DiagnoseCrossGenreLatest -or $CompareCrossGenreLatest -or $StudyEnvelopeLatest -or $StudyFunctionsLatest) -and $UseCase -ne 'CrossGenre') { throw 'HOLD_REVIEW_REQUIRES_CROSS_GENRE' }
+if ((@($CheckOnly, $ReviewLatest, $PrepareLatest, $DiagnoseCrossGenreLatest, $CompareCrossGenreLatest, $StudyEnvelopeLatest, $StudyFunctionsLatest, $RecoverHomeOnly) | Where-Object { $_ }).Count -gt 1) { throw 'HOLD_INCOMPATIBLE_MODES' }
+if (($DiagnoseCrossGenreLatest -or $CompareCrossGenreLatest -or $StudyEnvelopeLatest -or $StudyFunctionsLatest -or $RecoverHomeOnly) -and $UseCase -ne 'CrossGenre') { throw 'HOLD_REVIEW_REQUIRES_CROSS_GENRE' }
 if ($UseCase -in @('Retail','CrossGenre') -and ($ReviewLatest -or $PrepareLatest)) { throw 'HOLD_RETAIL_REQUIRES_NEW_MODEL_RUN' }
 $ErrorActionPreference = "Stop"
 $branch = "feature/b198zr1-protected-architectural-revision"
@@ -75,7 +76,7 @@ try {
     & node --test scripts/r125-saved-education-preflight.test.mjs
     if ($LASTEXITCODE -ne 0) { throw "HOLD_EDUCATION_PREFLIGHT_REGRESSION" }
     if ($UseCase -eq 'CrossGenre') {
-      & node --test scripts/r125-cross-genre-pilot.test.mjs scripts/r125-cross-genre-offline-diagnostic.test.mjs scripts/r125-five-genre-source-comparison.test.mjs scripts/r125-expressive-envelope-v2.test.mjs scripts/r125-five-genre-real-envelope-pilot.test.mjs scripts/r125-functional-facade-v3.test.mjs scripts/r125-five-genre-real-functions-pilot.test.mjs
+      & node --test scripts/r125-cross-genre-pilot.test.mjs scripts/r125-cross-genre-offline-diagnostic.test.mjs scripts/r125-five-genre-source-comparison.test.mjs scripts/r125-expressive-envelope-v2.test.mjs scripts/r125-five-genre-real-envelope-pilot.test.mjs scripts/r125-functional-facade-v3.test.mjs scripts/r125-five-genre-real-functions-pilot.test.mjs scripts/r125-v3-failed-only-home-recovery.test.mjs
       if ($LASTEXITCODE -ne 0) { throw 'HOLD_CROSS_GENRE_REGRESSION' }
     }
     if ($ReviewLatest -or $PrepareLatest) {
@@ -193,6 +194,48 @@ try {
       if ($LASTEXITCODE -ne 0) {
         $runHold = $true
         Write-Warning "FIVE_GENRE_FUNCTION_HOLD: Evidence preserved. No automatic model retries or world writes."
+      } else {
+        $reviewViewer = Join-Path $out "index.html"
+      }
+    } elseif ($RecoverHomeOnly) {
+      # This mode is bound to the user's FIRST genuine 4/5 V3 report, not
+      # whichever similarly named folder happens to be newest.
+      $privateRoot = Join-Path $env:USERPROFILE "Documents\MAB_Private_Runs"
+      if (-not (Test-Path -LiteralPath $privateRoot)) { throw "HOLD_PRIVATE_RUNS_NOT_FOUND" }
+      $expectedStudy = "12bb7417e1b48f8436693f8391dd4a48318b34b5cd57d006bdb3b82e9f3f3e25"
+      $expectedDiagnostic = "91f963e2182b17e035b85c745d26e9ff594c25e58011d722b57486a61457a96e"
+      $expectedEnvelope = "85f79dfaa1b69d6c943e60f41582136c25df78536c590eb9e5ce82906b99ebe5"
+      $expectedFunctions = "c661150f153945cb062bf1898d7b93c2798b9d2ad96fa9544fb0a0cd49cf50a0"
+      $previous = Get-ChildItem -LiteralPath $privateRoot -Directory -Filter "r125-cross-genre-*" |
+        Where-Object { $_.Name -cmatch '^r125-cross-genre-[0-9]{8}-[0-9]{6}-[0-9a-f]{8}$' -and
+          (Test-Path -LiteralPath (Join-Path $_.FullName "CROSS_GENRE_REPORT.json")) -and
+          ((Get-FileHash -LiteralPath (Join-Path $_.FullName "CROSS_GENRE_REPORT.json") -Algorithm SHA256).Hash.ToLowerInvariant() -ceq $expectedStudy) } |
+        Select-Object -First 1
+      if (-not $previous) { throw "HOLD_ORIGINAL_FIVE_GENRE_SOURCE_NOT_MATCHED" }
+      $diagnostic = Get-ChildItem -LiteralPath $privateRoot -Directory -Filter ($previous.Name + "-diagnostic-*") |
+        Where-Object { $_.Name -cmatch '^r125-cross-genre-[0-9]{8}-[0-9]{6}-[0-9a-f]{8}-diagnostic-[0-9a-f]{12}-[0-9a-f]{8}$' -and
+          (Test-Path -LiteralPath (Join-Path $_.FullName "DIAGNOSTIC_REPORT.json")) -and
+          ((Get-FileHash -LiteralPath (Join-Path $_.FullName "DIAGNOSTIC_REPORT.json") -Algorithm SHA256).Hash.ToLowerInvariant() -ceq $expectedDiagnostic) } |
+        Select-Object -First 1
+      if (-not $diagnostic) { throw "HOLD_ORIGINAL_GENRE_DIAGNOSTIC_NOT_MATCHED" }
+      $envelope = Get-ChildItem -LiteralPath $privateRoot -Directory -Filter ($previous.Name + "-envelope-*") |
+        Where-Object { $_.Name -cmatch '^r125-cross-genre-[0-9]{8}-[0-9]{6}-[0-9a-f]{8}-envelope-[0-9a-f]{12}-[0-9a-f]{8}$' -and
+          (Test-Path -LiteralPath (Join-Path $_.FullName "EXPRESSIVE_ENVELOPE_REPORT.json")) -and
+          ((Get-FileHash -LiteralPath (Join-Path $_.FullName "EXPRESSIVE_ENVELOPE_REPORT.json") -Algorithm SHA256).Hash.ToLowerInvariant() -ceq $expectedEnvelope) } |
+        Select-Object -First 1
+      if (-not $envelope) { throw "HOLD_ORIGINAL_FIVE_ENVELOPES_NOT_MATCHED" }
+      $oldV3 = Get-ChildItem -LiteralPath $privateRoot -Directory -Filter ($previous.Name + "-functions-*") |
+        Where-Object { $_.Name -cmatch '^r125-cross-genre-[0-9]{8}-[0-9]{6}-[0-9a-f]{8}-functions-[0-9a-f]{12}-[0-9a-f]{8}$' -and
+          (Test-Path -LiteralPath (Join-Path $_.FullName "FUNCTIONAL_FACADE_REPORT.json")) -and
+          ((Get-FileHash -LiteralPath (Join-Path $_.FullName "FUNCTIONAL_FACADE_REPORT.json") -Algorithm SHA256).Hash.ToLowerInvariant() -ceq $expectedFunctions) } |
+        Select-Object -First 1
+      if (-not $oldV3) { throw "HOLD_ORIGINAL_FOUR_PASS_ONE_HOME_HOLD_NOT_MATCHED" }
+      $out = Join-Path $privateRoot ($previous.Name + "-homeonly-" + $revision.Substring(0,12) + "-" + [guid]::NewGuid().ToString("N").Substring(0,8))
+      Write-Host "SHA verified: four V3 SOURCE successes frozen; one original HOME TOP_LEVEL HOLD. Only HOME may receive one new Qwen request."
+      & node scripts/r125-v3-failed-only-home-recovery.mjs --study $previous.FullName --diagnostic (Join-Path $diagnostic.FullName "DIAGNOSTIC_REPORT.json") --envelopes $envelope.FullName --original-functions $oldV3.FullName --out $out
+      if ($LASTEXITCODE -ne 0) {
+        $runHold = $true
+        Write-Warning "HOME_ONLY_HOLD: the original four successes and failed raw are preserved. No extra retries or Minecraft writes."
       } else {
         $reviewViewer = Join-Path $out "index.html"
       }
