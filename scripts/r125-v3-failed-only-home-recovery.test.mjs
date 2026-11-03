@@ -271,7 +271,7 @@ test('offline export reuses all five completed model source scenes without ANY n
  assert.deepEqual(result.gates,Array(9).fill('BLOCKED'));
  const png=fs.readFileSync(path.join(outDir,'SOURCE_ART_OVERVIEW.png'));
  assert.deepEqual([...png.subarray(0,8)],[137,80,78,71,13,10,26,10]);
- assert.equal(sha(png),result.imageSha256);
+ assert.equal(digest(png),result.imageSha256);
  assert(png.includes(Buffer.from('MAB_Source_Evidence\0','utf8')));
  assert(fs.existsSync(path.join(outDir,'OVERVIEW_AUDIT_REPORT.json')));
  assert(fs.existsSync(path.join(outDir,'index.html')));
