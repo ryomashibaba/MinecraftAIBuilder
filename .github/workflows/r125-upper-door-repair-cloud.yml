@@ -19,10 +19,14 @@ on:
       - 'configs/r125-education-verified-palette-v26.33.json'
       - 'source/ai/r125-spatial-composition.mjs'
       - 'source/ai/r125-expressive-envelope-v2.mjs'
+      - 'source/ai/r125-functional-facade-v3.mjs'
       - 'scripts/r125-spatial-composition.test.mjs'
       - 'scripts/r125-expressive-envelope-v2.test.mjs'
       - 'scripts/r125-five-genre-real-envelope-pilot.mjs'
       - 'scripts/r125-five-genre-real-envelope-pilot.test.mjs'
+      - 'scripts/r125-five-genre-real-functions-pilot.mjs'
+      - 'scripts/r125-five-genre-real-functions-pilot.test.mjs'
+      - 'scripts/r125-functional-facade-v3.test.mjs'
       - 'scripts/r125-cross-genre-pilot.mjs'
       - 'scripts/r125-cross-genre-pilot.test.mjs'
       - 'scripts/r125-cross-genre-offline-diagnostic.mjs'
@@ -51,7 +55,7 @@ jobs:
       - name: Run five-genre source/diagnostic and fake-model negative tests
         run: node --test scripts/r125-cross-genre-pilot.test.mjs scripts/r125-cross-genre-offline-diagnostic.test.mjs scripts/r125-five-genre-source-comparison.test.mjs
       - name: Prove independent whole-building authored roof profiles and usable interior air (FAKE ONLY)
-        run: node --test scripts/r125-expressive-envelope-v2.test.mjs scripts/r125-five-genre-real-envelope-pilot.test.mjs
+        run: node --test scripts/r125-expressive-envelope-v2.test.mjs scripts/r125-five-genre-real-envelope-pilot.test.mjs scripts/r125-functional-facade-v3.test.mjs scripts/r125-five-genre-real-functions-pilot.test.mjs
       - name: Check generic model-authored whole-building spatial compositions
         run: node --test scripts/r125-spatial-composition.test.mjs
       - name: Parse real Windows PowerShell launcher before any Windows handoff
