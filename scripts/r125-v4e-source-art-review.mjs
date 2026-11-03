@@ -26,7 +26,7 @@ function syntheticAuthor(){
  }
  return r;
 }
-function actualOrthographicSvg(primitives){
+export function actualOrthographicSvg(primitives){
  if(!Array.isArray(primitives)||primitives.length<100)error('EMPTY_B143');
  const faces=[
   {id:'roof',name:'ROOF / true highest voxel'},

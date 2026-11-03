@@ -229,3 +229,34 @@ test('V4E generates inspectable true B143 3D and five projections, never ART or 
   assert.throws(()=>exportV4ESourceArtEvidence(folder),/OUTPUT_MUST_BE_NEW/);
  }finally{fs.rmSync(base,{recursive:true,force:true});}
 });
+
+test('five independent synthetic genres use one unmodified V4E→true B143 engine with ART HOLD',async()=>{
+ const fs=await import('node:fs'),os=await import('node:os'),path=await import('node:path');
+ const {syntheticFiveGenreAuthorCases,exportV4ECrossGenreSource}
+  =await import('./r125-v4e-cross-genre-source-study.mjs');
+ const cases=syntheticFiveGenreAuthorCases();
+ assert.deepEqual(cases.map(x=>x.genre),['housing','shop','research','gallery','station']);
+ assert.equal(new Set(cases.map(x=>JSON.stringify(x.source.spaces.map(y=>y.attach)))).size>=3,true);
+ const base=fs.mkdtempSync(path.join(os.tmpdir(),'mab-v4e-cross-'));
+ const out=path.join(base,'source-study');
+ try{
+  const report=exportV4ECrossGenreSource(out);
+  assert.equal(report.authorProvenance,'FIVE_HAND_AUTHORED_SYNTHETIC_FIXTURES_NOT_LLM');
+  assert.equal(report.modelRequests,0);
+  assert.equal(report.humanArt,'NOT_REVIEWED');
+  assert.equal(report.cases.length,5);
+  assert.equal(new Set(report.cases.map(c=>c.geometrySha256)).size,5);
+  assert.equal(report.commonRepresentationLimitations.allSpaceFootprintsAxisAlignedRectangles,true);
+  assert(report.cases.every(c=>c.actualWindowProof.verifiedImmediateInwardAirCells===36));
+  assert.deepEqual(report.safety.gates,Array(9).fill('BLOCKED'));
+  assert.equal(report.safety.worldWrites,0);
+  assert(fs.existsSync(path.join(out,'index.html')));
+  for(const {genre} of cases){
+   const svg=fs.readFileSync(path.join(out,'FINAL_B143_'+genre+'_FIVE_VIEWS.svg'),'utf8');
+   assert(svg.includes('ACTUAL final B143 voxels'));
+  }
+  assert.deepEqual(JSON.parse(fs.readFileSync(
+   path.join(out,'FIVE_GENRE_SOURCE_ART_HOLD.json'),'utf8')),report);
+  assert.throws(()=>exportV4ECrossGenreSource(out),/OUTPUT_MUST_BE_NEW/);
+ }finally{fs.rmSync(base,{recursive:true,force:true});}
+});

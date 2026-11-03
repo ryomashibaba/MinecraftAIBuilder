@@ -1,5 +1,11 @@
 # MinecraftAIBuilder — START HERE（新チャット・AI開発者の統一入口）
 
+## 2026-11-03 方針逸脱監査→V4E全体建築能力・5ジャンル横断SOURCE研究
+
+- **方針監査**：憲章と戦略v2に照らすと最近のV4E窓安全性・五方向報告はSOURCEとして有効だが、世界水準の建築外観、実Qwen未知用途、階層・公共空間・Mac8GBに直接進む成果が少ない。窓/配色の修理と合成建物の重複評価を停止する。旧Education成功、main、Draft PR #128は必ず保護。
+- 次工程の**実装**：既存V4E/B143を変更せず、住宅/店舗/研究施設/美術館/駅舎5種の**独立合成AUTHOR**を同一の共通SOURCEコンパイラで5棟生成し、真正B143 3D/各5方向投影/動線/安全/各出所を一括出力する `scripts/r125-v4e-cross-genre-source-study.mjs` を追加。ジャンル別ホスト処方箋なし。既存R125 CIに追加、CI結果は現段階で未確認。
+- **本質的限界を隠さない**：全用途空間の外形が軸平行矩形で、自由輪郭・多層公共動線のモデル著作は未対応。5案の幾何SHAが違っても建築美術PASSにならない。結果を見てART REJECTの再現を測り、次に**モデルが主輪郭と公共の立体断面を著作できる非矩形共通エンジン**の最小改修へ戻る。新Qwen呼び出し0、施工0、NOT_PREPARED／9 BLOCKED／BuildPlan空、Work事前承認。
+
 ## 2026-11-03 V4E五方向真B143のCI実行・予備ART監査確定
 
 - 前工程CI [#41646265050](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41646265050) は `completed/success`。新ギャラリー工程 [#41647673833](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41647673833) も **Linux/Windows completed/success**。Artifact ID `13235393646`、取得ZIP SHA256とGitHub digest一致 `35ef614f54447444a5bb7cc6f4389b45ebddbd9eac79ad691af8a9c3c7af515f`。実合成B143 5,533 voxel、実ガラス36＋両面AIR各36。回転3D＋5方向SVGを実見。

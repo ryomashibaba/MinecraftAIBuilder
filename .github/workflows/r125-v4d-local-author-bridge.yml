@@ -8,6 +8,7 @@ on:
       - 'source/ai/r125-v4e-ranked-exterior-ir.mjs'
       - 'scripts/r125-v4e-ranked-exterior.test.mjs'
       - 'scripts/r125-v4e-source-art-review.mjs'
+      - 'scripts/r125-v4e-cross-genre-source-study.mjs'
       - 'scripts/r125-v4d-compact-model-fixture.mjs'
       - 'scripts/r125-v4d-relative-author-synthetic.mjs'
       - 'scripts/r125-v4d-local-architect.mjs'
@@ -44,6 +45,7 @@ jobs:
           node --check source/ai/r125-v4e-ranked-exterior-ir.mjs
           node --check scripts/r125-v4e-ranked-exterior.test.mjs
           node --check scripts/r125-v4e-source-art-review.mjs
+          node --check scripts/r125-v4e-cross-genre-source-study.mjs
           node --check scripts/r125-v4d-compact-model-fixture.mjs
           node --check scripts/r125-v4d-local-architect.mjs
           node --check scripts/r125-v4d-replay-private.mjs
@@ -69,6 +71,17 @@ jobs:
         with:
           name: V4E-SYNTHETIC-FINAL-B143-3D-FIVE-VIEWS-ART-HOLD
           path: ${{ runner.temp }}/v4e-source-art/
+          retention-days: 7
+      - name: Cross-genre common compiler on five independent SYNTHETIC author intents
+        run: |
+          node scripts/r125-v4e-cross-genre-source-study.mjs --out "$RUNNER_TEMP/v4e-five-genres"
+          test -s "$RUNNER_TEMP/v4e-five-genres/index.html"
+          test -s "$RUNNER_TEMP/v4e-five-genres/FIVE_GENRE_SOURCE_ART_HOLD.json"
+          test "$(find "$RUNNER_TEMP/v4e-five-genres" -name 'FINAL_B143_*_FIVE_VIEWS.svg' | wc -l)" -eq 5
+      - uses: actions/upload-artifact@v4
+        with:
+          name: V4E-FIVE-GENRES-SYNTHETIC-COMMON-ENGINE-ART-HOLD
+          path: ${{ runner.temp }}/v4e-five-genres/
           retention-days: 7
       - name: Record strong non-promotion boundary
         run: |
