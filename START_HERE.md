@@ -2,6 +2,12 @@
 
 **2026-11-02 JST 更新。長文プロンプト・ZIP交換なしで、GitHub正本を読み込んで既存開発を継続する。**
 
+## 2026-11-03 追加：保存済み5棟の一枚PNG出力を阻害したテスト誤字を修正
+
+- ユーザーWindows実走（旧HEAD `2e10995af7f1e66de0552ed661a1219931e4a1ce`）の `-UseCase CrossGenre -ExportOverviewLatest` は専用回帰49件中48件成功・1件失敗。失敗は `scripts/r125-v3-failed-only-home-recovery.test.mjs` で未定義 `sha(png)` を呼んでいたテスト側の `ReferenceError`。正本既存の `digest()` へ置換し、研究ブランチのコミット `c35f62c8e4e1ff29d0f974b33f87c426902d8e16` に修正保存。生成器・保存Qwen原文・ランチャー・世界書込安全ゲート・mainには変更なし。
+- 元のHOLDはスクリプトの安全な事前テスト停止であり、既存5/5 SOURCE記録を否定するものではない。**修正後の49件回帰とユーザー実WindowsでのPNG再出力は未確認**。GitHub Actionsの未完了/キャンセルをPASSと呼ばない。
+- 次はモデル再推論・Minecraft施工をせず、SHA固定した `scripts/r125-live-safe-worktree.ps1` を研究ブランチ最新HEADから実行して保存済み5/5を `SOURCE_ART_OVERVIEW.png` の一枚に書き出す。ランチャーは出力フォルダと当該PNGのみを開く（重複HTMLは起動しない）。成功したらこの一枚で5ジャンルの共通ART不足を評価し、用途別の場当たり改修に戻らない。ART HOLD、NOT_PREPARED／9 BLOCKED／BuildPlan空、Draft PR #128を継続。
+
 ## 2026-11-03 最新確定：V3実Qwen SOURCE 5/5成功／ART HOLD・スクショ手作業廃止
 
 - ユーザー提出 `FAILED_ONLY_RECOVERY_REPORT.json` と5ジャンルの正面・側面・俯瞰画像が新しいSOURCE実績。**`status=FIVE_FUNCTIONAL_SOURCE_CANDIDATES_ART_HOLD`、`sourceReadyCount=5`、`testInjectionPresent=false`、`qwen3:14b` HOME追加モデル呼出1、既存4成功の追加モデル呼出0、Minecraftワールド書込0**。これはローカルモデル自己申告の実験結果で、モデルサーバーの独立認証はない。以前HOMEの `R125_FUNCTIONAL_TOP_LEVEL` HOLDと旧原文は保存。
