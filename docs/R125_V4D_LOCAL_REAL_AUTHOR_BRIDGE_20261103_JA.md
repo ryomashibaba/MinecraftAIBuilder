@@ -143,3 +143,11 @@ Windowsの安全な研究作業コピーからは、必要な時だけ以下の�
 取得したorigin URL、branch名、Git HEAD、必要SOURCEが正しいことを検証してから、ユーザーにQwenの任意1回試験をY/N確認する。Nならコピーだけ用意し終了。YならLOCAL Ollamaへ `qwen3:14b` を最大1POSTし、PRIVATEモデル応答をローカルに保存、共有用 `REVIEW_SUMMARY_SHAREABLE.json` をエクスプローラーで選択表示。モデル未準備/実行不合格ならHOLD、自動再試行もGitHubへのアップロードもしない。
 
 安全検証引数 `--check-only` はGit/Nodeを確認するがclone/推論をしない。`--prepare-only` は選択画面を出さずに研究ブランチを1回安全にcloneして終了する。Windowsの [専用Actions #41632474602](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41632474602) は **completed/success**：`--check-only` で0 clone・0モデル呼出し、`--prepare-only` で本物の研究ブランチをGitHubからWindows LOCALAPPDATAの隔離フォルダへclone成功、branchとHEADを照合（`82479b1e77738a57cb1c0340e6794fbd3830b1a8`）、モデル推論なし。Linuxの既存29テストも29/29 PASS。**ワンクリック後のY選択で実Qwenが建築を生成するかは未実証**であり、ART認定0。GitHub認証が必要な環境ではgitが失敗する可能性があり、その際は強引な認証回避を行わず停止する。実LLM新推論、8GB Mac/2B、建築ART、実Minecraft施工は別の未認定項目である。
+
+## 2026-11-03 一回試験のSOURCE不合格→追加推論0回の自動診断と実Windows HTTP模擬検証
+
+- ダブルクリック用 `r125-v4d-one-click-setup.cmd` のY分岐は最大1回のLOCAL Ollama POSTだけを許可する。原文が保存されたSOURCE不合格時は、ユーザーが手で再生操作をしなくても `r125-v4d-replay-private.mjs` によってPRIVATE原文SHAを照合し、追加モデルPOSTなしでSOURCE失敗の構造コードを共有用 `REPLAY_SHAREABLE_STATUS.json` に記録する。元のモデル原文・ローカルパス・依頼本文は送信しない。
+- [実装70250111](https://github.com/ryomashibaba/MinecraftAIBuilder/commit/70250111e020d8b041dc48b8741dcebe9dc3302a) にCI用 `--run-once`（Y相当の非対話分岐）とGitHub CI専用模擬Ollamaを実装。模擬サーバーは `CI=true` と `MAB_V4D_TEST_DOUBLE_MODE=1` の両方がないと開始不能。実HTTPを介した模擬出力でも本物のモデル著作として昇格しない。
+- 初回 [GitHub Actions #41634978618](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41634978618) はWindows HTTP・SOURCE不合格保存・オフライン診断まで成功した一方、意図的なSOURCE HOLD終了コード2がPowerShell CIの終了値に残り全体FAIL。[修正a518980d](https://github.com/ryomashibaba/MinecraftAIBuilder/commit/a518980df5408be44782b7a17d949e58a87bc427) ではCIが期待するHOLDを検証した後だけ残留終了値を0へ変更。
+- 修正版 [CI #41635183616](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41635183616) は **completed/success**。Windows研究ブランチclone、模擬HTTP POST正確に1回、元モデル原文保存、追加モデル0回のSOURCE診断、安全JSON、WorldWrites0を確認。Linuxの旧テスト29/29 PASS。**実Qwen/Gemmaの建築能力、8GB Mac/2B、真正3Dの人間ART、Minecraft実機施工は未検証**。
+- 配布バッチのGit blob SHAは `518ec0919a24480d46ae0851d5e42e7adea306bc`。旧v1のダウンロード済コピーは自動更新されないため、本人へは新版v2を案内する。main・既存Education成功・PRIVATE Qwen原本・9安全ゲート/Draft PR #128を保持。

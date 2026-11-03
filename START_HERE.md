@@ -1,5 +1,12 @@
 # MinecraftAIBuilder — START HERE（新チャット・AI開発者の統一入口）
 
+## 2026-11-03 V4Dワンクリック試験：SOURCE不合格時の自動診断までWindows CI成功
+
+- ダブルクリック用 `scripts/r125-v4d-one-click-setup.cmd` を改良。Yで最大1回だけローカルQwenに依頼し、SOURCE失敗で元原文が残っていれば、別のローカルモデル問い合わせをせず自動的にオフラインSOURCE診断へ進む。完了後、共有用 `REPLAY_SHAREABLE_STATUS.json` または元の `REVIEW_SUMMARY_SHAREABLE.json` をエクスプローラーで選択表示する。既存Minecraftワールドへの施工なし、外部への回答原文アップロードなし。
+- CI専用 `--run-once` はY選択と同じ実処理を非対話実行し、`MAB_V4D_TEST_DOUBLE_MODE=1` の明示環境でのみ模擬Ollamaを偽応答として記録する。GitHub Windows CIで隔離clone→localhost GET/POST1回→不正AUTHORのSOURCE HOLD→元原文SHA一致→追加モデルPOST0の診断→安全JSON生成の実HTTP経路を試験し、模擬モデルを本物Qwenとして認定しない。
+- [実装70250111](https://github.com/ryomashibaba/MinecraftAIBuilder/commit/70250111e020d8b041dc48b8741dcebe9dc3302a)、[検査式修正a518980d](https://github.com/ryomashibaba/MinecraftAIBuilder/commit/a518980df5408be44782b7a17d949e58a87bc427)。初回CI #41634978618は、期待したSOURCE HOLD終了コード2がPowerShellの最終終了コードに残り全体FAIL（処理自体の検査は通過）。修正後の [CI #41635183616](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41635183616) は **completed/success**：Windows一連の模擬経路PASS、Linux既存 **29/29 PASS**。
+- 新版の配布 `MAB_V4D_ONE_CLICK_v2.cmd` はGit blob SHA `518ec0919a24480d46ae0851d5e42e7adea306bc` と一致。**旧v1ファイルは自動更新されないので新版を使用**。本物のQwen新推論0、ART正式採用0、Minecraft施工0。main/PR #128 Open Draft、Education実機成功、9 BLOCKED/BuildPlan空/WorldWrites0保護。Work事前承認。
+
 ## 2026-11-03 ワンクリックで研究ブランチを取得する（Windows実clone CI成功）
 
 - ユーザーの操作負担を減らすため、**手動Git操作が不要な独立Windowsバッチ** `scripts/r125-v4d-one-click-setup.cmd` を実装。これをダウンロードしてダブルクリックすると、Git/Nodeを確認し、GitHubの `feature/b198zr1-protected-architectural-revision` をユーザーの既存プロジェクトに触れず `%LOCALAPPDATA%\MinecraftAIBuilder\IsolatedV4D\study-...` に**新しい独立コピー**として `git clone --depth 1 --single-branch` で取得。origin・branch・HEAD・必要JSの存在を確かめる。
