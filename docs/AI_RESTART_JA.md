@@ -1,5 +1,7 @@
 # MinecraftAIBuilder — 開発再開の最新正本案内（2026-11-03）
 
+**2026-11-03最新：Windows一括モデル試験起動器と共有レシートを実装。** [専用Linux+Windows CI #41624377954](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41624377954) は **completed/success、Node 17/17 PASS、Windows -CheckOnly PASS**。研究ブランチ/Node/HEAD事前検査、ローカルOllama最大1POST、PRIVATE原文保存、共有用 `REVIEW_SUMMARY_SHAREABLE.json` は生回答や個人パスを除外。初回Windows CIの `-notmatch` 誤判定を `-notcontains` に修正。**実モデル推論0・Minecraft施工0・正式ART採用0**、8GB Mac/2B未検証。main・旧成功Education・PR #128 Draftを保護。 [研究正本](R125_V4D_LOCAL_REAL_AUTHOR_BRIDGE_20261103_JA.md)。
+
 **2026-11-03最新：小型LLM短縮IRの注入SOURCE CI 14/14 PASS／実2B・実Qwenモデルは未実行。** 旧詳細IRとEducation成功経路は凍結。モデルが用途・相対配置・屋根/高低・外壁・機能の中核を著作し、HOSTはジャンル非依存の機械的寸法だけを決定する `--compact` をオプトイン追加。専用 [GitHub Actions #41616751488](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41616751488) は14/14 PASS（HEAD 2bcd7031、テストダブルのみ）。初回13/14の誤負例は設計自由度を削らず是正。実モデル能力、8GB Mac、ART、Minecraft施工は未認定。既存状態はNOT_PREPARED/9 BLOCKED/BuildPlan空/WorldWrites0、main/保存Qwen/PR #128 Draft保護。次はローカル実モデル1回の原文・SOURCE・ARTを分離評価する。[研究正本](R125_V4D_LOCAL_REAL_AUTHOR_BRIDGE_20261103_JA.md)。
 
 **2026-11-03最新工程：実LLMへの接続準備（CI 8/8 PASS／実Qwen未実行）。** 相対AUTHOR建築IRから旧汎用SOURCEグラフ・外皮統合・B143・二幅動線に安全に渡す橋を実装。現行HEADはSTART_HEREから照合し、専用CI [#41615154621](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41615154621) を参照。これは注入テストダブルによる通信・SOURCE 8/8 PASSで**モデル実設計の成功ではない**。実Qwenの1件試行はローカル接続がある時のみ、Private原文保存・1POST・fail closed。モデル新推論0、Minecraft世界書込0、ART採用0、mainとEducation成功経路保護。[研究正本](R125_V4D_LOCAL_REAL_AUTHOR_BRIDGE_20261103_JA.md)。

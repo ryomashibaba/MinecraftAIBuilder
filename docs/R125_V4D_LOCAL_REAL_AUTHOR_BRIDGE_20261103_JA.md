@@ -82,3 +82,10 @@ node .\scripts\r125-v4d-local-architect.mjs --compact --model 'qwen3:14b' --out 
 作業コピーが古い/別ブランチ/追跡ファイル変更中であれば、安全のため明示的にHOLDする。実モデル成功でも自動GitHubアップロードはしない。チャットで共有するなら **`REVIEW_SUMMARY_SHAREABLE.json` だけ**で一次診断可能。ART判断には追加の視覚証拠とユーザー確認が別途必要。
 
 **ユーザーPCに接続できないこのチャット内では実モデル推論0、Minecraft世界接触0のまま。** GitHub ActionsのWindows検査成功も実Windows上のQwen推論の成功ではない。
+## 2026-11-03 GitHub Windows・Linux CI 完走結果
+
+- 実装コミット [88655719](https://github.com/ryomashibaba/MinecraftAIBuilder/commit/8865571968cc3b6e7fdc2df1308262cf949d464e)。Windows起動器、共有用の最小限JSON、旧ランナーの安全な原文保存、SOURCE検証と安全偽昇格の負例試験を追加。
+- 初回 [Actions #41624217688](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41624217688) は全体FAIL。ただしLinux側は**17/17 PASS**。Windowsランナーで起動器が `CHECK_ONLY_SAFE_NO_MODEL_CALL_NO_WORLD_WRITE`、`RESEARCH_HEAD`、`AUTHOR_MODE=COMPACT` を正しく出力したにもかかわらず、CIテストがPowerShell配列への `-notmatch` 使用で誤判定した。起動器や安全機構の不具合ではない。
+- 修正コミット [496c210c](https://github.com/ryomashibaba/MinecraftAIBuilder/commit/496c210cc3a2f7321217e834de566f21bdc466ac) はCI側の `-notmatch` を `-notcontains` に変更。最終 [Actions #41624377954](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41624377954) は**completed/success**。LinuxのNode **17 tests / 17 pass / 0 fail**、Windows-latestのPowerShell **-CheckOnly PASS**。このWindows検査はOllama POST 0、PRIVATEフォルダ作成0、Minecraft世界書込0。
+- `REVIEW_SUMMARY_SHAREABLE.json` は元回答・プロンプト・ローカルパス・APIエンドポイント・エラー全文を含まない。成功SOURCE候補と模擬モデルの区別、9 BLOCKED/WorldWrites0を保持する。人間ART・実Minecraft歩行・Mac 8GB/2B実績は全てNOT_TESTED/NOT_REVIEWED。
+- PCの安全な隔離研究ブランチが準備できた場合だけ、PowerShellから `& .\scripts\r125-v4d-local-one-shot.ps1` を1回実行できる設計。モデルの原文はローカルPRIVATEに残し、自動アップロードや自動再試行はしない。今回のチャットでは**本物のQwen/Gemma推論0回、Minecraft施工0回**。
