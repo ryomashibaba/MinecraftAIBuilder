@@ -14,6 +14,7 @@ on:
       - 'scripts/r125-v4d-author-source-diagnostics.test.mjs'
       - 'scripts/r125-v4d-shareable-receipt.mjs'
       - 'scripts/r125-v4d-local-one-shot.ps1'
+      - 'scripts/r125-v4d-one-click-setup.cmd'
       - 'scripts/r125-v4d-local-architect.test.mjs'
       - '.github/workflows/r125-v4d-local-author-bridge.yml'
   workflow_dispatch:
@@ -93,3 +94,13 @@ jobs:
             throw "V4D_WINDOWS_DEFAULT_MODE_DRIFT"
           }
           Write-Host "PASS: Windows launch preflight, branch/head/node validated. 0 model calls, 0 world writes."
+      - name: Verify one-click branch setup by actual isolated clone, NO model
+        shell: cmd
+        run: |
+          call scripts\r125-v4d-one-click-setup.cmd --check-only
+          if errorlevel 1 exit /b 1
+          call scripts\r125-v4d-one-click-setup.cmd --prepare-only
+          if errorlevel 1 exit /b 1
+          echo PASS: one-click git branch cloned into an isolated LOCALAPPDATA folder; 0 model requests.
+
+

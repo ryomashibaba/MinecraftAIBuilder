@@ -135,3 +135,11 @@ Windowsの安全な研究作業コピーからは、必要な時だけ以下の�
 ### 次の実質成果の優先順位
 
 合成診断テストだけ増やしても建築の美観が改善した証拠にはならない。**次はローカルの本物のQwenで未知の依頼1件を生成し、原文→SOURCE→真正B143美術審査を行うことが最優先**。実モデルにアクセスできない現状ではモデルが通る確率や建築美術の質はわからない。実モデル呼び出し0、正式ART採用0、Minecraft施工0。安全な隔離研究ブランチで `& .\scripts\r125-v4d-local-one-shot.ps1` を一度だけ使用し、PRIVATE原文から共有可能なレシートを得る。SOURCE成功でもARTは別途合否判断し、既存9 BLOCKED/BuildPlan空を維持。
+
+## 2026-11-03 ワンクリック取得と任意1回Qwen実験（Windows）
+
+今回、ユーザーが研究ブランチを取得済みか、GitHubの複雑な操作を理解している必要をなくすため `scripts/r125-v4d-one-click-setup.cmd` を追加した。**チャットで配布される .cmd ファイルをダブルクリックするだけ**でGit/Nodeの存在を確認し、専用 `%LOCALAPPDATA%\MinecraftAIBuilder\IsolatedV4D` 内に、名前の異なる新規の隔離作業コピーを `git clone --depth 1 --single-branch --branch feature/b198zr1-protected-architectural-revision` で取得する。既存repo、main、作業中の修正、元PRIVATEモデルデータ、Educationワールドは触らない。GitとNodeが未導入なら自動インストールせずHOLD。
+
+取得したorigin URL、branch名、Git HEAD、必要SOURCEが正しいことを検証してから、ユーザーにQwenの任意1回試験をY/N確認する。Nならコピーだけ用意し終了。YならLOCAL Ollamaへ `qwen3:14b` を最大1POSTし、PRIVATEモデル応答をローカルに保存、共有用 `REVIEW_SUMMARY_SHAREABLE.json` をエクスプローラーで選択表示。モデル未準備/実行不合格ならHOLD、自動再試行もGitHubへのアップロードもしない。
+
+安全検証引数 `--check-only` はGit/Nodeを確認するがclone/推論をしない。`--prepare-only` は選択画面を出さずに研究ブランチを1回安全にcloneして終了する。Windowsの専用Actionsで**実際のcloneを実行して検証**する（このコミット時は未完走）。GitHub認証が必要な環境ではgitが失敗する可能性があり、その際は強引な認証回避を行わず停止する。実LLM新推論、8GB Mac/2B、建築ART、実Minecraft施工は別の未認定項目である。

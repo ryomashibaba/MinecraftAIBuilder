@@ -1,5 +1,11 @@
 # MinecraftAIBuilder — START HERE（新チャット・AI開発者の統一入口）
 
+## 2026-11-03 ワンクリックで研究ブランチを取得する（Windows：新CI待ち）
+
+- ユーザーの操作負担を減らすため、**手動Git操作が不要な独立Windowsバッチ** `scripts/r125-v4d-one-click-setup.cmd` を実装。これをダウンロードしてダブルクリックすると、Git/Nodeを確認し、GitHubの `feature/b198zr1-protected-architectural-revision` をユーザーの既存プロジェクトに触れず `%LOCALAPPDATA%\MinecraftAIBuilder\IsolatedV4D\study-...` に**新しい独立コピー**として `git clone --depth 1 --single-branch` で取得。origin・branch・HEAD・必要JSの存在を確かめる。
+- 取得後に画面上の**Y/NでQwen1回試験を選択**。Nなら準備だけ、Yでも `qwen3:14b` をLOCAL 127.0.0.1へ最大1回POST、元モデル原文は非公開 `%LOCALAPPDATA%\MinecraftAIBuilder\PrivateModelStudies\...`、共有レシートだけをエクスプローラーに表示。世界施工・Git push・モデル自動再実行・既存ファイル上書きは禁止。git cloneできなければ停止して既存作業コピーに影響を与えない。
+- `--check-only` と `--prepare-only` は非対話の安全な検証用。GitHub ActionsのWindowsランナーで**本当の隔離clone**を試験する（現コミットのCIは未確認）。既存PR #128 Draft、main・Education原本・9 BLOCKED・WorldWrites0・Work事前承認を維持。実LLM/ART成功はまだ未認定。詳細 [V4D実ローカルモデル経路](docs/R125_V4D_LOCAL_REAL_AUTHOR_BRIDGE_20261103_JA.md)。
+
 ## 2026-11-03 V4D実モデルの失敗原因を安全に分類：Linux29/29＋Windows CI PASS
 
 - 前段は本物のQwen/Gemma推論0件、SOURCE再生の注入CI [#41626660965](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41626660965) Linux 23/23・Windows CheckOnly PASS。今回、PRIVATE原文が**元SHAと一致することを確認した後に限り**、JSON構造・部屋の用途の記述有無・接続先参照・屋根・外壁/窓の条件などを分類する `scripts/r125-v4d-author-source-diagnostics.mjs` を独立追加。元モデルを再POSTせず、失敗した候補を自動修復せず、建築美術を認定しない。
