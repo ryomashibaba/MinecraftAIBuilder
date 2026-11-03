@@ -1,5 +1,11 @@
 # MinecraftAIBuilder — START HERE（新チャット・AI開発者の統一入口）
 
+## 2026-11-03 V4D第二案：非矩形外郭＋実開放トランセクトのSOURCE追加（CI結果要確認）
+
+- V4D初回 1/1 SOURCE PASS・真正3D ART REJECT は凍結し、同一研究V4Dの独立オプトイン第二著作案を追加。主帯を横断し壁・屋根を実切除する大きな公共空気空間と、実床/屋根外郭が段階的に変化する非矩形主帯を **SOURCEそのもの** に実装。旧V4D形状・旧原本は上書きしない。
+- 新コード：`source/ai/r125-v4d-void-relief.mjs`、正負回帰 `scripts/r125-v4d-void-relief.test.mjs`、真正B143 2案3D＋同一縮尺SVG＋JSON `scripts/r125-v4d-void-relief-review.mjs`。既存R125 Actionsに結線。詳細：[V4D第二案コードとゲート](docs/R125_V4D_VOID_RELIEF_SECOND_SOURCE_STUDY_20261103_JA.md)。
+- **GitHub Actions完了前のSOURCE PASSを認定しない。新候補ART NOT_REVIEWED、実Qwen0、Minecraft施工/歩行0。** 正式採用0、全体ART HOLD、NOT_PREPARED/9 BLOCKED/BuildPlan空/worldWrites0。main・PR #128 Draft・R125 Education実機・private原文・旧V4Dを保護。Work事前承認制。
+
 ## 2026-11-03 V4D初回 SOURCE実装・CI確認入口
 
 - V4C正式CI #41596939516は成功、しかし**V4C 3/3 ART REJECT**の証拠は不変。V4Dでは箱型+屋根穴の微修正を繰り返さず、AUTHORが主屋根高低差と連続主帯のセットバック、北の大庇/広場、横の半屋外ロッジア、透明上部開口を選ぶ新しい**独立・オプトイン**意味IRの第1試作に着手。

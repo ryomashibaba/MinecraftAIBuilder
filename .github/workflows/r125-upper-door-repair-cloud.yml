@@ -25,6 +25,9 @@ on:
       - 'scripts/r125-site-composition-v4b-preview.mjs'
       - 'source/ai/r125-void-massing-v4c.mjs'
       - 'source/ai/r125-sculpted-spine-v4d.mjs'
+      - 'source/ai/r125-v4d-void-relief.mjs'
+      - 'scripts/r125-v4d-void-relief.test.mjs'
+      - 'scripts/r125-v4d-void-relief-review.mjs'
       - 'scripts/r125-v4d-synthetic-fixture.mjs'
       - 'scripts/r125-v4d-sculpted-spine.test.mjs'
       - 'scripts/r125-v4d-source-review.mjs'
@@ -119,6 +122,21 @@ jobs:
         with:
           name: R125-V4D-One-Synthetic-Author-Spine-3D-ART-HOLD
           path: ${{ runner.temp }}/v4d-source-review/
+          if-no-files-found: error
+          retention-days: 14
+      - name: V4D second AUTHOR true open-air public transect and nonrectangular perimeter SOURCE
+        run: |
+          node --check source/ai/r125-v4d-void-relief.mjs
+          node --check scripts/r125-v4d-void-relief.test.mjs
+          node --check scripts/r125-v4d-void-relief-review.mjs
+          node --test scripts/r125-v4d-void-relief.test.mjs
+      - name: Export original REJECT versus second V4D true B143 geometry
+        run: node scripts/r125-v4d-void-relief-review.mjs --out "$RUNNER_TEMP/v4d-void-relief-second"
+      - name: Upload V4D second SOURCE-only alternative, not ART or Qwen certification
+        uses: actions/upload-artifact@v4
+        with:
+          name: R125-V4D-Second-Synthetic-Author-Nonrectangular-Void-ART-HOLD
+          path: ${{ runner.temp }}/v4d-void-relief-second/
           if-no-files-found: error
           retention-days: 14
       - name: Parse real Windows PowerShell launcher before any Windows handoff
