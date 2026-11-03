@@ -57,3 +57,10 @@ node .\scripts\r125-v4d-local-architect.mjs --compact --model 'qwen3:14b' --out 
 ```
 
 実行経路自体は変更済みだが、GitHubのCI完走まではSOURCE PASSを宣言しない。実LLM試行はユーザーPC/個別のローカルモデルサーバーへのアクセスが必要であり、今のクラウドAIの研究コード保存だけでは実行できない。
+
+## 2026-11-03 実CI・失敗の是正（SOURCE ONLY）
+
+- 初回実装HEAD `5103f801fb45e21927d7557c65eb729e6e2dfa36` の専用CI [#41616542303](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41616542303) は **13/14、1 FAIL**。不正AUTHOR変形の負例で、「屋外公開庭を原玄関ではなく別の有効な屋内用途空間へ接続する」ことを不正として扱っていた。しかしその変更は技術的にSOURCE成立可能であり、AUTHORの創造の自由度を妨げる。生成器は変更せず、負例を未存在親室への参照へ修正。
+- 修正HEAD `2bcd7031ff88d5b5d30b339c49a80bcb56750ba2` の [GitHub Actions #41616751488](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41616751488) は **completed/success、Node test 14、pass14、fail0**。既存の詳細IR経路8件に加え、短縮IR→詳細IR→元B143・意味的な高さ変更→実最終形状差、機械的正規化の明示、SOURCE通路/3用途設備アクセス、入力不正拒否、1回模擬POST/私有原文保存/模擬非昇格の6件を検証した。
+- **実モデル推論実績は0件**。Nodeの注入モデル応答は真のQwen3:14B、2B小型モデル、8GB Mac上の実測ではない。小型モデルがこの短縮IRを正しく生成する可能性は実データ不足で**わからない**。
+- SOURCEテストはHOLD施工状態（NOT_PREPARED、9 BLOCKED、BuildPlan空、worldWrites0）。正式ART採用0件、過去のV4D建築のART REJECTを維持。次の実用工程は隔離ローカルコピーで未知自然言語→モデルの原文を1回生成・失敗時も保存→SOURCE真正3Dを独立評価する試験。1例成功でも住宅/店/研究施設を跨ぐ汎用性能や美術品質を自動認定しない。

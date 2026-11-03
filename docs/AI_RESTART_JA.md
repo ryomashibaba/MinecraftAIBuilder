@@ -1,5 +1,7 @@
 # MinecraftAIBuilder — 開発再開の最新正本案内（2026-11-03）
 
+**2026-11-03最新：小型LLM短縮IRの注入SOURCE CI 14/14 PASS／実2B・実Qwenモデルは未実行。** 旧詳細IRとEducation成功経路は凍結。モデルが用途・相対配置・屋根/高低・外壁・機能の中核を著作し、HOSTはジャンル非依存の機械的寸法だけを決定する `--compact` をオプトイン追加。専用 [GitHub Actions #41616751488](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41616751488) は14/14 PASS（HEAD 2bcd7031、テストダブルのみ）。初回13/14の誤負例は設計自由度を削らず是正。実モデル能力、8GB Mac、ART、Minecraft施工は未認定。既存状態はNOT_PREPARED/9 BLOCKED/BuildPlan空/WorldWrites0、main/保存Qwen/PR #128 Draft保護。次はローカル実モデル1回の原文・SOURCE・ARTを分離評価する。[研究正本](R125_V4D_LOCAL_REAL_AUTHOR_BRIDGE_20261103_JA.md)。
+
 **2026-11-03最新工程：実LLMへの接続準備（CI 8/8 PASS／実Qwen未実行）。** 相対AUTHOR建築IRから旧汎用SOURCEグラフ・外皮統合・B143・二幅動線に安全に渡す橋を実装。現行HEADはSTART_HEREから照合し、専用CI [#41615154621](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41615154621) を参照。これは注入テストダブルによる通信・SOURCE 8/8 PASSで**モデル実設計の成功ではない**。実Qwenの1件試行はローカル接続がある時のみ、Private原文保存・1POST・fail closed。モデル新推論0、Minecraft世界書込0、ART採用0、mainとEducation成功経路保護。[研究正本](R125_V4D_LOCAL_REAL_AUTHOR_BRIDGE_20261103_JA.md)。
 
 **2026-11-03最新進捗：** V4D汎用AUTHORグラフの屋根・外壁接合欠損、4幅共有扉、公共庭半屋外区画を独立研究コンパイラで実B143補修。専用GitHub Actions #41612917826完走SOURCE 3/3 PASS、元の欠損壁セル545/403/433を補修。一方、ARTは独立真正3D予備REJECT 3/3で正式採用0。合成設計の反復に固執せず、次は実LLM短いIRの接続/用途・外殻・半屋外の統合品質へ。モデル新推論0、世界書込0、旧実機成功保護。詳細はSTART_HEREの先頭と研究専用報告。

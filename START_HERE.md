@@ -1,10 +1,13 @@
 # MinecraftAIBuilder — START HERE（新チャット・AI開発者の統一入口）
 
-## 2026-11-03 V4D小型LLM向け短縮AUTHOR IR：既存実モデル経路への追加（CI未確認）
+## 2026-11-03 V4D小型LLM向け短縮AUTHOR IR：正式CI 14/14 PASS、実LLM試験は未実行
 
-- 既存詳細AUTHOR IRは変更・廃止しない。**小型2B/4Bでも自分で用途・相対接続・屋根の形式/高さ・開口方向・公共庭・設備の意味を決定**できるよう、オプトインの `source/ai/r125-v4d-compact-model-ir.mjs` を追加。従来多数の数値フィールドが必要だった外窓寸法・受付入口・開口オフセット・設備サイズ・庇などは、ジャンル/室名ではなく**全用途共通で固定された機械的換算規則**によって詳細IRへ変換し、その後は既存の厳格な相対配置→共通B143→SOURCE/9 BLOCKEDを通す。モデルの場所選択・接続衝突は補修せずHOLD。
-- 既存 `scripts/r125-v4d-local-architect.mjs` に明示 `--compact` オプションを追加。旧詳細モードはデフォルトのまま維持、実モデルへのPOSTは最大1回・原文PRIVATE保存・非課金/ローカル限定・世界書込0。**2B Mac 8GB実測0、実Qwen新生成0、合成SOURCE CIは未確認**。[実モデルブリッジ/短縮IRの差分と境界](docs/R125_V4D_LOCAL_REAL_AUTHOR_BRIDGE_20261103_JA.md)。
-- 過去SOURCE CI PASS・独立ART REJECT・保存Qwen原文/凍結Education成功・main保護、PR #128 Draft、Work個別承認維持。CIが通っても2Bの品質や建築美術は認定しない。
+- 既存詳細IRは不変更、追加オプトイン `--compact`。小型モデルがAUTHORとして選ぶ用途・相対接続・規模・屋根type/高低・壁/採光・設備の意味と材料を、**同じ共通の機械的寸法規則**で既存詳細IRへ展開 → 旧 `r125-v4d-authored-topology.mjs`/ `r125-v4d-envelope-integration.mjs` → 真正B143/2幅SOURCE経路/設備サービスを照合。HOSTはジャンル/室名により形を決定しない。元回答を補修せず1回POST・原文非公開保存。
+- 実装 [5103f801](https://github.com/ryomashibaba/MinecraftAIBuilder/commit/5103f801fb45e21927d7557c65eb729e6e2dfa36)、負例の誤判定を修正 [2bcd7031](https://github.com/ryomashibaba/MinecraftAIBuilder/commit/2bcd7031ff88d5b5d30b339c49a80bcb56750ba2)。初回CI #41616542303 は **13/14、1失敗**：公開庭を別の屋内棟につなぐ合法的AUTHOR選択を誤って不正としたテストのミス。接続先の不正参照に置き換え、MODELとSOURCEの自由度を変更せず再実行した。
+- 最終専用 [GitHub Actions #41616751488](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41616751488) は **completed/success・14/14 PASS・fail0**、実行HEAD `2bcd7031ff88d5b5d30b339c49a80bcb56750ba2`。既存詳細モード8テスト＋新短縮モード6テスト、注入モデル応答によるSOURCE構造・真正B143、相対変更、実窓/半屋外、原文保持、無効IR拒否、モデル出力1POST、安全ゲート。**実LLM新生成0、2B/4B・Mac 8GB実測0、美術ART認定0**。形式成功を創造的建築成功と混同しない。
+- 現段階の制約：単層・3〜5用途ノードで少なくとも一つの屋外公共空間を持つ建物向けオプトイン。一般的な小住宅など全用途に適用できる完成機能とは認定しない。次に実ローカルLLMの未知依頼1件で原文・失敗理由・SOURCE3D・美術を独立検証し、小型モデルが意図を著作できないならIR/輸送/幾何の原因を区別する。詳細 [研究正本](docs/R125_V4D_LOCAL_REAL_AUTHOR_BRIDGE_20261103_JA.md)。
+- main・旧原本・private Qwen・R125→B143→Education実機成功を保護、PR #128 Open/Draft、WorldWrites0、NOT_PREPARED/9 BLOCKED/BuildPlan空、Work事前承認維持。
+
 
 ## 2026-11-03 V4D実LLM設計IRブリッジ：専用CI 8/8 PASS／実モデル著作は未実行
 
