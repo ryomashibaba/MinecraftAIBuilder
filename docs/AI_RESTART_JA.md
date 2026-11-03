@@ -1,5 +1,7 @@
 # MinecraftAIBuilder — 開発再開の最新正本案内（2026-11-03）
 
+**2026-11-03最新進捗：** V4D汎用AUTHORグラフの屋根・外壁接合欠損、4幅共有扉、公共庭半屋外区画を独立研究コンパイラで実B143補修。専用GitHub Actions #41612917826完走SOURCE 3/3 PASS、元の欠損壁セル545/403/433を補修。一方、ARTは独立真正3D予備REJECT 3/3で正式採用0。合成設計の反復に固執せず、次は実LLM短いIRの接続/用途・外殻・半屋外の統合品質へ。モデル新推論0、世界書込0、旧実機成功保護。詳細はSTART_HEREの先頭と研究専用報告。
+
 **最新2026-11-03 SOURCE進捗（上位は START_HERE）**：研究HEADのV4D汎用空間グラフは直列/分岐/環状3件の合成AUTHORを同一SOURCE/真正B143へ変換、専用R125 CI #41610782194 completed/success。真正3D独立予備ARTは3/3 REJECT、実Qwen新設計0／Minecraft施工0／正式美術採用0。次は公共空間の立体性・外皮接合・用途設備の一体設計を、固定テンプレートに戻らず共通IRで改善。** 旧V4C工程案は履歴として下に保持。
 
 **固定入口：[ルートSTART_HERE](../START_HERE.md) → [2026-11-03完全統合引き継ぎ](MINECRAFT_AI_BUILDER_COMPLETE_HANDOFF_20261103_V4D_JA.md)。** 以下の古い2026-11-02以前の工程ログは歴史として残し、現在地・次作業の優先順位は上記最新版で更新する。現PRはDraft #128、研究ブランチ`feature/b198zr1-protected-architectural-revision`。最新HEADは常にGitHubから再取得する。

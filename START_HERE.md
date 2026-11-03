@@ -1,10 +1,12 @@
 # MinecraftAIBuilder — START HERE（新チャット・AI開発者の統一入口）
 
-## 2026-11-03 V4D既存3グラフの共通屋根・外壁接合研究（SOURCE CI未確定）
+## 2026-11-03 V4D屋根・外壁接合と公共半屋外：正式SOURCE PASS 3/3、真正3D予備ART REJECT 3/3
 
-- 前工程の直列/分岐/環状SOURCE 3/3 PASSと独立ART 3/3 REJECTは変更しない。SOURCEコード上、壁上端は全辺で低い庇高止まりで、折板/片流れ屋根の高い箇所では妻面が実ボクセルで欠損。この構造的共通不具合の修復を**独立オプトイン** `source/ai/r125-v4d-envelope-integration.mjs` に実装。
-- AUTHOR短い意匠IRで、用途別の妻面wall/glass、共有壁/入口の実4幅切り抜き、公開庭と接続する片側屋根付き半屋外区画を明示。HOSTが最後の真正B143で全周屋根接合・4幅の実支持床・公共屋根/柱/空気・用途と設備へのSOURCE動線を検査。旧グラフ3件を内容を変更せず比較。詳細：[新外皮SOURCE安全試験](docs/R125_V4D_ENVELOPE_INTEGRITY_STUDY_20261103_JA.md)。
-- GitHub専用CI・真正3D独立ARTは本コミット時点で未確認。**新Qwen0、新Minecraft施工0、正式ART採用0**。main/旧原本/R125→B143→Education成功経路とPR #128 Draftを保護、Workは事前承認制。初期NOT_PREPARED／9 BLOCKED／BuildPlan空／WorldWrites0。
+- 新しい独立オプトイン `source/ai/r125-v4d-envelope-integration.mjs` は、旧AUTHORグラフを変更せず、実屋根と外壁の接合欠損を作者指定のwall/glassで塞ぎ、入口と共有壁扉を4幅に拡張し、公共庭の接続部に柱・本物の屋根付き半屋外領域を生成する。旧V4DのART REJECTを保護。
+- 実装 [1cc7ba0](https://github.com/ryomashibaba/MinecraftAIBuilder/commit/1cc7ba012c0aa0c21fc1428e9c27f03aa111fb07)、専用 [R125 CI #41612917826](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41612917826) **completed/success**。Artifact ID **13220280864**、取得ZIPのSHA256 **`32eccd2cc3cf662380d8fe3f7649fc0e2af828ed968efb0f5f31c818a87c3548`** とGitHub digest一致。元の欠損壁上部の実セル545/403/433を閉じ、4幅実扉支持床16/16/20、公共半屋外屋根72/72/72、全用途・設備SOURCE到達12/12。B143完成7901/8064/7105 voxel、117/127/134 element。
+- 真正B143最終surfaceを前後比較し、正反対の2方向で確認。**技術はSOURCE PASS 3/3だが独立予備ART REJECT 3/3**：屋根壁の欠損・入口の狭さは改善したが、箱形の室配置と装飾の乏しさ、屋内機能と公共空間の体験は不足。人間正式ART認定0、新実LLM呼出0、Minecraft実機施工0。詳細：[第三者再審査と次工程](docs/R125_V4D_ENVELOPE_INTEGRITY_STUDY_20261103_JA.md)。
+- 次は同じ合成棟の小修理を止め、**本物のLLMからの短いIR → 用途/公共体積/外皮の意味的一体著作**と、実用的な機能設備の生成能力を優先。main・旧freeze・R125→B143→Education実機成功・保存Qwen原文保護、Draft PR #128 Open/Draft、NOT_PREPARED／9 BLOCKED／BuildPlan空／WorldWrites0、Work事前承認維持。
+
 
 ## 2026-11-03 V4D多用途グラフ：正式SOURCE 3/3 PASS／真正B143独立ART 3/3 REJECT
 
