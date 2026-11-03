@@ -124,6 +124,12 @@ test('five private saved cross-genre Qwen sources survive a fake five-function b
  assert.deepEqual(r.gates,Array(9).fill('BLOCKED'));
  assert.deepEqual(r.BuildPlan.operations,[]);
  assert(fs.existsSync(path.join(input.outDir,'index.html')));
+ const picture=fs.readFileSync(path.join(input.outDir,'SOURCE_ART_OVERVIEW.png'));
+ assert.deepEqual([...picture.subarray(0,8)],[137,80,78,71,13,10,26,10]);
+ assert(picture.includes(Buffer.from('MAB_Source_Evidence\0','utf8')));
+ assert.equal(r.artOverview?.sourceOnly,true);
+ assert.equal(r.artOverview?.worldWrites,0);
+ assert.equal(r.artOverview?.artApproved,false);
  assert(fs.existsSync(path.join(input.outDir,'cases','station','index.html')));
  assert(!fs.existsSync(path.join(input.outDir,'MAKECODE_EDUCATION.ts')));
  assert(!fs.existsSync(path.join(input.outDir,'MODEL_RESPONSE_ORIGINAL.txt')));
