@@ -1,5 +1,11 @@
 # MinecraftAIBuilder — START HERE（新チャット・AI開発者の統一入口）
 
+## 2026-11-03 V4D実LLMブリッジ：短い相対AUTHOR IR → R125実B143（新CI待ち）
+
+- 前回のSOURCE 3/3 PASS／真正3D ART 3/3 REJECTを不変の証拠として保持。箱形合成案の細工を中止し、**本物のモデルが未知の建築を著作するための相対配置・機能・外皮・半屋外・屋根断面の短いAUTHOR IR**に移る。オプトイン研究 `source/ai/r125-v4d-relative-author-ir.mjs` はモデル自身が選んだ設計を座標アンカーへ変換し、既存 `r125-v4d-authored-topology.mjs`→`r125-v4d-envelope-integration.mjs`→真正B143→2幅SOURCE動線・設備サービスへ連結する。HOSTがモデルの失敗案を勝手に修理しない。
+- `scripts/r125-v4d-local-architect.mjs` は既存Ollama preflight→正確なローカルモデルへ最大1回のJSON応答POST、原文を失敗時も非公開フォルダへ保存。モデルが不正JSON/衝突/ルート不通ならHOLDし、再POSTなし。出力は個人のGitリポジトリ外に限定、Minecraftコマンドなし。専用の**注入テストのみ** CI `.github/workflows/r125-v4d-local-author-bridge.yml` へ接続。**この時点で本物のQwen/Gemma新推論0、CI結果未確認、人間ART・実機施工とも未認定**。[全仕様・私有原文保護・最小操作](docs/R125_V4D_LOCAL_REAL_AUTHOR_BRIDGE_20261103_JA.md)。
+- main・旧凍結V4D/元Qwen・R125→B143→Education成功経路を保護。PR #128 Open/Draft/未マージ、Work事前承認。NOT_PREPARED／9 BLOCKED／BuildPlan空／WorldWrites0。実CIテストのB143成功を「実Qwen設計」と誤認しない。
+
 ## 2026-11-03 V4D屋根・外壁接合と公共半屋外：正式SOURCE PASS 3/3、真正3D予備ART REJECT 3/3
 
 - 新しい独立オプトイン `source/ai/r125-v4d-envelope-integration.mjs` は、旧AUTHORグラフを変更せず、実屋根と外壁の接合欠損を作者指定のwall/glassで塞ぎ、入口と共有壁扉を4幅に拡張し、公共庭の接続部に柱・本物の屋根付き半屋外領域を生成する。旧V4DのART REJECTを保護。

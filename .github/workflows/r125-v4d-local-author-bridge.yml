@@ -1,0 +1,39 @@
+name: R125 V4D Local Author Bridge — INJECTED TEST ONLY
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'source/ai/r125-v4d-relative-author-ir.mjs'
+      - 'scripts/r125-v4d-relative-author-synthetic.mjs'
+      - 'scripts/r125-v4d-local-architect.mjs'
+      - 'scripts/r125-v4d-local-architect.test.mjs'
+      - '.github/workflows/r125-v4d-local-author-bridge.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: r125-v4d-local-author-bridge-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  source-only-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check relative author IR and local loopback runner
+        run: |
+          node --check source/ai/r125-v4d-relative-author-ir.mjs
+          node --check scripts/r125-v4d-local-architect.mjs
+          node --check scripts/r125-v4d-relative-author-synthetic.mjs
+          node --check scripts/r125-v4d-local-architect.test.mjs
+      - name: Prove fail-closed synthetic authorship and actual B143 conversion through injected offline transport
+        run: node --test scripts/r125-v4d-local-architect.test.mjs
+      - name: Record strong non-promotion boundary
+        run: |
+          echo '## V4D compact real-model bridge — CI only' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Node tests use INJECTED TEST DOUBLE. No actual Ollama, no new Qwen/Gemma design, no paid API, no Minecraft world access.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'A verified true B143 geometry from a synthetic author is NOT a real-model success or an ART certification.' >> "$GITHUB_STEP_SUMMARY"
+          echo '9 BLOCKED, BuildPlan empty, NOT_PREPARED, WorldWrites0. Preserve main, prior model originals and Draft PR #128.' >> "$GITHUB_STEP_SUMMARY"
