@@ -109,7 +109,7 @@ def main():
             raise RuntimeError("OPENCODE_NOT_INSTALLED")
         version = call(["opencode", "--version"], timeout=15)
         # Explicitly refuse OpenCode 1 configuration because V1 permissions are different.
-        if not re.search(r"(?<![0-9])2\\.[0-9]+(?:\\.[0-9]+)?", version):
+        if not re.search(r"(?<![0-9])2\.[0-9]+(?:\.[0-9]+)?", version):
             raise RuntimeError("OPENCODE_V2_REQUIRED")
         report["opencode_version"] = version[:80]
 
