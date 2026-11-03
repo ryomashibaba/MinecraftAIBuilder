@@ -1,10 +1,11 @@
 # MinecraftAIBuilder — START HERE（新チャット・AI開発者の統一入口）
 
-## 2026-11-03 V4D第二案：非矩形外郭＋実開放トランセクトのSOURCE追加（CI結果要確認）
+## 2026-11-03 V4D第二案：実CI SOURCE PASS、真正3D ART REJECT
 
-- V4D初回 1/1 SOURCE PASS・真正3D ART REJECT は凍結し、同一研究V4Dの独立オプトイン第二著作案を追加。主帯を横断し壁・屋根を実切除する大きな公共空気空間と、実床/屋根外郭が段階的に変化する非矩形主帯を **SOURCEそのもの** に実装。旧V4D形状・旧原本は上書きしない。
-- 新コード：`source/ai/r125-v4d-void-relief.mjs`、正負回帰 `scripts/r125-v4d-void-relief.test.mjs`、真正B143 2案3D＋同一縮尺SVG＋JSON `scripts/r125-v4d-void-relief-review.mjs`。既存R125 Actionsに結線。詳細：[V4D第二案コードとゲート](docs/R125_V4D_VOID_RELIEF_SECOND_SOURCE_STUDY_20261103_JA.md)。
-- **GitHub Actions完了前のSOURCE PASSを認定しない。新候補ART NOT_REVIEWED、実Qwen0、Minecraft施工/歩行0。** 正式採用0、全体ART HOLD、NOT_PREPARED/9 BLOCKED/BuildPlan空/worldWrites0。main・PR #128 Draft・R125 Education実機・private原文・旧V4Dを保護。Work事前承認制。
+- 初回コード [659591cc6ec0](https://github.com/ryomashibaba/MinecraftAIBuilder/commit/659591cc6ec010f22ea286437add7ca954aedc1a) の [R125 GitHub Actions #41603430205](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41603430205) は **SUCCESS**、第二案Artifact ID **13215523011**（取得ZIP SHA256 `a27ec9f0d0a8d2fead28f868e62bf877e852fc6799929c3238f3ff22750a2273`）。真正B143第二案6,139 voxel、公共トランセクト実2幅床315セル、物理的な非矩形縁42セル、折れ12回、ガラス16 voxel、全用途SOURCEルート到達。
+- ただし真正3Dの東西斜視・上面を見ると、全体は大型の平坦な箱3つが主役で公共空洞の立体的・都市的空間体験が弱い。**新第二案もART REJECT、正式採用0**。技術PASSだけで美術合格にしない。旧V4D第一案もART REJECTのまま。
+- 第二案は同一V4D独立オプトインで、実Qwenモデル回答ではなく合成AUTHORテスト1例。元B143/旧V4D/保存Qwen原文/実機Education成功経路とmainは保護。新世界書込0、NOT_PREPARED／9 BLOCKED／BuildPlan空、Work事前承認。
+- 引き継ぎ詳細 [第二案SOURCE+真正3D ART独立審査](docs/R125_V4D_VOID_RELIEF_SECOND_SOURCE_STUDY_20261103_JA.md)。次は辺の微修正を重ねず、真の主マスと公共空洞を一体著作する共通短いIRに根本設計自由度を広げる。レビュー生成器からテスト定義を分離する構成整理を実施したため、この整理後CIはGitHubで最新結果を再確認する。
 
 ## 2026-11-03 V4D初回 SOURCE実装・CI確認入口
 

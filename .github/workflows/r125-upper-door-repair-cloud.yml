@@ -27,6 +27,7 @@ on:
       - 'source/ai/r125-sculpted-spine-v4d.mjs'
       - 'source/ai/r125-v4d-void-relief.mjs'
       - 'scripts/r125-v4d-void-relief.test.mjs'
+      - 'scripts/r125-v4d-void-relief-fixture.mjs'
       - 'scripts/r125-v4d-void-relief-review.mjs'
       - 'scripts/r125-v4d-synthetic-fixture.mjs'
       - 'scripts/r125-v4d-sculpted-spine.test.mjs'
@@ -128,6 +129,7 @@ jobs:
         run: |
           node --check source/ai/r125-v4d-void-relief.mjs
           node --check scripts/r125-v4d-void-relief.test.mjs
+          node --check scripts/r125-v4d-void-relief-fixture.mjs
           node --check scripts/r125-v4d-void-relief-review.mjs
           node --test scripts/r125-v4d-void-relief.test.mjs
       - name: Export original REJECT versus second V4D true B143 geometry

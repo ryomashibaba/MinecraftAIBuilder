@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {makeV4DSyntheticCivicStudy} from './r125-v4d-synthetic-fixture.mjs';
-import {makeV4DVoidReliefFixture} from './r125-v4d-void-relief.test.mjs';
+import {makeV4DVoidReliefFixture} from './r125-v4d-void-relief-fixture.mjs';
 import {compileSculptedSpineV4D} from '../source/ai/r125-sculpted-spine-v4d.mjs';
 import {compileV4DVoidRelief} from '../source/ai/r125-v4d-void-relief.mjs';
 import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';

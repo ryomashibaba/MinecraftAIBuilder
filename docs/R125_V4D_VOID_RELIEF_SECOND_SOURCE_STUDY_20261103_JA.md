@@ -18,3 +18,12 @@ GitHub Actionsで実際に完走するまでは **新候補 SOURCE未認証**。
 ## 固定保護
 
 研究ブランチへの通常コミットのみ。PR #128 Open/Draft/未マージ、base固定、main、R125→B143→Educationの既存実機成功、旧V1〜V4D初回、保存済みPRIVATE実Qwen生回答・失敗原本を変更しない。Workは事前承認制。ユーザーにスクショ・ZIPを要求しない。
+
+## 2026-11-03 CI実証・真正3D独立予備ART審査
+
+- 実際の初回実装コミット [659591cc6ec0](https://github.com/ryomashibaba/MinecraftAIBuilder/commit/659591cc6ec010f22ea286437add7ca954aedc1a) は、R125専用 [Actions #41603430205](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41603430205) で **completed/success**。新旧V4D Node正負例、真正B143ギャラリー、SVG、JSON、artifactアップロードまで全工程成功。これはSOURCE試験であり、Minecraft実機動作/完成建築の保証ではない。
+- Artifact **R125-V4D-Second-Synthetic-Author-Nonrectangular-Void-ART-HOLD** ID 13215523011、取得ZIP SHA256 `a27ec9f0d0a8d2fead28f868e62bf877e852fc6799929c3238f3ff22750a2273`（GitHub提供digestと取得ファイルの照合済み）。
+- 真正B143最終6,139 voxel（初回V4Dは6,690 voxel）。第二案 geometry SHA `03f77bc2fc786265980538a7cc509055c056233fcfba6e96eac734e50e6c6289`、source SHA `a8aaf068e0c5c62dd98bb9f801acb8a0f92d31e9a639c88478e5d93bf1e08c77`。上部を開放した全幅トランセクトの実2幅床315セル、屋根/床非矩形外縁42セル、折れ12回、ガラス16 voxel維持、入口→全プログラムのSOURCE到達PASS。
+- **真正ボクセルの東西斜視および上面を独立再投影して確認した美術判定は ART REJECT。** トランセクトの空気量と床は本物だが、実3Dの主像は依然として3つの大きい矩形建築群と平坦な壁・屋根。蛇行した外縁は小さく、公共空洞が都市的に体験できる迫力ある立体連続性/主従ファサードを生んでいない。「建築品質を突破した」や「モデル著作を実証した」とは言わない。旧初回V4DのART REJECTも固定。
+- **次のART-FIRST方針：** 小庇/色/小さな外縁凹凸を増量しない。AUTHOR短い意味IRで主外郭全体の非矩形マスと、公共広場→深い半屋外通過空間→利用可能な大きい内部空洞を立体的に一体著作する能力の最小再設計が必要。実Qwenを追加消費する前に真正3Dで質を判断。第二案の修正は、テストフィクスチャを製品レビューから分離する技術整理のみで形状そのものは不変。
+- 正式ART採用0、実Qwen新呼出0、Minecraft施工/歩行0、Work不使用、main・旧V4D原本・Education縦貫成功保護。技術的初期安全フラグ `NOT_PREPARED`／9 BLOCKED／BuildPlan空／worldWrites0 は不変。
