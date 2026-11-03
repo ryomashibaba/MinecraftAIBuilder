@@ -10,10 +10,11 @@ param(
   [switch]$DiagnoseCrossGenreLatest,
   [switch]$CompareCrossGenreLatest,
   [switch]$StudyEnvelopeLatest,
+  [switch]$StudyFunctionsLatest,
   [ValidateSet('Lab','Retail','CrossGenre')][string]$UseCase = 'Lab'
 )
-if ((@($CheckOnly, $ReviewLatest, $PrepareLatest, $DiagnoseCrossGenreLatest, $CompareCrossGenreLatest, $StudyEnvelopeLatest) | Where-Object { $_ }).Count -gt 1) { throw 'HOLD_INCOMPATIBLE_MODES' }
-if (($DiagnoseCrossGenreLatest -or $CompareCrossGenreLatest -or $StudyEnvelopeLatest) -and $UseCase -ne 'CrossGenre') { throw 'HOLD_REVIEW_REQUIRES_CROSS_GENRE' }
+if ((@($CheckOnly, $ReviewLatest, $PrepareLatest, $DiagnoseCrossGenreLatest, $CompareCrossGenreLatest, $StudyEnvelopeLatest, $StudyFunctionsLatest) | Where-Object { $_ }).Count -gt 1) { throw 'HOLD_INCOMPATIBLE_MODES' }
+if (($DiagnoseCrossGenreLatest -or $CompareCrossGenreLatest -or $StudyEnvelopeLatest -or $StudyFunctionsLatest) -and $UseCase -ne 'CrossGenre') { throw 'HOLD_REVIEW_REQUIRES_CROSS_GENRE' }
 if ($UseCase -in @('Retail','CrossGenre') -and ($ReviewLatest -or $PrepareLatest)) { throw 'HOLD_RETAIL_REQUIRES_NEW_MODEL_RUN' }
 $ErrorActionPreference = "Stop"
 $branch = "feature/b198zr1-protected-architectural-revision"
@@ -74,7 +75,7 @@ try {
     & node --test scripts/r125-saved-education-preflight.test.mjs
     if ($LASTEXITCODE -ne 0) { throw "HOLD_EDUCATION_PREFLIGHT_REGRESSION" }
     if ($UseCase -eq 'CrossGenre') {
-      & node --test scripts/r125-cross-genre-pilot.test.mjs scripts/r125-cross-genre-offline-diagnostic.test.mjs scripts/r125-five-genre-source-comparison.test.mjs scripts/r125-expressive-envelope-v2.test.mjs scripts/r125-five-genre-real-envelope-pilot.test.mjs
+      & node --test scripts/r125-cross-genre-pilot.test.mjs scripts/r125-cross-genre-offline-diagnostic.test.mjs scripts/r125-five-genre-source-comparison.test.mjs scripts/r125-expressive-envelope-v2.test.mjs scripts/r125-five-genre-real-envelope-pilot.test.mjs scripts/r125-functional-facade-v3.test.mjs scripts/r125-five-genre-real-functions-pilot.test.mjs
       if ($LASTEXITCODE -ne 0) { throw 'HOLD_CROSS_GENRE_REGRESSION' }
     }
     if ($ReviewLatest -or $PrepareLatest) {
@@ -165,6 +166,33 @@ try {
       if ($LASTEXITCODE -ne 0) {
         $runHold = $true
         Write-Warning "FIVE_GENRE_ENVELOPE_HOLD: Original five buildings preserved; no auto retry or world writes."
+      } else {
+        $reviewViewer = Join-Path $out "index.html"
+      }
+    } elseif ($StudyFunctionsLatest) {
+      $privateRoot = Join-Path $env:USERPROFILE "Documents\MAB_Private_Runs"
+      if (-not (Test-Path -LiteralPath $privateRoot)) { throw "HOLD_PRIVATE_RUNS_NOT_FOUND" }
+      $previous = Get-ChildItem -LiteralPath $privateRoot -Directory -Filter "r125-cross-genre-*" |
+        Where-Object { $_.Name -cmatch '^r125-cross-genre-[0-9]{8}-[0-9]{6}-[0-9a-f]{8}$' -and
+          (Test-Path -LiteralPath (Join-Path $_.FullName "CROSS_GENRE_REPORT.json")) } |
+        Sort-Object LastWriteTime -Descending | Select-Object -First 1
+      if (-not $previous) { throw "HOLD_NO_SAVED_CROSS_GENRE_RUN" }
+      $diagnostic = Get-ChildItem -LiteralPath $privateRoot -Directory -Filter ($previous.Name + "-diagnostic-*") |
+        Where-Object { $_.Name -cmatch '^r125-cross-genre-[0-9]{8}-[0-9]{6}-[0-9a-f]{8}-diagnostic-[0-9a-f]{12}-[0-9a-f]{8}$' -and
+          (Test-Path -LiteralPath (Join-Path $_.FullName "DIAGNOSTIC_REPORT.json")) } |
+        Sort-Object LastWriteTime -Descending | Select-Object -First 1
+      if (-not $diagnostic) { throw "HOLD_NO_MATCHING_DIAGNOSTIC_EVIDENCE" }
+      $envelope = Get-ChildItem -LiteralPath $privateRoot -Directory -Filter ($previous.Name + "-envelope-*") |
+        Where-Object { $_.Name -cmatch '^r125-cross-genre-[0-9]{8}-[0-9]{6}-[0-9a-f]{8}-envelope-[0-9a-f]{12}-[0-9a-f]{8}$' -and
+          (Test-Path -LiteralPath (Join-Path $_.FullName "EXPRESSIVE_ENVELOPE_REPORT.json")) } |
+        Sort-Object LastWriteTime -Descending | Select-Object -First 1
+      if (-not $envelope) { throw "HOLD_NO_SAVED_ENVELOPE_RUN" }
+      $out = Join-Path $privateRoot ($previous.Name + "-functions-" + $revision.Substring(0,12) + "-" + [guid]::NewGuid().ToString("N").Substring(0,8))
+      Write-Host "Author genuine functional equipment and facade openings in five independent genres, preserving Qwen originals."
+      & node scripts/r125-five-genre-real-functions-pilot.mjs --study $previous.FullName --diagnostic (Join-Path $diagnostic.FullName "DIAGNOSTIC_REPORT.json") --envelopes $envelope.FullName --out $out
+      if ($LASTEXITCODE -ne 0) {
+        $runHold = $true
+        Write-Warning "FIVE_GENRE_FUNCTION_HOLD: Evidence preserved. No automatic model retries or world writes."
       } else {
         $reviewViewer = Join-Path $out "index.html"
       }
