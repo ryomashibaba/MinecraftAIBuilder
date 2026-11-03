@@ -1,5 +1,10 @@
 # MinecraftAIBuilder — START HERE（新チャット・AI開発者の統一入口）
 
+## 2026-11-03 V4D第三案：双殻の傾斜大屋根と中央公開空間を最初から一体著作（CI未完）
+
+- 第二案も正式SOURCE PASS／独立ART REJECT。箱に小さな外郭変形を加える方式を止め、同一V4D内の**独立オプトイン第三案** `source/ai/r125-v4d-civic-swept-shell.mjs` へ。AUTHORが主軸の横移動、左右翼の屋根勾配・高さ・幅、室用途、入口、内外開口・採光を短い意味IRで指定。HOSTは真正B143傾斜beamの実占有と左右屋内翼・中央公開歩行軸の2幅SOURCE経路/空気を検証。既存研究原本・実Education成功・mainを保護。
+- 1件の合成AUTHOR原本、正負テスト、旧第二案との真正B143ギャラリー/同縮尺SVG/機械可読JSONを既存R125 Actionsへ接続。[実装・安全ゲート](docs/R125_V4D_CIVIC_SWEPT_SHELL_20261103_JA.md)。**新CI成功・人間ART合格・実Qwen推論・Minecraft実施工は未認証**。全体ART HOLD／正式採用0／NOT_PREPARED・9 BLOCKED・BuildPlan空・WorldWrites0。Work事前承認制。
+
 ## 2026-11-03 V4D第二案：実CI SOURCE PASS、真正3D ART REJECT
 
 - 初回コード [659591cc6ec0](https://github.com/ryomashibaba/MinecraftAIBuilder/commit/659591cc6ec010f22ea286437add7ca954aedc1a) の [R125 GitHub Actions #41603430205](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41603430205) は **SUCCESS**、第二案Artifact ID **13215523011**（取得ZIP SHA256 `a27ec9f0d0a8d2fead28f868e62bf877e852fc6799929c3238f3ff22750a2273`）。真正B143第二案6,139 voxel、公共トランセクト実2幅床315セル、物理的な非矩形縁42セル、折れ12回、ガラス16 voxel、全用途SOURCEルート到達。
