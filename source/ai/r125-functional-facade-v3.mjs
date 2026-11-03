@@ -105,8 +105,9 @@ function outsideWallIsReal(r,cut,rooms){
 /**
  * Genre-free wall feasibility guidance for an actual Qwen author.
  * Offers RELATIVE choices only, never a model-selected design, coordinates,
- * a template, or a silent fallback. Large 4x2 windows remain strictly checked
- * against the actual frozen roof, shared room walls and real door cuts.
+ * a template, or a silent fallback. Both 3x2 and 4x2 glazing candidates
+ * are strictly checked against the frozen roof, adjoining rooms and doors.
+ * A compact six-block-wide room can use an authentic 3x2 opening.
  */
 export function surveyFunctionalFacadeOpenings({originalPlan,envelopeIntent}={}){
  const baseline=compileSpatialComposition(originalPlan);
@@ -117,9 +118,9 @@ export function surveyFunctionalFacadeOpenings({originalPlan,envelopeIntent}={})
  const occupied=new Set(roof.compiled.primitives.map(p=>K(p[0],p[1],p[2])));
  return rooms.map(r=>{
   const choices=[];
-  for(const side of dirs)for(let offset=0;offset<=4;offset++){
+  for(const width of [4,3])for(const side of dirs)for(let offset=0;offset<=4;offset++){
    try{
-    const candidate=openingGeometry(r,{side,offset,width:4,height:2},0);
+    const candidate=openingGeometry(r,{side,offset,width,height:2},0);
     outsideWallIsReal(r,candidate.cut,rooms);
     if(doors.some(d=>intersects(d,candidate.cut)))continue;
     const [x,y,z]=candidate.cut.origin,[sx,sy,sz]=candidate.cut.size;
@@ -129,7 +130,7 @@ export function surveyFunctionalFacadeOpenings({originalPlan,envelopeIntent}={})
       if(occupied.has(K(xx,yy,zz)))existingSolid++;
      }
     if(existingSolid<4)continue;
-    choices.push({side,offset});
+    choices.push({side,offset,width,height:2});
    }catch(error){
     if(!/^R125_FUNCTIONAL_(WINDOW_|OPENING_)/.test(String(error?.message)))
      throw error;
