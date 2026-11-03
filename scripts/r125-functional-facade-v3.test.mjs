@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {SCHEMA as SPATIAL,compileSpatialComposition} from '../source/ai/r125-spatial-composition.mjs';
 import {ENVELOPE_SCHEMA,compileExpressiveEnvelopeV2} from '../source/ai/r125-expressive-envelope-v2.mjs';
 import {FUNCTION_SCHEMA,validateFunctionalIntent,compileFunctionalFacadeV3,
- surveyFunctionalFacadeOpenings}
+ surveyFunctionalFacadeOpenings,surveyFunctionalFixturePlacements}
  from '../source/ai/r125-functional-facade-v3.mjs';
 import {verifyCompiled} from '../source/ai/b143-building-dsl.mjs';
 
@@ -200,4 +200,35 @@ test('all-null facade does not falsely certify new daylight, while malformed ope
  const malformed=structuredClone(intent);
  malformed.rooms[0].opening={side:'south',offset:0,width:5,height:2};
  assert.throws(()=>validateFunctionalIntent(p,malformed),/ROOM_INTENT/);
+});
+
+
+test('five genres receive only post-placement B143 verified 2-wide equipment service options',()=>{
+ for(const p of sample){
+  const original=JSON.stringify(p),e=roof(p);
+  const choices=surveyFunctionalFixturePlacements({
+   originalPlan:p,envelopeIntent:e});
+  assert.equal(JSON.stringify(p),original);
+  assert.equal(choices.length,p.rooms.length);
+  assert(choices.every(r=>r.availableFunctionalFixturePlacements.length>0));
+  assert(choices.every(r=>r.authorMustChooseKindSideOffsetFromOptions));
+  assert(choices.every(r=>r.availableFunctionalFixturePlacements.every(option=>
+   ['north','south','east','west'].includes(option.side)&&
+   Number.isInteger(option.offset)&&option.offset>=0&&option.offset<=4&&
+   option.kinds.length>=2&&
+   option.evidence==='ACTUAL_B143_POST_PLACEMENT_TWO_WIDE_SERVICE')));
+  const serialized=JSON.stringify(choices);
+  assert.equal(JSON.stringify(surveyFunctionalFixturePlacements({
+   originalPlan:p,envelopeIntent:e})),serialized);
+ }
+});
+test('small six-block function room offers genuine supported fixture sites without special genre paths',()=>{
+ const p=structuredClone(sample[4]);
+ p.rooms[1].width=6;
+ p.rooms[1].depth=6;
+ const evidence=surveyFunctionalFixturePlacements({originalPlan:p,envelopeIntent:roof(p)});
+ assert.equal(evidence.length,2);
+ assert(evidence.every(r=>r.availableFunctionalFixturePlacements.length>0));
+ assert(evidence.every(r=>r.availableFunctionalFixturePlacements.some(c=>
+  c.kinds.includes('storage'))));
 });
