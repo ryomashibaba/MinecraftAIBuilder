@@ -17,6 +17,7 @@ import {FUNCTION_SCHEMA,compileFunctionalFacadeV3,surveyFunctionalFacadeOpenings
  from '../source/ai/r125-functional-facade-v3.mjs';
 import {preflightR125Ollama} from './r125-pilot.mjs';
 import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
+import {renderFiveGenreSourceEvidence} from './r125-five-genre-source-art-overview.mjs';
 
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const ENDPOINT='http://127.0.0.1:11434/v1/chat/completions';
@@ -263,6 +264,19 @@ export async function runFiveGenreFunctions(
   return report;
  }finally{
   report.summary??=summarizeFunctionBatch(report.cases);
+  if(reviews.length===5){
+   try{
+    const preview=renderFiveGenreSourceEvidence(reviews.map(p=>({
+     id:p.id,base:p.base,final:p.product,
+     status:p.report.status,
+     finalGeometrySha256:p.report.newGeometrySha256
+    })),report);
+    fs.writeFileSync(path.join(dest,'SOURCE_ART_OVERVIEW.png'),preview.png,{flag:'wx'});
+    report.artOverview={file:'SOURCE_ART_OVERVIEW.png',sha256:preview.sha256,
+     width:preview.width,height:preview.height,
+     sourceOnly:true,artApproved:false,worldWrites:0};
+   }catch(e){report.artOverviewError=String(e.message??e).slice(0,200)}
+  }
   write(dest,'FUNCTIONAL_FACADE_REPORT.json',report);
   if(reviews.length){
    const ext={width:0,height:0,depth:0};
@@ -291,7 +305,8 @@ export async function runFiveGenreFunctions(
     'figure{min-width:0;margin:0}svg{width:100%;image-rendering:pixelated}'+
     'a{color:#78deeb}@media(max-width:750px){.pair{grid-template-columns:1fr}}</style>'+
     '<h1>5ジャンル — Qwenの屋根設計から実際の用途・採光へ</h1>'+
-    '<p>保存済み建物と屋根を凍結。機能と開口のSOURCE試験のみ。建築ART・設備実用性・Minecraft実機は未認証。</p>'+
+    '<p>保存済み建物と屋根を凍結。機能と開口のSOURCE試験のみ。建築ART・設備実用性・Minecraft実機は未認証。</p>'+ 
+    (report.artOverview?.file?'<p><a href="SOURCE_ART_OVERVIEW.png">全5ジャンルの自動生成PNGを一枚で開く（スクショ不要）</a></p>':'')+
     '<p>結果: '+esc(report.status)+'。Model calls: '+report.modelCalls+
     '。World writes: 0。</p>'+cards+'</html>');
   }
