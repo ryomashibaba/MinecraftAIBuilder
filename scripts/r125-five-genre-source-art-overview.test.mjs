@@ -87,5 +87,5 @@ test('source overview refuses world-write, genre substitution and malformed mate
   /UNKNOWN_MATERIAL/);
  assert.throws(()=>renderFiveGenreSourceEvidence([
   {...examples[0],final:null,base:null},...examples.slice(1)],report),
-  /MISSING_REAL_B143_GEOMETRY/);
+  /PROVENANCE_OR_WORLD_WRITE/);
 });
