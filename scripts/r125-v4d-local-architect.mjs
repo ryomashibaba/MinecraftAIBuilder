@@ -15,6 +15,7 @@ import {COMPACT_SCHEMA,COMPACT_SYSTEM_PROMPT,compileCompactModelIntent}
  from '../source/ai/r125-v4d-compact-model-ir.mjs';
 import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
 import {buildV4DShareableReceipt} from './r125-v4d-shareable-receipt.mjs';
+import {RANKED_SCHEMA,RANKED_SYSTEM_PROMPT,compileRankedExteriorIntent} from '../source/ai/r125-v4e-ranked-exterior-ir.mjs';
 
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const MODEL=/^[A-Za-z0-9._:/-]{2,140}$/;
@@ -59,8 +60,8 @@ export function parseV4DLocalAuthorArgs(argv){
  const opt={},allowed=new Set(['--model','--out','--prompt','--endpoint']);
  for(let i=0;i<argv.length;i++){
   const k=argv[i];
-  if(k==='--compact'){
-   if(Object.hasOwn(opt,k))fail('DUPLICATE_COMPACT');
+  if(k==='--compact'||k==='--ranked-windows'){
+   if(Object.hasOwn(opt,k))fail('DUPLICATE_AUTHOR_MODE');
    opt[k]=true;continue;
   }
   const v=argv[++i];
@@ -71,11 +72,12 @@ export function parseV4DLocalAuthorArgs(argv){
  if(!MODEL.test(opt['--model']??'')||
   typeof opt['--out']!=='string'||opt['--out'].length<2)
   fail('MODEL_AND_PRIVATE_OUT_REQUIRED');
+ if(opt['--compact']&&opt['--ranked-windows'])fail('ONLY_ONE_AUTHOR_MODE');
  const endpoint=opt['--endpoint']??DEFAULT_ENDPOINT,port=ENDPOINT.exec(endpoint);
  if(!port||+port[1]<1||+port[1]>65535)fail('LOCAL_LOOPBACK_ONLY');
  const prompt=opt['--prompt']??DEFAULT_PROMPT;
  if(prompt.length<8||prompt.length>4000)fail('PROMPT_CONTRACT');
- return {model:opt['--model'],outDir:path.resolve(opt['--out']),prompt,endpoint,compact:opt['--compact']===true};
+ return {model:opt['--model'],outDir:path.resolve(opt['--out']),prompt,endpoint,compact:opt['--compact']===true,rankedWindows:opt['--ranked-windows']===true};
 }
 function validateLaunch({model,outDir,prompt,endpoint},fetcher,timeoutMs){
  if(!MODEL.test(model??'')||typeof outDir!=='string'||!outDir.trim()||
@@ -95,9 +97,10 @@ function validateLaunch({model,outDir,prompt,endpoint},fetcher,timeoutMs){
  return dest;
 }
 export async function runV4DLocalAuthor({
- model,outDir,prompt=DEFAULT_PROMPT,endpoint=DEFAULT_ENDPOINT,compact=false
+ model,outDir,prompt=DEFAULT_PROMPT,endpoint=DEFAULT_ENDPOINT,compact=false,rankedWindows=false
 }={}, {fetcher=fetch,timeoutMs=180000}={}){
- if(typeof compact!=='boolean')fail('COMPACT_MODE');
+ if(typeof compact!=='boolean'||typeof rankedWindows!=='boolean'||
+  (compact&&rankedWindows))fail('AUTHOR_MODE');
  const dir=validateLaunch({model,outDir,prompt,endpoint},fetcher,timeoutMs);
  const injected=fetcher!==fetch||process.env.MAB_V4D_TEST_DOUBLE_MODE==='1',start=Date.now();
  fs.mkdirSync(dir,{recursive:false});
@@ -107,7 +110,7 @@ export async function runV4DLocalAuthor({
   declaredProvider:'LOCAL_OLLAMA_127_0_0_1_NOT_AUTHENTICATED',
   testInjectionPresent:injected,modelNameCryptographicallyAttested:false,
   promptSha256:sha(prompt),responseRawSha256:null,
-  authorContract:compact?COMPACT_SCHEMA:RELATIVE_SCHEMA,
+  authorContract:rankedWindows?RANKED_SCHEMA:compact?COMPACT_SCHEMA:RELATIVE_SCHEMA,
   mechanizedExpandedIRSha256:null,
   rawCaptured:false,modelCalls:0,modelFinishReason:null,
   authoredIRSha256:null,translatedGraphSha256:null,
@@ -118,7 +121,7 @@ export async function runV4DLocalAuthor({
  };
  output(dir,'LOCAL_REQUEST.json',{
   model,endpoint,prompt,timeoutMs,maxOutputTokens:3072,
-  authorContract:compact?COMPACT_SCHEMA:RELATIVE_SCHEMA,
+  authorContract:rankedWindows?RANKED_SCHEMA:compact?COMPACT_SCHEMA:RELATIVE_SCHEMA,
   nModelGenerationAttemptsAllowed:1,sourceOnly:true,
   noPaidAPI:true,noWorldAccess:true
  });
@@ -139,7 +142,7 @@ export async function runV4DLocalAuthor({
      model,stream:false,temperature:0.45,reasoning_effort:'none',
      max_tokens:3072,response_format:{type:'json_object'},
      messages:[
-      {role:'system',content:compact?COMPACT_SYSTEM_PROMPT:V4D_RELATIVE_SYSTEM_PROMPT},
+      {role:'system',content:rankedWindows?RANKED_SYSTEM_PROMPT:compact?COMPACT_SYSTEM_PROMPT:V4D_RELATIVE_SYSTEM_PROMPT},
       {role:'user',content:prompt}
      ]
     })
@@ -169,7 +172,8 @@ export async function runV4DLocalAuthor({
     fail('MODEL_ORIGINAL_MISSING_OR_OVERSIZE');
    try{parsed=JSON.parse(raw);}catch{fail('MODEL_RESPONSE_NOT_PURE_JSON');}
   }finally{clearTimeout(timer);}
-  const result=compact?compileCompactModelIntent(parsed):compileRelativeAuthorIntent(parsed);
+  const result=rankedWindows?compileRankedExteriorIntent(parsed):
+   compact?compileCompactModelIntent(parsed):compileRelativeAuthorIntent(parsed);
   // Only the true model/test RESPONSE is compiled. Never substitute a fixture
   // or silently edit a failing model plan into a successful candidate.
   const gal=compileB143Gallery([result.b143.design]);
@@ -177,17 +181,22 @@ export async function runV4DLocalAuthor({
    path.join(ROOT,'source/ai/b143-viewer-template.html'),'utf8');
   const html=renderB143Html(gal,tpl);
   output(dir,'AUTHOR_INTENT_ORIGINAL.json',parsed);
-  if(compact){
+  if(compact||rankedWindows){
    output(dir,'MECHANICALLY_EXPANDED_AUTHOR_IR.json',result.expandedMechanicalIR);
-   output(dir,'GENERIC_MECHANICAL_NORMALIZATION.json',result.normalization);
+   if(compact)output(dir,'GENERIC_MECHANICAL_NORMALIZATION.json',result.normalization);
+   if(rankedWindows)output(dir,'RANKED_GLAZING_RESOLUTION.json',{
+    schema:RANKED_SCHEMA,windowFaces:result.chosenWindowFaces,
+    autoRepairPerformed:false,authorSelectedPriorities:true,worldWrites:0
+   });
   }
   output(dir,'TRANSLATED_AUTHOR_GRAPH.json',result.plan);
   output(dir,'TRANSLATED_AUTHOR_ENVELOPE.json',result.envelope);
   output(dir,'TRUE_B143_SOURCE.json',result.b143.design);
   output(dir,'TWO_WIDE_ROUTES_SOURCE.json',result.b143.sourceRoutes);
   output(dir,'index.html',html);
-  report.authoredIRSha256=compact?result.compactAuthorSha256:result.originalIntentSha256;
-  report.mechanizedExpandedIRSha256=compact?result.originalIntentSha256:null;
+  report.authoredIRSha256=rankedWindows?result.rankedAuthorSha256:
+   compact?result.compactAuthorSha256:result.originalIntentSha256;
+  report.mechanizedExpandedIRSha256=(compact||rankedWindows)?result.originalIntentSha256:null;
   report.translatedGraphSha256=sha(JSON.stringify(result.plan));
   report.sourceSha256=result.b143.sourceSha256;
   report.geometrySha256=result.b143.geometrySha256;
@@ -214,7 +223,7 @@ if(process.argv[1]===fileURLToPath(import.meta.url)){
  try{
   const opts=parseV4DLocalAuthorArgs(process.argv.slice(2));
   if(opts.help)console.log(
-   'node scripts/r125-v4d-local-architect.mjs --model qwen3:14b --out NEW_PRIVATE_FOLDER [--compact] [--prompt "日本語の独自建築依頼"] [--endpoint http://127.0.0.1:11434/v1/chat/completions] (ONE LOCAL MODEL REQUEST; NO Minecraft writes)'
+   'node scripts/r125-v4d-local-architect.mjs --model qwen3:14b --out NEW_PRIVATE_FOLDER [--compact|--ranked-windows] [--prompt "日本語の独自建築依頼"] [--endpoint http://127.0.0.1:11434/v1/chat/completions] (ONE LOCAL MODEL REQUEST; NO Minecraft writes)'
   );else{
    const result=await runV4DLocalAuthor(opts);
    console.log(JSON.stringify({status:result.status,reason:result.reason,

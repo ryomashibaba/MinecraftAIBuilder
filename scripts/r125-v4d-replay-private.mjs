@@ -15,6 +15,8 @@ import {compileRelativeAuthorIntent}
 import {COMPACT_SCHEMA,compileCompactModelIntent}
  from '../source/ai/r125-v4d-compact-model-ir.mjs';
 import {RELATIVE_SCHEMA} from '../source/ai/r125-v4d-relative-author-ir.mjs';
+import {RANKED_SCHEMA,compileRankedExteriorIntent}
+ from '../source/ai/r125-v4e-ranked-exterior-ir.mjs';
 import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
 import {classifyPrivateV4DFailure}
  from './r125-v4d-shareable-receipt.mjs';
@@ -59,7 +61,7 @@ function openStudy(dir){
   !['SOURCE_READY_PRIVATE_ART_REVIEW_REQUIRED','HOLD_TEST_DOUBLE_NOT_REAL_MODEL',
    'HOLD_MODEL_OR_SOURCE_INVALID_NO_REPAIR','HOLD_MODEL_TIMEOUT_OR_ABORTED',
    'HOLD_MODEL_NOT_INSTALLED','HOLD_LOCAL_PREFLIGHT'].includes(original.status)||
-  ![COMPACT_SCHEMA,RELATIVE_SCHEMA].includes(original.authorContract)||
+  ![COMPACT_SCHEMA,RELATIVE_SCHEMA,RANKED_SCHEMA].includes(original.authorContract)||
   request.authorContract!==original.authorContract||
   !Number.isSafeInteger(original.modelCalls)||original.modelCalls<0||
   original.modelCalls>1||typeof original.testInjectionPresent!=='boolean'||
@@ -157,9 +159,10 @@ export function replayPrivateV4D(study,out){
   authorDiagnostic=diagnosePrivateV4DAuthor(author,original.authorContract);
   let compiled;
   try{
-   compiled=original.authorContract===COMPACT_SCHEMA?
-    compileCompactModelIntent(author):
-    compileRelativeAuthorIntent(author);
+   compiled=original.authorContract===RANKED_SCHEMA?
+    compileRankedExteriorIntent(author):
+    original.authorContract===COMPACT_SCHEMA?
+    compileCompactModelIntent(author):compileRelativeAuthorIntent(author);
   }catch(e){
    report.status='HOLD_REPLAY_SOURCE_REJECTED';
    report.failureCategory=classifyPrivateV4DFailure(String(e?.message??e));

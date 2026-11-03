@@ -12,6 +12,7 @@ export function classifyPrivateV4DFailure(reason){
   return 'MODEL_COMPLETENESS';
  if(/MODEL_RESPONSE_NOT_PURE_JSON|MODEL_HTTP_INVALID_JSON|CHOICES/i.test(reason))
   return 'MODEL_FORMAT';
+ if(/R125_V4E_RANKED_/.test(reason))return 'RANKED_AUTHOR_EXTERIOR_INVALID';
  if(/R125_V4D_COMPACT_/.test(reason))return 'COMPACT_AUTHOR_IR_INVALID';
  if(/R125_V4D_RELATIVE_/.test(reason))return 'RELATIVE_AUTHOR_RELATIONS_INVALID';
  if(/R125_V4D_GRAPH_/.test(reason))return 'ARCHITECTURAL_GRAPH_INVALID';
@@ -60,7 +61,8 @@ export function buildV4DShareableReceipt(report){
   modelId:typeof report.modelId==='string'&&/^[A-Za-z0-9._:/-]{2,140}$/.test(report.modelId)?
    report.modelId:'UNVERIFIED',
   authorContract:['minecraftaibuilder-r125-v4d-compact-spatial-intent-v1',
-   'minecraftaibuilder-r125-v4d-relative-author-intent-v1'].includes(report.authorContract)?
+   'minecraftaibuilder-r125-v4d-relative-author-intent-v1',
+   'minecraftaibuilder-r125-v4e-ranked-exterior-author-v1'].includes(report.authorContract)?
    report.authorContract:'UNRECOGNIZED',
   reportedStatus:report.status,
   modelCallAttempts:report.modelCalls,

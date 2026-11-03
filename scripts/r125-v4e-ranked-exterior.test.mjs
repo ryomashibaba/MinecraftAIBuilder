@@ -80,9 +80,93 @@ test('V4E opt-in does not alter the old V4D frozen author contract or pretend to
  assert.equal(old.schema,COMPACT_SCHEMA);
  assert.equal(compileCompactModelIntent(old).modelIdentity,'NOT_ATTESTED');
  assert(RANKED_SYSTEM_PROMPT.includes('FIRST option'));
- assert(RANKED_SYSTEM_PROMPT.includes('NEVER choose an unlisted option'));
+ assert(RANKED_SYSTEM_PROMPT.includes('NO'));
  const ranked=compileRankedExteriorIntent(author());
  assert.equal(ranked.modelIdentity,'NOT_ATTESTED');
  assert.equal(ranked.modelSizeOrMacMemoryTested,false);
  assert.equal(ranked.sourceProvenance,'RANKED_AUTHOR_USER_OR_LLM_UNATTESTED');
+});
+
+test('V4E one POST with injected fake transport stays TEST_DOUBLE but gives true B143 and zero world writes',async()=>{
+ const fs=await import('node:fs'),os=await import('node:os'),path=await import('node:path');
+ const {runV4DLocalAuthor,parseV4DLocalAuthorArgs}
+  =await import('./r125-v4d-local-architect.mjs');
+ const {replayPrivateV4D}=await import('./r125-v4d-replay-private.mjs');
+ const folder=fs.mkdtempSync(path.join(os.tmpdir(),'mab-v4e-optin-'));
+ const study=path.join(folder,'study'),replay=path.join(folder,'replay');
+ const raw=JSON.stringify(author()),calls=[];
+ const fetcher=async(url,opt)=>{
+  calls.push({url,method:opt?.method});
+  if(opt?.method==='GET')return {ok:true,status:200,
+   text:async()=>JSON.stringify({models:[{name:'qwen3:14b'}]})};
+  if(opt?.method==='POST')return {ok:true,status:200,text:async()=>JSON.stringify({
+   model:'qwen3:14b',choices:[{finish_reason:'stop',message:{content:raw}}]
+  })};
+  throw Error('UNEXPECTED_TEST_CALL');
+ };
+ try{
+  const parsed=parseV4DLocalAuthorArgs(['--ranked-windows','--model','qwen3:14b',
+   '--out',study,'--prompt','An original culture facility with interior and courtyard.']);
+  assert.equal(parsed.rankedWindows,true);
+  assert.equal(parsed.compact,false);
+  assert.throws(()=>parseV4DLocalAuthorArgs(['--compact','--ranked-windows',
+   '--model','qwen3:14b','--out',study]),/ONLY_ONE_AUTHOR_MODE/);
+  const r=await runV4DLocalAuthor({...parsed},{fetcher,timeoutMs:15000});
+  assert.equal(r.status,'HOLD_TEST_DOUBLE_NOT_REAL_MODEL',r.reason);
+  assert.equal(r.authorContract,RANKED_SCHEMA);
+  assert.equal(r.modelCalls,1);
+  assert.equal(r.worldWrites,0);
+  assert.equal(calls.filter(x=>x.method==='POST').length,1);
+  const original=JSON.parse(fs.readFileSync(path.join(study,'AUTHOR_INTENT_ORIGINAL.json'),'utf8'));
+  assert.deepEqual(original,author());
+  assert(fs.existsSync(path.join(study,'RANKED_GLAZING_RESOLUTION.json')));
+  const receipt=JSON.parse(fs.readFileSync(path.join(study,'REVIEW_SUMMARY_SHAREABLE.json'),'utf8'));
+  assert.equal(receipt.authorContract,RANKED_SCHEMA);
+  assert.equal(receipt.sourceCandidateVerified,true);
+  assert.equal(receipt.explicitlyInjectedTestResponse,true);
+  const count=calls.length;
+  const rerun=replayPrivateV4D(study,replay);
+  assert.equal(count,calls.length);
+  assert.equal(rerun.status,'HOLD_TEST_DOUBLE_REPLAY_ONLY');
+  assert.equal(rerun.originalCompilerHashesMatch,true);
+  assert.equal(rerun.additionalModelCalls,0);
+  assert.equal(rerun.worldWrites,0);
+ }finally{fs.rmSync(folder,{recursive:true,force:true});}
+});
+test('V4E malformed original preference remains HOLD with safe diagnostic and zero replay calls',async()=>{
+ const fs=await import('node:fs'),os=await import('node:os'),path=await import('node:path');
+ const {runV4DLocalAuthor}=await import('./r125-v4d-local-architect.mjs');
+ const {replayPrivateV4D}=await import('./r125-v4d-replay-private.mjs');
+ const folder=fs.mkdtempSync(path.join(os.tmpdir(),'mab-v4e-invalid-'));
+ const study=path.join(folder,'study'),replay=path.join(folder,'replay');
+ const faulty=author();
+ faulty.spaces[0].windowPriority=['east','east','north','west'];
+ const calls=[],raw=JSON.stringify(faulty);
+ const fetcher=async(url,opt)=>{
+  calls.push(opt?.method);
+  if(opt?.method==='GET')return {ok:true,status:200,
+   text:async()=>JSON.stringify({models:[{name:'qwen3:14b'}]})};
+  return {ok:true,status:200,text:async()=>JSON.stringify({
+   model:'qwen3:14b',choices:[{finish_reason:'stop',message:{content:raw}}]
+  })};
+ };
+ try{
+  const r=await runV4DLocalAuthor({
+   model:'qwen3:14b',outDir:study,rankedWindows:true,
+   prompt:'An original public architecture research building.'
+  },{fetcher,timeoutMs:15000});
+  assert.equal(r.status,'HOLD_MODEL_OR_SOURCE_INVALID_NO_REPAIR');
+  assert.equal(r.modelCalls,1);
+  const receipt=JSON.parse(fs.readFileSync(path.join(study,'REVIEW_SUMMARY_SHAREABLE.json'),'utf8'));
+  assert.equal(receipt.failureCategory,'RANKED_AUTHOR_EXTERIOR_INVALID');
+  const before=calls.length;
+  const replayed=replayPrivateV4D(study,replay);
+  assert.equal(replayed.status,'HOLD_REPLAY_SOURCE_REJECTED');
+  assert.equal(replayed.additionalModelCalls,0);
+  assert.equal(calls.length,before);
+  const diag=JSON.parse(fs.readFileSync(path.join(replay,'AUTHOR_SOURCE_DIAGNOSTIC.json'),'utf8'));
+  assert(diag.issues.some(v=>v.code==='RANKED_WINDOW_PRIORITY_INVALID'));
+  assert.equal(replayed.worldWrites,0);
+  assert(!fs.existsSync(path.join(replay,'index.html')));
+ }finally{fs.rmSync(folder,{recursive:true,force:true});}
 });

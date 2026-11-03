@@ -7,11 +7,13 @@
  */
 import {COMPACT_SCHEMA} from '../source/ai/r125-v4d-compact-model-ir.mjs';
 import {RELATIVE_SCHEMA} from '../source/ai/r125-v4d-relative-author-ir.mjs';
+import {RANKED_SCHEMA} from '../source/ai/r125-v4e-ranked-exterior-ir.mjs';
 
 export const DIAGNOSTIC_SCHEMA='minecraftaibuilder-v4d-private-model-structural-diagnostic-v1';
 const ROOT_COMPACT=['schema','id','title','brief','materials','spaces'];
 const ROOT_DETAILED=['schema','id','title','brief','materials','spaces','entry','extraLinks'];
 const SPACE_COMPACT=['id','purpose','kind','width','depth','roof','height','facade','windowSide','feature','featureMaterial','attach'];
+const SPACE_RANKED=['id','purpose','kind','width','depth','roof','height','facade','windowPriority','feature','featureMaterial','attach'];
 const SPACE_DETAILED=['id','purpose','kind','width','depth','roof','facade','shelter','windows','fixture'];
 const enumSet=(arr,value)=>arr.includes(value);
 const record=value=>!!value&&typeof value==='object'&&!Array.isArray(value);
@@ -51,14 +53,14 @@ function safeProse(value){return typeof value==='string'&&value.length>=3&&value
 const opposite={east:'west',west:'east',south:'north',north:'south'};
 const dirs=['north','south','east','west'];
 export function diagnosePrivateV4DAuthor(author,contract){
- if(![COMPACT_SCHEMA,RELATIVE_SCHEMA].includes(contract))
+ if(![COMPACT_SCHEMA,RELATIVE_SCHEMA,RANKED_SCHEMA].includes(contract))
   throw Error('V4D_DIAG_UNRECOGNIZED_CONTRACT');
  const r=blank(contract);
  if(!record(author)){
   add(r,'TOP_LEVEL_NOT_OBJECT');return r;
  }
- const compact=contract===COMPACT_SCHEMA;
- const top=keyCounts(author,compact?ROOT_COMPACT:ROOT_DETAILED);
+ const compact=contract===COMPACT_SCHEMA,ranked=contract===RANKED_SCHEMA;
+ const top=keyCounts(author,(compact||ranked)?ROOT_COMPACT:ROOT_DETAILED);
  r.missingTopLevelKeyCount=top.missing;
  r.unexpectedTopLevelKeyCount=top.unexpected;
  if(top.missing||top.unexpected)add(r,'TOP_LEVEL_FIELDS');
@@ -84,7 +86,7 @@ export function diagnosePrivateV4DAuthor(author,contract){
  for(const [i,space] of author.spaces.entries()){
   if(i>=6){add(r,'EXCESS_SPACES_NOT_INSPECTED');break;}
   if(!record(space)){add(r,'SPACE_NOT_OBJECT',i);continue;}
-  const required=compact?SPACE_COMPACT:[...SPACE_DETAILED,...(i?['attach']:[])];
+  const required=ranked?SPACE_RANKED:compact?SPACE_COMPACT:[...SPACE_DETAILED,...(i?['attach']:[])];
   const counts=keyCounts(space,required);
   if(counts.missing||counts.unexpected)add(r,'SPACE_FIELD_SHAPE',i);
   if(!safeName(space.id)||used.has(space.id))add(r,'SPACE_IDENTIFIER_FORMAT_OR_DUPLICATE',i);
@@ -96,7 +98,27 @@ export function diagnosePrivateV4DAuthor(author,contract){
   else if(space.kind==='sky')r.openPublicSpaceCount++;
   else add(r,'SPACE_KIND_INVALID',i);
   const isCovered=space.kind==='covered';
-  if(compact){
+  if(ranked){
+   if(isCovered){
+    if(!enumSet(['ridgeX','ridgeZ','shedX','shedZ'],space.roof)||
+     !enumSet(['low','medium','high'],space.height))
+      add(r,'ROOF_PROFILE_DECISION_INVALID',i);
+    else r.roofTypeDecisionCount++;
+    if(!enumSet(['glass','wall'],space.facade))add(r,'FACADE_DECISION_INVALID',i);
+    if(!Array.isArray(space.windowPriority)||space.windowPriority.length!==4||
+     new Set(space.windowPriority).size!==4||
+     space.windowPriority.some(d=>!dirs.includes(d)))
+     add(r,'RANKED_WINDOW_PRIORITY_INVALID',i);
+    else r.windowsDeclaredCount++;
+   }else if(space.kind==='sky'&&
+    (space.roof!==null||space.height!==null||
+     space.facade!==null||space.windowPriority!==null))
+    add(r,'OPEN_SPACE_HAS_ENCLOSED_ROOF',i);
+   if(!safeProse(space.feature)||
+    !enumSet(['wood','stone','metal','concrete','accent'],space.featureMaterial))
+    add(r,'PROGRAM_FUNCTION_OR_MATERIAL_INVALID',i);
+   else r.modelNamedFunctionCount++;
+  }else if(compact){
    if(isCovered){
     if(!enumSet(['ridgeX','ridgeZ','shedX','shedZ'],space.roof)||
      !enumSet(['low','medium','high'],space.height))
@@ -142,17 +164,17 @@ export function diagnosePrivateV4DAuthor(author,contract){
    else r.modelNamedFunctionCount++;
   }
   if(i===0){
-   if(space.kind!=='covered'||(compact?space.attach!==null:
+   if(space.kind!=='covered'||((compact||ranked)?space.attach!==null:
     Object.hasOwn(space,'attach')))add(r,'FIRST_SPACE_MUST_BE_ENTRY',i);
    if(compact&&space.windowSide==='north')
     add(r,'ENTRY_WINDOW_CONFLICT',i);
   }else{
    const a=space.attach;
-   const expect=compact?['to','side','shift']:['to','side','shift','doorOffset'];
+   const expect=(compact||ranked)?['to','side','shift']:['to','side','shift','doorOffset'];
    const bad=!record(a)||keyCounts(a,expect).missing>0||
     keyCounts(a,expect).unexpected>0||!found.has(a.to)||
-    !dirs.includes(a.side)||!between(a.shift,compact?-3:-4,compact?3:4)||
-    (!compact&&!between(a.doorOffset,2,14));
+    !dirs.includes(a.side)||!between(a.shift,(compact||ranked)?-3:-4,(compact||ranked)?3:4)||
+    (!compact&&!ranked&&!between(a.doorOffset,2,14));
    if(bad)add(r,'PARENT_ATTACHMENT_INVALID',i);
    else{
     r.authorParentAttachmentCount++;
@@ -160,7 +182,7 @@ export function diagnosePrivateV4DAuthor(author,contract){
     old.add(a.side);connectedSides.set(a.to,old);
     const self=connectedSides.get(space.id)??new Set();
     self.add(opposite[a.side]);connectedSides.set(space.id,self);
-    if(compact&&space.kind==='sky'&&
+    if((compact||ranked)&&space.kind==='sky'&&
      author.spaces.slice(0,i).find(n=>record(n)&&n.id===a.to)?.kind!=='covered')
      add(r,'PUBLIC_SKY_NEEDS_COVERED_PARENT',i);
     if(!compact&&space.kind==='sky'&&record(space.shelter)&&
@@ -176,7 +198,10 @@ export function diagnosePrivateV4DAuthor(author,contract){
  author.spaces.slice(0,6).forEach((space,i)=>{
   if(!record(space)||typeof space.id!=='string')return;
   const usedSides=connectedSides.get(space.id)??new Set();
-  if(compact){
+  if(ranked){
+   // A ranked set of authorized alternatives is NOT an actual glazed face.
+   // The geometry resolver selects the FIRST proven exterior authorized face.
+  }else if(compact){
    if(usedSides.has(space.windowSide))add(r,'WINDOW_ON_SHARED_PARTITION',i);
   }else if(Array.isArray(space.windows)){
    for(const w of space.windows)
@@ -187,7 +212,7 @@ export function diagnosePrivateV4DAuthor(author,contract){
  return r;
 }
 export function diagnosePrivateV4DInvalidJSON(contract){
- if(![COMPACT_SCHEMA,RELATIVE_SCHEMA].includes(contract))
+ if(![COMPACT_SCHEMA,RELATIVE_SCHEMA,RANKED_SCHEMA].includes(contract))
   throw Error('V4D_DIAG_UNRECOGNIZED_CONTRACT');
  const report=blank(contract,'INVALID_JSON');
  add(report,'ORIGINAL_RESPONSE_NOT_JSON');
