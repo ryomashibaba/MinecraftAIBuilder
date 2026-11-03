@@ -23,7 +23,7 @@ REQUIRED = (
 )
 
 def safe_policy():
-    """OpenCode 2 format; read-only and same-worktree only. Not an OS sandbox."""
+    """OpenCode 2 format; all providers blocked, tools read-only. Not an OS sandbox."""
     return {
         "$schema": "https://opencode.ai/config.json",
         "update": "disable",
@@ -37,7 +37,6 @@ def safe_policy():
         ],
         "policies": [
             {"action": "provider.use", "resource": "*", "effect": "deny"},
-            {"action": "provider.use", "resource": "opencode", "effect": "allow"},
             {"action": "tool.use", "resource": "*", "effect": "deny"},
             {"action": "tool.use", "resource": "read:*", "effect": "allow"},
             {"action": "tool.use", "resource": "glob:*", "effect": "allow"},
@@ -61,7 +60,7 @@ def call(argv, cwd=None, timeout=30):
 def validate_policy(p):
     rules = p["policies"]
     assert rules[0] == {"action": "provider.use", "resource": "*", "effect": "deny"}
-    assert rules[1] == {"action": "provider.use", "resource": "opencode", "effect": "allow"}
+    assert not any(x["action"] == "provider.use" and x["effect"] == "allow" for x in rules)
     assert any(x == {"action": "tool.use", "resource": "*", "effect": "deny"} for x in rules)
     assert any(x == {"action": "tool.use", "resource": "external_directory:*", "effect": "deny"} for x in rules)
     assert any(x == {"action": "external_directory", "resource": "*", "effect": "deny"} for x in p["permissions"])
@@ -107,7 +106,7 @@ def main():
             raise RuntimeError("GIT_NOT_FOUND")
         if shutil.which("opencode") is None:
             raise RuntimeError("OPENCODE_NOT_INSTALLED")
-        version = call(["opencode", "--version"], timeout=15)
+        version = call([shutil.which("opencode"), "--version"], timeout=15)
         # Explicitly refuse OpenCode 1 configuration because V1 permissions are different.
         if not re.search(r"(?<![0-9])2\.[0-9]+(?:\.[0-9]+)?", version):
             raise RuntimeError("OPENCODE_V2_REQUIRED")
