@@ -2,6 +2,16 @@
 
 **2026-11-02 JST 更新。長文プロンプト・ZIP交換なしで、GitHub正本を読み込んで既存開発を継続する。**
 
+## 2026-11-03 最新確定：V3実Qwen SOURCE 5/5成功／ART HOLD・スクショ手作業廃止
+
+- ユーザー提出 `FAILED_ONLY_RECOVERY_REPORT.json` と5ジャンルの正面・側面・俯瞰画像が新しいSOURCE実績。**`status=FIVE_FUNCTIONAL_SOURCE_CANDIDATES_ART_HOLD`、`sourceReadyCount=5`、`testInjectionPresent=false`、`qwen3:14b` HOME追加モデル呼出1、既存4成功の追加モデル呼出0、Minecraftワールド書込0**。これはローカルモデル自己申告の実験結果で、モデルサーバーの独立認証はない。以前HOMEの `R125_FUNCTIONAL_TOP_LEVEL` HOLDと旧原文は保存。
+- **元4件をSHA検証して再利用した上でHOMEだけ復旧**。HOME新真正幾何 `664b3211f3874e159e60f720638d12a466a4fefa2271dd2a5e2751c82e9c6182`。店舗 `83b9eae7...`、研究施設 `7850cd79...`、美術館 `7099f91e...`、駅舎 `a247a968...` は以前の真正B143 4成功のまま。
+- **ART HOLD全5件維持**。画像では用途による開口・屋根の違いはあるが、まだ共通の直方体集合感が強く、高品質な住宅／店舗／研究施設／美術館／駅舎としての全体構成・本格的な用途表現は不十分。SOURCE成立をARTや実Minecraft施工の承認に昇格させない。元ワールド書込0、9 BLOCKED、BuildPlan空。
+- ユーザー要望：**今後は5枚のスクリーンショット撮影を原則要求しない。** `scripts/r125-five-genre-source-art-overview.mjs` は真正B143実ボクセルから全5ジャンル×凍結屋根/V3×正面/側面/俯瞰の**同一縮尺のPNG一枚**を直接生成。Node標準機能のみでPNGを出力し、**非秘密のSOURCE形状SHA・状況をPNG内部メタデータに埋め込む**。誇張された建築イラストは生成しない。
+- **現在の実行結果を再使用**：`scripts/r125-v3-export-saved-overview.mjs` が保存済みの旧V1/V2/V3と今回のHOME回復回答原文を全部SHA照合し、追加モデル呼出0で新しい私人フォルダに `SOURCE_ART_OVERVIEW.png`、`OVERVIEW_AUDIT_REPORT.json`、`index.html` を作る。ユーザー用の既存安全PowerShellランチャーに `-UseCase CrossGenre -ExportOverviewLatest` を追加し、提出された既存の5/5レポートSHA `0eb4f025cad49ebf59f10a04aa9d1352fe5d0fa60ba8869a032063974f815cce` に一致したデータだけ処理。原本の再推論・上書きなし。
+- 今後HOMEだけの再検証を改めて実行した場合も `r125-v3-failed-only-home-recovery.mjs` がPNGを**自動保存**する。ユーザーはスクリーンショットではなく、この一枚のPNGをアップロードすればARTを横断評価できる。詳しい故障診断が必要な場合だけ監査JSONを追加で提出してもらう。今のユーザーには**モデルを再実行せず、保存済み5/5を一枚のPNGへ書き出す操作のみ**提示する。
+- 独立PNG書き込みはテスト画像を使ってPNG構造と埋込メタデータをローカルで読み取れた。新しいGitHub Actions回帰と全SOURCEチェーンの実Windows稼働は**まだ正式PASS未確認**。成功を捏造しない。main / Draft PR #128 / R125 Education実機成功 / 私人Qwen原文 / Work事前承認を保護。
+
 ## 2026-11-03 最新：V3本物5ジャンル4/5成功、住宅1件だけを再試験（部分成功凍結）
 
 - **ユーザー提出の最新実Qwenレポート `FUNCTIONAL_FACADE_REPORT.json` が正本**。Model `qwen3:14b`、modelCalls5、`testInjectionPresent=false`、SOURCE成立4/5、Minecraft書込0。成功は独立店舗（動線2/2、追加ガラス8セル・設備8セル）、研究施設（4/4、24・13）、小美術館（4/4、24・14）、小駅舎（3/3、16・9）。**住宅HOMEだけ `R125_FUNCTIONAL_TOP_LEVEL` で技術HOLD**。この集計から具体的な不正フィールドは未特定であり、原Qwen原文を見ずに推測で修正しない。5棟すべて美術ART HOLD。
