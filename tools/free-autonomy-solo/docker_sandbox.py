@@ -48,7 +48,7 @@ class DockerPolicy:
 
 
 def docker_argv(policy: DockerPolicy, workspace: Path, *, agent: bool, command: list[str], cidfile: Path) -> list[str]:
-    """No Docker socket, host $HOME, host model credentials, or arbitrary volumes."""
+    """No Docker socket or host credentials; QA network is always disabled."""
     if not workspace.is_absolute() or not (workspace / ".git").is_dir():
         raise SandboxHold("DEDICATED_CLONE_REQUIRED")
     if not command or not all(isinstance(x, str) and x and '\0' not in x for x in command):
@@ -77,7 +77,7 @@ def docker_argv(policy: DockerPolicy, workspace: Path, *, agent: bool, command: 
     base = ["docker", "run", "--rm", "--init", "--read-only", "--cap-drop=ALL",
             "--security-opt=no-new-privileges", "--pids-limit", str(policy.pids),
             "--memory", policy.memory, "--cpus", policy.cpus,
-            "--network", policy.network, "--user", "1000:1000",
+            "--network", (policy.network if agent else "none"), "--user", "1000:1000",
             "--tmpfs", "/tmp:rw,nosuid,noexec,size=256m",
             "--tmpfs", "/home/agent:rw,nosuid,size=512m",
             "--workdir", "/work", "--env", "HOME=/home/agent",
