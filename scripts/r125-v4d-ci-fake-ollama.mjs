@@ -6,6 +6,7 @@
 import http from 'node:http';
 import fs from 'node:fs';
 import {makeV4DCompactSynthetic} from './r125-v4d-compact-model-fixture.mjs';
+import {RANKED_SCHEMA} from '../source/ai/r125-v4e-ranked-exterior-ir.mjs';
 
 if(process.env.CI!=='true'||process.env.MAB_V4D_TEST_DOUBLE_MODE!=='1'||
  !process.env.MAB_V4D_FAKE_READY_FILE||
@@ -15,6 +16,14 @@ if(process.env.CI!=='true'||process.env.MAB_V4D_TEST_DOUBLE_MODE!=='1'||
 const invalid=makeV4DCompactSynthetic();
 invalid.spaces[1].attach.to='nonexistent-parent';
 const raw=JSON.stringify(invalid);
+const rankedInvalid=makeV4DCompactSynthetic();
+rankedInvalid.schema=RANKED_SCHEMA;
+for(const space of rankedInvalid.spaces){
+ delete space.windowSide;
+ space.windowPriority=space.kind==='sky'?null:['east','south','west','north'];
+}
+rankedInvalid.spaces[0].windowPriority=['east','east','west','north'];
+const rankedRaw=JSON.stringify(rankedInvalid);
 function send(res,body){
  res.writeHead(200,{'Content-Type':'application/json'});
  res.end(JSON.stringify(body));
@@ -34,8 +43,9 @@ const server=http.createServer((req,res)=>{
     res.writeHead(400).end();return;
    }
    fs.appendFileSync(process.env.MAB_V4D_FAKE_POST_LOG,'ONE_TEST_DOUBLE_POST\n');
+   const newContract=request.messages[0]?.content?.includes(RANKED_SCHEMA);
    send(res,{model:'qwen3:14b',choices:[{
-    finish_reason:'stop',message:{role:'assistant',content:raw}
+    finish_reason:'stop',message:{role:'assistant',content:newContract?rankedRaw:raw}
    }]});
   });
   return;

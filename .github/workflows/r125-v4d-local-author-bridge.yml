@@ -17,6 +17,7 @@ on:
       - 'scripts/r125-v4d-shareable-receipt.mjs'
       - 'scripts/r125-v4d-local-one-shot.ps1'
       - 'scripts/r125-v4d-one-click-setup.cmd'
+      - 'scripts/r125-v4e-one-click-ranked-trial.cmd'
       - 'scripts/r125-v4d-ci-fake-ollama.mjs'
       - 'scripts/r125-v4d-local-architect.test.mjs'
       - '.github/workflows/r125-v4d-local-author-bridge.yml'
@@ -107,6 +108,10 @@ jobs:
           if errorlevel 1 exit /b 1
           call scripts\r125-v4d-one-click-setup.cmd --prepare-only
           if errorlevel 1 exit /b 1
+          call scripts\r125-v4e-one-click-ranked-trial.cmd --check-only
+          if errorlevel 1 exit /b 1
+          call scripts\r125-v4e-one-click-ranked-trial.cmd --prepare-only
+          if errorlevel 1 exit /b 1
           echo PASS: one-click git branch cloned into an isolated LOCALAPPDATA folder; 0 model requests.
 
       - name: Test one-click Y flow over fake localhost HTTP, then ZERO-call diagnosis
@@ -171,6 +176,40 @@ jobs:
               throw "V4D_FAKE_PRIVATE_RAW_MISSING"
             }
             Write-Host "PASS: Windows one-click --run-once, exactly ONE FAKE localhost POST, automatic 0-call SOURCE diagnostics, zero world writes."
+            & $env:ComSpec /d /c "call scripts\r125-v4e-one-click-ranked-trial.cmd --run-once"
+            $rankedExit = $LASTEXITCODE
+            if ($rankedExit -ne 2) {
+              throw "V4E_FAKE_RANKED_EXPECTED_HOLD_2_GOT_$rankedExit"
+            }
+            $postLines = @(Get-Content -LiteralPath $env:MAB_V4D_FAKE_POST_LOG)
+            if ($postLines.Count -ne 2 -or $postLines[0] -ne 'ONE_TEST_DOUBLE_POST' -or
+                $postLines[1] -ne 'ONE_TEST_DOUBLE_POST') {
+              throw "V4E_ONE_ADDITIONAL_FAKE_MODEL_POST_PER_SEPARATE_USER_INITIATED_STUDY"
+            }
+            $newCreated = @(Get-ChildItem -LiteralPath $private -Directory | Where-Object {
+              $_.FullName -notin $before
+            })
+            $newOriginal = @($newCreated | Where-Object { $_.Name -like 'V4E_*' -and $_.Name -notlike 'V4E_REPLAY_*' })
+            $newReplays = @($newCreated | Where-Object { $_.Name -like 'V4E_REPLAY_*' })
+            if ($newOriginal.Count -ne 1 -or $newReplays.Count -ne 1) {
+              throw "V4E_RANKED_PRIVATE_STUDY_AND_REPLAY_COUNT"
+            }
+            $rankedAttempt = Get-Content -LiteralPath (Join-Path $newOriginal[0].FullName 'REVIEW_SUMMARY_SHAREABLE.json') -Raw | ConvertFrom-Json
+            $rankedStatus = Get-Content -LiteralPath (Join-Path $newReplays[0].FullName 'REPLAY_SHAREABLE_STATUS.json') -Raw | ConvertFrom-Json
+            if ($rankedAttempt.authorContract -ne 'minecraftaibuilder-r125-v4e-ranked-exterior-author-v1' -or
+                $rankedAttempt.failureCategory -ne 'RANKED_AUTHOR_EXTERIOR_INVALID' -or
+                $rankedAttempt.reportedStatus -ne 'HOLD_MODEL_OR_SOURCE_INVALID_NO_REPAIR' -or
+                $rankedAttempt.explicitlyInjectedTestResponse -ne $true -or
+                $rankedAttempt.modelCallAttempts -ne 1 -or
+                $rankedAttempt.worldWrites -ne 0 -or
+                $rankedStatus.replayStatus -ne 'HOLD_REPLAY_SOURCE_REJECTED' -or
+                $rankedStatus.structuralIssueCodes -notcontains 'RANKED_WINDOW_PRIORITY_INVALID' -or
+                $rankedStatus.additionalModelCalls -ne 0 -or
+                $rankedStatus.originalIsTestInjection -ne $true -or
+                $rankedStatus.worldWrites -ne 0) {
+              throw "V4E_FAKE_AUTHOR_DIAGNOSIS_OR_PRIVACY_SAFETY_BROKEN"
+            }
+            Write-Host "PASS: V4E opt-in separate one-click, ONE FAKE localhost POST, 0-call offline ranked-window diagnosis, no world writes."
             # The explicit HOLD exit 2 was EXPECTED and verified above. Do not
             # let its residual native code fail the successful CI contract.
             $global:LASTEXITCODE = 0
