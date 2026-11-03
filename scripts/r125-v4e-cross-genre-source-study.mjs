@@ -60,6 +60,16 @@ const CASES=[
   materials:{floor:'concrete',wall:'stone',roof:'wood',public:'accent'}}
 ];
 const reserved=['housing','shop','research','gallery','station'];
+// Explicit independent SYNTHETIC author choices, NEVER per-genre HOST geometry.
+// Former loggia corner choices would damage original two-wide public access
+// when reused for FULL-height principal massing; do not silently repair them.
+const MASSING_AUTHOR_SAMPLES={
+ housing:{spaceId:'welcome',corner:'NE'},
+ shop:{spaceId:'learning',corner:'NE'},
+ research:{spaceId:'learning',corner:'SW'},
+ gallery:{spaceId:'learning',corner:'NW'},
+ station:{spaceId:'learning',corner:'NE'}
+};
 export function syntheticFiveGenreAuthorCases(){
  return CASES.map(c=>{
   const x=makeV4DCompactSynthetic();
@@ -78,7 +88,10 @@ export function syntheticFiveGenreAuthorCases(){
    s.windowPriority=s.kind==='sky'?null:
     (i===0?['north','south','east','west']:['south','east','north','west']);
   }
-  return {genre:c.id,source:x,authoredSection:{spaceId:c.sectionRoom,corner:c.sectionCorner,recessDepth:6}};
+  return {genre:c.id,source:x,
+   authoredSection:{spaceId:c.sectionRoom,corner:c.sectionCorner,recessDepth:6},
+   authoredMassing:{...MASSING_AUTHOR_SAMPLES[c.id],
+    cutWidth:7,cutDepth:7,publicAccessSide:'X'}};
  });
 }
 export function exportV4ECrossGenreSource(folder){
@@ -106,10 +119,7 @@ export function exportV4ECrossGenreSource(folder){
   s.trueSectionSourceWitness.actualDiagonalWallCells<30||
   s.worldWrites!==0||s.readiness!=='NOT_PREPARED'))
   fail('NONRECT_SECTION_SOURCE_FAIL_CLOSED');
- const massing=samples.map(s=>compileAuthoredPrimaryMassingVoid(s.source,{
-  spaceId:s.authoredSection.spaceId,corner:s.authoredSection.corner,
-  cutWidth:7,cutDepth:7
- }));
+ const massing=samples.map(s=>compileAuthoredPrimaryMassingVoid(s.source,s.authoredMassing));
  const massingReview=compileB143Gallery(massing.map(s=>s.b143Design));
  const sectionReview=compileB143Gallery(sectioned.map(s=>s.sectionedB143Design));
  const review=compileB143Gallery(results.map(r=>r.b143.design));

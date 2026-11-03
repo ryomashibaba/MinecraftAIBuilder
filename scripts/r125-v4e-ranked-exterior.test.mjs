@@ -394,10 +394,7 @@ test('author-owned PRIMARY massing removes real roof and building volume while p
   =await import('./r125-v4e-cross-genre-source-study.mjs');
  const samples=syntheticFiveGenreAuthorCases();
  const frozen=structuredClone(samples);
- const cuts=samples.map(s=>compileAuthoredPrimaryMassingVoid(s.source,{
-  spaceId:s.authoredSection.spaceId,corner:s.authoredSection.corner,
-  cutWidth:7,cutDepth:7
- }));
+ const cuts=samples.map(s=>compileAuthoredPrimaryMassingVoid(s.source,s.authoredMassing));
  assert.equal(cuts.length,5);
  for(const cut of cuts){
   assert.notEqual(cut.baselineGeometrySha256,cut.finalGeometrySha256);
@@ -476,8 +473,8 @@ test('ONE-response authored massing combines independent program and true open-s
  const frozen=structuredClone(cases);
  for(const [i,s] of cases.entries()){
   const answer={...structuredClone(s.source),schema:MASSING_SCHEMA,
-   massing:{spaceId:s.authoredSection.spaceId,corner:s.authoredSection.corner,
-    cutWidth:7,cutDepth:7,publicAccessSide:i===0?'Z':'X'}};
+   massing:{...structuredClone(s.authoredMassing),
+    publicAccessSide:i===0?'Z':'X'}};
   const before=structuredClone(answer);
   const result=compileMassingAuthorIntent(answer);
   assert.deepEqual(answer,before);
@@ -527,8 +524,7 @@ test('ONE injected local massing response stays test-double and offline replay p
  const study=path.join(root,'study'),replay=path.join(root,'replay');
  const sample=syntheticFiveGenreAuthorCases()[0];
  const answer={...structuredClone(sample.source),schema:MASSING_SCHEMA,
-  massing:{spaceId:sample.authoredSection.spaceId,corner:sample.authoredSection.corner,
-   cutWidth:7,cutDepth:7,publicAccessSide:'Z'}};
+  massing:{...structuredClone(sample.authoredMassing),publicAccessSide:'Z'}};
  const calls=[],raw=JSON.stringify(answer);
  const fetcher=async(url,opt)=>{
   calls.push(opt?.method);
