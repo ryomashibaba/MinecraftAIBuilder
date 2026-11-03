@@ -146,6 +146,68 @@ export function surveyFunctionalFacadeOpenings({originalPlan,envelopeIntent}={})
  });
 }
 
+/**
+ * Feasible physical fixture choices for a model to AUTHOR, not a HOST plan.
+ * Each choice is a local wall-relative class whose true B143 voxel placement
+ * has been compiled and audited AFTER insertion for reachable 2-wide service.
+ * Two geometry groups suffice: 3x1 counter/worktable/bench, and 2x2
+ * storage/display. All materials in the IR are solid, so they share occupancy.
+ * No building/genre-specific branch, retry or Minecraft world contact.
+ */
+export function surveyFunctionalFixturePlacements({originalPlan,envelopeIntent}={}){
+ const spatial=compileSpatialComposition(originalPlan);
+ const roof=compileExpressiveEnvelopeV2({originalPlan,intent:envelopeIntent});
+ const rooms=spatial.layout.rooms;
+ const occupied=new Set(roof.compiled.primitives.map(p=>K(p[0],p[1],p[2])));
+ const classes=[
+  {probeKind:'counter',kinds:['counter','worktable','bench']},
+  {probeKind:'storage',kinds:['storage','display']}
+ ];
+ const output=[];
+ for(const [i,room] of rooms.entries()){
+  const choices=[];
+  for(const side of dirs)for(let offset=0;offset<=4;offset++)
+   for(const group of classes){
+    let fixture;
+    try{
+     fixture=createRoomFixture(room,{
+      side,offset,kind:group.probeKind,
+      material:'wood',purpose:'GENERIC_VOXEL_CLEARANCE_PROBE'},i);
+    }catch(e){
+     if(/^R125_FUNCTIONAL_FIXTURE_TOO_/.test(String(e?.message)))continue;
+     throw e;
+    }
+    const [x,y,z]=fixture.element.origin;
+    const [sx,sy,sz]=fixture.element.size;
+    let clear=true;
+    for(let xx=x;xx<x+sx;xx++)for(let yy=y;yy<y+sy;yy++)
+     for(let zz=z;zz<z+sz;zz++){
+      // Real air and a supported ground-level footprint, not drawn geometry.
+      if(occupied.has(K(xx,yy,zz))||!occupied.has(K(xx,y-1,zz)))
+       clear=false;
+     }
+    if(!clear)continue;
+    const design={...roof.design,elements:[...roof.design.elements,fixture.element]};
+    const compiled=compileDesign(design);
+    const product={...spatial,design,compiled,
+     sourceSha256:compiled.sourceSha256,geometrySha256:compiled.geometrySha256};
+    const routes=auditR125SourceRoutes(product,{
+     featureTargets:[fixture.target]});
+    if(routes.status!=='SOURCE_ROUTES_REACH_ALL_ZONES'||
+       routes.zones.some(x=>!x.reachedFromEntrance)||
+       routes.featureAccess.length!==1||
+       !routes.featureAccess[0].reachableFromEntrance||
+       !routes.featureAccess[0].supportedTwoWideServiceWitness)continue;
+    choices.push({side,offset,kinds:group.kinds,
+     evidence:'ACTUAL_B143_POST_PLACEMENT_TWO_WIDE_SERVICE'});
+   }
+  output.push({roomId:room.id,purpose:room.purpose,
+   availableFunctionalFixturePlacements:choices,
+   authorMustChooseKindSideOffsetFromOptions:true});
+ }
+ return output;
+}
+
 export function compileFunctionalFacadeV3({originalPlan,envelopeIntent,functionalIntent}={}){
  validateFunctionalIntent(originalPlan,functionalIntent);
  const spatial=compileSpatialComposition(originalPlan);
