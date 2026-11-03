@@ -25,7 +25,7 @@ const fixtureIntent=(p,attachedTo,caseIndex)=>({
  rooms:p.rooms.map((r,i)=>({
   roomId:r.id,
   fixture:{kind:kind[(i+caseIndex)%kind.length],
-   side:i?'east':'west',offset:0,
+   side:i?attachedTo:'north',offset:0,
    material:i?'stone':'wood',purpose:'Functional service for '+r.id},
   opening:{side:i?'south':attachedTo==='south'?'west':'south',
    offset:0,width:4,height:2}
