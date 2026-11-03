@@ -12,10 +12,11 @@ param(
   [switch]$StudyEnvelopeLatest,
   [switch]$StudyFunctionsLatest,
   [switch]$RecoverHomeOnly,
+  [switch]$ExportOverviewLatest,
   [ValidateSet('Lab','Retail','CrossGenre')][string]$UseCase = 'Lab'
 )
-if ((@($CheckOnly, $ReviewLatest, $PrepareLatest, $DiagnoseCrossGenreLatest, $CompareCrossGenreLatest, $StudyEnvelopeLatest, $StudyFunctionsLatest, $RecoverHomeOnly) | Where-Object { $_ }).Count -gt 1) { throw 'HOLD_INCOMPATIBLE_MODES' }
-if (($DiagnoseCrossGenreLatest -or $CompareCrossGenreLatest -or $StudyEnvelopeLatest -or $StudyFunctionsLatest -or $RecoverHomeOnly) -and $UseCase -ne 'CrossGenre') { throw 'HOLD_REVIEW_REQUIRES_CROSS_GENRE' }
+if ((@($CheckOnly, $ReviewLatest, $PrepareLatest, $DiagnoseCrossGenreLatest, $CompareCrossGenreLatest, $StudyEnvelopeLatest, $StudyFunctionsLatest, $RecoverHomeOnly, $ExportOverviewLatest) | Where-Object { $_ }).Count -gt 1) { throw 'HOLD_INCOMPATIBLE_MODES' }
+if (($DiagnoseCrossGenreLatest -or $CompareCrossGenreLatest -or $StudyEnvelopeLatest -or $StudyFunctionsLatest -or $RecoverHomeOnly -or $ExportOverviewLatest) -and $UseCase -ne 'CrossGenre') { throw 'HOLD_REVIEW_REQUIRES_CROSS_GENRE' }
 if ($UseCase -in @('Retail','CrossGenre') -and ($ReviewLatest -or $PrepareLatest)) { throw 'HOLD_RETAIL_REQUIRES_NEW_MODEL_RUN' }
 $ErrorActionPreference = "Stop"
 $branch = "feature/b198zr1-protected-architectural-revision"
@@ -76,7 +77,7 @@ try {
     & node --test scripts/r125-saved-education-preflight.test.mjs
     if ($LASTEXITCODE -ne 0) { throw "HOLD_EDUCATION_PREFLIGHT_REGRESSION" }
     if ($UseCase -eq 'CrossGenre') {
-      & node --test scripts/r125-cross-genre-pilot.test.mjs scripts/r125-cross-genre-offline-diagnostic.test.mjs scripts/r125-five-genre-source-comparison.test.mjs scripts/r125-expressive-envelope-v2.test.mjs scripts/r125-five-genre-real-envelope-pilot.test.mjs scripts/r125-functional-facade-v3.test.mjs scripts/r125-five-genre-real-functions-pilot.test.mjs scripts/r125-v3-failed-only-home-recovery.test.mjs
+      & node --test scripts/r125-cross-genre-pilot.test.mjs scripts/r125-cross-genre-offline-diagnostic.test.mjs scripts/r125-five-genre-source-comparison.test.mjs scripts/r125-expressive-envelope-v2.test.mjs scripts/r125-five-genre-real-envelope-pilot.test.mjs scripts/r125-functional-facade-v3.test.mjs scripts/r125-five-genre-real-functions-pilot.test.mjs scripts/r125-v3-failed-only-home-recovery.test.mjs scripts/r125-five-genre-source-art-overview.test.mjs scripts/r125-v3-export-saved-overview.test.mjs
       if ($LASTEXITCODE -ne 0) { throw 'HOLD_CROSS_GENRE_REGRESSION' }
     }
     if ($ReviewLatest -or $PrepareLatest) {
@@ -197,7 +198,7 @@ try {
       } else {
         $reviewViewer = Join-Path $out "index.html"
       }
-    } elseif ($RecoverHomeOnly) {
+    } elseif ($RecoverHomeOnly -or $ExportOverviewLatest) {
       # This mode is bound to the user's FIRST genuine 4/5 V3 report, not
       # whichever similarly named folder happens to be newest.
       $privateRoot = Join-Path $env:USERPROFILE "Documents\MAB_Private_Runs"
@@ -230,14 +231,34 @@ try {
           ((Get-FileHash -LiteralPath (Join-Path $_.FullName "FUNCTIONAL_FACADE_REPORT.json") -Algorithm SHA256).Hash.ToLowerInvariant() -ceq $expectedFunctions) } |
         Select-Object -First 1
       if (-not $oldV3) { throw "HOLD_ORIGINAL_FOUR_PASS_ONE_HOME_HOLD_NOT_MATCHED" }
-      $out = Join-Path $privateRoot ($previous.Name + "-homeonly-" + $revision.Substring(0,12) + "-" + [guid]::NewGuid().ToString("N").Substring(0,8))
-      Write-Host "SHA verified: four V3 SOURCE successes frozen; one original HOME TOP_LEVEL HOLD. Only HOME may receive one new Qwen request."
-      & node scripts/r125-v3-failed-only-home-recovery.mjs --study $previous.FullName --diagnostic (Join-Path $diagnostic.FullName "DIAGNOSTIC_REPORT.json") --envelopes $envelope.FullName --original-functions $oldV3.FullName --out $out
-      if ($LASTEXITCODE -ne 0) {
-        $runHold = $true
-        Write-Warning "HOME_ONLY_HOLD: the original four successes and failed raw are preserved. No extra retries or Minecraft writes."
+      if ($ExportOverviewLatest) {
+        # PINNED to the user's saved 5/5 report, not a random newer result.
+        $expectedRecoveryReport = "0eb4f025cad49ebf59f10a04aa9d1352fe5d0fa60ba8869a032063974f815cce"
+        $recovery = Get-ChildItem -LiteralPath $privateRoot -Directory -Filter ($previous.Name + "-homeonly-*") |
+          Where-Object { $_.Name -cmatch '^r125-cross-genre-[0-9]{8}-[0-9]{6}-[0-9a-f]{8}-homeonly-[0-9a-f]{12}-[0-9a-f]{8}$' -and
+            (Test-Path -LiteralPath (Join-Path $_.FullName "FAILED_ONLY_RECOVERY_REPORT.json")) -and
+            ((Get-FileHash -LiteralPath (Join-Path $_.FullName "FAILED_ONLY_RECOVERY_REPORT.json") -Algorithm SHA256).Hash.ToLowerInvariant() -ceq $expectedRecoveryReport) } |
+          Select-Object -First 1
+        if (-not $recovery) { throw "HOLD_SUBMITTED_FIVE_SOURCE_RECOVERY_NOT_MATCHED" }
+        $out = Join-Path $privateRoot ($previous.Name + "-art-overview-" + $revision.Substring(0,12) + "-" + [guid]::NewGuid().ToString("N").Substring(0,8))
+        Write-Host "Producing one genuine-source PNG. ZERO model inference, zero world writes."
+        & node scripts/r125-v3-export-saved-overview.mjs --study $previous.FullName --diagnostic (Join-Path $diagnostic.FullName "DIAGNOSTIC_REPORT.json") --envelopes $envelope.FullName --original-functions $oldV3.FullName --recovery $recovery.FullName --out $out
+        if ($LASTEXITCODE -ne 0) {
+          $runHold = $true
+          Write-Warning "ART_OVERVIEW_HOLD: No original records changed. No Qwen requests."
+        } else {
+          $reviewViewer = Join-Path $out "SOURCE_ART_OVERVIEW.png"
+        }
       } else {
-        $reviewViewer = Join-Path $out "index.html"
+        $out = Join-Path $privateRoot ($previous.Name + "-homeonly-" + $revision.Substring(0,12) + "-" + [guid]::NewGuid().ToString("N").Substring(0,8))
+        Write-Host "SHA verified: four V3 SOURCE successes frozen; one original HOME TOP_LEVEL HOLD. Only HOME may receive one new Qwen request."
+        & node scripts/r125-v3-failed-only-home-recovery.mjs --study $previous.FullName --diagnostic (Join-Path $diagnostic.FullName "DIAGNOSTIC_REPORT.json") --envelopes $envelope.FullName --original-functions $oldV3.FullName --out $out
+        if ($LASTEXITCODE -ne 0) {
+          $runHold = $true
+          Write-Warning "HOME_ONLY_HOLD: the original four successes and failed raw are preserved. No extra retries or Minecraft writes."
+        } else {
+          $reviewViewer = Join-Path $out "index.html"
+        }
       }
     } elseif ($CheckOnly) {
       Write-Host "CHECK_ONLY_PASS: no model call, no model output, no world writes."
