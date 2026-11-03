@@ -1,9 +1,11 @@
 # MinecraftAIBuilder — START HERE（新チャット・AI開発者の統一入口）
 
-## 2026-11-03 V4D第四案：反復beamを廃止した作者断面→連続折板外皮のSOURCE実装
+## 2026-11-03 V4D第四案：SOURCE CI PASS／真正3D独立予備ART REJECT
 
-- 第三案の実CI SOURCE PASS、独立ART REJECTを凍結。厚いbeam反復を微修正せず、**AUTHORが3区間の断面高低・折点・公共軸・左右翼・入口を指定し、HOSTが連続した折板屋根の実B143箱ランへ変換**する新たな独立オプトインの共通SOURCE能力を実装した。中央の公開空気軸・大屋根・用途翼を最初から同時生成する。
-- 新モジュール `source/ai/r125-v4d-folded-envelope.mjs`、合成AUTHOR原本・正負テスト、旧第三案と第四案の真正B143 3D＋上面/正面SVG＋JSON出力を既存Actionsへ接続。[第四案の設計・技術境界](docs/R125_V4D_FOLDED_ENVELOPE_STUDY_20261103_JA.md)。**新CIの結果未確認／ART NOT_REVIEWED／新Qwen0／Minecraft施工0**。美術正式採用0、NOT_PREPARED／9 BLOCKED／BuildPlan空／WorldWrites0。main/旧原本/Education実機経路を保護、PR #128 Draft維持、Work事前承認。
+- `r125-v4d-folded-envelope.mjs` でAUTHORの短い断面IR→連続折板屋根・左右用途・中央公開歩行軸を真正B143へ変換。**実反復beamを廃止して技術的な外皮連続性を改善**。元の第一〜第三案とR125 Education実機成功は保護。
+- 最終専用 [R125 CI #41607722412](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41607722412) **completed/success**（実装HEAD `11e17a1570e8f2eb1180e9d36cd3f07c538cc009`）。初回brief長超過HOLDと比較SVGクリップ失敗は安全契約を緩めず修正。Artifact ID **13216834546**、取得ZIP SHA256 **`d5606b864026f0a8fc5591ce176536b83f902f8f872c23282863387dbcb0bd4e`** とGitHub digest一致。
+- 第四案真正B143 15,598 voxel、連続屋根実検査3,560箇所、中央開放空間の2幅支持床候補312、実ガラス2,050、入口→中央/西翼/東翼のSOURCE到達3/3、118/160 B143要素。**2方向の独立真正voxel斜視でART予備REJECT**：反復屋根ノイズは減ったが、ガラス翼・3区間の継ぎ目・用途と都市公共性が弱い。正式人間ART認定0、正式採用0。第三案までのART REJECTも不変。
+- 次はこの建物の微装飾を繰り返さず、**左右翼の固定スキーマから脱して、公共空間・用途別機能・異なる連絡トポロジーを同時著作する共通IR**に取り組む。[第四案のSOURCE/美術/失敗経緯](docs/R125_V4D_FOLDED_ENVELOPE_STUDY_20261103_JA.md)。新Qwen0／WorldWrites0、NOT_PREPARED・9 BLOCKED・BuildPlan空、PR #128 Draft維持、main/旧原本/Education成功経路保護、Work事前承認。
 
 ## 2026-11-03 V4D第三案：SOURCE PASS、真正3D予備ART REJECT
 
