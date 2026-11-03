@@ -461,3 +461,53 @@ test('model-authored Z-facing public opening genuinely connects interior to open
    /R125_V4E_MASSING_AUTHOR_MASSING_CONTRACT/);
  }
 });
+
+test('ONE-response authored massing combines independent program and true open-sky B143 without host repair',async()=>{
+ const {MASSING_SCHEMA,compileMassingAuthorIntent,MASSING_SYSTEM_PROMPT}
+  =await import('../source/ai/r125-v4e-massing-author-ir.mjs');
+ const {syntheticFiveGenreAuthorCases}
+  =await import('./r125-v4e-cross-genre-source-study.mjs');
+ const cases=syntheticFiveGenreAuthorCases();
+ const frozen=structuredClone(cases);
+ for(const [i,s] of cases.entries()){
+  const answer={...structuredClone(s.source),schema:MASSING_SCHEMA,
+   massing:{spaceId:s.authoredSection.spaceId,corner:s.authoredSection.corner,
+    cutWidth:7,cutDepth:7,publicAccessSide:i===0?'Z':'X'}};
+  const before=structuredClone(answer);
+  const result=compileMassingAuthorIntent(answer);
+  assert.deepEqual(answer,before);
+  assert.equal(result.authorContract,MASSING_SCHEMA);
+  assert.notEqual(result.b143.geometrySha256,result.unchangedRankedGeometrySha256);
+  assert.equal(result.authoredMassingSourceWitness.genuinelyOpenSkyFloorCells,49);
+  assert.equal(result.authoredMassingSourceWitness.publicPortalAuthored,true);
+  assert.equal(result.authoredMassingSourceWitness.authorSelectedPublicPortalAxis,
+   answer.massing.publicAccessSide);
+  assert.equal(result.b143.sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert(result.b143.compiled.primitives.length>100);
+  assert.equal(result.worldWrites,0);
+  assert.equal(result.worldContacts,0);
+  assert.equal(result.humanArt,'NOT_REVIEWED');
+  assert.equal(result.realModel,'NOT_TESTED');
+  assert.equal(result.constructionApproved,false);
+  assert.equal(result.executionAllowed,false);
+  assert.deepEqual(result.gates,Array(9).fill('BLOCKED'));
+  assert.deepEqual(result.BuildPlan.operations,[]);
+ }
+ assert.deepEqual(cases,frozen);
+ assert(MASSING_SYSTEM_PROMPT.includes('publicAccessSide'));
+ const s=cases[0],a={...structuredClone(s.source),schema:MASSING_SCHEMA,
+  massing:{spaceId:s.authoredSection.spaceId,corner:s.authoredSection.corner,
+   cutWidth:7,cutDepth:7,publicAccessSide:'X'}};
+ for(const change of [
+  x=>{delete x.massing.publicAccessSide;},
+  x=>{x.massing.publicAccessSide='Y';},
+  x=>{x.massing.cutWidth=12;},
+  x=>{x.massing.corner='NW';},
+  x=>{x.massing.spaceId='garden';},
+  x=>{x.massing.extraHostRepair=true;},
+  x=>{x.schema='not-the-authored-massing-schema';}
+ ]){
+  const bad=structuredClone(a);change(bad);
+  assert.throws(()=>compileMassingAuthorIntent(bad),/R125_V4E_/);
+ }
+});
