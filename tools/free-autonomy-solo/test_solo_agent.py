@@ -7,7 +7,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from solo_agent import Hold, changed_files, check_paths, execute, validate
+from solo_agent import Hold, changed_files, check_paths, execute, validate, run_cmd
 
 
 def sh(root, *args):
@@ -16,6 +16,14 @@ def sh(root, *args):
 
 class SoloAgentTests(unittest.TestCase):
     def setUp(self):
+        # Exactly the same fake CLI exercises the supervisor's state logic;
+        # Docker process execution is intentionally mocked and NOT certified.
+        patcher = patch('solo_agent.docker_preflight', return_value={'container_execution_verified': False})
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        runner = patch('solo_agent.docker_exec', side_effect=lambda policy, cwd, *, agent, command, cidfile, timeout, log: run_cmd(command, cwd, timeout, log))
+        runner.start()
+        self.addCleanup(runner.stop)
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
         self.root = Path(self.tmp.name)
@@ -41,7 +49,7 @@ class SoloAgentTests(unittest.TestCase):
             'tasks': ['Create a tiny source file'], 'checks': [[os.sys.executable, '-c',
               "from pathlib import Path; assert Path('source/generated.txt').read_text() == 'ok'"]],
             'allowed_prefixes': ['source'], 'state_dir': str(self.root / 'state'),
-            'max_cycles': 3, 'per_task_attempts': 2,
+            'max_cycles': 3, 'per_task_attempts': 2, 'sandbox_runtime': 'docker',
         }
 
     def test_prototype_commits_verified_fake_only(self):
@@ -56,7 +64,7 @@ class SoloAgentTests(unittest.TestCase):
                          'research(free-autonomy): task 1 verified source candidate')
 
     def test_no_sandbox_is_hold(self):
-        with self.assertRaisesRegex(Hold, 'OS_SANDBOX_NOT_ATTESTED'):
+        with self.assertRaisesRegex(Hold, 'DOCKER_RUNTIME_NOT_ACKNOWLEDGED'):
             execute(dict(self.cfg), push=False, sandbox_attested=False)
         self.assertEqual(sh(self.repo, 'git', 'status', '--porcelain'), '')
 
