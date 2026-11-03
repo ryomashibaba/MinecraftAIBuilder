@@ -68,7 +68,7 @@ jobs:
           if (-not $beforeExists -and (Test-Path -LiteralPath $private)) {
             throw "V4D_WINDOWS_CHECK_ONLY_CREATED_PRIVATE_FILES"
           }
-          if ($output -notmatch "AUTHOR_MODE=COMPACT") {
+          if ($output -notcontains "AUTHOR_MODE=COMPACT") {
             throw "V4D_WINDOWS_DEFAULT_MODE_DRIFT"
           }
           Write-Host "PASS: Windows launch preflight, branch/head/node validated. 0 model calls, 0 world writes."
