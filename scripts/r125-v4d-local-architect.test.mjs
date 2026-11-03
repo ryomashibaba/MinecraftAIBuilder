@@ -509,3 +509,66 @@ test('invalid author-chosen section is PRIVATE HOLD with only one test-double PO
   assert.equal(receipt.sourceCandidateVerified,false);
  }finally{tmp.clean();}
 });
+
+
+test('the new model-authored V4E section uses exact private OFFLINE replay: zero additional POST',async()=>{
+ const {SECTIONED_SCHEMA,compileSectionedAuthorIntent}
+  =await import('../source/ai/r125-v4e-sectioned-author-ir.mjs');
+ const {syntheticFiveGenreAuthorCases}=await import('./r125-v4e-cross-genre-source-study.mjs');
+ const {replayPrivateV4D}=await import('./r125-v4d-replay-private.mjs');
+ const {diagnosePrivateV4DAuthor}
+  =await import('./r125-v4d-author-source-diagnostics.mjs');
+ const s=syntheticFiveGenreAuthorCases()[0],author={...structuredClone(s.source),
+  schema:SECTIONED_SCHEMA,section:structuredClone(s.authoredSection)};
+ const raw=JSON.stringify(author),temp=sandbox(),f=fakeOllama({raw});
+ try{
+  const original=await runV4DLocalAuthor({model:'qwen3:14b',
+   outDir:temp.out,rankedSection:true,prompt:'A complete genuine architectural section for this public building.'
+  },{fetcher:f.fetcher,timeoutMs:15000});
+  assert.equal(original.status,'HOLD_TEST_DOUBLE_NOT_REAL_MODEL');
+  const diagnosis=diagnosePrivateV4DAuthor(author,SECTIONED_SCHEMA);
+  assert.equal(diagnosis.issues.length,0);
+  assert.equal(diagnosis.privateStringsIncluded,false);
+  const originalHash=compileSectionedAuthorIntent(author).b143.geometrySha256;
+  const dest=path.join(temp.root,'replay');
+  const result=replayPrivateV4D(temp.out,dest);
+  assert.equal(result.status,'HOLD_TEST_DOUBLE_REPLAY_ONLY',JSON.stringify(result));
+  assert.equal(result.geometrySHA256Replayed,originalHash);
+  assert.equal(result.originalCompilerHashesMatch,true);
+  assert.equal(result.additionalModelCalls,0);
+  assert.equal(result.worldWrites,0);
+  assert(fs.existsSync(path.join(dest,'index.html')));
+  assert(!fs.existsSync(path.join(dest,'MODEL_RESPONSE_ORIGINAL.txt')));
+  assert.equal(f.calls.filter(x=>x.method==='POST').length,1);
+ }finally{temp.clean();}
+});
+test('invalid section replay fails closed and diagnoses without exposing model fields',async()=>{
+ const {SECTIONED_SCHEMA}=await import('../source/ai/r125-v4e-sectioned-author-ir.mjs');
+ const {syntheticFiveGenreAuthorCases}=await import('./r125-v4e-cross-genre-source-study.mjs');
+ const {replayPrivateV4D}=await import('./r125-v4d-replay-private.mjs');
+ const {diagnosePrivateV4DAuthor}
+  =await import('./r125-v4d-author-source-diagnostics.mjs');
+ const sample=syntheticFiveGenreAuthorCases()[0],author={
+  ...structuredClone(sample.source),schema:SECTIONED_SCHEMA,
+  section:{spaceId:'welcome',corner:'SW',recessDepth:999}
+ };
+ const raw=JSON.stringify(author),f=fakeOllama({raw}),temp=sandbox();
+ try{
+  const d=diagnosePrivateV4DAuthor(author,SECTIONED_SCHEMA);
+  assert(d.issues.some(x=>x.code==='SECTION_DEPTH_INVALID'));
+  assert(!JSON.stringify(d).includes(author.title));
+  const first=await runV4DLocalAuthor({model:'qwen3:14b',outDir:temp.out,
+   rankedSection:true,prompt:'One unique accessible civic building and outdoor loggia.'
+  },{fetcher:f.fetcher,timeoutMs:15000});
+  assert.equal(first.status,'HOLD_MODEL_OR_SOURCE_INVALID_NO_REPAIR');
+  const offline=replayPrivateV4D(temp.out,path.join(temp.root,'replay'));
+  assert.equal(offline.status,'HOLD_REPLAY_SOURCE_REJECTED');
+  assert.equal(offline.originalResponseIntegrity,'SHA256_MATCH');
+  assert.equal(offline.additionalModelCalls,0);
+  const publicStatus=JSON.parse(fs.readFileSync(path.join(temp.root,'replay','REPLAY_SHAREABLE_STATUS.json'),'utf8'));
+  assert.equal(publicStatus.replayStatus,'HOLD_REPLAY_SOURCE_REJECTED');
+  assert(publicStatus.structuralIssueCodes.includes('SECTION_DEPTH_INVALID'));
+  assert(!JSON.stringify(publicStatus).includes(author.title));
+  assert.equal(f.calls.filter(x=>x.method==='POST').length,1);
+ }finally{temp.clean();}
+});

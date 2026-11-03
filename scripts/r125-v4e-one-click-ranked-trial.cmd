@@ -6,13 +6,15 @@ rem Isolated branch download. Never modifies an existing MinecraftAIBuilder.
 set "REPO_URL=https://github.com/ryomashibaba/MinecraftAIBuilder.git"
 set "RESEARCH_BRANCH=feature/b198zr1-protected-architectural-revision"
 set "MODEL_ID=qwen3:14b"
+set "AUTHOR_FLAG=--ranked-windows"
+if /i "%~1"=="--sectioned" set "AUTHOR_FLAG=--ranked-section"
 if not defined LOCALAPPDATA goto MISSING_LOCALAPPDATA
 where git.exe >nul 2>nul
 if errorlevel 1 goto MISSING_GIT
 where node.exe >nul 2>nul
 if errorlevel 1 goto MISSING_NODE
 if /i "%~1"=="--check-only" goto CHECK_ONLY
-if not "%~1"=="" if /i not "%~1"=="--prepare-only" if /i not "%~1"=="--run-once" goto BAD_ARGUMENT
+if not "%~1"=="" if /i not "%~1"=="--prepare-only" if /i not "%~1"=="--run-once" if /i not "%~1"=="--sectioned" goto BAD_ARGUMENT
 
 set "WORK_ROOT=%LOCALAPPDATA%\MinecraftAIBuilder\IsolatedV4E"
 if not exist "%WORK_ROOT%" mkdir "%WORK_ROOT%"
@@ -60,7 +62,7 @@ set "OUTPUT_DIR=%PRIVATE_ROOT%\V4E_%RANDOM%_%RANDOM%"
 if exist "%OUTPUT_DIR%" goto FOLDER_COLLISION
 echo.
 echo Running ONE OPT-IN V4E ranked-exterior model trial; no automatic retry.
-node.exe "%WORK_DIR%\scripts\r125-v4d-local-architect.mjs" --ranked-windows --model "%MODEL_ID%" --out "%OUTPUT_DIR%" --prompt "Design an original small public library and workshop with a functional reception and a sheltered open-air community courtyard."
+node.exe "%WORK_DIR%\scripts\r125-v4d-local-architect.mjs" %AUTHOR_FLAG% --model "%MODEL_ID%" --out "%OUTPUT_DIR%" --prompt "Design an original small public library and workshop with a functional reception and a sheltered open-air community courtyard."
 set "NODE_EXIT=%ERRORLEVEL%"
 set "SHARE_FILE=%OUTPUT_DIR%\REVIEW_SUMMARY_SHAREABLE.json"
 echo.
@@ -134,7 +136,7 @@ echo ERROR: Node.js is not available. Nothing changed.
 goto DONE
 :BAD_ARGUMENT
 set "FINAL_EXIT=1"
-echo ERROR: Supported flags are --check-only, --prepare-only, and --run-once.
+echo ERROR: Supported flags are --check-only, --prepare-only, --run-once, and --sectioned.
 goto DONE
 :CANNOT_MAKE_FOLDER
 set "FINAL_EXIT=1"

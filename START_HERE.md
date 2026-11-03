@@ -1,5 +1,11 @@
 # MinecraftAIBuilder — START HERE（新チャット・AI開発者の統一入口）
 
+## 2026-11-03 V4E新モデル著作経路：ローカル1クリック＆0回再推論の診断対応
+
+- 先行の1回答 V4E断面研究CI [#41656219485](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41656219485) は Linux/Windows **completed/success**（注入模擬1POST、実Qwen 0、ART合格0、Minecraft世界書込0）。
+- 追加実装：`scripts/r125-v4e-one-click-sectioned-trial.cmd` のダブルクリックで既存の隔離Git cloneと任意Y/N単発ローカルQwen試行へ。従来V4E launcherの既定 `--ranked-windows` は保全。新モードは元回答、モデル著作した `section`、本物の最終B143、動線/窓/屋根/設備、原本SHAをPRIVATEに保存。新`SECTIONED_SCHEMA` を既存の**元SHA再検証付きオフライン診断**と必要最小限の共有JSONに対応させ、再モデルPOST 0、失敗時HOLD維持。コード保存直後のCIは未確認。
+- 当面の正式ゴールはローカル実Qwenが未知用途で多様かつ美しい実3D建築を出力すること。合成5件やCLI/CIの正常動作は実Qwen・Mac8GB・美術・世界施工のPASSではない。R125 Education成功・main・PR #128 Draft・9 BLOCKED・Work事前承認を維持。
+
 ## 2026-11-03 V4Eモデルが全体設計＋非矩形ロッジアを同じ1回答で著作する非既定研究
 
 - **実装** `source/ai/r125-v4e-sectioned-author-ir.mjs`、既存 `scripts/r125-v4d-local-architect.mjs --ranked-section` に統合。モデル応答の全体設計と明示 `section:{spaceId,corner,recessDepth}` の両方が満たされる時だけ、既存V4E→真B143→SOURCE動線に合格する。モデル出力は再編集しない。旧V4D/旧V4E既定は無変更、実モデルは依然未試行。失敗時はPRIVATE元回答を保持し、2回目の推論・Minecraft書込0、ART/世界の偽PASS禁止。

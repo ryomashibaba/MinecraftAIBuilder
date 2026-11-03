@@ -22,6 +22,7 @@ on:
       - 'scripts/r125-v4d-local-one-shot.ps1'
       - 'scripts/r125-v4d-one-click-setup.cmd'
       - 'scripts/r125-v4e-one-click-ranked-trial.cmd'
+      - 'scripts/r125-v4e-one-click-sectioned-trial.cmd'
       - 'scripts/r125-v4d-ci-fake-ollama.mjs'
       - 'scripts/r125-v4d-local-architect.test.mjs'
       - '.github/workflows/r125-v4d-local-author-bridge.yml'
@@ -141,6 +142,8 @@ jobs:
           call scripts\r125-v4d-one-click-setup.cmd --prepare-only
           if errorlevel 1 exit /b 1
           call scripts\r125-v4e-one-click-ranked-trial.cmd --check-only
+          if errorlevel 1 exit /b 1
+          call scripts\r125-v4e-one-click-sectioned-trial.cmd --check-only
           if errorlevel 1 exit /b 1
           call scripts\r125-v4e-one-click-ranked-trial.cmd --prepare-only
           if errorlevel 1 exit /b 1

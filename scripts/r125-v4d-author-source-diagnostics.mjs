@@ -8,9 +8,11 @@
 import {COMPACT_SCHEMA} from '../source/ai/r125-v4d-compact-model-ir.mjs';
 import {RELATIVE_SCHEMA} from '../source/ai/r125-v4d-relative-author-ir.mjs';
 import {RANKED_SCHEMA} from '../source/ai/r125-v4e-ranked-exterior-ir.mjs';
+import {SECTIONED_SCHEMA} from '../source/ai/r125-v4e-sectioned-author-ir.mjs';
 
 export const DIAGNOSTIC_SCHEMA='minecraftaibuilder-v4d-private-model-structural-diagnostic-v1';
 const ROOT_COMPACT=['schema','id','title','brief','materials','spaces'];
+const ROOT_SECTIONED=[...ROOT_COMPACT,'section'];
 const ROOT_DETAILED=['schema','id','title','brief','materials','spaces','entry','extraLinks'];
 const SPACE_COMPACT=['id','purpose','kind','width','depth','roof','height','facade','windowSide','feature','featureMaterial','attach'];
 const SPACE_RANKED=['id','purpose','kind','width','depth','roof','height','facade','windowPriority','feature','featureMaterial','attach'];
@@ -53,14 +55,16 @@ function safeProse(value){return typeof value==='string'&&value.length>=3&&value
 const opposite={east:'west',west:'east',south:'north',north:'south'};
 const dirs=['north','south','east','west'];
 export function diagnosePrivateV4DAuthor(author,contract){
- if(![COMPACT_SCHEMA,RELATIVE_SCHEMA,RANKED_SCHEMA].includes(contract))
+ if(![COMPACT_SCHEMA,RELATIVE_SCHEMA,RANKED_SCHEMA,SECTIONED_SCHEMA].includes(contract))
   throw Error('V4D_DIAG_UNRECOGNIZED_CONTRACT');
  const r=blank(contract);
  if(!record(author)){
   add(r,'TOP_LEVEL_NOT_OBJECT');return r;
  }
- const compact=contract===COMPACT_SCHEMA,ranked=contract===RANKED_SCHEMA;
- const top=keyCounts(author,(compact||ranked)?ROOT_COMPACT:ROOT_DETAILED);
+ const compact=contract===COMPACT_SCHEMA,sectioned=contract===SECTIONED_SCHEMA,
+ ranked=contract===RANKED_SCHEMA||sectioned;
+ const top=keyCounts(author,sectioned?ROOT_SECTIONED:
+  (compact||ranked)?ROOT_COMPACT:ROOT_DETAILED);
  r.missingTopLevelKeyCount=top.missing;
  r.unexpectedTopLevelKeyCount=top.unexpected;
  if(top.missing||top.unexpected)add(r,'TOP_LEVEL_FIELDS');
@@ -194,6 +198,22 @@ export function diagnosePrivateV4DAuthor(author,contract){
  }
  if(r.coveredSpaceCount<2||r.openPublicSpaceCount<1)
   add(r,'PROGRAM_REQUIRES_TWO_COVERED_AND_PUBLIC_OPEN_SPACE');
+ // Section choices are checked as author intent only; no geometry is inferred
+ // or corrected here. Detailed spatial collision is handled by true B143.
+ if(sectioned){
+  const s=author.section;
+  if(!record(s)||keyCounts(s,['spaceId','corner','recessDepth']).missing||
+     keyCounts(s,['spaceId','corner','recessDepth']).unexpected){
+   add(r,'SECTION_AUTHOR_FIELDS');
+  }else{
+   if(!['NW','NE','SW','SE'].includes(s.corner))
+    add(r,'SECTION_CORNER_INVALID');
+   if(!between(s.recessDepth,5,6))
+    add(r,'SECTION_DEPTH_INVALID');
+   if(!author.spaces.some(v=>record(v)&&v.id===s.spaceId&&v.kind==='covered'))
+    add(r,'SECTION_ROOM_NOT_COVERED');
+  }
+ }
  // Check linked wall window directions after reading ALL attachments.
  author.spaces.slice(0,6).forEach((space,i)=>{
   if(!record(space)||typeof space.id!=='string')return;
@@ -212,7 +232,7 @@ export function diagnosePrivateV4DAuthor(author,contract){
  return r;
 }
 export function diagnosePrivateV4DInvalidJSON(contract){
- if(![COMPACT_SCHEMA,RELATIVE_SCHEMA,RANKED_SCHEMA].includes(contract))
+ if(![COMPACT_SCHEMA,RELATIVE_SCHEMA,RANKED_SCHEMA,SECTIONED_SCHEMA].includes(contract))
   throw Error('V4D_DIAG_UNRECOGNIZED_CONTRACT');
  const report=blank(contract,'INVALID_JSON');
  add(report,'ORIGINAL_RESPONSE_NOT_JSON');
