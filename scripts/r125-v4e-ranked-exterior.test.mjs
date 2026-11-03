@@ -428,3 +428,36 @@ test('author-owned PRIMARY massing removes real roof and building volume while p
   spaceId:'garden',corner:'NE',cutWidth:7,cutDepth:7
  }),/R125_V4E_MASSING_PRIMARY_VOLUME_TOO_SMALL/);
 });
+
+test('model-authored Z-facing public opening genuinely connects interior to open-sky principal mass without inventing floor',async()=>{
+ const {compileAuthoredPrimaryMassingVoid}
+  =await import('../source/ai/r125-v4e-authored-primary-massing-void.mjs');
+ const {syntheticFiveGenreAuthorCases}
+  =await import('./r125-v4e-cross-genre-source-study.mjs');
+ const samples=syntheticFiveGenreAuthorCases();
+ const s=samples[0],frozen=structuredClone(s.source);
+ const selected={spaceId:s.authoredSection.spaceId,
+  corner:s.authoredSection.corner,cutWidth:7,cutDepth:7,
+  publicAccessSide:'Z'};
+ const result=compileAuthoredPrimaryMassingVoid(s.source,selected);
+ assert.deepEqual(s.source,frozen);
+ assert.deepEqual(result.authoredVoid,selected);
+ assert.equal(result.sourceMassingWitness.authorSelectedPublicPortalAxis,'Z');
+ assert.equal(result.sourceMassingWitness.publicPortalAuthored,true);
+ assert.equal(result.sourceMassingWitness.physicallyVerifiedPublicPortalWallCells,6);
+ assert(result.sourceMassingWitness.originalEntranceToOpenSky.twoByTwoSourcePadsReached>10);
+ assert.equal(result.sourceMassingWitness.originalEntranceToOpenSky.supported,true);
+ assert.equal(result.sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(result.sourceMassingWitness.genuinelyOpenSkyFloorCells,49);
+ assert.equal(result.sourceMassingWitness.originalGlassAndBothAirLayers.verifiedPanelGlassCells,36);
+ assert.equal(result.worldWrites,0);
+ assert.equal(result.realModel,'NOT_TESTED');
+ assert.equal(result.architectureQuality,'ART_HOLD');
+ assert.deepEqual(result.BuildPlan.operations,[]);
+ assert.deepEqual(result.gates,Array(9).fill('BLOCKED'));
+ for(const invalid of ['none','x','WEST','Y']){
+  assert.throws(()=>compileAuthoredPrimaryMassingVoid(s.source,
+   {...selected,publicAccessSide:invalid}),
+   /R125_V4E_MASSING_AUTHOR_MASSING_CONTRACT/);
+ }
+});
