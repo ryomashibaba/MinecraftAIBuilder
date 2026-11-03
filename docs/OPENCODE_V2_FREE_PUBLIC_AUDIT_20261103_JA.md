@@ -20,3 +20,11 @@ OpenCode公式 https://opencode.ai/v2/docs/console/models は、`glm-5.3-flash-f
 - `FREE_MODEL_NOT_AVAILABLE_IN_CURRENT_ACCOUNT` は、**選択モデルがカタログに見えなかった**という意味であり、アカウント解約やOpenCode自体の失敗を意味しない。
 - `MODEL_RESPONSE_RECORDED_NEEDS_INDEPENDENT_REVIEW` でも**品質未認定**。内容をChatGPT側で正本と照合し、間違い・見落とし・タスク特定能力を評価。真のSOURCE/ART/実Education改善は次工程。
 - 調査中の本物の PRIVATE Qwen原文、ユーザーのローカルプロジェクト、Minecraft世界ファイルは一切送信しない。
+
+## 2026-11-03：初回実GLM起動失敗の保存・再実行禁止診断
+- ユーザーPC初回実測：`MODEL_LISTED_NO_INFERENCE`／`FREE_MODEL_RUN_FAILED_OR_UNAVAILABLE`／`opencode/glm-5.3-flash-free`／`catalog_model_listed=true`／`model_run_invocations=1`。実HTTP要求数と課金結果は不明、正常なモデル回答は未取得。**`MODEL_LISTED_NO_INFERENCE` は失敗時に残った古い状態値であり、実推論0回を意味しない。**
+- 原因不明：旧コードは stderr とCLI終了コードを記録していなかった。認証、使用枠、OpenCode設定、CLIエラー、ネットワーク等のどれかはまだ確定していない。
+- 公式OpenCode CLI V2の `run --standalone`、`--archived`、`--agent`、`--model`、`--file` はドキュメントに存在するが、各PCの実行時認証・設定まで保証しない。
+- `scripts/opencode-v2-failure-diagnostic.py` を追加。以前のPRIVATE回答文字列を共有せず固定カテゴリに分類し、`run --help` と `--version` を照合。**新規モデル呼出0、Git変更0、Minecraft変更0**。過去に保存していない stderr を復元したと偽装しない。
+- `scripts/opencode-v2-free-public-audit.py` の再発防止として、モデル実行開始時に状態を `HOLD` に落とし、CLI戻り値と stderr の**固定カテゴリ・長さ・ハッシュだけ**を新レシートへ保存するよう修正した。原文 stderr や資格情報は共有禁止。
+- 優先は事後診断→原因の切り分け。**同一失敗を無闇に再試行しない**。無料のまま正常動作・課金0の根拠が取れない場合はOpenCodeを主経路に採用しない。旧main、通常研究、Draft PR #128、Qwen PRIVATE、Education成功経路は保持する。
