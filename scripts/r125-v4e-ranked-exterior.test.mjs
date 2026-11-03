@@ -202,3 +202,30 @@ test('V4E source witnesses each entire glass panel and both immediate AIR sides 
  assert.throws(()=>proveRankedExteriorPhysicalGlazing(blockedInward,blockedInward.chosenWindowFaces),
   /R125_V4E_RANKED_PHYSICAL_INWARD_AIR_OBSTRUCTED_/);
 });
+
+test('V4E generates inspectable true B143 3D and five projections, never ART or real model PASS',async()=>{
+ const fs=await import('node:fs'),os=await import('node:os'),path=await import('node:path');
+ const {exportV4ESourceArtEvidence}=await import('./r125-v4e-source-art-review.mjs');
+ const base=fs.mkdtempSync(path.join(os.tmpdir(),'v4e-source-art-'));
+ const folder=path.join(base,'review');
+ try{
+  const report=exportV4ESourceArtEvidence(folder);
+  assert.equal(report.provenance,'LOCAL_STATIC_SYNTHETIC_FIXTURE_NOT_A_QWEN_GEMMA_RESPONSE');
+  assert.equal(report.modelRequests,0);
+  assert.equal(report.artCertifications,0);
+  assert.equal(report.humanArt,'NOT_REVIEWED');
+  assert(report.actualFinalB143Voxels>100);
+  assert.equal(report.orthographicViews.length,5);
+  assert.equal(report.rankedPhysicalGlazingSourceProof.verifiedImmediateInwardAirCells,36);
+  assert.deepEqual(report.safety.gates,Array(9).fill('BLOCKED'));
+  assert.equal(report.safety.worldWrites,0);
+  const svg=fs.readFileSync(path.join(folder,'ACTUAL_FINAL_B143_FIVE_VIEWS.svg'),'utf8');
+  assert(svg.startsWith('<svg xmlns="http://www.w3.org/2000/svg"'));
+  for(const side of ['ROOF','NORTH','SOUTH','WEST','EAST'])
+   assert(svg.includes(side));
+  assert(fs.readFileSync(path.join(folder,'index.html'),'utf8').includes('html'));
+  assert.deepEqual(JSON.parse(fs.readFileSync(
+   path.join(folder,'SOURCE_ART_HOLD_REPORT.json'),'utf8')),report);
+  assert.throws(()=>exportV4ESourceArtEvidence(folder),/OUTPUT_MUST_BE_NEW/);
+ }finally{fs.rmSync(base,{recursive:true,force:true});}
+});

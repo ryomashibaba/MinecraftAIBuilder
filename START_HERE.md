@@ -1,5 +1,11 @@
 # MinecraftAIBuilder — START HERE（新チャット・AI開発者の統一入口）
 
+## 2026-11-03 V4E真正B143・五方向審査資料の一括出力（合成SOURCEのみ）
+
+- 既存V4Eの見た目をCIテスト数だけで評価しないため、単一の**合成AUTHOR入力**から最終B143実voxelで5方向（屋根/北/南/西/東）の正投影SVGと回転可能な既存B143 3D viewer、幾何SHA・窓両面AIR・9 BLOCKEDのSOURCEレポートを同時生成する読取専用工程を実装。既存のR125-V4D workflowに1つのART HOLD artifactとして結線。新実LLM呼出0、Minecraft世界接触0。合成の建築美術・実モデル汎化は**未認定**。
+- 生成器は `scripts/r125-v4e-source-art-review.mjs`。CIが成功しても建築美術や本物のQwenの成功ではなく、真正3Dを人間が確認できるようにしただけ。前工程CI #41646265050は別に完了確認が必要。今後は現物5ビューを審査し、十分な意匠が成立しなければ同じ箱形建築の窓調整を停止してAUTHOR全体構成の自由度に戻る。V4Eの1件実Qwen試行はローカルモデルにアクセス可能な時のみ実施。
+- `main`・凍結原本・Education実機成功・従来V4D標準を保護。PR #128 Open/Draft、NOT_PREPARED/9 BLOCKED/BuildPlan空/WorldWrites0、Workは事前承認。
+
 ## 2026-11-03 V4E窓の室内側AIRを真正B143で確認（コード保存済／CI結果未確定）
 
 - 以前のV4E実窓18セル／外気18セル検証に加え、各窓セルの直後の**室内側AIR**を本物の最終B143占有配列で確認し、塞がれていれば `R125_V4E_RANKED_PHYSICAL_INWARD_AIR_OBSTRUCTED_*` でfail-closedにする。片面だけ透明な見かけの窓を合格扱いしない。2窓＝36ガラスセル／各面36隣接空気セルを想定した合成正例と室内閉塞負例を研究テストに追加。

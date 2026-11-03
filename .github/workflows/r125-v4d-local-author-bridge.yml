@@ -7,6 +7,7 @@ on:
       - 'source/ai/r125-v4d-compact-model-ir.mjs'
       - 'source/ai/r125-v4e-ranked-exterior-ir.mjs'
       - 'scripts/r125-v4e-ranked-exterior.test.mjs'
+      - 'scripts/r125-v4e-source-art-review.mjs'
       - 'scripts/r125-v4d-compact-model-fixture.mjs'
       - 'scripts/r125-v4d-relative-author-synthetic.mjs'
       - 'scripts/r125-v4d-local-architect.mjs'
@@ -42,6 +43,7 @@ jobs:
           node --check source/ai/r125-v4d-compact-model-ir.mjs
           node --check source/ai/r125-v4e-ranked-exterior-ir.mjs
           node --check scripts/r125-v4e-ranked-exterior.test.mjs
+          node --check scripts/r125-v4e-source-art-review.mjs
           node --check scripts/r125-v4d-compact-model-fixture.mjs
           node --check scripts/r125-v4d-local-architect.mjs
           node --check scripts/r125-v4d-replay-private.mjs
@@ -57,6 +59,17 @@ jobs:
           node --test scripts/r125-v4d-replay-private.test.mjs
           node --test scripts/r125-v4d-author-source-diagnostics.test.mjs
           node --test scripts/r125-v4e-ranked-exterior.test.mjs
+      - name: Export true B143 V4E synthetic views for independent human ART review
+        run: |
+          node scripts/r125-v4e-source-art-review.mjs --out "$RUNNER_TEMP/v4e-source-art"
+          test -s "$RUNNER_TEMP/v4e-source-art/index.html"
+          test -s "$RUNNER_TEMP/v4e-source-art/ACTUAL_FINAL_B143_FIVE_VIEWS.svg"
+          test -s "$RUNNER_TEMP/v4e-source-art/SOURCE_ART_HOLD_REPORT.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: V4E-SYNTHETIC-FINAL-B143-3D-FIVE-VIEWS-ART-HOLD
+          path: ${{ runner.temp }}/v4e-source-art/
+          retention-days: 7
       - name: Record strong non-promotion boundary
         run: |
           echo '## V4D compact real-model bridge — CI only' >> "$GITHUB_STEP_SUMMARY"
