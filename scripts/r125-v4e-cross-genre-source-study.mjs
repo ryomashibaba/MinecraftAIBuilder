@@ -14,6 +14,7 @@ import {compileB143Gallery,renderB143Html}
  from './b143-gallery-core.mjs';
 import {actualOrthographicSvg} from './r125-v4e-source-art-review.mjs';
 import {compileAuthoredPublicLoggia} from '../source/ai/r125-v4e-authored-public-loggia.mjs';
+import {compileAuthoredPrimaryMassingVoid} from '../source/ai/r125-v4e-authored-primary-massing-void.mjs';
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const fail=x=>{throw Error('R125_V4E_CROSS_GENRE_'+x);};
 const CASES=[
@@ -105,6 +106,11 @@ export function exportV4ECrossGenreSource(folder){
   s.trueSectionSourceWitness.actualDiagonalWallCells<30||
   s.worldWrites!==0||s.readiness!=='NOT_PREPARED'))
   fail('NONRECT_SECTION_SOURCE_FAIL_CLOSED');
+ const massing=samples.map(s=>compileAuthoredPrimaryMassingVoid(s.source,{
+  spaceId:s.authoredSection.spaceId,corner:s.authoredSection.corner,
+  cutWidth:7,cutDepth:7
+ }));
+ const massingReview=compileB143Gallery(massing.map(s=>s.b143Design));
  const sectionReview=compileB143Gallery(sectioned.map(s=>s.sectionedB143Design));
  const review=compileB143Gallery(results.map(r=>r.b143.design));
  const template=fs.readFileSync(path.join(ROOT,'source/ai/b143-viewer-template.html'),'utf8');
@@ -116,6 +122,22 @@ export function exportV4ECrossGenreSource(folder){
   modelRequests:0,realModelGeneralization:'NOT_TESTED',sourceStatus:'SOURCE_TECH_ONLY',
   humanArt:'NOT_REVIEWED',preliminaryArt:'HOLD_PENDING_REAL_3D_REVIEW',
   minecraftWorldWrites:0,minecraftWalking:'NOT_TESTED',
+  primaryMassingResearch:{
+   status:'SOURCE_ONLY_HUMAN_ART_HOLD',
+   authorProvenance:'SYNTHETIC_EXPLICIT_MASSING_PARAMETERS_NOT_REAL_LLM',
+   genreSpecificPrescriptions:false,
+   openToSkyVolumeCutNotFacadePaint:true,
+   cases:massing.map((m,i)=>({
+    genre:samples[i].genre,authoredVoid:m.authoredVoid,
+    baselineGeometrySha256:m.baselineGeometrySha256,
+    finalGeometrySha256:m.finalGeometrySha256,
+    finalB143Voxels:m.b143Compiled.primitives.length,
+    sourceWitness:m.sourceMassingWitness,
+    sourceRoutes:m.sourceRoutes.status,
+    humanArt:m.architectureQuality,
+    worldWrites:m.worldWrites
+   }))
+  },
   sectionResearch:{
    status:'SOURCE_TECH_ONLY_NOT_GENERAL_IRREGULAR_ARCHITECTURE',
    genreSpecificHostPrescriptions:false,
@@ -133,7 +155,9 @@ export function exportV4ECrossGenreSource(folder){
   commonRepresentationLimitations:{
    allSpaceFootprintsAxisAlignedRectangles:true,
    noModelAuthoredNonrectangularEnvelopeOrMultiStoryCirculation:true,
-   geometryShaDifferenceDoesNotCertifyArchitectureArt:true
+   geometryShaDifferenceDoesNotCertifyArchitectureArt:true,
+   newResearchPrimaryVolumeCornerOpenSkyVoid:true,
+   existingDefaultArchitectureStillRectangular:true
   },
   cases:samples.map((s,i)=>({
    genre:s.genre,
@@ -152,11 +176,15 @@ export function exportV4ECrossGenreSource(folder){
  };
  fs.mkdirSync(folder);
  fs.writeFileSync(path.join(folder,'index.html'),renderB143Html(review,template),{flag:'wx'});
+ fs.writeFileSync(path.join(folder,'massing.html'),
+  renderB143Html(massingReview,template),{flag:'wx'});
  fs.writeFileSync(path.join(folder,'sectioned.html'),
   renderB143Html(sectionReview,template),{flag:'wx'});
  for(const [i,r] of results.entries()){
   fs.writeFileSync(path.join(folder,'FINAL_B143_'+samples[i].genre+'_FIVE_VIEWS.svg'),
    actualOrthographicSvg(r.b143.compiled.primitives),{flag:'wx'});
+  fs.writeFileSync(path.join(folder,'MASSING_B143_'+samples[i].genre+'_FIVE_VIEWS.svg'),
+   actualOrthographicSvg(massing[i].b143Compiled.primitives),{flag:'wx'});
   fs.writeFileSync(path.join(folder,'SECTION_B143_'+samples[i].genre+'_FIVE_VIEWS.svg'),
    actualOrthographicSvg(sectioned[i].sectionedCompiled.primitives),{flag:'wx'});
  }

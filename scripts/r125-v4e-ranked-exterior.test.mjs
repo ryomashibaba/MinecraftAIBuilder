@@ -252,6 +252,12 @@ test('five independent synthetic genres use one unmodified V4E→true B143 engin
   assert.equal(report.safety.worldWrites,0);
   assert(fs.existsSync(path.join(out,'index.html')));
   assert(fs.existsSync(path.join(out,'sectioned.html')));
+  assert(fs.existsSync(path.join(out,'massing.html')));
+  assert.equal(report.primaryMassingResearch.cases.length,5);
+  assert(report.primaryMassingResearch.cases.every(c=>
+   c.sourceWitness.genuinelyOpenSkyFloorCells===49&&
+   c.baselineGeometrySha256!==c.finalGeometrySha256&&
+   c.humanArt==='ART_HOLD'));
   assert.equal(report.sectionResearch.sectionedCases.length,5);
   assert(report.sectionResearch.sectionedCases.every(c=>
    c.oldGeometrySha256!==c.newGeometrySha256&&c.art==='NOT_REVIEWED'));
@@ -259,6 +265,8 @@ test('five independent synthetic genres use one unmodified V4E→true B143 engin
    const svg=fs.readFileSync(path.join(out,'FINAL_B143_'+genre+'_FIVE_VIEWS.svg'),'utf8');
    assert(svg.includes('ACTUAL final B143 voxels'));
    assert(fs.readFileSync(path.join(out,'SECTION_B143_'+genre+'_FIVE_VIEWS.svg'),'utf8')
+    .includes('ACTUAL final B143 voxels'));
+   assert(fs.readFileSync(path.join(out,'MASSING_B143_'+genre+'_FIVE_VIEWS.svg'),'utf8')
     .includes('ACTUAL final B143 voxels'));
   }
   assert.deepEqual(JSON.parse(fs.readFileSync(
@@ -400,6 +408,7 @@ test('author-owned PRIMARY massing removes real roof and building volume while p
   assert(cut.sourceMassingWitness.protectedFixtureVoxels>0);
   assert.equal(cut.sourceMassingWitness.originalGlassAndBothAirLayers.verifiedPanelGlassCells,36);
   assert(cut.sourceMassingWitness.originalEntranceToOpenSky.twoByTwoSourcePadsReached>10);
+  assert.equal(cut.sourceMassingWitness.originalEntranceToOpenSky.supported,true);
   assert.equal(cut.sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
   assert.equal(cut.architectureQuality,'ART_HOLD');
   assert.equal(cut.realModel,'NOT_TESTED');
