@@ -32,3 +32,11 @@ node .\scripts\r125-v4d-local-architect.mjs --model "qwen3:14b" --out $out --pro
 `scripts/r125-v4d-local-architect.test.mjs` は、短いAUTHOR IRの真正B143変換と3D/動線・外皮・設備サービス接続、入力無修正、偽モデル応答の非昇格、モデル未導入時のPOST=0、JSON打切り原文保護、不正IRの原文保護、localhost以外拒絶、既存フォルダの破壊防止を試す。CI完走の成否はリンクと実行HEADで確認して報告。
 
 固定保護：main不変更、Draft PR #128 Open/Draft/未マージ、元private Qwen原文・凍結V4D案不変更、Education成功経路不変更、NOT_PREPARED／9 BLOCKED／BuildPlan空／worldWrites0、Work事前承認制。**これがユーザーの目標である本当の高品質AI建築の達成を証明するものではない**。
+
+## 正式CI結果・実行境界（2026-11-03 JST）
+
+- [実装コミット ece29cbe](https://github.com/ryomashibaba/MinecraftAIBuilder/commit/ece29cbe5ba5ccf1ede9e996656e1de96cf8f6df)。[専用 GitHub Actions #41615154621](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41615154621) は **completed/success**（チェックアウトHEAD `ece29cbe5ba5ccf1ede9e996656e1de96cf8f6df`）。
+- Node.js構文検査、原文の変更を防ぐSOURCE設計翻訳、1合成AUTHORでの真正B143物理連続性・公開庭・設備接近、ルーフ意図で実geometryが変わる負例、偽Ollama `GET /api/tags`→`POST /v1/chat/completions` 1回、モデル未登録POST=0、`finish_reason=length` の元回答保存、非合法設計拒否、非loopback URL・重複引数・既存出力ディレクトリ拒否の**全8テスト合格、失敗0件**。テストの正常応答も `HOLD_TEST_DOUBLE_NOT_REAL_MODEL` としてART・実モデル認定なし。
+- GitHubのActions実行者には実Ollama権限もローカルPCへの操作経路もない。今回の実モデル `qwen3:14b` POST **0回**、実Qwen3:14Bの建築生成成功数 **0件**、新Education施工 **0件**。モデルが多様な未知用途で綺麗な建築を著作できるかは**わからない**。実機Mac 8GB/2Bでの速度とIR完走も未測定。
+- 次の段階はGitHubの合成案を増やすことではなく、ユーザーの許可済み**隔離ローカル環境が操作可能な時だけ**1件を実Ollamaで実行し、原文のSHA・失敗理由・SOURCE真正3D・美術判定を分離する。実モデルの失敗は追加無断再POSTしない。ローカル操作不能時は、安全な静的コード検証以上を「実機成功」と言わない。
+- 合否はSOURCE PASS（CIの合成試験に限定）／新モデルART NOT_REVIEWED／元ART HOLD・REJECT履歴維持／WorldWrites0。旧main、Draft PR #128、R125 Education成功原本、PRIVATEモデル応答は全保持。

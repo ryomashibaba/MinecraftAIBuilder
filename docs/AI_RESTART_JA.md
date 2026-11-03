@@ -1,5 +1,7 @@
 # MinecraftAIBuilder — 開発再開の最新正本案内（2026-11-03）
 
+**2026-11-03最新工程：実LLMへの接続準備（CI 8/8 PASS／実Qwen未実行）。** 相対AUTHOR建築IRから旧汎用SOURCEグラフ・外皮統合・B143・二幅動線に安全に渡す橋を実装。現行HEADはSTART_HEREから照合し、専用CI [#41615154621](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41615154621) を参照。これは注入テストダブルによる通信・SOURCE 8/8 PASSで**モデル実設計の成功ではない**。実Qwenの1件試行はローカル接続がある時のみ、Private原文保存・1POST・fail closed。モデル新推論0、Minecraft世界書込0、ART採用0、mainとEducation成功経路保護。[研究正本](R125_V4D_LOCAL_REAL_AUTHOR_BRIDGE_20261103_JA.md)。
+
 **2026-11-03最新進捗：** V4D汎用AUTHORグラフの屋根・外壁接合欠損、4幅共有扉、公共庭半屋外区画を独立研究コンパイラで実B143補修。専用GitHub Actions #41612917826完走SOURCE 3/3 PASS、元の欠損壁セル545/403/433を補修。一方、ARTは独立真正3D予備REJECT 3/3で正式採用0。合成設計の反復に固執せず、次は実LLM短いIRの接続/用途・外殻・半屋外の統合品質へ。モデル新推論0、世界書込0、旧実機成功保護。詳細はSTART_HEREの先頭と研究専用報告。
 
 **最新2026-11-03 SOURCE進捗（上位は START_HERE）**：研究HEADのV4D汎用空間グラフは直列/分岐/環状3件の合成AUTHORを同一SOURCE/真正B143へ変換、専用R125 CI #41610782194 completed/success。真正3D独立予備ARTは3/3 REJECT、実Qwen新設計0／Minecraft施工0／正式美術採用0。次は公共空間の立体性・外皮接合・用途設備の一体設計を、固定テンプレートに戻らず共通IRで改善。** 旧V4C工程案は履歴として下に保持。

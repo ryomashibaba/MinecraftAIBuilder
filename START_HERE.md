@@ -1,10 +1,13 @@
 # MinecraftAIBuilder — START HERE（新チャット・AI開発者の統一入口）
 
-## 2026-11-03 V4D実LLMブリッジ：短い相対AUTHOR IR → R125実B143（新CI待ち）
+## 2026-11-03 V4D実LLM設計IRブリッジ：専用CI 8/8 PASS／実モデル著作は未実行
 
-- 前回のSOURCE 3/3 PASS／真正3D ART 3/3 REJECTを不変の証拠として保持。箱形合成案の細工を中止し、**本物のモデルが未知の建築を著作するための相対配置・機能・外皮・半屋外・屋根断面の短いAUTHOR IR**に移る。オプトイン研究 `source/ai/r125-v4d-relative-author-ir.mjs` はモデル自身が選んだ設計を座標アンカーへ変換し、既存 `r125-v4d-authored-topology.mjs`→`r125-v4d-envelope-integration.mjs`→真正B143→2幅SOURCE動線・設備サービスへ連結する。HOSTがモデルの失敗案を勝手に修理しない。
-- `scripts/r125-v4d-local-architect.mjs` は既存Ollama preflight→正確なローカルモデルへ最大1回のJSON応答POST、原文を失敗時も非公開フォルダへ保存。モデルが不正JSON/衝突/ルート不通ならHOLDし、再POSTなし。出力は個人のGitリポジトリ外に限定、Minecraftコマンドなし。専用の**注入テストのみ** CI `.github/workflows/r125-v4d-local-author-bridge.yml` へ接続。**この時点で本物のQwen/Gemma新推論0、CI結果未確認、人間ART・実機施工とも未認定**。[全仕様・私有原文保護・最小操作](docs/R125_V4D_LOCAL_REAL_AUTHOR_BRIDGE_20261103_JA.md)。
-- main・旧凍結V4D/元Qwen・R125→B143→Education成功経路を保護。PR #128 Open/Draft/未マージ、Work事前承認。NOT_PREPARED／9 BLOCKED／BuildPlan空／WorldWrites0。実CIテストのB143成功を「実Qwen設計」と誤認しない。
+- **実装済：** 本物のOllamaモデルが建築の用途・相対配置・屋根・外皮・公開庭・機能設備を短いAUTHOR IRとして選び、HOSTは同じ凍結済みSOURCEエンジンへ無修正で翻訳する。相対IR `source/ai/r125-v4d-relative-author-ir.mjs` → 元 `r125-v4d-authored-topology.mjs` → `r125-v4d-envelope-integration.mjs` → 真正B143/二幅SOURCE動線/設備サービス位置。genre別テンプレートやモデル失敗の自動修復なし。
+- ローカル実行 `scripts/r125-v4d-local-architect.mjs` は既存 `preflightR125Ollama` → 127.0.0.1限定でモデル1回POST、未完成/無効応答も**元テキストを非公開フォルダに凍結**、実B143の1つの回転ビューアをローカルへ保存。外部API/課金/PCへの自動接続/Minecraft世界接触なし。
+- 実装 [ece29cbe5ba5ccf](https://github.com/ryomashibaba/MinecraftAIBuilder/commit/ece29cbe5ba5ccf1ede9e996656e1de96cf8f6df)、専用 [GitHub Actions #41615154621](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41615154621) は **completed/success、8/8テストPASS・fail0**（Node構文、合成AUTHOR→B143真正変換、模擬Ollama GET+POST=1、テストダブル非昇格、モデル未登録POST=0、途切れた原文保護、invalid IR拒否、外部endpoint/既存フォルダ拒否）。**テストのネットワークは明示的に注入した模擬応答のみ。実Qwen/Gemmaの新規推論0。** 今回のCIで実建築美術のART認定やモデル汎化を宣言しない。
+- 元V4D第一〜第四案と汎用3グラフ/屋根接合のART REJECT証拠を保持。次の実質価値判断は**本当に1件のローカルモデルが未知依頼からオリジナルIRを生成できるか**を、非公開原文とSOURCE結果から独立検証すること。モデルの出力が失敗なら推論能力不足・IR冗長/形式制約・幾何エンジン由来を分離して調査する。現在はモデル実機接続なしのため未実行。詳細：[V4D実LLMブリッジ研究正本](docs/R125_V4D_LOCAL_REAL_AUTHOR_BRIDGE_20261103_JA.md)。
+- main・全凍結原本・R125→B143→Education実機成功・Private Qwen原文を保護、Draft PR #128 Open/未マージ、NOT_PREPARED・9 BLOCKED・BuildPlan空・WorldWrites0、Work事前承認。**ユーザーによるPC操作をこの工程で要求しない。**
+
 
 ## 2026-11-03 V4D屋根・外壁接合と公共半屋外：正式SOURCE PASS 3/3、真正3D予備ART REJECT 3/3
 
