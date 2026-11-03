@@ -114,7 +114,7 @@ function encodePng(width,height,pixels,metadata){
 /** Input stages must be independently verified before calling this renderer. */
 export function renderFiveGenreSourceEvidence(cases,report){
  if(!Array.isArray(cases)||cases.length!==5||
-    cases.some((c,i)=>c.id!==GENRES[i])||
+    cases.some((c,i)=>c.id!==GENRES[i]||!c.base)||
     !report||typeof report.status!=='string'||
     report.worldWrites!==0||report.art==='PASS'||report.minecraft==='PASS')
   fail('PROVENANCE_OR_WORLD_WRITE');
@@ -157,7 +157,7 @@ export function renderFiveGenreSourceEvidence(cases,report){
   drawText(fill,(i+1)+' '+LABELS[i],pad,y+5,2);
   metadata.cases.push({id:c.id,status:c.status??null,
    frozenV2GeometrySha256:c.base?.geometrySha256??null,
-   finalV3GeometrySha256:c.finalGeometrySha256??null,
+   finalV3GeometrySha256:c.final?c.finalGeometrySha256??null:null,
    finalPresent:!!c.final});
   for(const [k,scene] of [['FROZEN V2',c.base],['V3 SOURCE',c.final]]){
    const left=pad+(k==='V3 SOURCE'?panelW+gap:0),top=y+rowHeader;
