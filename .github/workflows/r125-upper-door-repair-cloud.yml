@@ -27,6 +27,10 @@ on:
       - 'source/ai/r125-sculpted-spine-v4d.mjs'
       - 'source/ai/r125-v4d-void-relief.mjs'
       - 'source/ai/r125-v4d-civic-swept-shell.mjs'
+      - 'source/ai/r125-v4d-folded-envelope.mjs'
+      - 'scripts/r125-v4d-folded-envelope-fixture.mjs'
+      - 'scripts/r125-v4d-folded-envelope.test.mjs'
+      - 'scripts/r125-v4d-folded-envelope-review.mjs'
       - 'scripts/r125-v4d-civic-swept-shell-fixture.mjs'
       - 'scripts/r125-v4d-civic-swept-shell.test.mjs'
       - 'scripts/r125-v4d-civic-swept-shell-review.mjs'
@@ -158,6 +162,21 @@ jobs:
         with:
           name: R125-V4D-Third-Civic-Swept-Shell-True-B143-SOURCE-ART-HOLD
           path: ${{ runner.temp }}/v4d-civic-shell/
+          if-no-files-found: error
+          retention-days: 14
+      - name: V4D fourth continuous folded envelope true B143 and fail-closed AUTHOR QA
+        run: |
+          node --check source/ai/r125-v4d-folded-envelope.mjs
+          node --check scripts/r125-v4d-folded-envelope-fixture.mjs
+          node --check scripts/r125-v4d-folded-envelope-review.mjs
+          node --test scripts/r125-v4d-folded-envelope.test.mjs
+      - name: Generate actual B143 third versus fourth continuous canopy design evidence
+        run: node scripts/r125-v4d-folded-envelope-review.mjs --out "$RUNNER_TEMP/r125-v4d-folded-shell"
+      - name: Archive V4D fourth true continuous roof 3D and cross-section, ART not reviewed
+        uses: actions/upload-artifact@v4
+        with:
+          name: R125-V4D-Fourth-Continuous-Folded-Shell-True-B143-ART-HOLD
+          path: ${{ runner.temp }}/r125-v4d-folded-shell/
           if-no-files-found: error
           retention-days: 14
       - name: Parse real Windows PowerShell launcher before any Windows handoff

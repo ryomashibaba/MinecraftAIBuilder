@@ -1,5 +1,10 @@
 # MinecraftAIBuilder — START HERE（新チャット・AI開発者の統一入口）
 
+## 2026-11-03 V4D第四案：反復beamを廃止した作者断面→連続折板外皮のSOURCE実装
+
+- 第三案の実CI SOURCE PASS、独立ART REJECTを凍結。厚いbeam反復を微修正せず、**AUTHORが3区間の断面高低・折点・公共軸・左右翼・入口を指定し、HOSTが連続した折板屋根の実B143箱ランへ変換**する新たな独立オプトインの共通SOURCE能力を実装した。中央の公開空気軸・大屋根・用途翼を最初から同時生成する。
+- 新モジュール `source/ai/r125-v4d-folded-envelope.mjs`、合成AUTHOR原本・正負テスト、旧第三案と第四案の真正B143 3D＋上面/正面SVG＋JSON出力を既存Actionsへ接続。[第四案の設計・技術境界](docs/R125_V4D_FOLDED_ENVELOPE_STUDY_20261103_JA.md)。**新CIの結果未確認／ART NOT_REVIEWED／新Qwen0／Minecraft施工0**。美術正式採用0、NOT_PREPARED／9 BLOCKED／BuildPlan空／WorldWrites0。main/旧原本/Education実機経路を保護、PR #128 Draft維持、Work事前承認。
+
 ## 2026-11-03 V4D第三案：SOURCE PASS、真正3D予備ART REJECT
 
 - 実装 [2c69cdb](https://github.com/ryomashibaba/MinecraftAIBuilder/commit/2c69cdb74cb9db131b43602070919bd7161c86c3)、専用 [Actions #41605640699](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41605640699) **completed/success**。Artifact ID **13216097158**、取得ZIP SHA256 `141e971c28484221dbcbb9a5986eecb38928680190c922fc76659f91d03af182` とGitHub digestが一致。
