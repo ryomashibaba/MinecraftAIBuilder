@@ -42,6 +42,16 @@ class DockerSandboxTests(unittest.TestCase):
             docker_argv(self.policy, self.repo, agent=False,
                         command=['bash', '-lc', 'rm -rf /'], cidfile=self.root / 'cid')
 
+    def test_qa_network_is_never_bridge_even_when_agent_is_online(self):
+        policy = DockerPolicy(network='bridge')
+        qa = docker_argv(policy, self.repo, agent=False, command=['node', '--version'],
+                         cidfile=self.root / 'qa.cid')
+        agent = docker_argv(policy, self.repo, agent=True,
+                            command=['opencode', 'run', '--auto', '--model', 'ollama/qwen3:14b', 'task'],
+                            cidfile=self.root / 'agent.cid')
+        self.assertEqual(qa[qa.index('--network') + 1], 'none')
+        self.assertEqual(agent[agent.index('--network') + 1], 'bridge')
+
     def test_rejects_network_without_explicit_approval(self):
         with self.assertRaisesRegex(SandboxHold, 'NETWORK_REQUIRES_EXPLICIT_APPROVAL'):
             DockerPolicy.from_config({'docker': {'network': 'bridge'}})
