@@ -115,7 +115,8 @@ export function surveyFunctionalFacadeOpenings({originalPlan,envelopeIntent}={})
  const rooms=baseline.layout.rooms;
  const doors=roof.design.elements.filter(e=>e.mode==='cut'&&
   /^(exterior-entrance|joint-\d+)$/.test(e.id));
- const occupied=new Set(roof.compiled.primitives.map(p=>K(p[0],p[1],p[2])));
+ const occupied=new Map(roof.compiled.primitives.map(p=>[K(p[0],p[1],p[2]),p[3]]));
+ const glass=MATERIALS.indexOf('glass');
  return rooms.map(r=>{
   const choices=[];
   for(const width of [4,3])for(const side of dirs)for(let offset=0;offset<=4;offset++){
@@ -124,12 +125,15 @@ export function surveyFunctionalFacadeOpenings({originalPlan,envelopeIntent}={})
     outsideWallIsReal(r,candidate.cut,rooms);
     if(doors.some(d=>intersects(d,candidate.cut)))continue;
     const [x,y,z]=candidate.cut.origin,[sx,sy,sz]=candidate.cut.size;
-    let existingSolid=0;
+    let existingSolid=0,newGlazedCells=0;
     for(let xx=x;xx<x+sx;xx++)for(let yy=y;yy<y+sy;yy++)
      for(let zz=z;zz<z+sz;zz++){
-      if(occupied.has(K(xx,yy,zz)))existingSolid++;
+      const key=K(xx,yy,zz);
+      if(occupied.has(key))existingSolid++;
+      if(occupied.has(key)&&occupied.get(key)!==glass)newGlazedCells++;
      }
-    if(existingSolid<4)continue;
+    // No pre-existing voids, partial wall openings or all-glass "new" glazing.
+    if(existingSolid!==sx*sy*sz||newGlazedCells<1)continue;
     choices.push({side,offset,width,height:2});
    }catch(error){
     if(!/^R125_FUNCTIONAL_(WINDOW_|OPENING_)/.test(String(error?.message)))
