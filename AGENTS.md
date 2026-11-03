@@ -1,29 +1,14 @@
-# AGENTS.md — MinecraftAIBuilder / 外部コーディングAI用安全入口
-更新基準: 2026-11-03。これはOpenCode移行**試験**のための補助指示であり、既存の憲章・設計・保護条件を上書きしない。
+# MinecraftAIBuilder — AI開発者共通入口
+これはChatGPT、ローカルLLM、OpenCodeなど**提供元に依存しない**安全契約。既存の憲章・正本が優先し、無料クラウドを無制限とみなさない。
 
-## 正本を読む順序
-1. `START_HERE.md` の最新版・リンク先を確認する。
-2. `docs/AI_RESTART_JA.md`、`docs/AI_PROJECT_CHARTER_JA.md`、`docs/PROJECT_STRATEGY_V2_JA.md`、`docs/R125_THIN_VERTICAL_SLICE_PLAN_JA.md` を読み、現在の作業に必要な規則を把握する。
-3. V4Dに関わる場合は `docs/R125_V4D_LOCAL_REAL_AUTHOR_BRIDGE_20261103_JA.md` と実コード、該当CIを確認する。
-4. 必ずGitの現在HEAD・差分・現在のCIを取り直す。文書に記載された古いSHAや「PASS」を現在の実行結果と取り違えない。
+## 読む順序
+`START_HERE.md`、`docs/AI_RESTART_JA.md`、`docs/AI_PROJECT_CHARTER_JA.md`、`docs/PROJECT_STRATEGY_V2_JA.md`、`docs/R125_THIN_VERTICAL_SLICE_PLAN_JA.md`。V4Dは`docs/R125_V4D_LOCAL_REAL_AUTHOR_BRIDGE_20261103_JA.md`。最新HEAD/差分/CIも取り直す。
 
-## 開発の本来の目的
-未知の自然言語要求から、モデル自身が独創的で使える建築を設計し、真正3D・機能・美術・実Minecraftの可用性を別々に証明する。R125→B143→Educationの実機成功経路を保護。テスト本数、形式的SOURCE PASS、工程番号だけを完成と呼ばない。小型ローカルモデル対応の目標も捨てない。
+## 固定方針
+未知用途から独創的・使える真正3D建築をAI自身が作り、SOURCE・形状機能・人のART・Education実機・未知用途汎化を別々に判断。小型Mac 8GB/2B対応も維持。R125→B143→Educationの成功経路を保護する。形式PASSを建築完成と呼ばない。
 
 ## 絶対保護
-- `main`、既存研究/開発ブランチ、Draft PR #128の状態、凍結B143/Qwen原本、過去の実機成功・PRIVATE原文を変更・上書き・merge・force pushしない。
-- ユーザーの認証情報、非公開モデル原文、個人用フォルダ、ワールドのデータを無料クラウドAI、GitHub、ログ、テレメトリーへ意図せず送らない。送信可否が不明なら停止して確認する。
-- 新しい試験は隔離コピー・専用作業ブランチで。デフォルトはSOURCEのみ、Minecraftワールドへの書込みはしない。既存憲章の実機施工包括許可は技術的安全ゲートの免除ではない。
-- `NOT_PREPARED`、9 `BLOCKED`、空のBuildPlan、WorldWrites0など未解除の実装ゲートを、推測で解除しない。
-- 無料モデル・API利用・外部サービスの費用とデータ取扱いを事前確認。**有料API/有料モデル/自動課金は禁止**。必要ならHOLD。
-- Work・mainへの反映・Draft PR #128の操作は事前承認なしに行わない。
+`main`、既存の開発ブランチ、Draft PR #128、凍結Qwen/B143原本、PRIVATE応答、既存ワールドを無承認変更・公開・マージしない。書込実験は隔離コピーのみ。ワールド施工は技術ゲートを満たすまでは禁止。 `NOT_PREPARED` / 9 `BLOCKED` / BuildPlan空 / WorldWrites0を勝手に解除しない。実模型や模擬CIを実LLM・ART・施工PASSに昇格させない。非公開データ・認証情報は無料クラウドに送らない。有料API・有料モデル・自動チャージ・Work・main更新は事前承認が必要。
 
-## 作業方法
-- **初回はPlan/読み取り専用理解試験**。次に実装するなら小さな隔離変更に限定。根拠のない修正を作らない。
-- 仕様未確定、入力原本不一致、真正実LLM未実行は正直にHOLD/NOT_TESTEDとする。注入・モックのCIを実モデルや建築美術の成功と主張しない。
-- SOURCE、真正3D機能、人間のART評価、Education実機、未知用途汎化を別軸に記録する。
-- 失敗の原因をソース/LLMの出力/幾何/環境のどれかに切り分け、証拠を残す。モデル応答の無断再送や自動「修理」は禁止。
-- 省コスト・ユーザー操作最小化。不要なテストやZIP、長文引き継ぎ文書、実機起動器を増やさない。
-
-## この移行試験の入口
-`docs/OPENCODE_TRANSITION_FIRST_RUN_20261103_JA.md` を開き、まず計画モードで第1試験を実施する。試験の合否は、AI自身の自己申告ではなくGit差分と独立テストで判断する。
+## 実行方法
+最初は読み取り専用で既存成果・未解決課題・次の価値ある工程・禁止操作を要約。コード編集は隔離ブランチのみ。実装→最小独立テスト→証拠保存。無料クラウドのモデル交換・利用枠切れ・GPU不足で自動課金や無限再試行をせず、進捗を保存してHOLD。**ローカル1GPUジョブ、無料クラウドの有限枠、ChatGPTの希少枠**を独立資源として扱う。次の入口は `docs/AI_EXECUTION_PORTABILITY_20261103_JA.md`。
