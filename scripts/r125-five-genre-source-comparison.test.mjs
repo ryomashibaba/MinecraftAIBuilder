@@ -101,8 +101,13 @@ test('source projection is actual B143 voxel projection, NOT invented illustrati
  for(const view of ['front','side','top']){
   const svg=projectExactSourceVoxels(product.compiled,view,product.design.bounds);
   assert(svg.startsWith('<svg'));
-  assert(svg.includes('EXACT B143 voxel'));
-  assert(svg.includes('<rect x='));
+  assert(svg.includes('aria-label="'+view+
+   ' projection, exact B143 voxel surface, uniform block scale"'));
+  // The projection must represent one actual block for each unique visible
+  // SOURCE column/row, rather than painted or invented geometry.
+  const projectedKeys=new Set(product.compiled.primitives.map(([x,y,z])=>
+   view==='front'?x+','+y:view==='side'?z+','+y:x+','+z));
+  assert.equal((svg.match(/<rect x="/g)||[]).length,projectedKeys.size);
  }
  assert(deriveCrossGenreLimits([{product}]).every(x=>x.observed));
 });
