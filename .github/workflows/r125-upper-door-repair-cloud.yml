@@ -19,6 +19,10 @@ on:
       - 'configs/r125-education-verified-palette-v26.33.json'
       - 'source/ai/r125-spatial-composition.mjs'
       - 'source/ai/r125-public-approach-v4a.mjs'
+      - 'source/ai/r125-site-composition-v4b.mjs'
+      - 'scripts/r125-site-composition-v4b-fixtures.mjs'
+      - 'scripts/r125-site-composition-v4b.test.mjs'
+      - 'scripts/r125-site-composition-v4b-preview.mjs'
       - 'scripts/r125-public-approach-v4a.test.mjs'
       - 'source/ai/r125-expressive-envelope-v2.mjs'
       - 'source/ai/r125-functional-facade-v3.mjs'
@@ -67,6 +71,20 @@ jobs:
         run: node --test scripts/r125-spatial-composition.test.mjs
       - name: Verify V4A optional public court B143 and cross-genre fail-closed author intent (FAKE ONLY)
         run: node --test scripts/r125-public-approach-v4a.test.mjs
+      - name: V4B five-site authored main-and-wing massing, court, glazing and fail-closed SOURCE (SYNTHETIC ONLY)
+        run: |
+          node --check source/ai/r125-site-composition-v4b.mjs
+          node --check scripts/r125-site-composition-v4b-preview.mjs
+          node --test scripts/r125-site-composition-v4b.test.mjs
+      - name: Generate real B143 3D gallery for five SYNTHETIC V4B sites, not real Qwen
+        run: node scripts/r125-site-composition-v4b-preview.mjs --out "$RUNNER_TEMP/v4b-synthetic-site-preview"
+      - name: Archive read-only V4B five-site 3D gallery and source proof
+        uses: actions/upload-artifact@v4
+        with:
+          name: R125-V4B-Five-Synthetic-Site-3D-SOURCE-Only
+          path: ${{ runner.temp }}/v4b-synthetic-site-preview/
+          if-no-files-found: error
+          retention-days: 14
       - name: Parse real Windows PowerShell launcher before any Windows handoff
         shell: pwsh
         run: |

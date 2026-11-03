@@ -2,6 +2,13 @@
 
 **2026-11-02 JST 更新。長文プロンプト・ZIP交換なしで、GitHub正本を読み込んで既存開発を継続する。**
 
+## 2026-11-03 次工程実装：V4B 主従敷地構成・中庭・入口共通IR（CI待ち）
+
+- 前工程V4Aの GitHub Actions [#41584403568](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41584403568) は今もキュー待機。**PASS未確認**。既存V4A/V1〜V3と凍結Qwen原文は変更しない。
+- 独立したオプトインV4B \`source/ai/r125-site-composition-v4b.mjs\` で、設計者が主棟・付属翼のX/Z位置・寸法・用途、棟同士の連絡口、街路側アプローチ、中庭、外壁開口をすべてIRで指定。HOSTはジャンル名から適当なデザインを生成せず、真正B143/2幅SOURCE動線/支持床/空気/全周壁/外ガラス/衝突を**検証**する。安全違反は無修復HOLD。
+- 合成5ジャンルの負例テストと、既存3Dビューアで現物SOURCEを5件一括で確認する **読取専用** ギャラリー生成器をGitHub既存CIに追加。**5件はテストダブルであり、住宅/店舗/研究所/美術館/駅舎の実Qwen設計5件ではない。ART HOLD／初回CI結果未確認**。
+- [V4B実装・制限・次ゲート](docs/R125_V4B_SITE_MASSING_SOURCE_PILOT_20261103_JA.md)。次工程：正式CIと3D実画像で失敗箇所・外観の改善幅を確認し、効果が薄ければ美術不採用。main・PR #128 Draft・既存施工経路・9 BLOCKED・BuildPlan空・Work事前承認を継続。
+
 ## 2026-11-03 最新実装：V4A 作者指定の公開入口・開放アプローチ（CI待ち）
 
 - 前工程で可視化した15/15外形不変を受け、場当たりの配色/窓追加ではなく**モデル著作の空間IR自由度**に着手。オプトイン `source/ai/r125-public-approach-v4a.mjs` を研究ブランチへ追加。元の `r125-spatial-composition.mjs`、V2/V3、private Qwen回答、R125 Education実機経路は**改変していない**。
