@@ -53,9 +53,9 @@ export function inspectSpatialPlanFields(plan){
   if(seen.has(r.id))issues.push({path:key+'.id',code:'DUPLICATE_ROOM_ID'});
   if(!word(r.purpose))issues.push({path:key+'.purpose',code:'INVALID_PURPOSE'});
   for(const field of ['width','depth']){
-   if(!int(r[field],7,14))
+   if(!int(r[field],6,14))
     issues.push({path:key+'.'+field,code:'DIMENSION_OUT_OF_RANGE',
-     expected:'integer 7..14',actual:Number.isFinite(r[field])?r[field]:typeof r[field]});
+     expected:'integer 6..14',actual:Number.isFinite(r[field])?r[field]:typeof r[field]});
   }
   if(!int(r.roofY,6,10))
    issues.push({path:key+'.roofY',code:'ROOF_HEIGHT_OUT_OF_RANGE',
