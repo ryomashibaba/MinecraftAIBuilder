@@ -11,12 +11,14 @@ import {RANKED_SCHEMA} from '../source/ai/r125-v4e-ranked-exterior-ir.mjs';
 import {SECTIONED_SCHEMA} from '../source/ai/r125-v4e-sectioned-author-ir.mjs';
 import {MASSING_SCHEMA} from '../source/ai/r125-v4e-massing-author-ir.mjs';
 import {WING_SCHEMA} from '../source/ai/r125-v4e-wing-author-ir.mjs';
+import {FLOORPLATE_SCHEMA} from '../source/ai/r125-v4f-floorplate-author-ir.mjs';
 
 export const DIAGNOSTIC_SCHEMA='minecraftaibuilder-v4d-private-model-structural-diagnostic-v1';
 const ROOT_COMPACT=['schema','id','title','brief','materials','spaces'];
 const ROOT_SECTIONED=[...ROOT_COMPACT,'section'];
 const ROOT_MASSING=[...ROOT_COMPACT,'massing'];
 const ROOT_WING=[...ROOT_COMPACT,'massing','wing'];
+const ROOT_FLOORPLATE=[...ROOT_WING,'floorplate'];
 const ROOT_DETAILED=['schema','id','title','brief','materials','spaces','entry','extraLinks'];
 const SPACE_COMPACT=['id','purpose','kind','width','depth','roof','height','facade','windowSide','feature','featureMaterial','attach'];
 const SPACE_RANKED=['id','purpose','kind','width','depth','roof','height','facade','windowPriority','feature','featureMaterial','attach'];
@@ -59,7 +61,7 @@ function safeProse(value){return typeof value==='string'&&value.length>=3&&value
 const opposite={east:'west',west:'east',south:'north',north:'south'};
 const dirs=['north','south','east','west'];
 export function diagnosePrivateV4DAuthor(author,contract){
- if(![COMPACT_SCHEMA,RELATIVE_SCHEMA,RANKED_SCHEMA,SECTIONED_SCHEMA,MASSING_SCHEMA,WING_SCHEMA].includes(contract))
+ if(![COMPACT_SCHEMA,RELATIVE_SCHEMA,RANKED_SCHEMA,SECTIONED_SCHEMA,MASSING_SCHEMA,WING_SCHEMA,FLOORPLATE_SCHEMA].includes(contract))
   throw Error('V4D_DIAG_UNRECOGNIZED_CONTRACT');
  const r=blank(contract);
  if(!record(author)){
@@ -67,9 +69,11 @@ export function diagnosePrivateV4DAuthor(author,contract){
  }
  const compact=contract===COMPACT_SCHEMA,sectioned=contract===SECTIONED_SCHEMA,
  massing=contract===MASSING_SCHEMA,winged=contract===WING_SCHEMA,
- ranked=contract===RANKED_SCHEMA||sectioned||massing||winged;
+ floorplated=contract===FLOORPLATE_SCHEMA,
+ ranked=contract===RANKED_SCHEMA||sectioned||massing||winged||floorplated;
  const top=keyCounts(author,sectioned?ROOT_SECTIONED:
-  winged?ROOT_WING:massing?ROOT_MASSING:(compact||ranked)?ROOT_COMPACT:ROOT_DETAILED);
+  floorplated?ROOT_FLOORPLATE:winged?ROOT_WING:massing?ROOT_MASSING:
+  (compact||ranked)?ROOT_COMPACT:ROOT_DETAILED);
  r.missingTopLevelKeyCount=top.missing;
  r.unexpectedTopLevelKeyCount=top.unexpected;
  if(top.missing||top.unexpected)add(r,'TOP_LEVEL_FIELDS');
@@ -219,7 +223,7 @@ export function diagnosePrivateV4DAuthor(author,contract){
     add(r,'SECTION_ROOM_NOT_COVERED');
   }
  }
- if(massing||winged){
+ if(massing||winged||floorplated){
   const v=author.massing;
   if(!record(v)||keyCounts(v,['spaceId','corner','cutWidth','cutDepth','publicAccessSide']).missing||
    keyCounts(v,['spaceId','corner','cutWidth','cutDepth','publicAccessSide']).unexpected)
@@ -232,7 +236,7 @@ export function diagnosePrivateV4DAuthor(author,contract){
     add(r,'PRIMARY_MASSING_ROOM_NOT_COVERED');
   }
  }
- if(winged){
+ if(winged||floorplated){
   const w=author.wing,expected=['spaceId','side','start','span','reach','roofY','purpose'];
   const fields=record(w)&&Object.hasOwn(w,'outline')?
    [...expected,'outline']:expected;
@@ -254,6 +258,19 @@ export function diagnosePrivateV4DAuthor(author,contract){
     add(r,'EXTERIOR_WING_ROOM_NOT_COVERED');
   }
  }
+ if(floorplated){
+  const v=author.floorplate,fields=['spaceId','corner','width','depth'];
+  if(!record(v)||keyCounts(v,fields).missing||keyCounts(v,fields).unexpected)
+   add(r,'COVERED_FLOORPLATE_AUTHOR_FIELDS');
+  else {
+   if(!['NW','NE','SW','SE'].includes(v.corner))
+    add(r,'COVERED_FLOORPLATE_CORNER_INVALID');
+   if(!between(v.width,6,8)||!between(v.depth,6,8))
+    add(r,'COVERED_FLOORPLATE_SIZE_INVALID');
+   if(!author.spaces.some(s=>record(s)&&s.id===v.spaceId&&s.kind==='covered'))
+    add(r,'COVERED_FLOORPLATE_SPACE_NOT_COVERED');
+  }
+ }
  // Check linked wall window directions after reading ALL attachments.
  author.spaces.slice(0,6).forEach((space,i)=>{
   if(!record(space)||typeof space.id!=='string')return;
@@ -272,7 +289,7 @@ export function diagnosePrivateV4DAuthor(author,contract){
  return r;
 }
 export function diagnosePrivateV4DInvalidJSON(contract){
- if(![COMPACT_SCHEMA,RELATIVE_SCHEMA,RANKED_SCHEMA,SECTIONED_SCHEMA,MASSING_SCHEMA,WING_SCHEMA].includes(contract))
+ if(![COMPACT_SCHEMA,RELATIVE_SCHEMA,RANKED_SCHEMA,SECTIONED_SCHEMA,MASSING_SCHEMA,WING_SCHEMA,FLOORPLATE_SCHEMA].includes(contract))
   throw Error('V4D_DIAG_UNRECOGNIZED_CONTRACT');
  const report=blank(contract,'INVALID_JSON');
  add(report,'ORIGINAL_RESPONSE_NOT_JSON');

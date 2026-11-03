@@ -286,8 +286,9 @@ export function exportV4ECrossGenreSource(folder){
    }))
   },
   commonRepresentationLimitations:{
-   allSpaceFootprintsAxisAlignedRectangles:true,
-   noModelAuthoredNonrectangularEnvelopeOrMultiStoryCirculation:true,
+   originalAuthorGraphRoomFootprintsRectangular:true,
+   nowSupportsOneModelAuthoredCoveredRoomFootprintSetback:true,
+   arbitraryBuildingWideFreeformContourAndMultiStoryCirculationNotYetSupported:true,
    geometryShaDifferenceDoesNotCertifyArchitectureArt:true,
    newResearchPrimaryVolumeCornerOpenSkyVoid:true,
    newResearchPublicWingBeyondOriginalFootprint:true,

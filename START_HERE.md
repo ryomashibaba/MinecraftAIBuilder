@@ -1,5 +1,12 @@
 # MinecraftAIBuilder — START HERE（新チャット・AI開発者の統一入口）
 
+## 2026-11-04 V4F単発ローカルAI作者経路 — 屋根付き主棟の実床平面を1回答で著作
+
+- 新しい**任意・非既定** `source/ai/r125-v4f-floorplate-author-ir.mjs` は STRICT JSON 1回答で全体プログラム/主棟massing/外部wing/covered floorplateを一貫して著作する。作者選択は `floorplate:{spaceId,corner,width,depth}`（6..8セル）で、HOSTは既存設計と最終B143 SOURCEと9 BLOCKEDを独立検証。これまでのV4D/V4Eデフォルトの動作や過去に成立した教育実機パスを変更しない。
+- 新フラグ `scripts/r125-v4d-local-architect.mjs --authored-floorplate` と隔離1クリック `scripts/r125-v4e-one-click-ranked-trial.cmd --floorplate` を接続。最大1回のローカルOllama生成を許可（追加の有料APIなし）。プライベート原文/改変前ウイング3D/改変後の5方向/投影差分/真正B143/安全な共有レシートを保存し、元原文SHAを使った追加0POSTオフライン再診断を実行可能とする。許可無しのMinecraftワールド施工は絶対にしない。
+- Linux/Windows CIは注入されたFAKE HTTPを使う**1モデルPOST模擬・実Qwen0・ART正式合格0**。実Qwenのこの新モードは未試験。前工程の非矩形屋根付き外郭研究はSOURCE PASSだが、画像実見では未だ箱型棟の印象が強いので**美術予備REJECT／正式ART HOLD**。今後の最優先は本物のAI独立設計と主棟/公共断面の建築品質の大幅改善。既存のPR#128はOpen Draft、main変更禁止、Work事前承認、BuildPlan.operations空、9ゲートBLOCKED。
+
+
 ## 2026-11-04 V4F 非矩形「屋根付き棟そのもの」の床・外壁・屋根を実B143加工するSOURCE研究
 
 - 新しい**非既定・独立研究** `source/ai/r125-v4e-authored-covered-floorplate-setback.mjs`。RANKED全体用途→作者の公開sky主棟質量→作者の外部公共ウイングを受けて、作者が `{spaceId,corner,width,depth}` で指定した**既存の屋根付き用途室の角を床 y=1 から屋根・全高まで完全にCUT**し、屋根下に接続する実内部外壁を新築する。従来の「床は残り、屋根だけ変化する」とは異なる真正の非矩形 *covered-building floorplate*。室用途・入口・公共動線・既存窓ガラスと内外AIR、全既存ボクセルの原状と新外壁の整合をすべてB143実ボクセルから監査。閉鎖と水平安全が不成立なら修理/移動せずSOURCE HOLD。

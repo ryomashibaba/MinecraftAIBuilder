@@ -12,6 +12,8 @@ export function classifyPrivateV4DFailure(reason){
   return 'MODEL_COMPLETENESS';
  if(/MODEL_RESPONSE_NOT_PURE_JSON|MODEL_HTTP_INVALID_JSON|CHOICES/i.test(reason))
   return 'MODEL_FORMAT';
+ if(/R125_V4F_FLOORPLATE_AUTHOR_|R125_V4E_FLOORPLATE_/.test(reason))
+  return 'COVERED_FLOORPLATE_AUTHOR_SOURCE_INVALID';
  if(/R125_V4E_WING_/.test(reason))return 'EXTERIOR_WING_AUTHOR_SOURCE_INVALID';
  if(/R125_V4E_MASSING_/.test(reason))return 'PRIMARY_MASSING_AUTHOR_SOURCE_INVALID';
  if(/R125_V4E_SECTIONED_|R125_V4E_SECTION_/.test(reason))return 'SECTIONED_AUTHOR_SOURCE_INVALID';
@@ -68,7 +70,8 @@ export function buildV4DShareableReceipt(report){
    'minecraftaibuilder-r125-v4e-ranked-exterior-author-v1',
    'minecraftaibuilder-r125-v4e-sectioned-author-v1',
    'minecraftaibuilder-r125-v4e-massing-author-v1',
-   'minecraftaibuilder-r125-v4e-exterior-wing-author-v1'].includes(report.authorContract)?
+   'minecraftaibuilder-r125-v4e-exterior-wing-author-v1',
+   'minecraftaibuilder-r125-v4f-covered-floorplate-author-v1'].includes(report.authorContract)?
    report.authorContract:'UNRECOGNIZED',
   reportedStatus:report.status,
   modelCallAttempts:report.modelCalls,

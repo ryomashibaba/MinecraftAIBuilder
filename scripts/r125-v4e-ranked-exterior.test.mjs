@@ -246,7 +246,8 @@ test('five independent synthetic genres use one unmodified V4E→true B143 engin
   assert.equal(report.humanArt,'NOT_REVIEWED');
   assert.equal(report.cases.length,5);
   assert.equal(new Set(report.cases.map(c=>c.geometrySha256)).size,5);
-  assert.equal(report.commonRepresentationLimitations.allSpaceFootprintsAxisAlignedRectangles,true);
+  assert.equal(report.commonRepresentationLimitations.originalAuthorGraphRoomFootprintsRectangular,true);
+  assert.equal(report.commonRepresentationLimitations.nowSupportsOneModelAuthoredCoveredRoomFootprintSetback,true);
   assert(report.cases.every(c=>c.actualWindowProof.verifiedImmediateInwardAirCells===36));
   assert.deepEqual(report.safety.gates,Array(9).fill('BLOCKED'));
   assert.equal(report.safety.worldWrites,0);
@@ -868,4 +869,110 @@ test('author chooses true covered-room nonrectangular footprint and original phy
  assert.equal(root.sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
  assert.equal(root.worldWrites,0);
  assert.deepEqual(root.gates,Array(9).fill('BLOCKED'));
+});
+
+
+test('V4F one-response floorplate author compiles functional 3D across five genres and strictly rejects corrupt choices',async()=>{
+ const {FLOORPLATE_SCHEMA,FLOORPLATE_SYSTEM_PROMPT,compileFloorplateAuthorIntent}
+  =await import('../source/ai/r125-v4f-floorplate-author-ir.mjs');
+ const {syntheticFiveGenreAuthorCases}
+  =await import('./r125-v4e-cross-genre-source-study.mjs');
+ const {diagnosePrivateV4DAuthor}
+  =await import('./r125-v4d-author-source-diagnostics.mjs');
+ const fixtures=syntheticFiveGenreAuthorCases(),orig=structuredClone(fixtures);
+ for(const s of fixtures){
+  const intent={...structuredClone(s.source),schema:FLOORPLATE_SCHEMA,
+   massing:structuredClone(s.authoredMassing),
+   wing:structuredClone(s.authoredContourWing),
+   floorplate:structuredClone(s.authoredFloorplate)};
+  const old=structuredClone(intent);
+  const result=compileFloorplateAuthorIntent(intent);
+  assert.deepEqual(intent,old);
+  assert.equal(result.authorContract,FLOORPLATE_SCHEMA);
+  assert.equal(result.authoredFloorplateSourceWitness.originalWalkableFloorColumnsRemoved,49);
+  assert.equal(result.authoredFloorplateSourceWitness.roofSilhouetteComparison.views
+   .find(v=>v.face==='roof').silhouetteChangedCells,49);
+  assert.equal(result.authoredFloorplateSourceWitness.everyUnchangedVoxelPreserved,true);
+  assert.notEqual(result.unchangedWingGeometrySha256,result.b143.geometrySha256);
+  assert.equal(result.b143.sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert.equal(result.worldContacts,0);
+  assert.equal(result.worldWrites,0);
+  assert.equal(result.executionAllowed,false);
+  assert.equal(result.constructionApproved,false);
+  assert.deepEqual(result.gates,Array(9).fill('BLOCKED'));
+  assert.deepEqual(result.BuildPlan.operations,[]);
+  assert.equal(result.humanArt,'NOT_REVIEWED');
+  assert.equal(result.realModel,'NOT_TESTED');
+  assert.equal(diagnosePrivateV4DAuthor(intent,FLOORPLATE_SCHEMA).issues.length,0);
+  const bad=structuredClone(intent);
+  bad.floorplate.depth=12;
+  assert.throws(()=>compileFloorplateAuthorIntent(bad),/R125_V4E_FLOORPLATE/);
+  assert(diagnosePrivateV4DAuthor(bad,FLOORPLATE_SCHEMA).issues.some(x=>
+   x.code==='COVERED_FLOORPLATE_SIZE_INVALID'));
+ }
+ assert.deepEqual(fixtures,orig);
+ assert(FLOORPLATE_SYSTEM_PROMPT.includes('floorplate'));
+});
+
+test('V4F local one-response fake Ollama: root covered building footprint, private review and SHA offline replay, ZERO model extra posts',async()=>{
+ const {FLOORPLATE_SCHEMA}=await import('../source/ai/r125-v4f-floorplate-author-ir.mjs');
+ const {syntheticFiveGenreAuthorCases}=await import('./r125-v4e-cross-genre-source-study.mjs');
+ const {parseV4DLocalAuthorArgs,runV4DLocalAuthor}=await import('./r125-v4d-local-architect.mjs');
+ const {replayPrivateV4D}=await import('./r125-v4d-replay-private.mjs');
+ const fs=await import('node:fs'),os=await import('node:os'),path=await import('node:path');
+ const parent=fs.mkdtempSync(path.join(os.tmpdir(),'mab-v4f-private-'));
+ const out=path.join(parent,'study'),replay=path.join(parent,'replay');
+ const fixture=syntheticFiveGenreAuthorCases()[0];
+ const input={...structuredClone(fixture.source),schema:FLOORPLATE_SCHEMA,
+  massing:{spaceId:'learning',corner:'NW',cutWidth:7,cutDepth:7,publicAccessSide:'X'},
+  wing:structuredClone(fixture.authoredContourWing),
+  floorplate:{spaceId:'welcome',corner:'NE',width:7,depth:7}};
+ const raw=JSON.stringify(input),calls=[];
+ const fetcher=async(url,opt)=>{
+  calls.push(opt?.method);
+  if(opt?.method==='GET')
+   return {ok:true,status:200,text:async()=>JSON.stringify({models:[{name:'qwen3:14b'}]})};
+  if(opt?.method==='POST')
+   return {ok:true,status:200,text:async()=>JSON.stringify({
+    model:'qwen3:14b',choices:[{finish_reason:'stop',message:{content:raw}}]})};
+  throw Error('UNEXPECTED_HTTP_TEST');
+ };
+ try{
+  const opts=parseV4DLocalAuthorArgs(['--authored-floorplate','--model','qwen3:14b',
+   '--out',out,'--prompt','Produce one independent program with a real covered main volume setback.']);
+  assert.equal(opts.authorFloorplate,true);
+  assert.throws(()=>parseV4DLocalAuthorArgs(['--authored-floorplate','--authored-wing',
+   '--model','qwen3:14b','--out',out]),/ONLY_ONE_AUTHOR_MODE/);
+  const run=await runV4DLocalAuthor(opts,{fetcher,timeoutMs:15000});
+  assert.equal(run.status,'HOLD_TEST_DOUBLE_NOT_REAL_MODEL',run.reason);
+  assert.equal(run.authorContract,FLOORPLATE_SCHEMA);
+  assert.equal(run.sourceRoutesStatus,'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert.equal(run.worldWrites,0);
+  assert.equal(calls.filter(x=>x==='POST').length,1);
+  assert.deepEqual(JSON.parse(fs.readFileSync(path.join(out,'AUTHOR_INTENT_ORIGINAL.json'),'utf8')),input);
+  assert.equal(fs.readFileSync(path.join(out,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8'),raw);
+  const art=JSON.parse(fs.readFileSync(path.join(out,'PRIVATE_B143_FLOORPLATE_ART_HOLD_COMPARISON.json'),'utf8'));
+  assert.equal(art.floorplateSourceWitness.rootMainRoomModified,true);
+  assert.equal(art.floorplateSourceWitness.originalWalkableFloorColumnsRemoved,49);
+  assert.equal(art.projectedVisibilityAudit.views.find(v=>v.face==='roof').silhouetteChangedCells,49);
+  assert.equal(art.extraModelRequests,0);
+  assert.equal(art.humanArchitecturalArt,'NOT_REVIEWED');
+  for(const name of [
+   'AUTHORED_COVERED_FLOORPLATE_SOURCE.json','BASELINE_WING_3D_PRIVATE.html',
+   'BASELINE_WING_FIVE_VIEWS_PRIVATE.svg','FINAL_COVERED_FLOORPLATE_FIVE_VIEWS_PRIVATE.svg',
+   'PRIVATE_B143_FLOORPLATE_VISIBILITY_DELTA.svg'
+  ])assert(fs.existsSync(path.join(out,name)),name);
+  const safe=JSON.parse(fs.readFileSync(path.join(out,'REVIEW_SUMMARY_SHAREABLE.json'),'utf8'));
+  assert.equal(safe.authorContract,FLOORPLATE_SCHEMA);
+  assert.equal(safe.sourceCandidateVerified,true);
+  assert.equal(safe.rawModelTextIncluded,false);
+  assert.equal(safe.explicitlyInjectedTestResponse,true);
+  const count=calls.length,rr=replayPrivateV4D(out,replay);
+  assert.equal(calls.length,count);
+  assert.equal(rr.status,'HOLD_TEST_DOUBLE_REPLAY_ONLY');
+  assert.equal(rr.originalCompilerHashesMatch,true);
+  assert.equal(rr.additionalModelCalls,0);
+  assert.equal(rr.worldWrites,0);
+  assert(!fs.existsSync(path.join(replay,'MODEL_RESPONSE_ORIGINAL.txt')));
+ }finally{fs.rmSync(parent,{recursive:true,force:true});}
 });
