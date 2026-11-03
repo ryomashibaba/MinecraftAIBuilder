@@ -11,6 +11,8 @@ import os
 import re
 import subprocess
 import tempfile
+import urllib.request
+from html.parser import HTMLParser
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -97,6 +99,53 @@ def prompt_from_public_clone(snapshot):
         + "\n\n".join(chunks)
     )
 
+class PriceRows(HTMLParser):
+    """Extract only visible HTML price table cells; fail closed on layout changes."""
+    def __init__(self):
+        super().__init__()
+        self.rows = []
+        self.row = None
+        self.cell = None
+
+    def handle_starttag(self, tag, attrs):
+        if tag == "tr":
+            self.row = []
+        if tag == "td" and self.row is not None:
+            self.cell = []
+
+    def handle_data(self, data):
+        if self.cell is not None:
+            self.cell.append(data)
+
+    def handle_endtag(self, tag):
+        if tag == "td" and self.cell is not None:
+            self.row.append(" ".join("".join(self.cell).split()))
+            self.cell = None
+        if tag == "tr" and self.row is not None:
+            self.rows.append(self.row)
+            self.row = None
+
+def verify_free_rate_from_html(html, model):
+    display = {
+        "opencode/glm-5.3-flash-free": "GLM-5.3-Flash Free",
+        "opencode/deepseek-v4.1-flash-free": "DeepSeek V4.1 Flash Free",
+    }[model]
+    parser = PriceRows()
+    parser.feed(html)
+    return any(row[:4] == [display, "Free", "Free", "Free"]
+               for row in parser.rows)
+
+def official_rate_is_free(model):
+    url = "https://opencode.ai/v2/docs/console/models"
+    request = urllib.request.Request(url, headers={"User-Agent": "MAB-Public-Free-Rate-Gate/1.0"})
+    with urllib.request.urlopen(request, timeout=15) as resp:
+        if resp.status != 200:
+            return False
+        raw = resp.read(2_000_001)
+    if len(raw) > 2_000_000:
+        return False
+    return verify_free_rate_from_html(raw.decode("utf-8", errors="replace"), model)
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--receipt", help="Existing READY_READONLY_NO_MODEL_INFERENCE JSON path")
@@ -112,6 +161,9 @@ def main():
         assert has_exact_model("opencode/glm-5.3-flash-free\nother/a", FREE_MODELS[0])
         assert not has_exact_model("opencode/glm-5.3-flash-free-paid\n", FREE_MODELS[0])
         assert not has_exact_model("other/a", FREE_MODELS[0])
+        sample = "<tr><td>GLM-5.3-Flash Free</td><td>Free</td><td>Free</td><td>Free</td></tr>"
+        assert verify_free_rate_from_html(sample, FREE_MODELS[0])
+        assert not verify_free_rate_from_html(sample.replace("<td>Free</td>", "<td>$1</td>", 1), FREE_MODELS[0])
         print("STATIC_PUBLIC_FREE_AUDIT_TEST_PASS; MODEL_REQUESTS=0")
         return 0
     if not args.receipt:
@@ -141,6 +193,7 @@ def main():
         "model_run_invocations": 0,
         "actual_provider_http_requests": "NOT_OBSERVED",
         "cost_verified_for_this_account": False,
+        "official_public_free_rate_verified": False,
         "paid_fallback": "DISABLED_BY_PROVIDER_POLICY_AND_EXPLICIT_MODEL",
         "source": "PUBLIC_GITHUB_SNAPSHOT_ONLY",
         "source_sha": receipt.get("trial_head"),
@@ -181,6 +234,14 @@ def main():
         result["reason"] = "READY_FOR_EXPLICIT_PUBLIC_MODEL_AUDIT"
         if not args.run:
             return 0
+        # Verify the official published public rate immediately before any model call.
+        # This does not prove account eligibility or override different billing terms.
+        try:
+            result["official_public_free_rate_verified"] = official_rate_is_free(args.model)
+        except Exception:
+            raise RuntimeError("OFFICIAL_FREE_RATE_UNAVAILABLE")
+        if not result["official_public_free_rate_verified"]:
+            raise RuntimeError("FREE_PRICE_NOT_VERIFIED_HOLD")
         # Exactly one CLI RUN invocation (OpenCode may internally make more than one HTTP
         # request, e.g. title generation; count is intentionally NOT claimed as one).
         public_prompt = prompt_from_public_clone(snapshot)
