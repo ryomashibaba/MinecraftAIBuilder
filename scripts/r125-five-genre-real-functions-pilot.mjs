@@ -50,8 +50,8 @@ const SYSTEM=[
  '2-wide service access to EACH fixture from the public exterior entrance.',
  'Choose open EXTERIOR walls, never a shared wall or an exterior doorway.',
  'The user prompt includes genre-neutral availableLargeExteriorOpenings for each room.',
- 'opening.side and opening.offset MUST be one of those actually buildable choices.',
- 'The options certify only the position for width 4 and height 2; other allowed sizes are still independently verified.',
+ 'opening.side, opening.offset, opening.width and opening.height MUST match ONE offered buildable choice EXACTLY.',
+ 'The options are actual geometry-derived 3x2 and 4x2 openings, not HOST-chosen designs. Do not enlarge height or width.',
  'Do not copy the same kinds/arrangement for all genres. Express what each room actually does.',
  'Host may reject a design but MUST NOT invent or silently move your authored geometry.',
  'This is not completion of full furniture, accessibility, art or Minecraft gameplay.'
