@@ -188,8 +188,11 @@ def execute(cfg: dict, *, push: bool, sandbox_attested: bool) -> dict:
             raise Hold("INITIAL_WORKSPACE_NOT_CLEAN")
         state = {"config_sha256": cfg_hash, "project": cfg["project"], "branch": cfg["branch"],
                  "next_task": 0, "cycles": 0, "commits": [], "outcomes": [], "status": "RUNNING",
-                 "model_configured": cfg["model"], "real_model_verified": False, "quality_certified": False}
+                 "model_configured": cfg["model"], "real_model_verified": False, "quality_certified": False,
+                 "last_head": git(p, "rev-parse", "HEAD")}
         write_atomic(state_path, state)
+    if state.get("last_head") != git(p, "rev-parse", "HEAD"):
+        raise Hold("GIT_HISTORY_CHANGED_OUTSIDE_SUPERVISOR")
     if not sandbox_attested:
         raise Hold("OS_SANDBOX_NOT_ATTESTED: git clone isolation alone cannot confine agent shell commands")
     deadline = time.monotonic() + cfg["max_minutes"] * 60
@@ -199,6 +202,9 @@ def execute(cfg: dict, *, push: bool, sandbox_attested: bool) -> dict:
             for item in state["commits"]:
                 if not item["pushed"]:
                     try:
+                        verify_repo(cfg)
+                        if git(p, "rev-parse", "HEAD") != state["last_head"]:
+                            raise Hold("GIT_HISTORY_CHANGED_BEFORE_PUSH")
                         git(p, "push", "origin", f"HEAD:refs/heads/{cfg['branch']}")
                     except Hold as ex:
                         state["status"] = "HOLD"
@@ -242,6 +248,9 @@ def execute(cfg: dict, *, push: bool, sandbox_attested: bool) -> dict:
                         state["outcomes"].append({"cycle": cycle, "status": "AGENT_FAILED", "exit": rc})
                         write_atomic(state_path, state)
                         continue
+                    verify_repo(cfg)  # Agent must not switch remote or research branch.
+                    if git(p, "rev-parse", "HEAD") != state["last_head"]:
+                        raise Hold("AGENT_MUTATED_GIT_HISTORY")
                     changed = changed_files(p)
                     check_paths(p, changed, cfg["allowed_prefixes"])
                     failing = []
@@ -255,18 +264,25 @@ def execute(cfg: dict, *, push: bool, sandbox_attested: bool) -> dict:
                         state["outcomes"].append({"cycle": cycle, "status": "INDEPENDENT_QA_FAILED"})
                         write_atomic(state_path, state)
                         continue
+                    verify_repo(cfg)  # Tests cannot silently redirect Git push.
+                    if git(p, "rev-parse", "HEAD") != state["last_head"]:
+                        raise Hold("QA_MUTATED_GIT_HISTORY")
                     # Commit only explicitly approved paths; refuse pre-staged surprises.
                     git(p, "reset", "--quiet")
                     git(p, "add", "--", *changed)
                     check_paths(p, changed_files(p), cfg["allowed_prefixes"])
                     git(p, "commit", "-m", f"research(free-autonomy): task {index + 1} verified source candidate")
                     sha = git(p, "rev-parse", "HEAD")
+                    state["last_head"] = sha
                     state["commits"].append({"task": index + 1, "sha": sha, "qa": "SOURCE_ONLY", "pushed": False})
                     state["next_task"] += 1
                     state["outcomes"].append({"cycle": cycle, "status": "SOURCE_CHECKS_PASSED", "sha": sha})
                     write_atomic(state_path, state)
                     if push:
                         try:
+                            verify_repo(cfg)
+                            if git(p, "rev-parse", "HEAD") != state["last_head"]:
+                                raise Hold("GIT_HISTORY_CHANGED_BEFORE_PUSH")
                             git(p, "push", "origin", f"HEAD:refs/heads/{cfg['branch']}")
                         except Hold as ex:
                             state["status"] = "HOLD"

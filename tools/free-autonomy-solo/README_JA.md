@@ -5,7 +5,7 @@
 ## 固定境界
 
 - 両プロジェクト同格。`project` に書いた**一件だけ**を1セッション中ずっと担当。OSの単一ロックで二重実行を拒否。
-- `main` 禁止・`research/` 接頭辞必須・リポジトリのGit origin完全照合・専用clone必須。原本/凍結資料/ `.github` / `.env` は研究対象外。
+- `main` 禁止・`research/` 接頭辞必須・リポジトリのGit origin完全照合・専用clone必須。モデル実行後・QA後・push前にGit origin/branch/HEADを再照合し、モデルによる勝手なcommitやremote差替えをHOLD。原本/凍結資料/ `.github` / `.env` は研究対象外。
 - 自動の `git commit` は**独立テスト成功後のみ**、pushはコマンドに明示した場合のみ・research branch限定。merge/公開/実世界書込/課金はしない。
 - `--model` は明示 `ollama/...` または`opencode/...-free`のみ。モデルを勝手に有料モデルへ切り替えない。無料モデルが継続して呼べるかは別途真正試験。
 - CLI実行成功は「真正ローカルモデル認証」ではない。ユニットテスト成功も建築ART/原作忠実度/180秒真正Chrome/実機Minecraft成功ではない。
@@ -58,4 +58,4 @@
 
 ## 現時点の証拠
 
-`python -m unittest -v test_solo_agent.py` のLinux/Python 3.13.5ローカル隔離Fake CLI試験8件はPASS。**Fake CLIであり実LLMのコード生成成功数は0件、Windows実機無人運転は0件**。SOURCEテスト成功後コミット・origin/branch/paths/モデル制限・再開の限定動作を確認しただけ。Strata A33の真正推論・長時間運転HOLDは維持。
+`python -m unittest -v test_solo_agent.py` のLinux/Python 3.13.5ローカル隔離Fake CLI試験11件はPASS。**Fake CLIであり実LLMのコード生成成功数は0件、Windows実機無人運転は0件**。SOURCEテスト成功後コミット・origin/branch/paths/モデル制限・再開の限定動作を確認しただけ。Strata A33の真正推論・長時間運転HOLDは維持。

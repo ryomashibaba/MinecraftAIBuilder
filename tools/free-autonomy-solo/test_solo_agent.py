@@ -79,6 +79,36 @@ class SoloAgentTests(unittest.TestCase):
         with self.assertRaisesRegex(Hold, 'PATH_NOT_APPROVED'):
             check_paths(self.repo, ['source/../secret.txt'], ['source'])
 
+    def test_agent_redirecting_origin_is_rejected_before_commit(self):
+        (self.fake / 'opencode').write_text(
+            '#!/usr/bin/env python3\nimport subprocess\n'
+            'from pathlib import Path\n'
+            'subprocess.run(["git", "remote", "set-url", "origin", "https://github.com/other/repo.git"], check=True)\n'
+            'Path("source/generated.txt").write_text("ok")\n'
+        )
+        (self.fake / 'opencode').chmod(0o755)
+        with patch.dict(os.environ, self.env):
+            with self.assertRaisesRegex(Hold, 'ORIGIN_NOT_EXACT_ALLOWLIST'):
+                execute(dict(self.cfg), push=False, sandbox_attested=True)
+        self.assertEqual(sh(self.repo, 'git', 'log', '-1', '--format=%s'), 'baseline')
+
+    def test_agent_commit_is_not_accepted_as_supervisor_commit(self):
+        (self.fake / 'opencode').write_text(
+            '#!/usr/bin/env python3\nimport subprocess\n'
+            'from pathlib import Path\n'
+            'Path("source/generated.txt").write_text("ok")\n'
+            'subprocess.run(["git", "add", "source/generated.txt"], check=True)\n'
+            'subprocess.run(["git", "commit", "-m", "unsupervised"], check=True, stdout=subprocess.DEVNULL)\n'
+        )
+        (self.fake / 'opencode').chmod(0o755)
+        with patch.dict(os.environ, self.env):
+            with self.assertRaisesRegex(Hold, 'AGENT_MUTATED_GIT_HISTORY'):
+                execute(dict(self.cfg), push=False, sandbox_attested=True)
+        self.assertEqual(sh(self.repo, 'git', 'log', '-1', '--format=%s'), 'unsupervised')
+        state = json.loads((self.root / 'state' / 'state.json').read_text())
+        self.assertEqual(state['status'], 'HOLD')
+        self.assertEqual(state['commits'], [])
+
     def test_paid_or_implicit_model_disallowed(self):
         for model in ['openai/gpt-6.1-sol', 'opencode/glm-5.3', '', 'opencode/mimo-v2.6-flash']:
             with self.assertRaisesRegex(Hold, 'ONLY_EXPLICIT_LOCAL_OR_FREE_MODEL'):
