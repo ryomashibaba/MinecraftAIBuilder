@@ -1,5 +1,11 @@
 # MinecraftAIBuilder — START HERE（新チャット・AI開発者の統一入口）
 
+## 2026-11-03 V4D多用途グラフ：固定左右翼から独立した共通SOURCE接続研究（新CI未確認）
+
+- 第四案のSOURCE PASS/ART REJECTを凍結し、同じ建物の細工に戻らない。短い作者IRの用途ノード・実共有壁接続・公開空洞・大屋根断面・採光・実用途設備を総合する **`source/ai/r125-v4d-authored-topology.mjs`** を新規オプトインで実装。
+- 直列／中心分岐／環状閉路という真に異なる接続次数・cycle rankの合成AUTHOR3件を同一エンジンへ入力し、実B143/2幅SOURCE動線/設備サービス到達/単一3D比較を既存Actionsへ追加。**実Qwen新推論0、SOURCE CI結果未確認、ART NOT_REVIEWED、Minecraft施工0**。[安全・審査契約](docs/R125_V4D_GENERIC_AUTHORED_TOPOLOGY_STUDY_20261103_JA.md)。
+- main、旧V1〜V4D第四案、R125→B143→Education実機成功原本、private Qwen原本を不変更。PR #128 Draft維持、Work事前承認制、NOT_PREPARED/9 BLOCKED/BuildPlan空/worldWrites0。
+
 ## 2026-11-03 V4D第四案：SOURCE CI PASS／真正3D独立予備ART REJECT
 
 - `r125-v4d-folded-envelope.mjs` でAUTHORの短い断面IR→連続折板屋根・左右用途・中央公開歩行軸を真正B143へ変換。**実反復beamを廃止して技術的な外皮連続性を改善**。元の第一〜第三案とR125 Education実機成功は保護。

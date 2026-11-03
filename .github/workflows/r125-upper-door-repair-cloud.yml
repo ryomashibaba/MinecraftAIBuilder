@@ -28,6 +28,10 @@ on:
       - 'source/ai/r125-v4d-void-relief.mjs'
       - 'source/ai/r125-v4d-civic-swept-shell.mjs'
       - 'source/ai/r125-v4d-folded-envelope.mjs'
+      - 'source/ai/r125-v4d-authored-topology.mjs'
+      - 'scripts/r125-v4d-authored-topology-fixtures.mjs'
+      - 'scripts/r125-v4d-authored-topology.test.mjs'
+      - 'scripts/r125-v4d-authored-topology-review.mjs'
       - 'scripts/r125-v4d-folded-envelope-fixture.mjs'
       - 'scripts/r125-v4d-folded-envelope.test.mjs'
       - 'scripts/r125-v4d-folded-envelope-review.mjs'
@@ -177,6 +181,21 @@ jobs:
         with:
           name: R125-V4D-Fourth-Continuous-Folded-Shell-True-B143-ART-HOLD
           path: ${{ runner.temp }}/r125-v4d-folded-shell/
+          if-no-files-found: error
+          retention-days: 14
+      - name: AUTHOR graph three independent synthetic physical SOURCE configurations and QA
+        run: |
+          node --check source/ai/r125-v4d-authored-topology.mjs
+          node --check scripts/r125-v4d-authored-topology-fixtures.mjs
+          node --check scripts/r125-v4d-authored-topology-review.mjs
+          node --test scripts/r125-v4d-authored-topology.test.mjs
+      - name: Export actual B143 three topologically different synthetic graph buildings
+        run: node scripts/r125-v4d-authored-topology-review.mjs --out "$RUNNER_TEMP/r125-v4d-authored-graphs"
+      - name: Archive actual B143 three authored graphs, art human review pending
+        uses: actions/upload-artifact@v4
+        with:
+          name: R125-V4D-Three-Independent-Authored-Spatial-Graphs-True-B143-ART-HOLD
+          path: ${{ runner.temp }}/r125-v4d-authored-graphs/
           if-no-files-found: error
           retention-days: 14
       - name: Parse real Windows PowerShell launcher before any Windows handoff
