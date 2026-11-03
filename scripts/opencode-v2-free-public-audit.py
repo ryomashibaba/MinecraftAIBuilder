@@ -28,6 +28,12 @@ REQUIRED = (
 )
 VERSION_MIN = (2, 2, 3)
 MAX_STDOUT = 14000
+# The local OpenCode V2 CLI (not the online docs) is authoritative for supported flags.
+REQUIRED_RUN_FLAGS = ("--standalone", "--agent", "--model", "--file")
+
+def run_help_compatible(help_text):
+    return all(re.search(r"(?<![\\w-])" + re.escape(flag) + r"(?![\\w-])", help_text)
+               for flag in REQUIRED_RUN_FLAGS)
 
 def policy(model):
     return {
@@ -160,6 +166,9 @@ def main():
     if args.self_test:
         assert parse_version("2.2.3") == VERSION_MIN
         assert parse_version("opencode 1.19.0") == (1, 19, 0)
+        assert run_help_compatible(" ".join(REQUIRED_RUN_FLAGS))
+        assert not run_help_compatible("--standalone --agent --model")
+        assert "--archived" not in REQUIRED_RUN_FLAGS
         assert has_exact_model("opencode/glm-5.3-flash-free\nother/a", FREE_MODELS[0])
         assert not has_exact_model("opencode/glm-5.3-flash-free-paid\n", FREE_MODELS[0])
         assert not has_exact_model("other/a", FREE_MODELS[0])
@@ -244,6 +253,20 @@ def main():
             raise RuntimeError("OFFICIAL_FREE_RATE_UNAVAILABLE")
         if not result["official_public_free_rate_verified"]:
             raise RuntimeError("FREE_PRICE_NOT_VERIFIED_HOLD")
+        # Local CLI help is authoritative: never try an unsupported flag or submit
+        # a model request just to discover CLI version incompatibilities.
+        help_run = subprocess.run(
+            [str(cli), "run", "--help"],
+            text=True, encoding="utf-8", errors="replace", capture_output=True,
+            timeout=20, check=False, cwd=study
+        )
+        result["local_run_help_checked"] = True
+        result["local_run_flags_supported"] = (
+            help_run.returncode == 0 and
+            run_help_compatible(help_run.stdout + "\\n" + help_run.stderr)
+        )
+        if not result["local_run_flags_supported"]:
+            raise RuntimeError("LOCAL_CLI_REQUIRED_FLAGS_UNSUPPORTED_HOLD")
         # Exactly one CLI RUN invocation (OpenCode may internally make more than one HTTP
         # request, e.g. title generation; count is intentionally NOT claimed as one).
         public_prompt = prompt_from_public_clone(snapshot)
@@ -255,7 +278,7 @@ def main():
         result["status"] = "HOLD"
         result["reason"] = "MODEL_RUN_ATTEMPT_IN_PROGRESS"
         call = subprocess.run(
-            [str(cli), "run", "--standalone", "--archived", "--agent", "mab-auditor",
+            [str(cli), "run", "--standalone", "--agent", "mab-auditor",
              "--model", args.model, "--file", str(public_evidence),
              "Analyze only the attached public GitHub evidence and answer its four questions."],
             text=True, encoding="utf-8", errors="replace", capture_output=True,
