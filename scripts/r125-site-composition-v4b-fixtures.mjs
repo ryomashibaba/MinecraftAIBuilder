@@ -6,8 +6,8 @@ export const makeSyntheticV4BSite=i=>{
  const w=16+i%3,d=13+i%2,roofY=9+i%3;
  return {
   schema:SITE_SCHEMA,id:'v4b-'+SYNTHETIC_GENRES[i],
-  title:'Independently authored '+SYNTHETIC_GENRES[i]+' public building',
-  brief:'Original spatial form with real arrival court, skylight and differentiated program',
+  title:'SYNTHETIC shared-layout '+SYNTHETIC_GENRES[i]+' SOURCE only',
+  brief:'Synthetic common topology for real B143 geometry testing; NOT independent Qwen design',
   materials:{floor:i===0?'wood':'stone',wall:'concrete',roof:'metal'},
   masses:[
    {id:'primary',purpose:'Visitors enter a coherent public program',

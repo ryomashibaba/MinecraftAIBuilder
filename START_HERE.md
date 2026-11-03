@@ -2,6 +2,14 @@
 
 **2026-11-02 JST 更新。長文プロンプト・ZIP交換なしで、GitHub正本を読み込んで既存開発を継続する。**
 
+## 2026-11-03 確定：V4A/V4B CI完走・真正3D ART REJECT 5/5
+
+- V4B初回の [CI #41589868598](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41589868598) が失敗した直接原因はV4A `r125-public-approach-v4a.mjs` の未閉じ引用符。研究ブランチ `c414f47770c46fa2a83549f25f54b15c213e0659` で訂正し、次の [CI #41594095747](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41594095747) が **SUCCESS**。SOURCE技術結果をARTやMinecraft施工へ昇格しない。
+- 正式CI Artifact **R125-V4B-Five-Synthetic-Site-3D-SOURCE-Only**（ID `13211695519`）を取得し、埋込真正B143 `surface` 全5棟を等角投影・独立ART予備審査。**5/5 ART REJECT**：主棟+東翼+南翼の同一ボックス連結、用途差が弱く、小中庭の空・支持床の有効内部は各2〜3ブロック²（全体投影占有に対し0.57〜0.85%）。`sourceRoutes` PASSは維持し、合成設計の正式美術採用は0。詳細 [V4B真正3D・ART審査](docs/R125_V4B_ACTUAL_SOURCE_ART_REVIEW_20261103_JA.md)。
+- 5件の合成ソースは**同一脚本で寸法だけを変えたテストダブル**。異なるSHAが本当に異なる5用途設計の証明ではない。ギャラリーの誤認を防ぐため、タイトルに `SYNTHETIC shared-layout` を明記し、出力レポートにも `independentArchitecturalDesignsCertified:0` と接続トポロジーの重複件数を保存するSOURCE回帰を追加。再実行後のCIは完走結果を別途確認する。
+- **次の本命**：V4Cとして、主役形状・複数の実用空洞・外部空間・人間のアプローチ動線を**設計者著作の意味IRから統合**する研究。窓追加や小中庭拡幅など場当たりの微修正を繰り返さない。Qwen実著作5件を始める前に、共通生成器が異なる非箱型空間構成を表現でき、複数視点ARTで意味のある改善を示す必要がある。
+- main・Draft PR #128・R125 Education安定経路・旧V1〜V4B原本・ユーザーprivate Qwen原文は保護。Minecraft WorldWrites 0、9 BLOCKED、BuildPlan空、Work事前承認制を維持。
+
 ## 2026-11-03 次工程実装：V4B 主従敷地構成・中庭・入口共通IR（CI待ち）
 
 - 前工程V4Aの GitHub Actions [#41584403568](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41584403568) は今もキュー待機。**PASS未確認**。既存V4A/V1〜V3と凍結Qwen原文は変更しない。

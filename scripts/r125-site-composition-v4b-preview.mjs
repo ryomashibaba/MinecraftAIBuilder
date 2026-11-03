@@ -13,11 +13,16 @@ const fail=s=>{throw Error('R125_V4B_PREVIEW_'+s)};
 export function createSyntheticV4BPreview({outDir}={}){
  if(typeof outDir!=='string'||!path.isAbsolute(outDir)||
   fs.existsSync(outDir)||!fs.existsSync(path.dirname(outDir)))fail('OUTPUT_PATH');
- const results=SYNTHETIC_GENRES.map((name,i)=>{
+ const plans=SYNTHETIC_GENRES.map((name,i)=>{
   const p=makeSyntheticV4BSite(i);
-  if(p.id!=='v4b-'+name)fail('SYNTHETIC_CASE_LABEL');
-  return compileAuthoredSiteV4B(p);
+  if(p.id!=='v4b-'+name||!p.title.startsWith('SYNTHETIC'))
+   fail('SYNTHETIC_CASE_LABEL');
+  return p;
  });
+ const connectionTopologies=plans.map(p=>p.links.map(l=>
+  l.from+'>'+l.to+':'+l.side).join('|'));
+ const distinctConnectionTopologyCount=new Set(connectionTopologies).size;
+ const results=plans.map(p=>compileAuthoredSiteV4B(p));
  if(results.length!==5||new Set(results.map(x=>x.geometrySha256)).size!==5||
   results.some(x=>x.sourceRoutes.status!=='SOURCE_ROUTES_REACH_ALL_ZONES'||
    x.worldWrites!==0||x.constructionApproved!==false||
@@ -31,6 +36,10 @@ export function createSyntheticV4BPreview({outDir}={}){
   modelAuthorship:'TEST_DOUBLE_NOT_REAL_MODEL',
   generationMethod:'AUTHOR_SUPPLIED_SYNTHETIC_IR_REAL_B143',
   actualQwenArchitectureCount:0,siteReadyCount:results.length,
+  independentArchitecturalDesignsCertified:0,
+  distinctConnectionTopologyCount,
+  allGenresShareOneConnectionTopology:distinctConnectionTopologyCount===1,
+  geometryHashDifferenceDoesNotProveSemanticDiversity:true,
   cases:results.map((r,i)=>({id:SYNTHETIC_GENRES[i],
    sourceSha256:r.sourceSha256,geometrySha256:r.geometrySha256,
    sourceRoutesStatus:r.sourceRoutes.status,

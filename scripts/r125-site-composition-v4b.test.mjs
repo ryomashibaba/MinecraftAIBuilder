@@ -37,6 +37,12 @@ test('five cross-genre TEST DOUBLES produce truly distinct authored B143 mass+co
   shapes.push(r.geometrySha256);
  }
  assert.equal(new Set(shapes).size,5);
+ // These test doubles intentionally reuse the same mass connection topology;
+ // five different voxel hashes are not five independent genre designs.
+ assert(ids.every((_,i)=>fixture(i).title.startsWith('SYNTHETIC')));
+ const signatures=ids.map((_,i)=>fixture(i).links.map(l=>
+  l.from+'>'+l.to+':'+l.side).join('|'));
+ assert.equal(new Set(signatures).size,1);
 });
 test('author intent cannot be repaired by HOST: exact fields, size limits, rooms and placements',()=>{
  const good=fixture(0),bad=[];
