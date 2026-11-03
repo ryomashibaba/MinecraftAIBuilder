@@ -75,3 +75,18 @@
 - QAコンテナは `node` / `npm` / `python3` のみ呼び出せる。ただし既定QAイメージはNodeであり、`python3` の有無や `node_modules` の準備は未確認。QA成功を実アート・原作再現・実世界内施工・真正LLM生成と混同しない。
 - `python -m unittest discover -s tools/free-autonomy-solo -p "test_*.py"` で監督器とDockerコマンド構築をFake試験。**実Docker/Windows/本物のOpenCode/真正Qwen/無料クラウド連続実行は未証明（HOLD）**。
 - 次の真正実行は「Docker本体の実起動と隔離→OpenCodeの固定モデル1回の真正応答→小さなソース修正→独立QA→研究コミットとpush→2工程目へ連続」の順で、証拠が揃うまで本番長時間運用を開始しない。
+
+
+## 2026-11-04 真正Linux Docker / OpenCode 2 CLIの限定PASS
+
+研究HEAD 0f519ba0bc15a77e7bf15b3574848dd9ae4b24c5 / [専用Actions #41742013939](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41742013939)：3ジョブすべて completed/success。
+
+- offline-contract-only：Mock/Fakeの安全回帰20/20 PASS。実LLM試験ではない。
+- native-docker-smoke-no-llm：真正Ubuntu Docker Server 28.0.4で独立2コンテナ起動。使い捨てworkspace書込、.git readonly、root filesystem readonly、socket非公開、network none、タイムアウト停止を検証。
+- real-opencode-v2-cli-no-llm：公開OpenCode v2.0.0イメージの本物のCLIを隔離Dockerで起動しヘルプ応答を確認。認証情報なし、ネットワーク遮断、モデル推論0回。
+- 独立QAは常時 network none。agentは別途明示承認した場合のみbridge使用可能。QA前後の変更対象とSHA256が異なる場合はcommitせずHOLD。
+- 既存r55-future-source-preflightは別にFAILし得る。今回の専用CI成功とリポジトリ全体のCI成功を混同しない。
+
+未達＝HOLD：Windows Docker実機、真正Ollama/Qwen/Gemma推論、無料クラウドモデルの真正連続利用、実LLMが行うソース修正→独立QA→GitHub push、長時間無人運転、MABのART/実機・TPS正式4v4/原作180秒品質。
+
+次ゲート：PC利用可能時に隔離使い捨てclone上でWindows Dockerとモデル通信を一括確認する。既存Windows/Ollama設定、原本、ゲーム、本番、main、保護研究ブランチに触れない。ユーザー操作はできるだけ1回にまとめる。
