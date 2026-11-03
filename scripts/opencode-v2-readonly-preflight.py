@@ -67,6 +67,19 @@ def validate_policy(p):
     assert not any(x["action"] == "provider.use" and x["resource"] not in ("*", "opencode") for x in rules)
     return True
 
+def parse_supported_v2(raw):
+    """Return sanitized semver and safety status; no execution or provider access."""
+    match = re.search(r"(?<![0-9])v?(\d+)\.(\d+)\.(\d+)", raw)
+    if not match:
+        return None, "OPENCODE_VERSION_UNRECOGNIZED"
+    numeric = tuple(int(match.group(i)) for i in (1, 2, 3))
+    semver = ".".join(str(x) for x in numeric)
+    if numeric[0] != 2:
+        return semver, "OPENCODE_V2_REQUIRED"
+    if numeric < (2, 2, 3):
+        return semver, "OPENCODE_V2_2_3_REQUIRED"
+    return semver, None
+
 def main():
     parser = argparse.ArgumentParser(description="OpenCode V2 model-free, read-only, isolated preflight")
     parser.add_argument("--self-test", action="store_true",
@@ -74,6 +87,10 @@ def main():
     args = parser.parse_args()
     validate_policy(safe_policy())
     if args.self_test:
+        assert parse_supported_v2("1.14.0") == ("1.14.0", "OPENCODE_V2_REQUIRED")
+        assert parse_supported_v2("2.2.2") == ("2.2.2", "OPENCODE_V2_2_3_REQUIRED")
+        assert parse_supported_v2("opencode v2.2.5") == ("2.2.5", None)
+        assert parse_supported_v2("nonsense") == (None, "OPENCODE_VERSION_UNRECOGNIZED")
         print("POLICY_STATIC_SELF_TEST_PASS; REAL_OPENCODE_NOT_EXECUTED")
         return 0
 
@@ -107,10 +124,10 @@ def main():
         if shutil.which("opencode") is None:
             raise RuntimeError("OPENCODE_NOT_INSTALLED")
         version = call([shutil.which("opencode"), "--version"], timeout=15)
-        # Explicitly refuse OpenCode 1 configuration because V1 permissions are different.
-        if not re.search(r"(?<![0-9])2\.[0-9]+(?:\.[0-9]+)?", version):
-            raise RuntimeError("OPENCODE_V2_REQUIRED")
-        report["opencode_version"] = version[:80]
+        parsed, reason = parse_supported_v2(version)
+        report["opencode_version"] = parsed
+        if reason:
+            raise RuntimeError(reason)
 
         source = work / "public_snapshot"
         call(["git", "-c", "credential.interactive=never", "clone", "--depth", "1",
@@ -142,7 +159,8 @@ def main():
         # Fixed codes only; do not publish raw OS exceptions, paths, or credentials.
         allowed = {
             "GIT_NOT_FOUND", "OPENCODE_NOT_INSTALLED", "COMMAND_EXIT_NONZERO",
-            "OPENCODE_V2_REQUIRED", "BRANCH_OR_HEAD_MISMATCH",
+            "OPENCODE_V2_REQUIRED", "OPENCODE_VERSION_UNRECOGNIZED",
+            "OPENCODE_V2_2_3_REQUIRED", "BRANCH_OR_HEAD_MISMATCH",
             "CANONICAL_SOURCE_MISSING", "SAFETY_CONTRACT_INCOMPLETE",
             "PROJECT_OPENCODE_CONFIG_EXISTS"
         }
