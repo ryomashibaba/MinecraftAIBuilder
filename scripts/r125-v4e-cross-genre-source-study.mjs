@@ -95,7 +95,7 @@ export function syntheticFiveGenreAuthorCases(){
    authoredSection:{spaceId:c.sectionRoom,corner:c.sectionCorner,recessDepth:6},
    authoredMassing:{...MASSING_AUTHOR_SAMPLES[c.id],
     cutWidth:7,cutDepth:7,publicAccessSide:'X'},
-   authoredWing:{spaceId:'learning',side:c.id==='research'?'west':c.link,
+   authoredWing:{spaceId:'learning',side:c.id==='shop'?'north':c.id==='research'?'west':c.link,
     start:4,span:12,reach:7,roofY:9,purpose:c.open}};
  });
 }
@@ -129,7 +129,10 @@ export function exportV4ECrossGenreSource(folder){
   results[i].b143.compiled.primitives,m.b143Compiled.primitives));
  if(visibility.some(v=>v.views.find(x=>x.face==='roof').depthChangedCells<1))
   fail('MASSING_ROOF_HEIGHT_DIFFERENCE_NOT_VISIBLE');
- const wings=samples.map(s=>compileAuthoredExteriorWing(s.source,s.authoredMassing,s.authoredWing));
+ const wings=samples.map(s=>{
+  try{return compileAuthoredExteriorWing(s.source,s.authoredMassing,s.authoredWing);}
+  catch(e){fail('SYNTHETIC_WING_'+s.genre+'_'+String(e.message));}
+ });
  const wingReview=compileB143Gallery(wings.map(w=>w.b143Design));
  if(wings.some(w=>w.sourceWingWitness.independentRoofSilhouette.views
    .find(v=>v.face==='roof').silhouetteChangedCells<84))
