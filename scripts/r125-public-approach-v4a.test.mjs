@@ -79,14 +79,17 @@ test('missing author dimensions, invented defaults, wrong plan or extra keys HOL
 });
 test('route audit refuses a court over the neighboring connected room',()=>{
  const p=plan(0);
- // Move the auxiliary room in front of the root, away from the frozen
- // centered V1 threshold but over the requested new public forecourt.
- p.rooms[1].width=6;
- p.rooms[1].depth=8;
- p.rooms[1].attach={to:'public-room',side:'north',shift:-3};
  const base=compileSpatialComposition(p);
  const intent={...approach(p,0),offset:2};
- assert.throws(()=>compilePublicApproachV4A({originalPlan:p,intent}),
+ // A V4-ready planner may in future supply arbitrary adjacent site masses.
+ // The shared validator must refuse cutting through any such volume.
+ const obstructed={...base,layout:{rooms:[
+  base.layout.rooms[0],
+  {...base.layout.rooms[1],
+   x:base.layout.rooms[0].x+2,
+   z:base.layout.rooms[0].z-2,width:4,depth:3}
+ ]}};
+ assert.throws(()=>validatePublicApproachIntent(p,intent,obstructed),
   /R125_APPROACH_OTHER_ROOM_OBSTRUCTS_APPROACH/);
  assert.equal(compileSpatialComposition(p).geometrySha256,base.geometrySha256);
 });
