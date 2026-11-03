@@ -36,7 +36,7 @@ const SYSTEM=[
  'Return exactly one compact JSON object. NO markdown, filler, world coordinates or commands.',
  'Top-level EXACT keys schema,planId,rooms; schema='+FUNCTION_SCHEMA+'.',
  'planId must be given original plan id. rooms must have one entry per provided room.',
- 'Each room entry EXACT keys roomId,fixture,opening.',
+ 'Each room entry EXACT keys roomId,fixture,opening; opening may be null for a room without needed exterior daylight.',
  'roomId must be the exact existing id.',
  'fixture EXACT keys kind,side,offset,material,purpose.',
  'fixture.kind counter|worktable|bench|display|storage; side north|south|east|west;',
@@ -50,7 +50,9 @@ const SYSTEM=[
  '2-wide service access to EACH fixture from the public exterior entrance.',
  'Choose open EXTERIOR walls, never a shared wall or an exterior doorway.',
  'The user prompt includes genre-neutral availableLargeExteriorOpenings for each room.',
- 'opening.side, opening.offset, opening.width and opening.height MUST match ONE offered buildable choice EXACTLY.',
+ 'For a room with an exterior window, opening.side/offset/width/height MUST EXACTLY match ONE availableLargeExteriorOpenings choice.',
+ 'If the room has zero choices, opening MUST be null. Interior storage or display rooms may choose null when daylight is inappropriate.',
+ 'Choose at least one valid new exterior opening for the building when available; never fabricate one in an internal wall.',
  'The options are actual geometry-derived 3x2 and 4x2 openings, not HOST-chosen designs. Do not enlarge height or width.',
  'Do not copy the same kinds/arrangement for all genres. Express what each room actually does.',
  'Host may reject a design but MUST NOT invent or silently move your authored geometry.',
@@ -172,8 +174,8 @@ export async function runFiveGenreFunctions(
    try{
     const facadeChoiceSurvey=surveyFunctionalFacadeOpenings({
      originalPlan:c.product.plan,envelopeIntent:c.envelopeIntent});
-    const blocked=facadeChoiceSurvey.find(x=>x.availableLargeExteriorOpenings.length===0);
-    if(blocked)fail('NO_EXTERIOR_OPENING_OPTION_'+blocked.roomId);
+    if(facadeChoiceSurvey.every(x=>x.availableLargeExteriorOpenings.length===0))
+     fail('NO_EXTERIOR_OPENING_OPTION_IN_BUILDING');
     const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),timeoutMs);
     let wire;
     try{
