@@ -1,5 +1,14 @@
 # MinecraftAIBuilder — START HERE（新チャット・AI開発者の統一入口）
 
+## 2026-11-03 V4D初回 SOURCE実装・CI確認入口
+
+- V4C正式CI #41596939516は成功、しかし**V4C 3/3 ART REJECT**の証拠は不変。V4Dでは箱型+屋根穴の微修正を繰り返さず、AUTHORが主屋根高低差と連続主帯のセットバック、北の大庇/広場、横の半屋外ロッジア、透明上部開口を選ぶ新しい**独立・オプトイン**意味IRの第1試作に着手。
+- 実装：source/ai/r125-sculpted-spine-v4d.mjs、単一の合成SOURCEテスト、実B143の3D/上面/立面を一括で出すCI。詳細は [V4D最初のSOURCE試験契約](docs/R125_V4D_SCULPTED_SPINE_SOURCE_PILOT_20261103_JA.md)。**新Qwen実推論0、Minecraft書込0。SOURCE CI・人間ARTの最終判断は実際のrunを照合するまで未認定。**
+- 次工程：GitHub ActionsのV4D Artifact（index.html / ACTUAL_B143_SOURCE_VIEWS.svg / V4D_SOURCE_REVIEW.json）を確認し、**ARTを3D実物で独立評価**。段状の箱連結に留まるならART REJECTして原理的表現を改善。合格を捏造して別用途/本物Qwenに移らない。
+- 研究ブランチ feature/b198zr1-protected-architectural-revision、Draft PR #128 Open/Draft継続、main・R125→B143→Education既存実機成功・旧V1〜V4C/private原文保護。NOT_PREPARED／9 BLOCKED／BuildPlan空／world writes 0。Work事前承認。
+
+
+
 **2026-11-03 JST 統合正本更新。新チャットではGitHubから最新HEADを照合して継続する。長文プロンプト・ZIP交換は不要。**
 
 ## 2026-11-03 完全統合引き継ぎ正本 — 新チャットはここから

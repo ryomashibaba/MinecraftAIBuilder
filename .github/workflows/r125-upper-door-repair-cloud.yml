@@ -24,6 +24,10 @@ on:
       - 'scripts/r125-site-composition-v4b.test.mjs'
       - 'scripts/r125-site-composition-v4b-preview.mjs'
       - 'source/ai/r125-void-massing-v4c.mjs'
+      - 'source/ai/r125-sculpted-spine-v4d.mjs'
+      - 'scripts/r125-v4d-synthetic-fixture.mjs'
+      - 'scripts/r125-v4d-sculpted-spine.test.mjs'
+      - 'scripts/r125-v4d-source-review.mjs'
       - 'scripts/r125-v4c-structural-fixtures.mjs'
       - 'scripts/r125-v4c-void-massing.test.mjs'
       - 'scripts/r125-v4c-source-review.mjs'
@@ -101,6 +105,20 @@ jobs:
         with:
           name: R125-V4C-Three-Distinct-Synthetic-Source-Topologies-ART-HOLD
           path: ${{ runner.temp }}/v4c-source-review/
+          if-no-files-found: error
+          retention-days: 14
+      - name: V4D true B143 stepped public spine and negative author-contract SOURCE tests
+        run: |
+          node --check source/ai/r125-sculpted-spine-v4d.mjs
+          node --check scripts/r125-v4d-source-review.mjs
+          node --test scripts/r125-v4d-sculpted-spine.test.mjs
+      - name: Export V4D single SYNTHETIC AUTHOR true B143 3D and fixed real-voxel views
+        run: node scripts/r125-v4d-source-review.mjs --out "$RUNNER_TEMP/v4d-source-review"
+      - name: Upload V4D one-case SOURCE-only / human ART not reviewed
+        uses: actions/upload-artifact@v4
+        with:
+          name: R125-V4D-One-Synthetic-Author-Spine-3D-ART-HOLD
+          path: ${{ runner.temp }}/v4d-source-review/
           if-no-files-found: error
           retention-days: 14
       - name: Parse real Windows PowerShell launcher before any Windows handoff
