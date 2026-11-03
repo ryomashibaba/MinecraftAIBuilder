@@ -1,10 +1,12 @@
 # MinecraftAIBuilder — START HERE（新チャット・AI開発者の統一入口）
 
-## 2026-11-03 V4D多用途グラフ：固定左右翼から独立した共通SOURCE接続研究（新CI未確認）
+## 2026-11-03 V4D多用途グラフ：正式SOURCE 3/3 PASS／真正B143独立ART 3/3 REJECT
 
-- 第四案のSOURCE PASS/ART REJECTを凍結し、同じ建物の細工に戻らない。短い作者IRの用途ノード・実共有壁接続・公開空洞・大屋根断面・採光・実用途設備を総合する **`source/ai/r125-v4d-authored-topology.mjs`** を新規オプトインで実装。
-- 直列／中心分岐／環状閉路という真に異なる接続次数・cycle rankの合成AUTHOR3件を同一エンジンへ入力し、実B143/2幅SOURCE動線/設備サービス到達/単一3D比較を既存Actionsへ追加。**実Qwen新推論0、SOURCE CI結果未確認、ART NOT_REVIEWED、Minecraft施工0**。[安全・審査契約](docs/R125_V4D_GENERIC_AUTHORED_TOPOLOGY_STUDY_20261103_JA.md)。
-- main、旧V1〜V4D第四案、R125→B143→Education実機成功原本、private Qwen原本を不変更。PR #128 Draft維持、Work事前承認制、NOT_PREPARED/9 BLOCKED/BuildPlan空/worldWrites0。
+- **固定左右翼からの脱却**：短いAUTHOR意味IRから3〜5用途のノードと独立の直列／分岐／環状接続、物理的共有壁の扉、roofless公共空間、真正B143屋根・実窓・設備を生成する独立オプトイン共通エンジン `source/ai/r125-v4d-authored-topology.mjs`。旧第一〜第四案のART REJECTを凍結し、同じ棟の装飾反復に戻らない。
+- 実装 [b83bf04c](https://github.com/ryomashibaba/MinecraftAIBuilder/commit/b83bf04c2052a08ff00ce406613314afe264e919)、専用 [R125 CI #41610782194](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41610782194) **completed/success**。Artifact ID **13219416378**、取得ZIPとGitHub digestが同一SHA256 `c2468f43d3dbfe5c65acff443eeabdf33ed65d36566cf39e981d54fe5bc0474b`。真正B143 直列7297／分岐7581／環状6602 voxel、接続次数+cycle rank は互いに異なり、全12/12用途SOURCE到達、全12/12用途設備サービスSOURCE到達、4ノード×3設計を検証した。**3例とも実LLMではない独立合成AUTHOR**。
+- 最終surfaceの独立2方向斜視・上面を比較して**ART予備REJECT 3/3、正式ART採用0**。接続は本当に違うが、外観は直方体の連結、平坦な大壁面、つながりの弱い屋根、公共性・機能性の表現不足。次は共通IRの主外殻と立体公共動線・用途機能の一体著作を根本強化。詳細 [正式CIとART独立監査](docs/R125_V4D_GENERIC_AUTHORED_TOPOLOGY_STUDY_20261103_JA.md)。
+- 旧main・R125→B143→Education実機成功・全凍結原本・private Qwen生原文不変更。PR #128 Open/Draft/Unmerged維持。実Qwen追加0、Minecraft施工0、NOT_PREPARED／9 BLOCKED／BuildPlan空／WorldWrites0、Work事前承認。
+
 
 ## 2026-11-03 V4D第四案：SOURCE CI PASS／真正3D独立予備ART REJECT
 

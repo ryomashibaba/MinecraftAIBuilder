@@ -1,5 +1,7 @@
 # MinecraftAIBuilder — 開発再開の最新正本案内（2026-11-03）
 
+**最新2026-11-03 SOURCE進捗（上位は START_HERE）**：研究HEADのV4D汎用空間グラフは直列/分岐/環状3件の合成AUTHORを同一SOURCE/真正B143へ変換、専用R125 CI #41610782194 completed/success。真正3D独立予備ARTは3/3 REJECT、実Qwen新設計0／Minecraft施工0／正式美術採用0。次は公共空間の立体性・外皮接合・用途設備の一体設計を、固定テンプレートに戻らず共通IRで改善。** 旧V4C工程案は履歴として下に保持。
+
 **固定入口：[ルートSTART_HERE](../START_HERE.md) → [2026-11-03完全統合引き継ぎ](MINECRAFT_AI_BUILDER_COMPLETE_HANDOFF_20261103_V4D_JA.md)。** 以下の古い2026-11-02以前の工程ログは歴史として残し、現在地・次作業の優先順位は上記最新版で更新する。現PRはDraft #128、研究ブランチ`feature/b198zr1-protected-architectural-revision`。最新HEADは常にGitHubから再取得する。
 
 - 直近V4C：実B143 SOURCE合成3/3 PASS、CI [#41596939516](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41596939516) SUCCESS、ART 3/3 REJECT。新実Qwen V4C推論0、ワールド書込0。次はV4Dの作者所有の主輪郭・高さの主従・半屋外公共空間の自由度を検証。旧R125/保存Qwen/Education実機成功を守る。
