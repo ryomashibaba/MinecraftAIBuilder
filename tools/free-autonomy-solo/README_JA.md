@@ -23,6 +23,9 @@
 ```json
 {
   "project": "minecraftaibuilder",
+  "sandbox_runtime": "docker",
+  "docker": {"network": "bridge", "memory": "6g", "cpus": "2"},
+  "network_access_approved": true,
   "workspace": "C:/FreeAutonomyIsolated/MinecraftAIBuilder",
   "branch": "research/free-autonomy-pilot-20261104",
   "model": "ollama/qwen3:14b",
@@ -41,6 +44,9 @@
 ```json
 {
   "project": "browser-ink-tps",
+  "sandbox_runtime": "docker",
+  "docker": {"network": "bridge", "memory": "6g", "cpus": "2"},
+  "network_access_approved": true,
   "workspace": "C:/FreeAutonomyIsolated/browser-ink-tps",
   "branch": "research/free-autonomy-pilot-20261104",
   "model": "ollama/qwen3:14b",
@@ -59,3 +65,13 @@
 ## 現時点の証拠
 
 `python -m unittest -v test_solo_agent.py` のLinux/Python 3.13.5ローカル隔離Fake CLI試験11件はPASS。**Fake CLIであり実LLMのコード生成成功数は0件、Windows実機無人運転は0件**。SOURCEテスト成功後コミット・origin/branch/paths/モデル制限・再開の限定動作を確認しただけ。Strata A33の真正推論・長時間運転HOLDは維持。
+
+## 2026-11-04 Docker境界（今回新規・未実機）
+
+- `solo_agent.py` は `sandbox_runtime: docker` を**必須**とする。旧 `--sandbox-attested` フラグは単なる起動者の認識確認であり、Docker実行を迂回できない。
+- OpenCode 2の研究用イメージ `ghcr.io/anomalyco/opencode:2.0.0` と、QA用 `node:22-bookworm-slim` を**事前にローカルで確認**する。監督器は自動pullやインストールをしない。利用可能なイメージ・CLI互換性はWindows実機で再検証。
+- AgentとQAはどちらも `docker run` の別コンテナ内で実行。Git cloneを `/work` だけにマウントし、`.git` は重ねて読み取り専用、ホストHOME・Docker socket・ユーザーデータ・GitHub認証をマウントしない。root filesystem readonly、権限/CAP縮小、CPU・RAM・PID制限、タイムアウト後の `docker rm -f` を準備。ただしこれらのオプションが実Windows環境で正しく成立した証拠はまだない。
+- 実モデルへの接続のための例では `network: bridge` と `network_access_approved: true` を**明示**する。ネットワーク到達を認めるため、隔離クローン内には秘密情報を置かない。ネット接続が不要な試験は `network: none` を指定する。Ollamaは `host.docker.internal:11434/v1` に接続する設定を注入するが、Windows側Ollamaのbind・firewall・LAN露出対策を別途検証する。
+- QAコンテナは `node` / `npm` / `python3` のみ呼び出せる。ただし既定QAイメージはNodeであり、`python3` の有無や `node_modules` の準備は未確認。QA成功を実アート・原作再現・実世界内施工・真正LLM生成と混同しない。
+- `python -m unittest discover -s tools/free-autonomy-solo -p "test_*.py"` で監督器とDockerコマンド構築をFake試験。**実Docker/Windows/本物のOpenCode/真正Qwen/無料クラウド連続実行は未証明（HOLD）**。
+- 次の真正実行は「Docker本体の実起動と隔離→OpenCodeの固定モデル1回の真正応答→小さなソース修正→独立QA→研究コミットとpush→2工程目へ連続」の順で、証拠が揃うまで本番長時間運用を開始しない。
