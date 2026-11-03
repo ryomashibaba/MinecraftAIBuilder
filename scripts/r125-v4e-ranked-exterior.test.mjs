@@ -4,7 +4,7 @@ import {makeV4DCompactSynthetic} from './r125-v4d-compact-model-fixture.mjs';
 import {compileCompactModelIntent,COMPACT_SCHEMA}
  from '../source/ai/r125-v4d-compact-model-ir.mjs';
 import {RANKED_SCHEMA,translateRankedExteriorIntent,
- compileRankedExteriorIntent,RANKED_SYSTEM_PROMPT}
+ compileRankedExteriorIntent,proveRankedExteriorPhysicalGlazing,RANKED_SYSTEM_PROMPT}
  from '../source/ai/r125-v4e-ranked-exterior-ir.mjs';
 function author(){
  const src=makeV4DCompactSynthetic();
@@ -169,4 +169,31 @@ test('V4E malformed original preference remains HOLD with safe diagnostic and ze
   assert.equal(replayed.worldWrites,0);
   assert(!fs.existsSync(path.join(replay,'index.html')));
  }finally{fs.rmSync(folder,{recursive:true,force:true});}
+});
+
+
+test('V4E source witnesses each entire glass panel and immediate outside AIR in final B143, never ART',()=>{
+ const result=compileRankedExteriorIntent(author());
+ const proof=result.rankedPhysicalGlazingSourceProof;
+ assert.equal(proof.status,'B143_WINDOW_GLASS_AND_IMMEDIATE_OUTWARD_AIR_SOURCE_VERIFIED');
+ assert.equal(proof.windowCount,2);
+ assert.equal(proof.verifiedPanelGlassCells,36);
+ assert.equal(proof.verifiedImmediateOutwardAirCells,36);
+ assert.equal(proof.humanArchitecturalArt,'NOT_REVIEWED');
+ assert.equal(result.worldWrites,0);
+ const room=result.plan.nodes[0];
+ const w=result.plan.windows.find(v=>v.nodeId===room.id);
+ assert.equal(w.side,'east');
+ const wx=room.x+room.width-1,wy=w.sillY,wz=room.z+w.offset;
+ const badGlass=structuredClone(result);
+ const cell=badGlass.b143.compiled.primitives.find(v=>
+  v[0]===wx&&v[1]===wy&&v[2]===wz);
+ assert(cell,'the exact selected panel cell must exist');
+ cell[3]=-1; // simulate a lost panel after the last B143 compilation
+ assert.throws(()=>proveRankedExteriorPhysicalGlazing(badGlass,badGlass.chosenWindowFaces),
+  /R125_V4E_RANKED_PHYSICAL_GLAZING_NOT_PRESENT_/);
+ const blockedOutward=structuredClone(result);
+ blockedOutward.b143.compiled.primitives.push([wx+1,wy,wz,-1]);
+ assert.throws(()=>proveRankedExteriorPhysicalGlazing(blockedOutward,blockedOutward.chosenWindowFaces),
+  /R125_V4E_RANKED_PHYSICAL_OUTWARD_AIR_OBSTRUCTED_/);
 });

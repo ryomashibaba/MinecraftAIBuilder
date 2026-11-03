@@ -8,6 +8,7 @@
  * Frozen V4D COMPACT_SCHEMA and Education success path remain unchanged.
  */
 import {createHash} from 'node:crypto';
+import {MATERIALS} from './b143-building-dsl.mjs';
 import {COMPACT_SCHEMA,translateCompactModelIntent}
  from './r125-v4d-compact-model-ir.mjs';
 import {translateRelativeAuthorIntent,compileRelativeAuthorIntent}
@@ -104,14 +105,75 @@ export function translateRankedExteriorIntent(untrusted){
   modelSizeOrMacMemoryTested:false
  };
 }
+
+/**
+ * V4E-specific post-compile SOURCE witness. A direction selected from the
+ * complete authored topology is not enough: verify that every intended
+ * 6x3 glazing panel survived as actual glass in final B143 primitives and
+ * that the immediately adjacent outward voxel is AIR. This is NOT a
+ * Minecraft-world, weatherproofing, architecture-quality or ART proof.
+ */
+export function proveRankedExteriorPhysicalGlazing(source, choices){
+ const plan=source?.plan,primitives=source?.b143?.compiled?.primitives;
+ if(!Array.isArray(plan?.nodes)||!Array.isArray(plan?.windows)||
+    !Array.isArray(primitives)||!Array.isArray(choices)||
+    plan.windows.length!==choices.length)
+    fail('PHYSICAL_WITNESS_INPUT');
+ const glass=MATERIALS.indexOf('glass');
+ if(glass<0)fail('PHYSICAL_GLASS_PALETTE');
+ const vox=new Map(primitives.map(p=>[p[0]+','+p[1]+','+p[2],p[3]]));
+ const key=(x,y,z)=>x+','+y+','+z;
+ let glassCells=0,adjacentAirCells=0;
+ const seen=new Set();
+ for(const c of choices){
+  if(!Number.isSafeInteger(c.spaceIndex)||seen.has(c.spaceIndex))
+   fail('PHYSICAL_CHOICE_DUPLICATE');
+  seen.add(c.spaceIndex);
+  const room=plan.nodes[c.spaceIndex];
+  const windows=plan.windows.filter(w=>w.nodeId===room?.id);
+  if(room?.kind!=='covered'||windows.length!==1)
+   fail('PHYSICAL_WINDOW_TO_ROOM_DRIFT');
+  const w=windows[0],side=c.selectedSide;
+  const dimension=side==='east'||side==='west'?room.depth:room.width;
+  if(w.side!==side||w.span!==6||w.sillY!==5||w.height!==3||
+    w.offset!==Math.floor((dimension-6)/2))
+   fail('PHYSICAL_AUTHORED_SIDE_DRIFT');
+  for(let t=0;t<w.span;t++)for(let dy=0;dy<w.height;dy++){
+   const y=w.sillY+dy;
+   const x=side==='west'?room.x:
+    side==='east'?endX(room):room.x+w.offset+t;
+   const z=side==='north'?room.z:
+    side==='south'?endZ(room):room.z+w.offset+t;
+   if(vox.get(key(x,y,z))!==glass)
+    fail('PHYSICAL_GLAZING_NOT_PRESENT_'+c.spaceIndex);
+   glassCells++;
+   const ox=x+(side==='east'?1:side==='west'?-1:0);
+   const oz=z+(side==='south'?1:side==='north'?-1:0);
+   if(vox.has(key(ox,y,oz)))
+    fail('PHYSICAL_OUTWARD_AIR_OBSTRUCTED_'+c.spaceIndex);
+   adjacentAirCells++;
+  }
+ }
+ return {
+  status:'B143_WINDOW_GLASS_AND_IMMEDIATE_OUTWARD_AIR_SOURCE_VERIFIED',
+  windowCount:choices.length,
+  verifiedPanelGlassCells:glassCells,
+  verifiedImmediateOutwardAirCells:adjacentAirCells,
+  weatherproofing:'NOT_TESTED',minecraftWalking:'NOT_TESTED',
+  humanArchitecturalArt:'NOT_REVIEWED',realModelIdentity:'NOT_ATTESTED',
+  worldContacts:0,worldWrites:0
+ };
+}
+
 export function compileRankedExteriorIntent(value){
  const m=translateRankedExteriorIntent(value);
  const source=compileRelativeAuthorIntent(m.expandedMechanicalIR);
+ const rankedPhysicalGlazingSourceProof=proveRankedExteriorPhysicalGlazing(source,m.chosenWindowFaces);
  if(source.worldContacts!==0||source.worldWrites!==0||
   source.constructionApproved!==false||
   source.executionAllowed!==false)
   fail('WORLD_SAFETY');
- return {...source,...m,
+ return {...source,...m,rankedPhysicalGlazingSourceProof,
   authorContract:RANKED_SCHEMA,
   sourceProvenance:'RANKED_AUTHOR_USER_OR_LLM_UNATTESTED',
   humanArt:'NOT_REVIEWED',modelIdentity:'NOT_ATTESTED',

@@ -1,5 +1,10 @@
 # MinecraftAIBuilder — START HERE（新チャット・AI開発者の統一入口）
 
+## 2026-11-03 V4E実B143窓セルと直外気の独立SOURCE照合（実Qwen/ART未認定）
+
+- 任意研究V4Eに、作者順位から採択した全窓について、**最終B143の6×3ガラス18セルと窓の外側に隣接する18セルの空気**を実voxel配列から個別に照合するfail-closed検査を追加。SOURCE選択だけで物理窓の存在を推測しない。ガラス欠損・窓外側の閉塞を注入する負例を同じV4Eテストに追加。旧V4D、SOURCE幾何の既定契約、R125→B143→Education、原本は変更しない。
+- **保存時点のCI結果は未確認**。テストの合成モデルを真のQwen推論や美術成功へ昇格しない。元のV4Dユーザー実試行SOURCE HOLD、V4E実Qwen未試行、ART HOLD、Minecraft施工禁止を維持。NOT_PREPARED・9 BLOCKED・BuildPlan空・WorldWrites0、main保護、PR #128 Draft、Work事前承認。
+
 ## 2026-11-03 V4E研究：著作した窓方角の優先順位→真正外壁SOURCEの実験的選択（従来V4D標準維持）
 
 - 2回目のユーザー提出SOURCE診断は **originalModelCalls=1、testInjectionPresent=false、additionalModelCalls=0、SHA256_MATCH、SOURCE HOLD**。形式不備0、schema不一致0、**WINDOW_ON_SHARED_PARTITIONのみ2件（配列index0,1）**。前回（形式2件＋共有壁窓2件）より形式は改善、窓問題は再発。4空間・covered3/sky1・接続3件、B143形状生成0。実LLMモデル身元/美術は未認証。
