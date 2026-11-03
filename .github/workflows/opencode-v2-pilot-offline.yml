@@ -1,0 +1,28 @@
+name: MAB OpenCode V2 Pilot - Offline Static Only
+on:
+  push:
+    branches:
+      - research/opencode-v2-readonly-pilot-20261103
+    paths:
+      - scripts/opencode-v2-readonly-preflight.py
+      - .github/workflows/opencode-v2-pilot-offline.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  static-no-model:
+    name: Offline no-model preflight (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Compile preflight
+        run: python -m py_compile scripts/opencode-v2-readonly-preflight.py
+      - name: Validate zero-provider read-only policy without network or model
+        run: python scripts/opencode-v2-readonly-preflight.py --self-test
