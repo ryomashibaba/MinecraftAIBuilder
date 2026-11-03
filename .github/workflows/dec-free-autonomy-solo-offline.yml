@@ -43,3 +43,17 @@ jobs:
         run: |
           echo 'REAL Docker Linux ephemeral smoke ONLY.'
           echo 'OpenCode, Ollama/Qwen, Windows Docker, GitHub push and multi-step autonomy remain HOLD.'
+
+  real-opencode-v2-cli-no-llm:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Obtain public OpenCode 2 image without any model/auth
+        run: docker pull ghcr.io/anomalyco/opencode:2.0.0
+      - name: Run OpenCode CLI help within Docker sandbox (NO LLM)
+        run: python3 tools/free-autonomy-solo/opencode_native_probe.py
+      - name: Explicit HOLD boundary
+        run: echo 'CLI process launch only. Model generation, Windows isolation and autonomy are not verified.'
