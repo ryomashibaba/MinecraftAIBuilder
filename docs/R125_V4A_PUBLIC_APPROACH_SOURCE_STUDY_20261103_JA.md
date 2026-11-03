@@ -8,6 +8,8 @@
 
 今回はV1の `compileSpatialComposition` を**一切変更せず**、別のオプトイン `source/ai/r125-public-approach-v4a.mjs` を新設。元の実モデル5件を勝手に上書きせず、共通コンパイラの能力を小さく実証する。
 
+**現段階のV4AはV1のSOURCEから独立派生する研究であり、保存済みV2屋根やV3機能を組み込んだ累積完成版ではない。** V3の本物の5件へ接続するときは、凍結屋根/機能SOURCEの幾何と入口開口の衝突を別途証明するまでHOLDする。現段階の合成5案を『V3改善後の実Qwen5案』と呼ばない。
+
 ## 著作IRの責任分離
 
 `schema=minecraftaibuilder-r125-author-public-approach-v4a` で `planId` / `rootRoomId` / `offset` / `width` / `depth` の**全フィールドを作者が明示**する。offset は rootの左端からの配置、widthは4〜6、depthは2〜3、rootの前方外壁からくぼませる奥行。rootの幅/奥行と他室の干渉を**読み取り専用で検査**し、不適合ならHOLDする。ジャンル名によるデフォルト/自動修復・モデルの再質問・世界の操作はしない。
