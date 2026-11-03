@@ -23,6 +23,10 @@ on:
       - 'scripts/r125-site-composition-v4b-fixtures.mjs'
       - 'scripts/r125-site-composition-v4b.test.mjs'
       - 'scripts/r125-site-composition-v4b-preview.mjs'
+      - 'source/ai/r125-void-massing-v4c.mjs'
+      - 'scripts/r125-v4c-structural-fixtures.mjs'
+      - 'scripts/r125-v4c-void-massing.test.mjs'
+      - 'scripts/r125-v4c-source-review.mjs'
       - 'scripts/r125-public-approach-v4a.test.mjs'
       - 'source/ai/r125-expressive-envelope-v2.mjs'
       - 'source/ai/r125-functional-facade-v3.mjs'
@@ -83,6 +87,20 @@ jobs:
         with:
           name: R125-V4B-Five-Synthetic-Site-3D-SOURCE-Only
           path: ${{ runner.temp }}/v4b-synthetic-site-preview/
+          if-no-files-found: error
+          retention-days: 14
+      - name: V4C authentic B143 and two-wide SOURCE for three different topology TEST FIXTURES
+        run: |
+          node --check source/ai/r125-void-massing-v4c.mjs
+          node --check scripts/r125-v4c-source-review.mjs
+          node --test scripts/r125-v4c-void-massing.test.mjs
+      - name: Export V4C B143 3D plus top-source comparison in one artifact
+        run: node scripts/r125-v4c-source-review.mjs --out "$RUNNER_TEMP/v4c-source-review"
+      - name: Upload synthetic V4C non-art-certified 3D and SVG evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: R125-V4C-Three-Distinct-Synthetic-Source-Topologies-ART-HOLD
+          path: ${{ runner.temp }}/v4c-source-review/
           if-no-files-found: error
           retention-days: 14
       - name: Parse real Windows PowerShell launcher before any Windows handoff
