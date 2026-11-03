@@ -1,5 +1,11 @@
 # MinecraftAIBuilder — START HERE（新チャット・AI開発者の統一入口）
 
+## 2026-11-03 V4E窓の室内側AIRを真正B143で確認（コード保存済／CI結果未確定）
+
+- 以前のV4E実窓18セル／外気18セル検証に加え、各窓セルの直後の**室内側AIR**を本物の最終B143占有配列で確認し、塞がれていれば `R125_V4E_RANKED_PHYSICAL_INWARD_AIR_OBSTRUCTED_*` でfail-closedにする。片面だけ透明な見かけの窓を合格扱いしない。2窓＝36ガラスセル／各面36隣接空気セルを想定した合成正例と室内閉塞負例を研究テストに追加。
+- コード[29f6a425](https://github.com/ryomashibaba/MinecraftAIBuilder/commit/29f6a425295d81c5f2c746ea5d1c12f1183f3d72)、負例[691922c0](https://github.com/ryomashibaba/MinecraftAIBuilder/commit/691922c063eec10a72637ce7aad74b6b139255ef)。[該当CI #41646265050](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41646265050)は記録時点pending、合格と宣言しない。実Qwenの新V4E実行なし、真正ART未審査、Minecraft世界施工なし。
+- 従来のV4D標準契約／保存モデル原文／Education実機成功経路・mainは無変更。PR #128 Open/Draft、`NOT_PREPARED`・9 BLOCKED・BuildPlan空・worldWrites0、Work事前承認。次はCIの完了確認、SOURCEが通る場合のみ実モデル1回試行と真正3Dの独立ART審査へ。
+
 ## 2026-11-03 V4E実B143窓セルと直外気の独立SOURCE照合（実Qwen/ART未認定）
 
 - 任意研究V4Eに、作者順位から採択した全窓について、**最終B143の6×3ガラス18セルと窓の外側に隣接する18セルの空気**を実voxel配列から個別に照合するfail-closed検査を追加。SOURCE選択だけで物理窓の存在を推測しない。ガラス欠損・窓外側の閉塞を注入する負例を同じV4Eテストに追加。旧V4D、SOURCE幾何の既定契約、R125→B143→Education、原本は変更しない。
