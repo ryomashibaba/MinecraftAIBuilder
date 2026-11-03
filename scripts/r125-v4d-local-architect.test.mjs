@@ -191,6 +191,33 @@ test('reject remote or unapproved endpoint, bad flags, repo output and existing 
  }finally{tmp.clean();}
 });
 
+test('real-model feedback guard: literal contract schema and both sides of shared wall window never silently repaired',()=>{
+ const prompt=COMPACT_SYSTEM_PROMPT;
+ assert(prompt.includes('"schema":"'+COMPACT_SCHEMA+'"'));
+ assert(prompt.includes('Never omit or rename schema'));
+ assert(prompt.includes('other five root keys id,title,brief,materials,spaces'));
+ assert(prompt.includes('parent EAST and child WEST walls touch'));
+ assert(prompt.includes('every later child'));
+ assert(prompt.includes('windowSide="none"'));
+ const original=makeV4DCompactSynthetic();
+ const cases=[
+  x=>{delete x.schema;},
+  x=>{x.schema='invalid-model-guessed-schema';},
+  x=>{delete x.materials;},
+  x=>{x.spaces[1].windowSide='east';}, // child east wall touches parent west
+  x=>{x.spaces[0].windowSide='west';}, // parent's west wall touches child east
+  x=>{x.spaces[0].windowSide='south';} // parent's south wall touches sky north
+ ];
+ for(const change of cases){
+  const candidate=structuredClone(original);
+  change(candidate);
+  assert.throws(()=>compileCompactModelIntent(candidate),/R125_/);
+ }
+ assert.equal(compileCompactModelIntent(original).worldWrites,0);
+ assert.equal(compileCompactModelIntent(original).art,'NOT_REVIEWED');
+ assert.equal(original.schema,COMPACT_SCHEMA);
+});
+
 test('compact small-model IR retains AUTHORED space topology while mechanically normalizing dimensions',()=>{
  const original=makeV4DCompactSynthetic(),snap=structuredClone(original);
  const translated=translateCompactModelIntent(original);
