@@ -252,6 +252,8 @@ def main():
         public_evidence = study / "PUBLIC_EVIDENCE.txt"
         public_evidence.write_text(public_prompt, encoding="utf-8")
         result["model_run_invocations"] = 1
+        result["status"] = "HOLD"
+        result["reason"] = "MODEL_RUN_ATTEMPT_IN_PROGRESS"
         call = subprocess.run(
             [str(cli), "run", "--standalone", "--archived", "--agent", "mab-auditor",
              "--model", args.model, "--file", str(public_evidence),
@@ -263,6 +265,25 @@ def main():
         # Never write stderr to shareable receipt: it may contain credentials or machine paths.
         result["response_sha256"] = hashlib.sha256(call.stdout.encode("utf-8")).hexdigest()
         result["response_chars"] = min(len(call.stdout), MAX_STDOUT)
+        result["cli_exit_code"] = call.returncode
+        result["stderr_sha256"] = hashlib.sha256(call.stderr.encode("utf-8")).hexdigest()
+        result["stderr_chars"] = len(call.stderr)
+        # Classify only by fixed labels. Never copy stderr (paths, keys) to receipts.
+        error = (call.stderr + "\n" + call.stdout[:1000]).lower()
+        category = "UNCLASSIFIED_CLI_FAILURE"
+        for code, expression in (
+            ("AUTH_OR_CREDENTIAL", r"unauthorized|authentication|invalid api.?key|401\\b"),
+            ("BILLING_OR_PAYMENT", r"insufficient credits|payment required|billing|402\\b"),
+            ("RATE_LIMIT_OR_QUOTA", r"rate.?limit|quota|429\\b"),
+            ("MODEL_RESOLUTION", r"model unavailable|providermodelnotfound|model not found"),
+            ("CONFIG_OR_POLICY", r"invalid config|configuration error|blocked by .*policy"),
+            ("CLI_FLAGS", r"unknown (option|argument)|unrecognized option"),
+            ("NETWORK_OR_TLS", r"econnreset|enotfound|etimedout|certificate verify|tls error"),
+        ):
+            if re.search(expression, error):
+                category = code
+                break
+        result["cli_failure_category"] = category if call.returncode != 0 or not call.stdout.strip() else "NONE"
         if call.returncode != 0 or not call.stdout.strip():
             raise RuntimeError("FREE_MODEL_RUN_FAILED_OR_UNAVAILABLE")
         result["status"] = "MODEL_RESPONSE_RECORDED_NEEDS_INDEPENDENT_REVIEW"
