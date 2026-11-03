@@ -404,6 +404,7 @@ test('author-owned PRIMARY massing removes real roof and building volume while p
   assert(cut.sourceMassingWitness.removedOriginalRoofVoxels>=20);
   assert.equal(cut.sourceMassingWitness.genuinelyOpenSkyFloorCells,49);
   assert(cut.sourceMassingWitness.newPhysicalFacadeVoxels>50);
+  assert(cut.sourceMassingWitness.protectedExteriorFacadeSeamCells>0);
   assert(cut.sourceMassingWitness.retainedOriginalRoofVoxels>20);
   assert(cut.sourceMassingWitness.protectedFixtureVoxels>0);
   assert.equal(cut.sourceMassingWitness.originalGlassAndBothAirLayers.verifiedPanelGlassCells,36);
@@ -427,6 +428,10 @@ test('author-owned PRIMARY massing removes real roof and building volume while p
  assert.throws(()=>compileAuthoredPrimaryMassingVoid(s.source,{
   spaceId:'garden',corner:'NE',cutWidth:7,cutDepth:7
  }),/R125_V4E_MASSING_PRIMARY_VOLUME_TOO_SMALL/);
+ const shop=samples[1];
+ assert.throws(()=>compileAuthoredPrimaryMassingVoid(shop.source,{
+  spaceId:'welcome',corner:'NW',cutWidth:9,cutDepth:7
+ }),/R125_V4E_MASSING_MASSING_COLLIDES_ORIGINAL_ENTRANCE/);
 });
 
 test('model-authored Z-facing public opening genuinely connects interior to open-sky principal mass without inventing floor',async()=>{

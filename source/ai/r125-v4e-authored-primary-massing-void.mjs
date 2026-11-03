@@ -79,6 +79,14 @@ export function compileAuthoredPrimaryMassingVoid(originalAuthor,authoredVoid){
  if(!Number.isSafeInteger(design0.bounds.height)||design0.bounds.height<node.roof.eaveY+8)
   fail('B143_HEIGHT_BOUND_UNVERIFIED');
  const xb=west?right+1:left-1,zb=north?bottom+1:top-1;
+ const originalEntrance=design0.elements.find(e=>e.id==='exterior-entrance'&&
+  e.mode==='cut'&&e.shape==='box');
+ if(!originalEntrance)fail('ORIGINAL_REAL_ENTRANCE_MISSING');
+ const entryLeft=originalEntrance.origin[0],entryTop=originalEntrance.origin[2];
+ const entryRight=entryLeft+originalEntrance.size[0]-1;
+ const entryBottom=entryTop+originalEntrance.size[2]-1;
+ if(left<=entryRight&&right>=entryLeft&&top<=entryBottom&&bottom>=entryTop)
+  fail('MASSING_COLLIDES_ORIGINAL_ENTRANCE');
  const portalZ=top+Math.floor((v.cutDepth-2)/2);
  const portalX=left+Math.floor((v.cutWidth-2)/2);
  // A short, model-authored circulation choice: the new public void can open
@@ -89,10 +97,13 @@ export function compileAuthoredPrimaryMassingVoid(originalAuthor,authoredVoid){
  const elements=[...design0.elements.map(e=>structuredClone(e)),
   box('primary-void-all-heights','cut',[left,2,top],
    [v.cutWidth,design0.bounds.height-2,v.cutDepth]),
-  box('primary-void-x-facade','add',[xb,2,top],
-   [1,node.roof.eaveY-3,v.cutDepth],base.plan.materials.wall),
-  box('primary-void-z-facade','add',[left,2,zb],
-   [v.cutWidth,node.roof.eaveY-3,1],base.plan.materials.wall),
+  // Stop each NEW internal facade one cell short of the ORIGINAL exterior
+  // boundary. Extending it through the old north/south entry seam would
+  // incorrectly fill an authored entrance even when the void misses it.
+  box('primary-void-x-facade','add',[xb,2,top+(north?1:0)],
+   [1,node.roof.eaveY-3,v.cutDepth-1],base.plan.materials.wall),
+  box('primary-void-z-facade','add',[left+(west?1:0),2,zb],
+   [v.cutWidth-1,node.roof.eaveY-3,1],base.plan.materials.wall),
   ...(publicPortalAxis==='X'?
    [box('primary-void-public-portal','cut',[xb,2,portalZ],[1,3,2])]:
    [box('primary-void-public-portal','cut',[portalX,2,zb],[2,3,1])])];
@@ -113,13 +124,25 @@ export function compileAuthoredPrimaryMassingVoid(originalAuthor,authoredVoid){
  }
  if(roofRemoved<20||voidAirColumns<49)fail('NOT_SUBSTANTIVE_ROOF_VOID');
  const wall=MATERIALS.indexOf(base.plan.materials.wall);
- let newFacades=0;
+ let newFacades=0,protectedExteriorSeamCells=0;
  for(let z=top;z<=bottom;z++)for(let y=2;y<=node.roof.eaveY-2;y++){
+  if(z===(north?top:bottom)){
+   if(vox.get(k(xb,y,z))!==oldMap.get(k(xb,y,z)))
+    fail('EXTERIOR_X_SEAM_CHANGED');
+   protectedExteriorSeamCells++;
+   continue;
+  }
   const shouldBeAir=publicPortalAxis==='X'&&z>=portalZ&&z<portalZ+2&&y<=4;
   if(shouldBeAir){if(vox.has(k(xb,y,z)))fail('PORTAL_NOT_PHYSICAL');}
   else {if(vox.get(k(xb,y,z))!==wall)fail('INTERIOR_X_FACADE_INCOMPLETE');newFacades++;}
  }
  for(let x=left;x<=right;x++)for(let y=2;y<=node.roof.eaveY-2;y++){
+  if(x===(west?left:right)){
+   if(vox.get(k(x,y,zb))!==oldMap.get(k(x,y,zb)))
+    fail('EXTERIOR_Z_SEAM_CHANGED');
+   protectedExteriorSeamCells++;
+   continue;
+  }
   const shouldBeAir=publicPortalAxis==='Z'&&
    x>=portalX&&x<portalX+2&&y<=4;
   if(shouldBeAir){
@@ -200,6 +223,7 @@ export function compileAuthoredPrimaryMassingVoid(originalAuthor,authoredVoid){
    removedOriginalRoofVoxels:roofRemoved,
    genuinelyOpenSkyFloorCells:voidAirColumns,
    newPhysicalFacadeVoxels:newFacades,
+   protectedExteriorFacadeSeamCells:protectedExteriorSeamCells,
    retainedOriginalRoofVoxels:roofOutsidePreserved,
    protectedFixtureVoxels:fixtureVoxels,
    originalGlassAndBothAirLayers:glazing,
