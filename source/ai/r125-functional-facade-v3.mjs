@@ -101,6 +101,46 @@ function outsideWallIsReal(r,cut,rooms){
    fail('OPENING_PARTLY_SHARED_'+r.id);
  }
 }
+
+/**
+ * Genre-free wall feasibility guidance for an actual Qwen author.
+ * Offers RELATIVE choices only, never a model-selected design, coordinates,
+ * a template, or a silent fallback. Large 4x2 windows remain strictly checked
+ * against the actual frozen roof, shared room walls and real door cuts.
+ */
+export function surveyFunctionalFacadeOpenings({originalPlan,envelopeIntent}={}){
+ const baseline=compileSpatialComposition(originalPlan);
+ const roof=compileExpressiveEnvelopeV2({originalPlan,intent:envelopeIntent});
+ const rooms=baseline.layout.rooms;
+ const doors=roof.design.elements.filter(e=>e.mode==='cut'&&
+  /^(exterior-entrance|joint-\d+)$/.test(e.id));
+ const occupied=new Set(roof.compiled.primitives.map(p=>K(p[0],p[1],p[2])));
+ return rooms.map(r=>{
+  const choices=[];
+  for(const side of dirs)for(let offset=0;offset<=4;offset++){
+   try{
+    const candidate=openingGeometry(r,{side,offset,width:4,height:2},0);
+    outsideWallIsReal(r,candidate.cut,rooms);
+    if(doors.some(d=>intersects(d,candidate.cut)))continue;
+    const [x,y,z]=candidate.cut.origin,[sx,sy,sz]=candidate.cut.size;
+    let existingSolid=0;
+    for(let xx=x;xx<x+sx;xx++)for(let yy=y;yy<y+sy;yy++)
+     for(let zz=z;zz<z+sz;zz++){
+      if(occupied.has(K(xx,yy,zz)))existingSolid++;
+     }
+    if(existingSolid<4)continue;
+    choices.push({side,offset});
+   }catch(error){
+    if(!/^R125_FUNCTIONAL_(WINDOW_|OPENING_)/.test(String(error?.message)))
+     throw error;
+   }
+  }
+  return {roomId:r.id,purpose:r.purpose,
+   availableLargeExteriorOpenings:choices,
+   authorMustChooseFromOptions:true};
+ });
+}
+
 export function compileFunctionalFacadeV3({originalPlan,envelopeIntent,functionalIntent}={}){
  validateFunctionalIntent(originalPlan,functionalIntent);
  const spatial=compileSpatialComposition(originalPlan);
@@ -151,15 +191,46 @@ export function compileFunctionalFacadeV3({originalPlan,envelopeIntent,functiona
    !z.supportedTwoWideServiceWitness))
    fail('REAL_SOURCE_FUNCTION_ACCESS_HOLD');
  const before=new Map(roof.compiled.primitives.map(p=>[K(p[0],p[1],p[2]),p[3]]));
+ const after=new Map(compiled.primitives.map(p=>[K(p[0],p[1],p[2]),p[3]]));
  const glass=MATERIALS.indexOf('glass');
- const newGlass=compiled.primitives.filter(p=>p[3]===glass&&
-  before.get(K(p[0],p[1],p[2]))!==glass).length;
- const fixtureCells=compiled.primitives.filter(p=>
-  fixtures.some(f=>p[0]>=f.origin[0]&&p[0]<f.origin[0]+f.size[0]&&
-   p[1]>=f.origin[1]&&p[1]<f.origin[1]+f.size[1]&&
-   p[2]>=f.origin[2]&&p[2]<f.origin[2]+f.size[2])).length;
- if(newGlass<1||fixtureCells<rooms.length)
-  fail('NO_MEANINGFUL_PHYSICAL_PROGRAM');
+ const perRoomWindow=[];
+ for(const [i,window] of windows.entries()){
+  const [x,y,z]=window.cut.origin,[sx,sy,sz]=window.cut.size;
+  let newGlass=0,realGlass=0,originalFacadeCells=0;
+  for(let xx=x;xx<x+sx;xx++)for(let yy=y;yy<y+sy;yy++)
+   for(let zz=z;zz<z+sz;zz++){
+    const k=K(xx,yy,zz);
+    if(after.get(k)!==glass)fail('INCOMPLETE_WINDOW_GLAZING_'+rooms[i].id);
+    realGlass++;
+    if(before.get(k)!==glass)newGlass++;
+    if(before.has(k))originalFacadeCells++;
+   }
+  if(newGlass<1||originalFacadeCells<4)
+   fail('NOT_NEW_REAL_FACADE_GLAZING_'+rooms[i].id);
+  perRoomWindow.push({roomId:rooms[i].id,
+   newGlassCells:newGlass,finalGlassCells:realGlass,
+   preexistingFacadeCells:originalFacadeCells});
+ }
+ const perRoomFixtures=[];
+ for(const [i,feature] of fixtures.entries()){
+  const [x,y,z]=feature.origin,[sx,sy,sz]=feature.size;
+  const expected=MATERIALS.indexOf(feature.material);
+  let verified=0,added=0;
+  for(let xx=x;xx<x+sx;xx++)for(let yy=y;yy<y+sy;yy++)
+   for(let zz=z;zz<z+sz;zz++){
+    const k=K(xx,yy,zz);
+    if(after.get(k)!==expected)
+     fail('FIXTURE_MATERIAL_OR_VOLUME_MISSING_'+rooms[i].id);
+    verified++;
+    if(before.get(k)!==expected)added++;
+   }
+  if(added!==verified)fail('NO_NEW_PHYSICAL_FIXTURE_'+rooms[i].id);
+  perRoomFixtures.push({roomId:rooms[i].id,
+   newFixtureCells:added,verifiedMaterialCells:verified,
+   material:feature.material});
+ }
+ const newGlass=perRoomWindow.reduce((n,r)=>n+r.newGlassCells,0);
+ const fixtureCells=perRoomFixtures.reduce((n,r)=>n+r.newFixtureCells,0);
  if(compiled.geometrySha256===roof.geometrySha256)
   fail('NO_GEOMETRY_CHANGE');
  return {schema:'r125-function-and-facade-research-v3',
@@ -175,6 +246,8 @@ export function compileFunctionalFacadeV3({originalPlan,envelopeIntent,functiona
    actualFeatureServiceWitnesses:routes.featureAccess,
    independentlyAddedGlassCells:newGlass,
    physicallyVerifiedFixtureCells:fixtureCells,
+   perRoomOpeningEvidence:perRoomWindow,
+   perRoomFixtureEvidence:perRoomFixtures,
    roomPurposesNotCertifiedByShape:true},
   architectureAuthorship:'CALLER_SUPPLIED_NOT_MODEL_VERIFIED',
   architecturalArt:'NOT_REVIEWED',
