@@ -4,7 +4,7 @@
 
 - 2回目のユーザー提出SOURCE診断は **originalModelCalls=1、testInjectionPresent=false、additionalModelCalls=0、SHA256_MATCH、SOURCE HOLD**。形式不備0、schema不一致0、**WINDOW_ON_SHARED_PARTITIONのみ2件（配列index0,1）**。前回（形式2件＋共有壁窓2件）より形式は改善、窓問題は再発。4空間・covered3/sky1・接続3件、B143形状生成0。実LLMモデル身元/美術は未認証。
 - 同じプロンプトをただ長くするのでなく、旧V4Dを一切変えず**V4E任意研究契約** `source/ai/r125-v4e-ranked-exterior-ir.mjs` を追加。モデルは4方角の**優先順位を全部著作**し、HOSTは全空間の接続が確定した後、順位順に**実際の外壁である方向だけ**を確定的に選択。作者が許可していない方向にはしない。外壁候補が皆無・文法不正・既存SOURCE検証不合格はHOLD。選択の順位・採用方角・除外共有壁を明示したPRIVATE研究証拠を生成。元V4D/従来のEducation世界施工安全、モデル著作、世界的ART基準は保護。
-- **注意：V4Eは非既定の任意研究モード**。コード上は `--ranked-windows` で本物のローカルOllamaに1回だけ接続可能になり、専用の `scripts/r125-v4e-one-click-ranked-trial.cmd` も作成。元V4D `--compact`、以前のワンクリックv2は不変。Windows模擬HTTPの1試行と0追加POST診断は [CI #41641652949](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41641652949) でPASS、Linuxには旧V4Dエラー表記差分とV4Eテストの文面照合ミスがあったため修正中（実際のSOURCE/安全境界はそのまま）。**最終CIがPASSするまで実Qwenで新方式を試すことは勧めない**。ART認定/施工は禁止。main不変更、PR #128 Draft、9 BLOCKED、WorldWrites0。
+- **注意：V4Eは非既定の任意研究モード**。コード上は `--ranked-windows` で本物のローカルOllamaに1回だけ接続可能になり、専用の `scripts/r125-v4e-one-click-ranked-trial.cmd` も作成。元V4D `--compact`、以前のワンクリックv2は不変。[専用最終CI #41642486187](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41642486187) は **completed/success（検証HEAD 0fad4bb7）**。Linuxの旧V4D18件＋再生6件＋診断6件＋新V4E6件は**36/36 PASS、失敗0**。Windowsは旧V4Dと新V4Eそれぞれの隔離clone・localhost模擬HTTP1POST・SOURCE HOLD・追加0POST再診断・PRIVATE元回答と共有JSONの保持をPASS。**ただし本物QwenでV4Eを実行した証拠はまだない**。ART認定/施工は禁止。main不変更、PR #128 Draft、9 BLOCKED、WorldWrites0。
 
 ## 2026-11-03 初のユーザー提出V4D一回試行結果：SOURCE HOLDと指示の的確な強化（実モデル改善率は未測定）
 
