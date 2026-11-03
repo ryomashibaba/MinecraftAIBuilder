@@ -18,6 +18,8 @@ import {auditB143ProjectedVisibility,renderB143ProjectedVisibilityDelta}
 import {compileAuthoredPublicLoggia} from '../source/ai/r125-v4e-authored-public-loggia.mjs';
 import {compileAuthoredPrimaryMassingVoid} from '../source/ai/r125-v4e-authored-primary-massing-void.mjs';
 import {compileAuthoredExteriorWing} from '../source/ai/r125-v4e-authored-exterior-wing.mjs';
+import {compileAuthoredCoveredFloorplateSetback} from '../source/ai/r125-v4e-authored-covered-floorplate-setback.mjs';
+import {WING_SCHEMA,compileWingAuthorIntent} from '../source/ai/r125-v4e-wing-author-ir.mjs';
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const fail=x=>{throw Error('R125_V4E_CROSS_GENRE_'+x);};
 const CASES=[
@@ -77,6 +79,13 @@ const CONTOUR_AUTHOR_SAMPLES={
  housing:[6,9,7],shop:[7,9,6],research:[6,8,9],
  gallery:[9,6,7],station:[7,9,6]
 };
+const FLOORPLATE_AUTHOR_SAMPLES={
+ housing:{spaceId:'learning',corner:'NW',width:7,depth:7},
+ shop:{spaceId:'learning',corner:'SE',width:7,depth:7},
+ research:{spaceId:'learning',corner:'SE',width:7,depth:7},
+ gallery:{spaceId:'learning',corner:'SW',width:7,depth:7},
+ station:{spaceId:'learning',corner:'SE',width:7,depth:7}
+};
 export function syntheticFiveGenreAuthorCases(){
  return CASES.map(c=>{
   const x=makeV4DCompactSynthetic();
@@ -104,7 +113,8 @@ export function syntheticFiveGenreAuthorCases(){
     cutWidth:7,cutDepth:7,publicAccessSide:'X'},
    authoredWing:wing,
    authoredContourWing:{...wing,reach:9,
-    outline:CONTOUR_AUTHOR_SAMPLES[c.id].slice()}};
+    outline:CONTOUR_AUTHOR_SAMPLES[c.id].slice()},
+   authoredFloorplate:structuredClone(FLOORPLATE_AUTHOR_SAMPLES[c.id])};
  });
 }
 export function exportV4ECrossGenreSource(folder){
@@ -154,6 +164,32 @@ export function exportV4ECrossGenreSource(folder){
    c.sourceWingWitness.physicallyVerifiedSupportPostCount<4||
    contourAudit[i].views.find(v=>v.face==='roof').silhouetteChangedCells<12))
   fail('REAL_NONRECTANGULAR_OUTER_CONTOUR_NOT_VERIFIED');
+ const wingAuthors=samples.map(s=>({...structuredClone(s.source),
+  schema:WING_SCHEMA,massing:structuredClone(s.authoredMassing),
+  wing:structuredClone(s.authoredContourWing)}));
+ const floorplates=samples.map((s,i)=>{
+  try{return compileAuthoredCoveredFloorplateSetback(wingAuthors[i],s.authoredFloorplate);}
+  catch(e){fail('SYNTHETIC_COVERED_FLOORPLATE_'+s.genre+'_'+String(e.message));}
+ });
+ if(floorplates.some(f=>f.actualSourceWitness.entire3dRemovedColumns<36||
+  f.actualSourceWitness.roofSilhouetteComparison.views
+   .find(v=>v.face==='roof').silhouetteChangedCells<36||
+  f.sourceRoutes.status!=='SOURCE_ROUTES_REACH_ALL_ZONES'||f.worldWrites!==0))
+  fail('REAL_NONRECTANGULAR_COVERED_ROOM_NOT_VERIFIED');
+ // A separate independent synthetic author changes the chosen SKY corner,
+ // allowing the FIRST reception building to own its REAL nonrectangular floor.
+ const rootHousing=structuredClone(wingAuthors[0]);
+ rootHousing.massing={spaceId:'learning',corner:'NW',
+  cutWidth:7,cutDepth:7,publicAccessSide:'X'};
+ const rootBefore=compileWingAuthorIntent(rootHousing);
+ const rootMain=compileAuthoredCoveredFloorplateSetback(rootHousing,
+  {spaceId:'welcome',corner:'NE',width:7,depth:7});
+ if(!rootMain.actualSourceWitness.rootMainRoomModified||
+  rootMain.actualSourceWitness.roofSilhouetteComparison.views
+   .find(v=>v.face==='roof').silhouetteChangedCells<49||
+  rootMain.worldWrites!==0)fail('ROOT_RECEPTION_FLOORPLATE_NOT_REAL');
+ const floorplateReview=compileB143Gallery(floorplates.map(f=>f.b143Design));
+ const rootReview=compileB143Gallery([rootMain.b143Design]);
  const contourReview=compileB143Gallery(contoured.map(c=>c.b143Design));
  const wingReview=compileB143Gallery(wings.map(w=>w.b143Design));
  if(wings.some(w=>w.sourceWingWitness.independentRoofSilhouette.views
@@ -212,6 +248,29 @@ export function exportV4ECrossGenreSource(folder){
     humanArt:'NOT_REVIEWED',realModel:'NOT_TESTED'
    }))
   },
+  coveredFloorplateResearch:{
+   status:'SOURCE_ONLY_ARCHITECTURAL_ART_HOLD',
+   originalModelCalls:0,modelProvenance:'INDEPENDENT_SYNTHETIC_AUTHORS_NOT_QWEN',
+   sameEngineForEntryOrAnyCoveredRoom:true,
+   cases:floorplates.map((f,i)=>({
+    genre:samples[i].genre,authorSelection:samples[i].authoredFloorplate,
+    beforeGeometrySha256:f.unmodifiedPriorGeometrySha256,
+    afterGeometrySha256:f.finalGeometrySha256,
+    trueB143SourceWitness:f.actualSourceWitness,
+    sourceRoutes:f.sourceRoutes.status,worldWrites:f.worldWrites,
+    humanArt:f.humanArt,realModel:f.realModel
+   })),
+   independentlyAuthoredEntryMainVolumeCase:{
+    genre:'housing-main-entry-alternative-authorship',
+    changedMassingSelection:rootHousing.massing,
+    authorFloorplate:{spaceId:'welcome',corner:'NE',width:7,depth:7},
+    originalGeometrySha256:rootBefore.b143.geometrySha256,
+    finalGeometrySha256:rootMain.finalGeometrySha256,
+    witness:rootMain.actualSourceWitness,
+    sourceRoutes:rootMain.sourceRoutes.status,worldWrites:rootMain.worldWrites,
+    art:'NOT_REVIEWED',model:'NOT_TESTED'
+   }
+  },
   sectionResearch:{
    status:'SOURCE_TECH_ONLY_NOT_GENERAL_IRREGULAR_ARCHITECTURE',
    genreSpecificHostPrescriptions:false,
@@ -233,7 +292,9 @@ export function exportV4ECrossGenreSource(folder){
    newResearchPrimaryVolumeCornerOpenSkyVoid:true,
    newResearchPublicWingBeyondOriginalFootprint:true,
    newResearchThreeBandAuthorSpecifiedIrregularWing:true,
-   nonrectangularRoomOuterFacadeStillUnsolved:true,
+   trueNonrectangularSingleCoveredRoomFloorplateNowResearchSupported:true,
+   mainEntryMainVolumeDemonstratedInAlternateIndependentSyntheticPlan:true,
+   architecturalQualityStillNotCertified:true,
    existingDefaultArchitectureStillRectangular:true
   },
   cases:samples.map((s,i)=>({
@@ -261,6 +322,15 @@ export function exportV4ECrossGenreSource(folder){
   renderB143Html(wingReview,template),{flag:'wx'});
  fs.writeFileSync(path.join(folder,'contoured-wing.html'),
   renderB143Html(contourReview,template),{flag:'wx'});
+ fs.writeFileSync(path.join(folder,'covered-floorplate.html'),
+  renderB143Html(floorplateReview,template),{flag:'wx'});
+ fs.writeFileSync(path.join(folder,'main-entry-floorplate.html'),
+  renderB143Html(rootReview,template),{flag:'wx'});
+ fs.writeFileSync(path.join(folder,'MAIN_ENTRY_FLOORPLATE_FIVE_VIEWS.svg'),
+  actualOrthographicSvg(rootMain.b143Compiled.primitives),{flag:'wx'});
+ fs.writeFileSync(path.join(folder,'MAIN_ENTRY_FLOORPLATE_VISIBLE_DELTA.svg'),
+  renderB143ProjectedVisibilityDelta(
+   rootBefore.b143.compiled.primitives,rootMain.b143Compiled.primitives),{flag:'wx'});
  for(const [i,r] of results.entries()){
   fs.writeFileSync(path.join(folder,'FINAL_B143_'+samples[i].genre+'_FIVE_VIEWS.svg'),
    actualOrthographicSvg(r.b143.compiled.primitives),{flag:'wx'});
@@ -280,6 +350,11 @@ export function exportV4ECrossGenreSource(folder){
    renderB143ProjectedVisibilityDelta(
     fullRectangleControls[i].b143Compiled.primitives,
     contoured[i].b143Compiled.primitives),{flag:'wx'});
+  fs.writeFileSync(path.join(folder,'COVERED_FLOORPLATE_'+samples[i].genre+'_FIVE_VIEWS.svg'),
+   actualOrthographicSvg(floorplates[i].b143Compiled.primitives),{flag:'wx'});
+  fs.writeFileSync(path.join(folder,'COVERED_FLOORPLATE_'+samples[i].genre+'_VISIBLE_DELTA.svg'),
+   renderB143ProjectedVisibilityDelta(
+    contoured[i].b143Compiled.primitives,floorplates[i].b143Compiled.primitives),{flag:'wx'});
   fs.writeFileSync(path.join(folder,'SECTION_B143_'+samples[i].genre+'_FIVE_VIEWS.svg'),
    actualOrthographicSvg(sectioned[i].sectionedCompiled.primitives),{flag:'wx'});
  }
