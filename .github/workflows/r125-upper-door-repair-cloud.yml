@@ -18,6 +18,8 @@ on:
       - 'source/ai/r125-education-makecode-export.mjs'
       - 'configs/r125-education-verified-palette-v26.33.json'
       - 'source/ai/r125-spatial-composition.mjs'
+      - 'source/ai/r125-public-approach-v4a.mjs'
+      - 'scripts/r125-public-approach-v4a.test.mjs'
       - 'source/ai/r125-expressive-envelope-v2.mjs'
       - 'source/ai/r125-functional-facade-v3.mjs'
       - 'scripts/r125-spatial-composition.test.mjs'
@@ -63,6 +65,8 @@ jobs:
         run: node --test scripts/r125-expressive-envelope-v2.test.mjs scripts/r125-five-genre-real-envelope-pilot.test.mjs scripts/r125-functional-facade-v3.test.mjs scripts/r125-five-genre-real-functions-pilot.test.mjs scripts/r125-v3-failed-only-home-recovery.test.mjs scripts/r125-five-genre-source-art-overview.test.mjs
       - name: Check generic model-authored whole-building spatial compositions
         run: node --test scripts/r125-spatial-composition.test.mjs
+      - name: Verify V4A optional public court B143 and cross-genre fail-closed author intent (FAKE ONLY)
+        run: node --test scripts/r125-public-approach-v4a.test.mjs
       - name: Parse real Windows PowerShell launcher before any Windows handoff
         shell: pwsh
         run: |
