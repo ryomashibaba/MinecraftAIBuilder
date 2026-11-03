@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {SCHEMA as SPATIAL,compileSpatialComposition} from '../source/ai/r125-spatial-composition.mjs';
 import {ENVELOPE_SCHEMA,compileExpressiveEnvelopeV2} from '../source/ai/r125-expressive-envelope-v2.mjs';
-import {FUNCTION_SCHEMA,validateFunctionalIntent,compileFunctionalFacadeV3}
+import {FUNCTION_SCHEMA,validateFunctionalIntent,compileFunctionalFacadeV3,
+ surveyFunctionalFacadeOpenings}
  from '../source/ai/r125-functional-facade-v3.mjs';
 import {verifyCompiled} from '../source/ai/b143-building-dsl.mjs';
 
@@ -59,6 +60,10 @@ test('five genres express different HOST-generic functional elements and truly n
   assert(v3.sourceRoutes.featureAccess.every(x=>x.reachableFromEntrance));
   assert(v3.physicalProgram.independentlyAddedGlassCells>=1);
   assert(v3.physicalProgram.physicallyVerifiedFixtureCells>=p.rooms.length);
+  assert.equal(v3.physicalProgram.perRoomOpeningEvidence.length,p.rooms.length);
+  assert.equal(v3.physicalProgram.perRoomFixtureEvidence.length,p.rooms.length);
+  assert(v3.physicalProgram.perRoomOpeningEvidence.every(e=>e.newGlassCells>0&&e.preexistingFacadeCells>=4));
+  assert(v3.physicalProgram.perRoomFixtureEvidence.every(e=>e.newFixtureCells===e.verifiedMaterialCells&&e.newFixtureCells>0));
   assert(v3.physicalProgram.features.every(x=>x.genreTemplateUsed===false));
   assert.equal(v3.physicalProgram.roomPurposesNotCertifiedByShape,true);
   assert.deepEqual(v3.gates,Array(9).fill('BLOCKED'));
@@ -108,4 +113,29 @@ test('too-large furniture or glazing fails instead of moving a model-authored el
  assert.throws(()=>compileFunctionalFacadeV3({
   originalPlan:p,envelopeIntent:r,functionalIntent:glass}),
   /WINDOW_OUTSIDE_ROOM/);
+});
+
+test('genre-neutral exterior survey exposes only actually buildable wall choices without choosing the design',()=>{
+ for(const p of sample){
+  const e=roof(p);
+  const list=surveyFunctionalFacadeOpenings({originalPlan:p,envelopeIntent:e});
+  assert.equal(list.length,p.rooms.length);
+  assert(list.every(r=>r.authorMustChooseFromOptions&&r.availableLargeExteriorOpenings.length>0));
+  const original=JSON.stringify(p);
+  const second=JSON.stringify(list);
+  assert.deepEqual(list,surveyFunctionalFacadeOpenings({originalPlan:p,envelopeIntent:e}));
+  assert.equal(JSON.stringify(p),original);
+  assert.equal(JSON.stringify(list),second);
+  // Every offered 4x2 window must really build as an exterior wall opening.
+  // Multiple options per room remain available; the host does not pick one.
+  const intent=fixtureIntent(p,p.rooms[1].attach.side,0);
+  for(let i=0;i<p.rooms.length;i++){
+   const choices=list[i].availableLargeExteriorOpenings;
+   const pick=choices[0];
+   intent.rooms[i].opening={side:pick.side,offset:pick.offset,width:4,height:2};
+  }
+  const product=compileFunctionalFacadeV3({
+   originalPlan:p,envelopeIntent:e,functionalIntent:intent});
+  assert.equal(product.sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ }
 });
