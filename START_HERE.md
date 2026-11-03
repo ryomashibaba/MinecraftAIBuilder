@@ -1,5 +1,11 @@
 # MinecraftAIBuilder — START HERE（新チャット・AI開発者の統一入口）
 
+## 2026-11-03 方針回帰：5ジャンル共通の非矩形「半屋外ロッジア」断面SOURCE研究
+
+- 5ジャンル合成AUTHORの共通エンジンCI [#41649658276](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41649658276) **Linux/Windows SUCCESS**。各5,513〜5,584真B143 voxel、SOURCE到達5/5。ただし5方向の実見では全例に矩形棟の限界が残り、**予備ART REJECT／正式人間ART HOLD**。モデル実推論0。
+- 次の**実コード**：汎用のオプトイン非矩形外周研究 `source/ai/r125-v4e-authored-public-loggia.mjs`。作者がcovered用途室・北西/北東角・奥行5〜6を明示すると、既存の床/屋根/入口/機能/経路の原本を保ちながら、最終B143の角を実CUTし斜め階段状の外壁で閉じる**実支持床のある半屋外ロッジア**を生成。共有壁・ガラス・入口に干渉する選択は黙って修理せずHOLD。正負検証と用途横断同一エンジンを既存CIへ接続。SOURCE/AIR・実経路・世界書込0を再確認。CI未確定ならPASS宣言禁止。
+- これは矩形ボックスから出る**断面・外周表現の限定SOURCE能力試験**であり、自由な輪郭全体、二階機能、実Minecraft歩行、雨仕舞、構造・世界水準のARTまでは保証しない。小窓や色変更の反復ではなく共通生成能力へ進む。main・R125→B143→Education実機成功・V4D標準・PRIVATE原本を保持し、Draft PR #128とWork事前承認・9 BLOCKEDを維持。
+
 ## 2026-11-03 方針逸脱監査→V4E全体建築能力・5ジャンル横断SOURCE研究
 
 - **方針監査**：憲章と戦略v2に照らすと最近のV4E窓安全性・五方向報告はSOURCEとして有効だが、世界水準の建築外観、実Qwen未知用途、階層・公共空間・Mac8GBに直接進む成果が少ない。窓/配色の修理と合成建物の重複評価を停止する。旧Education成功、main、Draft PR #128は必ず保護。

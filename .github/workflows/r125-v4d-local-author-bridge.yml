@@ -6,6 +6,7 @@ on:
       - 'source/ai/r125-v4d-relative-author-ir.mjs'
       - 'source/ai/r125-v4d-compact-model-ir.mjs'
       - 'source/ai/r125-v4e-ranked-exterior-ir.mjs'
+      - 'source/ai/r125-v4e-authored-public-loggia.mjs'
       - 'scripts/r125-v4e-ranked-exterior.test.mjs'
       - 'scripts/r125-v4e-source-art-review.mjs'
       - 'scripts/r125-v4e-cross-genre-source-study.mjs'
@@ -43,6 +44,7 @@ jobs:
           node --check source/ai/r125-v4d-relative-author-ir.mjs
           node --check source/ai/r125-v4d-compact-model-ir.mjs
           node --check source/ai/r125-v4e-ranked-exterior-ir.mjs
+          node --check source/ai/r125-v4e-authored-public-loggia.mjs
           node --check scripts/r125-v4e-ranked-exterior.test.mjs
           node --check scripts/r125-v4e-source-art-review.mjs
           node --check scripts/r125-v4e-cross-genre-source-study.mjs
@@ -78,6 +80,8 @@ jobs:
           test -s "$RUNNER_TEMP/v4e-five-genres/index.html"
           test -s "$RUNNER_TEMP/v4e-five-genres/FIVE_GENRE_SOURCE_ART_HOLD.json"
           test "$(find "$RUNNER_TEMP/v4e-five-genres" -name 'FINAL_B143_*_FIVE_VIEWS.svg' | wc -l)" -eq 5
+          test "$(find "$RUNNER_TEMP/v4e-five-genres" -name 'SECTION_B143_*_FIVE_VIEWS.svg' | wc -l)" -eq 5
+          test -s "$RUNNER_TEMP/v4e-five-genres/sectioned.html"
       - uses: actions/upload-artifact@v4
         with:
           name: V4E-FIVE-GENRES-SYNTHETIC-COMMON-ENGINE-ART-HOLD

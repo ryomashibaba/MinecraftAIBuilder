@@ -251,12 +251,43 @@ test('five independent synthetic genres use one unmodified V4E→true B143 engin
   assert.deepEqual(report.safety.gates,Array(9).fill('BLOCKED'));
   assert.equal(report.safety.worldWrites,0);
   assert(fs.existsSync(path.join(out,'index.html')));
+  assert(fs.existsSync(path.join(out,'sectioned.html')));
+  assert.equal(report.sectionResearch.sectionedCases.length,5);
+  assert(report.sectionResearch.sectionedCases.every(c=>
+   c.oldGeometrySha256!==c.newGeometrySha256&&c.art==='NOT_REVIEWED'));
   for(const {genre} of cases){
    const svg=fs.readFileSync(path.join(out,'FINAL_B143_'+genre+'_FIVE_VIEWS.svg'),'utf8');
    assert(svg.includes('ACTUAL final B143 voxels'));
+   assert(fs.readFileSync(path.join(out,'SECTION_B143_'+genre+'_FIVE_VIEWS.svg'),'utf8')
+    .includes('ACTUAL final B143 voxels'));
   }
   assert.deepEqual(JSON.parse(fs.readFileSync(
    path.join(out,'FIVE_GENRE_SOURCE_ART_HOLD.json'),'utf8')),report);
   assert.throws(()=>exportV4ECrossGenreSource(out),/OUTPUT_MUST_BE_NEW/);
  }finally{fs.rmSync(base,{recursive:true,force:true});}
+});
+
+test('V4E author-controlled nonrect semi-outdoor sections produce real B143 and preserve access',async()=>{
+ const {compileAuthoredPublicLoggia}
+  =await import('../source/ai/r125-v4e-authored-public-loggia.mjs');
+ const {syntheticFiveGenreAuthorCases}
+  =await import('./r125-v4e-cross-genre-source-study.mjs');
+ const cases=syntheticFiveGenreAuthorCases();
+ const results=cases.map(s=>compileAuthoredPublicLoggia(s.source,s.authoredSection));
+ assert.equal(results.length,5);
+ assert(results.every(r=>r.finalGeometrySha256!==r.unchangedV4EBaseGeometrySha256));
+ assert(results.every(r=>r.trueSectionSourceWitness.physicallyRemovedOldWallCells>=12));
+ assert(results.every(r=>r.trueSectionSourceWitness.actualDiagonalWallCells>=30));
+ assert(results.every(r=>r.sectionedRoutes.status==='SOURCE_ROUTES_REACH_ALL_ZONES'));
+ assert(results.every(r=>r.worldWrites===0&&r.art==='NOT_REVIEWED'));
+ const first=cases[0];
+ assert.throws(()=>compileAuthoredPublicLoggia(first.source,{
+  spaceId:'welcome',corner:'NW',recessDepth:6
+ }),/R125_V4E_SECTION_RECESS_ON_SHARED_WALL/);
+ assert.throws(()=>compileAuthoredPublicLoggia(first.source,{
+  spaceId:'welcome',corner:'NE',recessDepth:12
+ }),/R125_V4E_SECTION_AUTHOR_SECTION_CONTRACT/);
+ assert.throws(()=>compileAuthoredPublicLoggia(first.source,{
+  spaceId:'garden',corner:'NE',recessDepth:6
+ }),/R125_V4E_SECTION_ENVELOPE_NOT_LARGE_ENOUGH/);
 });
