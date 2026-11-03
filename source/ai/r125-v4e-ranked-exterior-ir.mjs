@@ -110,7 +110,7 @@ export function translateRankedExteriorIntent(untrusted){
  * V4E-specific post-compile SOURCE witness. A direction selected from the
  * complete authored topology is not enough: verify that every intended
  * 6x3 glazing panel survived as actual glass in final B143 primitives and
- * that the immediately adjacent outward voxel is AIR. This is NOT a
+ * that both immediately adjacent inward and outward voxels are AIR. This is NOT a
  * Minecraft-world, weatherproofing, architecture-quality or ART proof.
  */
 export function proveRankedExteriorPhysicalGlazing(source, choices){
@@ -123,7 +123,7 @@ export function proveRankedExteriorPhysicalGlazing(source, choices){
  if(glass<0)fail('PHYSICAL_GLASS_PALETTE');
  const vox=new Map(primitives.map(p=>[p[0]+','+p[1]+','+p[2],p[3]]));
  const key=(x,y,z)=>x+','+y+','+z;
- let glassCells=0,adjacentAirCells=0;
+ let glassCells=0,adjacentAirCells=0,interiorAirCells=0;
  const seen=new Set();
  for(const c of choices){
   if(!Number.isSafeInteger(c.spaceIndex)||seen.has(c.spaceIndex))
@@ -152,6 +152,13 @@ export function proveRankedExteriorPhysicalGlazing(source, choices){
    if(vox.has(key(ox,y,oz)))
     fail('PHYSICAL_OUTWARD_AIR_OBSTRUCTED_'+c.spaceIndex);
    adjacentAirCells++;
+   // A glazing panel backed by solid interior material provides no usable
+   // interior opening, even if its outer face is exposed to exterior air.
+   const ix=x-(side==='east'?1:side==='west'?-1:0);
+   const iz=z-(side==='south'?1:side==='north'?-1:0);
+   if(vox.has(key(ix,y,iz)))
+    fail('PHYSICAL_INWARD_AIR_OBSTRUCTED_'+c.spaceIndex);
+   interiorAirCells++;
   }
  }
  return {
@@ -159,6 +166,7 @@ export function proveRankedExteriorPhysicalGlazing(source, choices){
   windowCount:choices.length,
   verifiedPanelGlassCells:glassCells,
   verifiedImmediateOutwardAirCells:adjacentAirCells,
+  verifiedImmediateInwardAirCells:interiorAirCells,
   weatherproofing:'NOT_TESTED',minecraftWalking:'NOT_TESTED',
   humanArchitecturalArt:'NOT_REVIEWED',realModelIdentity:'NOT_ATTESTED',
   worldContacts:0,worldWrites:0
