@@ -90,7 +90,7 @@ node .\scripts\r125-v4d-local-architect.mjs --compact --model 'qwen3:14b' --out 
 - `REVIEW_SUMMARY_SHAREABLE.json` は元回答・プロンプト・ローカルパス・APIエンドポイント・エラー全文を含まない。成功SOURCE候補と模擬モデルの区別、9 BLOCKED/WorldWrites0を保持する。人間ART・実Minecraft歩行・Mac 8GB/2B実績は全てNOT_TESTED/NOT_REVIEWED。
 - PCの安全な隔離研究ブランチが準備できた場合だけ、PowerShellから `& .\scripts\r125-v4d-local-one-shot.ps1` を1回実行できる設計。モデルの原文はローカルPRIVATEに残し、自動アップロードや自動再試行はしない。今回のチャットでは**本物のQwen/Gemma推論0回、Minecraft施工0回**。
 
-## 2026-11-03 追加：既存PRIVATEモデル原文を0 POSTでSOURCE再現する（新CI未検証）
+## 2026-11-03 追加：既存PRIVATEモデル原文を0 POSTでSOURCE再現する（正式CI PASS）
 
 最後の一回モデル試験でモデルが失敗した場合、モデルを再試行してコストを増やすよりも、**正確に保存された元JSON原文を、バージョン付きSOURCEコンパイラで再生し、当初の結果と比較する**必要がある。モデルの応答が不正だったのか、建築グラフがSOURCEに適合しなかったのか、後日のコード変更で結果が異なったのかを分離する。
 
@@ -110,3 +110,11 @@ Windowsの安全な研究作業コピーからは、必要な時だけ以下の�
 ```
 
 新CIは真正B143同一SHA再現と、SHA改ざん・途中切れ・未設置モデル・不正AUTHOR接続・SOURCEドリフト・シンボリックリンク入力・上書きの負例、およびWindows `-CheckOnly -ReplayStudy` の推論0/出力0の契約を検証する。CIの模擬元回答を実Qwen/Gemma原文と混同しない。
+
+### 2026-11-03 GitHub Actions 正式実測
+
+- 研究実装 [コミット99abad4e](https://github.com/ryomashibaba/MinecraftAIBuilder/commit/99abad4e092c416d549f7d11c82319264546cddf) により、オプトインの PRIVATE SOURCE再検証コード・6件の専用負例テスト・Windows起動器の `-ReplayStudy` 分岐・Linux/Windows CIを保存。
+- [Actions #41626660965](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41626660965) は **completed/success**。Linux Nodeの既存テスト **17/17 PASS**＋オフライン再現の新テスト **6/6 PASS**、計 **23/23 PASS、0 fail**。Windowsの `-CheckOnly` は通常と `-ReplayStudy` の両方を検査し、モデル推論・PRIVATEディレクトリ生成なしに正しいモード判定を確認。
+- 新6試験は、既存模擬AUTHOR原文の真正B143 SOURCE/geometry SHA一致再現、1バイト改変SHA不一致HOLD、不正接続と旧SOURCE不合格の維持、旧 `finish_reason=length` と未導入モデルのHOLD、原本と再コンパイル済形状の不一致HOLD、入力シンボリックリンク/不正報告/出力上書き防止を含む。いずれも**本物のQwenへの再問い合わせは0回**。
+- **原文のSHA一致は元のレポートとの整合性確認であり、モデルの暗号学的身元保証ではない**。モデルの実質的な発想品質・Mac 8GBでの実行性能・美術ART評価・Education内の実歩行は今回未確認。施工状態はNOT_PREPARED、9 BLOCKED、BuildPlan空、WorldWrites0。正式ART採用0件。
+- 次工程は隔離ローカル環境で本物のQwen/Gemmaを1回生成した時に、このSOURCE再現機能を使って**モデル/IR/実コンパイラ由来の問題を切り分け、3D美術審査の可否を別途判断**すること。ローカルモデルの結果なしに新しい合成建築の数を増やすことは優先しない。

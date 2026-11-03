@@ -1,10 +1,10 @@
 # MinecraftAIBuilder — START HERE（新チャット・AI開発者の統一入口）
 
-## 2026-11-03 V4D元モデル原文の完全オフラインSOURCE再現・差分HOLD（新CI未検証）
+## 2026-11-03 V4D元モデル原文の完全オフラインSOURCE再現・差分HOLD：Linux23/23・Windows CI PASS
 
 - 前工程のWindows/Linux専用CIは [#41624377954](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41624377954) completed/success（Linux17/17、Windows `-CheckOnly` PASS）。今回の次工程は、**実Qwenを再POSTする代わりに既存PRIVATE原文を読み取り専用で再コンパイルし、当初のSOURCE SHAと完成B143 geometry SHAが一致するか**を検証する。実モデルの新推論は0件。過去のART REJECT、実Qwen未認定を維持。
 - 新規オプトイン `scripts/r125-v4d-replay-private.mjs`：PRIVATEディレクトリの元モデル原文・JSONレシート・SHA照合後、旧AUTHORコンパイラを経て真正B143を再現。**追加モデルPOST0・外部API0・世界I/O0・元PRIVATEフォルダへ書込0**。出力は別の新規PRIVATEフォルダのみ。以前SOURCE HOLDだった入力がコード変更で通っても成功への自動昇格は禁止。元SOURCEとgeometry不一致なら必ずHOLD。
-- Windowsの `scripts/r125-v4d-local-one-shot.ps1 -ReplayStudy <PRIVATE研究フォルダ>` も**モデルを呼ばず**1回の再現試験を行う。相違がない時だけPRIVATE `index.html` とSOURCEを新規作成。外へ出せるのは**元モデル原文やフォルダ名を含まない `REPLAY_SHAREABLE_STATUS.json`**。未完成元応答・SHA不一致・過去不合格・Git内部パス/元フォルダへの上書きはHOLD。専用Linux/Windows CIを追加した（完走は未確認）。
+- Windowsの `scripts/r125-v4d-local-one-shot.ps1 -ReplayStudy <PRIVATE研究フォルダ>` も**モデルを呼ばず**1回の再現試験を行う。相違がない時だけPRIVATE `index.html` とSOURCEを新規作成。外へ出せるのは**元モデル原文やフォルダ名を含まない `REPLAY_SHAREABLE_STATUS.json`**。未完成元応答・SHA不一致・過去不合格・Git内部パス/元フォルダへの上書きはHOLD。専用 [Actions #41626660965](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41626660965) は **completed/success**（実装HEAD `99abad4e092c416d549f7d11c82319264546cddf`、Linux既存17/17と新規6/6の**合計23/23 PASS**、Windows `-CheckOnly` 標準モード/再検証モードもPASS）。テストはモデルの注入模擬回答であり実Qwen新推論0、ART認定0。
 - main・PR #128 Open/Draft、Education成功原本、凍結Qwen生原文、9 BLOCKED/BuildPlan空/WorldWrites0、Work事前承認を維持。[V4D一回試験と完全オフライン再現の研究正本](docs/R125_V4D_LOCAL_REAL_AUTHOR_BRIDGE_20261103_JA.md)。
 
 ## 2026-11-03 V4D Windows一括モデル試験：Linux 17/17・Windows事前検査PASS
