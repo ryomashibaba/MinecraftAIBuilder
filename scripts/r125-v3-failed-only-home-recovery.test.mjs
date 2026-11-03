@@ -14,6 +14,7 @@ import {FUNCTION_SCHEMA,compileFunctionalFacadeV3,
 import {GENRES} from './r125-cross-genre-pilot.mjs';
 import {auditOriginalHomeTopLevel,inspectFailedOnlyV3Evidence,
  runFailedOnlyV3} from './r125-v3-failed-only-home-recovery.mjs';
+import {exportSavedFiveGenreOverview} from './r125-v3-export-saved-overview.mjs';
 
 const digest=s=>createHash('sha256').update(s).digest('hex');
 const save=(folder,name,data)=>fs.writeFileSync(path.join(folder,name),
@@ -251,4 +252,50 @@ test('original home TOP_LEVEL inspection does not guess an unseen model cause',(
  assert.equal(report.planIdMatches,false);
  assert.equal(report.roomCountMatches,false);
  assert.equal(report.rawEdited,false);
+});
+
+test('offline export reuses all five completed model source scenes without ANY new inference',async t=>{
+ const p=setup(t),fake=localFake(p);
+ const initial=await runFailedOnlyV3(p,{fetcher:fake.fetcher});
+ assert.equal(initial.sourceReadyCount,5);
+ assert.equal(fake.getPosts(),1);
+ const outDir=path.join(path.dirname(p.outDir),'art-evidence-only');
+ const result=exportSavedFiveGenreOverview({...p,recoveryDir:p.outDir,outDir});
+ assert.equal(fake.getPosts(),1); // export did not and cannot POST
+ assert.equal(result.additionalModelCalls,0);
+ assert.equal(result.fourOldV3ModelsReused,4);
+ assert.equal(result.newHomeV3ModelReplayed,1);
+ assert.equal(result.status,'TEST_DOUBLE_OFFLINE_PREVIEW_ONLY');
+ assert.equal(result.embeddedMetadata.sourceReadyCount,5);
+ assert.equal(result.embeddedMetadata.worldWrites,0);
+ assert.deepEqual(result.gates,Array(9).fill('BLOCKED'));
+ const png=fs.readFileSync(path.join(outDir,'SOURCE_ART_OVERVIEW.png'));
+ assert.deepEqual([...png.subarray(0,8)],[137,80,78,71,13,10,26,10]);
+ assert.equal(sha(png),result.imageSha256);
+ assert(png.includes(Buffer.from('MAB_Source_Evidence\0','utf8')));
+ assert(fs.existsSync(path.join(outDir,'OVERVIEW_AUDIT_REPORT.json')));
+ assert(fs.existsSync(path.join(outDir,'index.html')));
+ assert.equal(fs.existsSync(path.join(outDir,'NEW_HOME_MODEL_RESPONSE_ORIGINAL.txt')),false);
+});
+test('an altered saved home response is rejected before creating any contact sheet',async t=>{
+ const p=setup(t),fake=localFake(p);
+ await runFailedOnlyV3(p,{fetcher:fake.fetcher});
+ const outDir=path.join(path.dirname(p.outDir),'art-evidence-only');
+ fs.appendFileSync(path.join(p.outDir,'cases','home',
+  'NEW_HOME_MODEL_RESPONSE_ORIGINAL.txt'),' ');
+ assert.throws(()=>exportSavedFiveGenreOverview({...p,recoveryDir:p.outDir,outDir}),
+  /NEW_HOME_ORIGINAL_RAW_SHA_DRIFT/);
+ assert.equal(fake.getPosts(),1);
+ assert.equal(fs.existsSync(outDir),false);
+});
+test('a tampered successful Qwen raw aborts offline export, with no silent reset',async t=>{
+ const p=setup(t),fake=localFake(p);
+ await runFailedOnlyV3(p,{fetcher:fake.fetcher});
+ const outDir=path.join(path.dirname(p.outDir),'art-evidence-only');
+ fs.appendFileSync(path.join(p.functionsDir,'cases','retail',
+  'MODEL_FUNCTION_RESPONSE_ORIGINAL.txt'),' ');
+ assert.throws(()=>exportSavedFiveGenreOverview({...p,recoveryDir:p.outDir,outDir}),
+  /MODEL_RAW_SHA_retail/);
+ assert.equal(fake.getPosts(),1);
+ assert.equal(fs.existsSync(outDir),false);
 });
