@@ -19,6 +19,8 @@ on:
       - 'configs/r125-education-verified-palette-v26.33.json'
       - 'source/ai/r125-spatial-composition.mjs'
       - 'scripts/r125-spatial-composition.test.mjs'
+      - 'scripts/r125-cross-genre-pilot.mjs'
+      - 'scripts/r125-cross-genre-pilot.test.mjs'
       - 'scripts/r125-live-safe-worktree.ps1'
       - 'scripts/r125-education-world-inventory.ps1'
       - 'scripts/r125-education-backup-and-candidate-check.ps1'
@@ -38,6 +40,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Run five-genre source/diagnostic and fake-model negative tests
+        run: node --test scripts/r125-cross-genre-pilot.test.mjs
       - name: Check generic model-authored whole-building spatial compositions
         run: node --test scripts/r125-spatial-composition.test.mjs
       - name: Parse real Windows PowerShell launcher before any Windows handoff
