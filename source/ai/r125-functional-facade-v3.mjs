@@ -38,13 +38,13 @@ export function validateFunctionalIntent(plan,intent){
  for(const r of intent.rooms){
   if(!rec(r,['roomId','fixture','opening'])||!ids.has(r.roomId)||
    seen.has(r.roomId)||!rec(r.fixture,['kind','side','offset','material','purpose'])||
-   !rec(r.opening,['side','offset','width','height']))fail('ROOM_CONTRACT');
+   (r.opening!==null&&!rec(r.opening,['side','offset','width','height'])))fail('ROOM_CONTRACT');
   seen.add(r.roomId);
   if(!types.includes(r.fixture.kind)||!dirs.includes(r.fixture.side)||
    !integer(r.fixture.offset,0,4)||!isNamed(r.fixture.purpose)||
    !['wood','stone','metal','accent'].includes(r.fixture.material)||
-   !dirs.includes(r.opening.side)||!integer(r.opening.offset,0,4)||
-   !integer(r.opening.width,3,4)||!integer(r.opening.height,2,3))
+   (r.opening!==null&&(!dirs.includes(r.opening.side)||!integer(r.opening.offset,0,4)||
+   !integer(r.opening.width,3,4)||!integer(r.opening.height,2,3))))
    fail('ROOM_INTENT');
  }
  return true;
@@ -156,21 +156,23 @@ export function compileFunctionalFacadeV3({originalPlan,envelopeIntent,functiona
  for(const [i,r] of rooms.entries()){
   const original=byId.get(r.id);
   const feature=createRoomFixture(r,original.fixture,i);
-  const window=openingGeometry(r,original.opening,i);
-  outsideWallIsReal(r,window.cut,rooms);
-  // Never replace a two-wide entrance/connection with a solid glass panel.
-  if(doorwayCuts.some(c=>intersects(window.cut,c)))
-   fail('WINDOW_BLOCKS_DOOR_'+r.id);
-  if(intersects(feature.element,window.cut))
-   fail('FURNITURE_WINDOW_INTERSECT_'+r.id);
+  let window=null;
+  if(original.opening!==null){
+   window=openingGeometry(r,original.opening,i);
+   outsideWallIsReal(r,window.cut,rooms);
+   if(doorwayCuts.some(c=>intersects(window.cut,c)))
+    fail('WINDOW_BLOCKS_DOOR_'+r.id);
+   if(intersects(feature.element,window.cut))
+    fail('FURNITURE_WINDOW_INTERSECT_'+r.id);
+   windows.push({...window,roomIndex:i});
+  }
   fixtures.push(feature.element);targets.push(feature.target);
-  windows.push(window);
   manifest.push({roomId:r.id,authoredPurpose:original.fixture.purpose,
    authoredKind:original.fixture.kind,
    authoredFixtureSide:original.fixture.side,
-   authoredOpeningSide:original.opening.side,
+   authoredOpeningSide:original.opening?.side??null,
    fixtureOrigin:feature.element.origin,fixtureSize:feature.element.size,
-   openingOrigin:window.cut.origin,openingSize:window.cut.size,
+   openingOrigin:window?.cut.origin??null,openingSize:window?.cut.size??null,
    genreTemplateUsed:false});
  }
  // The author only chooses semantic function/relative placement. HOST
@@ -194,8 +196,11 @@ export function compileFunctionalFacadeV3({originalPlan,envelopeIntent,functiona
  const before=new Map(roof.compiled.primitives.map(p=>[K(p[0],p[1],p[2]),p[3]]));
  const after=new Map(compiled.primitives.map(p=>[K(p[0],p[1],p[2]),p[3]]));
  const glass=MATERIALS.indexOf('glass');
- const perRoomWindow=[];
- for(const [i,window] of windows.entries()){
+ const perRoomWindow=rooms.map(r=>({roomId:r.id,
+  newGlassCells:0,finalGlassCells:0,preexistingFacadeCells:0,
+  authoredExteriorOpening:false}));
+ for(const window of windows){
+  const i=window.roomIndex;
   const [x,y,z]=window.cut.origin,[sx,sy,sz]=window.cut.size;
   let newGlass=0,realGlass=0,originalFacadeCells=0;
   for(let xx=x;xx<x+sx;xx++)for(let yy=y;yy<y+sy;yy++)
@@ -208,9 +213,9 @@ export function compileFunctionalFacadeV3({originalPlan,envelopeIntent,functiona
    }
   if(newGlass<1||originalFacadeCells<4)
    fail('NOT_NEW_REAL_FACADE_GLAZING_'+rooms[i].id);
-  perRoomWindow.push({roomId:rooms[i].id,
+  perRoomWindow[i]={roomId:rooms[i].id,authoredExteriorOpening:true,
    newGlassCells:newGlass,finalGlassCells:realGlass,
-   preexistingFacadeCells:originalFacadeCells});
+   preexistingFacadeCells:originalFacadeCells};
  }
  const perRoomFixtures=[];
  for(const [i,feature] of fixtures.entries()){
@@ -231,6 +236,7 @@ export function compileFunctionalFacadeV3({originalPlan,envelopeIntent,functiona
    material:feature.material});
  }
  const newGlass=perRoomWindow.reduce((n,r)=>n+r.newGlassCells,0);
+ if(newGlass===0)fail('NO_NEW_REAL_FACADE_GLAZING_BUILDING');
  const fixtureCells=perRoomFixtures.reduce((n,r)=>n+r.newFixtureCells,0);
  if(compiled.geometrySha256===roof.geometrySha256)
   fail('NO_GEOMETRY_CHANGE');
