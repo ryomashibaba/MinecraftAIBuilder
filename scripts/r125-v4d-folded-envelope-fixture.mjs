@@ -4,7 +4,7 @@ export function makeV4DFoldedEnvelopeFixture(){
  return {
   schema:V4D_FOLDED_SCHEMA,id:'sectioned-civic-roof-gallery',
   title:'SYNTHETIC: urban forum with sculpted continuous folded canopy',
-  brief:'Three distinct light-filled program wings unified by angled continuous roof folds and an open civic spine',
+  brief:'Three civic wings with continuous folded roof plates and a connected open public passage',
   materials:{floor:'stone',wall:'concrete',roof:'metal',public:'accent'},
   site:{frontZ:19,sectionLength:20,approachDepth:10,entryOffset:7},
   sections:[
