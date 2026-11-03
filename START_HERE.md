@@ -1,5 +1,13 @@
 # MinecraftAIBuilder — START HERE（新チャット・AI開発者の統一入口）
 
+## 2026-11-03 初のユーザー提出V4D一回試行結果：SOURCE HOLDと指示の的確な強化（実モデル改善率は未測定）
+
+- ユーザー提出の共有用3ファイル `AUTHOR_SOURCE_DIAGNOSTIC.json`、`OFFLINE_REPLAY_REPORT.json`、`REPLAY_SHAREABLE_STATUS.json` を診断。ローカル試行記録は **originalModelCalls=1, originalTestInjectionPresent=false, additionalModelCalls=0**。本物の特定モデルによる生成かは暗号学的には未認証。PRIVATEモデル原文SHA整合 **SHA256_MATCH**、元回答は **HOLD_MODEL_OR_SOURCE_INVALID_NO_REPAIR**／再診断 **HOLD_REPLAY_SOURCE_REJECTED**。**SOURCE成功・B143構築なし、ART未審査、Minecraft WorldWrites0、NOT_PREPARED/9 BLOCKED**。
+- 保存された解析で **JSON形式自体は有効**、最上位必須キー1つ不足、スキーマ不一致、2番目と3番目の空間の共有壁に面した窓、という4件。4空間（covered 3 / sky 1）と親参照3件は記述済み。**どの最上位キーが欠けたか、schemaキーが欠落か誤値かは原文非共有なので不明**。原文/ローカルパス/個別SHA/私的建築案はGitHubに載せない。
+- 正本SOURCEの幾何と安全ゲートは一切変えず、モデル用 `COMPACT_SYSTEM_PROMPT` のみ、必須 `schema` のリテラル値、最上位6キーの必須性、親と子それぞれの共有壁を窓の候補から除く双方向ルール、未来の子からの共有壁も考慮して `windowSide="none"` を選べることを明示。これを検証する新しいfail-closed回帰テストを追加。[実装339a76a](https://github.com/ryomashibaba/MinecraftAIBuilder/commit/339a76a083b89c8ccc9a68a8595a80fc03fa8cb8)。
+- [専用GitHub Actions #41637699588](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41637699588) は **completed/success**。Linux Node従来29+新規1 = **30/30 PASS**、Windows研究branch取得・偽ローカルOllamaによるHTTP1POST・失敗時0POST再診断PASS。**新しい実モデル生成は未実施。今回のプロンプト強化が実Qwenの成績やARTを改善するかはまだ分からない**。
+- 次はユーザーが希望しPCを利用できる場合、既存のダブルクリックv2ツールを**再実行して最新ブランチを新しい隔離コピーに取得し、別の1回だけのモデル試行**でモデルの出力を比較する。過去の失敗原文はPRIVATEに保持し補修しない。SOURCEに通れば実際のB143を観察して独立ART判定。Minecraft施工禁止、main/旧Education成功/PR #128 Draft/Work事前承認を維持。
+
 ## 2026-11-03 V4Dワンクリック試験：SOURCE不合格時の自動診断までWindows CI成功
 
 - ダブルクリック用 `scripts/r125-v4d-one-click-setup.cmd` を改良。Yで最大1回だけローカルQwenに依頼し、SOURCE失敗で元原文が残っていれば、別のローカルモデル問い合わせをせず自動的にオフラインSOURCE診断へ進む。完了後、共有用 `REPLAY_SHAREABLE_STATUS.json` または元の `REVIEW_SUMMARY_SHAREABLE.json` をエクスプローラーで選択表示する。既存Minecraftワールドへの施工なし、外部への回答原文アップロードなし。

@@ -151,3 +151,14 @@ Windowsの安全な研究作業コピーからは、必要な時だけ以下の�
 - 初回 [GitHub Actions #41634978618](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41634978618) はWindows HTTP・SOURCE不合格保存・オフライン診断まで成功した一方、意図的なSOURCE HOLD終了コード2がPowerShell CIの終了値に残り全体FAIL。[修正a518980d](https://github.com/ryomashibaba/MinecraftAIBuilder/commit/a518980df5408be44782b7a17d949e58a87bc427) ではCIが期待するHOLDを検証した後だけ残留終了値を0へ変更。
 - 修正版 [CI #41635183616](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41635183616) は **completed/success**。Windows研究ブランチclone、模擬HTTP POST正確に1回、元モデル原文保存、追加モデル0回のSOURCE診断、安全JSON、WorldWrites0を確認。Linuxの旧テスト29/29 PASS。**実Qwen/Gemmaの建築能力、8GB Mac/2B、真正3Dの人間ART、Minecraft実機施工は未検証**。
 - 配布バッチのGit blob SHAは `518ec0919a24480d46ae0851d5e42e7adea306bc`。旧v1のダウンロード済コピーは自動更新されないため、本人へは新版v2を案内する。main・既存Education成功・PRIVATE Qwen原本・9安全ゲート/Draft PR #128を保持。
+
+## 2026-11-03 ユーザー提出による初のV4Dローカル試行結果と具体的な改善（原文は非共有）
+
+ユーザーが共有した3つの許可済み診断JSONを照合した。これまでのCIの模擬モデルではなく、実際のローカル実行記録は modelCalls=1 / testInjectionPresent=false / additionalModelCalls=0。ただしモデルの身元暗号学的立証はなく、**「Qwenが間違いなく著作した」とは認定しない**。元モデル原文はPRIVATEに保存され、SHA256_MATCH。JSONパース自体は成功したが真正SOURCEは不合格（HOLD_MODEL_OR_SOURCE_INVALID_NO_REPAIR → HOLD_REPLAY_SOURCE_REJECTED）、SOURCE/形状SHAは未生成、Minecraft世界書き込み0、9 BLOCKED。
+
+- 構造診断4件：`TOP_LEVEL_FIELDS`（必要なトップレベルキーが1件不足）、`CONTRACT_SCHEMA`（契約スキーマ不一致）、`WINDOW_ON_SHARED_PARTITION`（空間配列 index=1 と 2 の計2件）。出力には合計4空間（covered 3 / sky 1）、屋根選択3、設備用途名4、親参照3が存在した。部屋が無い失敗ではなく、**契約の完全性と共有壁への採光方向選択**が問題。元回答の具体的な生テキストが未共有なので欠落キーの名称は特定できない。
+- 更新 [339a76a](https://github.com/ryomashibaba/MinecraftAIBuilder/commit/339a76a083b89c8ccc9a68a8595a80fc03fa8cb8) では `COMPACT_SYSTEM_PROMPT` のみ限定改善。`"schema":"minecraftaibuilder-r125-v4d-compact-spatial-intent-v1"` をJSONリテラルとして必須と明記し、最上位の全6キーを省略しないよう指定。各 `attach.side` について親のその方向と子の逆方向が共有壁であり、後に連結される子の壁も含めて窓を置かないこと、外壁と断言できなければ `windowSide="none"` を使うことを明示。ユーザーの元回答の補修・ジャンル固定・形状自動補正・追加再推論は行わない。
+- 新回帰テストは、schemaキーの欠落・誤値、必須materials欠落、親の共有壁窓、子の共有壁窓、公開庭に隣接する親の窓を**すべてHOLD**に維持することと、修正版プロンプトの説明を確認するもの。既存の真正B143へ通じる安全な機能経路は凍結したまま。
+- [専用CI #41637699588](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41637699588) は **completed/success**、Linux Node **30/30 PASS**、Windows実branch clone＋模擬localhost Qwen互換応答1POST→元モデルの不正SOURCE HOLD→0追加POSTオフライン再診断PASS。これは**プロンプトにルールが存在することとSOURCE拒否が維持されること**の確認であり、変更後の実モデル正解率やビジュアル・ART品質の改善証明ではない。
+
+次の実質試験は、本人が安全な隔離PC環境で希望した時にだけ、既存のダブルクリック版v2（実行時に最新の研究ブランチを新規cloneする仕組み）から一回だけ新たな試験を実行し、以前と同じ3つの**安全な共有JSON**で比較すること。元の生成回答はPRIVATEに保持し、SOURCE成功なら index.html/真正B143で用途・ファサード・全視点美術を別審査。現段階で正式ART採用0件。
