@@ -1,5 +1,11 @@
 # MinecraftAIBuilder — START HERE（新チャット・AI開発者の統一入口）
 
+## 2026-11-03 V4D既存3グラフの共通屋根・外壁接合研究（SOURCE CI未確定）
+
+- 前工程の直列/分岐/環状SOURCE 3/3 PASSと独立ART 3/3 REJECTは変更しない。SOURCEコード上、壁上端は全辺で低い庇高止まりで、折板/片流れ屋根の高い箇所では妻面が実ボクセルで欠損。この構造的共通不具合の修復を**独立オプトイン** `source/ai/r125-v4d-envelope-integration.mjs` に実装。
+- AUTHOR短い意匠IRで、用途別の妻面wall/glass、共有壁/入口の実4幅切り抜き、公開庭と接続する片側屋根付き半屋外区画を明示。HOSTが最後の真正B143で全周屋根接合・4幅の実支持床・公共屋根/柱/空気・用途と設備へのSOURCE動線を検査。旧グラフ3件を内容を変更せず比較。詳細：[新外皮SOURCE安全試験](docs/R125_V4D_ENVELOPE_INTEGRITY_STUDY_20261103_JA.md)。
+- GitHub専用CI・真正3D独立ARTは本コミット時点で未確認。**新Qwen0、新Minecraft施工0、正式ART採用0**。main/旧原本/R125→B143→Education成功経路とPR #128 Draftを保護、Workは事前承認制。初期NOT_PREPARED／9 BLOCKED／BuildPlan空／WorldWrites0。
+
 ## 2026-11-03 V4D多用途グラフ：正式SOURCE 3/3 PASS／真正B143独立ART 3/3 REJECT
 
 - **固定左右翼からの脱却**：短いAUTHOR意味IRから3〜5用途のノードと独立の直列／分岐／環状接続、物理的共有壁の扉、roofless公共空間、真正B143屋根・実窓・設備を生成する独立オプトイン共通エンジン `source/ai/r125-v4d-authored-topology.mjs`。旧第一〜第四案のART REJECTを凍結し、同じ棟の装飾反復に戻らない。

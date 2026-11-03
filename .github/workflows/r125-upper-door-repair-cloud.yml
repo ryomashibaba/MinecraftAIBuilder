@@ -29,6 +29,10 @@ on:
       - 'source/ai/r125-v4d-civic-swept-shell.mjs'
       - 'source/ai/r125-v4d-folded-envelope.mjs'
       - 'source/ai/r125-v4d-authored-topology.mjs'
+      - 'source/ai/r125-v4d-envelope-integration.mjs'
+      - 'scripts/r125-v4d-envelope-integration-fixtures.mjs'
+      - 'scripts/r125-v4d-envelope-integration.test.mjs'
+      - 'scripts/r125-v4d-envelope-integration-review.mjs'
       - 'scripts/r125-v4d-authored-topology-fixtures.mjs'
       - 'scripts/r125-v4d-authored-topology.test.mjs'
       - 'scripts/r125-v4d-authored-topology-review.mjs'
@@ -196,6 +200,21 @@ jobs:
         with:
           name: R125-V4D-Three-Independent-Authored-Spatial-Graphs-True-B143-ART-HOLD
           path: ${{ runner.temp }}/r125-v4d-authored-graphs/
+          if-no-files-found: error
+          retention-days: 14
+      - name: R125 actual roof to wall enclosed AUTHOR cladding with four-wide real civic door and public arcade
+        run: |
+          node --check source/ai/r125-v4d-envelope-integration.mjs
+          node --check scripts/r125-v4d-envelope-integration-fixtures.mjs
+          node --check scripts/r125-v4d-envelope-integration-review.mjs
+          node --test scripts/r125-v4d-envelope-integration.test.mjs
+      - name: Export three true B143 civic facade enclosure alternative 3D views
+        run: node scripts/r125-v4d-envelope-integration-review.mjs --out "$RUNNER_TEMP/r125-v4d-envelope-facades"
+      - name: Archive three synthetic real B143 enclosed roofs and civic arcades for independent ART review
+        uses: actions/upload-artifact@v4
+        with:
+          name: R125-V4D-Three-Graph-True-Roof-Wall-Enclosure-Public-Arcade-ART-HOLD
+          path: ${{ runner.temp }}/r125-v4d-envelope-facades/
           if-no-files-found: error
           retention-days: 14
       - name: Parse real Windows PowerShell launcher before any Windows handoff
