@@ -1,0 +1,30 @@
+name: Dec free-autonomy single-project prototype (FAKE-only)
+
+on:
+  push:
+    branches:
+      - research/dec-free-autonomy-solo-pilot-20261104
+    paths:
+      - 'tools/free-autonomy-solo/**'
+      - '.github/workflows/dec-free-autonomy-solo-offline.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline-contract-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Python syntax check
+        run: python3 -m py_compile tools/free-autonomy-solo/solo_agent.py
+      - name: Isolated fake OpenCode CLI safety regression
+        run: python3 -m unittest discover -v -s tools/free-autonomy-solo -p 'test_solo_agent.py'
+      - name: Evidence limitations
+        run: |
+          echo 'FAKE CLI / SOURCE supervisor only.'
+          echo 'Real OpenCode model, Windows, OS sandbox, GitHub push, ART, Minecraft and full-match fidelity remain unverified.'
