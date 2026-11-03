@@ -255,6 +255,11 @@ test('five independent synthetic genres use one unmodified V4E→true B143 engin
   assert(fs.existsSync(path.join(out,'massing.html')));
   assert.equal(report.primaryMassingResearch.cases.length,5);
   assert.equal(report.exteriorWingResearch.cases.length,5);
+  assert.equal(report.contouredExteriorWingResearch.cases.length,5);
+  assert(report.contouredExteriorWingResearch.cases.every(c=>
+   c.realB143ContourWitness.authorContourExplicit===true&&
+   c.actualRectangleVsContourVisibility.views.find(v=>v.face==='roof')
+    .silhouetteChangedCells>=12));
   assert(report.exteriorWingResearch.cases.every(c=>
    c.sourceWitness.independentRoofSilhouette.views.find(v=>v.face==='roof')
     .silhouetteChangedCells>=84));
@@ -268,6 +273,10 @@ test('five independent synthetic genres use one unmodified V4E→true B143 engin
   assert(report.sectionResearch.sectionedCases.every(c=>
    c.oldGeometrySha256!==c.newGeometrySha256&&c.art==='NOT_REVIEWED'));
   for(const {genre} of cases){
+   const contourDelta=fs.readFileSync(path.join(out,'CONTOUR_VS_RECTANGLE_B143_'+genre+'_VISIBLE_DELTA.svg'),'utf8');
+   assert(contourDelta.includes('ACTUAL B143 VISIBLE DELTA'));
+   const contouredSvg=fs.readFileSync(path.join(out,'CONTOURED_WING_B143_'+genre+'_FIVE_VIEWS.svg'),'utf8');
+   assert(contouredSvg.includes('ACTUAL final B143 voxels'));
    const wingDelta=fs.readFileSync(path.join(out,'WING_B143_'+genre+'_SILHOUETTE_DELTA.svg'),'utf8');
    assert(wingDelta.includes('ACTUAL B143 VISIBLE DELTA'));
    const delta=fs.readFileSync(path.join(out,'MASSING_B143_'+genre+'_VISIBILITY_DELTA.svg'),'utf8');
@@ -675,7 +684,7 @@ test('one original FULL WING model response: 1 fake POST, private art comparison
  const study=path.join(root,'study'),replay=path.join(root,'replay');
  const sample=syntheticFiveGenreAuthorCases()[0];
  const answer={...structuredClone(sample.source),schema:WING_SCHEMA,
-  massing:structuredClone(sample.authoredMassing),wing:structuredClone(sample.authoredWing)};
+  massing:structuredClone(sample.authoredMassing),wing:structuredClone(sample.authoredContourWing)};
  const raw=JSON.stringify(answer),requests=[];
  const fetcher=async(url,opt)=>{
   requests.push(opt?.method);
@@ -702,7 +711,10 @@ test('one original FULL WING model response: 1 fake POST, private art comparison
   assert.equal(fs.readFileSync(path.join(study,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8'),raw);
   const art=JSON.parse(fs.readFileSync(path.join(study,'PRIVATE_B143_WING_ART_HOLD_COMPARISON.json'),'utf8'));
   assert(art.actuallyAddedCells>84);
-  assert.equal(art.wingSourceWitness.actualSupportedWingFloorCells,84);
+  assert.equal(art.wingSourceWitness.actualSupportedWingFloorCells,88);
+  assert.equal(art.wingSourceWitness.authorContourExplicit,true);
+  assert.deepEqual(art.wingSourceWitness.authoredThreeBandDepths,[6,9,7]);
+  assert.equal(art.wingSourceWitness.physicallyVerifiedSupportPostCount,6);
   assert(art.projectedVisibilityAudit.views.find(v=>v.face==='roof').silhouetteChangedCells>=84);
   assert.equal(art.extraModelRequests,0);
   assert.equal(art.humanArchitecturalArt,'NOT_REVIEWED');
@@ -726,4 +738,57 @@ test('one original FULL WING model response: 1 fake POST, private art comparison
   assert(diagnosePrivateV4DAuthor(invalid,WING_SCHEMA).issues
    .some(i=>i.code==='EXTERIOR_WING_DIMENSIONS_INVALID'));
  }finally{fs.rmSync(root,{recursive:true,force:true});}
+});
+
+test('AI-authored 3-band nonrectangular wing preserves archived rectangle and visibly differs from a SAME-REACH rectangle',async()=>{
+ const {compileAuthoredExteriorWing}
+  =await import('../source/ai/r125-v4e-authored-exterior-wing.mjs');
+ const {compileWingAuthorIntent,WING_SCHEMA}
+  =await import('../source/ai/r125-v4e-wing-author-ir.mjs');
+ const {diagnosePrivateV4DAuthor}
+  =await import('./r125-v4d-author-source-diagnostics.mjs');
+ const {syntheticFiveGenreAuthorCases}
+  =await import('./r125-v4e-cross-genre-source-study.mjs');
+ const {auditB143ProjectedVisibility}
+  =await import('./r125-v4e-visibility-delta.mjs');
+ const cases=syntheticFiveGenreAuthorCases(),unchanged=structuredClone(cases);
+ for(const s of cases){
+  const rectangle=compileAuthoredExteriorWing(s.source,s.authoredMassing,
+   {...s.authoredWing,reach:9});
+  const contour=compileAuthoredExteriorWing(s.source,s.authoredMassing,
+   s.authoredContourWing);
+  const w=contour.sourceWingWitness;
+  assert.equal(w.authorContourExplicit,true);
+  assert.deepEqual(w.authoredThreeBandDepths,s.authoredContourWing.outline);
+  assert(w.actualVerifiedDistinctStepDepths>=2);
+  assert(w.physicallyVerifiedSupportPostCount>=4);
+  assert(w.actualSupportedWingFloorCells>=60);
+  assert.equal(w.actualSupportedWingFloorCells,w.actualCoverRoofCells);
+  assert.equal(w.realPortalCellsRemoved,6);
+  assert.equal(w.originalGlazingUnchanged.verifiedPanelGlassCells,36);
+  assert.equal(w.originalGlazingUnchanged.verifiedImmediateInwardAirCells,36);
+  assert.equal(w.originalGlazingUnchanged.verifiedImmediateOutwardAirCells,36);
+  assert.equal(w.twoWideUserRoute.status,'SOURCE_TWO_WIDE_ENTRANCE_TO_WING_REACHABLE');
+  assert.equal(contour.sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert.equal(contour.worldWrites,0);
+  assert.deepEqual(contour.gates,Array(9).fill('BLOCKED'));
+  assert.notEqual(rectangle.newGeometrySha256,contour.newGeometrySha256);
+  const visible=auditB143ProjectedVisibility(
+   rectangle.b143Compiled.primitives,contour.b143Compiled.primitives);
+  assert(visible.views.find(v=>v.face==='roof').silhouetteChangedCells>=12);
+  const answer={...structuredClone(s.source),schema:WING_SCHEMA,
+   massing:structuredClone(s.authoredMassing),wing:structuredClone(s.authoredContourWing)};
+  const whole=compileWingAuthorIntent(answer);
+  assert.equal(whole.b143.geometrySha256,contour.newGeometrySha256);
+  assert.equal(whole.humanArt,'NOT_REVIEWED');
+  assert.equal(diagnosePrivateV4DAuthor(answer,WING_SCHEMA).issues.length,0);
+  for(const bad of [[9,9,9],[6,7],[5,9,7],[6,10,7],[6,6,6]]){
+   const rejected=structuredClone(answer);
+   rejected.wing.outline=bad;
+   assert.throws(()=>compileWingAuthorIntent(rejected),/R125_V4E_/);
+   assert(diagnosePrivateV4DAuthor(rejected,WING_SCHEMA).issues.some(i=>
+    i.code==='EXTERIOR_WING_CONTOUR_INVALID'));
+  }
+ }
+ assert.deepEqual(cases,unchanged);
 });

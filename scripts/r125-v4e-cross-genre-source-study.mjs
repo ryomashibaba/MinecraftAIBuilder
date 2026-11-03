@@ -73,6 +73,10 @@ const MASSING_AUTHOR_SAMPLES={
  gallery:{spaceId:'learning',corner:'NW'},
  station:{spaceId:'learning',corner:'NE'}
 };
+const CONTOUR_AUTHOR_SAMPLES={
+ housing:[6,9,7],shop:[7,9,6],research:[6,8,9],
+ gallery:[9,6,7],station:[7,9,6]
+};
 export function syntheticFiveGenreAuthorCases(){
  return CASES.map(c=>{
   const x=makeV4DCompactSynthetic();
@@ -91,12 +95,16 @@ export function syntheticFiveGenreAuthorCases(){
    s.windowPriority=s.kind==='sky'?null:
     (i===0?['north','south','east','west']:['south','east','north','west']);
   }
+  const wing={spaceId:'learning',
+   side:c.id==='shop'?'north':c.id==='research'?'west':c.link,
+   start:4,span:12,reach:7,roofY:9,purpose:c.open};
   return {genre:c.id,source:x,
    authoredSection:{spaceId:c.sectionRoom,corner:c.sectionCorner,recessDepth:6},
    authoredMassing:{...MASSING_AUTHOR_SAMPLES[c.id],
     cutWidth:7,cutDepth:7,publicAccessSide:'X'},
-   authoredWing:{spaceId:'learning',side:c.id==='shop'?'north':c.id==='research'?'west':c.link,
-    start:4,span:12,reach:7,roofY:9,purpose:c.open}};
+   authoredWing:wing,
+   authoredContourWing:{...wing,reach:9,
+    outline:CONTOUR_AUTHOR_SAMPLES[c.id].slice()}};
  });
 }
 export function exportV4ECrossGenreSource(folder){
@@ -133,6 +141,20 @@ export function exportV4ECrossGenreSource(folder){
   try{return compileAuthoredExteriorWing(s.source,s.authoredMassing,s.authoredWing);}
   catch(e){fail('SYNTHETIC_WING_'+s.genre+'_'+String(e.message));}
  });
+ const fullRectangleControls=samples.map(s=>compileAuthoredExteriorWing(
+  s.source,s.authoredMassing,{...s.authoredWing,reach:9}));
+ const contoured=samples.map(s=>{
+  try{return compileAuthoredExteriorWing(s.source,s.authoredMassing,s.authoredContourWing);}
+  catch(e){fail('SYNTHETIC_CONTOUR_'+s.genre+'_'+String(e.message));}
+ });
+ const contourAudit=contoured.map((c,i)=>auditB143ProjectedVisibility(
+  fullRectangleControls[i].b143Compiled.primitives,c.b143Compiled.primitives));
+ if(contoured.some((c,i)=>!c.sourceWingWitness.authorContourExplicit||
+   c.sourceWingWitness.actualVerifiedDistinctStepDepths<2||
+   c.sourceWingWitness.physicallyVerifiedSupportPostCount<4||
+   contourAudit[i].views.find(v=>v.face==='roof').silhouetteChangedCells<12))
+  fail('REAL_NONRECTANGULAR_OUTER_CONTOUR_NOT_VERIFIED');
+ const contourReview=compileB143Gallery(contoured.map(c=>c.b143Design));
  const wingReview=compileB143Gallery(wings.map(w=>w.b143Design));
  if(wings.some(w=>w.sourceWingWitness.independentRoofSilhouette.views
    .find(v=>v.face==='roof').silhouetteChangedCells<84))
@@ -174,6 +196,22 @@ export function exportV4ECrossGenreSource(folder){
     finalGeometrySha256:w.newGeometrySha256,
     sourceRoutes:w.sourceRoutes.status,worldWrites:w.worldWrites}))
   },
+  contouredExteriorWingResearch:{
+   status:'SOURCE_ONLY_HUMAN_ART_HOLD',
+   authorProvenance:'SYNTHETIC_EXPLICIT_THREE_BAND_DEPTHS_NOT_QWEN',
+   noGenreSpecificHostGeometryPrescriptions:true,
+   fullDepthRectangleControlUsed:true,
+   cases:contoured.map((c,i)=>({
+    genre:samples[i].genre,authoredWing:c.authoredWing,
+    actualB143VoxelCount:c.b143Compiled.primitives.length,
+    realB143ContourWitness:c.sourceWingWitness,
+    originalRectangleControlGeometrySha256:fullRectangleControls[i].newGeometrySha256,
+    finalContourGeometrySha256:c.newGeometrySha256,
+    actualRectangleVsContourVisibility:contourAudit[i],
+    sourceRoutes:c.sourceRoutes.status,worldWrites:c.worldWrites,
+    humanArt:'NOT_REVIEWED',realModel:'NOT_TESTED'
+   }))
+  },
   sectionResearch:{
    status:'SOURCE_TECH_ONLY_NOT_GENERAL_IRREGULAR_ARCHITECTURE',
    genreSpecificHostPrescriptions:false,
@@ -194,6 +232,8 @@ export function exportV4ECrossGenreSource(folder){
    geometryShaDifferenceDoesNotCertifyArchitectureArt:true,
    newResearchPrimaryVolumeCornerOpenSkyVoid:true,
    newResearchPublicWingBeyondOriginalFootprint:true,
+   newResearchThreeBandAuthorSpecifiedIrregularWing:true,
+   nonrectangularRoomOuterFacadeStillUnsolved:true,
    existingDefaultArchitectureStillRectangular:true
   },
   cases:samples.map((s,i)=>({
@@ -219,6 +259,8 @@ export function exportV4ECrossGenreSource(folder){
   renderB143Html(sectionReview,template),{flag:'wx'});
  fs.writeFileSync(path.join(folder,'exterior-wing.html'),
   renderB143Html(wingReview,template),{flag:'wx'});
+ fs.writeFileSync(path.join(folder,'contoured-wing.html'),
+  renderB143Html(contourReview,template),{flag:'wx'});
  for(const [i,r] of results.entries()){
   fs.writeFileSync(path.join(folder,'FINAL_B143_'+samples[i].genre+'_FIVE_VIEWS.svg'),
    actualOrthographicSvg(r.b143.compiled.primitives),{flag:'wx'});
@@ -232,6 +274,12 @@ export function exportV4ECrossGenreSource(folder){
   fs.writeFileSync(path.join(folder,'WING_B143_'+samples[i].genre+'_SILHOUETTE_DELTA.svg'),
    renderB143ProjectedVisibilityDelta(massing[i].b143Compiled.primitives,
     wings[i].b143Compiled.primitives),{flag:'wx'});
+  fs.writeFileSync(path.join(folder,'CONTOURED_WING_B143_'+samples[i].genre+'_FIVE_VIEWS.svg'),
+   actualOrthographicSvg(contoured[i].b143Compiled.primitives),{flag:'wx'});
+  fs.writeFileSync(path.join(folder,'CONTOUR_VS_RECTANGLE_B143_'+samples[i].genre+'_VISIBLE_DELTA.svg'),
+   renderB143ProjectedVisibilityDelta(
+    fullRectangleControls[i].b143Compiled.primitives,
+    contoured[i].b143Compiled.primitives),{flag:'wx'});
   fs.writeFileSync(path.join(folder,'SECTION_B143_'+samples[i].genre+'_FIVE_VIEWS.svg'),
    actualOrthographicSvg(sectioned[i].sectionedCompiled.primitives),{flag:'wx'});
  }

@@ -234,13 +234,21 @@ export function diagnosePrivateV4DAuthor(author,contract){
  }
  if(winged){
   const w=author.wing,expected=['spaceId','side','start','span','reach','roofY','purpose'];
-  if(!record(w)||keyCounts(w,expected).missing||keyCounts(w,expected).unexpected)
+  const fields=record(w)&&Object.hasOwn(w,'outline')?
+   [...expected,'outline']:expected;
+  if(!record(w)||keyCounts(w,fields).missing||keyCounts(w,fields).unexpected)
    add(r,'EXTERIOR_WING_AUTHOR_FIELDS');
   else {
    if(!dirs.includes(w.side))add(r,'EXTERIOR_WING_SIDE_INVALID');
    if(!between(w.start,3,12)||!between(w.span,10,18)||
     !between(w.reach,6,9)||!between(w.roofY,8,9))
     add(r,'EXTERIOR_WING_DIMENSIONS_INVALID');
+   if(Object.hasOwn(w,'outline')&&
+    (!Array.isArray(w.outline)||w.outline.length!==3||
+     !between(w.reach,8,9)||w.outline.some(v=>!between(v,6,w.reach))||
+     Math.max(...w.outline)!==w.reach||
+     Math.min(...w.outline)>w.reach-2))
+    add(r,'EXTERIOR_WING_CONTOUR_INVALID');
    if(!safeProse(w.purpose))add(r,'EXTERIOR_WING_PURPOSE_INVALID');
    if(!author.spaces.some(x=>record(x)&&x.id===w.spaceId&&x.kind==='covered'))
     add(r,'EXTERIOR_WING_ROOM_NOT_COVERED');

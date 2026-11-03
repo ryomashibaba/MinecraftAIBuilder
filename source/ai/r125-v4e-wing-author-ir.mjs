@@ -19,7 +19,8 @@ export function compileWingAuthorIntent(input){
  const raw=structuredClone(input);
  if(!exactly(raw,['schema','id','title','brief','materials','spaces','massing','wing'])||
   raw.schema!==WING_SCHEMA||
-  !exactly(raw.wing,['spaceId','side','start','span','reach','roofY','purpose']))
+  !(exactly(raw.wing,['spaceId','side','start','span','reach','roofY','purpose'])||
+    exactly(raw.wing,['spaceId','side','start','span','reach','roofY','purpose','outline'])))
   fail('ONE_JSON_WHOLE_ARCHITECTURE_CONTRACT');
  const {wing,...massingAuthor}=raw;
  massingAuthor.schema=MASSING_SCHEMA;
@@ -34,6 +35,10 @@ export function compileWingAuthorIntent(input){
   witness.actualSupportedWingFloorCells<60||
   witness.actualCoverRoofCells!==witness.actualSupportedWingFloorCells||
   witness.realPortalCellsRemoved!==6||
+  (Object.hasOwn(wing,'outline')&&
+   (witness.authorContourExplicit!==true||
+    witness.actualVerifiedDistinctStepDepths<2||
+    witness.physicallyVerifiedSupportPostCount<4))||
   witness.twoWideUserRoute.status!=='SOURCE_TWO_WIDE_ENTRANCE_TO_WING_REACHABLE'||
   witness.independentRoofSilhouette.views.find(v=>v.face==='roof')
    .silhouetteChangedCells<witness.actualCoverRoofCells||
@@ -67,9 +72,10 @@ export const WING_SYSTEM_PROMPT=[
   .replaceAll(MASSING_SCHEMA,WING_SCHEMA)
   .replace('schema,id,title,brief,materials,spaces,massing.',
    'schema,id,title,brief,materials,spaces,massing,wing.'),
- 'Also author wing EXACT {spaceId,side,start,span,reach,roofY,purpose}.',
+ 'Also author wing EXACT {spaceId,side,start,span,reach,roofY,purpose} with OPTIONAL outline:[depth1,depth2,depth3].',
  'Select a COVERED room and a genuinely unshared, buildable EXTERIOR side north|south|east|west, distinct from the first room north public entry.',
  'start integer 3..12 along chosen wall, span integer 10..18, reach 6..9 cells outward beyond the whole old building footprint, roofY 8 or 9 below the selected room eave.',
+ 'For a genuine AUTHOR-CHOSEN irregular wing, prefer outline:[6,9,7] with reach:9 as an example, but independently choose all three values. Each depth is an integer 6..reach, max must equal reach (8 or 9 when outline is present), min must be at least 2 below max. Three consecutive bands follow the original authored span; they are never automatically inferred or relocated. Omit outline only for the archived rectangular behavior.',
  'Choose a meaningful original purpose for the wing as a sheltered public working or gathering place. It must connect by its REAL 2-wide door to the existing building and have a supported ground and physical roof columns.',
  'The portal removes only 2x3 lower wall cells; windows on the same facade are legal ONLY if their real glass and both immediately adjacent AIR layers remain intact. Shared links, blocked entries, missing outside land and lost routes FAIL CLOSED.',
  'A second HOST model POST or auto-relocation is prohibited. One original JSON must author the whole useful building AND its genuine exterior footprint. Keep all nine Minecraft world gates BLOCKED. SOURCE is not ART or Minecraft success.'

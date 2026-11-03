@@ -1,5 +1,13 @@
 # MinecraftAIBuilder — START HERE（新チャット・AI開発者の統一入口）
 
+## 2026-11-04 3区間AUTHOR外周輪郭／真B143の新しい研究
+
+- 非既定 `--authored-wing` の既存JSON（従来7キー・矩形）は完全な後方互換を保ちつつ、作者が選ぶ任意の `wing.outline:[depthA,depthB,depthC]` を受け付ける。3区間は元の用途室の面に沿って連続し、各区間は外側への実際の張り出し6〜9セルを決定する。最大値が `wing.reach` であり、最大と最小の差2以上、`reach` は8または9。HOSTは用途別スタイルや補修・移動・固定輪郭を追加しない。
+- 真のB143で各区間の支持床・屋根・4〜6本の連続支持柱・既存本入口／2幅新入口／窓ガラス内外AIR／用途室／動線を独立SOURCE検査し、不成立はfail-closeする。既存の矩形版SOURCE／原文SHA再現契約を維持。5用途の独立合成AUTHORの段状輪郭を同じ最大張出量の矩形対照と比較し、単なる寸法拡大ではないシルエット差を検査する。3Dと5方向／差分をActions成果物に出す。
+- 合成SOURCEとCIの合格は、実Qwenの初回実行・建築全体のART・Minecraft施工の合格ではない。箱型主体という美術的限界は残り、ARTはHOLD。main・Education成功経路・PR#128 Draft・9 BLOCKED・worldWrites0を維持。最新CIは都度確認。
+
+
+
 ## 2026-11-04 実ローカルQwen用の非既定1応答AUTHORウイング経路
 
 - `scripts/r125-v4d-local-architect.mjs --authored-wing` と既存隔離1クリック `scripts/r125-v4e-one-click-ranked-trial.cmd --wing` を追加。人間の要望→ローカル単発モデル1POST→完全AUTHOR JSON（用途・マス・外部翼）→本物のB143と実験的屋根外形・2幅SOURCE歩行監査→PRIVATE五方向/変更前後/3D→原文SHA再検証オフライン再診断という経路。旧既定・`--massing`/`--sectioned`不変更、リトライやクラウド有料API利用なし。

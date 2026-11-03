@@ -40,15 +40,64 @@ function twoWideRoute(compiled,design,entry,goal){
  return {status:'SOURCE_TWO_WIDE_ENTRANCE_TO_WING_REACHABLE',
   reachedPads:visited.size,minecraftWalk:'NOT_TESTED'};
 }
+
+/**
+ * Explicit AUTHOR 3-band perimeter. The host only maps the ordered authored
+ * reaches onto the selected wall; no chosen fallback, no style template.
+ * A missing outline keeps the exact archived rectangular-wing behavior.
+ */
+function authoredWingFootprint(node,wing,xAxis,far,wx,wz,sx,sz){
+ if(wing.outline===undefined)
+  return [{x:wx,z:wz,sx,sz,reach:wing.reach,band:0}];
+ const widths=[Math.floor(wing.span/3),Math.floor(wing.span/3)];
+ widths.push(wing.span-widths[0]-widths[1]);
+ let along=0;
+ return widths.map((len,band)=>{
+  const d=wing.outline[band];
+  const x=xAxis?(far?node.x+node.width:node.x-d):node.x+wing.start+along;
+  const z=xAxis?node.z+wing.start+along:(far?node.z+node.depth:node.z-d);
+  along+=len;
+  return {x,z,sx:xAxis?d:len,sz:xAxis?len:d,reach:d,band};
+ });
+}
+function authoredWingPosts(parts,xAxis,far,outlined){
+ if(!outlined){
+  const p=parts[0];
+  const farX=xAxis?(far?p.x+p.sx-2:p.x+1):null;
+  const farZ=xAxis?null:(far?p.z+p.sz-2:p.z+1);
+  return xAxis?[[farX,p.z+1],[farX,p.z+p.sz-2]]:
+   [[p.x+1,farZ],[p.x+p.sx-2,farZ]];
+ }
+ const positions=new Map();
+ for(const p of parts){
+  const nearFar=xAxis?(far?p.x+p.sx-2:p.x+1):
+   (far?p.z+p.sz-2:p.z+1);
+  const end=xAxis?p.z+p.sz-2:p.x+p.sx-2;
+  const start=xAxis?p.z+1:p.x+1;
+  for(const along of [start,end]){
+   const point=xAxis?[nearFar,along]:[along,nearFar];
+   positions.set(point.join(','),point);
+  }
+ }
+ if(positions.size<4)fail('NOT_ENOUGH_CONTOUR_POSTS');
+ return [...positions.values()];
+}
+
 export function compileAuthoredExteriorWing(originalAuthor,authoredMassing,authoredWing){
  const wing=structuredClone(authoredWing),author=structuredClone(originalAuthor);
- if(!exact(wing,['spaceId','side','start','span','reach','roofY','purpose'])||
+ const flatKeys=['spaceId','side','start','span','reach','roofY','purpose'];
+ const outlined=Object.hasOwn(wing??{},'outline');
+ if(!(exact(wing,flatKeys)||(outlined&&exact(wing,[...flatKeys,'outline'])))||
   typeof wing.spaceId!=='string'||
   !['north','south','east','west'].includes(wing.side)||
   !Number.isSafeInteger(wing.start)||wing.start<3||wing.start>12||
   !Number.isSafeInteger(wing.span)||wing.span<10||wing.span>18||
   !Number.isSafeInteger(wing.reach)||wing.reach<6||wing.reach>9||
   !Number.isSafeInteger(wing.roofY)||wing.roofY<8||wing.roofY>9||
+  (outlined&&(!Array.isArray(wing.outline)||wing.outline.length!==3||
+   wing.reach<8||wing.outline.some(x=>!Number.isSafeInteger(x)||x<6||x>wing.reach)||
+   Math.max(...wing.outline)!==wing.reach||
+   Math.min(...wing.outline)>wing.reach-2))||
   typeof wing.purpose!=='string'||wing.purpose.length<3||wing.purpose.length>150||
   /[\u0000-\u001f<>]/.test(wing.purpose))fail('AUTHOR_WING_CONTRACT');
  const base=compileRankedExteriorIntent(author);
@@ -81,10 +130,22 @@ export function compileAuthoredExteriorWing(originalAuthor,authoredMassing,autho
  const depth=Math.max(design0.bounds.depth,wz+sz+3);
  if(wx<1||wz<1||width>128||depth>128)
   fail('WING_OUTSIDE_B143_LOCAL_SITE');
+ const parts=authoredWingFootprint(node,wing,xAxis,far,wx,wz,sx,sz);
+ const footprint=new Set();
+ for(const part of parts)for(let x=part.x;x<part.x+part.sx;x++)
+  for(let z=part.z;z<part.z+part.sz;z++){
+   const key=x+','+z;
+   if(footprint.has(key))fail('AUTHOR_OUTLINE_BANDS_OVERLAP');
+   footprint.add(key);
+  }
+ const plannedFloorCells=parts.reduce((n,p)=>n+p.sx*p.sz,0);
+ if(plannedFloorCells!==footprint.size||plannedFloorCells<60)
+  fail('AUTHOR_OUTLINE_FOOTPRINT_TOO_SMALL');
  const old=new Map(prior.primitives.map(p=>[K(p[0],p[1],p[2]),p[3]]));
  // No host-chosen rerouting: the authored wing must occupy unbuilt local land.
- for(let x=wx;x<wx+sx;x++)for(let z=wz;z<wz+sz;z++)
-  for(let y=1;y<design0.bounds.height;y++)
+ for(const part of parts)for(let x=part.x;x<part.x+part.sx;x++)
+  for(let z=part.z;z<part.z+part.sz;z++)
+   for(let y=1;y<design0.bounds.height;y++)
    if(old.has(K(x,y,z)))fail('WING_SITE_OCCUPIED');
  const wallMat=MATERIALS.indexOf(base.plan.materials.wall);
  const removed=new Set();
@@ -94,13 +155,12 @@ export function compileAuthoredExteriorWing(originalAuthor,authoredMassing,autho
     const k=K(x,y,z);if(old.get(k)!==wallMat)fail('WING_DOOR_REQUIRES_REAL_WALL');
     removed.add(k);
    }
- const farX=xAxis?(far?wx+sx-2:wx+1):null;
- const farZ=xAxis?null:(far?wz+sz-2:wz+1);
- const posts=xAxis?[[farX,wz+1],[farX,wz+sz-2]]:
-  [[wx+1,farZ],[wx+sx-2,farZ]];
+ const posts=authoredWingPosts(parts,xAxis,far,outlined);
  const elements=[...design0.elements.map(e=>structuredClone(e)),
-  box('wing-real-public-floor','add',[wx,1,wz],[sx,1,sz],base.plan.materials.public),
-  box('wing-real-cover-roof','add',[wx,wing.roofY,wz],[sx,1,sz],base.plan.materials.roof),
+  ...parts.map((p,i)=>box(outlined?'wing-floor-'+i:'wing-real-public-floor','add',
+   [p.x,1,p.z],[p.sx,1,p.sz],base.plan.materials.public)),
+  ...parts.map((p,i)=>box(outlined?'wing-roof-'+i:'wing-real-cover-roof','add',
+   [p.x,wing.roofY,p.z],[p.sx,1,p.sz],base.plan.materials.roof)),
   ...posts.map(([x,z],i)=>box('wing-physical-post-'+i,'add',
    [x,2,z],[1,wing.roofY-2,1],base.plan.materials.wall)),
   box('wing-authored-two-wide-door','cut',portal,portalSize)];
@@ -113,10 +173,23 @@ export function compileAuthoredExteriorWing(originalAuthor,authoredMassing,autho
  const floorMat=MATERIALS.indexOf(base.plan.materials.public);
  const roofMat=MATERIALS.indexOf(base.plan.materials.roof);
  let floorCells=0,roofCells=0,postCells=0;
+ for(const part of parts)for(let x=part.x;x<part.x+part.sx;x++)
+  for(let z=part.z;z<part.z+part.sz;z++){
+   if(current.get(K(x,1,z))!==floorMat||
+    current.get(K(x,wing.roofY,z))!==roofMat)
+    fail('REAL_CONTOUR_FLOOR_OR_ROOF_MISSING');
+   floorCells++;roofCells++;
+  }
+ if(floorCells!==plannedFloorCells||roofCells!==plannedFloorCells)
+  fail('CONTOUR_AREA_DRIFT');
+ // A step is genuine only if the true B143 has NO extra new roof/floor
+ // anywhere in the authored max-reach bounding rectangle.
  for(let x=wx;x<wx+sx;x++)for(let z=wz;z<wz+sz;z++){
-  if(current.get(K(x,1,z))!==floorMat||
-   current.get(K(x,wing.roofY,z))!==roofMat)fail('REAL_WING_SUPPORT_OR_SHADE_MISSING');
-  floorCells++;roofCells++;
+  if(footprint.has(x+','+z))continue;
+  for(const y of [1,wing.roofY]){
+   const key=K(x,y,z);
+   if(!old.has(key)&&current.has(key))fail('CONTOUR_SURFACE_LEAK');
+  }
  }
  for(const [x,z] of posts)for(let y=2;y<wing.roofY;y++){
   if(current.get(K(x,y,z))!==wallMat)fail('WING_PHYSICAL_POST_MISSING');
@@ -145,7 +218,14 @@ export function compileAuthoredExteriorWing(originalAuthor,authoredMassing,autho
   routes.featureAccess.some(z=>!z.reachableFromEntrance))
   fail('EXISTING_ZONE_OR_FUNCTION_ROUTE_DAMAGED');
  const from=[entrance.origin[0],entrance.origin[2]+1];
- const to=[wx+Math.floor((sx-2)/2),wz+Math.floor((sz-2)/2)];
+ const middle=outlined?wing.outline[1]:wing.reach;
+ const along=wing.start+Math.floor((wing.span-2)/2);
+ const to=outlined?(xAxis?
+  [(far?node.x+node.width:node.x-middle)+Math.floor((middle-2)/2),
+   node.z+along]:
+  [node.x+along,
+   (far?node.z+node.depth:node.z-middle)+Math.floor((middle-2)/2)]):
+  [wx+Math.floor((sx-2)/2),wz+Math.floor((sz-2)/2)];
  const walk=twoWideRoute(compiled,design,from,to);
  const silhouette=auditB143ProjectedVisibility(prior.primitives,compiled.primitives);
  if(silhouette.views.find(v=>v.face==='roof').silhouetteChangedCells<floorCells)
@@ -162,6 +242,12 @@ export function compileAuthoredExteriorWing(originalAuthor,authoredMassing,autho
   sourceWingWitness:{
    actualSupportedWingFloorCells:floorCells,actualCoverRoofCells:roofCells,
    actualConnectedPostCells:postCells,realPortalCellsRemoved:removed.size,
+   authorContourExplicit:outlined,
+   authoredThreeBandDepths:outlined?wing.outline.slice():null,
+   actualThreeBandPublicFloorCells:outlined?
+    parts.map(p=>p.sx*p.sz):null,
+   actualVerifiedDistinctStepDepths:outlined?new Set(wing.outline).size:0,
+   physicallyVerifiedSupportPostCount:posts.length,
    twoWideUserRoute:walk,originalGlazingUnchanged:glazing,
    independentRoofSilhouette: silhouette,
    fullyOutsideOldBuiltFootprint:true,authorPurpose:wing.purpose,
