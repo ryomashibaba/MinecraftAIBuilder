@@ -28,3 +28,13 @@ OpenCode公式 https://opencode.ai/v2/docs/console/models は、`glm-5.3-flash-f
 - `scripts/opencode-v2-failure-diagnostic.py` を追加。以前のPRIVATE回答文字列を共有せず固定カテゴリに分類し、`run --help` と `--version` を照合。**新規モデル呼出0、Git変更0、Minecraft変更0**。過去に保存していない stderr を復元したと偽装しない。
 - `scripts/opencode-v2-free-public-audit.py` の再発防止として、モデル実行開始時に状態を `HOLD` に落とし、CLI戻り値と stderr の**固定カテゴリ・長さ・ハッシュだけ**を新レシートへ保存するよう修正した。原文 stderr や資格情報は共有禁止。
 - 優先は事後診断→原因の切り分け。**同一失敗を無闇に再試行しない**。無料のまま正常動作・課金0の根拠が取れない場合はOpenCodeを主経路に採用しない。旧main、通常研究、Draft PR #128、Qwen PRIVATE、Education成功経路は保持する。
+
+## 2026-11-03 最終トリアージ：追加モデル実行はHOLD、通常開発優先
+- ユーザーが共有した二回目の実行レシート：`status=HOLD`、`FREE_MODEL_RUN_FAILED_OR_UNAVAILABLE`、`catalog_model_listed=true`、`local_run_flags_supported=true`、`cli_exit_code=1`、`response_chars=0`、`stderr_chars=126`、`cli_failure_category=UNCLASSIFIED_CLI_FAILURE`。ネットワーク実リクエスト数とアカウント請求状態は未観測。
+- 本試行のCLIコマンドは合計2回実行済みで、推論の正常回答は0件。**モデルが低性能であるという証拠ではない。**
+- さらにユーザーの読み取り専用PC診断：`debug config`終了0、JSONとして解釈可能、`debug agents`終了0、`mab-auditor`検出、`expected_model_configured=false`、以前のログ末尾300行に認証/クォータ両語句有り、設定エラー語句なし。**全体設定 `config.model` の単一項目確認と個別エージェント設定を混同しない**。
+- 過去300行ログは対象実行時刻（2026-11-03T14:10:05Z付近）と `run=` IDで相関確認されていない。ログの認証/クォータ語句を今回の失敗原因と断定しない。エラーstderr原文は以前の実行で保存していないため、この証拠から原因特定は不可。
+- OpenCode公式の設定仕様：https://opencode.ai/v2/docs/config/ 、Agents：https://opencode.ai/v2/docs/agents/ 、ログrun IDでの追跡：https://opencode.ai/v2/docs/troubleshooting/ 。
+- **対応方針：新しいモデル試行、OpenCodeのインストール更新、課金、認証設定の破壊的変更、通常研究ブランチの書込を保留。** この有料API非依存の代替経路は`FREE_PROVIDER_EXECUTION_HOLD`であり主戦力として未認定。
+- 事後調査を再開するなら、本人のローカルログを外部へ送らず、当該実行の`run` IDと時刻に一致したエラーカテゴリのみ抽出する。あるいは別途アカウントの無課金接続資格を確認。課金設定変更やログ原文公開を先に要求しない。
+- MinecraftAIBuilderのR125安定経路・実教育施工成功・V4Dの既存HOLD・建築美術ゲートの継続開発を最優先し、Browser Ink TPSも通常開発継続。Work事前承認制と全原本保護は不変。
