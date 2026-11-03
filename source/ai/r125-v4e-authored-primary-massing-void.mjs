@@ -151,7 +151,8 @@ export function compileAuthoredPrimaryMassingVoid(originalAuthor,authoredVoid){
  for(let x=entrance.origin[0];x<entrance.origin[0]+entrance.size[0];x++)
   for(let z=entrance.origin[2];z<entrance.origin[2]+entrance.size[2];z++)
    for(let y=2;y<Math.min(design0.bounds.height,entrance.origin[1]+entrance.size[1]);y++)
-    if(vox.has(k(x,y,z)))fail('ORIGINAL_ENTRANCE_BLOCKED');
+    if(vox.get(k(x,y,z))!==oldMap.get(k(x,y,z)))
+     fail('ORIGINAL_ENTRANCE_CHANGED');
  const routes=auditR125SourceRoutes({
   schema:'minecraftaibuilder-r125-plan-to-b143-result-v1',
   design,compiled:final,program:base.b143.program,
