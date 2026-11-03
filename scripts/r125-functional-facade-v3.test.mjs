@@ -100,7 +100,7 @@ test('an interior/shared facade is NOT a real exterior window',()=>{
 });
 test('too-large furniture or glazing fails instead of moving a model-authored element',()=>{
  const p=sample[1],r=roof(p),intent=fixtureIntent(p,'south',1);
- const big=structuredClone(intent);big.rooms[0].fixture.offset=4;
+ const big=structuredClone(intent);big.rooms[1].fixture.offset=4;
  assert.throws(()=>compileFunctionalFacadeV3({
   originalPlan:p,envelopeIntent:r,functionalIntent:big}),
   /FIXTURE_TOO_LONG|FIXTURE_TOO_WIDE/);
