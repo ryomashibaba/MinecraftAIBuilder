@@ -95,3 +95,58 @@ test('never accept altered model raw whose SHA does not match stored model evide
   /RAW_INTEGRITY_station/);
  assert.equal(fs.existsSync(out),false);
 });
+
+test('saved depth-6 station-like plan is replayed as a NEW offline SOURCE 3D, preserving original historical HOLD',t=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'r125-station-replay-'));
+ t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
+ const study=path.join(root,'study');fs.mkdirSync(study);
+ const rows=[];
+ for(const [i,g] of GENRES.entries()){
+  const original=plan(i);
+  if(i===4)original.rooms[1].depth=6;
+  const raw=JSON.stringify(original);
+  const folder=path.join(study,'cases',g.id);
+  fs.mkdirSync(folder,{recursive:true});
+  const previous=i<4?compileSpatialComposition(original):null;
+  const row={id:g.id,genre:g.genre,status:i<4?
+   'SOURCE_AND_3D_READY_ART_HOLD':'HOLD_MODEL_IR_INVALID',
+   rawSha256:sha(raw),geometrySha256:previous?.geometrySha256??null};
+  write(folder,'MODEL_RESPONSE_ORIGINAL.txt',raw);
+  write(folder,'CASE_REPORT.json',row);
+  rows.push(row);
+ }
+ write(study,'CROSS_GENRE_REPORT.json',{
+  schema:'r125-local-cross-genre-study-v1',model:'qwen3:14b',
+  testInjectionPresent:false,modelCalls:5,cases:rows,
+  status:'HOLD_GENRE_BATCH_PARTIAL',analysis:{sourceCompiled:4}
+ });
+ const output=path.join(root,'diagnostic');
+ const result=diagnoseSavedGenreBatch({studyDir:study,outDir:output});
+ assert.equal(result.originalCompiledCount,4);
+ assert.equal(result.reInferenceCalls,0);
+ assert.equal(result.worldWrites,0);
+ assert.equal(result.recoveredSourceCandidates.length,1);
+ assert.equal(result.recoveredSourceCandidates[0].id,'station');
+ assert.equal(result.recoveredSourceCandidates[0].sourceRoutes,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(result.cases[4].originalStatus,'HOLD_MODEL_IR_INVALID');
+ assert.equal(result.cases[4].rawIntegrity,'SHA256_MATCHED');
+ assert.equal(result.cases[4].sourceReplay,
+  'OFFLINE_SOURCE_NOW_COMPILED_NOT_ORIGINAL_QWEN_RETRY');
+ assert(result.cases.slice(0,4).every(c=>c.sourceReplay==='MATCHED_SAVED_GEOMETRY'));
+ const recovered=path.join(output,'recovered-station');
+ assert(fs.existsSync(path.join(recovered,'index.html')));
+ assert(fs.existsSync(path.join(recovered,'B143_SOURCE.json')));
+ assert(fs.existsSync(path.join(recovered,'SOURCE_ROUTES.json')));
+ assert(!fs.existsSync(path.join(output,'MAKECODE_EDUCATION.ts')));
+ assert.equal(fs.readFileSync(path.join(study,'cases','station',
+  'MODEL_RESPONSE_ORIGINAL.txt'),'utf8'),JSON.stringify({...plan(4),
+   rooms:[plan(4).rooms[0],{...plan(4).rooms[1],depth:6}]}));
+});
+test('shared diagnostic field contract permits minimum six but rejects five without silent coercion',()=>{
+ const valid=plan(4); valid.rooms[1].depth=6;
+ assert.deepEqual(inspectSpatialPlanFields(valid),[]);
+ const invalid=structuredClone(valid);invalid.rooms[1].depth=5;
+ assert.deepEqual(inspectSpatialPlanFields(invalid)
+  .filter(x=>x.code==='DIMENSION_OUT_OF_RANGE')
+  .map(x=>x.path),['plan.rooms[1].depth']);
+});
