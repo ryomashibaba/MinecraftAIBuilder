@@ -9,6 +9,7 @@
 - **ART HOLD全5件維持**。画像では用途による開口・屋根の違いはあるが、まだ共通の直方体集合感が強く、高品質な住宅／店舗／研究施設／美術館／駅舎としての全体構成・本格的な用途表現は不十分。SOURCE成立をARTや実Minecraft施工の承認に昇格させない。元ワールド書込0、9 BLOCKED、BuildPlan空。
 - ユーザー要望：**今後は5枚のスクリーンショット撮影を原則要求しない。** `scripts/r125-five-genre-source-art-overview.mjs` は真正B143実ボクセルから全5ジャンル×凍結屋根/V3×正面/側面/俯瞰の**同一縮尺のPNG一枚**を直接生成。Node標準機能のみでPNGを出力し、**非秘密のSOURCE形状SHA・状況をPNG内部メタデータに埋め込む**。誇張された建築イラストは生成しない。
 - **現在の実行結果を再使用**：`scripts/r125-v3-export-saved-overview.mjs` が保存済みの旧V1/V2/V3と今回のHOME回復回答原文を全部SHA照合し、追加モデル呼出0で新しい私人フォルダに `SOURCE_ART_OVERVIEW.png`、`OVERVIEW_AUDIT_REPORT.json`、`index.html` を作る。ユーザー用の既存安全PowerShellランチャーに `-UseCase CrossGenre -ExportOverviewLatest` を追加し、提出された既存の5/5レポートSHA `0eb4f025cad49ebf59f10a04aa9d1352fe5d0fa60ba8869a032063974f815cce` に一致したデータだけ処理。原本の再推論・上書きなし。
+- 5ジャンルを新規推論する通常の `r125-five-genre-real-functions-pilot.mjs` でも、成功数に応じて凍結屋根と新機能を同一縮尺の1枚の `SOURCE_ART_OVERVIEW.png` として自動保存する。**一部HOLDを5/5成功と偽らず**、各元モデルの原文は保存場所から外に出さない。
 - 今後HOMEだけの再検証を改めて実行した場合も `r125-v3-failed-only-home-recovery.mjs` がPNGを**自動保存**する。ユーザーはスクリーンショットではなく、この一枚のPNGをアップロードすればARTを横断評価できる。詳しい故障診断が必要な場合だけ監査JSONを追加で提出してもらう。今のユーザーには**モデルを再実行せず、保存済み5/5を一枚のPNGへ書き出す操作のみ**提示する。
 - 独立PNG書き込みはテスト画像を使ってPNG構造と埋込メタデータをローカルで読み取れた。新しいGitHub Actions回帰と全SOURCEチェーンの実Windows稼働は**まだ正式PASS未確認**。成功を捏造しない。main / Draft PR #128 / R125 Education実機成功 / 私人Qwen原文 / Work事前承認を保護。
 
