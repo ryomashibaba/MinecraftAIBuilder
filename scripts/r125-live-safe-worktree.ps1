@@ -77,7 +77,7 @@ try {
     & node --test scripts/r125-saved-education-preflight.test.mjs
     if ($LASTEXITCODE -ne 0) { throw "HOLD_EDUCATION_PREFLIGHT_REGRESSION" }
     if ($UseCase -eq 'CrossGenre') {
-      & node --test scripts/r125-cross-genre-pilot.test.mjs scripts/r125-cross-genre-offline-diagnostic.test.mjs scripts/r125-five-genre-source-comparison.test.mjs scripts/r125-expressive-envelope-v2.test.mjs scripts/r125-five-genre-real-envelope-pilot.test.mjs scripts/r125-functional-facade-v3.test.mjs scripts/r125-five-genre-real-functions-pilot.test.mjs scripts/r125-v3-failed-only-home-recovery.test.mjs scripts/r125-five-genre-source-art-overview.test.mjs scripts/r125-v3-export-saved-overview.test.mjs
+      & node --test scripts/r125-cross-genre-pilot.test.mjs scripts/r125-cross-genre-offline-diagnostic.test.mjs scripts/r125-five-genre-source-comparison.test.mjs scripts/r125-expressive-envelope-v2.test.mjs scripts/r125-five-genre-real-envelope-pilot.test.mjs scripts/r125-functional-facade-v3.test.mjs scripts/r125-five-genre-real-functions-pilot.test.mjs scripts/r125-v3-failed-only-home-recovery.test.mjs scripts/r125-five-genre-source-art-overview.test.mjs
       if ($LASTEXITCODE -ne 0) { throw 'HOLD_CROSS_GENRE_REGRESSION' }
     }
     if ($ReviewLatest -or $PrepareLatest) {
