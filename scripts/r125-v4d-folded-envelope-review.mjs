@@ -36,7 +36,7 @@ function elevationSvg(a,b){
    '" fill="'+(color[MATERIALS[cell.mat]]||'#ffabab')+'"/>');
   }
   for(const cell of front.values()){
-   const x=x0+8+cell.x*w,y=688-cell.y*w;
+   const x=x0+8+cell.x*w,y=704-cell.y*4;
    if(x+w>x0+566||y<570)fail('ELEVATION_CLIPPED');
    parts.push('<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+w+
    '" fill="'+(color[MATERIALS[cell.mat]]||'#ffabab')+'"/>');
