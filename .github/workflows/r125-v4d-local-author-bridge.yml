@@ -8,6 +8,8 @@ on:
       - 'scripts/r125-v4d-compact-model-fixture.mjs'
       - 'scripts/r125-v4d-relative-author-synthetic.mjs'
       - 'scripts/r125-v4d-local-architect.mjs'
+      - 'scripts/r125-v4d-replay-private.mjs'
+      - 'scripts/r125-v4d-replay-private.test.mjs'
       - 'scripts/r125-v4d-shareable-receipt.mjs'
       - 'scripts/r125-v4d-local-one-shot.ps1'
       - 'scripts/r125-v4d-local-architect.test.mjs'
@@ -33,11 +35,15 @@ jobs:
           node --check source/ai/r125-v4d-compact-model-ir.mjs
           node --check scripts/r125-v4d-compact-model-fixture.mjs
           node --check scripts/r125-v4d-local-architect.mjs
+          node --check scripts/r125-v4d-replay-private.mjs
+          node --check scripts/r125-v4d-replay-private.test.mjs
           node --check scripts/r125-v4d-shareable-receipt.mjs
           node --check scripts/r125-v4d-relative-author-synthetic.mjs
           node --check scripts/r125-v4d-local-architect.test.mjs
       - name: Prove fail-closed synthetic authorship and actual B143 conversion through injected offline transport
-        run: node --test scripts/r125-v4d-local-architect.test.mjs
+        run: |
+          node --test scripts/r125-v4d-local-architect.test.mjs
+          node --test scripts/r125-v4d-replay-private.test.mjs
       - name: Record strong non-promotion boundary
         run: |
           echo '## V4D compact real-model bridge — CI only' >> "$GITHUB_STEP_SUMMARY"
@@ -67,6 +73,16 @@ jobs:
           }
           if (-not $beforeExists -and (Test-Path -LiteralPath $private)) {
             throw "V4D_WINDOWS_CHECK_ONLY_CREATED_PRIVATE_FILES"
+          }
+          if ($output -notcontains "RUN_MODE=ONE_LOCAL_MODEL_POST_MAX") {
+            throw "V4D_WINDOWS_DEFAULT_MODEL_MODE_DRIFT"
+          }
+          $replayCheck = & .\scripts\r125-v4d-local-one-shot.ps1 -CheckOnly -ReplayStudy '__NO_REAL_STUDY_OPENED__'
+          if ($replayCheck -notcontains "RUN_MODE=OFFLINE_REPLAY") {
+            throw "V4D_WINDOWS_REPLAY_CHECK_ONLY_CONTRACT_MISSING"
+          }
+          if (-not $beforeExists -and (Test-Path -LiteralPath $private)) {
+            throw "V4D_WINDOWS_REPLAY_CHECK_ONLY_CREATED_PRIVATE_FILES"
           }
           if ($output -notcontains "AUTHOR_MODE=COMPACT") {
             throw "V4D_WINDOWS_DEFAULT_MODE_DRIFT"

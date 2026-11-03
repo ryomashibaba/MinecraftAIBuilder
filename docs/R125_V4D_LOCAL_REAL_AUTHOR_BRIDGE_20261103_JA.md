@@ -89,3 +89,24 @@ node .\scripts\r125-v4d-local-architect.mjs --compact --model 'qwen3:14b' --out 
 - 修正コミット [496c210c](https://github.com/ryomashibaba/MinecraftAIBuilder/commit/496c210cc3a2f7321217e834de566f21bdc466ac) はCI側の `-notmatch` を `-notcontains` に変更。最終 [Actions #41624377954](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41624377954) は**completed/success**。LinuxのNode **17 tests / 17 pass / 0 fail**、Windows-latestのPowerShell **-CheckOnly PASS**。このWindows検査はOllama POST 0、PRIVATEフォルダ作成0、Minecraft世界書込0。
 - `REVIEW_SUMMARY_SHAREABLE.json` は元回答・プロンプト・ローカルパス・APIエンドポイント・エラー全文を含まない。成功SOURCE候補と模擬モデルの区別、9 BLOCKED/WorldWrites0を保持する。人間ART・実Minecraft歩行・Mac 8GB/2B実績は全てNOT_TESTED/NOT_REVIEWED。
 - PCの安全な隔離研究ブランチが準備できた場合だけ、PowerShellから `& .\scripts\r125-v4d-local-one-shot.ps1` を1回実行できる設計。モデルの原文はローカルPRIVATEに残し、自動アップロードや自動再試行はしない。今回のチャットでは**本物のQwen/Gemma推論0回、Minecraft施工0回**。
+
+## 2026-11-03 追加：既存PRIVATEモデル原文を0 POSTでSOURCE再現する（新CI未検証）
+
+最後の一回モデル試験でモデルが失敗した場合、モデルを再試行してコストを増やすよりも、**正確に保存された元JSON原文を、バージョン付きSOURCEコンパイラで再生し、当初の結果と比較する**必要がある。モデルの応答が不正だったのか、建築グラフがSOURCEに適合しなかったのか、後日のコード変更で結果が異なったのかを分離する。
+
+`scripts/r125-v4d-replay-private.mjs` は `--study <PRIVATE研究フォルダ> --out <存在しない新規PRIVATEフォルダ>` を受け取り、元 `MODEL_RESPONSE_ORIGINAL.txt` のSHA-256を当初 `V4D_LOCAL_AUTHOR_REPORT.json` の原本SHAと照合。少しでも原文が変更されていれば即時HOLD。原本 `LOCAL_REQUEST.json` に保存された厳密な契約に従い、以前の `--compact` / 詳細モードを明示的に選択して既存AUTHOR→B143のSOURCEコンパイラで再検証する。**HTTPやOllama、Minecraftの呼び出しは実装しない**。
+
+合否の安全条件：
+- 原試験のSOURCEと最終形状SHAの両方が正しく一致した場合のみ、元の成功SOURCEを**オフラインで再現できた**とする。合成モデル（testInjectionPresent=true）は `HOLD_TEST_DOUBLE_REPLAY_ONLY` であり、実LLMの成果として数えない。
+- 元の応答が不正JSON、`finish_reason=length`、原文未保存、SOURCE不合格だった場合は、モデルを再呼び出しせずHOLD。過去に不合格だった原文を新コードでコンパイルできても `HOLD_PREVIOUSLY_FAILED_BUT_CURRENT_COMPILER_ACCEPTS` にして正式合格へ変更しない。
+- 元のSHAと再コンパイル結果が不一致なら `HOLD_RECOMPILED_GEOMETRY_OR_SOURCE_CHANGED`。何が変わったかを確認する対象であり、制作品質の向上認定ではない。
+- 元のPRIVATEディレクトリは読み取り専用でアクセスし、レポート・真のSOURCE・ギャラリーは**新規フォルダ**だけに保存する。元回答、ユーザープロンプト、パス、秘匿エラー全文は新フォルダや共有用 `REPLAY_SHAREABLE_STATUS.json` に複製しない。
+- SOURCE再現成功でも人間ART、建築用途評価、実Minecraft歩行、8GB級Mac/2B実証は未認定。NOT_PREPARED、9 BLOCKED、BuildPlan空、WorldWrites0は不変。
+
+Windowsの安全な研究作業コピーからは、必要な時だけ以下のように前回試験フォルダを指定して**モデルを呼ばない**再現ができる：
+
+```powershell
+& .\scripts\r125-v4d-local-one-shot.ps1 -ReplayStudy "$env:LOCALAPPDATA\MinecraftAIBuilder\PrivateModelStudies\V4D_前回試験フォルダ名"
+```
+
+新CIは真正B143同一SHA再現と、SHA改ざん・途中切れ・未設置モデル・不正AUTHOR接続・SOURCEドリフト・シンボリックリンク入力・上書きの負例、およびWindows `-CheckOnly -ReplayStudy` の推論0/出力0の契約を検証する。CIの模擬元回答を実Qwen/Gemma原文と混同しない。

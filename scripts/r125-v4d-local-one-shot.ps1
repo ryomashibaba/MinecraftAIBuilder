@@ -13,7 +13,8 @@ param(
   [string]$Model = 'qwen3:14b',
   [string]$Prompt = 'Design an original small civic learning center with a functional arrival room, an independent making space and a sheltered open-air public courtyard.',
   [switch]$Detailed,
-  [switch]$CheckOnly
+  [switch]$CheckOnly,
+  [string]$ReplayStudy = ''
 )
 
 $ErrorActionPreference = 'Stop'
@@ -59,6 +60,7 @@ if ($CheckOnly) {
   Write-Output 'CHECK_ONLY_SAFE_NO_MODEL_CALL_NO_WORLD_WRITE'
   Write-Output ('RESEARCH_HEAD=' + $gitHead.Trim())
   Write-Output ('AUTHOR_MODE=' + $(if ($Detailed) { 'DETAILED' } else { 'COMPACT' }))
+  Write-Output ('RUN_MODE=' + $(if ($ReplayStudy) { 'OFFLINE_REPLAY' } else { 'ONE_LOCAL_MODEL_POST_MAX' }))
   return
 }
 
@@ -74,6 +76,33 @@ $studyName = 'V4D_' + (Get-Date -Format 'yyyyMMdd_HHmmss_fff') + '_' +
   [Guid]::NewGuid().ToString('N').Substring(0, 8)
 $out = Join-Path $privateRoot $studyName
 if (Test-Path -LiteralPath $out) { throw 'V4D_PRECHECK_OUTPUT_COLLISION' }
+
+if ($ReplayStudy) {
+  $replayRunner = Join-Path $repo 'scripts\r125-v4d-replay-private.mjs'
+  if (-not (Test-Path -LiteralPath $replayRunner -PathType Leaf)) {
+    throw 'V4D_REPLAY_RUNNER_MISSING'
+  }
+  Write-Output ('V4D_OFFLINE_REPLAY_START - repo commit ' + $gitHead.Trim())
+  & $nodeTool.Source $replayRunner '--study' $ReplayStudy '--out' $out
+  $replayExit = $LASTEXITCODE
+  $receiptFile = Join-Path $out 'REPLAY_SHAREABLE_STATUS.json'
+  if (-not (Test-Path -LiteralPath $receiptFile -PathType Leaf)) {
+    throw 'V4D_REPLAY_NO_STATUS: preserve original source; no model calls.'
+  }
+  $receipt = Get-Content -LiteralPath $receiptFile -Raw | ConvertFrom-Json
+  if ($receipt.worldWrites -ne 0 -or
+      $receipt.schema -ne 'minecraftaibuilder-v4d-offline-replay-minimal-share-v1' -or
+      $receipt.additionalModelCalls -ne 0) {
+    throw 'V4D_REPLAY_STATUS_SAFETY_HOLD'
+  }
+  Write-Output ('V4D_REPLAY_STATUS=' + $receipt.replayStatus)
+  Write-Output ('SHAREABLE_SUMMARY=' + $receiptFile)
+  Write-Output 'ORIGINAL_MODEL_TEXT_REMAINED_PRIVATE. No model or world call.'
+  if ($replayExit -ne 0) {
+    throw 'V4D_OFFLINE_REPLAY_HOLD: share only REPLAY_SHAREABLE_STATUS.json if useful.'
+  }
+  return
+}
 
 $argsForNode = @($runner, '--model', $Model, '--out', $out, '--prompt', $Prompt)
 if (-not $Detailed) { $argsForNode += '--compact' }
