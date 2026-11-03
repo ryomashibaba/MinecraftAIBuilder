@@ -1,3 +1,13 @@
+# MinecraftAIBuilder — 開発再開の最新正本案内（2026-11-03）
+
+**固定入口：[ルートSTART_HERE](../START_HERE.md) → [2026-11-03完全統合引き継ぎ](MINECRAFT_AI_BUILDER_COMPLETE_HANDOFF_20261103_V4D_JA.md)。** 以下の古い2026-11-02以前の工程ログは歴史として残し、現在地・次作業の優先順位は上記最新版で更新する。現PRはDraft #128、研究ブランチ`feature/b198zr1-protected-architectural-revision`。最新HEADは常にGitHubから再取得する。
+
+- 直近V4C：実B143 SOURCE合成3/3 PASS、CI [#41596939516](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41596939516) SUCCESS、ART 3/3 REJECT。新実Qwen V4C推論0、ワールド書込0。次はV4Dの作者所有の主輪郭・高さの主従・半屋外公共空間の自由度を検証。旧R125/保存Qwen/Education実機成功を守る。
+- 上位の[固定憲章](AI_PROJECT_CHARTER_JA.md)・[戦略v2](PROJECT_STRATEGY_V2_JA.md)を維持。main改変・PR Ready/Merge/Close・凍結原本変更・無断Work/有料APIは禁止。技術未準備の施工禁止、9 BLOCKED/BuildPlan空を維持。
+- この案内だけで「MVP完成」「美術合格」「世界施工済み」を主張しない。実モデル/合成/人間ART/Minecraft実機を別々に記録する。
+
+---
+
 ## 2026-11-02 GitHub固定入口・帰宅後のPC実推論再開準備
 
 - 最新の固定入口としてルート [START_HERE.md](../START_HERE.md) を作成し、[完全統合引き継ぎ](MINECRAFT_AI_BUILDER_COMPLETE_HANDOFF_20261102_JA.md)へ接続。将来の新チャットは短文1つでGitHubの研究ブランチ・憲章・戦略・原本・現状・失敗を再取得する。毎日同じ長文/ZIPを要求しない。
