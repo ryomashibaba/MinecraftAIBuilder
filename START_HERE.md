@@ -2,6 +2,12 @@
 
 **2026-11-02 JST 更新。長文プロンプト・ZIP交換なしで、GitHub正本を読み込んで既存開発を継続する。**
 
+## 2026-11-03 方針の効率化：局所修正ではなく全体建築能力
+
+- ユーザー提供の新店舗は **実Qwen由来SOURCE 897セル／2室到達PASS／Minecraft施工未実施／ART HOLD**。従来R125の固定二分割と限定的な形状表現がボトルネック。窓・小屋根の局所修正を繰り返さない。
+- **新研究経路**：`source/ai/r125-spatial-composition.mjs` は意味的な2〜5室の接続関係・相対配置・各室高さから真正B143の外形と入口・床・壁・開口を編成。独立の3合成配置をSOURCE回帰で検査済み。R125専用 Actions [#41557614763](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41557614763) **SUCCESS**。**まだ実Qwenの新形式出力／美術／Minecraft施工は未実証**。
+- 目標は住宅・店舗・研究施設で、実Qwenによる独自の建物全体構成→真正3D→人間ART→安全なEducation試験施工へ進むこと。旧R125の成功経路・凍結原本・main・Draft PR #128を保護し、新形式を成功と偽って主経路へ昇格させない。詳細：[全体構成方針と新研究](docs/R125_WHOLE_BUILDING_SPATIAL_COMPOSITION_20261103_JA.md)。
+
 > **最初に行うこと**：このファイル → [完全統合引き継ぎ](docs/MINECRAFT_AI_BUILDER_COMPLETE_HANDOFF_20261102_JA.md) → [固定憲章](docs/AI_PROJECT_CHARTER_JA.md) → [正式戦略](docs/PROJECT_STRATEGY_V2_JA.md) → [最短MVP](docs/R125_THIN_VERTICAL_SLICE_PLAN_JA.md) → [時系列の詳細な研究・失敗記録](docs/AI_RESTART_JA.md) を読む。指示の優先順位は「ユーザーの最新指示／固定憲章と戦略 ＞ 実コードと実CI ＞ 履歴文書の過去時点の記述」。
 
 ## 2026-11-02 23時台：**実Qwen→Education施工→2室実歩行**まで到達
