@@ -377,3 +377,45 @@ test('V4E walking passage keeps SOUTH authored corners, refuses blocked/shared o
   spaceId:'welcome',corner:'NW',recessDepth:6
  }),/R125_V4E_SECTION_RECESS_ON_SHARED_WALL/);
 });
+
+
+test('author-owned PRIMARY massing removes real roof and building volume while preserving program and safe World0',async()=>{
+ const {compileAuthoredPrimaryMassingVoid}
+  =await import('../source/ai/r125-v4e-authored-primary-massing-void.mjs');
+ const {syntheticFiveGenreAuthorCases}
+  =await import('./r125-v4e-cross-genre-source-study.mjs');
+ const samples=syntheticFiveGenreAuthorCases();
+ const frozen=structuredClone(samples);
+ const cuts=samples.map(s=>compileAuthoredPrimaryMassingVoid(s.source,{
+  spaceId:s.authoredSection.spaceId,corner:s.authoredSection.corner,
+  cutWidth:7,cutDepth:7
+ }));
+ assert.equal(cuts.length,5);
+ for(const cut of cuts){
+  assert.notEqual(cut.baselineGeometrySha256,cut.finalGeometrySha256);
+  assert(cut.sourceMassingWitness.removedOriginalRoofVoxels>=20);
+  assert.equal(cut.sourceMassingWitness.genuinelyOpenSkyFloorCells,49);
+  assert(cut.sourceMassingWitness.newPhysicalFacadeVoxels>50);
+  assert(cut.sourceMassingWitness.retainedOriginalRoofVoxels>20);
+  assert(cut.sourceMassingWitness.protectedFixtureVoxels>0);
+  assert.equal(cut.sourceMassingWitness.originalGlassAndBothAirLayers.verifiedPanelGlassCells,36);
+  assert(cut.sourceMassingWitness.originalEntranceToOpenSky.twoByTwoSourcePadsReached>10);
+  assert.equal(cut.sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert.equal(cut.architectureQuality,'ART_HOLD');
+  assert.equal(cut.realModel,'NOT_TESTED');
+  assert.equal(cut.worldWrites,0);
+  assert.deepEqual(cut.gates,Array(9).fill('BLOCKED'));
+  assert.deepEqual(cut.BuildPlan.operations,[]);
+ }
+ assert.deepEqual(samples,frozen);
+ const s=samples[0];
+ assert.throws(()=>compileAuthoredPrimaryMassingVoid(s.source,{
+  spaceId:'welcome',corner:'NW',cutWidth:7,cutDepth:7
+ }),/R125_V4E_MASSING_MASSING_VOID_INTERSECTS_SHARED_WALL/);
+ assert.throws(()=>compileAuthoredPrimaryMassingVoid(s.source,{
+  spaceId:'welcome',corner:'NE',cutWidth:12,cutDepth:7
+ }),/R125_V4E_MASSING_AUTHOR_MASSING_CONTRACT/);
+ assert.throws(()=>compileAuthoredPrimaryMassingVoid(s.source,{
+  spaceId:'garden',corner:'NE',cutWidth:7,cutDepth:7
+ }),/R125_V4E_MASSING_PRIMARY_VOLUME_TOO_SMALL/);
+});
