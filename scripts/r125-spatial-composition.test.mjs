@@ -60,3 +60,29 @@ test('no mutation of author plan and no implied model or world certification',()
  assert.equal(result.inGameWalking,'NOT_TESTED');
  assert.equal(result.architecturalQuality,'NOT_REVIEWED');
 });
+
+test('universal compact 6-wide or 6-deep rooms are accepted only when real B143 voxels and two-wide interior routes pass',()=>{
+ const designs=[
+  p('compact-side',[r('front',12,10,6),
+   r('compact-back',9,6,7,{to:'front',side:'east',shift:0})]),
+  p('compact-front',[r('front',6,10,6),
+   r('compact-back',6,6,8,{to:'front',side:'south',shift:0})]),
+  p('compact-three-zone',[r('front',12,10,7),
+   r('east',6,6,6,{to:'front',side:'east',shift:0}),
+   r('west',6,6,8,{to:'front',side:'west',shift:0})])
+ ];
+ for(const design of designs){
+  assert.equal(validateSpatialComposition(design),true);
+  const result=compileSpatialComposition(design);
+  assert.equal(verifyCompiled(result.design,result.compiled),true);
+  assert.equal(result.sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert(result.sourceRoutes.zones.every(z=>z.reachedTwoWidePadCount>=1));
+  assert(result.sourceRoutes.zones.every(z=>z.reachedFromEntrance));
+  assert.equal(result.worldWrites,0);
+  assert.deepEqual(result.gates,Array(9).fill('BLOCKED'));
+  assert.deepEqual(result.BuildPlan.operations,[]);
+ }
+ const tooSmall=structuredClone(designs[0]);
+ tooSmall.rooms[1].depth=5;
+ assert.throws(()=>validateSpatialComposition(tooSmall),/ROOM_CONTRACT/);
+});
