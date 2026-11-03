@@ -126,16 +126,41 @@ test('genre-neutral exterior survey exposes only actually buildable wall choices
   assert.deepEqual(list,surveyFunctionalFacadeOpenings({originalPlan:p,envelopeIntent:e}));
   assert.equal(JSON.stringify(p),original);
   assert.equal(JSON.stringify(list),second);
-  // Every offered 4x2 window must really build as an exterior wall opening.
-  // Multiple options per room remain available; the host does not pick one.
+  // Each offered 3x2 or 4x2 window must be buildable without host
+  // choosing its size or moving an authored opening.
   const intent=fixtureIntent(p,p.rooms[1].attach.side,0);
   for(let i=0;i<p.rooms.length;i++){
    const choices=list[i].availableLargeExteriorOpenings;
    const pick=choices[0];
-   intent.rooms[i].opening={side:pick.side,offset:pick.offset,width:4,height:2};
+   intent.rooms[i].opening={...pick};
   }
   const product=compileFunctionalFacadeV3({
    originalPlan:p,envelopeIntent:e,functionalIntent:intent});
   assert.equal(product.sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
  }
+});
+
+
+test('6x6 compact side-room offers a real 3-wide opening without an illegal 4-wide fallback',()=>{
+ const p=structuredClone(sample[0]);
+ p.rooms[1].width=6;
+ p.rooms[1].depth=6;
+ const e=roof(p);
+ const options=surveyFunctionalFacadeOpenings({originalPlan:p,envelopeIntent:e});
+ const roomOptions=options.find(x=>x.roomId===p.rooms[1].id).availableLargeExteriorOpenings;
+ assert(roomOptions.length>0);
+ assert(roomOptions.some(x=>x.width===3&&x.height===2));
+ assert(roomOptions.every(x=>x.width===3));
+ const intent=fixtureIntent(p,p.rooms[1].attach.side,0);
+ for(const [i,room] of p.rooms.entries()){
+  const available=options.find(x=>x.roomId===room.id).availableLargeExteriorOpenings;
+  intent.rooms[i].opening={...available[0]};
+ }
+ const product=compileFunctionalFacadeV3({
+  originalPlan:p,envelopeIntent:e,functionalIntent:intent});
+ assert.equal(product.sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(product.physicalProgram.perRoomOpeningEvidence.length,2);
+ assert(product.physicalProgram.perRoomOpeningEvidence.every(x=>x.newGlassCells>0));
+ assert.equal(product.worldWrites,0);
+ assert.deepEqual(product.gates,Array(9).fill('BLOCKED'));
 });
