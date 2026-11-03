@@ -18,6 +18,7 @@ import {FUNCTION_SCHEMA,compileFunctionalFacadeV3,
  from '../source/ai/r125-functional-facade-v3.mjs';
 import {preflightR125Ollama} from './r125-pilot.mjs';
 import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
+import {renderFiveGenreSourceEvidence} from './r125-five-genre-source-art-overview.mjs';
 
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const ENDPOINT='http://127.0.0.1:11434/v1/chat/completions';
@@ -173,6 +174,7 @@ function renderReview(cases,report){
   '<p>技術状態: '+esc(report.status)+'。今回のQwen POST: '+report.modelCalls+
   '。元4件の新規推論: 0。Minecraft world writes: 0。</p>'+
   '<p>全5件についてART・実機は未認証。旧HOMEのTOP_LEVEL HOLDと生回答は保存。</p>'+
+  (report.artOverview?.imageFile?'<p><a href="SOURCE_ART_OVERVIEW.png">自動生成の5ジャンル比較画像（PNG・スクショ不要）を開く</a></p>':'')+
   cards+'</html>';
 }
 export async function runFailedOnlyV3(
@@ -337,6 +339,17 @@ export async function runFailedOnlyV3(
    report.exportError=String(e.message).slice(0,160);
   }
   report.sourceReadyCount=cases.filter(c=>c.compiled).length;
+  try{
+   const art=renderFiveGenreSourceEvidence(cases.map(c=>({
+    id:c.id,base:c.envelope,final:c.compiled,
+    status:c.id==='home'?report.cases[0].status:'REUSED_SHA_VERIFIED_ART_HOLD',
+    finalGeometrySha256:c.compiled?.finalGeometrySha256??null
+   })),report);
+   fs.writeFileSync(path.join(out,'SOURCE_ART_OVERVIEW.png'),art.png,{flag:'wx'});
+   report.artOverview={imageFile:'SOURCE_ART_OVERVIEW.png',
+    imageSha256:art.sha256,width:art.width,height:art.height,
+    source:'ACTUAL_B143_ONLY',modelCallsAdditional:0,worldWrites:0};
+  }catch(e){report.artOverviewError=String(e.message??e).slice(0,180)}
   write(out,'FAILED_ONLY_RECOVERY_REPORT.json',report);
   write(out,'index.html',renderReview(cases,report));
  }
