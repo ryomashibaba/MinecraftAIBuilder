@@ -207,7 +207,7 @@ def main():
     try:
         if not cli.is_file():
             raise RuntimeError("LOCAL_V2_CLI_MISSING")
-        v = subprocess.run([str(cli), "--version"], text=True, capture_output=True,
+        v = subprocess.run([str(cli), "--version"], text=True, encoding="utf-8", errors="replace", capture_output=True,
                            timeout=20, check=False, cwd=study)
         if v.returncode != 0 or not (parse_version(v.stdout) and parse_version(v.stdout) >= VERSION_MIN
                                       and parse_version(v.stdout)[0] == 2):
@@ -224,7 +224,7 @@ def main():
         config_path.write_text(json.dumps(cfg, ensure_ascii=False, indent=2)+"\n", encoding="utf-8")
         validate_policy(json.loads(config_path.read_text(encoding="utf-8")), args.model)
         result["reason"] = "CATALOG_CHECK_ONLY"
-        listed = subprocess.run([str(cli), "models"], text=True, capture_output=True,
+        listed = subprocess.run([str(cli), "models"], text=True, encoding="utf-8", errors="replace", capture_output=True,
                                 timeout=90, check=False, cwd=study)
         result["catalog_command_invocations"] = 1
         if listed.returncode != 0:
@@ -249,11 +249,15 @@ def main():
         public_prompt = prompt_from_public_clone(snapshot)
         if len(public_prompt) > 24000:
             raise RuntimeError("PUBLIC_PROMPT_TOO_LARGE")
+        public_evidence = study / "PUBLIC_EVIDENCE.txt"
+        public_evidence.write_text(public_prompt, encoding="utf-8")
         result["model_run_invocations"] = 1
         call = subprocess.run(
             [str(cli), "run", "--standalone", "--archived", "--agent", "mab-auditor",
-             "--model", args.model, public_prompt],
-            text=True, capture_output=True, cwd=study, timeout=180, check=False
+             "--model", args.model, "--file", str(public_evidence),
+             "Analyze only the attached public GitHub evidence and answer its four questions."],
+            text=True, encoding="utf-8", errors="replace", capture_output=True,
+            cwd=study, timeout=180, check=False
         )
         (study / "MODEL_RESPONSE_PRIVATE.txt").write_text(call.stdout[:MAX_STDOUT], encoding="utf-8")
         # Never write stderr to shareable receipt: it may contain credentials or machine paths.
