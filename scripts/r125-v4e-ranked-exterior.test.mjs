@@ -637,3 +637,29 @@ test('genre-independent physical exterior wing changes REAL outside footprint an
   {...home.authoredWing,spaceId:'welcome',side:'west'}),
   /R125_V4E_WING_WING_COLLIDES_LINK_OR_ENTRANCE/);
 });
+
+test('one-response author owns full functional architecture, massing and TRUE new exterior silhouette across five genres',async()=>{
+ const {compileWingAuthorIntent,WING_SCHEMA,WING_SYSTEM_PROMPT}
+  =await import('../source/ai/r125-v4e-wing-author-ir.mjs');
+ const {syntheticFiveGenreAuthorCases}
+  =await import('./r125-v4e-cross-genre-source-study.mjs');
+ for(const s of syntheticFiveGenreAuthorCases()){
+  const answer={...structuredClone(s.source),schema:WING_SCHEMA,
+   massing:structuredClone(s.authoredMassing),wing:structuredClone(s.authoredWing)};
+  const frozen=structuredClone(answer),out=compileWingAuthorIntent(answer);
+  assert.deepEqual(answer,frozen);
+  assert.equal(out.authorContract,WING_SCHEMA);
+  assert.equal(out.b143.sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert.notEqual(out.unchangedMassingGeometrySha256,out.b143.geometrySha256);
+  assert.equal(out.authoredWingSourceWitness.actualSupportedWingFloorCells,84);
+  assert(out.authoredWingSourceWitness.independentRoofSilhouette.views
+   .find(v=>v.face==='roof').silhouetteChangedCells>=84);
+  assert.equal(out.worldWrites,0);
+  assert.deepEqual(out.gates,Array(9).fill('BLOCKED'));
+  assert.equal(out.humanArt,'NOT_REVIEWED');
+  assert.equal(out.realModel,'NOT_TESTED');
+  const invalid=structuredClone(answer);invalid.wing.reach=20;
+  assert.throws(()=>compileWingAuthorIntent(invalid),/R125_V4E_/);
+ }
+ assert(WING_SYSTEM_PROMPT.includes('wing EXACT'));
+});
