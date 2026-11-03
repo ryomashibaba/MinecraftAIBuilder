@@ -1,5 +1,12 @@
 # MinecraftAIBuilder — START HERE（新チャット・AI開発者の統一入口）
 
+## 2026-11-04 非既定V4Eの主棟形状・同一モデル回答によるSOURCE研究
+
+- `source/ai/r125-v4e-massing-author-ir.mjs`：短い1 JSONの中で全体用途・室構成、主棟の7〜10×7〜10の全高外気開放、X/Z公共通路方向をAUTHORが決め、HOSTは真正B143へ決定的変換する。HOSTによる設計補修はしない。
+- 既存 `scripts/r125-v4e-one-click-ranked-trial.cmd --massing` を明示指定すると隔離clone・最大1回ローカルQwen推論・PRIVATE原文/五方向3D前後比較・オフライン追加0推論再診断を利用できる。従来既定/`--sectioned` は変えない。新しい実Qwen試行は未実施であり、テストダブルは実モデルとして数えない。
+- 本研究のCIは最新GitHubで再確認が必要。SOURCE検証をART/実機/LLM合格と混同しない。NOT_PREPARED/9 BLOCKED/WorldWrites0、main・既存Education実機経路・Draft PR #128を維持。
+
+
 ## 2026-11-04 V4E実モデルの3D品質を審査するPRIVATE二案・五方向差分出力
 
 - 先行1クリック／オフライン再診断CI [#41656739669](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41656739669) は **Linux・Windows completed/success**。研究branch HEAD `5bae3873` の検証。

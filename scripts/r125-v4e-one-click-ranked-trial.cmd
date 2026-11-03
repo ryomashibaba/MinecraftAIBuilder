@@ -8,13 +8,14 @@ set "RESEARCH_BRANCH=feature/b198zr1-protected-architectural-revision"
 set "MODEL_ID=qwen3:14b"
 set "AUTHOR_FLAG=--ranked-windows"
 if /i "%~1"=="--sectioned" set "AUTHOR_FLAG=--ranked-section"
+if /i "%~1"=="--massing" set "AUTHOR_FLAG=--authored-massing"
 if not defined LOCALAPPDATA goto MISSING_LOCALAPPDATA
 where git.exe >nul 2>nul
 if errorlevel 1 goto MISSING_GIT
 where node.exe >nul 2>nul
 if errorlevel 1 goto MISSING_NODE
 if /i "%~1"=="--check-only" goto CHECK_ONLY
-if not "%~1"=="" if /i not "%~1"=="--prepare-only" if /i not "%~1"=="--run-once" if /i not "%~1"=="--sectioned" goto BAD_ARGUMENT
+if not "%~1"=="" if /i not "%~1"=="--prepare-only" if /i not "%~1"=="--run-once" if /i not "%~1"=="--sectioned" if /i not "%~1"=="--massing" goto BAD_ARGUMENT
 
 set "WORK_ROOT=%LOCALAPPDATA%\MinecraftAIBuilder\IsolatedV4E"
 if not exist "%WORK_ROOT%" mkdir "%WORK_ROOT%"
@@ -38,6 +39,7 @@ if "%GIT_HEAD%"=="" goto WRONG_HEAD
 if not exist "%WORK_DIR%\scripts\r125-v4d-local-architect.mjs" goto MISSING_RUNNER
 if not exist "%WORK_DIR%\scripts\r125-v4d-shareable-receipt.mjs" goto MISSING_RUNNER
 if not exist "%WORK_DIR%\source\ai\r125-v4e-ranked-exterior-ir.mjs" goto MISSING_RUNNER
+if /i "%~1"=="--massing" if not exist "%WORK_DIR%\source\ai\r125-v4e-massing-author-ir.mjs" goto MISSING_RUNNER
 
 echo [2/3] Research branch is prepared and verified.
 echo Branch: %ACTUAL_BRANCH%
@@ -136,7 +138,7 @@ echo ERROR: Node.js is not available. Nothing changed.
 goto DONE
 :BAD_ARGUMENT
 set "FINAL_EXIT=1"
-echo ERROR: Supported flags are --check-only, --prepare-only, --run-once, and --sectioned.
+echo ERROR: Supported flags are --check-only, --prepare-only, --run-once, --sectioned and --massing.
 goto DONE
 :CANNOT_MAKE_FOLDER
 set "FINAL_EXIT=1"

@@ -511,3 +511,54 @@ test('ONE-response authored massing combines independent program and true open-s
   assert.throws(()=>compileMassingAuthorIntent(bad),/R125_V4E_/);
  }
 });
+
+test('ONE injected local massing response stays test-double and offline replay preserves SHA, one POST, zero world writes',async()=>{
+ const {MASSING_SCHEMA}=await import('../source/ai/r125-v4e-massing-author-ir.mjs');
+ const {syntheticFiveGenreAuthorCases}=await import('./r125-v4e-cross-genre-source-study.mjs');
+ const {parseV4DLocalAuthorArgs,runV4DLocalAuthor}=await import('./r125-v4d-local-architect.mjs');
+ const {replayPrivateV4D}=await import('./r125-v4d-replay-private.mjs');
+ const fs=await import('node:fs'),os=await import('node:os'),path=await import('node:path');
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'mab-massing-private-'));
+ const study=path.join(root,'study'),replay=path.join(root,'replay');
+ const sample=syntheticFiveGenreAuthorCases()[0];
+ const answer={...structuredClone(sample.source),schema:MASSING_SCHEMA,
+  massing:{spaceId:sample.authoredSection.spaceId,corner:sample.authoredSection.corner,
+   cutWidth:7,cutDepth:7,publicAccessSide:'Z'}};
+ const calls=[],raw=JSON.stringify(answer);
+ const fetcher=async(url,opt)=>{
+  calls.push(opt?.method);
+  if(opt?.method==='GET')return {ok:true,status:200,text:async()=>JSON.stringify({models:[{name:'qwen3:14b'}]})};
+  if(opt?.method==='POST')return {ok:true,status:200,text:async()=>JSON.stringify({
+   model:'qwen3:14b',choices:[{finish_reason:'stop',message:{content:raw}}]})};
+  throw Error('UNEXPECTED_TEST_HTTP');
+ };
+ try{
+  const parsed=parseV4DLocalAuthorArgs(['--authored-massing','--model','qwen3:14b',
+   '--out',study,'--prompt','Make an original useful public architecture with open-air gathering space.']);
+  assert.equal(parsed.authoredMassing,true);
+  assert.throws(()=>parseV4DLocalAuthorArgs(['--ranked-section','--authored-massing',
+   '--model','qwen3:14b','--out',study]),/ONLY_ONE_AUTHOR_MODE/);
+  const r=await runV4DLocalAuthor(parsed,{fetcher,timeoutMs:15000});
+  assert.equal(r.status,'HOLD_TEST_DOUBLE_NOT_REAL_MODEL',r.reason);
+  assert.equal(r.authorContract,MASSING_SCHEMA);
+  assert.equal(r.sourceRoutesStatus,'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert.equal(r.worldWrites,0);
+  assert.equal(calls.filter(x=>x==='POST').length,1);
+  assert.deepEqual(JSON.parse(fs.readFileSync(path.join(study,'AUTHOR_INTENT_ORIGINAL.json'),'utf8')),answer);
+  const art=JSON.parse(fs.readFileSync(path.join(study,'PRIVATE_B143_MASSING_ART_HOLD_COMPARISON.json'),'utf8'));
+  assert(art.actuallyRemovedCells>0);
+  assert.equal(art.extraModelRequests,0);
+  assert.equal(art.humanArchitecturalArt,'NOT_REVIEWED');
+  assert(fs.existsSync(path.join(study,'FINAL_PRIMARY_MASSING_FIVE_VIEWS_PRIVATE.svg')));
+  const shared=JSON.parse(fs.readFileSync(path.join(study,'REVIEW_SUMMARY_SHAREABLE.json'),'utf8'));
+  assert.equal(shared.authorContract,MASSING_SCHEMA);
+  assert.equal(shared.explicitlyInjectedTestResponse,true);
+  assert.equal(shared.sourceCandidateVerified,true);
+  const n=calls.length,rr=replayPrivateV4D(study,replay);
+  assert.equal(calls.length,n);
+  assert.equal(rr.status,'HOLD_TEST_DOUBLE_REPLAY_ONLY');
+  assert.equal(rr.originalCompilerHashesMatch,true);
+  assert.equal(rr.additionalModelCalls,0);
+  assert.equal(rr.worldWrites,0);
+ }finally{fs.rmSync(root,{recursive:true,force:true});}
+});
