@@ -61,10 +61,12 @@ export function compileAuthoredExteriorWing(originalAuthor,authoredMassing,autho
  const reverse={east:'west',west:'east',north:'south',south:'north'};
  if(base.plan.links.some(l=>l.from===node.id&&l.side===wing.side||
   l.to===node.id&&reverse[l.side]===wing.side)||
-  base.chosenWindowFaces.some(c=>base.plan.nodes[c.spaceIndex].id===node.id&&
-   c.selectedSide===wing.side)||
+  // Keep shared-wall and true entrance prohibitions. A same-face window is
+  // allowed ONLY because the actual unchanged glass and BOTH AIR layers are
+  // verified on final B143 below, after physically cutting the lower doorway.
+
   (node.id===base.plan.nodes[0].id&&wing.side==='north'))
-  fail('WING_COLLIDES_LINK_WINDOW_OR_ENTRANCE');
+  fail('WING_COLLIDES_LINK_OR_ENTRANCE');
  const far=wing.side==='east'||wing.side==='south';
  const wx=xAxis?(far?node.x+node.width:node.x-wing.reach):node.x+wing.start;
  const wz=xAxis?node.z+wing.start:(far?node.z+node.depth:node.z-wing.reach);

@@ -619,6 +619,9 @@ test('genre-independent physical exterior wing changes REAL outside footprint an
   assert.equal(w.twoWideUserRoute.status,'SOURCE_TWO_WIDE_ENTRANCE_TO_WING_REACHABLE');
   assert(w.twoWideUserRoute.reachedPads>20);
   assert(w.independentRoofSilhouette.views.find(v=>v.face==='roof').silhouetteChangedCells>=84);
+  assert.equal(w.originalGlazingUnchanged.verifiedPanelGlassCells,36);
+  assert.equal(w.originalGlazingUnchanged.verifiedImmediateOutwardAirCells,36);
+  assert.equal(w.originalGlazingUnchanged.verifiedImmediateInwardAirCells,36);
   assert.equal(out.sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
   assert.equal(out.humanArt,'NOT_REVIEWED');
   assert.equal(out.realModel,'NOT_TESTED');
@@ -632,5 +635,5 @@ test('genre-independent physical exterior wing changes REAL outside footprint an
  const home=cases[0];
  assert.throws(()=>compileAuthoredExteriorWing(home.source,home.authoredMassing,
   {...home.authoredWing,spaceId:'welcome',side:'west'}),
-  /R125_V4E_WING_WING_COLLIDES_LINK_WINDOW_OR_ENTRANCE/);
+  /R125_V4E_WING_WING_COLLIDES_LINK_OR_ENTRANCE/);
 });
