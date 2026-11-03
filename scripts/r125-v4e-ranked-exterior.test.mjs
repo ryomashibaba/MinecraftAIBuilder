@@ -80,7 +80,7 @@ test('V4E opt-in does not alter the old V4D frozen author contract or pretend to
  assert.equal(old.schema,COMPACT_SCHEMA);
  assert.equal(compileCompactModelIntent(old).modelIdentity,'NOT_ATTESTED');
  assert(RANKED_SYSTEM_PROMPT.includes('FIRST option'));
- assert(RANKED_SYSTEM_PROMPT.includes('NO'));
+ assert(RANKED_SYSTEM_PROMPT.includes('NEVER choose an unlisted option'));
  const ranked=compileRankedExteriorIntent(author());
  assert.equal(ranked.modelIdentity,'NOT_ATTESTED');
  assert.equal(ranked.modelSizeOrMacMemoryTested,false);
