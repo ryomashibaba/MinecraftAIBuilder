@@ -183,7 +183,7 @@ export function surveyFunctionalFixturePlacements({originalPlan,envelopeIntent}=
     for(let xx=x;xx<x+sx;xx++)for(let yy=y;yy<y+sy;yy++)
      for(let zz=z;zz<z+sz;zz++){
       // Real air and a supported ground-level footprint, not drawn geometry.
-      if(occupied.has(K(xx,yy,zz))||!occupied.has(K(xx,y-1,zz)))
+      if(occupied.has(K(xx,yy,zz))||(yy===y&&!occupied.has(K(xx,y-1,zz))))
        clear=false;
      }
     if(!clear)continue;
