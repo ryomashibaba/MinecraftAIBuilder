@@ -8,6 +8,8 @@ on:
       - 'scripts/r125-v4d-compact-model-fixture.mjs'
       - 'scripts/r125-v4d-relative-author-synthetic.mjs'
       - 'scripts/r125-v4d-local-architect.mjs'
+      - 'scripts/r125-v4d-shareable-receipt.mjs'
+      - 'scripts/r125-v4d-local-one-shot.ps1'
       - 'scripts/r125-v4d-local-architect.test.mjs'
       - '.github/workflows/r125-v4d-local-author-bridge.yml'
   workflow_dispatch:
@@ -31,6 +33,7 @@ jobs:
           node --check source/ai/r125-v4d-compact-model-ir.mjs
           node --check scripts/r125-v4d-compact-model-fixture.mjs
           node --check scripts/r125-v4d-local-architect.mjs
+          node --check scripts/r125-v4d-shareable-receipt.mjs
           node --check scripts/r125-v4d-relative-author-synthetic.mjs
           node --check scripts/r125-v4d-local-architect.test.mjs
       - name: Prove fail-closed synthetic authorship and actual B143 conversion through injected offline transport
@@ -41,3 +44,31 @@ jobs:
           echo 'Node tests use INJECTED TEST DOUBLE for both legacy detailed and new compact author contracts. No actual Ollama, no 2B/Mac evidence, no new Qwen/Gemma design, no paid API, no Minecraft world access.' >> "$GITHUB_STEP_SUMMARY"
           echo 'A verified true B143 geometry from a synthetic author is NOT a real-model success or an ART certification.' >> "$GITHUB_STEP_SUMMARY"
           echo '9 BLOCKED, BuildPlan empty, NOT_PREPARED, WorldWrites0. Preserve main, prior model originals and Draft PR #128.' >> "$GITHUB_STEP_SUMMARY"
+
+  windows-offline-launch-contract:
+    name: Windows PowerShell NO-MODEL preflight
+    runs-on: windows-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify local study one-shot launcher without Ollama or any writes
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $private = Join-Path $env:LOCALAPPDATA 'MinecraftAIBuilder\PrivateModelStudies'
+          $beforeExists = Test-Path -LiteralPath $private
+          $output = & .\scripts\r125-v4d-local-one-shot.ps1 -CheckOnly
+          $output | ForEach-Object { Write-Host $_ }
+          if ($output -notcontains "CHECK_ONLY_SAFE_NO_MODEL_CALL_NO_WORLD_WRITE") {
+            throw "V4D_WINDOWS_CHECK_ONLY_CONTRACT_MISSING"
+          }
+          if (-not $beforeExists -and (Test-Path -LiteralPath $private)) {
+            throw "V4D_WINDOWS_CHECK_ONLY_CREATED_PRIVATE_FILES"
+          }
+          if ($output -notmatch "AUTHOR_MODE=COMPACT") {
+            throw "V4D_WINDOWS_DEFAULT_MODE_DRIFT"
+          }
+          Write-Host "PASS: Windows launch preflight, branch/head/node validated. 0 model calls, 0 world writes."

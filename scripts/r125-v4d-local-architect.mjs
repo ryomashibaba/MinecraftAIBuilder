@@ -14,6 +14,7 @@ import {RELATIVE_SCHEMA,compileRelativeAuthorIntent}
 import {COMPACT_SCHEMA,COMPACT_SYSTEM_PROMPT,compileCompactModelIntent}
  from '../source/ai/r125-v4d-compact-model-ir.mjs';
 import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
+import {buildV4DShareableReceipt} from './r125-v4d-shareable-receipt.mjs';
 
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const MODEL=/^[A-Za-z0-9._:/-]{2,140}$/;
@@ -206,6 +207,7 @@ export async function runV4DLocalAuthor({
  }finally{
   report.elapsedMs=Date.now()-start;
   output(dir,'V4D_LOCAL_AUTHOR_REPORT.json',report);
+  output(dir,'REVIEW_SUMMARY_SHAREABLE.json',buildV4DShareableReceipt(report));
  }
 }
 if(process.argv[1]===fileURLToPath(import.meta.url)){

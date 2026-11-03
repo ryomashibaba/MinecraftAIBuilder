@@ -1,4 +1,6 @@
 import test from 'node:test';
+import {buildV4DShareableReceipt,classifyPrivateV4DFailure,SAFE_SHARE_SCHEMA}
+ from './r125-v4d-shareable-receipt.mjs';
 import {makeV4DCompactSynthetic}
  from './r125-v4d-compact-model-fixture.mjs';
 import {COMPACT_SCHEMA,COMPACT_SYSTEM_PROMPT,
@@ -304,4 +306,97 @@ test('compact flag can be selected only once, full legacy mode stays default',()
  assert.throws(()=>parseV4DLocalAuthorArgs([
   '--model','qwen3:14b','--out','new-private-dir','--compact','--compact'
  ]),/DUPLICATE_COMPACT/);
+});
+
+test('source receipt exposes only allowlisted metadata, never private model text/prompt/errors/paths',()=>{
+ const secret='PRIVATE_LONG_MODEL_RESPONSE_AND_WINDOWS_PATH_C_USERS';
+ const report={
+  schema:'minecraftaibuilder-r125-v4d-local-model-author-attempt-v1',
+  status:'HOLD_MODEL_OR_SOURCE_INVALID_NO_REPAIR',
+  reason:'R125_V4D_GRAPH_INVALID_'+secret,
+  modelId:'qwen3:14b',authorContract:COMPACT_SCHEMA,
+  prompt:secret,endpoint:'http://127.0.0.1:11434/v1/chat/completions',
+  localPath:'C:\\Users\\Somebody\\Documents\\Private\\',
+  testInjectionPresent:false,modelCalls:1,rawCaptured:true,
+  responseRawSha256:'a'.repeat(64),
+  sourceRoutesStatus:'NOT_TESTED',sourceSha256:null,geometrySha256:null,
+  actualB143VoxelCount:null,
+  readiness:'NOT_PREPARED',constructionApproved:false,
+  executionAllowed:false,gates:Array(9).fill('BLOCKED'),
+  BuildPlan:{operations:[]},worldContacts:0,worldWrites:0
+ };
+ const safe=buildV4DShareableReceipt(report);
+ const text=JSON.stringify(safe);
+ assert.equal(safe.schema,SAFE_SHARE_SCHEMA);
+ assert.equal(safe.reportedStatus,report.status);
+ assert.equal(safe.failureCategory,'ARCHITECTURAL_GRAPH_INVALID');
+ assert.equal(safe.originalRawSavedPrivately,true);
+ assert.equal(safe.originalRawSha256,'a'.repeat(64));
+ assert.equal(safe.sourceCandidateVerified,false);
+ assert.equal(safe.actualOllamaInferenceAttested,false);
+ assert.equal(safe.modelIdentityCryptographicallyVerified,false);
+ assert.equal(safe.worldWrites,0);
+ assert(!text.includes(secret));
+ assert(!text.includes('C:\\Users'));
+ assert(!text.includes(report.endpoint));
+ assert(!Object.hasOwn(safe,'reason'));
+ assert(!Object.hasOwn(safe,'prompt'));
+ assert(!Object.hasOwn(safe,'localPath'));
+ assert(!Object.hasOwn(safe,'endpoint'));
+ assert.equal(classifyPrivateV4DFailure('MODEL_TRUNCATED_NO_AUTO_RETRY'),'MODEL_COMPLETENESS');
+ assert.equal(classifyPrivateV4DFailure('R125_V4D_COMPACT_BAD'),'COMPACT_AUTHOR_IR_INVALID');
+});
+test('shareable receipt refuses contradictory ART promotion, model promotion, 2 POST, or any world writes',()=>{
+ const source={
+  schema:'minecraftaibuilder-r125-v4d-local-model-author-attempt-v1',
+  modelId:'qwen3:14b',authorContract:COMPACT_SCHEMA,
+  status:'HOLD_TEST_DOUBLE_NOT_REAL_MODEL',reason:null,
+  testInjectionPresent:true,modelCalls:1,rawCaptured:true,
+  responseRawSha256:'a'.repeat(64),
+  sourceRoutesStatus:'SOURCE_ROUTES_REACH_ALL_ZONES',
+  sourceSha256:'b'.repeat(64),geometrySha256:'c'.repeat(64),
+  actualB143VoxelCount:6000,
+  readiness:'NOT_PREPARED',constructionApproved:false,
+  executionAllowed:false,gates:Array(9).fill('BLOCKED'),
+  BuildPlan:{operations:[]},worldContacts:0,worldWrites:0
+ };
+ const safe=buildV4DShareableReceipt(source);
+ assert.equal(safe.sourceCandidateVerified,true);
+ assert.equal(safe.explicitlyInjectedTestResponse,true);
+ assert.equal(safe.actualOllamaInferenceAttested,false);
+ assert.equal(safe.humanArchitecturalArt,'NOT_REVIEWED');
+ const edit=(change)=>{const z=structuredClone(source);change(z);return z};
+ assert.throws(()=>buildV4DShareableReceipt(edit(x=>x.worldWrites=1)),/SAFE_RECEIPT_/);
+ assert.throws(()=>buildV4DShareableReceipt(edit(x=>x.modelCalls=2)),/SAFE_RECEIPT_/);
+ assert.throws(()=>buildV4DShareableReceipt(edit(x=>x.constructionApproved=true)),/SAFE_RECEIPT_/);
+ assert.throws(()=>buildV4DShareableReceipt(edit(x=>x.gates[0]='PASS')),/SAFE_RECEIPT_/);
+ assert.throws(()=>buildV4DShareableReceipt(edit(x=>x.status='HOLD_NOT_A_KNOWN_STATUS')),/SAFE_RECEIPT_/);
+ assert.throws(()=>buildV4DShareableReceipt(edit(x=>{x.testInjectionPresent=false;})),/SAFE_RECEIPT_/);
+ assert.throws(()=>buildV4DShareableReceipt(edit(x=>{
+  x.status='SOURCE_READY_PRIVATE_ART_REVIEW_REQUIRED';x.geometrySha256=null;
+ })),/SAFE_RECEIPT_/);
+});
+test('one compact injected study generates safe-to-share receipt without publishing full request or model answer',async()=>{
+ const temp=sandbox();
+ const p=makeV4DCompactSynthetic(),raw=JSON.stringify(p),fake=fakeOllama({raw});
+ try{
+  const r=await runV4DLocalAuthor({model:'qwen3:14b',outDir:temp.out,
+   compact:true,prompt:'A brand new public maker institution with a sheltered civic garden.'
+  },{fetcher:fake.fetcher,timeoutMs:15000});
+  assert.equal(r.status,'HOLD_TEST_DOUBLE_NOT_REAL_MODEL');
+  const fp=path.join(temp.out,'REVIEW_SUMMARY_SHAREABLE.json');
+  assert(fs.existsSync(fp));
+  const safeText=fs.readFileSync(fp,'utf8'),safe=JSON.parse(safeText);
+  assert.equal(safe.reportedStatus,'HOLD_TEST_DOUBLE_NOT_REAL_MODEL');
+  assert.equal(safe.sourceCandidateVerified,true);
+  assert.equal(safe.explicitlyInjectedTestResponse,true);
+  assert.equal(safe.humanArchitecturalArt,'NOT_REVIEWED');
+  assert.equal(safe.modelCallAttempts,1);
+  assert.equal(safe.worldWrites,0);
+  assert(!safeText.includes(raw));
+  assert(!safeText.includes('brand new public maker institution'));
+  assert(!safeText.includes(temp.root));
+  assert(fs.existsSync(path.join(temp.out,'MODEL_RESPONSE_ORIGINAL.txt')));
+  assert(fs.existsSync(path.join(temp.out,'index.html')));
+ }finally{temp.clean();}
 });

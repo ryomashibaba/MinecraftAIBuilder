@@ -1,5 +1,12 @@
 # MinecraftAIBuilder — START HERE（新チャット・AI開発者の統一入口）
 
+## 2026-11-03 V4D Windows実モデル1回試験・共有用安全レシート（新CI待ち）
+
+- 前回の短縮IR SOURCE 14/14 PASSと実LLM推論0件を保護した上で、ローカル実験を**1回のスクリプト実行**へ整理。研究ブランチ/HEAD/Nodeバージョン/追跡ファイルの変更を確認してからのみ `scripts/r125-v4d-local-one-shot.ps1` を起動可能にする。デフォルトは `--compact` + `qwen3:14b` + 未知の公共施設依頼。元フォルダのgit checkout/fetch/reset、インストール、モデル自動再試行、世界操作、外部API、有料アクセスは一切なし。出力はGit外のローカルアプリデータ専用新フォルダ。
+- `scripts/r125-v4d-shareable-receipt.mjs` を新規作成し、失敗の場合も `REVIEW_SUMMARY_SHAREABLE.json` に**安全に共有できる必要最小限のSOURCEステータス、失敗カテゴリ、SHA、合成テスト識別、9 BLOCKED**のみ出力。元の `MODEL_RESPONSE_ORIGINAL.txt`、プロンプト、パス、3D幾何全文は自動でGitHubにも外部にも送らない。合成CIを実Qwen成功へ昇格禁止。
+- 既存14テストに共有レシートの機密保護・安全偽装拒否・正常/異常模擬送信試験を追加。GitHub Actionsの独立Windows `-CheckOnly` 検査で**モデル推論/出力ディレクトリ書込なし**の起動前検証を追加した。現コミットでCI結果は未確認。詳細：[V4Dモデル試行と最小レシート研究](docs/R125_V4D_LOCAL_REAL_AUTHOR_BRIDGE_20261103_JA.md)。
+- 本物のローカルQwen・Gemmaをこのクラウドセッションで実行したという主張ではない。既存 main / freeze / Qwen 原文 / R125 Education 実機成功、PR #128 Open/Draft、NOT_PREPARED/9 BLOCKED/BuildPlan空/WorldWrites0を維持。Work個別承認。
+
 ## 2026-11-03 V4D小型LLM向け短縮AUTHOR IR：正式CI 14/14 PASS、実LLM試験は未実行
 
 - 既存詳細IRは不変更、追加オプトイン `--compact`。小型モデルがAUTHORとして選ぶ用途・相対接続・規模・屋根type/高低・壁/採光・設備の意味と材料を、**同じ共通の機械的寸法規則**で既存詳細IRへ展開 → 旧 `r125-v4d-authored-topology.mjs`/ `r125-v4d-envelope-integration.mjs` → 真正B143/2幅SOURCE経路/設備サービスを照合。HOSTはジャンル/室名により形を決定しない。元回答を補修せず1回POST・原文非公開保存。

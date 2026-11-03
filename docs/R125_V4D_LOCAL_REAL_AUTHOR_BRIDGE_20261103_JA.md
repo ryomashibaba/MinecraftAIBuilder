@@ -64,3 +64,21 @@ node .\scripts\r125-v4d-local-architect.mjs --compact --model 'qwen3:14b' --out 
 - 修正HEAD `2bcd7031ff88d5b5d30b339c49a80bcb56750ba2` の [GitHub Actions #41616751488](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41616751488) は **completed/success、Node test 14、pass14、fail0**。既存の詳細IR経路8件に加え、短縮IR→詳細IR→元B143・意味的な高さ変更→実最終形状差、機械的正規化の明示、SOURCE通路/3用途設備アクセス、入力不正拒否、1回模擬POST/私有原文保存/模擬非昇格の6件を検証した。
 - **実モデル推論実績は0件**。Nodeの注入モデル応答は真のQwen3:14B、2B小型モデル、8GB Mac上の実測ではない。小型モデルがこの短縮IRを正しく生成する可能性は実データ不足で**わからない**。
 - SOURCEテストはHOLD施工状態（NOT_PREPARED、9 BLOCKED、BuildPlan空、worldWrites0）。正式ART採用0件、過去のV4D建築のART REJECTを維持。次の実用工程は隔離ローカルコピーで未知自然言語→モデルの原文を1回生成・失敗時も保存→SOURCE真正3Dを独立評価する試験。1例成功でも住宅/店/研究施設を跨ぐ汎用性能や美術品質を自動認定しない。
+
+## 2026-11-03 続き：安全な1回実モデル試験の起動器と最小限共有レシート（初回CI未確認）
+
+前工程の `--compact` SOURCE 14/14 PASSは本物のQwen実生成ではない。次工程でPCの操作負担と非公開モデル原文の流出リスクを減らすため、既存ローカル実行経路に次の二つを追加する。構造的建築品質やARTの成功とは別の技術改善として扱う。
+
+- `scripts/r125-v4d-local-one-shot.ps1`：Windows PowerShell 5.1/7で動かす起動器。**現在研究ブランチであること、追跡ファイルに未保存の変更がないこと、Node 20以上があること、既存JSが存在すること**を事前にチェック。勝手にgit fetch/pull/checkout/stash/resetしない。モデルが未導入/未起動なら停止し、継続的なループにしない。実行はOllamaループバックに最大1POST。原文・真正B143はGit外の `LOCALAPPDATA\MinecraftAIBuilder\PrivateModelStudies\V4D_...\` に新規保存。
+- 同じファイルの `-CheckOnly` は**推論・PRIVATEディレクトリ作成・Git更新を一切せず**、起動可否を検査する。これをGitHubのWindows runnerで確認し、偽Ollamaサーバーを実PCと取り違えない。
+- `scripts/r125-v4d-shareable-receipt.mjs`：既存のローカル実験が終わったとき、私人の元回答・住所パス・依頼文・HTTP宛先・生のエラー文面を**許可リストに含めず**、`REVIEW_SUMMARY_SHAREABLE.json` だけを自動生成する。安全ゲートの虚偽報告、複数POST、モデルの注入試験→本物への偽昇格は拒否。SOURCE成功後も `humanArchitecturalArt: NOT_REVIEWED`、`minecraftWalking: NOT_TESTED` を変えない。
+
+実際にユーザーのPCで実行する場合だけ、**事前に安全確認済みの研究ブランチの作業コピー内**のPowerShellから1行で起動できる。
+
+```powershell
+& .\scripts\r125-v4d-local-one-shot.ps1
+```
+
+作業コピーが古い/別ブランチ/追跡ファイル変更中であれば、安全のため明示的にHOLDする。実モデル成功でも自動GitHubアップロードはしない。チャットで共有するなら **`REVIEW_SUMMARY_SHAREABLE.json` だけ**で一次診断可能。ART判断には追加の視覚証拠とユーザー確認が別途必要。
+
+**ユーザーPCに接続できないこのチャット内では実モデル推論0、Minecraft世界接触0のまま。** GitHub ActionsのWindows検査成功も実Windows上のQwen推論の成功ではない。
