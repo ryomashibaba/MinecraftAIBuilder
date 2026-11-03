@@ -1,5 +1,11 @@
 # MinecraftAIBuilder — START HERE（新チャット・AI開発者の統一入口）
 
+## 2026-11-04 V4E実モデルの3D品質を審査するPRIVATE二案・五方向差分出力
+
+- 先行1クリック／オフライン再診断CI [#41656739669](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41656739669) は **Linux・Windows completed/success**。研究branch HEAD `5bae3873` の検証。
+- 追加実装：非既定 `--ranked-section` が真正B143 SOURCEを満たしたとき、**同一モデルの1回答をそのまま**元の矩形外形（BASELINE）と、AI指定ロッジアを施した最終非矩形版（FINAL）として決定的に2回コンパイル。最終ボクセル5方向SVG（屋根/東西南北）を2枚・両3D viewer・真の追加/削除/材料差分数・原文SHA・9 BLOCKEDをPRIVATE試行フォルダへ出力。既存合成専用レンダラの「SYNTHETIC AUTHOR」表記をそのまま実モデルに流用せず、私人の `PRIVATE MODEL ATTEMPT` に分離。**追加モデルPOST 0、WorldWrites 0、ART NOT_REVIEWED**。
+- モデル回答が不成立なら元テキストを保持してHOLD、偽3D比較を生成しない。旧V4D・旧V4E既定、実Minecraft成功経路、main、Draft PR #128は不変更。生成した2案の現物美術をユーザーが審査し、単なる21床セルの小変化ではART合格としない。**この追加実装のCIは保存直後未確認**。本物の新Qwen実試行も未実施。
+
 ## 2026-11-03 V4E新モデル著作経路：ローカル1クリック＆0回再推論の診断対応
 
 - 先行の1回答 V4E断面研究CI [#41656219485](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41656219485) は Linux/Windows **completed/success**（注入模擬1POST、実Qwen 0、ART合格0、Minecraft世界書込0）。

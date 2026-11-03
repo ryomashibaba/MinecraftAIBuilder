@@ -26,7 +26,9 @@ function syntheticAuthor(){
  }
  return r;
 }
-export function actualOrthographicSvg(primitives){
+export function actualOrthographicSvg(primitives,{sourceKind='SYNTHETIC_AUTHOR'}={}){
+ if(!['SYNTHETIC_AUTHOR','PRIVATE_SINGLE_MODEL_ATTEMPT_UNATTESTED'].includes(sourceKind))
+  error('INVALID_VIEW_SOURCE_KIND');
  if(!Array.isArray(primitives)||primitives.length<100)error('EMPTY_B143');
  const faces=[
   {id:'roof',name:'ROOF / true highest voxel'},
@@ -37,8 +39,14 @@ export function actualOrthographicSvg(primitives){
  ];
  const items=['<svg xmlns="http://www.w3.org/2000/svg" width="1270" height="770" viewBox="0 0 1270 770">',
   '<rect width="1270" height="770" fill="#102638"/>',
-  '<text x="20" y="30" fill="#fff" font-family="sans-serif" font-size="20">V4E SYNTHETIC AUTHOR — ACTUAL final B143 voxels</text>',
-  '<text x="20" y="50" fill="#b5c7d3" font-family="sans-serif" font-size="12">SOURCE study only. Human ART NOT REVIEWED. No real Qwen/Gemma trial, no Minecraft world.</text>'];
+  '<text x="20" y="30" fill="#fff" font-family="sans-serif" font-size="20">'+
+   (sourceKind==='SYNTHETIC_AUTHOR'?
+    'V4E SYNTHETIC AUTHOR — ACTUAL final B143 voxels':
+    'V4E PRIVATE MODEL ATTEMPT — ACTUAL final B143 voxels')+'</text>',
+  '<text x="20" y="50" fill="#b5c7d3" font-family="sans-serif" font-size="12">'+
+   (sourceKind==='SYNTHETIC_AUTHOR'?
+    'SOURCE study only. Human ART NOT REVIEWED. No real Qwen/Gemma trial, no Minecraft world.':
+    'LOCAL PRIVATE. Model identity NOT independently attested; human ART NOT REVIEWED; no Minecraft world.')+'</text>'];
  for(const [i,f] of faces.entries()){
   const visible=new Map();
   for(const p of primitives){

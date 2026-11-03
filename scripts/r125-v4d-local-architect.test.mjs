@@ -466,6 +466,24 @@ test('single opt-in model response AUTHORS both nonrect section and entire build
   assert(body.messages[0].content.includes(SECTIONED_SCHEMA));
   assert(fs.existsSync(path.join(tmp.out,'AUTHORED_SECTION_SOURCE.json')));
   assert(fs.existsSync(path.join(tmp.out,'index.html')));
+  const delta=JSON.parse(fs.readFileSync(path.join(tmp.out,
+    'PRIVATE_B143_SECTION_ART_HOLD_COMPARISON.json'),'utf8'));
+  assert.equal(delta.schema,'r125-v4e-private-one-response-b143-geometry-delta-art-hold-v1');
+  assert.equal(delta.provenance,'INJECTED_TEST_DOUBLE_NOT_REAL_MODEL');
+  assert.equal(delta.originalResponseSha256,r.responseRawSha256);
+  assert.equal(delta.baselineGeometrySha256,result.unchangedRankedGeometrySha256);
+  assert.equal(delta.finalGeometrySha256,result.b143.geometrySha256);
+  assert(delta.actuallyRemovedCells+delta.actuallyAddedCells+delta.changedMaterialCells>20);
+  assert.equal(delta.extraModelRequests,0);
+  assert.equal(delta.realModelIdentityVerified,false);
+  assert.equal(delta.humanArchitecturalArt,'NOT_REVIEWED');
+  assert.deepEqual(delta.gates,Array(9).fill('BLOCKED'));
+  const pre=fs.readFileSync(path.join(tmp.out,'BASELINE_RANKED_FIVE_VIEWS_PRIVATE.svg'),'utf8'),
+   post=fs.readFileSync(path.join(tmp.out,'FINAL_SECTIONED_FIVE_VIEWS_PRIVATE.svg'),'utf8');
+  assert(pre.includes('PRIVATE MODEL ATTEMPT'));
+  assert(post.includes('PRIVATE MODEL ATTEMPT'));
+  assert(!post.includes('SYNTHETIC AUTHOR'));
+  assert(fs.existsSync(path.join(tmp.out,'BASELINE_RANKED_3D_PRIVATE.html')));
   assert(fs.existsSync(path.join(tmp.out,'TRUE_B143_SOURCE.json')));
   assert.equal(fs.readFileSync(path.join(tmp.out,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8'),original);
   const receipt=JSON.parse(fs.readFileSync(path.join(tmp.out,'REVIEW_SUMMARY_SHAREABLE.json'),'utf8'));
@@ -504,6 +522,8 @@ test('invalid author-chosen section is PRIVATE HOLD with only one test-double PO
   assert.equal(f.calls.filter(x=>x.method==='POST').length,1);
   assert.equal(fs.readFileSync(path.join(tmp.out,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8'),raw);
   assert(!fs.existsSync(path.join(tmp.out,'TRUE_B143_SOURCE.json')));
+  assert(!fs.existsSync(path.join(tmp.out,'FINAL_SECTIONED_FIVE_VIEWS_PRIVATE.svg')));
+  assert(!fs.existsSync(path.join(tmp.out,'PRIVATE_B143_SECTION_ART_HOLD_COMPARISON.json')));
   const receipt=JSON.parse(fs.readFileSync(path.join(tmp.out,'REVIEW_SUMMARY_SHAREABLE.json'),'utf8'));
   assert.equal(receipt.failureCategory,'SECTIONED_AUTHOR_SOURCE_INVALID');
   assert.equal(receipt.sourceCandidateVerified,false);

@@ -17,6 +17,7 @@ import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
 import {buildV4DShareableReceipt} from './r125-v4d-shareable-receipt.mjs';
 import {RANKED_SCHEMA,RANKED_SYSTEM_PROMPT,compileRankedExteriorIntent} from '../source/ai/r125-v4e-ranked-exterior-ir.mjs';
 import {SECTIONED_SCHEMA,SECTIONED_SYSTEM_PROMPT,compileSectionedAuthorIntent} from '../source/ai/r125-v4e-sectioned-author-ir.mjs';
+import {actualOrthographicSvg} from './r125-v4e-source-art-review.mjs';
 
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const MODEL=/^[A-Za-z0-9._:/-]{2,140}$/;
@@ -182,6 +183,58 @@ export async function runV4DLocalAuthor({
   const tpl=fs.readFileSync(
    path.join(ROOT,'source/ai/b143-viewer-template.html'),'utf8');
   const html=renderB143Html(gal,tpl);
+  let sectionPrivateArtEvidence=null;
+  if(rankedSection){
+   // Derive an exact pre-section control from the SAME private model response.
+   // This is a second deterministic B143 compilation, NOT an extra model POST.
+   const beforeAuthor=structuredClone(parsed);
+   delete beforeAuthor.section;
+   beforeAuthor.schema=RANKED_SCHEMA;
+   const before=compileRankedExteriorIntent(beforeAuthor);
+   if(before.b143.geometrySha256!==result.unchangedRankedGeometrySha256||
+      before.worldWrites!==0||result.worldWrites!==0||
+      before.b143.sourceRoutes.status!=='SOURCE_ROUTES_REACH_ALL_ZONES'||
+      result.b143.sourceRoutes.status!=='SOURCE_ROUTES_REACH_ALL_ZONES'||
+      result.humanArt!=='NOT_REVIEWED'||
+      result.gates.some(x=>x!=='BLOCKED'))
+    fail('PRIVATE_ART_PREPOST_SOURCE_DRIFT');
+   const oldVox=new Map(before.b143.compiled.primitives.map(p=>[p.slice(0,3).join(','),p[3]]));
+   const newVox=new Map(result.b143.compiled.primitives.map(p=>[p.slice(0,3).join(','),p[3]]));
+   let removed=0,added=0,replaced=0;
+   for(const [cell,mat] of oldVox){
+    if(!newVox.has(cell))removed++;
+    else if(newVox.get(cell)!==mat)replaced++;
+   }
+   for(const cell of newVox.keys())if(!oldVox.has(cell))added++;
+   if(removed+added+replaced===0)fail('PRIVATE_ART_NO_MEANINGFUL_SECTION');
+   const viewKind={sourceKind:'PRIVATE_SINGLE_MODEL_ATTEMPT_UNATTESTED'};
+   sectionPrivateArtEvidence={
+    baselineHtml:renderB143Html(compileB143Gallery([before.b143.design]),tpl),
+    baselineSvg:actualOrthographicSvg(before.b143.compiled.primitives,viewKind),
+    finalSvg:actualOrthographicSvg(result.b143.compiled.primitives,viewKind),
+    report:{
+     schema:'r125-v4e-private-one-response-b143-geometry-delta-art-hold-v1',
+     provenance:injected?'INJECTED_TEST_DOUBLE_NOT_REAL_MODEL':
+      'LOCAL_OLLAMA_CLAIM_NOT_INDEPENDENTLY_AUTHENTICATED',
+     authoredSection:result.authoredSection,
+     originalResponseSha256:report.responseRawSha256,
+     baselineGeometrySha256:before.b143.geometrySha256,
+     finalGeometrySha256:result.b143.geometrySha256,
+     beforeB143VoxelCount:oldVox.size,afterB143VoxelCount:newVox.size,
+     actuallyRemovedCells:removed,actuallyAddedCells:added,
+     changedMaterialCells:replaced,
+     orthographicViews:['roof','north','south','west','east'],
+     extraModelRequests:0,realModelIdentityVerified:false,
+     authorSourceRoutesBeforeAndAfter:'SOURCE_ROUTES_REACH_ALL_ZONES',
+     humanArchitecturalArt:'NOT_REVIEWED',
+     architecturalQualityConclusion:'UNASSESSED_ART_HOLD',
+     minecraftWalking:'NOT_TESTED',worldContacts:0,worldWrites:0,
+     readiness:'NOT_PREPARED',constructionApproved:false,
+     executionAllowed:false,gates:Array(9).fill('BLOCKED'),
+     BuildPlan:{operations:[]}
+    }
+   };
+  }
   output(dir,'AUTHOR_INTENT_ORIGINAL.json',parsed);
   if(compact||rankedWindows||rankedSection){
    output(dir,'MECHANICALLY_EXPANDED_AUTHOR_IR.json',result.expandedMechanicalIR);
@@ -203,6 +256,12 @@ export async function runV4DLocalAuthor({
   output(dir,'TRUE_B143_SOURCE.json',result.b143.design);
   output(dir,'TWO_WIDE_ROUTES_SOURCE.json',result.b143.sourceRoutes);
   output(dir,'index.html',html);
+  if(sectionPrivateArtEvidence){
+   output(dir,'BASELINE_RANKED_3D_PRIVATE.html',sectionPrivateArtEvidence.baselineHtml);
+   output(dir,'BASELINE_RANKED_FIVE_VIEWS_PRIVATE.svg',sectionPrivateArtEvidence.baselineSvg);
+   output(dir,'FINAL_SECTIONED_FIVE_VIEWS_PRIVATE.svg',sectionPrivateArtEvidence.finalSvg);
+   output(dir,'PRIVATE_B143_SECTION_ART_HOLD_COMPARISON.json',sectionPrivateArtEvidence.report);
+  }
   report.authoredIRSha256=rankedSection?result.sectionedAuthorSha256:
    rankedWindows?result.rankedAuthorSha256:
    compact?result.compactAuthorSha256:result.originalIntentSha256;
