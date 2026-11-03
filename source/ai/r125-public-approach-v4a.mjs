@@ -18,7 +18,7 @@ const exact=(o,ks)=>o!==null&&typeof o==='object'&&!Array.isArray(o)&&
  Object.keys(o).sort().join('|')===ks.slice().sort().join('|');
 const int=(v,a,b)=>Number.isSafeInteger(v)&&v>=a&&v<=b;
 const sha=x=>createHash('sha256').update(JSON.stringify(x)).digest('hex');
-const K=(x,y,z)=>x+','+y+','+z';
+const K=(x,y,z)=>x+','+y+','+z;
 const intersects=(a0,a1,b0,b1)=>a0<=b1&&b0<=a1;
 const maxX=r=>r.x+r.width-1;
 const maxZ=r=>r.z+r.depth-1;
