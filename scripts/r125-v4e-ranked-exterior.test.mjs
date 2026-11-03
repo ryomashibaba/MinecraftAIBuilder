@@ -292,27 +292,26 @@ test('V4E author-controlled nonrect semi-outdoor sections produce real B143 and 
  }),/R125_V4E_SECTION_ENVELOPE_NOT_LARGE_ENOUGH/);
 });
 
-test('V4E SOUTH corner author choices create two distinct protected real B143 sections',async()=>{
+test('V4E SOUTH corners author true exposed faces and reject parent-linked sides',async()=>{
  const {compileAuthoredPublicLoggia}
   =await import('../source/ai/r125-v4e-authored-public-loggia.mjs');
  const {syntheticFiveGenreAuthorCases}
   =await import('./r125-v4e-cross-genre-source-study.mjs');
- const src=structuredClone(syntheticFiveGenreAuthorCases()[0].source);
- // Both child programs are deliberately attached to the SIDE edges, leaving
- // a broad SOUTH public facade and its central authored window untouched.
- src.spaces[0].width=30;
- src.spaces[0].depth=30;
- src.spaces[2].attach={to:src.spaces[0].id,side:'east',shift:0};
- src.spaces[0].windowPriority=['south','east','west','north'];
- const before=structuredClone(src);
- const a=compileAuthoredPublicLoggia(src,{
-  spaceId:src.spaces[0].id,corner:'SW',recessDepth:6});
- const b=compileAuthoredPublicLoggia(src,{
-  spaceId:src.spaces[0].id,corner:'SE',recessDepth:6});
- assert.deepEqual(src,before,'author output must remain byte-equivalent as data');
- assert.notEqual(a.finalGeometrySha256,b.finalGeometrySha256);
- assert.notEqual(a.finalGeometrySha256,a.unchangedV4EBaseGeometrySha256);
+ // The gallery's model-authored attached rooms are on opposite outer flanks:
+ // WEST child leaves its SOUTH/WEST corner exposed; EAST child leaves SOUTH/EAST.
+ // Do not move either child's linked wall or silently fake an exposed side.
+ const cases=syntheticFiveGenreAuthorCases();
+ const left=structuredClone(cases[0].source);
+ const right=structuredClone(cases[1].source);
+ const frozenL=structuredClone(left),frozenR=structuredClone(right);
+ const a=compileAuthoredPublicLoggia(left,{
+  spaceId:'learning',corner:'SW',recessDepth:6});
+ const b=compileAuthoredPublicLoggia(right,{
+  spaceId:'learning',corner:'SE',recessDepth:6});
+ assert.deepEqual(left,frozenL);
+ assert.deepEqual(right,frozenR);
  for(const r of [a,b]){
+  assert.notEqual(r.finalGeometrySha256,r.unchangedV4EBaseGeometrySha256);
   assert(r.trueSectionSourceWitness.sourceRoofVoxelsPreserved>0);
   assert(r.trueSectionSourceWitness.authoredFixtureVoxelsPreserved>0);
   assert.equal(r.trueSectionSourceWitness.finalPhysicalGlazing.verifiedPanelGlassCells,36);
@@ -324,11 +323,13 @@ test('V4E SOUTH corner author choices create two distinct protected real B143 se
   assert.deepEqual(r.gates,Array(9).fill('BLOCKED'));
   assert.equal(r.art,'NOT_REVIEWED');
  }
- const old=syntheticFiveGenreAuthorCases()[0];
- assert.throws(()=>compileAuthoredPublicLoggia(old.source,{
-  spaceId:old.source.spaces[0].id,corner:'SW',recessDepth:6
+ assert.throws(()=>compileAuthoredPublicLoggia(left,{
+  spaceId:'learning',corner:'SE',recessDepth:6
  }),/R125_V4E_SECTION_RECESS_ON_SHARED_WALL/);
- assert.throws(()=>compileAuthoredPublicLoggia(src,{
-  spaceId:src.spaces[0].id,corner:'SS',recessDepth:6
+ assert.throws(()=>compileAuthoredPublicLoggia(right,{
+  spaceId:'learning',corner:'SW',recessDepth:6
+ }),/R125_V4E_SECTION_RECESS_ON_SHARED_WALL/);
+ assert.throws(()=>compileAuthoredPublicLoggia(left,{
+  spaceId:'learning',corner:'SS',recessDepth:6
  }),/R125_V4E_SECTION_AUTHOR_SECTION_CONTRACT/);
 });
