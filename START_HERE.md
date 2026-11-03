@@ -2,6 +2,14 @@
 
 **2026-11-02 JST 更新。長文プロンプト・ZIP交換なしで、GitHub正本を読み込んで既存開発を継続する。**
 
+## 2026-11-03 最新実装：V4C 本物の大中庭・外部前庭を持つAUTHOR主導の共通IR
+
+- V4B 5/5 ART REJECT（2〜3 block²の空庭、5件同一トポロジー）を固定証拠とし、配色・窓など局所改修ではなく **2〜5の主従棟位置・親子接続・中庭・屋外前庭**を外部設計者が著作する汎用V4Cを独立開発した。旧R125主経路、V1〜V4B原文、Minecraft Education成功経路は一切変更していない。
+- 実装：source/ai/r125-void-massing-v4c.mjs。AUTHORの明示する中庭（最低49 block²実支持床＋頭上空気・四方壁・2幅ゲート）、屋外前庭（10〜22×6〜16 blockの支持床）、棟接続、入口を真正B143へ変換。入口→全用途棟と中庭の2幅SOURCEルート、無修復HOLD、NOT_PREPARED/9 BLOCKED/BuildPlan空/World0維持。**初期制約：北入口・単層・軸平行矩形主体。真のゲーム内施工・構造・地形は未検証。**
+- 3つの作者供給の **合成テスト構成** を別々に作成。east-south-court：中庭64/前庭112 block²。west-north-court：90/112。serial-court：110/180。3つの接続トポロジーは相異なる。これは**Qwenの新設計ではない**。本物のB143変換器/ルート監査の限定暫定検証3/3、ハッシュ計算のみ検証用代替だったため正式Node PASSは未認定。
+- CIと証拠：scripts/r125-v4c-void-massing.test.mjs（真正3D、2幅動線、負例のHOLD）、scripts/r125-v4c-source-review.mjs（GitHubから3D index.html・実ボクセル比較SOURCE_TOP_VIEWS.svg・機械可読JSONを自動出力）を既存R125 workflowに追加。[V4C初回Actions #41596939516](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41596939516) は**キュー待ち、正式完走と美術評価は未確認**。詳細 [V4C共通IR・試験契約](docs/R125_V4C_AUTHORED_MASS_VOIDS_SOURCE_PILOT_20261103_JA.md)。
+- 次工程：Actions完走→Artifactの真正B143 3Dの上面・斜視・入口・庭と内部をV4Bと比較して**ART FIRST**で採否判断。形状SHA差と庭面積だけで美術合格にしない。品質ゲート後にだけ本物の独立Qwen著作を有限回検討し、原本をSHA保護。main変更禁止、Draft PR #128継続、Work事前承認制。
+
 ## 2026-11-03 確定：V4A/V4B CI完走・真正3D ART REJECT 5/5
 
 - V4B初回の [CI #41589868598](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41589868598) が失敗した直接原因はV4A `r125-public-approach-v4a.mjs` の未閉じ引用符。研究ブランチ `c414f47770c46fa2a83549f25f54b15c213e0659` で訂正し、次の [CI #41594095747](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41594095747) が **SUCCESS**。SOURCE技術結果をARTやMinecraft施工へ昇格しない。
