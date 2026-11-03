@@ -351,7 +351,7 @@ try {
     try { Invoke-Item -LiteralPath $out }
     catch { Write-Warning "Open the preserved evidence folder manually: $out" }
     $viewer = Join-Path $out "index.html"
-    if (Test-Path -LiteralPath $viewer) {
+    if ((-not $ExportOverviewLatest) -and (Test-Path -LiteralPath $viewer)) {
       try { Invoke-Item -LiteralPath $viewer }
       catch { Write-Warning "Viewer was saved but could not be opened: $viewer" }
     }
