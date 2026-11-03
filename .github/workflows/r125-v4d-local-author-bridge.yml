@@ -5,6 +5,8 @@ on:
     paths:
       - 'source/ai/r125-v4d-relative-author-ir.mjs'
       - 'source/ai/r125-v4d-compact-model-ir.mjs'
+      - 'source/ai/r125-v4e-ranked-exterior-ir.mjs'
+      - 'scripts/r125-v4e-ranked-exterior.test.mjs'
       - 'scripts/r125-v4d-compact-model-fixture.mjs'
       - 'scripts/r125-v4d-relative-author-synthetic.mjs'
       - 'scripts/r125-v4d-local-architect.mjs'
@@ -37,6 +39,8 @@ jobs:
         run: |
           node --check source/ai/r125-v4d-relative-author-ir.mjs
           node --check source/ai/r125-v4d-compact-model-ir.mjs
+          node --check source/ai/r125-v4e-ranked-exterior-ir.mjs
+          node --check scripts/r125-v4e-ranked-exterior.test.mjs
           node --check scripts/r125-v4d-compact-model-fixture.mjs
           node --check scripts/r125-v4d-local-architect.mjs
           node --check scripts/r125-v4d-replay-private.mjs
@@ -51,6 +55,7 @@ jobs:
           node --test scripts/r125-v4d-local-architect.test.mjs
           node --test scripts/r125-v4d-replay-private.test.mjs
           node --test scripts/r125-v4d-author-source-diagnostics.test.mjs
+          node --test scripts/r125-v4e-ranked-exterior.test.mjs
       - name: Record strong non-promotion boundary
         run: |
           echo '## V4D compact real-model bridge — CI only' >> "$GITHUB_STEP_SUMMARY"

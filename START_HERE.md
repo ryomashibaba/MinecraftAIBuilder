@@ -1,5 +1,11 @@
 # MinecraftAIBuilder — START HERE（新チャット・AI開発者の統一入口）
 
+## 2026-11-03 V4E研究：モデルの「窓方向1つ」負荷を著作順位式の外壁選択へ分離（CI結果未確定）
+
+- 2回目のユーザー提出SOURCE診断は **originalModelCalls=1、testInjectionPresent=false、additionalModelCalls=0、SHA256_MATCH、SOURCE HOLD**。形式不備0、schema不一致0、**WINDOW_ON_SHARED_PARTITIONのみ2件（配列index0,1）**。前回（形式2件＋共有壁窓2件）より形式は改善、窓問題は再発。4空間・covered3/sky1・接続3件、B143形状生成0。実LLMモデル身元/美術は未認証。
+- 同じプロンプトをただ長くするのでなく、旧V4Dを一切変えず**V4E任意研究契約** `source/ai/r125-v4e-ranked-exterior-ir.mjs` を追加。モデルは4方角の**優先順位を全部著作**し、HOSTは全空間の接続が確定した後、順位順に**実際の外壁である方向だけ**を確定的に選択。作者が許可していない方向にはしない。外壁候補が皆無・文法不正・既存SOURCE検証不合格はHOLD。選択の順位・採用方角・除外共有壁を明示したPRIVATE研究証拠を生成。元V4D/従来のEducation世界施工安全、モデル著作、世界的ART基準は保護。
+- **注意：V4Eは現在オフライン合成模型用の研究原型**。実Qwen接続経路の標準切り替え、ART認定、Minecraft施工は禁止。新V4EのテストはGitHub Actionsに追加したが現時点で成績未確定。実モデルでV4Dと比較する前にCI/SOURCE合格を確認する。main不変更、PR #128 Draft、9 BLOCKED、WorldWrites0。
+
 ## 2026-11-03 初のユーザー提出V4D一回試行結果：SOURCE HOLDと指示の的確な強化（実モデル改善率は未測定）
 
 - ユーザー提出の共有用3ファイル `AUTHOR_SOURCE_DIAGNOSTIC.json`、`OFFLINE_REPLAY_REPORT.json`、`REPLAY_SHAREABLE_STATUS.json` を診断。ローカル試行記録は **originalModelCalls=1, originalTestInjectionPresent=false, additionalModelCalls=0**。本物の特定モデルによる生成かは暗号学的には未認証。PRIVATEモデル原文SHA整合 **SHA256_MATCH**、元回答は **HOLD_MODEL_OR_SOURCE_INVALID_NO_REPAIR**／再診断 **HOLD_REPLAY_SOURCE_REJECTED**。**SOURCE成功・B143構築なし、ART未審査、Minecraft WorldWrites0、NOT_PREPARED/9 BLOCKED**。
