@@ -1,4 +1,4 @@
-name: Dec free-autonomy single-project prototype (FAKE-only)
+name: Dec free-autonomy single-project pilot (fake QA + real Docker smoke)
 
 on:
   push:
@@ -21,10 +21,25 @@ jobs:
         with:
           persist-credentials: false
       - name: Python syntax check
-        run: python3 -m py_compile tools/free-autonomy-solo/solo_agent.py tools/free-autonomy-solo/docker_sandbox.py
+        run: python3 -m py_compile tools/free-autonomy-solo/solo_agent.py tools/free-autonomy-solo/docker_sandbox.py tools/free-autonomy-solo/docker_native_probe.py
       - name: Isolated fake OpenCode CLI safety regression
         run: python3 -m unittest discover -v -s tools/free-autonomy-solo -p 'test_*.py'
       - name: Evidence limitations
         run: |
-          echo 'FAKE CLI / Docker command-builder contract / SOURCE supervisor only.'
-          echo 'Real OpenCode model, Windows, OS sandbox, GitHub push, ART, Minecraft and full-match fidelity remain unverified.'
+          echo 'Fake CLI contract tests only. Real LLM, Windows and project quality remain unverified.'
+
+  native-docker-smoke-no-llm:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Obtain public QA runtime image (no model image or credentials)
+        run: docker pull node:22-bookworm-slim
+      - name: Actually start Docker and assert isolation/timeout
+        run: python3 tools/free-autonomy-solo/docker_native_probe.py
+      - name: Explicit certification scope
+        run: |
+          echo 'REAL Docker Linux ephemeral smoke ONLY.'
+          echo 'OpenCode, Ollama/Qwen, Windows Docker, GitHub push and multi-step autonomy remain HOLD.'
