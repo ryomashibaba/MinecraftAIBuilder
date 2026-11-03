@@ -99,7 +99,7 @@ export async function runV4DLocalAuthor({
 }={}, {fetcher=fetch,timeoutMs=180000}={}){
  if(typeof compact!=='boolean')fail('COMPACT_MODE');
  const dir=validateLaunch({model,outDir,prompt,endpoint},fetcher,timeoutMs);
- const injected=fetcher!==fetch,start=Date.now();
+ const injected=fetcher!==fetch||process.env.MAB_V4D_TEST_DOUBLE_MODE==='1',start=Date.now();
  fs.mkdirSync(dir,{recursive:false});
  const report={
   schema:'minecraftaibuilder-r125-v4d-local-model-author-attempt-v1',

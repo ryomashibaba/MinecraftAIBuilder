@@ -15,6 +15,7 @@ on:
       - 'scripts/r125-v4d-shareable-receipt.mjs'
       - 'scripts/r125-v4d-local-one-shot.ps1'
       - 'scripts/r125-v4d-one-click-setup.cmd'
+      - 'scripts/r125-v4d-ci-fake-ollama.mjs'
       - 'scripts/r125-v4d-local-architect.test.mjs'
       - '.github/workflows/r125-v4d-local-author-bridge.yml'
   workflow_dispatch:
@@ -102,5 +103,72 @@ jobs:
           call scripts\r125-v4d-one-click-setup.cmd --prepare-only
           if errorlevel 1 exit /b 1
           echo PASS: one-click git branch cloned into an isolated LOCALAPPDATA folder; 0 model requests.
+
+      - name: Test one-click Y flow over fake localhost HTTP, then ZERO-call diagnosis
+        shell: pwsh
+        env:
+          MAB_V4D_TEST_DOUBLE_MODE: '1'
+        run: |
+          $ErrorActionPreference = "Stop"
+          $env:MAB_V4D_FAKE_READY_FILE = Join-Path $env:RUNNER_TEMP 'v4d_fake_ready.txt'
+          $env:MAB_V4D_FAKE_POST_LOG = Join-Path $env:RUNNER_TEMP 'v4d_fake_posts.txt'
+          $stdout = Join-Path $env:RUNNER_TEMP 'v4d_fake_stdout.txt'
+          $stderr = Join-Path $env:RUNNER_TEMP 'v4d_fake_stderr.txt'
+          $private = Join-Path $env:LOCALAPPDATA 'MinecraftAIBuilder\PrivateModelStudies'
+          $before = @()
+          if (Test-Path -LiteralPath $private) {
+            $before = @(Get-ChildItem -LiteralPath $private -Directory | Select-Object -ExpandProperty FullName)
+          }
+          $node = (Get-Command node).Source
+          $server = Start-Process -FilePath $node -ArgumentList @('scripts/r125-v4d-ci-fake-ollama.mjs') -NoNewWindow -PassThru -RedirectStandardOutput $stdout -RedirectStandardError $stderr
+          try {
+            for ($i=0; $i -lt 25; $i++) {
+              if (Test-Path -LiteralPath $env:MAB_V4D_FAKE_READY_FILE) { break }
+              if ($server.HasExited) { throw "V4D_FAKE_SERVER_EXITED_EARLY" }
+              Start-Sleep -Milliseconds 400
+            }
+            if (-not (Test-Path -LiteralPath $env:MAB_V4D_FAKE_READY_FILE)) {
+              throw "V4D_LOCAL_FAKE_HTTP_NOT_READY"
+            }
+            & $env:ComSpec /d /c "call scripts\r125-v4d-one-click-setup.cmd --run-once"
+            $exitCode = $LASTEXITCODE
+            if ($exitCode -ne 2) {
+              throw "V4D_FAKE_INVALID_SOURCE_EXPECTED_HOLD_EXIT_2_GOT_$exitCode"
+            }
+            $posts = @(Get-Content -LiteralPath $env:MAB_V4D_FAKE_POST_LOG)
+            if ($posts.Count -ne 1 -or $posts[0] -ne 'ONE_TEST_DOUBLE_POST') {
+              throw "V4D_FAKE_LOOPBACK_MODEL_POST_NOT_EXACTLY_ONE"
+            }
+            $created = @(Get-ChildItem -LiteralPath $private -Directory | Where-Object {
+              $_.FullName -notin $before
+            })
+            $original = @($created | Where-Object { $_.Name -like 'V4D_*' -and $_.Name -notlike 'V4D_REPLAY_*' })
+            $replays = @($created | Where-Object { $_.Name -like 'V4D_REPLAY_*' })
+            if ($original.Count -ne 1 -or $replays.Count -ne 1) {
+              throw "V4D_AUTO_OFFLINE_DIAGNOSE_FOLDER_COUNT"
+            }
+            $attempt = Get-Content -LiteralPath (Join-Path $original[0].FullName 'REVIEW_SUMMARY_SHAREABLE.json') -Raw | ConvertFrom-Json
+            $diag = Get-Content -LiteralPath (Join-Path $replays[0].FullName 'REPLAY_SHAREABLE_STATUS.json') -Raw | ConvertFrom-Json
+            if ($attempt.reportedStatus -ne 'HOLD_MODEL_OR_SOURCE_INVALID_NO_REPAIR' -or
+                $attempt.modelCallAttempts -ne 1 -or
+                $attempt.explicitlyInjectedTestResponse -ne $true -or
+                $attempt.worldWrites -ne 0) {
+              throw "V4D_FAKE_ATTEMPT_FALSE_REAL_MODEL_OR_SOURCE_PROMOTION"
+            }
+            if ($diag.replayStatus -ne 'HOLD_REPLAY_SOURCE_REJECTED' -or
+                $diag.additionalModelCalls -ne 0 -or
+                $diag.originalIsTestInjection -ne $true -or
+                $diag.worldWrites -ne 0 -or
+                $diag.structuralIssueCodes -notcontains 'PARENT_ATTACHMENT_INVALID') {
+              throw "V4D_FAKE_AUTO_DIAGNOSTIC_CONTRACT"
+            }
+            if (-not (Test-Path (Join-Path $original[0].FullName 'MODEL_RESPONSE_ORIGINAL.txt'))) {
+              throw "V4D_FAKE_PRIVATE_RAW_MISSING"
+            }
+            Write-Host "PASS: Windows one-click --run-once, exactly ONE FAKE localhost POST, automatic 0-call SOURCE diagnostics, zero world writes."
+          } finally {
+            Stop-Process -Id $server.Id -Force -ErrorAction SilentlyContinue
+          }
+
 
 

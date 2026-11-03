@@ -12,7 +12,7 @@ if errorlevel 1 goto MISSING_GIT
 where node.exe >nul 2>nul
 if errorlevel 1 goto MISSING_NODE
 if /i "%~1"=="--check-only" goto CHECK_ONLY
-if not "%~1"=="" if /i not "%~1"=="--prepare-only" goto BAD_ARGUMENT
+if not "%~1"=="" if /i not "%~1"=="--prepare-only" if /i not "%~1"=="--run-once" goto BAD_ARGUMENT
 
 set "WORK_ROOT=%LOCALAPPDATA%\MinecraftAIBuilder\IsolatedV4D"
 if not exist "%WORK_ROOT%" mkdir "%WORK_ROOT%"
@@ -42,6 +42,7 @@ echo Git commit: %GIT_HEAD%
 echo Isolated folder: %WORK_DIR%
 echo.
 if /i "%~1"=="--prepare-only" goto PREPARED
+if /i "%~1"=="--run-once" goto RUN_MODEL
 echo [3/3] Optional real local Qwen trial.
 echo This contacts ONLY local Ollama at 127.0.0.1.
 echo At most ONE model generation request. No Minecraft world write.
@@ -60,15 +61,54 @@ echo.
 echo Running ONE private compact-IR trial; no automatic retry.
 node.exe "%WORK_DIR%\scripts\r125-v4d-local-architect.mjs" --compact --model "%MODEL_ID%" --out "%OUTPUT_DIR%" --prompt "Design an original small public library and workshop with a functional reception and a sheltered open-air community courtyard."
 set "NODE_EXIT=%ERRORLEVEL%"
+set "SHARE_FILE=%OUTPUT_DIR%\REVIEW_SUMMARY_SHAREABLE.json"
 echo.
-if exist "%OUTPUT_DIR%\REVIEW_SUMMARY_SHAREABLE.json" (
- echo Share ONLY REVIEW_SUMMARY_SHAREABLE.json with ChatGPT.
- echo Private study folder: %OUTPUT_DIR%
- start "" explorer.exe /select,"%OUTPUT_DIR%\REVIEW_SUMMARY_SHAREABLE.json"
-) else (
- echo No shareable receipt was created. Report the error shown above.
+if "%NODE_EXIT%"=="0" goto SOURCE_READY
+if not exist "%OUTPUT_DIR%\MODEL_RESPONSE_ORIGINAL.txt" goto NO_RAW_TO_DIAGNOSE
+echo SOURCE HOLD: replaying saved response OFFLINE to classify the cause.
+echo No additional model request will be sent.
+set "REPLAY_DIR=%PRIVATE_ROOT%\V4D_REPLAY_%RANDOM%_%RANDOM%"
+if exist "%REPLAY_DIR%" goto FOLDER_COLLISION
+node.exe "%WORK_DIR%\scripts\r125-v4d-replay-private.mjs" --study "%OUTPUT_DIR%" --out "%REPLAY_DIR%"
+if exist "%REPLAY_DIR%\REPLAY_SHAREABLE_STATUS.json" (
+  set "SHARE_FILE=%REPLAY_DIR%\REPLAY_SHAREABLE_STATUS.json"
+  echo Offline diagnostic saved. Original response remains private.
 )
-if not "%NODE_EXIT%"=="0" echo Test returned HOLD. Do not retry automatically.
+goto SHOW_RECEIPT
+
+:NO_RAW_TO_DIAGNOSE
+echo Model response was not saved; see original local preflight report.
+goto SHOW_RECEIPT
+
+:SOURCE_READY
+echo Original response compiled; SOURCE candidate only, NOT ART PASS.
+echo The private index.html is available for human review.
+goto SHOW_RECEIPT
+
+:SHOW_RECEIPT
+if exist "%OUTPUT_DIR%\REVIEW_SUMMARY_SHAREABLE.json" (
+ echo Model attempt summary saved locally.
+) else (
+ echo No model-attempt receipt was created; see error messages above.
+)
+rem Prefer diagnostics on failed outputs. Do not use variable assignments inside
+rem a parenthesized CMD block because percent expansion is evaluated early.
+if exist "%SHARE_FILE%" goto OPEN_RECEIPT
+echo No shareable JSON was produced. Report the error above.
+goto FINISH_MODEL
+
+:OPEN_RECEIPT
+echo Share ONLY the selected JSON with ChatGPT.
+echo Shareable file: %SHARE_FILE%
+if "%MAB_V4D_TEST_DOUBLE_MODE%"=="1" goto FINISH_MODEL
+start "" explorer.exe /select,"%SHARE_FILE%"
+goto FINISH_MODEL
+
+:FINISH_MODEL
+if not "%NODE_EXIT%"=="0" (
+ echo Attempt finished with HOLD. Do not retry automatically.
+ set "FINAL_EXIT=2"
+)
 goto DONE
 
 :CHECK_ONLY
@@ -93,7 +133,7 @@ echo ERROR: Node.js is not available. Nothing changed.
 goto DONE
 :BAD_ARGUMENT
 set "FINAL_EXIT=1"
-echo ERROR: Supported flags are --check-only and --prepare-only.
+echo ERROR: Supported flags are --check-only, --prepare-only, and --run-once.
 goto DONE
 :CANNOT_MAKE_FOLDER
 set "FINAL_EXIT=1"
@@ -127,5 +167,6 @@ goto DONE
 echo.
 if /i "%~1"=="--check-only" (endlocal & exit /b %FINAL_EXIT%)
 if /i "%~1"=="--prepare-only" (endlocal & exit /b %FINAL_EXIT%)
+if /i "%~1"=="--run-once" (endlocal & exit /b %FINAL_EXIT%)
 pause
 endlocal
