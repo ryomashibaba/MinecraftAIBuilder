@@ -172,13 +172,14 @@ test('V4E malformed original preference remains HOLD with safe diagnostic and ze
 });
 
 
-test('V4E source witnesses each entire glass panel and immediate outside AIR in final B143, never ART',()=>{
+test('V4E source witnesses each entire glass panel and both immediate AIR sides in final B143, never ART',()=>{
  const result=compileRankedExteriorIntent(author());
  const proof=result.rankedPhysicalGlazingSourceProof;
  assert.equal(proof.status,'B143_WINDOW_GLASS_AND_IMMEDIATE_OUTWARD_AIR_SOURCE_VERIFIED');
  assert.equal(proof.windowCount,2);
  assert.equal(proof.verifiedPanelGlassCells,36);
  assert.equal(proof.verifiedImmediateOutwardAirCells,36);
+ assert.equal(proof.verifiedImmediateInwardAirCells,36);
  assert.equal(proof.humanArchitecturalArt,'NOT_REVIEWED');
  assert.equal(result.worldWrites,0);
  const room=result.plan.nodes[0];
@@ -196,4 +197,8 @@ test('V4E source witnesses each entire glass panel and immediate outside AIR in 
  blockedOutward.b143.compiled.primitives.push([wx+1,wy,wz,-1]);
  assert.throws(()=>proveRankedExteriorPhysicalGlazing(blockedOutward,blockedOutward.chosenWindowFaces),
   /R125_V4E_RANKED_PHYSICAL_OUTWARD_AIR_OBSTRUCTED_/);
+ const blockedInward=structuredClone(result);
+ blockedInward.b143.compiled.primitives.push([wx-1,wy,wz,-1]);
+ assert.throws(()=>proveRankedExteriorPhysicalGlazing(blockedInward,blockedInward.chosenWindowFaces),
+  /R125_V4E_RANKED_PHYSICAL_INWARD_AIR_OBSTRUCTED_/);
 });
