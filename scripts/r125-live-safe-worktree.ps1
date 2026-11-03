@@ -7,10 +7,10 @@ param(
   [switch]$CheckOnly,
   [switch]$ReviewLatest,
   [switch]$PrepareLatest,
-  [ValidateSet('Lab','Retail')][string]$UseCase = 'Lab'
+  [ValidateSet('Lab','Retail','CrossGenre')][string]$UseCase = 'Lab'
 )
 if ((@($CheckOnly, $ReviewLatest, $PrepareLatest) | Where-Object { $_ }).Count -gt 1) { throw 'HOLD_INCOMPATIBLE_MODES' }
-if ($UseCase -eq 'Retail' -and ($ReviewLatest -or $PrepareLatest)) { throw 'HOLD_RETAIL_REQUIRES_NEW_MODEL_RUN' }
+if ($UseCase -in @('Retail','CrossGenre') -and ($ReviewLatest -or $PrepareLatest)) { throw 'HOLD_RETAIL_REQUIRES_NEW_MODEL_RUN' }
 $ErrorActionPreference = "Stop"
 $branch = "feature/b198zr1-protected-architectural-revision"
 $work = $null
@@ -69,6 +69,10 @@ try {
     if ($LASTEXITCODE -ne 0) { throw "HOLD_PRIVATE_REVIEW_REGRESSION" }
     & node --test scripts/r125-saved-education-preflight.test.mjs
     if ($LASTEXITCODE -ne 0) { throw "HOLD_EDUCATION_PREFLIGHT_REGRESSION" }
+    if ($UseCase -eq 'CrossGenre') {
+      & node --test scripts/r125-cross-genre-pilot.test.mjs
+      if ($LASTEXITCODE -ne 0) { throw 'HOLD_CROSS_GENRE_REGRESSION' }
+    }
     if ($ReviewLatest -or $PrepareLatest) {
       $privateRoot = Join-Path $env:USERPROFILE "Documents\MAB_Private_Runs"
       if (-not (Test-Path -LiteralPath $privateRoot)) { throw "HOLD_PRIVATE_RUNS_NOT_FOUND" }
@@ -99,6 +103,15 @@ try {
       $privateRoot = Join-Path $env:USERPROFILE "Documents\MAB_Private_Runs"
       New-Item -ItemType Directory -Path $privateRoot -Force | Out-Null
       $suffix = [guid]::NewGuid().ToString("N").Substring(0,8)
+      if ($UseCase -eq 'CrossGenre') {
+        $out = Join-Path $privateRoot ("r125-cross-genre-" + (Get-Date -Format "yyyyMMdd-HHmmss") + "-" + $suffix)
+        Write-Host "Five independent real local Qwen designs, sequential GPU requests, no Minecraft writes."
+        & node scripts/r125-cross-genre-pilot.mjs --model "qwen3:14b" --out $out
+        if ($LASTEXITCODE -ne 0) {
+          $runHold = $true
+          Write-Warning "CROSS_GENRE_HOLD: All original evidence and shared-failure report preserved."
+        }
+      } else {
       if ($UseCase -eq 'Retail') {
         $out = Join-Path $privateRoot ("r125-retail-" + (Get-Date -Format "yyyyMMdd-HHmmss") + "-" + $suffix)
         # Only the intended brief is HOST-authored. The model must author
@@ -156,6 +169,7 @@ try {
       } else {
         $runHold = $true
         Write-Warning "No R125 report found; inspect model startup diagnostics. No retry was made."
+      }
       }
     }
   } finally {
