@@ -2,6 +2,13 @@
 
 **2026-11-02 JST 更新。長文プロンプト・ZIP交換なしで、GitHub正本を読み込んで既存開発を継続する。**
 
+## 2026-11-03 最新：Windows一枚PNG実提出・外形不変15/15・ART HOLD
+
+- **ユーザーが `SOURCE_ART_OVERVIEW.png` を提出**（1478×1601px、画像SHA256 `5ff189928b031794b909021e8209d22028f6976c8e404c587e63a412387c435d`）。PNGの埋込 `MAB_Source_Evidence` は `sourceReadyCount=5` / `modelCallsThisRun=0` / `worldWrites=0` / `humanArt=NOT_REVIEWED` / `minecraft=NOT_TESTED`、共有8px/block。CRC正当性と先行5件のSOURCE SHA照合に矛盾なし。**これでユーザーWindowsのPNG出力到達は確認できたが、全Node CIが成功した証拠ではない**。
+- **人間＋ピクセル横断ART予備監査**：FROZEN V2対V3の5棟×正面/側面/上面=15組の建物外形占有マスクがすべて差0px。変化は可視材質/窓などであり、形状SHAの差が「完成建築の外観変化」を証明するわけではない。全5棟ART HOLD継続。用途として読める入口・主従立体・公共空洞/中庭・魅力的なファサードが不足。詳細は [単一PNG画像の根拠つきART予備審査](docs/R125_V3_FIVE_GENRE_ONE_PNG_ART_AUDIT_20261103_JA.md)。
+- 共有ボトルネックはSOURCEに明示された**2〜5個の軸平行矩形の空間接続木＋HOSTが壁/屋根/中央入口を箱生成する**汎用IRの自由度。V3の追加採光/設備の設計目標を否定せず、今後は既存安定R125/B143/Education経路を守ったまま、モデルが外部接近・主要入口・主役体積/空洞などを著作する小さな共通IRの**オプトインSOURCE研究**へ。5ジャンル横断・美術採用0・個別建物向け手修正なし・無断Work/実世界施工なし。
+- **このターンでは画像評価と正本保存のみ**。新モデル推論/機能実装/実Minecraft試験は未実施。次担当は本監査を読んでV4概念IRの最小設計と失敗条件を定義し、過去5棟のSHAを保存したまま必要な共通修正だけ進める。
+
 ## 2026-11-03 追加：保存済み5棟の一枚PNG出力を阻害したテスト誤字を修正
 
 - ユーザーWindows実走（旧HEAD `2e10995af7f1e66de0552ed661a1219931e4a1ce`）の `-UseCase CrossGenre -ExportOverviewLatest` は専用回帰49件中48件成功・1件失敗。失敗は `scripts/r125-v3-failed-only-home-recovery.test.mjs` で未定義 `sha(png)` を呼んでいたテスト側の `ReferenceError`。正本既存の `digest()` へ置換し、研究ブランチのコミット `c35f62c8e4e1ff29d0f974b33f87c426902d8e16` に修正保存。生成器・保存Qwen原文・ランチャー・世界書込安全ゲート・mainには変更なし。
