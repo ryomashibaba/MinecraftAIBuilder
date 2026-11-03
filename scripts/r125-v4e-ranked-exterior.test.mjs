@@ -291,3 +291,44 @@ test('V4E author-controlled nonrect semi-outdoor sections produce real B143 and 
   spaceId:'garden',corner:'NE',recessDepth:6
  }),/R125_V4E_SECTION_ENVELOPE_NOT_LARGE_ENOUGH/);
 });
+
+test('V4E SOUTH corner author choices create two distinct protected real B143 sections',async()=>{
+ const {compileAuthoredPublicLoggia}
+  =await import('../source/ai/r125-v4e-authored-public-loggia.mjs');
+ const {syntheticFiveGenreAuthorCases}
+  =await import('./r125-v4e-cross-genre-source-study.mjs');
+ const src=structuredClone(syntheticFiveGenreAuthorCases()[0].source);
+ // Both child programs are deliberately attached to the SIDE edges, leaving
+ // a broad SOUTH public facade and its central authored window untouched.
+ src.spaces[0].width=30;
+ src.spaces[0].depth=30;
+ src.spaces[2].attach={to:src.spaces[0].id,side:'east',shift:0};
+ src.spaces[0].windowPriority=['south','east','west','north'];
+ const before=structuredClone(src);
+ const a=compileAuthoredPublicLoggia(src,{
+  spaceId:src.spaces[0].id,corner:'SW',recessDepth:6});
+ const b=compileAuthoredPublicLoggia(src,{
+  spaceId:src.spaces[0].id,corner:'SE',recessDepth:6});
+ assert.deepEqual(src,before,'author output must remain byte-equivalent as data');
+ assert.notEqual(a.finalGeometrySha256,b.finalGeometrySha256);
+ assert.notEqual(a.finalGeometrySha256,a.unchangedV4EBaseGeometrySha256);
+ for(const r of [a,b]){
+  assert(r.trueSectionSourceWitness.sourceRoofVoxelsPreserved>0);
+  assert(r.trueSectionSourceWitness.authoredFixtureVoxelsPreserved>0);
+  assert.equal(r.trueSectionSourceWitness.finalPhysicalGlazing.verifiedPanelGlassCells,36);
+  assert.equal(r.trueSectionSourceWitness.finalPhysicalGlazing.verifiedImmediateInwardAirCells,36);
+  assert.equal(r.trueSectionSourceWitness.finalPhysicalGlazing.verifiedImmediateOutwardAirCells,36);
+  assert.equal(r.sectionedRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert.equal(r.worldWrites,0);
+  assert.equal(r.readiness,'NOT_PREPARED');
+  assert.deepEqual(r.gates,Array(9).fill('BLOCKED'));
+  assert.equal(r.art,'NOT_REVIEWED');
+ }
+ const old=syntheticFiveGenreAuthorCases()[0];
+ assert.throws(()=>compileAuthoredPublicLoggia(old.source,{
+  spaceId:old.source.spaces[0].id,corner:'SW',recessDepth:6
+ }),/R125_V4E_SECTION_RECESS_ON_SHARED_WALL/);
+ assert.throws(()=>compileAuthoredPublicLoggia(src,{
+  spaceId:src.spaces[0].id,corner:'SS',recessDepth:6
+ }),/R125_V4E_SECTION_AUTHOR_SECTION_CONTRACT/);
+});
