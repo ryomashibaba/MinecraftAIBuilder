@@ -18,6 +18,8 @@ import {RELATIVE_SCHEMA} from '../source/ai/r125-v4d-relative-author-ir.mjs';
 import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
 import {classifyPrivateV4DFailure}
  from './r125-v4d-shareable-receipt.mjs';
+import {diagnosePrivateV4DAuthor,diagnosePrivateV4DInvalidJSON}
+ from './r125-v4d-author-source-diagnostics.mjs';
 
 export const REPLAY_SCHEMA='minecraftaibuilder-r125-v4d-offline-replay-v1';
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
@@ -102,6 +104,7 @@ export function replayPrivateV4D(study,out){
  const {root,original,request}=openStudy(study);
  const destination=checkedDestination(out,root);
  fs.mkdirSync(destination);
+ let authorDiagnostic=null;
  const report={
   schema:REPLAY_SCHEMA,
   status:'HOLD_NOT_REPLAYED',
@@ -147,9 +150,11 @@ export function replayPrivateV4D(study,out){
   let author;
   try{author=JSON.parse(raw);}
   catch{
+   authorDiagnostic=diagnosePrivateV4DInvalidJSON(original.authorContract);
    report.status='HOLD_ORIGINAL_MODEL_INVALID_JSON';
    return report;
   }
+  authorDiagnostic=diagnosePrivateV4DAuthor(author,original.authorContract);
   let compiled;
   try{
    compiled=original.authorContract===COMPACT_SCHEMA?
@@ -198,6 +203,12 @@ export function replayPrivateV4D(study,out){
    'SOURCE_REPRODUCED_OFFLINE_ART_NOT_REVIEWED';
   return report;
  }finally{
+  if(authorDiagnostic){
+   report.structuralDiagnosticIssueCodes=authorDiagnostic.issues.map(x=>x.code)
+    .filter((code,index,all)=>all.indexOf(code)===index);
+   report.structuralDiagnosticIssueCount=authorDiagnostic.issues.length;
+   write(destination,'AUTHOR_SOURCE_DIAGNOSTIC.json',authorDiagnostic);
+  }
   // Deliberately no copy of the private model raw, prompts, model paths,
   // absolute source paths, or original private error text.
   write(destination,'OFFLINE_REPLAY_REPORT.json',report);
@@ -211,6 +222,9 @@ export function replayPrivateV4D(study,out){
    sourceSha256:report.sourceCodeSHA256Replayed,
    geometrySha256:report.geometrySHA256Replayed,
    failureCategory:report.failureCategory,
+   structuralIssueCodes:report.structuralDiagnosticIssueCodes??[],
+   structuralIssueCount:report.structuralDiagnosticIssueCount??null,
+   structuralDataDerivedOnlyFromShaVerifiedOriginal:!!authorDiagnostic,
    humanArt:'NOT_REVIEWED',minecraftWalking:'NOT_TESTED',
    sourceIsNotMinecraftConstruction:true,worldWrites:0,
    noOriginalPromptOrResponseIncluded:true

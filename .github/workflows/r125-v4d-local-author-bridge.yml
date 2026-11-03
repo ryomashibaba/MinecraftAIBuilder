@@ -10,6 +10,8 @@ on:
       - 'scripts/r125-v4d-local-architect.mjs'
       - 'scripts/r125-v4d-replay-private.mjs'
       - 'scripts/r125-v4d-replay-private.test.mjs'
+      - 'scripts/r125-v4d-author-source-diagnostics.mjs'
+      - 'scripts/r125-v4d-author-source-diagnostics.test.mjs'
       - 'scripts/r125-v4d-shareable-receipt.mjs'
       - 'scripts/r125-v4d-local-one-shot.ps1'
       - 'scripts/r125-v4d-local-architect.test.mjs'
@@ -37,6 +39,8 @@ jobs:
           node --check scripts/r125-v4d-local-architect.mjs
           node --check scripts/r125-v4d-replay-private.mjs
           node --check scripts/r125-v4d-replay-private.test.mjs
+          node --check scripts/r125-v4d-author-source-diagnostics.mjs
+          node --check scripts/r125-v4d-author-source-diagnostics.test.mjs
           node --check scripts/r125-v4d-shareable-receipt.mjs
           node --check scripts/r125-v4d-relative-author-synthetic.mjs
           node --check scripts/r125-v4d-local-architect.test.mjs
@@ -44,6 +48,7 @@ jobs:
         run: |
           node --test scripts/r125-v4d-local-architect.test.mjs
           node --test scripts/r125-v4d-replay-private.test.mjs
+          node --test scripts/r125-v4d-author-source-diagnostics.test.mjs
       - name: Record strong non-promotion boundary
         run: |
           echo '## V4D compact real-model bridge — CI only' >> "$GITHUB_STEP_SUMMARY"

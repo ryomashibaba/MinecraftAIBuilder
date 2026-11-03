@@ -1,5 +1,11 @@
 # MinecraftAIBuilder — START HERE（新チャット・AI開発者の統一入口）
 
+## 2026-11-03 V4D実モデルの失敗原因を安全に分類する補助診断（SOURCE CI未確定）
+
+- 前段は本物のQwen/Gemma推論0件、SOURCE再生の注入CI [#41626660965](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41626660965) Linux 23/23・Windows CheckOnly PASS。今回、PRIVATE原文が**元SHAと一致することを確認した後に限り**、JSON構造・部屋の用途の記述有無・接続先参照・屋根・外壁/窓の条件などを分類する `scripts/r125-v4d-author-source-diagnostics.mjs` を独立追加。元モデルを再POSTせず、失敗した候補を自動修復せず、建築美術を認定しない。
+- `scripts/r125-v4d-replay-private.mjs` にPRIVATEの `AUTHOR_SOURCE_DIAGNOSTIC.json` と共有許可済みの**静的問題コード/件数**を記録する経路を追加。ユーザープロンプト、元回答、建物/用途の名前、パスやエラー原文は診断JSONにも共有用にも含めない。SHA不一致時は診断対象にすらしない。元SOURCE/geometryの一致判定と旧HOLD維持は不変。
+- 合成入力で合法/不正AUTHORと、元入力改ざん、無効JSON、PRIVATE流出の回帰をテスト・CIへ追加（現時点で完走未確認）。実モデル新試行0、正式ART採用0、Minecraft世界書込0。main・旧R125→B143→Education、PR #128 Draft、9 BLOCKED/BuildPlan空を保護。[診断研究](docs/R125_V4D_LOCAL_REAL_AUTHOR_BRIDGE_20261103_JA.md)。
+
 ## 2026-11-03 V4D元モデル原文の完全オフラインSOURCE再現・差分HOLD：Linux23/23・Windows CI PASS
 
 - 前工程のWindows/Linux専用CIは [#41624377954](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41624377954) completed/success（Linux17/17、Windows `-CheckOnly` PASS）。今回の次工程は、**実Qwenを再POSTする代わりに既存PRIVATE原文を読み取り専用で再コンパイルし、当初のSOURCE SHAと完成B143 geometry SHAが一致するか**を検証する。実モデルの新推論は0件。過去のART REJECT、実Qwen未認定を維持。
