@@ -152,8 +152,11 @@ def validate(cfg: dict) -> None:
     required = {"project", "workspace", "branch", "model", "tasks", "checks", "allowed_prefixes", "state_dir"}
     if not required.issubset(cfg) or cfg["project"] not in PROJECTS:
         raise Hold("INVALID_CONFIG_OR_PROJECT")
-    if not isinstance(cfg["tasks"], list) or not cfg["tasks"] or not all(isinstance(t, str) and t.strip() for t in cfg["tasks"]):
-        raise Hold("TASKS_REQUIRED")
+    goal = cfg.get("continuous_goal")
+    if goal is not None and (not isinstance(goal, str) or not goal.strip()):
+        raise Hold("CONTINUOUS_GOAL_INVALID")
+    if not isinstance(cfg["tasks"], list) or (not cfg["tasks"] and not goal) or not all(isinstance(t, str) and t.strip() for t in cfg["tasks"]):
+        raise Hold("TASKS_OR_CONTINUOUS_GOAL_REQUIRED")
     if not isinstance(cfg["checks"], list) or not cfg["checks"] or not all(isinstance(c, list) and c and all(isinstance(a, str) and a for a in c) for c in cfg["checks"]):
         raise Hold("CHECKS_ARGV_LIST_REQUIRED")
     if not isinstance(cfg["allowed_prefixes"], list) or not cfg["allowed_prefixes"] or not all(re.fullmatch(r"[A-Za-z0-9_-]+(?:/[A-Za-z0-9_-]+)*/?", x) for x in cfg["allowed_prefixes"]):
@@ -209,9 +212,14 @@ def execute(cfg: dict, *, push: bool, sandbox_attested: bool) -> dict:
         state["status"] = "RUNNING"
         state.pop("hold_reason", None)
         write_atomic(state_path, state)
-        while state["next_task"] < len(cfg["tasks"]) and state["cycles"] < cfg["max_cycles"] and time.monotonic() < deadline:
+        while (state["next_task"] < len(cfg["tasks"]) or cfg.get("continuous_goal")) and state["cycles"] < cfg["max_cycles"] and time.monotonic() < deadline:
             index = state["next_task"]
-            task = cfg["tasks"][index]
+            if index < len(cfg["tasks"]):
+                task = cfg["tasks"][index]
+            else:
+                task = ("Advance the fixed long-running goal by choosing the NEXT DISTINCT meaningful development task. "
+                        "Do not repeat prior commits or invent evidence. Goal: " + cfg["continuous_goal"])
+            previous = ", ".join(x["sha"][:12] for x in state["commits"][-5:])
             feedback = ""
             success = False
             for attempt in range(cfg["per_task_attempts"]):
@@ -224,7 +232,7 @@ def execute(cfg: dict, *, push: bool, sandbox_attested: bool) -> dict:
                           "Do not commit, push, modify protected originals, use paid APIs, change model, or touch paths outside this repository. "
                           "Preserve established project strategy, quality gates and existing successes. "
                           "You may inspect and edit within approved project subfolders. Avoid destructive commands. "
-                          f"Task: {task}\nFailure feedback from independent check: {feedback[-1800:]}" )
+                          f"Task: {task}\nRecent committed steps: {previous}\nFailure feedback from independent check: {feedback[-1800:]}" )
                 try:
                     rc, tail = run_cmd(["opencode", "run", "--auto", "--model", cfg["model"], prompt],
                                        p, min(cfg["agent_timeout_seconds"], max(1, int(deadline - time.monotonic()))),
@@ -279,8 +287,10 @@ def execute(cfg: dict, *, push: bool, sandbox_attested: bool) -> dict:
                 state["hold_reason"] = "RETRY_OR_TIME_BUDGET_EXHAUSTED_WITHOUT_VERIFIED_SOURCE_CHANGE"
                 write_atomic(state_path, state)
                 break
-        if state["next_task"] == len(cfg["tasks"]):
+        if not cfg.get("continuous_goal") and state["next_task"] == len(cfg["tasks"]):
             state["status"] = "TASK_QUEUE_COMPLETED_SOURCE_ONLY"
+        elif cfg.get("continuous_goal") and state["status"] == "RUNNING":
+            state["status"] = "WINDOW_ENDED_SOURCE_ONLY"
         elif state["status"] == "RUNNING":
             state["status"] = "HOLD"
             state["hold_reason"] = "GLOBAL_CYCLE_OR_TIME_BUDGET_EXHAUSTED"
@@ -298,7 +308,7 @@ def main() -> int:
         cfg = json.loads(args.config.read_text(encoding="utf-8"))
         state = execute(cfg, push=args.push, sandbox_attested=args.sandbox_attested)
         print(json.dumps({"status": state["status"], "cycles": state["cycles"], "commits": state["commits"]}, ensure_ascii=False))
-        return 0 if state["status"].startswith("TASK_QUEUE_COMPLETED") else 2
+        return 0 if state["status"] in {"TASK_QUEUE_COMPLETED_SOURCE_ONLY", "WINDOW_ENDED_SOURCE_ONLY"} else 2
     except (Hold, OSError, ValueError, KeyError) as ex:
         print(f"HOLD: {ex}", file=sys.stderr)
         return 2

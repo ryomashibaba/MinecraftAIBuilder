@@ -15,7 +15,7 @@
 ## プロトタイプの使い方
 
 1. OS隔離済みの**捨てられる独立clone**を作り、既存開発フォルダ・ワールド・原本をマウントしない。`research/`ブランチを使用。Docker/WSL等でのローカルモデル到達・GPU/CPU負荷は実機実証が必要。
-2. 下のJSONを Gitリポジトリ**外**に置き、絶対パスを設定。 `tasks` は1セッションで順次こなす複数の開発目的で、1工程ごとにプロジェクトを替えない。`allowed_prefixes` は対象変更領域に限定する。`checks` は実プロジェクトの独立検査を複数指定する。
+2. 下のJSONを Gitリポジトリ**外**に置き、絶対パスを設定。 `tasks` は1セッションで順次こなす複数の開発目的で、1工程ごとにプロジェクトを替えない。任意の `continuous_goal` を併記すると、指定課題終了後も同一プロジェクトで別の意味ある工程を選び、全体の実行時間・サイクル上限まで継続する（上限は安全予算であり品質合格ラインではない）。無変更・独立検証失敗が続けばHOLD。`allowed_prefixes` は対象変更領域に限定する。`checks` は実プロジェクトの独立検査を複数指定する。
 3. `python solo_agent.py --config ... --sandbox-attested --push` で実行。`--push` を省略すればローカルコミットまで。`state_dir/state.json` で結果と未認定フラグを確認。
 
 ### 設定例：MinecraftAIBuilder
@@ -30,6 +30,7 @@
   "checks": [["node", "--test", "scripts/r125-v4d-local-architect.test.mjs"]],
   "allowed_prefixes": ["source", "scripts"],
   "state_dir": "C:/FreeAutonomyPrivate/MAB-20261104",
+  "continuous_goal": "既存のStrategy v2を守り、実Qwen→B143→真正ARTを段階的に改善する。SOURCE/ART/実機を混同しない",
   "max_cycles": 12,
   "max_minutes": 840
 }
@@ -47,6 +48,7 @@
   "checks": [["npm", "run", "typecheck"], ["npm", "test"]],
   "allowed_prefixes": ["src", "scripts", "tools"],
   "state_dir": "C:/FreeAutonomyPrivate/TPS-20261104",
+  "continuous_goal": "既存の原作証拠・忠実度ゲートを維持して、180秒4v4に向けた原作SOURCEの未達を一つずつ解消する",
   "max_cycles": 12,
   "max_minutes": 840
 }

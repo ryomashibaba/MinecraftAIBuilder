@@ -89,6 +89,25 @@ class SoloAgentTests(unittest.TestCase):
         with self.assertRaisesRegex(Hold, 'INITIAL_WORKSPACE_NOT_CLEAN'):
             execute(dict(self.cfg), push=False, sandbox_attested=True)
 
+    def test_continuous_goal_advances_three_distinct_steps(self):
+        (self.fake / 'opencode').write_text(
+            '#!/usr/bin/env python3\nfrom pathlib import Path\n'
+            'f=Path("source/generated.txt")\n'
+            'f.write_text((f.read_text() if f.exists() else "") + "step\\n")\n'
+            'print("MOCK_ONLY")\n'
+        )
+        (self.fake / 'opencode').chmod(0o755)
+        cfg = dict(self.cfg, continuous_goal='Continue fixed project scope', max_cycles=3,
+                   checks=[[os.sys.executable, '-c',
+                            "from pathlib import Path; assert Path('source/generated.txt').is_file()"]])
+        with patch.dict(os.environ, self.env):
+            result = execute(cfg, push=False, sandbox_attested=True)
+        self.assertEqual(result['status'], 'WINDOW_ENDED_SOURCE_ONLY')
+        self.assertEqual(len(result['commits']), 3)
+        self.assertEqual(result['cycles'], 3)
+        self.assertEqual(result['real_model_verified'], False)
+        self.assertEqual(sh(self.repo, 'git', 'status', '--porcelain'), '')
+
     def test_resume_does_not_repeat_committed_task(self):
         with patch.dict(os.environ, self.env):
             result = execute(dict(self.cfg), push=False, sandbox_attested=True)
