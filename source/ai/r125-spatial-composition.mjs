@@ -2,7 +2,7 @@
  * Opt-in generic architectural composition: AI chooses functional rooms,
  * dimensions, roof heights and a relative adjacency tree. HOST computes only
  * safe exact coordinates and real B143 voxels. No typology-specific templates.
- * Never approves Minecraft construction.
+ * Minimum 6x6 allows a 4x4 usable clear interior before source route checks.\n * Every accepted original still must satisfy REAL 2-wide voxel circulation.\n * Never approves Minecraft construction.
  */
 import {createHash} from 'node:crypto';
 import {SCHEMA as B143,compileDesign,verifyCompiled} from './b143-building-dsl.mjs';
@@ -36,7 +36,7 @@ export function validateSpatialComposition(p){
   if(!keys(r,i===0?['id','purpose','width','depth','roofY']:
     ['id','purpose','width','depth','roofY','attach'])||
    !slug(r.id)||seen.has(r.id)||!prose(r.purpose)||
-   !int(r.width,7,14)||!int(r.depth,7,14)||!int(r.roofY,6,10))
+   !int(r.width,6,14)||!int(r.depth,6,14)||!int(r.roofY,6,10))
     fail('ROOM_CONTRACT');
   if(i>0&&(!keys(r.attach,['to','side','shift'])||
     !seen.has(r.attach.to)||
