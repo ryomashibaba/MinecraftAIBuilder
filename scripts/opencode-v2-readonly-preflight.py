@@ -80,6 +80,14 @@ def parse_supported_v2(raw):
         return semver, "OPENCODE_V2_2_3_REQUIRED"
     return semver, None
 
+def find_cli(base):
+    """Prefer the dedicated side-by-side V2 CLI over legacy V1 on PATH."""
+    local = base / "cli" / "node_modules" / ".bin" / ("opencode.cmd" if os.name == "nt" else "opencode")
+    if local.is_file():
+        return str(local), "PILOT_LOCAL"
+    candidate = shutil.which("opencode")
+    return candidate, "PATH" if candidate else "NOT_FOUND"
+
 def main():
     parser = argparse.ArgumentParser(description="OpenCode V2 model-free, read-only, isolated preflight")
     parser.add_argument("--self-test", action="store_true",
@@ -91,6 +99,7 @@ def main():
         assert parse_supported_v2("2.2.2") == ("2.2.2", "OPENCODE_V2_2_3_REQUIRED")
         assert parse_supported_v2("opencode v2.2.5") == ("2.2.5", None)
         assert parse_supported_v2("nonsense") == (None, "OPENCODE_VERSION_UNRECOGNIZED")
+        assert find_cli(Path("__not_a_real_pilot_folder_"))[1] in ("PATH", "NOT_FOUND")
         print("POLICY_STATIC_SELF_TEST_PASS; REAL_OPENCODE_NOT_EXECUTED")
         return 0
 
@@ -106,6 +115,7 @@ def main():
         "trial_branch": BRANCH,
         "trial_head": None,
         "opencode_version": None,
+        "opencode_source": "UNDETERMINED",
         "isolated_clone": False,
         "opencode_v2_static_policy_written": False,
         "model_requests": 0,
@@ -121,9 +131,11 @@ def main():
     try:
         if shutil.which("git") is None:
             raise RuntimeError("GIT_NOT_FOUND")
-        if shutil.which("opencode") is None:
+        cli, cli_source = find_cli(base)
+        report["opencode_source"] = cli_source
+        if cli is None:
             raise RuntimeError("OPENCODE_NOT_INSTALLED")
-        version = call([shutil.which("opencode"), "--version"], timeout=15)
+        version = call([cli, "--version"], timeout=15)
         parsed, reason = parse_supported_v2(version)
         report["opencode_version"] = parsed
         if reason:
