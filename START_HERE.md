@@ -2,6 +2,14 @@
 
 **2026-11-02 JST 更新。長文プロンプト・ZIP交換なしで、GitHub正本を読み込んで既存開発を継続する。**
 
+## 2026-11-03 最新実装：V4A 作者指定の公開入口・開放アプローチ（CI待ち）
+
+- 前工程で可視化した15/15外形不変を受け、場当たりの配色/窓追加ではなく**モデル著作の空間IR自由度**に着手。オプトイン `source/ai/r125-public-approach-v4a.mjs` を研究ブランチへ追加。元の `r125-spatial-composition.mjs`、V2/V3、private Qwen回答、R125 Education実機経路は**改変していない**。
+- V4Aはモデル/設計者が `rootRoomId` / `offset` / `width` / `depth` を厳格に指定する空間IR。既存真正B143の屋根・正面壁を一部切除し、**床付き外部くぼみ＋左右壁＋奥の本当の2幅入口**を生成。B143真正SOURCE、屋外支持床/空気、全室2幅SOURCE動線、旧V1と異なるgeometry SHAを機械検査。失敗は無修復HOLD、全施工ゲート不変。
+- **重要な限定**：現在のV4Aはroot北側のみ／低層直方体の組合せの範囲。主従ボリューム/中庭/駅前広場の完成自由設計ではない。5ジャンルの証明は**合成テストダブル**であり、新Qwen5実回答や美術PASSではない。実モデル追加POST0、Minecraft World Writes 0。
+- 回帰 `scripts/r125-public-approach-v4a.test.mjs` を旧R125 GitHub Actionsワークフローに接続。初回 [#41584403568](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41584403568) は**キュー待機を確認、正式PASS未確認**。旧回帰の削除なし。詳細 [V4A実装・試験境界](docs/R125_V4A_PUBLIC_APPROACH_SOURCE_STUDY_20261103_JA.md)。
+- **次の判定**：CIと真正3Dの別視点確認でV4AのSOURCEだけを判断。外観改善が不十分ならART REJECTし、V4Bの主従ボリューム/外部空間一体著作へ進む。5ジャンル共通エンジン、Mac軽量IR、原本保護、Draft PR #128、main不変更、Work事前承認、NOT_PREPARED/9 BLOCKED/BuildPlan空を継続。
+
 ## 2026-11-03 最新：Windows一枚PNG実提出・外形不変15/15・ART HOLD
 
 - **ユーザーが `SOURCE_ART_OVERVIEW.png` を提出**（1478×1601px、画像SHA256 `5ff189928b031794b909021e8209d22028f6976c8e404c587e63a412387c435d`）。PNGの埋込 `MAB_Source_Evidence` は `sourceReadyCount=5` / `modelCallsThisRun=0` / `worldWrites=0` / `humanArt=NOT_REVIEWED` / `minecraft=NOT_TESTED`、共有8px/block。CRC正当性と先行5件のSOURCE SHA照合に矛盾なし。**これでユーザーWindowsのPNG出力到達は確認できたが、全Node CIが成功した証拠ではない**。
