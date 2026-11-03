@@ -13,6 +13,8 @@ import {RANKED_SCHEMA,compileRankedExteriorIntent}
 import {compileB143Gallery,renderB143Html}
  from './b143-gallery-core.mjs';
 import {actualOrthographicSvg} from './r125-v4e-source-art-review.mjs';
+import {auditB143ProjectedVisibility,renderB143ProjectedVisibilityDelta}
+ from './r125-v4e-visibility-delta.mjs';
 import {compileAuthoredPublicLoggia} from '../source/ai/r125-v4e-authored-public-loggia.mjs';
 import {compileAuthoredPrimaryMassingVoid} from '../source/ai/r125-v4e-authored-primary-massing-void.mjs';
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
@@ -120,6 +122,10 @@ export function exportV4ECrossGenreSource(folder){
   s.worldWrites!==0||s.readiness!=='NOT_PREPARED'))
   fail('NONRECT_SECTION_SOURCE_FAIL_CLOSED');
  const massing=samples.map(s=>compileAuthoredPrimaryMassingVoid(s.source,s.authoredMassing));
+ const visibility=massing.map((m,i)=>auditB143ProjectedVisibility(
+  results[i].b143.compiled.primitives,m.b143Compiled.primitives));
+ if(visibility.some(v=>v.views.find(x=>x.face==='roof').depthChangedCells<1))
+  fail('MASSING_ROOF_HEIGHT_DIFFERENCE_NOT_VISIBLE');
  const massingReview=compileB143Gallery(massing.map(s=>s.b143Design));
  const sectionReview=compileB143Gallery(sectioned.map(s=>s.sectionedB143Design));
  const review=compileB143Gallery(results.map(r=>r.b143.design));
@@ -142,6 +148,7 @@ export function exportV4ECrossGenreSource(folder){
     baselineGeometrySha256:m.baselineGeometrySha256,
     finalGeometrySha256:m.finalGeometrySha256,
     finalB143Voxels:m.b143Compiled.primitives.length,
+    visibilityEvidence:visibility[i],
     sourceWitness:m.sourceMassingWitness,
     sourceRoutes:m.sourceRoutes.status,
     humanArt:m.architectureQuality,
@@ -195,6 +202,9 @@ export function exportV4ECrossGenreSource(folder){
    actualOrthographicSvg(r.b143.compiled.primitives),{flag:'wx'});
   fs.writeFileSync(path.join(folder,'MASSING_B143_'+samples[i].genre+'_FIVE_VIEWS.svg'),
    actualOrthographicSvg(massing[i].b143Compiled.primitives),{flag:'wx'});
+   fs.writeFileSync(path.join(folder,'MASSING_B143_'+samples[i].genre+'_VISIBILITY_DELTA.svg'),
+    renderB143ProjectedVisibilityDelta(r.b143.compiled.primitives,
+     massing[i].b143Compiled.primitives),{flag:'wx'});
   fs.writeFileSync(path.join(folder,'SECTION_B143_'+samples[i].genre+'_FIVE_VIEWS.svg'),
    actualOrthographicSvg(sectioned[i].sectionedCompiled.primitives),{flag:'wx'});
  }

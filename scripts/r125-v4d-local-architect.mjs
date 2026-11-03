@@ -18,6 +18,8 @@ import {buildV4DShareableReceipt} from './r125-v4d-shareable-receipt.mjs';
 import {RANKED_SCHEMA,RANKED_SYSTEM_PROMPT,compileRankedExteriorIntent} from '../source/ai/r125-v4e-ranked-exterior-ir.mjs';
 import {SECTIONED_SCHEMA,SECTIONED_SYSTEM_PROMPT,compileSectionedAuthorIntent} from '../source/ai/r125-v4e-sectioned-author-ir.mjs';
 import {actualOrthographicSvg} from './r125-v4e-source-art-review.mjs';
+import {auditB143ProjectedVisibility,renderB143ProjectedVisibilityDelta}
+ from './r125-v4e-visibility-delta.mjs';
 import {MASSING_SCHEMA,MASSING_SYSTEM_PROMPT,compileMassingAuthorIntent} from '../source/ai/r125-v4e-massing-author-ir.mjs';
 
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
@@ -215,6 +217,8 @@ export async function runV4DLocalAuthor({
     baselineHtml:renderB143Html(compileB143Gallery([before.b143.design]),tpl),
     baselineSvg:actualOrthographicSvg(before.b143.compiled.primitives,viewKind),
     finalSvg:actualOrthographicSvg(result.b143.compiled.primitives,viewKind),
+    visibilitySvg:renderB143ProjectedVisibilityDelta(
+     before.b143.compiled.primitives,result.b143.compiled.primitives,viewKind),
     report:{
      schema:rankedSection?'r125-v4e-private-one-response-b143-geometry-delta-art-hold-v1':
       'r125-v4e-private-one-response-primary-massing-art-hold-v1',
@@ -229,6 +233,8 @@ export async function runV4DLocalAuthor({
      beforeB143VoxelCount:oldVox.size,afterB143VoxelCount:newVox.size,
      actuallyRemovedCells:removed,actuallyAddedCells:added,
      changedMaterialCells:replaced,
+     projectedVisibilityAudit:auditB143ProjectedVisibility(
+      before.b143.compiled.primitives,result.b143.compiled.primitives),
      orthographicViews:['roof','north','south','west','east'],
      extraModelRequests:0,realModelIdentityVerified:false,
      authorSourceRoutesBeforeAndAfter:'SOURCE_ROUTES_REACH_ALL_ZONES',
@@ -273,7 +279,9 @@ export async function runV4DLocalAuthor({
    output(dir,'BASELINE_RANKED_FIVE_VIEWS_PRIVATE.svg',sectionPrivateArtEvidence.baselineSvg);
    output(dir,authoredMassing?'FINAL_PRIMARY_MASSING_FIVE_VIEWS_PRIVATE.svg':
     'FINAL_SECTIONED_FIVE_VIEWS_PRIVATE.svg',sectionPrivateArtEvidence.finalSvg);
-   output(dir,authoredMassing?'PRIVATE_B143_MASSING_ART_HOLD_COMPARISON.json':
+   output(dir,authoredMassing?'PRIVATE_B143_MASSING_VISIBILITY_DELTA.svg':
+     'PRIVATE_B143_SECTION_VISIBILITY_DELTA.svg',sectionPrivateArtEvidence.visibilitySvg);
+    output(dir,authoredMassing?'PRIVATE_B143_MASSING_ART_HOLD_COMPARISON.json':
     'PRIVATE_B143_SECTION_ART_HOLD_COMPARISON.json',sectionPrivateArtEvidence.report);
   }
   report.authoredIRSha256=authoredMassing?result.massingAuthorSha256:

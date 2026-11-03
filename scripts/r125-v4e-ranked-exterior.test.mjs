@@ -255,6 +255,8 @@ test('five independent synthetic genres use one unmodified V4E→true B143 engin
   assert(fs.existsSync(path.join(out,'massing.html')));
   assert.equal(report.primaryMassingResearch.cases.length,5);
   assert(report.primaryMassingResearch.cases.every(c=>
+   c.visibilityEvidence.views.find(v=>v.face==='roof').depthChangedCells>0));
+  assert(report.primaryMassingResearch.cases.every(c=>
    c.sourceWitness.genuinelyOpenSkyFloorCells===49&&
    c.baselineGeometrySha256!==c.finalGeometrySha256&&
    c.humanArt==='ART_HOLD'));
@@ -262,6 +264,8 @@ test('five independent synthetic genres use one unmodified V4E→true B143 engin
   assert(report.sectionResearch.sectionedCases.every(c=>
    c.oldGeometrySha256!==c.newGeometrySha256&&c.art==='NOT_REVIEWED'));
   for(const {genre} of cases){
+   const delta=fs.readFileSync(path.join(out,'MASSING_B143_'+genre+'_VISIBILITY_DELTA.svg'),'utf8');
+   assert(delta.includes('ACTUAL B143 VISIBLE DELTA'));
    const svg=fs.readFileSync(path.join(out,'FINAL_B143_'+genre+'_FIVE_VIEWS.svg'),'utf8');
    assert(svg.includes('ACTUAL final B143 voxels'));
    assert(fs.readFileSync(path.join(out,'SECTION_B143_'+genre+'_FIVE_VIEWS.svg'),'utf8')
@@ -548,6 +552,8 @@ test('ONE injected local massing response stays test-double and offline replay p
   assert.deepEqual(JSON.parse(fs.readFileSync(path.join(study,'AUTHOR_INTENT_ORIGINAL.json'),'utf8')),answer);
   const art=JSON.parse(fs.readFileSync(path.join(study,'PRIVATE_B143_MASSING_ART_HOLD_COMPARISON.json'),'utf8'));
   assert(art.actuallyRemovedCells>0);
+  assert(art.projectedVisibilityAudit.views.find(v=>v.face==='roof').depthChangedCells>0);
+  assert(fs.existsSync(path.join(study,'PRIVATE_B143_MASSING_VISIBILITY_DELTA.svg')));
   assert.equal(art.extraModelRequests,0);
   assert.equal(art.humanArchitecturalArt,'NOT_REVIEWED');
   assert(fs.existsSync(path.join(study,'FINAL_PRIMARY_MASSING_FIVE_VIEWS_PRIVATE.svg')));
@@ -562,4 +568,32 @@ test('ONE injected local massing response stays test-double and offline replay p
   assert.equal(rr.additionalModelCalls,0);
   assert.equal(rr.worldWrites,0);
  }finally{fs.rmSync(root,{recursive:true,force:true});}
+});
+
+test('REAL B143 five-view height/silhouette/material delta catches same-material roof removal',async()=>{
+ const {auditB143ProjectedVisibility,renderB143ProjectedVisibilityDelta}
+  =await import('./r125-v4e-visibility-delta.mjs');
+ const {compileRankedExteriorIntent}
+  =await import('../source/ai/r125-v4e-ranked-exterior-ir.mjs');
+ const {compileAuthoredPrimaryMassingVoid}
+  =await import('../source/ai/r125-v4e-authored-primary-massing-void.mjs');
+ const {syntheticFiveGenreAuthorCases}
+  =await import('./r125-v4e-cross-genre-source-study.mjs');
+ for(const s of syntheticFiveGenreAuthorCases()){
+  const original=compileRankedExteriorIntent(s.source).b143.compiled.primitives;
+  const cut=compileAuthoredPrimaryMassingVoid(s.source,s.authoredMassing).b143Compiled.primitives;
+  const frozen=JSON.stringify([original,cut]);
+  const audit=auditB143ProjectedVisibility(original,cut);
+  assert.equal(audit.views.length,5);
+  assert.equal(audit.certifiedImprovement,false);
+  assert(audit.views.find(v=>v.face==='roof').depthChangedCells>0);
+  assert(audit.views.every(v=>v.changeFraction>=0&&v.changeFraction<=1));
+  const svg=renderB143ProjectedVisibilityDelta(original,cut);
+  assert(svg.includes('ACTUAL B143 VISIBLE DELTA'));
+  assert(svg.includes('fill="#ffd26a"'));
+  assert.equal(JSON.stringify([original,cut]),frozen);
+  const permuted=auditB143ProjectedVisibility(original,[...original].reverse());
+  assert(permuted.views.every(v=>v.changedCells===0));
+ }
+ assert.throws(()=>auditB143ProjectedVisibility([],[]),/REAL_B143_REQUIRED/);
 });

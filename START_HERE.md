@@ -1,5 +1,12 @@
 # MinecraftAIBuilder — START HERE（新チャット・AI開発者の統一入口）
 
+## 2026-11-04 本物のB143可視輪郭・屋根高さ差分の独立研究
+
+- 既存5方向のカラー表示では、**同じ材質の屋根と床の高さの違いが視覚化されにくい**問題をGitHub Actions実投影で確認。住宅案の1000px幅の5方向カラー図を比較すると606,000ピクセル中56ピクセルの差だけだった。これは美術の進歩とは認定できない。
+- `scripts/r125-v4e-visibility-delta.mjs` により真正B143から5方向の**輪郭・奥行/高さ・材質**差を分離。5用途合成には `MASSING_B143_*_VISIBILITY_DELTA.svg`、既存単発PRIVATEモデル研究には可視差分と監査JSONを追加する。元モデル原文は公開しない。真の美観や実モデル品質の合格判定はしない。
+- CI結果は最新GitHubで再確認。main/教育実機成功経路/PR#128 Draftを維持し、worldWrites0、9 BLOCKED、ART HOLDを保護。
+
+
 ## 2026-11-04 非既定V4Eの主棟形状・同一モデル回答によるSOURCE研究
 
 - `source/ai/r125-v4e-massing-author-ir.mjs`：短い1 JSONの中で全体用途・室構成、主棟の7〜10×7〜10の全高外気開放、X/Z公共通路方向をAUTHORが決め、HOSTは真正B143へ決定的変換する。HOSTによる設計補修はしない。
