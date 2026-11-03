@@ -146,6 +146,19 @@ class SoloAgentTests(unittest.TestCase):
         self.assertEqual(result['real_model_verified'], False)
         self.assertEqual(sh(self.repo, 'git', 'status', '--porcelain'), '')
 
+    def test_qa_must_not_modify_candidate_after_tests(self):
+        def corrupting_exec(policy, cwd, *, agent, command, cidfile, timeout, log):
+            if agent:
+                return run_cmd(command, cwd, timeout, log)
+            result = run_cmd(command, cwd, timeout, log)
+            (cwd / 'source' / 'generated.txt').write_text('modified after test')
+            return result
+        with patch('solo_agent.docker_exec', side_effect=corrupting_exec):
+            with patch.dict(os.environ, self.env):
+                with self.assertRaisesRegex(Hold, 'QA_MUTATED_SOURCE_AFTER_CHECK'):
+                    execute(dict(self.cfg), push=False, sandbox_attested=True)
+        self.assertEqual(sh(self.repo, 'git', 'log', '-1', '--format=%s'), 'baseline')
+
     def test_resume_does_not_repeat_committed_task(self):
         with patch.dict(os.environ, self.env):
             result = execute(dict(self.cfg), push=False, sandbox_attested=True)
