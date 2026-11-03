@@ -164,3 +164,40 @@ test('6x6 compact side-room offers a real 3-wide opening without an illegal 4-wi
  assert.equal(product.worldWrites,0);
  assert.deepEqual(product.gates,Array(9).fill('BLOCKED'));
 });
+
+
+test('storage rooms may be intentionally windowless, with real features and valid source routes',()=>{
+ const p=structuredClone(sample[1]);
+ const e=roof(p);
+ const intent=fixtureIntent(p,p.rooms[1].attach.side,0);
+ const choices=surveyFunctionalFacadeOpenings({originalPlan:p,envelopeIntent:e});
+ const exterior=choices[0].availableLargeExteriorOpenings[0];
+ intent.rooms[0].opening={...exterior};
+ intent.rooms[1].opening=null;
+ assert.equal(validateFunctionalIntent(p,intent),true);
+ const product=compileFunctionalFacadeV3({
+  originalPlan:p,envelopeIntent:e,functionalIntent:intent});
+ assert.equal(product.sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(product.sourceRoutes.featureAccess.length,p.rooms.length);
+ assert.equal(product.physicalProgram.perRoomOpeningEvidence.length,2);
+ assert.equal(product.physicalProgram.perRoomOpeningEvidence[0].authoredExteriorOpening,true);
+ assert(product.physicalProgram.perRoomOpeningEvidence[0].newGlassCells>0);
+ assert.equal(product.physicalProgram.perRoomOpeningEvidence[1].authoredExteriorOpening,false);
+ assert.equal(product.physicalProgram.perRoomOpeningEvidence[1].newGlassCells,0);
+ assert.equal(product.physicalProgram.perRoomFixtureEvidence.length,2);
+ assert(product.physicalProgram.perRoomFixtureEvidence.every(r=>r.newFixtureCells>0));
+ assert.equal(product.worldWrites,0);
+ assert.deepEqual(product.BuildPlan.operations,[]);
+});
+test('all-null facade does not falsely certify new daylight, while malformed openings fail',()=>{
+ const p=sample[0],e=roof(p),intent=fixtureIntent(p,'east',0);
+ const allNone=structuredClone(intent);
+ for(const room of allNone.rooms)room.opening=null;
+ assert.equal(validateFunctionalIntent(p,allNone),true);
+ assert.throws(()=>compileFunctionalFacadeV3({
+  originalPlan:p,envelopeIntent:e,functionalIntent:allNone}),
+  /NO_NEW_REAL_FACADE_GLAZING_BUILDING/);
+ const malformed=structuredClone(intent);
+ malformed.rooms[0].opening={side:'south',offset:0,width:5,height:2};
+ assert.throws(()=>validateFunctionalIntent(p,malformed),/ROOM_INTENT/);
+});
