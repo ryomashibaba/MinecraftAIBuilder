@@ -272,9 +272,9 @@ def main():
         error = (call.stderr + "\n" + call.stdout[:1000]).lower()
         category = "UNCLASSIFIED_CLI_FAILURE"
         for code, expression in (
-            ("AUTH_OR_CREDENTIAL", r"unauthorized|authentication|invalid api.?key|401\\b"),
-            ("BILLING_OR_PAYMENT", r"insufficient credits|payment required|billing|402\\b"),
-            ("RATE_LIMIT_OR_QUOTA", r"rate.?limit|quota|429\\b"),
+            ("AUTH_OR_CREDENTIAL", r"unauthorized|authentication|invalid api.?key|401\b"),
+            ("BILLING_OR_PAYMENT", r"insufficient credits|payment required|billing|402\b"),
+            ("RATE_LIMIT_OR_QUOTA", r"rate.?limit|quota|429\b"),
             ("MODEL_RESOLUTION", r"model unavailable|providermodelnotfound|model not found"),
             ("CONFIG_OR_POLICY", r"invalid config|configuration error|blocked by .*policy"),
             ("CLI_FLAGS", r"unknown (option|argument)|unrecognized option"),
