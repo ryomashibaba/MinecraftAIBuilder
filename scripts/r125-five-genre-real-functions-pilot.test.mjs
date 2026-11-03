@@ -169,4 +169,8 @@ test('cross-genre source failures are grouped as symptoms not proven common caus
   {genre:'店舗',failureCategory:'MODEL_FUNCTION_IR'}]);
  assert.equal(summary.sharedSymptoms.length,1);
  assert.equal(summary.sharedSymptoms[0].sharedRootCause,'NOT_YET_PROVEN');
+ assert.equal(classifyFunctionFailure('R125_FUNCTIONAL_NO_NEW_REAL_FACADE_GLAZING_BUILDING'),
+  'MODEL_FUNCTION_PROGRAM_NO_NEW_DAYLIGHT');
+ assert.equal(classifyFunctionFailure('R125_FUNCTION_BATCH_NO_EXTERIOR_OPENING_OPTION_IN_BUILDING'),
+  'SHARED_SPATIAL_NO_EXTERIOR_GLAZING_SITE');
 });
