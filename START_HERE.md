@@ -3,8 +3,8 @@
 ## 2026-11-03 V4D初回 SOURCE実装・CI確認入口
 
 - V4C正式CI #41596939516は成功、しかし**V4C 3/3 ART REJECT**の証拠は不変。V4Dでは箱型+屋根穴の微修正を繰り返さず、AUTHORが主屋根高低差と連続主帯のセットバック、北の大庇/広場、横の半屋外ロッジア、透明上部開口を選ぶ新しい**独立・オプトイン**意味IRの第1試作に着手。
-- 実装：source/ai/r125-sculpted-spine-v4d.mjs、単一の合成SOURCEテスト、実B143の3D/上面/立面を一括で出すCI。詳細は [V4D最初のSOURCE試験契約](docs/R125_V4D_SCULPTED_SPINE_SOURCE_PILOT_20261103_JA.md)。**新Qwen実推論0、Minecraft書込0。SOURCE CI・人間ARTの最終判断は実際のrunを照合するまで未認定。**
-- 次工程：GitHub ActionsのV4D Artifact（index.html / ACTUAL_B143_SOURCE_VIEWS.svg / V4D_SOURCE_REVIEW.json）を確認し、**ARTを3D実物で独立評価**。段状の箱連結に留まるならART REJECTして原理的表現を改善。合格を捏造して別用途/本物Qwenに移らない。
+- 実装：source/ai/r125-sculpted-spine-v4d.mjs、単一の合成SOURCEテスト、実B143の3D/上面/立面を一括で出すCI。詳細は [V4D最初のSOURCE試験契約](docs/R125_V4D_SCULPTED_SPINE_SOURCE_PILOT_20261103_JA.md)。**新Qwen実推論0、Minecraft書込0。正式専用CI [#41601328742](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41601328742) SUCCESS・合成SOURCE PASS 1/1。ただし真正3Dを独立斜視確認してART REJECT 1/1。** [V4D真正3D ART審査](docs/R125_V4D_ACTUAL_B143_ART_REJECT_20261103_JA.md)。
+- 最新ゲート：V4D Artifact #13214224396 を取得してZIP SHA256照合。真正B143 voxelから東西の斜視と上面・立面を独立確認し、主屋根の矩形段差・広い無地の壁/屋根・弱い公共空洞を理由に**ART REJECT**。次は小装飾/配色の増量ではなく作者著作の非矩形外郭・立体公共空洞へ**同一V4D工程で**設計自由度を根本改善し、実Qwen消費前に再審査。
 - 研究ブランチ feature/b198zr1-protected-architectural-revision、Draft PR #128 Open/Draft継続、main・R125→B143→Education既存実機成功・旧V1〜V4C/private原文保護。NOT_PREPARED／9 BLOCKED／BuildPlan空／world writes 0。Work事前承認。
 
 
