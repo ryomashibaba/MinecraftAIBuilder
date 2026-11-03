@@ -112,6 +112,15 @@ try {
       if ($LASTEXITCODE -ne 0) {
         $runHold = $true
         Write-Warning "DIAGNOSTIC_HOLD: Source evidence could not be independently read. No new model request."
+      } else {
+        # Open the new source-derived preview if a preserved original is
+        # newly compilable. Do not edit or promote the historical HOLD.
+        $candidate = Get-ChildItem -LiteralPath $out -Directory -Filter "recovered-*" |
+          Sort-Object Name | Select-Object -First 1
+        if ($candidate) {
+          $preview = Join-Path $candidate.FullName "index.html"
+          if (Test-Path -LiteralPath $preview) { $reviewViewer = $preview }
+        }
       }
     } elseif ($CheckOnly) {
       Write-Host "CHECK_ONLY_PASS: no model call, no model output, no world writes."
