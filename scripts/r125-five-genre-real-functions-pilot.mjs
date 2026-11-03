@@ -12,7 +12,7 @@ import {inspectPreservedFiveGenreSources,projectExactSourceVoxels}
  from './r125-five-genre-source-comparison.mjs';
 import {compileExpressiveEnvelopeV2}
  from '../source/ai/r125-expressive-envelope-v2.mjs';
-import {FUNCTION_SCHEMA,compileFunctionalFacadeV3}
+import {FUNCTION_SCHEMA,compileFunctionalFacadeV3,surveyFunctionalFacadeOpenings}
  from '../source/ai/r125-functional-facade-v3.mjs';
 import {preflightR125Ollama} from './r125-pilot.mjs';
 import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
@@ -49,6 +49,9 @@ const SYSTEM=[
  'The HOST generates actual blocks, validates a truly exterior opening and clear',
  '2-wide service access to EACH fixture from the public exterior entrance.',
  'Choose open EXTERIOR walls, never a shared wall or an exterior doorway.',
+ 'The user prompt includes genre-neutral availableLargeExteriorOpenings for each room.',
+ 'opening.side and opening.offset MUST be one of those actually buildable choices.',
+ 'The options certify only the position for width 4 and height 2; other allowed sizes are still independently verified.',
  'Do not copy the same kinds/arrangement for all genres. Express what each room actually does.',
  'Host may reject a design but MUST NOT invent or silently move your authored geometry.',
  'This is not completion of full furniture, accessibility, art or Minecraft gameplay.'
@@ -167,6 +170,10 @@ export async function runFiveGenreFunctions(
     failureCategory:null,reason:null,art:'NOT_REVIEWED',worldWrites:0};
    let product=null;
    try{
+    const facadeChoiceSurvey=surveyFunctionalFacadeOpenings({
+     originalPlan:c.product.plan,envelopeIntent:c.envelopeIntent});
+    const blocked=facadeChoiceSurvey.find(x=>x.availableLargeExteriorOpenings.length===0);
+    if(blocked)fail('NO_EXTERIOR_OPENING_OPTION_'+blocked.roomId);
     const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),timeoutMs);
     let wire;
     try{
@@ -181,7 +188,8 @@ export async function runFiveGenreFunctions(
          '各室が実際の機能を持つよう設備の種類・位置・外壁の大きな採光開口を'+
          '部屋ごとに独立決定し、指定スキーマの短いJSONで返す。\n'+
          JSON.stringify({plan:c.product.plan,
-          envelopeIntent:c.envelopeIntent,layout:c.product.layout})}]})
+          envelopeIntent:c.envelopeIntent,layout:c.product.layout,
+          facadeChoiceSurvey})}]})
      });
      if(!response?.ok)fail('MODEL_HTTP_'+response?.status);
      const text=await response.text();
