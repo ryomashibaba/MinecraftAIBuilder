@@ -58,6 +58,7 @@ def policy(model):
             {"action": "plugin.use", "resource": "*", "effect": "deny"},
             {"action": "integration.connect", "resource": "*", "effect": "deny"},
             {"action": "integration.use", "resource": "*", "effect": "deny"},
+            {"action": "integration.use", "resource": "opencode*", "effect": "allow"},
         ],
     }
 
@@ -71,6 +72,7 @@ def validate_policy(config, model):
     assert config["policies"][1] == {"action": "provider.use", "resource": "opencode", "effect": "allow"}
     for a in ("tool.use", "mcp.use", "skill.use", "plugin.use", "integration.connect", "integration.use"):
         assert {"action": a, "resource": "*", "effect": "deny"} in config["policies"]
+    assert config["policies"][-1] == {"action": "integration.use", "resource": "opencode*", "effect": "allow"}
     return True
 
 def parse_version(value):
