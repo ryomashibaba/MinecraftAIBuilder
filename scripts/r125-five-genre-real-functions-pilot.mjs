@@ -94,7 +94,7 @@ export function summarizeFunctionBatch(rows){
    category,genres:[...v],sharedRootCause:'NOT_YET_PROVEN'})),
   humanArt:'NOT_REVIEWED',minecraft:'NOT_TESTED',worldWrites:0};
 }
-function verifySavedEnvelope(evidence,envelopeDir){
+export function verifySavedEnvelope(evidence,envelopeDir){
  if(typeof envelopeDir!=='string'||!path.isAbsolute(envelopeDir)||
     fs.lstatSync(envelopeDir).isSymbolicLink())fail('ENVELOPE_DIR');
  const folder=fs.realpathSync(envelopeDir);
