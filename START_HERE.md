@@ -2,6 +2,12 @@
 
 **2026-11-02 JST 更新。長文プロンプト・ZIP交換なしで、GitHub正本を読み込んで既存開発を継続する。**
 
+## 2026-11-03 追加固定方針：5ジャンルを一括試験して共通問題を優先修正
+
+- **正式戦略更新済み**：住宅・店舗・研究施設・小美術館・小駅舎を同じ共通生成器/同じ条件で設計し、複数ジャンルで再現する空間・外観・設備・動線の問題を先に直す。症状の一致は原因の同一性の証明ではない。詳しくは docs/PROJECT_STRATEGY_V2_JA.md。
+- **実装**：scripts/r125-cross-genre-pilot.mjs が本物のローカルQwen 5独立回答（逐次GPU実行）を一操作で取得し、真正B143・SOURCE・原文SHA・個別3D・共通HOLD分類・比較index.htmlを私人フォルダに保存。scripts/r125-live-safe-worktree.ps1 -UseCase CrossGenre から起動。推論を実施したとはまだ認定しない。
+- **証拠境界**：2026-11-03の実装はSOURCE回帰とバッチ入口の追加。GitHub CI [R125 cross-genre #41559198079](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41559198079) はここに記述する時点で結果待ち。合成モデル回答のテスト成功を実Qwen・建築美術・Minecraft施工の合格にしない。既存2,089セル研究施設、旧R125、凍結原本、main、Draft PR #128は保護。
+
 ## 2026-11-03 方針の効率化：局所修正ではなく全体建築能力
 
 - ユーザー提供の新店舗は **実Qwen由来SOURCE 897セル／2室到達PASS／Minecraft施工未実施／ART HOLD**。従来R125の固定二分割と限定的な形状表現がボトルネック。窓・小屋根の局所修正を繰り返さない。
