@@ -12,7 +12,8 @@ import {inspectPreservedFiveGenreSources,projectExactSourceVoxels}
  from './r125-five-genre-source-comparison.mjs';
 import {compileExpressiveEnvelopeV2}
  from '../source/ai/r125-expressive-envelope-v2.mjs';
-import {FUNCTION_SCHEMA,compileFunctionalFacadeV3,surveyFunctionalFacadeOpenings}
+import {FUNCTION_SCHEMA,compileFunctionalFacadeV3,surveyFunctionalFacadeOpenings,
+ surveyFunctionalFixturePlacements}
  from '../source/ai/r125-functional-facade-v3.mjs';
 import {preflightR125Ollama} from './r125-pilot.mjs';
 import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
@@ -49,7 +50,9 @@ const SYSTEM=[
  'The HOST generates actual blocks, validates a truly exterior opening and clear',
  '2-wide service access to EACH fixture from the public exterior entrance.',
  'Choose open EXTERIOR walls, never a shared wall or an exterior doorway.',
- 'The user prompt includes genre-neutral availableLargeExteriorOpenings for each room.',
+ 'The user prompt includes availableLargeExteriorOpenings and availableFunctionalFixturePlacements.',
+ 'fixture.kind, fixture.side and fixture.offset MUST match one listed placement and a kind in its kinds list.',
+ 'Those placements are verified AFTER physical fixture insertion for a 2-wide SOURCE service route.',
  'For a room with an exterior window, opening.side/offset/width/height MUST EXACTLY match ONE availableLargeExteriorOpenings choice.',
  'If the room has zero choices, opening MUST be null. Interior storage or display rooms may choose null when daylight is inappropriate.',
  'Choose at least one valid new exterior opening for the building when available; never fabricate one in an internal wall.',
@@ -70,6 +73,8 @@ export function classifyFunctionFailure(s){
   return 'MODEL_FUNCTION_PROGRAM_NO_NEW_DAYLIGHT';
  if(/R125_FUNCTION_BATCH_NO_EXTERIOR_OPENING_OPTION_IN_BUILDING/.test(s))
   return 'SHARED_SPATIAL_NO_EXTERIOR_GLAZING_SITE';
+ if(/R125_FUNCTION_BATCH_NO_REACHABLE_FUNCTION_PLACEMENT_/.test(s))
+  return 'SHARED_SPATIAL_NO_FUNCTION_SERVICE_SITE';
  if(/R125_FUNCTIONAL_(OPENING_TO_OTHER_ROOM|OPENING_PARTLY_SHARED|WINDOW_BLOCKS_DOOR|REAL_SOURCE_FUNCTION_ACCESS_HOLD)/.test(s))
   return 'SHARED_PHYSICAL_RELATIONSHIP';
  if(/R125_FUNCTIONAL_|B143_|R125_ROUTE_/.test(s))
@@ -178,6 +183,13 @@ export async function runFiveGenreFunctions(
    try{
     const facadeChoiceSurvey=surveyFunctionalFacadeOpenings({
      originalPlan:c.product.plan,envelopeIntent:c.envelopeIntent});
+    const fixtureChoiceSurvey=surveyFunctionalFixturePlacements({
+     originalPlan:c.product.plan,envelopeIntent:c.envelopeIntent});
+    const missingFixtureSite=fixtureChoiceSurvey.find(x=>
+     x.availableFunctionalFixturePlacements.length===0);
+    write(folder,'SOURCE_AUTHOR_OPTIONS.json',{facadeChoiceSurvey,fixtureChoiceSurvey,
+     sourceOnly:true,authorChoiceRequired:true,worldWrites:0});
+    if(missingFixtureSite)fail('NO_REACHABLE_FUNCTION_PLACEMENT_'+missingFixtureSite.roomId);
     if(facadeChoiceSurvey.every(x=>x.availableLargeExteriorOpenings.length===0))
      fail('NO_EXTERIOR_OPENING_OPTION_IN_BUILDING');
     const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),timeoutMs);
@@ -195,7 +207,7 @@ export async function runFiveGenreFunctions(
          '部屋ごとに独立決定し、指定スキーマの短いJSONで返す。\n'+
          JSON.stringify({plan:c.product.plan,
           envelopeIntent:c.envelopeIntent,layout:c.product.layout,
-          facadeChoiceSurvey})}]})
+          facadeChoiceSurvey,fixtureChoiceSurvey})}]})
      });
      if(!response?.ok)fail('MODEL_HTTP_'+response?.status);
      const text=await response.text();
