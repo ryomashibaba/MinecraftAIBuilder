@@ -2,6 +2,13 @@
 
 **2026-11-02 JST 更新。長文プロンプト・ZIP交換なしで、GitHub正本を読み込んで既存開発を継続する。**
 
+## 2026-11-03 最新確定：V4C真正B143 CI PASS／ART REJECT 3/3
+
+- R125 GitHub Actions [#41596939516](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41596939516) は正式に `completed/success`。V4C 3つの異なる合成トポロジー、真正B143・2幅SOURCE動線・負例、単一3D+SVG比較をCI完走。Artifact `R125-V4C-Three-Distinct-Synthetic-Source-Topologies-ART-HOLD` ID **13213215256**、ZIP SHA256 `bae7414c7562df5a9a6756f57461222571f9c4198607d058b4d7983b27166261`、`index.html` 内の実ボクセル `surface` を等角投影し、元JSONと照合。
+- **V4C SOURCE TECH PASS 3/3、ART REJECT 3/3。** 中庭は確かに64/90/110 block²、屋外前庭112/112/180 block²、接続トポロジー3種類。ただし**斜視でも巨大な箱+翼+屋根の穴**が主体。3件とも実ガラス **0 voxel**、外壁/屋根の建築言語もほぼ同じ。空間面積を増やしただけでは住宅・公共建築などの完成ARTとして不十分。これを実Qwenの能力不足と誤認しない（合成3件・実Qwen追加0）。
+- 根拠、3D/B143のSHA、独立ART拒否理由、次工程V4Dの不可侵安全・美術ゲート：[V4C真正3D ART REJECT／V4D入口](docs/R125_V4C_ACTUAL_B143_ART_GATE_20261103_JA.md)。旧V1〜V4C・privateモデル原文、R125 Educationの実機成功、mainは保護。Draft PR #128 Open/Draft、`NOT_PREPARED`/9 BLOCKED/BuildPlan空/world writes 0を継続。
+- **次工程はV4Dの主輪郭・立面主従・意味ある公共の半屋外空間を設計者自身が著作できる共通IR**。安易な中庭拡張・外壁の窓/配色増加・同型5連作は反省から禁止。単純なSOURCEパスや形状SHAの違いでART自動PASSを与えない。まず表現能力と真正SOURCE安全性、その後に審査し、必要な場合だけ少数の本物Qwen設計を行う。
+
 ## 2026-11-03 最新実装：V4C 本物の大中庭・外部前庭を持つAUTHOR主導の共通IR
 
 - V4B 5/5 ART REJECT（2〜3 block²の空庭、5件同一トポロジー）を固定証拠とし、配色・窓など局所改修ではなく **2〜5の主従棟位置・親子接続・中庭・屋外前庭**を外部設計者が著作する汎用V4Cを独立開発した。旧R125主経路、V1〜V4B原文、Minecraft Education成功経路は一切変更していない。
