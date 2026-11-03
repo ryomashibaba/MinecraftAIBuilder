@@ -191,6 +191,24 @@ def execute(cfg: dict, *, push: bool, sandbox_attested: bool) -> dict:
         raise Hold("OS_SANDBOX_NOT_ATTESTED: git clone isolation alone cannot confine agent shell commands")
     deadline = time.monotonic() + cfg["max_minutes"] * 60
     with single_agent_lock():
+        # A prior successful commit is not considered remotely saved until push succeeds.
+        if push:
+            for item in state["commits"]:
+                if not item["pushed"]:
+                    try:
+                        git(p, "push", "origin", f"HEAD:refs/heads/{cfg['branch']}")
+                    except Hold as ex:
+                        state["status"] = "HOLD"
+                        state["hold_reason"] = "UNPUSHED_RESEARCH_COMMIT: " + str(ex)
+                        write_atomic(state_path, state)
+                        raise
+                    item["pushed"] = True
+                    write_atomic(state_path, state)
+        if state["status"] == "HOLD" and state.get("hold_reason", "").startswith(("PATH_NOT_APPROVED", "SYMLINK_OR_ESCAPE")):
+            raise Hold("PREVIOUS_SAFETY_HOLD_NEEDS_ISOLATED_CLONE_REVIEW")
+        state["status"] = "RUNNING"
+        state.pop("hold_reason", None)
+        write_atomic(state_path, state)
         while state["next_task"] < len(cfg["tasks"]) and state["cycles"] < cfg["max_cycles"] and time.monotonic() < deadline:
             index = state["next_task"]
             task = cfg["tasks"][index]
@@ -240,7 +258,13 @@ def execute(cfg: dict, *, push: bool, sandbox_attested: bool) -> dict:
                     state["outcomes"].append({"cycle": cycle, "status": "SOURCE_CHECKS_PASSED", "sha": sha})
                     write_atomic(state_path, state)
                     if push:
-                        git(p, "push", "origin", f"HEAD:refs/heads/{cfg['branch']}")
+                        try:
+                            git(p, "push", "origin", f"HEAD:refs/heads/{cfg['branch']}")
+                        except Hold as ex:
+                            state["status"] = "HOLD"
+                            state["hold_reason"] = "UNPUSHED_RESEARCH_COMMIT: " + str(ex)
+                            write_atomic(state_path, state)
+                            raise
                         state["commits"][-1]["pushed"] = True
                         write_atomic(state_path, state)
                     success = True
