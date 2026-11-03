@@ -40,7 +40,7 @@ test('ranked authored glazing resolves only to previously AUTHORIZED exterior di
  assert.equal(result.humanArt,'NOT_REVIEWED');
  assert.notEqual(result.b143.geometrySha256,null);
 });
-test('changing MODEL preference order changes actual glazing and B143 geometry without modifying topology',()=>{
+test('changing MODEL preference order preserves B143 geometry when the selected exterior side remains the same',()=>{
  const src=author(),modified=structuredClone(src);
  modified.spaces[0].windowPriority=['east','west','south','north'];
  const a=compileRankedExteriorIntent(src);
@@ -80,7 +80,7 @@ test('V4E opt-in does not alter the old V4D frozen author contract or pretend to
  assert.equal(old.schema,COMPACT_SCHEMA);
  assert.equal(compileCompactModelIntent(old).modelIdentity,'NOT_ATTESTED');
  assert(RANKED_SYSTEM_PROMPT.includes('FIRST option'));
- assert(RANKED_SYSTEM_PROMPT.includes('NO'));
+ assert(RANKED_SYSTEM_PROMPT.includes('NEVER choose an unlisted option'));
  const ranked=compileRankedExteriorIntent(author());
  assert.equal(ranked.modelIdentity,'NOT_ATTESTED');
  assert.equal(ranked.modelSizeOrMacMemoryTested,false);

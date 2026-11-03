@@ -170,3 +170,13 @@ Windowsの安全な研究作業コピーからは、必要な時だけ以下の�
 **今回の研究は旧契約に自動修復コードを追加するものではない。** 新しい独立の `RANKED_SCHEMA` が、モデルの**著作した4方向の許容順位** `windowPriority` を受け取り、まず窓なしの既存SOURCE上で建物全体の本当の部屋位置を解決し、他の用途空間と接していない完全外壁に限り最上位のモデル許可方向を窓にする。ユーザー・モデルの元の相対配置・屋根・用途・素材・ファサードは改変しない。候補なしまたは最終真正B143検証失敗ならHOLDし、元IR補修や未許可方向への移動はしない。元の詳細/compact v1路線とEducation実機成功経路は不変。
 
 現段階は**実モデル未使用のSOURCE研究**であり、V4Eの優位性・Art・Mac8GBの能力は未証明。現行ワンクリックv2のデフォルトを勝手に変更しない。CI成功後に新契約をユーザーが明示的に選べる安全なモデル接続を別工程で検討する。
+
+## 2026-11-03 V4Eを実ローカルモデルから明示的に呼べる任意経路へ接続
+
+2回の実PC記録はそれぞれ `originalModelCalls=1` / `testInjectionPresent=false` / 元回答SHA一致だが、モデル同一性は暗号学的未認証。両方ともSOURCE HOLD／真正B143形状出力0、ART未判定。2回目は契約schema/最上位項目が正しくなった一方、index0,1の共有壁窓2件のみ残る。**この2例から因果的な改善率やQwenの一般的な実力は断定しない。**
+
+新V4Eは凍結旧V4Dで選ぶwindowSideの代わり、モデル著作 `windowPriority`（四方向の優先順位）をコンパイル前に明確な選択契約とし、全親子接続を確定したあとに限り、原文でモデルが順序づけた**実際の外壁方向から選択**する。優先順位と除外方向は PRIVATE `RANKED_GLAZING_RESOLUTION.json` に記録する。モデル著作の権利と数学的制約の区別を維持し、外壁なしならHOLD、SOURCE不合格を勝手に修理しない。
+
+実装は既存 `scripts/r125-v4d-local-architect.mjs` にオプトイン `--ranked-windows` を追加し、`r125-v4d-shareable-receipt.mjs` の契約認識、`r125-v4d-replay-private.mjs` の0追加POST再生、`r125-v4d-author-source-diagnostics.mjs` のV4E専用ランキング構造診断を安全に接続した。旧 `--compact` と `--ranked-windows` は同時使用HOLD、旧 `--compact` 2重指定の既存エラー名を保存。別配布 `scripts/r125-v4e-one-click-ranked-trial.cmd` はユーザーの既存ワンクリックv2を改変せず独立フォルダへ研究ブランチをcloneし、YとNの明示選択を保つ。新ZIPはGit blob `cf21e5dfbbc254c56aa2804554b7ad8b38b25931` と完全一致確認済み。
+
+初回V4E研究CI #41639766831では4 SOURCEテスト中3 PASS、旧V4Eテストに意味のない大文字断片を要求した検査文が失敗。修正後の研究単体 #41639918503 は success。実モデル接続の初回総合 #41640951768 では**Windowsの新/旧ワンクリックと模擬HTTP・オフライン診断が成功**したが、Linux側で旧V4D `--compact` 二重指定エラー名の互換性が壊れていることを検出し修正。続く #41641652949 はWindows PASS、Linuxの旧V4Eテスト文面が再混入してFAILしたため、検査文を新しい必須文面に一致させる最後の修正を実施した。**修正版の最終CI合格を確認するまで本物のモデルへのV4E試験はHOLD**。実QwenによるV4E出力0、ART認定0、ワールド接触0、NOT_PREPARED/9 BLOCKED。ここに挙げた初回FAILをSOURCE成功と呼ばない。
