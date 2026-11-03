@@ -235,13 +235,13 @@ test('compact invalid model designs stay REJECTED rather than host auto-correcti
   x=>x.spaces[1].attach.side='diagonal',
   x=>x.spaces[1].attach.shift=20,
   x=>x.spaces[1].windowSide='east',
-  x=>x.spaces[2].attach.to='learning',
+  x=>x.spaces[2].attach.to='unknown-room',
   x=>x.spaces[2].roof='ridgeX',
   x=>x.spaces[2].windowSide='none',
   x=>x.materials.roof='explosive',
   x=>x.spaces[0].featureMaterial='lava'
  ];
- for(const mutation of mutations){
+ for(const [i,mutation] of mutations.entries()){
   const candidate=structuredClone(p);
   mutation(candidate);
   assert.throws(()=>compileCompactModelIntent(candidate),
