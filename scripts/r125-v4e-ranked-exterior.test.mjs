@@ -254,6 +254,10 @@ test('five independent synthetic genres use one unmodified V4E→true B143 engin
   assert(fs.existsSync(path.join(out,'sectioned.html')));
   assert(fs.existsSync(path.join(out,'massing.html')));
   assert.equal(report.primaryMassingResearch.cases.length,5);
+  assert.equal(report.exteriorWingResearch.cases.length,5);
+  assert(report.exteriorWingResearch.cases.every(c=>
+   c.sourceWitness.independentRoofSilhouette.views.find(v=>v.face==='roof')
+    .silhouetteChangedCells>=84));
   assert(report.primaryMassingResearch.cases.every(c=>
    c.visibilityEvidence.views.find(v=>v.face==='roof').depthChangedCells>0));
   assert(report.primaryMassingResearch.cases.every(c=>
@@ -264,6 +268,8 @@ test('five independent synthetic genres use one unmodified V4E→true B143 engin
   assert(report.sectionResearch.sectionedCases.every(c=>
    c.oldGeometrySha256!==c.newGeometrySha256&&c.art==='NOT_REVIEWED'));
   for(const {genre} of cases){
+   const wingDelta=fs.readFileSync(path.join(out,'WING_B143_'+genre+'_SILHOUETTE_DELTA.svg'),'utf8');
+   assert(wingDelta.includes('ACTUAL B143 VISIBLE DELTA'));
    const delta=fs.readFileSync(path.join(out,'MASSING_B143_'+genre+'_VISIBILITY_DELTA.svg'),'utf8');
    assert(delta.includes('ACTUAL B143 VISIBLE DELTA'));
    const svg=fs.readFileSync(path.join(out,'FINAL_B143_'+genre+'_FIVE_VIEWS.svg'),'utf8');
@@ -596,4 +602,35 @@ test('REAL B143 five-view height/silhouette/material delta catches same-material
   assert(permuted.views.every(v=>v.changedCells===0));
  }
  assert.throws(()=>auditB143ProjectedVisibility([],[]),/REAL_B143_REQUIRED/);
+});
+
+test('genre-independent physical exterior wing changes REAL outside footprint and preserves entrance, windows and routes',async()=>{
+ const {compileAuthoredExteriorWing}
+  =await import('../source/ai/r125-v4e-authored-exterior-wing.mjs');
+ const {syntheticFiveGenreAuthorCases}
+  =await import('./r125-v4e-cross-genre-source-study.mjs');
+ const cases=syntheticFiveGenreAuthorCases(),snapshot=structuredClone(cases);
+ for(const s of cases){
+  const out=compileAuthoredExteriorWing(s.source,s.authoredMassing,s.authoredWing);
+  const w=out.sourceWingWitness;
+  assert.equal(w.actualSupportedWingFloorCells,84);
+  assert.equal(w.actualCoverRoofCells,84);
+  assert.equal(w.realPortalCellsRemoved,6);
+  assert.equal(w.twoWideUserRoute.status,'SOURCE_TWO_WIDE_ENTRANCE_TO_WING_REACHABLE');
+  assert(w.twoWideUserRoute.reachedPads>20);
+  assert(w.independentRoofSilhouette.views.find(v=>v.face==='roof').silhouetteChangedCells>=84);
+  assert.equal(out.sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert.equal(out.humanArt,'NOT_REVIEWED');
+  assert.equal(out.realModel,'NOT_TESTED');
+  assert.equal(out.worldWrites,0);
+  assert.deepEqual(out.gates,Array(9).fill('BLOCKED'));
+  assert.deepEqual(out.BuildPlan.operations,[]);
+  assert.throws(()=>compileAuthoredExteriorWing(s.source,s.authoredMassing,
+   {...s.authoredWing,span:21}),/R125_V4E_WING_AUTHOR_WING_CONTRACT/);
+ }
+ assert.deepEqual(cases,snapshot);
+ const home=cases[0];
+ assert.throws(()=>compileAuthoredExteriorWing(home.source,home.authoredMassing,
+  {...home.authoredWing,spaceId:'welcome',side:'west'}),
+  /R125_V4E_WING_WING_COLLIDES_LINK_WINDOW_OR_ENTRANCE/);
 });

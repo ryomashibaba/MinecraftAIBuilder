@@ -17,6 +17,7 @@ import {auditB143ProjectedVisibility,renderB143ProjectedVisibilityDelta}
  from './r125-v4e-visibility-delta.mjs';
 import {compileAuthoredPublicLoggia} from '../source/ai/r125-v4e-authored-public-loggia.mjs';
 import {compileAuthoredPrimaryMassingVoid} from '../source/ai/r125-v4e-authored-primary-massing-void.mjs';
+import {compileAuthoredExteriorWing} from '../source/ai/r125-v4e-authored-exterior-wing.mjs';
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const fail=x=>{throw Error('R125_V4E_CROSS_GENRE_'+x);};
 const CASES=[
@@ -93,7 +94,9 @@ export function syntheticFiveGenreAuthorCases(){
   return {genre:c.id,source:x,
    authoredSection:{spaceId:c.sectionRoom,corner:c.sectionCorner,recessDepth:6},
    authoredMassing:{...MASSING_AUTHOR_SAMPLES[c.id],
-    cutWidth:7,cutDepth:7,publicAccessSide:'X'}};
+    cutWidth:7,cutDepth:7,publicAccessSide:'X'},
+   authoredWing:{spaceId:'learning',side:c.id==='research'?'west':c.link,
+    start:4,span:12,reach:7,roofY:9,purpose:c.open}};
  });
 }
 export function exportV4ECrossGenreSource(folder){
@@ -126,6 +129,11 @@ export function exportV4ECrossGenreSource(folder){
   results[i].b143.compiled.primitives,m.b143Compiled.primitives));
  if(visibility.some(v=>v.views.find(x=>x.face==='roof').depthChangedCells<1))
   fail('MASSING_ROOF_HEIGHT_DIFFERENCE_NOT_VISIBLE');
+ const wings=samples.map(s=>compileAuthoredExteriorWing(s.source,s.authoredMassing,s.authoredWing));
+ const wingReview=compileB143Gallery(wings.map(w=>w.b143Design));
+ if(wings.some(w=>w.sourceWingWitness.independentRoofSilhouette.views
+   .find(v=>v.face==='roof').silhouetteChangedCells<84))
+  fail('REAL_OUTSIDE_SILHOUETTE_WING_NOT_VISIBLE');
  const massingReview=compileB143Gallery(massing.map(s=>s.b143Design));
  const sectionReview=compileB143Gallery(sectioned.map(s=>s.sectionedB143Design));
  const review=compileB143Gallery(results.map(r=>r.b143.design));
@@ -155,6 +163,14 @@ export function exportV4ECrossGenreSource(folder){
     worldWrites:m.worldWrites
    }))
   },
+  exteriorWingResearch:{
+   status:'SOURCE_ONLY_HUMAN_ART_HOLD',
+   newOutsideSupportedPublicWing:true,modelRuns:0,
+   cases:wings.map((w,i)=>({genre:samples[i].genre,
+    authoredWing:w.authoredWing,sourceWitness:w.sourceWingWitness,
+    finalGeometrySha256:w.newGeometrySha256,
+    sourceRoutes:w.sourceRoutes.status,worldWrites:w.worldWrites}))
+  },
   sectionResearch:{
    status:'SOURCE_TECH_ONLY_NOT_GENERAL_IRREGULAR_ARCHITECTURE',
    genreSpecificHostPrescriptions:false,
@@ -174,6 +190,7 @@ export function exportV4ECrossGenreSource(folder){
    noModelAuthoredNonrectangularEnvelopeOrMultiStoryCirculation:true,
    geometryShaDifferenceDoesNotCertifyArchitectureArt:true,
    newResearchPrimaryVolumeCornerOpenSkyVoid:true,
+   newResearchPublicWingBeyondOriginalFootprint:true,
    existingDefaultArchitectureStillRectangular:true
   },
   cases:samples.map((s,i)=>({
@@ -197,6 +214,8 @@ export function exportV4ECrossGenreSource(folder){
   renderB143Html(massingReview,template),{flag:'wx'});
  fs.writeFileSync(path.join(folder,'sectioned.html'),
   renderB143Html(sectionReview,template),{flag:'wx'});
+ fs.writeFileSync(path.join(folder,'exterior-wing.html'),
+  renderB143Html(wingReview,template),{flag:'wx'});
  for(const [i,r] of results.entries()){
   fs.writeFileSync(path.join(folder,'FINAL_B143_'+samples[i].genre+'_FIVE_VIEWS.svg'),
    actualOrthographicSvg(r.b143.compiled.primitives),{flag:'wx'});
@@ -205,6 +224,11 @@ export function exportV4ECrossGenreSource(folder){
    fs.writeFileSync(path.join(folder,'MASSING_B143_'+samples[i].genre+'_VISIBILITY_DELTA.svg'),
     renderB143ProjectedVisibilityDelta(r.b143.compiled.primitives,
      massing[i].b143Compiled.primitives),{flag:'wx'});
+  fs.writeFileSync(path.join(folder,'WING_B143_'+samples[i].genre+'_FIVE_VIEWS.svg'),
+   actualOrthographicSvg(wings[i].b143Compiled.primitives),{flag:'wx'});
+  fs.writeFileSync(path.join(folder,'WING_B143_'+samples[i].genre+'_SILHOUETTE_DELTA.svg'),
+   renderB143ProjectedVisibilityDelta(massing[i].b143Compiled.primitives,
+    wings[i].b143Compiled.primitives),{flag:'wx'});
   fs.writeFileSync(path.join(folder,'SECTION_B143_'+samples[i].genre+'_FIVE_VIEWS.svg'),
    actualOrthographicSvg(sectioned[i].sectionedCompiled.primitives),{flag:'wx'});
  }
