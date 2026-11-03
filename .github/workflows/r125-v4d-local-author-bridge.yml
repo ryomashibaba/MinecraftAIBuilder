@@ -7,6 +7,7 @@ on:
       - 'source/ai/r125-v4d-compact-model-ir.mjs'
       - 'source/ai/r125-v4e-ranked-exterior-ir.mjs'
       - 'source/ai/r125-v4e-authored-public-loggia.mjs'
+      - 'source/ai/r125-v4e-sectioned-author-ir.mjs'
       - 'scripts/r125-v4e-ranked-exterior.test.mjs'
       - 'scripts/r125-v4e-source-art-review.mjs'
       - 'scripts/r125-v4e-cross-genre-source-study.mjs'
@@ -45,6 +46,7 @@ jobs:
           node --check source/ai/r125-v4d-compact-model-ir.mjs
           node --check source/ai/r125-v4e-ranked-exterior-ir.mjs
           node --check source/ai/r125-v4e-authored-public-loggia.mjs
+          node --check source/ai/r125-v4e-sectioned-author-ir.mjs
           node --check scripts/r125-v4e-ranked-exterior.test.mjs
           node --check scripts/r125-v4e-source-art-review.mjs
           node --check scripts/r125-v4e-cross-genre-source-study.mjs

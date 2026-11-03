@@ -1,5 +1,10 @@
 # MinecraftAIBuilder — START HERE（新チャット・AI開発者の統一入口）
 
+## 2026-11-03 V4Eモデルが全体設計＋非矩形ロッジアを同じ1回答で著作する非既定研究
+
+- **実装** `source/ai/r125-v4e-sectioned-author-ir.mjs`、既存 `scripts/r125-v4d-local-architect.mjs --ranked-section` に統合。モデル応答の全体設計と明示 `section:{spaceId,corner,recessDepth}` の両方が満たされる時だけ、既存V4E→真B143→SOURCE動線に合格する。モデル出力は再編集しない。旧V4D/旧V4E既定は無変更、実モデルは依然未試行。失敗時はPRIVATE元回答を保持し、2回目の推論・Minecraft書込0、ART/世界の偽PASS禁止。
+- SOURCE 1応答/無効断面/元JSON保護/共有レシートをテストダブルで検証し、既存CIへ結線。**この更新時点の新CI結果は未確認**。main・Education成功原本・PR #128 Draft、NOT_PREPARED/9 BLOCKED・Work事前承認を維持。単なる窓や色の増殖ではなく、AIが形状意思を持つことを狙った研究であり自由曲面や2階の完成ではない。
+
 ## 2026-11-03 方針回帰：5ジャンル共通の非矩形「半屋外ロッジア」断面SOURCE研究
 
 - 5ジャンル合成AUTHORの共通エンジンCI [#41649658276](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41649658276) **Linux/Windows SUCCESS**。各5,513〜5,584真B143 voxel、SOURCE到達5/5。ただし5方向の実見では全例に矩形棟の限界が残り、**予備ART REJECT／正式人間ART HOLD**。モデル実推論0。

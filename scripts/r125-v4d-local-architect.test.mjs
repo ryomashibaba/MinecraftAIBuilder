@@ -427,3 +427,85 @@ test('one compact injected study generates safe-to-share receipt without publish
   assert(fs.existsSync(path.join(temp.out,'index.html')));
  }finally{temp.clean();}
 });
+
+
+test('single opt-in model response AUTHORS both nonrect section and entire building, test-double never REAL',async()=>{
+ const {SECTIONED_SCHEMA,SECTIONED_SYSTEM_PROMPT,compileSectionedAuthorIntent}
+  =await import('../source/ai/r125-v4e-sectioned-author-ir.mjs');
+ const {syntheticFiveGenreAuthorCases}=await import('./r125-v4e-cross-genre-source-study.mjs');
+ const sample=syntheticFiveGenreAuthorCases()[0];
+ const author={...structuredClone(sample.source),schema:SECTIONED_SCHEMA,
+   section:structuredClone(sample.authoredSection)};
+ const original=JSON.stringify(author);
+ const result=compileSectionedAuthorIntent(author);
+ assert.equal(JSON.stringify(author),original);
+ assert.notEqual(result.b143.geometrySha256,result.unchangedRankedGeometrySha256);
+ assert.equal(result.b143.sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert(result.authoredNonrectSectionWitness.actualDiagonalWallCells>=30);
+ assert.deepEqual(result.gates,Array(9).fill('BLOCKED'));
+ assert.equal(result.worldWrites,0);
+ assert.equal(result.humanArt,'NOT_REVIEWED');
+ assert(SECTIONED_SYSTEM_PROMPT.includes(SECTIONED_SCHEMA));
+ const args=parseV4DLocalAuthorArgs(['--model','qwen3:14b','--out','some-unique-folder','--ranked-section']);
+ assert.equal(args.rankedSection,true);
+ assert.throws(()=>parseV4DLocalAuthorArgs(['--model','qwen3:14b','--out','x-folder','--ranked-section','--ranked-section']),/DUPLICATE_RANKED_SECTION/);
+ assert.throws(()=>parseV4DLocalAuthorArgs(['--model','qwen3:14b','--out','x-folder','--ranked-section','--compact']),/ONLY_ONE_AUTHOR_MODE/);
+ const tmp=sandbox(),f=fakeOllama({raw:original});
+ try{
+  const r=await runV4DLocalAuthor({model:'qwen3:14b',outDir:tmp.out,
+   rankedSection:true,prompt:'Design a distinctive civic science workshop with an inhabitable outdoor loggia.'
+  },{fetcher:f.fetcher,timeoutMs:15000});
+  assert.equal(r.status,'HOLD_TEST_DOUBLE_NOT_REAL_MODEL',r.reason);
+  assert.equal(r.authorContract,SECTIONED_SCHEMA);
+  assert.equal(r.geometrySha256,result.b143.geometrySha256);
+  assert.equal(r.authoredIRSha256,result.sectionedAuthorSha256);
+  assert.equal(r.modelCalls,1);
+  assert.equal(f.calls.filter(x=>x.method==='POST').length,1);
+  assert.equal(f.calls.filter(x=>x.method==='GET').length,1);
+  const body=JSON.parse(f.calls.find(x=>x.method==='POST').body);
+  assert(body.messages[0].content.includes(SECTIONED_SCHEMA));
+  assert(fs.existsSync(path.join(tmp.out,'AUTHORED_SECTION_SOURCE.json')));
+  assert(fs.existsSync(path.join(tmp.out,'index.html')));
+  assert(fs.existsSync(path.join(tmp.out,'TRUE_B143_SOURCE.json')));
+  assert.equal(fs.readFileSync(path.join(tmp.out,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8'),original);
+  const receipt=JSON.parse(fs.readFileSync(path.join(tmp.out,'REVIEW_SUMMARY_SHAREABLE.json'),'utf8'));
+  assert.equal(receipt.authorContract,SECTIONED_SCHEMA);
+  assert.equal(receipt.sourceCandidateVerified,true);
+  assert.equal(receipt.actualOllamaInferenceAttested,false);
+  assert.equal(receipt.worldWrites,0);
+  assert(!JSON.stringify(receipt).includes(author.title));
+ }finally{tmp.clean();}
+});
+test('invalid author-chosen section is PRIVATE HOLD with only one test-double POST and no silent repair',async()=>{
+ const {SECTIONED_SCHEMA,compileSectionedAuthorIntent}
+  =await import('../source/ai/r125-v4e-sectioned-author-ir.mjs');
+ const {syntheticFiveGenreAuthorCases}=await import('./r125-v4e-cross-genre-source-study.mjs');
+ const sample=syntheticFiveGenreAuthorCases()[0];
+ const source={...structuredClone(sample.source),schema:SECTIONED_SCHEMA,
+  section:structuredClone(sample.authoredSection)};
+ for(const mutate of [
+  x=>x.section.corner='NW',
+  x=>x.section.corner='UP',
+  x=>x.section.recessDepth=100,
+  x=>x.section.spaceId='ghost',
+  x=>x.unknown={worldWrites:1},
+  x=>x.section.worldWrites=1
+ ]){
+  const candidate=structuredClone(source);mutate(candidate);
+  assert.throws(()=>compileSectionedAuthorIntent(candidate),/R125_V4E_SECTIONED_|R125_V4E_SECTION_/);
+ }
+ const x=structuredClone(source);x.section.corner='NW';
+ const raw=JSON.stringify(x),tmp=sandbox(),f=fakeOllama({raw});
+ try{
+  const r=await runV4DLocalAuthor({model:'qwen3:14b',outDir:tmp.out,
+   rankedSection:true,prompt:'Build a usable community facility with intentionally authored section.'
+  },{fetcher:f.fetcher,timeoutMs:15000});
+  assert.equal(r.status,'HOLD_MODEL_OR_SOURCE_INVALID_NO_REPAIR');
+  assert.equal(f.calls.filter(x=>x.method==='POST').length,1);
+  assert.equal(fs.readFileSync(path.join(tmp.out,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8'),raw);
+  assert(!fs.existsSync(path.join(tmp.out,'TRUE_B143_SOURCE.json')));
+  const receipt=JSON.parse(fs.readFileSync(path.join(tmp.out,'REVIEW_SUMMARY_SHAREABLE.json'),'utf8'));
+  assert.equal(receipt.failureCategory,'SECTIONED_AUTHOR_SOURCE_INVALID');
+  assert.equal(receipt.sourceCandidateVerified,false);
+ }finally{tmp.clean();}
+});
