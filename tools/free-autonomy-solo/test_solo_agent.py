@@ -7,7 +7,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from solo_agent import Hold, changed_files, check_paths, execute, validate, run_cmd
+from solo_agent import Hold, changed_files, check_paths, execute, validate, run_cmd, verify_repo, require_existing_remote_research_branch
 
 
 def sh(root, *args):
@@ -62,6 +62,76 @@ class SoloAgentTests(unittest.TestCase):
         self.assertEqual(sh(self.repo, 'git', 'status', '--porcelain'), '')
         self.assertEqual(sh(self.repo, 'git', 'log', '-1', '--format=%s'),
                          'research(free-autonomy): task 1 verified source candidate')
+
+    def test_both_equal_priority_projects_have_exact_git_origin_admission(self):
+        # One shared supervisor, two equally protected public source repositories.
+        accepted = [
+            ('minecraftaibuilder', 'https://github.com/ryomashibaba/MinecraftAIBuilder.git'),
+            ('browser-ink-tps', 'https://github.com/ryomashibaba/browser-ink-tps.git'),
+        ]
+        for project, url in accepted:
+            with self.subTest(project=project):
+                sh(self.repo, 'git', 'remote', 'set-url', 'origin', url)
+                cfg = dict(self.cfg, project=project)
+                self.assertEqual(verify_repo(cfg), self.repo.resolve())
+                if project == 'browser-ink-tps':
+                    with self.assertRaisesRegex(Hold, 'ORIGIN_NOT_EXACT_ALLOWLIST'):
+                        verify_repo(dict(cfg, project='minecraftaibuilder'))
+
+    def test_unattended_push_refuses_absent_remote_branch_and_preserves_local_commit(self):
+        real_run = subprocess.run
+        calls = {'ls_remote': 0, 'push': 0}
+        def offline_git(argv, **kwargs):
+            if argv[:2] == ['git', 'ls-remote']:
+                calls['ls_remote'] += 1
+                return subprocess.CompletedProcess(argv, 2, stdout='', stderr='')
+            if argv[:2] == ['git', 'push']:
+                calls['push'] += 1
+                raise AssertionError('network push must never be attempted')
+            return real_run(argv, **kwargs)
+        with patch('solo_agent.subprocess.run', side_effect=offline_git):
+            with patch.dict(os.environ, self.env):
+                with self.assertRaisesRegex(Hold, 'REMOTE_RESEARCH_BRANCH_NOT_PREEXISTING'):
+                    execute(dict(self.cfg), push=True, sandbox_attested=True)
+        self.assertGreaterEqual(calls['ls_remote'], 1)
+        self.assertEqual(calls['push'], 0)
+        state = json.loads((self.root / 'state' / 'state.json').read_text())
+        self.assertEqual(state['status'], 'HOLD')
+        self.assertIn('UNPUSHED_RESEARCH_COMMIT', state['hold_reason'])
+        self.assertEqual(len(state['commits']), 1)
+        self.assertFalse(state['commits'][0]['pushed'])
+        self.assertEqual(sh(self.repo, 'git', 'status', '--porcelain'), '')
+
+    def test_existing_remote_branch_exact_ref_gate_for_both_projects(self):
+        real_run = subprocess.run
+        for project, url in [
+            ('minecraftaibuilder', 'https://github.com/ryomashibaba/MinecraftAIBuilder.git'),
+            ('browser-ink-tps', 'https://github.com/ryomashibaba/browser-ink-tps.git'),
+        ]:
+            sh(self.repo, 'git', 'remote', 'set-url', 'origin', url)
+            cfg = dict(self.cfg, project=project)
+            ref = 'refs/heads/' + cfg['branch']
+            def fake_remote(argv, **kwargs):
+                if argv[:2] == ['git', 'ls-remote']:
+                    return subprocess.CompletedProcess(argv, 0,
+                        stdout='a' * 40 + '\t' + ref + '\n', stderr='')
+                return real_run(argv, **kwargs)
+            with self.subTest(project=project):
+                with patch('solo_agent.subprocess.run', side_effect=fake_remote):
+                    result = require_existing_remote_research_branch(cfg, self.repo)
+                self.assertEqual(result, 'a' * 40)
+
+    def test_remote_ref_mismatch_rejected_even_when_ls_remote_succeeds(self):
+        real_run = subprocess.run
+        def fake_remote(argv, **kwargs):
+            if argv[:2] == ['git', 'ls-remote']:
+                return subprocess.CompletedProcess(argv, 0,
+                    stdout='a' * 40 + '\trefs/heads/research/another-branch\n',
+                    stderr='')
+            return real_run(argv, **kwargs)
+        with patch('solo_agent.subprocess.run', side_effect=fake_remote):
+            with self.assertRaisesRegex(Hold, 'REMOTE_RESEARCH_BRANCH_NOT_PREEXISTING'):
+                require_existing_remote_research_branch(self.cfg, self.repo)
 
     def test_no_sandbox_is_hold(self):
         with self.assertRaisesRegex(Hold, 'DOCKER_RUNTIME_NOT_ACKNOWLEDGED'):
