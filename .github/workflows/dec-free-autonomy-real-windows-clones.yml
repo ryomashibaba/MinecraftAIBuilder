@@ -54,7 +54,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
-      - name: Prepare TPS immutable source into new LOCALAPPDATA private clone
+      - name: Prepare TPS immutable source using canonical Windows Git blob normalization
         shell: pwsh
         run: |
           python tools/free-autonomy-solo/prepare_pinned_real_project.py --project browser-ink-tps
