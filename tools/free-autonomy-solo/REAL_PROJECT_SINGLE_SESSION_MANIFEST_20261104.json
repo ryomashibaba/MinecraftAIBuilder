@@ -13,7 +13,7 @@
     "minecraftaibuilder": {
       "repository": "ryomashibaba/MinecraftAIBuilder",
       "source_branch_at_audit": "feature/b198zr1-protected-architectural-revision",
-      "pinned_commit": "ad070ecb3244e1cce742f37e1943f0cff7e31ca2",
+      "pinned_commit": "fe1682e15ffa063f4dc415b06c4d76a54737a06e",
       "source_file": "source/ai/r125-v4h-mezzanine-author-ir.mjs",
       "source_blob_sha": "4cbcbb448737b314b6d5d4bfcdc367e9b1b45f52",
       "research_branch_for_private_clone": "research/dec-local-14b-mab-v4h-source-pilot",
