@@ -1,4 +1,4 @@
-# READ-ONLY private source preflight for previously generated Qwen drafts.
+# READ-ONLY MAB .mjs syntax parsing of previously generated Qwen drafts.
 # No model invocation, no Docker, no source execution, no network upload, no git push.
 [CmdletBinding()]
 param(
@@ -47,10 +47,10 @@ $chosen = @($eligible | Sort-Object -Property Updated -Descending)[0]
 $root = [string]$chosen.Folder
 
 # Immutable reviewed Python bundle: verify each Git blob before import.
-$revision = '18fe21c5e13b2166f4e0d03da7e0e0f832e6f84c'
+$revision = 'd3252598bec8ad1131c2b38c6abe77b685be7032'
 $repo = 'ryomashibaba/MinecraftAIBuilder'
 $items = @(
-  @{ Name = 'promote_private_real_drafts_docker.py'; Blob = '906ff96a31a5cf89ac9c5405b37328ec58fb7099' },
+  @{ Name = 'promote_private_real_drafts_docker.py'; Blob = 'b1675da4dbae2fb9b3e7115507777c5104f8dd98' },
   @{ Name = 'docker_sandbox.py'; Blob = '20b6817b1e50c99435cdb29a13beafdb4fbcf4dd' },
   @{ Name = 'prepare_pinned_real_project.py'; Blob = 'ce4d56452ec0a1d513dfa419a80780eed1283894' },
   @{ Name = 'draft_real_project_local14b.py'; Blob = '3651e8e8bf145c755db3fbe91c8288b99165dc46' },
@@ -69,19 +69,19 @@ foreach ($file in $items) {
   }
 }
 Write-Host ('SINGLE_PROJECT=' + $Project + '; EXISTING_PRIVATE_DRAFTS_ONLY; NO_NEW_MODEL_REQUEST')
-Write-Host 'STATIC CHECK: receipt hashes, exact source origin, Git identity, bounded changes, protected anchors'
-& python (Join-Path $sourceFolder 'promote_private_real_drafts_docker.py') --receipt-dir $root --project $Project --model $Model --static-only
+Write-Host 'SYNTAX CHECK: prior static integrity plus Node MJS parser; no module import or execution'
+& python (Join-Path $sourceFolder 'promote_private_real_drafts_docker.py') --receipt-dir $root --project $Project --model $Model --mjs-syntax-only
 $code = $LASTEXITCODE
-$statusFile = Join-Path $root 'SHAREABLE_STATIC_PREFLIGHT.json'
+$statusFile = Join-Path $root 'SHAREABLE_MJS_SYNTAX_RESULT.json'
 if (-not (Test-Path -LiteralPath $statusFile -PathType Leaf)) {
-  throw 'STATIC_PREFLIGHT_RESULT_MISSING'
+  throw 'MJS_SYNTAX_RESULT_MISSING'
 }
-Write-Host ('UPLOAD_THIS_SMALL_STATIC_PREFLIGHT_JSON=' + $statusFile)
+Write-Host ('UPLOAD_THIS_SMALL_MJS_SYNTAX_JSON=' + $statusFile)
 try {
   Start-Process -FilePath explorer.exe -ArgumentList ('/select,"' + $statusFile + '"') -ErrorAction Stop
-  Write-Host 'STATIC_RESULT_SHOWN_IN_EXPLORER'
+  Write-Host 'MJS_SYNTAX_RESULT_SHOWN_IN_EXPLORER'
 } catch {
   Write-Host 'EXPLORER_UNAVAILABLE__USE_REPORTED_JSON_PATH'
 }
-if ($code -ne 0) { throw 'STATIC_PREFLIGHT_HOLD_SEE_SHAREABLE_RESULT' }
-Write-Host 'STATIC_ADMISSION_ONLY__REAL_SOURCE_QA_NOT_RUN__NO_GIT_COMMIT_OR_PUSH'
+if ($code -ne 0) { throw 'MJS_SYNTAX_HOLD_SEE_SHAREABLE_RESULT' }
+Write-Host 'NODE_PARSE_ONLY__NO_GENERATED_CODE_EXECUTED__REAL_SOURCE_QA_NOT_RUN__NO_COMMIT_OR_PUSH'
