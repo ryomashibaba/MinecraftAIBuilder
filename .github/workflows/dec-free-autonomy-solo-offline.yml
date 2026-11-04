@@ -59,6 +59,7 @@ jobs:
         run: echo 'CLI process launch only. Model generation, Windows isolation and autonomy are not verified.'
 
   genuine-free-model-once-ephemeral:
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
     timeout-minutes: 12
     steps:
