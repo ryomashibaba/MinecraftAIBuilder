@@ -7,7 +7,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from solo_agent import Hold, changed_files, check_paths, execute, validate, run_cmd, verify_repo, require_existing_remote_research_branch
+from solo_agent import Hold, changed_files, check_paths, execute, validate, run_cmd, verify_repo, require_existing_remote_research_branch, single_agent_lock
 
 
 def sh(root, *args):
@@ -132,6 +132,38 @@ class SoloAgentTests(unittest.TestCase):
         with patch('solo_agent.subprocess.run', side_effect=fake_remote):
             with self.assertRaisesRegex(Hold, 'REMOTE_RESEARCH_BRANCH_NOT_PREEXISTING'):
                 require_existing_remote_research_branch(self.cfg, self.repo)
+
+    def test_one_local_agent_lock_blocks_second_process_across_projects(self):
+        # Simulate MAB owning the local model and Browser Ink TPS attempting
+        # to start in another OS process. Same lock regardless of project.
+        child = """
+from solo_agent import single_agent_lock, Hold
+try:
+    with single_agent_lock():
+        print('SECOND_AGENT_WRONGLY_ACQUIRED_LOCK')
+        raise SystemExit(17)
+except Hold as exc:
+    print(str(exc))
+    raise SystemExit(0)
+"""
+        env = {**os.environ, **self.env, 'FREE_AUTONOMY_TEST_PROJECT': 'browser-ink-tps'}
+        with patch.dict(os.environ, self.env):
+            with single_agent_lock():
+                r = subprocess.run([os.sys.executable, '-c', child], cwd=Path(__file__).parent,
+                                   capture_output=True, text=True, timeout=20, env=env)
+                self.assertEqual(r.returncode, 0, r.stderr)
+                self.assertIn('ANOTHER_LOCAL_AGENT_OWNS_LOCK', r.stdout)
+        # Owner release restores ability to start a *different* project.
+        next_project = """
+from solo_agent import single_agent_lock
+with single_agent_lock():
+    print('NEXT_PROJECT_OWNS_LOCK_AFTER_RELEASE')
+"""
+        r2 = subprocess.run([os.sys.executable, '-c', next_project],
+                            cwd=Path(__file__).parent, capture_output=True,
+                            text=True, timeout=20, env=env)
+        self.assertEqual(r2.returncode, 0, r2.stderr)
+        self.assertIn('NEXT_PROJECT_OWNS_LOCK_AFTER_RELEASE', r2.stdout)
 
     def test_no_sandbox_is_hold(self):
         with self.assertRaisesRegex(Hold, 'DOCKER_RUNTIME_NOT_ACKNOWLEDGED'):
