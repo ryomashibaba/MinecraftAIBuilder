@@ -32,6 +32,21 @@ PATCH_SCHEMA = {
     "required": ["find", "replace"]
 }
 TARGET_PATTERN = re.compile(r"[A-Za-z0-9_-]+(?:/[A-Za-z0-9_.-]+)+\.(?:js|mjs|ts|tsx|json|py)\Z")
+# Model-format/content mistakes must not strand an unattended safe session.
+# Security/identity/path/Git/QA mutations are deliberately NOT retryable.
+RETRYABLE_MODEL_HOLDS = {
+    "MODEL_PATCH_NOT_VALID_JSON", "MODEL_PATCH_KEYS_INVALID",
+    "MODEL_PATCH_TYPES_INVALID", "MODEL_PATCH_FIELDS_TOO_LARGE",
+    "MODEL_PATCH_FIND_EMPTY", "MODEL_PATCH_REPLACEMENT_EMPTY",
+    "MODEL_PATCH_NOOP_IDENTICAL", "MODEL_FIND_NOT_EXACTLY_UNIQUE",
+    "MODEL_PATCH_NOT_MEANINGFUL_OR_TOO_LARGE",
+}
+
+
+def is_safe_model_retry(exc: Exception) -> bool:
+    return isinstance(exc, Hold) and str(exc) in RETRYABLE_MODEL_HOLDS
+
+
 
 
 def validate_config(cfg: dict) -> None:
@@ -280,6 +295,25 @@ def execute(cfg: dict, *, push: bool = False) -> dict:
                     success = True
                     break
                 except (Hold, SandboxHold, ValueError, OSError, KeyError) as exc:
+                    if is_safe_model_retry(exc):
+                        # A model format/no-op error is harmless only if no
+                        # source bytes or Git history changed in the meantime.
+                        verify_repo(cfg)
+                        if (git(workspace, "rev-parse", "HEAD") != state["last_head"]
+                                or changed_files(workspace)):
+                            state["status"] = "HOLD"
+                            state["hold_reason"] = "MODEL_RETRY_AFTER_UNEXPECTED_WORKSPACE_CHANGE"
+                            write_atomic(state_path, state)
+                            raise Hold(state["hold_reason"]) from exc
+                        feedback = ("Your previous patch was rejected as " + str(exc) +
+                                    ". Return a NEW, NONEMPTY find and a DIFFERENT "
+                                    "replace string that genuinely implements the task.")
+                        state["last_failure"] = str(exc)
+                        state.setdefault("outcomes", []).append({
+                            "cycle": cycle, "status": "REJECTED_MODEL_PATCH_NO_WRITE",
+                            "reason": str(exc)})
+                        write_atomic(state_path, state)
+                        continue
                     state["status"] = "HOLD"
                     state["hold_reason"] = type(exc).__name__ + ": " + str(exc)[:150]
                     write_atomic(state_path, state)
