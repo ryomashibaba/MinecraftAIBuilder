@@ -153,6 +153,24 @@ def quarantine_and_restore_unverified(
     if git(workspace, "rev-parse", "HEAD") != expected_head:
         raise Hold("RESUME_QUARANTINE_HEAD_CHANGED_BEFORE_BACKUP")
     check_paths(workspace, paths, cfg["allowed_prefixes"])
+    # Bound file sizes BEFORE hashing/reading any untrusted leftover. A failed
+    # agent can leave a massive file; its size is not a reason to OOM on resume.
+    size_hint = 0
+    for name in paths:
+        candidate = workspace / name
+        for parent in candidate.parents:
+            if parent == workspace:
+                break
+            if parent.is_symlink():
+                raise Hold("RESUME_QUARANTINE_SYMLINK_PARENT")
+        if candidate.is_symlink():
+            raise Hold("RESUME_QUARANTINE_SYMLINK_REFUSED")
+        if candidate.exists():
+            if not candidate.is_file():
+                raise Hold("RESUME_QUARANTINE_NONREGULAR_FILE")
+            size_hint += candidate.stat().st_size
+            if size_hint > 2_000_000:
+                raise Hold("RESUME_QUARANTINE_BYTES_BUDGET")
     before = snapshot_candidate(workspace, paths)
     tracked_raw = subprocess.check_output(
         ["git", "ls-files", "--cached", "-z"], cwd=workspace, timeout=35)
