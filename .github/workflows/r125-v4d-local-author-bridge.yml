@@ -30,6 +30,12 @@ on:
       - 'scripts/r125-v4j-five-genre-local.test.mjs'
       - 'scripts/r125-v4j-v3-one-local.mjs'
       - 'scripts/r125-v4j-v3-one-local.test.mjs'
+      - 'scripts/r125-v4j-current-pilot.mjs'
+      - 'scripts/r125-v4j-current-pilot.test.mjs'
+      - 'scripts/r125-v4j-safe-ci-gate.mjs'
+      - 'scripts/r125-v4j-safe-ci-gate.test.mjs'
+      - 'scripts/r125-v4j-permanent-launcher.cmd'
+      - 'scripts/r125-v4j-permanent-launcher.test.mjs'
       - 'scripts/r125-v4j-five-genre-replay.mjs'
       - 'scripts/r125-v4j-five-genre-replay.test.mjs'
       - 'scripts/r125-v4e-source-art-review.mjs'
@@ -195,6 +201,11 @@ jobs:
           node --test scripts/r125-v4j-five-genre-local.test.mjs
           node --check scripts/r125-v4j-v3-one-local.mjs
           node --test scripts/r125-v4j-v3-one-local.test.mjs
+          node --check scripts/r125-v4j-current-pilot.mjs
+          node --test scripts/r125-v4j-current-pilot.test.mjs
+          node --check scripts/r125-v4j-safe-ci-gate.mjs
+          node --test scripts/r125-v4j-safe-ci-gate.test.mjs
+          node --test scripts/r125-v4j-permanent-launcher.test.mjs
           node --check source/ai/r125-v4j-precision-prompt.mjs
           node --check scripts/r125-v4j-precision-prompt.test.mjs
           node --test scripts/r125-v4j-precision-prompt.test.mjs

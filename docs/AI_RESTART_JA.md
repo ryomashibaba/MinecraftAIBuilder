@@ -1,5 +1,8 @@
 # MinecraftAIBuilder — 開発再開の最新正本案内（2026-11-03）
 
+**2026-11-04 V4住宅の新実測結果と一度導入・恒久再利用するローカル自動起動器（新CI未確認）**：V4 `V4J_V4_ONE_SHAREABLE.json` のモデル1要求、追加要求0、実Qwen主張・TEST DOUBLE=false、SOURCE HOLD、拒否 `GRAPH_ENTRY`。V2/V3の `MASSING_PRIMARY_VOLUME_TOO_SMALL` はV4住宅では観測されず、改善確証やART PASSには扱わない。ユーザー操作削減のため `scripts/r125-v4j-permanent-launcher.cmd` を導入。ワンタイムで同じ起動器を使用し、毎回研究ブランチを専有一時フォルダへ取得、**当該HEADの R125 V4D Local Author Bridge と Education-first offline QAの双方がSUCCESSになるまでモデル要求0のCIゲート**、ユーザーがローカル1試行開始を明示確認した場合だけ元モデル回答を1件PRIVATE保存。最新の実行スクリプトは今の段階ではV4住宅、今後研究ブランチで更新する安定入口 `scripts/r125-v4j-current-pilot.mjs` を利用。共有可能なJSONだけをWindowsクリップボードへ入れ、チャットでCtrl+Vすればよい。コピー不可ならExplorerで該当ファイルを選択。元回答・プロンプト・ローカルstudyは自動アップロード/削除なし。一時Git cloneだけ掃除する。追加入金/API/本番世界/main/保護されたEducation実機成功経路は禁止。USERのPCにこの起動器を常駐設置したとは主張せず、ユーザーが一度保存して起動した場合のみ動く。9 BLOCKEDとPR#128 Draft保持。
+
+
 **2026-11-04 V3実Qwen住宅の再失敗に基づく、V4明示オプトイン幾何成立範囲研究（新CI未確認）**：V3住宅1回・SOURCE HOLD、`MASSING_PRIMARY_VOLUME_TOO_SMALL`（V2住宅と同一コード）。JSON形式の強制だけでは幾何の算術が保証されない。この1条件に限り、新V4実験は *モデルへ渡す選択肢* を変更する（モデル原文の修正ではない）：屋内COVERED各室の幅・奥行22..30、massing.cutWidth/cutDepth 7..8。すると**いずれかの既存屋内室を対象とする限り**全ての整数組合せで width/depth >= 2*cut+6 が成立する（機械テスト）。従来V3（幅18..30、切断7..10）とは別プロトコル `V4J_SINGLE_RESPONSE_FEASIBLE_MASSING_V4`、新たな幾何選択範囲が建築多様性に悪影響を持つ可能性も認識して実験扱い。`scripts/r125-v4j-v3-one-local.mjs` の `--geometry-v4` を明示した単体研究のみで有効化、元V2/V3は完全維持。1モデル回答・追加再要求なし・0ワールド操作、HOLDなら元回答に触れない。間取りの重複/物理窓/動線/美術は保証されない。実QwenのSOURCE成功率は未測定。Windowsファイルやmain/教育実機成功経路は未変更。
 
 
