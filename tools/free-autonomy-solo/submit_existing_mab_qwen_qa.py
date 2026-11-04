@@ -144,7 +144,7 @@ def run(base: Path, *, confirm=input, printer=print,
             payload = verified_private_payload(root, PROJECT, MODEL, manifest=manifest)
             if payload.get("synthetic_fixture") is not False:
                 raise Hold("SYNTHETIC_SOURCE_CANNOT_CLAIM_GENUINE_QWEN")
-            if tuple(payload["stage1_sha256"] for _ in range(1)) != (EXPECTED_DRAFT_HASHES[0],):
+            if payload["stage1_sha256"] != EXPECTED_DRAFT_HASHES[0]:
                 raise Hold("STAGE1_EXPECTED_HASH_MISMATCH")
             if payload["stage2_sha256"] != EXPECTED_DRAFT_HASHES[1]:
                 raise Hold("STAGE2_EXPECTED_HASH_MISMATCH")
