@@ -29,6 +29,8 @@ import {HEIGHT_SCHEMA,HEIGHT_SYSTEM_PROMPT,compileHeightAuthorIntent}
  from '../source/ai/r125-v4g-height-author-ir.mjs';
 import {MEZZANINE_SCHEMA,MEZZANINE_SYSTEM_PROMPT,compileMezzanineAuthorIntent}
  from '../source/ai/r125-v4h-mezzanine-author-ir.mjs';
+import {CIVIC_ARCADE_SCHEMA,CIVIC_ARCADE_SYSTEM_PROMPT,compileCivicArcadeAuthorIntent}
+ from '../source/ai/r125-v4j-civic-author-ir.mjs';
 import {actualB143MezzanineSectionSvg}
  from './r125-v4h-mezzanine-section.mjs';
 
@@ -75,7 +77,7 @@ export function parseV4DLocalAuthorArgs(argv){
  const opt={},allowed=new Set(['--model','--out','--prompt','--endpoint']);
  for(let i=0;i<argv.length;i++){
   const k=argv[i];
-  if(k==='--compact'||k==='--ranked-windows'||k==='--ranked-section'||k==='--authored-massing'||k==='--authored-wing'||k==='--authored-floorplate'||k==='--authored-atrium'||k==='--authored-mezzanine'){
+  if(k==='--compact'||k==='--ranked-windows'||k==='--ranked-section'||k==='--authored-massing'||k==='--authored-wing'||k==='--authored-floorplate'||k==='--authored-atrium'||k==='--authored-mezzanine'||k==='--authored-civic-arcade'){
    if(Object.hasOwn(opt,k))fail(k==='--compact'?'DUPLICATE_COMPACT':k==='--ranked-section'?'DUPLICATE_RANKED_SECTION':k==='--authored-massing'?'DUPLICATE_AUTHORED_MASSING':'DUPLICATE_RANKED_WINDOWS');
    opt[k]=true;continue;
   }
@@ -87,12 +89,12 @@ export function parseV4DLocalAuthorArgs(argv){
  if(!MODEL.test(opt['--model']??'')||
   typeof opt['--out']!=='string'||opt['--out'].length<2)
   fail('MODEL_AND_PRIVATE_OUT_REQUIRED');
- if([opt['--compact'],opt['--ranked-windows'],opt['--ranked-section'],opt['--authored-massing'],opt['--authored-wing'],opt['--authored-floorplate'],opt['--authored-atrium'],opt['--authored-mezzanine']].filter(Boolean).length>1)fail('ONLY_ONE_AUTHOR_MODE');
+ if([opt['--compact'],opt['--ranked-windows'],opt['--ranked-section'],opt['--authored-massing'],opt['--authored-wing'],opt['--authored-floorplate'],opt['--authored-atrium'],opt['--authored-mezzanine'],opt['--authored-civic-arcade']].filter(Boolean).length>1)fail('ONLY_ONE_AUTHOR_MODE');
  const endpoint=opt['--endpoint']??DEFAULT_ENDPOINT,port=ENDPOINT.exec(endpoint);
  if(!port||+port[1]<1||+port[1]>65535)fail('LOCAL_LOOPBACK_ONLY');
  const prompt=opt['--prompt']??DEFAULT_PROMPT;
  if(prompt.length<8||prompt.length>4000)fail('PROMPT_CONTRACT');
- return {model:opt['--model'],outDir:path.resolve(opt['--out']),prompt,endpoint,compact:opt['--compact']===true,rankedWindows:opt['--ranked-windows']===true,rankedSection:opt['--ranked-section']===true,authoredMassing:opt['--authored-massing']===true,authorWing:opt['--authored-wing']===true,authorFloorplate:opt['--authored-floorplate']===true,authorAtrium:opt['--authored-atrium']===true,authorMezzanine:opt['--authored-mezzanine']===true};
+ return {model:opt['--model'],outDir:path.resolve(opt['--out']),prompt,endpoint,compact:opt['--compact']===true,rankedWindows:opt['--ranked-windows']===true,rankedSection:opt['--ranked-section']===true,authoredMassing:opt['--authored-massing']===true,authorWing:opt['--authored-wing']===true,authorFloorplate:opt['--authored-floorplate']===true,authorAtrium:opt['--authored-atrium']===true,authorMezzanine:opt['--authored-mezzanine']===true,authorArcade:opt['--authored-civic-arcade']===true};
 }
 function validateLaunch({model,outDir,prompt,endpoint},fetcher,timeoutMs){
  if(!MODEL.test(model??'')||typeof outDir!=='string'||!outDir.trim()||
@@ -112,10 +114,10 @@ function validateLaunch({model,outDir,prompt,endpoint},fetcher,timeoutMs){
  return dest;
 }
 export async function runV4DLocalAuthor({
- model,outDir,prompt=DEFAULT_PROMPT,endpoint=DEFAULT_ENDPOINT,compact=false,rankedWindows=false,rankedSection=false,authoredMassing=false,authorWing=false,authorFloorplate=false,authorAtrium=false,authorMezzanine=false
+ model,outDir,prompt=DEFAULT_PROMPT,endpoint=DEFAULT_ENDPOINT,compact=false,rankedWindows=false,rankedSection=false,authoredMassing=false,authorWing=false,authorFloorplate=false,authorAtrium=false,authorMezzanine=false,authorArcade=false
 }={}, {fetcher=fetch,timeoutMs=180000}={}){
- if([compact,rankedWindows,rankedSection,authoredMassing,authorWing,authorFloorplate,authorAtrium,authorMezzanine].some(x=>typeof x!=='boolean')||
-  [compact,rankedWindows,rankedSection,authoredMassing,authorWing,authorFloorplate,authorAtrium,authorMezzanine].filter(Boolean).length>1)fail('AUTHOR_MODE');
+ if([compact,rankedWindows,rankedSection,authoredMassing,authorWing,authorFloorplate,authorAtrium,authorMezzanine,authorArcade].some(x=>typeof x!=='boolean')||
+  [compact,rankedWindows,rankedSection,authoredMassing,authorWing,authorFloorplate,authorAtrium,authorMezzanine,authorArcade].filter(Boolean).length>1)fail('AUTHOR_MODE');
  const dir=validateLaunch({model,outDir,prompt,endpoint},fetcher,timeoutMs);
  const injected=fetcher!==fetch||process.env.MAB_V4D_TEST_DOUBLE_MODE==='1',start=Date.now();
  fs.mkdirSync(dir,{recursive:false});
@@ -125,7 +127,7 @@ export async function runV4DLocalAuthor({
   declaredProvider:'LOCAL_OLLAMA_127_0_0_1_NOT_AUTHENTICATED',
   testInjectionPresent:injected,modelNameCryptographicallyAttested:false,
   promptSha256:sha(prompt),responseRawSha256:null,
-  authorContract:authorMezzanine?MEZZANINE_SCHEMA:authorAtrium?HEIGHT_SCHEMA:authorFloorplate?FLOORPLATE_SCHEMA:authorWing?WING_SCHEMA:authoredMassing?MASSING_SCHEMA:rankedSection?SECTIONED_SCHEMA:rankedWindows?RANKED_SCHEMA:compact?COMPACT_SCHEMA:RELATIVE_SCHEMA,
+  authorContract:authorArcade?CIVIC_ARCADE_SCHEMA:authorMezzanine?MEZZANINE_SCHEMA:authorAtrium?HEIGHT_SCHEMA:authorFloorplate?FLOORPLATE_SCHEMA:authorWing?WING_SCHEMA:authoredMassing?MASSING_SCHEMA:rankedSection?SECTIONED_SCHEMA:rankedWindows?RANKED_SCHEMA:compact?COMPACT_SCHEMA:RELATIVE_SCHEMA,
   mechanizedExpandedIRSha256:null,
   rawCaptured:false,modelCalls:0,modelFinishReason:null,
   authoredIRSha256:null,translatedGraphSha256:null,
@@ -135,8 +137,8 @@ export async function runV4DLocalAuthor({
   mac8GBTwoB:'NOT_TESTED',...blank()
  };
  output(dir,'LOCAL_REQUEST.json',{
-  model,endpoint,prompt,timeoutMs,maxOutputTokens:authorMezzanine?4096:3072,
-  authorContract:authorMezzanine?MEZZANINE_SCHEMA:authorAtrium?HEIGHT_SCHEMA:authorFloorplate?FLOORPLATE_SCHEMA:authorWing?WING_SCHEMA:authoredMassing?MASSING_SCHEMA:rankedSection?SECTIONED_SCHEMA:rankedWindows?RANKED_SCHEMA:compact?COMPACT_SCHEMA:RELATIVE_SCHEMA,
+  model,endpoint,prompt,timeoutMs,maxOutputTokens:authorArcade||authorMezzanine?4096:3072,
+  authorContract:authorArcade?CIVIC_ARCADE_SCHEMA:authorMezzanine?MEZZANINE_SCHEMA:authorAtrium?HEIGHT_SCHEMA:authorFloorplate?FLOORPLATE_SCHEMA:authorWing?WING_SCHEMA:authoredMassing?MASSING_SCHEMA:rankedSection?SECTIONED_SCHEMA:rankedWindows?RANKED_SCHEMA:compact?COMPACT_SCHEMA:RELATIVE_SCHEMA,
   nModelGenerationAttemptsAllowed:1,sourceOnly:true,
   noPaidAPI:true,noWorldAccess:true
  });
@@ -155,9 +157,9 @@ export async function runV4DLocalAuthor({
     headers:{'Content-Type':'application/json','Accept':'application/json'},
     body:JSON.stringify({
      model,stream:false,temperature:0.45,reasoning_effort:'none',
-     max_tokens:authorMezzanine?4096:3072,response_format:{type:'json_object'},
+     max_tokens:authorArcade||authorMezzanine?4096:3072,response_format:{type:'json_object'},
      messages:[
-      {role:'system',content:authorMezzanine?MEZZANINE_SYSTEM_PROMPT:authorAtrium?HEIGHT_SYSTEM_PROMPT:authorFloorplate?FLOORPLATE_SYSTEM_PROMPT:authorWing?WING_SYSTEM_PROMPT:authoredMassing?MASSING_SYSTEM_PROMPT:rankedSection?SECTIONED_SYSTEM_PROMPT:rankedWindows?RANKED_SYSTEM_PROMPT:compact?COMPACT_SYSTEM_PROMPT:V4D_RELATIVE_SYSTEM_PROMPT},
+      {role:'system',content:authorArcade?CIVIC_ARCADE_SYSTEM_PROMPT:authorMezzanine?MEZZANINE_SYSTEM_PROMPT:authorAtrium?HEIGHT_SYSTEM_PROMPT:authorFloorplate?FLOORPLATE_SYSTEM_PROMPT:authorWing?WING_SYSTEM_PROMPT:authoredMassing?MASSING_SYSTEM_PROMPT:rankedSection?SECTIONED_SYSTEM_PROMPT:rankedWindows?RANKED_SYSTEM_PROMPT:compact?COMPACT_SYSTEM_PROMPT:V4D_RELATIVE_SYSTEM_PROMPT},
       {role:'user',content:prompt}
      ]
     })
@@ -187,7 +189,8 @@ export async function runV4DLocalAuthor({
     fail('MODEL_ORIGINAL_MISSING_OR_OVERSIZE');
    try{parsed=JSON.parse(raw);}catch{fail('MODEL_RESPONSE_NOT_PURE_JSON');}
   }finally{clearTimeout(timer);}
-  const result=authorMezzanine?compileMezzanineAuthorIntent(parsed):
+  const result=authorArcade?compileCivicArcadeAuthorIntent(parsed):
+    authorMezzanine?compileMezzanineAuthorIntent(parsed):
    authorAtrium?compileHeightAuthorIntent(parsed):
    authorFloorplate?compileFloorplateAuthorIntent(parsed):
    authorWing?compileWingAuthorIntent(parsed):
@@ -202,22 +205,25 @@ export async function runV4DLocalAuthor({
    path.join(ROOT,'source/ai/b143-viewer-template.html'),'utf8');
   const html=renderB143Html(gal,tpl);
   let sectionPrivateArtEvidence=null;
-  if(rankedSection||authoredMassing||authorWing||authorFloorplate||authorAtrium||authorMezzanine){
+  if(rankedSection||authoredMassing||authorWing||authorFloorplate||authorAtrium||authorMezzanine||authorArcade){
    // Derive an exact pre-section control from the SAME private model response.
    // This is a second deterministic B143 compilation, NOT an extra model POST.
    const beforeAuthor=structuredClone(parsed);
    if(rankedSection)delete beforeAuthor.section;
-   else if(authorMezzanine)delete beforeAuthor.mezzanine;
+   else if(authorArcade)delete beforeAuthor.arcade;
+    else if(authorMezzanine)delete beforeAuthor.mezzanine;
    else if(authorAtrium)delete beforeAuthor.atrium;
    else if(authorFloorplate)delete beforeAuthor.floorplate;
    else {delete beforeAuthor.massing;if(authorWing)delete beforeAuthor.wing;}
-   beforeAuthor.schema=authorMezzanine?HEIGHT_SCHEMA:
+   beforeAuthor.schema=authorArcade?MEZZANINE_SCHEMA:authorMezzanine?HEIGHT_SCHEMA:
     authorAtrium?FLOORPLATE_SCHEMA:authorFloorplate?WING_SCHEMA:RANKED_SCHEMA;
-   const before=authorMezzanine?compileHeightAuthorIntent(beforeAuthor):
+   const before=authorArcade?compileMezzanineAuthorIntent(beforeAuthor):
+     authorMezzanine?compileHeightAuthorIntent(beforeAuthor):
     authorAtrium?compileFloorplateAuthorIntent(beforeAuthor):
     authorFloorplate?compileWingAuthorIntent(beforeAuthor):
      compileRankedExteriorIntent(beforeAuthor);
-   if(before.b143.geometrySha256!==(authorMezzanine?
+   if(before.b143.geometrySha256!==(authorArcade?
+     result.unchangedMezzanineGeometrySha256:authorMezzanine?
      result.unchangedAtriumGeometrySha256:authorAtrium?
      result.unchangedFloorplateGeometrySha256:authorFloorplate?
      result.unchangedWingGeometrySha256:result.unchangedRankedGeometrySha256)||
@@ -244,7 +250,8 @@ export async function runV4DLocalAuthor({
     visibilitySvg:renderB143ProjectedVisibilityDelta(
      before.b143.compiled.primitives,result.b143.compiled.primitives,viewKind),
     report:{
-     schema:authorMezzanine?'r125-v4h-private-one-response-true-mezzanine-art-hold-v1':
+     schema:authorArcade?'r125-v4j-private-one-response-civic-arcade-art-hold-v1':
+       authorMezzanine?'r125-v4h-private-one-response-true-mezzanine-art-hold-v1':
       authorAtrium?'r125-v4g-private-one-response-raised-functional-hall-art-hold-v1':
       authorFloorplate?'r125-v4f-private-one-response-covered-floorplate-art-hold-v1':
       authorWing?'r125-v4e-private-one-response-exterior-wing-art-hold-v1':
@@ -255,15 +262,18 @@ export async function runV4DLocalAuthor({
      ...(rankedSection?{authoredSection:result.authoredSection}:
       {authoredMassing:result.authoredMassing,
        massingWitness:result.authoredMassingSourceWitness,
-       ...(authorWing||authorFloorplate||authorAtrium||authorMezzanine?{authoredWing:result.authoredWing,
+       ...(authorWing||authorFloorplate||authorAtrium||authorMezzanine||authorArcade?{authoredWing:result.authoredWing,
         wingSourceWitness:result.authoredWingSourceWitness}:{}),
-       ...(authorFloorplate||authorAtrium||authorMezzanine?{authoredFloorplate:result.authoredFloorplate,
+       ...(authorFloorplate||authorAtrium||authorMezzanine||authorArcade?{authoredFloorplate:result.authoredFloorplate,
         floorplateSourceWitness:result.authoredFloorplateSourceWitness}:{}),
-       ...(authorAtrium||authorMezzanine?{authoredAtrium:result.authoredAtrium,
+       ...(authorAtrium||authorMezzanine||authorArcade?{authoredAtrium:result.authoredAtrium,
         tallHallSourceWitness:result.authoredTallHallSourceWitness}:{}),
-        ...(authorMezzanine?{authoredMezzanine:result.authoredMezzanine,
+        ...(authorMezzanine||authorArcade?{authoredMezzanine:result.authoredMezzanine,
          mezzanineSourceWitness:result.authoredMezzanineSourceWitness,
-         interiorUpperLevelProvenByRealB143:true}:{})}),
+         interiorUpperLevelProvenByRealB143:true}:{}),
+         ...(authorArcade?{authoredArcade:result.authoredArcade,
+          civicArcadeSourceWitness:result.authoredArcadeSourceWitness,
+          actualPublicForecourtAndUpperRoute:true}:{})}),
      originalResponseSha256:report.responseRawSha256,
      baselineGeometrySha256:before.b143.geometrySha256,
      finalGeometrySha256:result.b143.geometrySha256,
@@ -285,11 +295,11 @@ export async function runV4DLocalAuthor({
    };
   }
   output(dir,'AUTHOR_INTENT_ORIGINAL.json',parsed);
-  if(compact||rankedWindows||rankedSection||authoredMassing||authorWing||authorFloorplate||authorAtrium||authorMezzanine){
+  if(compact||rankedWindows||rankedSection||authoredMassing||authorWing||authorFloorplate||authorAtrium||authorMezzanine||authorArcade){
    output(dir,'MECHANICALLY_EXPANDED_AUTHOR_IR.json',result.expandedMechanicalIR);
    if(compact)output(dir,'GENERIC_MECHANICAL_NORMALIZATION.json',result.normalization);
-   if(rankedWindows||rankedSection||authoredMassing||authorWing||authorFloorplate||authorAtrium||authorMezzanine)output(dir,'RANKED_GLAZING_RESOLUTION.json',{
-    schema:authorMezzanine?MEZZANINE_SCHEMA:authorAtrium?HEIGHT_SCHEMA:authorFloorplate?FLOORPLATE_SCHEMA:authorWing?WING_SCHEMA:authoredMassing?MASSING_SCHEMA:rankedSection?SECTIONED_SCHEMA:RANKED_SCHEMA,windowFaces:result.chosenWindowFaces,
+   if(rankedWindows||rankedSection||authoredMassing||authorWing||authorFloorplate||authorAtrium||authorMezzanine||authorArcade)output(dir,'RANKED_GLAZING_RESOLUTION.json',{
+    schema:authorArcade?CIVIC_ARCADE_SCHEMA:authorMezzanine?MEZZANINE_SCHEMA:authorAtrium?HEIGHT_SCHEMA:authorFloorplate?FLOORPLATE_SCHEMA:authorWing?WING_SCHEMA:authoredMassing?MASSING_SCHEMA:rankedSection?SECTIONED_SCHEMA:RANKED_SCHEMA,windowFaces:result.chosenWindowFaces,
     autoRepairPerformed:false,authorSelectedPriorities:true,worldWrites:0
    });
   }
@@ -300,27 +310,27 @@ export async function runV4DLocalAuthor({
    geometrySha256:result.b143.geometrySha256,
    worldWrites:0,humanArt:'NOT_REVIEWED'
   });
-  if(authoredMassing||authorWing||authorFloorplate||authorAtrium||authorMezzanine)output(dir,'AUTHORED_PRIMARY_MASSING_SOURCE.json',{
+  if(authoredMassing||authorWing||authorFloorplate||authorAtrium||authorMezzanine||authorArcade)output(dir,'AUTHORED_PRIMARY_MASSING_SOURCE.json',{
     schema:MASSING_SCHEMA,authorOriginalSha256:result.massingAuthorSha256,
     authoredMassing:result.authoredMassing,
     witness:result.authoredMassingSourceWitness,
     geometrySha256:result.b143.geometrySha256,worldWrites:0,humanArt:'NOT_REVIEWED'
    });
-  if(authorWing||authorFloorplate||authorAtrium||authorMezzanine)output(dir,'AUTHORED_EXTERIOR_WING_SOURCE.json',{
+  if(authorWing||authorFloorplate||authorAtrium||authorMezzanine||authorArcade)output(dir,'AUTHORED_EXTERIOR_WING_SOURCE.json',{
    schema:WING_SCHEMA,authorOriginalSha256:result.wingAuthorSha256,
    authoredWing:result.authoredWing,
    sourceWitness:result.authoredWingSourceWitness,
    geometrySha256:result.b143.geometrySha256,
    worldWrites:0,humanArt:'NOT_REVIEWED'
   });
-  if(authorFloorplate||authorAtrium||authorMezzanine)output(dir,'AUTHORED_COVERED_FLOORPLATE_SOURCE.json',{
+  if(authorFloorplate||authorAtrium||authorMezzanine||authorArcade)output(dir,'AUTHORED_COVERED_FLOORPLATE_SOURCE.json',{
    schema:FLOORPLATE_SCHEMA,authorOriginalSha256:result.floorplateAuthorSha256,
    authorSetback:result.authoredFloorplate,
    sourceWitness:result.authoredFloorplateSourceWitness,
    geometrySha256:result.b143.geometrySha256,
    worldWrites:0,humanArt:'NOT_REVIEWED'
   });
-  if(authorAtrium||authorMezzanine)output(dir,'AUTHORED_TALL_PUBLIC_HALL_SOURCE.json',{
+  if(authorAtrium||authorMezzanine||authorArcade)output(dir,'AUTHORED_TALL_PUBLIC_HALL_SOURCE.json',{
    schema:HEIGHT_SCHEMA,authorOriginalSha256:result.heightAuthorSha256,
    authoredAtrium:result.authoredAtrium,
    trueB143HeightWitness:result.authoredTallHallSourceWitness,
@@ -328,7 +338,7 @@ export async function runV4DLocalAuthor({
    worldContacts:0,worldWrites:0,engineering:'NOT_TESTED',
    humanArt:'NOT_REVIEWED'
   });
-  if(authorMezzanine)output(dir,'AUTHORED_FUNCTIONAL_UPPER_GALLERY_SOURCE.json',{
+  if(authorMezzanine||authorArcade)output(dir,'AUTHORED_FUNCTIONAL_UPPER_GALLERY_SOURCE.json',{
    schema:MEZZANINE_SCHEMA,
    authorOriginalSha256:result.mezzanineAuthorSha256,
    authoredMezzanine:result.authoredMezzanine,
@@ -338,46 +348,60 @@ export async function runV4DLocalAuthor({
    art:'NOT_REVIEWED',realMinecraftWalking:'NOT_TESTED',
    worldContacts:0,worldWrites:0
   });
+   if(authorArcade)output(dir,'AUTHORED_PUBLIC_ARCADE_SOURCE.json',{
+    schema:CIVIC_ARCADE_SCHEMA,originalAuthorSha256:result.civicArcadeAuthorSha256,
+    authoredArcade:result.authoredArcade,
+    actualB143PublicArchitecture:result.authoredArcadeSourceWitness,
+    finalGeometrySha256:result.b143.geometrySha256,
+    realQwen:'NOT_TESTED',humanART:'NOT_REVIEWED',
+    worldContacts:0,worldWrites:0
+   });
    output(dir,'TRANSLATED_AUTHOR_GRAPH.json',result.plan);
   output(dir,'TRANSLATED_AUTHOR_ENVELOPE.json',result.envelope);
   output(dir,'TRUE_B143_SOURCE.json',result.b143.design);
   output(dir,'TWO_WIDE_ROUTES_SOURCE.json',result.b143.sourceRoutes);
   output(dir,'index.html',html);
   if(sectionPrivateArtEvidence){
-   output(dir,authorMezzanine?'BASELINE_TALL_HALL_3D_PRIVATE.html':
+   output(dir,authorArcade?'BASELINE_TWO_LEVEL_GALLERY_3D_PRIVATE.html':
+     authorMezzanine?'BASELINE_TALL_HALL_3D_PRIVATE.html':
     authorAtrium?'BASELINE_FLOORPLATE_3D_PRIVATE.html':
     authorFloorplate?'BASELINE_WING_3D_PRIVATE.html':
     'BASELINE_RANKED_3D_PRIVATE.html',sectionPrivateArtEvidence.baselineHtml);
-   output(dir,authorMezzanine?'BASELINE_TALL_HALL_FIVE_VIEWS_PRIVATE.svg':
+   output(dir,authorArcade?'BASELINE_TWO_LEVEL_GALLERY_FIVE_VIEWS_PRIVATE.svg':
+     authorMezzanine?'BASELINE_TALL_HALL_FIVE_VIEWS_PRIVATE.svg':
     authorAtrium?'BASELINE_FLOORPLATE_FIVE_VIEWS_PRIVATE.svg':
     authorFloorplate?'BASELINE_WING_FIVE_VIEWS_PRIVATE.svg':
     'BASELINE_RANKED_FIVE_VIEWS_PRIVATE.svg',sectionPrivateArtEvidence.baselineSvg);
-   output(dir,authorMezzanine?'FINAL_TWO_LEVEL_PUBLIC_GALLERY_FIVE_VIEWS_PRIVATE.svg':
+   output(dir,authorArcade?'FINAL_PUBLIC_ARCADE_FIVE_VIEWS_PRIVATE.svg':
+     authorMezzanine?'FINAL_TWO_LEVEL_PUBLIC_GALLERY_FIVE_VIEWS_PRIVATE.svg':
     authorAtrium?'FINAL_TALL_PUBLIC_HALL_FIVE_VIEWS_PRIVATE.svg':
     authorFloorplate?'FINAL_COVERED_FLOORPLATE_FIVE_VIEWS_PRIVATE.svg':
     authorWing?'FINAL_EXTERIOR_WING_FIVE_VIEWS_PRIVATE.svg':
     authoredMassing?'FINAL_PRIMARY_MASSING_FIVE_VIEWS_PRIVATE.svg':
     'FINAL_SECTIONED_FIVE_VIEWS_PRIVATE.svg',sectionPrivateArtEvidence.finalSvg);
-   output(dir,authorMezzanine?'PRIVATE_B143_MEZZANINE_EXTERIOR_VISIBILITY_DELTA.svg':
+   output(dir,authorArcade?'PRIVATE_B143_CIVIC_ARCADE_VISIBILITY_DELTA.svg':
+     authorMezzanine?'PRIVATE_B143_MEZZANINE_EXTERIOR_VISIBILITY_DELTA.svg':
     authorAtrium?'PRIVATE_B143_ATRIUM_VISIBILITY_DELTA.svg':
     authorFloorplate?'PRIVATE_B143_FLOORPLATE_VISIBILITY_DELTA.svg':
     authorWing?'PRIVATE_B143_WING_VISIBILITY_DELTA.svg':
      authoredMassing?'PRIVATE_B143_MASSING_VISIBILITY_DELTA.svg':
      'PRIVATE_B143_SECTION_VISIBILITY_DELTA.svg',sectionPrivateArtEvidence.visibilitySvg);
-    output(dir,authorMezzanine?'PRIVATE_B143_MEZZANINE_ART_HOLD_COMPARISON.json':
+    output(dir,authorArcade?'PRIVATE_B143_CIVIC_ARCADE_ART_HOLD_COMPARISON.json':
+     authorMezzanine?'PRIVATE_B143_MEZZANINE_ART_HOLD_COMPARISON.json':
     authorAtrium?'PRIVATE_B143_ATRIUM_ART_HOLD_COMPARISON.json':
     authorFloorplate?'PRIVATE_B143_FLOORPLATE_ART_HOLD_COMPARISON.json':
     authorWing?'PRIVATE_B143_WING_ART_HOLD_COMPARISON.json':
     authoredMassing?'PRIVATE_B143_MASSING_ART_HOLD_COMPARISON.json':
     'PRIVATE_B143_SECTION_ART_HOLD_COMPARISON.json',sectionPrivateArtEvidence.report);
   }
-  if(authorMezzanine){
+  if(authorMezzanine||authorArcade){
    const a=result.authoredAtrium,n=result.plan.nodes.find(q=>q.id===a.spaceId);
    if(!n)fail('PRIVATE_UPPER_ROOM_NOT_PRESENT');
    const slice={x:result.authoredMezzanineSourceWitness.actualSectionPlaneX,
     zStart:n.z+a.offsetZ,zEnd:n.z+a.offsetZ+a.depth-1,
     yMax:result.b143.design.bounds.height-2};
-   const beforeAuthor=structuredClone(parsed);delete beforeAuthor.mezzanine;
+   const beforeAuthor=structuredClone(parsed);
+    delete beforeAuthor.mezzanine;if(authorArcade)delete beforeAuthor.arcade;
    beforeAuthor.schema=HEIGHT_SCHEMA;
    const initial=compileHeightAuthorIntent(beforeAuthor);
    const beforeSlice=actualB143MezzanineSectionSvg(initial.b143.compiled,
@@ -388,11 +412,11 @@ export async function runV4DLocalAuthor({
    output(dir,'PRIVATE_B143_MEZZANINE_INTERIOR_BEFORE.svg',beforeSlice);
    output(dir,'PRIVATE_B143_MEZZANINE_INTERIOR_AFTER.svg',afterSlice);
   }
-  report.authoredIRSha256=authorMezzanine?result.mezzanineAuthorSha256:authorAtrium?result.heightAuthorSha256:authorFloorplate?result.floorplateAuthorSha256:authorWing?result.wingAuthorSha256:authoredMassing?result.massingAuthorSha256:
+  report.authoredIRSha256=authorArcade?result.civicArcadeAuthorSha256:authorMezzanine?result.mezzanineAuthorSha256:authorAtrium?result.heightAuthorSha256:authorFloorplate?result.floorplateAuthorSha256:authorWing?result.wingAuthorSha256:authoredMassing?result.massingAuthorSha256:
     rankedSection?result.sectionedAuthorSha256:
    rankedWindows?result.rankedAuthorSha256:
    compact?result.compactAuthorSha256:result.originalIntentSha256;
-  report.mechanizedExpandedIRSha256=(compact||rankedWindows||rankedSection||authoredMassing||authorWing||authorFloorplate||authorAtrium||authorMezzanine)?result.originalIntentSha256:null;
+  report.mechanizedExpandedIRSha256=(compact||rankedWindows||rankedSection||authoredMassing||authorWing||authorFloorplate||authorAtrium||authorMezzanine||authorArcade)?result.originalIntentSha256:null;
   report.translatedGraphSha256=sha(JSON.stringify(result.plan));
   report.sourceSha256=result.b143.sourceSha256;
   report.geometrySha256=result.b143.geometrySha256;
