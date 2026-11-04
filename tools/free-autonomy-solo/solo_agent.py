@@ -84,6 +84,42 @@ def require_existing_remote_research_branch(cfg: dict, workspace: Path) -> str:
     return records[0][:-len(expected_suffix)]
 
 
+def push_verified_research_commit(cfg: dict, workspace: Path, expected_head: str) -> str:
+    """Publish an already-QA-verified HEAD only if the exact remote ref is unchanged.
+
+    The explicit lease prevents a race with another developer; proving the
+    remote SHA is a LOCAL ancestor of the candidate prevents a non-FF update.
+    Nothing uses this on main or creates a new branch.
+    """
+    verify_repo(cfg)
+    if git(workspace, "rev-parse", "HEAD") != expected_head:
+        raise Hold("GIT_HISTORY_CHANGED_BEFORE_PUSH")
+    if changed_files(workspace):
+        raise Hold("UNVERIFIED_WORKTREE_BEFORE_PUSH")
+    remote_sha = require_existing_remote_research_branch(cfg, workspace)
+    # The remote object may not exist in a shallow/old clone. Refuse rather
+    # than fetch/rebase/merge/update protected material automatically.
+    ancestry = subprocess.run(
+        ["git", "merge-base", "--is-ancestor", remote_sha, expected_head],
+        cwd=workspace, capture_output=True, timeout=35, check=False,
+        env={**os.environ, "GIT_TERMINAL_PROMPT": "0", "GCM_INTERACTIVE": "Never"},
+    )
+    if ancestry.returncode != 0:
+        raise Hold("REMOTE_RESEARCH_TIP_NOT_LOCAL_ANCESTOR")
+    verify_repo(cfg)
+    if (git(workspace, "rev-parse", "HEAD") != expected_head
+            or changed_files(workspace)):
+        raise Hold("LOCAL_SOURCE_CHANGED_BEFORE_PUSH")
+    ref = "refs/heads/" + cfg["branch"]
+    # Lease is intentionally precise. A forced update is NEVER allowed unless
+    # it is a proven fast-forward against the exact SHA observed above.
+    # No branch creation or automatic git fetch/rebase/pull is permitted.
+    git(workspace, "push", "--porcelain",
+        f"--force-with-lease={ref}:{remote_sha}",
+        "origin", f"{expected_head}:{ref}")
+    return remote_sha
+
+
 def changed_files(p: Path) -> list[str]:
     # Using porcelain -z makes filenames with whitespace and rename entries unambiguous.
     raw = subprocess.check_output(["git", "status", "--porcelain=v1", "-z", "--untracked-files=all"], cwd=p)
@@ -444,8 +480,7 @@ def execute(cfg: dict, *, push: bool, sandbox_attested: bool) -> dict:
                         verify_repo(cfg)
                         if git(p, "rev-parse", "HEAD") != state["last_head"]:
                             raise Hold("GIT_HISTORY_CHANGED_BEFORE_PUSH")
-                        require_existing_remote_research_branch(cfg, p)
-                        git(p, "push", "origin", f"HEAD:refs/heads/{cfg['branch']}")
+                        push_verified_research_commit(cfg, p, state["last_head"])
                     except Hold as ex:
                         state["status"] = "HOLD"
                         state["hold_reason"] = "UNPUSHED_RESEARCH_COMMIT: " + str(ex)
@@ -615,8 +650,7 @@ def execute(cfg: dict, *, push: bool, sandbox_attested: bool) -> dict:
                             verify_repo(cfg)
                             if git(p, "rev-parse", "HEAD") != state["last_head"]:
                                 raise Hold("GIT_HISTORY_CHANGED_BEFORE_PUSH")
-                            require_existing_remote_research_branch(cfg, p)
-                            git(p, "push", "origin", f"HEAD:refs/heads/{cfg['branch']}")
+                            push_verified_research_commit(cfg, p, state["last_head"])
                         except Hold as ex:
                             state["status"] = "HOLD"
                             state["hold_reason"] = "UNPUSHED_RESEARCH_COMMIT: " + str(ex)
