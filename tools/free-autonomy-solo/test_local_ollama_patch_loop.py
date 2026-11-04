@@ -218,7 +218,7 @@ class LocalPatchLoopTests(unittest.TestCase):
                 return subprocess.CompletedProcess(argv, 0, stdout="", stderr="")
             return real_run(argv, **kw)
         with patch("local_ollama_patch_loop.subprocess.run", side_effect=fake_only_remote):
-            with self.assertRaisesRegex(Hold, "REMOTE_APPROVED_RESEARCH_BRANCH_NOT_FOUND"):
+            with self.assertRaisesRegex(Hold, "REMOTE_RESEARCH_BRANCH_NOT_PREEXISTING"):
                 ensure_remote_research_branch(self.cfg, self.clone)
 
     def test_schema_real_api_shape_but_mocked_response(self):
@@ -265,6 +265,105 @@ class LocalPatchLoopTests(unittest.TestCase):
                    return_value={"models": [{"name": "unrelated:7b"}]}):
             with self.assertRaisesRegex(Hold, "MODEL_NOT_INSTALLED_NO_AUTO_PULL"):
                 propose_once("qwen3:14b", "source/x.mjs", "x", "Improve", "")
+
+
+    def make_local_remote(self):
+        """Actual disposable bare Git repo; no network and no GitHub push."""
+        remote = self.home / "local-only.git"
+        git(self.clone, "init", "--bare", str(remote))
+        git(self.clone, "remote", "set-url", "origin", str(remote))
+        git(self.clone, "push", "origin",
+            "HEAD:refs/heads/research/isolated-test")
+        return remote
+
+    def test_real_ollama_path_pushes_two_verified_local_commits_with_lease(self):
+        remote = self.make_local_remote()
+        cfg = dict(self.cfg)
+        with patch.dict(os.environ, self.env), \
+             patch("local_ollama_patch_loop.qa_image_preflight"), \
+             patch("local_ollama_patch_loop.verify_repo", return_value=self.clone.resolve()), \
+             patch("solo_agent.verify_repo", return_value=self.clone.resolve()), \
+             patch("local_ollama_patch_loop.propose_once", side_effect=self.proposals), \
+             patch("local_ollama_patch_loop.run_in_docker", return_value=(0, "MOCK_SOURCE_QA")):
+            outcome = execute(cfg, push=True)
+        self.assertEqual(outcome["status"], "SOURCE_ONLY_TASK_QUEUE_DONE")
+        self.assertEqual(len(outcome["commits"]), 2)
+        self.assertTrue(all(c["pushed"] for c in outcome["commits"]))
+        self.assertEqual(git(remote, "rev-parse", "refs/heads/research/isolated-test"),
+                         outcome["last_head"])
+        self.assertEqual(git(self.clone, "status", "--porcelain"), "")
+        self.assertFalse(outcome["real_model_verified"])
+        self.assertFalse(outcome["art_certified"])
+
+    def test_direct_ollama_path_remote_diverged_keeps_local_verified_commit(self):
+        remote = self.make_local_remote()
+        other = self.home / "other-clone"
+        git(self.clone, "clone", "--branch", self.cfg["branch"], str(remote), str(other))
+        git(other, "config", "user.name", "External Fixture")
+        git(other, "config", "user.email", "fixture@example.invalid")
+        (other / "source" / "external.txt").write_text("other branch advance")
+        git(other, "add", "source/external.txt")
+        git(other, "commit", "-m", "external branch advance")
+        git(other, "push", "origin", "HEAD:refs/heads/research/isolated-test")
+        remote_tip = git(remote, "rev-parse", "refs/heads/research/isolated-test")
+        cfg = dict(self.cfg, tasks=self.cfg["tasks"][:1])
+        with patch.dict(os.environ, self.env), \
+             patch("local_ollama_patch_loop.qa_image_preflight"), \
+             patch("local_ollama_patch_loop.verify_repo", return_value=self.clone.resolve()), \
+             patch("solo_agent.verify_repo", return_value=self.clone.resolve()), \
+             patch("local_ollama_patch_loop.propose_once", side_effect=self.proposals[:1]), \
+             patch("local_ollama_patch_loop.run_in_docker", return_value=(0, "MOCK_SOURCE_QA")):
+            with self.assertRaisesRegex(
+                    Hold, "REMOTE_RESEARCH_TIP_NOT_LOCAL_ANCESTOR"):
+                execute(cfg, push=True)
+        private = json.loads(
+            (self.home / "PRIVATE" / "local_patch_state.json").read_text())
+        self.assertEqual(private["status"], "HOLD")
+        self.assertIn("UNPUSHED_RESEARCH_COMMIT:", private["hold_reason"])
+        self.assertEqual(len(private["commits"]), 1)
+        self.assertFalse(private["commits"][0]["pushed"])
+        self.assertEqual(private["last_head"], git(self.clone, "rev-parse", "HEAD"))
+        self.assertEqual(git(remote, "rev-parse",
+                             "refs/heads/research/isolated-test"), remote_tip)
+        self.assertEqual(git(self.clone, "status", "--porcelain"), "")
+
+    def test_direct_ollama_resume_pending_rejects_remote_divergence_without_model_call(self):
+        remote = self.make_local_remote()
+        cfg = dict(self.cfg, tasks=self.cfg["tasks"][:1])
+        with patch.dict(os.environ, self.env), \
+             patch("local_ollama_patch_loop.qa_image_preflight"), \
+             patch("local_ollama_patch_loop.verify_repo", return_value=self.clone.resolve()), \
+             patch("solo_agent.verify_repo", return_value=self.clone.resolve()), \
+             patch("local_ollama_patch_loop.propose_once", side_effect=self.proposals[:1]), \
+             patch("local_ollama_patch_loop.run_in_docker", return_value=(0, "MOCK_SOURCE_QA")):
+            first = execute(cfg, push=False)
+        self.assertEqual(first["status"], "SOURCE_ONLY_TASK_QUEUE_DONE")
+        other = self.home / "other-later-clone"
+        git(self.clone, "clone", "--branch", self.cfg["branch"], str(remote), str(other))
+        git(other, "config", "user.name", "External Fixture")
+        git(other, "config", "user.email", "fixture@example.invalid")
+        (other / "source" / "external.txt").write_text("independent")
+        git(other, "add", "source/external.txt")
+        git(other, "commit", "-m", "external update")
+        git(other, "push", "origin", "HEAD:refs/heads/research/isolated-test")
+        remote_tip = git(remote, "rev-parse", "refs/heads/research/isolated-test")
+        with patch.dict(os.environ, self.env), \
+             patch("local_ollama_patch_loop.qa_image_preflight"), \
+             patch("local_ollama_patch_loop.verify_repo", return_value=self.clone.resolve()), \
+             patch("solo_agent.verify_repo", return_value=self.clone.resolve()), \
+             patch("local_ollama_patch_loop.propose_once",
+                   side_effect=AssertionError("model must not be rerun")):
+            with self.assertRaisesRegex(Hold,
+                                        "REMOTE_RESEARCH_TIP_NOT_LOCAL_ANCESTOR"):
+                execute(cfg, push=True)
+        private = json.loads(
+            (self.home / "PRIVATE" / "local_patch_state.json").read_text())
+        self.assertEqual(private["status"], "HOLD")
+        self.assertEqual(len(private["commits"]), 1)
+        self.assertFalse(private["commits"][0]["pushed"])
+        self.assertEqual(git(remote, "rev-parse",
+                             "refs/heads/research/isolated-test"), remote_tip)
+
 
 if __name__ == "__main__":
     unittest.main()
