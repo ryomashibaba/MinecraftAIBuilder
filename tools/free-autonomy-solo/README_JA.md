@@ -142,3 +142,14 @@
 - 完了または失敗の両方で、小さな共有用 `SHAREABLE_FIRST_PILOT_STATUS.json` を `LOCALAPPDATA/FreeAutonomyPrivate/QwenRealProjectPilotSource/<run-id>` に保存する。画面の `UPLOAD_THIS_SMALL_STATUS_JSON=...` で場所を表示し、**この小さいJSONだけ**をチャットに添付すれば次の工程を判断できる。新しい集約項目には、試行回数、2段階の結果、所要秒、モデル報告の出力tokens/s、HOLD理由を含む一方、ソース本文・差分・プロンプト・トークン・ローカルユーザーパスを含めない。モデル応答、Gitのユーザー資格情報、PRIVATE下書きの全文はアップロードしない。
 - 成功しても `TWO_REAL_SOURCE_PRIVATE_DRAFTS_ONLY` の意味は **「実モデルに2段階の単一ファイル修正案を提出させ、限定構文ゲートを通した」だけ**。生成されたコードの実行、独立QA、研究コミット/プッシュ、最新本線へのマージ、作品品質の採否は次のゲート。真正モデル身元はAPI自己報告にすぎず、独立認証ではない。
 - CIは `cmd /c ... --ci-self-test` とPowerShell ASTの形式検査のみ。ユーザーWindows/Ollama実機と本物のモデル呼び出しの成功証拠にはならない。失敗ならHOLDの小さな共有JSONを受け取って原因を分け、**手順を増やす前にこちらで修正**する。
+
+
+## 2026-11-04：真正Windows Qwen試行（初回HOLD）からの具体修正
+
+本人Windows上の実行ログ（本人がチャットに貼付）から確認できたこと：
+
+- `qwen3:14b` への`/api/chat` 要求を2回試行し、モデル報告の完了JSONは得たが、固定MABソースに対してどちらも `PATCH_MATCH_MUST_BE_UNIQUE`。**stage 1で0/2案、stage 2に未到達、HOLD**。原本編集・QA・Git commit・remote pushは0。PINNED_SOURCE_INTEGRITY_PASSで、モデルの独立身元や成果の品質は未証明。ログには私人用の保存先が含まれるため、公開Gitの記録には絶対パスを再掲しない。
+- この失敗はLLMにソースの引用文字列を完全一致で出力させる方式に起因し得る。曖昧・不一致を適用可能に緩和するのは危険なので、**編集候補の厳密一致行をホストが既存ソースから一意に抽出**し、モデルには `{"slot":番号,"replace":新しい1行または置換コード}` のみ返させる方式へ変更。任意 `find`、曖昧/重複行、範囲外slot、空/同一置換、保護アンカーの削除は引き続き拒否。model生成コードは私的テキストのまま・実行なし。
+- GitHub実ソース2系統の選択を保持し、長時間モデル切替や原本リライトは行わない。段階2も独立した一意編集slotから選ぶ。合格しても意味のある品質・ART/4v4・長時間無人開発は未認定。
+- さらに、旧ランチャーは結果JSONの`UPLOAD_THIS_SMALL_STATUS_JSON=`パスを表示するだけだったため、ユーザーから「終了後にファイルが表示されなかった」と報告。**新PowerShellは結果JSON保存後、Windows ExplorerでそのJSONを選択表示する**。Explorerが開かなくてもJSONは必ずprivateフォルダに保持し、表示されたパスから手動で開ける。
+- 新版の起動CMDは新PowerShell版の固定コミットおよびGit blob SHAのみ実行可能にし、さらに下位Python実装と固定マニフェストのSHAも確認する。旧版の実行失敗を隠さず、再実行による本物の2段階修正案は別途実測を要する。
