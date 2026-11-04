@@ -36,6 +36,10 @@ test('V4H FIVE independent author mezzanines really reach 2-wide upper functiona
   assert.equal(after.humanArt,'NOT_REVIEWED');
   assert.equal(after.realModel,'NOT_TESTED');
   assert.equal(after.minecraftWalking,'NOT_TESTED');
+  assert(['west','east'].includes(w.authorChosenStairLane));
+  const badLane={...s.mezzanine,stairLane:'center'};
+  assert.throws(()=>compileAuthoredPublicMezzanine(s.heightAuthor,badLane),
+   /R125_V4H_MEZZANINE_EXPLICIT_AUTHOR_MEZZANINE_GRAMMAR/);
   const bad={...s.mezzanine,rise:12};
   assert.throws(()=>compileAuthoredPublicMezzanine(s.heightAuthor,bad),
    /R125_V4H_MEZZANINE_EXPLICIT_AUTHOR_MEZZANINE_GRAMMAR/);

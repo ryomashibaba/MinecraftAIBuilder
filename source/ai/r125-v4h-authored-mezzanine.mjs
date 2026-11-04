@@ -24,7 +24,8 @@ const box=(id,origin,size,material)=>({
 });
 export function compileAuthoredPublicMezzanine(heightAuthor,mezzanine){
  const raw=structuredClone(heightAuthor),m=structuredClone(mezzanine);
- if(!exact(m,['side','deckOffsetX','deckWidth','rise','purpose'])||
+ if(!exact(m,['side','stairLane','deckOffsetX','deckWidth','rise','purpose'])||
+  !['west','east'].includes(m.stairLane)||
   !['north','south'].includes(m.side)||
   !Number.isSafeInteger(m.deckOffsetX)||m.deckOffsetX<1||m.deckOffsetX>3||
   !Number.isSafeInteger(m.deckWidth)||m.deckWidth<8||m.deckWidth>10||
@@ -41,7 +42,8 @@ export function compileAuthoredPublicMezzanine(heightAuthor,mezzanine){
  const x=x0+m.deckOffsetX,deckZ=m.side==='north'?z0+1:z0+a.depth-4;
  const deckEndX=x+m.deckWidth-1,deckEndZ=deckZ+2;
  const deckY=1+m.rise,standingY=deckY+1;
- const stairX=x+1,stairLowZ=m.side==='north'?deckEndZ+1:deckZ-1;
+ const stairX=m.stairLane==='west'?x+1:deckEndX-2;
+ const stairLowZ=m.side==='north'?deckEndZ+1:deckZ-1;
  const stairStartZ=m.side==='north'?stairLowZ+m.rise:stairLowZ-m.rise;
  const dir=m.side==='north'?-1:1;
  if(deckEndX>=x0+a.width-1||
@@ -210,6 +212,7 @@ export function compileAuthoredPublicMezzanine(heightAuthor,mezzanine){
    independentProjections:projection,
    externalViewsMayFullyOccludeInteriorWork:true,
    actualSectionPlaneX:stairX,
+   authorChosenStairLane:m.stairLane,
    genuineMultiLevelCirculation:'SOURCE_TWO_WIDE_REACHES_UPPER_PROGRAM_AND_EQUIPMENT',
    actualMinecraftWalking:'NOT_TESTED',
    structuralEngineering:'NOT_TESTED',

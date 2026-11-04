@@ -17,15 +17,15 @@ import {actualB143MezzanineSectionSvg} from './r125-v4h-mezzanine-section.mjs';
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const fail=s=>{throw Error('R125_V4H_STUDY_'+s);};
 const choices={
- housing:{side:'north',deckOffsetX:2,deckWidth:8,rise:7,
+ housing:{side:'north',stairLane:'west',deckOffsetX:2,deckWidth:8,rise:7,
   purpose:'Elevated family learning and interactive community reading space'},
- shop:{side:'south',deckOffsetX:2,deckWidth:8,rise:7,
+ shop:{side:'south',stairLane:'east',deckOffsetX:2,deckWidth:8,rise:7,
   purpose:'Public craft demonstration and shopping information balcony'},
- research:{side:'north',deckOffsetX:2,deckWidth:8,rise:7,
+ research:{side:'north',stairLane:'east',deckOffsetX:2,deckWidth:8,rise:7,
   purpose:'Scientific interpretation observation and researcher briefing gallery'},
- gallery:{side:'south',deckOffsetX:2,deckWidth:8,rise:7,
+ gallery:{side:'south',stairLane:'east',deckOffsetX:2,deckWidth:8,rise:7,
   purpose:'Public interpretive art teaching and participatory display mezzanine'},
- station:{side:'north',deckOffsetX:2,deckWidth:8,rise:7,
+ station:{side:'north',stairLane:'east',deckOffsetX:2,deckWidth:8,rise:7,
   purpose:'Elevated public transport guidance and information mezzanine'}
 };
 export function syntheticFiveAuthorMezzanineCases(){
@@ -87,7 +87,7 @@ export function exportV4HTrueMezzanineStudy(folder){
   const {genre,heightAuthor,mezzanine}=cases[i];
   const a=heightAuthor.atrium,
    n=before[i].plan.nodes.find(x=>x.id===a.spaceId),
-   x=n.x+a.offsetX+mezzanine.deckOffsetX+1;
+   x=final[i].sourceWitness.actualSectionPlaneX;
   const range={x,zStart:n.z+a.offsetZ,zEnd:n.z+a.offsetZ+a.depth-1,
    yMax:final[i].b143Design.bounds.height-2};
   fs.writeFileSync(path.join(folder,'STAIR_SECTION_BEFORE_'+genre+'.svg'),
