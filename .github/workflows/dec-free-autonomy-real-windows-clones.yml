@@ -1,0 +1,75 @@
+name: December autonomous project admission - real pinned private Git clones on Windows
+
+on:
+  push:
+    branches:
+      - research/dec-free-autonomy-solo-pilot-20261104
+    paths:
+      - '.github/workflows/dec-free-autonomy-real-windows-clones.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pinned-minecraftaibuilder-windows-clone:
+    name: Pinned actual MAB source isolated Windows clone (NO LLM or QA)
+    runs-on: windows-2022
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Prepare MAB immutable source into new LOCALAPPDATA private clone
+        shell: pwsh
+        run: |
+          python tools/free-autonomy-solo/prepare_pinned_real_project.py --project minecraftaibuilder
+      - name: Preserve sanitized SHA/root/status evidence outside any repository
+        shell: pwsh
+        run: |
+          $dest = Join-Path $env:RUNNER_TEMP "mab-admission"
+          New-Item -ItemType Directory -Force -Path $dest | Out-Null
+          $files = @(Get-ChildItem (Join-Path $env:LOCALAPPDATA "FreeAutonomyPrivate\PinnedRealSources") -Filter SHAREABLE_PREPARE_RECEIPT.json -Recurse -File)
+          if ($files.Count -ne 1) { throw "MAB_EXPECTED_ONE_RECEIPT" }
+          Copy-Item $files[0].FullName (Join-Path $dest "SHAREABLE_PREPARE_RECEIPT.json")
+          $report = Get-Content $files[0].FullName -Raw | ConvertFrom-Json
+          if ($report.status -ne 'REAL_SOURCE_CLONE_PINNED_READONLY_READY' -or $report.git_remote_pushes -ne 0) { throw "MAB_ADMISSION_NOT_VERIFIED" }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: real-mab-windows-pinned-source-admission
+          path: ${{ runner.temp }}/mab-admission/SHAREABLE_PREPARE_RECEIPT.json
+          retention-days: 7
+
+  pinned-browser-ink-tps-windows-clone:
+    name: Pinned actual TPS source isolated Windows clone (NO LLM or QA)
+    runs-on: windows-2022
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Prepare TPS immutable source into new LOCALAPPDATA private clone
+        shell: pwsh
+        run: |
+          python tools/free-autonomy-solo/prepare_pinned_real_project.py --project browser-ink-tps
+      - name: Preserve sanitized SHA/root/status evidence outside any repository
+        shell: pwsh
+        run: |
+          $dest = Join-Path $env:RUNNER_TEMP "tps-admission"
+          New-Item -ItemType Directory -Force -Path $dest | Out-Null
+          $files = @(Get-ChildItem (Join-Path $env:LOCALAPPDATA "FreeAutonomyPrivate\PinnedRealSources") -Filter SHAREABLE_PREPARE_RECEIPT.json -Recurse -File)
+          if ($files.Count -ne 1) { throw "TPS_EXPECTED_ONE_RECEIPT" }
+          Copy-Item $files[0].FullName (Join-Path $dest "SHAREABLE_PREPARE_RECEIPT.json")
+          $report = Get-Content $files[0].FullName -Raw | ConvertFrom-Json
+          if ($report.status -ne 'REAL_SOURCE_CLONE_PINNED_READONLY_READY' -or $report.git_remote_pushes -ne 0) { throw "TPS_ADMISSION_NOT_VERIFIED" }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: real-tps-windows-pinned-source-admission
+          path: ${{ runner.temp }}/tps-admission/SHAREABLE_PREPARE_RECEIPT.json
+          retention-days: 7
