@@ -1,6 +1,6 @@
 {
   "schema": "dec-real-project-single-session-pinned-source-v1",
-  "purpose": "Select exactly one protected source lineage for local Qwen/Gemma; pinned source admission only, NOT model inference, source mutation or certification",
+  "purpose": "Select exactly one current-audited protected source lineage for local Qwen/Gemma; immutable commit and unchanged source blob admission only, NOT model inference, source mutation or certification",
   "simultaneous_active_projects_max": 1,
   "local_model_auto_download": false,
   "allow_paid_api": false,
@@ -13,7 +13,7 @@
     "minecraftaibuilder": {
       "repository": "ryomashibaba/MinecraftAIBuilder",
       "source_branch_at_audit": "feature/b198zr1-protected-architectural-revision",
-      "pinned_commit": "fe1682e15ffa063f4dc415b06c4d76a54737a06e",
+      "pinned_commit": "19ef7fd0f3d08ab6c8cd350b44df9ab0eb69a963",
       "source_file": "source/ai/r125-v4h-mezzanine-author-ir.mjs",
       "source_blob_sha": "4cbcbb448737b314b6d5d4bfcdc367e9b1b45f52",
       "research_branch_for_private_clone": "research/dec-local-14b-mab-v4h-source-pilot",
@@ -36,7 +36,7 @@
     "browser-ink-tps": {
       "repository": "ryomashibaba/browser-ink-tps",
       "source_branch_at_audit": "research/t21-b406-single-session-real-enemy-range-audit-20261103",
-      "pinned_commit": "0942eca28ca3cc2c66cc754c0d6d8e6fdedb6c07",
+      "pinned_commit": "771e8151501f6badc653f5e5b90be531b750a2ff",
       "source_file": "src/app/B193SourceCoopMode.ts",
       "source_blob_sha": "9e2fe93e6e85cb12ffb27ac1d2506c87ee10bca4",
       "research_branch_for_private_clone": "research/dec-local-14b-tps-b423-source-pilot",
