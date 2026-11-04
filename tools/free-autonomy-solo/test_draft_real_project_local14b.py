@@ -59,6 +59,7 @@ class RealSourceDraftTests(unittest.TestCase):
         source_text = MAB_SOURCE if project == "minecraftaibuilder" else TPS_SOURCE
         source_path.write_text(source_text, encoding="utf-8")
         git(workspace, "init", "-b", lane["research_branch_for_private_clone"])
+        git(workspace, "config", "core.autocrlf", "false")
         git(workspace, "config", "user.name", "Private Fixture")
         git(workspace, "config", "user.email", "private@example.invalid")
         git(workspace, "remote", "add", "origin",
