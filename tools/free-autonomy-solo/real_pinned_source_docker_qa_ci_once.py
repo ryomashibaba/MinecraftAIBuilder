@@ -14,7 +14,7 @@ from pathlib import Path
 import tempfile
 
 from prepare_pinned_real_project import load_manifest, prepare, verify_private_clone
-from promote_private_real_drafts_docker import promote
+from promote_private_real_drafts_docker import promote, docker_run
 
 MODEL = "ci-synthetic-comments-no-llm"
 
@@ -69,6 +69,16 @@ def main():
         root = Path(pre["private_workspace_path"]).parent
         lane = manifest["project_candidates"][args.project]
         verify_private_clone(root / "repo", lane)
+        # Execute a real adversarial write attempt in the exact readonly
+        # SOURCE+network-none QA container. Must fail and leave no canary.
+        canary = root / "repo" / ".docker-readonly-source-canary"
+        rc, _ = docker_run(
+            root / "repo",
+            ["node", "-e",
+             "require('fs').writeFileSync('/work/.docker-readonly-source-canary', 'BAD')"],
+            root, "negative-readonly-qa", timeout=35)
+        if rc == 0 or canary.exists():
+            raise SystemExit("DOCKER_QA_READONLY_ISOLATION_BREAK")
         fixture(root, args.project, manifest)
         result = promote(root, args.project, MODEL,
                          allow_public_npm_deps=args.project=="browser-ink-tps")
@@ -81,6 +91,7 @@ def main():
             "model_calls": 0, "model_is_fake": True,
             "synthetic_change": "comments_only",
             "sandbox_network_for_qa": result["sandbox_network_for_qa"],
+            "real_docker_readonly_source_negative_test": True,
             "true_docker_qa_executed": result.get("completed_stages", 0) > 0,
             "actual_local_qa_commits": len(result["local_qa_commits"]),
             "completed_stages": result["completed_stages"],
