@@ -75,3 +75,19 @@ jobs:
         run: |
           echo 'Real FREE-model call attempt once; no paid API credentials.'
           echo 'No Windows, original project editing or long-running autonomous development attested.'
+
+  windows-readonly-ps-parser:
+    runs-on: windows-2022
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: PowerShell AST parsing only (no Docker/model/network invocation)
+        shell: pwsh
+        run: |
+          $tokens = $null
+          $parseErrors = $null
+          [void][System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path 'tools/free-autonomy-solo/windows_readonly_audit.ps1'), [ref]$tokens, [ref]$parseErrors)
+          if ($parseErrors.Count -gt 0) { $parseErrors | Format-List | Out-String | Write-Host; exit 2 }
+          Write-Host 'WINDOWS_READONLY_PS_AST_PASS'
