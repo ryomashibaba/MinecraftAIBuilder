@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import html
 import json
 import os
 from pathlib import Path
@@ -92,6 +93,99 @@ console.log(JSON.stringify({
 REASON_CODE = re.compile(r"[A-Z][A-Z0-9_]{2,130}\Z")
 
 
+def _checkpoint(summary: dict, path: Path) -> None:
+    """Durable private report after each candidate, never a public artifact."""
+    staged = path.with_name(path.name + ".unverified-tmp")
+    staged.write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n",
+                      encoding="utf-8")
+    os.replace(staged, path)
+
+
+def _finish_status(summary: dict) -> None:
+    """Only ALL requested, independently checked and distinct buildings pass."""
+    rows = summary["results"]
+    count = summary["generated_buildings_source_passed"]
+    geometries = [
+        row["geometry_sha256"] for row in rows
+        if row.get("independent_source_pass") is True
+    ]
+    summary["distinct_accepted_geometry_count"] = len(set(geometries))
+    summary["rejected_or_unverified_count"] = summary["independent_original_briefs"] - count
+    summary["whole_batch_verified"] = (
+        len(rows) == summary["independent_original_briefs"]
+        and count == len(rows)
+        and count == len(set(geometries))
+    )
+    if count and len(geometries) != len(set(geometries)):
+        summary["status"] = "HOLD_DUPLICATE_GEOMETRY_ACROSS_ORIGINAL_BRIEFS"
+    elif summary["whole_batch_verified"]:
+        summary["status"] = "ALL_ORIGINAL_ARCHITECTURES_SOURCE_ONLY_ART_HOLD"
+    elif count:
+        summary["status"] = "HOLD_PARTIAL_ARCHITECTURE_SOURCE_ACCEPTANCE"
+    else:
+        summary["status"] = "HOLD_NO_ORIGINAL_SOURCE_ACCEPTED"
+
+
+def _private_review_html(summary: dict, root: Path) -> Path:
+    """One static side-by-side private SOURCE review; NO JS and NO ART PASS."""
+    def esc(value: object) -> str:
+        return html.escape(str(value), quote=True)
+
+    cards = []
+    for slug, _ in BRIEFS[:summary["independent_original_briefs"]]:
+        row = next((r for r in summary["results"]
+                    if r.get("brief_id") == slug), {})
+        status = row.get("status", "NOT_STARTED")
+        img = root / ("private-original-" + slug) / (
+            "FINAL_TWO_LEVEL_PUBLIC_GALLERY_FIVE_VIEWS_PRIVATE.svg")
+        picture = ""
+        if (row.get("independent_source_pass") is True
+                and img.is_file() and not img.is_symlink()
+                and img.stat().st_size > 512):
+            # The path is exclusively built from a fixed, author-owned slug.
+            picture = ('<img loading="lazy" alt="B143 source-only '
+                       + esc(slug) + ' five-view geometry" src="'
+                       + esc("private-original-" + slug + "/" + img.name)
+                       + '">')
+        else:
+            picture = '<p class="none">3D SOURCE not accepted — no art preview</p>'
+        cards.append(
+            '<article><h2>' + esc(slug) + '</h2><p class="status">'
+            + esc(status) + '</p>' + picture
+            + '<p>Voxels: ' + esc(row.get("source_voxel_count", "NOT_PROVEN"))
+            + '</p><p>Reason: ' + esc(row.get("reason_code", "NONE_RECORDED"))
+            + '</p></article>'
+        )
+    page = '''<!doctype html><html lang="ja"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<meta http-equiv="Content-Security-Policy"
+ content="default-src 'none'; img-src 'self' file:; style-src 'unsafe-inline'">
+<title>Private V4H Architecture Source Review</title>
+<style>body{font-family:system-ui,sans-serif;background:#101820;color:#ecf4f7;
+margin:0;padding:2rem}h1{font-size:1.6rem}p{line-height:1.5}
+.note{color:#ffc983}.grid{display:grid;grid-template-columns:
+repeat(auto-fit,minmax(min(100%,340px),1fr));gap:1rem}
+article{background:#20303b;padding:1rem;border:1px solid #415769;
+border-radius:12px;min-width:0}h2{margin:.3rem 0}
+img{width:100%;height:auto;max-height:640px;object-fit:contain;background:#e9eff3}
+.status{overflow-wrap:anywhere;color:#9fe5b6}
+.none{padding:4rem 1rem;text-align:center;border:1px dashed #72808b}
+small{color:#c6d4dc}</style></head><body>
+<h1>V4H — Independent Original Architecture Comparison</h1>
+<p class="note">SOURCE only. Human ART: NOT_REVIEWED. Minecraft walking:
+NOT_TESTED. No design has been adopted, built or uploaded.</p>
+<p>Overall gate: ''' + esc(summary.get("status", "UNVERIFIED")) + '''</p>
+<div class="grid">''' + "".join(cards) + '''</div>
+<p><small>Any missing image is a HOLD, not a blank approved design.
+Only original, single-response B143 geometry is displayed.</small></p>
+</body></html>'''
+    output = root / "V4H_PRIVATE_SOURCE_COMPARE.html"
+    staged = root / "V4H_PRIVATE_SOURCE_COMPARE.html.tmp"
+    staged.write_text(page, encoding="utf-8")
+    os.replace(staged, output)
+    return output
+
+
 def _node(workspace: Path, code: str, env: dict, timeout: int) -> subprocess.CompletedProcess:
     return subprocess.run(
         ["node", "--input-type=module", "--eval", code],
@@ -117,7 +211,7 @@ def run_batch(model: str, cases: int) -> tuple[dict, Path]:
     dest.mkdir(parents=True, exist_ok=False)
     summary = {
         "schema": SCHEMA, "project": PROJECT, "selected_model_label": model,
-        "status": "HOLD", "independent_original_briefs": cases,
+        "status": "RUNNING_INCOMPLETE_NOT_CERTIFIED", "independent_original_briefs": cases,
         "generated_buildings_source_passed": 0, "model_posts_observed": 0,
         "private_original_responses_uploaded": False,
         "protected_project_files_modified": False,
@@ -128,6 +222,7 @@ def run_batch(model: str, cases: int) -> tuple[dict, Path]:
         "results": [],
     }
     output_path = dest / "SHAREABLE_V4H_REAL_14B_BATCH.json"
+    _checkpoint(summary, output_path)
     try:
         with exclusive_local_project_lock():
             if not local_model_installed(model):
@@ -148,6 +243,7 @@ def run_batch(model: str, cases: int) -> tuple[dict, Path]:
                     "world_writes": 0, "art_status": "NOT_REVIEWED",
                 }
                 summary["results"].append(case)
+                _checkpoint(summary, output_path)
                 out = dest / ("private-original-" + slug)
                 try:
                     env = {**os.environ,
@@ -208,19 +304,17 @@ def run_batch(model: str, cases: int) -> tuple[dict, Path]:
                     case["status"] = "HOLD_PROCESS_OR_SOURCE_EXCEPTION"
                     case["exception_type"] = type(exc).__name__
                 finally:
+                    _checkpoint(summary, output_path)
                     _identity_health(workspace, lane)
-            summary["status"] = ("SOURCE_ONLY_PRIVATE_ART_HOLD" if
-                                 summary["generated_buildings_source_passed"] else
-                                 "HOLD_NO_ORIGINAL_SOURCE_ACCEPTED")
+            _finish_status(summary)
     except (RuntimeError, OSError, ValueError, KeyError, subprocess.TimeoutExpired) as exc:
         summary["status"] = "HOLD_INFRASTRUCTURE_OR_MODEL"
         message = str(exc)
         summary["reason_code"] = (
             message if REASON_CODE.fullmatch(message) else type(exc).__name__)
     finally:
-        output_path.write_text(
-            json.dumps(summary, ensure_ascii=False, indent=2) + "\n",
-            encoding="utf-8")
+        _checkpoint(summary, output_path)
+        _private_review_html(summary, dest)
     return summary, output_path
 
 
@@ -246,7 +340,8 @@ def main() -> int:
         "world_writes": result["world_writes"],
     }, ensure_ascii=False))
     print("PRIVATE_SHAREABLE_RESULT_PATH=" + str(report_path))
-    return 0 if result["status"] == "SOURCE_ONLY_PRIVATE_ART_HOLD" else 2
+    print("PRIVATE_SOURCE_COMPARISON_HTML=" + str(report_path.parent / "V4H_PRIVATE_SOURCE_COMPARE.html"))
+    return 0 if result["status"] == "ALL_ORIGINAL_ARCHITECTURES_SOURCE_ONLY_ART_HOLD" else 2
 
 
 if __name__ == "__main__":

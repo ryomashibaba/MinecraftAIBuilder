@@ -58,6 +58,8 @@ class PrivateOriginalArchitectureBatchTests(unittest.TestCase):
                 (out / "V4D_LOCAL_AUTHOR_REPORT.json").write_text(
                     json.dumps(report), encoding="utf-8")
                 if not rejected:
+                    (out / "FINAL_TWO_LEVEL_PUBLIC_GALLERY_FIVE_VIEWS_PRIVATE.svg").write_text(
+                        "<svg>" + ("geometry" * 100) + "</svg>", encoding="utf-8")
                     (out / "AUTHOR_INTENT_ORIGINAL.json").write_text(
                         '{"dummy":"private-model-output"}', encoding="utf-8")
                     (out / "MODEL_RESPONSE_ORIGINAL.txt").write_text(
@@ -80,7 +82,8 @@ class PrivateOriginalArchitectureBatchTests(unittest.TestCase):
              patch.object(batch, "_node", side_effect=fake_node):
             result, saved = batch.run_batch("qwen3:14b", 3)
 
-        self.assertEqual(result["status"], "SOURCE_ONLY_PRIVATE_ART_HOLD")
+        self.assertEqual(result["status"], "HOLD_PARTIAL_ARCHITECTURE_SOURCE_ACCEPTANCE")
+        self.assertFalse(result["whole_batch_verified"])
         self.assertEqual(author_calls,
                          ["space-science", "cultural-library", "craft-maker"])
         self.assertEqual(len(qa_calls), 2)
@@ -93,6 +96,49 @@ class PrivateOriginalArchitectureBatchTests(unittest.TestCase):
         self.assertEqual(result["github_pushes"], 0)
         self.assertEqual(result["world_writes"], 0)
         self.assertTrue(saved.is_file())
+        gallery = saved.parent / "V4H_PRIVATE_SOURCE_COMPARE.html"
+        self.assertTrue(gallery.is_file())
+        self.assertIn("space-science", gallery.read_text(encoding="utf-8"))
+        self.assertIn("cultural-library", gallery.read_text(encoding="utf-8"))
+        self.assertIn("ART: NOT_REVIEWED", gallery.read_text(encoding="utf-8"))
+
+    def test_all_source_pass_requires_every_brief_and_unique_geometry(self):
+        summary = {
+            "independent_original_briefs": 3,
+            "generated_buildings_source_passed": 3,
+            "results": [
+                {"status": "SOURCE_ONLY_PRIVATE_ART_HOLD",
+                 "independent_source_pass": True,
+                 "geometry_sha256": str(i) * 64}
+                for i in (1, 2, 3)
+            ],
+        }
+        batch._finish_status(summary)
+        self.assertEqual(summary["status"],
+                         "ALL_ORIGINAL_ARCHITECTURES_SOURCE_ONLY_ART_HOLD")
+        self.assertTrue(summary["whole_batch_verified"])
+        self.assertEqual(summary["distinct_accepted_geometry_count"], 3)
+        summary["results"][2]["geometry_sha256"] = "1" * 64
+        batch._finish_status(summary)
+        self.assertFalse(summary["whole_batch_verified"])
+        self.assertEqual(summary["status"],
+                         "HOLD_DUPLICATE_GEOMETRY_ACROSS_ORIGINAL_BRIEFS")
+
+    def test_private_review_escapes_reason_values_and_has_no_script(self):
+        with tempfile.TemporaryDirectory() as temp:
+            report = {
+                "independent_original_briefs": 1,
+                "status": "HOLD_NO_ORIGINAL_SOURCE_ACCEPTED",
+                "results": [{"brief_id": "space-science",
+                             "status": "HOLD",
+                             "reason_code": "<script>alert(1)</script>"}],
+            }
+            path = batch._private_review_html(report, Path(temp))
+            html_text = path.read_text(encoding="utf-8")
+            self.assertIn("&lt;script&gt;", html_text)
+            self.assertNotIn("<script>", html_text)
+            self.assertIn("default-src 'none'", html_text)
+            self.assertIn("no art preview", html_text)
 
     def test_no_installed_local_model_holds_before_any_project_clone(self):
         with patch.object(batch, "local_model_installed", return_value=False), \
