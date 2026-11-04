@@ -62,6 +62,20 @@ def bounded_local_qa_feedback(failures: list[str]) -> str:
         if not code:
             continue
         diagnostics.append(code.group(1))
+        # Node TAP's failed *single-token* test names can explain which
+        # behaviors regressed (e.g. "above", "valid"). Never forward full
+        # test labels or raw output as instructions to the local model.
+        failed_tests = []
+        for line in failure.splitlines():
+            match = re.fullmatch(
+                r"(?:# )?not ok [0-9]{1,5} - ([a-z][a-z0-9_-]{0,39})",
+                line.strip())
+            if match and match.group(1) not in failed_tests:
+                failed_tests.append(match.group(1))
+            if len(failed_tests) == 3:
+                break
+        if failed_tests:
+            diagnostics.append("LOCAL_FAILED_TESTS=" + ",".join(failed_tests))
         # A narrow error excerpt is useful for a real code repair attempt;
         # surrounding log lines may contain arbitrary instructions or secrets.
         for line in failure.splitlines():

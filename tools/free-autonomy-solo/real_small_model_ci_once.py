@@ -156,7 +156,7 @@ def run_probe() -> dict:
                      "request": "Fix this JS clamp function to clamp to both inclusive bounds while keeping the signature. Don't implement inverted-bound errors yet.",
                      "checks": [["node", "--test", "source/basic.test.mjs"]]},
                     {"path": "source/calc.mjs",
-                     "request": "Keep the existing valid clamp return expression and all three normal cases. Add a separate early if statement before the return so inverted bounds throw RangeError. Do not put throw inside an expression or use logical operators to invoke throw. Only edit the guard needed for this error condition.",
+                     "request": "Preserve the correct existing clamp behavior for value below low, within bounds, and above high. The ONLY error condition is low > high (the bounds themselves are inverted): throw RangeError then. Never throw just because value is below low or above high; clamp those as before. Add a separate valid if statement before the existing return; do not put throw inside an expression.",
                      "checks": [["node", "--test", "source/basic.test.mjs",
                                   "source/bounds.test.mjs"]]}
                 ]
