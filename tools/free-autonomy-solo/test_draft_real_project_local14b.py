@@ -177,7 +177,7 @@ class RealSourceDraftTests(unittest.TestCase):
                 find = (anchor if project == "minecraftaibuilder"
                         else "export function sourceCoopEligible(p) {")
                 replacement = ("DELETED_PUBLIC_ANCHOR" if project == "minecraftaibuilder"
-                               else "export function sourceCoopEligibleRemoved(p) {")
+                               else "export function safeCoopRemoved(p) {")
                 with self.assertRaisesRegex(Hold, "PROTECTED_PUBLIC_CONTRACT_ANCHOR_REMOVED"):
                     bounded_replacement(project, original, {
                         "find": find, "replace": replacement})
