@@ -32,6 +32,8 @@ import {CIVIC_ARCADE_SCHEMA,compileCivicArcadeAuthorIntent}
 import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
 import {classifyPrivateV4DFailure}
  from './r125-v4d-shareable-receipt.mjs';
+import {classifyPrivateCompilerRejection}
+ from './r125-v4d-compiler-reject-codes.mjs';
 import {diagnosePrivateV4DAuthor,diagnosePrivateV4DInvalidJSON}
  from './r125-v4d-author-source-diagnostics.mjs';
 
@@ -159,7 +161,8 @@ export function replayPrivateV4D(study,out){
   worldContacts:0,worldWrites:0,
   readiness:'NOT_PREPARED',constructionApproved:false,executionAllowed:false,
   BuildPlan:{operations:[]},gates:Array(9).fill('BLOCKED'),
-  failureCategory:classifyPrivateV4DFailure(original.reason)
+  failureCategory:classifyPrivateV4DFailure(original.reason),
+  compilerRejectCode:null
  };
  try{
   if(!original.rawCaptured||original.modelCalls===0){
@@ -208,6 +211,7 @@ export function replayPrivateV4D(study,out){
   }catch(e){
    report.status='HOLD_REPLAY_SOURCE_REJECTED';
    report.failureCategory=classifyPrivateV4DFailure(String(e?.message??e));
+   report.compilerRejectCode=classifyPrivateCompilerRejection(String(e?.message??e));
    return report;
   }
   const result=compiled.b143;
@@ -270,6 +274,7 @@ export function replayPrivateV4D(study,out){
    sourceSha256:report.sourceCodeSHA256Replayed,
    geometrySha256:report.geometrySHA256Replayed,
    failureCategory:report.failureCategory,
+   compilerRejectCode:report.compilerRejectCode,
    structuralIssueCodes:report.structuralDiagnosticIssueCodes??[],
    structuralIssueCount:report.structuralDiagnosticIssueCount??null,
    structuralDataDerivedOnlyFromShaVerifiedOriginal:!!authorDiagnostic,

@@ -95,6 +95,9 @@ test('previously invalid ORIGINAL semantic source stays HOLD even if a later com
   assert.equal(old.status,'HOLD_MODEL_OR_SOURCE_INVALID_NO_REPAIR');
   const before=replayPrivateV4D(s.study,s.replay);
   assert.equal(before.status,'HOLD_REPLAY_SOURCE_REJECTED');
+  assert.equal(before.compilerRejectCode,'COMPACT_PARENT_BEFORE_CHILD');
+  assert.equal(read(path.join(s.replay,'REPLAY_SHAREABLE_STATUS.json')).compilerRejectCode,
+   'COMPACT_PARENT_BEFORE_CHILD');
   assert(!fs.existsSync(path.join(s.replay,'index.html')));
   assert.equal(before.additionalModelCalls,0);
   // Even if local private evidence was replaced and re-hashed externally
