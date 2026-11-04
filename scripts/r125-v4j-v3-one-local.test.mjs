@@ -3,6 +3,9 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import {createHash} from 'node:crypto';
+import {V4J_STRUCTURED_SYSTEM_PROMPT} from '../source/ai/r125-v4j-structured-author-schema.mjs';
+import {V4J_ENVELOPE_SYSTEM_PROMPT} from '../source/ai/r125-v4j-feasible-envelope.mjs';
 import {parseV3OneArgs,runV3OneGenreStudy}
  from './r125-v4j-v3-one-local.mjs';
 test('V3 representative trial CLI rejects unknown/multiple/unsafe genre controls',()=>{
@@ -32,6 +35,8 @@ test('one V3 LOCAL test-double POST and zero extra replay POST are never a real 
    {fetcher,timeoutMs:15000});
   assert.deepEqual(calls,['GET','POST']);
   assert.equal(safe.promptProtocol,'V4J_SINGLE_RESPONSE_SCHEMA_GUIDED_V3');
+  assert.equal(safe.systemPromptSha256,
+   createHash('sha256').update(V4J_STRUCTURED_SYSTEM_PROMPT).digest('hex'));
   assert.equal(safe.genre,'housing');
   assert.equal(safe.explicitlyInjectedTestResponse,true);
   assert.equal(safe.sourceCandidateVerified,false);
@@ -83,6 +88,8 @@ test('one opt-in V4 fake schema call remains HOLD and exports distinct V4 sharea
   },{fetcher,timeoutMs:15000});
   assert.deepEqual(methods,['GET','POST']);
   assert.equal(o.promptProtocol,'V4J_SINGLE_RESPONSE_FEASIBLE_MASSING_V4');
+  assert.equal(o.systemPromptSha256,
+   createHash('sha256').update(V4J_ENVELOPE_SYSTEM_PROMPT).digest('hex'));
   assert.equal(o.schema,'minecraftaibuilder-v4j-v4-one-genre-safe-handoff-v1');
   assert.equal(o.sourceCandidateVerified,false);
   assert.equal(o.explicitlyInjectedTestResponse,true);
