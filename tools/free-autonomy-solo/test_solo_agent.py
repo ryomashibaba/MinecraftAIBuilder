@@ -374,6 +374,45 @@ with single_agent_lock():
         self.assertTrue((self.repo / 'source' / 'unverified-leftover.txt').exists())
 
 
+    def test_free_cloud_noop_can_advance_to_explicit_clean_fallback(self):
+        # A process may return exit 0 after only describing code, no edit.
+        (self.fake / 'opencode').write_text(
+            '#!/usr/bin/env python3\nimport sys\n'
+            'from pathlib import Path\n'
+            'model=sys.argv[sys.argv.index("--model")+1]\n'
+            'if model=="opencode/first-free":\n'
+            '    print("NO_PATCH"); sys.exit(0)\n'
+            'if model!="opencode/second-free": sys.exit(19)\n'
+            'Path("source/generated.txt").write_text("ok")\n'
+        )
+        (self.fake / 'opencode').chmod(0o755)
+        cfg = dict(self.cfg, model='opencode/first-free',
+                   fallback_models=['opencode/second-free'], per_task_attempts=2)
+        with patch.dict(os.environ, self.env):
+            result = execute(cfg, push=False, sandbox_attested=True)
+        self.assertEqual(result['status'], 'TASK_QUEUE_COMPLETED_SOURCE_ONLY')
+        self.assertEqual(result['cycles'], 2)
+        self.assertEqual(result['outcomes'][0]['status'], 'AGENT_NO_SOURCE_CHANGE')
+        self.assertEqual(result['outcomes'][0]['model'], 'opencode/first-free')
+        self.assertEqual(len(result['commits']), 1)
+        self.assertEqual(result['commits'][0]['model_requested'], 'opencode/second-free')
+        self.assertFalse(result['real_model_verified'])
+
+    def test_noop_without_fallback_exhausts_budget_not_fake_success(self):
+        (self.fake / 'opencode').write_text(
+            '#!/usr/bin/env python3\nprint("EXPLANATION_ONLY")\n'
+        )
+        (self.fake / 'opencode').chmod(0o755)
+        cfg = dict(self.cfg, per_task_attempts=2)
+        with patch.dict(os.environ, self.env):
+            result = execute(cfg, push=False, sandbox_attested=True)
+        self.assertEqual(result['status'], 'HOLD')
+        self.assertEqual(result['cycles'], 2)
+        self.assertEqual([x['status'] for x in result['outcomes']],
+                         ['AGENT_NO_SOURCE_CHANGE', 'AGENT_NO_SOURCE_CHANGE'])
+        self.assertEqual(result['commits'], [])
+        self.assertEqual(sh(self.repo, 'git', 'log', '-1', '--format=%s'), 'baseline')
+
 
 if __name__ == '__main__':
     unittest.main()
