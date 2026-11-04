@@ -21,7 +21,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: ryomashibaba/MinecraftAIBuilder
-          ref: ad070ecb3244e1cce742f37e1943f0cff7e31ca2
+          ref: fe1682e15ffa063f4dc415b06c4d76a54737a06e
           path: real-mab
           persist-credentials: false
       - uses: actions/setup-node@v4
@@ -30,7 +30,7 @@ jobs:
       - name: Confirm immutable source identity and no private world I/O
         run: |
           cd real-mab
-          test "$(git rev-parse HEAD)" = ad070ecb3244e1cce742f37e1943f0cff7e31ca2
+          test "$(git rev-parse HEAD)" = fe1682e15ffa063f4dc415b06c4d76a54737a06e
           node --check source/ai/r125-v4h-mezzanine-author-ir.mjs
           node --check source/ai/r125-v4h-authored-mezzanine.mjs
       - name: Actual V4H mezzanine 3D/2-wide paths/writes-0 SOURCE tests
