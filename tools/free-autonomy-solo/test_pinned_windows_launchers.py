@@ -65,6 +65,33 @@ class WindowsRealSourceLauncherPins(unittest.TestCase):
             with self.subTest(file=name):
                 self.assertEqual(actual_sha, git_blob_sha(ROOT / name))
 
+    def test_original_v4h_real_14b_batch_bootstrap_is_sha_pinned(self):
+        launch = (ROOT / "RUN_REAL_MAB_V4H_14B_ARCHITECTURE.ps1").read_text(
+            encoding="utf-8")
+        cmd = (ROOT / "RUN_REAL_MAB_V4H_14B_ARCHITECTURE.cmd").read_text(
+            encoding="utf-8")
+        downloads = re.findall(
+            r"@\\{ Name='([^']+)'; Blob='([a-f0-9]{40})' \\}", launch)
+        expected = {
+            "real_mab_original_architecture_batch.py",
+            "draft_real_project_local14b.py",
+            "prepare_pinned_real_project.py",
+            "local_qwen_no_docker_two_step.py",
+            MANIFEST,
+        }
+        self.assertEqual({name for name, _ in downloads}, expected)
+        for name, expected_blob in downloads:
+            with self.subTest(name=name):
+                self.assertEqual(expected_blob, git_blob_sha(ROOT / name))
+        self.assertRegex(launch, r"\\$rev = '[a-f0-9]{40}'")
+        self.assertRegex(cmd, r"/[a-f0-9]{40}/tools/free-autonomy-solo/"
+                         r"RUN_REAL_MAB_V4H_14B_ARCHITECTURE\\.ps1")
+        self.assertIn(git_blob_sha(ROOT / "RUN_REAL_MAB_V4H_14B_ARCHITECTURE.ps1"),
+                      cmd)
+        self.assertIn("--ci-self-test", cmd)
+        self.assertIn("CiSelfTest", launch)
+        self.assertNotIn("/main/tools/free-autonomy-solo/", cmd)
+
     def test_double_click_bootstrap_pins_exact_current_pilot_source(self):
         text = (ROOT / BOOTSTRAP_CMD).read_text(encoding="utf-8")
         self.assertRegex(text, r"/[a-f0-9]{40}/tools/free-autonomy-solo/" + PILOT_PS1)
