@@ -91,3 +91,24 @@ jobs:
           [void][System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path 'tools/free-autonomy-solo/windows_readonly_audit.ps1'), [ref]$tokens, [ref]$parseErrors)
           if ($parseErrors.Count -gt 0) { $parseErrors | Format-List | Out-String | Write-Host; exit 2 }
           Write-Host 'WINDOWS_READONLY_PS_AST_PASS'
+
+
+  windows-no-docker-python-contract:
+    runs-on: windows-2022
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: No-Docker local-model AST interpreter offline regression on genuine Windows Python
+        shell: pwsh
+        run: |
+          python -m py_compile tools/free-autonomy-solo/local_qwen_no_docker_two_step.py
+          python -m unittest discover -v -s tools/free-autonomy-solo -p test_local_qwen_no_docker_two_step.py
+      - name: Honest test boundary
+        shell: pwsh
+        run: |
+          Write-Host 'Real Windows CPython mock tests ONLY. No Ollama/Qwen inference, no Docker, no user machine.'
