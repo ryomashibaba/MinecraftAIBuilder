@@ -28,4 +28,4 @@ jobs:
         if: always()
         run: |
           echo 'One-time public repo standard CI runner; NO proprietary data / paid API credentials.'
-          echo 'qwen3:0.6b CPU fixture does NOT certify user Windows, qwen3:14b, art quality, 180s TPS, or overnight autonomy.'
+          echo 'qwen3:1.7b CPU fixture does NOT certify user Windows, qwen3:14b, art quality, 180s TPS, or overnight autonomy.'
