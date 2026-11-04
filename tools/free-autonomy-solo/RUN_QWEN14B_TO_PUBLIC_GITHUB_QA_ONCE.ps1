@@ -76,7 +76,7 @@ try {
 if ($submitted.status -ne 'PUBLIC_RESEARCH_QA_SUBMITTED' -or
     $submitted.git_remote -ne 'ryomashibaba/MinecraftAIBuilder' -or
     $submitted.git_branch -ne 'research/dec-free-autonomy-solo-pilot-20261104' -or
-    [string]$submitted.commit -cnotmatch '^[0-9a-f]{40}
+    [string]$submitted.commit -cnotmatch '^[0-9a-f]{40}$'
 ) {
   throw 'PUBLIC_SUBMISSION_IDENTITY_INVALID__NO_GITHUB_QA_CLAIM'
 }
