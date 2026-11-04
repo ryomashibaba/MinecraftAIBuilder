@@ -7,7 +7,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from solo_agent import Hold, changed_files, check_paths, execute, validate, run_cmd, verify_repo, require_existing_remote_research_branch, single_agent_lock
+from solo_agent import Hold, changed_files, check_paths, execute, validate, run_cmd, verify_repo, require_existing_remote_research_branch, push_verified_research_commit, single_agent_lock
 
 
 def sh(root, *args):
@@ -738,6 +738,111 @@ with single_agent_lock():
         self.assertIn(sentinel,
                       (self.root / 'state' / 'agent_0001.private.log').read_text())
         self.assertEqual(sh(self.repo, 'git', 'status', '--porcelain'), '')
+
+
+
+    def make_bare_remote_for_push_tests(self):
+        """Actual LOCAL bare Git only; no GitHub credentials or real push."""
+        bare = self.root / 'fixture-remote.git'
+        bare.mkdir()
+        sh(self.repo, 'git', 'init', '--bare', str(bare))
+        sh(self.repo, 'git', 'remote', 'set-url', 'origin', str(bare))
+        sh(self.repo, 'git', 'push', 'origin',
+           'HEAD:refs/heads/research/free-autonomy-pilot')
+        return bare
+
+    def test_exact_remote_lease_publishes_verified_fast_forward_only(self):
+        bare = self.make_bare_remote_for_push_tests()
+        old = sh(self.repo, 'git', 'rev-parse', 'HEAD')
+        (self.repo / 'source' / 'new-feature.txt').write_text('approved fixture change')
+        sh(self.repo, 'git', 'add', 'source/new-feature.txt')
+        sh(self.repo, 'git', 'commit', '-m', 'verified fixture candidate')
+        candidate = sh(self.repo, 'git', 'rev-parse', 'HEAD')
+        with patch('solo_agent.verify_repo', return_value=self.repo.resolve()):
+            remote_before = push_verified_research_commit(self.cfg, self.repo, candidate)
+        self.assertEqual(remote_before, old)
+        self.assertEqual(sh(bare, 'git', 'rev-parse',
+                            'refs/heads/research/free-autonomy-pilot'), candidate)
+        self.assertEqual(sh(self.repo, 'git', 'status', '--porcelain'), '')
+        # Re-running after remote accepted but state recording was interrupted
+        # must be idempotent, not create a duplicate or rewrite anything.
+        with patch('solo_agent.verify_repo', return_value=self.repo.resolve()):
+            remote_retry = push_verified_research_commit(self.cfg, self.repo, candidate)
+        self.assertEqual(remote_retry, candidate)
+        self.assertEqual(sh(bare, 'git', 'rev-parse',
+                            'refs/heads/research/free-autonomy-pilot'), candidate)
+
+    def test_remote_lease_rejects_concurrent_research_update(self):
+        bare = self.make_bare_remote_for_push_tests()
+        intruder = self.root / 'external-fixture-clone'
+        sh(self.repo, 'git', 'clone', '--branch', self.cfg['branch'],
+           str(bare), str(intruder))
+        sh(intruder, 'git', 'config', 'user.name', 'External Fixture')
+        sh(intruder, 'git', 'config', 'user.email', 'external@example.invalid')
+        (self.repo / 'source' / 'ours.txt').write_text('our verified source')
+        sh(self.repo, 'git', 'add', 'source/ours.txt')
+        sh(self.repo, 'git', 'commit', '-m', 'our verified source')
+        candidate = sh(self.repo, 'git', 'rev-parse', 'HEAD')
+        real_preflight = require_existing_remote_research_branch
+        observed = []
+        def remote_advanced_between_read_and_push(cfg, workspace):
+            tip = real_preflight(cfg, workspace)
+            observed.append(tip)
+            (intruder / 'source' / 'theirs.txt').write_text('other developer')
+            sh(intruder, 'git', 'add', 'source/theirs.txt')
+            sh(intruder, 'git', 'commit', '-m', 'other developer')
+            sh(intruder, 'git', 'push', 'origin',
+               'HEAD:refs/heads/research/free-autonomy-pilot')
+            return tip
+        with patch('solo_agent.verify_repo', return_value=self.repo.resolve()):
+            with patch('solo_agent.require_existing_remote_research_branch',
+                       side_effect=remote_advanced_between_read_and_push):
+                with self.assertRaisesRegex(Hold, 'GIT_PUSH_FAILED'):
+                    push_verified_research_commit(self.cfg, self.repo, candidate)
+        self.assertEqual(len(observed), 1)
+        self.assertEqual(sh(bare, 'git', 'rev-parse',
+                            'refs/heads/research/free-autonomy-pilot'),
+                         sh(intruder, 'git', 'rev-parse', 'HEAD'))
+        self.assertEqual(sh(self.repo, 'git', 'rev-parse', 'HEAD'), candidate)
+        self.assertEqual(sh(self.repo, 'git', 'status', '--porcelain'), '')
+
+    def test_remote_divergence_refused_before_push_even_when_ref_exists(self):
+        bare = self.make_bare_remote_for_push_tests()
+        other = self.root / 'other-fixture-clone'
+        sh(self.repo, 'git', 'clone', '--branch', self.cfg['branch'],
+           str(bare), str(other))
+        sh(other, 'git', 'config', 'user.name', 'Other Fixture')
+        sh(other, 'git', 'config', 'user.email', 'other@example.invalid')
+        (self.repo / 'source' / 'ours.txt').write_text('ours')
+        sh(self.repo, 'git', 'add', 'source/ours.txt')
+        sh(self.repo, 'git', 'commit', '-m', 'ours')
+        ours = sh(self.repo, 'git', 'rev-parse', 'HEAD')
+        (other / 'source' / 'theirs.txt').write_text('theirs')
+        sh(other, 'git', 'add', 'source/theirs.txt')
+        sh(other, 'git', 'commit', '-m', 'theirs')
+        sh(other, 'git', 'push', 'origin',
+           'HEAD:refs/heads/research/free-autonomy-pilot')
+        theirs = sh(other, 'git', 'rev-parse', 'HEAD')
+        sh(self.repo, 'git', 'fetch', 'origin',
+           'refs/heads/research/free-autonomy-pilot')
+        with patch('solo_agent.verify_repo', return_value=self.repo.resolve()):
+            with self.assertRaisesRegex(Hold,
+                                        'REMOTE_RESEARCH_TIP_NOT_LOCAL_ANCESTOR'):
+                push_verified_research_commit(self.cfg, self.repo, ours)
+        self.assertEqual(sh(bare, 'git', 'rev-parse',
+                            'refs/heads/research/free-autonomy-pilot'), theirs)
+        self.assertEqual(sh(self.repo, 'git', 'rev-parse', 'HEAD'), ours)
+
+    def test_unverified_worktree_refused_before_remote_publication(self):
+        bare = self.make_bare_remote_for_push_tests()
+        original = sh(self.repo, 'git', 'rev-parse', 'HEAD')
+        (self.repo / 'source' / 'unverified.txt').write_text('not QA approved')
+        with patch('solo_agent.verify_repo', return_value=self.repo.resolve()):
+            with self.assertRaisesRegex(Hold, 'UNVERIFIED_WORKTREE_BEFORE_PUSH'):
+                push_verified_research_commit(self.cfg, self.repo, original)
+        self.assertEqual(sh(bare, 'git', 'rev-parse',
+                            'refs/heads/research/free-autonomy-pilot'), original)
+        self.assertTrue((self.repo / 'source' / 'unverified.txt').exists())
 
 
 
