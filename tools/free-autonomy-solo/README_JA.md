@@ -138,7 +138,7 @@
 
 - [RUN_FIRST_PRIVATE_REAL_MODEL_PILOT.cmd](./RUN_FIRST_PRIVATE_REAL_MODEL_PILOT.cmd) を1ファイルだけダウンロードし、Windowsでダブルクリックする。GitとPython 3.13および起動済みOllamaが必要。GitHubへの読み取り専用のアクセスも使う。Chrome/ゲーム/既存プロジェクト作業フォルダーを閉じる必要はない。
 - 画面の `1`（MinecraftAIBuilder）または `2`（Browser Ink TPS）を選ぶ。同時に両方は実行しない。既に `qwen3:14b` が導入されていれば優先して使い、そうでなければ導入済みモデルから選択する。モデルの自動pull・インストール・有料サービス接続はしない。
-- CMDは**変更不能なGitコミット** `35a8eac5d969453839c27164a8c58c9353ad3e71` のPowerShellソースを取得し、Git Blob `f9e9ef1ef68e5661ee44d7ae281b65038ee13dea` を照合してから起動する。既存Python側も4ファイルのGit blobを照合する。手元の `LOCALAPPDATA/FreeAutonomyPrivate` へ隔離Git cloneと未実行 `.txt` 下書きを置く。
-- 完了または失敗の両方で、小さな共有用 `SHAREABLE_FIRST_PILOT_STATUS.json` を `LOCALAPPDATA/FreeAutonomyPrivate/QwenRealProjectPilotSource/<run-id>` に保存する。画面の `UPLOAD_THIS_SMALL_STATUS_JSON=...` で場所を表示し、**この小さいJSONだけ**をチャットに添付すれば次の工程を判断できる。モデル応答、Gitのユーザー資格情報、PRIVATE下書きの全文はアップロードしない。
+- CMDは**変更不能なGitコミット** `1710e849a5b51bd40ceb4f4f20f3e8f8a49d96cf` のPowerShellソースを取得し、Git Blob `149fb594b6c646c9b0753cbdb2431d2adb544354` を照合してから起動する。既存Python側も4ファイルのGit blobを照合する。手元の `LOCALAPPDATA/FreeAutonomyPrivate` へ隔離Git cloneと未実行 `.txt` 下書きを置く。
+- 完了または失敗の両方で、小さな共有用 `SHAREABLE_FIRST_PILOT_STATUS.json` を `LOCALAPPDATA/FreeAutonomyPrivate/QwenRealProjectPilotSource/<run-id>` に保存する。画面の `UPLOAD_THIS_SMALL_STATUS_JSON=...` で場所を表示し、**この小さいJSONだけ**をチャットに添付すれば次の工程を判断できる。新しい集約項目には、試行回数、2段階の結果、所要秒、モデル報告の出力tokens/s、HOLD理由を含む一方、ソース本文・差分・プロンプト・トークン・ローカルユーザーパスを含めない。モデル応答、Gitのユーザー資格情報、PRIVATE下書きの全文はアップロードしない。
 - 成功しても `TWO_REAL_SOURCE_PRIVATE_DRAFTS_ONLY` の意味は **「実モデルに2段階の単一ファイル修正案を提出させ、限定構文ゲートを通した」だけ**。生成されたコードの実行、独立QA、研究コミット/プッシュ、最新本線へのマージ、作品品質の採否は次のゲート。真正モデル身元はAPI自己報告にすぎず、独立認証ではない。
 - CIは `cmd /c ... --ci-self-test` とPowerShell ASTの形式検査のみ。ユーザーWindows/Ollama実機と本物のモデル呼び出しの成功証拠にはならない。失敗ならHOLDの小さな共有JSONを受け取って原因を分け、**手順を増やす前にこちらで修正**する。
