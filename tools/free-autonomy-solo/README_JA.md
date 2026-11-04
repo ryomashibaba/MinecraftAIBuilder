@@ -121,3 +121,11 @@
 - 修正後は `solo_agent.execute()` の単一プロジェクトOSロックを取得してから、**GitHub pushの再試行やモデル呼び出しより前**に origin / 研究branch / HEAD / git statusを再点検する。HEADの外部変更または未検証の変更（未追跡ファイルを含む）でHOLDにし、理由を外部PRIVATE状態ファイルに保存する。保護された原本やmainへ変更は加えない。
 - 同一セッション内の不合格候補の連続再修正は従来通り。ただし中断を挟んで再起動した際には、未検証の差分を勝手に前回モデルや別無料プロバイダへ渡さない。未検証ファイルは**自動削除・自動公開しない**。隔離クローンでのレビュー・退避後に正常なclean状態から再開できる。
 - 回帰は真正Git一時リポジトリ＋Fake CLIで、「一度コミット済み→未検証の残骸あり→モデル/QAの追加実行禁止→clean後に再開」「未送信のQA済みresearchコミットがある→dirtyならremote pushにも進まない」を検査。**Windows本人PCの長時間真正LLM試験ではない**。自動退避・無人復旧は別設計とし、原本を損なう雑な `git clean -fd` などは導入しない。
+
+## 2026-11-04：無料クラウド真正再試験とアカウント未接続の境界
+
+- 過去の真正無料モデル試行 [Actions #41742847107](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41742847107) の**attempt 2**を、GitHub連携から手動で1回再実行。実ログではOpenCode 2.0.0の匿名Docker環境が `Model unavailable: opencode/glm-5.3-flash-free` を返し、exit 1となった。モデル推論、コード変更、独立QA、研究コミットは発生していない。**attempt 1 は240秒のタイムアウト**であり、当初のタイムアウト原因が今回の「モデル不可」と同じだったことまでは証明できない。
+- OpenCodeの公式 [モデルドキュメント](https://dev.opencode.ai/v2/docs/models/) は、モデルの有効性がプロジェクトのプロバイダ設定・認証状態に依存し、サインアウト状態では`opencode` providerが見えない場合があることを明記している。無料モデルが [公式一覧](https://opencode.ai/v2/docs/console/models/) に掲載されていても**この匿名CIから推論できる証拠ではない**。
+- そのため、既存の `free_model_real_once.py` で実LLM要求前に、資格情報を注入しないDocker `opencode models opencode` **厳密1コマンドだけ**でモデル可視性を検査する。該当モデルがリストされない、コマンド失敗、時間切れでは推論を一切試行せずHOLD。モデル一覧への表示は可用性・無料資格・速度・品質の保証ではなく、実推論ゲートは別。
+- 既存 `opencode_native_probe.py` のGitHub Linux CLIジョブで、公開の捨てクローンと認証情報なしの条件のまま、上記モデル一覧の可視性を **診断扱い** で記録する。モデル一覧取得が失敗しても従来のCLIパーサ試験成功を失敗と混同しない。Docker画像の固定・ホスト認証情報非共有・オフラインQAは維持する。
+- 追加の認証情報・GitHub Secrets・API課金・有料モデルへの自動移行は実装しない。今後、無料クラウドの利用条件と対象アカウントが実際に整った隔離環境を用意できない場合は、この経路をHOLDのままにし、既存のローカルLLM/Strata経路と同格の開発目的を追求する。未承認のWork/Computer Use/本番公開は開始しない。
