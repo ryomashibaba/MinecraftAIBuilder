@@ -89,7 +89,8 @@ jobs:
           foreach ($file in @(
             'tools/free-autonomy-solo/windows_readonly_audit.ps1',
             'tools/free-autonomy-solo/RUN_PREPARE_REAL_PROJECT_ONCE.ps1',
-            'tools/free-autonomy-solo/RUN_QWEN14B_REAL_SOURCE_DRAFT_ONCE.ps1'
+            'tools/free-autonomy-solo/RUN_QWEN14B_REAL_SOURCE_DRAFT_ONCE.ps1',
+            'tools/free-autonomy-solo/RUN_QWEN14B_TO_PUBLIC_GITHUB_QA_ONCE.ps1'
           )) {
             $tokens = $null
             $parseErrors = $null
