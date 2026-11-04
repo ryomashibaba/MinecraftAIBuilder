@@ -58,7 +58,7 @@ def bounded_local_qa_feedback(failures: list[str]) -> str:
     """
     diagnostics = []
     for failure in failures[:3]:
-        code = re.match(r"(CHECK_\\d+_RC\\d+):", failure)
+        code = re.match(r"(CHECK_\d+_RC\d+):", failure)
         if not code:
             continue
         diagnostics.append(code.group(1))
@@ -66,8 +66,8 @@ def bounded_local_qa_feedback(failures: list[str]) -> str:
         # surrounding log lines may contain arbitrary instructions or secrets.
         for line in failure.splitlines():
             match = re.search(
-                r"\\b(?:SyntaxError|ReferenceError|TypeError|AssertionError|RangeError):"
-                r"\\s*([A-Za-z0-9_.$:/() -]{1,160})", line)
+                r"\b(?:SyntaxError|ReferenceError|TypeError|AssertionError|RangeError):"
+                r"\s*([A-Za-z0-9_.$:/() -]{1,160})", line)
             if match:
                 excerpt = match.group(0).strip()[:180]
                 diagnostics.append("LOCAL_QA_ERROR=" + excerpt)
