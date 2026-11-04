@@ -18,6 +18,7 @@ on:
       - 'scripts/r125-v4d-compact-model-fixture.mjs'
       - 'scripts/r125-v4d-relative-author-synthetic.mjs'
       - 'scripts/r125-v4d-local-architect.mjs'
+      - 'scripts/r125-v4h-real-qwen-trial.ps1'
       - 'scripts/r125-v4d-replay-private.mjs'
       - 'scripts/r125-v4d-replay-private.test.mjs'
       - 'scripts/r125-v4d-author-source-diagnostics.mjs'
@@ -132,6 +133,11 @@ jobs:
           $ErrorActionPreference = "Stop"
           $private = Join-Path $env:LOCALAPPDATA 'MinecraftAIBuilder\PrivateModelStudies'
           $beforeExists = Test-Path -LiteralPath $private
+          $v4hPreflight = & .\scripts\r125-v4h-real-qwen-trial.ps1 -CheckOnly
+          if ($v4hPreflight -notcontains 'V4H_CHECK_ONLY_PASS_NO_CLONE_NO_MODEL_NO_WORLD' -or
+              $v4hPreflight -notcontains 'MODEL_GENERATION_REQUESTS=0') {
+            throw 'V4H_NONINVASIVE_CHECK_ONLY_NOT_VERIFIED'
+          }
           $output = & .\scripts\r125-v4d-local-one-shot.ps1 -CheckOnly
           $output | ForEach-Object { Write-Host $_ }
           if ($output -notcontains "CHECK_ONLY_SAFE_NO_MODEL_CALL_NO_WORLD_WRITE") {
@@ -265,6 +271,40 @@ jobs:
               throw "V4E_FAKE_AUTHOR_DIAGNOSIS_OR_PRIVACY_SAFETY_BROKEN"
             }
             Write-Host "PASS: V4E opt-in separate one-click, ONE FAKE localhost POST, 0-call offline ranked-window diagnosis, no world writes."
+            # Test actual pinned local-Qwen launcher against CI FAKE HTTP only.
+            $beforeV4HPosts = @(Get-Content -LiteralPath $env:MAB_V4D_FAKE_POST_LOG).Count
+            $v4hStdout = Join-Path $env:RUNNER_TEMP 'v4h_launcher_stdout.txt'
+            $v4hStderr = Join-Path $env:RUNNER_TEMP 'v4h_launcher_stderr.txt'
+            $v4hArgs = @('-NoProfile','-File',(Join-Path $PWD 'scripts/r125-v4h-real-qwen-trial.ps1'),'-ExpectedCommit',$env:GITHUB_SHA)
+            $child = Start-Process -FilePath (Get-Command pwsh).Source -ArgumentList $v4hArgs -NoNewWindow -PassThru -Wait -RedirectStandardOutput $v4hStdout -RedirectStandardError $v4hStderr
+            Get-Content -LiteralPath $v4hStdout | ForEach-Object { Write-Host $_ }
+            if ($child.ExitCode -ne 2) {
+              Get-Content -LiteralPath $v4hStderr | ForEach-Object { Write-Host $_ }
+              throw "V4H_USER_LAUNCHER_FAKE_HOLD_EXIT_2_REQUIRED_$($child.ExitCode)"
+            }
+            if (@(Get-Content -LiteralPath $env:MAB_V4D_FAKE_POST_LOG).Count -ne ($beforeV4HPosts + 1)) {
+              throw 'V4H_ONE_AND_ONLY_ONE_FAKE_POST'
+            }
+            $share = @(Get-ChildItem -LiteralPath $private -File -Filter 'V4H_HANDOFF_*.json')
+            if ($share.Count -ne 1) { throw 'V4H_SAFE_ONE_FILE_HANDOFF_MISSING' }
+            $result = Get-Content -LiteralPath $share[0].FullName -Raw | ConvertFrom-Json
+            if ($result.schema -ne 'minecraftaibuilder-r125-v4h-one-local-qwen-audition-handoff-v1' -or
+                $result.researchHead -ne $env:GITHUB_SHA -or
+                $result.modelGenerationAttempts -ne 1 -or
+                $result.sourceCandidateVerified -ne $false -or
+                $result.explicitlyInjectedTestResponse -ne $true -or
+                $result.offlineReplayStatus -ne 'HOLD_REPLAY_SOURCE_REJECTED' -or
+                $result.offlineReplayAdditionalModelCalls -ne 0 -or
+                $result.worldWrites -ne 0 -or
+                $result.nineSafetyGates -ne '9 BLOCKED') {
+              throw 'V4H_INVALID_FAKE_USER_HANDOFF_OR_SAFETY_DRIFT'
+            }
+            $plain = Get-Content -LiteralPath $share[0].FullName -Raw
+            foreach ($secret in @('LOCAL_REQUEST','127.0.0.1','MODEL_RESPONSE_ORIGINAL','PrivateModelStudies')) {
+              if ($plain.Contains($secret)) { throw "V4H_HANDOFF_LEAKED_PRIVATE_DETAIL_$secret" }
+            }
+            Write-Host 'PASS: V4H pinned Windows launcher, exactly ONE FAKE POST, safe 1-file handoff, offline replay, no Qwen/World.'
+
             # The explicit HOLD exit 2 was EXPECTED and verified above. Do not
             # let its residual native code fail the successful CI contract.
             $global:LASTEXITCODE = 0

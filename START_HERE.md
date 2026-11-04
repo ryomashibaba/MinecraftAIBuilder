@@ -1,5 +1,14 @@
 # MinecraftAIBuilder — START HERE（新チャット・AI開発者の統一入口）
 
+## 2026-11-04 V4H実Qwen初回パイロット用・PINNED 1操作 Windows ランチャー（未実機）
+
+- **本工程実装**: `scripts/r125-v4h-real-qwen-trial.ps1`。実ユーザーPCに対し、PowerShell 5.1+・git・Node 20+と既存のローカルOllama `qwen3:14b` を使う**本人が明示して起動する1回だけの**SOURCE-only試験。`-CheckOnly` は0 clone/0 model/0 world。実試験は40桁 `-ExpectedCommit` を必須とし、固定の研究ブランチを**新しい隔離LOCALAPPDATAフォルダ**へ1回clone後、remote/branch/実HEADが指定値と一致しない場合は**0モデル呼出しで拒否**。mainや既存原本に触らない。安全検査は全て継承し、失敗時に後追い生成を行わない。
+- 実Qwenパイロットの実行は、ユーザー本人のWindows端末での明示操作が必要。ChatからユーザーのWindows内のOllamaを実行したとは決して主張しない。モデル未導入/容量/出力長/JSON/グラフ/外壁/階段/設備・高さ不整合は、元の応答を**PRIVATE原文のまま保存**し、追加0 POSTのオフライン再診断を可能な場合に実行。実 Qwen の初回到達/ART評価は実際のUSER結果が返ってくるまで未判定。ローカルのモデル名は本人環境で実在するものか確認が必要。
+- **共有ファイル1つ**: 新しい `PrivateModelStudies/V4H_HANDOFF_<UUID>.json`。元応答本文・プロンプト・プライベートパス・3D原文等は入れず、モデル回答の自己申告と合否、コード/geometry SHA、実B143元検証、出力経路の証拠、オフライン再生の状態、安全9 BLOCKED、世界0だけをallowlist化。失敗時も当ファイルを自動作成。GitHub ActionsのFAKE localhostで実コマンドを通すCIは**本物のQwenを証明しない**。実行はユーザーへの追加課金/Work/Computer Use許可を意味しない。
+- **使い方（研究ブランチ取得済みの場合）**: PowerShellで `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\r125-v4h-real-qwen-trial.ps1 -ExpectedCommit <CURRENT_VERIFIED_40HEX_BRANCH_HEAD>`。スクリプトのGitHub rawダウンロードは必ず取得元SHA256/git blob検証を行い、コードを書き換えない。検証前のモデル実行や無人本番施工を許可しない。起動後に表示される**共有用JSONのみ**をこのチャットに添付すればよい。
+- この研究はV4Hの実機ローカルモデル試験へ到達するための操作簡略化。建築物の美術・構造安全・雨仕舞・Educationの実歩行・ワールド施工は相変わらずNOT_TESTED/ART HOLD。**実機のPASSを捏造しない。**
+
+
 ## 2026-11-04 V4H-1: ローカルAIの1回答で二層公共建築を制作する非既定研究経路
 
 - **実装**: `source/ai/r125-v4h-mezzanine-author-ir.mjs` に全館コンパクト意図+主棟の公共吹抜けmassing+外部wing+真正非矩形床平面+高さのある本当の室内ホール+実際に歩ける2幅階段付き上階の6選択を、1個の厳格なJSONとしてAUTHORする `MEZZANINE_SCHEMA` を追加。`mezzanine:{side,stairLane,deckOffsetX,deckWidth,rise,purpose}` は作者本人が指定。HOSTは下階・屋根・用途設備・ガラス36・上階業務設備へのアクセスを現物B143から証明。既存のV4D〜V4G標準設計は不変。
