@@ -56,6 +56,33 @@ def verify_repo(cfg: dict) -> Path:
     return p
 
 
+def require_existing_remote_research_branch(cfg: dict, workspace: Path) -> str:
+    """Read-only admission: no unattended push may CREATE a remote branch.
+
+    The exact GitHub origin and local research/ branch are checked again here;
+    lack of network/authentication or an absent remote branch fails closed.
+    This is an approval boundary, not evidence of actual source quality.
+    """
+    verify_repo(cfg)
+    ref = "refs/heads/" + cfg["branch"]
+    env = {**os.environ, "GIT_TERMINAL_PROMPT": "0", "GCM_INTERACTIVE": "Never"}
+    try:
+        result = subprocess.run(
+            ["git", "ls-remote", "--exit-code", "--heads", "origin", ref],
+            cwd=workspace, capture_output=True, text=True,
+            encoding="utf-8", errors="replace", timeout=25, env=env,
+        )
+    except (OSError, subprocess.TimeoutExpired) as ex:
+        raise Hold("REMOTE_RESEARCH_PREFLIGHT_UNAVAILABLE") from ex
+    expected_suffix = "\t" + ref
+    records = [line for line in result.stdout.splitlines() if line]
+    if (result.returncode != 0 or len(records) != 1
+            or not records[0].endswith(expected_suffix)
+            or not re.fullmatch(r"[0-9a-f]{40}", records[0][:-len(expected_suffix)])):
+        raise Hold("REMOTE_RESEARCH_BRANCH_NOT_PREEXISTING")
+    return records[0][:-len(expected_suffix)]
+
+
 def changed_files(p: Path) -> list[str]:
     # Using porcelain -z makes filenames with whitespace and rename entries unambiguous.
     raw = subprocess.check_output(["git", "status", "--porcelain=v1", "-z", "--untracked-files=all"], cwd=p)
@@ -242,6 +269,7 @@ def execute(cfg: dict, *, push: bool, sandbox_attested: bool) -> dict:
                         verify_repo(cfg)
                         if git(p, "rev-parse", "HEAD") != state["last_head"]:
                             raise Hold("GIT_HISTORY_CHANGED_BEFORE_PUSH")
+                        require_existing_remote_research_branch(cfg, p)
                         git(p, "push", "origin", f"HEAD:refs/heads/{cfg['branch']}")
                     except Hold as ex:
                         state["status"] = "HOLD"
@@ -326,6 +354,7 @@ def execute(cfg: dict, *, push: bool, sandbox_attested: bool) -> dict:
                             verify_repo(cfg)
                             if git(p, "rev-parse", "HEAD") != state["last_head"]:
                                 raise Hold("GIT_HISTORY_CHANGED_BEFORE_PUSH")
+                            require_existing_remote_research_branch(cfg, p)
                             git(p, "push", "origin", f"HEAD:refs/heads/{cfg['branch']}")
                         except Hold as ex:
                             state["status"] = "HOLD"
