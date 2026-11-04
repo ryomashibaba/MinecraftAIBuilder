@@ -20,7 +20,7 @@ if errorlevel 1 goto MISSING_GIT
 where node.exe >nul 2>nul
 if errorlevel 1 goto MISSING_NODE
 if /i "%~1"=="--check-only" goto CHECK_ONLY
-if not "%~1"=="" if /i not "%~1"=="--prepare-only" if /i not "%~1"=="--run-once" if /i not "%~1"=="--sectioned" if /i not "%~1"=="--massing" if /i not "%~1"=="--wing" if /i not "%~1"=="--floorplate" if /i not "%~1"=="--atrium" if /i not "%~1"=="--mezzanine" if /i not "%~1"=="--arcade" if /i not "%~1"=="--arcade-five" goto BAD_ARGUMENT
+if not "%~1"=="" if /i not "%~1"=="--prepare-only" if /i not "%~1"=="--run-once" if /i not "%~1"=="--sectioned" if /i not "%~1"=="--massing" if /i not "%~1"=="--wing" if /i not "%~1"=="--floorplate" if /i not "%~1"=="--atrium" if /i not "%~1"=="--mezzanine" if /i not "%~1"=="--arcade" if /i not "%~1"=="--arcade-five" if /i not "%~1"=="--replay-latest-five" goto BAD_ARGUMENT
 
 set "WORK_ROOT=%LOCALAPPDATA%\MinecraftAIBuilder\IsolatedV4E"
 if not exist "%WORK_ROOT%" mkdir "%WORK_ROOT%"
@@ -52,6 +52,7 @@ if /i "%~1"=="--mezzanine" if not exist "%WORK_DIR%\source\ai\r125-v4h-mezzanine
 if /i "%~1"=="--arcade" if not exist "%WORK_DIR%\source\ai\r125-v4j-civic-author-ir.mjs" goto MISSING_RUNNER
 if /i "%~1"=="--arcade-five" if not exist "%WORK_DIR%\scripts\r125-v4j-five-genre-local.mjs" goto MISSING_RUNNER
 if /i "%~1"=="--arcade-five" if not exist "%WORK_DIR%\scripts\r125-v4j-five-genre-replay.mjs" goto MISSING_RUNNER
+if /i "%~1"=="--replay-latest-five" if not exist "%WORK_DIR%\scripts\r125-v4j-five-genre-replay.mjs" goto MISSING_RUNNER
 
 echo [2/3] Research branch is prepared and verified.
 echo Branch: %ACTUAL_BRANCH%
@@ -61,6 +62,7 @@ echo.
 if /i "%~1"=="--prepare-only" goto PREPARED
 if /i "%~1"=="--run-once" goto RUN_MODEL
 if /i "%~1"=="--arcade-five" goto FIVE_CHOICE
+if /i "%~1"=="--replay-latest-five" goto REPLAY_LATEST_FIVE
 echo [3/3] Optional V4E ranked exterior research Qwen trial.
 echo This contacts ONLY local Ollama at 127.0.0.1.
 echo At most ONE model generation request. No Minecraft world write.
@@ -186,6 +188,39 @@ echo No summary created. Do not automatically retry.
 if not "%NODE_EXIT%"=="0" set "FINAL_EXIT=2"
 goto DONE
 
+:REPLAY_LATEST_FIVE
+rem Inspect a PREVIOUS private five-genre study; never contact Ollama.
+rem A fresh isolated branch clone is used; no change to old original JSON.
+set "PRIVATE_ROOT=%LOCALAPPDATA%\MinecraftAIBuilder\PrivateModelStudies"
+if not exist "%PRIVATE_ROOT%" goto NO_PREVIOUS_FIVE_STUDY
+set "LATEST_FIVE_STUDY="
+for /f "delims=" %%G in ('dir /b /ad /o:-d /t:c "%PRIVATE_ROOT%\V4J_FIVE_*" 2^>nul') do if not defined LATEST_FIVE_STUDY set "LATEST_FIVE_STUDY=%PRIVATE_ROOT%\%%G"
+if not defined LATEST_FIVE_STUDY goto NO_PREVIOUS_FIVE_STUDY
+if not exist "%LATEST_FIVE_STUDY%\FIVE_GENRES_SHAREABLE_SUMMARY.json" goto NO_PREVIOUS_FIVE_STUDY
+set "FIVE_REPLAY_DIR=%PRIVATE_ROOT%\V4J_REPLAY_%RANDOM%_%RANDOM%"
+if exist "%FIVE_REPLAY_DIR%" goto FOLDER_COLLISION
+echo.
+echo [3/3] Replaying saved ORIGINAL five-genre Qwen responses, zero model calls.
+echo Original study: %LATEST_FIVE_STUDY%
+node.exe "%WORK_DIR%\scripts\r125-v4j-five-genre-replay.mjs" --study "%LATEST_FIVE_STUDY%" --out "%FIVE_REPLAY_DIR%"
+set "NODE_EXIT=%ERRORLEVEL%"
+if not "%NODE_EXIT%"=="0" goto REPLAY_ONLY_FAILED
+set "SHARE_FILE=%FIVE_REPLAY_DIR%\FIVE_GENRES_OFFLINE_REPLAY_SHAREABLE.json"
+if not exist "%SHARE_FILE%" goto REPLAY_ONLY_FAILED
+echo Done. ZERO additional model requests. Share ONLY this JSON:
+echo %SHARE_FILE%
+if "%MAB_V4D_TEST_DOUBLE_MODE%"=="1" goto DONE
+start "" explorer.exe /select,"%SHARE_FILE%"
+goto DONE
+:REPLAY_ONLY_FAILED
+echo Offline diagnostic HOLD; preserved every original study.
+set "FINAL_EXIT=2"
+goto DONE
+:NO_PREVIOUS_FIVE_STUDY
+echo ERROR: No valid prior V4J_FIVE_* private study found. No model call.
+set "FINAL_EXIT=2"
+goto DONE
+
 :CHECK_ONLY
 echo CHECK_ONLY_OK: git and node present. 0 clone, 0 model calls.
 goto DONE
@@ -208,7 +243,7 @@ echo ERROR: Node.js is not available. Nothing changed.
 goto DONE
 :BAD_ARGUMENT
 set "FINAL_EXIT=1"
-echo ERROR: Supported flags are --check-only, --prepare-only, --run-once, --sectioned, --massing, --wing, --floorplate, --atrium, --mezzanine, --arcade and --arcade-five.
+echo ERROR: Supported flags are --check-only, --prepare-only, --run-once, --sectioned, --massing, --wing, --floorplate, --atrium, --mezzanine, --arcade, --arcade-five and --replay-latest-five.
 goto DONE
 :CANNOT_MAKE_FOLDER
 set "FINAL_EXIT=1"
@@ -243,6 +278,7 @@ echo.
 if /i "%~1"=="--check-only" (endlocal & exit /b %FINAL_EXIT%)
 if /i "%~1"=="--prepare-only" (endlocal & exit /b %FINAL_EXIT%)
 if /i "%~1"=="--run-once" (endlocal & exit /b %FINAL_EXIT%)
+if /i "%~1"=="--replay-latest-five" (endlocal & exit /b %FINAL_EXIT%)
 if "%MAB_V4D_TEST_DOUBLE_MODE%"=="1" (endlocal & exit /b %FINAL_EXIT%)
 pause
 endlocal

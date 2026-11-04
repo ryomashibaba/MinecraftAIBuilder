@@ -1,5 +1,8 @@
 # MinecraftAIBuilder — 開発再開の最新正本案内（2026-11-03）
 
+**2026-11-04 V2実Qwenの保存済み結果を追加AI 0回で再診断するワンクリック経路（CI未確認）**：既存 `scripts/r125-v4e-one-click-ranked-trial.cmd` に `--replay-latest-five` を追加。`%LOCALAPPDATA%\MinecraftAIBuilder\PrivateModelStudies` の直近 `V4J_FIVE_*` を読み取り専用で取り出し、元のPRIVATE回答を変更せず新しい `V4J_REPLAY_*` に安全カテゴリ・構造診断と `FIVE_GENRES_OFFLINE_REPLAY_SHAREABLE.json` を記録。**実Qwen再生成0・ローカルOllama接触0・Minecraftワールド接触0**。隔離Gitクローンのみ追加、ユーザーの既存元フォルダを保護。Fake localhost CI で元モデル要求件数不変・再生のみ新フォルダ1を検証。これは実建築ART/PASSやモデルIDの認証ではない。
+
+
 **2026-11-04 V2実測のHOLD段階分析（新CI未確認）**：新しいQwen5ジャンル試験は構造診断コード合計が前回35→今回10に減った一方、真正B143は依然0/5。housingとstationは構造診断コード0にもかかわらずSOURCE失敗。そこでオフライン再生時の実コンパイラエラーをユーザー原文や機密メッセージでなく**有限の静的ソース失敗カテゴリ**だけにして `sourceFailureFamily` とジャンル横断の `sourceRejectionTriage` に記録し、次回は追加モデル要求なしで既存PRIVATE元回答から原因を絞る。静的構造診断0はSOURCE成功でもART成功でもない。元データを上書きしない。既存R125 Education/main/PR #128/9 BLOCKEDは保護。
 
 

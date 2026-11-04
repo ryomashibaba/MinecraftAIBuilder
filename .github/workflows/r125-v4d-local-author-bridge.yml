@@ -394,6 +394,35 @@ jobs:
               throw "V4J_FIVE_OFFLINE_REPLAY_MADE_UNEXPECTED_MODEL_CALL"
             }
             Write-Host "PASS: V4J --arcade-five exact Windows one-click, 5 fake local POSTs, automatic 0-POST cross-genre replay, ART HOLD, zero world writes."
+            # Re-read the existing V4J_FIVE model responses from disk, no
+            # extra fake HTTP POST, no original-file overwrite or ART promotion.
+            & $env:ComSpec /d /c "call scripts\r125-v4e-one-click-ranked-trial.cmd --replay-latest-five"
+            $offlineOnlyExit = $LASTEXITCODE
+            if ($offlineOnlyExit -ne 0) {
+              throw "V4J_REPLAY_LATEST_FIVE_EXPECTED_ZERO_CALL_EXIT_0_GOT_$offlineOnlyExit"
+            }
+            $afterReplayPosts = @(Get-Content -LiteralPath $env:MAB_V4D_FAKE_POST_LOG)
+            if ($afterReplayPosts.Count -ne 7) {
+              throw 'V4J_REPLAY_LATEST_FIVE_UNEXPECTED_MODEL_POST'
+            }
+            $afterReplayFolders = @(Get-ChildItem -LiteralPath $private -Directory |
+              Where-Object { $_.Name -like 'V4J_REPLAY_*' })
+            $newReplay = @($afterReplayFolders | Where-Object {
+              $_.FullName -notin @($fiveReplay | Select-Object -ExpandProperty FullName)
+            })
+            if ($afterReplayFolders.Count -ne 2 -or $newReplay.Count -ne 1) {
+              throw 'V4J_REPLAY_LATEST_FIVE_EXPECTED_ONE_NEW_PRIVATE_RESULT'
+            }
+            $offlineOnly = Get-Content -LiteralPath (Join-Path $newReplay[0].FullName 'FIVE_GENRES_OFFLINE_REPLAY_SHAREABLE.json') -Raw | ConvertFrom-Json
+            if ($offlineOnly.networkCalls -ne 0 -or
+                $offlineOnly.additionalModelCalls -ne 0 -or
+                $offlineOnly.worldWrites -ne 0 -or
+                $offlineOnly.sourceReproducedCount -ne 0 -or
+                $offlineOnly.sourceRejectionTriage.shaVerifiedNonInjectedCompilationHolds -ne 0 -or
+                $offlineOnly.syntheticRunsNeverPromoted -ne $true) {
+              throw 'V4J_ZERO_MODEL_REPLAY_OR_TEST_DOUBLE_BOUNDARY_BROKEN'
+            }
+            Write-Host 'PASS: --replay-latest-five, no model/HTTP post, no world write; original test-double never promoted.'
             # Test actual pinned local-Qwen launcher against CI FAKE HTTP only.
             $beforeV4HPosts = @(Get-Content -LiteralPath $env:MAB_V4D_FAKE_POST_LOG).Count
             $v4hStdout = Join-Path $env:RUNNER_TEMP 'v4h_launcher_stdout.txt'
