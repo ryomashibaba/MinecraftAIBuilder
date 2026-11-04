@@ -1,5 +1,13 @@
 # MinecraftAIBuilder — START HERE（新チャット・AI開発者の統一入口）
 
+## 2026-11-04 V4H-1: ローカルAIの1回答で二層公共建築を制作する非既定研究経路
+
+- **実装**: `source/ai/r125-v4h-mezzanine-author-ir.mjs` に全館コンパクト意図+主棟の公共吹抜けmassing+外部wing+真正非矩形床平面+高さのある本当の室内ホール+実際に歩ける2幅階段付き上階の6選択を、1個の厳格なJSONとしてAUTHORする `MEZZANINE_SCHEMA` を追加。`mezzanine:{side,stairLane,deckOffsetX,deckWidth,rise,purpose}` は作者本人が指定。HOSTは下階・屋根・用途設備・ガラス36・上階業務設備へのアクセスを現物B143から証明。既存のV4D〜V4G標準設計は不変。
+- **ローカル実行**: `node scripts/r125-v4d-local-architect.mjs --authored-mezzanine --model qwen3:14b --out NEW_PRIVATE_FOLDER --prompt '...'` はlocalhostのOllamaを最大1 POST（V4H専用4096出力トークン上限、その他のモード3072のまま）。Windowsの隔離ワンクリック `scripts/r125-v4e-one-click-ranked-trial.cmd --mezzanine` も明示選択のみで対応。実模型や別AIへ勝手に切り替えず、失敗回答は元回答/理由をPRIVATE保存してそのままHOLD。
+- **証拠**: PRIVATE元モデル本文SHA256、元のV4G高さ空間とのB143幾何SHA比較、二層の用途・歩行・業務台のsourceWitness、変更前後の**同一物理断面** B143 Z/Y SVG、5方向の正投影（室内は外壁に隠れて見えなくても構わない）、`REVIEW_SUMMARY_SHAREABLE.json`、元回答の整合SHAを無課金・ゼロ推論で検査するOFFLINE REPLAY。追加モデル呼出し・Minecraft世界接触なし。
+- **判定**: CIの模擬1応答が成功しても**実Qwenの試行ではない**。5用途の合成AUTHORはSOURCE研究であり、元の花屋Education実機経路・main原本/世界は凍結保護。`NOT_PREPARED` / `BuildPlan.operations=[]` / worldWrites0 / 9 BLOCKED。真正Minecraftでの2階歩行・構造物の安全・ARTの合格・美麗さは未検証。現状の美術課題（箱の寄せ集め、雑な色、ほぼ装飾なし）は維持されるため**美術正式ART HOLD**。Work/Computer Useおよび追加費用は事前承認制。
+
+
 ## 2026-11-04 V4H：実際に行ける上階の公共ギャラリー（非既定SOURCE研究）
 
 - V4Gまでの高屋根は、実際に人が使える二層公共空間ではなかった。`source/ai/r125-v4h-authored-mezzanine.mjs` は**AI/作者が指定した** `mezzanine:{side,stairLane,deckOffsetX,deckWidth,rise,purpose}` を使い、V4Gの高天井ホールの内側に**本物の2幅・1段ずつ登るB143 staircase、実支持床を持つ高所ギャラリー、支柱、階段出入口を塞がないガード縁、作者目的に対応した高所業務台**を追加する。研究上の適合しない作者指定は直さず失敗（HOLD）。まず北/南方向の階段、左右の階段通路（作者の明示選択）、高さ6〜8セルを研究する。設備と物理的に衝突した指定は誤魔化さずHOLD。
