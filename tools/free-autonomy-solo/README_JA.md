@@ -242,3 +242,19 @@
 試験は一時GitクローンとFAKE OpenCode CLI／模擬QAを利用。非ゼロ終了＋部分編集→PRIVATE退避→次の試行、QA失敗→退避→検証済みHEADからの再試行、既定HOLD、禁止パス拒否、QA改変拒否、フォールバックへのPRIVATE stdout漏洩拒否を追加した。GitHub Actionsで**この保存HEAD**のCIが完了するまでは合格未確定。真正Windows/Ollama/Gemma、夜間から登校中の長時間連続稼働・ユーザーWindows上のDocker OS隔離・実プロジェクト品質は別ゲートであり、推測でPASSにしない。
 
 既存セッションの途中で設定を変えるとconfig_sha256が変わって再開拒否になるため、オプトインの適用は明示的に新しい使い捨て研究clone・PRIVATEセッションで開始すること。自動git pushは別途明示オプトイン済み既存研究remoteのみで、PRIVATE失敗候補をGitHubへ自動公開しない。
+
+
+## 2026-11-05 次工程：研究ブランチへのGitHub保存を厳密な競合拒否付きにする
+
+**目的と不変条件**：2026年12月対策の自律開発を「テストでPASSするだけ」で止めず、承認済み研究ブランチに検証済みコードを安全保存できるようにする。MinecraftAIBuilder / Browser Ink TPSは同格、ローカルAIは片方だけ連続担当。main・凍結原本・Education成功経路・本番・有料API・Work/Computer Use開始は保護する。
+
+既存の検証済みコミット保存経路を、単なる「remote researchブランチが存在する」確認から**厳密な競合確認**へ変更した。
+
+1. Git originの完全一致、ローカルbranch名が明示した研究branchであること、ローカルHEADが最新のSOURCE QA済みコミットと一致すること、未検証の変更が残っていないことを確認する。
+2. GitHubへの**読取専用** ls-remoteで該当研究remoteのHEADを取得する。存在しない研究branchは自動作成しない。リモートHEADのGitオブジェクトが隔離cloneに存在し、そのremote HEADがローカルQA済みHEADの祖先であることを検証する。**不明/浅いclone/分岐はHOLD**し、勝手にfetch/rebase/mergeしない。
+3. リモートHEADのSHAが確認後に変わった場合の競合を防ぐため、**そのSHAと完全一致する場合だけ**Git pushを受理する明示的なleaseを使用する。通常の意味での履歴巻き戻し・非fast-forward更新は行わず、ローカルで祖先関係を証明できた更新だけを送る。ブランチの競合を勝手に解消・強制上書きしない。
+4. GitHubがpushを受理した後だけPRIVATE state内のコミットを pushed=true にする。失敗ならコミットと作業ツリーを保存し、HOLD_UNPUSHEDとして後日の明示確認へ。落ちた後の再送も同じ安全ゲートに従う。
+
+実回帰は**外部GitHubに書き込まないローカルbare Git fixture**で実施。正常fast-forward保存、成功後の重複再送、リモートの同時更新競合、分岐、未検証ファイル混入、監督器実行内のpush記録、再開時のremote競合と未送信commit保持を検証した。GitHub Actionsの専用CI合格は監督器のSOURCE運用安全性に限られ、真のQwen/Gemma開発・Windows上の長時間自律運転・ART/Education/ブラウザ180秒4v4の合格にはならない。
+
+**運用注意**：旧バージョンの失敗済みPRIVATE状態を自動的に書き換えない。既存コミット履歴のremote変更があれば人間の承認なしに自動rebaseやpushを続けない。ユーザーのWindowsにDockerやモデルを無断導入せず、有料APIや新規公開の権限を拡大しない。
