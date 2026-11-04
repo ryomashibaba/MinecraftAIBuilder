@@ -278,6 +278,24 @@ def execute(cfg: dict, *, push: bool, sandbox_attested: bool) -> dict:
         raise Hold("GIT_HISTORY_CHANGED_OUTSIDE_SUPERVISOR")
     deadline = time.monotonic() + cfg["max_minutes"] * 60
     with single_agent_lock():
+        # Never resume on a dirty disposable clone. A killed agent, failed QA,
+        # or interrupted free-cloud fallback may have left UNVERIFIED edits.
+        # Check BEFORE pushing an older verified commit or invoking any model.
+        # Within a single running session, QA retries can still work on their
+        # own candidate; this gate applies only on fresh execute()/resume.
+        verify_repo(cfg)
+        if git(p, "rev-parse", "HEAD") != state["last_head"]:
+            state["status"] = "HOLD"
+            state["hold_reason"] = "GIT_HISTORY_CHANGED_BEFORE_RESUME"
+            write_atomic(state_path, state)
+            raise Hold(state["hold_reason"])
+        unverified_paths = changed_files(p)
+        if unverified_paths:
+            state["status"] = "HOLD"
+            state["hold_reason"] = "UNVERIFIED_WORKTREE_ON_RESUME_REQUIRES_ISOLATED_REVIEW"
+            state["unverified_paths_count"] = len(unverified_paths)
+            write_atomic(state_path, state)
+            raise Hold(state["hold_reason"])
         # A prior successful commit is not considered remotely saved until push succeeds.
         if push:
             for item in state["commits"]:
