@@ -171,7 +171,10 @@ test('V3 five-genre pilot stays five distinct briefs / sequential / synthetic AR
   const r=await runFiveGenreLocal(opts3,{runOne:async o=>{
    calls.push({prompt:o.prompt,structured:o.structuredCivicContract,
     author:o.authorArcade,precision:o.precisionCivicContract});
-   return fake('HOLD_MODEL_OR_SOURCE_INVALID_NO_REPAIR');
+   // The synthetic reply represents one attempted model POST, not a missing
+   // installation. Keep the SOURCE rejection and explicit TEST DOUBLE label.
+   return {...fake('HOLD_MODEL_OR_SOURCE_INVALID_NO_REPAIR'),
+    modelCalls:1,reason:'R125_V4J_CIVIC_AUTHOR_ONE_ORIGINAL_JSON_WITH_COMPLETE_PUBLIC_ARCHITECTURE'};
   }});
   assert.equal(r.promptProtocol,'V4J_SINGLE_RESPONSE_SCHEMA_GUIDED_V3');
   assert.equal(r.knownModelCallAttempts,5);
