@@ -1,5 +1,8 @@
 # MinecraftAIBuilder — 開発再開の最新正本案内（2026-11-03）
 
+**2026-11-04 V4J真正モデルの5ジャンル外形比較をSOURCE専用で追加（CI未確認）**：既存V4Iの5方向正規化外形Jaccard計算を、V4JのPRIVATEモデル成功例へ共通適用。各実Qwen候補についてPRIVATE `TRUE_B143_SOURCE.json` から再コンパイルし、保存済みSOURCE/geometry SHAが共に一致した場合のみ、2件以上の独立用途で外形比較。共有するのはジャンル別ボクセル数・投影セル数・10組最大の類似度のみ。モデル生回答や全形状の位置情報は共有しない。SHA不一致・ソース欠損はHOLD。テストダブルは実モデル多様性測定に昇格せず、実Qwen未実施、正式ART HOLD、Minecraft施工0/9 BLOCKED。既存Windowsランチャー・R125成功原本・main・Draft PR #128は保持。
+
+
 **2026-11-04 V4Jの5ジャンル連続・実ローカルモデル試験経路（CI未確認）**：既存Windowsの隔離起動器に明示オプトイン `--arcade-five` を追加。住宅・店舗・研究施設・展示館・駅舎で独立の自然文依頼を同じ汎用エンジンへ順番に送り、各ジャンル最大1 POST・全体最大5。原文・3Dは各PRIVATEフォルダだけに残し、共有は安全な `FIVE_GENRES_SHAREABLE_SUMMARY.json` のみ。モデル不在・通信不全・タイムアウトは残工程を中断。SOURCEとART/実モデル真正性・Minecraft歩行を別管理し、実Qwenの新試験は**未実施**、正式ART HOLD、9ゲートBLOCKED、mainと933ブロック成功経路、PR #128 Draftを維持。
 
 

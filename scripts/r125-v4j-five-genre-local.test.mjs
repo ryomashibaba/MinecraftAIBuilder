@@ -45,6 +45,8 @@ test('five sequential synthetic sources stay TEST DOUBLE, ART HOLD and private',
   assert.equal(r.attemptedGenres,5);assert.equal(r.knownModelCallAttempts,5);
   assert.equal(r.sourceCandidates,5);assert.equal(r.modelCallCountComplete,true);
   assert.equal(r.humanArchitecturalArt,'NOT_REVIEWED');
+  assert.equal(r.visualGeometryComparison.status,'NOT_RUN_ON_TEST_DOUBLE');
+  assert.equal(r.visualGeometryComparison.humanArchitecturalArt,'NOT_REVIEWED');
   assert.deepEqual(r.gates,Array(9).fill('BLOCKED'));assert.equal(r.worldWrites,0);
   const summary=fs.readFileSync(path.join(out,'FIVE_GENRES_SHAREABLE_SUMMARY.json'),'utf8');
   assert.deepEqual(JSON.parse(summary),r);

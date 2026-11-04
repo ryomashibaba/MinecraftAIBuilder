@@ -107,3 +107,31 @@ test('V4I exports real B143 five-view and material/silhouette score evidence to 
    /R125_V4I_ART_SCREENING_NEW_ISOLATED_OUTSIDE_REPO_OUTPUT_REQUIRED/);
  }finally{fs.rmSync(parent,{recursive:true,force:true});}
 });
+
+
+test('V4I shared real-model five-view triage compares exact B143 voxels without model-ART promotion',async()=>{
+ const {compareV4IPrivateRealB143Silhouettes}=await import(
+  './r125-v4i-architectural-art-audit.mjs');
+ const input=cases();
+ const vox=input[0].after.b143Compiled.primitives;
+ const report=compareV4IPrivateRealB143Silhouettes([
+  {genre:'housing',primitives:vox},
+  {genre:'shop',primitives:vox},
+  {genre:'gallery',primitives:input[3].after.b143Compiled.primitives}
+ ]);
+ assert.equal(report.caseCount,3);
+ assert.equal(report.pairCount,3);
+ assert.equal(report.pairwise[0].meanFiveViewSimilarity,1);
+ assert.equal(report.visualMetricPassThresholds,'UNDEFINED_DO_NOT_INVENT');
+ assert.equal(report.humanArchitecturalArt,'NOT_REVIEWED');
+ assert.equal(report.noUntrustedModelTextOrCoordinatesIncluded,true);
+ assert.equal(report.worldWrites,0);
+ assert(!Object.hasOwn(report.cases[0],'primitives'));
+ assert.throws(()=>compareV4IPrivateRealB143Silhouettes([
+  {genre:'housing',primitives:vox},{genre:'housing',primitives:vox}
+ ]),/PRIVATE_CROSS_GENRE_INPUT/);
+ assert.throws(()=>compareV4IPrivateRealB143Silhouettes([
+  {genre:'housing',primitives:[vox[0],vox[0],...vox]},
+  {genre:'shop',primitives:vox}
+ ]),/DUPLICATE_B143_CELL/);
+});

@@ -9,6 +9,9 @@ import {parseV4DLocalAuthorArgs,runV4DLocalAuthor}
  from './r125-v4d-local-architect.mjs';
 import {buildV4DShareableReceipt}
  from './r125-v4d-shareable-receipt.mjs';
+import {compileDesign} from '../source/ai/b143-building-dsl.mjs';
+import {compareV4IPrivateRealB143Silhouettes}
+ from './r125-v4i-architectural-art-audit.mjs';
 
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const fail=x=>{throw Error('R125_V4J_FIVE_GENRE_'+x);};
@@ -39,6 +42,8 @@ export async function runFiveGenreLocal(opts,{runOne=runV4DLocalAuthor,
  const injected=runOne!==runV4DLocalAuthor||fetcher!==fetch||
   process.env.MAB_V4D_TEST_DOUBLE_MODE==='1';
  const outcomes=[];let knownCalls=0,stoppedReason=null;
+ const independentSourceCases=[];
+ let privateSourceIntegrityHOLD=false;
  for(const item of FIVE_INDEPENDENT_BRIEFS){
   let receipt;
   try{
@@ -56,6 +61,22 @@ export async function runFiveGenreLocal(opts,{runOne=runV4DLocalAuthor,
    break;
   }
   knownCalls+=receipt.modelCallAttempts;
+  if(!injected&&receipt.sourceCandidateVerified){
+   // Recompile the exact PRIVATE final B143, never the original model text.
+   // Both independent source and geometry hashes must match the local receipt.
+   try{
+    const file=path.join(root,item.genre,'TRUE_B143_SOURCE.json');
+    const stat=fs.lstatSync(file);
+    if(!stat.isFile()||stat.isSymbolicLink()||
+     stat.size===0||stat.size>1000000)throw Error('UNSAFE_PRIVATE_SOURCE');
+    const design=JSON.parse(fs.readFileSync(file,'utf8'));
+    const compiled=compileDesign(design);
+    if(compiled.sourceSha256!==receipt.compiledB143SourceSha256||
+     compiled.geometrySha256!==receipt.finalGeometrySha256)
+     throw Error('PRIVATE_B143_SHA_DRIFT');
+    independentSourceCases.push({genre:item.genre,primitives:compiled.primitives});
+   }catch{privateSourceIntegrityHOLD=true;}
+  }
   outcomes.push({genre:item.genre,status:receipt.reportedStatus,
    attempts:receipt.modelCallAttempts,
    injectedTestResponse:receipt.explicitlyInjectedTestResponse,
@@ -73,6 +94,28 @@ export async function runFiveGenreLocal(opts,{runOne=runV4DLocalAuthor,
    stoppedReason=receipt.reportedStatus;break;
   }
  }
+ let visualGeometryComparison={
+  status:injected?'NOT_RUN_ON_TEST_DOUBLE':
+   privateSourceIntegrityHOLD?'HOLD_PRIVATE_B143_INTEGRITY':
+   independentSourceCases.length<2?'INSUFFICIENT_VERIFIED_REAL_B143_CASES':
+   'PENDING_LOCAL_SOURCE_ANALYSIS',
+  caseCount:independentSourceCases.length,pairCount:0,
+  humanArchitecturalArt:'NOT_REVIEWED',
+  visualMetricPassThresholds:'UNDEFINED_DO_NOT_INVENT'
+ };
+ if(!injected&&!privateSourceIntegrityHOLD&&independentSourceCases.length>=2){
+  try{
+   visualGeometryComparison=compareV4IPrivateRealB143Silhouettes(
+    independentSourceCases);
+  }catch{
+   visualGeometryComparison={
+    status:'HOLD_PRIVATE_SOURCE_GEOMETRY_AUDIT',
+    caseCount:0,pairCount:0,
+    humanArchitecturalArt:'NOT_REVIEWED',
+    visualMetricPassThresholds:'UNDEFINED_DO_NOT_INVENT'
+   };
+  }
+ }
  const result={
   schema:'minecraftaibuilder-r125-v4j-five-genre-private-safe-batch-v1',
   provenance:injected?'INJECTED_TEST_DOUBLE_NOT_REAL_MODEL':
@@ -86,7 +129,8 @@ export async function runFiveGenreLocal(opts,{runOne=runV4DLocalAuthor,
   sourceCandidates:outcomes.filter(r=>r.sourceCandidateVerified).length,
   stoppedReason,
   remainingUnattemptedGenres:FIVE_INDEPENDENT_BRIEFS.slice(outcomes.length).map(x=>x.genre),
-  outcomes,humanArchitecturalArt:'NOT_REVIEWED',minecraftRealWalking:'NOT_TESTED',
+  outcomes,visualGeometryComparison,
+  humanArchitecturalArt:'NOT_REVIEWED',minecraftRealWalking:'NOT_TESTED',
   modelIdentityCryptographicallyVerified:false,
   readiness:'NOT_PREPARED',constructionApproved:false,executionAllowed:false,
   BuildPlan:{operations:[]},gates:Array(9).fill('BLOCKED'),

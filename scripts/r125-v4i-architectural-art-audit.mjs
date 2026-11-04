@@ -193,6 +193,52 @@ export function assessV4IActualB143ArtEvidence(input){
  };
  return {report,svg:matrixSvg(safeCases,pairs)};
 }
+
+/**
+ * Compare real compiled B143 exterior geometry from separate *private* model
+ * studies without exporting designs or voxel coordinates. Existing V4I
+ * normalization is shared by synthetic and real model source observations.
+ * Source integrity must be checked by the caller before invoking this.
+ */
+export function compareV4IPrivateRealB143Silhouettes(input){
+ const genres=['housing','shop','research','gallery','station'];
+ if(!Array.isArray(input)||input.length<2||input.length>5||
+  new Set(input.map(c=>c.genre)).size!==input.length||
+  input.some(c=>!genres.includes(c.genre)))
+  fail('PRIVATE_CROSS_GENRE_INPUT');
+ const snapshots=input.map(c=>{
+  const projectionsByFace=projections(c.primitives);
+  return {genre:c.genre,realB143VoxelCount:c.primitives.length,
+   projectionPixels:Object.fromEntries(FACE.map(f=>[f,projectionsByFace[f].size])),
+   normalized:Object.fromEntries(FACE.map(f=>[
+    f,normalizedSilhouette(projectionsByFace[f])]))};
+ });
+ const pairs=[];
+ for(let i=0;i<snapshots.length;i++)for(let j=i+1;j<snapshots.length;j++){
+  const a=snapshots[i],b=snapshots[j];
+  const perFace=Object.fromEntries(FACE.map(f=>[
+   f,jaccard(a.normalized[f],b.normalized[f]).similarity]));
+  pairs.push({genreA:a.genre,genreB:b.genre,
+   perFaceSilhouetteSimilarity:perFace,
+   meanFiveViewSimilarity:clampRound(
+    FACE.reduce((sum,f)=>sum+perFace[f],0)/FACE.length)});
+ }
+ return {
+  schema:'r125-v4j-private-model-b143-five-view-diversity-triage-v1',
+  status:'SOURCE_GEOMETRY_COMPARISON_ONLY',
+  caseCount:snapshots.length,pairCount:pairs.length,
+  cases:snapshots.map(({genre,realB143VoxelCount,projectionPixels})=>({
+   genre,realB143VoxelCount,projectionPixels})),
+  pairwise:pairs,
+  noUntrustedModelTextOrCoordinatesIncluded:true,
+  visualMetricPassThresholds:'UNDEFINED_DO_NOT_INVENT',
+  humanArchitecturalArt:'NOT_REVIEWED',
+  originalModelAuthenticity:'UNVERIFIED',
+  realMinecraftWalking:'NOT_TESTED',
+  constructionApproved:false,worldWrites:0
+ };
+}
+
 export function exportV4IArchitecturalEvidence(folder){
  if(typeof folder!=='string'||!path.isAbsolute(folder)||fs.existsSync(folder)||
   !fs.existsSync(path.dirname(folder))||
