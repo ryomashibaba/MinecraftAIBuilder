@@ -72,13 +72,22 @@ def exclusive_local_project_lock():
     """Same OS lock file as the existing local supervisor; across both projects."""
     lock_dir = Path(os.environ.get("LOCALAPPDATA") or Path.home()) / "FreeAutonomySolo"
     lock_dir.mkdir(parents=True, exist_ok=True)
-    with open(lock_dir / "one-local-project.lock", "a+b") as file:
-        file.seek(0)
-        if not file.read(1):
+    try:
+        file = open(lock_dir / "one-local-project.lock", "a+b")
+    except OSError as exc:
+        raise Hold("ANOTHER_LOCAL_PROJECT_ALREADY_RUNNING") from exc
+    with file:
+        try:
             file.seek(0)
-            file.write(b"0")
-            file.flush()
-        file.seek(0)
+            if not file.read(1):
+                file.seek(0)
+                file.write(b"0")
+                file.flush()
+            file.seek(0)
+        except OSError as exc:
+            # Windows mandatory byte-range locks can deny an overlapping
+            # read before msvcrt.locking gets a chance to fail.
+            raise Hold("ANOTHER_LOCAL_PROJECT_ALREADY_RUNNING") from exc
         if os.name == "nt":
             import msvcrt
             try:
