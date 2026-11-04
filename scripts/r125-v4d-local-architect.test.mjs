@@ -399,6 +399,25 @@ test('shareable receipt refuses contradictory ART promotion, model promotion, 2 
  assert.throws(()=>buildV4DShareableReceipt(edit(x=>x.gates[0]='PASS')),/SAFE_RECEIPT_/);
  assert.throws(()=>buildV4DShareableReceipt(edit(x=>x.status='HOLD_NOT_A_KNOWN_STATUS')),/SAFE_RECEIPT_/);
  assert.throws(()=>buildV4DShareableReceipt(edit(x=>{x.testInjectionPresent=false;})),/SAFE_RECEIPT_/);
+ // Previously the shareable receipt accepted these contradictory source-success
+ // claims, although zero-POST private replay rejects synthetic real-model status.
+ assert.throws(()=>buildV4DShareableReceipt(edit(x=>{
+  x.status='SOURCE_READY_PRIVATE_ART_REVIEW_REQUIRED';
+ })),/FALSE_SOURCE_OR_MODEL_PROMOTION/);
+ assert.throws(()=>buildV4DShareableReceipt(edit(x=>{
+  x.modelCalls=0;
+ })),/FALSE_SOURCE_OR_MODEL_PROMOTION/);
+ assert.throws(()=>buildV4DShareableReceipt(edit(x=>{
+  x.sourceRoutesStatus='NOT_TESTED';
+ })),/FALSE_SOURCE_OR_MODEL_PROMOTION/);
+ const genuineCandidate=edit(x=>{
+  x.status='SOURCE_READY_PRIVATE_ART_REVIEW_REQUIRED';
+  x.testInjectionPresent=false;
+ });
+ const safeGenuineCandidate=buildV4DShareableReceipt(genuineCandidate);
+ assert.equal(safeGenuineCandidate.sourceCandidateVerified,true);
+ assert.equal(safeGenuineCandidate.explicitlyInjectedTestResponse,false);
+ assert.equal(safeGenuineCandidate.actualOllamaInferenceAttested,false);
  assert.throws(()=>buildV4DShareableReceipt(edit(x=>{
   x.status='SOURCE_READY_PRIVATE_ART_REVIEW_REQUIRED';x.geometrySha256=null;
  })),/SAFE_RECEIPT_/);

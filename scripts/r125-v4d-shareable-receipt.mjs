@@ -61,8 +61,12 @@ export function buildV4DShareableReceipt(report){
  const candidate=validated&&
   (report.status==='SOURCE_READY_PRIVATE_ART_REVIEW_REQUIRED'||
    report.status==='HOLD_TEST_DOUBLE_NOT_REAL_MODEL');
- if((report.status==='SOURCE_READY_PRIVATE_ART_REVIEW_REQUIRED'&&!validated)||
-  (report.status==='HOLD_TEST_DOUBLE_NOT_REAL_MODEL'&&!synthetic)||
+ // A successful SOURCE candidate must have one response and consistent
+ // provenance. Synthetic model doubles can never claim the real-model status.
+ const sourceReady=report.status==='SOURCE_READY_PRIVATE_ART_REVIEW_REQUIRED';
+ const syntheticReady=report.status==='HOLD_TEST_DOUBLE_NOT_REAL_MODEL';
+ if((sourceReady&&(!validated||synthetic||report.modelCalls!==1))||
+  (syntheticReady&&(!validated||!synthetic||report.modelCalls!==1))||
   (report.status==='HOLD_MODEL_NOT_INSTALLED'&&report.modelCalls!==0))
   hold('FALSE_SOURCE_OR_MODEL_PROMOTION');
  return {
