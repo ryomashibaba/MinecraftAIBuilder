@@ -11,7 +11,7 @@ import unittest
 from unittest.mock import patch
 
 from prepare_pinned_real_project import load_manifest, source_blob_sha, verify_private_clone
-from promote_private_real_drafts_docker import promote, qa_commands, _read_receipt, Hold
+from promote_private_real_drafts_docker import preflight_private_drafts, promote, qa_commands, _read_receipt, Hold
 
 SOURCES = {
     "minecraftaibuilder": (
@@ -182,6 +182,57 @@ class PinnedRealSourcePromotionTests(unittest.TestCase):
                         manifest=manifest, use_lock=False)
         self.assertEqual(r["status"], "HOLD")
         self.assertEqual(r["hold_reason"], "TPS_PUBLIC_NPM_DEP_SETUP_NEEDS_OPT_IN")
+
+
+    def test_static_preflight_accepts_two_chained_drafts_without_docker_or_qa(self):
+        for project in SOURCES:
+            with self.subTest(project=project):
+                root, work, manifest, lane, original = self.fixture(project)
+                before_head = g(work, "rev-parse", "HEAD")
+                with patch("promote_private_real_drafts_docker.require_docker_qa_image") as docker, \\
+                     patch("promote_private_real_drafts_docker.docker_run") as execute_qa:
+                    result = preflight_private_drafts(
+                        root, project, "qwen3:14b", manifest=manifest, use_lock=False)
+                docker.assert_not_called()
+                execute_qa.assert_not_called()
+                self.assertEqual(
+                    result["status"], "STATIC_PRIVATE_DRAFTS_ADMISSIBLE_FOR_ISOLATED_QA_ONLY")
+                self.assertEqual(len(result["checked_stages"]), 2)
+                self.assertFalse(result["native_qa_executed"])
+                self.assertFalse(result["candidate_quality_certified"])
+                self.assertFalse(result["generated_code_executed"])
+                self.assertEqual(result["git_commits"], 0)
+                self.assertEqual(result["github_pushes"], 0)
+                self.assertEqual((work / lane["source_file"]).read_text(), original)
+                self.assertEqual(g(work, "rev-parse", "HEAD"), before_head)
+                self.assertEqual(g(work, "status", "--porcelain"), "")
+                self.assertTrue((root / "SHAREABLE_STATIC_PREFLIGHT.json").is_file())
+
+    def test_static_preflight_fails_closed_for_tampered_draft(self):
+        root, work, manifest, lane, original = self.fixture()
+        (root / "draft_2.private.txt").write_text("modified without receipt")
+        with patch("promote_private_real_drafts_docker.require_docker_qa_image") as docker, \\
+             patch("promote_private_real_drafts_docker.docker_run") as run:
+            result = preflight_private_drafts(
+                root, "minecraftaibuilder", "qwen3:14b",
+                manifest=manifest, use_lock=False)
+        self.assertEqual(result["status"], "HOLD")
+        self.assertEqual(result["reason"], "PRIVATE_DRAFT_SHA_MISMATCH")
+        self.assertEqual(result["checked_stages"], [])
+        docker.assert_not_called()
+        run.assert_not_called()
+        self.assertEqual((work / lane["source_file"]).read_text(), original)
+
+    def test_static_preflight_rejects_wrong_model_without_leaking_drafts(self):
+        root, work, manifest, lane, original = self.fixture()
+        with patch("promote_private_real_drafts_docker.docker_run") as run:
+            result = preflight_private_drafts(
+                root, "minecraftaibuilder", "fake:0b",
+                manifest=manifest, use_lock=False)
+        self.assertEqual(result["status"], "HOLD")
+        self.assertEqual(result["reason"], "PRIVATE_DRAFT_RECEIPT_NOT_ADMISSIBLE")
+        self.assertNotIn("draft_1.private", json.dumps(result))
+        run.assert_not_called()
 
     def test_no_docker_fails_closed_without_commit(self):
         root, work, manifest, lane, original = self.fixture()
