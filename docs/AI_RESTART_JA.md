@@ -1,5 +1,8 @@
 # MinecraftAIBuilder — 開発再開の最新正本案内（2026-11-03）
 
+**2026-11-04 実Qwen 5ジャンル新規実測 0/5 SOURCE 再生 — V4J作者プロンプト研究改善（新CI未確認）**：提出された `FIVE_GENRES_OFFLINE_REPLAY_SHAREABLE.json` は5件すべて `originalResponseIntegrity=SHA256_MATCH`、`originalWasInjectedTestDouble=false`、`HOLD_REPLAY_SOURCE_REJECTED`、`sourceReproducedCount=0`。構造診断は窓4方向配列5/5、吹抜けの既存屋内室参照4/5、空間親接続3/5、空間ID3/5、空間フィールド3/5など。**共通診断コードは共通の根本原因を証明しない。** 既存SOURCE失敗を自動修正しない。次回の5ジャンルの新しい独立モデル要求でのみ、`V4J_SINGLE_RESPONSE_CONTRACT_CLARITY_V2`（最重要の参照・フィールド・型・枚数を一カ所に集約した短いシステム指示）を使用し、元V4J著者スキーマ/コンパイラ、従来1回/ジャンル、0 world-write、9 BLOCKEDは固定。既存単体V4D・V4H・既存実機施工成功経路のプロンプトは不変。`LOCAL_REQUEST.json` に新旧プロンプト識別とsystem SHAをPRIVATE記録、効果は**未実測**。次のモデル試験で5ジャンル発生コード/真正3D/用途/美術を別々に評価し、逆効果なら研究上HOLDして撤回可能。ユーザーの追加課金・Workなし。
+
+
 **2026-11-04 V4J 個別実Qwenの真正B143・5ジャンルPRIVATE外観レビュー画面（CI未確認）**：既存0追加モデル要求 `r125-v4j-five-genre-replay.mjs` が、元のSOURCE/geometry SHAを再検証した**非テストダブルの真正B143のみ** `TRUE_B143_FIVE_VIEWS_PRIVATE.svg` を生成し、単一の `FIVE_GENRES_PRIVATE_ART_REVIEW.html` で住宅・店舗・研究・展示・駅の5用途を横並びで比較可能にした。SOURCE HOLD・テストダブルは画像表示しない。実モデル成功ケースがある場合のみWindowsワンクリックからローカルHTMLを開く。外形類似度はSOURCE参考値、ART合格ではない。モデル原文とローカルパスをHTMLに入れず、**共有するのは `FIVE_GENRES_OFFLINE_REPLAY_SHAREABLE.json` のみ**。本番施工・main・既存成功経路に変更なし。9 BLOCKED維持。
 
 

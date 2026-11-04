@@ -107,7 +107,7 @@ export async function runFiveGenreLocal(opts,{runOne=runV4DLocalAuthor,
   let receipt;
   try{
    const report=await runOne({model:opts.model,endpoint:opts.endpoint,
-    authorArcade:true,prompt:item.prompt,
+    authorArcade:true,precisionCivicContract:true,prompt:item.prompt,
     outDir:path.join(root,item.genre)},{fetcher,timeoutMs});
    receipt=buildV4DShareableReceipt(report);
    if(injected&&!receipt.explicitlyInjectedTestResponse)
@@ -209,6 +209,7 @@ export async function runFiveGenreLocal(opts,{runOne=runV4DLocalAuthor,
   promptContentsIncluded:false,rawResponsesIncluded:false,
   localPathsIncluded:false,fullErrorsIncluded:false,
   mode:'FIVE_DISTINCT_PROMPTS_ONE_COMMON_AUTHOR_ENGINE',
+  promptProtocol:'V4J_SINGLE_RESPONSE_CONTRACT_CLARITY_V2',
   sequentialOnly:true,oneAttemptPerGenre:true,maxModelAttempts:5,
   attemptedGenres:outcomes.length,knownModelCallAttempts:knownCalls,
   modelCallCountComplete:stoppedReason!=='UNEXPECTED_LOCAL_RUNNER_ERROR',

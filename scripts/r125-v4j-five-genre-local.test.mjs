@@ -38,11 +38,13 @@ test('five sequential synthetic sources stay TEST DOUBLE, ART HOLD and private',
    active++;maxActive=Math.max(maxActive,active);
    assert.equal(o.outDir,path.join(out,FIVE_INDEPENDENT_BRIEFS[prompts.length].genre));
    assert.equal(o.model,'qwen3:14b');assert.equal(o.authorArcade,true);
+   assert.equal(o.precisionCivicContract,true);
    prompts.push(o.prompt);await Promise.resolve();active--;return fake();
   }});
   assert.equal(maxActive,1);
   assert.deepEqual(prompts,FIVE_INDEPENDENT_BRIEFS.map(x=>x.prompt));
   assert.equal(r.provenance,'INJECTED_TEST_DOUBLE_NOT_REAL_MODEL');
+  assert.equal(r.promptProtocol,'V4J_SINGLE_RESPONSE_CONTRACT_CLARITY_V2');
   assert.equal(r.attemptedGenres,5);assert.equal(r.knownModelCallAttempts,5);
   assert.equal(r.sourceCandidates,5);assert.equal(r.modelCallCountComplete,true);
   assert.equal(r.humanArchitecturalArt,'NOT_REVIEWED');
