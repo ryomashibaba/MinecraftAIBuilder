@@ -128,10 +128,10 @@ class DockerSandboxTests(unittest.TestCase):
     def test_open_code_free_model_catalog_exact_name(self):
         from free_model_real_once import visible_in_provider_catalog
         self.assertTrue(visible_in_provider_catalog(
-            'opencode/deepseek-v4.1-flash-free\\nopencode/glm-5.3-flash-free\\n',
+            'opencode/deepseek-v4.1-flash-free\nopencode/glm-5.3-flash-free\n',
             'opencode/glm-5.3-flash-free'))
         self.assertFalse(visible_in_provider_catalog(
-            'opencode/glm-5.3-flash-free-preview\\n',
+            'opencode/glm-5.3-flash-free-preview\n',
             'opencode/glm-5.3-flash-free'))
         self.assertFalse(visible_in_provider_catalog(
             'Model unavailable: opencode/glm-5.3-flash-free',
