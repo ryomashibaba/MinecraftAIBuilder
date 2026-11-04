@@ -54,24 +54,28 @@ export function compileAuthoredPublicMezzanine(heightAuthor,mezzanine){
  const wallMat=base.plan.materials.wall;
  const serviceMaterial=base.plan.materials.public;
  const planNew=new Map(),elements=[];
- const stage=(id,origin,size,material)=>{
-  elements.push(box(id,origin,size,material));
+ const stage=(id,origin,size,material,repeatOffset=null)=>{
+  const spec=box(id,origin,size,material);
+  if(repeatOffset)spec.repeat={count:2,offset:repeatOffset};
+  elements.push(spec);
   const i=MATERIALS.indexOf(material);
-  for(let xx=origin[0];xx<origin[0]+size[0];xx++)
-   for(let yy=origin[1];yy<origin[1]+size[1];yy++)
-    for(let zz=origin[2];zz<origin[2]+size[2];zz++){
-     const k=key(xx,yy,zz);
-     if(planNew.has(k)&&planNew.get(k)!==i)
-      fail('NEW_MEZZANINE_ELEMENTS_COLLIDE');
-     planNew.set(k,i);
-    }
+  for(let q=0;q<(repeatOffset?2:1);q++){
+   const at=origin.map((v,n)=>v+q*(repeatOffset?.[n]??0));
+   for(let xx=at[0];xx<at[0]+size[0];xx++)
+    for(let yy=at[1];yy<at[1]+size[1];yy++)
+     for(let zz=at[2];zz<at[2]+size[2];zz++){
+      const k=key(xx,yy,zz);
+      if(planNew.has(k)&&planNew.get(k)!==i)
+       fail('NEW_MEZZANINE_ELEMENTS_COLLIDE');
+      planNew.set(k,i);
+     }
+  }
  };
  stage('mezz-public-gallery-floor',[x,deckY,deckZ],[m.deckWidth,1,3],floorMat);
  // Real load-bearing columns all the way down to the existing ground floor.
- for(const [i,xx,zz] of [
-  [0,x,deckZ],[1,deckEndX,deckZ],
-  [2,x,deckEndZ],[3,deckEndX,deckEndZ]
- ])stage('mezz-public-gallery-support-'+i,[xx,2,zz],[1,deckY-2,1],wallMat);
+ for(const [i,zz] of [[0,deckZ],[1,deckEndZ]])
+  stage('mezz-public-gallery-support-pair-'+i,
+   [x,2,zz],[1,deckY-2,1],wallMat,[m.deckWidth-1,0,0]);
  const stair={id:'mezz-public-actual-two-wide-stair',shape:'staircase',
   mode:'add',material:floorMat,origin:[stairX,1,stairStartZ],
   axis:'z',direction:dir,width:2,steps:m.rise+1,treadDepth:1};
@@ -89,8 +93,8 @@ export function compileAuthoredPublicMezzanine(heightAuthor,mezzanine){
  }
  // Guard only exposed edges and leave the entire TWO-WIDE stair-to-gallery
  // landing unblocked. No unverified "safe for actual player" certification.
- for(const [id,xx] of [['west',x],['east',deckEndX]])
-  stage('mezz-upper-guard-'+id,[xx,deckY+1,deckZ],[1,2,3],wallMat);
+ stage('mezz-upper-guard-pair',[x,deckY+1,deckZ],
+  [1,2,3],wallMat,[m.deckWidth-1,0,0]);
  const rimZ=m.side==='north'?deckEndZ:deckZ;
  const gapStart=stairX,gapEnd=stairX+1;
  if(gapStart>x+1)
