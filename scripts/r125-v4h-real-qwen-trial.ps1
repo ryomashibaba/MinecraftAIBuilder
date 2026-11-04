@@ -154,7 +154,7 @@ $share = [ordered]@{
     nineSafetyGates = '9 BLOCKED'
     worldContacts = 0
     worldWrites = 0
-    instruction = 'Share ONLY this JSON; do NOT upload the PrivateModelStudies folder or original model response. SOURCE is not ART PASS.'
+    instruction = 'Share ONLY this JSON. Keep private model responses, full evidence folders and architecture source on your own PC. SOURCE is not ART PASS.'
 }
 $share | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $sharePath -Encoding UTF8 -NoNewline
 Write-Output ('V4H_SHARE_ONLY_THIS_FILE=' + $sharePath)
