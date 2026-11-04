@@ -1,5 +1,8 @@
 # MinecraftAIBuilder — 開発再開の最新正本案内（2026-11-03）
 
+**2026-11-04 V4J 個別実Qwenの真正B143・5ジャンルPRIVATE外観レビュー画面（CI未確認）**：既存0追加モデル要求 `r125-v4j-five-genre-replay.mjs` が、元のSOURCE/geometry SHAを再検証した**非テストダブルの真正B143のみ** `TRUE_B143_FIVE_VIEWS_PRIVATE.svg` を生成し、単一の `FIVE_GENRES_PRIVATE_ART_REVIEW.html` で住宅・店舗・研究・展示・駅の5用途を横並びで比較可能にした。SOURCE HOLD・テストダブルは画像表示しない。実モデル成功ケースがある場合のみWindowsワンクリックからローカルHTMLを開く。外形類似度はSOURCE参考値、ART合格ではない。モデル原文とローカルパスをHTMLに入れず、**共有するのは `FIVE_GENRES_OFFLINE_REPLAY_SHAREABLE.json` のみ**。本番施工・main・既存成功経路に変更なし。9 BLOCKED維持。
+
+
 **2026-11-04 V4J 5ジャンルワンクリック自動オフライン再診断（CI未確認）**：既存 `scripts/r125-v4e-one-click-ranked-trial.cmd --arcade-five` のY選択で5ジャンルのローカルモデル実験後、同じ隔離クローンにある `r125-v4j-five-genre-replay.mjs` を**自動実行**してPRIVATEの5ジャンル原文をSHA付きで再診断する。追加AI要求0・Minecraft書き込み0。最新の安全な `FIVE_GENRES_OFFLINE_REPLAY_SHAREABLE.json` をエクスプローラーで選択する。再診断が不成立なら既存 `FIVE_GENRES_SHAREABLE_SUMMARY.json` を保護して提示、無断リトライなし。Windows GitHub Actionsで「5回だけの**FAKE localhost** POST・0再生POST・各出力HOLD」を検証。これは実Qwenの成功や人間ART合格ではない。原本、main、Draft PR、9 BLOCKED維持。
 
 

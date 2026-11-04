@@ -6,7 +6,8 @@ import path from 'node:path';
 import {CIVIC_ARCADE_SCHEMA} from '../source/ai/r125-v4j-civic-author-ir.mjs';
 import {syntheticFiveV4JArcadeAuthors} from './r125-v4j-civic-facade-study.mjs';
 import {runV4DLocalAuthor} from './r125-v4d-local-architect.mjs';
-import {replayFiveGenrePrivateBatch,parseFiveGenreReplayArgs}
+import {replayFiveGenrePrivateBatch,parseFiveGenreReplayArgs,
+ renderFiveGenrePrivateArtReview}
  from './r125-v4j-five-genre-replay.mjs';
 const mk=()=>fs.mkdtempSync(path.join(os.tmpdir(),'mab-v4j-offline-'));
 const fixture=()=>{
@@ -29,6 +30,10 @@ test('existing batch with no attempted models yields five honest NOT_ATTEMPTED o
   assert.equal(r.geometry.status,'INSUFFICIENT_INDEPENDENT_REAL_MODEL_SOURCES');
   assert.equal(r.worldWrites,0);
   assert.deepEqual(r.gates,Array(9).fill('BLOCKED'));
+  const html=fs.readFileSync(path.join(out,'FIVE_GENRES_PRIVATE_ART_REVIEW.html'),'utf8');
+  assert.equal((html.match(/SOURCE HOLD \/ TEST DOUBLE/g)??[]).length,5);
+  assert(!html.includes('<img '));
+  assert(!html.includes(study));
   assert.throws(()=>replayFiveGenrePrivateBatch(study,out),
    /FRESH_SEPARATE_OUTPUT_REQUIRED/);
   assert.throws(()=>parseFiveGenreReplayArgs(['--out','x','--study','y']),
@@ -67,6 +72,10 @@ test('one actual synthetic local HTTP response replays offline without any extra
   assert.equal(r.outcomes[0].originalResponseIntegrity,'SHA256_MATCH');
   assert.equal(r.geometry.status,'INSUFFICIENT_INDEPENDENT_REAL_MODEL_SOURCES');
   assert.equal(r.outcomes[1].offlineStatus,'NOT_ATTEMPTED');
+  const html=fs.readFileSync(path.join(out,'FIVE_GENRES_PRIVATE_ART_REVIEW.html'),'utf8');
+  assert(!html.includes('<img '));
+  assert(!html.includes(original));
+  assert(!html.includes(dir));
   assert.equal(r.sharedSourceIssues.length,0);
   assert.equal(fs.readFileSync(rawPath,'utf8'),before);
   const summary=fs.readFileSync(path.join(out,
@@ -89,4 +98,33 @@ test('symlinked genre is refused; replay does not leak target or invent an offli
   assert(!JSON.stringify(r).includes(dir));
   assert.equal(r.additionalModelCalls,0);
  }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
+
+test('private gallery shows only SHA-verified real non-test B143 and never embeds author-provided strings',()=>{
+ const names=['housing','shop','research','gallery','station'];
+ const summary={additionalModelCalls:0,worldWrites:0,userArtAssessment:'NOT_REVIEWED',
+  outcomes:names.map((genre,i)=>({
+   genre,originalWasInjectedTestDouble:i!==0,
+   independentRealSourceReproduced:i===0,
+   originalResponseIntegrity:'SHA256_MATCH',
+   offlineStatus:i===0?'SOURCE_REPRODUCED_OFFLINE_ART_NOT_REVIEWED':
+    'HOLD_TEST_DOUBLE_REPLAY_ONLY',
+   structuralIssueCodes:i===1?['PARENT_ATTACHMENT_INVALID','<script>alert(1)</script>']:[]
+  })),
+  geometry:{pairwise:[
+   {genreA:'housing',genreB:'shop',meanFiveViewSimilarity:0.754321}
+  ]}
+ };
+ const html=renderFiveGenrePrivateArtReview(summary);
+ assert.equal((html.match(/<img /g)??[]).length,1);
+ assert(html.includes('housing/TRUE_B143_FIVE_VIEWS_PRIVATE.svg'));
+ assert(!html.includes('shop/TRUE_B143_FIVE_VIEWS_PRIVATE.svg'));
+ assert(html.includes('0.754'));
+ assert(!html.includes('<script>'));
+ assert(!html.includes('alert(1)</script>'));
+ assert(!html.includes('http://'));
+ assert(!html.includes('https://'));
+ assert(html.includes('ART HOLD'));
+ assert.throws(()=>renderFiveGenrePrivateArtReview({...summary,worldWrites:1}),
+  /PRIVATE_ART_REVIEW_REQUIRES_SAFE_OFFLINE_SUMMARY/);
 });

@@ -163,6 +163,15 @@ if not "%REPLAY_EXIT%"=="0" (
 if not exist "%FIVE_REPLAY_DIR%\FIVE_GENRES_OFFLINE_REPLAY_SHAREABLE.json" goto FIVE_NO_REPLAY_SUMMARY
 set "SHARE_FILE=%FIVE_REPLAY_DIR%\FIVE_GENRES_OFFLINE_REPLAY_SHAREABLE.json"
 echo Five-genre zero-model-call offline diagnostic created.
+rem Show a real B143 comparison only when at least one true verified original
+rem has been reconstructed. Synthetic responses never get visual ART promotion.
+if "%MAB_V4D_TEST_DOUBLE_MODE%"=="1" goto FIVE_SHARE_SUMMARY
+set "HAS_TRUE_REPLAY_VIEW="
+for %%G in (housing shop research gallery station) do if exist "%FIVE_REPLAY_DIR%\%%G\TRUE_B143_FIVE_VIEWS_PRIVATE.svg" set "HAS_TRUE_REPLAY_VIEW=1"
+if not defined HAS_TRUE_REPLAY_VIEW goto FIVE_SHARE_SUMMARY
+if not exist "%FIVE_REPLAY_DIR%\FIVE_GENRES_PRIVATE_ART_REVIEW.html" goto FIVE_SHARE_SUMMARY
+echo Opening the PRIVATE true-B143 five-genre ART HOLD comparison.
+start "" "%FIVE_REPLAY_DIR%\FIVE_GENRES_PRIVATE_ART_REVIEW.html"
 goto FIVE_SHARE_SUMMARY
 :FIVE_NO_REPLAY_SUMMARY
 echo No offline result available; the original 5-genre summary is preserved.
