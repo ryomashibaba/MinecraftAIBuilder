@@ -127,7 +127,7 @@ class LocalPatchLoopTests(unittest.TestCase):
             validate_config(cfg)
 
     def test_refuses_unapproved_source_paths(self):
-        cfg = dict(self.cfg, tasks=[{"path": "docs/continuity/DECISIONS_JA.md",
+        cfg = dict(self.cfg, tasks=[{"path": "docs/continuity/DECISIONS_JA.json",
                                      "request": "Edit immutable decisions"}],
                    allowed_prefixes=["docs"])
         with patch("local_ollama_patch_loop.qa_image_preflight"), \
@@ -151,6 +151,34 @@ class LocalPatchLoopTests(unittest.TestCase):
             self.skipTest("symlinks unavailable")
         with self.assertRaisesRegex(Hold, "SOURCE_MUST_BE_REGULAR_FILE"):
             apply_exact_patch(link, {"find": "x", "replace": "y"}, "x")
+
+    def test_independent_qa_can_change_between_consecutive_tasks(self):
+        cfg = dict(self.cfg)
+        cfg["tasks"] = [
+            dict(self.cfg["tasks"][0], checks=[["node", "--test", "first.test.mjs"]]),
+            dict(self.cfg["tasks"][1], checks=[["node", "--test", "second.test.mjs"]])
+        ]
+        commands = []
+        def qa(_cfg, command, *args, **kwargs):
+            commands.append(command)
+            return 0, "MOCK_QA_ONLY"
+        with patch.dict(os.environ, self.env), \
+             patch("local_ollama_patch_loop.qa_image_preflight"), \
+             patch("local_ollama_patch_loop.propose_once",
+                   side_effect=self.proposals), \
+             patch("local_ollama_patch_loop.run_in_docker", side_effect=qa):
+            result = execute(cfg)
+        self.assertEqual(result["status"], "SOURCE_ONLY_TASK_QUEUE_DONE")
+        self.assertEqual(commands, [["node", "--test", "first.test.mjs"],
+                                    ["node", "--test", "second.test.mjs"]])
+
+    def test_push_refuses_branch_not_present_on_remote(self):
+        from local_ollama_patch_loop import ensure_remote_research_branch
+        with patch("local_ollama_patch_loop.subprocess.run") as fake:
+            fake.return_value.returncode = 0
+            fake.return_value.stdout = ""
+            with self.assertRaisesRegex(Hold, "REMOTE_APPROVED_RESEARCH_BRANCH_NOT_FOUND"):
+                ensure_remote_research_branch(self.cfg, self.clone)
 
     def test_schema_real_api_shape_but_mocked_response(self):
         def fake_response(url, payload=None, timeout=0):
