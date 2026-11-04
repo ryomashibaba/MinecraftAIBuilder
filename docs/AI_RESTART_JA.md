@@ -1,5 +1,8 @@
 # MinecraftAIBuilder — 開発再開の最新正本案内（2026-11-03）
 
+**2026-11-04 V2実Qwenの5種類の正確な拒否コード→V3オプトイン構造化JSON研究**：直近の保存済み実Qwenでは housing MASSING_PRIMARY_VOLUME_TOO_SMALL / shop COMPACT_ROOT / research CIVIC_AUTHOR_ONE_ORIGINAL_JSON_WITH_COMPLETE_PUBLIC_ARCHITECTURE / gallery COMPACT_SPACE_FIELDS / station GRAPH_SOLID_FOOTPRINT_OVERLAP、5件すべて元SHA一致、SOURCE0/5、ART HOLD。既存共通エンジンの多段契約を変更せず、研究専用 `--structured-v3` を `scripts/r125-v4j-five-genre-local.mjs` に追加。ローカルOllama互換 `/v1/chat/completions` にオプトインで `response_format.type=json_schema`（ユーザー指定形状、各genre別固定テンプレートなし）を渡す。リクエストは **1 POST/ジャンル、最大5 POST、逐次、追加リトライ/クラウドAPI/ワールド操作なし**。異なるV3プロンプトは元のV2を残して識別し、元応答・リクエスト/スキーマSHAをPRIVATE記録、再生時にメタデータを検証する。スキーマは欠落キー・型・列挙値などの研究対策であり、相互参照・外形欠損・平面的衝突・美術の合格を保証しない。CIフェイクは実モデルではなく、V3の実機性能を証明しない。既存のWindows V2起動器には変更なし。main/PR#128/9 BLOCKED保護。
+
+
 **2026-11-04 V2 5ジャンル Qwen SOURCE拒否の安全な精密診断（CI未確認）**：最後の実測では住宅は外形、店舗/展示館はCOMPACT、研究施設はCIVIC、駅舎はGRAPHで全5件HOLD。静的構造診断が0の住宅・駅舎も真正B143には進まなかった。元回答にユーザーの部屋IDが混入し得る生エラーメッセージを共有せず、既存SOURCEの `throw Error` に定義された有限のエラー名だけを `compilerRejectCode` と5ジャンル `sourceRejectionTriage.specificCompilerRejectCodes` へ出力し、未認識なら `UNCLASSIFIED_COMPILER_REJECTION`。次の実Qwen呼出しは必要なく、既存PRIVATEの再生だけを行う。前回 Windows CMD 分岐追加でCI failure（ラベル DONE 未認識）が生じたため `8716c788` で元の起動器を復元、問題分岐は残さない。元ANSWER/本番世界/main/教育実機成功経路を変更せず、9ゲートBLOCKEDとART HOLDを維持。
 
 

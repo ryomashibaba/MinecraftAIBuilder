@@ -35,6 +35,9 @@ import {actualB143MezzanineSectionSvg}
  from './r125-v4h-mezzanine-section.mjs';
 import {V4J_PRECISION_PROTOCOL,V4J_PRECISION_SYSTEM_PROMPT}
  from '../source/ai/r125-v4j-precision-prompt.mjs';
+import {V4J_STRUCTURED_PROTOCOL,V4J_STRUCTURED_SYSTEM_PROMPT,
+ V4J_STRUCTURED_RESPONSE_FORMAT,V4J_STRUCTURED_CIVIC_JSON_SCHEMA}
+ from '../source/ai/r125-v4j-structured-author-schema.mjs';
 
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const MODEL=/^[A-Za-z0-9._:/-]{2,140}$/;
@@ -116,20 +119,29 @@ function validateLaunch({model,outDir,prompt,endpoint},fetcher,timeoutMs){
  return dest;
 }
 export async function runV4DLocalAuthor({
- model,outDir,prompt=DEFAULT_PROMPT,endpoint=DEFAULT_ENDPOINT,compact=false,rankedWindows=false,rankedSection=false,authoredMassing=false,authorWing=false,authorFloorplate=false,authorAtrium=false,authorMezzanine=false,authorArcade=false,precisionCivicContract=false
+ model,outDir,prompt=DEFAULT_PROMPT,endpoint=DEFAULT_ENDPOINT,compact=false,rankedWindows=false,rankedSection=false,authoredMassing=false,authorWing=false,authorFloorplate=false,authorAtrium=false,authorMezzanine=false,authorArcade=false,precisionCivicContract=false,structuredCivicContract=false
 }={}, {fetcher=fetch,timeoutMs=180000}={}){
  if(typeof precisionCivicContract!=='boolean'||(precisionCivicContract&&!authorArcade))fail('PRECISION_CONTRACT_REQUIRES_CIVIC_AUTHOR');
+ if(typeof structuredCivicContract!=='boolean'||
+  (structuredCivicContract&&(!precisionCivicContract||!authorArcade)))
+  fail('STRUCTURED_CONTRACT_REQUIRES_V4J_PRECISION');
  if([compact,rankedWindows,rankedSection,authoredMassing,authorWing,authorFloorplate,authorAtrium,authorMezzanine,authorArcade].some(x=>typeof x!=='boolean')||
   [compact,rankedWindows,rankedSection,authoredMassing,authorWing,authorFloorplate,authorAtrium,authorMezzanine,authorArcade].filter(Boolean).length>1)fail('AUTHOR_MODE');
  const dir=validateLaunch({model,outDir,prompt,endpoint},fetcher,timeoutMs);
  const injected=fetcher!==fetch||process.env.MAB_V4D_TEST_DOUBLE_MODE==='1',start=Date.now();
- const modelSystemPrompt=precisionCivicContract?V4J_PRECISION_SYSTEM_PROMPT:
+ const modelSystemPrompt=structuredCivicContract?V4J_STRUCTURED_SYSTEM_PROMPT:
+  precisionCivicContract?V4J_PRECISION_SYSTEM_PROMPT:
   authorArcade?CIVIC_ARCADE_SYSTEM_PROMPT:authorMezzanine?MEZZANINE_SYSTEM_PROMPT:
   authorAtrium?HEIGHT_SYSTEM_PROMPT:authorFloorplate?FLOORPLATE_SYSTEM_PROMPT:
   authorWing?WING_SYSTEM_PROMPT:authoredMassing?MASSING_SYSTEM_PROMPT:
   rankedSection?SECTIONED_SYSTEM_PROMPT:rankedWindows?RANKED_SYSTEM_PROMPT:
   compact?COMPACT_SYSTEM_PROMPT:V4D_RELATIVE_SYSTEM_PROMPT;
- const promptProtocol=precisionCivicContract?V4J_PRECISION_PROTOCOL:'LEGACY_AUTHOR_CONTRACT';
+ const promptProtocol=structuredCivicContract?V4J_STRUCTURED_PROTOCOL:
+  precisionCivicContract?V4J_PRECISION_PROTOCOL:'LEGACY_AUTHOR_CONTRACT';
+ const structuredSchemaSha256=structuredCivicContract?
+  sha(JSON.stringify(V4J_STRUCTURED_CIVIC_JSON_SCHEMA)):null;
+ const responseFormat=structuredCivicContract?V4J_STRUCTURED_RESPONSE_FORMAT:
+  {type:'json_object'};
  fs.mkdirSync(dir,{recursive:false});
  const report={
   schema:'minecraftaibuilder-r125-v4d-local-model-author-attempt-v1',
@@ -137,7 +149,7 @@ export async function runV4DLocalAuthor({
   declaredProvider:'LOCAL_OLLAMA_127_0_0_1_NOT_AUTHENTICATED',
   testInjectionPresent:injected,modelNameCryptographicallyAttested:false,
   promptSha256:sha(prompt),systemPromptSha256:sha(modelSystemPrompt),
-  promptProtocol,responseRawSha256:null,
+  promptProtocol,structuredSchemaSha256,responseRawSha256:null,
   authorContract:authorArcade?CIVIC_ARCADE_SCHEMA:authorMezzanine?MEZZANINE_SCHEMA:authorAtrium?HEIGHT_SCHEMA:authorFloorplate?FLOORPLATE_SCHEMA:authorWing?WING_SCHEMA:authoredMassing?MASSING_SCHEMA:rankedSection?SECTIONED_SCHEMA:rankedWindows?RANKED_SCHEMA:compact?COMPACT_SCHEMA:RELATIVE_SCHEMA,
   mechanizedExpandedIRSha256:null,
   rawCaptured:false,modelCalls:0,modelFinishReason:null,
@@ -150,7 +162,7 @@ export async function runV4DLocalAuthor({
  output(dir,'LOCAL_REQUEST.json',{
   model,endpoint,prompt,timeoutMs,maxOutputTokens:authorArcade||authorMezzanine?4096:3072,
   authorContract:authorArcade?CIVIC_ARCADE_SCHEMA:authorMezzanine?MEZZANINE_SCHEMA:authorAtrium?HEIGHT_SCHEMA:authorFloorplate?FLOORPLATE_SCHEMA:authorWing?WING_SCHEMA:authoredMassing?MASSING_SCHEMA:rankedSection?SECTIONED_SCHEMA:rankedWindows?RANKED_SCHEMA:compact?COMPACT_SCHEMA:RELATIVE_SCHEMA,
-  systemPromptSha256:sha(modelSystemPrompt),promptProtocol,
+  systemPromptSha256:sha(modelSystemPrompt),promptProtocol,structuredSchemaSha256,
   nModelGenerationAttemptsAllowed:1,sourceOnly:true,
   noPaidAPI:true,noWorldAccess:true
  });
@@ -169,7 +181,8 @@ export async function runV4DLocalAuthor({
     headers:{'Content-Type':'application/json','Accept':'application/json'},
     body:JSON.stringify({
      model,stream:false,temperature:0.45,reasoning_effort:'none',
-     max_tokens:authorArcade||authorMezzanine?4096:3072,response_format:{type:'json_object'},
+     max_tokens:authorArcade||authorMezzanine?4096:3072,
+     response_format:responseFormat,
      messages:[
       {role:'system',content:modelSystemPrompt},
       {role:'user',content:prompt}

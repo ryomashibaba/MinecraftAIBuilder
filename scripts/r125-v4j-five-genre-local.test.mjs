@@ -29,6 +29,11 @@ test('five genuinely distinct model briefs and no common fake single prompt',()=
  assert.equal(new Set(FIVE_INDEPENDENT_BRIEFS.map(x=>x.prompt)).size,5);
  assert.throws(()=>parseFiveGenreArgs(['--model','qwen3:14b',
   '--out','new','--prompt','one text']),/FIVE_GENRE_BRIEFS/);
+ const v3=parseFiveGenreArgs(['--model','qwen3:14b','--out','new','--structured-v3']);
+ assert.equal(v3.structuredCivicContract,true);
+ assert.equal(v3.authorArcade,true);
+ assert.throws(()=>parseFiveGenreArgs(['--model','qwen3:14b','--out','new',
+  '--structured-v3','--structured-v3']),/DUPLICATE_STRUCTURED_V3/);
 });
 test('five sequential synthetic sources stay TEST DOUBLE, ART HOLD and private',async()=>{
  const tmp=mk(),out=path.join(tmp,'batch');let active=0,maxActive=0;
@@ -155,5 +160,27 @@ test('V4J repeated SOURCE failures group only symptoms, never assume identical r
   assert.equal(r.crossGenreSharedSymptoms[0].sharedRootCauseProven,false);
   assert.deepEqual(r.noRoofOutlineChangeGenres,[]);
   assert.equal(r.visualGeometryComparison.status,'NOT_RUN_ON_TEST_DOUBLE');
+ }finally{fs.rmSync(tmp,{recursive:true,force:true});}
+});
+
+test('V3 five-genre pilot stays five distinct briefs / sequential / synthetic ART HOLD',async()=>{
+ const tmp=mk(),out=path.join(tmp,'v3');
+ const calls=[];
+ try{
+  const opts3={...opts(out),structuredCivicContract:true};
+  const r=await runFiveGenreLocal(opts3,{runOne:async o=>{
+   calls.push({prompt:o.prompt,structured:o.structuredCivicContract,
+    author:o.authorArcade,precision:o.precisionCivicContract});
+   return fake('HOLD_MODEL_OR_SOURCE_INVALID_NO_REPAIR');
+  }});
+  assert.equal(r.promptProtocol,'V4J_SINGLE_RESPONSE_SCHEMA_GUIDED_V3');
+  assert.equal(r.knownModelCallAttempts,5);
+  assert.equal(r.sourceCandidates,0);
+  assert.equal(r.humanArchitecturalArt,'NOT_REVIEWED');
+  assert.equal(r.worldWrites,0);
+  assert.deepEqual(r.gates,Array(9).fill('BLOCKED'));
+  assert.equal(calls.length,5);
+  assert.deepEqual(calls.map(x=>x.prompt),FIVE_INDEPENDENT_BRIEFS.map(x=>x.prompt));
+  assert(calls.every(x=>x.structured&&x.author&&x.precision));
  }finally{fs.rmSync(tmp,{recursive:true,force:true});}
 });

@@ -11,6 +11,8 @@ on:
       - 'scripts/r125-v4e-ranked-exterior.test.mjs'
       - 'source/ai/r125-v4j-civic-author-ir.mjs'
       - 'source/ai/r125-v4j-precision-prompt.mjs'
+      - 'source/ai/r125-v4j-structured-author-schema.mjs'
+      - 'scripts/r125-v4j-structured-author-schema.test.mjs'
       - 'scripts/r125-v4j-precision-prompt.test.mjs'
       - 'source/ai/r125-v4h-authored-mezzanine.mjs'
       - 'scripts/r125-v4h-mezzanine-source-study.mjs'
@@ -190,6 +192,9 @@ jobs:
           node --check source/ai/r125-v4j-precision-prompt.mjs
           node --check scripts/r125-v4j-precision-prompt.test.mjs
           node --test scripts/r125-v4j-precision-prompt.test.mjs
+          node --check source/ai/r125-v4j-structured-author-schema.mjs
+          node --check scripts/r125-v4j-structured-author-schema.test.mjs
+          node --test scripts/r125-v4j-structured-author-schema.test.mjs
           node --check scripts/r125-v4j-five-genre-replay.mjs
           node --check scripts/r125-v4j-five-genre-replay.test.mjs
           node --test scripts/r125-v4j-five-genre-replay.test.mjs

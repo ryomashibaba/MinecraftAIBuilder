@@ -12,6 +12,8 @@ import {buildV4DShareableReceipt}
 import {compileDesign} from '../source/ai/b143-building-dsl.mjs';
 import {compareV4IPrivateRealB143Silhouettes}
  from './r125-v4i-architectural-art-audit.mjs';
+import {V4J_STRUCTURED_PROTOCOL}
+ from '../source/ai/r125-v4j-structured-author-schema.mjs';
 
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const fail=x=>{throw Error('R125_V4J_FIVE_GENRE_'+x);};
@@ -25,7 +27,11 @@ export const FIVE_INDEPENDENT_BRIEFS=Object.freeze([
 ]);
 export function parseFiveGenreArgs(args){
  if(args.includes('--prompt'))fail('BRIEFS_ARE_FIVE_INDEPENDENT_FIXED_TASKS');
- return parseV4DLocalAuthorArgs([...args,'--authored-civic-arcade']);
+ const occurrences=args.filter(x=>x==='--structured-v3').length;
+ if(occurrences>1)fail('DUPLICATE_STRUCTURED_V3');
+ const clean=args.filter(x=>x!=='--structured-v3');
+ return {...parseV4DLocalAuthorArgs([...clean,'--authored-civic-arcade']),
+  structuredCivicContract:occurrences===1};
 }
 
 /**
@@ -87,7 +93,9 @@ export function summarizeVerifiedPrivateCivicVisibility(art,receipt){
 
 export async function runFiveGenreLocal(opts,{runOne=runV4DLocalAuthor,
  fetcher=fetch,timeoutMs=180000}={}){
- if(!opts||!opts.authorArcade||typeof opts.outDir!=='string'||
+ if(!opts||!opts.authorArcade||
+  (opts.structuredCivicContract!==undefined&&
+   typeof opts.structuredCivicContract!=='boolean')||typeof opts.outDir!=='string'||
   typeof runOne!=='function')fail('OPTIONS');
  const root=path.resolve(opts.outDir),parent=path.dirname(root);
  if(!fs.existsSync(parent)||!fs.statSync(parent).isDirectory()||
@@ -107,7 +115,8 @@ export async function runFiveGenreLocal(opts,{runOne=runV4DLocalAuthor,
   let receipt;
   try{
    const report=await runOne({model:opts.model,endpoint:opts.endpoint,
-    authorArcade:true,precisionCivicContract:true,prompt:item.prompt,
+    authorArcade:true,precisionCivicContract:true,
+    structuredCivicContract:opts.structuredCivicContract===true,prompt:item.prompt,
     outDir:path.join(root,item.genre)},{fetcher,timeoutMs});
    receipt=buildV4DShareableReceipt(report);
    if(injected&&!receipt.explicitlyInjectedTestResponse)
@@ -209,7 +218,8 @@ export async function runFiveGenreLocal(opts,{runOne=runV4DLocalAuthor,
   promptContentsIncluded:false,rawResponsesIncluded:false,
   localPathsIncluded:false,fullErrorsIncluded:false,
   mode:'FIVE_DISTINCT_PROMPTS_ONE_COMMON_AUTHOR_ENGINE',
-  promptProtocol:'V4J_SINGLE_RESPONSE_CONTRACT_CLARITY_V2',
+  promptProtocol:opts.structuredCivicContract===true?V4J_STRUCTURED_PROTOCOL:
+   'V4J_SINGLE_RESPONSE_CONTRACT_CLARITY_V2',
   sequentialOnly:true,oneAttemptPerGenre:true,maxModelAttempts:5,
   attemptedGenres:outcomes.length,knownModelCallAttempts:knownCalls,
   modelCallCountComplete:stoppedReason!=='UNEXPECTED_LOCAL_RUNNER_ERROR',
