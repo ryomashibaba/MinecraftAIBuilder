@@ -31,7 +31,7 @@ PROMPT = (
     "original JSON author decision, with no host repair."
 )
 
-AUTHOR_SCRIPT = String.raw if False else r'''
+AUTHOR_SCRIPT = r'''
 import {runV4DLocalAuthor} from './scripts/r125-v4d-local-architect.mjs';
 const response=await runV4DLocalAuthor({
  model:process.env.MAB_AUTHOR_MODEL,
