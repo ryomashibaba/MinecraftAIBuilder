@@ -156,3 +156,22 @@ jobs:
           python -m unittest discover -v -s tools/free-autonomy-solo -p test_draft_real_project_local14b.py
           Write-Host 'MOCK_MODEL_ONLY_AND_NO_UNTRUSTED_CODE_EXECUTED'
 
+
+
+  windows-private-source-promotion-mock:
+    runs-on: windows-2022
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Actual Windows Git fixture confirms two-stage QA gating, no actual Docker or model
+        shell: pwsh
+        run: |
+          python -m py_compile tools/free-autonomy-solo/promote_private_real_drafts_docker.py
+          python -m unittest discover -v -s tools/free-autonomy-solo -p test_promote_private_real_drafts_docker.py
+          Write-Host 'WINDOWS_LOCAL_GIT_COMMIT_GATE_MOCK_DOCKER_QA_ONLY__MODEL_HOLD'
+
