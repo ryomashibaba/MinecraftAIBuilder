@@ -91,6 +91,9 @@ class RealSourceDraftTests(unittest.TestCase):
                 new = "export function " + target + "(value) {\n  return value ?? false;\n}"
                 result = {"find": old, "replace": new}
             return {"model": "qwen3:14b", "done": True, "eval_count": 21,
+                    "prompt_eval_count": 120, "eval_duration": 700_000_000,
+                    "prompt_eval_duration": 1_000_000_000,
+                    "load_duration": 100_000_000, "total_duration": 1_800_000_000,
                     "message": {"content": json.dumps(result)}}
         return api
 
@@ -110,6 +113,12 @@ class RealSourceDraftTests(unittest.TestCase):
             "minecraftaibuilder")
         self.assertEqual(result["status"], "TWO_REAL_SOURCE_PRIVATE_DRAFTS_ONLY")
         self.assertEqual((result["model_calls_attempted"], result["model_drafts"]), (2, 2))
+        self.assertTrue(result["model_speed_metrics_unverified_provider_report"])
+        first = result["stages"][0]
+        self.assertEqual(first["reported_output_tokens_per_second"], 30.0)
+        self.assertEqual(first["reported_prompt_eval_count"], 120)
+        self.assertEqual(first["reported_total_duration_ns"], 1_800_000_000)
+        self.assertGreaterEqual(first["attempt_wall_seconds"], 0)
         self.assertFalse(result["native_QA_executed"])
         self.assertEqual(result["git_commits"], 0)
         self.assertEqual(result["git_pushes"], 0)
@@ -137,6 +146,8 @@ class RealSourceDraftTests(unittest.TestCase):
         self.assertEqual(result["status"], "HOLD")
         self.assertEqual(result["model_calls_attempted"], 2)
         self.assertEqual(result["model_drafts"], 0)
+        self.assertEqual(len(result["stages"]), 2)
+        self.assertTrue(all(stage["attempt_wall_seconds"] >= 0 for stage in result["stages"]))
         self.assertEqual(git(workspace, "rev-parse", "HEAD"), head)
         self.assertEqual((workspace / lane["source_file"]).read_text(), original)
         self.assertEqual(git(workspace, "status", "--porcelain"), "")
