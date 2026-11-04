@@ -1,5 +1,8 @@
 # MinecraftAIBuilder — 開発再開の最新正本案内（2026-11-03）
 
+**2026-11-04 V3実Qwen住宅の再失敗に基づく、V4明示オプトイン幾何成立範囲研究（新CI未確認）**：V3住宅1回・SOURCE HOLD、`MASSING_PRIMARY_VOLUME_TOO_SMALL`（V2住宅と同一コード）。JSON形式の強制だけでは幾何の算術が保証されない。この1条件に限り、新V4実験は *モデルへ渡す選択肢* を変更する（モデル原文の修正ではない）：屋内COVERED各室の幅・奥行22..30、massing.cutWidth/cutDepth 7..8。すると**いずれかの既存屋内室を対象とする限り**全ての整数組合せで width/depth >= 2*cut+6 が成立する（機械テスト）。従来V3（幅18..30、切断7..10）とは別プロトコル `V4J_SINGLE_RESPONSE_FEASIBLE_MASSING_V4`、新たな幾何選択範囲が建築多様性に悪影響を持つ可能性も認識して実験扱い。`scripts/r125-v4j-v3-one-local.mjs` の `--geometry-v4` を明示した単体研究のみで有効化、元V2/V3は完全維持。1モデル回答・追加再要求なし・0ワールド操作、HOLDなら元回答に触れない。間取りの重複/物理窓/動線/美術は保証されない。実QwenのSOURCE成功率は未測定。Windowsファイルやmain/教育実機成功経路は未変更。
+
+
 **2026-11-04 V3構造化Ollamaの実機互換性を1回のLOCAL推論で先行研究（新CI未確認）**：`node scripts/r125-v4j-v3-one-local.mjs --model qwen3:14b --out NEW_PRIVATE_DIR --genre housing`（`--genre`省略時 housing）。既存同一ジャンルの元briefを使用し、1件のみ `response_format=json_schema` の原本回答を保存する。1モデル要求/自動リトライ0。元回答をSHA検証付きの別PRIVATEディレクトリで追加AI0回再診断し、`V4J_V3_ONE_SHAREABLE.json` のみ共有可能。TEST DOUBLE/失敗はSOURCE成功と宣言しない。5ジャンルV3の実行はこの1件のHTTP互換性が確認できてからとし、5件の不必要な無駄なモデル呼出しを避ける。既存V2 Windows実行器は変更しない。本番・main・元Education成功・Draft PR #128/9ゲートBLOCKEDは不変。
 
 

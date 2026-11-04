@@ -16,16 +16,21 @@ import {buildV4DShareableReceipt}
  from './r125-v4d-shareable-receipt.mjs';
 import {V4J_STRUCTURED_PROTOCOL}
  from '../source/ai/r125-v4j-structured-author-schema.mjs';
+import {V4J_ENVELOPE_PROTOCOL}
+ from '../source/ai/r125-v4j-feasible-envelope.mjs';
 
 const fail=x=>{throw Error('R125_V4J_V3_ONE_STUDY_'+x);};
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const inside=(a,b)=>a===b||a.startsWith(b+path.sep);
 const MODEL=/^[A-Za-z0-9._:/-]{2,140}$/;
 export function parseV3OneArgs(args){
- if(args.length!==4&&args.length!==6)fail('ARGS_MODEL_OUT_OPTIONAL_GENRE');
+ const v4Count=args.filter(x=>x==='--geometry-v4').length;
+ if(v4Count>1)fail('DUPLICATE_GEOMETRY_V4');
+ const pairs=args.filter(x=>x!=='--geometry-v4');
+ if(pairs.length!==4&&pairs.length!==6)fail('ARGS_MODEL_OUT_OPTIONAL_GENRE');
  const opt=Object.create(null),keys=new Set(['--model','--out','--genre']);
- for(let i=0;i<args.length;i+=2){
-  const k=args[i],v=args[i+1];
+ for(let i=0;i<pairs.length;i+=2){
+  const k=pairs[i],v=pairs[i+1];
   if(!keys.has(k)||Object.hasOwn(opt,k)||typeof v!=='string'||!v||
    v.startsWith('--'))fail('ARGUMENTS');
   opt[k]=v;
@@ -36,7 +41,8 @@ export function parseV3OneArgs(args){
    !FIVE_INDEPENDENT_BRIEFS.some(x=>x.genre===opt['--genre'])))
   fail('MODEL_OUTPUT_OR_GENRE');
  return {model:opt['--model'],outDir:opt['--out'],
-  genre:opt['--genre']??'housing'};
+  genre:opt['--genre']??'housing',
+  ...(v4Count===1?{geometryEnvelopeV4:true}:{})};
 }
 export async function runV3OneGenreStudy(options,{
  runOne=runV4DLocalAuthor,replay=replayPrivateV4D,fetcher=fetch,
@@ -45,6 +51,9 @@ export async function runV3OneGenreStudy(options,{
  if(!options||!MODEL.test(options.model??'')||
   typeof options.outDir!=='string'||!Number.isSafeInteger(timeoutMs)||
   timeoutMs<1000||timeoutMs>300000)fail('OPTIONS');
+ if(options.geometryEnvelopeV4!==undefined&&
+  typeof options.geometryEnvelopeV4!=='boolean')fail('GEOMETRY_V4_BOOLEAN_ONLY');
+ const useV4=options.geometryEnvelopeV4===true;
  const brief=FIVE_INDEPENDENT_BRIEFS.find(x=>x.genre===options.genre);
  if(!brief)fail('UNKNOWN_GENRE');
  const out=path.resolve(options.outDir),parent=path.dirname(out);
@@ -57,7 +66,8 @@ export async function runV3OneGenreStudy(options,{
   process.env.MAB_V4D_TEST_DOUBLE_MODE==='1';
  const report=await runOne({
   model:options.model,outDir:out,prompt:brief.prompt,authorArcade:true,
-  precisionCivicContract:true,structuredCivicContract:true
+  precisionCivicContract:true,structuredCivicContract:true,
+  geometryEnvelopeV4:useV4
  },{fetcher,timeoutMs});
  const receipt=buildV4DShareableReceipt(report);
  if(injected&&receipt.explicitlyInjectedTestResponse!==true)
@@ -74,9 +84,11 @@ export async function runV3OneGenreStudy(options,{
    replayStatus='HOLD_OFFLINE_REPLAY_SAFE_STOP';
   }
  }
+ const handoffName=useV4?'V4J_V4_ONE_SHAREABLE.json':'V4J_V3_ONE_SHAREABLE.json';
  const safe={
-  schema:'minecraftaibuilder-v4j-v3-one-genre-safe-handoff-v1',
-  genre:brief.genre,promptProtocol:V4J_STRUCTURED_PROTOCOL,
+  schema:useV4?'minecraftaibuilder-v4j-v4-one-genre-safe-handoff-v1':
+   'minecraftaibuilder-v4j-v3-one-genre-safe-handoff-v1',
+  genre:brief.genre,promptProtocol:useV4?V4J_ENVELOPE_PROTOCOL:V4J_STRUCTURED_PROTOCOL,
   reportedStatus:receipt.reportedStatus,
   sourceCandidateVerified:!injected&&receipt.sourceCandidateVerified,
   explicitlyInjectedTestResponse:receipt.explicitlyInjectedTestResponse,
@@ -91,7 +103,7 @@ export async function runV3OneGenreStudy(options,{
   constructionApproved:false,executionAllowed:false,
   gates:Array(9).fill('BLOCKED')
  };
- fs.writeFileSync(path.join(out,'V4J_V3_ONE_SHAREABLE.json'),
+ fs.writeFileSync(path.join(out,handoffName),
   JSON.stringify(safe,null,2)+'\n',{flag:'wx'});
  return safe;
 }
@@ -101,7 +113,8 @@ if(process.argv[1]===fileURLToPath(import.meta.url)){
   const result=await runV3OneGenreStudy(options);
   console.log(JSON.stringify({status:result.reportedStatus,
    replay:result.replayStatus,modelCalls:result.modelGenerationAttempts,
-   shareOnly:'V4J_V3_ONE_SHAREABLE.json',worldWrites:0}));
+   shareOnly:result.promptProtocol===V4J_ENVELOPE_PROTOCOL?
+    'V4J_V4_ONE_SHAREABLE.json':'V4J_V3_ONE_SHAREABLE.json',worldWrites:0}));
   if(!result.sourceCandidateVerified)process.exitCode=2;
  }catch{console.error('V4J_V3_ONE_SOURCE_HOLD');process.exitCode=2;}
 }

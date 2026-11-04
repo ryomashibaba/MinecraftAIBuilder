@@ -52,3 +52,47 @@ test('one V3 LOCAL test-double POST and zero extra replay POST are never a real 
   assert.deepEqual(calls,['GET','POST']);
  }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });
+
+test('geometry V4 CLI is explicit; prior V3 flags keep original contract',()=>{
+ const v4=parseV3OneArgs(['--model','qwen3:14b','--out','private',
+  '--geometry-v4']);
+ assert.equal(v4.genre,'housing');
+ assert.equal(v4.geometryEnvelopeV4,true);
+ assert.equal(parseV3OneArgs(['--model','qwen3:14b','--out','private'])
+  .geometryEnvelopeV4,undefined);
+ assert.throws(()=>parseV3OneArgs(['--model','qwen3:14b','--out','private',
+  '--geometry-v4','--geometry-v4']),/DUPLICATE_GEOMETRY_V4/);
+ assert.throws(()=>parseV3OneArgs(['--model','qwen3:14b','--out','private',
+  '--geometry-v4','--out','another']),/ARGS_/);
+});
+test('one opt-in V4 fake schema call remains HOLD and exports distinct V4 shareable only',async()=>{
+ const d=fs.mkdtempSync(path.join(os.tmpdir(),'v4j-v4-one-'));
+ const out=path.join(d,'original'),methods=[];
+ const fetcher=async(_url,opts)=>{
+  methods.push(opts.method);
+  if(opts.method==='GET')return {ok:true,text:async()=>JSON.stringify({
+   models:[{name:'qwen3:14b'}]})};
+  if(opts.method==='POST')return {ok:true,text:async()=>JSON.stringify({
+   model:'qwen3:14b',choices:[{finish_reason:'stop',
+    message:{role:'assistant',content:'{"schema":"invalid"}'}}]})};
+  throw Error('UNEXPECTED_FAKE_CALL');
+ };
+ try{
+  const o=await runV3OneGenreStudy({
+   model:'qwen3:14b',outDir:out,genre:'housing',geometryEnvelopeV4:true
+  },{fetcher,timeoutMs:15000});
+  assert.deepEqual(methods,['GET','POST']);
+  assert.equal(o.promptProtocol,'V4J_SINGLE_RESPONSE_FEASIBLE_MASSING_V4');
+  assert.equal(o.schema,'minecraftaibuilder-v4j-v4-one-genre-safe-handoff-v1');
+  assert.equal(o.sourceCandidateVerified,false);
+  assert.equal(o.explicitlyInjectedTestResponse,true);
+  assert.equal(o.modelGenerationAttempts,1);
+  assert.equal(o.replayAdditionalModelCalls,0);
+  assert.equal(o.replayStatus,'HOLD_REPLAY_SOURCE_REJECTED');
+  assert.deepEqual(o.gates,Array(9).fill('BLOCKED'));
+  assert.equal(o.worldWrites,0);
+  assert.deepEqual(JSON.parse(fs.readFileSync(path.join(out,'V4J_V4_ONE_SHAREABLE.json'),'utf8')),o);
+  assert.equal(fs.existsSync(path.join(out,'V4J_V3_ONE_SHAREABLE.json')),false);
+  assert.equal(fs.existsSync(path.join(out+'-replay','REPLAY_SHAREABLE_STATUS.json')),true);
+ }finally{fs.rmSync(d,{recursive:true,force:true});}
+});
