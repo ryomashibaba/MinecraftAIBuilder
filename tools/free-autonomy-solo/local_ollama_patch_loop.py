@@ -20,7 +20,9 @@ import time
 from docker_sandbox import DockerPolicy, SandboxHold
 from local_ollama_real_probe import get_json
 from solo_agent import (Hold, check_paths, changed_files, git, run_in_docker,
-                        single_agent_lock, snapshot_candidate, verify_repo, write_atomic)
+                        single_agent_lock, snapshot_candidate, verify_repo, write_atomic,
+                        require_existing_remote_research_branch,
+                        push_verified_research_commit)
 
 BASE = "http://127.0.0.1:11434"
 PATCH_SCHEMA = {
@@ -163,19 +165,9 @@ def apply_exact_patch(target: Path, proposal: dict, original: str) -> str:
     return hashlib.sha256(modified.encode("utf-8")).hexdigest()
 
 
-def ensure_remote_research_branch(cfg: dict, workspace: Path) -> None:
-    """Prevent push from quietly creating a new, unapproved remote branch."""
-    verify_repo(cfg)
-    ref = "refs/heads/" + cfg["branch"]
-    try:
-        r = subprocess.run(["git", "ls-remote", "--heads", "origin", ref],
-                           cwd=workspace, capture_output=True, text=True, timeout=20,
-                           env={**os.environ, "GIT_TERMINAL_PROMPT": "0",
-                                "GCM_INTERACTIVE": "Never"})
-    except (OSError, subprocess.TimeoutExpired) as ex:
-        raise Hold("REMOTE_BRANCH_VERIFICATION_UNAVAILABLE") from ex
-    if r.returncode != 0 or not r.stdout.strip().endswith("\t" + ref):
-        raise Hold("REMOTE_APPROVED_RESEARCH_BRANCH_NOT_FOUND")
+def ensure_remote_research_branch(cfg: dict, workspace: Path) -> str:
+    """Shared exact-ref existence gate. Does NOT itself permit a push."""
+    return require_existing_remote_research_branch(cfg, workspace)
 
 
 def execute(cfg: dict, *, push: bool = False) -> dict:
@@ -211,9 +203,14 @@ def execute(cfg: dict, *, push: bool = False) -> dict:
         if push:
             for entry in state["commits"]:
                 if not entry["pushed"]:
-                    verify_repo(cfg)
-                    ensure_remote_research_branch(cfg, workspace)
-                    git(workspace, "push", "origin", "HEAD:refs/heads/" + cfg["branch"])
+                    try:
+                        push_verified_research_commit(
+                            cfg, workspace, state["last_head"])
+                    except Hold as exc:
+                        state["status"] = "HOLD"
+                        state["hold_reason"] = "UNPUSHED_RESEARCH_COMMIT: " + str(exc)
+                        write_atomic(state_path, state)
+                        raise
                     entry["pushed"] = True
                     write_atomic(state_path, state)
         while state["next_task"] < len(cfg["tasks"]):
@@ -287,9 +284,8 @@ def execute(cfg: dict, *, push: bool = False) -> dict:
                         "local_ollama_response_observed": True})
                     write_atomic(state_path, state)
                     if push:
-                        verify_repo(cfg)
-                        ensure_remote_research_branch(cfg, workspace)
-                        git(workspace, "push", "origin", "HEAD:refs/heads/" + cfg["branch"])
+                        push_verified_research_commit(
+                            cfg, workspace, state["last_head"])
                         state["commits"][-1]["pushed"] = True
                         write_atomic(state_path, state)
                     success = True
@@ -315,7 +311,16 @@ def execute(cfg: dict, *, push: bool = False) -> dict:
                         write_atomic(state_path, state)
                         continue
                     state["status"] = "HOLD"
-                    state["hold_reason"] = type(exc).__name__ + ": " + str(exc)[:150]
+                    if not state.get("hold_reason", "").startswith(
+                            "UNPUSHED_RESEARCH_COMMIT: "):
+                        if isinstance(exc, Hold) and state.get("commits") and (
+                                state["commits"][-1].get("sha") == state["last_head"] and
+                                state["next_task"] == state["commits"][-1]["task"] and
+                                not state["commits"][-1].get("pushed")):
+                            state["hold_reason"] = (
+                                "UNPUSHED_RESEARCH_COMMIT: " + str(exc)[:120])
+                        else:
+                            state["hold_reason"] = type(exc).__name__ + ": " + str(exc)[:150]
                     write_atomic(state_path, state)
                     raise
             if not success:
