@@ -71,7 +71,7 @@ class WindowsRealSourceLauncherPins(unittest.TestCase):
         cmd = (ROOT / "RUN_REAL_MAB_V4H_14B_ARCHITECTURE.cmd").read_text(
             encoding="utf-8")
         downloads = re.findall(
-            r"@\\{ Name='([^']+)'; Blob='([a-f0-9]{40})' \\}", launch)
+            r"@\{ Name='([^']+)'; Blob='([a-f0-9]{40})' \}", launch)
         expected = {
             "real_mab_original_architecture_batch.py",
             "draft_real_project_local14b.py",
@@ -83,9 +83,9 @@ class WindowsRealSourceLauncherPins(unittest.TestCase):
         for name, expected_blob in downloads:
             with self.subTest(name=name):
                 self.assertEqual(expected_blob, git_blob_sha(ROOT / name))
-        self.assertRegex(launch, r"\\$rev = '[a-f0-9]{40}'")
+        self.assertRegex(launch, r"\$rev = '[a-f0-9]{40}'")
         self.assertRegex(cmd, r"/[a-f0-9]{40}/tools/free-autonomy-solo/"
-                         r"RUN_REAL_MAB_V4H_14B_ARCHITECTURE\\.ps1")
+                         r"RUN_REAL_MAB_V4H_14B_ARCHITECTURE\.ps1")
         self.assertIn(git_blob_sha(ROOT / "RUN_REAL_MAB_V4H_14B_ARCHITECTURE.ps1"),
                       cmd)
         self.assertIn("--ci-self-test", cmd)
