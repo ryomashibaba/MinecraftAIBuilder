@@ -54,7 +54,7 @@ REVIEWED_EXACT = (
 )
 BASE_WITNESS = " const w=upper.sourceWitness;"
 QWEN_BROKEN_WITNESS = (
-    " const w=upper.sourceWitness; "
+    "const w=upper.sourceWitness; "
     "if(!w.physical2WideStairTreads||w.physical2WideStairTreads<1||"
     "w.physical2WideStairTreads>5) fail('INVALID_STAIR_TREAD_COUNT');"
 )
