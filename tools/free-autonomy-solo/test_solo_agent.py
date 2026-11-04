@@ -327,6 +327,53 @@ with single_agent_lock():
                 with self.assertRaisesRegex(Hold, 'FALLBACK_MODELS_MUST_BE_EXPLICIT'):
                     validate(dict(self.cfg, fallback_models=candidate))
 
+    def test_dirty_resume_rejects_before_any_model_call(self):
+        # Simulate a terminated model that left an unreviewed worktree edit
+        # without changing the last supervisor-verified commit.
+        with patch.dict(os.environ, self.env):
+            first = execute(dict(self.cfg), push=False, sandbox_attested=True)
+        self.assertEqual(first['status'], 'TASK_QUEUE_COMPLETED_SOURCE_ONLY')
+        previous_sha = first['last_head']
+        (self.repo / 'source' / 'interrupted.tmp').write_text('unverified candidate')
+        with patch('solo_agent.run_in_docker',
+                   side_effect=AssertionError('resume must not execute a model or QA')):
+            with patch.dict(os.environ, self.env):
+                with self.assertRaisesRegex(
+                        Hold, 'UNVERIFIED_WORKTREE_ON_RESUME_REQUIRES_ISOLATED_REVIEW'):
+                    execute(dict(self.cfg), push=False, sandbox_attested=True)
+        state = json.loads((self.root / 'state' / 'state.json').read_text())
+        self.assertEqual(state['status'], 'HOLD')
+        self.assertEqual(state['hold_reason'],
+                         'UNVERIFIED_WORKTREE_ON_RESUME_REQUIRES_ISOLATED_REVIEW')
+        self.assertEqual(state['unverified_paths_count'], 1)
+        self.assertEqual(state['last_head'], previous_sha)
+        self.assertEqual(len(state['commits']), 1)
+        self.assertTrue((self.repo / 'source' / 'interrupted.tmp').exists())
+        # Cleaning this dedicated clone AFTER review allows ordinary resume.
+        (self.repo / 'source' / 'interrupted.tmp').unlink()
+        with patch.dict(os.environ, self.env):
+            resumed = execute(dict(self.cfg), push=False, sandbox_attested=True)
+        self.assertEqual(resumed['status'], 'TASK_QUEUE_COMPLETED_SOURCE_ONLY')
+        self.assertEqual(len(resumed['commits']), 1)
+
+    def test_dirty_resume_rejects_before_pending_research_push(self):
+        with patch.dict(os.environ, self.env):
+            first = execute(dict(self.cfg), push=False, sandbox_attested=True)
+        self.assertEqual(len(first['commits']), 1)
+        self.assertFalse(first['commits'][0]['pushed'])
+        (self.repo / 'source' / 'unverified-leftover.txt').write_text('not QA verified')
+        with patch('solo_agent.require_existing_remote_research_branch',
+                   side_effect=AssertionError('remote must not be contacted')):
+            with patch.dict(os.environ, self.env):
+                with self.assertRaisesRegex(Hold, 'UNVERIFIED_WORKTREE_ON_RESUME'):
+                    execute(dict(self.cfg), push=True, sandbox_attested=True)
+        state = json.loads((self.root / 'state' / 'state.json').read_text())
+        self.assertEqual(state['status'], 'HOLD')
+        self.assertFalse(state['commits'][0]['pushed'])
+        self.assertEqual(state['last_head'], first['last_head'])
+        self.assertTrue((self.repo / 'source' / 'unverified-leftover.txt').exists())
+
+
 
 if __name__ == '__main__':
     unittest.main()
