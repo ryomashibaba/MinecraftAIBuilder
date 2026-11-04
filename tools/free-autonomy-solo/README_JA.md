@@ -275,3 +275,12 @@
 **実測の境界**：この修正に付随するオフライン回帰では、実Gitと模擬Ollama・模擬QAを用いて161件PASSを確認。真正Qwen3:14B連続推論、ユーザーWindows上のDockerと長時間動作、MinecraftのART/Education実機、Browser Ink TPSの正式180秒4v4は**未検証**。この文書を含む最新コミットの専用CI結果は必ず該当HEADで確認する。
 
 **次に必要な証拠**：本人PCでDocker隔離が利用できるときは、既存の1回起動経路で同一プロジェクトの複数の意味あるソース修正を実Qwenに実行させ、SOURCE QA→コミット→研究branchへの明示承認済み保存→再開まで通し、モデルとQAの失敗・時間・成果の質を記録する。Docker未導入なら安全なPRIVATE下書き経路を維持し、ユーザー操作を繰り返し要求しない。
+
+
+## 2026-11-05：真正Qwen4BのSOURCE改修成功と「一発独自建築」失敗を分離して記録
+
+この節は過去のFake/Mock試験やレビュー済み修正案と**混同しない**。12月対策の最上位目的はChatGPTへの依存を減らした実開発。MinecraftAIBuilder / Browser Ink TPSは同格の最重要2件だが、ローカルモデルの同時担当は1件。今回の公開CIはMinecraftAIBuilderだけを担当し、ユーザーWindows・本番・main・教育ワールドを操作しない。
+
+- **実ソースの2工程限定成功**：[Actions #41922563549](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41922563549)／研究HEAD `d67a626fd0cc64bcb6c5d25ed1533199a243dfd5`。公開CI上の真正Ollama `qwen3:4b` が監査済みV4H実ソース（固定 `19ef7fd0f3d08ab6c8cd350b44df9ab0eb69a963`）に対し2件のPRIVATE修正案を生成。隔離Dockerで各1コマンドのSOURCE QAが合格し、使い捨てGit cloneにローカルコミット2件。GitHubへの生成差分push 0。**既存テストに通ることと、変更の機能的価値・ART・Minecraft実機の認定は別**。生成差分は公開Artifactに保存せず、当該一時ランナーで終了。
+- **同じ4Bでの一発オリジナル建築は不合格**：[Actions #41925385789](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41925385789)／研究HEAD `fe8e06f7d98f530bf29bac313399cf9a025292f9`。既存 `scripts/r125-v4d-local-architect.mjs` と `--authored-mezzanine` 相当の真V4H著作経路を用い、独自の宇宙科学公共施設を**1回のモデルPOST**で全体著作させた。モデルは `finish_reason=stop`、回答原文のPRIVATE捕捉成功。しかし `R125_V4E_RANKED_COVERED_REQUIRES_AUTHORED_FOUR_SIDE_RANKING_0` でSOURCE HOLD。最初の屋内空間の `windowPriority` は、北・東・南・西を重複なく四つ並べた作者順位でなければならない。仕様は既存 `r125-v4e-ranked-exterior-ir.mjs` の固定制約にも明記済みであり、**コンパイラの欠陥が確認されたわけではなく、モデル回答が条件を満たさなかった**。B143の建築SOURCE成功0、ART成功0、Education世界書込0。自動で窓順位を補修・再生成せずHOLD。
+- 上記2試験は用途と難易度が異なり、1.7B対4Bの一般的な優劣や、ユーザーWindowsのQwen3:14Bの性能は判定できない。GitHub上の匿名モデル名も暗号学的に独立検証していない。**追加の小型モデル再試行で合格を演出しない**。次はユーザーPCの既存14B等が利用できる段階で、固定の一発作者契約を守って真の設計を実測する。条件未達なら理由と元回答はPRIVATE保持し、原本を変更しない。
