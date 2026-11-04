@@ -146,7 +146,7 @@ def run_probe() -> dict:
                            "pids": 64, "qa_image": "node:22-bookworm-slim"},
                 "model": MODEL,
                 "allowed_prefixes": ["source"],
-                "max_cycles": 4, "per_task_attempts": 2,
+                "max_cycles": 5, "per_task_attempts": 3,
                 "max_minutes": 9, "model_timeout_seconds": 155,
                 "qa_timeout_seconds": 65,
                 "checks": [["node", "--test", "source/basic.test.mjs"]],
@@ -155,7 +155,7 @@ def run_probe() -> dict:
                      "request": "Fix this JS clamp function to clamp to both inclusive bounds while keeping the signature. Don't implement inverted-bound errors yet.",
                      "checks": [["node", "--test", "source/basic.test.mjs"]]},
                     {"path": "source/calc.mjs",
-                     "request": "Retain the existing correct clamping behavior and additionally throw RangeError for low > high.",
+                     "request": "Preserve the existing return expression and normal clamping behavior exactly. Add one early guard at the start of the function: if (low > high), throw new RangeError. Only change the source code needed for this error guard.",
                      "checks": [["node", "--test", "source/basic.test.mjs",
                                   "source/bounds.test.mjs"]]}
                 ]
@@ -171,11 +171,20 @@ def run_probe() -> dict:
             if state_path.is_file():
                 state = json.loads(state_path.read_text(encoding="utf-8"))
                 report["local_git_commits_by_agent"] = len(state.get("commits", []))
+                report["local_commit_shas"] = [c.get("sha") for c in state.get("commits", [])]
+                report["candidate_sha256_by_commit"] = [
+                    c.get("source_sha256") for c in state.get("commits", [])]
                 report["agent_cycles"] = state.get("cycles", 0)
                 report["final_source_status"] = state.get("status")
                 report["qa_checks_certified"] = len(state.get("commits", []))
                 report["local_model_calls_recorded"] = sum(
                     1 for p in (base / "private-state").glob("model_*.private.json"))
+                logs = sorted((base / "private-state").glob("qa_*.private.log"))
+                if state.get("status") not in ("SOURCE_ONLY_TASK_QUEUE_DONE",):
+                    if logs:
+                        # Public synthetic source fixture only; never user project data.
+                        report["last_private_fixture_qa_tail"] = logs[-1].read_text(
+                            encoding="utf-8", errors="replace")[-1800:]
             report["real_model_qa_e2e_pass"] = (
                 report["local_git_commits_by_agent"] == 2
                 and report["status"] == "SOURCE_ONLY_TASK_QUEUE_DONE")
