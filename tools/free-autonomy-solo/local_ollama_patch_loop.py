@@ -284,8 +284,14 @@ def execute(cfg: dict, *, push: bool = False) -> dict:
                         "local_ollama_response_observed": True})
                     write_atomic(state_path, state)
                     if push:
-                        push_verified_research_commit(
-                            cfg, workspace, state["last_head"])
+                        try:
+                            push_verified_research_commit(
+                                cfg, workspace, state["last_head"])
+                        except Hold as exc:
+                            state["status"] = "HOLD"
+                            state["hold_reason"] = "UNPUSHED_RESEARCH_COMMIT: " + str(exc)
+                            write_atomic(state_path, state)
+                            raise
                         state["commits"][-1]["pushed"] = True
                         write_atomic(state_path, state)
                     success = True
@@ -313,14 +319,7 @@ def execute(cfg: dict, *, push: bool = False) -> dict:
                     state["status"] = "HOLD"
                     if not state.get("hold_reason", "").startswith(
                             "UNPUSHED_RESEARCH_COMMIT: "):
-                        if isinstance(exc, Hold) and state.get("commits") and (
-                                state["commits"][-1].get("sha") == state["last_head"] and
-                                state["next_task"] == state["commits"][-1]["task"] and
-                                not state["commits"][-1].get("pushed")):
-                            state["hold_reason"] = (
-                                "UNPUSHED_RESEARCH_COMMIT: " + str(exc)[:120])
-                        else:
-                            state["hold_reason"] = type(exc).__name__ + ": " + str(exc)[:150]
+                        state["hold_reason"] = type(exc).__name__ + ": " + str(exc)[:150]
                     write_atomic(state_path, state)
                     raise
             if not success:
