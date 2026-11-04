@@ -63,7 +63,7 @@ test('geometry V4 CLI is explicit; prior V3 flags keep original contract',()=>{
  assert.throws(()=>parseV3OneArgs(['--model','qwen3:14b','--out','private',
   '--geometry-v4','--geometry-v4']),/DUPLICATE_GEOMETRY_V4/);
  assert.throws(()=>parseV3OneArgs(['--model','qwen3:14b','--out','private',
-  '--geometry-v4','--out','another']),/ARGS_/);
+  '--geometry-v4','--out','another']),/ARGUMENTS/);
 });
 test('one opt-in V4 fake schema call remains HOLD and exports distinct V4 shareable only',async()=>{
  const d=fs.mkdtempSync(path.join(os.tmpdir(),'v4j-v4-one-'));
