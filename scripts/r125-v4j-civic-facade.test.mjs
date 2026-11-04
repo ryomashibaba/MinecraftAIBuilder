@@ -108,3 +108,146 @@ test('V4J source-only true five-view evidence exported to new isolated art-hold 
    /R125_V4J_FACADE_STUDY_FRESH_OUTSIDE_REPO_ONLY/);
  }finally{fs.rmSync(home,{recursive:true,force:true});}
 });
+
+
+test('V4J ONE original complete author JSON retains provenance and exact true B143 civic SOURCE',async()=>{
+ const {CIVIC_ARCADE_SCHEMA,CIVIC_ARCADE_SYSTEM_PROMPT,compileCivicArcadeAuthorIntent}=
+  await import('../source/ai/r125-v4j-civic-author-ir.mjs');
+ const sample=syntheticFiveV4JArcadeAuthors()[0];
+ const input={...structuredClone(sample.wholeBuilding),
+  schema:CIVIC_ARCADE_SCHEMA,arcade:structuredClone(sample.arcade)};
+ const frozen=JSON.stringify(input),compiled=compileCivicArcadeAuthorIntent(input);
+ assert.equal(JSON.stringify(input),frozen);
+ assert.equal(compiled.authorContract,CIVIC_ARCADE_SCHEMA);
+ assert.equal(compiled.b143.geometrySha256,compiled.geometrySha256);
+ assert.equal(compiled.b143.sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(compiled.authoredArcadeSourceWitness.allFunctionsReachable,true);
+ assert(compiled.b143.program.some(p=>p.level===1));
+ assert(compiled.b143.program.some(p=>p.zones.some(z=>z.id==='author-public-forecourt-arcade')));
+ assert.deepEqual(compiled.gates,Array(9).fill('BLOCKED'));
+ assert.equal(compiled.worldWrites,0);
+ assert.equal(compiled.humanArt,'NOT_REVIEWED');
+ assert(CIVIC_ARCADE_SYSTEM_PROMPT.includes(CIVIC_ARCADE_SCHEMA));
+ const broken=structuredClone(input);
+ broken.arcade.roofline=[8,8,8];
+ assert.throws(()=>compileCivicArcadeAuthorIntent(broken),
+  /R125_V4J_PUBLIC_ARCADE_AUTHOR_3_BAY_FUNCTIONAL_FACADE_CONTRACT/);
+ const smuggled=structuredClone(input);smuggled.worldWrites=1;
+ assert.throws(()=>compileCivicArcadeAuthorIntent(smuggled),
+  /R125_V4J_CIVIC_AUTHOR_ONE_ORIGINAL_JSON/);
+});
+
+test('V4J opt-in LOCAL one response: one fake POST, exact PRIVATE original, independent 3D, zero world writes, safe receipt and zero-POST replay',async()=>{
+ const {CIVIC_ARCADE_SCHEMA,compileCivicArcadeAuthorIntent}=
+  await import('../source/ai/r125-v4j-civic-author-ir.mjs');
+ const {parseV4DLocalAuthorArgs,runV4DLocalAuthor}=
+  await import('./r125-v4d-local-architect.mjs');
+ const {replayPrivateV4D}=await import('./r125-v4d-replay-private.mjs');
+ const {diagnosePrivateV4DAuthor}=
+  await import('./r125-v4d-author-source-diagnostics.mjs');
+ const sample=syntheticFiveV4JArcadeAuthors()[1];
+ const original={...structuredClone(sample.wholeBuilding),
+  schema:CIVIC_ARCADE_SCHEMA,arcade:structuredClone(sample.arcade)};
+ const raw=JSON.stringify(original),truth=compileCivicArcadeAuthorIntent(original);
+ const diag=diagnosePrivateV4DAuthor(original,CIVIC_ARCADE_SCHEMA);
+ assert.equal(diag.issues.length,0,JSON.stringify(diag.issues));
+ const flags=parseV4DLocalAuthorArgs(['--model','qwen3:14b',
+  '--out','civic-private-output','--authored-civic-arcade']);
+ assert.equal(flags.authorArcade,true);
+ assert.throws(()=>parseV4DLocalAuthorArgs(['--model','qwen3:14b',
+  '--out','civic-private-output','--authored-civic-arcade','--authored-mezzanine']),
+  /ONLY_ONE_AUTHOR_MODE/);
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'mab-v4j-one-model-'));
+ const dest=path.join(root,'model-original');
+ const calls=[];
+ const fetcher=async(url,init)=>{
+  calls.push({url,method:init?.method,body:init?.body});
+  assert(url.startsWith('http://127.0.0.1:'));
+  if(init?.method==='GET')return {ok:true,status:200,
+   text:async()=>JSON.stringify({models:[{name:'qwen3:14b'}]})};
+  if(init?.method==='POST')return {ok:true,status:200,
+   text:async()=>JSON.stringify({model:'qwen3:14b',choices:[
+    {finish_reason:'stop',message:{role:'assistant',content:raw}}]})};
+  throw Error('UNEXPECTED_NETWORK');
+ };
+ try{
+  const report=await runV4DLocalAuthor({model:'qwen3:14b',outDir:dest,
+   authorArcade:true,
+   prompt:'Invent a unique civic shop with a two level public interior and accessible forecourt.'},
+   {fetcher,timeoutMs:15000});
+  assert.equal(report.status,'HOLD_TEST_DOUBLE_NOT_REAL_MODEL',report.reason);
+  assert.equal(report.authorContract,CIVIC_ARCADE_SCHEMA);
+  assert.equal(report.geometrySha256,truth.b143.geometrySha256);
+  assert.equal(report.sourceRoutesStatus,'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert.equal(report.modelCalls,1);
+  assert.equal(calls.filter(c=>c.method==='POST').length,1);
+  assert.equal(calls.filter(c=>c.method==='GET').length,1);
+  const request=JSON.parse(calls.find(c=>c.method==='POST').body);
+  assert(request.messages[0].content.includes(CIVIC_ARCADE_SCHEMA));
+  assert.equal(request.max_tokens,4096);
+  assert.equal(fs.readFileSync(path.join(dest,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8'),raw);
+  for(const name of ['TRUE_B143_SOURCE.json','index.html',
+   'AUTHORED_PUBLIC_ARCADE_SOURCE.json',
+   'AUTHORED_FUNCTIONAL_UPPER_GALLERY_SOURCE.json',
+   'BASELINE_TWO_LEVEL_GALLERY_3D_PRIVATE.html',
+   'FINAL_PUBLIC_ARCADE_FIVE_VIEWS_PRIVATE.svg',
+   'PRIVATE_B143_CIVIC_ARCADE_ART_HOLD_COMPARISON.json'])
+   assert(fs.statSync(path.join(dest,name)).size>40,name);
+  const comparison=JSON.parse(fs.readFileSync(path.join(dest,
+   'PRIVATE_B143_CIVIC_ARCADE_ART_HOLD_COMPARISON.json'),'utf8'));
+  assert.equal(comparison.finalGeometrySha256,truth.b143.geometrySha256);
+  assert.equal(comparison.humanArchitecturalArt,'NOT_REVIEWED');
+  assert.equal(comparison.extraModelRequests,0);
+  const summary=fs.readFileSync(path.join(dest,'REVIEW_SUMMARY_SHAREABLE.json'),'utf8');
+  assert.equal(JSON.parse(summary).authorContract,CIVIC_ARCADE_SCHEMA);
+  assert(!summary.includes(original.title));
+  assert(!summary.includes(original.brief));
+  assert(!summary.includes(root));
+  const replay=replayPrivateV4D(dest,path.join(root,'replay'));
+  assert.equal(replay.status,'HOLD_TEST_DOUBLE_REPLAY_ONLY');
+  assert.equal(replay.geometrySHA256Replayed,truth.b143.geometrySha256);
+  assert.equal(replay.additionalModelCalls,0);
+  assert.equal(calls.filter(c=>c.method==='POST').length,1);
+  assert.equal(report.worldWrites,0);
+  assert.deepEqual(report.gates,Array(9).fill('BLOCKED'));
+ }finally{fs.rmSync(root,{recursive:true,force:true});}
+});
+
+test('V4J invalid original stays PRIVATE HOLD with one fake model POST and no source promotion',async()=>{
+ const {CIVIC_ARCADE_SCHEMA}=
+  await import('../source/ai/r125-v4j-civic-author-ir.mjs');
+ const {runV4DLocalAuthor}=await import('./r125-v4d-local-architect.mjs');
+ const {diagnosePrivateV4DAuthor}=
+  await import('./r125-v4d-author-source-diagnostics.mjs');
+ const sample=syntheticFiveV4JArcadeAuthors()[2];
+ const broken={...structuredClone(sample.wholeBuilding),
+  schema:CIVIC_ARCADE_SCHEMA,arcade:structuredClone(sample.arcade)};
+ broken.arcade.roofline=[8,8,8];
+ const issue=diagnosePrivateV4DAuthor(broken,CIVIC_ARCADE_SCHEMA);
+ assert(issue.issues.some(x=>x.code==='CIVIC_ARCADE_THREE_BAY_ROOFLINE_INVALID'));
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'mab-v4j-hold-'));
+ let posts=0;
+ const fetcher=async(url,init)=>{
+  if(init.method==='GET')return {ok:true,status:200,
+   text:async()=>JSON.stringify({models:[{name:'qwen3:14b'}]})};
+  posts++;
+  return {ok:true,status:200,text:async()=>JSON.stringify({
+   model:'qwen3:14b',choices:[{finish_reason:'stop',
+    message:{content:JSON.stringify(broken)}}]})};
+ };
+ try{
+  const dir=path.join(root,'candidate'),result=await runV4DLocalAuthor({
+   model:'qwen3:14b',outDir:dir,authorArcade:true,
+   prompt:'Create an entirely new connected public architecture.'},
+   {fetcher,timeoutMs:15000});
+  assert.equal(posts,1);
+  assert.equal(result.modelCalls,1);
+  assert.equal(result.status,'HOLD_MODEL_OR_SOURCE_INVALID_NO_REPAIR');
+  assert.equal(result.worldWrites,0);
+  assert(!fs.existsSync(path.join(dir,'TRUE_B143_SOURCE.json')));
+  assert(!fs.existsSync(path.join(dir,'index.html')));
+  const status=JSON.parse(fs.readFileSync(path.join(dir,'REVIEW_SUMMARY_SHAREABLE.json'),'utf8'));
+  assert.equal(status.failureCategory,'PUBLIC_CIVIC_ARCADE_AUTHOR_OR_SOURCE_INVALID');
+  assert.equal(status.sourceCandidateVerified,false);
+ }finally{fs.rmSync(root,{recursive:true,force:true});}
+});
