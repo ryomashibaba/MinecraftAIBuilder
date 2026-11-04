@@ -15,6 +15,9 @@ on:
       - 'scripts/r125-v4h-mezzanine.test.mjs'
       - 'scripts/r125-v4i-architectural-art-audit.mjs'
       - 'scripts/r125-v4i-architectural-art-audit.test.mjs'
+      - 'scripts/r125-v4j-civic-arcade.mjs'
+      - 'scripts/r125-v4j-civic-facade-study.mjs'
+      - 'scripts/r125-v4j-civic-facade.test.mjs'
       - 'scripts/r125-v4e-source-art-review.mjs'
       - 'scripts/r125-v4e-cross-genre-source-study.mjs'
       - 'scripts/r125-v4d-compact-model-fixture.mjs'
@@ -145,6 +148,35 @@ jobs:
         with:
           name: V4I-SYNTHETIC-FIVE-GENRE-B143-APPEARANCE-AUDIT-ART-HOLD
           path: ${{ runner.temp }}/v4i-b143-art-hold/
+          retention-days: 7
+
+
+  v4j-real-visible-functional-facade:
+    name: V4J true civic entry architecture source-only ART HOLD
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Prove author-owned real visible 3-bay PUBLIC architecture and strict old-source protection
+        run: |
+          node --check scripts/r125-v4j-civic-arcade.mjs
+          node --check scripts/r125-v4j-civic-facade-study.mjs
+          node --check scripts/r125-v4j-civic-facade.test.mjs
+          node --test scripts/r125-v4j-civic-facade.test.mjs
+      - name: Export actual B143 architecture before/after, all five genres and 2-wide functional public routes
+        run: |
+          node scripts/r125-v4j-civic-facade-study.mjs "$RUNNER_TEMP/v4j-authored-facade"
+          test -s "$RUNNER_TEMP/v4j-authored-facade/V4J_TRUE_FORECOURT_SOURCE_ART_HOLD.json"
+          test -s "$RUNNER_TEMP/v4j-authored-facade/V4J_TRUE_PUBLIC_FORECOURT_3D.html"
+          test "$(find "$RUNNER_TEMP/v4j-authored-facade" -name 'V4J_*_AFTER_FIVE_VIEWS.svg' | wc -l)" -eq 5
+          test "$(find "$RUNNER_TEMP/v4j-authored-facade" -name 'V4J_*_VISIBLE_FACADE_DELTA.svg' | wc -l)" -eq 5
+      - uses: actions/upload-artifact@v4
+        with:
+          name: V4J-FIVE-SYNTHETIC-TRUE-FUNCTIONAL-PUBLIC-FACADE-ART-HOLD
+          path: ${{ runner.temp }}/v4j-authored-facade/
           retention-days: 7
 
   windows-offline-launch-contract:
