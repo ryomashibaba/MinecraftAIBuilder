@@ -4,6 +4,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import shutil
 from pathlib import Path
 import subprocess
 import tempfile
@@ -11,7 +12,7 @@ import unittest
 from unittest.mock import patch
 
 from prepare_pinned_real_project import load_manifest, source_blob_sha, verify_private_clone
-from promote_private_real_drafts_docker import preflight_private_drafts, promote, qa_commands, _read_receipt, Hold
+from promote_private_real_drafts_docker import (preflight_private_drafts, syntax_check_existing_mab_private_drafts, promote, qa_commands, _read_receipt, Hold)
 
 SOURCES = {
     "minecraftaibuilder": (
@@ -233,6 +234,72 @@ class PinnedRealSourcePromotionTests(unittest.TestCase):
         self.assertEqual(result["reason"], "PRIVATE_DRAFT_RECEIPT_NOT_ADMISSIBLE")
         self.assertNotIn("draft_1.private", json.dumps(result))
         run.assert_not_called()
+
+
+    @unittest.skipUnless(shutil.which("node"), "Requires Node syntax parser only")
+    def test_existing_private_mab_drafts_parse_without_running_code(self):
+        root, work, manifest, lane, original = self.fixture()
+        head = g(work, "rev-parse", "HEAD")
+        marker = self.temp / "NODE_MUST_NOT_EXECUTE_THIS_FILE"
+        file = root / "draft_2.private.txt"
+        candidate = file.read_text() + (
+            "import {writeFileSync} from 'node:fs'; "
+            + "writeFileSync(" + json.dumps(str(marker)) + ", 'FAIL');\n")
+        file.write_text(candidate, encoding="utf-8")
+        receipt = root / "SHAREABLE_DRAFT_RESULT.json"
+        obj = json.loads(receipt.read_text())
+        obj["stages"][1]["candidate_sha256"] = digest(candidate)
+        receipt.write_text(json.dumps(obj))
+        with patch("promote_private_real_drafts_docker.docker_run") as docker, \
+             patch("promote_private_real_drafts_docker.require_docker_qa_image") as docker_image:
+            result = syntax_check_existing_mab_private_drafts(
+                root, "minecraftaibuilder", "qwen3:14b",
+                manifest=manifest, use_lock=False)
+        self.assertEqual(result["status"], "PRIVATE_MAB_MODULE_SYNTAX_ONLY_PASS")
+        self.assertEqual([s["stage"] for s in result["stages"]], [1, 2])
+        self.assertTrue(result["baseline_module_syntax_passed"])
+        self.assertFalse(result["source_code_executed"])
+        self.assertFalse(result["native_qa_executed"])
+        self.assertFalse(marker.exists(), "Node syntax checker MUST NOT run code")
+        docker.assert_not_called()
+        docker_image.assert_not_called()
+        self.assertEqual(g(work, "rev-parse", "HEAD"), head)
+        self.assertEqual((work / lane["source_file"]).read_text(), original)
+        self.assertTrue((root / "SHAREABLE_MJS_SYNTAX_RESULT.json").is_file())
+        saved = json.loads((root / "SHAREABLE_MJS_SYNTAX_RESULT.json").read_text())
+        self.assertNotIn("writeFileSync", json.dumps(saved))
+
+    @unittest.skipUnless(shutil.which("node"), "Requires Node syntax parser only")
+    def test_existing_private_mab_drafts_reject_syntax_error(self):
+        root, work, manifest, lane, original = self.fixture()
+        invalid = (root / "draft_2.private.txt").read_text() + "export const BROKEN = ;\n"
+        (root / "draft_2.private.txt").write_text(invalid)
+        path = root / "SHAREABLE_DRAFT_RESULT.json"
+        data = json.loads(path.read_text())
+        data["stages"][1]["candidate_sha256"] = digest(invalid)
+        path.write_text(json.dumps(data))
+        with patch("promote_private_real_drafts_docker.docker_run") as docker:
+            result = syntax_check_existing_mab_private_drafts(
+                root, "minecraftaibuilder", "qwen3:14b",
+                manifest=manifest, use_lock=False)
+        self.assertEqual(result["status"], "HOLD")
+        self.assertEqual(result["reason"], "MJS_SYNTAX_REJECTED_STAGE_2")
+        self.assertEqual(len(result["stages"]), 1)
+        self.assertFalse(result["source_code_executed"])
+        docker.assert_not_called()
+        self.assertEqual((work / lane["source_file"]).read_text(), original)
+
+    def test_existing_private_mab_syntax_requires_installed_node(self):
+        root, _, manifest, _, _ = self.fixture()
+        with patch("promote_private_real_drafts_docker.shutil.which", return_value=None), \
+             patch("promote_private_real_drafts_docker.subprocess.run") as process:
+            result = syntax_check_existing_mab_private_drafts(
+                root, "minecraftaibuilder", "qwen3:14b",
+                manifest=manifest, use_lock=False)
+        self.assertEqual(result["status"], "HOLD")
+        self.assertEqual(result["reason"], "NODE_NOT_INSTALLED_NO_AUTO_INSTALL")
+        self.assertFalse(result["source_code_executed"])
+        process.assert_not_called()
 
     def test_no_docker_fails_closed_without_commit(self):
         root, work, manifest, lane, original = self.fixture()
