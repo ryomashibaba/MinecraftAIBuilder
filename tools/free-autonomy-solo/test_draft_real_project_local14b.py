@@ -246,7 +246,7 @@ class RealSourceDraftTests(unittest.TestCase):
                 "if(w.physical2WideStairTreads>5) fail('BAD_FIXED_LIMIT');"),
         }
         source = MAB_SOURCE.replace(
-            "  return raw;".replace("  ", " "),
+            " return raw;",
             " const w=upper.sourceWitness;\n return raw;")
         slots = exact_edit_slots("minecraftaibuilder", source)
         self.assertTrue(any("const w=upper.sourceWitness;" in x["exact"] for x in slots))
