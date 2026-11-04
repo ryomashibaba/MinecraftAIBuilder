@@ -136,16 +136,19 @@ def snapshot_candidate(workspace: Path, paths: list[str]) -> dict[str, str]:
 
 def quarantine_and_restore_unverified(
     cfg: dict, workspace: Path, state_dir: Path, paths: list[str],
-    expected_head: str,
+    expected_head: str, *, opt_in_key: str = "quarantine_unverified_on_resume",
 ) -> dict:
-    """Explicit opt-in recovery of an INTERRUPTED disposable research clone.
+    """Explicit opt-in recovery of an UNVERIFIED disposable research clone.
 
     Back up EVERY changed regular file before restoring only those exact paths.
     No git clean, silent discard, cross-project model switch, or public upload.
     Never use this on a source checkout that is not an intentionally disposable
     and separately authorized research clone.
     """
-    if cfg.get("quarantine_unverified_on_resume") is not True:
+    if opt_in_key not in ("quarantine_unverified_on_resume",
+                          "quarantine_unverified_on_agent_failure"):
+        raise Hold("RESUME_QUARANTINE_UNKNOWN_AUTHORIZATION")
+    if cfg.get(opt_in_key) is not True:
         raise Hold("RESUME_QUARANTINE_NOT_AUTHORIZED")
     if not paths or len(paths) > 20:
         raise Hold("RESUME_QUARANTINE_PATH_BUDGET")
@@ -348,8 +351,10 @@ def validate(cfg: dict) -> None:
         DockerPolicy.from_config(cfg)
     except SandboxHold as ex:
         raise Hold(str(ex)) from ex
-    if type(cfg.get("quarantine_unverified_on_resume", False)) is not bool:
-        raise Hold("RESUME_QUARANTINE_OPT_IN_MUST_BE_BOOLEAN")
+    for opt_in in ("quarantine_unverified_on_resume",
+                   "quarantine_unverified_on_agent_failure"):
+        if type(cfg.get(opt_in, False)) is not bool:
+            raise Hold("RESUME_QUARANTINE_OPT_IN_MUST_BE_BOOLEAN")
     for key, default, limit in [("max_cycles", 12, 10000), ("per_task_attempts", 3, 10), ("agent_timeout_seconds", 1800, 86400), ("check_timeout_seconds", 600, 3600), ("max_minutes", 720, 10080)]:
         value = cfg.setdefault(key, default)
         if type(value) is not int or not (1 <= value <= limit):
@@ -486,11 +491,29 @@ def execute(cfg: dict, *, push: bool, sandbox_attested: bool) -> dict:
                         verify_repo(cfg)
                         if git(p, "rev-parse", "HEAD") != state["last_head"]:
                             raise Hold("AGENT_FAILED_MUTATED_GIT_HISTORY")
-                        if changed_files(p):
-                            raise Hold("AGENT_FAILED_LEFT_UNVERIFIED_WORKTREE")
-                        feedback = f"AGENT_EXIT_{rc}: {tail}"
-                        state["outcomes"].append({"cycle": cycle, "status": "AGENT_FAILED",
-                                                  "exit": rc, "model": selected_model})
+                        failed_paths = changed_files(p)
+                        recovered_failure = False
+                        if failed_paths:
+                            if cfg.get("quarantine_unverified_on_agent_failure") is not True:
+                                raise Hold("AGENT_FAILED_LEFT_UNVERIFIED_WORKTREE")
+                            recovery = quarantine_and_restore_unverified(
+                                cfg, p, state_dir, failed_paths,
+                                state["last_head"],
+                                opt_in_key="quarantine_unverified_on_agent_failure")
+                            state.setdefault("failed_attempt_quarantines", []).append({
+                                **recovery, "cycle": cycle,
+                                "model_requested": selected_model})
+                            write_atomic(state_path, state)
+                            recovered_failure = True
+                        # Do not send the failed candidate's source or raw CLI
+                        # log to the next provider as fallback feedback.
+                        feedback = (f"AGENT_EXIT_{rc}: source privately quarantined"
+                                    if recovered_failure else f"AGENT_EXIT_{rc}: {tail}")
+                        state["outcomes"].append({
+                            "cycle": cycle,
+                            "status": ("AGENT_FAILED_QUARANTINED_FOR_RETRY"
+                                       if recovered_failure else "AGENT_FAILED"),
+                            "exit": rc, "model": selected_model})
                         if model_index < len(approved_models) - 1:
                             model_index += 1
                         elif "Model unavailable:" in tail:
