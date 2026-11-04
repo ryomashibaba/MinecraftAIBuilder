@@ -26,6 +26,8 @@ class ExactPublicSourceQAWorkflowTest(unittest.TestCase):
             run(branch="main"),
             run(event="workflow_dispatch"),
             run(path=".github/workflows/another.yml@refs/heads/" + BRANCH),
+            run(path=None),
+            run(ident=True),
         ]
         self.assertIsNone(choose_exact_run({"workflow_runs": mismatches}, SHA))
         selected = choose_exact_run({"workflow_runs": mismatches + [run()]}, SHA)
