@@ -171,3 +171,14 @@
 - [RUN_CHECK_EXISTING_PRIVATE_DRAFTS_ONCE.cmd](./RUN_CHECK_EXISTING_PRIVATE_DRAFTS_ONCE.cmd) は `minecraftaibuilder` / `qwen3:14b` を既定値にし、プライベート保存場所のうち最も新しい整合した成功receiptを**1つだけ**選ぶ。ダブルクリックで実行し、結果JSONをExplorerで選択表示する。下書き本文やPatchはチャットに送らず小さい結果JSONだけを添付する。
 - スクリプトは固定Git SHA/Blobで検証した公開Python検証器のみダウンロードし、本人のモデル応答やゲームソースは外部送信しない。候補が欠損・改変・別モデル・別プロジェクト・既存原本dirtyならHOLD、勝手に修復・削除しない。
 - これは独立QAへの**準備**であり、正式な独立テストはDockerを含む隔離環境を確認した後、別工程で実施する。CIの本検証は真正Git一時fixture＋偽Docker禁止の静的コード経路のみ。本人PCの最新候補そのもののQA合格は別途確認する。
+
+
+## 2026-11-04：真正Qwen3:14B・既存2段階PRIVATE修正案の静的PASS、次は実コードを実行しない構文検査
+
+本人が添付した `SHAREABLE_STATIC_PREFLIGHT.json` で `status=STATIC_PRIVATE_DRAFTS_ADMISSIBLE_FOR_ISOLATED_QA_ONLY` を確認。MAB固定コミット `fe1682e15ffa063f4dc415b06c4d76a54737a06e` に対し、stage 1・2ともモデルreceiptとSHA256一致、変更量有界、保護対象契約アンカー維持の3条件PASS。生成コード実行0・Docker0・本来のNode SOURCE QA0・Git commits0・GitHub push0・有料API0。**これは修正コードの良否、Nodeでの構文合格、作品ARTの合格ではない**。
+
+- 今回、既存 `promote_private_real_drafts_docker.py` に **`--mjs-syntax-only`** を追加。既存の静的署名・Git HEAD・差分境界の検査に合格した場合のみ、同じ PRIVATE 下書き2件と比較用元MAB `.mjs` を `node --input-type=module --check` の **標準入力**に渡し、構文の受理/拒否を確認する。Node.jsの `--check` はモジュールのコードを実行せず、依存モジュールのロードやゲームテストも行わない。
+- Node.jsが導入されていなければ `NODE_NOT_INSTALLED_NO_AUTO_INSTALL` でHOLD。インストール、Docker、自動モデル再推論、追加コスト、公開pushはしない。ユーザーPCがWindows 11であることだけではNodeの導入済みを仮定しない。
+- プライベートなソースやNode構文エラー原文は表示/送信しない。結果JSON `SHAREABLE_MJS_SYNTAX_RESULT.json` はステージごとのSHA256/構文PASS、モデル自己申告、コード非実行、HOLD理由のみ。元ソース・2件の修正案ともユーザーPCの私有作業領域内に留まり、原本Git履歴とファイルを変更しない。
+- 既存の [RUN_CHECK_EXISTING_PRIVATE_DRAFTS_ONCE.cmd](./RUN_CHECK_EXISTING_PRIVATE_DRAFTS_ONCE.cmd) は新版でMAB `qwen3:14b` の最新成功PRIVATE下書きを選び、この構文パーサへ進める（既存PRIVATE下書きを再生成しない）。Windows Explorerで小さなJSONを選択表示する。**構文PASSであっても独立機能QAではなく、正式なSOURCE QA/生成コードの実行/採用/長時間自律運転とは分離**。
+- 実装のGit回帰試験は、動作させるとファイルを作るはずの悪意を想定したJavaScript文を `node --check` に与え、ファイルが作られないことを確かめるほか、構文エラーが適切なHOLDになること、Node未導入でもHOLDになることを検証する。ユーザーの真正生成コード本文はこの公開CIへ持ち込まない。
