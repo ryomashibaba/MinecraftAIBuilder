@@ -63,6 +63,11 @@ export async function runFiveGenreLocal(opts,{runOne=runV4DLocalAuthor,
    sourceCirculation:receipt.sourceCirculation,
    finalGeometrySha256:receipt.finalGeometrySha256,
    failureCategory:receipt.failureCategory});
+  // HTTP/transport failures can use the generic SOURCE HOLD status.
+  // Do not continue sending requests to the other four genres on an outage.
+  if(receipt.failureCategory==='LOCAL_MODEL_TRANSPORT_OR_TIMEOUT'){
+   stoppedReason='LOCAL_TRANSPORT_FAILURE';break;
+  }
   if(['HOLD_MODEL_NOT_INSTALLED','HOLD_LOCAL_PREFLIGHT',
    'HOLD_MODEL_TIMEOUT_OR_ABORTED'].includes(receipt.reportedStatus)){
    stoppedReason=receipt.reportedStatus;break;

@@ -65,6 +65,20 @@ test('missing local model stops remaining four independent attempts, zero POSTs'
   assert.equal(r.stoppedReason,'HOLD_MODEL_NOT_INSTALLED');
  }finally{fs.rmSync(tmp,{recursive:true,force:true});}
 });
+test('local HTTP failure stops other genres even if wrapper status is generic SOURCE HOLD',async()=>{
+ const tmp=mk(),out=path.join(tmp,'batch');let n=0;
+ try{
+  const r=await runFiveGenreLocal(opts(out),{runOne:async()=>{
+   n++;return {...fake('HOLD_MODEL_OR_SOURCE_INVALID_NO_REPAIR'),
+    modelCalls:1,reason:'R125_V4D_LOCAL_AUTHOR_MODEL_HTTP_503'};
+  }});
+  assert.equal(n,1);
+  assert.equal(r.attemptedGenres,1);
+  assert.equal(r.knownModelCallAttempts,1);
+  assert.equal(r.stoppedReason,'LOCAL_TRANSPORT_FAILURE');
+  assert.equal(r.remainingUnattemptedGenres.length,4);
+ }finally{fs.rmSync(tmp,{recursive:true,force:true});}
+});
 test('unexpected failure is fail-closed and model call count marked incomplete',async()=>{
  const tmp=mk(),out=path.join(tmp,'batch');
  try{
