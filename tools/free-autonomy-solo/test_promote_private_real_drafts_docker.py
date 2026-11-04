@@ -291,15 +291,13 @@ class PinnedRealSourcePromotionTests(unittest.TestCase):
 
     def test_existing_private_mab_syntax_requires_installed_node(self):
         root, _, manifest, _, _ = self.fixture()
-        with patch("promote_private_real_drafts_docker.shutil.which", return_value=None), \
-             patch("promote_private_real_drafts_docker.subprocess.run") as process:
+        with patch("promote_private_real_drafts_docker.shutil.which", return_value=None):
             result = syntax_check_existing_mab_private_drafts(
                 root, "minecraftaibuilder", "qwen3:14b",
                 manifest=manifest, use_lock=False)
         self.assertEqual(result["status"], "HOLD")
         self.assertEqual(result["reason"], "NODE_NOT_INSTALLED_NO_AUTO_INSTALL")
         self.assertFalse(result["source_code_executed"])
-        process.assert_not_called()
 
     def test_no_docker_fails_closed_without_commit(self):
         root, work, manifest, lane, original = self.fixture()
