@@ -52,6 +52,26 @@ if ($LASTEXITCODE -ne 0 -or $versionText -notmatch '^v(\d+)\.') {
 }
 if ([int]$Matches[1] -lt 20) { throw 'V4H_NODE20_OR_NEWER_REQUIRED' }
 
+# Same byte-range lock as the pre-existing local AI supervisor, across both projects.
+$lockDir = Join-Path $env:LOCALAPPDATA 'FreeAutonomySolo'
+New-Item -ItemType Directory -Force -Path $lockDir | Out-Null
+$lockPath = Join-Path $lockDir 'one-local-project.lock'
+$lockStream = [System.IO.File]::Open($lockPath,
+    [System.IO.FileMode]::OpenOrCreate,
+    [System.IO.FileAccess]::ReadWrite,
+    [System.IO.FileShare]::ReadWrite)
+try {
+    if ($lockStream.Length -eq 0) {
+        $lockStream.WriteByte(48)
+        $lockStream.Flush()
+    }
+    $lockStream.Position = 0
+    $lockStream.Lock(0,1)
+} catch {
+    $lockStream.Dispose()
+    throw 'ANOTHER_LOCAL_PROJECT_ALREADY_RUNNING'
+}
+try {
 $base = Join-Path $env:LOCALAPPDATA 'MinecraftAIBuilder'
 $sourceRoot = Join-Path $base 'IsolatedV4H'
 $privateRoot = Join-Path $base 'PrivateModelStudies'
@@ -193,3 +213,8 @@ if (-not $OriginalTestFlag) {
     Start-Process -FilePath explorer.exe -ArgumentList ('/select,"' + $sharePath + '"') -ErrorAction SilentlyContinue | Out-Null
 }
 if ($runExit -ne 0) { exit 2 }
+
+} finally {
+    $lockStream.Unlock(0,1)
+    $lockStream.Dispose()
+}
