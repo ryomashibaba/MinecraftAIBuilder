@@ -22,8 +22,8 @@
 
 ~~~powershell
 $ErrorActionPreference = "Stop"
-$rev = "280c1c27fbcd4f977679f9ddf93cddbdb5eee4a2"
-$blob = "afabe75bd089c773539ce8a2209972f4fdb86c35"
+$rev = "7b0db3c83aafacc830844d869384878a387391d9"
+$blob = "e6f94f389d09919d9c0919f2c0ded1c95d5520a8"
 $path = Join-Path $env:TEMP "RUN_QWEN14B_TO_PUBLIC_GITHUB_QA_ONCE.ps1"
 $url = "https://raw.githubusercontent.com/ryomashibaba/MinecraftAIBuilder/$rev/tools/free-autonomy-solo/RUN_QWEN14B_TO_PUBLIC_GITHUB_QA_ONCE.ps1"
 Invoke-WebRequest -UseBasicParsing -Uri $url -OutFile $path
