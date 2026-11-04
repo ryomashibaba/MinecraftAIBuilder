@@ -246,14 +246,14 @@ def execute(cfg: dict, *, push: bool = False) -> dict:
                                                   state_dir / f"qa_{cycle:04}_{i}.private.log",
                                                   agent=False)
                         if rc:
-                            failures.append(f"CHECK_{i}_RC{rc}: {output[-450:]}")
+                            failures.append(f"CHECK_{i}_RC{rc}: {output[-1800:]}")
                     verify_repo(cfg)
                     if git(workspace, "rev-parse", "HEAD") != state["last_head"]:
                         raise Hold("QA_CHANGED_GIT_HISTORY")
                     if changed_files(workspace) != changed or snapshot_candidate(workspace, changed) != before_qa:
                         raise Hold("QA_CHANGED_SOURCE_OR_OTHER_FILES")
                     if failures:
-                        feedback = "; ".join(failures)[-1000:]
+                        feedback = "; ".join(failures)[-1800:]
                         git(workspace, "restore", "--worktree", "--", t["path"])
                         state["last_failure"] = "INDEPENDENT_QA_FAILED"
                         write_atomic(state_path, state)
