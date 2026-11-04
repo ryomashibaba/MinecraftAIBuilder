@@ -22,7 +22,8 @@ from local_ollama_real_probe import get_json
 from solo_agent import (Hold, check_paths, changed_files, git, run_in_docker,
                         single_agent_lock, snapshot_candidate, verify_repo, write_atomic,
                         require_existing_remote_research_branch,
-                        push_verified_research_commit)
+                        push_verified_research_commit,
+                        quarantine_and_restore_unverified)
 
 BASE = "http://127.0.0.1:11434"
 PATCH_SCHEMA = {
@@ -86,6 +87,8 @@ def validate_config(cfg: dict) -> None:
             raise Hold("INVALID_SAFETY_BUDGET_" + key)
     if not isinstance(cfg.get("docker", {}), dict):
         raise Hold("DOCKER_OPTIONS_MUST_BE_OBJECT")
+    if type(cfg.get("quarantine_unverified_on_qa_failure", False)) is not bool:
+        raise Hold("QA_PRIVATE_QUARANTINE_OPT_IN_MUST_BE_BOOLEAN")
     if cfg.get("docker", {}).get("network", "none") != "none":
         raise Hold("DIRECT_LOCAL_MODEL_REQUIRES_QA_NETWORK_NONE")
     DockerPolicy.from_config(cfg)
@@ -213,6 +216,11 @@ def execute(cfg: dict, *, push: bool = False) -> dict:
                         raise
                     entry["pushed"] = True
                     write_atomic(state_path, state)
+        # A repaired pending push must not leave an old HOLD marker attached
+        # to a different future task outcome.
+        state["status"] = "RUNNING"
+        state.pop("hold_reason", None)
+        write_atomic(state_path, state)
         while state["next_task"] < len(cfg["tasks"]):
             if state["cycles"] >= cfg["max_cycles"] or time.monotonic() - start >= 60 * cfg["max_minutes"]:
                 state["status"] = "HOLD_BUDGET_REACHED"
@@ -265,8 +273,24 @@ def execute(cfg: dict, *, push: bool = False) -> dict:
                     if changed_files(workspace) != changed or snapshot_candidate(workspace, changed) != before_qa:
                         raise Hold("QA_CHANGED_SOURCE_OR_OTHER_FILES")
                     if failures:
-                        feedback = "; ".join(failures)[-1800:]
-                        git(workspace, "restore", "--worktree", "--", t["path"])
+                        if cfg.get("quarantine_unverified_on_qa_failure") is True:
+                            recovery = quarantine_and_restore_unverified(
+                                cfg, workspace, state_dir, changed, state["last_head"],
+                                opt_in_key="quarantine_unverified_on_qa_failure")
+                            state.setdefault("qa_failure_quarantines", []).append({
+                                **recovery, "cycle": cycle,
+                                "task": state["next_task"] + 1,
+                                "failed_checks": len(failures),
+                                "model_requested": cfg["model"]})
+                            feedback = ("INDEPENDENT_QA_FAILED_AFTER_PRIVATE_BACKUP;"
+                                        f" failed_checks={len(failures)};"
+                                        " retry on verified original source")
+                        else:
+                            feedback = "; ".join(failures)[-1800:]
+                            git(workspace, "restore", "--worktree", "--", t["path"])
+                        if (git(workspace, "rev-parse", "HEAD") != state["last_head"]
+                                or changed_files(workspace)):
+                            raise Hold("QA_FAILURE_RESTORATION_NOT_CLEAN")
                         state["last_failure"] = "INDEPENDENT_QA_FAILED"
                         write_atomic(state_path, state)
                         continue
