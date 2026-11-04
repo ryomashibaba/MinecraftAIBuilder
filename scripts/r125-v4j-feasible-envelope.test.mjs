@@ -6,6 +6,12 @@ import {V4J_ENVELOPE_PROTOCOL,V4J_ENVELOPE_BOUNDS,
  from '../source/ai/r125-v4j-feasible-envelope.mjs';
 import {V4J_STRUCTURED_CIVIC_JSON_SCHEMA as original}
  from '../source/ai/r125-v4j-structured-author-schema.mjs';
+import {makeV4DCompactSynthetic}
+ from './r125-v4d-compact-model-fixture.mjs';
+import {translateCompactModelIntent}
+ from '../source/ai/r125-v4d-compact-model-ir.mjs';
+import {translateRelativeAuthorIntent}
+ from '../source/ai/r125-v4d-relative-author-ir.mjs';
 
 test('V4 mathematically guarantees the massing width/depth prerequisite for ANY covered target and selected cut',()=>{
  const covered=s.properties.spaces.items.oneOf.find(x=>x.properties.kind.enum[0]==='covered');
@@ -96,4 +102,21 @@ test('V4 one local synthetic request uses envelope schema once, V2/V3 remain unc
   assert.equal(r.worldWrites,0);
   assert.deepEqual(r.gates,Array(9).fill('BLOCKED'));
  }finally{fs.rmSync(d,{recursive:true,force:true});}
+});
+
+test('V4 root north entry collision is independently proven by frozen graph SOURCE; no implicit author repair',()=>{
+ const author=makeV4DCompactSynthetic();
+ const unchanged=structuredClone(author);
+ const good=translateCompactModelIntent(author).expandedMechanicalIR;
+ assert.doesNotThrow(()=>translateRelativeAuthorIntent(good));
+ const conflicting=structuredClone(author);
+ conflicting.spaces[2].attach={
+  to:conflicting.spaces[0].id,side:'north',shift:0
+ };
+ const doomed=translateCompactModelIntent(conflicting).expandedMechanicalIR;
+ assert.throws(()=>translateRelativeAuthorIntent(doomed),/R125_V4D_GRAPH_ENTRY/);
+ assert.deepEqual(author,unchanged);
+ assert.equal(conflicting.spaces[2].attach.side,'north');
+ assert(p.includes('Never attach ANY later space directly to spaces[0].id with attach.side="north"'));
+ assert(p.includes('no host redirection or hidden repair'));
 });
