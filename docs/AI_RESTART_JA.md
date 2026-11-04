@@ -1,5 +1,8 @@
 # MinecraftAIBuilder — 開発再開の最新正本案内（2026-11-03）
 
+**2026-11-04 V4J新旧実Qwenの識別と0追加モデル再診断（CI未確認）**：PRIVATEの元レポートとローカル要求内の `promptProtocol` / `systemPromptSha256` を照合し、不一致はHOLD。両方未記録の旧実績は `LEGACY_UNVERSIONED`、V2は `V4J_SINGLE_RESPONSE_CONTRACT_CLARITY_V2` と区別。共有用5ジャンル再診断JSONに版数別件数と、非注入・元回答SHA一致のジャンル別失敗コード頻度を付加。同じコードは同じ根因の証明ではない。原回答改変・モデル再要求・世界操作は0、実機施工成功経路、main、Draft PR #128、9 BLOCKEDは不変。
+
+
 **2026-11-04 実Qwen 5ジャンル新規実測 0/5 SOURCE 再生 — V4J作者プロンプト研究改善（新CI未確認）**：提出された `FIVE_GENRES_OFFLINE_REPLAY_SHAREABLE.json` は5件すべて `originalResponseIntegrity=SHA256_MATCH`、`originalWasInjectedTestDouble=false`、`HOLD_REPLAY_SOURCE_REJECTED`、`sourceReproducedCount=0`。構造診断は窓4方向配列5/5、吹抜けの既存屋内室参照4/5、空間親接続3/5、空間ID3/5、空間フィールド3/5など。**共通診断コードは共通の根本原因を証明しない。** 既存SOURCE失敗を自動修正しない。次回の5ジャンルの新しい独立モデル要求でのみ、`V4J_SINGLE_RESPONSE_CONTRACT_CLARITY_V2`（最重要の参照・フィールド・型・枚数を一カ所に集約した短いシステム指示）を使用し、元V4J著者スキーマ/コンパイラ、従来1回/ジャンル、0 world-write、9 BLOCKEDは固定。既存単体V4D・V4H・既存実機施工成功経路のプロンプトは不変。`LOCAL_REQUEST.json` に新旧プロンプト識別とsystem SHAをPRIVATE記録、効果は**未実測**。次のモデル試験で5ジャンル発生コード/真正3D/用途/美術を別々に評価し、逆効果なら研究上HOLDして撤回可能。ユーザーの追加課金・Workなし。
 
 

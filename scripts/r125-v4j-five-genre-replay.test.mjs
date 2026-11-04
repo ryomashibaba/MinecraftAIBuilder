@@ -26,6 +26,8 @@ test('existing batch with no attempted models yields five honest NOT_ATTEMPTED o
   assert.equal(r.additionalModelCalls,0);
   assert.equal(r.networkCalls,0);
   assert.equal(r.outcomes.length,5);
+  assert.deepEqual(r.promptProtocols,[{promptProtocol:'UNAVAILABLE',count:5}]);
+  assert.deepEqual(r.nonInjectedShaMatchedIssueFrequency,[]);
   assert(r.outcomes.every(x=>x.offlineStatus==='NOT_ATTEMPTED'));
   assert.equal(r.geometry.status,'INSUFFICIENT_INDEPENDENT_REAL_MODEL_SOURCES');
   assert.equal(r.worldWrites,0);
@@ -68,6 +70,9 @@ test('one actual synthetic local HTTP response replays offline without any extra
   assert.equal(r.attemptedOfflineReplays,1);
   assert.equal(r.sourceReproducedCount,0);
   assert.equal(r.outcomes[0].originalWasInjectedTestDouble,true);
+  assert.equal(r.outcomes[0].promptProtocol,'LEGACY_AUTHOR_CONTRACT');
+  assert.equal(r.outcomes[0].systemPromptSHA256,trial.systemPromptSha256);
+  assert.deepEqual(r.nonInjectedShaMatchedIssueFrequency,[]);
   assert.equal(r.outcomes[0].offlineStatus,'HOLD_TEST_DOUBLE_REPLAY_ONLY');
   assert.equal(r.outcomes[0].originalResponseIntegrity,'SHA256_MATCH');
   assert.equal(r.geometry.status,'INSUFFICIENT_INDEPENDENT_REAL_MODEL_SOURCES');

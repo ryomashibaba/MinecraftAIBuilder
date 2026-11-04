@@ -135,7 +135,8 @@ export function replayFiveGenrePrivateBatch(study,out){
  for(const item of FIVE_INDEPENDENT_BRIEFS){
   const folder=path.join(physicalStudy,item.genre);
   let status='NOT_ATTEMPTED',sourceReproduced=false,synthetic=false,
-   structuralIssueCodes=[],originalResponseIntegrity='NOT_CHECKED';
+   structuralIssueCodes=[],originalResponseIntegrity='NOT_CHECKED',
+   promptProtocol='UNAVAILABLE',systemPromptSHA256=null;
   if(fs.existsSync(folder)){
    replayAttempts++;
    try{
@@ -145,6 +146,8 @@ export function replayFiveGenrePrivateBatch(study,out){
     const replayRoot=path.join(destination,item.genre);
     const report=replayPrivateV4D(folder,replayRoot);
     status=report.status;
+    promptProtocol=report.originalPromptProtocol;
+    systemPromptSHA256=report.originalSystemPromptSHA256;
     synthetic=report.originalTestInjectionPresent===true;
     originalResponseIntegrity=report.originalResponseIntegrity;
     structuralIssueCodes=safeIssueCodes(report.structuralDiagnosticIssueCodes);
@@ -173,6 +176,7 @@ export function replayFiveGenrePrivateBatch(study,out){
   }
   outcomes.push({genre:item.genre,offlineStatus:status,
    originalResponseIntegrity,originalWasInjectedTestDouble:synthetic,
+   promptProtocol,systemPromptSHA256,
    independentRealSourceReproduced:sourceReproduced,structuralIssueCodes});
  }
  const codeIndex=new Map();
@@ -196,6 +200,22 @@ export function replayFiveGenrePrivateBatch(study,out){
    caseCount:0,pairCount:0,humanArchitecturalArt:'NOT_REVIEWED',
    visualMetricPassThresholds:'UNDEFINED_DO_NOT_INVENT'};}
  }
+ const promptProtocols=Object.entries(outcomes.reduce((counts,o)=>{
+  counts[o.promptProtocol]=(counts[o.promptProtocol]??0)+1;
+  return counts;
+ },Object.create(null))).map(([promptProtocol,count])=>({promptProtocol,count}));
+ const issueIndex=new Map();
+ for(const o of outcomes){
+  if(o.originalWasInjectedTestDouble||o.originalResponseIntegrity!=='SHA256_MATCH')continue;
+  for(const issue of o.structuralIssueCodes){
+   if(!issueIndex.has(issue))issueIndex.set(issue,[]);
+   issueIndex.get(issue).push(o.genre);
+  }
+ }
+ const nonInjectedShaMatchedIssueFrequency=[...issueIndex.entries()]
+  .map(([issueCode,genres])=>({issueCode,genreCount:genres.length,genres,
+   sameUnderlyingRootCauseProven:false}))
+  .sort((a,b)=>b.genreCount-a.genreCount||a.issueCode.localeCompare(b.issueCode));
  const summary={
   schema:'minecraftaibuilder-r125-v4j-five-genre-zero-model-call-offline-replay-v1',
   inputIsPrivateExistingOriginal:true,originalFilesMutated:false,
@@ -203,6 +223,8 @@ export function replayFiveGenrePrivateBatch(study,out){
   attemptedOfflineReplays:replayAttempts,
   sourceReproducedCount:outcomes.filter(x=>x.independentRealSourceReproduced).length,
   outcomes,sharedSourceIssues,geometry,
+  promptProtocols,nonInjectedShaMatchedIssueFrequency,
+  promptProtocolAttribution:'MATCHING_PRIVATE_MANIFESTS_NOT_MODEL_AUTHENTICITY',
   syntheticRunsNeverPromoted:true,
   noRawModelTextOrPromptsOrAbsolutePathsIncluded:true,
   userArtAssessment:'NOT_REVIEWED',realMinecraftWalking:'NOT_TESTED',
