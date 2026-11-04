@@ -21,6 +21,7 @@ from pathlib import Path
 import re
 import sys
 import tempfile
+import time
 
 from prepare_pinned_real_project import Hold as CloneHold, load_manifest, prepare, verify_private_clone
 from local_qwen_no_docker_two_step import local_api
@@ -154,7 +155,9 @@ def model_proposal(model: str, project: str, path: str, current: str,
     except (ValueError, KeyError, TypeError) as exc:
         raise Hold("MODEL_PATCH_NOT_JSON") from exc
     metrics = {k: response.get(k) for k in
-               ("model", "done", "eval_count", "prompt_eval_count", "total_duration")}
+               ("model", "done", "eval_count", "prompt_eval_count",
+                "total_duration", "eval_duration", "prompt_eval_duration",
+                "load_duration")}
     return proposal, metrics
 
 
@@ -198,6 +201,17 @@ def stage_private_candidate(root: Path, lane: dict, stage: int,
         "diff_bytes": len(shown.encode("utf-8")),
         "reported_model": metrics.get("model"),
         "reported_eval_count": metrics.get("eval_count"),
+        "reported_prompt_eval_count": metrics.get("prompt_eval_count"),
+        "reported_total_duration_ns": metrics.get("total_duration"),
+        "reported_eval_duration_ns": metrics.get("eval_duration"),
+        "reported_prompt_eval_duration_ns": metrics.get("prompt_eval_duration"),
+        "reported_load_duration_ns": metrics.get("load_duration"),
+        "reported_output_tokens_per_second": (
+            round(metrics["eval_count"] * 1_000_000_000 / metrics["eval_duration"], 2)
+            if type(metrics.get("eval_count")) is int and metrics["eval_count"] >= 0
+            and type(metrics.get("eval_duration")) is int
+            and metrics["eval_duration"] > 0 else None
+        ),
         "candidate_file_executable": False,
     }
 
@@ -218,6 +232,8 @@ def run(project: str, model: str, *, transport=local_api,
         "native_QA_executed": False, "git_commits": 0, "git_pushes": 0,
         "original_files_changed": False, "private_worktree_changed": False,
         "real_model_independently_identified": False,
+        "model_speed_metrics_unverified_provider_report": True,
+        "model_comparison_is_not_project_quality_certification": True,
         "art_or_game_certified": False, "unattended_autonomy_certified": False,
         "stages": [],
     }
@@ -242,6 +258,7 @@ def run(project: str, model: str, *, transport=local_api,
             for stage in (1, 2):
                 feedback, accepted = "", False
                 for attempt in (1, 2):
+                    attempt_started = time.monotonic()
                     report["model_calls_attempted"] += 1
                     try:
                         proposed, metrics = model_proposal(
@@ -253,6 +270,7 @@ def run(project: str, model: str, *, transport=local_api,
                         next_source = bounded_replacement(project, current, proposed)
                         detail = stage_private_candidate(
                             root, lane, stage, current, next_source, metrics)
+                        detail["attempt_wall_seconds"] = round(time.monotonic() - attempt_started, 3)
                         report["stages"].append(detail)
                         report["model_drafts"] += 1
                         current = next_source
@@ -263,7 +281,8 @@ def run(project: str, model: str, *, transport=local_api,
                         report["stages"].append({
                             "stage": stage, "attempt": attempt,
                             "result": "REJECTED_WITHOUT_SOURCE_WRITE",
-                            "reason": feedback[:120]})
+                            "reason": feedback[:120],
+                            "attempt_wall_seconds": round(time.monotonic() - attempt_started, 3)})
                         # No host/network/auth errors are safe to silently
                         # retry; retry only model formatting / patch quality.
                         if not feedback.startswith(("PATCH_", "MODEL_PATCH_",
