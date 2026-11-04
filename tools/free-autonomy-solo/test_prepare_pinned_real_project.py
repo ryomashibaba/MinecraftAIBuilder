@@ -105,6 +105,24 @@ class RealProjectSourceAdmissionTests(unittest.TestCase):
             with self.assertRaisesRegex(Hold, "RESEARCH_BRANCH_CHANGED"):
                 verify_private_clone(root, lane)
 
+    def test_canonical_blob_hash_filters_cross_platform_crlf(self):
+        # A Git blob is LF-normalized by source .gitattributes on Windows;
+        # the literal raw file SHA must not be used for the admission gate.
+        with tempfile.TemporaryDirectory() as td:
+            root, lane = self.mock_repo(Path(td))
+            attrs = root / ".gitattributes"
+            attrs.write_text("* text=auto\n", encoding="utf-8")
+            git(root, "add", ".gitattributes")
+            git(root, "commit", "-m", "enable normalized text attributes")
+            target = root / lane["source_file"]
+            lf = target.read_bytes()
+            target.write_bytes(lf.replace(b"\n", b"\r\n"))
+            self.assertNotEqual(source_blob_sha(target.read_bytes()),
+                                lane["source_blob_sha"])
+            actual = git(root, "hash-object", "--path",
+                         lane["source_file"], lane["source_file"])
+            self.assertEqual(actual, lane["source_blob_sha"])
+
     def test_wrong_remote_rejected(self):
         with tempfile.TemporaryDirectory() as td:
             root, lane = self.mock_repo(Path(td))
