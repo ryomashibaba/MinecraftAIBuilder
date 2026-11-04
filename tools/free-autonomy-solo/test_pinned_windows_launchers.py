@@ -68,7 +68,7 @@ class WindowsRealSourceLauncherPins(unittest.TestCase):
     def test_double_click_bootstrap_pins_exact_current_pilot_source(self):
         text = (ROOT / BOOTSTRAP_CMD).read_text(encoding="utf-8")
         self.assertRegex(text, r"/[a-f0-9]{40}/tools/free-autonomy-solo/" + PILOT_PS1)
-        self.assertIn("'-cne '" , text.replace(" -cne '", "'-cne '"))
+        self.assertIn(" -cne '", text)
         self.assertIn("-cne '" + git_blob_sha(ROOT / PILOT_PS1) + "'", text)
         self.assertIn("--ci-self-test", text)
         self.assertNotIn("/main/tools/free-autonomy-solo/", text)

@@ -6,6 +6,9 @@ on:
       - research/dec-free-autonomy-solo-pilot-20261104
     paths:
       - '.github/workflows/dec-free-autonomy-real-windows-clones.yml'
+      - 'tools/free-autonomy-solo/REAL_PROJECT_SINGLE_SESSION_MANIFEST_20261104.json'
+      - 'tools/free-autonomy-solo/prepare_pinned_real_project.py'
+      - 'tools/free-autonomy-solo/RUN_PREPARE_REAL_PROJECT_ONCE.ps1'
   workflow_dispatch:
 
 permissions:
@@ -26,7 +29,7 @@ jobs:
       - name: Prepare MAB immutable source into new LOCALAPPDATA private clone
         shell: pwsh
         run: |
-          python tools/free-autonomy-solo/prepare_pinned_real_project.py --project minecraftaibuilder
+          & ./tools/free-autonomy-solo/RUN_PREPARE_REAL_PROJECT_ONCE.ps1 -Project minecraftaibuilder
       - name: Preserve sanitized SHA/root/status evidence outside any repository
         shell: pwsh
         run: |
@@ -57,7 +60,7 @@ jobs:
       - name: Prepare TPS immutable source using canonical Windows Git blob normalization
         shell: pwsh
         run: |
-          python tools/free-autonomy-solo/prepare_pinned_real_project.py --project browser-ink-tps
+          & ./tools/free-autonomy-solo/RUN_PREPARE_REAL_PROJECT_ONCE.ps1 -Project browser-ink-tps
       - name: Preserve sanitized SHA/root/status evidence outside any repository
         shell: pwsh
         run: |
