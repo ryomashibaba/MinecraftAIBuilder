@@ -28,3 +28,10 @@ MinecraftAIBuilderとBrowser Ink TPSは完全同格の最優先2件。ローカ�
 
 ## 未完了
 本人Windowsの真正Qwen3:14Bを使った本物の建築著作は未実行。14Bの成功率は分からない。研究ブランチのSOURCE検証は人間の建築ART、Minecraftワールド、長時間自律コーディングの認定ではない。12月対策研究ブランチの旧SHA固定ランチャーは新V4Hソースを自動追従しないため、別バージョンを同じ成功と呼ばず、次の14B実測時は参照HEADとファイルblobを必ず照合する。
+
+
+## 2026-11-05 実機14Bの固定ソース1操作入口
+- CMD: scripts/DEC_RUN_REAL_QWEN14B_V4H_PINNED_ONCE.cmd はPS1のGit blobを厳密照合して実行する。PS1の研究ソースは固定SHA de28d50c9240dbb95c47732b0456625a70f8a785 からのみ Git fetch し、source blob 934292ca75aed1cc6e374350b9e2fa20121719f8 を独立照合する。branchの動くHEADを信じない。
+- local modelは導入済み qwen3:14b のみ（pull無し）。一回答のオリジナル建築を元のV4H契約でSOURCE検証し、PRIVATE原回答と公開可能な短いJSONだけに分離。失敗回答の自動補修・リトライ・Minecraft書込なし。
+- 同格最優先のMinecraftAIBuilder/TPSの同時ローカル実行は禁止。FreeAutonomySolo/one-local-project.lock の1-byte OSロックを取得し競合ならHOLD。main、既存開発branch、原本、Education成功施工、PR、Pages、他プロジェクトを不変更。
+- Windows ActionsのPowerShell構文・CMD起動自己検査・歴史SHA fetch・V4H実SOURCE回帰はモデル試験ではない。本人Windows Qwen14B本物の推論・3DのART評価・世界内歩行・長時間自律codingは引き続き未実測。

@@ -33,6 +33,11 @@ jobs:
             $errorsFound | Format-List | Out-String | Write-Host
             exit 2
           }
+          $lockSrc = Get-Content -Raw scripts/DEC_RUN_REAL_QWEN14B_V4H_PINNED_ONCE.ps1
+          if (-not $lockSrc.Contains("'one-local-project.lock'") -or
+              -not $lockSrc.Contains('$lockStream.Lock(0,1)')) {
+            throw 'SHARED_LOCAL_MODEL_LOCK_ABSENT'
+          }
           & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $path -CheckOnly
           if ($LASTEXITCODE -ne 0) { exit 2 }
           & cmd /c 'scripts\DEC_RUN_REAL_QWEN14B_V4H_PINNED_ONCE.cmd' --ci-self-test
@@ -44,7 +49,7 @@ jobs:
           $cmdText = Get-Content -Raw scripts/DEC_RUN_REAL_QWEN14B_V4H_PINNED_ONCE.cmd
           $blob = ((& git hash-object scripts/DEC_RUN_REAL_QWEN14B_V4H_PINNED_ONCE.ps1) | Out-String).Trim()
           if (-not $cmdText.Contains($blob)) { throw 'CMD_PINNED_BLOB_MISMATCH' }
-          if (-not $cmdText.Contains('7ecdedb5cdb283ed29032e7601794193ca32f147')) {
+          if (-not $cmdText.Contains('ba9e13c9dd9402f35a2dec5de572739cef0046f5')) {
             throw 'CMD_IMMUTABLE_PARENT_MISMATCH'
           }
           $private = Join-Path $env:RUNNER_TEMP 'immutable-v4h-qa'
