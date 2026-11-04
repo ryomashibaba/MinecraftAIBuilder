@@ -62,7 +62,7 @@ jobs:
         run: |
           cd real-tps
           test "$(git rev-parse HEAD)" = 0942eca28ca3cc2c66cc754c0d6d8e6fdedb6c07
-      - name: Install with NO lockfile: real TS app baseline, non-reproducible transitive versions
+      - name: 'Install without a TPS lockfile; disclose non-reproducible transitive versions'
         run: |
           cd real-tps
           test ! -e package-lock.json
