@@ -97,7 +97,10 @@ def propose_once(model: str, file_path: str, source: str, goal: str,
     prompt = (
         "You are editing exactly one existing source file in a disposable isolated research clone. "
         "Return JSON with exactly two strings: find and replace. "
-        "find must appear in source exactly once; replace must be the exact replacement text. "
+        "find must appear in source exactly once and CANNOT be empty. "
+        "Copy a short exact original substring into find (for example a return line), "
+        "then author actual corrected source for replace. "
+        "Both strings must be nonempty, different, and be valid within this file. "
         "Do NOT use shell commands, introduce external calls, touch other files, or change tests. "
         "Maintain the preexisting code and user project quality constraints. "
         f"\nFile: {file_path}\nTask: {goal}\nIndependent QA feedback: {feedback[:1200]}\n"
@@ -114,10 +117,18 @@ def propose_once(model: str, file_path: str, source: str, goal: str,
         result = json.loads(response["message"]["content"])
     except (ValueError, KeyError, TypeError) as e:
         raise Hold("MODEL_PATCH_NOT_VALID_JSON") from e
-    if (not isinstance(result, dict) or set(result) != {"find", "replace"}
-            or any(not isinstance(x, str) or len(x) > 8000 for x in result.values())
-            or not result["find"] or result["find"] == result["replace"]):
-        raise Hold("MODEL_PATCH_SCHEMA_REJECTED")
+    if not isinstance(result, dict) or set(result) != {"find", "replace"}:
+        raise Hold("MODEL_PATCH_KEYS_INVALID")
+    if not isinstance(result["find"], str) or not isinstance(result["replace"], str):
+        raise Hold("MODEL_PATCH_TYPES_INVALID")
+    if len(result["find"]) > 8000 or len(result["replace"]) > 8000:
+        raise Hold("MODEL_PATCH_FIELDS_TOO_LARGE")
+    if not result["find"]:
+        raise Hold("MODEL_PATCH_FIND_EMPTY")
+    if not result["replace"]:
+        raise Hold("MODEL_PATCH_REPLACEMENT_EMPTY")
+    if result["find"] == result["replace"]:
+        raise Hold("MODEL_PATCH_NOOP_IDENTICAL")
     metrics = {k: response.get(k) for k in ("model", "done", "eval_count",
                                            "prompt_eval_count", "total_duration")}
     return result, metrics
