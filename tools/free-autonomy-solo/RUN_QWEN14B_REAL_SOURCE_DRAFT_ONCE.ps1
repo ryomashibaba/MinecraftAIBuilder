@@ -13,10 +13,10 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-$revision = '02415e5698763a48ecdae5568a5fa9079bfc8f90'
+$revision = 'f7890e8a9449a9a7f5cf4c42e4c090fde7cfe044'
 $repo = 'ryomashibaba/MinecraftAIBuilder'
 $files = @(
-  @{ Name = 'draft_real_project_local14b.py'; GitBlob = 'b06ecd8881f411ba792b6387279d4577578afc51' },
+  @{ Name = 'draft_real_project_local14b.py'; GitBlob = 'fad5f00994f467e65891319a202edbe407a2d4aa' },
   @{ Name = 'prepare_pinned_real_project.py'; GitBlob = 'ce4d56452ec0a1d513dfa419a80780eed1283894' },
   @{ Name = 'local_qwen_no_docker_two_step.py'; GitBlob = 'ec98a13b7191a3f70f58af3bf3c08f85c8e60503' },
   @{ Name = 'REAL_PROJECT_SINGLE_SESSION_MANIFEST_20261104.json'; GitBlob = '0e601f25dd14d4475bcdb31efda1d5041a34b005' }
