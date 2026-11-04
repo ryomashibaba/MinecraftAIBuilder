@@ -152,7 +152,7 @@ def quarantine_and_restore_unverified(
     before = snapshot_candidate(workspace, paths)
     tracked_raw = subprocess.check_output(
         ["git", "ls-files", "--cached", "-z"], cwd=workspace, timeout=35)
-    tracked = set(tracked_raw.decode("utf-8", "surrogateescape").split("\\0"))
+    tracked = set(tracked_raw.decode("utf-8", "surrogateescape").split(chr(0)))
     total = 0
     payloads = []
     for name in paths:
