@@ -104,7 +104,15 @@ def verify_private_clone(workspace: Path, lane: dict) -> dict:
     target = workspace / lane["source_file"]
     if target.is_symlink() or not target.is_file() or not target.resolve().is_relative_to(workspace.resolve()):
         raise Hold("SOURCE_PATH_MISSING_OR_ESCAPE")
-    actual = source_blob_sha(target.read_bytes())
+    # Git's canonical blob can differ in raw worktree newlines on Windows
+    # when source repo has text=auto attributes. Validate the committed tree
+    # AND the worktree through Git's exact source-path clean filters.
+    entry = run_git(workspace, ["ls-tree", "HEAD", "--", lane["source_file"]])
+    want = "100644 blob " + lane["source_blob_sha"] + "\t" + lane["source_file"]
+    if entry != want:
+        raise Hold("PINNED_SOURCE_TREE_BLOB_MISMATCH")
+    actual = run_git(workspace, ["hash-object", "--path", lane["source_file"],
+                                 lane["source_file"]])
     if actual != lane["source_blob_sha"]:
         raise Hold("SOURCE_BLOB_PIN_MISMATCH")
     return {
