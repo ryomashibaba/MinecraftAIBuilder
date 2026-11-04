@@ -236,8 +236,6 @@ def propose(model: str, previous: str, stage: int, feedback: str,
 
 
 def run_trial(model: str, root: Path, *, transport=local_api) -> dict:
-    if not isinstance(model, str) or not MODEL_RE.fullmatch(model):
-        raise Hold("MODEL_NAME_INVALID")
     root.mkdir(parents=True, exist_ok=False)
     receipt = {
         "schema": "free-autonomy-no-docker-two-stage-real-local-v1",
@@ -250,6 +248,8 @@ def run_trial(model: str, root: Path, *, transport=local_api) -> dict:
         "stage_results": [],
     }
     try:
+        if not isinstance(model, str) or not MODEL_RE.fullmatch(model):
+            raise Hold("MODEL_NAME_INVALID")
         listing = transport("/api/tags", timeout=8)
         models = {x.get("name") for x in listing.get("models", [])
                   if isinstance(x, dict)}
