@@ -14,6 +14,7 @@ import {WING_SCHEMA} from '../source/ai/r125-v4e-wing-author-ir.mjs';
 import {FLOORPLATE_SCHEMA} from '../source/ai/r125-v4f-floorplate-author-ir.mjs';
 import {HEIGHT_SCHEMA} from '../source/ai/r125-v4g-height-author-ir.mjs';
 import {MEZZANINE_SCHEMA} from '../source/ai/r125-v4h-mezzanine-author-ir.mjs';
+import {CIVIC_ARCADE_SCHEMA} from '../source/ai/r125-v4j-civic-author-ir.mjs';
 
 export const DIAGNOSTIC_SCHEMA='minecraftaibuilder-v4d-private-model-structural-diagnostic-v1';
 const ROOT_COMPACT=['schema','id','title','brief','materials','spaces'];
@@ -23,6 +24,7 @@ const ROOT_WING=[...ROOT_COMPACT,'massing','wing'];
 const ROOT_FLOORPLATE=[...ROOT_WING,'floorplate'];
 const ROOT_ATRIUM=[...ROOT_FLOORPLATE,'atrium'];
 const ROOT_MEZZANINE=[...ROOT_ATRIUM,'mezzanine'];
+const ROOT_CIVIC=[...ROOT_MEZZANINE,'arcade'];
 const ROOT_DETAILED=['schema','id','title','brief','materials','spaces','entry','extraLinks'];
 const SPACE_COMPACT=['id','purpose','kind','width','depth','roof','height','facade','windowSide','feature','featureMaterial','attach'];
 const SPACE_RANKED=['id','purpose','kind','width','depth','roof','height','facade','windowPriority','feature','featureMaterial','attach'];
@@ -65,7 +67,7 @@ function safeProse(value){return typeof value==='string'&&value.length>=3&&value
 const opposite={east:'west',west:'east',south:'north',north:'south'};
 const dirs=['north','south','east','west'];
 export function diagnosePrivateV4DAuthor(author,contract){
- if(![COMPACT_SCHEMA,RELATIVE_SCHEMA,RANKED_SCHEMA,SECTIONED_SCHEMA,MASSING_SCHEMA,WING_SCHEMA,FLOORPLATE_SCHEMA,HEIGHT_SCHEMA,MEZZANINE_SCHEMA].includes(contract))
+ if(![COMPACT_SCHEMA,RELATIVE_SCHEMA,RANKED_SCHEMA,SECTIONED_SCHEMA,MASSING_SCHEMA,WING_SCHEMA,FLOORPLATE_SCHEMA,HEIGHT_SCHEMA,MEZZANINE_SCHEMA,CIVIC_ARCADE_SCHEMA].includes(contract))
   throw Error('V4D_DIAG_UNRECOGNIZED_CONTRACT');
  const r=blank(contract);
  if(!record(author)){
@@ -75,8 +77,9 @@ export function diagnosePrivateV4DAuthor(author,contract){
  massing=contract===MASSING_SCHEMA,winged=contract===WING_SCHEMA,
  floorplated=contract===FLOORPLATE_SCHEMA,heighted=contract===HEIGHT_SCHEMA,
   mezzanined=contract===MEZZANINE_SCHEMA,
- ranked=contract===RANKED_SCHEMA||sectioned||massing||winged||floorplated||heighted||mezzanined;
- const top=keyCounts(author,sectioned?ROOT_SECTIONED:
+   civic=contract===CIVIC_ARCADE_SCHEMA,
+ ranked=contract===RANKED_SCHEMA||sectioned||massing||winged||floorplated||heighted||mezzanined||civic;
+ const top=keyCounts(author,civic?ROOT_CIVIC:sectioned?ROOT_SECTIONED:
   mezzanined?ROOT_MEZZANINE:heighted?ROOT_ATRIUM:floorplated?ROOT_FLOORPLATE:winged?ROOT_WING:massing?ROOT_MASSING:
   (compact||ranked)?ROOT_COMPACT:ROOT_DETAILED);
  r.missingTopLevelKeyCount=top.missing;
@@ -228,7 +231,7 @@ export function diagnosePrivateV4DAuthor(author,contract){
     add(r,'SECTION_ROOM_NOT_COVERED');
   }
  }
- if(massing||winged||floorplated||heighted||mezzanined){
+ if(massing||winged||floorplated||heighted||mezzanined||civic){
   const v=author.massing;
   if(!record(v)||keyCounts(v,['spaceId','corner','cutWidth','cutDepth','publicAccessSide']).missing||
    keyCounts(v,['spaceId','corner','cutWidth','cutDepth','publicAccessSide']).unexpected)
@@ -241,7 +244,7 @@ export function diagnosePrivateV4DAuthor(author,contract){
     add(r,'PRIMARY_MASSING_ROOM_NOT_COVERED');
   }
  }
- if(winged||floorplated||heighted||mezzanined){
+ if(winged||floorplated||heighted||mezzanined||civic){
   const w=author.wing,expected=['spaceId','side','start','span','reach','roofY','purpose'];
   const fields=record(w)&&Object.hasOwn(w,'outline')?
    [...expected,'outline']:expected;
@@ -263,7 +266,7 @@ export function diagnosePrivateV4DAuthor(author,contract){
     add(r,'EXTERIOR_WING_ROOM_NOT_COVERED');
   }
  }
- if(floorplated||heighted||mezzanined){
+ if(floorplated||heighted||mezzanined||civic){
   const v=author.floorplate,fields=['spaceId','corner','width','depth'];
   if(!record(v)||keyCounts(v,fields).missing||keyCounts(v,fields).unexpected)
    add(r,'COVERED_FLOORPLATE_AUTHOR_FIELDS');
@@ -276,7 +279,7 @@ export function diagnosePrivateV4DAuthor(author,contract){
     add(r,'COVERED_FLOORPLATE_SPACE_NOT_COVERED');
   }
  }
- if(heighted||mezzanined){
+ if(heighted||mezzanined||civic){
   const v=author.atrium,fields=['spaceId','offsetX','offsetZ',
    'width','depth','lift','roofForm'];
   if(!record(v)||keyCounts(v,fields).missing||keyCounts(v,fields).unexpected)
@@ -293,7 +296,7 @@ export function diagnosePrivateV4DAuthor(author,contract){
     add(r,'TALL_ATRIUM_ROOF_FORM_INVALID');
   }
  }
- if(mezzanined){
+ if(mezzanined||civic){
   const m=author.mezzanine,fields=['side','stairLane','deckOffsetX',
    'deckWidth','rise','purpose'];
   if(!record(m)||keyCounts(m,fields).missing||keyCounts(m,fields).unexpected)
@@ -310,6 +313,27 @@ export function diagnosePrivateV4DAuthor(author,contract){
   }
  }
  // Check linked wall window directions after reading ALL attachments.
+ if(civic){
+  const a=author.arcade,fields=['width','depth','setback','roofline',
+   'postMaterial','roofMaterial','serviceMaterial','purpose'];
+  if(!record(a)||keyCounts(a,fields).missing||keyCounts(a,fields).unexpected)
+   add(r,'CIVIC_ARCADE_AUTHOR_FIELDS');
+  else{
+   if(![12,15].includes(a.width)||!between(a.depth,3,5)||
+      !between(a.setback,0,1))add(r,'CIVIC_ARCADE_DIMENSIONS_INVALID');
+   if(!Array.isArray(a.roofline)||a.roofline.length!==3||
+      !a.roofline.every(x=>between(x,8,12))||
+      a.roofline.every(x=>x===a.roofline[0]))
+     add(r,'CIVIC_ARCADE_THREE_BAY_ROOFLINE_INVALID');
+   if(!['stone','wood','concrete','metal','accent'].includes(a.postMaterial)||
+      !['stone','wood','concrete','metal'].includes(a.roofMaterial)||
+      !['stone','wood','concrete','metal','accent'].includes(a.serviceMaterial))
+     add(r,'CIVIC_ARCADE_MATERIAL_INVALID');
+   if(typeof a.purpose!=='string'||a.purpose.length<12||a.purpose.length>160||
+      /[\u0000-\u001f<>]/.test(a.purpose))
+     add(r,'CIVIC_ARCADE_PUBLIC_PURPOSE_INVALID');
+  }
+ }
  author.spaces.slice(0,6).forEach((space,i)=>{
   if(!record(space)||typeof space.id!=='string')return;
   const usedSides=connectedSides.get(space.id)??new Set();
@@ -327,7 +351,7 @@ export function diagnosePrivateV4DAuthor(author,contract){
  return r;
 }
 export function diagnosePrivateV4DInvalidJSON(contract){
- if(![COMPACT_SCHEMA,RELATIVE_SCHEMA,RANKED_SCHEMA,SECTIONED_SCHEMA,MASSING_SCHEMA,WING_SCHEMA,FLOORPLATE_SCHEMA,HEIGHT_SCHEMA,MEZZANINE_SCHEMA].includes(contract))
+ if(![COMPACT_SCHEMA,RELATIVE_SCHEMA,RANKED_SCHEMA,SECTIONED_SCHEMA,MASSING_SCHEMA,WING_SCHEMA,FLOORPLATE_SCHEMA,HEIGHT_SCHEMA,MEZZANINE_SCHEMA,CIVIC_ARCADE_SCHEMA].includes(contract))
   throw Error('V4D_DIAG_UNRECOGNIZED_CONTRACT');
  const report=blank(contract,'INVALID_JSON');
  add(report,'ORIGINAL_RESPONSE_NOT_JSON');
