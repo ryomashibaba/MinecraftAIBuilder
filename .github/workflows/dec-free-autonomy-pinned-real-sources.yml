@@ -1,0 +1,85 @@
+name: December autonomy - pinned REAL source baselines for both equal-priority projects
+
+on:
+  push:
+    branches:
+      - research/dec-free-autonomy-solo-pilot-20261104
+    paths:
+      - '.github/workflows/dec-free-autonomy-pinned-real-sources.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  minecraftaibuilder-real-v4h-source-baseline:
+    name: MinecraftAIBuilder actual V4H SOURCE baseline (NOT ART/Education)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Fetch verified REAL MAB protected research source (read-only credentials)
+        uses: actions/checkout@v4
+        with:
+          repository: ryomashibaba/MinecraftAIBuilder
+          ref: ad070ecb3244e1cce742f37e1943f0cff7e31ca2
+          path: real-mab
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Confirm immutable source identity and no private world I/O
+        run: |
+          cd real-mab
+          test "$(git rev-parse HEAD)" = ad070ecb3244e1cce742f37e1943f0cff7e31ca2
+          node --check source/ai/r125-v4h-mezzanine-author-ir.mjs
+          node --check source/ai/r125-v4h-authored-mezzanine.mjs
+      - name: Actual V4H mezzanine 3D/2-wide paths/writes-0 SOURCE tests
+        run: |
+          cd real-mab
+          node --test scripts/r125-v4h-mezzanine.test.mjs
+      - name: Ensure unchanged source; not real model/art/gameplay
+        run: |
+          cd real-mab
+          test -z "$(git status --porcelain --untracked-files=all)"
+          echo 'MAB_REAL_SOURCE_TESTS_ONLY; source revision pinned; real Qwen, ART, Education world interaction remain HOLD.'
+
+  browser-ink-tps-real-b423-baseline:
+    name: Browser Ink TPS actual B423 TYPECHECK + Vitest baseline (NOT Chromium 180s)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Fetch REAL TPS protected research source (read-only credentials)
+        uses: actions/checkout@v4
+        with:
+          repository: ryomashibaba/browser-ink-tps
+          ref: 0942eca28ca3cc2c66cc754c0d6d8e6fdedb6c07
+          path: real-tps
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Confirm immutable source identity
+        run: |
+          cd real-tps
+          test "$(git rev-parse HEAD)" = 0942eca28ca3cc2c66cc754c0d6d8e6fdedb6c07
+      - name: Install exactly locked dependencies
+        run: |
+          cd real-tps
+          npm ci --no-audit --no-fund
+      - name: Actual project TypeScript typecheck on pinned B423 source
+        run: |
+          cd real-tps
+          npm run typecheck
+      - name: Real pinned B193/B423 independent unit tests
+        run: |
+          cd real-tps
+          npx vitest run src/app/B193SourceCoopMode.test.ts
+      - name: Actual full TypeScript/Vite build (not native game proof)
+        run: |
+          cd real-tps
+          npm run build
+      - name: Ensure protected source was not changed
+        run: |
+          cd real-tps
+          test -z "$(git status --porcelain --untracked-files=all)"
+          echo 'TPS_REAL_SOURCE_TESTS_ONLY; Chrome 180s 4v4/ink/score/art not certified.'
