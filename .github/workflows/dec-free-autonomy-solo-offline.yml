@@ -96,6 +96,7 @@ jobs:
             'tools/free-autonomy-solo/windows_readonly_audit.ps1',
             'tools/free-autonomy-solo/RUN_PREPARE_REAL_PROJECT_ONCE.ps1',
             'tools/free-autonomy-solo/RUN_QWEN14B_REAL_SOURCE_DRAFT_ONCE.ps1',
+            'tools/free-autonomy-solo/RUN_REAL_MAB_V4H_14B_ARCHITECTURE.ps1',
             'tools/free-autonomy-solo/RUN_QWEN14B_TO_PUBLIC_GITHUB_QA_ONCE.ps1',
             'tools/free-autonomy-solo/RUN_CHECK_EXISTING_PRIVATE_DRAFTS_ONCE.ps1',
             'tools/free-autonomy-solo/RUN_PUBLISH_EXISTING_QWEN_MAB_TWO_DRAFTS.ps1',
@@ -112,6 +113,11 @@ jobs:
           & cmd /c 'tools\free-autonomy-solo\RUN_FIRST_PRIVATE_REAL_MODEL_PILOT.cmd' --ci-self-test
           if ($LASTEXITCODE -ne 0) { exit 2 }
           Write-Host 'WINDOWS_PRIVATE_PILOT_CMD_SELF_TEST_NO_MODEL'
+          & ./tools/free-autonomy-solo/RUN_REAL_MAB_V4H_14B_ARCHITECTURE.ps1 -CiSelfTest
+          if ($LASTEXITCODE -ne 0) { exit 2 }
+          & cmd /c 'tools\free-autonomy-solo\RUN_REAL_MAB_V4H_14B_ARCHITECTURE.cmd' --ci-self-test
+          if ($LASTEXITCODE -ne 0) { exit 2 }
+          Write-Host 'WINDOWS_REAL_14B_V4H_ARCHITECTURE_BOOTSTRAP_STATIC_PASS'
           & cmd /c 'tools\free-autonomy-solo\RUN_CHECK_EXISTING_PRIVATE_DRAFTS_ONCE.cmd' --ci-self-test
           if ($LASTEXITCODE -ne 0) { exit 2 }
           Write-Host 'WINDOWS_EXISTING_DRAFT_STATIC_PREFLIGHT_CMD_SELF_TEST'
@@ -220,3 +226,23 @@ jobs:
           python -m unittest discover -v -s tools/free-autonomy-solo -p test_public_source_qa_handoff.py
           python -m unittest discover -v -s tools/free-autonomy-solo -p test_receive_public_research_qa.py
           Write-Host 'PUBLIC_HANDOFF_WINDOWS_MOCK_ONLY_NO_GIT_PUSH_NO_REAL_QWEN'
+
+  windows-real-14b-architecture-offline:
+    runs-on: windows-2022
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Genuine Windows Python 3.13 static syntax and model-free original architect regression
+        shell: pwsh
+        run: |
+          python -m py_compile tools/free-autonomy-solo/real_mab_original_architecture_batch.py
+          python tools/free-autonomy-solo/real_mab_original_architecture_batch.py --ci-self-test
+          if ($LASTEXITCODE -ne 0) { exit 2 }
+          python -m unittest discover -v -s tools/free-autonomy-solo -p test_real_mab_original_architecture_batch.py
+          if ($LASTEXITCODE -ne 0) { exit 2 }
+          Write-Host 'REAL_WINDOWS_PYTHON_STATIC_AND_MOCK_PASSES__NO_QWEN_RUN'
