@@ -1,5 +1,8 @@
 # MinecraftAIBuilder — 開発再開の最新正本案内（2026-11-03）
 
+**2026-11-04 V3構造化Ollamaの実機互換性を1回のLOCAL推論で先行研究（新CI未確認）**：`node scripts/r125-v4j-v3-one-local.mjs --model qwen3:14b --out NEW_PRIVATE_DIR --genre housing`（`--genre`省略時 housing）。既存同一ジャンルの元briefを使用し、1件のみ `response_format=json_schema` の原本回答を保存する。1モデル要求/自動リトライ0。元回答をSHA検証付きの別PRIVATEディレクトリで追加AI0回再診断し、`V4J_V3_ONE_SHAREABLE.json` のみ共有可能。TEST DOUBLE/失敗はSOURCE成功と宣言しない。5ジャンルV3の実行はこの1件のHTTP互換性が確認できてからとし、5件の不必要な無駄なモデル呼出しを避ける。既存V2 Windows実行器は変更しない。本番・main・元Education成功・Draft PR #128/9ゲートBLOCKEDは不変。
+
+
 **2026-11-04 V2実Qwenの5種類の正確な拒否コード→V3オプトイン構造化JSON研究**：直近の保存済み実Qwenでは housing MASSING_PRIMARY_VOLUME_TOO_SMALL / shop COMPACT_ROOT / research CIVIC_AUTHOR_ONE_ORIGINAL_JSON_WITH_COMPLETE_PUBLIC_ARCHITECTURE / gallery COMPACT_SPACE_FIELDS / station GRAPH_SOLID_FOOTPRINT_OVERLAP、5件すべて元SHA一致、SOURCE0/5、ART HOLD。既存共通エンジンの多段契約を変更せず、研究専用 `--structured-v3` を `scripts/r125-v4j-five-genre-local.mjs` に追加。ローカルOllama互換 `/v1/chat/completions` にオプトインで `response_format.type=json_schema`（ユーザー指定形状、各genre別固定テンプレートなし）を渡す。リクエストは **1 POST/ジャンル、最大5 POST、逐次、追加リトライ/クラウドAPI/ワールド操作なし**。異なるV3プロンプトは元のV2を残して識別し、元応答・リクエスト/スキーマSHAをPRIVATE記録、再生時にメタデータを検証する。スキーマは欠落キー・型・列挙値などの研究対策であり、相互参照・外形欠損・平面的衝突・美術の合格を保証しない。CIフェイクは実モデルではなく、V3の実機性能を証明しない。既存のWindows V2起動器には変更なし。main/PR#128/9 BLOCKED保護。
 
 

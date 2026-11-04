@@ -26,6 +26,8 @@ on:
       - 'scripts/r125-v4j-civic-facade.test.mjs'
       - 'scripts/r125-v4j-five-genre-local.mjs'
       - 'scripts/r125-v4j-five-genre-local.test.mjs'
+      - 'scripts/r125-v4j-v3-one-local.mjs'
+      - 'scripts/r125-v4j-v3-one-local.test.mjs'
       - 'scripts/r125-v4j-five-genre-replay.mjs'
       - 'scripts/r125-v4j-five-genre-replay.test.mjs'
       - 'scripts/r125-v4e-source-art-review.mjs'
@@ -189,6 +191,8 @@ jobs:
           node --check scripts/r125-v4j-five-genre-local.mjs
           node --check scripts/r125-v4j-five-genre-local.test.mjs
           node --test scripts/r125-v4j-five-genre-local.test.mjs
+          node --check scripts/r125-v4j-v3-one-local.mjs
+          node --test scripts/r125-v4j-v3-one-local.test.mjs
           node --check source/ai/r125-v4j-precision-prompt.mjs
           node --check scripts/r125-v4j-precision-prompt.test.mjs
           node --test scripts/r125-v4j-precision-prompt.test.mjs
