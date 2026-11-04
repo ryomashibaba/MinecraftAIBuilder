@@ -1,0 +1,72 @@
+{
+  "schema": "dec-real-project-single-session-pinned-source-v1",
+  "purpose": "Select exactly one protected source lineage for local Qwen/Gemma; pinned source admission only, NOT model inference, source mutation or certification",
+  "simultaneous_active_projects_max": 1,
+  "local_model_auto_download": false,
+  "allow_paid_api": false,
+  "allow_main_write": false,
+  "allow_existing_source_revision_overwrite": false,
+  "allow_dockerless_untrusted_model_source_execution": false,
+  "work_requires_separate_approval": true,
+  "art_and_real_game_quality_not_certified": true,
+  "project_candidates": {
+    "minecraftaibuilder": {
+      "repository": "ryomashibaba/MinecraftAIBuilder",
+      "source_branch_at_audit": "feature/b198zr1-protected-architectural-revision",
+      "pinned_commit": "ad070ecb3244e1cce742f37e1943f0cff7e31ca2",
+      "source_file": "source/ai/r125-v4h-mezzanine-author-ir.mjs",
+      "source_blob_sha": "4cbcbb448737b314b6d5d4bfcdc367e9b1b45f52",
+      "research_branch_for_private_clone": "research/dec-local-14b-mab-v4h-source-pilot",
+      "native_qa_argv": [
+        [
+          "node",
+          "--test",
+          "scripts/r125-v4h-mezzanine.test.mjs"
+        ]
+      ],
+      "baseline_scope": "Actual V4H synthetic SOURCE compile/2-wide upper access tests; no genuine Qwen, Minecraft Education, ART acceptance",
+      "protected": [
+        "main",
+        "Education known-good R125→B143 pathway",
+        "existing authored versions",
+        "Minecraft world writes",
+        "Draft PR #128"
+      ]
+    },
+    "browser-ink-tps": {
+      "repository": "ryomashibaba/browser-ink-tps",
+      "source_branch_at_audit": "research/t21-b406-single-session-real-enemy-range-audit-20261103",
+      "pinned_commit": "0942eca28ca3cc2c66cc754c0d6d8e6fdedb6c07",
+      "source_file": "src/app/B193SourceCoopMode.ts",
+      "source_blob_sha": "9e2fe93e6e85cb12ffb27ac1d2506c87ee10bca4",
+      "research_branch_for_private_clone": "research/dec-local-14b-tps-b423-source-pilot",
+      "native_qa_argv": [
+        [
+          "npm",
+          "run",
+          "typecheck"
+        ],
+        [
+          "npx",
+          "vitest",
+          "run",
+          "src/app/B193SourceCoopMode.test.ts"
+        ],
+        [
+          "npm",
+          "run",
+          "build"
+        ]
+      ],
+      "package_lock_absent": true,
+      "baseline_scope": "Actual B423 source replay TypeScript, Vitest, Vite build; no genuine Chrome 180s, 4v4, score, physical original source fidelity",
+      "protected": [
+        "main",
+        "T20 production",
+        "Original-source immutable 25/17/26/0 references",
+        "Draft PR #5",
+        "Pages/public activation"
+      ]
+    }
+  }
+}
