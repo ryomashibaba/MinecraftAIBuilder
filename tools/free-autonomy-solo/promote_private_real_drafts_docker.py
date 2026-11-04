@@ -414,11 +414,18 @@ def main() -> int:
                     choices=("minecraftaibuilder", "browser-ink-tps"))
     ap.add_argument("--model", default="qwen3:14b")
     ap.add_argument("--allow-public-npm-deps", action="store_true")
+    ap.add_argument("--static-only", action="store_true",
+                    help="Read-only preflight of private drafts; never run generated code or Docker")
     args = ap.parse_args()
-    result = promote(args.receipt_dir, args.project, args.model,
-                     allow_public_npm_deps=args.allow_public_npm_deps)
+    if args.static_only:
+        result = preflight_private_drafts(args.receipt_dir, args.project, args.model)
+        expected = "STATIC_PRIVATE_DRAFTS_ADMISSIBLE_FOR_ISOLATED_QA_ONLY"
+    else:
+        result = promote(args.receipt_dir, args.project, args.model,
+                         allow_public_npm_deps=args.allow_public_npm_deps)
+        expected = "TWO_STAGES_INDEPENDENT_DOCKER_SOURCE_QA_LOCAL_COMMITS"
     print(json.dumps(result, ensure_ascii=False, indent=2))
-    return 0 if result["status"] == "TWO_STAGES_INDEPENDENT_DOCKER_SOURCE_QA_LOCAL_COMMITS" else 2
+    return 0 if result["status"] == expected else 2
 
 
 if __name__ == "__main__":
