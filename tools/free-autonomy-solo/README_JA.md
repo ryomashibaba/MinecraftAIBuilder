@@ -258,3 +258,20 @@
 実回帰は**外部GitHubに書き込まないローカルbare Git fixture**で実施。正常fast-forward保存、成功後の重複再送、リモートの同時更新競合、分岐、未検証ファイル混入、監督器実行内のpush記録、再開時のremote競合と未送信commit保持を検証した。GitHub Actionsの専用CI合格は監督器のSOURCE運用安全性に限られ、真のQwen/Gemma開発・Windows上の長時間自律運転・ART/Education/ブラウザ180秒4v4の合格にはならない。
 
 **運用注意**：旧バージョンの失敗済みPRIVATE状態を自動的に書き換えない。既存コミット履歴のremote変更があれば人間の承認なしに自動rebaseやpushを続けない。ユーザーのWindowsにDockerやモデルを無断導入せず、有料APIや新規公開の権限を拡大しない。
+
+
+## 2026-11-05：真正ローカルOllama（Qwen/Gemma）開発経路を安全な連続SOURCE QAに統合
+
+**背景**：OpenCode/無料クラウド監督器の競合防止・PRIVATE復旧が進んだ一方、ユーザーが本当に利用する`local_ollama_patch_loop.py`には古いGitHub push経路が残っていた。12月対策の目的はStrata完成でなく、追加課金原則0円で同一プロジェクトを長時間進めること。MinecraftAIBuilderとBrowser Ink TPSの優先度は同格であり、担当するローカルモデルは一度に1プロジェクトのみ。
+
+**今回の実装**：
+
+- `local_ollama_patch_loop.py`の2箇所（検証済みタスク直後、停止・再開後の未送信タスク）で、既存の`solo_agent.push_verified_research_commit`を共通利用。Git origin、研究branch、QA済みHEAD、clean作業ツリー、既存remote SHA、祖先関係、exact remote leaseを検査。リモートの別開発が進んだ場合は**HOLDで保存**し、fetch/rebase/merge/強制上書きしない。GitHubがpush成功を返したときだけPRIVATE状態の`pushed=true`に進める。
+- リモート競合で止まった際は`UNPUSHED_RESEARCH_COMMIT`をPRIVATE状態に残す。解消後の再開で、未実施モデル推論を増やさず既存検証済みコミットを再照合する。過去のHOLD文言が後の無関係な失敗を誤分類しないようにする。
+- `"quarantine_unverified_on_qa_failure": true`を明示した**新規PRIVATEセッションのみ**、独立SOURCE QAに不合格の候補をSHA256・元バイトのPRIVATE証拠として退避し、厳密な元コミットの研究clone状態へ戻して次の試行を行える。既定では従来の修復処理を維持する。QAによる追加ファイルや候補改変、禁止パス、容量制限超過、Git履歴変更はHOLD。
+- QAは現行どおりDocker内ネットワーク遮断で行い、直接Ollamaはローカル導入済みモデルにのみ接続する。DockerがユーザーWindowsにないならHOLDし、自動導入や非隔離の生成コード実行には切り替えない。公開モデル・有料API・外部認証の無断追加もしない。
+- 回帰は一時の**ローカルbare Git**で行い、真正Git操作のfast-forward保存・分岐拒否・停止後の未送信コミットの扱いと、模擬Qwen応答による2工程編集・QA不合格のPRIVATE退避・QA改変拒否・非booleanオプトイン拒否を確認。GitHubへの本物のpushやユーザーPC操作は実施しない。
+
+**実測の境界**：この修正に付随するオフライン回帰では、実Gitと模擬Ollama・模擬QAを用いて161件PASSを確認。真正Qwen3:14B連続推論、ユーザーWindows上のDockerと長時間動作、MinecraftのART/Education実機、Browser Ink TPSの正式180秒4v4は**未検証**。この文書を含む最新コミットの専用CI結果は必ず該当HEADで確認する。
+
+**次に必要な証拠**：本人PCでDocker隔離が利用できるときは、既存の1回起動経路で同一プロジェクトの複数の意味あるソース修正を実Qwenに実行させ、SOURCE QA→コミット→研究branchへの明示承認済み保存→再開まで通し、モデルとQAの失敗・時間・成果の質を記録する。Docker未導入なら安全なPRIVATE下書き経路を維持し、ユーザー操作を繰り返し要求しない。
