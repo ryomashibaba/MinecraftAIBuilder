@@ -53,8 +53,12 @@ def docker_argv(policy: DockerPolicy, workspace: Path, *, agent: bool, command: 
         raise SandboxHold("DEDICATED_CLONE_REQUIRED")
     if not command or not all(isinstance(x, str) and x and '\0' not in x for x in command):
         raise SandboxHold("INVALID_CHILD_COMMAND")
+    # Read-only provider-model catalog check: exact args only, no generated
+    # code, model request, login action or credential transfer. All other
+    # agent commands still require the existing explicit model run syntax.
+    catalog_only = agent and command == ["opencode", "models", "opencode"]
     if agent:
-        if command[0] != "opencode" or command[1:3] != ["run", "--auto"]:
+        if not catalog_only and (command[0] != "opencode" or command[1:3] != ["run", "--auto"]):
             raise SandboxHold("AGENT_MUST_USE_OPENCODE_RUN_AUTO")
     elif command[0] not in {"node", "npm", "python3"}:
         raise SandboxHold("QA_EXECUTABLE_NOT_ALLOWLISTED")
@@ -62,7 +66,7 @@ def docker_argv(policy: DockerPolicy, workspace: Path, *, agent: bool, command: 
     if agent and image.startswith("node:"):
         raise SandboxHold("AGENT_IMAGE_MUST_BE_OPENCODE")
     model = None
-    if agent:
+    if agent and not catalog_only:
         try:
             model = command[command.index("--model") + 1]
         except (ValueError, IndexError) as exc:
