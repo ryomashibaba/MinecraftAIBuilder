@@ -44,10 +44,13 @@ def validate_config(cfg: dict) -> None:
     if not isinstance(cfg["model"], str) or not re.fullmatch(r"[A-Za-z0-9_.:-]{1,90}", cfg["model"]):
         raise Hold("MODEL_NAME_INVALID")
     if (not isinstance(cfg["tasks"], list) or not cfg["tasks"] or len(cfg["tasks"]) > 100
-            or any(not isinstance(t, dict) or set(t) != {"path", "request"}
+            or any(not isinstance(t, dict) or not {"path", "request"}.issubset(t) or set(t) - {"path", "request", "checks"}
                    or not isinstance(t["request"], str) or not t["request"].strip()
                    or len(t["request"]) > 1500
                    or not isinstance(t["path"], str) or not TARGET_PATTERN.fullmatch(t["path"])
+                   or ("checks" in t and (not isinstance(t["checks"], list) or not t["checks"]
+                       or any(not isinstance(c, list) or not c or not all(isinstance(a, str) and a for a in c)
+                              or c[0] not in {"node", "npm"} for c in t["checks"])))
                    for t in cfg["tasks"])):
         raise Hold("TASKS_REQUIRE_EXPLICIT_EXISTING_SOURCE_PATH")
     if (not isinstance(cfg["allowed_prefixes"], list) or not cfg["allowed_prefixes"]
@@ -64,6 +67,8 @@ def validate_config(cfg: dict) -> None:
         value = cfg.setdefault(key, default)
         if type(value) is not int or not (1 <= value <= ceiling):
             raise Hold("INVALID_SAFETY_BUDGET_" + key)
+    if not isinstance(cfg.get("docker", {}), dict):
+        raise Hold("DOCKER_OPTIONS_MUST_BE_OBJECT")
     if cfg.get("docker", {}).get("network", "none") != "none":
         raise Hold("DIRECT_LOCAL_MODEL_REQUIRES_QA_NETWORK_NONE")
     DockerPolicy.from_config(cfg)
@@ -132,6 +137,21 @@ def apply_exact_patch(target: Path, proposal: dict, original: str) -> str:
     return hashlib.sha256(modified.encode("utf-8")).hexdigest()
 
 
+def ensure_remote_research_branch(cfg: dict, workspace: Path) -> None:
+    """Prevent push from quietly creating a new, unapproved remote branch."""
+    verify_repo(cfg)
+    ref = "refs/heads/" + cfg["branch"]
+    try:
+        r = subprocess.run(["git", "ls-remote", "--heads", "origin", ref],
+                           cwd=workspace, capture_output=True, text=True, timeout=20,
+                           env={**os.environ, "GIT_TERMINAL_PROMPT": "0",
+                                "GCM_INTERACTIVE": "Never"})
+    except (OSError, subprocess.TimeoutExpired) as ex:
+        raise Hold("REMOTE_BRANCH_VERIFICATION_UNAVAILABLE") from ex
+    if r.returncode != 0 or not r.stdout.strip().endswith("\t" + ref):
+        raise Hold("REMOTE_APPROVED_RESEARCH_BRANCH_NOT_FOUND")
+
+
 def execute(cfg: dict, *, push: bool = False) -> dict:
     validate_config(cfg)
     workspace = verify_repo(cfg)
@@ -166,6 +186,7 @@ def execute(cfg: dict, *, push: bool = False) -> dict:
             for entry in state["commits"]:
                 if not entry["pushed"]:
                     verify_repo(cfg)
+                    ensure_remote_research_branch(cfg, workspace)
                     git(workspace, "push", "origin", "HEAD:refs/heads/" + cfg["branch"])
                     entry["pushed"] = True
                     write_atomic(state_path, state)
@@ -208,7 +229,7 @@ def execute(cfg: dict, *, push: bool = False) -> dict:
                         raise Hold("PATCH_MODIFIED_UNEXPECTED_PATHS")
                     before_qa = snapshot_candidate(workspace, changed)
                     failures = []
-                    for i, argv in enumerate(cfg["checks"]):
+                    for i, argv in enumerate(t.get("checks", cfg["checks"])):
                         rc, output = run_in_docker(cfg, argv, workspace,
                                                   cfg["qa_timeout_seconds"],
                                                   state_dir / f"qa_{cycle:04}_{i}.private.log",
@@ -241,6 +262,7 @@ def execute(cfg: dict, *, push: bool = False) -> dict:
                     write_atomic(state_path, state)
                     if push:
                         verify_repo(cfg)
+                        ensure_remote_research_branch(cfg, workspace)
                         git(workspace, "push", "origin", "HEAD:refs/heads/" + cfg["branch"])
                         state["commits"][-1]["pushed"] = True
                         write_atomic(state_path, state)
