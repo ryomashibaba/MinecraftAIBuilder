@@ -154,8 +154,10 @@ def qa_commands(project: str) -> list[list[str]]:
         return [
             ["node", "node_modules/typescript/bin/tsc", "--noEmit", "--incremental", "false"],
             ["node", "node_modules/vitest/vitest.mjs", "run",
+             "--configLoader", "runner",
              "src/app/B193SourceCoopMode.test.ts"],
             ["node", "node_modules/vite/bin/vite.js", "build",
+             "--configLoader", "runner",
              "--outDir", "/tmp/qa-tps-dist"],
         ]
     raise Hold("UNSUPPORTED_PROJECT")
