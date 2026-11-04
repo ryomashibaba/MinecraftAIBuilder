@@ -1,4 +1,4 @@
-# Dec 2026: fixed research SOURCE, one genuine installed Qwen14B V4H author attempt.
+# December: genuine local Qwen14B one-shot V4H, immutable amended author contract.
 #Requires -Version 5.1
 <#
   R125 V4H independent PRIVATE local-Qwen SOURCE audition.
@@ -117,7 +117,9 @@ if (-not (Test-Path -LiteralPath $attemptShare -PathType Leaf)) {
 }
 $attempt = Get-Content -LiteralPath $attemptShare -Raw -Encoding UTF8 | ConvertFrom-Json
 $fullPath = Join-Path $studyDir 'V4D_LOCAL_AUTHOR_REPORT.json'
-$privateReport = if (Test-Path -LiteralPath $fullPath -PathType Leaf) { Get-Content -LiteralPath $fullPath -Raw -Encoding UTF8 | ConvertFrom-Json } else { $null }
+$privateReport = if (Test-Path -LiteralPath $fullPath -PathType Leaf) {
+    Get-Content -LiteralPath $fullPath -Raw -Encoding UTF8 | ConvertFrom-Json
+} else { $null }
 if ($null -eq $privateReport -or $privateReport.testInjectionPresent -ne $false -or
     $attempt.modelId -cne $Model -or
     $attempt.authorContract -cne 'minecraftaibuilder-r125-v4h-mezzanine-author-v1' -or
@@ -165,29 +167,10 @@ $share = [ordered]@{
     sourceCirculation = $attempt.sourceCirculation
     failureCategory = $attempt.failureCategory
     systemPromptSha256 = $privateReport.systemPromptSha256
-    reasonCode = if ([string]$privateReport.reason -cmatch '^R125_[A-Z0-9_]{1,125}    offlineReplayStatus = if ($null -ne $diagnosis) { $diagnosis.replayStatus } else { 'NOT_NEEDED_OR_NO_RAW' }
-    offlineReplayAdditionalModelCalls = 0
-    humanArchitecturalArt = 'NOT_REVIEWED'
-    actualMinecraftWalking = 'NOT_TESTED'
-    constructionApproved = $false
-    readiness = 'NOT_PREPARED'
-    nineSafetyGates = '9 BLOCKED'
-    worldContacts = 0
-    worldWrites = 0
-    instruction = 'Share ONLY this JSON. Keep private model responses, full evidence folders and architecture source on your own PC. SOURCE is not ART PASS.'
-}
-$share | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $sharePath -Encoding UTF8 -NoNewline
-Write-Output ('V4H_SHARE_ONLY_THIS_FILE=' + $sharePath)
-if ($attempt.sourceCandidateVerified) {
-    Write-Output 'V4H_SOURCE_CANDIDATE_ART_HOLD_NEEDS_HUMAN_REVIEW'
-} else {
-    Write-Output 'V4H_SOURCE_HOLD_DO_NOT_RETRY_AUTOMATICALLY'
-}
-if (-not $OriginalTestFlag) {
-    Start-Process -FilePath explorer.exe -ArgumentList ('/select,"' + $sharePath + '"') -ErrorAction SilentlyContinue | Out-Null
-}
-if ($runExit -ne 0) { exit 2 }
-) { [string]$privateReport.reason } else { 'PRIVATE_REASON_NOT_SHAREABLE' }
+    reasonCode = if ($null -ne $privateReport.PSObject.Properties['reason'] -and
+                      [string]$privateReport.reason -cmatch '^R125_[A-Z0-9_]{1,125}$') {
+                      [string]$privateReport.reason
+                 } else { 'PRIVATE_REASON_NOT_SHAREABLE' }
     offlineReplayStatus = if ($null -ne $diagnosis) { $diagnosis.replayStatus } else { 'NOT_NEEDED_OR_NO_RAW' }
     offlineReplayAdditionalModelCalls = 0
     humanArchitecturalArt = 'NOT_REVIEWED'
