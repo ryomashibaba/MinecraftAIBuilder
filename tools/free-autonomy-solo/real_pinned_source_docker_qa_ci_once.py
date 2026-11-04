@@ -72,13 +72,16 @@ def main():
         # Execute a real adversarial write attempt in the exact readonly
         # SOURCE+network-none QA container. Must fail and leave no canary.
         canary = root / "repo" / ".docker-readonly-source-canary"
-        rc, _ = docker_run(
+        rc, negative_output = docker_run(
             root / "repo",
             ["node", "-e",
              "require('fs').writeFileSync('/work/.docker-readonly-source-canary', 'BAD')"],
             root, "negative-readonly-qa", timeout=35)
         if rc == 0 or canary.exists():
             raise SystemExit("DOCKER_QA_READONLY_ISOLATION_BREAK")
+        if not any(marker in negative_output for marker in (
+                "EROFS", "EACCES", "read-only file system", "permission denied")):
+            raise SystemExit("DOCKER_NEGATIVE_TEST_FAILED_FOR_UNKNOWN_REASON")
         fixture(root, args.project, manifest)
         result = promote(root, args.project, MODEL,
                          allow_public_npm_deps=args.project=="browser-ink-tps")
