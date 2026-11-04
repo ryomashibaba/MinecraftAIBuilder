@@ -13,6 +13,8 @@ on:
       - 'scripts/r125-v4h-mezzanine-source-study.mjs'
       - 'scripts/r125-v4h-mezzanine-section.mjs'
       - 'scripts/r125-v4h-mezzanine.test.mjs'
+      - 'scripts/r125-v4i-architectural-art-audit.mjs'
+      - 'scripts/r125-v4i-architectural-art-audit.test.mjs'
       - 'scripts/r125-v4e-source-art-review.mjs'
       - 'scripts/r125-v4e-cross-genre-source-study.mjs'
       - 'scripts/r125-v4d-compact-model-fixture.mjs'
@@ -117,6 +119,33 @@ jobs:
           echo 'Node tests use INJECTED TEST DOUBLE for both legacy detailed and new compact author contracts. No actual Ollama, no 2B/Mac evidence, no new Qwen/Gemma design, no paid API, no Minecraft world access.' >> "$GITHUB_STEP_SUMMARY"
           echo 'A verified true B143 geometry from a synthetic author is NOT a real-model success or an ART certification.' >> "$GITHUB_STEP_SUMMARY"
           echo '9 BLOCKED, BuildPlan empty, NOT_PREPARED, WorldWrites0. Preserve main, prior model originals and Draft PR #128.' >> "$GITHUB_STEP_SUMMARY"
+
+  v4i-independent-appearance-triage:
+    name: V4I B143 evidence-only ART HOLD audit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify quantitative art evidence is strictly source-only and ART-HOLD
+        run: |
+          node --check scripts/r125-v4i-architectural-art-audit.mjs
+          node --check scripts/r125-v4i-architectural-art-audit.test.mjs
+          node --test scripts/r125-v4i-architectural-art-audit.test.mjs
+      - name: Export five authentic B143 silhouettes, exterior deltas, diversity and surface dominance for HUMAN ART judgement
+        run: |
+          node scripts/r125-v4i-architectural-art-audit.mjs "$RUNNER_TEMP/v4i-b143-art-hold"
+          test -s "$RUNNER_TEMP/v4i-b143-art-hold/V4I_ART_HOLD_VISIBLE_GEOMETRY_AND_DIVERSITY.json"
+          test -s "$RUNNER_TEMP/v4i-b143-art-hold/V4I_ACTUAL_B143_DIVERSITY_MATRIX.svg"
+          test "$(find "$RUNNER_TEMP/v4i-b143-art-hold" -name 'V4I_*_TRUE_FIVE_VIEWS.svg' | wc -l)" -eq 5
+          test "$(find "$RUNNER_TEMP/v4i-b143-art-hold" -name 'V4I_*_EXTERIOR_DELTA.svg' | wc -l)" -eq 5
+      - uses: actions/upload-artifact@v4
+        with:
+          name: V4I-SYNTHETIC-FIVE-GENRE-B143-APPEARANCE-AUDIT-ART-HOLD
+          path: ${{ runner.temp }}/v4i-b143-art-hold/
+          retention-days: 7
 
   windows-offline-launch-contract:
     name: Windows PowerShell NO-MODEL preflight

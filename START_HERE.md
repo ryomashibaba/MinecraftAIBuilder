@@ -1,5 +1,13 @@
 # MinecraftAIBuilder — START HERE（新チャット・AI開発者の統一入口）
 
+## 2026-11-04 V4I 不在時クラウド安全ART監査（SYNTHETIC、実Qwen不要）
+
+- **目的**：V4Hでは真正B143で2階の用途と動線は成功したが、内観の改善が外観の改善を意味するわけではない。「SOURCE PASSだから美しい」を禁止するため、5ジャンルの独立合成作者によるB143全ボクセルから、屋根/入口北立面/南/西/東の**深度・外形・材質の投影変化**を数字で検査する。
+- `scripts/r125-v4i-architectural-art-audit.mjs`：V4G高ホールをBEFORE、V4H上階ホールをAFTERとして、同一ジャンル・同一デザインの真正B143から5方向の `silhouetteChangedCells`/`depthChangedCells`/`materialChangedCells` を測定。異ジャンル同士ではスケール/平行移動を正規化した5方向の外形Jaccard（10組）と可視表面の素材支配率を提供する。**事前に合格閾値を発明せず**、これらは材料の良し悪しや建築美術・視線の意味の自動審査をしない。実Qwenを装ったテンプレート生成はしない。
+- **ART REVIEW実物証拠**：`V4I_ART_HOLD_VISIBLE_GEOMETRY_AND_DIVERSITY.json`・`V4I_ACTUAL_B143_DIVERSITY_MATRIX.svg`・5ジャンル×5方向の真正B143 SVGと外観の前後可視差分。GitHub Actions `V4I B143 evidence-only ART HOLD audit` でソース、原本保護、9 BLOCKED、WorldWrites0・元の2階用途の到達を独立検査し、7日保存Artifactsを閲覧可能。住宅/店舗/研究/展示/駅舎の美術に未承認のスコア合格/REJECT数値閾値は使用しない。
+- 外出中はPC内のOllama実行不可なので、初回実Qwen V4H試験は**未実施のまま保留**。ランチャー・既存の933ブロックEducation施工成功・R125主経路・main原本・PR#128 Open Draftを変更禁止。美術はART HOLD、SOURCEのみ検査できる。次は人の目で実3Dから明確なデザイン問題を抽出し、ホスト固定の箱型テンプレートに引き戻さず、AIが本当に使える建築外形・立面表現を広げる。
+
+
 ## 2026-11-04 V4H実Qwen初回パイロット用・PINNED 1操作 Windows ランチャー（未実機）
 
 - **本工程実装**: `scripts/r125-v4h-real-qwen-trial.ps1`。実ユーザーPCに対し、PowerShell 5.1+・git・Node 20+と既存のローカルOllama `qwen3:14b` を使う**本人が明示して起動する1回だけの**SOURCE-only試験。`-CheckOnly` は0 clone/0 model/0 world。実試験は40桁 `-ExpectedCommit` を必須とし、固定の研究ブランチを**新しい隔離LOCALAPPDATAフォルダ**へ1回clone後、remote/branch/実HEADが指定値と一致しない場合は**0モデル呼出しで拒否**。mainや既存原本に触らない。安全検査は全て継承し、失敗時に後追い生成を行わない。
