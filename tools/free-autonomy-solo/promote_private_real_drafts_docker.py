@@ -25,7 +25,7 @@ import uuid
 
 from docker_sandbox import DockerPolicy, SandboxHold
 from prepare_pinned_real_project import load_manifest, verify_private_clone, Hold as CloneHold
-from draft_real_project_local14b import exclusive_local_project_lock, bounded_replacement
+from draft_real_project_local14b import exclusive_local_project_lock, ANCHORS
 
 QA_IMAGE = "node:22-bookworm-slim"
 QA_MEMORY = "4g"
@@ -262,6 +262,10 @@ def promote(root: Path, project: str, model: str,
                 raise Hold("DRAFT_CHAIN_BROKEN")
             for previous, following in ((before, drafts[0]), (drafts[0], drafts[1])):
                 _check_one_contiguous_revision(previous, following)
+                for contract_name in ANCHORS[project]:
+                    if previous.count(contract_name) and (
+                            following.count(contract_name) < previous.count(contract_name)):
+                        raise Hold("PROTECTED_PUBLIC_CONTRACT_ANCHOR_REMOVED")
             require_docker_qa_image()
             if project == "browser-ink-tps" and not allow_public_npm_deps:
                 raise Hold("TPS_PUBLIC_NPM_DEP_SETUP_NEEDS_OPT_IN")
