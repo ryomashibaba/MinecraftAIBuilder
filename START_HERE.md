@@ -2,7 +2,7 @@
 
 ## 2026-11-04 V4J 前庭3ベイの真正公共ファサード・安全な見た目改善研究
 
-- V4I監査で「上階追加126ボクセルでも屋根5方向の外観変化ほぼゼロ」と判明した問題に、実外形改善の研究実装で応える。**ユーザー外出中・ローカルLLM不可**のため、GitHubのCIだけで完了する合成5作者の独立試験を行う。`scripts/r125-v4j-civic-arcade.mjs` がV4Hの建物一式を非既定研究として受け取り、作者明示の `arcade:{width,depth,setback,roofline:[left,center,right],postMaterial,roofMaterial,serviceMaterial,purpose}` に従い、入口手前の公共床上に**連続支持柱8本、屋根高さを3区間独立に設計した本物の外部3D屋根、屋根段差の接続立ち上がり、両側の公共設備2台**を作成。形式だけの飾りではなく中央の入口から2幅歩行路と外部公共機能を実B143のSOURCEで証明する。
+- V4I監査で「上階追加126ボクセルでも屋根5方向の外観変化ほぼゼロ」と判明した問題に、実外形改善の研究実装で応える。**ユーザー外出中・ローカルLLM不可**のため、GitHubのCIだけで完了する合成5作者の独立試験を行う。`scripts/r125-v4j-civic-arcade.mjs` と `scripts/r125-v4j-lossless-b143-pack.mjs`（既存V4H高密度B143を同じ全ボクセル・geometry SHAで厳密照合し、BOX repeatに表現だけ圧縮。160要素上限は緩和しない） がV4Hの建物一式を非既定研究として受け取り、作者明示の `arcade:{width,depth,setback,roofline:[left,center,right],postMaterial,roofMaterial,serviceMaterial,purpose}` に従い、入口手前の公共床上に**連続支持柱8本、屋根高さを3区間独立に設計した本物の外部3D屋根、屋根段差の接続立ち上がり、両側の公共設備2台**を作成。形式だけの飾りではなく中央の入口から2幅歩行路と外部公共機能を実B143のSOURCEで証明する。
 - 既存正面ひさしに**二枚重ね**で屋根を作らず、前庭内に別の実体積として構成。入口・従来のレセプション設備とルート、二層階段・上階の利用設備、全旧ボクセル・安全ゲートを完全保護。外形はAUTHOREDの3区間屋根高さ/材料/目的のみが選択を左右し、ホストが用途ごとに様式を決めたり、無理な指定を自動調整したりしない。最小限の厳密な地面・AIR・現物ガラス・プログラム経路・五方向実投影を検証する。
 - `scripts/r125-v4j-civic-facade-study.mjs` が独立の住宅/店舗/研究施設/展示館/駅舎の**合成**作者から、前後の真正B143 SVG 5面図×5組・変更点・3DプレビューHTML・原文/geometry SHAとSOURCEレポートを生成。新GitHub Actions `V4J true civic entry architecture source-only ART HOLD` が検証・7日Artifacts保存。確認したいのは既存V4Hより外観の屋根上方投影が実際に変化するか。**美術が良いと判定することではない**。
 - 実Qwenのモデル生成・芸術的自由設計・Minecraft実歩行・建築の耐候性/荷重安全は未試験。`NOT_PREPARED`、BuildPlan空、WorldWrites0、9ゲートBLOCKED、mainや既存原本、教育用花屋933ブロック経路、PR #128 Open/Draftを不変更。Work/Computer Use事前承認、追加課金禁止、ART正式HOLD。次は実3Dでレビューし、作者にさらなる外形操作の自由を与えるかを決定する。

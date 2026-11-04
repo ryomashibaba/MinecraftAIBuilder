@@ -11,6 +11,8 @@ import {compileDesign,verifyCompiled,MATERIALS}
 import {auditR125SourceRoutes} from '../source/ai/r125-source-routes.mjs';
 import {auditB143ProjectedVisibility}
  from '../scripts/r125-v4e-visibility-delta.mjs';
+import {packV4JWithoutAnyGeometryChanges}
+ from './r125-v4j-lossless-b143-pack.mjs';
 const fail=x=>{throw Error('R125_V4J_PUBLIC_ARCADE_'+x);};
 const K=(x,y,z)=>x+','+y+','+z;
 const exact=(v,fields)=>v!==null&&typeof v==='object'&&!Array.isArray(v)&&
@@ -30,7 +32,6 @@ function continuousTwoWideWalk(occupied,bounds,entrance,covered){
  for(let i=0;i<todo.length;i++){
   const [x,z]=todo[i];
   for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]]){
-   const id=K(x+dx,0,z+dz).replace(',0,',',');
    // Use consistent pair IDs: forbid a hidden diagonal shortcut.
    const pair=[x+dx,z+dz],p=pair.join(',');
    if(!seen.has(p)&&clear(...pair)){seen.add(p);todo.push(pair);}
@@ -138,14 +139,15 @@ export function compileAuthoredCivicApproachArcade(originalMezzanineAuthor,autho
   stage('facade-civic-function-workpoint-'+i,
    [x,2,zService],[2,1,1],a.serviceMaterial);
  }
- if(design0.elements.length+extra.length>160)
-  fail('B143_160_ELEMENT_MAX_PROTECTED');
+ const requiredSaved=Math.max(0,design0.elements.length+extra.length-160);
+ const packing=packV4JWithoutAnyGeometryChanges(design0,old,requiredSaved);
  for(const [id,mat] of planned){
   if(before.has(id))
    fail('NEW_FUNCTION_OVERWRITES_ANY_PROTECTED_OLD_VOXEL');
  }
- const design={...design0,elements:[
-  ...design0.elements.map(e=>structuredClone(e)),...extra]};
+ const design={...packing.design,elements:[
+  ...packing.design.elements.map(e=>structuredClone(e)),...extra]};
+ if(design.elements.length>160)fail('B143_LIMIT_NOT_RELAXED');
  const compiled=compileDesign(design);
  if(!verifyCompiled(design,compiled)||
   compiled.geometrySha256===old.geometrySha256)
@@ -250,6 +252,7 @@ export function compileAuthoredCivicApproachArcade(originalMezzanineAuthor,autho
    allFunctionsReachable:true,
    physicallyNewB143VoxelCount:planned.size,
    genuineVisibleFiveViewDelta:visibility,
+   losslessOriginalB143Packing:packing.proof,
    skylineAndForecourtAreOutsidePriorCanopy:true,
    realHumanArt:'NOT_REVIEWED',originalModel:'NOT_TESTED',
    trueMinecraftWalking:'NOT_TESTED',physicalStructuralSafety:'NOT_TESTED'
