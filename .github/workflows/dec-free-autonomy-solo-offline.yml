@@ -104,6 +104,11 @@ jobs:
             if ($parseErrors.Count -gt 0) { $parseErrors | Format-List | Out-String | Write-Host; exit 2 }
           }
           Write-Host 'WINDOWS_READONLY_AND_PINNED_CLONE_PS_AST_PASS'
+          # Exercise the Windows double-click bootstrap in a mode that never
+          # downloads source, invokes Ollama, or modifies any repository.
+          & cmd /c 'tools\free-autonomy-solo\RUN_FIRST_PRIVATE_REAL_MODEL_PILOT.cmd' --ci-self-test
+          if ($LASTEXITCODE -ne 0) { exit 2 }
+          Write-Host 'WINDOWS_PRIVATE_PILOT_CMD_SELF_TEST_NO_MODEL'
 
 
   windows-no-docker-python-contract:
