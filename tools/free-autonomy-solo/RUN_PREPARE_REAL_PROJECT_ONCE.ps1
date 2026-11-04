@@ -8,12 +8,12 @@ param(
 )
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
-$rev = '98d33ce641ac29b2850df6ccfacb711c0b6d0478'
+$rev = 'a23b0e5b23affa5aae43fa0e9e6a2a4ff650e5fc'
 $ownerRepo = 'ryomashibaba/MinecraftAIBuilder'
 $manifest = 'REAL_PROJECT_SINGLE_SESSION_MANIFEST_20261104.json'
 $scriptName = 'prepare_pinned_real_project.py'
 $files = @(
-  @{ Name = $manifest; SHA = '0e601f25dd14d4475bcdb31efda1d5041a34b005' },
+  @{ Name = $manifest; SHA = '45c51152eff0c12e0deb7f213a04c78bdc2ae41a' },
   @{ Name = $scriptName; SHA = 'ce4d56452ec0a1d513dfa419a80780eed1283894' }
 )
 if (-not (Get-Command python -ErrorAction SilentlyContinue)) {

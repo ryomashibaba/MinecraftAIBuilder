@@ -13,13 +13,13 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 # Immutable, reviewed source bundle. Do not replace with mutable branch HEAD.
-$revision = '9297aa7e711613be03cca257671e6820508a4557'
+$revision = 'a23b0e5b23affa5aae43fa0e9e6a2a4ff650e5fc'
 $repo = 'ryomashibaba/MinecraftAIBuilder'
 $files = @(
   @{ Name = 'draft_real_project_local14b.py'; GitBlob = 'f8539d764c15217f70d0c17c5b5629cc6e9dddeb' },
   @{ Name = 'prepare_pinned_real_project.py'; GitBlob = 'ce4d56452ec0a1d513dfa419a80780eed1283894' },
   @{ Name = 'local_qwen_no_docker_two_step.py'; GitBlob = 'ec98a13b7191a3f70f58af3bf3c08f85c8e60503' },
-  @{ Name = 'REAL_PROJECT_SINGLE_SESSION_MANIFEST_20261104.json'; GitBlob = '64092643467a6fb07753d669839106eed3be6102' }
+  @{ Name = 'REAL_PROJECT_SINGLE_SESSION_MANIFEST_20261104.json'; GitBlob = '45c51152eff0c12e0deb7f213a04c78bdc2ae41a' }
 )
 
 if (-not $env:LOCALAPPDATA) { throw 'LOCALAPPDATA_REQUIRED' }
