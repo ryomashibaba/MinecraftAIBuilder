@@ -96,10 +96,45 @@ test('one opt-in V4 fake schema call remains HOLD and exports distinct V4 sharea
   assert.equal(o.modelGenerationAttempts,1);
   assert.equal(o.replayAdditionalModelCalls,0);
   assert.equal(o.replayStatus,'HOLD_REPLAY_SOURCE_REJECTED');
+  assert.equal(o.graphEntryNorthSideOccupied,null);
   assert.deepEqual(o.gates,Array(9).fill('BLOCKED'));
   assert.equal(o.worldWrites,0);
   assert.deepEqual(JSON.parse(fs.readFileSync(path.join(out,'V4J_V4_ONE_SHAREABLE.json'),'utf8')),o);
   assert.equal(fs.existsSync(path.join(out,'V4J_V3_ONE_SHAREABLE.json')),false);
   assert.equal(fs.existsSync(path.join(out+'-replay','REPLAY_SHAREABLE_STATUS.json')),true);
  }finally{fs.rmSync(d,{recursive:true,force:true});}
+});
+test('V4 clipboard-safe report shows north entry collision only with SHA-verified original replay evidence (mock only)',async()=>{
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'v4j-graph-safe-'));
+ const out=path.join(dir,'one'),calls=[];
+ const fetcher=async(_url,opts)=>{
+  calls.push(opts.method);
+  if(opts.method==='GET')return {ok:true,text:async()=>JSON.stringify({
+   models:[{name:'qwen3:14b'}]})};
+  return {ok:true,text:async()=>JSON.stringify({
+   model:'qwen3:14b',choices:[{finish_reason:'stop',
+    message:{role:'assistant',content:'{"schema":"invalid"}'}}]})};
+ };
+ const replay=()=>({
+  status:'HOLD_REPLAY_SOURCE_REJECTED',
+  compilerRejectCode:'GRAPH_ENTRY',
+  originalResponseIntegrity:'SHA256_MATCH',
+  structuralDiagnosticIssueCodes:['ENTRY_NORTH_SIDE_OCCUPIED'],
+  additionalModelCalls:0
+ });
+ try{
+  const result=await runV3OneGenreStudy({
+   model:'qwen3:14b',outDir:out,genre:'housing',geometryEnvelopeV4:true
+  },{fetcher,replay,timeoutMs:15000});
+  assert.equal(result.graphEntryNorthSideOccupied,true);
+  assert.equal(result.compilerRejectCode,'GRAPH_ENTRY');
+  assert.equal(result.sourceCandidateVerified,false);
+  assert.equal(result.explicitlyInjectedTestResponse,true);
+  assert.deepEqual(calls,['GET','POST']);
+  const shared=fs.readFileSync(path.join(out,'V4J_V4_ONE_SHAREABLE.json'),'utf8');
+  assert.equal(JSON.parse(shared).graphEntryNorthSideOccupied,true);
+  assert(!shared.includes(dir));
+  assert(!shared.includes('{"schema":"invalid"}'));
+  assert.deepEqual(result.gates,Array(9).fill('BLOCKED'));
+ }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });

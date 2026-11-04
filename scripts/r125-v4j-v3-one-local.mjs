@@ -73,13 +73,23 @@ export async function runV3OneGenreStudy(options,{
  if(injected&&receipt.explicitlyInjectedTestResponse!==true)
   fail('TEST_DOUBLE_IDENTITY_MISSING');
  let replayStatus='NOT_ATTEMPTED_NO_SAVED_MODEL_RESPONSE',
-  compilerRejectCode=null,replayAdditionalModelCalls=0;
+  compilerRejectCode=null,replayAdditionalModelCalls=0,
+  graphEntryNorthSideOccupied=null;
  if(report.rawCaptured===true){
   try{
    const result=replay(out,out+'-replay');
    replayStatus=result.status;
    compilerRejectCode=result.compilerRejectCode??null;
    replayAdditionalModelCalls=result.additionalModelCalls;
+   // Only a SHA-verified original and an actual frozen GRAPH_ENTRY reject
+   // may yield a specific privacy-safe entry-side diagnosis.
+   if(result.originalResponseIntegrity==='SHA256_MATCH'&&
+      result.status==='HOLD_REPLAY_SOURCE_REJECTED'&&
+      result.compilerRejectCode==='GRAPH_ENTRY'&&
+      result.additionalModelCalls===0&&
+      Array.isArray(result.structuralDiagnosticIssueCodes))
+    graphEntryNorthSideOccupied=result.structuralDiagnosticIssueCodes
+     .includes('ENTRY_NORTH_SIDE_OCCUPIED');
   }catch{
    replayStatus='HOLD_OFFLINE_REPLAY_SAFE_STOP';
   }
@@ -98,6 +108,7 @@ export async function runV3OneGenreStudy(options,{
   explicitlyInjectedTestResponse:receipt.explicitlyInjectedTestResponse,
   modelGenerationAttempts:receipt.modelCallAttempts,
   replayStatus,compilerRejectCode,replayAdditionalModelCalls,
+  graphEntryNorthSideOccupied,
   systemSchemaEnforcementNotIndependentlyVerified:true,
   noPromptOrRawSourceOrPrivatePathIncluded:true,
   humanArchitecturalArt:'NOT_REVIEWED',
