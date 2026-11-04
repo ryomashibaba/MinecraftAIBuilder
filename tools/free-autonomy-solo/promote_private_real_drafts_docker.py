@@ -85,11 +85,16 @@ def docker_run(workspace: Path, args: list[str], root: Path, label: str,
     # Containers have no host credentials/Docker socket. The whole source
     # is read-only for QA. Only explicitly requested dependency preflight may
     # use a writable private staging clone + public npm network.
+    # Use the host user's numeric UID on Linux, so the disposable npm
+    # staging clone remains writable without granting the container root.
+    # Docker Desktop Windows mounts use Docker's remapped user as configured.
+    user = (f"{os.getuid()}:{os.getgid()}"
+            if hasattr(os, "getuid") and os.getuid() != 0 else "1000:1000")
     argv = ["docker", "run", "--rm", "--init", "--read-only",
             "--cap-drop=ALL", "--security-opt=no-new-privileges",
             "--pids-limit", "128", "--memory", QA_MEMORY,
             "--cpus", QA_CPUS, "--network", network,
-            "--user", "1000:1000",
+            "--user", user,
             "--tmpfs", "/tmp:rw,nosuid,size=384m",
             "--tmpfs", "/home/agent:rw,nosuid,size=256m",
             "--workdir", "/work", "--env", "HOME=/home/agent",
