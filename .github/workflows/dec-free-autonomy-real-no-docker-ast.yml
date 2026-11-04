@@ -1,0 +1,30 @@
+name: Dec local 2-step no-Docker-AST real model witness (ephemeral)
+
+on:
+  push:
+    branches:
+      - research/dec-free-autonomy-solo-pilot-20261104
+    paths:
+      - 'tools/free-autonomy-solo/real_no_docker_ast_ci_once.py'
+
+permissions:
+  contents: read
+
+jobs:
+  genuine-local-qwen-ast-two-stage:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Pull official public Ollama image
+        run: docker pull ollama/ollama:latest
+      - name: Run real public Qwen3 1.7B and bounded AST interpreter (NO model code execution)
+        run: python3 tools/free-autonomy-solo/real_no_docker_ast_ci_once.py
+      - name: Evidence scope
+        if: always()
+        run: |
+          echo 'No paid API, no Docker on user Windows, and no user project data used.'
+          echo 'One public 1.7B CPU fixture is not a certification of the 14B Windows setup.'
+          echo 'This does not test real Minecraft/TPS source code or overnight autonomy.'
