@@ -34,3 +34,12 @@
 3. 真正長時間運用へ進む前に、**本物の独立clone保証、OS隔離、リソース/ネットワーク安全性、正本非破壊、GitHubへの研究コミット・回復**を検証。長時間稼働の本質は品質と成果であり、テスト件数やStrata実装数ではない。
 
 注意：GitHub ActionsログのSUCCESS/FAILはタスク全体のPASSであり、一部のMODEL/QAステップ成功を「完成」と記載しない。
+
+
+## 追加の真正再試験（監査更新）
+
+5. [#41749324866](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41749324866)：**completed/failure**。本物のQwen3 1.7Bで4サイクル、QA合格済みローカルGitコミット1件（`868701ab1bf2f88f60c05035288e1e959a9e8493`）。モデルが無変更のfind/replaceを出した2回は、**ソース無書込のまま安全に拒否して自動再試行**。別の試行ではモデルがJS式 `return Math.max(Math.min(value, high), low) || throw new RangeError;` を生成し、Node.jsのSyntaxError（Unexpected token 'throw'）により独立QAで不合格。最後まで2工程目は通らず `HOLD_NOT_VERIFIED`。GitHub remoteへのpush0件、原本の変更0件。モデルのコード品質不足によるHOLDであり、隔離やQAのFAILをPASSと偽装していない。
+
+この結果により、**小型Qwen 1.7Bが2工程を安定して自律修正できるとする根拠はない**。最終的な主力モデル採用には、ユーザーのWindows上のQwen3:14B等の真正連続試験と、MinecraftAIBuilder/TPS実ソース品質監査が必要。
+
+なお、この文書の最終追加時点で、修正したFake回帰の最新CIは実行待ちのため、新修正を「CI完了済み」とは表現しない。
