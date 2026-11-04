@@ -47,8 +47,9 @@ def choose_exact_run(payload: dict, commit: str) -> dict | None:
             continue
         if (item.get("head_sha") == commit and item.get("head_branch") == BRANCH
                 and item.get("event") == "push"
-                and isinstance(item.get("id"), int) and item["id"] > 0
-                and item.get("path", "").split("@")[0] == ".github/workflows/" + WORKFLOW):
+                and type(item.get("id")) is int and item["id"] > 0
+                and isinstance(item.get("path"), str)
+                and item["path"].split("@")[0] == ".github/workflows/" + WORKFLOW):
             matches.append(item)
     return max(matches, key=lambda run: run["id"]) if matches else None
 
