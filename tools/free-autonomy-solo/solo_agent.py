@@ -328,6 +328,7 @@ def execute(cfg: dict, *, push: bool, sandbox_attested: bool) -> dict:
             previous = ", ".join(x["sha"][:12] for x in state["commits"][-5:])
             feedback = ""
             success = False
+            unavailable_exhausted = False
             approved_models = [cfg["model"], *cfg.get("fallback_models", [])]
             model_index = 0
             for attempt in range(cfg["per_task_attempts"]):
@@ -359,6 +360,13 @@ def execute(cfg: dict, *, push: bool, sandbox_attested: bool) -> dict:
                                                   "exit": rc, "model": selected_model})
                         if model_index < len(approved_models) - 1:
                             model_index += 1
+                        elif "Model unavailable:" in tail:
+                            # An unavailable model does not become available
+                            # through identical retries in this isolated run.
+                            unavailable_exhausted = True
+                            state["outcomes"][-1]["status"] = "AGENT_MODEL_UNAVAILABLE"
+                            write_atomic(state_path, state)
+                            break
                         write_atomic(state_path, state)
                         continue
                     verify_repo(cfg)  # Agent must not switch remote or research branch.
@@ -438,7 +446,10 @@ def execute(cfg: dict, *, push: bool, sandbox_attested: bool) -> dict:
                     raise
             if not success:
                 state["status"] = "HOLD"
-                state["hold_reason"] = "RETRY_OR_TIME_BUDGET_EXHAUSTED_WITHOUT_VERIFIED_SOURCE_CHANGE"
+                state["hold_reason"] = (
+                    "NO_APPROVED_AVAILABLE_MODEL_IN_THIS_ENVIRONMENT"
+                    if unavailable_exhausted else
+                    "RETRY_OR_TIME_BUDGET_EXHAUSTED_WITHOUT_VERIFIED_SOURCE_CHANGE")
                 write_atomic(state_path, state)
                 break
         if not cfg.get("continuous_goal") and state["next_task"] == len(cfg["tasks"]):
