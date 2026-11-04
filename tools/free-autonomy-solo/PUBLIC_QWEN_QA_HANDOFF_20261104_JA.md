@@ -41,3 +41,14 @@ browser-ink-tpsを選ぶ場合は最終行の `minecraftaibuilder` を `browser-
 - 本物のユーザーWindowsのQwen14Bで修正案が生成できるか、Git Credential Managerからの公開提出が成功するか、実コードの有益な改修、Minecraft ART/Education施工、TPS真正180秒4v4、夜間/学校時間中の長時間自律運用はすべて別途**未実証（HOLD）**。
 
 評価区分：**PUBLIC_TRANSPORT_SOURCE_QA（実Docker証拠が出た場合のみ）／LOCAL_QWEN14B_HOLD／ART_AND_FULL_GAME_HOLD／LONG_UNATTENDED_HOLD**。
+
+## 統合試験の確定結果（2026-11-04、合成コメントのみ）
+
+**MAB・TPS両方の「公開研究branchにファイル追加 → Actions pushトリガー → 提出差分SHA/固定source照合 → 実Docker QA → 隔離ローカルGit commit」が成立した。** これは真正Github Runner上の実コードでの試験であり、Fake Dockerではない。ただし候補のコードは本物のQwenが生成したわけではなく、機能を変えない合成コメントのみを使用した。
+
+- MinecraftAIBuilder: [Actions #41794461970](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41794461970) **SUCCESS**。研究submissionコミット `9bf860480fc99911d8ce58b141a247aeab64061f`。固定V4H HEAD `fe1682e15ffa063f4dc415b06c4d76a54737a06e`。2工程/各1独立Node SOURCE QA/隔離Git commit **2件**。7日間の証拠JSON [Artifact #13305131066](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41794461970/artifacts/13305131066)。
+- Browser Ink TPS: [Actions #41794476009](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41794476009) **SUCCESS**。研究submissionコミット `bb4c764e537667fe80488136872a684565d72a80`。固定B423 HEAD `0942eca28ca3cc2c66cc754c0d6d8e6fdedb6c07`。2工程/各3独立QA（TypeScript・Vitest・Vite build）/隔離Git commit **2件**。7日間の証拠JSON [Artifact #13305031851](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41794476009/artifacts/13305031851)。
+- どちらも `synthetic_fixture=true` / `model_reported_only=ci-synthetic-comments-no-llm` / `runner_model_calls=0` / `github_remote_pushes_from_runner=0` / `project_improvement_certified=false` / `long_unattended_autonomy_certified=false`。
+- 回帰とWindows検査: [Actions #41794127076](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41794127076) は97件PASS（Windows Git実体の新規公開プロトコル関連15件PASS）。[Actions #41794612062](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41794612062) は新PowerShellワンショットの構文検査PASS。[Actions #41794872164](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41794872164) SUCCESS。旧mainやユーザーPCソースには変更なし。
+
+以上は「**合成データでの公開GitHub受渡し工程と、安全な独立SOURCE QA工程が2件とも成功した**」ことの実証。手元Windowsの真正Qwen14Bによる有益な修正の発生・WindowsのGit資格情報による本番提出・長時間自律化は引き続き**未実証/HOLD**。研究用の固定V4H/B423 HEADを最新V4J/B431の完成版と混同せず、実改修の評価に使う時は最新の開発正本との差分・有効なQAを再監査する。
