@@ -8,11 +8,21 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import subprocess
 import tempfile
 from docker_sandbox import DockerPolicy, SandboxHold, docker_exec
 
 MODEL = "opencode/glm-5.3-flash-free"
+
+
+def visible_in_provider_catalog(catalog: str, model: str) -> bool:
+    """A catalog listing is NOT a successful, authorized model inference."""
+    if not isinstance(catalog, str) or not isinstance(model, str):
+        return False
+    # Printed catalog entries have the form provider/model, possibly with
+    # extra metadata; never accept substrings like model-name-preview.
+    return model in set(re.findall(r"opencode/[a-z0-9_.-]+", catalog))
 
 
 def sh(repo: Path, *args: str) -> str:
@@ -52,6 +62,25 @@ def trial() -> dict:
         (repo / "calc.py").chmod(0o666)
         (repo / "test_contract.py").chmod(0o444)
         policy = DockerPolicy(network="bridge", memory="4g", cpus="2", pids=128)
+        # First verify that the *actual signed-out* OpenCode container can
+        # even list this model. OpenCode's public docs say an unavailable
+        # provider is absent from the local enabled catalog. This uses no
+        # model tokens, credentials, paid API, or project source.
+        catalog_rc, catalog_tail = docker_exec(
+            policy, repo, agent=True,
+            command=["opencode", "models", "opencode"],
+            cidfile=root / "model-catalog.cid", timeout=45,
+            log=root / "model-catalog.private.log")
+        catalog_text = (root / "model-catalog.private.log").read_text(encoding="utf-8")
+        if catalog_rc != 0:
+            raise SandboxHold(
+                "FREE_PROVIDER_CATALOG_NOT_AVAILABLE_NO_INFERENCE_ATTEMPT;"
+                " CLI_EXIT=" + str(catalog_rc) + " tail=" + catalog_tail[-180:])
+        if not visible_in_provider_catalog(catalog_text, MODEL):
+            raise SandboxHold(
+                "FREE_MODEL_NOT_VISIBLE_IN_SIGNED_OUT_RUNTIME_NO_INFERENCE_ATTEMPT;"
+                " MODEL=" + MODEL)
+        # Metadata visibility does not attest provider acceptance or capacity.
         prompt = (
             "You are in a disposable, public, isolated test repository. "
             "Edit ONLY calc.py. Its clamp(value, low, high) function must clamp "
@@ -65,7 +94,11 @@ def trial() -> dict:
             cidfile=root / "model.cid", timeout=240,
             log=root / "model.private.log")
         if rc != 0:
-            raise SandboxHold("GENUINE_FREE_REQUEST_NOT_SUCCESSFUL; CLI_EXIT=" +
+            cause = ("MODEL_UNAVAILABLE_OR_PROVIDER_REJECTED"
+                     if "Model unavailable:" in tail else
+                     "MODEL_CALL_TIMED_OUT" if rc == 124 else
+                     "FREE_MODEL_REQUEST_FAILED")
+            raise SandboxHold(cause + "; CLI_EXIT=" +
                               str(rc) + " tail=" + tail[-250:])
         if sh(repo, "rev-parse", "HEAD") != pre:
             raise SandboxHold("UNAUTHORIZED_GIT_HISTORY_MUTATION")
