@@ -174,9 +174,12 @@ class LocalPatchLoopTests(unittest.TestCase):
 
     def test_push_refuses_branch_not_present_on_remote(self):
         from local_ollama_patch_loop import ensure_remote_research_branch
-        with patch("local_ollama_patch_loop.subprocess.run") as fake:
-            fake.return_value.returncode = 0
-            fake.return_value.stdout = ""
+        real_run = subprocess.run
+        def fake_only_remote(argv, **kw):
+            if argv[:2] == ["git", "ls-remote"]:
+                return subprocess.CompletedProcess(argv, 0, stdout="", stderr="")
+            return real_run(argv, **kw)
+        with patch("local_ollama_patch_loop.subprocess.run", side_effect=fake_only_remote):
             with self.assertRaisesRegex(Hold, "REMOTE_APPROVED_RESEARCH_BRANCH_NOT_FOUND"):
                 ensure_remote_research_branch(self.cfg, self.clone)
 
