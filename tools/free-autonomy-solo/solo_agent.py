@@ -367,7 +367,11 @@ def execute(cfg: dict, *, push: bool, sandbox_attested: bool) -> dict:
                     break
                 except Hold as ex:
                     state["status"] = "HOLD"
-                    state["hold_reason"] = str(ex)
+                    # Preserve the stronger UNPUSHED marker set by the push
+                    # guard, so resume tooling cannot mistake a local-only
+                    # verified commit for a remotely saved result.
+                    if not state.get("hold_reason", "").startswith("UNPUSHED_RESEARCH_COMMIT: "):
+                        state["hold_reason"] = str(ex)
                     write_atomic(state_path, state)
                     raise
             if not success:
