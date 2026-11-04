@@ -365,6 +365,18 @@ def execute(cfg: dict, *, push: bool, sandbox_attested: bool) -> dict:
                     if git(p, "rev-parse", "HEAD") != state["last_head"]:
                         raise Hold("AGENT_MUTATED_GIT_HISTORY")
                     changed = changed_files(p)
+                    if not changed:
+                        # A real free provider may exit 0 after only explaining
+                        # a task, without producing a patch. Treat it as a
+                        # failed candidate, never as a verified success.
+                        feedback = "AGENT_EXITED_SUCCESS_WITHOUT_SOURCE_CHANGE"
+                        state["outcomes"].append({"cycle": cycle,
+                                                  "status": "AGENT_NO_SOURCE_CHANGE",
+                                                  "model": selected_model})
+                        if model_index < len(approved_models) - 1:
+                            model_index += 1
+                        write_atomic(state_path, state)
+                        continue
                     check_paths(p, changed, cfg["allowed_prefixes"])
                     # Capture candidate bytes: QA may not rewrite the version we commit.
                     before_qa = snapshot_candidate(p, changed)
