@@ -14,8 +14,8 @@ test('V4J precision prompt preserves exactly the original author contract withou
  assert(V4J_PRECISION_SYSTEM_PROMPT.includes(CIVIC_ARCADE_SCHEMA));
  assert(V4J_PRECISION_SYSTEM_PROMPT.length<CIVIC_ARCADE_SYSTEM_PROMPT.length);
  for(const rule of ['windowPriority:null','four different lowercase strings',
-  'earlier','COVERED spaces[].id','roofForm','12..140','12..160',
-  'EXACT {schema,id,title,brief,materials,spaces,massing,wing,floorplate,atrium,mezzanine,arcade}']){
+  'EARLIER','COVERED spaces[].id','roofForm','12..140','12..160',
+  'EXACTLY {schema,id,title,brief,materials,spaces,massing,wing,floorplate,atrium,mezzanine,arcade}']){
   assert(V4J_PRECISION_SYSTEM_PROMPT.includes(rule),rule);
  }
  for(const forbidden of ['example-house','example-shop','fixed housing',
