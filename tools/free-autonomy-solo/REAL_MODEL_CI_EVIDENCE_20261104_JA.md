@@ -43,3 +43,12 @@
 この結果により、**小型Qwen 1.7Bが2工程を安定して自律修正できるとする根拠はない**。最終的な主力モデル採用には、ユーザーのWindows上のQwen3:14B等の真正連続試験と、MinecraftAIBuilder/TPS実ソース品質監査が必要。
 
 なお、この文書の最終追加時点で、修正したFake回帰の最新CIは実行待ちのため、新修正を「CI完了済み」とは表現しない。
+
+
+## 2026-11-04 Docker不要・AST解釈式の実証（新経路）
+
+- local_qwen_no_docker_two_step.py：**ユーザーPCにDocker / Node / Git cloneを要求せず**、既存のPython3とOllamaに導入済みの qwen3:14b 等を用いて2工程を試す。生成PythonコードをOSでexec/eval/importしない。制限されたASTインタプリタでclamp正常6ケースと不正境界追加2ケースを独立評価。最大4回のモデル呼び出し、外部API・自動pull・project original変更なし。shareable JSONへ各段階の合否とモデル自己申告を記録。
+- [専用Actions #41755858835](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41755858835)：Windows用モデル接続は**Mockのみ**、55件のオフライン回帰PASS。実Linux Docker隔離とOpenCode CLIヘルプは別ジョブとしてPASS。Model-generated PythonコードはASTとして解釈のみ。
+- [真正1.7B試験 #41756006603](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41756006603)：completed/failure。GitHub ActionsのOllama APIから本物の qwen3:1.7b 応答を取得したが、1工程目の生成コードが2回とも SOURCE_SYNTAX_INVALID。**独立AST QAを通る工程は0、2工程達成0**。モデル生成コード実行0、GitHub push0、有料API0。小型モデルの失敗をユーザーの14B品質不合格とは判断しない。
+- 直接のWindows14B真正試験は**未実施、HOLD**。固定配布コミット ac6f76aef6e0bdf72a854cc5dbf65b7ae90ebbff とGit blob ec98a13b7191a3f70f58af3bf3c08f85c8e60503 を用いる1回コピーPowerShellコマンドは NEXT_LOCAL_TWO_STAGE_20261104_JA.md に保存。
+- 現段階の成果は「Docker不要の安全な2工程モデル評価入口を構築し、Mock QA 55件PASS。真正1.7Bではソース構文不合格」。SOURCE/ART/Windows/長時間運用の証拠を厳密に区別し、実開発品質はまだ主張しない。
