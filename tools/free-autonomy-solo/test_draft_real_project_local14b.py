@@ -209,7 +209,7 @@ class RealSourceDraftTests(unittest.TestCase):
             {"slot": 0, "replace": "bad"},
             {"slot": 99, "replace": "bad"},
             {"slot": True, "replace": "bad"},
-            {"slot": 1, "replace": "const exact=(v,fields)=>null;"},
+            {"slot": 1, "replace": ""},
         ):
             with self.subTest(proposal=proposal):
                 with self.assertRaisesRegex(Hold, "PATCH_"):
