@@ -509,8 +509,12 @@ def execute(cfg: dict, *, push: bool, sandbox_attested: bool) -> dict:
                             recovered_failure = True
                         # Do not send the failed candidate's source or raw CLI
                         # log to the next provider as fallback feedback.
+                        # Full stdout/stderr remains PRIVATE on disk. Even a
+                        # clean failure may print confidential context; never
+                        # forward its raw tail to a different provider/model.
                         feedback = (f"AGENT_EXIT_{rc}: source privately quarantined"
-                                    if recovered_failure else f"AGENT_EXIT_{rc}: {tail}")
+                                    if recovered_failure else
+                                    f"AGENT_EXIT_{rc}: no candidate retained")
                         state["outcomes"].append({
                             "cycle": cycle,
                             "status": ("AGENT_FAILED_QUARANTINED_FOR_RETRY"
