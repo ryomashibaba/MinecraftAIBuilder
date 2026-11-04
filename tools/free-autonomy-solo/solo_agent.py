@@ -136,6 +136,7 @@ def snapshot_candidate(workspace: Path, paths: list[str]) -> dict[str, str]:
 
 def quarantine_and_restore_unverified(
     cfg: dict, workspace: Path, state_dir: Path, paths: list[str],
+    expected_head: str,
 ) -> dict:
     """Explicit opt-in recovery of an INTERRUPTED disposable research clone.
 
@@ -148,6 +149,9 @@ def quarantine_and_restore_unverified(
         raise Hold("RESUME_QUARANTINE_NOT_AUTHORIZED")
     if not paths or len(paths) > 20:
         raise Hold("RESUME_QUARANTINE_PATH_BUDGET")
+    verify_repo(cfg)
+    if git(workspace, "rev-parse", "HEAD") != expected_head:
+        raise Hold("RESUME_QUARANTINE_HEAD_CHANGED_BEFORE_BACKUP")
     check_paths(workspace, paths, cfg["allowed_prefixes"])
     before = snapshot_candidate(workspace, paths)
     tracked_raw = subprocess.check_output(
@@ -204,6 +208,8 @@ def quarantine_and_restore_unverified(
     # Fail closed: require the same source bytes, origin, research branch and
     # HEAD after the PRIVATE backup and immediately before any restoration.
     verify_repo(cfg)
+    if git(workspace, "rev-parse", "HEAD") != expected_head:
+        raise Hold("RESUME_QUARANTINE_HEAD_CHANGED_BEFORE_RESTORE")
     if snapshot_candidate(workspace, paths) != before:
         raise Hold("RESUME_QUARANTINE_SOURCE_CHANGED_BEFORE_RESTORE")
     tracked_paths = [name for name, _, is_tracked in payloads if is_tracked]
@@ -216,7 +222,8 @@ def quarantine_and_restore_unverified(
             if target.is_symlink() or not target.is_file():
                 raise Hold("RESUME_QUARANTINE_UNTRACKED_FILE_CHANGED")
             target.unlink()
-    if changed_files(workspace) or not manifest.is_file():
+    if (changed_files(workspace) or not manifest.is_file()
+            or git(workspace, "rev-parse", "HEAD") != expected_head):
         raise Hold("RESUME_QUARANTINE_RESTORE_NOT_CLEAN")
     return {"checkpoint": checkpoint, "paths": len(paths),
             "private_manifest": str(manifest),
@@ -387,7 +394,7 @@ def execute(cfg: dict, *, push: bool, sandbox_attested: bool) -> dict:
             if cfg.get("quarantine_unverified_on_resume") is True:
                 try:
                     recovery = quarantine_and_restore_unverified(
-                        cfg, p, state_dir, unverified_paths)
+                        cfg, p, state_dir, unverified_paths, state["last_head"])
                     if git(p, "rev-parse", "HEAD") != state["last_head"]:
                         raise Hold("RESUME_QUARANTINE_HEAD_CHANGED")
                     state.setdefault("resume_quarantines", []).append(recovery)
