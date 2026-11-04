@@ -44,6 +44,8 @@ test('original synthetic response can reproduce identical TRUE B143 without ANY 
   const replay=replayPrivateV4D(s.study,s.replay);
   assert.equal(model.calls.length,count);
   assert.equal(replay.schema,REPLAY_SCHEMA);
+  assert.equal(replay.originalPromptProtocol,'LEGACY_AUTHOR_CONTRACT');
+  assert.equal(replay.originalSystemPromptSHA256,original.systemPromptSha256);
   assert.equal(replay.additionalModelCalls,0);
   assert.equal(replay.originalCompilerHashesMatch,true);
   assert.equal(replay.originalResponseIntegrity,'SHA256_MATCH');
@@ -58,6 +60,7 @@ test('original synthetic response can reproduce identical TRUE B143 without ANY 
   assert(fs.existsSync(path.join(s.replay,'TRUE_B143_REPLAY_SOURCE.json')));
   const safe=read(path.join(s.replay,'REPLAY_SHAREABLE_STATUS.json'));
   assert.equal(safe.originalIsTestInjection,true);
+  assert.equal(safe.originalPromptProtocol,'LEGACY_AUTHOR_CONTRACT');
   assert.equal(safe.originalModelIdentityAttested,false);
   assert.equal(safe.noOriginalPromptOrResponseIncluded,true);
   const outText=fs.readFileSync(path.join(s.replay,'OFFLINE_REPLAY_REPORT.json'),'utf8');
@@ -158,5 +161,33 @@ test('no overwrite, symlink source, invalid private manifest and repository-inte
   fs.writeFileSync(man,JSON.stringify(body));
   assert.throws(()=>replayPrivateV4D(s.study,path.join(s.parent,'z')),/PREVIOUS_REPORT_UNTRUSTED_OR_UNSAFE/);
   assert(!fs.existsSync(path.join(s.parent,'z')));
+ }finally{s.clean();}
+});
+
+test('edited local request prompt identity is rejected before replay output',async()=>{
+ const s=privateTemp(),mock=fakeOllama(JSON.stringify(makeV4DCompactSynthetic()));
+ try{
+  await trial(s.study,mock);
+  const f=path.join(s.study,'LOCAL_REQUEST.json'),o=read(f);
+  o.promptProtocol='V4J_SINGLE_RESPONSE_CONTRACT_CLARITY_V2';
+  fs.writeFileSync(f,JSON.stringify(o));
+  assert.throws(()=>replayPrivateV4D(s.study,s.replay),/PROMPT_PROTOCOL_MANIFEST_MISMATCH/);
+  assert.equal(fs.existsSync(s.replay),false);
+ }finally{s.clean();}
+});
+
+test('unversioned legacy private files remain replayable without falsely claiming V2',async()=>{
+ const s=privateTemp(),mock=fakeOllama(JSON.stringify(makeV4DCompactSynthetic()));
+ try{
+  await trial(s.study,mock);
+  for(const n of ['LOCAL_REQUEST.json','V4D_LOCAL_AUTHOR_REPORT.json']){
+   const f=path.join(s.study,n),o=read(f);
+   delete o.promptProtocol;delete o.systemPromptSha256;
+   fs.writeFileSync(f,JSON.stringify(o));
+  }
+  const a=replayPrivateV4D(s.study,s.replay);
+  assert.equal(a.originalPromptProtocol,'LEGACY_UNVERSIONED');
+  assert.equal(a.originalSystemPromptSHA256,null);
+  assert.equal(a.status,'HOLD_TEST_DOUBLE_REPLAY_ONLY');
  }finally{s.clean();}
 });

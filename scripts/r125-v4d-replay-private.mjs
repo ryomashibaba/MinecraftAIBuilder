@@ -92,6 +92,19 @@ function openStudy(dir){
  if(original.status==='SOURCE_READY_PRIVATE_ART_REVIEW_REQUIRED'&&
   original.testInjectionPresent===true)
   fail('SYNTHETIC_REAL_SOURCE_CONFLICT');
+ const marked=[original.promptProtocol,request.promptProtocol,
+  original.systemPromptSha256,request.systemPromptSha256]
+  .some(x=>x!==undefined);
+ if(marked){
+  const allowed=['LEGACY_AUTHOR_CONTRACT','V4J_SINGLE_RESPONSE_CONTRACT_CLARITY_V2'];
+  if(!allowed.includes(original.promptProtocol)||
+   original.promptProtocol!==request.promptProtocol||
+   !hex(original.systemPromptSha256)||
+   original.systemPromptSha256!==request.systemPromptSha256||
+   (original.promptProtocol==='V4J_SINGLE_RESPONSE_CONTRACT_CLARITY_V2'&&
+    original.authorContract!==CIVIC_ARCADE_SCHEMA))
+   fail('PROMPT_PROTOCOL_MANIFEST_MISMATCH');
+ }
  return {root:p,original,request};
 }
 function checkedDestination(dest,source){
@@ -123,6 +136,9 @@ export function replayPrivateV4D(study,out){
   schema:REPLAY_SCHEMA,
   status:'HOLD_NOT_REPLAYED',
   originalRunStatus:original.status,
+  originalPromptProtocol:original.promptProtocol??'LEGACY_UNVERSIONED',
+  originalSystemPromptSHA256:hex(original.systemPromptSha256)?original.systemPromptSha256:null,
+  protocolIsManifestDeclaredNotModelAttested:true,
   originalTestInjectionPresent:original.testInjectionPresent,
   originalModelCalls:original.modelCalls,
   additionalModelCalls:0,
@@ -244,6 +260,9 @@ export function replayPrivateV4D(study,out){
   write(destination,'REPLAY_SHAREABLE_STATUS.json',{
    schema:'minecraftaibuilder-v4d-offline-replay-minimal-share-v1',
    replayStatus:report.status,
+   originalPromptProtocol:report.originalPromptProtocol,
+   originalSystemPromptSHA256:report.originalSystemPromptSHA256,
+   protocolIsManifestDeclaredNotModelAttested:true,
    additionalModelCalls:0,originalModelIdentityAttested:false,
    originalIsTestInjection:original.testInjectionPresent,
    inputResponseIntegrity:report.originalResponseIntegrity,
