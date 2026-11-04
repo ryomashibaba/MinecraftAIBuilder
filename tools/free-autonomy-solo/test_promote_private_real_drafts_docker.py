@@ -189,7 +189,7 @@ class PinnedRealSourcePromotionTests(unittest.TestCase):
             with self.subTest(project=project):
                 root, work, manifest, lane, original = self.fixture(project)
                 before_head = g(work, "rev-parse", "HEAD")
-                with patch("promote_private_real_drafts_docker.require_docker_qa_image") as docker, \\
+                with patch("promote_private_real_drafts_docker.require_docker_qa_image") as docker, \
                      patch("promote_private_real_drafts_docker.docker_run") as execute_qa:
                     result = preflight_private_drafts(
                         root, project, "qwen3:14b", manifest=manifest, use_lock=False)
@@ -211,7 +211,7 @@ class PinnedRealSourcePromotionTests(unittest.TestCase):
     def test_static_preflight_fails_closed_for_tampered_draft(self):
         root, work, manifest, lane, original = self.fixture()
         (root / "draft_2.private.txt").write_text("modified without receipt")
-        with patch("promote_private_real_drafts_docker.require_docker_qa_image") as docker, \\
+        with patch("promote_private_real_drafts_docker.require_docker_qa_image") as docker, \
              patch("promote_private_real_drafts_docker.docker_run") as run:
             result = preflight_private_drafts(
                 root, "minecraftaibuilder", "qwen3:14b",
