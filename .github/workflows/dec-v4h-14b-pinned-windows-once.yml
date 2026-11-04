@@ -1,0 +1,80 @@
+name: Dec V4H genuine Qwen14B pinned Windows one-click (offline verification)
+
+on:
+  push:
+    branches:
+      - research/dec-v4h-one-response-author-contract-20261105
+    paths:
+      - 'scripts/DEC_RUN_REAL_QWEN14B_V4H_PINNED_ONCE.ps1'
+      - 'scripts/DEC_RUN_REAL_QWEN14B_V4H_PINNED_ONCE.cmd'
+      - '.github/workflows/dec-v4h-14b-pinned-windows-once.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows-pinned-launcher-no-model:
+    runs-on: windows-2022
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Actual Windows PowerShell parse, static no-model check and CMD
+        shell: pwsh
+        run: |
+          $path = 'scripts/DEC_RUN_REAL_QWEN14B_V4H_PINNED_ONCE.ps1'
+          $tokens = $null
+          $errorsFound = $null
+          [void][System.Management.Automation.Language.Parser]::ParseFile(
+            (Resolve-Path $path), [ref]$tokens, [ref]$errorsFound)
+          if ($errorsFound.Count -gt 0) {
+            $errorsFound | Format-List | Out-String | Write-Host
+            exit 2
+          }
+          & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $path -CheckOnly
+          if ($LASTEXITCODE -ne 0) { exit 2 }
+          & cmd /c 'scripts\DEC_RUN_REAL_QWEN14B_V4H_PINNED_ONCE.cmd' --ci-self-test
+          if ($LASTEXITCODE -ne 0) { exit 2 }
+          Write-Host 'WINDOWS_14B_PINNED_LAUNCHER_STATIC_PASS_NO_MODEL'
+      - name: Verify immutable PowerShell blob in CMD and real historical research SHA fetch
+        shell: pwsh
+        run: |
+          $cmdText = Get-Content -Raw scripts/DEC_RUN_REAL_QWEN14B_V4H_PINNED_ONCE.cmd
+          $blob = ((& git hash-object scripts/DEC_RUN_REAL_QWEN14B_V4H_PINNED_ONCE.ps1) | Out-String).Trim()
+          if (-not $cmdText.Contains($blob)) { throw 'CMD_PINNED_BLOB_MISMATCH' }
+          if (-not $cmdText.Contains('7ecdedb5cdb283ed29032e7601794193ca32f147')) {
+            throw 'CMD_IMMUTABLE_PARENT_MISMATCH'
+          }
+          $private = Join-Path $env:RUNNER_TEMP 'immutable-v4h-qa'
+          git init -q $private
+          git -C $private remote add origin https://github.com/ryomashibaba/MinecraftAIBuilder.git
+          git -C $private -c credential.interactive=never fetch -q --depth 1 --no-tags origin de28d50c9240dbb95c47732b0456625a70f8a785
+          if ($LASTEXITCODE -ne 0) { throw 'IMMUTABLE_SHA_FETCH_FAILED' }
+          $got = ((git -C $private rev-parse FETCH_HEAD) | Out-String).Trim()
+          if ($got -cne 'de28d50c9240dbb95c47732b0456625a70f8a785') {
+            throw 'IMMUTABLE_GIT_FETCH_DRIFT'
+          }
+          $blobPinned = ((git -C $private rev-parse 'FETCH_HEAD:source/ai/r125-v4h-mezzanine-author-ir.mjs') | Out-String).Trim()
+          if ($blobPinned -cne '934292ca75aed1cc6e374350b9e2fa20121719f8') {
+            throw 'REAL_V4H_PINNED_SOURCE_BLOB_MISMATCH'
+          }
+          Write-Host 'REAL_IMMUTABLE_V4H_14B_SOURCE_FETCH_CONFIRMED_NO_MODEL'
+
+  actual-v4h-source-qa-no-model:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: True B143 V4H source and fixed author contract regression
+        run: |
+          node --check source/ai/r125-v4h-mezzanine-author-ir.mjs
+          node --test scripts/r125-v4h-mezzanine.test.mjs scripts/r125-v4h-window-author-contract.test.mjs
+      - name: Frozen world and source-only declaration
+        run: echo 'No Qwen14B was run in CI; ART, Minecraft, original branches and main remain unchanged.'
