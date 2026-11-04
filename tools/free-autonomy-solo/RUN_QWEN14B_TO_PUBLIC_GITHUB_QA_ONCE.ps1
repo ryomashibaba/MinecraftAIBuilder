@@ -22,7 +22,7 @@ if (-not (Get-Command git -ErrorAction SilentlyContinue)) { throw 'GIT_REQUIRED_
 if (-not (Get-Command python -ErrorAction SilentlyContinue)) { throw 'PYTHON_REQUIRED_NO_AUTO_INSTALL' }
 
 # Immutable reviewed research code; these are checked by Git blob SHA before use.
-$rev = '5ad2d3547b64fe8fee59d8de42ecefbcf0872f7d'
+$rev = '41e2ecda5b8a260256639900ffc458b46c4799a2'
 $origin = 'ryomashibaba/MinecraftAIBuilder'
 $items = @(
   @{ Name = 'draft_real_project_local14b.py'; Blob = 'fad5f00994f467e65891319a202edbe407a2d4aa' },
@@ -33,7 +33,7 @@ $items = @(
   @{ Name = 'public_qa_handoff_protocol.py'; Blob = '25c79a24881b94540332722367bc05aafa25ebaf' },
   @{ Name = 'promote_private_real_drafts_docker.py'; Blob = '233cedaac2ccb292f2951148e115c3fd7ba08db8' },
   @{ Name = 'docker_sandbox.py'; Blob = 'e68c8e2c4f356d2741105aee6ff5660abdb7a294' },
-  @{ Name = 'verify_public_research_qa.py'; Blob = '60da2079fc12be5d83ec3a495f83ac9cb31c4b04' }
+  @{ Name = 'verify_public_research_qa.py'; Blob = '2ffdb415541a710bd3734745575a2e4cc5fb73b6' }
 )
 $directory = Join-Path $env:LOCALAPPDATA ('FreeAutonomyPrivate\PublicQASourceBootstrap\' + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Force -Path $directory | Out-Null
