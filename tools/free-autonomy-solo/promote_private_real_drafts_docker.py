@@ -17,6 +17,7 @@ import json
 import os
 from pathlib import Path
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -307,6 +308,86 @@ def preflight_private_drafts(
 
 
 
+def syntax_check_existing_mab_private_drafts(
+    root: Path, project: str, model: str, *,
+    manifest: dict | None = None, use_lock: bool = True,
+) -> dict:
+    """Parse existing generated MAB .mjs WITHOUT executing the source.
+
+    The only subprocess is Node's native `--check` syntax parser, with the
+    model text provided via stdin. No import resolution, tests, Docker, model
+    calls, public upload, project write, or local Git commit are performed.
+    This is not a native SOURCE QA result or quality certification.
+    """
+    if project != "minecraftaibuilder":
+        raise Hold("JS_MODULE_SYNTAX_ONLY_MAB_SUPPORTED")
+    manifest = load_manifest() if manifest is None else manifest
+    root = root.expanduser().resolve(strict=True)
+    lane = manifest["project_candidates"][project]
+    report = {
+        "schema": "real-project-private-mjs-syntax-v1",
+        "status": "HOLD", "project": project, "model_reported_only": model,
+        "source_commit": lane["pinned_commit"],
+        "stages": [], "baseline_module_syntax_passed": False,
+        "source_code_executed": False, "node_parse_only": True,
+        "node_modules_loaded": False, "native_qa_executed": False,
+        "docker_executed": False, "model_calls": 0,
+        "git_commits": 0, "github_pushes": 0, "paid_api_calls": 0,
+        "project_original_changed": False,
+        "source_behavior_certified": False,
+        "art_or_real_game_certified": False,
+        "long_unattended_autonomy_certified": False,
+    }
+    lock = exclusive_local_project_lock() if use_lock else nullcontext()
+    try:
+        with lock:
+            static = preflight_private_drafts(
+                root, project, model, manifest=manifest, use_lock=False)
+            if static["status"] != "STATIC_PRIVATE_DRAFTS_ADMISSIBLE_FOR_ISOLATED_QA_ONLY":
+                raise Hold("STATIC_PREFLIGHT_" + static.get("reason", "HOLD"))
+            node = shutil.which("node")
+            if not node:
+                raise Hold("NODE_NOT_INSTALLED_NO_AUTO_INSTALL")
+            original = root / "repo"
+            verify_private_clone(original, lane)
+            _, drafts = _read_receipt(root, project, model, manifest)
+            baseline = (original / lane["source_file"]).read_text(encoding="utf-8")
+            # Reject host-side Node startup flags that might enable injected
+            # modules or a preload. No model draft paths are CLI arguments.
+            env = {k: v for k, v in os.environ.items()
+                   if k not in {"NODE_OPTIONS", "NODE_PATH", "NODE_REPL_HISTORY"}}
+            for stage, content in ((0, baseline), (1, drafts[0]), (2, drafts[1])):
+                try:
+                    check = subprocess.run(
+                        [node, "--input-type=module", "--check"],
+                        input=content, text=True, encoding="utf-8",
+                        capture_output=True, timeout=30,
+                        cwd=str(original), env=env)
+                except (OSError, subprocess.TimeoutExpired) as exc:
+                    raise Hold("NODE_SYNTAX_PARSER_UNAVAILABLE") from exc
+                if check.returncode != 0:
+                    # Never return stdout/stderr: Node syntax errors can
+                    # include verbatim PRIVATE model-generated source lines.
+                    raise Hold("MJS_SYNTAX_REJECTED_STAGE_" + str(stage))
+                if stage == 0:
+                    report["baseline_module_syntax_passed"] = True
+                else:
+                    report["stages"].append({
+                        "stage": stage, "candidate_sha256": sha256(content),
+                        "module_syntax_parsed": True,
+                        "module_code_executed": False,
+                    })
+            verify_private_clone(original, lane)
+            report["status"] = "PRIVATE_MAB_MODULE_SYNTAX_ONLY_PASS"
+    except (CloneHold, Hold, SandboxHold, OSError, ValueError, KeyError, TypeError) as exc:
+        report["status"] = "HOLD"
+        report["reason"] = str(exc)[:160]
+    finally:
+        (root / "SHAREABLE_MJS_SYNTAX_RESULT.json").write_text(
+            json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+    return report
+
+
 def promote(root: Path, project: str, model: str,
             *, allow_public_npm_deps: bool = False,
             manifest: dict | None = None, use_lock: bool = True) -> dict:
@@ -416,10 +497,18 @@ def main() -> int:
     ap.add_argument("--allow-public-npm-deps", action="store_true")
     ap.add_argument("--static-only", action="store_true",
                     help="Read-only preflight of private drafts; never run generated code or Docker")
+    ap.add_argument("--mjs-syntax-only", action="store_true",
+                    help="Use Node syntax parser on existing private MAB drafts; no generated code execution")
     args = ap.parse_args()
+    if args.static_only and args.mjs_syntax_only:
+        raise SystemExit("CHOOSE_EXACTLY_ONE_READ_ONLY_MODE")
     if args.static_only:
         result = preflight_private_drafts(args.receipt_dir, args.project, args.model)
         expected = "STATIC_PRIVATE_DRAFTS_ADMISSIBLE_FOR_ISOLATED_QA_ONLY"
+    elif args.mjs_syntax_only:
+        result = syntax_check_existing_mab_private_drafts(
+            args.receipt_dir, args.project, args.model)
+        expected = "PRIVATE_MAB_MODULE_SYNTAX_ONLY_PASS"
     else:
         result = promote(args.receipt_dir, args.project, args.model,
                          allow_public_npm_deps=args.allow_public_npm_deps)
