@@ -175,3 +175,22 @@ jobs:
           python -m unittest discover -v -s tools/free-autonomy-solo -p test_promote_private_real_drafts_docker.py
           Write-Host 'WINDOWS_LOCAL_GIT_COMMIT_GATE_MOCK_DOCKER_QA_ONLY__MODEL_HOLD'
 
+
+
+  windows-public-source-handoff-mock:
+    runs-on: windows-2022
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Real Windows Git public source privacy + tamper rejection, fake Docker only
+        shell: pwsh
+        run: |
+          python -m py_compile tools/free-autonomy-solo/public_qa_handoff_protocol.py tools/free-autonomy-solo/receive_public_research_qa.py tools/free-autonomy-solo/submit_public_research_qa.py
+          python -m unittest discover -v -s tools/free-autonomy-solo -p test_public_source_qa_handoff.py
+          python -m unittest discover -v -s tools/free-autonomy-solo -p test_receive_public_research_qa.py
+          Write-Host 'PUBLIC_HANDOFF_WINDOWS_MOCK_ONLY_NO_GIT_PUSH_NO_REAL_QWEN'
