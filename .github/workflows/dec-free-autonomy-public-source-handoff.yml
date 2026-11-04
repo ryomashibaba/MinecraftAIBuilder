@@ -1,0 +1,50 @@
+name: December public research Qwen source handoff - real Docker QA, no model
+
+on:
+  push:
+    branches:
+      - research/dec-free-autonomy-solo-pilot-20261104
+    paths:
+      - 'tools/free-autonomy-solo/submissions/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dec-public-source-qa-single-project
+  cancel-in-progress: false
+
+jobs:
+  one-public-research-source-submission:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Read only one pushed submission; never expose repository write token
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Public QA runtime only - no API credentials or LLM
+        run: docker pull node:24-bookworm-slim
+      - name: Inspect exactly one newly added source submission and run isolated Docker SOURCE QA
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          AFTER_SHA: ${{ github.sha }}
+        run: |
+          python3 tools/free-autonomy-solo/receive_public_research_qa.py --repo-root . --before "$BEFORE_SHA" --after "$AFTER_SHA"
+      - name: Publish ONLY sanitized SOURCE-QA result, never raw model code
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dec-public-research-source-qa-result
+          path: ${{ runner.temp }}/dec-public-source-qa-result.json
+          retention-days: 7
+          if-no-files-found: warn
+      - name: Preserve honest result boundaries
+        if: always()
+        run: |
+          echo 'Input is PUBLIC Git history, with explicit client consent.'
+          echo 'GitHub-hosted Linux Docker only, not the user Windows PC.'
+          echo 'Qwen model identity is user-reported, NOT attested by the CI runner.'
+          echo 'Real source unit tests do NOT certify Minecraft ART/Education or real TPS 180s 4v4.'
+          echo 'No GitHub push/PR merge or production deployment by this runner.'
