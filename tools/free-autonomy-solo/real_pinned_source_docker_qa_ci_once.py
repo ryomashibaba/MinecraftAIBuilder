@@ -109,6 +109,22 @@ def main():
                         line = re.sub(r"/[^\s]+", "<PATH>", line)[:220]
                         diagnostics.append(line)
                 summary["public_npm_error_lines"] = diagnostics[-12:]
+        if result["status"] == "HOLD":
+            # CI uses only public immutable source and synthetic comment edits,
+            # so small diagnostics can be shared without user model payloads.
+            import re
+            for filename in ("qa-stage1-check0.private.log",
+                             "qa-stage1-check1.private.log",
+                             "qa-stage1-check2.private.log"):
+                trace = root / filename
+                if not trace.is_file():
+                    continue
+                diagnostic = []
+                for line in trace.read_text(errors="replace").splitlines():
+                    if re.search(r"Error|ERROR|EACCES|FAIL|failed|Readonly|Permission|\btest\b|\bpass\b|\bexit\b|ERR_", line):
+                        line = re.sub(r"/[^\s]+", "<PATH>", line)[:190]
+                        diagnostic.append(line)
+                summary["public_fixture_" + filename.replace(".private.log", "_diagnostic")] = diagnostic[-10:]
         print(json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True))
         where = Path(os.environ.get("RUNNER_TEMP", str(base)))
         (where / ("dec-real-source-qa-" + args.project + ".json")).write_text(
