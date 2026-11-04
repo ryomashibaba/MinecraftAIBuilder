@@ -135,7 +135,10 @@ class DockerSandboxTests(unittest.TestCase):
             'opencode/glm-5.3-flash-free'))
         self.assertFalse(visible_in_provider_catalog(
             'Model unavailable: opencode/glm-5.3-flash-free',
-            'opencode/a-free'))
+            'opencode/glm-5.3-flash-free'))
+        self.assertTrue(visible_in_provider_catalog(
+            'opencode/glm-5.3-flash-free    input_cost: 0',
+            'opencode/glm-5.3-flash-free'))
         self.assertFalse(visible_in_provider_catalog('', 'opencode/a-free'))
 
 
