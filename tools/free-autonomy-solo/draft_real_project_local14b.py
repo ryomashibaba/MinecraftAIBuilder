@@ -238,6 +238,9 @@ def run(project: str, model: str, *, transport=local_api,
                         proposed, metrics = model_proposal(
                             model, project, lane["source_file"], current,
                             stage, feedback, transport=transport)
+                        # A model request cannot silently alter checked-out Git.
+                        # Verify source pin BEFORE writing any private artifact.
+                        verify_private_clone(workspace, lane)
                         next_source = bounded_replacement(project, current, proposed)
                         detail = stage_private_candidate(
                             root, lane, stage, current, next_source, metrics)
