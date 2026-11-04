@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   pinned-minecraftaibuilder-windows-clone:
-    name: Pinned actual MAB source isolated Windows clone (NO LLM or QA)
+    name: Latest pinned V4H MAB source isolated Windows clone (NO LLM or QA)
     runs-on: windows-2022
     timeout-minutes: 12
     steps:
