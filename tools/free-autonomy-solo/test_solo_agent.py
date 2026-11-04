@@ -846,5 +846,53 @@ with single_agent_lock():
 
 
 
+    def test_supervisor_records_pushed_only_after_local_bare_remote_accepts(self):
+        bare = self.make_bare_remote_for_push_tests()
+        with patch('solo_agent.verify_repo', return_value=self.repo.resolve()):
+            with patch.dict(os.environ, self.env):
+                result = execute(dict(self.cfg), push=True, sandbox_attested=True)
+        self.assertEqual(result['status'], 'TASK_QUEUE_COMPLETED_SOURCE_ONLY')
+        self.assertEqual(len(result['commits']), 1)
+        self.assertTrue(result['commits'][0]['pushed'])
+        self.assertEqual(sh(bare, 'git', 'rev-parse',
+                            'refs/heads/research/free-autonomy-pilot'),
+                         result['commits'][0]['sha'])
+        self.assertFalse(result['real_model_verified'])
+        self.assertFalse(result['quality_certified'])
+
+    def test_pending_verified_commit_remains_unpushed_if_remote_advanced(self):
+        bare = self.make_bare_remote_for_push_tests()
+        other = self.root / 'racing-fixture'
+        sh(self.repo, 'git', 'clone', '--branch', self.cfg['branch'],
+           str(bare), str(other))
+        sh(other, 'git', 'config', 'user.name', 'Other Fixture')
+        sh(other, 'git', 'config', 'user.email', 'other@example.invalid')
+        with patch('solo_agent.verify_repo', return_value=self.repo.resolve()):
+            with patch.dict(os.environ, self.env):
+                first = execute(dict(self.cfg), push=False, sandbox_attested=True)
+        self.assertFalse(first['commits'][0]['pushed'])
+        (other / 'source' / 'external.txt').write_text('external research update')
+        sh(other, 'git', 'add', 'source/external.txt')
+        sh(other, 'git', 'commit', '-m', 'external research')
+        sh(other, 'git', 'push', 'origin',
+           'HEAD:refs/heads/research/free-autonomy-pilot')
+        with patch('solo_agent.verify_repo', return_value=self.repo.resolve()):
+            with patch.dict(os.environ, self.env):
+                with self.assertRaisesRegex(
+                        Hold, 'REMOTE_RESEARCH_TIP_NOT_LOCAL_ANCESTOR'):
+                    execute(dict(self.cfg), push=True, sandbox_attested=True)
+        state = json.loads((self.root / 'state' / 'state.json').read_text())
+        self.assertEqual(state['status'], 'HOLD')
+        self.assertEqual(len(state['commits']), 1)
+        self.assertFalse(state['commits'][0]['pushed'])
+        self.assertIn('UNPUSHED_RESEARCH_COMMIT', state['hold_reason'])
+        self.assertEqual(state['last_head'], first['last_head'])
+        self.assertEqual(sh(bare, 'git', 'rev-parse',
+                            'refs/heads/research/free-autonomy-pilot'),
+                         sh(other, 'git', 'rev-parse', 'HEAD'))
+        self.assertEqual(sh(self.repo, 'git', 'status', '--porcelain'), '')
+
+
+
 if __name__ == '__main__':
     unittest.main()
