@@ -112,3 +112,23 @@ jobs:
         shell: pwsh
         run: |
           Write-Host 'Real Windows CPython mock tests ONLY. No Ollama/Qwen inference, no Docker, no user machine.'
+
+
+  windows-shared-single-local-model-lock:
+    runs-on: windows-2022
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Prove Windows OS-level cross-process lock excludes parallel MAB + TPS agents
+        shell: pwsh
+        run: |
+          python -m unittest discover -v -s tools/free-autonomy-solo -p test_solo_agent.py -k one_local_agent_lock
+      - name: Evidence scope
+        shell: pwsh
+        run: |
+          Write-Host 'Real Windows msvcrt cross-process lock only. No Qwen/Ollama inference or actual project mutation.'
