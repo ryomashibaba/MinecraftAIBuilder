@@ -22,8 +22,8 @@
 
 ~~~powershell
 $ErrorActionPreference = "Stop"
-$rev = "67fb38453360d9727dad90c22b5bdddf8422f89c"
-$blob = "47663737a53607061678b039c99957584d8534f8"
+$rev = "280c1c27fbcd4f977679f9ddf93cddbdb5eee4a2"
+$blob = "afabe75bd089c773539ce8a2209972f4fdb86c35"
 $path = Join-Path $env:TEMP "RUN_QWEN14B_TO_PUBLIC_GITHUB_QA_ONCE.ps1"
 $url = "https://raw.githubusercontent.com/ryomashibaba/MinecraftAIBuilder/$rev/tools/free-autonomy-solo/RUN_QWEN14B_TO_PUBLIC_GITHUB_QA_ONCE.ps1"
 Invoke-WebRequest -UseBasicParsing -Uri $url -OutFile $path
@@ -52,3 +52,11 @@ browser-ink-tpsを選ぶ場合は最終行の `minecraftaibuilder` を `browser-
 - 回帰とWindows検査: [Actions #41794127076](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41794127076) は97件PASS（Windows Git実体の新規公開プロトコル関連15件PASS）。[Actions #41794612062](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41794612062) は新PowerShellワンショットの構文検査PASS。[Actions #41794872164](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41794872164) SUCCESS。旧mainやユーザーPCソースには変更なし。
 
 以上は「**合成データでの公開GitHub受渡し工程と、安全な独立SOURCE QA工程が2件とも成功した**」ことの実証。手元Windowsの真正Qwen14Bによる有益な修正の発生・WindowsのGit資格情報による本番提出・長時間自律化は引き続き**未実証/HOLD**。研究用の固定V4H/B423 HEADを最新V4J/B431の完成版と混同せず、実改修の評価に使う時は最新の開発正本との差分・有効なQAを再監査する。
+
+
+## 2026-11-04 追加工程：公開提出後の真正GitHub Actions最終結果まで自動確認
+
+- ワンクリック `RUN_QWEN14B_TO_PUBLIC_GITHUB_QA_ONCE.ps1` に読み取り専用 `verify_public_research_qa.py` を接続した。これは**既存の提出・独立QAを増殖させない**ための結果照合。新Workflow・有料API・GitHub書込み・モデル推論を増やさない。
+- PUBLIC投稿には従来どおり `-PublishPublicCode` の明示同意が必要。提出ツールが返した40桁の**正確なコミットSHA**を検査し、対象研究ブランチ・pushイベント・対象ワークフローと完全一致するGitHub Actions実行だけを最大30分（40秒間隔）読み取る。別SHA・別ブランチ・別Workflow・進行中・失敗・GitHubへの到達不能・時間超過は全てHOLD。GitHub APIは認証情報なしの公開読み取りなのでレート制限によるHOLDもあり得る。
+- 結果をPRIVATEソース領域の `SHAREABLE_GITHUB_QA_STATUS.json` に保存する。成功の表記は `EXACT_GITHUB_SOURCE_QA_WORKFLOW_SUCCESS_ONLY` に限定。これはGitHubワークフローの成功確認のみであり、Artifact本文を別途精査したこと、モデルが真正Qwen14Bだったこと、価値ある実修正・Minecraft ART/Education施工・TPS真正4v4・夜間長時間自律開発の認定ではない。
+- この結果照合器自体は固定Git blobでダウンロードし、既存のPowerShellワンクリック経路からのみ使う。**現段階ではWindows本人PCでの実行は未検証**。監督システムは本研究ブランチ内で改善を継続しつつ、次はユーザーWindows側の真正モデル出力が必要な品質ゲートを進める。
