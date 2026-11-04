@@ -151,3 +151,24 @@ test('original invalid JSON is diagnosed from authenticated original without att
   assert(!fs.existsSync(path.join(s.replay,'TRUE_B143_REPLAY_SOURCE.json')));
  }finally{s.clean();}
 });
+
+test('frozen graph north entry conflict is separately diagnosed for original compact IR without repair or private identifiers',()=>{
+ const valid=makeV4DCompactSynthetic();
+ const noConflict=diagnosePrivateV4DAuthor(valid,COMPACT_SCHEMA);
+ assert(!noConflict.issues.some(i=>i.code==='ENTRY_NORTH_SIDE_OCCUPIED'));
+ const invalid=structuredClone(valid),root=invalid.spaces[0].id;
+ invalid.spaces[2].attach={to:root,side:'north',shift:0};
+ const original=JSON.stringify(invalid);
+ const report=diagnosePrivateV4DAuthor(invalid,COMPACT_SCHEMA);
+ assert.equal(JSON.stringify(invalid),original);
+ assert.deepEqual(report.issues.filter(i=>i.code==='ENTRY_NORTH_SIDE_OCCUPIED'),
+  [{code:'ENTRY_NORTH_SIDE_OCCUPIED',spaceIndex:2}]);
+ assert.equal(report.sourcePassNotInferred,true);
+ assert.equal(report.privateStringsIncluded,false);
+ assert.equal(report.sourceModelCalls,0);
+ assert(!JSON.stringify(report).includes(root));
+ const other=structuredClone(valid);
+ other.spaces[2].attach={to:other.spaces[1].id,side:'north',shift:0};
+ assert(!diagnosePrivateV4DAuthor(other,COMPACT_SCHEMA).issues
+  .some(i=>i.code==='ENTRY_NORTH_SIDE_OCCUPIED'));
+});

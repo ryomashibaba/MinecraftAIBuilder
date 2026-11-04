@@ -199,6 +199,11 @@ export function diagnosePrivateV4DAuthor(author,contract){
    if(bad)add(r,'PARENT_ATTACHMENT_INVALID',i);
    else{
     r.authorParentAttachmentCount++;
+    // The first covered room's north face is reserved for public entry.
+    // Diagnose the original author decision; never silently reattach it.
+    if(a.to===author.spaces[0]?.id&&a.side==='north'&&
+      safeName(author.spaces[0]?.id))
+     add(r,'ENTRY_NORTH_SIDE_OCCUPIED',i);
     const old=connectedSides.get(a.to)??new Set();
     old.add(a.side);connectedSides.set(a.to,old);
     const self=connectedSides.get(space.id)??new Set();
