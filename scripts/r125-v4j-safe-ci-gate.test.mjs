@@ -40,3 +40,36 @@ test('CI guard can poll source-only without invoking any local Qwen request',asy
  assert.equal(reads,2);
  assert.equal(pauses,1);
 });
+
+test('more than 100 exact-head runs are fully paginated before allowing model use',async()=>{
+ const unrelated=Array.from({length:100},(_,i)=>
+  run('independent-workflow-'+i,sha,'completed','success',i+1));
+ unrelated[3]=run(REQUIRED_CHECKS[0],sha,'completed','success',150);
+ const visited=[];
+ const result=await checkExactHeadCi(sha,{fetcher:async url=>{
+  visited.push(url);
+  return {ok:true,json:async()=>({
+   total_count:101,workflow_runs:visited.length===1?unrelated:
+    [run(REQUIRED_CHECKS[1],sha,'completed','success',151)]
+  })};
+ }});
+ assert.equal(visited.length,2);
+ assert(visited[1].endsWith('&page=2'));
+ assert.equal(result.safeToRunModel,true);
+ assert.equal(result.checks.length,2);
+ assert.equal(result.checks[1].runId,151);
+});
+test('incomplete or excessive paginated workflow evidence holds without a model call',async()=>{
+ const unrelated=Array.from({length:100},(_,i)=>
+  run('unrelated-'+i,sha,'completed','success',i+1));
+ let reads=0;
+ await assert.rejects(checkExactHeadCi(sha,{fetcher:async()=>{
+  reads++;
+  return {ok:true,json:async()=>({total_count:101,
+   workflow_runs:reads===1?unrelated:[]})};
+ }}),/CI_INCOMPLETE_RESPONSE_HOLD/);
+ assert.equal(reads,2);
+ await assert.rejects(checkExactHeadCi(sha,{fetcher:async()=>({
+  ok:true,json:async()=>({total_count:501,workflow_runs:unrelated})
+ })}),/CI_PAGINATION_LIMIT_HOLD/);
+});

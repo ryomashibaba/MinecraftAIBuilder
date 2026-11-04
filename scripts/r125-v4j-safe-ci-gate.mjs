@@ -30,15 +30,33 @@ export function assessCiRuns(runs,sha){
 }
 export async function checkExactHeadCi(sha,{fetcher=fetch}={}){
  if(!SHA.test(sha))throw Error('CI_SHA_REQUIRED');
- const url='https://api.github.com/repos/ryomashibaba/MinecraftAIBuilder/actions/runs'+
+ const baseUrl='https://api.github.com/repos/ryomashibaba/MinecraftAIBuilder/actions/runs'+
   '?head_sha='+sha+'&per_page=100';
- const reply=await fetcher(url,{headers:{
-  'Accept':'application/vnd.github+json','User-Agent':'MinecraftAIBuilder-Local-CIGuard'
- }});
- if(!reply||reply.ok!==true)throw Error('CI_NETWORK_OR_RATE_LIMIT_HOLD');
- const data=await reply.json();
- if(!Array.isArray(data?.workflow_runs))throw Error('CI_RESPONSE_UNVERIFIED');
- return assessCiRuns(data.workflow_runs,sha);
+ const all=[];
+ // A busy exact HEAD can have over 100 workflows. Never treat an incomplete
+ // first page as proof that a required job is absent (or that both passed).
+ // Fail closed if more than five pages are needed or the API is inconsistent.
+ for(let page=1;page<=5;page++){
+  const url=baseUrl+(page===1?'':'&page='+page);
+  const reply=await fetcher(url,{headers:{
+   'Accept':'application/vnd.github+json','User-Agent':'MinecraftAIBuilder-Local-CIGuard'
+  }});
+  if(!reply||reply.ok!==true)throw Error('CI_NETWORK_OR_RATE_LIMIT_HOLD');
+  const data=await reply.json();
+  if(!Array.isArray(data?.workflow_runs)||data.workflow_runs.length>100)
+   throw Error('CI_RESPONSE_UNVERIFIED');
+  const total=data.total_count;
+  if(total!==undefined&&(!Number.isSafeInteger(total)||total<0))
+   throw Error('CI_RESPONSE_UNVERIFIED');
+  if(total>500)throw Error('CI_PAGINATION_LIMIT_HOLD');
+  all.push(...data.workflow_runs);
+  if(total!==undefined){
+   if(all.length>total)throw Error('CI_RESPONSE_UNVERIFIED');
+   if(all.length===total)return assessCiRuns(all,sha);
+   if(data.workflow_runs.length<100)throw Error('CI_INCOMPLETE_RESPONSE_HOLD');
+  }else if(data.workflow_runs.length<100)return assessCiRuns(all,sha);
+ }
+ throw Error('CI_PAGINATION_LIMIT_HOLD');
 }
 export async function waitForExactHeadCi(sha,{fetcher=fetch,maxChecks=60,
  pause=ms=>new Promise(resolve=>setTimeout(resolve,ms)),periodMs=15000}={}){
