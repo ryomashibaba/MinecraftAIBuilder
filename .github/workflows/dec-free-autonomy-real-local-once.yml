@@ -22,7 +22,7 @@ jobs:
         run: |
           docker pull ollama/ollama:latest
           docker pull node:22-bookworm-slim
-      - name: Real Ollama 0.6B inference and bounded two-step source QA in disposable clone
+      - name: Real Ollama 1.7B inference and bounded two-step source QA in disposable clone
         run: python3 tools/free-autonomy-solo/real_small_model_ci_once.py
       - name: Show honest evidence boundary
         if: always()
