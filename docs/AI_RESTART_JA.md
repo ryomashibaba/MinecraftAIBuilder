@@ -1,5 +1,8 @@
 # MinecraftAIBuilder — 開発再開の最新正本案内（2026-11-03）
 
+**2026-11-04 V4Jの5ジャンル連続・実ローカルモデル試験経路（CI未確認）**：既存Windowsの隔離起動器に明示オプトイン `--arcade-five` を追加。住宅・店舗・研究施設・展示館・駅舎で独立の自然文依頼を同じ汎用エンジンへ順番に送り、各ジャンル最大1 POST・全体最大5。原文・3Dは各PRIVATEフォルダだけに残し、共有は安全な `FIVE_GENRES_SHAREABLE_SUMMARY.json` のみ。モデル不在・通信不全・タイムアウトは残工程を中断。SOURCEとART/実モデル真正性・Minecraft歩行を別管理し、実Qwenの新試験は**未実施**、正式ART HOLD、9ゲートBLOCKED、mainと933ブロック成功経路、PR #128 Draftを維持。
+
+
 **2026-11-04 V4Jモデル1応答の研究経路をGitHub保存（新CI検証待ち）**：従来のV4Jは5用途の**合成作者**による真正B143公共ファサードSOURCEに留まっていた。新しい非既定 `--authored-civic-arcade` は、元の研究ブランチにあるV4H二層建築と3ベイ外部前庭を**同じ1 JSONで作者指定**できる契約を追加し、既存のローカルV4D実行器・PRIVATE回答SHA・真B143・入口/上階/前庭の共通SOURCE動線・五方向の前後差分・9安全ゲートBLOCKEDへ接続。既存Windowsワンクリック起動器にも `--arcade` を追加した。オフライン再現（追加モデルPOST=0）、非公開の構造診断、最小共有レシート、正負のテストダブル試験を既存V4D CIへ追加。**コード保存コミット `0d4520f1`、新CI [#41796867155](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41796867155) はこの記録時点で queued、PASS未確認。** 既存の合成V4J CI [#41793756581](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41793756581) のV4JジョブはSUCCESS。現時点で新実Qwen生成0、本物のMinecraftでの新歩行0、正式美術ART合格0。main・旧R125→B143→Education実機成功・凍結原本・Open/Draft PR #128保護。施工は `NOT_PREPARED`／BuildPlan空／9 BLOCKED／WorldWrites0。既存既定と旧V4D/H動作は不変更。新CI失敗ならこの工程は未完了HOLDのままとし、CIと真正3D証拠から修正する。
 
 
