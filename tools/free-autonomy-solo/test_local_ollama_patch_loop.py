@@ -365,5 +365,64 @@ class LocalPatchLoopTests(unittest.TestCase):
                              "refs/heads/research/isolated-test"), remote_tip)
 
 
+
+    def test_real_ollama_qa_failure_private_quarantine_and_clean_retry(self):
+        cfg = dict(self.cfg, tasks=self.cfg["tasks"][:1],
+                   quarantine_unverified_on_qa_failure=True)
+        proposals = [
+            ({"find": "return value;", "replace": "return 7;"},
+             {"model": "qwen3:14b", "done": True, "eval_count": 12}),
+            ({"find": "return value;", "replace": "return Math.max(0,value);"},
+             {"model": "qwen3:14b", "done": True, "eval_count": 17}),
+        ]
+        with patch.dict(os.environ, self.env), \
+             patch("local_ollama_patch_loop.qa_image_preflight"), \
+             patch("local_ollama_patch_loop.propose_once", side_effect=proposals), \
+             patch("local_ollama_patch_loop.run_in_docker",
+                   side_effect=[(1, "MOCK_INVALID_QA"),
+                                (0, "MOCK_PASS")]):
+            result = execute(cfg)
+        self.assertEqual(result["status"], "SOURCE_ONLY_TASK_QUEUE_DONE")
+        self.assertEqual(result["cycles"], 2)
+        self.assertEqual(len(result["commits"]), 1)
+        self.assertEqual(len(result["qa_failure_quarantines"]), 1)
+        record = result["qa_failure_quarantines"][0]
+        self.assertEqual(record["failed_checks"], 1)
+        self.assertEqual(record["model_requested"], "qwen3:14b")
+        manifest = Path(record["private_manifest"])
+        data = json.loads(manifest.read_text(encoding="utf-8"))
+        self.assertEqual(data["scope"], "PRIVATE_UNVERIFIED_NOT_QA_PASSED")
+        item = data["items"][0]
+        self.assertEqual(item["path"], "source/calc.mjs")
+        self.assertIn(b"return 7;", (manifest.parent / item["backup"]).read_bytes())
+        self.assertIn("Math.max(0,value)", self.target.read_text())
+        self.assertEqual(git(self.clone, "status", "--porcelain"), "")
+        self.assertFalse(result["real_model_verified"])
+
+    def test_real_ollama_qa_failure_quarantine_refuses_modified_source(self):
+        cfg = dict(self.cfg, tasks=self.cfg["tasks"][:1],
+                   quarantine_unverified_on_qa_failure=True)
+        def qa_tamper(*args, **kwargs):
+            self.target.write_text("QA_CHANGED_SOURCE_INDEPENDENTLY")
+            return (1, "MOCK_FAIL")
+        with patch.dict(os.environ, self.env), \
+             patch("local_ollama_patch_loop.qa_image_preflight"), \
+             patch("local_ollama_patch_loop.propose_once",
+                   return_value=self.proposals[0]), \
+             patch("local_ollama_patch_loop.run_in_docker",
+                   side_effect=qa_tamper):
+            with self.assertRaisesRegex(Hold, "QA_CHANGED_SOURCE_OR_OTHER_FILES"):
+                execute(cfg)
+        private = json.loads(
+            (self.home / "PRIVATE" / "local_patch_state.json").read_text())
+        self.assertEqual(private["status"], "HOLD")
+        self.assertNotIn("qa_failure_quarantines", private)
+        self.assertEqual(self.target.read_text(), "QA_CHANGED_SOURCE_INDEPENDENTLY")
+
+    def test_local_ollama_quarantine_must_be_explicit_boolean(self):
+        with self.assertRaisesRegex(Hold, "QA_PRIVATE_QUARANTINE_OPT_IN_MUST_BE_BOOLEAN"):
+            validate_config(dict(self.cfg, quarantine_unverified_on_qa_failure="yes"))
+
+
 if __name__ == "__main__":
     unittest.main()
