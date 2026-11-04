@@ -22,10 +22,10 @@ foreach ($program in @('python','git','node','ollama')) {
   }
 }
 if (-not $env:LOCALAPPDATA) { throw 'LOCALAPPDATA_REQUIRED' }
-$rev = 'ed112fd250959acfbc07094f2c51d25cd288ebbd'
+$rev = '1945ae8ce4edca5d57abaefeec44e7c6af361b0d'
 $origin = 'ryomashibaba/MinecraftAIBuilder'
 $files = @(
-  @{ Name='real_mab_original_architecture_batch.py'; Blob='REPLACE_RUNNER_BLOB' },
+  @{ Name='real_mab_original_architecture_batch.py'; Blob='8573e6ffcd12dbb224c93806d072ef1431cb9756' },
   @{ Name='draft_real_project_local14b.py'; Blob='f8539d764c15217f70d0c17c5b5629cc6e9dddeb' },
   @{ Name='prepare_pinned_real_project.py'; Blob='ce4d56452ec0a1d513dfa419a80780eed1283894' },
   @{ Name='local_qwen_no_docker_two_step.py'; Blob='ec98a13b7191a3f70f58af3bf3c08f85c8e60503' },
