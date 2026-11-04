@@ -182,3 +182,16 @@
 - プライベートなソースやNode構文エラー原文は表示/送信しない。結果JSON `SHAREABLE_MJS_SYNTAX_RESULT.json` はステージごとのSHA256/構文PASS、モデル自己申告、コード非実行、HOLD理由のみ。元ソース・2件の修正案ともユーザーPCの私有作業領域内に留まり、原本Git履歴とファイルを変更しない。
 - 既存の [RUN_CHECK_EXISTING_PRIVATE_DRAFTS_ONCE.cmd](./RUN_CHECK_EXISTING_PRIVATE_DRAFTS_ONCE.cmd) は新版でMAB `qwen3:14b` の最新成功PRIVATE下書きを選び、この構文パーサへ進める（既存PRIVATE下書きを再生成しない）。Windows Explorerで小さなJSONを選択表示する。**構文PASSであっても独立機能QAではなく、正式なSOURCE QA/生成コードの実行/採用/長時間自律運転とは分離**。
 - 実装のGit回帰試験は、動作させるとファイルを作るはずの悪意を想定したJavaScript文を `node --check` に与え、ファイルが作られないことを確かめるほか、構文エラーが適切なHOLDになること、Node未導入でもHOLDになることを検証する。ユーザーの真正生成コード本文はこの公開CIへ持ち込まない。
+
+
+## 2026-11-04：本人が公開研究ブランチへの送信と隔離SOURCE QAを明示承認
+
+本人がチャットで「この2件の修正案を公開GitHubの研究ブランチに送信して、隔離環境で本物の動作テストを行ってもよいです」と承認。これは **MAB固定ソースに対する今回の真正Qwen3:14Bの2件だけ** の公開研究提出承認であり、`main`へのマージ・正式原本採用・Work/Computer Use起動・有料API・他の研究提案の無条件公開を意味しない。
+
+- 事前結果：真正Qwen 2/2 PRIVATE下書き生成PASS → SHA256・変更境界・保護アンカー静的2/2 PASS → `node --input-type=module --check` 構文2/2 PASS。ソースは本人Windowsの隔離私有領域にあり、このチャット側には**結果メタデータのみ**。こちらからWindows内の下書きを読んだりGitHubへ直接公開することはできない。
+- 今回の2件の誤選択を防ぐため公開クライアントが要求するSHA256を固定：stage1 `03b73c926cb507b9fc0bed50c3a9b38cf5cada631b15a428b9e3f240fe8098cc`、stage2 `5b8468783df8126d6e053bf7d37b4c9b74fd543bdd345d5898ac88fe022df6d6`。対象 `minecraftaibuilder`、モデル報告 `qwen3:14b`、元コミット `fe1682e15ffa063f4dc415b06c4d76a54737a06e` を固定。PRIVATEレシート・静的検査・構文検査すべてのSHAを照合して選ぶ。
+- [RUN_PUBLISH_EXISTING_QWEN_MAB_TWO_DRAFTS.cmd](./RUN_PUBLISH_EXISTING_QWEN_MAB_TWO_DRAFTS.cmd) を本人Windows上で**1回だけ**実行。Git Blobを検証したPowerShellがレビュー済みPythonコード9件を追加でSHA照合して取得。真正Qwenを再呼び出しせず、最終読取・構文チェックを行った後、既存 `submit_public_research_qa.py --publish-public-code` に今回の PRIVATE 下書きを渡す。
+- 既存の送信器はベースGitを新しい使い捨てcloneで取得し、**既存の** `ryomashibaba/MinecraftAIBuilder:research/dec-free-autonomy-solo-pilot-20261104` にだけ、1ファイル追加コミットをfast-forwardでpushする。生成コード2段階の全文を公開提出JSONへ載せるため、**公開Git履歴から原則回収不能**。保守的な秘密文字列・スコープの確認は実施するが、あらゆる機密や不適切なコードを自動で確実に発見できるわけではない。既存Git認証がなければHOLDし、秘密鍵・トークンをチャットに送らない。
+- GitHub受信側は既存 `.github/workflows/dec-free-autonomy-public-source-handoff.yml` を使用し、GitHub UbuntuランナーのDocker内部、`network=none`、読取専用ソース、無資格情報で真正SOURCE QAを実施。各stageが合格すれば**ランナーの使い捨て隔離clone内のみ**で研究コミットを作成。main・既存開発ブランチ・Minecraft世界・本番へ反映しない。既存ワークフローと受信器を増設しない。
+- 公開クライアントは正確な提出コミットSHA・pushイベント・対象ワークフロー・対象ブランチを照合して結果を監視。私有 `SHAREABLE_REAL_QWEN_PUBLIC_QA_HANDOFF.json` に、送信コミット・Actions URL/結果・HOLD理由のみ保存し、Explorerで選択表示する。本人には**この小さなJSONだけ**をチャットに送ってもらい、こちらでActionsとArtifactを独立確認する。
+- 現時点で**実際の2件のpush・GitHub QAは未実行**。ランチャー・構文CIの成功と、本人Windowsでの公開提出成功・有用なソース改善・ART合格・長時間自律実行は必ず区別する。
