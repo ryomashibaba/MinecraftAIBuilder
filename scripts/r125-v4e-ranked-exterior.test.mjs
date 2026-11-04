@@ -1044,3 +1044,117 @@ test('V4G genuinely authored double-height usable public hall replaces full old 
   {...housing.authoredAtrium,spaceId:'learning',offsetX:4,offsetZ:4}),
   /R125_V4G_ATRIUM_ORIGINAL_REAL_ATRIUM_FLOOR_NOT_PRESENT/);
 });
+
+
+test('V4G ONE original author controls full public program, footprint and physical elevated hall for all genres',async()=>{
+ const {HEIGHT_SCHEMA,HEIGHT_SYSTEM_PROMPT,compileHeightAuthorIntent}
+  =await import('../source/ai/r125-v4g-height-author-ir.mjs');
+ const {syntheticFiveGenreAuthorCases}
+  =await import('./r125-v4e-cross-genre-source-study.mjs');
+ const {diagnosePrivateV4DAuthor}
+  =await import('./r125-v4d-author-source-diagnostics.mjs');
+ const fixtures=syntheticFiveGenreAuthorCases(),snapshot=structuredClone(fixtures);
+ for(const s of fixtures){
+  const answer={...structuredClone(s.source),schema:HEIGHT_SCHEMA,
+   massing:structuredClone(s.authoredMassing),
+   wing:structuredClone(s.authoredContourWing),
+   floorplate:structuredClone(s.authoredFloorplate),
+   atrium:structuredClone(s.authoredAtrium)};
+  const frozen=structuredClone(answer);
+  const result=compileHeightAuthorIntent(answer),w=result.authoredTallHallSourceWitness;
+  assert.deepEqual(answer,frozen);
+  assert.equal(result.authorContract,HEIGHT_SCHEMA);
+  assert.notEqual(result.unchangedFloorplateGeometrySha256,result.b143.geometrySha256);
+  assert.equal(w.usableGroundLevelAtriumFloorColumns,
+   answer.atrium.width*answer.atrium.depth);
+  assert.equal(w.physicallyPresentRaisedRoofCells,
+   answer.atrium.width*answer.atrium.depth);
+  assert(w.physicallyGlazedClerestoryCells>=96);
+  assert.equal(w.actualGlassInsideOutsideAIRCells,2*w.physicallyGlazedClerestoryCells);
+  assert(w.actualGainAtHighestVoxel>=5);
+  assert(w.verifiedTallHallCenterVerticalAirCells>=18);
+  assert.equal(w.realHallEntryTwoWideWalk.width,2);
+  assert.equal(result.b143.sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert.equal(result.realModel,'NOT_TESTED');
+  assert.equal(result.humanArt,'NOT_REVIEWED');
+  assert.equal(result.worldContacts,0);assert.equal(result.worldWrites,0);
+  assert.deepEqual(result.gates,Array(9).fill('BLOCKED'));
+  assert.deepEqual(result.BuildPlan.operations,[]);
+  assert.equal(diagnosePrivateV4DAuthor(answer,HEIGHT_SCHEMA).issues.length,0);
+  const bad=structuredClone(answer);bad.atrium.lift=14;
+  assert.throws(()=>compileHeightAuthorIntent(bad),/R125_V4G_ATRIUM_AUTHOR_HEIGHT_SECTION_CONTRACT/);
+  assert(diagnosePrivateV4DAuthor(bad,HEIGHT_SCHEMA).issues
+   .some(x=>x.code==='TALL_ATRIUM_SECTION_DIMENSION_INVALID'));
+ }
+ assert(HEIGHT_SYSTEM_PROMPT.includes('atrium'));
+ assert.deepEqual(fixtures,snapshot);
+});
+
+test('V4G local fake ONE response has real tall roof and clerestory, private art evidence, zero-call source SHA replay, and ZERO worlds',async()=>{
+ const {HEIGHT_SCHEMA}=await import('../source/ai/r125-v4g-height-author-ir.mjs');
+ const {syntheticFiveGenreAuthorCases}
+  =await import('./r125-v4e-cross-genre-source-study.mjs');
+ const {parseV4DLocalAuthorArgs,runV4DLocalAuthor}
+  =await import('./r125-v4d-local-architect.mjs');
+ const {replayPrivateV4D}=await import('./r125-v4d-replay-private.mjs');
+ const fs=await import('node:fs'),os=await import('node:os'),path=await import('node:path');
+ const parent=fs.mkdtempSync(path.join(os.tmpdir(),'mab-v4g-private-'));
+ const out=path.join(parent,'study'),replay=path.join(parent,'replay');
+ const sample=syntheticFiveGenreAuthorCases()[0];
+ const answer={...structuredClone(sample.source),schema:HEIGHT_SCHEMA,
+  massing:structuredClone(sample.authoredMassing),
+  wing:structuredClone(sample.authoredContourWing),
+  floorplate:structuredClone(sample.authoredFloorplate),
+  atrium:structuredClone(sample.authoredAtrium)};
+ const raw=JSON.stringify(answer),requests=[];
+ const fetcher=async(url,opt)=>{
+  requests.push(opt?.method);
+  if(opt?.method==='GET')
+   return {ok:true,status:200,text:async()=>JSON.stringify({models:[{name:'qwen3:14b'}]})};
+  if(opt?.method==='POST')
+   return {ok:true,status:200,text:async()=>JSON.stringify({
+    model:'qwen3:14b',choices:[{finish_reason:'stop',message:{content:raw}}]})};
+  throw Error('UNEXPECTED_MODEL_ORIGIN');
+ };
+ try{
+  const opt=parseV4DLocalAuthorArgs(['--authored-atrium','--model','qwen3:14b',
+   '--out',out,'--prompt','Design one unique inhabited public double-height hall with an original roof profile.']);
+  assert.equal(opt.authorAtrium,true);
+  assert.throws(()=>parseV4DLocalAuthorArgs([
+   '--authored-atrium','--authored-floorplate',
+   '--model','qwen3:14b','--out',out]),/ONLY_ONE_AUTHOR_MODE/);
+  const report=await runV4DLocalAuthor(opt,{fetcher,timeoutMs:15000});
+  assert.equal(report.status,'HOLD_TEST_DOUBLE_NOT_REAL_MODEL',report.reason);
+  assert.equal(report.authorContract,HEIGHT_SCHEMA);
+  assert.equal(report.sourceRoutesStatus,'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert.equal(report.worldWrites,0);
+  assert.equal(requests.filter(x=>x==='POST').length,1);
+  assert.deepEqual(JSON.parse(fs.readFileSync(
+   path.join(out,'AUTHOR_INTENT_ORIGINAL.json'),'utf8')),answer);
+  assert.equal(fs.readFileSync(path.join(out,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8'),raw);
+  const art=JSON.parse(fs.readFileSync(
+   path.join(out,'PRIVATE_B143_ATRIUM_ART_HOLD_COMPARISON.json'),'utf8'));
+  assert(art.projectedVisibilityAudit.views.find(v=>v.face==='roof').depthChangedCells>=100);
+  assert(art.tallHallSourceWitness.actualGainAtHighestVoxel>=5);
+  assert.equal(art.tallHallSourceWitness.physicallyGlazedClerestoryCells,120);
+  assert.equal(art.extraModelRequests,0);
+  assert.equal(art.humanArchitecturalArt,'NOT_REVIEWED');
+  for(const f of [
+   'BASELINE_FLOORPLATE_3D_PRIVATE.html','BASELINE_FLOORPLATE_FIVE_VIEWS_PRIVATE.svg',
+   'FINAL_TALL_PUBLIC_HALL_FIVE_VIEWS_PRIVATE.svg','PRIVATE_B143_ATRIUM_VISIBILITY_DELTA.svg',
+   'AUTHORED_TALL_PUBLIC_HALL_SOURCE.json'
+  ])assert(fs.existsSync(path.join(out,f)),f);
+  const safe=JSON.parse(fs.readFileSync(path.join(out,'REVIEW_SUMMARY_SHAREABLE.json'),'utf8'));
+  assert.equal(safe.authorContract,HEIGHT_SCHEMA);
+  assert.equal(safe.sourceCandidateVerified,true);
+  assert.equal(safe.explicitlyInjectedTestResponse,true);
+  assert.equal(safe.rawModelTextIncluded,false);
+  const callsBeforeReplay=requests.length,replayed=replayPrivateV4D(out,replay);
+  assert.equal(requests.length,callsBeforeReplay);
+  assert.equal(replayed.status,'HOLD_TEST_DOUBLE_REPLAY_ONLY');
+  assert.equal(replayed.originalCompilerHashesMatch,true);
+  assert.equal(replayed.additionalModelCalls,0);
+  assert.equal(replayed.worldWrites,0);
+  assert(!fs.existsSync(path.join(replay,'MODEL_RESPONSE_ORIGINAL.txt')));
+ }finally{fs.rmSync(parent,{recursive:true,force:true});}
+});

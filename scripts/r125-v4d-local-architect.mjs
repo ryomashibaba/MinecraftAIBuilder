@@ -25,6 +25,8 @@ import {WING_SCHEMA,WING_SYSTEM_PROMPT,compileWingAuthorIntent}
  from '../source/ai/r125-v4e-wing-author-ir.mjs';
 import {FLOORPLATE_SCHEMA,FLOORPLATE_SYSTEM_PROMPT,compileFloorplateAuthorIntent}
  from '../source/ai/r125-v4f-floorplate-author-ir.mjs';
+import {HEIGHT_SCHEMA,HEIGHT_SYSTEM_PROMPT,compileHeightAuthorIntent}
+ from '../source/ai/r125-v4g-height-author-ir.mjs';
 
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const MODEL=/^[A-Za-z0-9._:/-]{2,140}$/;
@@ -69,7 +71,7 @@ export function parseV4DLocalAuthorArgs(argv){
  const opt={},allowed=new Set(['--model','--out','--prompt','--endpoint']);
  for(let i=0;i<argv.length;i++){
   const k=argv[i];
-  if(k==='--compact'||k==='--ranked-windows'||k==='--ranked-section'||k==='--authored-massing'||k==='--authored-wing'||k==='--authored-floorplate'){
+  if(k==='--compact'||k==='--ranked-windows'||k==='--ranked-section'||k==='--authored-massing'||k==='--authored-wing'||k==='--authored-floorplate'||k==='--authored-atrium'){
    if(Object.hasOwn(opt,k))fail(k==='--compact'?'DUPLICATE_COMPACT':k==='--ranked-section'?'DUPLICATE_RANKED_SECTION':k==='--authored-massing'?'DUPLICATE_AUTHORED_MASSING':'DUPLICATE_RANKED_WINDOWS');
    opt[k]=true;continue;
   }
@@ -81,12 +83,12 @@ export function parseV4DLocalAuthorArgs(argv){
  if(!MODEL.test(opt['--model']??'')||
   typeof opt['--out']!=='string'||opt['--out'].length<2)
   fail('MODEL_AND_PRIVATE_OUT_REQUIRED');
- if([opt['--compact'],opt['--ranked-windows'],opt['--ranked-section'],opt['--authored-massing'],opt['--authored-wing'],opt['--authored-floorplate']].filter(Boolean).length>1)fail('ONLY_ONE_AUTHOR_MODE');
+ if([opt['--compact'],opt['--ranked-windows'],opt['--ranked-section'],opt['--authored-massing'],opt['--authored-wing'],opt['--authored-floorplate'],opt['--authored-atrium']].filter(Boolean).length>1)fail('ONLY_ONE_AUTHOR_MODE');
  const endpoint=opt['--endpoint']??DEFAULT_ENDPOINT,port=ENDPOINT.exec(endpoint);
  if(!port||+port[1]<1||+port[1]>65535)fail('LOCAL_LOOPBACK_ONLY');
  const prompt=opt['--prompt']??DEFAULT_PROMPT;
  if(prompt.length<8||prompt.length>4000)fail('PROMPT_CONTRACT');
- return {model:opt['--model'],outDir:path.resolve(opt['--out']),prompt,endpoint,compact:opt['--compact']===true,rankedWindows:opt['--ranked-windows']===true,rankedSection:opt['--ranked-section']===true,authoredMassing:opt['--authored-massing']===true,authorWing:opt['--authored-wing']===true,authorFloorplate:opt['--authored-floorplate']===true};
+ return {model:opt['--model'],outDir:path.resolve(opt['--out']),prompt,endpoint,compact:opt['--compact']===true,rankedWindows:opt['--ranked-windows']===true,rankedSection:opt['--ranked-section']===true,authoredMassing:opt['--authored-massing']===true,authorWing:opt['--authored-wing']===true,authorFloorplate:opt['--authored-floorplate']===true,authorAtrium:opt['--authored-atrium']===true};
 }
 function validateLaunch({model,outDir,prompt,endpoint},fetcher,timeoutMs){
  if(!MODEL.test(model??'')||typeof outDir!=='string'||!outDir.trim()||
@@ -106,10 +108,10 @@ function validateLaunch({model,outDir,prompt,endpoint},fetcher,timeoutMs){
  return dest;
 }
 export async function runV4DLocalAuthor({
- model,outDir,prompt=DEFAULT_PROMPT,endpoint=DEFAULT_ENDPOINT,compact=false,rankedWindows=false,rankedSection=false,authoredMassing=false,authorWing=false,authorFloorplate=false
+ model,outDir,prompt=DEFAULT_PROMPT,endpoint=DEFAULT_ENDPOINT,compact=false,rankedWindows=false,rankedSection=false,authoredMassing=false,authorWing=false,authorFloorplate=false,authorAtrium=false
 }={}, {fetcher=fetch,timeoutMs=180000}={}){
- if([compact,rankedWindows,rankedSection,authoredMassing,authorWing,authorFloorplate].some(x=>typeof x!=='boolean')||
-  [compact,rankedWindows,rankedSection,authoredMassing,authorWing,authorFloorplate].filter(Boolean).length>1)fail('AUTHOR_MODE');
+ if([compact,rankedWindows,rankedSection,authoredMassing,authorWing,authorFloorplate,authorAtrium].some(x=>typeof x!=='boolean')||
+  [compact,rankedWindows,rankedSection,authoredMassing,authorWing,authorFloorplate,authorAtrium].filter(Boolean).length>1)fail('AUTHOR_MODE');
  const dir=validateLaunch({model,outDir,prompt,endpoint},fetcher,timeoutMs);
  const injected=fetcher!==fetch||process.env.MAB_V4D_TEST_DOUBLE_MODE==='1',start=Date.now();
  fs.mkdirSync(dir,{recursive:false});
@@ -119,7 +121,7 @@ export async function runV4DLocalAuthor({
   declaredProvider:'LOCAL_OLLAMA_127_0_0_1_NOT_AUTHENTICATED',
   testInjectionPresent:injected,modelNameCryptographicallyAttested:false,
   promptSha256:sha(prompt),responseRawSha256:null,
-  authorContract:authorFloorplate?FLOORPLATE_SCHEMA:authorWing?WING_SCHEMA:authoredMassing?MASSING_SCHEMA:rankedSection?SECTIONED_SCHEMA:rankedWindows?RANKED_SCHEMA:compact?COMPACT_SCHEMA:RELATIVE_SCHEMA,
+  authorContract:authorAtrium?HEIGHT_SCHEMA:authorFloorplate?FLOORPLATE_SCHEMA:authorWing?WING_SCHEMA:authoredMassing?MASSING_SCHEMA:rankedSection?SECTIONED_SCHEMA:rankedWindows?RANKED_SCHEMA:compact?COMPACT_SCHEMA:RELATIVE_SCHEMA,
   mechanizedExpandedIRSha256:null,
   rawCaptured:false,modelCalls:0,modelFinishReason:null,
   authoredIRSha256:null,translatedGraphSha256:null,
@@ -130,7 +132,7 @@ export async function runV4DLocalAuthor({
  };
  output(dir,'LOCAL_REQUEST.json',{
   model,endpoint,prompt,timeoutMs,maxOutputTokens:3072,
-  authorContract:authorFloorplate?FLOORPLATE_SCHEMA:authorWing?WING_SCHEMA:authoredMassing?MASSING_SCHEMA:rankedSection?SECTIONED_SCHEMA:rankedWindows?RANKED_SCHEMA:compact?COMPACT_SCHEMA:RELATIVE_SCHEMA,
+  authorContract:authorAtrium?HEIGHT_SCHEMA:authorFloorplate?FLOORPLATE_SCHEMA:authorWing?WING_SCHEMA:authoredMassing?MASSING_SCHEMA:rankedSection?SECTIONED_SCHEMA:rankedWindows?RANKED_SCHEMA:compact?COMPACT_SCHEMA:RELATIVE_SCHEMA,
   nModelGenerationAttemptsAllowed:1,sourceOnly:true,
   noPaidAPI:true,noWorldAccess:true
  });
@@ -151,7 +153,7 @@ export async function runV4DLocalAuthor({
      model,stream:false,temperature:0.45,reasoning_effort:'none',
      max_tokens:3072,response_format:{type:'json_object'},
      messages:[
-      {role:'system',content:authorFloorplate?FLOORPLATE_SYSTEM_PROMPT:authorWing?WING_SYSTEM_PROMPT:authoredMassing?MASSING_SYSTEM_PROMPT:rankedSection?SECTIONED_SYSTEM_PROMPT:rankedWindows?RANKED_SYSTEM_PROMPT:compact?COMPACT_SYSTEM_PROMPT:V4D_RELATIVE_SYSTEM_PROMPT},
+      {role:'system',content:authorAtrium?HEIGHT_SYSTEM_PROMPT:authorFloorplate?FLOORPLATE_SYSTEM_PROMPT:authorWing?WING_SYSTEM_PROMPT:authoredMassing?MASSING_SYSTEM_PROMPT:rankedSection?SECTIONED_SYSTEM_PROMPT:rankedWindows?RANKED_SYSTEM_PROMPT:compact?COMPACT_SYSTEM_PROMPT:V4D_RELATIVE_SYSTEM_PROMPT},
       {role:'user',content:prompt}
      ]
     })
@@ -181,7 +183,8 @@ export async function runV4DLocalAuthor({
     fail('MODEL_ORIGINAL_MISSING_OR_OVERSIZE');
    try{parsed=JSON.parse(raw);}catch{fail('MODEL_RESPONSE_NOT_PURE_JSON');}
   }finally{clearTimeout(timer);}
-  const result=authorFloorplate?compileFloorplateAuthorIntent(parsed):
+  const result=authorAtrium?compileHeightAuthorIntent(parsed):
+   authorFloorplate?compileFloorplateAuthorIntent(parsed):
    authorWing?compileWingAuthorIntent(parsed):
    authoredMassing?compileMassingAuthorIntent(parsed):
     rankedSection?compileSectionedAuthorIntent(parsed):
@@ -194,17 +197,21 @@ export async function runV4DLocalAuthor({
    path.join(ROOT,'source/ai/b143-viewer-template.html'),'utf8');
   const html=renderB143Html(gal,tpl);
   let sectionPrivateArtEvidence=null;
-  if(rankedSection||authoredMassing||authorWing||authorFloorplate){
+  if(rankedSection||authoredMassing||authorWing||authorFloorplate||authorAtrium){
    // Derive an exact pre-section control from the SAME private model response.
    // This is a second deterministic B143 compilation, NOT an extra model POST.
    const beforeAuthor=structuredClone(parsed);
    if(rankedSection)delete beforeAuthor.section;
+   else if(authorAtrium)delete beforeAuthor.atrium;
    else if(authorFloorplate)delete beforeAuthor.floorplate;
    else {delete beforeAuthor.massing;if(authorWing)delete beforeAuthor.wing;}
-   beforeAuthor.schema=authorFloorplate?WING_SCHEMA:RANKED_SCHEMA;
-   const before=authorFloorplate?compileWingAuthorIntent(beforeAuthor):
-    compileRankedExteriorIntent(beforeAuthor);
-   if(before.b143.geometrySha256!==(authorFloorplate?
+   beforeAuthor.schema=authorAtrium?FLOORPLATE_SCHEMA:
+    authorFloorplate?WING_SCHEMA:RANKED_SCHEMA;
+   const before=authorAtrium?compileFloorplateAuthorIntent(beforeAuthor):
+    authorFloorplate?compileWingAuthorIntent(beforeAuthor):
+     compileRankedExteriorIntent(beforeAuthor);
+   if(before.b143.geometrySha256!==(authorAtrium?
+     result.unchangedFloorplateGeometrySha256:authorFloorplate?
      result.unchangedWingGeometrySha256:result.unchangedRankedGeometrySha256)||
       before.worldWrites!==0||result.worldWrites!==0||
       before.b143.sourceRoutes.status!=='SOURCE_ROUTES_REACH_ALL_ZONES'||
@@ -229,7 +236,8 @@ export async function runV4DLocalAuthor({
     visibilitySvg:renderB143ProjectedVisibilityDelta(
      before.b143.compiled.primitives,result.b143.compiled.primitives,viewKind),
     report:{
-     schema:authorFloorplate?'r125-v4f-private-one-response-covered-floorplate-art-hold-v1':
+     schema:authorAtrium?'r125-v4g-private-one-response-raised-functional-hall-art-hold-v1':
+      authorFloorplate?'r125-v4f-private-one-response-covered-floorplate-art-hold-v1':
       authorWing?'r125-v4e-private-one-response-exterior-wing-art-hold-v1':
       rankedSection?'r125-v4e-private-one-response-b143-geometry-delta-art-hold-v1':
       'r125-v4e-private-one-response-primary-massing-art-hold-v1',
@@ -240,8 +248,10 @@ export async function runV4DLocalAuthor({
        massingWitness:result.authoredMassingSourceWitness,
        ...(authorWing||authorFloorplate?{authoredWing:result.authoredWing,
         wingSourceWitness:result.authoredWingSourceWitness}:{}),
-       ...(authorFloorplate?{authoredFloorplate:result.authoredFloorplate,
-        floorplateSourceWitness:result.authoredFloorplateSourceWitness}:{})}),
+       ...(authorFloorplate||authorAtrium?{authoredFloorplate:result.authoredFloorplate,
+        floorplateSourceWitness:result.authoredFloorplateSourceWitness}:{}),
+       ...(authorAtrium?{authoredAtrium:result.authoredAtrium,
+        tallHallSourceWitness:result.authoredTallHallSourceWitness}:{})}),
      originalResponseSha256:report.responseRawSha256,
      baselineGeometrySha256:before.b143.geometrySha256,
      finalGeometrySha256:result.b143.geometrySha256,
@@ -263,11 +273,11 @@ export async function runV4DLocalAuthor({
    };
   }
   output(dir,'AUTHOR_INTENT_ORIGINAL.json',parsed);
-  if(compact||rankedWindows||rankedSection||authoredMassing||authorWing||authorFloorplate){
+  if(compact||rankedWindows||rankedSection||authoredMassing||authorWing||authorFloorplate||authorAtrium){
    output(dir,'MECHANICALLY_EXPANDED_AUTHOR_IR.json',result.expandedMechanicalIR);
    if(compact)output(dir,'GENERIC_MECHANICAL_NORMALIZATION.json',result.normalization);
-   if(rankedWindows||rankedSection||authoredMassing||authorWing||authorFloorplate)output(dir,'RANKED_GLAZING_RESOLUTION.json',{
-    schema:authorFloorplate?FLOORPLATE_SCHEMA:authorWing?WING_SCHEMA:authoredMassing?MASSING_SCHEMA:rankedSection?SECTIONED_SCHEMA:RANKED_SCHEMA,windowFaces:result.chosenWindowFaces,
+   if(rankedWindows||rankedSection||authoredMassing||authorWing||authorFloorplate||authorAtrium)output(dir,'RANKED_GLAZING_RESOLUTION.json',{
+    schema:authorAtrium?HEIGHT_SCHEMA:authorFloorplate?FLOORPLATE_SCHEMA:authorWing?WING_SCHEMA:authoredMassing?MASSING_SCHEMA:rankedSection?SECTIONED_SCHEMA:RANKED_SCHEMA,windowFaces:result.chosenWindowFaces,
     autoRepairPerformed:false,authorSelectedPriorities:true,worldWrites:0
    });
   }
@@ -278,25 +288,33 @@ export async function runV4DLocalAuthor({
    geometrySha256:result.b143.geometrySha256,
    worldWrites:0,humanArt:'NOT_REVIEWED'
   });
-  if(authoredMassing||authorWing||authorFloorplate)output(dir,'AUTHORED_PRIMARY_MASSING_SOURCE.json',{
+  if(authoredMassing||authorWing||authorFloorplate||authorAtrium)output(dir,'AUTHORED_PRIMARY_MASSING_SOURCE.json',{
     schema:MASSING_SCHEMA,authorOriginalSha256:result.massingAuthorSha256,
     authoredMassing:result.authoredMassing,
     witness:result.authoredMassingSourceWitness,
     geometrySha256:result.b143.geometrySha256,worldWrites:0,humanArt:'NOT_REVIEWED'
    });
-  if(authorWing||authorFloorplate)output(dir,'AUTHORED_EXTERIOR_WING_SOURCE.json',{
+  if(authorWing||authorFloorplate||authorAtrium)output(dir,'AUTHORED_EXTERIOR_WING_SOURCE.json',{
    schema:WING_SCHEMA,authorOriginalSha256:result.wingAuthorSha256,
    authoredWing:result.authoredWing,
    sourceWitness:result.authoredWingSourceWitness,
    geometrySha256:result.b143.geometrySha256,
    worldWrites:0,humanArt:'NOT_REVIEWED'
   });
-  if(authorFloorplate)output(dir,'AUTHORED_COVERED_FLOORPLATE_SOURCE.json',{
+  if(authorFloorplate||authorAtrium)output(dir,'AUTHORED_COVERED_FLOORPLATE_SOURCE.json',{
    schema:FLOORPLATE_SCHEMA,authorOriginalSha256:result.floorplateAuthorSha256,
    authorSetback:result.authoredFloorplate,
    sourceWitness:result.authoredFloorplateSourceWitness,
    geometrySha256:result.b143.geometrySha256,
    worldWrites:0,humanArt:'NOT_REVIEWED'
+  });
+  if(authorAtrium)output(dir,'AUTHORED_TALL_PUBLIC_HALL_SOURCE.json',{
+   schema:HEIGHT_SCHEMA,authorOriginalSha256:result.heightAuthorSha256,
+   authoredAtrium:result.authoredAtrium,
+   trueB143HeightWitness:result.authoredTallHallSourceWitness,
+   finalGeometrySha256:result.b143.geometrySha256,
+   worldContacts:0,worldWrites:0,engineering:'NOT_TESTED',
+   humanArt:'NOT_REVIEWED'
   });
    output(dir,'TRANSLATED_AUTHOR_GRAPH.json',result.plan);
   output(dir,'TRANSLATED_AUTHOR_ENVELOPE.json',result.envelope);
@@ -304,28 +322,33 @@ export async function runV4DLocalAuthor({
   output(dir,'TWO_WIDE_ROUTES_SOURCE.json',result.b143.sourceRoutes);
   output(dir,'index.html',html);
   if(sectionPrivateArtEvidence){
-   output(dir,authorFloorplate?'BASELINE_WING_3D_PRIVATE.html':
+   output(dir,authorAtrium?'BASELINE_FLOORPLATE_3D_PRIVATE.html':
+    authorFloorplate?'BASELINE_WING_3D_PRIVATE.html':
     'BASELINE_RANKED_3D_PRIVATE.html',sectionPrivateArtEvidence.baselineHtml);
-   output(dir,authorFloorplate?'BASELINE_WING_FIVE_VIEWS_PRIVATE.svg':
+   output(dir,authorAtrium?'BASELINE_FLOORPLATE_FIVE_VIEWS_PRIVATE.svg':
+    authorFloorplate?'BASELINE_WING_FIVE_VIEWS_PRIVATE.svg':
     'BASELINE_RANKED_FIVE_VIEWS_PRIVATE.svg',sectionPrivateArtEvidence.baselineSvg);
-   output(dir,authorFloorplate?'FINAL_COVERED_FLOORPLATE_FIVE_VIEWS_PRIVATE.svg':
+   output(dir,authorAtrium?'FINAL_TALL_PUBLIC_HALL_FIVE_VIEWS_PRIVATE.svg':
+    authorFloorplate?'FINAL_COVERED_FLOORPLATE_FIVE_VIEWS_PRIVATE.svg':
     authorWing?'FINAL_EXTERIOR_WING_FIVE_VIEWS_PRIVATE.svg':
     authoredMassing?'FINAL_PRIMARY_MASSING_FIVE_VIEWS_PRIVATE.svg':
     'FINAL_SECTIONED_FIVE_VIEWS_PRIVATE.svg',sectionPrivateArtEvidence.finalSvg);
-   output(dir,authorFloorplate?'PRIVATE_B143_FLOORPLATE_VISIBILITY_DELTA.svg':
+   output(dir,authorAtrium?'PRIVATE_B143_ATRIUM_VISIBILITY_DELTA.svg':
+    authorFloorplate?'PRIVATE_B143_FLOORPLATE_VISIBILITY_DELTA.svg':
     authorWing?'PRIVATE_B143_WING_VISIBILITY_DELTA.svg':
      authoredMassing?'PRIVATE_B143_MASSING_VISIBILITY_DELTA.svg':
      'PRIVATE_B143_SECTION_VISIBILITY_DELTA.svg',sectionPrivateArtEvidence.visibilitySvg);
-    output(dir,authorFloorplate?'PRIVATE_B143_FLOORPLATE_ART_HOLD_COMPARISON.json':
+    output(dir,authorAtrium?'PRIVATE_B143_ATRIUM_ART_HOLD_COMPARISON.json':
+    authorFloorplate?'PRIVATE_B143_FLOORPLATE_ART_HOLD_COMPARISON.json':
     authorWing?'PRIVATE_B143_WING_ART_HOLD_COMPARISON.json':
     authoredMassing?'PRIVATE_B143_MASSING_ART_HOLD_COMPARISON.json':
     'PRIVATE_B143_SECTION_ART_HOLD_COMPARISON.json',sectionPrivateArtEvidence.report);
   }
-  report.authoredIRSha256=authorFloorplate?result.floorplateAuthorSha256:authorWing?result.wingAuthorSha256:authoredMassing?result.massingAuthorSha256:
+  report.authoredIRSha256=authorAtrium?result.heightAuthorSha256:authorFloorplate?result.floorplateAuthorSha256:authorWing?result.wingAuthorSha256:authoredMassing?result.massingAuthorSha256:
     rankedSection?result.sectionedAuthorSha256:
    rankedWindows?result.rankedAuthorSha256:
    compact?result.compactAuthorSha256:result.originalIntentSha256;
-  report.mechanizedExpandedIRSha256=(compact||rankedWindows||rankedSection||authoredMassing||authorWing||authorFloorplate)?result.originalIntentSha256:null;
+  report.mechanizedExpandedIRSha256=(compact||rankedWindows||rankedSection||authoredMassing||authorWing||authorFloorplate||authorAtrium)?result.originalIntentSha256:null;
   report.translatedGraphSha256=sha(JSON.stringify(result.plan));
   report.sourceSha256=result.b143.sourceSha256;
   report.geometrySha256=result.b143.geometrySha256;
@@ -352,7 +375,7 @@ if(process.argv[1]===fileURLToPath(import.meta.url)){
  try{
   const opts=parseV4DLocalAuthorArgs(process.argv.slice(2));
   if(opts.help)console.log(
-   'node scripts/r125-v4d-local-architect.mjs --model qwen3:14b --out NEW_PRIVATE_FOLDER [--compact|--ranked-windows|--ranked-section|--authored-massing|--authored-wing|--authored-floorplate] [--prompt "日本語の独自建築依頼"] [--endpoint http://127.0.0.1:11434/v1/chat/completions] (ONE LOCAL MODEL REQUEST; NO Minecraft writes)'
+   'node scripts/r125-v4d-local-architect.mjs --model qwen3:14b --out NEW_PRIVATE_FOLDER [--compact|--ranked-windows|--ranked-section|--authored-massing|--authored-wing|--authored-floorplate|--authored-atrium] [--prompt "日本語の独自建築依頼"] [--endpoint http://127.0.0.1:11434/v1/chat/completions] (ONE LOCAL MODEL REQUEST; NO Minecraft writes)'
   );else{
    const result=await runV4DLocalAuthor(opts);
    console.log(JSON.stringify({status:result.status,reason:result.reason,

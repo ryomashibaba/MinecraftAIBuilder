@@ -11,13 +11,14 @@ if /i "%~1"=="--sectioned" set "AUTHOR_FLAG=--ranked-section"
 if /i "%~1"=="--massing" set "AUTHOR_FLAG=--authored-massing"
 if /i "%~1"=="--wing" set "AUTHOR_FLAG=--authored-wing"
 if /i "%~1"=="--floorplate" set "AUTHOR_FLAG=--authored-floorplate"
+if /i "%~1"=="--atrium" set "AUTHOR_FLAG=--authored-atrium"
 if not defined LOCALAPPDATA goto MISSING_LOCALAPPDATA
 where git.exe >nul 2>nul
 if errorlevel 1 goto MISSING_GIT
 where node.exe >nul 2>nul
 if errorlevel 1 goto MISSING_NODE
 if /i "%~1"=="--check-only" goto CHECK_ONLY
-if not "%~1"=="" if /i not "%~1"=="--prepare-only" if /i not "%~1"=="--run-once" if /i not "%~1"=="--sectioned" if /i not "%~1"=="--massing" if /i not "%~1"=="--wing" if /i not "%~1"=="--floorplate" goto BAD_ARGUMENT
+if not "%~1"=="" if /i not "%~1"=="--prepare-only" if /i not "%~1"=="--run-once" if /i not "%~1"=="--sectioned" if /i not "%~1"=="--massing" if /i not "%~1"=="--wing" if /i not "%~1"=="--floorplate" if /i not "%~1"=="--atrium" goto BAD_ARGUMENT
 
 set "WORK_ROOT=%LOCALAPPDATA%\MinecraftAIBuilder\IsolatedV4E"
 if not exist "%WORK_ROOT%" mkdir "%WORK_ROOT%"
@@ -44,6 +45,7 @@ if not exist "%WORK_DIR%\source\ai\r125-v4e-ranked-exterior-ir.mjs" goto MISSING
 if /i "%~1"=="--massing" if not exist "%WORK_DIR%\source\ai\r125-v4e-massing-author-ir.mjs" goto MISSING_RUNNER
 if /i "%~1"=="--wing" if not exist "%WORK_DIR%\source\ai\r125-v4e-wing-author-ir.mjs" goto MISSING_RUNNER
 if /i "%~1"=="--floorplate" if not exist "%WORK_DIR%\source\ai\r125-v4f-floorplate-author-ir.mjs" goto MISSING_RUNNER
+if /i "%~1"=="--atrium" if not exist "%WORK_DIR%\source\ai\r125-v4g-height-author-ir.mjs" goto MISSING_RUNNER
 
 echo [2/3] Research branch is prepared and verified.
 echo Branch: %ACTUAL_BRANCH%
@@ -142,7 +144,7 @@ echo ERROR: Node.js is not available. Nothing changed.
 goto DONE
 :BAD_ARGUMENT
 set "FINAL_EXIT=1"
-echo ERROR: Supported flags are --check-only, --prepare-only, --run-once, --sectioned, --massing, --wing and --floorplate.
+echo ERROR: Supported flags are --check-only, --prepare-only, --run-once, --sectioned, --massing, --wing, --floorplate and --atrium.
 goto DONE
 :CANNOT_MAKE_FOLDER
 set "FINAL_EXIT=1"

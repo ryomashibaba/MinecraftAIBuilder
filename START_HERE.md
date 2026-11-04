@@ -1,5 +1,12 @@
 # MinecraftAIBuilder — START HERE（新チャット・AI開発者の統一入口）
 
+## 2026-11-04 V4G全体AUTHOR AI単発経路（既定変更なし、SOURCE研究のみ）
+
+- `source/ai/r125-v4g-height-author-ir.mjs`：モデルが一つの完全JSONに建物の用途/部屋・実public massing・非矩形公共wing・非矩形の床平面・`atrium`（空間Id、2方向オフセット、長さ、奥行、元の棟の最高屋根を超えるlift、ridgeX/ridgeZ/shedX/shedZ）を同時AUTHORする。真B143から旧屋根除去／新屋根の下の内部AIR／四面クリアな上部ガラス／元窓／玄関からの2幅歩行源／世界0書込み・9 BLOCKEDを再監査。単なる高い屋根を重ねるフェイクは禁止。失敗候補は勝手に補修せずHOLD。
+- 研究ブランチの `scripts/r125-v4d-local-architect.mjs --authored-atrium` と `scripts/r125-v4e-one-click-ranked-trial.cmd --atrium` を明示指定した場合のみローカルOllamaへの最大1回のPOST。PRIVATE元回答とSHA、増築前のV4F 3D/五方向、V4G増築後五方向と真B143差分・SOURCE証拠を保存し、オフライン再検証は追加モデルPOST0回。既定V4D／既存V4E/V4F・以前のEducation真正施工成功・main/原本は不変更。
+- 合成のHTTPテストダブル/CIは本物のQwen実推論ではない。実QwenとARTは**未実証/正式ART HOLD**。高天井、耐荷重、雨仕舞、採光設計の建築技術や2階交通、美しい都市としての最終ARTをSOURCE合格と混同しない。必ず実3Dで審査。9ゲートBLOCKED/BuildPlan空/WorldWrites0、PR #128 Open Draft/merge禁止、Work事前承認を維持。
+
+
 ## 2026-11-04 V4G 受付・機能棟の高天井空間を実B143で建設する研究（SOURCE only）
 
 - `source/ai/r125-v4g-authored-atrium-height.mjs`: 作者が `atrium:{spaceId,offsetX,offsetZ,width,depth,lift,roofForm}` を明示し、先行の非矩形屋根付き主棟に対して、**実際の床の上に残っていた元の屋根を大面積で除去**し、連続した高い外壁・四方向真正ガラス上部採光とその両面AIR・勾配/片流れ屋根を生成。`lift=7..11`、床範囲10..16セル×10..16セル、ridgeX/ridgeZ/shedX/shedZ。作者指定位置が既存の吹抜け・床切欠き・構造・機能・入口に重なればSOURCE HOLD、ホスト側の移動・補修なし。

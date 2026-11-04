@@ -23,6 +23,8 @@ import {MASSING_SCHEMA,compileMassingAuthorIntent} from '../source/ai/r125-v4e-m
 import {WING_SCHEMA,compileWingAuthorIntent} from '../source/ai/r125-v4e-wing-author-ir.mjs';
 import {FLOORPLATE_SCHEMA,compileFloorplateAuthorIntent}
  from '../source/ai/r125-v4f-floorplate-author-ir.mjs';
+import {HEIGHT_SCHEMA,compileHeightAuthorIntent}
+ from '../source/ai/r125-v4g-height-author-ir.mjs';
 import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
 import {classifyPrivateV4DFailure}
  from './r125-v4d-shareable-receipt.mjs';
@@ -67,7 +69,7 @@ function openStudy(dir){
   !['SOURCE_READY_PRIVATE_ART_REVIEW_REQUIRED','HOLD_TEST_DOUBLE_NOT_REAL_MODEL',
    'HOLD_MODEL_OR_SOURCE_INVALID_NO_REPAIR','HOLD_MODEL_TIMEOUT_OR_ABORTED',
    'HOLD_MODEL_NOT_INSTALLED','HOLD_LOCAL_PREFLIGHT'].includes(original.status)||
-  ![COMPACT_SCHEMA,RELATIVE_SCHEMA,RANKED_SCHEMA,SECTIONED_SCHEMA,MASSING_SCHEMA,WING_SCHEMA,FLOORPLATE_SCHEMA].includes(original.authorContract)||
+  ![COMPACT_SCHEMA,RELATIVE_SCHEMA,RANKED_SCHEMA,SECTIONED_SCHEMA,MASSING_SCHEMA,WING_SCHEMA,FLOORPLATE_SCHEMA,HEIGHT_SCHEMA].includes(original.authorContract)||
   request.authorContract!==original.authorContract||
   !Number.isSafeInteger(original.modelCalls)||original.modelCalls<0||
   original.modelCalls>1||typeof original.testInjectionPresent!=='boolean'||
@@ -165,7 +167,9 @@ export function replayPrivateV4D(study,out){
   authorDiagnostic=diagnosePrivateV4DAuthor(author,original.authorContract);
   let compiled;
   try{
-   compiled=original.authorContract===FLOORPLATE_SCHEMA?
+   compiled=original.authorContract===HEIGHT_SCHEMA?
+    compileHeightAuthorIntent(author):
+    original.authorContract===FLOORPLATE_SCHEMA?
     compileFloorplateAuthorIntent(author):
     original.authorContract===WING_SCHEMA?
     compileWingAuthorIntent(author):
