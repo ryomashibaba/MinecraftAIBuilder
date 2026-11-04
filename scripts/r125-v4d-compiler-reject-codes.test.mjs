@@ -18,7 +18,7 @@ test('indices and author-chosen IDs never escape PRIVATE source report',()=>{
  assert.equal(classifyPrivateCompilerRejection('R125_V4D_COMPACT_MATERIALS_wall'),
   'COMPACT_MATERIALS_ENUM');
  assert.equal(classifyPrivateCompilerRejection(
-  'R125_V4D_GRAPH_REAL_PUBLIC_FLOOR-private-building'),
+  'R125_V4D_GRAPH_REAL_PUBLIC_FLOOR_private-building'),
   'GRAPH_REAL_PUBLIC_FLOOR');
 });
 test('unknown raw strings are not shared',()=>{
