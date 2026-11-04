@@ -97,7 +97,8 @@ jobs:
             'tools/free-autonomy-solo/RUN_PREPARE_REAL_PROJECT_ONCE.ps1',
             'tools/free-autonomy-solo/RUN_QWEN14B_REAL_SOURCE_DRAFT_ONCE.ps1',
             'tools/free-autonomy-solo/RUN_QWEN14B_TO_PUBLIC_GITHUB_QA_ONCE.ps1',
-            'tools/free-autonomy-solo/RUN_CHECK_EXISTING_PRIVATE_DRAFTS_ONCE.ps1'
+            'tools/free-autonomy-solo/RUN_CHECK_EXISTING_PRIVATE_DRAFTS_ONCE.ps1',
+            'tools/free-autonomy-solo/RUN_PUBLISH_EXISTING_QWEN_MAB_TWO_DRAFTS.ps1'
           )) {
             $tokens = $null
             $parseErrors = $null
@@ -113,6 +114,11 @@ jobs:
           & cmd /c 'tools\free-autonomy-solo\RUN_CHECK_EXISTING_PRIVATE_DRAFTS_ONCE.cmd' --ci-self-test
           if ($LASTEXITCODE -ne 0) { exit 2 }
           Write-Host 'WINDOWS_EXISTING_DRAFT_STATIC_PREFLIGHT_CMD_SELF_TEST'
+          # Public source submission code is parsed/smoked, NEVER invoked
+          # in CI, which has no user consent or private source drafts.
+          & cmd /c 'tools\free-autonomy-solo\RUN_PUBLISH_EXISTING_QWEN_MAB_TWO_DRAFTS.cmd' --ci-self-test
+          if ($LASTEXITCODE -ne 0) { exit 2 }
+          Write-Host 'WINDOWS_PUBLIC_QWEN_HANDOFF_CMD_SELF_TEST_NO_PUSH'
 
 
   windows-no-docker-python-contract:
