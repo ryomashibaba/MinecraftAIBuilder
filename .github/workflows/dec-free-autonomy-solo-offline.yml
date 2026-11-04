@@ -96,7 +96,8 @@ jobs:
             'tools/free-autonomy-solo/windows_readonly_audit.ps1',
             'tools/free-autonomy-solo/RUN_PREPARE_REAL_PROJECT_ONCE.ps1',
             'tools/free-autonomy-solo/RUN_QWEN14B_REAL_SOURCE_DRAFT_ONCE.ps1',
-            'tools/free-autonomy-solo/RUN_QWEN14B_TO_PUBLIC_GITHUB_QA_ONCE.ps1'
+            'tools/free-autonomy-solo/RUN_QWEN14B_TO_PUBLIC_GITHUB_QA_ONCE.ps1',
+            'tools/free-autonomy-solo/RUN_CHECK_EXISTING_PRIVATE_DRAFTS_ONCE.ps1'
           )) {
             $tokens = $null
             $parseErrors = $null
@@ -109,6 +110,9 @@ jobs:
           & cmd /c 'tools\free-autonomy-solo\RUN_FIRST_PRIVATE_REAL_MODEL_PILOT.cmd' --ci-self-test
           if ($LASTEXITCODE -ne 0) { exit 2 }
           Write-Host 'WINDOWS_PRIVATE_PILOT_CMD_SELF_TEST_NO_MODEL'
+          & cmd /c 'tools\free-autonomy-solo\RUN_CHECK_EXISTING_PRIVATE_DRAFTS_ONCE.cmd' --ci-self-test
+          if ($LASTEXITCODE -ne 0) { exit 2 }
+          Write-Host 'WINDOWS_EXISTING_DRAFT_STATIC_PREFLIGHT_CMD_SELF_TEST'
 
 
   windows-no-docker-python-contract:
