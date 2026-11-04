@@ -268,6 +268,65 @@ with single_agent_lock():
         self.assertEqual(result['commits'], again['commits'])
         self.assertEqual(len(again['commits']), 1)
 
+    def test_explicit_free_cloud_fallback_after_clean_model_failure(self):
+        # Fake CLI contract only, not a provider availability/quality test.
+        (self.fake / 'opencode').write_text(
+            '#!/usr/bin/env python3\nimport sys\n'
+            'from pathlib import Path\n'
+            'model=sys.argv[sys.argv.index("--model")+1]\n'
+            'if model=="opencode/offline-free":\n'
+            '    print("OFFLINE_MODEL_FIXTURE"); sys.exit(17)\n'
+            'if model!="opencode/backup-free": sys.exit(19)\n'
+            'Path("source/generated.txt").write_text("ok")\n'
+            'print("MOCK_BACKUP_MODEL")\n'
+        )
+        (self.fake / 'opencode').chmod(0o755)
+        cfg = dict(self.cfg, model='opencode/offline-free',
+                   fallback_models=['opencode/backup-free'], per_task_attempts=2)
+        with patch.dict(os.environ, self.env):
+            result = execute(cfg, push=False, sandbox_attested=True)
+        self.assertEqual(result['status'], 'TASK_QUEUE_COMPLETED_SOURCE_ONLY')
+        self.assertEqual(result['project'], 'minecraftaibuilder')
+        self.assertEqual(result['cycles'], 2)
+        self.assertEqual(result['outcomes'][0]['status'], 'AGENT_FAILED')
+        self.assertEqual(result['outcomes'][0]['model'], 'opencode/offline-free')
+        self.assertEqual(result['commits'][0]['model_requested'], 'opencode/backup-free')
+        self.assertFalse(result['real_model_verified'])
+        self.assertEqual(sh(self.repo, 'git', 'status', '--porcelain'), '')
+
+    def test_fallback_refuses_partial_edit_after_failure(self):
+        (self.fake / 'opencode').write_text(
+            '#!/usr/bin/env python3\nimport sys\n'
+            'from pathlib import Path\n'
+            'Path("source/generated.txt").write_text("unverified")\n'
+            'sys.exit(17)\n'
+        )
+        (self.fake / 'opencode').chmod(0o755)
+        cfg = dict(self.cfg, model='opencode/offline-free',
+                   fallback_models=['opencode/backup-free'], per_task_attempts=2)
+        with patch.dict(os.environ, self.env):
+            with self.assertRaisesRegex(Hold, 'AGENT_FAILED_LEFT_UNVERIFIED_WORKTREE'):
+                execute(cfg, push=False, sandbox_attested=True)
+        state = json.loads((self.root / 'state' / 'state.json').read_text())
+        self.assertEqual(state['status'], 'HOLD')
+        self.assertEqual(state['cycles'], 1)
+        self.assertEqual(state['commits'], [])
+        self.assertEqual(sh(self.repo, 'git', 'log', '-1', '--format=%s'), 'baseline')
+
+    def test_unapproved_or_paid_fallbacks_are_rejected(self):
+        cases = [
+            ['openai/gpt-6.1-sol'],
+            ['opencode/model-without-free-suffix'],
+            ['opencode/backup-free', 'opencode/backup-free'],
+            ['ollama/qwen3:14b', 'ollama/qwen3:14b'],
+            'opencode/backup-free',
+            ['opencode/backup-free'] * 4,
+        ]
+        for candidate in cases:
+            with self.subTest(candidate=candidate):
+                with self.assertRaisesRegex(Hold, 'FALLBACK_MODELS_MUST_BE_EXPLICIT'):
+                    validate(dict(self.cfg, fallback_models=candidate))
+
 
 if __name__ == '__main__':
     unittest.main()
