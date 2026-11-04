@@ -1,0 +1,51 @@
+name: December MAB independently tested reviewed Qwen repair (no model, no user action)
+
+on:
+  push:
+    branches:
+      - research/dec-free-autonomy-solo-pilot-20261104
+    paths:
+      - 'tools/free-autonomy-solo/reviewed_qwen_mab_repair_qa.py'
+      - 'tools/free-autonomy-solo/test_reviewed_qwen_mab_repair_qa.py'
+      - '.github/workflows/dec-reviewed-qwen-mab-repair-qa.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dec-reviewed-qwen-mab-repair-single-run
+  cancel-in-progress: false
+
+jobs:
+  independent-isolated-review-repair-qa:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Fetch only PUBLIC research tree without persisted GitHub credentials
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Read-only deterministic repair contract (no model or Docker)
+        run: |
+          python3 -m unittest discover -v -s tools/free-autonomy-solo -p 'test_reviewed_qwen_mab_repair_qa.py'
+      - name: Download public Node QA container runtime, no user Windows or model
+        run: docker pull node:24-bookworm-slim
+      - name: Reconstruct only explicitly verified two failed public Qwen changes and run genuine network-isolated source QA
+        run: python3 tools/free-autonomy-solo/reviewed_qwen_mab_repair_qa.py
+      - name: Upload metadata-only research result; never publish the repaired source or private runner data
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dec-mab-reviewed-qwen-repair-real-qa-result
+          path: ${{ runner.temp }}/dec-reviewed-qwen-mab-repair-qa-result.json
+          retention-days: 7
+          if-no-files-found: warn
+      - name: Keep results distinct from original Qwen and Minecraft real-world quality
+        if: always()
+        run: |
+          echo 'Original genuine Qwen submissions FAILED stage 1 independent QA.'
+          echo 'Repair is assistant-reviewed, no model calls and no paid API.'
+          echo 'QA uses GitHub-hosted runner isolated Docker (network=none).'
+          echo 'No write to main or user Windows; never publish candidate from QA.'
+          echo 'Unit tests do not certify Minecraft Education walking or ART.'
