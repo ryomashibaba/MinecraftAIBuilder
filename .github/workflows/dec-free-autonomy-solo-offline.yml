@@ -9,6 +9,12 @@ on:
       - '.github/workflows/dec-free-autonomy-solo-offline.yml'
   workflow_dispatch:
 
+# Keep only the newest push's identical CI workload. A manually dispatched
+# genuine free-model trial must not be canceled by an unrelated code push.
+concurrency:
+  group: dec-free-autonomy-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: ${{ github.event_name == 'push' }}
+
 permissions:
   contents: read
 
