@@ -1,0 +1,43 @@
+name: Dec genuine Qwen4B one V4H author after window contract fix
+
+on:
+  push:
+    branches:
+      - research/dec-v4h-one-response-author-contract-20261105
+    paths:
+      - 'scripts/dec-v4h-one-real-qwen4b-after-contract.py'
+      - '.github/workflows/dec-v4h-one-real-qwen4b-after-contract.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  one-real-v4h-original-architect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 23
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Syntax
+        run: python3 -m py_compile scripts/dec-v4h-one-real-qwen4b-after-contract.py
+      - name: Download free public local container models on disposable CI only
+        run: |
+          docker pull ollama/ollama:latest
+          docker pull node:24-bookworm-slim
+      - name: One true Qwen4B architectural response and isolated B143 source QA
+        run: python3 scripts/dec-v4h-one-real-qwen4b-after-contract.py
+      - name: Sanitized result only no source or raw model JSON
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v4h-genuine-qwen4b-window-contract-one-response-sanitized
+          path: ${{ runner.temp }}/v4h-qwen4b-after-contract.json
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Real-model is not real-world quality
+        if: always()
+        run: echo 'Qwen4B, not user Qwen14B. SOURCE only; no human ART, Minecraft world or overnight code certification.'
