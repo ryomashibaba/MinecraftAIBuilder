@@ -48,3 +48,29 @@ python $path --model qwen3:14b --allow-public-qa-image-pull
 - 先行 #41744827211、#41745045798 等のFAILは追加した負例の想定例外とモック範囲の誤りによる。修正版でテストを修復し、旧FAILをSUCCESSとは言い換えない。
 - genuine-free-model-once-ephemeral は明示実行以外SKIPPEDを維持。Windows真正モデル・実際のGitHub push・プロジェクト作品品質は未検証HOLD。
 - Windows入口 RUN_LOCAL_QWEN_TWO_STEP.py は実機未実行。ソースのみGitHub保存済み、必要な固定源blobハッシュ確認を行う。公開Node QAイメージの初回pullは利用者が --allow-public-qa-image-pull を選んだ場合に限る。
+
+
+## 2026-11-04 更新：Docker未導入ならこちらを優先（新経路）
+
+従来の RUN_LOCAL_QWEN_TWO_STEP.py はDocker Linux Engineを要求し、古いパッチ監督コードに固定されている。**Docker未導入のWindowsで、この古い経路を無理に実行する必要はない。** 下記の新経路を推奨する。
+
+新しい local_qwen_no_docker_two_step.py は **Pythonと、既に起動しているOllamaの導入済みモデルだけ**を使用し、無課金の真正モデル応答から２工程の小規模コード生成を確認する。Git clone・Docker・Node・追加の有料API・モデル自動pull・プロジェクト原本のマウントは行わない。
+
+最大２工程×各２回のモデル応答。第１工程はclampの正常動作６ケース、第２工程は既存動作を維持したまま不正な境界へのValueErrorを含む８ケース。モデル生成コードはASTの許可されたノードだけを検証・解釈し、exec/eval/import/shellでモデル生成コード自体を実行しない。私有領域に段階別候補と共有可能なJSONを保存。成功時の証明は TWO_STAGE_REAL_LOCAL_AST_QA_ONLY であり、実プロジェクト開発・Gitコミット・ART・180秒4v4・長時間無人運用のPASSではない。
+
+Windows PowerShellに以下を１度コピーする。Gitコマンドは固定配布ソースの**照合だけ**に利用し、clone/commit/pushは行わない。
+
+~~~powershell
+$ErrorActionPreference = "Stop"
+$rev = "ac6f76aef6e0bdf72a854cc5dbf65b7ae90ebbff"
+$expectedBlob = "ec98a13b7191a3f70f58af3bf3c08f85c8e60503"
+$script = Join-Path $env:TEMP "FA_LocalQwen_NoDocker_TwoStep.py"
+$uri = "https://raw.githubusercontent.com/ryomashibaba/MinecraftAIBuilder/$rev/tools/free-autonomy-solo/local_qwen_no_docker_two_step.py"
+Invoke-WebRequest -UseBasicParsing -Uri $uri -OutFile $script
+if ((git hash-object $script).Trim() -ne $expectedBlob) { throw "SOURCE_INTEGRITY_HOLD" }
+python $script --model qwen3:14b
+~~~
+
+Ollamaでのインストール済みモデル名が異なる場合に限り、最後の --model をタグ名と完全一致するものに置き換える（Gemmaも対応）。モデル未導入なら変更や自動取得なしでHOLD。GPU負荷が重いため、ゲームと同時利用は避ける。結果はコンソールの PRIVATE_RESULT_PATH にある SHAREABLE_RESULT.json だけで足り、スクショや全モデル出力の提出は不要。
+
+この経路は**本物のWindowsでのユーザー実行結果がまだなく、事前のオフラインMock試験のみ**。GitHub CIで実Linux推論を試す別ルートもあり、そちらはユーザーの14BやWindowsの証拠に流用しない。
