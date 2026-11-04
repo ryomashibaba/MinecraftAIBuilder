@@ -1,5 +1,11 @@
 # 2026年12月対策：単独プロジェクト長時間自律実行の安全研究
 
+> **2026-11-04 最終QA状況（古い節の「未実行」表記より優先）：**
+> 公開済み真正Qwen3:14B元2段階修正案は独立SOURCE QAで不合格（[Actions #41845806261](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41845806261)）。同じ公開材料から生成した別由来・アシスタントレビュー修正案は、GitHub隔離Dockerで2段階ともSOURCE QA合格（[Actions #41847626931](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41847626931)）。**Qwen自身が2段階成功したとは報告しない。** ユーザーPCでの操作不要、作品ART/実機と長期自律は未証明。
+>
+> **正本監査**：[QWEN_REAL_SOURCE_PUBLIC_QA_RESULT_20261104_JA.md](./QWEN_REAL_SOURCE_PUBLIC_QA_RESULT_20261104_JA.md)
+
+
 この試作は MinecraftAIBuilder / Browser Ink TPS **どちらか一つ**を同時に担当させるための、外部監督型 `OpenCode` CLI 実行器です。**Strataの正式な代替認定ではなく、OSS/無料クラウド/ローカルLLMの可換な選択肢としての研究実装**です。
 
 ## 固定境界
