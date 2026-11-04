@@ -62,10 +62,14 @@ jobs:
         run: |
           cd real-tps
           test "$(git rev-parse HEAD)" = 0942eca28ca3cc2c66cc754c0d6d8e6fdedb6c07
-      - name: Install exactly locked dependencies
+      - name: Install with NO lockfile: real TS app baseline, non-reproducible transitive versions
         run: |
           cd real-tps
-          npm ci --no-audit --no-fund
+          test ! -e package-lock.json
+          test ! -e npm-shrinkwrap.json
+          npm install --no-save --package-lock=false --no-audit --no-fund
+          npm ls --depth=0
+          echo 'TPS_NO_LOCKFILE: source package.json versions pinned, transitive dependency resolution is NOT reproducibly locked.'
       - name: Actual project TypeScript typecheck on pinned B423 source
         run: |
           cd real-tps
