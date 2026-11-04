@@ -13,10 +13,10 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 # Immutable, reviewed source bundle. Do not replace with mutable branch HEAD.
-$revision = '6c420365270a6f974c0974930234e103ebc41865'
+$revision = '120710051fc6ee16034e111c5d50ed4be44e57f0'
 $repo = 'ryomashibaba/MinecraftAIBuilder'
 $files = @(
-  @{ Name = 'draft_real_project_local14b.py'; GitBlob = 'b045c80f6508e3db5199519ecd94bedff9e658a4' },
+  @{ Name = 'draft_real_project_local14b.py'; GitBlob = '3651e8e8bf145c755db3fbe91c8288b99165dc46' },
   @{ Name = 'prepare_pinned_real_project.py'; GitBlob = 'ce4d56452ec0a1d513dfa419a80780eed1283894' },
   @{ Name = 'local_qwen_no_docker_two_step.py'; GitBlob = 'ec98a13b7191a3f70f58af3bf3c08f85c8e60503' },
   @{ Name = 'REAL_PROJECT_SINGLE_SESSION_MANIFEST_20261104.json'; GitBlob = '64092643467a6fb07753d669839106eed3be6102' }
@@ -144,6 +144,14 @@ try {
 } finally {
   $summary | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $sharePath -Encoding UTF8
   Write-Host ('UPLOAD_THIS_SMALL_STATUS_JSON=' + $sharePath)
+  # Explorer is a local convenience, not a source/model/Qa execution gate.
+  # Always keep the JSON on disk even when Explorer is unavailable.
+  try {
+    Start-Process -FilePath explorer.exe -ArgumentList ('/select,"' + $sharePath + '"') -ErrorAction Stop
+    Write-Host 'RESULT_FILE_SHOWN_IN_EXPLORER'
+  } catch {
+    Write-Host ('RESULT_EXPLORER_UNAVAILABLE__OPEN_MANUALLY=' + $private)
+  }
   if ($summary.private_receipt_present) {
     Write-Host 'PRIVATE_DRAFT_RECEIPT_RETAINED_LOCALLY__DO_NOT_UPLOAD_SOURCE'
   }
