@@ -12,6 +12,8 @@ export function classifyPrivateV4DFailure(reason){
   return 'MODEL_COMPLETENESS';
  if(/MODEL_RESPONSE_NOT_PURE_JSON|MODEL_HTTP_INVALID_JSON|CHOICES/i.test(reason))
   return 'MODEL_FORMAT';
+ if(/R125_V4J_CIVIC_AUTHOR_|R125_V4J_PUBLIC_ARCADE_|R125_V4J_LOSSLESS_PACK_/.test(reason))
+  return 'PUBLIC_CIVIC_ARCADE_AUTHOR_OR_SOURCE_INVALID';
  if(/R125_V4H_MEZZANINE_AUTHOR_|R125_V4H_MEZZANINE_/.test(reason))
   return 'PUBLIC_MEZZANINE_AUTHOR_OR_FUNCTIONAL_SOURCE_INVALID';
  if(/R125_V4G_HEIGHT_AUTHOR_|R125_V4G_ATRIUM_/.test(reason))
@@ -77,7 +79,8 @@ export function buildV4DShareableReceipt(report){
    'minecraftaibuilder-r125-v4e-exterior-wing-author-v1',
    'minecraftaibuilder-r125-v4f-covered-floorplate-author-v1',
    'minecraftaibuilder-r125-v4g-tall-hall-author-v1',
-   'minecraftaibuilder-r125-v4h-mezzanine-author-v1'].includes(report.authorContract)?
+   'minecraftaibuilder-r125-v4h-mezzanine-author-v1',
+    'minecraftaibuilder-r125-v4j-civic-arcade-author-v1'].includes(report.authorContract)?
    report.authorContract:'UNRECOGNIZED',
   reportedStatus:report.status,
   modelCallAttempts:report.modelCalls,
