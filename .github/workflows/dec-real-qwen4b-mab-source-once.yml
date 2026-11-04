@@ -1,0 +1,41 @@
+name: Dec genuine Qwen4B on pinned public MAB source - independent QA
+
+on:
+  push:
+    branches:
+      - research/dec-free-autonomy-solo-pilot-20261104
+    paths:
+      - 'tools/free-autonomy-solo/real_qwen4b_mab_source_ci_once.py'
+      - '.github/workflows/dec-real-qwen4b-mab-source-once.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  genuine-qwen4b-single-project:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 27
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Syntax-check genuine source-runner
+        run: python3 -m py_compile tools/free-autonomy-solo/real_qwen4b_mab_source_ci_once.py
+      - name: Obtain public Ollama and independent QA images
+        run: |
+          docker pull ollama/ollama:latest
+          docker pull node:24-bookworm-slim
+      - name: Genuine local Qwen4B edits audited MAB V4H then isolated SOURCE QA
+        run: python3 tools/free-autonomy-solo/real_qwen4b_mab_source_ci_once.py
+      - name: Keep sanitized result, never model source or private drafts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qwen4b-real-mab-private-stage-sanitized-qa
+          path: ${{ runner.temp }}/qwen4b-real-mab-qa-sanitized.json
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Explicit scope
+        if: always()
+        run: echo 'No Windows 14B, no ART, no Minecraft Education, no source push, no paid API and no overnight certification.'
