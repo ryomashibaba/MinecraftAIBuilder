@@ -11,6 +11,7 @@ import difflib
 import json
 import os
 from pathlib import Path
+import subprocess
 import sys
 
 from draft_real_project_local14b import exclusive_local_project_lock
@@ -187,8 +188,14 @@ def main() -> int:
     base = Path(os.environ.get("LOCALAPPDATA") or "") / (
         "FreeAutonomyPrivate/Local14BRealProjectDrafts/PrivateClones")
     report, root = run(base)
-    print("SHAREABLE_PUBLIC_QA_STATUS_PATH=" + str(root / OUTPUT_NAME))
+    output = root / OUTPUT_NAME
+    print("SHAREABLE_PUBLIC_QA_STATUS_PATH=" + str(output))
     print(json.dumps(report, ensure_ascii=False, indent=2))
+    if os.name == "nt":
+        try:
+            subprocess.Popen(["explorer.exe", "/select," + str(output)])
+        except OSError:
+            print("RESULT_EXPLORER_UNAVAILABLE_USE_PATH_ABOVE")
     return 0 if report["status"] == "EXACT_GITHUB_SOURCE_QA_WORKFLOW_SUCCESS_ONLY" else 2
 
 
