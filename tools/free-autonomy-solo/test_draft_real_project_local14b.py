@@ -222,6 +222,45 @@ class RealSourceDraftTests(unittest.TestCase):
                 with self.assertRaisesRegex(Hold, "PATCH_"):
                     host_located_slot_replacement(project, MAB_SOURCE, proposal)
 
+    def test_mab_multiline_declaration_is_replaced_as_one_complete_span(self):
+        source = MAB_SOURCE.replace(
+            "const exact=(v,fields)=>!!v&&Object.keys(v).length===fields.length;",
+            "const exact=(v,fields)=>!!v&&\n Object.keys(v).length===fields.length;")
+        slots = exact_edit_slots("minecraftaibuilder", source)
+        self.assertGreaterEqual(len(slots), 2)
+        self.assertIn("\n Object.keys(v).length===fields.length;", slots[0]["exact"])
+        new_source = host_located_slot_replacement(
+            "minecraftaibuilder", source,
+            {"slot": 1, "replace": (
+                "const exact=(v,fields)=>!!v&&Array.isArray(fields)&&"
+                "Object.keys(v).length===fields.length;")})
+        # Genuine Qwen failure was the original dangling second expression.
+        self.assertNotIn("\n Object.keys(v).length===fields.length;", new_source)
+        self.assertEqual(new_source.count("const exact=(v,fields)=>"), 1)
+
+    def test_mab_rejects_real_qwen_impossible_fixed_stair_bound(self):
+        proposal = {
+            "slot": 4,
+            "replace": (
+                " const w=upper.sourceWitness; "
+                "if(w.physical2WideStairTreads>5) fail('BAD_FIXED_LIMIT');"),
+        }
+        source = MAB_SOURCE.replace(
+            "  return raw;",
+            "  const w=upper.sourceWitness;\n  return raw;")
+        slots = exact_edit_slots("minecraftaibuilder", source)
+        self.assertTrue(any("const w=upper.sourceWitness;" in x["exact"] for x in slots))
+        index = next(x["slot"] for x in slots if "const w=upper.sourceWitness;" in x["exact"])
+        proposal["slot"] = index
+        with self.assertRaisesRegex(Hold, "PATCH_MAB_FIXED_STAIR_TREAD_LIMIT_FORBIDDEN"):
+            host_located_slot_replacement("minecraftaibuilder", source, proposal)
+        # A guard on missing witness itself is not a contradictory fixed bound.
+        valid = host_located_slot_replacement(
+            "minecraftaibuilder", source,
+            {"slot": index,
+             "replace": "  const w=upper.sourceWitness; if(!w) throw Error('MISSING_WITNESS');"})
+        self.assertIn("MISSING_WITNESS", valid)
+
     def test_repeated_source_line_cannot_be_host_edit_slot(self):
         source = MAB_SOURCE.replace(
             " const raw=structuredClone(input);",
