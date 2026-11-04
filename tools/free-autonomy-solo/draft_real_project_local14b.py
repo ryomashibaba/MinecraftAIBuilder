@@ -100,7 +100,7 @@ def host_located_slot_replacement(project: str, source: str, proposal: dict) -> 
     # model to add hard-coded tread inequalities where the existing
     # correct invariant is equality to mezzanine.rise + 1.
     if (project == "minecraftaibuilder" and isinstance(replacement, str)
-            and re.search(r"physical2WideStairTreads\\s*(?:<=?|>=?)\\s*\\d+\\b",
+            and re.search(r"physical2WideStairTreads\s*(?:<=?|>=?)\s*\d+\b",
                           replacement)):
         raise Hold("PATCH_MAB_FIXED_STAIR_TREAD_LIMIT_FORBIDDEN")
     return bounded_replacement(
