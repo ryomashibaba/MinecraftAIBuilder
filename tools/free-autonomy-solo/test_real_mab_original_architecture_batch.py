@@ -52,7 +52,7 @@ class PrivateOriginalArchitectureBatchTests(unittest.TestCase):
                               else "SOURCE_READY_PRIVATE_ART_REVIEW_REQUIRED",
                     "reason": "R125_V4E_RANKED_COVERED_REQUIRES_AUTHORED_FOUR_SIDE_RANKING_0"
                               if rejected else None,
-                    "geometrySha256": "b" * 64,
+                    "geometrySha256": "b" * 63 + slug[-1],
                     "actualB143VoxelCount": 42,
                 }
                 (out / "V4D_LOCAL_AUTHOR_REPORT.json").write_text(
@@ -70,7 +70,8 @@ class PrivateOriginalArchitectureBatchTests(unittest.TestCase):
                 qa_calls.append(Path(env["MAB_ORIGINAL_JSON"]).parent.name)
                 return subprocess.CompletedProcess(["node"], 0, json.dumps({
                     "status": "SOURCE_ONLY_INDEPENDENT_PASS",
-                    "geometrySha256": "b" * 64,
+                    "geometrySha256": "b" * 63 + Path(
+                        env["MAB_ORIGINAL_JSON"]).parent.name[-1],
                     "voxelCount": 42,
                 }), "")
             raise AssertionError("UNEXPECTED_CODE_EXECUTION")
