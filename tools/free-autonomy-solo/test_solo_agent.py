@@ -713,5 +713,33 @@ with single_agent_lock():
 
 
 
+    def test_clean_failed_provider_stdout_stays_private_across_fallback(self):
+        sentinel = 'PRIVATE_PROVIDER_LOG_MUST_NOT_REACH_NEXT_MODEL'
+        (self.fake / 'opencode').write_text(
+            '#!/usr/bin/env python3\nimport sys\n'
+            'from pathlib import Path\n'
+            'model=sys.argv[sys.argv.index("--model")+1]\n'
+            'if model=="opencode/a-free":\n'
+            f'    print({sentinel!r})\n'
+            '    sys.exit(14)\n'
+            f'if {sentinel!r} in " ".join(sys.argv):\n'
+            '    sys.exit(88)\n'
+            'Path("source/generated.txt").write_text("ok")\n'
+        )
+        (self.fake / 'opencode').chmod(0o755)
+        cfg = dict(self.cfg, model='opencode/a-free',
+                   fallback_models=['opencode/b-free'], per_task_attempts=2)
+        with patch.dict(os.environ, self.env):
+            state = execute(cfg, push=False, sandbox_attested=True)
+        self.assertEqual(state['status'], 'TASK_QUEUE_COMPLETED_SOURCE_ONLY')
+        self.assertEqual(state['cycles'], 2)
+        self.assertEqual(state['commits'][0]['model_requested'], 'opencode/b-free')
+        self.assertEqual(state['outcomes'][0]['status'], 'AGENT_FAILED')
+        self.assertIn(sentinel,
+                      (self.root / 'state' / 'agent_0001.private.log').read_text())
+        self.assertEqual(sh(self.repo, 'git', 'status', '--porcelain'), '')
+
+
+
 if __name__ == '__main__':
     unittest.main()
