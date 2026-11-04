@@ -24,7 +24,7 @@ def visible_in_provider_catalog(catalog: str, model: str) -> bool:
     # verbose metadata. An error message saying "Model unavailable: ID"
     # must never count as a successful catalog listing.
     for raw_line in catalog.splitlines():
-        line = re.sub(r"\\x1b\\[[0-9;]*m", "", raw_line).strip()
+        line = re.sub(r"\x1b\[[0-9;]*m", "", raw_line).strip()
         if line.split(maxsplit=1)[:1] == [model]:
             return True
     return False
