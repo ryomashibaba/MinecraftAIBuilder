@@ -96,6 +96,19 @@ def main():
         }
         if result["status"] != "TWO_STAGES_INDEPENDENT_DOCKER_SOURCE_QA_LOCAL_COMMITS":
             summary["hold_reason"] = result.get("hold_reason", "UNSPECIFIED_HOLD")
+            # Public pinned package dependency setup is BEFORE any candidate
+            # source was put in sandbox; redact paths and show only npm error
+            # categories for troubleshooting this synthetic CI job.
+            public_npm = root / "trusted-deps.private.log"
+            if public_npm.is_file():
+                import re
+                lines = public_npm.read_text(errors="replace").splitlines()
+                diagnostics = []
+                for line in lines:
+                    if re.search(r"npm (error|ERR!)|EACCES|ENET|ENOENT|EUSAGE|Error response from daemon", line, re.I):
+                        line = re.sub(r"/[^\s]+", "<PATH>", line)[:220]
+                        diagnostics.append(line)
+                summary["public_npm_error_lines"] = diagnostics[-12:]
         print(json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True))
         where = Path(os.environ.get("RUNNER_TEMP", str(base)))
         (where / ("dec-real-source-qa-" + args.project + ".json")).write_text(
