@@ -535,5 +535,97 @@ with single_agent_lock():
         self.assertEqual((self.repo / 'source' / 'new.txt').read_text(), 'unverified')
 
 
+    def test_failed_agent_partial_edit_is_quarantined_and_retry_succeeds(self):
+        # Real isolated Git fixture, fake model; first model writes and exits 17.
+        counter = self.root / 'attempt-count'
+        fake_code = (
+            '#!/usr/bin/env python3\nimport sys\n'
+            'from pathlib import Path\n'
+            f'counter=Path({str(counter)!r})\n'
+            'n=int(counter.read_text()) if counter.exists() else 0\n'
+            'counter.write_text(str(n+1))\n'
+            'target=Path("source/generated.txt")\n'
+            'if n==0:\n'
+            '    target.write_text("UNVERIFIED_PRIVATE_SENTINEL")\n'
+            '    print("UNVERIFIED_PRIVATE_SENTINEL")\n'
+            '    sys.exit(17)\n'
+            'if "UNVERIFIED_PRIVATE_SENTINEL" in " ".join(sys.argv):\n'
+            '    sys.exit(19)\n'
+            'if target.exists():\n'
+            '    sys.exit(21)\n'
+            'target.write_text("ok")\n'
+            'print("FAKE_RETRY_SUCCESS")\n'
+        )
+        (self.fake / 'opencode').write_text(fake_code, encoding='utf-8')
+        (self.fake / 'opencode').chmod(0o755)
+        cfg = dict(self.cfg, quarantine_unverified_on_agent_failure=True)
+        with patch.dict(os.environ, self.env):
+            result = execute(cfg, push=False, sandbox_attested=True)
+        self.assertEqual(result['status'], 'TASK_QUEUE_COMPLETED_SOURCE_ONLY')
+        self.assertEqual(result['cycles'], 2)
+        self.assertEqual(result['outcomes'][0]['status'],
+                         'AGENT_FAILED_QUARANTINED_FOR_RETRY')
+        self.assertEqual(result['outcomes'][1]['status'], 'SOURCE_CHECKS_PASSED')
+        self.assertEqual(len(result['commits']), 1)
+        self.assertEqual(sh(self.repo, 'git', 'status', '--porcelain'), '')
+        self.assertEqual((self.repo / 'source' / 'generated.txt').read_text(), 'ok')
+        record = result['failed_attempt_quarantines'][0]
+        self.assertEqual(record['cycle'], 1)
+        self.assertEqual(record['model_requested'], 'ollama/qwen3:14b')
+        self.assertEqual(record['status'],
+                         'PRIVATE_BACKUP_VERIFIED_RESEARCH_CLONE_RESTORED')
+        manifest = Path(record['private_manifest'])
+        data = json.loads(manifest.read_text(encoding='utf-8'))
+        item = data['items'][0]
+        self.assertEqual(item['path'], 'source/generated.txt')
+        self.assertEqual((manifest.parent / item['backup']).read_bytes(),
+                         b'UNVERIFIED_PRIVATE_SENTINEL')
+        self.assertFalse(result['real_model_verified'])
+        self.assertFalse(result['quality_certified'])
+
+    def test_failure_quarantine_is_opt_in_and_default_fails_closed(self):
+        (self.fake / 'opencode').write_text(
+            '#!/usr/bin/env python3\nimport sys\n'
+            'from pathlib import Path\n'
+            'Path("source/generated.txt").write_text("failed edit")\n'
+            'sys.exit(3)\n',
+            encoding='utf-8')
+        (self.fake / 'opencode').chmod(0o755)
+        with patch.dict(os.environ, self.env):
+            with self.assertRaisesRegex(Hold,
+                                        'AGENT_FAILED_LEFT_UNVERIFIED_WORKTREE'):
+                execute(dict(self.cfg), push=False, sandbox_attested=True)
+        self.assertEqual((self.repo / 'source' / 'generated.txt').read_text(),
+                         'failed edit')
+        self.assertEqual(sh(self.repo, 'git', 'log', '-1', '--format=%s'),
+                         'baseline')
+
+    def test_failure_quarantine_refuses_protected_files_without_cleaning(self):
+        (self.fake / 'opencode').write_text(
+            '#!/usr/bin/env python3\nimport sys\n'
+            'from pathlib import Path\n'
+            'Path(".github").mkdir(exist_ok=True)\n'
+            'Path(".github/runner.yml").write_text("unreviewed")\n'
+            'sys.exit(4)\n',
+            encoding='utf-8')
+        (self.fake / 'opencode').chmod(0o755)
+        cfg = dict(self.cfg, quarantine_unverified_on_agent_failure=True)
+        with patch.dict(os.environ, self.env):
+            with self.assertRaisesRegex(Hold, 'PATH_NOT_APPROVED'):
+                execute(cfg, push=False, sandbox_attested=True)
+        self.assertEqual((self.repo / '.github' / 'runner.yml').read_text(),
+                         'unreviewed')
+        state = json.loads((self.root / 'state' / 'state.json').read_text())
+        self.assertEqual(state['status'], 'HOLD')
+        self.assertEqual(len(state['commits']), 0)
+
+    def test_failure_quarantine_boolean_validation(self):
+        with self.assertRaisesRegex(Hold,
+                                    'RESUME_QUARANTINE_OPT_IN_MUST_BE_BOOLEAN'):
+            validate(dict(self.cfg,
+                          quarantine_unverified_on_agent_failure='yes'))
+
+
+
 if __name__ == '__main__':
     unittest.main()
