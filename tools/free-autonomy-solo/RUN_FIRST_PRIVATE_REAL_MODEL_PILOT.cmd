@@ -22,7 +22,7 @@ echo Selecting one project and one already-installed LOCAL model.
 echo The chosen model can generate PRIVATE drafts; no generated code is run.
 echo No GitHub push, no Docker installation, no paid API or model download.
 powershell.exe -NoProfile -ExecutionPolicy Bypass -Command ^
-  "$ErrorActionPreference='Stop'; $p=Join-Path $env:TEMP ('dec-private-source-pilot-'+[guid]::NewGuid().ToString('N')+'.ps1'); $url='https://raw.githubusercontent.com/ryomashibaba/MinecraftAIBuilder/35a8eac5d969453839c27164a8c58c9353ad3e71/tools/free-autonomy-solo/RUN_QWEN14B_REAL_SOURCE_DRAFT_ONCE.ps1'; Invoke-WebRequest -UseBasicParsing -Uri $url -OutFile $p; $blob=((& git hash-object $p) | Out-String).Trim(); if($blob -cne 'f9e9ef1ef68e5661ee44d7ae281b65038ee13dea'){throw 'PINNED_LAUNCHER_INTEGRITY_HOLD'}; & $p"
+  "$ErrorActionPreference='Stop'; $p=Join-Path $env:TEMP ('dec-private-source-pilot-'+[guid]::NewGuid().ToString('N')+'.ps1'); $url='https://raw.githubusercontent.com/ryomashibaba/MinecraftAIBuilder/1710e849a5b51bd40ceb4f4f20f3e8f8a49d96cf/tools/free-autonomy-solo/RUN_QWEN14B_REAL_SOURCE_DRAFT_ONCE.ps1'; Invoke-WebRequest -UseBasicParsing -Uri $url -OutFile $p; $blob=((& git hash-object $p) | Out-String).Trim(); if($blob -cne '149fb594b6c646c9b0753cbdb2431d2adb544354'){throw 'PINNED_LAUNCHER_INTEGRITY_HOLD'}; & $p"
 set "PILOT_EXIT=%ERRORLEVEL%"
 echo.
 echo PRIVATE pilot finished with exit code %PILOT_EXIT%.
