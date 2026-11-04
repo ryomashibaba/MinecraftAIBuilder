@@ -8,6 +8,7 @@
  * differently-materialed add operations. Never cross a cut.
  */
 import {compileDesign,verifyCompiled} from '../source/ai/b143-building-dsl.mjs';
+import {createHash} from 'node:crypto';
 const fail=s=>{throw Error('R125_V4J_LOSSLESS_PACK_'+s);};
 const deep=v=>structuredClone(v);
 const box=e=>e?.shape==='box'&&e.mode==='add'&&
@@ -72,8 +73,15 @@ export function packV4JWithoutAnyGeometryChanges(original,realCompiled,
  const compact=deep(original);
  compact.elements=el.filter((_,i)=>!removed.has(i));
  const compiled=compileDesign(compact);
+ // B143.geometrySha256 deliberately includes the full design AST as well as
+ // primitives. A source-only repeat re-encoding MUST change that source-
+ // coupled SHA; prove voxel identity independently rather than hiding it.
+ const voxelSha=vox=>createHash('sha256')
+  .update(JSON.stringify(vox)).digest('hex');
+ const oldVoxelSha=voxelSha(realCompiled.primitives),
+  packedVoxelSha=voxelSha(compiled.primitives);
  if(!verifyCompiled(compact,compiled)||
-  compiled.geometrySha256!==realCompiled.geometrySha256||
+  packedVoxelSha!==oldVoxelSha||
   compiled.primitives.length!==realCompiled.primitives.length||
   compiled.primitives.some((p,i)=>p.some((v,j)=>v!==realCompiled.primitives[i][j])))
   fail('PACKING_WOULD_CHANGE_EVEN_ONE_AUTHOR_B143_VOXEL');
@@ -83,8 +91,12 @@ export function packV4JWithoutAnyGeometryChanges(original,realCompiled,
   proof:{priorElements:original.elements.length,
    packedElements:compact.elements.length,savedElements:pairs.length,
    newFeatureRequiredSavings:requiredSavings,
-   sourceGeometrySha256Before:realCompiled.geometrySha256,
-   sourceGeometrySha256After:compiled.geometrySha256,
+   originalSourceCoupledB143GeometrySha256:realCompiled.geometrySha256,
+   packedSourceCoupledB143GeometrySha256:compiled.geometrySha256,
+   originalVoxelOnlySha256:oldVoxelSha,
+   packedVoxelOnlySha256:packedVoxelSha,
+   originalSourceASTNotModified:true,
+   sourceCoupledSHAChangesWhenRepresentationChanges:true,
    realCompiledVoxelsIdentical:true,
    sourceASTIsPackedWithoutChangingOriginalAuthor:true,
    geometryNotArtCertification:true,

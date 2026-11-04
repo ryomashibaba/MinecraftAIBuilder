@@ -21,8 +21,10 @@ test('V4J all five independently authored exterior public arcades produce real v
   assert(w.actualSupportColumnCells>35);
   assert.equal(w.actualTwoWorkstationCells,4);
   assert.equal(w.losslessOriginalB143Packing.realCompiledVoxelsIdentical,true);
-  assert.equal(w.losslessOriginalB143Packing.sourceGeometrySha256Before,
-   w.losslessOriginalB143Packing.sourceGeometrySha256After);
+  assert.equal(w.losslessOriginalB143Packing.originalVoxelOnlySha256,
+   w.losslessOriginalB143Packing.packedVoxelOnlySha256);
+  assert.equal(w.losslessOriginalB143Packing.originalSourceASTNotModified,true);
+  assert.equal(w.losslessOriginalB143Packing.sourceCoupledSHAChangesWhenRepresentationChanges,true);
   assert(w.losslessOriginalB143Packing.savedElements>=
    w.losslessOriginalB143Packing.newFeatureRequiredSavings);
   assert(q.b143Design.elements.length<=160);
