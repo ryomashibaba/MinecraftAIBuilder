@@ -36,7 +36,11 @@ $summary = [ordered]@{
   generated_code_executed = $false
   github_pushes = 0
   paid_api_calls = 0
-  private_receipt_path = $null
+  private_receipt_present = $false
+  model_calls_attempted = 0
+  model_drafts = 0
+  source_pinned_commit = $null
+  stages = @()
   reason = $null
 }
 try {
@@ -97,23 +101,51 @@ try {
   if ($receiptLines.Count -eq 1) {
     $receiptPath = ([string]$receiptLines[0]).Substring('PRIVATE_RESULT_PATH='.Length)
     if (Test-Path -LiteralPath $receiptPath -PathType Leaf) {
-      $summary.private_receipt_path = $receiptPath
+      $summary.private_receipt_present = $true
+      # Copy ONLY bounded, non-source diagnostic fields. Never include any
+      # generated source text, patch, diff, token, prompt, or local home path.
+      $rawReceipt = Get-Content -LiteralPath $receiptPath -Raw -Encoding UTF8 | ConvertFrom-Json
+      if ($rawReceipt.schema -ne 'real-project-qwen-local-private-draft-v1' -or
+          $rawReceipt.project -ne $Project) {
+        throw 'PRIVATE_RECEIPT_IDENTITY_MISMATCH'
+      }
+      $summary.model_calls_attempted = $rawReceipt.model_calls_attempted
+      $summary.model_drafts = $rawReceipt.model_drafts
+      if ($rawReceipt.PSObject.Properties['pinned_source_commit']) {
+        $summary.source_pinned_commit = $rawReceipt.pinned_source_commit
+      }
+      foreach ($item in @($rawReceipt.stages)) {
+        $safeStage = [ordered]@{}
+        foreach ($key in @('stage', 'attempt', 'result',
+                           'reason', 'attempt_wall_seconds',
+                           'reported_eval_count',
+                           'reported_output_tokens_per_second')) {
+          $property = $item.PSObject.Properties[$key]
+          if ($null -ne $property) { $safeStage[$key] = $property.Value }
+        }
+        $summary.stages += $safeStage
+      }
+      if ($rawReceipt.PSObject.Properties['hold_reason']) {
+        $summary.reason = [string]$rawReceipt.hold_reason
+      }
     }
   }
   if ($exitCode -ne 0) { throw 'LOCAL_MODEL_PRIVATE_DRAFT_HOLD_SEE_RESULT' }
-  if (-not $summary.private_receipt_path) { throw 'SHAREABLE_DRAFT_RECEIPT_NOT_FOUND' }
+  if (-not $summary.private_receipt_present) { throw 'SHAREABLE_DRAFT_RECEIPT_NOT_FOUND' }
   $summary.status = 'TWO_REAL_SOURCE_PRIVATE_DRAFTS_ONLY'
   Write-Host 'PRIVATE_DRAFTS_SAVED__NOT_EXECUTED__NO_QA_OR_GIT_COMMIT__NO_GITHUB_PUSH'
 } catch {
   $summary.status = 'HOLD'
   $reason = [string]$_.Exception.Message
-  $summary.reason = $reason.Substring(0, [Math]::Min(160, $reason.Length))
+  if (-not $summary.reason) {
+    $summary.reason = $reason.Substring(0, [Math]::Min(160, $reason.Length))
+  }
   Write-Host ('PILOT_HOLD: ' + $summary.reason)
 } finally {
-  $summary | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath $sharePath -Encoding UTF8
+  $summary | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $sharePath -Encoding UTF8
   Write-Host ('UPLOAD_THIS_SMALL_STATUS_JSON=' + $sharePath)
-  if ($summary.private_receipt_path) {
-    Write-Host ('OPTIONAL_PRIVATE_DRAFT_RECEIPT=' + $summary.private_receipt_path)
+  if ($summary.private_receipt_present) {
+    Write-Host 'PRIVATE_DRAFT_RECEIPT_RETAINED_LOCALLY__DO_NOT_UPLOAD_SOURCE'
   }
 }
 if ($summary.status -ne 'TWO_REAL_SOURCE_PRIVATE_DRAFTS_ONLY') { exit 2 }
