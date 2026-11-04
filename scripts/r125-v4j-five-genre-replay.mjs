@@ -106,6 +106,53 @@ export function renderFiveGenrePrivateArtReview(summary){
   'モデル識別の暗号学的証明なし。レビュー開始前のART認定はありません。</footer></body></html>\n';
 }
 
+
+const SOURCE_FAMILIES=new Set([
+ 'PUBLIC_CIVIC_ARCADE_AUTHOR_OR_SOURCE_INVALID',
+ 'PUBLIC_MEZZANINE_AUTHOR_OR_FUNCTIONAL_SOURCE_INVALID',
+ 'TALL_FUNCTIONAL_PUBLIC_ATRIUM_SOURCE_INVALID',
+ 'COVERED_FLOORPLATE_AUTHOR_SOURCE_INVALID',
+ 'EXTERIOR_WING_AUTHOR_SOURCE_INVALID',
+ 'PRIMARY_MASSING_AUTHOR_SOURCE_INVALID',
+ 'SECTIONED_AUTHOR_SOURCE_INVALID','RANKED_AUTHOR_EXTERIOR_INVALID',
+ 'COMPACT_AUTHOR_IR_INVALID','RELATIVE_AUTHOR_RELATIONS_INVALID',
+ 'ARCHITECTURAL_GRAPH_INVALID','ENCLOSURE_OR_PUBLIC_SPACE_INVALID',
+ 'SOURCE_CIRCULATION_INVALID','B143_COMPILATION_INVALID'
+]);
+const safeSourceFamily=x=>SOURCE_FAMILIES.has(x)?x:
+ 'UNCLASSIFIED_SOURCE_REJECTION';
+/**
+ * These are source compiler FAMILIES, never the actual private error text.
+ * Zero static-field diagnostics does NOT certify semantic B143 correctness.
+ */
+export function summarizeFiveGenreReplayRejections(outcomes){
+ if(!Array.isArray(outcomes)||outcomes.length!==FIVE_INDEPENDENT_BRIEFS.length||
+  outcomes.some((o,i)=>o?.genre!==FIVE_INDEPENDENT_BRIEFS[i].genre))
+  error('REJECTION_SUMMARY_REQUIRES_FIVE_KNOWN_GENRES');
+ const cases=outcomes.filter(o=>o.originalWasInjectedTestDouble===false&&
+  o.originalResponseIntegrity==='SHA256_MATCH'&&
+  o.offlineStatus==='HOLD_REPLAY_SOURCE_REJECTED');
+ const grouping=new Map();
+ for(const o of cases){
+  const family=safeSourceFamily(o.sourceFailureFamily);
+  if(!grouping.has(family))grouping.set(family,[]);
+  grouping.get(family).push(o.genre);
+ }
+ return {
+  schema:'r125-v4j-five-genre-source-rejection-triage-v1',
+  shaVerifiedNonInjectedCompilationHolds:cases.length,
+  zeroStaticIssueYetCompilationHeldGenres:cases.filter(o=>
+   Array.isArray(o.structuralIssueCodes)&&o.structuralIssueCodes.length===0)
+   .map(o=>o.genre),
+  genericCompilerFailureFamilies:[...grouping.entries()].map(([family,genres])=>({
+   family,genreCount:genres.length,genres,sameUnderlyingRootCauseProven:false
+  })),
+  staticFieldCheckIsNot3DCompilationProof:true,
+  privateErrorMessagesIncluded:false,modelIdentityAttested:false,
+  humanArt:'NOT_REVIEWED',worldWrites:0
+ };
+}
+
 export function parseFiveGenreReplayArgs(args){
  if(args.length!==4||args[0]!=='--study'||args[2]!=='--out'||
   !args[1]||!args[3])error('ARGS_EXPECT_STUDY_AND_NEW_OUT');
@@ -136,7 +183,8 @@ export function replayFiveGenrePrivateBatch(study,out){
   const folder=path.join(physicalStudy,item.genre);
   let status='NOT_ATTEMPTED',sourceReproduced=false,synthetic=false,
    structuralIssueCodes=[],originalResponseIntegrity='NOT_CHECKED',
-   promptProtocol='UNAVAILABLE',systemPromptSHA256=null;
+   promptProtocol='UNAVAILABLE',systemPromptSHA256=null,
+   sourceFailureFamily=null;
   if(fs.existsSync(folder)){
    replayAttempts++;
    try{
@@ -146,6 +194,8 @@ export function replayFiveGenrePrivateBatch(study,out){
     const replayRoot=path.join(destination,item.genre);
     const report=replayPrivateV4D(folder,replayRoot);
     status=report.status;
+    sourceFailureFamily=status==='HOLD_REPLAY_SOURCE_REJECTED'?
+     safeSourceFamily(report.failureCategory):null;
     promptProtocol=report.originalPromptProtocol;
     systemPromptSHA256=report.originalSystemPromptSHA256;
     synthetic=report.originalTestInjectionPresent===true;
@@ -176,7 +226,7 @@ export function replayFiveGenrePrivateBatch(study,out){
   }
   outcomes.push({genre:item.genre,offlineStatus:status,
    originalResponseIntegrity,originalWasInjectedTestDouble:synthetic,
-   promptProtocol,systemPromptSHA256,
+   promptProtocol,systemPromptSHA256,sourceFailureFamily,
    independentRealSourceReproduced:sourceReproduced,structuralIssueCodes});
  }
  const codeIndex=new Map();
@@ -223,6 +273,7 @@ export function replayFiveGenrePrivateBatch(study,out){
   attemptedOfflineReplays:replayAttempts,
   sourceReproducedCount:outcomes.filter(x=>x.independentRealSourceReproduced).length,
   outcomes,sharedSourceIssues,geometry,
+  sourceRejectionTriage:summarizeFiveGenreReplayRejections(outcomes),
   promptProtocols,nonInjectedShaMatchedIssueFrequency,
   promptProtocolAttribution:'MATCHING_PRIVATE_MANIFESTS_NOT_MODEL_AUTHENTICITY',
   syntheticRunsNeverPromoted:true,

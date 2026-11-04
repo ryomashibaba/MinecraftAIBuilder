@@ -7,7 +7,7 @@ import {CIVIC_ARCADE_SCHEMA} from '../source/ai/r125-v4j-civic-author-ir.mjs';
 import {syntheticFiveV4JArcadeAuthors} from './r125-v4j-civic-facade-study.mjs';
 import {runV4DLocalAuthor} from './r125-v4d-local-architect.mjs';
 import {replayFiveGenrePrivateBatch,parseFiveGenreReplayArgs,
- renderFiveGenrePrivateArtReview}
+ renderFiveGenrePrivateArtReview,summarizeFiveGenreReplayRejections}
  from './r125-v4j-five-genre-replay.mjs';
 const mk=()=>fs.mkdtempSync(path.join(os.tmpdir(),'mab-v4j-offline-'));
 const fixture=()=>{
@@ -27,6 +27,7 @@ test('existing batch with no attempted models yields five honest NOT_ATTEMPTED o
   assert.equal(r.networkCalls,0);
   assert.equal(r.outcomes.length,5);
   assert.deepEqual(r.promptProtocols,[{promptProtocol:'UNAVAILABLE',count:5}]);
+  assert.equal(r.sourceRejectionTriage.shaVerifiedNonInjectedCompilationHolds,0);
   assert.deepEqual(r.nonInjectedShaMatchedIssueFrequency,[]);
   assert(r.outcomes.every(x=>x.offlineStatus==='NOT_ATTEMPTED'));
   assert.equal(r.geometry.status,'INSUFFICIENT_INDEPENDENT_REAL_MODEL_SOURCES');
@@ -70,6 +71,7 @@ test('one actual synthetic local HTTP response replays offline without any extra
   assert.equal(r.attemptedOfflineReplays,1);
   assert.equal(r.sourceReproducedCount,0);
   assert.equal(r.outcomes[0].originalWasInjectedTestDouble,true);
+  assert.equal(r.sourceRejectionTriage.shaVerifiedNonInjectedCompilationHolds,0);
   assert.equal(r.outcomes[0].promptProtocol,'LEGACY_AUTHOR_CONTRACT');
   assert.equal(r.outcomes[0].systemPromptSHA256,trial.systemPromptSha256);
   assert.deepEqual(r.nonInjectedShaMatchedIssueFrequency,[]);
@@ -132,4 +134,28 @@ test('private gallery shows only SHA-verified real non-test B143 and never embed
  assert(html.includes('ART HOLD'));
  assert.throws(()=>renderFiveGenrePrivateArtReview({...summary,worldWrites:1}),
   /PRIVATE_ART_REVIEW_REQUIRES_SAFE_OFFLINE_SUMMARY/);
+});
+
+test('two genuine SHA-bound compiler HOLDS are not a SOURCE success even with zero structural codes',()=>{
+ const genres=['housing','shop','research','gallery','station'];
+ const cases=genres.map((genre,i)=>({
+  genre,offlineStatus:i<=2?'HOLD_REPLAY_SOURCE_REJECTED':'NOT_ATTEMPTED',
+  originalWasInjectedTestDouble:i===2,
+  originalResponseIntegrity:i<=2?'SHA256_MATCH':'NOT_CHECKED',
+  structuralIssueCodes:i===0?[]:['PARENT_ATTACHMENT_INVALID'],
+  sourceFailureFamily:i===0?'TALL_FUNCTIONAL_PUBLIC_ATRIUM_SOURCE_INVALID':
+   i===1?'USER_SECRET_NOT_A_COMPILER_FAMILY':'B143_COMPILATION_INVALID'
+ }));
+ const r=summarizeFiveGenreReplayRejections(cases);
+ assert.equal(r.shaVerifiedNonInjectedCompilationHolds,2);
+ assert.deepEqual(r.zeroStaticIssueYetCompilationHeldGenres,['housing']);
+ assert.deepEqual(r.genericCompilerFailureFamilies.map(x=>x.family),[
+  'TALL_FUNCTIONAL_PUBLIC_ATRIUM_SOURCE_INVALID',
+  'UNCLASSIFIED_SOURCE_REJECTION'
+ ]);
+ assert(!JSON.stringify(r).includes('USER_SECRET'));
+ assert(r.genericCompilerFailureFamilies.every(x=>!x.sameUnderlyingRootCauseProven));
+ assert.equal(r.staticFieldCheckIsNot3DCompilationProof,true);
+ assert.throws(()=>summarizeFiveGenreReplayRejections(cases.slice(0,4)),
+  /REJECTION_SUMMARY_REQUIRES_FIVE_KNOWN_GENRES/);
 });

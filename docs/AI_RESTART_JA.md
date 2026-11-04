@@ -1,5 +1,8 @@
 # MinecraftAIBuilder — 開発再開の最新正本案内（2026-11-03）
 
+**2026-11-04 V2実測のHOLD段階分析（新CI未確認）**：新しいQwen5ジャンル試験は構造診断コード合計が前回35→今回10に減った一方、真正B143は依然0/5。housingとstationは構造診断コード0にもかかわらずSOURCE失敗。そこでオフライン再生時の実コンパイラエラーをユーザー原文や機密メッセージでなく**有限の静的ソース失敗カテゴリ**だけにして `sourceFailureFamily` とジャンル横断の `sourceRejectionTriage` に記録し、次回は追加モデル要求なしで既存PRIVATE元回答から原因を絞る。静的構造診断0はSOURCE成功でもART成功でもない。元データを上書きしない。既存R125 Education/main/PR #128/9 BLOCKEDは保護。
+
+
 **2026-11-04 V4J新旧実Qwenの識別と0追加モデル再診断（CI未確認）**：PRIVATEの元レポートとローカル要求内の `promptProtocol` / `systemPromptSha256` を照合し、不一致はHOLD。両方未記録の旧実績は `LEGACY_UNVERSIONED`、V2は `V4J_SINGLE_RESPONSE_CONTRACT_CLARITY_V2` と区別。共有用5ジャンル再診断JSONに版数別件数と、非注入・元回答SHA一致のジャンル別失敗コード頻度を付加。同じコードは同じ根因の証明ではない。原回答改変・モデル再要求・世界操作は0、実機施工成功経路、main、Draft PR #128、9 BLOCKEDは不変。
 
 
