@@ -99,15 +99,18 @@ function openStudy(dir){
   .some(x=>x!==undefined);
  if(marked){
   const allowed=['LEGACY_AUTHOR_CONTRACT','V4J_SINGLE_RESPONSE_CONTRACT_CLARITY_V2',
-   'V4J_SINGLE_RESPONSE_SCHEMA_GUIDED_V3'];
+   'V4J_SINGLE_RESPONSE_SCHEMA_GUIDED_V3',
+   'V4J_SINGLE_RESPONSE_FEASIBLE_MASSING_V4'];
   if(!allowed.includes(original.promptProtocol)||
    original.promptProtocol!==request.promptProtocol||
    !hex(original.systemPromptSha256)||
    original.systemPromptSha256!==request.systemPromptSha256||
    (['V4J_SINGLE_RESPONSE_CONTRACT_CLARITY_V2',
-     'V4J_SINGLE_RESPONSE_SCHEMA_GUIDED_V3'].includes(original.promptProtocol)&&
+     'V4J_SINGLE_RESPONSE_SCHEMA_GUIDED_V3',
+     'V4J_SINGLE_RESPONSE_FEASIBLE_MASSING_V4'].includes(original.promptProtocol)&&
     original.authorContract!==CIVIC_ARCADE_SCHEMA)||
-   (original.promptProtocol==='V4J_SINGLE_RESPONSE_SCHEMA_GUIDED_V3'&&
+   (['V4J_SINGLE_RESPONSE_SCHEMA_GUIDED_V3',
+     'V4J_SINGLE_RESPONSE_FEASIBLE_MASSING_V4'].includes(original.promptProtocol)&&
     (!hex(original.structuredSchemaSha256)||
      original.structuredSchemaSha256!==request.structuredSchemaSha256)))
    fail('PROMPT_PROTOCOL_MANIFEST_MISMATCH');

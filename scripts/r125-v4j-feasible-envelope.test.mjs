@@ -47,3 +47,53 @@ test('V4 does not change any prior V3 schema/contract or fix model chosen geomet
   assert(!JSON.stringify(s).includes('"'+genre+'"'));
  }
 });
+
+test('V4 one local synthetic request uses envelope schema once, V2/V3 remain unchanged',async()=>{
+ const {runV4DLocalAuthor}=await import('./r125-v4d-local-architect.mjs');
+ const {createHash}=await import('node:crypto');
+ const fs=await import('node:fs');
+ const os=await import('node:os');
+ const path=await import('node:path');
+ const d=fs.mkdtempSync(path.join(os.tmpdir(),'v4j-v4-envelope-'));
+ const dest=path.join(d,'one'),calls=[];
+ const fetcher=async(_url,options)=>{
+  calls.push({method:options?.method,body:options?.body});
+  if(options.method==='GET')return {ok:true,text:async()=>JSON.stringify({
+   models:[{name:'qwen3:14b'}]})};
+  if(options.method==='POST')return {ok:true,text:async()=>JSON.stringify({
+   model:'qwen3:14b',choices:[{finish_reason:'stop',message:{
+    role:'assistant',content:'{"schema":"fake-invalid-model-output"}'}}]
+  })};
+  throw Error('UNEXPECTED_REQUEST');
+ };
+ try{
+  await assert.rejects(runV4DLocalAuthor({
+   model:'qwen3:14b',outDir:dest,prompt:'new public architectural housing brief',
+   authorArcade:true,precisionCivicContract:true,geometryEnvelopeV4:true
+  },{fetcher}),/V4_ENVELOPE_REQUIRES_STRUCTURED_CIVIC_AUTHOR/);
+  assert.equal(calls.length,0);
+  const r=await runV4DLocalAuthor({
+   model:'qwen3:14b',outDir:dest,prompt:'new public architectural housing brief',
+   authorArcade:true,precisionCivicContract:true,
+   structuredCivicContract:true,geometryEnvelopeV4:true
+  },{fetcher});
+  assert.equal(r.status,'HOLD_MODEL_OR_SOURCE_INVALID_NO_REPAIR');
+  assert.equal(r.testInjectionPresent,true);
+  assert.deepEqual(calls.map(c=>c.method),['GET','POST']);
+  const body=JSON.parse(calls[1].body);
+  assert.deepEqual(body.response_format,fmt);
+  assert.equal(body.messages[0].content,p);
+  assert.equal(body.stream,false);
+  const h=createHash('sha256').update(JSON.stringify(s)).digest('hex');
+  assert.equal(r.promptProtocol,V4J_ENVELOPE_PROTOCOL);
+  assert.equal(r.structuredSchemaSha256,h);
+  const req=JSON.parse(fs.readFileSync(path.join(dest,'LOCAL_REQUEST.json'),'utf8'));
+  assert.equal(req.promptProtocol,V4J_ENVELOPE_PROTOCOL);
+  assert.equal(req.structuredSchemaSha256,h);
+  assert.equal(req.nModelGenerationAttemptsAllowed,1);
+  assert.equal(req.noPaidAPI,true);
+  assert.equal(req.noWorldAccess,true);
+  assert.equal(r.worldWrites,0);
+  assert.deepEqual(r.gates,Array(9).fill('BLOCKED'));
+ }finally{fs.rmSync(d,{recursive:true,force:true});}
+});

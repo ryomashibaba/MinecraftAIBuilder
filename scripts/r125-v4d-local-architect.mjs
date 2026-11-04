@@ -38,6 +38,9 @@ import {V4J_PRECISION_PROTOCOL,V4J_PRECISION_SYSTEM_PROMPT}
 import {V4J_STRUCTURED_PROTOCOL,V4J_STRUCTURED_SYSTEM_PROMPT,
  V4J_STRUCTURED_RESPONSE_FORMAT,V4J_STRUCTURED_CIVIC_JSON_SCHEMA}
  from '../source/ai/r125-v4j-structured-author-schema.mjs';
+import {V4J_ENVELOPE_PROTOCOL,V4J_ENVELOPE_SYSTEM_PROMPT,
+ V4J_ENVELOPE_RESPONSE_FORMAT,V4J_ENVELOPE_CIVIC_SCHEMA}
+ from '../source/ai/r125-v4j-feasible-envelope.mjs';
 
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const MODEL=/^[A-Za-z0-9._:/-]{2,140}$/;
@@ -119,28 +122,35 @@ function validateLaunch({model,outDir,prompt,endpoint},fetcher,timeoutMs){
  return dest;
 }
 export async function runV4DLocalAuthor({
- model,outDir,prompt=DEFAULT_PROMPT,endpoint=DEFAULT_ENDPOINT,compact=false,rankedWindows=false,rankedSection=false,authoredMassing=false,authorWing=false,authorFloorplate=false,authorAtrium=false,authorMezzanine=false,authorArcade=false,precisionCivicContract=false,structuredCivicContract=false
+ model,outDir,prompt=DEFAULT_PROMPT,endpoint=DEFAULT_ENDPOINT,compact=false,rankedWindows=false,rankedSection=false,authoredMassing=false,authorWing=false,authorFloorplate=false,authorAtrium=false,authorMezzanine=false,authorArcade=false,precisionCivicContract=false,structuredCivicContract=false,geometryEnvelopeV4=false
 }={}, {fetcher=fetch,timeoutMs=180000}={}){
  if(typeof precisionCivicContract!=='boolean'||(precisionCivicContract&&!authorArcade))fail('PRECISION_CONTRACT_REQUIRES_CIVIC_AUTHOR');
  if(typeof structuredCivicContract!=='boolean'||
   (structuredCivicContract&&(!precisionCivicContract||!authorArcade)))
   fail('STRUCTURED_CONTRACT_REQUIRES_V4J_PRECISION');
+ if(typeof geometryEnvelopeV4!=='boolean'||
+  (geometryEnvelopeV4&&(!structuredCivicContract||!precisionCivicContract||!authorArcade)))
+  fail('V4_ENVELOPE_REQUIRES_STRUCTURED_CIVIC_AUTHOR');
  if([compact,rankedWindows,rankedSection,authoredMassing,authorWing,authorFloorplate,authorAtrium,authorMezzanine,authorArcade].some(x=>typeof x!=='boolean')||
   [compact,rankedWindows,rankedSection,authoredMassing,authorWing,authorFloorplate,authorAtrium,authorMezzanine,authorArcade].filter(Boolean).length>1)fail('AUTHOR_MODE');
  const dir=validateLaunch({model,outDir,prompt,endpoint},fetcher,timeoutMs);
  const injected=fetcher!==fetch||process.env.MAB_V4D_TEST_DOUBLE_MODE==='1',start=Date.now();
- const modelSystemPrompt=structuredCivicContract?V4J_STRUCTURED_SYSTEM_PROMPT:
+ const modelSystemPrompt=geometryEnvelopeV4?V4J_ENVELOPE_SYSTEM_PROMPT:
+  structuredCivicContract?V4J_STRUCTURED_SYSTEM_PROMPT:
   precisionCivicContract?V4J_PRECISION_SYSTEM_PROMPT:
   authorArcade?CIVIC_ARCADE_SYSTEM_PROMPT:authorMezzanine?MEZZANINE_SYSTEM_PROMPT:
   authorAtrium?HEIGHT_SYSTEM_PROMPT:authorFloorplate?FLOORPLATE_SYSTEM_PROMPT:
   authorWing?WING_SYSTEM_PROMPT:authoredMassing?MASSING_SYSTEM_PROMPT:
   rankedSection?SECTIONED_SYSTEM_PROMPT:rankedWindows?RANKED_SYSTEM_PROMPT:
   compact?COMPACT_SYSTEM_PROMPT:V4D_RELATIVE_SYSTEM_PROMPT;
- const promptProtocol=structuredCivicContract?V4J_STRUCTURED_PROTOCOL:
+ const promptProtocol=geometryEnvelopeV4?V4J_ENVELOPE_PROTOCOL:
+  structuredCivicContract?V4J_STRUCTURED_PROTOCOL:
   precisionCivicContract?V4J_PRECISION_PROTOCOL:'LEGACY_AUTHOR_CONTRACT';
- const structuredSchemaSha256=structuredCivicContract?
-  sha(JSON.stringify(V4J_STRUCTURED_CIVIC_JSON_SCHEMA)):null;
- const responseFormat=structuredCivicContract?V4J_STRUCTURED_RESPONSE_FORMAT:
+ const structuredSchemaSha256=geometryEnvelopeV4?
+  sha(JSON.stringify(V4J_ENVELOPE_CIVIC_SCHEMA)):
+  structuredCivicContract?sha(JSON.stringify(V4J_STRUCTURED_CIVIC_JSON_SCHEMA)):null;
+ const responseFormat=geometryEnvelopeV4?V4J_ENVELOPE_RESPONSE_FORMAT:
+  structuredCivicContract?V4J_STRUCTURED_RESPONSE_FORMAT:
   {type:'json_object'};
  fs.mkdirSync(dir,{recursive:false});
  const report={
