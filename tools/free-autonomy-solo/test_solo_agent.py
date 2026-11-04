@@ -413,6 +413,45 @@ with single_agent_lock():
         self.assertEqual(result['commits'], [])
         self.assertEqual(sh(self.repo, 'git', 'log', '-1', '--format=%s'), 'baseline')
 
+    def test_unavailable_free_provider_stops_without_wasting_retries(self):
+        (self.fake / 'opencode').write_text(
+            '#!/usr/bin/env python3\nimport sys\n'
+            'print("Model unavailable: opencode/retired-free")\n'
+            'sys.exit(1)\n'
+        )
+        (self.fake / 'opencode').chmod(0o755)
+        cfg = dict(self.cfg, model='opencode/retired-free',
+                   per_task_attempts=4, max_cycles=5)
+        with patch.dict(os.environ, self.env):
+            result = execute(cfg, push=False, sandbox_attested=True)
+        self.assertEqual(result['status'], 'HOLD')
+        self.assertEqual(result['cycles'], 1)
+        self.assertEqual(result['hold_reason'],
+                         'NO_APPROVED_AVAILABLE_MODEL_IN_THIS_ENVIRONMENT')
+        self.assertEqual(result['outcomes'][0]['status'], 'AGENT_MODEL_UNAVAILABLE')
+        self.assertEqual(result['commits'], [])
+        self.assertEqual(sh(self.repo, 'git', 'status', '--porcelain'), '')
+
+    def test_all_explicit_free_providers_unavailable_try_each_once(self):
+        (self.fake / 'opencode').write_text(
+            '#!/usr/bin/env python3\nimport sys\n'
+            'model=sys.argv[sys.argv.index("--model")+1]\n'
+            'print("Model unavailable: " + model)\n'
+            'sys.exit(1)\n'
+        )
+        (self.fake / 'opencode').chmod(0o755)
+        cfg = dict(self.cfg, model='opencode/a-free',
+                   fallback_models=['opencode/b-free'],
+                   per_task_attempts=4, max_cycles=5)
+        with patch.dict(os.environ, self.env):
+            result = execute(cfg, push=False, sandbox_attested=True)
+        self.assertEqual(result['status'], 'HOLD')
+        self.assertEqual(result['cycles'], 2)
+        self.assertEqual([x['model'] for x in result['outcomes']],
+                         ['opencode/a-free', 'opencode/b-free'])
+        self.assertEqual(result['outcomes'][-1]['status'], 'AGENT_MODEL_UNAVAILABLE')
+        self.assertEqual(result['commits'], [])
+
 
 if __name__ == '__main__':
     unittest.main()
