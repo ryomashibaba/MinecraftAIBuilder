@@ -146,8 +146,9 @@ def run_probe() -> dict:
                            "pids": 64, "qa_image": "node:22-bookworm-slim"},
                 "model": MODEL,
                 "allowed_prefixes": ["source"],
-                "max_cycles": 5, "per_task_attempts": 3,
-                "max_minutes": 9, "model_timeout_seconds": 155,
+                "max_cycles": 6, "per_task_attempts": 3,
+                "quarantine_unverified_on_qa_failure": True,
+                "max_minutes": 11, "model_timeout_seconds": 155,
                 "qa_timeout_seconds": 65,
                 "checks": [["node", "--test", "source/basic.test.mjs"]],
                 "tasks": [
@@ -155,7 +156,7 @@ def run_probe() -> dict:
                      "request": "Fix this JS clamp function to clamp to both inclusive bounds while keeping the signature. Don't implement inverted-bound errors yet.",
                      "checks": [["node", "--test", "source/basic.test.mjs"]]},
                     {"path": "source/calc.mjs",
-                     "request": "Preserve the existing return expression and normal clamping behavior exactly. Add one early guard at the start of the function: if (low > high), throw new RangeError. Only change the source code needed for this error guard.",
+                     "request": "Keep the existing valid clamp return expression and all three normal cases. Add a separate early if statement before the return so inverted bounds throw RangeError. Do not put throw inside an expression or use logical operators to invoke throw. Only edit the guard needed for this error condition.",
                      "checks": [["node", "--test", "source/basic.test.mjs",
                                   "source/bounds.test.mjs"]]}
                 ]
