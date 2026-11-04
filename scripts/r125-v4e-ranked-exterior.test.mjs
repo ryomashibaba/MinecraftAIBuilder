@@ -258,6 +258,12 @@ test('five independent synthetic genres use one unmodified V4E→true B143 engin
   assert.equal(report.exteriorWingResearch.cases.length,5);
   assert.equal(report.contouredExteriorWingResearch.cases.length,5);
   assert.equal(report.coveredFloorplateResearch.cases.length,5);
+  assert.equal(report.trueInhabitedElevatedPublicHallResearch.cases.length,5);
+  assert(report.trueInhabitedElevatedPublicHallResearch.cases.every(c=>
+   c.realRoofWallGlassAirWitness.actualGainAtHighestVoxel>=5&&
+   c.realRoofWallGlassAirWitness.physicallyGlazedClerestoryCells>=96&&
+   c.realRoofWallGlassAirWitness.realHallEntryTwoWideWalk.width===2&&
+   c.worldWrites===0));
   assert(report.coveredFloorplateResearch.cases.every(c=>
    c.trueB143SourceWitness.entire3dRemovedColumns===49&&
    c.trueB143SourceWitness.roofSilhouetteComparison.views
@@ -281,6 +287,10 @@ test('five independent synthetic genres use one unmodified V4E→true B143 engin
   assert(report.sectionResearch.sectionedCases.every(c=>
    c.oldGeometrySha256!==c.newGeometrySha256&&c.art==='NOT_REVIEWED'));
   for(const {genre} of cases){
+   const elevatedSvg=fs.readFileSync(path.join(out,'ATRIUM_B143_'+genre+'_FIVE_VIEWS.svg'),'utf8');
+   assert(elevatedSvg.includes('ACTUAL final B143 voxels'));
+   const heightDelta=fs.readFileSync(path.join(out,'ATRIUM_B143_'+genre+'_VISIBLE_DELTA.svg'),'utf8');
+   assert(heightDelta.includes('ACTUAL B143 VISIBLE DELTA'));
    const floorplateSvg=fs.readFileSync(path.join(out,'COVERED_FLOORPLATE_'+genre+'_FIVE_VIEWS.svg'),'utf8');
    assert(floorplateSvg.includes('ACTUAL final B143 voxels'));
    const floorDelta=fs.readFileSync(path.join(out,'COVERED_FLOORPLATE_'+genre+'_VISIBLE_DELTA.svg'),'utf8');
@@ -975,4 +985,62 @@ test('V4F local one-response fake Ollama: root covered building footprint, priva
   assert.equal(rr.worldWrites,0);
   assert(!fs.existsSync(path.join(replay,'MODEL_RESPONSE_ORIGINAL.txt')));
  }finally{fs.rmSync(parent,{recursive:true,force:true});}
+});
+
+
+test('V4G genuinely authored double-height usable public hall replaces full old roof, source windows and two-wide routes preserved across five genres',async()=>{
+ const {compileAuthoredTallPublicHall}
+  =await import('../source/ai/r125-v4g-authored-atrium-height.mjs');
+ const {FLOORPLATE_SCHEMA}
+  =await import('../source/ai/r125-v4f-floorplate-author-ir.mjs');
+ const {syntheticFiveGenreAuthorCases}
+  =await import('./r125-v4e-cross-genre-source-study.mjs');
+ const fixtures=syntheticFiveGenreAuthorCases(),frozen=structuredClone(fixtures);
+ for(const s of fixtures){
+  const author={...structuredClone(s.source),schema:FLOORPLATE_SCHEMA,
+   massing:structuredClone(s.authoredMassing),
+   wing:structuredClone(s.authoredContourWing),
+   floorplate:structuredClone(s.authoredFloorplate)};
+  const original=structuredClone(author),a=structuredClone(s.authoredAtrium);
+  const r=compileAuthoredTallPublicHall(author,a),w=r.actualSourceWitness;
+  assert.deepEqual(author,original);
+  assert.deepEqual(s.authoredAtrium,a);
+  assert.notEqual(r.finalGeometrySha256,r.priorGeometrySha256);
+  assert.equal(w.usableGroundLevelAtriumFloorColumns,a.width*a.depth);
+  assert.equal(w.physicallyPresentRaisedRoofCells,a.width*a.depth);
+  assert(w.actuallyRemovedOldRoofVoxels>=a.width*a.depth);
+  assert(w.physicallyConnectedRoofBoundaryCells>=36);
+  assert(w.physicallyGlazedClerestoryCells>=96);
+  assert.equal(w.actualGlassInsideOutsideAIRCells,2*w.physicallyGlazedClerestoryCells);
+  assert(w.actualGainAtHighestVoxel>=5);
+  assert(w.verifiedTallHallCenterVerticalAirCells>=18);
+  assert.equal(w.verifiedOriginalWindowCells,36);
+  assert(w.realHallEntryTwoWideWalk.realSupportedPadsReached>0);
+  assert.equal(w.realHallEntryTwoWideWalk.width,2);
+  assert.equal(r.sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert(w.actualVisibleFiveDirections.views.find(v=>v.face==='roof').depthChangedCells>=100);
+  assert(r.b143Design.elements.length<=160);
+  assert.equal(r.humanArt,'NOT_REVIEWED');
+  assert.equal(r.realModel,'NOT_TESTED');
+  assert.equal(r.worldContacts,0);assert.equal(r.worldWrites,0);
+  assert.equal(r.readiness,'NOT_PREPARED');
+  assert.equal(r.constructionApproved,false);
+  assert.equal(r.executionAllowed,false);
+  assert.deepEqual(r.gates,Array(9).fill('BLOCKED'));
+  assert.deepEqual(r.BuildPlan.operations,[]);
+  const bad={...a,lift:13};
+  assert.throws(()=>compileAuthoredTallPublicHall(author,bad),
+   /R125_V4G_ATRIUM_AUTHOR_HEIGHT_SECTION_CONTRACT/);
+  assert.throws(()=>compileAuthoredTallPublicHall(author,{...a,offsetX:7,width:16}),
+   /R125_V4G_ATRIUM_AUTHOR_HALL_NOT_INSIDE_REAL_COVERED_ROOM/);
+ }
+ assert.deepEqual(fixtures,frozen);
+ const housing=fixtures[0];
+ const home={...structuredClone(housing.source),schema:FLOORPLATE_SCHEMA,
+  massing:structuredClone(housing.authoredMassing),
+  wing:structuredClone(housing.authoredContourWing),
+  floorplate:structuredClone(housing.authoredFloorplate)};
+ assert.throws(()=>compileAuthoredTallPublicHall(home,
+  {...housing.authoredAtrium,spaceId:'learning',offsetX:4,offsetZ:4}),
+  /R125_V4G_ATRIUM_ORIGINAL_REAL_ATRIUM_FLOOR_NOT_PRESENT/);
 });

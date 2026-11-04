@@ -19,6 +19,8 @@ import {compileAuthoredPublicLoggia} from '../source/ai/r125-v4e-authored-public
 import {compileAuthoredPrimaryMassingVoid} from '../source/ai/r125-v4e-authored-primary-massing-void.mjs';
 import {compileAuthoredExteriorWing} from '../source/ai/r125-v4e-authored-exterior-wing.mjs';
 import {compileAuthoredCoveredFloorplateSetback} from '../source/ai/r125-v4e-authored-covered-floorplate-setback.mjs';
+import {compileAuthoredTallPublicHall} from '../source/ai/r125-v4g-authored-atrium-height.mjs';
+import {FLOORPLATE_SCHEMA} from '../source/ai/r125-v4f-floorplate-author-ir.mjs';
 import {WING_SCHEMA,compileWingAuthorIntent} from '../source/ai/r125-v4e-wing-author-ir.mjs';
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const fail=x=>{throw Error('R125_V4E_CROSS_GENRE_'+x);};
@@ -86,6 +88,18 @@ const FLOORPLATE_AUTHOR_SAMPLES={
  gallery:{spaceId:'learning',corner:'SW',width:7,depth:7},
  station:{spaceId:'learning',corner:'SE',width:7,depth:7}
 };
+const ATRIUM_AUTHOR_SAMPLES={
+ housing:{spaceId:'welcome',offsetX:4,offsetZ:7,
+  width:12,depth:12,lift:9,roofForm:'ridgeX'},
+ shop:{spaceId:'welcome',offsetX:5,offsetZ:5,
+  width:14,depth:14,lift:9,roofForm:'ridgeZ'},
+ research:{spaceId:'welcome',offsetX:5,offsetZ:5,
+  width:14,depth:14,lift:10,roofForm:'shedX'},
+ gallery:{spaceId:'welcome',offsetX:5,offsetZ:5,
+  width:14,depth:14,lift:8,roofForm:'shedZ'},
+ station:{spaceId:'welcome',offsetX:5,offsetZ:5,
+  width:14,depth:14,lift:11,roofForm:'ridgeX'}
+};
 export function syntheticFiveGenreAuthorCases(){
  return CASES.map(c=>{
   const x=makeV4DCompactSynthetic();
@@ -114,7 +128,8 @@ export function syntheticFiveGenreAuthorCases(){
    authoredWing:wing,
    authoredContourWing:{...wing,reach:9,
     outline:CONTOUR_AUTHOR_SAMPLES[c.id].slice()},
-   authoredFloorplate:structuredClone(FLOORPLATE_AUTHOR_SAMPLES[c.id])};
+   authoredFloorplate:structuredClone(FLOORPLATE_AUTHOR_SAMPLES[c.id]),
+   authoredAtrium:structuredClone(ATRIUM_AUTHOR_SAMPLES[c.id])};
  });
 }
 export function exportV4ECrossGenreSource(folder){
@@ -188,6 +203,24 @@ export function exportV4ECrossGenreSource(folder){
   rootMain.actualSourceWitness.roofSilhouetteComparison.views
    .find(v=>v.face==='roof').silhouetteChangedCells<49||
   rootMain.worldWrites!==0)fail('ROOT_RECEPTION_FLOORPLATE_NOT_REAL');
+ const floorplateAuthors=samples.map((s,i)=>({
+  ...structuredClone(wingAuthors[i]),schema:FLOORPLATE_SCHEMA,
+  floorplate:structuredClone(s.authoredFloorplate)
+ }));
+ const atriums=samples.map((s,i)=>{
+  try{return compileAuthoredTallPublicHall(floorplateAuthors[i],s.authoredAtrium);}
+  catch(e){fail('SYNTHETIC_TALL_HALL_'+s.genre+'_'+String(e.message));}
+ });
+ if(atriums.some((v,i)=>
+   v.actualSourceWitness.usableGroundLevelAtriumFloorColumns<
+    samples[i].authoredAtrium.width*samples[i].authoredAtrium.depth||
+   v.actualSourceWitness.actualGainAtHighestVoxel<5||
+   v.actualSourceWitness.physicallyGlazedClerestoryCells<96||
+   v.actualSourceWitness.verifiedTallHallCenterVerticalAirCells<18||
+   v.sourceRoutes.status!=='SOURCE_ROUTES_REACH_ALL_ZONES'||
+   v.worldWrites!==0||v.gates.length!==9))
+  fail('REAL_DOUBLE_HEIGHT_FUNCTIONAL_HALL_NOT_PROVEN');
+ const atriumReview=compileB143Gallery(atriums.map(x=>x.b143Design));
  const floorplateReview=compileB143Gallery(floorplates.map(f=>f.b143Design));
  const rootReview=compileB143Gallery([rootMain.b143Design]);
  const contourReview=compileB143Gallery(contoured.map(c=>c.b143Design));
@@ -271,6 +304,23 @@ export function exportV4ECrossGenreSource(folder){
     art:'NOT_REVIEWED',model:'NOT_TESTED'
    }
   },
+  trueInhabitedElevatedPublicHallResearch:{
+   status:'SOURCE_ONLY_HUMAN_ART_HOLD',realModelCalls:0,
+   genreSpecificTemplates:false,
+   provenance:'INDEPENDENT_EXPLICIT_SYNTHETIC_5_AUTHOR_HEIGHT_CHOICES_NOT_LLM',
+   architecturalSection:'REAL_OLD_ROOF_REMOVED_AND_NEW_HIGH_WALL_CLERESTORY_ROOF',
+   noSecondStoreyOrEngineeringCertification:true,
+   cases:atriums.map((a,i)=>({
+    genre:samples[i].genre,authorSelection:samples[i].authoredAtrium,
+    priorGeometrySha256:a.priorGeometrySha256,
+    finalGeometrySha256:a.finalGeometrySha256,
+    B143FinalVoxels:a.b143Compiled.primitives.length,
+    B143FinalElements:a.b143Design.elements.length,
+    realRoofWallGlassAirWitness:a.actualSourceWitness,
+    sourceRoutes:a.sourceRoutes.status,worldWrites:a.worldWrites,
+    humanArt:'NOT_REVIEWED',realQwen:'NOT_TESTED'
+   }))
+  },
   sectionResearch:{
    status:'SOURCE_TECH_ONLY_NOT_GENERAL_IRREGULAR_ARCHITECTURE',
    genreSpecificHostPrescriptions:false,
@@ -296,6 +346,9 @@ export function exportV4ECrossGenreSource(folder){
    trueNonrectangularSingleCoveredRoomFloorplateNowResearchSupported:true,
    mainEntryMainVolumeDemonstratedInAlternateIndependentSyntheticPlan:true,
    architecturalQualityStillNotCertified:true,
+   trueAuthorSelectedDoubleHeightFunctionalHallNowResearchSupported:true,
+   multiStoryFunctionalCirculationStillNotSupported:true,
+   trueLocalQwenHeightArchitectureStillNotTested:true,
    existingDefaultArchitectureStillRectangular:true
   },
   cases:samples.map((s,i)=>({
@@ -325,6 +378,8 @@ export function exportV4ECrossGenreSource(folder){
   renderB143Html(contourReview,template),{flag:'wx'});
  fs.writeFileSync(path.join(folder,'covered-floorplate.html'),
   renderB143Html(floorplateReview,template),{flag:'wx'});
+ fs.writeFileSync(path.join(folder,'tall-public-hall.html'),
+  renderB143Html(atriumReview,template),{flag:'wx'});
  fs.writeFileSync(path.join(folder,'main-entry-floorplate.html'),
   renderB143Html(rootReview,template),{flag:'wx'});
  fs.writeFileSync(path.join(folder,'MAIN_ENTRY_FLOORPLATE_FIVE_VIEWS.svg'),
@@ -356,6 +411,11 @@ export function exportV4ECrossGenreSource(folder){
   fs.writeFileSync(path.join(folder,'COVERED_FLOORPLATE_'+samples[i].genre+'_VISIBLE_DELTA.svg'),
    renderB143ProjectedVisibilityDelta(
     contoured[i].b143Compiled.primitives,floorplates[i].b143Compiled.primitives),{flag:'wx'});
+  fs.writeFileSync(path.join(folder,'ATRIUM_B143_'+samples[i].genre+'_FIVE_VIEWS.svg'),
+   actualOrthographicSvg(atriums[i].b143Compiled.primitives),{flag:'wx'});
+  fs.writeFileSync(path.join(folder,'ATRIUM_B143_'+samples[i].genre+'_VISIBLE_DELTA.svg'),
+   renderB143ProjectedVisibilityDelta(
+    floorplates[i].b143Compiled.primitives,atriums[i].b143Compiled.primitives),{flag:'wx'});
   fs.writeFileSync(path.join(folder,'SECTION_B143_'+samples[i].genre+'_FIVE_VIEWS.svg'),
    actualOrthographicSvg(sectioned[i].sectionedCompiled.primitives),{flag:'wx'});
  }

@@ -1,5 +1,12 @@
 # MinecraftAIBuilder — START HERE（新チャット・AI開発者の統一入口）
 
+## 2026-11-04 V4G 受付・機能棟の高天井空間を実B143で建設する研究（SOURCE only）
+
+- `source/ai/r125-v4g-authored-atrium-height.mjs`: 作者が `atrium:{spaceId,offsetX,offsetZ,width,depth,lift,roofForm}` を明示し、先行の非矩形屋根付き主棟に対して、**実際の床の上に残っていた元の屋根を大面積で除去**し、連続した高い外壁・四方向真正ガラス上部採光とその両面AIR・勾配/片流れ屋根を生成。`lift=7..11`、床範囲10..16セル×10..16セル、ridgeX/ridgeZ/shedX/shedZ。作者指定位置が既存の吹抜け・床切欠き・構造・機能・入口に重なればSOURCE HOLD、ホスト側の移動・補修なし。
+- 床・設備・ガラス36と窓内外AIR・外部ウイング・玄関・2幅歩行SOURCE・元ボクセル全保護・追加屋根支持・実採光AIR・元最高点対比と新室内高さを本物のB143で独立確認。住宅/店舗/研究施設/美術館/駅舎の5用途合成作者で同じSOURCEコンパイラを実行し、真3D・五方向・対照可視差分をGitHub Actionsへ記録。この研究は、ただの屋根飾り・二階交通・本物Qwenの成功・高度な建築美術・構造安全や雨仕舞を認定しない。
+- 研究段階は非既定であり、2026年11月4日の先行 V4F 1回答・R125→B143→Education実機成功と凍結原本、main、PR #128 Draft を不変更。`NOT_PREPARED`、`BuildPlan.operations=[]`、世界接触/書込0、9安全ゲートBLOCKED、Work事前承認。合成実験を本物の自律AIや美術合格として報告しない。
+
+
 ## 2026-11-04 V4F単発ローカルAI作者経路 — 屋根付き主棟の実床平面を1回答で著作
 
 - 新しい**任意・非既定** `source/ai/r125-v4f-floorplate-author-ir.mjs` は STRICT JSON 1回答で全体プログラム/主棟massing/外部wing/covered floorplateを一貫して著作する。作者選択は `floorplate:{spaceId,corner,width,depth}`（6..8セル）で、HOSTは既存設計と最終B143 SOURCEと9 BLOCKEDを独立検証。これまでのV4D/V4Eデフォルトの動作や過去に成立した教育実機パスを変更しない。
