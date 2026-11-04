@@ -12,8 +12,11 @@ import {compileAuthoredPublicMezzanine}
  from './r125-v4h-authored-mezzanine.mjs';
 export const MEZZANINE_SCHEMA='minecraftaibuilder-r125-v4h-mezzanine-author-v1';
 const fail=s=>{throw Error('R125_V4H_MEZZANINE_AUTHOR_'+s);};
+// Compare actual field membership, not delimiter-joined names: an untrusted
+// key like "id|massing" must never masquerade as two required author keys.
 const exact=(v,fields)=>!!v&&typeof v==='object'&&!Array.isArray(v)&&
- Object.keys(v).sort().join('|')===fields.slice().sort().join('|');
+ Object.keys(v).length===fields.length&&
+ fields.every(field=>Object.hasOwn(v,field));
 const hash=x=>createHash('sha256').update(JSON.stringify(x)).digest('hex');
 export function compileMezzanineAuthorIntent(input){
  const raw=structuredClone(input);
@@ -81,6 +84,7 @@ export const MEZZANINE_SYSTEM_PROMPT=[
   .replaceAll('schema,id,title,brief,materials,spaces,massing,wing,floorplate,atrium.',
    'schema,id,title,brief,materials,spaces,massing,wing,floorplate,atrium,mezzanine.'),
  'One architect, one original response, NO repairs: author mezzanine EXACT {side,stairLane,deckOffsetX,deckWidth,rise,purpose}.',
+ 'MANDATORY AUTHOR WINDOW CONTRACT in this same complete JSON: EACH covered space must include windowPriority, an array with precisely four UNIQUE compass direction strings; the set must be north, east, south and west, each once, in an order YOU invent. EACH sky space must set windowPriority:null. Do not omit, duplicate, shorten or use a single windowSide value. The host will not insert, reorder, select a template or repair any author windowPriority.',
  'The mezzanine is an OCCUPIED PUBLIC UPPER LEVEL inside the selected previously authored double-height atrium, not merely an attractive free-floating floor or decorative bridge.',
  'side north|south chooses which end contains a real 3-cell-deep supported upper deck; stairLane west|east chooses a separate 2-block-wide approach stair and matching safe opening.',
  'deckOffsetX integer 1..3, deckWidth integer 8..10, rise integer 6..8. Choose values compatible with the authored atrium dimensions and especially the original public reception fixture. You must explicitly avoid existing fixtures, doorways, windows, skylights and author public paths.',

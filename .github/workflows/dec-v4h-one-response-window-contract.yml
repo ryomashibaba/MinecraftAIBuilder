@@ -1,0 +1,35 @@
+name: Dec V4H exact author window contract source-only ART HOLD
+
+on:
+  push:
+    branches:
+      - research/dec-v4h-one-response-author-contract-20261105
+    paths:
+      - 'source/ai/r125-v4h-mezzanine-author-ir.mjs'
+      - 'scripts/r125-v4h-window-author-contract.test.mjs'
+      - '.github/workflows/dec-v4h-one-response-window-contract.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  actual-v4h-source-qa-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Actual unchanged and revised V4H source regression
+        run: |
+          node --check source/ai/r125-v4h-mezzanine-author-ir.mjs
+          node --test scripts/r125-v4h-mezzanine.test.mjs scripts/r125-v4h-window-author-contract.test.mjs
+      - name: Confirm source-only no tracked modifications
+        run: |
+          git diff --exit-code
+          test -z "$(git status --porcelain)"
+      - name: ART and real Qwen gate
+        run: echo 'Only real B143 SOURCE fixtures tested. Not real Qwen14B, ART, Minecraft Education or any world writes.'
