@@ -21,11 +21,11 @@ const choices={
   purpose:'Elevated family learning and interactive community reading space'},
  shop:{side:'south',stairLane:'east',deckOffsetX:2,deckWidth:8,rise:7,
   purpose:'Public craft demonstration and shopping information balcony'},
- research:{side:'north',stairLane:'east',deckOffsetX:2,deckWidth:8,rise:7,
+ research:{side:'north',stairLane:'east',deckOffsetX:1,deckWidth:8,rise:7,
   purpose:'Scientific interpretation observation and researcher briefing gallery'},
  gallery:{side:'south',stairLane:'east',deckOffsetX:2,deckWidth:8,rise:7,
   purpose:'Public interpretive art teaching and participatory display mezzanine'},
- station:{side:'north',stairLane:'east',deckOffsetX:2,deckWidth:8,rise:7,
+ station:{side:'north',stairLane:'east',deckOffsetX:1,deckWidth:8,rise:7,
   purpose:'Elevated public transport guidance and information mezzanine'}
 };
 export function syntheticFiveAuthorMezzanineCases(){
