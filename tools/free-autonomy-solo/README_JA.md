@@ -153,3 +153,21 @@
 - GitHub実ソース2系統の選択を保持し、長時間モデル切替や原本リライトは行わない。段階2も独立した一意編集slotから選ぶ。合格しても意味のある品質・ART/4v4・長時間無人開発は未認定。
 - さらに、旧ランチャーは結果JSONの`UPLOAD_THIS_SMALL_STATUS_JSON=`パスを表示するだけだったため、ユーザーから「終了後にファイルが表示されなかった」と報告。**新PowerShellは結果JSON保存後、Windows ExplorerでそのJSONを選択表示する**。Explorerが開かなくてもJSONは必ずprivateフォルダに保持し、表示されたパスから手動で開ける。
 - 新版の起動CMDは新PowerShell版の固定コミットおよびGit blob SHAのみ実行可能にし、さらに下位Python実装と固定マニフェストのSHAも確認する。旧版の実行失敗を隠さず、再実行による本物の2段階修正案は別途実測を要する。
+
+
+## 2026-11-04：本人Windowsの真正Qwen3:14Bで2段階PRIVATE下書きが完成
+
+本人が添付した `SHAREABLE_FIRST_PILOT_STATUS.json` の検証結果：
+
+- プロジェクト `minecraftaibuilder`、要求モデル `qwen3:14b`、固定ソースコミット `fe1682e15ffa063f4dc415b06c4d76a54737a06e`。
+- `status=TWO_REAL_SOURCE_PRIVATE_DRAFTS_ONLY`。第1段階：5.569秒・45出力tokens・Ollama報告37.67tokens/s。第2段階：2.845秒・61出力tokens・37.94tokens/s。モデル要求計2、受理したPRIVATE下書き計2。**初回の `PATCH_MATCH_MUST_BE_UNIQUE` はこの実走では発生しなかった。**
+- **真正モデルの編集内容やQA結果は添付されたサマリーに含まれていない。** 実際のコードの構文・意味・テスト合否・優位性・速度の一般化は未検証。未承認コード実行0、元プロジェクト変更0、GitHub push0、有料API0。
+- 既存の隔離Docker SOURCE QAへの接続は、本人WindowsのDocker Desktop導入・可用性が未確認であるため自動開始しない。保護された本線・Minecraft本体・Draft PR #128は一切変更しない。
+
+### 次工程：既存2件のPRIVATE下書きに対する、モデル再実行なしの静的事前検証
+
+- 既存 `promote_private_real_drafts_docker.py` に `--static-only` を追加。同じ安全な受け渡し境界で、本人PCに残った元ソースの固定Git履歴・ソースblob、モデルreceipt、2段階のSHA256連鎖、候補の変更量、保護契約アンカーの保存を検査する。
+- **生成コードの実行・Node/npmテスト・Docker起動・モデル再要求・Git commit/push・外部API呼び出しは0**。結果は `SHAREABLE_STATIC_PREFLIGHT.json` のみローカル保存。PASSでも**静的整合性の確認だけ**であり、有効な建築改良・SOURCE QA・ART合格とは決して判定しない。
+- [RUN_CHECK_EXISTING_PRIVATE_DRAFTS_ONCE.cmd](./RUN_CHECK_EXISTING_PRIVATE_DRAFTS_ONCE.cmd) は `minecraftaibuilder` / `qwen3:14b` を既定値にし、プライベート保存場所のうち最も新しい整合した成功receiptを**1つだけ**選ぶ。ダブルクリックで実行し、結果JSONをExplorerで選択表示する。下書き本文やPatchはチャットに送らず小さい結果JSONだけを添付する。
+- スクリプトは固定Git SHA/Blobで検証した公開Python検証器のみダウンロードし、本人のモデル応答やゲームソースは外部送信しない。候補が欠損・改変・別モデル・別プロジェクト・既存原本dirtyならHOLD、勝手に修復・削除しない。
+- これは独立QAへの**準備**であり、正式な独立テストはDockerを含む隔離環境を確認した後、別工程で実施する。CIの本検証は真正Git一時fixture＋偽Docker禁止の静的コード経路のみ。本人PCの最新候補そのもののQA合格は別途確認する。
