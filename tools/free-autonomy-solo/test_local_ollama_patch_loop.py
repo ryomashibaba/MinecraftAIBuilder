@@ -83,6 +83,44 @@ class LocalPatchLoopTests(unittest.TestCase):
         self.assertTrue((self.home / "PRIVATE" / "model_0001.private.json").is_file())
         self.assertTrue((self.home / "PRIVATE" / "model_0002.private.json").is_file())
 
+    def test_model_noop_is_retried_without_workspace_write(self):
+        noop = ({"find": "return Math.max(0,value);",
+                 "replace": "return Math.max(0,value);"},
+                {"model": "qwen3:14b", "done": True})
+        result, calls, qa = self.run_fake(
+            patches=[self.proposals[0], noop, self.proposals[1]])
+        self.assertEqual((result["status"], calls, qa),
+                         ("SOURCE_ONLY_TASK_QUEUE_DONE", 3, 2))
+        self.assertEqual(len(result["commits"]), 2)
+        self.assertEqual(result["outcomes"][0]["status"], "REJECTED_MODEL_PATCH_NO_WRITE")
+
+    def test_repeated_model_noop_holds_cleanly(self):
+        noop = ({"find": "return value;", "replace": "return value;"},
+                {"model": "qwen3:14b", "done": True})
+        cfg = dict(self.cfg, tasks=[self.cfg["tasks"][0]],
+                   max_cycles=2, per_task_attempts=2)
+        with patch.dict(os.environ, self.env), \
+             patch("local_ollama_patch_loop.qa_image_preflight"), \
+             patch("local_ollama_patch_loop.propose_once", side_effect=[noop, noop]), \
+             patch("local_ollama_patch_loop.run_in_docker") as qa:
+            result = execute(cfg)
+        self.assertEqual(result["status"], "HOLD_NOT_VERIFIED")
+        self.assertEqual(len(result["commits"]), 0)
+        self.assertEqual(git(self.clone, "status", "--porcelain"), "")
+        self.assertEqual(git(self.clone, "rev-parse", "HEAD"), self.base)
+        qa.assert_not_called()
+
+    def test_security_critical_source_change_not_retried(self):
+        cfg = dict(self.cfg, tasks=[self.cfg["tasks"][0]])
+        with patch.dict(os.environ, self.env), \
+             patch("local_ollama_patch_loop.qa_image_preflight"), \
+             patch("local_ollama_patch_loop.propose_once",
+                   side_effect=Hold("SOURCE_CHANGED_DURING_MODEL_RESPONSE")) as model:
+            with self.assertRaisesRegex(Hold, "SOURCE_CHANGED_DURING_MODEL_RESPONSE"):
+                execute(cfg)
+        self.assertEqual(model.call_count, 1)
+        self.assertEqual(git(self.clone, "rev-parse", "HEAD"), self.base)
+
     def test_resuming_completed_queue_does_not_regenerate(self):
         self.run_fake()
         result, calls, tests = self.run_fake(patches=[])
