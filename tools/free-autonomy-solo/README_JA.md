@@ -226,3 +226,19 @@
 - 導入前提：操作者が**捨ててもよい独立研究clone**とPRIVATE保存先を確保し、Docker隔離の真正動作を先に確認した場合に限る。既存原本やユーザーの普段のGit作業ツリーでは本設定を使わない。設定追加による`config_sha256`変更は既存セッションの再開を拒否するため、新しいPRIVATEセッションを作ってから有効にする。
 
 検証の出自：`test_solo_agent.py`内の一時Gitと模擬モデルで機密退避・元バイト一致・安全復旧・禁止場所の拒否・容量上限・HEAD変更拒否を試験する。**真正Windows Docker／実Qwen、夜間連続運転、実作品品質の証明ではない。** CIの最終結果は実行HEAD単位で照合してからPASS/FAILを報告する。ローカル環境にDockerを自動インストールせず、追加課金、Work/Computer Use起動、既存のPRマージ・本番公開をしない。
+
+
+## 2026-11-05 次工程：同一セッション内でのモデル失敗・SOURCE QA失敗からの限定自動回復
+
+既存の中断再開用PRIVATE退避（quarantine_unverified_on_resume）を、安全な**無人連続セッション中の限定回復**へ拡張した。最優先のMinecraftAIBuilder / Browser Ink TPSは同格、ローカルモデルは一度に1プロジェクトを専有する。Strataの完成を目標化せず、既存のsolo_agent.pyへ集約する。追加課金、Work/Computer Use起動、原本やmainの変更、正式ゲーム/ART合格判定は行わない。
+
+新しいオプトイン設定（**既定はいずれもfalse**。明示した新しいPRIVATE状態セッションでのみ有効）：
+
+- **"quarantine_unverified_on_agent_failure": true**：AIプロセスが非ゼロ終了し、承認済み研究cloneに未検証編集があるとき、PRIVATE退避・SHA照合・対象パス限定の原状復旧を行う。**綺麗な元状態が確認できたときのみ**、残りのモデル試行へ進める。Git HEAD/branch/originを勝手に書き換えた場合や、保護パス、2MB/20パス制限を超える場合は従来通りHOLD。
+- **"quarantine_unverified_on_qa_failure": true**：独立QAがFAILとなった候補について、テストにより候補のパス・内容が変えられていないことを検査し、PRIVATEに不合格の原文候補を退避してから、直前の検証済みHEADへ対象パスだけ復元する。次の試行は前の**未検証候補を混ぜない**。テストがファイルを改変したり、対象外の新規ファイルを生成したら自動掃除をせずHOLD。
+- モデルの非ゼロ終了時の詳細stdout/stderrは従来通りPRIVATEログに保存するが、**別の無料・ローカルモデルへフォールバックするプロンプトには生ログを渡さない**。許可範囲内の失敗であることだけ伝え、失敗したプロバイダから次のプロバイダへの予期しない原文伝播を防ぐ。
+- 退避証拠は state_dir/quarantine/<checkpoint>/manifest.private.json と原バイト。状態ファイルには failed_attempt_quarantines / qa_failure_quarantines を分けて記録。いずれも**採用・独立QA成功・本物のLLM稼働・ゲーム品質合格の証拠ではない**。
+
+試験は一時GitクローンとFAKE OpenCode CLI／模擬QAを利用。非ゼロ終了＋部分編集→PRIVATE退避→次の試行、QA失敗→退避→検証済みHEADからの再試行、既定HOLD、禁止パス拒否、QA改変拒否、フォールバックへのPRIVATE stdout漏洩拒否を追加した。GitHub Actionsで**この保存HEAD**のCIが完了するまでは合格未確定。真正Windows/Ollama/Gemma、夜間から登校中の長時間連続稼働・ユーザーWindows上のDocker OS隔離・実プロジェクト品質は別ゲートであり、推測でPASSにしない。
+
+既存セッションの途中で設定を変えるとconfig_sha256が変わって再開拒否になるため、オプトインの適用は明示的に新しい使い捨て研究clone・PRIVATEセッションで開始すること。自動git pushは別途明示オプトイン済み既存研究remoteのみで、PRIVATE失敗候補をGitHubへ自動公開しない。
