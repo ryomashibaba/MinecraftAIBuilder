@@ -61,10 +61,23 @@ def exact_edit_slots(project: str, source: str) -> list[dict]:
     lines = source.splitlines()
     options = []
     for marker in EDIT_SLOT_MARKERS[project]:
-        matches = [line for line in lines if marker in line]
+        matches = [i for i, line in enumerate(lines) if marker in line]
         if len(matches) != 1:
             continue
-        exact_line = matches[0]
+        idx = matches[0]
+        exact_line = lines[idx]
+        # The authentic V4H exact() declaration spans TWO source lines.
+        # An LLM editing only its first line leaves the original second line
+        # dangling at module top level (the genuine first Qwen QA failure).
+        # Host selects the COMPLETE statement, never a partial expression.
+        if project == "minecraftaibuilder" and marker == "const exact=(v,fields)=>":
+            if exact_line.rstrip().endswith("&&"):
+                if idx + 1 >= len(lines):
+                    continue
+                continuation = lines[idx + 1]
+                if not continuation.strip().endswith(";"):
+                    continue
+                exact_line += "\n" + continuation
         if not exact_line.strip() or source.count(exact_line) != 1:
             continue
         options.append({"slot": len(options) + 1, "exact": exact_line})
@@ -81,9 +94,18 @@ def host_located_slot_replacement(project: str, source: str, proposal: dict) -> 
     slot = proposal["slot"]
     if type(slot) is not int or not (1 <= slot <= len(options)):
         raise Hold("PATCH_SLOT_INVALID")
+    replacement = proposal["replace"]
+    # The real Qwen second proposal introduced an impossible bound
+    # (treads <= 5 while V4H rise 6..8 requires 7..9). Never allow a
+    # model to add hard-coded tread inequalities where the existing
+    # correct invariant is equality to mezzanine.rise + 1.
+    if (project == "minecraftaibuilder" and isinstance(replacement, str)
+            and re.search(r"physical2WideStairTreads\\s*(?:<=?|>=?)\\s*\\d+\\b",
+                          replacement)):
+        raise Hold("PATCH_MAB_FIXED_STAIR_TREAD_LIMIT_FORBIDDEN")
     return bounded_replacement(
         project, source,
-        {"find": options[slot - 1]["exact"], "replace": proposal["replace"]})
+        {"find": options[slot - 1]["exact"], "replace": replacement})
 
 GOALS = {
     "minecraftaibuilder": (
@@ -172,9 +194,12 @@ def model_proposal(model: str, project: str, path: str, current: str,
         "This is an isolated, publicly available training-source clone. "
         "You are a source reviewer and propose ONE exact replacement only. "
         "Respond solely as a valid JSON object {slot:integer, replace:string}. "
-        "Choose a numbered EDIT SLOT, which is a real exact source line selected "
-        "by the host. Do NOT copy text into a find field. "
-        "Write a DIFFERENT, meaningful replacement for that entire line. "
+        "Choose a numbered EDIT SLOT, which is an exact source statement/span "
+        "selected by the host. Do NOT copy text into a find field. "
+        "Write a DIFFERENT, meaningful replacement for that ENTIRE statement/span. "
+        "Never leave a partial expression, dangling continuation or orphaned "
+        "top-level statement. V4H requires rise 6..8 and physical2WideStairTreads "
+        "exactly rise+1 (7..9); never add a conflicting fixed tread limit. "
         "Do not include full rewritten files, markdown code fences or explanations. "
         "No shell, Git commands, tool calls, tests or external networking. "
         "Never change guards protecting original game geometry, world writes, "
@@ -185,7 +210,7 @@ def model_proposal(model: str, project: str, path: str, current: str,
         f"STAGE: {stage}/2\nGOAL: {GOALS[project][stage - 1]}\n"
         f"PREVIOUS REJECTION: {feedback[:180]}\n"
         "EDIT SLOTS: pick ONLY one slot by number. The host locates its "
-        "exact original line; never guess or truncate that text. "
+        "exact original span, possibly MULTILINE; never guess or truncate it. "
         "The replacement must be valid code including original safeguards.\n"
         + "\n".join(f"SLOT {option['slot']}: {option['exact']}"
                     for option in edit_slots) + "\n"
