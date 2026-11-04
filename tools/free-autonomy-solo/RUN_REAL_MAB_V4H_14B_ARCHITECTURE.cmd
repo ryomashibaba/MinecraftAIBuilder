@@ -22,7 +22,7 @@ echo One model, ONE project, independent original public-building designs.
 echo All original answers and B143 render artifacts remain private on this PC.
 echo No Minecraft world writes, generated code execution, GitHub push, or paid API.
 powershell.exe -NoProfile -ExecutionPolicy Bypass -Command ^
-  "$ErrorActionPreference='Stop'; $p=Join-Path $env:TEMP ('mab-real-v4h-14b-'+[guid]::NewGuid().ToString('N')+'.ps1'); $url='https://raw.githubusercontent.com/ryomashibaba/MinecraftAIBuilder/22f76fcdb13de26a98126d929b474b1dca654e10/tools/free-autonomy-solo/RUN_REAL_MAB_V4H_14B_ARCHITECTURE.ps1'; Invoke-WebRequest -UseBasicParsing -Uri $url -OutFile $p; $blob=((& git hash-object $p) | Out-String).Trim(); if($blob -cne '3ff8f53348993d1da226e54c04f2cd5b2b746ce3'){throw 'PINNED_V4H_14B_LAUNCHER_INTEGRITY_HOLD'}; & $p"
+  "$ErrorActionPreference='Stop'; $p=Join-Path $env:TEMP ('mab-real-v4h-14b-'+[guid]::NewGuid().ToString('N')+'.ps1'); $url='https://raw.githubusercontent.com/ryomashibaba/MinecraftAIBuilder/55a8d0881fb269e699d6baacb005e680b0135477/tools/free-autonomy-solo/RUN_REAL_MAB_V4H_14B_ARCHITECTURE.ps1'; Invoke-WebRequest -UseBasicParsing -Uri $url -OutFile $p; $blob=((& git hash-object $p) | Out-String).Trim(); if($blob -cne '9526be05705f6eb2cc55d637de07bd07ff4d8531'){throw 'PINNED_V4H_14B_LAUNCHER_INTEGRITY_HOLD'}; & $p"
 set "V4H_EXIT=%ERRORLEVEL%"
 echo.
 if not "%V4H_EXIT%"=="0" (

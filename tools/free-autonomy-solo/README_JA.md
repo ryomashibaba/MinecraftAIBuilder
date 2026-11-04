@@ -284,3 +284,16 @@
 - **実ソースの2工程限定成功**：[Actions #41922563549](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41922563549)／研究HEAD `d67a626fd0cc64bcb6c5d25ed1533199a243dfd5`。公開CI上の真正Ollama `qwen3:4b` が監査済みV4H実ソース（固定 `19ef7fd0f3d08ab6c8cd350b44df9ab0eb69a963`）に対し2件のPRIVATE修正案を生成。隔離Dockerで各1コマンドのSOURCE QAが合格し、使い捨てGit cloneにローカルコミット2件。GitHubへの生成差分push 0。**既存テストに通ることと、変更の機能的価値・ART・Minecraft実機の認定は別**。生成差分は公開Artifactに保存せず、当該一時ランナーで終了。
 - **同じ4Bでの一発オリジナル建築は不合格**：[Actions #41925385789](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41925385789)／研究HEAD `fe8e06f7d98f530bf29bac313399cf9a025292f9`。既存 `scripts/r125-v4d-local-architect.mjs` と `--authored-mezzanine` 相当の真V4H著作経路を用い、独自の宇宙科学公共施設を**1回のモデルPOST**で全体著作させた。モデルは `finish_reason=stop`、回答原文のPRIVATE捕捉成功。しかし `R125_V4E_RANKED_COVERED_REQUIRES_AUTHORED_FOUR_SIDE_RANKING_0` でSOURCE HOLD。最初の屋内空間の `windowPriority` は、北・東・南・西を重複なく四つ並べた作者順位でなければならない。仕様は既存 `r125-v4e-ranked-exterior-ir.mjs` の固定制約にも明記済みであり、**コンパイラの欠陥が確認されたわけではなく、モデル回答が条件を満たさなかった**。B143の建築SOURCE成功0、ART成功0、Education世界書込0。自動で窓順位を補修・再生成せずHOLD。
 - 上記2試験は用途と難易度が異なり、1.7B対4Bの一般的な優劣や、ユーザーWindowsのQwen3:14Bの性能は判定できない。GitHub上の匿名モデル名も暗号学的に独立検証していない。**追加の小型モデル再試行で合格を演出しない**。次はユーザーPCの既存14B等が利用できる段階で、固定の一発作者契約を守って真の設計を実測する。条件未達なら理由と元回答はPRIVATE保持し、原本を変更しない。
+
+
+## 2026-11-05：14B一発建築評価を「一部成功＝全件成功」にしない恒久修正
+
+MinecraftAIBuilderの固定V4H原本を使った、導入済みローカルモデルの独立3ジャンル一括評価を、**実モデルの再試行・自動修正・追加モデルpullなし**で実行できる研究入口として実装した。研究ブランチの `real_mab_original_architecture_batch.py` とWindowsダブルクリック起動器 `RUN_REAL_MAB_V4H_14B_ARCHITECTURE.cmd` を使う。MODELは既存の `qwen3:14b` がデフォルト。アーキテクチャ生成を行うのはWindowsユーザーが実際に起動した場合だけで、この時点で本人PCの真正14B性能は**未実測**。
+
+発見した品質問題：旧版バッチは3案中1案だけSOURCE成功しても、全バッチを終了コード0で成功扱いしていた。修正版は全選択案が1回生成されて真正B143 SOURCEと独立再コンパイルで合格、さらに**合格案のジオメトリSHAが全件異なる**場合のみ `ALL_ORIGINAL_ARCHITECTURES_SOURCE_ONLY_ART_HOLD` とする。部分成功 `HOLD_PARTIAL_ARCHITECTURE_SOURCE_ACCEPTANCE`、同一形状の再現 `HOLD_DUPLICATE_GEOMETRY_ACROSS_ORIGINAL_BRIEFS`、全不合格 `HOLD_NO_ORIGINAL_SOURCE_ACCEPTED` はいずれもバッチ合格・終了コード0に昇格しない。別ジャンルの同一形状は独創性合格とはみなさないが、SHA差異も高品質の証明にはならない。
+
+AI回答原文・JSON・SVG・3Dプレビューは `%LOCALAPPDATA%\FreeAutonomyPrivate\RealOriginalV4H14B\<run>` 配下のPRIVATEのみ。1案の開始前・結果処理後に一時ファイルの原子的置換で `SHAREABLE_V4H_REAL_14B_BATCH.json` を保存するため、途中プロセス停止でも最後の保存分が残る。停止時点のRUNNING判定は認証・建築SOURCE合格ではない。試行中断時の未確定モデルPOSTを勝手に再開・再発行しない。生成元SOURCEは固定SHAとGit blobで検証され、GitHub remote/main・Educationワールドへpush/writeしない。
+
+`V4H_PRIVATE_SOURCE_COMPARE.html` は**3案の5視点SVGを安全な静的HTMLで横並び**にして人間が品質を調べるための非公開レビュー画面。モデルの生文言はHTMLに埋め込まず、事前定義したジャンルslugと安全な診断コードのみ表示する。HTTP外部アクセスもSCRIPTも不要。画像が存在しても **ART=NOT_REVIEWED、Minecraft walking=NOT_TESTED、正式施工=BLOCKED** のまま。ユーザー操作はダブルクリック1回を目標とし、モデル・Node・Git・Pythonの追加インストールはしない。
+
+認定対象は「一発モデル建築SOURCE試験の安全な評価入口」であり、「長時間自律コーディング完成」や「4Bが独創的建築に成功した」ことではない。独立QAに合格した生成ソースを実ゲームやEducationへ自動昇格しない。
