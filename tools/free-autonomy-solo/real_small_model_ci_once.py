@@ -175,6 +175,9 @@ def run_probe() -> dict:
                 report["candidate_sha256_by_commit"] = [
                     c.get("source_sha256") for c in state.get("commits", [])]
                 report["agent_cycles"] = state.get("cycles", 0)
+                report["rejected_model_patches_without_write"] = sum(
+                    1 for o in state.get("outcomes", [])
+                    if o.get("status") == "REJECTED_MODEL_PATCH_NO_WRITE")
                 report["final_source_status"] = state.get("status")
                 report["qa_checks_certified"] = len(state.get("commits", []))
                 report["local_model_calls_recorded"] = sum(
