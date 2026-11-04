@@ -12,6 +12,7 @@ import re
 import subprocess
 import sys
 import time
+import uuid
 
 from docker_sandbox import DockerPolicy, SandboxHold, docker_exec, docker_preflight
 
@@ -133,6 +134,96 @@ def snapshot_candidate(workspace: Path, paths: list[str]) -> dict[str, str]:
     return result
 
 
+def quarantine_and_restore_unverified(
+    cfg: dict, workspace: Path, state_dir: Path, paths: list[str],
+) -> dict:
+    """Explicit opt-in recovery of an INTERRUPTED disposable research clone.
+
+    Back up EVERY changed regular file before restoring only those exact paths.
+    No git clean, silent discard, cross-project model switch, or public upload.
+    Never use this on a source checkout that is not an intentionally disposable
+    and separately authorized research clone.
+    """
+    if cfg.get("quarantine_unverified_on_resume") is not True:
+        raise Hold("RESUME_QUARANTINE_NOT_AUTHORIZED")
+    if not paths or len(paths) > 20:
+        raise Hold("RESUME_QUARANTINE_PATH_BUDGET")
+    check_paths(workspace, paths, cfg["allowed_prefixes"])
+    before = snapshot_candidate(workspace, paths)
+    tracked_raw = subprocess.check_output(
+        ["git", "ls-files", "--cached", "-z"], cwd=workspace, timeout=35)
+    tracked = set(tracked_raw.decode("utf-8", "surrogateescape").split("\\0"))
+    total = 0
+    payloads = []
+    for name in paths:
+        target = workspace / name
+        for parent in target.parents:
+            if parent == workspace:
+                break
+            if parent.is_symlink():
+                raise Hold("RESUME_QUARANTINE_SYMLINK_PARENT")
+        if target.exists():
+            if not target.is_file():
+                raise Hold("RESUME_QUARANTINE_NONREGULAR_FILE")
+            payload = target.read_bytes()
+            total += len(payload)
+        else:
+            payload = None  # A staged or unstaged deletion is still recorded.
+        if total > 2_000_000:
+            raise Hold("RESUME_QUARANTINE_BYTES_BUDGET")
+        payloads.append((name, payload, name in tracked))
+    # A stable pre-copy snapshot prevents saving a file from one version and
+    # resetting a concurrently changed version without provenance.
+    if snapshot_candidate(workspace, paths) != before:
+        raise Hold("RESUME_QUARANTINE_SOURCE_CHANGED_DURING_READ")
+    checkpoint = uuid.uuid4().hex
+    backup_dir = state_dir / "quarantine" / checkpoint
+    backup_dir.mkdir(parents=True, exist_ok=False)
+    items = []
+    for index, (name, payload, is_tracked) in enumerate(payloads):
+        proof = before[name]
+        filename = None
+        if payload is not None:
+            if hashlib.sha256(payload).hexdigest() != proof:
+                raise Hold("RESUME_QUARANTINE_HASH_MISMATCH")
+            filename = f"{index:03d}-{proof}.bin"
+            dst = backup_dir / filename
+            dst.write_bytes(payload)
+            if hashlib.sha256(dst.read_bytes()).hexdigest() != proof:
+                raise Hold("RESUME_QUARANTINE_BACKUP_VERIFY_FAILED")
+        items.append({"path": name, "tracked": is_tracked,
+                      "sha256_or_deleted": proof, "backup": filename})
+    manifest = backup_dir / "manifest.private.json"
+    write_atomic(manifest, {
+        "schema": "dec-unverified-source-quarantine-v1",
+        "scope": "PRIVATE_UNVERIFIED_NOT_QA_PASSED",
+        "project": cfg["project"], "branch": cfg["branch"],
+        "verified_head": git(workspace, "rev-parse", "HEAD"),
+        "items": items,
+    })
+    # Fail closed: require the same source bytes, origin, research branch and
+    # HEAD after the PRIVATE backup and immediately before any restoration.
+    verify_repo(cfg)
+    if snapshot_candidate(workspace, paths) != before:
+        raise Hold("RESUME_QUARANTINE_SOURCE_CHANGED_BEFORE_RESTORE")
+    tracked_paths = [name for name, _, is_tracked in payloads if is_tracked]
+    if tracked_paths:
+        git(workspace, "restore", "--source=HEAD", "--staged", "--worktree",
+            "--", *tracked_paths)
+    for name, _, is_tracked in payloads:
+        if not is_tracked:
+            target = workspace / name
+            if target.is_symlink() or not target.is_file():
+                raise Hold("RESUME_QUARANTINE_UNTRACKED_FILE_CHANGED")
+            target.unlink()
+    if changed_files(workspace) or not manifest.is_file():
+        raise Hold("RESUME_QUARANTINE_RESTORE_NOT_CLEAN")
+    return {"checkpoint": checkpoint, "paths": len(paths),
+            "private_manifest": str(manifest),
+            "status": "PRIVATE_BACKUP_VERIFIED_RESEARCH_CLONE_RESTORED",
+            "certification": "NO_MODEL_OR_QA_RUN_BY_RECOVERY"}
+
+
 @contextlib.contextmanager
 def single_agent_lock():
     base = Path(os.environ.get("LOCALAPPDATA") or Path.home()) / "FreeAutonomySolo"
@@ -232,6 +323,8 @@ def validate(cfg: dict) -> None:
         DockerPolicy.from_config(cfg)
     except SandboxHold as ex:
         raise Hold(str(ex)) from ex
+    if type(cfg.get("quarantine_unverified_on_resume", False)) is not bool:
+        raise Hold("RESUME_QUARANTINE_OPT_IN_MUST_BE_BOOLEAN")
     for key, default, limit in [("max_cycles", 12, 10000), ("per_task_attempts", 3, 10), ("agent_timeout_seconds", 1800, 86400), ("check_timeout_seconds", 600, 3600), ("max_minutes", 720, 10080)]:
         value = cfg.setdefault(key, default)
         if type(value) is not int or not (1 <= value <= limit):
@@ -291,11 +384,26 @@ def execute(cfg: dict, *, push: bool, sandbox_attested: bool) -> dict:
             raise Hold(state["hold_reason"])
         unverified_paths = changed_files(p)
         if unverified_paths:
-            state["status"] = "HOLD"
-            state["hold_reason"] = "UNVERIFIED_WORKTREE_ON_RESUME_REQUIRES_ISOLATED_REVIEW"
-            state["unverified_paths_count"] = len(unverified_paths)
-            write_atomic(state_path, state)
-            raise Hold(state["hold_reason"])
+            if cfg.get("quarantine_unverified_on_resume") is True:
+                try:
+                    recovery = quarantine_and_restore_unverified(
+                        cfg, p, state_dir, unverified_paths)
+                    if git(p, "rev-parse", "HEAD") != state["last_head"]:
+                        raise Hold("RESUME_QUARANTINE_HEAD_CHANGED")
+                    state.setdefault("resume_quarantines", []).append(recovery)
+                    write_atomic(state_path, state)
+                except (Hold, OSError, subprocess.SubprocessError) as ex:
+                    state["status"] = "HOLD"
+                    state["hold_reason"] = "RESUME_QUARANTINE_HOLD: " + str(ex)
+                    state["unverified_paths_count"] = len(unverified_paths)
+                    write_atomic(state_path, state)
+                    raise Hold(state["hold_reason"]) from ex
+            else:
+                state["status"] = "HOLD"
+                state["hold_reason"] = "UNVERIFIED_WORKTREE_ON_RESUME_REQUIRES_ISOLATED_REVIEW"
+                state["unverified_paths_count"] = len(unverified_paths)
+                write_atomic(state_path, state)
+                raise Hold(state["hold_reason"])
         # A prior successful commit is not considered remotely saved until push succeeds.
         if push:
             for item in state["commits"]:
