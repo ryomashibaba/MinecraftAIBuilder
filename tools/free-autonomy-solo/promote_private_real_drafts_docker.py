@@ -27,7 +27,7 @@ from docker_sandbox import DockerPolicy, SandboxHold
 from prepare_pinned_real_project import load_manifest, verify_private_clone, Hold as CloneHold
 from draft_real_project_local14b import exclusive_local_project_lock, ANCHORS
 
-QA_IMAGE = "node:22-bookworm-slim"
+QA_IMAGE = "node:24-bookworm-slim"
 QA_MEMORY = "4g"
 QA_CPUS = "2"
 QA_TIMEOUT = 240
