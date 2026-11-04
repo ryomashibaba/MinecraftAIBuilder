@@ -1,5 +1,13 @@
 # MinecraftAIBuilder — START HERE（新チャット・AI開発者の統一入口）
 
+## 2026-11-04 V4H：実際に行ける上階の公共ギャラリー（非既定SOURCE研究）
+
+- V4Gまでの高屋根は、実際に人が使える二層公共空間ではなかった。`source/ai/r125-v4h-authored-mezzanine.mjs` は**AI/作者が指定した** `mezzanine:{side,deckOffsetX,deckWidth,rise,purpose}` を使い、V4Gの高天井ホールの内側に**本物の2幅・1段ずつ登るB143 staircase、実支持床を持つ高所ギャラリー、支柱、階段出入口を塞がないガード縁、作者目的に対応した高所業務台**を追加する。研究上の適合しない作者指定は直さず失敗（HOLD）。まず北/南方向の階段と高さ6〜8セルを研究する。
+- 独立B143でY1旧床の原材質・既存部屋と設備/元窓内外AIR/屋根/元動線の全ボクセル不変を検査し、専用の2階用途プログラムと設備の正面に入口から到達するかを**既存のR125 2幅SOURCE徒歩グラフ（1段上昇まで）で確認**する。単なる上階の床の存在だけでPASSにしない。外観5方向では室内階段が隠れるので、真正B143の**内部Z/Y断面SVG**（変更前/後）と3Dビューアを別に保存する。
+- `scripts/r125-v4h-mezzanine-source-study.mjs` で5用途の独立**合成作者**を同一汎用エンジンに通し、Actionsに実ボクセル5件・前後断面・安全レポートを保存する。ここはSOURCE-onlyであり、現時点では一体的V4H単一モデル回答の研究ランチャーは未追加。**実Qwen 0回・Minecraft実歩行0回・ART正式合格0件**。外観美術の悪さを隠して「美しい」と宣言しない。構造耐荷重・階段勾配・手すりの法規・Minecraft実挙動は未検証で、施工不可。
+- 既存V4D/V4E/V4F/V4G既定・成功R125→B143→Education、main原本、PR #128 Open/Draftを保護。9 BLOCKED、NOT_PREPARED、BuildPlan空、worldWrites0、Work/Computer Use事前承認、無料ローカル/クラウド優先を維持。次は実モデル試験と総合建築美術の拒否基準を重視。
+
+
 ## 2026-11-04 V4G全体AUTHOR AI単発経路（既定変更なし、SOURCE研究のみ）
 
 - `source/ai/r125-v4g-height-author-ir.mjs`：モデルが一つの完全JSONに建物の用途/部屋・実public massing・非矩形公共wing・非矩形の床平面・`atrium`（空間Id、2方向オフセット、長さ、奥行、元の棟の最高屋根を超えるlift、ridgeX/ridgeZ/shedX/shedZ）を同時AUTHORする。真B143から旧屋根除去／新屋根の下の内部AIR／四面クリアな上部ガラス／元窓／玄関からの2幅歩行源／世界0書込み・9 BLOCKEDを再監査。単なる高い屋根を重ねるフェイクは禁止。失敗候補は勝手に補修せずHOLD。

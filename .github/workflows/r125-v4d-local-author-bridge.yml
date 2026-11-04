@@ -9,6 +9,10 @@ on:
       - 'source/ai/r125-v4e-authored-public-loggia.mjs'
       - 'source/ai/r125-v4e-sectioned-author-ir.mjs'
       - 'scripts/r125-v4e-ranked-exterior.test.mjs'
+      - 'source/ai/r125-v4h-authored-mezzanine.mjs'
+      - 'scripts/r125-v4h-mezzanine-source-study.mjs'
+      - 'scripts/r125-v4h-mezzanine-section.mjs'
+      - 'scripts/r125-v4h-mezzanine.test.mjs'
       - 'scripts/r125-v4e-source-art-review.mjs'
       - 'scripts/r125-v4e-cross-genre-source-study.mjs'
       - 'scripts/r125-v4d-compact-model-fixture.mjs'
@@ -49,6 +53,10 @@ jobs:
           node --check source/ai/r125-v4e-authored-public-loggia.mjs
           node --check source/ai/r125-v4e-sectioned-author-ir.mjs
           node --check scripts/r125-v4e-ranked-exterior.test.mjs
+          node --check source/ai/r125-v4h-authored-mezzanine.mjs
+          node --check scripts/r125-v4h-mezzanine-section.mjs
+          node --check scripts/r125-v4h-mezzanine-source-study.mjs
+          node --check scripts/r125-v4h-mezzanine.test.mjs
           node --check scripts/r125-v4e-source-art-review.mjs
           node --check scripts/r125-v4e-cross-genre-source-study.mjs
           node --check scripts/r125-v4d-compact-model-fixture.mjs
@@ -66,6 +74,7 @@ jobs:
           node --test scripts/r125-v4d-replay-private.test.mjs
           node --test scripts/r125-v4d-author-source-diagnostics.test.mjs
           node --test scripts/r125-v4e-ranked-exterior.test.mjs
+          node --test scripts/r125-v4h-mezzanine.test.mjs
       - name: Export true B143 V4E synthetic views for independent human ART review
         run: |
           node scripts/r125-v4e-source-art-review.mjs --out "$RUNNER_TEMP/v4e-source-art"
@@ -89,6 +98,17 @@ jobs:
         with:
           name: V4E-FIVE-GENRES-SYNTHETIC-COMMON-ENGINE-ART-HOLD
           path: ${{ runner.temp }}/v4e-five-genres/
+          retention-days: 7
+      - name: V4H REAL 2-WIDE MEZZANINE FIVE-GENRE SOURCE and actual stair cutaway
+        run: |
+          node scripts/r125-v4h-mezzanine-source-study.mjs "$RUNNER_TEMP/v4h-mezzanine"
+          test -s "$RUNNER_TEMP/v4h-mezzanine/mezzanine-3d.html"
+          test -s "$RUNNER_TEMP/v4h-mezzanine/V4H_TRUE_MEZZANINE_SOURCE_ART_HOLD.json"
+          test "$(find "$RUNNER_TEMP/v4h-mezzanine" -name 'STAIR_SECTION_AFTER_*.svg' | wc -l)" -eq 5
+      - uses: actions/upload-artifact@v4
+        with:
+          name: V4H-FIVE-SYNTHETIC-AUTHOR-TRUE-STAIRS-MEZZANINE-ART-HOLD
+          path: ${{ runner.temp }}/v4h-mezzanine/
           retention-days: 7
       - name: Record strong non-promotion boundary
         run: |
