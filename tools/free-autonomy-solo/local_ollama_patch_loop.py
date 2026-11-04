@@ -50,6 +50,33 @@ def is_safe_model_retry(exc: Exception) -> bool:
     return isinstance(exc, Hold) and str(exc) in RETRYABLE_MODEL_HOLDS
 
 
+def bounded_local_qa_feedback(failures: list[str]) -> str:
+    """Pass bounded diagnostic *data* to the same local model, not raw QA logs.
+
+    The full QA output stays in the private log. In particular, no untrusted
+    stdout/stderr is stored in state or forwarded to any cloud fallback.
+    """
+    diagnostics = []
+    for failure in failures[:3]:
+        code = re.match(r"(CHECK_\\d+_RC\\d+):", failure)
+        if not code:
+            continue
+        diagnostics.append(code.group(1))
+        # A narrow error excerpt is useful for a real code repair attempt;
+        # surrounding log lines may contain arbitrary instructions or secrets.
+        for line in failure.splitlines():
+            match = re.search(
+                r"\\b(?:SyntaxError|ReferenceError|TypeError|AssertionError|RangeError):"
+                r"\\s*([A-Za-z0-9_.$:/() -]{1,160})", line)
+            if match:
+                excerpt = match.group(0).strip()[:180]
+                diagnostics.append("LOCAL_QA_ERROR=" + excerpt)
+                break
+    return "; ".join(diagnostics)[:700]
+
+
+
+
 
 
 def validate_config(cfg: dict) -> None:
@@ -284,6 +311,7 @@ def execute(cfg: dict, *, push: bool = False) -> dict:
                                 "model_requested": cfg["model"]})
                             feedback = ("INDEPENDENT_QA_FAILED_AFTER_PRIVATE_BACKUP;"
                                         f" failed_checks={len(failures)};"
+                                        f" {bounded_local_qa_feedback(failures)};"
                                         " retry on verified original source")
                         else:
                             feedback = "; ".join(failures)[-1800:]
