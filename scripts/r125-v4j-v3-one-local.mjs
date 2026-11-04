@@ -89,6 +89,10 @@ export async function runV3OneGenreStudy(options,{
   schema:useV4?'minecraftaibuilder-v4j-v4-one-genre-safe-handoff-v1':
    'minecraftaibuilder-v4j-v3-one-genre-safe-handoff-v1',
   genre:brief.genre,promptProtocol:useV4?V4J_ENVELOPE_PROTOCOL:V4J_STRUCTURED_PROTOCOL,
+  // Public SHA of the versioned SYSTEM instruction, never the private model text.
+  // Same protocol label may have successive non-retroactive study refinements.
+  systemPromptSha256:/^[a-f0-9]{64}$/.test(report.systemPromptSha256??'')?
+   report.systemPromptSha256:null,
   reportedStatus:receipt.reportedStatus,
   sourceCandidateVerified:!injected&&receipt.sourceCandidateVerified,
   explicitlyInjectedTestResponse:receipt.explicitlyInjectedTestResponse,
