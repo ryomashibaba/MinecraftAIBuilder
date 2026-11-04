@@ -1,5 +1,8 @@
 # MinecraftAIBuilder — 開発再開の最新正本案内（2026-11-03）
 
+**2026-11-04 V4J 5ジャンルワンクリック自動オフライン再診断（CI未確認）**：既存 `scripts/r125-v4e-one-click-ranked-trial.cmd --arcade-five` のY選択で5ジャンルのローカルモデル実験後、同じ隔離クローンにある `r125-v4j-five-genre-replay.mjs` を**自動実行**してPRIVATEの5ジャンル原文をSHA付きで再診断する。追加AI要求0・Minecraft書き込み0。最新の安全な `FIVE_GENRES_OFFLINE_REPLAY_SHAREABLE.json` をエクスプローラーで選択する。再診断が不成立なら既存 `FIVE_GENRES_SHAREABLE_SUMMARY.json` を保護して提示、無断リトライなし。Windows GitHub Actionsで「5回だけの**FAKE localhost** POST・0再生POST・各出力HOLD」を検証。これは実Qwenの成功や人間ART合格ではない。原本、main、Draft PR、9 BLOCKED維持。
+
+
 **2026-11-04 V4J 5ジャンル PRIVATE 保存済み原文の0モデル呼出し再診断（新規CI未確認）**：既存 `scripts/r125-v4d-replay-private.mjs` をそのまま再利用する `scripts/r125-v4j-five-genre-replay.mjs` を追加。`node scripts/r125-v4j-five-genre-replay.mjs --study "既存PRIVATEのV4J_FIVE_*フォルダ" --out "新規PRIVATE検証フォルダ"` により、実モデル再呼出し0で各既存回答・旧SOURCE/geometry SHA・B143・失敗の構造問題コードを確認。旧SOURCE失敗は勝手に格上げしない。5用途共通のエラーコードを原因未証明の症状として比較し、元がTEST DOUBLEの場合は実モデルPASSに昇格しない。共有ファイルは新規フォルダの `FIVE_GENRES_OFFLINE_REPLAY_SHAREABLE.json` のみ。原文/パス/個別ソース/HTMLはPRIVATE。追加課金・ワールド操作0、human ART HOLD、9ゲートBLOCKED。既存成功経路/main/Draft PR #128は保護。
 
 

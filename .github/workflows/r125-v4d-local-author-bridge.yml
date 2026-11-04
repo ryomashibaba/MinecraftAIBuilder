@@ -350,6 +350,45 @@ jobs:
               throw "V4E_FAKE_AUTHOR_DIAGNOSIS_OR_PRIVACY_SAFETY_BROKEN"
             }
             Write-Host "PASS: V4E opt-in separate one-click, ONE FAKE localhost POST, 0-call offline ranked-window diagnosis, no world writes."
+            # Prove --arcade-five on the real Windows CMD: five fake local POSTs,
+            # automatic 0-POST offline replay, no model/source/ART promotion.
+            & $env:ComSpec /d /c "call scripts\r125-v4e-one-click-ranked-trial.cmd --arcade-five"
+            $fiveExit = $LASTEXITCODE
+            if ($fiveExit -ne 2) {
+              throw "V4J_FIVE_FAKE_INVALID_SOURCE_EXPECTED_HOLD_2_GOT_$fiveExit"
+            }
+            $postAll = @(Get-Content -LiteralPath $env:MAB_V4D_FAKE_POST_LOG)
+            if ($postAll.Count -ne 7 -or @($postAll | Where-Object {$_ -ne 'ONE_TEST_DOUBLE_POST'}).Count -ne 0) {
+              throw "V4J_FIVE_SEQUENTIAL_FAKE_POST_COUNT_NOT_5_ADDITIONAL"
+            }
+            $createdFive = @(Get-ChildItem -LiteralPath $private -Directory | Where-Object {
+              $_.FullName -notin $before
+            })
+            $fiveOriginal = @($createdFive | Where-Object { $_.Name -like 'V4J_FIVE_*' })
+            $fiveReplay = @($createdFive | Where-Object { $_.Name -like 'V4J_REPLAY_*' })
+            if ($fiveOriginal.Count -ne 1 -or $fiveReplay.Count -ne 1) {
+              throw "V4J_FIVE_ORIGINAL_AND_OFFLINE_DIAGNOSIS_FOLDER_COUNT"
+            }
+            $fiveInitial = Get-Content -LiteralPath (Join-Path $fiveOriginal[0].FullName 'FIVE_GENRES_SHAREABLE_SUMMARY.json') -Raw | ConvertFrom-Json
+            $fiveSafe = Get-Content -LiteralPath (Join-Path $fiveReplay[0].FullName 'FIVE_GENRES_OFFLINE_REPLAY_SHAREABLE.json') -Raw | ConvertFrom-Json
+            if ($fiveInitial.provenance -ne 'INJECTED_TEST_DOUBLE_NOT_REAL_MODEL' -or
+                $fiveInitial.attemptedGenres -ne 5 -or
+                $fiveInitial.knownModelCallAttempts -ne 5 -or
+                $fiveInitial.sourceCandidates -ne 0 -or
+                $fiveInitial.worldWrites -ne 0 -or
+                $fiveSafe.additionalModelCalls -ne 0 -or
+                $fiveSafe.networkCalls -ne 0 -or
+                $fiveSafe.attemptedOfflineReplays -ne 5 -or
+                $fiveSafe.sourceReproducedCount -ne 0 -or
+                $fiveSafe.worldWrites -ne 0 -or
+                $fiveSafe.syntheticRunsNeverPromoted -ne $true -or
+                $fiveSafe.userArtAssessment -ne 'NOT_REVIEWED') {
+              throw "V4J_FIVE_REAL_WINDOWS_FAKE_OR_OFFLINE_REPLAY_SAFETY_BROKEN"
+            }
+            if (@(Get-Content -LiteralPath $env:MAB_V4D_FAKE_POST_LOG).Count -ne 7) {
+              throw "V4J_FIVE_OFFLINE_REPLAY_MADE_UNEXPECTED_MODEL_CALL"
+            }
+            Write-Host "PASS: V4J --arcade-five exact Windows one-click, 5 fake local POSTs, automatic 0-POST cross-genre replay, ART HOLD, zero world writes."
             # Test actual pinned local-Qwen launcher against CI FAKE HTTP only.
             $beforeV4HPosts = @(Get-Content -LiteralPath $env:MAB_V4D_FAKE_POST_LOG).Count
             $v4hStdout = Join-Path $env:RUNNER_TEMP 'v4h_launcher_stdout.txt'

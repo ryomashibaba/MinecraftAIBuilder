@@ -51,6 +51,7 @@ if /i "%~1"=="--atrium" if not exist "%WORK_DIR%\source\ai\r125-v4g-height-autho
 if /i "%~1"=="--mezzanine" if not exist "%WORK_DIR%\source\ai\r125-v4h-mezzanine-author-ir.mjs" goto MISSING_RUNNER
 if /i "%~1"=="--arcade" if not exist "%WORK_DIR%\source\ai\r125-v4j-civic-author-ir.mjs" goto MISSING_RUNNER
 if /i "%~1"=="--arcade-five" if not exist "%WORK_DIR%\scripts\r125-v4j-five-genre-local.mjs" goto MISSING_RUNNER
+if /i "%~1"=="--arcade-five" if not exist "%WORK_DIR%\scripts\r125-v4j-five-genre-replay.mjs" goto MISSING_RUNNER
 
 echo [2/3] Research branch is prepared and verified.
 echo Branch: %ACTUAL_BRANCH%
@@ -71,6 +72,8 @@ goto PREPARED
 :FIVE_CHOICE
 echo [3/3] Five distinct briefs: housing, shop, research, gallery and station.
 echo Up to FIVE local Ollama attempts, strictly sequential; no paid API or world writes.
+echo An offline five-genre diagnosis will run automatically afterwards, with ZERO extra model requests.
+if "%MAB_V4D_TEST_DOUBLE_MODE%"=="1" goto RUN_FIVE_MODEL
 choice /C YN /M "Run five independent V4J source-only Qwen studies (Y=yes, N=prepare only)"
 if errorlevel 2 goto PREPARED
 if errorlevel 1 goto RUN_FIVE_MODEL
@@ -146,6 +149,24 @@ node.exe "%WORK_DIR%\scripts\r125-v4j-five-genre-local.mjs" --model "%MODEL_ID%"
 set "NODE_EXIT=%ERRORLEVEL%"
 set "SHARE_FILE=%OUTPUT_DIR%\FIVE_GENRES_SHAREABLE_SUMMARY.json"
 if not exist "%SHARE_FILE%" goto FIVE_NO_SUMMARY
+rem Reuse the existing ZERO-POST replay against this precise ORIGINAL batch.
+rem Replay writes ONLY into a fresh PRIVATE folder. Even a held model
+rem answer is diagnosed without recontacting Ollama or changing the source.
+set "FIVE_REPLAY_DIR=%PRIVATE_ROOT%\V4J_REPLAY_%RANDOM%_%RANDOM%"
+if exist "%FIVE_REPLAY_DIR%" goto FOLDER_COLLISION
+node.exe "%WORK_DIR%\scripts\r125-v4j-five-genre-replay.mjs" --study "%OUTPUT_DIR%" --out "%FIVE_REPLAY_DIR%"
+set "REPLAY_EXIT=%ERRORLEVEL%"
+if not "%REPLAY_EXIT%"=="0" (
+ echo Offline comparison HOLD; keeping the original five-genre shareable summary.
+ set "FINAL_EXIT=2"
+)
+if not exist "%FIVE_REPLAY_DIR%\FIVE_GENRES_OFFLINE_REPLAY_SHAREABLE.json" goto FIVE_NO_REPLAY_SUMMARY
+set "SHARE_FILE=%FIVE_REPLAY_DIR%\FIVE_GENRES_OFFLINE_REPLAY_SHAREABLE.json"
+echo Five-genre zero-model-call offline diagnostic created.
+goto FIVE_SHARE_SUMMARY
+:FIVE_NO_REPLAY_SUMMARY
+echo No offline result available; the original 5-genre summary is preserved.
+:FIVE_SHARE_SUMMARY
 echo Share ONLY the safe summary file: %SHARE_FILE%
 if "%MAB_V4D_TEST_DOUBLE_MODE%"=="1" goto FIVE_FINISHED
 start "" explorer.exe /select,"%SHARE_FILE%"
@@ -213,5 +234,6 @@ echo.
 if /i "%~1"=="--check-only" (endlocal & exit /b %FINAL_EXIT%)
 if /i "%~1"=="--prepare-only" (endlocal & exit /b %FINAL_EXIT%)
 if /i "%~1"=="--run-once" (endlocal & exit /b %FINAL_EXIT%)
+if "%MAB_V4D_TEST_DOUBLE_MODE%"=="1" (endlocal & exit /b %FINAL_EXIT%)
 pause
 endlocal
