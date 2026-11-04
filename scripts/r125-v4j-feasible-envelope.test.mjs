@@ -120,3 +120,25 @@ test('V4 root north entry collision is independently proven by frozen graph SOUR
  assert(p.includes('Never attach ANY later space directly to spaces[0].id with attach.side="north"'));
  assert(p.includes('no host redirection or hidden repair'));
 });
+
+test('V4 shared geometry guidance rejects same-side sibling overlap in frozen graph, without host repair',()=>{
+ const author=makeV4DCompactSynthetic();
+ const original=structuredClone(author);
+ const good=translateCompactModelIntent(author).expandedMechanicalIR;
+ assert.doesNotThrow(()=>translateRelativeAuthorIntent(good));
+ const collision=structuredClone(author);
+ collision.spaces[2].attach={
+  to:collision.spaces[0].id,side:'west',shift:0
+ };
+ const doomed=translateCompactModelIntent(collision).expandedMechanicalIR;
+ assert.throws(()=>translateRelativeAuthorIntent(doomed),
+  /R125_V4D_GRAPH_SOLID_FOOTPRINT_OVERLAP/);
+ assert.deepEqual(author,original);
+ assert.equal(collision.spaces[2].attach.side,'west');
+ assert(p.includes('V4 RELATIVE PLAN CHECK'));
+ assert(p.includes('parent.x+parent.width-1'));
+ assert(p.includes('parent.z-child.depth+1'));
+ assert(p.includes('floor((parentSize-childSize)/2)+attach.shift'));
+ assert(p.includes('>=7 cells of contact'));
+ assert(p.includes('failed original JSON is never silently moved or repaired'));
+});
