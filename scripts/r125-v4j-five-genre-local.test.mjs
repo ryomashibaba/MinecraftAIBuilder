@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {FIVE_INDEPENDENT_BRIEFS,parseFiveGenreArgs,runFiveGenreLocal}
+import {FIVE_INDEPENDENT_BRIEFS,parseFiveGenreArgs,runFiveGenreLocal,
+ summarizeVerifiedPrivateCivicVisibility}
  from './r125-v4j-five-genre-local.mjs';
 const sha='a'.repeat(64);
 const mk=()=>fs.mkdtempSync(path.join(os.tmpdir(),'mab-v4j-5genres-'));
@@ -91,5 +92,66 @@ test('unexpected failure is fail-closed and model call count marked incomplete',
   assert.equal(r.outcomes[0].attempts,'UNKNOWN');
   assert.equal(r.stoppedReason,'UNEXPECTED_LOCAL_RUNNER_ERROR');
   assert(!JSON.stringify(r).includes('PRIVATE_ORIGINAL_DO_NOT_LEAK'));
+ }finally{fs.rmSync(tmp,{recursive:true,force:true});}
+});
+
+
+test('V4J private visible shape triage is original-SHA-bound and never asserts architectural ART',()=>{
+ const baseView=face=>({face,baselineCells:350,finalCells:350,unionCells:350,
+  changedCells:5,silhouetteChangedCells:0,depthChangedCells:5,
+  materialChangedCells:0,changeFraction:0.014286});
+ const safeReceipt={
+  sourceCandidateVerified:true,explicitlyInjectedTestResponse:false,
+  originalRawSha256:sha,finalGeometrySha256:sha
+ };
+ const privateArt={
+  schema:'r125-v4j-private-one-response-civic-arcade-art-hold-v1',
+  provenance:'LOCAL_OLLAMA_CLAIM_NOT_INDEPENDENTLY_AUTHENTICATED',
+  originalResponseSha256:sha,finalGeometrySha256:sha,
+  realModelIdentityVerified:false,humanArchitecturalArt:'NOT_REVIEWED',
+  architecturalQualityConclusion:'UNASSESSED_ART_HOLD',
+  worldContacts:0,worldWrites:0,readiness:'NOT_PREPARED',
+  constructionApproved:false,executionAllowed:false,
+  gates:Array(9).fill('BLOCKED'),BuildPlan:{operations:[]},
+  projectedVisibilityAudit:{
+   schema:'r125-v4e-actual-b143-projection-depth-audit-v1',
+   provenance:'TRUE_B143_COMPILED_VOXEL_ARRAYS',certifiedImprovement:false,
+   views:['roof','north','south','west','east'].map(baseView)
+  }
+ };
+ const s=summarizeVerifiedPrivateCivicVisibility(privateArt,safeReceipt);
+ assert.equal(s.fiveViews.length,5);
+ assert.equal(s.roofOutline,'UNCHANGED_IN_ROOF_PROJECTION');
+ assert.equal(s.architecturalBeauty,'NOT_REVIEWED');
+ assert.equal(s.modelIdentityAuthenticated,false);
+ assert(!JSON.stringify(s).includes(sha));
+ assert.throws(()=>summarizeVerifiedPrivateCivicVisibility(
+  {...privateArt,originalResponseSha256:'b'.repeat(64)},safeReceipt),
+  /PRIVATE_CIVIC_VISIBLE_EVIDENCE_NOT_VERIFIED/);
+ assert.throws(()=>summarizeVerifiedPrivateCivicVisibility(privateArt,
+  {...safeReceipt,explicitlyInjectedTestResponse:true}),
+  /PRIVATE_CIVIC_VISIBLE_EVIDENCE_NOT_VERIFIED/);
+ assert.throws(()=>summarizeVerifiedPrivateCivicVisibility({
+  ...privateArt,projectedVisibilityAudit:{
+   ...privateArt.projectedVisibilityAudit,
+   views:privateArt.projectedVisibilityAudit.views.map((v,i)=>
+    i===0?{...v,changedCells:400}:v)
+  }
+ },safeReceipt),/PRIVATE_CIVIC_VISIBLE_EVIDENCE_NOT_VERIFIED/);
+});
+test('V4J repeated SOURCE failures group only symptoms, never assume identical root cause',async()=>{
+ const tmp=mk(),out=path.join(tmp,'batch');
+ try{
+  const r=await runFiveGenreLocal(opts(out),{runOne:async()=>({
+   ...fake('HOLD_MODEL_OR_SOURCE_INVALID_NO_REPAIR'),
+   modelCalls:1,reason:'R125_V4J_CIVIC_AUTHOR_MISSING_JSON_REQUIRED_FIELD'
+  })});
+  assert.equal(r.attemptedGenres,5);
+  assert.equal(r.sourceCandidates,0);
+  assert.equal(r.crossGenreSharedSymptoms.length,1);
+  assert.equal(r.crossGenreSharedSymptoms[0].genres.length,5);
+  assert.equal(r.crossGenreSharedSymptoms[0].sharedRootCauseProven,false);
+  assert.deepEqual(r.noRoofOutlineChangeGenres,[]);
+  assert.equal(r.visualGeometryComparison.status,'NOT_RUN_ON_TEST_DOUBLE');
  }finally{fs.rmSync(tmp,{recursive:true,force:true});}
 });

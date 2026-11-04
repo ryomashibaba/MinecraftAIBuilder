@@ -27,6 +27,64 @@ export function parseFiveGenreArgs(args){
  if(args.includes('--prompt'))fail('BRIEFS_ARE_FIVE_INDEPENDENT_FIXED_TASKS');
  return parseV4DLocalAuthorArgs([...args,'--authored-civic-arcade']);
 }
+
+/**
+ * Extract ONLY geometry visibility counts from the already-private,
+ * one-response civic ART HOLD report. This is not a second model request or
+ * independent human aesthetic grading. Use after source SHA verification.
+ */
+export function summarizeVerifiedPrivateCivicVisibility(art,receipt){
+ const failArt=()=>fail('PRIVATE_CIVIC_VISIBLE_EVIDENCE_NOT_VERIFIED');
+ if(!art||typeof art!=='object'||Array.isArray(art)||
+  art.schema!=='r125-v4j-private-one-response-civic-arcade-art-hold-v1'||
+  art.provenance!=='LOCAL_OLLAMA_CLAIM_NOT_INDEPENDENTLY_AUTHENTICATED'||
+  !receipt?.sourceCandidateVerified||
+  receipt.explicitlyInjectedTestResponse!==false||
+  typeof receipt.originalRawSha256!=='string'||
+  art.originalResponseSha256!==receipt.originalRawSha256||
+  art.finalGeometrySha256!==receipt.finalGeometrySha256||
+  art.realModelIdentityVerified!==false||
+  art.humanArchitecturalArt!=='NOT_REVIEWED'||
+  art.architecturalQualityConclusion!=='UNASSESSED_ART_HOLD'||
+  art.worldContacts!==0||art.worldWrites!==0||
+  art.readiness!=='NOT_PREPARED'||
+  art.constructionApproved!==false||art.executionAllowed!==false||
+  !Array.isArray(art.gates)||art.gates.length!==9||
+  art.gates.some(x=>x!=='BLOCKED')||
+  !Array.isArray(art.BuildPlan?.operations)||art.BuildPlan.operations.length!==0||
+  art.projectedVisibilityAudit?.schema!=='r125-v4e-actual-b143-projection-depth-audit-v1'||
+  art.projectedVisibilityAudit?.provenance!=='TRUE_B143_COMPILED_VOXEL_ARRAYS'||
+  art.projectedVisibilityAudit?.certifiedImprovement!==false)
+  failArt();
+ const required=['roof','north','south','west','east'];
+ const views=art.projectedVisibilityAudit.views;
+ if(!Array.isArray(views)||views.length!==5||
+  views.some((v,i)=>v?.face!==required[i]||
+   !['baselineCells','finalCells','unionCells','changedCells',
+    'silhouetteChangedCells','depthChangedCells','materialChangedCells']
+    .every(k=>Number.isSafeInteger(v[k])&&v[k]>=0)||
+   !Number.isFinite(v.changeFraction)||v.changeFraction<0||
+   v.changeFraction>1||
+   v.changedCells>v.unionCells||
+   v.changedCells!==v.silhouetteChangedCells+v.depthChangedCells+
+    v.materialChangedCells))
+   failArt();
+ return {
+  status:'PRIVATE_SHA_BOUND_GEOMETRY_DELTA_NOT_ART_PASS',
+  fiveViews:views.map(v=>({
+   face:v.face,changedCells:v.changedCells,
+   silhouetteChangedCells:v.silhouetteChangedCells,
+   depthChangedCells:v.depthChangedCells,
+   materialChangedCells:v.materialChangedCells,
+   changeFraction:v.changeFraction
+  })),
+  roofOutline:views[0].silhouetteChangedCells===0?
+   'UNCHANGED_IN_ROOF_PROJECTION':'CHANGED_IN_ROOF_PROJECTION',
+  architecturalBeauty:'NOT_REVIEWED',
+  modelIdentityAuthenticated:false
+ };
+}
+
 export async function runFiveGenreLocal(opts,{runOne=runV4DLocalAuthor,
  fetcher=fetch,timeoutMs=180000}={}){
  if(!opts||!opts.authorArcade||typeof opts.outDir!=='string'||
@@ -44,6 +102,7 @@ export async function runFiveGenreLocal(opts,{runOne=runV4DLocalAuthor,
  const outcomes=[];let knownCalls=0,stoppedReason=null;
  const independentSourceCases=[];
  let privateSourceIntegrityHOLD=false;
+ const verifiedExteriorDeltaByGenre=new Map();
  for(const item of FIVE_INDEPENDENT_BRIEFS){
   let receipt;
   try{
@@ -74,6 +133,15 @@ export async function runFiveGenreLocal(opts,{runOne=runV4DLocalAuthor,
     if(compiled.sourceSha256!==receipt.compiledB143SourceSha256||
      compiled.geometrySha256!==receipt.finalGeometrySha256)
      throw Error('PRIVATE_B143_SHA_DRIFT');
+    const artFile=path.join(root,item.genre,
+     'PRIVATE_B143_CIVIC_ARCADE_ART_HOLD_COMPARISON.json');
+    const artStat=fs.lstatSync(artFile);
+    if(!artStat.isFile()||artStat.isSymbolicLink()||
+     artStat.size===0||artStat.size>2000000)
+     throw Error('UNSAFE_PRIVATE_VISIBILITY_REPORT');
+    const art=JSON.parse(fs.readFileSync(artFile,'utf8'));
+    const safeVisible=summarizeVerifiedPrivateCivicVisibility(art,receipt);
+    verifiedExteriorDeltaByGenre.set(item.genre,safeVisible);
     independentSourceCases.push({genre:item.genre,primitives:compiled.primitives});
    }catch{privateSourceIntegrityHOLD=true;}
   }
@@ -83,7 +151,8 @@ export async function runFiveGenreLocal(opts,{runOne=runV4DLocalAuthor,
    sourceCandidateVerified:receipt.sourceCandidateVerified,
    sourceCirculation:receipt.sourceCirculation,
    finalGeometrySha256:receipt.finalGeometrySha256,
-   failureCategory:receipt.failureCategory});
+   failureCategory:receipt.failureCategory,
+   verifiedExteriorDelta:verifiedExteriorDeltaByGenre.get(item.genre)??null});
   // HTTP/transport failures can use the generic SOURCE HOLD status.
   // Do not continue sending requests to the other four genres on an outage.
   // Preserve the more specific fail-closed terminal state first.
@@ -118,6 +187,21 @@ export async function runFiveGenreLocal(opts,{runOne=runV4DLocalAuthor,
    };
   }
  }
+ const symptomBuckets=new Map();
+ for(const o of outcomes){
+  if(o.sourceCandidateVerified||o.failureCategory==='NOT_APPLICABLE')continue;
+  // Repeated symptoms are NOT proof of one underlying root cause.
+  if(!symptomBuckets.has(o.failureCategory))symptomBuckets.set(o.failureCategory,[]);
+  symptomBuckets.get(o.failureCategory).push(o.genre);
+ }
+ const crossGenreSharedSymptoms=[...symptomBuckets.entries()]
+  .filter(([,genres])=>genres.length>=2)
+  .map(([failureCategory,genres])=>({
+   failureCategory,genres,sharedRootCauseProven:false
+  }));
+ const noRoofOutlineChangeGenres=outcomes
+  .filter(o=>o.verifiedExteriorDelta?.roofOutline==='UNCHANGED_IN_ROOF_PROJECTION')
+  .map(o=>o.genre);
  const result={
   schema:'minecraftaibuilder-r125-v4j-five-genre-private-safe-batch-v1',
   provenance:injected?'INJECTED_TEST_DOUBLE_NOT_REAL_MODEL':
@@ -132,6 +216,8 @@ export async function runFiveGenreLocal(opts,{runOne=runV4DLocalAuthor,
   stoppedReason,
   remainingUnattemptedGenres:FIVE_INDEPENDENT_BRIEFS.slice(outcomes.length).map(x=>x.genre),
   outcomes,visualGeometryComparison,
+  crossGenreSharedSymptoms,
+  noRoofOutlineChangeGenres,
   humanArchitecturalArt:'NOT_REVIEWED',minecraftRealWalking:'NOT_TESTED',
   modelIdentityCryptographicallyVerified:false,
   readiness:'NOT_PREPARED',constructionApproved:false,executionAllowed:false,
