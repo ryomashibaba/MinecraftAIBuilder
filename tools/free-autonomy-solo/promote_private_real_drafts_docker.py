@@ -54,7 +54,9 @@ def run_git(cwd: Path, *args: str, timeout: int = 150, env: dict | None = None) 
         raise Hold("GIT_UNAVAILABLE_OR_TIMED_OUT") from exc
     if r.returncode:
         raise Hold("GIT_" + args[0].upper() + "_FAILED")
-    return r.stdout.strip()
+    # Preserve porcelain's leading status column (" M path"). Plain strip()
+    # silently deletes it and can invalidate a strict changed-path check.
+    return r.stdout.rstrip("\r\n")
 
 
 def require_docker_qa_image() -> None:
