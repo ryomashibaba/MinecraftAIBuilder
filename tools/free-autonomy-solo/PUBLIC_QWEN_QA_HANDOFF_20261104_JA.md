@@ -22,8 +22,8 @@
 
 ~~~powershell
 $ErrorActionPreference = "Stop"
-$rev = "7b0db3c83aafacc830844d869384878a387391d9"
-$blob = "e6f94f389d09919d9c0919f2c0ded1c95d5520a8"
+$rev = "1c2833a7e8579b4fc60d6fde6030538ce17c5e86"
+$blob = "3c79e2ea8c11ff914bcb0ac2e2db6a805ba93bfe"
 $path = Join-Path $env:TEMP "RUN_QWEN14B_TO_PUBLIC_GITHUB_QA_ONCE.ps1"
 $url = "https://raw.githubusercontent.com/ryomashibaba/MinecraftAIBuilder/$rev/tools/free-autonomy-solo/RUN_QWEN14B_TO_PUBLIC_GITHUB_QA_ONCE.ps1"
 Invoke-WebRequest -UseBasicParsing -Uri $url -OutFile $path
@@ -60,3 +60,12 @@ browser-ink-tpsを選ぶ場合は最終行の `minecraftaibuilder` を `browser-
 - PUBLIC投稿には従来どおり `-PublishPublicCode` の明示同意が必要。提出ツールが返した40桁の**正確なコミットSHA**を検査し、対象研究ブランチ・pushイベント・対象ワークフローと完全一致するGitHub Actions実行だけを最大30分（40秒間隔）読み取る。別SHA・別ブランチ・別Workflow・進行中・失敗・GitHubへの到達不能・時間超過は全てHOLD。GitHub APIは認証情報なしの公開読み取りなのでレート制限によるHOLDもあり得る。
 - 結果をPRIVATEソース領域の `SHAREABLE_GITHUB_QA_STATUS.json` に保存する。成功の表記は `EXACT_GITHUB_SOURCE_QA_WORKFLOW_SUCCESS_ONLY` に限定。これはGitHubワークフローの成功確認のみであり、Artifact本文を別途精査したこと、モデルが真正Qwen14Bだったこと、価値ある実修正・Minecraft ART/Education施工・TPS真正4v4・夜間長時間自律開発の認定ではない。
 - この結果照合器自体は固定Git blobでダウンロードし、既存のPowerShellワンクリック経路からのみ使う。**現段階ではWindows本人PCでの実行は未検証**。監督システムは本研究ブランチ内で改善を継続しつつ、次はユーザーWindows側の真正モデル出力が必要な品質ゲートを進める。
+
+
+## 2026-11-04 継続工程：真正ローカルLLMの比較可能なPRIVATE計測
+
+- 既存 `draft_real_project_local14b.py` に**モデル別の独立推論計測のみ**を追加。適用対象はこれまで通り選択された一つの実ソース固定ファイル・二段階ソース下書きであり、長時間自律開発・成果の品質・美術・実機を合格認定するものではない。
+- PRIVATEの `SHAREABLE_DRAFT_RESULT.json` に、各試行の wall-clock秒（エラー時も）、Ollamaが自己申告した `total_duration` / `eval_duration` / `prompt_eval_duration` / `load_duration` のナノ秒値、入力/出力トークン数、算出可能なときだけ出力tokens/sを記録。未報告または無効な推論時間では速度を算出せずnullとする。API応答のモデル名は独立したモデル身元の証明ではない。
+- **Qwen14B専用認定ではない**。既存の `-Model` オプションに、Ollamaでインストール済みの実際のタグを明示して利用できる。Qwen3.8 27B/Gemma 4 26B-A4B/gpt-oss 20B/LFM2.5 24B/Qwen3 14Bの可否・実行速度・開発品質は本人Windowsで未計測。比較時は同一プロジェクト、同じ固定ソース、同じ段階目標に限定し、各モデルを逐次実行する（夜間の長時間担当プロジェクトを頻繁に切り替えない）。
+- 新規Workflow、監督器、モデルダウンロード、有料API、GitHubへのPRIVATE応答掲載は追加しない。明示 `-PublishPublicCode` のない実行は今まで通り公開提出しない。既存Windows 1クリック配布の固定Git blobを計測版へ更新した。
+- オフラインテストとWindows構文CIの結果は対象HEADのActions最終状態を別途確認する。成功してもMODEL品質の合格とは扱わない。
