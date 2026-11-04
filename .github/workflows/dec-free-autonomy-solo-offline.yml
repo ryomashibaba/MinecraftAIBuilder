@@ -86,11 +86,16 @@ jobs:
       - name: PowerShell AST parsing only (no Docker/model/network invocation)
         shell: pwsh
         run: |
-          $tokens = $null
-          $parseErrors = $null
-          [void][System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path 'tools/free-autonomy-solo/windows_readonly_audit.ps1'), [ref]$tokens, [ref]$parseErrors)
-          if ($parseErrors.Count -gt 0) { $parseErrors | Format-List | Out-String | Write-Host; exit 2 }
-          Write-Host 'WINDOWS_READONLY_PS_AST_PASS'
+          foreach ($file in @(
+            'tools/free-autonomy-solo/windows_readonly_audit.ps1',
+            'tools/free-autonomy-solo/RUN_PREPARE_REAL_PROJECT_ONCE.ps1'
+          )) {
+            $tokens = $null
+            $parseErrors = $null
+            [void][System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $file), [ref]$tokens, [ref]$parseErrors)
+            if ($parseErrors.Count -gt 0) { $parseErrors | Format-List | Out-String | Write-Host; exit 2 }
+          }
+          Write-Host 'WINDOWS_READONLY_AND_PINNED_CLONE_PS_AST_PASS'
 
 
   windows-no-docker-python-contract:
