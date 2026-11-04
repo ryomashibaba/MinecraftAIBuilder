@@ -34,6 +34,8 @@ on:
       - 'scripts/r125-v4h-real-qwen-trial.ps1'
       - 'scripts/r125-v4d-replay-private.mjs'
       - 'scripts/r125-v4d-replay-private.test.mjs'
+      - 'scripts/r125-v4d-compiler-reject-codes.mjs'
+      - 'scripts/r125-v4d-compiler-reject-codes.test.mjs'
       - 'scripts/r125-v4d-author-source-diagnostics.mjs'
       - 'scripts/r125-v4d-author-source-diagnostics.test.mjs'
       - 'scripts/r125-v4d-shareable-receipt.mjs'
@@ -86,6 +88,8 @@ jobs:
         run: |
           node --test scripts/r125-v4d-local-architect.test.mjs
           node --test scripts/r125-v4d-replay-private.test.mjs
+          node --check scripts/r125-v4d-compiler-reject-codes.mjs
+          node --test scripts/r125-v4d-compiler-reject-codes.test.mjs
           node --test scripts/r125-v4d-author-source-diagnostics.test.mjs
           node --test scripts/r125-v4e-ranked-exterior.test.mjs
           node --test scripts/r125-v4h-mezzanine.test.mjs

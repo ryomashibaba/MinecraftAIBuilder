@@ -28,6 +28,7 @@ test('existing batch with no attempted models yields five honest NOT_ATTEMPTED o
   assert.equal(r.outcomes.length,5);
   assert.deepEqual(r.promptProtocols,[{promptProtocol:'UNAVAILABLE',count:5}]);
   assert.equal(r.sourceRejectionTriage.shaVerifiedNonInjectedCompilationHolds,0);
+  assert.deepEqual(r.sourceRejectionTriage.specificCompilerRejectCodes,[]);
   assert.deepEqual(r.nonInjectedShaMatchedIssueFrequency,[]);
   assert(r.outcomes.every(x=>x.offlineStatus==='NOT_ATTEMPTED'));
   assert.equal(r.geometry.status,'INSUFFICIENT_INDEPENDENT_REAL_MODEL_SOURCES');
@@ -72,6 +73,7 @@ test('one actual synthetic local HTTP response replays offline without any extra
   assert.equal(r.sourceReproducedCount,0);
   assert.equal(r.outcomes[0].originalWasInjectedTestDouble,true);
   assert.equal(r.sourceRejectionTriage.shaVerifiedNonInjectedCompilationHolds,0);
+  assert.deepEqual(r.sourceRejectionTriage.specificCompilerRejectCodes,[]);
   assert.equal(r.outcomes[0].promptProtocol,'LEGACY_AUTHOR_CONTRACT');
   assert.equal(r.outcomes[0].systemPromptSHA256,trial.systemPromptSha256);
   assert.deepEqual(r.nonInjectedShaMatchedIssueFrequency,[]);
@@ -143,6 +145,8 @@ test('two genuine SHA-bound compiler HOLDS are not a SOURCE success even with ze
   originalWasInjectedTestDouble:i===2,
   originalResponseIntegrity:i<=2?'SHA256_MATCH':'NOT_CHECKED',
   structuralIssueCodes:i===0?[]:['PARENT_ATTACHMENT_INVALID'],
+  sourceFailureCode:i===0?'MASSING_PRIMARY_VOLUME_TOO_SMALL':
+   i===1?'PRIVATE_USER_TEXT_NOT_ALLOWED':'COMPACT_PARENT_BEFORE_CHILD',
   sourceFailureFamily:i===0?'TALL_FUNCTIONAL_PUBLIC_ATRIUM_SOURCE_INVALID':
    i===1?'USER_SECRET_NOT_A_COMPILER_FAMILY':'B143_COMPILATION_INVALID'
  }));
@@ -154,6 +158,9 @@ test('two genuine SHA-bound compiler HOLDS are not a SOURCE success even with ze
   'UNCLASSIFIED_SOURCE_REJECTION'
  ]);
  assert(!JSON.stringify(r).includes('USER_SECRET'));
+ assert(!JSON.stringify(r).includes('PRIVATE_USER_TEXT'));
+ assert.deepEqual(r.specificCompilerRejectCodes.map(x=>x.compilerRejectCode),
+  ['MASSING_PRIMARY_VOLUME_TOO_SMALL','UNCLASSIFIED_COMPILER_REJECTION']);
  assert(r.genericCompilerFailureFamilies.every(x=>!x.sameUnderlyingRootCauseProven));
  assert.equal(r.staticFieldCheckIsNot3DCompilationProof,true);
  assert.throws(()=>summarizeFiveGenreReplayRejections(cases.slice(0,4)),

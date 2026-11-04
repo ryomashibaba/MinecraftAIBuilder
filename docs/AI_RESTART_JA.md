@@ -1,5 +1,8 @@
 # MinecraftAIBuilder — 開発再開の最新正本案内（2026-11-03）
 
+**2026-11-04 V2 5ジャンル Qwen SOURCE拒否の安全な精密診断（CI未確認）**：最後の実測では住宅は外形、店舗/展示館はCOMPACT、研究施設はCIVIC、駅舎はGRAPHで全5件HOLD。静的構造診断が0の住宅・駅舎も真正B143には進まなかった。元回答にユーザーの部屋IDが混入し得る生エラーメッセージを共有せず、既存SOURCEの `throw Error` に定義された有限のエラー名だけを `compilerRejectCode` と5ジャンル `sourceRejectionTriage.specificCompilerRejectCodes` へ出力し、未認識なら `UNCLASSIFIED_COMPILER_REJECTION`。次の実Qwen呼出しは必要なく、既存PRIVATEの再生だけを行う。前回 Windows CMD 分岐追加でCI failure（ラベル DONE 未認識）が生じたため `8716c788` で元の起動器を復元、問題分岐は残さない。元ANSWER/本番世界/main/教育実機成功経路を変更せず、9ゲートBLOCKEDとART HOLDを維持。
+
+
 **2026-11-04 V2実Qwenの保存済み結果を追加AI 0回で再診断するワンクリック経路（CI未確認）**：既存 `scripts/r125-v4e-one-click-ranked-trial.cmd` に `--replay-latest-five` を追加。`%LOCALAPPDATA%\MinecraftAIBuilder\PrivateModelStudies` の直近 `V4J_FIVE_*` を読み取り専用で取り出し、元のPRIVATE回答を変更せず新しい `V4J_REPLAY_*` に安全カテゴリ・構造診断と `FIVE_GENRES_OFFLINE_REPLAY_SHAREABLE.json` を記録。**実Qwen再生成0・ローカルOllama接触0・Minecraftワールド接触0**。隔離Gitクローンのみ追加、ユーザーの既存元フォルダを保護。Fake localhost CI で元モデル要求件数不変・再生のみ新フォルダ1を検証。これは実建築ART/PASSやモデルIDの認証ではない。
 
 

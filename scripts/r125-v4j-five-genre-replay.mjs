@@ -12,6 +12,8 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {FIVE_INDEPENDENT_BRIEFS} from './r125-v4j-five-genre-local.mjs';
 import {replayPrivateV4D} from './r125-v4d-replay-private.mjs';
+import {safeStaticCompilerRejectCode}
+ from './r125-v4d-compiler-reject-codes.mjs';
 import {compileDesign} from '../source/ai/b143-building-dsl.mjs';
 import {compareV4IPrivateRealB143Silhouettes}
  from './r125-v4i-architectural-art-audit.mjs';
@@ -132,11 +134,14 @@ export function summarizeFiveGenreReplayRejections(outcomes){
  const cases=outcomes.filter(o=>o.originalWasInjectedTestDouble===false&&
   o.originalResponseIntegrity==='SHA256_MATCH'&&
   o.offlineStatus==='HOLD_REPLAY_SOURCE_REJECTED');
- const grouping=new Map();
+ const grouping=new Map(),specific=new Map();
  for(const o of cases){
   const family=safeSourceFamily(o.sourceFailureFamily);
   if(!grouping.has(family))grouping.set(family,[]);
   grouping.get(family).push(o.genre);
+  const reason=safeStaticCompilerRejectCode(o.sourceFailureCode);
+  if(!specific.has(reason))specific.set(reason,[]);
+  specific.get(reason).push(o.genre);
  }
  return {
   schema:'r125-v4j-five-genre-source-rejection-triage-v1',
@@ -144,6 +149,9 @@ export function summarizeFiveGenreReplayRejections(outcomes){
   zeroStaticIssueYetCompilationHeldGenres:cases.filter(o=>
    Array.isArray(o.structuralIssueCodes)&&o.structuralIssueCodes.length===0)
    .map(o=>o.genre),
+  specificCompilerRejectCodes:[...specific.entries()].map(([compilerRejectCode,genres])=>({
+   compilerRejectCode,genreCount:genres.length,genres,sameUnderlyingRootCauseProven:false
+  })),
   genericCompilerFailureFamilies:[...grouping.entries()].map(([family,genres])=>({
    family,genreCount:genres.length,genres,sameUnderlyingRootCauseProven:false
   })),
@@ -184,7 +192,7 @@ export function replayFiveGenrePrivateBatch(study,out){
   let status='NOT_ATTEMPTED',sourceReproduced=false,synthetic=false,
    structuralIssueCodes=[],originalResponseIntegrity='NOT_CHECKED',
    promptProtocol='UNAVAILABLE',systemPromptSHA256=null,
-   sourceFailureFamily=null;
+   sourceFailureFamily=null,sourceFailureCode=null;
   if(fs.existsSync(folder)){
    replayAttempts++;
    try{
@@ -196,6 +204,8 @@ export function replayFiveGenrePrivateBatch(study,out){
     status=report.status;
     sourceFailureFamily=status==='HOLD_REPLAY_SOURCE_REJECTED'?
      safeSourceFamily(report.failureCategory):null;
+    sourceFailureCode=status==='HOLD_REPLAY_SOURCE_REJECTED'?
+     safeStaticCompilerRejectCode(report.compilerRejectCode):null;
     promptProtocol=report.originalPromptProtocol;
     systemPromptSHA256=report.originalSystemPromptSHA256;
     synthetic=report.originalTestInjectionPresent===true;
@@ -226,7 +236,7 @@ export function replayFiveGenrePrivateBatch(study,out){
   }
   outcomes.push({genre:item.genre,offlineStatus:status,
    originalResponseIntegrity,originalWasInjectedTestDouble:synthetic,
-   promptProtocol,systemPromptSHA256,sourceFailureFamily,
+   promptProtocol,systemPromptSHA256,sourceFailureFamily,sourceFailureCode,
    independentRealSourceReproduced:sourceReproduced,structuralIssueCodes});
  }
  const codeIndex=new Map();
