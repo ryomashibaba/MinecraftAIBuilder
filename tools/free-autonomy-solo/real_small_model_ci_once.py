@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""One-off genuine Ollama/qwen3:1.7b CPU witness on isolated public CI fixture.
+"""One-off genuine Ollama/qwen3:4b CPU witness on isolated public CI fixture.
 
 No GitHub credential, secret, private project content, paid API, GPU or push.
 This is deliberately much smaller than the user's Qwen3:14b and is NOT
@@ -17,7 +17,7 @@ import time
 from local_ollama_real_probe import get_json
 from local_ollama_patch_loop import execute
 
-MODEL = "qwen3:1.7b"
+MODEL = "qwen3:4b"
 IMAGE = "ollama/ollama:latest"
 
 
@@ -108,7 +108,7 @@ def real_chat_witness() -> dict:
 def run_probe() -> dict:
     report = {"schema": "dec-free-autonomy-small-local-real-v1",
               "status": "HOLD", "model_requested": MODEL,
-              "model_scale": "1.7B_cpu_fixture_not_user_14B",
+              "model_scale": "4B_cpu_fixture_not_user_14B",
               "real_local_inference_observed": False,
               "local_git_commits_by_agent": 0, "qa_checks_certified": 0,
               "github_pushes": 0, "paid_api_credentials": False,

@@ -1,4 +1,4 @@
-name: Dec free autonomy one-off real local Qwen CPU proof
+name: Dec free autonomy one-off real local Qwen 4B CPU proof
 
 on:
   push:
@@ -13,7 +13,7 @@ permissions:
 jobs:
   genuine-local-qwen-ephemeral:
     runs-on: ubuntu-24.04
-    timeout-minutes: 18
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with:
@@ -22,10 +22,10 @@ jobs:
         run: |
           docker pull ollama/ollama:latest
           docker pull node:22-bookworm-slim
-      - name: Real Ollama 1.7B inference and bounded two-step source QA in disposable clone
+      - name: Real Ollama 4B inference and bounded two-step source QA in disposable clone
         run: python3 tools/free-autonomy-solo/real_small_model_ci_once.py
       - name: Show honest evidence boundary
         if: always()
         run: |
           echo 'One-time public repo standard CI runner; NO proprietary data / paid API credentials.'
-          echo 'qwen3:1.7b CPU fixture does NOT certify user Windows, qwen3:14b, art quality, 180s TPS, or overnight autonomy.'
+          echo 'qwen3:4b CPU fixture does NOT certify user Windows, qwen3:14b, art quality, 180s TPS, or overnight autonomy.'
