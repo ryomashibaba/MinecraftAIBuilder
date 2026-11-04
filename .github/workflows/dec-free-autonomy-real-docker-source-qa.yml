@@ -26,7 +26,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Pull public pinned-project QA runtime only, no paid model
-        run: docker pull node:22-bookworm-slim
+        run: docker pull node:24-bookworm-slim
       - name: Native Docker per-stage QA on actual MAB/TPS protected source clones with synthetic comments
         run: python3 tools/free-autonomy-solo/real_pinned_source_docker_qa_ci_once.py --project ${{ matrix.project }}
       - name: Publish intentionally limited model-FALSE SOURCE-QA proof
