@@ -171,9 +171,16 @@ class RealSourceDraftTests(unittest.TestCase):
             original = MAB_SOURCE if project == "minecraftaibuilder" else TPS_SOURCE
             anchor = ANCHORS[project][0]
             with self.subTest(project=project):
+                # TPS legitimately references sourceCoopEligible in another
+                # function, so its bare name is NOT a unique edit location.
+                # A protected-declaration removal must still be rejected.
+                find = (anchor if project == "minecraftaibuilder"
+                        else "export function sourceCoopEligible(p) {")
+                replacement = ("DELETED_PUBLIC_ANCHOR" if project == "minecraftaibuilder"
+                               else "export function sourceCoopEligibleRemoved(p) {")
                 with self.assertRaisesRegex(Hold, "PROTECTED_PUBLIC_CONTRACT_ANCHOR_REMOVED"):
                     bounded_replacement(project, original, {
-                        "find": anchor, "replace": "DELETED_PUBLIC_ANCHOR"})
+                        "find": find, "replace": replacement})
 
     def test_bounded_patch_rejects_noops_and_ambiguous_finds(self):
         for proposal, reason in [
