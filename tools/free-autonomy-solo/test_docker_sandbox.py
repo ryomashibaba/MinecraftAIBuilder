@@ -104,6 +104,41 @@ class DockerSandboxTests(unittest.TestCase):
         self.assertFalse(cidfile.exists())
         self.assertTrue(any(c.args[0][0:3] == ['docker', 'rm', '-f'] for c in runner.call_args_list))
 
+    def test_public_provider_catalog_is_exact_non_inference_command(self):
+        cmd = docker_argv(DockerPolicy(network='bridge'), self.repo, agent=True,
+                          command=['opencode', 'models', 'opencode'],
+                          cidfile=self.root / 'catalog.cid')
+        self.assertEqual(cmd[cmd.index('--entrypoint') + 1], 'opencode')
+        self.assertEqual(cmd[-2:], ['models', 'opencode'])
+        self.assertEqual(cmd[cmd.index('--network') + 1], 'bridge')
+        self.assertNotIn('OPENCODE_CONFIG_CONTENT=', ' '.join(cmd))
+        self.assertIn('dst=/work/.git,readonly', ' '.join(cmd))
+        for forbidden in (
+            ['opencode', 'auth', 'login'],
+            ['opencode', 'models', 'anthropic'],
+            ['opencode', 'models', 'opencode', '--refresh'],
+            ['sh', '-c', 'env'],
+        ):
+            with self.subTest(command=forbidden):
+                with self.assertRaisesRegex(SandboxHold, 'AGENT_MUST_USE_OPENCODE'):
+                    docker_argv(DockerPolicy(network='bridge'), self.repo,
+                                agent=True, command=forbidden,
+                                cidfile=self.root / 'no.cid')
+
+    def test_open_code_free_model_catalog_exact_name(self):
+        from free_model_real_once import visible_in_provider_catalog
+        self.assertTrue(visible_in_provider_catalog(
+            'opencode/deepseek-v4.1-flash-free\\nopencode/glm-5.3-flash-free\\n',
+            'opencode/glm-5.3-flash-free'))
+        self.assertFalse(visible_in_provider_catalog(
+            'opencode/glm-5.3-flash-free-preview\\n',
+            'opencode/glm-5.3-flash-free'))
+        self.assertFalse(visible_in_provider_catalog(
+            'Model unavailable: opencode/glm-5.3-flash-free',
+            'opencode/a-free'))
+        self.assertFalse(visible_in_provider_catalog('', 'opencode/a-free'))
+
+
 
 if __name__ == '__main__':
     unittest.main()
