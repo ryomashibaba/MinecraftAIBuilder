@@ -90,3 +90,16 @@
 未達＝HOLD：Windows Docker実機、真正Ollama/Qwen/Gemma推論、無料クラウドモデルの真正連続利用、実LLMが行うソース修正→独立QA→GitHub push、長時間無人運転、MABのART/実機・TPS正式4v4/原作180秒品質。
 
 次ゲート：PC利用可能時に隔離使い捨てclone上でWindows Dockerとモデル通信を一括確認する。既存Windows/Ollama設定、原本、ゲーム、本番、main、保護研究ブランチに触れない。ユーザー操作はできるだけ1回にまとめる。
+
+
+## 2026-11-04 今回：真正無料クラウド試行の実測FAILとローカル別経路
+
+最上位目的は12月のChatGPT非依存・無料/低費用・長時間自律実開発。Strata完成や単体テスト数の増加自体を目的にしない。MinecraftAIBuilderとBrowser Ink TPSは同格、ローカル同時担当は1件、main/原本/本番/有料API/Workは保護する。
+
+- `free_model_real_once.py` は公開の使い捨てコードfixtureだけを用い、OpenCode 2.0.0 `opencode/glm-5.3-flash-free` の真正実行を1回試みた。[Actions #41742847107](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41742847107) は **completed/failure**。CLIは選択モデルを表示したが、240秒で終了せず **exit 124**。コード変更・独立QA・commitは0。認証/通信/混雑/モデル能力のどれが原因かは未特定。無料モデルのカタログ掲載は稼働実績でない。
+- 以後 `genuine-free-model-once-ephemeral` は `workflow_dispatch` の明示実行時のみ。通常pushでは呼び出さず、無料モデル枠の無用な連続消費を防ぐ。
+- `windows_readonly_audit.ps1` はWindows上のGit/Python/Docker/Linux image/Ollama loopbackだけを読み取り、推論・インストール・pull・Docker実起動・プロジェクト改変を行わない。Windows Actionsでは**AST構文だけ**PASSし、ユーザーWindowsでの稼働結果は未取得。
+- `local_ollama_real_probe.py` は**手動起動時だけ**、既に導入済みのローカルQwen/Gemmaから選択した1モデルへ1回だけ localhost POSTする。公開の小さなコードfixtureをJSONで受け、許可AST構文だけを検証し、独立8ケースの結果を非公開ローカル保存。原本・GitHub・外部APIには書かない。GitHub CIのこの経路は**オフラインMock/合成入力4試験のみ**であり、ローカル真正モデル実行はまだ0。
+- [専用Actions #41743900196](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41743900196) は**4ジョブSUCCESS、無料モデル実行ジョブSKIPPED**。オフライン回帰24/24 PASS、Linux実Docker・OpenCode CLIヘルプ・Windows PowerShell AST限定PASS。MAB ART/Minecraft実機、TPS 180秒/4v4、Windows本体・真正Ollamaコード生成/長時間無人開発は引き続きHOLD。
+
+次は Windows本体の読取専用診断→Qwen/Gemma真正1応答を観測し、実LLMによる対象コード変更→独立QA→隔離研究ブランチ保存の連続工程へ進む。ChatGPT枠やユーザー手動操作を無駄に消費しない。詳細な合格率・速度閾値は未確定のまま。
