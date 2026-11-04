@@ -235,6 +235,78 @@ def _commit_local(workspace: Path, project: str, lane: dict, stage: int) -> str:
     return run_git(workspace, "rev-parse", "HEAD")
 
 
+
+def preflight_private_drafts(
+    root: Path, project: str, model: str, *,
+    manifest: dict | None = None, use_lock: bool = True,
+) -> dict:
+    """Read-only source/draft admission. Never executes candidate code or Docker.
+
+    Do not mistake a static admissibility result for JavaScript correctness,
+    real independent QA, model quality, or safe publication.
+    """
+    manifest = load_manifest() if manifest is None else manifest
+    if project not in {"minecraftaibuilder", "browser-ink-tps"}:
+        raise Hold("PROJECT_NOT_APPROVED")
+    root = root.expanduser().resolve(strict=True)
+    lane = manifest["project_candidates"][project]
+    report = {
+        "schema": "real-project-private-static-preflight-v1",
+        "status": "HOLD", "project": project,
+        "model_reported_only": model,
+        "source_commit": lane["pinned_commit"],
+        "checked_stages": [],
+        "generated_code_executed": False, "docker_executed": False,
+        "native_qa_executed": False, "git_commits": 0,
+        "github_pushes": 0, "paid_api_calls": 0,
+        "project_original_changed": False,
+        "candidate_quality_certified": False,
+        "art_or_real_game_certified": False,
+        "long_unattended_autonomy_certified": False,
+    }
+    lock = exclusive_local_project_lock() if use_lock else nullcontext()
+    try:
+        with lock:
+            original = root / "repo"
+            verify_private_clone(original, lane)
+            data, drafts = _read_receipt(root, project, model, manifest)
+            before = (original / lane["source_file"]).read_text(encoding="utf-8")
+            accepted = [s for s in data["stages"]
+                        if isinstance(s, dict) and
+                        s.get("result") == "PRIVATE_UNVERIFIED_DIFF"]
+            if sha256(before) != accepted[0]["source_previous_sha256"]:
+                raise Hold("ORIGINAL_TEXT_SHA_MISMATCH")
+            if sha256(drafts[0]) != accepted[1]["source_previous_sha256"]:
+                raise Hold("DRAFT_CHAIN_BROKEN")
+            prev = before
+            for n, candidate in enumerate(drafts, 1):
+                _check_one_contiguous_revision(prev, candidate)
+                for contract_name in ANCHORS[project]:
+                    if prev.count(contract_name) and (
+                        candidate.count(contract_name) < prev.count(contract_name)
+                    ):
+                        raise Hold("PROTECTED_PUBLIC_CONTRACT_ANCHOR_REMOVED")
+                report["checked_stages"].append({
+                    "stage": n,
+                    "candidate_sha256": sha256(candidate),
+                    "receipt_hash_matched": True,
+                    "revision_bounded": True,
+                    "protected_contract_anchors_retained": True,
+                })
+                prev = candidate
+            verify_private_clone(original, lane)
+            report["status"] = "STATIC_PRIVATE_DRAFTS_ADMISSIBLE_FOR_ISOLATED_QA_ONLY"
+    except (CloneHold, Hold, SandboxHold, OSError, ValueError, KeyError, TypeError) as exc:
+        report["status"] = "HOLD"
+        report["reason"] = str(exc)[:160]
+    finally:
+        # Metadata only. No source, prompt, patch, credentials, private paths.
+        (root / "SHAREABLE_STATIC_PREFLIGHT.json").write_text(
+            json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+    return report
+
+
+
 def promote(root: Path, project: str, model: str,
             *, allow_public_npm_deps: bool = False,
             manifest: dict | None = None, use_lock: bool = True) -> dict:
