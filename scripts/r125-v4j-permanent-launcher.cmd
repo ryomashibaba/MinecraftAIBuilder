@@ -49,11 +49,14 @@ powershell.exe -NoProfile -NonInteractive -Command "Get-Content -LiteralPath $en
 if errorlevel 1 goto CLIPBOARD_FALLBACK
 echo SAFE REPORT COPIED TO CLIPBOARD. In your ChatGPT conversation press Ctrl+V and Send.
 if not "%MODEL_EXIT%"=="0" echo SOURCE HOLD is valid diagnostic evidence, NOT a pass.
+if not "%MODEL_EXIT%"=="0" goto DONE
 set "FINAL_EXIT=0"
 goto DONE
 :CLIPBOARD_FALLBACK
 echo Clipboard unavailable. Explorer will select the safe JSON. Attach ONLY that file.
 start "" explorer.exe /select,"%V4J_SAFE_FILE%"
+if not "%MODEL_EXIT%"=="0" echo SOURCE HOLD is valid diagnostic evidence, NOT a pass.
+if not "%MODEL_EXIT%"=="0" goto DONE
 set "FINAL_EXIT=0"
 goto DONE
 :NO_LOCALAPPDATA

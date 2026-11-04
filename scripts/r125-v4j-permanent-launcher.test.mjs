@@ -24,3 +24,12 @@ test('no production world, git pushes, raw sharing, model auto-download or priva
  assert(cmd.includes('if not exist "%V4J_SAFE_FILE%" goto NO_SAFE_OUTPUT'));
  assert(cmd.includes('PRIVATE studies stay'));
 });
+
+test('safe-report recovery does not convert SOURCE HOLD into exit code zero',()=>{
+ const guard='if not "%MODEL_EXIT%"=="0" goto DONE';
+ assert.equal(cmd.split(guard).length-1,2);
+ assert.equal(cmd.split('set "FINAL_EXIT=0"').length-1,2);
+ assert(cmd.indexOf('set "MODEL_EXIT=%ERRORLEVEL%"')<cmd.indexOf(guard));
+ assert(cmd.indexOf('V4J_CURRENT_SAFE_REPORT.json')<cmd.indexOf(guard));
+ assert(cmd.includes('if not exist "%V4J_SAFE_FILE%" goto NO_SAFE_OUTPUT'));
+});

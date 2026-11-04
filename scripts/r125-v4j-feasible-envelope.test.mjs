@@ -142,3 +142,12 @@ test('V4 shared geometry guidance rejects same-side sibling overlap in frozen gr
  assert(p.includes('>=7 cells of contact'));
  assert(p.includes('failed original JSON is never silently moved or repaired'));
 });
+
+test('V4 real GRAPH_ENTRY evidence prompts a root-relative final adjacency check without disabling other north links',()=>{
+ assert(p.includes('set rootId=spaces[0].id'));
+ assert(p.includes('attach.to equals rootId AND attach.side is north'));
+ assert(p.includes('north attachment on a NONROOT parent is not automatically forbidden'));
+ assert(p.includes('do not ask the HOST to relocate any room'));
+ assert.deepEqual(s.properties.spaces.items.oneOf[0].properties.attach,
+  original.properties.spaces.items.oneOf[0].properties.attach);
+});
