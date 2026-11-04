@@ -53,5 +53,26 @@ if ($receipts.Count -eq 1) {
     try { Start-Process explorer.exe -ArgumentList ('/select,"' + $statusFile + '"') } catch {}
   }
 }
-if ($rc -ne 0) { throw 'GENUINE_V4H_AUTHOR_HOLD__PRIVATE_RECEIPT_PRESERVED' }
-Write-Host 'V4H_SOURCE_ONLY_PRIVATE_ART_HOLD__NOT_MINECRAFT_WORLD_OR_HUMAN_ART_PASS'
+# Open only the trusted, locally generated static comparison gallery.
+# Its authored HTML contains no scripts; the B143 SVGs remain private images.
+$views = @($lines | Where-Object { ([string]$_).StartsWith('PRIVATE_SOURCE_COMPARISON_HTML=') })
+if ($views.Count -eq 1) {
+  $viewPath = ([string]$views[0]).Substring('PRIVATE_SOURCE_COMPARISON_HTML='.Length)
+  $base = [System.IO.Path]::GetFullPath((Join-Path $env:LOCALAPPDATA 'FreeAutonomyPrivate\RealOriginalV4H14B'))
+  $resolved = [System.IO.Path]::GetFullPath($viewPath)
+  if ($resolved.StartsWith($base + [System.IO.Path]::DirectorySeparatorChar,
+                           [System.StringComparison]::OrdinalIgnoreCase) -and
+      (Split-Path -Path $resolved -Leaf) -ceq 'V4H_PRIVATE_SOURCE_COMPARE.html' -and
+      (Test-Path -LiteralPath $resolved -PathType Leaf)) {
+    try {
+      Start-Process -FilePath $resolved -ErrorAction Stop
+      Write-Host 'PRIVATE_V4H_SOURCE_COMPARISON_OPENED__ART_NOT_APPROVED'
+    } catch {
+      Write-Host ('PRIVATE_COMPARE_SAVED_OPEN_MANUALLY=' + $resolved)
+    }
+  } else {
+    Write-Host 'PRIVATE_REVIEW_PATH_NOT_WHITELISTED_NO_OPEN'
+  }
+}
+if ($rc -ne 0) { throw 'GENUINE_V4H_ARCHITECTURE_ALL_CASES_NOT_VERIFIED__PRIVATE_RESULTS_SAVED' }
+Write-Host 'ALL_SELECTED_CASES_SOURCE_ONLY_PASS__HUMAN_ART_AND_MINECRAFT_WORLD_STILL_HOLD'
