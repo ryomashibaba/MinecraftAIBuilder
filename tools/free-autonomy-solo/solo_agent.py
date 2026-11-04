@@ -137,14 +137,23 @@ def snapshot_candidate(workspace: Path, paths: list[str]) -> dict[str, str]:
 def single_agent_lock():
     base = Path(os.environ.get("LOCALAPPDATA") or Path.home()) / "FreeAutonomySolo"
     base.mkdir(parents=True, exist_ok=True)
-    f = open(base / "one-local-project.lock", "a+b")
     try:
-        f.seek(0)
-        if not f.read(1):
+        f = open(base / "one-local-project.lock", "a+b")
+    except OSError as ex:
+        raise Hold("LOCAL_AGENT_LOCK_FILE_UNAVAILABLE") from ex
+    try:
+        # On Windows, reading or initializing a region already locked by
+        # another process can itself raise PermissionError *before* calling
+        # msvcrt.locking. Normalize this to a fail-closed ownership HOLD.
+        try:
             f.seek(0)
-            f.write(b"0")
-            f.flush()
-        f.seek(0)
+            if not f.read(1):
+                f.seek(0)
+                f.write(b"0")
+                f.flush()
+            f.seek(0)
+        except (PermissionError, BlockingIOError) as ex:
+            raise Hold("ANOTHER_LOCAL_AGENT_OWNS_LOCK") from ex
         if os.name == "nt":
             import msvcrt
             try:
