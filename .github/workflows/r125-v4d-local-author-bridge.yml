@@ -9,6 +9,7 @@ on:
       - 'source/ai/r125-v4e-authored-public-loggia.mjs'
       - 'source/ai/r125-v4e-sectioned-author-ir.mjs'
       - 'scripts/r125-v4e-ranked-exterior.test.mjs'
+      - 'source/ai/r125-v4j-civic-author-ir.mjs'
       - 'source/ai/r125-v4h-authored-mezzanine.mjs'
       - 'scripts/r125-v4h-mezzanine-source-study.mjs'
       - 'scripts/r125-v4h-mezzanine-section.mjs'
@@ -163,6 +164,11 @@ jobs:
           node-version: '22'
       - name: Prove author-owned real visible 3-bay PUBLIC architecture and strict old-source protection
         run: |
+          node --check source/ai/r125-v4j-civic-author-ir.mjs
+          node --check scripts/r125-v4d-local-architect.mjs
+          node --check scripts/r125-v4d-replay-private.mjs
+          node --check scripts/r125-v4d-author-source-diagnostics.mjs
+          node --check scripts/r125-v4d-shareable-receipt.mjs
           node --check scripts/r125-v4j-lossless-b143-pack.mjs
           node --check scripts/r125-v4j-civic-arcade.mjs
           node --check scripts/r125-v4j-civic-facade-study.mjs
