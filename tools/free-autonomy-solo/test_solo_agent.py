@@ -453,5 +453,87 @@ with single_agent_lock():
         self.assertEqual(result['commits'], [])
 
 
+    def test_opt_in_quarantines_and_restores_exact_dirty_paths_before_resume(self):
+        cfg = dict(self.cfg, quarantine_unverified_on_resume=True)
+        with patch.dict(os.environ, self.env):
+            first = execute(cfg, push=False, sandbox_attested=True)
+        self.assertEqual(first['status'], 'TASK_QUEUE_COMPLETED_SOURCE_ONLY')
+        original_commit = first['last_head']
+        tracked = self.repo / 'source' / 'generated.txt'
+        tracked.write_text('interrupted tracked edit', encoding='utf-8')
+        leftover = self.repo / 'source' / 'interrupted.tmp'
+        leftover.write_bytes(b'interrupted untracked bytes')
+        with patch('solo_agent.run_in_docker',
+                   side_effect=AssertionError('completed task must not rerun a model/QA')):
+            with patch.dict(os.environ, self.env):
+                resumed = execute(cfg, push=False, sandbox_attested=True)
+        self.assertEqual(resumed['status'], 'TASK_QUEUE_COMPLETED_SOURCE_ONLY')
+        self.assertEqual(resumed['last_head'], original_commit)
+        self.assertEqual(sh(self.repo, 'git', 'status', '--porcelain'), '')
+        self.assertEqual(tracked.read_text(), 'ok')
+        self.assertFalse(leftover.exists())
+        self.assertEqual(len(resumed['resume_quarantines']), 1)
+        recovered = resumed['resume_quarantines'][0]
+        self.assertEqual(recovered['status'], 'PRIVATE_BACKUP_VERIFIED_RESEARCH_CLONE_RESTORED')
+        self.assertEqual(recovered['paths'], 2)
+        manifest = Path(recovered['private_manifest'])
+        self.assertTrue(manifest.is_file())
+        data = json.loads(manifest.read_text(encoding='utf-8'))
+        self.assertEqual(data['scope'], 'PRIVATE_UNVERIFIED_NOT_QA_PASSED')
+        entries = {x['path']: x for x in data['items']}
+        for name, expected in [('source/generated.txt', b'interrupted tracked edit'),
+                               ('source/interrupted.tmp', b'interrupted untracked bytes')]:
+            self.assertEqual((manifest.parent / entries[name]['backup']).read_bytes(),
+                             expected)
+        self.assertFalse(resumed['real_model_verified'])
+        self.assertFalse(resumed['quality_certified'])
+
+    def test_recovery_refuses_protected_path_and_preserves_everything(self):
+        cfg = dict(self.cfg, quarantine_unverified_on_resume=True)
+        with patch.dict(os.environ, self.env):
+            first = execute(cfg, push=False, sandbox_attested=True)
+        self.assertEqual(len(first['commits']), 1)
+        protected = self.repo / '.github'
+        protected.mkdir()
+        blocked = protected / 'policy.yml'
+        blocked.write_text('unreviewed')
+        with patch.dict(os.environ, self.env):
+            with self.assertRaisesRegex(Hold, 'PATH_NOT_APPROVED'):
+                execute(cfg, push=False, sandbox_attested=True)
+        self.assertEqual(blocked.read_text(), 'unreviewed')
+        self.assertEqual(sh(self.repo, 'git', 'status', '--porcelain'), '?? .github/')
+        state = json.loads((self.root / 'state' / 'state.json').read_text())
+        self.assertEqual(state['status'], 'HOLD')
+        self.assertFalse(state.get('resume_quarantines'))
+
+    def test_recovery_refuses_overbudget_file_and_does_not_delete_it(self):
+        cfg = dict(self.cfg, quarantine_unverified_on_resume=True)
+        with patch.dict(os.environ, self.env):
+            execute(cfg, push=False, sandbox_attested=True)
+        big = self.repo / 'source' / 'too-big.tmp'
+        big.write_bytes(b'a' * 2_000_001)
+        with patch.dict(os.environ, self.env):
+            with self.assertRaisesRegex(Hold, 'RESUME_QUARANTINE_BYTES_BUDGET'):
+                execute(cfg, push=False, sandbox_attested=True)
+        self.assertEqual(big.stat().st_size, 2_000_001)
+        self.assertEqual(sh(self.repo, 'git', 'status', '--porcelain'), '?? source/too-big.tmp')
+
+    def test_recovery_opt_in_requires_explicit_boolean(self):
+        with self.assertRaisesRegex(Hold, 'RESUME_QUARANTINE_OPT_IN_MUST_BE_BOOLEAN'):
+            validate(dict(self.cfg, quarantine_unverified_on_resume='true'))
+
+    def test_recovery_never_fixes_changed_git_head(self):
+        cfg = dict(self.cfg, quarantine_unverified_on_resume=True)
+        with patch.dict(os.environ, self.env):
+            execute(cfg, push=False, sandbox_attested=True)
+        (self.repo / 'source' / 'new.txt').write_text('unverified')
+        sh(self.repo, 'git', 'add', 'source/new.txt')
+        sh(self.repo, 'git', 'commit', '-m', 'untrusted outside supervisor')
+        with patch.dict(os.environ, self.env):
+            with self.assertRaisesRegex(Hold, 'GIT_HISTORY_CHANGED_OUTSIDE_SUPERVISOR'):
+                execute(cfg, push=False, sandbox_attested=True)
+        self.assertEqual((self.repo / 'source' / 'new.txt').read_text(), 'unverified')
+
+
 if __name__ == '__main__':
     unittest.main()
