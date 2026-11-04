@@ -1,0 +1,40 @@
+name: Dec genuine Qwen4B original V4H architecture author SOURCE study
+
+on:
+  push:
+    branches:
+      - research/dec-free-autonomy-solo-pilot-20261104
+    paths:
+      - 'tools/free-autonomy-solo/real_qwen4b_mab_v4h_architecture_ci_once.py'
+      - '.github/workflows/dec-real-qwen4b-v4h-architecture-once.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  genuine-v4h-one-original-architect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 21
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Validate runner syntax, no inferred model pass
+        run: python3 -m py_compile tools/free-autonomy-solo/real_qwen4b_mab_v4h_architecture_ci_once.py
+      - name: Obtain public Ollama and independent readonly Docker QA images
+        run: |
+          docker pull ollama/ollama:latest
+          docker pull node:24-bookworm-slim
+      - name: ONE genuine model authors full V4H architecture; source/B143 safety gates
+        run: python3 tools/free-autonomy-solo/real_qwen4b_mab_v4h_architecture_ci_once.py
+      - name: Save sanitized results, never private model architecture or visuals
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qwen4b-full-original-v4h-b143-sanitized-result
+          path: ${{ runner.temp }}/v4h-qwen-original-author-sanitized.json
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Explicit source vs art boundary
+        if: always()
+        run: echo 'Original Qwen architecture experiment; ART, Minecraft walking, paid API, user Windows and autonomous production NOT certified.'
