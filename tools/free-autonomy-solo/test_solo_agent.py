@@ -627,5 +627,91 @@ with single_agent_lock():
 
 
 
+    def test_qa_failure_quarantine_restarts_from_clean_verified_base(self):
+        counter = self.root / 'qa-model-count'
+        (self.fake / 'opencode').write_text(
+            '#!/usr/bin/env python3\nimport sys\n'
+            'from pathlib import Path\n'
+            f'counter=Path({str(counter)!r})\n'
+            'n=int(counter.read_text()) if counter.exists() else 0\n'
+            'counter.write_text(str(n+1))\n'
+            'source=Path("source/generated.txt")\n'
+            'if n==0:\n'
+            '    source.write_text("unverified-bad-code")\n'
+            'else:\n'
+            '    if source.exists(): sys.exit(33)\n'
+            '    source.write_text("ok")\n'
+        )
+        (self.fake / 'opencode').chmod(0o755)
+        cfg = dict(self.cfg, quarantine_unverified_on_qa_failure=True)
+        with patch.dict(os.environ, self.env):
+            state = execute(cfg, push=False, sandbox_attested=True)
+        self.assertEqual(state['status'], 'TASK_QUEUE_COMPLETED_SOURCE_ONLY')
+        self.assertEqual(state['cycles'], 2)
+        self.assertEqual(state['outcomes'][0]['status'],
+                         'INDEPENDENT_QA_FAILED_QUARANTINED_FOR_RETRY')
+        self.assertEqual(state['outcomes'][1]['status'], 'SOURCE_CHECKS_PASSED')
+        self.assertEqual(len(state['commits']), 1)
+        self.assertEqual(sh(self.repo, 'git', 'status', '--porcelain'), '')
+        self.assertEqual((self.repo / 'source' / 'generated.txt').read_text(), 'ok')
+        quarantines = state['qa_failure_quarantines']
+        self.assertEqual(len(quarantines), 1)
+        self.assertEqual(quarantines[0]['failed_checks'], 1)
+        manifest = Path(quarantines[0]['private_manifest'])
+        data = json.loads(manifest.read_text(encoding='utf-8'))
+        self.assertEqual(data['scope'], 'PRIVATE_UNVERIFIED_NOT_QA_PASSED')
+        self.assertEqual((manifest.parent / data['items'][0]['backup']).read_bytes(),
+                         b'unverified-bad-code')
+        self.assertFalse(state['real_model_verified'])
+        self.assertFalse(state['quality_certified'])
+
+    def test_qa_failure_default_preserves_draft_not_autodeleted(self):
+        (self.fake / 'opencode').write_text(
+            '#!/usr/bin/env python3\n'
+            'from pathlib import Path\n'
+            'Path("source/generated.txt").write_text("bad")\n'
+        )
+        (self.fake / 'opencode').chmod(0o755)
+        cfg = dict(self.cfg, max_cycles=1, per_task_attempts=1)
+        with patch.dict(os.environ, self.env):
+            state = execute(cfg, push=False, sandbox_attested=True)
+        self.assertEqual(state['status'], 'HOLD')
+        self.assertEqual(state['outcomes'][0]['status'], 'INDEPENDENT_QA_FAILED')
+        self.assertEqual((self.repo / 'source' / 'generated.txt').read_text(), 'bad')
+        self.assertEqual(len(state['commits']), 0)
+        self.assertNotIn('qa_failure_quarantines', state)
+
+    def test_qa_failure_quarantine_rejects_test_mutation_without_deletion(self):
+        def tampering_qa(policy, cwd, *, agent, command, cidfile, timeout, log):
+            result = run_cmd(command, cwd, timeout, log)
+            if not agent:
+                (cwd / 'source' / 'generated.txt').write_text('QA_TAMPERED')
+            return result
+        (self.fake / 'opencode').write_text(
+            '#!/usr/bin/env python3\n'
+            'from pathlib import Path\n'
+            'Path("source/generated.txt").write_text("bad")\n'
+        )
+        (self.fake / 'opencode').chmod(0o755)
+        cfg = dict(self.cfg, quarantine_unverified_on_qa_failure=True)
+        with patch('solo_agent.docker_exec', side_effect=tampering_qa):
+            with patch.dict(os.environ, self.env):
+                with self.assertRaisesRegex(
+                        Hold, 'QA_FAILED_MUTATED_OR_EXPANDED_CANDIDATE'):
+                    execute(cfg, push=False, sandbox_attested=True)
+        self.assertEqual((self.repo / 'source' / 'generated.txt').read_text(),
+                         'QA_TAMPERED')
+        self.assertEqual(sh(self.repo, 'git', 'log', '-1', '--format=%s'),
+                         'baseline')
+        self.assertFalse((self.root / 'state' / 'quarantine').exists())
+
+    def test_qa_failure_quarantine_boolean_validation(self):
+        with self.assertRaisesRegex(Hold,
+                                    'RESUME_QUARANTINE_OPT_IN_MUST_BE_BOOLEAN'):
+            validate(dict(self.cfg,
+                          quarantine_unverified_on_qa_failure=1))
+
+
+
 if __name__ == '__main__':
     unittest.main()
