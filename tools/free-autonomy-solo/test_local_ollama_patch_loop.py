@@ -198,6 +198,22 @@ class LocalPatchLoopTests(unittest.TestCase):
         self.assertEqual(a, {"find": "old", "replace": "new"})
         self.assertEqual(m["eval_count"], 11)
 
+    def test_real_failure_shapes_have_distinct_safe_diagnostics(self):
+        cases = [
+            ({'find': '', 'replace': 'return 0;'}, 'MODEL_PATCH_FIND_EMPTY'),
+            ({'find': 'return value;', 'replace': ''}, 'MODEL_PATCH_REPLACEMENT_EMPTY'),
+            ({'find': 'x', 'replace': 'x'}, 'MODEL_PATCH_NOOP_IDENTICAL'),
+            ({'bad': 'x'}, 'MODEL_PATCH_KEYS_INVALID'),
+        ]
+        for proposal, reason in cases:
+            with self.subTest(reason=reason):
+                with patch("local_ollama_patch_loop.get_json", side_effect=[
+                    {'models': [{'name': 'qwen3:14b'}]},
+                    {'model': 'qwen3:14b', 'done': True,
+                     'message': {'content': json.dumps(proposal)}}]):
+                    with self.assertRaisesRegex(Hold, reason):
+                        propose_once('qwen3:14b', 'source/calc.mjs', 'return value;', 'Fix', '')
+
     def test_model_non_matching_identity_is_rejected(self):
         with patch("local_ollama_patch_loop.get_json",
                    side_effect=[{"models": [{"name": "qwen3:14b"}]},
