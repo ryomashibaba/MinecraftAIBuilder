@@ -6,6 +6,7 @@ on:
       - research/dec-free-autonomy-solo-pilot-20261104
     paths:
       - 'tools/free-autonomy-solo/real_pinned_source_docker_qa_ci_once.py'
+      - 'tools/free-autonomy-solo/promote_private_real_drafts_docker.py'
       - '.github/workflows/dec-free-autonomy-real-docker-source-qa.yml'
   workflow_dispatch:
 
