@@ -172,3 +172,43 @@ test('frozen graph north entry conflict is separately diagnosed for original com
  assert(!diagnosePrivateV4DAuthor(other,COMPACT_SCHEMA).issues
   .some(i=>i.code==='ENTRY_NORTH_SIDE_OCCUPIED'));
 });
+
+test('cross-genre coordinate preflight detects genuine authored footprint collisions without repairing or exposing IDs',async()=>{
+ const {translateCompactModelIntent}=await import('../source/ai/r125-v4d-compact-model-ir.mjs');
+ const {translateRelativeAuthorIntent}=await import('../source/ai/r125-v4d-relative-author-ir.mjs');
+ for(const genre of ['housing','shop','research','gallery','station']){
+  const source=makeV4DCompactSynthetic(),original=JSON.stringify(source);
+  const normal=diagnosePrivateV4DAuthor(source,COMPACT_SCHEMA);
+  assert.equal(normal.footprintAssessment,'COMPLETE_COORDINATE_ONLY_SOURCE_NOT_PROVEN');
+  assert(!normal.issues.some(x=>x.code==='AUTHORED_SOLID_FOOTPRINT_OVERLAP'));
+  const clash=structuredClone(source);
+  // Two independent AUTHOR links choose the same western space volume.
+  // Actual GRAPH is the arbiter; this preflight never relocates a room.
+  clash.spaces[2].attach={to:clash.spaces[0].id,side:'west',shift:0};
+  const authorBytes=JSON.stringify(clash);
+  const diagnostic=diagnosePrivateV4DAuthor(clash,COMPACT_SCHEMA);
+  assert.equal(JSON.stringify(clash),authorBytes);
+  assert.deepEqual(diagnostic.issues.filter(x=>x.code==='AUTHORED_SOLID_FOOTPRINT_OVERLAP'),
+   [{code:'AUTHORED_SOLID_FOOTPRINT_OVERLAP',spaceIndex:2}],genre);
+  assert.equal(diagnostic.footprintAssessment,'COMPLETE_COORDINATE_ONLY_SOURCE_NOT_PROVEN');
+  const expanded=translateCompactModelIntent(clash).expandedMechanicalIR;
+  assert.throws(()=>translateRelativeAuthorIntent(expanded),
+   /R125_V4D_GRAPH_SOLID_FOOTPRINT_OVERLAP/,genre);
+  assert.equal(JSON.stringify(source),original);
+  const exported=JSON.stringify(diagnostic);
+  assert(!exported.includes(clash.spaces[0].id));
+  assert(!exported.includes(clash.spaces[1].id));
+  assert(!exported.includes(clash.spaces[2].id));
+  assert.equal(diagnostic.sourcePassNotInferred,true);
+  assert.equal(diagnostic.sourceModelCalls,0);
+  assert.equal(diagnostic.artApproved,false);
+ }
+});
+test('incomplete author attachment cannot be mislabeled as a verified footprint scan',()=>{
+ const s=makeV4DCompactSynthetic();
+ s.spaces[1].attach.to='private-not-yet-defined';
+ const r=diagnosePrivateV4DAuthor(s,COMPACT_SCHEMA);
+ assert.equal(r.footprintAssessment,'NOT_ASSESSED');
+ assert(!r.issues.some(i=>i.code==='AUTHORED_SOLID_FOOTPRINT_OVERLAP'));
+ assert.equal(r.sourcePassNotInferred,true);
+});

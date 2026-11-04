@@ -138,3 +138,36 @@ test('V4 clipboard-safe report shows north entry collision only with SHA-verifie
   assert.deepEqual(result.gates,Array(9).fill('BLOCKED'));
  }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });
+
+test('safe handoff exposes footprint collision only with matching SHA-verified frozen GRAPH evidence (injected fake only)',async()=>{
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'v4j-footprint-safe-'));
+ const out=path.join(dir,'one'),calls=[];
+ const fetcher=async(_url,opts)=>{
+  calls.push(opts.method);
+  if(opts.method==='GET')return {ok:true,text:async()=>JSON.stringify({models:[{name:'qwen3:14b'}]})};
+  return {ok:true,text:async()=>JSON.stringify({model:'qwen3:14b',choices:[{
+   finish_reason:'stop',message:{role:'assistant',content:'{"schema":"invalid"}'}
+  }]})};
+ };
+ const replay=()=>({
+  status:'HOLD_REPLAY_SOURCE_REJECTED',
+  compilerRejectCode:'GRAPH_SOLID_FOOTPRINT_OVERLAP',
+  originalResponseIntegrity:'SHA256_MATCH',
+  structuralDiagnosticIssueCodes:['AUTHORED_SOLID_FOOTPRINT_OVERLAP'],
+  additionalModelCalls:0
+ });
+ try{
+  const safe=await runV3OneGenreStudy({
+   model:'qwen3:14b',outDir:out,genre:'station',geometryEnvelopeV4:true
+  },{fetcher,replay,timeoutMs:15000});
+  assert.deepEqual(calls,['GET','POST']);
+  assert.equal(safe.graphSolidFootprintOverlap,true);
+  assert.equal(safe.sourceCandidateVerified,false);
+  assert.equal(safe.explicitlyInjectedTestResponse,true);
+  assert.deepEqual(safe.gates,Array(9).fill('BLOCKED'));
+  const shared=fs.readFileSync(path.join(out,'V4J_V4_ONE_SHAREABLE.json'),'utf8');
+  assert.equal(JSON.parse(shared).graphSolidFootprintOverlap,true);
+  assert(!shared.includes(dir));
+  assert(!shared.includes('{"schema":"invalid"}'));
+ }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});

@@ -41,6 +41,7 @@ const blank=(contract,format='VALID_JSON')=>({
  windowsDeclaredCount:0,
  modelNamedFunctionCount:0,
  authorParentAttachmentCount:0,
+ footprintAssessment:'NOT_ASSESSED',
  issues:[],
  sourceModelCalls:0,
  diagnosticOnly:true,
@@ -66,6 +67,56 @@ function safeProse(value){return typeof value==='string'&&value.length>=3&&value
  !/[\u0000-\u001f<>]/.test(value);}
 const opposite={east:'west',west:'east',south:'north',north:'south'};
 const dirs=['north','south','east','west'];
+// Independent coordinate-only source diagnostic. Mirrors the stable
+// R125 relative author's LOCAL placement arithmetic. This does NOT alter
+// model output, rewrite a link, or certify frozen GRAPH / B143 success.
+// Only integer space indexes and fixed error codes may leave PRIVATE replay.
+function diagnoseAuthoredFootprints(author,report){
+ const spaces=author.spaces;
+ if(!Array.isArray(spaces)||spaces.length<3||spaces.length>5)return;
+ const placed=new Map(),all=[];
+ for(const [index,s] of spaces.entries()){
+  if(!record(s)||!safeName(s.id)||placed.has(s.id)||
+   !between(s.width,18,30)||!between(s.depth,18,30)||
+   !['covered','sky'].includes(s.kind))return;
+  let x=48,z=42;
+  if(index===0){
+   if(s.kind!=='covered')return;
+  }else{
+   const a=s.attach,p=record(a)?placed.get(a.to):null;
+   if(!p||!dirs.includes(a.side)||!between(a.shift,-4,4))return;
+   if(a.side==='east'){
+    x=p.x+p.width-1;
+    z=p.z+Math.floor((p.depth-s.depth)/2)+a.shift;
+   }else if(a.side==='west'){
+    x=p.x-s.width+1;
+    z=p.z+Math.floor((p.depth-s.depth)/2)+a.shift;
+   }else if(a.side==='south'){
+    x=p.x+Math.floor((p.width-s.width)/2)+a.shift;
+    z=p.z+p.depth-1;
+   }else{
+    x=p.x+Math.floor((p.width-s.width)/2)+a.shift;
+    z=p.z-s.depth+1;
+   }
+  }
+  const node={x,z,width:s.width,depth:s.depth};
+  placed.set(s.id,node);
+  all.push(node);
+ }
+ report.footprintAssessment='COMPLETE_COORDINATE_ONLY_SOURCE_NOT_PROVEN';
+ for(let later=1;later<all.length;later++){
+  const b=all[later];
+  for(let earlier=0;earlier<later;earlier++){
+   const a=all[earlier];
+   const overlapX=Math.max(0,Math.min(a.x+a.width-1,b.x+b.width-1)-Math.max(a.x,b.x)+1);
+   const overlapZ=Math.max(0,Math.min(a.z+a.depth-1,b.z+b.depth-1)-Math.max(a.z,b.z)+1);
+   // Frozen GRAPH rejects genuine SOLID_FOOTPRINT_OVERLAP when BOTH
+   // horizontal intersection lengths exceed one voxel, not at a shared wall.
+   if(overlapX>1&&overlapZ>1)
+    add(report,'AUTHORED_SOLID_FOOTPRINT_OVERLAP',later);
+  }
+ }
+}
 export function diagnosePrivateV4DAuthor(author,contract){
  if(![COMPACT_SCHEMA,RELATIVE_SCHEMA,RANKED_SCHEMA,SECTIONED_SCHEMA,MASSING_SCHEMA,WING_SCHEMA,FLOORPLATE_SCHEMA,HEIGHT_SCHEMA,MEZZANINE_SCHEMA,CIVIC_ARCADE_SCHEMA].includes(contract))
   throw Error('V4D_DIAG_UNRECOGNIZED_CONTRACT');
@@ -317,6 +368,8 @@ export function diagnosePrivateV4DAuthor(author,contract){
     add(r,'PUBLIC_MEZZANINE_PURPOSE_INVALID');
   }
  }
+ // Coordinate-only provenance is separate from compiler SOURCE acceptance.
+ diagnoseAuthoredFootprints(author,r);
  // Check linked wall window directions after reading ALL attachments.
  if(civic){
   const a=author.arcade,fields=['width','depth','setback','roofline',

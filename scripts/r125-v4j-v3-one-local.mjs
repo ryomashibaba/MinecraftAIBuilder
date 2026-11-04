@@ -74,7 +74,8 @@ export async function runV3OneGenreStudy(options,{
   fail('TEST_DOUBLE_IDENTITY_MISSING');
  let replayStatus='NOT_ATTEMPTED_NO_SAVED_MODEL_RESPONSE',
   compilerRejectCode=null,replayAdditionalModelCalls=0,
-  graphEntryNorthSideOccupied=null;
+  graphEntryNorthSideOccupied=null,
+  graphSolidFootprintOverlap=null;
  if(report.rawCaptured===true){
   try{
    const result=replay(out,out+'-replay');
@@ -90,6 +91,15 @@ export async function runV3OneGenreStudy(options,{
       Array.isArray(result.structuralDiagnosticIssueCodes))
     graphEntryNorthSideOccupied=result.structuralDiagnosticIssueCodes
      .includes('ENTRY_NORTH_SIDE_OCCUPIED');
+   // A positive collision witness is exported only when the SHA-verified
+   // original was rejected by the matching frozen GRAPH error.
+   if(result.originalResponseIntegrity==='SHA256_MATCH'&&
+      result.status==='HOLD_REPLAY_SOURCE_REJECTED'&&
+      result.compilerRejectCode==='GRAPH_SOLID_FOOTPRINT_OVERLAP'&&
+      result.additionalModelCalls===0&&
+      Array.isArray(result.structuralDiagnosticIssueCodes)&&
+      result.structuralDiagnosticIssueCodes.includes('AUTHORED_SOLID_FOOTPRINT_OVERLAP'))
+    graphSolidFootprintOverlap=true;
   }catch{
    replayStatus='HOLD_OFFLINE_REPLAY_SAFE_STOP';
   }
@@ -108,7 +118,7 @@ export async function runV3OneGenreStudy(options,{
   explicitlyInjectedTestResponse:receipt.explicitlyInjectedTestResponse,
   modelGenerationAttempts:receipt.modelCallAttempts,
   replayStatus,compilerRejectCode,replayAdditionalModelCalls,
-  graphEntryNorthSideOccupied,
+  graphEntryNorthSideOccupied,graphSolidFootprintOverlap,
   systemSchemaEnforcementNotIndependentlyVerified:true,
   noPromptOrRawSourceOrPrivatePathIncluded:true,
   humanArchitecturalArt:'NOT_REVIEWED',
