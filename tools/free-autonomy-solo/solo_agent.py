@@ -218,6 +218,14 @@ def validate(cfg: dict) -> None:
     model = cfg["model"]
     if not isinstance(model, str) or not (model.startswith("ollama/") or (model.startswith("opencode/") and model.endswith("-free"))):
         raise Hold("ONLY_EXPLICIT_LOCAL_OR_FREE_MODEL")
+    # Only explicitly selected LOCAL or name-marked FREE models may be tried.
+    # Never discover a provider's paid fallback or rotate projects.
+    fallbacks = cfg.get("fallback_models", [])
+    if (not isinstance(fallbacks, list) or len(fallbacks) > 3 or
+            any(not isinstance(v, str) or not re.fullmatch(
+                r"(?:ollama/[A-Za-z0-9_.:/-]{1,100}|opencode/[A-Za-z0-9_.-]{1,100}-free)", v
+            ) for v in fallbacks) or len(set([model, *fallbacks])) != len(fallbacks) + 1):
+        raise Hold("FALLBACK_MODELS_MUST_BE_EXPLICIT_LOCAL_OR_FREE_AND_DISTINCT")
     if cfg.get("sandbox_runtime") != "docker":
         raise Hold("DOCKER_RUNTIME_REQUIRED_FOR_UNATTENDED_EXECUTION")
     try:
@@ -302,11 +310,14 @@ def execute(cfg: dict, *, push: bool, sandbox_attested: bool) -> dict:
             previous = ", ".join(x["sha"][:12] for x in state["commits"][-5:])
             feedback = ""
             success = False
+            approved_models = [cfg["model"], *cfg.get("fallback_models", [])]
+            model_index = 0
             for attempt in range(cfg["per_task_attempts"]):
                 if state["cycles"] >= cfg["max_cycles"] or time.monotonic() >= deadline:
                     break
                 state["cycles"] += 1
                 cycle = state["cycles"]
+                selected_model = approved_models[model_index]
                 write_atomic(state_path, state)
                 prompt = (f"Work on exactly one meaningful development task in {cfg['project']} on a disposable research clone. "
                           "Do not commit, push, modify protected originals, use paid APIs, change model, or touch paths outside this repository. "
@@ -314,12 +325,22 @@ def execute(cfg: dict, *, push: bool, sandbox_attested: bool) -> dict:
                           "You may inspect and edit within approved project subfolders. Avoid destructive commands. "
                           f"Task: {task}\nRecent committed steps: {previous}\nFailure feedback from independent check: {feedback[-1800:]}" )
                 try:
-                    rc, tail = run_in_docker(cfg, ["opencode", "run", "--auto", "--model", cfg["model"], prompt],
+                    rc, tail = run_in_docker(cfg, ["opencode", "run", "--auto", "--model", selected_model, prompt],
                                        p, min(cfg["agent_timeout_seconds"], max(1, int(deadline - time.monotonic()))),
                                        state_dir / f"agent_{cycle:04}.private.log", agent=True)
                     if rc != 0:
+                        # Switching models after ANY partial write could let a
+                        # second provider silently repair or leak an unreviewed draft.
+                        verify_repo(cfg)
+                        if git(p, "rev-parse", "HEAD") != state["last_head"]:
+                            raise Hold("AGENT_FAILED_MUTATED_GIT_HISTORY")
+                        if changed_files(p):
+                            raise Hold("AGENT_FAILED_LEFT_UNVERIFIED_WORKTREE")
                         feedback = f"AGENT_EXIT_{rc}: {tail}"
-                        state["outcomes"].append({"cycle": cycle, "status": "AGENT_FAILED", "exit": rc})
+                        state["outcomes"].append({"cycle": cycle, "status": "AGENT_FAILED",
+                                                  "exit": rc, "model": selected_model})
+                        if model_index < len(approved_models) - 1:
+                            model_index += 1
                         write_atomic(state_path, state)
                         continue
                     verify_repo(cfg)  # Agent must not switch remote or research branch.
@@ -337,7 +358,8 @@ def execute(cfg: dict, *, push: bool, sandbox_attested: bool) -> dict:
                             failing.append(f"CHECK_{j}_EXIT_{rc}: {out}")
                     if failing:
                         feedback = "\n".join(failing)
-                        state["outcomes"].append({"cycle": cycle, "status": "INDEPENDENT_QA_FAILED"})
+                        state["outcomes"].append({"cycle": cycle, "status": "INDEPENDENT_QA_FAILED",
+                                                  "model": selected_model})
                         write_atomic(state_path, state)
                         continue
                     verify_repo(cfg)  # Tests cannot silently redirect Git push.
@@ -354,7 +376,8 @@ def execute(cfg: dict, *, push: bool, sandbox_attested: bool) -> dict:
                     git(p, "commit", "-m", f"research(free-autonomy): task {index + 1} verified source candidate")
                     sha = git(p, "rev-parse", "HEAD")
                     state["last_head"] = sha
-                    state["commits"].append({"task": index + 1, "sha": sha, "qa": "SOURCE_ONLY", "pushed": False})
+                    state["commits"].append({"task": index + 1, "sha": sha, "qa": "SOURCE_ONLY",
+                                             "model_requested": selected_model, "pushed": False})
                     state["next_task"] += 1
                     state["outcomes"].append({"cycle": cycle, "status": "SOURCE_CHECKS_PASSED", "sha": sha})
                     write_atomic(state_path, state)
