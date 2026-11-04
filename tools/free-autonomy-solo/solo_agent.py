@@ -146,7 +146,8 @@ def quarantine_and_restore_unverified(
     and separately authorized research clone.
     """
     if opt_in_key not in ("quarantine_unverified_on_resume",
-                          "quarantine_unverified_on_agent_failure"):
+                          "quarantine_unverified_on_agent_failure",
+                          "quarantine_unverified_on_qa_failure"):
         raise Hold("RESUME_QUARANTINE_UNKNOWN_AUTHORIZATION")
     if cfg.get(opt_in_key) is not True:
         raise Hold("RESUME_QUARANTINE_NOT_AUTHORIZED")
@@ -352,7 +353,8 @@ def validate(cfg: dict) -> None:
     except SandboxHold as ex:
         raise Hold(str(ex)) from ex
     for opt_in in ("quarantine_unverified_on_resume",
-                   "quarantine_unverified_on_agent_failure"):
+                   "quarantine_unverified_on_agent_failure",
+                   "quarantine_unverified_on_qa_failure"):
         if type(cfg.get(opt_in, False)) is not bool:
             raise Hold("RESUME_QUARANTINE_OPT_IN_MUST_BE_BOOLEAN")
     for key, default, limit in [("max_cycles", 12, 10000), ("per_task_attempts", 3, 10), ("agent_timeout_seconds", 1800, 86400), ("check_timeout_seconds", 600, 3600), ("max_minutes", 720, 10080)]:
@@ -551,9 +553,38 @@ def execute(cfg: dict, *, push: bool, sandbox_attested: bool) -> dict:
                         if rc:
                             failing.append(f"CHECK_{j}_EXIT_{rc}: {out}")
                     if failing:
-                        feedback = "\n".join(failing)
-                        state["outcomes"].append({"cycle": cycle, "status": "INDEPENDENT_QA_FAILED",
-                                                  "model": selected_model})
+                        # Existing contract: QA failures are retained in-place
+                        # unless the user has explicitly enabled bounded private
+                        # recovery for a disposable research clone.
+                        if cfg.get("quarantine_unverified_on_qa_failure") is True:
+                            verify_repo(cfg)
+                            if git(p, "rev-parse", "HEAD") != state["last_head"]:
+                                raise Hold("QA_FAILED_MUTATED_GIT_HISTORY")
+                            qa_paths = changed_files(p)
+                            check_paths(p, qa_paths, cfg["allowed_prefixes"])
+                            if (qa_paths != changed or
+                                    snapshot_candidate(p, qa_paths) != before_qa):
+                                raise Hold("QA_FAILED_MUTATED_OR_EXPANDED_CANDIDATE")
+                            recovery = quarantine_and_restore_unverified(
+                                cfg, p, state_dir, qa_paths, state["last_head"],
+                                opt_in_key="quarantine_unverified_on_qa_failure")
+                            state.setdefault("qa_failure_quarantines", []).append({
+                                **recovery, "cycle": cycle,
+                                "model_requested": selected_model,
+                                "failed_checks": len(failing)})
+                            feedback = ("INDEPENDENT_QA_FAILED_AFTER_PRIVATE_BACKUP; "
+                                        "candidate reverted to verified source; "
+                                        f"failed check count {len(failing)}")
+                            state["outcomes"].append({
+                                "cycle": cycle,
+                                "status": "INDEPENDENT_QA_FAILED_QUARANTINED_FOR_RETRY",
+                                "model": selected_model,
+                                "failed_checks": len(failing)})
+                        else:
+                            feedback = "\n".join(failing)
+                            state["outcomes"].append({
+                                "cycle": cycle, "status": "INDEPENDENT_QA_FAILED",
+                                "model": selected_model})
                         write_atomic(state_path, state)
                         continue
                     verify_repo(cfg)  # Tests cannot silently redirect Git push.
