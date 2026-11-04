@@ -22,10 +22,10 @@ if (-not (Get-Command git -ErrorAction SilentlyContinue)) { throw 'GIT_REQUIRED_
 if (-not (Get-Command python -ErrorAction SilentlyContinue)) { throw 'PYTHON_REQUIRED_NO_AUTO_INSTALL' }
 
 # Immutable reviewed research code; these are checked by Git blob SHA before use.
-$rev = '41e2ecda5b8a260256639900ffc458b46c4799a2'
+$rev = '6c420365270a6f974c0974930234e103ebc41865'
 $origin = 'ryomashibaba/MinecraftAIBuilder'
 $items = @(
-  @{ Name = 'draft_real_project_local14b.py'; Blob = 'fad5f00994f467e65891319a202edbe407a2d4aa' },
+  @{ Name = 'draft_real_project_local14b.py'; Blob = 'b045c80f6508e3db5199519ecd94bedff9e658a4' },
   @{ Name = 'prepare_pinned_real_project.py'; Blob = 'ce4d56452ec0a1d513dfa419a80780eed1283894' },
   @{ Name = 'local_qwen_no_docker_two_step.py'; Blob = 'ec98a13b7191a3f70f58af3bf3c08f85c8e60503' },
   @{ Name = 'REAL_PROJECT_SINGLE_SESSION_MANIFEST_20261104.json'; Blob = '64092643467a6fb07753d669839106eed3be6102' },
