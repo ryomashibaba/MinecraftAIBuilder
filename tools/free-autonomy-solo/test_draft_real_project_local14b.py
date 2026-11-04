@@ -11,28 +11,31 @@ import unittest
 from unittest.mock import patch
 
 from draft_real_project_local14b import (
-    ANCHORS, Hold, bounded_replacement, exclusive_local_project_lock,
+    ANCHORS, Hold, bounded_replacement, exact_edit_slots,
+    host_located_slot_replacement, exclusive_local_project_lock,
     local_model_installed, run,
 )
 from prepare_pinned_real_project import load_manifest, source_blob_sha, verify_private_clone
 
 
 MAB_SOURCE = """export const MEZZANINE_SCHEMA = 'v4h';
-export function compileMezzanineAuthorIntent(value) {
-  return value;
+const exact=(v,fields)=>!!v&&Object.keys(v).length===fields.length;
+export function compileMezzanineAuthorIntent(input) {
+ const raw=structuredClone(input);
+ return raw;
 }
 export function compileAuthoredPublicMezzanine(value) {
-  return value;
+ return value;
 }
 """
-TPS_SOURCE = """export function sourceCoopEligible(value) {
-  return value;
+TPS_SOURCE = """export function sourceCoopEligible(p) {
+ return p.get('t21Play')==='preview';
 }
-export function b423UseRealSourceWorldReplay(value) {
-  return value;
+export function b423UseRealSourceWorldReplay(p,phase) {
+ return phase==='TIME_UP'&&sourceCoopEligible(p);
 }
 export function sourceCoopNavigationUrl(value) {
-  return value;
+ return value;
 }
 """
 
@@ -80,16 +83,27 @@ class RealSourceDraftTests(unittest.TestCase):
             self.assertFalse(payload["stream"])
             self.assertTrue(payload["format"]["required"])
             self.count += 1
+            self.assertIn('"slot"', json.dumps(payload["format"]))
             if invalid_stage1:
-                result = {"find": "", "replace": "bad"}
+                result = {"slot": 0, "replace": "bad"}
+            elif project == "minecraftaibuilder":
+                if self.count == 1:
+                    result = {
+                        "slot": 1,
+                        "replace": "const exact=(v,fields)=>!!v&&Array.isArray(fields)&&Object.keys(v).length===fields.length;"
+                    }
+                else:
+                    result = {"slot": 2, "replace": " const raw=structuredClone(input??{});"}
+            elif self.count == 1:
+                result = {
+                    "slot": 1,
+                    "replace": " return p.get('t21Play')==='preview'&&p.get('t21QaDrive')==='source';"
+                }
             else:
-                target = ("compileMezzanineAuthorIntent" if project == "minecraftaibuilder"
-                          else "sourceCoopEligible") if self.count == 1 else (
-                          "compileAuthoredPublicMezzanine" if project == "minecraftaibuilder"
-                          else "b423UseRealSourceWorldReplay")
-                old = "export function " + target + "(value) {\n  return value;\n}"
-                new = "export function " + target + "(value) {\n  return value ?? false;\n}"
-                result = {"find": old, "replace": new}
+                result = {
+                    "slot": 2,
+                    "replace": " return phase==='TIME_UP'&&sourceCoopEligible(p)&&p.has('t21W10B203');"
+                }
             return {"model": "qwen3:14b", "done": True, "eval_count": 21,
                     "prompt_eval_count": 120, "eval_duration": 700_000_000,
                     "prompt_eval_duration": 1_000_000_000,
@@ -129,7 +143,7 @@ class RealSourceDraftTests(unittest.TestCase):
         self.assertEqual(verify_private_clone(workspace, lane)["head"], head)
         self.assertTrue(Path(result["private_receipt_path"]).is_file())
         self.assertTrue((workspace.parent / "draft_2.private.txt").is_file())
-        self.assertIn("return value ?? false", (workspace.parent / "draft_2.private.txt").read_text())
+        self.assertIn("structuredClone(input??{})", (workspace.parent / "draft_2.private.txt").read_text())
 
     def test_real_git_tps_two_source_drafts_without_project_mutation(self):
         result, manifest, lane, workspace, original, head = self.execute_fixture(
@@ -171,6 +185,42 @@ class RealSourceDraftTests(unittest.TestCase):
             with self.subTest(reason=reason):
                 with self.assertRaisesRegex(Hold, reason):
                     bounded_replacement("minecraftaibuilder", MAB_SOURCE, proposal)
+
+
+    def test_real_pinned_source_edit_windows_are_host_located(self):
+        for project in ("minecraftaibuilder", "browser-ink-tps"):
+            with self.subTest(project=project):
+                source = MAB_SOURCE if project == "minecraftaibuilder" else TPS_SOURCE
+                slots = exact_edit_slots(project, source)
+                self.assertGreaterEqual(len(slots), 2)
+                self.assertEqual([x["slot"] for x in slots], list(range(1, len(slots) + 1)))
+                for option in slots:
+                    self.assertEqual(source.count(option["exact"]), 1)
+                first = slots[0]["exact"]
+                result = host_located_slot_replacement(
+                    project, source, {"slot": 1, "replace": first + " // private defensiveness study"})
+                self.assertNotEqual(result, source)
+                self.assertEqual(result.count(first), 1)
+
+    def test_model_never_supplies_ambiguous_or_unmatched_find(self):
+        project = "minecraftaibuilder"
+        for proposal in (
+            {"find": "return raw;", "replace": "return false;"},
+            {"slot": 0, "replace": "bad"},
+            {"slot": 99, "replace": "bad"},
+            {"slot": True, "replace": "bad"},
+            {"slot": 1, "replace": "const exact=(v,fields)=>null;"},
+        ):
+            with self.subTest(proposal=proposal):
+                with self.assertRaisesRegex(Hold, "PATCH_"):
+                    host_located_slot_replacement(project, MAB_SOURCE, proposal)
+
+    def test_repeated_source_line_cannot_be_host_edit_slot(self):
+        source = MAB_SOURCE.replace(
+            " const raw=structuredClone(input);",
+            " const raw=structuredClone(input);\n const raw=structuredClone(input);")
+        slots = exact_edit_slots("minecraftaibuilder", source)
+        self.assertNotIn(" const raw=structuredClone(input);", [x["exact"] for x in slots])
 
     def test_unknown_model_is_never_downloaded(self):
         def api(path, payload=None, timeout=0):
