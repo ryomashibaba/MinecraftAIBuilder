@@ -107,7 +107,8 @@ export function compileAuthoredPublicMezzanine(heightAuthor,mezzanine){
    [deckEndX-gapEnd-1,2,1],wallMat);
  // An author-named usable work point on the raised gallery, NOT only a
  // broad platform. It must have a physically connected adjacent service pad.
- const featureX=deckEndX-2,featureZ=deckZ+1;
+ const featureX=m.stairLane==='west'?deckEndX-2:x+1;
+ const featureZ=deckZ+1;
  stage('mezz-authored-public-service-desk',
   [featureX,deckY+1,featureZ],[2,1,1],serviceMaterial);
  if(elements.length+oldDesign.elements.length>160)
