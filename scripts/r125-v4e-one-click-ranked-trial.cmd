@@ -13,13 +13,14 @@ if /i "%~1"=="--wing" set "AUTHOR_FLAG=--authored-wing"
 if /i "%~1"=="--floorplate" set "AUTHOR_FLAG=--authored-floorplate"
 if /i "%~1"=="--atrium" set "AUTHOR_FLAG=--authored-atrium"
 if /i "%~1"=="--mezzanine" set "AUTHOR_FLAG=--authored-mezzanine"
+if /i "%~1"=="--arcade" set "AUTHOR_FLAG=--authored-civic-arcade"
 if not defined LOCALAPPDATA goto MISSING_LOCALAPPDATA
 where git.exe >nul 2>nul
 if errorlevel 1 goto MISSING_GIT
 where node.exe >nul 2>nul
 if errorlevel 1 goto MISSING_NODE
 if /i "%~1"=="--check-only" goto CHECK_ONLY
-if not "%~1"=="" if /i not "%~1"=="--prepare-only" if /i not "%~1"=="--run-once" if /i not "%~1"=="--sectioned" if /i not "%~1"=="--massing" if /i not "%~1"=="--wing" if /i not "%~1"=="--floorplate" if /i not "%~1"=="--atrium" if /i not "%~1"=="--mezzanine" goto BAD_ARGUMENT
+if not "%~1"=="" if /i not "%~1"=="--prepare-only" if /i not "%~1"=="--run-once" if /i not "%~1"=="--sectioned" if /i not "%~1"=="--massing" if /i not "%~1"=="--wing" if /i not "%~1"=="--floorplate" if /i not "%~1"=="--atrium" if /i not "%~1"=="--mezzanine" if /i not "%~1"=="--arcade" goto BAD_ARGUMENT
 
 set "WORK_ROOT=%LOCALAPPDATA%\MinecraftAIBuilder\IsolatedV4E"
 if not exist "%WORK_ROOT%" mkdir "%WORK_ROOT%"
@@ -48,6 +49,7 @@ if /i "%~1"=="--wing" if not exist "%WORK_DIR%\source\ai\r125-v4e-wing-author-ir
 if /i "%~1"=="--floorplate" if not exist "%WORK_DIR%\source\ai\r125-v4f-floorplate-author-ir.mjs" goto MISSING_RUNNER
 if /i "%~1"=="--atrium" if not exist "%WORK_DIR%\source\ai\r125-v4g-height-author-ir.mjs" goto MISSING_RUNNER
 if /i "%~1"=="--mezzanine" if not exist "%WORK_DIR%\source\ai\r125-v4h-mezzanine-author-ir.mjs" goto MISSING_RUNNER
+if /i "%~1"=="--arcade" if not exist "%WORK_DIR%\source\ai\r125-v4j-civic-author-ir.mjs" goto MISSING_RUNNER
 
 echo [2/3] Research branch is prepared and verified.
 echo Branch: %ACTUAL_BRANCH%
@@ -146,7 +148,7 @@ echo ERROR: Node.js is not available. Nothing changed.
 goto DONE
 :BAD_ARGUMENT
 set "FINAL_EXIT=1"
-echo ERROR: Supported flags are --check-only, --prepare-only, --run-once, --sectioned, --massing, --wing, --floorplate, --atrium and --mezzanine.
+echo ERROR: Supported flags are --check-only, --prepare-only, --run-once, --sectioned, --massing, --wing, --floorplate, --atrium, --mezzanine and --arcade.
 goto DONE
 :CANNOT_MAKE_FOLDER
 set "FINAL_EXIT=1"
