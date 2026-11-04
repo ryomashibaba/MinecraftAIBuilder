@@ -13,10 +13,10 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 # Immutable, reviewed source bundle. Do not replace with mutable branch HEAD.
-$revision = '120710051fc6ee16034e111c5d50ed4be44e57f0'
+$revision = '9297aa7e711613be03cca257671e6820508a4557'
 $repo = 'ryomashibaba/MinecraftAIBuilder'
 $files = @(
-  @{ Name = 'draft_real_project_local14b.py'; GitBlob = '3651e8e8bf145c755db3fbe91c8288b99165dc46' },
+  @{ Name = 'draft_real_project_local14b.py'; GitBlob = 'f8539d764c15217f70d0c17c5b5629cc6e9dddeb' },
   @{ Name = 'prepare_pinned_real_project.py'; GitBlob = 'ce4d56452ec0a1d513dfa419a80780eed1283894' },
   @{ Name = 'local_qwen_no_docker_two_step.py'; GitBlob = 'ec98a13b7191a3f70f58af3bf3c08f85c8e60503' },
   @{ Name = 'REAL_PROJECT_SINGLE_SESSION_MANIFEST_20261104.json'; GitBlob = '64092643467a6fb07753d669839106eed3be6102' }
