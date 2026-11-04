@@ -136,7 +136,15 @@ def _trusted_dependency_setup(workspace: Path, root: Path) -> None:
                     "--package-lock=false", "--no-audit", "--no-fund"],
         root, "trusted-deps", network="bridge", writable=True, timeout=420)
     if rc:
-        raise Hold("TPS_DEPENDENCY_SANDBOX_INSTALL_FAILED_RC" + str(rc))
+        # Only public, pre-model dependency setup has run at this point.
+        # Expose no private source nor arbitrary raw stderr in the receipt.
+        problem = ("EACCES" if "EACCES" in output else
+                   "ENET" if "ENET" in output else
+                   "ENOENT" if "ENOENT" in output else
+                   "EUSAGE" if "EUSAGE" in output else
+                   "UNKNOWN")
+        raise Hold("TPS_DEPENDENCY_SANDBOX_INSTALL_FAILED_RC" + str(rc) +
+                   "_" + problem)
 
 
 def qa_commands(project: str) -> list[list[str]]:
