@@ -137,3 +137,21 @@ jobs:
         shell: pwsh
         run: |
           Write-Host 'Real Windows msvcrt cross-process lock only. No Qwen/Ollama inference or actual project mutation.'
+
+  windows-real-project-two-draft-mock:
+    runs-on: windows-2022
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Actual Windows Git clone fixture + MOCK two-source Qwen proposal tests
+        shell: pwsh
+        run: |
+          python -m py_compile tools/free-autonomy-solo/draft_real_project_local14b.py
+          python -m unittest discover -v -s tools/free-autonomy-solo -p test_draft_real_project_local14b.py
+          Write-Host 'MOCK_MODEL_ONLY_AND_NO_UNTRUSTED_CODE_EXECUTED'
+
