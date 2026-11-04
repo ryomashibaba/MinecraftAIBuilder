@@ -195,3 +195,15 @@
 - GitHub受信側は既存 `.github/workflows/dec-free-autonomy-public-source-handoff.yml` を使用し、GitHub UbuntuランナーのDocker内部、`network=none`、読取専用ソース、無資格情報で真正SOURCE QAを実施。各stageが合格すれば**ランナーの使い捨て隔離clone内のみ**で研究コミットを作成。main・既存開発ブランチ・Minecraft世界・本番へ反映しない。既存ワークフローと受信器を増設しない。
 - 公開クライアントは正確な提出コミットSHA・pushイベント・対象ワークフロー・対象ブランチを照合して結果を監視。私有 `SHAREABLE_REAL_QWEN_PUBLIC_QA_HANDOFF.json` に、送信コミット・Actions URL/結果・HOLD理由のみ保存し、Explorerで選択表示する。本人には**この小さなJSONだけ**をチャットに送ってもらい、こちらでActionsとArtifactを独立確認する。
 - 現時点で**実際の2件のpush・GitHub QAは未実行**。ランチャー・構文CIの成功と、本人Windowsでの公開提出成功・有用なソース改善・ART合格・長時間自律実行は必ず区別する。
+
+
+## 2026-11-04：人間操作最小化を標準化 — この公開研究ソース以後はGitHub側で無人QA・再診断
+
+本人から「もう少し私の工程を減らせない？」との要望。**今後の既定運用は、既に公開された研究材料のテスト・解析・安全な隔離修正は GitHub コネクタ/Actions 側で完結させること**。同じソースの再推論・毎回ZIPダウンロード・ローカルCMD実行・JSON添付は要求しない。
+
+- 真正Qwen3:14Bの公開研究提出コミット `741932d8f0e41efdc5c1fd99bd99ea690cb64720` を受領済み。本人がアップロードした最終Handoff JSONでは、`public_submission_confirmed=true`、QA run `41845806261` が `failure`。GitHubから独立に再照合：受信workflowの `INDEPENDENT_DOCKER_QA_STAGE1_CHECK0_RC1`、SOURCE QA実際の合格0。原本/main/本番は無変更、Windows生成コード実行0。モデル生成PASS・静的PASS・Node構文PASSは**実行PASSではない**。
+- 公開Qwen stage 1のソースには、モジュールトップレベルで未定義変数 `v` にアクセスする余剰式がある。これは `node --check` ではPASSするが、Nodeモジュール実行時は `ReferenceError` を起こす（問題部分を別に単体再現）。Qwen stage 2は正常な7～9段の階段に対し最大5段を要求する矛盾した検証を追加。ゆえに、両Qwen修正案を**ゲーム品質改善として認定しない**。
+- 元のQwen提出JSONと固定SHA2件は一切書き換えない。代わりに、別由来 `ASSISTANT_REVIEWED_REPAIR_FROM_FAILED_QWEN_NOT_QWEN_INFERENCE` を明記した決定的・限定的な修正の候補を隔離作成し、既存の `receive_public_research_qa.handle` と `promote_private_real_drafts_docker.py` で実Docker/Node SOURCEテストを実行する経路 `.github/workflows/dec-reviewed-qwen-mab-repair-qa.yml` と `tools/free-autonomy-solo/reviewed_qwen_mab_repair_qa.py` を追加。受信済みの公開材料から**ユーザー操作0・モデル再呼び出し0・有料API0・main更新0**で実行する。
+- 受信公開Qwenデータのコミット・ペイロードSHA・各stage SHAを完全照合し、既知の差分と**完全一致**しなければHOLD。見かけ上の修正を無条件で適用しない。初回レビュー用CIで公開Qwenのstage2にインデント1文字差を検出→精密照合を修正して再試験。ローカルユーザーPCを操作せず、公開済み差分だけで対処。
+- 修正後の候補もGitHub runnerの一時領域にのみ置き、成功まで**自動公開・原本マージしない**。真正Qwenの生成実績と、GPTによる修正提案と、独立SOURCE QAと、Minecraft Education/ARTを厳密に区別。公開提出に必要な本人承認が得られているのは元のQwen2件であり、今後の新たな原本・秘密情報の公開を包括許可とは扱わない。
+- 将来の無人ローカルLLM連続セッションを成立させるにはWindows上で最初の一度だけ長時間管理プロセスの導入/ログイン等の初期設定が必要になり得る。こちらのチャットからWindowsプログラムを勝手に常駐させない。安全な単一研究ブランチ内の修正・検証・コミットを無人で回し、main/公開範囲拡張/追加費用/WorkやComputer Useは従来の個別承認境界を守る。MinecraftAIBuilderとBrowser Ink TPSは同格だがローカルAIの同時作業は1プロジェクトのみ。
