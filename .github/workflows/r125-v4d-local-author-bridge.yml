@@ -22,6 +22,8 @@ on:
       - 'scripts/r125-v4j-civic-facade.test.mjs'
       - 'scripts/r125-v4j-five-genre-local.mjs'
       - 'scripts/r125-v4j-five-genre-local.test.mjs'
+      - 'scripts/r125-v4j-five-genre-replay.mjs'
+      - 'scripts/r125-v4j-five-genre-replay.test.mjs'
       - 'scripts/r125-v4e-source-art-review.mjs'
       - 'scripts/r125-v4e-cross-genre-source-study.mjs'
       - 'scripts/r125-v4d-compact-model-fixture.mjs'
@@ -179,6 +181,9 @@ jobs:
           node --check scripts/r125-v4j-five-genre-local.mjs
           node --check scripts/r125-v4j-five-genre-local.test.mjs
           node --test scripts/r125-v4j-five-genre-local.test.mjs
+          node --check scripts/r125-v4j-five-genre-replay.mjs
+          node --check scripts/r125-v4j-five-genre-replay.test.mjs
+          node --test scripts/r125-v4j-five-genre-replay.test.mjs
       - name: Export actual B143 architecture before/after, all five genres and 2-wide functional public routes
         run: |
           node scripts/r125-v4j-civic-facade-study.mjs "$RUNNER_TEMP/v4j-authored-facade"

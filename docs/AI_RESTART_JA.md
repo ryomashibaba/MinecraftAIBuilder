@@ -1,5 +1,8 @@
 # MinecraftAIBuilder — 開発再開の最新正本案内（2026-11-03）
 
+**2026-11-04 V4J 5ジャンル PRIVATE 保存済み原文の0モデル呼出し再診断（新規CI未確認）**：既存 `scripts/r125-v4d-replay-private.mjs` をそのまま再利用する `scripts/r125-v4j-five-genre-replay.mjs` を追加。`node scripts/r125-v4j-five-genre-replay.mjs --study "既存PRIVATEのV4J_FIVE_*フォルダ" --out "新規PRIVATE検証フォルダ"` により、実モデル再呼出し0で各既存回答・旧SOURCE/geometry SHA・B143・失敗の構造問題コードを確認。旧SOURCE失敗は勝手に格上げしない。5用途共通のエラーコードを原因未証明の症状として比較し、元がTEST DOUBLEの場合は実モデルPASSに昇格しない。共有ファイルは新規フォルダの `FIVE_GENRES_OFFLINE_REPLAY_SHAREABLE.json` のみ。原文/パス/個別ソース/HTMLはPRIVATE。追加課金・ワールド操作0、human ART HOLD、9ゲートBLOCKED。既存成功経路/main/Draft PR #128は保護。
+
+
 **2026-11-04 V4J 5ジャンル美術改善の根因切り分け追加（最新CIは未確認）**：実ローカル作者のPRIVATE真正B143成功例に対し、再コンパイルのSOURCE/geometry SHAと別保存の元回答SHA・9ゲートHOLD・5方向真正投影証拠が一致したときだけ、屋根輪郭/奥行き/材料の変化セル数を共有用集計に付加する。屋根輪郭が変化ゼロならそのジャンルを列挙して改善優先事項を明確化。同じSOURCE失敗カテゴリが複数用途で出ても共通根因は**未証明**として扱う。追加モデル要求なし・モデル生回答非公開・自動ART合格なし。実Qwen/実歩行/美術は未検証。従来main、成功原本、Draft PRと9 BLOCKEDを保護。
 
 
