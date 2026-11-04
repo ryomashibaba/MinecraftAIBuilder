@@ -130,3 +130,15 @@
 - 既存 `opencode_native_probe.py` のGitHub Linux CLIジョブで、公開の捨てクローンと認証情報なしの条件のまま、上記モデル一覧の可視性を **診断扱い** で記録する。モデル一覧取得が失敗しても従来のCLIパーサ試験成功を失敗と混同しない。Docker画像の固定・ホスト認証情報非共有・オフラインQAは維持する。
 - 追加の認証情報・GitHub Secrets・API課金・有料モデルへの自動移行は実装しない。今後、無料クラウドの利用条件と対象アカウントが実際に整った隔離環境を用意できない場合は、この経路をHOLDのままにし、既存のローカルLLM/Strata経路と同格の開発目的を追求する。未承認のWork/Computer Use/本番公開は開始しない。
 - 既存の単一プロジェクト監督器 `solo_agent.py` でも、Docker内OpenCodeが明示的な `Model unavailable:` で終了し、承認済みの代替モデルが尽きた場合は、同じ実行条件で残りの再試行枠を使い切らず `NO_APPROVED_AVAILABLE_MODEL_IN_THIS_ENVIRONMENT` のHOLDにする。別モデルへの移行は既存のクリーンワークツリー検査後に限る。実モデルの認証や長時間運用の成功とは区別する。
+
+
+## 2026-11-04：Windows本人PCでの真正モデル試行（PRIVATE・ワンダブルクリック）
+
+**目標：基盤の模擬PASSから進み、導入済みOllamaによる実ソース修正案2段階が生成できるかを本人PCで確認する。** モデルが本当に実行できたと認定するには、本人PCの PRIVATE receipt が必要。ここでは実AI成果/ゲーム改善はまだHOLD。
+
+- [RUN_FIRST_PRIVATE_REAL_MODEL_PILOT.cmd](./RUN_FIRST_PRIVATE_REAL_MODEL_PILOT.cmd) を1ファイルだけダウンロードし、Windowsでダブルクリックする。GitとPython 3.13および起動済みOllamaが必要。GitHubへの読み取り専用のアクセスも使う。Chrome/ゲーム/既存プロジェクト作業フォルダーを閉じる必要はない。
+- 画面の `1`（MinecraftAIBuilder）または `2`（Browser Ink TPS）を選ぶ。同時に両方は実行しない。既に `qwen3:14b` が導入されていれば優先して使い、そうでなければ導入済みモデルから選択する。モデルの自動pull・インストール・有料サービス接続はしない。
+- CMDは**変更不能なGitコミット** `35a8eac5d969453839c27164a8c58c9353ad3e71` のPowerShellソースを取得し、Git Blob `f9e9ef1ef68e5661ee44d7ae281b65038ee13dea` を照合してから起動する。既存Python側も4ファイルのGit blobを照合する。手元の `LOCALAPPDATA/FreeAutonomyPrivate` へ隔離Git cloneと未実行 `.txt` 下書きを置く。
+- 完了または失敗の両方で、小さな共有用 `SHAREABLE_FIRST_PILOT_STATUS.json` を `LOCALAPPDATA/FreeAutonomyPrivate/QwenRealProjectPilotSource/<run-id>` に保存する。画面の `UPLOAD_THIS_SMALL_STATUS_JSON=...` で場所を表示し、**この小さいJSONだけ**をチャットに添付すれば次の工程を判断できる。モデル応答、Gitのユーザー資格情報、PRIVATE下書きの全文はアップロードしない。
+- 成功しても `TWO_REAL_SOURCE_PRIVATE_DRAFTS_ONLY` の意味は **「実モデルに2段階の単一ファイル修正案を提出させ、限定構文ゲートを通した」だけ**。生成されたコードの実行、独立QA、研究コミット/プッシュ、最新本線へのマージ、作品品質の採否は次のゲート。真正モデル身元はAPI自己報告にすぎず、独立認証ではない。
+- CIは `cmd /c ... --ci-self-test` とPowerShell ASTの形式検査のみ。ユーザーWindows/Ollama実機と本物のモデル呼び出しの成功証拠にはならない。失敗ならHOLDの小さな共有JSONを受け取って原因を分け、**手順を増やす前にこちらで修正**する。
