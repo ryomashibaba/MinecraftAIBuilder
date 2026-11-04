@@ -18,6 +18,7 @@ import uuid
 SOURCE_REVISION = "125615388cadd8a2e0be85b46bde701e2dc4ed50"
 SOURCE_BLOBS = {"solo_agent.py":"58277f689c05950f550827cb89c7c76cafab8ee5","docker_sandbox.py":"e68c8e2c4f356d2741105aee6ff5660abdb7a294","local_ollama_real_probe.py":"a793ae298d5ecf35330c01d336266eea313b6132","local_ollama_patch_loop.py":"0d2e3e3738bdcfa272658bf8f1302ea1fc9c08e1"}
 OWNER_REPO = "ryomashibaba/MinecraftAIBuilder"
+QA_IMAGE = "node:22-bookworm-slim@sha256:4b150b48b4116e2a22f2c39cc27025fbf4f153e2078fd3b14d159fdb5c7279da"
 
 
 class Hold(Exception):
@@ -46,6 +47,32 @@ def pinned_download(dest: Path) -> None:
         if actual != blob:
             raise Hold("SOURCE_GIT_BLOB_INTEGRITY_MISMATCH: " + name)
         (dest / name).write_bytes(raw)
+
+
+def ensure_qa_image(*, allow_public_pull: bool) -> None:
+    try:
+        server = subprocess.run(["docker", "version", "--format", "{{.Server.Version}}"],
+                                capture_output=True, text=True, timeout=20)
+        mode = subprocess.run(["docker", "info", "--format", "{{.OSType}}"],
+                              capture_output=True, text=True, timeout=20)
+    except (OSError, subprocess.TimeoutExpired) as ex:
+        raise Hold("DOCKER_ENGINE_UNAVAILABLE") from ex
+    if server.returncode or not server.stdout.strip() or mode.returncode or mode.stdout.strip() != "linux":
+        raise Hold("DOCKER_LINUX_ENGINE_REQUIRED")
+    found = subprocess.run(["docker", "image", "inspect", QA_IMAGE],
+                           capture_output=True, timeout=20)
+    if found.returncode and allow_public_pull:
+        try:
+            pulled = subprocess.run(["docker", "pull", QA_IMAGE], capture_output=True,
+                                    text=True, timeout=600)
+        except (OSError, subprocess.TimeoutExpired) as ex:
+            raise Hold("PUBLIC_QA_IMAGE_DOWNLOAD_FAILED") from ex
+        if pulled.returncode:
+            raise Hold("PUBLIC_QA_IMAGE_DOWNLOAD_FAILED")
+        found = subprocess.run(["docker", "image", "inspect", QA_IMAGE],
+                               capture_output=True, timeout=20)
+    if found.returncode:
+        raise Hold("PINNED_QA_IMAGE_NOT_CACHED_NO_AUTO_PULL")
 
 
 def create_fixture(path: Path) -> None:
@@ -83,6 +110,7 @@ def create_fixture(path: Path) -> None:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--model", default="qwen3:14b")
+    ap.add_argument("--allow-public-qa-image-pull", action="store_true")
     args = ap.parse_args()
     if os.name != "nt" or not os.environ.get("LOCALAPPDATA"):
         raise Hold("WINDOWS_LOCALAPPDATA_REQUIRED")
@@ -98,6 +126,7 @@ def main() -> int:
               "project_quality_certified": False, "long_autonomy_certified": False}
     try:
         pinned_download(private_code)
+        ensure_qa_image(allow_public_pull=args.allow_public_qa_image_pull)
         fixture = root / "disposable-fixture"
         create_fixture(fixture)
         config = {
@@ -107,7 +136,7 @@ def main() -> int:
             "model": args.model,
             "state_dir": str(root / "private-state"),
             "sandbox_runtime": "docker",
-            "docker": {"network": "none", "qa_image": "node:22-bookworm-slim",
+            "docker": {"network": "none", "qa_image": QA_IMAGE,
                        "memory": "2g", "cpus": "2", "pids": 64},
             "tasks": [
                 {"path": "source/calc.mjs",
