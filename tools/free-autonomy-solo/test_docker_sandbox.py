@@ -139,6 +139,9 @@ class DockerSandboxTests(unittest.TestCase):
         self.assertTrue(visible_in_provider_catalog(
             'opencode/glm-5.3-flash-free    input_cost: 0',
             'opencode/glm-5.3-flash-free'))
+        self.assertTrue(visible_in_provider_catalog(
+            '\x1b[32mopencode/glm-5.3-flash-free\x1b[0m',
+            'opencode/glm-5.3-flash-free'))
         self.assertFalse(visible_in_provider_catalog('', 'opencode/a-free'))
 
 
