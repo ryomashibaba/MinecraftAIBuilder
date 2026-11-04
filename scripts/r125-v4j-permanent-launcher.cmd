@@ -36,9 +36,8 @@ echo [2/4] Check BOTH workflow results for exact Git commit: %MAB_HEAD%
 echo This may check again until GitHub finishes. NO model requests yet.
 node.exe "%SOURCE_DIR%\scripts\r125-v4j-safe-ci-gate.mjs" "%MAB_HEAD%"
 if errorlevel 1 goto CI_HOLD
-echo [3/4] CI OK. Model: %MAB_MODEL%, ONE original private response.
-choice /C YN /M "Authorize one local Qwen research model request (Y/N)"
-if errorlevel 2 goto USER_DECLINED
+echo [3/4] CI OK. Your double-click authorizes ONE local Qwen research model request.
+echo Model: %MAB_MODEL%. No additional confirmation needed.
 set "PRIVATE_OUT=%PRIVATE_ROOT%\V4J_AUTO_%RANDOM%_%RANDOM%"
 if exist "%PRIVATE_OUT%" goto OWNED_COLLISION
 node.exe "%SOURCE_DIR%\scripts\r125-v4j-current-pilot.mjs" --model "%MAB_MODEL%" --out "%PRIVATE_OUT%"
@@ -55,10 +54,6 @@ goto DONE
 :CLIPBOARD_FALLBACK
 echo Clipboard unavailable. Explorer will select the safe JSON. Attach ONLY that file.
 start "" explorer.exe /select,"%V4J_SAFE_FILE%"
-set "FINAL_EXIT=0"
-goto DONE
-:USER_DECLINED
-echo Cancelled. No model requests.
 set "FINAL_EXIT=0"
 goto DONE
 :NO_LOCALAPPDATA

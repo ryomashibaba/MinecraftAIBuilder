@@ -7,7 +7,8 @@ test('one reusable local launcher checks exact SHA and both CI before Qwen',()=>
  assert(cmd.includes('r125-v4j-current-pilot.mjs'));
  assert(cmd.indexOf('r125-v4j-safe-ci-gate.mjs" "%MAB_HEAD%"')<
   cmd.indexOf('r125-v4j-current-pilot.mjs" --model'));
- assert(cmd.includes('choice /C YN'));
+ assert(!cmd.includes('choice /C YN'));
+ assert(cmd.includes('Your double-click authorizes ONE local Qwen research model request.'));
  assert(cmd.includes('if errorlevel 1 goto CI_HOLD'));
  assert(cmd.includes('V4J_CURRENT_SAFE_REPORT.json'));
  assert(cmd.includes('Set-Clipboard'));
