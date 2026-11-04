@@ -86,12 +86,14 @@ export async function runFiveGenreLocal(opts,{runOne=runV4DLocalAuthor,
    failureCategory:receipt.failureCategory});
   // HTTP/transport failures can use the generic SOURCE HOLD status.
   // Do not continue sending requests to the other four genres on an outage.
-  if(receipt.failureCategory==='LOCAL_MODEL_TRANSPORT_OR_TIMEOUT'){
-   stoppedReason='LOCAL_TRANSPORT_FAILURE';break;
-  }
+  // Preserve the more specific fail-closed terminal state first.
+  // The receipt classifies MODEL_NOT_INSTALLED under transport failures too.
   if(['HOLD_MODEL_NOT_INSTALLED','HOLD_LOCAL_PREFLIGHT',
    'HOLD_MODEL_TIMEOUT_OR_ABORTED'].includes(receipt.reportedStatus)){
    stoppedReason=receipt.reportedStatus;break;
+  }
+  if(receipt.failureCategory==='LOCAL_MODEL_TRANSPORT_OR_TIMEOUT'){
+   stoppedReason='LOCAL_TRANSPORT_FAILURE';break;
   }
  }
  let visualGeometryComparison={
