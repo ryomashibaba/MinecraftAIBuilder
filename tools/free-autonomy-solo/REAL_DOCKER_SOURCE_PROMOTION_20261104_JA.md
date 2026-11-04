@@ -37,3 +37,9 @@
 3. プログラムとしてSOURCE QA PASSになっても、MinecraftAIBuilderは未知用途の自律3D設計・ART評価・Education実機成功、TPSはF1〜F5の真4v4/再戦と原作忠実度が合格しない限り採用せず研究扱い。
 
 本工程の合格表記：**SOURCE_PIPELINE_PASS / REAL_MODEL_HOLD / ART_OR_FULL_GAME_HOLD / WINDOWS_LONG_AUTONOMY_HOLD**。
+
+## 追加セキュリティ実証（2026-11-04）
+
+**[Actions #41791664261](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41791664261) は最終SUCCESS、両プロジェクトのジョブSUCCESS。** 先行の2工程連続QA/2件隔離ローカルcommitに加え、真正Dockerコンテナに `/work/.docker-readonly-source-canary` を書き込もうとする負例を各プロジェクトで実行。単なる異常終了は認めず、実際の `EROFS`/`EACCES`（読み取り専用/権限エラー）が返され、ソース側にcanaryが作られなかった場合だけ合格とする。両系統で負例・通常QAとも通過。**コンテナのソース読み取り専用性を実行で確認**した。
+
+その後もSOURCE・ART/実機・モデル・長時間運転を混同しない。なおTPS側の長期開発本線は、ここに固定したB423チェックポイントからB430などへ進行している可能性があり、**この研究用基盤は固定コミットの再現性証拠であって、今後の最新TPS HEADを自動認定するものではない**。本物のモデル差分を新しいプロジェクトで採用する前に、その時点の最新正本へ再同期し、独立QAを取り直す必要がある。
