@@ -103,3 +103,13 @@
 - [専用Actions #41743900196](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/41743900196) は**4ジョブSUCCESS、無料モデル実行ジョブSKIPPED**。オフライン回帰24/24 PASS、Linux実Docker・OpenCode CLIヘルプ・Windows PowerShell AST限定PASS。MAB ART/Minecraft実機、TPS 180秒/4v4、Windows本体・真正Ollamaコード生成/長時間無人開発は引き続きHOLD。
 
 次は Windows本体の読取専用診断→Qwen/Gemma真正1応答を観測し、実LLMによる対象コード変更→独立QA→隔離研究ブランチ保存の連続工程へ進む。ChatGPT枠やユーザー手動操作を無駄に消費しない。詳細な合格率・速度閾値は未確定のまま。
+
+
+## 2026-11-04：無料クラウドを含む承認済みモデルの限定フォールバック
+
+- 既存 `solo_agent.py` に任意の `fallback_models` を追加。**新しい監督器/Workflowは追加しない**。一度の長時間セッションで担当する **project は固定**。別のプロジェクトへの切り替えではなく、モデル呼び出しが失敗した場合のみ、設定に列挙した別モデルを同じ目的で試す。
+- 設定例：`"model": "opencode/<実際の無料モデルID>-free", "fallback_models": ["opencode/<別の実際の無料モデルID>-free"], "per_task_attempts": 2`。これは説明用のプレースホルダーで、実際のモデルIDと無償性・認証条件は都度確認する。フォールバック候補は最大3個、重複不可、`ollama/...` または `opencode/...-free` の明示指定のみ。モデルの自動探索、有料モデル自動採用、追加API課金、モデルダウンロードはしない。
+- `AGENT_EXIT != 0` の場合、Gitの origin / branch / HEAD とワークツリーが**完全に変わっていない場合だけ**次の明示候補へ移る。部分的なソース編集、untracked生成物、勝手なgit commitがあったらHOLDし、次モデルに渡さない。従来のQA失敗時は同モデルの反復修正を維持。モデル使用履歴と研究コミットの要求モデルをPRIVATE状態に記録する。
+- `fallback_models` 省略時は従来どおり単一モデル。Docker OS隔離、単一ローカルプロジェクトロック、研究ブランチ限定、独立QA、明示pushが必須。CIのFake CLIによるフォールバック成功は**真正無料モデルの稼働・有用な開発成果・長時間無人成功を意味しない**。
+- 無料クラウドの実運用前に、選択したモデルが現行の無料提供対象であること、認証方法・利用枠・ソース送信範囲を確認する。OpenCode無料モデルの過去240秒タイムアウトは原因不明のまま。モデル名が`-free`で終わることだけでは利用可能性も課金ゼロも保証できない。
+- Gemini CLIについては2026年6月18日から個人向けGoogleログインによる利用終了とのGoogle公式案内があるため、古い「1日1,000回無料」の説明をそのまま根拠にしない。GoogleのGemini API規約には18歳以上の年齢制限もある。これらを自動的に有効化したり、利用規約の回避を目的とした実装を追加しない。Strata/Antigravity等の候補も比較対象として維持するが、実測認定は別途必要。
