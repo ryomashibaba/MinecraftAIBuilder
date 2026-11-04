@@ -13,10 +13,11 @@ import json
 import os
 from pathlib import Path
 import re
+import subprocess
 import sys
 import time
 
-from docker_sandbox import DockerPolicy, SandboxHold, docker_preflight
+from docker_sandbox import DockerPolicy, SandboxHold
 from local_ollama_real_probe import get_json
 from solo_agent import (Hold, check_paths, changed_files, git, run_in_docker,
                         single_agent_lock, snapshot_candidate, verify_repo, write_atomic)
@@ -68,7 +69,23 @@ def validate_config(cfg: dict) -> None:
     DockerPolicy.from_config(cfg)
 
 
-def propose_once(model: str, file_path: str, source: str, goal: str, feedback: str) -> tuple[dict, dict]:
+def qa_image_preflight(policy: DockerPolicy) -> None:
+    """Direct host Ollama only needs a locally cached QA image, not OpenCode."""
+    try:
+        engine = subprocess.run(["docker", "version", "--format", "{{.Server.Version}}"],
+                                capture_output=True, text=True, timeout=15)
+        image = subprocess.run(["docker", "image", "inspect", policy.qa_image],
+                               capture_output=True, text=True, timeout=15)
+    except (OSError, subprocess.TimeoutExpired) as ex:
+        raise Hold("QA_DOCKER_DAEMON_UNAVAILABLE") from ex
+    if engine.returncode or not engine.stdout.strip():
+        raise Hold("QA_DOCKER_DAEMON_UNAVAILABLE")
+    if image.returncode:
+        raise Hold("QA_IMAGE_MISSING_NO_AUTO_PULL")
+
+
+def propose_once(model: str, file_path: str, source: str, goal: str,
+                 feedback: str, timeout: int = 240) -> tuple[dict, dict]:
     installed = get_json(BASE + "/api/tags")
     if model not in {x.get("name") for x in installed.get("models", []) if isinstance(x, dict)}:
         raise Hold("MODEL_NOT_INSTALLED_NO_AUTO_PULL")
@@ -85,7 +102,7 @@ def propose_once(model: str, file_path: str, source: str, goal: str, feedback: s
            "think": False,
            "options": {"temperature": 0, "num_predict": 1100},
            "messages": [{"role": "user", "content": prompt}]}
-    response = get_json(BASE + "/api/chat", req, timeout=240)
+    response = get_json(BASE + "/api/chat", req, timeout=timeout)
     if response.get("done") is not True or response.get("model") != model:
         raise Hold("MODEL_RESPONSE_NOT_COMPLETE_OR_IDENTIFIED")
     try:
@@ -122,7 +139,7 @@ def execute(cfg: dict, *, push: bool = False) -> dict:
     if state_dir == workspace or workspace in state_dir.parents or state_dir in workspace.parents:
         raise Hold("STATE_DIR_MUST_BE_OUTSIDE_REPOSITORY")
     policy = DockerPolicy.from_config(cfg)
-    docker_preflight(policy)  # Images must already be present; no downloads.
+    qa_image_preflight(policy)  # Only QA runtime is needed; no OpenCode image.
     if changed_files(workspace):
         raise Hold("DIRTY_WORKSPACE_REFUSED")
     state_dir.mkdir(parents=True, exist_ok=True)
@@ -173,7 +190,18 @@ def execute(cfg: dict, *, push: bool = False) -> dict:
                 write_atomic(state_path, state)
                 try:
                     proposal, metrics = propose_once(cfg["model"], t["path"], original,
-                                                      t["request"], feedback)
+                                                      t["request"], feedback,
+                                                      timeout=cfg["model_timeout_seconds"])
+                    private_witness = {
+                        "requested_model": cfg["model"], "model_reported": metrics.get("model"),
+                        "source_before_sha256": hashlib.sha256(original.encode("utf-8")).hexdigest(),
+                        "proposal_sha256": hashlib.sha256(
+                            json.dumps(proposal, ensure_ascii=False, sort_keys=True).encode("utf-8")).hexdigest(),
+                        "response_metrics": metrics, "local_http_attempt": True,
+                        "project": cfg["project"], "task_index": state["next_task"],
+                        "real_model_identity_independently_verified": False
+                    }
+                    write_atomic(state_dir / f"model_{cycle:04}.private.json", private_witness)
                     digest = apply_exact_patch(target, proposal, original)
                     changed = changed_files(workspace)
                     if changed != [t["path"]]:
@@ -208,7 +236,8 @@ def execute(cfg: dict, *, push: bool = False) -> dict:
                         "sha": sha, "task": state["next_task"], "source_sha256": digest,
                         "independent_qa": "SOURCE_ONLY", "pushed": False,
                         "reported_model": metrics.get("model"),
-                        "reported_eval_count": metrics.get("eval_count")})
+                        "reported_eval_count": metrics.get("eval_count"),
+                        "local_ollama_response_observed": True})
                     write_atomic(state_path, state)
                     if push:
                         verify_repo(cfg)
