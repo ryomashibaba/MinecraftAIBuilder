@@ -1,0 +1,43 @@
+name: Dec genuine Qwen4B stop and resume prior private QA source across cycles
+
+on:
+  push:
+    branches:
+      - research/dec-free-autonomy-solo-pilot-20261104
+    paths:
+      - 'tools/free-autonomy-solo/real_qwen4b_stop_resume_ci.py'
+      - '.github/workflows/dec-real-qwen4b-stop-resume.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  genuine-qwen4b-restart-after-private-source-qa:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Compile trusted model and QA entrypoints
+        run: |
+          python3 -m py_compile tools/free-autonomy-solo/real_qwen4b_stop_resume_ci.py
+          python3 -m py_compile tools/free-autonomy-solo/run_mab_private_continuous.py
+      - name: Pull disposable public model and QA images
+        run: |
+          docker pull ollama/ollama:latest
+          docker pull node:24-bookworm-slim
+      - name: Real 4B code generation, controlled HOLD, private audit and real resume
+        run: python3 tools/free-autonomy-solo/real_qwen4b_stop_resume_ci.py
+      - name: Publish sanitized result only, no generated source or model response
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dec-real-4b-private-qa-resume-sanitized
+          path: ${{ runner.temp }}/real-qwen4b-stopped-resume-sanitized.json
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Boundaries
+        if: always()
+        run: echo 'The controlled interruption was injected, not a genuine model failure. Real 4B proposals and Docker QA only; no 14B, ART, main, Minecraft world, or public model source.'
