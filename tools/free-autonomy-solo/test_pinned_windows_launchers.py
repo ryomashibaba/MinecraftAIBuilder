@@ -127,7 +127,14 @@ class WindowsRealSourceLauncherPins(unittest.TestCase):
         self.assertEqual({name for name, _ in sources}, expected)
         for name, blob in sources:
             with self.subTest(name=name):
-                self.assertEqual(blob, git_blob_sha(ROOT / name))
+                if name == "draft_real_project_local14b.py":
+                    # The 2026-11-05 two-step launcher is an immutable
+                    # historical build. New cumulative source features must
+                    # have a separate, independently pinned launcher.
+                    self.assertEqual(
+                        blob, "f727db8d07a871969f9bb92f6278b53d57b614b7")
+                else:
+                    self.assertEqual(blob, git_blob_sha(ROOT / name))
         self.assertIn(
             "/5b265667c622ccfe3097bcd7346bd9a16e086872/"
             "tools/free-autonomy-solo/RUN_PRIVATE_MAB_SOURCE_SESSION.ps1",
