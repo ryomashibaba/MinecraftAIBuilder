@@ -44,7 +44,7 @@ test('copies only vetted shareable V6 handoff without original text or genre tem
 });
 
 test('V7 is opt-in: it copies only V7 allowlisted HOLD; V6 default is unaffected',async()=>{
- const sha='b'.repeat(40),prev=process.env.MAB_HEAD;
+ const sha='b'.repeat(40),prev=process.env.MAB_HEAD,stages=[];
  const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'v7-stable-entry-'));
  const out=path.join(tmp,'private');
  const safety={
@@ -61,8 +61,11 @@ test('V7 is opt-in: it copies only V7 allowlisted HOLD; V6 default is unaffected
   assert.deepEqual(parseStableArgs(['--model','qwen3:14b','--out','private','--v7-semantic']),
    {model:'qwen3:14b',outDir:'private',v7Semantic:true});
   const r=await runStableLocalStudy(['--model','qwen3:14b','--out',out,'--v7-semantic'],{
-   v7BindingLoader:async()=>({deriveIntegratedShell:()=>{},checkResourceSafety:()=>{}}),
+   v7HeadReader:()=>{stages.push('head');return sha;},
+   v7CiChecker:async()=>{stages.push('ci');return {safeToRunModel:true};},
+   v7BindingLoader:async()=>{stages.push('private-import');return {deriveIntegratedShell:()=>{},checkResourceSafety:()=>{}};},
    v7Runner:async opts=>{
+    stages.push('runner');
     n++;assert.equal(opts.headSha,sha);assert.equal(opts.model,'qwen3:14b');
     fs.mkdirSync(opts.outDir);
     fs.writeFileSync(path.join(opts.outDir,'V7_SEMANTIC_SHAREABLE.json'),JSON.stringify(safety));
@@ -70,11 +73,35 @@ test('V7 is opt-in: it copies only V7 allowlisted HOLD; V6 default is unaffected
    }
   });
   assert.equal(n,1);
+  assert.deepEqual(stages,['head','ci','private-import','runner']);
   assert.deepEqual(JSON.parse(fs.readFileSync(r.shareableFile,'utf8')),safety);
   assert(!fs.readFileSync(r.shareableFile,'utf8').includes(tmp));
   assert.throws(()=>parseStableArgs(['--model','qwen3:14b','--out','private','--v7-semantic','--extra']),/ARGS/);
  }finally{
   if(prev===undefined)delete process.env.MAB_HEAD;else process.env.MAB_HEAD=prev;
   fs.rmSync(tmp,{recursive:true,force:true});
+ }
+});
+
+test('V7 rejects before PRIVATE import when exact-head CI is pending or HEAD differs',async()=>{
+ const sha='c'.repeat(40),prev=process.env.MAB_HEAD,trace=[];
+ process.env.MAB_HEAD=sha;
+ const args=['--model','qwen3:14b','--out','unused-private','--v7-semantic'];
+ const deps={
+  v7HeadReader:()=>{trace.push('head');return sha;},
+  v7CiChecker:async()=>{trace.push('ci');return {safeToRunModel:false};},
+  v7BindingLoader:async()=>{trace.push('private-import');throw Error('PRIVATE_LOADED_UNSAFELY');},
+  v7Runner:async()=>{trace.push('runner');throw Error('MODEL_RUN_UNSAFELY');}
+ };
+ try{
+  await assert.rejects(runStableLocalStudy(args,deps),/V7_REQUIRED_CI_NOT_SUCCESS/);
+  assert.deepEqual(trace,['head','ci']);
+  trace.length=0;
+  await assert.rejects(runStableLocalStudy(args,{
+   ...deps,v7HeadReader:()=>{trace.push('head');return 'd'.repeat(40);}
+  }),/V7_HEAD_MISMATCH/);
+  assert.deepEqual(trace,['head']);
+ }finally{
+  if(prev===undefined)delete process.env.MAB_HEAD;else process.env.MAB_HEAD=prev;
  }
 });

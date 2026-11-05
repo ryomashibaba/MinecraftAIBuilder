@@ -9,9 +9,15 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
+import {execFileSync} from 'node:child_process';
+import {checkExactHeadCi} from './r125-v4j-safe-ci-gate.mjs';
 import {runV7PrivateOnce} from './r125-v7-private-once.mjs';
 import {runV3OneGenreStudy} from './r125-v4j-v3-one-local.mjs';
 const MODEL=/^[A-Za-z0-9._:/-]{2,140}$/;
+const SHA=/^[a-f0-9]{40}$/;
+const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const actualHead=()=>execFileSync('git.exe',['-C',ROOT,'rev-parse','HEAD'],
+ {encoding:'utf8',timeout:10000,windowsHide:true}).trim();
 const fail=x=>{throw Error('V4J_STABLE_LOCAL_'+x);};
 export function parseStableArgs(args){
  if(![4,5].includes(args.length)||(args.length===5&&args[4]!=='--v7-semantic')||
@@ -38,10 +44,25 @@ async function loadV7PrivateBindings(){
 }
 export async function runStableLocalStudy(args,{
  runner=runV3OneGenreStudy,v7Runner=runV7PrivateOnce,
- v7BindingLoader=loadV7PrivateBindings
+ v7BindingLoader=loadV7PrivateBindings,
+ v7HeadReader=actualHead,v7CiChecker=checkExactHeadCi
 }={}){
  const a=parseStableArgs(args);
  if(a.v7Semantic){
+  // PRIVATE modules can run arbitrary top-level code at import time.
+  // First verify the current clone HEAD and BOTH exact-head public CI checks.
+  const expectedHead=process.env.MAB_HEAD;
+  if(!SHA.test(expectedHead??''))fail('V7_HEAD_REQUIRED');
+  let observedHead;
+  try{observedHead=v7HeadReader();}
+  catch{fail('V7_HEAD_UNVERIFIED');}
+  if(observedHead!==expectedHead)fail('V7_HEAD_MISMATCH');
+  let ci;
+  try{ci=await v7CiChecker(expectedHead);}
+  catch{fail('V7_CI_UNVERIFIED');}
+  if(ci?.safeToRunModel!==true)fail('V7_REQUIRED_CI_NOT_SUCCESS');
+  // The V7 runner also verifies HEAD and CI before any model request.
+  // Import side effects still require separate Windows PRIVATE review.
   const bindings=await v7BindingLoader();
   const result=await v7Runner({model:a.model,outDir:a.outDir,
    headSha:process.env.MAB_HEAD,prompt:process.env.MAB_V7_BRIEF||undefined,
