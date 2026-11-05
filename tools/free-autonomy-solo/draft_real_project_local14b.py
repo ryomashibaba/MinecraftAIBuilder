@@ -123,7 +123,7 @@ def host_located_slot_replacement(project: str, source: str, proposal: dict,
         # to mutate the input/objects via assignment or increment, or to
         # override the frozen real stair geometry with a numeric cap.
         condition = replacement[replacement.index("if(") + 3:
-                                replacement.index(") fail(")]
+                                replacement.index(")")]
         if (re.search(r"(?<![=!<>])=(?!=)", condition)
                 or "++" in condition or "--" in condition):
             raise Hold("PATCH_MAB_GUARD_SIDE_EFFECT_FORBIDDEN")
