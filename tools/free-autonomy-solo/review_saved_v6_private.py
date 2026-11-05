@@ -201,7 +201,12 @@ def run_existing(base: Path, *, qa: bool, platform_name: str = os.name,
             try:
                 gate(DockerPolicy.from_config(cfg))
             except Exception:
+                # Missing Docker must not consume the one-shot QA receipt.
+                # A later attempt may QA the SAME saved candidate without re-inference.
                 status["status"] = DOCKER_HOLD
+                receipt = root / "V6_EXISTING_SOURCE_INSPECTION_SHAREABLE.json"
+                if receipt.exists() or receipt.is_symlink():
+                    receipt = None
                 return status, receipt
             if not current_source_commit():
                 fail("PUBLIC_V6_SOURCE_HEAD_MOVED_NO_QA")
