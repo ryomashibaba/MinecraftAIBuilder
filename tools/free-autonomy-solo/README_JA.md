@@ -323,3 +323,10 @@ AI回答原文・JSON・SVG・3Dプレビューは `%LOCALAPPDATA%\FreeAutonomyP
 - 既存 `run_mab_private_continuous.py` に `--resume-latest` を追加。ローカルPRIVATEに残った直近HOLDセッションの正本SOURCE SHA・2段階ごとのGit親子・差分対象1ファイル・private SHA256・独立QA記録をすべて再監査し、新規独立PRIVATE cloneを構築する。承認済み修正の再生成を行わず、残りのサイクルのみ実行する。失敗・改ざん時はモデル生成0回で停止。公開GitHub・元ソース・Minecraftワールドは書換えない。
 - `RUN_MAB_RESUME_LAST_QA.cmd` はWindowsの再開専用1クリック入口。既存起動器と同じ固定SHAのPowerShellを取得し、`-ResumeLatest` で呼び出す。Docker/Node像が既存状態に無ければモデル生成前にHOLD。新規実行は従来 `RUN_MAB_CUMULATIVE_6_STAGES.cmd`。
 - GitHub Actions使い捨てCIで消えたQwen4B生成ソースをこの機能で復元することは**できない**。今後本人PCのローカルPRIVATE上にQA正本が残っている場合だけ再開する。SOURCE PASSはART/ゲーム完成や夜間自律性の認定ではない。
+
+
+## 2026-11-05 — 二度目のHOLD後も保存済み4段階を保護
+- 真正Qwen3:4b CI #41965082171で停止前4段階 SOURCE QAは合格し、最初の再開で4段階の再利用が実証された。第5段階のモデル下書きは2回不合格で、SOURCE 6段階合格とは言えない。
+- run_mab_private_continuous.py は再開セッション内に、相対セッション識別子だけを記録するPRIVATE_QA_RESUME_PREDECESSOR.json を追加。後の再開で元の非公開QA履歴まで辿り、Git SHA、QA証拠、モデル生成ソースのSHAを再照合する。private絶対パスやソース本文は共有報告に含まない。
+- 前回停止のPRIVATE履歴が改ざん、欠損、外部参照、循環していた場合は推論開始前にHOLD。GitHub上の消えた使い捨てCI成果は復元不能。元のゲーム・main・Educationの成功経路、PRやPagesには触れない。
+- 2つのWindows 1クリック起動器を今回の研究コードにSHA固定し直した。本人PCにDocker/Nodeイメージがない場合は推論0回で停止。真正14B Windowsの検証は未完了。
