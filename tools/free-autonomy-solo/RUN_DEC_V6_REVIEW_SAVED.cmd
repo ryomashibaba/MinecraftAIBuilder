@@ -23,7 +23,7 @@ echo Review previously saved Qwen14B V6 PRIVATE candidate without inference.
 echo Candidate source stays PRIVATE. Only existing Docker QA may execute it.
 echo No Minecraft writes, public GitHub upload or paid API.
 powershell.exe -NoProfile -ExecutionPolicy Bypass -Command ^
-  "$ErrorActionPreference='Stop'; $p=Join-Path $env:TEMP ('dec-v6-review-'+[guid]::NewGuid().ToString('N')+'.ps1'); $u='https://raw.githubusercontent.com/ryomashibaba/MinecraftAIBuilder/502e2ef6e3f50d66bb56d7bfbc4e0f5ac9a8a367/tools/free-autonomy-solo/RUN_DEC_V6_REVIEW_SAVED.ps1'; Invoke-WebRequest -UseBasicParsing -Uri $u -OutFile $p; $h=((& git hash-object --no-filters $p)|Out-String).Trim(); if($h -cne 'b374e42c82e771ee06705e2daf128c66e2040f54'){throw 'V6_SAVED_REVIEW_PS1_IMMUTABLE_BLOB_HOLD'}; & $p"
+  "$ErrorActionPreference='Stop'; $p=Join-Path $env:TEMP ('dec-v6-review-'+[guid]::NewGuid().ToString('N')+'.ps1'); $u='https://raw.githubusercontent.com/ryomashibaba/MinecraftAIBuilder/e6a2259d455cd27cf1229d4ab1b295ab0a5d9821/tools/free-autonomy-solo/RUN_DEC_V6_REVIEW_SAVED.ps1'; Invoke-WebRequest -UseBasicParsing -Uri $u -OutFile $p; $h=((& git hash-object --no-filters $p)|Out-String).Trim(); if($h -cne 'eb60afc614191011c0ebf619ad6462a81d48fc04'){throw 'V6_SAVED_REVIEW_PS1_IMMUTABLE_BLOB_HOLD'}; & $p"
 set "RESULT=%ERRORLEVEL%"
 if not "%RESULT%"=="0" (
   echo HOLD: Candidate preserved. Do not regenerate Qwen.
