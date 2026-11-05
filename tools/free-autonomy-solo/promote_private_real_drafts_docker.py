@@ -25,6 +25,7 @@ import time
 import uuid
 
 from docker_sandbox import DockerPolicy, SandboxHold
+from private_verified_source_evidence import save_private_verified_stage, EvidenceHold
 from prepare_pinned_real_project import load_manifest, verify_private_clone, Hold as CloneHold
 from draft_real_project_local14b import exclusive_local_project_lock, ANCHORS
 
@@ -443,6 +444,12 @@ def promote(root: Path, project: str, model: str,
                 _trusted_dependency_setup(scratch, root)
                 # installation is allowed to write only ignored node_modules.
                 verify_private_clone(scratch, lane)
+            # Preserve QA-passed source in local PRIVATE review evidence,
+            # not in a public GitHub artifact or temporary CI log.
+            review_dir = root / ("private-source-review-" + uuid.uuid4().hex)
+            review_dir.mkdir(mode=0o700)
+            report["private_source_review_directory"] = str(review_dir)
+            report["private_source_review_stages"] = 0
             current = before
             for stage, body in enumerate(drafts, 1):
                 verify_private_clone(original, lane)
@@ -475,10 +482,17 @@ def promote(root: Path, project: str, model: str,
                     "stage": stage, "commit": sha, "candidate_sha256": sha256(body),
                     "qa_checks_passed": len(commands), "source_only": True})
                 report["completed_stages"] = stage
+                save_private_verified_stage(
+                    root, scratch, lane, stage, body, sha,
+                    lane["pinned_commit"] if stage == 1 else
+                    report["local_qa_commits"][0]["commit"],
+                    len(commands), review_dir,
+                )
+                report["private_source_review_stages"] = stage
                 current = body
             verify_private_clone(original, lane)
             report["status"] = "TWO_STAGES_INDEPENDENT_DOCKER_SOURCE_QA_LOCAL_COMMITS"
-    except (CloneHold, Hold, SandboxHold, OSError, ValueError, KeyError, TypeError) as exc:
+    except (CloneHold, Hold, SandboxHold, EvidenceHold, OSError, ValueError, KeyError, TypeError) as exc:
         report["status"] = "HOLD"
         report["hold_reason"] = str(exc)[:160]
     finally:
