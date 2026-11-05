@@ -131,6 +131,18 @@ def host_located_slot_replacement(project: str, source: str, proposal: dict,
                 r"physical2WideStairTreads\s*(?:<=?|>=?)\s*\d+\b",
                 condition):
             raise Hold("PATCH_MAB_FIXED_STAIR_TREAD_LIMIT_FORBIDDEN")
+        # Every completed cycle must add a NEW validation, not simply count
+        # the same condition a second time with a different failure label.
+        # This comparison uses only host-accepted one-line guard syntax,
+        # never the model's explanation, fuzzy source edits or shell code.
+        canonical = re.sub(r"\s+", "", condition)
+        previous_guards = re.findall(
+            r"(?m)^[ \t]*if\(([A-Za-z0-9_.?!<>=&|'\\"\[\] +\-]{3,240})\)"
+            r"[ \t]*fail\('[A-Z][A-Z0-9_]{2,63}'\);[ \t]*$",
+            source)
+        if any(re.sub(r"\s+", "", old) == canonical
+               for old in previous_guards):
+            raise Hold("PATCH_MAB_DUPLICATE_ADDITIVE_GUARD")
         return bounded_replacement(
             project, source,
             {"find": original_slot_text,

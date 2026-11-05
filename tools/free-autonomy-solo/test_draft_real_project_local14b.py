@@ -333,6 +333,42 @@ class RealSourceDraftTests(unittest.TestCase):
         self.assertIn("if(raw.mezzanine.rise===0) fail('BAD_RISE');", verified)
         self.assertIn(" const before=compileHeightAuthorIntent(heightAuthor);", verified)
 
+    def test_mab_third_cycle_rejects_repeated_guards_not_cosmetic_codes(self):
+        # A model that merely changes fail('CODE') or whitespace must not
+        # get credit for a fifth/sixth distinct source improvement.
+        source = MAB_SOURCE.replace(
+            " return raw;",
+            " const before=compileHeightAuthorIntent(heightAuthor);\n"
+            " const upper=compileAuthoredPublicMezzanine(heightAuthor,mezzanine);\n"
+            " return raw;")
+        slot = next(x["slot"] for x in exact_edit_slots(
+            "minecraftaibuilder", source, cycle_number=3)
+            if "const before=compileHeightAuthorIntent" in x["exact"])
+        added = " if(raw.mezzanine.rise===0) fail('FIRST_GUARD');"
+        once = host_located_slot_replacement(
+            "minecraftaibuilder", source,
+            {"slot": slot, "replace": added}, cycle_number=3)
+        self.assertEqual(once.count("const before=compileHeightAuthorIntent"), 1)
+        for repeated in (
+            added,
+            " if(raw.mezzanine.rise === 0) fail('OTHER_GUARD');",
+        ):
+            with self.subTest(repeated=repeated):
+                with self.assertRaisesRegex(
+                    Hold, "PATCH_MAB_DUPLICATE_ADDITIVE_GUARD"):
+                    host_located_slot_replacement(
+                        "minecraftaibuilder", once,
+                        {"slot": slot, "replace": repeated}, cycle_number=3)
+        different = " if(raw.mezzanine.deckWidth===0) fail('SECOND_GUARD');"
+        twice = host_located_slot_replacement(
+            "minecraftaibuilder", once,
+            {"slot": slot, "replace": different}, cycle_number=3)
+        self.assertIn(added, twice)
+        self.assertIn(different, twice)
+        self.assertEqual(
+            twice.count("const before=compileHeightAuthorIntent(heightAuthor);"),
+            1)
+
     def test_mab_third_cycle_has_distinct_instruction_no_host_repair(self):
         captures = []
         def fake(path, payload=None, timeout=0):
