@@ -7,6 +7,7 @@
 [CmdletBinding()]
 param(
   [switch]$CiSelfTest,
+  [switch]$ResumeLatest,
   [ValidatePattern('^[A-Za-z0-9_.:/-]{1,100}$')]
   [string]$Model='qwen3:14b'
 )
@@ -22,10 +23,10 @@ foreach ($program in @('git','python')) {
     throw ('MISSING_COMMAND_' + $program + '_NO_AUTO_INSTALL')
   }
 }
-$revision='ef336aee5a88ebcbf200b60c27633fb627c5975f'
+$revision='e943189adc01bb17fb6002de9d3387082dbb6e31'
 $repo='ryomashibaba/MinecraftAIBuilder'
 $items=@(
-  @{ Name='run_mab_private_continuous.py'; Blob='b2059daa40d80fe58d435477e4bbcf2ebebd5f9d' },
+  @{ Name='run_mab_private_continuous.py'; Blob='2917c5d2bc01b1af1b36756be1b63b01cc1d8022' },
   @{ Name='run_mab_private_autonomy_once.py'; Blob='ff741ebe62be4f1c7b5b420456df3559d5963d66' },
   @{ Name='draft_real_project_local14b.py'; Blob='e06af88b4c47a13df8b1ce7c59b635caa35fada6' },
   @{ Name='promote_private_real_drafts_docker.py'; Blob='89a038891996c52fc153935f58ba14439c11ac21' },
@@ -50,7 +51,12 @@ foreach ($entry in $items) {
 Write-Host 'MAB_IMMUTABLE_CUMULATIVE_SOURCE_VERIFIED'
 Write-Host 'ONE_PROJECT_MAX_3_CYCLES_6_QA_SOURCE_REVISIONS'
 Write-Host 'NO_MODEL_PULL_NO_PAID_API_NO_GITHUB_PUSH'
-$lines=@(& python (Join-Path $base 'run_mab_private_continuous.py') --model $Model --cycles 3 2>&1)
+$pythonArgs=@('--model',$Model,'--cycles','3')
+if ($ResumeLatest) {
+  $pythonArgs+= '--resume-latest'
+  Write-Host 'RESUME_ONLY_PREVIOUS_FULLY_VERIFIED_PRIVATE_QA__NO_REGENERATE_PRIOR_STAGES'
+}
+$lines=@(& python (Join-Path $base 'run_mab_private_continuous.py') @pythonArgs 2>&1)
 $exitCode=$LASTEXITCODE
 $lines | ForEach-Object { Write-Host ([string]$_) }
 $resultRows=@($lines | Where-Object {
