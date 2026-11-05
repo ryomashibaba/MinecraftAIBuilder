@@ -149,10 +149,11 @@ class SavedCandidateTests(unittest.TestCase):
         self.assertEqual(result["reason_code"], "PRIVATE_MODEL_CANDIDATE_REMOVED_SOURCE_SAFETY_PROOF")
 
     def test_duplicate_receipt_stops_not_reruns(self):
-        def absent(_policy):
-            raise RuntimeError("MOCK_DOCKER_NOT_INSTALLED")
+        # QA receipt is created only after a genuine QA attempt, not a
+        # missing-Docker preflight. No model or real Docker is invoked.
         _, p = m.run_existing(self.base, qa=True, platform_name="nt",
-                               gate=absent)
+                               gate=lambda _policy: None,
+                               docker=lambda *a, **kw: (1, "MOCK_BASELINE_FAILURE"))
         self.assertTrue(p.is_file())
         calls = []
         def no_call(*args, **kwargs):
