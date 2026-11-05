@@ -18,10 +18,10 @@ foreach($cmd in @('git','python')) {
  }
 }
 $repo='ryomashibaba/MinecraftAIBuilder'
-$revision='652f001b035e70e07b3240a75108930748155a52'
+$revision='0544361ad70a41ba899fdb6a281e76d2e65f038b'
 $items=@(
- @{Name='review_saved_v6_private.py';Blob='a7b89ce45b40e553be151990918fdb7627c0728b'},
- @{Name='dec_current_v6_private.py';Blob='a6f7329a73a94e5b8474d172cd44ae239cd2aeec'},
+ @{Name='review_saved_v6_private.py';Blob='bc83afd67bdec1fbd4b9798f389c7a8503598498'},
+ @{Name='dec_current_v6_private.py';Blob='d4790ecd626c7606ce3641de4a01fc8e326b1571'},
  @{Name='prepare_pinned_real_project.py';Blob='ce4d56452ec0a1d513dfa419a80780eed1283894'},
  @{Name='local_ollama_patch_loop.py';Blob='f063712259f67deaa0c0d8017b06e75299075514'},
  @{Name='docker_sandbox.py';Blob='20b6817b1e50c99435cdb29a13beafdb4fbcf4dd'},
