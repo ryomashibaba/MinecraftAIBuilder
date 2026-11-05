@@ -151,3 +151,45 @@ test('V4 real GRAPH_ENTRY evidence prompts a root-relative final adjacency check
  assert.deepEqual(s.properties.spaces.items.oneOf[0].properties.attach,
   original.properties.spaces.items.oneOf[0].properties.attach);
 });
+
+test('V5 independently authored root entry forces attach:null without tuple/prefixItems, retaining V4',async()=>{
+ const {V4J_ENTRY_FIRST_PROTOCOL,V4J_ENTRY_FIRST_CIVIC_SCHEMA:v5,
+  V4J_ENTRY_FIRST_RESPONSE_FORMAT:format,V4J_ENTRY_FIRST_SYSTEM_PROMPT:prompt,
+  materializeV4JEntryFirstAuthor:convert}=
+  await import('../source/ai/r125-v4j-feasible-envelope.mjs');
+ assert.equal(V4J_ENTRY_FIRST_PROTOCOL,'V4J_SINGLE_RESPONSE_EXPLICIT_ENTRY_V5');
+ assert.equal(v5.properties.spaces,undefined);
+ assert.equal(v5.properties.entrySpace.properties.kind.enum[0],'covered');
+ assert.deepEqual(v5.properties.entrySpace.properties.attach,{type:'null'});
+ assert.deepEqual(v5.properties.entrySpace.required,
+  s.properties.spaces.items.oneOf[0].required);
+ assert.equal(v5.properties.otherSpaces.minItems,2);
+ assert.equal(v5.properties.otherSpaces.maxItems,4);
+ assert(v5.properties.otherSpaces.items.oneOf.every(x=>
+  x.properties.attach.type==='object'));
+ assert.equal(format.json_schema.strict,true);
+ assert.deepEqual(format.json_schema.schema,v5);
+ assert.deepEqual(v5.properties.massing,s.properties.massing);
+ assert(s.properties.spaces.items.oneOf[0].properties.attach.anyOf.some(x=>x.type==='null'));
+ assert(prompt.includes('entrySpace and otherSpaces INSTEAD'));
+ const author={};
+ for(const k of v5.required)author[k]={};
+ author.schema=s.properties.schema.enum[0];
+ author.entrySpace={kind:'covered',attach:null,id:'public-entry'};
+ author.otherSpaces=[
+  {id:'west-wing',kind:'covered',attach:{to:'public-entry',side:'west',shift:0}},
+  {id:'open-yard',kind:'sky',attach:{to:'west-wing',side:'south',shift:1}}
+ ];
+ const snapshot=JSON.stringify(author),restored=convert(author);
+ assert.equal(JSON.stringify(author),snapshot);
+ assert.deepEqual(restored.spaces,[author.entrySpace,...author.otherSpaces]);
+ assert.equal(restored.spaces[0].attach,null);
+ assert.equal(restored.spaces[1].attach.side,'west');
+ assert(!Object.hasOwn(restored,'entrySpace'));
+ const wrong=structuredClone(author);
+ wrong.entrySpace.attach={to:'x',side:'north',shift:0};
+ assert.throws(()=>convert(wrong),/R125_V4K_ENTRY_FIRST_ROOT_ENTRY_CONTRACT/);
+ const missing=structuredClone(author);
+ missing.otherSpaces[1].attach=null;
+ assert.throws(()=>convert(missing),/R125_V4K_ENTRY_FIRST_CHILD_ATTACHMENT_REQUIRED/);
+});

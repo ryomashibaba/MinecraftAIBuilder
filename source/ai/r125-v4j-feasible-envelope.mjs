@@ -47,3 +47,63 @@ export const V4J_ENVELOPE_SYSTEM_PROMPT=[
  'FINAL ROOT-ENTRY CHECK BEFORE ONE ORIGINAL JSON: set rootId=spaces[0].id. For EVERY later spaces[i], inspect its original attach.to and attach.side. If attach.to equals rootId AND attach.side is north, this plan is invalid because the root NORTH facade belongs to the public entrance. Choose a different original, author-owned topology BEFORE sending your one JSON; do not ask the HOST to relocate any room, and do not produce a follow-up correction. A north attachment on a NONROOT parent is not automatically forbidden: it must satisfy the actual frozen graph and all-room overlap checks. Preserve creative massing, functions, materials and room purposes. Perform this exact root-side check even if every JSON field and massing dimension is valid.',
  'One original JSON. If you cannot design a valid building inside these constraints, do not claim B143 success or architectural ART pass. No model follow-up, paid API, or world write.'
 ].join('\n');
+
+/**
+ * Opt-in V5 author output contract. Unlike tuple-schema/prefixItems, the
+ * PUBLIC ENTRY is one required OBJECT, separate from the author-chosen array.
+ * This does not alter V4 output, any AUTHOR choices, or frozen SOURCE.
+ */
+export const V4J_ENTRY_FIRST_PROTOCOL='V4J_SINGLE_RESPONSE_EXPLICIT_ENTRY_V5';
+const v5=structuredClone(V4J_ENVELOPE_CIVIC_SCHEMA);
+const oldSpaces=v5.properties.spaces;
+const firstCovered=oldSpaces.items.oneOf.find(x=>x.properties.kind.enum[0]==='covered');
+if(!firstCovered)throw Error('V4J_V5_COVERED_ENTRY_SCHEMA_MISSING');
+const entrySchema=structuredClone(firstCovered);
+entrySchema.properties.attach={type:'null'};
+const followingSchema=structuredClone(oldSpaces);
+followingSchema.minItems=2;
+followingSchema.maxItems=4;
+for(const item of followingSchema.items.oneOf){
+ const attached=item.properties.attach?.anyOf?.find(x=>x.type==='object');
+ if(!attached)throw Error('V4J_V5_CHILD_ATTACHMENT_SCHEMA_MISSING');
+ item.properties.attach=structuredClone(attached);
+}
+const newFields={};
+for(const [k,v] of Object.entries(v5.properties)){
+ if(k==='spaces'){
+  newFields.entrySpace=entrySchema;
+  newFields.otherSpaces=followingSchema;
+ }else newFields[k]=v;
+}
+v5.properties=newFields;
+v5.required=Object.keys(newFields);
+if(v5.required.length!==13||Object.hasOwn(v5.properties,'spaces'))
+ throw Error('V4J_V5_ROOT_SCHEMA_INVARIANT');
+export const V4J_ENTRY_FIRST_CIVIC_SCHEMA=v5;
+export const V4J_ENTRY_FIRST_RESPONSE_FORMAT={
+ type:'json_schema',
+ json_schema:{name:'v4j_explicit_entry_author_v5',strict:true,schema:v5}
+};
+export const V4J_ENTRY_FIRST_SYSTEM_PROMPT=[
+ V4J_ENVELOPE_SYSTEM_PROMPT,
+ 'V5 OUTPUT SHAPE OVERRIDES ALL EARLIER ROOT spaces INSTRUCTIONS: output entrySpace and otherSpaces INSTEAD of root spaces. entrySpace is your original first COVERED public reception with attach:null, including all other ordinary space keys. otherSpaces is an ARRAY of 2..4 later fully authored spaces, each with a non-null attach object to an EARLIER model-chosen room id. Their conceptual ordered space sequence is [entrySpace,...otherSpaces]; do not output root spaces. You still choose every roof, facade, massing, function, dimension and room adjacency. This is not a building template.',
+ 'The HOST may only reconstruct the old spaces array in exactly that author order; it cannot edit, remove, create or relocate any room or fix invalid references. The first room north face must be free for entrance. The unchanged SOURCE compiler and all construction safety gates are authoritative. ONE ORIGINAL JSON, zero retries or paid API.'
+].join('\n');
+const v5Record=x=>x!==null&&typeof x==='object'&&!Array.isArray(x);
+export function materializeV4JEntryFirstAuthor(input){
+ if(!v5Record(input)||Object.keys(input).sort().join('|')!==
+  v5.required.slice().sort().join('|')||
+  input.schema!==V4J_ENVELOPE_CIVIC_SCHEMA.properties.schema.enum[0])
+  throw Error('R125_V4K_ENTRY_FIRST_ROOT_FIELDS');
+ if(!v5Record(input.entrySpace)||input.entrySpace.kind!=='covered'||
+  input.entrySpace.attach!==null)
+  throw Error('R125_V4K_ENTRY_FIRST_ROOT_ENTRY_CONTRACT');
+ if(!Array.isArray(input.otherSpaces)||
+  input.otherSpaces.length<2||input.otherSpaces.length>4)
+  throw Error('R125_V4K_ENTRY_FIRST_OTHER_SPACES_COUNT');
+ if(input.otherSpaces.some(x=>!v5Record(x)||!v5Record(x.attach)))
+  throw Error('R125_V4K_ENTRY_FIRST_CHILD_ATTACHMENT_REQUIRED');
+ const author=structuredClone(input);
+ const {entrySpace,otherSpaces,...rest}=author;
+ return {...rest,spaces:[entrySpace,...otherSpaces]};
+}
