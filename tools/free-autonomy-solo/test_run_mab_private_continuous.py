@@ -93,7 +93,7 @@ class CumulativePrivateGitChainTests(unittest.TestCase):
             shutil.copytree(self.seed, p)
         else:
             p = Path(prepared_workspace)
-            if not p.is_relative_to(private_root.resolve()):
+            if not p.resolve(strict=True).is_relative_to(private_root.resolve(strict=True)):
                 raise ValueError("TEST_PREPARED_WORKSPACE_OUTSIDE_CYCLE")
         verify_private_clone(p, lane)
         original = (p / lane["source_file"]).read_text(encoding="utf-8")
