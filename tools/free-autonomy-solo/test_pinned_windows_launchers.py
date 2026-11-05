@@ -63,7 +63,14 @@ class WindowsRealSourceLauncherPins(unittest.TestCase):
         self.assertEqual(len(checks), len(expected))
         for name, actual_sha in checks:
             with self.subTest(file=name):
-                self.assertEqual(actual_sha, git_blob_sha(ROOT / name))
+                if name == "draft_real_project_local14b.py":
+                    # Old bootstrap downloads the IMMUTABLE 2026-11-04
+                    # draft blob, not the updated full-session contract.
+                    self.assertEqual(actual_sha,
+                                     "f8539d764c15217f70d0c17c5b5629cc6e9dddeb")
+                    self.assertIn("$revision = 'a23b0e5b23affa5aae43fa0e9e6a2a4ff650e5fc'", script)
+                else:
+                    self.assertEqual(actual_sha, git_blob_sha(ROOT / name))
 
     def test_original_v4h_real_14b_batch_bootstrap_is_sha_pinned(self):
         launch = (ROOT / "RUN_REAL_MAB_V4H_14B_ARCHITECTURE.ps1").read_text(
@@ -82,7 +89,12 @@ class WindowsRealSourceLauncherPins(unittest.TestCase):
         self.assertEqual({name for name, _ in downloads}, expected)
         for name, expected_blob in downloads:
             with self.subTest(name=name):
-                self.assertEqual(expected_blob, git_blob_sha(ROOT / name))
+                if name == "draft_real_project_local14b.py":
+                    self.assertEqual(expected_blob,
+                                     "f8539d764c15217f70d0c17c5b5629cc6e9dddeb")
+                    self.assertIn("$rev = '1294d4e71bb21845756ac90043b680b87a3d09a3'", launch)
+                else:
+                    self.assertEqual(expected_blob, git_blob_sha(ROOT / name))
         self.assertRegex(launch, r"\$rev = '[a-f0-9]{40}'")
         self.assertRegex(cmd, r"/[a-f0-9]{40}/tools/free-autonomy-solo/"
                          r"RUN_REAL_MAB_V4H_14B_ARCHITECTURE\.ps1")

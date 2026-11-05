@@ -105,11 +105,13 @@ class PrivateOneSessionAutonomyTests(unittest.TestCase):
                 "local_qa_commits": commits, "github_pushes": 0}
 
     def launch(self, **kwargs):
-        return run_single_session(
+        arguments = dict(
             private_root=self.root, manifest=self.config,
             inspect_model=self.installed, preflight_docker=self.available,
-            draft=self.draft, lock=self.one_project_lock, **kwargs,
+            draft=self.draft, lock=self.one_project_lock,
         )
+        arguments.update(kwargs)
+        return run_single_session(**arguments)
 
     def test_two_verified_private_stages_complete_under_single_os_lock(self):
         summary, path = self.launch(qa=self.qa)
