@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {INTEGRATED_SEMANTIC_SCHEMA,validateIntegratedSemanticIntent,
  prepareIntegratedSemanticBridge,assertAuthoredSemanticsUnchanged,
- projectIntegratedSemanticOperations}
+ projectIntegratedSemanticOperations,executeIntegratedSemanticBridge}
  from '../source/ai/r125-integrated-semantic-bridge.mjs';
 const synthetic=()=>({
  schema:INTEGRATED_SEMANTIC_SCHEMA,id:'model-design-sample',
@@ -86,4 +86,51 @@ test('no type-specific layouts: same contract accepts other semantic programs',(
  assert.equal(out.payload.authoredChoices.shelters.length,2);
  assert.equal(out.payload.authoredChoices.features[0].purpose,'Information and ticket service counter');
  assert.equal(out.status,'PREPARED_SEMANTIC_HANDOFF_NOT_B143');
+});
+
+// Injected transport/product only: no claim to execute the PRIVATE engine in CI.
+import {compileDesign,SCHEMA} from '../source/ai/b143-building-dsl.mjs';
+function injectedHost(change=()=>{}){
+ return {
+  expand:p=>({authorEcho:p.authoredChoices,operations:p.operations}),
+  derive:e=>{
+   const design={schema:SCHEMA,id:'synthetic-boundary',title:'Injected boundary product',
+    brief:'Synthetic B143 contract fixture, no semantic or art certification',
+    designOnly:true,bounds:{width:8,height:8,depth:8},elements:[
+     {id:'floor',shape:'box',mode:'add',material:'stone',origin:[0,1,0],size:[8,1,8]}]};
+   const r={design,compiled:compileDesign(design),readiness:'NOT_PREPARED',
+    constructionApproved:false,executionAllowed:false,worldContacts:0,worldWrites:0,
+    gates:Array(9).fill('BLOCKED'),BuildPlan:{operations:[]}};
+   change(r,e);return r;
+  }
+ };
+}
+test('bound PRIVATE executor recompiles source and every voxel; it never certifies meaning or ART',async()=>{
+ const a=synthetic(),snapshot=JSON.stringify(a);
+ const r=await executeIntegratedSemanticBridge(a,injectedHost());
+ assert.equal(r.status,'GENUINE_B143_CANDIDATE');
+ assert.equal(r.realB143,'RECOMPILED_SHA_MATCH');
+ assert.equal(r.semanticFulfillment,'NOT_CERTIFIED');
+ assert.equal(r.provenance,'CALLER_SUPPLIED_UNATTESTED');
+ assert.equal(r.art,'ART_HOLD');assert.equal(r.modelCalls,0);
+ assert.deepEqual(r.gates,Array(9).fill('BLOCKED'));
+ assert.equal(JSON.stringify(a),snapshot);
+ assert.equal((await executeIntegratedSemanticBridge(a,{})).reason,'PRIVATE_HOST_NOT_BOUND');
+});
+test('host rejection, semantic mutation, voxel tampering and unsafe products HOLD without leaking PRIVATE text',async()=>{
+ const hosts=[
+  {expand:()=>{throw Error('PRIVATE sensitive path and text');},derive:()=>{}},
+  injectedHost((r,e)=>{e.authorEcho.entry.face='north';}),
+  injectedHost(r=>{r.compiled.primitives[0][0]++;}),
+  injectedHost(r=>{r.compiled.geometrySha256='0'.repeat(64);}),
+  injectedHost(r=>{r.worldWrites=1;}),
+  injectedHost(r=>{r.executionAllowed=true;}),
+  injectedHost(r=>{r.gates[0]='PASS';}),
+  injectedHost(r=>{r.BuildPlan.operations.push({type:'unsafe'});})
+ ];
+ for(const host of hosts){const r=await executeIntegratedSemanticBridge(synthetic(),host);
+  assert.equal(r.status,'HOLD');assert.equal(r.reason,'PRIVATE_HOST_REJECTED');
+  assert.equal(r.worldWrites,0);assert.equal(r.realB143,'NOT_TESTED');
+  assert(!('privateProduct' in r));assert(!JSON.stringify(r).includes('sensitive'));
+ }
 });

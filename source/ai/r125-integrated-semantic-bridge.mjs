@@ -8,6 +8,7 @@
  * this public module. A valid contract is not a SOURCE/ART/Minecraft pass.
  */
 import {createHash} from 'node:crypto';
+import {verifyCompiled} from './b143-building-dsl.mjs';
 
 export const INTEGRATED_SEMANTIC_SCHEMA =
  'minecraftaibuilder-r125-integrated-semantic-intent-v1';
@@ -143,6 +144,47 @@ export function assertAuthoredSemanticsUnchanged(prepared,hostEcho){
   fail('OPERATION_PLAN_TAMPERED');
  if(sha(hostEcho)!==prepared.authorSha256)fail('HOST_CHANGED_AUTHOR_CHOICES');
  return true;
+}
+
+/** Execute the handoff against an explicitly supplied PRIVATE host.
+ * expand must resolve ALL operations or throw; derive is the existing engine,
+ * not an implicit public fallback. No IO, transport, model or world adapter.
+ * This verifies genuine source/voxels, not whether semantic meanings or ART
+ * are fulfilled. Independent PRIVATE physical and image audits remain needed.
+ */
+export async function executeIntegratedSemanticBridge(untrusted,host){
+ const prepared=prepareIntegratedSemanticBridge(untrusted);
+ if(typeof host?.expand!=='function'||typeof host?.derive!=='function')
+  return {...hold('PRIVATE_HOST_NOT_BOUND'),authorSha256:prepared.authorSha256};
+ try{
+  // Defensive copies keep untrusted host callbacks away from the commitment.
+  const expanded=await host.expand(structuredClone(prepared.payload));
+  assertAuthoredSemanticsUnchanged(prepared,expanded?.authorEcho);
+  const result=await host.derive(expanded);
+  // A host may retain its input references while compiling. Check again.
+  assertAuthoredSemanticsUnchanged(prepared,expanded?.authorEcho);
+  if(!result?.design||!result?.compiled||
+     !verifyCompiled(result.design,result.compiled))fail('HOST_B143_INVALID');
+  if(result.readiness!=='NOT_PREPARED'||result.constructionApproved!==false||
+     result.executionAllowed!==false||result.worldContacts!==0||result.worldWrites!==0||
+     !Array.isArray(result.gates)||result.gates.length!==9||
+     !result.gates.every(g=>g==='BLOCKED')||
+     !Array.isArray(result.BuildPlan?.operations)||result.BuildPlan.operations.length!==0)
+   fail('HOST_SAFETY');
+  return {...hold('INDEPENDENT_PHYSICAL_AND_ART_REVIEW_REQUIRED'),
+   status:'GENUINE_B143_CANDIDATE',realB143:'RECOMPILED_SHA_MATCH',
+   authorSha256:prepared.authorSha256,
+   operationSha256:prepared.payload.operationSha256,
+   sourceSha256:result.compiled.sourceSha256,
+   geometrySha256:result.compiled.geometrySha256,
+   // PRIVATE product: callers MUST NOT upload this object as a safe receipt.
+   privateProduct:result,authorEcho:structuredClone(expanded.authorEcho),
+   semanticFulfillment:'NOT_CERTIFIED',provenance:'CALLER_SUPPLIED_UNATTESTED'};
+ }catch{
+  // Do not leak host exception text, local paths, or authored identifiers.
+  return {...hold('PRIVATE_HOST_REJECTED'),authorSha256:prepared.authorSha256,
+   operationSha256:prepared.payload.operationSha256};
+ }
 }
 
 export const INTEGRATED_SEMANTIC_AUTHOR_PROMPT=[

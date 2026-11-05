@@ -1,5 +1,7 @@
 # MinecraftAIBuilder — 開発再開の最新正本案内（2026-11-03）
 
+**2026-11-05 V7 PRIVATE実接続・未完成**：操作列→既存PRIVATE一体エンジン→真正B143を住宅1,263／駅舎1,202セルで実再生成、保存済み最終セルと完全一致。出所は保存済みアシスタント著作からHOST派生した短いIRであり、新ローカルLLM著作ではない。登録済み空間への限定接続、未知用途・新接続の自動解決は未実装。頭上2セルの独立検査は成立、追加の頭上3セル検査は住宅0/6・駅舎3/5でHOLD。72真正画像をPRIVATE保存して実見しART REJECT。新モデル0・世界0・9 BLOCKED。必須CI双方SUCCESSと資源安全が未確定のため実推論HOLD。次は共通ホストの未対応空間バインディング。[実装・実測・制約](R125_V7_PRIVATE_ENGINE_CONNECTION_JA.md)。PRIVATEデータ・画像・パスは公開しない。
+
 **2026-11-04 V4住宅の新実測結果と一度導入・恒久再利用するローカル自動起動器（新CI未確認）**：V4 `V4J_V4_ONE_SHAREABLE.json` のモデル1要求、追加要求0、実Qwen主張・TEST DOUBLE=false、SOURCE HOLD、拒否 `GRAPH_ENTRY`。V2/V3の `MASSING_PRIMARY_VOLUME_TOO_SMALL` はV4住宅では観測されず、改善確証やART PASSには扱わない。ユーザー操作削減のため `scripts/r125-v4j-permanent-launcher.cmd` を導入。ワンタイムで同じ起動器を使用し、毎回研究ブランチを専有一時フォルダへ取得、**当該HEADの R125 V4D Local Author Bridge と Education-first offline QAの双方がSUCCESSになるまでモデル要求0のCIゲート**、ユーザーがローカル1試行開始を明示確認した場合だけ元モデル回答を1件PRIVATE保存。最新の実行スクリプトは今の段階ではV4住宅、今後研究ブランチで更新する安定入口 `scripts/r125-v4j-current-pilot.mjs` を利用。共有可能なJSONだけをWindowsクリップボードへ入れ、チャットでCtrl+Vすればよい。コピー不可ならExplorerで該当ファイルを選択。元回答・プロンプト・ローカルstudyは自動アップロード/削除なし。一時Git cloneだけ掃除する。追加入金/API/本番世界/main/保護されたEducation実機成功経路は禁止。USERのPCにこの起動器を常駐設置したとは主張せず、ユーザーが一度保存して起動した場合のみ動く。9 BLOCKEDとPR#128 Draft保持。
 
 
