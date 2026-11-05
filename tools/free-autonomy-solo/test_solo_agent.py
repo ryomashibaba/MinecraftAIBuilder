@@ -437,9 +437,9 @@ with single_agent_lock():
         # A fresh launch with unchanged config/HEAD may NOT repeat the call,
         # even after the fake provider becomes available in the test fixture.
         (self.fake / 'opencode').write_text(
-            '#!/usr/bin/env python3\\nimport sys\\n'
-            'print("Model unavailable: opencode/retired-free")\\n'
-            'sys.exit(1)\\n'
+            '#!/usr/bin/env python3\nimport sys\n'
+            'print("Model unavailable: opencode/retired-free")\n'
+            'sys.exit(1)\n'
         )
         (self.fake / 'opencode').chmod(0o755)
         cfg = dict(self.cfg, model='opencode/retired-free',
@@ -450,8 +450,8 @@ with single_agent_lock():
                          'NO_APPROVED_AVAILABLE_MODEL_IN_THIS_ENVIRONMENT')
         self.assertEqual(first['cycles'], 1)
         (self.fake / 'opencode').write_text(
-            '#!/usr/bin/env python3\\nfrom pathlib import Path\\n'
-            'Path("source/generated.txt").write_text("ok")\\n'
+            '#!/usr/bin/env python3\nfrom pathlib import Path\n'
+            'Path("source/generated.txt").write_text("ok")\n'
         )
         (self.fake / 'opencode').chmod(0o755)
         with patch('solo_agent.run_in_docker',
