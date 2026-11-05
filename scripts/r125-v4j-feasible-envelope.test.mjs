@@ -193,3 +193,33 @@ test('V5 independently authored root entry forces attach:null without tuple/pref
  missing.otherSpaces[1].attach=null;
  assert.throws(()=>convert(missing),/R125_V4K_ENTRY_FIRST_CHILD_ATTACHMENT_REQUIRED/);
 });
+
+test('V5 lossless entry mapping preserves genuine one-building B143 geometry and routes without host repair',async()=>{
+ const {syntheticFiveV4JArcadeAuthors}=
+  await import('./r125-v4j-civic-facade-study.mjs');
+ const {CIVIC_ARCADE_SCHEMA,compileCivicArcadeAuthorIntent}=
+  await import('../source/ai/r125-v4j-civic-author-ir.mjs');
+ const {materializeV4JEntryFirstAuthor:convert}=
+  await import('../source/ai/r125-v4j-feasible-envelope.mjs');
+ const example=syntheticFiveV4JArcadeAuthors().find(x=>x.genre==='housing');
+ assert(example);
+ const authored={...structuredClone(example.wholeBuilding),
+  schema:CIVIC_ARCADE_SCHEMA,arcade:structuredClone(example.arcade)};
+ const {spaces,...unchangedFields}=authored;
+ const separated={...unchangedFields,entrySpace:structuredClone(spaces[0]),
+  otherSpaces:structuredClone(spaces.slice(1))};
+ const exactOriginal=JSON.stringify(separated);
+ const mapped=convert(separated);
+ assert.equal(JSON.stringify(separated),exactOriginal);
+ assert.deepEqual(mapped.spaces,authored.spaces);
+ const a=compileCivicArcadeAuthorIntent(authored);
+ const b=compileCivicArcadeAuthorIntent(mapped);
+ assert.equal(b.b143.geometrySha256,a.b143.geometrySha256);
+ assert.equal(b.b143.sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(b.b143.sourceRoutes.zones.length,a.b143.sourceRoutes.zones.length);
+ assert.equal(b.worldContacts,0);
+ assert.equal(b.worldWrites,0);
+ assert.equal(b.constructionApproved,false);
+ assert.deepEqual(b.gates,Array(9).fill('BLOCKED'));
+ assert.equal(b.humanArt,'NOT_REVIEWED');
+});
