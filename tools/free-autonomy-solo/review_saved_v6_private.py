@@ -98,6 +98,75 @@ def choose_saved(base: Path) -> Path:
     return max(eligible)[2]
 
 
+
+def verified_candidate_bytes(raw: bytes, expected_sha: str) -> bytes:
+    """Accept exact saved bytes, or ONLY the Windows write_text CRLF transform.
+
+    The original Qwen draft was hashed from UTF-8 LF text, but on Windows
+    Path.write_text(newline=None) converted LF to CRLF at save time. Never
+    trust a changed receipt or arbitrarily normalize mixed/newline content.
+    Do not modify the saved PRIVATE original. This is NOT SOURCE QA.
+    """
+    if (not isinstance(expected_sha, str) or not SHA256.fullmatch(expected_sha)
+            or not raw or len(raw) > 20_000 or b"\x00" in raw):
+        fail("PRIVATE_SAVED_V6_CANDIDATE_SHA_MISMATCH")
+    if hashlib.sha256(raw).hexdigest() == expected_sha:
+        if len(raw) > 16_000:
+            fail("PRIVATE_MODEL_CANDIDATE_OVER_BUDGET")
+        return raw
+    # Restrict to the one known Windows text-writing transformation.
+    if (b"\r\n" not in raw or raw.count(b"\r") != raw.count(b"\r\n")
+            or raw.count(b"\n") != raw.count(b"\r\n")):
+        fail("PRIVATE_SAVED_V6_CANDIDATE_SHA_MISMATCH")
+    canonical = raw.replace(b"\r\n", b"\n")
+    if (len(canonical) > 16_000
+            or hashlib.sha256(canonical).hexdigest() != expected_sha):
+        fail("PRIVATE_SAVED_V6_CANDIDATE_SHA_MISMATCH")
+    return canonical
+
+
+def select_review_receipt(root: Path, qa: bool) -> Path:
+    name = ("V6_EXISTING_SOURCE_QA_SHAREABLE.json" if qa
+            else "V6_EXISTING_SOURCE_INSPECTION_SHAREABLE.json")
+    existing = root / name
+    if existing.is_symlink():
+        fail("PRIVATE_REVIEW_RECEIPT_ALREADY_EXISTS_NO_REPEAT")
+    if not existing.exists():
+        return existing
+    # The prior Windows newline false alarm already consumed this receipt.
+    # Preserve it unmodified, and authorize ONE narrowly bounded recovery.
+    if not qa or not existing.is_file() or existing.stat().st_size > 8_000:
+        fail("PRIVATE_REVIEW_RECEIPT_ALREADY_EXISTS_NO_REPEAT")
+    try:
+        previous = json.loads(existing.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        fail("PRIVATE_REVIEW_RECEIPT_ALREADY_EXISTS_NO_REPEAT")
+    expected = {
+        "schema": "dec-v6-existing-candidate-private-qa-v1",
+        "status": "HOLD_PRIVATE_EXISTING_CANDIDATE_NO_PUBLICATION",
+        "reason_code": "PRIVATE_SAVED_V6_CANDIDATE_SHA_MISMATCH",
+        "project": "minecraftaibuilder",
+        "baseline_commit": SOURCE_COMMIT,
+        "candidate_verified_sha256": None,
+        "original_project_changed": False,
+        "public_model_source_pushes": 0,
+        "model_calls": 0,
+        "paid_api_calls": 0,
+        "world_writes": 0,
+        "independent_docker_qa_checks_passed": 0,
+        "local_private_commits": 0,
+        "source_qa_passed": False,
+        "art_certified": False,
+        "minecraft_walking_certified": False,
+    }
+    if not isinstance(previous, dict) or previous != expected:
+        fail("PRIVATE_REVIEW_RECEIPT_ALREADY_EXISTS_NO_REPEAT")
+    recovered = root / "V6_EXISTING_SOURCE_QA_CRLF_RECOVERY_SHAREABLE.json"
+    if recovered.exists() or recovered.is_symlink():
+        fail("PRIVATE_REVIEW_RECEIPT_ALREADY_EXISTS_NO_REPEAT")
+    return recovered
+
+
 def admitted(root: Path) -> tuple[dict, Path, str]:
     report_file = regular(root, RECEIPT, 12_000)
     data = json.loads(report_file.read_text(encoding="utf-8"))
@@ -124,10 +193,8 @@ def admitted(root: Path) -> tuple[dict, Path, str]:
     expected_sha = data.get("candidate_sha256")
     if not isinstance(expected_sha, str) or not SHA256.fullmatch(expected_sha):
         fail("PRIVATE_SAVED_V6_RECEIPT_DIGEST_INVALID")
-    candidate_file = regular(root, CANDIDATE, 16_000)
-    raw = candidate_file.read_bytes()
-    if hashlib.sha256(raw).hexdigest() != expected_sha or b"\x00" in raw:
-        fail("PRIVATE_SAVED_V6_CANDIDATE_SHA_MISMATCH")
+    candidate_file = regular(root, CANDIDATE, 20_000)
+    raw = verified_candidate_bytes(candidate_file.read_bytes(), expected_sha)
     candidate = raw.decode("utf-8")
     parent = root / "private-clones"
     if parent.is_symlink() or not parent.is_dir() or parent.resolve(strict=True).parent != root.resolve(strict=True):
@@ -187,12 +254,7 @@ def run_existing(base: Path, *, qa: bool, platform_name: str = os.name,
     try:
         with lock():
             root = choose_saved(base)
-            receipt = root / (
-                "V6_EXISTING_SOURCE_QA_SHAREABLE.json" if qa
-                else "V6_EXISTING_SOURCE_INSPECTION_SHAREABLE.json"
-            )
-            if receipt.exists() or receipt.is_symlink():
-                fail("PRIVATE_REVIEW_RECEIPT_ALREADY_EXISTS_NO_REPEAT")
+            receipt = select_review_receipt(root, qa)
             cfg, workspace, digest = admitted(root)
             status["candidate_verified_sha256"] = digest
             if not qa:
@@ -223,9 +285,8 @@ def run_existing(base: Path, *, qa: bool, platform_name: str = os.name,
             if not current_source_commit():
                 fail("PUBLIC_V6_SOURCE_MOVED_DURING_QA")
             source = workspace / SOURCE_FILE
-            raw = regular(root, CANDIDATE, 16_000).read_bytes()
-            if hashlib.sha256(raw).hexdigest() != digest:
-                fail("PRIVATE_CANDIDATE_CHANGED_BEFORE_QA")
+            raw = verified_candidate_bytes(
+                regular(root, CANDIDATE, 20_000).read_bytes(), digest)
             source.write_bytes(raw)  # disposable PRIVATE clone ONLY
             if changed_files(workspace) != [SOURCE_FILE]:
                 fail("PRIVATE_CANDIDATE_CHANGED_UNEXPECTED_PATHS")
