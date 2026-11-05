@@ -297,3 +297,12 @@ AI回答原文・JSON・SVG・3Dプレビューは `%LOCALAPPDATA%\FreeAutonomyP
 `V4H_PRIVATE_SOURCE_COMPARE.html` は**3案の5視点SVGを安全な静的HTMLで横並び**にして人間が品質を調べるための非公開レビュー画面。モデルの生文言はHTMLに埋め込まず、事前定義したジャンルslugと安全な診断コードのみ表示する。HTTP外部アクセスもSCRIPTも不要。画像が存在しても **ART=NOT_REVIEWED、Minecraft walking=NOT_TESTED、正式施工=BLOCKED** のまま。ユーザー操作はダブルクリック1回を目標とし、モデル・Node・Git・Pythonの追加インストールはしない。
 
 認定対象は「一発モデル建築SOURCE試験の安全な評価入口」であり、「長時間自律コーディング完成」や「4Bが独創的建築に成功した」ことではない。独立QAに合格した生成ソースを実ゲームやEducationへ自動昇格しない。
+
+
+## 2026-11-05：MAB 1回起動で「モデル→Docker隔離QA→非公開修正成果」まで連結
+
+- 現在の研究入口：tools/free-autonomy-solo/RUN_PRIVATE_MAB_SOURCE_SESSION.cmd。単一選択プロジェクトはMinecraftAIBuilder固定。デフォルトの既存モデルは qwen3:14b。歴史的な既存CMD/PS1は書き換えない。新CMDは研究PS1のGit blobを検証、PS1は2026-11-05監査済みGit commit 6410cc2aaef09d7895159c03abfdefb0ef4402d0 と8つの依存ファイルのblob SHAを一括検証し、動くmain/ブランチ先端を使わない。
+- tools/free-autonomy-solo/run_mab_private_autonomy_once.py：固定ソースの正当性検査を維持しながら、Docker daemonと導入済み node:24-bookworm-slim を事前確認。未導入なら **モデル生成0回**でHOLD。追加Docker install/image pull/モデルpull/有料APIなし。Windows PCの既存14Bのみ。単一プロジェクトOSロックを、生成→独立QA→非公開レビュー保存にわたり保持。
+- まずモデルが実ソースに対し2段階のPRIVATE案を作成し、既存のpromote_private_real_drafts_docker.pyがネットワークなし・read-only Dockerで独立SOURCE QAを行う。QA完了後の2段階の使い捨てGitローカルcommitと一致する生成コード全文・patch・SHAはローカルPRIVATEのreviewに残る。2工程目が失敗しても1工程目の結果を保存し、全体HOLDを維持。
+- 認証を通った各ステージのファイル・コミット・SHA・QA証拠を改めて検証し、ユーザーに見せる SHAREABLE_MAB_LOCAL_SOURCE_AUTONOMY.json はハッシュ・安全状態・QA件数・HOLDだけ。原生成ソース、ローカルPCパス、原LLM回答は含まれない。生成コードのWindowsホスト実行なし、main/正式QA/PR/Pages/ゲームワールド書込みゼロ、GitHub pushゼロ、ART/gameplay/長時間自律開発の成功認定ゼロ。
+- 確認したCIは「模擬モデル＋QAのオーケストレーション」と、既存の真Dockerサンドボックス試験。ユーザーWindowsでの実Qwen14B＋Docker連続動作は**未実施**。既存ホストがDocker未導入なら起動してもHOLDになり、追加のユーザー操作は今は要求しない。実際の夜間放置・長時間自律化は、この統合経路の真のWindows実測から判断する。

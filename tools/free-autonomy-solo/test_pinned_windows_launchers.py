@@ -104,6 +104,40 @@ class WindowsRealSourceLauncherPins(unittest.TestCase):
         self.assertIn("CiSelfTest", launch)
         self.assertNotIn("/main/tools/free-autonomy-solo/", cmd)
 
+    def test_new_mab_full_session_one_click_is_sha_pinned_without_mutating_legacy(self):
+        launch = (ROOT / "RUN_PRIVATE_MAB_SOURCE_SESSION.ps1").read_text(
+            encoding="utf-8")
+        cmd = (ROOT / "RUN_PRIVATE_MAB_SOURCE_SESSION.cmd").read_text(
+            encoding="utf-8")
+        self.assertIn(
+            "$revision = '6410cc2aaef09d7895159c03abfdefb0ef4402d0'",
+            launch)
+        sources = re.findall(
+            r"@\{ Name='([^']+)'; Blob='([a-f0-9]{40})' \}", launch)
+        expected = {
+            "run_mab_private_autonomy_once.py",
+            "draft_real_project_local14b.py",
+            "promote_private_real_drafts_docker.py",
+            "private_verified_source_evidence.py",
+            "prepare_pinned_real_project.py",
+            "local_qwen_no_docker_two_step.py",
+            "docker_sandbox.py",
+            MANIFEST,
+        }
+        self.assertEqual({name for name, _ in sources}, expected)
+        for name, blob in sources:
+            with self.subTest(name=name):
+                self.assertEqual(blob, git_blob_sha(ROOT / name))
+        self.assertIn(
+            "/5b265667c622ccfe3097bcd7346bd9a16e086872/"
+            "tools/free-autonomy-solo/RUN_PRIVATE_MAB_SOURCE_SESSION.ps1",
+            cmd)
+        self.assertIn(git_blob_sha(ROOT / "RUN_PRIVATE_MAB_SOURCE_SESSION.ps1"),
+                      cmd)
+        self.assertIn("--ci-self-test", cmd)
+        self.assertIn("CiSelfTest", launch)
+        self.assertNotIn("/main/tools/free-autonomy-solo/", cmd)
+
     def test_double_click_bootstrap_pins_exact_current_pilot_source(self):
         text = (ROOT / BOOTSTRAP_CMD).read_text(encoding="utf-8")
         self.assertRegex(text, r"/[a-f0-9]{40}/tools/free-autonomy-solo/" + PILOT_PS1)

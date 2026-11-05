@@ -27,7 +27,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Python syntax check
-        run: python3 -m py_compile tools/free-autonomy-solo/solo_agent.py tools/free-autonomy-solo/docker_sandbox.py tools/free-autonomy-solo/docker_native_probe.py
+        run: python3 -m py_compile tools/free-autonomy-solo/solo_agent.py tools/free-autonomy-solo/docker_sandbox.py tools/free-autonomy-solo/docker_native_probe.py tools/free-autonomy-solo/run_mab_private_autonomy_once.py
       - name: Isolated fake OpenCode CLI safety regression
         run: python3 -m unittest discover -v -s tools/free-autonomy-solo -p 'test_*.py'
       - name: Evidence limitations
@@ -97,6 +97,7 @@ jobs:
             'tools/free-autonomy-solo/RUN_PREPARE_REAL_PROJECT_ONCE.ps1',
             'tools/free-autonomy-solo/RUN_QWEN14B_REAL_SOURCE_DRAFT_ONCE.ps1',
             'tools/free-autonomy-solo/RUN_REAL_MAB_V4H_14B_ARCHITECTURE.ps1',
+            'tools/free-autonomy-solo/RUN_PRIVATE_MAB_SOURCE_SESSION.ps1',
             'tools/free-autonomy-solo/RUN_QWEN14B_TO_PUBLIC_GITHUB_QA_ONCE.ps1',
             'tools/free-autonomy-solo/RUN_CHECK_EXISTING_PRIVATE_DRAFTS_ONCE.ps1',
             'tools/free-autonomy-solo/RUN_PUBLISH_EXISTING_QWEN_MAB_TWO_DRAFTS.ps1',
@@ -118,6 +119,11 @@ jobs:
           & cmd /c 'tools\free-autonomy-solo\RUN_REAL_MAB_V4H_14B_ARCHITECTURE.cmd' --ci-self-test
           if ($LASTEXITCODE -ne 0) { exit 2 }
           Write-Host 'WINDOWS_REAL_14B_V4H_ARCHITECTURE_BOOTSTRAP_STATIC_PASS'
+          & ./tools/free-autonomy-solo/RUN_PRIVATE_MAB_SOURCE_SESSION.ps1 -CiSelfTest
+          if ($LASTEXITCODE -ne 0) { exit 2 }
+          & cmd /c 'tools\free-autonomy-solo\RUN_PRIVATE_MAB_SOURCE_SESSION.cmd' --ci-self-test
+          if ($LASTEXITCODE -ne 0) { exit 2 }
+          Write-Host 'WINDOWS_PRIVATE_MAB_ONE_SESSION_BOOTSTRAP_STATIC_PASS_NO_MODEL'
           & cmd /c 'tools\free-autonomy-solo\RUN_CHECK_EXISTING_PRIVATE_DRAFTS_ONCE.cmd' --ci-self-test
           if ($LASTEXITCODE -ne 0) { exit 2 }
           Write-Host 'WINDOWS_EXISTING_DRAFT_STATIC_PREFLIGHT_CMD_SELF_TEST'
