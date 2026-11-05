@@ -12,7 +12,7 @@ This is a *draft-generation experiment*, NOT verified autonomous development.
 from __future__ import annotations
 
 import argparse
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 import difflib
 import hashlib
 import json
@@ -299,7 +299,8 @@ def stage_private_candidate(root: Path, lane: dict, stage: int,
 
 
 def run(project: str, model: str, *, transport=local_api,
-        private_root: Path | None = None, manifest: dict | None = None) -> dict:
+        private_root: Path | None = None, manifest: dict | None = None,
+        use_lock: bool = True) -> dict:
     manifest = load_manifest() if manifest is None else manifest
     if project not in GOALS or project not in manifest.get("project_candidates", {}):
         raise Hold("PROJECT_NOT_APPROVED")
@@ -320,7 +321,9 @@ def run(project: str, model: str, *, transport=local_api,
         "stages": [],
     }
     try:
-        with exclusive_local_project_lock():
+        # A trusted full-session supervisor can own the SAME lock throughout
+        # model generation and isolated QA; CLI and legacy callers keep locking.
+        with (exclusive_local_project_lock() if use_lock else nullcontext()):
             if not local_model_installed(model, transport=transport):
                 raise Hold("LOCAL_MODEL_NOT_INSTALLED_NO_PULL")
             admission = prepare(project, manifest, base / "PrivateClones")
