@@ -191,6 +191,8 @@ class CumulativePrivateGitChainTests(unittest.TestCase):
         self.assertEqual(report["completed_cycles"], 1)
         self.assertEqual(report["completed_qa_source_stages"], 3)
         self.assertEqual(report["private_review_stages"], 3)
+        self.assertEqual(report.get("qa_hold_reason_code"),
+                         "INDEPENDENT_DOCKER_QA_STAGE2_CHECK0_RC1")
         self.assertEqual(self.qa_count, 4)
         self.assertEqual(len(report["accepted_cycles"]), 1)
         self.assertEqual(self.calls[-1], "LOCK_RELEASED")
@@ -203,6 +205,28 @@ class CumulativePrivateGitChainTests(unittest.TestCase):
         self.assertEqual(report["status"], "HOLD_CUMULATIVE_SOURCE_OR_GIT_INTEGRITY")
         self.assertEqual(self.generation_count, 1)
         self.assertEqual(report["completed_cycles"], 0)
+        self.assertEqual(self.calls[-1], "LOCK_RELEASED")
+
+    def test_untrusted_qa_failure_diagnostics_do_not_leak_to_shareable_receipt(self):
+        def privacy_bad_qa(private_dir, project, model, *, manifest, use_lock):
+            return {"status": "HOLD", "completed_stages": 0,
+                    "private_source_review_stages": 0,
+                    "hold_reason": "SECRET_USER_PATH C:\\private\\token"}
+        report, receipt = self.run_it(cycles=1, qa=privacy_bad_qa)
+        self.assertEqual(report["status"], "HOLD_PARTIAL_QA_REVIEW_PRESERVED")
+        self.assertEqual(report["qa_hold_reason_code"],
+                         "PRIVATE_DIAGNOSTIC_NOT_SHAREABLE")
+        self.assertNotIn("SECRET_USER_PATH", receipt.read_text(encoding="utf-8"))
+
+    def test_known_draft_failure_code_is_preserved_without_qa(self):
+        def unaccepted(*args, **kwargs):
+            return {"status": "HOLD", "model_calls_attempted": 1,
+                    "hold_reason": "STAGE_1_DRAFT_NOT_ACCEPTED"}
+        report, _ = self.run_it(cycles=1, draft=unaccepted)
+        self.assertEqual(report["draft_hold_reason_code"],
+                         "STAGE_1_DRAFT_NOT_ACCEPTED")
+        self.assertEqual(report["model_calls_attempted"], 1)
+        self.assertEqual(report["completed_qa_source_stages"], 0)
         self.assertEqual(self.calls[-1], "LOCK_RELEASED")
 
     def test_docker_missing_never_calls_model(self):

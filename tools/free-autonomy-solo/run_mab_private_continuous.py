@@ -34,6 +34,14 @@ from private_verified_source_evidence import EvidenceHold
 
 PASS = "MULTICYCLE_CUMULATIVE_SOURCE_QA_PRIVATE_ONLY_ART_HOLD"
 SHA = re.compile(r"[a-f0-9]{40}\Z")
+SAFE_FAILURE_CODE = re.compile(r"[A-Z][A-Z0-9_]{2,130}\Z")
+
+
+def _safe_failure_reason(value: object) -> str:
+    """Only machine-readable hold codes leave the private QA receipt."""
+    if isinstance(value, str) and SAFE_FAILURE_CODE.fullmatch(value):
+        return value
+    return "PRIVATE_DIAGNOSTIC_NOT_SHAREABLE"
 
 
 def _successor_from_qa(
@@ -182,6 +190,8 @@ def run_cumulative(
                 summary["model_calls_attempted"] += calls
                 if draft_result.get("status") != "TWO_REAL_SOURCE_PRIVATE_DRAFTS_ONLY":
                     summary["status"] = "HOLD_CYCLE_MODEL_DRAFT_FAILED_PRIOR_QA_PRESERVED"
+                    summary["draft_hold_reason_code"] = _safe_failure_reason(
+                        draft_result.get("hold_reason"))
                     return summary, report_path
                 private_receipt = draft_result.get("private_receipt_path")
                 if not isinstance(private_receipt, str):
@@ -207,6 +217,8 @@ def run_cumulative(
                         succeeded != 2 or reviewed != 2 or
                         verified.get("github_pushes") != 0):
                     summary["status"] = "HOLD_PARTIAL_QA_REVIEW_PRESERVED"
+                    summary["qa_hold_reason_code"] = _safe_failure_reason(
+                        verified.get("hold_reason"))
                     return summary, report_path
                 safe = _verified_private_evidence(
                     verified, stage_dir, config["project_candidates"][PROJECT])
