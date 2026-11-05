@@ -316,3 +316,10 @@ AI回答原文・JSON・SVG・3Dプレビューは `%LOCALAPPDATA%\FreeAutonomyP
 - GitHub ActionsのGit連鎖テストは偽モデル+偽Docker QAである。真正Qwen14BをユーザーWindowsで動かした証明ではなく、6件のSOURCEテスト成功は美術・真正Minecraft・完成ゲームの認定ではない。基本方針（MABとBrowser Ink TPSは完全同格、OSロック、追加課金なし、Work事前承認）を維持。
 
 - Windows Git長パスのHOLDを避けるため、新連続研究のローカルprivate保存ルートとclone階層を短縮した。Windows 2022での再検証まで本物のQwen14B連続作業は未実証。
+
+## 2026-11-05 — 3サイクル目の失敗を受けた実コード継続機能
+
+- 真正Qwen3:4bの独立実測：2サイクル／4段階すべて隔離SOURCE QA合格（Actions #41951739250）。3サイクル試験は4段階まで合格、5段階目のモデル下書きでHOLD（Actions #41951663977）。停止理由の細部は当該旧CIのサニタイズ結果からは確定不能。
+- 既存 `run_mab_private_continuous.py` に `--resume-latest` を追加。ローカルPRIVATEに残った直近HOLDセッションの正本SOURCE SHA・2段階ごとのGit親子・差分対象1ファイル・private SHA256・独立QA記録をすべて再監査し、新規独立PRIVATE cloneを構築する。承認済み修正の再生成を行わず、残りのサイクルのみ実行する。失敗・改ざん時はモデル生成0回で停止。公開GitHub・元ソース・Minecraftワールドは書換えない。
+- `RUN_MAB_RESUME_LAST_QA.cmd` はWindowsの再開専用1クリック入口。既存起動器と同じ固定SHAのPowerShellを取得し、`-ResumeLatest` で呼び出す。Docker/Node像が既存状態に無ければモデル生成前にHOLD。新規実行は従来 `RUN_MAB_CUMULATIVE_6_STAGES.cmd`。
+- GitHub Actions使い捨てCIで消えたQwen4B生成ソースをこの機能で復元することは**できない**。今後本人PCのローカルPRIVATE上にQA正本が残っている場合だけ再開する。SOURCE PASSはART/ゲーム完成や夜間自律性の認定ではない。

@@ -130,6 +130,8 @@ jobs:
           Write-Host 'WINDOWS_MAB_CUMULATIVE_6_SOURCE_STATIC_PASS'
           & cmd /c 'tools\free-autonomy-solo\RUN_MAB_CUMULATIVE_6_STAGES.cmd' --ci-self-test
           if ($LASTEXITCODE -ne 0) { exit 2 }
+          & cmd /c 'tools\free-autonomy-solo\RUN_MAB_RESUME_LAST_QA.cmd' --ci-self-test
+          if ($LASTEXITCODE -ne 0) { exit 2 }
           & cmd /c 'tools\free-autonomy-solo\RUN_CHECK_EXISTING_PRIVATE_DRAFTS_ONCE.cmd' --ci-self-test
           if ($LASTEXITCODE -ne 0) { exit 2 }
           Write-Host 'WINDOWS_EXISTING_DRAFT_STATIC_PREFLIGHT_CMD_SELF_TEST'
