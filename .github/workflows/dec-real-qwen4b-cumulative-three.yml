@@ -1,4 +1,4 @@
-name: Dec genuine Qwen4B MAB three cumulative private SOURCE QA cycles
+name: Dec genuine Qwen4B MAB three cumulative private SOURCE QA cycles (guard-only instructions clarified)
 
 on:
   push:
