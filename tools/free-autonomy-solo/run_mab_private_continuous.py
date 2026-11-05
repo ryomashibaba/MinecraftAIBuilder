@@ -118,6 +118,66 @@ def _successor_from_qa(
 
 
 
+_PRIVATE_PREDECESSOR = "PRIVATE_QA_RESUME_PREDECESSOR.json"
+_PRIVATE_SESSION_RE = re.compile(r"m-[a-f0-9]{16}\Z")
+
+
+def _owned_prior_private_cycle(base: Path, newest: Path, cycle: int) -> Path:
+    """Find a QA-accepted cycle in the explicit PRIVATE predecessor chain.
+
+    A resume session only saves its *newly generated* cycles locally; accepted
+    prior cycles remain in the previous private session. Never guess an older
+    root, read arbitrary paths or silently fall back after a corrupted link.
+    """
+    canonical_base = base.resolve(strict=True)
+    node = newest
+    visited = set()
+    for _depth in range(5):  # bounded by up to three source cycles
+        if (node.is_symlink() or node.parent.resolve(strict=True) != canonical_base
+                or not _PRIVATE_SESSION_RE.fullmatch(node.name)
+                or not node.is_dir() or node.name in visited):
+            raise EvidenceHold("RESUME_PRIVATE_ANCESTRY_INVALID")
+        visited.add(node.name)
+        candidate = node / ("c" + str(cycle)) / "PrivateClones"
+        if candidate.is_symlink() or candidate.parent.is_symlink():
+            raise EvidenceHold("RESUME_PRIVATE_ANCESTRY_SYMLINK")
+        if candidate.is_dir():
+            if candidate.resolve(strict=True).parent != candidate.parent.resolve(strict=True):
+                raise EvidenceHold("RESUME_PRIVATE_CYCLE_DIRECTORY_ESCAPE")
+            return candidate
+        link = node / _PRIVATE_PREDECESSOR
+        if link.is_symlink() or not link.is_file():
+            raise EvidenceHold("RESUME_PRIVATE_PREDECESSOR_MISSING")
+        try:
+            data = json.loads(link.read_text(encoding="utf-8"))
+        except (ValueError, OSError):
+            raise EvidenceHold("RESUME_PRIVATE_PREDECESSOR_INVALID")
+        prior = data.get("prior_session")
+        if (data.get("schema") != "mab-private-source-predecessor-v1"
+                or type(prior) is not str
+                or not _PRIVATE_SESSION_RE.fullmatch(prior)):
+            raise EvidenceHold("RESUME_PRIVATE_PREDECESSOR_INVALID")
+        node = canonical_base / prior
+    raise EvidenceHold("RESUME_PRIVATE_ANCESTRY_DEPTH_EXCEEDED")
+
+
+def _save_private_resume_predecessor(newest: Path, previous: Path) -> None:
+    """Keep relative private ancestry off the shareable report entirely."""
+    if (not _PRIVATE_SESSION_RE.fullmatch(newest.name)
+            or not _PRIVATE_SESSION_RE.fullmatch(previous.name)
+            or newest == previous or previous.is_symlink()):
+        raise EvidenceHold("RESUME_PRIVATE_PREDECESSOR_INVALID")
+    data = {
+        "schema": "mab-private-source-predecessor-v1",
+        "prior_session": previous.name,
+    }
+    destination = newest / _PRIVATE_PREDECESSOR
+    with destination.open("x", encoding="utf-8") as stream:
+        json.dump(data, stream, ensure_ascii=False, sort_keys=True)
+        stream.write("\n")
+    destination.chmod(0o600)
+
+
 def _resume_verified_private_session(
     base: Path, new_root: Path, manifest: dict, model: str, cycles: int,
 ) -> tuple[dict, dict, Path, int]:
@@ -177,11 +237,11 @@ def _resume_verified_private_session(
     current = copy.deepcopy(manifest)
     fresh: Path | None = None
     for n in range(1, done + 1):
-        clones = previous_root / ("c" + str(n)) / "PrivateClones"
+        clones = _owned_prior_private_cycle(base, previous_root, n)
         if (clones.is_symlink() or not clones.is_dir() or
                 clones.parent.is_symlink() or
                 clones.resolve(strict=True).parent !=
-                (previous_root / ("c" + str(n))).resolve(strict=True)):
+                clones.parent.resolve(strict=True)):
             raise EvidenceHold("RESUME_PRIVATE_CLONE_BASE_UNTRUSTED")
         parents = [p for p in clones.iterdir()
                    if (p.is_dir() and not p.is_symlink() and
@@ -220,6 +280,9 @@ def _resume_verified_private_session(
             stage_dir, audited, current, next_root)
     if fresh is None:
         raise EvidenceHold("RESUME_NEXT_PRIVATE_CLONE_MISSING")
+    # Only after verifying all original private cycles and their Git SHA chain
+    # may the new session point to the old one. Future resumes will re-audit.
+    _save_private_resume_predecessor(new_root, previous_root)
     return earlier, current, fresh, done
 
 
