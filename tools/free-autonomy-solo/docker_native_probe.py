@@ -10,6 +10,7 @@ import subprocess
 import tempfile
 
 from docker_sandbox import DockerPolicy, SandboxHold, docker_exec
+from docker_sandbox_verified import docker_exec as docker_exec_verified
 
 
 def run_probe():
@@ -61,11 +62,25 @@ console.log('REAL_DOCKER_PROTECTIONS_PASS');
             log=base / "timeout.private.log")
         if rc != 124 or (base / "timeout.cid").exists():
             raise SandboxHold("TIMED_OUT_CONTAINER_NOT_CLEANED")
+        # Execute the December-only NEW cleanup boundary against real Linux
+        # Docker on a disposable runner. Existing SHA-pinned Windows source
+        # and prior 2-container smoke remain unchanged.
+        verified_id = base / "verified.cid"
+        verified_rc, verified_tail = docker_exec_verified(
+            policy, workspace, agent=False,
+            command=["node", "-e", "console.log('DEC_VERIFIED_OWNED_CLEANUP_REAL_DOCKER')"],
+            cidfile=verified_id, timeout=60,
+            log=base / "verified.private.log")
+        if verified_rc != 0 or "DEC_VERIFIED_OWNED_CLEANUP_REAL_DOCKER" not in verified_tail:
+            raise SandboxHold("DEC_VERIFIED_OWNED_CONTAINER_RUN_FAILED")
+        if verified_id.exists():
+            raise SandboxHold("DEC_VERIFIED_OWNED_CONTAINER_ID_NOT_RELEASED")
         return {
             "schema": "free-autonomy-docker-native-linux-smoke-v1",
             "status": "REAL_DOCKER_LINUX_SMOKE_ONLY",
             "docker_server": server,
-            "container_invocations": 2,
+            "container_invocations": 3,
+            "dec_verified_owned_docker_cleanup_real_linux": True,
             "root_filesystem_read_only": True,
             "git_metadata_read_only": True,
             "container_workspace_write": True,
