@@ -409,7 +409,8 @@ def run_in_docker(cfg: dict, command: list[str], cwd: Path, timeout: int, log: P
         raise Hold(str(ex)) from ex
 
 
-def execute(cfg: dict, *, push: bool, sandbox_attested: bool) -> dict:
+def execute(cfg: dict, *, push: bool, sandbox_attested: bool,
+            retry_unavailable_once: bool = False) -> dict:
     validate(cfg)
     if not sandbox_attested:
         raise Hold("DOCKER_RUNTIME_NOT_ACKNOWLEDGED")
@@ -473,6 +474,17 @@ def execute(cfg: dict, *, push: bool, sandbox_attested: bool) -> dict:
                 state["unverified_paths_count"] = len(unverified_paths)
                 write_atomic(state_path, state)
                 raise Hold(state["hold_reason"])
+        # A free provider's reported unavailability is a persistent HOLD.
+        # An identical automatic restart must not burn another model attempt.
+        # Only an explicit one-run operator recheck after external availability
+        # changed may retry; this is NOT proof the provider has recovered.
+        if (state.get("status") == "HOLD" and
+                state.get("hold_reason") == "NO_APPROVED_AVAILABLE_MODEL_IN_THIS_ENVIRONMENT"):
+            if not retry_unavailable_once:
+                raise Hold("MODEL_UNAVAILABLE_RETRY_REQUIRES_EXPLICIT_RECHECK")
+            state["operator_requested_unavailable_retries"] = (
+                state.get("operator_requested_unavailable_retries", 0) + 1)
+            write_atomic(state_path, state)
         # A prior successful commit is not considered remotely saved until push succeeds.
         if push:
             for item in state["commits"]:
@@ -694,10 +706,13 @@ def main() -> int:
     ap.add_argument("--config", required=True, type=Path)
     ap.add_argument("--push", action="store_true", help="Push only exact research branch; opt-in")
     ap.add_argument("--sandbox-attested", action="store_true", help="Acknowledge Docker-only sandbox requirement; not proof of isolation")
+    ap.add_argument("--retry-unavailable-once", action="store_true",
+                    help="Explicitly recheck a previously unavailable provider once after external conditions change; not automatic")
     args = ap.parse_args()
     try:
         cfg = json.loads(args.config.read_text(encoding="utf-8"))
-        state = execute(cfg, push=args.push, sandbox_attested=args.sandbox_attested)
+        state = execute(cfg, push=args.push, sandbox_attested=args.sandbox_attested,
+                        retry_unavailable_once=args.retry_unavailable_once)
         print(json.dumps({"status": state["status"], "cycles": state["cycles"], "commits": state["commits"]}, ensure_ascii=False))
         return 0 if state["status"] in {"TASK_QUEUE_COMPLETED_SOURCE_ONLY", "WINDOW_ENDED_SOURCE_ONLY"} else 2
     except (Hold, OSError, ValueError, KeyError) as ex:

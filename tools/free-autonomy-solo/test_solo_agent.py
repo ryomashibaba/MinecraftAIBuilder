@@ -432,6 +432,48 @@ with single_agent_lock():
         self.assertEqual(result['commits'], [])
         self.assertEqual(sh(self.repo, 'git', 'status', '--porcelain'), '')
 
+    def test_unavailable_provider_does_not_automatically_retry_on_restart(self):
+        # The first genuine-looking model-unavailable response is MOCKED.
+        # A fresh launch with unchanged config/HEAD may NOT repeat the call,
+        # even after the fake provider becomes available in the test fixture.
+        (self.fake / 'opencode').write_text(
+            '#!/usr/bin/env python3\\nimport sys\\n'
+            'print("Model unavailable: opencode/retired-free")\\n'
+            'sys.exit(1)\\n'
+        )
+        (self.fake / 'opencode').chmod(0o755)
+        cfg = dict(self.cfg, model='opencode/retired-free',
+                   per_task_attempts=3, max_cycles=5)
+        with patch.dict(os.environ, self.env):
+            first = execute(cfg, push=False, sandbox_attested=True)
+        self.assertEqual(first['hold_reason'],
+                         'NO_APPROVED_AVAILABLE_MODEL_IN_THIS_ENVIRONMENT')
+        self.assertEqual(first['cycles'], 1)
+        (self.fake / 'opencode').write_text(
+            '#!/usr/bin/env python3\\nfrom pathlib import Path\\n'
+            'Path("source/generated.txt").write_text("ok")\\n'
+        )
+        (self.fake / 'opencode').chmod(0o755)
+        with patch('solo_agent.run_in_docker',
+                   side_effect=AssertionError('automatic unavailable retry forbidden')):
+            with patch.dict(os.environ, self.env):
+                with self.assertRaisesRegex(
+                        Hold, 'MODEL_UNAVAILABLE_RETRY_REQUIRES_EXPLICIT_RECHECK'):
+                    execute(cfg, push=False, sandbox_attested=True)
+        preserved = json.loads((self.root / 'state' / 'state.json').read_text())
+        self.assertEqual(preserved['cycles'], 1)
+        self.assertEqual(preserved['status'], 'HOLD')
+        self.assertEqual(preserved['commits'], [])
+        # Explicit operator recheck is scoped to just this invocation.
+        with patch.dict(os.environ, self.env):
+            resumed = execute(cfg, push=False, sandbox_attested=True,
+                              retry_unavailable_once=True)
+        self.assertEqual(resumed['status'], 'TASK_QUEUE_COMPLETED_SOURCE_ONLY')
+        self.assertEqual(resumed['operator_requested_unavailable_retries'], 1)
+        self.assertEqual(resumed['cycles'], 2)
+        self.assertEqual(len(resumed['commits']), 1)
+        self.assertFalse(resumed['real_model_verified'])
+
     def test_all_explicit_free_providers_unavailable_try_each_once(self):
         (self.fake / 'opencode').write_text(
             '#!/usr/bin/env python3\nimport sys\n'
