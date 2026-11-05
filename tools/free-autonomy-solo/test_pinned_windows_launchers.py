@@ -175,7 +175,7 @@ class WindowsRealSourceLauncherPins(unittest.TestCase):
         cmd = (ROOT / "RUN_MAB_CUMULATIVE_6_STAGES.cmd").read_text(
             encoding="utf-8")
         self.assertIn(
-            "/80f0beefbd2300b2a66a50967d9a07d5d9c19fdf/"
+            "/bbbe4b1eb878c747ff05a2967f7bbef6e2f1c8ee/"
             "tools/free-autonomy-solo/RUN_MAB_CUMULATIVE_6_STAGES.ps1", cmd)
         self.assertIn(
             git_blob_sha(ROOT / "RUN_MAB_CUMULATIVE_6_STAGES.ps1"), cmd)
