@@ -42,7 +42,10 @@ import {V4J_ENVELOPE_PROTOCOL,V4J_ENVELOPE_SYSTEM_PROMPT,
  V4J_ENVELOPE_RESPONSE_FORMAT,V4J_ENVELOPE_CIVIC_SCHEMA,
  V4J_ENTRY_FIRST_PROTOCOL,V4J_ENTRY_FIRST_SYSTEM_PROMPT,
  V4J_ENTRY_FIRST_CIVIC_SCHEMA,V4J_ENTRY_FIRST_RESPONSE_FORMAT,
- materializeV4JEntryFirstAuthor}
+ materializeV4JEntryFirstAuthor,
+ V4J_PARENT_INDEX_PROTOCOL,V4J_PARENT_INDEX_SYSTEM_PROMPT,
+ V4J_PARENT_INDEX_CIVIC_SCHEMA,V4J_PARENT_INDEX_RESPONSE_FORMAT,
+ materializeV4JParentIndexAuthor}
  from '../source/ai/r125-v4j-feasible-envelope.mjs';
 
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
@@ -125,12 +128,16 @@ function validateLaunch({model,outDir,prompt,endpoint},fetcher,timeoutMs){
  return dest;
 }
 export async function runV4DLocalAuthor({
- model,outDir,prompt=DEFAULT_PROMPT,endpoint=DEFAULT_ENDPOINT,compact=false,rankedWindows=false,rankedSection=false,authoredMassing=false,authorWing=false,authorFloorplate=false,authorAtrium=false,authorMezzanine=false,authorArcade=false,precisionCivicContract=false,structuredCivicContract=false,geometryEnvelopeV4=false,entryFirstV5=false
+ model,outDir,prompt=DEFAULT_PROMPT,endpoint=DEFAULT_ENDPOINT,compact=false,rankedWindows=false,rankedSection=false,authoredMassing=false,authorWing=false,authorFloorplate=false,authorAtrium=false,authorMezzanine=false,authorArcade=false,precisionCivicContract=false,structuredCivicContract=false,geometryEnvelopeV4=false,entryFirstV5=false,parentIndexV6=false
 }={}, {fetcher=fetch,timeoutMs=180000}={}){
  if(typeof precisionCivicContract!=='boolean'||(precisionCivicContract&&!authorArcade))fail('PRECISION_CONTRACT_REQUIRES_CIVIC_AUTHOR');
  if(typeof structuredCivicContract!=='boolean'||
   (structuredCivicContract&&(!precisionCivicContract||!authorArcade)))
   fail('STRUCTURED_CONTRACT_REQUIRES_V4J_PRECISION');
+ if(typeof parentIndexV6!=='boolean'||(parentIndexV6&&
+  (!structuredCivicContract||!precisionCivicContract||!authorArcade||
+   geometryEnvelopeV4||entryFirstV5)))
+  fail('PARENT_INDEX_V6_REQUIRES_EXCLUSIVE_CIVIC_CONTRACT');
  if(typeof entryFirstV5!=='boolean'||(entryFirstV5&&
   (!structuredCivicContract||!precisionCivicContract||!authorArcade||geometryEnvelopeV4)))
   fail('ENTRY_FIRST_V5_REQUIRES_SEPARATE_CIVIC_CONTRACT');
@@ -141,7 +148,8 @@ export async function runV4DLocalAuthor({
   [compact,rankedWindows,rankedSection,authoredMassing,authorWing,authorFloorplate,authorAtrium,authorMezzanine,authorArcade].filter(Boolean).length>1)fail('AUTHOR_MODE');
  const dir=validateLaunch({model,outDir,prompt,endpoint},fetcher,timeoutMs);
  const injected=fetcher!==fetch||process.env.MAB_V4D_TEST_DOUBLE_MODE==='1',start=Date.now();
- const modelSystemPrompt=entryFirstV5?V4J_ENTRY_FIRST_SYSTEM_PROMPT:
+ const modelSystemPrompt=parentIndexV6?V4J_PARENT_INDEX_SYSTEM_PROMPT:
+  entryFirstV5?V4J_ENTRY_FIRST_SYSTEM_PROMPT:
   geometryEnvelopeV4?V4J_ENVELOPE_SYSTEM_PROMPT:
   structuredCivicContract?V4J_STRUCTURED_SYSTEM_PROMPT:
   precisionCivicContract?V4J_PRECISION_SYSTEM_PROMPT:
@@ -150,16 +158,20 @@ export async function runV4DLocalAuthor({
   authorWing?WING_SYSTEM_PROMPT:authoredMassing?MASSING_SYSTEM_PROMPT:
   rankedSection?SECTIONED_SYSTEM_PROMPT:rankedWindows?RANKED_SYSTEM_PROMPT:
   compact?COMPACT_SYSTEM_PROMPT:V4D_RELATIVE_SYSTEM_PROMPT;
- const promptProtocol=entryFirstV5?V4J_ENTRY_FIRST_PROTOCOL:
+ const promptProtocol=parentIndexV6?V4J_PARENT_INDEX_PROTOCOL:
+  entryFirstV5?V4J_ENTRY_FIRST_PROTOCOL:
   geometryEnvelopeV4?V4J_ENVELOPE_PROTOCOL:
   structuredCivicContract?V4J_STRUCTURED_PROTOCOL:
   precisionCivicContract?V4J_PRECISION_PROTOCOL:'LEGACY_AUTHOR_CONTRACT';
- const structuredSchemaSha256=entryFirstV5?
+ const structuredSchemaSha256=parentIndexV6?
+  sha(JSON.stringify(V4J_PARENT_INDEX_CIVIC_SCHEMA)):
+  entryFirstV5?
   sha(JSON.stringify(V4J_ENTRY_FIRST_CIVIC_SCHEMA)):
   geometryEnvelopeV4?
   sha(JSON.stringify(V4J_ENVELOPE_CIVIC_SCHEMA)):
   structuredCivicContract?sha(JSON.stringify(V4J_STRUCTURED_CIVIC_JSON_SCHEMA)):null;
- const responseFormat=entryFirstV5?V4J_ENTRY_FIRST_RESPONSE_FORMAT:
+ const responseFormat=parentIndexV6?V4J_PARENT_INDEX_RESPONSE_FORMAT:
+  entryFirstV5?V4J_ENTRY_FIRST_RESPONSE_FORMAT:
   geometryEnvelopeV4?V4J_ENVELOPE_RESPONSE_FORMAT:
   structuredCivicContract?V4J_STRUCTURED_RESPONSE_FORMAT:
   {type:'json_object'};
@@ -235,8 +247,9 @@ export async function runV4DLocalAuthor({
     fail('MODEL_ORIGINAL_MISSING_OR_OVERSIZE');
    try{parsed=JSON.parse(raw);}catch{fail('MODEL_RESPONSE_NOT_PURE_JSON');}
   }finally{clearTimeout(timer);}
-  const compilationAuthor=entryFirstV5?
-   materializeV4JEntryFirstAuthor(parsed):parsed;
+  const compilationAuthor=parentIndexV6?
+   materializeV4JParentIndexAuthor(parsed):
+   entryFirstV5?materializeV4JEntryFirstAuthor(parsed):parsed;
   const result=authorArcade?compileCivicArcadeAuthorIntent(compilationAuthor):
     authorMezzanine?compileMezzanineAuthorIntent(parsed):
    authorAtrium?compileHeightAuthorIntent(parsed):

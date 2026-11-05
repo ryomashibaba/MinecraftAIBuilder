@@ -21,10 +21,10 @@ export async function runStableLocalStudy(args,{
  runner=runV3OneGenreStudy
 }={}){
  const a=parseStableArgs(args);
- const result=await runner({...a,genre:'housing',entryFirstV5:true});
- if(result.schema!=='minecraftaibuilder-v4j-v5-one-genre-safe-handoff-v1'||
+ const result=await runner({...a,genre:'housing',parentIndexV6:true});
+ if(result.schema!=='minecraftaibuilder-v4j-v6-one-genre-safe-handoff-v1'||
   result.genre!=='housing'||
-  result.promptProtocol!=='V4J_SINGLE_RESPONSE_EXPLICIT_ENTRY_V5'||
+  result.promptProtocol!=='V4J_SINGLE_RESPONSE_AUTHOR_PARENT_INDEX_V6'||
   result.replayAdditionalModelCalls!==0||
   !Number.isSafeInteger(result.modelGenerationAttempts)||
   result.modelGenerationAttempts<0||result.modelGenerationAttempts>1||
@@ -34,7 +34,7 @@ export async function runStableLocalStudy(args,{
   result.gates.some(g=>g!=='BLOCKED'))
   fail('UNTRUSTED_SOURCE_RECEIPT');
  const dir=path.resolve(a.outDir);
- const safeFile=path.join(dir,'V4J_V5_ONE_SHAREABLE.json');
+ const safeFile=path.join(dir,'V4J_V6_ONE_SHAREABLE.json');
  const actual=JSON.parse(fs.readFileSync(safeFile,'utf8'));
  if(JSON.stringify(actual)!==JSON.stringify(result))
   fail('PRIVATE_SAFE_FILE_MISMATCH');

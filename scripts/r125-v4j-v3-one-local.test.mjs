@@ -212,3 +212,44 @@ test('V5 opt-in uses one injected POST, raw SHA and replay reject without repair
   assert(!fs.existsSync(path.join(out,'V4J_V4_ONE_SHAREABLE.json')));
  }finally{fs.rmSync(root,{recursive:true,force:true});}
 });
+
+test('V6 fake Ollama uses one POST and preserves private ORIGINAL and HOLD without root-north repair',async()=>{
+ const {V4J_PARENT_INDEX_RESPONSE_FORMAT:fmt6,V4J_PARENT_INDEX_SYSTEM_PROMPT:prompt}=
+  await import('../source/ai/r125-v4j-feasible-envelope.mjs');
+ const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'v4j-v6-index-'));
+ const out=path.join(tmp,'private'),methods=[];
+ const raw=JSON.stringify({schema:'invalid',entrySpace:{attach:null},otherSpaces:[]});
+ const fetcher=async(_url,opts)=>{
+  methods.push({method:opts.method,body:opts.body});
+  if(opts.method==='GET')return {ok:true,text:async()=>JSON.stringify({
+   models:[{name:'qwen3:14b'}]})};
+  return {ok:true,text:async()=>JSON.stringify({
+   model:'qwen3:14b',choices:[{finish_reason:'stop',
+    message:{role:'assistant',content:raw}}]})};
+ };
+ try{
+  const status=await runV3OneGenreStudy({model:'qwen3:14b',
+   outDir:out,genre:'housing',parentIndexV6:true},{fetcher,timeoutMs:15000});
+  assert.deepEqual(methods.map(x=>x.method),['GET','POST']);
+  const posted=JSON.parse(methods[1].body);
+  assert.deepEqual(posted.response_format,fmt6);
+  assert.equal(posted.messages[0].content,prompt);
+  assert.equal(status.promptProtocol,'V4J_SINGLE_RESPONSE_AUTHOR_PARENT_INDEX_V6');
+  assert.equal(status.schema,'minecraftaibuilder-v4j-v6-one-genre-safe-handoff-v1');
+  assert.equal(status.modelGenerationAttempts,1);
+  assert.equal(status.replayAdditionalModelCalls,0);
+  assert.equal(status.replayStatus,'HOLD_REPLAY_SOURCE_REJECTED');
+  assert.equal(status.compilerRejectCode,'PARENT_INDEX_ROOT_FIELDS');
+  assert.equal(status.reportedStatus,'HOLD_MODEL_OR_SOURCE_INVALID_NO_REPAIR');
+  assert.equal(status.sourceCandidateVerified,false);
+  assert.equal(status.explicitlyInjectedTestResponse,true);
+  assert.deepEqual(status.gates,Array(9).fill('BLOCKED'));
+  assert.equal(status.worldWrites,0);
+  assert.equal(fs.readFileSync(path.join(out,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8'),raw);
+  const shared=fs.readFileSync(path.join(out,'V4J_V6_ONE_SHAREABLE.json'),'utf8');
+  assert.deepEqual(JSON.parse(shared),status);
+  assert(!shared.includes(raw));
+  assert(!shared.includes(tmp));
+  assert(!fs.existsSync(path.join(out,'V4J_V5_ONE_SHAREABLE.json')));
+ }finally{fs.rmSync(tmp,{recursive:true,force:true});}
+});

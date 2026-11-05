@@ -16,7 +16,7 @@ import {buildV4DShareableReceipt}
  from './r125-v4d-shareable-receipt.mjs';
 import {V4J_STRUCTURED_PROTOCOL}
  from '../source/ai/r125-v4j-structured-author-schema.mjs';
-import {V4J_ENTRY_FIRST_PROTOCOL}
+import {V4J_ENTRY_FIRST_PROTOCOL,V4J_PARENT_INDEX_PROTOCOL}
  from '../source/ai/r125-v4j-feasible-envelope.mjs';
 import {V4J_ENVELOPE_PROTOCOL}
  from '../source/ai/r125-v4j-feasible-envelope.mjs';
@@ -53,6 +53,10 @@ export async function runV3OneGenreStudy(options,{
  if(!options||!MODEL.test(options.model??'')||
   typeof options.outDir!=='string'||!Number.isSafeInteger(timeoutMs)||
   timeoutMs<1000||timeoutMs>300000)fail('OPTIONS');
+ if(options.parentIndexV6!==undefined&&typeof options.parentIndexV6!=='boolean')
+  fail('PARENT_INDEX_V6_BOOLEAN_ONLY');
+ if(options.parentIndexV6&&(options.entryFirstV5||options.geometryEnvelopeV4))
+  fail('V6_MUST_NOT_COMBINE_OLD_PROTOCOLS');
  if(options.entryFirstV5!==undefined&&typeof options.entryFirstV5!=='boolean')
   fail('V5_ONLY_EXPLICIT_BOOLEAN');
  if(options.entryFirstV5&&options.geometryEnvelopeV4)
@@ -61,6 +65,7 @@ export async function runV3OneGenreStudy(options,{
   typeof options.geometryEnvelopeV4!=='boolean')fail('GEOMETRY_V4_BOOLEAN_ONLY');
  const useV4=options.geometryEnvelopeV4===true;
  const useV5=options.entryFirstV5===true;
+ const useV6=options.parentIndexV6===true;
  const brief=FIVE_INDEPENDENT_BRIEFS.find(x=>x.genre===options.genre);
  if(!brief)fail('UNKNOWN_GENRE');
  const out=path.resolve(options.outDir),parent=path.dirname(out);
@@ -74,7 +79,7 @@ export async function runV3OneGenreStudy(options,{
  const report=await runOne({
   model:options.model,outDir:out,prompt:brief.prompt,authorArcade:true,
   precisionCivicContract:true,structuredCivicContract:true,
-  geometryEnvelopeV4:useV4,entryFirstV5:useV5
+  geometryEnvelopeV4:useV4,entryFirstV5:useV5,parentIndexV6:useV6
  },{fetcher,timeoutMs});
  const receipt=buildV4DShareableReceipt(report);
  if(injected&&receipt.explicitlyInjectedTestResponse!==true)
@@ -111,12 +116,14 @@ export async function runV3OneGenreStudy(options,{
    replayStatus='HOLD_OFFLINE_REPLAY_SAFE_STOP';
   }
  }
- const handoffName=useV5?'V4J_V5_ONE_SHAREABLE.json':useV4?'V4J_V4_ONE_SHAREABLE.json':'V4J_V3_ONE_SHAREABLE.json';
+ const handoffName=useV6?'V4J_V6_ONE_SHAREABLE.json':useV5?'V4J_V5_ONE_SHAREABLE.json':useV4?'V4J_V4_ONE_SHAREABLE.json':'V4J_V3_ONE_SHAREABLE.json';
  const safe={
-  schema:useV5?'minecraftaibuilder-v4j-v5-one-genre-safe-handoff-v1':
+  schema:useV6?'minecraftaibuilder-v4j-v6-one-genre-safe-handoff-v1':
+   useV5?'minecraftaibuilder-v4j-v5-one-genre-safe-handoff-v1':
    useV4?'minecraftaibuilder-v4j-v4-one-genre-safe-handoff-v1':
    'minecraftaibuilder-v4j-v3-one-genre-safe-handoff-v1',
-  genre:brief.genre,promptProtocol:useV5?V4J_ENTRY_FIRST_PROTOCOL:useV4?V4J_ENVELOPE_PROTOCOL:V4J_STRUCTURED_PROTOCOL,
+  genre:brief.genre,promptProtocol:useV6?V4J_PARENT_INDEX_PROTOCOL:
+   useV5?V4J_ENTRY_FIRST_PROTOCOL:useV4?V4J_ENVELOPE_PROTOCOL:V4J_STRUCTURED_PROTOCOL,
   // Public SHA of the versioned SYSTEM instruction, never the private model text.
   // Same protocol label may have successive non-retroactive study refinements.
   systemPromptSha256:/^[a-f0-9]{64}$/.test(report.systemPromptSha256??'')?
@@ -146,7 +153,9 @@ if(process.argv[1]===fileURLToPath(import.meta.url)){
   const result=await runV3OneGenreStudy(options);
   console.log(JSON.stringify({status:result.reportedStatus,
    replay:result.replayStatus,modelCalls:result.modelGenerationAttempts,
-   shareOnly:result.promptProtocol===V4J_ENTRY_FIRST_PROTOCOL?
+   shareOnly:result.promptProtocol===V4J_PARENT_INDEX_PROTOCOL?
+    'V4J_V6_ONE_SHAREABLE.json':
+    result.promptProtocol===V4J_ENTRY_FIRST_PROTOCOL?
     'V4J_V5_ONE_SHAREABLE.json':
     result.promptProtocol===V4J_ENVELOPE_PROTOCOL?
     'V4J_V4_ONE_SHAREABLE.json':'V4J_V3_ONE_SHAREABLE.json',worldWrites:0}));

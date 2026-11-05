@@ -107,3 +107,76 @@ export function materializeV4JEntryFirstAuthor(input){
  const {entrySpace,otherSpaces,...rest}=author;
  return {...rest,spaces:[entrySpace,...otherSpaces]};
 }
+
+/**
+ * Opt-in V6 research: structural root-relative link without an LLM knowing
+ * the dynamically authored first room ID. Author selects parentIndex and
+ * direction. HOST only looks up that already authored room ID; never shifts,
+ * rotates, relocates, repairs, or changes the authored spatial relationship.
+ * V2-V5 schemas/prompts and the frozen SOURCE compiler remain unchanged.
+ */
+export const V4J_PARENT_INDEX_PROTOCOL='V4J_SINGLE_RESPONSE_AUTHOR_PARENT_INDEX_V6';
+const v6=structuredClone(V4J_ENTRY_FIRST_CIVIC_SCHEMA);
+const sideValues=['north','east','south','west'];
+const makeAttachment=(indexProperty,sides)=>({
+ type:'object',
+ properties:{
+  parentIndex:indexProperty,
+  side:{enum:sides},
+  shift:{type:'integer',minimum:-3,maximum:3}
+ },
+ required:['parentIndex','side','shift'],
+ additionalProperties:false
+});
+const rootAttach=makeAttachment({type:'integer',enum:[0]},['east','south','west']);
+const laterAttach=makeAttachment({type:'integer',minimum:1,maximum:3},sideValues);
+for(const item of v6.properties.otherSpaces.items.oneOf){
+ if(item.properties.attach?.type!=='object')
+  throw Error('V4J_V6_CHILD_ATTACH_SCHEMA_DRIFT');
+ item.properties.attach={oneOf:[structuredClone(rootAttach),structuredClone(laterAttach)]};
+}
+if(v6.properties.entrySpace.properties.attach?.type!=='null'||
+ v6.properties.otherSpaces.minItems!==2||
+ v6.properties.otherSpaces.maxItems!==4)
+ throw Error('V4J_V6_ENTRY_SCHEMA_DRIFT');
+export const V4J_PARENT_INDEX_CIVIC_SCHEMA=v6;
+export const V4J_PARENT_INDEX_RESPONSE_FORMAT={
+ type:'json_schema',
+ json_schema:{name:'v4j_root_side_safe_author_v6',strict:true,schema:v6}
+};
+export const V4J_PARENT_INDEX_SYSTEM_PROMPT=[
+ V4J_ENVELOPE_SYSTEM_PROMPT,
+ 'V6 REQUIRED OUTPUT CONTRACT overrides earlier JSON shape and room attachment rules: replace root spaces ARRAY with entrySpace OBJECT and otherSpaces ARRAY (2..4). entrySpace is the FIRST covered public reception; attach MUST be null. Every other room is fully author-designed but its attach has exactly {parentIndex,side,shift} instead of {to,side,shift}. parentIndex is YOUR integer index in [entrySpace,...otherSpaces], starting with entrySpace=0. Parent must be earlier than the current authored room, never itself or a future room. The FIRST child can therefore only select parentIndex=0.',
+ 'ROOT ENTRY SAFETY: whenever YOU choose parentIndex=0, side can ONLY be east, south or west; north is forbidden. Whenever YOU choose parentIndex>=1, side may be north,east,south,west subject to all real SOURCE geometrical tests. Do not assume that north is banned for all rooms. Preserve creative decisions on functions, shapes, roofs, facades, shifts, and massing. There is NO fixed template topology.',
+ 'Host only converts YOUR earlier parentIndex to the already authored parent room id, with no route repair, no shifts or redesign. The original response stays private and hash-pinned. If any authored index is not earlier, root north is occupied, or any true geometry fails, fail closed. ONE original JSON and no additional model request.'
+].join('\n');
+export function materializeV4JParentIndexAuthor(input){
+ const fail=x=>{throw Error('R125_V4L_PARENT_INDEX_'+x);};
+ if(!v5Record(input)||Object.keys(input).sort().join('|')!==
+  v6.required.slice().sort().join('|')||
+  input.schema!==V4J_ENVELOPE_CIVIC_SCHEMA.properties.schema.enum[0])
+  fail('ROOT_FIELDS');
+ if(!v5Record(input.entrySpace)||input.entrySpace.kind!=='covered'||
+  input.entrySpace.attach!==null)
+  fail('ENTRY_CONTRACT');
+ if(!Array.isArray(input.otherSpaces)||
+  input.otherSpaces.length<2||input.otherSpaces.length>4)
+  fail('SPACES_COUNT');
+ const authored=structuredClone(input);
+ const {entrySpace,otherSpaces,...rest}=authored;
+ const spaces=[entrySpace,...otherSpaces];
+ for(let i=1;i<spaces.length;i++){
+  const a=spaces[i]?.attach;
+  if(!v5Record(a)||Object.keys(a).sort().join('|')!==
+    'parentIndex|shift|side'||!Number.isSafeInteger(a.parentIndex)||
+    a.parentIndex<0||a.parentIndex>=i||
+    !Number.isSafeInteger(a.shift)||a.shift < -3||a.shift > 3||
+    !sideValues.includes(a.side))
+   fail('PARENT_BEFORE_CHILD');
+  if(a.parentIndex===0&&a.side==='north')fail('ROOT_NORTH_FORBIDDEN');
+  const parentId=spaces[a.parentIndex]?.id;
+  if(typeof parentId!=='string')fail('PARENT_ID');
+  spaces[i].attach={to:parentId,side:a.side,shift:a.shift};
+ }
+ return {...rest,spaces};
+}

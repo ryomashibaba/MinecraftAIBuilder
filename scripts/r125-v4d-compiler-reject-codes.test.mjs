@@ -40,3 +40,12 @@ test('V5 entry contract rejects with allowlisted private-safe error families',()
    'ENTRY_FIRST_'+token);
  }
 });
+
+test('V6 root-north prohibition has explicit private-safe error codes',()=>{
+ for(const token of ['ROOT_FIELDS','ENTRY_CONTRACT','SPACES_COUNT',
+  'PARENT_BEFORE_CHILD','ROOT_NORTH_FORBIDDEN','PARENT_ID']){
+  const code='PARENT_INDEX_'+token;
+  assert.equal(classifyPrivateCompilerRejection('R125_V4L_PARENT_INDEX_'+token),code);
+  assert.equal(safeStaticCompilerRejectCode(code),code);
+ }
+});

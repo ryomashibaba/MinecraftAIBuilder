@@ -223,3 +223,84 @@ test('V5 lossless entry mapping preserves genuine one-building B143 geometry and
  assert.deepEqual(b.gates,Array(9).fill('BLOCKED'));
  assert.equal(b.humanArt,'NOT_REVIEWED');
 });
+
+test('V6 numbered attachment reserves north of root while keeping nonroot north available',async()=>{
+ const {V4J_PARENT_INDEX_PROTOCOL,V4J_PARENT_INDEX_CIVIC_SCHEMA:q,
+  V4J_PARENT_INDEX_RESPONSE_FORMAT:fmt6,V4J_PARENT_INDEX_SYSTEM_PROMPT:prompt,
+  materializeV4JParentIndexAuthor:adapt}=
+  await import('../source/ai/r125-v4j-feasible-envelope.mjs');
+ assert.equal(V4J_PARENT_INDEX_PROTOCOL,'V4J_SINGLE_RESPONSE_AUTHOR_PARENT_INDEX_V6');
+ assert.equal(q.properties.entrySpace.properties.attach.type,'null');
+ const roomVariants=q.properties.otherSpaces.items.oneOf;
+ assert(roomVariants.length===2);
+ for(const room of roomVariants){
+  const options=room.properties.attach.oneOf;
+  assert.equal(options.length,2);
+  assert.deepEqual(options[0].properties.parentIndex.enum,[0]);
+  assert(!options[0].properties.side.enum.includes('north'));
+  assert(options[0].properties.side.enum.includes('west'));
+  assert.equal(options[1].properties.parentIndex.minimum,1);
+  assert.equal(options[1].properties.parentIndex.maximum,3);
+  assert(options[1].properties.side.enum.includes('north'));
+ }
+ assert.equal(fmt6.json_schema.strict,true);
+ assert.deepEqual(fmt6.json_schema.schema,q);
+ assert(q.properties.massing.properties.cutWidth.maximum===8);
+ assert(prompt.includes('parentIndex=0'));
+ const sample={};
+ for(const k of q.required)sample[k]={};
+ sample.schema=q.properties.schema.enum[0];
+ sample.entrySpace={id:'housing-entry',kind:'covered',attach:null};
+ sample.otherSpaces=[
+  {id:'reading-wing',kind:'covered',attach:{parentIndex:0,side:'east',shift:2}},
+  {id:'sky-plaza',kind:'sky',attach:{parentIndex:1,side:'north',shift:-1}}
+ ];
+ const exact=JSON.stringify(sample),mapped=adapt(sample);
+ assert.equal(JSON.stringify(sample),exact);
+ assert.equal(mapped.spaces[1].attach.to,'housing-entry');
+ assert.deepEqual(mapped.spaces[1].attach,{to:'housing-entry',side:'east',shift:2});
+ assert.deepEqual(mapped.spaces[2].attach,{to:'reading-wing',side:'north',shift:-1});
+ const north=structuredClone(sample);north.otherSpaces[0].attach.side='north';
+ assert.throws(()=>adapt(north),/R125_V4L_PARENT_INDEX_ROOT_NORTH_FORBIDDEN/);
+ const future=structuredClone(sample);future.otherSpaces[0].attach.parentIndex=1;
+ assert.throws(()=>adapt(future),/R125_V4L_PARENT_INDEX_PARENT_BEFORE_CHILD/);
+ const self=structuredClone(sample);self.otherSpaces[1].attach.parentIndex=2;
+ assert.throws(()=>adapt(self),/R125_V4L_PARENT_INDEX_PARENT_BEFORE_CHILD/);
+ const wrong=structuredClone(sample);wrong.entrySpace.attach={parentIndex:0,side:'east',shift:0};
+ assert.throws(()=>adapt(wrong),/R125_V4L_PARENT_INDEX_ENTRY_CONTRACT/);
+});
+test('V6 authentic housing SOURCE geometry equals original model-authored reference topology',async()=>{
+ const {syntheticFiveV4JArcadeAuthors}=
+  await import('./r125-v4j-civic-facade-study.mjs');
+ const {CIVIC_ARCADE_SCHEMA,compileCivicArcadeAuthorIntent}=
+  await import('../source/ai/r125-v4j-civic-author-ir.mjs');
+ const {materializeV4JParentIndexAuthor:adapt}=
+  await import('../source/ai/r125-v4j-feasible-envelope.mjs');
+ const sample=syntheticFiveV4JArcadeAuthors().find(x=>x.genre==='housing');
+ assert(sample);
+ const original={...structuredClone(sample.wholeBuilding),
+  schema:CIVIC_ARCADE_SCHEMA,arcade:structuredClone(sample.arcade)};
+ const {spaces,...otherFields}=original;
+ const input={...otherFields,entrySpace:structuredClone(spaces[0]),
+  otherSpaces:spaces.slice(1).map((s,i)=>{
+   const parentIndex=spaces.slice(0,i+1).findIndex(p=>p.id===s.attach.to);
+   assert(parentIndex>=0);
+   return {...structuredClone(s),attach:{
+    parentIndex,side:s.attach.side,shift:s.attach.shift
+   }};
+  })};
+ const snapshot=JSON.stringify(input);
+ const restored=adapt(input);
+ assert.equal(JSON.stringify(input),snapshot);
+ assert.deepEqual(restored.spaces,original.spaces);
+ const sourceBefore=compileCivicArcadeAuthorIntent(original);
+ const sourceAfter=compileCivicArcadeAuthorIntent(restored);
+ assert.equal(sourceBefore.b143.geometrySha256,sourceAfter.b143.geometrySha256);
+ assert.equal(sourceBefore.b143.sourceSha256,sourceAfter.b143.sourceSha256);
+ assert.equal(sourceAfter.b143.sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(sourceAfter.worldWrites,0);
+ assert.equal(sourceAfter.worldContacts,0);
+ assert.equal(sourceAfter.constructionApproved,false);
+ assert.deepEqual(sourceAfter.gates,Array(9).fill('BLOCKED'));
+ assert.equal(sourceAfter.humanArt,'NOT_REVIEWED');
+});
