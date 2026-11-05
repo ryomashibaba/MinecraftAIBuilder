@@ -69,6 +69,16 @@ def run() -> dict:
             ]
             if result.get("reason_code"):
                 report["reason_code"] = result["reason_code"]
+            # The failure code is from the trusted local proposal validator.
+            # Never upload the model reply, generated code, private Git
+            # worktree or arbitrary raw diagnostic from the model.
+            if result.get("draft_hold_reason_code"):
+                report["draft_hold_reason_code"] = result["draft_hold_reason_code"]
+            if result.get("qa_hold_reason_code"):
+                report["qa_hold_reason_code"] = result["qa_hold_reason_code"]
+            if isinstance(result.get("draft_rejection_reason_codes"), list):
+                report["draft_rejection_reason_codes"] = result[
+                    "draft_rejection_reason_codes"][:8]
             if (result.get("status") == PASS and
                     report["completed_cycles"] == 3 and
                     report["qa_source_stages"] == 6 and
