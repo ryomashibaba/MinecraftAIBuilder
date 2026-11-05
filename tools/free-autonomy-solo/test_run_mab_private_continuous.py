@@ -157,7 +157,7 @@ class CumulativePrivateGitChainTests(unittest.TestCase):
 
     def test_six_cumulative_source_revisions_in_one_locked_session(self):
         report, path = self.run_it(cycles=3)
-        self.assertEqual(report["status"], PASS)
+        self.assertEqual(report["status"], PASS, report.get("reason_code"))
         self.assertEqual(report["completed_cycles"], 3)
         self.assertEqual(report["completed_qa_source_stages"], 6)
         self.assertEqual(report["private_review_stages"], 6)
@@ -182,7 +182,7 @@ class CumulativePrivateGitChainTests(unittest.TestCase):
     def test_cycle_two_second_stage_qa_failure_preserves_cycle_one(self):
         self.fail_qa_on_check = 4
         report, path = self.run_it(cycles=3)
-        self.assertEqual(report["status"], "HOLD_PARTIAL_QA_REVIEW_PRESERVED")
+        self.assertEqual(report["status"], "HOLD_PARTIAL_QA_REVIEW_PRESERVED", report.get("reason_code"))
         self.assertEqual(report["completed_cycles"], 1)
         self.assertEqual(report["completed_qa_source_stages"], 3)
         self.assertEqual(report["private_review_stages"], 3)
