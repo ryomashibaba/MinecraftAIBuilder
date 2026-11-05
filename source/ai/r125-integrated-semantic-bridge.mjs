@@ -83,6 +83,28 @@ export function validateIntegratedSemanticIntent(untrusted){
 }
 
 /**
+ * Lossless executable handoff declarations for the PRIVATE integrated host.
+ * This is NOT a geometry generator: every datum comes from the original author.
+ * The host must bind these symbolic space keys to real geometry or fail closed.
+ */
+export function projectIntegratedSemanticOperations(untrusted){
+ const author=validateIntegratedSemanticIntent(untrusted);
+ const operations=[
+  ...author.spaces.map(s=>({type:'SPACE',key:s.key,
+   purpose:s.purpose,link:s.link})),
+  ...author.roofs.map(r=>({type:'ROOF',space:r.space,
+   profile:r.profile,axis:r.axis,rank:r.rank})),
+  {type:'ENTRY',face:author.entry.face,space:author.entry.space,
+   intent:author.entry.intent},
+  ...author.shelters.map(s=>({type:'SHELTER',purpose:s.purpose,
+   connectTo:s.connectTo,edge:s.edge,scale:s.scale,roof:s.roof})),
+  ...author.features.map(f=>({type:'FEATURE',space:f.space,
+   kind:f.kind,purpose:f.purpose}))
+ ];
+ return {operations,operationSha256:sha(operations)};
+}
+
+/**
  * A precise symbolic handoff, NOT a secretly auto-filled roof/voxel design.
  * PRIVATE host must map these symbols to its old intent.json + original B143
  * source. If it cannot preserve author choices, it MUST HOLD (no fallback).
@@ -90,10 +112,11 @@ export function validateIntegratedSemanticIntent(untrusted){
 export function prepareIntegratedSemanticBridge(untrusted){
  const author=validateIntegratedSemanticIntent(untrusted);
  const authorSha256=sha(author);
+ const {operations,operationSha256}=projectIntegratedSemanticOperations(author);
  const payload={
   schema:'minecraftaibuilder-r125-integrated-host-handoff-v1',
   authorSource:'CALLER_SUPPLIED_UNATTESTED',authorSha256,
-  authoredChoices:author,
+  authoredChoices:author,operations,operationSha256,
   hostResponsibilities:[
    'BIND_EXISTING_SOURCE_AND_GEOMETRY_SHA_PRIVATE',
    'MAP_SPACE_KEYS_TO_ORIGINAL_AND_NEW_SPACE_ANCHORS',
@@ -113,6 +136,10 @@ export function assertAuthoredSemanticsUnchanged(prepared,hostEcho){
  if(prepared?.status!=='PREPARED_SEMANTIC_HANDOFF_NOT_B143' ||
   prepared.payload?.authorSha256!==sha(prepared.payload?.authoredChoices))
   fail('PREPARED_TAMPERED');
+ const expected=projectIntegratedSemanticOperations(prepared.payload.authoredChoices);
+ if(prepared.payload.operationSha256!==expected.operationSha256 ||
+  sha(prepared.payload.operations)!==expected.operationSha256)
+  fail('OPERATION_PLAN_TAMPERED');
  if(sha(hostEcho)!==prepared.authorSha256)fail('HOST_CHANGED_AUTHOR_CHOICES');
  return true;
 }

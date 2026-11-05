@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {INTEGRATED_SEMANTIC_SCHEMA,validateIntegratedSemanticIntent,
- prepareIntegratedSemanticBridge,assertAuthoredSemanticsUnchanged}
+ prepareIntegratedSemanticBridge,assertAuthoredSemanticsUnchanged,
+ projectIntegratedSemanticOperations}
  from '../source/ai/r125-integrated-semantic-bridge.mjs';
 const synthetic=()=>({
  schema:INTEGRATED_SEMANTIC_SCHEMA,id:'model-design-sample',
@@ -32,6 +33,27 @@ test('synthetic author intent is preserved, but it is NOT genuine B143',()=>{
  const changed=synthetic();changed.entry.face='north';
  assert.throws(()=>assertAuthoredSemanticsUnchanged(result,changed),
   /HOST_CHANGED_AUTHOR_CHOICES/);
+});
+test('PRIVATE operation plan projects every authored choice without geometry defaults',()=>{
+ const raw=synthetic(),snapshot=JSON.stringify(raw);
+ const {operations,operationSha256}=projectIntegratedSemanticOperations(raw);
+ assert.equal(operations.length,7);
+ assert.deepEqual(operations.map(o=>o.type),
+  ['SPACE','SPACE','ROOF','ROOF','ENTRY','SHELTER','FEATURE']);
+ assert.deepEqual(operations[1].link,{to:'hall',kind:'open'});
+ assert.equal(operations[2].profile,'gable');
+ assert.equal(operations[4].face,'south');
+ assert.equal(operations[5].roof,'shed');
+ assert.equal(operations[6].kind,'seat');
+ assert.equal(JSON.stringify(raw),snapshot);
+ const ready=prepareIntegratedSemanticBridge(raw);
+ assert.deepEqual(ready.payload.operations,operations);
+ assert.equal(ready.payload.operationSha256,operationSha256);
+ assert.equal(ready.realB143,'NOT_TESTED');
+ const tampered=prepareIntegratedSemanticBridge(raw);
+ tampered.payload.operations[2].profile='flat';
+ assert.throws(()=>assertAuthoredSemanticsUnchanged(tampered,raw),
+  /OPERATION_PLAN_TAMPERED/);
 });
 test('author topology, roof priority and all meaning must be explicit',()=>{
  const changes=[
