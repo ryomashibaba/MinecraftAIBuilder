@@ -1,0 +1,43 @@
+name: Dec genuine Qwen4B two cumulative MAB SOURCE cycles in isolated Docker
+
+on:
+  push:
+    branches:
+      - research/dec-free-autonomy-solo-pilot-20261104
+    paths:
+      - 'tools/free-autonomy-solo/real_qwen4b_two_cumulative_ci.py'
+      - '.github/workflows/dec-real-qwen4b-two-cumulative.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  two-true-qwen4b-cumulative-source-cycles:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Real source runner static syntax
+        run: |
+          python3 -m py_compile tools/free-autonomy-solo/real_qwen4b_two_cumulative_ci.py
+          python3 -m py_compile tools/free-autonomy-solo/run_mab_private_continuous.py
+      - name: Download public free model and QA images only to disposable CI
+        run: |
+          docker pull ollama/ollama:latest
+          docker pull node:24-bookworm-slim
+      - name: True Qwen4B stage1-4 cumulative QA/source commit chain or explicit HOLD
+        run: python3 tools/free-autonomy-solo/real_qwen4b_two_cumulative_ci.py
+      - name: Publish only sanitized status; never candidate source, patch or raw response
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: genuine-qwen4b-two-cumulative-source-cycles-sanitized
+          path: ${{ runner.temp }}/dec-qwen4b-two-cycles-source-sanitized.json
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Confirm outcome scope
+        if: always()
+        run: echo 'Only public source two real 4B cycles; no 14B, Windows, ART, gameplay, paid API, GitHub push, or Minecraft world.'
