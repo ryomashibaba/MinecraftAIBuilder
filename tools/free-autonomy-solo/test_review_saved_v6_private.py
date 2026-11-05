@@ -149,8 +149,10 @@ class SavedCandidateTests(unittest.TestCase):
         self.assertEqual(result["reason_code"], "PRIVATE_MODEL_CANDIDATE_REMOVED_SOURCE_SAFETY_PROOF")
 
     def test_duplicate_receipt_stops_not_reruns(self):
+        def absent(_policy):
+            raise RuntimeError("MOCK_DOCKER_NOT_INSTALLED")
         _, p = m.run_existing(self.base, qa=True, platform_name="nt",
-                               gate=lambda _p: RuntimeError("fake"))
+                               gate=absent)
         self.assertTrue(p.is_file())
         calls = []
         def no_call(*args, **kwargs):
