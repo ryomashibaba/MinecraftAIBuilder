@@ -49,3 +49,37 @@ test('V6 root-north prohibition has explicit private-safe error codes',()=>{
   assert.equal(safeStaticCompilerRejectCode(code),code);
  }
 });
+
+test('relative SOURCE compiler emits only redacted allowlisted failure codes',()=>{
+ const fixed=['ATTACH_SIDE','ROOT','ENTRY','ROOT_MUST_BE_COVERED',
+  'LOCAL_SITE_TOO_LARGE_OR_COLLIDING','TOO_MANY_LINKS',
+  'B143_ROUTE_AND_WORLD_HOLD'];
+ for(const token of fixed){
+  const safe='RELATIVE_'+token;
+  assert.equal(classifyPrivateCompilerRejection('R125_V4D_RELATIVE_'+token),safe);
+  assert.equal(safeStaticCompilerRejectCode(safe),safe);
+ }
+ for(const [raw,safe] of [
+  ['R125_V4D_RELATIVE_SPACE_3','RELATIVE_SPACE_FIELDS'],
+  ['R125_V4D_RELATIVE_EXTRA_LINK_1','RELATIVE_EXTRA_LINK_FIELDS'],
+  ['R125_V4D_RELATIVE_COVERED_INTENT_private-room','RELATIVE_COVERED_INTENT'],
+  ['R125_V4D_RELATIVE_SKY_INTENT_private-room','RELATIVE_SKY_INTENT'],
+  ['R125_V4D_RELATIVE_ATTACH_private-room','RELATIVE_ATTACH'],
+  ['R125_V4D_RELATIVE_WINDOW_INTENT_private-room_1','RELATIVE_WINDOW_INTENT']]){
+  assert.equal(classifyPrivateCompilerRejection(raw),safe);
+  assert.equal(safeStaticCompilerRejectCode(safe),safe);
+  assert(!safe.includes('private-room'));
+ }
+});
+test('relative compiler reject classifier refuses unsafe identifiers, messages and token overflow',()=>{
+ for(const raw of [
+  'R125_V4D_RELATIVE_ATTACH_private room',
+  'R125_V4D_RELATIVE_ATTACH_private-room EXTRA PRIVATE TEXT',
+  'R125_V4D_RELATIVE_WINDOW_INTENT_private-room_5',
+  'R125_V4D_RELATIVE_SPACE_12',
+  'R125_V4D_RELATIVE_UNKNOWN',
+  'R125_V4D_RELATIVE_ATTACH_'+ 'x'.repeat(245),
+  'C:\\Users\\PRIVATE\\R125_V4D_RELATIVE_ENTRY']){
+  assert.equal(classifyPrivateCompilerRejection(raw),UNKNOWN_COMPILER_REJECT);
+ }
+});

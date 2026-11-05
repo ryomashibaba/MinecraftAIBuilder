@@ -5,6 +5,10 @@
  */
 export const UNKNOWN_COMPILER_REJECT='UNCLASSIFIED_COMPILER_REJECTION';
 const types=[
+ ['RELATIVE','R125_V4D_RELATIVE_',[
+  'ATTACH_SIDE','ROOT','ENTRY','ROOT_MUST_BE_COVERED',
+  'LOCAL_SITE_TOO_LARGE_OR_COLLIDING','TOO_MANY_LINKS',
+  'B143_ROUTE_AND_WORLD_HOLD']],
  ['PARENT_INDEX','R125_V4L_PARENT_INDEX_',[
   'ROOT_FIELDS','ENTRY_CONTRACT','SPACES_COUNT',
   'PARENT_BEFORE_CHILD','ROOT_NORTH_FORBIDDEN','PARENT_ID']],
@@ -68,6 +72,14 @@ const types=[
 const exact=new Map(types.flatMap(([label,prefix,tokens])=>
  tokens.map(token=>[prefix+token,label+'_'+token])));
 const indexed=[
+ // Relative SOURCE has fixed errors and indexed/author-named errors.
+ // Validate the entire exact message before dropping the PRIVATE identifier.
+ [/^R125_V4D_RELATIVE_SPACE_[0-4]$/,'RELATIVE_SPACE_FIELDS'],
+ [/^R125_V4D_RELATIVE_EXTRA_LINK_[0-1]$/,'RELATIVE_EXTRA_LINK_FIELDS'],
+ [/^R125_V4D_RELATIVE_COVERED_INTENT_[a-z][a-z0-9-]{2,34}$/,'RELATIVE_COVERED_INTENT'],
+ [/^R125_V4D_RELATIVE_SKY_INTENT_[a-z][a-z0-9-]{2,34}$/,'RELATIVE_SKY_INTENT'],
+ [/^R125_V4D_RELATIVE_ATTACH_[a-z][a-z0-9-]{2,34}$/,'RELATIVE_ATTACH'],
+ [/^R125_V4D_RELATIVE_WINDOW_INTENT_[a-z][a-z0-9-]{2,34}_[0-1]$/,'RELATIVE_WINDOW_INTENT'],
  [/^R125_V4D_COMPACT_MATERIALS_(floor|wall|roof|public)$/,'COMPACT_MATERIALS_ENUM'],
  [/^R125_V4D_COMPACT_SPACE_[0-4]$/,'COMPACT_SPACE_FIELDS'],
  [/^R125_V4D_COMPACT_COVERED_[0-4]$/,'COMPACT_COVERED_ENUM'],
