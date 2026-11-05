@@ -36,11 +36,11 @@ const author=()=>({
  shelters:[{purpose:'Outdoor waiting and weather observation',connectTo:'arrival',edge:'south',scale:'medium',roof:'flat'}],
  features:[{space:'observe',kind:'equipment',purpose:'Weather observation equipment'}]
 });
-const safeProduct=(expanded)=>({...{
- design:expanded.base.design,compiled:expanded.base.compiled,
+const safeProduct=(base)=>({
+ design:base.design,compiled:base.compiled,
  readiness:'NOT_PREPARED',constructionApproved:false,executionAllowed:false,
  worldContacts:0,worldWrites:0,gates:Array(9).fill('BLOCKED'),BuildPlan:{operations:[]}
-}});
+});
 const resource=async()=>({status:'SAFE_FOR_ONE_REQUEST',measuredAtEpochMs:Date.now()});
 function sandbox(){
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'v7-private-one-'));
