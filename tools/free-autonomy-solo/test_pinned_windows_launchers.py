@@ -145,6 +145,33 @@ class WindowsRealSourceLauncherPins(unittest.TestCase):
         self.assertIn("CiSelfTest", launch)
         self.assertNotIn("/main/tools/free-autonomy-solo/", cmd)
 
+    def test_cumulative_six_stage_source_launcher_uses_fixed_SHA_blobs(self):
+        launch = (ROOT / "RUN_MAB_CUMULATIVE_6_STAGES.ps1").read_text(
+            encoding="utf-8")
+        self.assertIn(
+            "$revision='fbaadbbe1b5c0b07bd80c001038417d6c0c5e43c'",
+            launch)
+        self.assertIn("CiSelfTest", launch)
+        checks = re.findall(
+            r"@\{ Name='([^']+)'; Blob='([0-9a-f]{40})' \}", launch)
+        expected = {
+            "run_mab_private_continuous.py",
+            "run_mab_private_autonomy_once.py",
+            "draft_real_project_local14b.py",
+            "promote_private_real_drafts_docker.py",
+            "private_verified_source_evidence.py",
+            "prepare_pinned_real_project.py",
+            "local_qwen_no_docker_two_step.py",
+            "docker_sandbox.py",
+            MANIFEST,
+        }
+        self.assertEqual({name for name, _ in checks}, expected)
+        self.assertEqual(len(checks), len(expected))
+        for name, blob in checks:
+            with self.subTest(file=name):
+                self.assertEqual(blob, git_blob_sha(ROOT / name))
+        self.assertNotIn("/main/tools/free-autonomy-solo/", launch)
+
     def test_double_click_bootstrap_pins_exact_current_pilot_source(self):
         text = (ROOT / BOOTSTRAP_CMD).read_text(encoding="utf-8")
         self.assertRegex(text, r"/[a-f0-9]{40}/tools/free-autonomy-solo/" + PILOT_PS1)
