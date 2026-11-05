@@ -349,6 +349,7 @@ class RealSourceDraftTests(unittest.TestCase):
         self.assertIn("CYCLE: 1/3", captures[0]["messages"][1]["content"])
         self.assertIn("CYCLE: 3/3", captures[1]["messages"][1]["content"])
         self.assertIn("TWO different slot kinds", captures[1]["messages"][0]["content"])
+        self.assertNotIn("UPPERCASE_CODE');;", captures[1]["messages"][0]["content"])
         self.assertIn("no assignments, increments", captures[1]["messages"][0]["content"])
         self.assertIn("For ADD_GUARD, do not rewrite", captures[1]["messages"][1]["content"])
         self.assertNotIn(

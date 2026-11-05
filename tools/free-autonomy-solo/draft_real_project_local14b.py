@@ -272,7 +272,7 @@ def model_proposal(model: str, project: str, path: str, current: str,
         "top-level statement. V4H requires rise 6..8 and physical2WideStairTreads "
         "exactly rise+1 (7..9); never add a conflicting fixed tread limit. "
         "For ADD_GUARD, replace must be exactly one complete line with "
-        "if(condition) fail('UPPERCASE_CODE');; do not include a newline, "
+        "if(condition) fail('UPPERCASE_CODE'); do not include a newline, "
         "braces, a second statement, the compiler call, or explanation. "
         "The host retains the original compiler call byte-for-byte. "
         "Conditions may use pure property checks and comparisons only: "
