@@ -24,7 +24,7 @@ echo Existing Docker plus its vetted Node image is required BEFORE inference.
 echo Max 3 cycles, up to 6 cumulative QA source revisions.
 echo No Minecraft writes, no public source push, no paid APIs.
 powershell.exe -NoProfile -ExecutionPolicy Bypass -Command ^
-  "$ErrorActionPreference='Stop'; $p=Join-Path $env:TEMP ('mab-continuous-'+[guid]::NewGuid().ToString('N')+'.ps1'); $url='https://raw.githubusercontent.com/ryomashibaba/MinecraftAIBuilder/adaeb0c0292a210cdf4f7f63c42b4535553ca39c/tools/free-autonomy-solo/RUN_MAB_CUMULATIVE_6_STAGES.ps1'; Invoke-WebRequest -UseBasicParsing -Uri $url -OutFile $p; $sha=((& git hash-object --no-filters $p)|Out-String).Trim(); if($sha -cne '7919494e82bbf0c0af1998dd7c08b2326d2bfd62'){throw 'MAB_CUMULATIVE_PS1_BLOB_MISMATCH_NO_MODEL'}; & $p"
+  "$ErrorActionPreference='Stop'; $p=Join-Path $env:TEMP ('mab-continuous-'+[guid]::NewGuid().ToString('N')+'.ps1'); $url='https://raw.githubusercontent.com/ryomashibaba/MinecraftAIBuilder/6aea853a6c3eda96f022133d3f3b639968515c51/tools/free-autonomy-solo/RUN_MAB_CUMULATIVE_6_STAGES.ps1'; Invoke-WebRequest -UseBasicParsing -Uri $url -OutFile $p; $sha=((& git hash-object --no-filters $p)|Out-String).Trim(); if($sha -cne '3765f8991e7ca9db4c6bf348f1a3d47956c6d156'){throw 'MAB_CUMULATIVE_PS1_BLOB_MISMATCH_NO_MODEL'}; & $p"
 set "MAB_STATUS=%ERRORLEVEL%"
 echo.
 if not "%MAB_STATUS%"=="0" (

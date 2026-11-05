@@ -150,7 +150,7 @@ class WindowsRealSourceLauncherPins(unittest.TestCase):
         launch = (ROOT / "RUN_MAB_CUMULATIVE_6_STAGES.ps1").read_text(
             encoding="utf-8")
         self.assertIn(
-            "$revision='6588c854dbb3ebecbd262a250eda52f03f5ff595'",
+            "$revision='185810f06f3f8c82088b718202044f444bf065c4'",
             launch)
         self.assertIn("CiSelfTest", launch)
         checks = re.findall(
@@ -175,7 +175,7 @@ class WindowsRealSourceLauncherPins(unittest.TestCase):
         cmd = (ROOT / "RUN_MAB_CUMULATIVE_6_STAGES.cmd").read_text(
             encoding="utf-8")
         self.assertIn(
-            "/adaeb0c0292a210cdf4f7f63c42b4535553ca39c/"
+            "/6aea853a6c3eda96f022133d3f3b639968515c51/"
             "tools/free-autonomy-solo/RUN_MAB_CUMULATIVE_6_STAGES.ps1", cmd)
         self.assertIn(
             git_blob_sha(ROOT / "RUN_MAB_CUMULATIVE_6_STAGES.ps1"), cmd)
@@ -184,7 +184,7 @@ class WindowsRealSourceLauncherPins(unittest.TestCase):
         resume = (ROOT / "RUN_MAB_RESUME_LAST_QA.cmd").read_text(
             encoding="utf-8")
         self.assertIn(
-            "/adaeb0c0292a210cdf4f7f63c42b4535553ca39c/"
+            "/6aea853a6c3eda96f022133d3f3b639968515c51/"
             "tools/free-autonomy-solo/RUN_MAB_CUMULATIVE_6_STAGES.ps1", resume)
         self.assertIn(git_blob_sha(ROOT / "RUN_MAB_CUMULATIVE_6_STAGES.ps1"),
                       resume)
