@@ -300,7 +300,8 @@ def stage_private_candidate(root: Path, lane: dict, stage: int,
 
 def run(project: str, model: str, *, transport=local_api,
         private_root: Path | None = None, manifest: dict | None = None,
-        use_lock: bool = True) -> dict:
+        use_lock: bool = True,
+        prepared_workspace: Path | None = None) -> dict:
     manifest = load_manifest() if manifest is None else manifest
     if project not in GOALS or project not in manifest.get("project_candidates", {}):
         raise Hold("PROJECT_NOT_APPROVED")
@@ -326,10 +327,23 @@ def run(project: str, model: str, *, transport=local_api,
         with (exclusive_local_project_lock() if use_lock else nullcontext()):
             if not local_model_installed(model, transport=transport):
                 raise Hold("LOCAL_MODEL_NOT_INSTALLED_NO_PULL")
-            admission = prepare(project, manifest, base / "PrivateClones")
-            if admission.get("status") != "REAL_SOURCE_CLONE_PINNED_READONLY_READY":
-                raise Hold("PINNED_PRIVATE_CLONE_" + admission.get("reason", "HOLD"))
-            workspace = Path(admission["private_workspace_path"])
+            if prepared_workspace is None:
+                admission = prepare(project, manifest, base / "PrivateClones")
+                if admission.get("status") != "REAL_SOURCE_CLONE_PINNED_READONLY_READY":
+                    raise Hold("PINNED_PRIVATE_CLONE_" + admission.get("reason", "HOLD"))
+                workspace = Path(admission["private_workspace_path"])
+            else:
+                # Only trusted session orchestration may supply this successor.
+                # It is a FRESH private clone of the last two QA-passed commits,
+                # never the existing user's project or a public source change.
+                workspace = Path(prepared_workspace).resolve(strict=True)
+                expected_parent = (base / "PrivateClones").resolve(strict=True)
+                if (workspace.name != "repo" or
+                        workspace.parent.parent != expected_parent or
+                        workspace.is_symlink() or
+                        workspace.parent.is_symlink()):
+                    raise Hold("SUCCESSOR_PRIVATE_WORKSPACE_ESCAPE")
+                verify_private_clone(workspace, manifest["project_candidates"][project])
             root = workspace.parent
             receipt = root / "SHAREABLE_DRAFT_RESULT.json"
             lane = manifest["project_candidates"][project]
