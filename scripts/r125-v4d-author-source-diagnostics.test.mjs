@@ -212,3 +212,35 @@ test('incomplete author attachment cannot be mislabeled as a verified footprint 
  assert(!r.issues.some(i=>i.code==='AUTHORED_SOLID_FOOTPRINT_OVERLAP'));
  assert.equal(r.sourcePassNotInferred,true);
 });
+
+test('historically schema-valid long room ID provably overflows frozen derived fixture ID',async()=>{
+ const {translateCompactModelIntent}=
+  await import('../source/ai/r125-v4d-compact-model-ir.mjs');
+ const {compileRelativeAuthorIntent}=
+  await import('../source/ai/r125-v4d-relative-author-ir.mjs');
+ const intent=makeV4DCompactSynthetic(),oldId=intent.spaces[0].id;
+ const tooLong='a'+'b'.repeat(27);
+ assert.equal(tooLong.length,28);
+ intent.spaces[0].id=tooLong;
+ for(const room of intent.spaces.slice(1))
+  if(room.attach.to===oldId)room.attach.to=tooLong;
+ const snapshot=JSON.stringify(intent);
+ const detailed=translateCompactModelIntent(intent).expandedMechanicalIR;
+ assert.equal(detailed.spaces[0].fixture.id.length,36);
+ assert.throws(()=>compileRelativeAuthorIntent(detailed),
+  /R125_V4D_RELATIVE_SPACE_0/);
+ assert.equal(JSON.stringify(intent),snapshot);
+ const diagnostic=diagnosePrivateV4DAuthor(intent,COMPACT_SCHEMA);
+ assert(diagnostic.issues.some(x=>x.code==='DERIVED_FIXTURE_ID_TOO_LONG'&&
+  x.spaceIndex===0));
+ assert(diagnostic.issues.some(x=>x.code==='DERIVED_GLAZING_ID_TOO_LONG'&&
+  x.spaceIndex===0));
+ assert(!JSON.stringify(diagnostic).includes(tooLong));
+ const windowOnly='a'+'b'.repeat(25);
+ intent.spaces[0].id=windowOnly;
+ for(const room of intent.spaces.slice(1))
+  if(room.attach.to===tooLong)room.attach.to=windowOnly;
+ const winDiagnostic=diagnosePrivateV4DAuthor(intent,COMPACT_SCHEMA);
+ assert(!winDiagnostic.issues.some(x=>x.code==='DERIVED_FIXTURE_ID_TOO_LONG'));
+ assert(winDiagnostic.issues.some(x=>x.code==='DERIVED_GLAZING_ID_TOO_LONG'));
+});

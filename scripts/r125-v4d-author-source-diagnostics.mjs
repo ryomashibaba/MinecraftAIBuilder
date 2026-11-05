@@ -163,6 +163,12 @@ export function diagnosePrivateV4DAuthor(author,contract){
   if(counts.missing||counts.unexpected)add(r,'SPACE_FIELD_SHAPE',i);
   if(!safeName(space.id)||used.has(space.id))add(r,'SPACE_IDENTIFIER_FORMAT_OR_DUPLICATE',i);
   if(typeof space.id==='string')used.add(space.id);
+  // Derived fixture/glazing slugs must fit the frozen 35-char bound.
+  // Only fixed issue codes and integer positions leave PRIVATE diagnosis.
+  if((compact||ranked)&&safeName(space.id)&&space.id.length>27)
+   add(r,'DERIVED_FIXTURE_ID_TOO_LONG',i);
+  if((compact||ranked)&&space.kind==='covered'&&safeName(space.id)&&space.id.length>25)
+   add(r,'DERIVED_GLAZING_ID_TOO_LONG',i);
   if(!safeProse(space.purpose))add(r,'SPACE_PURPOSE_INVALID',i);
   if(!between(space.width,18,30)||!between(space.depth,18,30))
    add(r,'SPACE_DIMENSION_RANGE',i);

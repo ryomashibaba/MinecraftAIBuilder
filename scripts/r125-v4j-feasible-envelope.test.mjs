@@ -304,3 +304,39 @@ test('V6 authentic housing SOURCE geometry equals original model-authored refere
  assert.deepEqual(sourceAfter.gates,Array(9).fill('BLOCKED'));
  assert.equal(sourceAfter.humanArt,'NOT_REVIEWED');
 });
+
+test('V6 room IDs are structurally bounded for unchanged frozen fixture and glazing suffixes',async()=>{
+ const {V4J_PARENT_INDEX_CIVIC_SCHEMA:contract,V4J_PARENT_INDEX_SYSTEM_PROMPT:prompt,
+  materializeV4JParentIndexAuthor:adapt}=
+  await import('../source/ai/r125-v4j-feasible-envelope.mjs');
+ const rootId=contract.properties.entrySpace.properties.id;
+ const children=contract.properties.otherSpaces.items.oneOf;
+ assert.equal(rootId.minLength,3);
+ assert.equal(rootId.maxLength,25);
+ assert.equal(rootId.pattern,'^[a-z][a-z0-9-]{2,24}$');
+ assert(children.every(item=>item.properties.id.maxLength===25));
+ assert(prompt.includes('3..25 characters'));
+ assert.equal(25+'-fixture'.length<=35,true);
+ assert.equal(25+'-glazing-1'.length,35);
+ const v={};
+ for(const k of contract.required)v[k]={};
+ v.schema=contract.properties.schema.enum[0];
+ v.entrySpace={id:'a'+'b'.repeat(24),kind:'covered',attach:null};
+ v.otherSpaces=[
+  {id:'study-room',kind:'covered',attach:{parentIndex:0,side:'east',shift:0}},
+  {id:'public-garden',kind:'sky',attach:{parentIndex:1,side:'south',shift:0}}
+ ];
+ const original=JSON.stringify(v);
+ const mapped=adapt(v);
+ assert.equal(JSON.stringify(v),original);
+ assert.equal(mapped.spaces[0].id.length,25);
+ assert.equal(mapped.spaces[1].attach.to,mapped.spaces[0].id);
+ const oldAcceptedTooLong=structuredClone(v);
+ oldAcceptedTooLong.entrySpace.id='a'+'b'.repeat(27);
+ assert.throws(()=>adapt(oldAcceptedTooLong),
+  /R125_V4L_PARENT_INDEX_DERIVED_ROOM_IDENTIFIER_LIMIT/);
+ const tooLongChild=structuredClone(v);
+ tooLongChild.otherSpaces[1].id='a'+'b'.repeat(25);
+ assert.throws(()=>adapt(tooLongChild),
+  /R125_V4L_PARENT_INDEX_DERIVED_ROOM_IDENTIFIER_LIMIT/);
+});

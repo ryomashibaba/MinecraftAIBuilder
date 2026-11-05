@@ -83,3 +83,11 @@ test('relative compiler reject classifier refuses unsafe identifiers, messages a
   assert.equal(classifyPrivateCompilerRejection(raw),UNKNOWN_COMPILER_REJECT);
  }
 });
+
+test('V6 derived room identifier rejection redacts authored room IDs',()=>{
+ const raw='R125_V4L_PARENT_INDEX_DERIVED_ROOM_IDENTIFIER_LIMIT';
+ const safe='PARENT_INDEX_DERIVED_ROOM_IDENTIFIER_LIMIT';
+ assert.equal(classifyPrivateCompilerRejection(raw),safe);
+ assert.equal(safeStaticCompilerRejectCode(safe),safe);
+ assert.equal(classifyPrivateCompilerRejection(raw+' private-room'),UNKNOWN_COMPILER_REJECT);
+});

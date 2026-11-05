@@ -117,6 +117,12 @@ export function materializeV4JEntryFirstAuthor(input){
  */
 export const V4J_PARENT_INDEX_PROTOCOL='V4J_SINGLE_RESPONSE_AUTHOR_PARENT_INDEX_V6';
 const v6=structuredClone(V4J_ENTRY_FIRST_CIVIC_SCHEMA);
+// Frozen SOURCE derives room-id + '-fixture' and room-id + '-glazing-1'.
+// The longest suffix is 10 chars; derived slugs may not exceed 35.
+// V6 alone excludes uncompilable authored IDs; never shorten model output.
+const v6RoomId={type:'string',minLength:3,maxLength:25,
+ pattern:'^[a-z][a-z0-9-]{2,24}$'};
+v6.properties.entrySpace.properties.id=structuredClone(v6RoomId);
 const sideValues=['north','east','south','west'];
 const makeAttachment=(indexProperty,sides)=>({
  type:'object',
@@ -131,6 +137,7 @@ const makeAttachment=(indexProperty,sides)=>({
 const rootAttach=makeAttachment({type:'integer',enum:[0]},['east','south','west']);
 const laterAttach=makeAttachment({type:'integer',minimum:1,maximum:3},sideValues);
 for(const item of v6.properties.otherSpaces.items.oneOf){
+ item.properties.id=structuredClone(v6RoomId);
  if(item.properties.attach?.type!=='object')
   throw Error('V4J_V6_CHILD_ATTACH_SCHEMA_DRIFT');
  item.properties.attach={oneOf:[structuredClone(rootAttach),structuredClone(laterAttach)]};
@@ -147,6 +154,7 @@ export const V4J_PARENT_INDEX_RESPONSE_FORMAT={
 export const V4J_PARENT_INDEX_SYSTEM_PROMPT=[
  V4J_ENVELOPE_SYSTEM_PROMPT,
  'V6 REQUIRED OUTPUT CONTRACT overrides earlier JSON shape and room attachment rules: replace root spaces ARRAY with entrySpace OBJECT and otherSpaces ARRAY (2..4). entrySpace is the FIRST covered public reception; attach MUST be null. Every other room is fully author-designed but its attach has exactly {parentIndex,side,shift} instead of {to,side,shift}. parentIndex is YOUR integer index in [entrySpace,...otherSpaces], starting with entrySpace=0. Parent must be earlier than the current authored room, never itself or a future room. The FIRST child can therefore only select parentIndex=0.',
+ 'V6 GENERATED-ID BOUND: entrySpace.id and each otherSpaces[].id must be a unique lowercase-hyphen slug 3..25 characters. The unchanged frozen compiler appends -fixture and -glazing-1 to room IDs and refuses derived IDs exceeding 35 characters. The HOST will NOT truncate or rename your authored IDs.',
  'ROOT ENTRY SAFETY: whenever YOU choose parentIndex=0, side can ONLY be east, south or west; north is forbidden. Whenever YOU choose parentIndex>=1, side may be north,east,south,west subject to all real SOURCE geometrical tests. Do not assume that north is banned for all rooms. Preserve creative decisions on functions, shapes, roofs, facades, shifts, and massing. There is NO fixed template topology.',
  'Host only converts YOUR earlier parentIndex to the already authored parent room id, with no route repair, no shifts or redesign. The original response stays private and hash-pinned. If any authored index is not earlier, root north is occupied, or any true geometry fails, fail closed. ONE original JSON and no additional model request.'
 ].join('\n');
@@ -165,6 +173,9 @@ export function materializeV4JParentIndexAuthor(input){
  const authored=structuredClone(input);
  const {entrySpace,otherSpaces,...rest}=authored;
  const spaces=[entrySpace,...otherSpaces];
+ if(spaces.some(s=>!v5Record(s)||typeof s.id!=='string'||
+  !/^[a-z][a-z0-9-]{2,24}$/.test(s.id)))
+  fail('DERIVED_ROOM_IDENTIFIER_LIMIT');
  for(let i=1;i<spaces.length;i++){
   const a=spaces[i]?.attach;
   if(!v5Record(a)||Object.keys(a).sort().join('|')!==
