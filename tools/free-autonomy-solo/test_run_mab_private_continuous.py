@@ -79,13 +79,15 @@ class CumulativePrivateGitChainTests(unittest.TestCase):
         self.calls.append("QA_READY")
 
     def fake_draft(self, project, model, *, manifest, private_root,
-                   use_lock, prepared_workspace=None):
+                   use_lock, prepared_workspace=None, cycle_number=1):
         if use_lock:
             raise ValueError("TEST_PRIVATE_DRAFT_REACQUIRED_LOCK")
         if project != "minecraftaibuilder":
             raise ValueError("TEST_UNEXPECTED_PROJECT_LANE")
         if model != "qwen3:14b":
             raise ValueError("TEST_UNEXPECTED_MODEL_LANE")
+        if cycle_number != self.generation_count + 1:
+            raise ValueError("TEST_CYCLE_NUMBER_OR_PRIOR_QA_GIT_MISMATCH")
         lane = manifest["project_candidates"][project]
         if prepared_workspace is None:
             p = private_root / "PrivateClones" / "minecraftaibuilder-first" / "repo"
@@ -382,6 +384,25 @@ class CumulativePrivateGitChainTests(unittest.TestCase):
         self.assertEqual(summary["reason_code"],
                          "RESUME_QA_HASHES_NOT_MATCHING_SESSION")
         self.assertEqual(self.generation_count, 2)
+
+    def test_rejected_model_patch_reports_allowlisted_reasons_without_private_text(self):
+        def fail_patch(*args, **kwargs):
+            return {"status": "HOLD",
+                    "model_calls_attempted": 2,
+                    "hold_reason": "STAGE_1_DRAFT_NOT_ACCEPTED",
+                    "stages": [
+                        {"result": "REJECTED_WITHOUT_SOURCE_WRITE",
+                         "reason": "PATCH_SLOT_INVALID"},
+                        {"result": "REJECTED_WITHOUT_SOURCE_WRITE",
+                         "reason": "C:\\Users\\someone\\private\\token.txt"}
+                    ]}
+        report, path = self.run_it(cycles=1, draft=fail_patch)
+        self.assertEqual(report["status"],
+                         "HOLD_CYCLE_MODEL_DRAFT_FAILED_PRIOR_QA_PRESERVED")
+        self.assertEqual(report["draft_rejection_reason_codes"],
+                         ["PATCH_SLOT_INVALID"])
+        self.assertNotIn("someone", path.read_text(encoding="utf-8"))
+        self.assertEqual(report["model_calls_attempted"], 2)
 
     def test_docker_missing_never_calls_model(self):
         def missing():

@@ -13,7 +13,7 @@ from unittest.mock import patch
 from draft_real_project_local14b import (
     ANCHORS, Hold, bounded_replacement, exact_edit_slots,
     host_located_slot_replacement, exclusive_local_project_lock,
-    local_model_installed, run,
+    local_model_installed, model_proposal, run,
 )
 from prepare_pinned_real_project import load_manifest, source_blob_sha, verify_private_clone
 
@@ -260,6 +260,61 @@ class RealSourceDraftTests(unittest.TestCase):
             {"slot": index,
              "replace": "  const w=upper.sourceWitness; if(!w) throw Error('MISSING_WITNESS');"})
         self.assertIn("MISSING_WITNESS", valid)
+
+
+    def test_mab_extra_slots_keep_compiler_calls_bit_for_bit(self):
+        source = MAB_SOURCE.replace(
+            " return raw;",
+            " const before=compileHeightAuthorIntent(heightAuthor);\n"
+            " const upper=compileAuthoredPublicMezzanine(heightAuthor,mezzanine);\n"
+            " return raw;")
+        slots = exact_edit_slots("minecraftaibuilder", source)
+        self.assertGreaterEqual(len(slots), 4)
+        for token in (
+            " const before=compileHeightAuthorIntent(heightAuthor);",
+            " const upper=compileAuthoredPublicMezzanine(heightAuthor,mezzanine);",
+        ):
+            slot = next(x["slot"] for x in slots if x["exact"] == token)
+            with self.subTest(slot=slot):
+                replace = " if(!input) throw Error('MISSING');\n" + token
+                updated = host_located_slot_replacement(
+                    "minecraftaibuilder", source,
+                    {"slot": slot, "replace": replace})
+                self.assertIn(replace, updated)
+                self.assertEqual(updated.count(token), 1)
+                with self.assertRaisesRegex(
+                    Hold, "PATCH_MAB_FROZEN_COMPILER_CALL_MUST_REMAIN_EXACT"):
+                    host_located_slot_replacement(
+                        "minecraftaibuilder", source,
+                        {"slot": slot,
+                         "replace": token.replace("(", "(extra,")})
+
+    def test_mab_third_cycle_has_distinct_instruction_no_host_repair(self):
+        captures = []
+        def fake(path, payload=None, timeout=0):
+            captures.append(payload)
+            return {"model": "qwen3:14b", "done": True,
+                    "message": {"content": '{"slot":1,"replace":"x"}'}}
+        first, _ = model_proposal(
+            "qwen3:14b", "minecraftaibuilder", "safe.mjs",
+            MAB_SOURCE, 1, "", transport=fake, cycle_number=1)
+        third, _ = model_proposal(
+            "qwen3:14b", "minecraftaibuilder", "safe.mjs",
+            MAB_SOURCE, 1, "", transport=fake, cycle_number=3)
+        self.assertEqual(first, third)
+        self.assertIn("CYCLE: 1/3", captures[0]["messages"][1]["content"])
+        self.assertIn("CYCLE: 3/3", captures[1]["messages"][1]["content"])
+        self.assertIn("UNUSED", captures[1]["messages"][1]["content"])
+        self.assertNotEqual(captures[0]["messages"][1]["content"],
+                            captures[1]["messages"][1]["content"])
+        self.assertFalse(captures[1]["stream"])
+        self.assertFalse(captures[1]["think"])
+        for value in (0, 4, True):
+            with self.subTest(value=value):
+                with self.assertRaisesRegex(Hold, "MODEL_SOURCE_CYCLE_OUTSIDE_BUDGET"):
+                    model_proposal("qwen3:14b", "minecraftaibuilder", "x",
+                                   MAB_SOURCE, 1, "", transport=fake,
+                                   cycle_number=value)
 
     def test_repeated_source_line_cannot_be_host_edit_slot(self):
         source = MAB_SOURCE.replace(
