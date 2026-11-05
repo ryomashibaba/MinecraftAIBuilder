@@ -113,6 +113,26 @@ class PinnedRealSourcePromotionTests(unittest.TestCase):
                 self.assertEqual(g(work, "status", "--porcelain"), "")
                 self.assertEqual((work / lane["source_file"]).read_text(), original)
                 qa_repo = Path(result["qa_workspace_private"])
+                review = Path(result["private_source_review_directory"])
+                self.assertEqual(result["private_source_review_stages"], 2)
+                self.assertTrue(review.is_dir())
+                manifest = json.loads((review / "REVIEW_ONLY_PRIVATE_MANIFEST.json").read_text())
+                self.assertEqual(
+                    manifest["status"], "TWO_SOURCE_STAGES_REVIEW_ONLY_ART_HOLD")
+                self.assertEqual(len(manifest["source_stages"]), 2)
+                self.assertFalse(manifest["human_approval"])
+                self.assertFalse(manifest["real_gameplay_or_art_certified"])
+                self.assertEqual(manifest["github_pushes"], 0)
+                for n in (1, 2):
+                    saved = review / f"STAGE_{n}_PRIVATE_SOURCE.txt"
+                    diff = review / f"STAGE_{n}_PRIVATE_DIFF.patch"
+                    self.assertTrue(saved.is_file())
+                    self.assertTrue(diff.is_file())
+                    self.assertIn("private reviewed stage-",
+                                  saved.read_text(encoding="utf-8"))
+                    self.assertIn("diff --git", diff.read_text(encoding="utf-8"))
+                    self.assertEqual(manifest["source_stages"][n-1]["candidate_sha256"],
+                                     digest(saved.read_text(encoding="utf-8")))
                 self.assertEqual(g(qa_repo, "rev-list", "--count", "HEAD"), "3")
                 self.assertEqual(g(qa_repo, "status", "--porcelain"), "")
                 self.assertEqual(verify_private_clone(work, lane)["head"], head)
@@ -132,6 +152,13 @@ class PinnedRealSourcePromotionTests(unittest.TestCase):
         self.assertEqual(result["status"], "HOLD")
         self.assertEqual(result["completed_stages"], 1)
         self.assertEqual(len(result["local_qa_commits"]), 1)
+        self.assertEqual(result["private_source_review_stages"], 1)
+        review = Path(result["private_source_review_directory"])
+        self.assertTrue((review / "STAGE_1_PRIVATE_DIFF.patch").exists())
+        self.assertFalse((review / "STAGE_2_PRIVATE_SOURCE.txt").exists())
+        self.assertEqual(
+            json.loads((review / "REVIEW_ONLY_PRIVATE_MANIFEST.json").read_text())["status"],
+            "PARTIAL_REVIEW_ONLY_NOT_CERTIFIED")
         self.assertIn("INDEPENDENT_DOCKER_QA_STAGE2", result["hold_reason"])
         self.assertEqual((work / lane["source_file"]).read_text(), original)
 
