@@ -30,6 +30,8 @@ import {MEZZANINE_SCHEMA,compileMezzanineAuthorIntent}
 import {CIVIC_ARCADE_SCHEMA,compileCivicArcadeAuthorIntent}
  from '../source/ai/r125-v4j-civic-author-ir.mjs';
 import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
+import {V4J_ENTRY_FIRST_PROTOCOL,materializeV4JEntryFirstAuthor}
+ from '../source/ai/r125-v4j-feasible-envelope.mjs';
 import {classifyPrivateV4DFailure}
  from './r125-v4d-shareable-receipt.mjs';
 import {classifyPrivateCompilerRejection}
@@ -100,17 +102,17 @@ function openStudy(dir){
  if(marked){
   const allowed=['LEGACY_AUTHOR_CONTRACT','V4J_SINGLE_RESPONSE_CONTRACT_CLARITY_V2',
    'V4J_SINGLE_RESPONSE_SCHEMA_GUIDED_V3',
-   'V4J_SINGLE_RESPONSE_FEASIBLE_MASSING_V4'];
+   'V4J_SINGLE_RESPONSE_FEASIBLE_MASSING_V4',V4J_ENTRY_FIRST_PROTOCOL];
   if(!allowed.includes(original.promptProtocol)||
    original.promptProtocol!==request.promptProtocol||
    !hex(original.systemPromptSha256)||
    original.systemPromptSha256!==request.systemPromptSha256||
    (['V4J_SINGLE_RESPONSE_CONTRACT_CLARITY_V2',
      'V4J_SINGLE_RESPONSE_SCHEMA_GUIDED_V3',
-     'V4J_SINGLE_RESPONSE_FEASIBLE_MASSING_V4'].includes(original.promptProtocol)&&
+     'V4J_SINGLE_RESPONSE_FEASIBLE_MASSING_V4',V4J_ENTRY_FIRST_PROTOCOL].includes(original.promptProtocol)&&
     original.authorContract!==CIVIC_ARCADE_SCHEMA)||
    (['V4J_SINGLE_RESPONSE_SCHEMA_GUIDED_V3',
-     'V4J_SINGLE_RESPONSE_FEASIBLE_MASSING_V4'].includes(original.promptProtocol)&&
+     'V4J_SINGLE_RESPONSE_FEASIBLE_MASSING_V4',V4J_ENTRY_FIRST_PROTOCOL].includes(original.promptProtocol)&&
     (!hex(original.structuredSchemaSha256)||
      original.structuredSchemaSha256!==request.structuredSchemaSha256)))
    fail('PROMPT_PROTOCOL_MANIFEST_MISMATCH');
@@ -195,11 +197,13 @@ export function replayPrivateV4D(study,out){
    report.status='HOLD_ORIGINAL_MODEL_INVALID_JSON';
    return report;
   }
-  authorDiagnostic=diagnosePrivateV4DAuthor(author,original.authorContract);
   let compiled;
   try{
+   const originalForCompiler=original.promptProtocol===V4J_ENTRY_FIRST_PROTOCOL?
+    materializeV4JEntryFirstAuthor(author):author;
+   authorDiagnostic=diagnosePrivateV4DAuthor(originalForCompiler,original.authorContract);
    compiled=original.authorContract===CIVIC_ARCADE_SCHEMA?
-      compileCivicArcadeAuthorIntent(author):
+      compileCivicArcadeAuthorIntent(originalForCompiler):
      original.authorContract===MEZZANINE_SCHEMA?
      compileMezzanineAuthorIntent(author):
     original.authorContract===HEIGHT_SCHEMA?

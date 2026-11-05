@@ -16,6 +16,8 @@ import {buildV4DShareableReceipt}
  from './r125-v4d-shareable-receipt.mjs';
 import {V4J_STRUCTURED_PROTOCOL}
  from '../source/ai/r125-v4j-structured-author-schema.mjs';
+import {V4J_ENTRY_FIRST_PROTOCOL}
+ from '../source/ai/r125-v4j-feasible-envelope.mjs';
 import {V4J_ENVELOPE_PROTOCOL}
  from '../source/ai/r125-v4j-feasible-envelope.mjs';
 
@@ -51,9 +53,14 @@ export async function runV3OneGenreStudy(options,{
  if(!options||!MODEL.test(options.model??'')||
   typeof options.outDir!=='string'||!Number.isSafeInteger(timeoutMs)||
   timeoutMs<1000||timeoutMs>300000)fail('OPTIONS');
+ if(options.entryFirstV5!==undefined&&typeof options.entryFirstV5!=='boolean')
+  fail('V5_ONLY_EXPLICIT_BOOLEAN');
+ if(options.entryFirstV5&&options.geometryEnvelopeV4)
+  fail('V5_AND_V4_MUTUALLY_EXCLUSIVE');
  if(options.geometryEnvelopeV4!==undefined&&
   typeof options.geometryEnvelopeV4!=='boolean')fail('GEOMETRY_V4_BOOLEAN_ONLY');
  const useV4=options.geometryEnvelopeV4===true;
+ const useV5=options.entryFirstV5===true;
  const brief=FIVE_INDEPENDENT_BRIEFS.find(x=>x.genre===options.genre);
  if(!brief)fail('UNKNOWN_GENRE');
  const out=path.resolve(options.outDir),parent=path.dirname(out);
@@ -67,7 +74,7 @@ export async function runV3OneGenreStudy(options,{
  const report=await runOne({
   model:options.model,outDir:out,prompt:brief.prompt,authorArcade:true,
   precisionCivicContract:true,structuredCivicContract:true,
-  geometryEnvelopeV4:useV4
+  geometryEnvelopeV4:useV4,entryFirstV5:useV5
  },{fetcher,timeoutMs});
  const receipt=buildV4DShareableReceipt(report);
  if(injected&&receipt.explicitlyInjectedTestResponse!==true)
@@ -104,11 +111,12 @@ export async function runV3OneGenreStudy(options,{
    replayStatus='HOLD_OFFLINE_REPLAY_SAFE_STOP';
   }
  }
- const handoffName=useV4?'V4J_V4_ONE_SHAREABLE.json':'V4J_V3_ONE_SHAREABLE.json';
+ const handoffName=useV5?'V4J_V5_ONE_SHAREABLE.json':useV4?'V4J_V4_ONE_SHAREABLE.json':'V4J_V3_ONE_SHAREABLE.json';
  const safe={
-  schema:useV4?'minecraftaibuilder-v4j-v4-one-genre-safe-handoff-v1':
+  schema:useV5?'minecraftaibuilder-v4j-v5-one-genre-safe-handoff-v1':
+   useV4?'minecraftaibuilder-v4j-v4-one-genre-safe-handoff-v1':
    'minecraftaibuilder-v4j-v3-one-genre-safe-handoff-v1',
-  genre:brief.genre,promptProtocol:useV4?V4J_ENVELOPE_PROTOCOL:V4J_STRUCTURED_PROTOCOL,
+  genre:brief.genre,promptProtocol:useV5?V4J_ENTRY_FIRST_PROTOCOL:useV4?V4J_ENVELOPE_PROTOCOL:V4J_STRUCTURED_PROTOCOL,
   // Public SHA of the versioned SYSTEM instruction, never the private model text.
   // Same protocol label may have successive non-retroactive study refinements.
   systemPromptSha256:/^[a-f0-9]{64}$/.test(report.systemPromptSha256??'')?
@@ -138,7 +146,9 @@ if(process.argv[1]===fileURLToPath(import.meta.url)){
   const result=await runV3OneGenreStudy(options);
   console.log(JSON.stringify({status:result.reportedStatus,
    replay:result.replayStatus,modelCalls:result.modelGenerationAttempts,
-   shareOnly:result.promptProtocol===V4J_ENVELOPE_PROTOCOL?
+   shareOnly:result.promptProtocol===V4J_ENTRY_FIRST_PROTOCOL?
+    'V4J_V5_ONE_SHAREABLE.json':
+    result.promptProtocol===V4J_ENVELOPE_PROTOCOL?
     'V4J_V4_ONE_SHAREABLE.json':'V4J_V3_ONE_SHAREABLE.json',worldWrites:0}));
   if(!result.sourceCandidateVerified)process.exitCode=2;
  }catch{console.error('V4J_V3_ONE_SOURCE_HOLD');process.exitCode=2;}

@@ -39,7 +39,10 @@ import {V4J_STRUCTURED_PROTOCOL,V4J_STRUCTURED_SYSTEM_PROMPT,
  V4J_STRUCTURED_RESPONSE_FORMAT,V4J_STRUCTURED_CIVIC_JSON_SCHEMA}
  from '../source/ai/r125-v4j-structured-author-schema.mjs';
 import {V4J_ENVELOPE_PROTOCOL,V4J_ENVELOPE_SYSTEM_PROMPT,
- V4J_ENVELOPE_RESPONSE_FORMAT,V4J_ENVELOPE_CIVIC_SCHEMA}
+ V4J_ENVELOPE_RESPONSE_FORMAT,V4J_ENVELOPE_CIVIC_SCHEMA,
+ V4J_ENTRY_FIRST_PROTOCOL,V4J_ENTRY_FIRST_SYSTEM_PROMPT,
+ V4J_ENTRY_FIRST_CIVIC_SCHEMA,V4J_ENTRY_FIRST_RESPONSE_FORMAT,
+ materializeV4JEntryFirstAuthor}
  from '../source/ai/r125-v4j-feasible-envelope.mjs';
 
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
@@ -122,12 +125,15 @@ function validateLaunch({model,outDir,prompt,endpoint},fetcher,timeoutMs){
  return dest;
 }
 export async function runV4DLocalAuthor({
- model,outDir,prompt=DEFAULT_PROMPT,endpoint=DEFAULT_ENDPOINT,compact=false,rankedWindows=false,rankedSection=false,authoredMassing=false,authorWing=false,authorFloorplate=false,authorAtrium=false,authorMezzanine=false,authorArcade=false,precisionCivicContract=false,structuredCivicContract=false,geometryEnvelopeV4=false
+ model,outDir,prompt=DEFAULT_PROMPT,endpoint=DEFAULT_ENDPOINT,compact=false,rankedWindows=false,rankedSection=false,authoredMassing=false,authorWing=false,authorFloorplate=false,authorAtrium=false,authorMezzanine=false,authorArcade=false,precisionCivicContract=false,structuredCivicContract=false,geometryEnvelopeV4=false,entryFirstV5=false
 }={}, {fetcher=fetch,timeoutMs=180000}={}){
  if(typeof precisionCivicContract!=='boolean'||(precisionCivicContract&&!authorArcade))fail('PRECISION_CONTRACT_REQUIRES_CIVIC_AUTHOR');
  if(typeof structuredCivicContract!=='boolean'||
   (structuredCivicContract&&(!precisionCivicContract||!authorArcade)))
   fail('STRUCTURED_CONTRACT_REQUIRES_V4J_PRECISION');
+ if(typeof entryFirstV5!=='boolean'||(entryFirstV5&&
+  (!structuredCivicContract||!precisionCivicContract||!authorArcade||geometryEnvelopeV4)))
+  fail('ENTRY_FIRST_V5_REQUIRES_SEPARATE_CIVIC_CONTRACT');
  if(typeof geometryEnvelopeV4!=='boolean'||
   (geometryEnvelopeV4&&(!structuredCivicContract||!precisionCivicContract||!authorArcade)))
   fail('V4_ENVELOPE_REQUIRES_STRUCTURED_CIVIC_AUTHOR');
@@ -135,7 +141,8 @@ export async function runV4DLocalAuthor({
   [compact,rankedWindows,rankedSection,authoredMassing,authorWing,authorFloorplate,authorAtrium,authorMezzanine,authorArcade].filter(Boolean).length>1)fail('AUTHOR_MODE');
  const dir=validateLaunch({model,outDir,prompt,endpoint},fetcher,timeoutMs);
  const injected=fetcher!==fetch||process.env.MAB_V4D_TEST_DOUBLE_MODE==='1',start=Date.now();
- const modelSystemPrompt=geometryEnvelopeV4?V4J_ENVELOPE_SYSTEM_PROMPT:
+ const modelSystemPrompt=entryFirstV5?V4J_ENTRY_FIRST_SYSTEM_PROMPT:
+  geometryEnvelopeV4?V4J_ENVELOPE_SYSTEM_PROMPT:
   structuredCivicContract?V4J_STRUCTURED_SYSTEM_PROMPT:
   precisionCivicContract?V4J_PRECISION_SYSTEM_PROMPT:
   authorArcade?CIVIC_ARCADE_SYSTEM_PROMPT:authorMezzanine?MEZZANINE_SYSTEM_PROMPT:
@@ -143,13 +150,17 @@ export async function runV4DLocalAuthor({
   authorWing?WING_SYSTEM_PROMPT:authoredMassing?MASSING_SYSTEM_PROMPT:
   rankedSection?SECTIONED_SYSTEM_PROMPT:rankedWindows?RANKED_SYSTEM_PROMPT:
   compact?COMPACT_SYSTEM_PROMPT:V4D_RELATIVE_SYSTEM_PROMPT;
- const promptProtocol=geometryEnvelopeV4?V4J_ENVELOPE_PROTOCOL:
+ const promptProtocol=entryFirstV5?V4J_ENTRY_FIRST_PROTOCOL:
+  geometryEnvelopeV4?V4J_ENVELOPE_PROTOCOL:
   structuredCivicContract?V4J_STRUCTURED_PROTOCOL:
   precisionCivicContract?V4J_PRECISION_PROTOCOL:'LEGACY_AUTHOR_CONTRACT';
- const structuredSchemaSha256=geometryEnvelopeV4?
+ const structuredSchemaSha256=entryFirstV5?
+  sha(JSON.stringify(V4J_ENTRY_FIRST_CIVIC_SCHEMA)):
+  geometryEnvelopeV4?
   sha(JSON.stringify(V4J_ENVELOPE_CIVIC_SCHEMA)):
   structuredCivicContract?sha(JSON.stringify(V4J_STRUCTURED_CIVIC_JSON_SCHEMA)):null;
- const responseFormat=geometryEnvelopeV4?V4J_ENVELOPE_RESPONSE_FORMAT:
+ const responseFormat=entryFirstV5?V4J_ENTRY_FIRST_RESPONSE_FORMAT:
+  geometryEnvelopeV4?V4J_ENVELOPE_RESPONSE_FORMAT:
   structuredCivicContract?V4J_STRUCTURED_RESPONSE_FORMAT:
   {type:'json_object'};
  fs.mkdirSync(dir,{recursive:false});
@@ -224,7 +235,9 @@ export async function runV4DLocalAuthor({
     fail('MODEL_ORIGINAL_MISSING_OR_OVERSIZE');
    try{parsed=JSON.parse(raw);}catch{fail('MODEL_RESPONSE_NOT_PURE_JSON');}
   }finally{clearTimeout(timer);}
-  const result=authorArcade?compileCivicArcadeAuthorIntent(parsed):
+  const compilationAuthor=entryFirstV5?
+   materializeV4JEntryFirstAuthor(parsed):parsed;
+  const result=authorArcade?compileCivicArcadeAuthorIntent(compilationAuthor):
     authorMezzanine?compileMezzanineAuthorIntent(parsed):
    authorAtrium?compileHeightAuthorIntent(parsed):
    authorFloorplate?compileFloorplateAuthorIntent(parsed):
@@ -243,7 +256,7 @@ export async function runV4DLocalAuthor({
   if(rankedSection||authoredMassing||authorWing||authorFloorplate||authorAtrium||authorMezzanine||authorArcade){
    // Derive an exact pre-section control from the SAME private model response.
    // This is a second deterministic B143 compilation, NOT an extra model POST.
-   const beforeAuthor=structuredClone(parsed);
+   const beforeAuthor=structuredClone(compilationAuthor);
    if(rankedSection)delete beforeAuthor.section;
    else if(authorArcade)delete beforeAuthor.arcade;
     else if(authorMezzanine)delete beforeAuthor.mezzanine;
@@ -435,7 +448,7 @@ export async function runV4DLocalAuthor({
    const slice={x:result.authoredMezzanineSourceWitness.actualSectionPlaneX,
     zStart:n.z+a.offsetZ,zEnd:n.z+a.offsetZ+a.depth-1,
     yMax:result.b143.design.bounds.height-2};
-   const beforeAuthor=structuredClone(parsed);
+   const beforeAuthor=structuredClone(compilationAuthor);
     delete beforeAuthor.mezzanine;if(authorArcade)delete beforeAuthor.arcade;
    beforeAuthor.schema=HEIGHT_SCHEMA;
    const initial=compileHeightAuthorIntent(beforeAuthor);

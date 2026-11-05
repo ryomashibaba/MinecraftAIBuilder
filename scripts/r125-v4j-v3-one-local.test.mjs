@@ -171,3 +171,44 @@ test('safe handoff exposes footprint collision only with matching SHA-verified f
   assert(!shared.includes('{"schema":"invalid"}'));
  }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });
+ 
+test('V5 opt-in uses one injected POST, raw SHA and replay reject without repairing invalid entry',async()=>{
+ const {V4J_ENTRY_FIRST_RESPONSE_FORMAT:format,V4J_ENTRY_FIRST_SYSTEM_PROMPT:prompt}=
+  await import('../source/ai/r125-v4j-feasible-envelope.mjs');
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'v4j-v5-one-'));
+ const out=path.join(root,'original'),calls=[];
+ const raw=JSON.stringify({schema:'minecraftaibuilder-r125-v4j-civic-arcade-author-intent-v1'});
+ const fetcher=async(_url,opts)=>{
+  calls.push({method:opts.method,body:opts.body});
+  if(opts.method==='GET')return {ok:true,text:async()=>JSON.stringify({
+   models:[{name:'qwen3:14b'}]})};
+  return {ok:true,text:async()=>JSON.stringify({
+   model:'qwen3:14b',choices:[{finish_reason:'stop',
+    message:{role:'assistant',content:raw}}]})};
+ };
+ try{
+  const safe=await runV3OneGenreStudy({model:'qwen3:14b',outDir:out,
+   genre:'housing',entryFirstV5:true},{fetcher,timeoutMs:15000});
+  assert.deepEqual(calls.map(x=>x.method),['GET','POST']);
+  const posted=JSON.parse(calls[1].body);
+  assert.deepEqual(posted.response_format,format);
+  assert.equal(posted.messages[0].content,prompt);
+  assert.equal(safe.promptProtocol,'V4J_SINGLE_RESPONSE_EXPLICIT_ENTRY_V5');
+  assert.equal(safe.schema,'minecraftaibuilder-v4j-v5-one-genre-safe-handoff-v1');
+  assert.equal(safe.compilerRejectCode,'ENTRY_FIRST_ROOT_FIELDS');
+  assert.equal(safe.reportedStatus,'HOLD_MODEL_OR_SOURCE_INVALID_NO_REPAIR');
+  assert.equal(safe.replayStatus,'HOLD_REPLAY_SOURCE_REJECTED');
+  assert.equal(safe.sourceCandidateVerified,false);
+  assert.equal(safe.explicitlyInjectedTestResponse,true);
+  assert.equal(safe.modelGenerationAttempts,1);
+  assert.equal(safe.replayAdditionalModelCalls,0);
+  assert.deepEqual(safe.gates,Array(9).fill('BLOCKED'));
+  assert.equal(safe.worldWrites,0);
+  assert.equal(fs.readFileSync(path.join(out,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8'),raw);
+  const share=fs.readFileSync(path.join(out,'V4J_V5_ONE_SHAREABLE.json'),'utf8');
+  assert.deepEqual(JSON.parse(share),safe);
+  assert(!share.includes(raw));
+  assert(!share.includes(root));
+  assert(!fs.existsSync(path.join(out,'V4J_V4_ONE_SHAREABLE.json')));
+ }finally{fs.rmSync(root,{recursive:true,force:true});}
+});

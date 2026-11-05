@@ -10,12 +10,12 @@ test('permanent entry accepts only explicit model and private new output',()=>{
   {model:'qwen3:14b',outDir:'local'});
  assert.throws(()=>parseStableArgs(['--model','qwen3:14b','--out','local','--extra']),/ARGS/);
 });
-test('copies only vetted shareable V4 handoff without original text or genre templates',async()=>{
+test('copies only vetted shareable V5 handoff without original text or genre templates',async()=>{
  const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'v4j-stable-'));
  const out=path.join(tmp,'pilot');
  const safe={
-  schema:'minecraftaibuilder-v4j-v4-one-genre-safe-handoff-v1',
-  genre:'housing',promptProtocol:'V4J_SINGLE_RESPONSE_FEASIBLE_MASSING_V4',
+  schema:'minecraftaibuilder-v4j-v5-one-genre-safe-handoff-v1',
+  genre:'housing',promptProtocol:'V4J_SINGLE_RESPONSE_EXPLICIT_ENTRY_V5',
   reportedStatus:'HOLD_MODEL_OR_SOURCE_INVALID_NO_REPAIR',
   modelGenerationAttempts:1,replayAdditionalModelCalls:0,
   sourceCandidateVerified:false,explicitlyInjectedTestResponse:true,
@@ -26,9 +26,10 @@ test('copies only vetted shareable V4 handoff without original text or genre tem
  try{
   const runner=async o=>{
    n++;assert.equal(o.model,'qwen3:14b');
-   assert.equal(o.genre,'housing');assert.equal(o.geometryEnvelopeV4,true);
+   assert.equal(o.genre,'housing');assert.equal(o.entryFirstV5,true);
+   assert.equal(o.geometryEnvelopeV4,undefined);
    fs.mkdirSync(o.outDir);
-   fs.writeFileSync(path.join(o.outDir,'V4J_V4_ONE_SHAREABLE.json'),
+   fs.writeFileSync(path.join(o.outDir,'V4J_V5_ONE_SHAREABLE.json'),
     JSON.stringify(safe));
    return safe;
   };

@@ -30,3 +30,13 @@ test('unknown raw strings are not shared',()=>{
  }
  assert.equal(safeStaticCompilerRejectCode('COMPACT_ROOT'),'COMPACT_ROOT');
 });
+
+test('V5 entry contract rejects with allowlisted private-safe error families',()=>{
+ for(const token of ['ROOT_FIELDS','ROOT_ENTRY_CONTRACT',
+  'OTHER_SPACES_COUNT','CHILD_ATTACHMENT_REQUIRED']){
+  assert.equal(classifyPrivateCompilerRejection('R125_V4K_ENTRY_FIRST_'+token),
+   'ENTRY_FIRST_'+token);
+  assert.equal(safeStaticCompilerRejectCode('ENTRY_FIRST_'+token),
+   'ENTRY_FIRST_'+token);
+ }
+});
