@@ -364,6 +364,7 @@ def run_cumulative(
                 call_kwargs = {
                     "manifest": config, "private_root": cycle_root,
                     "use_lock": False,
+                    "cycle_number": n,
                 }
                 if prepared is not None:
                     call_kwargs["prepared_workspace"] = prepared
@@ -376,6 +377,16 @@ def run_cumulative(
                     summary["status"] = "HOLD_CYCLE_MODEL_DRAFT_FAILED_PRIOR_QA_PRESERVED"
                     summary["draft_hold_reason_code"] = _safe_failure_reason(
                         draft_result.get("hold_reason"))
+                    # The model's private receipt contains reject reasons, but
+                    # no generated code or local private path may be exported.
+                    # Surface only distinct, known machine-readable codes.
+                    rejected = draft_result.get("stages", [])
+                    if isinstance(rejected, list):
+                        summary["draft_rejection_reason_codes"] = sorted({
+                            value for item in rejected if isinstance(item, dict)
+                            for value in [_safe_failure_reason(item.get("reason"))]
+                            if value != "PRIVATE_DIAGNOSTIC_NOT_SHAREABLE"
+                        })[:8]
                     return summary, report_path
                 private_receipt = draft_result.get("private_receipt_path")
                 if not isinstance(private_receipt, str):
