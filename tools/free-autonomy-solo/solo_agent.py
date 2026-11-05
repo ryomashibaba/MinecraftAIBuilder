@@ -400,6 +400,73 @@ def validate(cfg: dict) -> None:
             raise Hold(f"BAD_LIMIT_{key}")
 
 
+
+def _host_platform() -> str:
+    return sys.platform
+
+
+def _windows_memory_snapshot_bytes() -> tuple[int, int]:
+    """Read OS-wide physical available and commit headroom, with no side effects.
+
+    Values are byte counts, not process working sets or a prediction of
+    model-loading pressure. Do not use these to relax Strata's active guards.
+    """
+    import ctypes
+
+    class PerformanceInformation(ctypes.Structure):
+        _fields_ = [
+            ("cb", ctypes.c_uint32),
+            ("CommitTotal", ctypes.c_size_t),
+            ("CommitLimit", ctypes.c_size_t),
+            ("CommitPeak", ctypes.c_size_t),
+            ("PhysicalTotal", ctypes.c_size_t),
+            ("PhysicalAvailable", ctypes.c_size_t),
+            ("SystemCache", ctypes.c_size_t),
+            ("KernelTotal", ctypes.c_size_t),
+            ("KernelPaged", ctypes.c_size_t),
+            ("KernelNonpaged", ctypes.c_size_t),
+            ("PageSize", ctypes.c_size_t),
+            ("HandleCount", ctypes.c_uint32),
+            ("ProcessCount", ctypes.c_uint32),
+            ("ThreadCount", ctypes.c_uint32),
+        ]
+    info = PerformanceInformation()
+    info.cb = ctypes.sizeof(PerformanceInformation)
+    fn = ctypes.WinDLL("psapi", use_last_error=True).GetPerformanceInfo
+    fn.argtypes = [ctypes.POINTER(PerformanceInformation), ctypes.c_uint32]
+    fn.restype = ctypes.c_int
+    if fn(ctypes.byref(info), info.cb) == 0:
+        raise Hold("HOST_MEMORY_SENSOR_UNAVAILABLE")
+    if (info.PageSize <= 0 or info.CommitLimit < info.CommitTotal
+            or info.PhysicalAvailable > info.PhysicalTotal
+            or info.PhysicalTotal == 0):
+        raise Hold("HOST_MEMORY_SENSOR_INVALID")
+    return (int(info.PhysicalAvailable) * int(info.PageSize),
+            int(info.CommitLimit - info.CommitTotal) * int(info.PageSize))
+
+
+def require_windows_preboot_headroom() -> None:
+    """Block new model attempts under the established 4+4 GiB start minima.
+
+    A PASS is one point-in-time admission only. Strata's 3+2 GiB *active*
+    guard and genuine A26 memory HOLD are completely unchanged.
+    """
+    if _host_platform() != "win32":
+        return  # Other hosts are not certified by this Windows-only gate.
+    try:
+        physical, commit = _windows_memory_snapshot_bytes()
+    except Hold:
+        raise
+    except (OSError, AttributeError, ValueError, TypeError) as exc:
+        raise Hold("HOST_MEMORY_SENSOR_UNAVAILABLE") from exc
+    if (type(physical) is not int or type(commit) is not int
+            or physical < 0 or commit < 0):
+        raise Hold("HOST_MEMORY_SENSOR_INVALID")
+    minimum = 4 * 1024 ** 3
+    if physical < minimum or commit < minimum:
+        raise Hold("HOST_PREBOOT_MEMORY_HEADROOM_LOW")
+
+
 def run_in_docker(cfg: dict, command: list[str], cwd: Path, timeout: int, log: Path, *, agent: bool) -> tuple[int, str]:
     try:
         policy = DockerPolicy.from_config(cfg)
@@ -522,6 +589,16 @@ def execute(cfg: dict, *, push: bool, sandbox_attested: bool,
             for attempt in range(cfg["per_task_attempts"]):
                 if state["cycles"] >= cfg["max_cycles"] or time.monotonic() >= deadline:
                     break
+                # Before *every* new model call, observe existing Windows
+                # preboot physical + commit gates. No cycle or model request
+                # is consumed when admission fails, and no process is killed.
+                try:
+                    require_windows_preboot_headroom()
+                except Hold as ex:
+                    state["status"] = "HOLD"
+                    state["hold_reason"] = str(ex)
+                    write_atomic(state_path, state)
+                    raise
                 state["cycles"] += 1
                 cycle = state["cycles"]
                 selected_model = approved_models[model_index]

@@ -52,6 +52,59 @@ class SoloAgentTests(unittest.TestCase):
             'max_cycles': 3, 'per_task_attempts': 2, 'sandbox_runtime': 'docker',
         }
 
+
+    def test_windows_model_preboot_requires_physical_and_commit_4_gib(self):
+        # Real owner/project Git operations stay mocked. No actual model,
+        # Windows resource API, Docker or user-machine changes.
+        guard = 4 * 1024 ** 3
+        for label, free_phys, commit in (
+            ("physical_low", guard - 1, guard + 1),
+            ("commit_low", guard + 1, guard - 1),
+            ("both_low", guard - 1, guard - 1),
+        ):
+            with self.subTest(label=label):
+                with patch("solo_agent._host_platform", return_value="win32"), \
+                     patch("solo_agent._windows_memory_snapshot_bytes",
+                           return_value=(free_phys, commit)), \
+                     patch("solo_agent.run_in_docker",
+                           side_effect=AssertionError("model/QA must not run")), \
+                     patch.dict(os.environ, self.env):
+                    with self.assertRaisesRegex(Hold, "HOST_PREBOOT_MEMORY_HEADROOM_LOW"):
+                        execute(dict(self.cfg), push=False, sandbox_attested=True)
+                receipt = json.loads((self.root / "state" / "state.json").read_text())
+                self.assertEqual(receipt["status"], "HOLD")
+                self.assertEqual(receipt["cycles"], 0)
+                self.assertEqual(receipt["commits"], [])
+                self.assertEqual(sh(self.repo, "git", "status", "--porcelain"), "")
+        # The gate has no reason to mask explicit missing sensor results.
+        with patch("solo_agent._host_platform", return_value="win32"), \
+             patch("solo_agent._windows_memory_snapshot_bytes",
+                   side_effect=OSError("unavailable")), \
+             patch("solo_agent.run_in_docker",
+                   side_effect=AssertionError("sensor failure must not run model")), \
+             patch.dict(os.environ, self.env):
+            with self.assertRaisesRegex(Hold, "HOST_MEMORY_SENSOR_UNAVAILABLE"):
+                execute(dict(self.cfg), push=False, sandbox_attested=True)
+        self.assertEqual(json.loads((self.root / "state" / "state.json").read_text())["cycles"], 0)
+
+    def test_windows_preboot_exact_boundary_allows_mock_source_cycle(self):
+        guard = 4 * 1024 ** 3
+        with patch("solo_agent._host_platform", return_value="win32"), \
+             patch("solo_agent._windows_memory_snapshot_bytes",
+                   return_value=(guard, guard)), \
+             patch.dict(os.environ, self.env):
+            result = execute(dict(self.cfg), push=False, sandbox_attested=True)
+        self.assertEqual(result["status"], "TASK_QUEUE_COMPLETED_SOURCE_ONLY")
+        self.assertEqual(result["cycles"], 1)
+        self.assertFalse(result["real_model_verified"])
+
+    def test_windows_memory_sensor_invalid_reading_refuses_to_start(self):
+        from solo_agent import require_windows_preboot_headroom
+        with patch("solo_agent._host_platform", return_value="win32"), \
+             patch("solo_agent._windows_memory_snapshot_bytes", return_value=(None, 1)):
+            with self.assertRaisesRegex(Hold, "HOST_MEMORY_SENSOR_INVALID"):
+                require_windows_preboot_headroom()
+
     def test_prototype_commits_verified_fake_only(self):
         with patch.dict(os.environ, self.env):
             result = execute(dict(self.cfg), push=False, sandbox_attested=True)
