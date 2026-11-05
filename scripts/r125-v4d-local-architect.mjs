@@ -110,11 +110,11 @@ export function parseV4DLocalAuthorArgs(argv){
  if(prompt.length<8||prompt.length>4000)fail('PROMPT_CONTRACT');
  return {model:opt['--model'],outDir:path.resolve(opt['--out']),prompt,endpoint,compact:opt['--compact']===true,rankedWindows:opt['--ranked-windows']===true,rankedSection:opt['--ranked-section']===true,authoredMassing:opt['--authored-massing']===true,authorWing:opt['--authored-wing']===true,authorFloorplate:opt['--authored-floorplate']===true,authorAtrium:opt['--authored-atrium']===true,authorMezzanine:opt['--authored-mezzanine']===true,authorArcade:opt['--authored-civic-arcade']===true};
 }
-function validateLaunch({model,outDir,prompt,endpoint},fetcher,timeoutMs){
+function validateLaunch({model,outDir,prompt,endpoint,parentIndexV6=false},fetcher,timeoutMs){
  if(!MODEL.test(model??'')||typeof outDir!=='string'||!outDir.trim()||
   typeof prompt!=='string'||prompt.length<8||prompt.length>4000||
   typeof fetcher!=='function'||!Number.isSafeInteger(timeoutMs)||
-  timeoutMs<1000||timeoutMs>300000)fail('LAUNCH');
+  timeoutMs<1000||timeoutMs>(parentIndexV6?600000:300000))fail('LAUNCH');
  const m=ENDPOINT.exec(endpoint);
  if(!m||+m[1]<1||+m[1]>65535)fail('LOCAL_LOOPBACK_ONLY');
  const dest=path.resolve(outDir);
@@ -129,7 +129,7 @@ function validateLaunch({model,outDir,prompt,endpoint},fetcher,timeoutMs){
 }
 export async function runV4DLocalAuthor({
  model,outDir,prompt=DEFAULT_PROMPT,endpoint=DEFAULT_ENDPOINT,compact=false,rankedWindows=false,rankedSection=false,authoredMassing=false,authorWing=false,authorFloorplate=false,authorAtrium=false,authorMezzanine=false,authorArcade=false,precisionCivicContract=false,structuredCivicContract=false,geometryEnvelopeV4=false,entryFirstV5=false,parentIndexV6=false
-}={}, {fetcher=fetch,timeoutMs=180000}={}){
+}={}, {fetcher=fetch,timeoutMs=parentIndexV6?600000:180000}={}){
  if(typeof precisionCivicContract!=='boolean'||(precisionCivicContract&&!authorArcade))fail('PRECISION_CONTRACT_REQUIRES_CIVIC_AUTHOR');
  if(typeof structuredCivicContract!=='boolean'||
   (structuredCivicContract&&(!precisionCivicContract||!authorArcade)))
@@ -146,7 +146,7 @@ export async function runV4DLocalAuthor({
   fail('V4_ENVELOPE_REQUIRES_STRUCTURED_CIVIC_AUTHOR');
  if([compact,rankedWindows,rankedSection,authoredMassing,authorWing,authorFloorplate,authorAtrium,authorMezzanine,authorArcade].some(x=>typeof x!=='boolean')||
   [compact,rankedWindows,rankedSection,authoredMassing,authorWing,authorFloorplate,authorAtrium,authorMezzanine,authorArcade].filter(Boolean).length>1)fail('AUTHOR_MODE');
- const dir=validateLaunch({model,outDir,prompt,endpoint},fetcher,timeoutMs);
+ const dir=validateLaunch({model,outDir,prompt,endpoint,parentIndexV6},fetcher,timeoutMs);
  const injected=fetcher!==fetch||process.env.MAB_V4D_TEST_DOUBLE_MODE==='1',start=Date.now();
  const modelSystemPrompt=parentIndexV6?V4J_PARENT_INDEX_SYSTEM_PROMPT:
   entryFirstV5?V4J_ENTRY_FIRST_SYSTEM_PROMPT:

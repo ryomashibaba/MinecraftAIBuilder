@@ -48,11 +48,11 @@ export function parseV3OneArgs(args){
 }
 export async function runV3OneGenreStudy(options,{
  runOne=runV4DLocalAuthor,replay=replayPrivateV4D,fetcher=fetch,
- timeoutMs=180000
+ timeoutMs=options?.parentIndexV6?600000:180000
 }={}){
  if(!options||!MODEL.test(options.model??'')||
   typeof options.outDir!=='string'||!Number.isSafeInteger(timeoutMs)||
-  timeoutMs<1000||timeoutMs>300000)fail('OPTIONS');
+  timeoutMs<1000||timeoutMs>(options.parentIndexV6?600000:300000))fail('OPTIONS');
  if(options.parentIndexV6!==undefined&&typeof options.parentIndexV6!=='boolean')
   fail('PARENT_INDEX_V6_BOOLEAN_ONLY');
  if(options.parentIndexV6&&(options.entryFirstV5||options.geometryEnvelopeV4))

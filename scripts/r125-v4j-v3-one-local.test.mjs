@@ -229,9 +229,10 @@ test('V6 fake Ollama uses one POST and preserves private ORIGINAL and HOLD witho
  };
  try{
   const status=await runV3OneGenreStudy({model:'qwen3:14b',
-   outDir:out,genre:'housing',parentIndexV6:true},{fetcher,timeoutMs:15000});
+   outDir:out,genre:'housing',parentIndexV6:true},{fetcher});
   assert.deepEqual(methods.map(x=>x.method),['GET','POST']);
   const posted=JSON.parse(methods[1].body);
+  assert.equal(JSON.parse(fs.readFileSync(path.join(out,'LOCAL_REQUEST.json'),'utf8')).timeoutMs,600000);
   assert.deepEqual(posted.response_format,fmt6);
   assert.equal(posted.messages[0].content,prompt);
   assert.equal(status.promptProtocol,'V4J_SINGLE_RESPONSE_AUTHOR_PARENT_INDEX_V6');
@@ -252,4 +253,10 @@ test('V6 fake Ollama uses one POST and preserves private ORIGINAL and HOLD witho
   assert(!shared.includes(tmp));
   assert(!fs.existsSync(path.join(out,'V4J_V5_ONE_SHAREABLE.json')));
  }finally{fs.rmSync(tmp,{recursive:true,force:true});}
+});
+
+test('V6 timeout is capped at ten minutes without enlarging the older V4 ceiling',async()=>{
+ const args={model:'qwen3:14b',outDir:path.join(os.tmpdir(),'timeout-bounds-not-created'),genre:'housing'};
+ await assert.rejects(runV3OneGenreStudy({...args,parentIndexV6:true},{timeoutMs:600001}),/OPTIONS/);
+ await assert.rejects(runV3OneGenreStudy({...args,geometryEnvelopeV4:true},{timeoutMs:300001}),/OPTIONS/);
 });
