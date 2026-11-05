@@ -80,9 +80,12 @@ class CumulativePrivateGitChainTests(unittest.TestCase):
 
     def fake_draft(self, project, model, *, manifest, private_root,
                    use_lock, prepared_workspace=None):
-        self.assertFalse(use_lock)
-        self.assertEqual(project, "minecraftaibuilder")
-        self.assertEqual(model, "qwen3:14b")
+        if use_lock:
+            raise ValueError("TEST_PRIVATE_DRAFT_REACQUIRED_LOCK")
+        if project != "minecraftaibuilder":
+            raise ValueError("TEST_UNEXPECTED_PROJECT_LANE")
+        if model != "qwen3:14b":
+            raise ValueError("TEST_UNEXPECTED_MODEL_LANE")
         lane = manifest["project_candidates"][project]
         if prepared_workspace is None:
             p = private_root / "PrivateClones" / "minecraftaibuilder-first" / "repo"
@@ -90,7 +93,8 @@ class CumulativePrivateGitChainTests(unittest.TestCase):
             shutil.copytree(self.seed, p)
         else:
             p = Path(prepared_workspace)
-            self.assertTrue(p.is_relative_to(private_root.resolve()))
+            if not p.is_relative_to(private_root.resolve()):
+                raise ValueError("TEST_PREPARED_WORKSPACE_OUTSIDE_CYCLE")
         verify_private_clone(p, lane)
         original = (p / lane["source_file"]).read_text(encoding="utf-8")
         self.generation_count += 1
@@ -130,7 +134,8 @@ class CumulativePrivateGitChainTests(unittest.TestCase):
         return 0, "FAKE_ISOLATED_QA_PASS"
 
     def fake_qa(self, private_dir, project, model, *, manifest, use_lock):
-        self.assertFalse(use_lock)
+        if use_lock:
+            raise ValueError("TEST_PRIVATE_QA_REACQUIRED_LOCK")
         with patch("promote_private_real_drafts_docker.require_docker_qa_image"), \
              patch("promote_private_real_drafts_docker.docker_run",
                    side_effect=self.qa_command):
