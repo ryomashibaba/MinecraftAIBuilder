@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {INTEGRATED_SEMANTIC_SCHEMA,validateIntegratedSemanticIntent,
  prepareIntegratedSemanticBridge,assertAuthoredSemanticsUnchanged,
+ INTEGRATED_SPATIAL_V7_SUPPORTED_PROMPT,INTEGRATED_SPATIAL_V7_SUPPORTED_PROTOCOL,
  projectIntegratedSemanticOperations,executeIntegratedSemanticBridge}
  from '../source/ai/r125-integrated-semantic-bridge.mjs';
 const synthetic=()=>({
@@ -176,4 +177,21 @@ test('parent choice moves the physical space; unsupported engine capabilities HO
   assert.equal(result.status,'HOLD');assert(!result.privateProduct);
  }
  assert.throws(()=>createIntegratedSpatialHost(),/EXISTING_ENGINE_REQUIRED/);
+});
+
+test('V7 optional model contract names only currently implemented PRIVATE HOST capabilities',()=>{
+ const prompt=INTEGRATED_SPATIAL_V7_SUPPORTED_PROMPT;
+ assert.equal(INTEGRATED_SPATIAL_V7_SUPPORTED_PROTOCOL,'V7_PRIVATE_SINGLE_SEMANTIC_SPATIAL_HOST_V1');
+ assert(prompt.includes(INTEGRATED_SEMANTIC_SCHEMA));
+ assert(prompt.includes('2..4 rooms'));
+ assert(prompt.includes('profile:shed'));
+ assert(prompt.includes('face:north|south'));
+ assert(prompt.includes('roof:flat'));
+ assert(prompt.includes('no more than TWO per room'));
+ assert(prompt.includes('under 4096 UTF-8 bytes'));
+ assert(!prompt.includes('gable|shed|flat|segmented'));
+ // Synthetic candidate is host-supported but not real-model evidence.
+ const host=createIntegratedSpatialHost({deriveIntegratedShell:()=>{throw Error('PRIVATE_ONLY');}});
+ const expanded=host.expand(prepareIntegratedSemanticBridge(supportedSpatialAuthor()).payload);
+ assert.equal(expanded.intent.architecture.shelters.length,1);
 });

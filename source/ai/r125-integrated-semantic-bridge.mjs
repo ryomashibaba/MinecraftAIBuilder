@@ -198,3 +198,26 @@ export const INTEGRATED_SEMANTIC_AUTHOR_PROMPT=[
  'Features 1..16: {space:key,kind:seat|worktop|storage|display|service|equipment,purpose:meaningfulText}.',
  'Do not output world coordinates, element IDs, source hashes, B143, Minecraft commands, code, repair instructions, or an art approval.'
 ].join('\n');
+
+
+/**
+ * Honest capabilities for ONE optional V7 PRIVATE spatial-host pilot.
+ * A prompt is not proof that model intent/geometry/ART will pass.
+ * Keep the broader, research-only INTEGRATED_SEMANTIC_AUTHOR_PROMPT intact.
+ */
+export const INTEGRATED_SPATIAL_V7_SUPPORTED_PROTOCOL='V7_PRIVATE_SINGLE_SEMANTIC_SPATIAL_HOST_V1';
+export const INTEGRATED_SPATIAL_V7_SUPPORTED_PROMPT=[
+ 'You are the original architect. From the user brief choose a meaningful building concept and its room functions, not a fixed residential/station template.',
+ 'Return ONE raw JSON object ONLY, no markdown or surrounding text. EXACT top-level keys: schema,id,concept,spaces,roofs,entry,shelters,features.',
+ 'schema is exactly '+INTEGRATED_SEMANTIC_SCHEMA+'. id and each space key must be unique lowercase slugs, start with a letter, 3..25 characters.',
+ 'concept, purposes, entry intent are nonempty meaningful natural-language strings of 3..160 characters each.',
+ 'spaces: 2..4 rooms in parent-before-child order, EXACT {key,purpose,link}; first link:null, later link:{to:<earlier-key>,kind:door|open}. Author the relationships and functions yourself.',
+ 'Every room mechanically has a 12x10 rectangular footprint. This V7 HOST cannot make shaped, multistorey, gabled or variable-size rooms. Do not claim those capabilities.',
+ 'roofs: exactly ONE per room, EXACT {space,profile:shed,axis:x|z,rank:primary|secondary|subordinate}. EXACTLY ONE primary roof, all roofs must be shed.',
+ 'entry: EXACT {face:north|south,space:<one-room-key>,intent:<meaningful-intent>}.',
+ 'shelters: EXACTLY ONE shelter: {purpose,connectTo:<entry.space>,edge:<entry.face>,scale:small|medium|large,roof:flat}. The shelter MUST attach to the entry room on the entry side.',
+ 'features: 1..5 items, no more than TWO per room; each EXACT {space:<room-key>,kind:seat|worktop|storage|display|service|equipment,purpose:<meaningful-role>}.',
+ 'The HOST chooses safe coordinates, doors and component cells deterministically. It DOES NOT change your authored room links, roof rank, entry or equipment. Impossible contacts/overlaps HOLD, no retry.',
+ 'Keep the JSON under 4096 UTF-8 bytes. Never output B143, raw voxels, world commands, construction approval, art pass, extra keys, or repair instructions.',
+ 'Think about circulation and identity within these honest limits, then output JSON only.'
+].join('\n');
