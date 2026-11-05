@@ -117,6 +117,112 @@ def _successor_from_qa(
     return next_manifest, fresh
 
 
+
+def _resume_verified_private_session(
+    base: Path, new_root: Path, manifest: dict, model: str, cycles: int,
+) -> tuple[dict, dict, Path, int]:
+    """Audit a stopped private session and clone only its final QA-approved HEAD.
+
+    The private source and manifests are NOT trusted just because they exist.
+    Every earlier cycle is independently checked against committed Git blobs,
+    an exclusive-source diff, review hashes, and the canonical audited public
+    baseline. A partial current cycle is intentionally discarded on resume.
+    """
+    source = manifest["project_candidates"][PROJECT]
+    eligible: list[tuple[float, Path, dict]] = []
+    canonical_base = base.resolve(strict=True)
+    for old in base.iterdir():
+        if (old == new_root or old.is_symlink() or not old.is_dir() or
+                not re.fullmatch(r"m-[a-f0-9]{16}", old.name) or
+                old.parent.resolve(strict=True) != canonical_base):
+            continue
+        prior_receipt = old / "SHAREABLE_MAB_CUMULATIVE_SOURCE_QA.json"
+        if prior_receipt.is_symlink() or not prior_receipt.is_file():
+            continue
+        try:
+            earlier = json.loads(prior_receipt.read_text(encoding="utf-8"))
+            done = earlier.get("completed_cycles")
+            if (earlier.get("schema") != "dec-mab-cumulative-private-source-qa-v1"
+                    or earlier.get("project") != PROJECT
+                    or earlier.get("model_requested") != model
+                    or earlier.get("requested_cycles") != cycles
+                    or not isinstance(earlier.get("status"), str)
+                    or not earlier["status"].startswith("HOLD_")
+                    or type(done) is not int or not 1 <= done < cycles
+                    or earlier.get("base_audited_public_source_commit")
+                        != source["pinned_commit"]
+                    or earlier.get("base_audited_public_source_blob")
+                        != source["source_blob_sha"]):
+                continue
+            eligible.append((prior_receipt.stat().st_mtime, old, earlier))
+        except (ValueError, OSError, TypeError):
+            continue
+    if not eligible:
+        raise EvidenceHold("NO_STOPPED_PRIVATE_QA_SESSION_ELIGIBLE")
+    # Never silently fall back to an older session if the latest eligible
+    # candidate has been tampered with; that latest candidate must HOLD.
+    _time, previous_root, earlier = max(eligible, key=lambda e: e[0])
+    done = earlier["completed_cycles"]
+    accepted = earlier.get("accepted_cycles")
+    if (not isinstance(accepted, list) or len(accepted) != done
+            or earlier.get("completed_qa_source_stages") != 2 * done
+            or earlier.get("private_review_stages") != 2 * done
+            or earlier.get("original_source_modified") is not False
+            or earlier.get("github_pushes") != 0
+            or earlier.get("minecraft_world_writes") != 0
+            or earlier.get("model_generated_code_executed_on_windows") is not False
+            or type(earlier.get("model_calls_attempted")) is not int
+            or not 2 * done <= earlier["model_calls_attempted"] <= 4 * cycles):
+        raise EvidenceHold("RESUME_PRIOR_RECEIPT_INCONSISTENT")
+    current = copy.deepcopy(manifest)
+    fresh: Path | None = None
+    for n in range(1, done + 1):
+        clones = previous_root / ("c" + str(n)) / "PrivateClones"
+        if (clones.is_symlink() or not clones.is_dir() or
+                clones.parent.is_symlink() or
+                clones.resolve(strict=True).parent !=
+                (previous_root / ("c" + str(n))).resolve(strict=True)):
+            raise EvidenceHold("RESUME_PRIVATE_CLONE_BASE_UNTRUSTED")
+        parents = [p for p in clones.iterdir()
+                   if (p.is_dir() and not p.is_symlink() and
+                       (p / "SHAREABLE_PROMOTION_RESULT.json").is_file())]
+        if len(parents) != 1:
+            raise EvidenceHold("RESUME_QA_STAGE_DIRECTORY_NOT_UNIQUE")
+        stage_dir = parents[0].resolve(strict=True)
+        if stage_dir.parent != clones.resolve(strict=True):
+            raise EvidenceHold("RESUME_QA_STAGE_DIRECTORY_ESCAPE")
+        receipt_file = stage_dir / "SHAREABLE_PROMOTION_RESULT.json"
+        if receipt_file.is_symlink():
+            raise EvidenceHold("RESUME_PRIOR_QA_RECEIPT_SYMLINK")
+        audited = json.loads(receipt_file.read_text(encoding="utf-8"))
+        current_lane = current["project_candidates"][PROJECT]
+        if (audited.get("project") != PROJECT or
+                audited.get("status") !=
+                "TWO_STAGES_INDEPENDENT_DOCKER_SOURCE_QA_LOCAL_COMMITS" or
+                audited.get("completed_stages") != 2 or
+                audited.get("private_source_review_stages") != 2 or
+                audited.get("github_pushes") != 0 or
+                audited.get("source_commit") != current_lane["pinned_commit"] or
+                audited.get("source_blob") != current_lane["source_blob_sha"]):
+            raise EvidenceHold("RESUME_QA_RECEIPT_UNVERIFIED")
+        verify_private_clone(stage_dir / "repo", current_lane)
+        review = _verified_private_evidence(audited, stage_dir, current_lane)
+        original_entry = accepted[n - 1]
+        if (not isinstance(original_entry, dict)
+                or original_entry.get("cycle") != n
+                or original_entry.get("source_sha256") !=
+                    [x["candidate_sha256"] for x in review]
+                or original_entry.get("qa_commands") !=
+                    [x["independent_qa_commands_passed"] for x in review]):
+            raise EvidenceHold("RESUME_QA_HASHES_NOT_MATCHING_SESSION")
+        next_root = new_root / ("c" + str(done + 1)) if n == done else None
+        current, fresh = _successor_from_qa(
+            stage_dir, audited, current, next_root)
+    if fresh is None:
+        raise EvidenceHold("RESUME_NEXT_PRIVATE_CLONE_MISSING")
+    return earlier, current, fresh, done
+
+
 def run_cumulative(
     model: str = "qwen3:14b", *, cycles: int = 3,
     private_root: Path | None = None, manifest: dict | None = None,
@@ -125,6 +231,7 @@ def run_cumulative(
     draft=draft_source, qa=promote,
     lock=exclusive_local_project_lock,
     successor=_successor_from_qa,
+    resume_latest: bool = False,
 ) -> tuple[dict, Path]:
     config = load_manifest() if manifest is None else copy.deepcopy(manifest)
     base = (private_root if private_root is not None else
@@ -162,6 +269,7 @@ def run_cumulative(
                 config.get("allow_dockerless_untrusted_model_source_execution") is not False):
             raise EvidenceHold("MULTICYCLE_POLICY_OR_BUDGET_INVALID")
         prepared: Path | None = None
+        start_cycle = 1
         with lock():
             # Never burn real model tokens before required QA sandbox exists.
             try:
@@ -172,7 +280,20 @@ def run_cumulative(
             if not inspect_model(model):
                 summary["status"] = "HOLD_LOCAL_MODEL_NOT_INSTALLED_NO_PULL"
                 return summary, report_path
-            for n in range(1, cycles + 1):
+            if resume_latest:
+                earlier, config, prepared, done = _resume_verified_private_session(
+                    base, root, config, model, cycles)
+                summary["completed_cycles"] = done
+                summary["completed_qa_source_stages"] = 2 * done
+                summary["private_review_stages"] = 2 * done
+                summary["model_calls_attempted"] = earlier["model_calls_attempted"]
+                summary["accepted_cycles"] = copy.deepcopy(earlier["accepted_cycles"])
+                summary["resumed_prior_verified_cycles"] = done
+                summary["resumed_without_redoing_prior_model_calls"] = True
+                start_cycle = done + 1
+                summary["status"] = "RESUMED_PRIOR_PRIVATE_SOURCE_QA_VERIFIED"
+                _receipt(summary, report_path)
+            for n in range(start_cycle, cycles + 1):
                 cycle_root = root / ("c" + str(n))
                 summary["status"] = "MODEL_SOURCE_CYCLE_RUNNING_UNCERTIFIED"
                 summary["active_cycle"] = n
@@ -257,8 +378,11 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--model", default="qwen3:14b")
     parser.add_argument("--cycles", type=int, default=3, choices=(1, 2, 3))
+    parser.add_argument("--resume-latest", action="store_true",
+                        help="Resume only the newest stopped, fully reverified private QA session")
     args = parser.parse_args()
-    summary, path = run_cumulative(args.model, cycles=args.cycles)
+    summary, path = run_cumulative(
+        args.model, cycles=args.cycles, resume_latest=args.resume_latest)
     print(json.dumps(summary, ensure_ascii=False, indent=2))
     print("PRIVATE_SHAREABLE_RESULT_PATH=" + str(path))
     return 0 if summary["status"] == PASS else 2
