@@ -23,7 +23,7 @@ echo Resume the most recent stopped MinecraftAIBuilder PRIVATE QA session.
 echo Re-validate all prior SOURCE QA Git commits before any model generation.
 echo No replay of accepted stages, no public source push, no paid API.
 powershell.exe -NoProfile -ExecutionPolicy Bypass -Command ^
-  "$ErrorActionPreference='Stop'; $p=Join-Path $env:TEMP ('mab-resume-'+[guid]::NewGuid().ToString('N')+'.ps1'); $url='https://raw.githubusercontent.com/ryomashibaba/MinecraftAIBuilder/35126386137fcb44f29af5e414387cb5b69071df/tools/free-autonomy-solo/RUN_MAB_CUMULATIVE_6_STAGES.ps1'; Invoke-WebRequest -UseBasicParsing -Uri $url -OutFile $p; $sha=((& git hash-object --no-filters $p)|Out-String).Trim(); if($sha -cne '0438812edd7f379e9a61533262e82c13350fa887'){throw 'MAB_QA_RESUME_BOOTSTRAP_BLOB_HOLD'}; & $p -ResumeLatest"
+  "$ErrorActionPreference='Stop'; $p=Join-Path $env:TEMP ('mab-resume-'+[guid]::NewGuid().ToString('N')+'.ps1'); $url='https://raw.githubusercontent.com/ryomashibaba/MinecraftAIBuilder/c5989660603788a67a02bada9cca6b8b0a22547b/tools/free-autonomy-solo/RUN_MAB_CUMULATIVE_6_STAGES.ps1'; Invoke-WebRequest -UseBasicParsing -Uri $url -OutFile $p; $sha=((& git hash-object --no-filters $p)|Out-String).Trim(); if($sha -cne '287c3d6b44f8e049f6985ed6d59312ff2fa78172'){throw 'MAB_QA_RESUME_BOOTSTRAP_BLOB_HOLD'}; & $p -ResumeLatest"
 set "STATUS=%ERRORLEVEL%"
 echo.
 if not "%STATUS%"=="0" (
