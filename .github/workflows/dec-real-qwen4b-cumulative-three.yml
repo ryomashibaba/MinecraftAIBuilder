@@ -1,0 +1,41 @@
+name: Dec genuine Qwen4B MAB three cumulative private SOURCE QA cycles
+
+on:
+  push:
+    branches:
+      - research/dec-free-autonomy-solo-pilot-20261104
+    paths:
+      - 'tools/free-autonomy-solo/real_qwen4b_cumulative_three_ci.py'
+      - '.github/workflows/dec-real-qwen4b-cumulative-three.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  genuine-qwen4b-three-source-cycles:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Trusted Python syntax
+        run: python3 -m py_compile tools/free-autonomy-solo/real_qwen4b_cumulative_three_ci.py tools/free-autonomy-solo/run_mab_private_continuous.py
+      - name: Disposable Ollama weights and independent SOURCE QA image
+        run: |
+          docker pull ollama/ollama:latest
+          docker pull node:24-bookworm-slim
+      - name: Three genuine model-to-Docker-to-private-Git cycles or explicit HOLD
+        run: python3 tools/free-autonomy-solo/real_qwen4b_cumulative_three_ci.py
+      - name: Save only allowlisted SHA and progress receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qwen4b-three-cumulative-source-sanitized
+          path: ${{ runner.temp }}/qwen4b-three-cycles-safe.json
+          retention-days: 7
+          if-no-files-found: ignore
+      - name: Strict certification boundary
+        if: always()
+        run: echo 'No actual Windows 14B, no raw source upload, no human ART, no Minecraft construction, no gameplay PASS.'
