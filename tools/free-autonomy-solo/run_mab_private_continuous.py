@@ -37,8 +37,8 @@ SHA = re.compile(r"[a-f0-9]{40}\Z")
 
 
 def _successor_from_qa(
-    draft_dir: Path, audited: dict, manifest: dict, next_private_base: Path,
-) -> tuple[dict, Path]:
+    draft_dir: Path, audited: dict, manifest: dict, next_private_base: Path | None,
+) -> tuple[dict, Path | None]:
     """Prove the two independent Git commits form a source-only chain.
 
     Clone exclusively from a PRIVATE QA clone at exactly the second accepted
@@ -86,6 +86,9 @@ def _successor_from_qa(
     next_lane = next_manifest["project_candidates"][PROJECT]
     next_lane["pinned_commit"] = sha2
     next_lane["source_blob_sha"] = blob_sha
+    # The final cycle must also prove committed source lineage; no new clone.
+    if next_private_base is None:
+        return next_manifest, None
     # This destination is PRIVATE and fresh. Do not create or overwrite repo
     # worktrees the user might already have in their project folders.
     workbase = next_private_base / "PrivateClones"
@@ -94,7 +97,8 @@ def _successor_from_qa(
     root.mkdir()
     fresh = root / "repo"
     run_git(
-        qa_repo, "-c", "core.hooksPath=" + str(root / "disabled-hooks"),
+        qa_repo, "-c", "core.autocrlf=false",
+        "-c", "core.hooksPath=" + str(root / "disabled-hooks"),
         "clone", "--no-local", "--quiet",
         "--branch", next_lane["research_branch_for_private_clone"],
         str(qa_repo), str(fresh), timeout=180)
@@ -209,14 +213,14 @@ def run_cumulative(
                 # No later cycle may use an unverified or unsigned code result.
                 if len(safe) != 2:
                     raise EvidenceHold("MULTICYCLE_EVIDENCE_STAGE_COUNT")
-                # Verify that the final private QA HEAD actually descends
-                # from the previous QA state, before accepting the cycle.
-                if n < cycles:
-                    next_base = root / ("cycle-" + str(n + 1))
-                    next_config, next_prepared = successor(
-                        stage_dir, verified, config, next_base)
-                else:
-                    next_config, next_prepared = config, None
+                # Every cycle, including final, must show a genuine two-commit
+                # private Git chain before its state becomes accepted.
+                next_base = (
+                    root / ("cycle-" + str(n + 1))
+                    if n < cycles else None
+                )
+                next_config, next_prepared = successor(
+                    stage_dir, verified, config, next_base)
                 summary["accepted_cycles"].append({
                     "cycle": n,
                     "source_sha256": [x["candidate_sha256"] for x in safe],
