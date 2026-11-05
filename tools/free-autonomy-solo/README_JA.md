@@ -330,3 +330,11 @@ AI回答原文・JSON・SVG・3Dプレビューは `%LOCALAPPDATA%\FreeAutonomyP
 - run_mab_private_continuous.py は再開セッション内に、相対セッション識別子だけを記録するPRIVATE_QA_RESUME_PREDECESSOR.json を追加。後の再開で元の非公開QA履歴まで辿り、Git SHA、QA証拠、モデル生成ソースのSHAを再照合する。private絶対パスやソース本文は共有報告に含まない。
 - 前回停止のPRIVATE履歴が改ざん、欠損、外部参照、循環していた場合は推論開始前にHOLD。GitHub上の消えた使い捨てCI成果は復元不能。元のゲーム・main・Educationの成功経路、PRやPagesには触れない。
 - 2つのWindows 1クリック起動器を今回の研究コードにSHA固定し直した。本人PCにDocker/Nodeイメージがない場合は推論0回で停止。真正14B Windowsの検証は未完了。
+
+
+## 2026-11-05: 第5段階モデル下書きの研究改善（固定憲章継続）
+- 以前の真正Qwen3:4bでは計4段階がSOURCE QA成功、5段階目のモデル提案はHOLDした。原因の詳細コードは従来公開記録から不明のため、HOLD理由を推測で断定しない。
+- draft_real_project_local14b.py: 選択可能なV4Hソース行に既存コンパイラー2呼び出しの前後を追加。ただし各呼び出しは完全一致の行として1回残さなければならず、削除や書換え・複製はHOLD。既存の9ブロック安全ゲートや真正AUTHOR意図は保持する。
+- 同一の指示を3回繰り返す設計を修正し、source-onlyのcycle 1/2/3別に原入力境界、ネスト型、ソース証拠の検証課題を与える。3サイクルの上限と1プロジェクトOSロック、各段階最大2回のモデル提案制限を変えない。
+- run_mab_private_continuous.py: モデル下書きがHOLDした場合は元回答やprivateパスを共有せず、ALLOWLIST適合のPATCH等の理由コードのみ保持し次回判断の正確性を改善。
+- Windows 1クリック新規/再開起動CMDを変更済みソースSHAに固定。これは真正4B/14Bの追加成功をまだ意味しない。
