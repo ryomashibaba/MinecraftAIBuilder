@@ -369,6 +369,64 @@ class RealSourceDraftTests(unittest.TestCase):
             twice.count("const before=compileHeightAuthorIntent(heightAuthor);"),
             1)
 
+    def test_mab_third_cycle_accepts_format_only_guard_variants_without_new_risk(self):
+        source = MAB_SOURCE.replace(
+            " return raw;",
+            " const before=compileHeightAuthorIntent(heightAuthor);\n"
+            " const upper=compileAuthoredPublicMezzanine(heightAuthor,mezzanine);\n"
+            " return raw;")
+        options = exact_edit_slots("minecraftaibuilder", source, cycle_number=3)
+        slot = next(x["slot"] for x in options
+                    if "const before=compileHeightAuthorIntent" in x["exact"])
+        valid = (
+            " if (raw.mezzanine.rise===0) fail('RISE_MISSING');",
+            " if(raw.mezzanine.rise===0) { fail('RISE_MISSING'); }",
+            'if (raw.mezzanine.rise===0) { fail("RISE_MISSING"); }',
+        )
+        for guard in valid:
+            with self.subTest(guard=guard):
+                modified = host_located_slot_replacement(
+                    "minecraftaibuilder", source,
+                    {"slot": slot, "replace": guard}, cycle_number=3)
+                self.assertIn(guard, modified)
+                self.assertEqual(
+                    modified.count("const before=compileHeightAuthorIntent(heightAuthor);"),
+                    1)
+        invalid = (
+            " if(raw.mezzanine.rise===0) { fail('NO_RISE'); evil(); }",
+            " if(raw.mezzanine.rise===0) { fail('NO_RISE');",
+            " if(raw.mezzanine.rise===0) fail('NO_RISE');\nvoid 0;",
+            " if(process.exit(1)) fail('NO_RISE');",
+            " if(raw.mezzanine.rise===0) { fail('NO_RISE'); } }",
+        )
+        for guard in invalid:
+            with self.subTest(guard=guard):
+                with self.assertRaisesRegex(
+                        Hold, "PATCH_MAB_ADDITIVE_GUARD_ONLY"):
+                    host_located_slot_replacement(
+                        "minecraftaibuilder", source,
+                        {"slot": slot, "replace": guard}, cycle_number=3)
+
+    def test_cosmetic_guard_forms_cannot_bypass_duplicate_quality_gate(self):
+        source = MAB_SOURCE.replace(
+            " return raw;",
+            " const before=compileHeightAuthorIntent(heightAuthor);\n"
+            " const upper=compileAuthoredPublicMezzanine(heightAuthor,mezzanine);\n"
+            " return raw;")
+        slot = next(x["slot"] for x in exact_edit_slots(
+            "minecraftaibuilder", source, cycle_number=3)
+            if "const before=compileHeightAuthorIntent" in x["exact"])
+        first = " if(raw.mezzanine.rise===0) { fail('CODE_ONE'); }"
+        once = host_located_slot_replacement(
+            "minecraftaibuilder", source,
+            {"slot": slot, "replace": first}, cycle_number=3)
+        second = 'if (raw.mezzanine.rise === 0) fail("CODE_TWO");'
+        with self.assertRaisesRegex(
+                Hold, "PATCH_MAB_DUPLICATE_ADDITIVE_GUARD"):
+            host_located_slot_replacement(
+                "minecraftaibuilder", once,
+                {"slot": slot, "replace": second}, cycle_number=3)
+
     def test_mab_third_cycle_has_distinct_instruction_no_host_repair(self):
         captures = []
         def fake(path, payload=None, timeout=0):

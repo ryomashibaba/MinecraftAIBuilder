@@ -97,6 +97,32 @@ def exact_edit_slots(project: str, source: str, *,
     return options
 
 
+
+# Cosmetic forms only: the author supplies ONE actual if/FAIL statement.
+# Distinguish formatting flexibility from any ability to call arbitrary code.
+_MAB_GUARD_CONDITION = r"[A-Za-z0-9_.?!<>=&|'\"\[\] +\-]{3,240}"
+_MAB_GUARD_CODE = r"(?P<quote>['\"])(?P<code>[A-Z][A-Z0-9_]{2,63})(?P=quote)"
+_MAB_INLINE = re.compile(
+    r"if[ \t]*\((?P<condition>" + _MAB_GUARD_CONDITION
+    + r")\)[ \t]*fail\(" + _MAB_GUARD_CODE + r"\);"
+)
+_MAB_BRACED = re.compile(
+    r"if[ \t]*\((?P<condition>" + _MAB_GUARD_CONDITION
+    + r")\)[ \t]*\{[ \t]*fail\(" + _MAB_GUARD_CODE
+    + r"\);[ \t]*\}"
+)
+
+
+def _parse_mab_additive_guard(text: object) -> str | None:
+    if (not isinstance(text, str) or len(text) > 360
+            or "\n" in text or "\r" in text or "\x00" in text):
+        return None
+    candidate = text.strip(" \t")
+    match = (_MAB_INLINE.fullmatch(candidate)
+             or _MAB_BRACED.fullmatch(candidate))
+    return match.group("condition") if match else None
+
+
 def host_located_slot_replacement(project: str, source: str, proposal: dict,
                                   *, cycle_number: int = 1) -> str:
     """Use host-approved exact text; never apply fuzzy or ambiguous edits."""
@@ -114,16 +140,12 @@ def host_located_slot_replacement(project: str, source: str, proposal: dict,
         # Model writes a bounded ONE-LINE validation guard only. The host
         # retains the checked-in compiler call byte-for-byte, never asking a
         # small model to retype that line. This is not architectural repair.
-        if (not isinstance(replacement, str) or
-                not re.fullmatch(
-                    r" {0,2}if\([A-Za-z0-9_.?!<>=&|'\"\[\] +\-]{3,240}\)"
-                    r" *fail\('[A-Z][A-Z0-9_]{2,63}'\);", replacement)):
+        condition = _parse_mab_additive_guard(replacement)
+        if condition is None:
             raise Hold("PATCH_MAB_ADDITIVE_GUARD_ONLY")
         # The guard is model-authored SOURCE validation, never permission
         # to mutate the input/objects via assignment or increment, or to
         # override the frozen real stair geometry with a numeric cap.
-        condition = replacement[replacement.index("if(") + 3:
-                                replacement.index(")")]
         if (re.search(r"(?<![=!<>])=(?!=)", condition)
                 or "++" in condition or "--" in condition):
             raise Hold("PATCH_MAB_GUARD_SIDE_EFFECT_FORBIDDEN")
@@ -136,11 +158,10 @@ def host_located_slot_replacement(project: str, source: str, proposal: dict,
         # This comparison uses only host-accepted one-line guard syntax,
         # never the model's explanation, fuzzy source edits or shell code.
         canonical = re.sub(r"\s+", "", condition)
-        previous_guards = re.findall(
-            r"(?m)^[ \t]*if\(([^()\r\n]{3,240})\)"
-            r"[ \t]*fail\('[A-Z][A-Z0-9_]{2,63}'\);[ \t]*$",
-            source)
-        if any(re.sub(r"\s+", "", old) == canonical
+        previous_guards = (
+            _parse_mab_additive_guard(line) for line in source.splitlines()
+        )
+        if any(old is not None and re.sub(r"\s+", "", old) == canonical
                for old in previous_guards):
             raise Hold("PATCH_MAB_DUPLICATE_ADDITIVE_GUARD")
         return bounded_replacement(
@@ -283,9 +304,11 @@ def model_proposal(model: str, project: str, path: str, current: str,
         "Never leave a partial expression, dangling continuation or orphaned "
         "top-level statement. V4H requires rise 6..8 and physical2WideStairTreads "
         "exactly rise+1 (7..9); never add a conflicting fixed tread limit. "
-        "For ADD_GUARD, replace must be exactly one complete line with "
-        "if(condition) fail('UPPERCASE_CODE'); do not include a newline, "
-        "braces, a second statement, the compiler call, or explanation. "
+        "For ADD_GUARD, replace must be exactly one complete line such as "
+        "if(condition) fail('UPPERCASE_CODE'); OR "
+        "if (condition) { fail(\"UPPERCASE_CODE\"); }. "
+        "Single or double quotes and optional braces are allowed, "
+        "but never multiple statements, newlines, compiler calls, or explanations. "
         "The host retains the original compiler call byte-for-byte. "
         "Conditions may use pure property checks and comparisons only: "
         "no assignments, increments, function calls, or fixed stair caps. "
