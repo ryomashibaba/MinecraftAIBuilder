@@ -258,8 +258,9 @@ def run_existing(base: Path, *, qa: bool, platform_name: str = os.name,
         status["reason_code"] = reason(exc)
         return status, receipt
     finally:
-        if receipt is not None:
+        if receipt is not None and not receipt.exists() and not receipt.is_symlink():
             # A shareable report is never a carrier for private source/logs/paths.
+            # Repeated launches must not overwrite the original signed-off receipt.
             with receipt.open("x", encoding="utf-8") as out:
                 json.dump(status, out, ensure_ascii=False, indent=2)
                 out.write("\n")
