@@ -22,10 +22,10 @@ foreach ($program in @('git','python')) {
     throw ('MISSING_COMMAND_' + $program + '_NO_AUTO_INSTALL')
   }
 }
-$revision='fbaadbbe1b5c0b07bd80c001038417d6c0c5e43c'
+$revision='327b4bbcf90c02c54d49ab1c5bd47e0007173caa'
 $repo='ryomashibaba/MinecraftAIBuilder'
 $items=@(
-  @{ Name='run_mab_private_continuous.py'; Blob='6940318207abcc18daf31e8eb0331753abd34694' },
+  @{ Name='run_mab_private_continuous.py'; Blob='ccc2e66733b84da85311f043990958c29492621a' },
   @{ Name='run_mab_private_autonomy_once.py'; Blob='ff741ebe62be4f1c7b5b420456df3559d5963d66' },
   @{ Name='draft_real_project_local14b.py'; Blob='e06af88b4c47a13df8b1ce7c59b635caa35fada6' },
   @{ Name='promote_private_real_drafts_docker.py'; Blob='ce668f1e4901a701ec2a0b09812b74c7e7398a1e' },
