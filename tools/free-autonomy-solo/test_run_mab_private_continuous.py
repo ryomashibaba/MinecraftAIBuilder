@@ -136,6 +136,9 @@ class CumulativePrivateGitChainTests(unittest.TestCase):
                    side_effect=self.qa_command):
             result = promote(private_dir, project, model,
                              manifest=manifest, use_lock=False)
+        if result["status"] == "HOLD":
+            print("MOCK_WINDOWS_GIT_QA_HOLD_REASON=" +
+                  str(result.get("hold_reason", "UNSPECIFIED")), flush=True)
         if self.corrupt_git_receipt and result["status"] == (
                 "TWO_STAGES_INDEPENDENT_DOCKER_SOURCE_QA_LOCAL_COMMITS"):
             result["local_qa_commits"][-1]["commit"] = "f" * 40
