@@ -299,6 +299,40 @@ class RealSourceDraftTests(unittest.TestCase):
                             {"slot": slot, "replace": invalid},
                             cycle_number=3)
 
+
+    def test_cycle_three_additive_guards_cannot_mutate_or_cap_frozen_stairs(self):
+        source = MAB_SOURCE.replace(
+            " return raw;",
+            " const before=compileHeightAuthorIntent(heightAuthor);\n"
+            " const upper=compileAuthoredPublicMezzanine(heightAuthor,mezzanine);\n"
+            " return raw;")
+        options = exact_edit_slots("minecraftaibuilder", source, cycle_number=3)
+        guard_slot = next(x["slot"] for x in options
+                          if "const before=compileHeightAuthorIntent" in x["exact"])
+        bad_guards = (
+            (" if(raw.title='tampered') fail('BAD_AUTHOR');",
+             "PATCH_MAB_GUARD_SIDE_EFFECT_FORBIDDEN"),
+            (" if(raw.mezzanine.rise+=1) fail('BAD_RISE');",
+             "PATCH_MAB_GUARD_SIDE_EFFECT_FORBIDDEN"),
+            (" if(raw.mezzanine.rise++) fail('BAD_RISE');",
+             "PATCH_MAB_GUARD_SIDE_EFFECT_FORBIDDEN"),
+            (" if(w.physical2WideStairTreads<=5) fail('BAD_STAIRS');",
+             "PATCH_MAB_FIXED_STAIR_TREAD_LIMIT_FORBIDDEN"),
+        )
+        for guard, code in bad_guards:
+            with self.subTest(guard=guard):
+                with self.assertRaisesRegex(Hold, code):
+                    host_located_slot_replacement(
+                        "minecraftaibuilder", source,
+                        {"slot": guard_slot, "replace": guard}, cycle_number=3)
+        verified = host_located_slot_replacement(
+            "minecraftaibuilder", source,
+            {"slot": guard_slot,
+             "replace": " if(raw.mezzanine.rise===0) fail('BAD_RISE');"},
+            cycle_number=3)
+        self.assertIn("if(raw.mezzanine.rise===0) fail('BAD_RISE');", verified)
+        self.assertIn(" const before=compileHeightAuthorIntent(heightAuthor);", verified)
+
     def test_mab_third_cycle_has_distinct_instruction_no_host_repair(self):
         captures = []
         def fake(path, payload=None, timeout=0):
