@@ -314,3 +314,5 @@ AI回答原文・JSON・SVG・3Dプレビューは `%LOCALAPPDATA%\FreeAutonomyP
 - 新規 RUN_MAB_CUMULATIVE_6_STAGES.cmd：同一モデル・同一プロジェクトのWindowsダブルクリック入口。PS1と全依存の固定Git blobを検査。使い捨て隔離DockerがなければモデルPOST前にHOLD。モデルDL/有料API/ユーザー本物のプロジェクト上書き/ホストでの生成コード実行/公開GitHubへのpush/ワールド施工は不可。
 - 正確な結果は SHAREABLE_MAB_CUMULATIVE_SOURCE_QA.json に記録。累積サイクルごとの検証済みソースSHAを保存するが、原LLM回答・ソース全文・秘密情報・ローカル私的パスは共有ファイルに含めない。
 - GitHub ActionsのGit連鎖テストは偽モデル+偽Docker QAである。真正Qwen14BをユーザーWindowsで動かした証明ではなく、6件のSOURCEテスト成功は美術・真正Minecraft・完成ゲームの認定ではない。基本方針（MABとBrowser Ink TPSは完全同格、OSロック、追加課金なし、Work事前承認）を維持。
+
+- Windows Git長パスのHOLDを避けるため、新連続研究のローカルprivate保存ルートとclone階層を短縮した。Windows 2022での再検証まで本物のQwen14B連続作業は未実証。
