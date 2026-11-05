@@ -268,26 +268,36 @@ class RealSourceDraftTests(unittest.TestCase):
             " const before=compileHeightAuthorIntent(heightAuthor);\n"
             " const upper=compileAuthoredPublicMezzanine(heightAuthor,mezzanine);\n"
             " return raw;")
-        slots = exact_edit_slots("minecraftaibuilder", source)
-        self.assertGreaterEqual(len(slots), 4)
+        early = exact_edit_slots("minecraftaibuilder", source, cycle_number=1)
+        second = exact_edit_slots("minecraftaibuilder", source, cycle_number=2)
+        later = exact_edit_slots("minecraftaibuilder", source, cycle_number=3)
+        self.assertEqual(len(early), len(second))
+        self.assertEqual(len(later), len(early) + 2)
         for token in (
             " const before=compileHeightAuthorIntent(heightAuthor);",
             " const upper=compileAuthoredPublicMezzanine(heightAuthor,mezzanine);",
         ):
-            slot = next(x["slot"] for x in slots if x["exact"] == token)
+            self.assertNotIn(token, [entry["exact"] for entry in early])
+            slot = next(x["slot"] for x in later if x["exact"] == token)
             with self.subTest(slot=slot):
-                replace = " if(!input) throw Error('MISSING');\n" + token
+                guard = " if(!input) fail('MISSING_INPUT');"
                 updated = host_located_slot_replacement(
                     "minecraftaibuilder", source,
-                    {"slot": slot, "replace": replace})
-                self.assertIn(replace, updated)
+                    {"slot": slot, "replace": guard}, cycle_number=3)
+                self.assertIn(guard + "\n" + token, updated)
                 self.assertEqual(updated.count(token), 1)
-                with self.assertRaisesRegex(
-                    Hold, "PATCH_MAB_FROZEN_COMPILER_CALL_MUST_REMAIN_EXACT"):
-                    host_located_slot_replacement(
-                        "minecraftaibuilder", source,
-                        {"slot": slot,
-                         "replace": token.replace("(", "(extra,")})
+                self.assertEqual(updated.count(guard), 1)
+                # A model must NOT rewrite the compiler call, or ask the host
+                # to copy and repair it. The contract is guard-fragment only.
+                for invalid in (token, guard + "\n" + token,
+                                " if(process.exit(1)) fail('MISSING');",
+                                " throw Error('NOT_A_GUARD');"):
+                    with self.assertRaisesRegex(
+                        Hold, "PATCH_MAB_ADDITIVE_GUARD_ONLY"):
+                        host_located_slot_replacement(
+                            "minecraftaibuilder", source,
+                            {"slot": slot, "replace": invalid},
+                            cycle_number=3)
 
     def test_mab_third_cycle_has_distinct_instruction_no_host_repair(self):
         captures = []
