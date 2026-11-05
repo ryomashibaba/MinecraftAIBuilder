@@ -170,5 +170,82 @@ class SavedCandidateTests(unittest.TestCase):
         self.assertEqual(result["reason_code"],"PRIVATE_CLONE_NOT_UNIQUE")
 
 
+    def test_windows_crlf_draft_matches_original_lf_digest_without_rewriting_saved(self):
+        windows_bytes = self.after.replace("\n", "\r\n").encode("utf-8")
+        self.candidate.write_bytes(windows_bytes)
+        report, out = m.run_existing(self.base, qa=False, platform_name="nt")
+        self.assertEqual(report["status"], m.INSPECTED)
+        self.assertEqual(report["candidate_verified_sha256"],
+                         hashlib.sha256(self.after.encode()).hexdigest())
+        self.assertEqual(self.candidate.read_bytes(), windows_bytes)
+        self.assertEqual(self.file.read_text(), self.before)
+        self.assertEqual(json.loads(out.read_text()), report)
+
+    def test_windows_crlf_legacy_sha_receipt_recovery_only_once(self):
+        historical = {
+            "schema": "dec-v6-existing-candidate-private-qa-v1",
+            "status": "HOLD_PRIVATE_EXISTING_CANDIDATE_NO_PUBLICATION",
+            "project": "minecraftaibuilder",
+            "candidate_verified_sha256": None,
+            "baseline_commit": self.commit,
+            "original_project_changed": False, "public_model_source_pushes": 0,
+            "model_calls": 0, "paid_api_calls": 0, "world_writes": 0,
+            "independent_docker_qa_checks_passed": 0, "local_private_commits": 0,
+            "source_qa_passed": False, "art_certified": False,
+            "minecraft_walking_certified": False,
+            "reason_code": "PRIVATE_SAVED_V6_CANDIDATE_SHA_MISMATCH",
+        }
+        historical_file = self.root / "V6_EXISTING_SOURCE_QA_SHAREABLE.json"
+        historical_file.write_text(json.dumps(historical))
+        prior_bytes = historical_file.read_bytes()
+        windows_bytes = self.after.replace("\n", "\r\n").encode("utf-8")
+        self.candidate.write_bytes(windows_bytes)
+        calls=[]
+        def fake_docker(cfg, command, workspace, timeout, log, *, agent):
+            calls.append(command)
+            return 0, "MOCK_ONLY"
+        report, output = m.run_existing(self.base, qa=True, platform_name="nt",
+            gate=lambda policy: None, docker=fake_docker)
+        self.assertEqual(report["status"], m.PASS, report.get("reason_code"))
+        self.assertEqual(report["model_calls"], 0)
+        self.assertEqual(report["independent_docker_qa_checks_passed"], 2)
+        self.assertEqual(report["local_private_commits"], 1)
+        self.assertEqual(len(calls), 4)
+        self.assertEqual(self.candidate.read_bytes(), windows_bytes)
+        self.assertEqual(historical_file.read_bytes(), prior_bytes)
+        self.assertEqual(output.name, "V6_EXISTING_SOURCE_QA_CRLF_RECOVERY_SHAREABLE.json")
+        report2, _ = m.run_existing(self.base, qa=True, platform_name="nt",
+            gate=lambda policy: self.fail("no second docker"),
+            docker=lambda *a,**k: self.fail("no second QA"))
+        self.assertEqual(report2["reason_code"], "PRIVATE_REVIEW_RECEIPT_ALREADY_EXISTS_NO_REPEAT")
+
+    def test_crlf_candidate_tamper_is_rejected(self):
+        self.candidate.write_bytes(self.after.replace("\n", "\r\n").encode()
+                                   + b"// changed after SHA\r\n")
+        result, _ = m.run_existing(self.base, qa=False, platform_name="nt")
+        self.assertEqual(result["reason_code"], "PRIVATE_SAVED_V6_CANDIDATE_SHA_MISMATCH")
+        self.assertEqual(self.file.read_text(), self.before)
+
+    def test_mixed_and_bare_carriage_returns_are_not_silently_normalized(self):
+        candidate = self.after.encode()
+        expected_sha = hashlib.sha256(candidate).hexdigest()
+        for bad in (candidate.replace(b"\n", b"\r"), candidate + b"\r\n",
+                    candidate.replace(b"\n", b"\r\r\n")):
+            with self.subTest(raw=bad):
+                with self.assertRaises(m.ReviewHold):
+                    m.verified_candidate_bytes(bad, expected_sha)
+
+    def test_other_historical_hold_cannot_recover_as_crlf(self):
+        previous = self.root / "V6_EXISTING_SOURCE_QA_SHAREABLE.json"
+        previous.write_text(json.dumps({
+            "schema": "dec-v6-existing-candidate-private-qa-v1",
+            "status": "HOLD_PRIVATE_EXISTING_CANDIDATE_NO_PUBLICATION",
+            "reason_code": "PRIVATE_MODEL_SOURCE_FAILED_INDEPENDENT_DOCKER_QA"
+        }))
+        result, _ = m.run_existing(self.base, qa=True, platform_name="nt",
+            gate=lambda policy: self.fail("unexpected Docker"))
+        self.assertEqual(result["reason_code"], "PRIVATE_REVIEW_RECEIPT_ALREADY_EXISTS_NO_REPEAT")
+
+
 if __name__ == "__main__":
     unittest.main()
