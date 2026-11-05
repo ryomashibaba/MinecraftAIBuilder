@@ -44,6 +44,8 @@ EDIT_SLOT_MARKERS = {
         " const raw=structuredClone(input);",
         " const {mezzanine,...heightAuthor}=raw;",
         " const w=upper.sourceWitness;",
+        " const before=compileHeightAuthorIntent(heightAuthor);",
+        " const upper=compileAuthoredPublicMezzanine(heightAuthor,mezzanine);",
     ),
     "browser-ink-tps": (
         " return p.get('t21Play')===",
@@ -95,6 +97,15 @@ def host_located_slot_replacement(project: str, source: str, proposal: dict) -> 
     if type(slot) is not int or not (1 <= slot <= len(options)):
         raise Hold("PATCH_SLOT_INVALID")
     replacement = proposal["replace"]
+    original_slot_text = options[slot - 1]["exact"]
+    if (project == "minecraftaibuilder" and
+            ("const before=compileHeightAuthorIntent(heightAuthor);" in original_slot_text
+             or "const upper=compileAuthoredPublicMezzanine(heightAuthor,mezzanine);" in original_slot_text)):
+        # Additional compiler-call slots permit guards but NOT changing,
+        # duplicating or deleting the precise original compiler statement.
+        if (not isinstance(replacement, str) or
+                replacement.splitlines().count(original_slot_text) != 1):
+            raise Hold("PATCH_MAB_FROZEN_COMPILER_CALL_MUST_REMAIN_EXACT")
     # The real Qwen second proposal introduced an impossible bound
     # (treads <= 5 while V4H rise 6..8 requires 7..9). Never allow a
     # model to add hard-coded tread inequalities where the existing
@@ -126,6 +137,28 @@ GOALS = {
         "Keep genuine full 180s source 4v4 behavior, no synthetic actors, and no score claims."
     ),
 }
+# Source-only sequential improvements, not architecture host repairs.
+MAB_CYCLE_GOALS = {
+    1: GOALS["minecraftaibuilder"],
+    2: (
+        "After the first TWO QA-accepted revisions, add ONE narrow check "
+        "at the author input boundary or nested shape validation. "
+        "Preserve every valid original architectural choice and fixture.",
+        "After prior QA-accepted revisions, add a DIFFERENT defensive "
+        "validation for malformed author intent or nested provenance. "
+        "Retain the genuine two-wide stair and existing source gates.",
+    ),
+    3: (
+        "Four genuine source improvements are already QA-accepted. Make "
+        "ONE NEW narrow source-validation improvement, preferably at a "
+        "previously UNUSED approved edit slot. An additive compiler-call "
+        "guard MUST keep the original compiler call line exactly unchanged.",
+        "Finish with one DISTINCT narrow author-input or source-evidence "
+        "defense, preserving previous source checks and all nine BLOCKED "
+        "Minecraft construction gates. Do not fake gameplay or ART.",
+    ),
+}
+
 ANCHORS = {
     "minecraftaibuilder": (
         "MEZZANINE_SCHEMA", "compileMezzanineAuthorIntent", "compileAuthoredPublicMezzanine"
@@ -188,8 +221,13 @@ def local_model_installed(model: str, transport=local_api) -> bool:
 
 
 def model_proposal(model: str, project: str, path: str, current: str,
-                   stage: int, feedback: str, transport=local_api) -> tuple[dict, dict]:
+                   stage: int, feedback: str, transport=local_api,
+                   *, cycle_number: int = 1) -> tuple[dict, dict]:
+    if type(cycle_number) is not int or not 1 <= cycle_number <= 3:
+        raise Hold("MODEL_SOURCE_CYCLE_OUTSIDE_BUDGET")
     edit_slots = exact_edit_slots(project, current)
+    goals = (MAB_CYCLE_GOALS[cycle_number] if project == "minecraftaibuilder"
+             else GOALS[project])
     system_prompt = (
         "This is an isolated, publicly available training-source clone. "
         "You are a source reviewer and propose ONE exact replacement only. "
@@ -200,6 +238,8 @@ def model_proposal(model: str, project: str, path: str, current: str,
         "Never leave a partial expression, dangling continuation or orphaned "
         "top-level statement. V4H requires rise 6..8 and physical2WideStairTreads "
         "exactly rise+1 (7..9); never add a conflicting fixed tread limit. "
+        "For an ADDITIVE compiler-call edit slot, preserve that entire "
+        "original call as exactly one unchanged line. Add checks around it. "
         "Do not include full rewritten files, markdown code fences or explanations. "
         "No shell, Git commands, tool calls, tests or external networking. "
         "Never change guards protecting original game geometry, world writes, "
@@ -207,7 +247,8 @@ def model_proposal(model: str, project: str, path: str, current: str,
     )
     prompt = (
         f"PROJECT: {project}\nFILE: {path}\n"
-        f"STAGE: {stage}/2\nGOAL: {GOALS[project][stage - 1]}\n"
+        f"CYCLE: {cycle_number}/3 STAGE: {stage}/2\n"
+        f"GOAL: {goals[stage - 1]}\n"
         f"PREVIOUS REJECTION: {feedback[:180]}\n"
         "EDIT SLOTS: pick ONLY one slot by number. The host locates its "
         "exact original span, possibly MULTILINE; never guess or truncate it. "
@@ -301,7 +342,10 @@ def stage_private_candidate(root: Path, lane: dict, stage: int,
 def run(project: str, model: str, *, transport=local_api,
         private_root: Path | None = None, manifest: dict | None = None,
         use_lock: bool = True,
-        prepared_workspace: Path | None = None) -> dict:
+        prepared_workspace: Path | None = None,
+        cycle_number: int = 1) -> dict:
+    if type(cycle_number) is not int or not 1 <= cycle_number <= 3:
+        raise Hold("MODEL_SOURCE_CYCLE_OUTSIDE_BUDGET")
     manifest = load_manifest() if manifest is None else manifest
     if project not in GOALS or project not in manifest.get("project_candidates", {}):
         raise Hold("PROJECT_NOT_APPROVED")
@@ -362,7 +406,8 @@ def run(project: str, model: str, *, transport=local_api,
                     try:
                         proposed, metrics = model_proposal(
                             model, project, lane["source_file"], current,
-                            stage, feedback, transport=transport)
+                            stage, feedback, transport=transport,
+                            cycle_number=cycle_number)
                         # A model request cannot silently alter checked-out Git.
                         # Verify source pin BEFORE writing any private artifact.
                         verify_private_clone(workspace, lane)
