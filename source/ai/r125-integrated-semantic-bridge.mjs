@@ -90,6 +90,7 @@ export function validateIntegratedSemanticIntent(untrusted){
 export function projectIntegratedSemanticOperations(untrusted){
  const author=validateIntegratedSemanticIntent(untrusted);
  const operations=[
+  {type:'CONCEPT',id:author.id,concept:author.concept},
   ...author.spaces.map(s=>({type:'SPACE',key:s.key,
    purpose:s.purpose,link:s.link})),
   ...author.roofs.map(r=>({type:'ROOF',space:r.space,

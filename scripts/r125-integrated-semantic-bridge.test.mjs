@@ -37,21 +37,23 @@ test('synthetic author intent is preserved, but it is NOT genuine B143',()=>{
 test('PRIVATE operation plan projects every authored choice without geometry defaults',()=>{
  const raw=synthetic(),snapshot=JSON.stringify(raw);
  const {operations,operationSha256}=projectIntegratedSemanticOperations(raw);
- assert.equal(operations.length,7);
+ assert.equal(operations.length,8);
  assert.deepEqual(operations.map(o=>o.type),
-  ['SPACE','SPACE','ROOF','ROOF','ENTRY','SHELTER','FEATURE']);
- assert.deepEqual(operations[1].link,{to:'hall',kind:'open'});
- assert.equal(operations[2].profile,'gable');
- assert.equal(operations[4].face,'south');
- assert.equal(operations[5].roof,'shed');
- assert.equal(operations[6].kind,'seat');
+  ['CONCEPT','SPACE','SPACE','ROOF','ROOF','ENTRY','SHELTER','FEATURE']);
+ assert.equal(operations[0].id,raw.id);
+ assert.equal(operations[0].concept,raw.concept);
+ assert.deepEqual(operations[2].link,{to:'hall',kind:'open'});
+ assert.equal(operations[3].profile,'gable');
+ assert.equal(operations[5].face,'south');
+ assert.equal(operations[6].roof,'shed');
+ assert.equal(operations[7].kind,'seat');
  assert.equal(JSON.stringify(raw),snapshot);
  const ready=prepareIntegratedSemanticBridge(raw);
  assert.deepEqual(ready.payload.operations,operations);
  assert.equal(ready.payload.operationSha256,operationSha256);
  assert.equal(ready.realB143,'NOT_TESTED');
  const tampered=prepareIntegratedSemanticBridge(raw);
- tampered.payload.operations[2].profile='flat';
+ tampered.payload.operations[3].profile='flat';
  assert.throws(()=>assertAuthoredSemanticsUnchanged(tampered,raw),
   /OPERATION_PLAN_TAMPERED/);
 });
