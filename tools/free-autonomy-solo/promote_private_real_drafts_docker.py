@@ -213,7 +213,12 @@ def _check_one_contiguous_revision(before: str, after: str) -> None:
 
 
 def _copy_for_qa(original: Path, dest: Path, lane: dict) -> None:
-    run_git(original, "clone", "--no-local", "--quiet", "--branch",
+    # On Git for Windows, setting core.autocrlf *after* checkout is too late
+    # for a parent that contains already-QA-committed LF source revisions.
+    # Fix EOL semantics at clone time; otherwise the next QA clone can
+    # falsely appear dirty before the candidate is written.
+    run_git(original, "-c", "core.autocrlf=false",
+            "clone", "--no-local", "--quiet", "--branch",
             lane["research_branch_for_private_clone"], str(original),
             str(dest), timeout=250)
     run_git(dest, "remote", "set-url", "origin",
