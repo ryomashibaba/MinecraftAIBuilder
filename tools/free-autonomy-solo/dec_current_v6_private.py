@@ -194,7 +194,9 @@ def run_once(base: Path, *, real: bool, draft_only: bool = False,
                 result['status'] = 'HOLD_PRIVATE_CLONE_CHANGED_NO_EXECUTION'
                 return result, receipt
             candidate_file = private_root / 'V6_UNVERIFIED_SOURCE_PRIVATE.txt'
-            candidate_file.write_text(candidate, encoding='utf-8')
+            # Preserve the precise bytes used for candidate_sha256 on Windows.
+            # write_text(newline=None) silently expands LF to CRLF there.
+            candidate_file.write_bytes(candidate.encode('utf-8'))
             diff_file = private_root / 'V6_UNVERIFIED_DIFF_PRIVATE.patch'
             diff_file.write_text(''.join(difflib.unified_diff(
                 original.splitlines(keepends=True),
