@@ -23,6 +23,11 @@ const SHA=/^[a-f0-9]{40}$/;
 const LOCAL='http://127.0.0.1:11434/v1/chat/completions';
 const fail=code=>{throw Error('V7_PRIVATE_ONCE_'+code);};
 const hash=s=>createHash('sha256').update(s).digest('hex');
+const freshResourceClearance=(resource,now=Date.now())=>
+ resource?.status==='SAFE_FOR_ONE_REQUEST' &&
+ Number.isSafeInteger(resource.measuredAtEpochMs) &&
+ resource.measuredAtEpochMs<=now &&
+ now-resource.measuredAtEpochMs<=45000;
 const save=(dir,name,content)=>fs.writeFileSync(path.join(dir,name),
  typeof content==='string'?content:JSON.stringify(content,null,2)+'\n',{flag:'wx'});
 const actualHead=()=>execFileSync('git.exe',['-C',ROOT,'rev-parse','HEAD'],
@@ -87,9 +92,7 @@ export async function runV7PrivateOnce({
   let resource;
   try{resource=await checkResourceSafety({model,headSha,oneRequest:true});}
   catch{result.status='HOLD_RESOURCE_UNKNOWN';result.reason='RESOURCE_PROBE_FAILED';return result;}
-  if(resource?.status!=='SAFE_FOR_ONE_REQUEST'||
-   !Number.isSafeInteger(resource.measuredAtEpochMs)||
-   Math.abs(Date.now()-resource.measuredAtEpochMs)>45000){
+  if(!freshResourceClearance(resource)){
    result.status='HOLD_RESOURCE_UNKNOWN';result.reason='NO_FRESH_RESOURCE_CLEARANCE';return result;
   }
   // Resource assertion is supplied by the PRIVATE Windows monitor, not
@@ -100,6 +103,13 @@ export async function runV7PrivateOnce({
   catch{result.status='HOLD_OLLAMA_PREFLIGHT';result.reason='LOCAL_MODEL_LIST_UNAVAILABLE';return result;}
   if(listing.status!=='LOCAL_MODEL_LISTED'){
    result.status='HOLD_MODEL_NOT_INSTALLED';result.reason='MODEL_NOT_LISTED';return result;
+  }
+  // Listing can delay the POST while other host processes change memory use.
+  // Re-measure immediately before POST; public code cannot attest calibration.
+  try{resource=await checkResourceSafety({model,headSha,oneRequest:true});}
+  catch{result.status='HOLD_RESOURCE_UNKNOWN';result.reason='RESOURCE_PROBE_FAILED';return result;}
+  if(!freshResourceClearance(resource)){
+   result.status='HOLD_RESOURCE_UNKNOWN';result.reason='NO_FRESH_RESOURCE_CLEARANCE';return result;
   }
   save(dir,'V7_LOCAL_REQUEST_PRIVATE.json',{model,prompt,
    systemPromptSha256:hash(INTEGRATED_SPATIAL_V7_SUPPORTED_PROMPT),

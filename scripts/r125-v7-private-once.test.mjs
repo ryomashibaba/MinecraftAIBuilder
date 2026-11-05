@@ -107,3 +107,36 @@ test('unsupported roof is rejected with original preserved, no auto-retry',async
   assert.equal(r.b143Recompiled,false);assert.equal(r.worldWrites,0);
  }finally{fs.rmSync(tmp.root,{recursive:true,force:true});}
 });
+
+test('resource safety revoked after Ollama listing forbids model POST',async()=>{
+ const tmp=sandbox(),calls=[];let checks=0;
+ try{
+  const monitor=async()=>{
+   checks++;
+   return checks===1?
+    {status:'SAFE_FOR_ONE_REQUEST',measuredAtEpochMs:Date.now()}:
+    {status:'HOLD_RESOURCE_REVOKED',measuredAtEpochMs:Date.now()};
+  };
+  const r=await runV7PrivateOnce(params(tmp.outDir,
+   {checkResourceSafety:monitor}),{
+   ciFetcher:fakeCi(),modelFetcher:fakeModel(author(),calls),headReader:()=>sha});
+  assert.equal(checks,2);
+  assert.equal(r.status,'HOLD_RESOURCE_UNKNOWN');
+  assert.equal(r.modelGenerationAttempts,0);
+  assert.deepEqual(calls.map(c=>c.method),['GET']);
+  assert(!fs.existsSync(path.join(tmp.outDir,'V7_MODEL_RESPONSE_ORIGINAL_PRIVATE.txt')));
+  assert.equal(r.worldWrites,0);
+ }finally{fs.rmSync(tmp.root,{recursive:true,force:true});}
+});
+test('future-dated resource assertions fail closed before Ollama contact',async()=>{
+ const tmp=sandbox(),calls=[];
+ try{
+  const r=await runV7PrivateOnce(params(tmp.outDir,{
+   checkResourceSafety:async()=>({status:'SAFE_FOR_ONE_REQUEST',
+    measuredAtEpochMs:Date.now()+10000})
+  }),{ciFetcher:fakeCi(),modelFetcher:fakeModel(author(),calls),headReader:()=>sha});
+  assert.equal(r.status,'HOLD_RESOURCE_UNKNOWN');
+  assert.equal(r.modelGenerationAttempts,0);
+  assert.equal(calls.length,0);
+ }finally{fs.rmSync(tmp.root,{recursive:true,force:true});}
+});
