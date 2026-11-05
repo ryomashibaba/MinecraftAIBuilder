@@ -306,3 +306,11 @@ AI回答原文・JSON・SVG・3Dプレビューは `%LOCALAPPDATA%\FreeAutonomyP
 - まずモデルが実ソースに対し2段階のPRIVATE案を作成し、既存のpromote_private_real_drafts_docker.pyがネットワークなし・read-only Dockerで独立SOURCE QAを行う。QA完了後の2段階の使い捨てGitローカルcommitと一致する生成コード全文・patch・SHAはローカルPRIVATEのreviewに残る。2工程目が失敗しても1工程目の結果を保存し、全体HOLDを維持。
 - 認証を通った各ステージのファイル・コミット・SHA・QA証拠を改めて検証し、ユーザーに見せる SHAREABLE_MAB_LOCAL_SOURCE_AUTONOMY.json はハッシュ・安全状態・QA件数・HOLDだけ。原生成ソース、ローカルPCパス、原LLM回答は含まれない。生成コードのWindowsホスト実行なし、main/正式QA/PR/Pages/ゲームワールド書込みゼロ、GitHub pushゼロ、ART/gameplay/長時間自律開発の成功認定ゼロ。
 - 確認したCIは「模擬モデル＋QAのオーケストレーション」と、既存の真Dockerサンドボックス試験。ユーザーWindowsでの実Qwen14B＋Docker連続動作は**未実施**。既存ホストがDocker未導入なら起動してもHOLDになり、追加のユーザー操作は今は要求しない。実際の夜間放置・長時間自律化は、この統合経路の真のWindows実測から判断する。
+
+## 2026-11-05: 累積6段階の実ソース開発（新研究経路）
+
+- 新規 run_mab_private_continuous.py：既存MABソースで独立QAを通過したPRIVATE Git stage2 HEADを、次のサイクルの真正ソース基点として再利用。最大3サイクル×2段階=6件の累積コード修正、最大12回のモデル出力（各段階最大2回）。失敗時はそこで停止。
+- 既存の旧2段階ランチャーおよび公開GitHubの正式コードは変更しない。後続のコピーは新しいPRIVATE Git cloneに限定し、各サイクルのcommit/parent/祖父のGit SHA、差分の1ファイル制限、model回答のSHA、QA証拠の一致を確認する。
+- 新規 RUN_MAB_CUMULATIVE_6_STAGES.cmd：同一モデル・同一プロジェクトのWindowsダブルクリック入口。PS1と全依存の固定Git blobを検査。使い捨て隔離DockerがなければモデルPOST前にHOLD。モデルDL/有料API/ユーザー本物のプロジェクト上書き/ホストでの生成コード実行/公開GitHubへのpush/ワールド施工は不可。
+- 正確な結果は SHAREABLE_MAB_CUMULATIVE_SOURCE_QA.json に記録。累積サイクルごとの検証済みソースSHAを保存するが、原LLM回答・ソース全文・秘密情報・ローカル私的パスは共有ファイルに含めない。
+- GitHub ActionsのGit連鎖テストは偽モデル+偽Docker QAである。真正Qwen14BをユーザーWindowsで動かした証明ではなく、6件のSOURCEテスト成功は美術・真正Minecraft・完成ゲームの認定ではない。基本方針（MABとBrowser Ink TPSは完全同格、OSロック、追加課金なし、Work事前承認）を維持。

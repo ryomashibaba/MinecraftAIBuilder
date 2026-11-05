@@ -128,6 +128,8 @@ jobs:
           & ./tools/free-autonomy-solo/RUN_MAB_CUMULATIVE_6_STAGES.ps1 -CiSelfTest
           if ($LASTEXITCODE -ne 0) { exit 2 }
           Write-Host 'WINDOWS_MAB_CUMULATIVE_6_SOURCE_STATIC_PASS'
+          & cmd /c 'tools\free-autonomy-solo\RUN_MAB_CUMULATIVE_6_STAGES.cmd' --ci-self-test
+          if ($LASTEXITCODE -ne 0) { exit 2 }
           & cmd /c 'tools\free-autonomy-solo\RUN_CHECK_EXISTING_PRIVATE_DRAFTS_ONCE.cmd' --ci-self-test
           if ($LASTEXITCODE -ne 0) { exit 2 }
           Write-Host 'WINDOWS_EXISTING_DRAFT_STATIC_PREFLIGHT_CMD_SELF_TEST'
@@ -256,3 +258,23 @@ jobs:
           python -m unittest discover -v -s tools/free-autonomy-solo -p test_real_mab_original_architecture_batch.py
           if ($LASTEXITCODE -ne 0) { exit 2 }
           Write-Host 'REAL_WINDOWS_PYTHON_STATIC_AND_MOCK_PASSES__NO_QWEN_RUN'
+
+  windows-cumulative-private-git-real-commits-model-qa-mocked:
+    runs-on: windows-2022
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Real Windows private Git clone and 6 chained mock model/QA source commits
+        shell: pwsh
+        run: |
+          python -m unittest discover -v -s tools/free-autonomy-solo -p 'test_run_mab_private_continuous.py'
+          if ($LASTEXITCODE -ne 0) { exit 2 }
+          Write-Host 'WINDOWS_REAL_PRIVATE_GIT_SIX_CUMULATIVE_STAGES_MODEL_AND_DOCKER_MOCKED_PASS'
+      - name: ART real model and safety boundary
+        shell: pwsh
+        run: Write-Host 'REAL Git Windows test; fake model and Docker QA; no genuine 14B, real gameplay, ART or public source write.'

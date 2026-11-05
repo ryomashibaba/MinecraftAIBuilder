@@ -171,6 +171,15 @@ class WindowsRealSourceLauncherPins(unittest.TestCase):
             with self.subTest(file=name):
                 self.assertEqual(blob, git_blob_sha(ROOT / name))
         self.assertNotIn("/main/tools/free-autonomy-solo/", launch)
+        cmd = (ROOT / "RUN_MAB_CUMULATIVE_6_STAGES.cmd").read_text(
+            encoding="utf-8")
+        self.assertIn(
+            "/79a607bf27ded8d13b3f984f395c0f5fdb81df38/"
+            "tools/free-autonomy-solo/RUN_MAB_CUMULATIVE_6_STAGES.ps1", cmd)
+        self.assertIn(
+            git_blob_sha(ROOT / "RUN_MAB_CUMULATIVE_6_STAGES.ps1"), cmd)
+        self.assertIn("--ci-self-test", cmd)
+        self.assertNotIn("/main/tools/free-autonomy-solo/", cmd)
 
     def test_double_click_bootstrap_pins_exact_current_pilot_source(self):
         text = (ROOT / BOOTSTRAP_CMD).read_text(encoding="utf-8")
