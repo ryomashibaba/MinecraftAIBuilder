@@ -54,3 +54,9 @@
 - 1 POSTのみ、回答原本はPRIVATEの `V7_MODEL_RESPONSE_ORIGINAL_PRIVATE.txt` に原文保存。意味IRは無補修。既存 `createIntegratedSpatialHost`→`executeIntegratedSemanticBridge`→既存B143照合を呼ぶ。成功候補も独立物理・ART・実Minecraft未認定でHOLD。
 - `V7_SEMANTIC_SHAREABLE.json` はallowlistメタデータ限定。PRIVATE B143・原回答・構図・ローカルパスは共有しない。
 - テストdoubleの成功は実モデル著作の証拠ではない。現行恒久ランチャーV6既定経路はそのまま。V7のWindows PRIVATEエンジン実バインドと必要な事前安全計測は未実行。
+
+## 既存恒久入口のV7オプトイン（V6既定は無変更）
+
+- 元の`scripts/r125-v4j-permanent-launcher.cmd`を使う。従来の起動はV6のままで、V7は`MAB_V7_OPT_IN=1`が明示されたときだけ`--v7-semantic`で同じ恒久`current-pilot`へ入る。
+- V7は外部PRIVATEモジュールへの絶対パス`MAB_V7_PRIVATE_HOST_MODULE`を要求。そのPRIVATEモジュールは`deriveIntegratedShell`（実エンジン）と`checkResourceSafety`（直近45秒以内の実資源安全計測を行う関数）をexportする必要がある。これは既存PRIVATE資産を触れるWindows承認済みセッションが結合するための契約であり、GitHubにはモジュール・パス・原回答を保存しない。
+- 準備と両CIの同一HEAD SUCCESS、資源安全証拠のいずれかがなければモデル0回HOLD。V7の実モデル試行・ART・Minecraftは未実施。恒久起動器はPRIVATE原回答をコピーせず、従来と同じ`V4J_CURRENT_SAFE_REPORT.json`のみを共有する。

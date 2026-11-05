@@ -40,7 +40,12 @@ echo [3/4] CI OK. Your double-click authorizes ONE local Qwen research model req
 echo Model: %MAB_MODEL%. No additional confirmation needed.
 set "PRIVATE_OUT=%PRIVATE_ROOT%\V4J_AUTO_%RANDOM%_%RANDOM%"
 if exist "%PRIVATE_OUT%" goto OWNED_COLLISION
-node.exe "%SOURCE_DIR%\scripts\r125-v4j-current-pilot.mjs" --model "%MAB_MODEL%" --out "%PRIVATE_OUT%"
+if /I "%MAB_V7_OPT_IN%"=="1" (
+  echo V7 opt-in requested. PRIVATE engine and fresh memory safety are mandatory.
+  node.exe "%SOURCE_DIR%\scripts\r125-v4j-current-pilot.mjs" --model "%MAB_MODEL%" --out "%PRIVATE_OUT%" --v7-semantic
+) else (
+  node.exe "%SOURCE_DIR%\scripts\r125-v4j-current-pilot.mjs" --model "%MAB_MODEL%" --out "%PRIVATE_OUT%"
+)
 set "MODEL_EXIT=%ERRORLEVEL%"
 set "V4J_SAFE_FILE=%PRIVATE_OUT%\V4J_CURRENT_SAFE_REPORT.json"
 if not exist "%V4J_SAFE_FILE%" goto NO_SAFE_OUTPUT

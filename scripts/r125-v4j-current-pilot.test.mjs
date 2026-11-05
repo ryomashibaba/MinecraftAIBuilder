@@ -42,3 +42,39 @@ test('copies only vetted shareable V6 handoff without original text or genre tem
   assert.throws(()=>parseStableArgs(['--model','invalid;cmd','--out',out]),/ARGS/);
  }finally{fs.rmSync(tmp,{recursive:true,force:true});}
 });
+
+test('V7 is opt-in: it copies only V7 allowlisted HOLD; V6 default is unaffected',async()=>{
+ const sha='b'.repeat(40),prev=process.env.MAB_HEAD;
+ const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'v7-stable-entry-'));
+ const out=path.join(tmp,'private');
+ const safety={
+  schema:'minecraftaibuilder-r125-v7-private-one-safe-v1',
+  protocol:'V7_PRIVATE_SINGLE_SEMANTIC_SPATIAL_HOST_V1',headSha:sha,
+  status:'HOLD_REQUIRED_CI',reason:'BOTH_EXACT_HEAD_CI_NOT_SUCCESS',
+  modelGenerationAttempts:0,worldContacts:0,worldWrites:0,
+  readiness:'NOT_PREPARED',constructionApproved:false,executionAllowed:false,
+  BuildPlan:{operations:[]},gates:Array(9).fill('BLOCKED')
+ };
+ let n=0;
+ try{
+  process.env.MAB_HEAD=sha;
+  assert.deepEqual(parseStableArgs(['--model','qwen3:14b','--out','private','--v7-semantic']),
+   {model:'qwen3:14b',outDir:'private',v7Semantic:true});
+  const r=await runStableLocalStudy(['--model','qwen3:14b','--out',out,'--v7-semantic'],{
+   v7BindingLoader:async()=>({deriveIntegratedShell:()=>{},checkResourceSafety:()=>{}}),
+   v7Runner:async opts=>{
+    n++;assert.equal(opts.headSha,sha);assert.equal(opts.model,'qwen3:14b');
+    fs.mkdirSync(opts.outDir);
+    fs.writeFileSync(path.join(opts.outDir,'V7_SEMANTIC_SHAREABLE.json'),JSON.stringify(safety));
+    return safety;
+   }
+  });
+  assert.equal(n,1);
+  assert.deepEqual(JSON.parse(fs.readFileSync(r.shareableFile,'utf8')),safety);
+  assert(!fs.readFileSync(r.shareableFile,'utf8').includes(tmp));
+  assert.throws(()=>parseStableArgs(['--model','qwen3:14b','--out','private','--v7-semantic','--extra']),/ARGS/);
+ }finally{
+  if(prev===undefined)delete process.env.MAB_HEAD;else process.env.MAB_HEAD=prev;
+  fs.rmSync(tmp,{recursive:true,force:true});
+ }
+});
