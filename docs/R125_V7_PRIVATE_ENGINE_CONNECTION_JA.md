@@ -47,3 +47,10 @@
 新しい実モデル自身の短いIRは未生成。今回のモデル試行判断時は現HEAD必須CIの片方が実行中で、空きRAM約5.5GBから安全な追加推論容量も確定できなかった。実推論はHOLD。最終push後のCI結果は別途そのHEADで確認する。
 
 次は現在HEADの必須CI双方SUCCESSと資源安全を確認し、既存恒久入口のV7オプトイン接続を行って、対応範囲内の短い実モデルIRを既存PRIVATEエンジンへ流す。未対応断面・制約はモデルへ事前に開示し、元回答を保存した上でHOLDする。汎用機能・美術品質は引き続き未完成。新しいZIP/CMD/ワークフロー、有料API、main変更、PR Ready/Close/Mergeはなし。
+
+## V7追加：単発PRIVATE試行の公開側実行器（モデル試行は未実施）
+
+- `scripts/r125-v7-private-once.mjs` に、既存の正確なHEADと必須CI2本、PRIVATEホスト実体、45秒以内の資源安全計測、ローカルOllamaのモデル名の事前照合をすべて必要とする実行経路を実装。いずれか不足・不明・失敗ならモデル生成0回でHOLD。
+- 1 POSTのみ、回答原本はPRIVATEの `V7_MODEL_RESPONSE_ORIGINAL_PRIVATE.txt` に原文保存。意味IRは無補修。既存 `createIntegratedSpatialHost`→`executeIntegratedSemanticBridge`→既存B143照合を呼ぶ。成功候補も独立物理・ART・実Minecraft未認定でHOLD。
+- `V7_SEMANTIC_SHAREABLE.json` はallowlistメタデータ限定。PRIVATE B143・原回答・構図・ローカルパスは共有しない。
+- テストdoubleの成功は実モデル著作の証拠ではない。現行恒久ランチャーV6既定経路はそのまま。V7のWindows PRIVATEエンジン実バインドと必要な事前安全計測は未実行。

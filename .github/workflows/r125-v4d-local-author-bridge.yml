@@ -10,6 +10,8 @@ on:
       - 'source/ai/r125-integrated-semantic-bridge.mjs'
       - 'source/ai/r125-integrated-spatial-host.mjs'
       - 'scripts/r125-integrated-semantic-bridge.test.mjs'
+      - 'scripts/r125-v7-private-once.mjs'
+      - 'scripts/r125-v7-private-once.test.mjs'
       - 'source/ai/r125-v4e-ranked-exterior-ir.mjs'
       - 'source/ai/r125-v4e-authored-public-loggia.mjs'
       - 'source/ai/r125-v4e-sectioned-author-ir.mjs'
@@ -87,6 +89,8 @@ jobs:
           node --check source/ai/r125-integrated-semantic-bridge.mjs
           node --check source/ai/r125-integrated-spatial-host.mjs
           node --check scripts/r125-integrated-semantic-bridge.test.mjs
+          node --check scripts/r125-v7-private-once.mjs
+          node --check scripts/r125-v7-private-once.test.mjs
           node --check source/ai/r125-v4e-ranked-exterior-ir.mjs
           node --check source/ai/r125-v4e-authored-public-loggia.mjs
           node --check source/ai/r125-v4e-sectioned-author-ir.mjs
@@ -110,6 +114,7 @@ jobs:
         run: |
           node --test scripts/r125-v4d-short-semantic.test.mjs
           node --test scripts/r125-integrated-semantic-bridge.test.mjs
+          node --test scripts/r125-v7-private-once.test.mjs
           node --test scripts/r125-v4d-local-architect.test.mjs
           node --test scripts/r125-v4d-replay-private.test.mjs
           node --check scripts/r125-v4d-compiler-reject-codes.mjs
