@@ -8,6 +8,7 @@ on:
       - 'source/ai/r125-v4d-short-semantic-ir.mjs'
       - 'scripts/r125-v4d-short-semantic.test.mjs'
       - 'source/ai/r125-integrated-semantic-bridge.mjs'
+      - 'source/ai/r125-integrated-spatial-host.mjs'
       - 'scripts/r125-integrated-semantic-bridge.test.mjs'
       - 'source/ai/r125-v4e-ranked-exterior-ir.mjs'
       - 'source/ai/r125-v4e-authored-public-loggia.mjs'
@@ -84,6 +85,7 @@ jobs:
           node --check source/ai/r125-v4d-short-semantic-ir.mjs
           node --check scripts/r125-v4d-short-semantic.test.mjs
           node --check source/ai/r125-integrated-semantic-bridge.mjs
+          node --check source/ai/r125-integrated-spatial-host.mjs
           node --check scripts/r125-integrated-semantic-bridge.test.mjs
           node --check source/ai/r125-v4e-ranked-exterior-ir.mjs
           node --check source/ai/r125-v4e-authored-public-loggia.mjs

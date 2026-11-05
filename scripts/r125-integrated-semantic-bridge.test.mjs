@@ -90,6 +90,7 @@ test('no type-specific layouts: same contract accepts other semantic programs',(
 
 // Injected transport/product only: no claim to execute the PRIVATE engine in CI.
 import {compileDesign,SCHEMA} from '../source/ai/b143-building-dsl.mjs';
+import {createIntegratedSpatialHost} from '../source/ai/r125-integrated-spatial-host.mjs';
 function injectedHost(change=()=>{}){
  return {
   expand:p=>({authorEcho:p.authoredChoices,operations:p.operations}),
@@ -133,4 +134,46 @@ test('host rejection, semantic mutation, voxel tampering and unsafe products HOL
   assert.equal(r.worldWrites,0);assert.equal(r.realB143,'NOT_TESTED');
   assert(!('privateProduct' in r));assert(!JSON.stringify(r).includes('sensitive'));
  }
+});
+
+function supportedSpatialAuthor(){
+ const a=synthetic();a.roofs.forEach(r=>r.profile='shed');
+ a.shelters[0].roof='flat';return a;
+}
+test('common HOST mechanically expands author topology, actual door walls, fixtures and independent roof sections',()=>{
+ const host=createIntegratedSpatialHost({deriveIntegratedShell:()=>{throw Error('PRIVATE engine not available in public CI');}});
+ const a=supportedSpatialAuthor();
+ const expand=a=>host.expand(prepareIntegratedSemanticBridge(a).payload);
+ const open=expand(a);
+ assert.deepEqual(open.authorEcho,a);assert.equal(open.intent.spaces.length,a.spaces.length);
+ assert.equal(open.intent.partitions.length,0);
+ assert.equal(open.intent.architecture.roofSections.length,a.roofs.length);
+ assert.equal(open.intent.architecture.shelters.length,a.shelters.length);
+ assert.equal(open.intent.fixtures.length,a.features.length);
+ assert.equal(open.journal.length,projectIntegratedSemanticOperations(a).operations.length);
+ a.spaces[1].link.kind='door';
+ const door=expand(a);assert.equal(door.intent.partitions.length,1);
+ assert(door.intent.joins.some(j=>j.spaces.includes('reading')&&j.openingId!==null));
+ a.features[0].kind='storage';const storage=expand(a);
+ assert.notDeepEqual(storage.intent.fixtures[0].parts,door.intent.fixtures[0].parts);
+ // The host has a procedural support-floor seed, never a historical model source.
+ assert.equal(storage.provenance,'PROCEDURAL_HOST_SOURCE_SEED_NOT_HISTORICAL_SOURCE');
+ assert.equal(storage.base.compiled.primitives.filter(c=>c[1]===1).length,120);
+});
+test('parent choice moves the physical space; unsupported engine capabilities HOLD without replacement',async()=>{
+ const host=createIntegratedSpatialHost({deriveIntegratedShell:()=>{throw Error('NO_PRIVATE_ENGINE');}});
+ const a=supportedSpatialAuthor();
+ a.spaces.push({key:'workshop',purpose:'Public hands-on practical work',link:{to:'reading',kind:'door'}});
+ a.roofs.push({space:'workshop',profile:'shed',axis:'x',rank:'subordinate'});
+ const before=host.expand(prepareIntegratedSemanticBridge(a).payload);
+ a.spaces[2].link.to='hall';
+ const after=host.expand(prepareIntegratedSemanticBridge(a).payload);
+ assert.notDeepEqual(before.intent.spaces[2].rect,after.intent.spaces[2].rect);
+ for(const change of [a=>a.roofs[0].profile='gable',a=>a.entry.face='east',
+  a=>a.shelters[0].roof='shed',a=>a.shelters=[]]){
+  const b=supportedSpatialAuthor();change(b);
+  const result=await executeIntegratedSemanticBridge(b,host);
+  assert.equal(result.status,'HOLD');assert(!result.privateProduct);
+ }
+ assert.throws(()=>createIntegratedSpatialHost(),/EXISTING_ENGINE_REQUIRED/);
 });
