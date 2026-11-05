@@ -229,6 +229,90 @@ class CumulativePrivateGitChainTests(unittest.TestCase):
         self.assertEqual(report["completed_qa_source_stages"], 0)
         self.assertEqual(self.calls[-1], "LOCK_RELEASED")
 
+
+    def stop_after_two_qa_cycles(self):
+        def stop_third_cycle(project, model, **kwargs):
+            if self.generation_count >= 2:
+                self.calls.append("THIRD_CYCLE_MODEL_HOLD_FAKE")
+                return {"status": "HOLD", "model_calls_attempted": 2,
+                        "hold_reason": "STAGE_1_DRAFT_NOT_ACCEPTED"}
+            return self.fake_draft(project, model, **kwargs)
+        report, receipt = self.run_it(cycles=3, draft=stop_third_cycle)
+        self.assertEqual(report["completed_cycles"], 2)
+        self.assertEqual(report["completed_qa_source_stages"], 4)
+        self.assertEqual(report["private_review_stages"], 4)
+        self.assertEqual(report["status"],
+                         "HOLD_CYCLE_MODEL_DRAFT_FAILED_PRIOR_QA_PRESERVED")
+        self.assertEqual(self.generation_count, 2)
+        self.assertEqual(self.calls[-1], "LOCK_RELEASED")
+        return report, receipt
+
+    def test_resume_only_third_cycle_with_four_real_git_qa_commits_preserved(self):
+        first, receipt = self.stop_after_two_qa_cycles()
+        earlier_contents = receipt.read_bytes()
+        self.calls.clear()
+        resumed, next_receipt = self.run_it(
+            cycles=3, resume_latest=True, draft=self.fake_draft)
+        self.assertEqual(resumed["status"], PASS, resumed.get("reason_code"))
+        self.assertEqual(resumed["completed_cycles"], 3)
+        self.assertEqual(resumed["completed_qa_source_stages"], 6)
+        self.assertEqual(resumed["private_review_stages"], 6)
+        self.assertEqual(resumed["resumed_prior_verified_cycles"], 2)
+        self.assertTrue(resumed["resumed_without_redoing_prior_model_calls"])
+        self.assertEqual(resumed["model_calls_attempted"],
+                         first["model_calls_attempted"] + 2)
+        self.assertEqual(self.generation_count, 3)
+        self.assertEqual(self.qa_count, 6)
+        self.assertEqual(len(resumed["accepted_cycles"]), 3)
+        self.assertEqual(resumed["accepted_cycles"][:2], first["accepted_cycles"])
+        self.assertEqual(receipt.read_bytes(), earlier_contents)
+        self.assertEqual(self.calls.count("LOCK_ACQUIRED"), 1)
+        self.assertEqual(self.calls[-1], "LOCK_RELEASED")
+        self.assertEqual(json.loads(next_receipt.read_text())["status"], PASS)
+        self.assertNotIn(str(self.root), next_receipt.read_text())
+
+    def test_resume_tampered_previous_private_source_refused_without_generation(self):
+        _prior, receipt = self.stop_after_two_qa_cycles()
+        review = list((receipt.parent / "c2" / "PrivateClones").glob(
+            "*/private-source-review-*/STAGE_2_PRIVATE_SOURCE.txt"))
+        self.assertEqual(len(review), 1)
+        review[0].write_text("tampered source outside Git review", encoding="utf-8")
+        self.calls.clear()
+        summary, result = self.run_it(
+            cycles=3, resume_latest=True, draft=self.fake_draft)
+        self.assertEqual(summary["status"],
+                         "HOLD_CUMULATIVE_SOURCE_OR_GIT_INTEGRITY")
+        self.assertEqual(summary["reason_code"],
+                         "PRIVATE_REVIEW_RECORDED_HASH_OR_QA_MISMATCH")
+        self.assertEqual(self.generation_count, 2)
+        self.assertEqual(self.calls[-1], "LOCK_RELEASED")
+        self.assertEqual(summary["completed_cycles"], 0)
+        self.assertNotIn("tampered source", result.read_text())
+
+    def test_resume_missing_prior_private_qa_never_generates(self):
+        summary, receipt = self.run_it(
+            cycles=3, resume_latest=True, draft=self.fake_draft)
+        self.assertEqual(summary["status"],
+                         "HOLD_CUMULATIVE_SOURCE_OR_GIT_INTEGRITY")
+        self.assertEqual(summary["reason_code"],
+                         "NO_STOPPED_PRIVATE_QA_SESSION_ELIGIBLE")
+        self.assertEqual(self.generation_count, 0)
+        self.assertTrue(receipt.exists())
+        self.assertEqual(self.calls[-1], "LOCK_RELEASED")
+
+    def test_resume_changed_prior_accepted_hashes_is_rejected(self):
+        _old, receipt = self.stop_after_two_qa_cycles()
+        entry = json.loads(receipt.read_text())
+        entry["accepted_cycles"][0]["source_sha256"][0] = "0" * 64
+        receipt.write_text(json.dumps(entry), encoding="utf-8")
+        summary, _ = self.run_it(cycles=3, resume_latest=True,
+                                 draft=self.fake_draft)
+        self.assertEqual(summary["status"],
+                         "HOLD_CUMULATIVE_SOURCE_OR_GIT_INTEGRITY")
+        self.assertEqual(summary["reason_code"],
+                         "RESUME_QA_HASHES_NOT_MATCHING_SESSION")
+        self.assertEqual(self.generation_count, 2)
+
     def test_docker_missing_never_calls_model(self):
         def missing():
             raise RuntimeError("NO_DOCKER")
