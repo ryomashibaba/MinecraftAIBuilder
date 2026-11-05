@@ -1,0 +1,41 @@
+name: Dec genuine Qwen4B through new cumulative MAB private SOURCE QA once
+
+on:
+  push:
+    branches:
+      - research/dec-free-autonomy-solo-pilot-20261104
+    paths:
+      - 'tools/free-autonomy-solo/real_qwen4b_cumulative_once_ci.py'
+      - '.github/workflows/dec-real-qwen4b-cumulative-once.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  one-real-cumulative-source-cycle:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 28
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Check trusted Python code only
+        run: python3 -m py_compile tools/free-autonomy-solo/real_qwen4b_cumulative_once_ci.py tools/free-autonomy-solo/run_mab_private_continuous.py
+      - name: Public disposable Ollama and independent QA images
+        run: |
+          docker pull ollama/ollama:latest
+          docker pull node:24-bookworm-slim
+      - name: Genuine Qwen4B one source cycle then Docker QA and private Git lineage
+        run: python3 tools/free-autonomy-solo/real_qwen4b_cumulative_once_ci.py
+      - name: Sanitized status only; no generated model source
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qwen4b-cumulative-source-qa-sanitized
+          path: ${{ runner.temp }}/dec-qwen4b-cumulative-sanitized.json
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Scope of any result
+        if: always()
+        run: echo 'No user Windows 14B, no three cycles, no ART or Minecraft world, and no public model code.'
