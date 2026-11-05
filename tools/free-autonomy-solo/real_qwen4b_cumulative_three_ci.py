@@ -21,6 +21,7 @@ def run() -> dict:
     report = {
         "schema": "dec-real-qwen4b-three-cycles-v1",
         "status": "HOLD", "model_requested": MODEL,
+        "cycle_edit_protocol": "FIRST_FOUR_PROVEN_SLOTS_THIRD_CYCLE_ADDITIVE_GUARDS",
         "requested_cycles": 3, "completed_cycles": 0,
         "model_calls_attempted": 0, "qa_source_stages": 0,
         "verified_private_review_stages": 0,
