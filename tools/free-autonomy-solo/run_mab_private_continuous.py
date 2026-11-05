@@ -93,7 +93,7 @@ def _successor_from_qa(
     # worktrees the user might already have in their project folders.
     workbase = next_private_base / "PrivateClones"
     workbase.mkdir(parents=True, exist_ok=True)
-    root = workbase / (PROJECT + "-successor-" + uuid.uuid4().hex)
+    root = workbase / ("n-" + uuid.uuid4().hex[:16])
     root.mkdir()
     fresh = root / "repo"
     run_git(
@@ -121,9 +121,9 @@ def run_cumulative(
     config = load_manifest() if manifest is None else copy.deepcopy(manifest)
     base = (private_root if private_root is not None else
             Path(os.environ.get("LOCALAPPDATA") or tempfile.gettempdir())
-            / "FreeAutonomyPrivate" / "MABContinuousPrivateSources")
+            / "FreeAutonomyPrivate" / "MC")
     base.mkdir(parents=True, exist_ok=True)
-    root = base / ("mab-continuous-" + uuid.uuid4().hex)
+    root = base / ("m-" + uuid.uuid4().hex[:16])
     root.mkdir(mode=0o700)
     report_path = root / "SHAREABLE_MAB_CUMULATIVE_SOURCE_QA.json"
     lane = config["project_candidates"][PROJECT]
@@ -165,7 +165,7 @@ def run_cumulative(
                 summary["status"] = "HOLD_LOCAL_MODEL_NOT_INSTALLED_NO_PULL"
                 return summary, report_path
             for n in range(1, cycles + 1):
-                cycle_root = root / ("cycle-" + str(n))
+                cycle_root = root / ("c" + str(n))
                 summary["status"] = "MODEL_SOURCE_CYCLE_RUNNING_UNCERTIFIED"
                 summary["active_cycle"] = n
                 _receipt(summary, report_path)
@@ -216,7 +216,7 @@ def run_cumulative(
                 # Every cycle, including final, must show a genuine two-commit
                 # private Git chain before its state becomes accepted.
                 next_base = (
-                    root / ("cycle-" + str(n + 1))
+                    root / ("c" + str(n + 1))
                     if n < cycles else None
                 )
                 next_config, next_prepared = successor(
