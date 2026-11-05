@@ -137,7 +137,7 @@ def host_located_slot_replacement(project: str, source: str, proposal: dict,
         # never the model's explanation, fuzzy source edits or shell code.
         canonical = re.sub(r"\s+", "", condition)
         previous_guards = re.findall(
-            r"(?m)^[ \t]*if\(([A-Za-z0-9_.?!<>=&|'\\"\[\] +\-]{3,240})\)"
+            r"(?m)^[ \t]*if\(([^()\r\n]{3,240})\)"
             r"[ \t]*fail\('[A-Z][A-Z0-9_]{2,63}'\);[ \t]*$",
             source)
         if any(re.sub(r"\s+", "", old) == canonical
