@@ -271,6 +271,76 @@ class CumulativePrivateGitChainTests(unittest.TestCase):
         self.assertEqual(json.loads(next_receipt.read_text())["status"], PASS)
         self.assertNotIn(str(self.root), next_receipt.read_text())
 
+
+    def stop_resumed_third_cycle_without_model(self):
+        first, _prior = self.stop_after_two_qa_cycles()
+        self.calls.clear()
+
+        def second_hold(*args, **kwargs):
+            if "prepared_workspace" not in kwargs:
+                raise ValueError("TEST_RESUMED_SOURCE_NOT_USED")
+            return {"status": "HOLD", "model_calls_attempted": 0,
+                    "hold_reason": "STAGE_1_DRAFT_NOT_ACCEPTED"}
+
+        second, second_receipt = self.run_it(
+            cycles=3, resume_latest=True, draft=second_hold)
+        self.assertEqual(second["status"],
+                         "HOLD_CYCLE_MODEL_DRAFT_FAILED_PRIOR_QA_PRESERVED")
+        self.assertEqual(second["completed_cycles"], 2)
+        self.assertEqual(second["completed_qa_source_stages"], 4)
+        self.assertEqual(second["private_review_stages"], 4)
+        self.assertEqual(second["accepted_cycles"], first["accepted_cycles"])
+        self.assertEqual(self.generation_count, 2)
+        self.assertEqual(self.qa_count, 4)
+        predecessor = second_receipt.parent / "PRIVATE_QA_RESUME_PREDECESSOR.json"
+        self.assertTrue(predecessor.is_file())
+        self.assertNotIn(str(self.root), predecessor.read_text(encoding="utf-8"))
+        return second, second_receipt, predecessor
+
+    def test_repeated_real_git_resumes_keep_prior_four_qa_commits(self):
+        second, previous_receipt, predecessor = (
+            self.stop_resumed_third_cycle_without_model())
+        self.calls.clear()
+        third, third_receipt = self.run_it(
+            cycles=3, resume_latest=True, draft=self.fake_draft)
+        self.assertEqual(third["status"], PASS, third.get("reason_code"))
+        self.assertEqual(third["completed_cycles"], 3)
+        self.assertEqual(third["completed_qa_source_stages"], 6)
+        self.assertEqual(third["private_review_stages"], 6)
+        self.assertEqual(third["accepted_cycles"][:2],
+                         second["accepted_cycles"])
+        self.assertEqual(third["model_calls_attempted"],
+                         second["model_calls_attempted"] + 2)
+        self.assertEqual(third["resumed_prior_verified_cycles"], 2)
+        self.assertEqual(self.generation_count, 3)
+        self.assertEqual(self.qa_count, 6)
+        self.assertEqual(self.calls.count("LOCK_ACQUIRED"), 1)
+        self.assertEqual(self.calls[-1], "LOCK_RELEASED")
+        self.assertEqual(
+            json.loads(previous_receipt.read_text(encoding="utf-8"))["completed_cycles"],
+            2)
+        self.assertEqual(json.loads(third_receipt.read_text())["status"], PASS)
+        self.assertTrue(predecessor.is_file())
+
+    def test_repeated_resume_rejects_ancestry_path_escape_before_model(self):
+        _second, _receipt, predecessor = (
+            self.stop_resumed_third_cycle_without_model())
+        predecessor.write_text(json.dumps({
+            "schema": "mab-private-source-predecessor-v1",
+            "prior_session": "../../outside"
+        }), encoding="utf-8")
+        self.calls.clear()
+        report, result = self.run_it(
+            cycles=3, resume_latest=True, draft=self.fake_draft)
+        self.assertEqual(report["status"],
+                         "HOLD_CUMULATIVE_SOURCE_OR_GIT_INTEGRITY")
+        self.assertEqual(report["reason_code"],
+                         "RESUME_PRIVATE_PREDECESSOR_INVALID")
+        self.assertEqual(self.generation_count, 2)
+        self.assertEqual(self.qa_count, 4)
+        self.assertEqual(self.calls[-1], "LOCK_RELEASED")
+        self.assertNotIn("outside", result.read_text())
+
     def test_resume_tampered_previous_private_source_refused_without_generation(self):
         _prior, receipt = self.stop_after_two_qa_cycles()
         review = list((receipt.parent / "c2" / "PrivateClones").glob(
