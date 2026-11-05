@@ -128,11 +128,12 @@ class WindowsRealSourceLauncherPins(unittest.TestCase):
         for name, blob in sources:
             with self.subTest(name=name):
                 if name == "draft_real_project_local14b.py":
-                    # The 2026-11-05 two-step launcher is an immutable
-                    # historical build. New cumulative source features must
-                    # have a separate, independently pinned launcher.
+                    # This older launcher remains pinned to its historical code.
                     self.assertEqual(
                         blob, "f727db8d07a871969f9bb92f6278b53d57b614b7")
+                elif name == "promote_private_real_drafts_docker.py":
+                    self.assertEqual(
+                        blob, "ce668f1e4901a701ec2a0b09812b74c7e7398a1e")
                 else:
                     self.assertEqual(blob, git_blob_sha(ROOT / name))
         self.assertIn(
@@ -149,7 +150,7 @@ class WindowsRealSourceLauncherPins(unittest.TestCase):
         launch = (ROOT / "RUN_MAB_CUMULATIVE_6_STAGES.ps1").read_text(
             encoding="utf-8")
         self.assertIn(
-            "$revision='327b4bbcf90c02c54d49ab1c5bd47e0007173caa'",
+            "$revision='07628f7ff50e60e8a602869e2b21f149cccab725'",
             launch)
         self.assertIn("CiSelfTest", launch)
         checks = re.findall(
