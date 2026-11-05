@@ -10,7 +10,6 @@ import json
 from pathlib import Path
 import re
 import subprocess
-import time
 
 
 class SandboxHold(RuntimeError):
@@ -121,41 +120,6 @@ def docker_preflight(policy: DockerPolicy) -> dict:
             "container_execution_verified": False, "real_model_verified": False}
 
 
-
-def confirm_owned_docker_removed(cidfile: Path) -> None:
-    """Fail closed unless Docker explicitly confirms that our owned ID is gone.
-
-    The cidfile is retained if cleanup or verification fails, allowing a safe
-    later review. No name-based kill, prune or broad container enumeration.
-    """
-    if not cidfile.is_file():
-        raise SandboxHold("OWNED_DOCKER_ID_UNAVAILABLE")
-    try:
-        container_id = cidfile.read_text(encoding="ascii").strip()
-    except (OSError, UnicodeError) as exc:
-        raise SandboxHold("OWNED_DOCKER_ID_UNREADABLE") from exc
-    if not re.fullmatch(r"[0-9a-f]{64}", container_id):
-        raise SandboxHold("OWNED_DOCKER_ID_INVALID")
-    try:
-        subprocess.run(["docker", "rm", "-f", container_id],
-                       capture_output=True, timeout=25, check=False)
-        for attempt in range(3):
-            check = subprocess.run(["docker", "container", "inspect", container_id],
-                                   capture_output=True, text=True, encoding="utf-8",
-                                   errors="replace", timeout=15, check=False)
-            if check.returncode != 0:
-                message = check.stdout + "\n" + check.stderr
-                if re.search(r"(?im)^\s*(?:Error(?: response from daemon)?:\s*)?No such (?:object|container):", message):
-                    cidfile.unlink()
-                    return
-                raise SandboxHold("OWNED_DOCKER_INSPECT_UNAVAILABLE")
-            if attempt < 2:
-                time.sleep(0.2)
-    except (OSError, subprocess.TimeoutExpired) as exc:
-        raise SandboxHold("OWNED_DOCKER_CLEANUP_UNAVAILABLE") from exc
-    raise SandboxHold("OWNED_DOCKER_CONTAINER_STILL_PRESENT")
-
-
 def docker_exec(policy: DockerPolicy, workspace: Path, *, agent: bool,
                 command: list[str], cidfile: Path, timeout: int, log: Path) -> tuple[int, str]:
     """Supervise docker CLI; force-remove container even if CLI times out.
@@ -166,29 +130,25 @@ def docker_exec(policy: DockerPolicy, workspace: Path, *, agent: bool,
     if cidfile.exists():
         raise SandboxHold("STALE_CONTAINER_ID_FILE")
     argv = docker_argv(policy, workspace, agent=agent, command=command, cidfile=cidfile)
-    cli_completed_or_timed_out = False
     try:
         proc = subprocess.run(argv, capture_output=True, text=True, timeout=timeout,
                               encoding="utf-8", errors="replace", stdin=subprocess.DEVNULL)
         rc = proc.returncode
         output = proc.stdout + "\n" + proc.stderr
-        cli_completed_or_timed_out = True
     except subprocess.TimeoutExpired as exc:
         rc = 124
         def as_text(value):
             return value.decode("utf-8", errors="replace") if isinstance(value, bytes) else (value or "")
         output = as_text(exc.stdout) + "\n" + as_text(exc.stderr)
-        cli_completed_or_timed_out = True
     except OSError as exc:
         raise SandboxHold("DOCKER_EXEC_UNAVAILABLE") from exc
     finally:
         if cidfile.is_file():
-            # Safety-critical: retain the ownership receipt if removal is
-            # uncertain, even when the agent Docker CLI returned success.
-            confirm_owned_docker_removed(cidfile)
-        elif cli_completed_or_timed_out:
-            # A successful CLI without an owned-ID receipt is not proof that
-            # the container was removed. No other container may be targeted.
-            raise SandboxHold("OWNED_DOCKER_ID_UNAVAILABLE")
+            container_id = cidfile.read_text(encoding="ascii", errors="replace").strip()
+            if re.fullmatch(r"[0-9a-f]{12,64}", container_id):
+                # --rm already clears normally; rm -f handles orphaned timeout.
+                subprocess.run(["docker", "rm", "-f", container_id],
+                               capture_output=True, timeout=25, check=False)
+            cidfile.unlink(missing_ok=True)
     log.write_text(str(output)[-150000:], encoding="utf-8")
     return rc, str(output)[-3500:]

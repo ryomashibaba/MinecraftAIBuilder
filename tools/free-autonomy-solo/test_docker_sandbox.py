@@ -93,8 +93,6 @@ class DockerSandboxTests(unittest.TestCase):
             if args[0:2] == ['docker', 'run']:
                 cidfile.write_text('a' * 64)
                 raise subprocess.TimeoutExpired(args, 1, output=b'TIMEOUT')
-            if args[0:3] == ['docker', 'container', 'inspect']:
-                return subprocess.CompletedProcess(args, 1, '', 'Error: No such object: ' + 'a' * 64)
             return subprocess.CompletedProcess(args, 0, '', '')
 
         with patch('docker_sandbox.subprocess.run', side_effect=fake_run) as runner:
@@ -105,53 +103,6 @@ class DockerSandboxTests(unittest.TestCase):
         self.assertIn('TIMEOUT', tail)
         self.assertFalse(cidfile.exists())
         self.assertTrue(any(c.args[0][0:3] == ['docker', 'rm', '-f'] for c in runner.call_args_list))
-
-    def test_owned_container_cleanup_confirms_absence_and_preserves_receipt_on_failure(self):
-        from docker_sandbox import confirm_owned_docker_removed
-        cid = 'a' * 64
-        cidfile = self.root / 'owned.cid'
-
-        def result(args, code, err=''):
-            return subprocess.CompletedProcess(args, code, '', err)
-
-        cases = (
-            ('removed', lambda args: result(args, 0) if args[1] == 'rm' else
-             result(args, 1, 'Error: No such object: ' + cid), None),
-            ('already_removed', lambda args: result(args, 1, 'No such container') if args[1] == 'rm' else
-             result(args, 1, 'Error: No such container: ' + cid), None),
-            ('still_running', lambda args: result(args, 1) if args[1] == 'rm' else
-             result(args, 0), 'OWNED_DOCKER_CONTAINER_STILL_PRESENT'),
-            ('daemon_failure', lambda args: result(args, 1) if args[1] == 'rm' else
-             result(args, 1, 'Cannot connect to the Docker daemon'), 'OWNED_DOCKER_INSPECT_UNAVAILABLE'),
-        )
-        for label, fake, failure in cases:
-            with self.subTest(case=label):
-                cidfile.write_text(cid)
-                with patch('docker_sandbox.subprocess.run', side_effect=lambda args, **kwargs: fake(args)), \
-                     patch('docker_sandbox.time.sleep'):
-                    if failure:
-                        with self.assertRaisesRegex(SandboxHold, failure):
-                            confirm_owned_docker_removed(cidfile)
-                        self.assertTrue(cidfile.exists())
-                    else:
-                        confirm_owned_docker_removed(cidfile)
-                        self.assertFalse(cidfile.exists())
-
-        cidfile.write_text('BAD')
-        with patch('docker_sandbox.subprocess.run') as runner:
-            with self.assertRaisesRegex(SandboxHold, 'OWNED_DOCKER_ID_INVALID'):
-                confirm_owned_docker_removed(cidfile)
-            runner.assert_not_called()
-        self.assertTrue(cidfile.exists())
-
-    def test_cli_without_owned_id_receipt_is_a_safety_hold(self):
-        cidfile = self.root / 'missing.cid'
-        with patch('docker_sandbox.subprocess.run',
-                   return_value=subprocess.CompletedProcess(['docker'], 0, 'OK', '')) as runner:
-            with self.assertRaisesRegex(SandboxHold, 'OWNED_DOCKER_ID_UNAVAILABLE'):
-                docker_exec(self.policy, self.repo, agent=False, command=['node', '--version'],
-                            cidfile=cidfile, timeout=1, log=self.root / 'private.log')
-        self.assertEqual(runner.call_count, 1)
 
     def test_public_provider_catalog_is_exact_non_inference_command(self):
         cmd = docker_argv(DockerPolicy(network='bridge'), self.repo, agent=True,

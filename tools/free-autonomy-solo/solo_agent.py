@@ -14,7 +14,8 @@ import sys
 import time
 import uuid
 
-from docker_sandbox import DockerPolicy, SandboxHold, docker_exec, docker_preflight
+from docker_sandbox import DockerPolicy, SandboxHold, docker_preflight
+from docker_sandbox_verified import docker_exec
 
 PROJECTS = {
     "minecraftaibuilder": "ryomashibaba/MinecraftAIBuilder",
