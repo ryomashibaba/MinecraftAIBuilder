@@ -206,6 +206,11 @@ def restore_checkpoint(
                               previous, commit).splitlines()
             if paths != [pinned_source]:
                 raise CheckpointHold("CHECKPOINT_GIT_SOURCE_SCOPE_INVALID")
+            # Reject changed file modes, including executable source or symlink.
+            mode_line = _git_text(bare, "ls-tree", commit, "--", pinned_source)
+            if (not mode_line.startswith("100644 blob ") or
+                    not mode_line.endswith("\t" + pinned_source)):
+                raise CheckpointHold("CHECKPOINT_GIT_SOURCE_MODE_INVALID")
             count = _git_text(bare, "cat-file", "-s", f"{commit}:{pinned_source}")
             if not count.isdecimal() or int(count) > SOURCE_MAX:
                 raise CheckpointHold("CHECKPOINT_GIT_SOURCE_SIZE_EXCEEDED")
@@ -234,7 +239,8 @@ def restore_checkpoint(
             "model_requests": 0,
             "original_project_modified": False,
             "art_or_gameplay_certified": False,
-            "private_bare_repo": str(destination),
+            # Never print an owner-private absolute path in shareable stdout.
+            "private_bare_repo_name": destination.name,
         }
 
 
