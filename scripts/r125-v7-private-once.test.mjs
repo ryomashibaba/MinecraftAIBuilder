@@ -217,3 +217,27 @@ test('independent monitor must advance both heartbeat and actual measurement tim
  assert.equal(monitorSampleAdvanced({...base,independentMonitorActive:false},
   advanced,now),false);
 });
+
+test('pre-POST clearance rejects cached SAFE measurements before any model attempt',async()=>{
+ const {prePostMonitorReady}=await import('./r125-v7-private-once.mjs');
+ const now=Date.now();
+ const first={status:'SAFE_FOR_ONE_REQUEST',measuredAtEpochMs:now-1500,
+  independentMonitorActive:true,monitorId:'private-worker-001',
+  monitorHeartbeatEpochMs:now-1400};
+ const next={...first,measuredAtEpochMs:now-100,
+  monitorHeartbeatEpochMs:now-50};
+ assert.equal(prePostMonitorReady(first,next,now),true);
+ assert.equal(prePostMonitorReady(first,first,now),false);
+ assert.equal(prePostMonitorReady(first,{...next,
+  measuredAtEpochMs:first.measuredAtEpochMs},now),false);
+ assert.equal(prePostMonitorReady(first,{...next,
+  monitorHeartbeatEpochMs:first.monitorHeartbeatEpochMs},now),false);
+ assert.equal(prePostMonitorReady(first,{...next,
+  monitorId:'private-worker-002'},now),false);
+ assert.equal(prePostMonitorReady(first,{...next,
+  status:'HOLD_RESOURCE_REVOKED'},now),false);
+ assert.equal(prePostMonitorReady(first,{...next,
+  measuredAtEpochMs:now+1},now),false);
+ assert.equal(prePostMonitorReady({...first,
+  measuredAtEpochMs:now-46000},next,now),false);
+});

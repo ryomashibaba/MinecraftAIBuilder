@@ -54,6 +54,12 @@ export function monitorSampleAdvanced(before,after,now=Date.now()){
   after.monitorId===before.monitorId &&
   after.monitorHeartbeatEpochMs>before.monitorHeartbeatEpochMs;
 }
+/** Fail closed when the second pre-POST resource report is a cached snapshot. */
+export function prePostMonitorReady(before,after,now=Date.now()){
+ return freshResourceClearance(before,now) &&
+  freshResourceClearance(after,now) &&
+  monitorSampleAdvanced(before,after,now);
+}
 const save=(dir,name,content)=>fs.writeFileSync(path.join(dir,name),
  typeof content==='string'?content:JSON.stringify(content,null,2)+'\n',{flag:'wx'});
 /** Exact-head CI covers the committed bytes only; a dirty checkout is not attested. */
@@ -137,6 +143,9 @@ export async function runV7PrivateOnce({
   if(!freshResourceClearance(resource)){
    result.status='HOLD_RESOURCE_UNKNOWN';result.reason='NO_FRESH_RESOURCE_CLEARANCE';return result;
   }
+  // Preserve the first resource sample. A second, cached SAFE report must
+  // never authorize a real POST, even with a recently updated heartbeat.
+  const resourceBeforeListing=resource;
   // Resource assertion is supplied by the PRIVATE Windows monitor, not
   // independent proof of RAM safety by this public, host-agnostic code.
   const host=createIntegratedSpatialHost({deriveIntegratedShell});
@@ -180,6 +189,10 @@ export async function runV7PrivateOnce({
   if(!injected&&!independentMonitorReady(resource)){
    result.status='HOLD_INDEPENDENT_MONITOR';
    result.reason='ACTIVE_SEPARATE_MONITOR_NOT_ATTESTED';return result;
+  }
+  if(!injected&&!prePostMonitorReady(resourceBeforeListing,resource)){
+   result.status='HOLD_INDEPENDENT_MONITOR';
+   result.reason='PRE_POST_MONITOR_RESOURCE_SAMPLE_NOT_ADVANCING';return result;
   }
   // CI and resource preflight may have taken time. Never POST from a now-dirty
   // or changed checkout, even when the old commit's CI was successful.
