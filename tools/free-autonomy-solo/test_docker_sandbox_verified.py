@@ -97,7 +97,8 @@ class VerifiedDockerLifecycleTests(unittest.TestCase):
                     return self.outcome(args, 1, "Error: No such object: " + CID)
                 with patch("docker_sandbox_verified.subprocess.run", side_effect=fake):
                     rc, _ = docker_exec(
-                        DockerPolicy(), self.workspace, agent=agent,
+                        (DockerPolicy(network="bridge") if agent else DockerPolicy()),
+                        self.workspace, agent=agent,
                         command=command, cidfile=self.cidfile,
                         timeout=5, log=self.log,
                     )
