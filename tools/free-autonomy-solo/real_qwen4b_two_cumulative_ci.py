@@ -21,6 +21,26 @@ EXPECTED_QA_STAGES = 4
 SUCCESS = "GENUINE_QWEN4B_TWO_CUMULATIVE_CYCLES_PRIVATE_SOURCE_QA_ONLY"
 
 
+def _owned_container_cleanup_verified(container: str) -> bool:
+    """Fail closed unless Docker confirms the named container is absent."""
+    try:
+        subprocess.run(
+            ["docker", "rm", "-f", container], capture_output=True,
+            timeout=25, check=False)
+        probe = subprocess.run(
+            ["docker", "container", "inspect", container],
+            capture_output=True, text=True, timeout=25, check=False)
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+    if probe.returncode == 0:
+        return False
+    # A daemon/permission error must NOT masquerade as an absent container.
+    return probe.stderr.strip() in {
+        f"Error: No such container: {container}",
+        f"Error: No such object: {container}",
+    }
+
+
 def experiment() -> dict:
     result = {
         "schema": "dec-real-qwen4b-two-cumulative-source-qa-v1",
@@ -41,6 +61,7 @@ def experiment() -> dict:
         "remote_git_pushes": 0,
         "paid_api_calls": 0,
         "raw_model_source_uploaded": False,
+        "container_cleanup_verified": False,
     }
     with tempfile.TemporaryDirectory(prefix="dec-qwen4b-two-cycle-") as ephemeral:
         root = Path(ephemeral)
@@ -97,9 +118,11 @@ def experiment() -> dict:
             result["status"] = "HOLD_OLLAMA_OR_CI_INFRASTRUCTURE"
             result["exception_type"] = type(exc).__name__
         finally:
-            subprocess.run(
-                ["docker", "rm", "-f", container], capture_output=True,
-                timeout=25, check=False)
+            result["container_cleanup_verified"] = _owned_container_cleanup_verified(
+                container)
+            if not result["container_cleanup_verified"]:
+                # Successful SOURCE QA is not a completed safe owned run.
+                result["status"] = "HOLD_OWNED_CONTAINER_CLEANUP_UNVERIFIED"
     return result
 
 
