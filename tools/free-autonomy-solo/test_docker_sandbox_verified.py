@@ -78,6 +78,34 @@ class VerifiedDockerLifecycleTests(unittest.TestCase):
         self.assertFalse(self.cidfile.exists())
         self.assertTrue(any(call.args[0][:3] == ["docker", "container", "inspect"] for call in runner.call_args_list))
 
+    def test_owned_agent_and_qa_never_pull_images_implicitly(self):
+        scenarios = [
+            (False, ["node", "--version"]),
+            (True, ["opencode", "run", "--auto", "--model",
+                    "ollama/qwen3:14b", "write an isolated candidate"]),
+        ]
+        for agent, command in scenarios:
+            with self.subTest(agent=agent):
+                runs = []
+                def fake(args, **kwargs):
+                    if args[:2] == ["docker", "run"]:
+                        runs.append(args)
+                        self.cidfile.write_text(CID)
+                        return self.outcome(args, 0)
+                    if args[:2] == ["docker", "rm"]:
+                        return self.outcome(args, 0)
+                    return self.outcome(args, 1, "Error: No such object: " + CID)
+                with patch("docker_sandbox_verified.subprocess.run", side_effect=fake):
+                    rc, _ = docker_exec(
+                        DockerPolicy(), self.workspace, agent=agent,
+                        command=command, cidfile=self.cidfile,
+                        timeout=5, log=self.log,
+                    )
+                self.assertEqual(rc, 0)
+                self.assertEqual(len(runs), 1)
+                self.assertEqual(runs[0][2], "--pull=never")
+                self.assertFalse(self.cidfile.exists())
+
     def test_timeout_removes_only_exact_owned_container(self):
         def fake(args, **kwargs):
             if args[:2] == ["docker", "run"]:
