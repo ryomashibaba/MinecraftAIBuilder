@@ -224,6 +224,15 @@ def restore_checkpoint(
         destination = private_root / f"qa-restored-{final[:12]}.git"
         if destination.exists() or destination.is_symlink():
             raise CheckpointHold("CHECKPOINT_PRIVATE_RESTORE_ALREADY_EXISTS")
+        # Keep the authenticated, strictly validated stage-SHA proof PRIVATE
+        # beside the bare Git objects for later independent SOURCE re-QA.
+        private_proof = bare / "qa-proof.private.json"
+        with private_proof.open("x", encoding="utf-8") as fh:
+            json.dump(proof, fh, ensure_ascii=False, sort_keys=True)
+            fh.write("\n")
+        private_proof.chmod(0o600)
+        if _proof_strict(private_proof.read_bytes(), pinned_base, pinned_source) != proof:
+            raise CheckpointHold("CHECKPOINT_PRIVATE_PROOF_READBACK_FAILED")
         # No checkout, no untrusted source execution, and no public Git write.
         os.rename(bare, destination)
         return {
@@ -244,18 +253,197 @@ def restore_checkpoint(
         }
 
 
+
+def _docker_container_inventory() -> tuple[str, ...]:
+    """Require a live daemon-backed result, not a missing Docker CLI/daemon."""
+    try:
+        p = subprocess.run(
+            ["docker", "container", "ls", "--all", "--quiet", "--no-trunc"],
+            stdin=subprocess.DEVNULL, capture_output=True, text=True,
+            timeout=25, check=False)
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        raise CheckpointHold("CHECKPOINT_REQA_DOCKER_INVENTORY_UNAVAILABLE") from exc
+    if p.returncode:
+        raise CheckpointHold("CHECKPOINT_REQA_DOCKER_INVENTORY_FAILED")
+    return tuple(sorted(p.stdout.splitlines()))
+
+
+def _reqa_git_porcelain(repo: Path) -> str:
+    # Preserve the leading status column; _git_text(...).strip() cannot.
+    return _git(repo, "status", "--porcelain=v1", "--untracked-files=all").decode(
+        "utf-8").rstrip("\r\n")
+
+
+def recheck_restored_source_docker(
+    restored_bare: Path, base_repo: Path, private_root: Path, *,
+    pinned_base: str = PINNED_BASE,
+    pinned_source: str = PINNED_SOURCE,
+    pinned_blob: str = PINNED_BLOB,
+    preflight=None,
+    run_qa=None,
+    inventory=None,
+) -> dict:
+    """Re-run QA on every restored stage in disposable network-none Docker.
+
+    The Git base checkout is trusted/pinned. Generated source is never executed
+    by the host, staged into production, or published. There is no model call.
+    Injected QA/preflight/inventory callbacks exist for offline tests only;
+    CLI exposes no callback or baseline override.
+    """
+    if not (SHA40.fullmatch(pinned_base) and SHA40.fullmatch(pinned_blob) and
+            re.fullmatch(r"source/ai/[A-Za-z0-9_-]+\.mjs", pinned_source)):
+        raise CheckpointHold("CHECKPOINT_REQA_PINNED_INPUT_INVALID")
+    if (restored_bare.is_symlink() or not restored_bare.is_dir() or
+            private_root.is_symlink() or not private_root.is_dir() or
+            base_repo.is_symlink() or not base_repo.is_dir()):
+        raise CheckpointHold("CHECKPOINT_REQA_INPUT_DIRECTORY_INVALID")
+    restored_bare = restored_bare.resolve(strict=True)
+    base_repo = base_repo.resolve(strict=True)
+    private_root = private_root.resolve(strict=True)
+    if (restored_bare.parent != private_root or
+            not re.fullmatch(r"qa-restored-[0-9a-f]{12}\.git", restored_bare.name) or
+            base_repo == private_root or base_repo in private_root.parents or
+            private_root in base_repo.parents):
+        raise CheckpointHold("CHECKPOINT_REQA_PRIVATE_LOCATION_INVALID")
+    if (_git_text(restored_bare, "rev-parse", "--is-bare-repository") != "true" or
+            _git_text(base_repo, "rev-parse", "HEAD") != pinned_base or
+            _git_text(base_repo, "rev-parse", f"{pinned_base}:{pinned_source}") != pinned_blob or
+            _git_text(base_repo, "status", "--porcelain=v1", "--untracked-files=all")):
+        raise CheckpointHold("CHECKPOINT_REQA_TRUSTED_BASE_INVALID")
+    proof_file = restored_bare / "qa-proof.private.json"
+    if proof_file.is_symlink() or not proof_file.is_file() or proof_file.stat().st_size > PROOF_MAX:
+        raise CheckpointHold("CHECKPOINT_REQA_PROOF_MISSING")
+    proof = _proof_strict(proof_file.read_bytes(), pinned_base, pinned_source)
+    if ((restored_bare / "qa-reverification.private.json").exists() or
+            (restored_bare / "qa-reverification.private.json").is_symlink()):
+        raise CheckpointHold("CHECKPOINT_REQA_ALREADY_RECORDED")
+    final = proof["final_verified_head"]
+    if (restored_bare.name != f"qa-restored-{final[:12]}.git" or
+            _git_text(restored_bare, "rev-parse", "refs/heads/qa-restored-review-only") != final):
+        raise CheckpointHold("CHECKPOINT_REQA_FINAL_REF_CHANGED")
+    lineage = _git_text(restored_bare, "rev-list", "--reverse", f"{pinned_base}..{final}").splitlines()
+    stages = len(proof["accepted_cycles"]) * 2
+    if len(lineage) != stages or lineage[-1] != final:
+        raise CheckpointHold("CHECKPOINT_REQA_GIT_COUNT_CHANGED")
+    previous = pinned_base
+    for i, commit in enumerate(lineage):
+        if (_git_text(restored_bare, "rev-list", "--parents", "-n", "1", commit).split() !=
+                [commit, previous] or
+                _git_text(restored_bare, "diff-tree", "--no-commit-id", "--name-only",
+                          "-r", previous, commit).splitlines() != [pinned_source] or
+                not _git_text(restored_bare, "ls-tree", commit, "--", pinned_source).startswith(
+                    "100644 blob ")):
+            raise CheckpointHold("CHECKPOINT_REQA_STAGE_GIT_SCOPE_INVALID")
+        candidate = _git(restored_bare, "show", f"{commit}:{pinned_source}")
+        if (len(candidate) > SOURCE_MAX or
+                hashlib.sha256(candidate).hexdigest() !=
+                proof["accepted_cycles"][i // 2]["source_sha256"][i % 2]):
+            raise CheckpointHold("CHECKPOINT_REQA_STAGE_BYTES_INVALID")
+        previous = commit
+    if any(q.get("qa_commands") != [1, 1] for q in proof["accepted_cycles"]):
+        raise CheckpointHold("CHECKPOINT_REQA_COMMAND_COUNT_UNEXPECTED")
+    # Docker preflight comes *after* proof/Git checks and before staging source.
+    from promote_private_real_drafts_docker import (
+        require_docker_qa_image, docker_run)
+    if preflight is None:
+        preflight = require_docker_qa_image
+    if run_qa is None:
+        run_qa = docker_run
+    if inventory is None:
+        inventory = _docker_container_inventory
+    try:
+        preflight()
+    except Exception as exc:
+        raise CheckpointHold("CHECKPOINT_REQA_DOCKER_NOT_READY") from exc
+    with tempfile.TemporaryDirectory(prefix=".dec-reqa-", dir=private_root) as temp:
+        scratch = Path(temp)
+        template = scratch / "empty-template"
+        template.mkdir()
+        workspace = scratch / "trusted-qa-base"
+        _command(["git", "-c", "core.hooksPath=" + os.devnull,
+                  "clone", "--no-local", "--no-checkout", "--quiet",
+                  "--template", str(template), "--", str(base_repo), str(workspace)], timeout=120)
+        _command(["git", "-C", str(workspace),
+                  "-c", "core.hooksPath=" + os.devnull,
+                  "-c", "core.autocrlf=false",
+                  "checkout", "--detach", "--quiet", pinned_base], timeout=120)
+        source = workspace / pinned_source
+        if (source.is_symlink() or not source.is_file() or
+                _git_text(workspace, "rev-parse", "HEAD") != pinned_base or
+                _reqa_git_porcelain(workspace)):
+            raise CheckpointHold("CHECKPOINT_REQA_TRUSTED_CLONE_INVALID")
+        if hashlib.sha256(source.read_bytes()).hexdigest() != hashlib.sha256(
+                _git(base_repo, "show", f"{pinned_base}:{pinned_source}")).hexdigest():
+            raise CheckpointHold("CHECKPOINT_REQA_BASE_WORKTREE_MISMATCH")
+        proof_stages = []
+        for i, commit in enumerate(lineage):
+            source_bytes = _git(restored_bare, "show", f"{commit}:{pinned_source}")
+            expected = proof["accepted_cycles"][i // 2]["source_sha256"][i % 2]
+            source.write_bytes(source_bytes)
+            if (hashlib.sha256(source.read_bytes()).hexdigest() != expected or
+                    _reqa_git_porcelain(workspace) != " M " + pinned_source):
+                raise CheckpointHold("CHECKPOINT_REQA_STAGING_SCOPE_INVALID")
+            before_containers = inventory()
+            try:
+                rc, _private_output = run_qa(
+                    workspace, ["node", "--test", "scripts/r125-v4h-mezzanine.test.mjs"],
+                    scratch, f"reqa-stage{i+1}", network="none", writable=False)
+            except Exception as exc:
+                raise CheckpointHold("CHECKPOINT_REQA_DOCKER_COMMAND_FAILED") from exc
+            after_containers = inventory()
+            if before_containers != after_containers:
+                raise CheckpointHold("CHECKPOINT_REQA_CONTAINER_INVENTORY_CHANGED")
+            if (rc != 0 or hashlib.sha256(source.read_bytes()).hexdigest() != expected or
+                    _reqa_git_porcelain(workspace) != " M " + pinned_source or
+                    _git_text(base_repo, "rev-parse", "HEAD") != pinned_base):
+                raise CheckpointHold("CHECKPOINT_REQA_SOURCE_QA_NOT_PASSED")
+            proof_stages.append({"commit": commit, "source_sha256": expected,
+                                 "independent_docker_qa_checks": 1})
+        result = {
+            "status": "RESTORED_REAL_DOCKER_SOURCE_REQA_ONLY_ART_HOLD",
+            "base_commit": pinned_base, "final_commit": final,
+            "qa_stages_reexecuted": stages,
+            "network": "none", "model_requests": 0,
+            "container_inventory_unchanged": True,
+            "source_executed_on_host": False,
+            "source_published": False,
+            "original_project_modified": False,
+            "art_or_gameplay_certified": False,
+        }
+        receipt = restored_bare / "qa-reverification.private.json"
+        if receipt.exists() or receipt.is_symlink():
+            raise CheckpointHold("CHECKPOINT_REQA_ALREADY_RECORDED")
+        with receipt.open("x", encoding="utf-8") as stream:
+            json.dump({"result": result, "verified_stages": proof_stages}, stream,
+                      ensure_ascii=False, sort_keys=True)
+            stream.write("\n")
+        receipt.chmod(0o600)
+        return result
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--encrypted", required=True, type=Path)
-    ap.add_argument("--sha256", required=True)
-    ap.add_argument("--certificate", required=True, type=Path)
-    ap.add_argument("--private-key", required=True, type=Path)
+    ap.add_argument("--recheck-restored-docker", type=Path, default=None,
+                    help="Recheck a prior PRIVATE restored bare Git repo in isolated Docker")
+    ap.add_argument("--encrypted", type=Path)
+    ap.add_argument("--sha256")
+    ap.add_argument("--certificate", type=Path)
+    ap.add_argument("--private-key", type=Path)
     ap.add_argument("--base-repo", required=True, type=Path)
     ap.add_argument("--private-root", required=True, type=Path)
     a = ap.parse_args()
     try:
-        result = restore_checkpoint(a.encrypted, a.sha256, a.certificate,
-                                    a.private_key, a.base_repo, a.private_root)
+        if a.recheck_restored_docker is not None:
+            if any(v is not None for v in (a.encrypted, a.sha256,
+                                           a.certificate, a.private_key)):
+                raise CheckpointHold("CHECKPOINT_REQA_MODE_ARGUMENTS_MIXED")
+            result = recheck_restored_source_docker(
+                a.recheck_restored_docker, a.base_repo, a.private_root)
+        else:
+            if any(v is None for v in (a.encrypted, a.sha256,
+                                       a.certificate, a.private_key)):
+                raise CheckpointHold("CHECKPOINT_RESTORE_REQUIRED_ARGUMENT_MISSING")
+            result = restore_checkpoint(a.encrypted, a.sha256, a.certificate,
+                                        a.private_key, a.base_repo, a.private_root)
         print(json.dumps(result, sort_keys=True, ensure_ascii=False))
         return 0
     except (CheckpointHold, OSError, ValueError, TypeError) as exc:
