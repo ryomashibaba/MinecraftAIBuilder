@@ -195,3 +195,35 @@ test('V7 optional model contract names only currently implemented PRIVATE HOST c
  const expanded=host.expand(prepareIntegratedSemanticBridge(supportedSpatialAuthor()).payload);
  assert.equal(expanded.intent.architecture.shelters.length,1);
 });
+
+test('every sheltered entrance/contact pad lies on outdoor floor, never inside room wall',()=>{
+ const host=createIntegratedSpatialHost({deriveIntegratedShell:()=>{throw Error('PRIVATE_ONLY');}});
+ const inRect=(pad,rect)=>pad[0]>=rect[0]&&pad[0]<rect[0]+rect[2]&&
+  pad[1]>=rect[1]&&pad[1]<rect[1]+rect[3];
+ function check(a,which){
+  const intent=host.expand(prepareIntegratedSemanticBridge(a).payload).intent;
+  const shell=intent.architecture.shelters[which];
+  const join=intent.joins.find(j=>j.spaces[1]===shell.id);
+  const parent=intent.spaces.find(s=>s.id===a.shelters[which].connectTo);
+  const opening=intent.openings.find(o=>o.id===shell.connectionOpening);
+  assert(join&&opening&&parent);
+  assert.equal(join.openingId,opening.id);
+  assert.equal(inRect(join.clearPad,shell.rect),true,
+   a.shelters[which].edge+': pad must touch the actual shelter floor');
+  assert.equal(inRect(join.clearPad,parent.rect),false,
+   a.shelters[which].edge+': pad must not stop on room wall');
+  assert.equal(Math.abs(join.clearPad[0]-opening.origin[0])+
+   Math.abs(join.clearPad[1]-opening.origin[2]),1);
+ }
+ for(const face of ['north','south']){
+  const a=supportedSpatialAuthor();
+  a.entry.face=face;a.shelters[0].edge=face;
+  check(a,0);
+ }
+ for(const [face,space] of [['east','reading'],['west','hall']]){
+  const a=supportedSpatialAuthor();
+  a.shelters.push({purpose:'Sheltered exterior service and waiting',
+   connectTo:space,edge:face,scale:'medium',roof:'flat'});
+  check(a,1);
+ }
+});

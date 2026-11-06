@@ -18,7 +18,15 @@ const opening=(id,kind,rect,side)=>{
  if(side==='north'||side==='south')return {id,kind,origin:[x+4,2,side==='north'?z:z+d-1],size:[4,3,1]};
  return {id,kind,origin:[side==='west'?x:x+w-1,2,z+3],size:[1,3,4]};
 };
+// Door join clearance is separate; a shelter join must land OUTSIDE the
+// room's wall, on the actual covered approach floor in every orientation.
 const pad=o=>o.size[2]===1?[o.origin[0],o.origin[2]-1]:[o.origin[0]-1,o.origin[2]];
+const exteriorPad=(o,side)=>({
+ north:[o.origin[0],o.origin[2]-1],
+ south:[o.origin[0],o.origin[2]+1],
+ east:[o.origin[0]+1,o.origin[2]],
+ west:[o.origin[0]-1,o.origin[2]]
+})[side];
 const midpoint=rect=>[rect[0]+Math.floor((rect[2]-2)/2),rect[1]+Math.floor((rect[3]-2)/2)];
 export function createIntegratedSpatialHost({deriveIntegratedShell,compileDesign=compileB143}={}){
  yes(typeof deriveIntegratedShell==='function','EXISTING_ENGINE_REQUIRED');
@@ -105,9 +113,11 @@ export function createIntegratedSpatialHost({deriveIntegratedShell,compileDesign
     const shelter={id:'shelter-'+opIndex,purpose:op.purpose,rect,roofY:6,floorMaterial:'wood',roofMaterial:'metal',structureMaterial:'metal',
      columns,beams:columns.map((p,i)=>({from:p,to:columns[(i+1)%4]})),eaves:edge(),connectionOpening:o.id,interiorPad:inside,approachPad:approach};
     intent.architecture.shelters.push(shelter);
-    const clearPad=pad(o);
-    if(op.edge==='south')clearPad[1]++;
-    if(op.edge==='east')clearPad[0]++;
+    // Previously south/east were left on the room's outermost wall cell;
+    // north/west alone reached the shelter. Check actual floor rectangle.
+    const clearPad=exteriorPad(o,op.edge);
+    yes(clearPad[0]>=sx&&clearPad[0]<sx+sw&&
+     clearPad[1]>=sz&&clearPad[1]<sz+sd,'SHELTER_CONNECTION_NOT_ON_FLOOR');
     intent.joins.push({spaces:[parent.id,shelter.id],openingId:o.id,clearPad});
     if(isEntry){yes(!intent.architecture.entry,'DUPLICATE_ENTRY_SHELTER');intent.architecture.entry={side:author.entry.face,
      openingId:entry.id,shelterId:shelter.id,approachPad:approach,purpose:author.entry.intent};}
