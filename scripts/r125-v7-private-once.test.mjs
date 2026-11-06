@@ -189,21 +189,31 @@ test('real network transport combined with fake HEAD or CI must HOLD before all 
  }finally{fs.rmSync(tmp.root,{recursive:true,force:true});}
 });
 
-test('independent monitor heartbeat advances only with the same identity',async()=>{
+test('independent monitor must advance both heartbeat and actual measurement time',async()=>{
  const {monitorSampleAdvanced}=await import('./r125-v7-private-once.mjs');
  const now=Date.now();
- const base={status:'SAFE_FOR_ONE_REQUEST',measuredAtEpochMs:now,
+ const base={status:'SAFE_FOR_ONE_REQUEST',measuredAtEpochMs:now-1500,
   independentMonitorActive:true,monitorId:'private-worker-001',
   monitorHeartbeatEpochMs:now-1200};
- assert.equal(monitorSampleAdvanced(base,{...base,
-  monitorHeartbeatEpochMs:now-100},now),true);
+ const advanced={...base,measuredAtEpochMs:now-200,
+  monitorHeartbeatEpochMs:now-100};
+ assert.equal(monitorSampleAdvanced(base,advanced,now),true);
  assert.equal(monitorSampleAdvanced(base,base,now),false);
- assert.equal(monitorSampleAdvanced(base,{...base,
-  monitorId:'private-worker-002',monitorHeartbeatEpochMs:now-100},now),false);
- assert.equal(monitorSampleAdvanced(base,{...base,
+ // A live heartbeat with cached measurements must not be treated as live sampling.
+ assert.equal(monitorSampleAdvanced(base,{...advanced,
+  measuredAtEpochMs:base.measuredAtEpochMs},now),false);
+ assert.equal(monitorSampleAdvanced(base,{...advanced,
+  measuredAtEpochMs:base.measuredAtEpochMs-1},now),false);
+ assert.equal(monitorSampleAdvanced(base,{...advanced,
+  measuredAtEpochMs:now+100},now),false);
+ assert.equal(monitorSampleAdvanced(base,{...advanced,
+  measuredAtEpochMs:undefined},now),false);
+ assert.equal(monitorSampleAdvanced(base,{...advanced,
+  monitorId:'private-worker-002'},now),false);
+ assert.equal(monitorSampleAdvanced(base,{...advanced,
   monitorHeartbeatEpochMs:now+100},now),false);
- assert.equal(monitorSampleAdvanced(base,{...base,
+ assert.equal(monitorSampleAdvanced(base,{...advanced,
   monitorHeartbeatEpochMs:now-3500},now),false);
- assert.equal(monitorSampleAdvanced({...base,independentMonitorActive:false},{
-  ...base,monitorHeartbeatEpochMs:now-100},now),false);
+ assert.equal(monitorSampleAdvanced({...base,independentMonitorActive:false},
+  advanced,now),false);
 });

@@ -45,6 +45,10 @@ const independentMonitorReady=(x,now=Date.now())=>
 export function monitorSampleAdvanced(before,after,now=Date.now()){
  return before?.independentMonitorActive===true &&
   typeof before.monitorId==='string' &&
+  Number.isSafeInteger(before.measuredAtEpochMs) &&
+  Number.isSafeInteger(after?.measuredAtEpochMs) &&
+  after.measuredAtEpochMs>before.measuredAtEpochMs &&
+  after.measuredAtEpochMs<=now &&
   Number.isSafeInteger(before.monitorHeartbeatEpochMs) &&
   independentMonitorReady(after,now) &&
   after.monitorId===before.monitorId &&
