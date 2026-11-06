@@ -59,6 +59,9 @@ def docker_exec(policy: DockerPolicy, workspace: Path, *, agent: bool,
         raise SandboxHold("STALE_CONTAINER_ID_FILE")
     argv = docker_argv(policy, workspace, agent=agent,
                        command=command, cidfile=cidfile)
+    # This wrapper must never implicitly download images between preflight and run.
+    # Keep the legacy SHA-pinned docker_sandbox.py unchanged.
+    argv.insert(2, '--pull=never')
     cli_completed_or_timed_out = False
     try:
         proc = subprocess.run(
