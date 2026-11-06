@@ -1,7 +1,7 @@
 # One-command, read-only Windows readiness probe. No installs or model requests.
 # Project selection is intentionally absent: this probe changes neither project.
 [CmdletBinding()]
-param([string]$StrataSourceRoot = '')
+param([string]$StrataSourceRoot = '', [switch]$MemoryPressureHints)
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Continue'
 function Available([string]$name) { return [bool](Get-Command $name -ErrorAction SilentlyContinue) }
@@ -120,5 +120,69 @@ if (-not [string]::IsNullOrWhiteSpace($StrataSourceRoot)) {
   } catch {
     $receipt.strata_reported_source_pins.state = 'HOLD_SOURCE_PATH_OR_HASH_UNAVAILABLE'
   }
+}
+
+# Opt-in, one-shot read-only process-group hints. This NEVER attributes an
+# A26 failure, initiates a model, changes memory, or authorizes a retry.
+# WorkingSet64 includes shared pages: group sums MUST NOT be treated as
+# unique physical RAM or as proof of the process causing an A26 hold.
+# Do not disclose executable names, process IDs, paths or command lines.
+if ($MemoryPressureHints) {
+  $hint = [ordered]@{
+    state = 'UNKNOWN_PROCESS_SENSOR'
+    sampled_utc = [DateTime]::UtcNow.ToString('o')
+    metric = 'WORKING_SET64_SHARED_PAGES_MAY_REPEAT'
+    proves_a26_failure_cause = $false
+    proves_safe_live_inference = $false
+    categories = @()
+  }
+  try {
+    $totals = [ordered]@{
+      browser = [long]0
+      wsl_virtualization = [long]0
+      local_model = [long]0
+      docker = [long]0
+      developer_tools = [long]0
+      other = [long]0
+    }
+    $counts = @{}
+    foreach ($category in @($totals.Keys)) { $counts[$category] = 0 }
+    $processes = @(Get-Process -ErrorAction Stop)
+    if ($processes.Count -eq 0) { throw 'NO_PROCESS_SNAPSHOT' }
+    foreach ($proc in $processes) {
+      try {
+        $bytes = [double]$proc.WorkingSet64
+        if ([double]::IsNaN($bytes) -or [double]::IsInfinity($bytes) -or $bytes -lt 0) { continue }
+        $name = [string]$proc.ProcessName
+        $category = 'other'
+        if ($name -match '^(chrome|msedge|firefox)
+) { $category = 'browser' }
+        elseif ($name -match '^(vmmem|vmmemWSL|wslhost|wslservice)
+) { $category = 'wsl_virtualization' }
+        elseif ($name -match '^(ollama|ollama app|ollama_llama_server|llama-server|LM Studio|LM Studio Helper|lmstudio|lms)
+) { $category = 'local_model' }
+        elseif ($name -match '^(Docker Desktop|com\\.docker\\..*)
+) { $category = 'docker' }
+        elseif ($name -match '^(python|pythonw|python3|node|Code|Code - Insiders)
+) { $category = 'developer_tools' }
+        $totals[$category] = [long]($totals[$category] + [long]$bytes)
+        $counts[$category] = [int]($counts[$category] + 1)
+      } catch {
+        # Partial access is not interpreted as proof about an individual process.
+        continue
+      }
+    }
+    foreach ($category in @($totals.Keys)) {
+      $hint.categories += [ordered]@{
+        category = $category
+        process_count = [int]$counts[$category]
+        working_set_gib = [math]::Round($totals[$category] / 1GB, 3)
+      }
+    }
+    $hint.state = 'READ_ONLY_GROUP_SNAPSHOT_NOT_ATTRIBUTION'
+  } catch {
+    $hint.state = 'UNKNOWN_PROCESS_SENSOR'
+  }
+  $receipt.strata_process_memory_hint = $hint
 }
 $receipt | ConvertTo-Json -Depth 6
