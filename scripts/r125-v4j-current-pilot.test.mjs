@@ -101,6 +101,11 @@ test('V7 rejects before PRIVATE import when exact-head CI is pending or HEAD dif
    ...deps,v7HeadReader:()=>{trace.push('head');return 'd'.repeat(40);}
   }),/V7_HEAD_MISMATCH/);
   assert.deepEqual(trace,['head']);
+  trace.length=0;
+  await assert.rejects(runStableLocalStudy(args,{
+   ...deps,v7HeadReader:()=>{trace.push('head');throw Error('WORKTREE_DIRTY_OR_UNVERIFIED');}
+  }),/V7_HEAD_UNVERIFIED/);
+  assert.deepEqual(trace,['head']); // No CI, PRIVATE import or model runner.
  }finally{
   if(prev===undefined)delete process.env.MAB_HEAD;else process.env.MAB_HEAD=prev;
  }

@@ -9,15 +9,13 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
-import {execFileSync} from 'node:child_process';
 import {checkExactHeadCi} from './r125-v4j-safe-ci-gate.mjs';
-import {runV7PrivateOnce} from './r125-v7-private-once.mjs';
+import {runV7PrivateOnce,verifyCleanHead} from './r125-v7-private-once.mjs';
 import {runV3OneGenreStudy} from './r125-v4j-v3-one-local.mjs';
 const MODEL=/^[A-Za-z0-9._:/-]{2,140}$/;
 const SHA=/^[a-f0-9]{40}$/;
-const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-const actualHead=()=>execFileSync('git.exe',['-C',ROOT,'rev-parse','HEAD'],
- {encoding:'utf8',timeout:10000,windowsHide:true}).trim();
+// Before PRIVATE import, require the same clean exact-head checkout as V7 POST.
+const actualHead=()=>verifyCleanHead();
 const fail=x=>{throw Error('V4J_STABLE_LOCAL_'+x);};
 export function parseStableArgs(args){
  if(![4,5].includes(args.length)||(args.length===5&&args[4]!=='--v7-semantic')||
