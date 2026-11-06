@@ -27,6 +27,8 @@ function safeReport(){
   windowsRuntime:false,modelRequested:MODEL,
   ollamaTagsStatus:'NOT_CHECKED',ollamaPsStatus:'NOT_CHECKED',
   port11434Listening:null,modelListed:null,modelAlreadyLoaded:null,
+  listedModelMetadata:{reportedDiskSizeMiB:null,reportedDigest:null,
+   format:null,family:null,parameterSize:null,quantizationLevel:null},
   physicalMemory:{totalMiB:null,availableMiB:null},
   commitMemory:{committedMiB:null,limitMiB:null,headroomMiB:null},
   graphics:{gpuCount:null,minimumFreeMiB:null,minimumTotalMiB:null},
@@ -77,6 +79,22 @@ async function getOllama(pathname,fetcher=fetch){
    return {status:'INVALID_SCHEMA',data:null};
   return {status:'OK',data};
  }catch(e){return {status:transportReason(e),data:null};}
+}
+// All fields are allowlisted from Ollama GET /api/tags only.
+// Disk size and quantization identify a model, NOT its inference-memory peak.
+function listedMetadata(item){
+ const ascii=(v,re)=>typeof v==='string'&&re.test(v)?v:null;
+ const detail=item?.details&&typeof item.details==='object'&&
+  !Array.isArray(item.details)?item.details:{};
+ const size=safeInt(item?.size);
+ return {
+  reportedDiskSizeMiB:size===null?null:Math.floor(size/MiB),
+  reportedDigest:ascii(item?.digest,/^[a-f0-9]{64}$/i),
+  format:ascii(detail.format,/^[a-zA-Z0-9_.-]{1,40}$/),
+  family:ascii(detail.family,/^[a-zA-Z0-9_.-]{1,40}$/),
+  parameterSize:ascii(detail.parameter_size,/^[a-zA-Z0-9_.+-]{1,32}$/),
+  quantizationLevel:ascii(detail.quantization_level,/^[a-zA-Z0-9_.+-]{1,32}$/)
+ };
 }
 function listenerStatus(){
  try{
@@ -129,6 +147,14 @@ function selftest(){
  assert.equal(a.modelGenerationAttempts,0);
  assert.equal(a.BuildPlan.operations.length,0);
  assert.equal(classify(a),'OLLAMA_GET_NOT_VERIFIED');
+ const meta=listedMetadata({size:9608350245,digest:'a'.repeat(64),
+  details:{format:'gguf',family:'qwen3',parameter_size:'14.8B',quantization_level:'Q4_K_M'}});
+ assert.equal(meta.reportedDiskSizeMiB,Math.floor(9608350245/MiB));
+ assert.equal(meta.parameterSize,'14.8B');
+ assert.equal(meta.quantizationLevel,'Q4_K_M');
+ assert.equal(meta.reportedDigest,'a'.repeat(64));
+ assert.equal(listedMetadata({size:-1,details:{quantization_level:'invalid\\nvalue'}}).reportedDiskSizeMiB,null);
+ assert.equal(listedMetadata({size:-1,details:{quantization_level:'invalid\\nvalue'}}).quantizationLevel,null);
  return Promise.all(['/api/tags','/api/ps'].map(path=>getOllama(path,async(url,opts)=>{
   assert.equal(opts.method,'GET');
   assert.equal(url,ORIGIN+path);
@@ -154,7 +180,11 @@ async function main(){
  const [tags,ps]=await Promise.all([getOllama('/api/tags'),getOllama('/api/ps')]);
  report.ollamaTagsStatus=tags.status;
  report.ollamaPsStatus=ps.status;
- if(tags.status==='OK')report.modelListed=tags.data.models.some(x=>x.name===MODEL);
+ if(tags.status==='OK'){
+  const item=tags.data.models.find(x=>x.name===MODEL);
+  report.modelListed=Boolean(item);
+  if(item)report.listedModelMetadata=listedMetadata(item);
+ }
  if(ps.status==='OK'){
   const item=ps.data.models.find(x=>x.name===MODEL);
   report.modelAlreadyLoaded=Boolean(item);
