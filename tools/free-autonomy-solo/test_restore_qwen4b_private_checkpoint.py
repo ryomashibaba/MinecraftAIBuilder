@@ -10,7 +10,8 @@ import tempfile
 import unittest
 
 from restore_qwen4b_private_checkpoint import (
-    restore_checkpoint, CheckpointHold, _unpack_strict,
+    restore_checkpoint, recheck_restored_source_docker,
+    CheckpointHold, _unpack_strict,
 )
 _sha = lambda x: hashlib.sha256(x).hexdigest()
 
@@ -213,5 +214,107 @@ class RestoreCheckpoints(unittest.TestCase):
         self.make_archive(self.proof);self.encrypt()
         with self.assertRaises(CheckpointHold):self.restore()
 
+
+    def _reqa_fixture(self, *, run_qa=None, preflight=None, inventory=None):
+        """Synthetic Git proof with injected QA: never executes an actual model."""
+        if run_qa is None:
+            run_qa = lambda *a, **kw: (0, "FAKE QA")
+        if preflight is None:
+            preflight = lambda: None
+        if inventory is None:
+            inventory = lambda: ()
+        return recheck_restored_source_docker(
+            self.dest, self.baseline, self.private_root,
+            pinned_base=self.base_sha, pinned_source=SOURCE,
+            pinned_blob=self.blob_sha, preflight=preflight,
+            run_qa=run_qa, inventory=inventory)
+
+    def test_reqa_private_proof_and_two_stage_fixture(self):
+        self.restore()
+        self.assertTrue((self.dest / "qa-proof.private.json").is_file())
+        calls = []
+        def fake(workspace, argv, root, label, **opts):
+            self.assertEqual(argv, ["node", "--test", "scripts/r125-v4h-mezzanine.test.mjs"])
+            self.assertEqual(opts["network"], "none")
+            self.assertIs(opts["writable"], False)
+            calls.append(label)
+            return 0, "FAKE QA"
+        result = self._reqa_fixture(run_qa=fake)
+        self.assertEqual(result["qa_stages_reexecuted"], 2)
+        self.assertEqual(len(calls), 2)
+        self.assertEqual(result["model_requests"], 0)
+        self.assertFalse(result["source_executed_on_host"])
+        self.assertTrue((self.dest / "qa-reverification.private.json").is_file())
+        self.assertEqual(cmd("git", "rev-parse", "HEAD", cwd=self.baseline), self.base_sha)
+
+    def test_reqa_docker_not_ready_holds_without_execution(self):
+        self.restore()
+        called = []
+        def unavailable():
+            raise OSError("Offline synthetic no daemon")
+        def fake(*args, **kw):
+            called.append(True)
+            return 0, "FAKE QA"
+        with self.assertRaises(CheckpointHold):
+            self._reqa_fixture(preflight=unavailable, run_qa=fake)
+        self.assertFalse(called)
+        self.assertFalse((self.dest / "qa-reverification.private.json").exists())
+
+    def test_reqa_private_proof_changed_holds(self):
+        self.restore()
+        path = self.dest / "qa-proof.private.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        data["accepted_cycles"][0]["source_sha256"][1] = "0" * 64
+        path.write_text(json.dumps(data), encoding="utf-8")
+        with self.assertRaises(CheckpointHold):
+            self._reqa_fixture()
+        self.assertFalse((self.dest / "qa-reverification.private.json").exists())
+
+    def test_reqa_failing_qa_does_not_certify(self):
+        self.restore()
+        with self.assertRaises(CheckpointHold):
+            self._reqa_fixture(run_qa=lambda *a, **kw: (2, "FAILED"))
+        self.assertFalse((self.dest / "qa-reverification.private.json").exists())
+
+    def test_reqa_modified_source_during_qa_holds(self):
+        self.restore()
+        def fake(workspace, argv, root, label, **kw):
+            (workspace / SOURCE).write_text("untrusted mutation", encoding="utf-8")
+            return 0, "FAKE QA"
+        with self.assertRaises(CheckpointHold):
+            self._reqa_fixture(run_qa=fake)
+        self.assertFalse((self.dest / "qa-reverification.private.json").exists())
+
+    def test_reqa_container_inventory_changed_holds(self):
+        self.restore()
+        counter = [0]
+        def inventory():
+            counter[0] += 1
+            return () if counter[0] % 2 else ("new-orphan",)
+        with self.assertRaises(CheckpointHold):
+            self._reqa_fixture(inventory=inventory)
+        self.assertFalse((self.dest / "qa-reverification.private.json").exists())
+
+    def test_reqa_already_recorded_holds_before_qa(self):
+        self.restore()
+        (self.dest / "qa-reverification.private.json").write_text("old", encoding="utf-8")
+        called = []
+        def fake(*args, **kw):
+            called.append(True)
+            return 0, "FAKE QA"
+        with self.assertRaises(CheckpointHold):
+            self._reqa_fixture(run_qa=fake)
+        self.assertFalse(called)
+
+    def test_reqa_base_dirty_holds_before_qa(self):
+        self.restore()
+        (self.baseline / SOURCE).write_text("dirty", encoding="utf-8")
+        called = []
+        def fake(*args, **kw):
+            called.append(True)
+            return 0, "FAKE QA"
+        with self.assertRaises(CheckpointHold):
+            self._reqa_fixture(run_qa=fake)
+        self.assertFalse(called)
 
 if __name__=="__main__": unittest.main(verbosity=2)
