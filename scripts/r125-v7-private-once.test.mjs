@@ -175,3 +175,16 @@ test('HEAD changed after Ollama listing forbids one-shot model POST',async()=>{
   assert(!fs.existsSync(path.join(tmp.outDir,'V7_MODEL_RESPONSE_ORIGINAL_PRIVATE.txt')));
  }finally{fs.rmSync(tmp.root,{recursive:true,force:true});}
 });
+
+test('real network transport combined with fake HEAD or CI must HOLD before all requests',async()=>{
+ const tmp=sandbox();
+ try{
+  const r=await runV7PrivateOnce(params(tmp.outDir),{
+   ciFetcher:fakeCi(),headReader:()=>sha
+  });
+  assert.equal(r.status,'HOLD_REAL_TRANSPORT_WITH_INJECTION');
+  assert.equal(r.modelGenerationAttempts,0);
+  assert.equal(r.worldWrites,0);
+  assert(!fs.existsSync(path.join(tmp.outDir,'V7_MODEL_RESPONSE_ORIGINAL_PRIVATE.txt')));
+ }finally{fs.rmSync(tmp.root,{recursive:true,force:true});}
+});

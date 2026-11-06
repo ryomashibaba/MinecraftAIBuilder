@@ -96,6 +96,12 @@ export async function runV7PrivateOnce({
  fs.mkdirSync(dir,{recursive:false});
  const result=safeBase(headSha,injected);
  try{
+  // Never allow a real fetch POST when any CI, HEAD or mode dependency is
+  // test-injected. In that combination the normal production gates are not attested.
+  if(injected && modelFetcher===fetch){
+   result.status='HOLD_REAL_TRANSPORT_WITH_INJECTION';
+   result.reason='REAL_MODEL_REQUIRES_UNINJECTED_GATES';return result;
+  }
   // Both gates apply to the immutable code ACTUALLY running in this clone.
   try{if(headReader()!==headSha){
     result.status='HOLD_HEAD_MISMATCH';result.reason='HEAD_MISMATCH';return result;
