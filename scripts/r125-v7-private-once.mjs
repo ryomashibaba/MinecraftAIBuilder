@@ -20,7 +20,12 @@ import {createIntegratedSpatialHost} from '../source/ai/r125-integrated-spatial-
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const MODEL=/^[A-Za-z0-9._:/-]{2,140}$/;
 const SHA=/^[a-f0-9]{40}$/;
-const LOCAL='http://127.0.0.1:11434/v1/chat/completions';
+const LOCAL='http://127.0.0.1:11434/api/chat';
+const PREFLIGHT='http://127.0.0.1:11434/v1/chat/completions';
+const PS_URL='http://127.0.0.1:11434/api/ps';
+const TAGS_URL='http://127.0.0.1:11434/api/tags';
+const EXPECTED_DIGEST='bdbd181c33f2ed1b31c972991882db3cf4d192569092138a7d29e973cd9debe8';
+const EXPECTED_SIZE=9276198565;
 const fail=code=>{throw Error('V7_PRIVATE_ONCE_'+code);};
 const hash=s=>createHash('sha256').update(s).digest('hex');
 const freshResourceClearance=(resource,now=Date.now())=>
@@ -28,6 +33,12 @@ const freshResourceClearance=(resource,now=Date.now())=>
  Number.isSafeInteger(resource.measuredAtEpochMs) &&
  resource.measuredAtEpochMs<=now &&
  now-resource.measuredAtEpochMs<=45000;
+// A safe preflight flag alone is never proof of a live separate monitor.
+const independentMonitorReady=(x,now=Date.now())=>
+ x?.independentMonitorActive===true &&
+ typeof x.monitorId==='string' && /^[a-z0-9-]{8,80}$/i.test(x.monitorId) &&
+ Number.isSafeInteger(x.monitorHeartbeatEpochMs) &&
+ x.monitorHeartbeatEpochMs<=now && now-x.monitorHeartbeatEpochMs<=3000;
 const save=(dir,name,content)=>fs.writeFileSync(path.join(dir,name),
  typeof content==='string'?content:JSON.stringify(content,null,2)+'\n',{flag:'wx'});
 /** Exact-head CI covers the committed bytes only; a dirty checkout is not attested. */
@@ -62,7 +73,8 @@ const safeBase=(headSha,injected)=>({
  modelGenerationAttempts:0,rawCaptured:false,responseRawSha256:null,
  authorSha256:null,operationSha256:null,sourceSha256:null,
  geometrySha256:null,b143CellCount:null,
- b143Recompiled:false,semanticFulfillment:'NOT_CERTIFIED',
+ b143Recompiled:false,unloadConfirmed:false,activeMonitorSamples:0,
+ semanticFulfillment:'NOT_CERTIFIED',
  physicalAccess:'NOT_CERTIFIED',art:'NOT_REVIEWED',minecraftWalking:'NOT_TESTED',
  worldContacts:0,worldWrites:0,readiness:'NOT_PREPARED',
  constructionApproved:false,executionAllowed:false,BuildPlan:{operations:[]},
@@ -72,11 +84,11 @@ export async function runV7PrivateOnce({
  model,outDir,headSha,prompt=V7_HELD_OUT_BRIEF,
  deriveIntegratedShell,checkResourceSafety
 }={},{
- modelFetcher=fetch,ciFetcher=fetch,headReader=actualHead,timeoutMs=600000
+ modelFetcher=fetch,ciFetcher=fetch,headReader=actualHead,timeoutMs=120000
 }={}){
  if(!MODEL.test(model??'')||!SHA.test(headSha??'')||
   typeof prompt!=='string'||prompt.length<8||prompt.length>4000||
-  !Number.isSafeInteger(timeoutMs)||timeoutMs<1000||timeoutMs>600000)
+  !Number.isSafeInteger(timeoutMs)||timeoutMs<1000||timeoutMs>120000)
   fail('INVALID_OPTIONS');
  const dir=privateDir(outDir);
  const injected=modelFetcher!==fetch||ciFetcher!==fetch||headReader!==actualHead||
@@ -108,10 +120,34 @@ export async function runV7PrivateOnce({
   // independent proof of RAM safety by this public, host-agnostic code.
   const host=createIntegratedSpatialHost({deriveIntegratedShell});
   let listing;
-  try{listing=await preflightR125Ollama({model,endpoint:LOCAL,fetcher:modelFetcher});}
+  try{listing=await preflightR125Ollama({model,endpoint:PREFLIGHT,fetcher:modelFetcher});}
   catch{result.status='HOLD_OLLAMA_PREFLIGHT';result.reason='LOCAL_MODEL_LIST_UNAVAILABLE';return result;}
   if(listing.status!=='LOCAL_MODEL_LISTED'){
    result.status='HOLD_MODEL_NOT_INSTALLED';result.reason='MODEL_NOT_LISTED';return result;
+  }
+  // Verify the exact offline model and an empty loaded-model list via GET only.
+  if(!injected){
+   try{
+    if(model!=='qwen3:14b')throw Error('MODEL_NOT_APPROVED');
+    const tagsResponse=await modelFetcher(TAGS_URL,{method:'GET',
+     redirect:'error',signal:AbortSignal.timeout(5000)});
+    if(tagsResponse?.ok!==true)throw Error('TAGS_FAILED');
+    const tags=JSON.parse(await tagsResponse.text());
+    const entries=tags?.models?.filter(x=>x?.name===model);
+    if(!Array.isArray(entries)||entries.length!==1 ||
+      entries[0]?.digest!==EXPECTED_DIGEST||entries[0]?.size!==EXPECTED_SIZE||
+      entries[0]?.details?.quantization_level!=='Q4_K_M')
+     throw Error('MODEL_IDENTITY_MISMATCH');
+    const psResponse=await modelFetcher(PS_URL,{method:'GET',
+     redirect:'error',signal:AbortSignal.timeout(5000)});
+    if(psResponse?.ok!==true)throw Error('PS_FAILED');
+    const ps=JSON.parse(await psResponse.text());
+    if(!Array.isArray(ps?.models)||ps.models.length!==0)
+     throw Error('OTHER_MODEL_LOADED');
+   }catch{
+    result.status='HOLD_MODEL_IDENTITY';
+    result.reason='MODEL_IDENTITY_OR_IDLE_STATE_UNVERIFIED';return result;
+   }
   }
   // Listing can delay the POST while other host processes change memory use.
   // Re-measure immediately before POST; public code cannot attest calibration.
@@ -119,6 +155,10 @@ export async function runV7PrivateOnce({
   catch{result.status='HOLD_RESOURCE_UNKNOWN';result.reason='RESOURCE_PROBE_FAILED';return result;}
   if(!freshResourceClearance(resource)){
    result.status='HOLD_RESOURCE_UNKNOWN';result.reason='NO_FRESH_RESOURCE_CLEARANCE';return result;
+  }
+  if(!injected&&!independentMonitorReady(resource)){
+   result.status='HOLD_INDEPENDENT_MONITOR';
+   result.reason='ACTIVE_SEPARATE_MONITOR_NOT_ATTESTED';return result;
   }
   // CI and resource preflight may have taken time. Never POST from a now-dirty
   // or changed checkout, even when the old commit's CI was successful.
@@ -135,14 +175,30 @@ export async function runV7PrivateOnce({
    headSha,contract:INTEGRATED_SPATIAL_V7_SUPPORTED_PROTOCOL,maxAttempts:1,
    resourceAssertion:'PRIVATE_MONITOR_ASSERTED_NOT_PUBLICLY_ATTESTED'});
   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),timeoutMs);
+  let monitorActive=true,monitorPending=false,monitorFault=false,lastBeat=Date.now();
+  const fault=()=>{if(monitorActive){monitorFault=true;controller.abort();}};
+  const pulse=setInterval(()=>{
+   if(!monitorActive)return;
+   if(Date.now()-lastBeat>5000){fault();return;}
+   if(monitorPending)return;
+   monitorPending=true;
+   Promise.resolve().then(()=>checkResourceSafety({
+    model,headSha,oneRequest:true,phase:'DURING_INFERENCE'
+   })).then(sample=>{
+    if(!monitorActive)return;
+    if(!freshResourceClearance(sample)||
+       (!injected&&!independentMonitorReady(sample)))fault();
+    else{lastBeat=Date.now();result.activeMonitorSamples++;}
+   }).catch(fault).finally(()=>{monitorPending=false;});
+  },1000);
   let raw;
   try{
    result.modelGenerationAttempts=1; // Count attempt even for HTTP failure.
    const response=await modelFetcher(LOCAL,{
     method:'POST',redirect:'error',signal:controller.signal,
     headers:{'Content-Type':'application/json','Accept':'application/json'},
-    body:JSON.stringify({model,stream:false,temperature:0.45,
-     reasoning_effort:'none',max_tokens:3072,response_format:{type:'json_object'},
+    body:JSON.stringify({model,stream:false,think:false,keep_alive:0,
+     format:'json',options:{num_ctx:2048,num_predict:1024,temperature:0.45},
      messages:[{role:'system',content:INTEGRATED_SPATIAL_V7_SUPPORTED_PROMPT},
       {role:'user',content:prompt}]})
    });
@@ -158,22 +214,49 @@ export async function runV7PrivateOnce({
    if(parsedResponse?.model!==undefined&&parsedResponse.model!==model){
     result.status='HOLD_MODEL_RESPONSE';result.reason='MODEL_NAME_MISMATCH';return result;
    }
-   if(!Array.isArray(parsedResponse?.choices)||parsedResponse.choices.length!==1){
+   // Existing injected tests use the older mock shape; real Ollama
+   // must satisfy the native /api/chat completion contract.
+   const choice=injected?parsedResponse?.choices?.[0]:null;
+   if(injected&&(!Array.isArray(parsedResponse?.choices)||
+      parsedResponse.choices.length!==1)){
     result.status='HOLD_MODEL_RESPONSE';result.reason='NOT_ONE_CHOICE';return result;
    }
-   const choice=parsedResponse.choices[0];
-   raw=choice?.message?.content;
+   raw=injected?choice?.message?.content:parsedResponse?.message?.content;
    if(typeof raw==='string'&&raw.length>0&&raw.length<=250000){
     save(dir,'V7_MODEL_RESPONSE_ORIGINAL_PRIVATE.txt',raw);
     result.responseRawSha256=hash(raw);result.rawCaptured=true;
    }
-   if(choice?.finish_reason!=='stop'||typeof raw!=='string'||raw.length<30||
-      raw.length>30000){
+   if(monitorFault||
+      (injected&&choice?.finish_reason!=='stop')||
+      (!injected&&(parsedResponse?.done!==true||parsedResponse?.done_reason!=='stop'))||
+      typeof raw!=='string'||raw.length<30||raw.length>30000){
     result.status='HOLD_MODEL_RESPONSE';result.reason='MODEL_INCOMPLETE_OR_OVERSIZE';return result;
    }
   }catch{
    result.status='HOLD_MODEL_HTTP';result.reason='MODEL_FAILED_OR_TIMEOUT';return result;
-  }finally{clearTimeout(timer);}
+  }finally{
+   clearTimeout(timer);clearInterval(pulse);monitorActive=false;
+   // GET-only verification, never a second cleanup POST or model retry.
+   if(!injected&&result.modelGenerationAttempts>0){
+    try{
+     const psResponse=await modelFetcher(PS_URL,{method:'GET',
+      redirect:'error',signal:AbortSignal.timeout(5000)});
+     if(psResponse?.ok!==true)throw Error('PS_FAILED');
+     const ps=JSON.parse(await psResponse.text());
+     if(!Array.isArray(ps?.models)||ps.models.length!==0)
+      throw Error('MODEL_STILL_LOADED');
+     result.unloadConfirmed=true;
+    }catch{
+     result.status='HOLD_UNLOAD_UNKNOWN';
+     result.reason='UNLOAD_NOT_CONFIRMED';
+    }
+   }
+  }
+  if(monitorFault){
+   result.status='HOLD_MONITOR_INTERRUPTED';
+   result.reason='MONITOR_ABORT_OR_STALE';return result;
+  }
+  if(!injected&&!result.unloadConfirmed)return result;
   let author;
   try{author=JSON.parse(raw);}catch{
    result.status='HOLD_AUTHOR';result.reason='AUTHOR_NOT_PURE_JSON';return result;
