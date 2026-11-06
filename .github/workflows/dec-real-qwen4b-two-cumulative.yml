@@ -1,12 +1,8 @@
 name: Dec genuine Qwen4B two cumulative MAB SOURCE cycles in isolated Docker
 
+# A genuine model/image-pull run requires an explicit, separately approved
+# manual dispatch. Research commits must never auto-trigger expensive trials.
 on:
-  push:
-    branches:
-      - research/dec-free-autonomy-solo-pilot-20261104
-    paths:
-      - 'tools/free-autonomy-solo/real_qwen4b_two_cumulative_ci.py'
-      - '.github/workflows/dec-real-qwen4b-two-cumulative.yml'
   workflow_dispatch:
 
 permissions:
