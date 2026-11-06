@@ -27,18 +27,17 @@ def _owned_container_cleanup_verified(container: str) -> bool:
         subprocess.run(
             ["docker", "rm", "-f", container], capture_output=True,
             timeout=25, check=False)
+        # Docker's exact error wording varies by version/context. A successful
+        # daemon-backed ALL-container list (not stderr text) proves absence.
         probe = subprocess.run(
-            ["docker", "container", "inspect", container],
+            ["docker", "container", "ls", "--all", "--format", "{{.Names}}"],
             capture_output=True, text=True, timeout=25, check=False)
     except (OSError, subprocess.TimeoutExpired):
         return False
-    if probe.returncode == 0:
+    if probe.returncode != 0:
         return False
-    # A daemon/permission error must NOT masquerade as an absent container.
-    return probe.stderr.strip() in {
-        f"Error: No such container: {container}",
-        f"Error: No such object: {container}",
-    }
+    # Include stopped/removing containers. Require an exact name match.
+    return container not in probe.stdout.splitlines()
 
 
 def experiment() -> dict:
