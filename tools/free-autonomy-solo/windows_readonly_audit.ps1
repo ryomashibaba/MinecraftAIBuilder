@@ -158,7 +158,7 @@ if ($MemoryPressureHints) {
         if ($name -match '^(chrome|msedge|firefox)$') { $category = 'browser' }
         elseif ($name -match '^(vmmem|vmmemWSL|wslhost|wslservice)$') { $category = 'wsl_virtualization' }
         elseif ($name -match '^(ollama|ollama app|ollama_llama_server|llama-server|LM Studio|LM Studio Helper|lmstudio|lms)$') { $category = 'local_model' }
-        elseif ($name -match '^(Docker Desktop|com\\.docker\\..*)$') { $category = 'docker' }
+        elseif ($name -match '^(Docker Desktop|com\.docker\..*)$') { $category = 'docker' }
         elseif ($name -match '^(python|pythonw|python3|node|Code|Code - Insiders)$') { $category = 'developer_tools' }
         $totals[$category] = [long]($totals[$category] + [long]$bytes)
         $counts[$category] = [int]($counts[$category] + 1)
