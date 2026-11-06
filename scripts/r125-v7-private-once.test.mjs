@@ -188,3 +188,22 @@ test('real network transport combined with fake HEAD or CI must HOLD before all 
   assert(!fs.existsSync(path.join(tmp.outDir,'V7_MODEL_RESPONSE_ORIGINAL_PRIVATE.txt')));
  }finally{fs.rmSync(tmp.root,{recursive:true,force:true});}
 });
+
+test('independent monitor heartbeat advances only with the same identity',async()=>{
+ const {monitorSampleAdvanced}=await import('./r125-v7-private-once.mjs');
+ const now=Date.now();
+ const base={status:'SAFE_FOR_ONE_REQUEST',measuredAtEpochMs:now,
+  independentMonitorActive:true,monitorId:'private-worker-001',
+  monitorHeartbeatEpochMs:now-1200};
+ assert.equal(monitorSampleAdvanced(base,{...base,
+  monitorHeartbeatEpochMs:now-100},now),true);
+ assert.equal(monitorSampleAdvanced(base,base,now),false);
+ assert.equal(monitorSampleAdvanced(base,{...base,
+  monitorId:'private-worker-002',monitorHeartbeatEpochMs:now-100},now),false);
+ assert.equal(monitorSampleAdvanced(base,{...base,
+  monitorHeartbeatEpochMs:now+100},now),false);
+ assert.equal(monitorSampleAdvanced(base,{...base,
+  monitorHeartbeatEpochMs:now-3500},now),false);
+ assert.equal(monitorSampleAdvanced({...base,independentMonitorActive:false},{
+  ...base,monitorHeartbeatEpochMs:now-100},now),false);
+});

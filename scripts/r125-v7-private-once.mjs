@@ -39,6 +39,17 @@ const independentMonitorReady=(x,now=Date.now())=>
  typeof x.monitorId==='string' && /^[a-z0-9-]{8,80}$/i.test(x.monitorId) &&
  Number.isSafeInteger(x.monitorHeartbeatEpochMs) &&
  x.monitorHeartbeatEpochMs<=now && now-x.monitorHeartbeatEpochMs<=3000;
+/** Live samples must advance the same monitor, not replay a static flag.
+ * This checks the exposed contract; PRIVATE process independence remains unverified.
+ */
+export function monitorSampleAdvanced(before,after,now=Date.now()){
+ return before?.independentMonitorActive===true &&
+  typeof before.monitorId==='string' &&
+  Number.isSafeInteger(before.monitorHeartbeatEpochMs) &&
+  independentMonitorReady(after,now) &&
+  after.monitorId===before.monitorId &&
+  after.monitorHeartbeatEpochMs>before.monitorHeartbeatEpochMs;
+}
 const save=(dir,name,content)=>fs.writeFileSync(path.join(dir,name),
  typeof content==='string'?content:JSON.stringify(content,null,2)+'\n',{flag:'wx'});
 /** Exact-head CI covers the committed bytes only; a dirty checkout is not attested. */
@@ -176,12 +187,17 @@ export async function runV7PrivateOnce({
   if(!freshResourceClearance(resource)){
    result.status='HOLD_RESOURCE_UNKNOWN';result.reason='RESOURCE_CLEARANCE_EXPIRED';return result;
   }
+  if(!injected&&!independentMonitorReady(resource)){
+   result.status='HOLD_INDEPENDENT_MONITOR';
+   result.reason='MONITOR_LEASE_EXPIRED_BEFORE_POST';return result;
+  }
   save(dir,'V7_LOCAL_REQUEST_PRIVATE.json',{model,prompt,
    systemPromptSha256:hash(INTEGRATED_SPATIAL_V7_SUPPORTED_PROMPT),
    headSha,contract:INTEGRATED_SPATIAL_V7_SUPPORTED_PROTOCOL,maxAttempts:1,
    resourceAssertion:'PRIVATE_MONITOR_ASSERTED_NOT_PUBLICLY_ATTESTED'});
   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),timeoutMs);
   let monitorActive=true,monitorPending=false,monitorFault=false,lastBeat=Date.now();
+  let monitorPrevious=resource;
   const fault=()=>{if(monitorActive){monitorFault=true;controller.abort();}};
   const pulse=setInterval(()=>{
    if(!monitorActive)return;
@@ -193,8 +209,11 @@ export async function runV7PrivateOnce({
    })).then(sample=>{
     if(!monitorActive)return;
     if(!freshResourceClearance(sample)||
-       (!injected&&!independentMonitorReady(sample)))fault();
-    else{lastBeat=Date.now();result.activeMonitorSamples++;}
+       (!injected&&!monitorSampleAdvanced(monitorPrevious,sample)))fault();
+    else{
+     monitorPrevious=sample;
+     lastBeat=Date.now();result.activeMonitorSamples++;
+    }
    }).catch(fault).finally(()=>{monitorPending=false;});
   },1000);
   let raw;
@@ -239,7 +258,9 @@ export async function runV7PrivateOnce({
     result.status='HOLD_MODEL_RESPONSE';result.reason='MODEL_INCOMPLETE_OR_OVERSIZE';return result;
    }
   }catch{
-   result.status='HOLD_MODEL_HTTP';result.reason='MODEL_FAILED_OR_TIMEOUT';return result;
+   result.status=monitorFault?'HOLD_MONITOR_INTERRUPTED':'HOLD_MODEL_HTTP';
+   result.reason=monitorFault?'MONITOR_ABORTED_GENERATION':'MODEL_FAILED_OR_TIMEOUT';
+   return result;
   }finally{
    clearTimeout(timer);clearInterval(pulse);monitorActive=false;
    // GET-only verification, never a second cleanup POST or model retry.
@@ -261,6 +282,11 @@ export async function runV7PrivateOnce({
   if(monitorFault){
    result.status='HOLD_MONITOR_INTERRUPTED';
    result.reason='MONITOR_ABORT_OR_STALE';return result;
+  }
+  // A very quick response has zero active samples; only preflight was tested.
+  if(!injected&&result.activeMonitorSamples<1){
+   result.status='HOLD_NO_LIVE_MONITOR_SAMPLES';
+   result.reason='NO_DURING_INFERENCE_SAMPLE';return result;
   }
   if(!injected&&!result.unloadConfirmed)return result;
   let author;
