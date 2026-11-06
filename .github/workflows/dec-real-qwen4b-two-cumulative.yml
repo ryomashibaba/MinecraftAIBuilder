@@ -1,8 +1,16 @@
 name: Dec genuine Qwen4B two cumulative MAB SOURCE cycles in isolated Docker
 
-# A genuine model/image-pull run requires an explicit, separately approved
-# manual dispatch. Research commits must never auto-trigger expensive trials.
+# Branch-only research cannot receive workflow_dispatch unless this file also
+# exists on the default branch. Never edit main to enable this.
+# Instead, only an explicitly authorized change to the dedicated request path
+# may launch a real model run; ordinary research source/workflow pushes cannot.
+# No request file is created by this workflow or by this commit.
 on:
+  push:
+    branches:
+      - research/dec-free-autonomy-solo-pilot-20261104
+    paths:
+      - '.github/dec-qwen4b-approved-run-request.json'
   workflow_dispatch:
 
 permissions:
