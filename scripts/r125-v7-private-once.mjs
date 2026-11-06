@@ -30,8 +30,17 @@ const freshResourceClearance=(resource,now=Date.now())=>
  now-resource.measuredAtEpochMs<=45000;
 const save=(dir,name,content)=>fs.writeFileSync(path.join(dir,name),
  typeof content==='string'?content:JSON.stringify(content,null,2)+'\n',{flag:'wx'});
-const actualHead=()=>execFileSync('git.exe',['-C',ROOT,'rev-parse','HEAD'],
- {encoding:'utf8',timeout:10000,windowsHide:true}).trim();
+/** Exact-head CI covers the committed bytes only; a dirty checkout is not attested. */
+export function verifyCleanHead({gitExec=execFileSync,gitCommand='git.exe',repoRoot=ROOT}={}){
+ const opts={encoding:'utf8',timeout:10000,windowsHide:true};
+ const dirty=gitExec(gitCommand,['-C',repoRoot,'status','--porcelain=v1',
+  '--untracked-files=normal','--ignore-submodules=none'],opts);
+ if(typeof dirty!=='string'||dirty.length!==0)fail('WORKTREE_DIRTY_OR_UNVERIFIED');
+ const sha=gitExec(gitCommand,['-C',repoRoot,'rev-parse','HEAD'],opts);
+ if(typeof sha!=='string'||!SHA.test(sha.trim()))fail('HEAD_UNVERIFIED');
+ return sha.trim();
+}
+const actualHead=()=>verifyCleanHead();
 export const V7_HELD_OUT_BRIEF=
  '小さな水辺の気象観測と来訪者の休憩を両立する公共建築を設計してください。観測作業と来訪者の動線を両立し、入口前に意味のある半屋外空間を設けてください。';
 function privateDir(p){
@@ -110,6 +119,16 @@ export async function runV7PrivateOnce({
   catch{result.status='HOLD_RESOURCE_UNKNOWN';result.reason='RESOURCE_PROBE_FAILED';return result;}
   if(!freshResourceClearance(resource)){
    result.status='HOLD_RESOURCE_UNKNOWN';result.reason='NO_FRESH_RESOURCE_CLEARANCE';return result;
+  }
+  // CI and resource preflight may have taken time. Never POST from a now-dirty
+  // or changed checkout, even when the old commit's CI was successful.
+  try{if(headReader()!==headSha){
+   result.status='HOLD_HEAD_MISMATCH';result.reason='HEAD_CHANGED_BEFORE_MODEL';return result;
+  }}catch{
+   result.status='HOLD_HEAD_UNVERIFIED';result.reason='WORKTREE_UNVERIFIED_BEFORE_MODEL';return result;
+  }
+  if(!freshResourceClearance(resource)){
+   result.status='HOLD_RESOURCE_UNKNOWN';result.reason='RESOURCE_CLEARANCE_EXPIRED';return result;
   }
   save(dir,'V7_LOCAL_REQUEST_PRIVATE.json',{model,prompt,
    systemPromptSha256:hash(INTEGRATED_SPATIAL_V7_SUPPORTED_PROMPT),

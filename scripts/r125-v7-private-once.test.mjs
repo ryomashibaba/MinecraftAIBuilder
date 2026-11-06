@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {runV7PrivateOnce} from './r125-v7-private-once.mjs';
+import {runV7PrivateOnce,verifyCleanHead} from './r125-v7-private-once.mjs';
 import {INTEGRATED_SEMANTIC_SCHEMA} from '../source/ai/r125-integrated-semantic-bridge.mjs';
 const sha='a'.repeat(40);
 const ciName=['R125 V4D Local Author Bridge — INJECTED TEST ONLY','Education-first offline QA'];
@@ -138,5 +138,40 @@ test('future-dated resource assertions fail closed before Ollama contact',async(
   assert.equal(r.status,'HOLD_RESOURCE_UNKNOWN');
   assert.equal(r.modelGenerationAttempts,0);
   assert.equal(calls.length,0);
+ }finally{fs.rmSync(tmp.root,{recursive:true,force:true});}
+});
+
+test('exact-head verifier rejects dirty checkout before trusting Git SHA',()=>{
+ const seen=[];
+ assert.throws(()=>verifyCleanHead({gitCommand:'git',repoRoot:'/isolated',
+  gitExec:(_bin,args)=>{
+   seen.push(args[2]);
+   return args[2]==='status'?'?? modified-file.mjs\n':sha+'\n';
+  }
+ }),/WORKTREE_DIRTY_OR_UNVERIFIED/);
+ assert.deepEqual(seen,['status']);
+ const cleanCalls=[];
+ assert.equal(verifyCleanHead({gitCommand:'git',repoRoot:'/isolated',
+  gitExec:(_bin,args)=>{
+   cleanCalls.push(args[2]);
+   return args[2]==='status'?'':sha+'\n';
+  }
+ }),sha);
+ assert.deepEqual(cleanCalls,['status','rev-parse']);
+});
+test('HEAD changed after Ollama listing forbids one-shot model POST',async()=>{
+ const tmp=sandbox(),calls=[];let reads=0;
+ try{
+  const r=await runV7PrivateOnce(params(tmp.outDir),{
+   ciFetcher:fakeCi(),modelFetcher:fakeModel(author(),calls),
+   headReader:()=>++reads===1?sha:'b'.repeat(40)
+  });
+  assert.equal(reads,2);
+  assert.equal(r.status,'HOLD_HEAD_MISMATCH');
+  assert.equal(r.reason,'HEAD_CHANGED_BEFORE_MODEL');
+  assert.equal(r.modelGenerationAttempts,0);
+  assert.deepEqual(calls.map(c=>c.method),['GET']);
+  assert.equal(r.worldWrites,0);
+  assert(!fs.existsSync(path.join(tmp.outDir,'V7_MODEL_RESPONSE_ORIGINAL_PRIVATE.txt')));
  }finally{fs.rmSync(tmp.root,{recursive:true,force:true});}
 });
