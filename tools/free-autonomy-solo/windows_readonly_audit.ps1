@@ -79,9 +79,10 @@ try {
   $commitGiB = ($limit - $committed) / 1GB
   $receipt.strata_readonly_memory.physical_available_gib = [math]::Round($physicalGiB, 3)
   $receipt.strata_readonly_memory.commit_headroom_gib = [math]::Round($commitGiB, 3)
-  # Preserved preboot minima: 4GiB each. Active minima stay 3/2GiB,
-  # enforced by the original live Job guard, never by this diagnostic.
-  $receipt.strata_readonly_memory.entry_guard_met_at_snapshot = ($physicalGiB -ge 4 -and $commitGiB -ge 4)
+  # This read-only field reports the saved Strata A12 start_gate (7/8 GiB).
+  # The separate December solo_agent uses its own 4/4 GiB preboot gate.
+  # Neither snapshot proves active-load 3/2 GiB safety or authorizes inference.
+  $receipt.strata_readonly_memory.entry_guard_met_at_snapshot = ($physicalGiB -ge 7 -and $commitGiB -ge 8)
   if ($receipt.strata_readonly_memory.entry_guard_met_at_snapshot) {
     $receipt.strata_readonly_memory.state = 'READ_ONLY_BASELINE_GATE_ONLY__NOT_A26_PASS'
   } else {
