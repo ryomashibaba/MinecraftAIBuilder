@@ -33,6 +33,11 @@ jobs:
           docker pull ollama/ollama:latest
           docker pull node:24-bookworm-slim
       - name: True Qwen4B stage1-4 cumulative QA/source commit chain or explicit HOLD
+        env:
+          # Absent by default. These TWO owner-controlled secrets are both
+          # required for a ciphertext-only PRIVATE Git checkpoint handoff.
+          DEC_QWEN4B_ENCRYPTED_CHECKPOINT_APPROVED: ${{ secrets.DEC_QWEN4B_ENCRYPTED_CHECKPOINT_APPROVED }}
+          DEC_QWEN4B_RECIPIENT_CERT_PEM: ${{ secrets.DEC_QWEN4B_RECIPIENT_CERT_PEM }}
         run: python3 tools/free-autonomy-solo/real_qwen4b_two_cumulative_ci.py
       - name: Publish only sanitized status; never candidate source, patch or raw response
         if: always()
@@ -42,6 +47,16 @@ jobs:
           path: ${{ runner.temp }}/dec-qwen4b-two-cycles-source-sanitized.json
           if-no-files-found: ignore
           retention-days: 7
+      # Public-repository artifacts are readable by others. NEVER upload the
+      # PRIVATE Git bundle, model text, keys or plaintext audit data.
+      - name: Save explicitly authorized encrypted QA checkpoint only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qwen4b-private-qa-encrypted-checkpoint
+          path: ${{ runner.temp }}/dec-qwen4b-private-qa.cms
+          retention-days: 90
+          if-no-files-found: ignore
       - name: Confirm outcome scope
         if: always()
         run: echo 'Only public source two real 4B cycles; no 14B, Windows, ART, gameplay, paid API, GitHub push, or Minecraft world.'
