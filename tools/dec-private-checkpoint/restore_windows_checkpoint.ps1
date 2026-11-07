@@ -114,6 +114,7 @@ try {
         Hold 'DPAPI_TYPE_UNAVAILABLE'
     }
     if (-not $env:LOCALAPPDATA) { Hold 'LOCALAPPDATA_MISSING' }
+    $stage = 'ENV_OK'
     if ($CiphertextSha256 -cnotmatch '^[a-f0-9]{64}$') { Hold 'CIPHERTEXT_SHA_INVALID' }
 
     $recipientRoot = Join-Path $env:LOCALAPPDATA 'FreeAutonomyPrivate\DecCheckpointRecipient'
@@ -123,6 +124,7 @@ try {
     foreach ($file in @($recipientRoot, $publicCert, $sealedKey, $EncryptedCheckpoint, $BaseRepository)) {
         NoReparse $file
     }
+    $stage = 'INPUT_PATHS_OK'
     if (-not (Test-Path -LiteralPath $recipientRoot -PathType Container) -or
         -not (Test-Path -LiteralPath $publicCert -PathType Leaf) -or
         -not (Test-Path -LiteralPath $sealedKey -PathType Leaf) -or
@@ -130,11 +132,13 @@ try {
         -not (Test-Path -LiteralPath $BaseRepository -PathType Container)) {
         Hold 'REQUIRED_INPUT_MISSING'
     }
+    $stage = 'INPUT_FILES_OK'
     $cipher = Get-Item -LiteralPath $EncryptedCheckpoint
     if ($cipher.Length -lt 32 -or $cipher.Length -gt 20000000) { Hold 'CIPHERTEXT_SIZE_INVALID' }
     if ((Get-FileHash -LiteralPath $EncryptedCheckpoint -Algorithm SHA256).Hash.ToLowerInvariant() -cne $CiphertextSha256) {
         Hold 'CIPHERTEXT_SHA_MISMATCH'
     }
+    $stage = 'CIPHER_HASH_OK'
     if ((Get-Item -LiteralPath $sealedKey).Length -lt 128 -or
         (Get-Item -LiteralPath $sealedKey).Length -gt 16384 -or
         (Get-Item -LiteralPath $publicCert).Length -gt 16384) {
@@ -142,6 +146,7 @@ try {
     }
     # The output root is fixed; never accept an arbitrary location whose ACL
     # might be rewritten or whose PRIVATE Git objects could become public.
+    $stage = 'KEY_METADATA_OK'
     $PrivateRestoreRoot = Join-Path $env:LOCALAPPDATA 'FreeAutonomyPrivate\DecCheckpointRestored'
     NoReparse $env:LOCALAPPDATA
     $parent = Split-Path -Parent $PrivateRestoreRoot
@@ -204,6 +209,10 @@ try {
     # Never print original exception, Python/OpenSSL stderr, paths, or key data.
     Write-Output 'DEC_WINDOWS_PRIVATE_CHECKPOINT_RESTORE_HOLD'
     Write-Output ('DEC_WINDOWS_RESTORE_HOLD_STAGE=' + $stage)
+    $exceptionType = $_.Exception.GetType().Name
+    if ($exceptionType -cmatch '^[A-Za-z]{3,70}Exception$') {
+        Write-Output ('DEC_WINDOWS_RESTORE_EXCEPTION_TYPE=' + $exceptionType)
+    }
     # Only constant internal hold reasons; never original exceptions or paths.
     $holdCode = $_.Exception.Message
     if ($holdCode -cmatch '^DEC_WINDOWS_RESTORE_HOLD_[A-Z0-9_]{3,100}$') {
