@@ -11,7 +11,6 @@ on:
       - research/dec-free-autonomy-solo-pilot-20261104
     paths:
       - '.github/dec-qwen4b-approved-run-request.json'
-  workflow_dispatch:
 
 permissions:
   contents: read
@@ -24,6 +23,45 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+          fetch-depth: 0
+      - name: Enforce first-only explicit request and reject every rerun before model pull
+        shell: bash
+        run: |
+          set -euo pipefail
+          request='.github/dec-qwen4b-approved-run-request.json'
+          if [[ "${GITHUB_EVENT_NAME}" != 'push' || "${GITHUB_RUN_ATTEMPT}" != '1' ]]; then
+            echo 'HOLD_REQUEST_NOT_FIRST_PUSH_ATTEMPT_NO_MODEL_CALL'
+            exit 2
+          fi
+          if [[ "$(git rev-parse HEAD)" != "${GITHUB_SHA}" || ! -f "${request}" ]]; then
+            echo 'HOLD_REQUEST_COMMIT_OR_FILE_INVALID_NO_MODEL_CALL'
+            exit 2
+          fi
+          # A path filter alone would also allow later edits, delete/re-add or
+          # a GitHub "Re-run jobs" action. Require the first add in complete
+          # ancestry, and forbid unrelated source edits in the activation commit.
+          expected_add="$(printf 'A\\t%s' "${request}")"
+          actual_add="$(git diff-tree --no-commit-id --name-status -r HEAD -- "${request}")"
+          changed_paths="$(git diff-tree --no-commit-id --name-only -r HEAD)"
+          request_history="$(git rev-list HEAD -- "${request}" | wc -l | tr -d '[:space:]')"
+          if [[ "${actual_add}" != "${expected_add}" ||
+                "${changed_paths}" != "${request}" ||
+                "${request_history}" != '1' ]]; then
+            echo 'HOLD_REQUEST_REPLAY_OR_MIXED_COMMIT_NO_MODEL_CALL'
+            exit 2
+          fi
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          try:
+              request = json.loads(Path('.github/dec-qwen4b-approved-run-request.json').read_text(encoding='utf-8'))
+          except (OSError, UnicodeError, ValueError):
+              request = None
+          if request != {'scope': 'DECEMBER_2026', 'authorized_runs': 1}:
+              print('HOLD_REQUEST_PAYLOAD_INVALID_NO_MODEL_CALL')
+              raise SystemExit(2)
+          print('ONE_TIME_REQUEST_FIRST_CREATION_PREFLIGHT_PASS')
+          PY
       - name: Real source runner static syntax
         run: |
           python3 -m py_compile tools/free-autonomy-solo/real_qwen4b_two_cumulative_ci.py
