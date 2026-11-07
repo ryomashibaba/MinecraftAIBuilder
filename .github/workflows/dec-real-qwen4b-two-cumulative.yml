@@ -28,6 +28,38 @@ jobs:
         run: |
           python3 -m py_compile tools/free-autonomy-solo/real_qwen4b_two_cumulative_ci.py
           python3 -m py_compile tools/free-autonomy-solo/run_mab_private_continuous.py
+      # No image pull and no genuine model execution unless checkpoint
+      # retention is owner-approved and a usable recipient cert is supplied.
+      # Secrets are visible only to this step and the real runner step.
+      - name: FAIL CLOSED before image pulls unless owner enabled encrypted preservation
+        env:
+          DEC_QWEN4B_ENCRYPTED_CHECKPOINT_APPROVED: ${{ secrets.DEC_QWEN4B_ENCRYPTED_CHECKPOINT_APPROVED }}
+          DEC_QWEN4B_RECIPIENT_CERT_PEM: ${{ secrets.DEC_QWEN4B_RECIPIENT_CERT_PEM }}
+        run: |
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          import subprocess
+          import tempfile
+          approved = os.environ.get("DEC_QWEN4B_ENCRYPTED_CHECKPOINT_APPROVED", "")
+          cert = os.environ.get("DEC_QWEN4B_RECIPIENT_CERT_PEM", "")
+          if (approved != "APPROVE_ENCRYPTED_QA_CHECKPOINT_ONLY"
+                  or not cert.startswith("-----BEGIN CERTIFICATE-----\n")
+                  or not 0 < len(cert.encode("utf-8")) <= 16384):
+              print("HOLD_NO_OWNER_APPROVAL_OR_RECIPIENT_CERT_NO_MODEL_CALL")
+              raise SystemExit(2)
+          with tempfile.TemporaryDirectory(prefix="dec-cert-preflight-") as d:
+              path = Path(d) / "recipient.pem"
+              path.write_text(cert, encoding="utf-8")
+              check = subprocess.run(
+                  ["openssl", "x509", "-in", str(path), "-noout",
+                   "-checkend", "86400"],
+                  capture_output=True, timeout=15, check=False)
+              if check.returncode != 0:
+                  print("HOLD_RECIPIENT_CERT_INVALID_OR_EXPIRING_NO_MODEL_CALL")
+                  raise SystemExit(2)
+          print("OWNER_CHECKPOINT_CONSENT_AND_CERT_PREFLIGHT_PASS")
+          PY
       - name: Download public free model and QA images only to disposable CI
         run: |
           docker pull ollama/ollama:latest
