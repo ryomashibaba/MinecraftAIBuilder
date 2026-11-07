@@ -342,6 +342,9 @@ def recheck_restored_source_docker(
         previous = commit
     if any(q.get("qa_commands") != [1, 1] for q in proof["accepted_cycles"]):
         raise CheckpointHold("CHECKPOINT_REQA_COMMAND_COUNT_UNEXPECTED")
+    # An injected hook is a fixture, NEVER genuine independent Docker proof.
+    # In particular fixture success must not generate qa-reverification.private.json.
+    fixture_mode = any(hook is not None for hook in (preflight, run_qa, inventory))
     # Docker preflight comes *after* proof/Git checks and before staging source.
     from promote_private_real_drafts_docker import (
         require_docker_qa_image, docker_run)
@@ -400,9 +403,13 @@ def recheck_restored_source_docker(
             proof_stages.append({"commit": commit, "source_sha256": expected,
                                  "independent_docker_qa_checks": 1})
         result = {
-            "status": "RESTORED_REAL_DOCKER_SOURCE_REQA_ONLY_ART_HOLD",
+            "status": ("OFFLINE_FIXTURE_REQA_SIMULATED_NOT_REAL_DOCKER"
+                       if fixture_mode else
+                       "RESTORED_REAL_DOCKER_SOURCE_REQA_ONLY_ART_HOLD"),
             "base_commit": pinned_base, "final_commit": final,
-            "qa_stages_reexecuted": stages,
+            "qa_stages_reexecuted": 0 if fixture_mode else stages,
+            "fixture_stages_simulated": stages if fixture_mode else 0,
+            "independent_docker_qa_verified": not fixture_mode,
             "network": "none", "model_requests": 0,
             "container_inventory_unchanged": True,
             "source_executed_on_host": False,
@@ -410,6 +417,9 @@ def recheck_restored_source_docker(
             "original_project_modified": False,
             "art_or_gameplay_certified": False,
         }
+        if fixture_mode:
+            # No trusted receipt is written by injected fake QA callbacks.
+            return result
         receipt = restored_bare / "qa-reverification.private.json"
         if receipt.exists() or receipt.is_symlink():
             raise CheckpointHold("CHECKPOINT_REQA_ALREADY_RECORDED")
