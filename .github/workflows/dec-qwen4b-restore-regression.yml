@@ -42,6 +42,8 @@ jobs:
       - name: Pull public QA runtime only (NO Ollama, models or credentials)
         run: docker pull node:24-bookworm-slim
       - name: ReQA an ephemeral self-created encrypted Git bundle in real isolated Docker
+        env:
+          PYTHONPATH: tools/free-autonomy-solo
         run: |
           python3 - <<'PY'
           """Ephemeral synthetic Git bundle + actual Docker reQA, no model/private source."""
