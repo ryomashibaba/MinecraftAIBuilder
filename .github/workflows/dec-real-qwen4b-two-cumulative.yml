@@ -40,7 +40,7 @@ jobs:
           # A path filter alone would also allow later edits, delete/re-add or
           # a GitHub "Re-run jobs" action. Require the first add in complete
           # ancestry, and forbid unrelated source edits in the activation commit.
-          expected_add="$(printf 'A\\t%s' "${request}")"
+          expected_add="$(printf 'A\t%s' "${request}")"
           actual_add="$(git diff-tree --no-commit-id --name-status -r HEAD -- "${request}")"
           changed_paths="$(git diff-tree --no-commit-id --name-only -r HEAD)"
           request_history="$(git rev-list HEAD -- "${request}" | wc -l | tr -d '[:space:]')"
