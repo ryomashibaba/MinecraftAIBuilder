@@ -7,6 +7,8 @@ on:
     paths:
       - '.github/workflows/dec-private-checkpoint-windows-offline.yml'
       - 'tools/dec-private-checkpoint/init_windows_recipient.ps1'
+      - 'tools/dec-private-checkpoint/restore_windows_checkpoint.ps1'
+      - 'tools/dec-private-checkpoint/test_windows_checkpoint_restore.py'
 
 permissions:
   contents: read
@@ -48,3 +50,10 @@ jobs:
           if ($plaintext.Count -ne 0) { throw 'DEC_WINDOWS_PLAINTEXT_PRIVATE_KEY_FOUND' }
           Write-Host 'DEC_WINDOWS_DPAPI_SETUP_VERIFY_PASS'
           Write-Host 'SYNTHETIC_LOCAL_CERT_AND_KEY_ONLY; NO_MODEL; NO_SECRETS_UPLOAD'
+      - name: Restore a synthetic encrypted checkpoint with Windows DPAPI key (NO model)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          python.exe tools/dec-private-checkpoint/test_windows_checkpoint_restore.py
+          if ($LASTEXITCODE -ne 0) { throw 'DEC_WINDOWS_SYNTHETIC_RESTORE_FAILED' }
+          Write-Host 'WINDOWS_PRIVATE_RESTORE_E2E_FIXTURE_ONLY_NO_REAL_QA'
