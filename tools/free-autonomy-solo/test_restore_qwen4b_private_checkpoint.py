@@ -240,12 +240,27 @@ class RestoreCheckpoints(unittest.TestCase):
             calls.append(label)
             return 0, "FAKE QA"
         result = self._reqa_fixture(run_qa=fake)
-        self.assertEqual(result["qa_stages_reexecuted"], 2)
+        self.assertEqual(result["status"],
+                         "OFFLINE_FIXTURE_REQA_SIMULATED_NOT_REAL_DOCKER")
+        self.assertEqual(result["qa_stages_reexecuted"], 0)
+        self.assertEqual(result["fixture_stages_simulated"], 2)
+        self.assertFalse(result["independent_docker_qa_verified"])
         self.assertEqual(len(calls), 2)
         self.assertEqual(result["model_requests"], 0)
         self.assertFalse(result["source_executed_on_host"])
-        self.assertTrue((self.dest / "qa-reverification.private.json").is_file())
+        self.assertFalse((self.dest / "qa-reverification.private.json").exists())
         self.assertEqual(cmd("git", "rev-parse", "HEAD", cwd=self.baseline), self.base_sha)
+
+    def test_reqa_fixture_repeated_runs_never_stamp_real_receipt(self):
+        self.restore()
+        for _ in range(2):
+            result = self._reqa_fixture()
+            self.assertEqual(result["qa_stages_reexecuted"], 0)
+            self.assertEqual(result["fixture_stages_simulated"], 2)
+            self.assertNotEqual(
+                result["status"], "RESTORED_REAL_DOCKER_SOURCE_REQA_ONLY_ART_HOLD")
+            self.assertFalse(result["independent_docker_qa_verified"])
+            self.assertFalse((self.dest / "qa-reverification.private.json").exists())
 
     def test_reqa_docker_not_ready_holds_without_execution(self):
         self.restore()
