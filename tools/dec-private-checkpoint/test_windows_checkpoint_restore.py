@@ -127,6 +127,7 @@ def main() -> int:
             # Only sanitized machine-readable reason codes leave the fixture.
             approved = ("DEC_WINDOWS_RESTORE_REJECT_CODE=",
                         "DEC_WINDOWS_RESTORE_HOLD_STAGE=",
+                        "DEC_WINDOWS_RESTORE_HOLD_CODE=",
                         "DEC_WINDOWS_PRIVATE_CHECKPOINT_RESTORE_HOLD")
             for line in success.stdout.splitlines():
                 if (line.startswith(approved) and len(line) < 170 and
