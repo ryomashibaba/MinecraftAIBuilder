@@ -68,8 +68,18 @@ function Find-OpenSSL {
 }
 
 function Assert-OpenSSL([string]$Executable, [string[]]$Arguments, [string]$Code) {
-    & $Executable @Arguments 1>$null 2>$null
-    if ($LASTEXITCODE -ne 0) { Stop-Private $Code }
+    # OpenSSL RSA generation writes normal progress to stderr. Windows
+    # PowerShell 5.1 treats native stderr as a nonterminating ErrorRecord;
+    # under Stop it would abort even on successful exit 0.
+    $previousPreference = $ErrorActionPreference
+    try {
+        $ErrorActionPreference = 'Continue'
+        & $Executable @Arguments 1>$null 2>$null
+        $nativeExit = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $previousPreference
+    }
+    if ($nativeExit -ne 0) { Stop-Private $Code }
 }
 
 function Check-PrivatePair([string]$Executable, [string]$Certificate, [string]$Key, [string]$Scratch) {
