@@ -53,7 +53,9 @@ def _checkpoint_cert_or_none() -> str | None:
     approval = os.environ.get("DEC_QWEN4B_ENCRYPTED_CHECKPOINT_APPROVED", "")
     cert = os.environ.get("DEC_QWEN4B_RECIPIENT_CERT_PEM", "")
     if not approval:
-        return None
+        # Never consume genuine model cycles if QA-passed source would vanish
+        # when this disposable runner shuts down.
+        raise ValueError("PRIVATE_CHECKPOINT_CONSENT_MISSING_NO_MODEL_CALL")
     if approval != _CHECKPOINT_APPROVAL or not cert.startswith(
             "-----BEGIN CERTIFICATE-----\n"):
         raise ValueError("PRIVATE_CHECKPOINT_APPROVAL_OR_RECIPIENT_MISSING")
