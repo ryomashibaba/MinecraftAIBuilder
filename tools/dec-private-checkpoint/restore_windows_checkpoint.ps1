@@ -134,8 +134,12 @@ try {
     }
     $stage = 'INPUT_FILES_OK'
     $cipher = Get-Item -LiteralPath $EncryptedCheckpoint
+    $stage = 'CIPHER_INFO_OBTAINED'
     if ($cipher.Length -lt 32 -or $cipher.Length -gt 20000000) { Hold 'CIPHERTEXT_SIZE_INVALID' }
-    if ((Get-FileHash -LiteralPath $EncryptedCheckpoint -Algorithm SHA256).Hash.ToLowerInvariant() -cne $CiphertextSha256) {
+    $stage = 'CIPHER_SIZE_OK'
+    $cipherHash = (Get-FileHash -LiteralPath $EncryptedCheckpoint -Algorithm SHA256).Hash
+    $stage = 'CIPHER_HASH_COMPUTED'
+    if ($cipherHash.ToLowerInvariant() -cne $CiphertextSha256) {
         Hold 'CIPHERTEXT_SHA_MISMATCH'
     }
     $stage = 'CIPHER_HASH_OK'
@@ -209,8 +213,8 @@ try {
     # Never print original exception, Python/OpenSSL stderr, paths, or key data.
     Write-Output 'DEC_WINDOWS_PRIVATE_CHECKPOINT_RESTORE_HOLD'
     Write-Output ('DEC_WINDOWS_RESTORE_HOLD_STAGE=' + $stage)
-    $exceptionType = $_.Exception.GetType().Name
-    if ($exceptionType -cmatch '^[A-Za-z]{3,70}Exception$') {
+    $exceptionType = $_.Exception.GetType().Name.ToUpperInvariant()
+    if ($exceptionType -cmatch '^[A-Z]{3,70}EXCEPTION$') {
         Write-Output ('DEC_WINDOWS_RESTORE_EXCEPTION_TYPE=' + $exceptionType)
     }
     # Only constant internal hold reasons; never original exceptions or paths.
