@@ -1,5 +1,7 @@
 # 2026年12月対策 — 完全方針継承・批判的改善・新チャット引き継ぎ正本 V6.0
 
+> **2026-11-07更新・以後の新チャット入口**：これまでGitHub側に不足していたV5完全原本と単一状況台帳は、所有者が作成した **非公開** GitHub [december-2026-private](https://github.com/ryomashibaba/december-2026-private) の main に原文保護・日時付き追記を行って保存済み。新チャットはPRIVATEの README と V7統合正本から開始する。**本V6の旧HOLDや旧「次チャット開始文」は履歴**であり、後続のP1/P2/P3合成Windows PASSと現在の真正P3 HOLDは新PRIVATEの最新記録を優先する。PRIVATEの本文や秘密情報を公開研究branchへ転記しない。
+
 > **2026-11-07追補（最新検証差分）**：本V6の第2章・第4章・第6章・第8章は**作成時点の履歴**。その後のWindows復元とP3合成鍵復旧の実測、および以後のGitHub優先運用は末尾の**第9章**が優先する。上位の固定方針と権限境界は変更しない。
 
 **統合基準：2026-11-07 JST（本書作成時点）**  
@@ -168,3 +170,10 @@ GitHub操作0回でも、毎回「続けて」指示と不完全な引き継ぎ�
 - **未解除ゲート**：本人Windowsの受取鍵と暗号化バックアップの実在・再検証、GitHubのSecrets設定を扱えるUI/接続権限、GitHub Actions/Artifactの**本人アカウントの請求・容量**、成果の復元先。現在のGitHubコネクターにはSecrets/Billingの安全な書込み・参照APIがない。
 - 真正実行の既存起点は `.github/workflows/dec-real-qwen4b-two-cumulative.yml`。普通の研究pushではモデルは起動しない。**明示承認済み条件を現行環境で再確認した後でのみ**専用 `.github/dec-qwen4b-approved-run-request.json` の操作を検討。独断でrequestファイルを作成しない、無審査の自動起動をしない。
 - **再開はGitHubを先に調べ、本人操作は必要な1回のUIバッチに集約**する。CIMが拒否されても直ちに新監督器・新CIを追加しない。秘密・権限・請求が確認できなければP3真正部分をHOLDとする。このHOLDは第9.2節の合成Windows PASSを取り消さない。
+
+## 10. PRIVATE側への正本集約（2026-11-07 JST、公開情報のみ）
+
+- **新しい継続入口**：[PRIVATE repo README](https://github.com/ryomashibaba/december-2026-private/blob/main/README.md) → [V7統合・批判的引き継ぎ](https://github.com/ryomashibaba/december-2026-private/blob/main/docs/DECEMBER_2026_V7_INTEGRATED_CRITICAL_HANDOFF_20261107_JA.md) → 非公開V5第0〜9章と可変台帳の末尾。PRIVATE repoへアクセスできる認証済みユーザーのみ参照可能。アクセスできないセッションは読めたふりをせず、その具体的な操作だけHOLD。
+- **公開側の役割は不変**：公開可能なコード、合成fixture、GitHub Actions、匿名の検証結果。本公開repoのmain・作品コード・Draft PRは変更しない。PRIVATE repoをPUBLIC Actionsからcloneする自動権限連携は作らない。
+- **現状の差分**：Windows合成Git復元（Actions #42339479197）、本番sealer→DPAPI→合成4段階チェックポイント復元（#42349086056）、パスフレーズ暗号化した合成受取鍵の同一runner内バックアップ・再保護（#42353687546）はSUCCESS。ただし本人Windows鍵やSecrets、Billing、真正Qwen3:4B生成・保存・復号・独立SOURCE QAは未実証でP3真正実行はHOLD。
+- **運用の反省**：V5原本の全文や非公開情報を公開branchにコピーしない。新しい台帳の増殖・連続したHOLD再試行・不要なCI・手作業添付を止め、PRIVATE側の単一台帳のみ意味ある差分が出た時に更新する。PRIVATE側でActionsを新設しない。
