@@ -78,12 +78,12 @@ function PythonPath {
     NoReparse $result.Source
     return $result.Source
 }
-function RunNative([string]$Tool, [string[]]$Args, [string]$ErrorCode) {
+function RunNative([string]$Tool, [string[]]$CommandArguments, [string]$ErrorCode) {
     $old = $ErrorActionPreference
     try {
         $ErrorActionPreference = 'Continue'
         # Never forward raw stderr (including local paths or cryptographic details).
-        $result = @(& $Tool @Args 2>$null)
+        $result = @(& $Tool @CommandArguments 2>$null)
         $nativeCode = $LASTEXITCODE
     } finally {
         $ErrorActionPreference = $old
