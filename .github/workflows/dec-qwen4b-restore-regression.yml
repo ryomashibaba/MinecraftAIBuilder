@@ -26,6 +26,130 @@ jobs:
       - name: Run synthetic encrypted checkpoint restoration and reQA tests
         run: |
           python3 -m unittest discover -v -s tools/free-autonomy-solo -p 'test_restore_qwen4b_private_checkpoint.py'
+      - name: Verify genuine production sealer to restoration contract with synthetic four-stage Git
+        env:
+          PYTHONPATH: tools/free-autonomy-solo
+        run: |
+          python3 - <<'PY'
+          """Synthetic 4-stage producer -> encrypted CMS -> restored bare Git roundtrip.
+          NO models, no private project output, no Docker invocation or public generated code.
+          """
+          import hashlib
+          import json
+          import subprocess
+          import tempfile
+          from pathlib import Path
+          
+          from real_qwen4b_two_cumulative_ci import _verified_private_checkpoint
+          from restore_qwen4b_private_checkpoint import restore_checkpoint
+          
+          SOURCE = 'source/ai/r125-v4h-mezzanine-author-ir.mjs'
+          
+          def command(*args, cwd=None):
+              proc = subprocess.run(args, cwd=cwd, check=True, stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE, timeout=45, text=True)
+              return proc.stdout.strip()
+          
+          with tempfile.TemporaryDirectory(prefix='synthetic-qwen4b-roundtrip-') as folder:
+              home = Path(folder)
+              base = home / 'trusted-baseline'
+              base.mkdir()
+              command('git', 'init', '-q', '-b', 'research/fixture', cwd=base)
+              command('git', 'config', 'user.name', 'Fixture', cwd=base)
+              command('git', 'config', 'user.email', 'fixture@example.invalid', cwd=base)
+              target = base / SOURCE
+              target.parent.mkdir(parents=True)
+              target.write_text('export const fixture = 0;\n', encoding='utf-8')
+              command('git', 'add', '.', cwd=base)
+              command('git', 'commit', '-q', '-m', 'synthetic original', cwd=base)
+              baseline_sha = command('git', 'rev-parse', 'HEAD', cwd=base)
+              baseline_blob = command('git', 'rev-parse', 'HEAD:' + SOURCE, cwd=base)
+          
+              work = home / 'model-free-fixture'
+              command('git', 'clone', '-q', str(base), str(work))
+              command('git', 'config', 'user.name', 'Fixture', cwd=work)
+              command('git', 'config', 'user.email', 'fixture@example.invalid', cwd=work)
+              hashes, commits = [], []
+              for i in range(4):
+                  content = f'export const fixture = {i+1};\n'.encode()
+                  (work / SOURCE).write_bytes(content)
+                  command('git', 'add', SOURCE, cwd=work)
+                  command('git', 'commit', '-q', '-m', f'fixture stage {i+1}', cwd=work)
+                  hashes.append(hashlib.sha256(content).hexdigest())
+                  commits.append(command('git', 'rev-parse', 'HEAD', cwd=work))
+          
+              private = home / 'PRIVATE'
+              private.mkdir()
+              session = private / ('m-' + 'a' * 16)
+              stage = session / 'c2' / 'PrivateClones' / 'minecraftaibuilder-synthetic'
+              stage.mkdir(parents=True)
+              qa_clone = stage / 'qa-clone-synthetic'
+              command('git', 'clone', '-q', str(work), str(qa_clone))
+              review = stage / 'private-review'
+              review.mkdir()
+              second_base = commits[1]
+              second_blob = command('git', 'rev-parse', second_base + ':' + SOURCE, cwd=qa_clone)
+              (review / 'REVIEW_ONLY_PRIVATE_MANIFEST.json').write_text(json.dumps({
+                  'schema': 'dec-private-source-review-after-real-qa-v1',
+                  'status': 'TWO_SOURCE_STAGES_REVIEW_ONLY_ART_HOLD',
+                  'human_approval': False, 'github_pushes': 0,
+                  'source_file': SOURCE,
+                  'project_source_commit': second_base,
+                  'project_source_blob': second_blob,
+              }), encoding='utf-8')
+              (stage / 'SHAREABLE_PROMOTION_RESULT.json').write_text(json.dumps({
+                  'qa_workspace_private': str(qa_clone),
+                  'private_source_review_directory': str(review),
+                  'status': 'TWO_STAGES_INDEPENDENT_DOCKER_SOURCE_QA_LOCAL_COMMITS',
+                  'completed_stages': 2, 'private_source_review_stages': 2,
+                  'github_pushes': 0,
+                  'source_commit': second_base,
+                  'source_blob': second_blob,
+                  'local_qa_commits': [{'commit': commits[2]}, {'commit': commits[3]}],
+              }), encoding='utf-8')
+              accepted = [{'cycle': 1, 'source_sha256': hashes[:2], 'qa_commands': [1, 1]},
+                          {'cycle': 2, 'source_sha256': hashes[2:], 'qa_commands': [1, 1]}]
+              summary = {
+                  'completed_cycles': 2, 'accepted_cycles': accepted,
+                  'base_audited_public_source_commit': baseline_sha,
+                  'completed_qa_source_stages': 4, 'private_review_stages': 4,
+                  'github_pushes': 0, 'original_source_modified': False,
+              }
+              report = session / 'SHAREABLE_MAB_CUMULATIVE_SOURCE_QA.json'
+              report.write_text(json.dumps(summary), encoding='utf-8')
+              certificate = home / 'recipient.pem'
+              private_key = home / 'private-key.pem'
+              command('openssl', 'req', '-x509', '-newkey', 'rsa:2048',
+                      '-keyout', str(private_key), '-out', str(certificate),
+                      '-nodes', '-subj', '/CN=SyntheticCIOnly', '-days', '2')
+              encrypted = home / 'checkpoint.cms'
+              ciphertext_sha = _verified_private_checkpoint(
+                  private, report, summary, certificate.read_text(encoding='utf-8'), encrypted)
+              assert hashlib.sha256(encrypted.read_bytes()).hexdigest() == ciphertext_sha
+              restored_dir = home / 'restored-private'
+              restored_dir.mkdir()
+              restored = restore_checkpoint(
+                  encrypted, ciphertext_sha, certificate, private_key, base, restored_dir,
+                  pinned_base=baseline_sha, pinned_source=SOURCE, pinned_blob=baseline_blob)
+              assert restored['verified_source_stages'] == 4, restored
+              assert restored['final_commit'] == commits[3], restored
+              assert restored['model_requests'] == 0
+              assert restored['public_git_pushes'] == 0
+              print('PRODUCER_TO_CONSUMER_SYNTHETIC_FOUR_STAGE_PASS')
+          
+              rejected = home / 'must-not-appear.cms'
+              forged = json.loads(json.dumps(summary))
+              forged['accepted_cycles'][0]['source_sha256'][0] = '0' * 64
+              report.write_text(json.dumps(forged), encoding='utf-8')
+              try:
+                  _verified_private_checkpoint(private, report, forged,
+                                               certificate.read_text(encoding='utf-8'), rejected)
+              except (ValueError, OSError, subprocess.SubprocessError):
+                  assert not rejected.exists()
+                  print('PRODUCER_TAMPERED_SOURCE_HASH_REJECTED_PASS')
+              else:
+                  raise AssertionError('Forged synthetic source hash was accepted')
+          PY
       - name: Explicit scope of this evidence
         if: always()
         run: |
