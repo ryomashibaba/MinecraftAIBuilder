@@ -7,6 +7,7 @@ on:
     paths:
       - '.github/workflows/dec-private-checkpoint-windows-offline.yml'
       - 'tools/dec-private-checkpoint/init_windows_recipient.ps1'
+      - 'tools/dec-private-checkpoint/recovery_windows_recipient.ps1'
       - 'tools/dec-private-checkpoint/restore_windows_checkpoint.ps1'
       - 'tools/dec-private-checkpoint/test_windows_checkpoint_restore.py'
       - 'tools/free-autonomy-solo/restore_qwen4b_private_checkpoint.py'
@@ -51,6 +52,32 @@ jobs:
           if ($plaintext.Count -ne 0) { throw 'DEC_WINDOWS_PLAINTEXT_PRIVATE_KEY_FOUND' }
           Write-Host 'DEC_WINDOWS_DPAPI_SETUP_VERIFY_PASS'
           Write-Host 'SYNTHETIC_LOCAL_CERT_AND_KEY_ONLY; NO_MODEL; NO_SECRETS_UPLOAD'
+      - name: Verify offline password-encrypted DPAPI recovery and reimport on disposable Windows user
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $script = Join-Path $env:GITHUB_WORKSPACE 'tools/dec-private-checkpoint/recovery_windows_recipient.ps1'
+          $init = Join-Path $env:GITHUB_WORKSPACE 'tools/dec-private-checkpoint/init_windows_recipient.ps1'
+          $original = $env:LOCALAPPDATA
+          $backup = Join-Path $env:RUNNER_TEMP 'DEC_SYNTHETIC_PKCS8_ONLY'
+          $restoredAppData = Join-Path $env:RUNNER_TEMP 'DEC_SYNTHETIC_RECOVERY_OWNER'
+          $password = ConvertTo-SecureString 'CI-ONLY-DISPOSABLE-RECOVERY-PASSPHRASE-2026' -AsPlainText -Force
+          & $script -Operation Export -RecoveryDirectory $backup -Passphrase $password
+          if ($LASTEXITCODE -ne 0) { throw 'DEC_RECOVERY_EXPORT_FAILED' }
+          & $script -Operation Verify -RecoveryDirectory $backup -Passphrase $password
+          if ($LASTEXITCODE -ne 0) { throw 'DEC_RECOVERY_VERIFY_FAILED' }
+          try {
+            [void](New-Item -ItemType Directory -Path $restoredAppData -Force)
+            $env:LOCALAPPDATA = $restoredAppData
+            & $script -Operation Import -RecoveryDirectory $backup -Passphrase $password
+            if ($LASTEXITCODE -ne 0) { throw 'DEC_RECOVERY_IMPORT_FAILED' }
+            & $init -VerifyOnly
+            if ($LASTEXITCODE -ne 0) { throw 'DEC_RECOVERY_REIMPORTED_DPAPI_VERIFY_FAILED' }
+          } finally {
+            $env:LOCALAPPDATA = $original
+          }
+          Write-Host 'WINDOWS_P3_SYNTHETIC_ENCRYPTED_BACKUP_RESTORE_PASS'
+          Write-Host 'SYNTHETIC_ONLY_NO_USER_KEY_NO_SECRETS_NO_MODEL'
       - name: Restore a synthetic encrypted checkpoint with Windows DPAPI key (NO model)
         shell: pwsh
         run: |
