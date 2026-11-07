@@ -124,6 +124,14 @@ def main() -> int:
                                  text=True, encoding="utf-8", errors="replace", timeout=180)
         if success.returncode != 0 or \
                 "DEC_WINDOWS_PRIVATE_CHECKPOINT_RESTORE_PASS_REVIEW_ONLY" not in success.stdout:
+            # Only sanitized machine-readable reason codes leave the fixture.
+            approved = ("DEC_WINDOWS_RESTORE_REJECT_CODE=",
+                        "DEC_WINDOWS_RESTORE_HOLD_STAGE=",
+                        "DEC_WINDOWS_PRIVATE_CHECKPOINT_RESTORE_HOLD")
+            for line in success.stdout.splitlines():
+                if (line.startswith(approved) and len(line) < 170 and
+                        all(c.isupper() or c.isdigit() or c in "_=" for c in line)):
+                    print("SANITIZED_" + line)
             raise RuntimeError("WINDOWS_RESTORE_WRAPPER_POSITIVE_FAILED")
         saved = private_root / restore_name
         if not (saved / "qa-proof.private.json").is_file() or \
