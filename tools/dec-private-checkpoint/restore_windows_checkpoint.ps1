@@ -137,9 +137,22 @@ try {
     $stage = 'CIPHER_INFO_OBTAINED'
     if ($cipher.Length -lt 32 -or $cipher.Length -gt 20000000) { Hold 'CIPHERTEXT_SIZE_INVALID' }
     $stage = 'CIPHER_SIZE_OK'
-    $cipherHash = (Get-FileHash -LiteralPath $EncryptedCheckpoint -Algorithm SHA256).Hash
+    # Do not rely on optional Get-FileHash command availability on
+    # constrained Windows PowerShell 5.1 hosts. Use the standard .NET SHA256.
+    $hashEngine = [System.Security.Cryptography.SHA256]::Create()
+    $hashStream = $null
+    $hashBytes = $null
+    try {
+        $hashStream = [System.IO.File]::OpenRead($EncryptedCheckpoint)
+        $hashBytes = $hashEngine.ComputeHash($hashStream)
+    } finally {
+        if ($null -ne $hashStream) { $hashStream.Dispose() }
+        $hashEngine.Dispose()
+    }
+    $cipherHash = [System.BitConverter]::ToString($hashBytes).Replace('-', '').ToLowerInvariant()
+    [Array]::Clear($hashBytes, 0, $hashBytes.Length)
     $stage = 'CIPHER_HASH_COMPUTED'
-    if ($cipherHash.ToLowerInvariant() -cne $CiphertextSha256) {
+    if ($cipherHash -cne $CiphertextSha256) {
         Hold 'CIPHERTEXT_SHA_MISMATCH'
     }
     $stage = 'CIPHER_HASH_OK'
