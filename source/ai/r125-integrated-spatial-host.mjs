@@ -1,6 +1,6 @@
 /** Common mechanical expansion for the existing PRIVATE integrated-shell.
  * No genre/purpose-name dispatch. Existing frozen engine is injected explicitly.
- * Supported scope: 2..6 equal mechanical room footprints, parent tree, door/open,
+ * Supported scope: 2..6 rectangular room footprints (default 12x10; optional 8..14), parent tree, door/open,
  * shed roofs, north/south entry, explicit flat entry shelter, six fixture kinds.
  * Unsupported profiles/anchors/capacity HOLD; no substitution or retry.
  * Layout is HOST-derived, not model-authored coordinates. Building beauty,
@@ -15,8 +15,8 @@ const intersects=(a,b)=>a[0]<b[0]+b[2]&&b[0]<a[0]+a[2]&&a[1]<b[1]+b[3]&&b[1]<a[1
 const edge=()=>({distance:0,sides:[],material:'metal'});
 const opening=(id,kind,rect,side)=>{
  const [x,z,w,d]=rect;
- if(side==='north'||side==='south')return {id,kind,origin:[x+4,2,side==='north'?z:z+d-1],size:[4,3,1]};
- return {id,kind,origin:[side==='west'?x:x+w-1,2,z+3],size:[1,3,4]};
+ if(side==='north'||side==='south')return {id,kind,origin:[x+Math.floor((w-4)/2),2,side==='north'?z:z+d-1],size:[4,3,1]};
+ return {id,kind,origin:[side==='west'?x:x+w-1,2,z+Math.floor((d-4)/2)],size:[1,3,4]};
 };
 // Door join clearance is separate; a shelter join must land OUTSIDE the
 // room's wall, on the actual covered approach floor in every orientation.
@@ -49,7 +49,11 @@ export function createIntegratedSpatialHost({deriveIntegratedShell,compileDesign
   for(const [opIndex,op] of payload.operations.entries()){
    if(op.type==='CONCEPT')intent.purpose=op.concept;
    else if(op.type==='SPACE'){
-    let rect=[40,40,12,10],side=null,parent;
+    const footprint=op.footprint??{width:12,depth:10};
+    yes(Number.isSafeInteger(footprint.width)&&Number.isSafeInteger(footprint.depth)&&
+     [footprint.width,footprint.depth].every(n=>n>=8&&n<=14),'ROOM_FOOTPRINT_INVALID');
+    const cw=footprint.width,cd=footprint.depth;
+    let rect=[40,40,cw,cd],side=null,parent;
     if(op.link){
      parent=byKey.get(op.link.to);yes(parent,'MISSING_PARENT');
      side=sides.find(side=>{
@@ -57,8 +61,11 @@ export function createIntegratedSpatialHost({deriveIntegratedShell,compileDesign
       const childEdge={east:'west',west:'east',north:'south',south:'north'}[side];
       if(reserved.get(op.key).has(childEdge))return false;
       const [x,z,w,d]=parent.rect;
-      const c=side==='east'?[x+w-1,z,12,10]:side==='west'?[x-11,z,12,10]:side==='south'?[x,z+d-1,12,10]:[x,z-9,12,10];
-      if(c[0]<2||c[1]<2||c[0]+12>=123||c[1]+10>=123)return false;
+      const c=side==='east'?[x+w-1,z+Math.floor((d-cd)/2),cw,cd]:
+       side==='west'?[x-cw+1,z+Math.floor((d-cd)/2),cw,cd]:
+       side==='south'?[x+Math.floor((w-cw)/2),z+d-1,cw,cd]:
+       [x+Math.floor((w-cw)/2),z-cd+1,cw,cd];
+      if(c[0]<2||c[1]<2||c[0]+cw>=123||c[1]+cd>=123)return false;
       if(intent.spaces.some(s=>{
        if(s.id===parent.id||!intersects(c,s.rect))return false;
        const overlapX=Math.min(c[0]+c[2],s.rect[0]+s.rect[2])-Math.max(c[0],s.rect[0]);
@@ -100,6 +107,7 @@ export function createIntegratedSpatialHost({deriveIntegratedShell,compileDesign
     yes(op.roof==='flat','ENGINE_SHELTER_PROFILE_UNSUPPORTED');
     const parent=byKey.get(op.connectTo),[x,z,w,d]=parent.rect;
     const [a,b]={small:[6,4],medium:[8,6],large:[10,8]}[op.scale];
+    yes((op.edge==='north'||op.edge==='south'?w:d)>=a,'SHELTER_WIDER_THAN_ROOM');
     const rect=op.edge==='north'?[x+Math.floor((w-a)/2),z-b,a,b]:op.edge==='south'?[x+Math.floor((w-a)/2),z+d,a,b]:
      op.edge==='east'?[x+w,z+Math.floor((d-a)/2),b,a]:[x-b,z+Math.floor((d-a)/2),b,a];
     yes(rect[0]>=1&&rect[1]>=1&&rect[0]+rect[2]<124&&rect[1]+rect[3]<124,'SHELTER_BOUNDS');
@@ -133,6 +141,14 @@ export function createIntegratedSpatialHost({deriveIntegratedShell,compileDesign
      service:{parts:[part([x,2,z],[3,2,1])],pad:[x,z-2]},
      equipment:{parts:[part([x,2,z],[2,2,2])],pad:[x,z-2]}};
     const spec=specs[op.kind];yes(spec,'UNSUPPORTED_FIXTURE');
+    const [rx,rz,rw,rd]=s.rect;
+    yes(spec.parts.every(part=>part.origin[0]>=rx+1&&
+     part.origin[2]>=rz+1&&
+     part.origin[0]+part.size[0]<=rx+rw-1&&
+     part.origin[2]+part.size[2]<=rz+rd-1)&&
+     spec.pad[0]>=rx+1&&spec.pad[0]<rx+rw-1&&
+     spec.pad[1]>=rz+1&&spec.pad[1]<rz+rd-1,
+     'FIXTURE_OUTSIDE_ROOM');
     intent.fixtures.push({id:'fixture-'+opIndex,space:op.space,role:op.purpose,parts:spec.parts,servicePad:spec.pad});
    }else fail('UNKNOWN_OPERATION');
    journal.push({opIndex,type:op.type});
@@ -141,7 +157,7 @@ export function createIntegratedSpatialHost({deriveIntegratedShell,compileDesign
   const first=intent.spaces[0];
   const design={schema:B143,id:author.id,title:'Semantic author common host SOURCE',brief:author.concept,
    bounds:{...intent.siteBounds},designOnly:true,elements:[
-    {id:'space-0-floor',shape:'box',mode:'add',material:'wood',origin:[first.rect[0],1,first.rect[1]],size:[12,1,10]},
+    {id:'space-0-floor',shape:'box',mode:'add',material:'wood',origin:[first.rect[0],1,first.rect[1]],size:[first.rect[2],1,first.rect[3]]},
     {id:'host-seed-marker',shape:'box',mode:'add',material:'concrete',origin:[first.rect[0],2,first.rect[1]],size:[1,1,1]}]};
   base={design,compiled:compileDesign(design)};
   intent.baseSourceSha256=base.compiled.sourceSha256;intent.baseGeometrySha256=base.compiled.geometrySha256;

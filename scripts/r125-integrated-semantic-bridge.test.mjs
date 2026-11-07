@@ -227,3 +227,42 @@ test('every sheltered entrance/contact pad lies on outdoor floor, never inside r
   check(a,1);
  }
 });
+
+test('optional authored footprint changes host rectangles and real B143 support floor without altering legacy',()=>{
+ const h=createIntegratedSpatialHost({deriveIntegratedShell:()=>{throw Error('PRIVATE_NOT_AVAILABLE')}});
+ const legacy=supportedSpatialAuthor(),unchanged=h.expand(prepareIntegratedSemanticBridge(legacy).payload);
+ const a=structuredClone(legacy);
+ a.spaces[0].footprint={width:14,depth:12};
+ a.spaces[1].footprint={width:10,depth:9};
+ const prepared=prepareIntegratedSemanticBridge(a),expanded=h.expand(prepared.payload);
+ assertAuthoredSemanticsUnchanged(prepared,expanded.authorEcho);
+ assert.deepEqual(unchanged.intent.spaces.map(s=>s.rect),[[40,40,12,10],[51,40,12,10]]);
+ assert.deepEqual(expanded.intent.spaces.map(s=>s.rect),[[40,40,14,12],[53,41,10,9]]);
+ assert.equal(expanded.base.design.elements[0].size[0],14);
+ assert.equal(expanded.base.design.elements[0].size[2],12);
+ assert.equal(expanded.base.compiled.primitives.filter(p=>p[1]===1).length,168);
+ assert.equal(verifyCompiled(expanded.base.design,expanded.base.compiled),true);
+ assert.notEqual(unchanged.base.compiled.geometrySha256,expanded.base.compiled.geometrySha256);
+ assert.deepEqual(expanded.intent.architecture.roofSections[0].rect,[40,40,14,12]);
+ assert.equal(expanded.intent.openings.find(o=>o.kind==='entry').origin[0],45);
+ assert.equal(expanded.intent.openings.find(o=>o.kind==='entry').origin[2],51);
+ assert.equal(legacy.spaces[0].footprint,undefined);
+ assert(INTEGRATED_SPATIAL_V7_SUPPORTED_PROMPT.includes('Optional footprint'));
+});
+test('invalid and physically impossible authored dimensions reject rather than silently repairing',()=>{
+ const h=createIntegratedSpatialHost({deriveIntegratedShell:()=>{throw Error('PRIVATE_NOT_AVAILABLE')}});
+ const attempt=change=>{const a=supportedSpatialAuthor();change(a);
+  return h.expand(prepareIntegratedSemanticBridge(a).payload);};
+ for(const footprint of [{width:7,depth:10},{width:15,depth:10},
+  {width:12.5,depth:10},{width:10},{width:10,depth:10,extra:true}]){
+  assert.throws(()=>attempt(a=>{a.spaces[0].footprint=footprint}),
+   /R125_INTEGRATED_SEMANTIC_/);
+ }
+ assert.throws(()=>attempt(a=>{
+  a.spaces[0].footprint={width:8,depth:8};a.shelters[0].scale='large';
+ }),/SHELTER_WIDER_THAN_ROOM/);
+ assert.throws(()=>attempt(a=>{
+  a.spaces[1].footprint={width:8,depth:8};
+  a.features.push({space:'reading',kind:'seat',purpose:'Second seating area'});
+ }),/FIXTURE_OUTSIDE_ROOM/);
+});

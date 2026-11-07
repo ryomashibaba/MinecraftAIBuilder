@@ -44,8 +44,13 @@ export function validateIntegratedSemanticIntent(untrusted){
   value.spaces.length>8)fail('SPACE_COUNT');
  const known=new Set();
  for(const [i,s] of value.spaces.entries()){
-  if(!fields(s,['key','purpose','link']) || !slug(s.key) ||
+  if(!(fields(s,['key','purpose','link']) ||
+   fields(s,['key','purpose','link','footprint'])) || !slug(s.key) ||
    known.has(s.key) || !words(s.purpose))fail('SPACE_'+i);
+  if(Object.hasOwn(s,'footprint')&&
+    (!fields(s.footprint,['width','depth'])||
+     ![s.footprint.width,s.footprint.depth].every(n=>
+      Number.isSafeInteger(n)&&n>=8&&n<=14)))fail('FOOTPRINT_'+i);
   if(i===0){if(s.link!==null)fail('ROOT_LINK');}
   else if(!fields(s.link,['to','kind']) || !known.has(s.link.to) ||
    !['door','open'].includes(s.link.kind))fail('LINK_'+i);
@@ -93,7 +98,8 @@ export function projectIntegratedSemanticOperations(untrusted){
  const operations=[
   {type:'CONCEPT',id:author.id,concept:author.concept},
   ...author.spaces.map(s=>({type:'SPACE',key:s.key,
-   purpose:s.purpose,link:s.link})),
+   purpose:s.purpose,link:s.link,
+   ...(Object.hasOwn(s,'footprint')?{footprint:s.footprint}:{})})),
   ...author.roofs.map(r=>({type:'ROOF',space:r.space,
    profile:r.profile,axis:r.axis,rank:r.rank})),
   {type:'ENTRY',face:author.entry.face,space:author.entry.space,
@@ -191,7 +197,7 @@ export const INTEGRATED_SEMANTIC_AUTHOR_PROMPT=[
  'Design the building yourself, not a style label for a fixed template.',
  'Return only one JSON object with schema,id,concept,spaces,roofs,entry,shelters,features.',
  'schema='+INTEGRATED_SEMANTIC_SCHEMA,
- 'Use 2..8 spaces in parent-before-child order. Each has key,purpose,link; first link=null; others link={to:earlierKey,kind:door|open}.',
+ 'Use 2..8 spaces in parent-before-child order. Each has key,purpose,link; first link=null; others link={to:earlierKey,kind:door|open}. Optional per-space footprint:{width:8..14,depth:8..14}; omitted=12x10. Coordinate-free dimensions only.',
  'Each space has one roof entry {space,profile:gable|shed|flat|segmented,axis:x|z,rank:primary|secondary|subordinate}; exactly one primary.',
  'Entry {face:north|south|east|west,space:key,intent:meaningfulText}.',
  'Shelters 0..3: {purpose,connectTo:key,edge:north|south|east|west,scale:small|medium|large,roof:gable|shed|flat|segmented}.',
@@ -211,8 +217,8 @@ export const INTEGRATED_SPATIAL_V7_SUPPORTED_PROMPT=[
  'Return ONE raw JSON object ONLY, no markdown or surrounding text. EXACT top-level keys: schema,id,concept,spaces,roofs,entry,shelters,features.',
  'schema is exactly '+INTEGRATED_SEMANTIC_SCHEMA+'. id and each space key must be unique lowercase slugs, start with a letter, 3..25 characters.',
  'concept, purposes, entry intent are nonempty meaningful natural-language strings of 3..160 characters each.',
- 'spaces: 2..4 rooms in parent-before-child order, EXACT {key,purpose,link}; first link:null, later link:{to:<earlier-key>,kind:door|open}. Author the relationships and functions yourself.',
- 'Every room mechanically has a 12x10 rectangular footprint. This V7 HOST cannot make shaped, multistorey, gabled or variable-size rooms. Do not claim those capabilities.',
+ 'spaces: 2..4 rooms in parent-before-child order, EXACT {key,purpose,link} or {key,purpose,link,footprint:{width,depth}}; first link:null, later link:{to:<earlier-key>,kind:door|open}. Author relationships, functions and optional dimensions yourself.',
+ 'Room footprint is 12x10 by default. Optional footprint width and depth are integers 8..14; each room may differ. This V7 HOST cannot make nonrectangular, multistorey or gabled rooms. Do not claim those capabilities.',
  'roofs: exactly ONE per room, EXACT {space,profile:shed,axis:x|z,rank:primary|secondary|subordinate}. EXACTLY ONE primary roof, all roofs must be shed.',
  'entry: EXACT {face:north|south,space:<one-room-key>,intent:<meaningful-intent>}.',
  'shelters: EXACTLY ONE shelter: {purpose,connectTo:<entry.space>,edge:<entry.face>,scale:small|medium|large,roof:flat}. The shelter MUST attach to the entry room on the entry side.',
