@@ -209,8 +209,13 @@ try {
                    '--private-root', $PrivateRestoreRoot)
     $stage = 'PYTHON_CALLED'
     $lines = @(RunNative $python $arguments 'RESTORER_REJECTED_CHECKPOINT')
-    if ($lines.Count -ne 1) { Hold 'RESTORE_STDOUT_NOT_SINGLE_STATUS' }
-    try { $result = $lines[0] | ConvertFrom-Json -ErrorAction Stop }
+    # PowerShell 5.1 native output may be scalar or enumerated; normalize
+    # the entire bounded stdout and require ONE valid JSON document only.
+    $jsonText = ($lines -join "`n")
+    if ($jsonText.Length -lt 20 -or $jsonText.Length -gt 4096) {
+        Hold 'RESTORE_STDOUT_SIZE_INVALID'
+    }
+    try { $result = $jsonText | ConvertFrom-Json -ErrorAction Stop }
     catch { Hold 'RESTORE_RESULT_NOT_JSON' }
     if ($result.status -cne 'PRIVATE_QA_GIT_HISTORY_RESTORED_REVIEW_ONLY' -or
         $result.raw_source_executed -cne $false -or
