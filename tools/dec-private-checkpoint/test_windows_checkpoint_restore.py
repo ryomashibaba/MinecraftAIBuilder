@@ -59,7 +59,7 @@ def main() -> int:
     wrapper = Path(__file__).resolve().parent / "restore_windows_checkpoint.ps1"
     if not certificate.is_file() or not wrapper.is_file():
         raise RuntimeError("SETUP_OR_WRAPPER_MISSING")
-    with tempfile.TemporaryDirectory(prefix="dec-windows-restore-e2e-") as directory:
+    with tempfile.TemporaryDirectory(prefix="d-") as directory:
         root = Path(directory)
         base = root / "public-audited-base"
         base.mkdir()
@@ -93,12 +93,12 @@ def main() -> int:
             commits.append(command("git", "rev-parse", "HEAD", cwd=work))
         final = commits[-1]
         # Fixture-only receipts exercise the real sealer without claiming Docker QA.
-        synthetic_private = root / "synthetic-private"
+        synthetic_private = root / "p"
         synthetic_private.mkdir()
         session = synthetic_private / ("m-" + "a" * 16)
-        stage = session / "c2" / "PrivateClones" / "minecraftaibuilder-synthetic"
+        stage = session / "c2" / "PrivateClones" / "minecraftaibuilder-s"
         stage.mkdir(parents=True)
-        qa_clone = stage / "qa-clone-synthetic"
+        qa_clone = stage / "qa-clone-s"
         command("git", "clone", "-q", "--no-local", str(work), str(qa_clone))
         review = stage / "private-review"
         review.mkdir()
