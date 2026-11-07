@@ -6,6 +6,7 @@ on:
       - research/dec-free-autonomy-solo-pilot-20261104
     paths:
       - '.github/workflows/dec-private-checkpoint-windows-offline.yml'
+      - 'tools/dec-private-checkpoint/init_windows_recipient.ps1'
 
 permissions:
   contents: read
