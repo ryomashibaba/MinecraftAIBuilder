@@ -1,0 +1,33 @@
+name: December encrypted checkpoint restore offline regression (no model)
+
+on:
+  push:
+    branches:
+      - research/dec-free-autonomy-solo-pilot-20261104
+    paths:
+      - '.github/workflows/dec-qwen4b-restore-regression.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  check-restoration-with-synthetic-git:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify Python, Git and OpenSSL are installed
+        run: |
+          python3 --version
+          git --version
+          openssl version
+      - name: Run synthetic encrypted checkpoint restoration and reQA tests
+        run: |
+          python3 -m unittest discover -v -s tools/free-autonomy-solo -p 'test_restore_qwen4b_private_checkpoint.py'
+      - name: Explicit scope of this evidence
+        if: always()
+        run: |
+          echo 'Synthetic-only Python/Git/OpenSSL regressions.'
+          echo 'No model, no private artifacts, no Docker QA and no automatic source publication.'
