@@ -24,6 +24,7 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $exitCode = 2
+$stage = 'START'
 $privateBytes = $null
 $temporaryKey = $null
 $workDir = $null
@@ -87,7 +88,18 @@ function RunNative([string]$Tool, [string[]]$Args, [string]$ErrorCode) {
     } finally {
         $ErrorActionPreference = $old
     }
-    if ($nativeCode -ne 0) { Hold $ErrorCode }
+    if ($nativeCode -ne 0) {
+        if ($result.Count -eq 1) {
+            try {
+                $json = $result[0] | ConvertFrom-Json -ErrorAction Stop
+                if ($json.status -ceq 'HOLD' -and
+                    $json.reason -cmatch '^CHECKPOINT_[A-Z0-9_]{3,120}$') {
+                    Write-Host ('DEC_WINDOWS_RESTORE_REJECT_CODE=' + $json.reason)
+                }
+            } catch { }
+        }
+        Hold $ErrorCode
+    }
     return $result
 }
 
@@ -139,6 +151,7 @@ try {
         [void](New-Item -Path $PrivateRestoreRoot -ItemType Directory)
     }
     CurrentUserOnly $PrivateRestoreRoot $true
+    $stage = 'PRIVATE_ROOT_READY'
     $openssl = OpenSslPath
     $python = PythonPath
     $restoreCli = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\free-autonomy-solo\restore_qwen4b_private_checkpoint.py'))
@@ -163,6 +176,7 @@ try {
     CurrentUserOnly $temporaryKey $false
     [Array]::Clear($privateBytes, 0, $privateBytes.Length)
     $privateBytes = $null
+    $stage = 'TEMP_KEY_UNLOCKED'
 
     # Python's subprocess invokes 'openssl' by its CLI name. Keep PATH override
     # scoped to THIS process and restore it on every exit.
@@ -171,6 +185,7 @@ try {
                    '--sha256', $CiphertextSha256, '--certificate', $publicCert,
                    '--private-key', $temporaryKey, '--base-repo', $BaseRepository,
                    '--private-root', $PrivateRestoreRoot)
+    $stage = 'PYTHON_CALLED'
     $lines = @(RunNative $python $arguments 'RESTORER_REJECTED_CHECKPOINT')
     if ($lines.Count -ne 1) { Hold 'RESTORE_STDOUT_NOT_SINGLE_STATUS' }
     try { $result = $lines[0] | ConvertFrom-Json -ErrorAction Stop }
@@ -180,6 +195,7 @@ try {
         $result.independent_qa_reexecuted -cne $false -or
         $result.automated_model_resume -cne $false -or
         $result.public_git_pushes -ne 0) { Hold 'RESTORE_CONTRACT_NOT_MET' }
+    $stage = 'CONTRACT_ACCEPTED'
     Write-Output 'DEC_WINDOWS_PRIVATE_CHECKPOINT_RESTORE_PASS_REVIEW_ONLY'
     Write-Output ('RESTORED_FINAL_COMMIT=' + $result.final_commit)
     Write-Output ('VERIFIED_SOURCE_STAGES=' + $result.verified_source_stages)
@@ -187,6 +203,7 @@ try {
 } catch {
     # Never print original exception, Python/OpenSSL stderr, paths, or key data.
     Write-Output 'DEC_WINDOWS_PRIVATE_CHECKPOINT_RESTORE_HOLD'
+    Write-Output ('DEC_WINDOWS_RESTORE_HOLD_STAGE=' + $stage)
     $exitCode = 2
 } finally {
     if ($null -ne $privateBytes) { [Array]::Clear($privateBytes, 0, $privateBytes.Length) }
