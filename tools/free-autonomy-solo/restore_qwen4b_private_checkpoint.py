@@ -182,7 +182,9 @@ def restore_checkpoint(
             raise CheckpointHold("CHECKPOINT_GIT_BUNDLE_SHA_MISMATCH")
         bare = stage / "restored.git"
         _command(["git", "init", "--bare", "--quiet", str(bare)])
-        _git(bare, "fetch", "--no-tags", "--quiet", str(base_repo), pinned_base)
+        # The audited public base may be a depth-1 checkout. Without this Git
+        # flag, fetching a shallow root can exit 0 with an empty FETCH_HEAD.
+        _git(bare, "fetch", "--no-tags", "--quiet", "--update-shallow", str(base_repo), pinned_base)
         if _git_text(bare, "rev-parse", "FETCH_HEAD") != pinned_base:
             raise CheckpointHold("CHECKPOINT_IMPORTED_BASE_MISMATCH")
         _git(bare, "bundle", "verify", str(bundle))

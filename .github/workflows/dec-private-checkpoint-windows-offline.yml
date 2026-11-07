@@ -9,6 +9,7 @@ on:
       - 'tools/dec-private-checkpoint/init_windows_recipient.ps1'
       - 'tools/dec-private-checkpoint/restore_windows_checkpoint.ps1'
       - 'tools/dec-private-checkpoint/test_windows_checkpoint_restore.py'
+      - 'tools/free-autonomy-solo/restore_qwen4b_private_checkpoint.py'
 
 permissions:
   contents: read
