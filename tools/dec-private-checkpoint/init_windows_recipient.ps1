@@ -22,6 +22,17 @@ function Stop-Private([string]$Code) {
     throw "DEC_RECIPIENT_HOLD_$Code"
 }
 
+# Windows PowerShell 5.1 does not always auto-load this .NET Framework
+# assembly. Require real Windows DPAPI, never silently downgrade to plaintext.
+try {
+    Add-Type -AssemblyName System.Security -ErrorAction Stop
+} catch {
+    Stop-Private 'DPAPI_ASSEMBLY_UNAVAILABLE'
+}
+if (-not ('System.Security.Cryptography.ProtectedData' -as [type])) {
+    Stop-Private 'DPAPI_TYPE_UNAVAILABLE'
+}
+
 if ([System.Environment]::OSVersion.Platform -ne [System.PlatformID]::Win32NT) {
     Stop-Private 'WINDOWS_REQUIRED'
 }
