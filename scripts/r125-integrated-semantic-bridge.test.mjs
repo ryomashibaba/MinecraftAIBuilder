@@ -90,7 +90,7 @@ test('no type-specific layouts: same contract accepts other semantic programs',(
 });
 
 // Injected transport/product only: no claim to execute the PRIVATE engine in CI.
-import {compileDesign,SCHEMA} from '../source/ai/b143-building-dsl.mjs';
+import {compileDesign,SCHEMA,verifyCompiled} from '../source/ai/b143-building-dsl.mjs';
 import {createIntegratedSpatialHost} from '../source/ai/r125-integrated-spatial-host.mjs';
 function injectedHost(change=()=>{}){
  return {
