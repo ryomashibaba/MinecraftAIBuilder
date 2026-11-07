@@ -1,0 +1,49 @@
+name: December Windows recipient DPAPI key setup (offline no model)
+
+on:
+  push:
+    branches:
+      - research/dec-free-autonomy-solo-pilot-20261104
+    paths:
+      - '.github/workflows/dec-private-checkpoint-windows-offline.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  ephemeral-windows-recipient-smoke:
+    runs-on: windows-2025
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Create synthetic local-only key on disposable Windows runner
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $script = Join-Path $env:GITHUB_WORKSPACE 'tools/dec-private-checkpoint/init_windows_recipient.ps1'
+          & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $script
+          if ($LASTEXITCODE -ne 0) { throw 'DEC_WINDOWS_RECIPIENT_INITIALIZE_FAILED' }
+      - name: Verify Windows DPAPI roundtrip and no plaintext key survives
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $script = Join-Path $env:GITHUB_WORKSPACE 'tools/dec-private-checkpoint/init_windows_recipient.ps1'
+          & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $script -VerifyOnly
+          if ($LASTEXITCODE -ne 0) { throw 'DEC_WINDOWS_RECIPIENT_VERIFY_FAILED' }
+          $root = Join-Path $env:LOCALAPPDATA 'FreeAutonomyPrivate/DecCheckpointRecipient'
+          $public = Join-Path $root 'recipient-public.pem'
+          $dpapi = Join-Path $root 'recipient-private.dpapi'
+          if (-not (Test-Path -LiteralPath $public -PathType Leaf) -or
+              -not (Test-Path -LiteralPath $dpapi -PathType Leaf)) {
+            throw 'DEC_WINDOWS_PRIVATE_FILES_NOT_FOUND'
+          }
+          if ((Get-Content -LiteralPath $public -Raw) -notmatch 'BEGIN CERTIFICATE') {
+            throw 'DEC_WINDOWS_CERTIFICATE_INVALID'
+          }
+          $plaintext = @(Get-ChildItem -LiteralPath $root -Recurse -File |
+              Where-Object { $_.Name -match 'private.*\.pem$|\.key$' })
+          if ($plaintext.Count -ne 0) { throw 'DEC_WINDOWS_PLAINTEXT_PRIVATE_KEY_FOUND' }
+          Write-Host 'DEC_WINDOWS_DPAPI_SETUP_VERIFY_PASS'
+          Write-Host 'SYNTHETIC_LOCAL_CERT_AND_KEY_ONLY; NO_MODEL; NO_SECRETS_UPLOAD'
