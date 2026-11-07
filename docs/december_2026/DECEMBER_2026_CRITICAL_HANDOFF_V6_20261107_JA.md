@@ -1,5 +1,7 @@
 # 2026年12月対策 — 完全方針継承・批判的改善・新チャット引き継ぎ正本 V6.0
 
+> **2026-11-07追補（最新検証差分）**：本V6の第2章・第4章・第6章・第8章は**作成時点の履歴**。その後のWindows復元とP3合成鍵復旧の実測、および以後のGitHub優先運用は末尾の**第9章**が優先する。上位の固定方針と権限境界は変更しない。
+
 **統合基準：2026-11-07 JST（本書作成時点）**  
 **SCOPE：`DECEMBER_2026`／用途：既存V5.0・過去の単一状況台帳を保持したまま、2026-11-07の新しい検証事実と失敗、次の意思決定を統合する「現行運用の入口」**  
 **注記：本書自体は完全な無謬性を保証しない。動的なHEAD・CI・本人Windows状態は後で変わる。状態を主張する前に実際の証拠を再照合する。**
@@ -136,3 +138,33 @@ GitHub操作0回でも、毎回「続けて」指示と不完全な引き継ぎ�
 本V6の更新で、**「Windows DPAPI鍵管理がPASS」と「DPAPI鍵で本物の復元器を経由した復元がPASS」を厳格に分離**した。最新の復元はGit基点SHA照合でHOLDなので、仕組みの完全完成とは主張しない。正式な自律開発の到達度は従来のS2〜S4未実証という境界を維持する。バックアップ・鍵・費用・モデル承認・本番採用を勝手に進めない。未解決問題を本当に減らす次の工程は小さな再現と一括検証であり、CI/監督器の数量増加ではない。
 
 **これまでの歴史はV5原本に保存されたまま、本V6は最新の評価・失敗・意思決定に一本化する。文書作成そのものを自律開発成功と数えない。**
+
+## 9. GitHub優先の作業とP3の最新差分（2026-11-07 JST、検証済み範囲のみ）
+
+### 9.1 2026年12月対策のGitHub-first運用（所有者の2026-11-07指示）
+
+- **作業・共有・次チャットの第一入口はこの公開研究ブランチの既存V6**とする。新規ZIP/添付の受け渡し、別名正本や小型監督器の増殖を避け、必要な実装は既存スクリプトを最小修正してGitHubで追跡する。main、MAB/TPS作品本体、既存PRは保護する。
+- **Library V5全文と単一状況台帳はそのまま公開GitHubに転記しない**。個人PCの内部状態、PRIVATE実装や未公開の証拠に関わる可能性があるため、正本はLibraryに保持する。GitHub V6は安全な運用上の要約・差分のみを公開する。Work側でLibrary全文を開けない場合は、閲覧できない部分を推測せず、V6の最上位固定条件と本章の差分で許可済みの限定作業を継続し、欠けた具体的なPRIVATE情報が本当に不可欠な操作のみHOLDとする。
+- **原則GitHub操作はChat側で行う**。Work/Computer Useが必要なのは、本人Windows/Secrets/BillingのUIなどGitHubコネクターだけでは扱えない操作に限る。単なる「続けて」は機密・Windows・費用・main変更の新しい許可ではない。別途2026-11-07に限定承認されたP3は、その条件と上限を超えない。
+- GitHub Actionsの標準ランナー利用資格だけを根拠に**アカウント全体の実請求0円**を確定しない。Artifactの容量・保持・公開範囲・支払方法・費用上限を実利用条件で確認するまで真正P3起動はHOLDする。
+
+### 9.2 GitHub読取可能な真正の差分証拠
+
+以下は特定SHAに紐づく過去の確定済み実行結果であり、後続の最新HEADは毎回確認する。
+
+| 検証範囲 | 研究コミット／Actions | 合否と認定上限 |
+|---|---|---|
+| 浅いGit基点をbare repoへ取り込むWindows合成復元の修正 | `01d55037b9dad8d9ab66312cc5f1846928bbd5c4` / [run #42339479197](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/42339479197) | **Windows synthetic PASS**。固定基点取り込み失敗を修正。本人PC・真正Qwenではない |
+| 本番用のCMS暗号化関数→Windows DPAPI→実復元器→合成4段階Git履歴と改ざん/重複拒否 | `928c723dd7320052c8c04581103243ba8fb7a7f8` / [run #42349086056](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/42349086056) | **Windows synthetic 4-stage PASS**。モデル0、実Docker QAなし |
+| パスフレーズ暗号化PKCS#8バックアップ→検証→同一runnerの別Windows保存先にDPAPI再登録、前項の4段階復元維持 | `0d349c390a1572560591e614ecbadd2b0d350eef` / [run #42353687546](https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/42353687546) | **Windows synthetic backup/recovery PASS**。別PC/別ユーザー復元は未証明、本人の鍵ではない |
+
+- 現状の研究用既存スクリプト：`tools/dec-private-checkpoint/recovery_windows_recipient.ps1`、`tools/dec-private-checkpoint/init_windows_recipient.ps1`、`tools/dec-private-checkpoint/restore_windows_checkpoint.ps1`、`tools/dec-private-checkpoint/test_windows_checkpoint_restore.py`。
+- **2026-11-07 Work実機観測**：Computer Useで本人Windowsのアプリ一覧取得に成功した記録がある。ただしCIMはアクセス拒否で、本人の既存鍵・実機資源・DPAPI復元・GitHub Secrets・請求設定は未検証。これは**接続確認**であり**本人PC P3成功**ではない。
+- **真正Qwen3:4B成果の暗号化保存・本人鍵復元・独立SOURCE QAは未実施**。Strata S2〜S4、MAB/TPS正式ART/ゲーム完成も本12月経路で認定しない。R55の別CI failureを全CI成功と混同しない。
+
+### 9.3 P3で残る唯一の実行ゲートと次工程
+
+- 2026-11-07の所有者から**一回限定P3の承認**あり：本人Windowsの鍵生成/バックアップ/復旧確認、GitHub Secretsの安全な設定、Qwen3:4Bの**最大45分、1 run**、**暗号化済み**QA checkpointだけの公開GitHub Artifact保存（既存保持上限90日）、復元と独立SOURCE QA。ただし**追加課金原則0円、漏洩防止、復号可能性、公開内容の限定**は継続条件。秘密鍵・パスフレーズ・モデル原文はChat/GitHubへ送らない。
+- **未解除ゲート**：本人Windowsの受取鍵と暗号化バックアップの実在・再検証、GitHubのSecrets設定を扱えるUI/接続権限、GitHub Actions/Artifactの**本人アカウントの請求・容量**、成果の復元先。現在のGitHubコネクターにはSecrets/Billingの安全な書込み・参照APIがない。
+- 真正実行の既存起点は `.github/workflows/dec-real-qwen4b-two-cumulative.yml`。普通の研究pushではモデルは起動しない。**明示承認済み条件を現行環境で再確認した後でのみ**専用 `.github/dec-qwen4b-approved-run-request.json` の操作を検討。独断でrequestファイルを作成しない、無審査の自動起動をしない。
+- **再開はGitHubを先に調べ、本人操作は必要な1回のUIバッチに集約**する。CIMが拒否されても直ちに新監督器・新CIを追加しない。秘密・権限・請求が確認できなければP3真正部分をHOLDとする。このHOLDは第9.2節の合成Windows PASSを取り消さない。
