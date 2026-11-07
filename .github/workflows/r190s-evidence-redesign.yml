@@ -1,0 +1,41 @@
+name: R190-S Evidence-Grounded Model Redesign — FAKE ONLY
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'scripts/r190s-evidence-redesign.mjs'
+      - 'scripts/r190s-evidence-redesign.test.mjs'
+      - 'RUN_R190S_REDESIGN.cmd'
+      - 'scripts/r190t-source-comparison.mjs'
+      - 'scripts/r190t-source-comparison.test.mjs'
+      - 'scripts/r190x-saved-quality-compare.mjs'
+      - 'scripts/r190x-saved-quality-compare.test.mjs'
+      - 'RUN_R190X_COMPARE.cmd'
+      - '.github/workflows/r190s-evidence-redesign.yml'
+  pull_request:
+    paths:
+      - 'scripts/r190s-evidence-redesign.mjs'
+      - 'scripts/r190s-evidence-redesign.test.mjs'
+      - 'RUN_R190S_REDESIGN.cmd'
+      - 'scripts/r190t-source-comparison.mjs'
+      - 'scripts/r190t-source-comparison.test.mjs'
+      - 'scripts/r190x-saved-quality-compare.mjs'
+      - 'scripts/r190x-saved-quality-compare.test.mjs'
+      - 'RUN_R190X_COMPARE.cmd'
+      - '.github/workflows/r190s-evidence-redesign.yml'
+permissions:
+  contents: read
+jobs:
+  synthetic-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: node --check scripts/r190s-evidence-redesign.mjs
+      - run: node --test scripts/r190t-source-comparison.test.mjs
+      - run: node --test scripts/r190s-evidence-redesign.test.mjs
+      - run: node --check scripts/r190x-saved-quality-compare.mjs
+      - run: node --test scripts/r190x-saved-quality-compare.test.mjs
+      - run: node --test scripts/r190-h-architectural-route.test.mjs

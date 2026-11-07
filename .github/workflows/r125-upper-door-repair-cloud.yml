@@ -1,0 +1,331 @@
+name: R125 Saved Qwen C Upper-Floor Door Repair — SOURCE ONLY
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'source/ai/r125-architecture-plan.mjs'
+      - 'scripts/r125-upper-door-repair-study.mjs'
+      - 'scripts/r125-upper-door-repair-study.test.mjs'
+      - 'scripts/r125-roof-interior-study.mjs'
+      - 'scripts/r125-roof-interior-study.test.mjs'
+      - 'scripts/r125-semantic-pilot.mjs'
+      - 'scripts/r125-semantic-pilot.test.mjs'
+      - 'scripts/r125-saved-semantic-review.mjs'
+      - 'scripts/r125-saved-semantic-review.test.mjs'
+      - 'scripts/r125-saved-education-preflight.mjs'
+      - 'scripts/r125-saved-education-preflight.test.mjs'
+      - 'source/ai/r125-source-routes.mjs'
+      - 'source/ai/r125-education-makecode-export.mjs'
+      - 'configs/r125-education-verified-palette-v26.33.json'
+      - 'source/ai/r125-spatial-composition.mjs'
+      - 'source/ai/r125-public-approach-v4a.mjs'
+      - 'source/ai/r125-site-composition-v4b.mjs'
+      - 'scripts/r125-site-composition-v4b-fixtures.mjs'
+      - 'scripts/r125-site-composition-v4b.test.mjs'
+      - 'scripts/r125-site-composition-v4b-preview.mjs'
+      - 'source/ai/r125-void-massing-v4c.mjs'
+      - 'source/ai/r125-sculpted-spine-v4d.mjs'
+      - 'source/ai/r125-v4d-void-relief.mjs'
+      - 'source/ai/r125-v4d-civic-swept-shell.mjs'
+      - 'source/ai/r125-v4d-folded-envelope.mjs'
+      - 'source/ai/r125-v4d-authored-topology.mjs'
+      - 'source/ai/r125-v4d-envelope-integration.mjs'
+      - 'scripts/r125-v4d-envelope-integration-fixtures.mjs'
+      - 'scripts/r125-v4d-envelope-integration.test.mjs'
+      - 'scripts/r125-v4d-envelope-integration-review.mjs'
+      - 'scripts/r125-v4d-authored-topology-fixtures.mjs'
+      - 'scripts/r125-v4d-authored-topology.test.mjs'
+      - 'scripts/r125-v4d-authored-topology-review.mjs'
+      - 'scripts/r125-v4d-folded-envelope-fixture.mjs'
+      - 'scripts/r125-v4d-folded-envelope.test.mjs'
+      - 'scripts/r125-v4d-folded-envelope-review.mjs'
+      - 'scripts/r125-v4d-civic-swept-shell-fixture.mjs'
+      - 'scripts/r125-v4d-civic-swept-shell.test.mjs'
+      - 'scripts/r125-v4d-civic-swept-shell-review.mjs'
+      - 'scripts/r125-v4d-void-relief.test.mjs'
+      - 'scripts/r125-v4d-void-relief-fixture.mjs'
+      - 'scripts/r125-v4d-void-relief-review.mjs'
+      - 'scripts/r125-v4d-synthetic-fixture.mjs'
+      - 'scripts/r125-v4d-sculpted-spine.test.mjs'
+      - 'scripts/r125-v4d-source-review.mjs'
+      - 'scripts/r125-v4c-structural-fixtures.mjs'
+      - 'scripts/r125-v4c-void-massing.test.mjs'
+      - 'scripts/r125-v4c-source-review.mjs'
+      - 'scripts/r125-public-approach-v4a.test.mjs'
+      - 'source/ai/r125-expressive-envelope-v2.mjs'
+      - 'source/ai/r125-functional-facade-v3.mjs'
+      - 'scripts/r125-spatial-composition.test.mjs'
+      - 'scripts/r125-expressive-envelope-v2.test.mjs'
+      - 'scripts/r125-five-genre-real-envelope-pilot.mjs'
+      - 'scripts/r125-five-genre-real-envelope-pilot.test.mjs'
+      - 'scripts/r125-five-genre-real-functions-pilot.mjs'
+      - 'scripts/r125-five-genre-real-functions-pilot.test.mjs'
+      - 'scripts/r125-v3-failed-only-home-recovery.mjs'
+      - 'scripts/r125-v3-failed-only-home-recovery.test.mjs'
+      - 'scripts/r125-five-genre-source-art-overview.mjs'
+      - 'scripts/r125-five-genre-source-art-overview.test.mjs'
+      - 'scripts/r125-v3-export-saved-overview.mjs'
+      - 'scripts/r125-functional-facade-v3.test.mjs'
+      - 'scripts/r125-cross-genre-pilot.mjs'
+      - 'scripts/r125-cross-genre-pilot.test.mjs'
+      - 'scripts/r125-cross-genre-offline-diagnostic.mjs'
+      - 'scripts/r125-cross-genre-offline-diagnostic.test.mjs'
+      - 'scripts/r125-five-genre-source-comparison.mjs'
+      - 'scripts/r125-five-genre-source-comparison.test.mjs'
+      - 'scripts/r125-live-safe-worktree.ps1'
+      - 'scripts/r125-education-world-inventory.ps1'
+      - 'scripts/r125-education-backup-and-candidate-check.ps1'
+      - '.github/workflows/r125-upper-door-repair-cloud.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: r125-door-repair-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verified-source-repair:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run five-genre source/diagnostic and fake-model negative tests
+        run: node --test scripts/r125-cross-genre-pilot.test.mjs scripts/r125-cross-genre-offline-diagnostic.test.mjs scripts/r125-five-genre-source-comparison.test.mjs
+      - name: Prove independent whole-building authored roof profiles and usable interior air (FAKE ONLY)
+        run: node --test scripts/r125-expressive-envelope-v2.test.mjs scripts/r125-five-genre-real-envelope-pilot.test.mjs scripts/r125-functional-facade-v3.test.mjs scripts/r125-five-genre-real-functions-pilot.test.mjs scripts/r125-v3-failed-only-home-recovery.test.mjs scripts/r125-five-genre-source-art-overview.test.mjs
+      - name: Check generic model-authored whole-building spatial compositions
+        run: node --test scripts/r125-spatial-composition.test.mjs
+      - name: Verify V4A optional public court B143 and cross-genre fail-closed author intent (FAKE ONLY)
+        run: node --test scripts/r125-public-approach-v4a.test.mjs
+      - name: V4B five-site authored main-and-wing massing, court, glazing and fail-closed SOURCE (SYNTHETIC ONLY)
+        run: |
+          node --check source/ai/r125-site-composition-v4b.mjs
+          node --check scripts/r125-site-composition-v4b-preview.mjs
+          node --test scripts/r125-site-composition-v4b.test.mjs
+      - name: Generate real B143 3D gallery for five SYNTHETIC V4B sites, not real Qwen
+        run: node scripts/r125-site-composition-v4b-preview.mjs --out "$RUNNER_TEMP/v4b-synthetic-site-preview"
+      - name: Archive read-only V4B five-site 3D gallery and source proof
+        uses: actions/upload-artifact@v4
+        with:
+          name: R125-V4B-Five-Synthetic-Site-3D-SOURCE-Only
+          path: ${{ runner.temp }}/v4b-synthetic-site-preview/
+          if-no-files-found: error
+          retention-days: 14
+      - name: V4C authentic B143 and two-wide SOURCE for three different topology TEST FIXTURES
+        run: |
+          node --check source/ai/r125-void-massing-v4c.mjs
+          node --check scripts/r125-v4c-source-review.mjs
+          node --test scripts/r125-v4c-void-massing.test.mjs
+      - name: Export V4C B143 3D plus top-source comparison in one artifact
+        run: node scripts/r125-v4c-source-review.mjs --out "$RUNNER_TEMP/v4c-source-review"
+      - name: Upload synthetic V4C non-art-certified 3D and SVG evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: R125-V4C-Three-Distinct-Synthetic-Source-Topologies-ART-HOLD
+          path: ${{ runner.temp }}/v4c-source-review/
+          if-no-files-found: error
+          retention-days: 14
+      - name: V4D true B143 stepped public spine and negative author-contract SOURCE tests
+        run: |
+          node --check source/ai/r125-sculpted-spine-v4d.mjs
+          node --check scripts/r125-v4d-source-review.mjs
+          node --test scripts/r125-v4d-sculpted-spine.test.mjs
+      - name: Export V4D single SYNTHETIC AUTHOR true B143 3D and fixed real-voxel views
+        run: node scripts/r125-v4d-source-review.mjs --out "$RUNNER_TEMP/v4d-source-review"
+      - name: Upload V4D one-case SOURCE-only / human ART not reviewed
+        uses: actions/upload-artifact@v4
+        with:
+          name: R125-V4D-One-Synthetic-Author-Spine-3D-ART-HOLD
+          path: ${{ runner.temp }}/v4d-source-review/
+          if-no-files-found: error
+          retention-days: 14
+      - name: V4D second AUTHOR true open-air public transect and nonrectangular perimeter SOURCE
+        run: |
+          node --check source/ai/r125-v4d-void-relief.mjs
+          node --check scripts/r125-v4d-void-relief.test.mjs
+          node --check scripts/r125-v4d-void-relief-fixture.mjs
+          node --check scripts/r125-v4d-void-relief-review.mjs
+          node --test scripts/r125-v4d-void-relief.test.mjs
+      - name: Export original REJECT versus second V4D true B143 geometry
+        run: node scripts/r125-v4d-void-relief-review.mjs --out "$RUNNER_TEMP/v4d-void-relief-second"
+      - name: Upload V4D second SOURCE-only alternative, not ART or Qwen certification
+        uses: actions/upload-artifact@v4
+        with:
+          name: R125-V4D-Second-Synthetic-Author-Nonrectangular-Void-ART-HOLD
+          path: ${{ runner.temp }}/v4d-void-relief-second/
+          if-no-files-found: error
+          retention-days: 14
+      - name: V4D third opt-in full mass split-civic-shell physical roof and SOURCE safety
+        run: |
+          node --check source/ai/r125-v4d-civic-swept-shell.mjs
+          node --check scripts/r125-v4d-civic-swept-shell-fixture.mjs
+          node --check scripts/r125-v4d-civic-swept-shell-review.mjs
+          node --test scripts/r125-v4d-civic-swept-shell.test.mjs
+      - name: Export real B143 rejected previous versus authored twin swept shell
+        run: node scripts/r125-v4d-civic-swept-shell-review.mjs --out "$RUNNER_TEMP/v4d-civic-shell"
+      - name: Upload V4D third physical roof and public-canyon SOURCE (ART HOLD)
+        uses: actions/upload-artifact@v4
+        with:
+          name: R125-V4D-Third-Civic-Swept-Shell-True-B143-SOURCE-ART-HOLD
+          path: ${{ runner.temp }}/v4d-civic-shell/
+          if-no-files-found: error
+          retention-days: 14
+      - name: V4D fourth continuous folded envelope true B143 and fail-closed AUTHOR QA
+        run: |
+          node --check source/ai/r125-v4d-folded-envelope.mjs
+          node --check scripts/r125-v4d-folded-envelope-fixture.mjs
+          node --check scripts/r125-v4d-folded-envelope-review.mjs
+          node --test scripts/r125-v4d-folded-envelope.test.mjs
+      - name: Generate actual B143 third versus fourth continuous canopy design evidence
+        run: node scripts/r125-v4d-folded-envelope-review.mjs --out "$RUNNER_TEMP/r125-v4d-folded-shell"
+      - name: Archive V4D fourth true continuous roof 3D and cross-section, ART not reviewed
+        uses: actions/upload-artifact@v4
+        with:
+          name: R125-V4D-Fourth-Continuous-Folded-Shell-True-B143-ART-HOLD
+          path: ${{ runner.temp }}/r125-v4d-folded-shell/
+          if-no-files-found: error
+          retention-days: 14
+      - name: AUTHOR graph three independent synthetic physical SOURCE configurations and QA
+        run: |
+          node --check source/ai/r125-v4d-authored-topology.mjs
+          node --check scripts/r125-v4d-authored-topology-fixtures.mjs
+          node --check scripts/r125-v4d-authored-topology-review.mjs
+          node --test scripts/r125-v4d-authored-topology.test.mjs
+      - name: Export actual B143 three topologically different synthetic graph buildings
+        run: node scripts/r125-v4d-authored-topology-review.mjs --out "$RUNNER_TEMP/r125-v4d-authored-graphs"
+      - name: Archive actual B143 three authored graphs, art human review pending
+        uses: actions/upload-artifact@v4
+        with:
+          name: R125-V4D-Three-Independent-Authored-Spatial-Graphs-True-B143-ART-HOLD
+          path: ${{ runner.temp }}/r125-v4d-authored-graphs/
+          if-no-files-found: error
+          retention-days: 14
+      - name: R125 actual roof to wall enclosed AUTHOR cladding with four-wide real civic door and public arcade
+        run: |
+          node --check source/ai/r125-v4d-envelope-integration.mjs
+          node --check scripts/r125-v4d-envelope-integration-fixtures.mjs
+          node --check scripts/r125-v4d-envelope-integration-review.mjs
+          node --test scripts/r125-v4d-envelope-integration.test.mjs
+      - name: Export three true B143 civic facade enclosure alternative 3D views
+        run: node scripts/r125-v4d-envelope-integration-review.mjs --out "$RUNNER_TEMP/r125-v4d-envelope-facades"
+      - name: Archive three synthetic real B143 enclosed roofs and civic arcades for independent ART review
+        uses: actions/upload-artifact@v4
+        with:
+          name: R125-V4D-Three-Graph-True-Roof-Wall-Enclosure-Public-Arcade-ART-HOLD
+          path: ${{ runner.temp }}/r125-v4d-envelope-facades/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Parse real Windows PowerShell launcher before any Windows handoff
+        shell: pwsh
+        run: |
+          $tokens = $null
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile(
+            (Resolve-Path 'scripts/r125-live-safe-worktree.ps1').Path,
+            [ref]$tokens, [ref]$errors
+          ) | Out-Null
+          if ($errors.Count -gt 0) {
+            $errors | ForEach-Object { Write-Error $_.ToString() }
+            throw "R125_POWERSHELL_PARSER_FAILED"
+          }
+          $inventoryTokens = $null
+          $inventoryErrors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile(
+            (Resolve-Path 'scripts/r125-education-world-inventory.ps1').Path,
+            [ref]$inventoryTokens, [ref]$inventoryErrors
+          ) | Out-Null
+          if ($inventoryErrors.Count -gt 0) {
+            $inventoryErrors | ForEach-Object { Write-Error $_.ToString() }
+            throw "R125_WORLD_INVENTORY_POWERSHELL_PARSER_FAILED"
+          }
+          $backupTokens = $null
+          $backupErrors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile(
+            (Resolve-Path 'scripts/r125-education-backup-and-candidate-check.ps1').Path,
+            [ref]$backupTokens, [ref]$backupErrors
+          ) | Out-Null
+          if ($backupErrors.Count -gt 0) {
+            $backupErrors | ForEach-Object { Write-Error $_.ToString() }
+            throw "R125_BACKUP_AND_CANDIDATE_PARSER_FAILED"
+          }
+          Write-Host 'R125_POWERSHELL_PARSER_PASS (no model calls/world writes)'
+      - name: Test read-only world inventory on synthetic file fixture
+        shell: pwsh
+        run: |
+          $root = Join-Path $env:RUNNER_TEMP 'mab-world-inventory-fixture'
+          $world = Join-Path $root 'synthetic-world-01'
+          New-Item -ItemType Directory -Force -Path $world | Out-Null
+          [IO.File]::WriteAllText((Join-Path $world 'levelname.txt'), 'SOURCE_TEST_WORLD')
+          [IO.File]::WriteAllText((Join-Path $world 'level.dat'), 'TEST_ONLY_NOT_A_REAL_WORLD')
+          $before = (Get-FileHash (Join-Path $world 'level.dat') -Algorithm SHA256).Hash
+          $output = & pwsh -NoProfile -File 'scripts/r125-education-world-inventory.ps1' -WorldRoots $root | Out-String
+          if ($LASTEXITCODE -ne 0 -or $output -notmatch 'SOURCE_TEST_WORLD' -or
+              $output -notmatch 'zero world writes') {
+            throw "R125_WORLD_INVENTORY_TEST_FAILED"
+          }
+          $after = (Get-FileHash (Join-Path $world 'level.dat') -Algorithm SHA256).Hash
+          if ($before -ne $after) { throw "R125_WORLD_INVENTORY_CHANGED_WORLD_DATA" }
+          Write-Host 'R125_WORLD_INVENTORY_READONLY_TEST_PASS'
+      - name: Regression - Windows PowerShell 5.1 Unicode world-name gate (read only)
+        shell: pwsh
+        run: |
+          # A UTF-8/no-BOM .ps1 is decoded using the ANSI code page by Windows
+          # PowerShell 5.1. Forbid non-ASCII literals in this critical script.
+          $script = 'scripts/r125-education-backup-and-candidate-check.ps1'
+          $scriptText = [IO.File]::ReadAllText((Resolve-Path $script).Path)
+          if ($scriptText -match '[^\x00-\x7F]') {
+            throw 'R125_WINPS51_NON_ASCII_SCRIPT_RISK'
+          }
+          $fakeApp = Join-Path $env:RUNNER_TEMP 'r125-fake-localappdata'
+          $root = Join-Path $fakeApp 'Packages/Microsoft.MinecraftEducationEdition_8wekyb3d8bbwe/LocalState/games/com.mojang/minecraftWorlds'
+          $world = Join-Path $root 'FAKE_TEST_ONLY_WORLD'
+          New-Item -ItemType Directory -Force -Path $world | Out-Null
+          $expectedName = 'minecraftaibuildertest ' +
+            [char]0x306e + [char]0x30b3 + [char]0x30d4 + [char]0x30fc
+          [IO.File]::WriteAllText((Join-Path $world 'levelname.txt'), $expectedName, [Text.Encoding]::UTF8)
+          [IO.File]::WriteAllBytes((Join-Path $world 'level.dat'), [byte[]](1..128))
+          $before = (Get-FileHash (Join-Path $world 'level.dat') -Algorithm SHA256).Hash
+          $env:LOCALAPPDATA = $fakeApp
+          $missingBackup = Join-Path $fakeApp 'intentionally-absent.mcworld'
+          # Expected fail-closed gate: use a PowerShell catch instead of
+          # a native child pwsh exit=1, which GitHub's pwsh shell treats as
+          # an unhandled native-command error before an assertion can run.
+          $observed = $null
+          try {
+            & $script -BackupFile $missingBackup -NoFolderOpen | Out-Null
+          } catch {
+            $observed = $_.Exception.Message
+          }
+          if ($observed -cne 'HOLD_R125_WORLD_GATE_EXPORTED_BACKUP_NOT_FOUND') {
+            throw ('R125_WINPS51_UNICODE_WORLD_NAME_REGRESSION: ' + $observed)
+          }
+          $after = (Get-FileHash (Join-Path $world 'level.dat') -Algorithm SHA256).Hash
+          if ($before -ne $after) { throw 'R125_WORLD_GATE_TOUCHED_TEST_WORLD' }
+          Write-Host 'R125_WINPS51_ASCII_SOURCE_UNICODE_NAME_READONLY_PASS'
+      - name: Test intact old Qwen 2620 reference and opt-in C repair
+        run: |
+          node --check source/ai/r125-architecture-plan.mjs
+          node --check scripts/r125-upper-door-repair-study.mjs
+          node --check scripts/r125-roof-interior-study.mjs
+          node --check scripts/r125-semantic-pilot.mjs
+          node --check scripts/r125-saved-semantic-review.mjs
+          node --check scripts/r125-saved-education-preflight.mjs
+          node --test scripts/r125-expression-gallery.test.mjs scripts/r125-upper-door-repair-study.test.mjs scripts/r125-roof-interior-study.test.mjs scripts/r125-semantic-pilot.test.mjs scripts/r125-saved-semantic-review.test.mjs scripts/r125-saved-education-preflight.test.mjs
+      - name: Real-source 2-width component comparison, no model/world
+        run: |
+          node scripts/r125-upper-door-repair-study.mjs --out "$RUNNER_TEMP/r125-door-repair"
+          node scripts/r125-roof-interior-study.mjs --out "$RUNNER_TEMP/r125-door-repair/roof-interior"
+      - name: Report SOURCE proof without claiming actual Minecraft walking
+        run: |
+          echo '## R125 real Qwen saved geometry — opt-in HOST repair' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Original C: 2 disconnected floor regions at standing Y7; separate repaired C: required one region.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Raised sawtooth roof: source-only comparison across synthetic residential, retail and lab programs; human art NOT REVIEWED.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Research only, original Qwen and A–E unchanged, ART HOLD, Minecraft walking NOT TESTED, WorldWrites0, 9 BLOCKED.' >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: R125-C-Upper-Floor-Verified-Repair-Study
+          path: ${{ runner.temp }}/r125-door-repair/
+          if-no-files-found: error
+          retention-days: 21

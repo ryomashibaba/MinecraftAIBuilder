@@ -244,6 +244,19 @@ export async function generateModelDirectedArchitecture({
   }
  }
  yes(best!==null,'NO_COMPILED_ARCHITECTURE');
+ // Retain the conservative primary HOLD and report every independent cause.
+ const independentHoldReasons=[];
+ if(!bestProof.allDeclaredPlanAnchorsMatchSource)
+  independentHoldReasons.push('PLAN_ANCHORS_NOT_MATCHED');
+ if(bestHigh>0)independentHoldReasons.push('HIGH_RISK_SOURCE_TOPOLOGY');
+ if(bestCirculation.evaluatedSameElevationAnchorPairs>0&&
+    !bestCirculation.allDeclaredSameElevationPairsConnected)
+  independentHoldReasons.push('DISCONNECTED_SAME_ELEVATION_PUBLIC_ROUTE');
+ if(bestSteps.distinctDeclaredFloorElevations>1&&
+    !bestSteps.declaredSourceStepChainsSupported)
+  independentHoldReasons.push('UNVERIFIED_VERTICAL_SOURCE_TRANSFER');
+ if(bestCirculation.evaluatedSameElevationAnchorPairs===0)
+  independentHoldReasons.push('PUBLIC_CIRCULATION_NOT_TESTED');
  return {plan,design:structuredClone(best.design),compiled:best.compiled,
   report:{schema:RESULT_SCHEMA,userPromptSha256:H(prompt),
    planSha256:H(plan),sourceSha256:best.compiled.sourceSha256,
@@ -260,6 +273,8 @@ export async function generateModelDirectedArchitecture({
     bestCirculation.evaluatedSameElevationAnchorPairs===0?
     'HOLD_SOURCE_CIRCULATION_UNTESTED':
     'SOURCE_PLAN_ANCHORS_PASS_HUMAN_REVIEW_REQUIRED',
+   independentHoldReasons,
+   allExplicitSourceHoldsCleared:independentHoldReasons.length===0,
    planProof:bestProof,
    circulationProof:bestCirculation,
    multiLevelSourceProof:bestSteps,

@@ -1,0 +1,29 @@
+name: R29 Evidence Coverage Offline
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'source/ai/b198zr29-evidence-coverage-audit.mjs'
+      - 'scripts/b198zr29-evidence-coverage-audit.test.mjs'
+      - '.github/workflows/r29-evidence-coverage-offline.yml'
+  pull_request:
+    paths:
+      - 'source/ai/b198zr29-evidence-coverage-audit.mjs'
+      - 'scripts/b198zr29-evidence-coverage-audit.test.mjs'
+      - '.github/workflows/r29-evidence-coverage-offline.yml'
+permissions:
+  contents: read
+jobs:
+  r29-no-model-no-world:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node --test scripts/b198zr29-evidence-coverage-audit.test.mjs

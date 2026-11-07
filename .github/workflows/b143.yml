@@ -55,6 +55,9 @@ on:
       - 'scripts/prepare-b166-baseline.mjs'
       - 'scripts/prepare-b167-baseline.mjs'
       - 'scripts/qa-b145-browser.mjs'
+      - 'scripts/r125-expression-gallery.mjs'
+      - 'scripts/r125-expression-gallery.test.mjs'
+      - 'scripts/fixtures/r125-qwen14b-residential-2024a.json'
       - '.github/workflows/b143.yml'
   pull_request:
     paths:
@@ -107,6 +110,9 @@ on:
       - 'scripts/prepare-b166-baseline.mjs'
       - 'scripts/prepare-b167-baseline.mjs'
       - 'scripts/qa-b145-browser.mjs'
+      - 'scripts/r125-expression-gallery.mjs'
+      - 'scripts/r125-expression-gallery.test.mjs'
+      - 'scripts/fixtures/r125-qwen14b-residential-2024a.json'
       - '.github/workflows/b143.yml'
   workflow_dispatch:
 permissions:
@@ -483,6 +489,31 @@ jobs:
              v.status!=='PASS'||v.constructionApproved!==false||v.worldWrites!==0)
             throw Error('B167_CONSTRUCTION_OR_INTEGRITY_HOLD');
           console.log('B167_FULL_JOURNEY_1X1_SOURCE_HOLD_PASS');
+          "
+      - name: Offline public Qwen original — five real B143 mobile review scenes, no remote model
+        run: |
+          node --test scripts/r125-expression-gallery.test.mjs
+          # CI scratch output only, never touches checked-in model original.
+          rm -rf b142-site-output/qwen-reference
+          node scripts/r125-expression-gallery.mjs --out b142-site-output/qwen-reference
+          node --input-type=module -e "
+          import fs from 'node:fs';
+          const d='b142-site-output/qwen-reference/';
+          const a=JSON.parse(fs.readFileSync(d+'R125_EXPRESSION_COMPARISON.json','utf8'));
+          const html=fs.readFileSync(d+'index.html','utf8');
+          if(a.schema!=='r125-expression-visual-comparison-v1'||
+             a.exactOriginalPlanSha256!=='46aed429e795f2622cd8c49d8eb8f1153af20d5d958abf2f5f99020e909ce271'||
+             a.scenes.length!==5||a.originalPlanNeverEdited!==true||
+             a.scenes[0].provenance!=='ACTUAL_QWEN14B_ORIGINAL_SEMANTIC_PLAN'||
+             !a.scenes.slice(1).every(x=>x.provenance!=='ACTUAL_QWEN14B_ORIGINAL_SEMANTIC_PLAN')||
+             a.worldWrites!==0||a.constructionApproved!==false||
+             a.gates.length!==9||a.gates.some(x=>x!=='BLOCKED')||
+             !html.includes('id=\\\"mobileZoomIn\\\"')||
+             !html.includes('id=\\\"mobileCut\\\"')||
+             !html.includes('minecraftaibuilder-b143-gallery-v1')||
+             html.includes('fetch('))
+            throw Error('R125_PUBLIC_QWEN_MOBILE_PREVIEW_HOLD');
+          console.log('GITHUB_ONLY_PREVIEW_SOURCE_PASS 5 scenes, Qwen model requests 0, world writes 0');
           "
       - name: Evidence summary
         run: |

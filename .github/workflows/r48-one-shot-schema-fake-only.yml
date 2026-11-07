@@ -1,0 +1,34 @@
+name: R48 Fresh Authorized Native Schema Qwen — FAKE Only
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'scripts/b198zr48-consented-schema-qwen-once.mjs'
+      - 'scripts/b198zr48-consented-schema-qwen-once.test.mjs'
+      - 'source/ai/b198zr47-json-schema-format-gate.mjs'
+      - 'source/ai/b198s-native-ollama-source.mjs'
+      - '.github/workflows/r48-one-shot-schema-fake-only.yml'
+  pull_request:
+    paths:
+      - 'scripts/b198zr48-consented-schema-qwen-once.mjs'
+      - 'scripts/b198zr48-consented-schema-qwen-once.test.mjs'
+      - 'source/ai/b198zr47-json-schema-format-gate.mjs'
+      - 'source/ai/b198s-native-ollama-source.mjs'
+      - '.github/workflows/r48-one-shot-schema-fake-only.yml'
+permissions:
+  contents: read
+jobs:
+  pinned-schema-consent-fake:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: R48 one-call explicit consent fake-local-provider and strict R47/R46 regressions
+        run: node --test scripts/b198zr48-consented-schema-qwen-once.test.mjs scripts/b198zr47-json-schema-format-gate.test.mjs scripts/b198zr46-consented-single-qwen.test.mjs

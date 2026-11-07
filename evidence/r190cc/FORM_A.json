@@ -1,0 +1,286 @@
+{
+  "schema": "minecraftaibuilder-r190cc-freeform-3d-boolean-architecture-v1",
+  "originalBriefSha256": "bbd44cc9f28234055601b4055466e2f3564e7e4565d408432de4c4fab0aa277a",
+  "bounds": {
+    "width": 104,
+    "height": 96,
+    "depth": 72
+  },
+  "shellThickness": 2,
+  "floorYs": [
+    6,
+    12,
+    18,
+    24,
+    30,
+    36,
+    42,
+    48,
+    54,
+    60,
+    66,
+    72,
+    78,
+    84,
+    90
+  ],
+  "floorMaterial": 1,
+  "routeRef": {
+    "originalRawSha256": "041ac8905c697cb3eb347f8af3300d1ab470657edb8c841944eafdab7e8df353",
+    "source": "evidence/r190cb/RIFT_LANTERN.json",
+    "contract": "PRESERVE_AUTHOR_NODES_NO_AUTOMATIC_ROUTE_GENERATION"
+  },
+  "designOnly": true,
+  "id": "r190cc-a-sheared-skylight-basin",
+  "title": "SHEARED SKYLIGHT BASIN — asymmetric three-dimensional inhabited canyon",
+  "designIntent": {
+    "spatialExperience": "A generous street-concourse base rises into a single sheared load-bearing silhouette. Its hollow vertical daylight canyon and detached-looking but genuinely fused sky crown create changing scale from ground, side and skyline.",
+    "silhouette": "The section is not a sequence of 2D octagonal profiles; physically rotated volumes jointly form a diagonal wing, irregularly bulging tower core and off-axis massive public crown. Cuts should open large volumes in more than one viewpoint.",
+    "failureToAvoid": "Reject if dense horizontal floor bands, a blocky taper, hidden voids or thin tacked-on ribbons dominate the skyline. Interior office floor proxies, protected air and the already-author-written circulation must not be fabricated."
+  },
+  "solids": [
+    {
+      "id": "urban-lantern-underbody",
+      "center": [
+        47,
+        15,
+        38
+      ],
+      "radii": [
+        35,
+        22,
+        27
+      ],
+      "rotate": [
+        6,
+        0,
+        11
+      ],
+      "power": 3.2,
+      "material": 0
+    },
+    {
+      "id": "diagonal-living-spine",
+      "center": [
+        51,
+        50,
+        37
+      ],
+      "radii": [
+        23,
+        57,
+        22
+      ],
+      "rotate": [
+        14,
+        0,
+        -13
+      ],
+      "power": 2.5,
+      "material": 2
+    },
+    {
+      "id": "west-leaning-canyon-rib",
+      "center": [
+        31,
+        59,
+        27
+      ],
+      "radii": [
+        14,
+        39,
+        13
+      ],
+      "rotate": [
+        -17,
+        3,
+        -28
+      ],
+      "power": 2.4,
+      "material": 1
+    },
+    {
+      "id": "upper-sky-restaurant-canopy",
+      "center": [
+        70,
+        84,
+        39
+      ],
+      "radii": [
+        33,
+        15,
+        21
+      ],
+      "rotate": [
+        14,
+        -12,
+        11
+      ],
+      "power": 2.7,
+      "material": 3
+    },
+    {
+      "id": "northeast-rear-buttress",
+      "center": [
+        76,
+        43,
+        53
+      ],
+      "radii": [
+        11,
+        34,
+        13
+      ],
+      "rotate": [
+        -23,
+        15,
+        18
+      ],
+      "power": 2.5,
+      "material": 2
+    }
+  ],
+  "cuts": [
+    {
+      "id": "long-front-diagonal-daylight-gash",
+      "center": [
+        43,
+        50,
+        11
+      ],
+      "radii": [
+        18,
+        41,
+        21
+      ],
+      "rotate": [
+        18,
+        -8,
+        20
+      ],
+      "power": 2.4,
+      "material": 0
+    },
+    {
+      "id": "east-sky-shaft-opening",
+      "center": [
+        75,
+        54,
+        14
+      ],
+      "radii": [
+        18,
+        28,
+        21
+      ],
+      "rotate": [
+        -24,
+        0,
+        -22
+      ],
+      "power": 2.3,
+      "material": 0
+    },
+    {
+      "id": "urban-entry-cavern",
+      "center": [
+        44,
+        13,
+        7
+      ],
+      "radii": [
+        22,
+        13,
+        23
+      ],
+      "rotate": [
+        -8,
+        0,
+        9
+      ],
+      "power": 2.8,
+      "material": 0
+    },
+    {
+      "id": "crown-public-window",
+      "center": [
+        54,
+        84,
+        16
+      ],
+      "radii": [
+        19,
+        12,
+        23
+      ],
+      "rotate": [
+        -20,
+        9,
+        -14
+      ],
+      "power": 2.7,
+      "material": 0
+    },
+    {
+      "id": "rear-high-light-slit",
+      "center": [
+        79,
+        67,
+        65
+      ],
+      "radii": [
+        23,
+        23,
+        18
+      ],
+      "rotate": [
+        18,
+        0,
+        21
+      ],
+      "power": 2.6,
+      "material": 0
+    }
+  ],
+  "protectedVoids": [
+    {
+      "id": "ground-entry-air",
+      "origin": [
+        39,
+        11,
+        2
+      ],
+      "size": [
+        6,
+        5,
+        6
+      ]
+    },
+    {
+      "id": "east-sky-opening-air",
+      "origin": [
+        78,
+        52,
+        4
+      ],
+      "size": [
+        5,
+        6,
+        6
+      ]
+    },
+    {
+      "id": "crown-daylight-air",
+      "origin": [
+        47,
+        82,
+        3
+      ],
+      "size": [
+        5,
+        5,
+        6
+      ]
+    }
+  ]
+}

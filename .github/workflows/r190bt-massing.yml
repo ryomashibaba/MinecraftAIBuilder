@@ -1,0 +1,40 @@
+name: R190-BT architectural massing V3 A-B source QA offline
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'evidence/r190bt/**'
+      - 'scripts/r190bt-massing-study.mjs'
+      - '.github/workflows/r190bt-massing.yml'
+  pull_request:
+    paths:
+      - 'evidence/r190bt/**'
+      - 'scripts/r190bt-massing-study.mjs'
+      - '.github/workflows/r190bt-massing.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  physical-source-comparison:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Model-free exact geometry - spaces - routes - projections
+        env:
+          NODE_OPTIONS: --import=./scripts/r190bo-deny-network.mjs
+        run: node scripts/r190bt-massing-study.mjs --out bt-ci-evidence
+      - name: Save original V3 files, all 3D evidence and HOLD traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: R190BT-MASSING-OFFLINE-${{ matrix.os }}
+          path: bt-ci-evidence
+          if-no-files-found: warn

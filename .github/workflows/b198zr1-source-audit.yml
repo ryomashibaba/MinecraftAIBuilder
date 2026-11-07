@@ -1,0 +1,163 @@
+name: B198Z-R1 source-only architectural verification
+on:
+  push:
+    branches:
+      - feature/b198zr1-protected-architectural-revision
+    paths:
+      - 'evidence/b198zr1/**'
+      - 'evidence/b198zr2/**'
+      - 'scripts/b198zr1-strict-source-audit.mjs'
+      - 'source/ai/b198zr1-spatial-claims.mjs'
+      - 'source/ai/b198zr2-generic-quality-guide.mjs'
+      - 'source/ai/b198s-native-ollama-source.mjs'
+      - 'scripts/b198zr2-strict-architecture-audit.mjs'
+      - 'scripts/b198zr3-functional-review.test.mjs'
+      - 'scripts/b198zr3-offline-review.mjs'
+      - 'source/ai/b198zr3-functional-review-contract.mjs'
+      - 'evidence/b198zr3/**'
+      - 'source/ai/b198zr4-planned-source.mjs'
+      - 'scripts/b198zr4-planned-source.test.mjs'
+      - 'scripts/b198zr4-offline-replay.mjs'
+      - 'scripts/b198zr5-comparison.test.mjs'
+      - 'scripts/b198zr5-compare-captures.mjs'
+      - 'source/ai/b198zr5-model-comparison.mjs'
+      - 'scripts/b198zr6-authorized-single-r4-capture.mjs'
+      - 'scripts/b198zr6-authorized-single-r4-capture.test.mjs'
+      - 'scripts/RUN_B198ZR6_ONLY_AFTER_APPROVAL.cmd'
+      - 'source/ai/b198g-local-model-adapter.mjs'
+      - 'docs/B198ZR6_SAFE_SINGLE_CAPTURE_JA.md'
+      - 'scripts/b198zr7-offline-visual-review.mjs'
+      - 'docs/B198ZR7_OFFLINE_VISUAL_REVIEW_JA.md'
+      - 'source/ai/b198zr8-read-only-model-preflight.mjs'
+      - 'scripts/b198zr8-windows-launcher-smoke.test.mjs'
+      - 'scripts/b198zr8-read-only-preflight.test.mjs'
+      - 'docs/B198ZR8_PLAIN_JAPANESE_APPROVAL_AND_READINESS_JA.md'
+      - 'docs/B198ZR8_PRE_EXECUTION_BUG_AUDIT_20261019_JA.md'
+      - 'scripts/b198zr9-compact-staircase.test.mjs'
+      - 'scripts/b198zr10-generic-repeat.test.mjs'
+      - 'source/ai/b198zr11-compact-r4-output.mjs'
+      - 'scripts/b198zr11-output-budget.test.mjs'
+      - 'docs/B198ZR11_COMPACT_COMPLETE_JSON_JA.md'
+      - 'source/ai/b198zr13-quality-decision.mjs'
+      - 'scripts/b198zr13-review-saved-capture.mjs'
+      - 'scripts/b198zr13-quality-decision.test.mjs'
+      - 'docs/B198ZR13_CAPTURE_QUALITY_GATE_JA.md'
+      - 'source/ai/b198zr15-evidence-quality-target.mjs'
+      - 'scripts/b198zr15-compare-saved-reviews.mjs'
+      - 'scripts/b198zr15-evidence-quality-target.test.mjs'
+      - 'docs/B198ZR15_ARCHITECTURE_SUCCESS_CRITERIA_JA.md'
+      - 'docs/B198ZR10_GENERIC_REPEAT_JA.md'
+      - 'source/ai/b143-building-dsl.mjs'
+      - 'docs/B198ZR9_COMPACT_SOURCE_STAIRS_JA.md'
+      - 'evidence/b198zr5/**'
+      - 'docs/B198ZR5_COMPARISON_PROTOCOL_JA.md'
+      - 'docs/B198ZR4_SINGLE_PASS_MODEL_SPATIAL_PLANNING_JA.md'
+      - 'scripts/b198s-native-source.test.mjs'
+      - 'docs/B198ZR1_PROTECTED_ARCHITECTURAL_REVISION_JA.md'
+      - '.github/workflows/b198zr1-source-audit.yml'
+  pull_request:
+    paths:
+      - 'evidence/b198zr1/**'
+      - 'evidence/b198zr2/**'
+      - 'scripts/b198zr1-strict-source-audit.mjs'
+      - 'source/ai/b198zr1-spatial-claims.mjs'
+      - 'source/ai/b198zr2-generic-quality-guide.mjs'
+      - 'source/ai/b198s-native-ollama-source.mjs'
+      - 'scripts/b198zr2-strict-architecture-audit.mjs'
+      - 'scripts/b198zr3-functional-review.test.mjs'
+      - 'scripts/b198zr3-offline-review.mjs'
+      - 'source/ai/b198zr3-functional-review-contract.mjs'
+      - 'evidence/b198zr3/**'
+      - 'source/ai/b198zr4-planned-source.mjs'
+      - 'scripts/b198zr4-planned-source.test.mjs'
+      - 'scripts/b198zr4-offline-replay.mjs'
+      - 'scripts/b198zr5-comparison.test.mjs'
+      - 'scripts/b198zr5-compare-captures.mjs'
+      - 'source/ai/b198zr5-model-comparison.mjs'
+      - 'scripts/b198zr6-authorized-single-r4-capture.mjs'
+      - 'scripts/b198zr6-authorized-single-r4-capture.test.mjs'
+      - 'scripts/RUN_B198ZR6_ONLY_AFTER_APPROVAL.cmd'
+      - 'source/ai/b198g-local-model-adapter.mjs'
+      - 'docs/B198ZR6_SAFE_SINGLE_CAPTURE_JA.md'
+      - 'scripts/b198zr7-offline-visual-review.mjs'
+      - 'docs/B198ZR7_OFFLINE_VISUAL_REVIEW_JA.md'
+      - 'source/ai/b198zr8-read-only-model-preflight.mjs'
+      - 'scripts/b198zr8-windows-launcher-smoke.test.mjs'
+      - 'scripts/b198zr8-read-only-preflight.test.mjs'
+      - 'docs/B198ZR8_PLAIN_JAPANESE_APPROVAL_AND_READINESS_JA.md'
+      - 'docs/B198ZR8_PRE_EXECUTION_BUG_AUDIT_20261019_JA.md'
+      - 'scripts/b198zr9-compact-staircase.test.mjs'
+      - 'scripts/b198zr10-generic-repeat.test.mjs'
+      - 'source/ai/b198zr11-compact-r4-output.mjs'
+      - 'scripts/b198zr11-output-budget.test.mjs'
+      - 'docs/B198ZR11_COMPACT_COMPLETE_JSON_JA.md'
+      - 'source/ai/b198zr13-quality-decision.mjs'
+      - 'scripts/b198zr13-review-saved-capture.mjs'
+      - 'scripts/b198zr13-quality-decision.test.mjs'
+      - 'docs/B198ZR13_CAPTURE_QUALITY_GATE_JA.md'
+      - 'source/ai/b198zr15-evidence-quality-target.mjs'
+      - 'scripts/b198zr15-compare-saved-reviews.mjs'
+      - 'scripts/b198zr15-evidence-quality-target.test.mjs'
+      - 'docs/B198ZR15_ARCHITECTURE_SUCCESS_CRITERIA_JA.md'
+      - 'docs/B198ZR10_GENERIC_REPEAT_JA.md'
+      - 'source/ai/b143-building-dsl.mjs'
+      - 'docs/B198ZR9_COMPACT_SOURCE_STAIRS_JA.md'
+      - 'evidence/b198zr5/**'
+      - 'docs/B198ZR5_COMPARISON_PROTOCOL_JA.md'
+      - 'docs/B198ZR4_SINGLE_PASS_MODEL_SPATIAL_PLANNING_JA.md'
+      - 'scripts/b198s-native-source.test.mjs'
+      - 'docs/B198ZR1_PROTECTED_ARCHITECTURAL_REVISION_JA.md'
+      - '.github/workflows/b198zr1-source-audit.yml'
+permissions:
+  contents: read
+jobs:
+  strict-b143-and-abstract-walking:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Strict B143 design compiler and discrete occupancy review
+        run: node scripts/b198zr1-strict-source-audit.mjs
+      - name: B198Z-R2 genuine compiler and negative architecture regressions
+        run: node scripts/b198zr2-strict-architecture-audit.mjs
+      - name: Verify native model-transport fixture and quality-guide integration
+        run: node --test scripts/b198s-native-source.test.mjs
+      - name: Generic functional contract positive and adversarial regressions
+        run: node --test scripts/b198zr3-functional-review.test.mjs
+      - name: One-pass opt-in model-authored spatial program fixture + independent HOLD
+        run: node --test scripts/b198zr4-planned-source.test.mjs
+      - name: R5 real-evidence comparability and no-false-winner regressions
+        run: node --test scripts/b198zr5-comparison.test.mjs
+      - name: R6 authorization gate and one native HTTP capture (fixture only)
+        run: node --test scripts/b198zr6-authorized-single-r4-capture.test.mjs
+      - name: R8 exact-model read-only preflight and timeout error regressions
+        run: node --test scripts/b198zr8-read-only-preflight.test.mjs
+      - name: R9 compact stairs source parity, abstract functional route and legacy source proofs
+        run: node --test scripts/b198zr9-compact-staircase.test.mjs
+      - name: R10 generic repetition exact voxel parity, negative tests, quotas, independent route and legacy SHA
+        run: node --test scripts/b198zr10-generic-repeat.test.mjs
+      - name: R11 opt-in concise complete-JSON prompt and immutable raw fixture tests
+        run: node --test scripts/b198zr11-output-budget.test.mjs
+      - name: R13 independent architecture quality decision and human-review provenance HOLD
+        run: node --test scripts/b198zr13-quality-decision.test.mjs
+      - name: R15 original-versus-next-real-evidence comparison and pinned B198W human rubric test (no Qwen)
+        run: node --test scripts/b198zr15-evidence-quality-target.test.mjs
+      - name: End-to-end offline contract report (non-Minecraft)
+        run: |
+          node scripts/b198zr3-offline-review.mjs --design evidence/b198zr2/assistant-revised-library-r2.json --contract evidence/b198zr3/r2-functional-review-contract.json --out "$RUNNER_TEMP/b198zr3-offline-report.json"
+          test -s "$RUNNER_TEMP/b198zr3-offline-report.json"
+
+  actual-windows-command-and-zip-fixture:
+    runs-on: windows-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Real Windows CMD approval and ZIP packaging with fake localhost Ollama only
+        shell: pwsh
+        run: node --test scripts/b198zr8-windows-launcher-smoke.test.mjs

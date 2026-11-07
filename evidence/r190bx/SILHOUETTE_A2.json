@@ -1,0 +1,421 @@
+{
+  "schema": "minecraftaibuilder-b143-building-dsl-v1",
+  "brief": "BM高層ビルの独立彫刻先行研究。1・2F公共大広間／オフィス／頂部眺望レストランと大空洞の空間構成を形態から検討。これは用途・階段の機能的成立を証明する完成設計ではない。",
+  "bounds": {
+    "width": 90,
+    "height": 96,
+    "depth": 54
+  },
+  "designOnly": true,
+  "id": "r190bx-severed-sky-civic-shells-a2",
+  "title": "R190-BX A2 | SEVERED SKY — corrected independent main-spine grounding",
+  "elements": [
+    {
+      "id": "public-low-west-shell",
+      "shape": "box",
+      "mode": "add",
+      "material": "stone",
+      "origin": [
+        5,
+        0,
+        7
+      ],
+      "size": [
+        31,
+        17,
+        41
+      ],
+      "shell": 1
+    },
+    {
+      "id": "public-low-east-shell",
+      "shape": "box",
+      "mode": "add",
+      "material": "concrete",
+      "origin": [
+        55,
+        0,
+        9
+      ],
+      "size": [
+        30,
+        16,
+        36
+      ],
+      "shell": 1
+    },
+    {
+      "id": "west-urban-open-door",
+      "shape": "box",
+      "mode": "cut",
+      "origin": [
+        9,
+        1,
+        7
+      ],
+      "size": [
+        10,
+        8,
+        2
+      ]
+    },
+    {
+      "id": "east-urban-open-door",
+      "shape": "box",
+      "mode": "cut",
+      "origin": [
+        66,
+        1,
+        9
+      ],
+      "size": [
+        9,
+        7,
+        2
+      ]
+    },
+    {
+      "id": "severed-west-lower-sail",
+      "shape": "ellipsoid",
+      "mode": "add",
+      "material": "metal",
+      "center": [
+        19,
+        35,
+        27
+      ],
+      "radii": [
+        15,
+        27,
+        18
+      ],
+      "shell": 2
+    },
+    {
+      "id": "severed-west-upper-sail",
+      "shape": "ellipsoid",
+      "mode": "add",
+      "material": "glass",
+      "center": [
+        25,
+        67,
+        27
+      ],
+      "radii": [
+        14,
+        25,
+        17
+      ],
+      "shell": 2
+    },
+    {
+      "id": "severed-east-lower-sail",
+      "shape": "ellipsoid",
+      "mode": "add",
+      "material": "glass",
+      "center": [
+        73,
+        32,
+        25
+      ],
+      "radii": [
+        12,
+        25,
+        16
+      ],
+      "shell": 2
+    },
+    {
+      "id": "severed-east-upper-sail",
+      "shape": "ellipsoid",
+      "mode": "add",
+      "material": "concrete",
+      "center": [
+        66,
+        67,
+        25
+      ],
+      "radii": [
+        19,
+        25,
+        18
+      ],
+      "shell": 2
+    },
+    {
+      "id": "west-giant-urban-porthole",
+      "shape": "box",
+      "mode": "cut",
+      "origin": [
+        10,
+        16,
+        7
+      ],
+      "size": [
+        12,
+        28,
+        5
+      ]
+    },
+    {
+      "id": "east-giant-urban-porthole",
+      "shape": "box",
+      "mode": "cut",
+      "origin": [
+        68,
+        22,
+        8
+      ],
+      "size": [
+        9,
+        25,
+        4
+      ]
+    },
+    {
+      "id": "civic-west-suspended-floor",
+      "shape": "ellipsoid",
+      "mode": "add",
+      "material": "stone",
+      "center": [
+        21,
+        17,
+        27
+      ],
+      "radii": [
+        11,
+        1,
+        14
+      ]
+    },
+    {
+      "id": "civic-east-suspended-floor",
+      "shape": "ellipsoid",
+      "mode": "add",
+      "material": "stone",
+      "center": [
+        71,
+        16,
+        25
+      ],
+      "radii": [
+        10,
+        1,
+        13
+      ]
+    },
+    {
+      "id": "work-garden-west-1",
+      "shape": "ellipsoid",
+      "mode": "add",
+      "material": "wood",
+      "center": [
+        19,
+        38,
+        26
+      ],
+      "radii": [
+        11,
+        1,
+        13
+      ]
+    },
+    {
+      "id": "work-garden-east-1",
+      "shape": "ellipsoid",
+      "mode": "add",
+      "material": "wood",
+      "center": [
+        72,
+        40,
+        25
+      ],
+      "radii": [
+        10,
+        1,
+        13
+      ]
+    },
+    {
+      "id": "work-garden-west-2",
+      "shape": "ellipsoid",
+      "mode": "add",
+      "material": "wood",
+      "center": [
+        25,
+        61,
+        27
+      ],
+      "radii": [
+        10,
+        1,
+        12
+      ]
+    },
+    {
+      "id": "work-garden-east-2",
+      "shape": "ellipsoid",
+      "mode": "add",
+      "material": "wood",
+      "center": [
+        65,
+        63,
+        25
+      ],
+      "radii": [
+        11,
+        1,
+        13
+      ]
+    },
+    {
+      "id": "sky-restaurant-lens",
+      "shape": "ellipsoid",
+      "mode": "add",
+      "material": "glass",
+      "center": [
+        65,
+        88,
+        25
+      ],
+      "radii": [
+        15,
+        4,
+        16
+      ],
+      "shell": 1
+    },
+    {
+      "id": "west-inclined-front-spine",
+      "shape": "beam",
+      "mode": "add",
+      "material": "metal",
+      "start": [
+        6,
+        3,
+        5
+      ],
+      "end": [
+        33,
+        89,
+        5
+      ],
+      "thickness": 2
+    },
+    {
+      "id": "east-inclined-front-spine",
+      "shape": "beam",
+      "mode": "add",
+      "material": "metal",
+      "start": [
+        84,
+        3,
+        6
+      ],
+      "end": [
+        58,
+        89,
+        6
+      ],
+      "thickness": 2
+    },
+    {
+      "id": "west-back-sloping-spine",
+      "shape": "beam",
+      "mode": "add",
+      "material": "accent",
+      "start": [
+        5,
+        1,
+        49
+      ],
+      "end": [
+        31,
+        86,
+        49
+      ],
+      "thickness": 1
+    },
+    {
+      "id": "east-back-sloping-spine",
+      "shape": "beam",
+      "mode": "add",
+      "material": "accent",
+      "start": [
+        84,
+        1,
+        49
+      ],
+      "end": [
+        59,
+        86,
+        49
+      ],
+      "thickness": 1
+    },
+    {
+      "id": "civic-canyon-walk",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        34,
+        16,
+        25
+      ],
+      "size": [
+        23,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "sky-canyon-observatory",
+      "shape": "box",
+      "mode": "add",
+      "material": "wood",
+      "origin": [
+        35,
+        60,
+        25
+      ],
+      "size": [
+        22,
+        1,
+        4
+      ]
+    },
+    {
+      "id": "straddling-dining-vault",
+      "shape": "beam",
+      "mode": "add",
+      "material": "metal",
+      "start": [
+        32,
+        91,
+        46
+      ],
+      "end": [
+        57,
+        91,
+        46
+      ],
+      "thickness": 1
+    },
+    {
+      "id": "roof-south-oculus",
+      "shape": "box",
+      "mode": "cut",
+      "origin": [
+        62,
+        90,
+        27
+      ],
+      "size": [
+        8,
+        3,
+        8
+      ]
+    }
+  ]
+}

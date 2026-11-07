@@ -1,0 +1,30 @@
+name: R49 Exact Local Bounds and Self-Contradictory Paths — OFFLINE
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'source/ai/b198zr49-global-source-consistency.mjs'
+      - 'scripts/b198zr49-global-source-consistency.test.mjs'
+      - '.github/workflows/r49-global-source-consistency-offline.yml'
+  pull_request:
+    paths:
+      - 'source/ai/b198zr49-global-source-consistency.mjs'
+      - 'scripts/b198zr49-global-source-consistency.test.mjs'
+      - '.github/workflows/r49-global-source-consistency-offline.yml'
+permissions:
+  contents: read
+jobs:
+  global-consistency-read-only:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Strict read-only source-envelope and impossible-path diagnostics
+        run: node --test scripts/b198zr49-global-source-consistency.test.mjs scripts/b198zr47-json-schema-format-gate.test.mjs

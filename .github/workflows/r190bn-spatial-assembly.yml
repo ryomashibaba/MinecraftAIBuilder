@@ -1,0 +1,41 @@
+name: R190-BN Spatial Assembly and Capacity — OFFLINE ONLY
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'source/ai/r190bn-*'
+      - 'scripts/r190bn-*'
+      - 'scripts/fixtures/r190bn-*'
+      - '.github/workflows/r190bn-spatial-assembly.yml'
+  pull_request:
+    paths:
+      - 'source/ai/r190bn-*'
+      - 'scripts/r190bn-*'
+      - 'scripts/fixtures/r190bn-*'
+      - '.github/workflows/r190bn-spatial-assembly.yml'
+permissions:
+  contents: read
+jobs:
+  offline-source:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check source/ai/r190bn-spatial-assembly.mjs
+      - name: Spatial conversion, capacity and original BM evidence
+        run: node --test scripts/r190bn-spatial-assembly.test.mjs
+      - name: Existing BF BE BG BJ BK BL safety and provenance regressions
+        run: node --test scripts/r190bf-controlled-pair.test.mjs scripts/r190be-saved-design-comparison.test.mjs scripts/r190bg-source-anchored-review.test.mjs scripts/r190bj-failure-informed-prompt.test.mjs scripts/r190bk-evidence-stage-review.test.mjs
+      - name: Reproduce synthetic source views without model or world
+        run: node scripts/r190bn-offline-design-study.mjs --out bn-ci-source-only
+      - uses: actions/upload-artifact@v4
+        with:
+          name: R190BN-SYNTHETIC-SOURCE-${{ matrix.os }}
+          path: bn-ci-source-only

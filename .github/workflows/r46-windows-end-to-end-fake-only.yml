@@ -1,0 +1,26 @@
+name: R46 Windows Start-to-ZIP FAKE Only
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'tools/r46-approved/**'
+      - 'scripts/b198zr46-windows-one-click-fake.test.mjs'
+      - '.github/workflows/r46-windows-end-to-end-fake-only.yml'
+  pull_request:
+    paths:
+      - 'tools/r46-approved/**'
+      - 'scripts/b198zr46-windows-one-click-fake.test.mjs'
+      - '.github/workflows/r46-windows-end-to-end-fake-only.yml'
+permissions:
+  contents: read
+jobs:
+  prebound-fake-provider-e2e:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: R46 CMD and PowerShell in sandbox with loopback Ollama port prebound to synthetic server
+        run: node --test scripts/b198zr46-windows-one-click-fake.test.mjs

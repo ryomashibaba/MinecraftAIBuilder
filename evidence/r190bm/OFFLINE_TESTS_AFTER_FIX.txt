@@ -1,0 +1,45 @@
+✔ BE exact saved pair yields SHA-bound source views, no invented improvement or scores (162.1529ms)
+✔ BE differing source, model and numeric proxies cannot select an architectural winner (109.9006ms)
+✔ BE formal R4 HOLD is recomputed even if saved receipt falsely says PASS (96.2182ms)
+✔ BE truncated but parseable JSON and invalid original never receive false 3D (152.6659ms)
+✔ BE missing new capture is honest HOLD, no generation fallback (67.9966ms)
+✔ BE rejects prompt drift, raw tampering, hash-chain drift and unsafe receipts before output (216.7921ms)
+✔ BE output cannot overwrite or enter any source input; CLI has no generate flag (9.2578ms)
+✔ BE optional CI demo preserves the shared fixture identity (0.1598ms)
+✔ BF preparation SHA-locks one Japanese brief, model settings, no calls (28.831ms)
+✔ BF two independently authorized mock captures have identical provider controls and distinct original prompts (291.3573ms)
+✔ BF cannot silently invoke two requests in one run (29.7022ms)
+✔ BF prepared brief or locked protocol drift must abort before network (17.1834ms)
+✔ BF refuses missing B and tampered capture even when a valid A exists (113.6548ms)
+✔ BF no implicit consent on CLI and no combined auto-call option (20.1416ms)
+✔ BH invalid complete B143 pair never manufactures a BG 3D reviewer (146.9786ms)
+✔ BG composes actual-source gallery and offline human-form for valid saved pair (387.7962ms)
+✔ BG persisted reviewer observations are authenticated to exact review views, but do not yield ART PASS (325.1179ms)
+✔ BG refuses manipulated reviewer score, broken source SHA and false art approval (1022.14ms)
+✔ BG rejects missing source models, even if comparison has a reference-only file (100.621ms)
+✔ BG detects corrupted source views before writing any review document (167.0995ms)
+✔ BG refuses output under comparison source and bad CLI flags (7.9565ms)
+✔ BG retains valid model B143 as critical evidence when its R4 circulation is HOLD (178.8883ms)
+✔ BG empty review cannot masquerade as submitted human observation (199.8365ms)
+✔ BJ retains archived real failure bytes and creates only a SHA-bound alternate prompt (37.2943ms)
+✔ BJ rejects changed original/brief and corrupted prepared prompt, no source correction (27.1213ms)
+✔ BJ old BC prompt and protocol remain separately available (27.7234ms)
+✔ BJ variant uses existing consent-gated BF to compare synthetic saved A/B and BE/BG (314.2245ms)
+✔ BJ CLI cannot request a model, fix designs or authorize construction (0.4264ms)
+✔ BJ documented full CLI prepares real archived failure offline (108.5906ms)
+✔ BK equal synthetic B143 creates observation guide with no false architectural win (364.333ms)
+✔ BK invalid synthetic B never creates a fake B 3D and surfaces literal failures (205.7498ms)
+✔ BK refuses tampered BE comparison evidence before any output (212.3367ms)
+✔ BL rejects modified original request or any view before publication (717.725ms)
+✔ BL does not show an invalid source as a 3D or generate an invented view hash (116.5787ms)
+✔ BK refuses tampered BG reviewer and invalid-source diagnostic (294.0782ms)
+✔ BK records an independently supplied human observation only after BG validation (197.7193ms)
+✔ BK rejects fake human observations on an invalid pair and invented unsafe switches (108.4628ms)
+ℹ tests 37
+ℹ suites 0
+ℹ pass 37
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2599.1446

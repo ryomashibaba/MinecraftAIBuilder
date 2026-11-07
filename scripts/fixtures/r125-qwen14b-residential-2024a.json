@@ -1,0 +1,45 @@
+{
+  "schema": "minecraftaibuilder-r125-architecture-plan-v1",
+  "id": "residential-2024a",
+  "title": "Lumina Residence",
+  "brief": "A two-story residential home designed for modern family life, integrating work, study, and leisure spaces with a unique layout and natural materials.",
+  "footprint": {
+    "width": 24,
+    "depth": 28
+  },
+  "levels": [
+    {
+      "splitAxis": "x",
+      "splitPercent": 50,
+      "spaces": [
+        {
+          "id": "living-dining",
+          "purpose": "Open-plan living and dining area with natural light and flexible seating arrangements."
+        },
+        {
+          "id": "kitchen-work",
+          "purpose": "Integrated kitchen and home office with ample storage and ergonomic workstations."
+        }
+      ]
+    },
+    {
+      "splitAxis": "z",
+      "splitPercent": 40,
+      "spaces": [
+        {
+          "id": "bedroom-master",
+          "purpose": "Master bedroom with private en-suite bathroom and walk-in closet."
+        },
+        {
+          "id": "studio-children",
+          "purpose": "Multi-functional children's studio with play, study, and sleeping areas."
+        }
+      ]
+    }
+  ],
+  "materials": {
+    "floor": "wood",
+    "wall": "stone",
+    "roof": "concrete"
+  }
+}

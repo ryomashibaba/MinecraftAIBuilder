@@ -1,0 +1,70 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {makeV4DFoldedEnvelopeFixture} from './r125-v4d-folded-envelope-fixture.mjs';
+import {validateV4DFoldedEnvelope,compileV4DFoldedEnvelope}
+ from '../source/ai/r125-v4d-folded-envelope.mjs';
+import {verifyCompiled,MATERIALS} from '../source/ai/b143-building-dsl.mjs';
+test('AUTHOR cross-sections compile into continuous sheets with a REAL open sky axis and both program wings',()=>{
+ const original=makeV4DFoldedEnvelopeFixture(),copy=structuredClone(original);
+ validateV4DFoldedEnvelope(original);
+ const r=compileV4DFoldedEnvelope(original);
+ assert.deepEqual(original,copy);
+ assert(verifyCompiled(r.design,r.compiled));
+ assert(r.sourceProof.physicalRoofCellsChecked>2000);
+ assert(r.sourceProof.openSkyTwoWidePads>=100);
+ assert(r.sourceProof.actualGlazingVoxels>=150);
+ assert(r.sourceProof.totalB143Elements<=160);
+ assert(!r.design.elements.some(e=>e.shape==='beam'));
+ assert(r.design.elements.some(e=>e.id==='entry-roof-threshold'));
+ assert(r.design.elements.some(e=>e.id==='exterior-entrance'));
+ assert(r.compiled.primitives.some(t=>t[3]===MATERIALS.indexOf('glass')));
+ assert.equal(r.sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(r.sourceRoutes.zones.length,3);
+ assert(r.sourceRoutes.zones.every(t=>t.reachedFromEntrance));
+ assert.equal(r.readiness,'NOT_PREPARED');
+ assert.equal(r.constructionApproved,false);
+ assert.equal(r.executionAllowed,false);
+ assert.deepEqual(r.gates,Array(9).fill('BLOCKED'));
+ assert.deepEqual(r.BuildPlan.operations,[]);
+ assert.equal(r.worldContacts,0);
+ assert.equal(r.worldWrites,0);
+ assert.equal(r.realModelAuthorship,'NOT_ATTESTED');
+ assert.equal(r.humanArchitecturalArt,'NOT_REVIEWED');
+ assert.equal(r.minecraftWalking,'NOT_TESTED');
+});
+test('distinct author roof choice changes final geometry without host design substitution',()=>{
+ const a=makeV4DFoldedEnvelopeFixture();
+ const b=structuredClone(a);
+ b.sections[1].westRoof.crestY++;
+ const one=compileV4DFoldedEnvelope(a),two=compileV4DFoldedEnvelope(b);
+ assert.notEqual(one.originalPlanSha256,two.originalPlanSha256);
+ assert.notEqual(one.geometrySha256,two.geometrySha256);
+ assert.equal(one.provenance,'SYNTHETIC_AUTHOR_SUPPLIED_NOT_REAL_QWEN');
+});
+test('unknown fields and impossible cross-sections fail closed',()=>{
+ const source=makeV4DFoldedEnvelopeFixture(),snap=JSON.stringify(source),cases=[];
+ const bad=mut=>{let x=structuredClone(source);mut(x);cases.push(x)};
+ bad(x=>x.schema='wrong');
+ bad(x=>x.executable=true);
+ bad(x=>x.materials.roof='tnt');
+ bad(x=>x.site.frontZ=3);
+ bad(x=>x.site.sectionLength=4);
+ bad(x=>x.sections.pop());
+ bad(x=>x.sections[1].id=x.sections[0].id);
+ bad(x=>x.sections.forEach(s=>s.centerX=48));
+ bad(x=>x.sections.forEach(s=>s.westRoof.crestY=22));
+ bad(x=>x.sections.forEach(s=>s.eastRoof.crestY=25));
+ bad(x=>x.sections[1].centerX=70);
+ bad(x=>x.sections[1].courtWidth=3);
+ bad(x=>x.sections[0].westRoof.kneePercent=90);
+ bad(x=>x.sections[0].westRoof.crestY=9);
+ bad(x=>x.sections[0].eastSpan=3);
+ bad(x=>x.doors[1].side='west');
+ bad(x=>x.doors[0].offsetZ=1);
+ bad(x=>x.doors[1].sectionId='unidentified');
+ for(const x of cases){
+  assert.throws(()=>validateV4DFoldedEnvelope(x),/R125_V4D_FOLDED_/);
+  assert.throws(()=>compileV4DFoldedEnvelope(x),/R125_V4D_FOLDED_/);
+ }
+ assert.equal(JSON.stringify(source),snap);
+});

@@ -1,0 +1,106 @@
+/** Synthetic only: native roof-ring atrium, never post-process a box.
+ * Actual B143 voxels, no Minecraft or model requests.
+ */
+import fs from 'node:fs';
+import {createHash} from 'node:crypto';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {r190AMSyntheticPlan} from './r190am-author-layout-gallery.mjs';
+import {compileR190SemanticPlan} from '../source/ai/r190-semantic-massing.mjs';
+import {verifyCompiled} from '../source/ai/b143-building-dsl.mjs';
+import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
+import {renderR164Elevation} from './r164-exterior-audit.mjs';
+const variants=[
+ {name:'00-contained',court:{spaceId:'showroom',offsetX:4,offsetZ:3,width:9,depth:7},wingShift:0},
+ {name:'01-open-east',court:{spaceId:'showroom',offsetX:8,offsetZ:3,width:9,depth:7,openFace:'east'},wingShift:0},
+ {name:'02-open-east-asym',court:{spaceId:'showroom',offsetX:8,offsetZ:3,width:9,depth:7,openFace:'east'},wingShift:8}
+];
+const views=['front','rear','west','east','roof'];
+const write=(file,content)=>fs.writeFileSync(file,content,{flag:'wx'});
+const json=(file,x)=>write(file,JSON.stringify(x,null,2)+'\n');
+const sha=s=>createHash('sha256').update(s,'utf8').digest('hex');
+export function r190AOSyntheticPlan(name){
+ const v=variants.find(x=>x.name===name);
+ if(!v)throw Error('R190AO_UNKNOWN_CASE');
+ const p=r190AMSyntheticPlan(v.wingShift);
+ if(v.court)p.skyCourtIntent=structuredClone(v.court);
+ return p;
+}
+export function writeR190AOGallery(out){
+ if(!path.isAbsolute(out)||fs.existsSync(out)||
+  !fs.existsSync(path.dirname(out))||
+  !fs.statSync(path.dirname(out)).isDirectory())
+  throw Error('R190AO_NEW_ABSOLUTE_OUTPUT_REQUIRED');
+ const template=fs.readFileSync(new URL('../source/ai/b143-viewer-template.html',import.meta.url),'utf8');
+ fs.mkdirSync(out);
+ const scenes=[],links=[];
+ for(const v of variants){
+  const plan=r190AOSyntheticPlan(v.name);
+  const built=compileR190SemanticPlan(plan);
+  if(!verifyCompiled(built.design,built.compiled)||
+     !built.audit.allProgramSpacesReachable||
+     built.audit.witnesses.length!==plan.spaces.length||
+     built.worldContacts!==0||built.worldWrites!==0||
+     (v.court?built.audit.skyCourt?.actualOpenSkyColumns!==63:built.audit.skyCourt!==null))
+   throw Error('R190AO_REAL_SOURCE_AUDIT_HOLD');
+  if(v.court.openFace&&built.design.elements.some(x=>
+    x.id==='showroom-east'||x.id==='showroom-court-roof-east'))
+   throw Error('R190AO_NATIVE_U_COURT_MISSING');
+  const roof=plan.spaces[0].height;
+  if(v.court&&built.design.elements.some(x=>x.id==='showroom-roof'||
+    (x.id.startsWith('showroom-')&&x.mode==='cut'&&x.origin[1]===roof)))
+   throw Error('R190AO_FORBIDDEN_POST_HOC_ROOF_CUT');
+  json(path.join(out,v.name+'-IR.json'),plan);
+  json(path.join(out,v.name+'-B143.json'),built.design);
+  const html=renderB143Html(compileB143Gallery([built.design]),template);
+  if(!html.includes('<body>'))throw Error('R190AO_VIEWER_INVALID');
+  write(path.join(out,v.name+'-REAL-B143.html'),
+    html.replace('<body>','<body><aside style="padding:14px;background:#542917;color:white;font:16px system-ui">R190-AO SYNTHETIC / '+v.name+' / TRUE B143 / ART HOLD / NO LLM / NO CONSTRUCTION</aside>'));
+  const elevationSha256={};
+  for(const side of views){
+   const svg=renderR164Elevation(built.compiled,built.design,side);
+   write(path.join(out,v.name+'-'+side+'.svg'),svg);
+   elevationSha256[side]=sha(svg);
+  }
+  scenes.push({name:v.name,wingShift:v.wingShift,court:v.court,
+   elevationSha256,
+   provenance:'SYNTHETIC_NOT_MODEL_RESPONSE',
+   geometrySha256:built.compiled.geometrySha256,
+   sourceSha256:built.compiled.sourceSha256,
+   trueB143VoxelCount:built.compiled.primitives.length,
+   skyCourtAudit:built.audit.skyCourt,sourceRouteCertified:true,
+   modelCalls:0,worldWrites:0,art:'ART_HOLD'});
+  links.push('<li>'+v.name+'：<a href="'+v.name+'-REAL-B143.html">真正3D</a> / '+
+   views.map(s=>'<a href="'+v.name+'-'+s+'.svg">'+s+'</a>').join(' / ')+'</li>');
+ }
+ if(new Set(scenes.map(x=>x.geometrySha256)).size!==3)
+  throw Error('R190AO_NO_DISTINCT_SOURCE_GEOMETRY');
+ const difference=(a,b)=>views.filter(face=>
+   scenes[a].elevationSha256[face]!==scenes[b].elevationSha256[face]);
+ json(path.join(out,'SUMMARY.json'),{
+  schema:'minecraftaibuilder-r190ao-exterior-u-court-v1',
+  viewContrast:{containedToOpenEastChanged:difference(0,1),
+   openEastToShiftedWingChanged:difference(1,2),
+   notArtCertification:true,
+   onlyTheFirstPairAlsoChangesTheCourtPosition:true},
+  provenance:'SYNTHETIC_NOT_REAL_MODEL',scenes,modelCalls:0,
+  worldContacts:0,worldWrites:0,readiness:'NOT_PREPARED',
+  constructionApproved:false,executionAllowed:false,
+  gates:Array(9).fill('BLOCKED'),BuildPlan:{operations:[]},
+  art:'ART_HOLD',officialArtAdoptions:0,
+  minecraftWalking:'NOT_TESTED',humanArtJudgment:'NOT_PERFORMED'});
+ write(path.join(out,'index.html'),
+  '<!doctype html><html lang="ja"><meta charset="utf-8"><title>R190-AO 空洞・翼棟の真正3D比較</title>'+
+  '<h1>R190-AO：U字型外部開放中庭を設計した3案</h1>'+
+  '<p>3案すべて合成設計。真正B143形状。実Qwen/Gemma推論なし。Minecraft施工なし。美術ART HOLD。</p>'+
+  '<p>00→01は中庭位置と外壁開放の両方が変化。01→02は翼棟の位置だけを変更。</p>'+
+  '<ul>'+links.join('')+'</ul><a href="SUMMARY.json">検証根拠</a></html>');
+ return {count:3,uniqueGeometry:3,worldWrites:0,modelCalls:0,art:'ART_HOLD'};
+}
+if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){
+ try{
+  const a=process.argv.slice(2);
+  if(a.length!==2||a[0]!=='--out')throw Error('R190AO_ARGS');
+  console.log(JSON.stringify(writeR190AOGallery(a[1]),null,2));
+ }catch(e){console.error(String(e?.message??e));process.exitCode=2;}
+}

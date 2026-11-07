@@ -1,0 +1,28 @@
+name: R37 Human Quality Audit Offline
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'scripts/b198zr37-human-quality-audit-offline*'
+      - '.github/workflows/r37-human-quality-audit-offline.yml'
+  pull_request:
+    paths:
+      - 'scripts/b198zr37-human-quality-audit-offline*'
+      - '.github/workflows/r37-human-quality-audit-offline.yml'
+permissions:
+  contents: read
+jobs:
+  r37-claim-ledger-no-model-no-world:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Validate synthetic-only offline human-review claims and audit hash chain
+        run: node --test scripts/b198zr37-human-quality-audit-offline.test.mjs

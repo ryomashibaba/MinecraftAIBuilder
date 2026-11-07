@@ -10,10 +10,410 @@ on:
       - 'source/ai/b198g-local-model-adapter.mjs'
       - 'scripts/b198g-local-design.mjs'
       - 'scripts/b198g-local-adapter.test.mjs'
+      - 'scripts/r125-mvp.mjs'
+      - 'scripts/r125-mvp.test.mjs'
+      - 'scripts/r125-world-diff.mjs'
+      - 'scripts/r125-world-diff.test.mjs'
+      - 'scripts/r125-pilot.mjs'
+      - 'scripts/r125-pilot.test.mjs'
+      - 'scripts/r125-offline-replay.mjs'
+      - 'scripts/r125-offline-replay.test.mjs'
+      - 'source/ai/r125-architecture-plan.mjs'
+      - 'scripts/r125-architecture-plan.test.mjs'
+      - 'scripts/r125-semantic-pilot.mjs'
+      - 'scripts/r125-semantic-pilot.test.mjs'
+      - 'scripts/r125-expression-gallery.mjs'
+      - 'scripts/r125-expression-gallery.test.mjs'
+      - 'scripts/r125-multiuse-pilot.mjs'
+      - 'scripts/r125-multiuse-pilot.test.mjs'
+      - 'scripts/r125-real-multiuse-replay.test.mjs'
+      - 'source/ai/r125-source-routes.mjs'
+      - 'source/ai/r125-entrance-repair.mjs'
+      - 'source/ai/r125-functional-layer.mjs'
+      - 'scripts/r125-functional-layer.test.mjs'
+      - 'scripts/r125-functional-preview.mjs'
+      - 'scripts/r125-functional-preview.test.mjs'
+      - 'scripts/r131-real-3d-comparison.mjs'
+      - 'scripts/r131-real-3d-comparison.test.mjs'
+      - 'source/ai/r132-spatial-relations.mjs'
+      - 'scripts/r132-spatial-comparison.mjs'
+      - 'scripts/r132-spatial-comparison.test.mjs'
+      - 'scripts/r133-spatial-onepass.mjs'
+      - 'scripts/r133-spatial-onepass.test.mjs'
+      - 'source/ai/r134-multi-zone-plan.mjs'
+      - 'scripts/r134-multi-zone-plan.test.mjs'
+      - 'scripts/r134-fresh-model-pilot.mjs'
+      - 'scripts/r134-fresh-model-pilot.test.mjs'
+      - 'scripts/r134-multi-zone-gallery.mjs'
+      - 'scripts/r134-multi-zone-gallery.test.mjs'
+      - 'scripts/r135-furnished-program.mjs'
+      - 'scripts/r135-furnished-program.test.mjs'
+      - 'scripts/r136-local-evidence.mjs'
+      - 'scripts/r136-local-evidence.test.mjs'
+      - 'scripts/r137-bounded-recovery.mjs'
+      - 'scripts/r137-bounded-recovery.test.mjs'
+      - 'scripts/r137-user-capture-replay.mjs'
+      - 'scripts/r137-user-capture-replay.test.mjs'
+      - 'source/ai/r138-branching-topology.mjs'
+      - 'scripts/r138-branching-topology.test.mjs'
+      - 'scripts/r138-user-branch-comparison.mjs'
+      - 'scripts/r138-user-branch-comparison.test.mjs'
+      - 'source/ai/r139-room-relations.mjs'
+      - 'scripts/r139-room-relations.test.mjs'
+      - 'scripts/r139-relational-instructions.mjs'
+      - 'scripts/r147-esm-import-order.test.mjs'
+      - 'scripts/r146-one-click-offline-replay.ps1'
+      - 'RUN_R146_OFFLINE_REPLAY.cmd'
+      - 'scripts/r139-relational-model.mjs'
+      - 'scripts/r139-relational-model.test.mjs'
+      - 'scripts/r139-user-qwen-relations-comparison.mjs'
+      - 'scripts/r139-user-qwen-relations-comparison.test.mjs'
+      - 'scripts/r140-relational-local-runner.test.mjs'
+      - 'scripts/r141-local-graph-evidence.mjs'
+      - 'scripts/r141-local-graph-evidence.test.mjs'
+      - 'scripts/r143-independent-graph-audit.mjs'
+      - 'scripts/r143-independent-graph-audit.test.mjs'
+      - 'source/ai/r146-roof-material-boundary.mjs'
+      - 'scripts/r146-replay-saved-qwen.mjs'
+      - 'scripts/r146-user-real-roof-recovery.test.mjs'
+      - 'source/ai/r149-architectural-expression.mjs'
+      - 'source/ai/r150-furniture-articulation.mjs'
+      - 'source/ai/r154-volume-composition.mjs'
+      - 'source/ai/r155-roofline.mjs'
+      - 'source/ai/r158-spatial-balance.mjs'
+      - 'source/ai/r159-floorplan-intent.mjs'
+      - 'source/ai/r160-side-gallery.mjs'
+      - 'source/ai/r168-room-grid.mjs'
+      - 'source/ai/r170-four-room-volumes.mjs'
+      - 'source/ai/r176-ground-footprint.mjs'
+      - 'source/ai/r177-ground-intent.mjs'
+      - 'source/ai/r178-wing-courtyard.mjs'
+      - 'scripts/r178-wing-comparison.mjs'
+      - 'scripts/r178-wing-comparison.test.mjs'
+      - 'scripts/r180-variable-massing-comparison.mjs'
+      - 'scripts/r180-variable-massing.test.mjs'
+      - 'source/ai/r181-courtyard-graph.mjs'
+      - 'scripts/r181-courtyard-graph-comparison.mjs'
+      - 'scripts/r181-courtyard-graph.test.mjs'
+      - 'source/ai/r182-room-led-section.mjs'
+      - 'scripts/r182-room-led-section-comparison.mjs'
+      - 'scripts/r182-room-led-section.test.mjs'
+      - 'source/ai/r183-courtyard-negative-mass.mjs'
+      - 'scripts/r183-courtyard-void-comparison.mjs'
+      - 'scripts/r183-courtyard-void.test.mjs'
+      - 'source/ai/r184-composition-grammar.mjs'
+      - 'scripts/r184-composition-options.mjs'
+      - 'scripts/r184-composition-options.test.mjs'
+      - 'source/ai/r185-public-experience.mjs'
+      - 'scripts/r185-public-experience-comparison.mjs'
+      - 'scripts/r185-public-experience.test.mjs'
+      - 'source/ai/r186-vertical-public-slice.mjs'
+      - 'scripts/r186-vertical-slice-comparison.mjs'
+      - 'scripts/r186-vertical-slice.test.mjs'
+      - 'source/ai/r187-daylit-upper-court.mjs'
+      - 'scripts/r187-daylit-upper-court-comparison.mjs'
+      - 'scripts/r187-daylit-upper-court.test.mjs'
+      - 'source/ai/r188-inhabited-frontage.mjs'
+      - 'scripts/r188-inhabited-frontage-comparison.mjs'
+      - 'scripts/r188-inhabited-frontage.test.mjs'
+      - 'source/ai/r189-major-massing.mjs'
+      - 'scripts/r189-major-massing-comparison.mjs'
+      - 'scripts/r189-major-massing.test.mjs'
+      - 'source/ai/r190-semantic-massing.mjs'
+      - 'scripts/r190-semantic-fixtures.mjs'
+      - 'scripts/r190-semantic-massing.test.mjs'
+      - 'scripts/r190-source-review.mjs'
+      - 'source/ai/r190-saved-qwen-bridge.mjs'
+      - 'scripts/r190-saved-qwen-host-completion.mjs'
+      - 'scripts/r190-saved-qwen-bridge.test.mjs'
+      - 'scripts/r190-qwen-compatibility-report.mjs'
+      - 'source/ai/r190-model-proposal.mjs'
+      - 'scripts/r190-model-proposal.test.mjs'
+      - 'scripts/r190-local-semantic-run.mjs'
+      - 'source/ai/r190-request-coverage.mjs'
+      - 'scripts/r190-request-coverage.test.mjs'
+      - 'scripts/r190-h-architectural-route.test.mjs'
+      - 'scripts/r190n-one-click-research.mjs'
+      - 'scripts/r190n-one-click-research.test.mjs'
+      - 'scripts/r190p-glazing-comparison.mjs'
+      - 'scripts/r190p-glazing-comparison.test.mjs'
+      - 'source/ai/r190o-saved-model-forensics.mjs'
+      - 'scripts/r190o-offline-review.mjs'
+      - 'scripts/r190o-offline-review.test.mjs'
+      - 'RUN_R190O_OFFLINE_REVIEW.cmd'
+      - 'scripts/fixtures/r190n-independent-program.json'
+      - 'RUN_R190N_REAL_MODEL.cmd'
+      - 'scripts/r177-ground-intent.test.mjs'
+      - 'source/ai/r160-topology-intent.mjs'
+      - 'source/ai/r162-room-section-massing.mjs'
+      - 'source/ai/r163-daylit-sections.mjs'
+      - 'scripts/r163-daylight-comparison.mjs'
+      - 'scripts/r163-daylight-comparison.test.mjs'
+      - 'source/ai/r164-envelope-continuity.mjs'
+      - 'scripts/r164-exterior-audit.mjs'
+      - 'scripts/r164-exterior-audit.test.mjs'
+      - 'scripts/r165-local-model-architecture-audit.mjs'
+      - 'scripts/r165-local-model-architecture-audit.test.mjs'
+      - 'scripts/r167-offline-replay.mjs'
+      - 'scripts/r167-offline-replay.test.mjs'
+      - 'scripts/r172-ci-autoreview.mjs'
+      - 'scripts/r172-ci-autoreview.test.mjs'
+      - 'scripts/r162-room-section-comparison.mjs'
+      - 'scripts/r162-room-section-comparison.test.mjs'
+      - 'scripts/r160-side-gallery.test.mjs'
+      - 'scripts/r161-real-comparison.mjs'
+      - 'scripts/r161-real-comparison.test.mjs'
+      - 'scripts/r149-quality-comparison.mjs'
+      - 'scripts/r149-quality-comparison.test.mjs'
+      - 'scripts/r156-unknown-use-study.mjs'
+      - 'scripts/r156-unknown-use-study.test.mjs'
+      - 'scripts/r157-comparative-review.mjs'
+      - 'scripts/r157-comparative-review.test.mjs'
+      - 'scripts/r157-one-click-unknown-use.ps1'
+      - 'RUN_R157_UNKNOWN_USE.cmd'
+      - 'scripts/fixtures/r146-user-qwen14b-20261025-raw.json'
+      - 'scripts/fixtures/r136-user-qwen14b-20261025.json.gz'
+      - 'scripts/fixtures/r133-shop-independent-goals.json'
+      - 'scripts/r125-feature-model-pilot.mjs'
+      - 'scripts/r125-feature-model-pilot.test.mjs'
+      - 'source/ai/r125-functional-acceptance.mjs'
+      - 'scripts/r125-functional-acceptance.test.mjs'
+      - 'scripts/fixtures/r125-qwen14b-shop-20261024.json'
+      - 'scripts/fixtures/r125-qwen14b-research-20261024.json'
+      - 'source/ai/b198c-spatial-critic.mjs'
+      - 'scripts/r125-real-plan-replay.test.mjs'
+      - 'scripts/fixtures/r125-qwen14b-residential-2024a.json'
       - '.github/workflows/b198g-quality.yml'
 permissions:
   contents: read
+# Cancel obsolete checks when successive source-only commits update the same
+# draft PR. Only its latest source SHA can provide an acceptance verdict.
+concurrency:
+  group: b198g-quality-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 jobs:
+  r172-quick-three-use-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: R172 quick synthetic three-use 3D regression
+        run: |
+          node --check scripts/r172-ci-autoreview.mjs
+          node --test scripts/r172-ci-autoreview.test.mjs
+          node --test scripts/r177-ground-intent.test.mjs
+          node --test scripts/r178-wing-comparison.test.mjs
+          node --test scripts/r180-variable-massing.test.mjs
+          node --test scripts/r181-courtyard-graph.test.mjs
+          node --test scripts/r182-room-led-section.test.mjs
+          node --test scripts/r183-courtyard-void.test.mjs
+          node --test scripts/r184-composition-options.test.mjs
+          node --test scripts/r185-public-experience.test.mjs
+          node --test scripts/r186-vertical-slice.test.mjs
+          node --test scripts/r187-daylit-upper-court.test.mjs
+          node --test scripts/r188-inhabited-frontage.test.mjs
+          node --test scripts/r189-major-massing.test.mjs
+      - name: R190 genuine B143 semantic room topology and source-route QA
+        run: |
+          node --check source/ai/r190-semantic-massing.mjs
+          node --check scripts/r190-semantic-fixtures.mjs
+          node --check scripts/r190-source-review.mjs
+          node --test scripts/r190-semantic-massing.test.mjs
+          node scripts/r190-source-review.mjs --out r190-semantic-source-review
+      - name: R190-E saved real Qwen semantics vs HOST completion QA
+        run: |
+          node --check source/ai/r190-saved-qwen-bridge.mjs
+          node --check scripts/r190-qwen-compatibility-report.mjs
+          node --test scripts/r190-saved-qwen-bridge.test.mjs
+          node scripts/r190-qwen-compatibility-report.mjs --out r190-saved-qwen-evidence
+      - name: R190-F strict model-authored semantic proposal source-only contract
+        run: |
+          node --check source/ai/r190-model-proposal.mjs
+          node --check source/ai/b198g-local-model-adapter.mjs
+          node --check scripts/r190-local-semantic-run.mjs
+          node --check scripts/r190-model-proposal.test.mjs
+          node --test scripts/r190-model-proposal.test.mjs
+          node --check source/ai/r190-request-coverage.mjs
+          node --check scripts/r190-request-coverage.test.mjs
+          node --test scripts/r190-request-coverage.test.mjs
+          node --check scripts/r190-h-architectural-route.test.mjs
+          node --test scripts/r190-h-architectural-route.test.mjs
+          node --check scripts/r190n-one-click-research.mjs
+          node --check scripts/r190n-one-click-research.test.mjs
+          node --test scripts/r190n-one-click-research.test.mjs
+          node --check source/ai/r190o-saved-model-forensics.mjs
+          node --check scripts/r190o-offline-review.mjs
+          node --check scripts/r190o-offline-review.test.mjs
+          node --test scripts/r190o-offline-review.test.mjs
+          node --check scripts/r190p-glazing-comparison.mjs
+          node --check scripts/r190p-glazing-comparison.test.mjs
+          node --test scripts/r190p-glazing-comparison.test.mjs
+          node scripts/r190p-glazing-comparison.mjs --out r190p-synthetic-glazing-comparison
+
+      - name: Upload R190-P strictly synthetic glass facade 3D comparison
+        uses: actions/upload-artifact@v4
+        with:
+          name: R190-P-SYNTHETIC-EXTERIOR-GLAZING-B143
+          path: r190p-synthetic-glazing-comparison/
+          retention-days: 14
+          if-no-files-found: error
+      - name: Upload R190-E real archived Qwen fidelity and provenance report
+        uses: actions/upload-artifact@v4
+        with:
+          name: R190-E-ARCHIVED-REAL-QWEN-FOUR-SEMANTIC-FIDELITY
+          path: r190-saved-qwen-evidence/
+          retention-days: 14
+          if-no-files-found: error
+      - name: Upload R190 fifteen B143 variants and seventy-five elevations
+        uses: actions/upload-artifact@v4
+        with:
+          name: R190-SEMANTIC-FIVE-PROGRAM-FIFTEEN-VARIANT-3D
+          path: r190-semantic-source-review/
+          retention-days: 14
+          if-no-files-found: error
+      - name: R178 independent wing-courtyard synthetic 3D preview
+        run: |
+          node --check source/ai/r178-wing-courtyard.mjs
+          node --check scripts/r178-wing-comparison.mjs
+          node scripts/r178-wing-comparison.mjs --out r178-independent-wing-court
+      - name: Upload R178 independent physical wings and courtyard 3D evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: R178-INDEPENDENT-THREE-USE-WING-COURT-3D
+          path: r178-independent-wing-court/
+          retention-days: 14
+          if-no-files-found: error
+      - name: R180 matched-program wing envelope geometry preview
+        run: |
+          node --check scripts/r180-variable-massing-comparison.mjs
+          node scripts/r180-variable-massing-comparison.mjs --out r180-matched-program-massing
+      - name: Upload R180 source-only massing versus R178 comparison
+        uses: actions/upload-artifact@v4
+        with:
+          name: R180-MATCHED-PROGRAM-WING-MASSING-3D
+          path: r180-matched-program-massing/
+          retention-days: 14
+          if-no-files-found: error
+      - name: R181 three-volume source-only courtyard graph real B143
+        run: |
+          node --check source/ai/r181-courtyard-graph.mjs
+          node --check scripts/r181-courtyard-graph-comparison.mjs
+          node scripts/r181-courtyard-graph-comparison.mjs --out r181-three-volume-court
+      - name: Upload R181 source-only three-volume 3D and all views
+        uses: actions/upload-artifact@v4
+        with:
+          name: R181-THREE-VOLUME-COURTYARD-3D
+          path: r181-three-volume-court/
+          retention-days: 14
+          if-no-files-found: error
+      - name: R182 actual three-volume roof section versus R181 comparison
+        run: |
+          node --check source/ai/r182-room-led-section.mjs
+          node --check scripts/r182-room-led-section-comparison.mjs
+          node scripts/r182-room-led-section-comparison.mjs --out r182-room-led-section
+      - name: Upload R182 matched-use source-only stepped section 3D
+        uses: actions/upload-artifact@v4
+        with:
+          name: R182-ROOM-LED-SECTION-R181-COMPARISON-3D
+          path: r182-room-led-section/
+          retention-days: 14
+          if-no-files-found: error
+      - name: R183 real source-only carved courtyard mass 3-use comparison
+        run: |
+          node --check source/ai/r183-courtyard-negative-mass.mjs
+          node --check scripts/r183-courtyard-void-comparison.mjs
+          node scripts/r183-courtyard-void-comparison.mjs --out r183-negative-mass-source
+      - name: Upload R183 roof-void real B143 comparison
+        uses: actions/upload-artifact@v4
+        with:
+          name: R183-TRUE-NEGATIVE-MASS-THREE-USE-3D
+          path: r183-negative-mass-source/
+          retention-days: 14
+          if-no-files-found: error
+      - name: R184 produce 3 real B143 whole-massing architecture form alternatives
+        run: |
+          node --check source/ai/r184-composition-grammar.mjs
+          node --check scripts/r184-composition-options.mjs
+          node scripts/r184-composition-options.mjs --out r184-art-first-geometry
+      - name: Upload R184 source-only true 3D form alternatives
+        uses: actions/upload-artifact@v4
+        with:
+          name: R184-ART-FIRST-THREE-DISTINCT-WHOLE-FORMS-3D
+          path: r184-art-first-geometry/
+          retention-days: 14
+          if-no-files-found: error
+      - name: R185 create two grounded public-arrival B143 architecture comparisons
+        run: |
+          node --check source/ai/r185-public-experience.mjs
+          node --check scripts/r185-public-experience-comparison.mjs
+          node scripts/r185-public-experience-comparison.mjs --out r185-public-arrival-review
+      - name: Upload R185 ground-public-experience 3D comparison
+        uses: actions/upload-artifact@v4
+        with:
+          name: R185-HUMAN-SCALE-ARRIVAL-TWO-ARCHITECTURAL-FORMS-3D
+          path: r185-public-arrival-review/
+          retention-days: 14
+          if-no-files-found: error
+      - name: R186 assemble source-only upper gallery and true 16-step physical staircase
+        run: |
+          node --check source/ai/r186-vertical-public-slice.mjs
+          node --check scripts/r186-vertical-slice-comparison.mjs
+          node scripts/r186-vertical-slice-comparison.mjs --out r186-real-two-level-slice
+      - name: Upload R186 two-level real B143 and source room graph
+        uses: actions/upload-artifact@v4
+        with:
+          name: R186-SOURCE-ONLY-TRUE-STAIR-ENCLOSED-UPPER-ROOM-3D
+          path: r186-real-two-level-slice/
+          retention-days: 14
+          if-no-files-found: error
+      - name: R187 compile genuine daylit stair atrium and source-reached roofless skycourt
+        run: |
+          node --check source/ai/r187-daylit-upper-court.mjs
+          node --check scripts/r187-daylit-upper-court-comparison.mjs
+          node scripts/r187-daylit-upper-court-comparison.mjs --out r187-daylit-upper-court-review
+      - name: Upload R187 source-only upper skycourt real geometry and 2-width access
+        uses: actions/upload-artifact@v4
+        with:
+          name: R187-DAYLIT-SKYCOURT-ROOM-STAIR-SOURCE-3D
+          path: r187-daylit-upper-court-review/
+          retention-days: 14
+          if-no-files-found: error
+      - name: R188 real public frontage and two-wide transverse ground network
+        run: |
+          node --check source/ai/r188-inhabited-frontage.mjs
+          node --check scripts/r188-inhabited-frontage-comparison.mjs
+          node scripts/r188-inhabited-frontage-comparison.mjs --out r188-real-inhabited-frontage
+      - name: Upload R188 functional real B143 architecture and three arcades
+        uses: actions/upload-artifact@v4
+        with:
+          name: R188-FUNCTIONAL-THREE-ARCADES-TRUE-FRONTAGE-3D
+          path: r188-real-inhabited-frontage/
+          retention-days: 14
+          if-no-files-found: error
+      - name: R189 compile explicit four major building heights and protect R188 real rooms
+        run: |
+          node --check source/ai/r189-major-massing.mjs
+          node --check scripts/r189-major-massing-comparison.mjs
+          node scripts/r189-major-massing-comparison.mjs --out r189-major-volume-real-geometry
+      - name: Upload R189 four genuinely changed front and rear roofline B143 models
+        uses: actions/upload-artifact@v4
+        with:
+          name: R189-MAJOR-VOLUME-FRONT-REAR-HEIGHT-3D
+          path: r189-major-volume-real-geometry/
+          retention-days: 14
+          if-no-files-found: error
+      - name: R172 quick automatic three-use 3D preview
+        run: node scripts/r172-ci-autoreview.mjs --out r172-auto-three-use-review
+      - name: Upload R172 synthetic 3D and five-view comparison
+        uses: actions/upload-artifact@v4
+        with:
+          name: R172-CI-THREE-USE-SOURCE-3D
+          path: r172-auto-three-use-review/
+          retention-days: 14
+          if-no-files-found: error
   original-source-geometry:
     runs-on: ubuntu-latest
     timeout-minutes: 18
@@ -22,6 +422,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: R147 real fresh Node process import cycle smoke (before expensive QA)
+        run: |
+          node --check scripts/r139-relational-instructions.mjs
+          node --check scripts/r147-esm-import-order.test.mjs
+          node --test scripts/r147-esm-import-order.test.mjs
       - name: B198A-G original regressions and source topology QA
         run: |
           node --test \
@@ -33,6 +438,256 @@ jobs:
             scripts/b198f-evidence.test.mjs \
             scripts/b198g-autonomous-quality.test.mjs \
             scripts/b198g-local-adapter.test.mjs
+      - name: R125 one-shot local-HTTP fixture, real B143 voxels, fail-closed world gates
+        run: |
+          node --check scripts/r125-mvp.mjs
+          node --check scripts/r125-mvp.test.mjs
+          node --check scripts/r125-pilot.mjs
+          node --check scripts/r125-pilot.test.mjs
+          node --check scripts/r125-offline-replay.mjs
+          node --check scripts/r125-offline-replay.test.mjs
+          node --check source/ai/r125-architecture-plan.mjs
+          node --check scripts/r125-architecture-plan.test.mjs
+          node --check scripts/r125-semantic-pilot.mjs
+          node --check scripts/r125-semantic-pilot.test.mjs
+          node --check scripts/r125-real-plan-replay.test.mjs
+          node --check scripts/r125-expression-gallery.mjs
+          node --check scripts/r125-expression-gallery.test.mjs
+          node --check scripts/r125-multiuse-pilot.mjs
+          node --check scripts/r125-multiuse-pilot.test.mjs
+          node --check scripts/r125-real-multiuse-replay.test.mjs
+          node --check source/ai/r125-source-routes.mjs
+          node --check source/ai/r125-entrance-repair.mjs
+          node --check source/ai/r125-functional-layer.mjs
+          node --check scripts/r125-functional-layer.test.mjs
+          node --check scripts/r125-functional-preview.mjs
+          node --check scripts/r125-functional-preview.test.mjs
+          node --check scripts/r131-real-3d-comparison.mjs
+          node --check scripts/r131-real-3d-comparison.test.mjs
+          node --check source/ai/r132-spatial-relations.mjs
+          node --check scripts/r132-spatial-comparison.mjs
+          node --check scripts/r132-spatial-comparison.test.mjs
+          node --check scripts/r133-spatial-onepass.mjs
+          node --check scripts/r133-spatial-onepass.test.mjs
+          node --check source/ai/r134-multi-zone-plan.mjs
+          node --check scripts/r134-multi-zone-plan.test.mjs
+          node --check scripts/r134-fresh-model-pilot.mjs
+          node --check scripts/r134-fresh-model-pilot.test.mjs
+          node --check scripts/r134-multi-zone-gallery.mjs
+          node --check scripts/r134-multi-zone-gallery.test.mjs
+          node --check scripts/r135-furnished-program.mjs
+          node --check scripts/r135-furnished-program.test.mjs
+          node --check scripts/r136-local-evidence.mjs
+          node --check scripts/r136-local-evidence.test.mjs
+          node --check scripts/r137-bounded-recovery.mjs
+          node --check scripts/r137-bounded-recovery.test.mjs
+          node --check scripts/r137-user-capture-replay.mjs
+          node --check scripts/r137-user-capture-replay.test.mjs
+          node --check source/ai/r138-branching-topology.mjs
+          node --check scripts/r138-branching-topology.test.mjs
+          node --check scripts/r138-user-branch-comparison.mjs
+          node --check scripts/r138-user-branch-comparison.test.mjs
+          node --check source/ai/r139-room-relations.mjs
+          node --check scripts/r139-room-relations.test.mjs
+          node --check scripts/r139-relational-model.mjs
+          node --check source/ai/r154-volume-composition.mjs
+          node --check source/ai/r155-roofline.mjs
+          node --check source/ai/r158-spatial-balance.mjs
+          node --check source/ai/r159-floorplan-intent.mjs
+          node --check source/ai/r160-side-gallery.mjs
+          node --check source/ai/r168-room-grid.mjs
+          node --check source/ai/r170-four-room-volumes.mjs
+          node --check source/ai/r176-ground-footprint.mjs
+          node --check source/ai/r177-ground-intent.mjs
+          node --check source/ai/r178-wing-courtyard.mjs
+          node --check scripts/r178-wing-comparison.mjs
+          node --check scripts/r178-wing-comparison.test.mjs
+          node --check scripts/r180-variable-massing-comparison.mjs
+          node --check scripts/r180-variable-massing.test.mjs
+          node --check source/ai/r181-courtyard-graph.mjs
+          node --check scripts/r181-courtyard-graph-comparison.mjs
+          node --check scripts/r181-courtyard-graph.test.mjs
+          node --check source/ai/r182-room-led-section.mjs
+          node --check scripts/r182-room-led-section-comparison.mjs
+          node --check scripts/r182-room-led-section.test.mjs
+          node --check source/ai/r183-courtyard-negative-mass.mjs
+          node --check scripts/r183-courtyard-void-comparison.mjs
+          node --check scripts/r183-courtyard-void.test.mjs
+          node --check source/ai/r184-composition-grammar.mjs
+          node --check scripts/r184-composition-options.mjs
+          node --check scripts/r184-composition-options.test.mjs
+          node --check source/ai/r185-public-experience.mjs
+          node --check scripts/r185-public-experience-comparison.mjs
+          node --check scripts/r185-public-experience.test.mjs
+          node --check source/ai/r186-vertical-public-slice.mjs
+          node --check scripts/r186-vertical-slice-comparison.mjs
+          node --check scripts/r186-vertical-slice.test.mjs
+          node --check source/ai/r187-daylit-upper-court.mjs
+          node --check scripts/r187-daylit-upper-court-comparison.mjs
+          node --check scripts/r187-daylit-upper-court.test.mjs
+          node --check source/ai/r188-inhabited-frontage.mjs
+          node --check scripts/r188-inhabited-frontage-comparison.mjs
+          node --check scripts/r188-inhabited-frontage.test.mjs
+          node --check source/ai/r189-major-massing.mjs
+          node --check scripts/r189-major-massing-comparison.mjs
+          node --check scripts/r189-major-massing.test.mjs
+          node --check source/ai/r160-topology-intent.mjs
+          node --check source/ai/r162-room-section-massing.mjs
+          node --check source/ai/r163-daylit-sections.mjs
+          node --check scripts/r163-daylight-comparison.mjs
+          node --check scripts/r163-daylight-comparison.test.mjs
+          node --check source/ai/r164-envelope-continuity.mjs
+          node --check scripts/r164-exterior-audit.mjs
+          node --check scripts/r164-exterior-audit.test.mjs
+          node --check scripts/r165-local-model-architecture-audit.mjs
+          node --check scripts/r165-local-model-architecture-audit.test.mjs
+          node --check scripts/r167-offline-replay.mjs
+          node --check scripts/r167-offline-replay.test.mjs
+          node --check scripts/r172-ci-autoreview.mjs
+          node --check scripts/r172-ci-autoreview.test.mjs
+          node --check scripts/r177-ground-intent.test.mjs
+          node --check scripts/r162-room-section-comparison.mjs
+          node --check scripts/r162-room-section-comparison.test.mjs
+          node --check scripts/r160-side-gallery.test.mjs
+          node --check scripts/r139-relational-model.test.mjs
+          node --check scripts/r139-user-qwen-relations-comparison.mjs
+          node --check scripts/r139-user-qwen-relations-comparison.test.mjs
+          node --check scripts/r140-relational-local-runner.test.mjs
+          node --check scripts/r141-local-graph-evidence.mjs
+          node --check scripts/r141-local-graph-evidence.test.mjs
+          node --check scripts/r143-independent-graph-audit.mjs
+          node --check scripts/r143-independent-graph-audit.test.mjs
+          node --check source/ai/r146-roof-material-boundary.mjs
+          node --check scripts/r146-replay-saved-qwen.mjs
+          node --check scripts/r146-user-real-roof-recovery.test.mjs
+          node --check scripts/r125-feature-model-pilot.mjs
+          node --check scripts/r125-feature-model-pilot.test.mjs
+          node --check source/ai/r125-functional-acceptance.mjs
+          node --check scripts/r125-functional-acceptance.test.mjs
+          node --check scripts/r156-unknown-use-study.mjs
+          node --check scripts/r156-unknown-use-study.test.mjs
+          node --check scripts/r157-comparative-review.mjs
+          node --check scripts/r157-comparative-review.test.mjs
+          node --check scripts/r161-real-comparison.mjs
+          node --check scripts/r161-real-comparison.test.mjs
+          node --test scripts/r125-mvp.test.mjs scripts/r125-world-diff.test.mjs scripts/r125-pilot.test.mjs scripts/r125-offline-replay.test.mjs scripts/r125-architecture-plan.test.mjs scripts/r125-semantic-pilot.test.mjs scripts/r125-real-plan-replay.test.mjs scripts/r125-expression-gallery.test.mjs scripts/r125-multiuse-pilot.test.mjs scripts/r125-real-multiuse-replay.test.mjs scripts/r125-functional-layer.test.mjs scripts/r125-functional-preview.test.mjs scripts/r125-feature-model-pilot.test.mjs scripts/r125-functional-acceptance.test.mjs scripts/r131-real-3d-comparison.test.mjs scripts/r132-spatial-comparison.test.mjs scripts/r133-spatial-onepass.test.mjs scripts/r135-furnished-program.test.mjs scripts/r134-multi-zone-plan.test.mjs scripts/r134-fresh-model-pilot.test.mjs scripts/r134-multi-zone-gallery.test.mjs scripts/r136-local-evidence.test.mjs scripts/r137-bounded-recovery.test.mjs scripts/r137-user-capture-replay.test.mjs scripts/r138-branching-topology.test.mjs scripts/r138-user-branch-comparison.test.mjs scripts/r139-room-relations.test.mjs scripts/r139-relational-model.test.mjs scripts/r139-user-qwen-relations-comparison.test.mjs scripts/r140-relational-local-runner.test.mjs scripts/r141-local-graph-evidence.test.mjs scripts/r143-independent-graph-audit.test.mjs scripts/r146-user-real-roof-recovery.test.mjs scripts/r149-quality-comparison.test.mjs scripts/r156-unknown-use-study.test.mjs scripts/r157-comparative-review.test.mjs scripts/r160-side-gallery.test.mjs scripts/r161-real-comparison.test.mjs scripts/r162-room-section-comparison.test.mjs scripts/r163-daylight-comparison.test.mjs scripts/r164-exterior-audit.test.mjs scripts/r165-local-model-architecture-audit.test.mjs scripts/r167-offline-replay.test.mjs
+      - name: Build genuine-source four-scene visual review
+        run: node scripts/r125-expression-gallery.mjs --out r125-expression-preview
+      - name: Upload source-only 3D comparison for human review
+        uses: actions/upload-artifact@v4
+        with:
+          name: R125-EXPRESSION-FOUR-3D-VIEWS
+          path: r125-expression-preview/
+          retention-days: 14
+          if-no-files-found: error
+      - name: Render source-pinned before and after functional previews
+        run: node scripts/r131-real-3d-comparison.mjs --out r131-functional-comparison
+      - name: Upload before and after functional 3D scenes
+        uses: actions/upload-artifact@v4
+        with:
+          name: R125-QWEN14B-SHOP-RESEARCH-FUNCTIONAL-3D
+          path: r131-functional-comparison/
+          retention-days: 14
+          if-no-files-found: error
+      - name: Build source-only spatial correction 3D comparison
+        run: node scripts/r132-spatial-comparison.mjs --out r132-spatial-comparison
+      - name: Upload bounded spatial-correction B143 scenes
+        uses: actions/upload-artifact@v4
+        with:
+          name: R132-QWEN14B-SPATIAL-ORDER-3D
+          path: r132-spatial-comparison/
+          retention-days: 14
+          if-no-files-found: error
+      - name: Build independent new three and four room genuine 3D review
+        run: node scripts/r134-multi-zone-gallery.mjs --out r134-multi-zone-review
+      - name: Upload new multi room source only 3D scenes
+        uses: actions/upload-artifact@v4
+        with:
+          name: R134-NEW-MULTIZONE-THREE-3D-SCENES
+          path: r134-multi-zone-review/
+          retention-days: 14
+          if-no-files-found: error
+      - name: Replay user uploaded REAL Qwen14B saved raw into real host derived 3D
+        run: node scripts/r137-user-capture-replay.mjs --out r137-user-real-qwen-3d
+      - name: Upload host derived scenes from exact real Qwen14B replies
+        uses: actions/upload-artifact@v4
+        with:
+          name: R137-REAL-QWEN14B-THREE-BUILDINGS-3D-REPLAY
+          path: r137-user-real-qwen-3d/
+          retention-days: 14
+          if-no-files-found: error
+      - name: Build exact-user-Qwen strip vs branch six scene real source 3D
+        run: node scripts/r138-user-branch-comparison.mjs --out r138-qwen-branch-3d
+      - name: Upload real source branched topology comparative views
+        uses: actions/upload-artifact@v4
+        with:
+          name: R138-REAL-QWEN14B-STRIP-VS-BRANCH-3D
+          path: r138-qwen-branch-3d/
+          retention-days: 14
+          if-no-files-found: error
+      - name: Build authentic archived Qwen semantic rooms versus host-origin room graph
+        run: node scripts/r139-user-qwen-relations-comparison.mjs --out r139-room-graph-3d
+      - name: Upload R139 source-only room graph comparison for human art review
+        uses: actions/upload-artifact@v4
+        with:
+          name: R139-REAL-QWEN-SEMANTICS-HOST-GRAPH-3D
+          path: r139-room-graph-3d/
+          retention-days: 14
+          if-no-files-found: error
+      - name: Replay real Qwen14B graph with exactly one transparently host-corrected roof material
+        run: node scripts/r146-replay-saved-qwen.mjs --out r146-saved-real-qwen-roof-review
+      - name: Upload R146 full real Qwen source-only offline recovered 3D
+        uses: actions/upload-artifact@v4
+        with:
+          name: R146-REAL-QWEN14B-ONE-FIELD-HOST-CORRECTED-3D
+          path: r146-saved-real-qwen-roof-review/
+          retention-days: 14
+          if-no-files-found: error
+      - name: Build R149 genuine B143 before-after architectural quality review
+        run: node scripts/r149-quality-comparison.mjs --out r149-architectural-comparison
+      - name: Upload R149 original versus host-derived genuine B143 3D
+        uses: actions/upload-artifact@v4
+        with:
+          name: R149-REAL-QWEN-ARCHITECTURAL-QUALITY-3D-COMPARISON
+          path: r149-architectural-comparison/
+          retention-days: 14
+          if-no-files-found: error
+      - name: R161 controlled genuine B143 three floorplans six interactive source views
+        run: node scripts/r161-real-comparison.mjs --out r161-genuine-b143-review
+      - name: Upload R161 independent matched-input architectural comparison
+        uses: actions/upload-artifact@v4
+        with:
+          name: R161-MATCHED-INPUT-THREE-REAL-B143-VIEWS
+          path: r161-genuine-b143-review/
+          retention-days: 14
+          if-no-files-found: error
+      - name: R162 build source-pinned real usable rooms and three massed exteriors
+        run: node scripts/r162-room-section-comparison.mjs --out r162-actual-room-mass-review
+      - name: Upload R162 same-program real room-section and exterior comparison
+        uses: actions/upload-artifact@v4
+        with:
+          name: R162-REAL-ROOM-SECTION-AND-EXTERIOR-3D-COMPARISON
+          path: r162-actual-room-mass-review/
+          retention-days: 14
+          if-no-files-found: error
+      - name: R163 build three original real-roof rooms versus external high glazing
+        run: node scripts/r163-daylight-comparison.mjs --out r163-source-daylight-review
+      - name: Upload R163 actual exterior-facing clerestory B143 comparison
+        uses: actions/upload-artifact@v4
+        with:
+          name: R163-REAL-ROOM-DAYLIGHT-AND-ROOF-3D-REVIEW
+          path: r163-source-daylight-review/
+          retention-days: 14
+          if-no-files-found: error
+      - name: R164 independent all-wall upper air leak and true four elevations review
+        run: node scripts/r164-exterior-audit.mjs --out r164-independent-envelope-review
+      - name: Upload R164 real voxel elevations and upper-shell continuity
+        uses: actions/upload-artifact@v4
+        with:
+          name: R164-REAL-VOXEL-4-DIRECTION-ENVELOPE-AUDIT
+          path: r164-independent-envelope-review/
+          retention-days: 14
+          if-no-files-found: error
       - name: Keep the original Minecraft world offline
         run: |
           node --check source/ai/b198g-autonomous-quality.mjs

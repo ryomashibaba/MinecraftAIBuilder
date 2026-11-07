@@ -1,0 +1,19 @@
+{
+  "schema": "r125-education-user-verified-palette-v1",
+  "edition": "Minecraft Education",
+  "version": "26.33",
+  "blocks": {
+    "wood": {
+      "blockName": "oak_planks",
+      "evidence": "2026-10-31 user report: copied-world mabprobe PROBE MATCH and visually confirmed oak-plank block; screenshot in chat"
+    },
+    "concrete": {
+      "blockName": "white_concrete",
+      "evidence": "2026-11-01 user screenshot of Minecraft Education: chat PROBE MATCH white_concrete and visibly placed white concrete block; concrete color is host default, not AI-authored"
+    },
+    "metal": {
+      "blockName": "iron_block",
+      "evidence": "2026-11-01 user Minecraft Education v26.33 screenshot: chat PROBE MATCH: iron_block and one visually confirmed iron block in backed-up test world"
+    }
+  }
+}
