@@ -204,6 +204,11 @@ try {
     # Never print original exception, Python/OpenSSL stderr, paths, or key data.
     Write-Output 'DEC_WINDOWS_PRIVATE_CHECKPOINT_RESTORE_HOLD'
     Write-Output ('DEC_WINDOWS_RESTORE_HOLD_STAGE=' + $stage)
+    # Only constant internal hold reasons; never original exceptions or paths.
+    $holdCode = $_.Exception.Message
+    if ($holdCode -cmatch '^DEC_WINDOWS_RESTORE_HOLD_[A-Z0-9_]{3,100}$') {
+        Write-Output ('DEC_WINDOWS_RESTORE_HOLD_CODE=' + $holdCode)
+    }
     $exitCode = 2
 } finally {
     if ($null -ne $privateBytes) { [Array]::Clear($privateBytes, 0, $privateBytes.Length) }
