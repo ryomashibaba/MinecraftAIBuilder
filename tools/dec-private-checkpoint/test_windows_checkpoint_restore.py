@@ -8,20 +8,22 @@ No GitHub credentials, protected original writes, model calls or Docker involved
 from __future__ import annotations
 
 import hashlib
-import io
 import json
 import os
 from pathlib import Path
 import subprocess
 import shutil
-import tarfile
+import sys
 import tempfile
 
 BASE_SHA = "19ef7fd0f3d08ab6c8cd350b44df9ab0eb69a963"
 BASE_BLOB = "4cbcbb448737b314b6d5d4bfcdc367e9b1b45f52"
 SOURCE = "source/ai/r125-v4h-mezzanine-author-ir.mjs"
-CERT_SCOPE = "dec-qwen4b-private-encrypted-source-checkpoint-v1"
 PUBLIC_GIT = "https://github.com/ryomashibaba/MinecraftAIBuilder.git"
+
+# Reuse the real checkpoint sealer without invoking its model or Docker entrypoints.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "free-autonomy-solo"))
+from real_qwen4b_two_cumulative_ci import _verified_private_checkpoint
 
 
 def command(*args: str, cwd: Path | None = None, timeout: int = 120) -> str:
@@ -79,7 +81,8 @@ def main() -> int:
         source = work / SOURCE
         original = source.read_bytes()
         digests: list[str] = []
-        for i in (1, 2):
+        commits: list[str] = []
+        for i in (1, 2, 3, 4):
             # Keep the actual public source intact; only append a harmless
             # synthetic comment in an isolated local Git copy.
             amended = original + f"\n// DEC-SYNTHETIC-RESTORE-{i}\n".encode()
@@ -87,34 +90,55 @@ def main() -> int:
             command("git", "add", SOURCE, cwd=work)
             command("git", "commit", "-q", "-m", f"synthetic fixture stage {i}", cwd=work)
             digests.append(digest(amended))
-        final = command("git", "rev-parse", "HEAD", cwd=work)
-        bundle = root / "source.bundle"
-        command("git", "bundle", "create", str(bundle), "HEAD", "^" + BASE_SHA, cwd=work)
-        command("git", "bundle", "verify", str(bundle), cwd=work)
-        proof = {
-            "schema": CERT_SCOPE,
-            "scope": "RESEARCH_ONLY_SOURCE_QA_NOT_ADOPTED",
-            "base_public_commit": BASE_SHA,
-            "final_verified_head": final,
+            commits.append(command("git", "rev-parse", "HEAD", cwd=work))
+        final = commits[-1]
+        # Fixture-only receipts exercise the real sealer without claiming Docker QA.
+        synthetic_private = root / "synthetic-private"
+        synthetic_private.mkdir()
+        session = synthetic_private / ("m-" + "a" * 16)
+        stage = session / "c2" / "PrivateClones" / "minecraftaibuilder-synthetic"
+        stage.mkdir(parents=True)
+        qa_clone = stage / "qa-clone-synthetic"
+        command("git", "clone", "-q", "--no-local", str(work), str(qa_clone))
+        review = stage / "private-review"
+        review.mkdir()
+        second_base = commits[1]
+        second_blob = command("git", "rev-parse", second_base + ":" + SOURCE, cwd=qa_clone)
+        (review / "REVIEW_ONLY_PRIVATE_MANIFEST.json").write_text(json.dumps({
+            "schema": "dec-private-source-review-after-real-qa-v1",
+            "status": "TWO_SOURCE_STAGES_REVIEW_ONLY_ART_HOLD",
+            "human_approval": False, "github_pushes": 0,
             "source_file": SOURCE,
-            "accepted_cycles": [{"cycle": 1, "source_sha256": digests, "qa_commands": [1, 1]}],
-            "bundle_sha256": digest(bundle.read_bytes()),
-            "game_art_approved": False,
-            "model_code_publication_authorized": False,
+            "project_source_commit": second_base,
+            "project_source_blob": second_blob,
+        }), encoding="utf-8")
+        (stage / "SHAREABLE_PROMOTION_RESULT.json").write_text(json.dumps({
+            "qa_workspace_private": str(qa_clone),
+            "private_source_review_directory": str(review),
+            "status": "TWO_STAGES_INDEPENDENT_DOCKER_SOURCE_QA_LOCAL_COMMITS",
+            "completed_stages": 2, "private_source_review_stages": 2,
+            "github_pushes": 0,
+            "source_commit": second_base, "source_blob": second_blob,
+            "local_qa_commits": [{"commit": commits[2]}, {"commit": commits[3]}],
+        }), encoding="utf-8")
+        accepted = [
+            {"cycle": 1, "source_sha256": digests[:2], "qa_commands": [1, 1]},
+            {"cycle": 2, "source_sha256": digests[2:], "qa_commands": [1, 1]},
+        ]
+        summary = {
+            "completed_cycles": 2, "accepted_cycles": accepted,
+            "base_audited_public_source_commit": BASE_SHA,
+            "completed_qa_source_stages": 4, "private_review_stages": 4,
+            "github_pushes": 0, "original_source_modified": False,
         }
-        archive = root / "checkpoint.tar.gz"
-        with tarfile.open(archive, "w:gz") as tf:
-            for name, data in (("proof.json", json.dumps(proof).encode()),
-                               ("qa-commits.bundle", bundle.read_bytes())):
-                member = tarfile.TarInfo(name)
-                member.size = len(data)
-                member.mode = 0o600
-                tf.addfile(member, io.BytesIO(data))
+        report = session / "SHAREABLE_MAB_CUMULATIVE_SOURCE_QA.json"
+        report.write_text(json.dumps(summary), encoding="utf-8")
         encrypted = root / "encrypted-fixture.cms"
-        command("openssl", "cms", "-encrypt", "-aes-256-gcm", "-binary",
-                "-in", str(archive), "-outform", "DER", "-out", str(encrypted),
-                "-recip", str(certificate))
-        expected = digest(encrypted.read_bytes())
+        expected = _verified_private_checkpoint(
+            synthetic_private, report, summary,
+            certificate.read_text(encoding="utf-8"), encrypted)
+        if digest(encrypted.read_bytes()) != expected:
+            raise RuntimeError("SYNTHETIC_PRODUCTION_SEALER_SHA_MISMATCH")
         private_root = appdata / "FreeAutonomyPrivate/DecCheckpointRestored"
         restore_name = "qa-restored-" + final[:12] + ".git"
         runner_args = ["powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass",
@@ -123,7 +147,8 @@ def main() -> int:
         success = subprocess.run(runner_args, capture_output=True,
                                  text=True, encoding="utf-8", errors="replace", timeout=180)
         if success.returncode != 0 or \
-                "DEC_WINDOWS_PRIVATE_CHECKPOINT_RESTORE_PASS_REVIEW_ONLY" not in success.stdout:
+                "DEC_WINDOWS_PRIVATE_CHECKPOINT_RESTORE_PASS_REVIEW_ONLY" not in success.stdout or \
+                "VERIFIED_SOURCE_STAGES=4" not in success.stdout:
             # Only sanitized machine-readable reason codes leave the fixture.
             approved = ("DEC_WINDOWS_RESTORE_REJECT_CODE=",
                         "DEC_WINDOWS_RESTORE_HOLD_STAGE=",
@@ -143,7 +168,10 @@ def main() -> int:
         recipient = appdata / "FreeAutonomyPrivate/DecCheckpointRecipient"
         if list(recipient.glob("restore-*")) or list(recipient.rglob("temporary-private-key.pem")):
             raise RuntimeError("WINDOWS_PLAINTEXT_PRIVATE_KEY_RESIDUAL")
-        print("WINDOWS_DPAPI_TO_RESTORER_SYNTHETIC_ROUNDTRIP_PASS")
+        restored_proof = json.loads((saved / "qa-proof.private.json").read_text(encoding="utf-8"))
+        if len(restored_proof["accepted_cycles"]) != 2:
+            raise RuntimeError("WINDOWS_RESTORED_CYCLE_PROOF_INVALID")
+        print("WINDOWS_PRODUCTION_SEALER_DPAPI_FOUR_STAGE_ROUNDTRIP_PASS")
         # Repeated restores must fail closed, never overwrite a previous Git proof.
         negative = subprocess.run(runner_args, capture_output=True,
                                   text=True, encoding="utf-8", errors="replace", timeout=180)
@@ -164,6 +192,21 @@ def main() -> int:
         if list(recipient.glob("restore-*")):
             raise RuntimeError("WINDOWS_BAD_SHA_CREATED_TEMP_KEY")
         print("WINDOWS_DPAPI_TO_RESTORER_SHA_HOLD_PASS")
+        # Real producer must reject tampered synthetic source proof before encryption.
+        forged = json.loads(json.dumps(summary))
+        forged["accepted_cycles"][0]["source_sha256"][0] = "0" * 64
+        report.write_text(json.dumps(forged), encoding="utf-8")
+        rejected = root / "rejected-forged-fixture.cms"
+        try:
+            _verified_private_checkpoint(
+                synthetic_private, report, forged,
+                certificate.read_text(encoding="utf-8"), rejected)
+        except (ValueError, OSError, subprocess.SubprocessError):
+            if rejected.exists():
+                raise RuntimeError("SYNTHETIC_FORGED_CHECKPOINT_EXISTS")
+        else:
+            raise RuntimeError("SYNTHETIC_FORGED_SOURCE_HASH_ACCEPTED")
+        print("WINDOWS_PRODUCTION_SEALER_FORGED_HASH_REJECTED_PASS")
         # This fixture has not run independent Docker QA; never certify it.
         assert not (saved / "qa-reverification.private.json").exists()
         print("SYNTHETIC_ONLY_NO_MODEL_NO_DOCKER_NO_GAME_ADOPTION")
