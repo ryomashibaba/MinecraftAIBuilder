@@ -216,7 +216,7 @@ test('opt-in practical source entrance is clear of x-partition while all histori
  const legacyDoor=legacy.design.elements.find(x=>x.id==='exterior-entrance');
  const practicalDoor=practical.design.elements.find(x=>x.id==='exterior-entrance');
  const divider=practical.program[0].splitCoordinate;
- assert.equal(practicalDoor.origin[0],divider+2);
+ assert.equal(practicalDoor.origin[0],divider-2);
  assert.equal(legacyDoor.origin[0],Math.floor(original.footprint.width/2)-1);
  assert.equal(practical.planSha256,legacy.planSha256);
  assert.notEqual(practical.sourceSha256,legacy.sourceSha256);
@@ -225,6 +225,36 @@ test('opt-in practical source entrance is clear of x-partition while all histori
  assert.equal(JSON.stringify(original),snapshot);
  assert.equal(practical.worldWrites,0);
  assert.throws(()=>compileArchitecturePlan(original,{entrancePlacement:'unsafe'}),/R125_PLAN_ENTRANCE_PLACEMENT_MODE/);
+});
+test('four saved real Qwen plans retain frozen legacy geometry while opt-in entry placement is minimally safe',()=>{
+ const cases=[
+  ['../evidence/r125-real-l-corner-20261101/MODEL_RESPONSE_ORIGINAL.txt',10,true],
+  ['./fixtures/r125-qwen14b-residential-2024a.json',10,true],
+  ['./fixtures/r125-qwen14b-shop-20261024.json',11,false],
+  ['./fixtures/r125-qwen14b-research-20261024.json',10,true]
+ ];
+ for(const [path,expectedX,legacyCrossesDivider] of cases){
+  const original=JSON.parse(fs.readFileSync(new URL(path,import.meta.url),'utf8'));
+  const snapshot=JSON.stringify(original);
+  const frozen=compileArchitecturePlan(original);
+  const candidate=compileArchitecturePlan(original,{entrancePlacement:'source-accessible'});
+  const door=r=>r.design.elements.find(e=>e.id==='exterior-entrance').origin;
+  const oldX=door(frozen)[0],split=frozen.program[0].splitCoordinate;
+  assert.equal(oldX<=split&&oldX+1>=split,legacyCrossesDivider,original.id);
+  assert.equal(door(candidate)[0],expectedX,original.id);
+  assert.equal(candidate.planSha256,frozen.planSha256);
+  assert.equal(candidate.compiled.primitives.length,frozen.compiled.primitives.length);
+  assert.equal(verifyCompiled(candidate.design,candidate.compiled),true);
+  const cells=voxels(candidate.compiled),[x,y,z]=door(candidate);
+  for(let dx=0;dx<2;dx++)for(let dz=0;dz<2;dz++){
+   assert.equal(includes(cells,x+dx,y-1,z+1+dz),true,original.id+': floor');
+   for(let dy=0;dy<3;dy++)
+    assert.equal(includes(cells,x+dx,y+dy,z+1+dz),false,original.id+': headroom');
+  }
+  assert.equal(candidate.worldWrites,0);
+  assert.deepEqual(candidate.gates,Array(9).fill('BLOCKED'));
+  assert.equal(JSON.stringify(original),snapshot);
+ }
 });
 test('a south entry for z partition needs no source-accessible coordinate change',()=>{
  const original=plan('practical-research-lab',['z'],['experiment','records']);
@@ -401,7 +431,7 @@ test('model-selected ground entry zone changes real doorway while keeping routes
  const door=r=>r.design.elements.find(e=>e.id==='exterior-entrance').origin[0];
  assert.equal(door(first),first.program[0].splitCoordinate-2);
  assert.equal(door(second),second.program[0].splitCoordinate+2);
- assert.equal(old.geometrySha256,second.geometrySha256);
+ assert.equal(old.geometrySha256,first.geometrySha256);
  assert.notEqual(first.geometrySha256,second.geometrySha256);
  for(const p of [first,second]){
   assert.equal(verifyCompiled(p.design,p.compiled),true);

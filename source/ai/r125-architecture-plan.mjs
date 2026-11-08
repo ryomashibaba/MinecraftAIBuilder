@@ -18,10 +18,19 @@ const slug=s=>typeof s==='string'&&/^[a-z][a-z0-9-]{2,39}$/.test(s);
 const text=(s,max=180)=>typeof s==='string'&&s.length>=3&&s.length<=max&&
  !/[\u0000-\u001f<>]/.test(s);
 const integer=(v,a,b)=>Number.isSafeInteger(v)&&v>=a&&v<=b;
-// AI chooses the program-facing zone; HOST computes the opening.
-const groundEntryX=(axis,split,width,placement,zone)=>
- axis==='x'&&(zone!==undefined||placement==='source-accessible')?
-  (zone==='first'?split-2:split+2):Math.floor(width/2)-1;
+// Authored entry-zone choices always win. Otherwise, the opt-in path
+// preserves a clear centered entrance and moves it only if a divider blocks
+// the two-wide opening. This nearest-safe default is HOST geometry policy,
+// not a claim that the model authored the unprovided entry-zone choice.
+const groundEntryX=(axis,split,width,placement,zone)=>{
+ const center=Math.floor(width/2)-1;
+ if(axis!=='x')return center;
+ if(zone==='first')return split-2;
+ if(zone==='second')return split+2;
+ if(placement!=='source-accessible'||center+1<split||center>split)return center;
+ const first=split-2,second=split+2;
+ return Math.abs(center-first)<=Math.abs(center-second)?first:second;
+};
 export function validateArchitecturePlan(p){
  const standard=['schema','id','title','brief','footprint','levels','materials'];
  const expressive=Object.hasOwn(p??{},'expression');
