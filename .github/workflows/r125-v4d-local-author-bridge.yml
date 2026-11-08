@@ -450,7 +450,10 @@ jobs:
             $beforeV4HPosts = @(Get-Content -LiteralPath $env:MAB_V4D_FAKE_POST_LOG).Count
             $v4hStdout = Join-Path $env:RUNNER_TEMP 'v4h_launcher_stdout.txt'
             $v4hStderr = Join-Path $env:RUNNER_TEMP 'v4h_launcher_stderr.txt'
-            $v4hArgs = @('-NoProfile','-File',(Join-Path $PWD 'scripts/r125-v4h-real-qwen-trial.ps1'),'-ExpectedCommit',$env:GITHUB_SHA)
+            # This V4H fixture clones the protected legacy branch, NOT the current
+            # isolated Gate C HEAD. Verify that immutable baseline explicitly.
+            $v4hPinnedHead = '16c742266f01acb5f21d207735918c2d30bb2cf5'
+            $v4hArgs = @('-NoProfile','-File',(Join-Path $PWD 'scripts/r125-v4h-real-qwen-trial.ps1'),'-ExpectedCommit',$v4hPinnedHead)
             $child = Start-Process -FilePath (Get-Command pwsh).Source -ArgumentList $v4hArgs -NoNewWindow -PassThru -Wait -RedirectStandardOutput $v4hStdout -RedirectStandardError $v4hStderr
             Get-Content -LiteralPath $v4hStdout | ForEach-Object { Write-Host $_ }
             if ($child.ExitCode -ne 2) {
@@ -464,7 +467,7 @@ jobs:
             if ($share.Count -ne 1) { throw 'V4H_SAFE_ONE_FILE_HANDOFF_MISSING' }
             $result = Get-Content -LiteralPath $share[0].FullName -Raw | ConvertFrom-Json
             if ($result.schema -ne 'minecraftaibuilder-r125-v4h-one-local-qwen-audition-handoff-v1' -or
-                $result.researchHead -ne $env:GITHUB_SHA -or
+                $result.researchHead -ne $v4hPinnedHead -or
                 $result.modelGenerationAttempts -ne 1 -or
                 $result.sourceCandidateVerified -ne $false -or
                 $result.explicitlyInjectedTestResponse -ne $true -or
