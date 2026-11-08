@@ -51,7 +51,7 @@ export function createIntegratedSpatialHost({deriveIntegratedShell,compileDesign
   const reserved=new Map(author.spaces.map(s=>[s.key,new Set()]));
   reserved.get(author.entry.space).add(author.entry.face);
   for(const s of author.shelters)reserved.get(s.connectTo).add(s.edge);
-  const byKey=new Map(),attachments=new Map(),fixtureCounts=new Map();
+  const byKey=new Map(),fixtureCounts=new Map(),roofTrims=new Map(author.spaces.map(x=>[x.key,new Set()]));
   let base,entry;
   for(const [opIndex,op] of payload.operations.entries()){
    if(op.type==='CONCEPT')intent.purpose=op.concept;
@@ -127,6 +127,15 @@ export function createIntegratedSpatialHost({deriveIntegratedShell,compileDesign
      yes(side,'NO_SAFE_PARENT_CONTACT_'+op.key);reserved.get(parent.id).add(side);
      reserved.get(op.key).add({east:'west',west:'east',north:'south',south:'north'}[side]);
      const contactSide={east:'west',west:'east',north:'south',south:'north'}[side];
+     // A child overhanging its parent's contact span must own that entire
+     // shared edge. Otherwise trimming the child's whole edge leaves an
+     // unroofed tail not covered by the shorter parent room.
+     const [px,pz,pw,pd]=parent.rect;
+     const overhang=(side==='east'||side==='west')?
+      rect[1]<pz||rect[1]+rect[3]>pz+pd:
+      rect[0]<px||rect[0]+rect[2]>px+pw;
+     if(overhang)roofTrims.get(parent.id).add(side);
+     else roofTrims.get(op.key).add(contactSide);
      const o=opening('contact-'+opIndex,'passage',rect,contactSide),clearPad=pad(o);
      if(op.link.kind==='door'){
       const [x,z,w,d]=rect;
@@ -138,14 +147,16 @@ export function createIntegratedSpatialHost({deriveIntegratedShell,compileDesign
      intent.joins.push({spaces:[parent.id,op.key],openingId:op.link.kind==='door'?o.id:null,clearPad});
     }
     const space={id:op.key,purpose:op.purpose,rect};
-    intent.spaces.push(space);byKey.set(op.key,space);attachments.set(op.key,side);
+    intent.spaces.push(space);byKey.set(op.key,space);
    }else if(op.type==='ROOF'){
     yes(['shed','hip','barrel'].includes(op.profile),'ENGINE_PROFILE_UNSUPPORTED');
     const space=byKey.get(op.space);yes(space,'MISSING_ROOF_SPACE');
-    let [x,z,w,d]=space.rect;const side=attachments.get(op.space);
-    // The earlier parent owns their shared wall strip: exact, disjoint roof coverage.
-    if(side==='east'){x++;w--;}if(side==='west')w--;
-    if(side==='south'){z++;d--;}if(side==='north')d--;
+    let [x,z,w,d]=space.rect;const trims=roofTrims.get(op.space);
+    // Allocate the wall strip to whichever side spans it completely, never
+    // silently discard overhanging floor cells. The author roof form is kept.
+    if(trims.has('west')){x++;w--;}if(trims.has('east'))w--;
+    if(trims.has('north')){z++;d--;}if(trims.has('south'))d--;
+    yes(w>0&&d>0,'ENGINE_EMPTY_ROOF_REGION');
     const eaveY={primary:7,secondary:6,subordinate:5}[op.rank];
     intent.architecture.roofSections.push({id:'roof-'+op.space,rect:[x,z,w,d],eaves:edge(),
      profile:{form:op.profile,axis:op.axis,range:op.axis==='x'?[x,x+w-1]:[z,z+d-1],eaveY,rise:1}});
@@ -204,6 +215,22 @@ export function createIntegratedSpatialHost({deriveIntegratedShell,compileDesign
    journal.push({opIndex,type:op.type});
   }
   yes(intent.architecture.entry,'EXPLICIT_SHELTER_MUST_CONNECT_ENTRY');
+  // The existing PRIVATE engine rejects missing or overlapping roof coverage.
+  // Fail closed at the public boundary rather than hide a late engine error.
+  const roofs=new Set();
+  for(const sec of intent.architecture.roofSections){
+   const [x,z,w,d]=sec.rect;
+   for(let rx=x;rx<x+w;rx++)for(let rz=z;rz<z+d;rz++){
+    const k=rx+','+rz;
+    yes(!roofs.has(k),'ENGINE_ROOF_OVERLAP');roofs.add(k);
+   }
+  }
+  const floors=new Set();
+  for(const space of intent.spaces){
+   const [x,z,w,d]=space.rect;
+   for(let rx=x;rx<x+w;rx++)for(let rz=z;rz<z+d;rz++)floors.add(rx+','+rz);
+  }
+  yes(floors.size===roofs.size&&[...floors].every(k=>roofs.has(k)),'ENGINE_ROOF_COVERAGE');
   const first=intent.spaces[0];
   const design={schema:B143,id:author.id,title:'Semantic author common host SOURCE',brief:author.concept,
    bounds:{...intent.siteBounds},designOnly:true,elements:[

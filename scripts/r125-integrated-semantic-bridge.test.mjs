@@ -369,5 +369,18 @@ test('entry canopy footprint is reserved before sibling placement, without chang
  assert(expanded.intent.spaces.every(s=>!overlaps(canopy.rect,s.rect)));
  assert.equal(verifyCompiled(expanded.base.design,expanded.base.compiled),true);
  assert.equal(expanded.intent.architecture.entry.shelterId,canopy.id);
+ // A larger child overhangs its parent by one cell. The old all-edge trim
+ // silently dropped room2 floor (40,39) from every roof region, violating the
+ // real PRIVATE engine's full-coverage contract. Preserve author room cells.
+ assert.deepEqual(expanded.intent.architecture.roofSections.map(s=>s.rect),[
+  [41,40,8,11],[49,40,8,10],[29,39,12,12]]);
+ const planCells=rect=>{const [x,z,w,d]=rect,pts=[];
+  for(let i=x;i<x+w;i++)for(let j=z;j<z+d;j++)pts.push(i+','+j);
+  return pts;};
+ const floors=new Set(expanded.intent.spaces.flatMap(s=>planCells(s.rect)));
+ const roofCells=expanded.intent.architecture.roofSections.flatMap(s=>planCells(s.rect));
+ assert.equal(new Set(roofCells).size,roofCells.length,'no overlapping roof cells');
+ assert.deepEqual([...new Set(roofCells)].sort(),[...floors].sort(),
+  'every supported floor cell must have exactly one roof owner');
  // This is a synthetic HOST/seed proof, not an independent PRIVATE B143/ART pass.
 });
