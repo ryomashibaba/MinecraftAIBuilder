@@ -16,6 +16,7 @@ import {
  executeIntegratedSemanticBridge
 } from '../source/ai/r125-integrated-semantic-bridge.mjs';
 import {createIntegratedSpatialHost} from '../source/ai/r125-integrated-spatial-host.mjs';
+import {classifyOllamaStopEvidence} from '../source/ai/r125-v7-ollama-stop-evidence.mjs';
 
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const MODEL=/^[A-Za-z0-9._:/-]{2,140}$/;
@@ -94,7 +95,9 @@ const safeBase=(headSha,injected)=>({
  modelGenerationAttempts:0,rawCaptured:false,responseRawSha256:null,
  authorSha256:null,operationSha256:null,sourceSha256:null,
  geometrySha256:null,b143CellCount:null,
- b143Recompiled:false,unloadConfirmed:false,activeMonitorSamples:0,
+ b143Recompiled:false,clientAbortSignaled:false,ollamaCompletionObserved:false,
+ ollamaModelAbsentAtProbe:false,serverStopEvidence:'UNKNOWN',
+ unloadConfirmed:false,activeMonitorSamples:0,
  semanticFulfillment:'NOT_CERTIFIED',
  physicalAccess:'NOT_CERTIFIED',art:'NOT_REVIEWED',minecraftWalking:'NOT_TESTED',
  worldContacts:0,worldWrites:0,readiness:'NOT_PREPARED',
@@ -233,7 +236,7 @@ export async function runV7PrivateOnce({
     }
    }).catch(fault).finally(()=>{monitorPending=false;});
   },1000);
-  let raw;
+  let raw,completionResponseObserved=false;
   try{
    result.modelGenerationAttempts=1; // Count attempt even for HTTP failure.
    const response=await modelFetcher(LOCAL,{
@@ -263,6 +266,10 @@ export async function runV7PrivateOnce({
       parsedResponse.choices.length!==1)){
     result.status='HOLD_MODEL_RESPONSE';result.reason='NOT_ONE_CHOICE';return result;
    }
+   completionResponseObserved=injected
+    ? choice?.finish_reason==='stop'
+    : parsedResponse?.done===true&&parsedResponse?.done_reason==='stop';
+   result.ollamaCompletionObserved=completionResponseObserved;
    raw=injected?choice?.message?.content:parsedResponse?.message?.content;
    if(typeof raw==='string'&&raw.length>0&&raw.length<=250000){
     save(dir,'V7_MODEL_RESPONSE_ORIGINAL_PRIVATE.txt',raw);
@@ -275,10 +282,12 @@ export async function runV7PrivateOnce({
     result.status='HOLD_MODEL_RESPONSE';result.reason='MODEL_INCOMPLETE_OR_OVERSIZE';return result;
    }
   }catch{
+   result.clientAbortSignaled=controller.signal.aborted;
    result.status=monitorFault?'HOLD_MONITOR_INTERRUPTED':'HOLD_MODEL_HTTP';
    result.reason=monitorFault?'MONITOR_ABORTED_GENERATION':'MODEL_FAILED_OR_TIMEOUT';
    return result;
   }finally{
+   result.clientAbortSignaled=controller.signal.aborted;
    clearTimeout(timer);clearInterval(pulse);monitorActive=false;
    // GET-only verification, never a second cleanup POST or model retry.
    if(!injected&&result.modelGenerationAttempts>0){
@@ -287,12 +296,15 @@ export async function runV7PrivateOnce({
       redirect:'error',signal:AbortSignal.timeout(5000)});
      if(psResponse?.ok!==true)throw Error('PS_FAILED');
      const ps=JSON.parse(await psResponse.text());
-     if(!Array.isArray(ps?.models)||ps.models.length!==0)
-      throw Error('MODEL_STILL_LOADED');
-     result.unloadConfirmed=true;
+     const evidence=classifyOllamaStopEvidence({
+      clientAbortSignaled:controller.signal.aborted,
+      completionResponseObserved,models:ps?.models
+     });
+     Object.assign(result,evidence);
+     if(!result.unloadConfirmed)throw Error('SERVER_COMPLETION_AND_UNLOAD_NOT_CONFIRMED');
     }catch{
      result.status='HOLD_UNLOAD_UNKNOWN';
-     result.reason='UNLOAD_NOT_CONFIRMED';
+     result.reason='SERVER_COMPLETION_OR_UNLOAD_NOT_CONFIRMED';
     }
    }
   }
