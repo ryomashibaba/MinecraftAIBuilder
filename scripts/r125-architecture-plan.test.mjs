@@ -422,6 +422,47 @@ test('invalid AI-selected rear-corner side fails closed',()=>{
  assert.throws(()=>compileArchitecturePlan(p),/R125_PLAN_EXPRESSION_CORNER_CUT/);
 });
 
+test('opt-in rear setback stair threshold connects both upper zones without altering legacy SOURCE',()=>{
+ for(const [depth,percent,split] of [[16,60,7],[18,60,8],[24,40,8]]){
+  const original=plan('upper-stair-threshold',['x','z'],['community hall','workroom']);
+  original.footprint={width:24,depth};
+  original.levels[1].splitPercent=percent;
+  original.expression={setbackSide:'rear',setbackDepth:3,
+   roofProfile:'ridge',roofAxis:'x',facadeLanguage:'plain'};
+  const snapshot=structuredClone(original);
+  const legacy=compileArchitecturePlan(original,{entrancePlacement:'source-accessible'});
+  const optIn=compileArchitecturePlan(original,{
+   entrancePlacement:'source-accessible',upperDoorPlacement:'stair-clear'});
+  const oldRoutes=auditR125SourceRoutes(legacy),routes=auditR125SourceRoutes(optIn);
+  assert.equal(oldRoutes.status,'HOLD_SOURCE_ROUTES');
+  assert.equal(routes.status,'SOURCE_ROUTES_REACH_ALL_ZONES',JSON.stringify(routes.issues));
+  assert(routes.zones.every(z=>z.reachedFromEntrance));
+  assert.equal(verifyCompiled(optIn.design,optIn.compiled),true);
+  assert.equal(legacy.planSha256,optIn.planSha256);
+  assert.deepEqual(original,snapshot);
+  const relief=optIn.design.elements.find(e=>e.id==='l1-stair-threshold-relief');
+  assert.deepEqual(relief.origin,[3,7,split]);
+  assert.deepEqual(relief.size,[2,3,1]);
+  const ordinary=optIn.design.elements.find(e=>e.id==='l1-internal-door');
+  assert.deepEqual(ordinary.origin,[7,7,split]);
+  const cells=voxels(optIn.compiled);
+  assert.equal(includes(cells,3,6,split),true,'supported landing survives');
+  assert.equal(includes(cells,3,7,split),false,'threshold is clear');
+  assert.equal(includes(cells,7,7,split),false,'room doorway remains clear');
+  assert.equal(includes(cells,6,7,split),true,'separate passage preserves intervening wall');
+  assert.equal(optIn.worldWrites,0);
+  assert.deepEqual(optIn.gates,Array(9).fill('BLOCKED'));
+ }
+ const unaffected=plan('far-upper-divider',['x','z'],['family lounge','private room']);
+ unaffected.footprint={width:24,depth:24};
+ unaffected.levels[1].splitPercent=60;
+ unaffected.expression={setbackSide:'rear',setbackDepth:3,
+  roofProfile:'ridge',roofAxis:'x',facadeLanguage:'plain'};
+ const other=compileArchitecturePlan(unaffected,{
+  entrancePlacement:'source-accessible',upperDoorPlacement:'stair-clear'});
+ assert.equal(other.design.elements.some(e=>e.id==='l1-stair-threshold-relief'),false);
+ assert.equal(auditR125SourceRoutes(other).status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+});
 test('model-selected ground entry zone changes real doorway while keeping routes',()=>{
  const base=plan('two-zone-entrance',['x'],['visitor hall','storage room']);
  const snapshot=structuredClone(base);

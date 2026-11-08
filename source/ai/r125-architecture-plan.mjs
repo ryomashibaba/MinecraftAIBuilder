@@ -354,6 +354,14 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
      Math.max(x0+2,Math.min(x1-3,3+2+2)):
      x0+2;
     box(tag+'-internal-door','cut',null,[doorX,y,split],[2,3,1]);
+    // The fixed five-tread stair ends at z=7 and lands at z=8.
+    // If an upper z-divider crosses either cell, moving the normal room
+    // door clear of the shaft also blocks the ascent. Research opt-in only:
+    // keep the normal room door and open a separate two-wide threshold.
+    const stairLastTreadZ=3+5-1;
+    if(l===1&&upperDoorPlacement==='stair-clear'&&
+       split>=stairLastTreadZ&&split<=stairLastTreadZ+1)
+     box(tag+'-stair-threshold-relief','cut',null,[3,y,split],[2,3,1]);
   }
   if(l===0)
    box('exterior-entrance','cut',null,
