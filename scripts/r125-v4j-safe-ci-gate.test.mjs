@@ -3,8 +3,12 @@ import assert from 'node:assert/strict';
 import {REQUIRED_CHECKS,assessCiRuns,checkExactHeadCi,waitForExactHeadCi}
  from './r125-v4j-safe-ci-gate.mjs';
 const sha='a'.repeat(40),wrong='b'.repeat(40);
-const run=(name,head_sha,status='completed',conclusion='success',id=1)=>
- ({name,head_sha,status,conclusion,id});
+const run=(name,head_sha,status='completed',conclusion='success',id=1,event)=>
+ ({name,head_sha,status,conclusion,id,
+  event:event??(name===REQUIRED_CHECKS[1]?'workflow_dispatch':'push'),
+  path:name===REQUIRED_CHECKS[0]
+   ?'.github/workflows/r125-v4d-local-author-bridge.yml'
+   :name===REQUIRED_CHECKS[1]?'.github/workflows/qa.yml':'other.yml'});
 test('exact GitHub HEAD must have BOTH named workflows completed SUCCESS',()=>{
  const runs=[run(REQUIRED_CHECKS[0],sha),run(REQUIRED_CHECKS[1],sha,'completed','success',2)];
  assert.equal(assessCiRuns(runs,sha).safeToRunModel,true);
@@ -72,4 +76,24 @@ test('incomplete or excessive paginated workflow evidence holds without a model 
  await assert.rejects(checkExactHeadCi(sha,{fetcher:async()=>({
   ok:true,json:async()=>({total_count:501,workflow_runs:unrelated})
  })}),/CI_PAGINATION_LIMIT_HOLD/);
+});
+
+test('a pull_request merge checkout must not masquerade as exact-head QA',()=>{
+ const runs=[run(REQUIRED_CHECKS[0],sha),
+  run(REQUIRED_CHECKS[1],sha,'completed','success',2,'pull_request')];
+ const result=assessCiRuns(runs,sha);
+ assert.equal(result.safeToRunModel,false);
+ assert.equal(result.permanentlyBlocked,false);
+ assert.equal(result.checks[1].status,'NOT_FOUND');
+});
+test('a required workflow label at the wrong path cannot approve a model POST',()=>{
+ const runs=[run(REQUIRED_CHECKS[0],sha),
+  {...run(REQUIRED_CHECKS[1],sha,'completed','success',2),path:'.github/workflows/other.yml'}];
+ assert.equal(assessCiRuns(runs,sha).safeToRunModel,false);
+});
+test('latest eligible same-HEAD run must win over its older success',()=>{
+ const ok=[run(REQUIRED_CHECKS[0],sha),run(REQUIRED_CHECKS[1],sha,'completed','success',2)];
+ const failed=[...ok,run(REQUIRED_CHECKS[1],sha,'completed','failure',3)];
+ assert.equal(assessCiRuns(failed,sha).safeToRunModel,false);
+ assert.equal(assessCiRuns(failed,sha).permanentlyBlocked,true);
 });

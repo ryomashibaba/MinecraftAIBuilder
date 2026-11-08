@@ -9,12 +9,21 @@ export const REQUIRED_CHECKS=[
  'R125 V4D Local Author Bridge — INJECTED TEST ONLY',
  'Education-first offline QA'
 ];
+// The Actions API's head_sha on a pull_request run identifies its source
+// branch, but checkout@v4 tests refs/pull/N/merge by default, NOT that HEAD.
+// Only direct-HEAD event types at the expected workflow file are eligible.
+const REQUIRED_WORKFLOW_PATHS=new Map([
+ [REQUIRED_CHECKS[0],'.github/workflows/r125-v4d-local-author-bridge.yml'],
+ [REQUIRED_CHECKS[1],'.github/workflows/qa.yml']
+]);
+const DIRECT_HEAD_EVENTS=new Set(['push','workflow_dispatch']);
 export function assessCiRuns(runs,sha){
  if(!SHA.test(sha)||!Array.isArray(runs))throw Error('CI_INPUT_INVALID');
  const latest=new Map();
  for(const r of runs){
   if(!r||r.head_sha!==sha||!REQUIRED_CHECKS.includes(r.name)||
-   !Number.isSafeInteger(r.id))continue;
+   !Number.isSafeInteger(r.id)||!DIRECT_HEAD_EVENTS.has(r.event)||
+   r.path!==REQUIRED_WORKFLOW_PATHS.get(r.name))continue;
   if(!latest.has(r.name)||latest.get(r.name).id<r.id)latest.set(r.name,r);
  }
  const detail=REQUIRED_CHECKS.map(name=>{
