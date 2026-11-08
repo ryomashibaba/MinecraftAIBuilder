@@ -284,6 +284,17 @@ def experiment() -> dict:
                 result["qa_hold_reason_code"] = status["qa_hold_reason_code"]
             if status.get("draft_hold_reason_code"):
                 result["draft_hold_reason_code"] = status["draft_hold_reason_code"]
+            # Export codes only, never private model text, paths or patches.
+            rejected = status.get("draft_rejection_reason_codes")
+            if isinstance(rejected, list):
+                safe_codes = sorted({
+                    code for code in rejected[:8]
+                    if isinstance(code, str)
+                    and re.fullmatch(r"[A-Z][A-Z0-9_]{2,130}", code)
+                    and code != "PRIVATE_DIAGNOSTIC_NOT_SHAREABLE"
+                })
+                if safe_codes:
+                    result["draft_rejection_reason_codes"] = safe_codes
             if status.get("reason_code"):
                 result["reason_code"] = status["reason_code"]
             accepted = status.get("accepted_cycles", [])
