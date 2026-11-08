@@ -76,6 +76,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import os
+          import hashlib
           from pathlib import Path
           import subprocess
           import tempfile
@@ -95,6 +96,23 @@ jobs:
                   capture_output=True, timeout=15, check=False)
               if check.returncode != 0:
                   print("HOLD_RECIPIENT_CERT_INVALID_OR_EXPIRING_NO_MODEL_CALL")
+                  raise SystemExit(2)
+          # Pin the independently verified owner recovery certificate (DER).
+          # Checking X.509 validity alone cannot prevent an unrecoverable
+          # checkpoint if the GitHub Secret contains a different certificate.
+          with tempfile.TemporaryDirectory(prefix="dec-owner-cert-pin-") as d:
+              path = Path(d) / "recipient.pem"
+              path.write_text(cert, encoding="utf-8")
+              der = subprocess.run(
+                  ["openssl", "x509", "-in", str(path), "-outform", "DER"],
+                  capture_output=True, timeout=15, check=False)
+              expected_der_sha256 = (
+                  "adc9195f8d6e303005aa45e1a80f52e"
+                  "9c82ddeece749235d5f3dd85f63009483"
+              )
+              if (der.returncode != 0 or
+                      hashlib.sha256(der.stdout).hexdigest() != expected_der_sha256):
+                  print("HOLD_RECIPIENT_CERT_NOT_OWNER_PINNED_NO_MODEL_CALL")
                   raise SystemExit(2)
           print("OWNER_CHECKPOINT_CONSENT_AND_CERT_PREFLIGHT_PASS")
           PY
