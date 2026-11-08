@@ -337,3 +337,37 @@ test('room-sibling lookahead preserves authorship while avoiding greedy contact 
  assert.equal(expanded.intent.architecture.shelters.length,1);
  // This remains synthetic HOST/seed B143 evidence, never PRIVATE, ART, or model authorship.
 });
+
+test('entry canopy footprint is reserved before sibling placement, without changing authored choices',()=>{
+ const h=createIntegratedSpatialHost({deriveIntegratedShell:()=>{throw Error('PRIVATE_ONLY');}});
+ const a=supportedSpatialAuthor();
+ a.spaces=[
+  {key:'room0',purpose:'Common public meeting and circulation',link:null,
+   footprint:{width:9,depth:11}},
+  {key:'room1',purpose:'Sheltered visitor arrival and waiting room',
+   link:{to:'room0',kind:'open'},footprint:{width:9,depth:10}},
+  {key:'room2',purpose:'Public activities and display room',
+   link:{to:'room0',kind:'open'},footprint:{width:12,depth:12}}
+ ];
+ a.roofs=[
+  {space:'room0',profile:'hip',axis:'x',rank:'primary'},
+  {space:'room1',profile:'barrel',axis:'z',rank:'secondary'},
+  {space:'room2',profile:'barrel',axis:'x',rank:'secondary'}
+ ];
+ a.entry={face:'south',space:'room1',intent:'Covered arrival and wayfinding'};
+ a.shelters=[{purpose:'Exterior covered arrival for visitors',
+  connectTo:'room1',edge:'south',scale:'small',roof:'flat'}];
+ a.features=[{space:'room0',kind:'seat',purpose:'Visitor seating and rest'}];
+ const prepared=prepareIntegratedSemanticBridge(a),expanded=h.expand(prepared.payload);
+ assertAuthoredSemanticsUnchanged(prepared,expanded.authorEcho);
+ assert.deepEqual(expanded.intent.spaces.map(s=>[s.id,s.rect]),[
+  ['room0',[40,40,9,11]],['room1',[48,40,9,10]],['room2',[29,39,12,12]]]);
+ const canopy=expanded.intent.architecture.shelters[0];
+ assert.deepEqual(canopy.rect,[49,50,6,4]);
+ const overlaps=(r,s)=>r[0]<s[0]+s[2]&&s[0]<r[0]+r[2]&&
+  r[1]<s[1]+s[3]&&s[1]<r[1]+r[3];
+ assert(expanded.intent.spaces.every(s=>!overlaps(canopy.rect,s.rect)));
+ assert.equal(verifyCompiled(expanded.base.design,expanded.base.compiled),true);
+ assert.equal(expanded.intent.architecture.entry.shelterId,canopy.id);
+ // This is a synthetic HOST/seed proof, not an independent PRIVATE B143/ART pass.
+});

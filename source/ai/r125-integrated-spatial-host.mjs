@@ -85,6 +85,27 @@ export function createIntegratedSpatialHost({deriveIntegratedShell,compileDesign
        // Shared wall columns are allowed; overlapping unrelated interiors are not.
        return dx>1||dz>1;
       }))return null;
+      // Project every already-anchored authored shelter before committing a
+      // contact. An otherwise valid room may block a later public entry canopy.
+      const rooms=[...placed,{id:room.key,rect:c}];
+      const projected=[];
+      for(const shelter of author.shelters){
+       const owner=rooms.find(s=>s.id===shelter.connectTo);
+       if(!owner)continue;
+       const [x,z,w,d]=owner.rect;
+       const scale={small:[6,4],medium:[8,6],large:[10,8]}[shelter.scale];
+       if(!scale)return null;
+       const [a,b]=scale;
+       if((shelter.edge==='north'||shelter.edge==='south'?w:d)<a)continue;
+       const sh=shelter.edge==='north'?[x+Math.floor((w-a)/2),z-b,a,b]:
+        shelter.edge==='south'?[x+Math.floor((w-a)/2),z+d,a,b]:
+        shelter.edge==='east'?[x+w,z+Math.floor((d-a)/2),b,a]:
+        [x-b,z+Math.floor((d-a)/2),b,a];
+       if(sh[0]<1||sh[1]<1||sh[0]+sh[2]>=124||sh[1]+sh[3]>=124||
+          rooms.some(other=>other.id!==owner.id&&intersects(sh,other.rect))||
+          projected.some(previous=>intersects(sh,previous)))return null;
+       projected.push(sh);
+      }
       return c;
      };
      const later=payload.operations.slice(opIndex+1).filter(x=>
