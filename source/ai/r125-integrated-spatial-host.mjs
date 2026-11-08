@@ -63,25 +63,46 @@ export function createIntegratedSpatialHost({deriveIntegratedShell,compileDesign
     let rect=[40,40,cw,cd],side=null,parent;
     if(op.link){
      parent=byKey.get(op.link.to);yes(parent,'MISSING_PARENT');
-     side=sides.find(side=>{
-      if(reserved.get(parent.id).has(side))return false;
-      const childEdge={east:'west',west:'east',north:'south',south:'north'}[side];
-      if(reserved.get(op.key).has(childEdge))return false;
-      const [x,z,w,d]=parent.rect;
-      const c=side==='east'?[x+w-1,z+Math.floor((d-cd)/2),cw,cd]:
-       side==='west'?[x-cw+1,z+Math.floor((d-cd)/2),cw,cd]:
-       side==='south'?[x+Math.floor((w-cw)/2),z+d-1,cw,cd]:
-       [x+Math.floor((w-cw)/2),z-cd+1,cw,cd];
-      if(c[0]<2||c[1]<2||c[0]+cw>=123||c[1]+cd>=123)return false;
-      if(intent.spaces.some(s=>{
+     // Bounded sibling lookahead prevents a small early room from occupying
+     // the only viable contact for a later larger room. This never changes
+     // authored space order, room links, or source provenance.
+     const opposite={east:'west',west:'east',north:'south',south:'north'};
+     const position=(foot,dir)=>{
+      const [x,z,w,d]=parent.rect,ww=foot.width,dd=foot.depth;
+      return dir==='east'?[x+w-1,z+Math.floor((d-dd)/2),ww,dd]:
+       dir==='west'?[x-ww+1,z+Math.floor((d-dd)/2),ww,dd]:
+       dir==='south'?[x+Math.floor((w-ww)/2),z+d-1,ww,dd]:
+       [x+Math.floor((w-ww)/2),z-dd+1,ww,dd];
+     };
+     const valid=(room,dir,placed,used)=>{
+      if(used.has(dir)||reserved.get(room.key).has(opposite[dir]))return null;
+      const c=position(room.footprint??{width:12,depth:10},dir);
+      if(c[0]<2||c[1]<2||c[0]+c[2]>=123||c[1]+c[3]>=123)return null;
+      if(placed.some(s=>{
        if(s.id===parent.id||!intersects(c,s.rect))return false;
-       const overlapX=Math.min(c[0]+c[2],s.rect[0]+s.rect[2])-Math.max(c[0],s.rect[0]);
-       const overlapZ=Math.min(c[1]+c[3],s.rect[1]+s.rect[3])-Math.max(c[1],s.rect[1]);
-       // A shared corner is a solid wall column, not an unrequested doorway.
-       return overlapX>1||overlapZ>1;
-      }))return false;
-      rect=c;return true;
+       const dx=Math.min(c[0]+c[2],s.rect[0]+s.rect[2])-Math.max(c[0],s.rect[0]);
+       const dz=Math.min(c[1]+c[3],s.rect[1]+s.rect[3])-Math.max(c[1],s.rect[1]);
+       // Shared wall columns are allowed; overlapping unrelated interiors are not.
+       return dx>1||dz>1;
+      }))return null;
+      return c;
+     };
+     const later=payload.operations.slice(opIndex+1).filter(x=>
+      x.type==='SPACE'&&x.link?.to===parent.id);
+     const canFitLater=(i,placed,used)=>i===later.length||sides.some(dir=>{
+      const c=valid(later[i],dir,placed,used);
+      return c!==null&&canFitLater(i+1,[...placed,{id:later[i].key,rect:c}],
+       new Set([...used,dir]));
      });
+     const used=reserved.get(parent.id);
+     const candidates=sides.map(dir=>({side:dir,rect:valid(op,dir,intent.spaces,used)}))
+      .filter(x=>x.rect!==null);
+     // Favor the historical first-fit layout if it leaves all later siblings
+     // feasible. Only change direction when that first-fit demonstrably traps
+     // another room, preserving the author's original order and room links.
+     const chosen=candidates.find(x=>canFitLater(0,[...intent.spaces,
+      {id:op.key,rect:x.rect}],new Set([...used,x.side])))??candidates[0];
+     side=chosen?.side;rect=chosen?.rect??rect;
      yes(side,'NO_SAFE_PARENT_CONTACT_'+op.key);reserved.get(parent.id).add(side);
      reserved.get(op.key).add({east:'west',west:'east',north:'south',south:'north'}[side]);
      const contactSide={east:'west',west:'east',north:'south',south:'north'}[side];

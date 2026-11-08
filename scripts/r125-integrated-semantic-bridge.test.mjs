@@ -302,3 +302,38 @@ test('invalid and physically impossible authored dimensions reject rather than s
   a.features.push({space:'reading',kind:'seat',purpose:'Second seating area'});
  }),/FIXTURE_OUTSIDE_ROOM/);
 });
+
+test('room-sibling lookahead preserves authorship while avoiding greedy contact dead-end',()=>{
+ const h=createIntegratedSpatialHost({deriveIntegratedShell:()=>{throw Error('PRIVATE_ONLY');}});
+ const a=supportedSpatialAuthor();
+ a.spaces[0].footprint={width:11,depth:11};
+ a.spaces[1].footprint={width:12,depth:11};
+ a.spaces[1].link.kind='door';
+ a.spaces.push({key:'records',purpose:'Compact protected archive and records',
+  link:{to:'reading',kind:'door'},footprint:{width:8,depth:8}});
+ a.spaces.push({key:'gallery',purpose:'Wide community exhibition gallery',
+  link:{to:'reading',kind:'door'},footprint:{width:13,depth:10}});
+ a.roofs.push({space:'records',profile:'shed',axis:'x',rank:'secondary'},
+  {space:'gallery',profile:'shed',axis:'x',rank:'secondary'});
+ a.entry={space:'gallery',face:'south',intent:'Direct public gallery entrance'};
+ a.shelters[0].connectTo='gallery';
+ a.shelters[0].edge='south';
+ const prepared=prepareIntegratedSemanticBridge(a);
+ const expanded=h.expand(prepared.payload);
+ assertAuthoredSemanticsUnchanged(prepared,expanded.authorEcho);
+ assert.equal(verifyCompiled(expanded.base.design,expanded.base.compiled),true);
+ assert.deepEqual(expanded.intent.spaces.map(s=>[s.id,s.rect]),[
+  ['hall',[40,40,11,11]],['reading',[50,40,12,11]],
+  ['records',[52,50,8,8]],['gallery',[61,40,13,10]]]);
+ // Only the independent sibling declaration order changes. No topology,
+ // purpose, roof or ENTRY rewrite is needed to obtain the same rectangles.
+ const reordered=structuredClone(a);
+ [reordered.spaces[2],reordered.spaces[3]]=[reordered.spaces[3],reordered.spaces[2]];
+ const other=h.expand(prepareIntegratedSemanticBridge(reordered).payload);
+ const byKey=x=>Object.fromEntries(x.intent.spaces.map(s=>[s.id,s.rect]));
+ assert.deepEqual(byKey(expanded),byKey(other));
+ assert.equal(expanded.intent.joins.length,4);
+ assert.equal(expanded.intent.architecture.roofSections.length,4);
+ assert.equal(expanded.intent.architecture.shelters.length,1);
+ // This remains synthetic HOST/seed B143 evidence, never PRIVATE, ART, or model authorship.
+});
