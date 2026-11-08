@@ -312,12 +312,14 @@ export async function runV7PrivateOnce({
    result.status='HOLD_MONITOR_INTERRUPTED';
    result.reason='MONITOR_ABORT_OR_STALE';return result;
   }
+  // Preserve the stronger unload-unknown failure before assessing sample count.
+  // Both are HOLD; never mask a known server-stop/unload uncertainty.
+  if(!injected&&!result.unloadConfirmed)return result;
   // A very quick response has zero active samples; only preflight was tested.
   if(!injected&&result.activeMonitorSamples<1){
    result.status='HOLD_NO_LIVE_MONITOR_SAMPLES';
    result.reason='NO_DURING_INFERENCE_SAMPLE';return result;
   }
-  if(!injected&&!result.unloadConfirmed)return result;
   let author;
   try{author=JSON.parse(raw);}catch{
    result.status='HOLD_AUTHOR';result.reason='AUTHOR_NOT_PURE_JSON';return result;
