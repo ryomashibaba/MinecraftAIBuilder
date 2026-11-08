@@ -446,7 +446,15 @@ test('opt-in rear setback stair threshold connects both upper zones without alte
   const ordinary=optIn.design.elements.find(e=>e.id==='l1-internal-door');
   assert.deepEqual(ordinary.origin,[7,7,split]);
   const cells=voxels(optIn.compiled);
-  assert.equal(includes(cells,3,6,split),true,'supported landing survives');
+  // z=7 is the last stair tread with a deliberately absent upper slab.
+  // z=8 is the supported landing; both must survive a relief at z=7 or 8.
+  assert.equal(includes(cells,3,5,7),true,'last stair tread survives');
+  assert.equal(includes(cells,3,6,7),false,'upper stair shaft stays open');
+  assert.equal(includes(cells,3,6,8),true,'supported upper landing survives');
+  const stairs=auditArchitecturePlanCirculation(optIn);
+  assert.equal(stairs.status,'SOURCE_CLEARANCE_PROBES_PASS');
+  assert.equal(stairs.stairFlights[0].clearSupportedTreads,5);
+  assert.equal(stairs.stairFlights[0].sourceUpperLandingPass,true);
   assert.equal(includes(cells,3,7,split),false,'threshold is clear');
   assert.equal(includes(cells,7,7,split),false,'room doorway remains clear');
   assert.equal(includes(cells,6,7,split),true,'separate passage preserves intervening wall');
