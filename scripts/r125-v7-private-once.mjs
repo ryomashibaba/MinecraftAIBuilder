@@ -256,7 +256,8 @@ export async function runV7PrivateOnce({
    try{parsedResponse=JSON.parse(body);}catch{
     result.status='HOLD_MODEL_RESPONSE';result.reason='HTTP_JSON_INVALID';return result;
    }
-   if(parsedResponse?.model!==undefined&&parsedResponse.model!==model){
+   // Missing response identity is as untrusted as a different model name.
+   if(parsedResponse?.model!==model){
     result.status='HOLD_MODEL_RESPONSE';result.reason='MODEL_NAME_MISMATCH';return result;
    }
    // Existing injected tests use the older mock shape; real Ollama
