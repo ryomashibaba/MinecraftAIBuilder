@@ -184,7 +184,7 @@ test('V7 optional model contract names only currently implemented PRIVATE HOST c
  assert.equal(INTEGRATED_SPATIAL_V7_SUPPORTED_PROTOCOL,'V7_PRIVATE_SINGLE_SEMANTIC_SPATIAL_HOST_V1');
  assert(prompt.includes(INTEGRATED_SEMANTIC_SCHEMA));
  assert(prompt.includes('2..4 rooms'));
- assert(prompt.includes('profile:shed'));
+ assert(prompt.includes('profile:shed|hip|barrel'));
  assert(prompt.includes('face:north|south'));
  assert(prompt.includes('roof:flat'));
  assert(prompt.includes('no more than TWO per room'));
@@ -228,6 +228,33 @@ test('every sheltered entrance/contact pad lies on outdoor floor, never inside r
  }
 });
 
+test('V7 roof form choices survive author handoff and generic HOST without silent replacement',()=>{
+ const h=createIntegratedSpatialHost({deriveIntegratedShell:()=>{throw Error('PRIVATE_ENGINE_REQUIRED')}});
+ const original=supportedSpatialAuthor(),baseline=h.expand(prepareIntegratedSemanticBridge(original).payload);
+ assert.deepEqual(baseline.intent.architecture.roofSections.map(x=>x.profile.form),['shed','shed']);
+ const varied=structuredClone(original);
+ varied.roofs[0].profile='hip';varied.roofs[1].profile='barrel';
+ varied.roofs[1].axis='x';
+ const prepared=prepareIntegratedSemanticBridge(varied);
+ const expanded=h.expand(prepared.payload);
+ assertAuthoredSemanticsUnchanged(prepared,expanded.authorEcho);
+ assert.deepEqual(expanded.intent.architecture.roofSections.map(x=>x.profile.form),['hip','barrel']);
+ assert.deepEqual(expanded.intent.architecture.roofSections.map(x=>x.profile.axis),['x','x']);
+ assert.deepEqual(expanded.intent.architecture.roofSections.map(x=>x.profile.eaveY),[7,6]);
+ assert(expanded.intent.architecture.roofSections.every(x=>x.profile.rise===1));
+ assert.deepEqual(expanded.intent.spaces,baseline.intent.spaces);
+ assert.deepEqual(expanded.intent.joins,baseline.intent.joins);
+ assert.deepEqual(expanded.intent.architecture.shelters,baseline.intent.architecture.shelters);
+ assert.equal(verifyCompiled(expanded.base.design,expanded.base.compiled),true);
+ assert.deepEqual(expanded.base.design,baseline.base.design);
+ // This proves only HOST handoff. PRIVATE rendering, final pathing and ART remain untested.
+ for(const profile of ['gable','flat','segmented']){
+  const x=structuredClone(original);x.roofs[0].profile=profile;
+  assert.throws(()=>h.expand(prepareIntegratedSemanticBridge(x).payload),/ENGINE_PROFILE_UNSUPPORTED/);
+ }
+ const shelter=structuredClone(original);shelter.shelters[0].roof='hip';
+ assert.throws(()=>h.expand(prepareIntegratedSemanticBridge(shelter).payload),/ENGINE_SHELTER_PROFILE_UNSUPPORTED/);
+});
 test('optional authored footprint changes host rectangles and real B143 support floor without altering legacy',()=>{
  const h=createIntegratedSpatialHost({deriveIntegratedShell:()=>{throw Error('PRIVATE_NOT_AVAILABLE')}});
  const legacy=supportedSpatialAuthor(),unchanged=h.expand(prepareIntegratedSemanticBridge(legacy).payload);

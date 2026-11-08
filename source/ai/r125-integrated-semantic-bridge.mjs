@@ -21,7 +21,7 @@ const words = x => typeof x === 'string' && x.length >= 3 &&
  x.length <= 160 && !/[\u0000-\u001f<>]/.test(x);
 const sha = x => createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const sides = ['north','south','east','west'];
-const profiles = ['gable','shed','flat','segmented'];
+const profiles = ['gable','shed','flat','segmented','hip','barrel'];
 const scales = ['small','medium','large'];
 const fixtures = ['seat','worktop','storage','display','service','equipment'];
 const hold = reason => ({
@@ -198,7 +198,7 @@ export const INTEGRATED_SEMANTIC_AUTHOR_PROMPT=[
  'Return only one JSON object with schema,id,concept,spaces,roofs,entry,shelters,features.',
  'schema='+INTEGRATED_SEMANTIC_SCHEMA,
  'Use 2..8 spaces in parent-before-child order. Each has key,purpose,link; first link=null; others link={to:earlierKey,kind:door|open}. Optional per-space footprint:{width:8..14,depth:8..14}; omitted=12x10. Coordinate-free dimensions only.',
- 'Each space has one roof entry {space,profile:gable|shed|flat|segmented,axis:x|z,rank:primary|secondary|subordinate}; exactly one primary.',
+ 'Each space has one roof entry {space,profile:gable|shed|flat|segmented|hip|barrel,axis:x|z,rank:primary|secondary|subordinate}; exactly one primary.',
  'Entry {face:north|south|east|west,space:key,intent:meaningfulText}.',
  'Shelters 0..3: {purpose,connectTo:key,edge:north|south|east|west,scale:small|medium|large,roof:gable|shed|flat|segmented}.',
  'Features 1..16: {space:key,kind:seat|worktop|storage|display|service|equipment,purpose:meaningfulText}.',
@@ -219,7 +219,7 @@ export const INTEGRATED_SPATIAL_V7_SUPPORTED_PROMPT=[
  'concept, purposes, entry intent are nonempty meaningful natural-language strings of 3..160 characters each.',
  'spaces: 2..4 rooms in parent-before-child order, EXACT {key,purpose,link} or {key,purpose,link,footprint:{width,depth}}; first link:null, later link:{to:<earlier-key>,kind:door|open}. Author relationships, functions and optional dimensions yourself.',
  'Room footprint is 12x10 by default. Optional footprint width and depth are integers 8..14; each room may differ. This V7 HOST cannot make nonrectangular, multistorey or gabled rooms. Do not claim those capabilities.',
- 'roofs: exactly ONE per room, EXACT {space,profile:shed,axis:x|z,rank:primary|secondary|subordinate}. EXACTLY ONE primary roof, all roofs must be shed.',
+ 'roofs: exactly ONE per room, EXACT {space,profile:shed|hip|barrel,axis:x|z,rank:primary|secondary|subordinate}. EXACTLY ONE primary roof. Each roof uses the requested form; unsupported forms HOLD.',
  'entry: EXACT {face:north|south,space:<one-room-key>,intent:<meaningful-intent>}.',
  'shelters: EXACTLY ONE shelter: {purpose,connectTo:<entry.space>,edge:<entry.face>,scale:small|medium|large,roof:flat}. The shelter MUST attach to the entry room on the entry side.',
  'features: 1..5 items, no more than TWO per room; each EXACT {space:<room-key>,kind:seat|worktop|storage|display|service|equipment,purpose:<meaningful-role>}.',

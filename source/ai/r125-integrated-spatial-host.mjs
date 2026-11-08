@@ -1,7 +1,7 @@
 /** Common mechanical expansion for the existing PRIVATE integrated-shell.
  * No genre/purpose-name dispatch. Existing frozen engine is injected explicitly.
  * Supported scope: 2..6 rectangular room footprints (default 12x10; optional 8..14), parent tree, door/open,
- * shed roofs, north/south entry, explicit flat entry shelter, six fixture kinds.
+ * shed/hip/barrel room roofs, north/south entry, explicit flat entry shelter, six fixture kinds.
  * Unsupported profiles/anchors/capacity HOLD; no substitution or retry.
  * Layout is HOST-derived, not model-authored coordinates. Building beauty,
  * structural capacity, semantic function and in-game use remain uncertified.
@@ -91,7 +91,7 @@ export function createIntegratedSpatialHost({deriveIntegratedShell,compileDesign
     const space={id:op.key,purpose:op.purpose,rect};
     intent.spaces.push(space);byKey.set(op.key,space);attachments.set(op.key,side);
    }else if(op.type==='ROOF'){
-    yes(op.profile==='shed','ENGINE_PROFILE_UNSUPPORTED');
+    yes(['shed','hip','barrel'].includes(op.profile),'ENGINE_PROFILE_UNSUPPORTED');
     const space=byKey.get(op.space);yes(space,'MISSING_ROOF_SPACE');
     let [x,z,w,d]=space.rect;const side=attachments.get(op.space);
     // The earlier parent owns their shared wall strip: exact, disjoint roof coverage.
@@ -99,7 +99,7 @@ export function createIntegratedSpatialHost({deriveIntegratedShell,compileDesign
     if(side==='south'){z++;d--;}if(side==='north')d--;
     const eaveY={primary:7,secondary:6,subordinate:5}[op.rank];
     intent.architecture.roofSections.push({id:'roof-'+op.space,rect:[x,z,w,d],eaves:edge(),
-     profile:{form:'shed',axis:op.axis,range:op.axis==='x'?[x,x+w-1]:[z,z+d-1],eaveY,rise:1}});
+     profile:{form:op.profile,axis:op.axis,range:op.axis==='x'?[x,x+w-1]:[z,z+d-1],eaveY,rise:1}});
    }else if(op.type==='ENTRY'){
     const s=byKey.get(op.space);yes(s,'ENTRY_SPACE');
     entry=opening('exterior-entrance','entry',s.rect,op.face);intent.openings.push(entry);
