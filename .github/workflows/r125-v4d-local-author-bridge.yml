@@ -1,7 +1,7 @@
 name: R125 V4D Local Author Bridge — INJECTED TEST ONLY
 on:
   push:
-    branches: [feature/b198zr1-protected-architectural-revision]
+    branches: [feature/b198zr1-protected-architectural-revision, research/gatec-exacthead-ci-once-20261109]
     paths:
       - 'source/ai/r125-v4d-relative-author-ir.mjs'
       - 'source/ai/r125-v4d-compact-model-ir.mjs'

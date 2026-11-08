@@ -3,7 +3,7 @@ name: Education-first offline QA
 on:
   # Feature branches are already covered by pull_request: no duplicate full QA.
   push:
-    branches: [main]
+    branches: [main, research/gatec-exacthead-ci-once-20261109]
   pull_request:
   workflow_dispatch:
 
