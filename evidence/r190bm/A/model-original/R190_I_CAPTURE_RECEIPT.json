@@ -1,0 +1,43 @@
+{
+  "schema": "minecraftaibuilder-r190-j-capture-v1",
+  "status": "HOLD_MODEL_RESPONSE_OR_SPATIAL_REVIEW",
+  "failureCode": "B143_SCHEMA_OR_MODE",
+  "modelRequested": "qwen3:14b",
+  "transport": "openai",
+  "providerResponseObserved": true,
+  "providerFinishReason": "stop",
+  "providerConfirmedComplete": true,
+  "originalRawSha256": "e54f2abf87d36e0957d8393c960d2fce8075862d00ea1ea736365121a4b6a469",
+  "originalRequestSha256": "bbd44cc9f28234055601b4055466e2f3564e7e4565d408432de4c4fab0aa277a",
+  "rawProviderBytesPreserved": true,
+  "sourceGenerated": false,
+  "unapprovedGeometryEvidence": {
+    "status": "HOLD_B143_GEOMETRY_OR_VIEWER_INVALID",
+    "strictR4ReviewAccepted": false,
+    "real3DFromModelSource": false,
+    "humanArtReview": "ART_HOLD"
+  },
+  "modelIdentityCryptographicallyVerified": false,
+  "independentRequestCoverage": "NOT_CERTIFIED",
+  "humanArtReview": "ART_HOLD",
+  "minecraftWalking": "NOT_TESTED",
+  "readiness": "NOT_PREPARED",
+  "constructionApproved": false,
+  "executionAllowed": false,
+  "gates": [
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED"
+  ],
+  "BuildPlan": {
+    "operations": []
+  },
+  "worldWrites": 0,
+  "worldContacts": 0
+}

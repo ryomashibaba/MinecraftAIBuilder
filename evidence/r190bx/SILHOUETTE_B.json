@@ -1,0 +1,334 @@
+{
+  "schema": "minecraftaibuilder-b143-building-dsl-v1",
+  "brief": "BM高層ビルの独立彫刻先行研究。1・2F公共大広間／オフィス／頂部眺望レストランと大空洞の空間構成を形態から検討。これは用途・階段の機能的成立を証明する完成設計ではない。",
+  "bounds": {
+    "width": 90,
+    "height": 96,
+    "depth": 54
+  },
+  "designOnly": true,
+  "id": "r190bx-civic-arch-cut-rift",
+  "title": "R190-BX | ONE ARCH CITADEL — eroded structural megashell",
+  "elements": [
+    {
+      "id": "one-piece-civic-arch",
+      "shape": "ellipsoid",
+      "mode": "add",
+      "material": "glass",
+      "center": [
+        45,
+        51,
+        27
+      ],
+      "radii": [
+        39,
+        41,
+        22
+      ],
+      "shell": 2
+    },
+    {
+      "id": "grand-vertical-canyon-cut",
+      "shape": "box",
+      "mode": "cut",
+      "origin": [
+        35,
+        11,
+        4
+      ],
+      "size": [
+        22,
+        72,
+        47
+      ]
+    },
+    {
+      "id": "west-public-lobby-volume",
+      "shape": "ellipsoid",
+      "mode": "add",
+      "material": "concrete",
+      "center": [
+        19,
+        17,
+        26
+      ],
+      "radii": [
+        15,
+        16,
+        17
+      ],
+      "shell": 2
+    },
+    {
+      "id": "east-tower-foot",
+      "shape": "ellipsoid",
+      "mode": "add",
+      "material": "metal",
+      "center": [
+        70,
+        28,
+        27
+      ],
+      "radii": [
+        12,
+        25,
+        16
+      ],
+      "shell": 2
+    },
+    {
+      "id": "civic-west-arrival-cut",
+      "shape": "box",
+      "mode": "cut",
+      "origin": [
+        7,
+        3,
+        9
+      ],
+      "size": [
+        10,
+        8,
+        10
+      ]
+    },
+    {
+      "id": "civic-east-arrival-cut",
+      "shape": "box",
+      "mode": "cut",
+      "origin": [
+        70,
+        3,
+        12
+      ],
+      "size": [
+        10,
+        8,
+        8
+      ]
+    },
+    {
+      "id": "east-high-garden-volume",
+      "shape": "ellipsoid",
+      "mode": "add",
+      "material": "glass",
+      "center": [
+        68,
+        71,
+        26
+      ],
+      "radii": [
+        15,
+        21,
+        17
+      ],
+      "shell": 2
+    },
+    {
+      "id": "west-cheek-street-arc-opening",
+      "shape": "box",
+      "mode": "cut",
+      "origin": [
+        12,
+        31,
+        4
+      ],
+      "size": [
+        13,
+        21,
+        7
+      ]
+    },
+    {
+      "id": "east-cheek-sky-slit",
+      "shape": "box",
+      "mode": "cut",
+      "origin": [
+        74,
+        54,
+        4
+      ],
+      "size": [
+        7,
+        27,
+        8
+      ]
+    },
+    {
+      "id": "west-civic-gallery",
+      "shape": "ellipsoid",
+      "mode": "add",
+      "material": "stone",
+      "center": [
+        20,
+        15,
+        26
+      ],
+      "radii": [
+        13,
+        1,
+        14
+      ]
+    },
+    {
+      "id": "west-office-gallery",
+      "shape": "ellipsoid",
+      "mode": "add",
+      "material": "wood",
+      "center": [
+        17,
+        32,
+        26
+      ],
+      "radii": [
+        11,
+        1,
+        12
+      ]
+    },
+    {
+      "id": "west-office-gallery-high",
+      "shape": "ellipsoid",
+      "mode": "add",
+      "material": "wood",
+      "center": [
+        17,
+        58,
+        27
+      ],
+      "radii": [
+        10,
+        1,
+        12
+      ]
+    },
+    {
+      "id": "east-civic-gallery",
+      "shape": "ellipsoid",
+      "mode": "add",
+      "material": "stone",
+      "center": [
+        71,
+        17,
+        27
+      ],
+      "radii": [
+        10,
+        1,
+        13
+      ]
+    },
+    {
+      "id": "east-office-gallery",
+      "shape": "ellipsoid",
+      "mode": "add",
+      "material": "wood",
+      "center": [
+        68,
+        42,
+        26
+      ],
+      "radii": [
+        11,
+        1,
+        12
+      ]
+    },
+    {
+      "id": "east-sky-restaurant-floor",
+      "shape": "ellipsoid",
+      "mode": "add",
+      "material": "wood",
+      "center": [
+        65,
+        82,
+        26
+      ],
+      "radii": [
+        13,
+        1,
+        14
+      ]
+    },
+    {
+      "id": "great-ground-bridge",
+      "shape": "box",
+      "mode": "add",
+      "material": "stone",
+      "origin": [
+        31,
+        16,
+        26
+      ],
+      "size": [
+        29,
+        1,
+        3
+      ]
+    },
+    {
+      "id": "high-cultural-flyover",
+      "shape": "box",
+      "mode": "add",
+      "material": "accent",
+      "origin": [
+        32,
+        63,
+        26
+      ],
+      "size": [
+        25,
+        1,
+        3
+      ]
+    },
+    {
+      "id": "west-diagonal-resistance",
+      "shape": "beam",
+      "mode": "add",
+      "material": "metal",
+      "start": [
+        6,
+        6,
+        48
+      ],
+      "end": [
+        28,
+        89,
+        48
+      ],
+      "thickness": 2
+    },
+    {
+      "id": "east-diagonal-resistance",
+      "shape": "beam",
+      "mode": "add",
+      "material": "metal",
+      "start": [
+        83,
+        8,
+        48
+      ],
+      "end": [
+        62,
+        90,
+        48
+      ],
+      "thickness": 2
+    },
+    {
+      "id": "east-crown-sky-oculus",
+      "shape": "box",
+      "mode": "cut",
+      "origin": [
+        59,
+        89,
+        26
+      ],
+      "size": [
+        11,
+        3,
+        10
+      ]
+    }
+  ]
+}

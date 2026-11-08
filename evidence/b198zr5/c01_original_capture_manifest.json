@@ -1,0 +1,46 @@
+{
+  "schema": "minecraftaibuilder-b198zr5-c01-frozen-capture-manifest-v1",
+  "frozenCaseId": "c01",
+  "baseline": {
+    "origin": "USER_HANDOFF_REAL_QWEN_SOURCE_CLAIM",
+    "modelIdAsReported": "qwen3.8:27b",
+    "rawFileFromHandoff": "EVIDENCE/B198U_ORIGINAL_MODEL_RESPONSE_UNMODIFIED.txt",
+    "rawByteCount": 3397,
+    "rawSha256": "40810c69e56e59f61704ef0e0a1d96f98a2415aa057a86d7355c44421ab3edbf",
+    "singleModelCallElapsedSecondsAsReported": 88.748,
+    "authoredElementsAsReported": 14,
+    "b143Outcome": "HOLD_B143_OUTSIDE_LOCAL_BOUNDS",
+    "independentProviderIdentityAuthenticated": false,
+    "humanQualityCertified": false
+  },
+  "plannedR4": {
+    "rawSourcePresent": false,
+    "modelCallsAuthorizedOrMade": false,
+    "sourceSha256": null,
+    "modelQualitativeImprovementDemonstrated": false,
+    "comparisonStatus": "WAITING_FOR_AUTHORIZED_REAL_MODEL_CAPTURE"
+  },
+  "humanRating": {
+    "baselineHumanVisualAndSemanticReview": "NOT_COMPLETED_WITH_PINNED_R5_RUBRIC",
+    "plannedR4HumanVisualAndSemanticReview": "NO_R4_SOURCE",
+    "automaticJudgmentNeverPermitted": true
+  },
+  "originalResponseContentsIncludedInThisManifest": false,
+  "modelGenerationsPerformedByThisStep": 0,
+  "worldWrites": 0,
+  "readiness": "NOT_PREPARED",
+  "gates": [
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED"
+  ],
+  "BuildPlan": {
+    "operations": []
+  }
+}

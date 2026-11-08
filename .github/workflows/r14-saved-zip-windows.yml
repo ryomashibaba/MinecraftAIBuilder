@@ -1,0 +1,28 @@
+name: R14 Saved R6 ZIP Reaudit — Windows Read Only
+on:
+  push:
+    branches:
+      - feature/b198zr1-protected-architectural-revision
+    paths:
+      - 'tools/r14-mini/**'
+      - 'scripts/b198zr14-saved-zip-windows-smoke.ps1'
+      - '.github/workflows/r14-saved-zip-windows.yml'
+  pull_request:
+    paths:
+      - 'tools/r14-mini/**'
+      - 'scripts/b198zr14-saved-zip-windows-smoke.ps1'
+      - '.github/workflows/r14-saved-zip-windows.yml'
+permissions:
+  contents: read
+jobs:
+  actual-windows-read-only-saved-zip-audit:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Real Windows CMD / pinned 11-source download / zip re-audit / safety regressions
+        shell: powershell
+        run: ./scripts/b198zr14-saved-zip-windows-smoke.ps1

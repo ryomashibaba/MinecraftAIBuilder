@@ -1,0 +1,83 @@
+{
+  "origin": "DETERMINISTIC_FINAL_VOXEL_CHECKS_OF_MODEL_DECLARATIONS",
+  "geometrySha256": "5d76a26bdb61962deea388c4435bb6093ae7c537ed01d6454eca1025a6c8e0e6",
+  "spaces": [
+    {
+      "id": "public-concourse",
+      "purpose": "長い通過・滞在のための空間",
+      "levelId": "public-level",
+      "standingY": 1,
+      "clearHeight": 8,
+      "obstructedAirCells": 0,
+      "unsupportedFloorCells": 0,
+      "declaredArea": 1160,
+      "status": "SOURCE_FLOOR_AND_CLEAR_VOLUME_PRESENT"
+    }
+  ],
+  "r4": {
+    "status": "SOURCE_AND_DECLARED_SPATIAL_CLAIMS_FORMALLY_PASS",
+    "evidence": {
+      "schema": "minecraftaibuilder-b198zr3-functional-review-evidence-v1",
+      "caseId": "unverified-model-plan",
+      "contractAuthorship": "MODEL_DECLARED_UNVERIFIED",
+      "pinnedSourceSha256": "aeb95e2df65cb67a67a796f771ba81bda22b06dd256a615bb49e0da7a906bace",
+      "status": "FORMAL_GEOMETRY_AND_ROUTE_CONSTRAINTS_PASS",
+      "results": {
+        "protectedVoids": [],
+        "destinations": [
+          {
+            "id": "far-destination",
+            "reachable": true,
+            "shortestPathSteps": 68,
+            "maximumPathSteps": 200,
+            "passed": true
+          }
+        ],
+        "functionalZones": [
+          {
+            "id": "public-concourse",
+            "regionVolume": 1160,
+            "standable": 1160,
+            "reachable": 1160,
+            "percentOfRegion": 100,
+            "passed": true
+          }
+        ],
+        "abstractReachablePositions": 1176
+      },
+      "unverified": {
+        "requestSemantics": true,
+        "architecturalQuality": true,
+        "modelGeneralization": true,
+        "minecraftBlockStates": true,
+        "minecraftActualWalking": true,
+        "humanApproval": true
+      },
+      "sourceOnly": true,
+      "modelCalls": 0,
+      "safety": {
+        "readiness": "NOT_PREPARED",
+        "constructionApproved": false,
+        "executionAllowed": false,
+        "worldContacts": 0,
+        "worldWrites": 0,
+        "gates": [
+          "BLOCKED",
+          "BLOCKED",
+          "BLOCKED",
+          "BLOCKED",
+          "BLOCKED",
+          "BLOCKED",
+          "BLOCKED",
+          "BLOCKED",
+          "BLOCKED"
+        ],
+        "BuildPlan": {
+          "operations": []
+        }
+      }
+    }
+  },
+  "independentRequestFidelity": "NOT_CERTIFIED",
+  "art": "ART_HOLD"
+}

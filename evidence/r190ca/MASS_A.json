@@ -1,0 +1,1040 @@
+{
+  "schema": "minecraftaibuilder-r190ca-authored-space-mass-v1",
+  "id": "r190ca-stratified-civic-rift-a",
+  "title": "STRATIFIED CIVIC RIFT — inhabited nested tower cliffs",
+  "originalBriefSha256": "bbd44cc9f28234055601b4055466e2f3564e7e4565d408432de4c4fab0aa277a",
+  "bounds": {
+    "width": 96,
+    "height": 96,
+    "depth": 64
+  },
+  "intent": {
+    "architecturalIdea": "A genuinely occupiable large urban tower composed of four connected but asymmetrically shifted freeform building masses, large street portals, a carved vertical civic atrium and integrated upper occupiable strata rather than disconnected ornamental sheets.",
+    "publicExperience": "From a deep street portal, visitors enter a two-level high public arrival hall, view an open central canyon and proceed past office terraces to an upper skyline restaurant; every assigned program footprint must be checked against actual supported floors and empty headroom.",
+    "nextReview": "Audit actual volume, measurable supported rooms, continuous or disconnected mass, eight matching real voxel views and skyline quality; reject if this is still stacked slabs or a hollow gate."
+  },
+  "masses": [
+    {
+      "id": "west-civic-base",
+      "wallMaterial": "metal",
+      "floorMaterial": "stone",
+      "wall": 2,
+      "profiles": [
+        {
+          "y": 3,
+          "points": [
+            [
+              5,
+              20
+            ],
+            [
+              16,
+              7
+            ],
+            [
+              34,
+              7
+            ],
+            [
+              45,
+              20
+            ],
+            [
+              45,
+              38
+            ],
+            [
+              34,
+              51
+            ],
+            [
+              16,
+              51
+            ],
+            [
+              5,
+              38
+            ]
+          ]
+        },
+        {
+          "y": 25,
+          "points": [
+            [
+              6,
+              20
+            ],
+            [
+              17,
+              7
+            ],
+            [
+              33,
+              7
+            ],
+            [
+              44,
+              20
+            ],
+            [
+              44,
+              38
+            ],
+            [
+              33,
+              51
+            ],
+            [
+              17,
+              51
+            ],
+            [
+              6,
+              38
+            ]
+          ]
+        },
+        {
+          "y": 51,
+          "points": [
+            [
+              9,
+              21
+            ],
+            [
+              19,
+              10
+            ],
+            [
+              35,
+              10
+            ],
+            [
+              45,
+              21
+            ],
+            [
+              45,
+              37
+            ],
+            [
+              35,
+              48
+            ],
+            [
+              19,
+              48
+            ],
+            [
+              9,
+              37
+            ]
+          ]
+        }
+      ],
+      "floorYs": [
+        6,
+        12,
+        18,
+        24,
+        30,
+        36,
+        42,
+        48
+      ]
+    },
+    {
+      "id": "west-high-office",
+      "wallMaterial": "concrete",
+      "floorMaterial": "wood",
+      "wall": 2,
+      "profiles": [
+        {
+          "y": 48,
+          "points": [
+            [
+              9,
+              21
+            ],
+            [
+              19,
+              10
+            ],
+            [
+              35,
+              10
+            ],
+            [
+              45,
+              21
+            ],
+            [
+              45,
+              37
+            ],
+            [
+              35,
+              48
+            ],
+            [
+              19,
+              48
+            ],
+            [
+              9,
+              37
+            ]
+          ]
+        },
+        {
+          "y": 68,
+          "points": [
+            [
+              7,
+              22
+            ],
+            [
+              18,
+              11
+            ],
+            [
+              34,
+              11
+            ],
+            [
+              45,
+              22
+            ],
+            [
+              45,
+              36
+            ],
+            [
+              34,
+              47
+            ],
+            [
+              18,
+              47
+            ],
+            [
+              7,
+              36
+            ]
+          ]
+        },
+        {
+          "y": 92,
+          "points": [
+            [
+              12,
+              22
+            ],
+            [
+              21,
+              12
+            ],
+            [
+              33,
+              12
+            ],
+            [
+              42,
+              22
+            ],
+            [
+              42,
+              36
+            ],
+            [
+              33,
+              46
+            ],
+            [
+              21,
+              46
+            ],
+            [
+              12,
+              36
+            ]
+          ]
+        }
+      ],
+      "floorYs": [
+        53,
+        59,
+        65,
+        71,
+        77,
+        83,
+        89
+      ]
+    },
+    {
+      "id": "east-civic-office",
+      "wallMaterial": "concrete",
+      "floorMaterial": "stone",
+      "wall": 2,
+      "profiles": [
+        {
+          "y": 3,
+          "points": [
+            [
+              54,
+              22
+            ],
+            [
+              64,
+              10
+            ],
+            [
+              80,
+              10
+            ],
+            [
+              90,
+              22
+            ],
+            [
+              90,
+              40
+            ],
+            [
+              80,
+              52
+            ],
+            [
+              64,
+              52
+            ],
+            [
+              54,
+              40
+            ]
+          ]
+        },
+        {
+          "y": 31,
+          "points": [
+            [
+              51,
+              23
+            ],
+            [
+              62,
+              11
+            ],
+            [
+              78,
+              11
+            ],
+            [
+              89,
+              23
+            ],
+            [
+              89,
+              39
+            ],
+            [
+              78,
+              51
+            ],
+            [
+              62,
+              51
+            ],
+            [
+              51,
+              39
+            ]
+          ]
+        },
+        {
+          "y": 63,
+          "points": [
+            [
+              50,
+              22
+            ],
+            [
+              61,
+              11
+            ],
+            [
+              77,
+              11
+            ],
+            [
+              88,
+              22
+            ],
+            [
+              88,
+              38
+            ],
+            [
+              77,
+              49
+            ],
+            [
+              61,
+              49
+            ],
+            [
+              50,
+              38
+            ]
+          ]
+        }
+      ],
+      "floorYs": [
+        6,
+        12,
+        18,
+        24,
+        30,
+        36,
+        42,
+        48,
+        54,
+        60
+      ]
+    },
+    {
+      "id": "east-upper-crown",
+      "wallMaterial": "metal",
+      "floorMaterial": "wood",
+      "wall": 2,
+      "profiles": [
+        {
+          "y": 60,
+          "points": [
+            [
+              50,
+              22
+            ],
+            [
+              61,
+              11
+            ],
+            [
+              77,
+              11
+            ],
+            [
+              88,
+              22
+            ],
+            [
+              88,
+              38
+            ],
+            [
+              77,
+              49
+            ],
+            [
+              61,
+              49
+            ],
+            [
+              50,
+              38
+            ]
+          ]
+        },
+        {
+          "y": 75,
+          "points": [
+            [
+              55,
+              23
+            ],
+            [
+              65,
+              12
+            ],
+            [
+              79,
+              12
+            ],
+            [
+              89,
+              23
+            ],
+            [
+              89,
+              37
+            ],
+            [
+              79,
+              48
+            ],
+            [
+              65,
+              48
+            ],
+            [
+              55,
+              37
+            ]
+          ]
+        },
+        {
+          "y": 92,
+          "points": [
+            [
+              55,
+              23
+            ],
+            [
+              64,
+              13
+            ],
+            [
+              78,
+              13
+            ],
+            [
+              87,
+              23
+            ],
+            [
+              87,
+              37
+            ],
+            [
+              78,
+              47
+            ],
+            [
+              64,
+              47
+            ],
+            [
+              55,
+              37
+            ]
+          ]
+        }
+      ],
+      "floorYs": [
+        65,
+        71,
+        77,
+        83,
+        89
+      ]
+    }
+  ],
+  "bridges": [
+    {
+      "id": "lower-shared-hall-bridge",
+      "y": 18,
+      "polygon": [
+        [
+          40,
+          24
+        ],
+        [
+          47,
+          21
+        ],
+        [
+          58,
+          24
+        ],
+        [
+          58,
+          36
+        ],
+        [
+          47,
+          39
+        ],
+        [
+          40,
+          36
+        ]
+      ],
+      "material": "stone",
+      "thickness": 1
+    },
+    {
+      "id": "elevated-civic-street",
+      "y": 71,
+      "polygon": [
+        [
+          40,
+          22
+        ],
+        [
+          47,
+          19
+        ],
+        [
+          59,
+          22
+        ],
+        [
+          59,
+          38
+        ],
+        [
+          47,
+          42
+        ],
+        [
+          40,
+          38
+        ]
+      ],
+      "material": "wood",
+      "thickness": 1
+    },
+    {
+      "id": "crown-observation-link",
+      "y": 86,
+      "polygon": [
+        [
+          40,
+          24
+        ],
+        [
+          48,
+          22
+        ],
+        [
+          60,
+          24
+        ],
+        [
+          60,
+          36
+        ],
+        [
+          48,
+          38
+        ],
+        [
+          40,
+          36
+        ]
+      ],
+      "material": "glass",
+      "thickness": 1
+    }
+  ],
+  "cuts": [
+    {
+      "id": "west-street-gate",
+      "center": [
+        25,
+        13,
+        8
+      ],
+      "radii": [
+        17,
+        10,
+        14
+      ]
+    },
+    {
+      "id": "east-street-gate",
+      "center": [
+        72,
+        12,
+        9
+      ],
+      "radii": [
+        16,
+        10,
+        14
+      ]
+    },
+    {
+      "id": "central-interwoven-civic-void",
+      "center": [
+        47,
+        43,
+        30
+      ],
+      "radii": [
+        13,
+        15,
+        21
+      ]
+    },
+    {
+      "id": "west-sky-cut",
+      "center": [
+        19,
+        59,
+        8
+      ],
+      "radii": [
+        15,
+        11,
+        15
+      ]
+    },
+    {
+      "id": "east-restaurant-view-cut",
+      "center": [
+        81,
+        80,
+        9
+      ],
+      "radii": [
+        15,
+        10,
+        16
+      ]
+    }
+  ],
+  "programs": [
+    {
+      "id": "west-ground-hall",
+      "purpose": "street arrival hall level 1",
+      "floorY": 6,
+      "polygon": [
+        [
+          13,
+          31
+        ],
+        [
+          20,
+          26
+        ],
+        [
+          30,
+          26
+        ],
+        [
+          37,
+          31
+        ],
+        [
+          37,
+          37
+        ],
+        [
+          30,
+          42
+        ],
+        [
+          20,
+          42
+        ],
+        [
+          13,
+          37
+        ]
+      ]
+    },
+    {
+      "id": "east-ground-hall",
+      "purpose": "second civic hall level 1",
+      "floorY": 6,
+      "polygon": [
+        [
+          60,
+          32
+        ],
+        [
+          67,
+          27
+        ],
+        [
+          75,
+          27
+        ],
+        [
+          82,
+          32
+        ],
+        [
+          82,
+          38
+        ],
+        [
+          75,
+          43
+        ],
+        [
+          67,
+          43
+        ],
+        [
+          60,
+          38
+        ]
+      ]
+    },
+    {
+      "id": "west-upper-hall",
+      "purpose": "public gathering hall level 2",
+      "floorY": 12,
+      "polygon": [
+        [
+          13,
+          31
+        ],
+        [
+          20,
+          26
+        ],
+        [
+          30,
+          26
+        ],
+        [
+          37,
+          31
+        ],
+        [
+          37,
+          37
+        ],
+        [
+          30,
+          42
+        ],
+        [
+          20,
+          42
+        ],
+        [
+          13,
+          37
+        ]
+      ]
+    },
+    {
+      "id": "east-upper-hall",
+      "purpose": "second public hall level 2",
+      "floorY": 12,
+      "polygon": [
+        [
+          59,
+          32
+        ],
+        [
+          66,
+          27
+        ],
+        [
+          74,
+          27
+        ],
+        [
+          81,
+          32
+        ],
+        [
+          81,
+          38
+        ],
+        [
+          74,
+          43
+        ],
+        [
+          66,
+          43
+        ],
+        [
+          59,
+          38
+        ]
+      ]
+    },
+    {
+      "id": "west-open-office",
+      "purpose": "occupied office zone",
+      "floorY": 36,
+      "polygon": [
+        [
+          13,
+          26
+        ],
+        [
+          20,
+          20
+        ],
+        [
+          30,
+          20
+        ],
+        [
+          37,
+          26
+        ],
+        [
+          37,
+          34
+        ],
+        [
+          30,
+          40
+        ],
+        [
+          20,
+          40
+        ],
+        [
+          13,
+          34
+        ]
+      ]
+    },
+    {
+      "id": "east-open-office",
+      "purpose": "occupied office zone",
+      "floorY": 42,
+      "polygon": [
+        [
+          58,
+          27
+        ],
+        [
+          65,
+          21
+        ],
+        [
+          73,
+          21
+        ],
+        [
+          80,
+          27
+        ],
+        [
+          80,
+          35
+        ],
+        [
+          73,
+          41
+        ],
+        [
+          65,
+          41
+        ],
+        [
+          58,
+          35
+        ]
+      ]
+    },
+    {
+      "id": "upper-west-office",
+      "purpose": "upper office space",
+      "floorY": 71,
+      "polygon": [
+        [
+          17,
+          26
+        ],
+        [
+          23,
+          20
+        ],
+        [
+          31,
+          20
+        ],
+        [
+          37,
+          26
+        ],
+        [
+          37,
+          34
+        ],
+        [
+          31,
+          40
+        ],
+        [
+          23,
+          40
+        ],
+        [
+          17,
+          34
+        ]
+      ]
+    },
+    {
+      "id": "view-restaurant",
+      "purpose": "uppermost skyline restaurant floor",
+      "floorY": 89,
+      "polygon": [
+        [
+          61,
+          28
+        ],
+        [
+          67,
+          22
+        ],
+        [
+          75,
+          22
+        ],
+        [
+          81,
+          28
+        ],
+        [
+          81,
+          34
+        ],
+        [
+          75,
+          40
+        ],
+        [
+          67,
+          40
+        ],
+        [
+          61,
+          34
+        ]
+      ]
+    }
+  ],
+  "protectedVoids": [
+    {
+      "id": "mid-canyon-air-lower",
+      "origin": [
+        45,
+        35,
+        26
+      ],
+      "size": [
+        5,
+        5,
+        8
+      ]
+    },
+    {
+      "id": "mid-canyon-air-upper",
+      "origin": [
+        45,
+        46,
+        26
+      ],
+      "size": [
+        5,
+        5,
+        8
+      ]
+    }
+  ],
+  "designOnly": true
+}

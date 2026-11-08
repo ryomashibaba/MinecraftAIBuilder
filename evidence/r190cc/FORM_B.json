@@ -1,0 +1,306 @@
+{
+  "schema": "minecraftaibuilder-r190cc-freeform-3d-boolean-architecture-v1",
+  "originalBriefSha256": "bbd44cc9f28234055601b4055466e2f3564e7e4565d408432de4c4fab0aa277a",
+  "bounds": {
+    "width": 104,
+    "height": 96,
+    "depth": 72
+  },
+  "shellThickness": 2,
+  "floorYs": [
+    6,
+    12,
+    18,
+    24,
+    30,
+    36,
+    42,
+    48,
+    54,
+    60,
+    66,
+    72,
+    78,
+    84,
+    90
+  ],
+  "floorMaterial": 1,
+  "routeRef": {
+    "originalRawSha256": "041ac8905c697cb3eb347f8af3300d1ab470657edb8c841944eafdab7e8df353",
+    "source": "evidence/r190cb/RIFT_LANTERN.json",
+    "contract": "PRESERVE_AUTHOR_NODES_NO_AUTOMATIC_ROUTE_GENERATION"
+  },
+  "designOnly": true,
+  "id": "r190cc-b-tidal-arched-spatial-rift",
+  "title": "TIDAL ARCHED RIFT — inhabited sky arch and interlocking lateral void",
+  "designIntent": {
+    "spatialExperience": "A low metropolitan hall curls into an inhabited inclined upper arch, with one dramatic oblique void crossing the central high-rise instead of repeating decorative ribs. Public terraces and a sideways sky-dining mass remain volumetric rather than planes.",
+    "silhouette": "A diagonally ascending principal body is connected to a broad suspended-looking east crown by a deep living core, while the west and rear volumes change the profile from every side. Actual 3D rotated superellipsoids define the geometry.",
+    "failureToAvoid": "Reject if the front becomes a common stepped tower, if the east side looks like a fat vertical box, or if the internal sky fissure is only a cosmetic window instead of a large negative architectural space."
+  },
+  "solids": [
+    {
+      "id": "metropolis-foothall",
+      "center": [
+        49,
+        14,
+        37
+      ],
+      "radii": [
+        37,
+        21,
+        29
+      ],
+      "rotate": [
+        13,
+        3,
+        -12
+      ],
+      "power": 3.4,
+      "material": 1
+    },
+    {
+      "id": "tensioned-urban-arch",
+      "center": [
+        48,
+        50,
+        38
+      ],
+      "radii": [
+        25,
+        53,
+        20
+      ],
+      "rotate": [
+        -12,
+        8,
+        13
+      ],
+      "power": 3,
+      "material": 2
+    },
+    {
+      "id": "west-spatial-fin",
+      "center": [
+        26,
+        62,
+        26
+      ],
+      "radii": [
+        16,
+        40,
+        14
+      ],
+      "rotate": [
+        20,
+        -14,
+        -28
+      ],
+      "power": 2.7,
+      "material": 4
+    },
+    {
+      "id": "east-upper-fold",
+      "center": [
+        70,
+        68,
+        36
+      ],
+      "radii": [
+        18,
+        32,
+        16
+      ],
+      "rotate": [
+        -15,
+        8,
+        29
+      ],
+      "power": 2.8,
+      "material": 3
+    },
+    {
+      "id": "skyline-restaurant-crown",
+      "center": [
+        70,
+        86,
+        39
+      ],
+      "radii": [
+        32,
+        13,
+        19
+      ],
+      "rotate": [
+        19,
+        -4,
+        14
+      ],
+      "power": 3,
+      "material": 3
+    },
+    {
+      "id": "deep-rear-public-shoulder",
+      "center": [
+        68,
+        40,
+        52
+      ],
+      "radii": [
+        18,
+        31,
+        16
+      ],
+      "rotate": [
+        15,
+        10,
+        -18
+      ],
+      "power": 2.6,
+      "material": 2
+    }
+  ],
+  "cuts": [
+    {
+      "id": "vertical-chasm-front",
+      "center": [
+        51,
+        45,
+        7
+      ],
+      "radii": [
+        22,
+        39,
+        23
+      ],
+      "rotate": [
+        -18,
+        4,
+        26
+      ],
+      "power": 2.6,
+      "material": 0
+    },
+    {
+      "id": "cantilever-cut-at-high-level",
+      "center": [
+        56,
+        77,
+        43
+      ],
+      "radii": [
+        21,
+        15,
+        19
+      ],
+      "rotate": [
+        11,
+        5,
+        -18
+      ],
+      "power": 2.7,
+      "material": 0
+    },
+    {
+      "id": "rear-civic-daylight-breach",
+      "center": [
+        51,
+        60,
+        65
+      ],
+      "radii": [
+        25,
+        28,
+        20
+      ],
+      "rotate": [
+        -10,
+        4,
+        17
+      ],
+      "power": 2.4,
+      "material": 0
+    },
+    {
+      "id": "low-entry-urban-arch",
+      "center": [
+        45,
+        13,
+        8
+      ],
+      "radii": [
+        24,
+        13,
+        22
+      ],
+      "rotate": [
+        12,
+        3,
+        -10
+      ],
+      "power": 2.8,
+      "material": 0
+    },
+    {
+      "id": "west-diagonal-sun-window",
+      "center": [
+        22,
+        75,
+        10
+      ],
+      "radii": [
+        17,
+        18,
+        17
+      ],
+      "rotate": [
+        11,
+        6,
+        28
+      ],
+      "power": 2.5,
+      "material": 0
+    }
+  ],
+  "protectedVoids": [
+    {
+      "id": "first-level-threshold-air",
+      "origin": [
+        43,
+        12,
+        1
+      ],
+      "size": [
+        5,
+        4,
+        5
+      ]
+    },
+    {
+      "id": "west-sky-fissure-air",
+      "origin": [
+        19,
+        74,
+        3
+      ],
+      "size": [
+        5,
+        5,
+        5
+      ]
+    },
+    {
+      "id": "rear-daylight-air",
+      "origin": [
+        52,
+        61,
+        67
+      ],
+      "size": [
+        5,
+        5,
+        4
+      ]
+    }
+  ]
+}

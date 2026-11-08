@@ -1,0 +1,181 @@
+{
+  "schema": "minecraftaibuilder-r190bn-derived-source-study-v1",
+  "status": "SOURCE_SPACE_AND_ROUTE_PROXIES_PRESENT_ART_HOLD",
+  "authorship": "SYNTHETIC_TEST_FIXTURE",
+  "originalInputSha256": "f3bfe7436d2e287f7a76324f1e93b87627da397e19b033274359b69401610084",
+  "originalBriefSha256": "3d23250c74b4047c06d23d59fb7b6adf254ccd27ed89c070d7fc33e5b8119c1d",
+  "originalSourceUnmodified": true,
+  "sourceFormat": "minecraftaibuilder-r190bn-spatial-assembly-v1",
+  "outputAuthorship": "DETERMINISTIC_B143_FROM_AUTHOR_SPATIAL_ASSEMBLY",
+  "outputIsOriginalModelAuthoredB143": false,
+  "hostInventedGeometry": false,
+  "hostChoseLayoutOrLevels": false,
+  "hostRepairedSource": false,
+  "levels": [
+    {
+      "id": "public-level",
+      "standingY": 1
+    }
+  ],
+  "programSpaces": [
+    {
+      "id": "public-concourse",
+      "levelId": "public-level",
+      "purpose": "長い通過・滞在のための空間",
+      "origin": [
+        4,
+        4
+      ],
+      "size": [
+        58,
+        20
+      ],
+      "clearHeight": 8,
+      "minimumReachablePositions": 928,
+      "minimumReachablePercent": 80
+    }
+  ],
+  "elementMapping": [
+    {
+      "elementId": "hall-envelope-skin",
+      "operationId": "hall-envelope",
+      "spaceId": "public-concourse"
+    },
+    {
+      "elementId": "hall-envelope-floor",
+      "operationId": "hall-envelope",
+      "spaceId": "public-concourse"
+    },
+    {
+      "elementId": "arrival-slab",
+      "operationId": "arrival-slab",
+      "spaceId": null
+    },
+    {
+      "elementId": "arrival-door",
+      "operationId": "arrival-door",
+      "spaceId": null
+    },
+    {
+      "elementId": "curved-cover",
+      "operationId": "curved-cover",
+      "spaceId": null
+    },
+    {
+      "elementId": "window-cut",
+      "operationId": "window-cut",
+      "spaceId": null
+    },
+    {
+      "elementId": "window-glass",
+      "operationId": "window-glass",
+      "spaceId": null
+    }
+  ],
+  "spaceEvidence": [
+    {
+      "id": "public-concourse",
+      "purpose": "長い通過・滞在のための空間",
+      "levelId": "public-level",
+      "standingY": 1,
+      "clearHeight": 8,
+      "obstructedAirCells": 0,
+      "unsupportedFloorCells": 0,
+      "declaredArea": 1160,
+      "status": "SOURCE_FLOOR_AND_CLEAR_VOLUME_PRESENT"
+    }
+  ],
+  "functionalReview": {
+    "status": "SOURCE_AND_DECLARED_SPATIAL_CLAIMS_FORMALLY_PASS",
+    "evidence": {
+      "schema": "minecraftaibuilder-b198zr3-functional-review-evidence-v1",
+      "caseId": "unverified-model-plan",
+      "contractAuthorship": "MODEL_DECLARED_UNVERIFIED",
+      "pinnedSourceSha256": "aeb95e2df65cb67a67a796f771ba81bda22b06dd256a615bb49e0da7a906bace",
+      "status": "FORMAL_GEOMETRY_AND_ROUTE_CONSTRAINTS_PASS",
+      "results": {
+        "protectedVoids": [],
+        "destinations": [
+          {
+            "id": "far-destination",
+            "reachable": true,
+            "shortestPathSteps": 68,
+            "maximumPathSteps": 200,
+            "passed": true
+          }
+        ],
+        "functionalZones": [
+          {
+            "id": "public-concourse",
+            "regionVolume": 1160,
+            "standable": 1160,
+            "reachable": 1160,
+            "percentOfRegion": 100,
+            "passed": true
+          }
+        ],
+        "abstractReachablePositions": 1176
+      },
+      "unverified": {
+        "requestSemantics": true,
+        "architecturalQuality": true,
+        "modelGeneralization": true,
+        "minecraftBlockStates": true,
+        "minecraftActualWalking": true,
+        "humanApproval": true
+      },
+      "sourceOnly": true,
+      "modelCalls": 0,
+      "safety": {
+        "readiness": "NOT_PREPARED",
+        "constructionApproved": false,
+        "executionAllowed": false,
+        "worldContacts": 0,
+        "worldWrites": 0,
+        "gates": [
+          "BLOCKED",
+          "BLOCKED",
+          "BLOCKED",
+          "BLOCKED",
+          "BLOCKED",
+          "BLOCKED",
+          "BLOCKED",
+          "BLOCKED",
+          "BLOCKED"
+        ],
+        "BuildPlan": {
+          "operations": []
+        }
+      }
+    }
+  },
+  "derivedProposalSha256": "2ada02ebbb0e78be64868f2c41500a0f1f77317198c10ec08af1204d85c7ec8b",
+  "sourceSha256": "aeb95e2df65cb67a67a796f771ba81bda22b06dd256a615bb49e0da7a906bace",
+  "geometrySha256": "5d76a26bdb61962deea388c4435bb6093ae7c537ed01d6454eca1025a6c8e0e6",
+  "architecturalQuality": "NOT_CERTIFIED",
+  "structuralEngineering": "NOT_CERTIFIED",
+  "minecraftWalking": "NOT_TESTED",
+  "routeScope": "Existing R4 supported single-cell standing graph; no two-wide/real avatar guarantee",
+  "readiness": "NOT_PREPARED",
+  "constructionApproved": false,
+  "executionAllowed": false,
+  "gates": [
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED"
+  ],
+  "BuildPlan": {
+    "operations": []
+  },
+  "worldContacts": 0,
+  "worldWrites": 0,
+  "modelCalls": 0,
+  "art": "ART_HOLD",
+  "officialArtAdoptions": 0
+}

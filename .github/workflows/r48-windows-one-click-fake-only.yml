@@ -1,0 +1,26 @@
+name: R48 Windows Real-CMD Path — FAKE Local Ollama ONLY
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'tools/r48-approved/**'
+      - 'scripts/b198zr48-windows-one-click-fake.test.mjs'
+      - '.github/workflows/r48-windows-one-click-fake-only.yml'
+  pull_request:
+    paths:
+      - 'tools/r48-approved/**'
+      - 'scripts/b198zr48-windows-one-click-fake.test.mjs'
+      - '.github/workflows/r48-windows-one-click-fake-only.yml'
+permissions:
+  contents: read
+jobs:
+  windows-cmd-to-zip-against-prebound-synthetic-server:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Bind port 11434 to fake process BEFORE CMD launch; prove one schema-only request and ZIP
+        run: node --test scripts/b198zr48-windows-one-click-fake.test.mjs

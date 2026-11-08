@@ -43,7 +43,8 @@ jobs:
             scripts/b198i-studio-director.test.mjs
   real-3d-review-browser:
     needs: [source-and-intent-contract]
-    runs-on: ubuntu-latest
+    # Keep Playwright 1.56.1 on supported Ubuntu 24.04 for browser QA only.
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4

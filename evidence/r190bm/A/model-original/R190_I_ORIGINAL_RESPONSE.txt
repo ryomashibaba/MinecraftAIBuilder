@@ -1,0 +1,33 @@
+{
+
+"design": {
+  "id": "highrise-metropolis-01",
+  "title": "Metropolis High-Rise",
+  "brief": "A 30-floor urban skyscraper with open plazas at base, office floors above, and a rooftop restaurant",
+  "bounds": {"width": 64, "depth": 64, "height": 128},
+  "elements": [
+    {"id": "base-structure", "mode": "add", "shape": "box", "origin": [0,0,0], "size": [64,12,64], "material": "concrete"},
+    {"id": "atrium-cut", "mode": "cut", "shape": "box", "origin": [20,0,20], "size": [24,12,24]},
+    {"id": "core-stairs", "mode": "add", "shape": "staircase", "origin": [24,1,24], "axis": "z", "direction": 1, "width": 6, "steps": 30, "treadDepth": 2},
+    {"id": "office-walls", "mode": "add", "shape": "box", "origin": [0,12,0], "size": [64,116,64], "material": "concrete"},
+    {"id": "roof-restaurant", "mode": "add", "shape": "box", "origin": [0,116,0], "size": [64,12,64], "material": "glass"},
+    {"id": "column-repeat", "mode": "add", "shape": "box", "origin": [10,0,10], "size": [4,128,4], "repeat": {"count": 8, "offset": [8,0,8]}, "material": "concrete"}
+  ],
+  "designOnly": true
+},
+"explanation": "A 30-floor skyscraper with open plazas on levels 1-2, office floors 3-28, and a glass-enclosed restaurant on the 29th floor. Central atrium connects all levels with a spiral staircase. Structural columns repeat every 8 blocks.",
+"assumptions": ["Flat urban site", "No external elevators required", "Glass restaurant has internal support columns"],
+"spatialPlan": {
+  "designIntent": "Modern high-rise combining public plazas, office spaces, and a rooftop dining experience",
+  "massStrategy": "Central core with open base, vertical office zones, and glass-enclosed top floor",
+  "circulationStrategy": "Spiral staircase through central atrium with column-free open floors",
+  "entrance": [32,0,32],
+  "headroom": 3,
+  "protectedVoids": [{"id": "atrium", "origin": [20,0,20], "size": [24,12,24], "maxOccupiedCells": 0}],
+  "destinations": [{"id": "lobby", "point": [32,1,32], "maximumPathSteps": 10}, {"id": "restaurant", "point": [32,116,32], "maximumPathSteps": 20}],
+  "functionalZones": [
+    {"id": "plaza", "origin": [0,0,0], "size": [64,12,64], "minimumReachablePositions": 100, "minimumReachablePercent": 0.8},
+    {"id": "office", "origin": [0,12,0], "size": [64,104,64], "minimumReachablePositions": 500, "minimumReachablePercent": 0.9},
+    {"id": "restaurant", "origin": [0,116,0], "size": [64,12,64], "minimumReachablePositions": 50, "minimumReachablePercent": 0.75}
+  ]
+} }

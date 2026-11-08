@@ -1,0 +1,30 @@
+name: R31 Cross Genre Static Audit
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'source/ai/b198zr31-cross-genre-static-audit.mjs'
+      - 'scripts/b198zr31-cross-genre-static-audit.test.mjs'
+      - '.github/workflows/r31-cross-genre-static-audit.yml'
+  pull_request:
+    paths:
+      - 'source/ai/b198zr31-cross-genre-static-audit.mjs'
+      - 'scripts/b198zr31-cross-genre-static-audit.test.mjs'
+      - '.github/workflows/r31-cross-genre-static-audit.yml'
+permissions:
+  contents: read
+jobs:
+  r31-mock-only-no-model-no-world:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Audit static prompt scenarios without any Qwen or Minecraft operations
+        run: node --test scripts/b198zr31-cross-genre-static-audit.test.mjs

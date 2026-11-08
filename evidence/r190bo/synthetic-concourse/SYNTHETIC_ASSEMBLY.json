@@ -1,0 +1,170 @@
+{
+  "schema": "minecraftaibuilder-r190bn-spatial-assembly-v1",
+  "id": "bn-synthetic-concourse",
+  "title": "SYNTHETIC OFFLINE — bn-synthetic-concourse",
+  "brief": "合成検証：横長の公共コンコースと曲面の屋根被覆。実モデル設計・用途適合の証明ではない。",
+  "originalBriefSha256": "3d23250c74b4047c06d23d59fb7b6adf254ccd27ed89c070d7fc33e5b8119c1d",
+  "bounds": {
+    "width": 72,
+    "height": 20,
+    "depth": 32
+  },
+  "intent": {
+    "use": "Synthetic usable spaces for an offline translation study.",
+    "experience": "Synthetic authored space and circulation, not AI aesthetic improvement.",
+    "massing": "Author chooses all levels, exact voids, envelopes and primitive shapes.",
+    "circulation": "Author specifies every opening, stair flight and landing. No host solver."
+  },
+  "levels": [
+    {
+      "id": "public-level",
+      "standingY": 1
+    }
+  ],
+  "spaces": [
+    {
+      "id": "public-concourse",
+      "levelId": "public-level",
+      "purpose": "長い通過・滞在のための空間",
+      "origin": [
+        4,
+        4
+      ],
+      "size": [
+        58,
+        20
+      ],
+      "clearHeight": 8,
+      "minimumReachablePositions": 928,
+      "minimumReachablePercent": 80
+    }
+  ],
+  "operations": [
+    {
+      "kind": "enclosure",
+      "id": "hall-envelope",
+      "spaceId": "public-concourse",
+      "thickness": 1,
+      "materials": {
+        "floor": "wood",
+        "wall": "concrete",
+        "roof": "concrete"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "arrival-slab",
+        "mode": "add",
+        "shape": "box",
+        "origin": [
+          7,
+          0,
+          1
+        ],
+        "size": [
+          6,
+          1,
+          4
+        ],
+        "material": "stone"
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "arrival-door",
+        "mode": "cut",
+        "shape": "box",
+        "origin": [
+          8,
+          1,
+          3
+        ],
+        "size": [
+          4,
+          4,
+          1
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "curved-cover",
+        "shape": "ellipsoid",
+        "mode": "add",
+        "material": "metal",
+        "center": [
+          32,
+          12,
+          14
+        ],
+        "radii": [
+          25,
+          3,
+          12
+        ],
+        "shell": 1
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "window-cut",
+        "mode": "cut",
+        "shape": "box",
+        "origin": [
+          3,
+          3,
+          8
+        ],
+        "size": [
+          1,
+          3,
+          10
+        ]
+      }
+    },
+    {
+      "kind": "primitive",
+      "element": {
+        "id": "window-glass",
+        "mode": "add",
+        "shape": "box",
+        "origin": [
+          3,
+          3,
+          8
+        ],
+        "size": [
+          1,
+          3,
+          10
+        ],
+        "material": "glass"
+      }
+    }
+  ],
+  "entrance": [
+    9,
+    1,
+    2
+  ],
+  "headroom": 3,
+  "destinations": [
+    {
+      "id": "far-destination",
+      "point": [
+        59,
+        1,
+        20
+      ],
+      "maximumPathSteps": 200
+    }
+  ],
+  "protectedVoids": [],
+  "assumptions": [
+    "SYNTHETIC_TEST_FIXTURE; no model inference or artistic approval"
+  ]
+}

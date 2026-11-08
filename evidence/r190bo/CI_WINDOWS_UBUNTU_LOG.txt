@@ -1,0 +1,857 @@
+offline (windows-latest)	Set up job	﻿2026-10-29T21:53:50.7100597Z Current runner version: '2.338.0'
+offline (windows-latest)	Set up job	2026-10-29T21:53:50.7168761Z ##[group]Runner Image Provisioner
+offline (windows-latest)	Set up job	2026-10-29T21:53:50.7170186Z Hosted Compute Agent
+offline (windows-latest)	Set up job	2026-10-29T21:53:50.7171162Z Version: 20261021.618
+offline (windows-latest)	Set up job	2026-10-29T21:53:50.7172179Z Commit: 21505ad2541d5be6135ed84fc33697146cf75b8e
+offline (windows-latest)	Set up job	2026-10-29T21:53:50.7173397Z Build Date: 2026-10-21T00:45:21Z
+offline (windows-latest)	Set up job	2026-10-29T21:53:50.7175636Z Worker ID: {ee8ac246-b1c3-4695-8dcf-51d95aba1012}
+offline (windows-latest)	Set up job	2026-10-29T21:53:50.7176669Z Region: eastus
+offline (windows-latest)	Set up job	2026-10-29T21:53:50.7177252Z Cloud: Azure
+offline (windows-latest)	Set up job	2026-10-29T21:53:50.7177789Z ##[endgroup]
+offline (windows-latest)	Set up job	2026-10-29T21:53:50.7179381Z ##[group]Operating System
+offline (windows-latest)	Set up job	2026-10-29T21:53:50.7180192Z Microsoft Windows Server 2025
+offline (windows-latest)	Set up job	2026-10-29T21:53:50.7180781Z 10.0.26100
+offline (windows-latest)	Set up job	2026-10-29T21:53:50.7181279Z Datacenter
+offline (windows-latest)	Set up job	2026-10-29T21:53:50.7181782Z ##[endgroup]
+offline (windows-latest)	Set up job	2026-10-29T21:53:50.7182294Z ##[group]Runner Image
+offline (windows-latest)	Set up job	2026-10-29T21:53:50.7182971Z Image: windows-2025-vs2026
+offline (windows-latest)	Set up job	2026-10-29T21:53:50.7183563Z Version: 20261021.278.1
+offline (windows-latest)	Set up job	2026-10-29T21:53:50.7184782Z Included Software: https://github.com/actions/runner-images/blob/win25-vs2026/20261021.278/images/windows/Windows2025-VS2026-Readme.md
+offline (windows-latest)	Set up job	2026-10-29T21:53:50.7186919Z Image Release: https://github.com/actions/runner-images/releases/tag/win25-vs2026%2F20261021.278
+offline (windows-latest)	Set up job	2026-10-29T21:53:50.7187906Z ##[endgroup]
+offline (windows-latest)	Set up job	2026-10-29T21:53:50.7189044Z ##[group]GITHUB_TOKEN Permissions
+offline (windows-latest)	Set up job	2026-10-29T21:53:50.7191036Z Contents: read
+offline (windows-latest)	Set up job	2026-10-29T21:53:50.7191634Z Metadata: read
+offline (windows-latest)	Set up job	2026-10-29T21:53:50.7192228Z ##[endgroup]
+offline (windows-latest)	Set up job	2026-10-29T21:53:50.7194456Z Secret source: Actions
+offline (windows-latest)	Set up job	2026-10-29T21:53:50.7195877Z Cache mode: write
+offline (windows-latest)	Set up job	2026-10-29T21:53:50.7196620Z Prepare workflow directory
+offline (windows-latest)	Set up job	2026-10-29T21:53:50.7546008Z Prepare all required actions
+offline (windows-latest)	Set up job	2026-10-29T21:53:50.7594797Z Getting action download info
+offline (windows-latest)	Set up job	2026-10-29T21:53:50.9684784Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+offline (windows-latest)	Set up job	2026-10-29T21:53:51.1147230Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+offline (windows-latest)	Set up job	2026-10-29T21:53:51.2846353Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+offline (windows-latest)	Set up job	2026-10-29T21:53:51.8662069Z Complete job name: offline (windows-latest)
+offline (windows-latest)	Run actions/checkout@v4	﻿2026-10-29T21:53:52.1269921Z ##[group]Run actions/checkout@v4
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:52.1271020Z with:
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:52.1271509Z   repository: ryomashibaba/MinecraftAIBuilder
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:52.1277390Z   token: ***
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:52.1278124Z   ssh-strict: true
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:52.1278782Z   ssh-user: git
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:52.1279460Z   persist-credentials: true
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:52.1280291Z   clean: true
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:52.1280981Z   sparse-checkout-cone-mode: true
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:52.1281805Z   fetch-depth: 1
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:52.1282435Z   fetch-tags: false
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:52.1283117Z   show-progress: true
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:52.1283796Z   lfs: false
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:52.1284399Z   submodules: false
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:52.1285070Z   set-safe-directory: true
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:52.1285837Z   allow-unsafe-pr-checkout: false
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:52.1287110Z ##[endgroup]
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:52.6150545Z Syncing repository: ryomashibaba/MinecraftAIBuilder
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:52.6156474Z ##[group]Getting Git version info
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:52.6158365Z Working directory is 'D:\a\MinecraftAIBuilder\MinecraftAIBuilder'
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:52.8586157Z [command]"C:\Program Files\Git\bin\git.exe" version
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:53.3041941Z git version 2.56.0.windows.2
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:53.3108443Z ##[endgroup]
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:53.3131588Z Temporarily overriding HOME='D:\a\_temp\5936e163-029a-4bbc-aa8c-3b3a07f30b88' before making global git config changes
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:53.3133643Z Adding repository directory to the temporary git global config as a safe directory
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:53.3145727Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\MinecraftAIBuilder\MinecraftAIBuilder
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:53.3928410Z Deleting the contents of 'D:\a\MinecraftAIBuilder\MinecraftAIBuilder'
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:53.3935036Z ##[group]Initializing the repository
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:53.3944567Z [command]"C:\Program Files\Git\bin\git.exe" init D:\a\MinecraftAIBuilder\MinecraftAIBuilder
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:53.5081982Z Initialized empty Git repository in D:/a/MinecraftAIBuilder/MinecraftAIBuilder/.git/
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:53.5146973Z [command]"C:\Program Files\Git\bin\git.exe" remote add origin https://github.com/ryomashibaba/MinecraftAIBuilder
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:53.5911023Z ##[endgroup]
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:53.5912576Z ##[group]Disabling automatic garbage collection
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:53.5919899Z [command]"C:\Program Files\Git\bin\git.exe" config --local gc.auto 0
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:53.6308190Z ##[endgroup]
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:53.6310005Z ##[group]Setting up auth
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:53.6319729Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:53.6707028Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:55.8958199Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:55.9343018Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:56.4979220Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:56.5360488Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:57.1042333Z [command]"C:\Program Files\Git\bin\git.exe" config --local http.https://github.com/.extraheader "AUTHORIZATION: basic ***"
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:57.1442980Z ##[endgroup]
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:57.1444841Z ##[group]Fetching the repository
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:57.1469970Z [command]"C:\Program Files\Git\bin\git.exe" -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +789e0926ea79dbab3dd121d7d86d7c987a5b76aa:refs/remotes/origin/feature/b198zr1-protected-architectural-revision
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:58.9217591Z From https://github.com/ryomashibaba/MinecraftAIBuilder
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:58.9218913Z  * [new ref]         789e0926ea79dbab3dd121d7d86d7c987a5b76aa -> origin/feature/b198zr1-protected-architectural-revision
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:58.9263464Z ##[endgroup]
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:58.9263935Z ##[group]Determining the checkout info
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:58.9265701Z ##[endgroup]
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:58.9280198Z [command]"C:\Program Files\Git\bin\git.exe" sparse-checkout disable
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:58.9857971Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all extensions.worktreeConfig
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:59.0347117Z ##[group]Checking out the ref
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:59.0358257Z [command]"C:\Program Files\Git\bin\git.exe" checkout --progress --force -B feature/b198zr1-protected-architectural-revision refs/remotes/origin/feature/b198zr1-protected-architectural-revision
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:59.8644301Z Switched to a new branch 'feature/b198zr1-protected-architectural-revision'
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:59.8676899Z branch 'feature/b198zr1-protected-architectural-revision' set up to track 'origin/feature/b198zr1-protected-architectural-revision'.
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:59.8759373Z ##[endgroup]
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:59.9305024Z [command]"C:\Program Files\Git\bin\git.exe" log -1 --format=%H
+offline (windows-latest)	Run actions/checkout@v4	2026-10-29T21:53:59.9649993Z 789e0926ea79dbab3dd121d7d86d7c987a5b76aa
+offline (windows-latest)	Run actions/setup-node@v4	﻿2026-10-29T21:54:00.0221912Z ##[group]Run actions/setup-node@v4
+offline (windows-latest)	Run actions/setup-node@v4	2026-10-29T21:54:00.0222423Z with:
+offline (windows-latest)	Run actions/setup-node@v4	2026-10-29T21:54:00.0222717Z   node-version: 24
+offline (windows-latest)	Run actions/setup-node@v4	2026-10-29T21:54:00.0223033Z   always-auth: false
+offline (windows-latest)	Run actions/setup-node@v4	2026-10-29T21:54:00.0223363Z   check-latest: false
+offline (windows-latest)	Run actions/setup-node@v4	2026-10-29T21:54:00.0227742Z   token: ***
+offline (windows-latest)	Run actions/setup-node@v4	2026-10-29T21:54:00.0228051Z ##[endgroup]
+offline (windows-latest)	Run actions/setup-node@v4	2026-10-29T21:54:00.2049197Z Found in cache @ C:\hostedtoolcache\windows\node\24.22.1\x64
+offline (windows-latest)	Run actions/setup-node@v4	2026-10-29T21:54:00.2057632Z (node:9116) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+offline (windows-latest)	Run actions/setup-node@v4	2026-10-29T21:54:00.2058870Z (Use `node --trace-deprecation ...` to show where the warning was created)
+offline (windows-latest)	Run actions/setup-node@v4	2026-10-29T21:54:00.2061820Z ##[group]Environment details
+offline (windows-latest)	Run actions/setup-node@v4	2026-10-29T21:54:06.4997604Z node: v24.22.1
+offline (windows-latest)	Run actions/setup-node@v4	2026-10-29T21:54:06.4997915Z npm: 11.19.1
+offline (windows-latest)	Run actions/setup-node@v4	2026-10-29T21:54:06.4998435Z yarn: 1.22.22
+offline (windows-latest)	Run actions/setup-node@v4	2026-10-29T21:54:06.4999498Z ##[endgroup]
+offline (windows-latest)	New BN model contract, fake transport and real CLI regressions	﻿2026-10-29T21:54:06.5319101Z ##[group]Run node --test scripts/r190bo-spatial-local.test.mjs scripts/r190bn-spatial-assembly.test.mjs
+offline (windows-latest)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:54:06.5319997Z ^[[36;1mnode --test scripts/r190bo-spatial-local.test.mjs scripts/r190bn-spatial-assembly.test.mjs^[[0m
+offline (windows-latest)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:54:06.6493969Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+offline (windows-latest)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:54:06.6494493Z env:
+offline (windows-latest)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:54:06.6494821Z   NODE_OPTIONS: --import=./scripts/r190bo-deny-network.mjs
+offline (windows-latest)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:54:06.6495223Z ##[endgroup]
+offline (windows-latest)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:54:08.9833340Z ✔ BN enclosure matches independent six-face cell/material oracle; interior remains air (47.147ms)
+offline (windows-latest)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:54:08.9837357Z ✔ BN preserves authored two storeys and enclosed stair/landing route using existing R4 (69.2181ms)
+offline (windows-latest)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:54:08.9840601Z ✔ BN cannot invent a missing stair or upper portal; usable floors stay unreachable (83.6193ms)
+offline (windows-latest)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:54:08.9843623Z ✔ BN rejects invalid stair syntax without material/axis/step repair (104.1669ms)
+offline (windows-latest)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:54:08.9845107Z ✔ BN detects an actual filled room after ordered composition; purpose labels do not pass (30.3703ms)
+offline (windows-latest)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:54:08.9848834Z ✔ BN changed level is preserved; a reachable old roof point cannot certify the new upper space (62.0944ms)
+offline (windows-latest)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:54:08.9855270Z ✔ BN retains non-box authorship in a distinct long public-space probe (102.0325ms)
+offline (windows-latest)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:54:08.9856933Z ✔ BN capacity measures transient CSG failure separately from final geometry and height (845.7438ms)
+offline (windows-latest)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:54:08.9858729Z ✔ BN official BM raw failures cannot be converted or relabelled as the new format (1.4482ms)
+offline (windows-latest)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:54:09.9961444Z ✔ offline preparation uses exact frozen BM brief, host hash, finite grammar and zero discovery (83.4743ms)
+offline (windows-latest)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:54:09.9964848Z ✔ schema carries ADD/CUT materials, all six shapes, stair axis/steps, integer percentage (0.8757ms)
+offline (windows-latest)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:54:09.9974700Z ✔ generic Japanese briefs and Qwen/Gemma tags keep program, heights and form unchosen by host (36.1633ms)
+offline (windows-latest)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:54:09.9976900Z ✔ absent or historical approval rejects BEFORE transport or attempt creation (83.9098ms)
+offline (windows-latest)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:54:09.9978921Z ✔ an approval for an identical earlier preparation cannot authorize a fresh attempt (63.2671ms)
+offline (windows-latest)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:54:09.9980840Z ✔ tampered prepared request/brief/schema/source pins reject before transport (110.6544ms)
+offline (windows-latest)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:54:09.9982559Z ✔ in-memory fake native success preserves raw/HTTP separately and derives exact multi-storey voxels (421.5071ms)
+offline (windows-latest)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:54:09.9985796Z ✔ invalid/truncated/wrong hash/stair/material sources stay unchanged HOLD, without surrogate 3D (244.0673ms)
+offline (windows-latest)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:54:09.9988032Z ✔ provider length/error/model mismatch never compiles even a valid complete-looking content (167.6408ms)
+offline (windows-latest)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:54:09.9989763Z ✔ failed connection or malformed provider consumes exactly one attempt without invented model raw (101.6996ms)
+offline (windows-latest)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:54:09.9991720Z ✔ final occupied air yields functional HOLD; no host geometry repair (167.5583ms)
+offline (windows-latest)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:54:09.9998032Z ✔ distinct non-box replay retains all authored operations, zero transport and no attempt lock (219.0351ms)
+offline (windows-latest)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:54:10.0035302Z ✔ actual CLI prepare/inspect/replay and rejected run work without a provider (661.9927ms)
+offline (windows-latest)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:54:10.0254876Z ℹ tests 22
+offline (windows-latest)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:54:10.0255996Z ℹ suites 0
+offline (windows-latest)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:54:10.0256345Z ℹ pass 22
+offline (windows-latest)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:54:10.0256815Z ℹ fail 0
+offline (windows-latest)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:54:10.0258449Z ℹ cancelled 0
+offline (windows-latest)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:54:10.0258892Z ℹ skipped 0
+offline (windows-latest)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:54:10.0259221Z ℹ todo 0
+offline (windows-latest)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:54:10.0259606Z ℹ duration_ms 2853.7148
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	﻿2026-10-29T21:54:10.4010142Z ##[group]Run node --test scripts/r190bf-controlled-pair.test.mjs scripts/r190be-saved-design-comparison.test.mjs scripts/r190bg-source-anchored-review.test.mjs scripts/r190bj-failure-informed-prompt.test.mjs scripts/r190bk-evidence-stage-review.test.mjs
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:10.4012120Z ^[[36;1mnode --test scripts/r190bf-controlled-pair.test.mjs scripts/r190be-saved-design-comparison.test.mjs scripts/r190bg-source-anchored-review.test.mjs scripts/r190bj-failure-informed-prompt.test.mjs scripts/r190bk-evidence-stage-review.test.mjs^[[0m
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:10.4084940Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:10.4085289Z env:
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:10.4085529Z   NODE_OPTIONS: --import=./scripts/r190bo-deny-network.mjs
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:10.4085834Z ##[endgroup]
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:12.1066764Z ✔ BE exact saved pair yields SHA-bound source views, no invented improvement or scores (219.9096ms)
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:12.1070507Z ✔ BE differing source, model and numeric proxies cannot select an architectural winner (144.4426ms)
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:12.1080287Z ✔ BE formal R4 HOLD is recomputed even if saved receipt falsely says PASS (136.4708ms)
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:12.1107312Z ✔ BE truncated but parseable JSON and invalid original never receive false 3D (168.6488ms)
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:12.1109636Z ✔ BE missing new capture is honest HOLD, no generation fallback (74.923ms)
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:12.1131009Z ✔ BE rejects prompt drift, raw tampering, hash-chain drift and unsafe receipts before output (357.6165ms)
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:12.1149603Z ✔ BE output cannot overwrite or enter any source input; CLI has no generate flag (11.4599ms)
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:12.1155868Z ✔ BE optional CI demo preserves the shared fixture identity (0.3998ms)
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:12.1541777Z ✔ BF preparation SHA-locks one Japanese brief, model settings, no calls (16.7339ms)
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:12.1544496Z ✔ BF two independently authorized mock captures have identical provider controls and distinct original prompts (275.7648ms)
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:12.1558109Z ✔ BF cannot silently invoke two requests in one run (18.106ms)
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:12.1562108Z ✔ BF prepared brief or locked protocol drift must abort before network (11.2077ms)
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:12.1585961Z ✔ BF refuses missing B and tampered capture even when a valid A exists (99.0473ms)
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:12.1593950Z ✔ BF no implicit consent on CLI and no combined auto-call option (10.8808ms)
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:12.1605265Z ✔ BH invalid complete B143 pair never manufactures a BG 3D reviewer (124.6803ms)
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:13.5521661Z ✔ BG composes actual-source gallery and offline human-form for valid saved pair (350.5481ms)
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:13.5559801Z ✔ BG persisted reviewer observations are authenticated to exact review views, but do not yield ART PASS (241.3459ms)
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:13.5577125Z ✔ BG refuses manipulated reviewer score, broken source SHA and false art approval (1300.3813ms)
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:13.5585266Z ✔ BG rejects missing source models, even if comparison has a reference-only file (88.1505ms)
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:13.5633900Z ✔ BG detects corrupted source views before writing any review document (159.7746ms)
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:13.5635283Z ✔ BG refuses output under comparison source and bad CLI flags (9.4724ms)
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:13.5642059Z ✔ BG retains valid model B143 as critical evidence when its R4 circulation is HOLD (183.1234ms)
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:13.5649680Z ✔ BG empty review cannot masquerade as submitted human observation (218.1481ms)
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:13.5968867Z ✔ BJ retains archived real failure bytes and creates only a SHA-bound alternate prompt (20.3236ms)
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:13.5971607Z ✔ BJ rejects changed original/brief and corrupted prepared prompt, no source correction (15.8007ms)
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:13.5975021Z ✔ BJ old BC prompt and protocol remain separately available (18.2411ms)
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:13.5977306Z ✔ BJ variant uses existing consent-gated BF to compare synthetic saved A/B and BE/BG (341.2752ms)
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:13.5978733Z ✔ BJ CLI cannot request a model, fix designs or authorize construction (0.6325ms)
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:13.5983094Z ✔ BJ documented full CLI prepares real archived failure offline (373.058ms)
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:14.5905388Z ✔ BK equal synthetic B143 creates observation guide with no false architectural win (452.4732ms)
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:14.5910778Z ✔ BK invalid synthetic B never creates a fake B 3D and surfaces literal failures (114.3425ms)
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:14.5918267Z ✔ BK refuses tampered BE comparison evidence before any output (185.38ms)
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:14.5920260Z ✔ BL rejects modified original request or any view before publication (938.2554ms)
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:14.5924452Z ✔ BL does not show an invalid source as a 3D or generate an invented view hash (96.3912ms)
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:14.5928110Z ✔ BK refuses tampered BG reviewer and invalid-source diagnostic (235.5507ms)
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:14.5975188Z ✔ BK records an independently supplied human observation only after BG validation (138.2609ms)
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:14.5976286Z ✔ BK rejects fake human observations on an invalid pair and invented unsafe switches (81.2363ms)
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:14.6167954Z ℹ tests 37
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:14.6168453Z ℹ suites 0
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:14.6168914Z ℹ pass 37
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:14.6169293Z ℹ fail 0
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:14.6169675Z ℹ cancelled 0
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:14.6170052Z ℹ skipped 0
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:14.6170403Z ℹ todo 0
+offline (windows-latest)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:54:14.6170798Z ℹ duration_ms 3868.8638
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	﻿2026-10-29T21:54:14.7545886Z ##[group]Run node scripts/r190bo-offline-study.mjs --out bo-ci-evidence
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:14.7546684Z ^[[36;1mnode scripts/r190bo-offline-study.mjs --out bo-ci-evidence^[[0m
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:14.7618166Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:14.7618519Z env:
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:14.7618764Z   NODE_OPTIONS: --import=./scripts/r190bo-deny-network.mjs
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:14.7619089Z ##[endgroup]
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6003960Z {
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6004576Z   "schema": "minecraftaibuilder-r190bo-offline-study-v1",
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6005125Z   "newRealModelCalls": 0,
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6005393Z   "ollamaContacts": 0,
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6005607Z   "networkRequests": 0,
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6005815Z   "metadataReads": 0,
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6006443Z   "technicalResult": "OFFLINE_PATH_VALIDATED_WITH_SYNTHETIC_FIXTURES_ONLY",
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6007201Z   "realModelSpatialAssemblySuccess": "NOT_TESTED_AWAITING_SEPARATE_APPROVAL",
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6007646Z   "bmInventoryUnchanged": true,
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6007993Z   "preparations": [
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6008185Z     {
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6008413Z       "directory": "qwen-bm-preflight",
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6008677Z       "model": "qwen3:14b",
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6009081Z       "briefSha256": "bbd44cc9f28234055601b4055466e2f3564e7e4565d408432de4c4fab0aa277a",
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6009693Z       "requestSha256": "49393557b34e9b3d61d2229c6cffcaa4732cc0d887c536be3ce11cb7a7df8f67",
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6010289Z       "schemaSha256": "02947981e9857b993342e69c1550bf218853c051ec8003b21b2486427f017d8f",
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6010681Z       "requestBytes": 34742,
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6011000Z       "status": "OFFLINE_READY_AWAITING_SEPARATE_HUMAN_APPROVAL",
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6011339Z       "approvalGranted": false,
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6011564Z       "networkRequests": 0
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6011768Z     },
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6012069Z     {
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6012344Z       "directory": "gemma-bm-preflight",
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6012772Z       "model": "gemma4:26b",
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6013238Z       "briefSha256": "bbd44cc9f28234055601b4055466e2f3564e7e4565d408432de4c4fab0aa277a",
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6013825Z       "requestSha256": "d05617f202e7972545fef0b87d7f8c238daa6ee2a731357a9a335afdcadcbebc",
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6014399Z       "schemaSha256": "02947981e9857b993342e69c1550bf218853c051ec8003b21b2486427f017d8f",
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6015801Z       "requestBytes": 34743,
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6016139Z       "status": "OFFLINE_READY_AWAITING_SEPARATE_HUMAN_APPROVAL",
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6016492Z       "approvalGranted": false,
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6016722Z       "networkRequests": 0
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6016919Z     }
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6017073Z   ],
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6017249Z   "baselines": [
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6017468Z     {
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6017742Z       "side": "A",
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6018081Z       "status": "HOLD",
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6018678Z       "originalRawSha256": "e54f2abf87d36e0957d8393c960d2fce8075862d00ea1ea736365121a4b6a469",
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6019152Z       "failure": "R190BN_FORMAT",
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6019375Z       "unchanged": true,
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6019575Z       "repaired": false,
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6019765Z       "new3D": false
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6019939Z     },
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6020086Z     {
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6020243Z       "side": "B",
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6020426Z       "status": "HOLD",
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6020835Z       "originalRawSha256": "8e2590128e8bd932cddc2df595fcc01c3cbd660298cedd445431d0787bb90c86",
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6021280Z       "failure": "R190BN_FORMAT",
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6021524Z       "unchanged": true,
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6021726Z       "repaired": false,
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6022115Z       "new3D": false
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6022298Z     }
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6022451Z   ],
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6022604Z   "synthetic": [
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6022765Z     {
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6022987Z       "directory": "synthetic-reading/derived",
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6025677Z       "status": "SOURCE_SPACE_AND_ROUTE_PROXIES_PRESENT_ART_HOLD",
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6026053Z       "origin": "SYNTHETIC_TEST_FIXTURE",
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6026533Z       "originalRawSha256": "04a97ad267405b45c4c999564ac8313979ddea1192364f75e33a452ac4cec214",
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6027160Z       "geometrySha256": "4cf737ec59d902946bc32bed5a390e1cadc66e3b7a03675401cfb36536f2dbea",
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6027584Z       "art": "ART_HOLD",
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6027826Z       "requestFidelity": "NOT_CERTIFIED"
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6028060Z     },
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6028223Z     {
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6028446Z       "directory": "synthetic-concourse/derived",
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6028833Z       "status": "SOURCE_SPACE_AND_ROUTE_PROXIES_PRESENT_ART_HOLD",
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6029192Z       "origin": "SYNTHETIC_TEST_FIXTURE",
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6030065Z       "originalRawSha256": "f3bfe7436d2e287f7a76324f1e93b87627da397e19b033274359b69401610084",
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6030703Z       "geometrySha256": "5d76a26bdb61962deea388c4435bb6093ae7c537ed01d6454eca1025a6c8e0e6",
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6031263Z       "art": "ART_HOLD",
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6031659Z       "requestFidelity": "NOT_CERTIFIED"
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6032055Z     }
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6032323Z   ],
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6032573Z   "sameBriefCausalImprovement": "NOT_ESTABLISHED",
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6032862Z   "art": "ART_HOLD",
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6033065Z   "officialArtAdoptions": 0,
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6033398Z   "worldContacts": 0,
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6033725Z   "worldWrites": 0,
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6034076Z   "readiness": "NOT_PREPARED",
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6034408Z   "gates": [
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6034576Z     "BLOCKED",
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6034742Z     "BLOCKED",
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6034971Z     "BLOCKED",
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6035271Z     "BLOCKED",
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6035542Z     "BLOCKED",
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6035816Z     "BLOCKED",
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6035980Z     "BLOCKED",
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6036149Z     "BLOCKED",
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6036306Z     "BLOCKED"
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6036467Z   ],
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6036620Z   "BuildPlan": {
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6036798Z     "operations": []
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6036982Z   },
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6037173Z   "constructionApproved": false,
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6037411Z   "executionAllowed": false
+offline (windows-latest)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:54:15.6037804Z }
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	﻿2026-10-29T21:54:15.7365112Z ##[group]Run RUN_R190BO_OFFLINE_PREFLIGHT.cmd
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:15.7365556Z ^[[36;1mRUN_R190BO_OFFLINE_PREFLIGHT.cmd^[[0m
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:15.7403752Z shell: C:\Windows\system32\cmd.EXE /D /E:ON /V:OFF /S /C "CALL "{0}""
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:15.7404129Z env:
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:15.7404390Z   NODE_OPTIONS: --import=./scripts/r190bo-deny-network.mjs
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:15.7404705Z ##[endgroup]
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4882451Z {
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4883490Z   "schema": "minecraftaibuilder-r190bo-preflight-v1",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4884519Z   "status": "OFFLINE_READY_AWAITING_SEPARATE_HUMAN_APPROVAL",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4884968Z   "endpoint": "http://127.0.0.1:11434/api/chat",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4885261Z   "model": "qwen3:14b",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4885654Z   "briefSha256": "bbd44cc9f28234055601b4055466e2f3564e7e4565d408432de4c4fab0aa277a",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4886483Z   "requestSha256": "49393557b34e9b3d61d2229c6cffcaa4732cc0d887c536be3ce11cb7a7df8f67",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4887082Z   "schemaSha256": "02947981e9857b993342e69c1550bf218853c051ec8003b21b2486427f017d8f",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4887571Z   "sourcePins": [
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4888170Z     {
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4889117Z       "file": "scripts/b143-gallery-core.mjs",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4889874Z       "sha256": "d18480819ba16179c0341dcf9d51713eceec5901fbd0d71cf851f8ba9d7b62f8"
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4890273Z     },
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4890428Z     {
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4890657Z       "file": "scripts/r161-real-comparison.mjs",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4891668Z       "sha256": "3a8c11c8581dcadf6de84720b9e578807cf712764e42f5605788518582984277"
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4892273Z     },
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4892446Z     {
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4892695Z       "file": "scripts/r162-room-section-comparison.mjs",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4893174Z       "sha256": "d30c0ef61d99bd641a061083ecb7a8ef1d9cdbcb87d930c602785de64a8332c8"
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4894234Z     },
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4894398Z     {
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4894638Z       "file": "scripts/r163-daylight-comparison.mjs",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4895108Z       "sha256": "1bf2f01130f644238f94cb5006f2ee4d41f18e3fbc11098e4da5746bb059cf2c"
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4895481Z     },
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4895638Z     {
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4895862Z       "file": "scripts/r164-exterior-audit.mjs",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4896293Z       "sha256": "a5d9e2aed0a7345cc87964287b279d60660232a84a2b565a6c055921ae3b34aa"
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4896664Z     },
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4896812Z     {
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4897049Z       "file": "scripts/r190bc-design-first-section.mjs",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4897485Z       "sha256": "a45ff56512d1c3164367a2a9de8227085805bcc2ff6e16a09a9a115796007f5a"
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4897843Z     },
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4897987Z     {
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4898233Z       "file": "scripts/r190bo-spatial-local.mjs",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4898649Z       "sha256": "45db24a3631ff4a6278a04d741659f2005137ae5bfa64551e2f456ebc033f11f"
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4899318Z     },
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4899771Z     {
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4900000Z       "file": "source/ai/b143-building-dsl.mjs",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4900425Z       "sha256": "477c4306689d9fa62e91cefb30fa2ca877e934479f824585c5f71c7fdb56455d"
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4900777Z     },
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4900919Z     {
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4901138Z       "file": "source/ai/b143-viewer-template.html",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4901568Z       "sha256": "9e65645955456d5ac12b67f494ad1fca9b32b4d1b67614c236265f63c8d2b8c6"
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4901914Z     },
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4902057Z     {
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4902296Z       "file": "source/ai/b198-natural-language-design.mjs",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4902743Z       "sha256": "c8da65360cc805a18e0ca5115929ff62d6466e16f3ab7793d59c864a21217060"
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4903100Z     },
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4903242Z     {
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4903501Z       "file": "source/ai/b198zr3-functional-review-contract.mjs",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4903967Z       "sha256": "7d595841b65c9c962eb9cb959c06d7f0922ffb35aa0cb862df56d4b0d51229d1"
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4904968Z     },
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4907480Z     {
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4907758Z       "file": "source/ai/b198zr4-planned-source.mjs",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4908217Z       "sha256": "935643e27f04c8ffe6e1241111f73838a86eb14a7178b71002f04916defe5efe"
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4908596Z     },
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4908747Z     {
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4908976Z       "file": "source/ai/r125-functional-layer.mjs",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4909407Z       "sha256": "01186a42187ad079e90c0036bf97c8cf6114d57221712fa0fceb5f0218e300ac"
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4909771Z     },
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4909918Z     {
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4910128Z       "file": "source/ai/r125-source-routes.mjs",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4910561Z       "sha256": "1eb6830f4e4e254cf1d1e5a6d24a32c7989b3ca2a2c128fae7017c429d6c9705"
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4910918Z     },
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4911069Z     {
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4911286Z       "file": "source/ai/r134-multi-zone-plan.mjs",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4911712Z       "sha256": "3c74c1a7e879e35012b5f4ed29ddc6212c4dae77124aa2f812492eecb653aff5"
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4912091Z     },
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4912241Z     {
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4912464Z       "file": "source/ai/r138-branching-topology.mjs",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4912906Z       "sha256": "c18f05f0f7d949a5559cededa94240f1d4ea1ebf49f9cc0fbe25f505a64ca11d"
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4913264Z     },
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4913405Z     {
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4913611Z       "file": "source/ai/r139-room-relations.mjs",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4914022Z       "sha256": "3bbf42a34f25abcd28f701fa0d260671c83730f012fc029ef6307bd3b5fbdf20"
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4914370Z     },
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4914515Z     {
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4915120Z       "file": "source/ai/r149-architectural-expression.mjs",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4915938Z       "sha256": "029d6fdfa1b4e44cfbb4848d77a51cca423d710078e0aab486c865d63747862d"
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4918213Z     },
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4918495Z     {
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4918776Z       "file": "source/ai/r150-furniture-articulation.mjs",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4919281Z       "sha256": "74733b069e281793f156f77369c0cd48b17f0e6d24cf1d835ea035860de41088"
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4919660Z     },
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4919817Z     {
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4920039Z       "file": "source/ai/r160-side-gallery.mjs",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4920466Z       "sha256": "e0693371255f1b78d877bb1531df8ff375f1616e15500261a946d03f91e8a8a7"
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4920831Z     },
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4920982Z     {
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4921220Z       "file": "source/ai/r162-room-section-massing.mjs",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4921670Z       "sha256": "8f76e53f1d93c33b75c941196e1c6a5e94d71ef2ecff785a1b1ed7fbeefd8fd6"
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4922027Z     },
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4922170Z     {
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4922400Z       "file": "source/ai/r163-daylit-sections.mjs",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4922834Z       "sha256": "102b0669588e0d3ed1613af10a2ff6adfea77958287020cd260a7795770ba5ec"
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4923190Z     },
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4923339Z     {
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4923581Z       "file": "source/ai/r164-envelope-continuity.mjs",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4924041Z       "sha256": "d3b170fba5270ac89668f0e1d3997517dab96fa51b5f581ce323eefafecddf39"
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4924411Z     },
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4924565Z     {
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4924797Z       "file": "source/ai/r190bn-spatial-assembly.mjs",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4925229Z       "sha256": "588b704593b43cf179b5296d2ee1389553ca99a8d9b4146d0a3bddb99d1f7b8b"
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4925579Z     },
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4925733Z     {
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4925983Z       "file": "source/ai/r190bo-spatial-model-contract.mjs",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4926447Z       "sha256": "25962d96401f5fdb6d7bce08804930bf3f5fde5049df571a622ee071bd78fe70"
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4926798Z     }
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4926942Z   ],
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4927114Z   "bmComparison": {
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4927342Z     "sameOriginalBrief": true,
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4927765Z     "inventorySha256": "67d492e6357ef09f5e4682fa8f64e966461561e2ff96e601cf6963294166a545",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4928592Z     "originalA": "e54f2abf87d36e0957d8393c960d2fce8075862d00ea1ea736365121a4b6a469",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4929797Z     "originalB": "8e2590128e8bd932cddc2df595fcc01c3cbd660298cedd445431d0787bb90c86",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4930227Z     "oldSourcesModified": false,
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4930705Z     "causalComparison": "NOT_CONTROLLED: new IR, native transport, schema and context differ from BM"
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4931139Z   },
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4931386Z   "approvalNonce": "b6d2f8e0-4979-4327-b500-465dabb24bfe",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4932141Z   "approvalPhrase": "R190BO-ONE-POST-49393557b34e9b3d61d2229c6cffcaa4732cc0d887c536be3ce11cb7a7df8f67-b6d2f8e0-4979-4327-b500-465dabb24bfe",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4933215Z   "approvalGranted": false,
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4933500Z   "previousBMApprovalReusable": false,
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4933766Z   "maximumPostRequests": 1,
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4933987Z   "metadataRequests": 0,
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4934197Z   "automaticRetries": 0,
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4934399Z   "fallbacks": 0,
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4934594Z   "plannedTimeoutMs": 900000,
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4934875Z   "localModelInstalled": "NOT_QUERIED_OFFLINE",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4935255Z   "providerSchemaCompatibility": "NOT_TESTED_ON_REAL_OLLAMA",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4935723Z   "modelIdentityCryptographicallyVerified": false,
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4936031Z   "networkRequests": 0,
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4936232Z   "modelCalls": 0,
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4936417Z   "requestBytes": 34742,
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4936661Z   "mechanicalHashComputedByHost": true,
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4937130Z   "designAuthorship": "MODEL_MUST_CHOOSE_PROGRAM_LAYOUT_LEVELS_MASSING_VOIDS_STAIRS_OPENINGS",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4937593Z   "readiness": "NOT_PREPARED",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4937808Z   "gates": [
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4938050Z     "BLOCKED",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4938323Z     "BLOCKED",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4938609Z     "BLOCKED",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4938922Z     "BLOCKED",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4939167Z     "BLOCKED",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4939428Z     "BLOCKED",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4939684Z     "BLOCKED",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4939963Z     "BLOCKED",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4940223Z     "BLOCKED"
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4940388Z   ],
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4940551Z   "BuildPlan": {
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4940737Z     "operations": []
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4940924Z   },
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4941116Z   "constructionApproved": false,
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4941355Z   "executionAllowed": false,
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4941568Z   "worldContacts": 0,
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4941756Z   "worldWrites": 0,
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4941933Z   "art": "ART_HOLD",
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4942131Z   "officialArtAdoptions": 0
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4942336Z }
+offline (windows-latest)	Actual Windows offline CMD, no Ollama	2026-10-29T21:54:17.4942418Z
+offline (windows-latest)	Run actions/upload-artifact@v4	﻿2026-10-29T21:54:17.5270309Z ##[group]Run actions/upload-artifact@v4
+offline (windows-latest)	Run actions/upload-artifact@v4	2026-10-29T21:54:17.5270673Z with:
+offline (windows-latest)	Run actions/upload-artifact@v4	2026-10-29T21:54:17.5270896Z   name: R190BO-OFFLINE-NO-MODEL-windows-latest
+offline (windows-latest)	Run actions/upload-artifact@v4	2026-10-29T21:54:17.5271189Z   path: bo-ci-evidence
+offline (windows-latest)	Run actions/upload-artifact@v4	2026-10-29T21:54:17.5271395Z   if-no-files-found: warn
+offline (windows-latest)	Run actions/upload-artifact@v4	2026-10-29T21:54:17.5271621Z   compression-level: 6
+offline (windows-latest)	Run actions/upload-artifact@v4	2026-10-29T21:54:17.5271806Z   overwrite: false
+offline (windows-latest)	Run actions/upload-artifact@v4	2026-10-29T21:54:17.5271989Z   include-hidden-files: false
+offline (windows-latest)	Run actions/upload-artifact@v4	2026-10-29T21:54:17.5272206Z ##[endgroup]
+offline (windows-latest)	Run actions/upload-artifact@v4	2026-10-29T21:54:17.7261846Z (node:8244) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+offline (windows-latest)	Run actions/upload-artifact@v4	2026-10-29T21:54:17.7262681Z (Use `node --trace-deprecation ...` to show where the warning was created)
+offline (windows-latest)	Run actions/upload-artifact@v4	2026-10-29T21:54:17.7644576Z With the provided path, there will be 76 files uploaded
+offline (windows-latest)	Run actions/upload-artifact@v4	2026-10-29T21:54:17.7652750Z Artifact name is valid!
+offline (windows-latest)	Run actions/upload-artifact@v4	2026-10-29T21:54:17.7654406Z Root directory input is valid!
+offline (windows-latest)	Run actions/upload-artifact@v4	2026-10-29T21:54:17.9965096Z Beginning upload of artifact content to blob storage
+offline (windows-latest)	Run actions/upload-artifact@v4	2026-10-29T21:54:18.1202020Z (node:8244) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+offline (windows-latest)	Run actions/upload-artifact@v4	2026-10-29T21:54:18.1856395Z Uploaded bytes 147472
+offline (windows-latest)	Run actions/upload-artifact@v4	2026-10-29T21:54:18.2056949Z Finished uploading artifact content to blob storage!
+offline (windows-latest)	Run actions/upload-artifact@v4	2026-10-29T21:54:18.2058642Z SHA256 digest of uploaded artifact zip is cb6316a5b8a58b01c42a444444bdc310708f05414408a70dc9b9b4b6fc1cd707
+offline (windows-latest)	Run actions/upload-artifact@v4	2026-10-29T21:54:18.2061307Z Finalizing artifact upload
+offline (windows-latest)	Run actions/upload-artifact@v4	2026-10-29T21:54:18.6292763Z Artifact R190BO-OFFLINE-NO-MODEL-windows-latest.zip successfully finalized. Artifact ID 12934868416
+offline (windows-latest)	Run actions/upload-artifact@v4	2026-10-29T21:54:18.6294740Z Artifact R190BO-OFFLINE-NO-MODEL-windows-latest has been successfully uploaded! Final size is 147472 bytes. Artifact ID is 12934868416
+offline (windows-latest)	Run actions/upload-artifact@v4	2026-10-29T21:54:18.6304791Z Artifact download URL: https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40961560402/artifacts/12934868416
+offline (windows-latest)	Post Run actions/setup-node@v4	﻿2026-10-29T21:54:18.6747212Z Post job cleanup.
+offline (windows-latest)	Post Run actions/setup-node@v4	2026-10-29T21:54:18.8423199Z (node:1448) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+offline (windows-latest)	Post Run actions/setup-node@v4	2026-10-29T21:54:18.8424578Z (Use `node --trace-deprecation ...` to show where the warning was created)
+offline (windows-latest)	Post Run actions/checkout@v4	﻿2026-10-29T21:54:18.8805435Z Post job cleanup.
+offline (windows-latest)	Post Run actions/checkout@v4	2026-10-29T21:54:19.1075479Z [command]"C:\Program Files\Git\bin\git.exe" version
+offline (windows-latest)	Post Run actions/checkout@v4	2026-10-29T21:54:19.1509950Z git version 2.56.0.windows.2
+offline (windows-latest)	Post Run actions/checkout@v4	2026-10-29T21:54:19.1591951Z Temporarily overriding HOME='D:\a\_temp\e3ca5e0f-be0b-4ac5-a54d-e54768a1b2ac' before making global git config changes
+offline (windows-latest)	Post Run actions/checkout@v4	2026-10-29T21:54:19.1593321Z Adding repository directory to the temporary git global config as a safe directory
+offline (windows-latest)	Post Run actions/checkout@v4	2026-10-29T21:54:19.1602795Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\MinecraftAIBuilder\MinecraftAIBuilder
+offline (windows-latest)	Post Run actions/checkout@v4	2026-10-29T21:54:19.2028172Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+offline (windows-latest)	Post Run actions/checkout@v4	2026-10-29T21:54:19.2601846Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+offline (windows-latest)	Post Run actions/checkout@v4	2026-10-29T21:54:19.8908718Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+offline (windows-latest)	Post Run actions/checkout@v4	2026-10-29T21:54:19.9287434Z http.https://github.com/.extraheader
+offline (windows-latest)	Post Run actions/checkout@v4	2026-10-29T21:54:19.9341739Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all http.https://github.com/.extraheader
+offline (windows-latest)	Post Run actions/checkout@v4	2026-10-29T21:54:19.9748009Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+offline (windows-latest)	Post Run actions/checkout@v4	2026-10-29T21:54:20.5439704Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+offline (windows-latest)	Post Run actions/checkout@v4	2026-10-29T21:54:20.5866518Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+offline (windows-latest)	Complete job	﻿2026-10-29T21:54:21.2073604Z Cleaning up orphan processes
+offline (windows-latest)	Complete job	2026-10-29T21:54:21.2474819Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-node@v4, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+offline (ubuntu-24.04)	Set up job	﻿2026-10-29T21:53:50.4545419Z Current runner version: '2.338.0'
+offline (ubuntu-24.04)	Set up job	2026-10-29T21:53:50.4577876Z ##[group]Runner Image Provisioner
+offline (ubuntu-24.04)	Set up job	2026-10-29T21:53:50.4579122Z Hosted Compute Agent
+offline (ubuntu-24.04)	Set up job	2026-10-29T21:53:50.4580149Z Version: 20261021.618
+offline (ubuntu-24.04)	Set up job	2026-10-29T21:53:50.4581099Z Commit: 21505ad2541d5be6135ed84fc33697146cf75b8e
+offline (ubuntu-24.04)	Set up job	2026-10-29T21:53:50.4582245Z Build Date: 2026-10-21T00:45:21Z
+offline (ubuntu-24.04)	Set up job	2026-10-29T21:53:50.4583192Z Worker ID: {7d5b07f5-6410-43f1-9ba4-dca56530fcf7}
+offline (ubuntu-24.04)	Set up job	2026-10-29T21:53:50.4584716Z Region: northcentralus
+offline (ubuntu-24.04)	Set up job	2026-10-29T21:53:50.4585696Z Cloud: Azure
+offline (ubuntu-24.04)	Set up job	2026-10-29T21:53:50.4586504Z ##[endgroup]
+offline (ubuntu-24.04)	Set up job	2026-10-29T21:53:50.4588426Z ##[group]Operating System
+offline (ubuntu-24.04)	Set up job	2026-10-29T21:53:50.4589316Z Ubuntu
+offline (ubuntu-24.04)	Set up job	2026-10-29T21:53:50.4589981Z 24.04.5
+offline (ubuntu-24.04)	Set up job	2026-10-29T21:53:50.4590786Z LTS
+offline (ubuntu-24.04)	Set up job	2026-10-29T21:53:50.4591535Z ##[endgroup]
+offline (ubuntu-24.04)	Set up job	2026-10-29T21:53:50.4592285Z ##[group]Runner Image
+offline (ubuntu-24.04)	Set up job	2026-10-29T21:53:50.4593064Z Image: ubuntu-24.04
+offline (ubuntu-24.04)	Set up job	2026-10-29T21:53:50.4593792Z Version: 20261025.353.1
+offline (ubuntu-24.04)	Set up job	2026-10-29T21:53:50.4595593Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261025.353/images/ubuntu/Ubuntu2404-Readme.md
+offline (ubuntu-24.04)	Set up job	2026-10-29T21:53:50.4598026Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261025.353
+offline (ubuntu-24.04)	Set up job	2026-10-29T21:53:50.4599369Z ##[endgroup]
+offline (ubuntu-24.04)	Set up job	2026-10-29T21:53:50.4600911Z ##[group]GITHUB_TOKEN Permissions
+offline (ubuntu-24.04)	Set up job	2026-10-29T21:53:50.4604015Z Contents: read
+offline (ubuntu-24.04)	Set up job	2026-10-29T21:53:50.4605104Z Metadata: read
+offline (ubuntu-24.04)	Set up job	2026-10-29T21:53:50.4605833Z ##[endgroup]
+offline (ubuntu-24.04)	Set up job	2026-10-29T21:53:50.4608682Z Secret source: Actions
+offline (ubuntu-24.04)	Set up job	2026-10-29T21:53:50.4610152Z Cache mode: write
+offline (ubuntu-24.04)	Set up job	2026-10-29T21:53:50.4611185Z Prepare workflow directory
+offline (ubuntu-24.04)	Set up job	2026-10-29T21:53:50.4936215Z Prepare all required actions
+offline (ubuntu-24.04)	Set up job	2026-10-29T21:53:50.4985254Z Getting action download info
+offline (ubuntu-24.04)	Set up job	2026-10-29T21:53:50.7502627Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+offline (ubuntu-24.04)	Set up job	2026-10-29T21:53:50.8519271Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+offline (ubuntu-24.04)	Set up job	2026-10-29T21:53:50.9709436Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+offline (ubuntu-24.04)	Set up job	2026-10-29T21:53:51.2582323Z Complete job name: offline (ubuntu-24.04)
+offline (ubuntu-24.04)	Run actions/checkout@v4	﻿2026-10-29T21:53:51.3369079Z ##[group]Run actions/checkout@v4
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.3370071Z with:
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.3370683Z   repository: ryomashibaba/MinecraftAIBuilder
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.3375336Z   token: ***
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.3375964Z   ssh-strict: true
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.3376545Z   ssh-user: git
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.3377118Z   persist-credentials: true
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.3377923Z   clean: true
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.3378489Z   sparse-checkout-cone-mode: true
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.3379159Z   fetch-depth: 1
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.3379701Z   fetch-tags: false
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.3380251Z   show-progress: true
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.3380814Z   lfs: false
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.3381357Z   submodules: false
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.3381948Z   set-safe-directory: true
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.3382593Z   allow-unsafe-pr-checkout: false
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.3383420Z ##[endgroup]
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.5869418Z Syncing repository: ryomashibaba/MinecraftAIBuilder
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.5872145Z ##[group]Getting Git version info
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.5873455Z Working directory is '/home/runner/work/MinecraftAIBuilder/MinecraftAIBuilder'
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.5875284Z [command]/usr/bin/git version
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.5970139Z git version 2.56.0
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.5995280Z ##[endgroup]
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.6009659Z Temporarily overriding HOME='/home/runner/work/_temp/43efb58f-9c24-4236-9f0d-0d5568b8dc71' before making global git config changes
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.6011974Z Adding repository directory to the temporary git global config as a safe directory
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.6014090Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/MinecraftAIBuilder/MinecraftAIBuilder
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.6058581Z Deleting the contents of '/home/runner/work/MinecraftAIBuilder/MinecraftAIBuilder'
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.6069911Z ##[group]Initializing the repository
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.6073748Z [command]/usr/bin/git init /home/runner/work/MinecraftAIBuilder/MinecraftAIBuilder
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.6165727Z hint: Using 'master' as the name for the initial branch. This default branch name
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.6168091Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.6170048Z hint: to use in all of your new repositories, which will suppress this warning,
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.6171465Z hint: call:
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.6172353Z hint:
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.6173477Z hint: 	git config --global init.defaultBranch <name>
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.6174764Z hint:
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.6176068Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.6206180Z hint: 'development'. The just-created branch can be renamed via this command:
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.6208054Z hint:
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.6211008Z hint: 	git branch -m <name>
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.6212378Z hint:
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.6213519Z hint: Disable this message with "git config set advice.defaultBranchName false"
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.6215693Z Initialized empty Git repository in /home/runner/work/MinecraftAIBuilder/MinecraftAIBuilder/.git/
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.6237876Z [command]/usr/bin/git remote add origin https://github.com/ryomashibaba/MinecraftAIBuilder
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.6256177Z ##[endgroup]
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.6257815Z ##[group]Disabling automatic garbage collection
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.6260327Z [command]/usr/bin/git config --local gc.auto 0
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.6300799Z ##[endgroup]
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.6302404Z ##[group]Setting up auth
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.6307611Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.6340140Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.6647871Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.6680149Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.6889819Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.6921947Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.7122908Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.7161875Z ##[endgroup]
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.7162963Z ##[group]Fetching the repository
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:51.7174740Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +789e0926ea79dbab3dd121d7d86d7c987a5b76aa:refs/remotes/origin/feature/b198zr1-protected-architectural-revision
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:52.6827253Z From https://github.com/ryomashibaba/MinecraftAIBuilder
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:52.6830911Z  * [new ref]         789e0926ea79dbab3dd121d7d86d7c987a5b76aa -> origin/feature/b198zr1-protected-architectural-revision
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:52.6837685Z ##[endgroup]
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:52.6839828Z ##[group]Determining the checkout info
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:52.6842691Z ##[endgroup]
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:52.6844264Z [command]/usr/bin/git sparse-checkout disable
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:52.6899365Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:52.6932356Z ##[group]Checking out the ref
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:52.6937037Z [command]/usr/bin/git checkout --progress --force -B feature/b198zr1-protected-architectural-revision refs/remotes/origin/feature/b198zr1-protected-architectural-revision
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:52.8737573Z Switched to a new branch 'feature/b198zr1-protected-architectural-revision'
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:52.8742097Z branch 'feature/b198zr1-protected-architectural-revision' set up to track 'origin/feature/b198zr1-protected-architectural-revision'.
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:52.8752644Z ##[endgroup]
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:52.8792179Z [command]/usr/bin/git log -1 --format=%H
+offline (ubuntu-24.04)	Run actions/checkout@v4	2026-10-29T21:53:52.8817924Z 789e0926ea79dbab3dd121d7d86d7c987a5b76aa
+offline (ubuntu-24.04)	Run actions/setup-node@v4	﻿2026-10-29T21:53:52.9204749Z ##[group]Run actions/setup-node@v4
+offline (ubuntu-24.04)	Run actions/setup-node@v4	2026-10-29T21:53:52.9206078Z with:
+offline (ubuntu-24.04)	Run actions/setup-node@v4	2026-10-29T21:53:52.9207091Z   node-version: 24
+offline (ubuntu-24.04)	Run actions/setup-node@v4	2026-10-29T21:53:52.9208155Z   always-auth: false
+offline (ubuntu-24.04)	Run actions/setup-node@v4	2026-10-29T21:53:52.9209241Z   check-latest: false
+offline (ubuntu-24.04)	Run actions/setup-node@v4	2026-10-29T21:53:52.9218999Z   token: ***
+offline (ubuntu-24.04)	Run actions/setup-node@v4	2026-10-29T21:53:52.9219980Z ##[endgroup]
+offline (ubuntu-24.04)	Run actions/setup-node@v4	2026-10-29T21:53:53.0643097Z (node:2286) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+offline (ubuntu-24.04)	Run actions/setup-node@v4	2026-10-29T21:53:53.0646683Z (Use `node --trace-deprecation ...` to show where the warning was created)
+offline (ubuntu-24.04)	Run actions/setup-node@v4	2026-10-29T21:53:53.0650424Z Found in cache @ /opt/hostedtoolcache/node/24.22.1/x64
+offline (ubuntu-24.04)	Run actions/setup-node@v4	2026-10-29T21:53:53.0652587Z ##[group]Environment details
+offline (ubuntu-24.04)	Run actions/setup-node@v4	2026-10-29T21:53:53.4432528Z node: v24.22.1
+offline (ubuntu-24.04)	Run actions/setup-node@v4	2026-10-29T21:53:53.4433544Z npm: 11.19.1
+offline (ubuntu-24.04)	Run actions/setup-node@v4	2026-10-29T21:53:53.4434293Z yarn: 1.22.22
+offline (ubuntu-24.04)	Run actions/setup-node@v4	2026-10-29T21:53:53.4435756Z ##[endgroup]
+offline (ubuntu-24.04)	New BN model contract, fake transport and real CLI regressions	﻿2026-10-29T21:53:53.4562416Z ##[group]Run node --test scripts/r190bo-spatial-local.test.mjs scripts/r190bn-spatial-assembly.test.mjs
+offline (ubuntu-24.04)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:53:53.4563319Z ^[[36;1mnode --test scripts/r190bo-spatial-local.test.mjs scripts/r190bn-spatial-assembly.test.mjs^[[0m
+offline (ubuntu-24.04)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:53:53.4590883Z shell: /usr/bin/bash -e {0}
+offline (ubuntu-24.04)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:53:53.4591369Z env:
+offline (ubuntu-24.04)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:53:53.4591774Z   NODE_OPTIONS: --import=./scripts/r190bo-deny-network.mjs
+offline (ubuntu-24.04)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:53:53.4592192Z ##[endgroup]
+offline (ubuntu-24.04)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:53:54.9718157Z ✔ BN enclosure matches independent six-face cell/material oracle; interior remains air (19.220702ms)
+offline (ubuntu-24.04)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:53:54.9719925Z ✔ BN preserves authored two storeys and enclosed stair/landing route using existing R4 (61.52548ms)
+offline (ubuntu-24.04)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:53:54.9721001Z ✔ BN cannot invent a missing stair or upper portal; usable floors stay unreachable (55.785958ms)
+offline (ubuntu-24.04)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:53:54.9722662Z ✔ BN rejects invalid stair syntax without material/axis/step repair (113.91594ms)
+offline (ubuntu-24.04)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:53:54.9724006Z ✔ BN detects an actual filled room after ordered composition; purpose labels do not pass (45.898196ms)
+offline (ubuntu-24.04)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:53:54.9725711Z ✔ BN changed level is preserved; a reachable old roof point cannot certify the new upper space (82.079723ms)
+offline (ubuntu-24.04)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:53:54.9729783Z ✔ BN retains non-box authorship in a distinct long public-space probe (56.796164ms)
+offline (ubuntu-24.04)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:53:54.9734370Z ✔ BN capacity measures transient CSG failure separately from final geometry and height (930.338815ms)
+offline (ubuntu-24.04)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:53:54.9736752Z ✔ BN official BM raw failures cannot be converted or relabelled as the new format (1.134001ms)
+offline (ubuntu-24.04)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:53:55.0011788Z ✔ offline preparation uses exact frozen BM brief, host hash, finite grammar and zero discovery (19.785063ms)
+offline (ubuntu-24.04)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:53:55.0013422Z ✔ schema carries ADD/CUT materials, all six shapes, stair axis/steps, integer percentage (0.747906ms)
+offline (ubuntu-24.04)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:53:55.0018983Z ✔ generic Japanese briefs and Qwen/Gemma tags keep program, heights and form unchosen by host (9.82156ms)
+offline (ubuntu-24.04)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:53:55.0020158Z ✔ absent or historical approval rejects BEFORE transport or attempt creation (22.51288ms)
+offline (ubuntu-24.04)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:53:55.0021091Z ✔ an approval for an identical earlier preparation cannot authorize a fresh attempt (17.245087ms)
+offline (ubuntu-24.04)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:53:55.0022303Z ✔ tampered prepared request/brief/schema/source pins reject before transport (23.871609ms)
+offline (ubuntu-24.04)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:53:55.0023246Z ✔ in-memory fake native success preserves raw/HTTP separately and derives exact multi-storey voxels (157.684707ms)
+offline (ubuntu-24.04)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:53:55.0024207Z ✔ invalid/truncated/wrong hash/stair/material sources stay unchanged HOLD, without surrogate 3D (58.900083ms)
+offline (ubuntu-24.04)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:53:55.0025301Z ✔ provider length/error/model mismatch never compiles even a valid complete-looking content (26.404795ms)
+offline (ubuntu-24.04)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:53:55.0026412Z ✔ failed connection or malformed provider consumes exactly one attempt without invented model raw (21.475873ms)
+offline (ubuntu-24.04)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:53:55.0027399Z ✔ final occupied air yields functional HOLD; no host geometry repair (130.295928ms)
+offline (ubuntu-24.04)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:53:55.0028576Z ✔ distinct non-box replay retains all authored operations, zero transport and no attempt lock (229.053593ms)
+offline (ubuntu-24.04)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:53:55.0029751Z ✔ actual CLI prepare/inspect/replay and rejected run work without a provider (565.81126ms)
+offline (ubuntu-24.04)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:53:55.0030283Z ℹ tests 22
+offline (ubuntu-24.04)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:53:55.0030777Z ℹ suites 0
+offline (ubuntu-24.04)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:53:55.0035598Z ℹ pass 22
+offline (ubuntu-24.04)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:53:55.0036191Z ℹ fail 0
+offline (ubuntu-24.04)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:53:55.0036857Z ℹ cancelled 0
+offline (ubuntu-24.04)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:53:55.0037429Z ℹ skipped 0
+offline (ubuntu-24.04)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:53:55.0037933Z ℹ todo 0
+offline (ubuntu-24.04)	New BN model contract, fake transport and real CLI regressions	2026-10-29T21:53:55.0038537Z ℹ duration_ms 1502.025383
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	﻿2026-10-29T21:53:55.0106580Z ##[group]Run node --test scripts/r190bf-controlled-pair.test.mjs scripts/r190be-saved-design-comparison.test.mjs scripts/r190bg-source-anchored-review.test.mjs scripts/r190bj-failure-informed-prompt.test.mjs scripts/r190bk-evidence-stage-review.test.mjs
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:55.0108399Z ^[[36;1mnode --test scripts/r190bf-controlled-pair.test.mjs scripts/r190be-saved-design-comparison.test.mjs scripts/r190bg-source-anchored-review.test.mjs scripts/r190bj-failure-informed-prompt.test.mjs scripts/r190bk-evidence-stage-review.test.mjs^[[0m
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:55.0122679Z shell: /usr/bin/bash -e {0}
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:55.0123015Z env:
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:55.0123386Z   NODE_OPTIONS: --import=./scripts/r190bo-deny-network.mjs
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:55.0123797Z ##[endgroup]
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:55.9987432Z ✔ BE exact saved pair yields SHA-bound source views, no invented improvement or scores (207.554288ms)
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:56.0016671Z ✔ BE differing source, model and numeric proxies cannot select an architectural winner (126.219173ms)
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:56.0046202Z ✔ BE formal R4 HOLD is recomputed even if saved receipt falsely says PASS (100.769501ms)
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:56.0060162Z ✔ BE truncated but parseable JSON and invalid original never receive false 3D (119.722185ms)
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:56.0110798Z ✔ BE missing new capture is honest HOLD, no generation fallback (37.798922ms)
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:56.0112860Z ✔ BE rejects prompt drift, raw tampering, hash-chain drift and unsafe receipts before output (206.524001ms)
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:56.0117595Z ✔ BE output cannot overwrite or enter any source input; CLI has no generate flag (1.274205ms)
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:56.0119148Z ✔ BE optional CI demo preserves the shared fixture identity (0.162002ms)
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:56.0281634Z ✔ BF preparation SHA-locks one Japanese brief, model settings, no calls (4.972324ms)
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:56.0283628Z ✔ BF two independently authorized mock captures have identical provider controls and distinct original prompts (241.321421ms)
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:56.0285233Z ✔ BF cannot silently invoke two requests in one run (3.125076ms)
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:56.0312054Z ✔ BF prepared brief or locked protocol drift must abort before network (1.662426ms)
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:56.0313741Z ✔ BF refuses missing B and tampered capture even when a valid A exists (37.138936ms)
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:56.0335850Z ✔ BF no implicit consent on CLI and no combined auto-call option (2.178613ms)
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:56.0338713Z ✔ BH invalid complete B143 pair never manufactures a BG 3D reviewer (69.962099ms)
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:56.2533930Z ✔ BG composes actual-source gallery and offline human-form for valid saved pair (245.024759ms)
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:56.2555457Z ✔ BG persisted reviewer observations are authenticated to exact review views, but do not yield ART PASS (131.158749ms)
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:56.2557005Z ✔ BG refuses manipulated reviewer score, broken source SHA and false art approval (467.802354ms)
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:56.2558366Z ✔ BG rejects missing source models, even if comparison has a reference-only file (33.630212ms)
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:56.2559714Z ✔ BG detects corrupted source views before writing any review document (57.142694ms)
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:56.2560850Z ✔ BG refuses output under comparison source and bad CLI flags (1.391489ms)
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:56.2562050Z ✔ BG retains valid model B143 as critical evidence when its R4 circulation is HOLD (56.809674ms)
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:56.2563216Z ✔ BG empty review cannot masquerade as submitted human observation (63.751235ms)
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:56.2758964Z ✔ BJ retains archived real failure bytes and creates only a SHA-bound alternate prompt (7.655116ms)
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:56.2760149Z ✔ BJ rejects changed original/brief and corrupted prepared prompt, no source correction (1.87611ms)
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:56.2761325Z ✔ BJ old BC prompt and protocol remain separately available (2.829257ms)
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:56.2762441Z ✔ BJ variant uses existing consent-gated BF to compare synthetic saved A/B and BE/BG (220.03764ms)
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:56.2763462Z ✔ BJ CLI cannot request a model, fix designs or authorize construction (0.477112ms)
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:56.2765738Z ✔ BJ documented full CLI prepares real archived failure offline (102.787294ms)
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:56.6789828Z ✔ BK equal synthetic B143 creates observation guide with no false architectural win (117.583619ms)
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:56.6799720Z ✔ BK invalid synthetic B never creates a fake B 3D and surfaces literal failures (35.652217ms)
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:56.6806249Z ✔ BK refuses tampered BE comparison evidence before any output (50.508332ms)
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:56.6855746Z ✔ BL rejects modified original request or any view before publication (174.793577ms)
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:56.6858981Z ✔ BL does not show an invalid source as a 3D or generate an invented view hash (21.556228ms)
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:56.6859990Z ✔ BK refuses tampered BG reviewer and invalid-source diagnostic (66.482167ms)
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:56.6860951Z ✔ BK records an independently supplied human observation only after BG validation (45.391655ms)
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:56.6861883Z ✔ BK rejects fake human observations on an invalid pair and invented unsafe switches (22.055121ms)
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:56.6994000Z ℹ tests 37
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:56.6994806Z ℹ suites 0
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:56.6999355Z ℹ pass 37
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:56.7000136Z ℹ fail 0
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:56.7000786Z ℹ cancelled 0
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:56.7001444Z ℹ skipped 0
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:56.7002178Z ℹ todo 0
+offline (ubuntu-24.04)	Existing immutable BM, provenance and comparison regressions	2026-10-29T21:53:56.7002771Z ℹ duration_ms 1652.962923
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	﻿2026-10-29T21:53:56.7109096Z ##[group]Run node scripts/r190bo-offline-study.mjs --out bo-ci-evidence
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:56.7109685Z ^[[36;1mnode scripts/r190bo-offline-study.mjs --out bo-ci-evidence^[[0m
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:56.7122977Z shell: /usr/bin/bash -e {0}
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:56.7123293Z env:
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:56.7123698Z   NODE_OPTIONS: --import=./scripts/r190bo-deny-network.mjs
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:56.7124098Z ##[endgroup]
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0674713Z {
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0675739Z   "schema": "minecraftaibuilder-r190bo-offline-study-v1",
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0676374Z   "newRealModelCalls": 0,
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0676816Z   "ollamaContacts": 0,
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0677270Z   "networkRequests": 0,
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0677649Z   "metadataReads": 0,
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0678301Z   "technicalResult": "OFFLINE_PATH_VALIDATED_WITH_SYNTHETIC_FIXTURES_ONLY",
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0679144Z   "realModelSpatialAssemblySuccess": "NOT_TESTED_AWAITING_SEPARATE_APPROVAL",
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0679822Z   "bmInventoryUnchanged": true,
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0680419Z   "preparations": [
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0681028Z     {
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0681552Z       "directory": "qwen-bm-preflight",
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0682116Z       "model": "qwen3:14b",
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0682932Z       "briefSha256": "bbd44cc9f28234055601b4055466e2f3564e7e4565d408432de4c4fab0aa277a",
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0684036Z       "requestSha256": "49393557b34e9b3d61d2229c6cffcaa4732cc0d887c536be3ce11cb7a7df8f67",
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0685432Z       "schemaSha256": "02947981e9857b993342e69c1550bf218853c051ec8003b21b2486427f017d8f",
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0686261Z       "requestBytes": 34742,
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0687105Z       "status": "OFFLINE_READY_AWAITING_SEPARATE_HUMAN_APPROVAL",
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0687886Z       "approvalGranted": false,
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0688427Z       "networkRequests": 0
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0688901Z     },
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0689371Z     {
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0689915Z       "directory": "gemma-bm-preflight",
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0690551Z       "model": "gemma4:26b",
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0691675Z       "briefSha256": "bbd44cc9f28234055601b4055466e2f3564e7e4565d408432de4c4fab0aa277a",
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0692745Z       "requestSha256": "d05617f202e7972545fef0b87d7f8c238daa6ee2a731357a9a335afdcadcbebc",
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0693855Z       "schemaSha256": "02947981e9857b993342e69c1550bf218853c051ec8003b21b2486427f017d8f",
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0694869Z       "requestBytes": 34743,
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0695585Z       "status": "OFFLINE_READY_AWAITING_SEPARATE_HUMAN_APPROVAL",
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0696276Z       "approvalGranted": false,
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0696798Z       "networkRequests": 0
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0697360Z     }
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0697805Z   ],
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0698326Z   "baselines": [
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0698797Z     {
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0699222Z       "side": "A",
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0699783Z       "status": "HOLD",
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0700613Z       "originalRawSha256": "e54f2abf87d36e0957d8393c960d2fce8075862d00ea1ea736365121a4b6a469",
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0701576Z       "failure": "R190BN_FORMAT",
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0702114Z       "unchanged": true,
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0702566Z       "repaired": false,
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0703124Z       "new3D": false
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0703587Z     },
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0703984Z     {
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0704747Z       "side": "B",
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0705174Z       "status": "HOLD",
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0706090Z       "originalRawSha256": "8e2590128e8bd932cddc2df595fcc01c3cbd660298cedd445431d0787bb90c86",
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0706939Z       "failure": "R190BN_FORMAT",
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0707509Z       "unchanged": true,
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0708031Z       "repaired": false,
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0708570Z       "new3D": false
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0709110Z     }
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0709546Z   ],
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0709974Z   "synthetic": [
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0710551Z     {
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0711128Z       "directory": "synthetic-reading/derived",
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0712055Z       "status": "SOURCE_SPACE_AND_ROUTE_PROXIES_PRESENT_ART_HOLD",
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0713089Z       "origin": "SYNTHETIC_TEST_FIXTURE",
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0713991Z       "originalRawSha256": "04a97ad267405b45c4c999564ac8313979ddea1192364f75e33a452ac4cec214",
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0715236Z       "geometrySha256": "4cf737ec59d902946bc32bed5a390e1cadc66e3b7a03675401cfb36536f2dbea",
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0716129Z       "art": "ART_HOLD",
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0716761Z       "requestFidelity": "NOT_CERTIFIED"
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0717303Z     },
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0717724Z     {
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0718261Z       "directory": "synthetic-concourse/derived",
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0719326Z       "status": "SOURCE_SPACE_AND_ROUTE_PROXIES_PRESENT_ART_HOLD",
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0720111Z       "origin": "SYNTHETIC_TEST_FIXTURE",
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0721006Z       "originalRawSha256": "f3bfe7436d2e287f7a76324f1e93b87627da397e19b033274359b69401610084",
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0722127Z       "geometrySha256": "5d76a26bdb61962deea388c4435bb6093ae7c537ed01d6454eca1025a6c8e0e6",
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0723034Z       "art": "ART_HOLD",
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0723592Z       "requestFidelity": "NOT_CERTIFIED"
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0724186Z     }
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0724721Z   ],
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0725260Z   "sameBriefCausalImprovement": "NOT_ESTABLISHED",
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0725908Z   "art": "ART_HOLD",
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0726454Z   "officialArtAdoptions": 0,
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0727021Z   "worldContacts": 0,
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0727525Z   "worldWrites": 0,
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0728034Z   "readiness": "NOT_PREPARED",
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0728545Z   "gates": [
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0729156Z     "BLOCKED",
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0729673Z     "BLOCKED",
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0730093Z     "BLOCKED",
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0730514Z     "BLOCKED",
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0731012Z     "BLOCKED",
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0731503Z     "BLOCKED",
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0732016Z     "BLOCKED",
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0732493Z     "BLOCKED",
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0732930Z     "BLOCKED"
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0733395Z   ],
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0734058Z   "BuildPlan": {
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0734701Z     "operations": []
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0735178Z   },
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0736155Z   "constructionApproved": false,
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0736708Z   "executionAllowed": false
+offline (ubuntu-24.04)	Offline BM preparation and synthetic end-to-end evidence (NO model)	2026-10-29T21:53:57.0737191Z }
+offline (ubuntu-24.04)	Run actions/upload-artifact@v4	﻿2026-10-29T21:53:57.0873610Z ##[group]Run actions/upload-artifact@v4
+offline (ubuntu-24.04)	Run actions/upload-artifact@v4	2026-10-29T21:53:57.0873987Z with:
+offline (ubuntu-24.04)	Run actions/upload-artifact@v4	2026-10-29T21:53:57.0874329Z   name: R190BO-OFFLINE-NO-MODEL-ubuntu-24.04
+offline (ubuntu-24.04)	Run actions/upload-artifact@v4	2026-10-29T21:53:57.0874961Z   path: bo-ci-evidence
+offline (ubuntu-24.04)	Run actions/upload-artifact@v4	2026-10-29T21:53:57.0875276Z   if-no-files-found: warn
+offline (ubuntu-24.04)	Run actions/upload-artifact@v4	2026-10-29T21:53:57.0875607Z   compression-level: 6
+offline (ubuntu-24.04)	Run actions/upload-artifact@v4	2026-10-29T21:53:57.0875895Z   overwrite: false
+offline (ubuntu-24.04)	Run actions/upload-artifact@v4	2026-10-29T21:53:57.0876172Z   include-hidden-files: false
+offline (ubuntu-24.04)	Run actions/upload-artifact@v4	2026-10-29T21:53:57.0876579Z ##[endgroup]
+offline (ubuntu-24.04)	Run actions/upload-artifact@v4	2026-10-29T21:53:57.2443746Z (node:2448) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+offline (ubuntu-24.04)	Run actions/upload-artifact@v4	2026-10-29T21:53:57.2445058Z (Use `node --trace-deprecation ...` to show where the warning was created)
+offline (ubuntu-24.04)	Run actions/upload-artifact@v4	2026-10-29T21:53:57.2601774Z With the provided path, there will be 76 files uploaded
+offline (ubuntu-24.04)	Run actions/upload-artifact@v4	2026-10-29T21:53:57.2603111Z Artifact name is valid!
+offline (ubuntu-24.04)	Run actions/upload-artifact@v4	2026-10-29T21:53:57.2603816Z Root directory input is valid!
+offline (ubuntu-24.04)	Run actions/upload-artifact@v4	2026-10-29T21:53:57.5229918Z Beginning upload of artifact content to blob storage
+offline (ubuntu-24.04)	Run actions/upload-artifact@v4	2026-10-29T21:53:57.6169755Z (node:2448) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+offline (ubuntu-24.04)	Run actions/upload-artifact@v4	2026-10-29T21:53:57.7782850Z Uploaded bytes 147480
+offline (ubuntu-24.04)	Run actions/upload-artifact@v4	2026-10-29T21:53:57.8109589Z Finished uploading artifact content to blob storage!
+offline (ubuntu-24.04)	Run actions/upload-artifact@v4	2026-10-29T21:53:57.8111001Z SHA256 digest of uploaded artifact zip is 106b6373066ea97de3c8aa8356136efae7cf83d54cbc33f77922e7d81c10ea74
+offline (ubuntu-24.04)	Run actions/upload-artifact@v4	2026-10-29T21:53:57.8111896Z Finalizing artifact upload
+offline (ubuntu-24.04)	Run actions/upload-artifact@v4	2026-10-29T21:53:58.2969123Z Artifact R190BO-OFFLINE-NO-MODEL-ubuntu-24.04.zip successfully finalized. Artifact ID 12936540806
+offline (ubuntu-24.04)	Run actions/upload-artifact@v4	2026-10-29T21:53:58.2970333Z Artifact R190BO-OFFLINE-NO-MODEL-ubuntu-24.04 has been successfully uploaded! Final size is 147480 bytes. Artifact ID is 12936540806
+offline (ubuntu-24.04)	Run actions/upload-artifact@v4	2026-10-29T21:53:58.2976669Z Artifact download URL: https://github.com/ryomashibaba/MinecraftAIBuilder/actions/runs/40961560402/artifacts/12936540806
+offline (ubuntu-24.04)	Post Run actions/setup-node@v4	﻿2026-10-29T21:53:58.3616422Z Post job cleanup.
+offline (ubuntu-24.04)	Post Run actions/setup-node@v4	2026-10-29T21:53:58.4792183Z (node:2461) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+offline (ubuntu-24.04)	Post Run actions/setup-node@v4	2026-10-29T21:53:58.4793119Z (Use `node --trace-deprecation ...` to show where the warning was created)
+offline (ubuntu-24.04)	Post Run actions/checkout@v4	﻿2026-10-29T21:53:58.5006893Z Post job cleanup.
+offline (ubuntu-24.04)	Post Run actions/checkout@v4	2026-10-29T21:53:58.5815103Z [command]/usr/bin/git version
+offline (ubuntu-24.04)	Post Run actions/checkout@v4	2026-10-29T21:53:58.5885636Z git version 2.56.0
+offline (ubuntu-24.04)	Post Run actions/checkout@v4	2026-10-29T21:53:58.5918758Z Temporarily overriding HOME='/home/runner/work/_temp/32615a5a-9c70-4984-8b7d-c1f75ac28683' before making global git config changes
+offline (ubuntu-24.04)	Post Run actions/checkout@v4	2026-10-29T21:53:58.5920563Z Adding repository directory to the temporary git global config as a safe directory
+offline (ubuntu-24.04)	Post Run actions/checkout@v4	2026-10-29T21:53:58.5923215Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/MinecraftAIBuilder/MinecraftAIBuilder
+offline (ubuntu-24.04)	Post Run actions/checkout@v4	2026-10-29T21:53:58.5959634Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+offline (ubuntu-24.04)	Post Run actions/checkout@v4	2026-10-29T21:53:58.5995931Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+offline (ubuntu-24.04)	Post Run actions/checkout@v4	2026-10-29T21:53:58.6203147Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+offline (ubuntu-24.04)	Post Run actions/checkout@v4	2026-10-29T21:53:58.6227097Z http.https://github.com/.extraheader
+offline (ubuntu-24.04)	Post Run actions/checkout@v4	2026-10-29T21:53:58.6239761Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+offline (ubuntu-24.04)	Post Run actions/checkout@v4	2026-10-29T21:53:58.6274622Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+offline (ubuntu-24.04)	Post Run actions/checkout@v4	2026-10-29T21:53:58.6560866Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+offline (ubuntu-24.04)	Post Run actions/checkout@v4	2026-10-29T21:53:58.6599964Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+offline (ubuntu-24.04)	Complete job	﻿2026-10-29T21:53:58.7026174Z Cleaning up orphan processes
+offline (ubuntu-24.04)	Complete job	2026-10-29T21:53:58.7341070Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-node@v4, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

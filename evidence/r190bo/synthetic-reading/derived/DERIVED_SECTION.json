@@ -1,0 +1,149 @@
+{
+  "schema": "minecraftaibuilder-r190bc-original-section-study-v1",
+  "providerIdentityVerified": false,
+  "hostRepairedGeometry": false,
+  "sourceOnly": true,
+  "actualMinecraftWalking": "NOT_TESTED",
+  "structuralLoadSafety": "NOT_CERTIFIED",
+  "architecturalQuality": "NOT_CERTIFIED",
+  "humanArtReview": "ART_HOLD",
+  "readiness": "NOT_PREPARED",
+  "constructionApproved": false,
+  "executionAllowed": false,
+  "gates": [
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED"
+  ],
+  "BuildPlan": {
+    "operations": []
+  },
+  "worldContacts": 0,
+  "worldWrites": 0,
+  "modelCalls": 0,
+  "art": "ART_HOLD",
+  "officialArtAdoptions": 0,
+  "status": "HOLD_MODEL_DECLARED_ZONE_ACCESS_UNPROVEN",
+  "firstFailure": "MODEL_DECLARED_ZONE_NOT_CONNECTED_BY_FLAT_TWO_WIDE_SOURCE",
+  "sourceSha256": "f3843229acc2a06a88d2d1eacae3dfdab8651091c252561dd095db87cd5cf8dc",
+  "geometrySha256": "4cf737ec59d902946bc32bed5a390e1cadc66e3b7a03675401cfb36536f2dbea",
+  "modelDeclaredDesignIntent": "Synthetic usable spaces for an offline translation study. Synthetic authored space and circulation, not AI aesthetic improvement.",
+  "modelDeclaredMassStrategy": "Author chooses all levels, exact voids, envelopes and primitive shapes.",
+  "modelDeclaredCirculationStrategy": "Author specifies every opening, stair flight and landing. No host solver.",
+  "zoneEvidence": [
+    {
+      "id": "lower-gallery",
+      "modelPurposeUnverified": true,
+      "origin": [
+        3,
+        1,
+        3
+      ],
+      "size": [
+        12,
+        1,
+        24
+      ],
+      "requiredHeadroom": 3,
+      "twoWidePadCount": 253,
+      "roofedPadCount": 253,
+      "skyOpenPadCount": 0,
+      "partlyRoofedPadCount": 0,
+      "floorLevels": [
+        1
+      ],
+      "flatEntranceReachableTwoWidePadCount": 253,
+      "sourceStatus": "SOURCE_CLEAR_SUPPORTED_TWO_WIDE_FOOTPRINT_AND_FLAT_ENTRY_ROUTE",
+      "actualSeparateRoom": "NOT_CERTIFIED",
+      "overheadSolidsDoNotProveRoofOrWeatherproofing": true
+    },
+    {
+      "id": "upper-reading",
+      "modelPurposeUnverified": true,
+      "origin": [
+        3,
+        9,
+        3
+      ],
+      "size": [
+        12,
+        1,
+        24
+      ],
+      "requiredHeadroom": 3,
+      "twoWidePadCount": 253,
+      "roofedPadCount": 253,
+      "skyOpenPadCount": 0,
+      "partlyRoofedPadCount": 0,
+      "floorLevels": [
+        9
+      ],
+      "flatEntranceReachableTwoWidePadCount": 0,
+      "sourceStatus": "HOLD_TWO_WIDE_ZONE_NOT_REACHED_FROM_ENTRANCE",
+      "actualSeparateRoom": "NOT_CERTIFIED",
+      "overheadSolidsDoNotProveRoofOrWeatherproofing": true
+    }
+  ],
+  "flatEntranceRouteEvidence": {
+    "modelEntrance": [
+      6,
+      1,
+      1
+    ],
+    "entranceCandidateTwoWidePads": 3,
+    "sourceAllTwoWidePadsAtEntryHeight": 311,
+    "reachableTwoWidePadsAtEntryHeight": 264,
+    "widthInBlocks": 2,
+    "minimumAirHeightInBlocks": 3,
+    "onlySameHeightFlatPads": true,
+    "stairsAndVerticalCirculation": "NOT_CERTIFIED",
+    "minecraftWalking": "NOT_TESTED"
+  },
+  "sectionEvidence": {
+    "axis": "x-y",
+    "fixedZ": 1,
+    "width": 28,
+    "height": 24,
+    "finalSourceVoxelCount": 3802,
+    "occupiedCellsAtSlice": [
+      [
+        5,
+        0
+      ],
+      [
+        6,
+        0
+      ],
+      [
+        7,
+        0
+      ],
+      [
+        8,
+        0
+      ]
+    ],
+    "isModelOriginalFinalB143": false,
+    "cutAppliedThroughOriginalCompiler": true,
+    "doesNotProveOverallArchitectureQuality": true,
+    "isExactDerivedB143": true
+  },
+  "limitations": [
+    "No guarantee that roofed pads are independently enclosed rooms",
+    "No independent program or aesthetic certification",
+    "A valid flat SOURCE route cannot certify multi-level stairs or access",
+    "No load bearing analysis; no Minecraft avatar or world test"
+  ],
+  "inputAuthorship": "DETERMINISTIC_B143_FROM_AUTHOR_SPATIAL_ASSEMBLY",
+  "inputIsOriginalModelResponse": false,
+  "derivedInputUnmodified": true,
+  "derivedInputBytes": 2647,
+  "derivedProposalBytesSha256": "6ea83be92e87ccfb3e1c3ead3e0e3102dde692489998f9d0617bc8b83402da5a",
+  "modelOriginalSha256": "04a97ad267405b45c4c999564ac8313979ddea1192364f75e33a452ac4cec214"
+}

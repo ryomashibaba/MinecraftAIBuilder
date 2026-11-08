@@ -1,0 +1,60 @@
+name: R190-BC Original B143 Section — SYNTHETIC / SAVED ONLY
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'scripts/r190bc-design-first-section.mjs'
+      - 'scripts/r190bc-design-first-section.test.mjs'
+      - 'scripts/r190bc-offline-review.mjs'
+      - 'source/ai/b143-building-dsl.mjs'
+      - 'source/ai/b198zr4-planned-source.mjs'
+      - '.github/workflows/r190bc-original-section.yml'
+  pull_request:
+    paths:
+      - 'scripts/r190bc-design-first-section.mjs'
+      - 'scripts/r190bc-design-first-section.test.mjs'
+      - 'scripts/r190bc-offline-review.mjs'
+      - 'source/ai/b143-building-dsl.mjs'
+      - 'source/ai/b198zr4-planned-source.mjs'
+      - '.github/workflows/r190bc-original-section.yml'
+permissions:
+  contents: read
+jobs:
+  source-only:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check original-only section reviewer
+        run: node --check scripts/r190bc-design-first-section.mjs
+      - name: Check offline-only CLI
+        run: node --check scripts/r190bc-offline-review.mjs
+      - name: Strict SOURCE synthetic + saved-input regression tests
+        run: node --test scripts/r190bc-design-first-section.test.mjs
+      - name: Preserve saved original R190-AA as HOLD (no fake geometry)
+        shell: bash
+        run: |
+          mkdir -p r190bc-ci-evidence
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import {reviewR190BCOriginal,renderR190BCSectionSVG} from './scripts/r190bc-design-first-section.mjs';
+          const file='evidence/r190aa/pilot-01/MODEL_RESPONSE_ORIGINAL.txt';
+          const raw=fs.readFileSync(file);
+          const result=reviewR190BCOriginal(raw,{expectedSha256:'0bf706181bb2b7a30f8082f896a703c33749ba55f75d42010adba88f47c84f17'});
+          if(result.status!=='HOLD_INVALID_ORIGINAL_R4_OR_B143'||result.sectionEvidence!==null||result.modelCalls!==0||result.worldWrites!==0)
+            throw Error('R190BC_PREVIOUS_HOLD_BROKEN');
+          fs.writeFileSync('r190bc-ci-evidence/SAVED_R190AA_ORIGINAL_HOLD.json',JSON.stringify(result,null,2)+'\n');
+          fs.writeFileSync('r190bc-ci-evidence/SAVED_R190AA_NO_FALSE_3D.svg',renderR190BCSectionSVG(result));
+          NODE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: R190BC-SOURCE-ONLY-ORIGINAL-HOLD-${{ matrix.os }}
+          path: r190bc-ci-evidence/
+          if-no-files-found: error

@@ -1,0 +1,29 @@
+{
+  "schema": "minecraftaibuilder-r133-independent-goals-v1",
+  "needs": [
+    {
+      "id": "retail-display",
+      "zoneId": "front-retail-space",
+      "role": "display-stand",
+      "minCount": 1,
+      "minAddedVoxels": 8,
+      "minReachablePads": 1
+    },
+    {
+      "id": "staff-storage",
+      "zoneId": "back-employee-space",
+      "role": "storage-rack",
+      "minCount": 1,
+      "minAddedVoxels": 8,
+      "minReachablePads": 1
+    }
+  ],
+  "zoneOrders": [
+    {
+      "id": "front-before-back-depth",
+      "nearZoneId": "front-retail-space",
+      "farZoneId": "back-employee-space",
+      "axis": "z"
+    }
+  ]
+}

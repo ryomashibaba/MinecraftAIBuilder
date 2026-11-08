@@ -1,0 +1,52 @@
+{
+  "schema": "minecraftaibuilder-r125-architecture-plan-v1",
+  "id": "research-haven-01",
+  "title": "Research Haven",
+  "brief": "A two-story research facility with distinct functional zones on each level, optimized for observation, experimentation, and collaboration.",
+  "footprint": {
+    "width": 24,
+    "depth": 24
+  },
+  "levels": [
+    {
+      "splitAxis": "x",
+      "splitPercent": 50,
+      "spaces": [
+        {
+          "id": "observation-lab",
+          "purpose": "Observation and remote experimentation with high-glazing and controlled access."
+        },
+        {
+          "id": "equipment-storage",
+          "purpose": "Secure storage and maintenance of research equipment with restricted entry."
+        }
+      ]
+    },
+    {
+      "splitAxis": "z",
+      "splitPercent": 60,
+      "spaces": [
+        {
+          "id": "collaboration-hub",
+          "purpose": "Open-plan meeting and discussion space with integrated multimedia tools."
+        },
+        {
+          "id": "data-recording",
+          "purpose": "Secure and isolated area for data analysis, documentation, and record-keeping."
+        }
+      ]
+    }
+  ],
+  "materials": {
+    "floor": "concrete",
+    "wall": "metal",
+    "roof": "metal"
+  },
+  "expression": {
+    "setbackSide": "rear",
+    "setbackDepth": 3,
+    "roofProfile": "ridge",
+    "roofAxis": "z",
+    "facadeLanguage": "fins"
+  }
+}

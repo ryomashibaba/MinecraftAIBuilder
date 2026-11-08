@@ -1,0 +1,34 @@
+name: R52 Future One-Shot Automatic Failed-Source ZIP — OFFLINE Only
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'scripts/b198zr52-postcapture-auto-storyboard.mjs'
+      - 'scripts/b198zr52-postcapture-auto-storyboard.test.mjs'
+      - 'tools/r52-future/ARCHIVE_WITH_R51_DIAGNOSTIC_OFFLINE.ps1'
+      - 'scripts/b198zr51-uncompiled-envelope-storyboard.mjs'
+      - '.github/workflows/r52-future-autopackage-source-only.yml'
+  pull_request:
+    paths:
+      - 'scripts/b198zr52-postcapture-auto-storyboard.mjs'
+      - 'scripts/b198zr52-postcapture-auto-storyboard.test.mjs'
+      - 'tools/r52-future/ARCHIVE_WITH_R51_DIAGNOSTIC_OFFLINE.ps1'
+      - 'scripts/b198zr51-uncompiled-envelope-storyboard.mjs'
+      - '.github/workflows/r52-future-autopackage-source-only.yml'
+permissions:
+  contents: read
+jobs:
+  offline-prezip-and-windows-archive:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: R52 no-model prearchive automatic storyboard ZIP and R51 regression
+        run: node --test scripts/b198zr52-postcapture-auto-storyboard.test.mjs scripts/b198zr51-uncompiled-envelope-storyboard.test.mjs scripts/b198zr49-global-source-consistency.test.mjs

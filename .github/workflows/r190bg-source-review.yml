@@ -1,0 +1,38 @@
+name: R190-BG Visual Human Review from Exact B143 — OFFLINE ONLY
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'scripts/r190bg-*'
+      - 'scripts/r190be-saved-design-comparison.mjs'
+      - 'scripts/r190bf-controlled-pair.mjs'
+      - 'scripts/fixtures/r190bd-mock-original.mjs'
+      - '.github/workflows/r190bg-source-review.yml'
+  pull_request:
+    paths:
+      - 'scripts/r190bg-*'
+      - 'scripts/r190be-saved-design-comparison.mjs'
+      - 'scripts/r190bf-controlled-pair.mjs'
+      - 'scripts/fixtures/r190bd-mock-original.mjs'
+      - '.github/workflows/r190bg-source-review.yml'
+permissions:
+  contents: read
+jobs:
+  source-only:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Source reviewer syntax
+        run: node --check scripts/r190bg-source-anchored-review.mjs
+      - name: Offline model mock, actual saved view equality, review security
+        run: node --test scripts/r190bg-source-anchored-review.test.mjs
+      - name: Existing locked study regression
+        run: node --test scripts/r190bf-controlled-pair.test.mjs

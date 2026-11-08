@@ -1,0 +1,109 @@
+{
+  "origin": "DETERMINISTIC_FINAL_VOXEL_CHECKS_OF_MODEL_DECLARATIONS",
+  "geometrySha256": "4cf737ec59d902946bc32bed5a390e1cadc66e3b7a03675401cfb36536f2dbea",
+  "spaces": [
+    {
+      "id": "lower-gallery",
+      "purpose": "展示のための下階空間",
+      "levelId": "lower-level",
+      "standingY": 1,
+      "clearHeight": 7,
+      "obstructedAirCells": 0,
+      "unsupportedFloorCells": 0,
+      "declaredArea": 288,
+      "status": "SOURCE_FLOOR_AND_CLEAR_VOLUME_PRESENT"
+    },
+    {
+      "id": "upper-reading",
+      "purpose": "閲覧のための上階空間",
+      "levelId": "upper-level",
+      "standingY": 9,
+      "clearHeight": 7,
+      "obstructedAirCells": 0,
+      "unsupportedFloorCells": 0,
+      "declaredArea": 288,
+      "status": "SOURCE_FLOOR_AND_CLEAR_VOLUME_PRESENT"
+    }
+  ],
+  "r4": {
+    "status": "SOURCE_AND_DECLARED_SPATIAL_CLAIMS_FORMALLY_PASS",
+    "evidence": {
+      "schema": "minecraftaibuilder-b198zr3-functional-review-evidence-v1",
+      "caseId": "unverified-model-plan",
+      "contractAuthorship": "MODEL_DECLARED_UNVERIFIED",
+      "pinnedSourceSha256": "f3843229acc2a06a88d2d1eacae3dfdab8651091c252561dd095db87cd5cf8dc",
+      "status": "FORMAL_GEOMETRY_AND_ROUTE_CONSTRAINTS_PASS",
+      "results": {
+        "protectedVoids": [
+          {
+            "id": "reading-air",
+            "occupied": 0,
+            "volume": 240,
+            "passed": true
+          }
+        ],
+        "destinations": [
+          {
+            "id": "upper-destination",
+            "reachable": true,
+            "shortestPathSteps": 46,
+            "maximumPathSteps": 150,
+            "passed": true
+          }
+        ],
+        "functionalZones": [
+          {
+            "id": "lower-gallery",
+            "regionVolume": 288,
+            "standable": 288,
+            "reachable": 288,
+            "percentOfRegion": 100,
+            "passed": true
+          },
+          {
+            "id": "upper-reading",
+            "regionVolume": 288,
+            "standable": 288,
+            "reachable": 288,
+            "percentOfRegion": 100,
+            "passed": true
+          }
+        ],
+        "abstractReachablePositions": 766
+      },
+      "unverified": {
+        "requestSemantics": true,
+        "architecturalQuality": true,
+        "modelGeneralization": true,
+        "minecraftBlockStates": true,
+        "minecraftActualWalking": true,
+        "humanApproval": true
+      },
+      "sourceOnly": true,
+      "modelCalls": 0,
+      "safety": {
+        "readiness": "NOT_PREPARED",
+        "constructionApproved": false,
+        "executionAllowed": false,
+        "worldContacts": 0,
+        "worldWrites": 0,
+        "gates": [
+          "BLOCKED",
+          "BLOCKED",
+          "BLOCKED",
+          "BLOCKED",
+          "BLOCKED",
+          "BLOCKED",
+          "BLOCKED",
+          "BLOCKED",
+          "BLOCKED"
+        ],
+        "BuildPlan": {
+          "operations": []
+        }
+      }
+    }
+  },
+  "independentRequestFidelity": "NOT_CERTIFIED",
+  "art": "ART_HOLD"
+}

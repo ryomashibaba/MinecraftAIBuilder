@@ -1,0 +1,98 @@
+{
+  "id": "commons-fabrication-hub",
+  "title": "Community Fabrication Commons",
+  "footprint": {
+    "width": 28,
+    "depth": 24
+  },
+  "materials": {
+    "floor": "concrete",
+    "wall": "metal",
+    "roof": "sawtooth"
+  },
+  "layout": {
+    "axis": "z",
+    "spaces": [
+      {
+        "id": "entry-demonstration",
+        "purpose": "Public-facing demonstration and welcome area with interactive displays and seating for visitors",
+        "weight": 2
+      },
+      {
+        "id": "fabrication-studio",
+        "purpose": "Hands-on physical fabrication space with tools, workbenches, and material storage",
+        "weight": 4
+      },
+      {
+        "id": "technical-repair-bay",
+        "purpose": "Specialized room for technical repairs, diagnostics, and equipment maintenance",
+        "weight": 3
+      },
+      {
+        "id": "planning-discussion",
+        "purpose": "Quiet space for planning meetings, brainstorming, and small group discussions",
+        "weight": 2
+      }
+    ]
+  },
+  "form": {
+    "roofProfile": "sawtooth",
+    "facadeLanguage": "screen"
+  },
+  "objects": [
+    {
+      "id": "seating-1",
+      "zoneId": "entry-demonstration",
+      "role": "seating",
+      "corner": "near-left"
+    },
+    {
+      "id": "display-1",
+      "zoneId": "entry-demonstration",
+      "role": "display-stand",
+      "corner": "far-right"
+    },
+    {
+      "id": "bench-1",
+      "zoneId": "fabrication-studio",
+      "role": "work-surface",
+      "corner": "near-left"
+    },
+    {
+      "id": "tool-rack-1",
+      "zoneId": "fabrication-studio",
+      "role": "equipment-bank",
+      "corner": "far-right"
+    },
+    {
+      "id": "storage-1",
+      "zoneId": "technical-repair-bay",
+      "role": "storage-rack",
+      "corner": "near-left"
+    },
+    {
+      "id": "table-1",
+      "zoneId": "planning-discussion",
+      "role": "work-surface",
+      "corner": "near-right"
+    },
+    {
+      "id": "seating-2",
+      "zoneId": "planning-discussion",
+      "role": "seating",
+      "corner": "far-left"
+    },
+    {
+      "id": "equipment-1",
+      "zoneId": "technical-repair-bay",
+      "role": "equipment-bank",
+      "corner": "far-right"
+    }
+  ],
+  "relations": {
+    "entryFacingZoneId": "entry-demonstration",
+    "directAdjacencies": [
+      ["fabrication-studio", "technical-repair-bay"]
+    ]
+  }
+}

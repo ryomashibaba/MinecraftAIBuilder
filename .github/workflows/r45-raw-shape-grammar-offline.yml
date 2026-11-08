@@ -1,0 +1,30 @@
+name: R45 Original Grammar and Program Audit — Offline Only
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'source/ai/b198zr45-original-grammar-and-program-audit.mjs'
+      - 'scripts/b198zr45-original-grammar-and-program-audit.test.mjs'
+      - '.github/workflows/r45-raw-shape-grammar-offline.yml'
+  pull_request:
+    paths:
+      - 'source/ai/b198zr45-original-grammar-and-program-audit.mjs'
+      - 'scripts/b198zr45-original-grammar-and-program-audit.test.mjs'
+      - '.github/workflows/r45-raw-shape-grammar-offline.yml'
+permissions:
+  contents: read
+jobs:
+  raw-output-structure-only:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Read-only synthetic raw source QA, never live Qwen
+        run: node --test scripts/b198zr45-original-grammar-and-program-audit.test.mjs

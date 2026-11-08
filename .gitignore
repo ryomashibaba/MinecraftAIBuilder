@@ -20,3 +20,21 @@ artifacts/
 b112-review-output/
 b113-review-output/
 coverage/
+
+# R190-N genuine local model originals never belong in Git history.
+/r190n-local-evidence/
+
+# R190-R direct-model originals are local-only; never publish provider text.
+/r190r-local-evidence/
+
+# R190-S local model redesign source and unchanged original responses stay off GitHub.
+/r190s-local-evidence/
+
+# R190-AA real local model response archives are never committed.
+/r190aa-local-evidence/
+
+# R190-AB local provider originals and genuine 3D never committed.
+/r190ab-local-evidence/
+
+# Future BO originals and attempt locks remain local. Published BO study is synthetic only.
+/r190bo-local-evidence/

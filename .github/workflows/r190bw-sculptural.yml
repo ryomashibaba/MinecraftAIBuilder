@@ -1,0 +1,40 @@
+name: R190-BW sculptural architecture and width-two source-only comparison
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'evidence/r190bw/**'
+      - 'scripts/r190bw-sculptural-study.mjs'
+      - '.github/workflows/r190bw-sculptural.yml'
+  pull_request:
+    paths:
+      - 'evidence/r190bw/**'
+      - 'scripts/r190bw-sculptural-study.mjs'
+      - '.github/workflows/r190bw-sculptural.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  exact-geometry:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Frozen source B143 and R4 plus directed width-two strip, no provider
+        env:
+          NODE_OPTIONS: --import=./scripts/r190bo-deny-network.mjs
+        run: node scripts/r190bw-sculptural-study.mjs --out bw-ci-evidence
+      - name: Save real voxel five views, study and all FAIL/HOLD evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: R190BW-SCULPTURAL-OFFLINE-${{ matrix.os }}
+          path: bw-ci-evidence
+          if-no-files-found: warn

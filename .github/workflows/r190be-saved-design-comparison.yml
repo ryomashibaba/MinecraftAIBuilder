@@ -1,0 +1,42 @@
+name: R190-BE Saved Design Comparison — OFFLINE ONLY
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'scripts/r190be-*'
+      - 'scripts/r190bd-*'
+      - 'scripts/fixtures/r190bd-mock-original.mjs'
+      - 'scripts/r190bc-*'
+      - 'scripts/r190-h-architectural-route.test.mjs'
+      - '.github/workflows/r190be-saved-design-comparison.yml'
+  pull_request:
+    paths:
+      - 'scripts/r190be-*'
+      - 'scripts/r190bd-*'
+      - 'scripts/fixtures/r190bd-mock-original.mjs'
+      - 'scripts/r190bc-*'
+      - 'scripts/r190-h-architectural-route.test.mjs'
+      - '.github/workflows/r190be-saved-design-comparison.yml'
+permissions:
+  contents: read
+jobs:
+  saved-only:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test scripts/r190bd-consented-design-first.test.mjs scripts/r190bc-design-first-section.test.mjs scripts/r190-h-architectural-route.test.mjs scripts/r190t-source-comparison.test.mjs scripts/r190be-saved-design-comparison.test.mjs
+        env:
+          R190BE_SYNTHETIC_DEMO_OUT: r190be-synthetic-demo
+      - uses: actions/upload-artifact@v4
+        with:
+          name: R190BE-SYNTHETIC-ONLY-${{ matrix.os }}
+          path: r190be-synthetic-demo/
+          if-no-files-found: error

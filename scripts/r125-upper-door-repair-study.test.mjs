@@ -1,0 +1,50 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import {studyR125UpperDoorRepair,saveR125UpperDoorRepair} from './r125-upper-door-repair-study.mjs';
+test('actual saved Qwen C floor repaired without altering old-source model or original shape',t=>{
+ const s=studyR125UpperDoorRepair(),r=s.report;
+ assert.equal(r.legacyC.secondLevel.componentCount,2);
+ assert.equal(r.repairedC.secondLevel.componentCount,1);
+ assert.equal(r.repairedC.programFloorIssues.length,0);
+ assert.equal(r.repairedC.programFloorStatus,'PROGRAM_FLOORS_CLEAR_EXTERIOR_REVIEW_REQUIRED');
+ assert.deepEqual(r.repairedC.exteriorWarnings.map(x=>x.standingY),[13,14]);
+ assert(r.repairedC.exteriorWarnings.every(x=>
+  x.classification==='ROOF_ONLY_NONPROGRAM_SURFACE'&&
+  x.roofOnlySourceEvidence&&x.thisDoesNotProveTraversableRoof));
+ assert.equal(r.roofReview.roofOnlyWarningCount,2);
+ assert.equal(r.roofReview.nonRoofWarningCount,0);
+ assert.equal(r.roofReview.geometryRepairPerformed,false);
+ assert.equal(r.roofVolumeEvidence.source,'VERIFIED_FINAL_B143_VOXELS');
+ assert.equal(r.roofVolumeEvidence.roofBaseArea,484);
+ assert.equal(r.roofVolumeEvidence.verifiedSolidCapCells,484);
+ assert.equal(r.roofVolumeEvidence.additionalRoofSolidCellsAboveCap,682);
+ assert.equal(r.roofVolumeEvidence.capFullyClosedAcrossUpperEnvelope,true);
+ assert.equal(r.roofVolumeEvidence.additionalInteriorVolumeOpenedByRoofProfile,false);
+ assert.equal(r.roofVolumeEvidence.classification,
+  'DECORATIVE_PROFILE_ABOVE_SOLID_CEILING');
+ assert.equal(r.roofReview.humanArt,'NOT_REVIEWED');
+ assert.equal(r.legacyC.planSha256,r.repairedC.planSha256);
+ assert.notEqual(r.legacyC.sourceSha256,r.repairedC.sourceSha256);
+ assert.notEqual(r.legacyC.geometrySha256,r.repairedC.geometrySha256);
+ assert.equal(r.originalModelProgramUnchanged,true);
+ assert.equal(r.worldWrites,0);
+ assert.deepEqual(r.gates,Array(9).fill('BLOCKED'));
+ assert.equal(r.art,'NOT_REVIEWED');
+ assert.equal(r.minecraftWalking,'NOT_TESTED');
+ assert(s.originalHtml.includes('minecraftaibuilder-b143-gallery-v1'));
+ assert(s.repairedHtml.includes('minecraftaibuilder-b143-gallery-v1'));
+ assert(s.compareHtml.includes('HOST派生研究'));
+ assert(s.compareHtml.includes('屋根自体は変更していない'));
+ assert(s.compareHtml.includes('屋根板484/484セル'));
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'r125-door-repair-'));
+ t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
+ const out=path.join(root,'result'),saved=saveR125UpperDoorRepair(out);
+ assert.equal(saved.repairedC.secondLevel.componentCount,1);
+ assert(fs.existsSync(path.join(out,'index.html')));
+ assert(fs.existsSync(path.join(out,'legacy/index.html')));
+ assert(fs.existsSync(path.join(out,'stair-clear/index.html')));
+ assert.throws(()=>saveR125UpperDoorRepair(out),/OUTPUT_ALREADY_EXISTS/);
+});

@@ -1,0 +1,33 @@
+name: R22 Future Quality Profile — Fake Model Only
+on:
+  push:
+    branches:
+      - feature/b198zr1-protected-architectural-revision
+    paths:
+      - 'source/ai/b198s-native-ollama-source.mjs'
+      - 'source/ai/b198zr21-future-architecture-guide.mjs'
+      - 'scripts/b198zr22-profile-offline.test.mjs'
+      - '.github/workflows/r22-future-quality-fake.yml'
+  pull_request:
+    paths:
+      - 'source/ai/b198s-native-ollama-source.mjs'
+      - 'source/ai/b198zr21-future-architecture-guide.mjs'
+      - 'scripts/b198zr22-profile-offline.test.mjs'
+      - '.github/workflows/r22-future-quality-fake.yml'
+permissions:
+  contents: read
+jobs:
+  quality-profile-mock-only:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Offline only (ephemeral fixture server; NO real Qwen/GPU/Minecraft)
+        run: node --test scripts/b198zr22-profile-offline.test.mjs

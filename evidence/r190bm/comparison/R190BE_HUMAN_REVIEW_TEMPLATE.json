@@ -1,0 +1,43 @@
+{
+  "schema": "r190be-unscored-human-review-v1",
+  "originalBriefSha256": "bbd44cc9f28234055601b4055466e2f3564e7e4565d408432de4c4fab0aa277a",
+  "A": "e54f2abf87d36e0957d8393c960d2fce8075862d00ea1ea736365121a4b6a469",
+  "B": "8e2590128e8bd932cddc2df595fcc01c3cbd660298cedd445431d0787bb90c86",
+  "geometryA": null,
+  "geometryB": null,
+  "reviewer": null,
+  "reviewedAt": null,
+  "criteria": [
+    {
+      "criterion": "元依頼の用途と利用者への適合",
+      "scoreA": null,
+      "scoreB": null,
+      "evidenceA": null,
+      "evidenceB": null
+    },
+    {
+      "criterion": "入口からの空間体験と使える内部",
+      "scoreA": null,
+      "scoreB": null,
+      "evidenceA": null,
+      "evidenceB": null
+    },
+    {
+      "criterion": "質量・空洞・屋根・支持の造形的一貫性",
+      "scoreA": null,
+      "scoreB": null,
+      "evidenceA": null,
+      "evidenceB": null
+    },
+    {
+      "criterion": "独創性と依頼に応じた設計判断",
+      "scoreA": null,
+      "scoreB": null,
+      "evidenceA": null,
+      "evidenceB": null
+    }
+  ],
+  "scale": "0..4; attach exact view and source observations; leave unassessed criteria null",
+  "art": "ART_HOLD",
+  "officialArtAdoptions": 0
+}
