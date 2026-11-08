@@ -97,6 +97,32 @@ test('exactly one injected model response is stored PRIVATE, B143 candidate neve
   assert(fs.existsSync(path.join(tmp.outDir,'V7_TRUE_B143_SOURCE_PRIVATE.json')));
  }finally{fs.rmSync(tmp.root,{recursive:true,force:true});}
 });
+test('missing or mismatched model response identity holds without compiling',async()=>{
+ for(const responseModel of [undefined,'unapproved:model']){
+  const tmp=sandbox(),calls=[];
+  try{
+   const modelFetcher=async(url,req)=>{
+    calls.push({url,method:req?.method});
+    if(req?.method==='GET')return jsonResponse({models:[{name:'qwen3:14b'}]});
+    if(req?.method==='POST')return jsonResponse({
+     ...(responseModel===undefined?{}:{model:responseModel}),
+     choices:[{finish_reason:'stop',message:{content:JSON.stringify(author())}}]});
+    throw Error('NO_OTHER_TRANSPORT');
+   };
+   const r=await runV7PrivateOnce(params(tmp.outDir),{
+    ciFetcher:fakeCi(),modelFetcher,headReader:()=>sha});
+   assert.equal(r.status,'HOLD_MODEL_RESPONSE');
+   assert.equal(r.reason,'MODEL_NAME_MISMATCH');
+   assert.equal(r.modelGenerationAttempts,1);
+   assert.equal(calls.filter(x=>x.method==='POST').length,1);
+   assert.equal(r.rawCaptured,false);
+   assert.equal(r.b143Recompiled,false);
+   assert.equal(r.worldWrites,0);
+   assert(!fs.existsSync(path.join(tmp.outDir,'V7_MODEL_RESPONSE_ORIGINAL_PRIVATE.txt')));
+  }finally{fs.rmSync(tmp.root,{recursive:true,force:true});}
+ }
+});
+
 test('unsupported roof is rejected with original preserved, no auto-retry',async()=>{
  const tmp=sandbox(),calls=[],a=author();a.roofs[0].profile='gable';
  try{
