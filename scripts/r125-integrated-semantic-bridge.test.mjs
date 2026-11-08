@@ -196,8 +196,10 @@ test('V7 optional model contract names only currently implemented PRIVATE HOST c
  assert.equal(expanded.intent.architecture.shelters.length,1);
 });
 
-test('every sheltered entrance/contact pad lies on outdoor floor, never inside room wall',()=>{
+test('all shelter JOIN pads straddle their threshold and external approach stays on its floor',()=>{
  const host=createIntegratedSpatialHost({deriveIntegratedShell:()=>{throw Error('PRIVATE_ONLY');}});
+ const overlaps2=(pad,rect)=>pad[0]+1>=rect[0]&&pad[0]<rect[0]+rect[2]&&
+  pad[1]+1>=rect[1]&&pad[1]<rect[1]+rect[3];
  const inRect=(pad,rect)=>pad[0]>=rect[0]&&pad[0]<rect[0]+rect[2]&&
   pad[1]>=rect[1]&&pad[1]<rect[1]+rect[3];
  function check(a,which){
@@ -206,14 +208,21 @@ test('every sheltered entrance/contact pad lies on outdoor floor, never inside r
   const join=intent.joins.find(j=>j.spaces[1]===shell.id);
   const parent=intent.spaces.find(s=>s.id===a.shelters[which].connectTo);
   const opening=intent.openings.find(o=>o.id===shell.connectionOpening);
+  const side=a.shelters[which].edge;
   assert(join&&opening&&parent);
   assert.equal(join.openingId,opening.id);
-  assert.equal(inRect(join.clearPad,shell.rect),true,
-   a.shelters[which].edge+': pad must touch the actual shelter floor');
-  assert.equal(inRect(join.clearPad,parent.rect),false,
-   a.shelters[which].edge+': pad must not stop on room wall');
-  assert.equal(Math.abs(join.clearPad[0]-opening.origin[0])+
-   Math.abs(join.clearPad[1]-opening.origin[2]),1);
+  const o=opening.origin;
+  const outside={north:[o[0],o[2]-1],south:[o[0],o[2]+1],
+   east:[o[0]+1,o[2]],west:[o[0]-1,o[2]]}[side];
+  assert.equal(inRect(outside,shell.rect),true,side+': outdoor approach is on shelter floor');
+  assert.equal(inRect(outside,parent.rect),false,side+': outdoor approach is outside parent wall');
+  const threshold={north:outside,south:[outside[0],outside[1]-1],
+   east:[outside[0]-1,outside[1]],west:outside}[side];
+  assert.deepEqual(join.clearPad,threshold,side+': JOIN must straddle its threshold');
+  assert.equal(overlaps2(join.clearPad,parent.rect),true,side+': parent contact');
+  assert.equal(overlaps2(join.clearPad,shell.rect),true,side+': shelter contact');
+  assert.equal(overlaps2(join.clearPad,[o[0],o[2],opening.size[0],opening.size[2]]),true,
+   side+': declared opening contact');
  }
  for(const face of ['north','south']){
   const a=supportedSpatialAuthor();

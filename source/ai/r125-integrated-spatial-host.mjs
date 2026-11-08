@@ -27,6 +27,13 @@ const exteriorPad=(o,side)=>({
  east:[o.origin[0]+1,o.origin[2]],
  west:[o.origin[0]-1,o.origin[2]]
 })[side];
+// The exterior approach cell stays on the shelter floor. The 2x2 JOIN
+// clearance instead straddles the wall threshold for south/east too.
+const shelterJoinPad=(o,side)=>{
+ const outside=exteriorPad(o,side);
+ return side==='south'?[outside[0],outside[1]-1]:
+  side==='east'?[outside[0]-1,outside[1]]:outside;
+};
 const midpoint=rect=>[rect[0]+Math.floor((rect[2]-2)/2),rect[1]+Math.floor((rect[3]-2)/2)];
 export function createIntegratedSpatialHost({deriveIntegratedShell,compileDesign=compileB143}={}){
  yes(typeof deriveIntegratedShell==='function','EXISTING_ENGINE_REQUIRED');
@@ -123,9 +130,10 @@ export function createIntegratedSpatialHost({deriveIntegratedShell,compileDesign
     intent.architecture.shelters.push(shelter);
     // Previously south/east were left on the room's outermost wall cell;
     // north/west alone reached the shelter. Check actual floor rectangle.
-    const clearPad=exteriorPad(o,op.edge);
-    yes(clearPad[0]>=sx&&clearPad[0]<sx+sw&&
-     clearPad[1]>=sz&&clearPad[1]<sz+sd,'SHELTER_CONNECTION_NOT_ON_FLOOR');
+    const outsidePad=exteriorPad(o,op.edge);
+    yes(outsidePad[0]>=sx&&outsidePad[0]<sx+sw&&
+     outsidePad[1]>=sz&&outsidePad[1]<sz+sd,'SHELTER_CONNECTION_NOT_ON_FLOOR');
+    const clearPad=shelterJoinPad(o,op.edge);
     intent.joins.push({spaces:[parent.id,shelter.id],openingId:o.id,clearPad});
     if(isEntry){yes(!intent.architecture.entry,'DUPLICATE_ENTRY_SHELTER');intent.architecture.entry={side:author.entry.face,
      openingId:entry.id,shelterId:shelter.id,approachPad:approach,purpose:author.entry.intent};}
