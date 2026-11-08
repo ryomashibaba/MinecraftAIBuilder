@@ -10,7 +10,10 @@ const ciName=['R125 V4D Local Author Bridge — INJECTED TEST ONLY','Education-f
 const jsonResponse=obj=>({ok:true,text:async()=>JSON.stringify(obj)});
 function fakeCi(state='completed'){
  return async()=>({ok:true,json:async()=>({total_count:2,workflow_runs:
-  ciName.map((name,i)=>({name,id:i+1,head_sha:sha,status:state,conclusion:state==='completed'?'success':null}))})});
+  ciName.map((name,i)=>({name,id:i+1,head_sha:sha,status:state,
+   event:i===0?'push':'workflow_dispatch',
+   path:i===0?'.github/workflows/r125-v4d-local-author-bridge.yml':'.github/workflows/qa.yml',
+   conclusion:state==='completed'?'success':null}))})});
 }
 function fakeModel(author,log){
  return async(url,req)=>{
