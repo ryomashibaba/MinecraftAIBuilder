@@ -24,6 +24,27 @@ EXPECTED_CYCLES = 2
 EXPECTED_QA_STAGES = 4
 SUCCESS = "GENUINE_QWEN4B_TWO_CUMULATIVE_CYCLES_PRIVATE_SOURCE_QA_ONLY"
 
+# Only these audited, host-authored rejection codes may leave PRIVATE QA.
+# A code-shaped model string is NOT evidence that publication is safe.
+DRAFT_REJECTION_EXPORT_ALLOWLIST = frozenset({
+    "MODEL_PATCH_NOT_JSON",
+    "PATCH_FIELDS_NOT_STRINGS",
+    "PATCH_HAS_NO_MEANINGFUL_CHANGE_OR_TOO_LARGE",
+    "PATCH_KEYS_INVALID",
+    "PATCH_MAB_ADDITIVE_GUARD_ONLY",
+    "PATCH_MAB_DUPLICATE_ADDITIVE_GUARD",
+    "PATCH_MAB_FIXED_STAIR_TREAD_LIMIT_FORBIDDEN",
+    "PATCH_MAB_GUARD_SIDE_EFFECT_FORBIDDEN",
+    "PATCH_MATCH_MUST_BE_UNIQUE",
+    "PATCH_NOOP_EMPTY_OR_OVERSIZED",
+    "PATCH_NO_UNIQUE_TRUSTED_EDIT_SLOT",
+    "PATCH_PROJECT_UNKNOWN",
+    "PATCH_SLOT_INVALID",
+    "PATCH_SLOT_KEYS_INVALID",
+    "PATCH_SOURCE_CYCLE_OUTSIDE_BUDGET",
+    "PROTECTED_PUBLIC_CONTRACT_ANCHOR_REMOVED",
+})
+
 
 def _owned_container_cleanup_verified(container: str) -> bool:
     """Fail closed unless Docker confirms the named container is absent."""
@@ -290,7 +311,7 @@ def experiment() -> dict:
                 safe_codes = sorted({
                     code for code in rejected[:8]
                     if isinstance(code, str)
-                    and re.fullmatch(r"[A-Z][A-Z0-9_]{2,130}", code)
+                    and code in DRAFT_REJECTION_EXPORT_ALLOWLIST
                     and code != "PRIVATE_DIAGNOSTIC_NOT_SHAREABLE"
                 })
                 if safe_codes:
