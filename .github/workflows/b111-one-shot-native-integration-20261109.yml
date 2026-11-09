@@ -7,6 +7,8 @@ on:
       - research/b111-two-wide-room-proxy-20261109
     paths:
       - .github/workflows/b111-one-shot-native-integration-20261109.yml
+      - scripts/b111-b105b110b111-optin-chain.mjs
+      - scripts/b111-b105b110b111-optin-chain.test.mjs
   workflow_dispatch:
 permissions:
   contents: read

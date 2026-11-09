@@ -27,8 +27,19 @@ const safe=x=>x?.constructionApproved===false&&x?.worldContacts===0&&
  x.BuildPlan.worldCoordinates===null;
 const eq=(a,b)=>snapshot(a)===snapshot(b);
 function assertSource(volume,design){
- if(!safe(volume)||!safe(design)||!validAudit(auditB105(volume,design.plan)))
-  fail('B105_SOURCE_UNSAFE_OR_BAD');
+ if(!safe(volume)||!safe(design))
+  fail('B105_DESIGN_OR_WORLD_SAFETY_INVARIANT');
+ const audit=auditB105(volume,design.plan);
+ if(!validAudit(audit))
+  fail('B105_SOURCE_AUDIT_'+JSON.stringify({
+   envelopeConflicts:audit.envelopeConflicts,
+   roofCoverageGaps:audit.roofCoverageGaps,
+   portalVoidGaps:audit.portalVoidGaps,
+   furniturePathViolations:audit.furniturePathViolations,
+   stairInterfaceGaps:audit.stairInterfaceGaps,
+   issueCount:audit.issueCount,
+   issues:audit.geometryIssues?.slice(0,5)
+  }));
 }
 const rid=(id,level,roomId)=>id+'/'+level+'/'+roomId;
 function checkProposedRoom(room,chosen){
