@@ -870,3 +870,55 @@ test('explicit east/rear glazing creates real inside/outside daylight without op
   /EXPRESSION_DAYLIGHT_FACADE_CONFLICT/);
  assert.deepEqual(original,snapshot);
 });
+
+test('explicit one-cell two-volume roof eaves alter actual B143 skyline while preserving the paved courtyard and old author',()=>{
+ const original=JSON.parse(fs.readFileSync(new URL(
+  '../evidence/r125-real-l-corner-20261101/MODEL_RESPONSE_ORIGINAL.txt',
+  import.meta.url),'utf8'));
+ const snapshot=structuredClone(original);
+ assert.equal(compileArchitecturePlan(original,
+  {entrancePlacement:'source-accessible'}).compiled.primitives.length,1336);
+ for(const [side,size,expected] of [
+  ['east',4,1717],['west',4,1721],['east',5,1708],['west',5,1712]]){
+  const p=structuredClone(original);
+  p.id='r125-author-eave-'+side+'-'+size;
+  p.title='Author-specified one-cell shaded roof '+side+' '+size;
+  p.expression={...p.expression,roofProfile:'split-monitor',roofAxis:'x',
+   roofVolume:'raised',facadeLanguage:'recessed-portico',
+   rearCornerCut:{side,width:size,depth:size,access:'paved'},
+   daylightFacade:'east-and-rear-bays'};
+  const previous=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+  p.expression.roofOverhang='one-block';
+  const actual=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+  assert.equal(actual.compiled.primitives.length,expected);
+  assert.equal(verifyCompiled(actual.design,actual.compiled),true);
+  const a=new Map(previous.compiled.primitives.map(v=>
+   [v.slice(0,3).join(','),v[3]]));
+  const b=new Map(actual.compiled.primitives.map(v=>
+   [v.slice(0,3).join(','),v[3]]));
+  let added=0;
+  for(const [k,v] of a)assert.equal(b.get(k),v,'no authored voxel changed');
+  for(const [k,v] of b)if(!a.has(k)){
+   assert.equal(v,4,'the authored wood roof material is reused');
+   added++;
+  }
+  assert.equal(added,116,'true eave solids, not a texture swap');
+  const start=side==='west'?1:23-size;
+  for(let x=start;x<23;x++)for(let z=23-size;z<23;z++){
+   assert.equal(b.get([x,1,z].join(',')),4,'paved wooden courtyard floor');
+   for(let y=2;y<actual.design.bounds.height;y++)
+    assert.equal(b.has([x,y,z].join(',')),false,'the court stays sky-open');
+  }
+  assert.equal(actual.courtyardSourceOnly.status,
+   'SOURCE_2_WIDE_PAVED_COURT_REACHABLE');
+  assert.equal(auditR125SourceRoutes(actual).status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert.equal(actual.worldWrites,0);
+  assert.deepEqual(actual.compiled.BuildPlan.operations,[]);
+  assert.deepEqual(actual.gates,Array(9).fill('BLOCKED'));
+ }
+ const bad=structuredClone(original);
+ bad.expression.roofOverhang='one-block';
+ assert.throws(()=>compileArchitecturePlan(bad),
+  /EXPRESSION_ROOF_OVERHANG_CONFLICT/);
+ assert.deepEqual(original,snapshot);
+});

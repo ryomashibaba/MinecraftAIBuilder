@@ -199,16 +199,18 @@ test('paved author court stays OUTSIDE indoor six-fixture program despite a newl
   f('staff-storage-1','staff-workroom','storage-rack','far-right'),
   f('staff-storage-2','staff-workroom','storage-rack','near-right'),
   f('staff-worktop','staff-workroom','work-surface','far-left')];
- for(const [side,baseCount,featuredCount,daylight] of [
-  ['east',1601,1755,false],['west',1605,1759,false],
-  ['east',1601,1755,true],['west',1605,1759,true]]){
+ for(const [side,baseCount,featuredCount,daylight,overhang] of [
+  ['east',1601,1755,false,false],['west',1605,1759,false,false],
+  ['east',1601,1755,true,false],['west',1605,1759,true,false],
+  ['east',1717,1871,true,true],['west',1721,1875,true,true]]){
   const plan=structuredClone(original);
   plan.id='r125-paved-feature-'+side;
   plan.title='Authored courtyard with functional rooms '+side;
   plan.expression={...plan.expression,roofProfile:'split-monitor',roofAxis:'x',
    roofVolume:'raised',facadeLanguage:'recessed-portico',
    rearCornerCut:{...plan.expression.rearCornerCut,side,access:'paved'},
-   ...(daylight?{daylightFacade:'east-and-rear-bays'}:{})};
+   ...(daylight?{daylightFacade:'east-and-rear-bays'}:{}),
+   ...(overhang?{roofOverhang:'one-block'}:{})};
   const base=compileArchitecturePlan(plan,{entrancePlacement:'source-accessible'});
   const built=applyR125FeatureIntent({base,intent:{
    schema:'minecraftaibuilder-r130-feature-intent-v2',

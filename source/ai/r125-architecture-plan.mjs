@@ -57,7 +57,8 @@ export function validateArchitecturePlan(p){
   check(keys(e,['setbackSide','setbackDepth','roofProfile','roofAxis',
    'facadeLanguage',...(Object.hasOwn(e,'rearCornerCut')?['rearCornerCut']:[]),
    ...(Object.hasOwn(e,'roofVolume')?['roofVolume']:[]),
-   ...(Object.hasOwn(e,'daylightFacade')?['daylightFacade']:[])]),
+   ...(Object.hasOwn(e,'daylightFacade')?['daylightFacade']:[]),
+   ...(Object.hasOwn(e,'roofOverhang')?['roofOverhang']:[])]),
    'EXPRESSION_FIELDS');
   check(['none','east','rear'].includes(e.setbackSide)&&
    ((e.setbackSide==='none'&&e.setbackDepth===0)||
@@ -81,6 +82,12 @@ export function validateArchitecturePlan(p){
     e.roofProfile==='split-monitor'&&e.roofVolume==='raised'&&
     e.roofAxis==='x'&&p.levels.length===1),
    'EXPRESSION_DAYLIGHT_FACADE_CONFLICT');
+  // Explicit author opt-in only: no implied change to Qwen-authored roofs
+  // or previously supported ridge/sawtooth/daylight geometry.
+  check(e.roofOverhang===undefined||
+   (e.roofOverhang==='one-block'&&e.roofProfile==='split-monitor'&&
+    e.roofVolume==='raised'&&p.levels.length===1),
+   'EXPRESSION_ROOF_OVERHANG_CONFLICT');
   if(Object.hasOwn(e,'rearCornerCut')){
    check((keys(e.rearCornerCut,['width','depth'])||
     (keys(e.rearCornerCut,['width','depth','side'])||
@@ -538,6 +545,21 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
     box('daylight-rear-'+name+'-'+y+'-glass','add','glass',
      [x,y,upper.z1],[w,2,1]);
    }
+  }
+  if(original.expression.roofOverhang==='one-block'){
+   // These one-cell roof-edge source solids shape the real silhouette
+   // and shade the public entrance and monitor clerestory. They are not
+   // painted fake geometry. Original low/high roofs remain intact.
+   const x0=upper.x0,x1=upper.x1,z0=upper.z0,z1=upper.z1;
+   for(const [id,at,size] of [
+    ['low-west',[x0-1,top,z0],[1,1,spanZ]],
+    ['low-front',[x0-1,top,z0-1],[highX-x0+1,1,1]],
+    ['low-rear',[x0-1,top,z1+1],[highX-x0+1,1,1]],
+    ['high-east',[x1+1,top+4,z0-1],[1,1,spanZ+2]],
+    ['high-front',[highX-1,top+4,z0-1],[x1-highX+3,1,1]],
+    ['high-rear',[highX-1,top+4,z1+1],[x1-highX+3,1,1]],
+    ['high-clerestory',[highX-1,top+4,z0],[1,1,spanZ]]
+   ])box('roof-one-cell-eave-'+id,'add',roof,at,size);
   }
  }else if(roofProfile!=='flat'){
   const span=roofAxis==='x'?upper.x1-upper.x0+1:upper.z1-upper.z0+1;
