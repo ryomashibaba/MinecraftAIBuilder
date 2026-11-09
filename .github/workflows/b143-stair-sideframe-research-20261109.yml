@@ -1,0 +1,48 @@
+name: B143 office support-only staircase sideframe design trial
+on:
+  push:
+    branches:
+      - research/b143-two-office-stair-side-frame-20261109
+    paths:
+      - .github/workflows/b143-stair-sideframe-research-20261109.yml
+      - scripts/b143-office-stair-sideframe-trial.mjs
+      - scripts/b143-office-stair-sideframe-trial.test.mjs
+permissions:
+  contents: read
+jobs:
+  source-only-trial:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Frozen source, syntax and hard-stop unit tests
+        run: |
+          git rev-parse HEAD
+          node scripts/verify-freeze.mjs
+          node --check scripts/b143-office-stair-sideframe-trial.mjs
+          node --check scripts/b143-office-stair-sideframe-trial.test.mjs
+          node --test scripts/b143-office-stair-sideframe-trial.test.mjs
+      - name: Evaluate exact 15-source buildings but change NO design or world
+        run: node scripts/b143-office-stair-sideframe-trial.mjs
+      - name: Verify all 9 BLOCKED and preserve actual evidence
+        run: |
+          node --input-type=module -e "
+          import fs from 'node:fs';
+          import {verifyB143} from './scripts/b143-office-stair-sideframe-trial.mjs';
+          const r=JSON.parse(fs.readFileSync('b143-research-output/B143_Office_Sideframe_Source_Trial.json'));
+          if(!verifyB143(r)||r.cases.length!==2||r.BuildPlan.operations.length||
+             r.gates.some(x=>x!=='BLOCKED'))process.exit(2);
+          console.log('B143_OFFICE_SIDE_FRAME_SOURCE_ONLY_PASS');
+          "
+          test -z "$(git status --porcelain --untracked-files=no)"
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: B143-Office-SideFrame-Source-Only
+          path: b143-research-output/
+          retention-days: 7
