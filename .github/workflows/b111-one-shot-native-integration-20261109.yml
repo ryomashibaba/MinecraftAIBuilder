@@ -1,0 +1,50 @@
+# One targeted, read-only Node integration run for the B111 opt-in research branch.
+# Creating this file triggers only this one job; unrelated R55 is not retried.
+name: B111 research one-shot native 15-building integration
+on:
+  push:
+    branches:
+      - research/b111-two-wide-room-proxy-20261109
+    paths:
+      - .github/workflows/b111-one-shot-native-integration-20261109.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: b111-native-one-shot-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  native-15-building-chain:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - name: Checkout exact HEAD, read-only
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Node 22 for the original repo
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Record actual checkout and frozen B100 source
+        run: |
+          git rev-parse HEAD
+          sha256sum source/parallel/b100/main/B100_GENERIC_DESIGN_REPORT.json
+          test -z "$(git status --porcelain)"
+          node --version
+      - name: Native B105 to B110 to B111 integration, 15 actual B100 variants
+        shell: bash
+        run: |
+          set -o pipefail
+          node --check scripts/b111-b105b110b111-optin-chain.mjs
+          node --check scripts/b111-b105b110b111-optin-chain.test.mjs
+          node --test scripts/b111-b105b110b111-optin-chain.test.mjs 2>&1 | tee "$RUNNER_TEMP/B111_NATIVE_INTEGRATION_LOG.txt"
+          test -z "$(git status --porcelain)"
+      - name: Preserve single native test log, including a genuine FAIL
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: B111-ONE-SHOT-NATIVE-INTEGRATION-LOG
+          path: ${{ runner.temp }}/B111_NATIVE_INTEGRATION_LOG.txt
+          if-no-files-found: warn
+          retention-days: 7
