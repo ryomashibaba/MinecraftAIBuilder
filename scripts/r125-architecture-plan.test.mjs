@@ -579,3 +579,43 @@ test('roof volume supports z-axis two-level setback and rejects invalid forms',(
  assert.throws(()=>compileArchitecturePlan({...base,expression:{
   ...expression,roofVolume:'imaginary'}}),/R125_PLAN_EXPRESSION_ROOF_VOLUME/);
 });
+
+test('separate author-raised ridge and L-corner retain authentic Qwen flat-roof SOURCE',()=>{
+ const input=JSON.parse(fs.readFileSync(new URL(
+  '../evidence/r125-real-l-corner-20261101/MODEL_RESPONSE_ORIGINAL.txt',import.meta.url),'utf8'));
+ const snapshot=structuredClone(input);
+ const original=compileArchitecturePlan(input,{entrancePlacement:'source-accessible'});
+ assert.equal(original.compiled.primitives.length,1336);
+ assert.equal(auditR125SourceRoutes(original).status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ for(const [side,axis] of [['east','x'],['west','z']]){
+  // This is a separately AUTHORED research choice; not the Qwen raw answer.
+  const changed=structuredClone(input);
+  changed.id='r125-author-roof-'+side;
+  changed.title='Independent study of a raised L-corner roof '+side;
+  changed.expression={...changed.expression,
+   roofProfile:'ridge',roofAxis:axis,roofVolume:'raised',
+   rearCornerCut:{...changed.expression.rearCornerCut,side}};
+  const out=compileArchitecturePlan(changed,{entrancePlacement:'source-accessible'});
+  assert.equal(verifyCompiled(out.design,out.compiled),true);
+  assert.equal(auditR125SourceRoutes(out).status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert.equal(out.plan.expression.roofProfile,'ridge');
+  assert.equal(out.plan.expression.roofVolume,'raised');
+  assert(out.design.elements.some(e=>e.id.startsWith('recess-outer-roof-seal-')));
+  assert(out.compiled.primitives.length>original.compiled.primitives.length);
+  const real=voxels(out.compiled),top=6,cutX=side==='west'?1:19;
+  for(let x=cutX;x<cutX+4;x++)for(let z=19;z<23;z++)
+   for(let y=1;y<=top+3;y++)
+    assert.equal(includes(real,x,y,z),false,'open-air corner remains truly roofless');
+  assert.equal(includes(real,10,6,10),false,'old roof becomes usable air');
+  assert(real.size>0);
+  assert.equal(out.worldWrites,0);
+  assert.deepEqual(out.gates,Array(9).fill('BLOCKED'));
+ }
+ assert.deepEqual(input,snapshot);
+ const unsupported=structuredClone(input);
+ unsupported.expression.roofProfile='ridge';
+ assert.throws(()=>compileArchitecturePlan(unsupported),/EXPRESSION_CORNER_CONFLICT/);
+ unsupported.expression.roofVolume='raised';
+ unsupported.expression.roofProfile='sawtooth';
+ assert.throws(()=>compileArchitecturePlan(unsupported),/EXPRESSION_CORNER_CONFLICT/);
+});
