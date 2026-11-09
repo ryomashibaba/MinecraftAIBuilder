@@ -135,8 +135,12 @@ test('saved Qwen L-corner with explicit HOST raised roof and six assembled featu
  p.title='Independent study of a raised L-corner roof east';
  p.expression={...p.expression,roofProfile:'ridge',roofAxis:'x',
   roofVolume:'raised',rearCornerCut:{...p.expression.rearCornerCut,side:'east'}};
- const base=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
- assert.equal(base.compiled.primitives.length,1426);
+ for(const facadeLanguage of ['plain','recessed-portico']){
+ const variant=structuredClone(p);
+ variant.expression.facadeLanguage=facadeLanguage;
+ const base=compileArchitecturePlan(variant,{entrancePlacement:'source-accessible'});
+ assert.equal(base.compiled.primitives.length,
+  facadeLanguage==='plain'?1426:1445);
  const object=(id,zoneId,role,corner)=>({
   id,zoneId,role,corner,detail:'assembled'});
  const objects=[
@@ -156,7 +160,8 @@ test('saved Qwen L-corner with explicit HOST raised roof and six assembled featu
   need('staff-worktop','staff-workroom','work-surface',1,15,10)
  ]);
  const independent=auditR129FunctionalAcceptance({base,featured,spec:required});
- assert.equal(featured.compiled.primitives.length,1580);
+ assert.equal(featured.compiled.primitives.length,
+  facadeLanguage==='plain'?1580:1599);
  assert.equal(featured.addedVoxelCount,154);
  assert.equal(featured.placements.length,6);
  assert.equal(featured.immutableBaseGeometryProven,true);
@@ -173,5 +178,6 @@ test('saved Qwen L-corner with explicit HOST raised roof and six assembled featu
  assert.equal(featured.worldWrites,0);
  assert.deepEqual(featured.gates,Array(9).fill('BLOCKED'));
  assert.deepEqual(featured.compiled.BuildPlan.operations,[]);
+ }
  assert.equal(JSON.stringify(authored),rawSnapshot);
 });

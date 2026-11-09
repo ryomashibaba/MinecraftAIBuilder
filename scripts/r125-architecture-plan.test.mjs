@@ -619,3 +619,51 @@ test('separate author-raised ridge and L-corner retain authentic Qwen flat-roof 
  unsupported.expression.roofProfile='sawtooth';
  assert.throws(()=>compileArchitecturePlan(unsupported),/EXPRESSION_CORNER_CONFLICT/);
 });
+
+test('explicit researcher portico is a real three-deep B143 volume, preserves original Qwen, and rejects blocked envelopes',()=>{
+ const original=JSON.parse(fs.readFileSync(new URL(
+  '../evidence/r125-real-l-corner-20261101/MODEL_RESPONSE_ORIGINAL.txt',
+  import.meta.url),'utf8'));
+ const originalCopy=structuredClone(original);
+ const flat=compileArchitecturePlan(original,{entrancePlacement:'source-accessible'});
+ assert.equal(flat.compiled.primitives.length,1336);
+ const p=structuredClone(original);
+ p.id='r125-author-roof-east';
+ p.title='Independent study of a raised L-corner roof east';
+ p.expression={...p.expression,roofProfile:'ridge',roofAxis:'x',
+  roofVolume:'raised',rearCornerCut:{...p.expression.rearCornerCut,side:'east'}};
+ const baseline=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+ assert.equal(baseline.compiled.primitives.length,1426);
+ p.expression.facadeLanguage='recessed-portico';
+ const candidate=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+ const occupied=voxels(candidate.compiled);
+ const finalMaterials=new Map(candidate.compiled.primitives.map(v=>
+  [v.slice(0,3).join(','),v[3]]));
+ assert.equal(candidate.compiled.primitives.length,1445);
+ assert.equal(verifyCompiled(candidate.design,candidate.compiled),true);
+ const doorway=candidate.design.elements.filter(e=>e.id==='exterior-entrance');
+ assert.equal(doorway.length,1);
+ assert.deepEqual(doorway[0].origin,[10,2,4]);
+ for(let x=10;x<=11;x++)for(let z=1;z<=5;z++){
+  assert.equal(includes(occupied,x,1,z),true);
+  for(let y=2;y<=4;y++)
+   assert.equal(includes(occupied,x,y,z),false,'true clear covered forecourt');
+ }
+ for(let x=5;x<=8;x++)for(let y=2;y<=4;y++)
+  assert.equal(finalMaterials.get([x,y,4].join(',')),3,'true B143 display glazing');
+ for(const x of [4,12])for(let z=1;z<=4;z++)
+  assert.equal(includes(occupied,x,2,z),true,'real side return wall');
+ assert.equal(includes(occupied,8,5,1),true,'real entrance lintel');
+ assert.equal(auditR125SourceRoutes(candidate).status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(auditArchitecturePlanCirculation(candidate).status,
+  'SOURCE_CLEARANCE_PROBES_PASS');
+ assert.equal(candidate.worldWrites,0);
+ assert.equal(candidate.compiled.BuildPlan.operations.length,0);
+ assert.deepEqual(candidate.gates,Array(9).fill('BLOCKED'));
+ assert.deepEqual(original,originalCopy);
+ const bad=plan('too-compact-forecourt',['x']);
+ bad.expression={setbackSide:'none',setbackDepth:0,
+  roofProfile:'flat',roofAxis:'x',facadeLanguage:'recessed-portico'};
+ assert.throws(()=>compileArchitecturePlan(bad,{entrancePlacement:'source-accessible'}),
+  /EXPRESSION_PORTICO_PROGRAM_CONFLICT/);
+});

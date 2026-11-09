@@ -63,7 +63,7 @@ export function validateArchitecturePlan(p){
    'EXPRESSION_SETBACK');
   check(['flat','ridge','sawtooth'].includes(e.roofProfile)&&
    ['x','z'].includes(e.roofAxis)&&
-   ['plain','fins','screen'].includes(e.facadeLanguage),
+   ['plain','fins','screen','recessed-portico'].includes(e.facadeLanguage),
    'EXPRESSION_STYLE');
   // Explicit opt-in preserves the original B143 roof source for old plans.
   check(e.roofVolume===undefined||
@@ -367,7 +367,7 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
        split>=stairLastTreadZ&&split<=stairLastTreadZ+1)
      box(tag+'-stair-threshold-relief','cut',null,[3,y,split],[2,3,1]);
   }
-  if(l===0)
+  if(l===0&&facadeLanguage!=='recessed-portico')
    box('exterior-entrance','cut',null,
     [groundEntryX(axis,split,w,entrancePlacement,original.entryZone),y,z0],[2,3,1]);
   // A setback makes a real second-floor terrace. It must not be separated
@@ -392,6 +392,32 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
     entryX<=at[0]+size[0]-1&&entryX+1>=at[0])continue;
    box(tag+'-window-'+name+'-cut','cut',null,at,size);
    box(tag+'-window-'+name+'-glass','add','glass',at,size);
+  }
+  // An explicitly author-selected, genuinely recessed public entrance.
+  // Its three-deep covered forecourt replaces real walls, not facade paint.
+  // Historical plain/fins/screen plans remain exactly source-identical.
+  if(l===0&&facadeLanguage==='recessed-portico'){
+   const entryX=groundEntryX(axis,split,w,entrancePlacement,original.entryZone);
+   const left=entryX-6,right=entryX+2,backZ=z0+3;
+   // Never cross an existing authored interior partition or change the
+   // original entrance-side zone just to force a decorative public frontage.
+   check(left>=x0+2&&right<=x1-2&&backZ<z1-3&&
+    (axis!=='x'||split<=left||split>=right),
+    'EXPRESSION_PORTICO_PROGRAM_CONFLICT');
+   box('portico-open-forecourt','cut',null,
+    [left,y,z0],[right-left+1,4,3]);
+   box('portico-west-return','add',wall,[left,y,z0],[1,4,4]);
+   box('portico-east-return','add',wall,[right,y,z0],[1,4,4]);
+   box('portico-rear-wall','add',wall,
+    [left+1,y,backZ],[right-left-1,4,1]);
+   // The daylight panel and the door are BOTH openings in the new rear wall.
+   box('portico-display-cut','cut',null,[left+1,y,backZ],[4,3,1]);
+   box('portico-display-glass','add','glass',
+    [left+1,y,backZ],[4,3,1]);
+   box('exterior-entrance','cut',null,[entryX,y,backZ],[2,3,1]);
+   // Actual wall-to-wall lintel at the open forecourt, not floating posts.
+   box('portico-front-spandrel','add','accent',
+    [left,y+3,z0],[right-left+1,1,1]);
   }
   // Purely architectural articulation outside the envelope. Dynamic plan
   // controls the rhythm and materials; no fixed building-type switch.
