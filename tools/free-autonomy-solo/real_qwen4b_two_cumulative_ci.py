@@ -16,6 +16,7 @@ import re
 import subprocess
 import tarfile
 import tempfile
+import uuid
 
 from real_small_model_ci_once import MODEL, IMAGE, cmd, wait_ready
 from run_mab_private_continuous import PASS, run_cumulative
@@ -46,23 +47,62 @@ DRAFT_REJECTION_EXPORT_ALLOWLIST = frozenset({
 })
 
 
-def _owned_container_cleanup_verified(container: str) -> bool:
-    """Fail closed unless Docker confirms the named container is absent."""
+_OWNER_LABEL = "jp.december2026.qwen4b.owner"
+
+
+def _owned_container_cleanup_verified(
+    container: str, owner_token: str, started_container_id: str | None
+) -> bool:
+    """Delete only the exact run-created container, fail closed on ID drift.
+
+    Unverified docker-run results never grant deletion authority. Confirm both
+    the immutable startup ID and unpredictable label via daemon inspection.
+    """
+    if (re.fullmatch(r"[0-9a-f]{32}", owner_token) is None or
+            container != "dec-qwen4b-two-cycles-" + owner_token or
+            (started_container_id is not None and
+             (not isinstance(started_container_id, str) or
+              re.fullmatch(r"[0-9a-f]{64}", started_container_id) is None))):
+        return False
     try:
-        subprocess.run(
-            ["docker", "rm", "-f", container], capture_output=True,
-            timeout=25, check=False)
-        # Docker's exact error wording varies by version/context. A successful
-        # daemon-backed ALL-container list (not stderr text) proves absence.
+        # If docker run failed or returned an unverifiable ID, do NOT remove
+        # a same-name object, even if its label is identical to our token.
+        if started_container_id is not None:
+            check = subprocess.run(
+                ["docker", "inspect", "--format",
+                 '{{.Id}}|{{index .Config.Labels "' + _OWNER_LABEL + '"}}',
+                 container], capture_output=True, text=True, timeout=25,
+                check=False)
+            if check.returncode == 0:
+                fields = check.stdout.strip().split("|", 1)
+                if (len(fields) != 2 or
+                        fields[0] != started_container_id or
+                        fields[1] != owner_token):
+                    return False
+                # Delete ONLY the exact immutable ID returned by docker run.
+                removal = subprocess.run(
+                    ["docker", "rm", "-f", started_container_id],
+                    capture_output=True, text=True, timeout=25, check=False)
+                if removal.returncode != 0:
+                    return False
+        # A same-name absence is NOT sufficient: Docker allows renaming a
+        # still-running owner container. Check full immutable IDs AND names.
         probe = subprocess.run(
-            ["docker", "container", "ls", "--all", "--format", "{{.Names}}"],
+            ["docker", "container", "ls", "--all", "--no-trunc",
+             "--format", "{{.ID}}|{{.Names}}"],
             capture_output=True, text=True, timeout=25, check=False)
     except (OSError, subprocess.TimeoutExpired):
         return False
     if probe.returncode != 0:
         return False
-    # Include stopped/removing containers. Require an exact name match.
-    return container not in probe.stdout.splitlines()
+    for line in probe.stdout.splitlines():
+        parts = line.split("|", 1)
+        if len(parts) != 2 or re.fullmatch(r"[0-9a-f]{64}", parts[0]) is None:
+            return False  # Never certify success from malformed daemon output.
+        if parts[1] == container or parts[0] == started_container_id:
+            return False
+    return True
+
 
 
 _CHECKPOINT_APPROVAL = "APPROVE_ENCRYPTED_QA_CHECKPOINT_ONLY"
@@ -277,13 +317,20 @@ def experiment() -> dict:
         root = Path(ephemeral)
         os.environ["LOCALAPPDATA"] = str(root / "lock")
         (root / "lock").mkdir()
-        container = "dec-qwen4b-two-cycles-" + str(os.getpid())
+        owner_token = uuid.uuid4().hex
+        container = "dec-qwen4b-two-cycles-" + owner_token
         status, receipt = None, None
+        started_container_id = None
         try:
-            cmd(["docker", "run", "-d", "--rm", "--name", container,
+            observed_id = cmd(["docker", "run", "-d", "--rm", "--name", container,
+                 "--label", _OWNER_LABEL + "=" + owner_token,
                  "--cap-drop=ALL", "--security-opt=no-new-privileges",
                  "--pids-limit", "128", "--memory", "5g", "--cpus", "3",
                  "-p", "127.0.0.1:11434:11434", IMAGE], timeout=55)
+            if (not isinstance(observed_id, str) or
+                    re.fullmatch(r"[0-9a-f]{64}", observed_id) is None):
+                raise ValueError("OWNED_DOCKER_START_ID_NOT_VALID")
+            started_container_id = observed_id
             wait_ready()
             cmd(["docker", "exec", container, "ollama", "pull", MODEL],
                 timeout=450)
@@ -341,7 +388,7 @@ def experiment() -> dict:
             result["exception_type"] = type(exc).__name__
         finally:
             result["container_cleanup_verified"] = _owned_container_cleanup_verified(
-                container)
+                container, owner_token, started_container_id)
             if not result["container_cleanup_verified"]:
                 # Successful SOURCE QA is not a completed safe owned run.
                 result["status"] = "HOLD_OWNED_CONTAINER_CLEANUP_UNVERIFIED"

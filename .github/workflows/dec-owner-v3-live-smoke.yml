@@ -1,0 +1,99 @@
+name: DEC Docker V3 ownership one-shot isolated live smoke (NO MODEL)
+
+# Activated only by the first explicitly approved request, on a dedicated
+# non-main disposable research branch. Never re-trigger from code pushes.
+on:
+  push:
+    branches:
+      - research/dec-owner-v3-live-ci-20261109
+    paths:
+      - .github/dec-owner-v3-approved-request.json
+
+permissions:
+  contents: read
+
+jobs:
+  owner-v3-once:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    if: github.event_name == 'push' && github.run_attempt == 1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Prove exact approved first-creation commit before any Docker
+        shell: bash
+        run: |
+          set -euo pipefail
+          request='.github/dec-owner-v3-approved-request.json'
+          test "${GITHUB_REF}" = 'refs/heads/research/dec-owner-v3-live-ci-20261109'
+          test "${GITHUB_RUN_ATTEMPT}" = '1'
+          test "${GITHUB_ACTOR}" = 'ryomashibaba'
+          test "${GITHUB_TRIGGERING_ACTOR}" = 'ryomashibaba'
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          test "$(git rev-parse HEAD^)" = '4bf66c3192a8802d5de83771df986cf9ebaa3246'
+          test "$(git diff-tree --no-commit-id --name-status -r HEAD -- "${request}")" = "$(printf 'A\t%s' "${request}")"
+          test "$(git rev-list HEAD -- "${request}" | wc -l | tr -d '[:space:]')" = '1'
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          path = Path('.github/dec-owner-v3-approved-request.json')
+          assert json.loads(path.read_text(encoding='utf-8')) == {
+              'scope': 'DECEMBER_2026_DOCKER_OWNER_V3_SMOKE_ONLY',
+              'authorized_runs': 1,
+              'model_calls': 0,
+              'source_project_changes': False,
+          }
+          print('ONE_SHOT_REQUEST_VERIFIED_NO_MODEL')
+          PY
+          python3 - <<'PY'
+          import subprocess
+          permitted = {
+              '.github/dec-owner-v3-approved-request.json',
+              '.github/workflows/dec-owner-v3-live-smoke.yml',
+              'tools/free-autonomy-solo/real_qwen4b_two_cumulative_ci.py',
+              'tools/free-autonomy-solo/test_real_qwen4b_docker_owner.py',
+              'tools/free-autonomy-solo/DEC_DOCKER_OWNER_LIVE_CI_SMOKE_V2.py',
+          }
+          output = subprocess.check_output(
+              ['git','diff-tree','--no-commit-id','--name-only','-r','HEAD'], text=True)
+          actual = set(output.splitlines())
+          if actual != permitted:
+              raise SystemExit('HOLD_UNEXPECTED_CHANGED_PATHS_NO_DOCKER')
+          print('EXACT_FIVE_SCOPED_FILES_VERIFIED_NO_MODEL')
+          PY
+      - name: Verify patched target SHA and source syntax without model
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib
+          from pathlib import Path
+          target = Path('tools/free-autonomy-solo/real_qwen4b_two_cumulative_ci.py')
+          expected = '961bcec0fc9e0546268a5bcea0917f47cd5b8bafced53062d9d4b7a6617f0cb2'
+          if hashlib.sha256(target.read_bytes()).hexdigest() != expected:
+              raise SystemExit('HOLD_PATCHED_SOURCE_SHA_MISMATCH')
+          print('PINNED_V3_SOURCE_MATCH')
+          PY
+          python3 -m py_compile \
+            tools/free-autonomy-solo/real_qwen4b_two_cumulative_ci.py \
+            tools/free-autonomy-solo/DEC_DOCKER_OWNER_LIVE_CI_SMOKE_V2.py \
+            tools/free-autonomy-solo/test_real_qwen4b_docker_owner.py
+      - name: Confirm offline ownership contract before Docker
+        env:
+          PYTHONPATH: tools/free-autonomy-solo
+        run: python3 -m unittest discover -v -s tools/free-autonomy-solo -p test_real_qwen4b_docker_owner.py
+      - name: Launch exactly four owned disposable no-model containers
+        env:
+          GITHUB_ACTIONS: 'true'
+          DEC_DOCKER_OWNER_SMOKE_APPROVED: 'YES'
+        run: |
+          python3 tools/free-autonomy-solo/DEC_DOCKER_OWNER_LIVE_CI_SMOKE_V2.py --execute
+      - name: Preserve scope in job summary
+        if: always()
+        shell: bash
+        run: |
+          echo 'DEC Docker V3: only ownership smoke on an ephemeral runner.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'No model, no original MAB/TPS code edits, no user Windows, no GitHub writes.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'No certification of Qwen autonomy, 14B, Strata S2–S4, MAB ART or TPS gameplay.' >> "$GITHUB_STEP_SUMMARY"
