@@ -78,7 +78,11 @@ export function validateArchitecturePlan(p){
     'EXPRESSION_CORNER_CUT');
    // A full-height recess cannot share the current upper setback or
    // raised roof profiles without compromising the enclosing envelope.
-   check(e.setbackSide==='none'&&e.roofProfile==='flat',
+   // A raised ridge is compatible with a rear corner only when its
+   // full roof skin is explicitly clipped and the re-entrant eaves sealed.
+   // Never infer a new roof form from a plain authored facade.
+   check(e.setbackSide==='none'&&
+    (e.roofProfile==='flat'||(e.roofProfile==='ridge'&&e.roofVolume==='raised')),
     'EXPRESSION_CORNER_CONFLICT');
   }
  }
@@ -503,7 +507,7 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
   const xCut=westCut?1:w-1-rearCornerCut.width;
   const zCut=d-1-rearCornerCut.depth;
   box('rear-corner-void','cut',null,[xCut,1,zCut],
-   [rearCornerCut.width,top+1,rearCornerCut.depth]);
+   [rearCornerCut.width,raisedRoof?top+5:top+1,rearCornerCut.depth]);
   for(let l=0;l<count;l++){
    const y=2+5*l,tag='l'+l;
    box(tag+(westCut?'-recess-west-wall':'-recess-east-wall'),'add',wall,
@@ -521,6 +525,28 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
     [xCut+1,y+1,zCut-1],[2,2,1]);
    box(tag+'-recess-rear-window-glass','add','glass',
     [xCut+1,y+1,zCut-1],[2,2,1]);
+  }
+  if(raisedRoof){
+   // The corner cut exposes two new perimeter faces beneath a raised
+   // roof. Seal up to each authored ridge strip, not merely the old cap.
+   // No additional floor, entry, or author-intent substitution is made.
+   const roofExtra=(x,z)=>{
+    const k=roofAxis==='x'?x-upper.x0:z-upper.z0;
+    const span=roofAxis==='x'?upper.x1-upper.x0+1:upper.z1-upper.z0+1;
+    return Math.min(3,Math.floor(Math.min(k,span-1-k)/2));
+   };
+   const edgeX=westCut?xCut+rearCornerCut.width:xCut-1;
+   for(let z=zCut;z<zCut+rearCornerCut.depth;z++){
+    const extra=roofExtra(edgeX,z);
+    if(extra>0)box('recess-outer-roof-seal-x-'+z,'add',wall,
+     [edgeX,top,z],[1,extra,1]);
+   }
+   const edgeZ=zCut-1;
+   for(let x=xCut;x<xCut+rearCornerCut.width;x++){
+    const extra=roofExtra(x,edgeZ);
+    if(extra>0)box('recess-outer-roof-seal-z-'+x,'add',wall,
+     [x,top,edgeZ],[1,extra,1]);
+   }
   }
  }
  // The upper floor is an occupied terrace plate beyond the upper envelope;
