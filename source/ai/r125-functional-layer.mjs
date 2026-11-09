@@ -148,7 +148,8 @@ export function applyR125FeatureIntent({base,intent}={}){
   intent.objects.length>8)hold('INTENT_CONTRACT');
  const zones=new Map();
  for(const level of base.program)for(const zone of level.zones)
-  zones.set(zone.id,{zone,y:level.standingFloorY});
+  zones.set(zone.id,{zone,y:level.standingFloorY,
+    openAirRecess:level.openAirRecess});
  const ids=new Set();
  for(const obj of intent.objects){
   if(!exact(obj,v2?['id','zoneId','role','corner','detail']:
@@ -165,10 +166,16 @@ export function applyR125FeatureIntent({base,intent}={}){
  const keep=new Map(base.compiled.primitives.map(p=>[k(p[0],p[1],p[2]),p[3]]));
  const design=structuredClone(base.design),placements=[];
  for(const obj of intent.objects){
-  const {zone,y}=zones.get(obj.zoneId);
+  const {zone,y,openAirRecess}=zones.get(obj.zoneId);
   let chosen=null;
   for(const option of candidatePositions(obj,zone,y)){
    const {corner,pos,method}=option;
+   // A bounding room zone may include roofless open air. Even after
+   // exterior paving, indoor semantic furniture must NEVER occupy it.
+   if(openAirRecess&&pos.x<=openAirRecess.x[1]&&
+    pos.x+pos.sx-1>=openAirRecess.x[0]&&
+    pos.z<=openAirRecess.z[1]&&
+    pos.z+pos.sz-1>=openAirRecess.z[0])continue;
    let clear=true;
    for(let x=pos.x;x<pos.x+pos.sx;x++)
     for(let z=pos.z;z<pos.z+pos.sz;z++)

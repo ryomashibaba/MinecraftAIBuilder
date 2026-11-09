@@ -186,3 +186,53 @@ test('saved Qwen L-corner with explicit HOST raised roof and six assembled featu
  }
  assert.equal(JSON.stringify(authored),rawSnapshot);
 });
+
+test('paved author court stays OUTSIDE indoor six-fixture program despite a newly walkable floor',()=>{
+ const original=JSON.parse(fs.readFileSync(new URL(
+  '../evidence/r125-real-l-corner-20261101/MODEL_RESPONSE_ORIGINAL.txt',
+  import.meta.url),'utf8'));
+ const f=(id,zoneId,role,corner)=>({id,zoneId,role,corner,detail:'assembled'});
+ const objects=[
+  f('retail-display-1','retail-area','display-stand','far-left'),
+  f('retail-display-2','retail-area','display-stand','near-left'),
+  f('retail-display-3','retail-area','display-stand','far-right'),
+  f('staff-storage-1','staff-workroom','storage-rack','far-right'),
+  f('staff-storage-2','staff-workroom','storage-rack','near-right'),
+  f('staff-worktop','staff-workroom','work-surface','far-left')];
+ for(const [side,baseCount,featuredCount] of [
+  ['east',1601,1755],['west',1605,1759]]){
+  const plan=structuredClone(original);
+  plan.id='r125-paved-feature-'+side;
+  plan.title='Authored courtyard with functional rooms '+side;
+  plan.expression={...plan.expression,roofProfile:'split-monitor',roofAxis:'x',
+   roofVolume:'raised',facadeLanguage:'recessed-portico',
+   rearCornerCut:{...plan.expression.rearCornerCut,side,access:'paved'}};
+  const base=compileArchitecturePlan(plan,{entrancePlacement:'source-accessible'});
+  const built=applyR125FeatureIntent({base,intent:{
+   schema:'minecraftaibuilder-r130-feature-intent-v2',
+   basePlanSha256:base.planSha256,objects}});
+  const outdoor=base.program[0].openAirRecess;
+  assert.equal(base.compiled.primitives.length,baseCount);
+  assert.equal(built.compiled.primitives.length,featuredCount);
+  assert.equal(built.addedVoxelCount,154);
+  assert.equal(built.placements.length,6);
+  for(const o of built.placements){
+   const [x,,z]=o.origin,[sx,,sz]=o.size;
+   assert.equal(x<=outdoor.x[1]&&x+sx-1>=outdoor.x[0]&&
+    z<=outdoor.z[1]&&z+sz-1>=outdoor.z[0],false,
+    'indoor fixture MUST NOT occupy walkable outdoor court');
+  }
+  const proof=auditR129FunctionalAcceptance({base,featured:built,
+   spec:spec(base,[
+    need('retail-displays','retail-area','display-stand',3,75,10),
+    need('storage-racks','staff-workroom','storage-rack',2,50,10),
+    need('worktop','staff-workroom','work-surface',1,15,10)])});
+  assert.equal(proof.status,'SOURCE_ONLY_REQUIREMENTS_MET_REAL_FUNCTION_UNVERIFIED');
+  assert.deepEqual(proof.needChecks.map(x=>x.status),
+   Array(3).fill('SOURCE_EVIDENCE_PRESENT'));
+  assert.equal(built.everyFeatureSourceAccessible,true);
+  assert.equal(built.worldWrites,0);
+  assert.deepEqual(built.BuildPlan.operations,[]);
+  assert.deepEqual(built.gates,Array(9).fill('BLOCKED'));
+ }
+});

@@ -8,6 +8,7 @@
  */
 import {createHash} from 'node:crypto';
 import {compileDesign,verifyCompiled,SCHEMA as B143} from './b143-building-dsl.mjs';
+import {auditR125SourceRoutes} from './r125-source-routes.mjs';
 export const SCHEMA='minecraftaibuilder-r125-architecture-plan-v1';
 const hash=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
 const refuse=code=>{throw Error('R125_PLAN_'+code);};
@@ -75,7 +76,11 @@ export function validateArchitecturePlan(p){
    'EXPRESSION_MONITOR_PROGRAM_CONFLICT');
   if(Object.hasOwn(e,'rearCornerCut')){
    check((keys(e.rearCornerCut,['width','depth'])||
-    keys(e.rearCornerCut,['width','depth','side']))&&
+    (keys(e.rearCornerCut,['width','depth','side'])||
+      keys(e.rearCornerCut,['width','depth','side','access'])))&&
+     (e.rearCornerCut.access===undefined||e.rearCornerCut.access==='paved')&&
+     (e.rearCornerCut.access!=='paved'||
+      (e.rearCornerCut.width>=4&&e.rearCornerCut.depth>=4))&&
     (e.rearCornerCut.side===undefined||
      ['east','west'].includes(e.rearCornerCut.side))&&
     integer(e.rearCornerCut.width,3,5)&&integer(e.rearCornerCut.depth,3,5),
@@ -617,6 +622,15 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
      [x,top,edgeZ],[1,extra,1]);
    }
   }
+  if(rearCornerCut.access==='paved'){
+   // Explicit AUTHOR opt-in: a paved usable outdoor court, NEVER silently
+   // filled in a model-authored raw open-air L-corner.
+   box('recess-paved-court-floor','add',floor,
+    [xCut,1,zCut],[rearCornerCut.width,1,rearCornerCut.depth]);
+   // A two-wide, three-high true opening replaces the re-entrant glass.
+   box('recess-paved-court-access','cut',null,
+    [xCut+1,2,zCut-1],[2,3,1]);
+  }
  }
  // The upper floor is an occupied terrace plate beyond the upper envelope;
  // it is NOT proof of railings, weather safety, or accessible outdoor space.
@@ -625,7 +639,7 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
   elements,designOnly:true};
  const compiled=compileDesign(design);
  check(verifyCompiled(design,compiled),'EXPRESSION_COMPILER_NONDETERMINISTIC');
- return {schema:'minecraftaibuilder-r125-plan-to-b143-result-v1',
+ const result={schema:'minecraftaibuilder-r125-plan-to-b143-result-v1',
   planSha256:hash(original),plan:original,design,compiled,program,
   sourceSha256:compiled.sourceSha256,geometrySha256:compiled.geometrySha256,
   modelAuthorship:'CALLER_PROVIDED_PLAN_UNVERIFIED',
@@ -634,6 +648,44 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
   inGameWalking:'NOT_TESTED',architecturalQuality:'NOT_REVIEWED',
   constructionApproved:false,worldContacts:0,worldWrites:0,
   gates:Array(9).fill('BLOCKED')};
+ if(rearCornerCut?.access==='paved'){
+  const x0=rearCornerCut.side==='west'?1:w-1-rearCornerCut.width;
+  const z0=d-1-rearCornerCut.depth;
+  // Physical roofless paving must be exact; do not trust verbal intent.
+  const cells=new Map(compiled.primitives.map(v=>
+   [v[0]+','+v[1]+','+v[2],v[3]]));
+  for(let x=x0;x<x0+rearCornerCut.width;x++)
+   for(let z=z0;z<z0+rearCornerCut.depth;z++){
+    check(cells.get(x+',1,'+z)!==undefined,
+     'EXPRESSION_COURT_FLOOR_MISSING');
+    for(let y=2;y<design.bounds.height;y++)
+     check(!cells.has(x+','+y+','+z),
+      'EXPRESSION_COURT_NOT_SKY_OPEN');
+   }
+  // Probe an OUTDOOR zone using the established real two-wide route graph,
+  // independently of the two existing indoor program zone witnesses.
+  const probe='__r125_court_source_probe__';
+  const court={id:probe,purpose:'authored outdoor courtyard',
+   range:{x:[x0,x0+rearCornerCut.width-1],
+    z:[z0,z0+rearCornerCut.depth-1]}};
+  const withCourt={...result,program:result.program.map((level,i)=>
+   i===0?{...level,zones:[...level.zones,court]}:level)};
+  const audit=auditR125SourceRoutes(withCourt);
+  const witness=audit.zones.find(v=>v.id===probe);
+  check(audit.status==='SOURCE_ROUTES_REACH_ALL_ZONES'&&
+   witness?.reachedFromEntrance===true&&
+   witness.reachedTwoWidePadCount>=2,
+   'EXPRESSION_COURTYARD_SOURCE_ACCESS_HOLD');
+  result.courtyardSourceOnly={
+   status:'SOURCE_2_WIDE_PAVED_COURT_REACHABLE',
+   sourceWitness:witness.sourceWitness,
+   sourceGraphMoves:witness.sourceGraphMoves,
+   reachedTwoWidePadCount:witness.reachedTwoWidePadCount,
+   actualMinecraftWalking:'NOT_TESTED',
+   architecturalArt:'NOT_REVIEWED',
+   worldWrites:0};
+ }
+ return result;
 }
 
 /**

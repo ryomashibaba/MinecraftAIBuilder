@@ -753,3 +753,49 @@ test('physical two-elevation monitor glazing is source-aligned, air-backed and s
   {entrancePlacement:'source-accessible'}),/EXPRESSION_MONITOR_CLERESTORY_SPAN/);
  assert.deepEqual(original,snapshot);
 });
+
+test('author-opt-in 4x4 paved outdoor court has a real two-wide route, open sky, and does not rewrite the Qwen L-corner',()=>{
+ const original=JSON.parse(fs.readFileSync(new URL(
+  '../evidence/r125-real-l-corner-20261101/MODEL_RESPONSE_ORIGINAL.txt',
+  import.meta.url),'utf8'));
+ const frozen=structuredClone(original);
+ const legacy=compileArchitecturePlan(original,{entrancePlacement:'source-accessible'});
+ assert.equal(legacy.compiled.primitives.length,1336);
+ assert.equal(legacy.courtyardSourceOnly,undefined);
+ for(const [side,expectedCount,expectedMoves] of [
+  ['east',1601,24],['west',1605,22]]){
+  const p=structuredClone(original);
+  p.id='r125-court-'+side;
+  p.title='Author opted in to a paved courtyard '+side;
+  p.expression={...p.expression,roofProfile:'split-monitor',roofAxis:'x',
+   roofVolume:'raised',facadeLanguage:'recessed-portico',
+   rearCornerCut:{...p.expression.rearCornerCut,side,access:'paved'}};
+  const r=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+  assert.equal(verifyCompiled(r.design,r.compiled),true);
+  assert.equal(r.compiled.primitives.length,expectedCount);
+  const occupied=voxels(r.compiled);
+  const left=side==='east'?19:1;
+  for(let x=left;x<left+4;x++)for(let z=19;z<23;z++){
+   assert.equal(includes(occupied,x,1,z),true,'real paved floor');
+   for(let y=2;y<r.design.bounds.height;y++)
+    assert.equal(includes(occupied,x,y,z),false,'no roof or wall inside court');
+  }
+  for(let x=left+1;x<left+3;x++)for(let y=2;y<=4;y++)
+   assert.equal(includes(occupied,x,y,18),false,'actual indoor/outdoor doorway');
+  assert.equal(r.courtyardSourceOnly.status,'SOURCE_2_WIDE_PAVED_COURT_REACHABLE');
+  assert.equal(r.courtyardSourceOnly.reachedTwoWidePadCount,12);
+  assert.equal(r.courtyardSourceOnly.sourceGraphMoves,expectedMoves);
+  assert.equal(r.courtyardSourceOnly.actualMinecraftWalking,'NOT_TESTED');
+  assert.equal(auditR125SourceRoutes(r).status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert.equal(r.worldWrites,0);
+  assert.deepEqual(r.compiled.BuildPlan.operations,[]);
+  assert.deepEqual(r.gates,Array(9).fill('BLOCKED'));
+ }
+ const invalid=structuredClone(original);
+ invalid.expression.rearCornerCut={...invalid.expression.rearCornerCut,side:'east',access:'decorative'};
+ assert.throws(()=>compileArchitecturePlan(invalid),/R125_PLAN_EXPRESSION_CORNER_CUT/);
+ invalid.expression.rearCornerCut.access='paved';
+ invalid.expression.rearCornerCut.width=3;
+ assert.throws(()=>compileArchitecturePlan(invalid),/R125_PLAN_EXPRESSION_CORNER_CUT/);
+ assert.deepEqual(original,frozen);
+});
