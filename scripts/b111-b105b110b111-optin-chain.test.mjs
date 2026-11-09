@@ -43,7 +43,7 @@ test('15 B100 designs regenerate opt-in B105, genuine B110 and genuine B111 with
  assert.equal(sum('rooms'),279);
  assert.equal(sum('originalFixtureAnchors'),558);
  assert.equal(sum('reanchoredRooms'),9);
- assert.equal(sum('reanchoredFixtureCount'),13);
+ assert.equal(sum('reanchoredFixtureCount'),18);
  assert.equal(sum('netFurniturePlaceholderMoves'),9);
  assert.equal(sum('twoWideDirect')+sum('twoWideByLegalOrientation'),279);
  assert.equal(JSON.stringify(frozen),sourceSha);

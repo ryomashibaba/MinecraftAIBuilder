@@ -14,7 +14,7 @@ import {modelB111Interiors,auditB111Model}
 import {auditRoomTwoWide} from './b111-independent-two-wide-room-audit.mjs';
 import {selectB111LegalBedOrientation}
  from './b111-original-anchor-orientation-selector.mjs';
-import {proposeB111RoomTwoWide} from './b111-two-wide-furniture-whatif.mjs';
+import {selectB105AndB111JointCandidate} from './b111-b105-joint-anchor-candidate.mjs';
 
 const key=(x,y,z)=>x+','+y+','+z;
 const fail=(code)=>{throw Error('B111_B105_CHAIN_'+code);};
@@ -43,7 +43,7 @@ function assertSource(volume,design){
 }
 const rid=(id,level,roomId)=>id+'/'+level+'/'+roomId;
 function checkProposedRoom(room,chosen){
- if(chosen.status!=='UNADOPTED_SOURCE_ANCHOR_SHIFT'||
+ if(chosen.status!=='UNADOPTED_JOINT_B105_B111_SOURCE_ONLY'||
   chosen.maxAnchorShift!==1||chosen.fixtureChanges?.length!==room.furniture.length)
   fail('NOT_BOUNDED_SOURCE_PROPOSAL');
  const alter=room.furniture.map((f,i)=>{
@@ -78,8 +78,8 @@ export function tryB105B110B111TwoWideOptIn(design,originalB105){
  const shiftList=[];
  for(const {r,assessment} of originalRoutes){
   if(assessment.status!=='HOLD_REQUIRES_B110_ANCHOR_OR_ROOM')continue;
-  const suggestion=proposeB111RoomTwoWide(r);
-  if(suggestion.status!=='UNADOPTED_SOURCE_ANCHOR_SHIFT')
+  const suggestion=selectB105AndB111JointCandidate(r);
+  if(suggestion.status!=='UNADOPTED_JOINT_B105_B111_SOURCE_ONLY')
    fail('UNRESOLVED_REQUIRES_MORE_THAN_1_CELL');
   shiftList.push({level:r.level,roomId:r.roomId,
    original:r,changes:checkProposedRoom(r,suggestion)});
