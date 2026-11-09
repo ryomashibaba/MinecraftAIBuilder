@@ -3,7 +3,9 @@ name: Education-first offline QA
 on:
   # Feature branches are already covered by pull_request: no duplicate full QA.
   push:
-    branches: [main]
+    # One exact-HEAD research validation is opt-in via [research-verify].
+    # Main and pull_request behavior remain unchanged.
+    branches: [main, research/r125-entry-nearest-safe-source-20261109]
   pull_request:
   workflow_dispatch:
 
@@ -17,6 +19,9 @@ permissions:
 
 jobs:
   offline-tests:
+    # Keep expensive full Education QA off ordinary research pushes.
+    # A tagged exact-HEAD push executes the SAME complete QA, never a subset.
+    if: ${{ github.ref != 'refs/heads/research/r125-entry-nearest-safe-source-20261109' || contains(github.event.head_commit.message, '[research-verify]') }}
     runs-on: ubuntu-latest
     timeout-minutes: 70
     steps:

@@ -1,7 +1,8 @@
 name: R125 V4D Local Author Bridge — INJECTED TEST ONLY
 on:
   push:
-    branches: [feature/b198zr1-protected-architectural-revision]
+    # Existing feature branch plus the isolated R125 source-study HEAD.
+    branches: [feature/b198zr1-protected-architectural-revision, research/r125-entry-nearest-safe-source-20261109]
     paths:
       - 'source/ai/r125-v4d-relative-author-ir.mjs'
       - 'source/ai/r125-v4d-compact-model-ir.mjs'
