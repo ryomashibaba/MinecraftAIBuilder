@@ -24,9 +24,9 @@ test('reject B110 anchor mutation and detect unsupported source',()=>{
  assert.throws(()=>selectB111LegalBedOrientation(r),/B110_SOURCE_ANCHOR_MISMATCH/);
  assert.throws(()=>auditB111OrientationOnly([],Buffer.alloc(0)),/PINNED_PUBLIC_ARCHIVE_MISMATCH/);
 });
-test('frozen archived 279-room source yields exact 230/40/9 without adoption',()=>{
+test('frozen archived 279-room source yields exact 230/40/9 without adoption',
+ {skip:!process.env.B111_PINNED_PUBLIC_LAYOUTS},()=>{
  const path=process.env.B111_PINNED_PUBLIC_LAYOUTS;
- if(!path)return; // Optional external, SHA-pinned fixture; never in Git tree.
  const bytes=fs.readFileSync(path),rows=JSON.parse(bytes),before=JSON.stringify(rows);
  const report=auditB111OrientationOnly(rows,bytes);
  assert.deepEqual(report.summary,{rooms:279,unchanged2DClear:230,
