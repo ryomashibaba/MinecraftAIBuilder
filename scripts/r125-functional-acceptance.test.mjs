@@ -199,14 +199,16 @@ test('paved author court stays OUTSIDE indoor six-fixture program despite a newl
   f('staff-storage-1','staff-workroom','storage-rack','far-right'),
   f('staff-storage-2','staff-workroom','storage-rack','near-right'),
   f('staff-worktop','staff-workroom','work-surface','far-left')];
- for(const [side,baseCount,featuredCount] of [
-  ['east',1601,1755],['west',1605,1759]]){
+ for(const [side,baseCount,featuredCount,daylight] of [
+  ['east',1601,1755,false],['west',1605,1759,false],
+  ['east',1601,1755,true],['west',1605,1759,true]]){
   const plan=structuredClone(original);
   plan.id='r125-paved-feature-'+side;
   plan.title='Authored courtyard with functional rooms '+side;
   plan.expression={...plan.expression,roofProfile:'split-monitor',roofAxis:'x',
    roofVolume:'raised',facadeLanguage:'recessed-portico',
-   rearCornerCut:{...plan.expression.rearCornerCut,side,access:'paved'}};
+   rearCornerCut:{...plan.expression.rearCornerCut,side,access:'paved'},
+   ...(daylight?{daylightFacade:'east-and-rear-bays'}:{})};
   const base=compileArchitecturePlan(plan,{entrancePlacement:'source-accessible'});
   const built=applyR125FeatureIntent({base,intent:{
    schema:'minecraftaibuilder-r130-feature-intent-v2',
@@ -216,6 +218,17 @@ test('paved author court stays OUTSIDE indoor six-fixture program despite a newl
   assert.equal(built.compiled.primitives.length,featuredCount);
   assert.equal(built.addedVoxelCount,154);
   assert.equal(built.placements.length,6);
+  if(daylight){
+   const occupied=new Set(built.compiled.primitives.map(v=>
+    v.slice(0,3).join(',')));
+   for(const z of [5,6,7,8,13,14,15,16])
+    for(const y of [3,4,7,8]){
+     assert.equal(occupied.has([21,y,z].join(',')),false,
+      'staff fixture must not block daylit interior');
+     assert.equal(occupied.has([23,y,z].join(',')),false,
+      'east facade must face outdoor air');
+    }
+  }
   for(const o of built.placements){
    const [x,,z]=o.origin,[sx,,sz]=o.size;
    assert.equal(x<=outdoor.x[1]&&x+sx-1>=outdoor.x[0]&&

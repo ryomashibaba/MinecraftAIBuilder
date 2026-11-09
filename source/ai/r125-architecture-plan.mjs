@@ -56,7 +56,8 @@ export function validateArchitecturePlan(p){
   const e=p.expression;
   check(keys(e,['setbackSide','setbackDepth','roofProfile','roofAxis',
    'facadeLanguage',...(Object.hasOwn(e,'rearCornerCut')?['rearCornerCut']:[]),
-   ...(Object.hasOwn(e,'roofVolume')?['roofVolume']:[])]),
+   ...(Object.hasOwn(e,'roofVolume')?['roofVolume']:[]),
+   ...(Object.hasOwn(e,'daylightFacade')?['daylightFacade']:[])]),
    'EXPRESSION_FIELDS');
   check(['none','east','rear'].includes(e.setbackSide)&&
    ((e.setbackSide==='none'&&e.setbackDepth===0)||
@@ -74,6 +75,12 @@ export function validateArchitecturePlan(p){
    (e.roofVolume==='raised'&&e.roofAxis==='x'&&
     e.setbackSide==='none'&&p.levels.at(-1).splitAxis==='x'),
    'EXPRESSION_MONITOR_PROGRAM_CONFLICT');
+  // AUTHOR opt-in only; no implicit change to frozen source or prior massing.
+  check(e.daylightFacade===undefined||
+   (e.daylightFacade==='east-and-rear-bays'&&
+    e.roofProfile==='split-monitor'&&e.roofVolume==='raised'&&
+    e.roofAxis==='x'&&p.levels.length===1),
+   'EXPRESSION_DAYLIGHT_FACADE_CONFLICT');
   if(Object.hasOwn(e,'rearCornerCut')){
    check((keys(e.rearCornerCut,['width','depth'])||
     (keys(e.rearCornerCut,['width','depth','side'])||
@@ -502,6 +509,36 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
    [highX+2,3,upper.z0],[frontSpan,2,1]);
   box('roof-monitor-ground-light','add','glass',
    [highX+2,3,upper.z0],[frontSpan,2,1]);
+  if(original.expression.daylightFacade==='east-and-rear-bays'){
+   // Physically opened daylight to occupied zones, not facade paint.
+   // Paired upper/lower east glazing preserves solid end and middle piers.
+   const nearZ=upper.z0+4,farZ=Math.floor((upper.z0+upper.z1)/2)+2;
+   check(nearZ+5<farZ&&farZ+4<=upper.z1-2,
+    'EXPRESSION_DAYLIGHT_EAST_SPAN');
+   for(const [bay,z] of [['near',nearZ],['far',farZ]])
+    for(const [band,y] of [['low',3],['high',top+1]]){
+     box('daylight-east-'+bay+'-'+band+'-cut','cut',null,
+      [upper.x1,y,z],[1,2,4]);
+     box('daylight-east-'+bay+'-'+band+'-glass','add','glass',
+      [upper.x1,y,z],[1,2,4]);
+    }
+   // The west-cut return wall and the authored x-divider are retained:
+   // the west corner has a narrower second rear low bay.
+   const westCut=rearCornerCut?.side==='west';
+   const lowA=upper.x0+(westCut?5:2);
+   const lowB=lowA+4,lowWidth=westCut?2:3,upperA=highX+1;
+   check(lowB+lowWidth-1<=highX-2&&upperA+4<=upper.x1-2,
+    'EXPRESSION_DAYLIGHT_REAR_SPAN');
+   for(const [name,x,w,ys] of [
+    ['low-a',lowA,3,[3]],['low-b',lowB,lowWidth,[3]],
+    ['upper',upperA,4,[3,top+1]]
+   ])for(const y of ys){
+    box('daylight-rear-'+name+'-'+y+'-cut','cut',null,
+     [x,y,upper.z1],[w,2,1]);
+    box('daylight-rear-'+name+'-'+y+'-glass','add','glass',
+     [x,y,upper.z1],[w,2,1]);
+   }
+  }
  }else if(roofProfile!=='flat'){
   const span=roofAxis==='x'?upper.x1-upper.x0+1:upper.z1-upper.z0+1;
   for(let pos=0;pos<span;pos++){

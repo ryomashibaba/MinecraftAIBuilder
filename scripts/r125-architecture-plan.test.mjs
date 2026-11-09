@@ -799,3 +799,74 @@ test('author-opt-in 4x4 paved outdoor court has a real two-wide route, open sky,
  assert.throws(()=>compileArchitecturePlan(invalid),/R125_PLAN_EXPRESSION_CORNER_CUT/);
  assert.deepEqual(original,frozen);
 });
+
+test('explicit east/rear glazing creates real inside/outside daylight without opening an authored room divider',()=>{
+ const original=JSON.parse(fs.readFileSync(new URL(
+  '../evidence/r125-real-l-corner-20261101/MODEL_RESPONSE_ORIGINAL.txt',
+  import.meta.url),'utf8'));
+ const snapshot=structuredClone(original);
+ for(const [side,n,expected] of [['east',1601,60],['west',1605,58]]){
+  const p=structuredClone(original);
+  p.id='authored-daylight-'+side;
+  p.title='Author chose east and rear glazing '+side;
+  p.expression={...p.expression,roofProfile:'split-monitor',
+   roofAxis:'x',roofVolume:'raised',facadeLanguage:'recessed-portico',
+   rearCornerCut:{...p.expression.rearCornerCut,side,access:'paved'}};
+  const baseline=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+  p.expression.daylightFacade='east-and-rear-bays';
+  const candidate=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+  const a=new Map(baseline.compiled.primitives.map(v=>
+   [v.slice(0,3).join(','),v[3]]));
+  const b=new Map(candidate.compiled.primitives.map(v=>
+   [v.slice(0,3).join(','),v[3]]));
+  assert.equal(baseline.compiled.primitives.length,n);
+  assert.equal(candidate.compiled.primitives.length,n);
+  assert.equal(verifyCompiled(candidate.design,candidate.compiled),true);
+  let changed=0;
+  for(const [k,m] of b)if(a.get(k)!==m){
+   changed++;assert.equal(a.get(k),0);assert.equal(m,3);
+  }
+  assert.equal(changed,expected,'only genuine existing stone converted');
+  const open=[];
+  for(const z of [5,6,7,8,13,14,15,16])
+   for(const y of [3,4,7,8])
+    open.push([[22,y,z],[21,y,z],[23,y,z]]);
+  const start=side==='west'?6:3;
+  for(const x of [
+   ...Array.from({length:3},(_,i)=>start+i),
+   ...Array.from({length:side==='west'?2:3},(_,i)=>start+4+i)])
+   for(const y of [3,4])
+    open.push([[x,y,22],[x,y,21],[x,y,23]]);
+  for(let x=14;x<=17;x++)for(const y of [3,4,7,8])
+   open.push([[x,y,22],[x,y,21],[x,y,23]]);
+  assert.equal(open.length,expected);
+  for(const [pane,inside,outside] of open){
+   assert.equal(b.get(pane.join(',')),3,'real B143 glazed wall');
+   assert.equal(b.has(inside.join(',')),false,'actual indoor air');
+   assert.equal(b.has(outside.join(',')),false,'actual outdoor air');
+  }
+  if(side==='west')assert.equal(b.get('12,3,22'),0,
+   'author-chosen room divider remains stone');
+  assert.equal(candidate.courtyardSourceOnly.status,
+   'SOURCE_2_WIDE_PAVED_COURT_REACHABLE');
+  assert.equal(auditR125SourceRoutes(candidate).status,
+   'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert.equal(candidate.worldWrites,0);
+  assert.deepEqual(candidate.compiled.BuildPlan.operations,[]);
+  assert.deepEqual(candidate.gates,Array(9).fill('BLOCKED'));
+ }
+ const invalid=structuredClone(original);
+ invalid.id='invalid-daylight';
+ invalid.title='Unsupported daylight contract';
+ invalid.expression={...invalid.expression,roofProfile:'split-monitor',
+  roofAxis:'x',roofVolume:'raised',facadeLanguage:'recessed-portico',
+  rearCornerCut:{...invalid.expression.rearCornerCut,side:'east',access:'paved'},
+  daylightFacade:'unknown'};
+ assert.throws(()=>compileArchitecturePlan(invalid),
+  /EXPRESSION_DAYLIGHT_FACADE_CONFLICT/);
+ invalid.expression.daylightFacade='east-and-rear-bays';
+ invalid.expression.roofProfile='ridge';
+ assert.throws(()=>compileArchitecturePlan(invalid),
+  /EXPRESSION_DAYLIGHT_FACADE_CONFLICT/);
+ assert.deepEqual(original,snapshot);
+});
