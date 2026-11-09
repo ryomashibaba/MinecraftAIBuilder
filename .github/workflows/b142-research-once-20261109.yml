@@ -1,0 +1,49 @@
+name: B142 source-only staircase support and corridor triage
+on:
+  push:
+    branches:
+      - research/b142-support-vs-gallery-20261109
+    paths:
+      - .github/workflows/b142-research-once-20261109.yml
+      - scripts/b142-support-vs-gallery.mjs
+      - scripts/b142-support-vs-gallery.test.mjs
+permissions:
+  contents: read
+jobs:
+  exact-source-study:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify frozen originals and JS syntax
+        run: |
+          git rev-parse HEAD
+          node scripts/verify-freeze.mjs
+          node --check scripts/b142-support-vs-gallery.mjs
+          node --check scripts/b142-support-vs-gallery.test.mjs
+      - name: Guard against false approvals
+        run: node --test scripts/b142-support-vs-gallery.test.mjs
+      - name: Genuine B113 to B141 full-source analysis
+        run: node scripts/b142-support-vs-gallery.mjs
+      - name: Fail closed if any construction gate is loosened
+        run: |
+          node --input-type=module -e "
+          import fs from 'node:fs';
+          import {validateB142} from './scripts/b142-support-vs-gallery.mjs';
+          const r=JSON.parse(fs.readFileSync('b142-research-output/B142_Support_Gallery_Audit.json'));
+          if(!validateB142(r)||r.gates.some(x=>x!=='BLOCKED')||
+             r.totals.physicalCertification!==0)process.exit(2);
+          console.log('B142_ACTUAL_SOURCE_15_66_102_READ_ONLY_PASS');
+          "
+          test -z "$(git status --porcelain --untracked-files=no)"
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: B142-Fleet-Support-Corridor-Triage
+          path: b142-research-output/
+          retention-days: 7
