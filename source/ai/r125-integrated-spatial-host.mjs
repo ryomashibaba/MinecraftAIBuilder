@@ -199,7 +199,15 @@ export function createIntegratedSpatialHost({deriveIntegratedShell,compileDesign
      worktop:{parts:[part([x,2,z],[3,2,1])],pad:[x,z-2]},
      storage:{parts:[part([x,2,z],[1,3,3])],pad:[x+1,z]},
      display:{parts:[part([x,2,z],[2,2,1])],pad:[x,z-2]},
-     service:{parts:[part([x,2,z],[3,2,1])],pad:[x,z-2]},
+     // Unlike a worktop, service has a physical transaction aperture:
+     // a supported low counter, two posts and a lintel. Keep the exact
+     // existing servicePad and avoid changing any room or entry geometry.
+     service:{parts:[
+      part([x,2,z],[3,1,1]),
+      {origin:[x,3,z],size:[1,2,1],material:'metal'},
+      {origin:[x+2,3,z],size:[1,2,1],material:'metal'},
+      {origin:[x+1,4,z],size:[1,1,1],material:'metal'}
+     ],pad:[x,z-2]},
      equipment:{parts:[part([x,2,z],[2,2,2])],pad:[x,z-2]}};
     const spec=specs[op.kind];yes(spec,'UNSUPPORTED_FIXTURE');
     const [rx,rz,rw,rd]=s.rect;

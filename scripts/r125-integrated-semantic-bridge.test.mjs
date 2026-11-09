@@ -161,6 +161,36 @@ test('common HOST mechanically expands author topology, actual door walls, fixtu
  assert.equal(storage.provenance,'PROCEDURAL_HOST_SOURCE_SEED_NOT_HISTORICAL_SOURCE');
  assert.equal(storage.base.compiled.primitives.filter(c=>c[1]===1).length,120);
 });
+test('authored service vs worktop survives mechanical expansion into distinct genuine B143 fixture voxels',()=>{
+ const host=createIntegratedSpatialHost({deriveIntegratedShell:()=>{throw Error('PRIVATE_ENGINE_NOT_AVAILABLE');}});
+ const buildFixture=kind=>{
+  const a=supportedSpatialAuthor();
+  a.features=[{space:'reading',kind,purpose:'Function chosen by the author'}];
+  const expanded=host.expand(prepareIntegratedSemanticBridge(a).payload);
+  const fixture=expanded.intent.fixtures[0];
+  const design={schema:SCHEMA,id:'semantic-fixture-check',title:'Independent physical role test',
+   brief:'Synthetic author choice only; no claim of a full building or private source',
+   designOnly:true,bounds:{width:124,height:24,depth:124},
+   elements:fixture.parts.map((p,i)=>({
+    id:'fixture-piece-'+i,shape:'box',mode:'add',material:p.material,
+    origin:p.origin,size:p.size
+   }))};
+  const compiled=compileDesign(design);
+  assert(verifyCompiled(design,compiled));
+  assert(compiled.primitives.length>0);
+  return {fixture,compiled};
+ };
+ const worktop=buildFixture('worktop'),service=buildFixture('service');
+ // The exact approach/service pad remains identical, preserving clearance contracts.
+ assert.deepEqual(service.fixture.servicePad,worktop.fixture.servicePad);
+ assert.equal(service.fixture.space,worktop.fixture.space);
+ assert.equal(service.fixture.role,worktop.fixture.role);
+ assert.notDeepEqual(service.fixture.parts,worktop.fixture.parts);
+ assert.notEqual(service.compiled.geometrySha256,worktop.compiled.geometrySha256);
+ assert(service.fixture.parts.some(p=>p.material==='metal'));
+ // No claim of independent PRIVATE function/ART or Minecraft walking.
+});
+
 test('parent choice moves the physical space; unsupported engine capabilities HOLD without replacement',async()=>{
  const host=createIntegratedSpatialHost({deriveIntegratedShell:()=>{throw Error('NO_PRIVATE_ENGINE');}});
  const a=supportedSpatialAuthor();
