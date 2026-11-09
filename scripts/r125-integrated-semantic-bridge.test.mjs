@@ -230,6 +230,67 @@ test('compact dual feature intent maps to two independently accessible 2x2 pads'
  // Independent PRIVATE full-building geometry and Minecraft remain HOLD.
 });
 
+test('six equipment kinds across compact rooms never claim usable 2x2 pads or joins without clearance',()=>{
+ const h=createIntegratedSpatialHost({deriveIntegratedShell:()=>{throw Error('PRIVATE_ONLY');}});
+ const kinds=['seat','worktop','storage','display','service','equipment'];
+ const sizes=[[8,8],[9,9],[10,10],[12,10],[14,14]];
+ let accepted=0,held=0;
+ for(const [w,d] of sizes)for(const direction of ['north','south'])
+  for(const k1 of kinds)for(const k2 of kinds){
+   const a=supportedSpatialAuthor();
+   a.spaces[1].footprint={width:w,depth:d};
+   a.entry.face=direction;a.shelters[0].edge=direction;
+   a.features=[{space:'reading',kind:k1,purpose:'First functional equipment'},
+    {space:'reading',kind:k2,purpose:'Second functional equipment'}];
+   let e;
+   try{e=h.expand(prepareIntegratedSemanticBridge(a).payload);}
+   catch(error){
+    assert(/PRIVATE_SPATIAL_FIXTURE_2X2_PATH_CAPACITY/.test(String(error)),
+     'only explicit geometry capacity HOLD is acceptable: '+String(error));
+    held++;continue;
+   }
+   accepted++;
+   const room=e.intent.spaces.find(s=>s.id==='reading').rect,
+    [rx,rz,rw,rd]=room,solid=new Set();
+   for(const f of e.intent.fixtures){
+    const own=new Set();
+    for(const p of f.parts)for(let x=p.origin[0];x<p.origin[0]+p.size[0];x++)
+     for(let z=p.origin[2];z<p.origin[2]+p.size[2];z++)own.add(x+','+z);
+    assert([...own].every(s=>!solid.has(s)),'inter-fixture overlap');
+    for(const s of own)solid.add(s);
+   }
+   const free=([x,z])=>x>=rx+1&&x<=rx+rw-3&&z>=rz+1&&z<=rz+rd-3&&
+    ![[x,z],[x+1,z],[x,z+1],[x+1,z+1]].some(([i,j])=>solid.has(i+','+j));
+   assert(e.intent.fixtures.every(f=>free(f.servicePad)),
+    'both full 2x2 service pads accessible');
+   const entryPads=e.intent.joins.filter(j=>j.spaces.includes('reading')).map(j=>{
+    const [x,z]=j.clearPad;
+    if(x<rx+1)return [0,1,2].map(i=>[rx+1,z+i]);
+    if(x>rx+rw-3)return [0,1,2].map(i=>[rx+rw-3,z+i]);
+    if(z<rz+1)return [0,1,2].map(i=>[x+i,rz+1]);
+    if(z>rz+rd-3)return [0,1,2].map(i=>[x+i,rz+rd-3]);
+    return [];
+   }).map(xs=>xs.filter(free));
+   assert(entryPads.length>0&&entryPads.every(xs=>xs.length>0),
+    'at least one truly open two-wide JOIN seed');
+   let linked=false;
+   for(const origin of entryPads[0]){
+    const q=[origin],seen=new Set([origin.join(',')]);
+    for(let i=0;i<q.length;i++)for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]]){
+     const [x,z]=q[i],p=[x+dx,z+dz],key=p.join(',');
+     if(!seen.has(key)&&free(p)){seen.add(key);q.push(p);}
+    }
+    if(entryPads.every(xs=>xs.some(p=>seen.has(p.join(','))))&&
+     e.intent.fixtures.every(f=>seen.has(f.servicePad.join(','))))linked=true;
+   }
+   assert(linked,'all entry and equipment pads share 2-wide reachable component');
+   assert.equal(verifyCompiled(e.base.design,e.base.compiled),true);
+  }
+ assert.equal(accepted+held,360);
+ assert(accepted>=200,'unexpected capability collapse');
+ // Bounded public mechanical preflight only; never attest PRIVATE 10/10.
+});
+
 test('parent choice moves the physical space; unsupported engine capabilities HOLD without replacement',async()=>{
  const host=createIntegratedSpatialHost({deriveIntegratedShell:()=>{throw Error('NO_PRIVATE_ENGINE');}});
  const a=supportedSpatialAuthor();

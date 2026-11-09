@@ -61,10 +61,16 @@ function rehomeCompactFixturePair(first,second,rect,joins){
   out.sort((a,b)=>a.score-b.score||a.z-b.z||a.x-b.x);
   return out.map(x=>x.candidate);
  };
- const seeds=joins.map(j=>{
+ // A 4-cell opening offers three adjacent 2x2 positions, not just
+ // the historical corner of clearPad. Reject non-boundary joins explicitly.
+ const options=j=>{
   const [x,z]=j.clearPad;
-  return [Math.max(xMin,Math.min(xMax,x)),Math.max(zMin,Math.min(zMax,z))];
- });
+  if(x<xMin)return [0,1,2].map(i=>[xMin,z+i]);
+  if(x>xMax)return [0,1,2].map(i=>[xMax,z+i]);
+  if(z<zMin)return [0,1,2].map(i=>[x+i,zMin]);
+  if(z>zMax)return [0,1,2].map(i=>[x+i,zMax]);
+  return [];
+ };
  const isConnected=pair=>{
   const occupied=new Set();
   for(const s of pair){
@@ -77,20 +83,29 @@ function rehomeCompactFixturePair(first,second,rect,joins){
    if([...local].some(p=>occupied.has(p)))return false;
    for(const p of local)occupied.add(p);
   }
-  const free=(x,z)=>x>=xMin&&x<=xMax&&z>=zMin&&z<=zMax&&
+  const free=([x,z])=>x>=xMin&&x<=xMax&&z>=zMin&&z<=zMax&&
    ![key(x,z),key(x+1,z),key(x,z+1),key(x+1,z+1)].some(k=>occupied.has(k));
-  const targets=[...seeds,...pair.map(p=>p.pad)];
-  if(targets.some(([x,z])=>!free(x,z)))return false;
-  const start=seeds[0],queue=[start],visited=new Set([key(...start)]);
-  for(let i=0;i<queue.length;i++){
-   const [x,z]=queue[i];
-   for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]]){
-    const nx=x+dx,nz=z+dz,k=key(nx,nz);
-    if(!visited.has(k)&&free(nx,nz)){visited.add(k);queue.push([nx,nz]);}
+  if(pair.some(p=>!free(p.pad)))return false;
+  const seeds=joins.map(j=>options(j).filter(free));
+  if(seeds.some(list=>!list.length))return false;
+  for(const start of seeds[0]){
+   const queue=[start],visited=new Set([key(...start)]);
+   for(let i=0;i<queue.length;i++){
+    const [x,z]=queue[i];
+    for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]]){
+     const p=[x+dx,z+dz],k=key(...p);
+     if(!visited.has(k)&&free(p)){visited.add(k);queue.push(p);}
+    }
    }
+   if(pair.every(p=>visited.has(key(...p.pad)))&&
+    seeds.every(list=>list.some(p=>visited.has(key(...p)))))return true;
   }
-  return targets.every(p=>visited.has(key(...p)));
+  return false;
  };
+ // Existing fixed layout is retained only when it passes the SAME 2x2
+ // test as fallback layouts; never use the historical "it fits" shortcut.
+ if(within(first)&&within(second)&&isConnected([first,second]))
+  return [first,second];
  for(const a of placements(first,0))for(const b of placements(second,1))
   if(isConnected([a,b]))return [a,b];
  return null;
@@ -278,13 +293,13 @@ export function createIntegratedSpatialHost({deriveIntegratedShell,compileDesign
      part.origin[2]+part.size[2]<=rz+rd-1)&&
      p.pad[0]>=rx+1&&p.pad[0]<rx+rw-1&&
      p.pad[1]>=rz+1&&p.pad[1]<rz+rd-1;
-    if(!fits(spec)){
+    if(index===1){
      const prior=intent.fixtures.find(f=>f.space===op.space);
-     yes(index===1&&prior,'FIXTURE_OUTSIDE_ROOM');
+     yes(prior,'FIXTURE_PRIOR_MISSING');
      const layout=rehomeCompactFixturePair(
       {parts:prior.parts,pad:prior.servicePad},spec,s.rect,
       intent.joins.filter(j=>j.spaces.includes(op.space)));
-     yes(layout,'FIXTURE_OUTSIDE_ROOM');
+     yes(layout,'FIXTURE_2X2_PATH_CAPACITY');
      prior.parts=layout[0].parts;prior.servicePad=layout[0].pad;
      spec=layout[1];
     }
