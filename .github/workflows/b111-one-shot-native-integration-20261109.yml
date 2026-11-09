@@ -9,6 +9,8 @@ on:
       - .github/workflows/b111-one-shot-native-integration-20261109.yml
       - scripts/b111-b105b110b111-optin-chain.mjs
       - scripts/b111-b105b110b111-optin-chain.test.mjs
+      - scripts/b111-education-offline-block-interface.mjs
+      - scripts/b111-education-offline-block-interface.test.mjs
   workflow_dispatch:
 permissions:
   contents: read
@@ -41,7 +43,9 @@ jobs:
           node --check scripts/b111-b105-joint-anchor-candidate.mjs
           node --check scripts/b111-b105b110b111-optin-chain.mjs
           node --check scripts/b111-b105b110b111-optin-chain.test.mjs
-          node --test scripts/b111-b105-joint-anchor-candidate.test.mjs scripts/b111-b105b110b111-optin-chain.test.mjs 2>&1 | tee "$RUNNER_TEMP/B111_NATIVE_INTEGRATION_LOG.txt"
+          node --check scripts/b111-education-offline-block-interface.mjs
+          node --check scripts/b111-education-offline-block-interface.test.mjs
+          node --test scripts/b111-education-offline-block-interface.test.mjs 2>&1 | tee "$RUNNER_TEMP/B111_NATIVE_INTEGRATION_LOG.txt"
           test -z "$(git status --porcelain)"
       - name: Preserve single native test log, including a genuine FAIL
         if: always()
