@@ -120,3 +120,58 @@ test('independent acceptance counts assembled multi-material parts from B143 num
  assert.ok(verdict.featureEvidence[0].partCount>1);
  assert.equal(verdict.worldWrites,0);
 });
+
+test('saved Qwen L-corner with explicit HOST raised roof and six assembled features keeps 3 independent SOURCE requirements',()=>{
+ const raw=fs.readFileSync(new URL(
+  '../evidence/r125-real-l-corner-20261101/MODEL_RESPONSE_ORIGINAL.txt',
+  import.meta.url),'utf8');
+ const authored=JSON.parse(raw),rawSnapshot=JSON.stringify(authored);
+ const frozen=compileArchitecturePlan(authored,{entrancePlacement:'source-accessible'});
+ assert.equal(frozen.compiled.primitives.length,1336);
+ // This raised ridge is explicitly researcher-authored. It is NOT the
+ // Qwen original roof choice; do not reclassify it as model authorship.
+ const p=structuredClone(authored);
+ p.id='r125-author-roof-east';
+ p.title='Independent study of a raised L-corner roof east';
+ p.expression={...p.expression,roofProfile:'ridge',roofAxis:'x',
+  roofVolume:'raised',rearCornerCut:{...p.expression.rearCornerCut,side:'east'}};
+ const base=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+ assert.equal(base.compiled.primitives.length,1426);
+ const object=(id,zoneId,role,corner)=>({
+  id,zoneId,role,corner,detail:'assembled'});
+ const objects=[
+  object('retail-display-1','retail-area','display-stand','far-left'),
+  object('retail-display-2','retail-area','display-stand','near-left'),
+  object('retail-display-3','retail-area','display-stand','far-right'),
+  object('staff-storage-1','staff-workroom','storage-rack','far-right'),
+  object('staff-storage-2','staff-workroom','storage-rack','near-right'),
+  object('staff-worktop','staff-workroom','work-surface','far-left')
+ ];
+ const featured=applyR125FeatureIntent({base,intent:{
+  schema:'minecraftaibuilder-r130-feature-intent-v2',
+  basePlanSha256:base.planSha256,objects}});
+ const required=spec(base,[
+  need('three-retail-displays','retail-area','display-stand',3,75,10),
+  need('two-staff-racks','staff-workroom','storage-rack',2,50,10),
+  need('staff-worktop','staff-workroom','work-surface',1,15,10)
+ ]);
+ const independent=auditR129FunctionalAcceptance({base,featured,spec:required});
+ assert.equal(featured.compiled.primitives.length,1580);
+ assert.equal(featured.addedVoxelCount,154);
+ assert.equal(featured.placements.length,6);
+ assert.equal(featured.immutableBaseGeometryProven,true);
+ assert.equal(featured.sourceRouteAudit.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(featured.everyFeatureSourceAccessible,true);
+ assert.equal(independent.status,
+  'SOURCE_ONLY_REQUIREMENTS_MET_REAL_FUNCTION_UNVERIFIED');
+ assert.deepEqual(independent.needChecks.map(x=>x.status),
+  Array(3).fill('SOURCE_EVIDENCE_PRESENT'));
+ assert.equal(independent.minecraftFunctionCertified,false);
+ assert.equal(independent.aestheticCertified,false);
+ assert.equal(independent.worldWrites,0);
+ assert.deepEqual(independent.BuildPlan.operations,[]);
+ assert.equal(featured.worldWrites,0);
+ assert.deepEqual(featured.gates,Array(9).fill('BLOCKED'));
+ assert.deepEqual(featured.compiled.BuildPlan.operations,[]);
+ assert.equal(JSON.stringify(authored),rawSnapshot);
+});
