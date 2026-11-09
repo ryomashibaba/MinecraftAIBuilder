@@ -61,14 +61,18 @@ export function validateArchitecturePlan(p){
    ((e.setbackSide==='none'&&e.setbackDepth===0)||
     (e.setbackSide!=='none'&&p.levels.length===2&&[2,3,4].includes(e.setbackDepth))),
    'EXPRESSION_SETBACK');
-  check(['flat','ridge','sawtooth'].includes(e.roofProfile)&&
+  check(['flat','ridge','sawtooth','split-monitor'].includes(e.roofProfile)&&
    ['x','z'].includes(e.roofAxis)&&
    ['plain','fins','screen','recessed-portico'].includes(e.facadeLanguage),
    'EXPRESSION_STYLE');
   // Explicit opt-in preserves the original B143 roof source for old plans.
   check(e.roofVolume===undefined||
-   (e.roofVolume==='raised'&&['ridge','sawtooth'].includes(e.roofProfile)),
+   (e.roofVolume==='raised'&&['ridge','sawtooth','split-monitor'].includes(e.roofProfile)),
    'EXPRESSION_ROOF_VOLUME');
+  check(e.roofProfile!=='split-monitor'||
+   (e.roofVolume==='raised'&&e.roofAxis==='x'&&
+    e.setbackSide==='none'&&p.levels.at(-1).splitAxis==='x'),
+   'EXPRESSION_MONITOR_PROGRAM_CONFLICT');
   if(Object.hasOwn(e,'rearCornerCut')){
    check((keys(e.rearCornerCut,['width','depth'])||
     keys(e.rearCornerCut,['width','depth','side']))&&
@@ -82,7 +86,7 @@ export function validateArchitecturePlan(p){
    // full roof skin is explicitly clipped and the re-entrant eaves sealed.
    // Never infer a new roof form from a plain authored facade.
    check(e.setbackSide==='none'&&
-    (e.roofProfile==='flat'||(e.roofProfile==='ridge'&&e.roofVolume==='raised')),
+    (e.roofProfile==='flat'||(['ridge','split-monitor'].includes(e.roofProfile)&&e.roofVolume==='raised')),
     'EXPRESSION_CORNER_CONFLICT');
   }
  }
@@ -456,7 +460,36 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
  const raisedRoof=original.expression.roofVolume==='raised';
  if(!raisedRoof)box('roof-base','add',roof,[upper.x0,top,upper.z0],
   [upper.x1-upper.x0+1,1,upper.z1-upper.z0+1]);
- if(roofProfile!=='flat'){
+ if(roofProfile==='split-monitor'){
+  // Host implementation of an explicit author-selected building mass.
+  // The last-level authored split controls both genuine roof elevations.
+  const highX=program[count-1].splitCoordinate+1;
+  check(highX>=upper.x0+5&&highX<=upper.x1-6,
+   'EXPRESSION_MONITOR_VOLUME_BOUNDS');
+  const spanZ=upper.z1-upper.z0+1;
+  box('roof-monitor-low','add',roof,
+   [upper.x0,top,upper.z0],[highX-upper.x0,1,spanZ]);
+  box('roof-monitor-high','add',roof,
+   [highX,top+4,upper.z0],[upper.x1-highX+1,1,spanZ]);
+  // Enclose all raised faces, including the shared high-low monitor wall.
+  for(const [name,origin,size] of [
+   ['step',[highX,top,upper.z0],[1,4,spanZ]],
+   ['east',[upper.x1,top,upper.z0],[1,4,spanZ]],
+   ['north',[highX,top,upper.z0],[upper.x1-highX+1,4,1]],
+   ['south',[highX,top,upper.z1],[upper.x1-highX+1,4,1]]
+  ])box('roof-monitor-riser-'+name,'add',wall,origin,size);
+  // Real upper-face daylight, with outward air above the lower roof.
+  box('roof-monitor-westerly-light-cut','cut',null,
+   [highX,top+1,upper.z0+4],[1,2,10]);
+  box('roof-monitor-westerly-light','add','glass',
+   [highX,top+1,upper.z0+4],[1,2,10]);
+  const frontSpan=Math.min(4,upper.x1-highX-2);
+  check(frontSpan>=2,'EXPRESSION_MONITOR_FRONT_SPAN');
+  box('roof-monitor-front-light-cut','cut',null,
+   [highX+2,top+1,upper.z0],[frontSpan,2,1]);
+  box('roof-monitor-front-light','add','glass',
+   [highX+2,top+1,upper.z0],[frontSpan,2,1]);
+ }else if(roofProfile!=='flat'){
   const span=roofAxis==='x'?upper.x1-upper.x0+1:upper.z1-upper.z0+1;
   for(let pos=0;pos<span;pos++){
    const height=roofProfile==='ridge'?
@@ -559,7 +592,9 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
    const roofExtra=(x,z)=>{
     const k=roofAxis==='x'?x-upper.x0:z-upper.z0;
     const span=roofAxis==='x'?upper.x1-upper.x0+1:upper.z1-upper.z0+1;
-    return Math.min(3,Math.floor(Math.min(k,span-1-k)/2));
+    return roofProfile==='split-monitor'?
+     (x>=program[count-1].splitCoordinate+1?4:0):
+     Math.min(3,Math.floor(Math.min(k,span-1-k)/2));
    };
    const edgeX=westCut?xCut+rearCornerCut.width:xCut-1;
    for(let z=zCut;z<zCut+rearCornerCut.depth;z++){

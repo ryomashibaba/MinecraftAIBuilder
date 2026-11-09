@@ -667,3 +667,52 @@ test('explicit researcher portico is a real three-deep B143 volume, preserves or
  assert.throws(()=>compileArchitecturePlan(bad,{entrancePlacement:'source-accessible'}),
   /EXPRESSION_PORTICO_PROGRAM_CONFLICT/);
 });
+
+test('source-only split-monitor gives distinct physical roof volumes and open daylight to real interior',()=>{
+ const original=JSON.parse(fs.readFileSync(new URL(
+  '../evidence/r125-real-l-corner-20261101/MODEL_RESPONSE_ORIGINAL.txt',
+  import.meta.url),'utf8'));
+ const snapshot=structuredClone(original);
+ for(const side of ['east','west']){
+  const p=structuredClone(original);
+  p.id='r125-split-monitor-'+side;
+  p.title='Research authored split monitor '+side;
+  p.expression={...p.expression,roofProfile:'split-monitor',
+   roofAxis:'x',roofVolume:'raised',facadeLanguage:'recessed-portico',
+   rearCornerCut:{...p.expression.rearCornerCut,side}};
+  const c=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+  const vox=voxels(c.compiled),materials=new Map(c.compiled.primitives.map(v=>
+   [v.slice(0,3).join(','),v[3]]));
+  const xMonitor=c.program[0].splitCoordinate+1;
+  assert.equal(verifyCompiled(c.design,c.compiled),true);
+  assert.equal(includes(vox,6,6,10),true,'lower real roof');
+  assert.equal(includes(vox,16,10,10),true,'upper real roof');
+  assert.equal(includes(vox,16,6,10),false,'no false flat room ceiling');
+  for(let z=5;z<15;z++)for(let y=7;y<9;y++){
+   assert.equal(materials.get([xMonitor,y,z].join(',')),3,'actual glass');
+   assert.equal(includes(vox,xMonitor-1,y,z),false,'exterior side air');
+   assert.equal(includes(vox,xMonitor+1,y,z),false,'interior side air');
+  }
+  for(let x=15;x<19;x++)for(let y=7;y<9;y++)
+   assert.equal(materials.get([x,y,1].join(',')),3,'front elevated glazing');
+  const cutX=side==='west'?1:19;
+  for(let x=cutX;x<cutX+4;x++)for(let z=19;z<23;z++)
+   for(let y=1;y<12;y++)
+    assert.equal(includes(vox,x,y,z),false,'real L courtyard remains outdoors');
+  assert.equal(auditArchitecturePlanCirculation(c).status,
+   'SOURCE_CLEARANCE_PROBES_PASS');
+  assert.equal(auditR125SourceRoutes(c).status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert.equal(c.worldWrites,0);
+  assert.deepEqual(c.compiled.BuildPlan.operations,[]);
+  assert.deepEqual(c.gates,Array(9).fill('BLOCKED'));
+ }
+ const invalid=structuredClone(original);
+ invalid.expression.roofProfile='split-monitor';
+ assert.throws(()=>compileArchitecturePlan(invalid),
+  /EXPRESSION_MONITOR_PROGRAM_CONFLICT/);
+ invalid.expression.roofVolume='raised';
+ invalid.expression.roofAxis='z';
+ assert.throws(()=>compileArchitecturePlan(invalid),
+  /EXPRESSION_MONITOR_PROGRAM_CONFLICT/);
+ assert.deepEqual(original,snapshot);
+});
