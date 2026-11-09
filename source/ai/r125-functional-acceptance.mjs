@@ -5,6 +5,7 @@
  * evidence that a Minecraft building works. Every test remains source-only.
  */
 import {verifyCompiled,compileDesign} from './b143-building-dsl.mjs';
+import {createHash} from 'node:crypto';
 import {auditR125SourceRoutes} from './r125-source-routes.mjs';
 export const SCHEMA='minecraftaibuilder-r129-functional-acceptance-v1';
 const fail=s=>{throw Error('R129_ACCEPTANCE_'+s);};
@@ -14,6 +15,10 @@ const slug=s=>typeof s==='string'&&/^[a-z][a-z0-9-]{2,39}$/.test(s);
 const int=(n,min,max)=>Number.isSafeInteger(n)&&n>=min&&n<=max;
 const same=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
 const coord=(x,y,z)=>x+','+y+','+z;
+// Match the unchanged R125 feature compiler's exact JSON-stringified
+// semantic-ID SHA shortening. Reject mismatched B143 element ownership.
+const sourceFeatureRoot=id=>'feature-'+(id.length>19?
+ createHash('sha256').update(JSON.stringify(id)).digest('hex').slice(0,16):id);
 
 export function auditR129FunctionalAcceptance({base,featured,spec}={}){
  if(base?.schema!=='minecraftaibuilder-r125-plan-to-b143-result-v1'||
@@ -81,7 +86,8 @@ export function auditR129FunctionalAcceptance({base,featured,spec}={}){
   if(parts.length!==partIds.length||
    parts.some((e,i)=>e.id!==partIds[i]||e.shape!=='box'||
     e.mode!=='add'||!e.material||
-    !e.id.startsWith('feature-'+p.id)))
+    !(e.id===sourceFeatureRoot(p.id)||
+      e.id.startsWith(sourceFeatureRoot(p.id)+'-'))))
    fail('FEATURE_PART_LIST_INVALID');
   if(!p.elementIds&&(!same(parts[0].origin,p.origin)||
    !same(parts[0].size,p.size)||parts[0].material!==p.material))

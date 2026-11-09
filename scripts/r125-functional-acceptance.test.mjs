@@ -70,6 +70,43 @@ test('independent equipment checks apply to research without a genre router',()=
  assert.equal(r.needChecks.length,4);
  assert.equal(r.worldWrites,0);
 });
+test('long synthetic equipment IDs are independently audited on unaltered real Qwen research source',()=>{
+ const raw=load('research'),snapshot=JSON.stringify(raw);
+ const base=compileArchitecturePlan(raw,{entrancePlacement:'source-accessible'});
+ const objects=[
+  {id:'observation-console-north',zoneId:'observation-lab',role:'equipment-bank',corner:'far-left',detail:'assembled'},
+  {id:'equipment-storage-rack',zoneId:'equipment-storage',role:'storage-rack',corner:'far-right',detail:'assembled'},
+  {id:'collaboration-worktop',zoneId:'collaboration-hub',role:'work-surface',corner:'near-right',detail:'assembled'},
+  {id:'records-console-upper',zoneId:'data-recording',role:'equipment-bank',corner:'far-right',detail:'assembled'}
+ ];
+ const f=applyR125FeatureIntent({base,intent:{
+  schema:'minecraftaibuilder-r130-feature-intent-v2',
+  basePlanSha256:base.planSha256,objects
+ }});
+ const requirements=spec(base,objects.map((o,i)=>need('need-long-'+i,
+  o.zoneId,o.role,1,1,1)));
+ const q=auditR129FunctionalAcceptance({base,featured:f,spec:requirements});
+ assert.equal(base.compiled.primitives.length,2936);
+ assert.equal(JSON.stringify(raw),snapshot);
+ assert.equal(f.immutableBaseGeometryProven,true);
+ assert.equal(f.placements.length,4);
+ assert(f.placements.every(p=>p.id.length>19&&p.elementIds.length>1));
+ assert.equal(q.status,'SOURCE_ONLY_REQUIREMENTS_MET_REAL_FUNCTION_UNVERIFIED');
+ assert.equal(q.addedVoxelsVerified,f.addedVoxelCount);
+ assert(q.needChecks.every(c=>c.status==='SOURCE_EVIDENCE_PRESENT'));
+ assert(f.everyFeatureSourceAccessible);
+ assert.equal(f.sourceRouteAudit.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(q.minecraftFunctionCertified,false);
+ assert.equal(q.worldWrites,0);
+ assert.deepEqual(q.BuildPlan.operations,[]);
+ const forged=structuredClone(f);
+ forged.placements[0].id='observation-console-south';
+ forged.featurePlan.objects[0].id='observation-console-south';
+ assert.throws(()=>auditR129FunctionalAcceptance({base,featured:forged,spec:requirements}),
+  /R129_ACCEPTANCE_FEATURE_PART_LIST_INVALID/);
+ // Feature choices are synthetic for this test; Qwen did not author them.
+});
+
 test('single tiny device fails volume and usable walking-space requirements',()=>{
  const {base,featured}=build('shop',shopObjects.slice(0,1));
  const r=auditR129FunctionalAcceptance({base,featured,spec:spec(base,[
