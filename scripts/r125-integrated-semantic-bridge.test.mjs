@@ -191,6 +191,45 @@ test('authored service vs worktop survives mechanical expansion into distinct ge
  // No claim of independent PRIVATE function/ART or Minecraft walking.
 });
 
+test('compact dual feature intent maps to two independently accessible 2x2 pads',()=>{
+ const h=createIntegratedSpatialHost({deriveIntegratedShell:()=>{throw Error('PRIVATE_ONLY');}});
+ const a=supportedSpatialAuthor();
+ a.spaces[1].footprint={width:8,depth:8};
+ a.features=[
+  {space:'reading',kind:'worktop',purpose:'Hands-on working surface'},
+  {space:'reading',kind:'service',purpose:'Visitor service aperture'}
+ ];
+ const expanded=h.expand(prepareIntegratedSemanticBridge(a).payload);
+ const fixtures=expanded.intent.fixtures;
+ assert.equal(fixtures.length,2);
+ assert.notDeepEqual(fixtures[0].parts,fixtures[1].parts);
+ const [rx,rz,rw,rd]=expanded.intent.spaces.find(s=>s.id==='reading').rect;
+ const solid=new Set();
+ for(const f of fixtures){
+  const local=new Set();
+  for(const p of f.parts)for(let x=p.origin[0];x<p.origin[0]+p.size[0];x++)
+   for(let z=p.origin[2];z<p.origin[2]+p.size[2];z++)local.add(x+','+z);
+  assert([...local].every(k=>!solid.has(k)),'no inter-fixture collision');
+  for(const k of local)solid.add(k);
+ }
+ const free=([x,z])=>x>=rx+1&&x+1<=rx+rw-2&&
+  z>=rz+1&&z+1<=rz+rd-2&&
+  ![[x,z],[x+1,z],[x,z+1],[x+1,z+1]].some(([i,j])=>solid.has(i+','+j));
+ assert(fixtures.every(f=>free(f.servicePad)));
+ const join=expanded.intent.joins.find(j=>j.spaces.includes('reading'));
+ const seed=[Math.min(rx+rw-3,Math.max(rx+1,join.clearPad[0])),
+  Math.min(rz+rd-3,Math.max(rz+1,join.clearPad[1]))];
+ assert(free(seed));
+ const q=[seed],seen=new Set([seed.join(',')]);
+ for(let i=0;i<q.length;i++)for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]]){
+  const [x,z]=q[i],p=[x+dx,z+dz],key=p.join(',');
+  if(!seen.has(key)&&free(p)){seen.add(key);q.push(p);}
+ }
+ assert(fixtures.every(f=>seen.has(f.servicePad.join(','))));
+ assert.equal(verifyCompiled(expanded.base.design,expanded.base.compiled),true);
+ // Independent PRIVATE full-building geometry and Minecraft remain HOLD.
+});
+
 test('parent choice moves the physical space; unsupported engine capabilities HOLD without replacement',async()=>{
  const host=createIntegratedSpatialHost({deriveIntegratedShell:()=>{throw Error('NO_PRIVATE_ENGINE');}});
  const a=supportedSpatialAuthor();
@@ -327,10 +366,11 @@ test('invalid and physically impossible authored dimensions reject rather than s
  assert.throws(()=>attempt(a=>{
   a.spaces[0].footprint={width:8,depth:8};a.shelters[0].scale='large';
  }),/SHELTER_WIDER_THAN_ROOM/);
- assert.throws(()=>attempt(a=>{
+ const compact=attempt(a=>{
   a.spaces[1].footprint={width:8,depth:8};
   a.features.push({space:'reading',kind:'seat',purpose:'Second seating area'});
- }),/FIXTURE_OUTSIDE_ROOM/);
+ });
+ assert.equal(compact.intent.fixtures.length,2);
 });
 
 test('room-sibling lookahead preserves authorship while avoiding greedy contact dead-end',()=>{

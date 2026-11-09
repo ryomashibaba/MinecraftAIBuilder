@@ -35,6 +35,67 @@ const shelterJoinPad=(o,side)=>{
   side==='east'?[outside[0]-1,outside[1]]:outside;
 };
 const midpoint=rect=>[rect[0]+Math.floor((rect[2]-2)/2),rect[1]+Math.floor((rect[3]-2)/2)];
+
+/** Bounded HOST-only compact-room placement. Never certifies PRIVATE function or ART.
+ * All real 2x2 equipment pads and every declared join must remain connected.
+ * If this cannot be proven at the mechanical preflight level, fail closed.
+ */
+function rehomeCompactFixturePair(first,second,rect,joins){
+ const [rx,rz,rw,rd]=rect,xMin=rx+1,xMax=rx+rw-3,zMin=rz+1,zMax=rz+rd-3;
+ if(!joins.length)return null;
+ const key=(x,z)=>x+','+z;
+ const within=s=>s.pad[0]>=xMin&&s.pad[0]<=xMax&&
+  s.pad[1]>=zMin&&s.pad[1]<=zMax&&s.parts.every(p=>
+   p.origin[0]>=rx+1&&p.origin[2]>=rz+1&&
+   p.origin[0]+p.size[0]<=rx+rw-1&&p.origin[2]+p.size[2]<=rz+rd-1);
+ const placements=(s,index)=>{
+  const [px,,pz]=s.parts[0].origin,tx=index?rx+rw-4:rx+1,tz=rz+rd-3;
+  const out=[];
+  for(let z=rz+1;z<rz+rd-1;z++)for(let x=rx+1;x<rx+rw-1;x++){
+   const dx=x-px,dz=z-pz;
+   const candidate={parts:s.parts.map(p=>({
+    ...p,origin:[p.origin[0]+dx,p.origin[1],p.origin[2]+dz]
+   })),pad:[s.pad[0]+dx,s.pad[1]+dz]};
+   if(within(candidate))out.push({candidate,x,z,score:Math.abs(x-tx)+Math.abs(z-tz)});
+  }
+  out.sort((a,b)=>a.score-b.score||a.z-b.z||a.x-b.x);
+  return out.map(x=>x.candidate);
+ };
+ const seeds=joins.map(j=>{
+  const [x,z]=j.clearPad;
+  return [Math.max(xMin,Math.min(xMax,x)),Math.max(zMin,Math.min(zMax,z))];
+ });
+ const isConnected=pair=>{
+  const occupied=new Set();
+  for(const s of pair){
+   const local=new Set();
+   for(const p of s.parts)
+    for(let x=p.origin[0];x<p.origin[0]+p.size[0];x++)
+     for(let z=p.origin[2];z<p.origin[2]+p.size[2];z++)local.add(key(x,z));
+   // Parts of ONE fixture may overlap in projection at different heights.
+   // Two different fixtures must never share any occupied column.
+   if([...local].some(p=>occupied.has(p)))return false;
+   for(const p of local)occupied.add(p);
+  }
+  const free=(x,z)=>x>=xMin&&x<=xMax&&z>=zMin&&z<=zMax&&
+   ![key(x,z),key(x+1,z),key(x,z+1),key(x+1,z+1)].some(k=>occupied.has(k));
+  const targets=[...seeds,...pair.map(p=>p.pad)];
+  if(targets.some(([x,z])=>!free(x,z)))return false;
+  const start=seeds[0],queue=[start],visited=new Set([key(...start)]);
+  for(let i=0;i<queue.length;i++){
+   const [x,z]=queue[i];
+   for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]]){
+    const nx=x+dx,nz=z+dz,k=key(nx,nz);
+    if(!visited.has(k)&&free(nx,nz)){visited.add(k);queue.push([nx,nz]);}
+   }
+  }
+  return targets.every(p=>visited.has(key(...p)));
+ };
+ for(const a of placements(first,0))for(const b of placements(second,1))
+  if(isConnected([a,b]))return [a,b];
+ return null;
+}
+
 export function createIntegratedSpatialHost({deriveIntegratedShell,compileDesign=compileB143}={}){
  yes(typeof deriveIntegratedShell==='function','EXISTING_ENGINE_REQUIRED');
  return {expand(payload){
@@ -209,15 +270,25 @@ export function createIntegratedSpatialHost({deriveIntegratedShell,compileDesign
       {origin:[x+1,4,z],size:[1,1,1],material:'metal'}
      ],pad:[x,z-2]},
      equipment:{parts:[part([x,2,z],[2,2,2])],pad:[x,z-2]}};
-    const spec=specs[op.kind];yes(spec,'UNSUPPORTED_FIXTURE');
+    let spec=specs[op.kind];yes(spec,'UNSUPPORTED_FIXTURE');
     const [rx,rz,rw,rd]=s.rect;
-    yes(spec.parts.every(part=>part.origin[0]>=rx+1&&
+    const fits=p=>p.parts.every(part=>part.origin[0]>=rx+1&&
      part.origin[2]>=rz+1&&
      part.origin[0]+part.size[0]<=rx+rw-1&&
      part.origin[2]+part.size[2]<=rz+rd-1)&&
-     spec.pad[0]>=rx+1&&spec.pad[0]<rx+rw-1&&
-     spec.pad[1]>=rz+1&&spec.pad[1]<rz+rd-1,
-     'FIXTURE_OUTSIDE_ROOM');
+     p.pad[0]>=rx+1&&p.pad[0]<rx+rw-1&&
+     p.pad[1]>=rz+1&&p.pad[1]<rz+rd-1;
+    if(!fits(spec)){
+     const prior=intent.fixtures.find(f=>f.space===op.space);
+     yes(index===1&&prior,'FIXTURE_OUTSIDE_ROOM');
+     const layout=rehomeCompactFixturePair(
+      {parts:prior.parts,pad:prior.servicePad},spec,s.rect,
+      intent.joins.filter(j=>j.spaces.includes(op.space)));
+     yes(layout,'FIXTURE_OUTSIDE_ROOM');
+     prior.parts=layout[0].parts;prior.servicePad=layout[0].pad;
+     spec=layout[1];
+    }
+    yes(fits(spec),'FIXTURE_OUTSIDE_ROOM');
     intent.fixtures.push({id:'fixture-'+opIndex,space:op.space,role:op.purpose,parts:spec.parts,servicePad:spec.pad});
    }else fail('UNKNOWN_OPERATION');
    journal.push({opIndex,type:op.type});
