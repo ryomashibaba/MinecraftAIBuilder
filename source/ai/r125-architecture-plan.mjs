@@ -467,6 +467,8 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
   check(highX>=upper.x0+5&&highX<=upper.x1-6,
    'EXPRESSION_MONITOR_VOLUME_BOUNDS');
   const spanZ=upper.z1-upper.z0+1;
+  // The 10-cell clerestory must leave sound end piers. No silent clipping.
+  check(spanZ>=16,'EXPRESSION_MONITOR_CLERESTORY_SPAN');
   box('roof-monitor-low','add',roof,
    [upper.x0,top,upper.z0],[highX-upper.x0,1,spanZ]);
   box('roof-monitor-high','add',roof,
@@ -489,6 +491,12 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
    [highX+2,top+1,upper.z0],[frontSpan,2,1]);
   box('roof-monitor-front-light','add','glass',
    [highX+2,top+1,upper.z0],[frontSpan,2,1]);
+  // Align a real ground-level glazed opening with the existing monitor high light.
+  // Retain solid sill and lintel; historical and non-opt-in forms stay frozen.
+  box('roof-monitor-ground-light-cut','cut',null,
+   [highX+2,3,upper.z0],[frontSpan,2,1]);
+  box('roof-monitor-ground-light','add','glass',
+   [highX+2,3,upper.z0],[frontSpan,2,1]);
  }else if(roofProfile!=='flat'){
   const span=roofAxis==='x'?upper.x1-upper.x0+1:upper.z1-upper.z0+1;
   for(let pos=0;pos<span;pos++){

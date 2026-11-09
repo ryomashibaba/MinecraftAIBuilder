@@ -716,3 +716,40 @@ test('source-only split-monitor gives distinct physical roof volumes and open da
   /EXPRESSION_MONITOR_PROGRAM_CONFLICT/);
  assert.deepEqual(original,snapshot);
 });
+
+test('physical two-elevation monitor glazing is source-aligned, air-backed and short-span fail closed',()=>{
+ const original=JSON.parse(fs.readFileSync(new URL(
+  '../evidence/r125-real-l-corner-20261101/MODEL_RESPONSE_ORIGINAL.txt',
+  import.meta.url),'utf8'));
+ const snapshot=structuredClone(original);
+ for(const side of ['east','west']){
+  const p=structuredClone(original);
+  p.id='r125-monitor-visibility-'+side;
+  p.title='Research aligned physical facade '+side;
+  p.expression={...p.expression,roofProfile:'split-monitor',
+   roofAxis:'x',roofVolume:'raised',facadeLanguage:'recessed-portico',
+   rearCornerCut:{...p.expression.rearCornerCut,side}};
+  const r=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+  const material=new Map(r.compiled.primitives.map(v=>
+   [v.slice(0,3).join(','),v[3]]));
+  assert.equal(verifyCompiled(r.design,r.compiled),true);
+  assert(r.design.elements.some(e=>e.id==='roof-monitor-ground-light'));
+  for(let x=15;x<=18;x++)for(let y of [3,4,7,8]){
+   assert.equal(material.get([x,y,1].join(',')),3,'real two-elevation glass');
+   assert.equal(material.has([x,y,0].join(',')),false,'external air');
+   assert.equal(material.has([x,y,2].join(',')),false,'interior air');
+  }
+  assert.equal(auditR125SourceRoutes(r).status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert.equal(r.worldWrites,0);
+  assert.deepEqual(r.compiled.BuildPlan.operations,[]);
+  assert.deepEqual(r.gates,Array(9).fill('BLOCKED'));
+ }
+ const compact=structuredClone(original);
+ compact.footprint.depth=16;
+ delete compact.expression.rearCornerCut;
+ compact.expression={...compact.expression,roofProfile:'split-monitor',
+  roofAxis:'x',roofVolume:'raised',facadeLanguage:'recessed-portico'};
+ assert.throws(()=>compileArchitecturePlan(compact,
+  {entrancePlacement:'source-accessible'}),/EXPRESSION_MONITOR_CLERESTORY_SPAN/);
+ assert.deepEqual(original,snapshot);
+});
