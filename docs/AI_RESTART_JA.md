@@ -1,5 +1,25 @@
 # MinecraftAIBuilder — 開発再開の最新正本案内（2026-11-03）
 
+## 2026-11-10 現行優先順位・停止条件（この項を最初に読む）
+
+**目的・方針は不変更**：未知の日本語要求→本物のQwen/Gemmaが独自に短い建築意味IRを著作→共通HOST→真正凍結B143→独立の空間機能と実3D美術審査→安全なMinecraft Education試験施工・実歩行。R125が短期主経路、V6既定、V7はPRIVATE隔離下の非既定研究。MinecraftAIBuilderとBrowser Ink TPSは同格の重要プロジェクトで、他方をこの作業から変更しない。小型Mac（8GB／2B級）目標も維持する。
+
+**2026-11-10現在の確認済み技術証拠と限界**：
+- 旧R125のQwen由来研究施設では、Minecraft Educationの**2,089セル照合と2室実歩行についてユーザー実機報告**がある。2026-11-02の記録 `docs/R125_LIVE_QWEN_EDUCATION_REAL_PLACEMENT_20261102_JA.md` を優先し、新規4室の施工成功へ転用しない。古い933ブロック花屋成功も別件。
+- 保存済み・ユーザー申告Qwen3:14bの4室／設備8件は原文SHA-256 `d67dc624744b4745e8e8c228e20bde00ccd39c7b506d0ad82753f54f1db82591` を維持して真正B143と独立SOURCE動線PASS。R175上部テラス境界の実穴は6セルで塞ぎ、4/4室の**y>=6の限定SOURCE上部空気閉鎖**を検査。Minecraftの防水・実際の動作保証ではない。
+- R178は同一モデル1回答の高さ順序をR134ランナー→真正B143へ流す**模擬応答経路**まで接続。CI `42812930929` は27/27 PASS。**新実モデルPOSTは0**、合成入力やHOST高さ変更をQwen自身の著作と偽らない。実3Dの箱状表現は引き続き**ART REJECT／正式採用0**。
+- V7 PRIVATE一体エンジン研究の住宅・駅舎は意味IR→B143を実形状へ展開できるが、機械的な固定室寸法・浅い箱屋根が残りART REJECT。合成AUTHORのSOURCE PASSは未知用途の実モデル成功でもMinecraft完成でもない。
+
+**最優先の実行ゲート**：
+1. **Gate C P1はHOLD**。本人WindowsのPRIVATE合法アクセス、同一厳密HEADの必須2CI（`R125 V4D Local Author Bridge — INJECTED TEST ONLY`＋`Education-first offline QA`）、RAM/commit/VRAM・他モデル非競合・独立監視PID/heartbeat・停止/アンロード・個別承認が揃うまで**モデルロード、GET/POST、再試行を行わない**。研究ブランチの通常pushではQAがSKIPPEDになり、V4Dの対象パス以外の変更ではCI自体が起動しない。**当該HEADでは必須2件SUCCESSを確認できない**。モデル実行のためにGateや閾値、正式CIを緩めない。現在のR134通常ランナーは全モードでGate C HOLD時の実接続を防ぐが、全ランナー保護の証明ではない。
+2. **PRIVATEアクセス不能なら一度でHOLDしてPUBLICの価値ある一般欠陥に移る**。実モデル原文・私人ファイルを要求・公開・上書きしない。PUBLIC改善は独立した異用途の実Qwen原文と本物の3Dで原因を証明した**共通欠陥1件**だけ。過去に指摘済みの箱型屋根・窓自由度・室寸法問題へ装飾を足すだけ、合成テスト増殖・同用途2連続局所修正・無意味な引き継ぎ文書作成を中止する。
+3. 条件がすべて成立した**将来の承認済みWindows実行時だけ**、既存のV7 opt-in恒久入口で未知用途**最大1 POST／再試行0**、PRIVATE元回答SHA保全→作者IRを無断補正せず→真正B143→独立機能→同一3D固定視点の美術審査。ART REJECTならSOURCE成功を公開・正式採用へ格上げしない。通過後、住宅／店舗／研究施設を共通エンジンで比較し、さらに美術館／駅舎へ横断拡張。
+4. **Minecraft施工は別ゲート**。`readiness=NOT_PREPARED`、9×`BLOCKED`、`BuildPlan.operations=[]`、`worldWrites=0`。世界ID・対象範囲・バックアップ/復元・readback・素材・停止予算・歩行の条件が満たされるまで変更しない。main、B143/Qwen原本、正式QA、Draft PR #128、PRIVATE、Pagesは保護。Work/Computer Use・追加課金も個別承認制。
+
+**作業効率ルール**：着手時は最新HEAD・差分・対象CI・上記ゲートを一度だけ確認。既存プログラムを再利用し、1原因→1最小変更→対象テスト原則1回。重い全QAは必要な最終HEADでのみ実行。モデルが安全に試せない場合、別の形式テストを合格実績として積まず、阻害要因を明記して停止する。本文以下の過去記録は保持するが、現在の事実より優先しない。
+
+---
+
 **2026-11-05 V7 PRIVATE実接続・実モデル未完成**：既存形状の完全再生に続き、共通空間ホストから短い意味IR→既存PRIVATE一体エンジン→真正B143を実生成。住宅5室＋半屋外1領域1,695セル、駅舎3室＋半屋外2領域1,390セル。合成の親接続・door/open変更が部屋位置・間仕切りへ反映。4案とも独立全セル再構成と頭上3セルの全領域・設備到達が成立。新旧108画像はPRIVATE。ART REJECT、新実モデル0、実Minecraft0、9 BLOCKED。新IRは保存済みアシスタント意味のHOST派生で、ローカルLLM著作ではない。対応断面等の範囲制限あり。次は現HEAD必須CI双方SUCCESS・資源安全確認後、既存恒久入口のV7オプトイン接続と短い実モデルIR試行。[実装・実測・制約](R125_V7_PRIVATE_ENGINE_CONNECTION_JA.md)。
 
 **2026-11-04 V4住宅の新実測結果と一度導入・恒久再利用するローカル自動起動器（新CI未確認）**：V4 `V4J_V4_ONE_SHAREABLE.json` のモデル1要求、追加要求0、実Qwen主張・TEST DOUBLE=false、SOURCE HOLD、拒否 `GRAPH_ENTRY`。V2/V3の `MASSING_PRIMARY_VOLUME_TOO_SMALL` はV4住宅では観測されず、改善確証やART PASSには扱わない。ユーザー操作削減のため `scripts/r125-v4j-permanent-launcher.cmd` を導入。ワンタイムで同じ起動器を使用し、毎回研究ブランチを専有一時フォルダへ取得、**当該HEADの R125 V4D Local Author Bridge と Education-first offline QAの双方がSUCCESSになるまでモデル要求0のCIゲート**、ユーザーがローカル1試行開始を明示確認した場合だけ元モデル回答を1件PRIVATE保存。最新の実行スクリプトは今の段階ではV4住宅、今後研究ブランチで更新する安定入口 `scripts/r125-v4j-current-pilot.mjs` を利用。共有可能なJSONだけをWindowsクリップボードへ入れ、チャットでCtrl+Vすればよい。コピー不可ならExplorerで該当ファイルを選択。元回答・プロンプト・ローカルstudyは自動アップロード/削除なし。一時Git cloneだけ掃除する。追加入金/API/本番世界/main/保護されたEducation実機成功経路は禁止。USERのPCにこの起動器を常駐設置したとは主張せず、ユーザーが一度保存して起動した場合のみ動く。9 BLOCKEDとPR#128 Draft保持。
