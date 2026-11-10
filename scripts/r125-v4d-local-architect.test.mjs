@@ -144,6 +144,29 @@ test('V4H direct real transport refuses POST even if fake flag is set without CI
  }
 });
 
+test('Gate C P1 blocks native GET/POST for every legacy author family before any new output',async()=>{
+ const oldCI=process.env.GITHUB_ACTIONS;
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'r125-v4d-native-hold-'));
+ try{
+  delete process.env.GITHUB_ACTIONS;
+  const families=[{}, {compact:true},{rankedSection:true},{authorArcade:true},
+   {parentIndexV6:true,authorArcade:true,precisionCivicContract:true,
+    structuredCivicContract:true}];
+  for(const [i,mode] of families.entries()){
+   const out=path.join(root,'author-'+i);
+   await assert.rejects(()=>runV4DLocalAuthor({
+    model:'qwen3:14b',outDir:out,
+    prompt:'A new distinct civic spatial design with functional rooms.',
+    ...mode
+   }),/R125_V4D_LOCAL_AUTHOR_GATE_C_P1_NATIVE_MODEL_REQUIRES_V7_MONITORED_PATH/);
+   assert.equal(fs.existsSync(out),false,'no request dir and zero GET/POST');
+  }
+ }finally{
+  if(oldCI===undefined)delete process.env.GITHUB_ACTIONS;
+  else process.env.GITHUB_ACTIONS=oldCI;
+  fs.rmSync(root,{recursive:true,force:true});
+ }
+});
 test('missing local model preflight FAILS before any model generation request',async()=>{
  const tmp=sandbox(),f=fakeOllama({installed:false});
  try{

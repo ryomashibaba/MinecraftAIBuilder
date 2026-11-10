@@ -131,7 +131,7 @@ function validateLaunch({model,outDir,prompt,endpoint,parentIndexV6=false},fetch
 }
 // The CI fake server writes a distinct marker after binding 127.0.0.1.
 // Flags alone MUST NOT permit a production network POST.
-function v4hCiFakeLoopbackReady(){
+function v4dCiFakeLoopbackReady(){
  try{
   return process.env.GITHUB_ACTIONS==='true' &&
    process.env.CI==='true' &&
@@ -162,14 +162,16 @@ export async function runV4DLocalAuthor({
   fail('V4_ENVELOPE_REQUIRES_STRUCTURED_CIVIC_AUTHOR');
  if([shortSemantic,compact,rankedWindows,rankedSection,authoredMassing,authorWing,authorFloorplate,authorAtrium,authorMezzanine,authorArcade].some(x=>typeof x!=='boolean')||
   [shortSemantic,compact,rankedWindows,rankedSection,authoredMassing,authorWing,authorFloorplate,authorAtrium,authorMezzanine,authorArcade].filter(Boolean).length>1)fail('AUTHOR_MODE');
- // V4H's existing one-shot caller has no V7-grade independent monitor,
- // fresh resource leases, exact-head two-CI proof or server unload evidence.
- // Neither a pinned clone nor a model list GET authorizes real inference.
- // Reject BEFORE mkdir/preflight/POST; do not affect other author modes.
- // Injected unit-test transports and the existing explicit CI FAKE are not
- // real-model evidence and may exercise this legacy offline source path.
- if(authorMezzanine&&fetcher===fetch&&!v4hCiFakeLoopbackReady())
-  fail('V4H_REAL_POST_REQUIRES_MONITORED_GATEC_PATH');
+ // The entire V4D/V4E/V4J historical one-shot runner lacks V7's independent
+ // monitor, resource lease, exact-HEAD CI checks, and unload attestation.
+ // Gate C P1 is HOLD. No native model-list GET or real inference POST from
+ // ANY author mode; only V7's separately attested PRIVATE path may do that.
+ // Keep injected tests and the pre-existing CI fake localhost contract,
+ // which must never be presented as genuine model authorship.
+ // Reject before mkdir, Ollama preflight, or any HTTP contact.
+ if(fetcher===fetch&&!v4dCiFakeLoopbackReady())
+  fail(authorMezzanine?'V4H_REAL_POST_REQUIRES_MONITORED_GATEC_PATH':
+   'GATE_C_P1_NATIVE_MODEL_REQUIRES_V7_MONITORED_PATH');
  const dir=validateLaunch({model,outDir,prompt,endpoint,parentIndexV6},fetcher,timeoutMs);
  const injected=fetcher!==fetch||process.env.MAB_V4D_TEST_DOUBLE_MODE==='1',start=Date.now();
  const modelSystemPrompt=parentIndexV6?V4J_PARENT_INDEX_SYSTEM_PROMPT:
