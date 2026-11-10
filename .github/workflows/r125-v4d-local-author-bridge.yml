@@ -13,6 +13,8 @@ on:
       - 'scripts/r125-integrated-semantic-bridge.test.mjs'
       - 'scripts/r125-v7-private-once.mjs'
       - 'scripts/r125-v7-private-once.test.mjs'
+      - 'scripts/r125-v7-v4h-public-token-input.mjs'
+      - 'scripts/r125-v7-v4h-public-token-budget.py'
       - 'scripts/r125-v7-ollama-readonly-diagnostic.mjs'
       - 'scripts/r125-v7-ollama-load-only-calibration.mjs'
       - 'source/ai/r125-v4e-ranked-exterior-ir.mjs'
@@ -129,6 +131,12 @@ jobs:
           node --test scripts/r125-v4d-author-source-diagnostics.test.mjs
           node --test scripts/r125-v4e-ranked-exterior.test.mjs
           node --test scripts/r125-v4h-mezzanine.test.mjs
+      - name: Audit Qwen3 PUBLIC tokenizer capacity (no model, no PRIVATE)
+        timeout-minutes: 5
+        run: |
+          timeout 120s python3 -m pip install --no-input --no-cache-dir --disable-pip-version-check --target "$RUNNER_TEMP/mab-token-budget-py" tokenizers==0.22.1
+          node scripts/r125-v7-v4h-public-token-input.mjs > "$RUNNER_TEMP/mab-v7-v4h-public-input.json"
+          timeout 100s env PYTHONPATH="$RUNNER_TEMP/mab-token-budget-py" python3 scripts/r125-v7-v4h-public-token-budget.py "$RUNNER_TEMP/mab-v7-v4h-public-input.json"
       - name: Export true B143 V4E synthetic views for independent human ART review
         run: |
           node scripts/r125-v4e-source-art-review.mjs --out "$RUNNER_TEMP/v4e-source-art"
