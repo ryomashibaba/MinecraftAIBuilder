@@ -22,6 +22,9 @@ const rawSha='d67dc624744b4745e8e8c228e20bde00ccd39c7b506d0ad82753f54f1db82591';
 const faces=['front','rear','west','east','roof'];
 const key=p=>p.slice(0,3).join(',');
 const low=p=>new Map(p.compiled.primitives.filter(v=>v[1]<=5).map(v=>[key(v),v[3]]));
+const interior=p=>new Map(p.compiled.primitives.filter(v=>v[1]<=5&&
+ v[0]>=2&&v[0]<=p.design.bounds.width-3&&
+ v[2]>=2&&v[2]<=p.design.bounds.depth-3).map(v=>[key(v),v[3]]));
 const equal=(a,b)=>a.size===b.size&&[...a].every(([k,v])=>b.get(k)===v);
 const safe=(p,legacy=false)=>(p.readiness==='NOT_PREPARED'||
  (legacy&&p.readiness===undefined))&&p.worldWrites===0&&
@@ -47,6 +50,9 @@ function run(dir){
  const shell=deriveR149EnvelopeExpression(original,{plan:q.derivedModelReply});
  assert.equal(shell.r149ExpressionEvidence.unchangedInteriorVoxels,true);
  assert.equal(shell.r149ExpressionEvidence.modelIntentChanged,false);
+ assert(equal(interior(original),interior(shell)),
+  'R149_ADDED_WINDOWS_MUST_PRESERVE_ALL_ORIGINAL_INTERIOR_CELLS');
+ const shellLower=low(shell);
  const study=deriveR170FourRoomVolumes(shell,{studyStyle:'R173_SCULPTED_CLERESTORY'});
  const builds=[['original',original],['host-clerestory',study]],optional=[];
  try{
@@ -60,7 +66,10 @@ function run(dir){
   assert.equal(p.sourceRouteAudit.zones.length,4);
   assert.equal(p.sourceRouteAudit.featureAccess.length,8);
   assert(p.sourceRouteAudit.featureAccess.every(f=>f.reachableFromEntrance));
-  assert(equal(low(p),ground),name+':MODEL_SELECTED_LOWER_VOXELS_CHANGED');
+  assert(equal(low(p),name==='original'?ground:shellLower),
+   name+':LOWER_CELLS_CHANGED_VS_PROTECTED_ORIGINAL_OR_R149');
+  assert(equal(interior(p),interior(original)),
+   name+':ORIGINAL_INTERIOR_ROOM_OR_EQUIPMENT_CHANGED');
   return {name,sourceSha256:p.sourceSha256,geometrySha256:p.geometrySha256,
    voxelCount:p.compiled.primitives.length,
    maxY:Math.max(...p.compiled.primitives.map(v=>v[1])),
