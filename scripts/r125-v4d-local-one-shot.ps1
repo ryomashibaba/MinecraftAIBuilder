@@ -21,7 +21,7 @@ $ErrorActionPreference = 'Stop'
 $expectedBranch = 'feature/b198zr1-protected-architectural-revision'
 # For GitHub Actions only, allow the current source-study branch in
 # -CheckOnly without broadening permissions for any real model run.
-$ciResearchCheckOnly = $CheckOnly -and [string]::IsNullOrEmpty($ReplayStudy) -and
+$ciResearchCheckOnly = $CheckOnly -and
   $env:GITHUB_ACTIONS -ceq 'true' -and $env:CI -ceq 'true' -and
   $env:GITHUB_REF_NAME -ceq 'research/r125-entry-nearest-safe-source-20261109' -and
   $env:GITHUB_SHA -cmatch '^[0-9a-f]{40}$'
