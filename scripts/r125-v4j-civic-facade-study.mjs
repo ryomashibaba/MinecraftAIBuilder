@@ -82,7 +82,30 @@ export function exportV4JCivicFacadeStudy(folder){
    art:'NOT_REVIEWED',realQwen:'NOT_TESTED',
    constructionApproved:false,worldWrites:0};
  });
+ // The five author fixtures share the same core dimensions by construction.
+ // A five-genre comparison without dimension diversity tests roof/style choices
+ // but CANNOT isolate whether the generic HOST can author diverse main shells.
+ // Derive this from the actual input, never infer it from the genre labels.
+ const coreFootprints=samples.map(s=>({
+  genre:s.genre,
+  covered:s.wholeBuilding.spaces.filter(r=>r.kind==='covered').map(r=>({
+   id:r.id,width:r.width,depth:r.depth,height:r.height,roof:r.roof
+  }))
+ }));
+ const footprintSignatures=coreFootprints.map(s=>JSON.stringify(
+  s.covered.map(({width,depth})=>[width,depth])));
+ const distinctCoreDimensionPrograms=new Set(footprintSignatures).size;
  const report={schema:'r125-v4j-5-authored-functional-exterior-facade-study-v1',
+  authorFootprintCoverage:{
+   comparedGenres:coreFootprints.length,
+   distinctCoreDimensionPrograms,
+   coreFootprints,
+   primaryShellDimensionDiversity:
+    distinctCoreDimensionPrograms===1?'NOT_EXERCISED_BY_SYNTHETIC_FIXTURES':
+    'EXERCISED_IN_SYNTHETIC_FIXTURES_NOT_REAL_MODEL',
+   compilerCapabilityOrArtLimitationFromFiveGenreSimilarity:'NOT_DETERMINABLE',
+   note:'Identical authored core footprints constrain the interpretation of cross-genre silhouette similarity. Do not label it a HOST expressivity failure.'
+  },
   provenance:'INDEPENDENT_EXPLICIT_SYNTHETIC_AUTHORS_NOT_LOCAL_QWEN',
   compilerGenreSpecificStyling:false,modelRequests:0,
   previewStatus:'ART_HOLD_NOT_APPROVED',

@@ -83,6 +83,18 @@ test('V4J source-only true five-view evidence exported to new isolated art-hold 
   assert.equal(report.worldWrites,0);
   assert.equal(report.compilerGenreSpecificStyling,false);
   assert.equal(report.previewStatus,'ART_HOLD_NOT_APPROVED');
+  // The synthetic author sample itself has shared 24x24 + 22x22 core sizes.
+  // Do not misattribute cross-genre visual similarity solely to the compiler.
+  assert.equal(report.authorFootprintCoverage.comparedGenres,5);
+  assert.equal(report.authorFootprintCoverage.distinctCoreDimensionPrograms,1);
+  assert.equal(report.authorFootprintCoverage.primaryShellDimensionDiversity,
+   'NOT_EXERCISED_BY_SYNTHETIC_FIXTURES');
+  assert.equal(report.authorFootprintCoverage.compilerCapabilityOrArtLimitationFromFiveGenreSimilarity,
+   'NOT_DETERMINABLE');
+  assert(report.authorFootprintCoverage.coreFootprints.every(c=>
+   c.covered.length===2&&c.covered[0].width===24&&
+   c.covered[0].depth===24&&c.covered[1].width===22&&
+   c.covered[1].depth===22));
   assert.equal(report.supportsArchitectureBeautyCertification,false);
   assert.equal(report.requiresRealHuman3DReview,true);
   assert.deepEqual(report.safety.gates,Array(9).fill('BLOCKED'));
