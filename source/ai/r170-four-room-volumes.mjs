@@ -17,7 +17,7 @@ const addBox=(design,id,mode,origin,size,material)=>design.elements.push({
  id,shape:'box',mode,...(mode==='add'?{material}:{}),origin,size
 });
 export function deriveR170FourRoomVolumes(base,
- {studyStyle='R170_TERRACED_BASELINE'}={}){
+ {studyStyle='R170_TERRACED_BASELINE',roomHeightOrder=null}={}){
  const massed=studyStyle==='R175_SETBACK_TERRACES';
  const sculpted=studyStyle==='R173_SCULPTED_CLERESTORY'||massed;
  if(!sculpted&&studyStyle!=='R170_TERRACED_BASELINE')
@@ -35,6 +35,12 @@ export function deriveR170FourRoomVolumes(base,
   base.design.elements.some(e=>e.id.startsWith('r170-')))
   fail('VERIFIED_FOUR_ROOM_FURNISHED_SOURCE_REQUIRED');
  const zones=base.program[0].zones;
+ // All 4 explicit IDs must match actual compiled room zones; no HOST fallback.
+ if(roomHeightOrder!==null&&
+  (!sculpted||!Array.isArray(roomHeightOrder)||roomHeightOrder.length!==4||
+   new Set(roomHeightOrder).size!==4||
+   roomHeightOrder.some(id=>typeof id!=='string'||!zones.some(z=>z.id===id))))
+  fail('EXPLICIT_ROOM_HEIGHT_ORDER_MISMATCH');
  const {width:w,height:h,depth:d}=base.design.bounds;
  if(h<12||h>96||w<24||d<24)
   fail('BOUNDS_UNSUPPORTED');
@@ -60,11 +66,11 @@ export function deriveR170FourRoomVolumes(base,
   e.id.startsWith('roof-profile-')).map(e=>e.id);
  design.elements=design.elements.filter(e=>
   !e.id.startsWith('roof-profile-'));
- const ranks=zones.map(z=>z.id).sort((a,b)=>{
+ const ranks=roomHeightOrder===null?zones.map(z=>z.id).sort((a,b)=>{
   const wa=zones.find(z=>z.id===a).relativeWeight;
   const wb=zones.find(z=>z.id===b).relativeWeight;
   return wa-wb||a.localeCompare(b);
- });
+ }):roomHeightOrder;
  if(zones.some(z=>!Number.isInteger(z.relativeWeight)||
    z.relativeWeight<1||z.relativeWeight>4))
   fail('MODEL_ROOM_WEIGHT_REQUIRED');
@@ -298,7 +304,10 @@ export function deriveR170FourRoomVolumes(base,
    legacyRoofProfileRemovedFromDerivedOnly:legacyProfileIds,
    modelSelectedRoofFamilyPreserved:profile,
    modelSelectedRoomCount:4,
-   modelSelectedRoomWeightUsed:true,
+   modelSelectedRoomWeightUsed:roomHeightOrder===null,
+   verticalOrderAuthority:roomHeightOrder===null?
+    'HOST_DERIVED_FROM_MODEL_WEIGHT':'EXPLICIT_CALLER_NOT_MODEL_ATTESTED',
+   callerHeightOrder:roomHeightOrder===null?null:structuredClone(roomHeightOrder),
    roomSections:sections,
    oldSourceSha256:base.sourceSha256,
    newSourceSha256:compiled.sourceSha256,

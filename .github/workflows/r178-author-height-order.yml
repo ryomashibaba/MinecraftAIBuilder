@@ -1,0 +1,36 @@
+name: R178 explicit caller room-height order — offline SOURCE only
+on:
+  push:
+    branches: [research/r125-entry-nearest-safe-source-20261109]
+    paths:
+      - 'source/ai/r178-vertical-order-intent.mjs'
+      - 'source/ai/r170-four-room-volumes.mjs'
+      - 'scripts/r139-relational-model.mjs'
+      - 'scripts/r178-vertical-order.test.mjs'
+      - '.github/workflows/r178-author-height-order.yml'
+permissions:
+  contents: read
+jobs:
+  one-offline-source-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Strict synthetic R178 and existing R139 regression
+        env:
+          R178_REVIEW_DIR: ${{ runner.temp }}/r178-source-only
+        run: |
+          node --test scripts/r178-vertical-order.test.mjs scripts/r139-relational-model.test.mjs
+      - name: Preserve bounded source-only voxels for visual comparison
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r178-synthetic-only-four-room-height-choice
+          path: ${{ runner.temp }}/r178-source-only/
+          if-no-files-found: error
+          retention-days: 7

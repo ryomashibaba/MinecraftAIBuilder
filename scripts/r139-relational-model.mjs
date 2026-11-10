@@ -42,6 +42,8 @@ import {deriveR176GroundFootprint}
  from '../source/ai/r176-ground-footprint.mjs';
 import {validateR177GroundIntent,r177ToR160}
  from '../source/ai/r177-ground-intent.mjs';
+import {validateR178HeightOrderIntent,r178ToR160}
+ from '../source/ai/r178-vertical-order-intent.mjs';
 import {validateR160TopologyIntent,r160ToR151}
  from '../source/ai/r160-topology-intent.mjs';
 
@@ -61,7 +63,8 @@ export function parseR139RelationalFurnishedReply(raw,request,
   allowHostGridResearch=false,allowHostVolumeResearch=false,
   allowHostSculpturalResearch=false,allowHostMassingResearch=false,
   allowHostGroundFootprintResearch=false,
-  allowModelGroundShapeResearch=false}={}){
+  allowModelGroundShapeResearch=false,
+  allowModelRoomHeightOrderResearch=false}={}){
  if(typeof raw!=='string'||raw.length<20||raw.length>22000)
   fail('MISSING_OR_OVERSIZED_MODEL_REPLY');
  let reply;
@@ -75,7 +78,15 @@ export function parseR139RelationalFurnishedReply(raw,request,
  if(!only(reply,expressive?[...keys,'architecture']:keys)||
   !only(reply.relations,['entryFacingZoneId','directAdjacencies']))
   fail('FULL_REPLY_CONTRACT');
- if(allowModelGroundShapeResearch)validateR177GroundIntent(reply.architecture);
+ if(allowModelRoomHeightOrderResearch&&
+    (!allowTopologyComposition||!allowHostVolumeResearch||
+     !allowHostSculpturalResearch||allowHostMassingResearch||
+     allowModelGroundShapeResearch||allowHostGroundFootprintResearch||
+     allowVolumeComposition||allowRooflineComposition||
+     allowSpatialBalanceComposition||allowFloorplanComposition))
+  fail('R178_EXACT_OPTION_GATE_REQUIRED');
+ if(allowModelRoomHeightOrderResearch)validateR178HeightOrderIntent(reply.architecture);
+ else if(allowModelGroundShapeResearch)validateR177GroundIntent(reply.architecture);
  else if(allowTopologyComposition)validateR160TopologyIntent(reply.architecture);
  else if(allowFloorplanComposition)validateR159FloorplanIntent(reply.architecture);
  else if(allowSpatialBalanceComposition)validateR158SpatialBalanceIntent(reply.architecture);
@@ -146,7 +157,8 @@ export function parseR139RelationalFurnishedReply(raw,request,
     daylightStrategy:architecture.daylightStrategy,
     roofEdge:architecture.roofEdge
    }:allowTopologyComposition?r160ToR151(
-    allowModelGroundShapeResearch?r177ToR160(architecture):architecture
+    allowModelRoomHeightOrderResearch?r178ToR160(architecture):
+     allowModelGroundShapeResearch?r177ToR160(architecture):architecture
    ):architecture});
   const volume=(allowVolumeComposition||allowRooflineComposition||allowSpatialBalanceComposition||allowFloorplanComposition)?
    deriveR154VolumeComposition(envelope,{intent:(allowRooflineComposition||allowSpatialBalanceComposition||allowFloorplanComposition)?{
@@ -188,7 +200,9 @@ export function parseR139RelationalFurnishedReply(raw,request,
    deriveR170FourRoomVolumes(articulated,{
     studyStyle:allowHostMassingResearch===true?
      'R175_SETBACK_TERRACES':allowHostSculpturalResearch===true?
-     'R173_SCULPTED_CLERESTORY':'R170_TERRACED_BASELINE'
+     'R173_SCULPTED_CLERESTORY':'R170_TERRACED_BASELINE',
+    roomHeightOrder:allowModelRoomHeightOrderResearch?
+     architecture.roomHeightOrder:null
    }):null;
   const completed=highSectionEligible?
    deriveR163DaylitSections(articulated):
@@ -200,6 +214,8 @@ export function parseR139RelationalFurnishedReply(raw,request,
    integrated,completed,
    roomSectionScope:highSectionEligible?
     'REAL_THREE_ROOM_SECTIONS_AND_CLERESTORY':
+    hostFourRoomVolume&&allowModelRoomHeightOrderResearch===true?
+     'FOUR_ROOMS_R178_EXPLICIT_CALLER_VERTICAL_RANK_REAL_B143':
     hostFourRoomVolume&&allowModelGroundShapeResearch===true?
      'FOUR_ROOMS_R177_EXPLICIT_CALLER_GROUND_SHAPE_VERIFIED_B143':
     hostFourRoomVolume&&allowHostGroundFootprintResearch===true?
@@ -216,6 +232,8 @@ export function parseR139RelationalFurnishedReply(raw,request,
    intentAuthorship:'IN_THIS_SAME_MODEL_REPLY_NOT_HOST_INFERRED',
    groundShapeIntentOrigin:allowModelGroundShapeResearch?
     'EXPLICIT_CALLER_REPLY_UNVERIFIED_NOT_HOST_INFERRED':null,
+   verticalHeightOrderAuthority:allowModelRoomHeightOrderResearch?
+    'EXPLICIT_CALLER_REPLY_UNVERIFIED_NOT_HOST_RANKED':null,
    geometryAuthorship:'HOST_DERIVED_FROM_BOUNDED_MODEL_SEMANTIC_IR',
    aestheticApproval:'NOT_REVIEWED'};
  })():null;
@@ -239,6 +257,8 @@ export function parseR139RelationalFurnishedReply(raw,request,
   modelCallsDuringParsing:0,
   r177ExplicitGroundShapeFromCaller:allowModelGroundShapeResearch?
    structuredClone(architecture.groundShape):null,
+  r178ExplicitHeightOrderFromCaller:allowModelRoomHeightOrderResearch?
+   structuredClone(architecture.roomHeightOrder):null,
   legacyStripFurnitureNotRequired:true,
   semanticEquipmentZoneCount:semantics.physicallyRepresentedZoneCount,
   hostGeneratedGeometry:true,
