@@ -55,7 +55,7 @@ function run(dir){
  }catch(e){optional.push({study:'R175_SETBACK_TERRACES',status:'HOLD',code:String(e?.message??e).slice(0,120)});}
  const evidence=builds.map(([name,p])=>{
   assert(verifyCompiled(p.design,p.compiled),name+':B143');
-  assert(safe(p),name+':SAFETY');
+  assert(safe(p,name==='original'),name+':SAFETY');
   assert.equal(p.sourceRouteAudit.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
   assert.equal(p.sourceRouteAudit.zones.length,4);
   assert.equal(p.sourceRouteAudit.featureAccess.length,8);
