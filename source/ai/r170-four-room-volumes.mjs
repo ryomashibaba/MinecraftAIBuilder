@@ -178,8 +178,9 @@ export function deriveR170FourRoomVolumes(base,
    optional.push(...windows.slice(1).map(win=>({i,win})));
   }
   // Each actual opening takes a CUT and a separate glass ADD element.
-  // Reserve six B143 elements for two actual upper roof setbacks.
-  const capacity=Math.floor((160-design.elements.length-(massed?6:0))/2);
+  // Reserve an extra junction riser. Two adjacent terraces with unlike
+  // deck heights otherwise expose the HIGHER room's air below its own deck.
+  const capacity=Math.floor((160-design.elements.length-(massed?7:0))/2);
   if(capacity<required.length)
    fail('R174_MANDATORY_GLAZING_EXCEEDS_ELEMENT_BUDGET');
   const chosen=[...required,...optional.slice(0,capacity-required.length)];
@@ -228,10 +229,32 @@ export function deriveR170FourRoomVolumes(base,
     [innerX,deckY+1,zf],[1,s.roofY-deckY,zb-zf+1],west.material);
    upperSetbackDecks.push({zoneId:s.zoneId,rank:s.rank,side,
     roofY:s.roofY,deckY,outerX,innerX,
+    zRange:[zf,zb],band,
     witnessZ:Math.floor((zf+zb)/2),optionalSideWindowRemoved:removed===2});
   }
   if(upperSetbackDecks.length!==2||windowsPerRoom.some(n=>n<1))
    fail('R175_DECK_OR_MANDATORY_ROOM_GLAZING');
+  // R175's raised-volume evidence missed an actual exterior escape at the
+  // boundary of two neighboring *unequal-height* setbacks. The higher
+  // roof's under-deck cavity reached the lower neighboring exterior terrace.
+  // Close ONLY the verified shared weather seam; do not create a room
+  // wall below y=6 or alter the authored room/equipment programme.
+  const [a,b]=upperSetbackDecks;
+  if(a.side===b.side){
+   const sharedZ=Math.max(a.zRange[0],b.zRange[0]);
+   const earlierEnd=Math.min(a.zRange[1],b.zRange[1]);
+   if(sharedZ<=earlierEnd+1){
+    if(sharedZ<earlierEnd||a.outerX!==b.outerX||
+      a.band!==b.band||a.band!==3)
+     fail('R175_UNSUPPORTED_ADJACENT_TERRACE_GEOMETRY');
+    if(a.deckY!==b.deckY){
+     const lower=Math.min(a.deckY,b.deckY);
+     const upper=Math.max(a.deckY,b.deckY);
+     addBox(design,'r175-terrace-weather-riser','add',
+      [a.outerX,lower+1,sharedZ],[a.band,upper-lower,1],roof.material);
+    }
+   }
+  }
  }
  if(design.elements.length>160)
   fail('B143_ELEMENT_BUDGET_EXCEEDED');
@@ -245,6 +268,32 @@ export function deriveR170FourRoomVolumes(base,
  if(sorted(before)!==sorted(after))
   fail('ORIGINAL_ROOMS_DOORS_FURNITURE_CHANGED');
  const occupied=new Set(compiled.primitives.map(k));
+ // Independent-of-source-element flood: ensure no raised room's high-air
+ // component (y>=6) can reach the exterior through a missing roof/junction.
+ // This checks SOURCE 6-connected air only, not Minecraft rain/load safety.
+ const directions=[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]];
+ const upperAirAudit=[];
+ for(const s of sections){
+  const [cx,cz]=s.clearanceWitness,seed=[cx,s.roofY-1,cz];
+  if(occupied.has(k(seed)))fail('UPPER_AIR_SEED_OCCUPIED_'+s.zoneId);
+  const visited=new Set([k(seed)]),queue=[seed];
+  for(let i=0;i<queue.length;i++){
+   const [x,y,z]=queue[i];
+   if(x<1||x>w-2||z<1||z>d-2||y>=design.bounds.height-1)
+    fail('HIGH_ROOM_OPEN_TO_EXTERIOR_'+s.zoneId+'_'+x+'_'+y+'_'+z);
+   for(const [dx,dy,dz] of directions){
+    const nx=x+dx,ny=y+dy,nz=z+dz;
+    if(ny<6||ny>=design.bounds.height||nx<0||nx>=w||nz<0||nz>=d)
+     continue;
+    const candidate=k([nx,ny,nz]);
+    if(occupied.has(candidate)||visited.has(candidate))continue;
+    visited.add(candidate);queue.push([nx,ny,nz]);
+    if(visited.size>100000)fail('UPPER_AIR_FLOOD_BUDGET');
+   }
+  }
+  upperAirAudit.push({zoneId:s.zoneId,sourceUpperAirCellsVisited:visited.size,
+   yMin:6,escapedExterior:false});
+ }
  for(const t of upperSetbackDecks){
   const {outerX,innerX,roofY,deckY,witnessZ}=t;
   if(occupied.has([outerX,roofY,witnessZ].join(','))||
@@ -295,7 +344,11 @@ export function deriveR170FourRoomVolumes(base,
    sourceOnly:true,hostArtStudyNotModelHeightChoice:true,
    studyStyle,sculptedVolumeVariant:sculpted,
    R175_HOST_DERIVED_NOT_MODEL_SELECTED:massed,
-   upperSetbackDecks,originalGroundFootprintChanged:false,
+   upperSetbackDecks,
+   actualSixFaceUpperAirFloodAudit:upperAirAudit,
+   allFourSourceUpperAirComponentsClosed:true,
+   realMinecraftWeatherTightness:'NOT_TESTED',
+   originalGroundFootprintChanged:false,
    realExteriorClerestoryWindows:realClerestoryWindowCount,
    realExteriorClerestoryWindowsPerRoom:windowsPerRoom,
    omittedOptionalClerestoryWindows,

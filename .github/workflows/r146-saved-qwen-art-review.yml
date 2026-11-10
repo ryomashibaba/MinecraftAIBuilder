@@ -6,6 +6,8 @@ on:
     paths:
       - '.github/workflows/r146-saved-qwen-art-review.yml'
       - 'scripts/r146-saved-qwen-volume-compare.mjs'
+      - 'source/ai/r170-four-room-volumes.mjs'
+      - 'scripts/r170-four-room-envelope.test.mjs'
 permissions:
   contents: read
 jobs:
@@ -23,7 +25,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          node --test scripts/r146-user-real-roof-recovery.test.mjs
+          node --test scripts/r146-user-real-roof-recovery.test.mjs scripts/r170-four-room-envelope.test.mjs
           node scripts/r146-replay-saved-qwen.mjs --out "$RUNNER_TEMP/r146-art"
       - name: Strict B143 replay verification and three source-only SVG views
         shell: bash
