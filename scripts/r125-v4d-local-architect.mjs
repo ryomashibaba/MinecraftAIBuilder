@@ -129,6 +129,20 @@ function validateLaunch({model,outDir,prompt,endpoint,parentIndexV6=false},fetch
   fail('PRIVATE_OUTPUT_OUTSIDE_REPOSITORY_ONLY');
  return dest;
 }
+// The CI fake server writes a distinct marker after binding 127.0.0.1.
+// Flags alone MUST NOT permit a production network POST.
+function v4hCiFakeLoopbackReady(){
+ try{
+  return process.env.GITHUB_ACTIONS==='true' &&
+   process.env.CI==='true' &&
+   process.env.MAB_V4D_TEST_DOUBLE_MODE==='1' &&
+   typeof process.env.MAB_V4D_FAKE_READY_FILE==='string' &&
+   fs.readFileSync(process.env.MAB_V4D_FAKE_READY_FILE,'utf8')===
+    'GITHUB_CI_ONLY_FAKE_OLLAMA_READY\n' &&
+   typeof process.env.MAB_V4D_FAKE_POST_LOG==='string' &&
+   process.env.MAB_V4D_FAKE_POST_LOG.length>0;
+ }catch{return false;}
+}
 export async function runV4DLocalAuthor({
  model,outDir,prompt=DEFAULT_PROMPT,endpoint=DEFAULT_ENDPOINT,shortSemantic=false,compact=false,rankedWindows=false,rankedSection=false,authoredMassing=false,authorWing=false,authorFloorplate=false,authorAtrium=false,authorMezzanine=false,authorArcade=false,precisionCivicContract=false,structuredCivicContract=false,geometryEnvelopeV4=false,entryFirstV5=false,parentIndexV6=false
 }={}, {fetcher=fetch,timeoutMs=parentIndexV6?600000:180000}={}){
@@ -148,6 +162,14 @@ export async function runV4DLocalAuthor({
   fail('V4_ENVELOPE_REQUIRES_STRUCTURED_CIVIC_AUTHOR');
  if([shortSemantic,compact,rankedWindows,rankedSection,authoredMassing,authorWing,authorFloorplate,authorAtrium,authorMezzanine,authorArcade].some(x=>typeof x!=='boolean')||
   [shortSemantic,compact,rankedWindows,rankedSection,authoredMassing,authorWing,authorFloorplate,authorAtrium,authorMezzanine,authorArcade].filter(Boolean).length>1)fail('AUTHOR_MODE');
+ // V4H's existing one-shot caller has no V7-grade independent monitor,
+ // fresh resource leases, exact-head two-CI proof or server unload evidence.
+ // Neither a pinned clone nor a model list GET authorizes real inference.
+ // Reject BEFORE mkdir/preflight/POST; do not affect other author modes.
+ // Injected unit-test transports and the existing explicit CI FAKE are not
+ // real-model evidence and may exercise this legacy offline source path.
+ if(authorMezzanine&&fetcher===fetch&&!v4hCiFakeLoopbackReady())
+  fail('V4H_REAL_POST_REQUIRES_MONITORED_GATEC_PATH');
  const dir=validateLaunch({model,outDir,prompt,endpoint,parentIndexV6},fetcher,timeoutMs);
  const injected=fetcher!==fetch||process.env.MAB_V4D_TEST_DOUBLE_MODE==='1',start=Date.now();
  const modelSystemPrompt=parentIndexV6?V4J_PARENT_INDEX_SYSTEM_PROMPT:

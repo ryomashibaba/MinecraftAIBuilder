@@ -127,6 +127,23 @@ test('test injection can exercise ONE model protocol and real B143 while NEVER m
   assert(V4D_RELATIVE_SYSTEM_PROMPT.includes('AUTHOR'));
  }finally{temp.clean();}
 });
+test('V4H direct real transport refuses POST even if fake flag is set without CI sentinel',async()=>{
+ const tmp=sandbox(),oldCI=process.env.GITHUB_ACTIONS;
+ try{
+  // Absent a verifiable CI fake, runtime MUST fail before even creating out.
+  delete process.env.GITHUB_ACTIONS;
+  await assert.rejects(()=>runV4DLocalAuthor({
+   model:'qwen3:14b',outDir:tmp.out,authorMezzanine:true,
+   prompt:'Author a coherent two-level civic building with upper gallery.'
+  }),/R125_V4D_V4H_REAL_POST_REQUIRES_MONITORED_GATEC_PATH/);
+  assert.equal(fs.existsSync(tmp.out),false);
+ }finally{
+  if(oldCI===undefined)delete process.env.GITHUB_ACTIONS;
+  else process.env.GITHUB_ACTIONS=oldCI;
+  tmp.clean();
+ }
+});
+
 test('missing local model preflight FAILS before any model generation request',async()=>{
  const tmp=sandbox(),f=fakeOllama({installed:false});
  try{
