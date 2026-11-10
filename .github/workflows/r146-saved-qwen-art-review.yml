@@ -145,6 +145,11 @@ jobs:
           fs.writeFileSync(path.join(dir,'R146_THREE_VIEW_REVIEW.html'),html,{flag:'wx'});
           console.log(JSON.stringify({result:'R146_REAL_ARCHIVED_MODEL_TRUE_B143_AND_INDEPENDENT_SOURCE_PASS_ART_UNREVIEWED',voxels:scene.primitives.length,rooms:report.roomCount,equipment:report.furnishedEquipmentCount,sha256:scene.geometrySha256,views:views.map(v=>v.filename),modelPOSTs:0,worldWrites:0}));
           NODE
+      - name: Same archived Qwen four rooms — optional true B143 HOST-only raised-room source study
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/r146-saved-qwen-volume-compare.mjs --out "$RUNNER_TEMP/r146-art/host-volume-study"
       - name: Preserve genuine source and human ART review evidence
         if: success()
         uses: actions/upload-artifact@v4
