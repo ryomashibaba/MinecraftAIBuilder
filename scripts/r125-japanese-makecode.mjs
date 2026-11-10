@@ -11,10 +11,20 @@ import {exportB143EducationMakeCode} from '../source/ai/r125-education-makecode-
 
 export function exportSavedPlan(planFile, outDir, provenance='UNVERIFIED_DESIGN',paletteFile=null) {
  const plan=JSON.parse(fs.readFileSync(planFile,'utf8'));
- // Geometry is host-derived from the unmodified AI plan. New practical
- // exports use the opt-in source-accessible entrance; frozen legacy hashes
- // remain reproducible via compileArchitecturePlan(plan) without options.
- const product=compileArchitecturePlan(plan,{entrancePlacement:'source-accessible'});
+ // The author owns the plan and its room split; HOST owns a viable door.
+ // Preserve the prior practical geometry for every case EXCEPT an expressive
+ // upper z-divider directly intersecting the fixed stair's z=7/8 landing.
+ // This previously yielded HOLD_SOURCE_ROUTES even though the existing
+ // compiler has a proven, source-only two-wide "stair-clear" door policy.
+ // Original raw plans and compileArchitecturePlan(plan) remain unchanged.
+ const initial=compileArchitecturePlan(plan,{entrancePlacement:'source-accessible'});
+ const upper=initial.program[1];
+ const stairDividerAtLanding=Boolean(plan.expression)&&
+  upper?.splitAxis==='z'&&[7,8].includes(upper.splitCoordinate);
+ const upperDoorPlacement=stairDividerAtLanding?'stair-clear':'legacy';
+ const product=stairDividerAtLanding?compileArchitecturePlan(plan,{
+  entrancePlacement:'source-accessible',upperDoorPlacement
+ }):initial;
  // Reuse two EXISTING voxel-derived audits. Source pass means only an
  // offline clearance candidate, never in-game walking certification.
  const circulation=auditArchitecturePlanCirculation(product);
@@ -24,7 +34,11 @@ export function exportSavedPlan(planFile, outDir, provenance='UNVERIFIED_DESIGN'
   sourceSha256:product.sourceSha256,
   geometrySha256:product.geometrySha256,
   planSha256:product.planSha256,
-  hostSourceCompilerMode:'R125_SOURCE_ACCESSIBLE_ENTRANCE_FROM_MODEL_SPLIT_AXIS',
+  hostSourceCompilerMode:stairDividerAtLanding?
+   'R125_SOURCE_ACCESSIBLE_ENTRY_AND_HOST_STAIR_CLEAR_THRESHOLD':
+   'R125_SOURCE_ACCESSIBLE_ENTRANCE_FROM_MODEL_SPLIT_AXIS',
+  hostUpperDoorPlacement:upperDoorPlacement,
+  originalModelPlanUnchanged:true,
   status:circulation.status==='SOURCE_CLEARANCE_PROBES_PASS'&&
    routes.status==='SOURCE_ROUTES_REACH_ALL_ZONES'?
    'SOURCE_ROUTE_CANDIDATE':'HOLD_SOURCE_WALKABILITY',

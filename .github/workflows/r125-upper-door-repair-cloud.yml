@@ -1,9 +1,11 @@
 name: R125 Saved Qwen C Upper-Floor Door Repair — SOURCE ONLY
 on:
   push:
-    branches: [feature/b198zr1-protected-architectural-revision]
+    branches: [feature/b198zr1-protected-architectural-revision, research/r125-entry-nearest-safe-source-20261109]
     paths:
       - 'source/ai/r125-architecture-plan.mjs'
+      - 'scripts/r125-japanese-makecode.mjs'
+      - 'scripts/r125-architecture-plan.test.mjs'
       - 'scripts/r125-upper-door-repair-study.mjs'
       - 'scripts/r125-upper-door-repair-study.test.mjs'
       - 'scripts/r125-roof-interior-study.mjs'
@@ -84,6 +86,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   verified-source-repair:
+    if: github.ref == 'refs/heads/feature/b198zr1-protected-architectural-revision'
     runs-on: ubuntu-24.04
     timeout-minutes: 8
     steps:
@@ -329,3 +332,24 @@ jobs:
           path: ${{ runner.temp }}/r125-door-repair/
           if-no-files-found: error
           retention-days: 21
+
+  research-practical-makecode:
+    if: github.ref == 'refs/heads/research/r125-entry-nearest-safe-source-20261109'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: B143 real source, original Qwen SHA, staircase and MakeCode regression — no model/world
+        run: |
+          node --check scripts/r125-japanese-makecode.mjs
+          node --check scripts/r125-architecture-plan.test.mjs
+          node --test scripts/r125-architecture-plan.test.mjs
+      - name: Ensure source-only result is not an ART or Minecraft permit
+        run: |
+          echo 'R125 practical HOST stair-clear is opt-in only where fixed upper divider intersects z7/8 stair landing.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Unmodified model plans; frozen legacy geometry unchanged. B143/MakeCode source only; ART HOLD, Minecraft walking NOT TESTED; 9 gates BLOCKED.' >> "$GITHUB_STEP_SUMMARY"

@@ -358,6 +358,8 @@ test('unaltered Nov-1 Qwen 14B 203-character brief compiles to real L-corner SOU
   assert(report.plannedBlockCounts.glass>0);
   const walk=JSON.parse(fs.readFileSync(path.join(output,'SOURCE_WALKABILITY_REVIEW.json'),'utf8'));
   assert.equal(walk.status,'SOURCE_ROUTE_CANDIDATE');
+  assert.equal(walk.hostUpperDoorPlacement,'legacy');
+  assert.equal(walk.originalModelPlanUnchanged,true);
   assert.equal(walk.actualInGameWalking,'NOT_TESTED');
   const code=fs.readFileSync(path.join(output,'MAKECODE_EDUCATION.ts'),'utf8');
   assert.match(code,/player\.onChat\("mabbuild"/);
@@ -422,6 +424,46 @@ test('invalid AI-selected rear-corner side fails closed',()=>{
  assert.throws(()=>compileArchitecturePlan(p),/R125_PLAN_EXPRESSION_CORNER_CUT/);
 });
 
+test('practical MakeCode export closes known upper stair-landing divider with EXISTING HOST door rule',()=>{
+ const original=plan('source-real-upper-landing',['x','z'],['public studio','study area']);
+ original.footprint={width:24,depth:18};
+ original.levels[1].splitPercent=60;
+ original.expression={setbackSide:'rear',setbackDepth:3,
+  roofProfile:'ridge',roofAxis:'x',facadeLanguage:'plain'};
+ const originalText=JSON.stringify(original)+'\n';
+ const old=compileArchitecturePlan(original,{entrancePlacement:'source-accessible'});
+ assert.equal(old.program[1].splitCoordinate,8);
+ assert.equal(auditR125SourceRoutes(old).status,'HOLD_SOURCE_ROUTES');
+ const valid=compileArchitecturePlan(original,{entrancePlacement:'source-accessible',
+  upperDoorPlacement:'stair-clear'});
+ assert.equal(auditR125SourceRoutes(valid).status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(auditArchitecturePlanCirculation(valid).status,'SOURCE_CLEARANCE_PROBES_PASS');
+ const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'r125-practical-stair-entry-'));
+ try{
+  const input=path.join(tmp,'unchanged-model-plan.json');
+  const out=path.join(tmp,'education-source-only');
+  const palette=new URL('../configs/r125-education-verified-palette-v26.33.json',import.meta.url);
+  fs.writeFileSync(input,originalText);
+  const report=exportSavedPlan(input,out,'UNVERIFIED_DESIGN',palette);
+  assert.equal(report.sourceSha256,valid.sourceSha256);
+  assert.equal(report.geometrySha256,valid.geometrySha256);
+  assert.equal(report.worldWrites,0);
+  assert.equal(report.programExecuted,false);
+  assert.equal(fs.readFileSync(input,'utf8'),originalText);
+  const status=JSON.parse(fs.readFileSync(path.join(out,'SOURCE_WALKABILITY_REVIEW.json'),'utf8'));
+  assert.equal(status.status,'SOURCE_ROUTE_CANDIDATE');
+  assert.equal(status.hostUpperDoorPlacement,'stair-clear');
+  assert.equal(status.originalModelPlanUnchanged,true);
+  assert.equal(status.circulation.status,'SOURCE_CLEARANCE_PROBES_PASS');
+  assert.equal(status.routes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert(status.routes.zones.every(z=>z.reachedFromEntrance));
+  const geometry=JSON.parse(fs.readFileSync(path.join(out,'B143_SOURCE.json'),'utf8'));
+  assert.deepEqual(geometry,valid.design);
+  assert(geometry.elements.some(e=>e.id==='l1-stair-threshold-relief'));
+  assert(fs.readFileSync(path.join(out,'MAKECODE_EDUCATION.ts'),'utf8')
+    .includes('player.onChat("mabbuild"'));
+ }finally{fs.rmSync(tmp,{recursive:true,force:true});}
+});
 test('opt-in rear setback stair threshold connects both upper zones without altering legacy SOURCE',()=>{
  for(const [depth,percent,split] of [[16,60,7],[18,60,8],[24,40,8]]){
   const original=plan('upper-stair-threshold',['x','z'],['community hall','workroom']);
