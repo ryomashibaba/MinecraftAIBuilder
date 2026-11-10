@@ -17,7 +17,7 @@ import {
 } from '../source/ai/r125-integrated-semantic-bridge.mjs';
 import {createIntegratedSpatialHost} from '../source/ai/r125-integrated-spatial-host.mjs';
 import {classifyOllamaStopEvidence} from '../source/ai/r125-v7-ollama-stop-evidence.mjs';
-import {MEZZANINE_SCHEMA,MEZZANINE_SYSTEM_PROMPT,compileMezzanineAuthorIntent}
+import {MEZZANINE_SCHEMA,compileMezzanineAuthorIntent}
  from '../source/ai/r125-v4h-mezzanine-author-ir.mjs';
 
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
@@ -31,6 +31,23 @@ const EXPECTED_DIGEST='bdbd181c33f2ed1b31c972991882db3cf4d192569092138a7d29e973c
 const EXPECTED_SIZE=9276198565;
 const fail=code=>{throw Error('V7_PRIVATE_ONCE_'+code);};
 const V4H_PROTOCOL='V7_PRIVATE_MONITORED_V4H_MEZZANINE_V1';
+// Bounded V7-only system instruction. Original, more verbose V4H prompt and
+// author compiler stay frozen; the same strict SOURCE grammar is enforced
+// independently after capture. This is a capacity mitigation, NOT proof
+// that qwen3:14b fits within the existing 2048-token runtime window.
+export const V7_V4H_COMPACT_SYSTEM_PROMPT=[
+ "You are the ORIGINAL architect. Output exactly ONE JSON object: the whole useful 2-level public building, not a shape template. No prose, markdown, hidden repair or second attempt. Choose distinctive massing, inhabited spaces, a public entrance and usable upper service.",
+ "schema minecraftaibuilder-r125-v4h-mezzanine-author-v1; EXACT root keys: schema,id,title,brief,materials,spaces,massing,wing,floorplate,atrium,mezzanine. Do not add fields.",
+ "materials EXACT floor,wall,roof,public. floor wood|stone|concrete; wall/roof wood|stone|concrete|metal; public stone|concrete|accent.",
+ "spaces: array 3..5; first covered NORTH-entry reception with attach:null; at least 2 covered and 1 sky. Each EXACT id,purpose,kind,width,depth,roof,height,facade,windowPriority,feature,featureMaterial,attach. width/depth integer 18..30. covered: kind covered, roof ridgeX|ridgeZ|shedX|shedZ, height low|medium|high, facade wall|glass, windowPriority ordered permutation of north,east,south,west. sky: kind sky, roof/height/facade/windowPriority null. featureMaterial wood|stone|metal|concrete|accent. Nonfirst attach EXACT to,side,shift; to earlier room id; side north|south|east|west, shift -3..3. Every purpose and feature must be useful.",
+ "massing EXACT spaceId,corner,cutWidth,cutDepth,publicAccessSide. Covered room, corner NW|NE|SW|SE, cutWidth/depth 7..10 integers, publicAccessSide X|Z; chosen room width>=2*cutWidth+6, depth>=2*cutDepth+6. Both outer corner sides unshared. A real sky-open corner with supported floor and 2-wide 3-high portal; no entry/window/fixture collision.",
+ "wing EXACT spaceId,side,start,span,reach,roofY,purpose and OPTIONAL outline. Choose unshared external covered-room side except first reception NORTH entry; side north|south|east|west, start 3..12, span 10..18, reach 6..9, roofY 8|9 below room eave. For nonrectangular outline provide 3 band depths each 6..reach; max=reach, min<=max-2. Supported public ground, real roof and columns, clear 2-wide opening, meaningful use.",
+ "floorplate EXACT spaceId,corner,width,depth: covered room, corner NW|NE|SW|SE, dimensions 6..8. Removes FLOOR+external WALL+ROOF in its unshared corner; new inner enclosure. No overlap with massing, wing, glazing, entrance or furniture.",
+ "atrium EXACT spaceId,offsetX,offsetZ,width,depth,lift,roofForm. Covered public hall; offsets 3..7, width/depth 10..16; leave >=3 room cells on far side, no floorplate/void overlap. lift 7..11 ABOVE original roof peak. roofForm ridgeX|ridgeZ|shedX|shedZ. Real removed old roof, elevated enclosed ring, clerestory with clear glass/air, actual roof and retained public floor/equipment.",
+ "mezzanine EXACT side,stairLane,deckOffsetX,deckWidth,rise,purpose. In that inhabited atrium: side north|south; stairLane west|east; deckOffsetX 1..3, deckWidth 8..10, rise 6..8; supported 3-deep public upper floor, real 2-wide stairs with headroom/landing, reachable upper service desk. Purpose 12..140 characters, unique usable function.",
+ "All parts must fit TOGETHER and preserve original 2-wide entrance-to-every-function paths, glazed windows with inner/outer air, equipment, structural source supports and walkable public void. HOST validates actual B143 exactly, never silently repairs/resizes/moves anything. Invalid original => HOLD. Never claim ART PASS, Minecraft walking, model identity, weather/structural approval or world-write permission; all nine construction gates remain BLOCKED."
+].join('\n');
+
 const V4H_BRIEF='Design a useful two-level public building with a coherent welcoming hall, accessible upper gallery, functional stairs and distinctive whole-building massing. Independently choose its architecture and spatial program.';
 const hash=s=>createHash('sha256').update(s).digest('hex');
 const freshResourceClearance=(resource,now=Date.now())=>
@@ -119,7 +136,7 @@ export async function runV7PrivateOnce({
  const chosenPrompt=prompt===undefined?
   (authorMode==='v4h-mezzanine'?V4H_BRIEF:V7_HELD_OUT_BRIEF):prompt;
  const systemPrompt=authorMode==='v4h-mezzanine'?
-  MEZZANINE_SYSTEM_PROMPT:INTEGRATED_SPATIAL_V7_SUPPORTED_PROMPT;
+  V7_V4H_COMPACT_SYSTEM_PROMPT:INTEGRATED_SPATIAL_V7_SUPPORTED_PROMPT;
  if(!MODEL.test(model??'')||!SHA.test(headSha??'')||
   typeof chosenPrompt!=='string'||chosenPrompt.length<8||chosenPrompt.length>4000||
   !Number.isSafeInteger(timeoutMs)||timeoutMs<1000||timeoutMs>120000)

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {runV7PrivateOnce,verifyCleanHead} from './r125-v7-private-once.mjs';
+import {runV7PrivateOnce,verifyCleanHead,V7_V4H_COMPACT_SYSTEM_PROMPT} from './r125-v7-private-once.mjs';
 import {INTEGRATED_SEMANTIC_SCHEMA} from '../source/ai/r125-integrated-semantic-bridge.mjs';
 const sha='a'.repeat(40);
 const ciName=['R125 V4D Local Author Bridge — INJECTED TEST ONLY','Education-first offline QA'];
@@ -252,9 +252,31 @@ test('V7 V4H monitored injected source compiles true B143 yet never promotes ART
  const a={...structuredClone(sample.heightAuthor),schema:MEZZANINE_SCHEMA,
   mezzanine:structuredClone(sample.mezzanine)};
  const tmp=sandbox(),calls=[],raw=JSON.stringify(a);
+ const {MEZZANINE_SYSTEM_PROMPT}=await import('../source/ai/r125-v4h-mezzanine-author-ir.mjs');
+ assert(V7_V4H_COMPACT_SYSTEM_PROMPT.length<MEZZANINE_SYSTEM_PROMPT.length/2);
+ assert(V7_V4H_COMPACT_SYSTEM_PROMPT.length>=2500);
+ assert(V7_V4H_COMPACT_SYSTEM_PROMPT.length<4000);
+ for(const requirement of ['spaces,massing,wing,floorplate,atrium,mezzanine',
+  'id,purpose,kind,width,depth,roof,height,facade,windowPriority,feature,featureMaterial,attach',
+  'spaceId,corner,cutWidth,cutDepth,publicAccessSide',
+  'side,stairLane,deckOffsetX,deckWidth,rise,purpose',
+  'nine construction gates remain BLOCKED']){
+  assert(V7_V4H_COMPACT_SYSTEM_PROMPT.includes(requirement),requirement);
+ }
+ const fake=fakeModel(a,calls),checkedTransport=async(url,opt)=>{
+  if(opt?.method==='POST'){
+   const request=JSON.parse(opt.body);
+   assert.equal(request.messages[0].content,V7_V4H_COMPACT_SYSTEM_PROMPT);
+   assert.equal(request.options.num_ctx,2048);
+   assert.equal(request.options.num_predict,1024);
+   assert.equal(request.think,false);
+   assert.equal(request.stream,false);
+  }
+  return fake(url,opt);
+ };
  try{
   const result=await runV7PrivateOnce(params(tmp.outDir,{authorMode:'v4h-mezzanine'}),{
-   ciFetcher:fakeCi(),modelFetcher:fakeModel(a,calls),headReader:()=>sha});
+   ciFetcher:fakeCi(),modelFetcher:checkedTransport,headReader:()=>sha});
   assert.equal(result.status,'HOLD_INJECTED_TEST_NOT_MODEL',result.reason);
   assert.equal(result.protocol,'V7_PRIVATE_MONITORED_V4H_MEZZANINE_V1');
   assert.equal(calls.filter(x=>x.method==='POST').length,1);
