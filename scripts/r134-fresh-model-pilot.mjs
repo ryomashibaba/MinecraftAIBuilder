@@ -14,6 +14,8 @@ import {parseR135FreshFurnishedReply} from './r135-furnished-program.mjs';
 import {recoverR137Furnished} from './r137-bounded-recovery.mjs';
 import {RELATIONAL_INSTRUCTIONS}
  from './r139-relational-instructions.mjs';
+import {R178_HEIGHT_SCHEMA,R178_MODEL_INSTRUCTIONS}
+ from '../source/ai/r178-vertical-order-intent.mjs';
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const ENDPOINT=/^http:\/\/127\.0\.0\.1:(\d{2,5})\/v1\/chat\/completions$/;
 const MODEL=/^[A-Za-z0-9._:/-]{2,140}$/;
@@ -165,6 +167,21 @@ const R160_SYSTEM=R151_SYSTEM.replace(
  'Make topology selection from functional room needs, not building genre labels.',
  'Unrealizable layouts return HOLD, never silent fallback.'
 ].join('\n');
+// Optional single-raw-reply author choice; archived Qwen replies remain immutable.
+const R178_SYSTEM=R160_SYSTEM.replace(
+ 'spaces must have 3 or 4 distinct rooms; each EXACT id,purpose,weight.',
+ 'spaces MUST have EXACTLY four distinct rooms; each EXACT id,purpose,weight.'
+).replace(
+ 'architecture is exactly one small object with schema,entryHierarchy,daylightStrategy,roofEdge,spatialTopology.',
+ 'architecture is exactly one small object with schema,entryHierarchy,daylightStrategy,roofEdge,spatialTopology,roomHeightOrder.'
+).replace('minecraftaibuilder-r160-topology-ir-v1',R178_HEIGHT_SCHEMA)
+ +'\n'+[
+ 'For four rooms, spatialTopology MUST be central-spine.',
+ 'Choose your own roof order independently of the room weights.',
+ 'roomHeightOrder MUST contain precisely all four layout.spaces IDs once each.',
+ 'Unsupported geometry or invalid author choices HOLD; the host never rewrites the author order.',
+ R178_MODEL_INSTRUCTIONS
+ ].join('\n');
 export function makeR134FreshRequest({brief,siteWidth=32,siteDepth=32}={}){
 
 
@@ -218,7 +235,7 @@ export function parseR134FreshArgs(argv){
  if(!['none','assembled'].includes(equipmentMode))fail('INVALID_EQUIPMENT_MODE');
  const topologyMode=args['--topology']??'linear';
  const architectureMode=args['--architecture']??'none';
- if(!['none','intent','massing','volumes','roofline','spatial','floorplan','topology'].includes(architectureMode)||
+ if(!['none','intent','massing','volumes','roofline','spatial','floorplan','topology','height-order'].includes(architectureMode)||
   (architectureMode!=='none'&&topologyMode!=='graph'))
   fail('ARCHITECTURE_REQUIRES_GRAPH_TOPOLOGY');
  if(!['linear','graph'].includes(topologyMode)||
@@ -236,7 +253,7 @@ export async function runR134FreshModel({
  endpoint='http://127.0.0.1:11434/v1/chat/completions'
 }={}, {fetcher=fetch,timeoutMs=120000}={}){
  const p=ENDPOINT.exec(endpoint??'');
- if(!['none','intent','massing','volumes','roofline','spatial','floorplan','topology'].includes(architectureMode)||
+ if(!['none','intent','massing','volumes','roofline','spatial','floorplan','topology','height-order'].includes(architectureMode)||
   (architectureMode!=='none'&&topologyMode!=='graph')||
   !['none','bounded','roof-material-only'].includes(recoveryMode)||
   (recoveryMode==='bounded'&&equipmentMode!=='assembled')||
@@ -257,7 +274,8 @@ export async function runR134FreshModel({
   semanticEquipment:{perRoomAtLeastOne:true,maxObjects:8,
    allowedRoles:['work-surface','equipment-bank','display-stand',
     'storage-rack','seating']}}:request;
- const maxTokens=architectureMode==='topology'?2200:
+ const maxTokens=architectureMode==='height-order'?2500:
+  architectureMode==='topology'?2200:
   architectureMode==='floorplan'?2800:
   architectureMode==='spatial'?2600:
   architectureMode==='roofline'?2400:
@@ -302,7 +320,8 @@ export async function runR134FreshModel({
     body:JSON.stringify({model,stream:false,temperature:0.65,
      max_tokens:maxTokens,reasoning_effort:'none',
      response_format:{type:'json_object'},messages:[
-      {role:'system',content:architectureMode==='topology'?R160_SYSTEM:
+      {role:'system',content:architectureMode==='height-order'?R178_SYSTEM:
+       architectureMode==='topology'?R160_SYSTEM:
        architectureMode==='floorplan'?R159_SYSTEM:
        architectureMode==='spatial'?R158_SYSTEM:
        architectureMode==='roofline'?R155_SYSTEM:
@@ -342,7 +361,11 @@ export async function runR134FreshModel({
      allowRooflineComposition:architectureMode==='roofline',
      allowSpatialBalanceComposition:architectureMode==='spatial',
      allowFloorplanComposition:architectureMode==='floorplan',
-     allowTopologyComposition:architectureMode==='topology'
+     allowTopologyComposition:['topology','height-order'].includes(architectureMode),
+     allowHostGridResearch:architectureMode==='height-order',
+     allowHostVolumeResearch:architectureMode==='height-order',
+     allowHostSculpturalResearch:architectureMode==='height-order',
+     allowModelRoomHeightOrderResearch:architectureMode==='height-order'
     }):
     recovered?.result??(equipmentMode==='assembled'?
      parseR135FreshFurnishedReply(raw,request):null);
@@ -376,7 +399,8 @@ export async function runR134FreshModel({
     if(topologyMode==='graph'){
      write(dir,'R139_MODEL_SPATIAL_RELATIONS.json',composed.semanticIntent);
      if(composed.architectural){
-      const archTag=architectureMode==='topology'?'R160':
+      const archTag=architectureMode==='height-order'?'R178':
+       architectureMode==='topology'?'R160':
        architectureMode==='floorplan'?'R159':
        architectureMode==='spatial'?'R158':
        architectureMode==='roofline'?'R155':
@@ -396,6 +420,12 @@ export async function runR134FreshModel({
        spatialBalanceProof:composed.relationalBase?.r158SpatialBalanceEvidence??null,
        depthBalanceProof:composed.relationalBase?.r159DepthBalanceEvidence??null,
        independentSideGalleryProof:composed.relationalBase?.r160TopologyEvidence??null,
+       explicitHeightOrderProvenance:architectureMode==='height-order'?
+        'FROM_SAME_RAW_REPLY_TEST_DOUBLE_UNTIL_REAL_MODEL_ATTESTED':null,
+       explicitHeightOrder:architectureMode==='height-order'?
+        composed.r178ExplicitHeightOrderFromCaller:null,
+       actualHighRoomSourceProof:architectureMode==='height-order'?
+        result.r170FourRoomVolumeEvidence??null,
        realUsableRoomSectionProof:composed.architectural?.integrated?.r162RoomSectionEvidence??null,
        actualExteriorClerestoryProof:composed.architectural?.completed?.r163DaylightAndRoofEvidence??null,
        humanArtReview:'NOT_REVIEWED',
@@ -439,6 +469,13 @@ export async function runR134FreshModel({
     Boolean(composed?.architectural?.volume);
    report.genuineRooflineSourceOnly=
     Boolean(composed?.architectural?.roofline);
+   report.explicitFourRoomHeightOrderFromSameRawReply=
+    architectureMode==='height-order'&&
+    Boolean(composed?.r178ExplicitHeightOrderFromCaller);
+   report.actualFourRoomHighSourceOnly=
+    architectureMode==='height-order'&&
+    composed?.architectural?.roomSectionScope===
+      'FOUR_ROOMS_R178_EXPLICIT_CALLER_VERTICAL_RANK_REAL_B143';
    report.genuineTopologyDrivenDaylightSourceOnly=architectureMode==='topology'&&
     Boolean(composed?.architectural?.completed?.r163DaylightAndRoofEvidence);
    report.genuineTopologyDrivenHighRoomsSourceOnly=architectureMode==='topology'&&
