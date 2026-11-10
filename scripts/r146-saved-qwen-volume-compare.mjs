@@ -23,7 +23,8 @@ const faces=['front','rear','west','east','roof'];
 const key=p=>p.slice(0,3).join(',');
 const low=p=>new Map(p.compiled.primitives.filter(v=>v[1]<=5).map(v=>[key(v),v[3]]));
 const equal=(a,b)=>a.size===b.size&&[...a].every(([k,v])=>b.get(k)===v);
-const safe=p=>p.readiness==='NOT_PREPARED'&&p.worldWrites===0&&
+const safe=(p,legacy=false)=>(p.readiness==='NOT_PREPARED'||
+ (legacy&&p.readiness===undefined))&&p.worldWrites===0&&
  p.worldContacts===0&&p.executionAllowed===false&&p.constructionApproved===false&&
  p.gates?.length===9&&p.gates.every(g=>g==='BLOCKED')&&p.BuildPlan?.operations?.length===0;
 const write=(d,n,v)=>fs.writeFileSync(path.join(d,n),
@@ -42,7 +43,7 @@ function run(dir){
  assert.equal(original.placements.length,8);
  assert.equal(original.program[0].zones.length,4);
  assert.equal(q.relationalBase.directAdjacencyDoorEvidence.length,1);
- assert(safe(original));
+ assert(safe(original,true)); // R130 legacy lacks readiness; other 9 safety flags remain mandatory
  const shell=deriveR149EnvelopeExpression(original,{plan:q.derivedModelReply});
  assert.equal(shell.r149ExpressionEvidence.unchangedInteriorVoxels,true);
  assert.equal(shell.r149ExpressionEvidence.modelIntentChanged,false);
