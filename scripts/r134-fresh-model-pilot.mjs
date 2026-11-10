@@ -314,14 +314,15 @@ export async function runR134FreshModel({
  write(dir,'MODEL_REQUEST_NO_HIDDEN_GOALS.json',{model,endpoint,
   request:sourceRequest,maxTokens,protocol:'ONE_LOCAL_RESPONSE_NO_RETRY'});
  try{
-  // Gate C P1 currently HOLD: do not even GET the model list or cause
-  // Ollama model loading from the new real R178 CLI path. Only test-double
-  // injection is permitted for offline SOURCE verification here.
+  // Gate C P1 currently HOLD: no real GET or POST in ANY R134 mode.
+  // Only synthetic fetch injections are permitted for offline SOURCE tests.
   // This is a safe-default research guard, NOT a substitute for the future
   // independently attested Windows RAM/commit/VRAM/PID/exit approval.
-  if(architectureMode==='height-order'&&!injected){
-   report.status='HOLD_R178_GATE_C_P1_REAL_MODEL_NOT_AUTHORIZED';
-   report.reason='R178_REAL_MODEL_REQUIRES_INDEPENDENT_GATE_C_P1_CLEARANCE';
+  if(!injected){
+   // Applies to EVERY native R134 architecture mode, not only R178.
+   // Prior R125 user consent is not independent, current Gate C P1 clearance.
+   report.status='HOLD_GATE_C_P1_REAL_MODEL_NOT_AUTHORIZED';
+   report.reason='REAL_MODEL_REQUIRES_INDEPENDENT_GATE_C_P1_CLEARANCE';
    return report;
   }
   const p=await preflightR125Ollama({model,endpoint,fetcher});
