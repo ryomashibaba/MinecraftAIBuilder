@@ -135,7 +135,7 @@ test('V4H direct real transport refuses POST even if fake flag is set without CI
   await assert.rejects(()=>runV4DLocalAuthor({
    model:'qwen3:14b',outDir:tmp.out,authorMezzanine:true,
    prompt:'Author a coherent two-level civic building with upper gallery.'
-  }),/R125_V4D_V4H_REAL_POST_REQUIRES_MONITORED_GATEC_PATH/);
+  }),/R125_V4D_LOCAL_AUTHOR_V4H_REAL_POST_REQUIRES_MONITORED_GATEC_PATH/);
   assert.equal(fs.existsSync(tmp.out),false);
  }finally{
   if(oldCI===undefined)delete process.env.GITHUB_ACTIONS;
