@@ -51,6 +51,23 @@ test('R178 can only be selected explicitly with a local graph-and-equipment rout
   '--brief',brief,'--out','test','--topology','graph','--equipment','assembled',
   '--architecture','height-order','--endpoint','https://remote.example/v1/chat/completions']));
 });
+test('R178 real default runner stops BEFORE any local model preflight/POST under Gate C P1 HOLD',async t=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'r178-gate-c-'));
+ t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
+ const output=path.join(root,'real-gated');
+ const report=await runR134FreshModel(cfg(output));
+ assert.equal(report.status,'HOLD_R178_GATE_C_P1_REAL_MODEL_NOT_AUTHORIZED');
+ assert.equal(report.modelCalls,0);
+ assert.equal(report.originalModelResponseCaptured,false);
+ assert.equal(report.modelAuthoredProgram,false);
+ assert.equal(report.worldWrites,0);
+ assert.deepEqual(report.gates,Array(9).fill('BLOCKED'));
+ assert.equal(report.testInjectionPresent,false);
+ assert.equal(fs.existsSync(path.join(output,'MODEL_RAW_ORIGINAL.txt')),false);
+ assert.equal(fs.existsSync(path.join(output,'DERIVED_B143_SOURCE.json')),false);
+ const request=JSON.parse(fs.readFileSync(path.join(output,'MODEL_REQUEST_NO_HIDDEN_GOALS.json'),'utf8'));
+ assert.deepEqual(request.request.requiredDistinctFunctionalZones,{minimum:4,maximum:4});
+});
 test('one-response mocked local path preserves raw height order through REAL B143 and model=TEST_DOUBLE',async t=>{
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'r178-bridge-'));
  t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
@@ -64,7 +81,10 @@ test('one-response mocked local path preserves raw height order through REAL B14
    assert(body.messages[0].content.includes(R178_HEIGHT_SCHEMA));
    assert(body.messages[0].content.includes('roomHeightOrder'));
    assert(body.messages[0].content.includes('EXACTLY four'));
-   assert.equal(JSON.parse(body.messages[1].content).naturalLanguageBrief,brief);
+   assert(body.messages[0].content.includes('roomHeightOrder, not from relative room weights'));
+   const request=JSON.parse(body.messages[1].content);
+   assert.equal(request.naturalLanguageBrief,brief);
+   assert.deepEqual(request.requiredDistinctFunctionalZones,{minimum:4,maximum:4});
   })});
   assert.equal(result.status,'HOLD_TEST_DOUBLE_NOT_REAL_INFERENCE');
   assert.equal(result.modelCalls,1);
