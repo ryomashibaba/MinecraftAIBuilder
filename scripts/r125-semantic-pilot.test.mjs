@@ -84,10 +84,11 @@ test('missing exact model never sends POST',async t=>{
  assert.equal(posts,0);
  assert.equal(r.modelCalls,0);
 });
-test('real localhost HTTP fixture follows provider protocol and compiles real scene',async t=>{
+test('native R125 client cannot GET or POST even to a local listener while Gate C P1 is HOLD',async t=>{
  const root=temp();t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
- let posts=0;
+ let posts=0,gets=0;
  const server=http.createServer((req,res)=>{
+  gets++;
   if(req.method==='GET'){
    res.writeHead(200,{'Content-Type':'application/json'});
    res.end(JSON.stringify({models:[{name:'qwen3:14b'}]}));return;
@@ -104,10 +105,19 @@ test('real localhost HTTP fixture follows provider protocol and compiles real sc
  const r=await runR125SemanticPilot({model:'qwen3:14b',
   endpoint:'http://127.0.0.1:'+port+'/v1/chat/completions',
   outDir:path.join(root,'pilot')});
- assert.equal(posts,1);
- assert.equal(r.status,'SOURCE_AND_3D_READY_HUMAN_REVIEW_REQUIRED');
- assert.ok(r.sourceSha256);
+ assert.equal(gets,0,'native preflight GET must never contact listener');
+ assert.equal(posts,0,'no real model POST may reach listener');
+ assert.equal(r.status,'HOLD_GATE_C_P1_REAL_MODEL_NOT_AUTHORIZED');
+ assert.equal(r.modelCalls,0);
+ assert.equal(r.originalRawCaptured,false);
+ assert.equal(r.testInjectionPresent,false);
+ assert.equal(r.sourceSha256,null);
  assert.equal(r.world.worldWrites,0);
+ assert.deepEqual(r.world.gates,Array(9).fill('BLOCKED'));
+ assert.equal(fs.existsSync(path.join(root,'pilot','MODEL_RESPONSE_ORIGINAL.txt')),false);
+ assert.equal(fs.existsSync(path.join(root,'pilot','B143_SOURCE.json')),false);
+ const persisted=JSON.parse(fs.readFileSync(path.join(root,'pilot','R125_SEMANTIC_REPORT.json'),'utf8'));
+ assert.equal(persisted.status,r.status);
 });
 test('invalid endpoint, nonempty existing directory, bad CLI rejected',async t=>{
  assert.throws(()=>parseR125SemanticArgs(['--model','qwen3:14b',

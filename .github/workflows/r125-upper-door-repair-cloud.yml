@@ -348,8 +348,10 @@ jobs:
         run: |
           node --check scripts/r125-japanese-makecode.mjs
           node --check scripts/r125-architecture-plan.test.mjs
-          node --test scripts/r125-architecture-plan.test.mjs
+          node --check scripts/r125-semantic-pilot.mjs
+          node --test scripts/r125-architecture-plan.test.mjs scripts/r125-semantic-pilot.test.mjs
       - name: Ensure source-only result is not an ART or Minecraft permit
         run: |
           echo 'R125 practical HOST stair-clear is opt-in only where fixed upper divider intersects z7/8 stair landing.' >> "$GITHUB_STEP_SUMMARY"
-          echo 'Unmodified model plans; frozen legacy geometry unchanged. B143/MakeCode source only; ART HOLD, Minecraft walking NOT TESTED; 9 gates BLOCKED.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Unmodified model plans; frozen legacy geometry unchanged. R125 native model GET/POST blocked until Gate C P1 independently clears.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'B143/MakeCode source only; ART HOLD, Minecraft walking NOT TESTED; 9 gates BLOCKED.' >> "$GITHUB_STEP_SUMMARY"

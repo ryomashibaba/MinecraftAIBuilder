@@ -121,6 +121,16 @@ export async function runR125SemanticPilot({model,outDir,prompt=PROMPT,
   requestProtocol:'OPENAI_COMPATIBLE_JSON_OBJECT',
   ...{timeoutMs,maxOutputTokens:1536,reasoningEffort:'none'}});
  try{
+  // Gate C P1 remains HOLD on this research branch. The legacy R125
+  // standalone CLI and MakeCode --prompt entry MUST NOT reach either
+  // /api/tags GET or a model-generation POST without the separately
+  // attested Windows PRIVATE resource/monitor and exact-HEAD CI gates.
+  // Test-injected fetchers remain offline source test doubles only.
+  if(!report.testInjectionPresent){
+   report.status='HOLD_GATE_C_P1_REAL_MODEL_NOT_AUTHORIZED';
+   report.reason='REQUIRES_PRIVATE_MONITOR_RESOURCE_CALIBRATION_AND_EXACT_HEAD_CI';
+   return report;
+  }
   const available=await preflightR125Ollama({model,endpoint,fetcher});
   if(available.status!=='LOCAL_MODEL_LISTED'){
    report.status='HOLD_MODEL_NOT_INSTALLED';return report;
