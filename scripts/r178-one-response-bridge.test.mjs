@@ -56,7 +56,7 @@ test('R178 real default runner stops BEFORE any local model preflight/POST under
  t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
  const output=path.join(root,'real-gated');
  const report=await runR134FreshModel(cfg(output));
- assert.equal(report.status,'HOLD_R178_GATE_C_P1_REAL_MODEL_NOT_AUTHORIZED');
+ assert.equal(report.status,'HOLD_GATE_C_P1_REAL_MODEL_NOT_AUTHORIZED');
  assert.equal(report.modelCalls,0);
  assert.equal(report.originalModelResponseCaptured,false);
  assert.equal(report.modelAuthoredProgram,false);
@@ -67,6 +67,22 @@ test('R178 real default runner stops BEFORE any local model preflight/POST under
  assert.equal(fs.existsSync(path.join(output,'DERIVED_B143_SOURCE.json')),false);
  const request=JSON.parse(fs.readFileSync(path.join(output,'MODEL_REQUEST_NO_HIDDEN_GOALS.json'),'utf8'));
  assert.deepEqual(request.request.requiredDistinctFunctionalZones,{minimum:4,maximum:4});
+});
+test('all native R134 modes fail closed before any local GET/POST under Gate C P1 HOLD',async t=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'r134-global-gate-'));
+ t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
+ for(const mode of ['none','topology','height-order']){
+  const outDir=path.join(root,mode);
+  const report=await runR134FreshModel({...cfg(outDir),architectureMode:mode});
+  assert.equal(report.status,'HOLD_GATE_C_P1_REAL_MODEL_NOT_AUTHORIZED');
+  assert.equal(report.modelCalls,0);
+  assert.equal(report.originalModelResponseCaptured,false);
+  assert.equal(report.testInjectionPresent,false);
+  assert.equal(report.worldWrites,0);
+  assert.deepEqual(report.gates,Array(9).fill('BLOCKED'));
+  assert(!fs.existsSync(path.join(outDir,'MODEL_RAW_ORIGINAL.txt')));
+  assert(!fs.existsSync(path.join(outDir,'DERIVED_B143_SOURCE.json')));
+ }
 });
 test('one-response mocked local path preserves raw height order through REAL B143 and model=TEST_DOUBLE',async t=>{
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'r178-bridge-'));
