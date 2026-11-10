@@ -946,7 +946,9 @@ test('explicit one-cell two-volume roof eaves alter actual B143 skyline while pr
   }
   assert.equal(added,116,'true eave solids, not a texture swap');
   const start=side==='west'?1:23-size;
-  for(let x=start;x<23;x++)for(let z=23-size;z<23;z++){
+  const end=side==='west'?1+size:23;
+  assert.equal(end-start,size,'sky-open court X span matches authored corner width');
+  for(let x=start;x<end;x++)for(let z=23-size;z<23;z++){
    assert.equal(b.get([x,1,z].join(',')),4,'paved wooden courtyard floor');
    for(let y=2;y<actual.design.bounds.height;y++)
     assert.equal(b.has([x,y,z].join(',')),false,'the court stays sky-open');
