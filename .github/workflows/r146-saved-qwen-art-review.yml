@@ -5,6 +5,7 @@ on:
       - research/r125-entry-nearest-safe-source-20261109
     paths:
       - '.github/workflows/r146-saved-qwen-art-review.yml'
+      - 'scripts/r146-saved-qwen-volume-compare.mjs'
 permissions:
   contents: read
 jobs:
