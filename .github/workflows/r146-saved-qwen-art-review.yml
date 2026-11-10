@@ -89,10 +89,12 @@ jobs:
             !(v.y>=bounds.minY+1&&(v.x===0||v.z===0))):sourceCells;
            const occupied=new Set(cells.map(v=>v.x+','+v.y+','+v.z));
            const has=(x,y,z)=>occupied.has(x+','+y+','+z);
-           const project=(x,y,z)=>[(x-z)*10,(x+z)*5.5-y*11];
+           // Camera looks down from negative x and z: vertical projection MUST use -(x+z).
+          const project=(x,y,z)=>[(x-z)*10,-(x+z)*5.5-y*11];
            const faces=[];let exposedFaces=0;
            const poly=(a,color)=>{faces.push({points:a.map(v=>project(...v)),color});exposedFaces++};
-           cells.sort((a,b)=>(b.x+b.z)-(a.x+a.z)||a.y-b.y);
+           // Project opaque cubes from back to front in depth (-x,+y,-z).
+          cells.sort((a,b)=>(b.x+b.z-b.y)-(a.x+a.z-a.y)||a.y-b.y);
            for(const {x,y,z,m} of cells){
             const c=materialColors[m]??materialColors[0];
             if(!has(x,y,z-1))poly([[x,y,z],[x+1,y,z],[x+1,y+1,z],[x,y+1,z]],shade(c,.79));
