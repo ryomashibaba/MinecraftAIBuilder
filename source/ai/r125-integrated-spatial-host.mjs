@@ -186,13 +186,15 @@ export function createIntegratedSpatialHost({deriveIntegratedShell,compileDesign
      };
      const later=payload.operations.slice(opIndex+1).filter(x=>
       x.type==='SPACE'&&x.link?.to===parent.id);
-     const canFitLater=(i,placed,used)=>i===later.length||sides.some(dir=>{
+     const canFitLater=(i,placed,used)=>i===later.length||
+      (later[i].link.side?[later[i].link.side]:sides).some(dir=>{
       const c=valid(later[i],dir,placed,used);
       return c!==null&&canFitLater(i+1,[...placed,{id:later[i].key,rect:c}],
        new Set([...used,dir]));
      });
      const used=reserved.get(parent.id);
-     const candidates=sides.map(dir=>({side:dir,rect:valid(op,dir,intent.spaces,used)}))
+     const candidates=(op.link.side?[op.link.side]:sides)
+      .map(dir=>({side:dir,rect:valid(op,dir,intent.spaces,used)}))
       .filter(x=>x.rect!==null);
      // Favor the historical first-fit layout if it leaves all later siblings
      // feasible. Only change direction when that first-fit demonstrably traps
@@ -306,7 +308,10 @@ export function createIntegratedSpatialHost({deriveIntegratedShell,compileDesign
     yes(fits(spec),'FIXTURE_OUTSIDE_ROOM');
     intent.fixtures.push({id:'fixture-'+opIndex,space:op.space,role:op.purpose,parts:spec.parts,servicePad:spec.pad});
    }else fail('UNKNOWN_OPERATION');
-   journal.push({opIndex,type:op.type});
+   journal.push({opIndex,type:op.type,
+    ...(op.type==='SPACE'?{locationAuthority:op.link?
+     (Object.hasOwn(op.link,'side')?'AUTHOR_EXPLICIT_SIDE_UNATTESTED':
+      'HOST_DERIVED_SIDE'):'HOST_DERIVED_ROOT_ANCHOR'}:{})});
   }
   yes(intent.architecture.entry,'EXPLICIT_SHELTER_MUST_CONNECT_ENTRY');
   // The existing PRIVATE engine rejects missing or overlapping roof coverage.

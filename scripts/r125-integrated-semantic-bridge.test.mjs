@@ -309,6 +309,31 @@ test('parent choice moves the physical space; unsupported engine capabilities HO
  assert.throws(()=>createIntegratedSpatialHost(),/EXISTING_ENGINE_REQUIRED/);
 });
 
+test('author-chosen relative room side survives HOST placement; missing side remains HOST-DERIVED',()=>{
+ const host=createIntegratedSpatialHost({deriveIntegratedShell:()=>{throw Error('PRIVATE_ONLY');}});
+ const original=supportedSpatialAuthor();
+ const build=x=>host.expand(prepareIntegratedSemanticBridge(x).payload);
+ const unspecified=build(original);
+ const west=structuredClone(original);west.spaces[1].link.side='west';
+ const east=structuredClone(original);east.spaces[1].link.side='east';
+ const left=build(west),right=build(east);
+ const root=left.intent.spaces[0].rect;
+ assert(left.intent.spaces[1].rect[0]<root[0]);
+ assert(right.intent.spaces[1].rect[0]>root[0]);
+ assert.notDeepEqual(left.intent.spaces[1].rect,right.intent.spaces[1].rect);
+ assert.deepEqual(left.authorEcho,west);assert.deepEqual(right.authorEcho,east);
+ assert.equal(unspecified.journal[2].locationAuthority,'HOST_DERIVED_SIDE');
+ assert.equal(left.journal[2].locationAuthority,'AUTHOR_EXPLICIT_SIDE_UNATTESTED');
+ assert.notEqual(prepareIntegratedSemanticBridge(west).authorSha256,
+  prepareIntegratedSemanticBridge(east).authorSha256);
+ const blocked=structuredClone(original);blocked.spaces[1].link.side='south';
+ assert.throws(()=>build(blocked),/PRIVATE_SPATIAL_NO_SAFE_PARENT_CONTACT/);
+ const invalid=structuredClone(original);invalid.spaces[1].link.side='above';
+ assert.throws(()=>validateIntegratedSemanticIntent(invalid),/R125_INTEGRATED_SEMANTIC_LINK_/);
+ assert.equal(INTEGRATED_SPATIAL_V7_SUPPORTED_PROMPT.includes('HOST-DERIVED'),true);
+ // Public mechanical host only. The frozen PRIVATE engine and final B143/ART remain untested.
+});
+
 test('V7 optional model contract names only currently implemented PRIVATE HOST capabilities',()=>{
  const prompt=INTEGRATED_SPATIAL_V7_SUPPORTED_PROMPT;
  assert.equal(INTEGRATED_SPATIAL_V7_SUPPORTED_PROTOCOL,'V7_PRIVATE_SINGLE_SEMANTIC_SPATIAL_HOST_V1');

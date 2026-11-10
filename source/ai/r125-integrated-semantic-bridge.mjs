@@ -52,8 +52,10 @@ export function validateIntegratedSemanticIntent(untrusted){
      ![s.footprint.width,s.footprint.depth].every(n=>
       Number.isSafeInteger(n)&&n>=8&&n<=14)))fail('FOOTPRINT_'+i);
   if(i===0){if(s.link!==null)fail('ROOT_LINK');}
-  else if(!fields(s.link,['to','kind']) || !known.has(s.link.to) ||
-   !['door','open'].includes(s.link.kind))fail('LINK_'+i);
+  else if(!(fields(s.link,['to','kind']) ||
+   fields(s.link,['to','kind','side'])) || !known.has(s.link.to) ||
+   !['door','open'].includes(s.link.kind) ||
+   (Object.hasOwn(s.link,'side')&&!sides.includes(s.link.side)))fail('LINK_'+i);
   known.add(s.key);
  }
  if(!Array.isArray(value.roofs) || value.roofs.length!==value.spaces.length)
@@ -197,7 +199,7 @@ export const INTEGRATED_SEMANTIC_AUTHOR_PROMPT=[
  'Design the building yourself, not a style label for a fixed template.',
  'Return only one JSON object with schema,id,concept,spaces,roofs,entry,shelters,features.',
  'schema='+INTEGRATED_SEMANTIC_SCHEMA,
- 'Use 2..8 spaces in parent-before-child order. Each has key,purpose,link; first link=null; others link={to:earlierKey,kind:door|open}. Optional per-space footprint:{width:8..14,depth:8..14}; omitted=12x10. Coordinate-free dimensions only.',
+ 'Use 2..8 spaces in parent-before-child order. Each has key,purpose,link; first link=null; others link={to:earlierKey,kind:door|open,optional side:east|south|west|north}. The side is the child room direction relative to its parent; if omitted HOST chooses and must label it HOST-DERIVED. Optional per-space footprint:{width:8..14,depth:8..14}; omitted=12x10. Coordinate-free dimensions only.',
  'Each space has one roof entry {space,profile:gable|shed|flat|segmented|hip|barrel,axis:x|z,rank:primary|secondary|subordinate}; exactly one primary.',
  'Entry {face:north|south|east|west,space:key,intent:meaningfulText}.',
  'Shelters 0..3: {purpose,connectTo:key,edge:north|south|east|west,scale:small|medium|large,roof:gable|shed|flat|segmented}.',
@@ -217,7 +219,7 @@ export const INTEGRATED_SPATIAL_V7_SUPPORTED_PROMPT=[
  'Return ONE raw JSON object ONLY, no markdown or surrounding text. EXACT top-level keys: schema,id,concept,spaces,roofs,entry,shelters,features.',
  'schema is exactly '+INTEGRATED_SEMANTIC_SCHEMA+'. id and each space key must be unique lowercase slugs, start with a letter, 3..25 characters.',
  'concept, purposes, entry intent are nonempty meaningful natural-language strings of 3..160 characters each.',
- 'spaces: 2..4 rooms in parent-before-child order, EXACT {key,purpose,link} or {key,purpose,link,footprint:{width,depth}}; first link:null, later link:{to:<earlier-key>,kind:door|open}. Author relationships, functions and optional dimensions yourself.',
+ 'spaces: 2..4 rooms in parent-before-child order, EXACT {key,purpose,link} or {key,purpose,link,footprint:{width,depth}}; first link:null, later link:{to:<earlier-key>,kind:door|open} or {to:<earlier-key>,kind:door|open,side:east|south|west|north}. Choose side to author whole-building layout; omitted side is HOST-DERIVED. Author relationships, functions and optional dimensions yourself.',
  'Room footprint is 12x10 by default. Optional footprint width and depth are integers 8..14; each room may differ. This V7 HOST cannot make nonrectangular, multistorey or gabled rooms. Do not claim those capabilities.',
  'roofs: exactly ONE per room, EXACT {space,profile:shed|hip|barrel,axis:x|z,rank:primary|secondary|subordinate}. EXACTLY ONE primary roof. Each roof uses the requested form; unsupported forms HOLD.',
  'entry: EXACT {face:north|south,space:<one-room-key>,intent:<meaningful-intent>}.',
