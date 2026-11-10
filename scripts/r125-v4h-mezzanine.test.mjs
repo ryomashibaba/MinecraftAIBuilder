@@ -8,6 +8,21 @@ import {compileAuthoredPublicMezzanine}
  from '../source/ai/r125-v4h-authored-mezzanine.mjs';
 import {syntheticFiveAuthorMezzanineCases,exportV4HTrueMezzanineStudy}
  from './r125-v4h-mezzanine-source-study.mjs';
+test('V4H Windows launcher refuses unmonitored real Qwen before clone or PRIVATE directories',()=>{
+ const powershell=fs.readFileSync(new URL('./r125-v4h-real-qwen-trial.ps1',import.meta.url),'utf8');
+ const checkOnly=powershell.indexOf('if ($CheckOnly) {');
+ const gate=powershell.indexOf('$fakeOnlyCI = $false');
+ const pinned=powershell.indexOf("if ($ExpectedCommit -cnotmatch");
+ const directory=powershell.indexOf("$sourceRoot = Join-Path $base 'IsolatedV4H'");
+ const clone=powershell.indexOf('clone --quiet --depth 1 --single-branch');
+ assert(checkOnly>=0&&checkOnly<gate);
+ assert(gate>=0&&gate<pinned&&gate<directory&&gate<clone);
+ assert.match(powershell,/if \(-not \$fakeOnlyCI\) \{\s*throw 'V4H_REAL_POST_REQUIRES_MONITORED_GATEC_PATH'/);
+ assert(powershell.includes('GITHUB_CI_ONLY_FAKE_OLLAMA_READY'));
+ assert(powershell.includes("GITHUB_REF_NAME -ceq 'research/r125-entry-nearest-safe-source-20261109'"));
+ assert(powershell.includes('$head -cne $ExpectedCommit'));
+});
+
 test('V4H FIVE independent author mezzanines really reach 2-wide upper functional service with 3D stairs',()=>{
  const samples=syntheticFiveAuthorMezzanineCases(),frozen=structuredClone(samples);
  assert.deepEqual(samples.map(s=>s.genre),['housing','shop','research','gallery','station']);
