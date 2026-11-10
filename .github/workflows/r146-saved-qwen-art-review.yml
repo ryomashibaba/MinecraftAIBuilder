@@ -1,0 +1,153 @@
+name: R146 preserved Qwen offline B143 and three-view review
+on:
+  push:
+    branches:
+      - research/r125-entry-nearest-safe-source-20261109
+    paths:
+      - '.github/workflows/r146-saved-qwen-art-review.yml'
+permissions:
+  contents: read
+jobs:
+  one-building-source-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify saved Qwen bytes, original B143 and independent routes
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test scripts/r146-user-real-roof-recovery.test.mjs
+          node scripts/r146-replay-saved-qwen.mjs --out "$RUNNER_TEMP/r146-art"
+      - name: Strict B143 replay verification and three source-only SVG views
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import path from 'node:path';
+          import assert from 'node:assert/strict';
+          import {createHash} from 'node:crypto';
+          import {verifyCompiled} from './source/ai/b143-building-dsl.mjs';
+          
+          const dir=path.join(process.env.RUNNER_TEMP,'r146-art');
+          const read=n=>JSON.parse(fs.readFileSync(path.join(dir,n),'utf8'));
+          const report=read('R146_REPORT.json');
+          const scene=read('R146_FINAL_B143_VOXELS.json');
+          const source=read('R146_FINAL_B143_SOURCE.json');
+          const independent=read('R146_INDEPENDENT_GRAPH_AUDIT.json');
+          const raw=fs.readFileSync('scripts/fixtures/r146-user-qwen14b-20261025-raw.json','utf8');
+          const sha=createHash('sha256').update(raw).digest('hex');
+          assert.equal(sha,'d67dc624744b4745e8e8c228e20bde00ccd39c7b506d0ad82753f54f1db82591');
+          assert.equal(report.verifiedOriginalR145RawSha256,true);
+          assert.equal(report.status,'REAL_QWEN_PROGRAM_HOST_CORRECTED_MATERIAL_REAL_3D_SOURCE_REVIEW_REQUIRED');
+          assert.equal(report.originalQwenRawSha256,sha);
+          assert.equal(report.modelCalls,0);
+          assert.equal(report.worldWrites,0);
+          assert.equal(report.roomCount,4);
+          assert.equal(report.furnishedEquipmentCount,8);
+          assert.equal(report.directDoorCount,1);
+          assert.equal(report.qwenRoomLayoutChanged,false);
+          assert.equal(report.qwenRoomGraphChanged,false);
+          assert.equal(report.qwenEquipmentChanged,false);
+          assert.equal(report.independentGraphSourceAudit,'SOURCE_ROOM_GRAPH_VERIFIED');
+          assert.equal(independent.status,'SOURCE_ROOM_GRAPH_VERIFIED');
+          assert.equal(report.finalSourceRoutes,'SOURCE_ROUTES_REACH_ALL_ZONES');
+          assert.equal(report.finalVoxelCount,scene.primitives.length);
+          assert.equal(report.sourceSha256,scene.sourceSha256);
+          assert.equal(report.geometrySha256,scene.geometrySha256);
+          assert.equal(verifyCompiled(source,scene),true);
+          assert.deepEqual(report.gates,Array(9).fill('BLOCKED'));
+          assert.deepEqual(report.BuildPlan.operations,[]);
+          assert.ok(fs.existsSync(path.join(dir,'index.html')));
+          
+          const rawModel=JSON.parse(raw);
+          const materialColors=['#8f918d','#b7b9b1','#687c85','#a6ced6','#ab845a','#eadb99','#c48d67'];
+          const voxels=scene.primitives;
+          assert.ok(voxels.every(v=>v.length===4&&v.slice(0,3).every(Number.isSafeInteger)));
+          const bounds={
+           minX:Math.min(...voxels.map(v=>v[0])),maxX:Math.max(...voxels.map(v=>v[0])),
+           minY:Math.min(...voxels.map(v=>v[1])),maxY:Math.max(...voxels.map(v=>v[1])),
+           minZ:Math.min(...voxels.map(v=>v[2])),maxZ:Math.max(...voxels.map(v=>v[2]))
+          };
+          function shade(hex,ratio){
+           const arr=[1,3,5].map(i=>Math.min(255,Math.max(0,Math.round(parseInt(hex.slice(i,i+2),16)*ratio))));
+           return '#'+arr.map(c=>c.toString(16).padStart(2,'0')).join('');
+          }
+          function makeView(name,flipX,flipZ,cutaway){
+           const sourceCells=voxels.map(([x,y,z,m])=>({
+            x:flipX?bounds.maxX-x:x-bounds.minX,
+            y,z:flipZ?bounds.maxZ-z:z-bounds.minZ,m
+           }));
+           const cells=cutaway?sourceCells.filter(v=>
+            v.y<=Math.max(bounds.minY+3,bounds.maxY-2)&&
+            !(v.y>=bounds.minY+1&&(v.x===0||v.z===0))):sourceCells;
+           const occupied=new Set(cells.map(v=>v.x+','+v.y+','+v.z));
+           const has=(x,y,z)=>occupied.has(x+','+y+','+z);
+           const project=(x,y,z)=>[(x-z)*10,(x+z)*5.5-y*11];
+           const faces=[];let exposedFaces=0;
+           const poly=(a,color)=>{faces.push({points:a.map(v=>project(...v)),color});exposedFaces++};
+           cells.sort((a,b)=>(b.x+b.z)-(a.x+a.z)||a.y-b.y);
+           for(const {x,y,z,m} of cells){
+            const c=materialColors[m]??materialColors[0];
+            if(!has(x,y,z-1))poly([[x,y,z],[x+1,y,z],[x+1,y+1,z],[x,y+1,z]],shade(c,.79));
+            if(!has(x-1,y,z))poly([[x,y,z],[x,y,z+1],[x,y+1,z+1],[x,y+1,z]],shade(c,.92));
+            if(!has(x,y+1,z))poly([[x,y+1,z],[x+1,y+1,z],[x+1,y+1,z+1],[x,y+1,z+1]],shade(c,1.13));
+           }
+           if(!faces.length)throw Error('EMPTY_3D_VIEW_'+name);
+           const px=faces.flatMap(f=>f.points.map(q=>q[0])),py=faces.flatMap(f=>f.points.map(q=>q[1]));
+           const minX=Math.min(...px),maxX=Math.max(...px),minY=Math.min(...py),maxY=Math.max(...py);
+           const x=minX-20,y=minY-20,w=Math.max(100,maxX-minX+40),h=Math.max(100,maxY-minY+40);
+           const polygon=f=>'<polygon points="'+f.points.map(q=>q.join(',')).join(' ')+'" fill="'+f.color+'" stroke="#313b43" stroke-opacity=".14" stroke-width=".45"/>';
+           const svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="'+[x,y,w,h].join(' ')+'" width="1200" height="850" role="img" aria-label="'+name+'">'
+             +'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="#f4f5f2"/>'
+             +faces.map(polygon).join('')
+             +'</svg>';
+           fs.writeFileSync(path.join(dir,name+'.svg'),svg,{flag:'wx'});
+           return {filename:name+'.svg',renderedSourceCells:cells.length,exposedFaces,cutaway};
+          }
+          const views=[
+           makeView('01-front-left',false,false,false),
+           makeView('02-rear-right',true,true,false),
+           makeView('03-interior-cutaway',false,false,true)
+          ];
+          const receipt={
+           schema:'r146-saved-real-qwen-offline-source-and-3view-v1',
+           inputSha256:sha,baseModelProvenance:'ARCHIVED_USER_REPORTED_QWEN_NOT_INDEPENDENTLY_ATTESTED',
+           originalRawPreserved:true,
+           materialCorrection:'HOST_ONLY_SINGLE_FIELD_SAWTOOTH_TO_METAL',
+           modelLayoutOrEquipmentRewritten:false,roomCount:4,modelChosenEquipmentCount:8,
+           finalVoxelCount:scene.primitives.length,sourceSha256:scene.sourceSha256,
+           geometrySha256:scene.geometrySha256,
+           independentGraphSourceAudit:independent.status,sourceRoutes:report.finalSourceRoutes,
+           genuineB143Recompiled:true,
+           visualViews:views,artStatus:'HUMAN_ART_NOT_REVIEWED',
+           physicalMinecraftFunction:'NOT_TESTED',
+           modelPOSTs:0,worldWrites:0,readiness:'NOT_PREPARED',gates:Array(9).fill('BLOCKED')
+          };
+          fs.writeFileSync(path.join(dir,'R146_THREE_VIEW_RECEIPT.json'),JSON.stringify(receipt,null,2)+'\n',{flag:'wx'});
+          const esc=s=>s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
+          const html='<!doctype html><html lang="ja"><meta charset="utf-8"><title>R146 実Qwen保存設計 — TRUE B143 3視点</title>'
+           +'<style>body{margin:2rem auto;max-width:1050px;font:16px system-ui;color:#23313a;background:#f8f9f8}figure{margin:2rem 0 3rem}img{width:100%;border:1px solid #cdd4d2;border-radius:8px}figcaption{margin-top:.6rem;color:#556}small{color:#687}a{color:#245c86}</style>'
+           +'<h1>Community Fabrication Commons</h1><p>保存済み実Qwen原文からオフラインで再生成した真正B143の3方向。'
+           +'美術PASSを意味しません。3枚目は可視化のため手前の外壁と上部セルを除去した断面表示です。</p>'
+           +'<p><a href="index.html">元の操作可能なB143 3Dビューアを開く</a></p>'
+           +views.map((v,i)=>'<figure><img src="'+esc(v.filename)+'" alt="B143 '+esc(v.filename)+'"><figcaption>'
+           +['正面・左斜め','背面・右斜め','室内断面（可視化上の切断のみ）'][i]+'</figcaption></figure>').join('')
+           +'<small>モデルPOST 0、世界書込 0。未承認の形式的ART採用やMinecraft動作確認はありません。</small></html>';
+          fs.writeFileSync(path.join(dir,'R146_THREE_VIEW_REVIEW.html'),html,{flag:'wx'});
+          console.log(JSON.stringify({result:'R146_REAL_ARCHIVED_MODEL_TRUE_B143_AND_INDEPENDENT_SOURCE_PASS_ART_UNREVIEWED',voxels:scene.primitives.length,rooms:report.roomCount,equipment:report.furnishedEquipmentCount,sha256:scene.geometrySha256,views:views.map(v=>v.filename),modelPOSTs:0,worldWrites:0}));
+          NODE
+      - name: Preserve genuine source and human ART review evidence
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r146-preserved-real-qwen-source-3view
+          path: ${{ runner.temp }}/r146-art/
+          if-no-files-found: error
+          retention-days: 7
