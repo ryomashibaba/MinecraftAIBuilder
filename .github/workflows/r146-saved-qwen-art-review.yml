@@ -69,7 +69,7 @@ jobs:
           const rawModel=JSON.parse(raw);
           const materialColors=['#8f918d','#b7b9b1','#687c85','#a6ced6','#ab845a','#eadb99','#c48d67'];
           const voxels=scene.primitives;
-          assert.ok(voxels.every(v=>v.length===4&&v.slice(0,3).every(Number.isSafeInteger)));
+          assert.ok(voxels.every(v=>v.length===5&&v.slice(0,3).every(Number.isSafeInteger)&&Number.isSafeInteger(v[3])&&Number.isSafeInteger(v[4])));
           const bounds={
            minX:Math.min(...voxels.map(v=>v[0])),maxX:Math.max(...voxels.map(v=>v[0])),
            minY:Math.min(...voxels.map(v=>v[1])),maxY:Math.max(...voxels.map(v=>v[1])),
