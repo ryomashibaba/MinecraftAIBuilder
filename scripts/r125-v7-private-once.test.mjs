@@ -192,6 +192,50 @@ test('real network transport combined with fake HEAD or CI must HOLD before all 
  }finally{fs.rmSync(tmp.root,{recursive:true,force:true});}
 });
 
+test('monitor failure during injected POST aborts, never retries and keeps B143/world HOLD',
+ {timeout:12000},async()=>{
+ const tmp=sandbox(),calls=[];
+ let preflightSamples=0,duringSamples=0,abortAcknowledged=false;
+ const monitor=async({phase}={})=>{
+  if(phase==='DURING_INFERENCE'){
+   duringSamples++;
+   return {status:'HOLD_MONITOR_WORKER_LOST',measuredAtEpochMs:Date.now()};
+  }
+  preflightSamples++;
+  return {status:'SAFE_FOR_ONE_REQUEST',measuredAtEpochMs:Date.now()};
+ };
+ const transport=async(url,req)=>{
+  calls.push({url,method:req?.method});
+  if(req?.method==='GET')return jsonResponse({models:[{name:'qwen3:14b'}]});
+  if(req?.method==='POST')return new Promise((resolve,reject)=>{
+   const stop=()=>{abortAcknowledged=true;reject(Error('INJECTED_ABORT_ACKNOWLEDGED'));};
+   if(req.signal?.aborted)stop();
+   else req.signal?.addEventListener('abort',stop,{once:true});
+  });
+  throw Error('UNEXPECTED_TEST_TRANSPORT');
+ };
+ try{
+  const report=await runV7PrivateOnce(params(tmp.outDir,{
+   authorMode:'v4h-mezzanine',checkResourceSafety:monitor
+  }),{ciFetcher:fakeCi(),modelFetcher:transport,headReader:()=>sha,timeoutMs:10000});
+  assert.equal(preflightSamples,2);
+  assert(duringSamples>=1);
+  assert.equal(abortAcknowledged,true);
+  assert.equal(report.status,'HOLD_MONITOR_INTERRUPTED');
+  assert.equal(report.reason,'MONITOR_ABORTED_GENERATION');
+  assert.equal(report.clientAbortSignaled,true);
+  assert.equal(report.modelGenerationAttempts,1);
+  assert.equal(calls.filter(x=>x.method==='POST').length,1);
+  assert.equal(report.b143Recompiled,false);
+  assert.equal(report.unloadConfirmed,false);
+  assert.equal(report.worldContacts,0);assert.equal(report.worldWrites,0);
+  assert.deepEqual(report.gates,Array(9).fill('BLOCKED'));
+  assert(!fs.existsSync(path.join(tmp.outDir,'V7_MODEL_RESPONSE_ORIGINAL_PRIVATE.txt')));
+  assert(!fs.existsSync(path.join(tmp.outDir,'V7_TRUE_B143_SOURCE_PRIVATE.json')));
+  assert(fs.existsSync(path.join(tmp.outDir,'V7_SEMANTIC_SHAREABLE.json')));
+ }finally{fs.rmSync(tmp.root,{recursive:true,force:true});}
+});
+
 test('independent monitor must advance both heartbeat and actual measurement time',async()=>{
  const {monitorSampleAdvanced}=await import('./r125-v7-private-once.mjs');
  const now=Date.now();

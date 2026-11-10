@@ -305,6 +305,11 @@ jobs:
             throw "V4D_WINDOWS_DEFAULT_MODE_DRIFT"
           }
           Write-Host "PASS: Windows launch preflight, branch/head/node validated. 0 model calls, 0 world writes."
+      - name: V7 simulated worker failure aborts POST on native Windows Node (NO MODEL)
+        shell: pwsh
+        run: |
+          node --test --test-name-pattern="monitor failure during injected POST" scripts/r125-v7-private-once.test.mjs
+          if ($LASTEXITCODE -ne 0) { throw 'V7_SIMULATED_MONITOR_FAILURE_ABORT_CONTRACT_FAILED' }
       - name: Verify one-click branch setup by actual isolated clone, NO model
         shell: cmd
         run: |
