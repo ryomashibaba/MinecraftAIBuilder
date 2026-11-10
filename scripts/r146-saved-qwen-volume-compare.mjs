@@ -14,6 +14,8 @@ import {parseR139RelationalFurnishedReply} from './r139-relational-model.mjs';
 import {deriveR149EnvelopeExpression} from '../source/ai/r149-architectural-expression.mjs';
 import {deriveR170FourRoomVolumes} from '../source/ai/r170-four-room-volumes.mjs';
 import {verifyCompiled} from '../source/ai/b143-building-dsl.mjs';
+import {R178_HEIGHT_SCHEMA,validateR178HeightOrderIntent}
+ from '../source/ai/r178-vertical-order-intent.mjs';
 import {renderR164Elevation} from './r164-exterior-audit.mjs';
 import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
@@ -54,7 +56,43 @@ function run(dir){
   'R149_ADDED_WINDOWS_MUST_PRESERVE_ALL_ORIGINAL_INTERIOR_CELLS');
  const shellLower=low(shell);
  const study=deriveR170FourRoomVolumes(shell,{studyStyle:'R173_SCULPTED_CLERESTORY'});
+ // Two STATIC EVALUATOR hypotheses. Neither is part of the archived Qwen reply.
+ // We do not inject R178 architecture into that reply or attribute it to Qwen.
+ const heightCases=[
+  {name:'static-entry-tall',roomHeightOrder:[
+   'planning-discussion','technical-repair-bay',
+   'fabrication-studio','entry-demonstration']},
+  {name:'static-fabrication-tall',roomHeightOrder:[
+   'entry-demonstration','planning-discussion',
+   'technical-repair-bay','fabrication-studio']}
+ ];
+ const selected=new Set(original.program[0].zones.map(x=>x.id));
+ assert.equal(selected.size,4);
  const builds=[['original',original],['host-clerestory',study]],optional=[];
+ const heightCaseOrders=new Map();
+ for(const x of heightCases){
+  const ir={schema:R178_HEIGHT_SCHEMA,entryHierarchy:'quiet',
+   daylightStrategy:'even',roofEdge:'fine',spatialTopology:'central-spine',
+   roomHeightOrder:x.roomHeightOrder};
+  assert.equal(validateR178HeightOrderIntent(ir),true);
+  assert(x.roomHeightOrder.length===selected.size&&
+   x.roomHeightOrder.every(id=>selected.has(id)),'R178_STUDY_UNKNOWN_MODEL_ROOM');
+  const generated=deriveR170FourRoomVolumes(shell,{
+   studyStyle:'R173_SCULPTED_CLERESTORY',roomHeightOrder:ir.roomHeightOrder});
+  assert.deepEqual(generated.r170FourRoomVolumeEvidence.callerHeightOrder,
+   x.roomHeightOrder);
+  assert.equal(generated.r170FourRoomVolumeEvidence.verticalOrderAuthority,
+   'EXPLICIT_CALLER_NOT_MODEL_ATTESTED');
+  for(const section of generated.r170FourRoomVolumeEvidence.roomSections)
+   assert.equal(section.roofY,[9,10,12,14][x.roomHeightOrder.indexOf(section.zoneId)],
+    'R178_STUDY_AUTHOR_ORDER_NOT_REALIZED');
+  builds.push([x.name,generated]);
+  heightCaseOrders.set(x.name,structuredClone(x.roomHeightOrder));
+ }
+ assert.notEqual(
+  builds.find(([name])=>name==='static-entry-tall')[1].geometrySha256,
+  builds.find(([name])=>name==='static-fabrication-tall')[1].geometrySha256,
+  'R178_DISTINCT_EVALUATOR_HEIGHT_ORDERS_NO_SHAPE_DIFFERENCE');
  try{
   builds.push(['host-upper-setback',
    deriveR170FourRoomVolumes(shell,{studyStyle:'R175_SETBACK_TERRACES'})]);
@@ -77,8 +115,11 @@ function run(dir){
    sourceReachableEquipment:8,
    realExteriorClerestoryWindows:p.r170FourRoomVolumeEvidence?.realExteriorClerestoryWindows??0,
    raisedRoomSections:p.r170FourRoomVolumeEvidence?.roomSections??null,
+   heightOrderFromExternalStaticEvaluator:heightCaseOrders.get(name)??null,
    derivedGeometryProvenance:name==='original'?'ORIGINAL_ARCHIVED_QWEN_DESIGN':
-    'R149_R170_HOST_DERIVED_NOT_MODEL_SELECTED_HEIGHT'};
+    heightCaseOrders.has(name)?
+     'STATIC_EVALUATOR_ORDER_APPLIED_TO_ARCHIVED_QWEN_ROOMS_NOT_QWEN_AUTHORED':
+     'R149_R170_HOST_DERIVED_NOT_MODEL_SELECTED_HEIGHT'};
  });
  assert.notEqual(evidence[0].geometrySha256,evidence[1].geometrySha256);
  assert(evidence[1].maxY>evidence[0].maxY+1);
@@ -90,7 +131,10 @@ function run(dir){
   status:'REAL_B143_SOURCE_PASS_HUMAN_ART_UNREVIEWED',
   archivedRawSha256:rawSha,modelOrigin:'USER_REPORTED_QWEN_UNATTESTED',
   originalModelRawEdited:false,modelRoomAndEquipmentAuthorshipKept:true,
-  hostMassingNotModelAuthored:true,modelCalls:0,worldWrites:0,
+  hostMassingNotModelAuthored:true,
+  heightOrderProvenance:'TWO_STATIC_EVALUATOR_HYPOTHESES_NOT_IN_ORIGINAL_MODEL_RAW',
+  originalQwenRawUnmodifiedSha256:rawSha,
+  modelCalls:0,worldWrites:0,
   readiness:'NOT_PREPARED',gates:Array(9).fill('BLOCKED'),variants:evidence,optional};
  fs.mkdirSync(dir,{recursive:false});
  const template=fs.readFileSync(path.join(root,'source/ai/b143-viewer-template.html'),'utf8');
@@ -107,8 +151,8 @@ function run(dir){
   faces.map(f=>'<figure><img src="'+n+'-'+f+'.svg"><figcaption>'+f+'</figcaption></figure>').join('')+'</section>').join('');
  write(dir,'index.html','<!doctype html><html lang="ja"><meta charset="utf-8"><title>R146 HOST-only 3D comparison</title>'+
   '<style>body{font:15px system-ui;background:#14212e;color:#f0f5f7;padding:24px}a{color:#80d5ff}main{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}section{border:1px solid #607080;padding:14px}figure{margin:12px 0}img{width:100%}figcaption{color:#b4cbd9}</style>'+
-  '<h1>Archived Qwen design vs HOST-only R170 massing</h1>'+
-  '<p>New volumes, heights and high windows are HOST-derived from archived room weights; NOT newly model-authored. ART/Human approval pending. Minecraft 9 gates blocked.</p><main>'+
+  '<h1>Archived Qwen rooms — HOST massing and R178 evaluator-only height alternatives</h1>'+
+  '<p>Archived model raw is immutable. Original R170 height studies use HOST weights. Both static-* variants are evaluator-specified counterfactual room-height orders, NOT authored by Qwen or by the user. All still require human ART. Minecraft 9 gates blocked.</p><main>'+
   cards+'</main><p><a href="R146_HOST_VOLUME_COMPARISON.json">Source receipt</a></p></html>');
  return receipt;
 }
