@@ -244,3 +244,42 @@ test('pre-POST clearance rejects cached SAFE measurements before any model attem
  assert.equal(prePostMonitorReady({...first,
   measuredAtEpochMs:now-46000},next,now),false);
 });
+
+test('V7 V4H monitored injected source compiles true B143 yet never promotes ART or model',async()=>{
+ const {MEZZANINE_SCHEMA}=await import('../source/ai/r125-v4h-mezzanine-author-ir.mjs');
+ const {syntheticFiveAuthorMezzanineCases}=await import('./r125-v4h-mezzanine-source-study.mjs');
+ const sample=syntheticFiveAuthorMezzanineCases()[0];
+ const a={...structuredClone(sample.heightAuthor),schema:MEZZANINE_SCHEMA,
+  mezzanine:structuredClone(sample.mezzanine)};
+ const tmp=sandbox(),calls=[],raw=JSON.stringify(a);
+ try{
+  const result=await runV7PrivateOnce(params(tmp.outDir,{authorMode:'v4h-mezzanine'}),{
+   ciFetcher:fakeCi(),modelFetcher:fakeModel(a,calls),headReader:()=>sha});
+  assert.equal(result.status,'HOLD_INJECTED_TEST_NOT_MODEL',result.reason);
+  assert.equal(result.protocol,'V7_PRIVATE_MONITORED_V4H_MEZZANINE_V1');
+  assert.equal(calls.filter(x=>x.method==='POST').length,1);
+  assert.equal(result.modelGenerationAttempts,1);
+  assert.equal(result.b143Recompiled,true);
+  assert(result.b143CellCount>1000);
+  assert.equal(result.worldWrites,0);
+  assert.deepEqual(result.gates,Array(9).fill('BLOCKED'));
+  assert.equal(JSON.stringify(a),raw);
+  assert.equal(fs.readFileSync(path.join(tmp.outDir,'V7_MODEL_RESPONSE_ORIGINAL_PRIVATE.txt'),'utf8'),raw);
+  const saved=JSON.parse(fs.readFileSync(path.join(tmp.outDir,'V7_TRUE_B143_HASHES_PRIVATE.json'),'utf8'));
+  assert.equal(saved.authorContract,MEZZANINE_SCHEMA);
+  assert.equal(saved.geometrySha256,result.geometrySha256);
+  assert(!fs.readFileSync(path.join(tmp.outDir,'V7_SEMANTIC_SHAREABLE.json'),'utf8').includes(sample.mezzanine.purpose));
+ }finally{fs.rmSync(tmp.root,{recursive:true,force:true});}
+});
+test('V7 V4H malformed author and pending CI both HOLD without retry',async()=>{
+ const tmp=sandbox(),calls=[];
+ try{
+  await assert.rejects(runV7PrivateOnce(params(tmp.outDir,{authorMode:'unknown'})),/AUTHOR_MODE_UNSUPPORTED/);
+  assert(!fs.existsSync(tmp.outDir));
+  const pending=await runV7PrivateOnce(params(tmp.outDir,{authorMode:'v4h-mezzanine'}),{
+   ciFetcher:fakeCi('in_progress'),modelFetcher:fakeModel(author(),calls),headReader:()=>sha});
+  assert.equal(pending.status,'HOLD_REQUIRED_CI');
+  assert.equal(pending.modelGenerationAttempts,0);
+  assert.equal(calls.length,0);
+ }finally{fs.rmSync(tmp.root,{recursive:true,force:true});}
+});

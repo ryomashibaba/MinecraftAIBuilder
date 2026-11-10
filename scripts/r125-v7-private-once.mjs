@@ -17,6 +17,8 @@ import {
 } from '../source/ai/r125-integrated-semantic-bridge.mjs';
 import {createIntegratedSpatialHost} from '../source/ai/r125-integrated-spatial-host.mjs';
 import {classifyOllamaStopEvidence} from '../source/ai/r125-v7-ollama-stop-evidence.mjs';
+import {MEZZANINE_SCHEMA,MEZZANINE_SYSTEM_PROMPT,compileMezzanineAuthorIntent}
+ from '../source/ai/r125-v4h-mezzanine-author-ir.mjs';
 
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const MODEL=/^[A-Za-z0-9._:/-]{2,140}$/;
@@ -28,6 +30,8 @@ const TAGS_URL='http://127.0.0.1:11434/api/tags';
 const EXPECTED_DIGEST='bdbd181c33f2ed1b31c972991882db3cf4d192569092138a7d29e973cd9debe8';
 const EXPECTED_SIZE=9276198565;
 const fail=code=>{throw Error('V7_PRIVATE_ONCE_'+code);};
+const V4H_PROTOCOL='V7_PRIVATE_MONITORED_V4H_MEZZANINE_V1';
+const V4H_BRIEF='Design a useful two-level public building with a coherent welcoming hall, accessible upper gallery, functional stairs and distinctive whole-building massing. Independently choose its architecture and spatial program.';
 const hash=s=>createHash('sha256').update(s).digest('hex');
 const freshResourceClearance=(resource,now=Date.now())=>
  resource?.status==='SAFE_FOR_ONE_REQUEST' &&
@@ -86,9 +90,9 @@ function privateDir(p){
     real===ROOT||real.startsWith(ROOT+path.sep))fail('OUTPUT_INSIDE_REPO');
  return dir;
 }
-const safeBase=(headSha,injected)=>({
+const safeBase=(headSha,injected,mode)=>({
  schema:'minecraftaibuilder-r125-v7-private-one-safe-v1',
- protocol:INTEGRATED_SPATIAL_V7_SUPPORTED_PROTOCOL,
+ protocol:mode==='v4h-mezzanine'?V4H_PROTOCOL:INTEGRATED_SPATIAL_V7_SUPPORTED_PROTOCOL,
  headSha, status:'HOLD_NOT_STARTED',reason:'NOT_STARTED',
  declaredModelSource:'LOCAL_OLLAMA_UNATTESTED',
  explicitlyInjectedTestResponse:injected,
@@ -105,20 +109,26 @@ const safeBase=(headSha,injected)=>({
  gates:Array(9).fill('BLOCKED')
 });
 export async function runV7PrivateOnce({
- model,outDir,headSha,prompt=V7_HELD_OUT_BRIEF,
+ model,outDir,headSha,prompt,authorMode='integrated-semantic',
  deriveIntegratedShell,checkResourceSafety
 }={},{
  modelFetcher=fetch,ciFetcher=fetch,headReader=actualHead,timeoutMs=120000
 }={}){
+ if(!['integrated-semantic','v4h-mezzanine'].includes(authorMode))
+  fail('AUTHOR_MODE_UNSUPPORTED');
+ const chosenPrompt=prompt===undefined?
+  (authorMode==='v4h-mezzanine'?V4H_BRIEF:V7_HELD_OUT_BRIEF):prompt;
+ const systemPrompt=authorMode==='v4h-mezzanine'?
+  MEZZANINE_SYSTEM_PROMPT:INTEGRATED_SPATIAL_V7_SUPPORTED_PROMPT;
  if(!MODEL.test(model??'')||!SHA.test(headSha??'')||
-  typeof prompt!=='string'||prompt.length<8||prompt.length>4000||
+  typeof chosenPrompt!=='string'||chosenPrompt.length<8||chosenPrompt.length>4000||
   !Number.isSafeInteger(timeoutMs)||timeoutMs<1000||timeoutMs>120000)
   fail('INVALID_OPTIONS');
  const dir=privateDir(outDir);
  const injected=modelFetcher!==fetch||ciFetcher!==fetch||headReader!==actualHead||
   process.env.MAB_V4D_TEST_DOUBLE_MODE==='1';
  fs.mkdirSync(dir,{recursive:false});
- const result=safeBase(headSha,injected);
+ const result=safeBase(headSha,injected,authorMode);
  try{
   // Never allow a real fetch POST when any CI, HEAD or mode dependency is
   // test-injected. In that combination the normal production gates are not attested.
@@ -211,9 +221,9 @@ export async function runV7PrivateOnce({
    result.status='HOLD_INDEPENDENT_MONITOR';
    result.reason='MONITOR_LEASE_EXPIRED_BEFORE_POST';return result;
   }
-  save(dir,'V7_LOCAL_REQUEST_PRIVATE.json',{model,prompt,
-   systemPromptSha256:hash(INTEGRATED_SPATIAL_V7_SUPPORTED_PROMPT),
-   headSha,contract:INTEGRATED_SPATIAL_V7_SUPPORTED_PROTOCOL,maxAttempts:1,
+  save(dir,'V7_LOCAL_REQUEST_PRIVATE.json',{model,prompt:chosenPrompt,
+   systemPromptSha256:hash(systemPrompt),
+   headSha,contract:result.protocol,maxAttempts:1,
    resourceAssertion:'PRIVATE_MONITOR_ASSERTED_NOT_PUBLICLY_ATTESTED'});
   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),timeoutMs);
   let monitorActive=true,monitorPending=false,monitorFault=false,lastBeat=Date.now();
@@ -244,8 +254,8 @@ export async function runV7PrivateOnce({
     headers:{'Content-Type':'application/json','Accept':'application/json'},
     body:JSON.stringify({model,stream:false,think:false,keep_alive:0,
      format:'json',options:{num_ctx:2048,num_predict:1024,temperature:0.45},
-     messages:[{role:'system',content:INTEGRATED_SPATIAL_V7_SUPPORTED_PROMPT},
-      {role:'user',content:prompt}]})
+     messages:[{role:'system',content:systemPrompt},
+      {role:'user',content:chosenPrompt}]})
    });
    if(response?.ok!==true){result.status='HOLD_MODEL_HTTP';result.reason='LOCAL_MODEL_HTTP_FAILURE';return result;}
    const body=await response.text();
@@ -325,8 +335,31 @@ export async function runV7PrivateOnce({
    result.status='HOLD_AUTHOR';result.reason='AUTHOR_NOT_PURE_JSON';return result;
   }
   let candidate;
-  try{candidate=await executeIntegratedSemanticBridge(author,host);}
-  catch{result.status='HOLD_AUTHOR';result.reason='AUTHOR_SCHEMA_REJECTED';return result;}
+  if(authorMode==='v4h-mezzanine'){
+   // Author's original model JSON only. No fallback or HOST-authored geometry.
+   try{
+    const v4h=compileMezzanineAuthorIntent(author);
+    if(v4h.authorContract!==MEZZANINE_SCHEMA||
+       v4h.b143?.sourceRoutes?.status!=='SOURCE_ROUTES_REACH_ALL_ZONES'||
+       v4h.b143?.compiled?.geometrySha256!==v4h.geometrySha256||
+       v4h.b143?.compiled?.sourceSha256!==v4h.sourceSha256||
+       v4h.worldWrites!==0||v4h.worldContacts!==0||
+       v4h.constructionApproved!==false||v4h.executionAllowed!==false||
+       v4h.BuildPlan?.operations?.length!==0||
+       v4h.gates?.length!==9||v4h.gates.some(x=>x!=='BLOCKED'))
+      throw Error('V4H_SOURCE_INVALID');
+    candidate={status:'GENUINE_B143_CANDIDATE',
+     authorSha256:v4h.mezzanineAuthorSha256,operationSha256:null,
+     sourceSha256:v4h.sourceSha256,geometrySha256:v4h.geometrySha256,
+     privateProduct:{design:v4h.b143.design,compiled:v4h.b143.compiled}};
+   }catch{
+    result.status='HOLD_AUTHOR';result.reason='V4H_AUTHOR_OR_B143_REJECTED';
+    return result;
+   }
+  }else{
+   try{candidate=await executeIntegratedSemanticBridge(author,host);}
+   catch{result.status='HOLD_AUTHOR';result.reason='AUTHOR_SCHEMA_REJECTED';return result;}
+  }
   result.authorSha256=candidate.authorSha256??null;
   result.operationSha256=candidate.operationSha256??null;
   if(candidate.status!=='GENUINE_B143_CANDIDATE'){
@@ -342,7 +375,11 @@ export async function runV7PrivateOnce({
    sourceSha256:result.sourceSha256,geometrySha256:result.geometrySha256,
    b143CellCount:result.b143CellCount,authorSha256:result.authorSha256,
    operationSha256:result.operationSha256,
-   hostProvenance:'PRIVATE_EXPLICIT_HOST_DERIVED_NOT_HISTORICAL_SOURCE',
+   hostProvenance:authorMode==='v4h-mezzanine'?
+    'FROZEN_V4H_AUTHOR_COMPILER_NOT_HISTORICAL_SOURCE':
+    'PRIVATE_EXPLICIT_HOST_DERIVED_NOT_HISTORICAL_SOURCE',
+   authorContract:authorMode==='v4h-mezzanine'?MEZZANINE_SCHEMA:
+    INTEGRATED_SPATIAL_V7_SUPPORTED_PROTOCOL,
    modelIdentityCryptographicallyAuthenticated:false,
    independentPhysicalAudit:'NOT_TESTED',art:'NOT_REVIEWED'});
   result.status=injected?'HOLD_INJECTED_TEST_NOT_MODEL':

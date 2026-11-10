@@ -18,10 +18,11 @@ const SHA=/^[a-f0-9]{40}$/;
 const actualHead=()=>verifyCleanHead();
 const fail=x=>{throw Error('V4J_STABLE_LOCAL_'+x);};
 export function parseStableArgs(args){
- if(![4,5].includes(args.length)||(args.length===5&&args[4]!=='--v7-semantic')||
+ if(![4,5].includes(args.length)||(args.length===5&&!['--v7-semantic','--v7-mezzanine'].includes(args[4]))||
   args[0]!=='--model'||args[2]!=='--out'||
   !MODEL.test(args[1])||!args[3])fail('ARGS');
- return args.length===5?{model:args[1],outDir:args[3],v7Semantic:true}:
+ return args.length===5?{model:args[1],outDir:args[3],
+  ...(args[4]==='--v7-mezzanine'?{v7Mezzanine:true}:{v7Semantic:true})}:
   {model:args[1],outDir:args[3]};
 }
 const PRIVATE_ENGINE_VAR='MAB_V7_PRIVATE_HOST_MODULE';
@@ -46,7 +47,7 @@ export async function runStableLocalStudy(args,{
  v7HeadReader=actualHead,v7CiChecker=checkExactHeadCi
 }={}){
  const a=parseStableArgs(args);
- if(a.v7Semantic){
+ if(a.v7Semantic||a.v7Mezzanine){
   // PRIVATE modules can run arbitrary top-level code at import time.
   // First verify the current clone HEAD and BOTH exact-head public CI checks.
   const expectedHead=process.env.MAB_HEAD;
@@ -64,6 +65,7 @@ export async function runStableLocalStudy(args,{
   const bindings=await v7BindingLoader();
   const result=await v7Runner({model:a.model,outDir:a.outDir,
    headSha:process.env.MAB_HEAD,prompt:process.env.MAB_V7_BRIEF||undefined,
+   authorMode:a.v7Mezzanine?'v4h-mezzanine':'integrated-semantic',
    ...bindings});
   if(result.schema!=='minecraftaibuilder-r125-v7-private-one-safe-v1'||
    typeof result.status!=='string'||!result.status.startsWith('HOLD_')||

@@ -110,3 +110,43 @@ test('V7 rejects before PRIVATE import when exact-head CI is pending or HEAD dif
   if(prev===undefined)delete process.env.MAB_HEAD;else process.env.MAB_HEAD=prev;
  }
 });
+
+test('V4H explicit monitored CLI preserves exact HEAD, CI and PRIVATE gates',async()=>{
+ const sha='e'.repeat(40),old=process.env.MAB_HEAD,trace=[];
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'v7-v4h-entry-')),out=path.join(root,'private');
+ const args=['--model','qwen3:14b','--out',out,'--v7-mezzanine'];
+ const safe={schema:'minecraftaibuilder-r125-v7-private-one-safe-v1',
+  protocol:'V7_PRIVATE_MONITORED_V4H_MEZZANINE_V1',headSha:sha,
+  status:'HOLD_INJECTED_TEST_NOT_MODEL',modelGenerationAttempts:1,
+  worldContacts:0,worldWrites:0,readiness:'NOT_PREPARED',
+  constructionApproved:false,executionAllowed:false,BuildPlan:{operations:[]},
+  gates:Array(9).fill('BLOCKED')};
+ try{
+  process.env.MAB_HEAD=sha;
+  assert.deepEqual(parseStableArgs(args),{model:'qwen3:14b',outDir:out,v7Mezzanine:true});
+  const v=await runStableLocalStudy(args,{
+   v7HeadReader:()=>{trace.push('head');return sha;},
+   v7CiChecker:async()=>{trace.push('ci');return {safeToRunModel:true};},
+   v7BindingLoader:async()=>{trace.push('private');return {deriveIntegratedShell:()=>{},checkResourceSafety:()=>{}};},
+   v7Runner:async x=>{
+    trace.push('runner');assert.equal(x.authorMode,'v4h-mezzanine');
+    fs.mkdirSync(x.outDir);
+    fs.writeFileSync(path.join(x.outDir,'V7_SEMANTIC_SHAREABLE.json'),JSON.stringify(safe));
+    return safe;
+   }
+  });
+  assert.deepEqual(trace,['head','ci','private','runner']);
+  assert.deepEqual(JSON.parse(fs.readFileSync(v.shareableFile,'utf8')),safe);
+  trace.length=0;
+  await assert.rejects(runStableLocalStudy(args,{
+   v7HeadReader:()=>{trace.push('head');return sha;},
+   v7CiChecker:async()=>{trace.push('ci');return {safeToRunModel:false};},
+   v7BindingLoader:async()=>{trace.push('private');throw Error('UNSAFE');},
+   v7Runner:async()=>{trace.push('runner');throw Error('UNSAFE');}
+  }),/V7_REQUIRED_CI_NOT_SUCCESS/);
+  assert.deepEqual(trace,['head','ci']);
+ }finally{
+  if(old===undefined)delete process.env.MAB_HEAD;else process.env.MAB_HEAD=old;
+  fs.rmSync(root,{recursive:true,force:true});
+ }
+});
