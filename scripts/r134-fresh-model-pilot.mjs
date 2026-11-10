@@ -425,7 +425,7 @@ export async function runR134FreshModel({
        explicitHeightOrder:architectureMode==='height-order'?
         composed.r178ExplicitHeightOrderFromCaller:null,
        actualHighRoomSourceProof:architectureMode==='height-order'?
-        result.r170FourRoomVolumeEvidence??null,
+        (result.r170FourRoomVolumeEvidence??null):null,
        realUsableRoomSectionProof:composed.architectural?.integrated?.r162RoomSectionEvidence??null,
        actualExteriorClerestoryProof:composed.architectural?.completed?.r163DaylightAndRoofEvidence??null,
        humanArtReview:'NOT_REVIEWED',
