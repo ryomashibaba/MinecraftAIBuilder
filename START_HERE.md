@@ -1,5 +1,11 @@
 # MinecraftAIBuilder — START HERE（新チャット・AI開発者の統一入口）
 
+## 2026-11-10 最新・新チャット用の短縮正本（まずこちらを全文読む）
+
+**[MAB_20261110_CRITICAL_NEXT_CHAT_JA.md](docs/MAB_20261110_CRITICAL_NEXT_CHAT_JA.md)** を唯一の現行引き継ぎ入口にする。最新HEAD・PR・CIをライブ確認し、上位憲章・戦略v2・R125計画・AI_RESTART冒頭を継承。以下の2026-11-04以前の文章は保存履歴であり、実モデル実行許可や現在の安全状態として流用しない。PRIVATEファイルをPUBLICへ移さない。R125主線/V6既定、V7 Gate C P1 HOLD、9施工ゲートBLOCKED、ART正式採用0は維持。新チャットでは本人にこの資料の再貼付・手動ZIPアップロードを要求しない。
+
+---
+
 ## 2026-11-04 V4J 前庭3ベイの真正公共ファサード・安全な見た目改善研究
 
 - V4I監査で「上階追加126ボクセルでも屋根5方向の外観変化ほぼゼロ」と判明した問題に、実外形改善の研究実装で応える。**ユーザー外出中・ローカルLLM不可**のため、GitHubのCIだけで完了する合成5作者の独立試験を行う。`scripts/r125-v4j-civic-arcade.mjs` と `scripts/r125-v4j-lossless-b143-pack.mjs`（既存V4H高密度B143を同じ全ボクセルと**独立のボクセル専用SHA**で厳密照合。B143のgeometry SHAは設計記述も含むため圧縮で変わることを報告し、BOX repeatに表現だけ圧縮。160要素上限は緩和しない） がV4Hの建物一式を非既定研究として受け取り、作者明示の `arcade:{width,depth,setback,roofline:[left,center,right],postMaterial,roofMaterial,serviceMaterial,purpose}` に従い、入口手前の公共床上に**連続支持柱8本、屋根高さを3区間独立に設計した本物の外部3D屋根、屋根段差の接続立ち上がり、両側の公共設備2台**を作成。形式だけの飾りではなく中央の入口から2幅歩行路と外部公共機能を実B143のSOURCEで証明する。
