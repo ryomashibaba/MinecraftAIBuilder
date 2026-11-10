@@ -12,6 +12,9 @@
  * A HOLD exit code (2) is intentional; it is never a model-run permit.
  */
 import os from 'node:os';
+import fs from 'node:fs';
+import path from 'node:path';
+import {createHash} from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import assert from 'node:assert/strict';
 
@@ -19,6 +22,9 @@ const MODEL='qwen3:14b';
 const ORIGIN='http://127.0.0.1:11434';
 const SCHEMA='minecraftaibuilder-r125-v7-public-readonly-diagnostic-v1';
 const MiB=1048576;
+const HISTORICAL_MANIFEST_SHA='bdbd181c33f2ed1b31c972991882db3cf4d192569092138a7d29e973cd9debe8';
+const QWEN3_TEMPLATE_SHA='ae370d884f108d16e7cc8fd5259ebc5773a0afa6e078b11f4ed7e39a27e0dfc4';
+const digest=b=>createHash('sha256').update(b).digest('hex');
 const safeInt=n=>Number.isSafeInteger(n)&&n>=0?n:null;
 
 function safeReport(){
@@ -33,6 +39,8 @@ function safeReport(){
   commitMemory:{committedMiB:null,limitMiB:null,headroomMiB:null},
   graphics:{gpuCount:null,minimumFreeMiB:null,minimumTotalMiB:null},
   alreadyLoadedModel:{sizeMiB:null,sizeVramMiB:null,contextLength:null},
+  installedTemplate:{status:'NOT_CHECKED',matchesPinned:null,
+   ggufTokenizerVerified:false,ollamaRuntimeVerified:false},
   memoryPeakCalibrated:false,resourceSafetyCertified:false,
   modelGenerationAttempts:0,modelLoadAttempts:0,paidApiCalls:0,
   privateEngineImported:false,worldContacts:0,worldWrites:0,
@@ -96,6 +104,59 @@ function listedMetadata(item){
   quantizationLevel:ascii(detail.quantization_level,/^[a-zA-Z0-9_.+-]{1,32}$/)
  };
 }
+// Only the qwen3:14b Ollama manifest and its small TEMPLATE blob are read.
+// No GGUF model weights or directory traversal; never reveals local paths.
+function templateMatches(manifest,template,expectedManifest,expectedTemplate){
+ if(!Buffer.isBuffer(manifest)||!Buffer.isBuffer(template)||
+  manifest.length>65536||template.length>65536||
+  manifest.length<100||template.length<50)return false;
+ let obj;
+ try{obj=JSON.parse(manifest.toString('utf8'));}
+ catch{return false;}
+ const templates=obj?.layers?.filter(x=>
+  x?.mediaType==='application/vnd.ollama.image.template');
+ if(!Array.isArray(obj?.layers)||!Array.isArray(templates)||
+  templates.length!==1||!Number.isSafeInteger(templates[0].size)||
+  templates[0].size!==template.length||
+  typeof templates[0].digest!=='string'||
+  !/^sha256:[a-f0-9]{64}$/.test(templates[0].digest))return false;
+ return digest(manifest)===expectedManifest &&
+  templates[0].digest==='sha256:'+expectedTemplate &&
+  digest(template)===expectedTemplate;
+}
+function readSmall(file){
+ const st=fs.lstatSync(file);
+ if(!st.isFile()||st.size<1||st.size>65536)throw Error('NOT_SMALL_REGULAR_FILE');
+ const data=fs.readFileSync(file);
+ if(data.length!==st.size||data.length>65536)throw Error('FILE_CHANGED');
+ return data;
+}
+function inspectLocalTemplate(){
+ const unavailable={status:'UNKNOWN_OR_CHANGED',matchesPinned:null,
+  ggufTokenizerVerified:false,ollamaRuntimeVerified:false};
+ try{
+  const root=process.env.OLLAMA_MODELS??path.join(os.homedir(),'.ollama','models');
+  if(typeof root!=='string'||!path.isAbsolute(root))return unavailable;
+  const manifest=readSmall(path.join(root,'manifests','registry.ollama.ai',
+   'library','qwen3','14b'));
+  if(digest(manifest)!==HISTORICAL_MANIFEST_SHA)
+   return {...unavailable,matchesPinned:false};
+  const parsed=JSON.parse(manifest.toString('utf8'));
+  const templates=parsed?.layers?.filter(x=>
+   x?.mediaType==='application/vnd.ollama.image.template');
+  if(!Array.isArray(templates)||templates.length!==1||
+   typeof templates[0].digest!=='string'||
+   !/^sha256:[a-f0-9]{64}$/.test(templates[0].digest))
+   return {...unavailable,matchesPinned:false};
+  const blob=readSmall(path.join(root,'blobs',
+   'sha256-'+templates[0].digest.slice(7)));
+  const match=templateMatches(manifest,blob,
+   HISTORICAL_MANIFEST_SHA,QWEN3_TEMPLATE_SHA);
+  return {status:match?'PINNED_TEMPLATE_MATCH_READONLY':'TEMPLATE_MISMATCH_HOLD',
+   matchesPinned:match,ggufTokenizerVerified:false,ollamaRuntimeVerified:false};
+ }catch{return unavailable;}
+}
+
 function listenerStatus(){
  try{
   const script='$c=@(Get-NetTCPConnection -LocalPort 11434 -State Listen -ErrorAction Stop);'+
@@ -142,6 +203,23 @@ function selftest(){
  assert.equal(transportReason({name:'TimeoutError'}),'TIMEOUT');
  assert.equal(transportReason({cause:{code:'ENETUNREACH'}}),'NETWORK_UNREACHABLE');
  const a=safeReport();
+ const fakeTemplate=Buffer.from('Qwen3 legacy template test'.repeat(4));
+ const fakeManifest={schemaVersion:2,
+  layers:[{mediaType:'application/vnd.ollama.image.model',
+   digest:'sha256:'+'a'.repeat(64),size:9000000000},
+   {mediaType:'application/vnd.ollama.image.template',
+    digest:'sha256:'+digest(fakeTemplate),size:fakeTemplate.length}]};
+ const manifestBytes=Buffer.from(JSON.stringify(fakeManifest));
+ assert.equal(templateMatches(manifestBytes,fakeTemplate,
+  digest(manifestBytes),digest(fakeTemplate)),true);
+ assert.equal(templateMatches(manifestBytes,fakeTemplate,
+  '0'.repeat(64),digest(fakeTemplate)),false);
+ assert.equal(templateMatches(manifestBytes,fakeTemplate,
+  digest(manifestBytes),'f'.repeat(64)),false);
+ assert.equal(templateMatches(manifestBytes,
+  Buffer.concat([fakeTemplate,Buffer.from('X')]),
+  digest(manifestBytes),digest(fakeTemplate)),false);
+ assert.equal(safeReport().installedTemplate.status,'NOT_CHECKED');
  assert.equal(a.resourceSafetyCertified,false);
  assert.deepEqual(a.gates,Array(9).fill('BLOCKED'));
  assert.equal(a.modelGenerationAttempts,0);
@@ -176,6 +254,7 @@ async function main(){
  }
  report.windowsRuntime=true;
  sampleResources(report);
+ report.installedTemplate=inspectLocalTemplate();
  report.port11434Listening=listenerStatus();
  const [tags,ps]=await Promise.all([getOllama('/api/tags'),getOllama('/api/ps')]);
  report.ollamaTagsStatus=tags.status;
