@@ -57,7 +57,9 @@ if (-not $fakeOnlyCI) {
 }
 # Only GitHub's fake CI may choose the additional research ref. Exact SHA is
 # checked after clone, and real user launches never reach this block.
-if ($env:GITHUB_REF_NAME -ceq 'research/r125-entry-nearest-safe-source-20261109') {
+if ($env:GITHUB_REF_NAME -ceq 'research/r125-entry-nearest-safe-source-20261109' -or
+    ($env:GITHUB_REF_NAME -ceq 'research/r125-v6-readonly-facade-diagnostic-20261111' -and
+     $ExpectedCommit -ceq $env:GITHUB_SHA)) {
     $Branch = $env:GITHUB_REF_NAME
 }
 if ($ExpectedCommit -cnotmatch '^[a-f0-9]{40}$') {

@@ -23,7 +23,7 @@ $expectedBranch = 'feature/b198zr1-protected-architectural-revision'
 # -CheckOnly without broadening permissions for any real model run.
 $ciResearchCheckOnly = $CheckOnly -and
   $env:GITHUB_ACTIONS -ceq 'true' -and $env:CI -ceq 'true' -and
-  $env:GITHUB_REF_NAME -ceq 'research/r125-entry-nearest-safe-source-20261109' -and
+  $env:GITHUB_REF_NAME -cin @('research/r125-entry-nearest-safe-source-20261109', 'research/r125-v6-readonly-facade-diagnostic-20261111') -and
   $env:GITHUB_SHA -cmatch '^[0-9a-f]{40}$'
 $repo = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')).Path
 $runner = Join-Path $repo 'scripts\r125-v4d-local-architect.mjs'

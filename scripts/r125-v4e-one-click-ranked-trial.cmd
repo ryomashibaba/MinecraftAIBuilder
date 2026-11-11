@@ -5,6 +5,13 @@ title MinecraftAIBuilder V4E - Experimental Ranked Glazing
 rem Isolated branch download. Never modifies an existing MinecraftAIBuilder.
 set "REPO_URL=https://github.com/ryomashibaba/MinecraftAIBuilder.git"
 set "RESEARCH_BRANCH=feature/b198zr1-protected-architectural-revision"
+rem CI-only V6 exact-head replay. Never redirect a real model launch.
+rem --prepare-only uses no model. Fake-only runner must have a ready injected server.
+set "CI_V6_EXACT_HEAD="
+if "%GITHUB_ACTIONS%"=="true" if "%CI%"=="true" if "%GITHUB_REF_NAME%"=="research/r125-v6-readonly-facade-diagnostic-20261111" if not "%GITHUB_SHA%"=="" if /i "%~1"=="--prepare-only" set "CI_V6_EXACT_HEAD=1"
+if "%GITHUB_ACTIONS%"=="true" if "%CI%"=="true" if "%GITHUB_REF_NAME%"=="research/r125-v6-readonly-facade-diagnostic-20261111" if not "%GITHUB_SHA%"=="" if "%MAB_V4D_TEST_DOUBLE_MODE%"=="1" if defined MAB_V4D_FAKE_READY_FILE if defined MAB_V4D_FAKE_POST_LOG if exist "%MAB_V4D_FAKE_READY_FILE%" if /i "%~1"=="--run-once" set "CI_V6_EXACT_HEAD=1"
+if "%GITHUB_ACTIONS%"=="true" if "%CI%"=="true" if "%GITHUB_REF_NAME%"=="research/r125-v6-readonly-facade-diagnostic-20261111" if not "%GITHUB_SHA%"=="" if "%MAB_V4D_TEST_DOUBLE_MODE%"=="1" if defined MAB_V4D_FAKE_READY_FILE if defined MAB_V4D_FAKE_POST_LOG if exist "%MAB_V4D_FAKE_READY_FILE%" if /i "%~1"=="--arcade-five" set "CI_V6_EXACT_HEAD=1"
+if defined CI_V6_EXACT_HEAD set "RESEARCH_BRANCH=research/r125-v6-readonly-facade-diagnostic-20261111"
 set "MODEL_ID=qwen3:14b"
 set "AUTHOR_FLAG=--ranked-windows"
 if /i "%~1"=="--sectioned" set "AUTHOR_FLAG=--ranked-section"
@@ -41,6 +48,7 @@ for /f "delims=" %%G in ('git.exe -C "%WORK_DIR%" branch --show-current 2^>nul')
 if not "%ACTUAL_BRANCH%"=="%RESEARCH_BRANCH%" goto WRONG_BRANCH
 for /f "delims=" %%G in ('git.exe -C "%WORK_DIR%" rev-parse HEAD 2^>nul') do set "GIT_HEAD=%%G"
 if "%GIT_HEAD%"=="" goto WRONG_HEAD
+if defined CI_V6_EXACT_HEAD if /i not "%GIT_HEAD%"=="%GITHUB_SHA%" goto WRONG_HEAD
 if not exist "%WORK_DIR%\scripts\r125-v4d-local-architect.mjs" goto MISSING_RUNNER
 if not exist "%WORK_DIR%\scripts\r125-v4d-shareable-receipt.mjs" goto MISSING_RUNNER
 if not exist "%WORK_DIR%\source\ai\r125-v4e-ranked-exterior-ir.mjs" goto MISSING_RUNNER
