@@ -23,9 +23,9 @@ jobs:
         run: |
           node --check scripts/research/r125-v6-corner-facade-contract.test.mjs
           node --check scripts/research/r125-v6-offline-ranked-contrast.mjs
-          node --test scripts/research/r125-v6-offline-ranked-contrast.test.mjs scripts/research/r125-v6-corner-facade-contract.test.mjs scripts/r125-v4e-ranked-exterior.test.mjs
+          node --test scripts/research/r125-v6-offline-ranked-contrast.test.mjs scripts/r125-v4j-feasible-envelope.test.mjs scripts/r125-v4j-civic-facade.test.mjs
       - name: Evidence boundary
         if: always()
         run: |
-          echo 'Public synthetic tests include the V6-to-ranked contrast, but DO NOT certify full V6, original Qwen, human ART, world, or formal QA.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Public synthetic tests prove legacy full-V6 parity and that ranked-only research is NOT full-V6 repair; never certify original Qwen, ART, Minecraft or formal QA.' >> "$GITHUB_STEP_SUMMARY"
           echo 'No model, PRIVATE file, Ollama, paid API, or Minecraft world calls.' >> "$GITHUB_STEP_SUMMARY"

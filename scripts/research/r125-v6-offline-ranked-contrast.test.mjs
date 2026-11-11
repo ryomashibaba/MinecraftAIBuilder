@@ -3,8 +3,10 @@ import assert from 'node:assert/strict';
 import {contrastV6RankedLayer} from './r125-v6-offline-ranked-contrast.mjs';
 import {syntheticFiveV4JArcadeAuthors}
  from '../r125-v4j-civic-facade-study.mjs';
-import {CIVIC_ARCADE_SCHEMA}
+import {CIVIC_ARCADE_SCHEMA,compileCivicArcadeAuthorIntent}
  from '../../source/ai/r125-v4j-civic-author-ir.mjs';
+import {materializeV4JParentIndexAuthor}
+ from '../../source/ai/r125-v4j-feasible-envelope.mjs';
 
 function toV6(original){
  const {spaces,...rest}=structuredClone(original);
@@ -34,6 +36,16 @@ test('public housing V6 author: read-only ranked baseline and research opt-in, n
  assert.equal(result.rankedPhysicalWitness.allNineGatesBlocked,true);
  assert.equal(result.rankedPhysicalWitness.allZonesReached,true);
  assert.equal(result.rankedPhysicalWitness.allFeaturesReached,true);
+ // Independent full V6 pipeline is still the ORIGINAL legacy source path.
+ const rehydrated=materializeV4JParentIndexAuthor(v6);
+ const full=compileCivicArcadeAuthorIntent(rehydrated);
+ const direct=compileCivicArcadeAuthorIntent(original);
+ assert.equal(full.b143.geometrySha256,direct.b143.geometrySha256);
+ assert.equal(full.b143.sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(full.worldWrites,0);
+ assert.equal(full.constructionApproved,false);
+ assert.deepEqual(full.gates,Array(9).fill('BLOCKED'));
+ assert.equal(JSON.stringify(v6),frozen);
 });
 test('V6 corner-only reject reproduces, opt-in ranked improves without touching higher layers',()=>{
  const sample=syntheticFiveV4JArcadeAuthors().find(x=>x.genre==='housing');
@@ -72,4 +84,10 @@ test('V6 corner-only reject reproduces, opt-in ranked improves without touching 
  assert.equal(result.fullV6CompilerExecuted,false);
  assert.equal(result.modelIdentityAttested,false);
  assert.equal(result.gateCP1,'HOLD');
+ // This prevents a false claim that the optional ranked-only PASS has
+ // repaired the complete V6 architecture. Full V6 is still unmodified.
+ const fullV6=materializeV4JParentIndexAuthor(v6);
+ assert.throws(()=>compileCivicArcadeAuthorIntent(fullV6),
+  /R125_V4E_RANKED_NO_AUTHORED_EXTERIOR_OPTION_1$/);
+ assert.equal(JSON.stringify(v6),before);
 });
