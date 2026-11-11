@@ -1,5 +1,56 @@
 # MinecraftAIBuilder — 2026-11-10 批判的総合監査・次チャット実行正本
 
+## 2026-11-11 夜 最新・総合批判監査／新チャット再開指示（最優先）
+
+**この節が唯一の現行判断入口**。下の「クラウドAI方針」「11/11 V6引継ぎ」「11/10引継ぎ」、START_HERE.mdとAI_RESTART_JA.mdの旧記録は履歴として継承し、矛盾するときはこの節＋固定憲章／戦略v2／R125計画＋現在のGitHub実物・最新の安全条件を優先。新規企画でなくMinecraftAIBuilder既存開発の継続。別プロジェクト（Browser Ink TPS等）に越境せず、全体予算／優先順位ではMABとTPSは同格。現行の全体方針変更はしない。
+
+### A. 調査済みGitHub状態・実績と未達（2026-11-11 夜 JST）
+
+- 監査時の研究コードHEAD：**e5fe723597217f9bee6e954a7fc994cff70af2a9**、ブランチ research/r125-v6-readonly-facade-diagnostic-20261111。最新研究GitHub Actions **#42983385113 completed/success**。同HEADの研究専用ジョブはV6旧・研究用SOURCEの**合成22件PASS**と、新External Author境界の**3件PASS**を順に実行した。25件はテスト件数であり25棟の成功でも、実Qwen V6の成功でも、正式QA／ART／Minecraftでもない。従来からの別系統 R55 future-source-preflight Actions **#42983383077 failure（No jobs were run系）**は未解消。研究専用CI PASSを全ワークフロー成功やGate C通過と扱わない。
+- main HEAD **ef7be01a52e6676e2cf257cd615fe183872388ad**、保護された元研究ブランチ research/r125-entry-nearest-safe-source-20261109 HEAD **1e336a991d4f817dc3a08eb67d424434aa859fb6** は監査時不変。**Draft PR #128 Open/Draft、head 16c742266f01acb5f21d207735918c2d30bb2cf5、未Merge**。新しい引継ぎ保存コミットは文書のみでHEADが進む。文書保存後HEADでCIが走っていない場合、以前のe5fe...でのSUCCESSを「最新HEADの必須2CI SUCCESS」と呼ばない。開始時1回だけ最新HEAD／PR／差分／関連CIを再確認する。
+- 旧花屋**933ブロック**と実Qwen由来研究施設**2,089セル／2室実歩行**はユーザー実機成功報告のある**別事例**。保存済みQwen 4室・8設備の限定SOURCE証拠も別例であり、現在の未知要求V6の一貫成功ではない。実Qwen14B由来R125住宅「Lumina Residence」の保存済み真正IRを、2026-11-11に非既定 External Author 境界から既存HOST→真正B143へ再生し、**2,620ボクセル、source SHA 4ca2edf2eb066f2f0eecd7dfdc4a710a1e69bc7196c5f85c65483caaa0d9fbd1、geometry SHA 0fc0db6814e105db62da272abb1235cce9d77d4950eab2a0e91d940283201a2e、SOURCE_CLEARANCE_PROBES_PASS** を旧回帰証拠と照合しCIでPASSした。ただし再利用原文であり**新規AI推論／ChatGPT・Geminiの出力／真正V6原文／人間ART／実機歩行ではない**。
+- 外部作者研究ファイル scripts/research/mab-external-author-offline.mjs と同名.test.mjs を既存研究CIに限定接続済み。入力スキーマR125/V6、原文改変拒否、既存HOSTを使用、モデル通信0、世界操作0、固定コード以外のエラー表示抑制。**実Qwen R125のみ真正B143再生を実証、V6の実原文と実クラウドAI応答は未実証**。出力のSHA・ボクセル数もPRIVATEに由来し得るため、外部への共有は個別に安全確認し、PRIVATE元応答・パス・作者意図を無断転載しない。
+- V6の中央6セル窓帯研究はあくまで**合成SOURCE診断**。本来の作者契約「完全に非共有の外壁」を中央帯が空いていればよいと解釈するのは**意味契約変更**。旧Qwen回答がSOURCEになるとしても本人の意図を保持した正式修復とは限らない。元PRIVATE V6原文SHA・manifest照合の上で旧／新 ranked と**完全V6**を反実仮想比較する scripts/research/r125-v6-offline-ranked-contrast.mjs は完成しているが、**本人Windowsの真正V6 PRIVATE原文では未実行**。根本原因／研究修理成功はUNKNOWN／HOLD。
+- V7 PRIVATE一体設計、V4H／V4J等は非既定研究。合成作者・HOST派生形状・局所的SOURCE達成を本物のモデルの独創性や正式採用と混同しない。旧PRIVATEの1,047セル／10項目等の別研究評価も、新V6の合格へ読み替えない。ART正式採用**0**。Mac Apple Silicon 8GB／2B級4bitの基本モードは維持するが**実Mac未検証**。
+- **今の最終目的「未知要求を本物のAIが一体設計→実用SOURCE→真正3D人間ART→許可済みMinecraft Education試験世界で実歩行」：新しい1棟では未達。** 未検証のクラウドAIやユーザーのPlus契約による無料API権は推定しない。
+
+### B. 上位の固定契約と禁止事項
+
+1. 主経路 **R125→短い意味IR→共通HOST→凍結真正B143→独立機能QA→本物の3D・人間ART→安全なEducation/MakeCode試験施工・実歩行**。モデルは主殻／空洞／外観／用途／入口／上下関係を**一体的に自分で設計**。HOSTは意味を無断修正せず決定的形状化・厳格拒否し、ジャンル別固定箱テンプレートで美術を装わない。**V6既定**、**V7 PRIVATEは非既定研究**。先に完成1棟、その後住宅／店舗／研究施設の独立実作者比較、展示館／駅舎。小型Mac 8GB／2B基本目標はそのまま。
+2. **Gate C P1はHOLD**。実ローカルモデルのロード、/api/tags GET、モデルPOST／再試行は禁止。解除には**同じ実行用厳密コードHEAD**の「R125 V4D Local Author Bridge — INJECTED TEST ONLY」と「Education-first offline QA」の両SUCCESS、本人Windowsの合法PRIVATEアクセス、RAM／commit／VRAMピーク、モデル非競合、独立PID・heartbeat監視とkill／unload、個別承認等の**全条件**が必要。過去包括承認・研究CI25件PASSは代替しない。ローカルLLM同時1案件。新実推論が許可された場合も**最大1 POST・自動再試行0**、原文をPRIVATEに保全。重負荷や設定変更も個別承認。
+3. Minecraft施工は**完全独立の9ゲートHOLD**：readiness=NOT_PREPARED、constructionApproved=false、executionAllowed=false、BuildPlan.operations=[]、9×BLOCKED、worldContacts/worldWrites=0。実験ワールド識別、バックアップ／復元、材質、範囲、readback、停止予算、ユーザー許可が揃うまで一切接触しない。旧実機成功ワールドへの再施工も禁止。
+4. **main、元研究HEAD、凍結B143、正式QA、GitHub Pages、Draft PR #128（Ready/Close/Merge禁止）、PRIVATE元回答・秘密パス・鍵、既存Education世界／旧933成功経路を保護**。force-push、無断上書き・秘密のPUBLIC公開禁止。追加課金0円原則。Work／Computer Useは個別事前承認。自動クラウド有料API・無料枠の無確認利用、PRIVATE送信禁止。
+
+### C. 批判の結論・修正した開発戦略
+
+- **最大の失敗は、建物の完成品質ではなく、合成テスト数・CI・コミット・R番号・薄い屋根や窓の追加を進歩と数えたこと。** 22/22・3/3等はSOURCE契約の回帰証拠だけ。最優先KPIは**同じ実モデル原文の創造的な主殻・屋内実空洞・床・階段・入口・用途設備と2幅動線・多視点の美術審査・ゲーム内実用**をすべて実証した1棟の有無。「SRC PASSだが見た目が箱」であればART REJECT、正式採用0。
+- **PUBLIC/PRIVATE不在時の無意味な作業ループを終える。** 本人PCにつながらない時、古いZIP・コマンド・再貼付・アップロードを本人に要求しない。GitHubの静的読み直し→同じHOLD→新テスト→新コミット→新引継ぎの循環は禁止。毎回の回答で「完成に近付いた具体的な能力／原因実証」がなければ変更0件で理由と次の解除条件だけを報告して終了。
+- **形式的な正しさと作者契約を分離。** 旧「完全非共有壁」vs 研究「中心6セル」は未解決。証明不能な改善をHOST都合で採用しない。元IR不変、AUTHOR/HOST派生/合成、SOURCE/機能/ART/ワールド/費用を別列にする。R55の「No jobs were run」系FAILは専用研究CI SUCCESSと別管理し、正式QAが通ったとは絶対に書かない。
+- **クラウド対応は方針確定・実装を拡大しない。** Local Qwen/Gemma、将来の明示Cloud API、External Author（ChatGPT等のIR手動/許可された操作での受け渡し）を既存**同一短意味IR／HOST／B143**で処理する。実Qwen住宅のExternal Author互換性は実証済み。ChatGPT内のLuna等の呼称＝API利用可能とは決めない。Cloud APIはDISABLED、公式API・送信内容・本人の承認・守秘・固定送信先・通信/トークン/費用上限・再試行0の確認まで通信0。**一棟完成を妨げる新プロバイダ設計／API研究／模擬テストは今は優先しない**。
+- **本人の手作業を原則0**。Chat＋接続済みGitHubで低リスク作業を一括処理。真正Windows／PRIVATEが必須なら、合法アクセスの能力確認は一度のみ。必要な本人操作が発生する場合も**最後に1回の短いバッチ**で済むよう設計。無駄なChat↔Work往復、毎回のZIP、途中確認、別チャット管轄への介入は禁止。
+
+### D. 次チャットの「最初の一手」決定木
+
+**P0 読み取り（1回のみ）**：START_HERE.md先頭→本節を含む現行正本→AI_PROJECT_CHARTER_JA.md、PROJECT_STRATEGY_V2_JA.md、R125_THIN_VERTICAL_SLICE_PLAN_JA.md、AI_RESTART_JA.md現行冒頭を確認。GitHub研究HEAD／main／元研究HEAD／PR #128／専用CIと必要な正式CIを一度だけ実際に照合。既知事実を再検証と称して何度も回さない。
+
+**P1 証拠による分岐**：
+- **合法な本人WindowsのPRIVATEアクセスがその場で利用可能**：既存元回答とmanifest／SHA／作者契約の照合を読み取り専用1回→既存 r125-v6-offline-ranked-contrast.mjs の旧／新 ranked と**旧／新完全V6**を独立比較。新モデル0・外部送信0・世界接触0。出力は有限な安全カテゴリだけ。旧作者契約との整合性を別判断。最初に条件が欠けたらHOLDし、同じ失敗接続を再試行しない。Work/PC操作は必要なら個別事前承認を守る。
+- **PRIVATEにアクセスできない（現在のChat環境）**：PUBLICの**真正実モデル原文＋真正B143＋実視覚／独立機能証拠**から新規かつ反証可能な**共通欠陥1件**を確実に特定できた場合だけ、既存の隔離研究ブランチで狭い修正を行う。前回までのPUBLIC解析では新たなV6原因は未確定。根拠がなければ**即HOLD、作業0、コミット0、合成テスト0、CI0、追加資料0**。Windows接続を要求したり、外部AI研究へ逃げない。
+
+**P2 原因が証明された時だけ**：原因1つ・最小1修正・他用途／元原文の非退行・真正B143を検証、対象CIは原則1回。AUTHOR契約を変える場合は明示opt-in新契約と**新しい真正実モデルの許可済み実証**が別途必要。main/V6既定・凍結B143・PR #128は保護。
+
+**P3 実AIから1棟の完成**：Gate Cの全条件成立後、未知の新要求に対し作者1モデル回答を元SHA付きでPRIVATE保存→元作者IRの構造と意図の一致→共通HOST→B143空気/主殻/開口/支持床/階段/設備/2幅動線を独立監査→**真正3Dの固定視点複数枚を人が美術判定（未実施ならUNKNOWN）**。ART REJECTなら不採用・原因に戻す。合成で代用しない。
+
+**P4 安全施工以降**：ARTを通過し9施工ゲートが別に全成立した**専用Education試験世界のみ**でバックアップ・可逆施工・実歩行検証。成功後に異用途実モデル比較、Mac8GB/2B実測、非既定のクラウド作者比較へ展開。
+
+### E. 今後の一回の報告と退出条件
+
+1. 「HEAD／対象CI／保護対象」「実モデル／IR／B143／機能／真正3D／ART／Minecraftの独立状態」「今回新たに証明できた能力または原因」「未達／HOLDの**具体条件**」「ユーザー操作回数・費用・モデル通信・ワールド書込」を短く報告する。
+2. **SOURCE PASS≠実モデル最新成果≠人間ART PASS≠Minecraft完成**。不明はUNKNOWN、できない工程はHOLD。新しい成果なしに意味のない次工程の提案やドキュメント／CI／合成数の水増しをしない。
+3. 今回の総合監査で、次のチャットへの移行のため**この既存正本だけを一度更新**した。新規START_HEREや追加正本、コード変更・CI再実行は不要。ユーザーはこの文書の貼付やZIPアップロードをしなくてよい。新チャットでユーザーが「続けて」と言ったらDの決定木を適用し、条件不成立なら正直に停止する。
+
+---
+
 ## 2026-11-11 クラウドAI作者経路・将来拡張の確定方針（非既定・未実行）
 
 これはユーザーが明示した**既存MABの将来拡張**であり、建築完成の最優先順位や下記V6研究引継ぎの安全条件を変更しない。**未知要求→本物のAIによる一体設計→短い意味IR→既存共通HOST→真正B143→独立機能→人間ART→安全なEducation実歩行**が上位目的。R125主経路／V6既定／V7 PRIVATE非既定、Mac 8GB・2B級4bitのローカル基本モードを維持。追加課金は原則0円。
