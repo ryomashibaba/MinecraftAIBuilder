@@ -304,6 +304,17 @@ export function diagnosePrivateV4DAuthor(author,contract){
    if(!['X','Z'].includes(v.publicAccessSide))add(r,'PRIMARY_MASSING_PORTAL_SIDE_INVALID');
    if(!author.spaces.some(x=>record(x)&&x.id===v.spaceId&&x.kind==='covered'))
     add(r,'PRIMARY_MASSING_ROOM_NOT_COVERED');
+   else if(['NW','NE','SW','SE'].includes(v.corner)){
+    // Mirror the existing whole-side SOURCE guard, not a proposed relaxation
+    // to the cut rectangle. Read ALL validated attachments, including later
+    // children and the reverse side of a target's parent link. No author IDs,
+    // coordinates or rewritten design leave this diagnostic.
+    const used=connectedSides.get(v.spaceId)??new Set();
+    if(used.has(v.corner.endsWith('W')?'west':'east')||
+       used.has(v.corner.startsWith('N')?'north':'south'))
+     add(r,'PRIMARY_MASSING_INTERSECTS_SHARED_WALL',
+      author.spaces.findIndex(x=>record(x)&&x.id===v.spaceId));
+   }
   }
  }
  if(winged||floorplated||heighted||mezzanined||civic){

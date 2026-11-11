@@ -12,8 +12,52 @@ import {
 } from './r125-v4d-author-source-diagnostics.mjs';
 import {COMPACT_SCHEMA} from '../source/ai/r125-v4d-compact-model-ir.mjs';
 import {RELATIVE_SCHEMA} from '../source/ai/r125-v4d-relative-author-ir.mjs';
+import {MASSING_SCHEMA,compileMassingAuthorIntent}
+ from '../source/ai/r125-v4e-massing-author-ir.mjs';
 
 const readJSON=p=>JSON.parse(fs.readFileSync(p,'utf8'));
+test('massing preflight explains the unchanged SOURCE shared-wall rejection, including parent reverse sides',()=>{
+ const author=makeV4DCompactSynthetic();
+ author.schema=MASSING_SCHEMA;
+ for(const s of author.spaces){
+  delete s.windowSide;
+  s.windowPriority=s.kind==='covered'?['north','east','south','west']:null;
+ }
+ const code='PRIMARY_MASSING_INTERSECTS_SHARED_WALL';
+ const cases=[
+  // root has west and south children; learning's parent is to its east.
+  {index:0,corner:'NW',conflict:true},
+  {index:0,corner:'NE',conflict:false},
+  {index:0,corner:'SW',conflict:true},
+  {index:0,corner:'SE',conflict:true},
+  {index:1,corner:'NW',conflict:false},
+  {index:1,corner:'NE',conflict:true},
+  {index:1,corner:'SW',conflict:false},
+  {index:1,corner:'SE',conflict:true}
+ ];
+ for(const {index,corner,conflict} of cases){
+  author.massing={spaceId:author.spaces[index].id,corner,
+   cutWidth:7,cutDepth:7,publicAccessSide:'X'};
+  const before=JSON.stringify(author);
+  const r=diagnosePrivateV4DAuthor(author,MASSING_SCHEMA);
+  assert.deepEqual(r.issues.filter(i=>i.code===code),conflict?
+   [{code,spaceIndex:index}]:[]);
+  if(conflict)assert.throws(()=>compileMassingAuthorIntent(author),
+   /^Error: R125_V4E_MASSING_MASSING_VOID_INTERSECTS_SHARED_WALL$/);
+  assert.equal(JSON.stringify(author),before);
+  assert.equal(r.sourcePassNotInferred,true);
+  assert.equal(r.sourceModelCalls,0);
+  assert.equal(r.artApproved,false);
+  assert.equal(r.privateStringsIncluded,false);
+  for(const s of author.spaces)assert(!JSON.stringify(r).includes(s.id));
+ }
+ // Malformed corners/unknown targets retain their own diagnoses; they cannot
+ // be mistaken for confirmed shared-wall conflicts.
+ author.massing.corner='invalid';
+ assert(!diagnosePrivateV4DAuthor(author,MASSING_SCHEMA).issues.some(i=>i.code===code));
+ author.massing.corner='NE';author.massing.spaceId='missing-private-id';
+ assert(!diagnosePrivateV4DAuthor(author,MASSING_SCHEMA).issues.some(i=>i.code===code));
+});
 function temp(){
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'v4d-diagnostic-test-'));
  return {root,study:path.join(root,'study'),replay:path.join(root,'replay'),
