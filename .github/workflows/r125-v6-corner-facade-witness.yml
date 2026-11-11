@@ -10,6 +10,8 @@ on:
       - scripts/research/r125-v6-offline-ranked-contrast.test.mjs
       - scripts/research/mab-external-author-offline.mjs
       - scripts/research/mab-external-author-offline.test.mjs
+      - source/ai/r125-v4d-envelope-integration.mjs
+      - scripts/r125-v4d-envelope-integration.test.mjs
 permissions:
   contents: read
 jobs:
@@ -26,6 +28,7 @@ jobs:
           node --check scripts/research/r125-v6-corner-facade-contract.test.mjs
           node --check scripts/research/r125-v6-offline-ranked-contrast.mjs
           node --test scripts/research/r125-v6-offline-ranked-contrast.test.mjs scripts/r125-v4j-feasible-envelope.test.mjs scripts/r125-v4j-civic-facade.test.mjs
+          node --test scripts/r125-v4d-envelope-integration.test.mjs
       - name: Public original Qwen IR through external author boundary — SOURCE only
         run: |
           node --check scripts/research/mab-external-author-offline.mjs

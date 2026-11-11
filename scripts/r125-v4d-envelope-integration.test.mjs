@@ -4,7 +4,7 @@ import {compileAuthoredGraph}
  from '../source/ai/r125-v4d-authored-topology.mjs';
 import {validateEnvelopeIntegrity,compileEnvelopeIntegrity}
  from '../source/ai/r125-v4d-envelope-integration.mjs';
-import {verifyCompiled} from '../source/ai/b143-building-dsl.mjs';
+import {verifyCompiled,validateDesign} from '../source/ai/b143-building-dsl.mjs';
 import {makeV4DEnvelopeIntegrationFixtures}
  from './r125-v4d-envelope-integration-fixtures.mjs';
 
@@ -87,4 +87,50 @@ test('enclosure decisions fail closed, including incompatible frontage glazing',
    /R125_V4D_INTEGRITY_|R125_V4D_GRAPH_/);
  }
  assert.equal(JSON.stringify(v),orig);
+});
+
+test('legal long public-space IDs preserve authored intent and identical physical B143',()=>{
+ // Independent PUBLIC synthetic regression, not the PRIVATE V6 answer.
+ const fixture=makeV4DEnvelopeIntegrationFixtures()[0];
+ const baseline=compileEnvelopeIntegrity(fixture.plan,fixture.envelope);
+ // Exact pre-fix successful source: existing short IDs must not drift.
+ assert.equal(baseline.sourceSha256,
+  'b12d95acd80f55acdb47e76c06d81c9118b3a1480cdcd2dbb86d260582537bf1');
+ assert.equal(baseline.geometrySha256,
+  'ae3eed64ffd0f9c0fb13442c7930e996d8ea2d41c2e79f8aeaed5799f00a8494');
+ for(const length of [17,18,25,35]){
+  const v=structuredClone(fixture),sky=v.plan.nodes.find(n=>n.kind==='sky');
+  const old=sky.id,id='public-'+ 'x'.repeat(length-7);
+  sky.id=id;
+  for(const l of v.plan.links){
+   if(l.from===old)l.from=id;
+   if(l.to===old)l.to=id;
+  }
+  for(const f of v.plan.fixtures)if(f.nodeId===old)f.nodeId=id;
+  for(const s of v.envelope.publicShelters)if(s.nodeId===old)s.nodeId=id;
+  const original=structuredClone(v);
+  const r=compileEnvelopeIntegrity(v.plan,v.envelope);
+  assert.deepEqual(v,original,'Do not rename any authored identifier/reference');
+  assert.deepEqual(r.authorIR,v.plan);
+  assert.deepEqual(r.envelopeAuthorIR,v.envelope);
+  assert.deepEqual(r.compiled.primitives,baseline.compiled.primitives,
+   'Every coordinate, material and layer must match, not just voxel count');
+  assert(verifyCompiled(r.design,r.compiled));
+  assert.equal(r.sourceProof.continuousShadeColumns,
+   baseline.sourceProof.continuousShadeColumns);
+  assert.equal(r.sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert(r.sourceRoutes.zones.every(z=>z.reachedFromEntrance));
+  assert(r.sourceRoutes.featureAccess.every(f=>f.reachableFromEntrance));
+  assert.equal(r.readiness,'NOT_PREPARED');
+  assert.equal(r.constructionApproved,false);
+  assert.equal(r.executionAllowed,false);
+  assert.deepEqual(r.gates,Array(9).fill('BLOCKED'));
+  assert.deepEqual(r.BuildPlan.operations,[]);
+  assert.equal(r.worldContacts,0);
+  assert.equal(r.worldWrites,0);
+  // The frozen B143 limit still rejects oversized labels.
+  const invalid=structuredClone(r.design);
+  invalid.elements[0].id='x'.repeat(41);
+  assert.throws(()=>validateDesign(invalid),/^Error: B143_ELEMENT_ID$/);
+ }
 });

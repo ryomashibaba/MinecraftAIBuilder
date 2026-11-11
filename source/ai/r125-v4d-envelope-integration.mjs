@@ -125,7 +125,17 @@ function gableCells(plan,choice,add){
  }
  return count;
 }
-function publicShelter(n,c,add){
+function publicShelterIds(n,nodeIndex){
+ // B143 element labels are HOST metadata, not authored room identifiers.
+ // Keep previously compilable shelters' labels byte-identical. The underscore reserves
+ // the fallback namespace: authored graph slugs cannot contain underscores.
+ const labels=key=>({roof:'public-covered-arcade-'+key,
+  columns:[0,1].map(i=>'public-arcade-column-'+key+'-'+i)});
+ const original=labels(n.id);
+ return [original.roof,...original.columns].every(id=>id.length<=40)?
+  original:labels('node_'+nodeIndex);
+}
+function publicShelter(n,c,add,nodeIndex){
  // A genuine semicivic covered arcade inside the sky volume.
  // The roof lies 5-9 cells above the standing floor and is supported by
  // two end columns, kept two cells away from the public connection wall.
@@ -134,11 +144,12 @@ function publicShelter(n,c,add){
  const z=isX?n.z+2:(c.edge==='north'?n.z+1:maxZ(n)-d);
  const sx=isX?d:n.width-4,sz=isX?n.depth-4:d;
  const roofOrigin=[x,c.roofY,z],roofSize=[sx,1,sz];
- add.push(box('public-covered-arcade-'+n.id,'add',roofOrigin,roofSize,c.material));
+ const ids=publicShelterIds(n,nodeIndex);
+ add.push(box(ids.roof,'add',roofOrigin,roofSize,c.material));
  const postPositions=isX?[[x+Math.floor(d/2),z],[x+Math.floor(d/2),z+sz-1]]:
   [[x,z+Math.floor(d/2)],[x+sx-1,z+Math.floor(d/2)]];
  postPositions.forEach(([px,pz],i)=>{
-  add.push(box('public-arcade-column-'+n.id+'-'+i,'add',
+  add.push(box(ids.columns[i],'add',
    [px,2,pz],[1,c.roofY-2,1],c.material));
  });
  return sx*sz;
@@ -166,7 +177,7 @@ export function compileEnvelopeIntegrity(original,choicesValue){
  for(const sky of choices.publicShelters){
   const n=plan.nodes.find(n=>n.id===sky.nodeId);
   shelters.push({nodeId:n.id,edge:sky.edge,
-   shelteredRoofCells:publicShelter(n,sky,elements)});
+   shelteredRoofCells:publicShelter(n,sky,elements,plan.nodes.indexOf(n))});
  }
  const root=plan.nodes[0],entranceX=root.x+plan.entry.offset;
  // AUTHOR-approved broader framed entrance over a real public paved approach.
@@ -223,7 +234,8 @@ export function compileEnvelopeIntegrity(original,choicesValue){
     for(let yy=2;yy<design.bounds.height;yy++)if(has(xx,yy,zz)){clear=false;break;}
     if(clear&&has(xx,1,zz))skyPads++;
    }
-  const pillars=elements.filter(e=>e.id.startsWith('public-arcade-column-'+n.id));
+  const ids=publicShelterIds(n,plan.nodes.indexOf(n));
+  const pillars=elements.filter(e=>ids.columns.includes(e.id));
   for(const pillar of pillars){
    const [xx,,zz]=pillar.origin;
    for(let yy=2;yy<c.roofY;yy++)
