@@ -19,6 +19,12 @@ import {createIntegratedSpatialHost} from '../source/ai/r125-integrated-spatial-
 import {classifyOllamaStopEvidence} from '../source/ai/r125-v7-ollama-stop-evidence.mjs';
 import {MEZZANINE_SCHEMA,compileMezzanineAuthorIntent}
  from '../source/ai/r125-v4h-mezzanine-author-ir.mjs';
+import {CIVIC_ARCADE_SCHEMA,compileCivicArcadeAuthorIntent}
+ from '../source/ai/r125-v4j-civic-author-ir.mjs';
+import {V4J_PARENT_INDEX_PROTOCOL,V4J_PARENT_INDEX_SYSTEM_PROMPT,
+ V4J_PARENT_INDEX_CIVIC_SCHEMA,materializeV4JParentIndexAuthor}
+ from '../source/ai/r125-v4j-feasible-envelope.mjs';
+import {classifyPrivateCompilerRejection} from './r125-v4d-compiler-reject-codes.mjs';
 
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const MODEL=/^[A-Za-z0-9._:/-]{2,140}$/;
@@ -61,6 +67,10 @@ const independentMonitorReady=(x,now=Date.now())=>
  typeof x.monitorId==='string' && /^[a-z0-9-]{8,80}$/i.test(x.monitorId) &&
  Number.isSafeInteger(x.monitorHeartbeatEpochMs) &&
  x.monitorHeartbeatEpochMs<=now && now-x.monitorHeartbeatEpochMs<=3000;
+export const ownedV6ServiceReady=(x,previous=x)=>
+ x?.ownedServicePort===11435&&Number.isSafeInteger(x.ownedServicePid)&&
+ x.ownedServicePid>0&&x.ownedServicePid===previous?.ownedServicePid&&
+ x.ownedServiceInKillOnCloseJob===true&&x.sharedServiceIdle===true;
 /** Live samples must advance the same monitor, not replay a static flag.
  * This checks the exposed contract; PRIVATE process independence remains unverified.
  */
@@ -109,7 +119,8 @@ function privateDir(p){
 }
 const safeBase=(headSha,injected,mode)=>({
  schema:'minecraftaibuilder-r125-v7-private-one-safe-v1',
- protocol:mode==='v4h-mezzanine'?V4H_PROTOCOL:INTEGRATED_SPATIAL_V7_SUPPORTED_PROTOCOL,
+ protocol:mode==='civic-v6'?V4J_PARENT_INDEX_PROTOCOL:
+  mode==='v4h-mezzanine'?V4H_PROTOCOL:INTEGRATED_SPATIAL_V7_SUPPORTED_PROTOCOL,
  headSha, status:'HOLD_NOT_STARTED',reason:'NOT_STARTED',
  declaredModelSource:'LOCAL_OLLAMA_UNATTESTED',
  explicitlyInjectedTestResponse:injected,
@@ -127,19 +138,29 @@ const safeBase=(headSha,injected,mode)=>({
 });
 export async function runV7PrivateOnce({
  model,outDir,headSha,prompt,authorMode='integrated-semantic',
+ ownedServiceOrigin,
  deriveIntegratedShell,checkResourceSafety
 }={},{
  modelFetcher=fetch,ciFetcher=fetch,headReader=actualHead,timeoutMs=120000
 }={}){
- if(!['integrated-semantic','v4h-mezzanine'].includes(authorMode))
+ if(!['integrated-semantic','v4h-mezzanine','civic-v6'].includes(authorMode))
   fail('AUTHOR_MODE_UNSUPPORTED');
+ // Existing modes keep their original endpoint and runtime limits. New V6
+ // research requires a separate service; it cannot run on the shared daemon.
+ const civic=authorMode==='civic-v6';
+ if(civic?ownedServiceOrigin!=='http://127.0.0.1:11435':ownedServiceOrigin!==undefined)
+  fail('OWNED_V6_SERVICE_ORIGIN_REQUIRED');
+ const local=civic?ownedServiceOrigin+'/api/chat':LOCAL;
+ const preflight=civic?ownedServiceOrigin+'/v1/chat/completions':PREFLIGHT;
+ const tagsUrl=civic?ownedServiceOrigin+'/api/tags':TAGS_URL;
+ const psUrl=civic?ownedServiceOrigin+'/api/ps':PS_URL;
  const chosenPrompt=prompt===undefined?
   (authorMode==='v4h-mezzanine'?V4H_BRIEF:V7_HELD_OUT_BRIEF):prompt;
- const systemPrompt=authorMode==='v4h-mezzanine'?
+ const systemPrompt=civic?V4J_PARENT_INDEX_SYSTEM_PROMPT:authorMode==='v4h-mezzanine'?
   V7_V4H_COMPACT_SYSTEM_PROMPT:INTEGRATED_SPATIAL_V7_SUPPORTED_PROMPT;
  if(!MODEL.test(model??'')||!SHA.test(headSha??'')||
   typeof chosenPrompt!=='string'||chosenPrompt.length<8||chosenPrompt.length>4000||
-  !Number.isSafeInteger(timeoutMs)||timeoutMs<1000||timeoutMs>120000)
+  !Number.isSafeInteger(timeoutMs)||timeoutMs<1000||timeoutMs>(civic?600000:120000))
   fail('INVALID_OPTIONS');
  const dir=privateDir(outDir);
  const injected=modelFetcher!==fetch||ciFetcher!==fetch||headReader!==actualHead||
@@ -163,7 +184,7 @@ export async function runV7PrivateOnce({
   if(!ci.safeToRunModel){
    result.status='HOLD_REQUIRED_CI';result.reason='BOTH_EXACT_HEAD_CI_NOT_SUCCESS';return result;
   }
-  if(typeof deriveIntegratedShell!=='function'||
+  if((!civic&&typeof deriveIntegratedShell!=='function')||
    typeof checkResourceSafety!=='function'){
    result.status='HOLD_PRIVATE_HOST_OR_RESOURCE_PROBE';result.reason='PRIVATE_BINDING_REQUIRED';return result;
   }
@@ -173,14 +194,18 @@ export async function runV7PrivateOnce({
   if(!freshResourceClearance(resource)){
    result.status='HOLD_RESOURCE_UNKNOWN';result.reason='NO_FRESH_RESOURCE_CLEARANCE';return result;
   }
+  if(civic&&!injected&&!ownedV6ServiceReady(resource)){
+   result.status='HOLD_OWNED_SERVICE';
+   result.reason='DEDICATED_PROCESS_TREE_OR_NONCOMPETITION_UNVERIFIED';return result;
+  }
   // Preserve the first resource sample. A second, cached SAFE report must
   // never authorize a real POST, even with a recently updated heartbeat.
   const resourceBeforeListing=resource;
   // Resource assertion is supplied by the PRIVATE Windows monitor, not
   // independent proof of RAM safety by this public, host-agnostic code.
-  const host=createIntegratedSpatialHost({deriveIntegratedShell});
+  const host=civic?null:createIntegratedSpatialHost({deriveIntegratedShell});
   let listing;
-  try{listing=await preflightR125Ollama({model,endpoint:PREFLIGHT,fetcher:modelFetcher});}
+  try{listing=await preflightR125Ollama({model,endpoint:preflight,fetcher:modelFetcher});}
   catch{result.status='HOLD_OLLAMA_PREFLIGHT';result.reason='LOCAL_MODEL_LIST_UNAVAILABLE';return result;}
   if(listing.status!=='LOCAL_MODEL_LISTED'){
    result.status='HOLD_MODEL_NOT_INSTALLED';result.reason='MODEL_NOT_LISTED';return result;
@@ -189,7 +214,7 @@ export async function runV7PrivateOnce({
   if(!injected){
    try{
     if(model!=='qwen3:14b')throw Error('MODEL_NOT_APPROVED');
-    const tagsResponse=await modelFetcher(TAGS_URL,{method:'GET',
+    const tagsResponse=await modelFetcher(tagsUrl,{method:'GET',
      redirect:'error',signal:AbortSignal.timeout(5000)});
     if(tagsResponse?.ok!==true)throw Error('TAGS_FAILED');
     const tags=JSON.parse(await tagsResponse.text());
@@ -198,7 +223,7 @@ export async function runV7PrivateOnce({
       entries[0]?.digest!==EXPECTED_DIGEST||entries[0]?.size!==EXPECTED_SIZE||
       entries[0]?.details?.quantization_level!=='Q4_K_M')
      throw Error('MODEL_IDENTITY_MISMATCH');
-    const psResponse=await modelFetcher(PS_URL,{method:'GET',
+    const psResponse=await modelFetcher(psUrl,{method:'GET',
      redirect:'error',signal:AbortSignal.timeout(5000)});
     if(psResponse?.ok!==true)throw Error('PS_FAILED');
     const ps=JSON.parse(await psResponse.text());
@@ -219,6 +244,10 @@ export async function runV7PrivateOnce({
   if(!injected&&!independentMonitorReady(resource)){
    result.status='HOLD_INDEPENDENT_MONITOR';
    result.reason='ACTIVE_SEPARATE_MONITOR_NOT_ATTESTED';return result;
+  }
+  if(civic&&!injected&&!ownedV6ServiceReady(resource,resourceBeforeListing)){
+   result.status='HOLD_OWNED_SERVICE';
+   result.reason='DEDICATED_PROCESS_TREE_OR_NONCOMPETITION_UNVERIFIED';return result;
   }
   if(!injected&&!prePostMonitorReady(resourceBeforeListing,resource)){
    result.status='HOLD_INDEPENDENT_MONITOR';
@@ -241,6 +270,7 @@ export async function runV7PrivateOnce({
   save(dir,'V7_LOCAL_REQUEST_PRIVATE.json',{model,prompt:chosenPrompt,
    systemPromptSha256:hash(systemPrompt),
    headSha,contract:result.protocol,maxAttempts:1,
+   ...(civic?{ownedServiceOrigin,num_ctx:12288,num_predict:4096}:{}),
    resourceAssertion:'PRIVATE_MONITOR_ASSERTED_NOT_PUBLICLY_ATTESTED'});
   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),timeoutMs);
   let monitorActive=true,monitorPending=false,monitorFault=false,lastBeat=Date.now();
@@ -256,6 +286,7 @@ export async function runV7PrivateOnce({
    })).then(sample=>{
     if(!monitorActive)return;
     if(!freshResourceClearance(sample)||
+       (civic&&!injected&&!ownedV6ServiceReady(sample,resourceBeforeListing))||
        (!injected&&!monitorSampleAdvanced(monitorPrevious,sample)))fault();
     else{
      monitorPrevious=sample;
@@ -266,11 +297,12 @@ export async function runV7PrivateOnce({
   let raw,completionResponseObserved=false;
   try{
    result.modelGenerationAttempts=1; // Count attempt even for HTTP failure.
-   const response=await modelFetcher(LOCAL,{
+   const response=await modelFetcher(local,{
     method:'POST',redirect:'error',signal:controller.signal,
     headers:{'Content-Type':'application/json','Accept':'application/json'},
     body:JSON.stringify({model,stream:false,think:false,keep_alive:0,
-     format:'json',options:{num_ctx:2048,num_predict:1024,temperature:0.45},
+     format:civic?V4J_PARENT_INDEX_CIVIC_SCHEMA:'json',
+     options:{num_ctx:civic?12288:2048,num_predict:civic?4096:1024,temperature:0.45},
      messages:[{role:'system',content:systemPrompt},
       {role:'user',content:chosenPrompt}]})
    });
@@ -319,7 +351,7 @@ export async function runV7PrivateOnce({
    // GET-only verification, never a second cleanup POST or model retry.
    if(!injected&&result.modelGenerationAttempts>0){
     try{
-     const psResponse=await modelFetcher(PS_URL,{method:'GET',
+     const psResponse=await modelFetcher(psUrl,{method:'GET',
       redirect:'error',signal:AbortSignal.timeout(5000)});
      if(psResponse?.ok!==true)throw Error('PS_FAILED');
      const ps=JSON.parse(await psResponse.text());
@@ -352,11 +384,12 @@ export async function runV7PrivateOnce({
    result.status='HOLD_AUTHOR';result.reason='AUTHOR_NOT_PURE_JSON';return result;
   }
   let candidate;
-  if(authorMode==='v4h-mezzanine'){
+  if(civic||authorMode==='v4h-mezzanine'){
    // Author's original model JSON only. No fallback or HOST-authored geometry.
    try{
-    const v4h=compileMezzanineAuthorIntent(author);
-    if(v4h.authorContract!==MEZZANINE_SCHEMA||
+    const v4h=civic?compileCivicArcadeAuthorIntent(materializeV4JParentIndexAuthor(author)):
+     compileMezzanineAuthorIntent(author);
+    if(v4h.authorContract!==(civic?CIVIC_ARCADE_SCHEMA:MEZZANINE_SCHEMA)||
        v4h.b143?.sourceRoutes?.status!=='SOURCE_ROUTES_REACH_ALL_ZONES'||
        v4h.b143?.compiled?.geometrySha256!==v4h.geometrySha256||
        v4h.b143?.compiled?.sourceSha256!==v4h.sourceSha256||
@@ -366,11 +399,12 @@ export async function runV7PrivateOnce({
        v4h.gates?.length!==9||v4h.gates.some(x=>x!=='BLOCKED'))
       throw Error('V4H_SOURCE_INVALID');
     candidate={status:'GENUINE_B143_CANDIDATE',
-     authorSha256:v4h.mezzanineAuthorSha256,operationSha256:null,
+     authorSha256:civic?hash(JSON.stringify(author)):v4h.mezzanineAuthorSha256,operationSha256:null,
      sourceSha256:v4h.sourceSha256,geometrySha256:v4h.geometrySha256,
      privateProduct:{design:v4h.b143.design,compiled:v4h.b143.compiled}};
-   }catch{
-    result.status='HOLD_AUTHOR';result.reason='V4H_AUTHOR_OR_B143_REJECTED';
+   }catch(e){
+    result.status='HOLD_AUTHOR';result.reason=civic?'V6_AUTHOR_OR_B143_REJECTED':'V4H_AUTHOR_OR_B143_REJECTED';
+    if(civic)result.compilerRejectCode=classifyPrivateCompilerRejection(String(e?.message??e));
     return result;
    }
   }else{
@@ -392,10 +426,10 @@ export async function runV7PrivateOnce({
    sourceSha256:result.sourceSha256,geometrySha256:result.geometrySha256,
    b143CellCount:result.b143CellCount,authorSha256:result.authorSha256,
    operationSha256:result.operationSha256,
-   hostProvenance:authorMode==='v4h-mezzanine'?
+   hostProvenance:civic?'EXISTING_V6_AUTHOR_COMPILER_NO_REPAIR':authorMode==='v4h-mezzanine'?
     'FROZEN_V4H_AUTHOR_COMPILER_NOT_HISTORICAL_SOURCE':
     'PRIVATE_EXPLICIT_HOST_DERIVED_NOT_HISTORICAL_SOURCE',
-   authorContract:authorMode==='v4h-mezzanine'?MEZZANINE_SCHEMA:
+   authorContract:civic?CIVIC_ARCADE_SCHEMA:authorMode==='v4h-mezzanine'?MEZZANINE_SCHEMA:
     INTEGRATED_SPATIAL_V7_SUPPORTED_PROTOCOL,
    modelIdentityCryptographicallyAuthenticated:false,
    independentPhysicalAudit:'NOT_TESTED',art:'NOT_REVIEWED'});

@@ -3,9 +3,80 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {runV7PrivateOnce,verifyCleanHead,V7_V4H_COMPACT_SYSTEM_PROMPT} from './r125-v7-private-once.mjs';
+import {runV7PrivateOnce,verifyCleanHead,V7_V4H_COMPACT_SYSTEM_PROMPT,ownedV6ServiceReady} from './r125-v7-private-once.mjs';
 import {INTEGRATED_SEMANTIC_SCHEMA} from '../source/ai/r125-integrated-semantic-bridge.mjs';
 const sha='a'.repeat(40);
+test('V6 dedicated service ownership rejects missing, changed or competing service evidence',()=>{
+ const valid={ownedServicePort:11435,ownedServicePid:123,
+  ownedServiceInKillOnCloseJob:true,sharedServiceIdle:true};
+ assert(ownedV6ServiceReady(valid));
+ for(const patch of [{ownedServicePort:11434},{ownedServicePid:0},
+  {ownedServicePid:123.5},{ownedServiceInKillOnCloseJob:false},{sharedServiceIdle:false}])
+  assert(!ownedV6ServiceReady({...valid,...patch}));
+ assert(!ownedV6ServiceReady({...valid,ownedServicePid:124},valid));
+ assert(!ownedV6ServiceReady(null));
+});
+
+test('explicit monitored V6 preserves original contract and true compiler; never promotes injected authorship',async()=>{
+ const {syntheticFiveV4JArcadeAuthors}=await import('./r125-v4j-civic-facade-study.mjs');
+ const {CIVIC_ARCADE_SCHEMA,compileCivicArcadeAuthorIntent}=
+  await import('../source/ai/r125-v4j-civic-author-ir.mjs');
+ const {V4J_PARENT_INDEX_SYSTEM_PROMPT,V4J_PARENT_INDEX_CIVIC_SCHEMA,V4J_PARENT_INDEX_PROTOCOL}=
+  await import('../source/ai/r125-v4j-feasible-envelope.mjs');
+ const sample=syntheticFiveV4JArcadeAuthors().find(x=>x.genre==='housing');
+ const original={...sample.wholeBuilding,schema:CIVIC_ARCADE_SCHEMA,arcade:sample.arcade};
+ const {spaces,...rest}=structuredClone(original);
+ const v6={...rest,entrySpace:spaces[0],otherSpaces:spaces.slice(1).map((s,i)=>({
+  ...s,attach:{parentIndex:spaces.slice(0,i+1).findIndex(p=>p.id===s.attach.to),
+   side:s.attach.side,shift:s.attach.shift}}))};
+ const frozen=JSON.stringify(v6),tmp=sandbox(),calls=[];
+ try{
+  const transport=fakeModel(v6,calls);
+  const result=await runV7PrivateOnce({model:'qwen3:14b',outDir:tmp.outDir,
+   headSha:sha,authorMode:'civic-v6',ownedServiceOrigin:'http://127.0.0.1:11435',
+   checkResourceSafety:resource},{ciFetcher:fakeCi(),headReader:()=>sha,
+   modelFetcher:async(url,opt)=>{
+    assert(url.startsWith('http://127.0.0.1:11435/'));
+    if(opt?.method==='POST'){
+     const body=JSON.parse(opt.body);
+     assert.equal(body.messages[0].content,V4J_PARENT_INDEX_SYSTEM_PROMPT);
+     assert.deepEqual(body.format,V4J_PARENT_INDEX_CIVIC_SCHEMA);
+     assert.deepEqual(body.options,{num_ctx:12288,num_predict:4096,temperature:0.45});
+     assert.equal(body.keep_alive,0);
+    }
+    return transport(url,opt);
+   }});
+  assert.equal(result.status,'HOLD_INJECTED_TEST_NOT_MODEL',result.reason);
+  assert.equal(result.protocol,V4J_PARENT_INDEX_PROTOCOL);
+  assert.equal(result.b143Recompiled,true);
+  assert.equal(calls.filter(c=>c.method==='POST').length,1);
+  assert.equal(fs.readFileSync(path.join(tmp.outDir,'V7_MODEL_RESPONSE_ORIGINAL_PRIVATE.txt'),'utf8'),frozen);
+  assert.equal(JSON.stringify(v6),frozen);
+  const expected=compileCivicArcadeAuthorIntent(original);
+  assert.equal(result.geometrySha256,expected.b143.geometrySha256);
+  assert.equal(result.sourceSha256,expected.b143.sourceSha256);
+  assert.equal(result.worldWrites,0);
+  assert.deepEqual(result.gates,Array(9).fill('BLOCKED'));
+ }finally{fs.rmSync(tmp.root,{recursive:true,force:true});}
+});
+
+test('V6 refuses shared/remote origins and retains zero-call pending-CI guard',async()=>{
+ for(const origin of [undefined,'http://127.0.0.1:11434','https://example.com']){
+  const tmp=sandbox();
+  try{await assert.rejects(runV7PrivateOnce(params(tmp.outDir,
+   {authorMode:'civic-v6',ownedServiceOrigin:origin})),/OWNED_V6_SERVICE_ORIGIN_REQUIRED/);
+   assert(!fs.existsSync(tmp.outDir));
+  }finally{fs.rmSync(tmp.root,{recursive:true,force:true});}
+ }
+ const tmp=sandbox(),calls=[];
+ try{
+  const result=await runV7PrivateOnce(params(tmp.outDir,{authorMode:'civic-v6',
+   ownedServiceOrigin:'http://127.0.0.1:11435'}),{ciFetcher:fakeCi('in_progress'),
+   headReader:()=>sha,modelFetcher:fakeModel(author(),calls)});
+  assert.equal(result.status,'HOLD_REQUIRED_CI');
+  assert.equal(result.modelGenerationAttempts,0);assert.equal(calls.length,0);
+ }finally{fs.rmSync(tmp.root,{recursive:true,force:true});}
+});
 const ciName=['R125 V4D Local Author Bridge — INJECTED TEST ONLY','Education-first offline QA'];
 const jsonResponse=obj=>({ok:true,text:async()=>JSON.stringify(obj)});
 function fakeCi(state='completed'){
