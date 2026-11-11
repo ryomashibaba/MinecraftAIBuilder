@@ -6,6 +6,8 @@ on:
     paths:
       - .github/workflows/r125-v6-corner-facade-witness.yml
       - scripts/research/r125-v6-corner-facade-contract.test.mjs
+      - scripts/research/r125-v6-offline-ranked-contrast.mjs
+      - scripts/research/r125-v6-offline-ranked-contrast.test.mjs
 permissions:
   contents: read
 jobs:
@@ -20,9 +22,10 @@ jobs:
       - name: Actual frozen public modules — no model or Minecraft
         run: |
           node --check scripts/research/r125-v6-corner-facade-contract.test.mjs
-          node --test scripts/research/r125-v6-corner-facade-contract.test.mjs scripts/r125-v4e-ranked-exterior.test.mjs
+          node --check scripts/research/r125-v6-offline-ranked-contrast.mjs
+          node --test scripts/research/r125-v6-offline-ranked-contrast.test.mjs scripts/research/r125-v6-corner-facade-contract.test.mjs scripts/r125-v4e-ranked-exterior.test.mjs
       - name: Evidence boundary
         if: always()
         run: |
-          echo 'This test compiles public synthetic SOURCE through actual frozen B143; not original Qwen, human ART, world, or formal QA.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Public synthetic tests include the V6-to-ranked contrast, but DO NOT certify full V6, original Qwen, human ART, world, or formal QA.' >> "$GITHUB_STEP_SUMMARY"
           echo 'No model, PRIVATE file, Ollama, paid API, or Minecraft world calls.' >> "$GITHUB_STEP_SUMMARY"
