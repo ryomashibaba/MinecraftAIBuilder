@@ -8,9 +8,9 @@
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {translateRankedExteriorIntent,RANKED_SCHEMA} from
+import {translateRankedExteriorIntent,proveRankedExteriorPhysicalGlazing,RANKED_SCHEMA} from
  '../../source/ai/r125-v4e-ranked-exterior-ir.mjs';
-import {translateCompactModelIntent,COMPACT_SCHEMA} from
+import {translateCompactModelIntent,compileCompactModelIntent,COMPACT_SCHEMA} from
  '../../source/ai/r125-v4d-compact-model-ir.mjs';
 import {translateRelativeAuthorIntent} from
  '../../source/ai/r125-v4d-relative-author-ir.mjs';
@@ -92,4 +92,37 @@ test('V4E whole-face ranking can reject a valid nonlinked 6-wide south glazing c
   'No protected 2-wide portal exists on hall south face');
  assert.equal(plan.nodes.length,4);
  assert.equal(plan.links.length,3);
+});
+
+
+test('same authored topology: TRUE frozen B143 glass, interior/exterior air and routes',()=>{
+ // Counterfactual synthetic AUTHOR selection: the south face was always a
+ // lower-ranked ORIGINAL preference, not a host-invented new direction.
+ // This must never be used to promote the unrelated PRIVATE Qwen original.
+ const compact=author();
+ compact.spaces[1].windowSide='south';
+ const original=structuredClone(compact);
+ const compiled=compileCompactModelIntent(compact);
+ assert.deepEqual(compact,original,'Compiler must not mutate author source');
+ assert.equal(compiled.b143.sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert(compiled.b143.sourceRoutes.zones.every(z=>z.reachedFromEntrance));
+ assert(compiled.b143.sourceRoutes.featureAccess.every(f=>f.reachableFromEntrance));
+ assert(compiled.b143.compiled.primitives.length>0,'Real B143 geometry must exist');
+ const proof=proveRankedExteriorPhysicalGlazing(compiled,[
+  {spaceIndex:1,selectedSide:'south'}
+ ]);
+ assert.equal(proof.status,'B143_WINDOW_GLASS_AND_IMMEDIATE_OUTWARD_AIR_SOURCE_VERIFIED');
+ assert.equal(proof.windowCount,1);
+ assert.equal(proof.verifiedPanelGlassCells,18);
+ assert.equal(proof.verifiedImmediateOutwardAirCells,18);
+ assert.equal(proof.verifiedImmediateInwardAirCells,18);
+ assert.equal(compiled.worldWrites,0);
+ assert.equal(compiled.worldContacts,0);
+ assert.equal(compiled.constructionApproved,false);
+ assert.equal(compiled.executionAllowed,false);
+ assert.equal(compiled.readiness,'NOT_PREPARED');
+ assert.deepEqual(compiled.gates,Array(9).fill('BLOCKED'));
+ assert.deepEqual(compiled.BuildPlan.operations,[]);
+ assert.equal(proof.humanArchitecturalArt,'NOT_REVIEWED');
+ assert.equal(proof.minecraftWalking,'NOT_TESTED');
 });
