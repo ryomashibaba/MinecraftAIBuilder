@@ -5,7 +5,7 @@ on:
   push:
     # One exact-HEAD research validation is opt-in via [research-verify].
     # Main and pull_request behavior remain unchanged.
-    branches: [main, research/r125-entry-nearest-safe-source-20261109]
+    branches: [main, research/r125-entry-nearest-safe-source-20261109, research/r125-v6-readonly-facade-diagnostic-20261111]
   pull_request:
   workflow_dispatch:
 
