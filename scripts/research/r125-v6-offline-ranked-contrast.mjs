@@ -1,7 +1,7 @@
 /**
  * One-time, local-only research on an ALREADY SAVED V6 original response.
- * Uses one immutable author answer; legacy and opt-in ranked-only B143 checks.
- * This is NOT full Civic Arcade V6 source, ART, Minecraft, model identity or Gate C.
+ * Uses one immutable author answer for ranked AND full Civic Arcade V6 checks.
+ * Full-V6 SOURCE research PASS is not ART, model identity, Minecraft or Gate C.
  * No model transport, network, world IO or filesystem writes.
  *
  * node scripts/research/r125-v6-offline-ranked-contrast.mjs --study PRIVATE_DIR
@@ -11,10 +11,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
-import {CIVIC_ARCADE_SCHEMA} from '../../source/ai/r125-v4j-civic-author-ir.mjs';
+import {CIVIC_ARCADE_SCHEMA,compileCivicArcadeAuthorIntent}
+ from '../../source/ai/r125-v4j-civic-author-ir.mjs';
 import {materializeV4JParentIndexAuthor,V4J_PARENT_INDEX_PROTOCOL}
  from '../../source/ai/r125-v4j-feasible-envelope.mjs';
-import {RANKED_SCHEMA,compileRankedExteriorIntent}
+import {RANKED_SCHEMA,compileRankedExteriorIntent,
+ runWithRankedExteriorCenterStripResearch}
  from '../../source/ai/r125-v4e-ranked-exterior-ir.mjs';
 import {classifyPrivateCompilerRejection}
  from '../r125-v4d-compiler-reject-codes.mjs';
@@ -47,10 +49,35 @@ const isWithin=(child,parent)=>{
 };
 
 /**
- * Synthetic and PRIVATE input share this path. All fields other than the
- * author-ranked V4E subset remain untouched and are never auto-repaired.
- * No full V6 admission is implied by a ranked-only pass.
+ * Synthetic and PRIVATE input share this path. Nothing in the original
+ * author response may be repaired. Both complete V6 outcomes are SOURCE-only;
+ * neither author provenance, human ART, nor Minecraft is certified.
  */
+function auditFullV6Source(callback){
+ // Keep PRIVATE room IDs, exception messages and geometry SHAs internal.
+ // Only finite categories and checks are included in the public result.
+ try{
+  const out=callback(),routes=out?.b143?.sourceRoutes;
+  const worldSafe=out?.worldContacts===0&&out?.worldWrites===0&&
+   out?.readiness==='NOT_PREPARED'&&
+   out?.constructionApproved===false&&out?.executionAllowed===false&&
+   out?.gates?.length===9&&out.gates.every(g=>g==='BLOCKED')&&
+   Array.isArray(out?.BuildPlan?.operations)&&out.BuildPlan.operations.length===0;
+  const sourceReachable=routes?.status==='SOURCE_ROUTES_REACH_ALL_ZONES'&&
+   Array.isArray(routes.zones)&&routes.zones.every(z=>z.reachedFromEntrance)&&
+   Array.isArray(routes.featureAccess)&&routes.featureAccess.every(f=>f.reachableFromEntrance);
+  if(!worldSafe||!sourceReachable||typeof out?.b143?.geometrySha256!=='string')
+   return {status:'HOLD',rejectCode:'RESEARCH_FULL_V6_SOURCE_SAFETY_HOLD',
+    rawError:null,geometrySha:null,worldSafe:false,sourceReachable:false};
+  return {status:'PASS',rejectCode:null,rawError:null,
+   geometrySha:out.b143.geometrySha256,worldSafe:true,sourceReachable:true};
+ }catch(e){
+  const rawError=String(e?.message??e);
+  return {status:'HOLD',rejectCode:safeReject(e),rawError,
+   geometrySha:null,worldSafe:false,sourceReachable:false};
+ }
+}
+
 export function contrastV6RankedLayer(original,expectedOriginalError=null){
  const frozen=JSON.stringify(original);
  const materialized=materializeV4JParentIndexAuthor(original);
@@ -81,10 +108,20 @@ export function contrastV6RankedLayer(original,expectedOriginalError=null){
   };
   proposalGeometry=out.b143.geometrySha256;
  }catch(e){researchStatus='HOLD';researchError=e;}
+ const fullLegacy=auditFullV6Source(()=>
+  compileCivicArcadeAuthorIntent(materialized));
+ const fullResearch=auditFullV6Source(()=>
+  runWithRankedExteriorCenterStripResearch(()=>
+   compileCivicArcadeAuthorIntent(materialized)));
  if(JSON.stringify(original)!==frozen)hold('ORIGINAL_AUTHOR_MUTATED');
+ const fullImproved=oldStatus==='HOLD'&&researchStatus==='PASS'&&
+  fullLegacy.status==='HOLD'&&fullResearch.status==='PASS';
  return {
   ...safeBase(),
-  status:oldStatus==='HOLD'&&researchStatus==='PASS'?
+  status:fullLegacy.status==='PASS'&&fullResearch.status==='HOLD'?
+   'HOLD_RESEARCH_FULL_V6_REGRESSION':
+   fullImproved?'RESEARCH_FULL_V6_SOURCE_ONLY_PASS_NOT_ART':
+   oldStatus==='HOLD'&&researchStatus==='PASS'?
    'RESEARCH_RANKED_LAYER_ONLY_PASS_NOT_V6':
    oldStatus==='PASS'&&researchStatus==='PASS'?
    'RESEARCH_RANKED_BASELINE_AND_PROPOSAL_PASS':
@@ -98,7 +135,19 @@ export function contrastV6RankedLayer(original,expectedOriginalError=null){
   sameRankedGeometry:oldGeometry&&proposalGeometry?
    oldGeometry===proposalGeometry:null,
   rankedPhysicalWitness:proof,
-  fullV6Source:'NOT_TESTED',
+  fullV6CompilerExecuted:true,
+  fullV6LegacyStatus:fullLegacy.status,
+  fullV6ResearchStatus:fullResearch.status,
+  fullV6LegacyRejectCode:fullLegacy.rejectCode,
+  fullV6ResearchRejectCode:fullResearch.rejectCode,
+  originalFullV6ErrorReproduced:expectedOriginalError===null?null:
+   fullLegacy.status==='HOLD'&&fullLegacy.rawError===expectedOriginalError,
+  fullV6Source:fullResearch.status==='PASS'?
+   'RESEARCH_SOURCE_PASS_NOT_ART_OR_APPROVAL':'HOLD_NOT_APPROVED',
+  fullV6WorldSafetyVerified:fullResearch.worldSafe,
+  fullV6SourceRoutesVerified:fullResearch.sourceReachable,
+  sameFullV6Geometry:fullLegacy.geometrySha&&fullResearch.geometrySha?
+   fullLegacy.geometrySha===fullResearch.geometrySha:null,
   additionalModelCalls:0,worldWrites:0
  };
 }
@@ -145,7 +194,8 @@ function cli(){
   hold('ARGS_EXPECT_EXISTING_PRIVATE_STUDY');
  const {input,originalError}=readSavedV6Study(args[1]);
  const result=contrastV6RankedLayer(input,originalError);
- if(result.originalCompilerErrorReproduced!==true)
+ if(result.originalCompilerErrorReproduced!==true||
+  result.originalFullV6ErrorReproduced!==true)
   hold('ORIGINAL_COMPILER_ERROR_NOT_REPRODUCED');
  console.log(JSON.stringify({
   ...result,originalRawIntegrity:'SHA256_MATCH',

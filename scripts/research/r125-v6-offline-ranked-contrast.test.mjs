@@ -39,8 +39,12 @@ test('public housing V6 author: read-only ranked baseline and research opt-in, n
  assert.equal(JSON.stringify(v6),frozen);
  assert.equal(result.legacyRankedStatus,'PASS');
  assert.equal(result.researchRankedStatus,'PASS');
- assert.equal(result.fullV6Source,'NOT_TESTED');
- assert.equal(result.fullV6CompilerExecuted,false);
+ assert.equal(result.fullV6Source,'RESEARCH_SOURCE_PASS_NOT_ART_OR_APPROVAL');
+ assert.equal(result.fullV6CompilerExecuted,true);
+ assert.equal(result.fullV6LegacyStatus,'PASS');
+ assert.equal(result.fullV6ResearchStatus,'PASS');
+ assert.equal(result.fullV6WorldSafetyVerified,true);
+ assert.equal(result.fullV6SourceRoutesVerified,true);
  assert.equal(result.additionalModelCalls,0);
  assert.equal(result.worldWrites,0);
  assert.equal(result.rankedPhysicalWitness.allNineGatesBlocked,true);
@@ -90,8 +94,13 @@ test('V6 corner-only reject reproduces, opt-in ranked improves without touching 
  assert.equal(result.rankedPhysicalWitness.glassCells,54);
  assert.equal(result.rankedPhysicalWitness.inwardAirCells,54);
  assert.equal(result.rankedPhysicalWitness.outwardAirCells,54);
- assert.equal(result.fullV6Source,'NOT_TESTED');
- assert.equal(result.fullV6CompilerExecuted,false);
+ assert.equal(result.fullV6Source,'HOLD_NOT_APPROVED');
+ assert.equal(result.fullV6CompilerExecuted,true);
+ assert.equal(result.fullV6LegacyStatus,'HOLD');
+ assert.equal(result.fullV6ResearchStatus,'HOLD');
+ assert.equal(result.fullV6LegacyRejectCode,'RANKED_NO_EXTERIOR_OPTION');
+ assert.notEqual(result.fullV6ResearchRejectCode,'RANKED_NO_EXTERIOR_OPTION');
+ assert.equal(result.originalFullV6ErrorReproduced,true);
  assert.equal(result.modelIdentityAttested,false);
  assert.equal(result.gateCP1,'HOLD');
  // This prevents a false claim that the optional ranked-only PASS has
@@ -161,7 +170,10 @@ test('synthetic LOCAL V6 study: SHA-verified CLI contrast is fail-closed on unsa
   assert.equal(safe.originalCompilerErrorReproduced,true);
   assert.equal(safe.status,'RESEARCH_RANKED_LAYER_ONLY_PASS_NOT_V6');
   assert.equal(safe.originalRawIntegrity,'SHA256_MATCH');
-  assert.equal(safe.fullV6CompilerExecuted,false);
+  assert.equal(safe.fullV6CompilerExecuted,true);
+  assert.equal(safe.originalFullV6ErrorReproduced,true);
+  assert.equal(safe.fullV6ResearchStatus,'HOLD');
+  assert.equal(safe.fullV6WorldSafetyVerified,false);
   assert.equal(safe.worldWrites,0);
   assert.equal(safe.additionalModelCalls,0);
   assert(!run.stdout.includes(v6.entrySpace.id));
