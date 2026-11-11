@@ -54,7 +54,13 @@ export const V7_V4H_COMPACT_SYSTEM_PROMPT=[
  "All parts must fit TOGETHER and preserve original 2-wide entrance-to-every-function paths, glazed windows with inner/outer air, equipment, structural source supports and walkable public void. HOST validates actual B143 exactly, never silently repairs/resizes/moves anything. Invalid original => HOLD. Never claim ART PASS, Minecraft walking, model identity, weather/structural approval or world-write permission; all nine construction gates remain BLOCKED."
 ].join('\n');
 
-const V4H_BRIEF='Design a useful two-level public building with a coherent welcoming hall, accessible upper gallery, functional stairs and distinctive whole-building massing. Independently choose its architecture and spatial program.';
+export const V4H_BRIEF='Design a useful two-level public building with a coherent welcoming hall, accessible upper gallery, functional stairs and distinctive whole-building massing. Independently choose its architecture and spatial program.';
+export function v7RequestOptions(mode){
+ if(!['integrated-semantic','v4h-mezzanine','civic-v6'].includes(mode))
+  fail('AUTHOR_MODE_UNSUPPORTED');
+ return {num_ctx:mode==='civic-v6'?12288:2048,
+  num_predict:mode==='civic-v6'?4096:1024,temperature:0.45};
+}
 const hash=s=>createHash('sha256').update(s).digest('hex');
 const freshResourceClearance=(resource,now=Date.now())=>
  resource?.status==='SAFE_FOR_ONE_REQUEST' &&
@@ -302,7 +308,7 @@ export async function runV7PrivateOnce({
     headers:{'Content-Type':'application/json','Accept':'application/json'},
     body:JSON.stringify({model,stream:false,think:false,keep_alive:0,
      format:civic?V4J_PARENT_INDEX_CIVIC_SCHEMA:'json',
-     options:{num_ctx:civic?12288:2048,num_predict:civic?4096:1024,temperature:0.45},
+     options:v7RequestOptions(authorMode),
      messages:[{role:'system',content:systemPrompt},
       {role:'user',content:chosenPrompt}]})
    });

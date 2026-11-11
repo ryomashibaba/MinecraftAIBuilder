@@ -6,6 +6,13 @@ import path from 'node:path';
 import {runV7PrivateOnce,verifyCleanHead,V7_V4H_COMPACT_SYSTEM_PROMPT,ownedV6ServiceReady} from './r125-v7-private-once.mjs';
 import {INTEGRATED_SEMANTIC_SCHEMA} from '../source/ai/r125-integrated-semantic-bridge.mjs';
 const sha='a'.repeat(40);
+test('public V4H token evidence reads the protected settings actually used by native requests',async()=>{
+ const {publicTokenEvidence}=await import('./r125-v7-v4h-public-token-input.mjs');
+ const r=publicTokenEvidence();
+ assert.equal(r.num_ctx,2048);assert.equal(r.num_predict,1024);
+ assert.equal(r.prompt,V7_V4H_COMPACT_SYSTEM_PROMPT);
+ assert.equal(r.samples.length,5);assert.equal(r.modelCalls,0);
+});
 test('V6 dedicated service ownership rejects missing, changed or competing service evidence',()=>{
  const valid={ownedServicePort:11435,ownedServicePid:123,
   ownedServiceInKillOnCloseJob:true,sharedServiceIdle:true};
