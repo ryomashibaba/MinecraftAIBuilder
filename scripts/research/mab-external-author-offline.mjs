@@ -114,8 +114,15 @@ if(process.argv[1]===fileURLToPath(import.meta.url)){
  }catch(e){
   // Never print raw provider text, compiler exceptions, room IDs or local paths.
   const message=String(e?.message??'');
-  const code=message.startsWith('MAB_EXTERNAL_IR_')?message:
-   'MAB_EXTERNAL_IR_SOURCE_NOT_PROVEN';
+  const publicCodes=new Set([
+   'REQUIRE_CONTRACT_AND_INPUT','BAD_ARGUMENT','UNKNOWN_CONTRACT',
+   'ABSOLUTE_INPUT_REQUIRED','UNSAFE_INPUT','INPUT_INSIDE_PUBLIC_REPO',
+   'INPUT_CHANGED_WHILE_READING','INVALID_UTF8','INVALID_JSON',
+   'IR_OBJECT_REQUIRED','IR_SCHEMA_MISMATCH','SOURCE_OR_WORLD_BOUNDARY',
+   'R125_CIRCULATION_HOLD','V6_SOURCE_OR_WORLD_BOUNDARY',
+   'ORIGINAL_MUTATED'
+  ].map(code=>'MAB_EXTERNAL_IR_'+code));
+  const code=publicCodes.has(message)?message:'MAB_EXTERNAL_IR_SOURCE_NOT_PROVEN';
   console.error(JSON.stringify({status:'HOLD',code,modelCalls:0,
    networkCalls:0,worldWrites:0}));
   process.exitCode=2;
