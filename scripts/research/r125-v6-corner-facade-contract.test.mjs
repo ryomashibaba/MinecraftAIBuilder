@@ -183,3 +183,43 @@ test('original ranked V4E baseline still compiles and preserves prior directions
  assert.equal(result.worldWrites,0);
  assert.deepEqual(result.gates,Array(9).fill('BLOCKED'));
 });
+
+
+test('research strip mode keeps a four-linked covered hall fully rejected',()=>{
+ const base=author();
+ base.spaces.push(mkSpace('south-hall',
+  'Additional fully connected covered teaching room','covered',
+  {to:'middle-hall',side:'south',shift:0}));
+ const ranked=structuredClone(base);
+ ranked.schema=RANKED_SCHEMA;
+ for(const s of ranked.spaces){
+  delete s.windowSide;
+  s.windowPriority=s.kind==='covered'?['north','east','west','south']:null;
+ }
+ const frozen=structuredClone(ranked);
+ assert.throws(()=>translateRankedExteriorIntent(ranked,{centerStripResearchV2:true}),
+  /R125_V4E_RANKED_NO_AUTHORED_EXTERIOR_OPTION_1$/);
+ assert.deepEqual(ranked,frozen);
+});
+
+test('research strip mode rejects a linked south face and uses next authored safe north',()=>{
+ const base=author();
+ base.spaces[2].attach.side='south';
+ const ranked=structuredClone(base);
+ ranked.schema=RANKED_SCHEMA;
+ for(const [i,s] of ranked.spaces.entries()){
+  delete s.windowSide;
+  s.windowPriority=s.kind==='covered'?
+   i===1?['south','west','east','north']:['north','east','west','south']:null;
+ }
+ const frozen=structuredClone(ranked);
+ const witness=translateRankedExteriorIntent(ranked,{centerStripResearchV2:true});
+ const middle=witness.chosenWindowFaces.find(c=>c.spaceIndex===1);
+ assert(middle);
+ assert.deepEqual([middle.selectedSide,middle.authoredRank],['north',4]);
+ assert.deepEqual(middle.excludedNonExteriorDirections.slice().sort(),
+  ['east','south','west'],'All linked sides must be rejected before looking at the next rank');
+ assert.notEqual(witness.chosenWindowFaces[0].selectedSide,'north',
+  'Root main entrance is never an allowed facade');
+ assert.deepEqual(ranked,frozen);
+});

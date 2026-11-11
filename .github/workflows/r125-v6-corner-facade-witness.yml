@@ -20,7 +20,7 @@ jobs:
       - name: Actual frozen public modules — no model or Minecraft
         run: |
           node --check scripts/research/r125-v6-corner-facade-contract.test.mjs
-          node --test scripts/research/r125-v6-corner-facade-contract.test.mjs
+          node --test scripts/research/r125-v6-corner-facade-contract.test.mjs scripts/r125-v4e-ranked-exterior.test.mjs
       - name: Evidence boundary
         if: always()
         run: |
