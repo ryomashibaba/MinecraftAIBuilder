@@ -73,6 +73,7 @@ export function verifyExternalAuthorSource(original,contract){
   return {status:'R125_SOURCE_CANDIDATE_ART_AND_WORLD_HOLD',
    occupiedVoxels:product.compiled.primitives.length,
    geometrySha256:product.geometrySha256,
+   sourceSha256:product.sourceSha256,
    circulation:'SOURCE_CLEARANCE_PROBES_PASS'};
  }
  const out=compileCivicArcadeAuthorIntent(original);
@@ -90,6 +91,7 @@ export function verifyExternalAuthorSource(original,contract){
  return {status:'V6_SOURCE_CANDIDATE_ART_AND_WORLD_HOLD',
   occupiedVoxels:out.b143.compiled.primitives.length,
   geometrySha256:out.b143.geometrySha256,
+  sourceSha256:out.b143.sourceSha256,
   circulation:'SOURCE_ROUTES_REACH_ALL_ZONES'};
 }
 export function runExternalAuthorOffline({input,contract}){

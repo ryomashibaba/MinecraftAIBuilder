@@ -8,6 +8,8 @@ on:
       - scripts/research/r125-v6-corner-facade-contract.test.mjs
       - scripts/research/r125-v6-offline-ranked-contrast.mjs
       - scripts/research/r125-v6-offline-ranked-contrast.test.mjs
+      - scripts/research/mab-external-author-offline.mjs
+      - scripts/research/mab-external-author-offline.test.mjs
 permissions:
   contents: read
 jobs:
@@ -24,8 +26,13 @@ jobs:
           node --check scripts/research/r125-v6-corner-facade-contract.test.mjs
           node --check scripts/research/r125-v6-offline-ranked-contrast.mjs
           node --test scripts/research/r125-v6-offline-ranked-contrast.test.mjs scripts/r125-v4j-feasible-envelope.test.mjs scripts/r125-v4j-civic-facade.test.mjs
+      - name: Public original Qwen IR through external author boundary — SOURCE only
+        run: |
+          node --check scripts/research/mab-external-author-offline.mjs
+          node --test scripts/research/mab-external-author-offline.test.mjs
       - name: Evidence boundary
         if: always()
         run: |
           echo 'Public synthetic tests prove legacy full-V6 parity and that ranked-only research is NOT full-V6 repair; never certify original Qwen, ART, Minecraft or formal QA.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'External-author R125 replay uses an existing PUBLIC saved Qwen IR, not a new model, not V6 Qwen evidence, not ART or Minecraft.' >> "$GITHUB_STEP_SUMMARY"
           echo 'No model, PRIVATE file, Ollama, paid API, or Minecraft world calls.' >> "$GITHUB_STEP_SUMMARY"
