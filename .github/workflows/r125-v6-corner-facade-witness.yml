@@ -1,0 +1,27 @@
+name: R125 V6 corner-facade research witness (one-time isolated test)
+on:
+  push:
+    branches:
+      - research/r125-v6-readonly-facade-diagnostic-20261111
+    paths:
+      - .github/workflows/r125-v6-corner-facade-witness.yml
+permissions:
+  contents: read
+jobs:
+  exact-source-corner-facade-witness:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Actual frozen public modules — no model or Minecraft
+        run: |
+          node --check scripts/research/r125-v6-corner-facade-contract.test.mjs
+          node --test scripts/research/r125-v6-corner-facade-contract.test.mjs
+      - name: Evidence boundary
+        if: always()
+        run: |
+          echo 'This test is a synthetic, public SOURCE contract witness; not original Qwen, ART, world, or formal QA.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'No model, PRIVATE file, Ollama, paid API, or Minecraft world calls.' >> "$GITHUB_STEP_SUMMARY"
