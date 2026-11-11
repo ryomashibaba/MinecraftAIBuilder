@@ -8,7 +8,8 @@
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {translateRankedExteriorIntent,proveRankedExteriorPhysicalGlazing,RANKED_SCHEMA} from
+import {translateRankedExteriorIntent,compileRankedExteriorIntent,
+ proveRankedExteriorPhysicalGlazing,RANKED_SCHEMA} from
  '../../source/ai/r125-v4e-ranked-exterior-ir.mjs';
 import {translateCompactModelIntent,compileCompactModelIntent,COMPACT_SCHEMA} from
  '../../source/ai/r125-v4d-compact-model-ir.mjs';
@@ -158,4 +159,27 @@ test('same authored topology: TRUE frozen B143 glass, interior/exterior air and 
  assert.deepEqual(compiled.BuildPlan.operations,[]);
  assert.equal(proof.humanArchitecturalArt,'NOT_REVIEWED');
  assert.equal(proof.minecraftWalking,'NOT_TESTED');
+});
+
+
+test('original ranked V4E baseline still compiles and preserves prior directions',async()=>{
+ const {makeV4DCompactSynthetic}=
+  await import('../r125-v4d-compact-model-fixture.mjs');
+ const original=makeV4DCompactSynthetic();
+ original.schema=RANKED_SCHEMA;
+ for(const [i,s] of original.spaces.entries()){
+  delete s.windowSide;
+  s.windowPriority=s.kind==='sky'?null:
+   i===0?['west','east','south','north']:
+   ['east','west','south','north'];
+ }
+ const frozen=structuredClone(original);
+ const result=compileRankedExteriorIntent(original);
+ assert.deepEqual(original,frozen);
+ assert.equal(result.normalizedBy,'AUTHOR_RANKED_EXTERIOR_SURFACE_CONSTRAINT_V1');
+ assert.deepEqual(result.chosenWindowFaces.map(v=>[v.spaceIndex,v.selectedSide,v.authoredRank]),
+  [[0,'east',2],[1,'west',2]]);
+ assert.equal(result.b143.sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(result.worldWrites,0);
+ assert.deepEqual(result.gates,Array(9).fill('BLOCKED'));
 });
