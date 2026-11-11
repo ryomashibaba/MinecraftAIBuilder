@@ -19,22 +19,27 @@ const fail=code=>{throw Error('R125_V4E_RANKED_'+code);};
 const exact=(x,fields)=>x!==null&&typeof x==='object'&&!Array.isArray(x)&&
  Object.keys(x).sort().join('|')===fields.slice().sort().join('|');
 const endX=n=>n.x+n.width-1,endZ=n=>n.z+n.depth-1;
-const interval=(a,b,c,d)=>Math.max(a,c)<=Math.min(b,d);
-const faceTouches=(room,other,side)=>{
- if(side==='east')return (other.x===endX(room)||other.x===endX(room)+1||
-   (other.x<endX(room)&&endX(other)>=endX(room)))&&
-   interval(room.z,endZ(room),other.z,endZ(other));
- if(side==='west')return (endX(other)===room.x||endX(other)===room.x-1||
-   (other.x<=room.x&&endX(other)>room.x))&&
-   interval(room.z,endZ(room),other.z,endZ(other));
- if(side==='south')return (other.z===endZ(room)||other.z===endZ(room)+1||
-   (other.z<endZ(room)&&endZ(other)>=endZ(room)))&&
-   interval(room.x,endX(room),other.x,endX(other));
- if(side==='north')return (endZ(other)===room.z||endZ(other)===room.z-1||
-   (other.z<=room.z&&endZ(other)>room.z))&&
-   interval(room.x,endX(room),other.x,endX(other));
- fail('UNKNOWN_SIDE');
+// RESEARCH ONLY: narrow a facade decision to the exact already-defined
+// centred six-voxel glazing interval. Reject any neighbour occupying the
+// window face OR its immediate exterior air. FROZEN link/entry gates below
+// still reject entire connected sides; genuine B143 will arbitrate afterward.
+const centreWindowObstructed=(room,other,side)=>{
+ const length=side==='east'||side==='west'?room.depth:room.width;
+ const offset=Math.floor((length-6)/2);
+ const inside=(x,z)=>x>=other.x&&x<=endX(other)&&
+  z>=other.z&&z<=endZ(other);
+ for(let t=0;t<6;t++){
+  const x=side==='west'?room.x:
+   side==='east'?endX(room):room.x+offset+t;
+  const z=side==='north'?room.z:
+   side==='south'?endZ(room):room.z+offset+t;
+  const ox=x+(side==='east'?1:side==='west'?-1:0);
+  const oz=z+(side==='south'?1:side==='north'?-1:0);
+  if(inside(x,z)||inside(ox,oz))return true;
+ }
+ return false;
 };
+const opposite=side=>({east:'west',west:'east',north:'south',south:'north'})[side];
 const digest=v=>createHash('sha256').update(JSON.stringify(v)).digest('hex');
 function authorContract(value){
  if(!exact(value,['schema','id','title','brief','materials','spaces'])||
@@ -73,13 +78,19 @@ export function translateRankedExteriorIntent(untrusted){
  // change model authored adjacencies, dimensions, facade or roof decisions.
  const base=translateRelativeAuthorIntent(mechanical.expandedMechanicalIR);
  const indexed=base.plan.nodes;
+ const linkedSides=new Set();
+ for(const link of base.plan.links){
+  linkedSides.add(link.from+'|'+link.side);
+  linkedSides.add(link.to+'|'+opposite(link.side));
+ }
  const chosenWindowFaces=[];
  for(const [i,s] of input.spaces.entries()){
   if(s.kind!=='covered')continue;
   const room=indexed[i];
   if(room?.id!==s.id)fail('HOST_GRAPH_ID_DRIFT_'+i);
   const blocked=dirs.filter(dir=>
-   (i===0&&dir==='north')||indexed.some((n,j)=>i!==j&&faceTouches(room,n,dir))
+   (i===0&&dir==='north')||linkedSides.has(room.id+'|'+dir)||
+   indexed.some((n,j)=>i!==j&&centreWindowObstructed(room,n,dir))
   );
   const side=s.windowPriority.find(dir=>!blocked.includes(dir));
   if(!side)fail('NO_AUTHORED_EXTERIOR_OPTION_'+i);
