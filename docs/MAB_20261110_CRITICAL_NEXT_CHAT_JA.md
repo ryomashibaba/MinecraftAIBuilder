@@ -1,5 +1,47 @@
 # MinecraftAIBuilder — 2026-11-10 批判的総合監査・次チャット実行正本
 
+## 2026-11-11 V6研究の最新引継ぎ（この節が下の11/10現在地より優先）
+
+本節は新規企画でなく既存MinecraftAIBuilder開発の**現行差分**。公開の固定憲章・戦略v2・R125計画は維持。PRIVATE原文や秘密パスをPUBLIC/GitHubに転載しない。Browser Ink TPS等、他の独立プロジェクトに越境しない。
+
+### 検証済み状態と保護対象
+
+- **コード実証HEAD**：研究ブランチ research/r125-v6-readonly-facade-diagnostic-20261111 の 199757569a3308e819b64578968a85899dc875be。GitHub Actions #42977910566 は **22/22 NodeテストPASS**。合成V6のSOURCE技術検証であり、実Qwen/ART/Minecraft/正式QAのPASSではない。無関係のR55 future-source-preflightはFAIL。
+- 保護した元研究ブランチ research/r125-entry-nearest-safe-source-20261109 HEAD 1e336a991d4f817dc3a08eb67d424434aa859fb6。main HEAD ef7be01a52e6676e2cf257cd615fe183872388ad。PR #128はOpen/Draft、HEAD 16c742266f01acb5f21d207735918c2d30bb2cf5（いずれも11/11監査時）。次チャットで最新HEAD、差分、PR、対象CIを**一度だけ**ライブ照合する。
+- この節を保存する**文書だけのコミット**により最新研究HEADはコード実証HEADから進む。文書保存後のHEADについて「同じHEADの22/22 CI成功」と誤認しない。新CIを作ったり、文書のために不要な重いCIを再実行しない。
+
+### 変えない上位目的と実行禁止
+
+未知の自然言語要求→本物のQwen/Gemma本人が一体的に著作した短い意味IR→共通HOST→既存真正B143→独立した床・2幅動線・屋内空気・階段・設備の機能検証→真正3Dの人間ART→安全条件を満たすMinecraft Education試験世界へ施工・実歩行。**R125主経路／V6既定／V7 PRIVATEは非既定研究**。Mac Apple Silicon 8GB/2B級4bitの基本モードは将来の実測目標であり、現時点で成功未実証。933ブロック花屋と2,089セル・2室歩行研究施設は過去の別建物のユーザー実機成功報告で、現在のV6採用証明ではない。
+
+**Gate C P1はHOLD。** 必須の同一コードHEADの「R125 V4D Local Author Bridge — INJECTED TEST ONLY」「Education-first offline QA」の2CI SUCCESS、Windowsの正規PRIVATE接続、RAM/commit/VRAMピークと単一ローカルモデル非競合、独立PID/heartbeat監視・停止/アンロード、実行安全条件を実証するまで新規モデルロード・GET/POST・再試行禁止。2026-10-24の包括許可は2026-11月の現行安全条件を免除しない。施工は常に現状の NOT_PREPARED / constructionApproved=false / executionAllowed=false / BuildPlan.operations=[] / 9×BLOCKED / worldWrites=0 のまま。main、元研究HEAD、PR #128のReady/Close/Merge、凍結B143、正式QA、Pages、PRIVATE原本と鍵、保護ワールドへの無断書込禁止。追加課金0円原則、Work/Computer Useは個別承認制、ローカルLLM同時1案件のみ。
+
+### 研究の実測範囲と重大な反省
+
+隔離研究の**コード実証HEAD時点**で元研究HEADから15コミット/6ファイルの差分。V4Eの中央6セル窓帯選択を明示オプションで試し、同期的研究スコープでV6のネスト呼び出しへ伝えられるようにした。従来のV6選択を既定のまま保持。保存された元回答に対し、V4E窓段階と**完全V6の旧/研究用HOST**を新たなモデル通信なしで比較するツールが scripts/research/r125-v6-offline-ranked-contrast.mjs。元のPRIVATE原文はSHA・manifest・9ゲートを照合し、秘密情報は出力せず有限カテゴリのみ表示する。**本人Windowsの真正V6原文では未実行**であり、Qwen実修復はUNKNOWN/HOLD。
+
+合成V6住宅は研究適用で真正B143 SOURCE PASS。別の合成角接触例はV4E窓段階のガラス54セル/内外のAIR各54セルが証明されたが、完全V6では後段HOLD。角接触例は部屋IDを入れ替えながら旧massing/wing/floorplate/atrium/mezzanine/arcade参照を残しており、後段HOLDを研究HOSTの根因や真正Qwenの不具合と確定できない。**22/22は「合成テスト22件が期待挙動を示した」という意味で、実作品22棟の成功ではない。** 一部のテストは失敗を正しく捕捉することでPASSになる。
+
+**最重要の新たな批判的発見**：旧V4Eのモデルへの建築契約は、窓を置く面が「**完全な非共有外壁**」であると明示している。中央6セル部分だけが空いていれば部分接触のある壁でも選ぶ研究用HOSTは、この約束の意味を変える。ゆえに旧Qwen回答でSOURCEが成立したとしても、**元作者の意図へ忠実な修復とは認定不可**。過去原文での新旧比較は反実仮想の診断のみ。正式採用には元回答での独立根因実証、作者選択の保存、必要なら明確な新opt-in作者契約と安全解除後の新モデル検証、他用途への非退行が必要。研究用AsyncLocalStorageの暗黙設定をmain/正式経路へ無審査で移植しない。
+
+### 批判後の確定優先順位
+
+**P0 再開時1回**：本節→既存START_HERE入口→固定憲章/戦略/R125計画→AI_RESTART冒頭、安全ゲートとGitHub HEAD/CI/PR差分を照合。旧史料と衝突したら新しい実証・最新明示方針・GitHub実物を優先。本人へ古いZIPや本文再貼付を要求しない。
+
+**P1 Windows接続不能の間**：PC接続/Workを同じ失敗経路で何度も試さない。PUBLICに残る**実モデル由来**の元回答・真正B143・真正視覚証拠から、AUTHOR/HOST/B143/機能/ARTのどれに責任があるか、反証可能な**一般的欠陥1件**が確実に見つかった場合のみ、隔離研究ブランチで最小差分と必要な検証を1バッチで行う。既存L字店舗の真SOURCE/動線PASSや実機施工実績を保存。証拠がなければ**何も追加コミット・合成テスト・CI・資料を作らずHOLD**。
+
+**P2 PC正規接続が回復したら一度だけ**：PRIVATEフォルダ同定→元応答SHA/manifest照合→上記offline-ranked-contrastの読み取り専用実行で旧/新 ranked と完全V6を分けて比較→外へ出すのは有限カテゴリ・安全フラグだけ。0モデルPOST/0ネットワーク送信/0ワールド書込。元原文/プロンプト/部屋名/ローカルパスは秘密。研究フルV6がSOURCE PASSでも正式認証ではなく、作者契約の整合性と独立ART審査が別途必要。実行能力がなければHOLD。
+
+**P3 1棟の本当の完成へ**：真正作者性→実空洞/主殻/断面/入口/実用途設備・階段/経路→多視点真3Dでの**人間ART**の順に独立検証。SOURCE成功した「箱」でもART REJECTなら不採用。Minecraftは識別済み専用world・バックアップ/復元・材質・readback・範囲・停止と本人に許可された経路が成立した場合のみ別に試験施工。過去成功の再施工はしない。
+
+**P4 1棟成立後**：住宅・店舗・小研究施設の独立した実作者入力を共通HOSTで比較、次いで展示館/駅舎。Mac 8GB/2Bも実機測定なしで成功と断言しない。
+
+**停止・効率の厳格規則**：証拠なしの修正、合成件数、コミット、CI、R番号、引き継ぎ文書の量産禁止。1原因→1最小差分→対象CI原則1回。原本と研究パッチを常に分離、user操作0回を目標にChat＋GitHub中心、Work/PC能力確認は必要時1回のみ。次の指示が単に「続けて」ならこの順位を適用し、証拠がないときは具体的HOLD理由を一度述べて停止する。
+
+---
+
+
+
 **スコープ**：MinecraftAIBuilder既存開発のみ。新企画、基本方針変更、別プロジェクトへの施工権限移転ではない。これは過去の巨大なSTART_HERE/AI_RESTARTを置き換える歴史書ではなく、**次の一手に必要な短縮正本**。変更前研究HEADは `c5ebaba53f2a262ef5794dbf794c4e28eb9aa325`。保存コミット後のHEADとCIは新チャットでGitHubから一度だけライブ取得する。
 
 ## 1. 絶対に変えない目的・優先順位
