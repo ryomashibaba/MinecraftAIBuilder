@@ -14,6 +14,9 @@ import {CIVIC_ARCADE_SCHEMA,compileCivicArcadeAuthorIntent}
  from '../../source/ai/r125-v4j-civic-author-ir.mjs';
 import {materializeV4JParentIndexAuthor}
  from '../../source/ai/r125-v4j-feasible-envelope.mjs';
+import {RANKED_SCHEMA,runWithRankedExteriorCenterStripResearch,
+ compileRankedExteriorIntent}
+ from '../../source/ai/r125-v4e-ranked-exterior-ir.mjs';
 
 function toV6(original){
  const {spaces,...rest}=structuredClone(original);
@@ -176,4 +179,104 @@ test('synthetic LOCAL V6 study: SHA-verified CLI contrast is fail-closed on unsa
   manifest.responseRawSha256='0'.repeat(64);report();
   assert.throws(()=>readSavedV6Study(dir),/ORIGINAL_RAW_SHA256_MISMATCH/);
  }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
+
+
+test('research-only scoped context reaches nested V6 compilation without changing its legacy default',()=>{
+ const sample=syntheticFiveV4JArcadeAuthors().find(x=>x.genre==='housing');
+ assert(sample);
+ const original={...structuredClone(sample.wholeBuilding),
+  schema:CIVIC_ARCADE_SCHEMA,arcade:structuredClone(sample.arcade)};
+ const v6=toV6(original),before=JSON.stringify(v6);
+ const baseline=materializeV4JParentIndexAuthor(v6);
+ const legacy=compileCivicArcadeAuthorIntent(baseline);
+ assert.equal(legacy.b143.sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+
+ // Explicit synchronous research scope: same single AUTHOR answer, across
+ // all nested ranked references. The original entrypoint remains untouched.
+ let candidate=null,candidateError=null;
+ try{
+  candidate=runWithRankedExteriorCenterStripResearch(()=>
+   compileCivicArcadeAuthorIntent(baseline));
+ }catch(e){candidateError=e;}
+ if(candidate){
+  assert.equal(candidate.worldWrites,0);
+  assert.equal(candidate.worldContacts,0);
+  assert.equal(candidate.constructionApproved,false);
+  assert.equal(candidate.executionAllowed,false);
+  assert.deepEqual(candidate.gates,Array(9).fill('BLOCKED'));
+  assert.deepEqual(candidate.BuildPlan.operations,[]);
+  assert.equal(candidate.b143.sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ }else{
+  // Real downstream counterexample is informative but must not be called a
+  // successful full-V6 repair, even if the ranked-layer proof is green.
+  assert(candidateError instanceof Error);
+  assert.doesNotMatch(String(candidateError.message),
+   /R125_V4E_RANKED_NO_AUTHORED_EXTERIOR_OPTION_/);
+ }
+ const reverted=compileCivicArcadeAuthorIntent(baseline);
+ assert.equal(reverted.b143.geometrySha256,legacy.b143.geometrySha256);
+ assert.equal(reverted.b143.sourceSha256,legacy.b143.sourceSha256);
+ assert.equal(JSON.stringify(v6),before);
+ console.log('PUBLIC_SYNTHETIC_NESTED_V6_RESEARCH_STATUS='+(
+  candidate?'FULL_V6_SOURCE_PASS_NOT_ART_OR_REAL_MODEL':
+   'DOWNSTREAM_HOLD_NOT_FULL_V6_REPAIR'));
+});
+
+test('scoped research choice reaches nested V6 while the same corner author still HOLDs without scope',()=>{
+ const sample=syntheticFiveV4JArcadeAuthors().find(x=>x.genre==='housing');
+ assert(sample);
+ const original={...structuredClone(sample.wholeBuilding),
+  schema:CIVIC_ARCADE_SCHEMA,arcade:structuredClone(sample.arcade)};
+ const v6=toV6(original);
+ const mk=(id,kind,side,parentIndex)=>({
+  id,purpose:'Independent civic education and service area',kind,
+  width:24,depth:24,roof:kind==='sky'?null:'ridgeX',
+  height:kind==='sky'?null:'low',facade:kind==='sky'?null:'wall',
+  windowPriority:kind==='sky'?null:['north','east','west','south'],
+  feature:'Community learning service',featureMaterial:'wood',
+  attach:parentIndex===null?null:{parentIndex,side,shift:0}
+ });
+ v6.entrySpace=mk('root-hall','covered',null,null);
+ v6.otherSpaces=[
+  mk('middle-hall','covered','east',0),
+  mk('open-court','sky','north',1),
+  mk('east-studio','covered','east',1)
+ ];
+ v6.materials={floor:'wood',wall:'stone',roof:'wood',public:'stone'};
+ const before=JSON.stringify(v6);
+ const materialized=materializeV4JParentIndexAuthor(v6);
+ const ranked={
+  schema:RANKED_SCHEMA,
+  id:materialized.id,title:materialized.title,brief:materialized.brief,
+  materials:materialized.materials,spaces:materialized.spaces
+ };
+ assert.throws(()=>compileRankedExteriorIntent(ranked),
+  /R125_V4E_RANKED_NO_AUTHORED_EXTERIOR_OPTION_1$/);
+ const single=runWithRankedExteriorCenterStripResearch(()=>
+  compileRankedExteriorIntent(ranked));
+ assert.equal(single.normalizedBy,'AUTHOR_RANKED_CENTER_STRIP_RESEARCH_V2');
+ assert.equal(single.rankedPhysicalGlazingSourceProof.verifiedPanelGlassCells,54);
+ let full=null,error=null;
+ try{
+  full=runWithRankedExteriorCenterStripResearch(()=>
+   compileCivicArcadeAuthorIntent(materialized));
+ }catch(e){error=e;}
+ if(full){
+  assert.equal(full.worldWrites,0);
+  assert.equal(full.worldContacts,0);
+  assert.equal(full.constructionApproved,false);
+  assert.deepEqual(full.gates,Array(9).fill('BLOCKED'));
+  assert.equal(full.b143.sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ }else{
+  assert(error instanceof Error);
+  assert.doesNotMatch(String(error.message),
+   /R125_V4E_RANKED_NO_AUTHORED_EXTERIOR_OPTION_1$/);
+ }
+ assert.throws(()=>compileCivicArcadeAuthorIntent(materialized),
+  /R125_V4E_RANKED_NO_AUTHORED_EXTERIOR_OPTION_1$/);
+ assert.equal(JSON.stringify(v6),before);
+ console.log('PUBLIC_SYNTHETIC_CORNER_FULL_V6_RESEARCH_STATUS='+(
+  full?'FULL_V6_SOURCE_PASS_NOT_ART_OR_REAL_MODEL':
+   'DOWNSTREAM_HOLD_NOT_FULL_V6_REPAIR'));
 });

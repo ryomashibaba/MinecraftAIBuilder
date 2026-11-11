@@ -8,6 +8,7 @@
  * Frozen V4D COMPACT_SCHEMA and Education success path remain unchanged.
  */
 import {createHash} from 'node:crypto';
+import {AsyncLocalStorage} from 'node:async_hooks';
 import {MATERIALS} from './b143-building-dsl.mjs';
 import {COMPACT_SCHEMA,translateCompactModelIntent}
  from './r125-v4d-compact-model-ir.mjs';
@@ -15,6 +16,23 @@ import {translateRelativeAuthorIntent,compileRelativeAuthorIntent}
  from './r125-v4d-relative-author-ir.mjs';
 export const RANKED_SCHEMA='minecraftaibuilder-r125-v4e-ranked-exterior-author-v1';
 const dirs=['north','east','south','west'];
+/**
+ * EXPLICIT, ISOLATED RESEARCH ONLY. Nested V6 compile helpers make repeated
+ * calls to the ranked author source without accepting options. Propagate the
+ * exact same centered-window selection through one synchronous callback.
+ * Default/unwrapped compilation stays V4E whole-face legacy. This does NOT
+ * approve the proposal for real Qwen, full V6, Minecraft, or ART.
+ */
+const rankedResearchContext=new AsyncLocalStorage();
+export function runWithRankedExteriorCenterStripResearch(callback){
+ if(typeof callback!=='function')fail('RESEARCH_CALLBACK_REQUIRED');
+ return rankedResearchContext.run(true,()=>{
+  const result=callback();
+  if(result&&typeof result.then==='function')
+   fail('RESEARCH_CALLBACK_MUST_BE_SYNCHRONOUS');
+  return result;
+ });
+}
 const fail=code=>{throw Error('R125_V4E_RANKED_'+code);};
 const exact=(x,fields)=>x!==null&&typeof x==='object'&&!Array.isArray(x)&&
  Object.keys(x).sort().join('|')===fields.slice().sort().join('|');
@@ -86,7 +104,9 @@ function toBareCompact(original){
  });
  return src;
 }
-export function translateRankedExteriorIntent(untrusted,{centerStripResearchV2=false}={}){
+export function translateRankedExteriorIntent(untrusted,{
+ centerStripResearchV2=rankedResearchContext.getStore()===true
+}={}){
  if(typeof centerStripResearchV2!=='boolean')fail('RESEARCH_OPTION_BOOLEAN');
  const input=structuredClone(untrusted);
  authorContract(input);
