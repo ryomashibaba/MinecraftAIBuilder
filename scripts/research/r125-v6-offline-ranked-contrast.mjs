@@ -120,12 +120,20 @@ export function readSavedV6Study(folder){
   manifest.testInjectionPresent!==false||
   manifest.modelFinishReason!=='stop'||!BASE_ERROR.test(manifest.reason??'')||
   manifest.worldWrites!==0||manifest.worldContacts!==0||
+  manifest.readiness!=='NOT_PREPARED'||
+  manifest.constructionApproved!==false||
   manifest.executionAllowed!==false||
+  !Array.isArray(manifest.gates)||manifest.gates.length!==9||
+  manifest.gates.some(g=>g!=='BLOCKED')||
+  !Array.isArray(manifest.BuildPlan?.operations)||
+  manifest.BuildPlan.operations.length!==0||
   request.sourceOnly!==true||request.noWorldAccess!==true||
   request.noPaidAPI!==true||request.nModelGenerationAttemptsAllowed!==1||
   request.authorContract!==manifest.authorContract||
   request.promptProtocol!==manifest.promptProtocol||
-  request.systemPromptSha256!==manifest.systemPromptSha256)
+  request.systemPromptSha256!==manifest.systemPromptSha256||
+  !/^[a-f0-9]{64}$/.test(manifest.structuredSchemaSha256??'')||
+  request.structuredSchemaSha256!==manifest.structuredSchemaSha256)
   hold('ORIGINAL_STUDY_MANIFEST_NOT_VERIFIED');
  const raw=parseFile(root,'MODEL_RESPONSE_ORIGINAL.txt',250000);
  if(sha(raw)!==manifest.responseRawSha256)hold('ORIGINAL_RAW_SHA256_MISMATCH');
