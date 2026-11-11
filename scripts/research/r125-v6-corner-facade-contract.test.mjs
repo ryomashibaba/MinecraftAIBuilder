@@ -49,7 +49,7 @@ function touchingOnlyAtSouthCorner(hall,other){
  return xOverlap===1&&zOverlap===hall.depth;
 }
 
-test('V4E whole-face ranking can reject a valid nonlinked 6-wide south glazing candidate',()=>{
+test('V4E baseline HOLD and opt-in research proposal produce actual B143 for centered strip',()=>{
  const base=author();
  const ranked=structuredClone(base);
  ranked.schema=RANKED_SCHEMA;
@@ -58,9 +58,42 @@ test('V4E whole-face ranking can reject a valid nonlinked 6-wide south glazing c
   room.windowPriority=room.kind==='covered'?['north','east','west','south']:null;
  }
  const frozen=structuredClone(ranked);
+ // Public baseline is identical: it must still HOLD the very same case.
  assert.throws(()=>translateRankedExteriorIntent(ranked),
   /R125_V4E_RANKED_NO_AUTHORED_EXTERIOR_OPTION_1$/);
+ // RESEARCH opt-in only: first authored surface with a clear centered strip,
+ // while linked sides and all physical B143 constraints remain enforced.
+ const candidate=compileRankedExteriorIntent(ranked,{centerStripResearchV2:true});
+ assert.equal(candidate.normalizedBy,'AUTHOR_RANKED_CENTER_STRIP_RESEARCH_V2');
+ const middle=candidate.chosenWindowFaces.find(x=>x.spaceIndex===1);
+ assert(middle,'Original middle hall must receive one real window');
+ assert.deepEqual([middle.selectedSide,middle.authoredRank],['south',4]);
+ assert.deepEqual(middle.excludedNonExteriorDirections.slice().sort(),
+  ['east','north','west'],'All three authored linked sides stay blocked');
+ assert.equal(candidate.b143.sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert(candidate.b143.sourceRoutes.zones.every(x=>x.reachedFromEntrance));
+ assert(candidate.b143.sourceRoutes.featureAccess.every(x=>x.reachableFromEntrance));
+ assert.equal(candidate.chosenWindowFaces.length,3);
+ assert.equal(candidate.rankedPhysicalGlazingSourceProof.windowCount,3);
+ assert.equal(candidate.rankedPhysicalGlazingSourceProof.verifiedPanelGlassCells,54);
+ assert.equal(candidate.rankedPhysicalGlazingSourceProof.verifiedImmediateOutwardAirCells,54);
+ assert.equal(candidate.rankedPhysicalGlazingSourceProof.verifiedImmediateInwardAirCells,54);
+ assert.equal(candidate.worldWrites,0);
+ assert.equal(candidate.worldContacts,0);
+ assert.equal(candidate.executionAllowed,false);
+ assert.equal(candidate.constructionApproved,false);
+ assert.deepEqual(candidate.gates,Array(9).fill('BLOCKED'));
+ assert.deepEqual(candidate.BuildPlan.operations,[]);
  assert.deepEqual(ranked,frozen,'Original author decisions must not mutate');
+ // First authored allowed direction, never a HOST-chosen unlisted side.
+ const first=structuredClone(ranked);
+ first.spaces[1].windowPriority=['south','north','east','west'];
+ const reselected=compileRankedExteriorIntent(first,{centerStripResearchV2:true});
+ assert.equal(reselected.chosenWindowFaces.find(x=>x.spaceIndex===1).authoredRank,1);
+ assert.equal(reselected.b143.geometrySha256,candidate.b143.geometrySha256);
+ // Invalid research flag must not silently enable the candidate.
+ assert.throws(()=>translateRankedExteriorIntent(ranked,{centerStripResearchV2:'true'}),
+  /RESEARCH_OPTION_BOOLEAN/);
 
  // Only for a SOURCE contract counterexample: unlike the ranked contract,
  // compact authoring can select this already-authored SOUTH direction.
