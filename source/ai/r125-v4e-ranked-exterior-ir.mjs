@@ -39,6 +39,22 @@ const centreWindowObstructed=(room,other,side)=>{
  }
  return false;
 };
+const interval=(a,b,c,d)=>Math.max(a,c)<=Math.min(b,d);
+const faceTouches=(room,other,side)=>{
+ if(side==='east')return (other.x===endX(room)||other.x===endX(room)+1||
+   (other.x<endX(room)&&endX(other)>=endX(room)))&&
+   interval(room.z,endZ(room),other.z,endZ(other));
+ if(side==='west')return (endX(other)===room.x||endX(other)===room.x-1||
+   (other.x<=room.x&&endX(other)>room.x))&&
+   interval(room.z,endZ(room),other.z,endZ(other));
+ if(side==='south')return (other.z===endZ(room)||other.z===endZ(room)+1||
+   (other.z<endZ(room)&&endZ(other)>=endZ(room)))&&
+   interval(room.x,endX(room),other.x,endX(other));
+ if(side==='north')return (endZ(other)===room.z||endZ(other)===room.z-1||
+   (other.z<=room.z&&endZ(other)>room.z))&&
+   interval(room.x,endX(room),other.x,endX(other));
+ fail('UNKNOWN_SIDE');
+};
 const opposite=side=>({east:'west',west:'east',north:'south',south:'north'})[side];
 const digest=v=>createHash('sha256').update(JSON.stringify(v)).digest('hex');
 function authorContract(value){
@@ -70,7 +86,8 @@ function toBareCompact(original){
  });
  return src;
 }
-export function translateRankedExteriorIntent(untrusted){
+export function translateRankedExteriorIntent(untrusted,{centerStripResearchV2=false}={}){
+ if(typeof centerStripResearchV2!=='boolean')fail('RESEARCH_OPTION_BOOLEAN');
  const input=structuredClone(untrusted);
  authorContract(input);
  const mechanical=translateCompactModelIntent(toBareCompact(input));
@@ -89,8 +106,11 @@ export function translateRankedExteriorIntent(untrusted){
   const room=indexed[i];
   if(room?.id!==s.id)fail('HOST_GRAPH_ID_DRIFT_'+i);
   const blocked=dirs.filter(dir=>
-   (i===0&&dir==='north')||linkedSides.has(room.id+'|'+dir)||
-   indexed.some((n,j)=>i!==j&&centreWindowObstructed(room,n,dir))
+   (i===0&&dir==='north')||
+   (centerStripResearchV2?
+    linkedSides.has(room.id+'|'+dir)||
+     indexed.some((n,j)=>i!==j&&centreWindowObstructed(room,n,dir)):
+    indexed.some((n,j)=>i!==j&&faceTouches(room,n,dir)))
   );
   const side=s.windowPriority.find(dir=>!blocked.includes(dir));
   if(!side)fail('NO_AUTHORED_EXTERIOR_OPTION_'+i);
@@ -110,7 +130,9 @@ export function translateRankedExteriorIntent(untrusted){
   rankedAuthorSha256:digest(input),
   expandedMechanicalIR:mechanical.expandedMechanicalIR,
   chosenWindowFaces,
-  normalizedBy:'AUTHOR_RANKED_EXTERIOR_SURFACE_CONSTRAINT_V1',
+  normalizedBy:centerStripResearchV2?
+   'AUTHOR_RANKED_CENTER_STRIP_RESEARCH_V2':
+   'AUTHOR_RANKED_EXTERIOR_SURFACE_CONSTRAINT_V1',
   modelAuthoredAllPreferences:true,
   autoRepairPerformed:false,
   modelSizeOrMacMemoryTested:false
@@ -184,8 +206,8 @@ export function proveRankedExteriorPhysicalGlazing(source, choices){
  };
 }
 
-export function compileRankedExteriorIntent(value){
- const m=translateRankedExteriorIntent(value);
+export function compileRankedExteriorIntent(value,options={}){
+ const m=translateRankedExteriorIntent(value,options);
  const source=compileRelativeAuthorIntent(m.expandedMechanicalIR);
  const rankedPhysicalGlazingSourceProof=proveRankedExteriorPhysicalGlazing(source,m.chosenWindowFaces);
  if(source.worldContacts!==0||source.worldWrites!==0||
