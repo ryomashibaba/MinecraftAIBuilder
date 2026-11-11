@@ -13,6 +13,7 @@ on:
       - 'scripts/r125-integrated-semantic-bridge.test.mjs'
       - 'scripts/r125-v7-private-once.mjs'
       - 'scripts/r125-v7-private-once.test.mjs'
+      - 'scripts/r125-windows-owned-process.py'
       - 'scripts/r125-v7-v4h-public-token-input.mjs'
       - 'scripts/r125-v7-v4h-public-token-budget.py'
       - 'scripts/r125-v7-ollama-readonly-diagnostic.mjs'
@@ -305,6 +306,11 @@ jobs:
             throw "V4D_WINDOWS_DEFAULT_MODE_DRIFT"
           }
           Write-Host "PASS: Windows launch preflight, branch/head/node validated. 0 model calls, 0 world writes."
+      - name: Prove owned Windows process-tree stop on supervisor death (NO MODEL)
+        shell: pwsh
+        run: |
+          python scripts/r125-windows-owned-process.py --selftest
+          if ($LASTEXITCODE -ne 0) { throw 'WINDOWS_OWNED_PROCESS_TREE_STOP_UNPROVEN' }
       - name: V7 simulated worker failure aborts POST on native Windows Node (NO MODEL)
         shell: pwsh
         run: |
