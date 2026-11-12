@@ -1,5 +1,7 @@
 # MinecraftAIBuilder — 開発再開の最新正本案内（2026-11-03）
 
+**2026-11-12の実績を優先**：[批判監査の最新到達点](MAB_20261110_CRITICAL_NEXT_CHAT_JA.md#2026-11-12-v9-最新到達点下記の推論0art未審査より優先)。実Qwen7要求／完了原回答6／完全V6 SOURCE0、無意味な再試行は停止。一方、チャットAIの独立原案は真正B143・独立機能SOURCE QAを通過し、人間が「試験施工候補として採用」。[同一原文・形状・監査・未実行試験パケット](../evidence/r125/v9-chat-author-soundscape-20261112/README.md)を保持。Educationタイトルでv26.33確認、世界未入場・施工未承認。以下の過去の「推論未実施／ART未審査」は履歴であり、この更新より優先しない。
+
 **V9監視実行器へのV6接続（実推論未実施）**：既存 `runV7PrivateOnce` に明示 `authorMode:civic-v6` を追加。元V6 system／構造化schema／parentIndex変換／完全Civic B143を無補修で使用し、共有daemonでは走らず専用loopback 11435と自己所有Job・同一PID・共有側非競合の監視証拠を要求する。既存2モードと通常V6入口は不変更。新モードはcontext 12288／生成4096／1要求・keep_alive0で、資源監視が必要。関連17テストPASSは注入試験の技術証拠のみ。最新HEADの必須2CIと実監視接続を揃えるまでモデル0。建築完成・推論安全・ART・施工は未認定。
 
 **V9停止機構の実機証拠**：`scripts/r125-windows-owned-process.py` は、新たに起動する自己所有のプロセスだけをWindows Jobへ生成時に所属させる。本人Windowsで通常close／監督プロセス強制終了の両方を実行し、稼働heartbeatを持つ子・孫の停止とJob外の対照プロセス保全を確認。さらに専用Ollamaを別のloopbackポートで無推論起動し、リスナー所有PID／モデル未ロード／専用停止後のポート閉鎖と既存共有サービス保全を実測（GETのみ、モデルロード／推論0）。既存研究CIのWindows検査へ接続。資源監視／V6監視経路への接続と推論中停止は未実証で、現行Gate C解除を意味しない。

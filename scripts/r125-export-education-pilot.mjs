@@ -14,7 +14,8 @@ function read(p,max=200000){
  return fs.readFileSync(p);
 }
 const J=o=>JSON.stringify(o,null,2)+'\n';
-export function offlineEducationExport({designFile,compactFile,briefFile,out,provenance='UNVERIFIED_DESIGN',paletteFile=null}={}){
+export function offlineEducationExport({designFile,compactFile,briefFile,out,provenance='UNVERIFIED_DESIGN',paletteFile=null,placement='design-envelope'}={}){
+ if(!['design-envelope','grounded-source-footprint'].includes(placement))reject('PLACEMENT');
  if(typeof out!=='string'||!out||fs.existsSync(out)||!fs.existsSync(path.dirname(path.resolve(out))))
   reject('FRESH_OUTPUT');
  if(Boolean(designFile)===Boolean(compactFile))reject('ONE_INPUT_MODE');
@@ -39,7 +40,9 @@ export function offlineEducationExport({designFile,compactFile,briefFile,out,pro
   scene=derived.derived.compiled;
  }
  const verifiedPalette=paletteFile?JSON.parse(read(path.resolve(paletteFile),20000).toString('utf8')):null;
- const exported=exportB143EducationMakeCode({design,scene,provenance,verifiedPalette});
+ const footprint=placement==='grounded-source-footprint';
+ const exported=exportB143EducationMakeCode({design,scene,provenance,verifiedPalette,
+  groundLowestLayer:footprint,tightVoxelEnvelope:footprint,columnClearance:footprint});
  fs.mkdirSync(out);
  fs.writeFileSync(path.join(out,'MAKECODE_EDUCATION.ts'),exported.code,{flag:'wx'});
  const {code,...metadata}=exported;
@@ -55,7 +58,9 @@ export function offlineEducationExport({designFile,compactFile,briefFile,out,pro
   '7. 一度の実行後は再実行しない。部分施工・不具合なら元ワールドコピーへ復元。',
   '8. プログラムは試験ワールドのID/バックアップ実在を検証できない。',
   '9. 未対応の自由形状/未知用途のAI設計は、この出力だけでは解決しない。',
-  '10. このステップは実行ファイル生成のみ。成功実績と呼ぶにはゲーム内検証が必要。'
+  '10. このステップは実行ファイル生成のみ。成功実績と呼ぶにはゲーム内検証が必要。',
+  ...(footprint?['11. 最低層を地面へ平行移動。検査対象は実形状の各縦列の地面から最上セルまで（内部空洞を含む）。',
+   '12. 未使用の縦列・屋根より上は検査しない。表示された外接範囲全体を専用試験敷地として確保する。']:[])
  ].join('\n')+'\n',{flag:'wx'});
  return {status:'OFFLINE_MAKECODE_EXPORT_READY',out,metadata};
 }
@@ -63,12 +68,12 @@ if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.ur
  try{
   const args=process.argv.slice(2),opts={};
   for(let i=0;i<args.length;i+=2){
-   if(!['--design','--compact','--brief','--out','--provenance','--palette'].includes(args[i])||
+   if(!['--design','--compact','--brief','--out','--provenance','--palette','--placement'].includes(args[i])||
     !args[i+1]||Object.hasOwn(opts,args[i]))reject('ARGUMENTS');
    opts[args[i]]=args[i+1];
   }
   const result=offlineEducationExport({designFile:opts['--design'],compactFile:opts['--compact'],
-   briefFile:opts['--brief'],out:opts['--out'],provenance:opts['--provenance'],paletteFile:opts['--palette']});
+   briefFile:opts['--brief'],out:opts['--out'],provenance:opts['--provenance'],paletteFile:opts['--palette'],placement:opts['--placement']});
   console.log(J(result));if(result.status==='HOLD')process.exitCode=2;
  }catch(e){console.error(e.message);process.exitCode=1;}
 }

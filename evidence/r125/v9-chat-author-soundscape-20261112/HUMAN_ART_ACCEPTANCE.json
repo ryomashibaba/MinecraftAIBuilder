@@ -1,0 +1,15 @@
+{
+  "schema": "mab-human-art-decision-v1",
+  "decision": "ACCEPTED_AS_TRIAL_CONSTRUCTION_CANDIDATE",
+  "userReply": "試験施工候補として採用",
+  "sourceSha256": "7d702ceacfe7128044cc316e02ca62434752e7db78c265a9a4d8e04b3b87ba0b",
+  "geometrySha256": "d1326ec6670473f61204557fae8e6d45dd4c99a99ad28dbf60d3e7ba567aff21",
+  "originalSha256": "704823cd76ab89cd6cfd4076a72ee7ab27aa5b4360250a451b21bc9b8eb33cdd",
+  "source": "CURRENT_CHAT_AI_ORIGINAL_AUTHOR",
+  "originalFilesModified": false,
+  "minecraftWriteApproval": false,
+  "minecraftWalking": "NOT_TESTED",
+  "worldWrites": 0,
+  "observedEducationVersion": "26.33",
+  "versionEvidence": "TITLE_SCREEN_OBSERVED_VIA_COMPUTER_USE_2026_11_12"
+}

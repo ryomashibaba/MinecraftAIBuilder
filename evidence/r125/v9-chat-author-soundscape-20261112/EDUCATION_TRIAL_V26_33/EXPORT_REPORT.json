@@ -1,0 +1,107 @@
+{
+  "schema": "minecraftaibuilder-r125-education-makecode-pilot-v1",
+  "status": "OFFLINE_CODE_GENERATED_ONLY",
+  "provenance": "UNVERIFIED_DESIGN",
+  "sourceSha256": "7d702ceacfe7128044cc316e02ca62434752e7db78c265a9a4d8e04b3b87ba0b",
+  "geometrySha256": "d1326ec6670473f61204557fae8e6d45dd4c99a99ad28dbf60d3e7ba567aff21",
+  "makecodeSourceSha256": "14e7a3ba07c6c86878a0b58bd6494817764baa783e73df8856133494c7844698",
+  "bounds": {
+    "width": 61,
+    "height": 31,
+    "depth": 57
+  },
+  "clearanceMode": "SOURCE_FOOTPRINT_GROUND_TO_COLUMN_TOP",
+  "clearanceCells": 24734,
+  "supportCells": 2072,
+  "clearanceScope": "Occupied X/Z columns only, including interior air below their highest voxel; unused columns and air above roofs are not checked",
+  "plannedVoxelCount": 7926,
+  "plannedCuboids": 184,
+  "sourceVerticalOffset": -1,
+  "sourceHorizontalOffset": [
+    -17,
+    -32
+  ],
+  "envelopeTranslation": "EXACT_OCCUPIED_B143_VOXELS_ONLY",
+  "originalDesignBounds": {
+    "width": 81,
+    "height": 36,
+    "depth": 92
+  },
+  "materialMapping": [
+    "stone",
+    null,
+    "iron_block",
+    "glass",
+    "oak_planks",
+    null,
+    null
+  ],
+  "plannedMaterialCounts": {
+    "stone": 3490,
+    "concrete": 0,
+    "metal": 2744,
+    "glass": 180,
+    "wood": 1512,
+    "glow": 0,
+    "accent": 0
+  },
+  "plannedBlockCounts": {
+    "stone": 3490,
+    "iron_block": 2744,
+    "glass": 180,
+    "oak_planks": 1512
+  },
+  "usedMaterials": [
+    {
+      "id": 0,
+      "material": "stone",
+      "blockName": "stone",
+      "plannedCount": 3490
+    },
+    {
+      "id": 2,
+      "material": "metal",
+      "blockName": "iron_block",
+      "plannedCount": 2744
+    },
+    {
+      "id": 3,
+      "material": "glass",
+      "blockName": "glass",
+      "plannedCount": 180
+    },
+    {
+      "id": 4,
+      "material": "wood",
+      "blockName": "oak_planks",
+      "plannedCount": 1512
+    }
+  ],
+  "verifiedPaletteSha256": "1453030fd66a52739d4802d8e98e62b8b1785efd3cf133fc75ea748b19514995",
+  "materialMode": "STRICT_USER_ATTESTED",
+  "materialWarning": "Extra materials are user-attested, not software-certified in game",
+  "actualEducationExecution": "NOT_TESTED",
+  "requiresUserPasteAndExplicitChat": true,
+  "backupVerifiedByProgram": false,
+  "worldIdentityVerifiedByProgram": false,
+  "worldContacts": 0,
+  "worldWrites": 0,
+  "programExecuted": false,
+  "readiness": "NOT_PREPARED",
+  "BuildPlan": {
+    "operations": []
+  },
+  "gates": [
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED"
+  ],
+  "constructionApproved": false,
+  "art": "ART_HOLD"
+}

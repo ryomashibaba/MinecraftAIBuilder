@@ -1,0 +1,102 @@
+{
+  "status": "INDEPENDENT_PHYSICAL_SOURCE_QA_PASS",
+  "authorship": "CURRENT_CHAT_AI_DECLARED_NOT_INDEPENDENTLY_ATTESTED",
+  "localQwenOutput": false,
+  "allFinalVoxelsMaterialsAndLayersIndependentlyReconstructed": 7926,
+  "sourceAndGeometryHashesMatch": true,
+  "twoWideThreeAirPadsReached": 1750,
+  "modeledOutsideEntryConnected": true,
+  "zones": [
+    {
+      "id": "arrival-recording-hall",
+      "standingY": 2,
+      "supported3AirTwoWidePads": 651,
+      "connectedPads": 651,
+      "reached": true
+    },
+    {
+      "id": "quiet-edit-studio",
+      "standingY": 2,
+      "supported3AirTwoWidePads": 460,
+      "connectedPads": 460,
+      "reached": true
+    },
+    {
+      "id": "listening-court",
+      "standingY": 2,
+      "supported3AirTwoWidePads": 330,
+      "connectedPads": 330,
+      "reached": true
+    },
+    {
+      "id": "upper-arrival-recording-hall-public-gallery",
+      "standingY": 8,
+      "supported3AirTwoWidePads": 13,
+      "connectedPads": 13,
+      "reached": true
+    },
+    {
+      "id": "author-public-forecourt-arcade",
+      "standingY": 2,
+      "supported3AirTwoWidePads": 15,
+      "connectedPads": 15,
+      "reached": true
+    }
+  ],
+  "features": [
+    {
+      "id": "arrival-recording-hall-fixture",
+      "solidSourceGeometry": true,
+      "reachable3AirServicePad": true
+    },
+    {
+      "id": "quiet-edit-studio-fixture",
+      "solidSourceGeometry": true,
+      "reachable3AirServicePad": true
+    },
+    {
+      "id": "listening-court-fixture",
+      "solidSourceGeometry": true,
+      "reachable3AirServicePad": true
+    },
+    {
+      "id": "mezz-authored-public-service-desk",
+      "solidSourceGeometry": true,
+      "reachable3AirServicePad": true
+    },
+    {
+      "id": "facade-civic-function-workpoint-0",
+      "solidSourceGeometry": true,
+      "reachable3AirServicePad": true
+    },
+    {
+      "id": "facade-civic-function-workpoint-1",
+      "solidSourceGeometry": true,
+      "reachable3AirServicePad": true
+    }
+  ],
+  "originalWindowGlassAndBothAirSides": 36,
+  "openSkySupportedVoidColumns": 64,
+  "trueFloorSetbackCells": 36,
+  "externalWingReachable": true,
+  "art": "NOT_REVIEWED",
+  "actualMinecraftMovement": "NOT_TESTED",
+  "acousticPerformance": "NOT_TESTED",
+  "equipmentUse": "SOURCE_SERVICE_SURFACES_ONLY",
+  "structuralEngineering": "NOT_CERTIFIED",
+  "formalProjectQA": "NOT_REPLACED",
+  "worldWrites": 0,
+  "worldContacts": 0,
+  "constructionApproved": false,
+  "gates": [
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED"
+  ]
+}

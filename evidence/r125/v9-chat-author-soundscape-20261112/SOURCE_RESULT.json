@@ -1,0 +1,15 @@
+{
+  "status": "V6_SOURCE_CANDIDATE_ART_AND_WORLD_HOLD",
+  "occupiedVoxels": 7926,
+  "geometrySha256": "d1326ec6670473f61204557fae8e6d45dd4c99a99ad28dbf60d3e7ba567aff21",
+  "sourceSha256": "7d702ceacfe7128044cc316e02ca62434752e7db78c265a9a4d8e04b3b87ba0b",
+  "circulation": "SOURCE_ROUTES_REACH_ALL_ZONES",
+  "originalRawSha256": "704823cd76ab89cd6cfd4076a72ee7ab27aa5b4360250a451b21bc9b8eb33cdd",
+  "sourceAuthorship": "CURRENT_CHAT_AI_DECLARED_NOT_INDEPENDENTLY_ATTESTED",
+  "localQwenOutput": false,
+  "originalEdited": false,
+  "humanArt": "NOT_REVIEWED",
+  "minecraftWalking": "NOT_TESTED",
+  "worldWrites": 0,
+  "worldContacts": 0
+}

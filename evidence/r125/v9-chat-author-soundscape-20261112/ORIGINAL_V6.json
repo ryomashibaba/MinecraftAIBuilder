@@ -1,0 +1,43 @@
+{
+  "schema": "minecraftaibuilder-r125-v4j-civic-arcade-author-v1",
+  "id": "listening-garden-archive",
+  "title": "響きの庭・市民音風景アーカイブ",
+  "brief": "機材と記録を受け付ける明るい主ホール、静かな編集室、屋外の聴取庭を分岐させ、光の高窓を持つ上階で街の音の地図を共有する一棟。",
+  "materials": {"floor":"wood","wall":"stone","roof":"metal","public":"stone"},
+  "entrySpace": {
+    "id":"arrival-recording-hall",
+    "purpose":"市民の機材貸出・返却と採集記録の受付を行い、庭と静かな編集室を案内する公共ホール",
+    "kind":"covered","width":30,"depth":28,
+    "roof":"ridgeX","height":"medium","facade":"wall",
+    "windowPriority":["east","south","west","north"],
+    "feature":"録音機材の受渡しとフィールド記録の受付カウンター",
+    "featureMaterial":"wood","attach":null
+  },
+  "otherSpaces":[
+    {
+      "id":"quiet-edit-studio",
+      "purpose":"受付から扉を介して分岐する静かな試聴・編集と記録整理の室",
+      "kind":"covered","width":24,"depth":26,
+      "roof":"shedZ","height":"low","facade":"wall",
+      "windowPriority":["north","west","south","east"],
+      "feature":"録音の比較試聴と編集ノートを広げる共同作業台",
+      "featureMaterial":"wood",
+      "attach":{"parentIndex":0,"side":"west","shift":1}
+    },
+    {
+      "id":"listening-court",
+      "purpose":"外の音を聴き採集記録を持ち寄る開放的な庭と雨を避ける北側の縁",
+      "kind":"sky","width":22,"depth":20,
+      "roof":null,"height":null,"facade":null,"windowPriority":null,
+      "feature":"音風景の採集地図と観察メモを交換する屋外テーブル",
+      "featureMaterial":"stone",
+      "attach":{"parentIndex":0,"side":"south","shift":2}
+    }
+  ],
+  "massing":{"spaceId":"arrival-recording-hall","corner":"NE","cutWidth":8,"cutDepth":8,"publicAccessSide":"X"},
+  "wing":{"spaceId":"quiet-edit-studio","side":"west","start":4,"span":14,"reach":8,"roofY":8,"purpose":"静かな編集室の外で風防と録音機材を試し、収録条件を比較する屋根付きの縁"},
+  "floorplate":{"spaceId":"quiet-edit-studio","corner":"SW","width":6,"depth":6},
+  "atrium":{"spaceId":"arrival-recording-hall","offsetX":3,"offsetZ":4,"width":14,"depth":14,"lift":8,"roofForm":"shedZ"},
+  "mezzanine":{"side":"south","stairLane":"east","deckOffsetX":2,"deckWidth":10,"rise":6,"purpose":"街の音の地図と採集日誌を見比べ、来訪者が気づきを書き加える上階の公開記録ギャラリー"},
+  "arcade":{"width":12,"depth":3,"setback":1,"roofline":[9,11,10],"postMaterial":"stone","roofMaterial":"wood","serviceMaterial":"stone","purpose":"出発前の機材確認と帰着後の短い記録交換を雨の下でも行える入口前の公共回廊"}
+}

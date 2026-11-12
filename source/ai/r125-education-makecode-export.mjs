@@ -85,14 +85,15 @@ export function compactB143Cuboids(scene,{maxCuboids=2500}={}){
  return cuboids;
 }
 
-export function exportB143EducationMakeCode({design,scene,originOffset=[8,0,8],provenance='UNVERIFIED_DESIGN',groundLowestLayer=false,tightVoxelEnvelope=false,verifiedPalette=null,legacyStoneFallback=false}={}){
+export function exportB143EducationMakeCode({design,scene,originOffset=[8,0,8],provenance='UNVERIFIED_DESIGN',groundLowestLayer=false,tightVoxelEnvelope=false,columnClearance=false,verifiedPalette=null,legacyStoneFallback=false}={}){
  if(!design||!scene||!verifyCompiled(design,scene))fail('SOURCE_GEOMETRY_SHA_MISMATCH');
  if(!['UNVERIFIED_DESIGN','SYNTHETIC_TEST_FIXTURE','LOCAL_MODEL_CAPTURE','USER_AUTHORED'].includes(provenance))
   fail('PROVENANCE');
  if(!Array.isArray(originOffset)||originOffset.length!==3||
   !originOffset.every((v,i)=>int(v,i===1?0:5,i===1?10:64)))fail('ORIGIN_OFFSET');
  if(typeof groundLowestLayer!=='boolean'||typeof tightVoxelEnvelope!=='boolean'||
-  (tightVoxelEnvelope&&!groundLowestLayer))fail('GROUND_OPTION');
+    typeof columnClearance!=='boolean'||(tightVoxelEnvelope&&!groundLowestLayer)||
+    (columnClearance&&(!groundLowestLayer||!tightVoxelEnvelope)))fail('GROUND_OPTION');
  // Translate exact occupied source voxels, leaving B143 geometry and source
  // SHA immutable. This shrinks the preflight volume, not the architecture.
  const minX=tightVoxelEnvelope?Math.min(...scene.primitives.map(v=>v[0])):0;
@@ -102,8 +103,19 @@ export function exportB143EducationMakeCode({design,scene,originOffset=[8,0,8],p
  const maxY=tightVoxelEnvelope?Math.max(...scene.primitives.map(v=>v[1])):design.bounds.height-1;
  const maxZ=tightVoxelEnvelope?Math.max(...scene.primitives.map(v=>v[2])):design.bounds.depth-1;
  const b={width:maxX-minX+1,height:maxY-baseY+1,depth:maxZ-minZ+1};
+ // Opt-in footprint clearance: every occupied X/Z column from the grounded
+ // floor through its highest voxel, including all intervening interior air.
+ // Unused columns and air above the roof are outside this clearance scope.
+ const columnTops=new Map();
+ if(columnClearance)for(const [x,y,z] of scene.primitives){
+  const k=key(x-minX,0,z-minZ);
+  const prior=columnTops.get(k);
+  if(!prior||y-baseY>prior[2])columnTops.set(k,[x-minX,z-minZ,y-baseY]);
+ }
+ const columns=[...columnTops.values()].sort((a,b)=>a[1]-b[1]||a[0]-b[0]);
+ const clearanceCells=columnClearance?columns.reduce((n,c)=>n+c[2]+1,0):b.width*b.height*b.depth;
  if([b.width,b.height,b.depth].some(n=>!int(n,1,128))||
-    b.width*b.height*b.depth>40000||scene.primitives.length>20000)fail('PILOT_SIZE');
+    clearanceCells>40000||scene.primitives.length>20000)fail('PILOT_SIZE');
  const cuboids=compactB143Cuboids(scene).map(([x,y,z,X,Y,Z,m])=>
   [x-minX,y-baseY,z-minZ,X-minX,Y-baseY,Z-minZ,m]);
  const palette=resolvePalette(scene,verifiedPalette,legacyStoneFallback);
@@ -134,7 +146,22 @@ export function exportB143EducationMakeCode({design,scene,originOffset=[8,0,8],p
  'player.onChat("mabbuild", function () {',
  '    if (mabBusy || !mabReady || mabBuilt) { player.say("HOLD: busy, not set, or already attempted."); return }',
  '    mabBusy = true',
- '    player.say("Checking empty area. Please do not run mabverify until placement finishes.")',
+ '    player.say("Checking '+(columnClearance?'source footprint columns':'empty area')+'. Please do not run mabverify until placement finishes.")',
+ ...(columnClearance?[
+ '    // Exact source-footprint columns; cavities below roofs must be air too.',
+ '    let columns: number[][] = '+JSON.stringify(columns),
+ '    for (let i = 0; i < columns.length; i++) {',
+ '        let c = columns[i]',
+ '        for (let y = 0; y <= c[2]; y++) {',
+ '            if (!blocks.testForBlock(AIR, mabAt(c[0], y, c[1]))) {',
+ '                mabBusy = false; player.say("HOLD: non-air in source footprint. Wrote zero blocks."); return',
+ '            }',
+ '        }',
+ '        if (blocks.testForBlock(AIR, mabAt(c[0], -1, c[1]))) {',
+ '            mabBusy = false; player.say("HOLD: no flat ground support. Wrote zero blocks."); return',
+ '        }',
+ '    }'
+ ]:[
  '    for (let y = 0; y < '+b.height+'; y++) {',
  '        if (y % 2 == 0) player.say("Safety preflight layer " + (y + 1) + " / '+b.height+'")',
  '        for (let z = 0; z < '+b.depth+'; z++) {',
@@ -152,6 +179,7 @@ export function exportB143EducationMakeCode({design,scene,originOffset=[8,0,8],p
  '            }',
  '        }',
  '    }',
+ ]),
  '    mabBuilt = true',
  '    player.say("Preflight passed. Placing planned blocks now.")',
  '    for (let i = 0; i < mabRows.length; i++) {',
@@ -191,6 +219,9 @@ export function exportB143EducationMakeCode({design,scene,originOffset=[8,0,8],p
   status:'OFFLINE_CODE_GENERATED_ONLY',provenance,
   sourceSha256:scene.sourceSha256,geometrySha256:scene.geometrySha256,
   makecodeSourceSha256:sha(Buffer.from(code)),bounds:structuredClone(b),
+  ...(columnClearance?{clearanceMode:'SOURCE_FOOTPRINT_GROUND_TO_COLUMN_TOP',
+   clearanceCells,supportCells:columns.length,
+   clearanceScope:'Occupied X/Z columns only, including interior air below their highest voxel; unused columns and air above roofs are not checked'}:{}),
   plannedVoxelCount:scene.primitives.length,plannedCuboids:cuboids.length,
   sourceVerticalOffset:-baseY,
   ...(tightVoxelEnvelope?{sourceHorizontalOffset:[-minX,-minZ],

@@ -141,3 +141,53 @@ test('opt-in tight envelope requires grounding to protect support preflight',()=
  assert.throws(()=>exportB143EducationMakeCode({design:d,scene:compileDesign(d),
   tightVoxelEnvelope:true,legacyStoneFallback:true}),/GROUND_OPTION/);
 });
+
+test('footprint preflight checks interior air and every support before any fill',()=>{
+ const sparse={schema:d.schema,id:'sparse-clearance',title:'sparse clearance',
+  brief:'Offline safety regression',bounds:{width:100,height:30,depth:100},designOnly:true,
+  elements:[{id:'floor',shape:'box',mode:'add',material:'stone',origin:[10,2,10],size:[3,1,3]},
+   {id:'roof',shape:'box',mode:'add',material:'stone',origin:[10,8,10],size:[3,1,3]},
+   {id:'far',shape:'box',mode:'add',material:'stone',origin:[90,2,90],size:[1,1,1]}]};
+ const scene=compileDesign(sparse),before=structuredClone(scene);
+ const options={design:sparse,scene,groundLowestLayer:true,tightVoxelEnvelope:true};
+ assert.throws(()=>exportB143EducationMakeCode(options),/PILOT_SIZE/);
+ const out=exportB143EducationMakeCode({...options,columnClearance:true});
+ assert.equal(out.clearanceCells,64);assert.equal(out.supportCells,10);
+ assert.deepEqual(out.bounds,{width:81,height:7,depth:81});
+ assert.equal(out.sourceSha256,scene.sourceSha256);
+ assert.equal(out.geometrySha256,scene.geometrySha256);
+ const code=out.code.replace(/: number\[\]\[\]|: number\[\]|: number|: Position/g,'');
+ function run(obstruction){
+  const handlers={},fills=[],checked=[];
+  const expected=new Map(scene.primitives.map(([x,y,z,m])=>[[x-10+8,y-2,z-10+8].join(','),m]));
+  const player={position:()=>({x:0,y:0,z:0}),onChat:(n,f)=>handlers[n]=f,say:()=>{}};
+  const blocks={blockByName:s=>s,testForBlock:(_block,p)=>{
+   const k=[p.x,p.y,p.z].join(',');checked.push(k);
+   return p.y>=0?k!==obstruction:k===obstruction;
+  },fill:(material,a,b)=>{
+   assert.equal(checked.length,74,'all clearance and support reads precede first fill');
+   for(let x=a.x;x<=b.x;x++)for(let y=a.y;y<=b.y;y++)for(let z=a.z;z<=b.z;z++){
+    const k=[x,y,z].join(',');assert(expected.has(k),'no phantom placement');fills.push(k);
+   }
+  }};
+  vm.runInNewContext(code,{player,blocks,AIR:'air',FillOperation:{Keep:0},
+   pos:(x,y,z)=>({x,y,z}),positions:{add:(a,b)=>({x:a.x+b.x,y:a.y+b.y,z:a.z+b.z})}});
+  handlers.mabset();handlers.mabbuild();return {fills,checked,expected};
+ }
+ // Interior air under the roof, highest occupied roof, and missing support.
+ for(const blocked of ['9,3,9','9,6,9','9,-1,9'])assert.equal(run(blocked).fills.length,0);
+ const ok=run(null);assert.equal(ok.fills.length,scene.primitives.length);
+ assert.deepEqual(new Set(ok.fills),new Set(ok.expected.keys()));
+ assert(ok.checked.includes('9,3,9'));assert(!ok.checked.includes('50,0,50'));
+ assert.deepEqual(scene,before);assert.equal(out.constructionApproved,false);
+ assert.throws(()=>exportB143EducationMakeCode({design:sparse,scene,columnClearance:true}),/GROUND_OPTION/);
+});
+
+test('footprint mode preserves the 40000-cell clearance limit',()=>{
+ const large={schema:d.schema,id:'tall-clearance',title:'tall clearance',
+  brief:'Safety budget regression',bounds:{width:50,height:30,depth:50},designOnly:true,
+  elements:[{id:'roof',shape:'box',mode:'add',material:'stone',origin:[0,29,0],size:[50,1,50]},
+   {id:'base',shape:'box',mode:'add',material:'stone',origin:[0,0,0],size:[1,1,1]}]};
+ assert.throws(()=>exportB143EducationMakeCode({design:large,scene:compileDesign(large),
+  groundLowestLayer:true,tightVoxelEnvelope:true,columnClearance:true}),/PILOT_SIZE/);
+});
