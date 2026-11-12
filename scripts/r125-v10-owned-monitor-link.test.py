@@ -143,14 +143,13 @@ def test_mode(mod,root,mode,stage):
         stage[0]=mode+':FAULT_DETECTION'
         def fault_seen():
             d=read_json(folder/'monitor.json')
-            if mon.poll() is not None: return True
-            if not d or d.get('nonce')!=nonce or d.get('pid')!=mon.pid:
-                return False   # A transient Windows file read is not failure evidence.
-            if d.get('state')=='FAULT': return True
-            ms=d.get('timeMs')
-            if not isinstance(ms,int): return False
-            age=time.time_ns()//1000000-ms
-            return age>1800 or age<0
+            if mode=='monitor-death':
+                # This case deliberately terminated the separate monitor.
+                return mon.poll() is not None
+            # A simple process crash is NOT proof that the injected fault was
+            # delivered: require an authenticated FAULT report in this case.
+            return bool(d and d.get('nonce')==nonce and
+                        d.get('pid')==mon.pid and d.get('state')=='FAULT')
         check(until(fault_seen,6),'MONITOR_FAULT_NOT_DETECTED')
         stage[0]=mode+':OWNED_STOP'
         job.close()
