@@ -14,8 +14,65 @@ import {COMPACT_SCHEMA} from '../source/ai/r125-v4d-compact-model-ir.mjs';
 import {RELATIVE_SCHEMA} from '../source/ai/r125-v4d-relative-author-ir.mjs';
 import {MASSING_SCHEMA,compileMassingAuthorIntent}
  from '../source/ai/r125-v4e-massing-author-ir.mjs';
+import {RANKED_SCHEMA,translateRankedExteriorIntent}
+ from '../source/ai/r125-v4e-ranked-exterior-ir.mjs';
 
 const readJSON=p=>JSON.parse(fs.readFileSync(p,'utf8'));
+test('ranked preflight explains whole-face exhaustion from a nonlinked corner without relaxing SOURCE',()=>{
+ const author=makeV4DCompactSynthetic();author.schema=RANKED_SCHEMA;
+ for(const s of author.spaces){
+  delete s.windowSide;s.windowPriority=s.kind==='covered'?['north','east','south','west']:null;
+ }
+ Object.assign(author.spaces[0],{width:24,depth:24});
+ Object.assign(author.spaces[1],{width:18,depth:18,
+  attach:{to:author.spaces[0].id,side:'west',shift:0}});
+ Object.assign(author.spaces[2],{width:24,depth:18,
+  attach:{to:author.spaces[0].id,side:'south',shift:0}});
+ const frozen=structuredClone(author);
+ const report=diagnosePrivateV4DAuthor(author,RANKED_SCHEMA);
+ assert.deepEqual(report.issues.filter(i=>i.code.startsWith('RANKED_WINDOW_')),[
+  {code:'RANKED_WINDOW_FACADES_EXHAUSTED',spaceIndex:0},
+  {code:'RANKED_WINDOW_NONLINKED_CORNER_CONTACT',spaceIndex:0}
+ ]);
+ assert.throws(()=>translateRankedExteriorIntent(author),/NO_AUTHORED_EXTERIOR_OPTION_0$/);
+ // The isolated research option may solve the centred panel; diagnosis must
+ // still describe the UNCHANGED default rather than promoting that result.
+ assert.doesNotThrow(()=>translateRankedExteriorIntent(author,{centerStripResearchV2:true}));
+ assert.deepEqual(author,frozen);
+ for(const s of author.spaces)assert(!JSON.stringify(report).includes(s.id));
+ assert.equal(report.privateStringsIncluded,false);
+ assert.equal(report.sourcePassNotInferred,true);
+ assert.equal(report.sourceModelCalls,0);
+ author.spaces[2].width=22;
+ assert(!diagnosePrivateV4DAuthor(author,RANKED_SCHEMA).issues.some(i=>i.code.startsWith('RANKED_WINDOW_')));
+ assert.doesNotThrow(()=>translateRankedExteriorIntent(author));
+ // Invalid priority lists retain their own format diagnosis, not a confirmed
+ // proof that all four authored options were exhausted.
+ author.spaces[2].width=24;author.spaces[0].windowPriority=['east'];
+ assert(!diagnosePrivateV4DAuthor(author,RANKED_SCHEMA).issues.some(i=>i.code==='RANKED_WINDOW_FACADES_EXHAUSTED'));
+});
+
+test('ranked preflight includes the parent reverse side and all later child links',()=>{
+ const author=makeV4DCompactSynthetic();author.schema=RANKED_SCHEMA;
+ for(const s of author.spaces){
+  delete s.windowSide;s.windowPriority=s.kind==='covered'?['north','east','south','west']:null;
+ }
+ Object.assign(author.spaces[0],{width:24,depth:24});
+ Object.assign(author.spaces[1],{width:18,depth:18,
+  attach:{to:author.spaces[0].id,side:'east',shift:0}});
+ Object.assign(author.spaces[2],{width:18,depth:18,
+  attach:{to:author.spaces[1].id,side:'north',shift:0}});
+ for(const [id,side] of [['later-east','east'],['later-south','south']]){
+  author.spaces.push({...structuredClone(author.spaces[1]),id,
+   attach:{to:author.spaces[1].id,side,shift:0}});
+ }
+ const report=diagnosePrivateV4DAuthor(author,RANKED_SCHEMA);
+ assert.deepEqual(report.issues.filter(i=>i.code==='RANKED_WINDOW_FACADES_EXHAUSTED'),[
+  {code:'RANKED_WINDOW_FACADES_EXHAUSTED',spaceIndex:1}
+ ]);
+ assert.throws(()=>translateRankedExteriorIntent(author),/NO_AUTHORED_EXTERIOR_OPTION_1$/);
+});
+
 test('massing preflight explains the unchanged SOURCE shared-wall rejection, including parent reverse sides',()=>{
  const author=makeV4DCompactSynthetic();
  author.schema=MASSING_SCHEMA;

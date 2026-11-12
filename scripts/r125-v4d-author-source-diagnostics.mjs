@@ -71,7 +71,7 @@ const dirs=['north','south','east','west'];
 // R125 relative author's LOCAL placement arithmetic. This does NOT alter
 // model output, rewrite a link, or certify frozen GRAPH / B143 success.
 // Only integer space indexes and fixed error codes may leave PRIVATE replay.
-function diagnoseAuthoredFootprints(author,report){
+function diagnoseAuthoredFootprints(author,report,ranked,connectedSides){
  const spaces=author.spaces;
  if(!Array.isArray(spaces)||spaces.length<3||spaces.length>5)return;
  const placed=new Map(),all=[];
@@ -114,6 +114,50 @@ function diagnoseAuthoredFootprints(author,report){
    // horizontal intersection lengths exceed one voxel, not at a shared wall.
    if(overlapX>1&&overlapZ>1)
     add(report,'AUTHORED_SOLID_FOOTPRINT_OVERLAP',later);
+  }
+ }
+ if(!ranked)return;
+ // The unchanged default ranked resolver excludes a WHOLE facade even for
+ // a one-cell corner contact or a neighbouring cell just outside that face.
+ // Diagnose the actual legacy contract, never silently use center-strip
+ // research or move an authored room/window. Only fixed codes and indexes
+ // leave PRIVATE; these counts/coordinates remain local to this function.
+ const endX=n=>n.x+n.width-1,endZ=n=>n.z+n.depth-1;
+ const overlap=(a,b,c,d)=>Math.max(0,Math.min(b,d)-Math.max(a,c)+1);
+ const contactSpan=(room,other,side)=>{
+  const span=side==='east'||side==='west'?
+   overlap(room.z,endZ(room),other.z,endZ(other)):
+   overlap(room.x,endX(room),other.x,endX(other));
+  const touches=side==='east'?
+   other.x===endX(room)||other.x===endX(room)+1||
+    (other.x<endX(room)&&endX(other)>=endX(room)):
+   side==='west'?
+    endX(other)===room.x||endX(other)===room.x-1||
+     (other.x<=room.x&&endX(other)>room.x):
+   side==='south'?
+    other.z===endZ(room)||other.z===endZ(room)+1||
+     (other.z<endZ(room)&&endZ(other)>=endZ(room)):
+    endZ(other)===room.z||endZ(other)===room.z-1||
+     (other.z<=room.z&&endZ(other)>room.z);
+  return touches?span:0;
+ };
+ for(const [i,room] of all.entries()){
+  const s=spaces[i];
+  if(s.kind!=='covered'||!Array.isArray(s.windowPriority)||
+   s.windowPriority.length!==4||new Set(s.windowPriority).size!==4||
+   s.windowPriority.some(d=>!dirs.includes(d)))continue;
+  const used=connectedSides.get(s.id)??new Set();
+  let available=0,cornerOnly=false;
+  for(const side of dirs){
+   if(i===0&&side==='north')continue;
+   const contacts=all.flatMap((other,j)=>j===i?[]:[contactSpan(room,other,side)])
+    .filter(span=>span>0);
+   if(!contacts.length)available++;
+   else if(!used.has(side)&&contacts.every(span=>span===1))cornerOnly=true;
+  }
+  if(available===0){
+   add(report,'RANKED_WINDOW_FACADES_EXHAUSTED',i);
+   if(cornerOnly)add(report,'RANKED_WINDOW_NONLINKED_CORNER_CONTACT',i);
   }
  }
 }
@@ -386,7 +430,7 @@ export function diagnosePrivateV4DAuthor(author,contract){
   }
  }
  // Coordinate-only provenance is separate from compiler SOURCE acceptance.
- diagnoseAuthoredFootprints(author,r);
+ diagnoseAuthoredFootprints(author,r,ranked,connectedSides);
  // Check linked wall window directions after reading ALL attachments.
  if(civic){
   const a=author.arcade,fields=['width','depth','setback','roofline',
