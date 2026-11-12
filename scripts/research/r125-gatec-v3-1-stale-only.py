@@ -366,7 +366,7 @@ def offline_tests():
     base = {'nonce': 'a' * 32, 'pid': 11, 'seq': 1, 'state': 'ALIVE',
             'data': {'ramFreeMiB': 5000, 'commitHeadroomMiB': 10000,
                      'gpuTotalMiB': 16303, 'gpuFreeMiB': 15998,
-                     'sampleMs': time.time_ns() // 1000000}}
+                     'sampleMs': time.time_ns() // 1000000 - 100}}
     assert valid_new(base, None, base['nonce'], 11)
     assert classify(base, base, 4.9) == 'UNCHANGED'
     assert classify(base, base, 5.1) == 'STALE'
