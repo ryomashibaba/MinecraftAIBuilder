@@ -221,13 +221,14 @@ async function windowsLive(expectedHead){
   const nonce=randomBytes(16).toString('hex');
   const python=process.env.MAB_PYTHON_EXE||'py.exe';
   const prefix=process.env.MAB_PYTHON_EXE?[]:['-3'];
-  let mon=null,code='LIVE_SAMPLE_UNVERIFIED',seen=0;
+  let mon=null,code='LIVE_SAMPLE_UNVERIFIED',seen=0,spawnError=false;
   try{
     write(temp,'session.json',{nonce});
     mon=spawn(python,[...prefix,V31,'--role','monitor',
        '--folder',temp,'--nonce',nonce],
       {env:{...process.env,MAB_V31_PROBE_NONCE:nonce},
        windowsHide:true,stdio:'ignore'});
+    mon.on('error',()=>{spawnError=true;});
     if(!Number.isSafeInteger(mon.pid)||mon.pid<=0)
       return {status:'HOLD',reason:'MONITOR_PROCESS_UNAVAILABLE',gateCP1:'HOLD'};
     write(temp,'session.json',{nonce,monitorPid:mon.pid});
@@ -237,7 +238,9 @@ async function windowsLive(expectedHead){
     let previous=0;
     const deadline=Date.now()+15000;
     while(Date.now()<deadline&&seen<2){
-      if(mon.exitCode!==null) {code='MONITOR_EARLY_EXIT';break;}
+      if(spawnError||mon.exitCode!==null||mon.signalCode!==null) {
+        code='MONITOR_EARLY_EXIT';break;
+      }
       let entry;
       try{entry=decode(temp,'sample.json');}catch{await pause(180);continue;}
       if(entry.seq<=previous){await pause(180);continue;}
@@ -261,11 +264,11 @@ async function windowsLive(expectedHead){
       gateCP1:'HOLD',modelCalls:0,ollamaGetCalls:0,
       worldWrites:0};
   }finally{
-    if(mon&&mon.exitCode===null){
+    if(mon&&Number.isSafeInteger(mon.pid)&&
+       mon.exitCode===null&&mon.signalCode===null){
+      const exited=new Promise(resolve=>mon.once('exit',resolve));
       mon.kill();
-      await Promise.race([
-        new Promise(resolve=>mon.once('exit',resolve)),pause(5000)
-      ]);
+      await Promise.race([exited,pause(5000)]);
     }
     fs.rmSync(temp,{recursive:true,force:true});
   }
