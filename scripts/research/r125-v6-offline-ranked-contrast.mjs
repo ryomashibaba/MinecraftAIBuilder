@@ -13,7 +13,8 @@ import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import {CIVIC_ARCADE_SCHEMA,compileCivicArcadeAuthorIntent}
  from '../../source/ai/r125-v4j-civic-author-ir.mjs';
-import {materializeV4JParentIndexAuthor,V4J_PARENT_INDEX_PROTOCOL}
+import {materializeV4JParentIndexAuthor,V4J_PARENT_INDEX_PROTOCOL,
+ V4J_PARENT_INDEX_SYSTEM_PROMPT}
  from '../../source/ai/r125-v4j-feasible-envelope.mjs';
 import {RANKED_SCHEMA,compileRankedExteriorIntent,
  runWithRankedExteriorCenterStripResearch}
@@ -151,6 +152,58 @@ export function contrastV6RankedLayer(original,expectedOriginalError=null){
   additionalModelCalls:0,worldWrites:0
  };
 }
+
+/** V9 native originals are in V7_* files, not the legacy V4D_* files.
+ * Offline only: verify exact metadata, saved SHA and optional HTTP envelope
+ * before any B143 SOURCE contrast. Do not publish private names or responses.
+ */
+function readSavedNativeV9Study(root){
+ const req=JSON.parse(parseFile(root,'V7_LOCAL_REQUEST_PRIVATE.json',50000));
+ const m=JSON.parse(parseFile(root,'V7_SEMANTIC_SHAREABLE.json',50000));
+ if(req.contract!==V4J_PARENT_INDEX_PROTOCOL||
+  req.model!=='qwen3:14b'||!/^[a-f0-9]{40}$/.test(req.headSha??'')||
+  m.headSha!==req.headSha||req.maxAttempts!==1||
+  req.systemPromptSha256!==sha(V4J_PARENT_INDEX_SYSTEM_PROMPT)||
+  req.num_ctx!==12288||
+  (req.v6ThinkingStudy===true?
+   req.think!==true||req.num_predict!==7168:
+   req.v6ThinkingStudy!==undefined||req.think===true||req.num_predict!==4096)||
+  m.schema!=='minecraftaibuilder-r125-v7-private-one-safe-v1'||
+  m.protocol!==req.contract||
+  m.status!=='HOLD_AUTHOR'||m.reason!=='V6_AUTHOR_OR_B143_REJECTED'||
+  m.compilerRejectCode!=='RANKED_NO_EXTERIOR_OPTION'||
+  m.explicitlyInjectedTestResponse!==false||
+  m.modelGenerationAttempts!==1||m.rawCaptured!==true||
+  m.ollamaCompletionObserved!==true||m.unloadConfirmed!==true||
+  !Number.isSafeInteger(m.activeMonitorSamples)||m.activeMonitorSamples<1||
+  m.clientAbortSignaled!==false||m.b143Recompiled!==false||
+  m.worldContacts!==0||m.worldWrites!==0||
+  m.readiness!=='NOT_PREPARED'||m.constructionApproved!==false||
+  m.executionAllowed!==false||
+  !Array.isArray(m.gates)||m.gates.length!==9||
+  m.gates.some(x=>x!=='BLOCKED')||
+  !Array.isArray(m.BuildPlan?.operations)||m.BuildPlan.operations.length!==0||
+  !/^[a-f0-9]{64}$/.test(m.responseRawSha256??''))
+  hold('NATIVE_STUDY_MANIFEST_NOT_VERIFIED');
+ const raw=parseFile(root,'V7_MODEL_RESPONSE_ORIGINAL_PRIVATE.txt',250000);
+ if(sha(raw)!==m.responseRawSha256)hold('ORIGINAL_RAW_SHA256_MISMATCH');
+ if(req.v6ThinkingStudy===true){
+  const http=JSON.parse(parseFile(root,
+   'V6_THINKING_HTTP_ENVELOPE_ORIGINAL_PRIVATE.json',300000));
+  if(m.v6ThinkingStudy!==true||m.thinkingObserved!==true||
+   m.thinkingTokenBudgetVerified!==true||
+   http.model!=='qwen3:14b'||http.done!==true||
+   http.done_reason!=='stop'||http.message?.content!==raw||
+   typeof http.message?.thinking!=='string'||
+   http.message.thinking.length!==m.thinkingCharacterCount||
+   http.prompt_eval_count!==m.observedPromptTokens||
+   http.eval_count!==m.observedGeneratedTokens)
+   hold('NATIVE_HTTP_EVIDENCE_NOT_VERIFIED');
+ }
+ return {input:JSON.parse(raw),originalError:null,
+  expectedRejectCode:m.compilerRejectCode,studyFormat:'V9_NATIVE'};
+}
+
 export function readSavedV6Study(folder){
  const root=path.resolve(folder);
  const s=fs.lstatSync(root);
@@ -158,6 +211,8 @@ export function readSavedV6Study(folder){
  const repoRoot=path.resolve(fileURLToPath(new URL('../../',import.meta.url)));
  if(isWithin(fs.realpathSync(root),fs.realpathSync(repoRoot)))
   hold('PRIVATE_STUDY_INSIDE_REPO');
+ if(fs.existsSync(path.join(root,'V7_LOCAL_REQUEST_PRIVATE.json')))
+  return readSavedNativeV9Study(root);
  const manifest=JSON.parse(parseFile(root,'V4D_LOCAL_AUTHOR_REPORT.json',400000));
  const request=JSON.parse(parseFile(root,'LOCAL_REQUEST.json',50000));
  if(manifest.schema!=='minecraftaibuilder-r125-v4d-local-model-author-attempt-v1'||
@@ -186,20 +241,27 @@ export function readSavedV6Study(folder){
   hold('ORIGINAL_STUDY_MANIFEST_NOT_VERIFIED');
  const raw=parseFile(root,'MODEL_RESPONSE_ORIGINAL.txt',250000);
  if(sha(raw)!==manifest.responseRawSha256)hold('ORIGINAL_RAW_SHA256_MISMATCH');
- return {input:JSON.parse(raw),originalError:manifest.reason};
+ return {input:JSON.parse(raw),originalError:manifest.reason,
+  expectedRejectCode:null,studyFormat:'V4D_LEGACY'};
 }
 function cli(){
  const args=process.argv.slice(2);
  if(args.length!==2||args[0]!=='--study'||!args[1])
   hold('ARGS_EXPECT_EXISTING_PRIVATE_STUDY');
- const {input,originalError}=readSavedV6Study(args[1]);
+ const {input,originalError,expectedRejectCode,studyFormat}=readSavedV6Study(args[1]);
  const result=contrastV6RankedLayer(input,originalError);
- if(result.originalCompilerErrorReproduced!==true||
-  result.originalFullV6ErrorReproduced!==true)
-  hold('ORIGINAL_COMPILER_ERROR_NOT_REPRODUCED');
+ const reproduced=studyFormat==='V9_NATIVE'?
+  result.legacyRankedStatus==='HOLD'&&
+  result.legacyCompilerRejectCode===expectedRejectCode&&
+  result.fullV6LegacyStatus==='HOLD'&&
+  result.fullV6LegacyRejectCode===expectedRejectCode:
+  result.originalCompilerErrorReproduced===true&&
+  result.originalFullV6ErrorReproduced===true;
+ if(!reproduced)hold('ORIGINAL_COMPILER_ERROR_NOT_REPRODUCED');
  console.log(JSON.stringify({
   ...result,originalRawIntegrity:'SHA256_MATCH',
-  originalModelGenerationAttempts:1
+  originalModelGenerationAttempts:1,studyFormat,
+  originalSafeRejectReproduced:reproduced
  },null,2));
 }
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){
@@ -209,7 +271,8 @@ if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.ur
    'STUDY_DIR_UNSAFE','PRIVATE_STUDY_INSIDE_REPO',
    'PRIVATE_FILE_NOT_REGULAR_OR_SIZE_LIMIT',
    'ORIGINAL_STUDY_MANIFEST_NOT_VERIFIED','ORIGINAL_RAW_SHA256_MISMATCH',
-   'ORIGINAL_COMPILER_ERROR_NOT_REPRODUCED','ORIGINAL_AUTHOR_MUTATED']);
+   'ORIGINAL_COMPILER_ERROR_NOT_REPRODUCED','ORIGINAL_AUTHOR_MUTATED',
+   'NATIVE_STUDY_MANIFEST_NOT_VERIFIED','NATIVE_HTTP_EVIDENCE_NOT_VERIFIED']);
   console.log(JSON.stringify({
    ...safeBase(),status:'HOLD',reason:allowed.has(e?.message)?
     e.message:'PRIVATE_OR_SOURCE_UNVERIFIED'

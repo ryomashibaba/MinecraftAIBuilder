@@ -7,7 +7,7 @@ import os from 'node:os';
 import {createHash} from 'node:crypto';
 import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
-import {V4J_PARENT_INDEX_PROTOCOL} from '../../source/ai/r125-v4j-feasible-envelope.mjs';
+import {V4J_PARENT_INDEX_PROTOCOL,V4J_PARENT_INDEX_SYSTEM_PROMPT} from '../../source/ai/r125-v4j-feasible-envelope.mjs';
 import {syntheticFiveV4JArcadeAuthors}
  from '../r125-v4j-civic-facade-study.mjs';
 import {CIVIC_ARCADE_SCHEMA,compileCivicArcadeAuthorIntent}
@@ -193,6 +193,81 @@ test('synthetic LOCAL V6 study: SHA-verified CLI contrast is fail-closed on unsa
  }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });
 
+
+
+test('V9 native format: immutable original and HTTP evidence remain PRIVATE',()=>{
+ const sample=syntheticFiveV4JArcadeAuthors().find(x=>x.genre==='housing');
+ const v6=toV6({...structuredClone(sample.wholeBuilding),
+  schema:CIVIC_ARCADE_SCHEMA,arcade:structuredClone(sample.arcade)});
+ const mk=(id,kind,side,parentIndex)=>({
+  id,purpose:'PRIVATE_PURPOSE_MUST_NOT_PRINT',kind,
+  width:24,depth:24,roof:kind==='sky'?null:'ridgeX',
+  height:kind==='sky'?null:'low',facade:kind==='sky'?null:'wall',
+  windowPriority:kind==='sky'?null:['north','east','west','south'],
+  feature:'Public service',featureMaterial:'wood',
+  attach:parentIndex===null?null:{parentIndex,side,shift:0}
+ });
+ v6.entrySpace=mk('root-hall','covered',null,null);
+ v6.otherSpaces=[mk('middle-hall','covered','east',0),
+  mk('open-court','sky','north',1),mk('east-studio','covered','east',1)];
+ v6.materials={floor:'wood',wall:'stone',roof:'wood',public:'stone'};
+ const hash=s=>createHash('sha256').update(s).digest('hex');
+ const raw=JSON.stringify(v6),head='aba967c7d76b6351ce60aafd55927a274de4a386';
+ const req={model:'qwen3:14b',headSha:head,contract:V4J_PARENT_INDEX_PROTOCOL,
+  systemPromptSha256:hash(V4J_PARENT_INDEX_SYSTEM_PROMPT),
+  maxAttempts:1,num_ctx:12288,num_predict:7168,v6ThinkingStudy:true,think:true};
+ const m={schema:'minecraftaibuilder-r125-v7-private-one-safe-v1',
+  protocol:V4J_PARENT_INDEX_PROTOCOL,headSha:head,
+  status:'HOLD_AUTHOR',reason:'V6_AUTHOR_OR_B143_REJECTED',
+  compilerRejectCode:'RANKED_NO_EXTERIOR_OPTION',
+  explicitlyInjectedTestResponse:false,modelGenerationAttempts:1,rawCaptured:true,
+  ollamaCompletionObserved:true,unloadConfirmed:true,activeMonitorSamples:3,
+  clientAbortSignaled:false,b143Recompiled:false,
+  worldContacts:0,worldWrites:0,readiness:'NOT_PREPARED',
+  constructionApproved:false,executionAllowed:false,
+  gates:Array(9).fill('BLOCKED'),BuildPlan:{operations:[]},
+  responseRawSha256:hash(raw),v6ThinkingStudy:true,thinkingObserved:true,
+  thinkingTokenBudgetVerified:true,thinkingCharacterCount:0,
+  observedPromptTokens:3000,observedGeneratedTokens:1700};
+ const http={model:'qwen3:14b',done:true,done_reason:'stop',
+  message:{content:raw,thinking:'PRIVATE_THINKING_SENTINEL'},
+  prompt_eval_count:3000,eval_count:1700};
+ m.thinkingCharacterCount=http.message.thinking.length;
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'mab-native-v9-synthetic-'));
+ const write=(name,x)=>fs.writeFileSync(path.join(dir,name),
+  typeof x==='string'?x:JSON.stringify(x));
+ const script=fileURLToPath(new URL('./r125-v6-offline-ranked-contrast.mjs',import.meta.url));
+ try{
+  write('V7_LOCAL_REQUEST_PRIVATE.json',req);
+  write('V7_SEMANTIC_SHAREABLE.json',m);
+  write('V7_MODEL_RESPONSE_ORIGINAL_PRIVATE.txt',raw);
+  write('V6_THINKING_HTTP_ENVELOPE_ORIGINAL_PRIVATE.json',http);
+  assert.deepEqual(readSavedV6Study(dir).input,v6);
+  const run=spawnSync(process.execPath,[script,'--study',dir],
+   {encoding:'utf8',timeout:20000});
+  assert.equal(run.status,0,run.stdout);
+  const safe=JSON.parse(run.stdout);
+  assert.equal(safe.studyFormat,'V9_NATIVE');
+  assert.equal(safe.originalSafeRejectReproduced,true);
+  assert.equal(safe.fullV6LegacyRejectCode,'RANKED_NO_EXTERIOR_OPTION');
+  assert.equal(safe.fullV6ResearchStatus,'HOLD');
+  assert.equal(safe.worldWrites,0);
+  for(const secret of ['PRIVATE_PURPOSE_MUST_NOT_PRINT',
+   'PRIVATE_THINKING_SENTINEL',dir,v6.otherSpaces[0].id])
+   assert(!run.stdout.includes(secret));
+  m.responseRawSha256='0'.repeat(64);
+  write('V7_SEMANTIC_SHAREABLE.json',m);
+  assert.throws(()=>readSavedV6Study(dir),/ORIGINAL_RAW_SHA256_MISMATCH/);
+  m.responseRawSha256=hash(raw);m.gates[2]='PASS';
+  write('V7_SEMANTIC_SHAREABLE.json',m);
+  assert.throws(()=>readSavedV6Study(dir),/NATIVE_STUDY_MANIFEST_NOT_VERIFIED/);
+  m.gates[2]='BLOCKED';
+  write('V7_SEMANTIC_SHAREABLE.json',m);
+  http.message.content='MISMATCH';
+  write('V6_THINKING_HTTP_ENVELOPE_ORIGINAL_PRIVATE.json',http);
+  assert.throws(()=>readSavedV6Study(dir),/NATIVE_HTTP_EVIDENCE_NOT_VERIFIED/);
+ }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
 
 test('research-only scoped context reaches nested V6 compilation without changing its legacy default',()=>{
  const sample=syntheticFiveV4JArcadeAuthors().find(x=>x.genre==='housing');
