@@ -130,7 +130,8 @@ def worker(folder, nonce):
 def monitor(folder, nonce):
     authenticated(folder, nonce)
     seq = 0
-    while True:
+    deadline = time.monotonic() + 45.0  # Stop even if the test driver disappears.
+    while time.monotonic() < deadline:
         if (folder / 'freeze.flag').exists():
             # Intentionally stop publishing, but leave monitor process alive.
             time.sleep(.12)
