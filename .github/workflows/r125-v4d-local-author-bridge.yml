@@ -14,6 +14,7 @@ on:
       - 'scripts/r125-v7-private-once.mjs'
       - 'scripts/r125-v7-private-once.test.mjs'
       - 'scripts/r125-windows-owned-process.py'
+      - 'scripts/r125-v10-owned-monitor-link.test.py'
       - 'scripts/r125-v7-v4h-public-token-input.mjs'
       - 'scripts/r125-v7-v4h-public-token-budget.py'
       - 'scripts/r125-v7-ollama-readonly-diagnostic.mjs'
@@ -315,6 +316,11 @@ jobs:
         run: |
           python scripts/r125-windows-owned-process.py --selftest
           if ($LASTEXITCODE -ne 0) { throw 'WINDOWS_OWNED_PROCESS_TREE_STOP_UNPROVEN' }
+      - name: Verify dummy monitor fault/death closes owned Job (NO MODEL)
+        shell: pwsh
+        run: |
+          python scripts/r125-v10-owned-monitor-link.test.py --selftest
+          if ($LASTEXITCODE -ne 0) { throw 'V10_OWNED_MONITOR_LINK_FAIL_CLOSED' }
       - name: V7 simulated worker failure aborts POST on native Windows Node (NO MODEL)
         shell: pwsh
         run: |
