@@ -55,11 +55,13 @@ export const V7_V4H_COMPACT_SYSTEM_PROMPT=[
 ].join('\n');
 
 export const V4H_BRIEF='Design a useful two-level public building with a coherent welcoming hall, accessible upper gallery, functional stairs and distinctive whole-building massing. Independently choose its architecture and spatial program.';
-export function v7RequestOptions(mode){
+export function v7RequestOptions(mode,{v6ThinkingStudy=false}={}){
  if(!['integrated-semantic','v4h-mezzanine','civic-v6'].includes(mode))
   fail('AUTHOR_MODE_UNSUPPORTED');
+ if(typeof v6ThinkingStudy!=='boolean'||(v6ThinkingStudy&&mode!=='civic-v6'))
+  fail('THINKING_STUDY_V6_ONLY');
  return {num_ctx:mode==='civic-v6'?12288:2048,
-  num_predict:mode==='civic-v6'?4096:1024,temperature:0.45};
+  num_predict:mode==='civic-v6'?(v6ThinkingStudy?7168:4096):1024,temperature:0.45};
 }
 const hash=s=>createHash('sha256').update(s).digest('hex');
 const freshResourceClearance=(resource,now=Date.now())=>
@@ -144,7 +146,7 @@ const safeBase=(headSha,injected,mode)=>({
 });
 export async function runV7PrivateOnce({
  model,outDir,headSha,prompt,authorMode='integrated-semantic',
- ownedServiceOrigin,
+ ownedServiceOrigin,v6ThinkingStudy=false,v6ThinkingBudget,
  deriveIntegratedShell,checkResourceSafety
 }={},{
  modelFetcher=fetch,ciFetcher=fetch,headReader=actualHead,timeoutMs=120000
@@ -154,6 +156,7 @@ export async function runV7PrivateOnce({
  // Existing modes keep their original endpoint and runtime limits. New V6
  // research requires a separate service; it cannot run on the shared daemon.
  const civic=authorMode==='civic-v6';
+ const requestOptions=v7RequestOptions(authorMode,{v6ThinkingStudy});
  if(civic?ownedServiceOrigin!=='http://127.0.0.1:11435':ownedServiceOrigin!==undefined)
   fail('OWNED_V6_SERVICE_ORIGIN_REQUIRED');
  const local=civic?ownedServiceOrigin+'/api/chat':LOCAL;
@@ -168,11 +171,31 @@ export async function runV7PrivateOnce({
   typeof chosenPrompt!=='string'||chosenPrompt.length<8||chosenPrompt.length>4000||
   !Number.isSafeInteger(timeoutMs)||timeoutMs<1000||timeoutMs>(civic?600000:120000))
   fail('INVALID_OPTIONS');
+ if(v6ThinkingStudy&&(
+  v6ThinkingBudget?.publicTokenizerShaVerified!==true||
+  !Number.isSafeInteger(v6ThinkingBudget.framedInputTokens)||
+  v6ThinkingBudget.framedInputTokens<=0||
+  v6ThinkingBudget.context!==requestOptions.num_ctx||
+  v6ThinkingBudget.reservedOutputTokens!==requestOptions.num_predict||
+  !Number.isSafeInteger(v6ThinkingBudget.additionalFramingMargin)||
+  v6ThinkingBudget.additionalFramingMargin<256||
+  v6ThinkingBudget.framedInputTokens+v6ThinkingBudget.reservedOutputTokens+
+   v6ThinkingBudget.additionalFramingMargin>v6ThinkingBudget.context||
+  v6ThinkingBudget.systemPromptSha256!==hash(systemPrompt)||
+  v6ThinkingBudget.briefSha256!==hash(chosenPrompt)))
+  fail('THINKING_INPUT_BUDGET_UNVERIFIED');
  const dir=privateDir(outDir);
  const injected=modelFetcher!==fetch||ciFetcher!==fetch||headReader!==actualHead||
   process.env.MAB_V4D_TEST_DOUBLE_MODE==='1';
  fs.mkdirSync(dir,{recursive:false});
  const result=safeBase(headSha,injected,authorMode);
+ if(v6ThinkingStudy){
+  result.v6ThinkingStudy=true;
+  result.requestedOutputTokenLimit=requestOptions.num_predict;
+  result.thinkingObserved=false;
+  result.thinkingCharacterCount=0;
+  result.thinkingTokenBudgetVerified=false;
+ }
  try{
   // Never allow a real fetch POST when any CI, HEAD or mode dependency is
   // test-injected. In that combination the normal production gates are not attested.
@@ -276,7 +299,10 @@ export async function runV7PrivateOnce({
   save(dir,'V7_LOCAL_REQUEST_PRIVATE.json',{model,prompt:chosenPrompt,
    systemPromptSha256:hash(systemPrompt),
    headSha,contract:result.protocol,maxAttempts:1,
-   ...(civic?{ownedServiceOrigin,num_ctx:12288,num_predict:4096}:{}),
+   ...(civic?{ownedServiceOrigin,num_ctx:requestOptions.num_ctx,
+    num_predict:requestOptions.num_predict}:{}),
+   ...(v6ThinkingStudy?{v6ThinkingStudy:true,think:true,
+    tokenizerBudgetAssertion:v6ThinkingBudget}:{}),
    resourceAssertion:'PRIVATE_MONITOR_ASSERTED_NOT_PUBLICLY_ATTESTED'});
   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),timeoutMs);
   let monitorActive=true,monitorPending=false,monitorFault=false,lastBeat=Date.now();
@@ -306,9 +332,9 @@ export async function runV7PrivateOnce({
    const response=await modelFetcher(local,{
     method:'POST',redirect:'error',signal:controller.signal,
     headers:{'Content-Type':'application/json','Accept':'application/json'},
-    body:JSON.stringify({model,stream:false,think:false,keep_alive:0,
+    body:JSON.stringify({model,stream:false,think:v6ThinkingStudy,keep_alive:0,
      format:civic?V4J_PARENT_INDEX_CIVIC_SCHEMA:'json',
-     options:v7RequestOptions(authorMode),
+     options:requestOptions,
      messages:[{role:'system',content:systemPrompt},
       {role:'user',content:chosenPrompt}]})
    });
@@ -323,6 +349,15 @@ export async function runV7PrivateOnce({
    }
    if(parsedResponse?.model!==undefined&&parsedResponse.model!==model){
     result.status='HOLD_MODEL_RESPONSE';result.reason='MODEL_NAME_MISMATCH';return result;
+   }
+   // Thinking is a separate native field, never an alternate author JSON.
+   // Keep its original HTTP envelope PRIVATE; share only bounded counts.
+   // https://github.com/ollama/ollama/blob/main/docs/capabilities/thinking.mdx
+   if(v6ThinkingStudy){
+    save(dir,'V6_THINKING_HTTP_ENVELOPE_ORIGINAL_PRIVATE.json',body);
+    const thinking=parsedResponse?.message?.thinking;
+    result.thinkingObserved=typeof thinking==='string'&&thinking.length>0;
+    result.thinkingCharacterCount=typeof thinking==='string'?thinking.length:0;
    }
    // Existing injected tests use the older mock shape; real Ollama
    // must satisfy the native /api/chat completion contract.
@@ -339,6 +374,18 @@ export async function runV7PrivateOnce({
    if(typeof raw==='string'&&raw.length>0&&raw.length<=250000){
     save(dir,'V7_MODEL_RESPONSE_ORIGINAL_PRIVATE.txt',raw);
     result.responseRawSha256=hash(raw);result.rawCaptured=true;
+   }
+   if(v6ThinkingStudy){
+    const input=parsedResponse?.prompt_eval_count,output=parsedResponse?.eval_count;
+    const valid=Number.isSafeInteger(input)&&input>0&&
+     Number.isSafeInteger(output)&&output>=0&&output<=requestOptions.num_predict&&
+     input<=v6ThinkingBudget.framedInputTokens+v6ThinkingBudget.additionalFramingMargin&&
+     input+requestOptions.num_predict<=requestOptions.num_ctx;
+    result.thinkingTokenBudgetVerified=valid;
+    if(!valid){
+     result.status='HOLD_MODEL_RESPONSE';result.reason='THINKING_TOKEN_BUDGET_EVIDENCE_MISMATCH';return result;
+    }
+    result.observedPromptTokens=input;result.observedGeneratedTokens=output;
    }
    if(monitorFault||
       (injected&&choice?.finish_reason!=='stop')||

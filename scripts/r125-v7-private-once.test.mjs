@@ -3,9 +3,16 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {runV7PrivateOnce,verifyCleanHead,V7_V4H_COMPACT_SYSTEM_PROMPT,ownedV6ServiceReady} from './r125-v7-private-once.mjs';
+import {createHash} from 'node:crypto';
+import {runV7PrivateOnce,v7RequestOptions,verifyCleanHead,V7_HELD_OUT_BRIEF,V7_V4H_COMPACT_SYSTEM_PROMPT,ownedV6ServiceReady} from './r125-v7-private-once.mjs';
+import {V4J_PARENT_INDEX_SYSTEM_PROMPT,V4J_PARENT_INDEX_CIVIC_SCHEMA} from '../source/ai/r125-v4j-feasible-envelope.mjs';
 import {INTEGRATED_SEMANTIC_SCHEMA} from '../source/ai/r125-integrated-semantic-bridge.mjs';
 const sha='a'.repeat(40);
+const digest=s=>createHash('sha256').update(s).digest('hex');
+// TEST-ONLY budget assertion; genuine execution uses the pinned tokenizer.
+const thinkingBudget=()=>({publicTokenizerShaVerified:true,framedInputTokens:3000,
+ reservedOutputTokens:7168,additionalFramingMargin:256,context:12288,
+ systemPromptSha256:digest(V4J_PARENT_INDEX_SYSTEM_PROMPT),briefSha256:digest(V7_HELD_OUT_BRIEF)});
 test('public V4H token evidence reads the protected settings actually used by native requests',async()=>{
  const {publicTokenEvidence}=await import('./r125-v7-v4h-public-token-input.mjs');
  const r=publicTokenEvidence();
@@ -22,6 +29,95 @@ test('V6 dedicated service ownership rejects missing, changed or competing servi
   assert(!ownedV6ServiceReady({...valid,...patch}));
  assert(!ownedV6ServiceReady({...valid,ownedServicePid:124},valid));
  assert(!ownedV6ServiceReady(null));
+});
+
+test('explicit thinking preserves legacy budgets and rejects other-mode or malformed options before IO',async()=>{
+ assert.deepEqual(v7RequestOptions('civic-v6'),{num_ctx:12288,num_predict:4096,temperature:0.45});
+ assert.deepEqual(v7RequestOptions('civic-v6',{v6ThinkingStudy:true}),{num_ctx:12288,num_predict:7168,temperature:0.45});
+ for(const authorMode of ['integrated-semantic','v4h-mezzanine']){
+  assert.deepEqual(v7RequestOptions(authorMode),{num_ctx:2048,num_predict:1024,temperature:0.45});
+  assert.throws(()=>v7RequestOptions(authorMode,{v6ThinkingStudy:true}),/THINKING_STUDY_V6_ONLY/);
+ }
+ for(const patch of [{authorMode:'v4h-mezzanine',v6ThinkingStudy:true},
+  {authorMode:'civic-v6',v6ThinkingStudy:'true'},
+  {authorMode:'civic-v6',v6ThinkingStudy:1}]){
+  const tmp=sandbox(),calls=[];
+  try{
+   await assert.rejects(runV7PrivateOnce(params(tmp.outDir,patch),{
+    modelFetcher:fakeModel(author(),calls),ciFetcher:fakeCi(),headReader:()=>sha}),/THINKING_STUDY_V6_ONLY/);
+   assert.equal(calls.length,0);assert(!fs.existsSync(tmp.outDir));
+  }finally{fs.rmSync(tmp.root,{recursive:true,force:true});}
+ }
+});
+
+test('thinking trace stays PRIVATE and never substitutes for the final author response',async()=>{
+ const tmp=sandbox(),calls=[],sentinel='PRIVATE_THINKING_SENTINEL_DO_NOT_PUBLISH';
+ const final=JSON.stringify({schema:'invalid-author-schema',payload:'final content only'});
+ const envelope=JSON.stringify({model:'qwen3:14b',message:{thinking:sentinel,content:final},
+  prompt_eval_count:3000,eval_count:300,
+  choices:[{finish_reason:'stop',message:{content:final}}]});
+ try{
+  const r=await runV7PrivateOnce(params(tmp.outDir,{authorMode:'civic-v6',
+   ownedServiceOrigin:'http://127.0.0.1:11435',v6ThinkingStudy:true,v6ThinkingBudget:thinkingBudget()}),{
+   ciFetcher:fakeCi(),headReader:()=>sha,modelFetcher:async(url,opt)=>{
+    calls.push(opt?.method);
+    if(opt?.method==='GET')return jsonResponse({models:[{name:'qwen3:14b'}]});
+    const body=JSON.parse(opt.body);assert.equal(body.think,true);
+    assert.deepEqual(body.format,V4J_PARENT_INDEX_CIVIC_SCHEMA);
+    assert.equal(body.messages[0].content,V4J_PARENT_INDEX_SYSTEM_PROMPT);
+    assert.deepEqual(body.options,{num_ctx:12288,num_predict:7168,temperature:0.45});
+    return {ok:true,text:async()=>envelope};
+   }});
+  assert.equal(calls.filter(x=>x==='POST').length,1);
+  assert.equal(r.thinkingObserved,true);assert.equal(r.thinkingCharacterCount,sentinel.length);
+  assert.equal(r.thinkingTokenBudgetVerified,true);
+  assert.equal(r.b143Recompiled,false);assert.equal(r.worldWrites,0);
+  assert.deepEqual(r.gates,Array(9).fill('BLOCKED'));
+  assert.equal(fs.readFileSync(path.join(tmp.outDir,'V7_MODEL_RESPONSE_ORIGINAL_PRIVATE.txt'),'utf8'),final);
+  assert.equal(fs.readFileSync(path.join(tmp.outDir,'V6_THINKING_HTTP_ENVELOPE_ORIGINAL_PRIVATE.json'),'utf8'),envelope);
+  assert(!JSON.stringify(r).includes(sentinel));
+  const request=JSON.parse(fs.readFileSync(path.join(tmp.outDir,'V7_LOCAL_REQUEST_PRIVATE.json'),'utf8'));
+  assert.equal(request.think,true);assert.equal(request.num_predict,7168);
+ }finally{fs.rmSync(tmp.root,{recursive:true,force:true});}
+});
+
+test('unexpected server token accounting retains original private answer but forbids SOURCE compilation',async()=>{
+ const tmp=sandbox(),final=JSON.stringify({schema:'invalid-author-schema',payload:'unchanged final answer'});
+ try{
+  const r=await runV7PrivateOnce(params(tmp.outDir,{authorMode:'civic-v6',
+   ownedServiceOrigin:'http://127.0.0.1:11435',v6ThinkingStudy:true,v6ThinkingBudget:thinkingBudget()}),{
+    ciFetcher:fakeCi(),headReader:()=>sha,modelFetcher:async(_url,opt)=>opt?.method==='GET'?
+     jsonResponse({models:[{name:'qwen3:14b'}]}):jsonResponse({model:'qwen3:14b',
+      prompt_eval_count:5000,eval_count:300,message:{thinking:'private trace',content:final},
+      choices:[{finish_reason:'stop',message:{content:final}}]})});
+  assert.equal(r.status,'HOLD_MODEL_RESPONSE');
+  assert.equal(r.reason,'THINKING_TOKEN_BUDGET_EVIDENCE_MISMATCH');
+  assert.equal(r.thinkingTokenBudgetVerified,false);assert.equal(r.b143Recompiled,false);
+  assert.equal(r.modelGenerationAttempts,1);assert.equal(r.worldWrites,0);
+  assert.equal(fs.readFileSync(path.join(tmp.outDir,'V7_MODEL_RESPONSE_ORIGINAL_PRIVATE.txt'),'utf8'),final);
+ }finally{fs.rmSync(tmp.root,{recursive:true,force:true});}
+});
+
+test('thinking budget must fit and bind the exact system and user input before IO; CI remains mandatory',async()=>{
+ for(const patch of [null,{publicTokenizerShaVerified:false},{framedInputTokens:5000},
+  {reservedOutputTokens:4096},{briefSha256:'0'.repeat(64)},{systemPromptSha256:'0'.repeat(64)}]){
+  const tmp=sandbox(),calls=[];
+  try{
+   await assert.rejects(runV7PrivateOnce(params(tmp.outDir,{authorMode:'civic-v6',
+    ownedServiceOrigin:'http://127.0.0.1:11435',v6ThinkingStudy:true,
+    v6ThinkingBudget:patch===null?undefined:{...thinkingBudget(),...patch}}),{
+     ciFetcher:fakeCi(),headReader:()=>sha,modelFetcher:fakeModel(author(),calls)}),/THINKING_INPUT_BUDGET_UNVERIFIED/);
+   assert.equal(calls.length,0);assert(!fs.existsSync(tmp.outDir));
+  }finally{fs.rmSync(tmp.root,{recursive:true,force:true});}
+ }
+ const tmp=sandbox(),calls=[];
+ try{
+  const r=await runV7PrivateOnce(params(tmp.outDir,{authorMode:'civic-v6',
+   ownedServiceOrigin:'http://127.0.0.1:11435',v6ThinkingStudy:true,v6ThinkingBudget:thinkingBudget()}),{
+    ciFetcher:fakeCi('in_progress'),headReader:()=>sha,modelFetcher:fakeModel(author(),calls)});
+  assert.equal(r.status,'HOLD_REQUIRED_CI');assert.equal(r.modelGenerationAttempts,0);
+  assert.equal(calls.length,0);
+ }finally{fs.rmSync(tmp.root,{recursive:true,force:true});}
 });
 
 test('explicit monitored V6 preserves original contract and true compiler; never promotes injected authorship',async()=>{
