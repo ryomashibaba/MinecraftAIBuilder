@@ -254,12 +254,13 @@ async function windowsLive(expectedHead){
   }catch{
     return {status:'HOLD',reason:'GIT_PIN_UNVERIFIED',gateCP1:'HOLD'};
   }
-  const temp=fs.mkdtempSync(path.join(os.tmpdir(),'mab-gatec-bridge-live-'));
-  const nonce=randomBytes(16).toString('hex');
   let python;
   try{python=resolveDirectPythonExe();}
   catch{return {status:'HOLD',reason:'DIRECT_PYTHON_IDENTITY_UNVERIFIED',
     gateCP1:'HOLD',modelCalls:0,ollamaGetCalls:0,worldWrites:0};}
+  // Resolve before creating temp artifacts: fail closed without leftovers.
+  const temp=fs.mkdtempSync(path.join(os.tmpdir(),'mab-gatec-bridge-live-'));
+  const nonce=randomBytes(16).toString('hex');
   let mon=null,code='LIVE_SAMPLE_UNVERIFIED',seen=0,spawnError=false;
   try{
     write(temp,'session.json',{nonce});
