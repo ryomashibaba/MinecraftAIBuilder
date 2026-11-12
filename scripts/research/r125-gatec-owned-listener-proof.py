@@ -25,8 +25,8 @@ PORT=11435
 WIN=os.name=='nt'
 FLAGS=getattr(subprocess,'CREATE_NO_WINDOW',0)
 
-def receipt(ok=False,reason='NOT_RUN'):
-    return {'schema':SCHEMA,
+def receipt(ok=False,reason='NOT_RUN',diagnostic=None):
+    base={'schema':SCHEMA,
       'status':'WINDOWS_OWNED_LISTENER_AUTO_STOP_PASS_NOT_GATE_CLEARANCE' if ok else 'HOLD',
       'reason':reason,
       'ownedListenerPidVerified':ok,'listenerInKillOnCloseJobVerified':ok,
@@ -36,6 +36,9 @@ def receipt(ok=False,reason='NOT_RUN'):
       'inferenceMemoryPeakCalibrated':False,'productionThresholdCalibrated':False,
       'gateCP1':'HOLD','modelCalls':0,'ollamaGetCalls':0,
       'networkCallsExternal':0,'worldWrites':0,'privateRawIncluded':False}
+    if diagnostic is not None:
+        base['ownerMismatchDiagnostic']=diagnostic
+    return base
 
 def put(p,v):
     tmp=p.with_name(p.name+'.'+uuid.uuid4().hex+'.writing')
@@ -185,6 +188,28 @@ def descendant(folder,nonce):
     authorize(folder,nonce)
     time.sleep(70)
 
+def classify_owner_mismatch(observed,expected):
+    """No raw PID, path, identity, or private process data leaves this test."""
+    if observed==[expected]: return 'OWNER_STABLE'
+    if not observed: return 'LISTENER_NOT_OBSERVED'
+    if expected in observed: return 'UNEXPECTED_ADDITIONAL_LISTENER'
+    return 'DIFFERENT_LISTENER_OWNER'
+
+def safe_owner_mismatch(observed,expected,handles,supervisor_proc,folder,mod):
+    classification=classify_owner_mismatch(observed,expected)
+    # Hold even when an OS query may have been transient.
+    owned=bool(handles and mod.wait_process(handles[0],0)==258)
+    supervisor_alive=supervisor_proc is not None and supervisor_proc.poll() is None
+    result=read(folder/'result.json')
+    allowed={'SUPERVISOR_TIMEOUT','MONITOR_FAULT_RECEIVED',
+             'MONITOR_TERMINATED','MONITOR_STALE','MONITOR_INVALID',
+             'SUPERVISOR_SETUP_UNKNOWN','JOB_CLOSE_UNVERIFIED'}
+    reason=result.get('reason') if isinstance(result,dict) else None
+    return {'category':classification,
+            'ownedListenerAliveAtMismatch':owned,
+            'supervisorAliveAtMismatch':supervisor_alive,
+            'supervisorStopReason':reason if reason in allowed else 'NOT_AVAILABLE'}
+
 def windows_test():
     mod=owner_module()
     if port_owners(): return receipt(reason='PORT_11435_ALREADY_IN_USE')
@@ -229,9 +254,17 @@ def windows_test():
             return receipt(reason='OWNED_PROCESSES_NOT_RUNNING')
         if sibling.poll() is not None: return receipt(reason='SIBLING_NOT_RUNNING')
         stage='VERIFY_PORT_OWNERSHIP'
-        if port_owners()!=[b['pid']]: return receipt(reason='LISTENER_OWNER_MISMATCH')
+        first=port_owners()
+        if first!=[b['pid']]:
+            return receipt(reason='LISTENER_OWNER_MISMATCH',
+              diagnostic=safe_owner_mismatch(first,b['pid'],handles,
+                supervisor_proc,folder,mod))
         time.sleep(.15)
-        if port_owners()!=[b['pid']]: return receipt(reason='LISTENER_OWNER_UNSTABLE')
+        second=port_owners()
+        if second!=[b['pid']]:
+            return receipt(reason='LISTENER_OWNER_UNSTABLE',
+              diagnostic=safe_owner_mismatch(second,b['pid'],handles,
+                supervisor_proc,folder,mod))
         stage='VERIFY_INDEPENDENT_MONITOR_HEARTBEAT'
         prev=c['seq']
         advanced=until(lambda:(lambda v:v if v and v.get('nonce')==nonce
@@ -279,7 +312,11 @@ def offline_tests():
         else: raise AssertionError('INVALID_PID_LIST_ACCEPTED')
     assert receipt()['gateCP1']=='HOLD'
     assert receipt()['ownedListenerPidVerified'] is False
-    print(json.dumps({'offlineAssertions':8,'status':'PASS_OFFLINE_NOT_WINDOWS'}))
+    assert classify_owner_mismatch([123],123)=='OWNER_STABLE'
+    assert classify_owner_mismatch([],123)=='LISTENER_NOT_OBSERVED'
+    assert classify_owner_mismatch([123,456],123)=='UNEXPECTED_ADDITIONAL_LISTENER'
+    assert classify_owner_mismatch([456],123)=='DIFFERENT_LISTENER_OWNER'
+    print(json.dumps({'offlineAssertions':12,'status':'PASS_OFFLINE_NOT_WINDOWS'}))
 
 def main():
     ap=argparse.ArgumentParser()
