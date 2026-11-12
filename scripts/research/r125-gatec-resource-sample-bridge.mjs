@@ -193,6 +193,16 @@ async function offline(){
       expectedMonitorPid:pid,expectedHead:head}),
       /RESEARCH_PROBE_CONFIGURATION_INVALID/);
     checks++;
+    assert.equal(requireDirectPythonExe('C:\\Python313\\python.exe'),
+      'C:\\Python313\\python.exe');checks++;
+    assert.equal(requireDirectPythonExe('C:\\Python313\\python3.13.exe'),
+      'C:\\Python313\\python3.13.exe');checks++;
+    for(const invalid of ['py.exe','py','python.exe',
+      '.\\python.exe','\\\\host\\share\\python.exe',
+      'C:\\Windows\\py.exe','C:\\Python\\python.exe --flag']){
+      assert.throws(()=>requireDirectPythonExe(invalid),
+        /DIRECT_PYTHON_PATH_REQUIRED/);checks++;
+    }
   }finally{fs.rmSync(temp,{recursive:true,force:true});}
   return {schema:'MAB_GATEC_RESOURCE_BRIDGE_RESEARCH_V1',
     status:'PASS_OFFLINE_NOT_WINDOWS',checks,
@@ -202,6 +212,33 @@ async function offline(){
     modelCalls:0,ollamaGetCalls:0,worldWrites:0};
 }
 const pause=t=>new Promise(r=>setTimeout(r,t));
+
+/** A launcher such as py.exe owns a different PID from the Python child.
+ * PID-based monitoring must start the *interpreter itself*, never a wrapper.
+ * Reject indirect commands, network paths, aliases, and unknown executables.
+ */
+export function requireDirectPythonExe(candidate){
+  if(typeof candidate!=='string'||candidate.trim()!==candidate||
+     /[\r\n\0]/.test(candidate))
+    throw Error('DIRECT_PYTHON_PATH_REQUIRED');
+  const value=path.win32.normalize(candidate);
+  if(!/^[a-zA-Z]:\\/.test(value)||
+     !/^python(?:3(?:[0-9.]*)?)?\.exe$/i.test(path.win32.basename(value)))
+    throw Error('DIRECT_PYTHON_PATH_REQUIRED');
+  return value;
+}
+function resolveDirectPythonExe(){
+  const opts={encoding:'utf8',timeout:12000,windowsHide:true};
+  const indicated=process.env.MAB_PYTHON_EXE ||
+    execFileSync('py.exe',['-3','-c','import sys;print(sys.executable)'],opts).trim();
+  const python=requireDirectPythonExe(indicated);
+  if(!fs.statSync(python).isFile())throw Error('DIRECT_PYTHON_NOT_FILE');
+  const observed=execFileSync(python,
+    ['-c','import sys;print(sys.executable)'],opts).trim();
+  if(requireDirectPythonExe(observed).toLowerCase()!==python.toLowerCase())
+    throw Error('DIRECT_PYTHON_IDENTITY_MISMATCH');
+  return python;
+}
 async function windowsLive(expectedHead){
   if(process.platform!=='win32'||!HEAD_RE.test(expectedHead??'')){
     return {status:'HOLD',reason:'WINDOWS_AND_PINNED_HEAD_REQUIRED',gateCP1:'HOLD'};
@@ -219,12 +256,14 @@ async function windowsLive(expectedHead){
   }
   const temp=fs.mkdtempSync(path.join(os.tmpdir(),'mab-gatec-bridge-live-'));
   const nonce=randomBytes(16).toString('hex');
-  const python=process.env.MAB_PYTHON_EXE||'py.exe';
-  const prefix=process.env.MAB_PYTHON_EXE?[]:['-3'];
+  let python;
+  try{python=resolveDirectPythonExe();}
+  catch{return {status:'HOLD',reason:'DIRECT_PYTHON_IDENTITY_UNVERIFIED',
+    gateCP1:'HOLD',modelCalls:0,ollamaGetCalls:0,worldWrites:0};}
   let mon=null,code='LIVE_SAMPLE_UNVERIFIED',seen=0,spawnError=false;
   try{
     write(temp,'session.json',{nonce});
-    mon=spawn(python,[...prefix,V31,'--role','monitor',
+    mon=spawn(python,[V31,'--role','monitor',
        '--folder',temp,'--nonce',nonce],
       {env:{...process.env,MAB_V31_PROBE_NONCE:nonce},
        windowsHide:true,stdio:'ignore'});
@@ -245,6 +284,9 @@ async function windowsLive(expectedHead){
       try{entry=decode(temp,'sample.json');}catch{await pause(180);continue;}
       if(entry.seq<=previous){await pause(180);continue;}
       previous=entry.seq;
+      if(entry.nonce===nonce&&entry.pid!==mon.pid){
+        code='MONITOR_PROCESS_PID_DISAGREEMENT';break;
+      }
       const value=await probe({headSha:expectedHead,model:'qwen3:14b',
         phase:'DURING_INFERENCE'});
       if(value.reason!=='UNCALIBRATED_AND_JOB_BINDING_UNVERIFIED'){
