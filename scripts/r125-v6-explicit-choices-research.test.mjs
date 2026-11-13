@@ -211,3 +211,21 @@ test('single raw author envelope reaches second explicitly named candidate via g
  assert.deepEqual(r.BuildPlan.operations,[]);
  assert.deepEqual(r.gates,Array(9).fill('BLOCKED'));
 });
+
+test('V6 original-response prompt has ONE current root shape without accumulated legacy roots',()=>{
+ const p=V6_EXPLICIT_CHOICES_AUTHOR_SYSTEM_PROMPT;
+ assert(p.includes('EXACT top-level keys {schema,v6Author,allowedShifts,allowedCorners}'));
+ assert(p.includes('CARTESIAN AUTHOR PERMISSION'));
+ assert(p.includes('FIRST shift MUST'));
+ assert(p.includes('FIRST MUST'));
+ assert(p.includes('16 or fewer'));
+ assert(p.includes('non-default research'));
+ assert(p.includes('root north face is never a window'));
+ for(const legacy of [
+  'set rootId=spaces[0].id',
+  'V5 OUTPUT SHAPE OVERRIDES',
+  'V6 REQUIRED OUTPUT CONTRACT overrides earlier',
+  'ROOT: EXACTLY {schema,id,title,brief,materials,spaces',
+  'output entrySpace and otherSpaces INSTEAD of root spaces'
+ ])assert(!p.includes(legacy),legacy);
+});
