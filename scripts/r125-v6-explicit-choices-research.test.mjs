@@ -3,7 +3,7 @@ import {createHash} from 'node:crypto';
 import assert from 'node:assert/strict';
 import {enumerateV6ExplicitPlacementChoices,
  compileV6ExplicitPlacementResearch,V6_BOUNDED_CHOICES_SCHEMA,
- recognizedV6ResearchSourceReject,
+ recognizedV6ResearchSourceReject,v6ResearchFrozenSafetyDrift,
  V6_EXPLICIT_CHOICES_AUTHOR_JSON_SCHEMA,V6_EXPLICIT_CHOICES_AUTHOR_RESPONSE_FORMAT,
  V6_EXPLICIT_CHOICES_AUTHOR_SYSTEM_PROMPT,parseV6ExplicitChoicesOriginalRaw}
  from '../source/ai/r125-v6-explicit-choices-research.mjs';
@@ -94,6 +94,26 @@ test('unexpected R125 internal errors must not be retried as SOURCE geometry',()
   'R125_V4E_RANKED_NO_AUTHORED_EXTERIOR_OPTION_1'),true);
  assert.equal(recognizedV6ResearchSourceReject(
   'R125_V4E_MASSING_MASSING_VOID_INTERSECTS_SHARED_WALL'),true);
+ for(const unsafe of [
+  'R125_V4E_MASSING_FROZEN_SAFETY_DRIFT',
+  'R125_V4J_PUBLIC_ARCADE_FROZEN_PROTECTED_WORLD_GATES_DRIFT',
+  'R125_V4D_COMPACT_WORLD_SAFETY',
+  'R125_V4E_RANKED_WORLD_SAFETY',
+  'R125_V4D_GRAPH_B143_DRIFT'
+ ])assert.equal(recognizedV6ResearchSourceReject(unsafe),false,unsafe);
+ const safe={worldContacts:0,worldWrites:0,readiness:'NOT_PREPARED',
+  constructionApproved:false,executionAllowed:false,
+  gates:Array(9).fill('BLOCKED'),BuildPlan:{operations:[]}};
+ assert.equal(v6ResearchFrozenSafetyDrift(safe),false);
+ for(const modify of [
+  v=>{v.worldWrites=1;},v=>{v.worldContacts=1;},
+  v=>{v.readiness='READY';},v=>{v.executionAllowed=true;},
+  v=>{v.gates[0]='PASS';},v=>{v.BuildPlan.operations.push({});}
+ ]){
+  const invalid=structuredClone(safe);modify(invalid);
+  assert.equal(v6ResearchFrozenSafetyDrift(invalid),true);
+ }
+
 });
 
 test('recognized frozen SOURCE rejection advances ONLY to author-permitted next corner and true B143 passes',()=>{

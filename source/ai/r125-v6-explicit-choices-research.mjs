@@ -25,10 +25,26 @@ const corners=['NW','NE','SW','SE'];
 const uniqueOptions=(xs,predicate,max)=>Array.isArray(xs)&&xs.length>=1&&
  xs.length<=max&&xs.every(predicate)&&new Set(xs).size===xs.length;
 
-// Only known, sanitized compiler SOURCE rejection codes may advance to
-// another explicitly authored candidate. Internal exceptions must stop.
-export const recognizedV6ResearchSourceReject=message=>
- classifyPrivateCompilerRejection(message)!==UNKNOWN_COMPILER_REJECT;
+// Only these known, specifically PLACEMENT-related SOURCE refusals permit
+// another author-listed candidate. A known safety/contract/identity/QA error
+// is NOT evidence that a different arrangement may safely be tried.
+const V6_RETRYABLE_PLACEMENT_CODES=new Set([
+ 'RANKED_NO_EXTERIOR_OPTION',
+ 'MASSING_MASSING_VOID_INTERSECTS_SHARED_WALL'
+]);
+export const recognizedV6ResearchSourceReject=message=>{
+ const code=classifyPrivateCompilerRejection(message);
+ return code!==UNKNOWN_COMPILER_REJECT&&
+  V6_RETRYABLE_PLACEMENT_CODES.has(code);
+};
+// An inconsistent construction gate, world write or execution flag is a
+// safety-contract failure, never a reason to continue to another candidate.
+export const v6ResearchFrozenSafetyDrift=result=>
+ result?.worldContacts!==0||result?.worldWrites!==0||
+ result?.readiness!=='NOT_PREPARED'||
+ result?.constructionApproved!==false||result?.executionAllowed!==false||
+ result?.BuildPlan?.operations?.length!==0||
+ result?.gates?.length!==9||result.gates.some(g=>g!=='BLOCKED');
 
 // Does not compile or certify SOURCE. Caller must run the frozen compiler for
 // EACH derived candidate before treating any geometry as valid.
@@ -86,13 +102,17 @@ export function compileV6ExplicitPlacementResearch(packet){
   try{
    const originalModel=materializeV4JParentIndexAuthor(c.author);
    const result=compileCivicArcadeAuthorIntent(originalModel);
+   if(v6ResearchFrozenSafetyDrift(result))
+    return {status:'HOLD_FROZEN_SAFETY_CONTRACT_DRIFT',checked,
+     sourceVerified:false,modelAuthorshipVerified:false,
+     worldContacts:0,worldWrites:0,readiness:'NOT_PREPARED',
+     constructionApproved:false,executionAllowed:false,
+     gates:Array(9).fill('BLOCKED'),BuildPlan:{operations:[]}};
    if(result?.b143?.sourceRoutes?.status!=='SOURCE_ROUTES_REACH_ALL_ZONES'||
+    !Array.isArray(result.b143.sourceRoutes.zones)||
     result.b143.sourceRoutes.zones.some(z=>!z.reachedFromEntrance)||
-    result.b143.sourceRoutes.featureAccess.some(f=>!f.reachableFromEntrance)||
-    result.worldContacts!==0||result.worldWrites!==0||
-    result.constructionApproved!==false||result.executionAllowed!==false||
-    result.BuildPlan?.operations?.length!==0||
-    result.gates?.length!==9||result.gates.some(g=>g!=='BLOCKED'))
+    !Array.isArray(result.b143.sourceRoutes.featureAccess)||
+    result.b143.sourceRoutes.featureAccess.some(f=>!f.reachableFromEntrance))
     continue;
    return {
     status:'RESEARCH_AUTHOR_OPTIONS_SOURCE_PASS_NOT_GATE_CLEARANCE',
