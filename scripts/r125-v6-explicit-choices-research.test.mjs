@@ -1,10 +1,13 @@
 import test from 'node:test';
+import {createHash} from 'node:crypto';
 import assert from 'node:assert/strict';
 import {enumerateV6ExplicitPlacementChoices,
  compileV6ExplicitPlacementResearch,V6_BOUNDED_CHOICES_SCHEMA,
- recognizedV6ResearchSourceReject}
+ recognizedV6ResearchSourceReject,
+ V6_EXPLICIT_CHOICES_AUTHOR_JSON_SCHEMA,V6_EXPLICIT_CHOICES_AUTHOR_RESPONSE_FORMAT,
+ V6_EXPLICIT_CHOICES_AUTHOR_SYSTEM_PROMPT,parseV6ExplicitChoicesOriginalRaw}
  from '../source/ai/r125-v6-explicit-choices-research.mjs';
-import {materializeV4JParentIndexAuthor}
+import {materializeV4JParentIndexAuthor,V4J_PARENT_INDEX_CIVIC_SCHEMA}
  from '../source/ai/r125-v4j-feasible-envelope.mjs';
 import {compileCivicArcadeAuthorIntent,CIVIC_ARCADE_SCHEMA}
  from '../source/ai/r125-v4j-civic-author-ir.mjs';
@@ -150,4 +153,61 @@ test('all explicitly permitted but conflicting corners HOLD without HOST repair'
  assert.deepEqual(report.gates,Array(9).fill('BLOCKED'));
  assert.deepEqual(report.BuildPlan.operations,[]);
  assert.equal(JSON.stringify(packet),original);
+});
+
+test('nondefault single original response schema preserves whole frozen V6 schema and option bounds',()=>{
+ const s=V6_EXPLICIT_CHOICES_AUTHOR_JSON_SCHEMA;
+ assert.deepEqual(s.required,['schema','v6Author','allowedShifts','allowedCorners']);
+ assert.equal(s.additionalProperties,false);
+ assert.deepEqual(s.properties.v6Author,V4J_PARENT_INDEX_CIVIC_SCHEMA);
+ assert.equal(s.properties.allowedShifts.maxItems,4);
+ assert.equal(s.properties.allowedShifts.items.maxItems,3);
+ assert.equal(s.properties.allowedCorners.maxItems,2);
+ assert.equal(V6_EXPLICIT_CHOICES_AUTHOR_RESPONSE_FORMAT.json_schema.strict,true);
+ assert.equal(V6_EXPLICIT_CHOICES_AUTHOR_RESPONSE_FORMAT.json_schema.schema,s);
+ for(const token of ['SAME ORIGINAL RESPONSE','FIRST shift MUST','FIRST MUST',
+  '16 or fewer','non-default research'])assert(
+  V6_EXPLICIT_CHOICES_AUTHOR_SYSTEM_PROMPT.includes(token),token);
+});
+
+test('single unedited raw model-shaped JSON includes whole V6 and its alternatives without identity claim',()=>{
+ const p=validPacket(),original=p.v6Author.otherSpaces[0].attach.shift;
+ p.allowedShifts[0].push(original===3?2:original+1);
+ p.allowedCorners.push(p.allowedCorners[0]==='NE'?'NW':'NE');
+ const raw=JSON.stringify(p),snapshot=JSON.stringify(p);
+ const parsed=parseV6ExplicitChoicesOriginalRaw(raw);
+ assert.equal(parsed.originalRawSha256,
+  createHash('sha256').update(raw).digest('hex'));
+ assert.deepEqual(parsed.privatePacket,p);
+ assert.equal(parsed.explicitCandidateCount,4);
+ assert.equal(parsed.choicesPresentInSameRawJson,true);
+ assert.equal(parsed.modelAuthorshipVerified,false);
+ assert.equal(parsed.modelHttpIdentityVerified,false);
+ assert.equal(parsed.sourceVerified,false);
+ assert.equal(parsed.worldWrites,0);
+ assert.deepEqual(parsed.gates,Array(9).fill('BLOCKED'));
+ assert.equal(JSON.stringify(p),snapshot);
+ for(const bad of ['not json',JSON.stringify(p.v6Author),
+  JSON.stringify({...p,allowedCorners:['NW','NW']}),
+  JSON.stringify({...p,inventedField:true})])
+  assert.throws(()=>parseV6ExplicitChoicesOriginalRaw(bad),
+   /MAB_V6_BOUNDED_CHOICES_/);
+});
+
+test('single raw author envelope reaches second explicitly named candidate via genuine B143',()=>{
+ const p=validPacket();assert.equal(p.v6Author.massing.corner,'NE');
+ p.v6Author.massing.corner='NW';p.allowedCorners=['NW','NE'];
+ const parsed=parseV6ExplicitChoicesOriginalRaw(JSON.stringify(p));
+ assert.equal(parsed.explicitCandidateCount,2);
+ const r=compileV6ExplicitPlacementResearch(parsed.privatePacket);
+ assert.equal(r.status,'RESEARCH_AUTHOR_OPTIONS_SOURCE_PASS_NOT_GATE_CLEARANCE');
+ assert.equal(r.checked,2);assert.equal(r.selectedCorner,'NE');
+ const original=structuredClone(p.v6Author);original.massing.corner='NE';
+ const direct=compileCivicArcadeAuthorIntent(materializeV4JParentIndexAuthor(original));
+ assert.equal(r.sourceSha256,direct.b143.sourceSha256);
+ assert.equal(r.geometrySha256,direct.b143.geometrySha256);
+ assert.equal(r.modelAuthorshipVerified,false);
+ assert.equal(r.worldWrites,0);
+ assert.deepEqual(r.BuildPlan.operations,[]);
+ assert.deepEqual(r.gates,Array(9).fill('BLOCKED'));
 });
