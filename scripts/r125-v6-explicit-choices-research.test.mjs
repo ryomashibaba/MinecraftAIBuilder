@@ -92,3 +92,62 @@ test('unexpected R125 internal errors must not be retried as SOURCE geometry',()
  assert.equal(recognizedV6ResearchSourceReject(
   'R125_V4E_MASSING_MASSING_VOID_INTERSECTS_SHARED_WALL'),true);
 });
+
+test('recognized frozen SOURCE rejection advances ONLY to author-permitted next corner and true B143 passes',()=>{
+ const packet=validPacket();
+ // Synthetic housing author: first room has WEST and SOUTH child attachments.
+ // Its original NE massing corner compiles, but NW intersects the WEST wall.
+ assert.equal(packet.v6Author.otherSpaces[0].attach.side,'west');
+ assert.equal(packet.v6Author.otherSpaces[1].attach.side,'south');
+ assert.equal(packet.v6Author.massing.spaceId,packet.v6Author.entrySpace.id);
+ assert.equal(packet.v6Author.massing.corner,'NE');
+ packet.v6Author.massing.corner='NW';
+ packet.allowedCorners=['NW','NE'];
+ const immutablePacket=JSON.stringify(packet);
+ const rejected=materializeV4JParentIndexAuthor(packet.v6Author);
+ assert.throws(()=>compileCivicArcadeAuthorIntent(rejected),
+  /R125_V4E_MASSING_MASSING_VOID_INTERSECTS_SHARED_WALL/);
+ const result=compileV6ExplicitPlacementResearch(packet);
+ assert.equal(result.status,'RESEARCH_AUTHOR_OPTIONS_SOURCE_PASS_NOT_GATE_CLEARANCE');
+ assert.equal(result.checked,2);
+ assert.equal(result.selectedCorner,'NE');
+ assert.deepEqual(result.selectedShifts,packet.allowedShifts.map(v=>v[0]));
+ const permitted=structuredClone(packet.v6Author);
+ permitted.massing.corner='NE';
+ assert.deepEqual(result.privateSelectedV6,permitted);
+ const direct=compileCivicArcadeAuthorIntent(materializeV4JParentIndexAuthor(permitted));
+ assert.equal(result.sourceSha256,direct.b143.sourceSha256);
+ assert.equal(result.geometrySha256,direct.b143.geometrySha256);
+ assert.equal(result.privateCompiledResult.b143.sourceRoutes.status,
+  'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(result.modelAuthorshipVerified,false);
+ assert.equal(result.worldWrites,0);
+ assert.deepEqual(result.gates,Array(9).fill('BLOCKED'));
+ assert.deepEqual(result.BuildPlan.operations,[]);
+ assert.equal(JSON.stringify(packet),immutablePacket);
+});
+
+test('all explicitly permitted but conflicting corners HOLD without HOST repair',()=>{
+ const packet=validPacket();
+ assert.equal(packet.v6Author.massing.corner,'NE');
+ // WEST wall is used by first child; both these corners intersect it.
+ packet.v6Author.massing.corner='NW';
+ packet.allowedCorners=['NW','SW'];
+ const original=JSON.stringify(packet);
+ for(const corner of packet.allowedCorners){
+  const attempt=structuredClone(packet.v6Author);
+  attempt.massing.corner=corner;
+  assert.throws(()=>compileCivicArcadeAuthorIntent(
+   materializeV4JParentIndexAuthor(attempt)),
+   /R125_V4E_MASSING_MASSING_VOID_INTERSECTS_SHARED_WALL/);
+ }
+ const report=compileV6ExplicitPlacementResearch(packet);
+ assert.equal(report.status,'HOLD_ALL_EXPLICIT_CHOICES_SOURCE_REJECTED');
+ assert.equal(report.checked,2);
+ assert.equal(report.sourceVerified,false);
+ assert.equal(report.modelAuthorshipVerified,false);
+ assert.equal(report.worldWrites,0);
+ assert.deepEqual(report.gates,Array(9).fill('BLOCKED'));
+ assert.deepEqual(report.BuildPlan.operations,[]);
+ assert.equal(JSON.stringify(packet),original);
+});
