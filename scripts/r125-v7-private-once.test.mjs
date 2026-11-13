@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
-import {runV7PrivateOnce,v7RequestOptions,verifyCleanHead,V7_HELD_OUT_BRIEF,V7_V4H_COMPACT_SYSTEM_PROMPT,ownedV6ServiceReady} from './r125-v7-private-once.mjs';
+import {runV7PrivateOnce,v7RequestOptions,verifyCleanHead,V7_HELD_OUT_BRIEF,V7_V4H_COMPACT_SYSTEM_PROMPT,ownedV6ServiceReady,ownedStopNeededAfterProbe} from './r125-v7-private-once.mjs';
 import {V4J_PARENT_INDEX_SYSTEM_PROMPT,V4J_PARENT_INDEX_CIVIC_SCHEMA} from '../source/ai/r125-v4j-feasible-envelope.mjs';
 import {INTEGRATED_SEMANTIC_SCHEMA} from '../source/ai/r125-integrated-semantic-bridge.mjs';
 const sha='a'.repeat(40);
@@ -31,6 +31,15 @@ test('V6 dedicated service ownership rejects missing, changed or competing servi
  assert(!ownedV6ServiceReady(null));
 });
 
+test('V6 owned-stop required after failed or uncertain Ollama unload probe, even with native completion',()=>{
+ assert.equal(ownedStopNeededAfterProbe(true,1,false),true);
+ assert.equal(ownedStopNeededAfterProbe(true,1,null),true);
+ assert.equal(ownedStopNeededAfterProbe(true,1,undefined),true);
+ assert.equal(ownedStopNeededAfterProbe(true,1,true),false);
+ assert.equal(ownedStopNeededAfterProbe(true,0,false),false);
+ assert.equal(ownedStopNeededAfterProbe(false,1,false),false);
+ assert.equal(ownedStopNeededAfterProbe(true,2,false),false);
+});
 test('explicit thinking preserves legacy budgets and rejects other-mode or malformed options before IO',async()=>{
  assert.deepEqual(v7RequestOptions('civic-v6'),{num_ctx:12288,num_predict:4096,temperature:0.45});
  assert.deepEqual(v7RequestOptions('civic-v6',{v6ThinkingStudy:true}),{num_ctx:12288,num_predict:7168,temperature:0.45});

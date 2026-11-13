@@ -75,6 +75,10 @@ const independentMonitorReady=(x,now=Date.now())=>
  typeof x.monitorId==='string' && /^[a-z0-9-]{8,80}$/i.test(x.monitorId) &&
  Number.isSafeInteger(x.monitorHeartbeatEpochMs) &&
  x.monitorHeartbeatEpochMs<=now && now-x.monitorHeartbeatEpochMs<=3000;
+// Even a completed Ollama response is unsafe if the server unload probe fails.
+ // A HOLD classification alone is not a request to terminate the owned service.
+export const ownedStopNeededAfterProbe=(dedicatedV6,attempts,unloadConfirmed)=>
+ dedicatedV6===true&&attempts===1&&unloadConfirmed!==true;
 export const ownedV6ServiceReady=(x,previous=x)=>
  x?.ownedServicePort===11435&&Number.isSafeInteger(x.ownedServicePid)&&
  x.ownedServicePid>0&&x.ownedServicePid===previous?.ownedServicePid&&
@@ -427,14 +431,6 @@ export async function runV7PrivateOnce({
    clearTimeout(timer);clearInterval(pulse);monitorActive=false;
    if(civic&&(!completionResponseObserved||controller.signal.aborted||monitorFault))
     requestOwnedStop('MODEL_STOP_UNCONFIRMED');
-   if(ownerStopTask){
-    // Bound callback acknowledgement wait; real stop safety is independent
-    // supervisor responsibility, not a client-side boolean.
-    result.ownedStopRequestAcceptedByCallback=await new Promise(resolve=>{
-     const limit=setTimeout(()=>resolve(false),3000);
-     ownerStopTask.then(ok=>{clearTimeout(limit);resolve(ok);});
-    });
-   }
    // GET-only verification, never a second cleanup POST or model retry.
    if(!injected&&result.modelGenerationAttempts>0){
     try{
@@ -455,6 +451,18 @@ export async function runV7PrivateOnce({
       result.reason='SERVER_COMPLETION_OR_UNLOAD_NOT_CONFIRMED';
      }
     }
+   }
+   // A completed response does NOT prove unload. If /api/ps fails or still
+   // reports the model present, request an owned service stop exactly once.
+   // Never make this decision from the callback's self-reported acceptance.
+   if(!injected&&ownedStopNeededAfterProbe(civic,result.modelGenerationAttempts,
+      result.unloadConfirmed))requestOwnedStop('SERVER_UNLOAD_UNVERIFIED');
+   if(ownerStopTask){
+    // Bound wait only for callback acceptance; it is NOT Windows Job proof.
+    result.ownedStopRequestAcceptedByCallback=await new Promise(resolve=>{
+     const limit=setTimeout(()=>resolve(false),3000);
+     ownerStopTask.then(ok=>{clearTimeout(limit);resolve(ok);});
+    });
    }
   }
   if(monitorFault){
