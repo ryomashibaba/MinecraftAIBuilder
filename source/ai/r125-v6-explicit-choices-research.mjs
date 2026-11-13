@@ -43,8 +43,11 @@ export const v6ResearchFrozenSafetyDrift=result=>
  result?.worldContacts!==0||result?.worldWrites!==0||
  result?.readiness!=='NOT_PREPARED'||
  result?.constructionApproved!==false||result?.executionAllowed!==false||
- result?.BuildPlan?.operations?.length!==0||
- result?.gates?.length!==9||result.gates.some(g=>g!=='BLOCKED');
+ !Array.isArray(result?.BuildPlan?.operations)||
+ result.BuildPlan.operations.length!==0||
+ !Array.isArray(result?.gates)||
+ result.gates.length!==9||
+ Array.from({length:9},(_,i)=>result.gates[i]).some(g=>g!=='BLOCKED');
 
 // Does not compile or certify SOURCE. Caller must run the frozen compiler for
 // EACH derived candidate before treating any geometry as valid.
@@ -95,7 +98,10 @@ export function compileV6ExplicitPlacementResearch(packet){
  // An original invalid V6 response must never be silently normalized.
  try{materializeV4JParentIndexAuthor(packet.v6Author);}
  catch{return {status:'HOLD_INVALID_ORIGINAL_V6',checked:0,
-   sourceVerified:false,modelAuthorshipVerified:false};}
+   sourceVerified:false,modelAuthorshipVerified:false,
+   worldContacts:0,worldWrites:0,readiness:'NOT_PREPARED',
+   constructionApproved:false,executionAllowed:false,
+   gates:Array(9).fill('BLOCKED'),BuildPlan:{operations:[]}};}
  let checked=0;
  for(const c of candidates){
   checked++;

@@ -116,6 +116,31 @@ test('unexpected R125 internal errors must not be retried as SOURCE geometry',()
 
 });
 
+test('sparse gates, spoofed arrays and invalid original V6 fail closed',()=>{
+ const safe={worldContacts:0,worldWrites:0,readiness:'NOT_PREPARED',
+  constructionApproved:false,executionAllowed:false,
+  gates:Array(9).fill('BLOCKED'),BuildPlan:{operations:[]}};
+ for(const corrupt of [
+  v=>{v.gates=Array(9);},
+  v=>{delete v.gates[2];},
+  v=>{v.gates={length:9,some:()=>false};},
+  v=>{v.BuildPlan.operations={length:0};}
+ ]){
+  const example=structuredClone(safe);
+  corrupt(example);
+  assert.equal(v6ResearchFrozenSafetyDrift(example),true);
+ }
+ const p=validPacket();
+ p.v6Author.otherSpaces[0].attach.parentIndex=999;
+ const result=compileV6ExplicitPlacementResearch(p);
+ assert.equal(result.status,'HOLD_INVALID_ORIGINAL_V6');
+ assert.equal(result.checked,0);
+ assert.equal(result.worldWrites,0);
+ assert.equal(result.constructionApproved,false);
+ assert.deepEqual(result.gates,Array(9).fill('BLOCKED'));
+ assert.deepEqual(result.BuildPlan.operations,[]);
+});
+
 test('recognized frozen SOURCE rejection advances ONLY to author-permitted next corner and true B143 passes',()=>{
  const packet=validPacket();
  // Synthetic housing author: first room has WEST and SOUTH child attachments.
