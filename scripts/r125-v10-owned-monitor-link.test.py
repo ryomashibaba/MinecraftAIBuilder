@@ -28,13 +28,14 @@ SAFE={'OWNER_MODULE_UNAVAILABLE','WORKER_DESCENDANTS_NOT_OBSERVED',
       'V7_BRIDGE_OWNED_TREE_NOT_STOPPED','V7_BRIDGE_SIBLING_STOPPED',
       'V7_BRIDGE_RUNNER_RESULT_UNVERIFIED','V7_BRIDGE_RUNNER_FAILED',
       'V7_BRIDGE_WORKER_STILL_ALIVE'}
-def receipt(status='HOLD',reason='NOT_RUN',phase='INIT',trip=False,death=False,v7=False):
+def receipt(status='HOLD',reason='NOT_RUN',phase='INIT',trip=False,death=False,v7=False,driver=False):
     passed=status=='WINDOWS_JOB_MONITOR_LINK_PASS_NOT_MODEL_CLEARANCE'
     return {'schema':SCHEMA,'status':status,'reason':reason,
             'failurePhase':phase if not passed else 'NONE',
             'injectedMonitorTripStopsOwnedTree':trip,
             'monitorDeathStopsOwnedTree':death,
             'injectedV7StopCallbackClosesOwnedJob':v7,
+            'independentV7DriverExitClosesOwnedJob':driver,
             'realWindowsJobCombinedWithSeparateMonitor':passed,
             'unrelatedSiblingPreserved':passed,
             'realResourceSensorVerifiedByThisTest':False,
@@ -348,29 +349,180 @@ def v7_callback_mode(mod, root, stage):
                     p.kill();p.wait(timeout=5)
         for h in handles:mod.close_handle(h)
 
+
+# Separate OS watchdog for a TEST-OWNED worker. Unlike the synthetic V7 stop
+# callback case, the actual V7 Node process is forcibly killed mid fake POST.
+# This owner is a separate Python process holding the Job handle and observing
+# a pinned Node process handle; the test coordinator never closes that Job.
+def v7_watchdog_owner(folder,nonce):
+    mod=owner_module()
+    job=None
+    handle=None
+    closed=False
+    reason='WATCHDOG_UNINITIALIZED'
+    worker_pid=None
+    try:
+        job=mod.OwnedProcessTree()
+        job.start(str(Path(sys.executable).resolve()),
+                  [str(Path(__file__).resolve()),'--worker',str(folder)])
+        w=until(lambda:read_json(folder/'worker-pids.json'),8)
+        if not w or not isinstance(w.get('pids'),list) or len(w['pids'])!=2:
+            reason='WATCHDOG_WORKER_NOT_READY'
+            return
+        worker_pid=w['pids'][0]
+        atomic_json(folder/'watchdog-ready.json',
+                    {'nonce':nonce,'ownedPid':worker_pid})
+        driver=until(lambda:read_json(folder/'driver-identity.json'),10)
+        if not driver or driver.get('nonce')!=nonce or \
+           type(driver.get('pid')) is not int or driver['pid']<=0:
+            reason='WATCHDOG_DRIVER_IDENTITY_HOLD'
+            return
+        handle=mod.checked(mod.open_process(0x00100000,False,driver['pid']))
+        if mod.wait_process(handle,0)!=258:
+            reason='WATCHDOG_DRIVER_ALREADY_EXITED'
+            return
+        atomic_json(folder/'watchdog-armed.json',
+                    {'nonce':nonce,'pid':driver['pid'],'ownedPid':worker_pid})
+        if until(lambda:mod.wait_process(handle,0)==0,12):
+            reason='V7_DRIVER_EXITED_AUTONOMOUS_STOP'
+        else:
+            reason='WATCHDOG_DRIVER_TIMEOUT_HOLD'
+    except Exception:
+        reason='WATCHDOG_EXECUTION_HOLD'
+    finally:
+        if job is not None:
+            try:
+                job.close()
+                closed=True
+            except (RuntimeError,OSError):
+                reason='WATCHDOG_JOB_CLOSE_UNKNOWN'
+        if handle is not None:
+            mod.close_handle(handle)
+        atomic_json(folder/'watchdog-result.json',
+                    {'nonce':nonce,'reason':reason,
+                     'closedBySeparateSupervisor':closed,
+                     'ownedPid':worker_pid})
+
+def v7_driver_death_mode(mod,root,stage):
+    folder=root/'v7-driver-death'
+    folder.mkdir()
+    nonce=uuid.uuid4().hex
+    sha='a'*40  # Fake head and CI: injected transport only, NEVER real model.
+    owner=monitor_proc=sibling=node_proc=None
+    handles=[]
+    try:
+        stage[0]='V7_DEATH:START_INDEPENDENT_WATCHDOG'
+        env=dict(os.environ,MAB_V10_BRIDGE_NONCE=nonce)
+        owner=subprocess.Popen([sys.executable,str(Path(__file__).resolve()),
+              '--watchdog-owner',str(folder),nonce],
+              env=env,stdin=subprocess.DEVNULL,stdout=subprocess.DEVNULL,
+              stderr=subprocess.DEVNULL,creationflags=FLAGS)
+        w=until(lambda:read_json(folder/'watchdog-ready.json'),10)
+        check(w and w.get('nonce')==nonce and
+              type(w.get('ownedPid')) is int and w['ownedPid']>0,
+              'V7_WATCHDOG_OWNER_NOT_READY')
+        pids=read_json(folder/'worker-pids.json')
+        check(pids and isinstance(pids.get('pids'),list)
+              and len(pids['pids'])==2 and pids['pids'][0]==w['ownedPid'],
+              'V7_WATCHDOG_WORKER_MISSING')
+        for pid in pids['pids']:
+            handles.append(mod.checked(mod.open_process(0x00100000,False,pid)))
+        check(all(mod.wait_process(h,0)==258 for h in handles),
+              'V7_WATCHDOG_WORKER_DIED_EARLY')
+        sibling=subprocess.Popen([sys.executable,'-c',
+                                  'import time;time.sleep(85)'],
+                                  creationflags=FLAGS)
+        stage[0]='V7_DEATH:LAUNCH_RESOURCE_MONITOR'
+        monitor_proc=subprocess.Popen([str(Path(sys.executable).resolve()),
+              str(Path(__file__).resolve()),'--monitor',str(folder),nonce],
+              stdin=subprocess.DEVNULL,stdout=subprocess.DEVNULL,
+              stderr=subprocess.DEVNULL,creationflags=FLAGS)
+        check(until(lambda:(lambda m:m if m and
+              m.get('nonce')==nonce and m.get('pid')==monitor_proc.pid
+              and m.get('state')=='ALIVE' else None)(
+              read_json(folder/'monitor.json')),6),
+              'V7_WATCHDOG_MONITOR_MISSING')
+        stage[0]='V7_DEATH:LAUNCH_REAL_V7_RUNNER_FAKE_TRANSPORT'
+        node=shutil.which('node.exe')
+        check(node is not None,'V7_WATCHDOG_NODE_MISSING')
+        node_env=dict(env,MAB_V10_BRIDGE_FOLDER=str(folder),
+              MAB_V10_BRIDGE_HEAD=sha,
+              MAB_V10_BRIDGE_WORKER_PID=str(w['ownedPid']),
+              MAB_V10_BRIDGE_MONITOR_PID=str(monitor_proc.pid),
+              MAB_V10_V7_RUNNER=str(Path(__file__).resolve().with_name(
+                                    'r125-v7-private-once.mjs')))
+        node_proc=subprocess.Popen([node,'--input-type=module','--eval',
+              V7_BRIDGE_JS],env=node_env,
+              stdin=subprocess.DEVNULL,stdout=subprocess.DEVNULL,
+              stderr=subprocess.DEVNULL,creationflags=FLAGS)
+        atomic_json(folder/'driver-identity.json',
+              {'nonce':nonce,'pid':node_proc.pid})
+        stage[0]='V7_DEATH:WATCHDOG_ARM'
+        armed=until(lambda:read_json(folder/'watchdog-armed.json'),7)
+        check(armed and armed.get('nonce')==nonce and
+              armed.get('pid')==node_proc.pid and
+              armed.get('ownedPid')==w['ownedPid'],
+              'V7_WATCHDOG_DRIVER_NOT_ARMED')
+        stage[0]='V7_DEATH:VERIFY_FAKE_POST_PENDING'
+        ready=until(lambda:read_json(folder/'v7-post-ready.json'),8)
+        check(ready and ready.get('nonce')==nonce and ready.get('posts')==1
+              and node_proc.poll() is None,
+              'V7_WATCHDOG_POST_NOT_STARTED')
+        stage[0]='V7_DEATH:INJECT_NODE_PROCESS_DEATH'
+        node_proc.kill()
+        node_proc.wait(timeout=5)
+        stage[0]='V7_DEATH:INDEPENDENT_JOB_CLOSE'
+        receipt_=until(lambda:read_json(folder/'watchdog-result.json'),8)
+        check(receipt_ and receipt_.get('nonce')==nonce and
+              receipt_.get('reason')=='V7_DRIVER_EXITED_AUTONOMOUS_STOP' and
+              receipt_.get('closedBySeparateSupervisor') is True and
+              receipt_.get('ownedPid')==w['ownedPid'],
+              'V7_WATCHDOG_OWNER_CLOSE_UNVERIFIED')
+        check(owner.wait(timeout=5)==0,'V7_WATCHDOG_OWNER_EXIT_UNVERIFIED')
+        check(all(mod.wait_process(h,5000)==0 for h in handles),
+              'V7_WATCHDOG_OWNED_TREE_NOT_STOPPED')
+        check(sibling.poll() is None and monitor_proc.poll() is None,
+              'V7_WATCHDOG_OUTSIDE_PROCESSES_NOT_PRESERVED')
+        return True
+    finally:
+        for proc in (node_proc,owner,monitor_proc,sibling):
+            if proc and proc.poll() is None:
+                proc.terminate()
+                try:proc.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    proc.kill()
+                    proc.wait(timeout=5)
+        for handle in handles:mod.close_handle(handle)
+
 def main():
     if len(sys.argv)==3 and sys.argv[1]=='--worker':
         worker(Path(sys.argv[2])); return 0
     if len(sys.argv)==4 and sys.argv[1]=='--monitor' and len(sys.argv[3])==32:
         monitor(Path(sys.argv[2]),sys.argv[3]); return 0
+    if len(sys.argv)==4 and sys.argv[1]=='--watchdog-owner':
+        if os.name!='nt' or os.environ.get('MAB_V10_BRIDGE_NONCE')!=sys.argv[3]:
+            return 2
+        v7_watchdog_owner(Path(sys.argv[2]),sys.argv[3])
+        return 0
     if sys.argv[1:]!=['--selftest']:
         print(json.dumps(receipt(reason='SELFTEST_ONLY'))); return 2
     if os.name!='nt':
         print(json.dumps(receipt(reason='WINDOWS_REQUIRED'))); return 2
     stage=['OWNER_IMPORT']
-    trip=death=v7=False
+    trip=death=v7=driver=False
     root=Path(tempfile.mkdtemp(prefix='mab-v10-job-monitor-'))
     try:
         mod=owner_module()
         trip=test_mode(mod,root,'injected-trip',stage)
         death=test_mode(mod,root,'monitor-death',stage)
         v7=v7_callback_mode(mod,root,stage)
+        driver=v7_driver_death_mode(mod,root,stage)
         print(json.dumps(receipt('WINDOWS_JOB_MONITOR_LINK_PASS_NOT_MODEL_CLEARANCE',
-                                 'DUMMY_INTEGRATION_ONLY','DONE',trip,death,v7)))
+                                 'DUMMY_INTEGRATION_ONLY','DONE',trip,death,v7,driver)))
         return 0
     except Exception as e:
         reason=str(e) if isinstance(e,RuntimeError) and str(e) in SAFE else 'WINDOWS_TEST_EXCEPTION'
-        print(json.dumps(receipt('HOLD',reason,stage[0],trip,death,v7)))
+        print(json.dumps(receipt('HOLD',reason,stage[0],trip,death,v7,driver)))
         return 2
     finally:
         shutil.rmtree(root,ignore_errors=True)
