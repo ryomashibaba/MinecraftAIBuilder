@@ -64,6 +64,12 @@ on:
       # replay/contrast path changes, not just when the online author changes.
       - 'scripts/research/r125-v6-offline-ranked-contrast.mjs'
       - 'scripts/research/r125-v6-offline-ranked-contrast.test.mjs'
+      # The exact-HEAD safety CI must also cover the independent monitor,
+      # OS-owned synthetic listener, and held resource callback under study.
+      - 'scripts/research/r125-gatec-v3-1-stale-only.py'
+      - 'scripts/research/r125-gatec-owned-listener-proof.py'
+      - 'scripts/research/r125-gatec-resource-sample-bridge.mjs'
+      - 'scripts/research/r125-gatec-owned-sensor-bridge-e2e.py'
       - 'scripts/r125-v4d-compiler-reject-codes.mjs'
       - 'scripts/r125-v4d-compiler-reject-codes.test.mjs'
       - 'scripts/r125-v4d-author-source-diagnostics.mjs'
@@ -125,6 +131,13 @@ jobs:
           node --check scripts/r125-v4d-shareable-receipt.mjs
           node --check scripts/r125-v4d-relative-author-synthetic.mjs
           node --check scripts/r125-v4d-local-architect.test.mjs
+      - name: Gate C research monitor bridge contract (OFFLINE, NO MODEL)
+        run: |
+          node --check scripts/research/r125-gatec-resource-sample-bridge.mjs
+          node scripts/research/r125-gatec-resource-sample-bridge.mjs --offline-tests
+          python3 scripts/research/r125-gatec-v3-1-stale-only.py --offline-tests
+          python3 scripts/research/r125-gatec-owned-listener-proof.py --offline-tests
+          python3 scripts/research/r125-gatec-owned-sensor-bridge-e2e.py --offline-tests
       - name: Prove fail-closed synthetic authorship and actual B143 conversion through injected offline transport
         run: |
           node --test scripts/r125-v4d-short-semantic.test.mjs
