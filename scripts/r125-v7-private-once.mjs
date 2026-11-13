@@ -138,6 +138,7 @@ const safeBase=(headSha,injected,mode)=>({
  b143Recompiled:false,clientAbortSignaled:false,ollamaCompletionObserved:false,
  ollamaModelAbsentAtProbe:false,serverStopEvidence:'UNKNOWN',
  unloadConfirmed:false,activeMonitorSamples:0,
+ ownedStopRequestDispatched:false,ownedStopRequestAcceptedByCallback:false,
  semanticFulfillment:'NOT_CERTIFIED',
  physicalAccess:'NOT_CERTIFIED',art:'NOT_REVIEWED',minecraftWalking:'NOT_TESTED',
  worldContacts:0,worldWrites:0,readiness:'NOT_PREPARED',
@@ -147,7 +148,7 @@ const safeBase=(headSha,injected,mode)=>({
 export async function runV7PrivateOnce({
  model,outDir,headSha,prompt,authorMode='integrated-semantic',
  ownedServiceOrigin,v6ThinkingStudy=false,v6ThinkingBudget,
- deriveIntegratedShell,checkResourceSafety
+ deriveIntegratedShell,checkResourceSafety,stopOwnedService
 }={},{
  modelFetcher=fetch,ciFetcher=fetch,headReader=actualHead,timeoutMs=120000
 }={}){
@@ -212,6 +213,13 @@ export async function runV7PrivateOnce({
   catch{result.status='HOLD_CI_UNKNOWN';result.reason='CI_UNVERIFIED';return result;}
   if(!ci.safeToRunModel){
    result.status='HOLD_REQUIRED_CI';result.reason='BOTH_EXACT_HEAD_CI_NOT_SUCCESS';return result;
+  }
+  // Production V6 must bind a PRIVATE owner-stop request before any Ollama GET/POST.
+  // This callable is not itself OS ownership proof: the independent supervisor
+  // must still own and watchdog the actual dedicated process Job.
+  if(civic&&!injected&&typeof stopOwnedService!=='function'){
+   result.status='HOLD_OWNED_SERVICE';
+   result.reason='DEDICATED_OWNER_STOP_HANDLER_NOT_BOUND';return result;
   }
   if((!civic&&typeof deriveIntegratedShell!=='function')||
    typeof checkResourceSafety!=='function'){
@@ -304,10 +312,26 @@ export async function runV7PrivateOnce({
    ...(v6ThinkingStudy?{v6ThinkingStudy:true,think:true,
     tokenizerBudgetAssertion:v6ThinkingBudget}:{}),
    resourceAssertion:'PRIVATE_MONITOR_ASSERTED_NOT_PUBLICLY_ATTESTED'});
-  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),timeoutMs);
+  const controller=new AbortController();
   let monitorActive=true,monitorPending=false,monitorFault=false,lastBeat=Date.now();
-  let monitorPrevious=resource;
-  const fault=()=>{if(monitorActive){monitorFault=true;controller.abort();}};
+  let monitorPrevious=resource,ownerStopTask=null;
+  // Client HTTP abort alone cannot stop Ollama inference. Ask the PRIVATE
+  // supervisor to close its own Job once; never touch a shared/unowned PID.
+  // An acknowledgement is not proof that the OS Job really terminated.
+  const requestOwnedStop=reason=>{
+   if(!civic||typeof stopOwnedService!=='function'||ownerStopTask)return;
+   result.ownedStopRequestDispatched=true;
+   ownerStopTask=Promise.resolve().then(()=>stopOwnedService({
+    headSha,reason,expectedPort:11435,
+    expectedPid:resourceBeforeListing?.ownedServicePid
+   })).then(v=>v?.accepted===true).catch(()=>false);
+  };
+  const timer=setTimeout(()=>{
+   controller.abort();requestOwnedStop('MODEL_REQUEST_TIMEOUT');
+  },timeoutMs);
+  const fault=()=>{if(monitorActive){
+   monitorFault=true;controller.abort();requestOwnedStop('RESOURCE_MONITOR_HOLD');
+  }};
   const pulse=setInterval(()=>{
    if(!monitorActive)return;
    if(Date.now()-lastBeat>5000){fault();return;}
@@ -401,6 +425,16 @@ export async function runV7PrivateOnce({
   }finally{
    result.clientAbortSignaled=controller.signal.aborted;
    clearTimeout(timer);clearInterval(pulse);monitorActive=false;
+   if(civic&&(!completionResponseObserved||controller.signal.aborted||monitorFault))
+    requestOwnedStop('MODEL_STOP_UNCONFIRMED');
+   if(ownerStopTask){
+    // Bound callback acknowledgement wait; real stop safety is independent
+    // supervisor responsibility, not a client-side boolean.
+    result.ownedStopRequestAcceptedByCallback=await new Promise(resolve=>{
+     const limit=setTimeout(()=>resolve(false),3000);
+     ownerStopTask.then(ok=>{clearTimeout(limit);resolve(ok);});
+    });
+   }
    // GET-only verification, never a second cleanup POST or model retry.
    if(!injected&&result.modelGenerationAttempts>0){
     try{
@@ -415,8 +449,11 @@ export async function runV7PrivateOnce({
      Object.assign(result,evidence);
      if(!result.unloadConfirmed)throw Error('SERVER_COMPLETION_AND_UNLOAD_NOT_CONFIRMED');
     }catch{
-     result.status='HOLD_UNLOAD_UNKNOWN';
-     result.reason='SERVER_COMPLETION_OR_UNLOAD_NOT_CONFIRMED';
+     // Do not hide the more specific monitor-stop failure with a GET error.
+     if(!monitorFault){
+      result.status='HOLD_UNLOAD_UNKNOWN';
+      result.reason='SERVER_COMPLETION_OR_UNLOAD_NOT_CONFIRMED';
+     }
     }
    }
   }

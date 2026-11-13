@@ -370,6 +370,10 @@ test('monitor failure during injected POST aborts, never retries and keeps B143/
  {timeout:12000},async()=>{
  const tmp=sandbox(),calls=[];
  let preflightSamples=0,duringSamples=0,abortAcknowledged=false;
+ const ownerStopRequests=[];
+ const stopOwnedService=async req=>{
+  ownerStopRequests.push(req);return {accepted:true};
+ };
  const monitor=async({phase}={})=>{
   if(phase==='DURING_INFERENCE'){
    duringSamples++;
@@ -390,11 +394,17 @@ test('monitor failure during injected POST aborts, never retries and keeps B143/
  };
  try{
   const report=await runV7PrivateOnce(params(tmp.outDir,{
-   authorMode:'v4h-mezzanine',checkResourceSafety:monitor
+   authorMode:'civic-v6',ownedServiceOrigin:'http://127.0.0.1:11435',
+   checkResourceSafety:monitor,stopOwnedService
   }),{ciFetcher:fakeCi(),modelFetcher:transport,headReader:()=>sha,timeoutMs:10000});
   assert.equal(preflightSamples,2);
   assert(duringSamples>=1);
   assert.equal(abortAcknowledged,true);
+  assert.equal(ownerStopRequests.length,1);
+  assert.equal(ownerStopRequests[0].reason,'RESOURCE_MONITOR_HOLD');
+  assert.equal(ownerStopRequests[0].expectedPort,11435);
+  assert.equal(report.ownedStopRequestDispatched,true);
+  assert.equal(report.ownedStopRequestAcceptedByCallback,true);
   assert.equal(report.status,'HOLD_MONITOR_INTERRUPTED');
   assert.equal(report.reason,'MONITOR_ABORTED_GENERATION');
   assert.equal(report.clientAbortSignaled,true);
