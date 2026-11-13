@@ -21,13 +21,20 @@ SAFE={'OWNER_MODULE_UNAVAILABLE','WORKER_DESCENDANTS_NOT_OBSERVED',
       'OWNED_WORKER_NOT_RUNNING','MONITOR_NOT_OBSERVED',
       'MONITOR_NOT_ADVANCING','WORKER_NOT_ADVANCING',
       'MONITOR_FAULT_NOT_DETECTED','OWNED_TREE_NOT_STOPPED',
-      'OUTSIDE_JOB_SIBLING_STOPPED'}
-def receipt(status='HOLD',reason='NOT_RUN',phase='INIT',trip=False,death=False):
+      'OUTSIDE_JOB_SIBLING_STOPPED',
+      'V7_BRIDGE_NODE_UNAVAILABLE','V7_BRIDGE_OWNED_WORKER_MISSING',
+      'V7_BRIDGE_POST_NOT_STARTED','V7_BRIDGE_STOP_NOT_DELIVERED',
+      'V7_BRIDGE_STOP_IDENTITY_INVALID','V7_BRIDGE_MONITOR_TRIP_MISSING',
+      'V7_BRIDGE_OWNED_TREE_NOT_STOPPED','V7_BRIDGE_SIBLING_STOPPED',
+      'V7_BRIDGE_RUNNER_RESULT_UNVERIFIED','V7_BRIDGE_RUNNER_FAILED',
+      'V7_BRIDGE_WORKER_STILL_ALIVE'}
+def receipt(status='HOLD',reason='NOT_RUN',phase='INIT',trip=False,death=False,v7=False):
     passed=status=='WINDOWS_JOB_MONITOR_LINK_PASS_NOT_MODEL_CLEARANCE'
     return {'schema':SCHEMA,'status':status,'reason':reason,
             'failurePhase':phase if not passed else 'NONE',
             'injectedMonitorTripStopsOwnedTree':trip,
             'monitorDeathStopsOwnedTree':death,
+            'injectedV7StopCallbackClosesOwnedJob':v7,
             'realWindowsJobCombinedWithSeparateMonitor':passed,
             'unrelatedSiblingPreserved':passed,
             'realResourceSensorVerifiedByThisTest':False,
@@ -168,6 +175,179 @@ def test_mode(mod,root,mode,stage):
             sibling.terminate()
             sibling.wait(timeout=5)
         for h in handles: mod.close_handle(h)
+
+# Research-only integrated contract. A REAL Windows Job contains a dummy
+# Python worker. The production V7 JavaScript runner sees only injected
+# CI/transport/resource values. No native model, Ollama, HTTP or world writes.
+# Proves a V7 stopOwnedService request can reach the Python-owned Job; does
+# NOT prove ownership of a genuine Ollama service or independent OS watchdog.
+V7_BRIDGE_JS = r'''
+import fs from 'node:fs';
+import path from 'node:path';
+import {pathToFileURL} from 'node:url';
+
+const env=process.env, folder=env.MAB_V10_BRIDGE_FOLDER;
+const nonce=env.MAB_V10_BRIDGE_NONCE;
+const sha=env.MAB_V10_BRIDGE_HEAD;
+const workerPid=Number(env.MAB_V10_BRIDGE_WORKER_PID);
+const {runV7PrivateOnce}=await import(pathToFileURL(env.MAB_V10_V7_RUNNER).href);
+const atomic=(name,value)=>fs.writeFileSync(path.join(folder,name),
+  JSON.stringify(value),{flag:'wx'});
+const response=data=>({ok:true,text:async()=>JSON.stringify(data)});
+const checks=['R125 V4D Local Author Bridge — INJECTED TEST ONLY',
+  'Education-first offline QA'];
+const ciFetcher=async()=>({ok:true,json:async()=>({total_count:2,
+  workflow_runs:checks.map((name,i)=>({name,id:i+1,head_sha:sha,
+    status:'completed',conclusion:'success',event:'push',
+    path:i===0?'.github/workflows/r125-v4d-local-author-bridge.yml':
+      '.github/workflows/qa.yml'}))})});
+let posts=0,stopCalls=0;
+const resources=async({phase}={})=>{
+  let m;
+  try{m=JSON.parse(fs.readFileSync(path.join(folder,'monitor.json'),'utf8'));}
+  catch{return {status:'HOLD_MONITOR_READ_FAILED'};}
+  if(m.pid!==Number(env.MAB_V10_BRIDGE_MONITOR_PID)||
+     m.nonce!==nonce||m.state!=='ALIVE')
+    return {status:'HOLD_MONITOR_TRIPPED',measuredAtEpochMs:Date.now()};
+  return {status:'SAFE_FOR_ONE_REQUEST',measuredAtEpochMs:Date.now(),
+    ownedServicePort:11435,ownedServicePid:workerPid,
+    ownedServiceInKillOnCloseJob:true,sharedServiceIdle:true};
+};
+const modelFetcher=async(_url,req)=>{
+  if(req.method==='GET')return response({models:[{name:'qwen3:14b'}]});
+  if(req.method!=='POST')throw Error('UNEXPECTED_SYNTHETIC_TRANSPORT');
+  posts++;
+  atomic('v7-post-ready.json',{nonce,posts});
+  return new Promise((resolve,reject)=>{
+    const rejectOnAbort=()=>reject(Error('TEST_ABORT'));
+    if(req.signal.aborted)rejectOnAbort();
+    else req.signal.addEventListener('abort',rejectOnAbort,{once:true});
+  });
+};
+const stopOwnedService=async({headSha,reason,expectedPort,expectedPid})=>{
+  stopCalls++;
+  if(stopCalls!==1||headSha!==sha||reason!=='RESOURCE_MONITOR_HOLD'||
+     expectedPort!==11435||expectedPid!==workerPid)return {accepted:false};
+  atomic('v7-stop.json',{nonce,headSha,reason,expectedPort,expectedPid});
+  return {accepted:true};
+};
+let status='HOLD_BRIDGE_NOT_STARTED',stopRequest=false,accepted=false,
+  aborted=false,worldWrites=-1,attempts=-1;
+try{
+  const result=await runV7PrivateOnce({model:'qwen3:14b',headSha:sha,
+    authorMode:'civic-v6',ownedServiceOrigin:'http://127.0.0.1:11435',
+    outDir:path.join(folder,'injected-private'),checkResourceSafety:resources,
+    stopOwnedService},{ciFetcher,headReader:()=>sha,modelFetcher,timeoutMs:10000});
+  status=result.status;
+  stopRequest=result.ownedStopRequestDispatched;
+  accepted=result.ownedStopRequestAcceptedByCallback;
+  aborted=result.clientAbortSignaled;
+  worldWrites=result.worldWrites;attempts=result.modelGenerationAttempts;
+}catch{
+  status='HOLD_BRIDGE_RUNNER_EXCEPTION';
+}
+atomic('v7-result.json',{nonce,status,stopRequest,accepted,aborted,
+  worldWrites,attempts,posts,stopCalls,nativeModelCalls:0,
+  networkCalls:0,ollamaCalls:0});
+process.exitCode=(status==='HOLD_MONITOR_INTERRUPTED'&&
+  stopRequest===true&&accepted===true&&aborted===true&&
+  worldWrites===0&&attempts===1&&posts===1&&stopCalls===1)?0:2;
+'''
+
+def v7_callback_mode(mod, root, stage):
+    folder=root/'v7-injected-stop-bridge'
+    folder.mkdir()
+    job=mon=sibling=node_proc=None
+    handles=[]
+    nonce=uuid.uuid4().hex
+    sha='a'*40  # TEST-ONLY CI identity; NEVER claims actual-head clearance.
+    try:
+        stage[0]='V7_BRIDGE:OWNED_START'
+        sibling=subprocess.Popen([sys.executable,'-c',
+                                  'import time;time.sleep(85)'],
+                                 creationflags=FLAGS)
+        job=mod.OwnedProcessTree()
+        job.start(str(Path(sys.executable).resolve()),
+                  [str(Path(__file__).resolve()),'--worker',str(folder)])
+        w=until(lambda:read_json(folder/'worker-pids.json'))
+        check(w and isinstance(w.get('pids'),list) and len(w['pids'])==2,
+              'V7_BRIDGE_OWNED_WORKER_MISSING')
+        for pid in w['pids']:
+            handles.append(mod.checked(mod.open_process(0x00100000,False,int(pid))))
+        check(all(mod.wait_process(h,0)==258 for h in handles),
+              'V7_BRIDGE_WORKER_STILL_ALIVE')
+        stage[0]='V7_BRIDGE:INDEPENDENT_MONITOR'
+        mon=subprocess.Popen([str(Path(sys.executable).resolve()),
+                              str(Path(__file__).resolve()),'--monitor',
+                              str(folder),nonce],
+                             stdin=subprocess.DEVNULL,stdout=subprocess.DEVNULL,
+                             stderr=subprocess.DEVNULL,creationflags=FLAGS)
+        check(until(lambda:(lambda d:d if d and d.get('nonce')==nonce
+              and d.get('pid')==mon.pid and d.get('state')=='ALIVE'
+              else None)(read_json(folder/'monitor.json'))),
+              'MONITOR_NOT_OBSERVED')
+        stage[0]='V7_BRIDGE:START_INJECTED_NODE'
+        node=shutil.which('node.exe')
+        check(node is not None, 'V7_BRIDGE_NODE_UNAVAILABLE')
+        env=dict(os.environ,MAB_V10_BRIDGE_FOLDER=str(folder),
+                 MAB_V10_BRIDGE_NONCE=nonce,MAB_V10_BRIDGE_HEAD=sha,
+                 MAB_V10_BRIDGE_WORKER_PID=str(w['pids'][0]),
+                 MAB_V10_BRIDGE_MONITOR_PID=str(mon.pid),
+                 MAB_V10_V7_RUNNER=str(Path(__file__).resolve().with_name(
+                                      'r125-v7-private-once.mjs')))
+        node_proc=subprocess.Popen([node,'--input-type=module','--eval',
+                                    V7_BRIDGE_JS],env=env,
+                                   stdin=subprocess.DEVNULL,
+                                   stdout=subprocess.DEVNULL,
+                                   stderr=subprocess.DEVNULL,creationflags=FLAGS)
+        stage[0]='V7_BRIDGE:WAIT_SYNTHETIC_POST'
+        ready=until(lambda:read_json(folder/'v7-post-ready.json'),8)
+        check(ready and ready.get('nonce')==nonce and ready.get('posts')==1,
+              'V7_BRIDGE_POST_NOT_STARTED')
+        stage[0]='V7_BRIDGE:TRIGGER_MONITOR_FAULT'
+        (folder/'fault.flag').touch(exist_ok=False)
+        check(until(lambda:(lambda d:d if d and d.get('nonce')==nonce and
+              d.get('pid')==mon.pid and d.get('state')=='FAULT' else None)(
+              read_json(folder/'monitor.json')),5),
+              'V7_BRIDGE_MONITOR_TRIP_MISSING')
+        stage[0]='V7_BRIDGE:OWNED_STOP_REQUEST'
+        signal=until(lambda:read_json(folder/'v7-stop.json'),7)
+        check(signal is not None, 'V7_BRIDGE_STOP_NOT_DELIVERED')
+        check(signal=={'nonce':nonce,'headSha':sha,
+              'reason':'RESOURCE_MONITOR_HOLD','expectedPort':11435,
+              'expectedPid':w['pids'][0]},
+              'V7_BRIDGE_STOP_IDENTITY_INVALID')
+        stage[0]='V7_BRIDGE:CLOSE_OWNED_JOB'
+        job.close()
+        job=None
+        check(all(mod.wait_process(h,5000)==0 for h in handles),
+              'V7_BRIDGE_OWNED_TREE_NOT_STOPPED')
+        check(sibling.poll() is None, 'V7_BRIDGE_SIBLING_STOPPED')
+        stage[0]='V7_BRIDGE:VERIFY_RUNNER_RECEIPT'
+        r=until(lambda:read_json(folder/'v7-result.json'),5)
+        check(r is not None, 'V7_BRIDGE_RUNNER_RESULT_UNVERIFIED')
+        check(node_proc.wait(timeout=5)==0 and
+              r.get('nonce')==nonce and
+              r.get('status')=='HOLD_MONITOR_INTERRUPTED' and
+              r.get('stopRequest') is True and
+              r.get('accepted') is True and
+              r.get('aborted') is True and
+              r.get('worldWrites')==0 and r.get('attempts')==1 and
+              r.get('posts')==1 and r.get('stopCalls')==1 and
+              r.get('nativeModelCalls')==0 and
+              r.get('networkCalls')==0 and r.get('ollamaCalls')==0,
+              'V7_BRIDGE_RUNNER_FAILED')
+        return True
+    finally:
+        if job is not None: job.close()
+        for p in (node_proc,mon,sibling):
+            if p is not None and p.poll() is None:
+                p.terminate()
+                try:p.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    p.kill();p.wait(timeout=5)
+        for h in handles:mod.close_handle(h)
+
 def main():
     if len(sys.argv)==3 and sys.argv[1]=='--worker':
         worker(Path(sys.argv[2])); return 0
@@ -178,18 +358,19 @@ def main():
     if os.name!='nt':
         print(json.dumps(receipt(reason='WINDOWS_REQUIRED'))); return 2
     stage=['OWNER_IMPORT']
-    trip=death=False
+    trip=death=v7=False
     root=Path(tempfile.mkdtemp(prefix='mab-v10-job-monitor-'))
     try:
         mod=owner_module()
         trip=test_mode(mod,root,'injected-trip',stage)
         death=test_mode(mod,root,'monitor-death',stage)
+        v7=v7_callback_mode(mod,root,stage)
         print(json.dumps(receipt('WINDOWS_JOB_MONITOR_LINK_PASS_NOT_MODEL_CLEARANCE',
-                                 'DUMMY_INTEGRATION_ONLY','DONE',trip,death)))
+                                 'DUMMY_INTEGRATION_ONLY','DONE',trip,death,v7)))
         return 0
     except Exception as e:
         reason=str(e) if isinstance(e,RuntimeError) and str(e) in SAFE else 'WINDOWS_TEST_EXCEPTION'
-        print(json.dumps(receipt('HOLD',reason,stage[0],trip,death)))
+        print(json.dumps(receipt('HOLD',reason,stage[0],trip,death,v7)))
         return 2
     finally:
         shutil.rmtree(root,ignore_errors=True)
