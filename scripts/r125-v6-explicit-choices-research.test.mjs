@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {enumerateV6ExplicitPlacementChoices,
- compileV6ExplicitPlacementResearch,V6_BOUNDED_CHOICES_SCHEMA}
+ compileV6ExplicitPlacementResearch,V6_BOUNDED_CHOICES_SCHEMA,
+ recognizedV6ResearchSourceReject}
  from '../source/ai/r125-v6-explicit-choices-research.mjs';
 import {materializeV4JParentIndexAuthor}
  from '../source/ai/r125-v4j-feasible-envelope.mjs';
@@ -79,4 +80,15 @@ test('rejects unlisted, duplicated, out-of-range choices and excessive combinati
  }
  assert.throws(()=>enumerateV6ExplicitPlacementChoices(p),
   /MAB_V6_BOUNDED_CHOICES_TOO_MANY_EXPLICIT_COMBINATIONS/);
+});
+
+test('unexpected R125 internal errors must not be retried as SOURCE geometry',()=>{
+ assert.equal(recognizedV6ResearchSourceReject(
+  'R125_UNEXPECTED_INTERNAL_RUNTIME_FAILURE'),false);
+ assert.equal(recognizedV6ResearchSourceReject(
+  'B143_UNCLASSIFIED_INTERNAL_FAILURE'),false);
+ assert.equal(recognizedV6ResearchSourceReject(
+  'R125_V4E_RANKED_NO_AUTHORED_EXTERIOR_OPTION_1'),true);
+ assert.equal(recognizedV6ResearchSourceReject(
+  'R125_V4E_MASSING_MASSING_VOID_INTERSECTS_SHARED_WALL'),true);
 });

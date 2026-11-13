@@ -8,6 +8,8 @@ import {materializeV4JParentIndexAuthor}
  from './r125-v4j-feasible-envelope.mjs';
 import {compileCivicArcadeAuthorIntent}
  from './r125-v4j-civic-author-ir.mjs';
+import {classifyPrivateCompilerRejection,UNKNOWN_COMPILER_REJECT}
+ from '../../scripts/r125-v4d-compiler-reject-codes.mjs';
 
 // Non-default V6 research. This never repairs a single-shift V6 answer.
 // All alternatives must be explicitly supplied by an external author envelope.
@@ -20,6 +22,11 @@ const shift=x=>Number.isSafeInteger(x)&&x>=-3&&x<=3;
 const corners=['NW','NE','SW','SE'];
 const uniqueOptions=(xs,predicate,max)=>Array.isArray(xs)&&xs.length>=1&&
  xs.length<=max&&xs.every(predicate)&&new Set(xs).size===xs.length;
+
+// Only known, sanitized compiler SOURCE rejection codes may advance to
+// another explicitly authored candidate. Internal exceptions must stop.
+export const recognizedV6ResearchSourceReject=message=>
+ classifyPrivateCompilerRejection(message)!==UNKNOWN_COMPILER_REJECT;
 
 // Does not compile or certify SOURCE. Caller must run the frozen compiler for
 // EACH derived candidate before treating any geometry as valid.
@@ -103,7 +110,7 @@ export function compileV6ExplicitPlacementResearch(packet){
    // Expected strict SOURCE rejection: inspect next explicitly offered option.
    // Unexpected runtime failures are NOT geometry rejections; fail closed.
    const message=String(error?.message??'');
-   if(!/^(R125_|B143_|PRIVATE_SPATIAL_|V4J_)/.test(message))
+   if(!recognizedV6ResearchSourceReject(message))
     return {status:'HOLD_UNCLASSIFIED_SOURCE_EXCEPTION',checked,
      sourceVerified:false,modelAuthorshipVerified:false,
      worldContacts:0,worldWrites:0,readiness:'NOT_PREPARED',
