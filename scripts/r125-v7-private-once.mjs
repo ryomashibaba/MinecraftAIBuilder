@@ -70,7 +70,7 @@ const freshResourceClearance=(resource,now=Date.now())=>
  resource.measuredAtEpochMs<=now &&
  now-resource.measuredAtEpochMs<=45000;
 // A safe preflight flag alone is never proof of a live separate monitor.
-const independentMonitorReady=(x,now=Date.now())=>
+export const independentMonitorReady=(x,now=Date.now())=>
  x?.independentMonitorActive===true &&
  typeof x.monitorId==='string' && /^[a-z0-9-]{8,80}$/i.test(x.monitorId) &&
  Number.isSafeInteger(x.monitorHeartbeatEpochMs) &&
@@ -238,6 +238,13 @@ export async function runV7PrivateOnce({
   if(civic&&!injected&&!ownedV6ServiceReady(resource)){
    result.status='HOLD_OWNED_SERVICE';
    result.reason='DEDICATED_PROCESS_TREE_OR_NONCOMPETITION_UNVERIFIED';return result;
+  }
+  // Even a GET to an owned service is forbidden until the independent
+  // watchdog's live heartbeat has been established. The POST retains its
+  // stronger two-sample advancing-monitor gate below.
+  if(civic&&!injected&&!independentMonitorReady(resource)){
+   result.status='HOLD_INDEPENDENT_MONITOR';
+   result.reason='MONITOR_NOT_ATTESTED_BEFORE_OLLAMA_GET';return result;
   }
   // Preserve the first resource sample. A second, cached SAFE report must
   // never authorize a real POST, even with a recently updated heartbeat.

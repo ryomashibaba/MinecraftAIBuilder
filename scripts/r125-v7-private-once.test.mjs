@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
-import {runV7PrivateOnce,v7RequestOptions,verifyCleanHead,V7_HELD_OUT_BRIEF,V7_V4H_COMPACT_SYSTEM_PROMPT,ownedV6ServiceReady,ownedStopNeededAfterProbe} from './r125-v7-private-once.mjs';
+import {runV7PrivateOnce,v7RequestOptions,verifyCleanHead,V7_HELD_OUT_BRIEF,V7_V4H_COMPACT_SYSTEM_PROMPT,ownedV6ServiceReady,ownedStopNeededAfterProbe,independentMonitorReady} from './r125-v7-private-once.mjs';
 import {V4J_PARENT_INDEX_SYSTEM_PROMPT,V4J_PARENT_INDEX_CIVIC_SCHEMA} from '../source/ai/r125-v4j-feasible-envelope.mjs';
 import {INTEGRATED_SEMANTIC_SCHEMA} from '../source/ai/r125-integrated-semantic-bridge.mjs';
 const sha='a'.repeat(40);
@@ -31,6 +31,29 @@ test('V6 dedicated service ownership rejects missing, changed or competing servi
  assert(!ownedV6ServiceReady(null));
 });
 
+test('civic V6 requires an independent live heartbeat before any Ollama GET',()=>{
+ const now=Date.now();
+ const valid={independentMonitorActive:true,monitorId:'owned-monitor-v6-01',
+  monitorHeartbeatEpochMs:now-1000};
+ assert.equal(independentMonitorReady(valid,now),true);
+ for(const broken of [
+  {independentMonitorActive:false},
+  {monitorId:'bad'},
+  {monitorHeartbeatEpochMs:now-4001},
+  {monitorHeartbeatEpochMs:now+1000},
+  {monitorHeartbeatEpochMs:0}
+ ])assert.equal(independentMonitorReady({...valid,...broken},now),false);
+ assert.equal(independentMonitorReady(null,now),false);
+ // This order is security-sensitive and cannot be reached with a fake
+ // transport in the genuine non-injected path. Lock it as a static invariant.
+ const source=fs.readFileSync(new URL('./r125-v7-private-once.mjs',import.meta.url),'utf8');
+ const firstGate=source.indexOf('if(civic&&!injected&&!independentMonitorReady(resource)){');
+ const firstGet=source.indexOf('preflightR125Ollama({model,endpoint:preflight');
+ assert(firstGate>0&&firstGet>firstGate,'OWNED_V6_GET_MUST_FOLLOW_LIVE_MONITOR_GATE');
+ const guard=source.slice(firstGate,firstGet);
+ assert(guard.includes("MONITOR_NOT_ATTESTED_BEFORE_OLLAMA_GET"));
+ assert(guard.includes('return result;'));
+});
 test('V6 owned-stop required after failed or uncertain Ollama unload probe, even with native completion',()=>{
  assert.equal(ownedStopNeededAfterProbe(true,1,false),true);
  assert.equal(ownedStopNeededAfterProbe(true,1,null),true);
