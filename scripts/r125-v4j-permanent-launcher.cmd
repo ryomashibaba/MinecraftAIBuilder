@@ -7,6 +7,11 @@ rem GitHub CI runs, then asks for explicit single local Qwen pilot consent.
 rem Keeps private model response local. Copies ONLY safe report to clipboard.
 set "MAB_REPO=https://github.com/ryomashibaba/MinecraftAIBuilder.git"
 set "MAB_BRANCH=feature/b198zr1-protected-architectural-revision"
+rem The safe owned V6 study is EXPLICIT and never changes the default V6 route.
+if /I "%MAB_V6_CIVIC_RESEARCH_OPT_IN%"=="1" (
+  if /I "%MAB_V7_OPT_IN%"=="1" goto CONFLICTING_OPT_IN
+  set "MAB_BRANCH=research/r125-v6-readonly-facade-diagnostic-20261111"
+)
 set "MAB_MODEL=qwen3:14b"
 set "FINAL_EXIT=2"
 set "SOURCE_DIR="
@@ -40,11 +45,16 @@ echo [3/4] CI OK. Your double-click authorizes ONE local Qwen research model req
 echo Model: %MAB_MODEL%. No additional confirmation needed.
 set "PRIVATE_OUT=%PRIVATE_ROOT%\V4J_AUTO_%RANDOM%_%RANDOM%"
 if exist "%PRIVATE_OUT%" goto OWNED_COLLISION
-if /I "%MAB_V7_OPT_IN%"=="1" (
-  echo V7 opt-in requested. PRIVATE engine and fresh memory safety are mandatory.
-  node.exe "%SOURCE_DIR%\scripts\r125-v4j-current-pilot.mjs" --model "%MAB_MODEL%" --out "%PRIVATE_OUT%" --v7-semantic
+if /I "%MAB_V6_CIVIC_RESEARCH_OPT_IN%"=="1" (
+  echo CIVIC V6 owned research opt-in. PRIVATE owner stop and monitor are mandatory.
+  node.exe "%SOURCE_DIR%\scripts\r125-v4j-current-pilot.mjs" --model "%MAB_MODEL%" --out "%PRIVATE_OUT%" --v7-civic-v6
 ) else (
-  node.exe "%SOURCE_DIR%\scripts\r125-v4j-current-pilot.mjs" --model "%MAB_MODEL%" --out "%PRIVATE_OUT%"
+  if /I "%MAB_V7_OPT_IN%"=="1" (
+    echo V7 opt-in requested. PRIVATE engine and fresh memory safety are mandatory.
+    node.exe "%SOURCE_DIR%\scripts\r125-v4j-current-pilot.mjs" --model "%MAB_MODEL%" --out "%PRIVATE_OUT%" --v7-semantic
+  ) else (
+    node.exe "%SOURCE_DIR%\scripts\r125-v4j-current-pilot.mjs" --model "%MAB_MODEL%" --out "%PRIVATE_OUT%"
+  )
 )
 set "MODEL_EXIT=%ERRORLEVEL%"
 set "V4J_SAFE_FILE=%PRIVATE_OUT%\V4J_CURRENT_SAFE_REPORT.json"
@@ -63,6 +73,9 @@ start "" explorer.exe /select,"%V4J_SAFE_FILE%"
 if not "%MODEL_EXIT%"=="0" echo SOURCE HOLD is valid diagnostic evidence, NOT a pass.
 if not "%MODEL_EXIT%"=="0" goto DONE
 set "FINAL_EXIT=0"
+goto DONE
+:CONFLICTING_OPT_IN
+echo HOLD: Civic V6 research and V7 semantic opt-ins must not be combined.
 goto DONE
 :NO_LOCALAPPDATA
 echo HOLD: Windows LOCALAPPDATA unavailable.

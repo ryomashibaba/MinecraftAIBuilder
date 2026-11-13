@@ -150,3 +150,68 @@ test('V4H explicit monitored CLI preserves exact HEAD, CI and PRIVATE gates',asy
   fs.rmSync(root,{recursive:true,force:true});
  }
 });
+
+
+test('civic-v6 explicit entry pins owned 11435 and passes only allowed PRIVATE functions',async()=>{
+ const sha='f'.repeat(40),previous=process.env.MAB_HEAD,trace=[];
+ const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'v7-civic-v6-entry-'));
+ const out=path.join(tmp,'private');
+ const args=['--model','qwen3:14b','--out',out,'--v7-civic-v6'];
+ const probe=async()=>({status:'HOLD_RESOURCE_UNVERIFIED'});
+ const stop=async()=>({accepted:false});
+ const safe={schema:'minecraftaibuilder-r125-v7-private-one-safe-v1',
+  protocol:'V4J_SINGLE_RESPONSE_AUTHOR_PARENT_INDEX_V6',headSha:sha,
+  status:'HOLD_OWNED_SERVICE',reason:'DEDICATED_PROCESS_TREE_OR_NONCOMPETITION_UNVERIFIED',
+  modelGenerationAttempts:0,worldContacts:0,worldWrites:0,
+  readiness:'NOT_PREPARED',constructionApproved:false,
+  executionAllowed:false,BuildPlan:{operations:[]},gates:Array(9).fill('BLOCKED')};
+ try{
+  process.env.MAB_HEAD=sha;
+  assert.deepEqual(parseStableArgs(args),{model:'qwen3:14b',outDir:out,v7Civic:true});
+  const result=await runStableLocalStudy(args,{
+   v7HeadReader:()=>{trace.push('head');return sha;},
+   v7CiChecker:async()=>{trace.push('ci');return {safeToRunModel:true};},
+   v7BindingLoader:async mode=>{trace.push('private');
+    assert.equal(mode,'civic-v6');
+    return {checkResourceSafety:probe,stopOwnedService:stop,
+     model:'FORBIDDEN_OVERWRITE',headSha:'0'.repeat(40),
+     authorMode:'integrated-semantic',ownedServiceOrigin:'http://127.0.0.1:11434'};
+   },
+   v7Runner:async opts=>{
+    trace.push('runner');
+    assert.deepEqual(Object.keys(opts).sort(),[
+     'authorMode','checkResourceSafety','headSha','model','outDir','ownedServiceOrigin',
+     'prompt','stopOwnedService'].sort());
+    assert.equal(opts.authorMode,'civic-v6');
+    assert.equal(opts.model,'qwen3:14b');
+    assert.equal(opts.headSha,sha);
+    assert.equal(opts.ownedServiceOrigin,'http://127.0.0.1:11435');
+    assert.equal(opts.checkResourceSafety,probe);
+    assert.equal(opts.stopOwnedService,stop);
+    fs.mkdirSync(out);
+    fs.writeFileSync(path.join(out,'V7_SEMANTIC_SHAREABLE.json'),JSON.stringify(safe));
+    return safe;
+   }
+  });
+  assert.deepEqual(trace,['head','ci','private','runner']);
+  assert.deepEqual(JSON.parse(fs.readFileSync(result.shareableFile,'utf8')),safe);
+  const noStop=[];
+  await assert.rejects(runStableLocalStudy(args,{
+   v7HeadReader:()=>sha,v7CiChecker:async()=>({safeToRunModel:true}),
+   v7BindingLoader:async()=>({checkResourceSafety:probe}),
+   v7Runner:async()=>{noStop.push('UNSAFE');throw Error('UNSAFE');}
+  }),/V7_BOUND_FUNCTIONS_REQUIRED/);
+  assert.deepEqual(noStop,[]);
+  const skipped=[];
+  await assert.rejects(runStableLocalStudy(args,{
+   v7HeadReader:()=>sha,v7CiChecker:async()=>({safeToRunModel:false}),
+   v7BindingLoader:async()=>{skipped.push('PRIVATE');throw Error('UNSAFE');},
+   v7Runner:async()=>{skipped.push('RUN');throw Error('UNSAFE');}
+  }),/V7_REQUIRED_CI_NOT_SUCCESS/);
+  assert.deepEqual(skipped,[]);
+ }finally{
+  if(previous===undefined)delete process.env.MAB_HEAD;
+  else process.env.MAB_HEAD=previous;
+  fs.rmSync(tmp,{recursive:true,force:true});
+ }
+});

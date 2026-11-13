@@ -18,15 +18,16 @@ const SHA=/^[a-f0-9]{40}$/;
 const actualHead=()=>verifyCleanHead();
 const fail=x=>{throw Error('V4J_STABLE_LOCAL_'+x);};
 export function parseStableArgs(args){
- if(![4,5].includes(args.length)||(args.length===5&&!['--v7-semantic','--v7-mezzanine'].includes(args[4]))||
+ if(![4,5].includes(args.length)||(args.length===5&&!['--v7-semantic','--v7-mezzanine','--v7-civic-v6'].includes(args[4]))||
   args[0]!=='--model'||args[2]!=='--out'||
   !MODEL.test(args[1])||!args[3])fail('ARGS');
  return args.length===5?{model:args[1],outDir:args[3],
-  ...(args[4]==='--v7-mezzanine'?{v7Mezzanine:true}:{v7Semantic:true})}:
+  ...(args[4]==='--v7-mezzanine'?{v7Mezzanine:true}:
+   args[4]==='--v7-civic-v6'?{v7Civic:true}:{v7Semantic:true})}:
   {model:args[1],outDir:args[3]};
 }
 const PRIVATE_ENGINE_VAR='MAB_V7_PRIVATE_HOST_MODULE';
-async function loadV7PrivateBindings(){
+async function loadV7PrivateBindings(mode='integrated-semantic'){
  const requested=process.env[PRIVATE_ENGINE_VAR];
  if(typeof requested!=='string'||!path.isAbsolute(requested))
   fail('PRIVATE_ENGINE_MODULE_REQUIRED');
@@ -35,6 +36,13 @@ async function loadV7PrivateBindings(){
  if(actual===projectRoot||actual.startsWith(projectRoot+path.sep)||
   !fs.statSync(actual).isFile())fail('PRIVATE_ENGINE_MUST_BE_EXTERNAL');
  const module=await import(pathToFileURL(actual).href);
+ if(mode==='civic-v6'){
+  if(typeof module.checkResourceSafety!=='function'||
+     typeof module.stopOwnedService!=='function')
+   fail('PRIVATE_CIVIC_MONITOR_AND_OWNER_REQUIRED');
+  return {checkResourceSafety:module.checkResourceSafety,
+   stopOwnedService:module.stopOwnedService};
+ }
  if(typeof module.deriveIntegratedShell!=='function'||
   typeof module.checkResourceSafety!=='function')
   fail('PRIVATE_ENGINE_AND_RESOURCE_PROBE_REQUIRED');
@@ -47,7 +55,7 @@ export async function runStableLocalStudy(args,{
  v7HeadReader=actualHead,v7CiChecker=checkExactHeadCi
 }={}){
  const a=parseStableArgs(args);
- if(a.v7Semantic||a.v7Mezzanine){
+ if(a.v7Semantic||a.v7Mezzanine||a.v7Civic){
   // PRIVATE modules can run arbitrary top-level code at import time.
   // First verify the current clone HEAD and BOTH exact-head public CI checks.
   const expectedHead=process.env.MAB_HEAD;
@@ -62,11 +70,23 @@ export async function runStableLocalStudy(args,{
   if(ci?.safeToRunModel!==true)fail('V7_REQUIRED_CI_NOT_SUCCESS');
   // The V7 runner also verifies HEAD and CI before any model request.
   // Import side effects still require separate Windows PRIVATE review.
-  const bindings=await v7BindingLoader();
+  const mode=a.v7Civic?'civic-v6':
+   a.v7Mezzanine?'v4h-mezzanine':'integrated-semantic';
+  const bindings=await v7BindingLoader(mode);
+  // PRIVATE module exports are NOT execution options. Explicit allowlist
+  // prevents head/model/author-mode/endpoint overwrites via a spread.
+  if(typeof bindings?.checkResourceSafety!=='function'||
+     (a.v7Civic?typeof bindings.stopOwnedService!=='function':
+      typeof bindings.deriveIntegratedShell!=='function'))
+   fail('V7_BOUND_FUNCTIONS_REQUIRED');
   const result=await v7Runner({model:a.model,outDir:a.outDir,
-   headSha:process.env.MAB_HEAD,prompt:process.env.MAB_V7_BRIEF||undefined,
-   authorMode:a.v7Mezzanine?'v4h-mezzanine':'integrated-semantic',
-   ...bindings});
+   headSha:expectedHead,prompt:process.env.MAB_V7_BRIEF||undefined,
+   authorMode:mode,
+   checkResourceSafety:bindings.checkResourceSafety,
+   ...(a.v7Civic?{
+     stopOwnedService:bindings.stopOwnedService,
+     ownedServiceOrigin:'http://127.0.0.1:11435'
+   }:{deriveIntegratedShell:bindings.deriveIntegratedShell})});
   if(result.schema!=='minecraftaibuilder-r125-v7-private-one-safe-v1'||
    typeof result.status!=='string'||!result.status.startsWith('HOLD_')||
    !Number.isSafeInteger(result.modelGenerationAttempts)||

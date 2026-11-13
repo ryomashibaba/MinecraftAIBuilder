@@ -33,3 +33,15 @@ test('safe-report recovery does not convert SOURCE HOLD into exit code zero',()=
  assert(cmd.indexOf('V4J_CURRENT_SAFE_REPORT.json')<cmd.indexOf(guard));
  assert(cmd.includes('if not exist "%V4J_SAFE_FILE%" goto NO_SAFE_OUTPUT'));
 });
+
+
+test('owned civic V6 route is explicit, research only, and never touches default launcher mode',()=>{
+ assert(cmd.includes('MAB_V6_CIVIC_RESEARCH_OPT_IN'));
+ assert(cmd.includes('research/r125-v6-readonly-facade-diagnostic-20261111'));
+ assert(cmd.includes('--v7-civic-v6'));
+ assert(cmd.includes('goto CONFLICTING_OPT_IN'));
+ assert(cmd.indexOf('r125-v4j-safe-ci-gate.mjs" "%MAB_HEAD%"')<
+  cmd.indexOf('r125-v4j-current-pilot.mjs" --model'));
+ assert(cmd.includes('PRIVATE owner stop and monitor are mandatory'));
+ assert(cmd.includes('if /I "%MAB_V7_OPT_IN%"=="1" ('));
+});
