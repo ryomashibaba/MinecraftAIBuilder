@@ -248,7 +248,9 @@ export async function runV7PrivateOnce({
   }
   // Preserve the first resource sample. A second, cached SAFE report must
   // never authorize a real POST, even with a recently updated heartbeat.
-  const resourceBeforeListing=resource;
+  // PRIVATE probes may reuse a mutable report object. Retain the original
+  // ownership/monitor identity and timestamps independently of later reads.
+  const resourceBeforeListing=Object.freeze({...resource});
   // Resource assertion is supplied by the PRIVATE Windows monitor, not
   // independent proof of RAM safety by this public, host-agnostic code.
   const host=civic?null:createIntegratedSpatialHost({deriveIntegratedShell});
@@ -325,7 +327,7 @@ export async function runV7PrivateOnce({
    resourceAssertion:'PRIVATE_MONITOR_ASSERTED_NOT_PUBLICLY_ATTESTED'});
   const controller=new AbortController();
   let monitorActive=true,monitorPending=false,monitorFault=false,lastBeat=Date.now();
-  let monitorPrevious=resource,ownerStopTask=null;
+  let monitorPrevious=Object.freeze({...resource}),ownerStopTask=null;
   // Client HTTP abort alone cannot stop Ollama inference. Ask the PRIVATE
   // supervisor to close its own Job once; never touch a shared/unowned PID.
   // An acknowledgement is not proof that the OS Job really terminated.
@@ -356,7 +358,7 @@ export async function runV7PrivateOnce({
        (civic&&!injected&&!ownedV6ServiceReady(sample,resourceBeforeListing))||
        (!injected&&!monitorSampleAdvanced(monitorPrevious,sample)))fault();
     else{
-     monitorPrevious=sample;
+     monitorPrevious=Object.freeze({...sample});
      lastBeat=Date.now();result.activeMonitorSamples++;
     }
    }).catch(fault).finally(()=>{monitorPending=false;});

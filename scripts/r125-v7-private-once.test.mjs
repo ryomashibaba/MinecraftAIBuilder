@@ -398,6 +398,34 @@ test('real network transport combined with fake HEAD or CI must HOLD before all 
  }finally{fs.rmSync(tmp.root,{recursive:true,force:true});}
 });
 
+test('owned stop retains the first PID when a PRIVATE probe reuses its report object',async()=>{
+ const tmp=sandbox(),requests=[];
+ const report={status:'SAFE_FOR_ONE_REQUEST',measuredAtEpochMs:Date.now(),
+  ownedServicePid:123};
+ let samples=0;
+ try{
+  const result=await runV7PrivateOnce(params(tmp.outDir,{
+   authorMode:'civic-v6',ownedServiceOrigin:'http://127.0.0.1:11435',
+   checkResourceSafety:async()=>{
+    report.ownedServicePid=++samples===1?123:456;
+    report.measuredAtEpochMs=Date.now();
+    return report;
+   },
+   stopOwnedService:async request=>{requests.push(request);return {accepted:true};}
+  }),{ciFetcher:fakeCi(),headReader:()=>sha,modelFetcher:async(_url,options)=>{
+   if(options.method==='GET')return jsonResponse({models:[{name:'qwen3:14b'}]});
+   throw Error('INJECTED_TRANSPORT_FAILURE');
+  }});
+  assert.equal(samples,2);assert.equal(report.ownedServicePid,456);
+  assert.equal(requests.length,1);assert.equal(requests[0].expectedPid,123);
+  assert.equal(requests[0].expectedPort,11435);
+  assert.equal(result.ownedStopRequestAcceptedByCallback,true);
+  assert.equal(result.unloadConfirmed,false);
+  assert.equal(result.b143Recompiled,false);
+  assert.equal(result.worldWrites,0);assert.deepEqual(result.gates,Array(9).fill('BLOCKED'));
+ }finally{fs.rmSync(tmp.root,{recursive:true,force:true});}
+});
+
 test('monitor failure during injected POST aborts, never retries and keeps B143/world HOLD',
  {timeout:12000},async()=>{
  const tmp=sandbox(),calls=[];

@@ -6,6 +6,10 @@
 
 ## 2026-11-14 最新最優先判断 — 旧節のHEADと「最初の工程」を更新する正本追記
 
+2026-11-15 実装・検証追記（V11継続、以下の保護条件は不変）：開始時HEADは `2dbd08d0ced43196964e79f6b4ce138860c53bca`。基準コード `32a741b6e100265f2a81ff41ed3ee1e650d74283` との差分は本書のみ。Windows Work / Node v24.18.1で既存 `node --test scripts/r125-v6-explicit-choices-research.test.mjs` を1回実行し、真正B143を含む合成11/11 PASSを確認。実モデル著作・Gate C・Minecraft成功ではない。
+
+本追記と同じ差分で、公開 `r125-v7-private-once.mjs` の監視結果を値のスナップショットとして保持する修正を実装。プローブが同じオブジェクトを書き換えて返しても、初回の所有PID・監視時刻を後続値に置換させず、停止要求先を初回PIDへ固定する。既存テストファイルに再利用オブジェクトの回帰1件を追加。`node --test --test-name-pattern 'owned stop|monitor failure|owned-stop|ownership|monitor must advance|heartbeat|pre-POST' scripts/r125-v7-private-once.test.mjs` は7/7 PASS（注入transportのみ、実モデル通信・Job起動なし）。コールバック受付はOS停止証明ではない。現HEADのActions成功・本番連鎖・実機停止は未認定。PR #128 Open/Draft、main・B143・正式QA・既存ワールド無変更、Gate C P1 HOLD／施工9 BLOCKED／LIVE本番無効を維持。
+
 **重要：この節が本文の旧 §0・§2・§5・§9 にある時点依存のHEAD・CI・次作業指定より優先。** 旧節は消さず、当時の判断・証拠として保持する。ここは新しい全体方針を作る文書ではなく、V11既存唯一の親マスターを現在の実証に合わせて更新したもの。
 
 ### A. 不変のゴール／完成定義
