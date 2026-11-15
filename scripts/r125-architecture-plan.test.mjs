@@ -1103,6 +1103,9 @@ test('electronics research room has distinct real voxel equipment and still open
 
 test('multi-room fixture grammar is bounded, duplicate-free, and preserves old single fixture geometry',()=>{
  const p=plan('multifurniture-grammar',['x']);
+ // A bed AND a desk need an actually usable floor; a cramped 18x18
+ // house should HOLD rather than pretend both service routes are valid.
+ p.footprint={width:30,depth:30};
  p.levels[0].spaces[0].fixtures=['bed','desk'];
  const valid=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
  assert.equal(valid.fixtureTargets.length,2);
