@@ -1682,3 +1682,48 @@ test('model-authored unequal T zones yield real sized, navigable and equipped sp
    /THREE_ROOM_SECONDARY_PERCENT/);
  }
 });
+
+test('a lone narrow-zone fixture uses true B143 rotation only after normal candidates fail',()=>{
+ const p=plan('single-narrow-workshop',['x'],
+  ['small electronics service zone','connected circulation zone']);
+ p.footprint={width:30,depth:30};
+ const baseline=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+ const originalRange=baseline.program[0].zones[0].range.x;
+ baseline.program[0].zones[0].range.x=[originalRange[0],originalRange[0]+2];
+ const planWithFixture=structuredClone(p);
+ planWithFixture.levels[0].spaces[0].fixture='workbench';
+ const source={...baseline,plan:planWithFixture};
+ const sourceAuditor=trial=>{
+  const original=auditArchitecturePlanCirculation(trial);
+  if(original.status!=='SOURCE_CLEARANCE_PROBES_PASS')return original;
+  const top=trial.design.elements.find(e=>e.id==='fx-l0-z0-top');
+  // Synthetic corridor restriction makes all non-rotated 3-wide options
+  // genuinely fail a source auditor, allowing 1-wide alternate geometry.
+  if(top&&top.size[0]===3)return {
+   status:'SOURCE_CLEARANCE_PROBES_HOLD',
+   failures:[{code:'FIXTURE_BLOCKS_TWO_WIDE_SERVICE_CORRIDOR'}]};
+  return original;
+ };
+ const output=addAuthoredRoomFixtures(source,{auditCirculation:sourceAuditor});
+ assert.equal(output.fixtureTargets.length,1);
+ assert.equal(output.fixtureTargets[0].kind,'workbench');
+ assert.equal(output.fixtureTargets[0].orientation,'quarter-turn');
+ assert.equal(output.fixtureTargets[0].id,'fx-l0-z0');
+ assert.deepEqual(output.fixtureTargets[0].size,[1,3,3]);
+ const top=output.design.elements.find(e=>e.id==='fx-l0-z0-top');
+ assert.deepEqual(top.size,[1,1,3]);
+ assert.ok(output.fixtureSearch?.[0]?.rotatedCandidateEvaluations>0);
+ assert.equal(output.fixtureSearch[0].arrangementFound,true);
+ const routes=auditR125SourceRoutes(output,{featureTargets:output.fixtureTargets});
+ assert.equal(routes.status,'SOURCE_ROUTES_REACH_ALL_ZONES',
+  JSON.stringify(routes.issues));
+ assert.equal(routes.featureAccess[0].reachableFromEntrance,true);
+ assert.equal(auditArchitecturePlanCirculation(output).status,
+  'SOURCE_CLEARANCE_PROBES_PASS');
+ assert.equal(verifyCompiled(output.design,output.compiled),true);
+ assert.equal(baseline.sourceSha256,
+  compileArchitecturePlan(p,{entrancePlacement:'source-accessible'}).sourceSha256);
+ assert.equal(planWithFixture.levels[0].spaces[0].fixture,'workbench');
+ assert.deepEqual(output.compiled.BuildPlan.operations,[]);
+ assert.equal(output.worldWrites,0);
+});

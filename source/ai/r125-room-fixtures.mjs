@@ -248,14 +248,17 @@ export function addAuthoredRoomFixtures(product,{auditCirculation}={}){
    current=selected.product;targets.push(selected.target);
    continue;
   }
-  // Greedy placements of earlier roles can themselves block the last role.
-  // Only after an actual multi-role failure, reconstruct THIS zone from the
-  // checkpoint while keeping all other zones byte-for-byte unchanged.
+  // Only after the existing corner candidates all fail, use the proven
+  // bounded single-zone placement search. Historically the recovery was
+  // available to multiple fixtures only, so a lone 3x1 workbench in a
+  // 3..4-wide room could fail even with an accessible 90-degree layout.
+  // Preserve every successfully placed old building exactly.
+  const narrowSingle=!intent.multi&&range.x[1]-range.x[0]+1<=4;
   let fallback=null;
-  if(intent.multi){
+  if(intent.multi||narrowSingle){
    const start=zoneStarts.get(zkey);
-   const roles=intents.filter(i=>intentKey(i)===zkey&&
-    i.multi&&i.index<=intent.index);
+   const roles=intent.multi?intents.filter(i=>intentKey(i)===zkey&&
+    i.multi&&i.index<=intent.index):[intent];
    fallback=repairZone(start.product,start.targets,roles,auditCirculation);
    if(fallback.result){
     current=fallback.result.product;
