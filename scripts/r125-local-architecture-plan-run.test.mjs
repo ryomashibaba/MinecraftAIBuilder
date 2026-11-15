@@ -112,6 +112,20 @@ test('one call records raw and true SOURCE, without privately leaking raw into r
   assert.ok(viewer.includes('minecraftaibuilder-b143-gallery-v1'));
   assert.ok(viewer.includes(diag.geometrySha256));
   assert.equal(out.report.review3d,'TRUE_B143_HTML_GENERATED_ART_PENDING');
+  assert.equal(out.report.makeCodeStatus,'OFFLINE_CODE_GENERATED_ONLY');
+  assert.equal(typeof out.report.makeCodeSourceSha256,'string');
+  const exportReport=JSON.parse(fs.readFileSync(path.join(dest,
+   'MAKECODE_EXPORT_REPORT.json'),'utf8'));
+  assert.equal(exportReport.status,'OFFLINE_CODE_GENERATED_ONLY');
+  assert.equal(exportReport.sourceSha256,diag.sourceSha256);
+  assert.equal(exportReport.geometrySha256,diag.geometrySha256);
+  assert.equal(exportReport.programExecuted,false);
+  assert.equal(exportReport.worldWrites,0);
+  assert.deepEqual(exportReport.BuildPlan.operations,[]);
+  assert.equal(exportReport.materialMode,'STRICT_USER_ATTESTED');
+  const makecode=fs.readFileSync(path.join(dest,
+   'MAKECODE_EDUCATION_SOURCE_ONLY.ts'),'utf8');
+  assert.ok(makecode.includes('player.onChat("mabbuild"'));
 
  }finally{fs.rmSync(root,{recursive:true,force:true})}
 });
@@ -132,6 +146,7 @@ test('invalid response is captured verbatim but never repaired, re-requested or 
   assert.equal(out.report.sourceVerified,false);
   assert.equal(fs.readFileSync(path.join(dest,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8'),'{"schema":');
   assert.equal(fs.existsSync(path.join(dest,'B143_SOURCE_REVIEW_ONLY.json')),false);
+  assert.equal(fs.existsSync(path.join(dest,'MAKECODE_EDUCATION_SOURCE_ONLY.ts')),false);
   const diagnosis=JSON.parse(fs.readFileSync(path.join(dest,'SOURCE_DIAGNOSIS.json'),'utf8'));
   assert.equal(diagnosis.status,'HOLD_INVALID_ORIGINAL_JSON');
   assert.equal(diagnosis.originalEdited,false);

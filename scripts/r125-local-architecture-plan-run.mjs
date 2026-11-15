@@ -18,6 +18,8 @@ import {createR125ArchitecturePlanLocalAdapter,DEFAULT_LOCAL_ENDPOINT}
 import {diagnoseR125ArchitecturePlanOriginal}
  from './r125-offline-replay.mjs';
 import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
+import {compileDesign,verifyCompiled} from '../source/ai/b143-building-dsl.mjs';
+import {exportB143EducationMakeCode} from '../source/ai/r125-education-makecode-export.mjs';
 
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const fail=code=>{throw Error('R125_LOCAL_PLAN_'+code);};
@@ -89,6 +91,8 @@ export async function runR125LocalArchitecturePlan({
   minecraftWalking:'NOT_TESTED',
   nineWorldGates:Array(9).fill('BLOCKED')};
  let result;
+ let makeCodeStatus='NOT_ATTEMPTED',makeCodeReason=null,
+  makeCodeSourceSha256=null;
  try{
   modelStartMs=Date.now();
   const answer=await author({prompt});
@@ -107,6 +111,37 @@ export async function runR125LocalArchitecturePlan({
    const html=renderB143Html(compileB143Gallery([sourceDesign]),template);
    write(dest,'B143_SOURCE_3D_REVIEW_ONLY.html',html);
   }
+  // A tested SOURCE candidate can also yield a REVIEW-ONLY MakeCode file.
+  // Recompile the exact B143 design, NEVER a second host interpretation of
+  // the model plan; MakeCode source hashes must agree with SOURCE_DIAGNOSIS.
+  // A missing user-verified material mapping blocks export only, not SOURCE.
+  if(diagnosis.sourceVerified===true&&sourceDesign){
+   try{
+    const scene=compileDesign(sourceDesign);
+    if(!verifyCompiled(sourceDesign,scene)||
+       scene.sourceSha256!==diagnosis.sourceSha256||
+       scene.geometrySha256!==diagnosis.geometrySha256)
+     fail('MAKECODE_SOURCE_REPLAY_MISMATCH');
+    const palette=JSON.parse(fs.readFileSync(path.join(ROOT,
+     'configs/r125-education-verified-palette-v26.33.json'),'utf8'));
+    const packet=exportB143EducationMakeCode({
+     design:sourceDesign,scene,provenance:'LOCAL_MODEL_CAPTURE',
+     groundLowestLayer:true,verifiedPalette:palette});
+    if(packet.sourceSha256!==diagnosis.sourceSha256||
+       packet.geometrySha256!==diagnosis.geometrySha256||
+       packet.worldWrites!==0||packet.programExecuted!==false||
+       packet.BuildPlan?.operations?.length!==0)
+     fail('MAKECODE_PACKET_SOURCE_MISMATCH');
+    const {code,...packetReport}=packet;
+    write(dest,'MAKECODE_EDUCATION_SOURCE_ONLY.ts',code);
+    write(dest,'MAKECODE_EXPORT_REPORT.json',packetReport);
+    makeCodeStatus='OFFLINE_CODE_GENERATED_ONLY';
+    makeCodeSourceSha256=packet.makecodeSourceSha256;
+   }catch(e){
+    makeCodeStatus='HOLD_EDUCATION_EXPORT';
+    makeCodeReason=String(e?.message??e).slice(0,180);
+   }
+  }
   result={...common,
    status:diagnosis.status,originalSha256:answer.originalSha256,
    sourceSha256:diagnosis.sourceSha256??null,
@@ -116,7 +151,8 @@ export async function runR125LocalArchitecturePlan({
    modelCallAttempts:1,modelResponsesCaptured:1,
    originalCaptureFinishReason:captured.finishReason,
    modelRequestElapsedMs:modelElapsedMs,
-   providerReportedTokenUsage:captured.usage};
+   providerReportedTokenUsage:captured.usage,
+   makeCodeStatus,makeCodeReason,makeCodeSourceSha256};
  }catch(error){
   // An original MODEL response can be valid raw evidence even if the
   // transport adapter rejected its JSON/required fields. Diagnose it
@@ -145,6 +181,7 @@ export async function runR125LocalArchitecturePlan({
    modelRequestElapsedMs:modelStartMs===null?null:
     modelElapsedMs??Date.now()-modelStartMs,
    providerReportedTokenUsage:captured?.usage??null,
+   makeCodeStatus,makeCodeReason,makeCodeSourceSha256,
    sourceVerified:false,modelCallAttempts:1,
    modelResponsesCaptured:captured?1:0};
  }finally{

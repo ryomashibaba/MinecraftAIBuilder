@@ -30,6 +30,11 @@ export function renderR125BatchComparison(briefs,report){
      relative+'" title="'+esc(row.id)+' true B143 3D"></iframe>'+
      '<p><a href="'+relative+'">Open full-size true B143 3D</a></p>':
      '<p class="issue">No 3D scene (HOLD)</p>')+
+   '<p class="muted">Education export: '+esc(row.makeCodeStatus??'NOT_ATTEMPTED')+
+   (row.makeCodeReason?' — '+esc(row.makeCodeReason):'')+'</p>'+
+   (row.makeCodeStatus==='OFFLINE_CODE_GENERATED_ONLY'?
+    '<p><a href="./'+row.id+'/MAKECODE_EDUCATION_SOURCE_ONLY.ts">'+
+    'Open B143-derived test-world MakeCode (not executed)</a></p>':'')+
    '<p class="muted">Source SHA: '+esc(row.sourceSha256??'HOLD')+
    ' · Geometry SHA: '+esc(row.geometrySha256??'HOLD')+'</p></section>';
  }).join('');

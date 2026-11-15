@@ -141,7 +141,10 @@ export async function runR125ArchitecturePlanBatch({
    geometrySha256:one.report.geometrySha256??null,
    review3d:one.report.review3d??'NOT_GENERATED',
    modelRequestElapsedMs:one.report.modelRequestElapsedMs??null,
-   providerReportedTokenUsage:one.report.providerReportedTokenUsage??null};
+   providerReportedTokenUsage:one.report.providerReportedTokenUsage??null,
+   makeCodeStatus:one.report.makeCodeStatus??'NOT_ATTEMPTED',
+   makeCodeReason:one.report.makeCodeReason??null,
+   makeCodeSourceSha256:one.report.makeCodeSourceSha256??null};
   report.completed.push(row);report.attempted++;
   const success=row.status==='B143_SOURCE_CANDIDATE_ART_HOLD'&&
     row.sourceVerified===true;

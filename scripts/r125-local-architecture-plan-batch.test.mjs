@@ -78,6 +78,9 @@ test('one sequential SOURCE call per distinct brief, original files persisted',a
   assert.ok(html.includes('Human ART NOT REVIEWED'));
   assert.ok(html.includes('./home/B143_SOURCE_3D_REVIEW_ONLY.html'));
   assert.ok(report.completed.every(x=>x.authoredProgram?.length===1));
+  assert.ok(html.includes('MAKECODE_EDUCATION_SOURCE_ONLY.ts'));
+  assert.ok(report.completed.every(x=>x.makeCodeStatus==='OFFLINE_CODE_GENERATED_ONLY'));
+  assert.ok(fs.existsSync(path.join(output,'shop','MAKECODE_EDUCATION_SOURCE_ONLY.ts')));
  }finally{fs.rmSync(root,{recursive:true,force:true})}
 });
 test('bad first model response stops batch without extra requests',async()=>{
