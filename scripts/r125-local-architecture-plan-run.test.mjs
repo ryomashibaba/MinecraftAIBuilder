@@ -103,7 +103,7 @@ test('invalid response is captured verbatim but never repaired, re-requested or 
  try{
   const out=await runR125LocalArchitecturePlan({
    model:'qwen3:14b',prompt,outDir:dest
-  },{fetcher:async()=>{requests++;return provider('{"schema":')}}});
+  },{fetcher:async()=>{requests++;return provider('{"schema":');}});
   assert.equal(requests,1);
   assert.equal(out.report.status,'HOLD_MODEL_OR_SOURCE');
   assert.equal(out.report.modelResponsesCaptured,1);
