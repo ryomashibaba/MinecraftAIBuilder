@@ -146,6 +146,53 @@ export function validateArchitecturePlan(p){
   'ENTRY_ZONE_FRONT_ACCESS');
  return true;
 }
+
+/**
+ * Evidence-backed, non-blocking capacity advisory for AUTHOR-CHOSEN room
+ * partitions, footprints, setbacks and furniture. Room areas are UPPER
+ * BOUNDS: stairs, corner recesses and entrances reduce actual clear floor.
+ * Risk flags do not assert that a placement is impossible or skip SOURCE.
+ */
+export function assessR125AuthoredRoomCapacity(plan){
+ validateArchitecturePlan(plan);
+ const w=plan.footprint.width,d=plan.footprint.depth,e=plan.expression;
+ const zones=plan.levels.flatMap((level,index)=>{
+  const x0=1,z0=1;
+  const x1=w-2-(e?.setbackSide==='east'&&index===1?e.setbackDepth:0);
+  const z1=d-2-(e?.setbackSide==='rear'&&index===1?e.setbackDepth:0);
+  const ratio=level.splitPercent/100,axis=level.splitAxis;
+  const split=axis==='x'?
+   (e?Math.max(x0+4,Math.min(x1-4,Math.round(x0+(x1-x0)*ratio))):
+    Math.max(7,Math.min(w-7,Math.round(w*ratio)))):
+   (e?Math.max(z0+4,Math.min(z1-4,Math.round(z0+(z1-z0)*ratio))):
+    Math.max(8,Math.min(d-6,Math.round(d*ratio))));
+  const sizes=axis==='x'?
+   [[split-x0-1,z1-z0-1],[x1-split-1,z1-z0-1]]:
+   [[x1-x0-1,split-z0-1],[x1-x0-1,z1-split-1]];
+  return level.spaces.map((room,zi)=>{
+   const [width,depth]=sizes[zi];
+   const roles=room.fixtures??(room.fixture?[room.fixture]:[]);
+   const roleDepth=k=>k==='bed'?4:
+    ['seating','electronics','washbasin'].includes(k)?2:1;
+   const equipmentFootprintCells=roles.reduce((n,k)=>n+3*roleDepth(k),0);
+   const nominalFloorCellsUpperBound=Math.max(0,width*depth);
+   const risks=[];
+   if(roles.length>=2&&Math.min(width,depth)<=4)
+    risks.push('NARROW_MULTIPLE_EQUIPMENT');
+   if(roles.length>=2&&equipmentFootprintCells>nominalFloorCellsUpperBound/3)
+    risks.push('HIGH_EQUIPMENT_FOOTPRINT_FRACTION');
+   return {level:index,zoneIndex:zi,zoneId:room.id,
+    splitAxis:axis,nominalWidth:width,nominalDepth:depth,
+    nominalFloorCellsUpperBound,selectedEquipment:roles,
+    equipmentFootprintCells,risks};
+  });
+ });
+ return {schema:'r125-authored-room-capacity-advisory-v1',
+  sourceOnly:true,originalPlanEdited:false,modelCalls:0,worldWrites:0,
+  floorAreaIsUpperBound:true,impossibleVerdict:false,
+  zones,flaggedZones:zones.filter(x=>x.risks.length>0).length};
+}
+
 export function compileArchitecturePlan(plan,{
  entrancePlacement='legacy',upperDoorPlacement='legacy'
 }={}){

@@ -8,6 +8,8 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {SCHEMA as B143} from '../source/ai/b143-building-dsl.mjs';
+import {SCHEMA as PLAN,assessR125AuthoredRoomCapacity}
+ from '../source/ai/r125-architecture-plan.mjs';
 
 function good(){
  return {design:{schema:B143,id:'original-v1',title:'Generic small hall',
@@ -71,6 +73,36 @@ test('malformed JSON is HOLD and CLI forbids overwrite/incomplete arguments',()=
   /INVALID_ARGUMENT/);
 });
 
+test('capacity advisory reports 3-wide furnished upper zone without declaring impossibility',()=>{
+ const p={schema:PLAN,id:'narrow-study',title:'Measured furnished workshop',
+  brief:'Real workshop with paired equipment and an upper east terrace',
+  footprint:{width:16,depth:20},
+  levels:[0,1].map(i=>({splitAxis:'x',splitPercent:60,spaces:[
+   {id:'work-zone-'+i,purpose:'work area'},
+   {id:'control-zone-'+i,purpose:'control area',
+    ...(i===1?{fixtures:['electronics','seating','desk']}: {})}
+  ]})),
+  materials:{floor:'wood',wall:'concrete',roof:'stone'},
+  expression:{setbackSide:'east',setbackDepth:4,
+   roofProfile:'ridge',roofAxis:'x',facadeLanguage:'plain',
+   roofVolume:'raised'}};
+ const snap=JSON.stringify(p),advice=assessR125AuthoredRoomCapacity(p);
+ assert.equal(advice.zones.length,4);
+ const z=advice.zones.find(v=>v.zoneId==='control-zone-1');
+ assert.equal(z.nominalWidth,3);
+ assert.equal(z.nominalDepth,16);
+ assert.equal(z.equipmentFootprintCells,15);
+ assert.ok(z.risks.includes('NARROW_MULTIPLE_EQUIPMENT'));
+ assert.equal(advice.impossibleVerdict,false);
+ assert.equal(advice.floorAreaIsUpperBound,true);
+ assert.equal(JSON.stringify(p),snap);
+ const diagnosed=diagnoseR125ArchitecturePlanOriginal(snap);
+ assert.equal(diagnosed.spatialCapacity.zones.length,4);
+ assert.equal(diagnosed.spatialCapacity.zones[3].nominalWidth,3);
+ assert.equal(diagnosed.originalEdited,false);
+ assert.equal(diagnosed.modelCalls,0);
+ assert.equal(diagnosed.worldWrites,0);
+});
 test('saved real Nov-1 Qwen ArchitecturePlan replays through TRUE B143 and SOURCE routes',()=>{
  const original=readFileSync(new URL('../evidence/r125-real-l-corner-20261101/MODEL_RESPONSE_ORIGINAL.txt',
   import.meta.url),'utf8');

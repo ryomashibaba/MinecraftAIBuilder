@@ -12,7 +12,7 @@ import {createHash} from 'node:crypto';
 import {readModelProposal} from '../source/ai/b198-natural-language-design.mjs';
 import {validateDesign,compileDesign} from '../source/ai/b143-building-dsl.mjs';
 import {compileArchitecturePlan,auditArchitecturePlanCirculation,
- assessR125ProgramGeometry} from '../source/ai/r125-architecture-plan.mjs';
+ assessR125ProgramGeometry,assessR125AuthoredRoomCapacity} from '../source/ai/r125-architecture-plan.mjs';
 import {auditR125SourceRoutes} from '../source/ai/r125-source-routes.mjs';
 import {critiqueArchitecture} from '../source/ai/b198c-spatial-critic.mjs';
 import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
@@ -150,6 +150,11 @@ export function diagnoseR125ArchitecturePlanOriginal(raw){
  if(!isObj(original))
   return {...base,status:'HOLD_INVALID_ORIGINAL_PLAN',
    compilerReason:'ORIGINAL_NOT_PLAN_OBJECT',sourceVerified:false};
+ // Advisory comes from the raw AUTHOR plan even if B143 later cannot place
+ // one piece; it never edits the raw answer or guesses a feasible arrangement.
+ let spatialCapacity=null;
+ try{spatialCapacity=assessR125AuthoredRoomCapacity(original);}
+ catch{ /* Existing strict validator supplies the actual failure reason. */ }
  try{
   // This is an explicitly chosen GENERIC HOST policy, not a change to the
   // author-provided JSON. It is never selected as a retry after failure.
@@ -173,7 +178,7 @@ export function diagnoseR125ArchitecturePlanOriginal(raw){
   return {...base,
    status:functionalClear?'B143_SOURCE_CANDIDATE_ART_HOLD':'HOLD_FUNCTIONAL_SOURCE',
    sourceVerified:functionalClear,compilerReason:null,
-   hostPolicy,planSha256:built.planSha256,
+   hostPolicy,...(spatialCapacity?{spatialCapacity}:{}),planSha256:built.planSha256,
    sourceSha256:built.sourceSha256,geometrySha256:built.geometrySha256,
    occupiedVoxels:built.compiled.primitives.length,
    sourceRoutes:routes.status,sourceRouteIssues:routes.issues??[],
@@ -189,6 +194,7 @@ export function diagnoseR125ArchitecturePlanOriginal(raw){
  }catch(error){
   return {...base,status:'HOLD_PLAN_COMPILER_OR_QA',
    sourceVerified:false,compilerReason:String(error?.message??error).slice(0,360),
+   ...(spatialCapacity?{spatialCapacity}:{}),
    ...(error?.fixturePlacement?{fixturePlacement:error.fixturePlacement}:{})};
  }
 }
