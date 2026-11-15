@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import vm from 'node:vm';
 import os from 'node:os';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -310,4 +311,24 @@ test('three-genre viewer synchronizes presentation controls without changing tru
   assert.ok(!viewer.includes('fetch('));
   assert.equal(report.worldWrites,0);
  }finally{fs.rmSync(root,{recursive:true,force:true})}
+});
+
+test('actual cutaway controller exposes first-storey rooms beneath both flat and elevated single-storey roofs',()=>{
+ const template=fs.readFileSync(new URL(
+  '../source/ai/b143-viewer-template.html',import.meta.url),'utf8');
+ const definition=template.match(/function interiorBand\(s\)\{[\s\S]*?\n\}/);
+ assert.ok(definition,'viewer should expose a small pure floor-band decision');
+ const band=vm.runInNewContext('('+definition[0]+')',{});
+ assert.equal(band({levels:2,stats:{designOperations:[
+  {element:'floor-0'}]}}),0,'single-storey flat roof must disappear');
+ assert.equal(band({levels:3,stats:{designOperations:[
+  {element:'floor-0'},{element:'roof-monitor-high'}]}}),0,
+  'raised monitor is extra volume, not a second storey');
+ assert.equal(band({levels:3,stats:{designOperations:[
+  {element:'floor-0'},{element:'floor-1'}]}}),1,
+  'actual upper floor should remain visible beneath the second roof');
+ assert.equal(band({levels:1,stats:{designOperations:[]}}),0);
+ assert.ok(template.includes('floor.value=interiorBand(scene())'));
+ assert.ok(template.includes('el("cutaway").click()'),
+  'synchronized parent interior button uses the fixed native cutaway');
 });

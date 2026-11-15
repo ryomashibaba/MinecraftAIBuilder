@@ -158,7 +158,19 @@ select.addEventListener("change",()=>{index=Number(select.value);setScene();});
 floor.addEventListener("input",()=>{all.checked=false;updateFloor();drawSoon();});
 all.addEventListener("change",()=>{updateFloor();drawSoon();});
 el("reset").addEventListener("click",()=>{yaw=.72;pitch=.58;zoom=1;all.checked=true;updateFloor();drawSoon();});
-el("cutaway").addEventListener("click",()=>{all.checked=false;floor.value=Math.max(0,Math.floor(scene().levels*.55));updateFloor();drawSoon();});
+// B143 "levels" are five-voxel Y bands, NOT the actual floor count.
+// A 1-storey raised roof / high monitor may occupy 2-3 vertical bands.
+// The old percentage kept the roof visible and hid the very room under review.
+// Recognize the generic HOST's actual second-floor slab if present, otherwise
+// display the ground-floor section. This modifies camera presentation only.
+function interiorBand(s){
+ const ops=Array.isArray(s.stats?.designOperations)?s.stats.designOperations:[];
+ return ops.some(v=>v.element==="floor-1")?Math.min(1,s.levels-1):0;
+}
+el("cutaway").addEventListener("click",()=>{
+ all.checked=false;floor.value=interiorBand(scene());
+ updateFloor();drawSoon();
+});
 canvas.addEventListener("pointerdown",e=>{pressed=true;last=[e.clientX,e.clientY];canvas.setPointerCapture(e.pointerId);});
 canvas.addEventListener("pointermove",e=>{if(!pressed)return;yaw+=(e.clientX-last[0])*.007;pitch=Math.min(1.4,Math.max(.15,pitch+(e.clientY-last[1])*.005));last=[e.clientX,e.clientY];drawSoon();});
 canvas.addEventListener("pointerup",()=>pressed=false);
