@@ -64,9 +64,29 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    assert.equal(room.additionalProperties,false);
    assert.ok(room.properties.fixtures.items.enum.includes('electronics'));
    assert.equal(room.properties.fixtures.maxItems,3);
-   assert.deepEqual(structured.properties.expression.required,
-    ['setbackSide','setbackDepth','roofProfile','roofAxis','facadeLanguage']);
-   assert.equal(structured.properties.expression.additionalProperties,false);
+   const options=structured.properties.expression.anyOf;
+   assert.equal(options.length,7);
+   assert.ok(options.every(v=>v.type==='object'&&
+    v.additionalProperties===false));
+   const monitor=options.filter(v=>v.properties.roofProfile.enum.includes('split-monitor'));
+   assert.equal(monitor.length,1);
+   assert.deepEqual(monitor[0].properties.setbackSide.enum,['none']);
+   assert.deepEqual(monitor[0].properties.setbackDepth.enum,[0]);
+   assert.deepEqual(monitor[0].properties.roofAxis.enum,['x']);
+   assert.ok(monitor[0].required.includes('roofVolume'));
+   assert.equal(Object.hasOwn(monitor[0].properties,'rearCornerCut'),false);
+   const courtyard=options.filter(v=>v.required.includes('rearCornerCut'));
+   assert.equal(courtyard.length,2);
+   assert.ok(courtyard.every(v=>
+    v.properties.setbackSide.enum.join(',')==='none'));
+   assert.ok(courtyard.every(v=>
+    v.properties.roofProfile.enum.every(x=>x==='flat'||x==='ridge')));
+   const setback=options.filter(v=>
+    v.properties.setbackSide.enum.includes('east'));
+   assert.equal(setback.length,2);
+   assert.ok(setback.every(v=>
+    !v.properties.roofProfile.enum.includes('split-monitor')&&
+    !Object.hasOwn(v.properties,'rearCornerCut')));
    assert.equal(request.stream,false);
    assert.equal(request.messages[1].role,'user');
    assert.equal(request.messages[0].content.includes('B143 elements'),true);

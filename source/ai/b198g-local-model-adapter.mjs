@@ -227,20 +227,62 @@ const r125Level=r125obj({
  splitAxis:r125enum('x','z'),splitPercent:{type:'integer',enum:[40,50,60]},
  spaces:{type:'array',items:r125Room,minItems:2,maxItems:2}
 },['splitAxis','splitPercent','spaces']);
-const r125Expression=r125obj({
+// The original JSON-only Schema still permitted impossible combinations such as
+// split-monitor + an upper setback + a courtyard cut. Keep every historical
+// ArchitecturePlan valid; constrain only NEW local Ollama authorship, with
+// alternative complete object shapes instead of prompt-only warnings.
+// Disjoint alternatives preserve the model's independent form decisions.
+const r125Corner=r125obj({
+ width:r125int(3,5),depth:r125int(3,5),
+ side:r125enum('east','west'),access:r125enum('paved')
+},['width','depth']);
+const r125ExpressionFields={
  setbackSide:r125enum('none','east','rear'),
  setbackDepth:{type:'integer',enum:[0,2,3,4]},
  roofProfile:r125enum('flat','ridge','sawtooth','split-monitor'),
  roofAxis:r125enum('x','z'),
- facadeLanguage:r125enum('plain','fins','screen','recessed-portico'),
- roofVolume:r125enum('raised'),
- daylightFacade:r125enum('east-and-rear-bays'),
- roofOverhang:r125enum('one-block'),
- rearCornerCut:r125obj({
-  width:r125int(3,5),depth:r125int(3,5),
-  side:r125enum('east','west'),access:r125enum('paved')
- },['width','depth'])
-},['setbackSide','setbackDepth','roofProfile','roofAxis','facadeLanguage']);
+ facadeLanguage:r125enum('plain','fins','screen','recessed-portico')
+};
+const r125ExpressionRequired=['setbackSide','setbackDepth',
+ 'roofProfile','roofAxis','facadeLanguage'];
+const r125Expr=({roof,side,depth,axis,volume=false,corner=false,
+ monitorDaylight=false}={})=>r125obj({
+ ...r125ExpressionFields,
+ roofProfile:r125enum(...roof),
+ setbackSide:r125enum(...side),
+ setbackDepth:{type:'integer',enum:depth},
+ roofAxis:r125enum(...axis),
+ ...(volume?{roofVolume:r125enum('raised')}:{}),
+ ...(corner?{rearCornerCut:r125Corner}:{}),
+ ...(monitorDaylight?{
+  daylightFacade:r125enum('east-and-rear-bays'),
+  roofOverhang:r125enum('one-block')
+ }:{})
+},[...r125ExpressionRequired,...(volume==='required'?['roofVolume']:[]),
+ ...(corner==='required'?['rearCornerCut']:[])]);
+const r125Expression={
+ anyOf:[
+  // Flat massing, including real outdoor court OR upper setback.
+  r125Expr({roof:['flat'],side:['none'],depth:[0],axis:['x','z']}),
+  r125Expr({roof:['flat'],side:['east','rear'],depth:[2,3,4],
+   axis:['x','z']}),
+  r125Expr({roof:['flat'],side:['none'],depth:[0],axis:['x','z'],
+   corner:'required'}),
+  // Pitched architecture may choose raised real roof volume. A rear
+  // courtyard with a ridge is allowed only with that raised volume.
+  r125Expr({roof:['ridge','sawtooth'],side:['none'],depth:[0],
+   axis:['x','z'],volume:true}),
+  r125Expr({roof:['ridge','sawtooth'],side:['east','rear'],
+   depth:[2,3,4],axis:['x','z'],volume:true}),
+  r125Expr({roof:['ridge'],side:['none'],depth:[0],
+   axis:['x','z'],volume:'required',corner:'required'}),
+  // Monitor requires full raised volume, x axis, NO upper setback.
+  // Last-level x partition and single-level daylight variants remain
+  // checked by the independent HOST; unsupported source is still HOLD.
+  r125Expr({roof:['split-monitor'],side:['none'],depth:[0],
+   axis:['x'],volume:'required',monitorDaylight:true})
+ ]
+};
 export const R125_ARCHITECTURE_RESPONSE_SCHEMA=r125obj({
  schema:{type:'string',enum:[R125_PLAN_SCHEMA]},
  id:r125slug,title:r125text(180),brief:r125text(500),
