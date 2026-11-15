@@ -119,6 +119,7 @@ export function validateArchitecturePlan(p){
   for(const space of level.spaces){
    check(keys(space,['id','purpose',
     ...(Object.hasOwn(space??{},'fixture')?['fixture']:[]),
+    ...(Object.hasOwn(space??{},'fixtures')?['fixtures']:[]),
     ...(Object.hasOwn(space??{},'daylight')?['daylight']:[])])&&
     slug(space.id)&&text(space.purpose),'SPACE_FIELDS');
    check(space.fixture===undefined||
@@ -127,6 +128,14 @@ export function validateArchitecturePlan(p){
    check(space.daylight===undefined||
     ['wide-bay','clerestory'].includes(space.daylight),
     'SPACE_DAYLIGHT_ROLE');
+   const roles=['counter','workbench','display','storage','seating',
+    'bed','desk','washbasin','electronics'];
+   check(space.fixtures===undefined||
+    (space.fixture===undefined&&Array.isArray(space.fixtures)&&
+     space.fixtures.length>=1&&space.fixtures.length<=3&&
+     space.fixtures.every(x=>typeof x==='string'&&roles.includes(x))&&
+     new Set(space.fixtures).size===space.fixtures.length),
+    'SPACE_FIXTURE_GROUP');
    check(!seen.has(space.id),'DUPLICATE_SPACE_ID');
    seen.add(space.id);
   }

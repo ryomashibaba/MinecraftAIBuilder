@@ -9,7 +9,7 @@ import {verifyCompiled} from './b143-building-dsl.mjs';
 const err=msg=>{throw Error('R125_ROUTE_'+msg);};
 const key=(x,y,z)=>x+','+y+','+z;
 export function auditR125SourceRoutes(product,{featureTargets=[]}={}){
- if(!Array.isArray(featureTargets)||featureTargets.length>8)
+ if(!Array.isArray(featureTargets)||featureTargets.length>12)
   err('FEATURE_TARGET_CONTRACT');
  if(product?.schema!=='minecraftaibuilder-r125-plan-to-b143-result-v1'||
   !product.design||!product.compiled||!Array.isArray(product.program)||

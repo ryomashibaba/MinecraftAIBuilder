@@ -1057,6 +1057,72 @@ test('unknown room utility is rejected; legacy source remains identical',()=>{
  assert.throws(()=>compileArchitecturePlan(p),/R125_PLAN_SPACE_FIXTURE_ROLE/);
 });
 
+test('one room can hold genuinely different reachable bed and desk and storage',()=>{
+ const p=plan('inhabited-home',['x'],['sleeping and personal study','living']);
+ p.footprint={width:30,depth:30};
+ p.levels[0].spaces[0].fixtures=['bed','desk','storage'];
+ p.levels[0].spaces[1].fixtures=['seating','washbasin'];
+ const before=structuredClone(p);
+ before.levels[0].spaces.forEach(s=>delete s.fixtures);
+ const noFurniture=compileArchitecturePlan(before,{entrancePlacement:'source-accessible'});
+ const built=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+ assert.equal(built.fixtureTargets.length,5);
+ assert.equal(new Set(built.fixtureTargets.map(x=>x.id)).size,5);
+ assert.deepEqual(built.fixtureTargets.map(x=>x.kind),
+  ['bed','desk','storage','seating','washbasin']);
+ assert.notEqual(built.geometrySha256,noFurniture.geometrySha256);
+ const voxels=new Set(built.compiled.primitives.map(x=>x.slice(0,3).join(',')));
+ const bed=built.fixtureTargets[0];
+ assert.equal(bed.size[2],4);
+ assert.equal(voxels.has([bed.origin[0]+1,bed.origin[1]+1,bed.origin[2]+1].join(',')),true);
+ const audit=auditR125SourceRoutes(built,{featureTargets:built.fixtureTargets});
+ assert.equal(audit.status,'SOURCE_ROUTES_REACH_ALL_ZONES',JSON.stringify(audit.issues));
+ assert.equal(audit.featureAccess.length,5);
+ assert.ok(audit.featureAccess.every(x=>x.reachableFromEntrance));
+ assert.equal(auditArchitecturePlanCirculation(built).status,
+  'SOURCE_CLEARANCE_PROBES_PASS');
+ assert.deepEqual(built.compiled.BuildPlan.operations,[]);
+ assert.equal(built.worldWrites,0);
+});
+
+test('electronics research room has distinct real voxel equipment and still opens to circulation',()=>{
+ const p=plan('functional-electronics',['z'],
+  ['electronics prototyping laboratory','record keeping']);
+ p.footprint={width:30,depth:30};
+ p.levels[0].spaces[0].fixtures=['electronics','workbench','storage'];
+ p.levels[0].spaces[1].fixtures=['desk','display'];
+ const out=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+ assert.deepEqual(out.fixtureTargets.map(t=>t.kind),
+  ['electronics','workbench','storage','desk','display']);
+ const audit=auditR125SourceRoutes(out,{featureTargets:out.fixtureTargets});
+ assert.equal(audit.status,'SOURCE_ROUTES_REACH_ALL_ZONES',JSON.stringify(audit.issues));
+ assert.ok(audit.featureAccess.every(x=>x.reachableFromEntrance));
+ assert.equal(verifyCompiled(out.design,out.compiled),true);
+ assert.deepEqual(out.compiled.BuildPlan.operations,[]);
+});
+
+test('multi-room fixture grammar is bounded, duplicate-free, and preserves old single fixture geometry',()=>{
+ const p=plan('multifurniture-grammar',['x']);
+ p.levels[0].spaces[0].fixtures=['bed','desk'];
+ const valid=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+ assert.equal(valid.fixtureTargets.length,2);
+ for(const bad of [
+  [],['bed','bed'],['bed','desk','storage','seating'],['wrong']
+ ]) {
+  const q=structuredClone(p);
+  q.levels[0].spaces[0].fixtures=bad;
+  assert.throws(()=>compileArchitecturePlan(q),/R125_PLAN_SPACE_FIXTURE_GROUP/);
+ }
+ const both=structuredClone(p);
+ both.levels[0].spaces[0].fixture='seating';
+ assert.throws(()=>compileArchitecturePlan(both),/R125_PLAN_SPACE_FIXTURE_GROUP/);
+ const legacy=plan('legacy-single-fixture',['x']);
+ legacy.levels[0].spaces[0].fixture='seating';
+ const a=compileArchitecturePlan(legacy);
+ const b=compileArchitecturePlan(structuredClone(legacy));
+ assert.equal(a.sourceSha256,b.sourceSha256);
+ assert.equal(a.geometrySha256,b.geometrySha256);
+});
 test('all five purpose-neutral room fixture forms survive true SOURCE access checks',()=>{
  for(const role of ['counter','workbench','display','storage','seating']){
   const p=plan('fixture-'+role,['x'],['useful entry room','service zone']);

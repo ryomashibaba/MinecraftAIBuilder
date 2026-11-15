@@ -125,7 +125,8 @@ export async function runR125ArchitecturePlanBatch({
    authoredForm=authoredFormFamily(original);
    authoredProgram=original.levels.map(level=>({splitAxis:level.splitAxis,
     spaces:level.spaces.map(space=>({purpose:space.purpose,
-     ...(space.fixture?{fixture:space.fixture}:{})}))}));
+     ...(space.fixture?{fixture:space.fixture}:{}),
+     ...(space.fixtures?{fixtures:space.fixtures}:{})}))}));
    modelAuthoredFormFamilySha256=formHash(original);
   }
   const diagnosisPath=path.join(dest,item.id,'SOURCE_DIAGNOSIS.json');
