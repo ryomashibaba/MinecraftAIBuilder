@@ -588,13 +588,30 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
   // Its three-deep covered forecourt replaces real walls, not facade paint.
   // Historical plain/fins/screen plans remain exactly source-identical.
   if(l===0&&facadeLanguage==='recessed-portico'){
-   const entryX=groundEntryX(axis,split,w,entrancePlacement,original.entryZone);
-   const left=entryX-6,right=entryX+2,backZ=z0+3;
-   // Never cross an existing authored interior partition or change the
-   // original entrance-side zone just to force a decorative public frontage.
-   check(left>=x0+2&&right<=x1-2&&backZ<z1-3&&
-    (axis!=='x'||split<=left||split>=right),
-    'EXPRESSION_PORTICO_PROGRAM_CONFLICT');
+   const originalEntryX=groundEntryX(axis,split,w,entrancePlacement,
+    original.entryZone);
+   let entryX=originalEntryX;
+   let left=entryX-6,right=entryX+2;
+   const backZ=z0+3;
+   // Keep every previously successful authored portico byte-for-byte.
+   // Only a portico that would otherwise fail can shift ALONG the exterior
+   // wall, retaining its original 9-wide shape and the SAME entrance zone.
+   // x partitions allow the return wall on (not across) the divider.
+   const fits=()=>left>=x0+2&&right<=x1-2&&backZ<z1-3&&
+    (axis!=='x'||split<=left||split>=right);
+   if(!fits()&&entrancePlacement==='source-accessible'){
+    const firstSide=original.entryZone==='first'||
+     (original.entryZone!=='second'&&originalEntryX<split);
+    const minLeft=axis==='x'&&!firstSide?Math.max(x0+2,split):x0+2;
+    const maxRight=axis==='x'&&firstSide?Math.min(x1-2,split):x1-2;
+    // For a z partition there is no x-divider across the front wall.
+    const minimum=minLeft+6,maximum=maxRight-2;
+    if(minimum<=maximum){
+     entryX=Math.max(minimum,Math.min(maximum,originalEntryX));
+     left=entryX-6;right=entryX+2;
+    }
+   }
+   check(fits(),'EXPRESSION_PORTICO_PROGRAM_CONFLICT');
    box('portico-open-forecourt','cut',null,
     [left,y,z0],[right-left+1,4,3]);
    box('portico-west-return','add',wall,[left,y,z0],[1,4,4]);

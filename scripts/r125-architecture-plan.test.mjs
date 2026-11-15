@@ -666,6 +666,43 @@ test('separate author-raised ridge and L-corner retain authentic Qwen flat-roof 
  assert.throws(()=>compileArchitecturePlan(unsupported),/EXPRESSION_CORNER_CONFLICT/);
 });
 
+test('source-accessible portico relocates blocked entrances without changing AI-selected room',()=>{
+ for(const example of [
+  {id:'wide-east-portico',w:32,d:26,axis:'x',zone:'second'},
+  {id:'compact-z-portico',w:16,d:24,axis:'z',zone:'first'}
+ ]){
+  const authored=plan(example.id,[example.axis],
+   ['customer-facing work area','private preparation area']);
+  authored.footprint={width:example.w,depth:example.d};
+  authored.entryZone=example.zone;
+  authored.expression={setbackSide:'none',setbackDepth:0,
+   roofProfile:'flat',roofAxis:'x',facadeLanguage:'recessed-portico'};
+  const snapshot=structuredClone(authored);
+  const product=compileArchitecturePlan(authored,
+   {entrancePlacement:'source-accessible'});
+  const door=product.design.elements.find(e=>e.id==='exterior-entrance');
+  assert.ok(door,'real B143 entry cut exists');
+  assert.equal(door.mode,'cut');
+  assert.deepEqual(door.size,[2,3,1]);
+  assert.equal(door.origin[2],4,'three-deep covered approach');
+  const portico=product.design.elements.find(e=>e.id==='portico-open-forecourt');
+  assert.deepEqual(portico.size,[9,4,3]);
+  if(example.zone==='second'){
+   assert.ok(door.origin[0]>=product.program[0].splitCoordinate,
+    'entrance remains in authored second x zone');
+  }
+  assert.equal(verifyCompiled(product.design,product.compiled),true);
+  assert.equal(auditR125SourceRoutes(product).status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert.equal(auditArchitecturePlanCirculation(product).status,
+   'SOURCE_CLEARANCE_PROBES_PASS');
+  assert.deepEqual(authored,snapshot);
+  assert.equal(product.worldWrites,0);
+  assert.deepEqual(product.compiled.BuildPlan.operations,[]);
+ }
+ // Existing 24-wide Qwen corner and its valid portico keep exact voxels
+ // and original entry x=10, asserted by the frozen research regression.
+});
+
 test('explicit researcher portico is a real three-deep B143 volume, preserves original Qwen, and rejects blocked envelopes',()=>{
  const original=JSON.parse(fs.readFileSync(new URL(
   '../evidence/r125-real-l-corner-20261101/MODEL_RESPONSE_ORIGINAL.txt',
