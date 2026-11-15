@@ -5,7 +5,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {runR125SemanticPilot} from './r125-semantic-pilot.mjs';
-import {compileArchitecturePlan,auditArchitecturePlanCirculation} from '../source/ai/r125-architecture-plan.mjs';
+import {compileArchitecturePlan,auditArchitecturePlanCirculation,
+ assessR125ProgramGeometry} from '../source/ai/r125-architecture-plan.mjs';
+import {critiqueArchitecture} from '../source/ai/b198c-spatial-critic.mjs';
 import {auditR125SourceRoutes} from '../source/ai/r125-source-routes.mjs';
 import {exportB143EducationMakeCode} from '../source/ai/r125-education-makecode-export.mjs';
 
@@ -30,7 +32,13 @@ export function exportSavedPlan(planFile, outDir, provenance='UNVERIFIED_DESIGN'
  // Reuse two EXISTING voxel-derived audits. Source pass means only an
  // offline clearance candidate, never in-game walking certification.
  const circulation=auditArchitecturePlanCirculation(product);
- const routes=auditR125SourceRoutes(product);
+ const routes=auditR125SourceRoutes(product,{featureTargets:product.fixtureTargets??[]});
+ // Match the exact combined source gate from the genuine saved-model replay.
+ // In particular, an upstairs floor with two disconnected components is
+ // NOT approved just because the entry/individual fixture routes pass.
+ const critique=critiqueArchitecture({design:product.design,
+  compiled:product.compiled});
+ const programFloors=assessR125ProgramGeometry(product,critique);
  const walkability={
   schema:'minecraftaibuilder-r125-practical-source-review-v1',
   sourceSha256:product.sourceSha256,
@@ -42,9 +50,10 @@ export function exportSavedPlan(planFile, outDir, provenance='UNVERIFIED_DESIGN'
   hostUpperDoorPlacement:upperDoorPlacement,
   originalModelPlanUnchanged:true,
   status:circulation.status==='SOURCE_CLEARANCE_PROBES_PASS'&&
-   routes.status==='SOURCE_ROUTES_REACH_ALL_ZONES'?
+   routes.status==='SOURCE_ROUTES_REACH_ALL_ZONES'&&
+   programFloors.programFloorIssues.length===0?
    'SOURCE_ROUTE_CANDIDATE':'HOLD_SOURCE_WALKABILITY',
-  circulation,routes,modelCallsForReview:0,
+  circulation,routes,programFloors,modelCallsForReview:0,
   requiresInGameEntranceAndRoomWalk:true,
   actualInGameWalking:'NOT_TESTED',art:'NOT_REVIEWED',
   worldWrites:0,worldContacts:0

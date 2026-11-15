@@ -1,6 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {exportSavedPlan} from './r125-japanese-makecode.mjs';
 import {compileDesign} from '../source/ai/b143-building-dsl.mjs';
 import {compactB143Cuboids,exportB143EducationMakeCode} from '../source/ai/r125-education-makecode-export.mjs';
 import {compileR190BNAssembly} from '../source/ai/r190bn-spatial-assembly.mjs';
@@ -138,6 +143,36 @@ test('exported preview verification rejects a block that is only AIR',()=>{
  assert.ok(sayings.some(s=>s.includes('HOLD:')&&s.includes('positions')),
   'AIR after placement must NOT be accepted as the intended material');
  assert.equal(sayings.some(s=>s.includes('Positions and material counts match')),false);
+});
+test('real saved Qwen model plan exports test-world preview only after full SOURCE gate',()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'mab-v11-edu-preview-'));
+ const input=fileURLToPath(new URL(
+  '../evidence/r125-real-l-corner-20261101/MODEL_RESPONSE_ORIGINAL.txt',
+  import.meta.url));
+ try{
+  const dest=path.join(root,'preview');
+  const report=exportSavedPlan(input,dest,
+   'UNVERIFIED_DESIGN',null,true);
+  const review=JSON.parse(fs.readFileSync(
+   path.join(dest,'SOURCE_WALKABILITY_REVIEW.json'),'utf8'));
+  assert.equal(review.circulation.status,'SOURCE_CLEARANCE_PROBES_PASS');
+  assert.equal(review.routes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert.deepEqual(review.programFloors.programFloorIssues,[]);
+  assert.equal(review.status,'SOURCE_ROUTE_CANDIDATE');
+  assert.equal(report.status,'OFFLINE_CODE_GENERATED_ONLY');
+  assert.equal(report.materialMode,'UNVERIFIED_TEST_WORLD_PREVIEW');
+  assert.equal(report.actualEducationExecution,'NOT_TESTED');
+  assert.equal(report.worldWrites,0);
+  assert.equal(report.constructionApproved,false);
+  const code=fs.readFileSync(path.join(dest,'MAKECODE_EDUCATION.ts'),'utf8');
+  assert.match(code,/UNVERIFIED PREVIEW MATERIALS/);
+  assert.match(code,/player.onChat\("mabbuild"/);
+  assert.match(code,/mabverify/);
+  const receipt=JSON.parse(fs.readFileSync(
+   path.join(dest,'EXPORT_REPORT.json'),'utf8'));
+  assert.equal(receipt.materialMode,'UNVERIFIED_TEST_WORLD_PREVIEW');
+  assert.equal(receipt.geometrySha256,report.geometrySha256);
+ }finally{fs.rmSync(root,{recursive:true,force:true})}
 });
 test('strict default holds unverified wood instead of substituting stone',()=>{
  const scene=compileDesign(d);
