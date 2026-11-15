@@ -195,7 +195,8 @@ export function diagnoseR125ArchitecturePlanOriginal(raw){
   return {...base,status:'HOLD_PLAN_COMPILER_OR_QA',
    sourceVerified:false,compilerReason:String(error?.message??error).slice(0,360),
    ...(spatialCapacity?{spatialCapacity}:{}),
-   ...(error?.fixturePlacement?{fixturePlacement:error.fixturePlacement}:{})};
+   ...(error?.fixturePlacement?{fixturePlacement:error.fixturePlacement}:{}),
+   ...(error?.daylightPlacement?{daylightPlacement:error.daylightPlacement}:{})};
  }
 }
 

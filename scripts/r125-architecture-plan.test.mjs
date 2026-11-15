@@ -8,6 +8,7 @@ import {SCHEMA,validateArchitecturePlan,compileArchitecturePlan,
  auditArchitecturePlanCirculation,assessR125ProgramGeometry}
  from '../source/ai/r125-architecture-plan.mjs';
 import {addAuthoredRoomFixtures} from '../source/ai/r125-room-fixtures.mjs';
+import {addAuthoredRoomDaylight} from '../source/ai/r125-room-daylight.mjs';
 import {verifyCompiled,compileDesign} from '../source/ai/b143-building-dsl.mjs';
 import {auditR125SourceRoutes} from '../source/ai/r125-source-routes.mjs';
 import {critiqueArchitecture} from '../source/ai/b198c-spatial-critic.mjs';
@@ -993,6 +994,82 @@ test('model-selected fixtures become B143 voxels and retain reachable two-wide s
  assert.ok(built.gates.every(g=>g==='BLOCKED'));
 });
 
+test('model high window falls back to a smaller real glazed bay only when full 5-wide fails',()=>{
+ const p=plan('test-clerestory-narrow-wall',['x'],
+  ['assembly workspace','storage']);
+ p.footprint={width:24,depth:24};
+ const shell=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+ const selected=structuredClone(p);
+ selected.levels[0].spaces[0].daylight='clerestory';
+ const area=shell.program[0].zones[0].range;
+ const y=shell.program[0].standingFloorY+2;
+ const openX=[7,8,9];
+ const blocking=[];
+ const box=(id,x,z)=>blocking.push({id,shape:'box',mode:'add',
+  material:'metal',origin:[x,y,z],size:[1,1,1]});
+ for(let x=area.x[0];x<=area.x[1];x++){
+  if(!openX.includes(x))box('blocked-front-'+x,x,0);
+  box('blocked-rear-'+x,x,p.footprint.depth-1);
+ }
+ for(let z=area.z[0];z<=area.z[1];z++)
+  box('blocked-west-'+z,0,z);
+ const design={...shell.design,elements:[...shell.design.elements,...blocking]};
+ const compiled=compileDesign(design);
+ assert.equal(verifyCompiled(design,compiled),true);
+ const source={...shell,plan:selected,design,compiled,
+  sourceSha256:compiled.sourceSha256,geometrySha256:compiled.geometrySha256};
+ const outcome=addAuthoredRoomDaylight(source,{
+  auditCirculation:auditArchitecturePlanCirculation});
+ assert.equal(outcome.daylightTargets.length,1);
+ const win=outcome.daylightTargets[0];
+ assert.equal(win.face,'front');
+ assert.equal(win.kind,'clerestory');
+ assert.equal(win.origin[0],7);
+ assert.deepEqual(win.size,[3,1,1]);
+ assert.equal(win.adaptedWidthFrom,5);
+ assert.equal(win.outsideAirVerified,true);
+ assert.equal(win.sillLintelVerified,true);
+ assert.equal(auditR125SourceRoutes(outcome).status,
+  'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(auditArchitecturePlanCirculation(outcome).status,
+  'SOURCE_CLEARANCE_PROBES_PASS');
+ assert.deepEqual(outcome.compiled.BuildPlan.operations,[]);
+ assert.equal(outcome.worldWrites,0);
+});
+test('unsupported high window fails with bounded reasons and no false SOURCE promotion',()=>{
+ const p=plan('test-clerestory-hold',['x'],
+  ['assembly workspace','control room']);
+ p.footprint={width:24,depth:24};
+ const shell=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+ const selected=structuredClone(p);
+ selected.levels[0].spaces[0].daylight='clerestory';
+ const area=shell.program[0].zones[0].range;
+ const y=shell.program[0].standingFloorY+2;
+ const blocks=[];
+ const at=(id,x,z)=>blocks.push({id,shape:'box',mode:'add',
+  material:'metal',origin:[x,y,z],size:[1,1,1]});
+ for(let x=area.x[0];x<=area.x[1];x++){
+  at('block-front-'+x,x,0);
+  at('block-rear-'+x,x,p.footprint.depth-1);
+ }
+ for(let z=area.z[0];z<=area.z[1];z++)at('block-west-'+z,0,z);
+ const design={...shell.design,elements:[...shell.design.elements,...blocks]};
+ const compiled=compileDesign(design);
+ const source={...shell,plan:selected,design,compiled,
+  sourceSha256:compiled.sourceSha256,geometrySha256:compiled.geometrySha256};
+ let error;
+ try{addAuthoredRoomDaylight(source,{
+  auditCirculation:auditArchitecturePlanCirculation});}
+ catch(e){error=e;}
+ assert.equal(error?.message,
+  'R125_PLAN_DAYLIGHT_NO_SUPPORTED_EXTERIOR_BAY_area-0a');
+ assert.deepEqual(error.daylightPlacement.attemptedWidths,[5,4,3]);
+ assert.ok(error.daylightPlacement.candidatesEvaluated>0);
+ assert.ok(error.daylightPlacement.rejected.EXTERIOR_AIR_BLOCKED>0);
+ assert.equal(error.daylightPlacement.originalPlanEdited,false);
+ assert.equal(error.daylightPlacement.worldWrites,0);
+ assert.equal(shell.worldWrites,0);
+});
 test('model-selected wide-bay and clerestory create real glass with exterior AIR',()=>{
  const p=plan('daylight-shop',['x'],['customer retail','making lab']);
  p.footprint={width:24,depth:24};
