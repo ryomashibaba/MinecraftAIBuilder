@@ -25,7 +25,7 @@ const fixtureIntents=p=>p.plan.levels.flatMap((l,li)=>
   [{level:li,zoneIndex:zi,zoneId:s.id,kind:s.fixture,multi:false,
    ...(s.fixtureDetail?{detail:s.fixtureDetail}:{})}]));
 
-function positions(intent,product,turned=false){
+function positions(intent,product,turned=false,exhaustive=false){
  const range=product.program[intent.level].zones[intent.zoneIndex].range;
  const width=turned?roleDepth(intent.kind):3;
  const depth=turned?3:roleDepth(intent.kind);
@@ -37,11 +37,15 @@ function positions(intent,product,turned=false){
  ];
  const mx=Math.floor((range.x[0]+range.x[1]-width+1)/2);
  const mz=Math.floor((range.z[0]+range.z[1]-depth+1)/2);
- const candidates=intent.multi?
+ // A single authored fixture keeps its original four-corner placement first.
+ // Only after those fail, try other positions with the same bounded search
+ // already used for multiple fixtures. This rescues wide useful rooms where
+ // every corner is obstructed but wall or middle floor remains accessible.
+ const candidates=(intent.multi||exhaustive)?
   [...corners,[mx,range.z[0]],[mx,range.z[1]-depth+1],
    [range.x[0],mz],[range.x[1]-width+1,mz],[mx,mz]]:corners;
  if(intent.multi&&intent.index%2===1)candidates.reverse();
- if(intent.multi){
+ if(intent.multi||exhaustive){
   const seen=new Set(candidates.map(([x,z])=>x+','+z));
   for(let z=range.z[0];z<=range.z[1]-depth+1;z++)
    for(let x=range.x[0];x<=range.x[1]-width+1;x++){
@@ -200,7 +204,7 @@ function repairZone(start,previousTargets,zoneIntents,auditCirculation){
    (roleDepth(intent.kind)===1?[true,false]:[false,true]):
    [false]; // Preserve the proven existing search order in wider rooms.
   for(const turned of variants){
-   const {candidates}=positions(intent,product,turned);
+   const {candidates}=positions(intent,product,turned,true);
    const used=new Set();
    for(const [x,z] of candidates){
     const key=x+','+z;
@@ -253,9 +257,11 @@ export function addAuthoredRoomFixtures(product,{auditCirculation}={}){
   // available to multiple fixtures only, so a lone 3x1 workbench in a
   // 3..4-wide room could fail even with an accessible 90-degree layout.
   // Preserve every successfully placed old building exactly.
-  const narrowSingle=!intent.multi&&range.x[1]-range.x[0]+1<=4;
+  // A single item in a wide zone can also have all four corners unavailable.
+  // The fallback changes ONLY a previously failed placement; the valid
+  // original four-corner path and multi-item search remain unchanged.
   let fallback=null;
-  if(intent.multi||narrowSingle){
+  {
    const start=zoneStarts.get(zkey);
    const roles=intent.multi?intents.filter(i=>intentKey(i)===zkey&&
     i.multi&&i.index<=intent.index):[intent];

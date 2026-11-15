@@ -1707,6 +1707,59 @@ test('model-authored unequal T zones yield real sized, navigable and equipped sp
  }
 });
 
+test('one fixture in a wide room recovers reachable mid-wall placement when corners are blocked',()=>{
+ const basePlan=plan('wide-single-service-recovery',['x'],
+  ['reception and walkway','actual workshop']);
+ basePlan.footprint={width:26,depth:26};
+ const shell=compileArchitecturePlan(basePlan,
+  {entrancePlacement:'source-accessible'});
+ const area=shell.program[0].zones[1].range;
+ const y=shell.program[0].standingFloorY;
+ const corners=[
+  [area.x[0],area.z[1]],
+  [area.x[1]-2,area.z[1]],
+  [area.x[0],area.z[0]],
+  [area.x[1]-2,area.z[0]]
+ ];
+ // Four real B143 obstacles prevent the old corner-only algorithm from
+ // placing a 3x1 workbench. The central room and door are still open.
+ const obstacles=corners.map(([x,z],index)=>({
+  id:'existing-corner-obstacle-'+index,shape:'box',mode:'add',
+  material:'metal',origin:[x+1,y,z],size:[1,1,1]
+ }));
+ const sourceDesign={...shell.design,elements:[
+  ...shell.design.elements,...obstacles]};
+ const compiled=compileDesign(sourceDesign);
+ assert.equal(verifyCompiled(sourceDesign,compiled),true);
+ const selected=structuredClone(basePlan);
+ selected.levels[0].spaces[1].fixture='workbench';
+ const source={...shell,plan:selected,design:sourceDesign,compiled,
+  sourceSha256:compiled.sourceSha256,
+  geometrySha256:compiled.geometrySha256};
+ const beforePlan=structuredClone(selected);
+ const outcome=addAuthoredRoomFixtures(source,{
+  auditCirculation:auditArchitecturePlanCirculation});
+ assert.equal(outcome.fixtureTargets.length,1);
+ const target=outcome.fixtureTargets[0];
+ assert.equal(target.kind,'workbench');
+ assert.equal(target.zoneId,'area-0b');
+ assert.ok(!corners.some(([x,z])=>
+  target.origin[0]===x&&target.origin[2]===z));
+ assert.equal(outcome.fixtureSearch?.[0]?.arrangementFound,true);
+ assert.ok(outcome.fixtureSearch[0].candidateEvaluations<=540);
+ assert.equal(auditR125SourceRoutes(outcome,{
+  featureTargets:outcome.fixtureTargets}).status,
+  'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(auditArchitecturePlanCirculation(outcome).status,
+  'SOURCE_CLEARANCE_PROBES_PASS');
+ assert.equal(verifyCompiled(outcome.design,outcome.compiled),true);
+ const actual=voxels(outcome.compiled);
+ for(const [x,z] of corners)assert.ok(includes(actual,x+1,y,z));
+ assert.deepEqual(selected,beforePlan,'the AI-owned room and role must not change');
+ assert.equal(outcome.worldWrites,0);
+ assert.deepEqual(outcome.compiled.BuildPlan.operations,[]);
+});
+
 test('a lone narrow-zone fixture uses true B143 rotation only after normal candidates fail',()=>{
  const p=plan('single-narrow-workshop',['x'],
   ['small electronics service zone','connected circulation zone']);
