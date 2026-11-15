@@ -99,7 +99,7 @@ $reportFile = Join-Path $out 'BATCH_REPORT.json'
 if (-not (Test-Path -LiteralPath $reportFile -PathType Leaf)) {
  throw 'V11_PILOT_NO_REPORT_PRESERVE_LOCAL_FILES'
 }
-$report = Get-Content -LiteralPath $reportFile -Raw | ConvertFrom-Json
+$report = Get-Content -LiteralPath $reportFile -Raw -Encoding UTF8 | ConvertFrom-Json
 if ($report.schema -cne 'r125-local-plan-batch-v1' -or
     [int]$report.worldWrites -ne 0 -or
     [int]$report.attempted -gt 3 -or
