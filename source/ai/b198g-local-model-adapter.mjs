@@ -253,7 +253,14 @@ export function createR125ArchitecturePlanLocalAdapter({
    if(typeof raw!=='string'||raw.length<1||raw.length>60000)
     refuse('INVALID_MODEL_CONTENT');
    // MUST precede parsing, validation, source compilation and length rejection.
-   onRawModelResponse(raw,{finishReason:choice.finish_reason??null});
+   const reportedUsage=data.usage&&typeof data.usage==='object'?data.usage:{};
+   const count=key=>Number.isSafeInteger(reportedUsage[key])&&
+    reportedUsage[key]>=0&&reportedUsage[key]<=10000000?
+    reportedUsage[key]:null;
+   onRawModelResponse(raw,{finishReason:choice.finish_reason??null,
+    usage:{promptTokens:count('prompt_tokens'),
+     completionTokens:count('completion_tokens'),
+     totalTokens:count('total_tokens')}});
    if(choice.finish_reason==='length')refuse('TRUNCATED_MODEL_RESPONSE');
    let plan;
    try{plan=JSON.parse(raw);}

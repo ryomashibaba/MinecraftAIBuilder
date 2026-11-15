@@ -62,12 +62,12 @@ export async function runR125LocalArchitecturePlan({
   fail('OUT_DIRECTORY_REQUIRED');
  const dest=path.resolve(outDir);
  ensurePrivateNewDirectory(dest);
- let captured=null;
+ let captured=null,modelStartMs=null;
  // Validate endpoint, model, prompt and other options BEFORE allocating dir.
  const author=createR125ArchitecturePlanLocalAdapter({
   model,endpoint,fetcher,timeoutMs,reasoningEffort,maxOutputTokens,
-  onRawModelResponse(raw,{finishReason}){
-   captured={sha256:sha(raw),finishReason};
+  onRawModelResponse(raw,{finishReason,usage}){
+   captured={sha256:sha(raw),finishReason,usage};
    write(dest,'MODEL_RESPONSE_ORIGINAL.txt',raw);
   }
  });
@@ -90,6 +90,7 @@ export async function runR125LocalArchitecturePlan({
   nineWorldGates:Array(9).fill('BLOCKED')};
  let result;
  try{
+  modelStartMs=Date.now();
   const answer=await author({prompt});
   const raw=fs.readFileSync(path.join(dest,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8');
   if(answer.originalSha256!==sha(raw)||captured.sha256!==sha(raw))
@@ -112,11 +113,15 @@ export async function runR125LocalArchitecturePlan({
    sourceVerified:diagnosis.sourceVerified===true,
    review3d:sourceDesign?'TRUE_B143_HTML_GENERATED_ART_PENDING':'NOT_GENERATED',
    modelCallAttempts:1,modelResponsesCaptured:1,
-   originalCaptureFinishReason:captured.finishReason};
+   originalCaptureFinishReason:captured.finishReason,
+   modelRequestElapsedMs:Date.now()-modelStartMs,
+   providerReportedTokenUsage:captured.usage};
  }catch(error){
   result={...common,status:'HOLD_MODEL_OR_SOURCE',
    reason:String(error?.message??error).slice(0,300),
    originalSha256:captured?.sha256??null,
+   modelRequestElapsedMs:modelStartMs===null?null:Date.now()-modelStartMs,
+   providerReportedTokenUsage:captured?.usage??null,
    sourceVerified:false,modelCallAttempts:1,
    modelResponsesCaptured:captured?1:0};
  }finally{

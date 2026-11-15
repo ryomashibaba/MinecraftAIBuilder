@@ -16,7 +16,8 @@ const original=fs.readFileSync(
  import.meta.url),'utf8');
 const digest=s=>createHash('sha256').update(s).digest('hex');
 const provider=raw=>({ok:true,json:async()=>({
- choices:[{message:{content:raw},finish_reason:'stop'}]})});
+ choices:[{message:{content:raw},finish_reason:'stop'}],
+ usage:{prompt_tokens:157,completion_tokens:423,total_tokens:580}})});
 const prompt='未知の用途に対応し、入口・屋内動線・採光を持つ独創的な店舗を設計してください。';
 
 test('existing real Qwen original replays through the unchanged B143 and circulation',()=>{
@@ -82,6 +83,10 @@ test('one call records raw and true SOURCE, without privately leaking raw into r
   assert.equal(out.report.sourceVerified,true);
   assert.equal(out.report.originalSha256,digest(original));
   assert.equal(out.report.modelResponsesCaptured,1);
+  assert.ok(Number.isSafeInteger(out.report.modelRequestElapsedMs));
+  assert.ok(out.report.modelRequestElapsedMs>=0);
+  assert.deepEqual(out.report.providerReportedTokenUsage,{
+   promptTokens:157,completionTokens:423,totalTokens:580});
   assert.equal(fs.readFileSync(path.join(dest,'REQUEST_ORIGINAL.txt'),'utf8'),prompt);
   assert.equal(out.report.requestSha256,digest(prompt));
   assert.deepEqual(out.report.requestedGenerationSettings,{
