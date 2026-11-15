@@ -188,7 +188,7 @@ export function validateArchitecturePlan(p){
    'EXPRESSION_ROOF_VOLUME');
   check(e.roofProfile!=='split-monitor'||
    (e.roofVolume==='raised'&&e.roofAxis==='x'&&
-    e.setbackSide==='none'&&p.levels.at(-1).splitAxis==='x'),
+    e.setbackSide==='none'),
    'EXPRESSION_MONITOR_PROGRAM_CONFLICT');
   // AUTHOR opt-in only; no implicit change to frozen source or prior massing.
   check(e.daylightFacade===undefined||
@@ -613,7 +613,10 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
     // the TWO-WIDE supported walkway at the split wall. Opt-in
     // generic rule sets it beyond the shaft with 2-cell clearance.
     // This is HOST research; no change to the Qwen-authored program.
-    const clearGroundStair=l===0&&count===2&&entrancePlacement==='source-accessible'&&split>=3&&split<=8;
+    // A 2x2 standing pad needs TWO clear rows between the last tread
+    // (z=7) and this doorway. A divider at z=9 leaves only row z=8;
+    // the old z<=8 condition missed that horizontal turn obstruction.
+    const clearGroundStair=l===0&&count===2&&entrancePlacement==='source-accessible'&&split>=3&&split<=9;
     const doorX=(l===1&&upperDoorPlacement==='stair-clear')||clearGroundStair?
      Math.max(x0+2,Math.min(x1-3,3+2+2)):
      x0+2;
@@ -740,13 +743,21 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
   [upper.x1-upper.x0+1,1,upper.z1-upper.z0+1]);
  if(roofProfile==='split-monitor'){
   // Host implementation of an explicit author-selected building mass.
-  // The last-level authored split controls both genuine roof elevations.
-  const highX=program[count-1].splitCoordinate+1;
+  // An x partition retains its historical roof alignment. For a z
+  // partition the roof still spans x: center its step within the envelope
+  // instead of reinterpreting an authored z coordinate as an x coordinate.
+  // Room axes, proportions and the author's roof family remain unchanged.
+  const highX=program[count-1].splitAxis==='x'?
+   program[count-1].splitCoordinate+1:
+   Math.floor((upper.x0+upper.x1)/2)+1;
   check(highX>=upper.x0+5&&highX<=upper.x1-6,
    'EXPRESSION_MONITOR_VOLUME_BOUNDS');
   const spanZ=upper.z1-upper.z0+1;
-  // The 10-cell clerestory must leave sound end piers. No silent clipping.
-  check(spanZ>=16,'EXPRESSION_MONITOR_CLERESTORY_SPAN');
+  // HOST window dimensions adapt to the real roof span. Retain the
+  // historical 10-cell light when it fits, leaving four near-end cells
+  // and at least two far-end cells; never resize an author-owned dimension.
+  const clerestoryLength=Math.min(10,spanZ-6);
+  check(clerestoryLength>=2,'EXPRESSION_MONITOR_CLERESTORY_SPAN');
   box('roof-monitor-low','add',roof,
    [upper.x0,top,upper.z0],[highX-upper.x0,1,spanZ]);
   box('roof-monitor-high','add',roof,
@@ -760,9 +771,9 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
   ])box('roof-monitor-riser-'+name,'add',wall,origin,size);
   // Real upper-face daylight, with outward air above the lower roof.
   box('roof-monitor-westerly-light-cut','cut',null,
-   [highX,top+1,upper.z0+4],[1,2,10]);
+   [highX,top+1,upper.z0+4],[1,2,clerestoryLength]);
   box('roof-monitor-westerly-light','add','glass',
-   [highX,top+1,upper.z0+4],[1,2,10]);
+   [highX,top+1,upper.z0+4],[1,2,clerestoryLength]);
   const frontSpan=Math.min(4,upper.x1-highX-2);
   check(frontSpan>=2,'EXPRESSION_MONITOR_FRONT_SPAN');
   box('roof-monitor-front-light-cut','cut',null,

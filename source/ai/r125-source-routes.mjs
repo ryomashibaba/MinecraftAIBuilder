@@ -9,7 +9,9 @@ import {verifyCompiled} from './b143-building-dsl.mjs';
 const err=msg=>{throw Error('R125_ROUTE_'+msg);};
 const key=(x,y,z)=>x+','+y+','+z;
 export function auditR125SourceRoutes(product,{featureTargets=[]}={}){
- if(!Array.isArray(featureTargets)||featureTargets.length>12)
+ // ArchitecturePlan permits 2 levels x 3 rooms x 3 authored utilities.
+ // Audit every permitted utility rather than rejecting the thirteenth.
+ if(!Array.isArray(featureTargets)||featureTargets.length>18)
   err('FEATURE_TARGET_CONTRACT');
  if(product?.schema!=='minecraftaibuilder-r125-plan-to-b143-result-v1'||
   !product.design||!product.compiled||!Array.isArray(product.program)||

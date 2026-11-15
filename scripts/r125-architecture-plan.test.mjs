@@ -800,7 +800,7 @@ test('source-only split-monitor gives distinct physical roof volumes and open da
  assert.deepEqual(original,snapshot);
 });
 
-test('physical two-elevation monitor glazing is source-aligned, air-backed and short-span fail closed',()=>{
+test('physical two-elevation monitor glazing is air-backed and adapts to a compact span',()=>{
  const original=JSON.parse(fs.readFileSync(new URL(
   '../evidence/r125-real-l-corner-20261101/MODEL_RESPONSE_ORIGINAL.txt',
   import.meta.url),'utf8'));
@@ -832,8 +832,12 @@ test('physical two-elevation monitor glazing is source-aligned, air-backed and s
  delete compact.expression.rearCornerCut;
  compact.expression={...compact.expression,roofProfile:'split-monitor',
   roofAxis:'x',roofVolume:'raised',facadeLanguage:'recessed-portico'};
- assert.throws(()=>compileArchitecturePlan(compact,
-  {entrancePlacement:'source-accessible'}),/EXPRESSION_MONITOR_CLERESTORY_SPAN/);
+ const shorter=compileArchitecturePlan(compact,{entrancePlacement:'source-accessible'});
+ const light=shorter.design.elements.find(e=>e.id==='roof-monitor-westerly-light');
+ assert.equal(light.size[2],8);
+ assert.equal(light.origin[2],5);
+ assert.equal(light.origin[2]+light.size[2],13,'two solid far-end cells remain');
+ assert.equal(verifyCompiled(shorter.design,shorter.compiled),true);
  assert.deepEqual(original,snapshot);
 });
 
@@ -1946,4 +1950,76 @@ test('a lone narrow-zone fixture uses true B143 rotation only after normal candi
  assert.equal(planWithFixture.levels[0].spaces[0].fixture,'workbench');
  assert.deepEqual(output.compiled.BuildPlan.operations,[]);
  assert.equal(output.worldWrites,0);
+});
+
+test('all eighteen grammar-permitted utilities receive source service audits without relaxing B143',()=>{
+ const p=plan('eighteen-utility-study',['x','x']);
+ p.footprint={width:30,depth:30};
+ p.expression={setbackSide:'none',setbackDepth:0,roofProfile:'flat',roofAxis:'x',facadeLanguage:'plain'};
+ for(const [li,level] of p.levels.entries()){
+  level.spaces.push({id:'third-'+li,purpose:'another independent work area'});
+  for(const room of level.spaces)room.fixtures=['workbench','desk','storage'];
+ }
+ const saved=structuredClone(p);
+ const r=compileArchitecturePlan(p,{entrancePlacement:'source-accessible',upperDoorPlacement:'stair-clear'});
+ const route=auditR125SourceRoutes(r,{featureTargets:r.fixtureTargets});
+ assert.equal(r.fixtureTargets.length,18);
+ assert.equal(route.featureAccess.length,18);
+ assert.ok(route.featureAccess.every(f=>f.reachableFromEntrance));
+ assert.equal(route.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.ok(r.design.elements.length<=160);
+ assert.equal(verifyCompiled(r.design,r.compiled),true);
+ assert.throws(()=>auditR125SourceRoutes(r,{featureTargets:[...r.fixtureTargets,r.fixtureTargets[0]]}),/FEATURE_TARGET_CONTRACT/);
+ assert.deepEqual(p,saved);
+});
+
+test('monitor roof x step is independent of z room division and short daylight stays air-backed',()=>{
+ for(const depth of [16,18,20])for(const percent of [40,60]){
+  const p=plan('cross-axis-monitor-'+depth+'-'+percent,['z','z']);
+  p.footprint={width:26,depth};
+  p.levels[1].splitPercent=percent;
+  p.expression={setbackSide:'none',setbackDepth:0,roofProfile:'split-monitor',roofAxis:'x',roofVolume:'raised',facadeLanguage:'plain'};
+  const original=structuredClone(p);
+  const r=compileArchitecturePlan(p,{entrancePlacement:'source-accessible',upperDoorPlacement:'stair-clear'});
+  assert.equal(r.program[1].splitAxis,'z');
+  assert.equal(r.program[1].requestedPercent,percent);
+  const light=r.design.elements.find(e=>e.id==='roof-monitor-westerly-light');
+  assert.equal(light.size[2],Math.min(10,depth-8));
+  const v=new Map(r.compiled.primitives.map(c=>[c.slice(0,3).join(','),c[3]]));
+  const [x,y,z]=light.origin;
+  for(let dz=0;dz<light.size[2];dz++)for(let dy=0;dy<2;dy++){
+   assert.equal(v.get([x,y+dy,z+dz].join(',')),3);
+   assert.equal(v.has([x-1,y+dy,z+dz].join(',')),false);
+   assert.equal(v.has([x+1,y+dy,z+dz].join(',')),false);
+  }
+  assert.equal(verifyCompiled(r.design,r.compiled),true);
+  assert.equal(auditR125SourceRoutes(r).status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert.deepEqual(p,original);
+ }
+});
+
+test('two-wide ground turn clears a divider two rows after the last stair tread',()=>{
+ const p=plan('two-wide-stair-turn',['z','x']);
+ p.footprint={width:24,depth:24};
+ p.levels[0].splitPercent=40;
+ p.expression={setbackSide:'none',setbackDepth:0,roofProfile:'ridge',roofAxis:'z',roofVolume:'raised',facadeLanguage:'plain'};
+ const before=compileArchitecturePlan(p,{upperDoorPlacement:'stair-clear'});
+ const after=compileArchitecturePlan(p,{entrancePlacement:'source-accessible',upperDoorPlacement:'stair-clear'});
+ assert.equal(before.program[0].splitCoordinate,9);
+ const floor=r=>critiqueArchitecture({design:r.design,compiled:r.compiled}).objectiveAudit.elevationConnectivity.find(l=>l.standingY===2);
+ assert.equal(floor(before).componentCount,2);
+ assert.equal(floor(after).componentCount,1);
+ const oldDoor=before.design.elements.find(e=>e.id==='l0-internal-door');
+ const newDoor=after.design.elements.find(e=>e.id==='l0-internal-door');
+ assert.deepEqual(oldDoor.origin,[3,2,9]);
+ assert.deepEqual(newDoor.origin,[7,2,9]);
+ assert.deepEqual(before.design.elements.filter(e=>e.id!=='l0-internal-door'),after.design.elements.filter(e=>e.id!=='l0-internal-door'));
+ for(const level of p.levels)for(const room of level.spaces)room.fixtures=['workbench','desk','storage'];
+ const equipped=compileArchitecturePlan(p,{entrancePlacement:'source-accessible',upperDoorPlacement:'stair-clear'});
+ assert.equal(equipped.fixtureTargets.length,12);
+ assert.equal(floor(equipped).componentCount,1);
+ assert.equal(auditR125SourceRoutes(equipped,{featureTargets:equipped.fixtureTargets}).status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(auditArchitecturePlanCirculation(equipped).status,'SOURCE_CLEARANCE_PROBES_PASS');
+ assert.deepEqual(equipped.compiled.BuildPlan.operations,[]);
+ assert.equal(equipped.worldWrites,0);
 });
