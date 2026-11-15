@@ -26,13 +26,23 @@ $viewer = 'BATCH_COMPARE_3D.html'
 # authored briefs, never reinterpret or regenerate the successful research brief.
 $selectedBriefs = @()
 if ($OnlyHousingRetail) {
- $all = @(Get-Content -LiteralPath $pilot -Raw -Encoding UTF8 | ConvertFrom-Json)
+ $jsonText = Get-Content -LiteralPath $pilot -Raw -Encoding UTF8
+ $parsed = ConvertFrom-Json -InputObject $jsonText
+ # Windows PowerShell 5.1 may emit a JSON array as one pipeline object.
+ # foreach explicitly flattens a JSON array without relying on pipelines.
+ $all = @(foreach ($entry in $parsed) { $entry })
+ $ids = @($all | ForEach-Object { $_.id })
  if ($all.Count -ne 3 -or
-     (@($all | ForEach-Object { $_.id }) -join ',') -cne 'housing,retail,research') {
-  throw 'V11_RECHECK_PILOT_BRIEF_DRIFT'
+     ($ids -join ',') -cne 'housing,retail,research') {
+  throw ('V11_RECHECK_PILOT_BRIEF_DRIFT count=' + $all.Count +
+   ' ids=' + ($ids -join ','))
  }
- $selectedBriefs = @($all | Where-Object { $_.id -ceq 'housing' -or $_.id -ceq 'retail' })
- if ($selectedBriefs.Count -ne 2) { throw 'V11_RECHECK_NEEDS_TWO_BRIEFS' }
+ $selectedBriefs = @($all[0],$all[1])
+ if ($selectedBriefs.Count -ne 2 -or
+     $selectedBriefs[0].id -cne 'housing' -or
+     $selectedBriefs[1].id -cne 'retail') {
+  throw 'V11_RECHECK_NEEDS_TWO_BRIEFS'
+ }
 }
 
 if ($Model -notmatch '^[A-Za-z0-9._:/-]{2,140}$') {
