@@ -61,6 +61,11 @@ export function renderR125BatchComparison(briefs,report){
  esc(report.allSourceVerified)+'</p><p>'+esc(form)+'</p>'+
  '<p>Original model semantics above; actual HOST geometry below. '+
  'Human ART NOT REVIEWED · Minecraft walking NOT TESTED · No world construction.</p>'+
- '<p>Batch stop: '+esc(report.stopReason??'none')+'</p></header>'+
+ '<p>Experiment: '+esc(report.experimentOutcome??'NOT_STARTED')+
+ ' · SOURCE passes '+esc(report.sourcePassCount??0)+
+ '/'+esc(report.planned)+' · Original responses '+
+ esc(report.originalResponseCount??0)+
+ '/'+esc(report.planned)+'</p>'+
+ '<p>Transport stop: '+esc(report.stopReason??'none')+'</p></header>'+
  '<main>'+sections+'</main><footer>'+untried+'</footer></body></html>';
 }

@@ -103,6 +103,8 @@ export async function runR125ArchitecturePlanBatch({
  const report={schema:'r125-local-plan-batch-v1',
   model,endpoint,planned:briefs.length,attempted:0,automaticRetries:0,
   requestsParallel:false,allSourceVerified:false,
+  sourcePassCount:0,originalResponseCount:0,evaluatedAllBriefs:false,
+  experimentOutcome:'NOT_STARTED',
   geometryHashesDistinct:null,modelAuthoredFormFamiliesDistinct:null,
   visualDiversity:'NOT_REVIEWED',
   inGameWalking:'NOT_TESTED',worldWrites:0,
@@ -148,6 +150,8 @@ export async function runR125ArchitecturePlanBatch({
   report.completed.push(row);report.attempted++;
   const success=row.status==='B143_SOURCE_CANDIDATE_ART_HOLD'&&
     row.sourceVerified===true;
+  if(success)report.sourcePassCount++;
+  if(row.modelResponsesCaptured===1)report.originalResponseCount++;
   const geometry=report.completed.map(x=>x.geometrySha256).filter(Boolean);
   report.geometryHashesDistinct=geometry.length<2?null:
    new Set(geometry).size===geometry.length;
@@ -155,21 +159,30 @@ export async function runR125ArchitecturePlanBatch({
    .filter(Boolean);
   report.modelAuthoredFormFamiliesDistinct=families.length<2?null:
    new Set(families).size===families.length;
-  if(!success){
-   report.stopReason='STOP_ON_FIRST_NON_SOURCE_RESULT';
-   save();break;
-  }
-  if(report.geometryHashesDistinct===false){
-   report.stopReason='HOLD_IDENTICAL_GEOMETRY';
+  // A rejected ArchitecturePlan is valuable training/evaluation evidence,
+  // NOT a failure of the service. Continue for the other unfamiliar briefs
+  // without repairing or retrying the failed response. Duplicate buildings
+  // likewise remain recorded, rather than hiding the third genre.
+  // An absent provider original is qualitatively different: stop on that
+  // transport/service failure instead of blindly issuing more POSTs.
+  if(row.modelResponsesCaptured!==1){
+   report.stopReason='STOP_PROVIDER_DID_NOT_RETURN_CAPTURABLE_ORIGINAL';
    save();break;
   }
   save();
  }
- report.allSourceVerified=report.attempted===report.planned&&
-  report.completed.every(x=>x.sourceVerified)&&
-  report.geometryHashesDistinct!==false;
- if(!report.allSourceVerified&&!report.stopReason)
-  report.stopReason='INCOMPLETE_BATCH';
+ report.evaluatedAllBriefs=report.attempted===report.planned;
+ report.allSourceVerified=report.evaluatedAllBriefs&&
+  report.sourcePassCount===report.planned;
+ report.experimentOutcome=!report.evaluatedAllBriefs?
+  'HOLD_PROVIDER_OR_INCOMPLETE':
+  !report.allSourceVerified?
+   'COMPLETE_WITH_REJECTED_ARCHITECTURES':
+  report.geometryHashesDistinct===false?
+   'COMPLETE_WITH_IDENTICAL_B143_GEOMETRY':
+  report.modelAuthoredFormFamiliesDistinct===false?
+   'COMPLETE_WITH_REPEATED_AUTHOR_FORMS':
+   'ALL_SOURCE_PASS_FORM_VARIETY_CANDIDATE_ART_UNREVIEWED';
  save();
  fs.writeFileSync(path.join(dest,'BATCH_COMPARE_3D.html'),
   renderR125BatchComparison(briefs,report),{flag:'wx'});
@@ -191,7 +204,9 @@ if(process.argv[1]===fileURLToPath(import.meta.url)){
    const {report}=await runR125ArchitecturePlanBatch({
     model:a.model,briefsRaw:raw,outDir:a.outDir,endpoint:a.endpoint});
    console.log('R125_LOCAL_BATCH',JSON.stringify(report));
-   if(!report.allSourceVerified)process.exitCode=2;
+   if(!report.allSourceVerified||
+      report.geometryHashesDistinct===false||
+      report.modelAuthoredFormFamiliesDistinct===false)process.exitCode=2;
   }
  }catch(error){
   console.error('R125_BATCH_HOLD',String(error?.message??error));

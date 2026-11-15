@@ -91,7 +91,7 @@ $out = Join-Path $root ('V11_3Genre_' +
 if (Test-Path -LiteralPath $out) { throw 'V11_PILOT_OUTPUT_COLLISION' }
 Write-Output ('V11_PILOT_RUN_HEAD=' + $commit.Trim())
 Write-Output ('V11_PRIVATE_RESULT=' + $out)
-Write-Output 'Single model; up to three sequential calls; stop on first source HOLD.'
+Write-Output 'Single model; up to three sequential originals; continue after a design rejection, not a provider failure.'
 & $node $runner '--model' $Model '--pilot-three' '--out' $out `
  '--endpoint' $Endpoint
 $nodeExit = $LASTEXITCODE
@@ -108,6 +108,8 @@ if ($report.schema -cne 'r125-local-plan-batch-v1' -or
 }
 Write-Output ('V11_PILOT_ATTEMPTED=' + $report.attempted)
 Write-Output ('V11_PILOT_ALL_SOURCE=' + $report.allSourceVerified)
+Write-Output ('V11_PILOT_SOURCE_PASSES=' + $report.sourcePassCount)
+Write-Output ('V11_PILOT_EXPERIMENT=' + $report.experimentOutcome)
 Write-Output ('V11_PILOT_STOP_REASON=' + [string]$report.stopReason)
 Write-Output ('V11_PILOT_B143_REVIEW=' + (Join-Path $out $viewer))
 Write-Output 'ART_NOT_REVIEWED. MINECRAFT_NOT_TESTED. PRIVATE_SOURCE_NOT_UPLOADED.'
@@ -118,4 +120,6 @@ if (-not $NoOpen) {
   catch { Write-Warning 'V11_REVIEW_PAGE_OPEN_FAILED_USE_PRINTED_PATH' }
  }
 }
-if ($nodeExit -ne 0 -or $report.allSourceVerified -ne $true) { exit 2 }
+if ($nodeExit -ne 0 -or $report.allSourceVerified -ne $true -or
+    $report.geometryHashesDistinct -eq $false -or
+    $report.modelAuthoredFormFamiliesDistinct -eq $false) { exit 2 }

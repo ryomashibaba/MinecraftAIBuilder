@@ -61,6 +61,10 @@ test('one sequential SOURCE call per distinct brief, original files persisted',a
   assert.equal(peak,1);
   assert.equal(report.attempted,3);
   assert.equal(report.planned,3);
+  assert.equal(report.sourcePassCount,3);
+  assert.equal(report.originalResponseCount,3);
+  assert.equal(report.evaluatedAllBriefs,true);
+  assert.equal(report.experimentOutcome,'COMPLETE_WITH_REPEATED_AUTHOR_FORMS');
   assert.equal(report.geometryHashesDistinct,true);
   assert.equal(report.modelAuthoredFormFamiliesDistinct,false,
    'different dimensions are not creative differences in roof or massing');
@@ -83,7 +87,7 @@ test('one sequential SOURCE call per distinct brief, original files persisted',a
   assert.ok(fs.existsSync(path.join(output,'shop','MAKECODE_EDUCATION_SOURCE_ONLY.ts')));
  }finally{fs.rmSync(root,{recursive:true,force:true})}
 });
-test('bad first model response stops batch without extra requests',async()=>{
+test('bad source schema does NOT suppress the other two real-brief original attempts',async()=>{
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'mab-batch-stop-'));
  let calls=0;
  try{
@@ -91,15 +95,20 @@ test('bad first model response stops batch without extra requests',async()=>{
   const {report}=await runR125ArchitecturePlanBatch({
    model:'qwen3:14b',briefsRaw:input,outDir:output},
    {fetcher:async()=>{calls++;return provider('{"schema":')}});
-  assert.equal(calls,1);
-  assert.equal(report.attempted,1);
+  assert.equal(calls,3);
+  assert.equal(report.attempted,3);
+  assert.equal(report.originalResponseCount,3);
+  assert.equal(report.sourcePassCount,0);
+  assert.equal(report.evaluatedAllBriefs,true);
+  assert.equal(report.experimentOutcome,'COMPLETE_WITH_REJECTED_ARCHITECTURES');
   assert.equal(report.completed[0].modelResponsesCaptured,1);
-  assert.equal(report.stopReason,'STOP_ON_FIRST_NON_SOURCE_RESULT');
+  assert.equal(report.stopReason,null);
   assert.equal(report.allSourceVerified,false);
-  assert.equal(fs.existsSync(path.join(output,'lab')),false);
+  assert.equal(fs.existsSync(path.join(output,'lab')),true);
   const html=fs.readFileSync(path.join(output,'BATCH_COMPARE_3D.html'),'utf8');
   assert.ok(html.includes('No 3D scene (HOLD)'));
-  assert.ok(html.includes('NOT ATTEMPTED: lab'));
+  assert.ok(!html.includes('NOT ATTEMPTED: lab'));
+  assert.ok(html.includes('COMPLETE_WITH_REJECTED_ARCHITECTURES'));
   assert.equal((html.match(/<iframe /g)||[]).length,0);
   assert.equal(fs.readFileSync(path.join(output,'shop',
    'MODEL_RESPONSE_ORIGINAL.txt'),'utf8'),'{"schema":');
@@ -109,20 +118,70 @@ test('bad first model response stops batch without extra requests',async()=>{
    .includes('B198G_LOCAL_PLAN_NOT_JSON'));
  }finally{fs.rmSync(root,{recursive:true,force:true})}
 });
-test('identical building geometry is a diversity HOLD, never 3-use success',async()=>{
+test('identical buildings are still recorded for ALL three briefs and marked poor diversity',async()=>{
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'mab-batch-same-'));
  let calls=0;
  try{
   const {report}=await runR125ArchitecturePlanBatch({
    model:'qwen3:14b',briefsRaw:input,outDir:path.join(root,'same')},
    {fetcher:async()=>{calls++;return provider(original)}});
-  assert.equal(calls,2);
+  assert.equal(calls,3);
   assert.equal(report.geometryHashesDistinct,false);
   assert.equal(report.modelAuthoredFormFamiliesDistinct,false);
-  assert.equal(report.stopReason,'HOLD_IDENTICAL_GEOMETRY');
-  assert.equal(report.allSourceVerified,false);
+  assert.equal(report.stopReason,null);
+  assert.equal(report.sourcePassCount,3);
+  assert.equal(report.evaluatedAllBriefs,true);
+  assert.equal(report.experimentOutcome,'COMPLETE_WITH_IDENTICAL_B143_GEOMETRY');
+  assert.equal(report.allSourceVerified,true);
  }finally{fs.rmSync(root,{recursive:true,force:true})}
 });
+test('transport failure WITHOUT raw model content stops further POSTs',async()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'mab-no-raw-stop-'));
+ let calls=0;
+ try{
+  const out=path.join(root,'out');
+  const {report}=await runR125ArchitecturePlanBatch({
+   model:'qwen3:14b',briefsRaw:input,outDir:out
+  },{fetcher:async()=>{calls++;return {ok:false,status:503}}});
+  assert.equal(calls,1);
+  assert.equal(report.attempted,1);
+  assert.equal(report.originalResponseCount,0);
+  assert.equal(report.stopReason,'STOP_PROVIDER_DID_NOT_RETURN_CAPTURABLE_ORIGINAL');
+  assert.equal(report.experimentOutcome,'HOLD_PROVIDER_OR_INCOMPLETE');
+  assert.equal(fs.existsSync(path.join(out,'lab')),false);
+ }finally{fs.rmSync(root,{recursive:true,force:true})}
+});
+
+test('mixed invalid first and valid later proposals keep true source comparison',async()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'mab-mixed-research-'));
+ let calls=0;
+ try{
+  const out=path.join(root,'output');
+  const fake=async()=>{
+   calls++;
+   if(calls===1)return provider('invalid-original-json');
+   const plan=JSON.parse(original);
+   plan.footprint.width=24+(calls-2)*2;
+   return provider(JSON.stringify(plan));
+  };
+  const {report}=await runR125ArchitecturePlanBatch({
+   model:'qwen3:14b',briefsRaw:input,outDir:out
+  },{fetcher:fake});
+  assert.equal(calls,3);
+  assert.equal(report.originalResponseCount,3);
+  assert.equal(report.sourcePassCount,2);
+  assert.equal(report.evaluatedAllBriefs,true);
+  assert.equal(report.allSourceVerified,false);
+  assert.equal(report.experimentOutcome,'COMPLETE_WITH_REJECTED_ARCHITECTURES');
+  assert.equal(report.completed[0].sourceVerified,false);
+  assert.equal(report.completed[1].sourceVerified,true);
+  assert.equal(report.completed[2].sourceVerified,true);
+  const html=fs.readFileSync(path.join(out,'BATCH_COMPARE_3D.html'),'utf8');
+  assert.equal((html.match(/<iframe /g)||[]).length,2);
+  assert.ok(html.includes('SOURCE passes 2/3'));
+ }finally{fs.rmSync(root,{recursive:true,force:true})}
+});
+
 test('remote endpoints reject before creating output or calling model',async()=>{
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'mab-batch-url-'));
  let requests=0;
