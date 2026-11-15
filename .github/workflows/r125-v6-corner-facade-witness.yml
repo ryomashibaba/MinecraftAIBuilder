@@ -20,6 +20,13 @@ on:
       - scripts/r125-batch-compare.mjs
       - scripts/r125-local-architecture-plan-batch.test.mjs
       - scripts/r125-v11-pilot-three.json
+      - scripts/r125-saved-three-genre-baseline.mjs
+      - scripts/r125-saved-three-genre-baseline.test.mjs
+      - scripts/fixtures/r125-qwen14b-residential-2024a.json
+      - scripts/fixtures/r125-qwen14b-shop-20261024.json
+      - scripts/fixtures/r125-qwen14b-research-20261024.json
+      - scripts/b143-gallery-core.mjs
+      - source/ai/b143-viewer-template.html
       - scripts/r125-v11-windows-pilot.ps1
       - scripts/R125_V11_3_Buildings.cmd
       - scripts/research/r125-v6-corner-facade-contract.test.mjs
@@ -66,6 +73,8 @@ jobs:
           node --check scripts/r125-local-architecture-plan-run.mjs
           node --check scripts/r125-local-architecture-plan-batch.mjs
           node --check scripts/r125-batch-compare.mjs
+          node --check scripts/r125-saved-three-genre-baseline.mjs
+          node --test scripts/r125-saved-three-genre-baseline.test.mjs
           pwsh -NoProfile -File scripts/r125-v11-windows-pilot.ps1 -CheckOnly
           node --test scripts/r125-offline-replay.test.mjs scripts/r125-architecture-plan.test.mjs scripts/r125-local-architecture-plan-run.test.mjs scripts/r125-local-architecture-plan-batch.test.mjs scripts/b198g-local-adapter.test.mjs
       - name: Export saved real-Qwen B143 3D HTML for human ART review
@@ -78,6 +87,17 @@ jobs:
           name: R125-SAVED-REAL-QWEN-TRUE-B143-3D-ART-HOLD
           path: ${{ runner.temp }}/r125-genuine-qwen-3d/
           retention-days: 7
+      - name: Render three archived genuine Qwen genres in ONE real B143 3D baseline
+        run: |
+          node scripts/r125-saved-three-genre-baseline.mjs --out "$RUNNER_TEMP/r125-saved-three-genre-baseline"
+          test -s "$RUNNER_TEMP/r125-saved-three-genre-baseline/index.html"
+          test -s "$RUNNER_TEMP/r125-saved-three-genre-baseline/SAVED_3GENRE_BASELINE.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: R125-THREE-ARCHIVED-QWEN-GENRES-TRUE-B143-3D
+          path: ${{ runner.temp }}/r125-saved-three-genre-baseline/
+          if-no-files-found: error
+          retention-days: 14
       - name: Source-matched archived real-Qwen Education MakeCode export (never executed)
         run: |
           node scripts/r125-japanese-makecode.mjs --plan evidence/r125-real-l-corner-20261101/MODEL_RESPONSE_ORIGINAL.txt --out "$RUNNER_TEMP/r125-qwen-education-source" --palette configs/r125-education-verified-palette-v26.33.json
@@ -104,4 +124,5 @@ jobs:
           echo 'Public synthetic tests prove legacy full-V6 parity and that ranked-only research is NOT full-V6 repair; never certify original Qwen, ART, Minecraft or formal QA.' >> "$GITHUB_STEP_SUMMARY"
           echo 'External-author R125 replay uses an existing PUBLIC saved Qwen IR, not a new model, not V6 Qwen evidence, not ART or Minecraft.' >> "$GITHUB_STEP_SUMMARY"
           echo 'V11 saved real Qwen original is OFFLINE REPLAY, not a new local-model response or human ART pass.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Three archived genuine Qwen semantic plans can be compared in one truthful B143 3D artifact. They are old inputs, not three NEW generated buildings. No new local model POST.' >> "$GITHUB_STEP_SUMMARY"
           echo 'No model, PRIVATE file, Ollama, paid API, or Minecraft world calls.' >> "$GITHUB_STEP_SUMMARY"
