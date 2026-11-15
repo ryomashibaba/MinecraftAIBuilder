@@ -1,6 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {diagnoseR125Original,parseR125ReplayArgs} from './r125-offline-replay.mjs';
+import {diagnoseR125Original,diagnoseR125ArchitecturePlanOriginal,
+ parseR125ReplayArgs} from './r125-offline-replay.mjs';
+import {readFileSync} from 'node:fs';
+import {createHash} from 'node:crypto';
 import {SCHEMA as B143} from '../source/ai/b143-building-dsl.mjs';
 
 function good(){
@@ -63,4 +66,41 @@ test('malformed JSON is HOLD and CLI forbids overwrite/incomplete arguments',()=
   /INPUT_OUTPUT_CONFLICT/);
  assert.throws(()=>parseR125ReplayArgs(['--raw','a','--raw','b']),
   /INVALID_ARGUMENT/);
+});
+
+test('short ORIGINAL Qwen ArchitecturePlan replays through unchanged TRUE B143 and route QA',()=>{
+ const original=readFileSync(new URL('./fixtures/r125-qwen14b-residential-2024a.json',
+  import.meta.url),'utf8');
+ const r=diagnoseR125ArchitecturePlanOriginal(original);
+ assert.equal(r.originalSha256,
+  createHash('sha256').update(original).digest('hex'));
+ assert.equal(r.originalEdited,false);
+ assert.equal(r.modelCalls,0);
+ assert.equal(r.worldWrites,0);
+ assert.deepEqual(r.worldGates,Array(9).fill('BLOCKED'));
+ assert.equal(r.artStatus,'NOT_REVIEWED');
+ assert.equal(r.modelAuthorshipVerified,false);
+ assert.equal(r.status,'B143_SOURCE_CANDIDATE_ART_HOLD',
+  'genuine saved plan must compile into reachable source; no fake B143');
+ assert.equal(r.sourceVerified,true);
+ assert.ok(r.occupiedVoxels>100);
+ assert.equal(r.sourceRoutes,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(r.circulation,'SOURCE_CLEARANCE_PROBES_PASS');
+ assert.equal(r.sourceDesign.designOnly,true);
+});
+test('ArchitecturePlan replay rejects corrupted plan without silent model correction',()=>{
+ const malformed=diagnoseR125ArchitecturePlanOriginal('{invalid');
+ assert.equal(malformed.status,'HOLD_INVALID_ORIGINAL_JSON');
+ assert.equal(malformed.sourceVerified,false);
+ assert.equal(malformed.modelCalls,0);
+ const fake=diagnoseR125ArchitecturePlanOriginal(JSON.stringify({
+  schema:'minecraftaibuilder-r125-architecture-plan-v1',
+  id:'bad',title:'Test',brief:'a test',footprint:{width:18,depth:18},
+  levels:[],materials:{floor:'wood',wall:'wood',roof:'wood'},
+  unsafeWorldWrite:true
+ }));
+ assert.equal(fake.status,'HOLD_PLAN_COMPILER_OR_QA');
+ assert.equal(fake.sourceDesign,undefined);
+ assert.equal(fake.originalEdited,false);
+ assert.deepEqual(fake.worldGates,Array(9).fill('BLOCKED'));
 });

@@ -11,6 +11,10 @@ import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {readModelProposal} from '../source/ai/b198-natural-language-design.mjs';
 import {validateDesign,compileDesign} from '../source/ai/b143-building-dsl.mjs';
+import {compileArchitecturePlan,auditArchitecturePlanCirculation,
+ assessR125ProgramGeometry} from '../source/ai/r125-architecture-plan.mjs';
+import {auditR125SourceRoutes} from '../source/ai/r125-source-routes.mjs';
+import {critiqueArchitecture} from '../source/ai/b198c-spatial-critic.mjs';
 
 const digest=x=>createHash('sha256').update(x).digest('hex');
 const fail=reason=>{throw Error('R125_REPLAY_'+reason);};
@@ -120,6 +124,93 @@ export function diagnoseR125Original(raw){
  };
 }
 
+
+/**
+ * Opt-in offline replay for a SHORT, MODEL-AUTHORED ArchitecturePlan.
+ * The model owns the original semantic design; the trusted generic HOST owns
+ * geometry. No V6 placement patch, retry, model I/O or Minecraft contact.
+ * A SOURCE candidate is never an ART pass or world-construction approval.
+ */
+export function diagnoseR125ArchitecturePlanOriginal(raw){
+ if(typeof raw!=='string'||raw.length<1||raw.length>60000)
+  fail('PLAN_RAW_INPUT_SIZE');
+ const base={
+  schema:'r125-original-architecture-plan-diagnostic-v1',
+  originalSha256:digest(raw),originalEdited:false,
+  modelCalls:0,modelAuthorshipVerified:false,
+  worldContacts:0,worldWrites:0,worldGates:Array(9).fill('BLOCKED'),
+  constructionApproved:false,executionAllowed:false,
+  artStatus:'NOT_REVIEWED',minecraftWalking:'NOT_TESTED'
+ };
+ let original;
+ try{original=JSON.parse(raw);}
+ catch{return {...base,status:'HOLD_INVALID_ORIGINAL_JSON',
+  compilerReason:'ORIGINAL_NOT_JSON',sourceVerified:false};}
+ if(!isObj(original))
+  return {...base,status:'HOLD_INVALID_ORIGINAL_PLAN',
+   compilerReason:'ORIGINAL_NOT_PLAN_OBJECT',sourceVerified:false};
+ try{
+  // This is an explicitly chosen GENERIC HOST policy, not a change to the
+  // author-provided JSON. It is never selected as a retry after failure.
+  const hostPolicy={entrancePlacement:'source-accessible',
+   upperDoorPlacement:Object.hasOwn(original,'expression')?'stair-clear':'legacy'};
+  const built=compileArchitecturePlan(original,hostPolicy);
+  if(built.worldContacts!==0||built.worldWrites!==0||
+     built.constructionApproved!==false||
+     built.gates?.length!==9||built.gates.some(x=>x!=='BLOCKED')||
+     built.compiled?.readiness!=='NOT_PREPARED'||
+     built.compiled?.worldContacts!==0||
+     built.compiled?.BuildPlan?.operations?.length!==0)
+    fail('PLAN_WORLD_SAFETY_DRIFT');
+  const routes=auditR125SourceRoutes(built);
+  const circulation=auditArchitecturePlanCirculation(built);
+  const critique=critiqueArchitecture({design:built.design,compiled:built.compiled});
+  const floors=assessR125ProgramGeometry(built,critique);
+  const functionalClear=routes.status==='SOURCE_ROUTES_REACH_ALL_ZONES'&&
+   circulation.status==='SOURCE_CLEARANCE_PROBES_PASS'&&
+   floors.programFloorIssues.length===0;
+  return {...base,
+   status:functionalClear?'B143_SOURCE_CANDIDATE_ART_HOLD':'HOLD_FUNCTIONAL_SOURCE',
+   sourceVerified:functionalClear,compilerReason:null,
+   hostPolicy,planSha256:built.planSha256,
+   sourceSha256:built.sourceSha256,geometrySha256:built.geometrySha256,
+   occupiedVoxels:built.compiled.primitives.length,
+   sourceRoutes:routes.status,sourceRouteIssues:routes.issues??[],
+   circulation:circulation.status,circulationFailures:circulation.failures??[],
+   programFloors:floors.status,programFloorIssues:floors.programFloorIssues,
+   visualHighRiskCount:critique.highRiskCount,
+   // Only a trusted B143 source candidate, NOT an executable BuildPlan.
+   sourceDesign:built.design};
+ }catch(error){
+  return {...base,status:'HOLD_PLAN_COMPILER_OR_QA',
+   sourceVerified:false,compilerReason:String(error?.message??error).slice(0,360)};
+ }
+}
+
+function writeArchitecturePlanReplay(args){
+ const dest=args['--out'],parent=path.dirname(dest);
+ const repoRoot=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+ if(fs.existsSync(dest)||!fs.existsSync(parent)||!fs.statSync(parent).isDirectory())
+  fail('PLAN_OUTPUT_MUST_BE_NEW_DIRECTORY');
+ const resolvedParent=fs.realpathSync(parent);
+ if(resolvedParent===repoRoot||resolvedParent.startsWith(repoRoot+path.sep))
+  fail('PLAN_PRIVATE_OUTPUT_MUST_BE_OUTSIDE_REPOSITORY');
+ const raw=fs.readFileSync(args['--raw'],'utf8');
+ const report=diagnoseR125ArchitecturePlanOriginal(raw);
+ const {sourceDesign,...diagnosis}=report;
+ fs.mkdirSync(dest);
+ // Store exact private author bytes before any parsing or B143 review.
+ fs.writeFileSync(path.join(dest,'MODEL_RESPONSE_ORIGINAL.txt'),raw,{flag:'wx'});
+ fs.writeFileSync(path.join(dest,'SOURCE_DIAGNOSIS.json'),
+  JSON.stringify(diagnosis,null,2)+'\n',{flag:'wx'});
+ if(sourceDesign)
+  fs.writeFileSync(path.join(dest,'B143_SOURCE_REVIEW_ONLY.json'),
+   JSON.stringify(sourceDesign,null,2)+'\n',{flag:'wx'});
+ return {status:report.status,originalSha256:report.originalSha256,
+  sourceSha256:report.sourceSha256??null,
+  modelCalls:0,worldWrites:0,humanArt:'NOT_REVIEWED'};
+}
+
 export function parseR125ReplayArgs(argv){
  if(argv.length===1&&argv[0]==='--help')return {help:true};
  if(argv.length!==4)fail('REQUIRE_RAW_AND_OUT');
@@ -135,9 +226,14 @@ export function parseR125ReplayArgs(argv){
 }
 if(process.argv[1]===fileURLToPath(import.meta.url)){
  try{
-  const args=parseR125ReplayArgs(process.argv.slice(2));
-  if(args.help)console.log('node scripts/r125-offline-replay.mjs --raw ORIGINAL.txt --out NEW_DIAGNOSIS.json (NO INFERENCE / NO WORLD)');
-  else{
+  const planMode=process.argv[2]==='--architecture-plan';
+  const args=parseR125ReplayArgs(process.argv.slice(planMode?3:2));
+  if(args.help)console.log('B143: --raw ORIGINAL.txt --out NEW_DIAGNOSIS.json | ArchitecturePlan: --architecture-plan --raw ORIGINAL.txt --out NEW_PRIVATE_DIRECTORY (NO MODEL / NO WORLD)');
+  else if(planMode){
+   const result=writeArchitecturePlanReplay(args);
+   console.log('R125_ARCHITECTURE_PLAN_SOURCE_ONLY',JSON.stringify(result));
+   if(!result.sourceSha256)process.exitCode=2;
+  }else{
    if(fs.existsSync(args['--out']))fail('OUTPUT_ALREADY_EXISTS');
    const raw=fs.readFileSync(args['--raw'],'utf8');
    const report=diagnoseR125Original(raw);
