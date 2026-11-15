@@ -196,6 +196,73 @@ export function createR190SemanticModelAdapter({
  * The caller MUST persist raw model bytes via onRawModelResponse before QA.
  * A successful plan validation is not a SOURCE / ART / Minecraft success.
  */
+
+/**
+ * Ollama supports `response_format: {type:"json_schema",json_schema:{schema}}`
+ * on its local OpenAI-compatible chat endpoint. Use the SAME author schema
+ * as the strict HOST, not a JSON-only grammar that permits duplicate
+ * expression keys and silently clobbers the first authored object.
+ *
+ * This constrained decoding is a new model generation policy, NOT a
+ * post-hoc repair, alternate author, synthetic source, or SOURCE pass.
+ * Local non-Ollama-compatible ports keep the old JSON-object format.
+ */
+const r125obj=(properties,required)=>({
+ type:'object',properties,required,additionalProperties:false
+});
+const r125enum=(...choices)=>({type:'string',enum:choices});
+const r125int=(minimum,maximum)=>({type:'integer',minimum,maximum});
+const r125slug={type:'string',pattern:'^[a-z][a-z0-9-]{2,39}$'};
+const r125text=(maxLength)=>({type:'string',minLength:3,maxLength});
+const r125FixtureRoles=['counter','workbench','display','storage','seating',
+ 'bed','desk','washbasin','electronics'];
+const r125Room=r125obj({
+ id:r125slug,purpose:r125text(180),
+ fixture:r125enum('counter','workbench','display','storage','seating'),
+ fixtures:{type:'array',items:{type:'string',enum:r125FixtureRoles},
+  minItems:1,maxItems:3,uniqueItems:true},
+ daylight:r125enum('wide-bay','clerestory')
+},['id','purpose']);
+const r125Level=r125obj({
+ splitAxis:r125enum('x','z'),splitPercent:{type:'integer',enum:[40,50,60]},
+ spaces:{type:'array',items:r125Room,minItems:2,maxItems:2}
+},['splitAxis','splitPercent','spaces']);
+const r125Expression=r125obj({
+ setbackSide:r125enum('none','east','rear'),
+ setbackDepth:{type:'integer',enum:[0,2,3,4]},
+ roofProfile:r125enum('flat','ridge','sawtooth','split-monitor'),
+ roofAxis:r125enum('x','z'),
+ facadeLanguage:r125enum('plain','fins','screen','recessed-portico'),
+ roofVolume:r125enum('raised'),
+ daylightFacade:r125enum('east-and-rear-bays'),
+ roofOverhang:r125enum('one-block'),
+ rearCornerCut:r125obj({
+  width:r125int(3,5),depth:r125int(3,5),
+  side:r125enum('east','west'),access:r125enum('paved')
+ },['width','depth'])
+},['setbackSide','setbackDepth','roofProfile','roofAxis','facadeLanguage']);
+export const R125_ARCHITECTURE_RESPONSE_SCHEMA=r125obj({
+ schema:{type:'string',enum:[R125_PLAN_SCHEMA]},
+ id:r125slug,title:r125text(180),brief:r125text(500),
+ footprint:r125obj({width:r125int(16,32),depth:r125int(16,32)},
+  ['width','depth']),
+ levels:{type:'array',items:r125Level,minItems:1,maxItems:2},
+ materials:r125obj({
+  floor:r125enum('wood','stone','concrete'),
+  wall:r125enum('concrete','stone','wood','metal'),
+  roof:r125enum('stone','metal','wood','concrete')
+ },['floor','wall','roof']),
+ entryZone:r125enum('first','second'),expression:r125Expression
+},['schema','id','title','brief','footprint','levels','materials']);
+
+export function r125ResponseFormatForEndpoint(endpoint){
+ if(endpoint==='http://127.0.0.1:11434/v1/chat/completions')
+  return {type:'json_schema',json_schema:{
+   name:'r125_architecture_plan_v11',strict:true,
+   schema:R125_ARCHITECTURE_RESPONSE_SCHEMA}};
+ return {type:'json_object'};
+}
+
 export function createR125ArchitecturePlanLocalAdapter({
  model,endpoint=DEFAULT_LOCAL_ENDPOINT,fetcher=fetch,timeoutMs=180000,
  reasoningEffort=undefined,maxOutputTokens=4096,onRawModelResponse
@@ -240,7 +307,7 @@ export function createR125ArchitecturePlanLocalAdapter({
     method:'POST',signal:controller.signal,redirect:'error',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({model,stream:false,temperature:0.55,
-     response_format:{type:'json_object'},max_tokens:maxOutputTokens,
+     response_format:r125ResponseFormatForEndpoint(endpoint),max_tokens:maxOutputTokens,
      ...(reasoningEffort===undefined?{}:{reasoning_effort:reasoningEffort}),
      messages:[{role:'system',content:system},
       {role:'user',content:JSON.stringify({architecturalRequest:prompt,

@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
-import {createR125ArchitecturePlanLocalAdapter}
+import {createR125ArchitecturePlanLocalAdapter,R125_ARCHITECTURE_RESPONSE_SCHEMA}
  from '../source/ai/b198g-local-model-adapter.mjs';
 import {runR125LocalArchitecturePlan,parseR125LocalPlanArgs}
  from './r125-local-architecture-plan-run.mjs';
@@ -51,6 +51,22 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    posts++;
    assert.equal(url,'http://127.0.0.1:11434/v1/chat/completions');
    const request=JSON.parse(opts.body);
+   assert.equal(request.response_format.type,'json_schema');
+   assert.equal(request.response_format.json_schema.name,'r125_architecture_plan_v11');
+   assert.equal(request.response_format.json_schema.strict,true);
+   const structured=request.response_format.json_schema.schema;
+   assert.deepEqual(structured,R125_ARCHITECTURE_RESPONSE_SCHEMA);
+   assert.equal(structured.additionalProperties,false);
+   assert.equal(structured.properties.levels.maxItems,2);
+   assert.equal(structured.properties.levels.items.properties.spaces.minItems,2);
+   assert.equal(structured.properties.levels.items.properties.spaces.maxItems,2);
+   const room=structured.properties.levels.items.properties.spaces.items;
+   assert.equal(room.additionalProperties,false);
+   assert.ok(room.properties.fixtures.items.enum.includes('electronics'));
+   assert.equal(room.properties.fixtures.maxItems,3);
+   assert.deepEqual(structured.properties.expression.required,
+    ['setbackSide','setbackDepth','roofProfile','roofAxis','facadeLanguage']);
+   assert.equal(structured.properties.expression.additionalProperties,false);
    assert.equal(request.stream,false);
    assert.equal(request.messages[1].role,'user');
    assert.equal(request.messages[0].content.includes('B143 elements'),true);
@@ -93,7 +109,7 @@ test('one call records raw and true SOURCE, without privately leaking raw into r
   assert.equal(fs.readFileSync(path.join(dest,'REQUEST_ORIGINAL.txt'),'utf8'),prompt);
   assert.equal(out.report.requestSha256,digest(prompt));
   assert.deepEqual(out.report.requestedGenerationSettings,{
-   temperature:0.55,responseFormat:'json_object',
+   temperature:0.55,responseFormat:'json_schema',
    maxOutputTokens:4096,reasoningEffort:null,timeoutMs:180000
   });
   assert.equal(out.report.nineWorldGates.length,9);

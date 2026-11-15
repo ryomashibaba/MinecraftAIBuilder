@@ -13,7 +13,7 @@ import path from 'node:path';
 import os from 'node:os';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
-import {createR125ArchitecturePlanLocalAdapter,DEFAULT_LOCAL_ENDPOINT}
+import {createR125ArchitecturePlanLocalAdapter,DEFAULT_LOCAL_ENDPOINT,r125ResponseFormatForEndpoint}
  from '../source/ai/b198g-local-model-adapter.mjs';
 import {diagnoseR125ArchitecturePlanOriginal}
  from './r125-offline-replay.mjs';
@@ -82,7 +82,7 @@ export async function runR125LocalArchitecturePlan({
  const common={schema:'r125-local-plan-one-shot-v1',
   model,endpoint,requestSha256:sha(prompt),
   requestedGenerationSettings:{temperature:0.55,
-   responseFormat:'json_object',maxOutputTokens,
+   responseFormat:r125ResponseFormatForEndpoint(endpoint).type,maxOutputTokens,
    reasoningEffort:reasoningEffort??null,timeoutMs},
   attemptLimit:1,automaticRetries:0,
   provenance:'LOCAL_HTTP_PROVIDER_NOT_INDEPENDENTLY_ATTESTED',
