@@ -7,7 +7,7 @@
 import {compileDesign,verifyCompiled} from './b143-building-dsl.mjs';
 import {auditR125SourceRoutes} from './r125-source-routes.mjs';
 
-const BUDGET=360;
+const BUDGET=540; // Dual-axis fallback search only; legacy success path unchanged.
 const failPosition=diagnosis=>{
  const error=Error('R125_PLAN_FIXTURE_NO_REACHABLE_POSITION');
  error.fixturePlacement=diagnosis;throw error;
@@ -23,32 +23,33 @@ const fixtureIntents=p=>p.plan.levels.flatMap((l,li)=>
   s.fixture===undefined?[]:
   [{level:li,zoneIndex:zi,zoneId:s.id,kind:s.fixture,multi:false}]));
 
-function positions(intent,product){
+function positions(intent,product,turned=false){
  const range=product.program[intent.level].zones[intent.zoneIndex].range;
- const depth=roleDepth(intent.kind);
+ const width=turned?roleDepth(intent.kind):3;
+ const depth=turned?3:roleDepth(intent.kind);
  const corners=[
   [range.x[0],range.z[1]-depth+1],
-  [range.x[1]-2,range.z[1]-depth+1],
+  [range.x[1]-width+1,range.z[1]-depth+1],
   [range.x[0],range.z[0]],
-  [range.x[1]-2,range.z[0]]
+  [range.x[1]-width+1,range.z[0]]
  ];
- const mx=Math.floor((range.x[0]+range.x[1]-2)/2);
+ const mx=Math.floor((range.x[0]+range.x[1]-width+1)/2);
  const mz=Math.floor((range.z[0]+range.z[1]-depth+1)/2);
  const candidates=intent.multi?
   [...corners,[mx,range.z[0]],[mx,range.z[1]-depth+1],
-   [range.x[0],mz],[range.x[1]-2,mz],[mx,mz]]:corners;
+   [range.x[0],mz],[range.x[1]-width+1,mz],[mx,mz]]:corners;
  if(intent.multi&&intent.index%2===1)candidates.reverse();
  if(intent.multi){
   const seen=new Set(candidates.map(([x,z])=>x+','+z));
   for(let z=range.z[0];z<=range.z[1]-depth+1;z++)
-   for(let x=range.x[0];x<=range.x[1]-2;x++){
+   for(let x=range.x[0];x<=range.x[1]-width+1;x++){
     const key=x+','+z;
     if(!seen.has(key)){seen.add(key);candidates.push([x,z]);}
    }
  }
- return {candidates,range,depth};
+ return {candidates,range,width,depth};
 }
-function makeParts(intent,x,y,z){
+function makeParts(intent,x,y,z,turned=false){
  const key='fx-l'+intent.level+'-z'+intent.zoneIndex+
   (intent.multi?'-i'+intent.index:'');
  const add=(name,dx,dy,dz,sx,sy,sz,material)=>({
@@ -89,24 +90,38 @@ function makeParts(intent,x,y,z){
  };
  const parts=families[intent.kind]?.();
  if(!parts)throw Error('R125_PLAN_FIXTURE_UNKNOWN_ROLE');
- return {key,parts};
+ if(!turned)return {key,parts};
+ // Rotate physical shapes 90 degrees about the fixture's local footprint
+ // origin. All material cells and model-authored roles remain identical.
+ // An ordinary 3x1 desk becomes a 1x3 desk, leaving 2-wide access alongside
+ // it in a narrow 3-wide zone.
+ const rotated=parts.map(part=>{
+  const [px,py,pz]=part.origin,[sx,sy,sz]=part.size;
+  const dx=px-x,dy=py-y,dz=pz-z;
+  return {...part,origin:[x+dz,y+dy,z+3-(dx+sx)],
+   size:[sz,sy,sx]};
+ });
+ return {key,parts:rotated};
 }
-function tryOrigin(product,targets,intent,x,z,auditCirculation){
+function tryOrigin(product,targets,intent,x,z,auditCirculation,turned=false){
  const floor=product.program[intent.level];
  const range=floor.zones[intent.zoneIndex].range,y=floor.standingFloorY;
- const depth=roleDepth(intent.kind);
+ const width=turned?roleDepth(intent.kind):3;
+ const depth=turned?3:roleDepth(intent.kind);
  const rejected=(reason,evidence)=>({
-  ok:false,rejection:{at:[x,y,z],reason,...(evidence?{evidence}:{})}
+  ok:false,rejection:{at:[x,y,z],reason,
+  ...(turned?{orientation:'quarter-turn'}:{}),
+  ...(evidence?{evidence}:{})}
  });
- if(x<range.x[0]||x+2>range.x[1]||
+ if(x<range.x[0]||x+width-1>range.x[1]||
     z<range.z[0]||z+depth-1>range.z[1])
   return rejected('OUTSIDE_AUTHORED_ZONE');
- const {key,parts}=makeParts(intent,x,y,z);
+ const {key,parts}=makeParts(intent,x,y,z,turned);
  const occupied=new Set(product.compiled.primitives.map(c=>
   c[0]+','+c[1]+','+c[2]));
  const has=(a,b,c)=>occupied.has(a+','+b+','+c);
  let unsupported=null,collision=null;
- for(let a=x;a<x+3;a++)for(let c=z;c<z+depth;c++)
+ for(let a=x;a<x+width;a++)for(let c=z;c<z+depth;c++)
   if(!has(a,y-1,c)&&unsupported===null)unsupported=[a,y-1,c];
  for(const part of parts){
   const [ax,ay,az]=part.origin,[sx,sy,sz]=part.size;
@@ -126,7 +141,8 @@ function tryOrigin(product,targets,intent,x,z,auditCirculation){
   sourceSha256:compiled.sourceSha256,
   geometrySha256:compiled.geometrySha256};
  const target={id:key,zoneId:intent.zoneId,
-  origin:[x,y,z],size:[3,3,depth],kind:intent.kind};
+  origin:[x,y,z],size:[width,3,depth],kind:intent.kind,
+  ...(turned?{orientation:'quarter-turn'}:{})};
  const routes=auditR125SourceRoutes(trial,{featureTargets:[...targets,target]});
  if(routes.status!=='SOURCE_ROUTES_REACH_ALL_ZONES'||
     routes.featureAccess.some(f=>!f.reachableFromEntrance))
@@ -145,29 +161,39 @@ function repairZone(start,previousTargets,zoneIntents,auditCirculation){
  // are variable. No author plan/role edit, false service pass or model call.
  const tracker={attempted:true,mode:'BOUNDED_ZONE_LOCAL_BACKTRACK',
   maxCandidateEvaluations:BUDGET,candidateEvaluations:0,
-  searchLimitReached:false,arrangementFound:false,
+  rotatedCandidateEvaluations:0,searchLimitReached:false,
+  arrangementFound:false,
   affectedZone:zoneIntents[0].zoneId,
   roleOrder:zoneIntents.map(x=>x.kind)};
  const dfs=(index,product,placed)=>{
   if(index===zoneIntents.length)
    return {product,targets:placed};
   const intent=zoneIntents[index];
-  const {candidates}=positions(intent,product);
-  const used=new Set();
-  for(const [x,z] of candidates){
-   const key=x+','+z;
-   if(used.has(key))continue;
-   used.add(key);
-   if(tracker.candidateEvaluations>=BUDGET){
-    tracker.searchLimitReached=true;return null;
+  const zone=product.program[intent.level].zones[intent.zoneIndex].range;
+  const width=zone.x[1]-zone.x[0]+1;
+  // In a narrow room, rotate shallow desks and shelving toward the wall
+  // before spending the entire search budget on 3-wide path blockers.
+  const variants=width<=4&&roleDepth(intent.kind)===1?
+   [true,false]:[false,true];
+  for(const turned of variants){
+   const {candidates}=positions(intent,product,turned);
+   const used=new Set();
+   for(const [x,z] of candidates){
+    const key=x+','+z;
+    if(used.has(key))continue;
+    used.add(key);
+    if(tracker.candidateEvaluations>=BUDGET){
+     tracker.searchLimitReached=true;return null;
+    }
+    tracker.candidateEvaluations++;
+    if(turned)tracker.rotatedCandidateEvaluations++;
+    const step=tryOrigin(product,[...previousTargets,...placed],
+     intent,x,z,auditCirculation,turned);
+    if(!step.ok)continue;
+    const result=dfs(index+1,step.product,[...placed,step.target]);
+    if(result)return result;
+    if(tracker.searchLimitReached)return null;
    }
-   tracker.candidateEvaluations++;
-   const step=tryOrigin(product,[...previousTargets,...placed],
-    intent,x,z,auditCirculation);
-   if(!step.ok)continue;
-   const result=dfs(index+1,step.product,[...placed,step.target]);
-   if(result)return result;
-   if(tracker.searchLimitReached)break;
   }
   return null;
  };
@@ -222,7 +248,8 @@ export function addAuthoredRoomFixtures(product,{auditCirculation}={}){
     range,standingFloorY:current.program[intent.level].standingFloorY,
     footprint:[3,depth]},
    previouslyPlaced:targets.map(t=>({
-    id:t.id,zoneId:t.zoneId,kind:t.kind,origin:t.origin,size:t.size})),
+    id:t.id,zoneId:t.zoneId,kind:t.kind,origin:t.origin,size:t.size,
+    ...(t.orientation?{orientation:t.orientation}:{})})),
    candidateCount:candidates.length,
    rejectedCandidates:rejected,
    ...(fallback?{zoneLocalSearch:fallback.tracker}:{}),

@@ -1139,6 +1139,53 @@ test('zone-local backtracking changes only positions and retains all SOURCE chec
     ({id:s.id,purpose:s.purpose}))}))}),
    {entrancePlacement:'source-accessible'}).geometrySha256);
 });
+test('rotation fallback can free a two-wide passage alongside a shallow fixture',()=>{
+ const p=plan('narrow-research-layout',['x'],
+  ['small electronics control zone','utility corridor']);
+ p.footprint={width:30,depth:30};
+ const base=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+ const firstZone=base.program[0].zones[0];
+ const originalRange=firstZone.range.x;
+ // Simulate the actual 3-wide program subzone without changing model
+ // source geometry or providing an edited model response.
+ firstZone.range.x=[originalRange[0],originalRange[0]+2];
+ const authored=structuredClone(p);
+ authored.levels[0].spaces[0].fixtures=['desk','storage'];
+ const source={...base,plan:authored};
+ const audit=trial=>{
+  const clear=auditArchitecturePlanCirculation(trial);
+  if(clear.status!=='SOURCE_CLEARANCE_PROBES_PASS')return clear;
+  const desk=trial.design.elements.find(e=>e.id==='fx-l0-z0-i0-desk-top');
+  const storage=trial.design.elements.find(e=>e.id==='fx-l0-z0-i1-top-shelf');
+  // Require both genuinely distinct roles to have independent access.
+  // This blocks the default full-width desk after the second role, while
+  // allowing the same equipment to rotate along the real room wall.
+  if(desk&&storage&&desk.size[0]===3)
+   return {status:'SOURCE_CLEARANCE_PROBES_HOLD',
+    failures:[{code:'TEST_BLOCKED_TWO_WIDE_SIDE'}]};
+  return clear;
+ };
+ const out=addAuthoredRoomFixtures(source,{auditCirculation:audit});
+ assert.equal(out.fixtureTargets.length,2);
+ assert.equal(out.fixtureTargets[0].kind,'desk');
+ assert.equal(out.fixtureTargets[1].kind,'storage');
+ assert.equal(out.fixtureTargets[0].orientation,'quarter-turn');
+ assert.deepEqual(out.fixtureTargets[0].size,[1,3,3]);
+ const deskPart=out.design.elements.find(e=>e.id==='fx-l0-z0-i0-desk-top');
+ assert.deepEqual(deskPart.size,[1,1,3]);
+ assert.equal(out.fixtureSearch.length,1);
+ assert.equal(out.fixtureSearch[0].arrangementFound,true);
+ assert.ok(out.fixtureSearch[0].rotatedCandidateEvaluations>0);
+ assert.ok(out.fixtureSearch[0].candidateEvaluations<=540);
+ assert.equal(auditR125SourceRoutes(out,{
+  featureTargets:out.fixtureTargets}).status,
+  'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(auditArchitecturePlanCirculation(out).status,
+  'SOURCE_CLEARANCE_PROBES_PASS');
+ assert.equal(verifyCompiled(out.design,out.compiled),true);
+ assert.equal(base.worldWrites,0);
+ assert.equal(out.worldWrites,0);
+});
 test('one room can hold genuinely different reachable bed and desk and storage',()=>{
  const p=plan('inhabited-home',['x'],['sleeping and personal study','living']);
  p.footprint={width:30,depth:30};
