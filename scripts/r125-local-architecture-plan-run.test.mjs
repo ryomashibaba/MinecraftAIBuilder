@@ -93,6 +93,12 @@ test('one call records raw and true SOURCE, without privately leaking raw into r
   const runText=fs.readFileSync(path.join(dest,'RUN_REPORT.json'),'utf8');
   assert.equal(runText.includes('Customer retail display and sales'),false);
   assert.ok(fs.existsSync(path.join(dest,'B143_SOURCE_REVIEW_ONLY.json')));
+  const viewer=fs.readFileSync(path.join(dest,
+   'B143_SOURCE_3D_REVIEW_ONLY.html'),'utf8');
+  assert.ok(viewer.includes('minecraftaibuilder-b143-gallery-v1'));
+  assert.ok(viewer.includes(diag.geometrySha256));
+  assert.equal(out.report.review3d,'TRUE_B143_HTML_GENERATED_ART_PENDING');
+
  }finally{fs.rmSync(root,{recursive:true,force:true})}
 });
 

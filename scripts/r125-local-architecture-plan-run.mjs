@@ -17,6 +17,7 @@ import {createR125ArchitecturePlanLocalAdapter,DEFAULT_LOCAL_ENDPOINT}
  from '../source/ai/b198g-local-model-adapter.mjs';
 import {diagnoseR125ArchitecturePlanOriginal}
  from './r125-offline-replay.mjs';
+import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
 
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const fail=code=>{throw Error('R125_LOCAL_PLAN_'+code);};
@@ -90,12 +91,20 @@ export async function runR125LocalArchitecturePlan({
   const reviewed=diagnoseR125ArchitecturePlanOriginal(raw);
   const {sourceDesign,...diagnosis}=reviewed;
   write(dest,'SOURCE_DIAGNOSIS.json',diagnosis);
-  if(sourceDesign)write(dest,'B143_SOURCE_REVIEW_ONLY.json',sourceDesign);
+  if(sourceDesign){
+   write(dest,'B143_SOURCE_REVIEW_ONLY.json',sourceDesign);
+   // Render exactly the B143 geometry just audited, no invented voxels.
+   const template=fs.readFileSync(
+    path.join(ROOT,'source/ai/b143-viewer-template.html'),'utf8');
+   const html=renderB143Html(compileB143Gallery([sourceDesign]),template);
+   write(dest,'B143_SOURCE_3D_REVIEW_ONLY.html',html);
+  }
   result={...common,
    status:diagnosis.status,originalSha256:answer.originalSha256,
    sourceSha256:diagnosis.sourceSha256??null,
    geometrySha256:diagnosis.geometrySha256??null,
    sourceVerified:diagnosis.sourceVerified===true,
+   review3d:sourceDesign?'TRUE_B143_HTML_GENERATED_ART_PENDING':'NOT_GENERATED',
    modelCallAttempts:1,modelResponsesCaptured:1,
    originalCaptureFinishReason:captured.finishReason};
  }catch(error){
