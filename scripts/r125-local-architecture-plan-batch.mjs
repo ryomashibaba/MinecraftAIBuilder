@@ -123,9 +123,18 @@ export async function runR125ArchitecturePlanBatch({
  const save=()=>fs.writeFileSync(path.join(dest,'BATCH_REPORT.json'),
   JSON.stringify(report,null,2)+'\n');
  save();
+ // The default local qwen3:14b pilot needs its small semantic JSON, not
+ // thousands of hidden thinking tokens competing for the 4096-token cap.
+ // Ollama's OpenAI-compatible /v1 endpoint uses reasoning_effort:"none";
+ // "think:false" is a DIFFERENT (native /api/chat) protocol parameter.
+ // Keep non-default/custom LM Studio models and direct adapter callers
+ // unchanged: this is an explicit policy only for the bounded V11 batch.
+ const pilotReasoningEffort=endpoint===DEFAULT_LOCAL_ENDPOINT&&
+  model==='qwen3:14b'?'none':undefined;
  for(const item of briefs){
   const one=await runR125LocalArchitecturePlan({
-   model,prompt:item.prompt,endpoint,outDir:path.join(dest,item.id)
+   model,prompt:item.prompt,endpoint,outDir:path.join(dest,item.id),
+   reasoningEffort:pilotReasoningEffort
   },{fetcher,timeoutMs});
   let modelAuthoredFormFamilySha256=null,authoredForm=null,authoredProgram=null;
   if(one.report.sourceVerified){

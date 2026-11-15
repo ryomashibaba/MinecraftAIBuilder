@@ -49,7 +49,11 @@ test('one sequential SOURCE call per distinct brief, original files persisted',a
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'mab-batch-'));
  try{
   let postCount=0,active=0,peak=0;
-  const fake=async()=>{active++;peak=Math.max(active,peak);
+  const fake=async(_url,init)=>{active++;peak=Math.max(active,peak);
+   const body=JSON.parse(init.body);
+   assert.equal(body.reasoning_effort,'none',
+    'default Ollama qwen3:14b must leave the output budget for JSON');
+   assert.equal(body.max_tokens,4096);
    postCount++;const p=JSON.parse(original);
    // Different real voxel dimensions, not differing source IDs alone.
    p.footprint.width=24+(postCount-1)*2;
@@ -73,6 +77,11 @@ test('one sequential SOURCE call per distinct brief, original files persisted',a
   assert.equal(report.allSourceVerified,true);
   assert.equal(report.worldWrites,0);
   assert.equal(report.visualDiversity,'NOT_REVIEWED');
+  assert.ok(report.completed.every(x=>x.modelResponsesCaptured===1));
+  const savedSettings=JSON.parse(fs.readFileSync(path.join(output,
+   'shop','RUN_REPORT.json'),'utf8')).requestedGenerationSettings;
+  assert.equal(savedSettings.reasoningEffort,'none');
+  assert.equal(savedSettings.maxOutputTokens,4096);
   assert.equal(fs.readFileSync(path.join(output,'BRIEFS_ORIGINAL.json'),'utf8'),input);
   assert.equal(fs.existsSync(path.join(output,'shop','B143_SOURCE_3D_REVIEW_ONLY.html')),true);
   assert.equal(fs.existsSync(path.join(output,'lab','B143_SOURCE_3D_REVIEW_ONLY.html')),true);
@@ -89,6 +98,26 @@ test('one sequential SOURCE call per distinct brief, original files persisted',a
   assert.ok(fs.existsSync(path.join(output,'shop','MAKECODE_EDUCATION_SOURCE_ONLY.ts')));
  }finally{fs.rmSync(root,{recursive:true,force:true})}
 });
+test('non-default local provider retains its own thinking policy and never silently disables it',async()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'mab-other-local-model-'));
+ try{
+  let body;
+  const {report}=await runR125ArchitecturePlanBatch({
+   model:'qwen3:14b',endpoint:'http://127.0.0.1:47831/v1/chat/completions',
+   briefsRaw:JSON.stringify([requests[0]]),outDir:path.join(root,'other')
+  },{fetcher:async(_url,init)=>{
+   body=JSON.parse(init.body);return provider(original);
+  }});
+  assert.equal(Object.hasOwn(body,'reasoning_effort'),false);
+  assert.equal(report.sourcePassCount,1);
+  assert.equal(report.completed[0].modelResponsesCaptured,1);
+  assert.equal(JSON.parse(fs.readFileSync(path.join(root,
+   'other','shop','RUN_REPORT.json'),'utf8'))
+   .requestedGenerationSettings.reasoningEffort,null);
+  assert.equal(report.worldWrites,0);
+ }finally{fs.rmSync(root,{recursive:true,force:true})}
+});
+
 test('bad source schema does NOT suppress the other two real-brief original attempts',async()=>{
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'mab-batch-stop-'));
  let calls=0;
