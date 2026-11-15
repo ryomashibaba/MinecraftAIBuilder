@@ -991,6 +991,63 @@ test('model-selected fixtures become B143 voxels and retain reachable two-wide s
  assert.deepEqual(built.compiled.BuildPlan.operations,[]);
  assert.ok(built.gates.every(g=>g==='BLOCKED'));
 });
+
+test('model-selected wide-bay and clerestory create real glass with exterior AIR',()=>{
+ const p=plan('daylight-shop',['x'],['customer retail','making lab']);
+ p.footprint={width:24,depth:24};
+ p.levels[0].spaces[0].daylight='wide-bay';
+ p.levels[0].spaces[1].daylight='clerestory';
+ const original=structuredClone(p);
+ original.levels[0].spaces.forEach(s=>delete s.daylight);
+ const baseline=compileArchitecturePlan(original,{entrancePlacement:'source-accessible'});
+ const built=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+ assert.equal(built.daylightTargets.length,2);
+ assert.notEqual(baseline.geometrySha256,built.geometrySha256);
+ assert.equal(verifyCompiled(built.design,built.compiled),true);
+ const map=new Map(built.compiled.primitives.map(v=>[v.slice(0,3).join(','),v[3]]));
+ for(const b of built.daylightTargets){
+  assert.equal(b.outsideAirVerified,true);
+  const [x,y,z]=b.origin,[sx,sy,sz]=b.size;
+  assert.equal(Math.max(sx,sz),b.kind==='wide-bay'?4:5);
+  for(let i=x;i<x+sx;i++)for(let yy=y;yy<y+sy;yy++)
+   for(let j=z;j<z+sz;j++){
+    assert.equal(map.get([i,yy,j].join(',')),3);
+    const outside=b.face==='front'?[i,yy,j-1]:
+     b.face==='rear'?[i,yy,j+1]:
+     b.face==='east'?[i+1,yy,j]:[i-1,yy,j];
+    assert.equal(map.has(outside.join(',')),false);
+   }
+ }
+ assert.equal(auditR125SourceRoutes(built).status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(auditArchitecturePlanCirculation(built).status,
+  'SOURCE_CLEARANCE_PROBES_PASS');
+ assert.deepEqual(built.compiled.BuildPlan.operations,[]);
+});
+test('model-selected daylight and real furniture coexist with a raised roof',()=>{
+ const p=plan('daylight-maker',['z'],['visitor display','private workbench']);
+ p.footprint={width:24,depth:28};
+ p.levels[0].spaces[0].daylight='wide-bay';
+ p.levels[0].spaces[1].daylight='clerestory';
+ p.levels[0].spaces[0].fixture='display';
+ p.levels[0].spaces[1].fixture='workbench';
+ p.expression={setbackSide:'none',setbackDepth:0,
+  roofProfile:'ridge',roofAxis:'x',roofVolume:'raised',facadeLanguage:'fins'};
+ const result=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+ assert.equal(result.daylightTargets.length,2);
+ assert.equal(result.fixtureTargets.length,2);
+ const routes=auditR125SourceRoutes(result,{featureTargets:result.fixtureTargets});
+ assert.equal(routes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(verifyCompiled(result.design,result.compiled),true);
+ assert.deepEqual(result.compiled.BuildPlan.operations,[]);
+});
+test('opt-in daylight does not change legacy and rejects bogus choices',()=>{
+ const p=plan('daylight-legacy',['x']);
+ assert.equal(compileArchitecturePlan(p).sourceSha256,
+  compileArchitecturePlan(structuredClone(p)).sourceSha256);
+ p.levels[0].spaces[0].daylight='unbounded-window';
+ assert.throws(()=>compileArchitecturePlan(p),/R125_PLAN_SPACE_DAYLIGHT_ROLE/);
+});
+
 test('unknown room utility is rejected; legacy source remains identical',()=>{
  const p=plan('fixture-compatibility',['z']);
  const first=compileArchitecturePlan(p);

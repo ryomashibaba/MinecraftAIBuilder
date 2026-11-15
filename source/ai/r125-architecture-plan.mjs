@@ -10,6 +10,7 @@ import {createHash} from 'node:crypto';
 import {compileDesign,verifyCompiled,SCHEMA as B143} from './b143-building-dsl.mjs';
 import {auditR125SourceRoutes} from './r125-source-routes.mjs';
 import {addAuthoredRoomFixtures} from './r125-room-fixtures.mjs';
+import {addAuthoredRoomDaylight} from './r125-room-daylight.mjs';
 export const SCHEMA='minecraftaibuilder-r125-architecture-plan-v1';
 const hash=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
 const refuse=code=>{throw Error('R125_PLAN_'+code);};
@@ -117,11 +118,15 @@ export function validateArchitecturePlan(p){
    Array.isArray(level.spaces)&&level.spaces.length===2,'LEVEL_PROGRAM');
   for(const space of level.spaces){
    check(keys(space,['id','purpose',
-    ...(Object.hasOwn(space??{},'fixture')?['fixture']:[])])&&
+    ...(Object.hasOwn(space??{},'fixture')?['fixture']:[]),
+    ...(Object.hasOwn(space??{},'daylight')?['daylight']:[])])&&
     slug(space.id)&&text(space.purpose),'SPACE_FIELDS');
    check(space.fixture===undefined||
     ['counter','workbench','display','storage','seating'].includes(space.fixture),
     'SPACE_FIXTURE_ROLE');
+   check(space.daylight===undefined||
+    ['wide-bay','clerestory'].includes(space.daylight),
+    'SPACE_DAYLIGHT_ROLE');
    check(!seen.has(space.id),'DUPLICATE_SPACE_ID');
    seen.add(space.id);
   }
@@ -223,7 +228,7 @@ export function compileArchitecturePlan(plan,{
   elements,designOnly:true};
  const compiled=compileDesign(design);
  check(verifyCompiled(design,compiled),'COMPILED_SOURCE_MISMATCH');
- return addAuthoredRoomFixtures({
+ const built={
   schema:'minecraftaibuilder-r125-plan-to-b143-result-v1',
   planSha256:hash(original),plan:original,design,compiled,program,
   sourceSha256:compiled.sourceSha256,geometrySha256:compiled.geometrySha256,
@@ -232,7 +237,11 @@ export function compileArchitecturePlan(plan,{
   inGameWalking:'NOT_TESTED',architecturalQuality:'NOT_REVIEWED',
   constructionApproved:false,worldContacts:0,worldWrites:0,
   gates:Array(9).fill('BLOCKED')
- },{auditCirculation:auditArchitecturePlanCirculation});
+ };
+ const daylit=addAuthoredRoomDaylight(built,
+  {auditCirculation:auditArchitecturePlanCirculation});
+ return addAuthoredRoomFixtures(daylit,
+  {auditCirculation:auditArchitecturePlanCirculation});
 }
 
 /**
@@ -749,7 +758,10 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
    architecturalArt:'NOT_REVIEWED',
    worldWrites:0};
  }
- return addAuthoredRoomFixtures(result,{auditCirculation:auditArchitecturePlanCirculation});
+ const daylit=addAuthoredRoomDaylight(result,
+  {auditCirculation:auditArchitecturePlanCirculation});
+ return addAuthoredRoomFixtures(daylit,
+  {auditCirculation:auditArchitecturePlanCirculation});
 }
 
 /**

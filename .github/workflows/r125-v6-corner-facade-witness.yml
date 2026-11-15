@@ -8,6 +8,7 @@ on:
       - source/ai/b198g-local-model-adapter.mjs
       - source/ai/r125-architecture-plan.mjs
       - source/ai/r125-room-fixtures.mjs
+      - source/ai/r125-room-daylight.mjs
       - source/ai/r125-education-makecode-export.mjs
       - configs/r125-education-verified-palette-v26.33.json
       - scripts/r125-architecture-plan.test.mjs
@@ -59,6 +60,7 @@ jobs:
         run: |
           node --check source/ai/b198g-local-model-adapter.mjs
           node --check source/ai/r125-room-fixtures.mjs
+          node --check source/ai/r125-room-daylight.mjs
           node --check scripts/r125-local-architecture-plan-run.mjs
           node --check scripts/r125-local-architecture-plan-batch.mjs
           node --check scripts/r125-batch-compare.mjs
