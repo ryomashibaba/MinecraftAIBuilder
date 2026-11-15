@@ -13,18 +13,33 @@ export function renderR125BatchComparison(briefs,report){
   const program=(row.authoredProgram??[]).map((l,i)=>
    '<li>Level '+(i+1)+' ('+esc(l.splitAxis)+'): '+
     l.spaces.map(s=>esc(s.purpose)+
-    (s.fixture?' ['+esc(s.fixture)+']':'')).join(' / ')+'</li>').join('');
+    (s.fixtures?.length?' ['+esc(s.fixtures.join(', '))+']':
+     s.fixture?' ['+esc(s.fixture)+']':'')+
+    (s.fixtureDetail?' ('+esc(s.fixtureDetail)+')':'')+
+    (s.daylight?' {daylight '+esc(s.daylight)+'}':'')).join(' / ')+'</li>').join('');
   const authored=row.authoredForm?Object.entries(row.authoredForm)
    .map(([key,value])=>esc(key)+': '+esc(print(value))).join(' · '):
    'No validated original ArchitecturePlan';
   const findings=[row.failureReason,...(row.sourceIssues??[])]
    .filter(Boolean).map(x=>esc(print(x))).join(' | ');
   const hasViewer=row.review3d==='TRUE_B143_HTML_GENERATED_ART_PENDING';
+  const rooms=row.authoredProgram?.reduce((n,l)=>n+l.spaces.length,0)??null;
+  const sourceEvidence=row.sourceVerified===true?
+   '<p class="muted"><strong>True SOURCE evidence, not ART:</strong> '+
+   'rooms '+esc(rooms)+' · equipment '+esc(row.modelChosenFixtures??0)+
+   ' · reached service '+esc(row.fixtureServiceReached??0)+'/'+
+   esc(row.fixtureServiceTotal??0)+' · voxels '+esc(row.occupiedVoxels??'?')+
+   '<p class="muted">Routes '+esc(row.sourceRouteStatus??'UNKNOWN')+
+   ' · circulation '+esc(row.circulationStatus??'UNKNOWN')+
+   ' · floors '+esc(row.programFloorStatus??'UNKNOWN')+
+   ' · static risk flags '+esc(row.visualHighRiskCount??'?')+
+   ' (not human art judgement)</p>':
+   '<p class="issue">No verified SOURCE building: equipment/access quality NOT DETERMINED.</p>';
   // ids are regex-validated BEFORE any local model POST or filesystem work.
   const relative='./'+row.id+'/B143_SOURCE_3D_REVIEW_ONLY.html';
   return '<section><h2>'+esc(row.id)+'</h2><p><strong>'+
    esc(row.status)+'</strong></p><p>'+esc(brief)+'</p>'+
-   '<p class="muted">'+authored+'</p><ul>'+program+'</ul>'+
+   '<p class="muted">'+authored+'</p><ul>'+program+'</ul>'+sourceEvidence+
    (findings?'<p class="issue">'+findings+'</p>':'')+
    (hasViewer?'<iframe sandbox="allow-scripts" loading="lazy" src="'+
      relative+'" title="'+esc(row.id)+' true B143 3D"></iframe>'+

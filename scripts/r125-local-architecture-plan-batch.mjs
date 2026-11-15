@@ -76,7 +76,11 @@ export function authoredFormFamily(plan){
  return {levelAxes:plan.levels.map(l=>l.splitAxis),
   roomCounts:plan.levels.map(l=>l.spaces.length),
   roofProfile:e?.roofProfile??'unexpressed-flat',
-  roofAxis:e?.roofAxis??null,
+  // An unused axis on a flat roof must NOT count as creative variation.
+  roofAxis:e&&e.roofProfile!=='flat'?e.roofAxis??null:null,
+  roofVolume:e?.roofVolume??'flat-cap',
+  roofOverhang:e?.roofOverhang??'none',
+  daylightFacade:e?.daylightFacade??'none',
   setbackSide:e?.setbackSide??'none',
   setbackDepth:e?.setbackDepth??0,
   rearCornerCut:e?.rearCornerCut?
@@ -127,7 +131,9 @@ export async function runR125ArchitecturePlanBatch({
    authoredProgram=original.levels.map(level=>({splitAxis:level.splitAxis,
     spaces:level.spaces.map(space=>({purpose:space.purpose,
      ...(space.fixture?{fixture:space.fixture}:{}),
-     ...(space.fixtures?{fixtures:space.fixtures}:{})}))}));
+     ...(space.fixtures?{fixtures:space.fixtures}:{}),
+     ...(space.fixtureDetail?{fixtureDetail:space.fixtureDetail}:{}),
+     ...(space.daylight?{daylight:space.daylight}:{})}))}));
    modelAuthoredFormFamilySha256=formHash(original);
   }
   const diagnosisPath=path.join(dest,item.id,'SOURCE_DIAGNOSIS.json');
@@ -137,6 +143,17 @@ export async function runR125ArchitecturePlanBatch({
    modelAuthoredFormFamilySha256,authoredForm,authoredProgram,
    modelChosenDaylight:diagnosis?.modelChosenDaylight??0,
    daylightSourceWindows:diagnosis?.daylightSourceWindows??[],
+   // Original plan and checked B143 SOURCE only. Never artistic certification.
+   occupiedVoxels:diagnosis?.occupiedVoxels??null,
+   sourceRouteStatus:diagnosis?.sourceRoutes??null,
+   circulationStatus:diagnosis?.circulation??null,
+   programFloorStatus:diagnosis?.programFloors??null,
+   visualHighRiskCount:diagnosis?.visualHighRiskCount??null,
+   modelChosenFixtures:diagnosis?.modelChosenFixtures??0,
+   fixtureServiceTotal:diagnosis?.fixtureAccess?.length??0,
+   fixtureServiceReached:diagnosis?.fixtureAccess?.filter(x=>
+    x.reachableFromEntrance===true&&
+    x.supportedTwoWideServiceWitness!==null).length??0,
    failureReason:one.report.reason??diagnosis?.compilerReason??null,
    sourceIssues:[...(diagnosis?.sourceRouteIssues??[]),
     ...(diagnosis?.circulationFailures??[])].slice(0,8),

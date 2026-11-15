@@ -4,7 +4,8 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {runR125ArchitecturePlanBatch,parseR125BatchBriefs,parseR125BatchArgs}
+import {runR125ArchitecturePlanBatch,parseR125BatchBriefs,parseR125BatchArgs,
+ authoredFormFamily}
  from './r125-local-architecture-plan-batch.mjs';
 import {renderR125BatchComparison} from './r125-batch-compare.mjs';
 
@@ -201,4 +202,81 @@ test('comparison escapes untrusted original request text',()=>{
   modelAuthoredFormFamiliesDistinct:null,stopReason:'NOT_STARTED',completed:[]});
  assert.ok(html.includes('&lt;img src=x onerror=alert(1)&gt;'));
  assert.ok(!html.includes('<img src=x'));
+});
+
+test('form diversity reflects physical roof mass and not unused flat roof axis',()=>{
+ const p={levels:[{splitAxis:'x',spaces:[{},{}]}],
+  expression:{roofProfile:'flat',roofAxis:'x',setbackSide:'none',
+   setbackDepth:0,facadeLanguage:'plain'}};
+ const original=authoredFormFamily(p);
+ const ignored=structuredClone(p);ignored.expression.roofAxis='z';
+ assert.deepEqual(authoredFormFamily(ignored),original);
+ const pitched=structuredClone(p);
+ pitched.expression.roofProfile='ridge';pitched.expression.roofVolume='raised';
+ assert.notDeepEqual(authoredFormFamily(pitched),original);
+ const overhung=structuredClone(pitched);
+ overhung.expression.roofOverhang='one-block';
+ assert.notDeepEqual(authoredFormFamily(overhung),authoredFormFamily(pitched));
+ const triple=structuredClone(p);triple.levels[0].spaces.push({});
+ assert.notDeepEqual(authoredFormFamily(triple),original);
+ const glass=structuredClone(pitched);
+ glass.expression.daylightFacade='east-and-rear-bays';
+ assert.notDeepEqual(authoredFormFamily(glass),authoredFormFamily(pitched));
+});
+
+test('offline three-genre source and equipment are fully visible in comparison',async()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'mab-three-genre-evidence-'));
+ try{
+  const genres=[
+   {id:'home-plan',axis:'x',purposes:['living and dining room',
+    'quiet sleeping room','home working office'],
+    roles:['seating','bed','desk'],roof:'ridge',
+    facade:'plain',overhang:true},
+   {id:'shop-plan',axis:'x',purposes:['retail customer display',
+    'preparation and stock workshop'],
+    roles:['display','workbench'],roof:'flat',facade:'fins'},
+   {id:'lab-plan',axis:'z',purposes:['satellite assembly lab',
+    'electronic device test room','record archive'],
+    roles:['workbench','electronics','storage'],roof:'sawtooth',
+    facade:'screen'}
+  ];
+  const plans=genres.map(g=>({
+   schema:'minecraftaibuilder-r125-architecture-plan-v1',
+   id:g.id,title:'Purpose-specific independent small building',
+   brief:'Original functional layout with usable equipment and natural circulation',
+   footprint:{width:30,depth:30},
+   levels:[{splitAxis:g.axis,splitPercent:50,
+    spaces:g.purposes.map((purpose,i)=>({
+     id:g.id+'-room-'+i,purpose,fixtures:[g.roles[i]]}))}],
+   materials:{floor:'wood',wall:'concrete',roof:'metal'},
+   expression:{setbackSide:'none',setbackDepth:0,roofProfile:g.roof,
+    roofAxis:'x',facadeLanguage:g.facade,
+    ...(g.roof==='flat'?{}:{roofVolume:'raised'}),
+    ...(g.overhang?{roofOverhang:'one-block'}:{})}
+  }));
+  let calls=0;
+  const out=path.join(root,'compare');
+  const {report}=await runR125ArchitecturePlanBatch({
+   model:'qwen3:14b',briefsRaw:input,outDir:out
+  },{fetcher:async()=>provider(JSON.stringify(plans[calls++]))});
+  assert.equal(calls,3);
+  assert.equal(report.sourcePassCount,3,
+   JSON.stringify(report.completed.map(x=>({id:x.id,reason:x.failureReason}))));
+  assert.equal(report.modelAuthoredFormFamiliesDistinct,true);
+  assert.deepEqual(report.completed.map(x=>x.authoredProgram[0].spaces.length),[3,2,3]);
+  assert.deepEqual(report.completed.map(x=>x.modelChosenFixtures),[3,2,3]);
+  assert.deepEqual(report.completed.map(x=>x.fixtureServiceReached),[3,2,3]);
+  assert.deepEqual(report.completed.map(x=>x.fixtureServiceTotal),[3,2,3]);
+  assert.ok(report.completed.every(x=>x.occupiedVoxels>0&&
+   x.sourceRouteStatus==='SOURCE_ROUTES_REACH_ALL_ZONES'&&
+   x.circulationStatus==='SOURCE_CLEARANCE_PROBES_PASS'));
+  const page=fs.readFileSync(path.join(out,'BATCH_COMPARE_3D.html'),'utf8');
+  assert.equal((page.match(/<iframe /g)||[]).length,3);
+  assert.ok(page.includes('workbench')&&page.includes('electronics'));
+  assert.ok(page.includes('reached service 3/3'));
+  assert.ok(page.includes('reached service 2/2'));
+  assert.ok(page.includes('True SOURCE evidence, not ART'));
+  assert.ok(page.includes('Human ART NOT REVIEWED'));
+  assert.equal(report.worldWrites,0);
+ }finally{fs.rmSync(root,{recursive:true,force:true})}
 });
