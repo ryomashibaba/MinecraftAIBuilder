@@ -257,9 +257,14 @@ test('offline three-genre source and equipment are fully visible in comparison',
   let calls=0;
   const out=path.join(root,'compare');
   const {report}=await runR125ArchitecturePlanBatch({
-   model:'qwen3:14b',briefsRaw:input,outDir:out
+   model:'qwen3:14b',briefsRaw:JSON.stringify([
+    {id:'home',prompt:requests[2].prompt},
+    {id:'shop',prompt:requests[0].prompt},
+    {id:'lab',prompt:requests[1].prompt}
+   ]),outDir:out
   },{fetcher:async()=>provider(JSON.stringify(plans[calls++]))});
   assert.equal(calls,3);
+  assert.deepEqual(report.completed.map(x=>x.id),['home','shop','lab']);
   assert.equal(report.sourcePassCount,3,
    JSON.stringify(report.completed.map(x=>({id:x.id,reason:x.failureReason}))));
   assert.equal(report.modelAuthoredFormFamiliesDistinct,true);
