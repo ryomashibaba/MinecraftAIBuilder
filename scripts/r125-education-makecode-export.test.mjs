@@ -134,9 +134,10 @@ test('exported preview verification rejects a block that is only AIR',()=>{
   positions:{add:(a,b)=>({x:a.x+b.x,y:a.y+b.y,z:a.z+b.z})}};
  vm.runInNewContext(generated,env);
  actions.mabset();actions.mabbuild();actions.mabverify();
- assert.equal(fills.length,0,
-  'preflight must block if AIR rule does not allow empty source volume');
- assert.ok(sayings.some(s=>s.includes('Wrote zero blocks')));
+ assert.ok(fills.length>0,'preflight should allow the initial empty area');
+ assert.ok(sayings.some(s=>s.includes('HOLD:')&&s.includes('positions')),
+  'AIR after placement must NOT be accepted as the intended material');
+ assert.equal(sayings.some(s=>s.includes('Positions and material counts match')),false);
 });
 test('strict default holds unverified wood instead of substituting stone',()=>{
  const scene=compileDesign(d);
