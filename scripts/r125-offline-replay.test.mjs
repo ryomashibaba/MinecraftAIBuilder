@@ -1,8 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {diagnoseR125Original,diagnoseR125ArchitecturePlanOriginal,
- parseR125ReplayArgs} from './r125-offline-replay.mjs';
-import {readFileSync} from 'node:fs';
+ parseR125ReplayArgs,writeArchitecturePlanReplay} from './r125-offline-replay.mjs';
+import {readFileSync,mkdtempSync,existsSync,rmSync} from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {SCHEMA as B143} from '../source/ai/b143-building-dsl.mjs';
 
@@ -103,4 +106,26 @@ test('ArchitecturePlan replay rejects corrupted plan without silent model correc
  assert.equal(fake.sourceDesign,undefined);
  assert.equal(fake.originalEdited,false);
  assert.deepEqual(fake.worldGates,Array(9).fill('BLOCKED'));
+});
+
+test('saved genuine Qwen plan yields true B143 HTML for human review without another model call',()=>{
+ const root=mkdtempSync(path.join(os.tmpdir(),'r125-qwen-3d-'));
+ const rawPath=fileURLToPath(new URL(
+  '../evidence/r125-real-l-corner-20261101/MODEL_RESPONSE_ORIGINAL.txt',
+  import.meta.url));
+ const dest=path.join(root,'review');
+ try{
+  const receipt=writeArchitecturePlanReplay({'--raw':rawPath,'--out':dest});
+  const report=JSON.parse(readFileSync(path.join(dest,'SOURCE_DIAGNOSIS.json'),'utf8'));
+  const html=readFileSync(path.join(dest,'B143_SOURCE_3D_REVIEW_ONLY.html'),'utf8');
+  assert.equal(receipt.status,'B143_SOURCE_CANDIDATE_ART_HOLD');
+  assert.equal(report.sourceVerified,true);
+  assert.equal(report.modelCalls,0);
+  assert.equal(report.artStatus,'NOT_REVIEWED');
+  assert.equal(report.worldWrites,0);
+  assert.ok(html.includes('minecraftaibuilder-b143-gallery-v1'));
+  assert.ok(html.includes(report.geometrySha256));
+  assert.equal(readFileSync(path.join(dest,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8'),
+   readFileSync(rawPath,'utf8'));
+ }finally{rmSync(root,{recursive:true,force:true})}
 });

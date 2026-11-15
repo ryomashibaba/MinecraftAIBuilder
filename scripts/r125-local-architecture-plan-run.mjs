@@ -74,8 +74,14 @@ export async function runR125LocalArchitecturePlan({
  if(typeof prompt!=='string'||prompt.length<8||prompt.length>8000)
   fail('INVALID_PROMPT');
  fs.mkdirSync(dest,{recursive:false});
+ // Preserve the exact request beside the original model response so a new
+ // unknown-brief trial is genuinely reproducible without exposing it in CI.
+ write(dest,'REQUEST_ORIGINAL.txt',prompt);
  const common={schema:'r125-local-plan-one-shot-v1',
   model,endpoint,requestSha256:sha(prompt),
+  requestedGenerationSettings:{temperature:0.55,
+   responseFormat:'json_object',maxOutputTokens,
+   reasoningEffort:reasoningEffort??null,timeoutMs},
   attemptLimit:1,automaticRetries:0,
   provenance:'LOCAL_HTTP_PROVIDER_NOT_INDEPENDENTLY_ATTESTED',
   originalEdited:false,worldContacts:0,worldWrites:0,

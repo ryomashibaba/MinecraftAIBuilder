@@ -15,6 +15,7 @@ import {compileArchitecturePlan,auditArchitecturePlanCirculation,
  assessR125ProgramGeometry} from '../source/ai/r125-architecture-plan.mjs';
 import {auditR125SourceRoutes} from '../source/ai/r125-source-routes.mjs';
 import {critiqueArchitecture} from '../source/ai/b198c-spatial-critic.mjs';
+import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
 
 const digest=x=>createHash('sha256').update(x).digest('hex');
 const fail=reason=>{throw Error('R125_REPLAY_'+reason);};
@@ -187,7 +188,7 @@ export function diagnoseR125ArchitecturePlanOriginal(raw){
  }
 }
 
-function writeArchitecturePlanReplay(args){
+export function writeArchitecturePlanReplay(args){
  const dest=args['--out'],parent=path.dirname(dest);
  const repoRoot=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
  if(fs.existsSync(dest)||!fs.existsSync(parent)||!fs.statSync(parent).isDirectory())
@@ -203,9 +204,17 @@ function writeArchitecturePlanReplay(args){
  fs.writeFileSync(path.join(dest,'MODEL_RESPONSE_ORIGINAL.txt'),raw,{flag:'wx'});
  fs.writeFileSync(path.join(dest,'SOURCE_DIAGNOSIS.json'),
   JSON.stringify(diagnosis,null,2)+'\n',{flag:'wx'});
- if(sourceDesign)
+ if(sourceDesign){
   fs.writeFileSync(path.join(dest,'B143_SOURCE_REVIEW_ONLY.json'),
    JSON.stringify(sourceDesign,null,2)+'\n',{flag:'wx'});
+  // Review the actual B143 voxels from the archived model author, not a
+  // fabricated proxy shape or a host-redesigned replacement.
+  const template=fs.readFileSync(
+   path.join(repoRoot,'source/ai/b143-viewer-template.html'),'utf8');
+  const html=renderB143Html(compileB143Gallery([sourceDesign]),template);
+  fs.writeFileSync(path.join(dest,'B143_SOURCE_3D_REVIEW_ONLY.html'),
+   html,{flag:'wx'});
+ }
  return {status:report.status,originalSha256:report.originalSha256,
   sourceSha256:report.sourceSha256??null,
   modelCalls:0,worldWrites:0,humanArt:'NOT_REVIEWED'};

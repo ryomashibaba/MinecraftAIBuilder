@@ -82,6 +82,12 @@ test('one call records raw and true SOURCE, without privately leaking raw into r
   assert.equal(out.report.sourceVerified,true);
   assert.equal(out.report.originalSha256,digest(original));
   assert.equal(out.report.modelResponsesCaptured,1);
+  assert.equal(fs.readFileSync(path.join(dest,'REQUEST_ORIGINAL.txt'),'utf8'),prompt);
+  assert.equal(out.report.requestSha256,digest(prompt));
+  assert.deepEqual(out.report.requestedGenerationSettings,{
+   temperature:0.55,responseFormat:'json_object',
+   maxOutputTokens:4096,reasoningEffort:null,timeoutMs:180000
+  });
   assert.equal(out.report.nineWorldGates.length,9);
   assert.ok(out.report.nineWorldGates.every(x=>x==='BLOCKED'));
   assert.equal(out.report.artStatus,'NOT_REVIEWED');
