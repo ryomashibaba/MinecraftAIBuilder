@@ -118,7 +118,28 @@ export async function runR125LocalArchitecturePlan({
    modelRequestElapsedMs:modelElapsedMs,
    providerReportedTokenUsage:captured.usage};
  }catch(error){
+  // An original MODEL response can be valid raw evidence even if the
+  // transport adapter rejected its JSON/required fields. Diagnose it
+  // OFFLINE without another model call. Never promote an adapter failure.
+  let offlineDiagnosisStatus=null,offlineCompilerReason=null;
+  if(captured&&fs.existsSync(path.join(dest,'MODEL_RESPONSE_ORIGINAL.txt'))){
+   try{
+    const raw=fs.readFileSync(path.join(dest,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8');
+    if(sha(raw)===captured.sha256){
+     const reviewed=diagnoseR125ArchitecturePlanOriginal(raw);
+     const {sourceDesign,...diagnosis}=reviewed;
+     offlineDiagnosisStatus=diagnosis.status;
+     offlineCompilerReason=diagnosis.compilerReason??null;
+     const target=path.join(dest,'SOURCE_DIAGNOSIS.json');
+     if(!fs.existsSync(target))write(dest,'SOURCE_DIAGNOSIS.json',diagnosis);
+    }
+   }catch{
+    // Preserve exact original model error and path to private raw.
+    // Diagnostics MUST never mask the original failed request.
+   }
+  }
   result={...common,status:'HOLD_MODEL_OR_SOURCE',
+   offlineDiagnosisStatus,offlineCompilerReason,
    reason:String(error?.message??error).slice(0,300),
    originalSha256:captured?.sha256??null,
    modelRequestElapsedMs:modelStartMs===null?null:

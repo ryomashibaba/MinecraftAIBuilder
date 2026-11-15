@@ -129,6 +129,35 @@ test('invalid response is captured verbatim but never repaired, re-requested or 
   assert.equal(out.report.sourceVerified,false);
   assert.equal(fs.readFileSync(path.join(dest,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8'),'{"schema":');
   assert.equal(fs.existsSync(path.join(dest,'B143_SOURCE_REVIEW_ONLY.json')),false);
+  const diagnosis=JSON.parse(fs.readFileSync(path.join(dest,'SOURCE_DIAGNOSIS.json'),'utf8'));
+  assert.equal(diagnosis.status,'HOLD_INVALID_ORIGINAL_JSON');
+  assert.equal(diagnosis.originalEdited,false);
+  assert.equal(out.report.offlineDiagnosisStatus,'HOLD_INVALID_ORIGINAL_JSON');
+  assert.equal(out.report.automaticRetries,0);
+ }finally{fs.rmSync(root,{recursive:true,force:true})}
+});
+
+test('valid JSON invalid schema retains specific offline compiler reason without retries',async()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'mab-reject-'));
+ const dest=path.join(root,'invalid-plan');
+ const bad=JSON.stringify({...JSON.parse(original),unexpectedAuthorKey:'unverified'});
+ let calls=0;
+ try{
+  const {report}=await runR125LocalArchitecturePlan({
+   model:'qwen3:14b',prompt,outDir:dest
+  },{fetcher:async()=>{calls++;return provider(bad)}});
+  assert.equal(calls,1);
+  assert.equal(report.sourceVerified,false);
+  assert.equal(report.modelResponsesCaptured,1);
+  assert.equal(report.automaticRetries,0);
+  assert.equal(report.status,'HOLD_MODEL_OR_SOURCE');
+  assert.equal(report.offlineDiagnosisStatus,'HOLD_PLAN_COMPILER_OR_QA');
+  assert.match(report.offlineCompilerReason,/R125_PLAN_TOP_LEVEL_FIELDS/);
+  assert.equal(fs.readFileSync(path.join(dest,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8'),bad);
+  const diagnosis=JSON.parse(fs.readFileSync(path.join(dest,'SOURCE_DIAGNOSIS.json'),'utf8'));
+  assert.equal(diagnosis.status,'HOLD_PLAN_COMPILER_OR_QA');
+  assert.equal(diagnosis.modelCalls,0);
+  assert.equal(fs.existsSync(path.join(dest,'B143_SOURCE_REVIEW_ONLY.json')),false);
  }finally{fs.rmSync(root,{recursive:true,force:true})}
 });
 

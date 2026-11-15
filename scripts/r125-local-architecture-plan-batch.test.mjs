@@ -100,6 +100,10 @@ test('bad first model response stops batch without extra requests',async()=>{
   assert.equal((html.match(/<iframe /g)||[]).length,0);
   assert.equal(fs.readFileSync(path.join(output,'shop',
    'MODEL_RESPONSE_ORIGINAL.txt'),'utf8'),'{"schema":');
+  assert.equal(report.completed[0].failureReason,'B198G_PLAN_NOT_JSON');
+  assert.ok(fs.existsSync(path.join(output,'shop','SOURCE_DIAGNOSIS.json')));
+  assert.ok(fs.readFileSync(path.join(output,'BATCH_COMPARE_3D.html'),'utf8')
+   .includes('B198G_PLAN_NOT_JSON'));
  }finally{fs.rmSync(root,{recursive:true,force:true})}
 });
 test('identical building geometry is a diversity HOLD, never 3-use success',async()=>{
