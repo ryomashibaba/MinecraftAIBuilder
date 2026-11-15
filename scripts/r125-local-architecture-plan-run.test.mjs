@@ -59,7 +59,7 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    assert.equal(structured.additionalProperties,false);
    assert.equal(structured.properties.levels.maxItems,2);
    assert.equal(structured.properties.levels.items.properties.spaces.minItems,2);
-   assert.equal(structured.properties.levels.items.properties.spaces.maxItems,2);
+   assert.equal(structured.properties.levels.items.properties.spaces.maxItems,3);
    const room=structured.properties.levels.items.properties.spaces.items;
    assert.equal(room.additionalProperties,false);
    assert.ok(room.properties.fixtures.items.enum.includes('electronics'));

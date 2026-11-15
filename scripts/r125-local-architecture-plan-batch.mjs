@@ -74,6 +74,7 @@ export function parseR125BatchArgs(argv){
 export function authoredFormFamily(plan){
  const e=plan?.expression;
  return {levelAxes:plan.levels.map(l=>l.splitAxis),
+  roomCounts:plan.levels.map(l=>l.spaces.length),
   roofProfile:e?.roofProfile??'unexpressed-flat',
   roofAxis:e?.roofAxis??null,
   setbackSide:e?.setbackSide??'none',

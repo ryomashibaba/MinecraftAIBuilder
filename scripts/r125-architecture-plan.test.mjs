@@ -1547,3 +1547,56 @@ test('authored crafted equipment keeps old 7-role geometry optional and builds i
  assert.throws(()=>compileArchitecturePlan(wrong),
   /R125_PLAN_SPACE_FIXTURE_DETAIL/);
 });
+
+test('three room T plan genuinely changes SOURCE and reaches distinct rooms',()=>{
+ for(const axis of ['x','z'])for(const expressive of [false,true]){
+  const p=plan('t-three-'+axis+'-'+(expressive?'raised':'flat'),
+   [axis],['lively making room','recording area']);
+  p.footprint={width:26,depth:26};
+  p.levels[0].spaces.push({id:'area-0c',purpose:'quiet storage office'});
+  p.levels[0].spaces[0].fixture='workbench';
+  p.levels[0].spaces[2].fixture='storage';
+  if(expressive)p.expression={setbackSide:'none',setbackDepth:0,
+   roofProfile:'ridge',roofAxis:axis,roofVolume:'raised',facadeLanguage:'plain'};
+  const two=structuredClone(p);two.levels[0].spaces.pop();
+  const baseline=compileArchitecturePlan(two,{entrancePlacement:'source-accessible'});
+  const out=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+  assert.equal(out.program[0].zones.length,3);
+  assert.notEqual(out.geometrySha256,baseline.geometrySha256);
+  assert.ok(out.design.elements.some(v=>v.id==='l0-secondary-divider'));
+  assert.ok(out.design.elements.some(v=>v.id==='l0-secondary-door'));
+  assert.equal(verifyCompiled(out.design,out.compiled),true);
+  const circulation=auditArchitecturePlanCirculation(out);
+  assert.equal(circulation.status,'SOURCE_CLEARANCE_PROBES_PASS',
+   JSON.stringify(circulation.failures));
+  assert.equal(circulation.levels[0].secondaryPartitionSourcePass,true);
+  const routes=auditR125SourceRoutes(out,{featureTargets:out.fixtureTargets});
+  assert.equal(routes.status,'SOURCE_ROUTES_REACH_ALL_ZONES',
+   JSON.stringify(routes.issues));
+  assert.equal(routes.zones.length,3);
+  assert.ok(routes.zones.every(v=>v.reachedFromEntrance));
+  assert.ok(routes.featureAccess.every(v=>v.reachableFromEntrance));
+  assert.deepEqual(out.compiled.BuildPlan.operations,[]);
+ }
+});
+test('two storeys with 3 rooms each remain source-connected via staircase',()=>{
+ const p=plan('t-six',['x','z'],['entry lab','private workroom']);
+ p.footprint={width:28,depth:28};
+ p.levels[0].spaces.push({id:'area-0c',purpose:'ground service room'});
+ p.levels[1].spaces.push({id:'area-1c',purpose:'upstairs equipment room'});
+ p.expression={setbackSide:'none',setbackDepth:0,
+  roofProfile:'sawtooth',roofAxis:'x',roofVolume:'raised',
+  facadeLanguage:'plain'};
+ const out=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+ assert.deepEqual(out.program.map(l=>l.zones.length),[3,3]);
+ assert.equal(auditR125SourceRoutes(out).status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(auditArchitecturePlanCirculation(out).status,'SOURCE_CLEARANCE_PROBES_PASS');
+ assert.deepEqual(out.compiled.BuildPlan.operations,[]);
+});
+test('fourth room is not accepted',()=>{
+ const p=plan('fourth-reject',['x'],['first area','second area']);
+ p.levels[0].spaces.push({id:'area-0c',purpose:'third area'});
+ assert.equal(validateArchitecturePlan(p),true);
+ p.levels[0].spaces.push({id:'area-0d',purpose:'fourth area'});
+ assert.throws(()=>validateArchitecturePlan(p),/R125_PLAN_LEVEL_PROGRAM/);
+});

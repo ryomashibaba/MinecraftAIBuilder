@@ -34,6 +34,44 @@ const groundEntryX=(axis,split,width,placement,zone)=>{
  const first=split-2,second=split+2;
  return Math.abs(center-first)<=Math.abs(center-second)?first:second;
 };
+
+/** Additional author-owned space creates a real T plan only on opt-in. */
+function tLayout(level,{x0,x1,z0,z1},split){
+ if(level.spaces.length!==3)return null;
+ const [first,second,third]=level.spaces;
+ if(level.splitAxis==='x'){
+  const k=Math.floor((z0+z1)/2);
+  check(x1-split-1>=3&&k-z0-1>=3&&z1-k-1>=3,
+   'THREE_ROOM_MINIMUM_CLEAR_SPAN');
+  return {axis:'z',coordinate:k,
+   wallAt:y=>[split+1,y,k],wallSize:[x1-split-1,4,1],
+   doorAt:y=>[split+1,y,k],doorSize:[2,3,1],
+   mainDoorZ:Math.min(k-3,Math.max(z0+2,Math.floor((z0+k)/2))),
+   zones:[
+    {id:first.id,purpose:first.purpose,
+     range:{x:[x0+1,split-1],z:[z0+1,z1-1]}},
+    {id:second.id,purpose:second.purpose,
+     range:{x:[split+1,x1-1],z:[z0+1,k-1]}},
+    {id:third.id,purpose:third.purpose,
+     range:{x:[split+1,x1-1],z:[k+1,z1-1]}}
+   ]};
+ }
+ const k=Math.floor((x0+x1)/2);
+ check(z1-split-1>=3&&k-x0-1>=3&&x1-k-1>=3,
+  'THREE_ROOM_MINIMUM_CLEAR_SPAN');
+ return {axis:'x',coordinate:k,
+  wallAt:y=>[k,y,split+1],wallSize:[1,4,z1-split-1],
+  doorAt:y=>[k,y,split+1],doorSize:[1,3,2],
+  zones:[
+   {id:first.id,purpose:first.purpose,
+    range:{x:[x0+1,x1-1],z:[z0+1,split-1]}},
+   {id:second.id,purpose:second.purpose,
+    range:{x:[x0+1,k-1],z:[split+1,z1-1]}},
+   {id:third.id,purpose:third.purpose,
+    range:{x:[k+1,x1-1],z:[split+1,z1-1]}}
+  ]};
+}
+
 export function validateArchitecturePlan(p){
  const standard=['schema','id','title','brief','footprint','levels','materials'];
  const expressive=Object.hasOwn(p??{},'expression');
@@ -119,7 +157,7 @@ export function validateArchitecturePlan(p){
  for(const level of p.levels){
   check(keys(level,['splitAxis','splitPercent','spaces'])&&
    ['x','z'].includes(level.splitAxis)&&[40,50,60].includes(level.splitPercent)&&
-   Array.isArray(level.spaces)&&level.spaces.length===2,'LEVEL_PROGRAM');
+   Array.isArray(level.spaces)&&[2,3].includes(level.spaces.length),'LEVEL_PROGRAM');
   for(const space of level.spaces){
    check(keys(space,['id','purpose',
     ...(Object.hasOwn(space??{},'fixture')?['fixture']:[]),
@@ -180,6 +218,12 @@ export function assessR125AuthoredRoomCapacity(plan){
   const sizes=axis==='x'?
    [[split-x0-1,z1-z0-1],[x1-split-1,z1-z0-1]]:
    [[x1-x0-1,split-z0-1],[x1-x0-1,z1-split-1]];
+  if(level.spaces.length===3){
+   const k=Math.floor((axis==='x'?z0+z1:x0+x1)/2);
+   sizes.splice(1,1,...(axis==='x'?
+    [[x1-split-1,k-z0-1],[x1-split-1,z1-k-1]]:
+    [[k-x0-1,z1-split-1],[x1-k-1,z1-split-1]]));
+  }
   return level.spaces.map((room,zi)=>{
    const [width,depth]=sizes[zi];
    const roles=room.fixtures??(room.fixture?[room.fixture]:[]);
@@ -241,15 +285,22 @@ export function compileArchitecturePlan(plan,{
   const split=axis==='x'?
    Math.max(7,Math.min(w-7,Math.round(w*level.splitPercent/100))):
    Math.max(8,Math.min(d-6,Math.round(d*level.splitPercent/100)));
+  const three=tLayout(level,{x0:1,x1:w-2,z0:1,z1:d-2},split);
   if(axis==='x'){
    box(tag+'-divider','add',wall,[split,base+1,2],[1,4,d-4]);
    box(tag+'-inside-door','cut',null,
-    [split,base+1,Math.floor(d/2)-1],[1,3,2]);
+    [split,base+1,three?.mainDoorZ??Math.floor(d/2)-1],[1,3,2]);
   }else{
    box(tag+'-divider','add',wall,[2,base+1,split],[w-4,4,1]);
    // The short doorway also allows a stair arrival from z=7 when
    // the second-storey partition happens to be at z=8.
    box(tag+'-inside-door','cut',null,[3,base+1,split],[2,3,1]);
+  }
+  if(three){
+   box(tag+'-secondary-divider','add',wall,three.wallAt(base+1),
+    three.wallSize);
+   box(tag+'-secondary-door','cut',null,three.doorAt(base+1),
+    three.doorSize);
   }
   // External ground-level opening, without inventing a world landing.
   if(l===0){
@@ -274,13 +325,14 @@ export function compileArchitecturePlan(plan,{
   program.push({
    level:l,splitAxis:axis,requestedPercent:level.splitPercent,
    splitCoordinate:split,standingFloorY:base+1,
-   zones:axis==='x'?[
+   ...(three?{secondarySplitAxis:three.axis,secondarySplitCoordinate:three.coordinate}:{}),
+   zones:three?.zones??(axis==='x'?[
     {id:first.id,purpose:first.purpose,range:{x:[2,split-1],z:[2,d-3]}},
     {id:second.id,purpose:second.purpose,range:{x:[split+1,w-3],z:[2,d-3]}}
    ]:[
     {id:first.id,purpose:first.purpose,range:{x:[2,w-3],z:[2,split-1]}},
     {id:second.id,purpose:second.purpose,range:{x:[2,w-3],z:[split+1,d-3]}}
-   ],
+   ]),
    partitionDoorModelled:true,doorAccessibleInMinecraft:'NOT_TESTED'
   });
  }
@@ -362,8 +414,27 @@ export function auditArchitecturePlanCirculation(product){
   }
   if(!partitionPass)miss('PARTITION_OPENING_NOT_SUPPORTED_AND_CLEAR',{
    level:level.level});
+  let secondaryPass=null;
+  if(Number.isSafeInteger(level.secondarySplitCoordinate)){
+   const k=level.secondarySplitCoordinate,zone=level.zones[1].range;
+   secondaryPass=false;
+   if(level.secondarySplitAxis==='z'){
+    for(let x=zone.x[0];x<zone.x[1];x++)
+     if([k-1,k,k+1].every(z=>stand(x,y,z)&&stand(x+1,y,z))){
+      secondaryPass=true;break;
+     }
+   }else{
+    for(let z=zone.z[0];z<zone.z[1];z++)
+     if([k-1,k,k+1].every(x=>stand(x,y,z)&&stand(x,y,z+1))){
+      secondaryPass=true;break;
+     }
+   }
+   if(!secondaryPass)miss('SECONDARY_PARTITION_OPENING_NOT_CLEAR',
+    {level:level.level});
+  }
   levels.push({level:level.level,standingFloorY:y,
-   zoneWitnesses:witnesses,partitionSourcePass:partitionPass});
+   zoneWitnesses:witnesses,partitionSourcePass:partitionPass,
+   ...(secondaryPass===null?{}:{secondaryPartitionSourcePass:secondaryPass})});
  }
  const stairs=product.design.elements.filter(e=>e.shape==='staircase');
  const flights=[];
@@ -447,10 +518,11 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
   const split=axis==='x'?
    Math.max(x0+4,Math.min(x1-4,Math.round(x0+(x1-x0)*ratio))):
    Math.max(z0+4,Math.min(z1-4,Math.round(z0+(z1-z0)*ratio)));
+  const three=tLayout(level,{x0,x1,z0,z1},split);
   if(axis==='x'){
    box(tag+'-divider','add',wall,[split,y,z0+1],[1,4,z1-z0-1]);
    box(tag+'-internal-door','cut',null,
-    [split,y,Math.floor((z0+z1)/2)-1],[1,3,2]);
+    [split,y,three?.mainDoorZ??Math.floor((z0+z1)/2)-1],[1,3,2]);
   }else{
    box(tag+'-divider','add',wall,[x0+1,y,split],[x1-x0-1,4,1]);
    // At upper level, the legacy x0+2 doorway can align with the
@@ -471,6 +543,10 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
     if(l===1&&upperDoorPlacement==='stair-clear'&&
        split>=stairLastTreadZ&&split<=stairLastTreadZ+1)
      box(tag+'-stair-threshold-relief','cut',null,[3,y,split],[2,3,1]);
+  }
+  if(three){
+   box(tag+'-secondary-divider','add',wall,three.wallAt(y),three.wallSize);
+   box(tag+'-secondary-door','cut',null,three.doorAt(y),three.doorSize);
   }
   if(l===0&&facadeLanguage!=='recessed-portico')
    box('exterior-entrance','cut',null,
@@ -543,13 +619,14 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
      rearCornerCut.side==='west'?rearCornerCut.width:w-2],
     z:[d-1-rearCornerCut.depth,d-2]
    }}:{}),
-   zones:axis==='x'?[
+   ...(three?{secondarySplitAxis:three.axis,secondarySplitCoordinate:three.coordinate}:{}),
+   zones:three?.zones??(axis==='x'?[
     {id:first.id,purpose:first.purpose,range:{x:[x0+1,split-1],z:[z0+1,z1-1]}},
     {id:second.id,purpose:second.purpose,range:{x:[split+1,x1-1],z:[z0+1,z1-1]}}
    ]:[
     {id:first.id,purpose:first.purpose,range:{x:[x0+1,x1-1],z:[z0+1,split-1]}},
     {id:second.id,purpose:second.purpose,range:{x:[x0+1,x1-1],z:[split+1,z1-1]}}
-   ],
+   ]),
    partitionDoorModelled:true,doorAccessibleInMinecraft:'NOT_TESTED'});
  }
  if(count===2){
