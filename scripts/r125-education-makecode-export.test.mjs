@@ -87,6 +87,57 @@ test('existing BN genuinely compiled multi-storey scene exports without making a
 });
 
 
+test('explicit preview mode retains all material roles but never claims validated Education materials',()=>{
+ const scene=compileDesign(d);
+ // In normal mode even a small real wood structure remains blocked.
+ assert.throws(()=>exportB143EducationMakeCode({design:d,scene}),
+  /UNVERIFIED_MATERIAL_WOOD/);
+ const out=exportB143EducationMakeCode({design:d,scene,
+  groundLowestLayer:true,unverifiedTestWorldPreview:true});
+ assert.equal(out.materialMode,'UNVERIFIED_TEST_WORLD_PREVIEW');
+ assert.equal(out.verifiedPaletteSha256,null);
+ assert.equal(out.actualEducationExecution,'NOT_TESTED');
+ assert.equal(out.worldWrites,0);
+ assert.equal(out.constructionApproved,false);
+ assert.equal(out.readiness,'NOT_PREPARED');
+ assert.deepEqual(out.BuildPlan.operations,[]);
+ assert.equal(out.sourceSha256,scene.sourceSha256);
+ assert.equal(out.geometrySha256,scene.geometrySha256);
+ assert.equal(out.materialMapping[4],'oak_planks');
+ assert.equal(out.materialMapping[3],'glass');
+ assert.match(out.code,/UNVERIFIED PREVIEW MATERIALS/);
+ assert.match(out.code,/!blocks.testForBlock\(AIR, mabAt\(x,y,z\)\)/);
+ assert.match(out.code,/player.onChat\("mabset"/);
+ assert.match(out.code,/player.onChat\("mabbuild"/);
+ assert.match(out.code,/player.onChat\("mabverify"/);
+ assert.throws(()=>exportB143EducationMakeCode({design:d,scene,
+  unverifiedTestWorldPreview:true,legacyStoneFallback:true}),/PALETTE_MODE/);
+ assert.throws(()=>exportB143EducationMakeCode({design:d,scene,
+  unverifiedTestWorldPreview:true,verifiedPalette:{}}),/PALETTE_MODE/);
+});
+test('exported preview verification rejects a block that is only AIR',()=>{
+ const scene=compileDesign(d);
+ const generated=exportB143EducationMakeCode({design:d,scene,
+  unverifiedTestWorldPreview:true}).code
+  .replace(/: number\[\]\[\]|: number\[\]|: string\[\]|: number|: Position/g,'');
+ const actions={}, sayings=[],fills=[];
+ const player={position:()=>({x:0,y:0,z:0}),
+  onChat:(n,fn)=>actions[n]=fn,say:s=>sayings.push(s)};
+ const blocks={blockByName:name=>name,
+  // All placements are reported successful, but AIR is observed at every
+  // source location after build. The source must not attest a false PASS.
+  fill:(name,a,b,mode)=>fills.push({name,a,b,mode}),
+  testForBlock:(block,p)=>block==='air'?
+   p.y>=0 && p.y<d.bounds.height:true};
+ const env={player,blocks,AIR:'air',FillOperation:{Keep:0},
+  pos:(x,y,z)=>({x,y,z}),
+  positions:{add:(a,b)=>({x:a.x+b.x,y:a.y+b.y,z:a.z+b.z})}};
+ vm.runInNewContext(generated,env);
+ actions.mabset();actions.mabbuild();actions.mabverify();
+ assert.equal(fills.length,0,
+  'preflight must block if AIR rule does not allow empty source volume');
+ assert.ok(sayings.some(s=>s.includes('Wrote zero blocks')));
+});
 test('strict default holds unverified wood instead of substituting stone',()=>{
  const scene=compileDesign(d);
  assert.throws(()=>exportB143EducationMakeCode({design:d,scene}),/UNVERIFIED_MATERIAL_WOOD/);

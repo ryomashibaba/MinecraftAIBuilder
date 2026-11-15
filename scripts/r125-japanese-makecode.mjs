@@ -9,7 +9,9 @@ import {compileArchitecturePlan,auditArchitecturePlanCirculation} from '../sourc
 import {auditR125SourceRoutes} from '../source/ai/r125-source-routes.mjs';
 import {exportB143EducationMakeCode} from '../source/ai/r125-education-makecode-export.mjs';
 
-export function exportSavedPlan(planFile, outDir, provenance='UNVERIFIED_DESIGN',paletteFile=null) {
+export function exportSavedPlan(planFile, outDir, provenance='UNVERIFIED_DESIGN',paletteFile=null,previewTestWorld=false) {
+ if(typeof previewTestWorld!=='boolean'||(previewTestWorld&&paletteFile!==null))
+  throw Error('PREVIEW_REQUIRES_NO_ATTESTED_PALETTE');
  const plan=JSON.parse(fs.readFileSync(planFile,'utf8'));
  // The author owns the plan and its room split; HOST owns a viable door.
  // Preserve the prior practical geometry for every case EXCEPT an expressive
@@ -55,7 +57,7 @@ export function exportSavedPlan(planFile, outDir, provenance='UNVERIFIED_DESIGN'
    reason:'R125_SOURCE_WALKABILITY_NOT_VERIFIED',
    sourceSha256:product.sourceSha256,worldWrites:0,programExecuted:false};
  const verifiedPalette=paletteFile?JSON.parse(fs.readFileSync(paletteFile,'utf8')):null;
- const packet=exportB143EducationMakeCode({design:product.design,scene:product.compiled,provenance,groundLowestLayer:true,verifiedPalette});
+ const packet=exportB143EducationMakeCode({design:product.design,scene:product.compiled,provenance,groundLowestLayer:true,verifiedPalette,unverifiedTestWorldPreview:previewTestWorld});
  const {code,...report}=packet;
  fs.writeFileSync(path.join(outDir,'B143_SOURCE.json'),JSON.stringify(product.design,null,2)+'\n',{flag:'wx'});
  fs.writeFileSync(path.join(outDir,'MAKECODE_EDUCATION.ts'),code,{flag:'wx'});
@@ -64,16 +66,25 @@ export function exportSavedPlan(planFile, outDir, provenance='UNVERIFIED_DESIGN'
 }
 
 async function main(args) {
+ const previewTestWorld=args.includes('--preview-test-world');
+ const filtered=args.filter(a=>a!=='--preview-test-world');
+ if(args.filter(a=>a==='--preview-test-world').length>1)
+  throw Error('DUPLICATE_PREVIEW_FLAG');
  const options={};
- for(let i=0;i<args.length;i+=2) {
-  if(!['--out','--prompt','--model','--plan','--palette'].includes(args[i]) || !args[i+1] || Object.hasOwn(options,args[i])) throw Error('INVALID_ARGUMENTS');
-  options[args[i]]=args[i+1];
+ for(let i=0;i<filtered.length;i+=2) {
+  if(!['--out','--prompt','--model','--plan','--palette'].includes(filtered[i]) ||
+   !filtered[i+1] || Object.hasOwn(options,filtered[i]))
+   throw Error('INVALID_ARGUMENTS');
+  options[filtered[i]]=filtered[i+1];
  }
  const out=options['--out'];
- if(!out || fs.existsSync(out) || Boolean(options['--plan'])===Boolean(options['--prompt'])) throw Error('FRESH_OUTPUT_AND_ONE_INPUT_REQUIRED');
+ if(!out || fs.existsSync(out) || Boolean(options['--plan'])===Boolean(options['--prompt']))
+  throw Error('FRESH_OUTPUT_AND_ONE_INPUT_REQUIRED');
+ if(previewTestWorld&&(Boolean(options['--prompt'])||Boolean(options['--palette'])))
+  throw Error('PREVIEW_SAVED_PLAN_ONLY');
  if(options['--plan']) {
   if(options['--model']) throw Error('MODEL_NOT_USED_FOR_REPLAY');
-  return exportSavedPlan(options['--plan'],out,'UNVERIFIED_DESIGN',options['--palette']??null);
+  return exportSavedPlan(options['--plan'],out,'UNVERIFIED_DESIGN',options['--palette']??null,previewTestWorld);
  }
  if(!options['--model']) throw Error('MODEL_REQUIRED');
  fs.mkdirSync(out);

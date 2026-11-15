@@ -7,9 +7,17 @@ const key=(x,y,z)=>x+','+y+','+z;
 // Only stone/glass were observed in the protected Education v26.33 pilot.
 // A new block name must have independent user-attested in-game evidence.
 const KNOWN=Object.freeze({stone:'stone',glass:'glass'});
+// Explicit PREVIEW-ONLY guesses for a disposable Education test world.
+// None of these names is attested for the user's v26.33 installation.
+const PREVIEW=Object.freeze({
+ stone:'stone',concrete:'white_concrete',metal:'iron_block',
+ glass:'glass',wood:'oak_planks',glow:'glowstone',accent:'yellow_concrete'
+});
 const validName=s=>typeof s==='string'&&/^[a-z][a-z0-9_]{1,63}$/.test(s);
-function resolvePalette(scene,profile,legacy){
- if(typeof legacy!=='boolean'||(legacy&&profile!==null))fail('PALETTE_MODE');
+function resolvePalette(scene,profile,legacy,preview){
+ if(typeof legacy!=='boolean'||typeof preview!=='boolean'||
+    (legacy&&profile!==null)||(preview&&(legacy||profile!==null)))
+  fail('PALETTE_MODE');
  let blocks={};
  if(profile!==null){
   if(!profile||typeof profile!=='object'||Array.isArray(profile)||
@@ -34,7 +42,8 @@ function resolvePalette(scene,profile,legacy){
  const blockCounts={},used=[];
  for(let i=0;i<MATERIALS.length;i++){
   const material=MATERIALS[i],count=materialCounts[material];if(!count)continue;
-  const blockName=KNOWN[material]??blocks[material]?.blockName??(legacy?'stone':null);
+  const blockName=preview?PREVIEW[material]:
+   KNOWN[material]??blocks[material]?.blockName??(legacy?'stone':null);
   if(!blockName)fail('UNVERIFIED_MATERIAL_'+material.toUpperCase());
   if(!validName(blockName))fail('BAD_BLOCK_NAME');
   if(!legacy&&(materialMapping.includes(blockName)||
@@ -85,7 +94,7 @@ export function compactB143Cuboids(scene,{maxCuboids=2500}={}){
  return cuboids;
 }
 
-export function exportB143EducationMakeCode({design,scene,originOffset=[8,0,8],provenance='UNVERIFIED_DESIGN',groundLowestLayer=false,tightVoxelEnvelope=false,columnClearance=false,verifiedPalette=null,legacyStoneFallback=false}={}){
+export function exportB143EducationMakeCode({design,scene,originOffset=[8,0,8],provenance='UNVERIFIED_DESIGN',groundLowestLayer=false,tightVoxelEnvelope=false,columnClearance=false,verifiedPalette=null,legacyStoneFallback=false,unverifiedTestWorldPreview=false}={}){
  if(!design||!scene||!verifyCompiled(design,scene))fail('SOURCE_GEOMETRY_SHA_MISMATCH');
  if(!['UNVERIFIED_DESIGN','SYNTHETIC_TEST_FIXTURE','LOCAL_MODEL_CAPTURE','USER_AUTHORED'].includes(provenance))
   fail('PROVENANCE');
@@ -118,10 +127,15 @@ export function exportB143EducationMakeCode({design,scene,originOffset=[8,0,8],p
     clearanceCells>40000||scene.primitives.length>20000)fail('PILOT_SIZE');
  const cuboids=compactB143Cuboids(scene).map(([x,y,z,X,Y,Z,m])=>
   [x-minX,y-baseY,z-minZ,X-minX,Y-baseY,Z-minZ,m]);
- const palette=resolvePalette(scene,verifiedPalette,legacyStoneFallback);
+ const palette=resolvePalette(scene,verifiedPalette,legacyStoneFallback,unverifiedTestWorldPreview);
  const expectedCounts=MATERIALS.map(n=>palette.materialCounts[n]);
  const lines=[
  '// Auto-generated B143 voxels. Not a live bridge. Test-world COPY ONLY.',
+ ...(unverifiedTestWorldPreview?[
+  '// UNVERIFIED PREVIEW MATERIALS: speculative blockByName mappings.',
+  '// Use ONLY a disposable EMPTY flat TEST WORLD, never a valuable world.',
+  '// These mappings are not evidence or user-attested Education materials.'
+ ]:[]),
  '// In Education: press C -> Code Builder -> MakeCode JavaScript -> paste -> Run.',
  '// Stand on FLAT SOLID ground. Type mabset; inspect location; type mabbuild; then mabverify.',
  '// Back up your test world first. There is NO automatic rollback or world-ID check.',
@@ -200,7 +214,8 @@ export function exportB143EducationMakeCode({design,scene,originOffset=[8,0,8],p
  '        for (let y = r[1]; y <= r[4]; y++) {',
  '            for (let z = r[2]; z <= r[5]; z++) {',
  '                for (let x = r[0]; x <= r[3]; x++) {',
- '                    if (blocks.testForBlock(mabMaterials[r[6]], mabAt(x,y,z))) matchedCounts[r[6]]++',
+ '                    // A failed blockByName may resolve to AIR; do not count that as a pass.',
+ '                    if (!blocks.testForBlock(AIR, mabAt(x,y,z)) && blocks.testForBlock(mabMaterials[r[6]], mabAt(x,y,z))) matchedCounts[r[6]]++',
  '                    else mismatch++',
  '                }',
  '            }',
@@ -230,8 +245,11 @@ export function exportB143EducationMakeCode({design,scene,originOffset=[8,0,8],p
   materialMapping:palette.materialMapping,plannedMaterialCounts:palette.materialCounts,
   plannedBlockCounts:palette.blockCounts,usedMaterials:palette.used,
   verifiedPaletteSha256:palette.profileSha256,
-  materialMode:legacyStoneFallback?'EXPLICIT_LEGACY_STONE_FALLBACK':'STRICT_USER_ATTESTED',
-  materialWarning:legacyStoneFallback?
+  materialMode:unverifiedTestWorldPreview?'UNVERIFIED_TEST_WORLD_PREVIEW':
+   legacyStoneFallback?'EXPLICIT_LEGACY_STONE_FALLBACK':'STRICT_USER_ATTESTED',
+  materialWarning:unverifiedTestWorldPreview?
+   'DISPOSABLE TEST WORLD ONLY: candidate names are NOT verified for Education 26.33 and may be missing, air or wrong textures. Confirm visually and with screenshots. Not approved for real construction.':
+   legacyStoneFallback?
    'EXPLICIT LEGACY ONLY: materials collapse to stone. Not a faithful multi-material build.':
    'Extra materials are user-attested, not software-certified in game',
   actualEducationExecution:'NOT_TESTED',requiresUserPasteAndExplicitChat:true,
