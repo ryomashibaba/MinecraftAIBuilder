@@ -5,6 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {runR125ArchitecturePlanBatch,parseR125BatchBriefs,parseR125BatchArgs}
  from './r125-local-architecture-plan-batch.mjs';
+import {renderR125BatchComparison} from './r125-batch-compare.mjs';
 
 const original=fs.readFileSync(new URL(
  '../evidence/r125-real-l-corner-20261101/MODEL_RESPONSE_ORIGINAL.txt',
@@ -60,6 +61,12 @@ test('one sequential SOURCE call per distinct brief, original files persisted',a
   assert.equal(fs.existsSync(path.join(output,'lab','B143_SOURCE_3D_REVIEW_ONLY.html')),true);
   assert.equal(fs.existsSync(path.join(output,'home','B143_SOURCE_3D_REVIEW_ONLY.html')),true);
   assert.ok(report.completed.every(x=>x.sourceVerified&&x.originalSha256));
+  const html=fs.readFileSync(path.join(output,'BATCH_COMPARE_3D.html'),'utf8');
+  assert.equal((html.match(/<iframe /g)||[]).length,3);
+  assert.ok(html.includes('REPEATED model-authored form families'));
+  assert.ok(html.includes('Human ART NOT REVIEWED'));
+  assert.ok(html.includes('./home/B143_SOURCE_3D_REVIEW_ONLY.html'));
+  assert.ok(report.completed.every(x=>x.authoredProgram?.length===1));
  }finally{fs.rmSync(root,{recursive:true,force:true})}
 });
 test('bad first model response stops batch without extra requests',async()=>{
@@ -76,6 +83,10 @@ test('bad first model response stops batch without extra requests',async()=>{
   assert.equal(report.stopReason,'STOP_ON_FIRST_NON_SOURCE_RESULT');
   assert.equal(report.allSourceVerified,false);
   assert.equal(fs.existsSync(path.join(output,'lab')),false);
+  const html=fs.readFileSync(path.join(output,'BATCH_COMPARE_3D.html'),'utf8');
+  assert.ok(html.includes('No 3D scene (HOLD)'));
+  assert.ok(html.includes('NOT ATTEMPTED: lab'));
+  assert.equal((html.match(/<iframe /g)||[]).length,0);
   assert.equal(fs.readFileSync(path.join(output,'shop',
    'MODEL_RESPONSE_ORIGINAL.txt'),'utf8'),'{"schema":');
  }finally{fs.rmSync(root,{recursive:true,force:true})}
@@ -105,4 +116,12 @@ test('remote endpoints reject before creating output or calling model',async()=>
   },{fetcher:async()=>{requests++;return provider(original)}}),/B198G_LOCAL_ONLY_EXPLICIT/);
   assert.equal(requests,0);assert.equal(fs.existsSync(output),false);
  }finally{fs.rmSync(root,{recursive:true,force:true})}
+});
+
+test('comparison escapes untrusted original request text',()=>{
+ const html=renderR125BatchComparison([{id:'safe',prompt:'<img src=x onerror=alert(1)>'}],{
+  model:'qwen3:14b',attempted:0,planned:1,allSourceVerified:false,
+  modelAuthoredFormFamiliesDistinct:null,stopReason:'NOT_STARTED',completed:[]});
+ assert.ok(html.includes('&lt;img src=x onerror=alert(1)&gt;'));
+ assert.ok(!html.includes('<img src=x'));
 });

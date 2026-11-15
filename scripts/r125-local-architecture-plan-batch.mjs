@@ -15,6 +15,7 @@ import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import {createR125ArchitecturePlanLocalAdapter,DEFAULT_LOCAL_ENDPOINT}
  from '../source/ai/b198g-local-model-adapter.mjs';
+import {renderR125BatchComparison} from './r125-batch-compare.mjs';
 import {runR125LocalArchitecturePlan,ensurePrivateNewDirectory}
  from './r125-local-architecture-plan-run.mjs';
 
@@ -105,16 +106,26 @@ export async function runR125ArchitecturePlanBatch({
   const one=await runR125LocalArchitecturePlan({
    model,prompt:item.prompt,endpoint,outDir:path.join(dest,item.id)
   },{fetcher,timeoutMs});
-  let modelAuthoredFormFamilySha256=null;
+  let modelAuthoredFormFamilySha256=null,authoredForm=null,authoredProgram=null;
   if(one.report.sourceVerified){
    // Read the exact ORIGINAL response (not repaired SOURCE design) so a
    // HOST-derived difference is never attributed to the local model.
    const original=JSON.parse(fs.readFileSync(path.join(dest,item.id,
     'MODEL_RESPONSE_ORIGINAL.txt'),'utf8'));
+   authoredForm=authoredFormFamily(original);
+   authoredProgram=original.levels.map(level=>({splitAxis:level.splitAxis,
+    spaces:level.spaces.map(space=>({purpose:space.purpose,
+     ...(space.fixture?{fixture:space.fixture}:{})}))}));
    modelAuthoredFormFamilySha256=formHash(original);
   }
+  const diagnosisPath=path.join(dest,item.id,'SOURCE_DIAGNOSIS.json');
+  const diagnosis=fs.existsSync(diagnosisPath)?
+   JSON.parse(fs.readFileSync(diagnosisPath,'utf8')):null;
   const row={id:item.id,requestSha256:one.report.requestSha256,
-   modelAuthoredFormFamilySha256,
+   modelAuthoredFormFamilySha256,authoredForm,authoredProgram,
+   failureReason:one.report.reason??diagnosis?.compilerReason??null,
+   sourceIssues:[...(diagnosis?.sourceRouteIssues??[]),
+    ...(diagnosis?.circulationFailures??[])].slice(0,8),
    status:one.report.status,modelResponsesCaptured:one.report.modelResponsesCaptured,
    sourceVerified:one.report.sourceVerified,
    originalSha256:one.report.originalSha256,
@@ -147,6 +158,8 @@ export async function runR125ArchitecturePlanBatch({
  if(!report.allSourceVerified&&!report.stopReason)
   report.stopReason='INCOMPLETE_BATCH';
  save();
+ fs.writeFileSync(path.join(dest,'BATCH_COMPARE_3D.html'),
+  renderR125BatchComparison(briefs,report),{flag:'wx'});
  return {report,outputDirectory:dest};
 }
 

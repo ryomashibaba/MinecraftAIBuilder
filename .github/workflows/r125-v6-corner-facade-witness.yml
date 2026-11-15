@@ -14,6 +14,7 @@ on:
       - scripts/r125-local-architecture-plan-run.mjs
       - scripts/r125-local-architecture-plan-run.test.mjs
       - scripts/r125-local-architecture-plan-batch.mjs
+      - scripts/r125-batch-compare.mjs
       - scripts/r125-local-architecture-plan-batch.test.mjs
       - scripts/research/r125-v6-corner-facade-contract.test.mjs
       - scripts/research/r125-v6-offline-ranked-contrast.mjs
@@ -39,6 +40,7 @@ jobs:
           node --check source/ai/r125-room-fixtures.mjs
           node --check scripts/r125-local-architecture-plan-run.mjs
           node --check scripts/r125-local-architecture-plan-batch.mjs
+          node --check scripts/r125-batch-compare.mjs
           node --test scripts/r125-offline-replay.test.mjs scripts/r125-architecture-plan.test.mjs scripts/r125-local-architecture-plan-run.test.mjs scripts/r125-local-architecture-plan-batch.test.mjs scripts/b198g-local-adapter.test.mjs
       - name: Export saved real-Qwen B143 3D HTML for human ART review
         run: |
