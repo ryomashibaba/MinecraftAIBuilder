@@ -1121,8 +1121,12 @@ test('multi-room fixture grammar is bounded, duplicate-free, and preserves old s
  assert.throws(()=>compileArchitecturePlan(both),/R125_PLAN_SPACE_FIXTURE_GROUP/);
  const legacy=plan('legacy-single-fixture',['x']);
  legacy.levels[0].spaces[0].fixture='seating';
- const a=compileArchitecturePlan(legacy);
- const b=compileArchitecturePlan(structuredClone(legacy));
+ // Legacy default centred entrance can be physically cut off by the
+ // model-authored x partition. Test preservation under the SAME valid,
+ // explicitly chosen generic entrance policy.
+ const a=compileArchitecturePlan(legacy,{entrancePlacement:'source-accessible'});
+ const b=compileArchitecturePlan(structuredClone(legacy),
+  {entrancePlacement:'source-accessible'});
  assert.equal(a.sourceSha256,b.sourceSha256);
  assert.equal(a.geometrySha256,b.geometrySha256);
 });
