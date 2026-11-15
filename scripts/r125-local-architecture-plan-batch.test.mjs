@@ -285,3 +285,29 @@ test('offline three-genre source and equipment are fully visible in comparison',
   assert.equal(report.worldWrites,0);
  }finally{fs.rmSync(root,{recursive:true,force:true})}
 });
+
+test('three-genre viewer synchronizes presentation controls without changing true SOURCE or requiring extra manual clicks',async()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'mab-review-controls-'));
+ try{
+  const output=path.join(root,'compare');
+  const {report}=await runR125ArchitecturePlanBatch({
+   model:'qwen3:14b',briefsRaw:input,outDir:output
+  },{fetcher:async()=>provider(original)});
+  assert.equal(report.completed.length,3);
+  const page=fs.readFileSync(path.join(output,'BATCH_COMPARE_3D.html'),'utf8');
+  assert.ok(page.includes('id="allExterior"'));
+  assert.ok(page.includes('id="allInterior"'));
+  assert.equal((page.match(/class="mab-review"/g)||[]).length,3);
+  assert.ok(page.includes('postMessage({type:"mab-r125-review-v1",mode:selected},"*")'));
+  assert.ok(page.includes('frame.addEventListener("load"'));
+  assert.ok(page.includes('Rooms without authored equipment:'));
+  const viewer=fs.readFileSync(path.join(output,'shop',
+   'B143_SOURCE_3D_REVIEW_ONLY.html'),'utf8');
+  assert.ok(viewer.includes('msg.type!=="mab-r125-review-v1"'));
+  assert.ok(viewer.includes('event.source!==window.parent'));
+  assert.ok(viewer.includes('if(msg.mode==="exterior")el("reset").click()'));
+  assert.ok(viewer.includes('el("cutaway").click()'));
+  assert.ok(!viewer.includes('fetch('));
+  assert.equal(report.worldWrites,0);
+ }finally{fs.rmSync(root,{recursive:true,force:true})}
+});

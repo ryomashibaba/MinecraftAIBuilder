@@ -129,7 +129,7 @@ export async function runR125ArchitecturePlanBatch({
     'MODEL_RESPONSE_ORIGINAL.txt'),'utf8'));
    authoredForm=authoredFormFamily(original);
    authoredProgram=original.levels.map(level=>({splitAxis:level.splitAxis,
-    spaces:level.spaces.map(space=>({purpose:space.purpose,
+    spaces:level.spaces.map(space=>({id:space.id,purpose:space.purpose,
      ...(space.fixture?{fixture:space.fixture}:{}),
      ...(space.fixtures?{fixtures:space.fixtures}:{}),
      ...(space.fixtureDetail?{fixtureDetail:space.fixtureDetail}:{}),
