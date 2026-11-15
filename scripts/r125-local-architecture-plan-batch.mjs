@@ -17,6 +17,8 @@ import {fileURLToPath} from 'node:url';
 import {createR125ArchitecturePlanLocalAdapter,DEFAULT_LOCAL_ENDPOINT}
  from '../source/ai/b198g-local-model-adapter.mjs';
 import {renderR125BatchComparison} from './r125-batch-compare.mjs';
+import {saveR125SavedThreeGenreBaseline}
+ from './r125-saved-three-genre-baseline.mjs';
 import {runR125LocalArchitecturePlan,ensurePrivateNewDirectory}
  from './r125-local-architecture-plan-run.mjs';
 
@@ -211,6 +213,36 @@ export async function runR125ArchitecturePlanBatch({
   report.modelAuthoredFormFamiliesDistinct===false?
    'COMPLETE_WITH_REPEATED_AUTHOR_FORMS':
    'ALL_SOURCE_PASS_FORM_VARIETY_CANDIDATE_ART_UNREVIEWED';
+ // A real three-genre pilot is useful only if the USER can compare it with
+ // the three SAVED genuine Qwen baselines from earlier runs. Build an
+ // independent pinned B143 viewer from the already-public original plans;
+ // never replace or repair model outputs and never claim a same-prompt A/B.
+ // Custom one-to-three-brief trials remain unchanged.
+ if(briefs.length===3&&
+    briefs.map(x=>x.id).join(',')==='housing,retail,research'){
+  const archived=saveR125SavedThreeGenreBaseline(
+   path.join(dest,'ARCHIVED_QWEN_BASELINE'));
+  report.archivedComparison={
+   baselineViewer:'./ARCHIVED_QWEN_BASELINE/index.html',
+   basis:'ARCHIVED_PREVIOUSLY_AUTHORED_QWEN14B_NOT_NEW_OR_SAME_PROMPT',
+   exactSamePrompt:false,
+   countsAreNotArtScores:true,
+   baselineNewModelCalls:0,
+   comparisonRows:archived.scenes.map(old=>{
+    const fresh=report.completed.find(x=>x.id===old.genre);
+    const verified=fresh?.sourceVerified===true;
+    return {genre:old.genre,archivedB143Voxels:old.voxels,
+     archivedSelectedFixtures:old.modelChosenEquipment,
+     archivedSourceRoutes:old.sourceRouteStatus,
+     newStatus:fresh?.status??'NOT_ATTEMPTED',
+     newSourceVerified:verified,
+     newB143Voxels:verified?fresh.occupiedVoxels:null,
+     newSelectedFixtures:verified?fresh.modelChosenFixtures:null,
+     newSourceRoutes:verified?fresh.sourceRouteStatus:null,
+     voxelCountDelta:verified?fresh.occupiedVoxels-old.voxels:null};
+   })
+  };
+ }
  save();
  fs.writeFileSync(path.join(dest,'BATCH_COMPARE_3D.html'),
   renderR125BatchComparison(briefs,report),{flag:'wx'});

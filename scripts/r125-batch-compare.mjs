@@ -66,6 +66,26 @@ export function renderR125BatchComparison(briefs,report){
  }).join('');
  const untried=briefs.filter(x=>!report.completed.some(y=>y.id===x.id))
   .map(x=>'<p>NOT ATTEMPTED: '+esc(x.id)+' — '+esc(x.prompt)+'</p>').join('');
+ // Historical comparison is only displayed for the exact 3-genre pilot.
+ // The old designs used different prompts. More blocks or features are NOT
+ // automatic artistic superiority, and SOURCE failures remain visible.
+ const baseline=report.archivedComparison;
+ const oldComparison=baseline?
+  '<section class="archive"><h2>保存済み実Qwen 3用途 vs 今回の3用途</h2>'+
+   '<p>旧3棟は別の依頼文による過去の真正Qwen意味設計です。同一条件のA/B試験ではありません。'+
+   'ブロック数・設備数の増減だけでは建築の美しさは判定できません。</p>'+
+   '<p><a href="'+esc(baseline.baselineViewer)+'">過去3棟のB143 3Dを開く</a></p>'+
+   '<iframe class="archive-review" sandbox="allow-scripts" loading="lazy" src="'+
+    esc(baseline.baselineViewer)+'" title="Saved genuine Qwen 3 genre B143 baseline"></iframe>'+
+   '<table><thead><tr><th>用途</th><th>旧B143</th><th>新B143</th>'+
+    '<th>旧設備</th><th>新設備</th><th>新SOURCE</th></tr></thead><tbody>'+
+   baseline.comparisonRows.map(x=>'<tr><td>'+esc(x.genre)+
+    '</td><td>'+esc(x.archivedB143Voxels)+
+    '</td><td>'+esc(x.newB143Voxels??'未確定')+
+    '</td><td>'+esc(x.archivedSelectedFixtures)+
+    '</td><td>'+esc(x.newSelectedFixtures??'未確定')+
+    '</td><td>'+esc(x.newSourceVerified?'PASS':'HOLD / 未実施')+
+    '</td></tr>').join('')+'</tbody></table></section>':'';
  const form=report.modelAuthoredFormFamiliesDistinct===false?
   'REPEATED model-authored form families. Architectural diversity NOT CERTIFIED.':
   report.modelAuthoredFormFamiliesDistinct===true?
@@ -83,6 +103,10 @@ export function renderR125BatchComparison(briefs,report){
  'section{border:1px solid #3f596e;border-radius:9px;min-width:0;padding:12px}'+
  'iframe{width:100%;height:470px;border:1px solid #647b8d;background:#162739}'+
  'a{color:#96d6fd}.muted{font-size:.82rem;color:#bacbd9;overflow-wrap:anywhere}'+
+ '.archive{margin:16px;padding:12px;border:1px solid #647b8d;border-radius:9px}'+
+ '.archive iframe{height:390px;width:100%;border:1px solid #647b8d}'+
+ '.archive table{width:100%;border-collapse:collapse;font-size:.8rem}'+
+ '.archive td,.archive th{padding:7px 4px;border-bottom:1px solid #3f596e;text-align:left}'+
  '.issue{color:#f9c5a5}li{margin:4px 0}footer{padding:16px 24px}</style></head><body>'+
  '<header><h1>MinecraftAIBuilder V11 — TRUE B143 three-brief review</h1>'+
  '<p>MODEL '+esc(report.model)+' · Attempts '+esc(report.attempted)+
@@ -99,7 +123,7 @@ export function renderR125BatchComparison(briefs,report){
  '<div class="review-controls"><button type="button" id="allExterior" aria-pressed="true">3棟の外観</button>'+
  '<button type="button" id="allInterior" aria-pressed="false">3棟の断面・内部</button></div>'+
  '<p>表示切替は3Dカメラのみを変更します。SOURCEや実ワールドは変更しません。</p></header>'+
- '<main>'+sections+'</main><footer>'+untried+'</footer>'+
+ oldComparison+'<main>'+sections+'</main><footer>'+untried+'</footer>'+
  '<script>(function(){ "use strict";'+
  'let selected="exterior";'+
  'const frames=Array.from(document.querySelectorAll("iframe.mab-review"));'+

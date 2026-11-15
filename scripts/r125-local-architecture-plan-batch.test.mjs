@@ -287,6 +287,44 @@ test('offline three-genre source and equipment are fully visible in comparison',
  }finally{fs.rmSync(root,{recursive:true,force:true})}
 });
 
+test('real three-genre pilot automatically includes pinned archived B143 reference beside new originals',async()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'mab-real-genre-compare-'));
+ try{
+  const pilot=fs.readFileSync(new URL('./r125-v11-pilot-three.json',
+   import.meta.url),'utf8');
+  const destination=path.join(root,'private-three');
+  let calls=0;
+  const {report}=await runR125ArchitecturePlanBatch({
+   model:'qwen3:14b',briefsRaw:pilot,outDir:destination
+  },{fetcher:async()=>{calls++;return provider(original)}});
+  assert.equal(calls,3,'archived Qwen baseline must make ZERO extra model calls');
+  assert.equal(report.attempted,3);
+  assert.equal(report.archivedComparison?.exactSamePrompt,false);
+  assert.equal(report.archivedComparison?.baselineNewModelCalls,0);
+  assert.deepEqual(report.archivedComparison.comparisonRows.map(x=>x.genre),
+   ['housing','retail','research']);
+  assert.deepEqual(report.archivedComparison.comparisonRows.map(x=>
+   x.archivedB143Voxels),[2620,933,2936]);
+  assert.deepEqual(report.archivedComparison.comparisonRows.map(x=>
+   x.newB143Voxels),[1336,1336,1336]);
+  assert.ok(report.archivedComparison.comparisonRows.every(x=>
+   x.newSourceVerified===true&&x.archivedSelectedFixtures===0));
+  const oldDir=path.join(destination,'ARCHIVED_QWEN_BASELINE');
+  assert.ok(fs.readFileSync(path.join(oldDir,'index.html'),'utf8')
+   .includes('minecraftaibuilder-b143-gallery-v1'));
+  const saved=JSON.parse(fs.readFileSync(path.join(
+   oldDir,'SAVED_3GENRE_BASELINE.json'),'utf8'));
+  assert.equal(saved.newModelCalls,0);
+  const html=fs.readFileSync(path.join(destination,'BATCH_COMPARE_3D.html'),'utf8');
+  assert.ok(html.includes('過去3棟のB143 3Dを開く'));
+  assert.ok(html.includes('同一条件のA/B試験ではありません'));
+  assert.ok(html.includes('./ARCHIVED_QWEN_BASELINE/index.html'));
+  assert.equal((html.match(/<iframe /g)||[]).length,4);
+  assert.ok(html.includes('1336'));
+  assert.equal(report.worldWrites,0);
+ }finally{fs.rmSync(root,{recursive:true,force:true})}
+});
+
 test('three-genre viewer synchronizes presentation controls without changing true SOURCE or requiring extra manual clicks',async()=>{
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'mab-review-controls-'));
  try{
