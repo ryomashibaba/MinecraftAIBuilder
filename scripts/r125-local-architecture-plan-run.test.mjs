@@ -64,6 +64,8 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    assert.equal(room.additionalProperties,false);
    assert.ok(room.properties.fixtures.items.enum.includes('electronics'));
    assert.equal(room.properties.fixtures.maxItems,3);
+   assert.deepEqual(room.properties.fixtureDetail.enum,['crafted']);
+   assert.equal(room.required.includes('fixtureDetail'),false);
    const options=structured.properties.expression.anyOf;
    assert.equal(options.length,9);
    assert.ok(options.every(v=>v.type==='object'&&

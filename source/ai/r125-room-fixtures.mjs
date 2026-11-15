@@ -19,9 +19,11 @@ const roleDepth=kind=>kind==='bed'?4:
 const fixtureIntents=p=>p.plan.levels.flatMap((l,li)=>
  l.spaces.flatMap((s,zi)=>s.fixtures?
   s.fixtures.map((kind,index)=>({
-   level:li,zoneIndex:zi,zoneId:s.id,kind,index,multi:true})):
+   level:li,zoneIndex:zi,zoneId:s.id,kind,index,multi:true,
+   ...(s.fixtureDetail?{detail:s.fixtureDetail}:{})})):
   s.fixture===undefined?[]:
-  [{level:li,zoneIndex:zi,zoneId:s.id,kind:s.fixture,multi:false}]));
+  [{level:li,zoneIndex:zi,zoneId:s.id,kind:s.fixture,multi:false,
+   ...(s.fixtureDetail?{detail:s.fixtureDetail}:{})}]));
 
 function positions(intent,product,turned=false){
  const range=product.program[intent.level].zones[intent.zoneIndex].range;
@@ -90,6 +92,26 @@ function makeParts(intent,x,y,z,turned=false){
  };
  const parts=families[intent.kind]?.();
  if(!parts)throw Error('R125_PLAN_FIXTURE_UNKNOWN_ROLE');
+ // OPTIONAL authored detail. Every part fits inside the established
+ // 3 x roleDepth footprint and 3-high access volume, even when rotated.
+ // Legacy roles without detail keep their exact historic B143 elements.
+ if(intent.detail==='crafted'){
+  const details={
+   counter:()=>[add('register',1,2,0,1,1,1,'metal')],
+   workbench:()=>[add('bench-vise',1,2,0,1,1,1,'metal')],
+   display:()=>[add('display-object',1,2,0,1,1,1,'accent')],
+   storage:()=>[add('shelf-object',1,1,0,1,1,1,'accent')],
+   seating:()=>[add('left-arm',0,1,0,1,1,1,'accent'),
+    add('right-arm',2,1,0,1,1,1,'accent')],
+   bed:()=>[add('foot-left',0,2,0,1,1,1,'wood'),
+    add('foot-right',2,2,0,1,1,1,'wood')],
+   desk:()=>[add('monitor-frame-left',0,2,0,1,1,1,'metal'),
+    add('monitor-frame-right',2,2,0,1,1,1,'metal')],
+   washbasin:()=>[add('basin-water',1,1,0,1,1,1,'glass')],
+   electronics:()=>[add('control-unit',2,2,0,1,1,1,'accent')]
+  };
+  parts.push(...details[intent.kind]());
+ }
  if(!turned)return {key,parts};
  // Rotate physical shapes 90 degrees about the fixture's local footprint
  // origin. All material cells and model-authored roles remain identical.
@@ -142,6 +164,7 @@ function tryOrigin(product,targets,intent,x,z,auditCirculation,turned=false){
   geometrySha256:compiled.geometrySha256};
  const target={id:key,zoneId:intent.zoneId,
   origin:[x,y,z],size:[width,3,depth],kind:intent.kind,
+  ...(intent.detail?{detail:intent.detail}:{}),
   ...(turned?{orientation:'quarter-turn'}:{})};
  const routes=auditR125SourceRoutes(trial,{featureTargets:[...targets,target]});
  if(routes.status!=='SOURCE_ROUTES_REACH_ALL_ZONES'||

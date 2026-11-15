@@ -124,6 +124,7 @@ export function validateArchitecturePlan(p){
    check(keys(space,['id','purpose',
     ...(Object.hasOwn(space??{},'fixture')?['fixture']:[]),
     ...(Object.hasOwn(space??{},'fixtures')?['fixtures']:[]),
+    ...(Object.hasOwn(space??{},'fixtureDetail')?['fixtureDetail']:[]),
     ...(Object.hasOwn(space??{},'daylight')?['daylight']:[])])&&
     slug(space.id)&&text(space.purpose),'SPACE_FIELDS');
    check(space.fixture===undefined||
@@ -132,6 +133,12 @@ export function validateArchitecturePlan(p){
    check(space.daylight===undefined||
     ['wide-bay','clerestory'].includes(space.daylight),
     'SPACE_DAYLIGHT_ROLE');
+   // Explicit author-owned equipment presentation, never an inferred
+   // genre-specific decoration or a rewrite of old fixture geometry.
+   check(space.fixtureDetail===undefined||
+    (space.fixtureDetail==='crafted'&&
+     (space.fixture!==undefined||space.fixtures!==undefined)),
+    'SPACE_FIXTURE_DETAIL');
    const roles=['counter','workbench','display','storage','seating',
     'bed','desk','washbasin','electronics'];
    check(space.fixtures===undefined||

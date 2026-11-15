@@ -1502,3 +1502,48 @@ test('author-selected raised pitched eaves change true B143 silhouette without t
   ...invalid,roofVolume:'raised',rearCornerCut:{width:4,depth:4}}}),
   /R125_PLAN_EXPRESSION_ROOF_OVERHANG_CONFLICT/);
 });
+
+test('authored crafted equipment keeps old 7-role geometry optional and builds identifiable real shapes',()=>{
+ const original=plan('crafted-equipment-studio',['x'],
+  ['work zone','service zone']);
+ original.footprint={width:30,depth:30};
+ const choices=[
+  ['counter','register'],['workbench','bench-vise'],
+  ['display','display-object'],['storage','shelf-object'],
+  ['seating','left-arm'],['bed','foot-left'],
+  ['desk','monitor-frame-left'],['washbasin','basin-water'],
+  ['electronics','control-unit']
+ ];
+ for(const [kind,marker] of choices){
+  const base=structuredClone(original);
+  base.levels[0].spaces[0].fixtures=[kind];
+  const old=compileArchitecturePlan(base,
+   {entrancePlacement:'source-accessible'});
+  const detailed=structuredClone(base);
+  detailed.levels[0].spaces[0].fixtureDetail='crafted';
+  const newer=compileArchitecturePlan(detailed,
+   {entrancePlacement:'source-accessible'});
+  assert.ok(!old.design.elements.some(e=>e.id.endsWith('-'+marker)));
+  assert.ok(newer.design.elements.some(e=>e.id.endsWith('-'+marker)),kind);
+  assert.ok(newer.compiled.primitives.length>old.compiled.primitives.length,kind);
+  assert.equal(newer.fixtureTargets[0].detail,'crafted');
+  assert.equal(newer.fixtureTargets[0].kind,kind);
+  assert.equal(verifyCompiled(newer.design,newer.compiled),true);
+  assert.equal(auditArchitecturePlanCirculation(newer).status,
+   'SOURCE_CLEARANCE_PROBES_PASS');
+  assert.equal(auditR125SourceRoutes(newer,{
+   featureTargets:newer.fixtureTargets}).status,
+   'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert.deepEqual(newer.compiled.BuildPlan.operations,[]);
+  assert.equal(newer.worldWrites,0);
+  assert.deepEqual(base.levels[0].spaces[0].fixtures,[kind]);
+ }
+ const wrong=structuredClone(original);
+ wrong.levels[0].spaces[0].fixtureDetail='crafted';
+ assert.throws(()=>compileArchitecturePlan(wrong),
+  /R125_PLAN_SPACE_FIXTURE_DETAIL/);
+ wrong.levels[0].spaces[0].fixtures=['desk'];
+ wrong.levels[0].spaces[0].fixtureDetail='unknown';
+ assert.throws(()=>compileArchitecturePlan(wrong),
+  /R125_PLAN_SPACE_FIXTURE_DETAIL/);
+});
