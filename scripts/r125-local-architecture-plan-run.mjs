@@ -42,7 +42,7 @@ export function parseR125LocalPlanArgs(argv){
   endpoint:values['--endpoint']??DEFAULT_LOCAL_ENDPOINT};
 }
 
-function ensurePrivateNewDirectory(dest){
+export function ensurePrivateNewDirectory(dest){
  const parent=path.dirname(dest);
  if(!fs.existsSync(parent)||!fs.statSync(parent).isDirectory()||
     fs.existsSync(dest))fail('OUTPUT_MUST_BE_NEW_DIRECTORY');
