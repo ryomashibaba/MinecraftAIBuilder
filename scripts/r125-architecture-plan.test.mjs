@@ -81,7 +81,8 @@ test('distinct semantic programs/orientations produce distinct real geometry and
 test('bounded IR rejects structural abuse, unknown keys and malicious input',()=>{
  for(const alter of [
   p=>p.levels[0].spaces[1].id=p.levels[0].spaces[0].id,
-  p=>p.levels[0].spaces.push({id:'room-three',purpose:'extra'}),
+  p=>p.levels[0].spaces.push({id:'room-three',purpose:'extra'},
+   {id:'room-four',purpose:'extra'}),
   p=>p.levels[0].splitAxis='north',
   p=>p.footprint.width=500,
   p=>p.materials.floor='command_block',
