@@ -232,7 +232,7 @@ if(process.argv[1]===fileURLToPath(import.meta.url)){
   else if(planMode){
    const result=writeArchitecturePlanReplay(args);
    console.log('R125_ARCHITECTURE_PLAN_SOURCE_ONLY',JSON.stringify(result));
-   if(!result.sourceSha256)process.exitCode=2;
+   if(result.status!=='B143_SOURCE_CANDIDATE_ART_HOLD')process.exitCode=2;
   }else{
    if(fs.existsSync(args['--out']))fail('OUTPUT_ALREADY_EXISTS');
    const raw=fs.readFileSync(args['--raw'],'utf8');

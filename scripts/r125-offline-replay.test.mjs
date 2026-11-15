@@ -68,8 +68,8 @@ test('malformed JSON is HOLD and CLI forbids overwrite/incomplete arguments',()=
   /INVALID_ARGUMENT/);
 });
 
-test('short ORIGINAL Qwen ArchitecturePlan replays through unchanged TRUE B143 and route QA',()=>{
- const original=readFileSync(new URL('./fixtures/r125-qwen14b-residential-2024a.json',
+test('saved real Nov-1 Qwen ArchitecturePlan replays through TRUE B143 and SOURCE routes',()=>{
+ const original=readFileSync(new URL('../evidence/r125-real-l-corner-20261101/MODEL_RESPONSE_ORIGINAL.txt',
   import.meta.url),'utf8');
  const r=diagnoseR125ArchitecturePlanOriginal(original);
  assert.equal(r.originalSha256,
@@ -83,7 +83,7 @@ test('short ORIGINAL Qwen ArchitecturePlan replays through unchanged TRUE B143 a
  assert.equal(r.status,'B143_SOURCE_CANDIDATE_ART_HOLD',
   'genuine saved plan must compile into reachable source; no fake B143');
  assert.equal(r.sourceVerified,true);
- assert.ok(r.occupiedVoxels>100);
+ assert.equal(r.occupiedVoxels,1336);
  assert.equal(r.sourceRoutes,'SOURCE_ROUTES_REACH_ALL_ZONES');
  assert.equal(r.circulation,'SOURCE_CLEARANCE_PROBES_PASS');
  assert.equal(r.sourceDesign.designOnly,true);
