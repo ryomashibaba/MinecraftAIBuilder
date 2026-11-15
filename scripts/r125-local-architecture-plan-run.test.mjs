@@ -89,6 +89,11 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    const courtyard=options.filter(v=>v.required.includes('rearCornerCut'));
    assert.equal(courtyard.length,2);
    assert.ok(courtyard.every(v=>
+    v.properties.rearCornerCut.properties.width.maximum===8&&
+    v.properties.rearCornerCut.properties.depth.maximum===8));
+   assert.ok(request.messages[0].content.includes('6..8 deep/wide recess'));
+   assert.ok(request.messages[0].content.includes('RAISED ridge roof'));
+   assert.ok(courtyard.every(v=>
     v.properties.setbackSide.enum.join(',')==='none'));
    assert.ok(courtyard.every(v=>
     v.properties.roofProfile.enum.every(x=>x==='flat'||x==='ridge')));

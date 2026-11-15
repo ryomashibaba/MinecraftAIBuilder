@@ -142,7 +142,7 @@ export function validateArchitecturePlan(p){
       (e.rearCornerCut.width>=4&&e.rearCornerCut.depth>=4))&&
     (e.rearCornerCut.side===undefined||
      ['east','west'].includes(e.rearCornerCut.side))&&
-    integer(e.rearCornerCut.width,3,5)&&integer(e.rearCornerCut.depth,3,5),
+    integer(e.rearCornerCut.width,3,8)&&integer(e.rearCornerCut.depth,3,8),
     'EXPRESSION_CORNER_CUT');
    // A full-height recess cannot share the current upper setback or
    // raised roof profiles without compromising the enclosing envelope.

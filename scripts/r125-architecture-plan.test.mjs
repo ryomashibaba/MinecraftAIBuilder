@@ -800,6 +800,52 @@ test('physical two-elevation monitor glazing is source-aligned, air-backed and s
  assert.deepEqual(original,snapshot);
 });
 
+test('model-authored broad L-shaped courts are genuine open-air circulation, not a decorative cut',()=>{
+ const frozen=JSON.parse(fs.readFileSync(new URL(
+  '../evidence/r125-real-l-corner-20261101/MODEL_RESPONSE_ORIGINAL.txt',
+  import.meta.url),'utf8'));
+ const originalGeometry=compileArchitecturePlan(frozen,
+  {entrancePlacement:'source-accessible'}).geometrySha256;
+ for(const side of ['east','west'])for(const pitched of [false,true]){
+  const p=structuredClone(frozen);
+  p.id='broad-court-'+side+(pitched?'-ridge':'-flat');
+  p.title='Original broad L-court design '+side;
+  p.expression={...p.expression,roofProfile:pitched?'ridge':'flat',
+   roofAxis:'x',...(pitched?{roofVolume:'raised'}:{}),
+   rearCornerCut:{width:8,depth:8,side,access:'paved'}};
+  const unedited=structuredClone(p);
+  const b=compileArchitecturePlan(p,
+   {entrancePlacement:'source-accessible'});
+  const cells=new Map(b.compiled.primitives.map(([x,y,z,m])=>
+   [[x,y,z].join(','),m]));
+  const startX=side==='west'?1:p.footprint.width-1-8;
+  const startZ=p.footprint.depth-1-8;
+  let paved=0;
+  for(let x=startX;x<startX+8;x++)for(let z=startZ;z<startZ+8;z++){
+   assert.ok(cells.has([x,1,z].join(',')),'all 64 outdoor pads exist');
+   paved++;
+   for(let y=2;y<b.design.bounds.height;y++)
+    assert.equal(cells.has([x,y,z].join(',')),false,
+     'the authored court must open fully to sky');
+  }
+  assert.equal(paved,64);
+  assert.equal(b.courtyardSourceOnly.status,
+   'SOURCE_2_WIDE_PAVED_COURT_REACHABLE');
+  assert.equal(verifyCompiled(b.design,b.compiled),true);
+  assert.equal(auditR125SourceRoutes(b).status,
+   'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert.equal(auditArchitecturePlanCirculation(b).status,
+   'SOURCE_CLEARANCE_PROBES_PASS');
+  assert.ok(b.design.elements.some(e=>e.id==='recess-paved-court-access'));
+  assert.deepEqual(p,unedited,'never change model-authored raw plan');
+  assert.equal(b.worldWrites,0);
+  assert.deepEqual(b.compiled.BuildPlan.operations,[]);
+ }
+ assert.equal(compileArchitecturePlan(frozen,
+  {entrancePlacement:'source-accessible'}).geometrySha256,
+  originalGeometry,'frozen real Qwen 4x4 L-corner cannot change');
+});
+
 test('author-opt-in 4x4 paved outdoor court has a real two-wide route, open sky, and does not rewrite the Qwen L-corner',()=>{
  const original=JSON.parse(fs.readFileSync(new URL(
   '../evidence/r125-real-l-corner-20261101/MODEL_RESPONSE_ORIGINAL.txt',
