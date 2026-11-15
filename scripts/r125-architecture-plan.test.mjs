@@ -1070,6 +1070,62 @@ test('unsupported high window fails with bounded reasons and no false SOURCE pro
  assert.equal(error.daylightPlacement.worldWrites,0);
  assert.equal(shell.worldWrites,0);
 });
+test('a solid-only daylight replacement retains true SOURCE routes and all occupied coordinates',()=>{
+ const original=plan('daylight-no-air-change',['x']);
+ original.footprint={width:24,depth:24};
+ const before=compileArchitecturePlan(original,{entrancePlacement:'source-accessible'});
+ const light=structuredClone(original);
+ light.levels[0].spaces[0].daylight='clerestory';
+ const after=compileArchitecturePlan(light,{entrancePlacement:'source-accessible'});
+ assert.equal(after.daylightTargets.length,1);
+ const occupied=out=>new Set(out.compiled.primitives.map(v=>v.slice(0,3).join(',')));
+ assert.deepEqual(occupied(after),occupied(before),
+  'A wall->glass window MUST NOT change what is solid');
+ assert.equal(auditArchitecturePlanCirculation(before).status,
+  'SOURCE_CLEARANCE_PROBES_PASS');
+ assert.equal(auditArchitecturePlanCirculation(after).status,
+  'SOURCE_CLEARANCE_PROBES_PASS');
+ assert.equal(auditR125SourceRoutes(after).status,
+  'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(after.worldWrites,0);
+});
+test('already broken base building reports actual circulation failure before daylight candidates',()=>{
+ const sourcePlan=plan('daylight-preexisting-zone-block',['x']);
+ sourcePlan.footprint={width:24,depth:24};
+ const baseline=compileArchitecturePlan(sourcePlan,
+  {entrancePlacement:'source-accessible'});
+ const selected=structuredClone(sourcePlan);
+ selected.levels[0].spaces[1].daylight='clerestory';
+ const zone=baseline.program[0].zones[0].range;
+ const obstruction={id:'block-entire-left-room',shape:'box',
+  mode:'add',material:'metal',
+  origin:[zone.x[0],baseline.program[0].standingFloorY,zone.z[0]],
+  size:[zone.x[1]-zone.x[0]+1,2,zone.z[1]-zone.z[0]+1]};
+ const design={...baseline.design,
+  elements:[...baseline.design.elements,obstruction]};
+ const compiled=compileDesign(design);
+ assert.equal(verifyCompiled(design,compiled),true);
+ const shell={...baseline,plan:selected,design,compiled,
+  sourceSha256:compiled.sourceSha256,
+  geometrySha256:compiled.geometrySha256};
+ const baseResult=auditArchitecturePlanCirculation(shell);
+ assert.ok(baseResult.failures.some(x=>
+  x.code==='ZONE_HAS_NO_TWO_WIDE_CLEAR_SOURCE_FLOOR'));
+ let error=null;
+ try{addAuthoredRoomDaylight(shell,
+  {auditCirculation:auditArchitecturePlanCirculation});}
+ catch(e){error=e;}
+ assert.equal(error?.message,
+  'R125_PLAN_DAYLIGHT_BASELINE_SOURCE_HOLD_area-0b');
+ assert.equal(error?.daylightPlacement?.candidatesEvaluated,0);
+ assert.equal(error?.daylightPlacement?.upstreamOfWindow,true);
+ assert.ok(error.daylightPlacement.baselineCirculationFailures.some(x=>
+  x.code==='ZONE_HAS_NO_TWO_WIDE_CLEAR_SOURCE_FLOOR'));
+ assert.equal(error.daylightPlacement.originalPlanEdited,false);
+ assert.equal(error.daylightPlacement.modelCalls,0);
+ assert.equal(error.daylightPlacement.worldWrites,0);
+ assert.equal(baseline.worldWrites,0);
+});
 test('model-selected wide-bay and clerestory create real glass with exterior AIR',()=>{
  const p=plan('daylight-shop',['x'],['customer retail','making lab']);
  p.footprint={width:24,depth:24};

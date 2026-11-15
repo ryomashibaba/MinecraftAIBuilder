@@ -36,6 +36,28 @@ export function addAuthoredRoomDaylight(product,{auditCirculation}={}){
    [key(...v.slice(0,3)),v[3]]));
   const at=(x,y,z)=>matrix.get(key(x,y,z));
   const material=MATERIALS.indexOf(p.materials.wall);
+  // The cut+glass is allowed only at cells occupied by wall; it does not
+  // change the AIR/SOLID geometry used by SOURCE circulation. A broken
+  // shell cannot be fixed by exchanging wall material for glass. Diagnose
+  // it once at the source instead of mislabeling every window as a blocker.
+  const baselineCirculation=auditCirculation(current);
+  const baselineRoutes=auditR125SourceRoutes(current);
+  if(baselineCirculation.status!=='SOURCE_CLEARANCE_PROBES_PASS'||
+     baselineRoutes.status!=='SOURCE_ROUTES_REACH_ALL_ZONES'){
+   fail('BASELINE_SOURCE_HOLD_'+ask.id,{
+    schema:'r125-daylight-placement-failure-v1',
+    failed:{level:ask.li,zoneId:ask.id,kind:ask.kind,range:zone},
+    attemptedWidths:widths,candidatesEvaluated:0,
+    baselineCirculation:baselineCirculation.status,
+    baselineCirculationFailures:baselineCirculation.failures.slice(0,24),
+    baselineRoutes:baselineRoutes.status,
+    baselineRouteIssues:baselineRoutes.issues.slice(0,24),
+    upstreamOfWindow:true,
+    sourceOnly:true,originalPlanEdited:false,modelCalls:0,worldWrites:0
+   });
+  }
+  const baselineOccupied=new Set(current.compiled.primitives.map(v=>
+   key(...v.slice(0,3))));
   const rejected={WALL_OR_SILL_LINTEL:0,INTERIOR_AIR_BLOCKED:0,
    EXTERIOR_AIR_BLOCKED:0,SOURCE_CIRCULATION_HOLD:0,
    SOURCE_ROUTE_HOLD:0};
@@ -82,13 +104,46 @@ export function addAuthoredRoomDaylight(product,{auditCirculation}={}){
      ]};
      const compiled=compileDesign(design);
      if(!verifyCompiled(design,compiled))fail('SOURCE_MISMATCH');
+     const trialOccupied=new Set(compiled.primitives.map(v=>
+      key(...v.slice(0,3))));
+     // Verify the geometric premise before attributing ANY circulation
+     // regression to a material-only window replacement.
+     if(trialOccupied.size!==baselineOccupied.size||
+        [...baselineOccupied].some(id=>!trialOccupied.has(id)))
+      fail('UNEXPECTED_OCCUPANCY_CHANGE_'+ask.id,{
+       schema:'r125-daylight-placement-failure-v1',
+       failed:{level:ask.li,zoneId:ask.id,kind:ask.kind,range:zone},
+       attemptedWidths:widths,candidatesEvaluated,
+       selectedCandidate:{face:edge.face,origin,size},
+       baselineOccupiedCells:baselineOccupied.size,
+       trialOccupiedCells:trialOccupied.size,
+       sourceOnly:true,originalPlanEdited:false,modelCalls:0,worldWrites:0
+      });
      const trial={...current,design,compiled,
       sourceSha256:compiled.sourceSha256,geometrySha256:compiled.geometrySha256};
-     if(auditCirculation(trial).status!=='SOURCE_CLEARANCE_PROBES_PASS'){
-      rejected.SOURCE_CIRCULATION_HOLD++;continue;
+     const trialCirculation=auditCirculation(trial);
+     if(trialCirculation.status!=='SOURCE_CLEARANCE_PROBES_PASS'){
+      // No occupancy change is allowed above; a failure here is an
+      // auditor inconsistency, not evidence the window blocks a passage.
+      fail('SOURCE_AUDIT_INCONSISTENT_'+ask.id,{
+       schema:'r125-daylight-placement-failure-v1',
+       failed:{level:ask.li,zoneId:ask.id,kind:ask.kind,range:zone},
+       selectedCandidate:{face:edge.face,origin,size},
+       baselineCirculationFailures:baselineCirculation.failures,
+       trialCirculationFailures:trialCirculation.failures,
+       sourceOnly:true,originalPlanEdited:false,modelCalls:0,worldWrites:0
+      });
      }
-     if(auditR125SourceRoutes(trial).status!=='SOURCE_ROUTES_REACH_ALL_ZONES'){
-      rejected.SOURCE_ROUTE_HOLD++;continue;
+     const trialRoutes=auditR125SourceRoutes(trial);
+     if(trialRoutes.status!=='SOURCE_ROUTES_REACH_ALL_ZONES'){
+      fail('SOURCE_ROUTE_INCONSISTENT_'+ask.id,{
+       schema:'r125-daylight-placement-failure-v1',
+       failed:{level:ask.li,zoneId:ask.id,kind:ask.kind,range:zone},
+       selectedCandidate:{face:edge.face,origin,size},
+       baselineRouteIssues:baselineRoutes.issues,
+       trialRouteIssues:trialRoutes.issues,
+       sourceOnly:true,originalPlanEdited:false,modelCalls:0,worldWrites:0
+      });
      }
      current=trial;
      created={zoneId:ask.id,kind:ask.kind,face:edge.face,origin,size,
