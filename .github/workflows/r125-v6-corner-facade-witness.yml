@@ -6,6 +6,9 @@ on:
     paths:
       - .github/workflows/r125-v6-corner-facade-witness.yml
       - source/ai/b198g-local-model-adapter.mjs
+      - source/ai/r125-architecture-plan.mjs
+      - source/ai/r125-room-fixtures.mjs
+      - scripts/r125-architecture-plan.test.mjs
       - scripts/r125-offline-replay.mjs
       - scripts/r125-offline-replay.test.mjs
       - scripts/r125-local-architecture-plan-run.mjs
