@@ -1455,3 +1455,50 @@ test('compact ground z partition clears stair end in source-accessible mode',()=
  assert.equal(auditR125SourceRoutes(built).status,'SOURCE_ROUTES_REACH_ALL_ZONES');
  assert.deepEqual(built.plan,p);
 });
+
+test('author-selected raised pitched eaves change true B143 silhouette without touching interior or baseline source',()=>{
+ const raw=plan('fresh-architectural-massing',['x'],['studio','equipment room']);
+ raw.footprint={width:24,depth:26};
+ raw.materials={floor:'wood',wall:'stone',roof:'metal'};
+ for(const roofProfile of ['ridge','sawtooth']){
+  for(const roofAxis of ['x','z']){
+   const expression={setbackSide:'none',setbackDepth:0,roofProfile,
+    roofAxis,facadeLanguage:'plain',roofVolume:'raised'};
+   const bare=compileArchitecturePlan({...raw,expression},
+    {entrancePlacement:'source-accessible'});
+   const eaved=compileArchitecturePlan({...raw,expression:{
+    ...expression,roofOverhang:'one-block'}},
+    {entrancePlacement:'source-accessible'});
+   const before=new Map(bare.compiled.primitives.map(p=>
+    [p.slice(0,3).join(','),p[3]]));
+   const after=new Map(eaved.compiled.primitives.map(p=>
+    [p.slice(0,3).join(','),p[3]]));
+   assert.equal(verifyCompiled(eaved.design,eaved.compiled),true);
+   assert.ok(after.size>before.size,roofProfile+roofAxis);
+   for(const [k,v] of before)assert.equal(after.get(k),v,k);
+   for(const [k,v] of after)if(!before.has(k)){
+    const [x,,z]=k.split(',').map(Number);
+    assert.ok(x===0||x===raw.footprint.width-1||
+      z===0||z===raw.footprint.depth-1,k);
+    assert.equal(v,2); // B143 metal material index, not a new structure.
+   }
+   assert.equal(auditArchitecturePlanCirculation(eaved).status,
+    'SOURCE_CLEARANCE_PROBES_PASS');
+   assert.equal(auditR125SourceRoutes(eaved).status,
+    'SOURCE_ROUTES_REACH_ALL_ZONES');
+   assert.equal(eaved.compiled.BuildPlan.operations.length,0);
+   assert.equal(eaved.worldWrites,0);
+   assert.notEqual(eaved.sourceSha256,bare.sourceSha256);
+  }
+ }
+ const invalid={setbackSide:'none',setbackDepth:0,roofProfile:'ridge',
+  roofAxis:'x',facadeLanguage:'plain',roofOverhang:'one-block'};
+ assert.throws(()=>compileArchitecturePlan({...raw,expression:invalid}),
+  /R125_PLAN_EXPRESSION_ROOF_OVERHANG_CONFLICT/);
+ assert.throws(()=>compileArchitecturePlan({...raw,expression:{
+  ...invalid,roofVolume:'raised',roofOverhang:'two-block'}}),
+  /R125_PLAN_EXPRESSION_ROOF_OVERHANG_CONFLICT/);
+ assert.throws(()=>compileArchitecturePlan({...raw,expression:{
+  ...invalid,roofVolume:'raised',rearCornerCut:{width:4,depth:4}}}),
+  /R125_PLAN_EXPRESSION_ROOF_OVERHANG_CONFLICT/);
+});

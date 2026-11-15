@@ -246,7 +246,7 @@ const r125ExpressionFields={
 const r125ExpressionRequired=['setbackSide','setbackDepth',
  'roofProfile','roofAxis','facadeLanguage'];
 const r125Expr=({roof,side,depth,axis,volume=false,corner=false,
- monitorDaylight=false}={})=>r125obj({
+ monitorDaylight=false,pitchedEave=false}={})=>r125obj({
  ...r125ExpressionFields,
  roofProfile:r125enum(...roof),
  setbackSide:r125enum(...side),
@@ -254,12 +254,14 @@ const r125Expr=({roof,side,depth,axis,volume=false,corner=false,
  roofAxis:r125enum(...axis),
  ...(volume?{roofVolume:r125enum('raised')}:{}),
  ...(corner?{rearCornerCut:r125Corner}:{}),
+ ...(pitchedEave?{roofOverhang:r125enum('one-block')}:{}),
  ...(monitorDaylight?{
   daylightFacade:r125enum('east-and-rear-bays'),
   roofOverhang:r125enum('one-block')
  }:{})
 },[...r125ExpressionRequired,...(volume==='required'?['roofVolume']:[]),
- ...(corner==='required'?['rearCornerCut']:[])]);
+ ...(corner==='required'?['rearCornerCut']:[]),
+ ...(pitchedEave?['roofOverhang']:[])]);
 const r125Expression={
  anyOf:[
   // Flat massing, including real outdoor court OR upper setback.
@@ -276,6 +278,12 @@ const r125Expression={
    depth:[2,3,4],axis:['x','z'],volume:true}),
   r125Expr({roof:['ridge'],side:['none'],depth:[0],
    axis:['x','z'],volume:'required',corner:'required'}),
+  // Raised pitched eaves are a DISTINCT author-selected geometry variant;
+  // old bare roofs remain valid and byte-for-byte unchanged.
+  r125Expr({roof:['ridge','sawtooth'],side:['none'],depth:[0],
+   axis:['x','z'],volume:'required',pitchedEave:true}),
+  r125Expr({roof:['ridge','sawtooth'],side:['east','rear'],
+   depth:[2,3,4],axis:['x','z'],volume:'required',pitchedEave:true}),
   // Monitor requires full raised volume, x axis, NO upper setback.
   // Last-level x partition and single-level daylight variants remain
   // checked by the independent HOST; unsupported source is still HOLD.
@@ -330,10 +338,10 @@ export function createR125ArchitecturePlanLocalAdapter({
   'footprint EXACT {width:integer 16..32,depth:integer 16..32}. levels has 1 or 2 objects. Each level EXACT {splitAxis:"x"|"z",splitPercent:40|50|60,spaces:[{id,purpose,optional fixture OR fixtures,optional daylight},{id,purpose,optional fixture OR fixtures,optional daylight}]}. All space ids unique across levels.',
   'Functional equipment: choose OPTIONAL fixtures per room as an ARRAY of 1..3 DISTINCT roles among counter|workbench|display|storage|seating|bed|desk|washbasin|electronics. The old optional singular fixture remains supported, but NEVER use both fixture and fixtures in one space. A sleeping room needs an actual bed, not merely seating; a practical electronics laboratory may need electronics, workbench and storage; a washing zone may need a washbasin. Do not place incompatible roles in an unrelated zone just to fill a quota. The GENERIC HOST places all chosen roles in real B143 voxels with two-wide accessible service frontage or the design fails SOURCE. These are geometric equipment proxies, not working Minecraft plumbing or electronics.',
   'Optional per-room daylight: wide-bay|clerestory. To omit glazing OMIT the daylight key entirely; never emit daylight:none (4x2 or 5x1 real glass). Prefer appropriate openings for useful living, retail or workshop interiors. The generic HOST locates a true exterior wall with solid sill and lintel, unobstructed outside air and room-side air; unsupported bays HOLD with no silent fallback. No coordinates or fake daylight.',
-  'materials EXACT floor:wood|stone|concrete, wall:concrete|stone|wood|metal, roof:stone|metal|wood|concrete.',
+  'materials EXACT floor:wood|stone|concrete, wall:concrete|stone|wood|metal, roof:stone|metal|wood|concrete. Choose a coherent but legible contrast between main walls, roof and flooring when useful to the brief; changing material names alone is NOT architectural originality. Materials are semantic categories: Education preview block IDs are not guaranteed user-verified.',
   'entryZone optional "first" or "second"; for a ground-floor z split, only "first" is possible at the front.',
   'Emit at most ONE expression object. Put roofVolume inside that SAME object alongside all mandatory fields; never append a second expression object containing only roofVolume. Optional expression EXACT mandatory fields {setbackSide,setbackDepth,roofProfile,roofAxis,facadeLanguage}. setbackSide:none|east|rear; none requires setbackDepth:0; east/rear requires two levels and setbackDepth:2|3|4.',
-  'roofProfile:flat|ridge|sawtooth|split-monitor. roofAxis:x|z. facadeLanguage:plain|fins|screen|recessed-portico. For a REAL open interior under an elevated ridge or sawtooth roof choose expression roofVolume:"raised"; without it an extra flat roof remains underneath. A split-monitor MUST include roofVolume:"raised", roofAxis:"x", no setback and last level splitAxis:"x". Do not select conflicting options.',
+  'roofProfile:flat|ridge|sawtooth|split-monitor. roofAxis:x|z. facadeLanguage:plain|fins|screen|recessed-portico. For a REAL open interior under an elevated ridge or sawtooth roof choose expression roofVolume:"raised"; without it an extra flat roof remains underneath. On a raised ridge or sawtooth, you MAY explicitly choose roofOverhang:"one-block" to create real continuous eaves beyond all four exterior faces, if it improves silhouette and weather-sheltered appearance; never emit roofOverhang on flat roofs or with rearCornerCut. A split-monitor MUST include roofVolume:"raised", roofAxis:"x", no setback and last level splitAxis:"x". Do not select conflicting options.',
   'Optional expression rearCornerCut:{width:3..5,depth:3..5} creates a true open-air rear notch; it requires no setback and flat roof. Do not invent unsupported expression keys.',
   'For a new design actively SELECT an expression appropriate to the requested building: a real roof profile, orientation, and a facade language, not just a different title, material, or footprint. Prefer a raised roof volume when a pitched design is functional. Plain flat boxes only if the architectural program genuinely calls for them. For residential versus retail versus research briefs seek DIFFERENT spatial organizations, not a hardcoded building-type template.',
   'Before choosing rooms, infer the actual activities and workflow in THIS brief. Match each activity to equipment that visibly enables it: electronics is an instrument bench with screen, workbench is fabrication, desk is records, storage is shelving. Storage alone cannot represent making or testing. Distribute complementary equipment across rooms according to their purposes; avoid several near-identical storage rooms. Size the footprint for the chosen equipment and circulation rather than leaving oversized empty halls. These are activity-based decisions by YOU, not a fixed building-type recipe.',

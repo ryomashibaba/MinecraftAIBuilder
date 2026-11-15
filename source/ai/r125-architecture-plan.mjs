@@ -86,9 +86,13 @@ export function validateArchitecturePlan(p){
    'EXPRESSION_DAYLIGHT_FACADE_CONFLICT');
   // Explicit author opt-in only: no implied change to Qwen-authored roofs
   // or previously supported ridge/sawtooth/daylight geometry.
+  // A single-cell eave is supported on author-selected RAISED roof masses.
+  // Existing split-monitor semantics and all plans without opt-in are frozen.
   check(e.roofOverhang===undefined||
-   (e.roofOverhang==='one-block'&&e.roofProfile==='split-monitor'&&
-    e.roofVolume==='raised'&&p.levels.length===1),
+   (e.roofOverhang==='one-block'&&e.roofVolume==='raised'&&
+    ((e.roofProfile==='split-monitor'&&p.levels.length===1)||
+     (['ridge','sawtooth'].includes(e.roofProfile)&&
+      !Object.hasOwn(e,'rearCornerCut')))),
    'EXPRESSION_ROOF_OVERHANG_CONFLICT');
   if(Object.hasOwn(e,'rearCornerCut')){
    check((keys(e.rearCornerCut,['width','depth'])||
@@ -699,6 +703,49 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
     [1,height,upper.z1-upper.z0+1]:
     [upper.x1-upper.x0+1,height,1];
    box('roof-profile-'+pos,'add',roof,origin,size);
+  }
+  // AUTHOR opt-in only: continue each real roof profile one block beyond
+  // the external walls. The overhang is in the same material and elevation
+  // as the adjacent roof skin, and never fills usable interior air.
+  // This is generic geometry for either roof axis, not a genre preset.
+  if(raisedRoof&&original.expression.roofOverhang==='one-block'){
+   const alongX=roofAxis==='x';
+   const span=alongX?upper.x1-upper.x0+1:upper.z1-upper.z0+1;
+   const eaveRise=pos=>roofProfile==='ridge'?
+    Math.min(3,Math.floor(Math.min(pos,span-1-pos)/2)):
+    (pos%6===0?0:Math.ceil((pos%6)/2));
+   for(let pos=0;pos<span;pos++){
+    const atY=top+eaveRise(pos);
+    if(alongX){
+     const x=upper.x0+pos;
+     box('roof-pitched-eave-front-'+pos,'add',roof,
+      [x,atY,upper.z0-1],[1,1,1]);
+     box('roof-pitched-eave-rear-'+pos,'add',roof,
+      [x,atY,upper.z1+1],[1,1,1]);
+    }else{
+     const z=upper.z0+pos;
+     box('roof-pitched-eave-west-'+pos,'add',roof,
+      [upper.x0-1,atY,z],[1,1,1]);
+     box('roof-pitched-eave-east-'+pos,'add',roof,
+      [upper.x1+1,atY,z],[1,1,1]);
+    }
+   }
+   // Finish the two remaining eave edges and their four roof corners.
+   if(alongX){
+    box('roof-pitched-eave-low-end','add',roof,
+     [upper.x0-1,top+eaveRise(0),upper.z0-1],
+     [1,1,upper.z1-upper.z0+3]);
+    box('roof-pitched-eave-high-end','add',roof,
+     [upper.x1+1,top+eaveRise(span-1),upper.z0-1],
+     [1,1,upper.z1-upper.z0+3]);
+   }else{
+    box('roof-pitched-eave-low-end','add',roof,
+     [upper.x0-1,top+eaveRise(0),upper.z0-1],
+     [upper.x1-upper.x0+3,1,1]);
+    box('roof-pitched-eave-high-end','add',roof,
+     [upper.x0-1,top+eaveRise(span-1),upper.z1+1],
+     [upper.x1-upper.x0+3,1,1]);
+   }
   }
  }
  // An opt-in model-selected full-height recess forms a true L-shaped floor,
