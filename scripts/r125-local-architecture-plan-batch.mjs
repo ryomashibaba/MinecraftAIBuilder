@@ -133,6 +133,8 @@ export async function runR125ArchitecturePlanBatch({
    JSON.parse(fs.readFileSync(diagnosisPath,'utf8')):null;
   const row={id:item.id,requestSha256:one.report.requestSha256,
    modelAuthoredFormFamilySha256,authoredForm,authoredProgram,
+   modelChosenDaylight:diagnosis?.modelChosenDaylight??0,
+   daylightSourceWindows:diagnosis?.daylightSourceWindows??[],
    failureReason:one.report.reason??diagnosis?.compilerReason??null,
    sourceIssues:[...(diagnosis?.sourceRouteIssues??[]),
     ...(diagnosis?.circulationFailures??[])].slice(0,8),

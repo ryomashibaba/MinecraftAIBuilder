@@ -30,6 +30,9 @@ export function renderR125BatchComparison(briefs,report){
      relative+'" title="'+esc(row.id)+' true B143 3D"></iframe>'+
      '<p><a href="'+relative+'">Open full-size true B143 3D</a></p>':
      '<p class="issue">No 3D scene (HOLD)</p>')+
+   '<p class="muted">Model-selected real daylight: '+esc(row.modelChosenDaylight??0)+
+   ' — '+(row.daylightSourceWindows??[]).map(x=>
+    esc(x.kind+' on '+x.face+' exterior')).join(' / ')+'</p>'+
    '<p class="muted">Education export: '+esc(row.makeCodeStatus??'NOT_ATTEMPTED')+
    (row.makeCodeReason?' — '+esc(row.makeCodeReason):'')+'</p>'+
    (row.makeCodeStatus==='OFFLINE_CODE_GENERATED_ONLY'?

@@ -130,6 +130,37 @@ test('one call records raw and true SOURCE, without privately leaking raw into r
  }finally{fs.rmSync(root,{recursive:true,force:true})}
 });
 
+test('daylight authoring passes local adapter to true B143 3D and MakeCode',async()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'mab-daylight-full-'));
+ const dest=path.join(root,'result');
+ const modelOriginal=JSON.parse(original);
+ modelOriginal.id='authored-daylight-e2e';
+ modelOriginal.levels[0].spaces[0].daylight='wide-bay';
+ const raw=JSON.stringify(modelOriginal);
+ let requests=0;
+ try{
+  const {report}=await runR125LocalArchitecturePlan({
+   model:'qwen3:14b',prompt,outDir:dest
+  },{fetcher:async()=>{requests++;return provider(raw)}});
+  assert.equal(requests,1);
+  assert.equal(report.sourceVerified,true);
+  assert.equal(report.makeCodeStatus,'OFFLINE_CODE_GENERATED_ONLY');
+  const diagnosis=JSON.parse(fs.readFileSync(path.join(dest,'SOURCE_DIAGNOSIS.json'),'utf8'));
+  assert.equal(diagnosis.modelChosenDaylight,1);
+  assert.equal(diagnosis.daylightSourceWindows[0].kind,'wide-bay');
+  assert.equal(diagnosis.daylightSourceWindows[0].outsideAirVerified,true);
+  assert.equal(diagnosis.originalSha256,digest(raw));
+  const exportReport=JSON.parse(fs.readFileSync(path.join(dest,'MAKECODE_EXPORT_REPORT.json'),'utf8'));
+  assert.equal(exportReport.sourceSha256,diagnosis.sourceSha256);
+  assert.equal(exportReport.geometrySha256,diagnosis.geometrySha256);
+  assert.equal(exportReport.worldWrites,0);
+  assert.equal(exportReport.programExecuted,false);
+  assert.deepEqual(exportReport.BuildPlan.operations,[]);
+  assert.equal(fs.readFileSync(path.join(dest,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8'),raw);
+  assert.equal(report.artStatus,'NOT_REVIEWED');
+ }finally{fs.rmSync(root,{recursive:true,force:true})}
+});
+
 test('invalid response is captured verbatim but never repaired, re-requested or promoted',async()=>{
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'mab-hold-'));
  const dest=path.join(root,'result');

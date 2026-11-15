@@ -178,6 +178,8 @@ export function diagnoseR125ArchitecturePlanOriginal(raw){
    occupiedVoxels:built.compiled.primitives.length,
    sourceRoutes:routes.status,sourceRouteIssues:routes.issues??[],
    modelChosenFixtures:built.fixtureTargets?.length??0,
+   modelChosenDaylight:built.daylightTargets?.length??0,
+   daylightSourceWindows:built.daylightTargets??[],
    fixtureAccess:routes.featureAccess??[],
    circulation:circulation.status,circulationFailures:circulation.failures??[],
    programFloors:floors.status,programFloorIssues:floors.programFloorIssues,
