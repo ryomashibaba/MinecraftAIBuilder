@@ -1093,6 +1093,52 @@ test('failed furniture placement preserves source and reports exact candidate fa
  assert.equal(verifyCompiled(base.design,base.compiled),true);
 });
 
+test('zone-local backtracking changes only positions and retains all SOURCE checks',()=>{
+ const p=plan('locally-rearranged-lab',['x'],
+  ['multipurpose equipment studio','visitor space']);
+ p.footprint={width:30,depth:30};
+ const shell=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+ const single=structuredClone(p);
+ single.levels[0].spaces[0].fixtures=['seating'];
+ const authored={...shell,plan:single};
+ const first=addAuthoredRoomFixtures(authored,{
+  auditCirculation:auditArchitecturePlanCirculation
+ }).fixtureTargets[0].origin;
+ p.levels[0].spaces[0].fixtures=['seating','desk'];
+ const withTwo={...shell,plan:p};
+ const strict=trial=>{
+  const original=auditArchitecturePlanCirculation(trial);
+  if(original.status!=='SOURCE_CLEARANCE_PROBES_PASS')return original;
+  const seat=trial.design.elements.find(e=>e.id==='fx-l0-z0-i0-seat');
+  const desk=trial.design.elements.find(e=>e.id==='fx-l0-z0-i1-desk-top');
+  // A synthetic layout preference forces the usual greedy seat placement
+  // to fail only AFTER the second role. The SOURCE route auditor is real.
+  if(seat&&desk&&seat.origin.join(',')===first.join(','))
+   return {status:'SOURCE_CLEARANCE_PROBES_HOLD',
+    failures:[{code:'TEST_UNPREFERRED_SEAT_POSITION'}]};
+  return original;
+ };
+ const rebuilt=addAuthoredRoomFixtures(withTwo,{auditCirculation:strict});
+ assert.equal(rebuilt.fixtureTargets.length,2);
+ assert.equal(rebuilt.fixtureTargets[0].kind,'seating');
+ assert.equal(rebuilt.fixtureTargets[1].kind,'desk');
+ assert.notDeepEqual(rebuilt.fixtureTargets[0].origin,first);
+ assert.equal(rebuilt.fixtureSearch?.length,1);
+ assert.equal(rebuilt.fixtureSearch[0].arrangementFound,true);
+ assert.equal(rebuilt.fixtureSearch[0].searchLimitReached,false);
+ assert.ok(rebuilt.fixtureSearch[0].candidateEvaluations<=360);
+ assert.equal(auditR125SourceRoutes(rebuilt,{
+  featureTargets:rebuilt.fixtureTargets}).status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(auditArchitecturePlanCirculation(rebuilt).status,
+  'SOURCE_CLEARANCE_PROBES_PASS');
+ assert.deepEqual(rebuilt.compiled.BuildPlan.operations,[]);
+ assert.equal(rebuilt.worldWrites,0);
+ assert.equal(shell.geometrySha256,
+  compileArchitecturePlan(p.levels[0].spaces[0].fixtures===undefined?
+   p:({...p,levels:p.levels.map(l=>({...l,spaces:l.spaces.map(s=>
+    ({id:s.id,purpose:s.purpose}))}))}),
+   {entrancePlacement:'source-accessible'}).geometrySha256);
+});
 test('one room can hold genuinely different reachable bed and desk and storage',()=>{
  const p=plan('inhabited-home',['x'],['sleeping and personal study','living']);
  p.footprint={width:30,depth:30};
