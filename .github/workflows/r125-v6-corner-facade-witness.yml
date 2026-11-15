@@ -31,6 +31,7 @@ jobs:
       - name: V11 saved genuine Qwen replay, local plan transport and unchanged B143 tests
         run: |
           node --check source/ai/b198g-local-model-adapter.mjs
+          node --check source/ai/r125-room-fixtures.mjs
           node --check scripts/r125-local-architecture-plan-run.mjs
           node --test scripts/r125-offline-replay.test.mjs scripts/r125-architecture-plan.test.mjs scripts/r125-local-architecture-plan-run.test.mjs scripts/b198g-local-adapter.test.mjs
       - name: Export saved real-Qwen B143 3D HTML for human ART review

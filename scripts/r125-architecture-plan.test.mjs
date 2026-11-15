@@ -966,3 +966,36 @@ test('explicit one-cell two-volume roof eaves alter actual B143 skyline while pr
   /EXPRESSION_ROOF_OVERHANG_CONFLICT/);
  assert.deepEqual(original,snapshot);
 });
+
+test('model-selected fixtures become B143 voxels and retain reachable two-wide service side',()=>{
+ const authored=plan('model-fixture-shop',['x'],['retail display','staff workshop']);
+ authored.levels[0].spaces[0].fixture='display';
+ authored.levels[0].spaces[1].fixture='workbench';
+ const legacy=structuredClone(authored);
+ delete legacy.levels[0].spaces[0].fixture;
+ delete legacy.levels[0].spaces[1].fixture;
+ const options={entrancePlacement:'source-accessible'};
+ const baseline=compileArchitecturePlan(legacy,options);
+ const built=compileArchitecturePlan(authored,options);
+ assert.equal(built.fixtureTargets.length,2);
+ assert.notEqual(baseline.geometrySha256,built.geometrySha256);
+ assert.ok(built.design.elements.some(e=>e.id==='fx-l0-z0-glass'));
+ assert.ok(built.design.elements.some(e=>e.id==='fx-l0-z1-top'));
+ const routes=auditR125SourceRoutes(built,{featureTargets:built.fixtureTargets});
+ assert.equal(routes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.ok(routes.featureAccess.every(x=>x.reachableFromEntrance&&
+  x.supportedTwoWideServiceWitness!==null));
+ assert.equal(auditArchitecturePlanCirculation(built).status,
+  'SOURCE_CLEARANCE_PROBES_PASS');
+ assert.equal(built.worldWrites,0);
+ assert.deepEqual(built.compiled.BuildPlan.operations,[]);
+ assert.ok(built.gates.every(g=>g==='BLOCKED'));
+});
+test('unknown room utility is rejected; legacy source remains identical',()=>{
+ const p=plan('fixture-compatibility',['z']);
+ const first=compileArchitecturePlan(p);
+ assert.equal(compileArchitecturePlan(structuredClone(p)).sourceSha256,
+  first.sourceSha256);
+ p.levels[0].spaces[0].fixture='nonexistent-role';
+ assert.throws(()=>compileArchitecturePlan(p),/R125_PLAN_SPACE_FIXTURE_ROLE/);
+});

@@ -163,7 +163,7 @@ export function diagnoseR125ArchitecturePlanOriginal(raw){
      built.compiled?.worldContacts!==0||
      built.compiled?.BuildPlan?.operations?.length!==0)
     fail('PLAN_WORLD_SAFETY_DRIFT');
-  const routes=auditR125SourceRoutes(built);
+  const routes=auditR125SourceRoutes(built,{featureTargets:built.fixtureTargets??[]});
   const circulation=auditArchitecturePlanCirculation(built);
   const critique=critiqueArchitecture({design:built.design,compiled:built.compiled});
   const floors=assessR125ProgramGeometry(built,critique);
@@ -177,6 +177,8 @@ export function diagnoseR125ArchitecturePlanOriginal(raw){
    sourceSha256:built.sourceSha256,geometrySha256:built.geometrySha256,
    occupiedVoxels:built.compiled.primitives.length,
    sourceRoutes:routes.status,sourceRouteIssues:routes.issues??[],
+   modelChosenFixtures:built.fixtureTargets?.length??0,
+   fixtureAccess:routes.featureAccess??[],
    circulation:circulation.status,circulationFailures:circulation.failures??[],
    programFloors:floors.status,programFloorIssues:floors.programFloorIssues,
    visualHighRiskCount:critique.highRiskCount,
