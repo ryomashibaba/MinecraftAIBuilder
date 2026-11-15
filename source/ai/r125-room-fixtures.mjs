@@ -46,6 +46,16 @@ export function addAuthoredRoomFixtures(product,{auditCirculation}={}){
     [range.x[0],mz],[range.x[1]-2,mz],[mx,mz]]:
    corners;
   if(intent.multi&&intent.index%2===1)candidates.reverse();
+  // Keep historical candidates first; exhaust untried in-zone origins only
+  // when those fail. No role, room, orientation or clearance is changed.
+  if(intent.multi){
+   const seen=new Set(candidates.map(([x,z])=>x+','+z));
+   for(let z=range.z[0];z<=range.z[1]-depth+1;z++)
+    for(let x=range.x[0];x<=range.x[1]-2;x++){
+     const key=x+','+z;
+     if(!seen.has(key)){seen.add(key);candidates.push([x,z]);}
+    }
+  }
   const occupied=new Set(current.compiled.primitives.map(c=>
    c[0]+','+c[1]+','+c[2]));
   const has=(x,yy,z)=>occupied.has(x+','+yy+','+z);
