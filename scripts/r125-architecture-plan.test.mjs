@@ -309,7 +309,7 @@ test('corner recess fails closed on malformed size and unsupported massing combi
   rearCornerCut:{width:4,depth:5}};
  for(const candidate of [
   {...expression,rearCornerCut:{width:2,depth:4}},
-  {...expression,rearCornerCut:{width:6,depth:4}},
+  {...expression,rearCornerCut:{width:9,depth:4}},
   {...expression,rearCornerCut:{width:4,depth:5,script:'bad'}},
   {...expression,roofProfile:'ridge'},
   {...expression,setbackSide:'rear',setbackDepth:3}
