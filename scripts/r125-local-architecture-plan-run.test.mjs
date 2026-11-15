@@ -56,6 +56,9 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    assert.equal(request.messages[0].content.includes('B143 elements'),true);
    assert.equal(request.messages[0].content.includes('footprint'),true);
    assert.equal(request.messages[0].content.includes('No fixed building-type template'),true);
+   assert.equal(request.messages[0].content.includes('actively SELECT an expression'),true);
+   assert.equal(request.messages[0].content.includes('raised roof volume'),true);
+   assert.equal(request.messages[0].content.includes('ROOM-APPROPRIATE fixture'),true);
    assert.equal(request.messages[1].content.includes('sourceOnly'),true);
    assert.equal(opts.headers.Authorization,undefined);
    return provider(original);

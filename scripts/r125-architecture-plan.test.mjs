@@ -1019,3 +1019,35 @@ test('all five purpose-neutral room fixture forms survive true SOURCE access che
   assert.deepEqual(built.compiled.BuildPlan.operations,[]);
  }
 });
+
+// A model-authored expressive form, functional room equipment, and the
+// unchanged generic B143 compiler must work together, not only in separate
+// synthetic unit tests. This still does NOT claim genuine LLM inference.
+test('one actual raised architectural volume combines two practical fixture roles with reached service routes',()=>{
+ const p=plan('integrated-raised-market',['x'],
+  ['customer exhibition space','maker service workbench']);
+ p.footprint={width:24,depth:24};
+ p.levels[0].spaces[0].fixture='display';
+ p.levels[0].spaces[1].fixture='workbench';
+ p.expression={setbackSide:'none',setbackDepth:0,
+  roofProfile:'ridge',roofAxis:'x',
+  facadeLanguage:'fins',roofVolume:'raised'};
+ const built=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+ const v=voxels(built.compiled);
+ const ceiling=1+5*p.levels.length;
+ assert.equal(verifyCompiled(built.design,built.compiled),true);
+ assert.equal(built.fixtureTargets.length,2);
+ assert.ok(built.design.elements.some(e=>e.id.startsWith('roof-raised-skin-')));
+ assert.ok(built.design.elements.some(e=>e.id==='fx-l0-z0-glass'));
+ assert.ok(built.design.elements.some(e=>e.id==='fx-l0-z1-top'));
+ assert.equal(includes(v,Math.floor(p.footprint.width/2),ceiling,12),false,
+  'raised roof has real air under pitched roof, not a solid flat cap');
+ const route=auditR125SourceRoutes(built,{featureTargets:built.fixtureTargets});
+ assert.equal(route.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(route.featureAccess.length,2);
+ assert.ok(route.featureAccess.every(x=>x.reachableFromEntrance));
+ assert.equal(auditArchitecturePlanCirculation(built).status,
+  'SOURCE_CLEARANCE_PROBES_PASS');
+ assert.equal(built.worldWrites,0);
+ assert.deepEqual(built.compiled.BuildPlan.operations,[]);
+});
