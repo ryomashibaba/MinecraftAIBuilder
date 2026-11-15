@@ -62,7 +62,7 @@ export async function runR125LocalArchitecturePlan({
   fail('OUT_DIRECTORY_REQUIRED');
  const dest=path.resolve(outDir);
  ensurePrivateNewDirectory(dest);
- let captured=null,modelStartMs=null;
+ let captured=null,modelStartMs=null,modelElapsedMs=null;
  // Validate endpoint, model, prompt and other options BEFORE allocating dir.
  const author=createR125ArchitecturePlanLocalAdapter({
   model,endpoint,fetcher,timeoutMs,reasoningEffort,maxOutputTokens,
@@ -92,6 +92,7 @@ export async function runR125LocalArchitecturePlan({
  try{
   modelStartMs=Date.now();
   const answer=await author({prompt});
+  modelElapsedMs=Date.now()-modelStartMs;
   const raw=fs.readFileSync(path.join(dest,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8');
   if(answer.originalSha256!==sha(raw)||captured.sha256!==sha(raw))
    fail('RAW_CAPTURE_MISMATCH');
@@ -114,13 +115,14 @@ export async function runR125LocalArchitecturePlan({
    review3d:sourceDesign?'TRUE_B143_HTML_GENERATED_ART_PENDING':'NOT_GENERATED',
    modelCallAttempts:1,modelResponsesCaptured:1,
    originalCaptureFinishReason:captured.finishReason,
-   modelRequestElapsedMs:Date.now()-modelStartMs,
+   modelRequestElapsedMs:modelElapsedMs,
    providerReportedTokenUsage:captured.usage};
  }catch(error){
   result={...common,status:'HOLD_MODEL_OR_SOURCE',
    reason:String(error?.message??error).slice(0,300),
    originalSha256:captured?.sha256??null,
-   modelRequestElapsedMs:modelStartMs===null?null:Date.now()-modelStartMs,
+   modelRequestElapsedMs:modelStartMs===null?null:
+    modelElapsedMs??Date.now()-modelStartMs,
    providerReportedTokenUsage:captured?.usage??null,
    sourceVerified:false,modelCallAttempts:1,
    modelResponsesCaptured:captured?1:0};
