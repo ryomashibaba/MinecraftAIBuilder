@@ -5,7 +5,8 @@ import path from 'node:path';
 import {createHash} from 'node:crypto';
 import assert from 'node:assert/strict';
 import {SCHEMA,validateArchitecturePlan,compileArchitecturePlan,
- auditArchitecturePlanCirculation,assessR125ProgramGeometry}
+ auditArchitecturePlanCirculation,assessR125ProgramGeometry,
+ assessR125AuthoredRoomCapacity}
  from '../source/ai/r125-architecture-plan.mjs';
 import {addAuthoredRoomFixtures} from '../source/ai/r125-room-fixtures.mjs';
 import {addAuthoredRoomDaylight} from '../source/ai/r125-room-daylight.mjs';
@@ -1634,6 +1635,29 @@ test('large pitched eaves pack real B143 elements without losing any roof edge',
    'SOURCE_ROUTES_REACH_ALL_ZONES');
   assert.deepEqual(result.compiled.BuildPlan.operations,[]);
   assert.equal(result.worldWrites,0);
+ }
+});
+
+test('authored T-room capacity reflects the REAL secondary SOURCE partition',()=>{
+ for(const axis of ['x','z'])for(const percent of [35,50,65]){
+  const p=plan('capacity-'+axis+'-'+percent,[axis],
+   ['shared workshop','archive and records']);
+  p.footprint={width:30,depth:30};
+  p.levels[0].spaces.push({id:'area-0c',purpose:'private instruments'});
+  p.levels[0].secondarySplitPercent=percent;
+  const snapshot=structuredClone(p);
+  const estimate=assessR125AuthoredRoomCapacity(p);
+  const built=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+  for(let i=0;i<3;i++){
+   const room=estimate.zones[i],actual=built.program[0].zones[i].range;
+   assert.equal(room.nominalWidth,actual.x[1]-actual.x[0]+1,
+    axis+' '+percent+' room '+i+' width');
+   assert.equal(room.nominalDepth,actual.z[1]-actual.z[0]+1,
+    axis+' '+percent+' room '+i+' depth');
+  }
+  assert.deepEqual(p,snapshot,'capacity advisory must not edit authored plan');
+  assert.equal(estimate.originalPlanEdited,false);
+  assert.equal(estimate.worldWrites,0);
  }
 });
 

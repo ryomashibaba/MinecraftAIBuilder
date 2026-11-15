@@ -225,7 +225,11 @@ export function assessR125AuthoredRoomCapacity(plan){
    [[split-x0-1,z1-z0-1],[x1-split-1,z1-z0-1]]:
    [[x1-x0-1,split-z0-1],[x1-x0-1,z1-split-1]];
   if(level.spaces.length===3){
-   const k=Math.floor((axis==='x'?z0+z1:x0+x1)/2);
+   // Match the actual authored T partition, not an invented 50/50 zone.
+   const secondaryStart=axis==='x'?z0:x0;
+   const secondaryEnd=axis==='x'?z1:x1;
+   const k=Math.floor(secondaryStart+(secondaryEnd-secondaryStart)*
+    (level.secondarySplitPercent??50)/100);
    sizes.splice(1,1,...(axis==='x'?
     [[x1-split-1,k-z0-1],[x1-split-1,z1-k-1]]:
     [[k-x0-1,z1-split-1],[x1-k-1,z1-split-1]]));

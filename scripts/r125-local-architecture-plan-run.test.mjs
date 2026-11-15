@@ -107,6 +107,10 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    assert.equal(request.messages[0].content.includes('raised roof volume'),true);
    assert.equal(request.messages[0].content.includes('ROOM-APPROPRIATE fixture'),true);
    assert.equal(request.messages[0].content.includes('REAL ROOM BUDGET'),true);
+   assert.ok(request.messages[0].content.includes('first room occupies WEST'));
+   assert.ok(request.messages[0].content.includes('first room occupies FRONT'));
+   assert.ok(request.messages[0].content.includes('FRONT share of the EAST wing'));
+   assert.ok(!request.messages[0].content.includes('percentage counts from the front'));
    assert.equal(request.messages[0].content.includes('3-wide control room'),true);
    assert.equal(request.messages[1].content.includes('sourceOnly'),true);
    assert.equal(opts.headers.Authorization,undefined);
