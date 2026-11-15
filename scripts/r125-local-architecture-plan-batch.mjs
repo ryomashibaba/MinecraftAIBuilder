@@ -11,6 +11,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import {createR125ArchitecturePlanLocalAdapter,DEFAULT_LOCAL_ENDPOINT}
  from '../source/ai/b198g-local-model-adapter.mjs';
@@ -56,6 +57,26 @@ export function parseR125BatchArgs(argv){
   endpoint:o['--endpoint']??DEFAULT_LOCAL_ENDPOINT};
 }
 
+/**
+ * Model-authored MASSING family, deliberately excluding ID, palette, title,
+ * room purpose and footprint SIZE. A different SHA, materials or floor area
+ * alone is NOT evidence of a different architectural form.
+ */
+export function authoredFormFamily(plan){
+ const e=plan?.expression;
+ return {levelAxes:plan.levels.map(l=>l.splitAxis),
+  roofProfile:e?.roofProfile??'unexpressed-flat',
+  roofAxis:e?.roofAxis??null,
+  setbackSide:e?.setbackSide??'none',
+  setbackDepth:e?.setbackDepth??0,
+  rearCornerCut:e?.rearCornerCut?
+   {side:e.rearCornerCut.side??'east',
+    width:e.rearCornerCut.width,depth:e.rearCornerCut.depth}:null,
+  facadeLanguage:e?.facadeLanguage??'plain'};
+}
+const formHash=plan=>createHash('sha256')
+ .update(JSON.stringify(authoredFormFamily(plan))).digest('hex');
+
 export async function runR125ArchitecturePlanBatch({
  model,briefsRaw,outDir,endpoint=DEFAULT_LOCAL_ENDPOINT
 },{fetcher=fetch,timeoutMs=180000}={}){
@@ -73,7 +94,8 @@ export async function runR125ArchitecturePlanBatch({
  const report={schema:'r125-local-plan-batch-v1',
   model,endpoint,planned:briefs.length,attempted:0,automaticRetries:0,
   requestsParallel:false,allSourceVerified:false,
-  geometryHashesDistinct:null,visualDiversity:'NOT_REVIEWED',
+  geometryHashesDistinct:null,modelAuthoredFormFamiliesDistinct:null,
+  visualDiversity:'NOT_REVIEWED',
   inGameWalking:'NOT_TESTED',worldWrites:0,
   completed:[],stopReason:null};
  const save=()=>fs.writeFileSync(path.join(dest,'BATCH_REPORT.json'),
@@ -83,7 +105,16 @@ export async function runR125ArchitecturePlanBatch({
   const one=await runR125LocalArchitecturePlan({
    model,prompt:item.prompt,endpoint,outDir:path.join(dest,item.id)
   },{fetcher,timeoutMs});
+  let modelAuthoredFormFamilySha256=null;
+  if(one.report.sourceVerified){
+   // Read the exact ORIGINAL response (not repaired SOURCE design) so a
+   // HOST-derived difference is never attributed to the local model.
+   const original=JSON.parse(fs.readFileSync(path.join(dest,item.id,
+    'MODEL_RESPONSE_ORIGINAL.txt'),'utf8'));
+   modelAuthoredFormFamilySha256=formHash(original);
+  }
   const row={id:item.id,requestSha256:one.report.requestSha256,
+   modelAuthoredFormFamilySha256,
    status:one.report.status,modelResponsesCaptured:one.report.modelResponsesCaptured,
    sourceVerified:one.report.sourceVerified,
    originalSha256:one.report.originalSha256,
@@ -96,6 +127,10 @@ export async function runR125ArchitecturePlanBatch({
   const geometry=report.completed.map(x=>x.geometrySha256).filter(Boolean);
   report.geometryHashesDistinct=geometry.length<2?null:
    new Set(geometry).size===geometry.length;
+  const families=report.completed.map(x=>x.modelAuthoredFormFamilySha256)
+   .filter(Boolean);
+  report.modelAuthoredFormFamiliesDistinct=families.length<2?null:
+   new Set(families).size===families.length;
   if(!success){
    report.stopReason='STOP_ON_FIRST_NON_SOURCE_RESULT';
    save();break;

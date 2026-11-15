@@ -50,6 +50,8 @@ test('one sequential SOURCE call per distinct brief, original files persisted',a
   assert.equal(report.attempted,3);
   assert.equal(report.planned,3);
   assert.equal(report.geometryHashesDistinct,true);
+  assert.equal(report.modelAuthoredFormFamiliesDistinct,false,
+   'different dimensions are not creative differences in roof or massing');
   assert.equal(report.allSourceVerified,true);
   assert.equal(report.worldWrites,0);
   assert.equal(report.visualDiversity,'NOT_REVIEWED');
@@ -87,6 +89,7 @@ test('identical building geometry is a diversity HOLD, never 3-use success',asyn
    {fetcher:async()=>{calls++;return provider(original)}});
   assert.equal(calls,2);
   assert.equal(report.geometryHashesDistinct,false);
+  assert.equal(report.modelAuthoredFormFamiliesDistinct,false);
   assert.equal(report.stopReason,'HOLD_IDENTICAL_GEOMETRY');
   assert.equal(report.allSourceVerified,false);
  }finally{fs.rmSync(root,{recursive:true,force:true})}
