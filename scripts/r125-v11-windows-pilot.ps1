@@ -13,6 +13,7 @@ param(
  [string]$Model = 'qwen3:14b',
  [string]$Endpoint = 'http://127.0.0.1:11434/v1/chat/completions',
  [switch]$CheckOnly,
+ [switch]$OnlyHousingRetail,
  [switch]$NoOpen
 )
 $ErrorActionPreference = 'Stop'
@@ -21,6 +22,19 @@ $studyBranch = 'research/r125-v6-readonly-facade-diagnostic-20261111'
 $runner = Join-Path $repo 'scripts\r125-local-architecture-plan-batch.mjs'
 $pilot = Join-Path $repo 'scripts\r125-v11-pilot-three.json'
 $viewer = 'BATCH_COMPARE_3D.html'
+# Re-evaluate only the two genuine SOURCE failures; reuse the exact existing
+# authored briefs, never reinterpret or regenerate the successful research brief.
+$selectedBriefs = @()
+if ($OnlyHousingRetail) {
+ $all = @(Get-Content -LiteralPath $pilot -Raw -Encoding UTF8 | ConvertFrom-Json)
+ if ($all.Count -ne 3 -or
+     (@($all | ForEach-Object { $_.id }) -join ',') -cne 'housing,retail,research') {
+  throw 'V11_RECHECK_PILOT_BRIEF_DRIFT'
+ }
+ $selectedBriefs = @($all | Where-Object { $_.id -ceq 'housing' -or $_.id -ceq 'retail' })
+ if ($selectedBriefs.Count -ne 2) { throw 'V11_RECHECK_NEEDS_TWO_BRIEFS' }
+}
+
 if ($Model -notmatch '^[A-Za-z0-9._:/-]{2,140}$') {
  throw 'V11_PILOT_INVALID_MODEL_ID'
 }
@@ -46,7 +60,7 @@ if ($LASTEXITCODE -ne 0 -or -not $match.Success -or
 if ($CheckOnly) {
  & $node '--check' $runner
  if ($LASTEXITCODE -ne 0) { throw 'V11_PILOT_BATCH_SYNTAX_FAILED' }
- Write-Output 'V11_PILOT_CHECK_ONLY_PASS: no server, HTTP, model, world or output.'
+ Write-Output ('V11_PILOT_CHECK_ONLY_PASS: '+$(if($OnlyHousingRetail){'two original failure briefs'}else{'three original briefs'})+'; no server, HTTP, model, world or output.')
  return
 }
 if ($env:OS -cne 'Windows_NT') { throw 'V11_PILOT_WINDOWS_REQUIRED' }
@@ -91,10 +105,26 @@ $out = Join-Path $root ('V11_3Genre_' +
 if (Test-Path -LiteralPath $out) { throw 'V11_PILOT_OUTPUT_COLLISION' }
 Write-Output ('V11_PILOT_RUN_HEAD=' + $commit.Trim())
 Write-Output ('V11_PRIVATE_RESULT=' + $out)
-Write-Output 'Single model; up to three sequential originals; continue after a design rejection, not a provider failure.'
-& $node $runner '--model' $Model '--pilot-three' '--out' $out `
- '--endpoint' $Endpoint
-$nodeExit = $LASTEXITCODE
+Write-Output 'Single model, sequential originals; continue after design rejection, not provider failure.'
+$batchArgs = @($runner, '--model', $Model)
+if ($OnlyHousingRetail) {
+ $briefFile = Join-Path $root ('V11_2Failure_Briefs_'+[Guid]::NewGuid().ToString('N')+'.json')
+ $json = ConvertTo-Json -InputObject $selectedBriefs -Depth 6
+ [System.IO.File]::WriteAllText($briefFile, $json,
+  [System.Text.UTF8Encoding]::new($false))
+ $batchArgs += @('--briefs', $briefFile)
+} else {
+ $batchArgs += '--pilot-three'
+}
+$batchArgs += @('--out', $out, '--endpoint', $Endpoint)
+try {
+ & $node @batchArgs
+ $nodeExit = $LASTEXITCODE
+} finally {
+ if ($OnlyHousingRetail -and (Test-Path -LiteralPath $briefFile -PathType Leaf)) {
+  Remove-Item -LiteralPath $briefFile -Force
+ }
+}
 $reportFile = Join-Path $out 'BATCH_REPORT.json'
 if (-not (Test-Path -LiteralPath $reportFile -PathType Leaf)) {
  throw 'V11_PILOT_NO_REPORT_PRESERVE_LOCAL_FILES'
@@ -102,8 +132,9 @@ if (-not (Test-Path -LiteralPath $reportFile -PathType Leaf)) {
 $report = Get-Content -LiteralPath $reportFile -Raw -Encoding UTF8 | ConvertFrom-Json
 if ($report.schema -cne 'r125-local-plan-batch-v1' -or
     [int]$report.worldWrites -ne 0 -or
-    [int]$report.attempted -gt 3 -or
-    [int]$report.attempted -lt 1) {
+    [int]$report.attempted -gt $(if($OnlyHousingRetail){2}else{3}) -or
+    [int]$report.attempted -lt 1 -or
+    [int]$report.planned -ne $(if($OnlyHousingRetail){2}else{3})) {
  throw 'V11_PILOT_UNEXPECTED_REPORT'
 }
 Write-Output ('V11_PILOT_ATTEMPTED=' + $report.attempted)

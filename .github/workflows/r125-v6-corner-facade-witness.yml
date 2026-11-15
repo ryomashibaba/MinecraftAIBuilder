@@ -48,6 +48,8 @@ jobs:
         run: |
           call scripts\R125_V11_3_Buildings.cmd -CheckOnly
           if errorlevel 1 exit /b 1
+          call scripts\R125_V11_3_Buildings.cmd -CheckOnly -OnlyHousingRetail
+          if errorlevel 1 exit /b 1
   exact-source-corner-facade-witness:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
