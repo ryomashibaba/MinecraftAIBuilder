@@ -74,6 +74,16 @@ jobs:
           name: R125-SAVED-REAL-QWEN-TRUE-B143-3D-ART-HOLD
           path: ${{ runner.temp }}/r125-genuine-qwen-3d/
           retention-days: 7
+      - name: Source-matched archived real-Qwen Education MakeCode export (never executed)
+        run: |
+          node scripts/r125-japanese-makecode.mjs --plan evidence/r125-real-l-corner-20261101/MODEL_RESPONSE_ORIGINAL.txt --out "$RUNNER_TEMP/r125-qwen-education-source" --palette configs/r125-education-verified-palette-v26.33.json
+          test -s "$RUNNER_TEMP/r125-qwen-education-source/MAKECODE_EDUCATION.ts"
+          node --input-type=module -e 'import fs from "node:fs";let q=JSON.parse(fs.readFileSync(process.argv[1]));let e=JSON.parse(fs.readFileSync(process.argv[2]));if(q.sourceSha256!==e.sourceSha256||q.geometrySha256!==e.geometrySha256||e.worldWrites!==0||e.programExecuted!==false||e.materialMode!=="STRICT_USER_ATTESTED"||e.BuildPlan.operations.length!==0)process.exit(2)' "$RUNNER_TEMP/r125-genuine-qwen-3d/SOURCE_DIAGNOSIS.json" "$RUNNER_TEMP/r125-qwen-education-source/EXPORT_REPORT.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: R125-ARCHIVED-QWEN-EDUCATION-CODE-REVIEW-ONLY
+          path: ${{ runner.temp }}/r125-qwen-education-source/
+          retention-days: 7
       - name: Actual frozen public modules — no model or Minecraft
         run: |
           node --check scripts/research/r125-v6-corner-facade-contract.test.mjs
