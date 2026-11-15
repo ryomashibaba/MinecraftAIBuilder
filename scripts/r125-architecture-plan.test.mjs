@@ -1725,7 +1725,7 @@ test('one fixture in a wide room recovers reachable mid-wall placement when corn
  // placing a 3x1 workbench. The central room and door are still open.
  const obstacles=corners.map(([x,z],index)=>({
   id:'existing-corner-obstacle-'+index,shape:'box',mode:'add',
-  material:'metal',origin:[x+1,y,z],size:[1,1,1]
+  material:'metal',origin:[x+1,y+1,z],size:[1,1,1]
  }));
  const sourceDesign={...shell.design,elements:[
   ...shell.design.elements,...obstacles]};
@@ -1754,7 +1754,7 @@ test('one fixture in a wide room recovers reachable mid-wall placement when corn
   'SOURCE_CLEARANCE_PROBES_PASS');
  assert.equal(verifyCompiled(outcome.design,outcome.compiled),true);
  const actual=voxels(outcome.compiled);
- for(const [x,z] of corners)assert.ok(includes(actual,x+1,y,z));
+ for(const [x,z] of corners)assert.ok(includes(actual,x+1,y+1,z));
  assert.deepEqual(selected,beforePlan,'the AI-owned room and role must not change');
  assert.equal(outcome.worldWrites,0);
  assert.deepEqual(outcome.compiled.BuildPlan.operations,[]);
