@@ -6,7 +6,7 @@ import {createHash} from 'node:crypto';
 import assert from 'node:assert/strict';
 import {SCHEMA,validateArchitecturePlan,compileArchitecturePlan,
  auditArchitecturePlanCirculation,assessR125ProgramGeometry,
- assessR125AuthoredRoomCapacity}
+ assessR125AuthoredRoomCapacity,packR125RaisedRoofStrips}
  from '../source/ai/r125-architecture-plan.mjs';
 import {addAuthoredRoomFixtures} from '../source/ai/r125-room-fixtures.mjs';
 import {addAuthoredRoomDaylight} from '../source/ai/r125-room-daylight.mjs';
@@ -1686,6 +1686,62 @@ test('fourth room is not accepted',()=>{
  assert.throws(()=>validateArchitecturePlan(p),/R125_PLAN_LEVEL_PROGRAM/);
 });
 
+
+test('equal-height raised roof SOURCE strips compress only as needed and preserve every B143 voxel',()=>{
+ const cases=['ridge','sawtooth'];
+ for(const roofProfile of cases)for(const roofAxis of ['x','z']){
+  const old=plan('roof-packing-'+roofProfile+'-'+roofAxis,['x'],
+   ['assembly and work zone','reading and equipment zone']);
+  old.footprint={width:32,depth:32};
+  old.expression={setbackSide:'none',setbackDepth:0,roofProfile,
+   roofAxis,facadeLanguage:'plain',roofVolume:'raised',
+   roofOverhang:'one-block'};
+  const original=compileArchitecturePlan(old,
+   {entrancePlacement:'source-accessible'});
+  const sourceElementCount=original.design.elements.length;
+  const packedElements=packR125RaisedRoofStrips(original.design.elements,roofAxis);
+  assert.ok(packedElements.length<sourceElementCount,roofProfile+'/'+roofAxis);
+  assert.ok(packedElements.some(e=>e.id.startsWith('roof-raised-skin-')&&e.repeat),
+   'real existing B143 repeat primitive used');
+  const packedDesign={...original.design,elements:packedElements};
+  const compiled=compileDesign(packedDesign);
+  assert.equal(verifyCompiled(packedDesign,compiled),true);
+  const byCell=list=>new Map(list.map(v=>[v.slice(0,3).join(','),v[3]]));
+  assert.deepEqual(byCell(compiled.primitives),
+   byCell(original.compiled.primitives),
+   roofProfile+'/'+roofAxis+' exact material-and-geometry equality');
+  assert.equal(original.design.elements.length,sourceElementCount,
+   'old success unmodified');
+  assert.deepEqual(original.compiled.BuildPlan.operations,[]);
+ }
+});
+test('equipment budget reservation chooses roof packing without deleting authored roles',()=>{
+ const p=plan('equipment-roof-pack',['x','z'],
+  ['functional workshop','wash and records']);
+ p.footprint={width:32,depth:32};
+ p.expression={setbackSide:'none',setbackDepth:0,
+  roofProfile:'sawtooth',roofAxis:'x',facadeLanguage:'plain',
+  roofVolume:'raised',roofOverhang:'one-block'};
+ for(const level of p.levels)for(const space of level.spaces){
+  space.fixtures=['workbench','storage'];
+  space.fixtureDetail='crafted';
+ }
+ const snapshot=structuredClone(p);
+ const built=compileArchitecturePlan(p,{
+  entrancePlacement:'source-accessible',upperDoorPlacement:'stair-clear'});
+ assert.ok(built.design.elements.length<=160);
+ assert.ok(built.design.elements.some(e=>e.id.startsWith('roof-raised-skin-')&&e.repeat));
+ assert.equal(built.fixtureTargets.length,8);
+ assert.equal(built.fixtureTargets.filter(x=>x.detail==='crafted').length,8);
+ assert.equal(verifyCompiled(built.design,built.compiled),true);
+ assert.equal(auditR125SourceRoutes(built,{featureTargets:built.fixtureTargets}).status,
+  'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(auditArchitecturePlanCirculation(built).status,
+  'SOURCE_CLEARANCE_PROBES_PASS');
+ assert.deepEqual(p,snapshot);
+ assert.deepEqual(built.compiled.BuildPlan.operations,[]);
+ assert.equal(built.worldWrites,0);
+});
 test('large pitched eaves pack real B143 elements without losing any roof edge',()=>{
  for(const roofProfile of ['ridge','sawtooth'])for(const roofAxis of ['x','z']){
   const p=plan('packed-eave-'+roofProfile+'-'+roofAxis,['x'],

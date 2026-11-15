@@ -21,6 +21,60 @@ const slug=s=>typeof s==='string'&&/^[a-z][a-z0-9-]{2,39}$/.test(s);
 const text=(s,max=180)=>typeof s==='string'&&s.length>=3&&s.length<=max&&
  !/[\u0000-\u001f<>]/.test(s);
 const integer=(v,a,b)=>Number.isSafeInteger(v)&&v>=a&&v<=b;
+
+/**
+ * Pack adjacent equal-height raised-roof strips using B143's existing repeat
+ * primitive. Pure SOURCE representation optimization: no room/roof redesign,
+ * material swap, extra voxels, model calls or relaxation of B143's 160 limit.
+ * Safe only for three HOST-generated roof strip families; all are additive,
+ * within the same roof construction pass, with exact 1-cell axis strides.
+ * Call conditionally when the ORIGINAL author has requested enough equipment
+ * and daylight that uncompressed source would exceed the 160-element limit.
+ */
+export function packR125RaisedRoofStrips(elements,roofAxis){
+ check(Array.isArray(elements)&&['x','z'].includes(roofAxis),
+  'ROOF_PACK_INPUT');
+ const axis=roofAxis==='x'?0:2, step=[0,0,0];step[axis]=1;
+ const groups=new Map(),changes=new Map(),drop=new Set();
+ for(let i=0;i<elements.length;i++){
+  const e=elements[i],match=/^(roof-raised-(?:skin|eave-a|eave-b))-(\d+)$/
+   .exec(e.id??'');
+  if(!match||e.shape!=='box'||e.mode!=='add'||e.repeat||
+     e.size[axis]!==1)continue;
+  const others=[0,1,2].filter(n=>n!==axis);
+  const key=JSON.stringify([match[1],e.material,e.origin[1],e.size[1],
+   ...others.map(n=>[e.origin[n],e.size[n]])]);
+  if(!groups.has(key))groups.set(key,[]);
+  groups.get(key).push({index:i,element:e,position:e.origin[axis]});
+ }
+ for(const group of groups.values()){
+  group.sort((a,b)=>a.position-b.position);
+  for(let i=0;i<group.length;){
+   let j=i+1;
+   while(j<group.length&&group[j].position===group[j-1].position+1&&
+      j-i<32)j++;
+   if(j-i>=2){
+    const first=group[i];
+    changes.set(first.index,{...first.element,repeat:{
+     count:j-i,offset:[...step]}});
+    for(let k=i+1;k<j;k++)drop.add(group[k].index);
+   }
+   i=j;
+  }
+ }
+ return elements.flatMap((e,i)=>drop.has(i)?[]:[changes.get(i)??e]);
+}
+const roofReserve=p=>p.levels.reduce((sum,level)=>sum+
+ level.spaces.reduce((subtotal,room)=>{
+  const roles=room.fixtures??(room.fixture?[room.fixture]:[]);
+  const parts={counter:2,workbench:3,display:2,storage:4,seating:2,
+   bed:4,desk:4,washbasin:5,electronics:5};
+  const detail=room.fixtureDetail==='crafted'?{
+   counter:1,workbench:1,display:1,storage:1,seating:2,bed:2,
+   desk:2,washbasin:1,electronics:1}:{};
+  return subtotal+roles.reduce((total,role)=>total+parts[role]+
+   (detail[role]??0),0)+(room.daylight?2:0);
+ },0),0);
 // Authored entry-zone choices always win. Otherwise, the opt-in path
 // preserves a clear centered entrance and moves it only if a divider blocks
 // the two-wide opening. This nearest-safe default is HOST geometry policy,
@@ -926,6 +980,14 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
    box('recess-paved-court-access','cut',null,
     [xCut+1,2,zCut-1],[2,3,1]);
   }
+ }
+ // Leave old successful B143 SOURCE byte-for-byte unchanged. Only a new
+ // author response whose requested equipment/daylight would exceed B143's
+ // fixed 160-element budget gets a lossless roof-strip representation.
+ // A fixed source that still exceeds the budget is a genuine HOLD.
+ if(raisedRoof&&elements.length+roofReserve(original)>160){
+  const packed=packR125RaisedRoofStrips(elements,roofAxis);
+  elements.splice(0,elements.length,...packed);
  }
  // The upper floor is an occupied terrace plate beyond the upper envelope;
  // it is NOT proof of railings, weather safety, or accessible outdoor space.
