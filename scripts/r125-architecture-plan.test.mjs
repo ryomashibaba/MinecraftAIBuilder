@@ -1636,3 +1636,49 @@ test('large pitched eaves pack real B143 elements without losing any roof edge',
   assert.equal(result.worldWrites,0);
  }
 });
+
+test('model-authored unequal T zones yield real sized, navigable and equipped spaces',()=>{
+ for(const axis of ['x','z']){
+  const base=plan('variable-t-'+axis,[axis],['open making floor','archive and records']);
+  base.footprint={width:30,depth:30};
+  base.levels[0].spaces.push({id:'area-0c',purpose:'private instruments'});
+  const baseline=compileArchitecturePlan(base,{entrancePlacement:'source-accessible'});
+  const exact=structuredClone(base);exact.levels[0].secondarySplitPercent=50;
+  const equal=compileArchitecturePlan(exact,{entrancePlacement:'source-accessible'});
+  assert.equal(equal.geometrySha256,baseline.geometrySha256,'omitted 50% keeps old actual cells');
+  const measured=[];
+  for(const percent of [35,65]){
+   const q=structuredClone(base);
+   q.levels[0].secondarySplitPercent=percent;
+   q.levels[0].spaces[1].fixtures=[axis==='x'?'workbench':'desk'];
+   q.levels[0].spaces[2].fixtures=[axis==='x'?'storage':'display'];
+   const result=compileArchitecturePlan(q,{entrancePlacement:'source-accessible'});
+   assert.equal(validateArchitecturePlan(q),true);
+   const expected=Math.floor(1+27*percent/100);
+   assert.equal(result.program[0].secondarySplitCoordinate,expected);
+   assert.equal(result.program[0].secondarySplitAxis,axis==='x'?'z':'x');
+   measured.push(expected);
+   assert.notEqual(result.geometrySha256,baseline.geometrySha256);
+   assert.equal(verifyCompiled(result.design,result.compiled),true);
+   const circulation=auditArchitecturePlanCirculation(result);
+   assert.equal(circulation.status,'SOURCE_CLEARANCE_PROBES_PASS',
+    JSON.stringify(circulation.failures));
+   const routes=auditR125SourceRoutes(result,{featureTargets:result.fixtureTargets});
+   assert.equal(routes.status,'SOURCE_ROUTES_REACH_ALL_ZONES',
+    JSON.stringify(routes.issues));
+   assert.equal(routes.zones.length,3);
+   assert.equal(routes.featureAccess.length,2);
+   assert.ok(routes.featureAccess.every(v=>v.reachableFromEntrance));
+   assert.deepEqual(result.compiled.BuildPlan.operations,[]);
+   assert.equal(result.worldWrites,0);
+  }
+  assert.ok(measured[0]<measured[1]);
+  const invalid=structuredClone(base);
+  invalid.levels[0].spaces.pop();invalid.levels[0].secondarySplitPercent=35;
+  assert.throws(()=>validateArchitecturePlan(invalid),
+   /THREE_ROOM_SECONDARY_PERCENT/);
+  const badValue=structuredClone(base);badValue.levels[0].secondarySplitPercent=99;
+  assert.throws(()=>validateArchitecturePlan(badValue),
+   /THREE_ROOM_SECONDARY_PERCENT/);
+ }
+});

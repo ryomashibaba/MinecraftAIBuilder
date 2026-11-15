@@ -75,6 +75,10 @@ export function authoredFormFamily(plan){
  const e=plan?.expression;
  return {levelAxes:plan.levels.map(l=>l.splitAxis),
   roomCounts:plan.levels.map(l=>l.spaces.length),
+  roomPartitions:plan.levels.map(l=>({
+   primary:l.splitPercent,
+   secondary:l.spaces.length===3?l.secondarySplitPercent??50:null
+  })),
   roofProfile:e?.roofProfile??'unexpressed-flat',
   // An unused axis on a flat roof must NOT count as creative variation.
   roofAxis:e&&e.roofProfile!=='flat'?e.roofAxis??null:null,
@@ -129,6 +133,9 @@ export async function runR125ArchitecturePlanBatch({
     'MODEL_RESPONSE_ORIGINAL.txt'),'utf8'));
    authoredForm=authoredFormFamily(original);
    authoredProgram=original.levels.map(level=>({splitAxis:level.splitAxis,
+    splitPercent:level.splitPercent,
+    ...(level.secondarySplitPercent!==undefined?
+     {secondarySplitPercent:level.secondarySplitPercent}:{}),
     spaces:level.spaces.map(space=>({id:space.id,purpose:space.purpose,
      ...(space.fixture?{fixture:space.fixture}:{}),
      ...(space.fixtures?{fixtures:space.fixtures}:{}),

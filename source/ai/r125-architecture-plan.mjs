@@ -40,7 +40,8 @@ function tLayout(level,{x0,x1,z0,z1},split){
  if(level.spaces.length!==3)return null;
  const [first,second,third]=level.spaces;
  if(level.splitAxis==='x'){
-  const k=Math.floor((z0+z1)/2);
+  // Original three-room geometry stays identical when this is omitted.
+  const k=Math.floor(z0+(z1-z0)*(level.secondarySplitPercent??50)/100);
   check(x1-split-1>=3&&k-z0-1>=3&&z1-k-1>=3,
    'THREE_ROOM_MINIMUM_CLEAR_SPAN');
   return {axis:'z',coordinate:k,
@@ -56,7 +57,7 @@ function tLayout(level,{x0,x1,z0,z1},split){
      range:{x:[split+1,x1-1],z:[k+1,z1-1]}}
    ]};
  }
- const k=Math.floor((x0+x1)/2);
+ const k=Math.floor(x0+(x1-x0)*(level.secondarySplitPercent??50)/100);
  check(z1-split-1>=3&&k-x0-1>=3&&x1-k-1>=3,
   'THREE_ROOM_MINIMUM_CLEAR_SPAN');
  return {axis:'x',coordinate:k,
@@ -155,9 +156,14 @@ export function validateArchitecturePlan(p){
  }
  const seen=new Set();
  for(const level of p.levels){
-  check(keys(level,['splitAxis','splitPercent','spaces'])&&
+  check(keys(level,['splitAxis','splitPercent','spaces',
+   ...(Object.hasOwn(level??{},'secondarySplitPercent')?
+    ['secondarySplitPercent']:[])])&&
    ['x','z'].includes(level.splitAxis)&&[40,50,60].includes(level.splitPercent)&&
    Array.isArray(level.spaces)&&[2,3].includes(level.spaces.length),'LEVEL_PROGRAM');
+  check(level.secondarySplitPercent===undefined||
+   (level.spaces.length===3&&[35,50,65].includes(level.secondarySplitPercent)),
+   'THREE_ROOM_SECONDARY_PERCENT');
   for(const space of level.spaces){
    check(keys(space,['id','purpose',
     ...(Object.hasOwn(space??{},'fixture')?['fixture']:[]),

@@ -332,3 +332,15 @@ test('actual cutaway controller exposes first-storey rooms beneath both flat and
  assert.ok(template.includes('el("cutaway").click()'),
   'synchronized parent interior button uses the fixed native cutaway');
 });
+
+test('model can independently vary functional T-room proportions, not merely footprint sizes',()=>{
+ const p={levels:[{splitAxis:'x',splitPercent:50,spaces:[{},{},{}]}]};
+ const a=authoredFormFamily(p);
+ assert.equal(a.roomPartitions[0].secondary,50);
+ const explicit=structuredClone(p);explicit.levels[0].secondarySplitPercent=50;
+ assert.deepEqual(authoredFormFamily(explicit),a);
+ const unequal=structuredClone(p);unequal.levels[0].secondarySplitPercent=35;
+ assert.notDeepEqual(authoredFormFamily(unequal),a);
+ const other=structuredClone(p);other.levels[0].splitPercent=40;
+ assert.notDeepEqual(authoredFormFamily(other),a);
+});
