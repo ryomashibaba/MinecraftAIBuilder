@@ -1443,3 +1443,15 @@ test('one actual raised architectural volume combines two practical fixture role
  assert.equal(built.worldWrites,0);
  assert.deepEqual(built.compiled.BuildPlan.operations,[]);
 });
+
+test('compact ground z partition clears stair end in source-accessible mode',()=>{
+ const p=plan('compact-stair-door',['z','x']);
+ p.footprint={width:16,depth:16};
+ p.expression={setbackSide:'east',setbackDepth:2,roofProfile:'ridge',roofAxis:'z',facadeLanguage:'fins'};
+ const legacy=compileArchitecturePlan(p);
+ assert.ok(auditArchitecturePlanCirculation(legacy).failures.some(f=>f.code==='PARTITION_OPENING_NOT_SUPPORTED_AND_CLEAR'&&f.level===0));
+ const built=compileArchitecturePlan(p,{entrancePlacement:'source-accessible',upperDoorPlacement:'stair-clear'});
+ assert.equal(auditArchitecturePlanCirculation(built).status,'SOURCE_CLEARANCE_PROBES_PASS');
+ assert.equal(auditR125SourceRoutes(built).status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.deepEqual(built.plan,p);
+});

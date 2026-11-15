@@ -447,7 +447,8 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
     // the TWO-WIDE supported walkway at the split wall. Opt-in
     // generic rule sets it beyond the shaft with 2-cell clearance.
     // This is HOST research; no change to the Qwen-authored program.
-    const doorX=l===1&&upperDoorPlacement==='stair-clear'?
+    const clearGroundStair=l===0&&count===2&&entrancePlacement==='source-accessible'&&split>=3&&split<=8;
+    const doorX=(l===1&&upperDoorPlacement==='stair-clear')||clearGroundStair?
      Math.max(x0+2,Math.min(x1-3,3+2+2)):
      x0+2;
     box(tag+'-internal-door','cut',null,[doorX,y,split],[2,3,1]);
