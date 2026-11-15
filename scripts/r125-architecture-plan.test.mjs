@@ -999,3 +999,23 @@ test('unknown room utility is rejected; legacy source remains identical',()=>{
  p.levels[0].spaces[0].fixture='nonexistent-role';
  assert.throws(()=>compileArchitecturePlan(p),/R125_PLAN_SPACE_FIXTURE_ROLE/);
 });
+
+test('all five purpose-neutral room fixture forms survive true SOURCE access checks',()=>{
+ for(const role of ['counter','workbench','display','storage','seating']){
+  const p=plan('fixture-'+role,['x'],['useful entry room','service zone']);
+  p.levels[0].spaces[0].fixture=role;
+  const built=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+  const audit=auditR125SourceRoutes(built,{featureTargets:built.fixtureTargets});
+  assert.equal(audit.status,'SOURCE_ROUTES_REACH_ALL_ZONES',role);
+  assert.equal(audit.featureAccess.length,1,role);
+  assert.equal(audit.featureAccess[0].reachableFromEntrance,true,role);
+  if(role==='storage'){
+   assert.ok(built.design.elements.some(x=>x.id==='fx-l0-z0-top-shelf'));
+   assert.equal(built.compiled.primitives.some(v=>v[1]===3&&
+    v[0]===built.fixtureTargets[0].origin[0]+1&&
+    v[2]===built.fixtureTargets[0].origin[2]),false,
+    'storage shelf has an actual open middle bay');
+  }
+  assert.deepEqual(built.compiled.BuildPlan.operations,[]);
+ }
+});

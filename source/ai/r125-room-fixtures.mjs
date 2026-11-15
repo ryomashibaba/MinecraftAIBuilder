@@ -44,7 +44,11 @@ export function addAuthoredRoomFixtures(product,{auditCirculation}={}){
      add('top',0,1,0,3,1,1,'wood')],
     display:()=>[add('plinth',0,0,0,3,1,1,'stone'),
      add('glass',0,1,0,3,1,1,'glass')],
-    storage:()=>[add('posts',0,0,0,3,3,1,'wood')],
+    // Real open shelf bays, not a solid three-block-thick fake cupboard.
+    storage:()=>[add('left-upright',0,0,0,1,3,1,'wood'),
+     add('right-upright',2,0,0,1,3,1,'wood'),
+     add('bottom-shelf',0,0,0,3,1,1,'metal'),
+     add('top-shelf',0,2,0,3,1,1,'metal')],
     seating:()=>[add('seat',0,0,0,3,1,1,'wood'),
      add('back',0,1,1,3,1,1,'wood')]
    };
