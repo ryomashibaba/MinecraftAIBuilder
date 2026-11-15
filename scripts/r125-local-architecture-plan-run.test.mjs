@@ -65,9 +65,16 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    assert.ok(room.properties.fixtures.items.enum.includes('electronics'));
    assert.equal(room.properties.fixtures.maxItems,3);
    const options=structured.properties.expression.anyOf;
-   assert.equal(options.length,7);
+   assert.equal(options.length,9);
    assert.ok(options.every(v=>v.type==='object'&&
     v.additionalProperties===false));
+   const pitchedEaves=options.filter(v=>v.required.includes('roofOverhang'));
+   assert.equal(pitchedEaves.length,2);
+   assert.ok(pitchedEaves.every(v=>
+    v.required.includes('roofVolume')&&
+    v.properties.roofOverhang.enum.join(',')==='one-block'&&
+    v.properties.roofProfile.enum.join(',')==='ridge,sawtooth'&&
+    !Object.hasOwn(v.properties,'rearCornerCut')));
    const monitor=options.filter(v=>v.properties.roofProfile.enum.includes('split-monitor'));
    assert.equal(monitor.length,1);
    assert.deepEqual(monitor[0].properties.setbackSide.enum,['none']);
@@ -83,7 +90,7 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
     v.properties.roofProfile.enum.every(x=>x==='flat'||x==='ridge')));
    const setback=options.filter(v=>
     v.properties.setbackSide.enum.includes('east'));
-   assert.equal(setback.length,2);
+   assert.equal(setback.length,3);
    assert.ok(setback.every(v=>
     !v.properties.roofProfile.enum.includes('split-monitor')&&
     !Object.hasOwn(v.properties,'rearCornerCut')));
