@@ -28,7 +28,7 @@ export function renderR125BatchComparison(briefs,report){
    '<p class="muted"><strong>True SOURCE evidence, not ART:</strong> '+
    'rooms '+esc(rooms)+' · equipment '+esc(row.modelChosenFixtures??0)+
    ' · reached service '+esc(row.fixtureServiceReached??0)+'/'+
-   esc(row.fixtureServiceTotal??0)+' · voxels '+esc(row.occupiedVoxels??'?')+
+   esc(row.fixtureServiceTotal??0)+' · voxels '+esc(row.occupiedVoxels??'?')+'</p>'+
    '<p class="muted">Routes '+esc(row.sourceRouteStatus??'UNKNOWN')+
    ' · circulation '+esc(row.circulationStatus??'UNKNOWN')+
    ' · floors '+esc(row.programFloorStatus??'UNKNOWN')+

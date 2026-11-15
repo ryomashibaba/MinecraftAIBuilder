@@ -798,21 +798,28 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
    const eaveRise=pos=>roofProfile==='ridge'?
     Math.min(3,Math.floor(Math.min(pos,span-1-pos)/2)):
     (pos%6===0?0:Math.ceil((pos%6)/2));
-   for(let pos=0;pos<span;pos++){
+   // Compress contiguous equally elevated eaves into B143 boxes.
+   // Every occupied cell and material stays identical. Only the author-opt-in
+   // eave representation changes, never the historical roof baseline.
+   for(let pos=0;pos<span;){
     const atY=top+eaveRise(pos);
+    let end=pos+1;
+    while(end<span&&eaveRise(end)===eaveRise(pos))end++;
+    const length=end-pos;
     if(alongX){
      const x=upper.x0+pos;
      box('roof-pitched-eave-front-'+pos,'add',roof,
-      [x,atY,upper.z0-1],[1,1,1]);
+      [x,atY,upper.z0-1],[length,1,1]);
      box('roof-pitched-eave-rear-'+pos,'add',roof,
-      [x,atY,upper.z1+1],[1,1,1]);
+      [x,atY,upper.z1+1],[length,1,1]);
     }else{
      const z=upper.z0+pos;
      box('roof-pitched-eave-west-'+pos,'add',roof,
-      [upper.x0-1,atY,z],[1,1,1]);
+      [upper.x0-1,atY,z],[1,1,length]);
      box('roof-pitched-eave-east-'+pos,'add',roof,
-      [upper.x1+1,atY,z],[1,1,1]);
+      [upper.x1+1,atY,z],[1,1,length]);
     }
+    pos=end;
    }
    // Finish the two remaining eave edges and their four roof corners.
    if(alongX){

@@ -1601,3 +1601,38 @@ test('fourth room is not accepted',()=>{
  p.levels[0].spaces.push({id:'area-0d',purpose:'fourth area'});
  assert.throws(()=>validateArchitecturePlan(p),/R125_PLAN_LEVEL_PROGRAM/);
 });
+
+test('large pitched eaves pack real B143 elements without losing any roof edge',()=>{
+ for(const roofProfile of ['ridge','sawtooth'])for(const roofAxis of ['x','z']){
+  const p=plan('packed-eave-'+roofProfile+'-'+roofAxis,['x'],
+   ['living studio','equipment service']);
+  p.footprint={width:32,depth:32};
+  p.materials={floor:'wood',wall:'stone',roof:'metal'};
+  p.expression={setbackSide:'none',setbackDepth:0,roofProfile,
+   roofAxis,facadeLanguage:'plain',roofVolume:'raised',
+   roofOverhang:'one-block'};
+  const result=compileArchitecturePlan(p,
+   {entrancePlacement:'source-accessible'});
+  assert.ok(result.design.elements.length<=160,roofProfile+'/'+roofAxis);
+  const material=new Map(result.compiled.primitives.map(v=>
+   [v.slice(0,3).join(','),v[3]]));
+  for(let pos=0;pos<30;pos++){
+   const rise=roofProfile==='ridge'?
+    Math.min(3,Math.floor(Math.min(pos,29-pos)/2)):
+    (pos%6===0?0:Math.ceil((pos%6)/2));
+   const y=6+rise;
+   const expected=roofAxis==='x'?
+    [[1+pos,y,0],[1+pos,y,31]]:
+    [[0,y,1+pos],[31,y,1+pos]];
+   for(const at of expected)assert.equal(material.get(at.join(',')),2,
+    'missing original one-block roof eave '+at.join(','));
+  }
+  assert.equal(verifyCompiled(result.design,result.compiled),true);
+  assert.equal(auditArchitecturePlanCirculation(result).status,
+   'SOURCE_CLEARANCE_PROBES_PASS');
+  assert.equal(auditR125SourceRoutes(result).status,
+   'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert.deepEqual(result.compiled.BuildPlan.operations,[]);
+  assert.equal(result.worldWrites,0);
+ }
+});
