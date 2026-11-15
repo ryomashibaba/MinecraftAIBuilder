@@ -29,6 +29,22 @@ on:
 permissions:
   contents: read
 jobs:
+  # Real Windows PowerShell 5.1 + cmd.exe bootstrap, fake-only preflight.
+  # Clones the public research branch into a NEW isolated runner folder.
+  # No live model, no Ollama, no Minecraft, no private content upload.
+  windows-v11-click-launcher-smoke:
+    runs-on: windows-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Native CMD launcher -> isolated branch clone -> PowerShell CheckOnly
+        shell: cmd
+        run: |
+          call scripts\R125_V11_3_Buildings.cmd -CheckOnly
+          if errorlevel 1 exit /b 1
   exact-source-corner-facade-witness:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
