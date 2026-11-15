@@ -173,8 +173,9 @@ function repairZone(start,previousTargets,zoneIntents,auditCirculation){
   const width=zone.x[1]-zone.x[0]+1;
   // In a narrow room, rotate shallow desks and shelving toward the wall
   // before spending the entire search budget on 3-wide path blockers.
-  const variants=width<=4&&roleDepth(intent.kind)===1?
-   [true,false]:[false,true];
+  const variants=width<=4?
+   (roleDepth(intent.kind)===1?[true,false]:[false,true]):
+   [false]; // Preserve the proven existing search order in wider rooms.
   for(const turned of variants){
    const {candidates}=positions(intent,product,turned);
    const used=new Set();
