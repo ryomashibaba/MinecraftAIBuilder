@@ -3,7 +3,8 @@
  * calls, one original response per brief, no retry or Minecraft world I/O.
  *
  * node scripts/r125-local-architecture-plan-batch.mjs --model qwen3:14b
- *   --briefs C:\\private\\three-briefs.json --out C:\\private\\NEW-result
+ *   --pilot-three --out C:\\private\\NEW-result
+ * Or supply --briefs C:\\private\\three-briefs.json for custom requests.
  *
  * BRIEFS is a private JSON array of {"id":"home","prompt":"..."} objects.
  * Uses the existing owned local model lifecycle; never launches Ollama/LM
@@ -43,18 +44,25 @@ export function parseR125BatchBriefs(raw){
 }
 export function parseR125BatchArgs(argv){
  if(argv.length===1&&argv[0]==='--help')return {help:true};
- if(argv.length!==6&&argv.length!==8)fail('ARGS_REQUIRED');
+ const pilot=argv.includes('--pilot-three');
+ if(pilot&&argv.filter(x=>x==='--pilot-three').length!==1)
+  fail('DUPLICATE_PILOT_FLAG');
+ const pairs=pilot?argv.filter(x=>x!=='--pilot-three'):argv;
+ if(pairs.length!== (pilot?4:6)&&pairs.length!== (pilot?6:8))
+  fail('ARGS_REQUIRED');
  const o={},allowed=new Set(['--model','--briefs','--out','--endpoint']);
- for(let i=0;i<argv.length;i+=2){
-  const k=argv[i],v=argv[i+1];
+ for(let i=0;i<pairs.length;i+=2){
+  const k=pairs[i],v=pairs[i+1];
   if(!allowed.has(k)||Object.hasOwn(o,k)||typeof v!=='string'||
      !v.trim()||v.startsWith('--'))fail('ARGS_INVALID');
   o[k]=v;
  }
- if(!o['--model']||!o['--briefs']||!o['--out']||
-   (argv.length===8&&!o['--endpoint']))fail('ARGS_MISSING');
- return {model:o['--model'],briefsFile:path.resolve(o['--briefs']),
-  outDir:path.resolve(o['--out']),
+ if(!o['--model']||!o['--out']||
+    (pilot&&o['--briefs'])||(!pilot&&!o['--briefs'])||
+    (pairs.length===(pilot?6:8)&&!o['--endpoint']))
+  fail('ARGS_MISSING_OR_CONFLICT');
+ return {model:o['--model'],briefsFile:pilot?null:path.resolve(o['--briefs']),
+  pilotThree:pilot,outDir:path.resolve(o['--out']),
   endpoint:o['--endpoint']??DEFAULT_LOCAL_ENDPOINT};
 }
 
@@ -167,9 +175,14 @@ if(process.argv[1]===fileURLToPath(import.meta.url)){
  try{
   const a=parseR125BatchArgs(process.argv.slice(2));
   if(a.help){
-   console.log('R125 batch: --model LOCAL_ID --briefs PRIVATE_JSON_ARRAY --out NEW_PRIVATE_DIRECTORY [--endpoint http://127.0.0.1:PORT/v1/chat/completions]');
+   console.log('R125 batch: --model LOCAL_ID --pilot-three --out NEW_PRIVATE_DIRECTORY (or --briefs PRIVATE_JSON_ARRAY) [--endpoint http://127.0.0.1:PORT/v1/chat/completions]');
   }else{
-   const raw=fs.readFileSync(a.briefsFile,'utf8');
+   // Bundled pilot is an early development trial, not a held-out final
+   // generalization benchmark. Real calls require separately monitored
+   // and owned Windows model services.
+   const raw=fs.readFileSync(a.pilotThree?
+    fileURLToPath(new URL('./r125-v11-pilot-three.json',import.meta.url)):
+    a.briefsFile,'utf8');
    const {report}=await runR125ArchitecturePlanBatch({
     model:a.model,briefsRaw:raw,outDir:a.outDir,endpoint:a.endpoint});
    console.log('R125_LOCAL_BATCH',JSON.stringify(report));

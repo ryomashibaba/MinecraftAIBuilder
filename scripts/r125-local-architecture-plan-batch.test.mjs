@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import {fileURLToPath} from 'node:url';
 import {runR125ArchitecturePlanBatch,parseR125BatchBriefs,parseR125BatchArgs}
  from './r125-local-architecture-plan-batch.mjs';
 import {renderR125BatchComparison} from './r125-batch-compare.mjs';
@@ -29,6 +30,16 @@ test('batch parser preflights unique bounded original briefs',()=>{
  assert.throws(()=>parseR125BatchBriefs(JSON.stringify([
   requests[0],requests[1],requests[2],requests[0]])),/BRIEF_COUNT_1_TO_3/);
  assert.deepEqual(parseR125BatchArgs(['--help']),{help:true});
+ const pilotFile=fileURLToPath(new URL('./r125-v11-pilot-three.json',import.meta.url));
+ const pilot=parseR125BatchBriefs(fs.readFileSync(pilotFile,'utf8'));
+ assert.deepEqual(pilot.map(x=>x.id),['housing','retail','research']);
+ assert.ok(pilot.every(x=>x.prompt.length>=80));
+ const args=parseR125BatchArgs(['--model','qwen3:14b',
+  '--pilot-three','--out','/private/result']);
+ assert.equal(args.pilotThree,true);
+ assert.equal(args.briefsFile,null);
+ assert.throws(()=>parseR125BatchArgs(['--model','qwen3:14b',
+  '--pilot-three','--briefs','x','--out','y']),/ARGS_/);
  assert.equal(parseR125BatchArgs(['--model','qwen3:14b','--briefs',
   '/private/briefs.json','--out','/private/review']).model,'qwen3:14b');
 });
