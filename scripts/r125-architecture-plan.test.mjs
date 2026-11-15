@@ -1703,6 +1703,10 @@ test('equal-height raised roof SOURCE strips compress only as needed and preserv
   assert.ok(packedElements.length<sourceElementCount,roofProfile+'/'+roofAxis);
   assert.ok(packedElements.some(e=>e.id.startsWith('roof-raised-skin-')&&e.repeat),
    'real existing B143 repeat primitive used');
+  if(roofProfile==='sawtooth')
+   assert.ok(packedElements.some(e=>e.id.startsWith('roof-pitched-eave-')&&
+    e.repeat?.offset[roofAxis==='x'?0:2]===6),
+    'periodic pitched eaves are also losslessly packed');
   const packedDesign={...original.design,elements:packedElements};
   const compiled=compileDesign(packedDesign);
   assert.equal(verifyCompiled(packedDesign,compiled),true);

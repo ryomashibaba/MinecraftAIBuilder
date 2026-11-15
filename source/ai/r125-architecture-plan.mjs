@@ -34,32 +34,51 @@ const integer=(v,a,b)=>Number.isSafeInteger(v)&&v>=a&&v<=b;
 export function packR125RaisedRoofStrips(elements,roofAxis){
  check(Array.isArray(elements)&&['x','z'].includes(roofAxis),
   'ROOF_PACK_INPUT');
- const axis=roofAxis==='x'?0:2, step=[0,0,0];step[axis]=1;
+ const axis=roofAxis==='x'?0:2;
  const groups=new Map(),changes=new Map(),drop=new Set();
  for(let i=0;i<elements.length;i++){
-  const e=elements[i],match=/^(roof-raised-(?:skin|eave-a|eave-b))-(\d+)$/
+  const e=elements[i],match=/^(roof-(?:raised-(?:skin|eave-a|eave-b)|pitched-eave-(?:front|rear|west|east)))-(\d+)$/
    .exec(e.id??'');
-  if(!match||e.shape!=='box'||e.mode!=='add'||e.repeat||
-     e.size[axis]!==1)continue;
-  const others=[0,1,2].filter(n=>n!==axis);
-  const key=JSON.stringify([match[1],e.material,e.origin[1],e.size[1],
-   ...others.map(n=>[e.origin[n],e.size[n]])]);
+  if(!match||e.shape!=='box'||e.mode!=='add'||e.repeat)continue;
+  // Each B143 repeat preserves the original box volume. We never merge
+  // unlike material, dimensions, y or coordinates on the other two axes.
+  const other=[0,1,2].filter(n=>n!==axis);
+  const key=JSON.stringify([match[1],e.material,
+   ...other.map(n=>[e.origin[n],e.size[n]]),e.size[axis]]);
   if(!groups.has(key))groups.set(key,[]);
   groups.get(key).push({index:i,element:e,position:e.origin[axis]});
  }
  for(const group of groups.values()){
   group.sort((a,b)=>a.position-b.position);
-  for(let i=0;i<group.length;){
-   let j=i+1;
-   while(j<group.length&&group[j].position===group[j-1].position+1&&
-      j-i<32)j++;
-   if(j-i>=2){
-    const first=group[i];
-    changes.set(first.index,{...first.element,repeat:{
-     count:j-i,offset:[...step]}});
-    for(let k=i+1;k<j;k++)drop.add(group[k].index);
+  const all=new Map(group.map(x=>[x.position,x]));
+  // Ridge often has a long constant-height plateau: repeat side-by-side.
+  // Sawtooth has recurrent *identical* strips and eaves every six blocks.
+  // Choosing the longest arithmetic subsequence first avoids unnecessarily
+  // emitting 2-cell repeats when a 5-cell periodic repeat is available.
+  while(true){
+   let best=null;
+   for(const candidate of group){
+    if(drop.has(candidate.index)||changes.has(candidate.index))continue;
+    const width=candidate.element.size[axis];
+    for(const stride of new Set([width,6])){
+     if(stride<width)continue;
+     const run=[candidate];
+     for(let pos=candidate.position+stride;run.length<32;pos+=stride){
+      const next=all.get(pos);
+      if(!next||drop.has(next.index)||changes.has(next.index))break;
+      run.push(next);
+     }
+     if(run.length>=2&&(!best||run.length>best.run.length||
+        (run.length===best.run.length&&stride<best.stride)))
+      best={run,stride};
+    }
    }
-   i=j;
+   if(!best)break;
+   const head=best.run[0];
+   const offset=[0,0,0];offset[axis]=best.stride;
+   changes.set(head.index,{...head.element,repeat:{
+    count:best.run.length,offset}});
+   for(const item of best.run.slice(1))drop.add(item.index);
   }
  }
  return elements.flatMap((e,i)=>drop.has(i)?[]:[changes.get(i)??e]);
