@@ -7,6 +7,7 @@ import assert from 'node:assert/strict';
 import {SCHEMA,validateArchitecturePlan,compileArchitecturePlan,
  auditArchitecturePlanCirculation,assessR125ProgramGeometry}
  from '../source/ai/r125-architecture-plan.mjs';
+import {addAuthoredRoomFixtures} from '../source/ai/r125-room-fixtures.mjs';
 import {verifyCompiled,compileDesign} from '../source/ai/b143-building-dsl.mjs';
 import {auditR125SourceRoutes} from '../source/ai/r125-source-routes.mjs';
 import {critiqueArchitecture} from '../source/ai/b198c-spatial-critic.mjs';
@@ -1055,6 +1056,41 @@ test('unknown room utility is rejected; legacy source remains identical',()=>{
   first.sourceSha256);
  p.levels[0].spaces[0].fixture='nonexistent-role';
  assert.throws(()=>compileArchitecturePlan(p),/R125_PLAN_SPACE_FIXTURE_ROLE/);
+});
+
+test('failed furniture placement preserves source and reports exact candidate failure reasons',()=>{
+ const p=plan('trace-room-placement',['x']);
+ const base=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+ const originalGeometry=base.geometrySha256;
+ const authored={...base,plan:structuredClone(base.plan)};
+ authored.plan.levels[0].spaces[0].fixtures=['workbench'];
+ let failure=null;
+ try {
+  // Deliberately fail circulation after the exact real B143 access checks,
+  // proving the diagnostic is tied to a precise authored room and candidate.
+  addAuthoredRoomFixtures(authored,{auditCirculation:()=>({
+   status:'SOURCE_CLEARANCE_PROBES_HOLD',
+   failures:[{code:'TEST_CIRCULATION_REFUSAL'}]
+  })});
+ } catch(e) { failure=e; }
+ assert.equal(failure?.message,'R125_PLAN_FIXTURE_NO_REACHABLE_POSITION');
+ const diag=failure.fixturePlacement;
+ assert.equal(diag.schema,'r125-fixture-placement-failure-v1');
+ assert.equal(diag.failed.zoneId,'area-0a');
+ assert.equal(diag.failed.kind,'workbench');
+ assert.equal(diag.failed.level,0);
+ assert.equal(diag.candidateCount,9);
+ assert.equal(diag.rejectedCandidates.length,9);
+ assert.ok(diag.rejectedCandidates.every(x=>
+  x.reason==='OUTSIDE_AUTHORED_ZONE'||
+  x.reason==='UNSUPPORTED_FLOOR'||
+  x.reason==='EXISTING_VOXEL_COLLISION'||
+  x.reason==='SOURCE_SERVICE_ACCESS_HOLD'||
+  x.reason==='SOURCE_CIRCULATION_HOLD'));
+ assert.equal(diag.modelCalls,0);
+ assert.equal(diag.worldWrites,0);
+ assert.equal(base.geometrySha256,originalGeometry);
+ assert.equal(verifyCompiled(base.design,base.compiled),true);
 });
 
 test('one room can hold genuinely different reachable bed and desk and storage',()=>{

@@ -5,7 +5,14 @@
  */
 import {compileDesign,verifyCompiled} from './b143-building-dsl.mjs';
 import {auditR125SourceRoutes} from './r125-source-routes.mjs';
-const requirePosition=()=>{throw Error('R125_PLAN_FIXTURE_NO_REACHABLE_POSITION');};
+// A failed author-selected fixture has a concrete, PRIVATE offline witness.
+// Geometry, author roles and search order remain unchanged. This is not
+ // a fallback layout, a retry, or a reason to relax SOURCE checks.
+const requirePosition=diagnosis=>{
+ const e=Error('R125_PLAN_FIXTURE_NO_REACHABLE_POSITION');
+ e.fixturePlacement=diagnosis;
+ throw e;
+};
 
 export function addAuthoredRoomFixtures(product,{auditCirculation}={}){
  const intents=product.plan.levels.flatMap((l,li)=>
@@ -43,9 +50,16 @@ export function addAuthoredRoomFixtures(product,{auditCirculation}={}){
    c[0]+','+c[1]+','+c[2]));
   const has=(x,yy,z)=>occupied.has(x+','+yy+','+z);
   let placed=false;
+  const rejected=[];
+  const reject=(x,z,code,evidence)=>rejected.push({
+   at:[x,y,z],reason:code,...(evidence?{evidence}:{})
+  });
   for(const [x,z] of candidates){
    if(x<range.x[0]||x+2>range.x[1]||
-      z<range.z[0]||z+depth-1>range.z[1])continue;
+      z<range.z[0]||z+depth-1>range.z[1]){
+    reject(x,z,'OUTSIDE_AUTHORED_ZONE');
+    continue;
+   }
    const key='fx-l'+intent.level+'-z'+intent.zoneIndex+
     (intent.multi?'-i'+intent.index:'');
    const add=(name,dx,dy,dz,sx,sy,sz,material)=>({
@@ -91,15 +105,20 @@ export function addAuthoredRoomFixtures(product,{auditCirculation}={}){
    };
    const shapes=families[intent.kind]?.();
    if(!shapes)throw Error('R125_PLAN_FIXTURE_UNKNOWN_ROLE');
-   let blocked=false;
+   let unsupported=null,collision=null;
    for(let a=x;a<x+3;a++)for(let c=z;c<z+depth;c++)
-    if(!has(a,y-1,c))blocked=true;
+    if(!has(a,y-1,c)&&unsupported===null)unsupported=[a,y-1,c];
    for(const part of shapes){
     const [ax,ay,az]=part.origin,[sx,sy,sz]=part.size;
     for(let a=ax;a<ax+sx;a++)for(let yy=ay;yy<ay+sy;yy++)
-     for(let c=az;c<az+sz;c++)if(has(a,yy,c))blocked=true;
+     for(let c=az;c<az+sz;c++)
+      if(has(a,yy,c)&&collision===null)collision=[a,yy,c];
    }
-   if(blocked)continue;
+   if(unsupported||collision){
+    reject(x,z,unsupported?'UNSUPPORTED_FLOOR':'EXISTING_VOXEL_COLLISION',
+     {firstUnsupported:unsupported,firstCollision:collision});
+    continue;
+   }
    const design={...current.design,
     elements:[...current.design.elements,...shapes]};
    const compiled=compileDesign(design);
@@ -112,11 +131,33 @@ export function addAuthoredRoomFixtures(product,{auditCirculation}={}){
     origin:[x,y,z],size:[3,3,depth],kind:intent.kind};
    const routes=auditR125SourceRoutes(trial,{featureTargets:[...targets,target]});
    if(routes.status!=='SOURCE_ROUTES_REACH_ALL_ZONES'||
-      routes.featureAccess.some(f=>!f.reachableFromEntrance))continue;
-   if(auditCirculation(trial).status!=='SOURCE_CLEARANCE_PROBES_PASS')continue;
+      routes.featureAccess.some(f=>!f.reachableFromEntrance)){
+    reject(x,z,'SOURCE_SERVICE_ACCESS_HOLD',
+     {routeIssues:routes.issues.slice(0,12),
+      blockedServiceFeatures:routes.featureAccess.filter(f=>
+       !f.reachableFromEntrance).map(f=>f.id)});
+    continue;
+   }
+   const circulation=auditCirculation(trial);
+   if(circulation.status!=='SOURCE_CLEARANCE_PROBES_PASS'){
+    reject(x,z,'SOURCE_CIRCULATION_HOLD',
+     {circulationFailures:(circulation.failures??[]).slice(0,12)});
+    continue;
+   }
    targets.push(target);current=trial;placed=true;break;
   }
-  if(!placed)requirePosition();
+  if(!placed)requirePosition({
+   schema:'r125-fixture-placement-failure-v1',
+   failed:{level:intent.level,zoneIndex:intent.zoneIndex,
+    zoneId:intent.zoneId,kind:intent.kind,
+    fixtureIndex:intent.multi?intent.index:null,
+    range,standingFloorY:y,footprint:[3,depth]},
+   previouslyPlaced:targets.map(x=>({
+    id:x.id,zoneId:x.zoneId,kind:x.kind,origin:x.origin,size:x.size})),
+   candidateCount:candidates.length,
+   rejectedCandidates:rejected,
+   sourceOnly:true,originalPlanEdited:false,modelCalls:0,worldWrites:0
+  });
  }
  return {...current,fixtureTargets:targets,
   fixtureRoleOwner:'MODEL',fixtureGeometryOwner:'GENERIC_HOST',

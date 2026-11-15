@@ -188,7 +188,8 @@ export function diagnoseR125ArchitecturePlanOriginal(raw){
    sourceDesign:built.design};
  }catch(error){
   return {...base,status:'HOLD_PLAN_COMPILER_OR_QA',
-   sourceVerified:false,compilerReason:String(error?.message??error).slice(0,360)};
+   sourceVerified:false,compilerReason:String(error?.message??error).slice(0,360),
+   ...(error?.fixturePlacement?{fixturePlacement:error.fixturePlacement}:{})};
  }
 }
 
