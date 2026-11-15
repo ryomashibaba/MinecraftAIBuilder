@@ -1,0 +1,128 @@
+/**
+ * Opt-in V11 ONE local-model ArchitecturePlan -> original capture -> frozen
+ * B143 + SOURCE replay. No auto retry, no world calls, no 3D/ART promotion.
+ *
+ * node scripts/r125-local-architecture-plan-run.mjs --model qwen3:14b
+ *   --prompt "未知の建築要求をここに" --out "NEW_DIRECTORY_OUTSIDE_REPO"
+ *
+ * This CLI never starts an unmanaged model server. Use the existing owned
+ * Windows model/monitor lifecycle before running a real-model trial.
+ */
+import fs from 'node:fs';
+import path from 'node:path';
+import os from 'node:os';
+import {fileURLToPath} from 'node:url';
+import {createHash} from 'node:crypto';
+import {createR125ArchitecturePlanLocalAdapter,DEFAULT_LOCAL_ENDPOINT}
+ from '../source/ai/b198g-local-model-adapter.mjs';
+import {diagnoseR125ArchitecturePlanOriginal}
+ from './r125-offline-replay.mjs';
+
+const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const fail=code=>{throw Error('R125_LOCAL_PLAN_'+code);};
+const sha=raw=>createHash('sha256').update(raw).digest('hex');
+const write=(dir,name,data)=>fs.writeFileSync(path.join(dir,name),
+ typeof data==='string'?data:JSON.stringify(data,null,2)+'\n',{flag:'wx'});
+
+export function parseR125LocalPlanArgs(argv){
+ if(argv.length===1&&argv[0]==='--help')return {help:true};
+ if(argv.length!==6&&argv.length!==8)fail('ARGS_MODEL_PROMPT_OUT_REQUIRED');
+ const values={},allowed=new Set(['--model','--prompt','--out','--endpoint']);
+ for(let i=0;i<argv.length;i+=2){
+  if(!allowed.has(argv[i])||Object.hasOwn(values,argv[i])||
+     typeof argv[i+1]!=='string'||!argv[i+1].trim()||
+     argv[i+1].startsWith('--'))fail('INVALID_ARGUMENTS');
+  values[argv[i]]=argv[i+1];
+ }
+ if(!values['--model']||!values['--prompt']||!values['--out']||
+    (argv.length===8&&!values['--endpoint']))fail('MISSING_ARGUMENTS');
+ return {model:values['--model'],prompt:values['--prompt'],
+  outDir:path.resolve(values['--out']),
+  endpoint:values['--endpoint']??DEFAULT_LOCAL_ENDPOINT};
+}
+
+function ensurePrivateNewDirectory(dest){
+ const parent=path.dirname(dest);
+ if(!fs.existsSync(parent)||!fs.statSync(parent).isDirectory()||
+    fs.existsSync(dest))fail('OUTPUT_MUST_BE_NEW_DIRECTORY');
+ const realParent=fs.realpathSync(parent);
+ if(dest===ROOT||dest.startsWith(ROOT+path.sep)||
+    realParent===ROOT||realParent.startsWith(ROOT+path.sep))
+  fail('OUTPUT_MUST_BE_OUTSIDE_REPOSITORY');
+ if(realParent===path.parse(realParent).root)
+  fail('OUTPUT_ROOT_PARENT_DISALLOWED');
+}
+
+export async function runR125LocalArchitecturePlan({
+ model,prompt,outDir,endpoint=DEFAULT_LOCAL_ENDPOINT,
+ reasoningEffort=undefined,maxOutputTokens=4096
+},{fetcher=fetch,timeoutMs=180000}={}){
+ if(typeof outDir!=='string'||outDir.length===0)
+  fail('OUT_DIRECTORY_REQUIRED');
+ const dest=path.resolve(outDir);
+ ensurePrivateNewDirectory(dest);
+ let captured=null;
+ // Validate endpoint, model, prompt and other options BEFORE allocating dir.
+ const author=createR125ArchitecturePlanLocalAdapter({
+  model,endpoint,fetcher,timeoutMs,reasoningEffort,maxOutputTokens,
+  onRawModelResponse(raw,{finishReason}){
+   captured={sha256:sha(raw),finishReason};
+   write(dest,'MODEL_RESPONSE_ORIGINAL.txt',raw);
+  }
+ });
+ if(typeof prompt!=='string'||prompt.length<8||prompt.length>8000)
+  fail('INVALID_PROMPT');
+ fs.mkdirSync(dest,{recursive:false});
+ const common={schema:'r125-local-plan-one-shot-v1',
+  model,endpoint,requestSha256:sha(prompt),
+  attemptLimit:1,automaticRetries:0,
+  provenance:'LOCAL_HTTP_PROVIDER_NOT_INDEPENDENTLY_ATTESTED',
+  originalEdited:false,worldContacts:0,worldWrites:0,
+  constructionApproved:false,artStatus:'NOT_REVIEWED',
+  minecraftWalking:'NOT_TESTED',
+  nineWorldGates:Array(9).fill('BLOCKED')};
+ let result;
+ try{
+  const answer=await author({prompt});
+  const raw=fs.readFileSync(path.join(dest,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8');
+  if(answer.originalSha256!==sha(raw)||captured.sha256!==sha(raw))
+   fail('RAW_CAPTURE_MISMATCH');
+  const reviewed=diagnoseR125ArchitecturePlanOriginal(raw);
+  const {sourceDesign,...diagnosis}=reviewed;
+  write(dest,'SOURCE_DIAGNOSIS.json',diagnosis);
+  if(sourceDesign)write(dest,'B143_SOURCE_REVIEW_ONLY.json',sourceDesign);
+  result={...common,
+   status:diagnosis.status,originalSha256:answer.originalSha256,
+   sourceSha256:diagnosis.sourceSha256??null,
+   geometrySha256:diagnosis.geometrySha256??null,
+   sourceVerified:diagnosis.sourceVerified===true,
+   modelCallAttempts:1,modelResponsesCaptured:1,
+   originalCaptureFinishReason:captured.finishReason};
+ }catch(error){
+  result={...common,status:'HOLD_MODEL_OR_SOURCE',
+   reason:String(error?.message??error).slice(0,300),
+   originalSha256:captured?.sha256??null,
+   sourceVerified:false,modelCallAttempts:1,
+   modelResponsesCaptured:captured?1:0};
+ }finally{
+  // Never include raw provider text in the shareable run report.
+  write(dest,'RUN_REPORT.json',result);
+ }
+ return {report:result,outputDirectory:dest};
+}
+
+if(process.argv[1]===fileURLToPath(import.meta.url)){
+ try{
+  const args=parseR125LocalPlanArgs(process.argv.slice(2));
+  if(args.help)console.log('R125 local: --model LOCAL_ID --prompt TEXT --out NEW_PRIVATE_DIRECTORY [--endpoint http://127.0.0.1:PORT/v1/chat/completions]');
+  else{
+   const {report}=await runR125LocalArchitecturePlan(args);
+   console.log('R125_LOCAL_ARCHITECTURE_PLAN',JSON.stringify(report));
+   if(report.status!=='B143_SOURCE_CANDIDATE_ART_HOLD')
+    process.exitCode=2;
+  }
+ }catch(error){
+  console.error('R125_LOCAL_PLAN_HOLD',String(error?.message??error));
+  process.exitCode=2;
+ }
+}
