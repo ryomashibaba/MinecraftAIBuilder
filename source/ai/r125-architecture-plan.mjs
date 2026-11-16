@@ -12,6 +12,7 @@ import {auditR125SourceRoutes} from './r125-source-routes.mjs';
 import {addAuthoredRoomFixtures} from './r125-room-fixtures.mjs';
 import {addAuthoredRoomDaylight} from './r125-room-daylight.mjs';
 import {detailR125Envelope} from './r125-spatial-detail.mjs';
+import {addR125HipRoof} from './r125-hip-roof.mjs';
 export const SCHEMA='minecraftaibuilder-r125-architecture-plan-v1';
 const hash=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
 const refuse=code=>{throw Error('R125_PLAN_'+code);};
@@ -179,18 +180,20 @@ export function validateArchitecturePlan(p){
    ((e.setbackSide==='none'&&e.setbackDepth===0)||
     (e.setbackSide!=='none'&&p.levels.length===2&&[2,3,4].includes(e.setbackDepth))),
    'EXPRESSION_SETBACK');
-  check(['flat','ridge','sawtooth','split-monitor'].includes(e.roofProfile)&&
+  check(['flat','ridge','sawtooth','split-monitor','hip'].includes(e.roofProfile)&&
    ['x','z'].includes(e.roofAxis)&&
    ['plain','fins','screen','recessed-portico'].includes(e.facadeLanguage),
    'EXPRESSION_STYLE');
   // Explicit opt-in preserves the original B143 roof source for old plans.
   check(e.roofVolume===undefined||
-   (e.roofVolume==='raised'&&['ridge','sawtooth','split-monitor'].includes(e.roofProfile)),
+   (e.roofVolume==='raised'&&['ridge','sawtooth','split-monitor','hip'].includes(e.roofProfile)),
    'EXPRESSION_ROOF_VOLUME');
   check(e.roofProfile!=='split-monitor'||
    (e.roofVolume==='raised'&&e.roofAxis==='x'&&
     e.setbackSide==='none'),
    'EXPRESSION_MONITOR_PROGRAM_CONFLICT');
+  check(e.roofProfile!=='hip'||(e.roofVolume==='raised'&&
+   !Object.hasOwn(e,'rearCornerCut')),'EXPRESSION_HIP_CONFLICT');
   // AUTHOR opt-in only; no implicit change to frozen source or prior massing.
   check(e.daylightFacade===undefined||
    (e.daylightFacade==='east-and-rear-bays'&&
@@ -204,7 +207,7 @@ export function validateArchitecturePlan(p){
   check(e.roofOverhang===undefined||
    (e.roofOverhang==='one-block'&&e.roofVolume==='raised'&&
     ((e.roofProfile==='split-monitor'&&p.levels.length===1)||
-     (['ridge','sawtooth'].includes(e.roofProfile)&&
+     (['ridge','sawtooth','hip'].includes(e.roofProfile)&&
       !Object.hasOwn(e,'rearCornerCut')))),
    'EXPRESSION_ROOF_OVERHANG_CONFLICT');
   if(Object.hasOwn(e,'rearCornerCut')){
@@ -834,6 +837,9 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
     ['high-clerestory',[highX-1,top+4,z0],[1,1,spanZ]]
    ])box('roof-one-cell-eave-'+id,'add',roof,at,size);
   }
+ }else if(roofProfile==='hip'){
+  addR125HipRoof(box,{upper,top,roof,wall,roofAxis,
+   overhang:original.expression.roofOverhang==='one-block'});
  }else if(roofProfile!=='flat'){
   const span=roofAxis==='x'?upper.x1-upper.x0+1:upper.z1-upper.z0+1;
   for(let pos=0;pos<span;pos++){
