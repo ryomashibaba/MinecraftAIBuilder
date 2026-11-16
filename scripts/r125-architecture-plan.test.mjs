@@ -1309,7 +1309,8 @@ test('failed furniture placement preserves source and reports exact candidate fa
   x.reason==='UNSUPPORTED_FLOOR'||
   x.reason==='EXISTING_VOXEL_COLLISION'||
   x.reason==='SOURCE_SERVICE_ACCESS_HOLD'||
-  x.reason==='SOURCE_CIRCULATION_HOLD'));
+  x.reason==='SOURCE_CIRCULATION_HOLD'||
+  x.reason==='PROGRAM_FLOOR_COMPONENT_COUNT_CHANGED'));
  assert.equal(diag.modelCalls,0);
  assert.equal(diag.worldWrites,0);
  assert.equal(base.geometrySha256,originalGeometry);
@@ -2142,6 +2143,33 @@ test('two-wide ground turn clears a divider two rows after the last stair tread'
  assert.equal(auditArchitecturePlanCirculation(equipped).status,'SOURCE_CLEARANCE_PROBES_PASS');
  assert.deepEqual(equipped.compiled.BuildPlan.operations,[]);
  assert.equal(equipped.worldWrites,0);
+});
+
+test('HOST fixture placement preserves a connected two-wide floor at a recessed entrance',()=>{
+ const p={schema:SCHEMA,id:'entry-clear-regression',
+  title:'Entry clearance regression',
+  brief:'A generic two-room work building with a covered entrance.',
+  footprint:{width:24,depth:24},levels:[{splitAxis:'z',splitPercent:50,
+   spaces:[{id:'work-area',purpose:'work and instrument area',
+    fixtures:['workbench','electronics'],fixtureDetail:'crafted'},
+    {id:'public-room',purpose:'public viewing area'}]}],
+  materials:{floor:'concrete',wall:'stone',roof:'metal'},entryZone:'first',
+  expression:{setbackSide:'none',setbackDepth:0,roofProfile:'sawtooth',
+   roofAxis:'z',facadeLanguage:'recessed-portico',roofVolume:'raised',
+   roofOverhang:'one-block'}};
+ const original=structuredClone(p);
+ const r=compileArchitecturePlan(p,{entrancePlacement:'source-accessible',
+  upperDoorPlacement:'stair-clear'});
+ const audit=critiqueArchitecture({design:r.design,compiled:r.compiled});
+ const floor=audit.objectiveAudit.elevationConnectivity.find(x=>
+  x.standingY===r.program[0].standingFloorY);
+ assert.equal(floor.componentCount,1);
+ assert.equal(r.fixtureTargets.length,2);
+ assert.equal(r.fixtureTargets[1].kind,'electronics');
+ assert.notDeepEqual(r.fixtureTargets[1].origin,[10,2,6],
+  'the centered rack would break the recessed-entrance two-wide floor');
+ assert.equal(audit.worldWrites,0);
+ assert.deepEqual(p,original);
 });
 
 test('explicit HOST spatial detail creates a supported recessed entrance and preserves all authored equipment',()=>{

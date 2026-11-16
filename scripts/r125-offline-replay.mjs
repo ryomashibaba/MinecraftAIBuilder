@@ -189,8 +189,8 @@ export function diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail='legacy'}={
    fixtureAccess:routes.featureAccess??[],
    circulation:circulation.status,circulationFailures:circulation.failures??[],
    programFloors:floors.status,programFloorIssues:floors.programFloorIssues,
+   programFloorEvidence:floors.programFloorEvidence,
    ...(floors.programFloorIssues.length?{
-    programFloorEvidence:floors.programFloorEvidence,
     floorFailureLocation:'SOURCE_COMPONENT_BOUNDS_AND_DOOR_CUTS_NOT_PROVEN_CAUSE'
    }:{}),
    visualHighRiskCount:critique.highRiskCount,

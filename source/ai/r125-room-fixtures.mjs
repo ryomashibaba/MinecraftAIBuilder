@@ -5,6 +5,7 @@
  * No model, network, world IO, game physics or silent role replacement.
  */
 import {compileDesign,verifyCompiled} from './b143-building-dsl.mjs';
+import {auditInteriorTopology} from './b198c-spatial-critic.mjs';
 import {auditR125SourceRoutes} from './r125-source-routes.mjs';
 import {packR125AdjacentBoxes} from './r125-spatial-detail.mjs';
 
@@ -154,7 +155,8 @@ function makeParts(intent,x,y,z,turned=false,wallAligned=false){
  });
  return {key,parts:rotated};
 }
-function tryOrigin(product,targets,intent,x,z,auditCirculation,turned=false){
+function tryOrigin(product,targets,intent,x,z,auditCirculation,
+ floorComponentBaseline,turned=false){
  const floor=product.program[intent.level];
  const range=floor.zones[intent.zoneIndex].range,y=floor.standingFloorY;
  const width=turned?roleDepth(intent.kind):3;
@@ -193,6 +195,20 @@ function tryOrigin(product,targets,intent,x,z,auditCirculation,turned=false){
  const trial={...product,design,compiled,
   sourceSha256:compiled.sourceSha256,
   geometrySha256:compiled.geometrySha256};
+ // HOST-owned furniture may not disconnect a program floor that was
+ // connected before furniture placement. Compare true 2x2 supported B143
+ // pads on every authored program elevation; route/circulation checks alone
+ // can accept a one-wide path behind a blocked public threshold.
+ if(floorComponentBaseline.size){
+  const after=auditInteriorTopology({design,compiled}).elevationConnectivity;
+  for(const [standingY,baselineCount] of floorComponentBaseline){
+   const current=after.find(row=>row.standingY===standingY);
+   if((current?.componentCount??0)!==baselineCount)
+    return rejected('PROGRAM_FLOOR_COMPONENT_COUNT_CHANGED',{
+     standingY,baselineCount,currentCount:current?.componentCount??0,
+     totalStandingSquares:current?.totalStandingSquares??0});
+  }
+ }
  const target={id:key,zoneId:intent.zoneId,
   origin:[x,y,z],size:[width,3,depth],kind:intent.kind,
   ...(intent.detail?{detail:intent.detail}:{}),
@@ -210,7 +226,8 @@ function tryOrigin(product,targets,intent,x,z,auditCirculation,turned=false){
    {circulationFailures:(circulation.failures??[]).slice(0,12)});
  return {ok:true,product:trial,target};
 }
-function repairZone(start,previousTargets,zoneIntents,auditCirculation){
+function repairZone(start,previousTargets,zoneIntents,auditCirculation,
+ floorComponentBaseline){
  // Up to three model-authored utilities per zone. Only their HOST positions
  // are variable. No author plan/role edit, false service pass or model call.
  const tracker={attempted:true,mode:'BOUNDED_ZONE_LOCAL_BACKTRACK',
@@ -243,7 +260,7 @@ function repairZone(start,previousTargets,zoneIntents,auditCirculation){
     tracker.candidateEvaluations++;
     if(turned)tracker.rotatedCandidateEvaluations++;
     const step=tryOrigin(product,[...previousTargets,...placed],
-     intent,x,z,auditCirculation,turned);
+     intent,x,z,auditCirculation,floorComponentBaseline,turned);
     if(!step.ok)continue;
     const result=dfs(index+1,step.product,[...placed,step.target]);
     if(result)return result;
@@ -261,6 +278,11 @@ export function addAuthoredRoomFixtures(product,{auditCirculation}={}){
  if(!intents.length)return product;
  if(typeof auditCirculation!=='function')
   throw Error('R125_PLAN_FIXTURE_AUDITOR_REQUIRED');
+ const programElevations=new Set(product.program.map(level=>level.standingFloorY));
+ const floorComponentBaseline=new Map(auditInteriorTopology({
+  design:product.design,compiled:product.compiled
+ }).elevationConnectivity.filter(row=>programElevations.has(row.standingY))
+  .map(row=>[row.standingY,row.componentCount]));
  let current=product,targets=[],searchWitnesses=[];
  const zoneStarts=new Map();
  for(const intent of intents){
@@ -271,7 +293,8 @@ export function addAuthoredRoomFixtures(product,{auditCirculation}={}){
   let selected=null;
   const rejected=[];
   for(const [x,z] of candidates){
-   const probe=tryOrigin(current,targets,intent,x,z,auditCirculation);
+   const probe=tryOrigin(current,targets,intent,x,z,auditCirculation,
+    floorComponentBaseline);
    if(probe.ok){selected=probe;break;}
    rejected.push(probe.rejection);
   }
@@ -292,7 +315,8 @@ export function addAuthoredRoomFixtures(product,{auditCirculation}={}){
    const start=zoneStarts.get(zkey);
    const roles=intent.multi?intents.filter(i=>intentKey(i)===zkey&&
     i.multi&&i.index<=intent.index):[intent];
-   fallback=repairZone(start.product,start.targets,roles,auditCirculation);
+   fallback=repairZone(start.product,start.targets,roles,auditCirculation,
+    floorComponentBaseline);
    if(fallback.result){
     current=fallback.result.product;
     targets=[...start.targets,...fallback.result.targets];
