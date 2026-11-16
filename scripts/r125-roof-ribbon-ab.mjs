@@ -5,7 +5,7 @@ import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {diagnoseR125ArchitecturePlanOriginal} from './r125-offline-replay.mjs';
 import {saveB143ABReview} from './r125-static-art-review.mjs';
-import {compileDesign,verifyCompiled} from '../source/ai/b143-building-dsl.mjs';
+import {compileDesign,verifyCompiled,MATERIALS} from '../source/ai/b143-building-dsl.mjs';
 import {exportB143EducationMakeCode} from '../source/ai/r125-education-makecode-export.mjs';
 const repo=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const sha=s=>createHash('sha256').update(s).digest('hex');
@@ -44,15 +44,26 @@ export function compareR125RoofRibbon({rawFile,outDir,massing='baseline',educati
  if(education){
   const palette=JSON.parse(fs.readFileSync(path.join(repo,
    'configs/r125-education-verified-palette-v26.33.json'),'utf8'));
+  // One Code Builder paste per candidate now includes the existing movement
+  // probe. Its code is read-only and never changes the B143 building plan.
+  const movement=fs.readFileSync(path.join(repo,
+   'scripts/R125_V11_EDUCATION_INPUT_CHECK.ts'),'utf8');
+  if(!movement.includes('player.onChat("mabwhere"')||
+     !movement.includes('player.onChat("mabwalk"')||
+     /\bblocks\s*\.|\bplayer\s*\.\s*teleport\s*\(/.test(movement))
+   err('MOVEMENT_PROBE_NOT_READ_ONLY');
   const prepare=(diagnosis)=>{
    const design=diagnosis.sourceDesign,scene=compileDesign(design);
    if(!verifyCompiled(design,scene)||
       scene.sourceSha256!==diagnosis.sourceSha256||
       scene.geometrySha256!==diagnosis.geometrySha256)
     err('EDUCATION_SOURCE_MISMATCH');
-   const packet=exportB143EducationMakeCode({design,scene,
+   const base=exportB143EducationMakeCode({design,scene,
     provenance:'UNVERIFIED_DESIGN',groundLowestLayer:true,
     verifiedPalette:palette});
+   const code=base.code+'\n'+movement;
+   const packet={...base,code,makecodeSourceSha256:sha(code),
+    movementProbeEmbedded:true};
    if(packet.sourceSha256!==diagnosis.sourceSha256||
       packet.geometrySha256!==diagnosis.geometrySha256||
       packet.worldWrites!==0||packet.programExecuted!==false||
@@ -60,6 +71,30 @@ export function compareR125RoofRibbon({rawFile,outDir,massing='baseline',educati
    return packet;
   };
   educationPackets={before:prepare(a),after:prepare(b)};
+ }
+ // Verify the author-authored program, entrance, furniture and all real
+ // solid/air geometry BELOW the roof spring line are identical in B143.
+ // Comparing actual voxels guards against accidental HOST layout regressions.
+ const top=1+5*plan.levels.length;
+ const sceneA=compileDesign(a.sourceDesign),sceneB=compileDesign(b.sourceDesign);
+ if(!verifyCompiled(a.sourceDesign,sceneA)||
+    !verifyCompiled(b.sourceDesign,sceneB)||
+    sceneA.sourceSha256!==a.sourceSha256||
+    sceneB.sourceSha256!==b.sourceSha256)
+   err('AB_SOURCE_MISMATCH');
+ let unchangedUnderRoofVoxels=0;
+ if(compact){
+  const below=scene=>new Map(scene.primitives.filter(v=>v[1]<top)
+   .map(v=>[v.slice(0,3).join(','),v[3]]));
+  const oldInterior=below(sceneA),newInterior=below(sceneB);
+  if(oldInterior.size!==newInterior.size||
+     [...oldInterior].some(([key,material])=>newInterior.get(key)!==material))
+    err('AB_INTERIOR_OR_PROGRAM_DRIFT');
+  unchangedUnderRoofVoxels=oldInterior.size;
+  const glass=MATERIALS.indexOf('glass');
+  if(!sceneA.primitives.some(v=>v[1]>=top&&v[3]===glass)||
+     !sceneB.primitives.some(v=>v[1]>=top&&v[3]===glass))
+    err('AB_SKYLIGHT_LOST');
  }
  fs.mkdirSync(out);
  const before=path.join(out,'SOURCE_BASELINE.json'),
@@ -95,10 +130,11 @@ export function compareR125RoofRibbon({rawFile,outDir,massing='baseline',educati
     sourceSha256:report.sourceSha256,
     makecodeSourceSha256:report.makecodeSourceSha256,
     plannedVoxelCount:report.plannedVoxelCount,
-    materialMode:report.materialMode});
+    materialMode:report.materialMode,
+    movementProbeEmbedded:report.movementProbeEmbedded===true});
   }
   educationPreview={packets,worldExecution:'NOT_TESTED',
-   instruction:'Use existing dedicated flat test world, inspect unused site, paste one variant at a time; run mabset, mabbuild, mabverify',
+   instruction:'Use existing dedicated flat test world, inspect unused site; paste each variant once. Run mabwhere and mabwalk outdoors then indoors, and mabset, mabbuild, mabverify',
    actualMinecraftWalking:'NOT_TESTED'};
  }
  const result={schema:compact?'mab-v11-roof-massing-ab-v1':'mab-v11-roof-ribbon-ab-v1',
@@ -107,7 +143,8 @@ export function compareR125RoofRibbon({rawFile,outDir,massing='baseline',educati
   occupiedVoxels:a.occupiedVoxels,changedMaterial:diff.changedMaterial,
   ...(compact?{massing,occupiedVoxelsAfter:b.occupiedVoxels,
    added:diff.added,removed:diff.removed,roofCrestY:crests,
-   skylightPolicy:'SAME_SAWTOOTH_RIBBON_BOTH_SIDES'}:{}),
+   skylightPolicy:'SAME_SAWTOOTH_RIBBON_BOTH_SIDES',
+   unchangedUnderRoofVoxels,belowRoofGeometryAndMaterialIdentical:true}:{}),
   image:path.join(out,'ART_AB',ab.preview.file),
   modelCalls:0,worldWrites:0,minecraftWalking:'NOT_TESTED',
   humanArt:'NOT_REVIEWED',...(educationPreview?{education:educationPreview}:{})};
