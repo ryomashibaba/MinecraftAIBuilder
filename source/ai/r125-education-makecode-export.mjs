@@ -9,7 +9,7 @@ const key=(x,y,z)=>x+','+y+','+z;
 const KNOWN=Object.freeze({stone:'stone',glass:'glass'});
 // Explicit PREVIEW-ONLY guesses for a disposable Education test world.
 // None of these names is attested for the user's v26.33 installation.
-const PREVIEW=Object.freeze({
+export const PREVIEW=Object.freeze({
  stone:'stone',concrete:'white_concrete',metal:'iron_block',
  glass:'glass',wood:'oak_planks',glow:'glowstone',accent:'yellow_concrete'
 });

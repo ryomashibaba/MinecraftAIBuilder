@@ -1,7 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
-import {makeMaterialProbe,makeMaterialBatchProbe,DEFAULT_MATERIAL_BATCH} from './r125-material-probe.mjs';
+import {makeMaterialProbe,makeMaterialBatchProbe,makeEducationPreviewMaterialProbe,DEFAULT_MATERIAL_BATCH} from './r125-material-probe.mjs';
+import {MATERIALS} from '../source/ai/b143-building-dsl.mjs';
+import {PREVIEW} from '../source/ai/r125-education-makecode-export.mjs';
 test('unsafe candidate names refused',()=>{
  for(const n of ['air','water','lava','fire','tnt','some-bad-name','oak_planks");fill('])
   assert.throws(()=>makeMaterialProbe(n),/INVALID_BLOCK/);
@@ -150,6 +152,37 @@ test('mb all unknown AIR identifiers cause zero world writes',()=>{
  p.handlers.mb();
  assert.equal(p.fills.length,0);
  assert(p.messages.some(x=>x.includes('no valid IDs; zero writes')));
+});
+test('one-shot Education preview probe uses the identical actual MakeCode exporter block IDs, never a stale generic batch',()=>{
+ const batch=makeEducationPreviewMaterialProbe();
+ const expected=MATERIALS.map(m=>PREVIEW[m]);
+ assert.deepEqual(batch.blockNames,expected);
+ assert.equal(batch.blockNames.length,7);
+ assert.deepEqual(batch.previewMaterialMap,
+  Object.fromEntries(MATERIALS.map((m,i)=>[m,expected[i]])));
+ assert.equal(batch.previewPaletteVerified,false);
+ assert.equal(batch.testedMaterialsApproved,false);
+ assert.equal(batch.useOnlyInNewDisposableFlatTestWorld,true);
+ assert.equal(batch.worldWrites,0);
+ assert.equal(batch.inGameResult,'NOT_TESTED');
+ assert.deepEqual(batch.requestedSemanticMaterials,MATERIALS);
+ assert(!batch.code.includes('mabbuild'), 'material probe cannot construct a building');
+ assert(batch.code.includes('player.onChat("mb"'));
+ const aliases=new Set(expected);
+ assert.equal(aliases.size,expected.length,'distinct material identity required');
+ // The default legacy batch is NOT redefined; other studies keep their
+ // frozen intent instead of getting a silent change in candidates.
+ assert.equal(DEFAULT_MATERIAL_BATCH.length,8);
+ assert.notDeepEqual(DEFAULT_MATERIAL_BATCH,expected);
+ const p=batchHarness(expected);
+ assert.equal(p.calls.length,0);
+ assert.equal(p.fills.length,0);
+ p.handlers.mb();
+ assert.deepEqual(p.calls,expected);
+ assert.deepEqual(p.fills.map(e=>e.name),expected);
+ assert(p.messages.some(x=>x.includes('7/7 matching')));
+ p.handlers.mb();
+ assert.equal(p.fills.length,7,'single-shot no duplicate material writes');
 });
 test('new default uses Bedrock legacy stonebrick candidate, not proven material',()=>{
  assert(DEFAULT_MATERIAL_BATCH.includes('stonebrick'));

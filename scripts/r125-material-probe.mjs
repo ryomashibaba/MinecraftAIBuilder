@@ -2,11 +2,30 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {MATERIALS} from '../source/ai/b143-building-dsl.mjs';
+import {PREVIEW} from '../source/ai/r125-education-makecode-export.mjs';
 const fail=x=>{throw Error('R125_PROBE_'+x)};
 export const DEFAULT_MATERIAL_BATCH=Object.freeze([
  'gray_concrete','light_gray_concrete','black_concrete','red_concrete',
  'blue_concrete','spruce_planks','birch_planks','stonebrick'
 ]);
+// Shares the exact blockByName guesses with the genuine Education MakeCode
+// exporter. No independent list that can silently drift from its palette.
+export function makeEducationPreviewMaterialProbe(){
+ const materialNames=MATERIALS.map(material=>{
+  const name=PREVIEW[material];
+  if(typeof name!=='string')fail('PREVIEW_PALETTE_MISSING_'+material);
+  return name;
+ });
+ const probe=makeMaterialBatchProbe(materialNames);
+ return {...probe,
+  schema:'r125-education-preview-palette-material-probe-v1',
+  requestedSemanticMaterials:[...MATERIALS],
+  previewMaterialMap:Object.fromEntries(MATERIALS.map((m,i)=>[m,materialNames[i]])),
+  sourceOfTruth:'r125-education-makecode-export.mjs PREVIEW',
+  previewPaletteVerified:false,
+  useOnlyInNewDisposableFlatTestWorld:true};
+}
 const validName=name=>typeof name==='string'&&/^[a-z][a-z0-9_]{1,63}$/.test(name)&&
  !['air','water','lava','fire','tnt','command_block'].includes(name);
 export function makeMaterialProbe(blockName){
@@ -116,6 +135,9 @@ if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.ur
  let output;
  if(args.length===3&&args[0]==='--batch'&&args[1]==='--out'){
   result=makeMaterialBatchProbe();
+  output=args[2];
+ }else if(args.length===3&&args[0]==='--preview-palette'&&args[1]==='--out'){
+  result=makeEducationPreviewMaterialProbe();
   output=args[2];
  }else if(args.length===4&&args[0]==='--block'&&args[2]==='--out'){
   result=makeMaterialProbe(args[1]);
