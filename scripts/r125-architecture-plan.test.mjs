@@ -2194,15 +2194,27 @@ test('hip roof meets actual recessed-entry walls at true authored roof elevation
    assert.ok(roofs.length>0,'original roof must cover the return');
    return Math.max(...roofs.map(e=>e.origin[1]+e.size[1]-1));
   };
+  // The HOST packs adjacent equal-shape entrance boxes into B143 repeat
+  // elements. Validate *expanded* physical instances, not vanished source
+  // element IDs. No loosened roof alignment tolerances.
+  const returnWalls=new Map();
+  for(const e of built.design.elements.filter(e=>
+   /^detail-entry-(?:return|back)-/.test(e.id))){
+   for(let n=0;n<(e.repeat?.count??1);n++){
+    const x=e.origin[0]+n*(e.repeat?.offset[0]??0);
+    assert.equal(returnWalls.has(x),false,'duplicated return wall at '+x);
+    returnWalls.set(x,{height:e.size[1],
+     y:e.origin[1]+n*(e.repeat?.offset[1]??0)});
+   }
+  }
+  assert.equal(returnWalls.size,right-left+1,'all actual return cells kept');
   let physicallyRaised=0;
   for(let x=left;x<=right;x++){
-   const expected=at(x,back);
-   const name=x===left||x===right?
-    'detail-entry-return-'+x:'detail-entry-back-'+x;
-   const wall=built.design.elements.find(e=>e.id===name);
-   assert.ok(wall,'actual HOST return wall missing '+name);
-   assert.equal(wall.size[1],expected-1,
-    'enclosure reaches the actual authored hip roof, not an assumed flat cap');
+   const expected=at(x,back),wall=returnWalls.get(x);
+   assert.ok(wall,'physical entry return wall missing '+x);
+   assert.equal(wall.y,2,'same actual standing-floor wall base');
+   assert.equal(wall.height,expected-1,
+    'enclosure reaches the authored hip roof, not an assumed flat cap');
    if(expected>11)physicallyRaised++;
   }
   assert.ok(physicallyRaised>0,'test needs a raised roof over its actual entrance');
