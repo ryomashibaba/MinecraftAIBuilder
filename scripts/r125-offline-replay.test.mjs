@@ -173,3 +173,12 @@ test('offline spatial HOST is explicit, keeps original bytes and publishes its g
  assert.equal(parseR125ReplayArgs(['--raw','a','--out','b','--host-detail','spatial-v1'])['--host-detail'],'spatial-v1');
  assert.throws(()=>parseR125ReplayArgs(['--raw','a','--out','b','--host-detail','typo']),/HOST_DETAIL_MODE/);
 });
+
+test('roof ribbon replay argument is opt-in and does not accept arbitrary values',()=>{
+ const args=parseR125ReplayArgs(['--raw','/tmp/original.txt','--out','/tmp/review-new',
+  '--host-detail','spatial-v1','--roof-glazing','sawtooth-ribbon']);
+ assert.equal(args['--roof-glazing'],'sawtooth-ribbon');
+ assert.equal(args['--host-detail'],'spatial-v1');
+ assert.throws(()=>parseR125ReplayArgs(['--raw','a','--out','b',
+  '--roof-glazing','magic']),/ROOF_GLAZING_MODE/);
+});
