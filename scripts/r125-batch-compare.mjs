@@ -108,7 +108,7 @@ export function renderR125BatchComparison(briefs,report){
  '.archive table{width:100%;border-collapse:collapse;font-size:.8rem}'+
  '.archive td,.archive th{padding:7px 4px;border-bottom:1px solid #3f596e;text-align:left}'+
  '.issue{color:#f9c5a5}li{margin:4px 0}footer{padding:16px 24px}</style></head><body>'+
- '<header><h1>MinecraftAIBuilder V11 — TRUE B143 three-brief review</h1>'+
+ '<header><h1>MinecraftAIBuilder V11 — TRUE B143 '+esc(report.planned)+'-brief review</h1>'+
  '<p>MODEL '+esc(report.model)+' · Attempts '+esc(report.attempted)+
  '/'+esc(report.planned)+' · All SOURCE verified: '+
  esc(report.allSourceVerified)+'</p><p>'+esc(form)+'</p>'+
@@ -120,8 +120,8 @@ export function renderR125BatchComparison(briefs,report){
  esc(report.originalResponseCount??0)+
  '/'+esc(report.planned)+'</p>'+
  '<p>Transport stop: '+esc(report.stopReason??'none')+'</p>'+
- '<div class="review-controls"><button type="button" id="allExterior" aria-pressed="true">3棟の外観</button>'+
- '<button type="button" id="allInterior" aria-pressed="false">3棟の断面・内部</button></div>'+
+ '<div class="review-controls"><button type="button" id="allExterior" aria-pressed="true">'+esc(report.planned)+'棟の外観</button>'+
+ '<button type="button" id="allInterior" aria-pressed="false">'+esc(report.planned)+'棟の断面・内部</button></div>'+
  '<p>表示切替は3Dカメラのみを変更します。SOURCEや実ワールドは変更しません。</p></header>'+
  oldComparison+'<main>'+sections+'</main><footer>'+untried+'</footer>'+
  '<script>(function(){ "use strict";'+

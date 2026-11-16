@@ -227,6 +227,8 @@ export async function runR125ArchitecturePlanBatch({
    'COMPLETE_WITH_IDENTICAL_B143_GEOMETRY':
   report.modelAuthoredFormFamiliesDistinct===false?
    'COMPLETE_WITH_REPEATED_AUTHOR_FORMS':
+  report.planned===1?
+   'ONE_UNSEEN_BRIEF_SOURCE_PASS_ART_UNREVIEWED_NO_DIVERSITY_CLAIM':
    'ALL_SOURCE_PASS_FORM_VARIETY_CANDIDATE_ART_UNREVIEWED';
  // A real three-genre pilot is useful only if the USER can compare it with
  // the three SAVED genuine Qwen baselines from earlier runs. Build an

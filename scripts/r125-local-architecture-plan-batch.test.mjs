@@ -419,3 +419,55 @@ test('model can independently vary functional T-room proportions, not merely foo
  const other=structuredClone(p);other.levels[0].splitPercent=40;
  assert.notDeepEqual(authoredFormFamily(other),a);
 });
+
+test('single unseen brief performs exactly one mock response, real SOURCE replay and no invented diversity pass',async()=>{
+ // MOCK transport backed by an ALREADY SAVED genuine Qwen response.
+ // This is not a fresh Qwen generation or a human architectural ART score.
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'mab-unseen-one-mock-'));
+ const briefsRaw=fs.readFileSync(new URL('./r125-v11-single-unknown.json',
+  import.meta.url),'utf8');
+ try{
+  let posts=0;
+  const dest=path.join(root,'single-private');
+  const {report}=await runR125ArchitecturePlanBatch({
+   model:'qwen3:14b',briefsRaw,outDir:dest
+  },{fetcher:async(_url,opts)=>{
+   posts++;
+   const request=JSON.parse(opts.body);
+   assert.equal(request.model,'qwen3:14b');
+   assert.equal(request.reasoning_effort,'none');
+   assert.equal(request.max_tokens,4096);
+   assert.equal(request.messages[1].role,'user');
+   assert.equal(JSON.parse(request.messages[1].content).architecturalRequest,
+    JSON.parse(briefsRaw)[0].prompt);
+   return provider(original);
+  }});
+  assert.equal(posts,1,'exactly one mocked POST, no silent second design');
+  assert.equal(report.planned,1);
+  assert.equal(report.attempted,1);
+  assert.equal(report.originalResponseCount,1);
+  assert.equal(report.sourcePassCount,1);
+  assert.equal(report.allSourceVerified,true);
+  assert.equal(report.modelAuthoredFormFamiliesDistinct,null);
+  assert.equal(report.geometryHashesDistinct,null);
+  assert.equal(report.experimentOutcome,
+   'ONE_UNSEEN_BRIEF_SOURCE_PASS_ART_UNREVIEWED_NO_DIVERSITY_CLAIM');
+  assert.equal(report.completed[0].id,'tide-observatory');
+  assert.equal(report.completed[0].sourceVerified,true);
+  assert.equal(report.worldWrites,0);
+  assert.equal(report.archivedComparison,undefined,
+   'old three-building controls must not appear as same-prompt evidence');
+  assert.equal(fs.readFileSync(path.join(dest,'tide-observatory',
+   'MODEL_RESPONSE_ORIGINAL.txt'),'utf8'),original);
+  const html=fs.readFileSync(path.join(dest,'BATCH_COMPARE_3D.html'),'utf8');
+  assert(html.includes('TRUE B143 1-brief review'));
+  assert(html.includes('1棟の外観'));
+  assert(html.includes('1棟の断面・内部'));
+  assert(html.includes('Model-authored form diversity NOT DETERMINED'));
+  assert(!html.includes('3棟の外観'));
+  assert(!html.includes('3-brief review'));
+  assert(!fs.existsSync(path.join(dest,'ARCHIVED_QWEN_BASELINE')));
+  assert(fs.existsSync(path.join(dest,'tide-observatory',
+   'B143_SOURCE_3D_REVIEW_ONLY.html')));
+ }finally{fs.rmSync(root,{recursive:true,force:true});}
+});
