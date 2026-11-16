@@ -3,9 +3,10 @@
 # Probe: copies a 7-material verification script. Retail: copies the saved
 # reviewed shop MakeCode. Launches Education's official URI to the MAIN MENU.
 param(
-    [ValidateSet('Probe','Retail')][string]$Mode = 'Probe',
+    [ValidateSet('Probe','Retail','Movement')][string]$Mode = 'Probe',
     [string]$MakeCodeFile = '',
-    [switch]$CheckOnly
+    [switch]$CheckOnly,
+    [switch]$NoOpen
 )
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -62,7 +63,14 @@ function VerifyRetailPacket([string]$file) {
         ' blocks; SOURCE ' + $report.sourceSha256)
 }
 
-if ($Mode -eq 'Retail') {
+if ($Mode -eq 'Movement') {
+    Require ([string]::IsNullOrWhiteSpace($MakeCodeFile) 'MOVEMENT_TAKES_NO_CUSTOM_PACKET'
+    $codeFile = Join-Path $repo 'scripts\R125_V11_EDUCATION_INPUT_CHECK.ts'
+    Require (Test-Path -LiteralPath $codeFile -PathType Leaf) 'MOVEMENT_CODE_MISSING'
+    $movementCode = Get-Content -LiteralPath $codeFile -Raw -Encoding UTF8
+    Require ($movementCode.Contains('player.onChat("mabwhere"') -and
+        $movementCode.Contains('player.onChat("mabwalk"')) 'MOVEMENT_COMMANDS_MISSING'
+} elseif ($Mode -eq 'Retail') {
     Require (-not $CheckOnly) 'RETAIL_CHECKONLY_REQUIRES_PRIVATE_PACKET'
     if ([string]::IsNullOrWhiteSpace($MakeCodeFile)) {
         $MakeCodeFile = LocateRetailCode
@@ -109,14 +117,18 @@ if ($CheckOnly) {
 $code = Get-Content -LiteralPath $codeFile -Raw -Encoding UTF8
 Set-Clipboard -Value $code
 Write-Host 'MakeCode JavaScript copied to Windows clipboard.'
-try {
-    Start-Process -FilePath 'minecraftedu://open' -ErrorAction Stop
-    Write-Host 'Requested Minecraft Education main menu via official minecraftedu://open URI.'
-} catch {
-    Write-Warning 'Minecraft Education was not opened. Start it manually from Windows Start; clipboard is ready.'
+if (-not $NoOpen) {
+    try {
+        Start-Process -FilePath 'minecraftedu://open' -ErrorAction Stop
+        Write-Host 'Requested Minecraft Education main menu via official minecraftedu://open URI.'
+    } catch {
+        Write-Warning 'Minecraft Education was not opened. Start it manually from Windows Start; clipboard is ready.'
+    }
 }
 Write-Host 'In Minecraft Education: reuse ONE dedicated creative flat test world (enable cheats). For each new trial while standing on the ground: /tp @s ~256 ~ ~, confirm clear site; press C, open MakeCode JavaScript, and paste.'
-if ($Mode -eq 'Probe') {
+if ($Mode -eq 'Movement') {
+    Write-Host 'Read-only test: in the EXISTING creative flat test world, press C, MakeCode JavaScript, paste, Run, then Resume Game. Chat mabwhere; chat mabwalk and hold W in an open flat area. Repeat mabwalk just inside the building. If outdoor movement works but indoor does not, investigate physical obstruction. No world writes.'
+} elseif ($Mode -eq 'Probe') {
     Write-Host 'At an unused flat site in the dedicated test world only: run MakeCode, then chat mb. Confirm 7/7 matching and visually inspect blocks.'
     Write-Host 'Do NOT paste a building script until this first material test is evaluated.'
 } else {
