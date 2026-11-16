@@ -2381,6 +2381,22 @@ test('model-selected U courtyard with raised pitched roof has sealed reentrant g
     assert.equal(includes(v,x,y,z),false,'raised roof must not bridge open sky');
   }
   assert(built.compiled.primitives.some(c=>c[1]>7),'real raised roof');
+  const roofRise=(x,z)=>{
+   const pos=axis==='x'?x-1:z-1;
+   return Math.min(3,Math.floor(Math.min(pos,27-pos)/2));
+  };
+  // Behind the new inner/re-entrant walls, the raised roof has no gaps.
+  const innerX=x0+6,innerZ=z0-1;
+  const innerRise=roofRise(innerX,innerZ);
+  assert(innerRise>0);
+  for(let y=6;y<6+innerRise;y++)
+   assert.equal(includes(v,innerX,y,innerZ),true,
+    'inner courtyard rear wall must meet the exact ridge skin');
+  const sideZ=z0+3,sideX=x0-1,sideRise=roofRise(sideX,sideZ);
+  assert(sideRise>0);
+  for(let y=6;y<6+sideRise;y++)
+   assert.equal(includes(v,sideX,y,sideZ),true,
+    'courtyard wing return wall must meet the exact ridge skin');
   assert.equal(verifyCompiled(built.design,built.compiled),true);
   assert.equal(auditArchitecturePlanCirculation(built).status,
    'SOURCE_CLEARANCE_PROBES_PASS');
