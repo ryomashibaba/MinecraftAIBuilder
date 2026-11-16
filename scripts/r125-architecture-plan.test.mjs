@@ -2361,3 +2361,54 @@ test('U-shaped rear court refuses impossible spans, multiple storeys and incompa
   'EXPRESSION_REAR_COURT_CONFLICT');
  reject(q=>q.levels.push(structuredClone(q.levels[0])),'EXPRESSION_REAR_COURT_CONFLICT');
 });
+
+test('model-selected U courtyard with raised pitched roof has sealed reentrant gables and sky-open floor',()=>{
+ for(const axis of ['x','z'])for(const align of ['west','center','east']){
+  const p=plan('u-ridge-'+axis+'-'+align,[axis]);
+  p.footprint={width:30,depth:30};
+  p.expression={setbackSide:'none',setbackDepth:0,roofProfile:'ridge',
+   roofAxis:axis,roofVolume:'raised',facadeLanguage:'plain',
+   rearCourt:{width:12,depth:8,alignment:align,
+    entrySide:align==='east'?'east':'west',access:'paved'}};
+  const original=JSON.stringify(p);
+  const built=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+  const v=voxels(built.compiled),spare=30-2-12;
+  const left=align==='west'?5:align==='east'?spare-5:Math.floor(spare/2);
+  const x0=1+left,z0=30-1-8;
+  for(let x=x0;x<x0+12;x++)for(let z=z0;z<z0+8;z++){
+   assert.equal(includes(v,x,1,z),true,'actual paved floor');
+   for(let y=2;y<built.design.bounds.height;y++)
+    assert.equal(includes(v,x,y,z),false,'raised roof must not bridge open sky');
+  }
+  assert(built.compiled.primitives.some(c=>c[1]>7),'real raised roof');
+  assert.equal(verifyCompiled(built.design,built.compiled),true);
+  assert.equal(auditArchitecturePlanCirculation(built).status,
+   'SOURCE_CLEARANCE_PROBES_PASS');
+  assert.equal(auditR125SourceRoutes(built).status,
+   'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert.equal(built.courtyardSourceOnly?.massing,'U');
+  assert.equal(built.courtyardSourceOnly?.status,
+   'SOURCE_2_WIDE_PAVED_COURT_REACHABLE');
+  assert.deepEqual(built.compiled.BuildPlan.operations,[]);
+  assert.equal(built.worldWrites,0);
+  assert.equal(JSON.stringify(p),original);
+ }
+});
+
+test('U raised roof rejects roof plate, fake unraised pitched geometry and incompatible forms',()=>{
+ const p=plan('u-ridge-valid');
+ p.footprint={width:30,depth:30};
+ p.expression={setbackSide:'none',setbackDepth:0,roofProfile:'ridge',
+  roofAxis:'x',roofVolume:'raised',facadeLanguage:'plain',
+  rearCourt:{width:10,depth:8,alignment:'center',entrySide:'west',access:'paved'}};
+ const reject=(mutation)=>{
+  const q=structuredClone(p);mutation(q);
+  assert.throws(()=>compileArchitecturePlan(q,
+   {entrancePlacement:'source-accessible'}),/R125_PLAN_/);
+ };
+ reject(q=>delete q.expression.roofVolume);
+ reject(q=>q.expression.roofProfile='sawtooth');
+ reject(q=>q.expression.roofProfile='hip');
+ reject(q=>q.expression.roofOverhang='one-block');
+ reject(q=>{q.expression.roofProfile='flat'});
+});

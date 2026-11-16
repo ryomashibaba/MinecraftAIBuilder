@@ -221,13 +221,14 @@ export function validateArchitecturePlan(p){
     p.footprint.width>=c.width+12&&
     p.footprint.depth>=c.depth+14,
     'EXPRESSION_REAR_COURT');
-   // Only an actual independent AUTHOR request can select this U mass.
-   // Preserve old one/two-level Qwen models and all existing roof contracts.
+   // A SINGLE story author may independently choose a true raised ridge.
+   // No implicit change to any older flat U, L, or rectangular building.
    check(p.levels.length===1&&e.setbackSide==='none'&&
-    e.roofProfile==='flat'&&e.facadeLanguage==='plain'&&
+    ((e.roofProfile==='flat'&&!Object.hasOwn(e,'roofVolume'))||
+     (e.roofProfile==='ridge'&&e.roofVolume==='raised'))&&
+    e.facadeLanguage==='plain'&&
     !Object.hasOwn(e,'rearCornerCut')&&
     !Object.hasOwn(e,'frontCornerCut')&&
-    !Object.hasOwn(e,'roofVolume')&&
     !Object.hasOwn(e,'roofOverhang')&&
     !Object.hasOwn(e,'daylightFacade'),
     'EXPRESSION_REAR_COURT_CONFLICT');
@@ -1070,7 +1071,7 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
    xCut+c.width-3;
   const glassX=c.entrySide==='west'?xCut+c.width-3:xCut+1;
   box('u-court-open-sky','cut',null,[xCut,1,zCut],
-   [c.width,top+1,c.depth]);
+   [c.width,raisedRoof?top+5:top+1,c.depth]);
   // New true re-entrant shell around all three sides of the U opening.
   box('u-court-return-west','add',wall,
    [xCut-1,2,zCut],[1,4,c.depth]);
@@ -1085,6 +1086,26 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
    [glassX,3,innerZ],[2,2,1]);
   box('u-court-paving','add',floor,[xCut,1,zCut],
    [c.width,1,c.depth]);
+  if(raisedRoof){
+   // Remove the full original roof skin OVER the new open sky and close the
+   // three re-entrant faces up to the author-selected true ridge elevation.
+   // This is common roof geometry, independent of building genre.
+   const u=envelope(0),extra=(x,z)=>{
+    const pos=roofAxis==='x'?x-u.x0:z-u.z0;
+    const span=roofAxis==='x'?u.x1-u.x0+1:u.z1-u.z0+1;
+    return Math.min(3,Math.floor(Math.min(pos,span-1-pos)/2));
+   };
+   const seal=(id,x,z)=>{
+    const n=extra(x,z);
+    if(n>0)box(id,'add',wall,[x,top,z],[1,n,1]);
+   };
+   for(let z=zCut;z<zCut+c.depth;z++){
+    seal('u-court-west-gable-'+z,xCut-1,z);
+    seal('u-court-east-gable-'+z,xCut+c.width,z);
+   }
+   for(let x=xCut;x<xCut+c.width;x++)
+    seal('u-court-inner-gable-'+x,x,innerZ);
+  }
  }
  // Optional author-selected front court changes the primary building footprint.
  // It is not facade paint, a genre template or a historical-plan rewrite.

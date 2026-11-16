@@ -71,18 +71,23 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    assert.deepEqual(room.properties.fixtureDetail.enum,['crafted']);
    assert.equal(room.required.includes('fixtureDetail'),false);
    const options=structured.properties.expression.anyOf;
-   assert.equal(options.length,15);
+   assert.equal(options.length,16);
    const uCourt=options.filter(v=>v.required.includes('rearCourt'));
-   assert.equal(uCourt.length,1);
-   assert.deepEqual(uCourt[0].properties.roofProfile.enum,['flat']);
-   assert.deepEqual(uCourt[0].properties.setbackSide.enum,['none']);
-   assert.deepEqual(uCourt[0].properties.facadeLanguage.enum,['plain']);
-   assert.deepEqual(uCourt[0].properties.rearCourt.properties.alignment.enum,
-    ['west','center','east']);
-   assert.deepEqual(uCourt[0].properties.rearCourt.properties.entrySide.enum,
-    ['west','east']);
-   assert(!Object.hasOwn(uCourt[0].properties,'rearCornerCut'));
+   assert.equal(uCourt.length,2);
+   assert.deepEqual(uCourt.map(v=>v.properties.roofProfile.enum[0]),
+    ['flat','ridge']);
+   assert.equal(uCourt[0].required.includes('roofVolume'),false);
+   assert.equal(uCourt[1].required.includes('roofVolume'),true);
+   assert.deepEqual(uCourt[1].properties.roofVolume.enum,['raised']);
+   assert.ok(uCourt.every(v=>
+    v.properties.setbackSide.enum.join(',')==='none'&&
+    v.properties.facadeLanguage.enum.join(',')==='plain'&&
+    !Object.hasOwn(v.properties,'rearCornerCut')&&
+    !Object.hasOwn(v.properties,'roofOverhang')&&
+    v.properties.rearCourt.properties.alignment.enum.join(',')==='west,center,east'&&
+    v.properties.rearCourt.properties.entrySide.enum.join(',')==='west,east'));
    assert.ok(request.messages[0].content.includes('rearCourt'));
+   assert.ok(request.messages[0].content.includes('ridge roof with roofVolume'));
    const frontCourts=options.filter(v=>v.required.includes('frontCornerCut'));
    assert.equal(frontCourts.length,1);
    assert.deepEqual(frontCourts[0].properties.roofProfile.enum,['flat']);

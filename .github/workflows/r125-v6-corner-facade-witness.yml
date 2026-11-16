@@ -110,14 +110,14 @@ jobs:
           path: ${{ runner.temp }}/r125-saved-three-genre-baseline/
           if-no-files-found: error
           retention-days: 14
-      - name: Generate true B143 5-scene study with clearly separated author provenance
+      - name: Generate true B143 7-scene form study with genuine Qwen provenance separated
         run: |
           node scripts/r125-form-review-gallery.mjs --out "$RUNNER_TEMP/r125-form-review"
           test -s "$RUNNER_TEMP/r125-form-review/index.html"
           test -s "$RUNNER_TEMP/r125-form-review/FORM_REVIEW.json"
       - uses: actions/upload-artifact@v4
         with:
-          name: R125-QWEN-ARCHIVE-PLUS-SYNTHETIC-FRONT-COURT-3D
+          name: R125-QWEN-ARCHIVE-PLUS-ARCHITECTURAL-FORMS-3D
           path: ${{ runner.temp }}/r125-form-review/
           retention-days: 14
       - name: Source-matched archived real-Qwen Education MakeCode export (never executed)
