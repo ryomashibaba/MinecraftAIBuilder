@@ -9,6 +9,7 @@ on:
       - source/ai/r125-architecture-plan.mjs
       - source/ai/r125-room-fixtures.mjs
       - source/ai/r125-room-daylight.mjs
+      - source/ai/r125-spatial-detail.mjs
       - source/ai/r125-education-makecode-export.mjs
       - configs/r125-education-verified-palette-v26.33.json
       - scripts/r125-architecture-plan.test.mjs

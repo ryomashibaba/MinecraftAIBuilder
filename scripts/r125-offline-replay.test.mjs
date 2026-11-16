@@ -161,3 +161,15 @@ test('saved genuine Qwen plan yields true B143 HTML for human review without ano
    readFileSync(rawPath,'utf8'));
  }finally{rmSync(root,{recursive:true,force:true})}
 });
+
+test('offline spatial HOST is explicit, keeps original bytes and publishes its geometry owner',()=>{
+ const p={schema:PLAN,id:'offline-spatial-study',title:'Independent spatial study',brief:'Test real entry depth without authoring new equipment',footprint:{width:24,depth:20},levels:[{splitAxis:'z',splitPercent:50,spaces:[{id:'public-zone',purpose:'public working area',fixtures:['desk']},{id:'private-zone',purpose:'quiet working area',fixtures:['storage']}]}],materials:{floor:'wood',wall:'concrete',roof:'metal'},expression:{setbackSide:'none',setbackDepth:0,roofProfile:'ridge',roofAxis:'x',roofVolume:'raised',facadeLanguage:'plain'}};
+ const raw=JSON.stringify(p),legacy=diagnoseR125ArchitecturePlanOriginal(raw),study=diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail:'spatial-v1'});
+ assert.equal(study.sourceVerified,true,JSON.stringify(study));assert.equal(study.originalEdited,false);
+ assert.equal(study.originalSha256,legacy.originalSha256);
+ assert.equal(study.hostPolicy.hostDetail,'spatial-v1');assert.equal(study.spatialDetail.owner,'HOST');
+ assert.equal(study.modelChosenFixtures,2);assert.notEqual(study.geometrySha256,legacy.geometrySha256);
+ assert.equal(study.modelCalls,0);assert.equal(study.worldWrites,0);
+ assert.equal(parseR125ReplayArgs(['--raw','a','--out','b','--host-detail','spatial-v1'])['--host-detail'],'spatial-v1');
+ assert.throws(()=>parseR125ReplayArgs(['--raw','a','--out','b','--host-detail','typo']),/HOST_DETAIL_MODE/);
+});

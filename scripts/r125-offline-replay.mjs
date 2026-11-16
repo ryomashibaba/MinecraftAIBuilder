@@ -132,7 +132,7 @@ export function diagnoseR125Original(raw){
  * geometry. No V6 placement patch, retry, model I/O or Minecraft contact.
  * A SOURCE candidate is never an ART pass or world-construction approval.
  */
-export function diagnoseR125ArchitecturePlanOriginal(raw){
+export function diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail='legacy'}={}){
  if(typeof raw!=='string'||raw.length<1||raw.length>60000)
   fail('PLAN_RAW_INPUT_SIZE');
  const base={
@@ -159,7 +159,8 @@ export function diagnoseR125ArchitecturePlanOriginal(raw){
   // This is an explicitly chosen GENERIC HOST policy, not a change to the
   // author-provided JSON. It is never selected as a retry after failure.
   const hostPolicy={entrancePlacement:'source-accessible',
-   upperDoorPlacement:Object.hasOwn(original,'expression')?'stair-clear':'legacy'};
+   upperDoorPlacement:Object.hasOwn(original,'expression')?'stair-clear':'legacy',
+   ...(hostDetail!=='legacy'?{hostDetail}:{})};
   const built=compileArchitecturePlan(original,hostPolicy);
   if(built.worldContacts!==0||built.worldWrites!==0||
      built.constructionApproved!==false||
@@ -189,6 +190,7 @@ export function diagnoseR125ArchitecturePlanOriginal(raw){
    circulation:circulation.status,circulationFailures:circulation.failures??[],
    programFloors:floors.status,programFloorIssues:floors.programFloorIssues,
    visualHighRiskCount:critique.highRiskCount,
+   ...(built.spatialDetail?{spatialDetail:built.spatialDetail}:{}),
    // Only a trusted B143 source candidate, NOT an executable BuildPlan.
    sourceDesign:built.design};
  }catch(error){
@@ -209,7 +211,7 @@ export function writeArchitecturePlanReplay(args){
  if(resolvedParent===repoRoot||resolvedParent.startsWith(repoRoot+path.sep))
   fail('PLAN_PRIVATE_OUTPUT_MUST_BE_OUTSIDE_REPOSITORY');
  const raw=fs.readFileSync(args['--raw'],'utf8');
- const report=diagnoseR125ArchitecturePlanOriginal(raw);
+ const report=diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail:args['--host-detail']??'legacy'});
  const {sourceDesign,...diagnosis}=report;
  fs.mkdirSync(dest);
  // Store exact private author bytes before any parsing or B143 review.
@@ -234,27 +236,29 @@ export function writeArchitecturePlanReplay(args){
 
 export function parseR125ReplayArgs(argv){
  if(argv.length===1&&argv[0]==='--help')return {help:true};
- if(argv.length!==4)fail('REQUIRE_RAW_AND_OUT');
+ if(argv.length!==4&&argv.length!==6)fail('REQUIRE_RAW_AND_OUT');
  const opts={};
- for(let i=0;i<4;i+=2){
-  if(!['--raw','--out'].includes(argv[i])||Object.hasOwn(opts,argv[i])||
+ for(let i=0;i<argv.length;i+=2){
+  if(!['--raw','--out','--host-detail'].includes(argv[i])||Object.hasOwn(opts,argv[i])||
    !argv[i+1]||argv[i+1].startsWith('--'))fail('INVALID_ARGUMENT');
-  opts[argv[i]]=path.resolve(argv[i+1]);
+  opts[argv[i]]=argv[i]==='--host-detail'?argv[i+1]:path.resolve(argv[i+1]);
  }
  if(!opts['--raw']||!opts['--out']||opts['--raw']===opts['--out'])
   fail('INPUT_OUTPUT_CONFLICT');
+ if(opts['--host-detail']!==undefined&&opts['--host-detail']!=='spatial-v1')fail('HOST_DETAIL_MODE');
  return opts;
 }
 if(process.argv[1]===fileURLToPath(import.meta.url)){
  try{
   const planMode=process.argv[2]==='--architecture-plan';
   const args=parseR125ReplayArgs(process.argv.slice(planMode?3:2));
-  if(args.help)console.log('B143: --raw ORIGINAL.txt --out NEW_DIAGNOSIS.json | ArchitecturePlan: --architecture-plan --raw ORIGINAL.txt --out NEW_PRIVATE_DIRECTORY (NO MODEL / NO WORLD)');
+  if(args.help)console.log('B143: --raw ORIGINAL.txt --out NEW_DIAGNOSIS.json | ArchitecturePlan: --architecture-plan --raw ORIGINAL.txt --out NEW_PRIVATE_DIRECTORY [--host-detail spatial-v1] (NO MODEL / NO WORLD)');
   else if(planMode){
    const result=writeArchitecturePlanReplay(args);
    console.log('R125_ARCHITECTURE_PLAN_SOURCE_ONLY',JSON.stringify(result));
    if(result.status!=='B143_SOURCE_CANDIDATE_ART_HOLD')process.exitCode=2;
   }else{
+   if(args['--host-detail'])fail('HOST_DETAIL_REQUIRES_ARCHITECTURE_PLAN');
    if(fs.existsSync(args['--out']))fail('OUTPUT_ALREADY_EXISTS');
    const raw=fs.readFileSync(args['--raw'],'utf8');
    const report=diagnoseR125Original(raw);

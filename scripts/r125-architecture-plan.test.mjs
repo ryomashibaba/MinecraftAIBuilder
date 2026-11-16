@@ -10,6 +10,7 @@ import {SCHEMA,validateArchitecturePlan,compileArchitecturePlan,
  from '../source/ai/r125-architecture-plan.mjs';
 import {addAuthoredRoomFixtures} from '../source/ai/r125-room-fixtures.mjs';
 import {addAuthoredRoomDaylight} from '../source/ai/r125-room-daylight.mjs';
+import {packR125AdjacentBoxes} from '../source/ai/r125-spatial-detail.mjs';
 import {verifyCompiled,compileDesign} from '../source/ai/b143-building-dsl.mjs';
 import {auditR125SourceRoutes} from '../source/ai/r125-source-routes.mjs';
 import {critiqueArchitecture} from '../source/ai/b198c-spatial-critic.mjs';
@@ -2050,4 +2051,67 @@ test('two-wide ground turn clears a divider two rows after the last stair tread'
  assert.equal(auditArchitecturePlanCirculation(equipped).status,'SOURCE_CLEARANCE_PROBES_PASS');
  assert.deepEqual(equipped.compiled.BuildPlan.operations,[]);
  assert.equal(equipped.worldWrites,0);
+});
+
+test('explicit HOST spatial detail creates a supported recessed entrance and preserves all authored equipment',()=>{
+ for(const roof of ['ridge','sawtooth','split-monitor']){
+  const p=plan('spatial-detail-'+roof,['z','x']);p.footprint={width:24,depth:24};
+  p.expression={setbackSide:'none',setbackDepth:0,roofProfile:roof,roofAxis:'x',roofVolume:'raised',facadeLanguage:'fins'};
+  for(const level of p.levels)for(const room of level.spaces)room.fixtures=['desk','storage'];
+  const saved=structuredClone(p),policy={entrancePlacement:'source-accessible',upperDoorPlacement:'stair-clear'};
+  const old=compileArchitecturePlan(p,policy),now=compileArchitecturePlan(p,{...policy,hostDetail:'spatial-v1'});
+  assert.deepEqual(p,saved);assert.deepEqual(now.plan,saved);
+  assert.equal(compileArchitecturePlan(p,policy).sourceSha256,old.sourceSha256);
+  assert.notEqual(now.geometrySha256,old.geometrySha256);
+  assert.equal(now.spatialDetail.owner,'HOST');assert.equal(now.spatialDetail.equipmentAdded,0);
+  assert.equal(now.spatialDetail.roofProfilePreserved,roof);
+  const v=voxels(now.compiled),ex=now.spatialDetail.recessedEntry[0];
+  assert.equal(now.spatialDetail.recessedEntry[2],4);
+  for(let x=ex;x<=ex+1;x++)for(let z=0;z<=5;z++){
+   assert(includes(v,x,1,z),'ground supported approach');
+   for(let y=2;y<=4;y++)assert(!includes(v,x,y,z),'three-high real entry passage');
+  }
+  assert(includes(v,ex,5,1),'actual entrance canopy');
+  for(let y=6;y<now.design.bounds.height;y++)assert(!includes(v,ex,y,2),'full-height notch removes upper slab and roof');
+  assert.deepEqual(now.fixtureTargets.map(x=>[x.zoneId,x.kind]),old.fixtureTargets.map(x=>[x.zoneId,x.kind]));
+  assert.equal(now.fixtureTargets.length,8);assert.ok(now.fixtureTargets.every(x=>x.kind!=='oven'));
+  const route=auditR125SourceRoutes(now,{featureTargets:now.fixtureTargets});
+  assert.equal(route.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert.ok(route.featureAccess.every(x=>x.reachableFromEntrance));
+  assert.equal(auditArchitecturePlanCirculation(now).status,'SOURCE_CLEARANCE_PROBES_PASS');
+  const critique=critiqueArchitecture({design:now.design,compiled:now.compiled});
+  assert.deepEqual(assessR125ProgramGeometry(now,critique).programFloorIssues,[]);
+  assert.ok(now.design.elements.length<=160);assert(verifyCompiled(now.design,now.compiled));
+  assert.equal(now.worldWrites,0);assert.deepEqual(now.compiled.BuildPlan.operations,[]);
+ }
+});
+
+test('adjacent SOURCE box packing retains material voxels and does not cross cuts or shell boundaries',()=>{
+ const original=compileArchitecturePlan(plan('adjacent-box-proof')).design;
+ const d=structuredClone(original);
+ const b=(id,x,material='metal')=>({id,shape:'box',mode:'add',material,origin:[x,3,6],size:[1,2,1]});
+ d.elements.push(b('pair-a',5),b('pair-b',7),b('pair-c',9),
+  {id:'cut-between',shape:'box',mode:'cut',origin:[5,3,6],size:[1,1,1]},b('after-cut',11),
+  {...b('shell-a',12),size:[3,3,3],shell:1},{...b('solid-b',14),size:[3,3,3]});
+ const before=compileDesign(d),packed={...d,elements:packR125AdjacentBoxes(d.elements)},after=compileDesign(packed);
+ assert.deepEqual(after.primitives,before.primitives);
+ assert.deepEqual(packed.elements.find(e=>e.id==='pair-a').repeat,{count:3,offset:[2,0,0]});
+ assert(packed.elements.some(e=>e.id==='cut-between'));assert(packed.elements.some(e=>e.id==='after-cut'));
+ assert(packed.elements.some(e=>e.id==='shell-a'));assert(packed.elements.some(e=>e.id==='solid-b'));
+ assert(verifyCompiled(packed,after));
+});
+
+test('spatial HOST keeps beds modest in height and fails explicitly when a real entry court cannot fit',()=>{
+ const p=plan('spatial-bed-scale',['z']);p.footprint={width:24,depth:20};
+ p.expression={setbackSide:'none',setbackDepth:0,roofProfile:'ridge',roofAxis:'x',roofVolume:'raised',facadeLanguage:'plain'};
+ p.levels[0].spaces[1].fixtures=['bed','storage'];p.levels[0].spaces[1].fixtureDetail='crafted';
+ const policy={entrancePlacement:'source-accessible'},old=compileArchitecturePlan(p,policy);
+ const now=compileArchitecturePlan(p,{...policy,hostDetail:'spatial-v1'});
+ const head=r=>r.design.elements.find(e=>e.id.endsWith('-headboard'));
+ assert.equal(head(old).size[1],2);assert.equal(head(now).size[1],1);
+ assert.equal(now.fixtureTargets.length,2);
+ assert.equal(auditR125SourceRoutes(now,{featureTargets:now.fixtureTargets}).status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ const narrow=plan('narrow-real-entry',['x']);narrow.expression=p.expression;narrow.entryZone='first';
+ assert.throws(()=>compileArchitecturePlan(narrow,{...policy,hostDetail:'spatial-v1'}),/ENTRY_COURT_DOES_NOT_FIT/);
+ assert.throws(()=>compileArchitecturePlan(p,{hostDetail:'invented'}),/HOST_DETAIL_MODE/);
 });

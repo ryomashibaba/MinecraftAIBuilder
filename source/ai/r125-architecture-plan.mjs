@@ -11,6 +11,7 @@ import {compileDesign,verifyCompiled,SCHEMA as B143} from './b143-building-dsl.m
 import {auditR125SourceRoutes} from './r125-source-routes.mjs';
 import {addAuthoredRoomFixtures} from './r125-room-fixtures.mjs';
 import {addAuthoredRoomDaylight} from './r125-room-daylight.mjs';
+import {detailR125Envelope} from './r125-spatial-detail.mjs';
 export const SCHEMA='minecraftaibuilder-r125-architecture-plan-v1';
 const hash=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
 const refuse=code=>{throw Error('R125_PLAN_'+code);};
@@ -332,8 +333,10 @@ export function assessR125AuthoredRoomCapacity(plan){
 }
 
 export function compileArchitecturePlan(plan,{
- entrancePlacement='legacy',upperDoorPlacement='legacy'
+ entrancePlacement='legacy',upperDoorPlacement='legacy',hostDetail='legacy'
 }={}){
+ check(['legacy','spatial-v1'].includes(hostDetail),'HOST_DETAIL_MODE');
+ check(hostDetail==='legacy'||Boolean(plan?.expression),'HOST_DETAIL_REQUIRES_EXPRESSION');
  validateArchitecturePlan(plan);
  check(['legacy','source-accessible'].includes(entrancePlacement),
   'ENTRANCE_PLACEMENT_MODE');
@@ -343,7 +346,7 @@ export function compileArchitecturePlan(plan,{
  check(upperDoorPlacement==='legacy'||Boolean(plan.expression),
   'UPPER_DOOR_REQUIRES_EXPRESSION');
  const original=structuredClone(plan);
- if(original.expression)return compileExpressiveArchitecturePlan(original,{entrancePlacement,upperDoorPlacement});
+ if(original.expression)return compileExpressiveArchitecturePlan(original,{entrancePlacement,upperDoorPlacement,hostDetail});
  const {width:w,depth:d}=original.footprint;
  const count=original.levels.length;
  const floor=original.materials.floor,wall=original.materials.wall,
@@ -573,7 +576,7 @@ export function auditArchitecturePlanCirculation(product){
  * identically without expression; do NOT change the old pinned Qwen 14B 2620-
  * voxel result or its source digest. No typology-specific templates.
  */
-function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',upperDoorPlacement='legacy'}={}){
+function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',upperDoorPlacement='legacy',hostDetail='legacy'}={}){
  const {width:w,depth:d}=original.footprint;
  const count=original.levels.length;
  const {setbackSide,setbackDepth,roofProfile,roofAxis,facadeLanguage,
@@ -1011,6 +1014,8 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
     [xCut+1,2,zCut-1],[2,3,1]);
   }
  }
+ const spatialDetail=hostDetail==='spatial-v1'?
+  detailR125Envelope(elements,original,program):null;
  // Leave old successful B143 SOURCE byte-for-byte unchanged. Only a new
  // author response whose requested equipment/daylight would exceed B143's
  // fixed 160-element budget gets a lossless roof-strip representation.
@@ -1032,6 +1037,7 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
   modelAuthorship:'CALLER_PROVIDED_PLAN_UNVERIFIED',
   geometricRules:'GENERIC_EXPRESSIVE_ENVELOPE_NOT_STYLE_CERTIFIED',
   expression:structuredClone(original.expression),
+  ...(spatialDetail?{spatialDetail,fixturePlacement:'wall-aligned'}:{}),
   inGameWalking:'NOT_TESTED',architecturalQuality:'NOT_REVIEWED',
   constructionApproved:false,worldContacts:0,worldWrites:0,
   gates:Array(9).fill('BLOCKED')};

@@ -6,6 +6,7 @@
  */
 import {compileDesign,verifyCompiled} from './b143-building-dsl.mjs';
 import {auditR125SourceRoutes} from './r125-source-routes.mjs';
+import {packR125AdjacentBoxes} from './r125-spatial-detail.mjs';
 
 const BUDGET=540; // Dual-axis fallback search only; legacy success path unchanged.
 const failPosition=diagnosis=>{
@@ -44,7 +45,14 @@ function positions(intent,product,turned=false,exhaustive=false){
  const candidates=(intent.multi||exhaustive)?
   [...corners,[mx,range.z[0]],[mx,range.z[1]-depth+1],
    [range.x[0],mz],[range.x[1]-width+1,mz],[mx,mz]]:corners;
- if(intent.multi&&intent.index%2===1)candidates.reverse();
+ if(product.fixturePlacement==='wall-aligned'){
+  // Keep equipment off the middle of a room, reserving it for movement.
+  // The same SOURCE placement audits still decide whether a wall position fits.
+  const wallCandidates=[...corners,[mx,range.z[0]],[mx,range.z[1]-depth+1],
+   [range.x[0],mz],[range.x[1]-width+1,mz]];
+  if(intent.multi&&intent.index%2===1)wallCandidates.reverse();
+  candidates.splice(0,candidates.length,...wallCandidates,[mx,mz]);
+ }else if(intent.multi&&intent.index%2===1)candidates.reverse();
  if(intent.multi||exhaustive){
   const seen=new Set(candidates.map(([x,z])=>x+','+z));
   for(let z=range.z[0];z<=range.z[1]-depth+1;z++)
@@ -55,7 +63,7 @@ function positions(intent,product,turned=false,exhaustive=false){
  }
  return {candidates,range,width,depth};
 }
-function makeParts(intent,x,y,z,turned=false){
+function makeParts(intent,x,y,z,turned=false,wallAligned=false){
  const key='fx-l'+intent.level+'-z'+intent.zoneIndex+
   (intent.multi?'-i'+intent.index:'');
  const add=(name,dx,dy,dz,sx,sy,sz,material)=>({
@@ -125,6 +133,14 @@ function makeParts(intent,x,y,z,turned=false){
   };
   parts.push(...details[intent.kind]());
  }
+ if(wallAligned&&intent.kind==='bed'){
+  // A mattress, pillow and modest headboard share a two-block furniture
+  // height; the legacy three-high pillow/posts remain unchanged by default.
+  for(const part of parts){
+   if(part.id.endsWith('-headboard'))part.size[1]=1;
+   if(/-(pillow|foot-left|foot-right)$/.test(part.id))part.origin[1]=y+1;
+  }
+ }
  if(!turned)return {key,parts};
  // Rotate physical shapes 90 degrees about the fixture's local footprint
  // origin. All material cells and model-authored roles remain identical.
@@ -151,7 +167,9 @@ function tryOrigin(product,targets,intent,x,z,auditCirculation,turned=false){
  if(x<range.x[0]||x+width-1>range.x[1]||
     z<range.z[0]||z+depth-1>range.z[1])
   return rejected('OUTSIDE_AUTHORED_ZONE');
- const {key,parts}=makeParts(intent,x,y,z,turned);
+ const made=makeParts(intent,x,y,z,turned,product.fixturePlacement==='wall-aligned'),key=made.key;
+ const parts=product.fixturePlacement==='wall-aligned'?
+  packR125AdjacentBoxes(made.parts):made.parts;
  const occupied=new Set(product.compiled.primitives.map(c=>
   c[0]+','+c[1]+','+c[2]));
  const has=(a,b,c)=>occupied.has(a+','+b+','+c);
