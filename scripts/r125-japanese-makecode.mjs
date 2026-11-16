@@ -26,8 +26,12 @@ export function exportSavedPlan(planFile, outDir, provenance='UNVERIFIED_DESIGN'
  // This previously yielded HOLD_SOURCE_ROUTES even though the existing
  // compiler has a proven, source-only two-wide "stair-clear" door policy.
  // Original raw plans and compileArchitecturePlan(plan) remain unchanged.
- const initial=compileArchitecturePlan(plan,{entrancePlacement:'source-accessible'});
- const upper=initial.program[1];
+ // Some genuine author plans are SOURCE-valid ONLY under spatial-v1's
+ // explicit stair/entry HOST policy. Never run an unrelated default compile
+ // first: that may HOLD and wrongly prevent exporting the verified geometry.
+ const initial=hostDetail==='spatial-v1'?null:
+  compileArchitecturePlan(plan,{entrancePlacement:'source-accessible'});
+ const upper=initial?.program[1];
  const stairDividerAtLanding=Boolean(plan.expression)&&
   upper?.splitAxis==='z'&&[7,8].includes(upper.splitCoordinate);
  const upperDoorPlacement=stairDividerAtLanding?'stair-clear':'legacy';
