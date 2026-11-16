@@ -21,6 +21,8 @@ on:
       - scripts/r125-static-art-review.test.mjs
       - scripts/r125-recovered-art-review.mjs
       - scripts/r125-recovered-art-review.test.mjs
+      - scripts/r125-v11-education-recovered.ps1
+      - scripts/R125_V11_EDUCATION_RECOVERED.cmd
       - scripts/r125-v11-review-existing.ps1
       - scripts/r125-local-architecture-plan-run.test.mjs
       - scripts/r125-local-architecture-plan-batch.mjs
@@ -82,6 +84,10 @@ jobs:
         run: |
           call scripts\R125_V11_EDUCATION_PROBE.cmd -CheckOnly
           if errorlevel 1 exit /b 1
+          call scripts\R125_V11_EDUCATION_RECOVERED.cmd -CheckOnly
+          if errorlevel 1 exit /b 1
+          call scripts\R125_V11_EDUCATION_RECOVERED.cmd -Stage Preview -CheckOnly
+          if errorlevel 1 exit /b 1
   exact-source-corner-facade-witness:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
@@ -99,6 +105,7 @@ jobs:
           node --check scripts/r125-local-architecture-plan-run.mjs
           node --check scripts/r125-static-art-review.mjs
           node --check scripts/r125-recovered-art-review.mjs
+          node --check scripts/r125-material-probe.mjs
           node --check scripts/r125-local-architecture-plan-batch.mjs
           node --check scripts/r125-batch-compare.mjs
           node --check scripts/r125-saved-three-genre-baseline.mjs

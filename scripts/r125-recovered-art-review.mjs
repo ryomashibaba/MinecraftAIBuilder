@@ -15,6 +15,7 @@ import {saveB143ABReview} from './r125-static-art-review.mjs';
 import {compileDesign,verifyCompiled,MATERIALS} from '../source/ai/b143-building-dsl.mjs';
 import {exportB143EducationMakeCode,PREVIEW}
  from '../source/ai/r125-education-makecode-export.mjs';
+import {makeMaterialBatchProbe} from './r125-material-probe.mjs';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const sha=s=>createHash('sha256').update(s).digest('hex');
@@ -173,6 +174,32 @@ export function reviewRecoveredArchitecture({beforeStudy,failedStudy,outDir}={})
    result.education.plannedVoxelCount=pkt.plannedVoxelCount;
    result.education.userMustUseNewDisposableWorld=true;
    result.education.userMustNotTreatThisAsActualEducationTestPass=true;
+   // Only probe the materials actually used by this EXACT building, and
+   // missing independent Education v26.33 attestation. 0 model/world calls.
+   if(unverified.length){
+    const names=unverified.map(m=>PREVIEW[m]);
+    const probe=makeMaterialBatchProbe(names);
+    const probeFile=path.join(dir,'MAKECODE_MISSING_MATERIAL_PROBE.ts');
+    const reportFile=path.join(dir,'MISSING_MATERIAL_PROBE_REPORT.json');
+    fs.writeFileSync(probeFile,probe.code,{flag:'wx'});
+    const {code:discard,...probeMeta}=probe;
+    fs.writeFileSync(reportFile,JSON.stringify({
+     schema:'r125-recovered-used-material-probe-v1',
+     sourceSha256:repairedScene.sourceSha256,
+     geometrySha256:repairedScene.geometrySha256,
+     codeSha256:sha(probe.code),
+     missingSemanticMaterials:unverified,
+     previewBlockNames:names,
+     probe:probeMeta,
+     execution:'OFFLINE_ONLY',
+     worldWrites:0,actualEducationMaterialResults:'NOT_TESTED',
+     onlyForNewDisposableWorld:true
+    },null,2)+'\n',{flag:'wx'});
+    result.education.missingMaterialProbe={
+     file:probeFile,report:reportFile,codeSha256:sha(probe.code),
+     blockNames:names,chatCommand:'mb',worldWrites:0,
+     inGameResult:'NOT_TESTED'};
+   }else result.education.missingMaterialProbe=null;
   }catch(error){
    result.education.status='HOLD_OFFLINE_EDUCATION_PREVIEW';
    result.education.error=String(error?.message??error).slice(0,200);

@@ -79,6 +79,24 @@ test('one offline recovery replays saved original exactly and produces old/new s
   assert.deepEqual(packet.BuildPlan.operations,[]);
   assert.equal(report.education.plannedVoxelCount,
    packet.plannedVoxelCount);
+  if(report.education.missingInGameAttestation.length){
+   const probe=report.education.missingMaterialProbe;
+   assert.ok(probe?.file&&probe?.report);
+   assert.equal(probe.inGameResult,'NOT_TESTED');
+   assert.equal(probe.worldWrites,0);
+   assert.equal(probe.chatCommand,'mb');
+   assert.deepEqual(probe.blockNames,
+    report.education.missingInGameAttestation.map(x=>x.previewOnlyGuess));
+   const code=fs.readFileSync(probe.file,'utf8');
+   assert.equal(sha(code),probe.codeSha256);
+   assert(code.includes('player.onChat("mb"'));
+   const metadata=JSON.parse(fs.readFileSync(probe.report,'utf8'));
+   assert.equal(metadata.sourceSha256,verified.sourceSha256);
+   assert.equal(metadata.geometrySha256,verified.geometrySha256);
+   assert.equal(metadata.actualEducationMaterialResults,'NOT_TESTED');
+   assert.equal(metadata.worldWrites,0);
+   assert.deepEqual(metadata.previewBlockNames,probe.blockNames);
+  }else assert.equal(report.education.missingMaterialProbe,null);
   assert(fs.existsSync(report.abImage));
   assert.equal(fs.readFileSync(report.abImage).subarray(0,8).toString('hex'),
    '89504e470d0a1a0a');
