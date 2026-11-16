@@ -58,7 +58,8 @@ export function buildR125FormReviewGallery(){
    label:original.genre,id:p.id,
    sourceSha256:r.sourceSha256,geometrySha256:r.geometrySha256,
    voxels:r.compiled.primitives.length,authoredPlanModified:false,
-   localModelCalls:0,art:'NOT_REVIEWED',minecraftWalking:'NOT_TESTED'});
+   localModelCalls:0,art:'NOT_REVIEWED',minecraftWalking:'NOT_TESTED',
+   worldWrites:0});
  }
  const pair=[];
  for(const withCourt of [false,true]){
