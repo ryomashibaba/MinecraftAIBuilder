@@ -35,6 +35,14 @@ test('batch parser preflights unique bounded original briefs',()=>{
  const pilotFile=fileURLToPath(new URL('./r125-v11-pilot-three.json',import.meta.url));
  const pilot=parseR125BatchBriefs(fs.readFileSync(pilotFile,'utf8'));
  assert.deepEqual(pilot.map(x=>x.id),['housing','retail','research']);
+ const unknown=parseR125BatchBriefs(fs.readFileSync(
+  new URL('./r125-v11-single-unknown.json',import.meta.url),'utf8'));
+ assert.equal(unknown.length,1,'genuinely one local model response');
+ assert.equal(unknown[0].id,'tide-observatory');
+ assert(unknown[0].prompt.length>=80);
+ // Function-led unknown task, not a prescripted outcome in a new design form.
+ for(const preset of ['U字','L字','切妻','平屋根','ridge','rearCourt','frontCornerCut'])
+  assert(!unknown[0].prompt.includes(preset));
  assert.ok(pilot.every(x=>x.prompt.length>=80));
  const args=parseR125BatchArgs(['--model','qwen3:14b',
   '--pilot-three','--out','/private/result']);

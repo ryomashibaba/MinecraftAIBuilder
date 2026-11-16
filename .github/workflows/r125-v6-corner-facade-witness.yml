@@ -21,6 +21,7 @@ on:
       - scripts/r125-batch-compare.mjs
       - scripts/r125-local-architecture-plan-batch.test.mjs
       - scripts/r125-v11-pilot-three.json
+      - scripts/r125-v11-single-unknown.json
       - scripts/r125-saved-three-genre-baseline.mjs
       - scripts/r125-saved-three-genre-baseline.test.mjs
       - scripts/r125-form-review-gallery.mjs
@@ -63,6 +64,8 @@ jobs:
           call scripts\R125_V11_3_Buildings.cmd -CheckOnly
           if errorlevel 1 exit /b 1
           call scripts\R125_V11_3_Buildings.cmd -CheckOnly -OnlyHousingRetail
+          if errorlevel 1 exit /b 1
+          call scripts\R125_V11_3_Buildings.cmd -CheckOnly -SingleNewBrief
           if errorlevel 1 exit /b 1
       - name: Education one-click CMD -> PowerShell -> material MakeCode preview, check-only
         shell: cmd

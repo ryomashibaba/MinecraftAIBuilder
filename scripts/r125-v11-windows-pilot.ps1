@@ -1,11 +1,12 @@
 <#
 .SYNOPSIS
-  MAB V11: one command for a bounded, sequential three-building real local
-  ArchitecturePlan trial. Requires already running local Ollama/LM Studio.
+  MAB V11: one command for a bounded local ArchitecturePlan trial.
+  Requires an already running local Ollama/LM Studio.
 .DESCRIPTION
   Does not create/start/stop model servers, change OS settings, fetch code,
   touch Minecraft worlds, or upload PRIVATE results. Work can run this in the
   user's existing research checkout. Outputs are local PrivateModelStudies.
+  -SingleNewBrief: one new functional brief, with no prescribed architecture.
   -CheckOnly: GitHub CI / local dry run, no model HTTP, no new files.
 #>
 [CmdletBinding()]
@@ -14,6 +15,7 @@ param(
  [string]$Endpoint = 'http://127.0.0.1:11434/v1/chat/completions',
  [switch]$CheckOnly,
  [switch]$OnlyHousingRetail,
+ [switch]$SingleNewBrief,
  [switch]$NoOpen
 )
 $ErrorActionPreference = 'Stop'
@@ -21,6 +23,11 @@ $repo = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')).Path
 $studyBranch = 'research/r125-v6-readonly-facade-diagnostic-20261111'
 $runner = Join-Path $repo 'scripts\r125-local-architecture-plan-batch.mjs'
 $pilot = Join-Path $repo 'scripts\r125-v11-pilot-three.json'
+$single = Join-Path $repo 'scripts\r125-v11-single-unknown.json'
+if ($SingleNewBrief -and $OnlyHousingRetail) {
+ throw 'V11_PILOT_CONFLICTING_TRIAL_MODES'
+}
+$expectedCount = if ($SingleNewBrief) { 1 } elseif ($OnlyHousingRetail) { 2 } else { 3 }
 $viewer = 'BATCH_COMPARE_3D.html'
 # Re-evaluate only the two genuine SOURCE failures; reuse the exact existing
 # authored briefs, never reinterpret or regenerate the successful research brief.
@@ -45,6 +52,17 @@ if ($OnlyHousingRetail) {
  }
 }
 
+if ($SingleNewBrief) {
+ # Read UTF-8 explicitly on Windows PowerShell 5.1; no hardcoded roof/shape.
+ $jsonText = Get-Content -LiteralPath $single -Raw -Encoding UTF8
+ $parsed = ConvertFrom-Json -InputObject $jsonText
+ $all = @(foreach ($entry in $parsed) { $entry })
+ if ($all.Count -ne 1 -or $all[0].id -cne 'tide-observatory' -or
+     -not ($all[0].prompt -is [string]) -or $all[0].prompt.Length -lt 80) {
+  throw 'V11_PILOT_SINGLE_BRIEF_DRIFT'
+ }
+}
+
 if ($Model -notmatch '^[A-Za-z0-9._:/-]{2,140}$') {
  throw 'V11_PILOT_INVALID_MODEL_ID'
 }
@@ -54,7 +72,7 @@ if (-not $uri.Success -or [int]$uri.Groups[1].Value -lt 1 -or
     [int]$uri.Groups[1].Value -gt 65535) {
  throw 'V11_PILOT_LOOPBACK_ENDPOINT_REQUIRED'
 }
-foreach ($target in @($runner, $pilot,
+foreach ($target in @($runner, $pilot, $single,
   (Join-Path $repo 'scripts\r125-batch-compare.mjs'))) {
  if (-not (Test-Path -LiteralPath $target -PathType Leaf)) {
   throw ('V11_PILOT_MISSING_SOURCE: ' + $target)
@@ -70,7 +88,7 @@ if ($LASTEXITCODE -ne 0 -or -not $match.Success -or
 if ($CheckOnly) {
  & $node '--check' $runner
  if ($LASTEXITCODE -ne 0) { throw 'V11_PILOT_BATCH_SYNTAX_FAILED' }
- Write-Output ('V11_PILOT_CHECK_ONLY_PASS: '+$(if($OnlyHousingRetail){'two original failure briefs'}else{'three original briefs'})+'; no server, HTTP, model, world or output.')
+ Write-Output ('V11_PILOT_CHECK_ONLY_PASS: '+$(if($SingleNewBrief){'one unseen functional brief'}elseif($OnlyHousingRetail){'two original failure briefs'}else{'three original briefs'})+'; no server, HTTP, model, world or output.')
  return
 }
 if ($env:OS -cne 'Windows_NT') { throw 'V11_PILOT_WINDOWS_REQUIRED' }
@@ -109,15 +127,18 @@ if ($Endpoint -ceq 'http://127.0.0.1:11434/v1/chat/completions') {
 }
 $root = Join-Path $env:LOCALAPPDATA 'MinecraftAIBuilder\PrivateModelStudies'
 [void](New-Item -Path $root -ItemType Directory -Force)
-$out = Join-Path $root ('V11_3Genre_' +
+$studyName = if ($SingleNewBrief) { 'V11_UnseenSingle_' } else { 'V11_3Genre_' }
+$out = Join-Path $root ($studyName +
  (Get-Date -Format 'yyyyMMdd_HHmmss_fff') + '_' +
  [Guid]::NewGuid().ToString('N').Substring(0,8))
 if (Test-Path -LiteralPath $out) { throw 'V11_PILOT_OUTPUT_COLLISION' }
 Write-Output ('V11_PILOT_RUN_HEAD=' + $commit.Trim())
 Write-Output ('V11_PRIVATE_RESULT=' + $out)
-Write-Output 'Single model, sequential originals; continue after design rejection, not provider failure.'
+Write-Output ('One existing local model, '+$expectedCount+' bounded original POST(s), no automatic retries.')
 $batchArgs = @($runner, '--model', $Model)
-if ($OnlyHousingRetail) {
+if ($SingleNewBrief) {
+ $batchArgs += @('--briefs', $single)
+} elseif ($OnlyHousingRetail) {
  $briefFile = Join-Path $root ('V11_2Failure_Briefs_'+[Guid]::NewGuid().ToString('N')+'.json')
  $json = ConvertTo-Json -InputObject $selectedBriefs -Depth 6
  [System.IO.File]::WriteAllText($briefFile, $json,
@@ -142,9 +163,9 @@ if (-not (Test-Path -LiteralPath $reportFile -PathType Leaf)) {
 $report = Get-Content -LiteralPath $reportFile -Raw -Encoding UTF8 | ConvertFrom-Json
 if ($report.schema -cne 'r125-local-plan-batch-v1' -or
     [int]$report.worldWrites -ne 0 -or
-    [int]$report.attempted -gt $(if($OnlyHousingRetail){2}else{3}) -or
+    [int]$report.attempted -gt $expectedCount -or
     [int]$report.attempted -lt 1 -or
-    [int]$report.planned -ne $(if($OnlyHousingRetail){2}else{3})) {
+    [int]$report.planned -ne $expectedCount) {
  throw 'V11_PILOT_UNEXPECTED_REPORT'
 }
 Write-Output ('V11_PILOT_ATTEMPTED=' + $report.attempted)
