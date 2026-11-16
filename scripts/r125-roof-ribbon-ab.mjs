@@ -101,7 +101,10 @@ export function compareR125RoofRibbon({rawFile,outDir,massing='baseline',educati
       shape.unclosedEaveOrEndCells!==0||
       shape.unclosedStepCells!==0||
       shape.verticallyConnectedTwoWideRoofPads<1)
-    err('AB_ROOF_ENCLOSURE_OR_AIR_HOLD');
+    err('AB_ROOF_ENCLOSURE_OR_AIR_HOLD_'+[
+      shape.twoWideHighRoofPads,shape.verticallyConnectedTwoWideRoofPads,
+      shape.unclosedEaveOrEndCells,shape.unclosedStepCells,
+      Number(shape.flatRoofBaseRetained)].join('_'));
   roofAir={before:{twoWideHighPads:previous.twoWideHighRoofPads,
    verticallyConnectedPads:previous.verticallyConnectedTwoWideRoofPads},
    after:{twoWideHighPads:reduced.twoWideHighRoofPads,
