@@ -2511,3 +2511,38 @@ test('U raised roof rejects roof plate, fake unraised pitched geometry and incom
  reject(q=>q.expression.roofOverhang='one-block');
  reject(q=>{q.expression.roofProfile='flat'});
 });
+
+test('optional glazed sawtooth ribbon reduces opaque roof skin without changing source footprint or author plan',()=>{
+ const authored=plan('tide-roof-review',['x'],['sensor lab','field station']);
+ authored.footprint={width:24,depth:24};
+ authored.expression={setbackSide:'none',setbackDepth:0,
+  roofProfile:'sawtooth',roofAxis:'x',roofVolume:'raised',facadeLanguage:'plain'};
+ const raw=JSON.stringify(authored);
+ const original=compileArchitecturePlan(authored,{entrancePlacement:'source-accessible'});
+ const glazed=compileArchitecturePlan(authored,{
+  entrancePlacement:'source-accessible',roofGlazing:'sawtooth-ribbon'});
+ assert.equal(JSON.stringify(authored),raw,'model-authored bytes stay untouched');
+ assert.equal(glazed.planSha256,original.planSha256);
+ assert.notEqual(glazed.sourceSha256,original.sourceSha256);
+ assert.equal(verifyCompiled(glazed.design,glazed.compiled),true);
+ const occupied=scene=>scene.compiled.primitives.map(x=>x.slice(0,3).join(',')).sort();
+ assert.deepEqual(occupied(glazed),occupied(original),
+  'replacing roof material never makes gaps or adds extra roof mass');
+ const originalSkin=original.design.elements.filter(e=>e.id.startsWith('roof-raised-skin-'));
+ const glazedSkin=glazed.design.elements.filter(e=>e.id.startsWith('roof-raised-skin-'));
+ assert.equal(glazedSkin.length,originalSkin.length);
+ const changed=glazedSkin.filter((e,i)=>e.material!==originalSkin[i].material);
+ assert(changed.length>=2,'one glass ribbon per six raised sawtooth strips');
+ assert(changed.every(e=>e.material==='glass' &&
+  Number(e.id.slice('roof-raised-skin-'.length))%6===4));
+ assert.equal(auditArchitecturePlanCirculation(glazed).status,'SOURCE_CLEARANCE_PROBES_PASS');
+ assert.equal(auditR125SourceRoutes(glazed).status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(glazed.inGameWalking,'NOT_TESTED');
+ assert.equal(glazed.worldWrites,0);
+ assert.throws(()=>compileArchitecturePlan(authored,{roofGlazing:'unknown'}),
+  /R125_PLAN_ROOF_GLAZING_MODE/);
+ assert.throws(()=>compileArchitecturePlan({...authored,expression:{
+  ...authored.expression,roofProfile:'ridge'}},
+  {roofGlazing:'sawtooth-ribbon'}),
+  /R125_PLAN_ROOF_GLAZING_REQUIRES_RAISED_SAWTOOTH/);
+});
