@@ -81,7 +81,7 @@ test('compressed B143 sawtooth strips keep exactly the same enclosed roof-air ev
   'unclosedStepCells']){
   assert.equal(candidate[metric],baseline[metric],metric);
  }
- assert.equal(candidate.skinStripCount,24);
+ assert.equal(candidate.skinStripCount,p.footprint.width-2);
  assert(candidate.verticallyConnectedTwoWideRoofPads>0);
  assert.equal(candidate.actualMinecraftWalking,'NOT_TESTED');
 });
