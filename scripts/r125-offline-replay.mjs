@@ -132,7 +132,7 @@ export function diagnoseR125Original(raw){
  * geometry. No V6 placement patch, retry, model I/O or Minecraft contact.
  * A SOURCE candidate is never an ART pass or world-construction approval.
  */
-export function diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail='legacy'}={}){
+export function diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail='legacy',roofGlazing='none'}={}){
  if(typeof raw!=='string'||raw.length<1||raw.length>60000)
   fail('PLAN_RAW_INPUT_SIZE');
  const base={
@@ -160,7 +160,8 @@ export function diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail='legacy'}={
   // author-provided JSON. It is never selected as a retry after failure.
   const hostPolicy={entrancePlacement:'source-accessible',
    upperDoorPlacement:Object.hasOwn(original,'expression')?'stair-clear':'legacy',
-   ...(hostDetail!=='legacy'?{hostDetail}:{})};
+   ...(hostDetail!=='legacy'?{hostDetail}:{}),
+   ...(roofGlazing!=='none'?{roofGlazing}:{})};
   const built=compileArchitecturePlan(original,hostPolicy);
   if(built.worldContacts!==0||built.worldWrites!==0||
      built.constructionApproved!==false||
@@ -215,7 +216,8 @@ export function writeArchitecturePlanReplay(args){
  if(resolvedParent===repoRoot||resolvedParent.startsWith(repoRoot+path.sep))
   fail('PLAN_PRIVATE_OUTPUT_MUST_BE_OUTSIDE_REPOSITORY');
  const raw=fs.readFileSync(args['--raw'],'utf8');
- const report=diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail:args['--host-detail']??'legacy'});
+ const report=diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail:args['--host-detail']??'legacy',
+  roofGlazing:args['--roof-glazing']??'none'});
  const {sourceDesign,...diagnosis}=report;
  fs.mkdirSync(dest);
  // Store exact private author bytes before any parsing or B143 review.
@@ -240,29 +242,30 @@ export function writeArchitecturePlanReplay(args){
 
 export function parseR125ReplayArgs(argv){
  if(argv.length===1&&argv[0]==='--help')return {help:true};
- if(argv.length!==4&&argv.length!==6)fail('REQUIRE_RAW_AND_OUT');
+ if(![4,6,8].includes(argv.length))fail('REQUIRE_RAW_AND_OUT');
  const opts={};
  for(let i=0;i<argv.length;i+=2){
-  if(!['--raw','--out','--host-detail'].includes(argv[i])||Object.hasOwn(opts,argv[i])||
+  if(!['--raw','--out','--host-detail','--roof-glazing'].includes(argv[i])||Object.hasOwn(opts,argv[i])||
    !argv[i+1]||argv[i+1].startsWith('--'))fail('INVALID_ARGUMENT');
-  opts[argv[i]]=argv[i]==='--host-detail'?argv[i+1]:path.resolve(argv[i+1]);
+  opts[argv[i]]=['--host-detail','--roof-glazing'].includes(argv[i])?argv[i+1]:path.resolve(argv[i+1]);
  }
  if(!opts['--raw']||!opts['--out']||opts['--raw']===opts['--out'])
   fail('INPUT_OUTPUT_CONFLICT');
  if(opts['--host-detail']!==undefined&&opts['--host-detail']!=='spatial-v1')fail('HOST_DETAIL_MODE');
+ if(opts['--roof-glazing']!==undefined&&opts['--roof-glazing']!=='sawtooth-ribbon')fail('ROOF_GLAZING_MODE');
  return opts;
 }
 if(process.argv[1]===fileURLToPath(import.meta.url)){
  try{
   const planMode=process.argv[2]==='--architecture-plan';
   const args=parseR125ReplayArgs(process.argv.slice(planMode?3:2));
-  if(args.help)console.log('B143: --raw ORIGINAL.txt --out NEW_DIAGNOSIS.json | ArchitecturePlan: --architecture-plan --raw ORIGINAL.txt --out NEW_PRIVATE_DIRECTORY [--host-detail spatial-v1] (NO MODEL / NO WORLD)');
+  if(args.help)console.log('B143: --raw ORIGINAL.txt --out NEW_DIAGNOSIS.json | ArchitecturePlan: --architecture-plan --raw ORIGINAL.txt --out NEW_PRIVATE_DIRECTORY [--host-detail spatial-v1] [--roof-glazing sawtooth-ribbon] (NO MODEL / NO WORLD)');
   else if(planMode){
    const result=writeArchitecturePlanReplay(args);
    console.log('R125_ARCHITECTURE_PLAN_SOURCE_ONLY',JSON.stringify(result));
    if(result.status!=='B143_SOURCE_CANDIDATE_ART_HOLD')process.exitCode=2;
   }else{
-   if(args['--host-detail'])fail('HOST_DETAIL_REQUIRES_ARCHITECTURE_PLAN');
+   if(args['--host-detail']||args['--roof-glazing'])fail('HOST_POLICY_REQUIRES_ARCHITECTURE_PLAN');
    if(fs.existsSync(args['--out']))fail('OUTPUT_ALREADY_EXISTS');
    const raw=fs.readFileSync(args['--raw'],'utf8');
    const report=diagnoseR125Original(raw);
