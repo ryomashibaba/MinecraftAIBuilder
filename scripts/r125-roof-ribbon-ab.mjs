@@ -5,12 +5,16 @@ import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {diagnoseR125ArchitecturePlanOriginal} from './r125-offline-replay.mjs';
 import {saveB143ABReview} from './r125-static-art-review.mjs';
+import {compileDesign,verifyCompiled} from '../source/ai/b143-building-dsl.mjs';
+import {exportB143EducationMakeCode} from '../source/ai/r125-education-makecode-export.mjs';
 const repo=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const sha=s=>createHash('sha256').update(s).digest('hex');
 const err=s=>{throw Error('V11_ROOF_AB_'+s);};
-export function compareR125RoofRibbon({rawFile,outDir,massing='baseline'}={}){
+export function compareR125RoofRibbon({rawFile,outDir,massing='baseline',education=false}={}){
  if(!rawFile||!outDir)err('REQUIRE_RAW_OUT');
  if(!['baseline','compact-sawtooth'].includes(massing))err('MASSING_MODE');
+ if(typeof education!=='boolean'||(education&&massing!=='compact-sawtooth'))
+  err('EDUCATION_REQUIRES_COMPACT_AB');
  const compact=massing==='compact-sawtooth';
  const input=path.resolve(rawFile),out=path.resolve(outDir),parent=path.dirname(out);
  if(!fs.existsSync(input)||fs.existsSync(out)||!fs.existsSync(parent))
@@ -34,6 +38,29 @@ export function compareR125RoofRibbon({rawFile,outDir,massing='baseline'}={}){
     a.sourceSha256===b.sourceSha256||
     (!compact&&a.occupiedVoxels!==b.occupiedVoxels)||
     (compact&&a.geometrySha256===b.geometrySha256))err('SOURCE_HOLD');
+ // Export from the EXACT TWO B143 A/B designs, not a second HOST compile
+ // with implicit defaults. Strict verified palette; unknown materials HOLD.
+ let educationPackets=null;
+ if(education){
+  const palette=JSON.parse(fs.readFileSync(path.join(repo,
+   'configs/r125-education-verified-palette-v26.33.json'),'utf8'));
+  const prepare=(diagnosis)=>{
+   const design=diagnosis.sourceDesign,scene=compileDesign(design);
+   if(!verifyCompiled(design,scene)||
+      scene.sourceSha256!==diagnosis.sourceSha256||
+      scene.geometrySha256!==diagnosis.geometrySha256)
+    err('EDUCATION_SOURCE_MISMATCH');
+   const packet=exportB143EducationMakeCode({design,scene,
+    provenance:'UNVERIFIED_DESIGN',groundLowestLayer:true,
+    verifiedPalette:palette});
+   if(packet.sourceSha256!==diagnosis.sourceSha256||
+      packet.geometrySha256!==diagnosis.geometrySha256||
+      packet.worldWrites!==0||packet.programExecuted!==false||
+      packet.materialMode!=='STRICT_USER_ATTESTED')err('EDUCATION_PACKET_HOLD');
+   return packet;
+  };
+  educationPackets={before:prepare(a),after:prepare(b)};
+ }
  fs.mkdirSync(out);
  const before=path.join(out,'SOURCE_BASELINE.json'),
        after=path.join(out,'SOURCE_RIBBON.json');
@@ -52,6 +79,28 @@ export function compareR125RoofRibbon({rawFile,outDir,massing='baseline'}={}){
    err('NO_MEANINGFUL_COMPACT_ROOF');
  }else if(diff.added||diff.removed||!diff.changedMaterial)err('NON_MATERIAL_DELTA');
  if(sha(fs.readFileSync(input,'utf8'))!==hash)err('ORIGINAL_CHANGED');
+ let educationPreview=null;
+ if(educationPackets){
+  const rows=[['BASELINE',educationPackets.before],
+   ['COMPACT',educationPackets.after]];
+  const packets=[];
+  for(const [variant,packet] of rows){
+   const {code,...report}=packet;
+   const codeName='MAKECODE_'+variant+'.ts';
+   const reportName='EXPORT_'+variant+'.json';
+   fs.writeFileSync(path.join(out,codeName),code,{flag:'wx'});
+   fs.writeFileSync(path.join(out,reportName),
+    JSON.stringify(report,null,2)+'\n',{flag:'wx'});
+   packets.push({variant,codeFile:codeName,reportFile:reportName,
+    sourceSha256:report.sourceSha256,
+    makecodeSourceSha256:report.makecodeSourceSha256,
+    plannedVoxelCount:report.plannedVoxelCount,
+    materialMode:report.materialMode});
+  }
+  educationPreview={packets,worldExecution:'NOT_TESTED',
+   instruction:'Use existing dedicated flat test world, inspect unused site, paste one variant at a time; run mabset, mabbuild, mabverify',
+   actualMinecraftWalking:'NOT_TESTED'};
+ }
  const result={schema:compact?'mab-v11-roof-massing-ab-v1':'mab-v11-roof-ribbon-ab-v1',
   originalSha256:hash,originalEdited:false,
   sourceSha256Before:a.sourceSha256,sourceSha256After:b.sourceSha256,
@@ -61,7 +110,7 @@ export function compareR125RoofRibbon({rawFile,outDir,massing='baseline'}={}){
    skylightPolicy:'SAME_SAWTOOTH_RIBBON_BOTH_SIDES'}:{}),
   image:path.join(out,'ART_AB',ab.preview.file),
   modelCalls:0,worldWrites:0,minecraftWalking:'NOT_TESTED',
-  humanArt:'NOT_REVIEWED'};
+  humanArt:'NOT_REVIEWED',...(educationPreview?{education:educationPreview}:{})};
  fs.writeFileSync(path.join(out,'REVIEW.json'),
   JSON.stringify(result,null,2)+'\n',{flag:'wx'});
  return result;
@@ -69,10 +118,13 @@ export function compareR125RoofRibbon({rawFile,outDir,massing='baseline'}={}){
 if(process.argv[1]===fileURLToPath(import.meta.url)){
  try{
   const x=process.argv.slice(2);
-  if(![4,6].includes(x.length)||x[0]!=='--raw'||x[2]!=='--out'||
-   (x.length===6&&(x[4]!=='--massing'||x[5]!=='compact-sawtooth')))err('CLI');
+  const eduCount=x.filter(v=>v==='--education').length;
+  if(eduCount>1)err('CLI');
+  const args=x.filter(v=>v!=='--education');
+  if(![4,6].includes(args.length)||args[0]!=='--raw'||args[2]!=='--out'||
+   (args.length===6&&(args[4]!=='--massing'||args[5]!=='compact-sawtooth')))err('CLI');
   console.log('V11_ROOF_AB',JSON.stringify(compareR125RoofRibbon({
-   rawFile:x[1],outDir:x[3],
-   ...(x.length===6?{massing:x[5]}:{})})));
+   rawFile:args[1],outDir:args[3],education:eduCount===1,
+   ...(args.length===6?{massing:args[5]}:{})})));
  }catch(e){console.error(String(e?.message??e));process.exitCode=2;}
 }

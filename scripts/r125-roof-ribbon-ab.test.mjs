@@ -74,5 +74,23 @@ test('compact sawtooth lowers the B143 crest and leaves the author bytes unchang
   assert(fs.statSync(result.image).size>5000);
   assert.throws(()=>compareR125RoofRibbon({rawFile:raw,
    outDir:path.join(root,'BAD'),massing:'extreme'}),/MASSING_MODE/);
+  const packet=compareR125RoofRibbon({rawFile:raw,
+   outDir:path.join(root,'EDUCATION_AB'),massing:'compact-sawtooth',education:true});
+  assert.equal(packet.education.packets.length,2);
+  assert.equal(packet.education.worldExecution,'NOT_TESTED');
+  assert.equal(packet.sourceSha256Before,packet.education.packets[0].sourceSha256);
+  assert.equal(packet.sourceSha256After,packet.education.packets[1].sourceSha256);
+  for(const row of packet.education.packets){
+   const code=fs.readFileSync(path.join(root,'EDUCATION_AB',row.codeFile),'utf8');
+   const report=JSON.parse(fs.readFileSync(path.join(root,'EDUCATION_AB',row.reportFile),'utf8'));
+   assert.equal(createHash('sha256').update(code).digest('hex'),row.makecodeSourceSha256);
+   assert.equal(report.sourceSha256,row.sourceSha256);
+   assert.equal(report.materialMode,'STRICT_USER_ATTESTED');
+   assert.equal(report.actualEducationExecution,'NOT_TESTED');
+   assert.equal(report.worldWrites,0);
+   assert.equal(report.programExecuted,false);
+   assert(code.includes('player.onChat("mabbuild"'));
+   assert(code.includes('player.onChat("mabverify"'));
+  }
  }finally{fs.rmSync(root,{recursive:true,force:true});}
 });
