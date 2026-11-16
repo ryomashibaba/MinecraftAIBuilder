@@ -41,6 +41,9 @@ on:
       - source/ai/b143-viewer-template.html
       - scripts/r125-v11-windows-pilot.ps1
       - scripts/r125-v11-education-live-launch.ps1
+      - scripts/R125_V11_EDUCATION_MOVEMENT.cmd
+      - scripts/R125_V11_EDUCATION_INPUT_CHECK.ts
+      - scripts/r125-v11-education-input-check.test.mjs
       - scripts/R125_V11_EDUCATION_PROBE.cmd
       - scripts/R125_V11_EDUCATION_RETAIL.cmd
       - scripts/r125-material-probe.mjs
@@ -86,6 +89,8 @@ jobs:
           if errorlevel 1 exit /b 1
           call scripts\R125_V11_EDUCATION_RECOVERED.cmd -CheckOnly
           if errorlevel 1 exit /b 1
+          call scripts\R125_V11_EDUCATION_MOVEMENT.cmd -CheckOnly
+          if errorlevel 1 exit /b 1
           call scripts\R125_V11_EDUCATION_RECOVERED.cmd -Stage Preview -CheckOnly
           if errorlevel 1 exit /b 1
   exact-source-corner-facade-witness:
@@ -111,7 +116,7 @@ jobs:
           node --check scripts/r125-saved-three-genre-baseline.mjs
           node --test scripts/r125-saved-three-genre-baseline.test.mjs scripts/r125-form-review-gallery.test.mjs
           pwsh -NoProfile -File scripts/r125-v11-windows-pilot.ps1 -CheckOnly
-          node --test scripts/r125-offline-replay.test.mjs scripts/r125-architecture-plan.test.mjs scripts/r125-local-architecture-plan-run.test.mjs scripts/r125-local-architecture-plan-batch.test.mjs scripts/r125-static-art-review.test.mjs scripts/r125-recovered-art-review.test.mjs scripts/b198g-local-adapter.test.mjs scripts/r125-material-probe.test.mjs
+          node --test scripts/r125-v11-education-input-check.test.mjs scripts/r125-offline-replay.test.mjs scripts/r125-architecture-plan.test.mjs scripts/r125-local-architecture-plan-run.test.mjs scripts/r125-local-architecture-plan-batch.test.mjs scripts/r125-static-art-review.test.mjs scripts/r125-recovered-art-review.test.mjs scripts/b198g-local-adapter.test.mjs scripts/r125-material-probe.test.mjs
       - name: Export saved real-Qwen B143 3D HTML for human ART review
         run: |
           node scripts/r125-offline-replay.mjs --architecture-plan --raw evidence/r125-real-l-corner-20261101/MODEL_RESPONSE_ORIGINAL.txt --out "$RUNNER_TEMP/r125-genuine-qwen-3d"
