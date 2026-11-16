@@ -248,7 +248,7 @@ const r125ExpressionFields={
 const r125ExpressionRequired=['setbackSide','setbackDepth',
  'roofProfile','roofAxis','facadeLanguage'];
 const r125Expr=({roof,side,depth,axis,volume=false,corner=false,
- monitorDaylight=false,pitchedEave=false}={})=>r125obj({
+ frontCourt=false,facade=null,monitorDaylight=false,pitchedEave=false}={})=>r125obj({
  ...r125ExpressionFields,
  roofProfile:r125enum(...roof),
  setbackSide:r125enum(...side),
@@ -256,6 +256,11 @@ const r125Expr=({roof,side,depth,axis,volume=false,corner=false,
  roofAxis:r125enum(...axis),
  ...(volume?{roofVolume:r125enum('raised')}:{}),
  ...(corner?{rearCornerCut:r125Corner}:{}),
+ ...(frontCourt?{frontCornerCut:r125obj({
+  width:r125int(3,8),depth:r125int(3,8),
+  side:r125enum('east','west'),access:r125enum('paved')
+ },['width','depth','side','access'])}:{}),
+ ...(facade?{facadeLanguage:r125enum(...facade)}:{}),
  ...(pitchedEave?{roofOverhang:r125enum('one-block')}:{}),
  ...(monitorDaylight?{
   daylightFacade:r125enum('east-and-rear-bays'),
@@ -263,6 +268,7 @@ const r125Expr=({roof,side,depth,axis,volume=false,corner=false,
  }:{})
 },[...r125ExpressionRequired,...(volume==='required'?['roofVolume']:[]),
  ...(corner==='required'?['rearCornerCut']:[]),
+ ...(frontCourt?['frontCornerCut']:[]),
  ...(pitchedEave?['roofOverhang']:[])]);
 const r125Expression={
  anyOf:[
@@ -272,6 +278,9 @@ const r125Expression={
    axis:['x','z']}),
   r125Expr({roof:['flat'],side:['none'],depth:[0],axis:['x','z'],
    corner:'required'}),
+  // Author-owned front-corner massing with supported open-sky floor.
+  r125Expr({roof:['flat'],side:['none'],depth:[0],axis:['x','z'],
+   frontCourt:true,facade:['plain']}),
   // Pitched architecture may choose raised real roof volume. A rear
   // courtyard with a ridge is allowed only with that raised volume.
   r125Expr({roof:['ridge','sawtooth'],side:['none'],depth:[0],
@@ -349,6 +358,7 @@ export function createR125ArchitecturePlanLocalAdapter({
   'entryZone optional "first" or "second"; for a ground-floor z split, only "first" is possible at the front.',
   'Emit at most ONE expression object. Put roofVolume inside that SAME object alongside all mandatory fields; never append a second expression object containing only roofVolume. Optional expression EXACT mandatory fields {setbackSide,setbackDepth,roofProfile,roofAxis,facadeLanguage}. setbackSide:none|east|rear; none requires setbackDepth:0; east/rear requires two levels and setbackDepth:2|3|4.',
   'roofProfile:flat|ridge|sawtooth|split-monitor|hip. roofAxis:x|z. facadeLanguage:plain|fins|screen|recessed-portico. For a REAL open interior under an elevated ridge or sawtooth roof choose expression roofVolume:"raised"; without it an extra flat roof remains underneath. On a raised ridge, sawtooth or hip, you MAY explicitly choose roofOverhang:"one-block" to create real continuous eaves beyond all four exterior faces, if it improves silhouette and weather-sheltered appearance; never emit roofOverhang on flat roofs or with rearCornerCut. A split-monitor MUST include roofVolume:"raised", roofAxis:"x", no setback and last level splitAxis:"x". Do not select conflicting options.',
+  'Optional expression frontCornerCut:{width:3..8,depth:3..8,side:"east"|"west",access:"paved"} creates a true front open-sky L-shaped court with outdoor floor and indoor two-wide access. Use only ONE level, flat roof, plain facade, no setback or rearCornerCut, footprint width >= 2*cut.width+8, depth >= cut.depth+10. Keep the front main entrance outside the removed corner. Choose it only for a meaningful spatial program, not decoration.',
   'Optional expression rearCornerCut:{width:3..8,depth:3..8,side:"east"|"west",access:"paved"} creates a REAL open-sky rear L-shaped cut, with usable paved court and genuine two-wide doorway. It requires setbackSide:none, setbackDepth:0, and either flat roof OR roofProfile:ridge with roofVolume:"raised" (no eaves). A 6..8 deep/wide recess makes a substantial architectural courtyard only when footprint is sufficiently large (usually at least 24x24), and when it does not destroy the interior program. Smaller 3..5 recesses remain supported. Do not choose a court for mere decoration: connect it to the intended use and circulation; if the site is tight, omit the cut entirely. No sawtooth, hip or split-monitor corner in this local author schema. Do not invent unsupported expression keys.',
   'For a new design actively SELECT an expression appropriate to the requested building: a real roof profile, orientation, and a facade language, not just a different title, material, or footprint. Prefer a raised roof volume when a pitched design is functional. Plain flat boxes only if the architectural program genuinely calls for them. For residential versus retail versus research briefs seek DIFFERENT spatial organizations, not a hardcoded building-type template.',
   'Before choosing rooms, infer the actual activities and workflow in THIS brief. Match each activity to equipment that visibly enables it: electronics is an instrument bench with screen, workbench is fabrication, desk is records, storage is shelving. Storage alone cannot represent making or testing, and display furniture alone cannot represent bread production. Distribute complementary equipment across rooms according to their purposes; avoid several near-identical storage rooms. Size the footprint for the chosen equipment and circulation rather than leaving oversized empty halls. These are activity-based decisions by YOU, not a fixed building-type recipe.',

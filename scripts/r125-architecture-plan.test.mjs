@@ -2259,3 +2259,52 @@ test('spatial HOST keeps beds modest in height and fails explicitly when a real 
  assert.throws(()=>compileArchitecturePlan(narrow,{...policy,hostDetail:'spatial-v1'}),/ENTRY_COURT_DOES_NOT_FIT/);
  assert.throws(()=>compileArchitecturePlan(p,{hostDetail:'invented'}),/HOST_DETAIL_MODE/);
 });
+
+test('a Qwen-authorable front courtyard is a true L footprint with walkable outdoor source',()=>{
+ for(const side of ['west','east'])for(const axis of ['x','z']){
+  const p=plan('front-court-'+side+'-'+axis,[axis]);
+  p.footprint={width:28,depth:28};
+  p.expression={setbackSide:'none',setbackDepth:0,roofProfile:'flat',
+   roofAxis:'x',facadeLanguage:'plain',
+   frontCornerCut:{width:6,depth:5,side,access:'paved'}};
+  const snapshot=structuredClone(p);
+  const b=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+  const v=voxels(b.compiled),x0=side==='west'?1:21;
+  for(let x=x0;x<x0+6;x++)for(let z=1;z<=5;z++){
+   assert.equal(includes(v,x,1,z),true,'supported court floor');
+   for(let y=2;y<b.design.bounds.height;y++)
+    assert.equal(includes(v,x,y,z),false,'outdoor court has no roof or wall');
+  }
+  for(let x=x0+2;x<=x0+3;x++)for(let y=2;y<=4;y++)
+   assert.equal(includes(v,x,y,6),false,'actual two-wide internal doorway');
+  assert.equal(verifyCompiled(b.design,b.compiled),true);
+  assert.equal(auditArchitecturePlanCirculation(b).status,
+   'SOURCE_CLEARANCE_PROBES_PASS');
+  assert.equal(auditR125SourceRoutes(b).status,
+   'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert.equal(b.courtyardSourceOnly?.face,'front');
+  assert.equal(b.courtyardSourceOnly?.status,
+   'SOURCE_2_WIDE_PAVED_COURT_REACHABLE');
+  assert.deepEqual(p,snapshot,'author input is unchanged');
+  assert.equal(b.worldWrites,0);
+  assert.deepEqual(b.compiled.BuildPlan.operations,[]);
+ }
+});
+
+test('front court rejects unsafe mass combinations and narrow footprints',()=>{
+ const p=plan('front-court-reject');
+ p.footprint={width:28,depth:28};
+ p.expression={setbackSide:'none',setbackDepth:0,roofProfile:'flat',
+  roofAxis:'x',facadeLanguage:'plain',
+  frontCornerCut:{width:6,depth:5,side:'west',access:'paved'}};
+ const rejects=(mutate,reason)=>{
+  const q=structuredClone(p);mutate(q);
+  assert.throws(()=>compileArchitecturePlan(q,{entrancePlacement:'source-accessible'}),
+   new RegExp('R125_PLAN_'+reason));
+ };
+ rejects(q=>q.expression.frontCornerCut.width=9,'EXPRESSION_FRONT_COURT');
+ rejects(q=>q.footprint.width=18,'EXPRESSION_FRONT_COURT');
+ rejects(q=>q.expression.roofProfile='ridge','EXPRESSION_FRONT_COURT_CONFLICT');
+ rejects(q=>q.expression.rearCornerCut={width:4,depth:4},'EXPRESSION_FRONT_COURT_CONFLICT');
+ rejects(q=>q.expression.facadeLanguage='recessed-portico','EXPRESSION_FRONT_COURT_CONFLICT');
+});

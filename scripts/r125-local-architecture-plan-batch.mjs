@@ -92,7 +92,10 @@ export function authoredFormFamily(plan){
   rearCornerCut:e?.rearCornerCut?
    {side:e.rearCornerCut.side??'east',
     width:e.rearCornerCut.width,depth:e.rearCornerCut.depth}:null,
-  facadeLanguage:e?.facadeLanguage??'plain'};
+  ...(e?.frontCornerCut?{frontCornerCut:{
+    side:e.frontCornerCut.side,width:e.frontCornerCut.width,
+    depth:e.frontCornerCut.depth}}:{}),
+   facadeLanguage:e?.facadeLanguage??'plain'};
 }
 const formHash=plan=>createHash('sha256')
  .update(JSON.stringify(authoredFormFamily(plan))).digest('hex');

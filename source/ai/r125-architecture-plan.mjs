@@ -174,7 +174,8 @@ export function validateArchitecturePlan(p){
    'facadeLanguage',...(Object.hasOwn(e,'rearCornerCut')?['rearCornerCut']:[]),
    ...(Object.hasOwn(e,'roofVolume')?['roofVolume']:[]),
    ...(Object.hasOwn(e,'daylightFacade')?['daylightFacade']:[]),
-   ...(Object.hasOwn(e,'roofOverhang')?['roofOverhang']:[])]),
+   ...(Object.hasOwn(e,'roofOverhang')?['roofOverhang']:[]),
+   ...(Object.hasOwn(e,'frontCornerCut')?['frontCornerCut']:[])]),
    'EXPRESSION_FIELDS');
   check(['none','east','rear'].includes(e.setbackSide)&&
    ((e.setbackSide==='none'&&e.setbackDepth===0)||
@@ -210,6 +211,22 @@ export function validateArchitecturePlan(p){
      (['ridge','sawtooth','hip'].includes(e.roofProfile)&&
       !Object.hasOwn(e,'rearCornerCut')))),
    'EXPRESSION_ROOF_OVERHANG_CONFLICT');
+  if(Object.hasOwn(e,'frontCornerCut')){
+   const c=e.frontCornerCut;
+   check(keys(c,['width','depth','side','access'])&&
+    integer(c.width,3,8)&&integer(c.depth,3,8)&&
+    ['east','west'].includes(c.side)&&c.access==='paved'&&
+    p.footprint.width>=2*c.width+8&&
+    p.footprint.depth>=c.depth+10,
+    'EXPRESSION_FRONT_COURT');
+   check(p.levels.length===1&&e.setbackSide==='none'&&
+    e.roofProfile==='flat'&&e.facadeLanguage==='plain'&&
+    !Object.hasOwn(e,'rearCornerCut')&&
+    !Object.hasOwn(e,'roofVolume')&&
+    !Object.hasOwn(e,'roofOverhang')&&
+    !Object.hasOwn(e,'daylightFacade'),
+    'EXPRESSION_FRONT_COURT_CONFLICT');
+  }
   if(Object.hasOwn(e,'rearCornerCut')){
    check((keys(e.rearCornerCut,['width','depth'])||
     (keys(e.rearCornerCut,['width','depth','side'])||
@@ -583,7 +600,7 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
  const {width:w,depth:d}=original.footprint;
  const count=original.levels.length;
  const {setbackSide,setbackDepth,roofProfile,roofAxis,facadeLanguage,
-  rearCornerCut}=original.expression;
+  rearCornerCut,frontCornerCut}=original.expression;
  const {floor,wall,roof}=original.materials,elements=[],program=[];
  const box=(id,mode,material,origin,size)=>elements.push({
   id,shape:'box',mode,...(mode==='add'?{material}:{}),origin,size});
@@ -1020,6 +1037,30 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
     [xCut+1,2,zCut-1],[2,3,1]);
   }
  }
+ // Optional author-selected front court changes the primary building footprint.
+ // It is not facade paint, a genre template or a historical-plan rewrite.
+ if(frontCornerCut){
+  const west=frontCornerCut.side==='west';
+  const xCut=west?1:w-1-frontCornerCut.width;
+  const width=frontCornerCut.width,depth=frontCornerCut.depth;
+  const innerX=west?xCut+width:xCut-1,innerZ=1+depth;
+  const doorX=xCut+Math.max(1,Math.floor((width-2)/2));
+  const entry=elements.find(e=>e.id==='exterior-entrance');
+  check(Boolean(entry)&&
+   (entry.origin[0]+1<xCut||entry.origin[0]>=xCut+width),
+   'EXPRESSION_FRONT_COURT_ENTRY_CONFLICT');
+  box('front-court-sky-void','cut',null,[xCut,1,1],
+   [width,top+1,depth]);
+  box('front-court-side-wall','add',wall,[innerX,2,1],[1,4,depth]);
+  box('front-court-inner-wall','add',wall,[xCut,2,innerZ],[width,4,1]);
+  box('front-court-paving','add',floor,[xCut,1,1],[width,1,depth]);
+  box('front-court-interior-door','cut',null,
+   [doorX,2,innerZ],[2,3,1]);
+  if(depth>=4){
+   box('front-court-return-window-cut','cut',null,[innerX,3,2],[1,2,2]);
+   box('front-court-return-window-glass','add','glass',[innerX,3,2],[1,2,2]);
+  }
+ }
  const spatialDetail=hostDetail==='spatial-v1'?
   detailR125Envelope(elements,original,program):null;
  // Leave old successful B143 SOURCE byte-for-byte unchanged. Only a new
@@ -1047,14 +1088,15 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
   inGameWalking:'NOT_TESTED',architecturalQuality:'NOT_REVIEWED',
   constructionApproved:false,worldContacts:0,worldWrites:0,
   gates:Array(9).fill('BLOCKED')};
- if(rearCornerCut?.access==='paved'){
-  const x0=rearCornerCut.side==='west'?1:w-1-rearCornerCut.width;
-  const z0=d-1-rearCornerCut.depth;
+ if(rearCornerCut?.access==='paved'||frontCornerCut?.access==='paved'){
+  const c=frontCornerCut??rearCornerCut;
+  const x0=c.side==='west'?1:w-1-c.width;
+  const z0=frontCornerCut?1:d-1-c.depth;
   // Physical roofless paving must be exact; do not trust verbal intent.
   const cells=new Map(compiled.primitives.map(v=>
    [v[0]+','+v[1]+','+v[2],v[3]]));
-  for(let x=x0;x<x0+rearCornerCut.width;x++)
-   for(let z=z0;z<z0+rearCornerCut.depth;z++){
+  for(let x=x0;x<x0+c.width;x++)
+   for(let z=z0;z<z0+c.depth;z++){
     check(cells.get(x+',1,'+z)!==undefined,
      'EXPRESSION_COURT_FLOOR_MISSING');
     for(let y=2;y<design.bounds.height;y++)
@@ -1065,8 +1107,8 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
   // independently of the two existing indoor program zone witnesses.
   const probe='__r125_court_source_probe__';
   const court={id:probe,purpose:'authored outdoor courtyard',
-   range:{x:[x0,x0+rearCornerCut.width-1],
-    z:[z0,z0+rearCornerCut.depth-1]}};
+   range:{x:[x0,x0+c.width-1],
+    z:[z0,z0+c.depth-1]}};
   const withCourt={...result,program:result.program.map((level,i)=>
    i===0?{...level,zones:[...level.zones,court]}:level)};
   const audit=auditR125SourceRoutes(withCourt);
@@ -1077,6 +1119,7 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
    'EXPRESSION_COURTYARD_SOURCE_ACCESS_HOLD');
   result.courtyardSourceOnly={
    status:'SOURCE_2_WIDE_PAVED_COURT_REACHABLE',
+   ...(frontCornerCut?{face:'front'}:{}),
    sourceWitness:witness.sourceWitness,
    sourceGraphMoves:witness.sourceGraphMoves,
    reachedTwoWidePadCount:witness.reachedTwoWidePadCount,
