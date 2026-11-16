@@ -162,7 +162,7 @@ test('R125 saved one-storey retail screen uses iron_block and verified materials
   assert.deepEqual(JSON.parse(fs.readFileSync(input,'utf8')),plan);
  }finally{fs.rmSync(root,{recursive:true,force:true});}
 });
-test('strict palette still HOLDs an unverified accent despite iron_block and concrete being known',async()=>{
+test('user-attested yellow concrete accent exports faithfully without another model request',async()=>{
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'r125-unverified-accent-'));
  const plan={schema:'minecraftaibuilder-r125-architecture-plan-v1',id:'accent-shop',
   title:'Shop with expressive fins',brief:'Shop with visible facade fins and two rooms',
@@ -176,10 +176,18 @@ test('strict palette still HOLDs an unverified accent despite iron_block and con
   const input=path.join(root,'PLAN.json');fs.writeFileSync(input,JSON.stringify(plan));
   const result=await runFreeBuild({model:'qwen3:14b',prompt:null,plan:input,
    outRoot:path.join(root,'outputs')});
-  assert.equal(result.status,'HOLD');
-  assert.equal(result.errorCode,'R125_EDUCATION_EXPORT_UNVERIFIED_MATERIAL_ACCENT');
+  assert.equal(result.status,'MAKECODE_READY_HUMAN_REVIEW_REQUIRED');
+  assert((result.plannedBlockCounts.yellow_concrete??0)>0);
   assert.equal(result.worldWrites,0);
   assert.equal(result.modelRequestsAllowed,0);
+  assert.equal(result.actualMinecraftWalking,'NOT_TESTED');
+  const report=JSON.parse(fs.readFileSync(path.join(path.dirname(result.makecode),'EXPORT_REPORT.json'),'utf8'));
+  assert.equal(report.materialMode,'STRICT_USER_ATTESTED');
+  assert.equal(report.actualEducationExecution,'NOT_TESTED');
+  assert(report.usedMaterials.some(m=>m.material==='accent'&&m.blockName==='yellow_concrete'));
+  const code=fs.readFileSync(result.makecode,'utf8');
+  assert(code.includes('blocks.blockByName("yellow_concrete")'));
+  assert.equal(createHash('sha256').update(code).digest('hex'),result.makecodeSourceSha256);
  }finally{fs.rmSync(root,{recursive:true,force:true});}
 });
 
