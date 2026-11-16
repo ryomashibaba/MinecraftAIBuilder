@@ -1592,6 +1592,34 @@ test('author-selected raised pitched eaves change true B143 silhouette without t
   /R125_PLAN_EXPRESSION_ROOF_OVERHANG_CONFLICT/);
 });
 
+test('model-selected generic oven produces real block geometry with reachable service in two distinct building uses',()=>{
+ for(const genre of ['home','bakery']){
+  const p=plan('oven-'+genre,['x'],['functional food-preparation zone',
+   genre==='home'?'living space':'customer display']);
+  p.footprint={width:30,depth:30};
+  p.levels[0].spaces[0].fixtures=genre==='home'?
+   ['oven','washbasin']:['oven','workbench'];
+  p.levels[0].spaces[0].fixtureDetail='crafted';
+  p.levels[0].spaces[1].fixtures=genre==='home'?['seating']:['display'];
+  const original=structuredClone(p);
+  const built=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+  assert.equal(built.fixtureTargets.length,3);
+  assert.equal(built.fixtureTargets.filter(f=>f.kind==='oven').length,1);
+  assert.ok(built.design.elements.some(e=>e.id.endsWith('-door-glass')));
+  assert.ok(built.design.elements.some(e=>e.id.endsWith('-hearth-glow')));
+  assert.ok(built.design.elements.some(e=>e.id.endsWith('-heat-control')));
+  const routes=auditR125SourceRoutes(built,{featureTargets:built.fixtureTargets});
+  assert.equal(routes.status,'SOURCE_ROUTES_REACH_ALL_ZONES',JSON.stringify(routes.issues));
+  assert.ok(routes.featureAccess.every(e=>e.reachableFromEntrance));
+  assert.equal(auditArchitecturePlanCirculation(built).status,
+   'SOURCE_CLEARANCE_PROBES_PASS');
+  assert.equal(verifyCompiled(built.design,built.compiled),true);
+  assert.ok(built.design.elements.length<=160);
+  assert.deepEqual(built.compiled.BuildPlan.operations,[]);
+  assert.equal(built.worldWrites,0);
+  assert.deepEqual(p,original);
+ }
+});
 test('authored crafted equipment keeps old 7-role geometry optional and builds identifiable real shapes',()=>{
  const original=plan('crafted-equipment-studio',['x'],
   ['work zone','service zone']);

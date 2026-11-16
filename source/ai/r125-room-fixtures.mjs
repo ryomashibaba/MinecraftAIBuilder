@@ -14,7 +14,7 @@ const failPosition=diagnosis=>{
 };
 const intentKey=i=>i.level+':'+i.zoneIndex;
 const roleDepth=kind=>kind==='bed'?4:
- ['seating','washbasin','electronics'].includes(kind)?2:1;
+ ['seating','washbasin','electronics','oven'].includes(kind)?2:1;
 
 const fixtureIntents=p=>p.plan.levels.flatMap((l,li)=>
  l.spaces.flatMap((s,zi)=>s.fixtures?
@@ -92,7 +92,15 @@ function makeParts(intent,x,y,z,turned=false){
    add('rack-leg-b',2,0,0,1,1,1,'metal'),
    add('rack-desk',0,1,0,3,1,2,'wood'),
    add('rack-screen',0,2,1,2,1,1,'glass'),
-   add('rack-controller',2,2,1,1,1,1,'metal')]
+   add('rack-controller',2,2,1,1,1,1,'metal')],
+  // Optional author-selected food-heating station, 3 x 2 x 3. Geometric
+  // Minecraft blocks only: not a functional cooking or baking machine.
+  oven:()=>[add('base',0,0,0,3,1,2,'stone'),
+   add('side-a',0,1,0,1,2,2,'metal'),
+   add('side-b',2,1,0,1,2,2,'metal'),
+   add('hood',0,2,0,3,1,2,'metal'),
+   add('door-glass',1,1,0,1,1,1,'glass'),
+   add('hearth-glow',1,1,1,1,1,1,'glow')]
  };
  const parts=families[intent.kind]?.();
  if(!parts)throw Error('R125_PLAN_FIXTURE_UNKNOWN_ROLE');
@@ -112,7 +120,8 @@ function makeParts(intent,x,y,z,turned=false){
    desk:()=>[add('monitor-frame-left',0,2,0,1,1,1,'metal'),
     add('monitor-frame-right',2,2,0,1,1,1,'metal')],
    washbasin:()=>[add('basin-water',1,1,0,1,1,1,'glass')],
-   electronics:()=>[add('control-unit',2,2,0,1,1,1,'accent')]
+   electronics:()=>[add('control-unit',2,2,0,1,1,1,'accent')],
+   oven:()=>[add('heat-control',2,2,0,1,1,1,'accent')]
   };
   parts.push(...details[intent.kind]());
  }

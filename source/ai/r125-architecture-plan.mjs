@@ -87,10 +87,10 @@ const roofReserve=p=>p.levels.reduce((sum,level)=>sum+
  level.spaces.reduce((subtotal,room)=>{
   const roles=room.fixtures??(room.fixture?[room.fixture]:[]);
   const parts={counter:2,workbench:3,display:2,storage:4,seating:2,
-   bed:4,desk:4,washbasin:5,electronics:5};
+   bed:4,desk:4,washbasin:5,electronics:5,oven:6};
   const detail=room.fixtureDetail==='crafted'?{
    counter:1,workbench:1,display:1,storage:1,seating:2,bed:2,
-   desk:2,washbasin:1,electronics:1}:{};
+   desk:2,washbasin:1,electronics:1,oven:1}:{};
   return subtotal+roles.reduce((total,role)=>total+parts[role]+
    (detail[role]??0),0)+(room.daylight?2:0);
  },0),0);
@@ -257,7 +257,7 @@ export function validateArchitecturePlan(p){
      (space.fixture!==undefined||space.fixtures!==undefined)),
     'SPACE_FIXTURE_DETAIL');
    const roles=['counter','workbench','display','storage','seating',
-    'bed','desk','washbasin','electronics'];
+    'bed','desk','washbasin','electronics','oven'];
    check(space.fixtures===undefined||
     (space.fixture===undefined&&Array.isArray(space.fixtures)&&
      space.fixtures.length>=1&&space.fixtures.length<=3&&
@@ -311,7 +311,7 @@ export function assessR125AuthoredRoomCapacity(plan){
    const [width,depth]=sizes[zi];
    const roles=room.fixtures??(room.fixture?[room.fixture]:[]);
    const roleDepth=k=>k==='bed'?4:
-    ['seating','electronics','washbasin'].includes(k)?2:1;
+    ['seating','electronics','washbasin','oven'].includes(k)?2:1;
    const equipmentFootprintCells=roles.reduce((n,k)=>n+3*roleDepth(k),0);
    const nominalFloorCellsUpperBound=Math.max(0,width*depth);
    const risks=[];
