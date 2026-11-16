@@ -67,6 +67,8 @@ test('compact sawtooth lowers the B143 crest and leaves the author bytes unchang
   assert.equal(fs.readFileSync(raw,'utf8'),original);
   assert.equal(result.originalEdited,false);
   assert.equal(result.roofCrestY.after,result.roofCrestY.before-1);
+  assert(result.unchangedUnderRoofVoxels>200);
+  assert.equal(result.belowRoofGeometryAndMaterialIdentical,true);
   assert(result.added+result.removed>0);
   assert.notEqual(result.sourceSha256Before,result.sourceSha256After);
   assert.equal(result.modelCalls,0);
@@ -77,6 +79,7 @@ test('compact sawtooth lowers the B143 crest and leaves the author bytes unchang
   const packet=compareR125RoofRibbon({rawFile:raw,
    outDir:path.join(root,'EDUCATION_AB'),massing:'compact-sawtooth',education:true});
   assert.equal(packet.education.packets.length,2);
+  assert(packet.unchangedUnderRoofVoxels>200);
   assert.equal(packet.education.worldExecution,'NOT_TESTED');
   assert.equal(packet.sourceSha256Before,packet.education.packets[0].sourceSha256);
   assert.equal(packet.sourceSha256After,packet.education.packets[1].sourceSha256);
@@ -86,11 +89,28 @@ test('compact sawtooth lowers the B143 crest and leaves the author bytes unchang
    assert.equal(createHash('sha256').update(code).digest('hex'),row.makecodeSourceSha256);
    assert.equal(report.sourceSha256,row.sourceSha256);
    assert.equal(report.materialMode,'STRICT_USER_ATTESTED');
+   assert.equal(report.movementProbeEmbedded,true);
+   assert.equal(row.movementProbeEmbedded,true);
+   assert(code.includes('player.onChat("mabwhere"'));
+   assert(code.includes('player.onChat("mabwalk"'));
    assert.equal(report.actualEducationExecution,'NOT_TESTED');
    assert.equal(report.worldWrites,0);
    assert.equal(report.programExecuted,false);
    assert(code.includes('player.onChat("mabbuild"'));
    assert(code.includes('player.onChat("mabverify"'));
   }
+  // Both roof directions use the identical generic HOST rule, without
+  // extra Qwen calls or modifying the previous x-axis author original.
+  const axisZ={...p,id:'compact-roof-axis-z',
+   expression:{...p.expression,roofAxis:'z'}};
+  const zRaw=path.join(root,'Z_ORIGINAL.txt');
+  const zOriginal=JSON.stringify(axisZ);
+  fs.writeFileSync(zRaw,zOriginal);
+  const z=compareR125RoofRibbon({rawFile:zRaw,outDir:path.join(root,'Z_AB'),
+   massing:'compact-sawtooth'});
+  assert.equal(fs.readFileSync(zRaw,'utf8'),zOriginal);
+  assert.equal(z.roofCrestY.after,z.roofCrestY.before-1);
+  assert.equal(z.belowRoofGeometryAndMaterialIdentical,true);
+  assert(z.unchangedUnderRoofVoxels>200);
  }finally{fs.rmSync(root,{recursive:true,force:true});}
 });
