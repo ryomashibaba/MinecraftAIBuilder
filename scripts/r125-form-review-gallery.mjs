@@ -117,7 +117,7 @@ export function buildR125FormReviewGallery(){
   'source/ai/b143-viewer-template.html'),'utf8');
  let html=renderB143Html(gallery,template);
  const banner='<section class="info" id="r125-form-provenance">'+
-  '<strong>真正Qwen保存3棟 + 合成研究の同一用途A/B比較</strong>'+
+  '<strong>R125 V11：真正Qwen保存3棟 + 合成研究の同一用途A/B比較</strong>'+
   '<p>選択欄の最初の3棟は保存済みの真正Qwen原案を無変更で再生。'+
   '後半2棟は研究用の合成計画であり、Qwenが考案した建築ではありません。'+
   '新規ローカル推論・Minecraft施工・美術合格は一切主張しません。</p>'+
