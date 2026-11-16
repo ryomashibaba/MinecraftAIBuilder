@@ -5,6 +5,7 @@ import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {diagnoseR125ArchitecturePlanOriginal} from './r125-offline-replay.mjs';
 import {saveB143ABReview} from './r125-static-art-review.mjs';
+import {inspectRoofAir} from './r125-roof-interior-study.mjs';
 import {compileDesign,verifyCompiled,MATERIALS} from '../source/ai/b143-building-dsl.mjs';
 import {exportB143EducationMakeCode} from '../source/ai/r125-education-makecode-export.mjs';
 const repo=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
@@ -82,7 +83,7 @@ export function compareR125RoofRibbon({rawFile,outDir,massing='baseline',educati
     sceneA.sourceSha256!==a.sourceSha256||
     sceneB.sourceSha256!==b.sourceSha256)
    err('AB_SOURCE_MISMATCH');
- let unchangedUnderRoofVoxels=0;
+ let unchangedUnderRoofVoxels=0,roofAir=null;
  if(compact){
   const below=scene=>new Map(scene.primitives.filter(v=>v[1]<top)
    .map(v=>[v.slice(0,3).join(','),v[3]]));
@@ -91,6 +92,22 @@ export function compareR125RoofRibbon({rawFile,outDir,massing='baseline',educati
      [...oldInterior].some(([key,material])=>newInterior.get(key)!==material))
     err('AB_INTERIOR_OR_PROGRAM_DRIFT');
   unchangedUnderRoofVoxels=oldInterior.size;
+  const roofShape=s=>inspectRoofAir({compiled:s.scene},{
+   design:s.design,compiled:s.scene,plan});
+  const previous=roofShape({scene:sceneA,design:a.sourceDesign});
+  const reduced=roofShape({scene:sceneB,design:b.sourceDesign});
+  for(const shape of [previous,reduced])
+   if(shape.flatRoofBaseRetained||
+      shape.unclosedEaveOrEndCells!==0||
+      shape.unclosedStepCells!==0||
+      shape.verticallyConnectedTwoWideRoofPads<1)
+    err('AB_ROOF_ENCLOSURE_OR_AIR_HOLD');
+  roofAir={before:{twoWideHighPads:previous.twoWideHighRoofPads,
+   verticallyConnectedPads:previous.verticallyConnectedTwoWideRoofPads},
+   after:{twoWideHighPads:reduced.twoWideHighRoofPads,
+    verticallyConnectedPads:reduced.verticallyConnectedTwoWideRoofPads},
+   enclosedEavesAndSteps:true,
+   actualMinecraftWalking:'NOT_TESTED'};
   const glass=MATERIALS.indexOf('glass');
   if(!sceneA.primitives.some(v=>v[1]>=top&&v[3]===glass)||
      !sceneB.primitives.some(v=>v[1]>=top&&v[3]===glass))
@@ -144,7 +161,8 @@ export function compareR125RoofRibbon({rawFile,outDir,massing='baseline',educati
   ...(compact?{massing,occupiedVoxelsAfter:b.occupiedVoxels,
    added:diff.added,removed:diff.removed,roofCrestY:crests,
    skylightPolicy:'SAME_SAWTOOTH_RIBBON_BOTH_SIDES',
-   unchangedUnderRoofVoxels,belowRoofGeometryAndMaterialIdentical:true}:{}),
+   unchangedUnderRoofVoxels,belowRoofGeometryAndMaterialIdentical:true,
+   roofAir}:{}),
   image:path.join(out,'ART_AB',ab.preview.file),
   modelCalls:0,worldWrites:0,minecraftWalking:'NOT_TESTED',
   humanArt:'NOT_REVIEWED',...(educationPreview?{education:educationPreview}:{})};
