@@ -64,7 +64,7 @@ function VerifyRetailPacket([string]$file) {
 }
 
 if ($Mode -eq 'Movement') {
-    Require ([string]::IsNullOrWhiteSpace($MakeCodeFile) 'MOVEMENT_TAKES_NO_CUSTOM_PACKET'
+    Require ([string]::IsNullOrWhiteSpace($MakeCodeFile)) 'MOVEMENT_TAKES_NO_CUSTOM_PACKET'
     $codeFile = Join-Path $repo 'scripts\R125_V11_EDUCATION_INPUT_CHECK.ts'
     Require (Test-Path -LiteralPath $codeFile -PathType Leaf) 'MOVEMENT_CODE_MISSING'
     $movementCode = Get-Content -LiteralPath $codeFile -Raw -Encoding UTF8
