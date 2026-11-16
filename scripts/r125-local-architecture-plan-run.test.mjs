@@ -71,15 +71,15 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    assert.deepEqual(room.properties.fixtureDetail.enum,['crafted']);
    assert.equal(room.required.includes('fixtureDetail'),false);
    const options=structured.properties.expression.anyOf;
-   assert.equal(options.length,9);
+   assert.equal(options.length,13);
    assert.ok(options.every(v=>v.type==='object'&&
     v.additionalProperties===false));
    const pitchedEaves=options.filter(v=>v.required.includes('roofOverhang'));
-   assert.equal(pitchedEaves.length,2);
+   assert.equal(pitchedEaves.length,4);
    assert.ok(pitchedEaves.every(v=>
     v.required.includes('roofVolume')&&
     v.properties.roofOverhang.enum.join(',')==='one-block'&&
-    v.properties.roofProfile.enum.join(',')==='ridge,sawtooth'&&
+    ['ridge,sawtooth','hip'].includes(v.properties.roofProfile.enum.join(','))&&
     !Object.hasOwn(v.properties,'rearCornerCut')));
    const monitor=options.filter(v=>v.properties.roofProfile.enum.includes('split-monitor'));
    assert.equal(monitor.length,1);
@@ -93,7 +93,12 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    assert.ok(courtyard.every(v=>
     v.properties.rearCornerCut.properties.width.maximum===8&&
     v.properties.rearCornerCut.properties.depth.maximum===8));
-   assert.ok(request.messages[0].content.includes('6..8 deep/wide recess'));
+   const hipOptions=options.filter(v=>v.properties.roofProfile.enum.join(',')==='hip');
+    assert.equal(hipOptions.length,4);
+    assert.ok(hipOptions.every(v=>v.required.includes('roofVolume')&&
+      !Object.hasOwn(v.properties,'rearCornerCut')));
+    assert.ok(request.messages[0].content.includes('HIP roof'));
+    assert.ok(request.messages[0].content.includes('6..8 deep/wide recess'));
    assert.ok(request.messages[0].content.includes('RAISED ridge roof'));
    assert.ok(courtyard.every(v=>
     v.properties.setbackSide.enum.join(',')==='none'));
@@ -101,7 +106,7 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
     v.properties.roofProfile.enum.every(x=>x==='flat'||x==='ridge')));
    const setback=options.filter(v=>
     v.properties.setbackSide.enum.includes('east'));
-   assert.equal(setback.length,3);
+   assert.equal(setback.length,5);
    assert.ok(setback.every(v=>
     !v.properties.roofProfile.enum.includes('split-monitor')&&
     !Object.hasOwn(v.properties,'rearCornerCut')));

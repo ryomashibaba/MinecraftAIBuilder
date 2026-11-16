@@ -1593,6 +1593,78 @@ test('author-selected raised pitched eaves change true B143 silhouette without t
   /R125_PLAN_EXPRESSION_ROOF_OVERHANG_CONFLICT/);
 });
 
+
+test('authored hip roof adds real four-sided B143 volume, preserves facilities and differs by ridge axis',()=>{
+ const p=plan('hip-family',['x'],['family food-preparation room','quiet bedroom']);
+ p.footprint={width:28,depth:26};
+ p.levels[0].spaces[0].fixtures=['oven','washbasin'];
+ p.levels[0].spaces[1].fixtures=['bed'];
+ const older=structuredClone(p);
+ older.expression={setbackSide:'none',setbackDepth:0,
+  roofProfile:'ridge',roofAxis:'x',roofVolume:'raised',facadeLanguage:'plain'};
+ const baseline=compileArchitecturePlan(older,{entrancePlacement:'source-accessible'});
+ const hashes=[];
+ for(const axis of ['x','z'])for(const eaves of [false,true]){
+  const input=structuredClone(p);
+  input.expression={...older.expression,roofProfile:'hip',roofAxis:axis,
+   ...(eaves?{roofOverhang:'one-block'}:{})};
+  const untouched=structuredClone(input);
+  const result=compileArchitecturePlan(input,{entrancePlacement:'source-accessible'});
+  assert.equal(verifyCompiled(result.design,result.compiled),true);
+  assert.ok(result.design.elements.some(x=>x.id==='roof-hip-ridge'));
+  assert.equal(result.design.elements.some(x=>x.id==='roof-base'),false);
+  assert.equal(result.design.elements.filter(x=>x.id.startsWith('roof-hip-eave-')).length,
+   eaves?4:0);
+  assert.notEqual(result.geometrySha256,baseline.geometrySha256);
+  assert.deepEqual(result.fixtureTargets.map(x=>x.kind),['oven','washbasin','bed']);
+  const routes=auditR125SourceRoutes(result,{featureTargets:result.fixtureTargets});
+  assert.equal(routes.status,'SOURCE_ROUTES_REACH_ALL_ZONES',JSON.stringify(routes.issues));
+  assert.ok(routes.featureAccess.every(x=>x.reachableFromEntrance));
+  assert.equal(auditArchitecturePlanCirculation(result).status,
+   'SOURCE_CLEARANCE_PROBES_PASS');
+  const vox=voxels(result.compiled),cx=Math.floor(input.footprint.width/2),
+   cz=Math.floor(input.footprint.depth/2);
+  assert.equal(includes(vox,cx,6,cz),false,'roof has real raised center interior air');
+  assert.ok(result.compiled.bounds.maxY>6);
+  assert.equal(includes(vox,1,6,1),true,'all four roof corners are present');
+  if(eaves)assert.equal(includes(vox,0,6,1),true);
+  assert.ok(result.design.elements.length<=160);
+  assert.deepEqual(result.compiled.BuildPlan.operations,[]);
+  assert.equal(result.worldWrites,0);
+  assert.deepEqual(input,untouched);
+  if(!eaves)hashes.push(result.geometrySha256);
+ }
+ assert.notEqual(hashes[0],hashes[1],
+  'model-authored ridge direction must change actual voxels');
+ assert.equal(compileArchitecturePlan(older,
+  {entrancePlacement:'source-accessible'}).sourceSha256,baseline.sourceSha256);
+});
+test('raised hip roof works over a real two-storey stair and rejects invalid authored combinations',()=>{
+ for(const axis of ['x','z'])for(const setbackSide of ['none','east','rear']){
+  const p=plan('hip-tower-'+axis+'-'+setbackSide,['x','z'],
+   ['workroom','records']);
+  p.footprint={width:30,depth:28};
+  p.expression={setbackSide,setbackDepth:setbackSide==='none'?0:3,
+   roofProfile:'hip',roofAxis:axis,facadeLanguage:'plain',roofVolume:'raised'};
+  const result=compileArchitecturePlan(p,
+   {entrancePlacement:'source-accessible',upperDoorPlacement:'stair-clear'});
+  assert.equal(verifyCompiled(result.design,result.compiled),true);
+  assert.equal(auditArchitecturePlanCirculation(result).status,
+   'SOURCE_CLEARANCE_PROBES_PASS');
+  assert.equal(auditR125SourceRoutes(result).status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert.ok(result.design.elements.length<=160);
+  assert.deepEqual(result.compiled.BuildPlan.operations,[]);
+ }
+ const invalid=plan('hip-without-volume');
+ invalid.expression={setbackSide:'none',setbackDepth:0,
+  roofProfile:'hip',roofAxis:'x',facadeLanguage:'plain'};
+ assert.throws(()=>compileArchitecturePlan(invalid),
+  /R125_PLAN_EXPRESSION_HIP_CONFLICT/);
+ invalid.expression.roofVolume='raised';
+ invalid.expression.rearCornerCut={width:6,depth:6,side:'west'};
+ assert.throws(()=>compileArchitecturePlan(invalid),
+  /R125_PLAN_EXPRESSION_HIP_CONFLICT/);
+});
 test('model-selected generic oven produces real block geometry with reachable service in two distinct building uses',()=>{
  for(const genre of ['home','bakery']){
   const p=plan('oven-'+genre,['x'],['functional food-preparation zone',
