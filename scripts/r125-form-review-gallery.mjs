@@ -23,10 +23,13 @@ const saved=[
  'r125-qwen14b-shop-20261024.json',
  'r125-qwen14b-research-20261024.json'
 ];
-function controlledForm(withCourt){
+function controlledForm(form){
  const p={
-  schema:SCHEMA,id:withCourt?'research-front-court':'research-plain-control',
-  title:withCourt?'Controlled front open-air court':'Controlled rectangular envelope',
+  schema:SCHEMA,
+  id:form==='front'?'research-front-court':
+   form==='rear'?'research-u-court':'research-plain-control',
+  title:form==='front'?'Controlled front open-air court':
+   form==='rear'?'Controlled U-shaped courtyard':'Controlled rectangular envelope',
   brief:'SYNTHETIC generic public making and exhibition, not local Qwen authorship',
   footprint:{width:28,depth:28},
   levels:[{splitAxis:'x',splitPercent:50,spaces:[
@@ -36,8 +39,10 @@ function controlledForm(withCourt){
   materials:{floor:'wood',wall:'concrete',roof:'stone'},
   expression:{setbackSide:'none',setbackDepth:0,
    roofProfile:'flat',roofAxis:'x',facadeLanguage:'plain',
-   ...(withCourt?{frontCornerCut:{
-    width:6,depth:5,side:'west',access:'paved'}}:{})}
+   ...(form==='front'?{frontCornerCut:{
+    width:6,depth:5,side:'west',access:'paved'}}:{}),
+   ...(form==='rear'?{rearCourt:{
+    width:8,depth:6,alignment:'center',entrySide:'west',access:'paved'}}:{})}
  };
  return p;
 }
@@ -62,8 +67,9 @@ export function buildR125FormReviewGallery(){
    worldWrites:0});
  }
  const pair=[];
- for(const withCourt of [false,true]){
-  const p=controlledForm(withCourt),original=JSON.stringify(p);
+ for(const form of ['plain','front','rear']){
+  const withCourt=form!=='plain';
+  const p=controlledForm(form),original=JSON.stringify(p);
   const r=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
   if(JSON.stringify(p)!==original)stop('CONTROLLED_INPUT_MUTATION');
   const circulation=auditArchitecturePlanCirculation(r);
@@ -73,7 +79,7 @@ export function buildR125FormReviewGallery(){
   if(circulation.status!=='SOURCE_CLEARANCE_PROBES_PASS'||
      routes.status!=='SOURCE_ROUTES_REACH_ALL_ZONES'||
      floors.programFloorIssues.length!==0)
-   stop('CONTROLLED_SOURCE_REJECT_'+(withCourt?'COURT':'PLAIN')+'_'+
+   stop('CONTROLLED_SOURCE_REJECT_'+form.toUpperCase()+'_'+
     [circulation.status,routes.status,floors.programFloorIssues.length].join('_'));
   if(withCourt&&r.courtyardSourceOnly?.status!=='SOURCE_2_WIDE_PAVED_COURT_REACHABLE')
    stop('COURT_NOT_REACHABLE');
@@ -82,35 +88,47 @@ export function buildR125FormReviewGallery(){
    stop('WORLD_BOUNDARY_DRIFT');
   const cells=new Set(r.compiled.primitives.map(v=>v.slice(0,3).join(',')));
   const item={kind:'CONTROLLED_SYNTHETIC_FORM_STUDY',
-   label:withCourt?'author-selectable-front-court':'unchanged-shape-control',
+   label:form==='front'?'author-selectable-front-court':
+    form==='rear'?'author-selectable-U-court':'unchanged-shape-control',
    id:p.id,authoredBy:'RESEARCH_FIXTURE_NOT_LOCAL_QWEN',
-   featuresChanged:withCourt?['frontCornerCut']:[],
+   featuresChanged:form==='front'?['frontCornerCut']:
+    form==='rear'?['rearCourt']:[],
    fixturesSelected:['workbench','display'],
    sourceSha256:r.sourceSha256,geometrySha256:r.geometrySha256,
    voxels:r.compiled.primitives.length,sourceRoutes:routes.status,
    sourceCirculation:circulation.status,programFloorIssues:floors.programFloorIssues,
    highRiskFindings:critique.findings.filter(f=>f.severity==='HIGH').map(f=>f.id),
-   frontCourtyard:withCourt?{
+   frontCourtyard:form==='front'?{
     size:{width:6,depth:5},side:'west',groundCells:30,
     trueOpenSky:true,twoWideReachable:r.courtyardSourceOnly.status,
     independentExteriorDoorway:true
+   }:null,
+   rearCourtyard:form==='rear'?{
+    size:{width:8,depth:6},alignment:'center',entrySide:'west',
+    groundCells:48,trueOpenSky:true,
+    twoWideReachable:r.courtyardSourceOnly.status
    }:null,
    authorProviderIndependentlyAttested:false,localModelCalls:0,
    originalPlanEdited:false,art:'NOT_REVIEWED',
    minecraftWalking:'NOT_TESTED',worldWrites:0};
   pair.push({item,cells});scenes.push(item);designs.push(r.design);
  }
- const control=pair[0].cells,court=pair[1].cells;
+ const control=pair[0].cells,court=pair[1].cells,u=pair[2].cells;
  const removed=[...control].filter(c=>!court.has(c)).length;
  const added=[...court].filter(c=>!control.has(c)).length;
- if(!removed||!added||scenes[3].geometrySha256===scenes[4].geometrySha256)
+ const removedU=[...control].filter(c=>!u.has(c)).length;
+ const addedU=[...u].filter(c=>!control.has(c)).length;
+ if(!removed||!added||!removedU||!addedU||
+    scenes[3].geometrySha256===scenes[4].geometrySha256||
+    scenes[3].geometrySha256===scenes[5].geometrySha256||
+    scenes[4].geometrySha256===scenes[5].geometrySha256)
   stop('NO_TRUE_MASSING_DIFFERENCE');
  const comparison={removedSolidCells:removed,addedSolidCells:added,
   method:'ACTUAL_B143_OCCUPIED_VOXEL_SET_DIFFERENCE',
   visualImprovement:'NOT_CERTIFIED_BY_DIFFERENCE',
   sameProgramAndMaterials:true};
  const gallery=compileB143Gallery(designs);
- if(gallery.scenes.length!==5||
+ if(gallery.scenes.length!==6||
     gallery.geometryHashes.some((hash,i)=>hash!==scenes[i].geometrySha256))
   stop('TRUE_B143_GALLERY_MISMATCH');
  const template=fs.readFileSync(path.join(ROOT,
@@ -119,17 +137,23 @@ export function buildR125FormReviewGallery(){
  const banner='<section class="info" id="r125-form-provenance">'+
   '<strong>R125 V11：真正Qwen保存3棟 + 合成研究の同一用途A/B比較</strong>'+
   '<p>選択欄の最初の3棟は保存済みの真正Qwen原案を無変更で再生。'+
-  '後半2棟は研究用の合成計画であり、Qwenが考案した建築ではありません。'+
+  '後半3棟は研究用の合成計画であり、Qwenが考案した建築ではありません。'+
   '新規ローカル推論・Minecraft施工・美術合格は一切主張しません。</p>'+
   '<p>合成A/Bの実ボクセル差：削除 '+removed+' セル、追加 '+added+
+  ' セル。U字型の差：削除 '+removedU+' セル、追加 '+addedU+
   ' セル。品質向上かどうかは人間の3D比較と実機で要検証。</p></section>';
  const slot='<h2 style="margin-top:20px">表示設定</h2>';
  if(html.split(slot).length!==2)stop('VIEWER_INSERTION_CHANGED');
  html=html.replace(slot,banner+slot);
  return {html,report:{schema:'r125-v11-form-review-gallery-v1',
-  provenance:'THREE_ARCHIVED_QWEN_PLUS_TWO_LABELED_SYNTHETIC_RESEARCH_FORMS',
+  provenance:'THREE_ARCHIVED_QWEN_PLUS_THREE_LABELED_SYNTHETIC_RESEARCH_FORMS',
   newLocalModelCalls:0,allScenesTrueB143:true,originalThreeQwenUnchanged:true,
-  experimentalDifference:comparison,scenes,art:'NOT_REVIEWED',
+  experimentalDifference:comparison,
+  uShapedDifference:{removedSolidCells:removedU,addedSolidCells:addedU,
+   method:'ACTUAL_B143_OCCUPIED_VOXEL_SET_DIFFERENCE',
+   visualImprovement:'NOT_CERTIFIED_BY_DIFFERENCE',
+   sameProgramAndMaterials:true},
+  scenes,art:'NOT_REVIEWED',
   minecraft:'NOT_TESTED',worldWrites:0,constructionApproved:false,
   gates:Array(9).fill('BLOCKED')}};
 }

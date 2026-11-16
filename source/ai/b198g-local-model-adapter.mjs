@@ -248,7 +248,7 @@ const r125ExpressionFields={
 const r125ExpressionRequired=['setbackSide','setbackDepth',
  'roofProfile','roofAxis','facadeLanguage'];
 const r125Expr=({roof,side,depth,axis,volume=false,corner=false,
- frontCourt=false,facade=null,monitorDaylight=false,pitchedEave=false}={})=>r125obj({
+ frontCourt=false,rearCourt=false,facade=null,monitorDaylight=false,pitchedEave=false}={})=>r125obj({
  ...r125ExpressionFields,
  roofProfile:r125enum(...roof),
  setbackSide:r125enum(...side),
@@ -260,6 +260,11 @@ const r125Expr=({roof,side,depth,axis,volume=false,corner=false,
   width:r125int(3,8),depth:r125int(3,8),
   side:r125enum('east','west'),access:r125enum('paved')
  },['width','depth','side','access'])}:{}),
+ ...(rearCourt?{rearCourt:r125obj({
+  width:r125int(6,14),depth:r125int(4,10),
+  alignment:r125enum('west','center','east'),
+  entrySide:r125enum('west','east'),access:r125enum('paved')
+ },['width','depth','alignment','entrySide','access'])}:{}),
  ...(facade?{facadeLanguage:r125enum(...facade)}:{}),
  ...(pitchedEave?{roofOverhang:r125enum('one-block')}:{}),
  ...(monitorDaylight?{
@@ -269,6 +274,7 @@ const r125Expr=({roof,side,depth,axis,volume=false,corner=false,
 },[...r125ExpressionRequired,...(volume==='required'?['roofVolume']:[]),
  ...(corner==='required'?['rearCornerCut']:[]),
  ...(frontCourt?['frontCornerCut']:[]),
+ ...(rearCourt?['rearCourt']:[]),
  ...(pitchedEave?['roofOverhang']:[])]);
 const r125Expression={
  anyOf:[
@@ -281,6 +287,9 @@ const r125Expression={
   // Author-owned front-corner massing with supported open-sky floor.
   r125Expr({roof:['flat'],side:['none'],depth:[0],axis:['x','z'],
    frontCourt:true,facade:['plain']}),
+  // Model-placed central opening creates genuine U-shaped primary mass.
+  r125Expr({roof:['flat'],side:['none'],depth:[0],axis:['x','z'],
+   rearCourt:true,facade:['plain']}),
   // Pitched architecture may choose raised real roof volume. A rear
   // courtyard with a ridge is allowed only with that raised volume.
   r125Expr({roof:['ridge','sawtooth'],side:['none'],depth:[0],
@@ -358,6 +367,7 @@ export function createR125ArchitecturePlanLocalAdapter({
   'entryZone optional "first" or "second"; for a ground-floor z split, only "first" is possible at the front.',
   'Emit at most ONE expression object. Put roofVolume inside that SAME object alongside all mandatory fields; never append a second expression object containing only roofVolume. Optional expression EXACT mandatory fields {setbackSide,setbackDepth,roofProfile,roofAxis,facadeLanguage}. setbackSide:none|east|rear; none requires setbackDepth:0; east/rear requires two levels and setbackDepth:2|3|4.',
   'roofProfile:flat|ridge|sawtooth|split-monitor|hip. roofAxis:x|z. facadeLanguage:plain|fins|screen|recessed-portico. For a REAL open interior under an elevated ridge or sawtooth roof choose expression roofVolume:"raised"; without it an extra flat roof remains underneath. On a raised ridge, sawtooth or hip, you MAY explicitly choose roofOverhang:"one-block" to create real continuous eaves beyond all four exterior faces, if it improves silhouette and weather-sheltered appearance; never emit roofOverhang on flat roofs or with rearCornerCut. A split-monitor MUST include roofVolume:"raised", roofAxis:"x", no setback and last level splitAxis:"x". Do not select conflicting options.',
+  'Optional expression rearCourt:{width:6..14,depth:4..10,alignment:"west"|"center"|"east",entrySide:"west"|"east",access:"paved"} is a REAL U-shaped open-air rear court; its location, wing widths, daylight and two-wide indoor entry come from YOUR design. ONE level only with FLAT roof, plain facade, no upper setback and no other courtyard. Require footprint.width >= court.width+12 and footprint.depth >= court.depth+14. It removes a central roof/wall volume, and the generic HOST must prove outdoor paving and an uninterrupted inside-to-court route. Choose U massing when a substantial shared outdoor public/work area helps the brief. It is NOT a compulsory style for retail or any other building type.',
   'Optional expression frontCornerCut:{width:3..8,depth:3..8,side:"east"|"west",access:"paved"} creates a true front open-sky L-shaped court with outdoor floor and indoor two-wide access. Use only ONE level, flat roof, plain facade, no setback or rearCornerCut, footprint width >= 2*cut.width+8, depth >= cut.depth+10. Keep the front main entrance outside the removed corner. Choose it only for a meaningful spatial program, not decoration.',
   'Optional expression rearCornerCut:{width:3..8,depth:3..8,side:"east"|"west",access:"paved"} creates a REAL open-sky rear L-shaped cut, with usable paved court and genuine two-wide doorway. It requires setbackSide:none, setbackDepth:0, and either flat roof OR roofProfile:ridge with roofVolume:"raised" (no eaves). A 6..8 deep/wide recess makes a substantial architectural courtyard only when footprint is sufficiently large (usually at least 24x24), and when it does not destroy the interior program. Smaller 3..5 recesses remain supported. Do not choose a court for mere decoration: connect it to the intended use and circulation; if the site is tight, omit the cut entirely. No sawtooth, hip or split-monitor corner in this local author schema. Do not invent unsupported expression keys.',
   'For a new design actively SELECT an expression appropriate to the requested building: a real roof profile, orientation, and a facade language, not just a different title, material, or footprint. Prefer a raised roof volume when a pitched design is functional. Plain flat boxes only if the architectural program genuinely calls for them. For residential versus retail versus research briefs seek DIFFERENT spatial organizations, not a hardcoded building-type template.',

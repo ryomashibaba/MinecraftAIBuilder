@@ -95,6 +95,9 @@ export function authoredFormFamily(plan){
   ...(e?.frontCornerCut?{frontCornerCut:{
     side:e.frontCornerCut.side,width:e.frontCornerCut.width,
     depth:e.frontCornerCut.depth}}:{}),
+   ...(e?.rearCourt?{rearCourt:{
+    width:e.rearCourt.width,depth:e.rearCourt.depth,
+    alignment:e.rearCourt.alignment,entrySide:e.rearCourt.entrySide}}:{}),
    facadeLanguage:e?.facadeLanguage??'plain'};
 }
 const formHash=plan=>createHash('sha256')

@@ -2308,3 +2308,56 @@ test('front court rejects unsafe mass combinations and narrow footprints',()=>{
  rejects(q=>q.expression.rearCornerCut={width:4,depth:4},'EXPRESSION_FRONT_COURT_CONFLICT');
  rejects(q=>q.expression.facadeLanguage='recessed-portico','EXPRESSION_FRONT_COURT_CONFLICT');
 });
+
+test('author-controlled U-shaped rear courtyard alters primary roof volume with true two-wide outdoor route',()=>{
+ for(const axis of ['x','z'])for(const alignment of ['west','center','east']){
+  const p=plan('u-court-'+axis+'-'+alignment,[axis]);
+  p.footprint={width:30,depth:30};
+  p.expression={setbackSide:'none',setbackDepth:0,
+   roofProfile:'flat',roofAxis:'x',facadeLanguage:'plain',
+   rearCourt:{width:8,depth:6,alignment,entrySide:alignment==='east'?'east':'west',access:'paved'}};
+  const raw=JSON.stringify(p);
+  const result=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+  const cells=voxels(result.compiled);
+  const spare=p.footprint.width-2-8;
+  const x0=1+(alignment==='west'?5:alignment==='east'?spare-5:Math.floor(spare/2));
+  const z0=p.footprint.depth-1-6;
+  for(let x=x0;x<x0+8;x++)for(let z=z0;z<z0+6;z++){
+   assert.equal(includes(cells,x,1,z),true,'paved outdoor surface');
+   for(let y=2;y<result.design.bounds.height;y++)
+    assert.equal(includes(cells,x,y,z),false,'real roofless U-shaped opening');
+  }
+  assert.equal(result.courtyardSourceOnly?.massing,'U');
+  assert.equal(result.courtyardSourceOnly?.alignment,alignment);
+  assert.equal(result.courtyardSourceOnly?.status,'SOURCE_2_WIDE_PAVED_COURT_REACHABLE');
+  assert.equal(auditArchitecturePlanCirculation(result).status,
+   'SOURCE_CLEARANCE_PROBES_PASS');
+  assert.equal(auditR125SourceRoutes(result).status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert.equal(verifyCompiled(result.design,result.compiled),true);
+  assert.equal(result.worldWrites,0);
+  assert.deepEqual(result.compiled.BuildPlan.operations,[]);
+  assert.equal(JSON.stringify(p),raw,'original model-intent plan must not change');
+ }
+});
+
+test('U-shaped rear court refuses impossible spans, multiple storeys and incompatible competing forms',()=>{
+ const p=plan('u-court-guard');
+ p.footprint={width:28,depth:28};
+ p.expression={setbackSide:'none',setbackDepth:0,
+  roofProfile:'flat',roofAxis:'x',facadeLanguage:'plain',
+  rearCourt:{width:9,depth:6,alignment:'center',entrySide:'west',access:'paved'}};
+ const reject=(change,reason)=>{
+  const q=structuredClone(p);change(q);
+  assert.throws(()=>compileArchitecturePlan(q,{entrancePlacement:'source-accessible'}),
+   new RegExp('R125_PLAN_'+reason));
+ };
+ reject(q=>q.expression.rearCourt.width=15,'EXPRESSION_REAR_COURT');
+ reject(q=>q.expression.rearCourt.depth=11,'EXPRESSION_REAR_COURT');
+ reject(q=>q.footprint.width=19,'EXPRESSION_REAR_COURT');
+ reject(q=>q.expression.rearCourt.entrySide='middle','EXPRESSION_REAR_COURT');
+ reject(q=>q.expression.roofProfile='ridge','EXPRESSION_REAR_COURT_CONFLICT');
+ reject(q=>q.expression.rearCornerCut={width:5,depth:5},'EXPRESSION_REAR_COURT_CONFLICT');
+ reject(q=>q.expression.frontCornerCut={width:4,depth:4,side:'west',access:'paved'},
+  'EXPRESSION_REAR_COURT_CONFLICT');
+ reject(q=>q.levels.push(structuredClone(q.levels[0])),'EXPRESSION_REAR_COURT_CONFLICT');
+});

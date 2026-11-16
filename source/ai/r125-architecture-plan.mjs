@@ -175,7 +175,8 @@ export function validateArchitecturePlan(p){
    ...(Object.hasOwn(e,'roofVolume')?['roofVolume']:[]),
    ...(Object.hasOwn(e,'daylightFacade')?['daylightFacade']:[]),
    ...(Object.hasOwn(e,'roofOverhang')?['roofOverhang']:[]),
-   ...(Object.hasOwn(e,'frontCornerCut')?['frontCornerCut']:[])]),
+   ...(Object.hasOwn(e,'frontCornerCut')?['frontCornerCut']:[]),
+   ...(Object.hasOwn(e,'rearCourt')?['rearCourt']:[])]),
    'EXPRESSION_FIELDS');
   check(['none','east','rear'].includes(e.setbackSide)&&
    ((e.setbackSide==='none'&&e.setbackDepth===0)||
@@ -211,6 +212,26 @@ export function validateArchitecturePlan(p){
      (['ridge','sawtooth','hip'].includes(e.roofProfile)&&
       !Object.hasOwn(e,'rearCornerCut')))),
    'EXPRESSION_ROOF_OVERHANG_CONFLICT');
+  if(Object.hasOwn(e,'rearCourt')){
+   const c=e.rearCourt;
+   check(keys(c,['width','depth','alignment','entrySide','access'])&&
+    integer(c.width,6,14)&&integer(c.depth,4,10)&&
+    ['west','center','east'].includes(c.alignment)&&
+    ['west','east'].includes(c.entrySide)&&c.access==='paved'&&
+    p.footprint.width>=c.width+12&&
+    p.footprint.depth>=c.depth+14,
+    'EXPRESSION_REAR_COURT');
+   // Only an actual independent AUTHOR request can select this U mass.
+   // Preserve old one/two-level Qwen models and all existing roof contracts.
+   check(p.levels.length===1&&e.setbackSide==='none'&&
+    e.roofProfile==='flat'&&e.facadeLanguage==='plain'&&
+    !Object.hasOwn(e,'rearCornerCut')&&
+    !Object.hasOwn(e,'frontCornerCut')&&
+    !Object.hasOwn(e,'roofVolume')&&
+    !Object.hasOwn(e,'roofOverhang')&&
+    !Object.hasOwn(e,'daylightFacade'),
+    'EXPRESSION_REAR_COURT_CONFLICT');
+  }
   if(Object.hasOwn(e,'frontCornerCut')){
    const c=e.frontCornerCut;
    check(keys(c,['width','depth','side','access'])&&
@@ -600,7 +621,7 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
  const {width:w,depth:d}=original.footprint;
  const count=original.levels.length;
  const {setbackSide,setbackDepth,roofProfile,roofAxis,facadeLanguage,
-  rearCornerCut,frontCornerCut}=original.expression;
+  rearCornerCut,frontCornerCut,rearCourt}=original.expression;
  const {floor,wall,roof}=original.materials,elements=[],program=[];
  const box=(id,mode,material,origin,size)=>elements.push({
   id,shape:'box',mode,...(mode==='add'?{material}:{}),origin,size});
@@ -1037,6 +1058,34 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
     [xCut+1,2,zCut-1],[2,3,1]);
   }
  }
+ // Independent author-selected U-shaped central/rear court. This is a
+ // genuine open-sky VOLUME cut (walls, roof, floor), not facade ornament.
+ // An exact B143 route witness below must reach its newly paved ground.
+ if(rearCourt){
+  const c=rearCourt;
+  const spare=w-2-c.width,margin=c.alignment==='west'?5:
+   c.alignment==='east'?spare-5:Math.floor(spare/2);
+  const xCut=1+margin,zCut=d-1-c.depth;
+  const innerZ=zCut-1,doorX=c.entrySide==='west'?xCut+1:
+   xCut+c.width-3;
+  const glassX=c.entrySide==='west'?xCut+c.width-3:xCut+1;
+  box('u-court-open-sky','cut',null,[xCut,1,zCut],
+   [c.width,top+1,c.depth]);
+  // New true re-entrant shell around all three sides of the U opening.
+  box('u-court-return-west','add',wall,
+   [xCut-1,2,zCut],[1,4,c.depth]);
+  box('u-court-return-east','add',wall,
+   [xCut+c.width,2,zCut],[1,4,c.depth]);
+  box('u-court-interior-wall','add',wall,
+   [xCut,2,innerZ],[c.width,4,1]);
+  // Distinct author-chosen indoor access and a real air-backed window.
+  box('u-court-door','cut',null,[doorX,2,innerZ],[2,3,1]);
+  box('u-court-window-cut','cut',null,[glassX,3,innerZ],[2,2,1]);
+  box('u-court-window-glass','add','glass',
+   [glassX,3,innerZ],[2,2,1]);
+  box('u-court-paving','add',floor,[xCut,1,zCut],
+   [c.width,1,c.depth]);
+ }
  // Optional author-selected front court changes the primary building footprint.
  // It is not facade paint, a genre template or a historical-plan rewrite.
  if(frontCornerCut){
@@ -1088,9 +1137,13 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
   inGameWalking:'NOT_TESTED',architecturalQuality:'NOT_REVIEWED',
   constructionApproved:false,worldContacts:0,worldWrites:0,
   gates:Array(9).fill('BLOCKED')};
- if(rearCornerCut?.access==='paved'||frontCornerCut?.access==='paved'){
-  const c=frontCornerCut??rearCornerCut;
-  const x0=c.side==='west'?1:w-1-c.width;
+ if(rearCornerCut?.access==='paved'||frontCornerCut?.access==='paved'||
+    rearCourt?.access==='paved'){
+  const c=rearCourt??frontCornerCut??rearCornerCut;
+  const x0=rearCourt?1+(c.alignment==='west'?5:
+   c.alignment==='east'?w-2-c.width-5:
+   Math.floor((w-2-c.width)/2)):
+   c.side==='west'?1:w-1-c.width;
   const z0=frontCornerCut?1:d-1-c.depth;
   // Physical roofless paving must be exact; do not trust verbal intent.
   const cells=new Map(compiled.primitives.map(v=>
@@ -1120,6 +1173,8 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
   result.courtyardSourceOnly={
    status:'SOURCE_2_WIDE_PAVED_COURT_REACHABLE',
    ...(frontCornerCut?{face:'front'}:{}),
+   ...(rearCourt?{face:'rear',massing:'U',alignment:c.alignment,
+    entrySide:c.entrySide}:{}),
    sourceWitness:witness.sourceWitness,
    sourceGraphMoves:witness.sourceGraphMoves,
    reachedTwoWidePadCount:witness.reachedTwoWidePadCount,

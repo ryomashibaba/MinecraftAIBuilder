@@ -8,11 +8,11 @@ import {buildR125FormReviewGallery,saveR125FormReviewGallery}
 
 test('archived genuine Qwen SHA and provenance survive independent true B143 form comparison',()=>{
  const {html,report}=buildR125FormReviewGallery();
- assert.equal(report.scenes.length,5);
+ assert.equal(report.scenes.length,6);
  assert.deepEqual(report.scenes.slice(0,3).map(s=>s.kind),
   Array(3).fill('ARCHIVED_GENUINE_QWEN_PLAN'));
  assert.deepEqual(report.scenes.slice(3).map(s=>s.kind),
-  Array(2).fill('CONTROLLED_SYNTHETIC_FORM_STUDY'));
+  Array(3).fill('CONTROLLED_SYNTHETIC_FORM_STUDY'));
  assert.equal(report.scenes.every(s=>s.worldWrites===0),true);
  assert.equal(report.originalThreeQwenUnchanged,true);
  assert.equal(report.newLocalModelCalls,0);
@@ -22,6 +22,13 @@ test('archived genuine Qwen SHA and provenance survive independent true B143 for
  assert.equal(report.scenes[4].frontCourtyard.groundCells,30);
  assert.equal(report.scenes[4].frontCourtyard.twoWideReachable,
   'SOURCE_2_WIDE_PAVED_COURT_REACHABLE');
+ assert.equal(report.scenes[5].rearCourtyard.groundCells,48);
+ assert.equal(report.scenes[5].rearCourtyard.twoWideReachable,
+  'SOURCE_2_WIDE_PAVED_COURT_REACHABLE');
+ assert.equal(report.scenes[5].rearCourtyard.alignment,'center');
+ assert(report.uShapedDifference.removedSolidCells>0);
+ assert(report.uShapedDifference.addedSolidCells>0);
+ assert.equal(report.uShapedDifference.sameProgramAndMaterials,true);
  assert.equal(report.scenes.slice(3).every(x=>
   x.sourceRoutes==='SOURCE_ROUTES_REACH_ALL_ZONES'),true);
  assert.equal(report.art,'NOT_REVIEWED');
@@ -37,7 +44,7 @@ test('gallery writes offline-only and refuses overwriting an output directory',(
  try{
   const out=path.join(tmp,'comparison');
   const result=saveR125FormReviewGallery(out);
-  assert.equal(result.scenes.length,5);
+  assert.equal(result.scenes.length,6);
   const html=fs.readFileSync(path.join(out,'index.html'),'utf8');
   const report=JSON.parse(fs.readFileSync(path.join(out,'FORM_REVIEW.json'),'utf8'));
   assert(html.includes('真正Qwen保存3棟'));
