@@ -179,7 +179,7 @@ test('user-attested yellow concrete accent exports faithfully without another mo
   assert.equal(result.status,'MAKECODE_READY_HUMAN_REVIEW_REQUIRED');
   assert((result.plannedBlockCounts.yellow_concrete??0)>0);
   assert.equal(result.worldWrites,0);
-  assert.equal(result.modelRequestsAllowed,0);
+  assert.equal(JSON.parse(fs.readFileSync(path.join(result.output,'REQUEST.json'),'utf8')).mode,'SAVED_PLAN');
   assert.equal(result.actualMinecraftWalking,'NOT_TESTED');
   const report=JSON.parse(fs.readFileSync(path.join(path.dirname(result.makecode),'EXPORT_REPORT.json'),'utf8'));
   assert.equal(report.materialMode,'STRICT_USER_ATTESTED');
