@@ -3,8 +3,12 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {studyR125RoofInterior,saveR125RoofInterior}
+import {studyR125RoofInterior,saveR125RoofInterior,inspectRoofAir}
  from './r125-roof-interior-study.mjs';
+import {compileArchitecturePlan,packR125RaisedRoofStrips}
+ from '../source/ai/r125-architecture-plan.mjs';
+import {compileDesign,verifyCompiled}
+ from '../source/ai/b143-building-dsl.mjs';
 
 test('same generic raised-roof compiler opens real interior air in three different programs',t=>{
  const s=studyR125RoofInterior();
@@ -49,4 +53,35 @@ test('same generic raised-roof compiler opens real interior air in three differe
  assert(fs.existsSync(path.join(out,'roof-store-synthetic/raised/index.html')));
  assert(fs.existsSync(path.join(out,'ROOF_INTERIOR_SOURCE_REPORT.json')));
  assert.throws(()=>saveR125RoofInterior(out),/OUTPUT_ALREADY_EXISTS/);
+});
+
+test('compressed B143 sawtooth strips keep exactly the same enclosed roof-air evidence',()=>{
+ const p={schema:'minecraftaibuilder-r125-architecture-plan-v1',
+  id:'compressed-geometry',title:'Generic compact building',
+  brief:'No typology-specific rules; functional rooms and roof air',
+  footprint:{width:24,depth:24},
+  levels:[{splitAxis:'x',splitPercent:50,spaces:[
+   {id:'room-one',purpose:'Work and observation'},
+   {id:'room-two',purpose:'Visitor interpretation'}]}],
+  materials:{floor:'wood',wall:'stone',roof:'concrete'},
+  expression:{setbackSide:'none',setbackDepth:0,
+   roofProfile:'sawtooth',roofAxis:'x',facadeLanguage:'plain',roofVolume:'raised'}};
+ const before=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+ const elements=packR125RaisedRoofStrips(before.design.elements,'x');
+ assert(elements.length<before.design.elements.length);
+ assert(elements.some(e=>e.id.startsWith('roof-raised-skin-')&&e.repeat?.count>1));
+ const packed={...before.design,elements};
+ const scene=compileDesign(packed);
+ assert.equal(verifyCompiled(packed,scene),true);
+ assert.deepEqual(scene.primitives,before.compiled.primitives);
+ const baseline=inspectRoofAir(before,before);
+ const candidate=inspectRoofAir(before,{design:packed,compiled:scene,plan:p});
+ for(const metric of ['skinStripCount','twoWideHighRoofPads',
+  'verticallyConnectedTwoWideRoofPads','unclosedEaveOrEndCells',
+  'unclosedStepCells']){
+  assert.equal(candidate[metric],baseline[metric],metric);
+ }
+ assert.equal(candidate.skinStripCount,24);
+ assert(candidate.verticallyConnectedTwoWideRoofPads>0);
+ assert.equal(candidate.actualMinecraftWalking,'NOT_TESTED');
 });
