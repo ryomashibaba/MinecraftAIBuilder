@@ -22,7 +22,7 @@ test('archived genuine Qwen SHA and provenance survive independent true B143 for
  assert.equal(report.scenes[4].frontCourtyard.groundCells,30);
  assert.equal(report.scenes[4].frontCourtyard.twoWideReachable,
   'SOURCE_2_WIDE_PAVED_COURT_REACHABLE');
- assert.equal(report.scenes[5].rearCourtyard.groundCells,48);
+ assert.equal(report.scenes[5].rearCourtyard.groundCells,108);
  assert.equal(report.scenes[5].rearCourtyard.twoWideReachable,
   'SOURCE_2_WIDE_PAVED_COURT_REACHABLE');
  assert.equal(report.scenes[5].rearCourtyard.alignment,'center');

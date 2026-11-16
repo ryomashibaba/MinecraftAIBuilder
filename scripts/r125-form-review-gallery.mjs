@@ -42,7 +42,7 @@ function controlledForm(form){
    ...(form==='front'?{frontCornerCut:{
     width:6,depth:5,side:'west',access:'paved'}}:{}),
    ...(form==='rear'?{rearCourt:{
-    width:8,depth:6,alignment:'center',entrySide:'west',access:'paved'}}:{})}
+    width:12,depth:9,alignment:'center',entrySide:'west',access:'paved'}}:{})}
  };
  return p;
 }
@@ -104,8 +104,8 @@ export function buildR125FormReviewGallery(){
     independentExteriorDoorway:true
    }:null,
    rearCourtyard:form==='rear'?{
-    size:{width:8,depth:6},alignment:'center',entrySide:'west',
-    groundCells:48,trueOpenSky:true,
+    size:{width:12,depth:9},alignment:'center',entrySide:'west',
+    groundCells:108,trueOpenSky:true,
     twoWideReachable:r.courtyardSourceOnly.status
    }:null,
    authorProviderIndependentlyAttested:false,localModelCalls:0,
