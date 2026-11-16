@@ -71,7 +71,15 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    assert.deepEqual(room.properties.fixtureDetail.enum,['crafted']);
    assert.equal(room.required.includes('fixtureDetail'),false);
    const options=structured.properties.expression.anyOf;
-   assert.equal(options.length,13);
+   assert.equal(options.length,14);
+   const frontCourts=options.filter(v=>v.required.includes('frontCornerCut'));
+   assert.equal(frontCourts.length,1);
+   assert.deepEqual(frontCourts[0].properties.roofProfile.enum,['flat']);
+   assert.deepEqual(frontCourts[0].properties.facadeLanguage.enum,['plain']);
+   assert.deepEqual(frontCourts[0].properties.setbackSide.enum,['none']);
+   assert.equal(frontCourts[0].properties.frontCornerCut.required.includes('access'),true);
+   assert.ok(request.messages[0].content.includes('frontCornerCut'));
+   assert.equal(Object.hasOwn(frontCourts[0].properties,'rearCornerCut'),false);
    assert.ok(options.every(v=>v.type==='object'&&
     v.additionalProperties===false));
    const pitchedEaves=options.filter(v=>v.required.includes('roofOverhang'));
