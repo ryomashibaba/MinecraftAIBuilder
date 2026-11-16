@@ -6,6 +6,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {exportSavedPlan} from './r125-japanese-makecode.mjs';
+import {diagnoseR125ArchitecturePlanOriginal} from './r125-offline-replay.mjs';
 import {compileDesign} from '../source/ai/b143-building-dsl.mjs';
 import {compactB143Cuboids,exportB143EducationMakeCode} from '../source/ai/r125-education-makecode-export.mjs';
 import {compileR190BNAssembly} from '../source/ai/r190bn-spatial-assembly.mjs';
@@ -119,6 +120,56 @@ test('explicit preview mode retains all material roles but never claims validate
   unverifiedTestWorldPreview:true,legacyStoneFallback:true}),/PALETTE_MODE/);
  assert.throws(()=>exportB143EducationMakeCode({design:d,scene,
   unverifiedTestWorldPreview:true,verifiedPalette:{}}),/PALETTE_MODE/);
+});
+
+test('reviewed spatial-v1 source SHA maps to exact offline MakeCode building without a second model request',()=>{
+ const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'mab-spatial-export-'));
+ try{
+  const p={schema:'minecraftaibuilder-r125-architecture-plan-v1',
+   id:'source-matched-spatial-house',title:'Independent authored house',
+   brief:'Usable working rooms and recessed entry below real pitched roof',
+   footprint:{width:24,depth:20},
+   levels:[{splitAxis:'z',splitPercent:50,spaces:[
+    {id:'public-zone',purpose:'public workshop',fixtures:['desk']},
+    {id:'private-zone',purpose:'quiet storage',fixtures:['storage']}]}],
+   materials:{floor:'wood',wall:'concrete',roof:'metal'},
+   expression:{setbackSide:'none',setbackDepth:0,roofProfile:'ridge',
+    roofAxis:'x',roofVolume:'raised',facadeLanguage:'plain'}};
+  const raw=JSON.stringify(p),file=path.join(tmp,'MODEL_RESPONSE_ORIGINAL.txt');
+  fs.writeFileSync(file,raw);
+  const reviewed=diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail:'spatial-v1'});
+  assert.equal(reviewed.status,'B143_SOURCE_CANDIDATE_ART_HOLD',
+   JSON.stringify(reviewed));
+  const out=path.join(tmp,'reviewed-makecode');
+  const result=exportSavedPlan(file,out,'UNVERIFIED_DESIGN',null,true,{
+   hostDetail:'spatial-v1',expectedSourceSha256:reviewed.sourceSha256});
+  assert.equal(result.status,'OFFLINE_CODE_GENERATED_ONLY');
+  assert.equal(result.sourceSha256,reviewed.sourceSha256);
+  assert.equal(result.worldWrites,0);
+  assert.equal(result.materialMode,'UNVERIFIED_TEST_WORLD_PREVIEW');
+  const walk=JSON.parse(fs.readFileSync(path.join(out,
+   'SOURCE_WALKABILITY_REVIEW.json'),'utf8'));
+  assert.equal(walk.status,'SOURCE_ROUTE_CANDIDATE');
+  assert.equal(walk.hostDetail,'spatial-v1');
+  assert.equal(walk.hostUpperDoorPlacement,'stair-clear');
+  assert.equal(walk.sourceSha256,reviewed.sourceSha256);
+  const exportedDesign=JSON.parse(fs.readFileSync(path.join(out,'B143_SOURCE.json'),'utf8'));
+  assert.deepEqual(exportedDesign,reviewed.sourceDesign);
+  const code=fs.readFileSync(path.join(out,'MAKECODE_EDUCATION.ts'),'utf8');
+  assert.ok(code.includes('player.onChat("mabbuild"'));
+  assert.ok(code.includes('player.onChat("mabverify"'));
+  assert.equal(fs.readFileSync(file,'utf8'),raw,'raw model bytes immutable');
+  const legacy=diagnoseR125ArchitecturePlanOriginal(raw);
+  assert.notEqual(legacy.sourceSha256,reviewed.sourceSha256);
+  const wrong=path.join(tmp,'wrong');
+  assert.throws(()=>exportSavedPlan(file,wrong,'UNVERIFIED_DESIGN',null,true,{
+   hostDetail:'spatial-v1',expectedSourceSha256:'0'.repeat(64)}),
+   /SAVED_SOURCE_SHA_MISMATCH/);
+  assert.equal(fs.existsSync(wrong),false);
+  assert.throws(()=>exportSavedPlan(file,path.join(tmp,'unknown'),
+   'UNVERIFIED_DESIGN',null,true,{hostDetail:'unapproved'}),
+   /HOST_DETAIL_MODE/);
+ }finally{fs.rmSync(tmp,{recursive:true,force:true});}
 });
 test('exported preview verification rejects a block that is only AIR',()=>{
  const scene=compileDesign(d);

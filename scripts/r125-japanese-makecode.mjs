@@ -11,9 +11,14 @@ import {critiqueArchitecture} from '../source/ai/b198c-spatial-critic.mjs';
 import {auditR125SourceRoutes} from '../source/ai/r125-source-routes.mjs';
 import {exportB143EducationMakeCode} from '../source/ai/r125-education-makecode-export.mjs';
 
-export function exportSavedPlan(planFile, outDir, provenance='UNVERIFIED_DESIGN',paletteFile=null,previewTestWorld=false) {
+export function exportSavedPlan(planFile, outDir, provenance='UNVERIFIED_DESIGN',paletteFile=null,previewTestWorld=false,{hostDetail='legacy',expectedSourceSha256=null}={}) {
  if(typeof previewTestWorld!=='boolean'||(previewTestWorld&&paletteFile!==null))
   throw Error('PREVIEW_REQUIRES_NO_ATTESTED_PALETTE');
+ if(!['legacy','spatial-v1'].includes(hostDetail))
+  throw Error('HOST_DETAIL_MODE');
+ if(expectedSourceSha256!==null&&
+   (typeof expectedSourceSha256!=='string'||!/^[a-f0-9]{64}$/.test(expectedSourceSha256)))
+  throw Error('EXPECTED_SOURCE_SHA256_FORMAT');
  const plan=JSON.parse(fs.readFileSync(planFile,'utf8'));
  // The author owns the plan and its room split; HOST owns a viable door.
  // Preserve the prior practical geometry for every case EXCEPT an expressive
@@ -26,9 +31,20 @@ export function exportSavedPlan(planFile, outDir, provenance='UNVERIFIED_DESIGN'
  const stairDividerAtLanding=Boolean(plan.expression)&&
   upper?.splitAxis==='z'&&[7,8].includes(upper.splitCoordinate);
  const upperDoorPlacement=stairDividerAtLanding?'stair-clear':'legacy';
- const product=stairDividerAtLanding?compileArchitecturePlan(plan,{
+ // The opt-in spatial export must use EXACTLY the same HOST policy as the
+ // saved-model offline 3D replay, never an implicitly different geometry.
+ // The proven legacy MakeCode code path remains unchanged by default.
+ const product=hostDetail==='spatial-v1'?compileArchitecturePlan(plan,{
+  entrancePlacement:'source-accessible',
+  upperDoorPlacement:Object.hasOwn(plan,'expression')?'stair-clear':'legacy',
+  hostDetail
+ }):stairDividerAtLanding?compileArchitecturePlan(plan,{
   entrancePlacement:'source-accessible',upperDoorPlacement
  }):initial;
+ // Compare with the independently reviewed SOURCE before making any output.
+ // A mismatch is not a "close enough" building and must never be exported.
+ if(expectedSourceSha256!==null&&product.sourceSha256!==expectedSourceSha256)
+  throw Error('SAVED_SOURCE_SHA_MISMATCH');
  // Reuse two EXISTING voxel-derived audits. Source pass means only an
  // offline clearance candidate, never in-game walking certification.
  const circulation=auditArchitecturePlanCirculation(product);
@@ -44,10 +60,14 @@ export function exportSavedPlan(planFile, outDir, provenance='UNVERIFIED_DESIGN'
   sourceSha256:product.sourceSha256,
   geometrySha256:product.geometrySha256,
   planSha256:product.planSha256,
-  hostSourceCompilerMode:stairDividerAtLanding?
-   'R125_SOURCE_ACCESSIBLE_ENTRY_AND_HOST_STAIR_CLEAR_THRESHOLD':
-   'R125_SOURCE_ACCESSIBLE_ENTRANCE_FROM_MODEL_SPLIT_AXIS',
-  hostUpperDoorPlacement:upperDoorPlacement,
+  hostSourceCompilerMode:hostDetail==='spatial-v1'?
+   'R125_SOURCE_ACCESSIBLE_STAIR_CLEAR_WITH_SPATIAL_V1':
+   stairDividerAtLanding?
+    'R125_SOURCE_ACCESSIBLE_ENTRY_AND_HOST_STAIR_CLEAR_THRESHOLD':
+    'R125_SOURCE_ACCESSIBLE_ENTRANCE_FROM_MODEL_SPLIT_AXIS',
+  hostDetail,expectedSourceSha256,
+  hostUpperDoorPlacement:hostDetail==='spatial-v1'?
+   (Object.hasOwn(plan,'expression')?'stair-clear':'legacy'):upperDoorPlacement,
   originalModelPlanUnchanged:true,
   status:circulation.status==='SOURCE_CLEARANCE_PROBES_PASS'&&
    routes.status==='SOURCE_ROUTES_REACH_ALL_ZONES'&&
@@ -81,7 +101,8 @@ async function main(args) {
   throw Error('DUPLICATE_PREVIEW_FLAG');
  const options={};
  for(let i=0;i<filtered.length;i+=2) {
-  if(!['--out','--prompt','--model','--plan','--palette'].includes(filtered[i]) ||
+  if(!['--out','--prompt','--model','--plan','--palette',
+    '--host-detail','--source-sha256'].includes(filtered[i]) ||
    !filtered[i+1] || Object.hasOwn(options,filtered[i]))
    throw Error('INVALID_ARGUMENTS');
   options[filtered[i]]=filtered[i+1];
@@ -91,9 +112,15 @@ async function main(args) {
   throw Error('FRESH_OUTPUT_AND_ONE_INPUT_REQUIRED');
  if(previewTestWorld&&(Boolean(options['--prompt'])||Boolean(options['--palette'])))
   throw Error('PREVIEW_SAVED_PLAN_ONLY');
+ if(options['--prompt']&&(options['--host-detail']||options['--source-sha256']))
+  throw Error('SOURCE_OPTIONS_REPLAY_ONLY');
  if(options['--plan']) {
   if(options['--model']) throw Error('MODEL_NOT_USED_FOR_REPLAY');
-  return exportSavedPlan(options['--plan'],out,'UNVERIFIED_DESIGN',options['--palette']??null,previewTestWorld);
+  return exportSavedPlan(options['--plan'],out,'UNVERIFIED_DESIGN',
+   options['--palette']??null,previewTestWorld,{
+    hostDetail:options['--host-detail']??'legacy',
+    expectedSourceSha256:options['--source-sha256']??null
+   });
  }
  if(!options['--model']) throw Error('MODEL_REQUIRED');
  fs.mkdirSync(out);
