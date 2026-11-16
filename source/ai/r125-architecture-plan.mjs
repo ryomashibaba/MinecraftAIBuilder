@@ -375,9 +375,14 @@ export function assessR125AuthoredRoomCapacity(plan){
 }
 
 export function compileArchitecturePlan(plan,{
- entrancePlacement='legacy',upperDoorPlacement='legacy',hostDetail='legacy'
+ entrancePlacement='legacy',upperDoorPlacement='legacy',hostDetail='legacy',
+ roofGlazing='none'
 }={}){
  check(['legacy','spatial-v1'].includes(hostDetail),'HOST_DETAIL_MODE');
+ // Optional ART candidate only. Old authors and their original SOURCE are untouched.
+ check(['none','sawtooth-ribbon'].includes(roofGlazing),'ROOF_GLAZING_MODE');
+ check(roofGlazing==='none'||(plan?.expression?.roofProfile==='sawtooth'&&
+  plan.expression.roofVolume==='raised'),'ROOF_GLAZING_REQUIRES_RAISED_SAWTOOTH');
  check(hostDetail==='legacy'||Boolean(plan?.expression),'HOST_DETAIL_REQUIRES_EXPRESSION');
  validateArchitecturePlan(plan);
  check(['legacy','source-accessible'].includes(entrancePlacement),
@@ -388,7 +393,7 @@ export function compileArchitecturePlan(plan,{
  check(upperDoorPlacement==='legacy'||Boolean(plan.expression),
   'UPPER_DOOR_REQUIRES_EXPRESSION');
  const original=structuredClone(plan);
- if(original.expression)return compileExpressiveArchitecturePlan(original,{entrancePlacement,upperDoorPlacement,hostDetail});
+ if(original.expression)return compileExpressiveArchitecturePlan(original,{entrancePlacement,upperDoorPlacement,hostDetail,roofGlazing});
  const {width:w,depth:d}=original.footprint;
  const count=original.levels.length;
  const floor=original.materials.floor,wall=original.materials.wall,
@@ -618,7 +623,7 @@ export function auditArchitecturePlanCirculation(product){
  * identically without expression; do NOT change the old pinned Qwen 14B 2620-
  * voxel result or its source digest. No typology-specific templates.
  */
-function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',upperDoorPlacement='legacy',hostDetail='legacy'}={}){
+function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',upperDoorPlacement='legacy',hostDetail='legacy',roofGlazing='none'}={}){
  const {width:w,depth:d}=original.footprint;
  const count=original.levels.length;
  const {setbackSide,setbackDepth,roofProfile,roofAxis,facadeLanguage,
@@ -894,7 +899,12 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
     const size=roofAxis==='x'?
      [1,1,upper.z1-upper.z0+1]:
      [upper.x1-upper.x0+1,1,1];
-    box('roof-raised-skin-'+pos,'add',roof,origin,size);
+    // ART study: replace one solid roof strip per six with real skylight
+    // glass, retaining the AUTHOR's geometry, pitch and occupied envelope.
+    // Never enabled implicitly; explicit local replay is required.
+    const skinMaterial=roofGlazing==='sawtooth-ribbon'&&
+     roofProfile==='sawtooth'&&pos%6===4?'glass':roof;
+    box('roof-raised-skin-'+pos,'add',skinMaterial,origin,size);
     if(height>0){
      // A source-enclosed eave on BOTH long sides of this strip.
      const a=roofAxis==='x'?
