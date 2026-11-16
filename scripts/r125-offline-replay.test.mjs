@@ -182,3 +182,33 @@ test('roof ribbon replay argument is opt-in and does not accept arbitrary values
  assert.throws(()=>parseR125ReplayArgs(['--raw','a','--out','b',
   '--roof-glazing','magic']),/ROOF_GLAZING_MODE/);
 });
+
+test('offline genuine-plan-compatible roof study uses identical original bytes with alternate true B143 material',()=>{
+ const plan={
+  schema:PLAN,id:'tide-ribbon-study',title:'Generic coastal observation building',
+  brief:'Two accessible rooms for visiting and monitoring the coast',
+  footprint:{width:24,depth:24},
+  levels:[{splitAxis:'x',splitPercent:50,spaces:[
+   {id:'laboratory',purpose:'measure water samples'},
+   {id:'visitor',purpose:'observe results'}
+  ]}],
+  materials:{floor:'wood',wall:'concrete',roof:'concrete'},
+  expression:{setbackSide:'none',setbackDepth:0,
+   roofProfile:'sawtooth',roofAxis:'x',facadeLanguage:'plain',roofVolume:'raised'}
+ };
+ const raw=JSON.stringify(plan);
+ const base=diagnoseR125ArchitecturePlanOriginal(raw);
+ const ribbon=diagnoseR125ArchitecturePlanOriginal(raw,{roofGlazing:'sawtooth-ribbon'});
+ assert.equal(base.status,'B143_SOURCE_CANDIDATE_ART_HOLD',base.compilerReason);
+ assert.equal(ribbon.status,'B143_SOURCE_CANDIDATE_ART_HOLD',ribbon.compilerReason);
+ assert.equal(base.originalSha256,ribbon.originalSha256);
+ assert.equal(base.planSha256,ribbon.planSha256);
+ assert.notEqual(base.sourceSha256,ribbon.sourceSha256);
+ assert.equal(base.occupiedVoxels,ribbon.occupiedVoxels);
+ assert.equal(ribbon.hostPolicy.roofGlazing,'sawtooth-ribbon');
+ assert.equal(ribbon.originalEdited,false);
+ assert.equal(ribbon.modelCalls,0);
+ assert.equal(ribbon.worldWrites,0);
+ assert.equal(ribbon.minecraftWalking,'NOT_TESTED');
+ assert.equal(JSON.stringify(plan),raw);
+});
