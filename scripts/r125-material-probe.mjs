@@ -24,14 +24,16 @@ export function makeEducationPreviewMaterialProbe(){
   previewMaterialMap:Object.fromEntries(MATERIALS.map((m,i)=>[m,materialNames[i]])),
   sourceOfTruth:'r125-education-makecode-export.mjs PREVIEW',
   previewPaletteVerified:false,
-  useOnlyInNewDisposableFlatTestWorld:true};
+  useOnlyInDedicatedFlatTestWorld:true,
+  requireNewWorldForEveryTrial:false,
+  recommendedTeleportCommand:'/tp @s ~256 ~ ~'};
 }
 const validName=name=>typeof name==='string'&&/^[a-z][a-z0-9_]{1,63}$/.test(name)&&
  !['air','water','lava','fire','tnt','command_block'].includes(name);
 export function makeMaterialProbe(blockName){
  if(!validName(blockName))fail('INVALID_BLOCK');
  const code=[
-  '// Copy of EMPTY, backed-up Education test world only.',
+  '// Dedicated Education creative flat TEST WORLD: only an unused solid-ground site.',
   '// One candidate per script; no automatic retries or existing building edits.',
   'let mabProbeTried = false',
   'function mabMaterialSingleRun() {',
@@ -64,7 +66,8 @@ export function makeMaterialBatchProbe(names=DEFAULT_MATERIAL_BATCH){
   fail('BATCH_CONTRACT');
  const list=JSON.stringify(names);
  const code=[
-  '// BATCH MATERIAL PROBE: backed-up COPY of an EMPTY, flat Education test world ONLY.',
+  '// BATCH MATERIAL PROBE: dedicated flat Education TEST WORLD; fresh unused site only.',
+  '// Reuse this test world by standing on ground and chatting /tp @s ~256 ~ ~ before a NEW script.',
   '// One command "mb": 8 or fewer spaced targets, one shot; no automatic retries.',
   '// This is NOT a construction script or an automatic materials certification.',
   'let mabBatchTried = false',

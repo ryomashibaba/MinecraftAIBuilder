@@ -133,11 +133,12 @@ export function exportB143EducationMakeCode({design,scene,originOffset=[8,0,8],p
  '// Auto-generated B143 voxels. Not a live bridge. Test-world COPY ONLY.',
  ...(unverifiedTestWorldPreview?[
   '// UNVERIFIED PREVIEW MATERIALS: speculative blockByName mappings.',
-  '// Use ONLY a disposable EMPTY flat TEST WORLD, never a valuable world.',
+  '// Use ONE dedicated flat TEST WORLD at an unused empty site, never a valuable world.',
   '// These mappings are not evidence or user-attested Education materials.'
  ]:[]),
  '// In Education: press C -> Code Builder -> MakeCode JavaScript -> paste -> Run.',
- '// Stand on FLAT SOLID ground. Type mabset; inspect location; type mabbuild; then mabverify.',
+ '// Reuse the dedicated test world; for NEXT build, stand on ground then chat /tp @s ~256 ~ ~.',
+ '// Check unused flat land BEFORE mabset. Then mabset, inspect location, mabbuild, mabverify.',
  '// Back up your test world first. There is NO automatic rollback or world-ID check.',
  'let mabAnchor = player.position()',
  'let mabReady = false',
@@ -248,7 +249,7 @@ export function exportB143EducationMakeCode({design,scene,originOffset=[8,0,8],p
   materialMode:unverifiedTestWorldPreview?'UNVERIFIED_TEST_WORLD_PREVIEW':
    legacyStoneFallback?'EXPLICIT_LEGACY_STONE_FALLBACK':'STRICT_USER_ATTESTED',
   materialWarning:unverifiedTestWorldPreview?
-   'DISPOSABLE TEST WORLD ONLY: candidate names are NOT verified for Education 26.33 and may be missing, air or wrong textures. Confirm visually and with screenshots. Not approved for real construction.':
+   'DEDICATED FLAT TEST WORLD, UNUSED SITE ONLY: candidate names are NOT verified for Education 26.33 and may be missing, air or wrong textures. Confirm visually and with screenshots. Not approved for valuable worlds.':
    legacyStoneFallback?
    'EXPLICIT LEGACY ONLY: materials collapse to stone. Not a faithful multi-material build.':
    'Extra materials are user-attested, not software-certified in game',

@@ -115,12 +115,12 @@ try {
 } catch {
     Write-Warning 'Minecraft Education was not opened. Start it manually from Windows Start; clipboard is ready.'
 }
-Write-Host 'In Minecraft Education: create a NEW EMPTY FLAT test world, enable cheats, press C, select MakeCode, open JavaScript, and paste.'
+Write-Host 'In Minecraft Education: reuse ONE dedicated creative flat test world (enable cheats). For each new trial while standing on the ground: /tp @s ~256 ~ ~, confirm clear site; press C, open MakeCode JavaScript, and paste.'
 if ($Mode -eq 'Probe') {
-    Write-Host 'On an isolated fresh flat world only: run MakeCode, then chat mb. Confirm 7/7 matching and visually inspect blocks.'
+    Write-Host 'At an unused flat site in the dedicated test world only: run MakeCode, then chat mb. Confirm 7/7 matching and visually inspect blocks.'
     Write-Host 'Do NOT paste a building script until this first material test is evaluated.'
 } else {
-    Write-Host 'On an isolated fresh flat world only: run MakeCode, chat mabset, then mabbuild, then mabverify.'
+    Write-Host 'At an unused flat site in the dedicated test world only: run MakeCode, chat mabset, then mabbuild, then mabverify. Teleport only before mabset; the clearance preflight rejects occupied sites.'
     Write-Host 'A SOURCE or MakeCode PASS does not prove the in-game walk or architecture quality.'
 }
 Write-Host ('Copied source file: ' + $codeFile)

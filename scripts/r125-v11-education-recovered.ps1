@@ -1,7 +1,7 @@
 # MAB V11: one-command REAL saved-Qwen -> Minecraft Education test preparation.
 # Never calls a model, starts a world, pastes into Code Builder, or writes blocks.
 # -Stage Probe: prepare ONLY materials missing Education 26.33 attestation.
-# -Stage Preview: prepare saved SOURCE-matched building for a NEW flat test world.
+# -Stage Preview: prepare saved SOURCE-matched building for an empty site in ONE reusable dedicated flat test world.
 [CmdletBinding()]
 param(
  [ValidateSet('Probe','Preview')][string]$Stage='Probe',
@@ -122,7 +122,7 @@ if($Stage -ceq 'Probe'){
  Require ((Sha $codeFile) -ceq $manifest.education.packetSha256) 'PREVIEW_HASH'
  $chat='mabset, mabbuild, mabverify'
  if(@($manifest.education.missingInGameAttestation).Count -gt 0){
-  Write-Warning 'MAB_PREVIEW_MATERIALS_UNVERIFIED: use an empty disposable test world; inspect missing materials with -Stage Probe first.'
+  Write-Warning 'MAB_PREVIEW_MATERIALS_UNVERIFIED: inspect missing materials with -Stage Probe first; use a clear site in the dedicated flat test world.'
  }
 }
 $codeText=Get-Content -LiteralPath $codeFile -Raw -Encoding UTF8
@@ -135,4 +135,4 @@ if(-not $NoOpen){
  try{Start-Process -FilePath 'minecraftedu://open' -ErrorAction Stop}
  catch{Write-Warning 'MAB_EDU_OPEN_FAILED: launch Minecraft Education manually'}
 }
-Write-Output 'Use a NEW EMPTY FLAT Minecraft Education test world only. Open Code Builder / MakeCode JavaScript and paste clipboard. This launcher did not write any blocks.'
+Write-Output 'Reuse the dedicated CREATIVE FLAT TEST WORLD. For each new trial, stand on ground, chat /tp @s ~256 ~ ~, verify empty flat space, then paste into Code Builder / MakeCode JavaScript. This launcher did not teleport or place blocks.'

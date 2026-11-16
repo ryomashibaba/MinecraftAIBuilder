@@ -65,7 +65,9 @@ test('one offline recovery replays saved original exactly and produces old/new s
   assert.ok(report.education.usedMaterials.length>=1);
   assert.equal(report.education.materialCounts.stone>=0,true);
   assert.match(report.education.status,/^DISPOSABLE_PREVIEW_ONLY_/);
-  assert.equal(report.education.userMustUseNewDisposableWorld,true);
+  assert.equal(report.education.testWorldPolicy,'REUSE_DEDICATED_FLAT_WORLD_FRESH_SITE');
+  assert.equal(report.education.requireNewWorldForEveryTrial,false);
+  assert.equal(report.education.recommendedTeleportCommand,'/tp @s ~256 ~ ~');
   const makecode=fs.readFileSync(report.education.packet,'utf8');
   assert.ok(makecode.includes('mabbuild'));
   assert.equal(sha(makecode),report.education.packetSha256);
@@ -94,6 +96,8 @@ test('one offline recovery replays saved original exactly and produces old/new s
    assert.equal(metadata.sourceSha256,verified.sourceSha256);
    assert.equal(metadata.geometrySha256,verified.geometrySha256);
    assert.equal(metadata.actualEducationMaterialResults,'NOT_TESTED');
+   assert.equal(metadata.onlyForDedicatedFlatTestWorldAtFreshSite,true);
+   assert.equal(metadata.requireNewWorldForEveryTrial,false);
    assert.equal(metadata.worldWrites,0);
    assert.deepEqual(metadata.previewBlockNames,probe.blockNames);
   }else assert.equal(report.education.missingMaterialProbe,null);

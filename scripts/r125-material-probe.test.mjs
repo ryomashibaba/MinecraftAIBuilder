@@ -162,7 +162,9 @@ test('one-shot Education preview probe uses the identical actual MakeCode export
   Object.fromEntries(MATERIALS.map((m,i)=>[m,expected[i]])));
  assert.equal(batch.previewPaletteVerified,false);
  assert.equal(batch.testedMaterialsApproved,false);
- assert.equal(batch.useOnlyInNewDisposableFlatTestWorld,true);
+ assert.equal(batch.useOnlyInDedicatedFlatTestWorld,true);
+  assert.equal(batch.requireNewWorldForEveryTrial,false);
+  assert.equal(batch.recommendedTeleportCommand,'/tp @s ~256 ~ ~');
  assert.equal(batch.worldWrites,0);
  assert.equal(batch.inGameResult,'NOT_TESTED');
  assert.deepEqual(batch.requestedSemanticMaterials,MATERIALS);

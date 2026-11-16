@@ -172,7 +172,9 @@ export function reviewRecoveredArchitecture({beforeStudy,failedStudy,outDir}={})
    result.education.packetSha256=pkt.makecodeSourceSha256;
    result.education.plannedCuboids=pkt.plannedCuboids;
    result.education.plannedVoxelCount=pkt.plannedVoxelCount;
-   result.education.userMustUseNewDisposableWorld=true;
+   result.education.testWorldPolicy='REUSE_DEDICATED_FLAT_WORLD_FRESH_SITE';
+   result.education.requireNewWorldForEveryTrial=false;
+   result.education.recommendedTeleportCommand='/tp @s ~256 ~ ~';
    result.education.userMustNotTreatThisAsActualEducationTestPass=true;
    // Only probe the materials actually used by this EXACT building, and
    // missing independent Education v26.33 attestation. 0 model/world calls.
@@ -193,7 +195,9 @@ export function reviewRecoveredArchitecture({beforeStudy,failedStudy,outDir}={})
      probe:probeMeta,
      execution:'OFFLINE_ONLY',
      worldWrites:0,actualEducationMaterialResults:'NOT_TESTED',
-     onlyForNewDisposableWorld:true
+     onlyForDedicatedFlatTestWorldAtFreshSite:true,
+     requireNewWorldForEveryTrial:false,
+     recommendedTeleportCommand:'/tp @s ~256 ~ ~'
     },null,2)+'\n',{flag:'wx'});
     result.education.missingMaterialProbe={
      file:probeFile,report:reportFile,codeSha256:sha(probe.code),
