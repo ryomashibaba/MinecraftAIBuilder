@@ -29,6 +29,8 @@ on:
       - scripts/b143-gallery-core.mjs
       - source/ai/b143-viewer-template.html
       - scripts/r125-v11-windows-pilot.ps1
+      - scripts/r125-v11-education-live-launch.ps1
+      - scripts/r125-material-probe.mjs
       - scripts/R125_V11_3_Buildings.cmd
       - scripts/research/r125-v6-corner-facade-contract.test.mjs
       - scripts/research/r125-v6-offline-ranked-contrast.mjs
@@ -58,6 +60,11 @@ jobs:
           if errorlevel 1 exit /b 1
           call scripts\R125_V11_3_Buildings.cmd -CheckOnly -OnlyHousingRetail
           if errorlevel 1 exit /b 1
+      - name: Education desktop launcher — 7-material real exporter palette, check-only
+        shell: powershell
+        run: |
+          & scripts/r125-v11-education-live-launch.ps1 -Mode Probe -CheckOnly
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
   exact-source-corner-facade-witness:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
