@@ -57,6 +57,28 @@ test('one offline recovery replays saved original exactly and produces old/new s
   assert.equal(report.after.sourceVerified,true);
   assert.equal(report.after.sourceSha256,verified.sourceSha256);
   assert.equal(report.finalVoxelDifference.sameActualGeometryAndMaterial,true);
+  assert.equal(report.education.sourceSha256,verified.sourceSha256);
+  assert.equal(report.education.geometrySha256,verified.geometrySha256);
+  assert.equal(report.education.worldWrites,0);
+  assert.equal(report.education.inGameBlockPlacement,'NOT_TESTED');
+  assert.equal(report.education.inGameWalk,'NOT_TESTED');
+  assert.ok(report.education.usedMaterials.length>=1);
+  assert.equal(report.education.materialCounts.stone>=0,true);
+  assert.match(report.education.status,/^DISPOSABLE_PREVIEW_ONLY_/);
+  assert.equal(report.education.userMustUseNewDisposableWorld,true);
+  const makecode=fs.readFileSync(report.education.packet,'utf8');
+  assert.ok(makecode.includes('mabbuild'));
+  assert.equal(sha(makecode),report.education.packetSha256);
+  const packet=JSON.parse(fs.readFileSync(path.join(outDir,
+   'EDUCATION_DISPOSABLE_PREVIEW','MAKECODE_EXPORT_REPORT.json'),'utf8'));
+  assert.equal(packet.materialMode,'UNVERIFIED_TEST_WORLD_PREVIEW');
+  assert.equal(packet.sourceSha256,verified.sourceSha256);
+  assert.equal(packet.geometrySha256,verified.geometrySha256);
+  assert.equal(packet.worldWrites,0);
+  assert.equal(packet.programExecuted,false);
+  assert.deepEqual(packet.BuildPlan.operations,[]);
+  assert.equal(report.education.plannedVoxelCount,
+   packet.plannedVoxelCount);
   assert(fs.existsSync(report.abImage));
   assert.equal(fs.readFileSync(report.abImage).subarray(0,8).toString('hex'),
    '89504e470d0a1a0a');

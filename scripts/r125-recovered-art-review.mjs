@@ -12,7 +12,9 @@ import {createHash} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import {writeArchitecturePlanReplay} from './r125-offline-replay.mjs';
 import {saveB143ABReview} from './r125-static-art-review.mjs';
-import {compileDesign,verifyCompiled} from '../source/ai/b143-building-dsl.mjs';
+import {compileDesign,verifyCompiled,MATERIALS} from '../source/ai/b143-building-dsl.mjs';
+import {exportB143EducationMakeCode,PREVIEW}
+ from '../source/ai/r125-education-makecode-export.mjs';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const sha=s=>createHash('sha256').update(s).digest('hex');
@@ -121,6 +123,60 @@ export function reviewRecoveredArchitecture({beforeStudy,failedStudy,outDir}={})
   result.abReport=path.join(abDir,'AB_REPORT.json');
   result.finalVoxelDifference=ab.finalVoxelDifference;
   result.artifactStatus='SOURCE_PASS_ART_REVIEW_READY';
+  // Produce an actual Education code preview from the SAME certified SOURCE
+  // without starting Minecraft. Unverified material names are reported rather
+  // than treated as a successful in-game palette verification.
+  const repairedDesign=readJson(path.join(replayDir,'B143_SOURCE_REVIEW_ONLY.json'));
+  const repairedScene=compileDesign(repairedDesign);
+  const verifiedPalette=readJson(path.join(root,
+   'configs/r125-education-verified-palette-v26.33.json'));
+  const verifiedNames={stone:'stone',glass:'glass',
+   ...Object.fromEntries(Object.entries(verifiedPalette.blocks)
+    .map(([name,record])=>[name,record.blockName]))};
+  const count=Object.fromEntries(MATERIALS.map(k=>[k,0]));
+  for(const voxel of repairedScene.primitives)count[MATERIALS[voxel[3]]]++;
+  const usedMaterials=MATERIALS.filter(k=>count[k]>0);
+  const unverified=usedMaterials.filter(k=>!verifiedNames[k]);
+  result.education={status:'NOT_EVALUATED',materialCounts:count,
+   usedMaterials,attestedMaterialNames:Object.fromEntries(
+    usedMaterials.filter(k=>verifiedNames[k]).map(k=>[k,verifiedNames[k]])),
+   missingInGameAttestation:unverified.map(k=>({
+    material:k,previewOnlyGuess:PREVIEW[k],voxelCount:count[k]})),
+   missingAttestationIsNotAClaimTheBlockDoesNotExist:true,
+   inGameBlockPlacement:'NOT_TESTED',inGameWalk:'NOT_TESTED',
+   sourceSha256:repairedScene.sourceSha256,
+   geometrySha256:repairedScene.geometrySha256,
+   worldWrites:0};
+  try{
+   const pkt=exportB143EducationMakeCode({design:repairedDesign,
+    scene:repairedScene,provenance:'LOCAL_MODEL_CAPTURE',
+    groundLowestLayer:true,tightVoxelEnvelope:true,columnClearance:true,
+    unverifiedTestWorldPreview:true});
+   if(pkt.sourceSha256!==repairedScene.sourceSha256||
+      pkt.geometrySha256!==repairedScene.geometrySha256||
+      pkt.worldWrites!==0||pkt.programExecuted!==false||
+      pkt.BuildPlan?.operations?.length!==0)
+    bad('EDUCATION_PACKET_SOURCE_MISMATCH');
+   const dir=path.join(out,'EDUCATION_DISPOSABLE_PREVIEW');
+   const {code,...packetReport}=pkt;
+   fs.mkdirSync(dir);
+   fs.writeFileSync(path.join(dir,'MAKECODE_EDUCATION_PREVIEW_ONLY.ts'),
+    code,{flag:'wx'});
+   fs.writeFileSync(path.join(dir,'MAKECODE_EXPORT_REPORT.json'),
+    JSON.stringify(packetReport,null,2)+'\n',{flag:'wx'});
+   result.education.status=unverified.length?
+    'DISPOSABLE_PREVIEW_ONLY_MATERIAL_ATTESTATION_MISSING':
+    'DISPOSABLE_PREVIEW_ONLY_ALL_USED_PALETTE_NAMES_ATTESTED';
+   result.education.packet=path.join(dir,'MAKECODE_EDUCATION_PREVIEW_ONLY.ts');
+   result.education.packetSha256=pkt.makecodeSourceSha256;
+   result.education.plannedCuboids=pkt.plannedCuboids;
+   result.education.plannedVoxelCount=pkt.plannedVoxelCount;
+   result.education.userMustUseNewDisposableWorld=true;
+   result.education.userMustNotTreatThisAsActualEducationTestPass=true;
+  }catch(error){
+   result.education.status='HOLD_OFFLINE_EDUCATION_PREVIEW';
+   result.education.error=String(error?.message??error).slice(0,200);
+  }
  }
  fs.writeFileSync(path.join(out,'RECOVERY_ART_REPORT.json'),
   JSON.stringify(result,null,2)+'\n',{flag:'wx'});
