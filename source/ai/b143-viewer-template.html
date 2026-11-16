@@ -87,7 +87,7 @@ function setScene(){
  const s=scene();floor.max=s.levels-1;floor.value=s.levels-1;all.checked=true;
  el("sceneTitle").textContent=s.title;el("description").textContent=s.brief;
  const st=el("stats");st.replaceChildren(
-  infoLine("デザイン識別子",s.id),infoLine("概念セル",s.stats.voxels.toLocaleString()+"個"),
+  infoLine("デザイン識別子",s.id),infoLine("SOURCE全占有ボクセル",s.stats.voxels.toLocaleString()+"個"),
   infoLine("建築高さ",s.bounds.maxY-s.bounds.minY+1+"ブロック"),
   infoLine("構成操作",s.stats.designOperations.length+"回"),
   infoLine("3D生成の整合性","SHA256検証済み"),
@@ -146,8 +146,10 @@ function draw(){
   }
  }
  ctx.globalAlpha=1;
- el("meta").textContent="表示: "+active.length.toLocaleString()+" / "+s.surface.length.toLocaleString()+
-  " 実ボクセル、"+painted.toLocaleString()+" 面"+
+ el("meta").textContent="表示中の描画セル: "+active.length.toLocaleString()+
+  " / 外表面セル: "+s.surface.length.toLocaleString()+
+  " ｜SOURCE全占有: "+s.stats.voxels.toLocaleString()+
+  " ｜描画面: "+painted.toLocaleString()+
   (!all.checked?(Array.isArray(s.sectionCaps)?
    "｜断面：元SOURCEの内部セルを追加表示（施工なし）":
    "｜断面：旧外表面データのみ（未検証）"):"")+

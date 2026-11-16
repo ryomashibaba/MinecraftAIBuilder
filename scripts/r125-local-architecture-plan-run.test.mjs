@@ -141,6 +141,9 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    assert.equal(request.messages[0].content.includes('No fixed building-type template'),true);
    assert.equal(request.messages[0].content.includes('actively SELECT an expression'),true);
    assert.equal(request.messages[0].content.includes('raised roof volume'),true);
+   assert.equal(request.messages[0].content.includes('ROOF-TO-FACADE PROPORTION'),true);
+   assert.equal(request.messages[0].content.includes('VISUAL/WEATHER DESIGN TEST'),true);
+   assert.equal(request.messages[0].content.includes('recessed-portico'),true);
    assert.equal(request.messages[0].content.includes('ROOM-APPROPRIATE fixture'),true);
    assert.equal(request.messages[0].content.includes('REAL ROOM BUDGET'),true);
    assert.ok(request.messages[0].content.includes('first room occupies WEST'));
@@ -200,6 +203,9 @@ test('one call records raw and true SOURCE, without privately leaking raw into r
    'B143_SOURCE_3D_REVIEW_ONLY.html'),'utf8');
   assert.ok(viewer.includes('minecraftaibuilder-b143-gallery-v1'));
   assert.ok(viewer.includes(diag.geometrySha256));
+  assert.ok(viewer.includes('SOURCE全占有ボクセル'));
+  assert.ok(viewer.includes('外表面セル: '));
+  assert.ok(viewer.includes('｜SOURCE全占有: '));
   assert.equal(out.report.review3d,'TRUE_B143_HTML_GENERATED_ART_PENDING');
   assert.equal(out.report.makeCodeStatus,'OFFLINE_CODE_GENERATED_ONLY');
   assert.equal(typeof out.report.makeCodeSourceSha256,'string');
