@@ -53,7 +53,20 @@ function syntheticCases(seed){
 export function inspectRoofAir(before,after){
  const {design,compiled,plan}=after;
  const top=1+5*plan.levels.length;
- const skins=design.elements.filter(e=>e.id.startsWith('roof-raised-skin-'));
+ // HOST can compress identical strips into B143 repeat primitives. Expand
+ // their coordinates FOR ANALYSIS ONLY; verify against FINAL compiled voxels.
+ // Otherwise a valid compacted real Qwen roof appears to have missing strips.
+ const axisIndex=plan.expression.roofAxis==='x'?0:2;
+ const skins=design.elements.filter(e=>/^roof-raised-skin-\d+$/.test(e.id))
+  .flatMap(e=>{
+   const start=Number(e.id.slice('roof-raised-skin-'.length));
+   const count=e.repeat?.count??1,offset=e.repeat?.offset??[0,0,0];
+   return Array.from({length:count},(_,i)=>({
+    ...e,id:'roof-raised-skin-'+(start+offset[axisIndex]*i),
+    origin:e.origin.map((value,k)=>value+offset[k]*i),
+    repeat:undefined
+   }));
+  }).sort((a,b)=>Number(a.id.slice(17))-Number(b.id.slice(17)));
  const roofBase=design.elements.some(e=>e.id==='roof-base');
  const occupied=new Set(compiled.primitives.map(v=>key(v[0],v[1],v[2])));
  const older=new Set(before.compiled.primitives.map(v=>key(v[0],v[1],v[2])));
