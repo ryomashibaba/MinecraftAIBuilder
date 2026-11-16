@@ -932,11 +932,15 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
       sawtoothHeight(p);
      const rise=Math.abs(height-previous);
      if(rise>1){
-      const highPos=height>previous?pos:p;
+      // Compact-only: place the vertical reset glass on the LOW strip,
+      // outside the high ceiling's two-wide air pad. Preserve the exact
+      // previous glazing coordinates for historical default roof output.
+      const closurePos=height>previous?pos:
+       roofMassing==='compact-sawtooth'?pos:p;
       const y=top+Math.min(height,previous)+1;
       const origin=roofAxis==='x'?
-       [upper.x0+highPos,y,upper.z0]:
-       [upper.x0,y,upper.z0+highPos];
+       [upper.x0+closurePos,y,upper.z0]:
+       [upper.x0,y,upper.z0+closurePos];
       const size=roofAxis==='x'?
        [1,rise-1,upper.z1-upper.z0+1]:
        [upper.x1-upper.x0+1,rise-1,1];
