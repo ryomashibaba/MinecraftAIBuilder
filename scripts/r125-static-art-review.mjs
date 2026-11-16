@@ -63,7 +63,7 @@ const shade=(material,face)=>(palette[material]??palette[0])
  * Ground-floor cutaway HIDES source voxels; it NEVER adds or repairs blocks.
  */
 export function renderB143StaticPNG(compiled,{sx=1,sz=-1,
- cutAboveY=null,width=1200,height=760}={}){
+ cutAboveY=null,width=1200,height=760,includeRgb=false}={}){
  if(![1,-1].includes(sx)||![1,-1].includes(sz)||
     !Number.isSafeInteger(width)||width<320||width>2600||
     !Number.isSafeInteger(height)||height<220||height>2000||
@@ -116,9 +116,36 @@ export function renderB143StaticPNG(compiled,{sx=1,sz=-1,
   }
  }
  return {bytes:png(width,height,buf),renderedFaces:faces,
+  ...(includeRgb?{rgb:buf,width,height}:{}),
   originalSourceCells:compiled.primitives.length,renderedCells:vox.length,
   hiddenAboveY:cutAboveY,viewDirection:{x:sx,z:sz},
   status:'ORTHOGRAPHIC_REVIEW_PROXY_NOT_MINECRAFT_SCREENSHOT'};
+}
+/**
+ * Four SOURCE-matched reviews in ONE image. No new solids, re-design,
+ * browser, AI, external image packages, or Minecraft calls.
+ *
+ * Reading order: front-left, front-right, rear-right, ground-floor cutaway.
+ * Insets are the exact RGB buffers used for the individual four PNGs.
+ */
+export function makeB143ContactSheet(pics){
+ if(!Array.isArray(pics)||pics.length!==4||
+  pics.some(p=>p?.render?.width!==1200||p?.render?.height!==760||
+   !Buffer.isBuffer(p.render.rgb)||p.render.rgb.length!==1200*760*3))
+  refuse('CONTACT_SHEET_REQUIRES_FOUR_MATCHED_RGB_VIEWS');
+ const tileW=1200,tileH=760,gutter=16;
+ const width=tileW*2+gutter,height=tileH*2+gutter;
+ const rgb=Buffer.alloc(width*height*3,229);
+ for(let i=0;i<4;i++){
+  const col=i%2,row=Math.floor(i/2),src=pics[i].render.rgb;
+  for(let y=0;y<tileH;y++){
+   const target=((row*(tileH+gutter)+y)*width+
+    col*(tileW+gutter))*3;
+   src.copy(rgb,target,y*tileW*3,(y+1)*tileW*3);
+  }
+ }
+ return {bytes:png(width,height,rgb),width,height,
+  order:pics.map(x=>x.name)};
 }
 /** Offline render of PRIVATE saved B143 SOURCE; never loads a model or edits it. */
 export function saveB143StaticReview({sourcePath,outDir}={}){
@@ -147,7 +174,8 @@ export function saveB143StaticReview({sourcePath,outDir}={}){
   ['GROUND_FLOOR_CUTAWAY.png',1,-1,4]
  ];
  const pics=views.map(([name,sx,sz,cutAboveY])=>({
-  name,render:renderB143StaticPNG(compiled,{sx,sz,cutAboveY})}));
+  name,render:renderB143StaticPNG(compiled,{sx,sz,cutAboveY,includeRgb:true})}));
+ const contact=makeB143ContactSheet(pics);
  const report={schema:'r125-b143-offline-static-review-v1',
   id:design.id,sourceSha256:compiled.sourceSha256,
   geometrySha256:compiled.geometrySha256,
@@ -159,12 +187,16 @@ export function saveB143StaticReview({sourcePath,outDir}={}){
    originalSourceCells:render.originalSourceCells,
    renderedCells:render.renderedCells,hiddenAboveY:render.hiddenAboveY,
    viewDirection:render.viewDirection})),
+  contactSheet:{name:'CONTACT_4_VIEWS.png',sha256:digest(contact.bytes),
+   width:contact.width,height:contact.height,
+   order:contact.order,sourceVoxels:compiled.primitives.length},
   sourceGeometryNotEdited:true,originalModelResponseNotEdited:true,
   humanArt:'NOT_REVIEWED',minecraftWalking:'NOT_TESTED',
   modelCalls:0,worldContacts:0,worldWrites:0,constructionApproved:false};
  fs.mkdirSync(out);
  for(const pic of pics)
   fs.writeFileSync(path.join(out,pic.name),pic.render.bytes,{flag:'wx'});
+ fs.writeFileSync(path.join(out,'CONTACT_4_VIEWS.png'),contact.bytes,{flag:'wx'});
  fs.writeFileSync(path.join(out,'STATIC_REVIEW.json'),
   JSON.stringify(report,null,2)+'\n',{flag:'wx'});
  return report;

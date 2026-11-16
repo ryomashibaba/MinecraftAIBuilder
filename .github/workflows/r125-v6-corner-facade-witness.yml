@@ -18,6 +18,7 @@ on:
       - scripts/r125-local-architecture-plan-run.mjs
       - scripts/r125-static-art-review.mjs
       - scripts/r125-static-art-review.test.mjs
+      - scripts/r125-v11-review-existing.ps1
       - scripts/r125-local-architecture-plan-run.test.mjs
       - scripts/r125-local-architecture-plan-batch.mjs
       - scripts/r125-batch-compare.mjs
@@ -69,6 +70,8 @@ jobs:
           if errorlevel 1 exit /b 1
           call scripts\R125_V11_3_Buildings.cmd -CheckOnly -SingleNewBrief
           if errorlevel 1 exit /b 1
+          powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\r125-v11-review-existing.ps1 -CheckOnly -NoOpen
+          if errorlevel 1 exit /b 1
       - name: Education one-click CMD -> PowerShell -> material MakeCode preview, check-only
         shell: cmd
         run: |
@@ -112,6 +115,7 @@ jobs:
           test -s "$RUNNER_TEMP/r125-genuine-qwen-static-art/EXTERIOR_FRONT_RIGHT.png"
           test -s "$RUNNER_TEMP/r125-genuine-qwen-static-art/EXTERIOR_REAR_RIGHT.png"
           test -s "$RUNNER_TEMP/r125-genuine-qwen-static-art/GROUND_FLOOR_CUTAWAY.png"
+          test -s "$RUNNER_TEMP/r125-genuine-qwen-static-art/CONTACT_4_VIEWS.png"
           test -s "$RUNNER_TEMP/r125-genuine-qwen-static-art/STATIC_REVIEW.json"
       - uses: actions/upload-artifact@v4
         with:

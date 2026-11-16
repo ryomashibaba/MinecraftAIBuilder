@@ -31,6 +31,17 @@ test('saved genuine Qwen SOURCE renders deterministic no-browser PNGs without mo
   assert.equal(report.modelCalls,0);
   assert.equal(report.worldWrites,0);
   assert.equal(report.images.length,4);
+  assert.deepEqual(report.contactSheet.order,[
+   'EXTERIOR_FRONT_LEFT.png','EXTERIOR_FRONT_RIGHT.png',
+   'EXTERIOR_REAR_RIGHT.png','GROUND_FLOOR_CUTAWAY.png']);
+  assert.equal(report.contactSheet.sourceVoxels,report.occupiedVoxels);
+  assert.equal(report.contactSheet.width,2416);
+  assert.equal(report.contactSheet.height,1536);
+  const contact=fs.readFileSync(path.join(tmp,'first','CONTACT_4_VIEWS.png'));
+  assert.equal(contact.subarray(0,8).toString('hex'),'89504e470d0a1a0a');
+  assert.equal(contact.readUInt32BE(16),2416);
+  assert.equal(contact.readUInt32BE(20),1536);
+  assert.equal(report.contactSheet.sha256,hash(contact));
   assert(report.images.every(x=>x.renderedFaces>50&&
    x.originalSourceCells===report.occupiedVoxels));
   assert.equal(report.images[3].hiddenAboveY,4);
