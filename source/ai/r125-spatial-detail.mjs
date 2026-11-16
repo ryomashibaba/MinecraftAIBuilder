@@ -38,9 +38,12 @@ export function detailR125Envelope(elements,plan,program){
   id,shape:'box',mode,...(mode==='add'?{material}:{}),origin,size,
   ...(repeat?{repeat}:{})});
  // Query only genuine roof skins, including B143 repeats. No guessed roof
- // silhouette and no conversion of a sawtooth/monitor into a different style.
+ // silhouette and no conversion of the author-selected family. Hip bands,
+ // their central ridge and existing pitched/monitor roofs use the SAME
+ // final-top query. Explicit hip eaves are excluded: they are not the
+ // enclosing roof skin and must never raise a reconstructed entrance wall.
  const skins=elements.filter(e=>e.mode==='add'&&e.shape==='box'&&
-  /^(roof-raised-skin-|roof-profile-|roof-base$|roof-monitor-(low|high)$)/.test(e.id));
+  /^(roof-raised-skin-|roof-profile-|roof-base$|roof-monitor-(low|high)$|roof-hip-(?:[0-9]+-(?:front|rear|west|east)|inner-(?:front|rear|west|east)|ridge)$)/.test(e.id));
  const roofAt=(x,z)=>{
   let y=top;
   for(const e of skins)for(let n=0;n<(e.repeat?.count??1);n++){

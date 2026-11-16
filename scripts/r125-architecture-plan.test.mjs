@@ -2158,6 +2158,66 @@ test('explicit HOST spatial detail creates a supported recessed entrance and pre
  }
 });
 
+
+test('hip roof meets actual recessed-entry walls at true authored roof elevation, both ridge axes',()=>{
+ for(const roofAxis of ['x','z']){
+  const p=plan('hip-court-integration-'+roofAxis,['z','x'],
+   ['food and family preparation','quiet bedroom']);
+  p.footprint={width:28,depth:26};
+  p.expression={setbackSide:'none',setbackDepth:0,
+   roofProfile:'hip',roofAxis,roofVolume:'raised',facadeLanguage:'fins'};
+  p.levels[0].spaces[0].fixtures=['oven','washbasin'];
+  p.levels[0].spaces[1].fixtures=['bed'];
+  p.levels[1].spaces[0].fixtures=['desk','storage'];
+  const original=structuredClone(p);
+  const opts={entrancePlacement:'source-accessible',
+   upperDoorPlacement:'stair-clear'};
+  const bare=compileArchitecturePlan(p,opts);
+  const built=compileArchitecturePlan(p,{...opts,hostDetail:'spatial-v1'});
+  assert.deepEqual(p,original,'original author must not be rewritten');
+  assert.equal(verifyCompiled(built.design,built.compiled),true);
+  assert.notEqual(built.geometrySha256,bare.geometrySha256);
+  assert.equal(built.spatialDetail.roofProfilePreserved,'hip');
+  assert.deepEqual(built.fixtureTargets.map(f=>f.kind),
+   bare.fixtureTargets.map(f=>f.kind));
+  assert.ok(built.fixtureTargets.length>=5);
+  // The roof is NOT a level 11 flat cap: the roof height at the recessed
+  // rear wall differs by ridge direction and actual B143 tier.
+  const {left,right,back}=built.spatialDetail.court;
+  const hipSkins=bare.design.elements.filter(e=>
+   e.mode==='add'&&e.shape==='box'&&
+   /^(roof-hip-(?:\d+-(?:front|rear|west|east)|inner-(?:front|rear|west|east)|ridge))$/.test(e.id));
+  const at=(x,z)=>{
+   const roofs=hipSkins.filter(e=>x>=e.origin[0]&&
+    x<e.origin[0]+e.size[0]&&z>=e.origin[2]&&
+    z<e.origin[2]+e.size[2]);
+   assert.ok(roofs.length>0,'original roof must cover the return');
+   return Math.max(...roofs.map(e=>e.origin[1]+e.size[1]-1));
+  };
+  let physicallyRaised=0;
+  for(let x=left;x<=right;x++){
+   const expected=at(x,back);
+   const name=x===left||x===right?
+    'detail-entry-return-'+x:'detail-entry-back-'+x;
+   const wall=built.design.elements.find(e=>e.id===name);
+   assert.ok(wall,'actual HOST return wall missing '+name);
+   assert.equal(wall.size[1],expected-1,
+    'enclosure reaches the actual authored hip roof, not an assumed flat cap');
+   if(expected>11)physicallyRaised++;
+  }
+  assert.ok(physicallyRaised>0,'test needs a raised roof over its actual entrance');
+  const routes=auditR125SourceRoutes(built,{featureTargets:built.fixtureTargets});
+  assert.equal(routes.status,'SOURCE_ROUTES_REACH_ALL_ZONES',
+   JSON.stringify(routes.issues));
+  assert.ok(routes.featureAccess.every(f=>f.reachableFromEntrance));
+  assert.equal(auditArchitecturePlanCirculation(built).status,
+   'SOURCE_CLEARANCE_PROBES_PASS');
+  assert.deepEqual(built.compiled.BuildPlan.operations,[]);
+  assert.equal(built.worldWrites,0);
+  // No implicit opt-in or change to the original hip geometry.
+  assert.equal(compileArchitecturePlan(p,opts).sourceSha256,bare.sourceSha256);
+ }
+});
 test('adjacent SOURCE box packing retains material voxels and does not cross cuts or shell boundaries',()=>{
  const original=compileArchitecturePlan(plan('adjacent-box-proof')).design;
  const d=structuredClone(original);
