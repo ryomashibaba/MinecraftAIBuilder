@@ -7,6 +7,8 @@
   touch Minecraft worlds, or upload PRIVATE results. Work can run this in the
   user's existing research checkout. Outputs are local PrivateModelStudies.
   -SingleNewBrief: one new functional brief, with no prescribed architecture.
+  -ComparePriorTide: one SAME-BRIEF Qwen recheck then A/B PNG review
+  using the frozen PRIVATE 2026-11-16 tide result read-only. No extra POST.
   -CheckOnly: GitHub CI / local dry run, no model HTTP, no new files.
 #>
 [CmdletBinding()]
@@ -16,6 +18,7 @@ param(
  [switch]$CheckOnly,
  [switch]$OnlyHousingRetail,
  [switch]$SingleNewBrief,
+ [switch]$ComparePriorTide,
  [switch]$NoOpen
 )
 $ErrorActionPreference = 'Stop'
@@ -24,8 +27,14 @@ $studyBranch = 'research/r125-v6-readonly-facade-diagnostic-20261111'
 $runner = Join-Path $repo 'scripts\r125-local-architecture-plan-batch.mjs'
 $pilot = Join-Path $repo 'scripts\r125-v11-pilot-three.json'
 $single = Join-Path $repo 'scripts\r125-v11-single-unknown.json'
+$abRenderer = Join-Path $repo 'scripts\r125-static-art-review.mjs'
 if ($SingleNewBrief -and $OnlyHousingRetail) {
  throw 'V11_PILOT_CONFLICTING_TRIAL_MODES'
+}
+if ($ComparePriorTide -and (-not $SingleNewBrief -or $OnlyHousingRetail -or
+ $Model -cne 'qwen3:14b' -or
+ $Endpoint -cne 'http://127.0.0.1:11434/v1/chat/completions')) {
+ throw 'V11_TIDE_AB_REQUIRES_ONE_SAME_QWEN14B_BRIEF'
 }
 $expectedCount = if ($SingleNewBrief) { 1 } elseif ($OnlyHousingRetail) { 2 } else { 3 }
 $viewer = 'BATCH_COMPARE_3D.html'
@@ -72,7 +81,7 @@ if (-not $uri.Success -or [int]$uri.Groups[1].Value -lt 1 -or
     [int]$uri.Groups[1].Value -gt 65535) {
  throw 'V11_PILOT_LOOPBACK_ENDPOINT_REQUIRED'
 }
-foreach ($target in @($runner, $pilot, $single,
+foreach ($target in @($runner, $pilot, $single, $abRenderer,
   (Join-Path $repo 'scripts\r125-batch-compare.mjs'))) {
  if (-not (Test-Path -LiteralPath $target -PathType Leaf)) {
   throw ('V11_PILOT_MISSING_SOURCE: ' + $target)
@@ -88,6 +97,10 @@ if ($LASTEXITCODE -ne 0 -or -not $match.Success -or
 if ($CheckOnly) {
  & $node '--check' $runner
  if ($LASTEXITCODE -ne 0) { throw 'V11_PILOT_BATCH_SYNTAX_FAILED' }
+ if ($ComparePriorTide) {
+  & $node '--check' $abRenderer
+  if ($LASTEXITCODE -ne 0) { throw 'V11_TIDE_AB_RENDERER_SYNTAX_FAILED' }
+ }
  Write-Output ('V11_PILOT_CHECK_ONLY_PASS: '+$(if($SingleNewBrief){'one unseen functional brief'}elseif($OnlyHousingRetail){'two original failure briefs'}else{'three original briefs'})+'; no server, HTTP, model, world or output.')
  return
 }
@@ -124,6 +137,50 @@ if ($Endpoint -ceq 'http://127.0.0.1:11434/v1/chat/completions') {
  $listed = @($tags.models | Where-Object {
    $_.name -ceq $Model -or $_.model -ceq $Model })
  if ($listed.Count -eq 0) { throw 'V11_PILOT_MODEL_NOT_INSTALLED' }
+}
+# Verify the EXACT previous genuine Qwen response BEFORE any new model POST.
+# Never quietly switch the prompt, model, original or provider.
+if ($ComparePriorTide) {
+ $baseline = Join-Path $env:LOCALAPPDATA 'MinecraftAIBuilder\PrivateModelStudies\V11_UnseenSingle_20261116_143908_937_0bf923c6'
+ $oldOne = Join-Path $baseline 'tide-observatory'
+ $oldReportPath = Join-Path $baseline 'BATCH_REPORT.json'
+ $oldRaw = Join-Path $oldOne 'MODEL_RESPONSE_ORIGINAL.txt'
+ $oldRequest = Join-Path $oldOne 'REQUEST_ORIGINAL.txt'
+ $oldSource = Join-Path $oldOne 'B143_SOURCE_REVIEW_ONLY.json'
+ $oldDiagnosisPath = Join-Path $oldOne 'SOURCE_DIAGNOSIS.json'
+ foreach ($needed in @($oldReportPath,$oldRaw,$oldRequest,$oldSource,$oldDiagnosisPath)) {
+  if (-not (Test-Path -LiteralPath $needed -PathType Leaf)) {
+   throw 'V11_TIDE_AB_BASELINE_FILE_MISSING'
+  }
+ }
+ $oldReport = Get-Content -LiteralPath $oldReportPath -Raw -Encoding UTF8 | ConvertFrom-Json
+ $oldDiag = Get-Content -LiteralPath $oldDiagnosisPath -Raw -Encoding UTF8 | ConvertFrom-Json
+ $oldRows = @($oldReport.completed)
+ $briefFile = Get-Content -LiteralPath $single -Raw -Encoding UTF8 | ConvertFrom-Json
+ $brief = @(foreach ($item in $briefFile) { $item })
+ $savedPrompt = [System.IO.File]::ReadAllText($oldRequest,[System.Text.Encoding]::UTF8)
+ $oldRawSha = (Get-FileHash -LiteralPath $oldRaw -Algorithm SHA256).Hash.ToLowerInvariant()
+ if ($oldReport.schema -cne 'r125-local-plan-batch-v1' -or
+     $oldReport.model -cne $Model -or
+     [int]$oldReport.attempted -ne 1 -or
+     [int]$oldReport.originalResponseCount -ne 1 -or
+     $oldReport.allSourceVerified -ne $true -or
+     [int]$oldReport.worldWrites -ne 0 -or
+     $oldRows.Count -ne 1 -or
+     $oldRows[0].id -cne 'tide-observatory' -or
+     $oldRows[0].sourceVerified -ne $true -or
+     $oldDiag.sourceVerified -ne $true -or
+     $brief.Count -ne 1 -or
+     $savedPrompt -cne [string]$brief[0].prompt -or
+     $oldRawSha -cne 'd71eb74c74fda1d959059f5f1a46ef9e6c41f52a2f538b46116c703a7c2a5688' -or
+     $oldRows[0].originalSha256 -cne $oldRawSha -or
+     $oldRows[0].sourceSha256 -cne '8f25eb7ff967c0ea8e7269757bde96b83a05c5ad42f79608c47cf113404e1f6a' -or
+     $oldRows[0].geometrySha256 -cne '754d9c845553a1ef566fbb430bfad94231fb4fbe81265938f631d010cb22a753' -or
+     $oldDiag.sourceSha256 -cne $oldRows[0].sourceSha256 -or
+     $oldDiag.geometrySha256 -cne $oldRows[0].geometrySha256) {
+  throw 'V11_TIDE_AB_NOT_THE_EXACT_SAME_VERIFIED_BASELINE'
+ }
+ Write-Output 'V11_TIDE_AB_BASELINE_VERIFIED: SAME original brief and Qwen14B.'
 }
 $root = Join-Path $env:LOCALAPPDATA 'MinecraftAIBuilder\PrivateModelStudies'
 [void](New-Item -Path $root -ItemType Directory -Force)
@@ -173,6 +230,54 @@ Write-Output ('V11_PILOT_ALL_SOURCE=' + $report.allSourceVerified)
 Write-Output ('V11_PILOT_SOURCE_PASSES=' + $report.sourcePassCount)
 Write-Output ('V11_PILOT_EXPERIMENT=' + $report.experimentOutcome)
 Write-Output ('V11_PILOT_STOP_REASON=' + [string]$report.stopReason)
+if ($ComparePriorTide) {
+ # One POST already happened above. Never retry if it did not yield SOURCE.
+ if ($nodeExit -ne 0 -or $report.allSourceVerified -ne $true -or
+     [int]$report.attempted -ne 1 -or
+     [int]$report.originalResponseCount -ne 1 -or
+     @($report.completed).Count -ne 1 -or
+     $report.completed[0].sourceVerified -ne $true) {
+  Write-Output ('V11_TIDE_AB_ART_HOLD_PRESERVE_PRIVATE=' + $out)
+  throw 'V11_TIDE_AB_NEW_SOURCE_NOT_VERIFIED_NO_RETRY'
+ }
+ $newOne = Join-Path $out 'tide-observatory'
+ $newRequest = Join-Path $newOne 'REQUEST_ORIGINAL.txt'
+ $newSource = Join-Path $newOne 'B143_SOURCE_REVIEW_ONLY.json'
+ if (-not (Test-Path -LiteralPath $newRequest -PathType Leaf) -or
+     -not (Test-Path -LiteralPath $newSource -PathType Leaf) -or
+     [System.IO.File]::ReadAllText($newRequest,[System.Text.Encoding]::UTF8) -cne
+      $savedPrompt) {
+  throw 'V11_TIDE_AB_NEW_REQUEST_OR_SOURCE_MISMATCH'
+ }
+ $abOut = Join-Path $out 'SAME_BRIEF_AB_REVIEW'
+ & $node $abRenderer '--before' $oldSource '--after' $newSource '--out' $abOut
+ if ($LASTEXITCODE -ne 0) { throw 'V11_TIDE_AB_RENDER_FAILED_KEEP_ORIGINALS' }
+ $abReportPath = Join-Path $abOut 'AB_REPORT.json'
+ if (-not (Test-Path -LiteralPath $abReportPath -PathType Leaf)) {
+  throw 'V11_TIDE_AB_NO_REPORT'
+ }
+ $ab = Get-Content -LiteralPath $abReportPath -Raw -Encoding UTF8 | ConvertFrom-Json
+ if ($ab.schema -cne 'r125-same-brief-ab-v1' -or
+     $ab.before.sourceSha256 -cne $oldDiag.sourceSha256 -or
+     $ab.before.geometrySha256 -cne $oldDiag.geometrySha256 -or
+     $ab.after.sourceSha256 -cne $report.completed[0].sourceSha256 -or
+     $ab.after.geometrySha256 -cne $report.completed[0].geometrySha256 -or
+     [int]$ab.modelCalls -ne 0 -or [int]$ab.worldWrites -ne 0) {
+  throw 'V11_TIDE_AB_REPORT_PROVENANCE_MISMATCH'
+ }
+ Write-Output ('V11_TIDE_AB_OLD_SOURCE=' + $ab.before.sourceSha256)
+ Write-Output ('V11_TIDE_AB_NEW_SOURCE=' + $ab.after.sourceSha256)
+ Write-Output ('V11_TIDE_AB_IMAGE=' + (Join-Path $abOut 'AB_OLD_LEFT_NEW_RIGHT.png'))
+ Write-Output ('V11_TIDE_AB_VOXELS_OLD_NEW=' +
+  $ab.before.occupiedVoxels + '/' + $ab.after.occupiedVoxels)
+ Write-Output ('V11_TIDE_AB_FINAL_VOXEL_DELTA=' +
+  (ConvertTo-Json -InputObject $ab.finalVoxelDifference -Compress))
+ Write-Output 'V11_TIDE_AB_ART_HOLD. HUMAN REVIEW REQUIRED.'
+ if (-not $NoOpen) {
+  try { Start-Process -FilePath (Join-Path $abOut 'AB_OLD_LEFT_NEW_RIGHT.png') }
+  catch { Write-Warning 'V11_TIDE_AB_IMAGE_OPEN_FAILED_USE_PRINTED_PATH' }
+ }
+}
 Write-Output ('V11_PILOT_B143_REVIEW=' + (Join-Path $out $viewer))
 Write-Output 'ART_NOT_REVIEWED. MINECRAFT_NOT_TESTED. PRIVATE_SOURCE_NOT_UPLOADED.'
 if (-not $NoOpen) {

@@ -147,6 +147,102 @@ export function makeB143ContactSheet(pics){
  return {bytes:png(width,height,rgb),width,height,
   order:pics.map(x=>x.name)};
 }
+/**
+ * Same-brief A/B: OLD on left, NEW on right at the same four camera angles.
+ * Each object has its own auto-fit camera scale; not exact in-world scale.
+ */
+export function makeB143ABSheet(oldViews,newViews){
+ const expected=['EXTERIOR_FRONT_LEFT.png','EXTERIOR_FRONT_RIGHT.png',
+  'EXTERIOR_REAR_RIGHT.png','GROUND_FLOOR_CUTAWAY.png'];
+ if(!Array.isArray(oldViews)||!Array.isArray(newViews)||
+    oldViews.length!==4||newViews.length!==4)
+  refuse('AB_FOUR_VIEWS_REQUIRED');
+ const all=[oldViews,newViews];
+ if(all.some(views=>views.some((p,i)=>p.name!==expected[i]||
+  p.render?.width!==1200||p.render?.height!==760||
+  !Buffer.isBuffer(p.render.rgb)||p.render.rgb.length!==1200*760*3)))
+  refuse('AB_VIEWS_MISMATCH');
+ const tileW=1200,tileH=760,gap=16,width=tileW*2+gap,
+  height=tileH*4+gap*3;
+ const rgb=Buffer.alloc(width*height*3,226);
+ for(let row=0;row<4;row++)for(let col=0;col<2;col++){
+  const src=all[col][row].render.rgb;
+  for(let y=0;y<tileH;y++){
+   const at=((row*(tileH+gap)+y)*width+col*(tileW+gap))*3;
+   src.copy(rgb,at,y*tileW*3,(y+1)*tileW*3);
+  }
+ }
+ return {bytes:png(width,height,rgb),width,height,
+  rowOrder:expected,columnOrder:['OLD','NEW'],
+  physicalScale:'EACH_DESIGN_AUTO_FIT_NOT_SAME_PIXEL_PER_BLOCK'};
+}
+const validSource=(filename)=>{
+ if(typeof filename!=='string'||!filename)refuse('AB_SOURCE_PATH_REQUIRED');
+ const p=path.resolve(filename);
+ if(!fs.existsSync(p)||!fs.statSync(p).isFile()||
+   fs.statSync(p).size>2000000)refuse('AB_SOURCE_NOT_READABLE');
+ const raw=fs.readFileSync(p,'utf8'),design=JSON.parse(raw);
+ const scene=compileDesign(design);
+ if(!verifyCompiled(design,scene)||scene.worldContacts!==0||
+   scene.BuildPlan?.operations?.length!==0||scene.readiness!=='NOT_PREPARED')
+  refuse('AB_SOURCE_NOT_VERIFIED');
+ return {design,scene,fileHash:digest(raw)};
+};
+const fourViews=scene=>{
+ const cameras=[[-1,-1,null],[1,-1,null],[1,1,null],[1,-1,4]];
+ const names=['EXTERIOR_FRONT_LEFT.png','EXTERIOR_FRONT_RIGHT.png',
+  'EXTERIOR_REAR_RIGHT.png','GROUND_FLOOR_CUTAWAY.png'];
+ return cameras.map(([sx,sz,cutAboveY],i)=>({name:names[i],
+  render:renderB143StaticPNG(scene,{sx,sz,cutAboveY,includeRgb:true})}));
+};
+/** Compare two REAL persisted B143 designs without an inference call.
+ * SOURCE SHA contains author metadata; physical differences instead use
+ * actual final coordinates and MATERIAL indices, not source hash inequality.
+ */
+export function saveB143ABReview({beforeSourcePath,afterSourcePath,outDir}={}){
+ if(typeof outDir!=='string'||!outDir)refuse('AB_OUTPUT_REQUIRED');
+ const out=path.resolve(outDir),parent=path.dirname(out);
+ if(!fs.existsSync(parent)||!fs.statSync(parent).isDirectory()||
+    fs.existsSync(out))refuse('AB_OUTPUT_MUST_BE_NEW');
+ const repoRoot=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+ const realParent=fs.realpathSync(parent);
+ if(out===repoRoot||out.startsWith(repoRoot+path.sep)||
+   realParent===repoRoot||realParent.startsWith(repoRoot+path.sep))
+  refuse('AB_OUTPUT_INSIDE_REPOSITORY');
+ const before=validSource(beforeSourcePath),after=validSource(afterSourcePath);
+ const oldMap=new Map(before.scene.primitives.map(p=>[p.slice(0,3).join(','),p[3]]));
+ const newMap=new Map(after.scene.primitives.map(p=>[p.slice(0,3).join(','),p[3]]));
+ let added=0,removed=0,changedMaterial=0;
+ for(const [loc,material] of newMap){
+  if(!oldMap.has(loc))added++;
+  else if(oldMap.get(loc)!==material)changedMaterial++;
+ }
+ for(const loc of oldMap.keys())if(!newMap.has(loc))removed++;
+ const oldViews=fourViews(before.scene),newViews=fourViews(after.scene);
+ const sheet=makeB143ABSheet(oldViews,newViews);
+ const report={schema:'r125-same-brief-ab-v1',
+  before:{sourceSha256:before.scene.sourceSha256,
+   geometrySha256:before.scene.geometrySha256,
+   sourceFileSha256:before.fileHash,occupiedVoxels:before.scene.primitives.length},
+  after:{sourceSha256:after.scene.sourceSha256,
+   geometrySha256:after.scene.geometrySha256,
+   sourceFileSha256:after.fileHash,occupiedVoxels:after.scene.primitives.length},
+  finalVoxelDifference:{added,removed,changedMaterial,
+   sameActualGeometryAndMaterial:added===0&&removed===0&&changedMaterial===0},
+  preview:{file:'AB_OLD_LEFT_NEW_RIGHT.png',sha256:digest(sheet.bytes),
+   width:sheet.width,height:sheet.height,
+   columnOrder:sheet.columnOrder,rowOrder:sheet.rowOrder,
+   physicalScale:sheet.physicalScale,
+   style:'B143_SEMANTIC_COLOR_PROXY_NOT_MINECRAFT'},
+  modelCalls:0,worldWrites:0,sourceEdited:false,
+  artOutcome:'HUMAN_REVIEW_REQUIRED',minecraftWalking:'NOT_TESTED'};
+ fs.mkdirSync(out);
+ fs.writeFileSync(path.join(out,sheet.preview?.file??'AB_OLD_LEFT_NEW_RIGHT.png'),
+  sheet.bytes,{flag:'wx'});
+ fs.writeFileSync(path.join(out,'AB_REPORT.json'),
+  JSON.stringify(report,null,2)+'\n',{flag:'wx'});
+ return report;
+}
 /** Offline render of PRIVATE saved B143 SOURCE; never loads a model or edits it. */
 export function saveB143StaticReview({sourcePath,outDir}={}){
  if(typeof sourcePath!=='string'||typeof outDir!=='string'||!sourcePath||!outDir)
@@ -204,9 +300,13 @@ export function saveB143StaticReview({sourcePath,outDir}={}){
 if(process.argv[1]===fileURLToPath(import.meta.url)){
  try{
   const a=process.argv.slice(2);
-  if(a.length!==4||a[0]!=='--source'||a[2]!=='--out')
-   refuse('CLI_SOURCE_OUT_REQUIRED');
-  const report=saveB143StaticReview({sourcePath:a[1],outDir:a[3]});
-  console.log('R125_STATIC_ART_OFFLINE_SUCCESS',JSON.stringify(report));
+  if(a.length===6&&a[0]==='--before'&&a[2]==='--after'&&a[4]==='--out'){
+   const report=saveB143ABReview({
+    beforeSourcePath:a[1],afterSourcePath:a[3],outDir:a[5]});
+   console.log('R125_SAME_BRIEF_AB_OFFLINE_SUCCESS',JSON.stringify(report));
+  }else if(a.length===4&&a[0]==='--source'&&a[2]==='--out'){
+   const report=saveB143StaticReview({sourcePath:a[1],outDir:a[3]});
+   console.log('R125_STATIC_ART_OFFLINE_SUCCESS',JSON.stringify(report));
+  }else refuse('CLI_SOURCE_OUT_REQUIRED');
  }catch(e){console.error('R125_STATIC_ART_HOLD',String(e?.message??e));process.exitCode=2;}
 }
