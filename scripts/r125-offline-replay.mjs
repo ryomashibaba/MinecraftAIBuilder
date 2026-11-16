@@ -132,7 +132,7 @@ export function diagnoseR125Original(raw){
  * geometry. No V6 placement patch, retry, model I/O or Minecraft contact.
  * A SOURCE candidate is never an ART pass or world-construction approval.
  */
-export function diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail='legacy',roofGlazing='none'}={}){
+export function diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail='legacy',roofGlazing='none',roofMassing='default'}={}){
  if(typeof raw!=='string'||raw.length<1||raw.length>60000)
   fail('PLAN_RAW_INPUT_SIZE');
  const base={
@@ -161,7 +161,8 @@ export function diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail='legacy',ro
   const hostPolicy={entrancePlacement:'source-accessible',
    upperDoorPlacement:Object.hasOwn(original,'expression')?'stair-clear':'legacy',
    ...(hostDetail!=='legacy'?{hostDetail}:{}),
-   ...(roofGlazing!=='none'?{roofGlazing}:{})};
+   ...(roofGlazing!=='none'?{roofGlazing}:{}),
+   ...(roofMassing!=='default'?{roofMassing}:{})};
   const built=compileArchitecturePlan(original,hostPolicy);
   if(built.worldContacts!==0||built.worldWrites!==0||
      built.constructionApproved!==false||
@@ -217,7 +218,8 @@ export function writeArchitecturePlanReplay(args){
   fail('PLAN_PRIVATE_OUTPUT_MUST_BE_OUTSIDE_REPOSITORY');
  const raw=fs.readFileSync(args['--raw'],'utf8');
  const report=diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail:args['--host-detail']??'legacy',
-  roofGlazing:args['--roof-glazing']??'none'});
+  roofGlazing:args['--roof-glazing']??'none',
+   roofMassing:args['--roof-massing']??'default'});
  const {sourceDesign,...diagnosis}=report;
  fs.mkdirSync(dest);
  // Store exact private author bytes before any parsing or B143 review.
@@ -242,24 +244,25 @@ export function writeArchitecturePlanReplay(args){
 
 export function parseR125ReplayArgs(argv){
  if(argv.length===1&&argv[0]==='--help')return {help:true};
- if(![4,6,8].includes(argv.length))fail('REQUIRE_RAW_AND_OUT');
+ if(![4,6,8,10].includes(argv.length))fail('REQUIRE_RAW_AND_OUT');
  const opts={};
  for(let i=0;i<argv.length;i+=2){
-  if(!['--raw','--out','--host-detail','--roof-glazing'].includes(argv[i])||Object.hasOwn(opts,argv[i])||
+  if(!['--raw','--out','--host-detail','--roof-glazing','--roof-massing'].includes(argv[i])||Object.hasOwn(opts,argv[i])||
    !argv[i+1]||argv[i+1].startsWith('--'))fail('INVALID_ARGUMENT');
-  opts[argv[i]]=['--host-detail','--roof-glazing'].includes(argv[i])?argv[i+1]:path.resolve(argv[i+1]);
+  opts[argv[i]]=['--host-detail','--roof-glazing','--roof-massing'].includes(argv[i])?argv[i+1]:path.resolve(argv[i+1]);
  }
  if(!opts['--raw']||!opts['--out']||opts['--raw']===opts['--out'])
   fail('INPUT_OUTPUT_CONFLICT');
  if(opts['--host-detail']!==undefined&&opts['--host-detail']!=='spatial-v1')fail('HOST_DETAIL_MODE');
  if(opts['--roof-glazing']!==undefined&&opts['--roof-glazing']!=='sawtooth-ribbon')fail('ROOF_GLAZING_MODE');
+ if(opts['--roof-massing']!==undefined&&opts['--roof-massing']!=='compact-sawtooth')fail('ROOF_MASSING_MODE');
  return opts;
 }
 if(process.argv[1]===fileURLToPath(import.meta.url)){
  try{
   const planMode=process.argv[2]==='--architecture-plan';
   const args=parseR125ReplayArgs(process.argv.slice(planMode?3:2));
-  if(args.help)console.log('B143: --raw ORIGINAL.txt --out NEW_DIAGNOSIS.json | ArchitecturePlan: --architecture-plan --raw ORIGINAL.txt --out NEW_PRIVATE_DIRECTORY [--host-detail spatial-v1] [--roof-glazing sawtooth-ribbon] (NO MODEL / NO WORLD)');
+  if(args.help)console.log('B143: --raw ORIGINAL.txt --out NEW_DIAGNOSIS.json | ArchitecturePlan: --architecture-plan --raw ORIGINAL.txt --out NEW_PRIVATE_DIRECTORY [--host-detail spatial-v1] [--roof-glazing sawtooth-ribbon] [--roof-massing compact-sawtooth] (NO MODEL / NO WORLD)');
   else if(planMode){
    const result=writeArchitecturePlanReplay(args);
    console.log('R125_ARCHITECTURE_PLAN_SOURCE_ONLY',JSON.stringify(result));

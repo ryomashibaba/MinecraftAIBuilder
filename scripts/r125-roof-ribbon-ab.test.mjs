@@ -46,3 +46,33 @@ test('art A/B rejects non-sawtooth model before writing output',()=>{
   assert.equal(fs.existsSync(out),false);
  }finally{fs.rmSync(root,{recursive:true,force:true});}
 });
+
+test('compact sawtooth lowers the B143 crest and leaves the author bytes unchanged',()=>{
+ const p={schema:'minecraftaibuilder-r125-architecture-plan-v1',
+  id:'compact-roof-study',title:'A practical sea observatory',
+  brief:'A working observatory with laboratory and visitor space',
+  footprint:{width:24,depth:24},
+  levels:[{splitAxis:'x',splitPercent:50,spaces:[
+   {id:'lab-room',purpose:'Water analysis'},
+   {id:'visitor-room',purpose:'Read sample results'}]}],
+  materials:{floor:'wood',wall:'concrete',roof:'concrete'},
+  expression:{setbackSide:'none',setbackDepth:0,
+   roofProfile:'sawtooth',roofAxis:'x',facadeLanguage:'plain',roofVolume:'raised'}};
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'mab-roof-compact-'));
+ try{
+  const raw=path.join(root,'ORIGINAL.txt'),original=JSON.stringify(p);
+  fs.writeFileSync(raw,original);
+  const result=compareR125RoofRibbon({rawFile:raw,outDir:path.join(root,'A_B'),
+   massing:'compact-sawtooth'});
+  assert.equal(fs.readFileSync(raw,'utf8'),original);
+  assert.equal(result.originalEdited,false);
+  assert.equal(result.roofCrestY.after,result.roofCrestY.before-1);
+  assert(result.added+result.removed>0);
+  assert.notEqual(result.sourceSha256Before,result.sourceSha256After);
+  assert.equal(result.modelCalls,0);
+  assert.equal(result.worldWrites,0);
+  assert(fs.statSync(result.image).size>5000);
+  assert.throws(()=>compareR125RoofRibbon({rawFile:raw,
+   outDir:path.join(root,'BAD'),massing:'extreme'}),/MASSING_MODE/);
+ }finally{fs.rmSync(root,{recursive:true,force:true});}
+});

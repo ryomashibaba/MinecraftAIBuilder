@@ -376,11 +376,14 @@ export function assessR125AuthoredRoomCapacity(plan){
 
 export function compileArchitecturePlan(plan,{
  entrancePlacement='legacy',upperDoorPlacement='legacy',hostDetail='legacy',
- roofGlazing='none'
+ roofGlazing='none',roofMassing='default'
 }={}){
  check(['legacy','spatial-v1'].includes(hostDetail),'HOST_DETAIL_MODE');
  // Optional ART candidate only. Old authors and their original SOURCE are untouched.
  check(['none','sawtooth-ribbon'].includes(roofGlazing),'ROOF_GLAZING_MODE');
+ check(['default','compact-sawtooth'].includes(roofMassing),'ROOF_MASSING_MODE');
+ check(roofMassing==='default'||(plan?.expression?.roofProfile==='sawtooth'&&
+  plan.expression.roofVolume==='raised'),'ROOF_MASSING_REQUIRES_RAISED_SAWTOOTH');
  check(roofGlazing==='none'||(plan?.expression?.roofProfile==='sawtooth'&&
   plan.expression.roofVolume==='raised'),'ROOF_GLAZING_REQUIRES_RAISED_SAWTOOTH');
  check(hostDetail==='legacy'||Boolean(plan?.expression),'HOST_DETAIL_REQUIRES_EXPRESSION');
@@ -393,7 +396,7 @@ export function compileArchitecturePlan(plan,{
  check(upperDoorPlacement==='legacy'||Boolean(plan.expression),
   'UPPER_DOOR_REQUIRES_EXPRESSION');
  const original=structuredClone(plan);
- if(original.expression)return compileExpressiveArchitecturePlan(original,{entrancePlacement,upperDoorPlacement,hostDetail,roofGlazing});
+ if(original.expression)return compileExpressiveArchitecturePlan(original,{entrancePlacement,upperDoorPlacement,hostDetail,roofGlazing,roofMassing});
  const {width:w,depth:d}=original.footprint;
  const count=original.levels.length;
  const floor=original.materials.floor,wall=original.materials.wall,
@@ -623,7 +626,7 @@ export function auditArchitecturePlanCirculation(product){
  * identically without expression; do NOT change the old pinned Qwen 14B 2620-
  * voxel result or its source digest. No typology-specific templates.
  */
-function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',upperDoorPlacement='legacy',hostDetail='legacy',roofGlazing='none'}={}){
+function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',upperDoorPlacement='legacy',hostDetail='legacy',roofGlazing='none',roofMassing='default'}={}){
  const {width:w,depth:d}=original.footprint;
  const count=original.levels.length;
  const {setbackSide,setbackDepth,roofProfile,roofAxis,facadeLanguage,
@@ -885,11 +888,14 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
   addR125HipRoof(box,{upper,top,roof,wall,roofAxis,
    overhang:original.expression.roofOverhang==='one-block'});
  }else if(roofProfile!=='flat'){
+  // Explicit HOST-only geometry candidate; default preserves past output.
+  const sawtoothHeight=pos=>roofMassing==='compact-sawtooth'?
+   Math.floor((pos%6)/2):(pos%6===0?0:Math.ceil((pos%6)/2));
   const span=roofAxis==='x'?upper.x1-upper.x0+1:upper.z1-upper.z0+1;
   for(let pos=0;pos<span;pos++){
    const height=roofProfile==='ridge'?
     Math.min(3,Math.floor(Math.min(pos,span-1-pos)/2)):
-    (pos%6===0?0:Math.ceil((pos%6)/2));
+    sawtoothHeight(pos);
    if(raisedRoof){
     // TRUE raised volume: continuous pitched roof is the interior ceiling,
     // with actual air underneath instead of a solid flat base at top.
@@ -923,7 +929,7 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
      const p=pos-1;
      const previous=roofProfile==='ridge'?
       Math.min(3,Math.floor(Math.min(p,span-1-p)/2)):
-      (p%6===0?0:Math.ceil((p%6)/2));
+      sawtoothHeight(p);
      const rise=Math.abs(height-previous);
      if(rise>1){
       const highPos=height>previous?pos:p;
@@ -967,7 +973,7 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
    const span=alongX?upper.x1-upper.x0+1:upper.z1-upper.z0+1;
    const eaveRise=pos=>roofProfile==='ridge'?
     Math.min(3,Math.floor(Math.min(pos,span-1-pos)/2)):
-    (pos%6===0?0:Math.ceil((pos%6)/2));
+    sawtoothHeight(pos);
    // Compress contiguous equally elevated eaves into B143 boxes.
    // Every occupied cell and material stays identical. Only the author-opt-in
    // eave representation changes, never the historical roof baseline.

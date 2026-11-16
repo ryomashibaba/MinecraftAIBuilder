@@ -8,8 +8,10 @@ import {saveB143ABReview} from './r125-static-art-review.mjs';
 const repo=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const sha=s=>createHash('sha256').update(s).digest('hex');
 const err=s=>{throw Error('V11_ROOF_AB_'+s);};
-export function compareR125RoofRibbon({rawFile,outDir}={}){
+export function compareR125RoofRibbon({rawFile,outDir,massing='baseline'}={}){
  if(!rawFile||!outDir)err('REQUIRE_RAW_OUT');
+ if(!['baseline','compact-sawtooth'].includes(massing))err('MASSING_MODE');
+ const compact=massing==='compact-sawtooth';
  const input=path.resolve(rawFile),out=path.resolve(outDir),parent=path.dirname(out);
  if(!fs.existsSync(input)||fs.existsSync(out)||!fs.existsSync(parent))
   err('INPUT_MISSING_OR_OUTPUT_EXISTS');
@@ -21,13 +23,17 @@ export function compareR125RoofRibbon({rawFile,outDir}={}){
  let plan;try{plan=JSON.parse(original);}catch{err('INVALID_AUTHOR_JSON');}
  if(plan?.expression?.roofProfile!=='sawtooth'||
     plan.expression.roofVolume!=='raised')err('REQUIRES_RAISED_SAWTOOTH');
- const a=diagnoseR125ArchitecturePlanOriginal(original);
- const b=diagnoseR125ArchitecturePlanOriginal(original,{roofGlazing:'sawtooth-ribbon'});
+ // In compact A/B both candidates have identical glass treatment.
+ const a=diagnoseR125ArchitecturePlanOriginal(original,
+  compact?{roofGlazing:'sawtooth-ribbon'}:{});
+ const b=diagnoseR125ArchitecturePlanOriginal(original,
+  {roofGlazing:'sawtooth-ribbon',...(compact?{roofMassing:'compact-sawtooth'}:{})});
  if(!a.sourceVerified||!b.sourceVerified||
     a.originalSha256!==hash||b.originalSha256!==hash||
     a.planSha256!==b.planSha256||
     a.sourceSha256===b.sourceSha256||
-    a.occupiedVoxels!==b.occupiedVoxels)err('SOURCE_HOLD');
+    (!compact&&a.occupiedVoxels!==b.occupiedVoxels)||
+    (compact&&a.geometrySha256===b.geometrySha256))err('SOURCE_HOLD');
  fs.mkdirSync(out);
  const before=path.join(out,'SOURCE_BASELINE.json'),
        after=path.join(out,'SOURCE_RIBBON.json');
@@ -36,12 +42,23 @@ export function compareR125RoofRibbon({rawFile,outDir}={}){
  const ab=saveB143ABReview({beforeSourcePath:before,
   afterSourcePath:after,outDir:path.join(out,'ART_AB')});
  const diff=ab.finalVoxelDifference;
- if(diff.added||diff.removed||!diff.changedMaterial)err('NON_MATERIAL_DELTA');
+ let crests;
+ if(compact){
+  const crest=design=>Math.max(...design.elements
+   .filter(e=>/^roof-raised-skin-\d+$/.test(e.id)).map(e=>e.origin[1]));
+  crests={before:crest(a.sourceDesign),after:crest(b.sourceDesign)};
+  if(!Number.isFinite(crests.before)||!Number.isFinite(crests.after)||
+   crests.after>=crests.before||diff.added+diff.removed===0)
+   err('NO_MEANINGFUL_COMPACT_ROOF');
+ }else if(diff.added||diff.removed||!diff.changedMaterial)err('NON_MATERIAL_DELTA');
  if(sha(fs.readFileSync(input,'utf8'))!==hash)err('ORIGINAL_CHANGED');
- const result={schema:'mab-v11-roof-ribbon-ab-v1',
+ const result={schema:compact?'mab-v11-roof-massing-ab-v1':'mab-v11-roof-ribbon-ab-v1',
   originalSha256:hash,originalEdited:false,
   sourceSha256Before:a.sourceSha256,sourceSha256After:b.sourceSha256,
   occupiedVoxels:a.occupiedVoxels,changedMaterial:diff.changedMaterial,
+  ...(compact?{massing,occupiedVoxelsAfter:b.occupiedVoxels,
+   added:diff.added,removed:diff.removed,roofCrestY:crests,
+   skylightPolicy:'SAME_SAWTOOTH_RIBBON_BOTH_SIDES'}:{}),
   image:path.join(out,'ART_AB',ab.preview.file),
   modelCalls:0,worldWrites:0,minecraftWalking:'NOT_TESTED',
   humanArt:'NOT_REVIEWED'};
@@ -52,8 +69,10 @@ export function compareR125RoofRibbon({rawFile,outDir}={}){
 if(process.argv[1]===fileURLToPath(import.meta.url)){
  try{
   const x=process.argv.slice(2);
-  if(x.length!==4||x[0]!=='--raw'||x[2]!=='--out')err('CLI');
+  if(![4,6].includes(x.length)||x[0]!=='--raw'||x[2]!=='--out'||
+   (x.length===6&&(x[4]!=='--massing'||x[5]!=='compact-sawtooth')))err('CLI');
   console.log('V11_ROOF_AB',JSON.stringify(compareR125RoofRibbon({
-   rawFile:x[1],outDir:x[3]})));
+   rawFile:x[1],outDir:x[3],
+   ...(x.length===6?{massing:x[5]}:{})})));
  }catch(e){console.error(String(e?.message??e));process.exitCode=2;}
 }
