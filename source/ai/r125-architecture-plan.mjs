@@ -904,9 +904,10 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
      box('roof-raised-eave-a-'+pos,'add',wall,a,[1,height,1]);
      box('roof-raised-eave-b-'+pos,'add',wall,b,[1,height,1]);
     }
-    // At a sawtooth reset, the adjacent high/low skins are separated
-    // by two or more Y cells. Close the exposed vertical step using the
-    // real HOST wall material, never by silently restoring the flat cap.
+    // A deep sawtooth reset is its north-light clerestory: keep the real
+    // raised roof profile and close the step with B143 glass, not a blind
+    // wall. This gives the authored sawtooth a readable daylight face
+    // without adding a roof cap or changing the model's chosen profile.
     // Ridge rises by <=1 and retains its frozen historical SOURCE.
     if(pos>0){
      const p=pos-1;
@@ -923,7 +924,7 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
       const size=roofAxis==='x'?
        [1,rise-1,upper.z1-upper.z0+1]:
        [upper.x1-upper.x0+1,rise-1,1];
-      box('roof-raised-step-closure-'+pos,'add',wall,origin,size);
+      box('roof-raised-step-closure-'+pos,'add','glass',origin,size);
      }
     }
     // A nonzero final sawtooth strip has an otherwise open end gable.

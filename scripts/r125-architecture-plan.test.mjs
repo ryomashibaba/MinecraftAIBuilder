@@ -617,7 +617,13 @@ test('roof volume supports z-axis two-level setback and rejects invalid forms',(
   {entrancePlacement:'source-accessible'});
  assert.equal(verifyCompiled(sawtooth.design,sawtooth.compiled),true);
  assert(!sawtooth.design.elements.some(e=>e.id==='roof-base'));
- assert(sawtooth.design.elements.some(e=>e.id.startsWith('roof-raised-step-closure-')));
+ const clerestory=sawtooth.design.elements.find(e=>
+  e.id==='roof-raised-step-closure-6');
+ assert.ok(clerestory);
+ assert.equal(clerestory.material,'glass');
+ assert.ok(sawtooth.compiled.primitives.some(v=>
+  v[0]===clerestory.origin[0]&&v[1]===clerestory.origin[1]&&
+  v[2]===clerestory.origin[2]&&v[3]===3));
  assert.notEqual(sawtooth.geometrySha256,raised.geometrySha256);
  assert.equal(sawtooth.worldWrites,0);
  assert.deepEqual(sawtooth.gates,Array(9).fill('BLOCKED'));
@@ -625,6 +631,36 @@ test('roof volume supports z-axis two-level setback and rejects invalid forms',(
   ...expression,roofProfile:'flat'}}),/R125_PLAN_EXPRESSION_ROOF_VOLUME/);
  assert.throws(()=>compileArchitecturePlan({...base,expression:{
   ...expression,roofVolume:'imaginary'}}),/R125_PLAN_EXPRESSION_ROOF_VOLUME/);
+});
+
+test('raised sawtooth roof turns deep steps into source-backed glazed clerestories on either axis',()=>{
+ const base=plan('sawtooth-clerestory',['x'],['workroom','viewing room']);
+ base.footprint={width:24,depth:24};
+ for(const roofAxis of ['x','z']){
+  const original=structuredClone(base);
+  const result=compileArchitecturePlan({...base,expression:{
+   setbackSide:'none',setbackDepth:0,roofProfile:'sawtooth',roofAxis,
+   facadeLanguage:'plain',roofVolume:'raised'}},
+   {entrancePlacement:'source-accessible'});
+  const pane=result.design.elements.find(e=>
+   e.id==='roof-raised-step-closure-6');
+  assert.ok(pane,roofAxis);
+  assert.equal(pane.material,'glass',roofAxis);
+  assert.deepEqual(pane.size,roofAxis==='x'?[1,2,22]:[22,2,1]);
+  const actual=new Map(result.compiled.primitives.map(v=>
+   [v.slice(0,3).join(','),v[3]]));
+  for(let a=0;a<pane.size[0];a++)for(let y=0;y<pane.size[1];y++)
+   for(let c=0;c<pane.size[2];c++)
+    assert.equal(actual.get([pane.origin[0]+a,pane.origin[1]+y,
+     pane.origin[2]+c].join(',')),3,roofAxis);
+  assert.equal(verifyCompiled(result.design,result.compiled),true);
+  assert.equal(auditArchitecturePlanCirculation(result).status,
+   'SOURCE_CLEARANCE_PROBES_PASS');
+  assert.equal(auditR125SourceRoutes(result).status,
+   'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert.equal(result.worldWrites,0);
+  assert.deepEqual(base,original);
+ }
 });
 
 test('separate author-raised ridge and L-corner retain authentic Qwen flat-roof SOURCE',()=>{
