@@ -122,12 +122,18 @@ export function inspectRoofAir(before,after){
   if(!previous)fail('MISSING_PREVIOUS_SKIN');
   const ph=previous.origin[1]-top;
   if(Math.abs(h-ph)>1){
-   const tall=h>ph?skin:previous;
+   // A pitched roof reset may be glazed on the higher or lower
+   // adjacent strip. Both are physically adjacent to the step face;
+   // check FINAL B143 solids rather than requiring one HOST placement.
+   const tall=h>ph?skin:previous,short=h>ph?previous:skin;
    for(let offset=0;offset<extent;offset++)
     for(let y=top+Math.min(h,ph)+1;y<top+Math.max(h,ph);y++){
-     const x=axis==='x'?tall.origin[0]:tall.origin[0]+offset;
-     const z=axis==='x'?tall.origin[2]+offset:tall.origin[2];
-     if(!has(x,y,z))unclosedStepCells++;
+     const highX=axis==='x'?tall.origin[0]:tall.origin[0]+offset;
+     const highZ=axis==='x'?tall.origin[2]+offset:tall.origin[2];
+     const lowX=axis==='x'?short.origin[0]:short.origin[0]+offset;
+     const lowZ=axis==='x'?short.origin[2]+offset:short.origin[2];
+     if(!has(highX,y,highZ)&&!has(lowX,y,lowZ))
+      unclosedStepCells++;
     }
   }
  }
