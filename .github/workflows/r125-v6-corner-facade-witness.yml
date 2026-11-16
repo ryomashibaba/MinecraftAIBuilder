@@ -7,6 +7,7 @@ on:
       - .github/workflows/r125-v6-corner-facade-witness.yml
       - source/ai/b198g-local-model-adapter.mjs
       - source/ai/r125-architecture-plan.mjs
+      - source/ai/b198c-spatial-critic.mjs
       - source/ai/r125-room-fixtures.mjs
       - source/ai/r125-room-daylight.mjs
       - source/ai/r125-spatial-detail.mjs
@@ -90,6 +91,7 @@ jobs:
       - name: V11 saved genuine Qwen replay, local plan transport and unchanged B143 tests
         run: |
           node --check source/ai/b198g-local-model-adapter.mjs
+          node --check source/ai/b198c-spatial-critic.mjs
           node --check source/ai/r125-room-fixtures.mjs
           node --check source/ai/r125-room-daylight.mjs
           node --check scripts/r125-local-architecture-plan-run.mjs

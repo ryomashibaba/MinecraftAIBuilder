@@ -2110,6 +2110,25 @@ test('two-wide ground turn clears a divider two rows after the last stair tread'
  const floor=r=>critiqueArchitecture({design:r.design,compiled:r.compiled}).objectiveAudit.elevationConnectivity.find(l=>l.standingY===2);
  assert.equal(floor(before).componentCount,2);
  assert.equal(floor(after).componentCount,1);
+ // A genuine 2-component floor must expose all precise B143 pad bounds
+ // and the authored room / door evidence for an OFFLINE repair decision.
+ const failed=assessR125ProgramGeometry(before,critiqueArchitecture({
+  design:before.design,compiled:before.compiled}));
+ const floorEvidence=failed.programFloorEvidence.find(x=>x.standingY===2);
+ assert.equal(failed.status,'HOLD_PROGRAM_FLOORS');
+ assert.equal(floorEvidence.componentCount,2);
+ assert.equal(floorEvidence.components.length,2);
+ assert.equal(floorEvidence.components.reduce((n,x)=>n+x.stationCount,0),
+  floorEvidence.totalStandingSquares);
+ assert.ok(floorEvidence.components.every(x=>
+  x.sourceBounds.minX<=x.sourceBounds.maxX&&
+  x.sourceBounds.minZ<=x.sourceBounds.maxZ));
+ assert.ok(floorEvidence.doorwayCuts.some(x=>x.id==='l0-internal-door'&&
+  x.origin[2]===9));
+ assert.ok(floorEvidence.zones.length>=2);
+ assert.deepEqual(failed.programFloorIssues.find(x=>
+  x.code==='PROGRAM_FLOOR_DISCONNECTED_OR_MISSING'&&x.standingY===2)
+  .componentBounds,floorEvidence.components);
  const oldDoor=before.design.elements.find(e=>e.id==='l0-internal-door');
  const newDoor=after.design.elements.find(e=>e.id==='l0-internal-door');
  assert.deepEqual(oldDoor.origin,[3,2,9]);

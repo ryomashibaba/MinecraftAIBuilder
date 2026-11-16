@@ -126,6 +126,16 @@ export function auditInteriorTopology({design,compiled=compileDesign(design)}){
  const fragmentedElevations=elevationConnectivity.filter(x=>
   x.totalStandingSquares>=20&&x.componentCount>=2&&
   x.largestComponentShare<0.75);
+ // Full per-level component bounds, NOT the globally truncated "top 12".
+ // Only genuine 2x2-supported pads count; no invented bridge or relaxation.
+ const elevationComponentBounds=elevationConnectivity.map(row=>({
+  standingY:row.standingY,
+  totalStandingSquares:row.totalStandingSquares,
+  componentCount:row.componentCount,
+  components:comps.filter(c=>c.standingY===row.standingY).map(c=>({
+   stationCount:c.stationCount,sourceBounds:c.sourceBounds
+  }))
+ }));
  const summary={
   schema:SCHEMA,sourceSha256:compiled.sourceSha256,
   geometrySha256:compiled.geometrySha256,
@@ -137,6 +147,7 @@ export function auditInteriorTopology({design,compiled=compileDesign(design)}){
   largestComponentShare:count?round(largest/count):0,
   legacyGlobalShareMustNotDetermineFragmentation:true,
   elevationConnectivity,
+  elevationComponentBounds,
   fragmentedElevations,
   otherSameLevelComponents:comps.length?comps.length-1:0,
   largestComponents:comps.slice(0,12),

@@ -1239,11 +1239,27 @@ export function assessR125ProgramGeometry(product,critique){
  const roofElementsPresent=product.design.elements.some(e=>
   e.mode==='add'&&e.id.startsWith('roof-'));
  const reports=critique.objectiveAudit.elevationConnectivity;
- for(const y of levels){
+ const componentEvidence=critique.objectiveAudit.elevationComponentBounds??[];
+ const programFloorEvidence=[];
+ for(const y of [...levels].sort((a,b)=>a-b)){
   const row=reports.find(x=>x.standingY===y);
+  const components=componentEvidence.find(x=>x.standingY===y)?.components??[];
+  const doorwayCuts=product.design.elements
+   .filter(e=>e.mode==='cut'&&e.shape==='box'&&
+    /(?:door|entrance|threshold)/i.test(e.id)&&
+    e.origin[1]<=y&&y<e.origin[1]+e.size[1])
+   .map(e=>({id:e.id,origin:e.origin,size:e.size}));
+  const zones=product.program.filter(l=>l.standingFloorY===y)
+   .flatMap(l=>l.zones.map(z=>({id:z.id,range:z.range})));
+  programFloorEvidence.push({standingY:y,
+   totalStandingSquares:row?.totalStandingSquares??0,
+   componentCount:row?.componentCount??0,
+   components,doorwayCuts,zones,
+   classification:'EXACT_B143_TWO_BY_TWO_SOURCE_PADS_NOT_MINECRAFT_PATH'});
   if(!row||row.componentCount!==1||row.totalStandingSquares<10)
    programFloorIssues.push({code:'PROGRAM_FLOOR_DISCONNECTED_OR_MISSING',
-    standingY:y,componentCount:row?.componentCount??0});
+    standingY:y,componentCount:row?.componentCount??0,
+    componentBounds:components});
  }
  for(const finding of critique.findings.filter(x=>x.severity==='HIGH')){
   if(finding.id!=='FRAGMENTED_PUBLIC_SOURCE_FLOORS'||
@@ -1275,7 +1291,7 @@ export function assessR125ProgramGeometry(product,critique){
   status:programFloorIssues.length?'HOLD_PROGRAM_FLOORS':
    exteriorSurfaceAdvisories.length?'PROGRAM_FLOORS_CLEAR_EXTERIOR_REVIEW_REQUIRED':
     'PROGRAM_FLOORS_CLEAR',
-  programFloorIssues,exteriorSurfaceAdvisories,
+  programFloorIssues,programFloorEvidence,exteriorSurfaceAdvisories,
   genericB198CHighRiskCount:critique.highRiskCount,
   surfaceIsNotPlayerPath:true,worldWrites:0,worldWalking:'NOT_TESTED'};
 }
