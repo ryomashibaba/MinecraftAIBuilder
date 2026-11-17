@@ -532,7 +532,7 @@ export function addR125ActivityFloorInlays(product){
 // Shapes remain in the same 3-high station envelope; no world operations.
 export function restyleR125FixtureForms(product,{auditCirculation}={}){
  if(!Array.isArray(product?.fixtureTargets)||!product.fixtureTargets.length||
-    typeof auditCirculation!=='function)throw Error('R125_FIXTURE_FORM_INPUT');
+    typeof auditCirculation!=='function')throw Error('R125_FIXTURE_FORM_INPUT');
  const shape={
   oven:{hood:[0,2,1,3,1,1]},
   display:{glass:[1,1,0,1,1,1]},
