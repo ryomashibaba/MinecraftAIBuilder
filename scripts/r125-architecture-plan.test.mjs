@@ -8,7 +8,8 @@ import {SCHEMA,validateArchitecturePlan,compileArchitecturePlan,
  auditArchitecturePlanCirculation,assessR125ProgramGeometry,
  assessR125AuthoredRoomCapacity,packR125RaisedRoofStrips}
  from '../source/ai/r125-architecture-plan.mjs';
-import {addAuthoredRoomFixtures} from '../source/ai/r125-room-fixtures.mjs';
+import {addAuthoredRoomFixtures,auditR125FixtureDaylightView}
+ from '../source/ai/r125-room-fixtures.mjs';
 import {addAuthoredRoomDaylight} from '../source/ai/r125-room-daylight.mjs';
 import {packR125AdjacentBoxes} from '../source/ai/r125-spatial-detail.mjs';
 import {verifyCompiled,compileDesign} from '../source/ai/b143-building-dsl.mjs';
@@ -1282,6 +1283,54 @@ test('model-selected wide-bay and clerestory create real glass with exterior AIR
  assert.equal(auditArchitecturePlanCirculation(built).status,
   'SOURCE_CLEARANCE_PROBES_PASS');
  assert.deepEqual(built.compiled.BuildPlan.operations,[]);
+});
+test('window-to-room viewing band stays two adjacent clear columns on all four facades',()=>{
+ const scenarios=[
+  {face:'front',origin:[3,3,1],size:[4,2,1],inside:(u,y)=>[3+u,y,2]},
+  {face:'rear',origin:[3,3,14],size:[4,2,1],inside:(u,y)=>[3+u,y,13]},
+  {face:'east',origin:[14,3,3],size:[1,2,4],inside:(u,y)=>[13,y,3+u]},
+  {face:'west',origin:[1,3,3],size:[1,2,4],inside:(u,y)=>[2,y,3+u]}
+ ];
+ for(const item of scenarios){
+  const t={zoneId:'shared-room',kind:'wide-bay',face:item.face,
+   origin:item.origin,size:item.size};
+  const scene=positions=>({primitives:positions.map(p=>[...p,0,0])});
+  const view=vox=>auditR125FixtureDaylightView(scene(vox),[t]);
+  assert.equal(view([]).status,'DAYLIGHT_VIEW_CLEAR',item.face);
+  // Three blocked neighbors leave only a single clear column.
+  const blocked=[0,1,2].map(u=>item.inside(u,3));
+  assert.equal(view(blocked).status,'DAYLIGHT_VIEW_HOLD',item.face);
+  assert.equal(view(blocked).blocked[0].maxClearAdjacentColumns,1);
+  // Blocking one edge still leaves at least two adjacent clear positions.
+  assert.equal(view([item.inside(0,4)]).status,'DAYLIGHT_VIEW_CLEAR');
+  assert.equal(view([]).windowCount,1);
+ }
+ assert.equal(auditR125FixtureDaylightView(sceneForNoWindows(),[]).status,
+  'NO_AUTHORED_DAYLIGHT');
+ function sceneForNoWindows(){return {primitives:[]};}
+});
+test('window and authored equipment retain a real SOURCE-visible aperture across uses',()=>{
+ for(const [id,roomOne,roomTwo,feature] of [
+  ['home-view','Living room','Sleep and study','desk'],
+  ['shop-view','Customer display','Back-room storage','display'],
+  ['laboratory-view','Analysis lab','Visitor interpretation','electronics']
+ ]){
+  const p=plan(id,['x'],[roomOne,roomTwo]);
+  p.footprint={width:24,depth:24};
+  p.levels[0].spaces[0].daylight='wide-bay';
+  p.levels[0].spaces[0].fixture=feature;
+  p.levels[0].spaces[1].daylight='clerestory';
+  const built=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+  assert.equal(built.daylightTargets.length,2,id);
+  assert.equal(built.fixtureTargets.length,1,id);
+  const v=auditR125FixtureDaylightView(built.compiled,built.daylightTargets);
+  assert.equal(v.status,'DAYLIGHT_VIEW_CLEAR',id);
+  assert.equal(v.blocked.length,0);
+  assert.equal(auditR125SourceRoutes(built,{featureTargets:built.fixtureTargets}).status,
+   'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert.equal(verifyCompiled(built.design,built.compiled),true);
+  assert.equal(built.worldWrites,0);
+ }
 });
 test('model-selected daylight and real furniture coexist with a raised roof',()=>{
  const p=plan('daylight-maker',['z'],['visitor display','private workbench']);
