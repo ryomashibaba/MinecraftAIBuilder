@@ -152,6 +152,9 @@ if (-not (Test-Path -LiteralPath $finishOut)) {
   Write-Output 'V11_FINISH_ART_HOLD_SOURCE_POLICY_NOT_PASSED'
  }
 }
+} elseif (-not (Test-Path -LiteralPath $finishJSON -PathType Leaf)) {
+ Write-Output 'V11_FINISH_ART_HOLD_INCOMPLETE_PREVIOUS_OUTPUT'
+}
 if (Test-Path -LiteralPath $finishJSON -PathType Leaf) {
  $finishReport = Get-Content -LiteralPath $finishJSON -Raw -Encoding UTF8 | ConvertFrom-Json
  if ($finishReport.originalSha256 -cne $actualOriginalHash -or
@@ -174,3 +177,6 @@ if (-not $NoOpen) {
  try { Start-Process -FilePath $floorPNG; if (Test-Path -LiteralPath $finishPNG -PathType Leaf) { Start-Process -FilePath $finishPNG } }
  catch { Write-Warning 'V11_ART_OPEN_PNG_FAILED_USE_PRINTED_PATH' }
 }
+# Optional ART HOLD is a valid reviewed outcome. All mandatory validation
+# already threw on failure; never leak the last child node status to caller.
+$global:LASTEXITCODE = 0

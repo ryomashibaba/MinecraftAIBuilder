@@ -9,7 +9,8 @@ import {SCHEMA,validateArchitecturePlan,compileArchitecturePlan,
  assessR125AuthoredRoomCapacity,packR125RaisedRoofStrips,
  estimateR125AuthoredElementReserve}
  from '../source/ai/r125-architecture-plan.mjs';
-import {addAuthoredRoomFixtures,auditR125FixtureDaylightView}
+import {addAuthoredRoomFixtures,auditR125FixtureDaylightView,
+ addR125ActivityFloorInlays}
  from '../source/ai/r125-room-fixtures.mjs';
 import {addAuthoredRoomDaylight,auditR125PairedBayApproach}
  from '../source/ai/r125-room-daylight.mjs';
@@ -3187,4 +3188,43 @@ test('activity inlays highlight original equipment but change no standing geomet
  assert.equal(after.worldWrites,0);
  assert.deepEqual(after.gates,Array(9).fill('BLOCKED'));
  assert.equal(compileArchitecturePlan(p,policy).sourceSha256,before.sourceSha256);
+});
+
+test('B143 160-element near-capacity activity chooses original oven first without new solids',()=>{
+ const p=plan('bounded-actual-art',['z']);
+ p.footprint={width:26,depth:26};
+ p.expression={setbackSide:'none',setbackDepth:0,roofProfile:'ridge',
+  roofAxis:'x',roofVolume:'raised',facadeLanguage:'plain'};
+ p.levels[0].spaces[0].fixtures=['oven'];
+ p.levels[0].spaces[1].fixtures=['desk'];
+ const original=structuredClone(p);
+ const base=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+ assert.equal(base.fixtureTargets.length,2);
+ assert.ok(base.design.elements.length<159);
+ const v=base.compiled.primitives[0];
+ const material=['stone','concrete','metal','glass','wood','glow','accent'][v[3]];
+ const extra=Array.from({length:159-base.design.elements.length},(_,i)=>({
+  id:'inlay-budget-probe-'+i,shape:'box',mode:'add',material,
+  origin:v.slice(0,3),size:[1,1,1]}));
+ const design={...base.design,elements:[...base.design.elements,...extra]};
+ const compiled=compileDesign(design);
+ assert.deepEqual(compiled.primitives,base.compiled.primitives);
+ const crowded={...base,design,compiled};
+ const a=addR125ActivityFloorInlays(crowded);
+ assert.equal(a.design.elements.length,160);
+ assert.equal(a.activityInlayReview.roomCount,1);
+ assert.equal(a.activityInlayReview.eligibleRooms,2);
+ assert.equal(a.activityInlayReview.skippedRooms,1);
+ assert.equal(a.activityInlayReview.rooms[0].kind,'oven');
+ assert.equal(a.compiled.primitives.length,compiled.primitives.length);
+ assert.equal(verifyCompiled(a.design,a.compiled),true);
+ assert.equal(a.worldWrites,0);
+ assert.deepEqual(a.compiled.BuildPlan.operations,[]);
+ assert.deepEqual(p,original);
+ const fullDesign={...design,elements:[...design.elements,{
+  id:'inlay-budget-full',shape:'box',mode:'add',material,
+  origin:v.slice(0,3),size:[1,1,1]}]};
+ assert.throws(()=>addR125ActivityFloorInlays({...crowded,
+  design:fullDesign,compiled:compileDesign(fullDesign)}),
+ /R125_PLAN_ACTIVITY_INLAY_ELEMENT_BUDGET/);
 });

@@ -488,14 +488,20 @@ export function addR125ActivityFloorInlays(product){
   }
  }
  if(!patches.length)throw Error('R125_PLAN_ACTIVITY_INLAY_NO_SUPPORTED_FLOOR');
- if(product.design.elements.length+2*patches.length>160)
-  throw Error('R125_PLAN_ACTIVITY_INLAY_ELEMENT_BUDGET');
- const extra=patches.flatMap((p,i)=>[
-  {id:'host-art-inlay-cut-'+i,shape:'box',mode:'cut',
-   origin:p.origin,size:p.size},
-  {id:'host-art-inlay-fill-'+i,shape:'box',mode:'add',
-   material:'accent',origin:p.origin,size:p.size}
- ]);
+ // An 'add' overwrites the MATERIAL of a supported, already-occupied
+ // B143 cell. The prior cut was redundant and consumed half the budget.
+ // Select by existing model-authored functional importance; report skips.
+ const available=Math.max(0,160-product.design.elements.length);
+ if(available===0)throw Error('R125_PLAN_ACTIVITY_INLAY_ELEMENT_BUDGET');
+ const selected=patches.map((p,i)=>({...p,order:i}))
+  .sort((a,b)=>(priority[b.kind]??0)-(priority[a.kind]??0)||
+   a.order-b.order)
+  .slice(0,available).sort((a,b)=>a.order-b.order);
+ const chosenCells=new Set(selected.flatMap(p=>p.cells));
+ const extra=selected.map((p,i)=>({
+  id:'host-art-inlay-fill-'+i,shape:'box',mode:'add',
+  material:'accent',origin:p.origin,size:p.size
+ }));
  const design={...product.design,elements:[...product.design.elements,...extra]};
  const compiled=compileDesign(design);
  if(!verifyCompiled(design,compiled)||compiled.worldContacts!==0||
@@ -503,13 +509,19 @@ export function addR125ActivityFloorInlays(product){
   throw Error('R125_PLAN_ACTIVITY_INLAY_COMPILER');
  const after=new Map(compiled.primitives.map(v=>[v.slice(0,3).join(','),v[3]]));
  if(after.size!==before.size||[...before].some(([k,m])=>
-   after.get(k)!==(expected.has(k)?accentMaterial:m)))
+   after.get(k)!==(chosenCells.has(k)?accentMaterial:m)))
   throw Error('R125_PLAN_ACTIVITY_INLAY_NONFLOOR_DRIFT');
  return {...product,design,compiled,sourceSha256:compiled.sourceSha256,
   geometrySha256:compiled.geometrySha256,
-  activityInlayReview:{status:'SOURCE_FLOOR_MATERIAL_ONLY_ART_HOLD',
-   roomCount:patches.length,changedCells:expected.size,
-   rooms:patches.map(({zoneId,kind,origin,size})=>({zoneId,kind,origin,size})),
+  activityInlayReview:{
+   status:selected.length===patches.length?
+    'SOURCE_FLOOR_MATERIAL_ONLY_ART_HOLD':
+    'SOURCE_FLOOR_MATERIAL_PARTIAL_ELEMENT_BUDGET_ART_HOLD',
+   roomCount:selected.length,eligibleRooms:patches.length,
+   skippedRooms:patches.length-selected.length,
+   remainingB143Elements:160-design.elements.length,
+   changedCells:chosenCells.size,
+   rooms:selected.map(({zoneId,kind,origin,size})=>({zoneId,kind,origin,size})),
    originalAuthoredPlanUnchanged:true,occupancyUnchanged:true,
    fixtureLocationsUnchanged:true,minecraftWalking:'NOT_TESTED',
    modelCalls:0,worldWrites:0}};
