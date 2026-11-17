@@ -342,8 +342,7 @@ if ($customBrief) {
   $imageStream = [System.IO.File]::OpenRead($contact)
   try { $artBytesHash = $hashObject.ComputeHash($imageStream) }
   finally { $imageStream.Dispose(); $hashObject.Dispose() }
-  $actualArtSha = ([System.BitConverter]::ToString($artBytesHash)).
-   Replace('-','').ToLowerInvariant()
+  $actualArtSha = ([System.BitConverter]::ToString($artBytesHash)).Replace('-','').ToLowerInvariant()
   if ($manifest.schema -cne 'r125-b143-offline-static-review-v1' -or
       $manifest.sourceSha256 -cne $diag.sourceSha256 -or
       $manifest.geometrySha256 -cne $diag.geometrySha256 -or
