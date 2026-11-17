@@ -154,6 +154,34 @@ export function compareR125RoofRibbon({rawFile,outDir,massing='baseline',educati
    sourceSha256:expectedSource,
    renderer:'TRUE_B143_GALLERY_NOT_MINECRAFT_SCREENSHOT'});
  }
+ // One offline dashboard for human architectural comparison. The two
+ // iframes show separately verified ORIGINAL B143 sources and their interiors.
+ // They do not simulate Minecraft physics, material texture or player walking.
+ const dashboardFile='ROOF_AB_REVIEW.html';
+ const dashboard='<!doctype html><html lang="ja"><head><meta charset="utf-8">'+
+  '<meta name="viewport" content="width=device-width,initial-scale=1">'+
+  '<title>MAB V11 — 屋根 A/B 建築比較</title><style>'+
+  'body{margin:0;background:#101925;color:#eaf2fb;font:15px system-ui,sans-serif}'+
+  'header,section{padding:16px 22px}header{background:#193047}'+
+  'h1{font-size:22px;margin:0 0 8px}small{color:#bed3e5}'+
+  '.compare{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px}'+
+  '.view{min-width:0;background:#182a3a;border:1px solid #3e5b73;border-radius:9px;overflow:hidden}'+
+  'h2{font-size:18px;margin:12px}iframe{width:100%;height:65vh;min-height:370px;border:0}'+
+  'img{display:block;width:100%;height:auto}a{color:#8ee0ff}'+
+  '@media(max-width:800px){.compare{grid-template-columns:1fr}iframe{height:55vh}}'+
+  '</style></head><body><header><h1>MinecraftAIBuilder V11 — 同一AI設計の屋根比較</h1>'+
+  '<small>左: 既存屋根 + 採光帯 / 右: 低重心屋根 + 同一採光帯。'+
+  '2画面は真正B143 SOURCEの3D描画であり、Minecraft実機・歩行・美術合格を意味しません。'+
+  'マウスでそれぞれ回転、室内断面も確認できます。</small></header>'+
+  '<div class="compare"><div class="view"><h2>BEFORE — 通常の屋根</h2>'+
+  '<iframe loading="lazy" title="通常屋根 3D" src="B143_BASELINE_INTERACTIVE_3D.html"></iframe>'+
+  '</div><div class="view"><h2>AFTER — 低重心屋根</h2>'+
+  '<iframe loading="lazy" title="低重心屋根 3D" src="B143_COMPACT_INTERACTIVE_3D.html"></iframe>'+
+  '</div></div><section><h2>同角度の4面比較（左: 通常 / 右: 低重心）</h2>'+
+  '<img alt="屋根A/B SOURCE比較" src="ART_AB/AB_OLD_LEFT_NEW_RIGHT.png">'+
+  '<p>実機での見え方はMinecraft Educationで別途確認してください。'+
+  '床・設備・通路はSOURCE一致ですが実歩行は未検証です。</p></section></body></html>';
+ fs.writeFileSync(path.join(out,dashboardFile),dashboard,{flag:'wx'});
  let educationPreview=null;
  if(educationPackets){
   const rows=[['BASELINE',educationPackets.before],
@@ -188,6 +216,8 @@ export function compareR125RoofRibbon({rawFile,outDir,massing='baseline',educati
    roofAir}:{}),
   image:path.join(out,'ART_AB',ab.preview.file),
   interactive3D:threeDViews,
+  artDashboard:{file:dashboardFile,sha256:sha(dashboard),
+   type:'SOURCE_RENDER_ONLY',minecraftExecution:'NOT_TESTED'},
   modelCalls:0,worldWrites:0,minecraftWalking:'NOT_TESTED',
   humanArt:'NOT_REVIEWED',...(educationPreview?{education:educationPreview}:{})};
  fs.writeFileSync(path.join(out,'REVIEW.json'),
