@@ -167,6 +167,8 @@ export async function runR125ArchitecturePlanBatch({
    modelAuthoredFormFamilySha256,authoredForm,authoredProgram,
    modelChosenDaylight:diagnosis?.modelChosenDaylight??0,
    daylightSourceWindows:diagnosis?.daylightSourceWindows??[],
+   ...(diagnosis?.pairedWindowApproach?
+    {pairedWindowApproach:diagnosis.pairedWindowApproach}:{}),
    // Original plan and checked B143 SOURCE only. Never artistic certification.
    occupiedVoxels:diagnosis?.occupiedVoxels??null,
    sourceRouteStatus:diagnosis?.sourceRoutes??null,

@@ -14,6 +14,7 @@ import {validateDesign,compileDesign} from '../source/ai/b143-building-dsl.mjs';
 import {compileArchitecturePlan,auditArchitecturePlanCirculation,
  assessR125ProgramGeometry,assessR125AuthoredRoomCapacity} from '../source/ai/r125-architecture-plan.mjs';
 import {auditR125SourceRoutes} from '../source/ai/r125-source-routes.mjs';
+import {auditR125PairedBayApproach} from '../source/ai/r125-room-daylight.mjs';
 import {critiqueArchitecture} from '../source/ai/b198c-spatial-critic.mjs';
 import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
 
@@ -172,11 +173,14 @@ export function diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail='legacy',ro
      built.compiled?.BuildPlan?.operations?.length!==0)
     fail('PLAN_WORLD_SAFETY_DRIFT');
   const routes=auditR125SourceRoutes(built,{featureTargets:built.fixtureTargets??[]});
+  const pairedWindows=built.daylightTargets?.some(x=>x.kind==='paired-bays')?
+   auditR125PairedBayApproach(built):null;
   const circulation=auditArchitecturePlanCirculation(built);
   const critique=critiqueArchitecture({design:built.design,compiled:built.compiled});
   const floors=assessR125ProgramGeometry(built,critique);
   const functionalClear=routes.status==='SOURCE_ROUTES_REACH_ALL_ZONES'&&
    circulation.status==='SOURCE_CLEARANCE_PROBES_PASS'&&
+   (!pairedWindows||pairedWindows.status==='PAIRED_BAY_APPROACH_PASS')&&
    floors.programFloorIssues.length===0;
   return {...base,
    status:functionalClear?'B143_SOURCE_CANDIDATE_ART_HOLD':'HOLD_FUNCTIONAL_SOURCE',
@@ -188,6 +192,17 @@ export function diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail='legacy',ro
    modelChosenFixtures:built.fixtureTargets?.length??0,
    modelChosenDaylight:built.daylightTargets?.length??0,
    daylightSourceWindows:built.daylightTargets??[],
+   ...(pairedWindows?{pairedWindowApproach:{
+    status:pairedWindows.status,windowCount:pairedWindows.windowCount,
+    reachedWindowCount:pairedWindows.witnesses.filter(x=>
+     x.reachableFromEntrance).length,
+    windows:pairedWindows.witnesses.map(x=>({
+     id:x.id,zoneId:x.zoneId,requiredInteriorSide:x.sourceServiceSide,
+     reached:x.reachableFromEntrance,
+     supportedTwoWideServiceWitness:x.supportedTwoWideServiceWitness,
+     sourceGraphMoves:x.sourceGraphMoves
+    })),
+    realMinecraftWalking:'NOT_TESTED',worldWrites:0}}:{}),
    fixtureAccess:routes.featureAccess??[],
    circulation:circulation.status,circulationFailures:circulation.failures??[],
    programFloors:floors.status,programFloorIssues:floors.programFloorIssues,

@@ -123,6 +123,33 @@ test('saved real Nov-1 Qwen ArchitecturePlan replays through TRUE B143 and SOURC
  assert.equal(r.circulation,'SOURCE_CLEARANCE_PROBES_PASS');
  assert.equal(r.sourceDesign.designOnly,true);
 });
+test('paired-bay SOURCE replay preserves two independently reachable interior viewing witnesses',()=>{
+ const plan={schema:PLAN,id:'paired-viewpoint-replay',
+  title:'A usable observation laboratory',
+  brief:'Independent research workspace with visitor information and real windows',
+  footprint:{width:30,depth:30},
+  levels:[{splitAxis:'x',splitPercent:50,spaces:[
+   {id:'sample-lab',purpose:'Water sample laboratory',
+    fixtures:['workbench'],daylight:'paired-bays'},
+   {id:'visitor-space',purpose:'Visitor exhibition'}
+  ]}],
+  materials:{floor:'wood',wall:'concrete',roof:'stone'}};
+ const raw=JSON.stringify(plan);
+ const diagnosis=diagnoseR125ArchitecturePlanOriginal(raw);
+ assert.equal(diagnosis.sourceVerified,true,JSON.stringify(diagnosis));
+ assert.equal(diagnosis.pairedWindowApproach?.status,
+  'PAIRED_BAY_APPROACH_PASS');
+ assert.equal(diagnosis.pairedWindowApproach.windowCount,2);
+ assert.equal(diagnosis.pairedWindowApproach.reachedWindowCount,2);
+ assert(diagnosis.pairedWindowApproach.windows.every(w=>
+  w.reached===true&&w.supportedTwoWideServiceWitness!==null));
+ assert.equal(diagnosis.pairedWindowApproach.realMinecraftWalking,'NOT_TESTED');
+ assert.equal(diagnosis.modelChosenDaylight,2);
+ assert.equal(diagnosis.originalSha256,
+  createHash('sha256').update(raw).digest('hex'));
+ assert.deepEqual(diagnosis.worldGates,Array(9).fill('BLOCKED'));
+ assert.equal(diagnosis.worldWrites,0);
+});
 test('ArchitecturePlan replay rejects corrupted plan without silent model correction',()=>{
  const malformed=diagnoseR125ArchitecturePlanOriginal('{invalid');
  assert.equal(malformed.status,'HOLD_INVALID_ORIGINAL_JSON');

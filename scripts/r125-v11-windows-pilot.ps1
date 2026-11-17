@@ -7,6 +7,8 @@
   touch Minecraft worlds, or upload PRIVATE results. Work can run this in the
   user's existing research checkout. Outputs are local PrivateModelStudies.
   -SingleNewBrief: one new functional brief, with no prescribed architecture.
+  -SingleNewBrief -Prompt TEXT: ONE custom original Japanese brief, no templates.
+  Original prompt stays in the PRIVATE output; no uploads.
   -ComparePriorTide: one SAME-BRIEF Qwen recheck then A/B PNG review
   using the frozen PRIVATE 2026-11-16 tide result read-only. No extra POST.
   -CheckOnly: GitHub CI / local dry run, no model HTTP, no new files.
@@ -18,6 +20,7 @@ param(
  [switch]$CheckOnly,
  [switch]$OnlyHousingRetail,
  [switch]$SingleNewBrief,
+ [string]$Prompt = '',
  [switch]$ComparePriorTide,
  [switch]$NoOpen
 )
@@ -28,6 +31,12 @@ $runner = Join-Path $repo 'scripts\r125-local-architecture-plan-batch.mjs'
 $pilot = Join-Path $repo 'scripts\r125-v11-pilot-three.json'
 $single = Join-Path $repo 'scripts\r125-v11-single-unknown.json'
 $abRenderer = Join-Path $repo 'scripts\r125-static-art-review.mjs'
+$customBrief = $PSBoundParameters.ContainsKey('Prompt')
+if ($customBrief -and (-not $SingleNewBrief -or $ComparePriorTide -or
+    [string]::IsNullOrWhiteSpace($Prompt) -or $Prompt.Length -lt 8 -or
+    $Prompt.Length -gt 8000)) {
+ throw 'V11_PILOT_CUSTOM_PROMPT_REQUIRES_SINGLE_NEW_BRIEF_8_TO_8000'
+}
 if ($SingleNewBrief -and $OnlyHousingRetail) {
  throw 'V11_PILOT_CONFLICTING_TRIAL_MODES'
 }
@@ -61,7 +70,7 @@ if ($OnlyHousingRetail) {
  }
 }
 
-if ($SingleNewBrief) {
+if ($SingleNewBrief -and -not $customBrief) {
  # Read UTF-8 explicitly on Windows PowerShell 5.1; no hardcoded roof/shape.
  $jsonText = Get-Content -LiteralPath $single -Raw -Encoding UTF8
  $parsed = ConvertFrom-Json -InputObject $jsonText
@@ -184,7 +193,8 @@ if ($ComparePriorTide) {
 }
 $root = Join-Path $env:LOCALAPPDATA 'MinecraftAIBuilder\PrivateModelStudies'
 [void](New-Item -Path $root -ItemType Directory -Force)
-$studyName = if ($SingleNewBrief) { 'V11_UnseenSingle_' } else { 'V11_3Genre_' }
+$studyName = if ($customBrief) { 'V11_CustomBrief_' }
+ elseif ($SingleNewBrief) { 'V11_UnseenSingle_' } else { 'V11_3Genre_' }
 $out = Join-Path $root ($studyName +
  (Get-Date -Format 'yyyyMMdd_HHmmss_fff') + '_' +
  [Guid]::NewGuid().ToString('N').Substring(0,8))
@@ -193,7 +203,18 @@ Write-Output ('V11_PILOT_RUN_HEAD=' + $commit.Trim())
 Write-Output ('V11_PRIVATE_RESULT=' + $out)
 Write-Output ('One existing local model, '+$expectedCount+' bounded original POST(s), no automatic retries.')
 $batchArgs = @($runner, '--model', $Model)
-if ($SingleNewBrief) {
+if ($customBrief) {
+ # The exact user prompt is copied to BRIEFS_ORIGINAL.json by the existing
+ # batch runner before POST. This transient input is in PRIVATE and is
+ # removed after use. No model rewriting or architectural assumptions.
+ $briefFile = Join-Path $root ('V11_CustomBrief_Input_' +
+  [Guid]::NewGuid().ToString('N')+'.json')
+ $customRows = @([pscustomobject]@{id='custom-brief';prompt=$Prompt})
+ $json = ConvertTo-Json -InputObject $customRows -Depth 6
+ [System.IO.File]::WriteAllText($briefFile, $json,
+  [System.Text.UTF8Encoding]::new($false))
+ $batchArgs += @('--briefs', $briefFile)
+} elseif ($SingleNewBrief) {
  $batchArgs += @('--briefs', $single)
 } elseif ($OnlyHousingRetail) {
  $briefFile = Join-Path $root ('V11_2Failure_Briefs_'+[Guid]::NewGuid().ToString('N')+'.json')
@@ -209,7 +230,8 @@ try {
  & $node @batchArgs
  $nodeExit = $LASTEXITCODE
 } finally {
- if ($OnlyHousingRetail -and (Test-Path -LiteralPath $briefFile -PathType Leaf)) {
+ if (($OnlyHousingRetail -or $customBrief) -and
+     (Test-Path -LiteralPath $briefFile -PathType Leaf)) {
   Remove-Item -LiteralPath $briefFile -Force
  }
 }

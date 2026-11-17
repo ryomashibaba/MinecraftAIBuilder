@@ -6,7 +6,8 @@ import {createHash} from 'node:crypto';
 import assert from 'node:assert/strict';
 import {SCHEMA,validateArchitecturePlan,compileArchitecturePlan,
  auditArchitecturePlanCirculation,assessR125ProgramGeometry,
- assessR125AuthoredRoomCapacity,packR125RaisedRoofStrips}
+ assessR125AuthoredRoomCapacity,packR125RaisedRoofStrips,
+ estimateR125AuthoredElementReserve}
  from '../source/ai/r125-architecture-plan.mjs';
 import {addAuthoredRoomFixtures,auditR125FixtureDaylightView}
  from '../source/ai/r125-room-fixtures.mjs';
@@ -2011,6 +2012,23 @@ test('equal-height raised roof SOURCE strips compress only as needed and preserv
    'old success unmodified');
   assert.deepEqual(original.compiled.BuildPlan.operations,[]);
  }
+});
+test('roof element budget counts model-authored paired windows and repeated equipment exactly',()=>{
+ const p=plan('paired-roof-budget',['x'],['research workspace','visitor records']);
+ const old=structuredClone(p);
+ assert.equal(estimateR125AuthoredElementReserve(p),0);
+ p.levels[0].spaces[0].daylight='wide-bay';
+ assert.equal(estimateR125AuthoredElementReserve(p),2);
+ p.levels[0].spaces[0].daylight='paired-bays';
+ assert.equal(estimateR125AuthoredElementReserve(p),4,
+  'two pairs of actual B143 cut and glass elements are reserved');
+ p.levels[0].spaces[0].fixtures=['workbench','workbench','storage'];
+ assert.equal(estimateR125AuthoredElementReserve(p),4+3+3+4,
+  'repeated role instances each reserve real B143 parts');
+ p.levels[0].spaces[0].fixtureDetail='crafted';
+ assert.equal(estimateR125AuthoredElementReserve(p),4+4+4+5);
+ assert.equal(estimateR125AuthoredElementReserve(old),0,
+  'existing author designs keep their original budget');
 });
 test('equipment budget reservation chooses roof packing without deleting authored roles',()=>{
  const p=plan('equipment-roof-pack',['x','z'],

@@ -85,7 +85,7 @@ export function packR125RaisedRoofStrips(elements,roofAxis){
  }
  return elements.flatMap((e,i)=>drop.has(i)?[]:[changes.get(i)??e]);
 }
-const roofReserve=p=>p.levels.reduce((sum,level)=>sum+
+export const estimateR125AuthoredElementReserve=p=>p.levels.reduce((sum,level)=>sum+
  level.spaces.reduce((subtotal,room)=>{
   const roles=room.fixtures??(room.fixture?[room.fixture]:[]);
   const parts={counter:2,workbench:3,display:2,storage:4,seating:2,
@@ -94,7 +94,7 @@ const roofReserve=p=>p.levels.reduce((sum,level)=>sum+
    counter:1,workbench:1,display:1,storage:1,seating:2,bed:2,
    desk:2,washbasin:1,electronics:1,oven:1}:{};
   return subtotal+roles.reduce((total,role)=>total+parts[role]+
-   (detail[role]??0),0)+(room.daylight?2:0);
+   (detail[role]??0),0)+(room.daylight==='paired-bays'?4:room.daylight?2:0);
  },0),0);
 // Authored entry-zone choices always win. Otherwise, the opt-in path
 // preserves a clear centered entrance and moves it only if a divider blocks
@@ -1157,7 +1157,7 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
  // author response whose requested equipment/daylight would exceed B143's
  // fixed 160-element budget gets a lossless roof-strip representation.
  // A fixed source that still exceeds the budget is a genuine HOLD.
- if(raisedRoof&&elements.length+roofReserve(original)>160){
+ if(raisedRoof&&elements.length+estimateR125AuthoredElementReserve(original)>160){
   const packed=packR125RaisedRoofStrips(elements,roofAxis);
   elements.splice(0,elements.length,...packed);
  }
