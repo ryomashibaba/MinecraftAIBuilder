@@ -319,7 +319,17 @@ const r125Expression={
    axis:['x'],volume:'required',monitorDaylight:true})
  ]
 };
-export const R125_ARCHITECTURE_RESPONSE_SCHEMA=r125obj({
+// Bind number of storeys to possible upper-storey setbacks at GENERATION.
+// Root alternatives must be disjoint and complete: conditional if/then/else
+// is not reliably honored by llama.cpp-backed constrained JSON decoding.
+// This changes only the local author's grammar, never its original response,
+// the independent HOST validation, or the frozen B143 compiler.
+const r125OneLevelExpression={anyOf:r125Expression.anyOf.filter(v=>
+ v.properties.setbackSide.enum.length===1&&
+ v.properties.setbackSide.enum[0]==='none'&&
+ v.properties.setbackDepth.enum.length===1&&
+ v.properties.setbackDepth.enum[0]===0)};
+const r125PlanProperties={
  schema:{type:'string',enum:[R125_PLAN_SCHEMA]},
  id:r125slug,title:r125text(180),brief:r125text(500),
  footprint:r125obj({width:r125int(16,32),depth:r125int(16,32)},
@@ -331,7 +341,20 @@ export const R125_ARCHITECTURE_RESPONSE_SCHEMA=r125obj({
   roof:r125enum('stone','metal','wood','concrete')
  },['floor','wall','roof']),
  entryZone:r125enum('first','second'),expression:r125Expression
-},['schema','id','title','brief','footprint','levels','materials']);
+};
+const r125PlanRequired=['schema','id','title','brief','footprint','levels','materials'];
+const r125PlanVariant=(levelCount,expression)=>r125obj({
+ ...r125PlanProperties,
+ levels:{...r125PlanProperties.levels,
+  minItems:levelCount,maxItems:levelCount},
+ expression
+},r125PlanRequired);
+export const R125_ARCHITECTURE_RESPONSE_SCHEMA={
+ anyOf:[
+  r125PlanVariant(1,r125OneLevelExpression),
+  r125PlanVariant(2,r125Expression)
+ ]
+};
 
 export function r125ResponseFormatForEndpoint(endpoint){
  if(endpoint==='http://127.0.0.1:11434/v1/chat/completions')

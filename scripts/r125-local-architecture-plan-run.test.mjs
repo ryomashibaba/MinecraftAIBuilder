@@ -57,13 +57,24 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    assert.equal(request.response_format.json_schema.strict,true);
    const structured=request.response_format.json_schema.schema;
    assert.deepEqual(structured,R125_ARCHITECTURE_RESPONSE_SCHEMA);
-   assert.equal(structured.additionalProperties,false);
-   assert.equal(structured.properties.levels.maxItems,2);
-   assert.equal(structured.properties.levels.items.properties.spaces.minItems,2);
-   assert.equal(structured.properties.levels.items.properties.spaces.maxItems,3);
-   assert.deepEqual(structured.properties.levels.items.properties.secondarySplitPercent.enum,[35,50,65]);
-   assert.ok(!structured.properties.levels.items.required.includes('secondarySplitPercent'));
-   const room=structured.properties.levels.items.properties.spaces.items;
+   assert.equal(structured.anyOf.length,2);
+   const [oneLevel,authorSchema]=structured.anyOf;
+   assert.equal(oneLevel.additionalProperties,false);
+   assert.equal(oneLevel.properties.levels.minItems,1);
+   assert.equal(oneLevel.properties.levels.maxItems,1);
+   assert.equal(authorSchema.properties.levels.minItems,2);
+   assert.equal(authorSchema.properties.levels.maxItems,2);
+   assert.equal(oneLevel.properties.expression.anyOf.length,11);
+   assert.ok(oneLevel.properties.expression.anyOf.every(v=>
+    v.properties.setbackSide.enum.join(',')==='none'&&
+    v.properties.setbackDepth.enum.join(',')==='0'),
+    'one-storey author grammar must never allow an upper-storey setback');
+   assert.equal(authorSchema.additionalProperties,false);
+   assert.equal(authorSchema.properties.levels.items.properties.spaces.minItems,2);
+   assert.equal(authorSchema.properties.levels.items.properties.spaces.maxItems,3);
+   assert.deepEqual(authorSchema.properties.levels.items.properties.secondarySplitPercent.enum,[35,50,65]);
+   assert.ok(!authorSchema.properties.levels.items.required.includes('secondarySplitPercent'));
+   const room=authorSchema.properties.levels.items.properties.spaces.items;
    assert.equal(room.additionalProperties,false);
    assert.ok(room.properties.fixtures.items.enum.includes('electronics'));
    assert.ok(room.properties.fixtures.items.enum.includes('oven'));
@@ -75,7 +86,7 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
     'the Ollama schema accepts multiple author-chosen instances of one role');
    assert.deepEqual(room.properties.fixtureDetail.enum,['crafted']);
    assert.equal(room.required.includes('fixtureDetail'),false);
-   const options=structured.properties.expression.anyOf;
+   const options=authorSchema.properties.expression.anyOf;
    assert.equal(options.length,16);
    const uCourt=options.filter(v=>v.required.includes('rearCourt'));
    assert.equal(uCourt.length,2);
