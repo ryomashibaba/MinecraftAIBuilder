@@ -796,6 +796,16 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
     [left,y,z0],[right-left+1,4,3]);
    box('portico-west-return','add',wall,[left,y,z0],[1,4,4]);
    box('portico-east-return','add',wall,[right,y,z0],[1,4,4]);
+   // A two-level FRONT-setback portico can leave the fixed 2-wide stair
+   // start (x=3..4,z=3) behind its west return at x=5. The old return
+   // creates a source-only island: the top landing tests PASS, but no
+   // connected pad reaches the first stair tread from the public entry.
+   // Add a real 2-wide side threshold to that authored portico, never
+   // rewrite room order, move stairs, or modify historical non-front plans.
+   // The lintel remains overhead; each opening is true B143 air.
+   if(count===2&&setbackSide==='front'&&left===5)
+    box('portico-stair-vestibule-cut','cut',null,
+     [left,y,z0+1],[1,3,2]);
    box('portico-rear-wall','add',wall,
     [left+1,y,backZ],[right-left-1,4,1]);
    // The daylight panel and the door are BOTH openings in the new rear wall.

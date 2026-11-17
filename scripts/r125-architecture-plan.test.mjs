@@ -16,7 +16,7 @@ import {addAuthoredRoomDaylight,auditR125PairedBayApproach}
 import {packR125AdjacentBoxes} from '../source/ai/r125-spatial-detail.mjs';
 import {verifyCompiled,compileDesign} from '../source/ai/b143-building-dsl.mjs';
 import {exportB143EducationMakeCode} from '../source/ai/r125-education-makecode-export.mjs';
-import {auditR125SourceRoutes} from '../source/ai/r125-source-routes.mjs';
+import {auditR125SourceRoutes,auditR125VisitorRoutes} from '../source/ai/r125-source-routes.mjs';
 import {critiqueArchitecture} from '../source/ai/b198c-spatial-critic.mjs';
 import {exportSavedPlan} from './r125-japanese-makecode.mjs';
 
@@ -2966,4 +2966,81 @@ test('new street setback must be two-level exactly two blocks',()=>{
  p.expression.setbackDepth=2;
  p.levels=p.levels.slice(0,1);
  assert.throws(()=>validateArchitecturePlan(p),/R125_PLAN_EXPRESSION_SETBACK/);
+});
+
+
+test('front-setback two-story x40/z60 recessed portico keeps stair source-reachable',()=>{
+ // Separate synthetic structure matching the reported shape, not a copied
+ // PRIVATE model response. Test the physical entrance/upper route directly.
+ for(const secondAccess of ['shared','staff']){
+  const p=plan('front-portico-stair-'+secondAccess,['x','z'],
+   ['children reading room','paper craft workshop']);
+  p.footprint={width:32,depth:32};
+  p.levels[0].splitPercent=40;
+  p.levels[0].spaces[0].id='reading-room';
+  p.levels[0].spaces[1].id='workshop';
+  p.levels[0].spaces[0].access='public';
+  p.levels[0].spaces[1].access='public';
+  p.levels[1].splitPercent=60;
+  p.levels[1].spaces[0].id='staff-area';
+  p.levels[1].spaces[0].access=secondAccess==='shared'?'shared':'staff';
+  p.levels[1].spaces[1].id='entrance-hall';
+  p.levels[1].spaces[1].access=secondAccess;
+  p.entryZone='first';
+  p.expression={setbackSide:'front',setbackDepth:2,
+   roofProfile:'ridge',roofAxis:'z',
+   facadeLanguage:'recessed-portico',roofVolume:'raised'};
+  const untouched=structuredClone(p);
+  const b=compileArchitecturePlan(p,{
+   entrancePlacement:'source-accessible',upperDoorPlacement:'stair-clear'});
+  assert.deepEqual(p,untouched,'model-authored layout may not be repaired');
+  const entry=b.design.elements.find(e=>e.id==='exterior-entrance');
+  const returnCut=b.design.elements.find(e=>
+   e.id==='portico-stair-vestibule-cut');
+  assert.deepEqual(entry.origin.slice(1),[2,4]);
+  assert.deepEqual(returnCut.origin,[5,2,2]);
+  assert.deepEqual(returnCut.size,[1,3,2]);
+  assert.equal(verifyCompiled(b.design,b.compiled),true);
+  const cells=voxels(b.compiled);
+  assert.equal(includes(cells,5,2,2),false);
+  assert.equal(includes(cells,5,3,3),false);
+  assert.equal(includes(cells,5,5,3),true,'real over-door lintel retained');
+  assert.equal(auditArchitecturePlanCirculation(b).status,
+   'SOURCE_CLEARANCE_PROBES_PASS');
+  const route=auditR125SourceRoutes(b);
+  assert.equal(route.status,'SOURCE_ROUTES_REACH_ALL_ZONES',
+   JSON.stringify({issues:route.issues,zones:route.zones,
+    entry:route.sourceInteriorEntrance}));
+  assert.ok(route.zones.every(z=>z.reachedFromEntrance));
+  const visitor=auditR125VisitorRoutes(b,p);
+  if(secondAccess==='shared'){
+   // Both upper rooms are publicly traversable; SOURCE-only route succeeds.
+   assert.equal(visitor.status,'SOURCE_VISITOR_ROUTES_AVOID_STAFF',
+    JSON.stringify(visitor));
+  }else{
+   // Model-authored staff room still separates the upstairs shared room:
+   // adding stair access must not silently mislabel this as visitor-safe.
+   assert.equal(visitor.status,'HOLD_VISITOR_STAFF_SEPARATION');
+   assert.deepEqual(visitor.blocked,['entrance-hall']);
+  }
+  assert.deepEqual(b.compiled.BuildPlan.operations,[]);
+  assert.equal(b.worldWrites,0);
+ }
+});
+test('recessed-portico stair threshold never changes historical setback modes',()=>{
+ for(const side of ['none','east','rear']){
+  const p=plan('historical-portico-'+side,['x','z']);
+  p.footprint={width:32,depth:32};
+  p.levels[0].splitPercent=40;
+  p.levels[1].splitPercent=60;
+  p.entryZone='first';
+  p.expression={setbackSide:side,setbackDepth:side==='none'?0:2,
+   roofProfile:'ridge',roofAxis:'z',
+   facadeLanguage:'recessed-portico',roofVolume:'raised'};
+  const b=compileArchitecturePlan(p,{
+   entrancePlacement:'source-accessible',upperDoorPlacement:'stair-clear'});
+  assert.equal(b.design.elements.some(e=>
+   e.id==='portico-stair-vestibule-cut'),false);
+  assert.equal(b.worldWrites,0);
+ }
 });
