@@ -123,6 +123,10 @@ function tLayout(level,{x0,x1,z0,z1},split){
    wallAt:y=>[split+1,y,k],wallSize:[x1-split-1,4,1],
    doorAt:y=>[split+1,y,k],doorSize:[2,3,1],
    mainDoorZ:Math.min(k-3,Math.max(z0+2,Math.floor((z0+k)/2))),
+   // Optional author-owned direct first-to-third connection, independent
+   // of the second/third doorway. No retroactive changes to old plans.
+   thirdDirectAt:y=>[split,y,Math.floor((k+z1-1)/2)],
+   thirdDirectSize:[1,3,2],
    zones:[
     {id:first.id,purpose:first.purpose,
      range:{x:[x0+1,split-1],z:[z0+1,z1-1]}},
@@ -138,6 +142,8 @@ function tLayout(level,{x0,x1,z0,z1},split){
  return {axis:'x',coordinate:k,
   wallAt:y=>[k,y,split+1],wallSize:[1,4,z1-split-1],
   doorAt:y=>[k,y,split+1],doorSize:[1,3,2],
+  thirdDirectAt:y=>[Math.floor((k+x1-1)/2),y,split],
+  thirdDirectSize:[2,3,1],
   zones:[
    {id:first.id,purpose:first.purpose,
     range:{x:[x0+1,x1-1],z:[z0+1,split-1]}},
@@ -274,12 +280,17 @@ export function validateArchitecturePlan(p){
  for(const level of p.levels){
   check(keys(level,['splitAxis','splitPercent','spaces',
    ...(Object.hasOwn(level??{},'secondarySplitPercent')?
-    ['secondarySplitPercent']:[])])&&
+    ['secondarySplitPercent']:[]),
+   ...(Object.hasOwn(level??{},'thirdRoomLink')?
+    ['thirdRoomLink']:[])])&&
    ['x','z'].includes(level.splitAxis)&&[40,50,60].includes(level.splitPercent)&&
    Array.isArray(level.spaces)&&[2,3].includes(level.spaces.length),'LEVEL_PROGRAM');
   check(level.secondarySplitPercent===undefined||
    (level.spaces.length===3&&[35,50,65].includes(level.secondarySplitPercent)),
    'THREE_ROOM_SECONDARY_PERCENT');
+  check(level.thirdRoomLink===undefined||
+   (level.spaces.length===3&&level.thirdRoomLink==='first-and-second'),
+   'THREE_ROOM_LINK');
   for(const space of level.spaces){
    check(keys(space,['id','purpose',
     ...(Object.hasOwn(space??{},'fixture')?['fixture']:[]),
@@ -448,6 +459,9 @@ export function compileArchitecturePlan(plan,{
     three.wallSize);
    box(tag+'-secondary-door','cut',null,three.doorAt(base+1),
     three.doorSize);
+   if(level.thirdRoomLink==='first-and-second')
+    box(tag+'-third-direct-door','cut',null,
+     three.thirdDirectAt(base+1),three.thirdDirectSize);
   }
   // External ground-level opening, without inventing a world landing.
   if(l===0){
@@ -697,6 +711,9 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
   if(three){
    box(tag+'-secondary-divider','add',wall,three.wallAt(y),three.wallSize);
    box(tag+'-secondary-door','cut',null,three.doorAt(y),three.doorSize);
+   if(level.thirdRoomLink==='first-and-second')
+    box(tag+'-third-direct-door','cut',null,
+     three.thirdDirectAt(y),three.thirdDirectSize);
   }
   if(l===0&&facadeLanguage!=='recessed-portico')
    box('exterior-entrance','cut',null,

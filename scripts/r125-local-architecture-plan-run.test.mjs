@@ -74,6 +74,9 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    assert.equal(authorSchema.properties.levels.items.properties.spaces.maxItems,3);
    assert.deepEqual(authorSchema.properties.levels.items.properties.secondarySplitPercent.enum,[35,50,65]);
    assert.ok(!authorSchema.properties.levels.items.required.includes('secondarySplitPercent'));
+   assert.deepEqual(authorSchema.properties.levels.items.properties.thirdRoomLink.enum,
+    ['first-and-second']);
+   assert.ok(!authorSchema.properties.levels.items.required.includes('thirdRoomLink'));
    const room=authorSchema.properties.levels.items.properties.spaces.items;
    assert.equal(room.additionalProperties,false);
    assert.deepEqual(room.properties.access.enum,['public','shared','staff']);
@@ -179,6 +182,8 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    assert.equal(request.messages[0].content.includes('recessed-portico'),true);
    assert.equal(request.messages[0].content.includes('ROOM-APPROPRIATE fixture'),true);
    assert.equal(request.messages[0].content.includes('REAL ROOM BUDGET'),true);
+   assert.ok(request.messages[0].content.includes('thirdRoomLink:"first-and-second"'));
+   assert.ok(request.messages[0].content.includes('directly from first into third'));
    assert.ok(request.messages[0].content.includes('ESSENTIAL ACTIVITY COVERAGE'));
    assert.ok(request.messages[0].content.includes('bake or heat food -> oven'));
    assert.ok(request.messages[0].content.includes('broad flat-looking top'));

@@ -344,3 +344,55 @@ test('unknown and unavailable original user requests are not declared fully serv
   'NOT_EVALUATED_ORIGINAL_REQUEST_UNAVAILABLE');
  assert.equal(noBrief.sourceVerified,true,noBrief.compilerReason);
 });
+
+test('AI-authored T-layout direct link gives visitor access without staff traversal on both axes',()=>{
+ for(const axis of ['x','z']){
+  const p={schema:PLAN,id:'t-visitor-'+axis,
+   title:'Independent public and private visitor facilities',
+   brief:'Visitors access a public service room without staff-only transit',
+   footprint:{width:28,depth:28},
+   entryZone:'first',
+   levels:[{splitAxis:axis,splitPercent:50,
+    spaces:[
+     {id:'entry-room',purpose:'public entrance and foyer',access:'public'},
+     {id:'staff-room',purpose:'restricted equipment preparation',access:'staff'},
+     {id:'shared-room',purpose:'public instruction and exhibition',access:'shared'}
+    ]}],
+   materials:{floor:'wood',wall:'concrete',roof:'stone'},
+   expression:{setbackSide:'none',setbackDepth:0,roofProfile:'flat',
+    roofAxis:'x',facadeLanguage:'plain'}};
+  const before=structuredClone(p),raw=JSON.stringify(p);
+  const old=diagnoseR125ArchitecturePlanOriginal(raw);
+  assert.equal(old.visitorCirculation.status,'HOLD_VISITOR_STAFF_SEPARATION',
+   JSON.stringify(old.visitorCirculation));
+  assert.deepEqual(old.visitorCirculation.blocked,['shared-room']);
+  assert.equal(old.sourceVerified,false);
+  assert.deepEqual(p,before);
+  p.levels[0].thirdRoomLink='first-and-second';
+  const chosen=diagnoseR125ArchitecturePlanOriginal(JSON.stringify(p));
+  assert.equal(chosen.sourceVerified,true,
+   JSON.stringify({status:chosen.status,compilerReason:chosen.compilerReason,
+    visitor:chosen.visitorCirculation}));
+  assert.equal(chosen.visitorCirculation.status,'SOURCE_VISITOR_ROUTES_AVOID_STAFF',
+   JSON.stringify(chosen.visitorCirculation));
+  assert.deepEqual(chosen.visitorCirculation.blocked,[]);
+  assert.notEqual(old.geometrySha256,chosen.geometrySha256);
+  assert.equal(chosen.originalEdited,false);
+  assert.equal(chosen.worldWrites,0);
+ }
+});
+test('third-room direct link is explicit, only for three-room plans',()=>{
+ const p={schema:PLAN,id:'two-room-link-rejected',
+  title:'Two-room building',brief:'A legitimate but minimal building',
+  footprint:{width:24,depth:24},
+  levels:[{splitAxis:'z',splitPercent:50,
+   thirdRoomLink:'first-and-second',
+   spaces:[{id:'room-one',purpose:'entrance'},
+    {id:'room-two',purpose:'private room'}]}],
+  materials:{floor:'wood',wall:'concrete',roof:'stone'}};
+ const failed=diagnoseR125ArchitecturePlanOriginal(JSON.stringify(p));
+ assert.equal(failed.sourceVerified,false);
+ assert.match(failed.compilerReason,/R125_PLAN_THREE_ROOM_LINK/);
+ assert.equal(failed.originalEdited,false);
+ assert.equal(failed.worldWrites,0);
+});
