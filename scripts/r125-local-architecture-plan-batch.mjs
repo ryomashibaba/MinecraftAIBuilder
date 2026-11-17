@@ -159,6 +159,7 @@ export async function runR125ArchitecturePlanBatch({
      ...(space.fixture?{fixture:space.fixture}:{}),
      ...(space.fixtures?{fixtures:space.fixtures}:{}),
      ...(space.fixtureDetail?{fixtureDetail:space.fixtureDetail}:{}),
+     ...(space.fixtureArrangement?{fixtureArrangement:space.fixtureArrangement}:{}),
      ...(space.ovenHearth?{ovenHearth:space.ovenHearth}:{}),
      ...(space.daylight?{daylight:space.daylight}:{})}))}));
    modelAuthoredFormFamilySha256=formHash(original);

@@ -2879,3 +2879,45 @@ test('AI-author selected verified hearth supports exact B143 Education SOURCE ex
  assert.throws(()=>validateArchitecturePlan(bad),/R125_PLAN_SPACE_OVEN_HEARTH/);
 });
 
+
+test('AI-authored focal work island places actual B143 equipment centrally without changing old design',()=>{
+ const p=plan('focal-public-workspace',['x'],
+  ['visitor workshop','small maintenance room']);
+ p.footprint={width:30,depth:30};
+ p.levels[0].spaces[0].fixtures=['workbench'];
+ const original=structuredClone(p);
+ const legacy=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+ const chosen=structuredClone(p);
+ chosen.levels[0].spaces[0].fixtureArrangement='focal-island';
+ const result=compileArchitecturePlan(chosen,{entrancePlacement:'source-accessible'});
+ assert.deepEqual(p,original,'no old plan rewriting');
+ assert.equal(legacy.fixtureTargets.length,1);
+ assert.equal(result.fixtureTargets.length,1);
+ const a=legacy.fixtureTargets[0],b=result.fixtureTargets[0];
+ const zone=result.program[0].zones[0].range;
+ const midX=Math.floor((zone.x[0]+zone.x[1]-3+1)/2);
+ const midZ=Math.floor((zone.z[0]+zone.z[1]-1+1)/2);
+ assert.deepEqual([b.origin[0],b.origin[2]],[midX,midZ],
+  'model-chosen focal workstation is centered on real room floor');
+ assert.equal(b.arrangement,'focal-island');
+ assert.notDeepEqual(a.origin,b.origin);
+ assert.notEqual(legacy.geometrySha256,result.geometrySha256);
+ assert.equal(verifyCompiled(result.design,result.compiled),true);
+ assert.equal(auditR125SourceRoutes(result,{featureTargets:result.fixtureTargets}).status,
+  'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(auditArchitecturePlanCirculation(result).status,
+  'SOURCE_CLEARANCE_PROBES_PASS');
+ assert.deepEqual(result.compiled.BuildPlan.operations,[]);
+ assert.equal(result.worldWrites,0);
+});
+test('authored center can be rejected by real traffic and older room schemas stay unchanged',()=>{
+ const p=plan('focal-layout-validated',['x']);
+ p.levels[0].spaces[0].fixtureArrangement='focal-island';
+ assert.throws(()=>validateArchitecturePlan(p),/R125_PLAN_SPACE_FIXTURE_ARRANGEMENT/);
+ p.levels[0].spaces[0].fixtures=['desk'];
+ assert.equal(validateArchitecturePlan(p),true);
+ p.levels[0].spaces[0].fixtureArrangement='unverified';
+ assert.throws(()=>validateArchitecturePlan(p),/R125_PLAN_SPACE_FIXTURE_ARRANGEMENT/);
+ delete p.levels[0].spaces[0].fixtureArrangement;
+ assert.equal(validateArchitecturePlan(p),true);
+});

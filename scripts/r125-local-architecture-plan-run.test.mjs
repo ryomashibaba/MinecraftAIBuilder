@@ -91,6 +91,8 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    assert.equal(room.properties.fixtures.uniqueItems,undefined,
     'the Ollama schema accepts multiple author-chosen instances of one role');
    assert.deepEqual(room.properties.fixtureDetail.enum,['crafted']);
+   assert.deepEqual(room.properties.fixtureArrangement.enum,['focal-island']);
+   assert.equal(room.required.includes('fixtureArrangement'),false);
    assert.equal(room.required.includes('fixtureDetail'),false);
    const options=authorSchema.properties.expression.anyOf;
    assert.equal(options.length,18);
@@ -105,6 +107,7 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    assert.equal(room.required.includes('ovenHearth'),false);
    assert.ok(request.messages[0].content.includes('ridgeProfile:"steep"'));
    assert.ok(request.messages[0].content.includes('ovenHearth:"accent"'));
+   assert.ok(request.messages[0].content.includes('fixtureArrangement:"focal-island"'));
    for(const levelVariant of structured.anyOf){
     for(const expression of levelVariant.properties.expression.anyOf){
      const isPitched=expression.properties.roofProfile.enum.some(x=>

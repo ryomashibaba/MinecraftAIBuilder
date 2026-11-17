@@ -304,6 +304,7 @@ export function validateArchitecturePlan(p){
     ...(Object.hasOwn(space??{},'fixture')?['fixture']:[]),
     ...(Object.hasOwn(space??{},'fixtures')?['fixtures']:[]),
     ...(Object.hasOwn(space??{},'fixtureDetail')?['fixtureDetail']:[]),
+    ...(Object.hasOwn(space??{},'fixtureArrangement')?['fixtureArrangement']:[]),
     ...(Object.hasOwn(space??{},'ovenHearth')?['ovenHearth']:[]),
     ...(Object.hasOwn(space??{},'daylight')?['daylight']:[]),
     ...(Object.hasOwn(space??{},'access')?['access']:[])])&&
@@ -323,6 +324,10 @@ export function validateArchitecturePlan(p){
     (space.fixtureDetail==='crafted'&&
      (space.fixture!==undefined||space.fixtures!==undefined)),
     'SPACE_FIXTURE_DETAIL');
+   check(space.fixtureArrangement===undefined||
+    (space.fixtureArrangement==='focal-island'&&
+     (space.fixture!==undefined||space.fixtures!==undefined)),
+    'SPACE_FIXTURE_ARRANGEMENT');
    const roles=['counter','workbench','display','storage','seating',
     'bed','desk','washbasin','electronics','oven'];
    check(space.ovenHearth===undefined||

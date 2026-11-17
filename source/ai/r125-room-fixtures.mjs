@@ -65,10 +65,12 @@ const fixtureIntents=p=>p.plan.levels.flatMap((l,li)=>
   s.fixtures.map((kind,index)=>({
    level:li,zoneIndex:zi,zoneId:s.id,kind,index,multi:true,
    ...(s.fixtureDetail?{detail:s.fixtureDetail}:{}),
+   ...(s.fixtureArrangement?{arrangement:s.fixtureArrangement}:{}),
    ...(kind==='oven'&&s.ovenHearth?{hearth:s.ovenHearth}:{})})):
   s.fixture===undefined?[]:
   [{level:li,zoneIndex:zi,zoneId:s.id,kind:s.fixture,multi:false,
-   ...(s.fixtureDetail?{detail:s.fixtureDetail}:{})}]));
+   ...(s.fixtureDetail?{detail:s.fixtureDetail}:{}),
+   ...(s.fixtureArrangement?{arrangement:s.fixtureArrangement}:{})}]));
 
 function positions(intent,product,turned=false,exhaustive=false){
  const range=product.program[intent.level].zones[intent.zoneIndex].range;
@@ -97,6 +99,33 @@ function positions(intent,product,turned=false,exhaustive=false){
   if(intent.multi&&intent.index%2===1)wallCandidates.reverse();
   candidates.splice(0,candidates.length,...wallCandidates,[mx,mz]);
  }else if(intent.multi&&intent.index%2===1)candidates.reverse();
+ if(intent.arrangement==='focal-island'){
+  // An AUTHOR-chosen central activity focal point, not a forced template.
+  // Try one central 3xD workstation, then a ring of independent adjacent
+  // stations with a two-cell gap. Every position still goes through the
+  // unchanged B143 service, collision, floor and window access gates.
+  const separationX=width+2,separationZ=depth+2;
+  const centerFirst=[
+   [mx,mz],
+   [mx+separationX,mz],[mx-separationX,mz],
+   [mx,mz+separationZ],[mx,mz-separationZ],
+   [mx+separationX,mz+separationZ],
+   [mx-separationX,mz+separationZ],
+   [mx+separationX,mz-separationZ],
+   [mx-separationX,mz-separationZ]
+  ];
+  const ring=intent.multi&&intent.index>0?
+   [...centerFirst.slice(1),centerFirst[0]]:centerFirst;
+  const seen=new Set();
+  const preferred=[...ring,...candidates].filter(([x,z])=>{
+   if(x<range.x[0]||x+width-1>range.x[1]||
+      z<range.z[0]||z+depth-1>range.z[1])return false;
+   const k=x+','+z;
+   if(seen.has(k))return false;
+   seen.add(k);return true;
+  });
+  candidates.splice(0,candidates.length,...preferred);
+ }
  if(intent.multi||exhaustive){
   const seen=new Set(candidates.map(([x,z])=>x+','+z));
   for(let z=range.z[0];z<=range.z[1]-depth+1;z++)
@@ -263,6 +292,7 @@ function tryOrigin(product,targets,intent,x,z,auditCirculation,
  const target={id:key,zoneId:intent.zoneId,
   origin:[x,y,z],size:[width,3,depth],kind:intent.kind,
   ...(intent.detail?{detail:intent.detail}:{}),
+  ...(intent.arrangement?{arrangement:intent.arrangement}:{}),
   ...(turned?{orientation:'quarter-turn'}:{})};
  const routes=auditR125SourceRoutes(trial,{featureTargets:[...targets,target]});
  if(routes.status!=='SOURCE_ROUTES_REACH_ALL_ZONES'||
