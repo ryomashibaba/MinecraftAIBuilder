@@ -2140,6 +2140,44 @@ test('a lone narrow-zone fixture uses true B143 rotation only after normal candi
  assert.equal(output.worldWrites,0);
 });
 
+test('wide authored room recovers rotated equipment only after all old placements fail',()=>{
+ const p=plan('wide-room-rotation-recovery',['x'],
+  ['electronics workspace','adjacent service room']);
+ const shell=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+ const zone=shell.program[0].zones[0].range;
+ assert.ok(zone.x[1]-zone.x[0]+1>4);
+ const authored=structuredClone(p);
+ authored.levels[0].spaces[0].fixture='workbench';
+ const unchanged=structuredClone(authored);
+ const auditor=trial=>{
+  const actual=auditArchitecturePlanCirculation(trial);
+  if(actual.status!=='SOURCE_CLEARANCE_PROBES_PASS')return actual;
+  const top=trial.design.elements.find(e=>e.id==='fx-l0-z0-top');
+  if(top?.size[0]===3)return {status:'SOURCE_CLEARANCE_PROBES_HOLD',
+   failures:[{code:'TEST_WIDE_ZONE_NEEDS_LONGITUDINAL_WORKBENCH'}]};
+  return actual;
+ };
+ const output=addAuthoredRoomFixtures({...shell,plan:authored},
+  {auditCirculation:auditor});
+ assert.equal(output.fixtureTargets.length,1);
+ assert.equal(output.fixtureTargets[0].kind,'workbench');
+ assert.equal(output.fixtureTargets[0].orientation,'quarter-turn');
+ assert.deepEqual(output.fixtureTargets[0].size,[1,3,3]);
+ assert.equal(output.fixtureSearch?.[0]?.orientationFallback,
+  'WIDE_ZONE_AFTER_LEGACY_HOLD');
+ assert.ok(output.fixtureSearch[0].rotatedCandidateEvaluations>0);
+ assert.ok(output.fixtureSearch[0].candidateEvaluations<=540);
+ assert.equal(auditArchitecturePlanCirculation(output).status,
+  'SOURCE_CLEARANCE_PROBES_PASS');
+ assert.equal(auditR125SourceRoutes(output,{
+  featureTargets:output.fixtureTargets}).status,
+  'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(verifyCompiled(output.design,output.compiled),true);
+ assert.deepEqual(authored,unchanged);
+ assert.deepEqual(output.compiled.BuildPlan.operations,[]);
+ assert.equal(output.worldWrites,0);
+});
+
 test('all eighteen grammar-permitted utilities receive source service audits without relaxing B143',()=>{
  const p=plan('eighteen-utility-study',['x','x']);
  p.footprint={width:30,depth:30};

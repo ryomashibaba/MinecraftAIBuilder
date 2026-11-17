@@ -276,7 +276,7 @@ function tryOrigin(product,targets,intent,x,z,auditCirculation,
  return {ok:true,product:trial,target};
 }
 function repairZone(start,previousTargets,zoneIntents,auditCirculation,
- floorComponentBaseline){
+ floorComponentBaseline,quarterTurnOnly=false){
  // Up to three model-authored utilities per zone. Only their HOST positions
  // are variable. No author plan/role edit, false service pass or model call.
  const tracker={attempted:true,mode:'BOUNDED_ZONE_LOCAL_BACKTRACK',
@@ -284,7 +284,8 @@ function repairZone(start,previousTargets,zoneIntents,auditCirculation,
   rotatedCandidateEvaluations:0,searchLimitReached:false,
   arrangementFound:false,
   affectedZone:zoneIntents[0].zoneId,
-  roleOrder:zoneIntents.map(x=>x.kind)};
+  roleOrder:zoneIntents.map(x=>x.kind),
+  ...(quarterTurnOnly?{orientationFallback:'WIDE_ZONE_AFTER_LEGACY_HOLD'}:{})};
  const dfs=(index,product,placed)=>{
   if(index===zoneIntents.length)
    return {product,targets:placed};
@@ -293,9 +294,11 @@ function repairZone(start,previousTargets,zoneIntents,auditCirculation,
   const width=zone.x[1]-zone.x[0]+1;
   // In a narrow room, rotate shallow desks and shelving toward the wall
   // before spending the entire search budget on 3-wide path blockers.
-  const variants=width<=4?
+  // The second pass is reached ONLY after the unchanged wide-room search
+  // failed. Preserve every previous successful model-authored layout.
+  const variants=quarterTurnOnly?[true]:width<=4?
    (roleDepth(intent.kind)===1?[true,false]:[false,true]):
-   [false]; // Preserve the proven existing search order in wider rooms.
+   [false]; // Original wide-room search remains untouched.
   for(const turned of variants){
    const {candidates}=positions(intent,product,turned,true);
    const used=new Set();
@@ -359,13 +362,22 @@ export function addAuthoredRoomFixtures(product,{auditCirculation}={}){
   // A single item in a wide zone can also have all four corners unavailable.
   // The fallback changes ONLY a previously failed placement; the valid
   // original four-corner path and multi-item search remain unchanged.
-  let fallback=null;
+  let fallback=null,quarterTurnSearch=null;
   {
    const start=zoneStarts.get(zkey);
    const roles=intent.multi?intents.filter(i=>intentKey(i)===zkey&&
     i.multi&&i.index<=intent.index):[intent];
    fallback=repairZone(start.product,start.targets,roles,auditCirculation,
     floorComponentBaseline);
+   // A useful room wider than four blocks can still need a rotated desk,
+   // counter or bed to preserve a true two-wide route. Retry only after
+   // ALL original placements failed; never alter previously successful
+   // buildings, authored roles, or the original model response.
+   if(!fallback.result&&range.x[1]-range.x[0]+1>4){
+    quarterTurnSearch=repairZone(start.product,start.targets,roles,
+     auditCirculation,floorComponentBaseline,true);
+    if(quarterTurnSearch.result)fallback=quarterTurnSearch;
+   }
    if(fallback.result){
     current=fallback.result.product;
     targets=[...start.targets,...fallback.result.targets];
@@ -386,6 +398,7 @@ export function addAuthoredRoomFixtures(product,{auditCirculation}={}){
    candidateCount:candidates.length,
    rejectedCandidates:rejected,
    ...(fallback?{zoneLocalSearch:fallback.tracker}:{}),
+   ...(quarterTurnSearch?{wideZoneQuarterTurnSearch:quarterTurnSearch.tracker}:{}),
    sourceOnly:true,originalPlanEdited:false,modelCalls:0,worldWrites:0
   });
  }
