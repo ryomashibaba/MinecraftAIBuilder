@@ -304,8 +304,7 @@ export function validateArchitecturePlan(p){
    check(space.fixtures===undefined||
     (space.fixture===undefined&&Array.isArray(space.fixtures)&&
      space.fixtures.length>=1&&space.fixtures.length<=3&&
-     space.fixtures.every(x=>typeof x==='string'&&roles.includes(x))&&
-     new Set(space.fixtures).size===space.fixtures.length),
+     space.fixtures.every(x=>typeof x==='string'&&roles.includes(x))),
     'SPACE_FIXTURE_GROUP');
    check(!seen.has(space.id),'DUPLICATE_SPACE_ID');
    seen.add(space.id);

@@ -1540,7 +1540,42 @@ test('electronics research room has distinct real voxel equipment and still open
  assert.deepEqual(out.compiled.BuildPlan.operations,[]);
 });
 
-test('multi-room fixture grammar is bounded, duplicate-free, and preserves old single fixture geometry',()=>{
+test('two model-authored workbenches in one real laboratory remain separate and reachable',()=>{
+ const p=plan('repeated-authored-lab',['x'],
+  ['independent water sample stations','visitor observation room']);
+ p.footprint={width:30,depth:30};
+ p.levels[0].spaces[0].fixtures=['workbench','workbench','storage'];
+ const original=structuredClone(p);
+ const without=structuredClone(p);
+ delete without.levels[0].spaces[0].fixtures;
+ const base=compileArchitecturePlan(without,{entrancePlacement:'source-accessible'});
+ const built=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+ assert.deepEqual(p,original,'author original is never edited');
+ assert.equal(built.fixtureTargets.length,3);
+ assert.deepEqual(built.fixtureTargets.map(f=>f.kind),
+  ['workbench','workbench','storage']);
+ const [first,second]=built.fixtureTargets;
+ assert.notEqual(first.id,second.id,'each repeated role has a distinct target ID');
+ assert.notDeepEqual(first.origin,second.origin,'two benches must not overlap');
+ assert.equal(new Set(built.fixtureTargets.map(f=>f.id)).size,3);
+ assert.equal(built.design.elements.filter(e=>
+  /^fx-l0-z0-i[01]-top$/.test(e.id)).length,2,
+  'both author-requested benches are actual B143 geometry');
+ const routes=auditR125SourceRoutes(built,{
+  featureTargets:built.fixtureTargets});
+ assert.equal(routes.status,'SOURCE_ROUTES_REACH_ALL_ZONES',
+  JSON.stringify(routes.issues));
+ assert.equal(routes.featureAccess.length,3);
+ assert(routes.featureAccess.every(f=>f.reachableFromEntrance));
+ assert.equal(auditArchitecturePlanCirculation(built).status,
+  'SOURCE_CLEARANCE_PROBES_PASS');
+ assert.equal(verifyCompiled(built.design,built.compiled),true);
+ assert.notEqual(built.geometrySha256,base.geometrySha256);
+ assert.deepEqual(built.compiled.BuildPlan.operations,[]);
+ assert.equal(built.worldWrites,0);
+});
+
+test('multi-room fixture grammar is bounded and preserves old single fixture geometry',()=>{
  const p=plan('multifurniture-grammar',['x']);
  // A bed AND a desk need an actually usable floor; a cramped 18x18
  // house should HOLD rather than pretend both service routes are valid.
@@ -1549,7 +1584,7 @@ test('multi-room fixture grammar is bounded, duplicate-free, and preserves old s
  const valid=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
  assert.equal(valid.fixtureTargets.length,2);
  for(const bad of [
-  [],['bed','bed'],['bed','desk','storage','seating'],['wrong']
+  [],['bed','desk','storage','seating'],['wrong']
  ]) {
   const q=structuredClone(p);
   q.levels[0].spaces[0].fixtures=bad;
