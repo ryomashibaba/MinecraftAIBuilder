@@ -173,6 +173,7 @@ export async function runR125ArchitecturePlanBatch({
    // Original plan and checked B143 SOURCE only. Never artistic certification.
    occupiedVoxels:diagnosis?.occupiedVoxels??null,
    sourceRouteStatus:diagnosis?.sourceRoutes??null,
+   visitorCirculation:diagnosis?.visitorCirculation??null,
    circulationStatus:diagnosis?.circulation??null,
    programFloorStatus:diagnosis?.programFloors??null,
    visualHighRiskCount:diagnosis?.visualHighRiskCount??null,

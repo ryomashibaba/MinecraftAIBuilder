@@ -145,3 +145,80 @@ export function auditR125SourceRoutes(product,{featureTargets=[]}={}){
   worldCoordinates:null,worldWrites:0
  };
 }
+
+/**
+ * SOURCE-only visitor audit: two-wide supported B143 movement pads excluding
+ * the original model's staff room footprints. It does not change the plan,
+ * repair the building, verify Minecraft walking, or infer privacy by genre.
+ */
+export function auditR125VisitorRoutes(product,plan){
+ if(product?.schema!=='minecraftaibuilder-r125-plan-to-b143-result-v1'||
+   !product.design||!product.compiled||!Array.isArray(product.program)||
+   !verifyCompiled(product.design,product.compiled)||
+   !Array.isArray(plan?.levels)||plan.levels.length!==product.program.length)
+  err('VISITOR_INPUT');
+ const all=plan.levels.flatMap(level=>level.spaces);
+ const common={sourceOnly:true,modelCalls:0,worldWrites:0,
+  originalEdited:false,realMinecraftWalking:'NOT_TESTED',
+  artStatus:'NOT_REVIEWED'};
+ if(!all.some(s=>s.access!==undefined))
+  return {...common,status:'NOT_DECLARED_LEGACY',blocked:[]};
+ if(all.some(s=>!['public','shared','staff'].includes(s.access)))
+  return {...common,status:'HOLD_INCOMPLETE_ACCESS',blocked:[]};
+ const access=new Map(all.map(s=>[s.id,s.access]));
+ const zones=product.program.flatMap(l=>l.zones.map(z=>({
+  ...z,standingFloorY:l.standingFloorY,access:access.get(z.id)})));
+ if(zones.length!==all.length||zones.some(z=>!access.has(z.id)))
+  err('VISITOR_ROOM_MISMATCH');
+ const staff=zones.filter(z=>z.access==='staff');
+ const visitor=zones.filter(z=>z.access!=='staff');
+ if(visitor.length===0)return {...common,status:'NO_VISITOR_ROOMS_AUTHORED',
+  visitorRooms:0,staffRooms:staff.length,blocked:[]};
+ const solids=new Set(product.compiled.primitives.map(p=>key(p[0],p[1],p[2])));
+ const has=(x,y,z)=>solids.has(key(x,y,z));
+ const {width:w,height:h,depth:d}=product.design.bounds;
+ const pads=new Map();
+ for(let y=1;y<h-1;y++)for(let z=0;z<d;z++)for(let x=0;x<w-1;x++){
+  if(!has(x,y-1,z)||!has(x+1,y-1,z)||
+     has(x,y,z)||has(x+1,y,z)||has(x,y+1,z)||has(x+1,y+1,z))
+   continue;
+  if(staff.some(s=>s.standingFloorY===y&&z>=s.range.z[0]&&
+    z<=s.range.z[1]&&x<=s.range.x[1]&&x+1>=s.range.x[0]))
+   continue;
+  pads.set(key(x,y,z),{x,y,z});
+ }
+ const entry=product.design.elements.find(e=>e.id==='exterior-entrance'&&
+  e.mode==='cut'&&e.shape==='box'&&e.size[0]>=2&&e.size[1]>=2);
+ const root=entry?key(entry.origin[0],entry.origin[1],entry.origin[2]+1):null;
+ const queue=[],distance=new Map();
+ if(root&&pads.has(root)){queue.push(pads.get(root));distance.set(root,0);}
+ for(let i=0;i<queue.length;i++){
+  const p=queue[i],dist=distance.get(key(p.x,p.y,p.z));
+  for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]])
+   for(const dy of [0,1,-1]){
+    const k=key(p.x+dx,p.y+dy,p.z+dz);
+    if(pads.has(k)&&!distance.has(k)){
+     distance.set(k,dist+1);queue.push(pads.get(k));
+    }
+   }
+ }
+ const witnesses=visitor.map(z=>{
+  let best=null,steps=Infinity;
+  for(const [k,d] of distance){
+   const p=pads.get(k);
+   if(p.y!==z.standingFloorY||p.x<z.range.x[0]||
+     p.x+1>z.range.x[1]||p.z<z.range.z[0]||
+     p.z>z.range.z[1]||d>=steps)continue;
+   best=[p.x,p.y,p.z];steps=d;
+  }
+  return {id:z.id,access:z.access,reached:best!==null,
+   sourceWitness:best,sourceGraphMoves:best===null?null:steps};
+ });
+ const blocked=witnesses.filter(w=>!w.reached).map(w=>w.id);
+ return {...common,status:blocked.length?'HOLD_VISITOR_STAFF_SEPARATION':
+  'SOURCE_VISITOR_ROUTES_AVOID_STAFF',
+  visitorRooms:visitor.length,staffRooms:staff.length,
+  blocked,witnesses,sourceSha256:product.sourceSha256,
+  geometrySha256:product.geometrySha256,
+  modelAuthoredRoomRolesOnly:true,physicalVisitorWalkingNotCertified:true};
+}

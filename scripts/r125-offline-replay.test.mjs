@@ -239,3 +239,45 @@ test('offline genuine-plan-compatible roof study uses identical original bytes w
  assert.equal(ribbon.minecraftWalking,'NOT_TESTED');
  assert.equal(JSON.stringify(plan),raw);
 });
+
+test('real B143 visitor pads reject staff-through public access in an x-split',()=>{
+ const p={schema:PLAN,id:'visitor-split-example',
+  title:'Public gallery and private work',
+  brief:'Independent public visitor room alongside a private staff workroom',
+  footprint:{width:24,depth:24},entryZone:'first',
+  levels:[{splitAxis:'x',splitPercent:50,spaces:[
+   {id:'staff-room',purpose:'restricted staff tasks',access:'staff'},
+   {id:'public-room',purpose:'public visitor display',access:'public'}
+  ]}],
+  materials:{floor:'wood',wall:'concrete',roof:'stone'},
+  expression:{setbackSide:'none',setbackDepth:0,
+   roofProfile:'flat',roofAxis:'x',facadeLanguage:'plain'}};
+ const original=JSON.stringify(p),failed=diagnoseR125ArchitecturePlanOriginal(original);
+ assert.equal(failed.sourceRoutes,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(failed.visitorCirculation.status,'HOLD_VISITOR_STAFF_SEPARATION',
+  JSON.stringify(failed.visitorCirculation));
+ assert.deepEqual(failed.visitorCirculation.blocked,['public-room']);
+ assert.equal(failed.sourceVerified,false);
+ assert.equal(failed.originalEdited,false);
+ assert.equal(JSON.stringify(p),original);
+ p.entryZone='second'; // independent original plan, no automatic repair
+ const accepted=diagnoseR125ArchitecturePlanOriginal(JSON.stringify(p));
+ assert.equal(accepted.visitorCirculation.status,'SOURCE_VISITOR_ROUTES_AVOID_STAFF',
+  JSON.stringify(accepted.visitorCirculation));
+ assert.deepEqual(accepted.visitorCirculation.blocked,[]);
+ assert.equal(accepted.sourceVerified,true,JSON.stringify(accepted));
+ assert.equal(accepted.worldWrites,0);
+});
+test('old plan with no access labels remains SOURCE evidence, not visitor approval',()=>{
+ const p={schema:PLAN,id:'legacy-untagged-room',
+  title:'Historical room pair',brief:'Original authored plan without room privacy labels',
+  footprint:{width:24,depth:24},levels:[{
+   splitAxis:'x',splitPercent:50,
+   spaces:[{id:'room-left',purpose:'left work area'},
+    {id:'room-right',purpose:'right work area'}]}],
+  materials:{floor:'wood',wall:'concrete',roof:'stone'}};
+ const result=diagnoseR125ArchitecturePlanOriginal(JSON.stringify(p));
+ assert.equal(result.visitorCirculation.status,'NOT_DECLARED_LEGACY');
+ assert.equal(result.sourceVerified,true,result.compilerReason);
+ assert.equal(result.originalEdited,false);
+});
