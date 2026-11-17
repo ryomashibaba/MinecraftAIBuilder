@@ -405,3 +405,12 @@ test('V11 steeper ridge A/B remains an explicit offline CLI opt-in',()=>{
   '--out','/tmp/new-study','--roof-massing','auto']),
  /R125_REPLAY_ROOF_MASSING_MODE/);
 });
+
+test('activity-inlay visual trial can only be activated explicitly',()=>{
+ const opts=parseR125ReplayArgs(['--raw','/tmp/raw-plan.txt','--out',
+  '/tmp/art-review','--fixture-art','activity-inlays']);
+ assert.equal(opts['--fixture-art'],'activity-inlays');
+ assert.throws(()=>parseR125ReplayArgs(['--raw','/tmp/raw-plan.txt',
+  '--out','/tmp/art-review','--fixture-art','auto']),
+ /R125_REPLAY_FIXTURE_ART_MODE/);
+});

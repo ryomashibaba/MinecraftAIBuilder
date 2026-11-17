@@ -3155,3 +3155,36 @@ test('ridge ART opt-in refuses incompatible existing authored roofs',()=>{
  assert.throws(()=>compileArchitecturePlan(p,{
   roofMassing:'steep-ridge-review'}),/ROOF_MASSING_REQUIRES_UNMODIFIED_RAISED_RIDGE/);
 });
+
+test('activity inlays highlight original equipment but change no standing geometry or equipment',()=>{
+ const p=plan('activity-art-test',['x','z']);
+ p.footprint={width:30,depth:30};
+ p.expression={setbackSide:'none',setbackDepth:0,
+  roofProfile:'ridge',roofAxis:'z',roofVolume:'raised',facadeLanguage:'plain'};
+ p.levels[0].spaces[0].fixtures=['workbench','display'];
+ p.levels[0].spaces[1].fixtures=['oven','storage'];
+ p.levels[1].spaces[0].fixtures=['electronics','desk'];
+ p.levels[1].spaces[1].fixtures=['workbench','seating'];
+ const original=structuredClone(p),policy={entrancePlacement:'source-accessible',
+  upperDoorPlacement:'stair-clear'};
+ const before=compileArchitecturePlan(p,policy);
+ const after=compileArchitecturePlan(p,{...policy,fixtureArt:'activity-inlays'});
+ assert.deepEqual(p,original,'never change author plan');
+ assert.deepEqual(after.fixtureTargets,before.fixtureTargets);
+ assert.equal(after.compiled.primitives.length,before.compiled.primitives.length);
+ const b=new Map(before.compiled.primitives.map(v=>[v.slice(0,3).join(','),v[3]]));
+ const a=new Map(after.compiled.primitives.map(v=>[v.slice(0,3).join(','),v[3]]));
+ const changed=[...b].filter(([k,m])=>a.get(k)!==m);
+ assert.ok(changed.length>=4,'inlays must produce a material difference');
+ assert.ok(changed.every(([k])=>[1,6].includes(Number(k.split(',')[1]))));
+ assert.equal(after.activityInlayReview.changedCells,changed.length);
+ assert.equal(auditR125SourceRoutes(after,{featureTargets:after.fixtureTargets}).status,
+  'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(auditArchitecturePlanCirculation(after).status,
+  'SOURCE_CLEARANCE_PROBES_PASS');
+ assert.equal(verifyCompiled(after.design,after.compiled),true);
+ assert.deepEqual(after.compiled.BuildPlan.operations,[]);
+ assert.equal(after.worldWrites,0);
+ assert.deepEqual(after.gates,Array(9).fill('BLOCKED'));
+ assert.equal(compileArchitecturePlan(p,policy).sourceSha256,before.sourceSha256);
+});

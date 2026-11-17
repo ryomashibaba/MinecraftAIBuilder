@@ -4,7 +4,7 @@
  * owns positions, SOURCE clearance, and deterministic, limited search.
  * No model, network, world IO, game physics or silent role replacement.
  */
-import {compileDesign,verifyCompiled} from './b143-building-dsl.mjs';
+import {compileDesign,verifyCompiled,MATERIALS} from './b143-building-dsl.mjs';
 import {auditInteriorTopology} from './b198c-spatial-critic.mjs';
 import {auditR125SourceRoutes} from './r125-source-routes.mjs';
 import {auditR125PairedBayApproach} from './r125-room-daylight.mjs';
@@ -444,4 +444,73 @@ export function addAuthoredRoomFixtures(product,{auditCirculation}={}){
   ...(searchWitnesses.length?{fixtureSearch:searchWitnesses}:{}),
   fixtureRoleOwner:'MODEL',fixtureGeometryOwner:'GENERIC_HOST',
   fixtureAccess:'SOURCE_TWO_WIDE_PASS_NOT_GAME_TESTED'};
+}
+
+// Optional SOURCE-only ART trial. Inlay actual existing floor cells around a
+// MODEL-selected activity, without moving rooms, equipment or changing air.
+// Keep the default historical B143 output unchanged.
+export function addR125ActivityFloorInlays(product){
+ if(!product?.plan||!Array.isArray(product?.fixtureTargets)||
+    !Array.isArray(product?.program)||!product?.compiled?.primitives)
+  throw Error('R125_PLAN_ACTIVITY_INLAY_INPUT');
+ const before=new Map(product.compiled.primitives.map(v=>
+  [v.slice(0,3).join(','),v[3]]));
+ const floorMaterial=MATERIALS.indexOf(product.plan.materials.floor);
+ const accentMaterial=MATERIALS.indexOf('accent');
+ if(floorMaterial<0||accentMaterial<0)
+  throw Error('R125_PLAN_ACTIVITY_INLAY_MATERIAL');
+ const priority={oven:10,workbench:9,washbasin:8,electronics:7,
+  display:6,counter:5,desk:4,seating:3,storage:2,bed:1};
+ const patches=[],expected=new Set();
+ for(const level of product.program)for(const zone of level.zones){
+  const targets=product.fixtureTargets.filter(t=>t.zoneId===zone.id)
+   .sort((a,b)=>(priority[b.kind]??0)-(priority[a.kind]??0));
+  for(const target of targets){
+   const x0=zone.range.x[0],x1=zone.range.x[1],
+    z0=zone.range.z[0],z1=zone.range.z[1];
+   const w=Math.min(x1-x0+1,target.size[0]+2);
+   const d=Math.min(z1-z0+1,target.size[2]+2);
+   const x=Math.max(x0,Math.min(target.origin[0]-1,x1-w+1));
+   const z=Math.max(z0,Math.min(target.origin[2]-1,z1-d+1));
+   const y=level.standingFloorY-1;
+   if(w<3||d<2)continue;
+   const cells=[];
+   for(let xx=x;xx<x+w;xx++)for(let zz=z;zz<z+d;zz++)
+    cells.push(xx+','+y+','+zz);
+   // No gaps, doors or stairs may be silently filled in. Inlaid SOURCE
+   // support uses only existing cells of the original floor material.
+   if(cells.some(k=>before.get(k)!==floorMaterial||expected.has(k)))
+    continue;
+   patches.push({zoneId:zone.id,kind:target.kind,origin:[x,y,z],
+    size:[w,1,d],cells});
+   for(const k of cells)expected.add(k);
+   break;
+  }
+ }
+ if(!patches.length)throw Error('R125_PLAN_ACTIVITY_INLAY_NO_SUPPORTED_FLOOR');
+ if(product.design.elements.length+2*patches.length>160)
+  throw Error('R125_PLAN_ACTIVITY_INLAY_ELEMENT_BUDGET');
+ const extra=patches.flatMap((p,i)=>[
+  {id:'host-art-inlay-cut-'+i,shape:'box',mode:'cut',
+   origin:p.origin,size:p.size},
+  {id:'host-art-inlay-fill-'+i,shape:'box',mode:'add',
+   material:'accent',origin:p.origin,size:p.size}
+ ]);
+ const design={...product.design,elements:[...product.design.elements,...extra]};
+ const compiled=compileDesign(design);
+ if(!verifyCompiled(design,compiled)||compiled.worldContacts!==0||
+    compiled.BuildPlan?.operations?.length!==0)
+  throw Error('R125_PLAN_ACTIVITY_INLAY_COMPILER');
+ const after=new Map(compiled.primitives.map(v=>[v.slice(0,3).join(','),v[3]]));
+ if(after.size!==before.size||[...before].some(([k,m])=>
+   after.get(k)!==(expected.has(k)?accentMaterial:m)))
+  throw Error('R125_PLAN_ACTIVITY_INLAY_NONFLOOR_DRIFT');
+ return {...product,design,compiled,sourceSha256:compiled.sourceSha256,
+  geometrySha256:compiled.geometrySha256,
+  activityInlayReview:{status:'SOURCE_FLOOR_MATERIAL_ONLY_ART_HOLD',
+   roomCount:patches.length,changedCells:expected.size,
+   rooms:patches.map(({zoneId,kind,origin,size})=>({zoneId,kind,origin,size})),
+   originalAuthoredPlanUnchanged:true,occupancyUnchanged:true,
+   fixtureLocationsUnchanged:true,minecraftWalking:'NOT_TESTED',
+   modelCalls:0,worldWrites:0}};
 }
