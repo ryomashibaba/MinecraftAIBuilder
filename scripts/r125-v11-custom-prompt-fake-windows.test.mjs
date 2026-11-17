@@ -1,0 +1,106 @@
+/**
+ * Actual Windows PowerShell launcher, MOCK LOCAL HTTP transport only.
+ * Uses an already-public genuine Qwen ARCHITECTUREPLAN as the provider's
+ * unchanged fake response. This is NOT fresh local inference or Minecraft
+ * proof. Ensures novice one-paste custom prompt path really produces
+ * source-matched TRUE B143 exterior and cutaway PNG without world writes.
+ */
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {createServer} from 'node:http';
+import {spawn} from 'node:child_process';
+
+const root=path.resolve(fileURLToPath(new URL('..',import.meta.url)));
+const savedQwen=fs.readFileSync(new URL(
+ '../evidence/r125-real-l-corner-20261101/MODEL_RESPONSE_ORIGINAL.txt',
+ import.meta.url),'utf8');
+
+test('Windows custom user brief -> ONE mock model response -> strict B143 3D and four actual views',{
+ skip:process.platform!=='win32',timeout:210000
+},async()=>{
+ const temp=fs.mkdtempSync(path.join(os.tmpdir(),'mab-v11-custom-fake-'));
+ const local=path.join(temp,'LOCALAPPDATA');
+ fs.mkdirSync(local);
+ let posts=0;const requests=[];
+ const server=createServer((req,res)=>{
+  if(req.method!=='POST'||req.url!=='/v1/chat/completions'){
+   res.writeHead(404);res.end('not found');return;
+  }
+  let body='';
+  req.setEncoding('utf8');
+  req.on('data',c=>{body+=c;});
+  req.on('end',()=>{
+   posts++;
+   try{requests.push(JSON.parse(body));}
+   catch{res.writeHead(400);res.end('bad json');return;}
+   res.writeHead(200,{'Content-Type':'application/json'});
+   res.end(JSON.stringify({choices:[{finish_reason:'stop',
+    message:{content:savedQwen}}]}));
+  });
+ });
+ try{
+  await new Promise((resolve,reject)=>{
+   server.once('error',reject);
+   server.listen(0,'127.0.0.1',resolve);
+  });
+  const addr=server.address(),port=addr.port;
+  const prompt='Design a useful original research workshop with reachable equipment and public observation rooms';
+  const args=['-NoProfile','-ExecutionPolicy','Bypass','-File',
+   path.join(root,'scripts/r125-v11-windows-pilot.ps1'),
+   '-SingleNewBrief','-Prompt',prompt,'-Model','fake-local-author',
+   '-Endpoint',`http://127.0.0.1:${port}/v1/chat/completions`,'-NoOpen'];
+  const result=await new Promise((resolve,reject)=>{
+   const child=spawn('powershell.exe',args,{
+    cwd:root,env:{...process.env,LOCALAPPDATA:local},windowsHide:true});
+   let stdout='',stderr='';
+   child.stdout.setEncoding('utf8');
+   child.stderr.setEncoding('utf8');
+   child.stdout.on('data',chunk=>{stdout+=chunk;});
+   child.stderr.on('data',chunk=>{stderr+=chunk;});
+   child.once('error',reject);
+   child.once('close',code=>resolve({code,stdout,stderr}));
+  });
+  assert.equal(result.code,0,result.stdout+'\n'+result.stderr);
+  assert.equal(posts,1,'exactly one provider response, never retry');
+  assert.equal(requests[0].model,'fake-local-author');
+  assert.equal(requests[0].response_format.type,'json_object');
+  const found=/V11_PRIVATE_RESULT=([^\r\n]+)/.exec(result.stdout);
+  assert(found,'result path missing: '+result.stdout.slice(-1000));
+  const out=found[1].trim();
+  assert(out.startsWith(local),'result must remain PRIVATE');
+  const report=JSON.parse(fs.readFileSync(path.join(out,'BATCH_REPORT.json'),'utf8'));
+  assert.equal(report.planned,1);
+  assert.equal(report.attempted,1);
+  assert.equal(report.originalResponseCount,1);
+  assert.equal(report.sourcePassCount,1);
+  assert.equal(report.allSourceVerified,true);
+  assert.equal(report.worldWrites,0);
+  const row=report.completed[0];
+  assert.equal(row.id,'custom-brief');
+  const source=path.join(out,'custom-brief','B143_SOURCE_REVIEW_ONLY.json');
+  assert(fs.existsSync(source));
+  const originalRequest=fs.readFileSync(path.join(
+   out,'custom-brief','REQUEST_ORIGINAL.txt'),'utf8');
+  assert.equal(originalRequest,prompt);
+  const art=path.join(out,'CUSTOM_4_VIEW_SOURCE_ART');
+  const png=path.join(art,'CONTACT_4_VIEWS.png');
+  const manifest=JSON.parse(fs.readFileSync(path.join(art,
+   'STATIC_REVIEW.json'),'utf8'));
+  assert(fs.statSync(png).size>10000);
+  assert.equal(manifest.sourceSha256,row.sourceSha256);
+  assert.equal(manifest.geometrySha256,row.geometrySha256);
+  assert.equal(manifest.humanArt,'NOT_REVIEWED');
+  assert.equal(manifest.minecraftWalking,'NOT_TESTED');
+  assert.equal(manifest.modelCalls,0);
+  assert.equal(manifest.worldWrites,0);
+  assert(fs.existsSync(path.join(out,'BATCH_COMPARE_3D.html')));
+  assert(result.stdout.includes('V11_CUSTOM_TRUE_B143_4_VIEW_IMAGE='));
+ }finally{
+  await new Promise(resolve=>server.close(()=>resolve()));
+  fs.rmSync(temp,{recursive:true,force:true});
+ }
+});
