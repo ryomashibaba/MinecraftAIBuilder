@@ -31,12 +31,41 @@ export function detailR125Envelope(elements,plan,program){
  const top=1+5*count,ex=entry.origin[0],front=entry.origin[2];
  const zone=program[0].zones.find(z=>ex>=z.range.x[0]&&ex+1<=z.range.x[1]);
  const left=ex-2,right=ex+3,back=front+3;
- if(!zone||left<zone.range.x[0]||right>zone.range.x[1]||
-    back+2>zone.range.z[1]||left<=4)
-  throw Error('R125_DETAIL_ENTRY_COURT_DOES_NOT_FIT');
  const box=(id,mode,material,origin,size,repeat)=>elements.push({
   id,shape:'box',mode,...(mode==='add'?{material}:{}),origin,size,
   ...(repeat?{repeat}:{})});
+ const courtFits=Boolean(zone)&&left>=zone.range.x[0]&&
+  right<=zone.range.x[1]&&back+2<=zone.range.z[1]&&
+  // The lower stair occupies x=3..4, z=3..7 on two-storey plans.
+  // An entry-court cut must never remove those actual stair voxels.
+  (count===1||left>4);
+ if(!courtFits){
+  // A real one-block-deep covered public threshold is a bounded
+  // alternative when the six-wide, three-deep volume would erase stairs
+  // or enter another authored room. It touches ONLY exterior z=0:
+  // leave all entrance, inner walls, roof, rooms and stair voxels intact.
+  // This is an explicit HOST-derived ART study, not a model-authored court.
+  if(front!==1||ex<2||ex+1>w-3)
+   throw Error('R125_DETAIL_ENTRY_COURT_DOES_NOT_FIT');
+  const awningLeft=Math.max(1,ex-4);
+  const awningRight=Math.min(w-2,ex+5);
+  if(awningLeft>=ex||awningRight<=ex+1)
+   throw Error('R125_DETAIL_ENTRY_COURT_DOES_NOT_FIT');
+  const span=awningRight-awningLeft+1;
+  box('detail-covered-entry-landing','add',plan.materials.floor,
+   [awningLeft,1,0],[span,1,1]);
+  box('detail-covered-entry-canopy','add',plan.materials.roof,
+   [awningLeft,5,0],[span,1,1]);
+  for(const x of [awningLeft,awningRight])
+   box('detail-covered-entry-pier-'+x,'add',plan.materials.wall,
+    [x,2,0],[1,3,1]);
+  elements.splice(0,elements.length,...packR125AdjacentBoxes(elements));
+  return {policy:'spatial-v1',owner:'HOST',authorPlanEdited:false,
+   massing:'covered-threshold-fallback',originalEntry:[ex,2,front],
+   recessedEntry:null,canopy:{left:awningLeft,right:awningRight,z:0},
+   roofProfilePreserved:plan.expression.roofProfile,
+   equipmentAdded:0,worldWrites:0};
+ }
  // Query only genuine roof skins, including B143 repeats. No guessed roof
  // silhouette and no conversion of the author-selected family. Hip bands,
  // their central ridge and existing pitched/monitor roofs use the SAME
