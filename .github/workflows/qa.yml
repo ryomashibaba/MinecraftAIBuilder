@@ -34,7 +34,7 @@ jobs:
       - name: Education edition construction safety (offline only)
         run: node scripts/verify-safety.mjs
       - name: R125 exact MakeCode export and fail-closed preflight regressions (offline only)
-        run: node --test scripts/r125-education-makecode-export.test.mjs scripts/r125-saved-education-preflight.test.mjs scripts/r125-material-probe.test.mjs scripts/r125-free-build.test.mjs
+        run: node --test scripts/r125-education-makecode-export.test.mjs scripts/r125-saved-education-preflight.test.mjs scripts/r125-material-probe.test.mjs scripts/r125-free-build.test.mjs scripts/r125-v11-spatial-art.test.mjs
       - name: V9 chat-author independent SOURCE and exact Education packet audit (zero world calls)
         run: |
           python3 evidence/r125/v9-chat-author-soundscape-20261112/independent_source_qa.py
