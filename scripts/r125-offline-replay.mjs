@@ -168,6 +168,44 @@ export function auditR125ExplicitActivityProxy(requestedBrief,fixtureTargets=[])
  * geometry. No V6 placement patch, retry, model I/O or Minecraft contact.
  * A SOURCE candidate is never an ART pass or world-construction approval.
  */
+/**
+ * Genuine model-authored room-use evidence for evaluating the SOURCE.
+ * Rectangular plan bounds are not actual walkable floor, and this report
+ * is an ART advisory, never automatic functional certification.
+ */
+export function describeR125AuthoredRoomUse(original,built){
+ if(!Array.isArray(original?.levels)||!Array.isArray(built?.program)||
+    !Array.isArray(built?.fixtureTargets))
+  throw Error('R125_ROOM_USE_REQUIRES_MODEL_PROGRAM');
+ const floors=original.levels.map((level,i)=>{
+  const actual=built.program.find(l=>l.level===i);
+  if(!actual)throw Error('R125_ROOM_USE_LEVEL_MISSING');
+  const rooms=level.spaces.map(space=>{
+   const z=actual.zones.find(z=>z.id===space.id);
+   if(!z)throw Error('R125_ROOM_USE_ZONE_MISSING');
+   const area=Math.max(0,z.range.x[1]-z.range.x[0]+1)*
+    Math.max(0,z.range.z[1]-z.range.z[0]+1);
+   const targets=built.fixtureTargets.filter(t=>t.zoneId===space.id);
+   const occupied=targets.reduce((n,t)=>n+t.size[0]*t.size[2],0);
+   return {id:space.id,purpose:space.purpose,access:space.access??null,
+    roomBoundsAreaUpperLimit:area,authoredStationCount:targets.length,
+    stationKinds:targets.map(t=>t.kind),
+    stationFootprintProxyCells:occupied,
+    approximateRoomAreaFraction:area?Number((occupied/area).toFixed(3)):null};
+  });
+  return {storey:i+1,roomCount:rooms.length,
+   authoredStationCount:rooms.reduce((n,x)=>n+x.authoredStationCount,0),
+   roomsWithoutStations:rooms.filter(x=>x.authoredStationCount===0).map(x=>x.id),
+   rooms};
+ });
+ return {schema:'r125-authored-room-use-evidence-v1',
+  status:'ART_ADVISORY_ONLY_NOT_ACCEPTANCE',
+  storeys:floors,totalStations:floors.reduce((n,x)=>n+x.authoredStationCount,0),
+  roomAreaProxyNotWalkableArea:true,doesNotCertifyFunctionalRoomUse:true,
+  modelCalls:0,worldWrites:0,humanArt:'NOT_REVIEWED',
+  minecraftWalking:'NOT_TESTED'};
+}
+
 export function diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail='legacy',roofGlazing='none',roofMassing='default',fixtureArt='none',fixtureForm='default',requestedBrief=null}={}){
  if(typeof raw!=='string'||raw.length<1||raw.length>60000)
   fail('PLAN_RAW_INPUT_SIZE');
@@ -236,6 +274,7 @@ export function diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail='legacy',ro
    visitorCirculation:visitors,
    explicitActivityProxy,
    requestedActivityCoverage:'NOT_INDEPENDENTLY_VERIFIED_BY_SOURCE',
+   roomUseEvidence:describeR125AuthoredRoomUse(original,built),
    modelChosenFixtures:built.fixtureTargets?.length??0,
    modelChosenDaylight:built.daylightTargets?.length??0,
    daylightSourceWindows:built.daylightTargets??[],
