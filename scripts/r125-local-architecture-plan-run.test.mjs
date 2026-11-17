@@ -64,7 +64,7 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    assert.equal(oneLevel.properties.levels.maxItems,1);
    assert.equal(authorSchema.properties.levels.minItems,2);
    assert.equal(authorSchema.properties.levels.maxItems,2);
-   assert.equal(oneLevel.properties.expression.anyOf.length,11);
+   assert.equal(oneLevel.properties.expression.anyOf.length,12);
    assert.ok(oneLevel.properties.expression.anyOf.every(v=>
     v.properties.setbackSide.enum.join(',')==='none'&&
     v.properties.setbackDepth.enum.join(',')==='0'),
@@ -93,7 +93,18 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    assert.deepEqual(room.properties.fixtureDetail.enum,['crafted']);
    assert.equal(room.required.includes('fixtureDetail'),false);
    const options=authorSchema.properties.expression.anyOf;
-   assert.equal(options.length,16);
+   assert.equal(options.length,18);
+   const steep=options.filter(v=>v.required.includes('ridgeProfile'));
+   assert.equal(steep.length,2);
+   assert.ok(steep.every(v=>
+    v.properties.ridgeProfile.enum.join(',')==='steep'&&
+    v.properties.roofProfile.enum.join(',')==='ridge'&&
+    v.required.includes('roofVolume')&&
+    !Object.hasOwn(v.properties,'rearCornerCut')));
+   assert.deepEqual(room.properties.ovenHearth.enum,['accent']);
+   assert.equal(room.required.includes('ovenHearth'),false);
+   assert.ok(request.messages[0].content.includes('ridgeProfile:"steep"'));
+   assert.ok(request.messages[0].content.includes('ovenHearth:"accent"'));
    for(const levelVariant of structured.anyOf){
     for(const expression of levelVariant.properties.expression.anyOf){
      const isPitched=expression.properties.roofProfile.enum.some(x=>

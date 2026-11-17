@@ -450,6 +450,13 @@ test('model can independently vary functional T-room proportions, not merely foo
  assert.notDeepEqual(authoredFormFamily(unequal),a);
  const other=structuredClone(p);other.levels[0].splitPercent=40;
  assert.notDeepEqual(authoredFormFamily(other),a);
+ const ridge={...p,expression:{roofProfile:'ridge',roofAxis:'x'}};
+ const steep=structuredClone(ridge);
+ steep.expression.ridgeProfile='steep';
+ assert.notDeepEqual(authoredFormFamily(steep),authoredFormFamily(ridge),
+  'an actual roof shape change must count as author form variation');
+ const copied=structuredClone(ridge);
+ assert.deepEqual(authoredFormFamily(copied),authoredFormFamily(ridge));
 });
 
 test('single unseen brief performs exactly one mock response, real SOURCE replay and no invented diversity pass',async()=>{

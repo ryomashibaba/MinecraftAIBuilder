@@ -82,6 +82,7 @@ export function authoredFormFamily(plan){
    secondary:l.spaces.length===3?l.secondarySplitPercent??50:null
   })),
   roofProfile:e?.roofProfile??'unexpressed-flat',
+  ...(e?.ridgeProfile?{ridgeProfile:e.ridgeProfile}:{}),
   // An unused axis on a flat roof must NOT count as creative variation.
   roofAxis:e&&e.roofProfile!=='flat'?e.roofAxis??null:null,
   roofVolume:e?.roofVolume??'flat-cap',
@@ -158,6 +159,7 @@ export async function runR125ArchitecturePlanBatch({
      ...(space.fixture?{fixture:space.fixture}:{}),
      ...(space.fixtures?{fixtures:space.fixtures}:{}),
      ...(space.fixtureDetail?{fixtureDetail:space.fixtureDetail}:{}),
+     ...(space.ovenHearth?{ovenHearth:space.ovenHearth}:{}),
      ...(space.daylight?{daylight:space.daylight}:{})}))}));
    modelAuthoredFormFamilySha256=formHash(original);
   }

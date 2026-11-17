@@ -15,6 +15,7 @@ import {addAuthoredRoomDaylight,auditR125PairedBayApproach}
  from '../source/ai/r125-room-daylight.mjs';
 import {packR125AdjacentBoxes} from '../source/ai/r125-spatial-detail.mjs';
 import {verifyCompiled,compileDesign} from '../source/ai/b143-building-dsl.mjs';
+import {exportB143EducationMakeCode} from '../source/ai/r125-education-makecode-export.mjs';
 import {auditR125SourceRoutes} from '../source/ai/r125-source-routes.mjs';
 import {critiqueArchitecture} from '../source/ai/b198c-spatial-critic.mjs';
 import {exportSavedPlan} from './r125-japanese-makecode.mjs';
@@ -2774,3 +2775,107 @@ test('optional glazed sawtooth ribbon reduces opaque roof skin without changing 
   {roofGlazing:'sawtooth-ribbon'}),
   /R125_PLAN_ROOF_GLAZING_REQUIRES_RAISED_SAWTOOTH/);
 });
+
+
+test('AI-author steep ridge reduces wide roof plateau and preserves floor and traffic',()=>{
+ const p=plan('author-steep-roof',['z','x'],
+  ['visitor studio','instrument analysis']);
+ p.footprint={width:30,depth:28};
+ p.expression={setbackSide:'east',setbackDepth:3,
+  roofProfile:'ridge',roofAxis:'z',roofVolume:'raised',
+  facadeLanguage:'plain'};
+ const raw=structuredClone(p);
+ const old=compileArchitecturePlan(p,{
+  entrancePlacement:'source-accessible',upperDoorPlacement:'stair-clear'});
+ const chosen=structuredClone(p);
+ chosen.expression.ridgeProfile='steep';
+ const newRoof=compileArchitecturePlan(chosen,{
+  entrancePlacement:'source-accessible',upperDoorPlacement:'stair-clear'});
+ assert.deepEqual(p,raw,'new roof is explicit, never inferred in old author');
+ assert.ok(newRoof.compiled.bounds.maxY>old.compiled.bounds.maxY,
+  'wide pitched roof becomes taller instead of a broad 3-block-rise plateau');
+ assert.notEqual(old.geometrySha256,newRoof.geometrySha256);
+ assert.equal(verifyCompiled(newRoof.design,newRoof.compiled),true);
+ assert.equal(auditArchitecturePlanCirculation(newRoof).status,
+  'SOURCE_CLEARANCE_PROBES_PASS');
+ assert.equal(auditR125SourceRoutes(newRoof).status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ const oldV=new Map(old.compiled.primitives.map(v=>[v.slice(0,3).join(','),v[3]]));
+ const newV=new Map(newRoof.compiled.primitives.map(v=>[v.slice(0,3).join(','),v[3]]));
+ // Wall/floor/door/furniture/source voxels below top floor ceiling must
+ // remain unchanged; the author chose roof silhouette, not new rooms.
+ const top=1+5*chosen.levels.length;
+ for(const [key,mat] of oldV){
+  const y=Number(key.split(',')[1]);
+  if(y<top)assert.equal(newV.get(key),mat,
+   'no roof style may silently alter usable occupied floors: '+key);
+ }
+ assert.deepEqual(newRoof.compiled.BuildPlan.operations,[]);
+ assert.equal(newRoof.worldWrites,0);
+ for(const invalid of [
+  {ridgeProfile:'steep',roofProfile:'flat',roofVolume:undefined},
+  {ridgeProfile:'steep',roofProfile:'sawtooth'},
+  {ridgeProfile:'steep',rearCornerCut:{width:4,depth:4}}
+ ]){
+  const bad=structuredClone(chosen);
+  bad.expression={...bad.expression,...invalid};
+  assert.throws(()=>compileArchitecturePlan(bad),
+   /R125_PLAN_EXPRESSION_RIDGE_PROFILE/);
+ }
+});
+
+test('AI-author selected verified hearth supports exact B143 Education SOURCE export',()=>{
+ const p=plan('verified-hearth-architect',['x'],
+  ['public viewing space','private baking room']);
+ p.footprint={width:26,depth:26};
+ p.levels[0].spaces[1].fixtures=['oven'];
+ p.expression={setbackSide:'none',setbackDepth:0,
+  roofProfile:'flat',roofAxis:'x',facadeLanguage:'plain'};
+ const unverified=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+ const original=structuredClone(p);
+ const authored=structuredClone(p);
+ authored.levels[0].spaces[1].ovenHearth='accent';
+ const safe=compileArchitecturePlan(authored,{entrancePlacement:'source-accessible'});
+ assert.deepEqual(p,original);
+ assert.equal(verifyCompiled(safe.design,safe.compiled),true);
+ assert.equal(auditArchitecturePlanCirculation(safe).status,'SOURCE_CLEARANCE_PROBES_PASS');
+ assert.equal(auditR125SourceRoutes(safe,{featureTargets:safe.fixtureTargets}).status,
+  'SOURCE_ROUTES_REACH_ALL_ZONES');
+ const prior=unverified.design.elements.find(e=>e.id.endsWith('-hearth-glow'));
+ const replacement=safe.design.elements.find(e=>e.id.endsWith('-hearth-glow'));
+ assert.equal(prior.material,'glow');
+ assert.equal(replacement.material,'accent');
+ assert.deepEqual({...prior,material:'accent'},replacement,
+  'only the explicit oven hearth block material is changed');
+ const oldCells=new Map(unverified.compiled.primitives.map(v=>
+  [v.slice(0,3).join(','),v[3]]));
+ const newCells=new Map(safe.compiled.primitives.map(v=>
+  [v.slice(0,3).join(','),v[3]]));
+ assert.equal(oldCells.size,newCells.size);
+ assert.equal([...oldCells].filter(([k,v])=>newCells.get(k)!==v).length,1,
+  'one true source voxel changes, not a substitute building');
+ const palette=JSON.parse(fs.readFileSync(
+  new URL('../configs/r125-education-verified-palette-v26.33.json',
+   import.meta.url),'utf8'));
+ assert.throws(()=>exportB143EducationMakeCode({
+  design:unverified.design,scene:unverified.compiled,
+  provenance:'LOCAL_MODEL_CAPTURE',groundLowestLayer:true,
+  verifiedPalette:palette}),/UNVERIFIED_MATERIAL_GLOW/);
+ const packet=exportB143EducationMakeCode({
+  design:safe.design,scene:safe.compiled,
+  provenance:'LOCAL_MODEL_CAPTURE',groundLowestLayer:true,
+  verifiedPalette:palette});
+ assert.equal(packet.sourceSha256,safe.sourceSha256);
+ assert.equal(packet.geometrySha256,safe.geometrySha256);
+ assert.equal(packet.materialMode,'STRICT_USER_ATTESTED');
+ assert.equal(packet.plannedVoxelCount,safe.compiled.primitives.length);
+ assert.equal(packet.usedMaterials.some(x=>x.material==='glow'),false);
+ assert.equal(packet.usedMaterials.some(x=>x.material==='accent'),true);
+ assert.equal(packet.programExecuted,false);
+ assert.equal(packet.actualEducationExecution,'NOT_TESTED');
+ assert.deepEqual(packet.BuildPlan.operations,[]);
+ assert.equal(packet.worldWrites,0);
+ const bad=structuredClone(p);
+ bad.levels[0].spaces[0].ovenHearth='accent';
+ assert.throws(()=>validateArchitecturePlan(bad),/R125_PLAN_SPACE_OVEN_HEARTH/);
+});
+

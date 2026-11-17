@@ -64,7 +64,8 @@ const fixtureIntents=p=>p.plan.levels.flatMap((l,li)=>
  l.spaces.flatMap((s,zi)=>s.fixtures?
   s.fixtures.map((kind,index)=>({
    level:li,zoneIndex:zi,zoneId:s.id,kind,index,multi:true,
-   ...(s.fixtureDetail?{detail:s.fixtureDetail}:{})})):
+   ...(s.fixtureDetail?{detail:s.fixtureDetail}:{}),
+   ...(kind==='oven'&&s.ovenHearth?{hearth:s.ovenHearth}:{})})):
   s.fixture===undefined?[]:
   [{level:li,zoneIndex:zi,zoneId:s.id,kind:s.fixture,multi:false,
    ...(s.fixtureDetail?{detail:s.fixtureDetail}:{})}]));
@@ -151,7 +152,7 @@ function makeParts(intent,x,y,z,turned=false,wallAligned=false){
    add('side-b',2,1,0,1,2,2,'metal'),
    add('hood',0,2,0,3,1,2,'metal'),
    add('door-glass',1,1,0,1,1,1,'glass'),
-   add('hearth-glow',1,1,1,1,1,1,'glow')]
+   add('hearth-glow',1,1,1,1,1,1,intent.hearth??'glow')]
  };
  const parts=families[intent.kind]?.();
  if(!parts)throw Error('R125_PLAN_FIXTURE_UNKNOWN_ROLE');

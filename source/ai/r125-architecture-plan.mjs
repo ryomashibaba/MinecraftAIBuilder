@@ -181,6 +181,7 @@ export function validateArchitecturePlan(p){
    ...(Object.hasOwn(e,'roofVolume')?['roofVolume']:[]),
    ...(Object.hasOwn(e,'daylightFacade')?['daylightFacade']:[]),
    ...(Object.hasOwn(e,'roofOverhang')?['roofOverhang']:[]),
+   ...(Object.hasOwn(e,'ridgeProfile')?['ridgeProfile']:[]),
    ...(Object.hasOwn(e,'frontCornerCut')?['frontCornerCut']:[]),
    ...(Object.hasOwn(e,'rearCourt')?['rearCourt']:[])]),
    'EXPRESSION_FIELDS');
@@ -192,6 +193,13 @@ export function validateArchitecturePlan(p){
    ['x','z'].includes(e.roofAxis)&&
    ['plain','fins','screen','recessed-portico'].includes(e.facadeLanguage),
    'EXPRESSION_STYLE');
+  // Only an explicitly authored new ridge profile may replace the broad
+  // historical 3-block-rise plateau. Existing roofs are never reinterpreted.
+  check(e.ridgeProfile===undefined||
+   (e.ridgeProfile==='steep'&&e.roofProfile==='ridge'&&
+    e.roofVolume==='raised'&&!Object.hasOwn(e,'rearCornerCut')&&
+    !Object.hasOwn(e,'rearCourt')&&!Object.hasOwn(e,'frontCornerCut')),
+   'EXPRESSION_RIDGE_PROFILE');
   // Explicit opt-in preserves the original B143 roof source for old plans.
   check(e.roofVolume===undefined||
    (e.roofVolume==='raised'&&['ridge','sawtooth','split-monitor','hip'].includes(e.roofProfile)),
@@ -296,6 +304,7 @@ export function validateArchitecturePlan(p){
     ...(Object.hasOwn(space??{},'fixture')?['fixture']:[]),
     ...(Object.hasOwn(space??{},'fixtures')?['fixtures']:[]),
     ...(Object.hasOwn(space??{},'fixtureDetail')?['fixtureDetail']:[]),
+    ...(Object.hasOwn(space??{},'ovenHearth')?['ovenHearth']:[]),
     ...(Object.hasOwn(space??{},'daylight')?['daylight']:[]),
     ...(Object.hasOwn(space??{},'access')?['access']:[])])&&
     slug(space.id)&&text(space.purpose),'SPACE_FIELDS');
@@ -316,6 +325,10 @@ export function validateArchitecturePlan(p){
     'SPACE_FIXTURE_DETAIL');
    const roles=['counter','workbench','display','storage','seating',
     'bed','desk','washbasin','electronics','oven'];
+   check(space.ovenHearth===undefined||
+    (space.ovenHearth==='accent'&&
+     Array.isArray(space.fixtures)&&space.fixtures.includes('oven')),
+    'SPACE_OVEN_HEARTH');
    check(space.fixtures===undefined||
     (space.fixture===undefined&&Array.isArray(space.fixtures)&&
      space.fixtures.length>=1&&space.fixtures.length<=3&&
@@ -920,9 +933,11 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
   const sawtoothHeight=pos=>roofMassing==='compact-sawtooth'?
    Math.floor((pos%6)/2):(pos%6===0?0:Math.ceil((pos%6)/2));
   const span=roofAxis==='x'?upper.x1-upper.x0+1:upper.z1-upper.z0+1;
+  const ridgeHeight=pos=>Math.min(
+   original.expression.ridgeProfile==='steep'?6:3,
+   Math.floor(Math.min(pos,span-1-pos)/2));
   for(let pos=0;pos<span;pos++){
-   const height=roofProfile==='ridge'?
-    Math.min(3,Math.floor(Math.min(pos,span-1-pos)/2)):
+   const height=roofProfile==='ridge'?ridgeHeight(pos):
     sawtoothHeight(pos);
    if(raisedRoof){
     // TRUE raised volume: continuous pitched roof is the interior ceiling,
@@ -955,8 +970,7 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
     // Ridge rises by <=1 and retains its frozen historical SOURCE.
     if(pos>0){
      const p=pos-1;
-     const previous=roofProfile==='ridge'?
-      Math.min(3,Math.floor(Math.min(p,span-1-p)/2)):
+     const previous=roofProfile==='ridge'?ridgeHeight(p):
       sawtoothHeight(p);
      const rise=Math.abs(height-previous);
      if(rise>1){
@@ -1003,8 +1017,7 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
   if(raisedRoof&&original.expression.roofOverhang==='one-block'){
    const alongX=roofAxis==='x';
    const span=alongX?upper.x1-upper.x0+1:upper.z1-upper.z0+1;
-   const eaveRise=pos=>roofProfile==='ridge'?
-    Math.min(3,Math.floor(Math.min(pos,span-1-pos)/2)):
+   const eaveRise=pos=>roofProfile==='ridge'?ridgeHeight(pos):
     sawtoothHeight(pos);
    // Compress contiguous equally elevated eaves into B143 boxes.
    // Every occupied cell and material stays identical. Only the author-opt-in
