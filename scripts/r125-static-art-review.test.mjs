@@ -8,6 +8,7 @@ import {diagnoseR125ArchitecturePlanOriginal} from './r125-offline-replay.mjs';
 import {renderB143StaticPNG,saveB143StaticReview,saveB143ABReview}
  from './r125-static-art-review.mjs';
 import {saveSavedFloorReview} from './r125-v11-saved-floor-review.mjs';
+import {saveR125FinishAB} from './r125-v11-finish-art-ab.mjs';
 
 const hash=x=>createHash('sha256').update(x).digest('hex');
 const original=fs.readFileSync(new URL(
@@ -198,5 +199,50 @@ test('two-floor source review exposes genuinely separated upper floor voxels',()
   assert(result.views.every(v=>v.renderedCells>25));
   assert.equal(result.sourceSha256,reviewed.sourceSha256);
   assert.equal(result.worldWrites,0);
+ }finally{fs.rmSync(tmp,{recursive:true,force:true});}
+});
+
+test('one saved authored concept becomes SOURCE-checked activity and roof ART A/B without model',()=>{
+ const plan={schema:'minecraftaibuilder-r125-architecture-plan-v1',
+  id:'saved-workspace-ab',title:'An independently authored workspace',
+  brief:'A practical community studio with two separate activities',
+  footprint:{width:24,depth:24},
+  levels:[{splitAxis:'z',splitPercent:50,spaces:[
+   {id:'public-studio',purpose:'Shared making and display room',
+    fixtures:['desk'],access:'shared'},
+   {id:'staff-store',purpose:'Staff records and inventory',
+    fixtures:['storage'],access:'staff'}]}],
+  materials:{floor:'wood',wall:'concrete',roof:'metal'},entryZone:'first',
+  expression:{setbackSide:'none',setbackDepth:0,roofProfile:'ridge',
+   roofAxis:'x',roofVolume:'raised',facadeLanguage:'plain'}};
+ const raw=JSON.stringify(plan);
+ const originalDiagnosis=diagnoseR125ArchitecturePlanOriginal(raw);
+ assert.equal(originalDiagnosis.sourceVerified,true,
+  JSON.stringify({status:originalDiagnosis.status,reason:originalDiagnosis.compilerReason}));
+ const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'mab-finish-ab-'));
+ try{
+  const rawFile=path.join(tmp,'original.txt'),
+   sourceFile=path.join(tmp,'source.json'),out=path.join(tmp,'out');
+  fs.writeFileSync(rawFile,raw);
+  fs.writeFileSync(sourceFile,JSON.stringify(originalDiagnosis.sourceDesign));
+  const r=saveR125FinishAB({rawPath:rawFile,sourcePath:sourceFile,outDir:out});
+  assert.equal(r.originalSha256,hash(raw));
+  assert.equal(r.baselineSourceSha256,originalDiagnosis.sourceSha256);
+  assert.equal(r.policy.roofMassing,'steep-ridge-review');
+  assert.equal(r.policy.fixtureArt,'activity-inlays');
+  assert.equal(r.modelCalls,0);assert.equal(r.worldWrites,0);
+  assert.deepEqual(r.nineWorldGates,Array(9).fill('BLOCKED'));
+  assert.equal(r.art,'HUMAN_REVIEW_REQUIRED_NOT_ACCEPTED');
+  assert(r.changedVoxels.added+r.changedVoxels.removed+
+   r.changedVoxels.changedMaterial>0);
+  assert.equal(fs.readFileSync(rawFile,'utf8'),raw);
+  assert.equal(hash(fs.readFileSync(path.join(out,r.photo))),r.photoSha256);
+  assert.throws(()=>saveR125FinishAB({rawPath:rawFile,
+   sourcePath:sourceFile,outDir:out}),/NEW_OUTPUT_DIRECTORY_REQUIRED/);
+  fs.writeFileSync(sourceFile,'{"unverified":"source"}');
+  assert.throws(()=>saveR125FinishAB({rawPath:rawFile,
+   sourcePath:sourceFile,outDir:path.join(tmp,'bad')}),
+   /B143_|BASELINE_B143_ORIGINAL_MISMATCH/);
+  assert.equal(fs.existsSync(path.join(tmp,'bad')),false);
  }finally{fs.rmSync(tmp,{recursive:true,force:true});}
 });

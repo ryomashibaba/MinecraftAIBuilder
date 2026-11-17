@@ -17,6 +17,7 @@ $ErrorActionPreference = 'Stop'
 $repo = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')).Path
 $renderer = Join-Path $repo 'scripts\r125-static-art-review.mjs'
 $floorRenderer = Join-Path $repo 'scripts\r125-v11-saved-floor-review.mjs'
+$finishRenderer = Join-Path $repo 'scripts\r125-v11-finish-art-ab.mjs'
 if (-not (Test-Path -LiteralPath $renderer -PathType Leaf)) {
  throw 'V11_ART_RENDERER_MISSING'
 }
@@ -32,6 +33,8 @@ if ($CheckOnly) {
  if ($LASTEXITCODE -ne 0) { throw 'V11_ART_SYNTAX_HOLD' }
  & $node '--check' $floorRenderer
  if ($LASTEXITCODE -ne 0) { throw 'V11_ART_FLOOR_SYNTAX_HOLD' }
+ & $node '--check' $finishRenderer
+ if ($LASTEXITCODE -ne 0) { throw 'V11_ART_FINISH_SYNTAX_HOLD' }
  Write-Output 'V11_ART_CHECK_ONLY_PASS: No PRIVATE access, model, browser or world calls.'
  return
 }
@@ -138,6 +141,29 @@ if ($floorReport.originalSha256 -cne $actualOriginalHash -or
     [int]$floorReport.modelCalls -ne 0 -or [int]$floorReport.worldWrites -ne 0) {
  throw 'V11_ART_FLOOR_PROVENANCE_HOLD'
 }
+# Source-gated same-model ART A/B. Any unsupported activity policy is
+# logged as HOLD without hiding the original two-floor evidence.
+$finishOut = Join-Path $one 'FINISH_ART_AB_V1'
+$finishJSON = Join-Path $finishOut 'FINISH_AB_REPORT.json'
+$finishPNG = Join-Path $finishOut 'ART_AB\AB_OLD_LEFT_NEW_RIGHT.png'
+if (-not (Test-Path -LiteralPath $finishOut)) {
+ & $node $finishRenderer '--raw' $rawFile '--source' $src '--out' $finishOut
+ if ($LASTEXITCODE -ne 0) {
+  Write-Output 'V11_FINISH_ART_HOLD_SOURCE_POLICY_NOT_PASSED'
+ }
+}
+if (Test-Path -LiteralPath $finishJSON -PathType Leaf) {
+ $finishReport = Get-Content -LiteralPath $finishJSON -Raw -Encoding UTF8 | ConvertFrom-Json
+ if ($finishReport.originalSha256 -cne $actualOriginalHash -or
+     $finishReport.baselineSourceSha256 -cne $diag.sourceSha256 -or
+     $finishReport.photoSha256 -cne (Get-FileHash -LiteralPath $finishPNG -Algorithm SHA256).Hash.ToLowerInvariant() -or
+     [int]$finishReport.modelCalls -ne 0 -or
+     [int]$finishReport.worldWrites -ne 0) {
+  throw 'V11_FINISH_ART_PROVENANCE_HOLD'
+ }
+ Write-Output ('V11_FINISH_ART_AB=' + $finishPNG)
+ Write-Output ('V11_FINISH_ART_UNVERIFIED=' + ($finishReport.educationMaterials.unverified -join ','))
+}
 Write-Output ('V11_ART_FLOORS=' + $floorPNG)
 Write-Output ('V11_ART_EDUCATION_UNVERIFIED=' + ($floorReport.educationMaterials.unverified -join ','))
 Write-Output ('V11_ART_RESULT=' + $out)
@@ -145,6 +171,6 @@ Write-Output ('V11_ART_CONTACT=' + $contactFile)
 Write-Output ('V11_ART_VOXELS=' + $manifest.occupiedVoxels)
 Write-Output 'V11_ART_REVIEW_PENDING. No model, Minecraft or upload performed.'
 if (-not $NoOpen) {
- try { Start-Process -FilePath $floorPNG }
+ try { Start-Process -FilePath $floorPNG; if (Test-Path -LiteralPath $finishPNG -PathType Leaf) { Start-Process -FilePath $finishPNG } }
  catch { Write-Warning 'V11_ART_OPEN_PNG_FAILED_USE_PRINTED_PATH' }
 }
