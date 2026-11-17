@@ -46,13 +46,15 @@ export function summarizeR125InvalidSetbackOriginal(raw){
   depth:null;
  const validPair=setbackSide==='none'&&setbackDepth===0||
   (['east','rear'].includes(setbackSide)&&levelCount===2&&
-   [2,3,4].includes(setbackDepth))||
+   [2,3,4,6,8].includes(setbackDepth)&&
+   (setbackDepth<=4||(setbackSide==='east'?
+    p.footprint?.width>=28:p.footprint?.depth>=28)))||
   (setbackSide==='front'&&levelCount===2&&setbackDepth===2);
  if(validPair)return null;
  return {schema:'r125-invalid-author-setback-summary-v1',
   levelCount,setbackSide,setbackDepth,
   requiredRule:levelCount===1?'ONE_LEVEL_REQUIRES_NONE_AND_ZERO':
-   levelCount===2?'TWO_LEVELS_NONE_ZERO_EAST_REAR_TWO_TO_FOUR_OR_FRONT_TWO':
+   levelCount===2?'TWO_LEVELS_NONE_ZERO_EAST_REAR_TWO_THREE_FOUR_SIX_EIGHT_WIDE_OR_FRONT_TWO':
    'VALID_LEVEL_COUNT_REQUIRED',
   originalEdited:false,modelCalls:0,worldWrites:0};
 }

@@ -439,7 +439,7 @@ test('one-level model setback mismatch is rejected with safe original values, ne
  assert.equal(summarizeR125InvalidSetbackOriginal(JSON.stringify(front)),null);
  front.expression.setbackDepth=3;
  assert.equal(summarizeR125InvalidSetbackOriginal(JSON.stringify(front)).requiredRule,
-  'TWO_LEVELS_NONE_ZERO_EAST_REAR_TWO_TO_FOUR_OR_FRONT_TWO');
+  'TWO_LEVELS_NONE_ZERO_EAST_REAR_TWO_THREE_FOUR_SIX_EIGHT_WIDE_OR_FRONT_TWO');
  front.expression.setbackDepth=2;
  front.levels=front.levels.slice(0,1);
  assert.equal(summarizeR125InvalidSetbackOriginal(JSON.stringify(front)).requiredRule,
@@ -475,4 +475,30 @@ test('one original POST holds unmatched requested oven without correcting source
   assert.equal(fs.readFileSync(path.join(dest,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8'),original);
   assert.equal(report.worldWrites,0);
  }finally{fs.rmSync(root,{recursive:true,force:true})}
+});
+
+test('deep upper setback original diagnostic matches allowed footprint-dependent AUTHOR rules',()=>{
+ const author=JSON.parse(original);
+ author.levels=[structuredClone(author.levels[0]),structuredClone(author.levels[0])];
+ author.expression={...author.expression,setbackSide:'east',setbackDepth:8};
+ author.footprint={width:32,depth:32};
+ const before=JSON.stringify(author);
+ for(const side of ['east','rear'])for(const depth of [6,8]){
+  author.expression.setbackSide=side;author.expression.setbackDepth=depth;
+  author.footprint={width:32,depth:32};
+  assert.equal(summarizeR125InvalidSetbackOriginal(JSON.stringify(author)),null);
+  author.footprint[side==='east'?'width':'depth']=27;
+  const d=summarizeR125InvalidSetbackOriginal(JSON.stringify(author));
+  assert.equal(d.setbackDepth,depth);
+  assert.equal(d.originalEdited,false);
+  assert.equal(d.worldWrites,0);
+  assert.equal(d.requiredRule,
+   'TWO_LEVELS_NONE_ZERO_EAST_REAR_TWO_THREE_FOUR_SIX_EIGHT_WIDE_OR_FRONT_TWO');
+ }
+ author.footprint={width:32,depth:32};
+ author.expression.setbackSide='east';
+ author.expression.setbackDepth=7;
+ assert.equal(summarizeR125InvalidSetbackOriginal(JSON.stringify(author)).setbackDepth,7);
+ assert.equal(author.footprint.width,32);
+ assert.equal(JSON.parse(before).expression.setbackDepth,8);
 });
