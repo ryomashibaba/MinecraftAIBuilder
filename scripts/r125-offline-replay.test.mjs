@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {diagnoseR125Original,diagnoseR125ArchitecturePlanOriginal,
- parseR125ReplayArgs,writeArchitecturePlanReplay} from './r125-offline-replay.mjs';
+ describeR125AuthoredRoomUse,parseR125ReplayArgs,writeArchitecturePlanReplay} from './r125-offline-replay.mjs';
 import {readFileSync,mkdtempSync,existsSync,rmSync} from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -413,4 +413,36 @@ test('activity-inlay visual trial can only be activated explicitly',()=>{
  assert.throws(()=>parseR125ReplayArgs(['--raw','/tmp/raw-plan.txt',
   '--out','/tmp/art-review','--fixture-art','auto']),
  /R125_REPLAY_FIXTURE_ART_MODE/);
+});
+
+test('floor-by-floor source station evidence identifies underused levels without ART promotion',()=>{
+ const author={levels:[
+  {spaces:[{id:'work-zone',purpose:'shared workshop',access:'shared'},
+   {id:'back-store',purpose:'staff storage',access:'staff'}]},
+  {spaces:[{id:'learning-room',purpose:'public teaching',access:'public'},
+   {id:'gallery-room',purpose:'public gallery',access:'public'}]}]};
+ const built={program:[
+  {level:0,zones:[{id:'work-zone',range:{x:[2,13],z:[2,15]}},
+   {id:'back-store',range:{x:[15,21],z:[2,15]}}]},
+  {level:1,zones:[{id:'learning-room',range:{x:[2,13],z:[2,15]}},
+   {id:'gallery-room',range:{x:[15,21],z:[2,15]}}]}
+ ],fixtureTargets:[
+  {zoneId:'work-zone',kind:'workbench',size:[3,3,1]},
+  {zoneId:'work-zone',kind:'washbasin',size:[3,3,2]},
+  {zoneId:'back-store',kind:'storage',size:[3,3,1]},
+  {zoneId:'gallery-room',kind:'display',size:[3,3,1]}
+ ]};
+ const snapshot=structuredClone(author),e=describeR125AuthoredRoomUse(author,built);
+ assert.equal(e.schema,'r125-authored-room-use-evidence-v1');
+ assert.equal(e.totalStations,4);
+ assert.deepEqual(e.storeys.map(f=>f.authoredStationCount),[3,1]);
+ assert.deepEqual(e.storeys[1].roomsWithoutStations,['learning-room']);
+ assert.equal(e.storeys[0].rooms[0].roomBoundsAreaUpperLimit,168);
+ assert.equal(e.storeys[0].rooms[0].stationFootprintProxyCells,9);
+ assert.equal(e.storeys[0].rooms[0].approximateRoomAreaFraction,0.054);
+ assert.equal(e.status,'ART_ADVISORY_ONLY_NOT_ACCEPTANCE');
+ assert.equal(e.roomAreaProxyNotWalkableArea,true);
+ assert.equal(e.humanArt,'NOT_REVIEWED');
+ assert.equal(e.worldWrites,0);
+ assert.deepEqual(author,snapshot);
 });
