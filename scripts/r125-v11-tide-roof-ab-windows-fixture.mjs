@@ -17,7 +17,8 @@ if(!target||!fs.existsSync(target)||target===root||
  target.startsWith(root+path.sep))throw Error('CI_PRIVATE_ROOT_ONLY');
 const p={
  schema:'minecraftaibuilder-r125-architecture-plan-v1',
- id:'tide-observatory',title:'CI synthetic tide observatory',
+ // A capture JOB named tide-observatory must accept a different MODEL ID.
+ id:'ci-authored-tide-lab',title:'CI synthetic tide observatory',
  brief:'A test observatory with a working laboratory and visitor exhibition',
  footprint:{width:24,depth:24},
  levels:[{splitAxis:'x',splitPercent:50,spaces:[

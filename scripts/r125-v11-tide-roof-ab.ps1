@@ -43,6 +43,10 @@ function LoadStudy([string]$folder) {
   $report=Get-Content -LiteralPath $reportPath -Raw -Encoding UTF8 | ConvertFrom-Json
   $diagnosis=Get-Content -LiteralPath $diagnosticPath -Raw -Encoding UTF8 | ConvertFrom-Json
   $source=Get-Content -LiteralPath $sourcePath -Raw -Encoding UTF8 | ConvertFrom-Json
+  # 'tide-observatory' is the capture JOB name, not necessarily the
+  # authored ArchitecturePlan.id. Bind the B143 source to the exact
+  # hashed original author response instead of assuming those IDs match.
+  $author=Get-Content -LiteralPath $originalPath -Raw -Encoding UTF8 | ConvertFrom-Json
   $originalHash=Hash $originalPath
   if($report.schema -cne 'r125-recovered-source-art-review-v1' -or
      $report.model -cne 'qwen3:14b' -or
@@ -52,7 +56,8 @@ function LoadStudy([string]$folder) {
      $report.before.originalSha256 -cne $expectedBeforeOriginal -or
      $report.after.sourceVerified -ne $true -or
      $diagnosis.sourceVerified -ne $true -or
-     $source.id -cne 'tide-observatory' -or
+     [string]::IsNullOrWhiteSpace([string]$author.id) -or
+     $source.id -cne $author.id -or
      $report.after.originalSha256 -cne $originalHash -or
      $diagnosis.originalSha256 -cne $originalHash -or
      $report.after.sourceSha256 -cne $diagnosis.sourceSha256 -or
