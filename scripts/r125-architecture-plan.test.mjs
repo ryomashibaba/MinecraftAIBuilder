@@ -1678,7 +1678,7 @@ test('multi-room fixture grammar is bounded and preserves old single fixture geo
  const valid=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
  assert.equal(valid.fixtureTargets.length,2);
  for(const bad of [
-  [],['bed','desk','storage','seating'],['wrong']
+  [],['bed','desk','storage','seating','workbench','display'],['wrong']
  ]) {
   const q=structuredClone(p);
   q.levels[0].spaces[0].fixtures=bad;
@@ -3417,4 +3417,50 @@ test('V11 room-scale HOST art study preserves model-authored original',()=>{
  assert.notEqual(study.geometrySha256,small.geometrySha256);
  assert.equal(study.worldWrites,0);
  assert.deepEqual(study.gates,Array(9).fill('BLOCKED'));
+});
+
+test('V11 five real model-selected stations preserve SOURCE and world gates',()=>{
+ const p=plan('five-station-workroom',['x'],['making','showing']);
+ p.footprint={width:32,depth:32};
+ p.levels[0].spaces[0].fixtures=['workbench','workbench','storage','desk','display'];
+ const original=JSON.stringify(p);
+ assert.equal(validateArchitecturePlan(p),true);
+ const built=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+ assert.equal(JSON.stringify(p),original);
+ assert.deepEqual(built.fixtureTargets.map(x=>x.kind),
+  ['workbench','workbench','storage','desk','display']);
+ assert.equal(new Set(built.fixtureTargets.map(x=>x.id)).size,5);
+ assert.equal(auditR125SourceRoutes(built,{featureTargets:built.fixtureTargets}).status,
+  'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(auditArchitecturePlanCirculation(built).status,'SOURCE_CLEARANCE_PROBES_PASS');
+ assert.equal(verifyCompiled(built.design,built.compiled),true);
+ assert.deepEqual(built.compiled.BuildPlan.operations,[]);
+ assert.equal(built.worldWrites,0);
+ assert.deepEqual(built.gates,Array(9).fill('BLOCKED'));
+});
+test('V11 authored expanded silhouettes retain selected equipment kinds',()=>{
+ for(const [kind,shapes] of [
+  ['seating',['seat','back']],['display',['plinth','glazing']],
+  ['storage',['lower-shelf','upper-shelf','end-frame']]
+ ]){
+  const p=plan('scaled-'+kind,['x'],['making','showing']);
+  p.footprint={width:30,depth:30};
+  p.levels[0].spaces[0].fixtures=[kind];
+  p.levels[0].spaces[0].fixtureScale='expanded';
+  const original=JSON.stringify(p);
+  const built=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+  assert.equal(JSON.stringify(p),original);
+  assert.deepEqual(built.fixtureTargets.map(t=>t.kind),[kind]);
+  assert.ok(built.roomScaleReview.changes.some(c=>c.kind===kind&&c.scaleOwner==='MODEL'));
+  for(const shape of shapes)
+   assert.ok(built.design.elements.some(e=>e.id==='host-scale-fx-l0-z0-i0-'+shape),
+    kind+' '+shape);
+  assert.equal(auditR125SourceRoutes(built,{featureTargets:built.fixtureTargets}).status,
+   'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert.equal(auditArchitecturePlanCirculation(built).status,'SOURCE_CLEARANCE_PROBES_PASS');
+  assert.equal(verifyCompiled(built.design,built.compiled),true);
+  assert.equal(built.worldWrites,0);
+  assert.deepEqual(built.gates,Array(9).fill('BLOCKED'));
+  assert.deepEqual(built.compiled.BuildPlan.operations,[]);
+ }
 });

@@ -1,7 +1,8 @@
 /**
  * MAB V11: ONE saved genuine ArchitecturePlan -> actual 8-view B143 ART A/B.
  * No new model calls, hidden corrections, model-original edits, or world IO.
- * Only generic opt-in HOST workstation silhouettes are tested; no roof or floor styling.
+ * Default keeps the previous study. --integrated combines HOST spatial detail,
+ * activity-led arrangement and role-specific expanded surfaces.
  * Source failure is HOLD, not an auto retry or a claimed improvement.
  */
 import fs from 'node:fs';
@@ -16,7 +17,8 @@ const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const hash=s=>createHash('sha256').update(s).digest('hex');
 const fail=id=>{throw Error('R125_V11_FINISH_AB_'+id);};
 
-export function saveR125FinishAB({rawPath,sourcePath,outDir}={}){
+export function saveR125FinishAB({rawPath,sourcePath,outDir,integrated=false}={}){
+ if(typeof integrated!=='boolean')fail('INTEGRATED_FLAG');
  if([rawPath,sourcePath,outDir].some(s=>typeof s!=='string'||!s))
   fail('REQUIRES_RAW_SOURCE_OUT');
  const rawFile=path.resolve(rawPath),sourceFile=path.resolve(sourcePath);
@@ -47,7 +49,9 @@ export function saveR125FinishAB({rawPath,sourcePath,outDir}={}){
     savedScene.worldContacts!==0||
     savedScene.BuildPlan?.operations?.length!==0)
   fail('BASELINE_B143_ORIGINAL_MISMATCH');
- const policy={fixtureForm:'readable-v1'};
+ const policy=integrated?
+  {hostDetail:'spatial-v1',fixtureArt:'activity-layout',fixtureForm:'room-scale-v1'}:
+  {fixtureForm:'readable-v1'};
  const candidate=diagnoseR125ArchitecturePlanOriginal(original,policy);
  if(candidate.status!=='B143_SOURCE_CANDIDATE_ART_HOLD'||
     candidate.sourceVerified!==true||
@@ -59,7 +63,8 @@ export function saveR125FinishAB({rawPath,sourcePath,outDir}={}){
  if(!verifyCompiled(candidate.sourceDesign,afterScene)||
     afterScene.worldContacts!==0||
     afterScene.BuildPlan?.operations?.length!==0||
-    candidate.modelCalls!==0||candidate.worldWrites!==0)
+    candidate.modelCalls!==0||candidate.worldWrites!==0||
+    candidate.modelChosenFixtures!==current.modelChosenFixtures)
   fail('CANDIDATE_SOURCE_OR_WORLD_GATES');
  const originalCells=new Map(savedScene.primitives.map(v=>[v.slice(0,3).join(','),v[3]]));
  const newCells=new Map(afterScene.primitives.map(v=>[v.slice(0,3).join(','),v[3]]));
@@ -93,6 +98,8 @@ export function saveR125FinishAB({rawPath,sourcePath,outDir}={}){
   changedVoxels:ab.finalVoxelDifference,
   verifiedEquipmentCount:candidate.modelChosenFixtures,
   fixtureFormReview:candidate.fixtureFormReview??null,
+  roomScaleReview:candidate.roomScaleReview??null,
+  spatialDetail:candidate.spatialDetail??null,
   photo:'ART_AB/'+ab.preview.file,
   photoSha256:ab.preview.sha256,
   educationMaterials:{used,unverified,
@@ -111,10 +118,11 @@ export function saveR125FinishAB({rawPath,sourcePath,outDir}={}){
 if(process.argv[1]===fileURLToPath(import.meta.url)){
  try{
   const a=process.argv.slice(2);
-  if(a.length!==6||a[0]!=='--raw'||a[2]!=='--source'||a[4]!=='--out')
+  if(![6,7].includes(a.length)||a[0]!=='--raw'||a[2]!=='--source'||
+     a[4]!=='--out'||(a.length===7&&a[6]!=='--integrated'))
    fail('CLI');
   const r=saveR125FinishAB({
-   rawPath:a[1],sourcePath:a[3],outDir:a[5]});
+   rawPath:a[1],sourcePath:a[3],outDir:a[5],integrated:a.length===7});
   console.log('R125_V11_FINISH_ART_SOURCE_ONLY',JSON.stringify({
    baselineSha:r.baselineSourceSha256,candidateSha:r.candidateSourceSha256,
    unverifiedMaterials:r.educationMaterials.unverified,

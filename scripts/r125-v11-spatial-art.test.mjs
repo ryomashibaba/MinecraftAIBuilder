@@ -6,6 +6,7 @@ import path from 'node:path';
 import {SCHEMA} from '../source/ai/r125-architecture-plan.mjs';
 import {diagnoseR125ArchitecturePlanOriginal} from './r125-offline-replay.mjs';
 import {saveR125SpatialArt} from './r125-v11-spatial-art.mjs';
+import {saveR125FinishAB} from './r125-v11-finish-art-ab.mjs';
 import {detailR125Envelope} from '../source/ai/r125-spatial-detail.mjs';
 import {inspectR125SavedRoomUse} from './r125-v11-room-use-diagnosis.mjs';
 test('offline saved author: real recessed volume, SHA integrity and world gates',()=>{
@@ -173,5 +174,41 @@ test('saved-Qwen room use diagnosis: exact source, authored station counts, no w
    rawPath,sourcePath:forged,outDir:path.join(dir,'forged-report')}),
    /BASELINE_SHA_OR_WORLD_GUARD/);
   assert.equal(fs.existsSync(path.join(dir,'forged-report')),false);
+ }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
+
+test('V11 integrated HOST room-quality A/B emits eight-view real B143 preview',()=>{
+ const p={schema:SCHEMA,id:'integrated-quality-review',title:'Shared workshop gallery',
+  brief:'A shared creative workroom and public exhibition hall',
+  footprint:{width:30,depth:30},
+  levels:[{splitAxis:'x',splitPercent:50,spaces:[
+   {id:'work-room',purpose:'creative fabrication',access:'shared',
+    fixtures:['workbench','storage']},
+   {id:'public-gallery',purpose:'visitor display',access:'public',
+    fixtures:['display','seating']}]}],
+  materials:{floor:'wood',wall:'concrete',roof:'stone'},
+  expression:{setbackSide:'none',setbackDepth:0,
+   roofProfile:'ridge',roofAxis:'x',roofVolume:'raised',facadeLanguage:'fins'}};
+ const raw=JSON.stringify(p);
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'mab-integrated-quality-'));
+ try{
+  const rawPath=path.join(dir,'MODEL_RESPONSE_ORIGINAL.txt');
+  const sourcePath=path.join(dir,'B143_SOURCE_REVIEW_ONLY.json');
+  fs.writeFileSync(rawPath,raw);
+  const baseline=diagnoseR125ArchitecturePlanOriginal(raw);
+  assert.equal(baseline.sourceVerified,true,baseline.compilerReason);
+  fs.writeFileSync(sourcePath,JSON.stringify(baseline.sourceDesign));
+  const outDir=path.join(dir,'integrated-ab');
+  const result=saveR125FinishAB({rawPath,sourcePath,outDir,integrated:true});
+  assert.equal(result.originalAuthorUnchanged,true);
+  assert.equal(fs.readFileSync(rawPath,'utf8'),raw);
+  assert.equal(result.policy.fixtureForm,'room-scale-v1');
+  assert.equal(result.verifiedEquipmentCount,4);
+  assert.ok(result.roomScaleReview?.changes.length>0);
+  assert.ok(result.spatialDetail);
+  assert.ok(fs.existsSync(path.join(outDir,result.photo)));
+  assert.equal(result.art,'HUMAN_REVIEW_REQUIRED_NOT_ACCEPTED');
+  assert.equal(result.worldWrites,0);
+  assert.deepEqual(result.nineWorldGates,Array(9).fill('BLOCKED'));
  }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });

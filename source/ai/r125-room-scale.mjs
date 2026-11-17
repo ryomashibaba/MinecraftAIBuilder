@@ -71,20 +71,39 @@ export function expandR125RoomScale(product,{auditCirculation,includeHostStudy=f
      const post=[...origin],postSize=[w,1,d];
      post[long]=far;postSize[long]=1;
      const id='host-scale-'+station.id;
-     const parts=[
-      {id:id+'-surface',shape:'box',mode:'add',material:materials[0],
-       origin:[x,y+1,z],size:[w,1,d]},
-      {id:id+'-support',shape:'box',mode:'add',material:materials[1],
-       origin:post,size:postSize}
-     ];
-     if(['display','storage','electronics'].includes(station.kind)){
-      for(let xx=post[0];xx<post[0]+postSize[0];xx++)
-       for(let zz=post[2];zz<post[2]+postSize[2];zz++)
-        if(occupied.has(cell(xx,y+2,zz)))free=false;
+     // Only extend the MODEL-selected station. Geometry is role-specific:
+     // a bench continues as a bench, not as a detached work table.
+     const part=(name,material,at,extent)=>({
+      id:id+'-'+name,shape:'box',mode:'add',material,
+      origin:at,size:extent
+     });
+     let parts;
+     if(station.kind==='seating'){
+      const back=[x,y+1,z],backSize=[w,1,d];
+      back[short]+=size[short]-1;backSize[short]=1;
+      parts=[part('seat','wood',[x,y,z],[w,1,d]),
+       part('back','wood',back,backSize)];
+     }else if(station.kind==='display'){
+      parts=[part('plinth','stone',[x,y,z],[w,1,d]),
+       part('glazing','glass',[x,y+1,z],[w,1,d])];
+     }else if(station.kind==='storage'){
+      for(let xx=x;xx<x+w;xx++)for(let zz=z;zz<z+d;zz++)
+       if(occupied.has(cell(xx,y+2,zz)))free=false;
       if(!free)continue;
-      parts.push({id:id+'-upright',shape:'box',mode:'add',
-       material:station.kind==='storage'?'metal':'glass',
-       origin:[post[0],y+2,post[2]],size:postSize});
+      parts=[part('lower-shelf','metal',[x,y,z],[w,1,d]),
+       part('upper-shelf','metal',[x,y+2,z],[w,1,d]),
+       part('end-frame','wood',post,[postSize[0],3,postSize[2]])];
+     }else{
+      parts=[part('surface',materials[0],[x,y+1,z],[w,1,d]),
+       part('support',materials[1],post,postSize)];
+      if(station.kind==='electronics'){
+       for(let xx=post[0];xx<post[0]+postSize[0];xx++)
+        for(let zz=post[2];zz<post[2]+postSize[2];zz++)
+         if(occupied.has(cell(xx,y+2,zz)))free=false;
+       if(!free)continue;
+       parts.push(part('upright','glass',
+        [post[0],y+2,post[2]],postSize));
+      }
      }
      const design={...current.design,
       elements:[...current.design.elements,...parts]};

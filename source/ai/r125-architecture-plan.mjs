@@ -346,7 +346,7 @@ export function validateArchitecturePlan(p){
     'SPACE_OVEN_HEARTH');
    check(space.fixtures===undefined||
     (space.fixture===undefined&&Array.isArray(space.fixtures)&&
-     space.fixtures.length>=1&&space.fixtures.length<=3&&
+     space.fixtures.length>=1&&space.fixtures.length<=5&&
      space.fixtures.every(x=>typeof x==='string'&&roles.includes(x))),
     'SPACE_FIXTURE_GROUP');
    check(!seen.has(space.id),'DUPLICATE_SPACE_ID');

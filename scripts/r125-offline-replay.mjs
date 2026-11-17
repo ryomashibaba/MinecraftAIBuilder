@@ -300,6 +300,7 @@ export function diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail='legacy',ro
    ...(built.spatialDetail?{spatialDetail:built.spatialDetail}:{}),
     ...(built.activityInlayReview?{activityInlayReview:built.activityInlayReview}:{}),
     ...(built.fixtureFormReview?{fixtureFormReview:built.fixtureFormReview}:{}),
+   ...(built.roomScaleReview?{roomScaleReview:built.roomScaleReview}:{}),
    // Only a trusted B143 source candidate, NOT an executable BuildPlan.
    sourceDesign:built.design};
  }catch(error){
