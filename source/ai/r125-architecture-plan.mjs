@@ -423,9 +423,19 @@ export function compileArchitecturePlan(plan,{
  check(['legacy','spatial-v1','clear-front-fins'].includes(hostDetail),'HOST_DETAIL_MODE');
  // Optional ART candidate only. Old authors and their original SOURCE are untouched.
  check(['none','sawtooth-ribbon'].includes(roofGlazing),'ROOF_GLAZING_MODE');
- check(['default','compact-sawtooth'].includes(roofMassing),'ROOF_MASSING_MODE');
- check(roofMassing==='default'||(plan?.expression?.roofProfile==='sawtooth'&&
+ check(['default','compact-sawtooth','steep-ridge-review'].includes(roofMassing),'ROOF_MASSING_MODE');
+ check(roofMassing!=='compact-sawtooth'||(plan?.expression?.roofProfile==='sawtooth'&&
   plan.expression.roofVolume==='raised'),'ROOF_MASSING_REQUIRES_RAISED_SAWTOOTH');
+ // Explicit ART A/B: use the existing six-block ridge ceiling without
+ // rewriting the author's original plan, circulation, or furniture.
+ // Courtyard seals are roof-height-specific and must remain unchanged.
+ check(roofMassing!=='steep-ridge-review'||(
+  plan?.expression?.roofProfile==='ridge'&&
+  plan.expression.roofVolume==='raised'&&
+  plan.expression.ridgeProfile===undefined&&
+  plan.expression.rearCourt===undefined&&
+  plan.expression.rearCornerCut===undefined),
+  'ROOF_MASSING_REQUIRES_UNMODIFIED_RAISED_RIDGE');
  check(roofGlazing==='none'||(plan?.expression?.roofProfile==='sawtooth'&&
   plan.expression.roofVolume==='raised'),'ROOF_GLAZING_REQUIRES_RAISED_SAWTOOTH');
  check(hostDetail==='legacy'||Boolean(plan?.expression),'HOST_DETAIL_REQUIRES_EXPRESSION');
@@ -976,7 +986,7 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
    Math.floor((pos%6)/2):(pos%6===0?0:Math.ceil((pos%6)/2));
   const span=roofAxis==='x'?upper.x1-upper.x0+1:upper.z1-upper.z0+1;
   const ridgeHeight=pos=>Math.min(
-   original.expression.ridgeProfile==='steep'?6:3,
+   (original.expression.ridgeProfile==='steep'||roofMassing==='steep-ridge-review')?6:3,
    Math.floor(Math.min(pos,span-1-pos)/2));
   for(let pos=0;pos<span;pos++){
    const height=roofProfile==='ridge'?ridgeHeight(pos):

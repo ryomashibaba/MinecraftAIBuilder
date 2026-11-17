@@ -3110,3 +3110,48 @@ test('front-fin clearance is opt-in, not a historical Qwen geometry rewrite',()=
  assert.equal(a.design.elements.some(e=>e.id==='l0-fin-10'),false);
  assert.equal(a.worldWrites,0);
 });
+
+test('explicit steeper ridge A/B changes only roof voxels and preserves author original',()=>{
+ for(const axis of ['x','z']){
+  const p=plan('original-ridge-art-'+axis,['x','z']);
+  p.footprint={width:32,depth:32};
+  p.expression={setbackSide:'east',setbackDepth:2,
+   roofProfile:'ridge',roofAxis:axis,roofVolume:'raised',
+   facadeLanguage:'plain'};
+  const original=structuredClone(p);
+  const policy={entrancePlacement:'source-accessible',
+   upperDoorPlacement:'stair-clear'};
+  const before=compileArchitecturePlan(p,policy);
+  const after=compileArchitecturePlan(p,{...policy,
+   roofMassing:'steep-ridge-review'});
+  const repeat=compileArchitecturePlan(p,{...policy,
+   roofMassing:'steep-ridge-review'});
+  assert.deepEqual(p,original,'model plan must remain unchanged');
+  assert.equal(before.sourceSha256,compileArchitecturePlan(p,policy).sourceSha256);
+  assert.equal(after.sourceSha256,repeat.sourceSha256);
+  assert.notEqual(before.geometrySha256,after.geometrySha256);
+  const top=1+5*p.levels.length;
+  const below=r=>new Map(r.compiled.primitives.filter(v=>v[1]<top)
+   .map(v=>[v.slice(0,3).join(','),v[3]]));
+  assert.deepEqual(below(after),below(before),'lower-floor voxel materials unchanged');
+  const crest=r=>Math.max(...r.design.elements.filter(e=>
+   /^roof-raised-skin-\\d+$/.test(e.id)).map(e=>e.origin[1]));
+  assert.ok(crest(after)>crest(before),'new roof crest must be taller');
+  assert.equal(verifyCompiled(after.design,after.compiled),true);
+  assert.deepEqual(after.compiled.BuildPlan.operations,[]);
+  assert.equal(after.worldWrites,0);
+  assert.deepEqual(after.gates,Array(9).fill('BLOCKED'));
+ }
+});
+
+test('ridge ART opt-in refuses incompatible existing authored roofs',()=>{
+ const p=plan('ridge-art-refuse',['x']);
+ p.expression={setbackSide:'none',setbackDepth:0,
+  roofProfile:'flat',roofAxis:'x',facadeLanguage:'plain'};
+ assert.throws(()=>compileArchitecturePlan(p,{
+  roofMassing:'steep-ridge-review'}),/ROOF_MASSING_REQUIRES_UNMODIFIED_RAISED_RIDGE/);
+ p.expression={...p.expression,roofProfile:'ridge',roofVolume:'raised',
+  rearCornerCut:{width:4,depth:4,side:'east',access:'paved'}};
+ assert.throws(()=>compileArchitecturePlan(p,{
+  roofMassing:'steep-ridge-review'}),/ROOF_MASSING_REQUIRES_UNMODIFIED_RAISED_RIDGE/);
+});

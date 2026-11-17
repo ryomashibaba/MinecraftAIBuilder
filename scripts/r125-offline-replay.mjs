@@ -315,14 +315,14 @@ export function parseR125ReplayArgs(argv){
   fail('INPUT_OUTPUT_CONFLICT');
  if(opts['--host-detail']!==undefined&&opts['--host-detail']!=='spatial-v1')fail('HOST_DETAIL_MODE');
  if(opts['--roof-glazing']!==undefined&&opts['--roof-glazing']!=='sawtooth-ribbon')fail('ROOF_GLAZING_MODE');
- if(opts['--roof-massing']!==undefined&&opts['--roof-massing']!=='compact-sawtooth')fail('ROOF_MASSING_MODE');
+ if(opts['--roof-massing']!==undefined&&!['compact-sawtooth','steep-ridge-review'].includes(opts['--roof-massing']))fail('ROOF_MASSING_MODE');
  return opts;
 }
 if(process.argv[1]===fileURLToPath(import.meta.url)){
  try{
   const planMode=process.argv[2]==='--architecture-plan';
   const args=parseR125ReplayArgs(process.argv.slice(planMode?3:2));
-  if(args.help)console.log('B143: --raw ORIGINAL.txt --out NEW_DIAGNOSIS.json | ArchitecturePlan: --architecture-plan --raw ORIGINAL.txt --out NEW_PRIVATE_DIRECTORY [--host-detail spatial-v1] [--roof-glazing sawtooth-ribbon] [--roof-massing compact-sawtooth] (NO MODEL / NO WORLD)');
+  if(args.help)console.log('B143: --raw ORIGINAL.txt --out NEW_DIAGNOSIS.json | ArchitecturePlan: --architecture-plan --raw ORIGINAL.txt --out NEW_PRIVATE_DIRECTORY [--host-detail spatial-v1] [--roof-glazing sawtooth-ribbon] [--roof-massing compact-sawtooth|steep-ridge-review] (NO MODEL / NO WORLD)');
   else if(planMode){
    const result=writeArchitecturePlanReplay(args);
    console.log('R125_ARCHITECTURE_PLAN_SOURCE_ONLY',JSON.stringify(result));

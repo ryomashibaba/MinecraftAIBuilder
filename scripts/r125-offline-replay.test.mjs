@@ -396,3 +396,12 @@ test('third-room direct link is explicit, only for three-room plans',()=>{
  assert.equal(failed.originalEdited,false);
  assert.equal(failed.worldWrites,0);
 });
+
+test('V11 steeper ridge A/B remains an explicit offline CLI opt-in',()=>{
+ const args=parseR125ReplayArgs(['--raw','/tmp/original.txt',
+  '--out','/tmp/new-study','--roof-massing','steep-ridge-review']);
+ assert.equal(args['--roof-massing'],'steep-ridge-review');
+ assert.throws(()=>parseR125ReplayArgs(['--raw','/tmp/original.txt',
+  '--out','/tmp/new-study','--roof-massing','auto']),
+ /R125_REPLAY_ROOF_MASSING_MODE/);
+});
