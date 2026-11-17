@@ -181,6 +181,7 @@ test('saved genuine Qwen plan yields true B143 HTML for human review without ano
   assert.equal(report.sourceVerified,true);
   assert.equal(report.modelCalls,0);
   assert.equal(report.artStatus,'NOT_REVIEWED');
+  assert.equal(report.requestedActivityCoverage,'NOT_INDEPENDENTLY_VERIFIED_BY_SOURCE');
   assert.equal(report.worldWrites,0);
   assert.ok(html.includes('minecraftaibuilder-b143-gallery-v1'));
   assert.ok(html.includes(report.geometrySha256));

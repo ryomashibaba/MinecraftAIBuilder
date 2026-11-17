@@ -192,6 +192,7 @@ export function diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail='legacy',ro
    occupiedVoxels:built.compiled.primitives.length,
    sourceRoutes:routes.status,sourceRouteIssues:routes.issues??[],
    visitorCirculation:visitors,
+   requestedActivityCoverage:'NOT_INDEPENDENTLY_VERIFIED_BY_SOURCE',
    modelChosenFixtures:built.fixtureTargets?.length??0,
    modelChosenDaylight:built.daylightTargets?.length??0,
    daylightSourceWindows:built.daylightTargets??[],

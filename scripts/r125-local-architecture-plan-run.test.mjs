@@ -179,6 +179,9 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    assert.equal(request.messages[0].content.includes('recessed-portico'),true);
    assert.equal(request.messages[0].content.includes('ROOM-APPROPRIATE fixture'),true);
    assert.equal(request.messages[0].content.includes('REAL ROOM BUDGET'),true);
+   assert.ok(request.messages[0].content.includes('ESSENTIAL ACTIVITY COVERAGE'));
+   assert.ok(request.messages[0].content.includes('bake or heat food -> oven'));
+   assert.ok(request.messages[0].content.includes('broad flat-looking top'));
    assert.ok(request.messages[0].content.includes('first room occupies WEST'));
    assert.ok(request.messages[0].content.includes('first room occupies FRONT'));
    assert.ok(request.messages[0].content.includes('FRONT share of the EAST wing'));

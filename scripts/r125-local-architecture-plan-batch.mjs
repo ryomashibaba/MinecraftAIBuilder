@@ -177,6 +177,8 @@ export async function runR125ArchitecturePlanBatch({
    circulationStatus:diagnosis?.circulation??null,
    programFloorStatus:diagnosis?.programFloors??null,
    visualHighRiskCount:diagnosis?.visualHighRiskCount??null,
+   requestedActivityCoverage:diagnosis?.requestedActivityCoverage??
+    'NOT_INDEPENDENTLY_VERIFIED_BY_SOURCE',
    modelChosenFixtures:diagnosis?.modelChosenFixtures??0,
    fixtureServiceTotal:diagnosis?.fixtureAccess?.length??0,
    fixtureServiceReached:diagnosis?.fixtureAccess?.filter(x=>
