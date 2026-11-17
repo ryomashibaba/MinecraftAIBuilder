@@ -88,6 +88,20 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    assert.equal(room.required.includes('fixtureDetail'),false);
    const options=authorSchema.properties.expression.anyOf;
    assert.equal(options.length,16);
+   for(const levelVariant of structured.anyOf){
+    for(const expression of levelVariant.properties.expression.anyOf){
+     const isPitched=expression.properties.roofProfile.enum.some(x=>
+      ['ridge','sawtooth','hip','split-monitor'].includes(x));
+     if(isPitched){
+      assert.ok(expression.required.includes('roofVolume'),
+       'pitched roofs require model-authored raised volume');
+      assert.deepEqual(expression.properties.roofVolume.enum,['raised']);
+     }else{
+      assert.ok(!Object.hasOwn(expression.properties,'roofVolume'),
+       'flat roof should not introduce implicit raised volume');
+     }
+    }
+   }
    const uCourt=options.filter(v=>v.required.includes('rearCourt'));
    assert.equal(uCourt.length,2);
    assert.deepEqual(uCourt.map(v=>v.properties.roofProfile.enum[0]),
