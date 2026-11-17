@@ -5,6 +5,7 @@ import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {diagnoseR125ArchitecturePlanOriginal} from './r125-offline-replay.mjs';
 import {saveB143ABReview} from './r125-static-art-review.mjs';
+import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
 import {inspectRoofAir} from './r125-roof-interior-study.mjs';
 import {compileDesign,verifyCompiled,MATERIALS} from '../source/ai/b143-building-dsl.mjs';
 import {exportB143EducationMakeCode} from '../source/ai/r125-education-makecode-export.mjs';
@@ -134,6 +135,25 @@ export function compareR125RoofRibbon({rawFile,outDir,massing='baseline',educati
    err('NO_MEANINGFUL_COMPACT_ROOF');
  }else if(diff.added||diff.removed||!diff.changedMaterial)err('NON_MATERIAL_DELTA');
  if(sha(fs.readFileSync(input,'utf8'))!==hash)err('ORIGINAL_CHANGED');
+ // Exact source SHA is retained by rendering EACH saved B143 design alone.
+ // Renaming IDs to merge them into a single gallery would change SOURCE SHA.
+ const template=fs.readFileSync(path.join(repo,
+  'source/ai/b143-viewer-template.html'),'utf8');
+ const threeDViews=[];
+ for(const [variant,design,expectedSource,expectedGeometry] of [
+  ['BASELINE',a.sourceDesign,a.sourceSha256,a.geometrySha256],
+  ['COMPACT',b.sourceDesign,b.sourceSha256,b.geometrySha256]]){
+  const gallery=compileB143Gallery([design]);
+  if(gallery.sourceHashes[0]!==expectedSource||
+     gallery.geometryHashes[0]!==expectedGeometry)
+    err('VIEWER_SOURCE_DRIFT');
+  const html=renderB143Html(gallery,template);
+  const filename='B143_'+variant+'_INTERACTIVE_3D.html';
+  fs.writeFileSync(path.join(out,filename),html,{flag:'wx'});
+  threeDViews.push({variant,file:filename,sha256:sha(html),
+   sourceSha256:expectedSource,
+   renderer:'TRUE_B143_GALLERY_NOT_MINECRAFT_SCREENSHOT'});
+ }
  let educationPreview=null;
  if(educationPackets){
   const rows=[['BASELINE',educationPackets.before],
@@ -167,6 +187,7 @@ export function compareR125RoofRibbon({rawFile,outDir,massing='baseline',educati
    unchangedUnderRoofVoxels,belowRoofGeometryAndMaterialIdentical:true,
    roofAir}:{}),
   image:path.join(out,'ART_AB',ab.preview.file),
+  interactive3D:threeDViews,
   modelCalls:0,worldWrites:0,minecraftWalking:'NOT_TESTED',
   humanArt:'NOT_REVIEWED',...(educationPreview?{education:educationPreview}:{})};
  fs.writeFileSync(path.join(out,'REVIEW.json'),
