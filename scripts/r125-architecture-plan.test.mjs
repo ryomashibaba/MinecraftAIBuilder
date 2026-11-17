@@ -1318,7 +1318,8 @@ test('window and authored equipment retain a real SOURCE-visible aperture across
   const p=plan(id,['x'],[roomOne,roomTwo]);
   p.footprint={width:24,depth:24};
   p.levels[0].spaces[0].daylight='wide-bay';
-  p.levels[0].spaces[0].fixture=feature;
+  // New equipment roles belong to the explicit model-owned fixtures array.
+  p.levels[0].spaces[0].fixtures=[feature];
   p.levels[0].spaces[1].daylight='clerestory';
   const built=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
   assert.equal(built.daylightTargets.length,2,id);
