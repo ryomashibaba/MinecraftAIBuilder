@@ -3135,7 +3135,7 @@ test('explicit steeper ridge A/B changes only roof voxels and preserves author o
    .map(v=>[v.slice(0,3).join(','),v[3]]));
   assert.deepEqual(below(after),below(before),'lower-floor voxel materials unchanged');
   const crest=r=>Math.max(...r.design.elements.filter(e=>
-   /^roof-raised-skin-\\d+$/.test(e.id)).map(e=>e.origin[1]));
+   /^roof-raised-skin-\d+$/.test(e.id)).map(e=>e.origin[1]));
   assert.ok(crest(after)>crest(before),'new roof crest must be taller');
   assert.equal(verifyCompiled(after.design,after.compiled),true);
   assert.deepEqual(after.compiled.BuildPlan.operations,[]);
