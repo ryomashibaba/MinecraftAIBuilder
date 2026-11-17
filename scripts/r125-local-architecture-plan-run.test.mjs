@@ -85,7 +85,7 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    assert.ok(room.properties.fixtures.items.enum.includes('electronics'));
    assert.ok(room.properties.fixtures.items.enum.includes('oven'));
    assert.ok(!room.properties.fixture.enum.includes('oven'));
-   assert.equal(room.properties.fixtures.maxItems,3);
+   assert.equal(room.properties.fixtures.maxItems,5);
    assert.ok(room.properties.daylight.enum.includes('paired-bays'),
     'the model may explicitly request two air-backed exterior windows');
    assert.equal(room.properties.fixtures.uniqueItems,undefined,
