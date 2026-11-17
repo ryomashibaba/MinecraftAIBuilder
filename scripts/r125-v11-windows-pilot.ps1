@@ -31,6 +31,9 @@ $runner = Join-Path $repo 'scripts\r125-local-architecture-plan-batch.mjs'
 $pilot = Join-Path $repo 'scripts\r125-v11-pilot-three.json'
 $single = Join-Path $repo 'scripts\r125-v11-single-unknown.json'
 $abRenderer = Join-Path $repo 'scripts\r125-static-art-review.mjs'
+# True B143 SOURCE renderer; a successful custom prompt opens an inspectable
+# 4-view PNG automatically. It neither contacts a model nor Minecraft.
+$staticRenderer = $abRenderer
 $customBrief = $PSBoundParameters.ContainsKey('Prompt')
 if ($customBrief -and (-not $SingleNewBrief -or $ComparePriorTide -or
     [string]::IsNullOrWhiteSpace($Prompt) -or $Prompt.Length -lt 8 -or
@@ -106,8 +109,8 @@ if ($LASTEXITCODE -ne 0 -or -not $match.Success -or
 if ($CheckOnly) {
  & $node '--check' $runner
  if ($LASTEXITCODE -ne 0) { throw 'V11_PILOT_BATCH_SYNTAX_FAILED' }
- if ($ComparePriorTide) {
-  & $node '--check' $abRenderer
+ if ($ComparePriorTide -or $customBrief) {
+  & $node '--check' $staticRenderer
   if ($LASTEXITCODE -ne 0) { throw 'V11_TIDE_AB_RENDERER_SYNTAX_FAILED' }
  }
  Write-Output ('V11_PILOT_CHECK_ONLY_PASS: '+$(if($SingleNewBrief){'one unseen functional brief'}elseif($OnlyHousingRetail){'two original failure briefs'}else{'three original briefs'})+'; no server, HTTP, model, world or output.')
@@ -298,6 +301,59 @@ if ($ComparePriorTide) {
  if (-not $NoOpen) {
   try { Start-Process -FilePath (Join-Path $abOut 'AB_OLD_LEFT_NEW_RIGHT.png') }
   catch { Write-Warning 'V11_TIDE_AB_IMAGE_OPEN_FAILED_USE_PRINTED_PATH' }
+ }
+}
+# Complete the custom-brief quality loop without a second user command:
+# genuine model original -> strict B143 -> true exterior+cutaway PNG.
+# A SOURCE rejection remains a HOLD; do not render a proxy fake building.
+if ($customBrief) {
+ if ($nodeExit -eq 0 -and $report.allSourceVerified -eq $true -and
+     [int]$report.attempted -eq 1 -and
+     @($report.completed).Count -eq 1 -and
+     $report.completed[0].id -ceq 'custom-brief' -and
+     $report.completed[0].sourceVerified -eq $true) {
+  $sourcePath = Join-Path $out 'custom-brief\B143_SOURCE_REVIEW_ONLY.json'
+  $diagnosisPath = Join-Path $out 'custom-brief\SOURCE_DIAGNOSIS.json'
+  if (-not (Test-Path -LiteralPath $sourcePath -PathType Leaf) -or
+      -not (Test-Path -LiteralPath $diagnosisPath -PathType Leaf)) {
+   throw 'V11_CUSTOM_SOURCE_OR_DIAGNOSIS_MISSING'
+  }
+  $diag = Get-Content -LiteralPath $diagnosisPath -Raw -Encoding UTF8 |
+   ConvertFrom-Json
+  if ($diag.sourceVerified -ne $true -or
+      $diag.sourceSha256 -cne $report.completed[0].sourceSha256 -or
+      $diag.geometrySha256 -cne $report.completed[0].geometrySha256) {
+   throw 'V11_CUSTOM_DIAGNOSIS_OR_SOURCE_MISMATCH'
+  }
+  $artDir = Join-Path $out 'CUSTOM_4_VIEW_SOURCE_ART'
+  & $node $staticRenderer '--source' $sourcePath '--out' $artDir | Out-Null
+  if ($LASTEXITCODE -ne 0) { throw 'V11_CUSTOM_STATIC_RENDER_HOLD' }
+  $manifestFile = Join-Path $artDir 'STATIC_REVIEW.json'
+  $contact = Join-Path $artDir 'CONTACT_4_VIEWS.png'
+  if (-not (Test-Path -LiteralPath $manifestFile -PathType Leaf) -or
+      -not (Test-Path -LiteralPath $contact -PathType Leaf)) {
+   throw 'V11_CUSTOM_ART_REPORT_MISSING'
+  }
+  $manifest = Get-Content -LiteralPath $manifestFile -Raw -Encoding UTF8 |
+   ConvertFrom-Json
+  $actualArtSha = (Get-FileHash -LiteralPath $contact -Algorithm SHA256).Hash.ToLowerInvariant()
+  if ($manifest.schema -cne 'r125-b143-offline-static-review-v1' -or
+      $manifest.sourceSha256 -cne $diag.sourceSha256 -or
+      $manifest.geometrySha256 -cne $diag.geometrySha256 -or
+      $manifest.contactSheet.sha256 -cne $actualArtSha -or
+      [int]$manifest.modelCalls -ne 0 -or
+      [int]$manifest.worldWrites -ne 0 -or
+      $manifest.humanArt -cne 'NOT_REVIEWED') {
+   throw 'V11_CUSTOM_ART_PROVENANCE_HOLD'
+  }
+  Write-Output ('V11_CUSTOM_TRUE_B143_4_VIEW_IMAGE=' + $contact)
+  Write-Output 'V11_CUSTOM_HUMAN_ART_PENDING; no Minecraft execution.'
+  if (-not $NoOpen) {
+   try { Start-Process -FilePath $contact }
+   catch { Write-Warning 'V11_CUSTOM_ART_OPEN_FAILED_USE_PRINTED_PATH' }
+  }
+ } else {
+  Write-Output ('V11_CUSTOM_ART_HOLD_PRESERVE_PRIVATE=' + $out)
  }
 }
 Write-Output ('V11_PILOT_B143_REVIEW=' + (Join-Path $out $viewer))
