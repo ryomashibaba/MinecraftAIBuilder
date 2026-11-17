@@ -3379,10 +3379,9 @@ test('deep steps are restricted to genuinely wide footprints',()=>{
 
 test('V11 expanded station is a model-selected, real SOURCE geometry change',()=>{
  const p=plan('model-room-scale',['x'],['making','showing']);
- p.footprint={width:30,depth:28};
+ p.footprint={width:30,depth:30};
  p.levels[0].spaces[0].fixtures=['workbench'];
  p.levels[0].spaces[0].fixtureScale='expanded';
- p.levels[0].spaces[1].fixtures=['display'];
  const unscaled=structuredClone(p);
  delete unscaled.levels[0].spaces[0].fixtureScale;
  assert.equal(validateArchitecturePlan(p),true);
@@ -3405,9 +3404,8 @@ test('V11 expanded station is a model-selected, real SOURCE geometry change',()=
 });
 test('V11 room-scale HOST art study preserves model-authored original',()=>{
  const p=plan('host-room-scale',['x'],['making','showing']);
- p.footprint={width:30,depth:28};
+ p.footprint={width:30,depth:30};
  p.levels[0].spaces[0].fixtures=['workbench'];
- p.levels[0].spaces[1].fixtures=['display'];
  const original=JSON.stringify(p),small=compileArchitecturePlan(p);
  const study=compileArchitecturePlan(p,{fixtureForm:'room-scale-v1'});
  assert.equal(JSON.stringify(p),original);
