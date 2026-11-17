@@ -214,6 +214,11 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    assert.ok(request.messages[0].content.includes('thirdRoomLink:"first-and-second"'));
    assert.ok(request.messages[0].content.includes('directly from first into third'));
    assert.ok(request.messages[0].content.includes('ESSENTIAL ACTIVITY COVERAGE'));
+   assert.ok(request.messages[0].content.includes('ACTIVITY-LED FLOOR PROGRAM'));
+   assert.ok(request.messages[0].content.includes('mostly empty second floor'));
+   assert.ok(request.messages[0].content.includes('multiple independent stations'));
+   assert.ok(request.messages[0].content.indexOf('ACTIVITY-LED FLOOR PROGRAM')<
+    request.messages[0].content.indexOf('footprint EXACT'));
    assert.ok(request.messages[0].content.includes('staff-only FIRST upper room'));
    assert.ok(request.messages[0].content.includes('front terrace is NOT a substitute path'));
    assert.ok(request.messages[0].content.length<=15000,
