@@ -6,7 +6,8 @@ import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {createR125ArchitecturePlanLocalAdapter,R125_ARCHITECTURE_RESPONSE_SCHEMA}
  from '../source/ai/b198g-local-model-adapter.mjs';
-import {runR125LocalArchitecturePlan,parseR125LocalPlanArgs}
+import {runR125LocalArchitecturePlan,parseR125LocalPlanArgs,
+ summarizeR125InvalidSetbackOriginal}
  from './r125-local-architecture-plan-run.mjs';
 import {diagnoseR125ArchitecturePlanOriginal}
  from './r125-offline-replay.mjs';
@@ -309,6 +310,46 @@ test('valid JSON invalid schema retains specific offline compiler reason without
  }finally{fs.rmSync(root,{recursive:true,force:true})}
 });
 
+test('one-level model setback mismatch is rejected with safe original values, never silently repaired',async()=>{
+ const actual=JSON.parse(original);
+ actual.expression={...actual.expression,setbackSide:'east',setbackDepth:3};
+ const raw=JSON.stringify(actual);
+ const snapshot=raw;
+ assert.deepEqual(summarizeR125InvalidSetbackOriginal(raw),{
+  schema:'r125-invalid-author-setback-summary-v1',
+  levelCount:1,setbackSide:'east',setbackDepth:3,
+  requiredRule:'ONE_LEVEL_REQUIRES_NONE_AND_ZERO',
+  originalEdited:false,modelCalls:0,worldWrites:0
+ });
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'mab-setback-hold-'));
+ let posts=0;
+ try{
+  const result=await runR125LocalArchitecturePlan({
+   model:'qwen3:14b',prompt,outDir:path.join(root,'one')
+  },{fetcher:async()=>{posts++;return provider(raw)}});
+  assert.equal(posts,1);
+  assert.equal(result.report.status,'HOLD_MODEL_OR_SOURCE');
+  assert.equal(result.report.reason,'R125_PLAN_EXPRESSION_SETBACK');
+  assert.equal(result.report.invalidSetbackOriginal?.setbackDepth,3);
+  assert.equal(result.report.invalidSetbackOriginal?.levelCount,1);
+  assert.equal(result.report.originalSha256,digest(raw));
+  assert.equal(result.report.automaticRetries,0);
+  assert.equal(result.report.sourceVerified,false);
+  assert.equal(result.report.worldWrites,0);
+  assert.equal(fs.readFileSync(path.join(root,'one','MODEL_RESPONSE_ORIGINAL.txt'),'utf8'),snapshot);
+  assert.equal(fs.existsSync(path.join(root,'one','B143_SOURCE_REVIEW_ONLY.json')),false);
+  assert.equal(fs.existsSync(path.join(root,'one','MAKECODE_EDUCATION_SOURCE_ONLY.ts')),false);
+  const diag=JSON.parse(fs.readFileSync(path.join(root,'one','SOURCE_DIAGNOSIS.json'),'utf8'));
+  assert.equal(diag.status,'HOLD_PLAN_COMPILER_OR_QA');
+  assert.equal(diag.compilerReason,'R125_PLAN_EXPRESSION_SETBACK');
+ }finally{fs.rmSync(root,{recursive:true,force:true})}
+ const another={...actual,expression:{...actual.expression,
+  setbackSide:'none',setbackDepth:3}};
+ assert.equal(summarizeR125InvalidSetbackOriginal(JSON.stringify(another)).requiredRule,
+  'ONE_LEVEL_REQUIRES_NONE_AND_ZERO');
+ assert.equal(summarizeR125InvalidSetbackOriginal(original),null);
+ assert.equal(summarizeR125InvalidSetbackOriginal('{not json'),null);
+});
 test('CLI insists on explicit model/prompt/new private path',()=>{
  assert.deepEqual(parseR125LocalPlanArgs(['--help']),{help:true});
  assert.throws(()=>parseR125LocalPlanArgs(['--model','qwen3:14b']),

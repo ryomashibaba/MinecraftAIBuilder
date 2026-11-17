@@ -27,6 +27,34 @@ const sha=raw=>createHash('sha256').update(raw).digest('hex');
 const write=(dir,name,data)=>fs.writeFileSync(path.join(dir,name),
  typeof data==='string'?data:JSON.stringify(data,null,2)+'\n',{flag:'wx'});
 
+/** Bounded, read-only report of an invalid original model setback.
+ * It does NOT correct plan JSON, infer missing geometry or expose prompts.
+ */
+export function summarizeR125InvalidSetbackOriginal(raw){
+ if(typeof raw!=='string'||raw.length<1||raw.length>60000)return null;
+ let p;
+ try{p=JSON.parse(raw)}catch{return null}
+ if(!p||typeof p!=='object'||Array.isArray(p)||
+    !p.expression||typeof p.expression!=='object'||
+    Array.isArray(p.expression))return null;
+ const levelCount=Array.isArray(p.levels)&&p.levels.length<=2?
+  p.levels.length:null;
+ const side=p.expression.setbackSide;
+ const setbackSide=['none','east','rear'].includes(side)?side:'INVALID_OR_MISSING';
+ const depth=p.expression.setbackDepth;
+ const setbackDepth=Number.isSafeInteger(depth)&&depth>=0&&depth<=32?
+  depth:null;
+ const validPair=setbackSide==='none'&&setbackDepth===0||
+  (['east','rear'].includes(setbackSide)&&levelCount===2&&
+   [2,3,4].includes(setbackDepth));
+ if(validPair)return null;
+ return {schema:'r125-invalid-author-setback-summary-v1',
+  levelCount,setbackSide,setbackDepth,
+  requiredRule:levelCount===1?'ONE_LEVEL_REQUIRES_NONE_AND_ZERO':
+   levelCount===2?'TWO_LEVELS_NONE_ZERO_OR_EAST_REAR_TWO_TO_FOUR':
+   'VALID_LEVEL_COUNT_REQUIRED',
+  originalEdited:false,modelCalls:0,worldWrites:0};
+}
 export function parseR125LocalPlanArgs(argv){
  if(argv.length===1&&argv[0]==='--help')return {help:true};
  if(argv.length!==6&&argv.length!==8)fail('ARGS_MODEL_PROMPT_OUT_REQUIRED');
@@ -158,10 +186,13 @@ export async function runR125LocalArchitecturePlan({
   // transport adapter rejected its JSON/required fields. Diagnose it
   // OFFLINE without another model call. Never promote an adapter failure.
   let offlineDiagnosisStatus=null,offlineCompilerReason=null;
+  let invalidSetbackOriginal=null;
   if(captured&&fs.existsSync(path.join(dest,'MODEL_RESPONSE_ORIGINAL.txt'))){
    try{
     const raw=fs.readFileSync(path.join(dest,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8');
     if(sha(raw)===captured.sha256){
+     if(String(error?.message??'')==='R125_PLAN_EXPRESSION_SETBACK')
+      invalidSetbackOriginal=summarizeR125InvalidSetbackOriginal(raw);
      const reviewed=diagnoseR125ArchitecturePlanOriginal(raw);
      const {sourceDesign,...diagnosis}=reviewed;
      offlineDiagnosisStatus=diagnosis.status;
@@ -176,6 +207,7 @@ export async function runR125LocalArchitecturePlan({
   }
   result={...common,status:'HOLD_MODEL_OR_SOURCE',
    offlineDiagnosisStatus,offlineCompilerReason,
+   ...(invalidSetbackOriginal?{invalidSetbackOriginal}:{}),
    reason:String(error?.message??error).slice(0,300),
    originalSha256:captured?.sha256??null,
    modelRequestElapsedMs:modelStartMs===null?null:

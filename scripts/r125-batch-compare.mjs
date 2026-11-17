@@ -20,6 +20,13 @@ export function renderR125BatchComparison(briefs,report){
   const authored=row.authoredForm?Object.entries(row.authoredForm)
    .map(([key,value])=>esc(key)+': '+esc(print(value))).join(' · '):
    'No validated original ArchitecturePlan';
+  const setbackIssue=row.invalidSetbackOriginal?
+   '<p class="issue">Setback SOURCE HOLD: original model chose '+
+   'levels='+esc(row.invalidSetbackOriginal.levelCount??'UNKNOWN')+
+   ', side='+esc(row.invalidSetbackOriginal.setbackSide)+
+   ', depth='+esc(row.invalidSetbackOriginal.setbackDepth??'UNKNOWN')+
+   '. Required: '+esc(row.invalidSetbackOriginal.requiredRule)+
+   '. Original preserved; no automatic repair or retry.</p>':'';
   const findings=[row.failureReason,...(row.sourceIssues??[])]
    .filter(Boolean).map(x=>esc(print(x))).join(' | ');
   const hasViewer=row.review3d==='TRUE_B143_HTML_GENERATED_ART_PENDING';
@@ -47,7 +54,7 @@ export function renderR125BatchComparison(briefs,report){
   const relative='./'+row.id+'/B143_SOURCE_3D_REVIEW_ONLY.html';
   return '<section><h2>'+esc(row.id)+'</h2><p><strong>'+
    esc(row.status)+'</strong></p><p>'+esc(brief)+'</p>'+
-   '<p class="muted">'+authored+'</p><ul>'+program+'</ul>'+sourceEvidence+
+   '<p class="muted">'+authored+'</p><ul>'+program+'</ul>'+sourceEvidence+setbackIssue+
    (findings?'<p class="issue">'+findings+'</p>':'')+
    (hasViewer?'<iframe class="mab-review" sandbox="allow-scripts" loading="lazy" src="'+
      relative+'" title="'+esc(row.id)+' true B143 3D"></iframe>'+

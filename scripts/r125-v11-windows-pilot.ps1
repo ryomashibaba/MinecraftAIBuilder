@@ -255,6 +255,15 @@ Write-Output ('V11_PILOT_ALL_SOURCE=' + $report.allSourceVerified)
 Write-Output ('V11_PILOT_SOURCE_PASSES=' + $report.sourcePassCount)
 Write-Output ('V11_PILOT_EXPERIMENT=' + $report.experimentOutcome)
 Write-Output ('V11_PILOT_STOP_REASON=' + [string]$report.stopReason)
+if (@($report.completed).Count -eq 1 -and
+    $null -ne $report.completed[0].invalidSetbackOriginal) {
+ $bad = $report.completed[0].invalidSetbackOriginal
+ Write-Output ('V11_ORIGINAL_SETBACK_HOLD: levels=' +
+  [string]$bad.levelCount + '; side=' + [string]$bad.setbackSide +
+  '; depth=' + [string]$bad.setbackDepth +
+  '; required=' + [string]$bad.requiredRule +
+  '; original preserved; no repair or retry.')
+}
 if ($ComparePriorTide) {
  # One POST already happened above. Never retry if it did not yield SOURCE.
  if ($nodeExit -ne 0 -or $report.allSourceVerified -ne $true -or

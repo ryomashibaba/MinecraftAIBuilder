@@ -181,6 +181,8 @@ export async function runR125ArchitecturePlanBatch({
     x.reachableFromEntrance===true&&
     x.supportedTwoWideServiceWitness!==null).length??0,
    failureReason:one.report.reason??diagnosis?.compilerReason??null,
+   ...(one.report.invalidSetbackOriginal?
+    {invalidSetbackOriginal:one.report.invalidSetbackOriginal}:{}),
    sourceIssues:[...(diagnosis?.sourceRouteIssues??[]),
     ...(diagnosis?.circulationFailures??[])].slice(0,8),
    status:one.report.status,modelResponsesCaptured:one.report.modelResponsesCaptured,

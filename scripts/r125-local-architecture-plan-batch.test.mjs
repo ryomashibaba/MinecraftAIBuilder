@@ -157,7 +157,35 @@ test('bad source schema does NOT suppress the other two real-brief original atte
    .includes('B198G_LOCAL_PLAN_NOT_JSON'));
  }finally{fs.rmSync(root,{recursive:true,force:true})}
 });
-test('identical buildings are still recorded for ALL three briefs and marked poor diversity',async()=>{
+test('invalid genuine Qwen-shaped setback is shown as a narrow read-only diagnostic in user-facing 3D review',async()=>{
+ const p=JSON.parse(original);
+ p.expression={...p.expression,setbackSide:'east',setbackDepth:4};
+ const raw=JSON.stringify(p);
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'mab-setback-batch-'));
+ let posts=0;
+ try{
+  const out=path.join(root,'out');
+  const {report}=await runR125ArchitecturePlanBatch({
+   model:'qwen3:14b',briefsRaw:JSON.stringify([requests[0]]),outDir:out
+  },{fetcher:async()=>{posts++;return provider(raw)}});
+  assert.equal(posts,1);
+  assert.equal(report.sourcePassCount,0);
+  assert.equal(report.originalResponseCount,1);
+  assert.equal(report.worldWrites,0);
+  assert.equal(report.completed[0].failureReason,'R125_PLAN_EXPRESSION_SETBACK');
+  assert.equal(report.completed[0].invalidSetbackOriginal.levelCount,1);
+  assert.equal(report.completed[0].invalidSetbackOriginal.setbackSide,'east');
+  assert.equal(report.completed[0].invalidSetbackOriginal.setbackDepth,4);
+  assert.equal(fs.readFileSync(path.join(out,'shop','MODEL_RESPONSE_ORIGINAL.txt'),'utf8'),raw);
+  assert.equal(fs.existsSync(path.join(out,'shop','B143_SOURCE_REVIEW_ONLY.json')),false);
+  const html=fs.readFileSync(path.join(out,'BATCH_COMPARE_3D.html'),'utf8');
+  assert.match(html,/Setback SOURCE HOLD: original model chose levels=1, side=east, depth=4/);
+  assert.match(html,/Original preserved; no automatic repair or retry/);
+  assert.match(html,/No 3D scene \(HOLD\)/);
+  assert(!html.includes(raw),'PRIVATE original must not be pasted into generated HTML');
+ }finally{fs.rmSync(root,{recursive:true,force:true})}
+});
+test('identical buildings are still recorded for ALL three briefs and marked poor diversity',()=>{
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'mab-batch-same-'));
  let calls=0;
  try{
