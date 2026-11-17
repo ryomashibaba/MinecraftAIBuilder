@@ -10,7 +10,7 @@ import {createHash} from 'node:crypto';
 import {compileDesign,verifyCompiled,SCHEMA as B143} from './b143-building-dsl.mjs';
 import {auditR125SourceRoutes} from './r125-source-routes.mjs';
 import {addAuthoredRoomFixtures,addR125ActivityFloorInlays,restyleR125FixtureForms} from './r125-room-fixtures.mjs';
-import {addAuthoredRoomDaylight} from './r125-room-daylight.mjs';
+import {addAuthoredRoomDaylight,addR125SpatialDaylightBays} from './r125-room-daylight.mjs';
 import {expandR125RoomScale} from './r125-room-scale.mjs';
 import {detailR125Envelope} from './r125-spatial-detail.mjs';
 import {addR125HipRoof} from './r125-hip-roof.mjs';
@@ -846,7 +846,8 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
   }
   // Purely architectural articulation outside the envelope. Dynamic plan
   // controls the rhythm and materials; no fixed building-type switch.
-  if(facadeLanguage==='fins'){
+  if(facadeLanguage==='fins'&&!(hostDetail==='spatial-v1'&&
+    original.levels.some(level=>level.spaces.some(space=>space.daylight)))){
    // Keep real two-wide entry and terrace thresholds physically clear:
    // exterior fins must not obscure either author-selected front opening.
    // Outside the doorway clearance, retain the original authored rhythm.
@@ -1364,8 +1365,10 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
   l.spaces.some(s=>s.fixtureScale==='expanded'))?
   expandR125RoomScale(styled,{auditCirculation:auditArchitecturePlanCirculation,
    includeHostStudy:fixtureForm==='room-scale-v1'}):styled;
+ const articulated=hostDetail==='spatial-v1'&&original.expression.facadeLanguage==='fins'?
+  addR125SpatialDaylightBays(scaled):scaled;
  return fixtureArt==='activity-inlays'?
-  addR125ActivityFloorInlays(scaled):scaled;
+  addR125ActivityFloorInlays(articulated):articulated;
 }
 
 /**

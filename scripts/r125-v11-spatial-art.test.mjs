@@ -186,7 +186,7 @@ test('V11 integrated HOST room-quality A/B emits eight-view real B143 preview',(
    {id:'work-room',purpose:'creative fabrication',access:'shared',
     fixtures:['workbench','storage']},
    {id:'public-gallery',purpose:'visitor display',access:'public',
-    fixtures:['display','seating']}]}],
+    fixtures:['display','seating'],daylight:'wide-bay'}]}],
   materials:{floor:'wood',wall:'concrete',roof:'stone'},
   expression:{setbackSide:'none',setbackDepth:0,
    roofProfile:'ridge',roofAxis:'x',roofVolume:'raised',facadeLanguage:'fins'}};
@@ -206,6 +206,10 @@ test('V11 integrated HOST room-quality A/B emits eight-view real B143 preview',(
   assert.equal(result.policy.fixtureForm,'room-scale-v1');
   assert.equal(result.verifiedEquipmentCount,4);
   assert.ok(result.roomScaleReview?.changes.length>0);
+  assert.equal(result.spatialFacadeReview?.status,
+   'SOURCE_CONNECTED_DAYLIGHT_BAYS',JSON.stringify(result.spatialFacadeReview));
+  assert.ok(result.spatialFacadeReview.articulatedWindowCount>0);
+  assert.ok(result.spatialFacadeReview.changedVoxels>0);
   assert.ok(result.spatialDetail);
   assert.ok(fs.existsSync(path.join(outDir,result.photo)));
   assert.equal(result.art,'HUMAN_REVIEW_REQUIRED_NOT_ACCEPTED');

@@ -231,3 +231,101 @@ export function addAuthoredRoomDaylight(product,{auditCirculation}={}){
  return {...current,daylightTargets:chosen,
   daylightChoiceOwner:'MODEL',daylightGeometryOwner:'GENERIC_HOST'};
 }
+
+/**
+ * Spatial HOST turns the author's daylight choices into exterior bays. The
+ * façade rhythm follows the actual window openings instead of repeating the
+ * same fins at a fixed footprint interval. Only exterior blocks are added;
+ * all openings, room roles and interior positions remain authored/compiled.
+ */
+export function addR125SpatialDaylightBays(product){
+ const targets=product?.daylightTargets??[];
+ if(!Array.isArray(targets)||!Array.isArray(product?.design?.elements)||
+    !Array.isArray(product?.compiled?.primitives))
+  throw Error('R125_SPATIAL_DAYLIGHT_BAYS_INPUT');
+ if(!targets.length)return {...product,spatialFacadeReview:{
+  schema:'r125-spatial-facade-review-v1',status:'NO_AUTHORED_DAYLIGHT_BAYS',
+  authoredWindowCount:0,articulatedWindowCount:0,changedVoxels:0,
+  owner:'HOST',modelCalls:0,worldWrites:0}};
+ const protectedOpenings=product.design.elements.filter(e=>e.mode==='cut'&&
+  ['exterior-entrance','upper-terrace-access'].includes(e.id));
+ const solid=new Set(product.compiled.primitives.map(v=>key(v[0],v[1],v[2])));
+ let current=product,articulated=0,changedVoxels=0;
+ const skipped=[];
+ for(let i=0;i<targets.length;i++){
+  const t=targets[i];
+  if(!['front','rear','east','west'].includes(t.face)||
+     !Array.isArray(t.origin)||!Array.isArray(t.size)||
+     t.origin.length!==3||t.size.length!==3)throw Error('R125_SPATIAL_DAYLIGHT_BAY_TARGET');
+  const [x,y,z]=t.origin,[sx,sy,sz]=t.size;
+  const face=t.face,alongX=face==='front'||face==='rear';
+  const start=alongX?x:z,span=alongX?sx:sz;
+  const outward=face==='front'?[0,0,-1]:face==='rear'?[0,0,1]:
+   face==='west'?[-1,0,0]:[1,0,0];
+  const wallCoord=alongX?z:x,normalAxis=alongX?2:0;
+  const outerCoord=wallCoord+outward[normalAxis];
+  const originAt=(u,yy)=>alongX?[u,yy,outerCoord]:[outerCoord,yy,u];
+  const barHeight=sy+2,barY=y-1;
+  const parts=[
+   {id:`spatial-daylight-bay-${i}-left-fin`,origin:originAt(start-1,barY),
+    size:alongX?[1,barHeight,1]:[1,barHeight,1]},
+   {id:`spatial-daylight-bay-${i}-right-fin`,origin:originAt(start+span,barY),
+    size:[1,barHeight,1]},
+   {id:`spatial-daylight-bay-${i}-sill`,origin:originAt(start,y-1),
+    size:alongX?[span,1,1]:[1,1,span]},
+   {id:`spatial-daylight-bay-${i}-head`,origin:originAt(start,y+sy),
+    size:alongX?[span,1,1]:[1,1,span]}
+  ].map(p=>({...p,shape:'box',mode:'add',material:'accent'}));
+  const overlaps=(a,b)=>a.origin.every((v,k)=>v<b.origin[k]+b.size[k]&&
+   b.origin[k]<v+a.size[k]);
+  if(parts.some(p=>protectedOpenings.some(o=>overlaps(p,o)))){
+   skipped.push({zoneId:t.zoneId,face,reason:'ENTRY_OR_TERRACE_CLEARANCE'});continue;
+  }
+  const nextSolids=new Set(solid);
+  let blocked=false,blockedAt=null;
+  for(const p of parts){
+   const [px,py,pz]=p.origin,[pw,ph,pd]=p.size;
+   if(px<0||py<1||pz<0||px+pw>product.design.bounds.width||
+      py+ph>product.design.bounds.height||pz+pd>product.design.bounds.depth){blocked=true;break;}
+   for(let xx=px;xx<px+pw;xx++)for(let yy=py;yy<py+ph;yy++)
+    for(let zz=pz;zz<pz+pd;zz++){
+     const k=key(xx,yy,zz);
+     if(nextSolids.has(k)){blocked=true;blockedAt=[xx,yy,zz];break;}
+     nextSolids.add(k);
+    }
+   if(blocked)break;
+  }
+  if(blocked){skipped.push({zoneId:t.zoneId,face,reason:'EXTERIOR_VOXEL_COLLISION',at:blockedAt});continue;}
+  if(current.design.elements.length+parts.length>160){
+   skipped.push({zoneId:t.zoneId,face,reason:'B143_ELEMENT_BUDGET'});continue;
+  }
+  const design={...current.design,elements:[...current.design.elements,...parts]};
+  let compiled;
+  try{compiled=compileDesign(design);}catch{
+   skipped.push({zoneId:t.zoneId,face,reason:'B143_COMPILE_HOLD'});continue;
+  }
+  if(!verifyCompiled(design,compiled)||compiled.worldContacts!==0||
+     compiled.BuildPlan?.operations?.length!==0){
+   skipped.push({zoneId:t.zoneId,face,reason:'B143_VERIFY_HOLD'});continue;
+  }
+  const trial={...current,design,compiled,
+   sourceSha256:compiled.sourceSha256,geometrySha256:compiled.geometrySha256};
+  if(auditR125SourceRoutes(trial,{featureTargets:product.fixtureTargets??[]})
+     .status!=='SOURCE_ROUTES_REACH_ALL_ZONES'){
+   skipped.push({zoneId:t.zoneId,face,reason:'SOURCE_ROUTE_HOLD'});continue;
+  }
+  const after=new Set(compiled.primitives.map(v=>key(v[0],v[1],v[2])));
+  changedVoxels+=[...after].filter(k=>!solid.has(k)).length;
+  solid.clear();for(const k of after)solid.add(k);
+  current=trial;articulated++;
+ }
+ if(!articulated)return {...product,spatialFacadeReview:{
+  schema:'r125-spatial-facade-review-v1',status:'HOLD_NO_SAFE_DAYLIGHT_BAY',
+  authoredWindowCount:targets.length,articulatedWindowCount:0,changedVoxels:0,
+  skipped,owner:'HOST',modelCalls:0,worldWrites:0}};
+ return {...current,spatialFacadeReview:{
+  schema:'r125-spatial-facade-review-v1',status:'SOURCE_CONNECTED_DAYLIGHT_BAYS',
+  authoredWindowCount:targets.length,articulatedWindowCount:articulated,
+  changedVoxels,skipped,owner:'HOST',modelCalls:0,worldWrites:0,
+  humanArt:'NOT_REVIEWED',minecraftWalking:'NOT_TESTED'}};
+}

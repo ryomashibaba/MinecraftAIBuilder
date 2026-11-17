@@ -99,6 +99,7 @@ export function saveR125FinishAB({rawPath,sourcePath,outDir,integrated=false}={}
   verifiedEquipmentCount:candidate.modelChosenFixtures,
   fixtureFormReview:candidate.fixtureFormReview??null,
   roomScaleReview:candidate.roomScaleReview??null,
+  spatialFacadeReview:candidate.spatialFacadeReview??null,
   spatialDetail:candidate.spatialDetail??null,
   photo:'ART_AB/'+ab.preview.file,
   photoSha256:ab.preview.sha256,
