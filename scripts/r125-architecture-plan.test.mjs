@@ -3044,3 +3044,52 @@ test('recessed-portico stair threshold never changes historical setback modes',(
   assert.equal(b.worldWrites,0);
  }
 });
+
+test('authored fins do not block the two-wide actual ground entrances',()=>{
+ for(const axis of ['x','z'])for(const zone of axis==='x'?['first','second']:['first']){
+  const p=plan('fin-clear-'+axis+'-'+zone,[axis]);
+  p.footprint={width:24,depth:24};p.entryZone=zone;
+  p.expression={setbackSide:'none',setbackDepth:0,
+   roofProfile:'flat',roofAxis:'x',facadeLanguage:'fins'};
+  const original=structuredClone(p);
+  const r=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+  const door=r.design.elements.find(e=>e.id==='exterior-entrance');
+  assert.ok(door);
+  const fins=r.design.elements.filter(e=>/^l0-fin-/.test(e.id));
+  assert.ok(fins.length>0,'keep the other facade fins');
+  assert.ok(fins.every(e=>e.origin[0]<door.origin[0]-1||
+   e.origin[0]>=door.origin[0]+door.size[0]+1));
+  const solid=new Set(r.compiled.primitives.map(v=>v[0]+','+v[1]+','+v[2]));
+  for(let x=door.origin[0];x<door.origin[0]+door.size[0];x++)
+   for(let y=door.origin[1];y<door.origin[1]+door.size[1];y++)
+    assert.equal(solid.has(x+','+y+','+(door.origin[2]-1)),false,
+     'actual B143 outside threshold must be clear');
+  assert.deepEqual(p,original,'authored plan must remain unchanged');
+  assert.equal(r.worldWrites,0);
+  assert.deepEqual(r.compiled.BuildPlan.operations,[]);
+ }
+});
+
+test('authored fins also leave a front setback terrace doorway open',()=>{
+ const p=plan('fin-clear-front-terrace',['x','z']);
+ p.footprint={width:24,depth:24};
+ p.expression={setbackSide:'front',setbackDepth:2,
+  roofProfile:'flat',roofAxis:'x',facadeLanguage:'fins'};
+ const original=structuredClone(p);
+ const r=compileArchitecturePlan(p,{entrancePlacement:'source-accessible',
+  upperDoorPlacement:'stair-clear'});
+ const door=r.design.elements.find(e=>e.id==='upper-terrace-access');
+ assert.ok(door);
+ const fins=r.design.elements.filter(e=>/^l1-fin-/.test(e.id));
+ assert.ok(fins.length>0,'keep other upper facade fins');
+ assert.ok(fins.every(e=>e.origin[0]<door.origin[0]-1||
+  e.origin[0]>=door.origin[0]+door.size[0]+1));
+ const solid=new Set(r.compiled.primitives.map(v=>v[0]+','+v[1]+','+v[2]));
+ for(let x=door.origin[0];x<door.origin[0]+door.size[0];x++)
+  for(let y=door.origin[1];y<door.origin[1]+door.size[1];y++)
+   assert.equal(solid.has(x+','+y+','+(door.origin[2]-1)),false);
+ assert.deepEqual(p,original);
+ assert.equal(r.worldWrites,0);
+ assert.deepEqual(r.compiled.BuildPlan.operations,[]);
+});
+

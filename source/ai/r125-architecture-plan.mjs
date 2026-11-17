@@ -820,8 +820,18 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
   // Purely architectural articulation outside the envelope. Dynamic plan
   // controls the rhythm and materials; no fixed building-type switch.
   if(facadeLanguage==='fins'){
-   for(let x=x0+1;x<x1-1;x+=4)
-    box(tag+'-fin-'+x,'add','accent',[x,y+1,z0-1],[1,3,1]);
+   // Keep real two-wide entry and terrace thresholds physically clear:
+   // exterior fins must not obscure either author-selected front opening.
+   // Outside the doorway clearance, retain the original authored rhythm.
+   const frontDoors=elements.filter(e=>e.mode==='cut'&&
+    (e.id==='exterior-entrance'||e.id==='upper-terrace-access')&&
+    e.origin[1]===y&&e.origin[2]===z0);
+   for(let x=x0+1;x<x1-1;x+=4){
+    const shieldsDoor=frontDoors.some(e=>
+     x>=e.origin[0]-1&&x<e.origin[0]+e.size[0]+1);
+    if(!shieldsDoor)
+     box(tag+'-fin-'+x,'add','accent',[x,y+1,z0-1],[1,3,1]);
+   }
   }else if(facadeLanguage==='screen'){
    for(let z=z0+1;z<z1-1;z+=4)
     box(tag+'-screen-'+z,'add','metal',[x0-1,y+1,z],[1,3,1]);
