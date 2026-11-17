@@ -446,3 +446,14 @@ test('floor-by-floor source station evidence identifies underused levels without
  assert.equal(e.worldWrites,0);
  assert.deepEqual(author,snapshot);
 });
+
+test('real legacy author without fixtures remains valid zero-station room evidence',()=>{
+ const author={levels:[{spaces:[{id:'public-hall',purpose:'open visitor gallery'}]}]};
+ const compiled={program:[{level:0,zones:[{
+  id:'public-hall',range:{x:[2,11],z:[2,11]}}]}]};
+ const report=describeR125AuthoredRoomUse(author,compiled);
+ assert.equal(report.totalStations,0);
+ assert.deepEqual(report.storeys[0].roomsWithoutStations,['public-hall']);
+ assert.equal(report.status,'ART_ADVISORY_ONLY_NOT_ACCEPTANCE');
+ assert.equal(report.worldWrites,0);
+});
