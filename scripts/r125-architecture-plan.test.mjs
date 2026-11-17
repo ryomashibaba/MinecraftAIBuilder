@@ -16,6 +16,10 @@ import {addAuthoredRoomDaylight,auditR125PairedBayApproach}
  from '../source/ai/r125-room-daylight.mjs';
 import {packR125AdjacentBoxes} from '../source/ai/r125-spatial-detail.mjs';
 import {verifyCompiled,compileDesign} from '../source/ai/b143-building-dsl.mjs';
+import {buildVerifiedOvenResearchAlternative}
+ from './r125-v11-verified-oven-material-study.mjs';
+import {diagnoseR125ArchitecturePlanOriginal}
+ from './r125-offline-replay.mjs';
 import {exportB143EducationMakeCode} from '../source/ai/r125-education-makecode-export.mjs';
 import {auditR125SourceRoutes,auditR125VisitorRoutes} from '../source/ai/r125-source-routes.mjs';
 import {critiqueArchitecture} from '../source/ai/b198c-spatial-critic.mjs';
@@ -3261,4 +3265,49 @@ test('readable-v1 HOST creates distinct equipment silhouettes without changing m
  assert.equal(compileArchitecturePlan(p,opts).sourceSha256,a.sourceSha256);
  assert.throws(()=>compileArchitecturePlan(p,{...opts,fixtureForm:'auto'}),
   /R125_PLAN_FIXTURE_FORM_MODE/);
+});
+
+test('old genuine-compatible oven source gets separate strict Education material study, not an AI correction',()=>{
+ const p=plan('oven-education-research',['x'],
+  ['active food-heating room','public exhibit room']);
+ p.footprint={width:30,depth:30};
+ p.levels[0].spaces[0].fixtures=['oven','workbench'];
+ p.levels[0].spaces[1].fixtures=['display'];
+ const raw=JSON.stringify(p),snapshot=structuredClone(p);
+ const checked=diagnoseR125ArchitecturePlanOriginal(raw);
+ assert.equal(checked.sourceVerified,true,checked.compilerReason??'source hold');
+ const source=JSON.stringify(checked.sourceDesign);
+ const palette=JSON.parse(fs.readFileSync(
+  new URL('../configs/r125-education-verified-palette-v26.33.json',
+   import.meta.url),'utf8'));
+ const {derived,packet,report}=buildVerifiedOvenResearchAlternative({
+  originalRaw:raw,sourceDocument:source,diagnosis:checked,
+  verifiedPalette:palette});
+ assert.equal(report.originalModelSha256,
+  createHash('sha256').update(raw).digest('hex'));
+ assert.equal(report.originalSourceSha256,checked.sourceSha256);
+ assert.notEqual(report.hostAlternativeSourceSha256,checked.sourceSha256);
+ assert.equal(report.unchangedOccupiedCoordinates,true);
+ assert(report.changedMaterialCells>0);
+ assert.equal(report.alteredElementCount,1);
+ assert.equal(report.semanticReplacement.verifiedEducationBlock,'yellow_concrete');
+ assert.equal(report.notAnAIAuthoredCorrection,true);
+ assert.equal(packet.materialMode,'STRICT_USER_ATTESTED');
+ assert.equal(packet.usedMaterials.some(x=>x.material==='glow'),false);
+ assert.equal(packet.worldWrites,0);
+ assert.equal(packet.programExecuted,false);
+ assert.deepEqual(packet.BuildPlan.operations,[]);
+ assert.deepEqual(report.nineWorldGates,Array(9).fill('BLOCKED'));
+ assert.equal(verifyCompiled(derived,compileDesign(derived)),true);
+ assert.deepEqual(p,snapshot);
+ const tampered={...checked,sourceSha256:'0'.repeat(64)};
+ assert.throws(()=>buildVerifiedOvenResearchAlternative({
+  originalRaw:raw,sourceDocument:source,
+  diagnosis:tampered,verifiedPalette:palette}),
+  /SOURCE_MISMATCH/);
+ assert.throws(()=>buildVerifiedOvenResearchAlternative({
+  originalRaw:raw,sourceDocument:source,diagnosis:checked,
+  verifiedPalette:{...palette,blocks:{...palette.blocks,
+   accent:{blockName:'glowstone',evidence:'not verified'}}}}),
+  /ACCENT_ATTESTATION_REQUIRED/);
 });
