@@ -205,6 +205,10 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    assert.equal(request.messages[0].content.includes('ROOF-TO-FACADE PROPORTION'),true);
    assert.equal(request.messages[0].content.includes('VISUAL/WEATHER DESIGN TEST'),true);
    assert.equal(request.messages[0].content.includes('recessed-portico'),true);
+   assert.ok(request.messages[0].content.includes('REAL 9-block-wide, 3-deep entrance'));
+   assert.ok(request.messages[0].content.includes('splitCoordinate >= 11'));
+   assert.ok(request.messages[0].content.includes('splitCoordinate <= footprint.width - 12'));
+   assert.ok(request.messages[0].content.includes('plain/fins/screen instead'));
    assert.equal(request.messages[0].content.includes('ROOM-APPROPRIATE fixture'),true);
    assert.equal(request.messages[0].content.includes('REAL ROOM BUDGET'),true);
    assert.ok(request.messages[0].content.includes('thirdRoomLink:"first-and-second"'));
@@ -414,6 +418,20 @@ test('one-level model setback mismatch is rejected with safe original values, ne
  const another={...actual,expression:{...actual.expression,
   setbackSide:'none',setbackDepth:3}};
  assert.equal(summarizeR125InvalidSetbackOriginal(JSON.stringify(another)).requiredRule,
+  'ONE_LEVEL_REQUIRES_NONE_AND_ZERO');
+ // The author contract already supports the REAL two-level front terrace.
+ // Invalid-setback summaries must NOT misclassify its valid geometry when
+ // the actual hold is unrelated (such as an infeasible ground portico).
+ const front=structuredClone(actual);
+ front.levels=[structuredClone(actual.levels[0]),structuredClone(actual.levels[0])];
+ front.expression.setbackSide='front';front.expression.setbackDepth=2;
+ assert.equal(summarizeR125InvalidSetbackOriginal(JSON.stringify(front)),null);
+ front.expression.setbackDepth=3;
+ assert.equal(summarizeR125InvalidSetbackOriginal(JSON.stringify(front)).requiredRule,
+  'TWO_LEVELS_NONE_ZERO_EAST_REAR_TWO_TO_FOUR_OR_FRONT_TWO');
+ front.expression.setbackDepth=2;
+ front.levels=front.levels.slice(0,1);
+ assert.equal(summarizeR125InvalidSetbackOriginal(JSON.stringify(front)).requiredRule,
   'ONE_LEVEL_REQUIRES_NONE_AND_ZERO');
  assert.equal(summarizeR125InvalidSetbackOriginal(original),null);
  assert.equal(summarizeR125InvalidSetbackOriginal('{not json'),null);

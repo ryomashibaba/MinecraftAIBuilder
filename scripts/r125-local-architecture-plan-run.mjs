@@ -40,18 +40,19 @@ export function summarizeR125InvalidSetbackOriginal(raw){
  const levelCount=Array.isArray(p.levels)&&p.levels.length<=2?
   p.levels.length:null;
  const side=p.expression.setbackSide;
- const setbackSide=['none','east','rear'].includes(side)?side:'INVALID_OR_MISSING';
+ const setbackSide=['none','east','rear','front'].includes(side)?side:'INVALID_OR_MISSING';
  const depth=p.expression.setbackDepth;
  const setbackDepth=Number.isSafeInteger(depth)&&depth>=0&&depth<=32?
   depth:null;
  const validPair=setbackSide==='none'&&setbackDepth===0||
   (['east','rear'].includes(setbackSide)&&levelCount===2&&
-   [2,3,4].includes(setbackDepth));
+   [2,3,4].includes(setbackDepth))||
+  (setbackSide==='front'&&levelCount===2&&setbackDepth===2);
  if(validPair)return null;
  return {schema:'r125-invalid-author-setback-summary-v1',
   levelCount,setbackSide,setbackDepth,
   requiredRule:levelCount===1?'ONE_LEVEL_REQUIRES_NONE_AND_ZERO':
-   levelCount===2?'TWO_LEVELS_NONE_ZERO_OR_EAST_REAR_TWO_TO_FOUR':
+   levelCount===2?'TWO_LEVELS_NONE_ZERO_EAST_REAR_TWO_TO_FOUR_OR_FRONT_TWO':
    'VALID_LEVEL_COUNT_REQUIRED',
   originalEdited:false,modelCalls:0,worldWrites:0};
 }
