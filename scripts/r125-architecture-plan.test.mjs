@@ -2985,7 +2985,7 @@ test('front-setback two-story x40/z60 recessed portico keeps stair source-reacha
   p.levels[1].spaces[0].id='staff-area';
   p.levels[1].spaces[0].access=secondAccess==='shared'?'shared':'staff';
   p.levels[1].spaces[1].id='entrance-hall';
-  p.levels[1].spaces[1].access=secondAccess;
+  p.levels[1].spaces[1].access='shared';
   p.entryZone='first';
   p.expression={setbackSide:'front',setbackDepth:2,
    roofProfile:'ridge',roofAxis:'z',
