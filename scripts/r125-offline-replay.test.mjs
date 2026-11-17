@@ -282,3 +282,65 @@ test('old plan with no access labels remains SOURCE evidence, not visitor approv
  assert.equal(result.sourceVerified,true,result.compilerReason);
  assert.equal(result.originalEdited,false);
 });
+
+test('real B143 SOURCE holds user-explicit baking without source-placed oven',()=>{
+ const p={schema:PLAN,id:'activity-gate-study',
+  title:'Public workshop and private preparation',
+  brief:'An accessible building for public activities and private preparation',
+  footprint:{width:26,depth:26},
+  levels:[{splitAxis:'z',splitPercent:50,spaces:[
+   {id:'visitor-area',purpose:'public demonstration',access:'public',
+    fixtures:['workbench']},
+   {id:'preparation',purpose:'private technical preparation',access:'staff',
+    fixtures:['counter']}
+  ]}],
+  materials:{floor:'wood',wall:'concrete',roof:'stone'},
+  expression:{setbackSide:'none',setbackDepth:0,
+   roofProfile:'flat',roofAxis:'x',facadeLanguage:'plain'}};
+ const original=JSON.stringify(p);
+ const request='小さな体験工房。職員が焼成設備を管理し、来場者が見学する。';
+ const missing=diagnoseR125ArchitecturePlanOriginal(original,{requestedBrief:request});
+ assert.equal(missing.sourceRoutes,'SOURCE_ROUTES_REACH_ALL_ZONES',
+  JSON.stringify(missing));
+ assert.equal(missing.explicitActivityProxy.status,'HOLD_EXPLICIT_ACTIVITY_PROXY_MISSING');
+ assert.deepEqual(missing.explicitActivityProxy.missing,[{
+  capability:'baking-heating',requiredRole:'oven'}]);
+ assert.equal(missing.status,'HOLD_EXPLICIT_ACTIVITY_PROXY_MISSING');
+ assert.equal(missing.sourceVerified,false);
+ assert.equal(missing.originalEdited,false);
+ assert.equal(missing.originalSha256,createHash('sha256').update(original).digest('hex'));
+ assert.equal(JSON.stringify(p),original,'no post-hoc correction allowed');
+ assert.equal(missing.worldWrites,0);
+ p.levels[0].spaces[1].fixtures=['oven'];
+ const supplied=diagnoseR125ArchitecturePlanOriginal(JSON.stringify(p),
+  {requestedBrief:request});
+ assert.equal(supplied.explicitActivityProxy.status,
+  'EXPLICIT_ACTIVITY_PROXIES_PRESENT_NOT_FULL_USE_CERTIFIED',
+  JSON.stringify(supplied));
+ assert.deepEqual(supplied.explicitActivityProxy.missing,[]);
+ assert.equal(supplied.sourceVerified,true,
+  JSON.stringify({status:supplied.status,reason:supplied.compilerReason}));
+ assert.equal(supplied.requestedActivityCoverage,
+  'NOT_INDEPENDENTLY_VERIFIED_BY_SOURCE');
+ assert.equal(supplied.worldWrites,0);
+});
+
+test('unknown and unavailable original user requests are not declared fully served',()=>{
+ const p={schema:PLAN,id:'legacy-activity-unknown',title:'Two useful rooms',
+  brief:'Original unmodified building with function not checked',
+  footprint:{width:24,depth:24},
+  levels:[{splitAxis:'x',splitPercent:50,spaces:[
+   {id:'first-room',purpose:'work'},
+   {id:'second-room',purpose:'social'}]}],
+  materials:{floor:'wood',wall:'concrete',roof:'stone'}};
+ const raw=JSON.stringify(p);
+ const unknown=diagnoseR125ArchitecturePlanOriginal(raw,
+  {requestedBrief:'独創的な交流施設を設計してほしい'});
+ assert.equal(unknown.explicitActivityProxy.status,
+  'NO_HIGH_CONFIDENCE_CUES_NOT_FULL_USE_CERTIFIED');
+ assert.equal(unknown.sourceVerified,true,unknown.compilerReason);
+ const noBrief=diagnoseR125ArchitecturePlanOriginal(raw);
+ assert.equal(noBrief.explicitActivityProxy.status,
+  'NOT_EVALUATED_ORIGINAL_REQUEST_UNAVAILABLE');
+ assert.equal(noBrief.sourceVerified,true,noBrief.compilerReason);
+});

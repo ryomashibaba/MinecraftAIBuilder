@@ -128,12 +128,47 @@ export function diagnoseR125Original(raw){
 
 
 /**
+ * Limited independent check of the ORIGINAL user's explicit activities.
+ * No genre-specific building template, LLM, automatic repair or world I/O.
+ * Only high-confidence equipment affordances; unknown tasks remain UNKNOWN.
+ */
+export function auditR125ExplicitActivityProxy(requestedBrief,fixtureTargets=[]){
+ const base={schema:'r125-explicit-activity-proxy-v1',
+  scope:'HIGH_CONFIDENCE_LITERAL_CAPABILITIES_ONLY',
+  independentFullBriefCoverage:false,sourceOnly:true,originalEdited:false,
+  modelCalls:0,worldWrites:0,realMinecraftFunctionality:'NOT_TESTED'};
+ if(typeof requestedBrief!=='string'||!requestedBrief.trim()||
+    requestedBrief.length>8000)
+  return {...base,status:'NOT_EVALUATED_ORIGINAL_REQUEST_UNAVAILABLE',
+   assessed:[],missing:[]};
+ if(!Array.isArray(fixtureTargets))fail('INVALID_ACTIVITY_FIXTURES');
+ // Explicit ACTIONS, not words describing building genres or aesthetics.
+ const cues=[
+  ['baking-heating','oven',/焼成設備|焼成炉|オーブン|パンを焼|\boven\b/i],
+  ['washing-basin','washbasin',/洗面台|手洗い設備|手洗い場|\bwashbasin\b/i],
+  ['sleeping-bed','bed',/ベッド|就寝用ベッド|\bbed\b/i],
+  ['electronic-maintenance','electronics',
+   /電子機器(?:の|を)(?:点検|整備|操作)|\belectronic (?:equipment )?maintenance\b/i]
+ ];
+ const placed=new Set(fixtureTargets.map(f=>f.kind));
+ const assessed=cues.filter(([, ,rx])=>rx.test(requestedBrief))
+  .map(([capability,requiredRole])=>({
+   capability,requiredRole,sourcePlacedProxy:placed.has(requiredRole)}));
+ const missing=assessed.filter(x=>!x.sourcePlacedProxy)
+  .map(x=>({capability:x.capability,requiredRole:x.requiredRole}));
+ return {...base,status:missing.length?'HOLD_EXPLICIT_ACTIVITY_PROXY_MISSING':
+  assessed.length?'EXPLICIT_ACTIVITY_PROXIES_PRESENT_NOT_FULL_USE_CERTIFIED':
+   'NO_HIGH_CONFIDENCE_CUES_NOT_FULL_USE_CERTIFIED',
+  assessed,missing};
+}
+
+/**
  * Opt-in offline replay for a SHORT, MODEL-AUTHORED ArchitecturePlan.
  * The model owns the original semantic design; the trusted generic HOST owns
  * geometry. No V6 placement patch, retry, model I/O or Minecraft contact.
  * A SOURCE candidate is never an ART pass or world-construction approval.
  */
-export function diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail='legacy',roofGlazing='none',roofMassing='default'}={}){
+export function diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail='legacy',roofGlazing='none',roofMassing='default',requestedBrief=null}={}){
  if(typeof raw!=='string'||raw.length<1||raw.length>60000)
   fail('PLAN_RAW_INPUT_SIZE');
  const base={
@@ -174,6 +209,8 @@ export function diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail='legacy',ro
     fail('PLAN_WORLD_SAFETY_DRIFT');
   const routes=auditR125SourceRoutes(built,{featureTargets:built.fixtureTargets??[]});
   const visitors=auditR125VisitorRoutes(built,original);
+  const explicitActivityProxy=auditR125ExplicitActivityProxy(requestedBrief,
+   built.fixtureTargets??[]);
   const pairedWindows=built.daylightTargets?.some(x=>x.kind==='paired-bays')?
    auditR125PairedBayApproach(built):null;
   const circulation=auditArchitecturePlanCirculation(built);
@@ -181,17 +218,21 @@ export function diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail='legacy',ro
   const floors=assessR125ProgramGeometry(built,critique);
   const functionalClear=routes.status==='SOURCE_ROUTES_REACH_ALL_ZONES'&&
    !visitors.status.startsWith('HOLD_')&&
+   !explicitActivityProxy.status.startsWith('HOLD_')&&
    circulation.status==='SOURCE_CLEARANCE_PROBES_PASS'&&
    (!pairedWindows||pairedWindows.status==='PAIRED_BAY_APPROACH_PASS')&&
    floors.programFloorIssues.length===0;
   return {...base,
-   status:functionalClear?'B143_SOURCE_CANDIDATE_ART_HOLD':'HOLD_FUNCTIONAL_SOURCE',
+   status:functionalClear?'B143_SOURCE_CANDIDATE_ART_HOLD':
+    explicitActivityProxy.status.startsWith('HOLD_')?
+     'HOLD_EXPLICIT_ACTIVITY_PROXY_MISSING':'HOLD_FUNCTIONAL_SOURCE',
    sourceVerified:functionalClear,compilerReason:null,
    hostPolicy,...(spatialCapacity?{spatialCapacity}:{}),planSha256:built.planSha256,
    sourceSha256:built.sourceSha256,geometrySha256:built.geometrySha256,
    occupiedVoxels:built.compiled.primitives.length,
    sourceRoutes:routes.status,sourceRouteIssues:routes.issues??[],
    visitorCirculation:visitors,
+   explicitActivityProxy,
    requestedActivityCoverage:'NOT_INDEPENDENTLY_VERIFIED_BY_SOURCE',
    modelChosenFixtures:built.fixtureTargets?.length??0,
    modelChosenDaylight:built.daylightTargets?.length??0,

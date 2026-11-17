@@ -388,3 +388,25 @@ test('CLI insists on explicit model/prompt/new private path',()=>{
  assert.equal(parseR125LocalPlanArgs(['--model','qwen3:14b','--prompt',
   prompt,'--out','somewhere']).model,'qwen3:14b');
 });
+
+test('one original POST holds unmatched requested oven without correcting source',async()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'mab-explicit-activity-'));
+ let posts=0;
+ const dest=path.join(root,'one');
+ try{
+  const {report}=await runR125LocalArchitecturePlan({
+   model:'qwen3:14b',prompt:'小さな工房。職員は焼成設備を管理する。',
+   outDir:dest
+  },{fetcher:async()=>{posts++;return provider(original)}});
+  assert.equal(posts,1,'no automatic retry');
+  assert.equal(report.status,'HOLD_EXPLICIT_ACTIVITY_PROXY_MISSING');
+  assert.equal(report.sourceVerified,false);
+  assert.equal(report.makeCodeStatus,'NOT_ATTEMPTED');
+  const diag=JSON.parse(fs.readFileSync(path.join(dest,'SOURCE_DIAGNOSIS.json'),'utf8'));
+  assert.equal(diag.explicitActivityProxy.status,'HOLD_EXPLICIT_ACTIVITY_PROXY_MISSING');
+  assert.deepEqual(diag.explicitActivityProxy.missing,[{
+   capability:'baking-heating',requiredRole:'oven'}]);
+  assert.equal(fs.readFileSync(path.join(dest,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8'),original);
+  assert.equal(report.worldWrites,0);
+ }finally{fs.rmSync(root,{recursive:true,force:true})}
+});

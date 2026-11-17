@@ -128,7 +128,7 @@ export async function runR125LocalArchitecturePlan({
   const raw=fs.readFileSync(path.join(dest,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8');
   if(answer.originalSha256!==sha(raw)||captured.sha256!==sha(raw))
    fail('RAW_CAPTURE_MISMATCH');
-  const reviewed=diagnoseR125ArchitecturePlanOriginal(raw);
+  const reviewed=diagnoseR125ArchitecturePlanOriginal(raw,{requestedBrief:prompt});
   const {sourceDesign,...diagnosis}=reviewed;
   write(dest,'SOURCE_DIAGNOSIS.json',diagnosis);
   if(sourceDesign){
@@ -193,7 +193,7 @@ export async function runR125LocalArchitecturePlan({
     if(sha(raw)===captured.sha256){
      if(String(error?.message??'')==='R125_PLAN_EXPRESSION_SETBACK')
       invalidSetbackOriginal=summarizeR125InvalidSetbackOriginal(raw);
-     const reviewed=diagnoseR125ArchitecturePlanOriginal(raw);
+     const reviewed=diagnoseR125ArchitecturePlanOriginal(raw,{requestedBrief:prompt});
      const {sourceDesign,...diagnosis}=reviewed;
      offlineDiagnosisStatus=diagnosis.status;
      offlineCompilerReason=diagnosis.compilerReason??null;

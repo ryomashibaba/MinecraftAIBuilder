@@ -338,6 +338,7 @@ test('offline three-genre source and equipment are fully visible in comparison',
   assert.deepEqual(report.completed.map(x=>x.modelChosenFixtures),[3,2,3]);
   assert.deepEqual(report.completed.map(x=>x.fixtureServiceReached),[3,2,3]);
   assert.deepEqual(report.completed.map(x=>x.fixtureServiceTotal),[3,2,3]);
+  assert.ok(report.completed.every(x=>x.explicitActivityProxy!==null));
   assert.ok(report.completed.every(x=>x.requestedActivityCoverage===
    'NOT_INDEPENDENTLY_VERIFIED_BY_SOURCE'),
    'fixture reachability must not be mistaken for activity coverage');
