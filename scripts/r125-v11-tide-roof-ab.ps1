@@ -111,8 +111,11 @@ Require ($review.massing -ceq 'compact-sawtooth' -and
  $review.roofAir.enclosedEavesAndSteps -eq $true -and
  $review.belowRoofGeometryAndMaterialIdentical -eq $true) 'RESULT_NOT_REVIEW_READY'
 if($artOnly){
- Require ($null -eq $review.education) 'UNVERIFIED_MATERIAL_CODE_NOT_ALLOWED'
+ # PowerShell StrictMode throws for an absent JSON property; absence is the
+ # correct ART-only proof, since the runner never requested --education.
+ Require ($null -eq $review.PSObject.Properties['education']) 'UNVERIFIED_MATERIAL_CODE_NOT_ALLOWED'
 }else{
+ Require ($null -ne $review.PSObject.Properties['education']) 'STRICT_EDUCATION_REPORT_MISSING'
  Require ($review.education.worldExecution -ceq 'NOT_TESTED' -and
   @($review.education.packets).Count -eq 2) 'RESULT_NO_STRICT_PACKETS'
  foreach($row in @($review.education.packets)) {
