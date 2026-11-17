@@ -175,7 +175,7 @@ export function auditR125ExplicitActivityProxy(requestedBrief,fixtureTargets=[])
  */
 export function describeR125AuthoredRoomUse(original,built){
  if(!Array.isArray(original?.levels)||!Array.isArray(built?.program)||
-    !Array.isArray(built?.fixtureTargets))
+    (built.fixtureTargets!==undefined&&!Array.isArray(built.fixtureTargets)))
   throw Error('R125_ROOM_USE_REQUIRES_MODEL_PROGRAM');
  const floors=original.levels.map((level,i)=>{
   const actual=built.program.find(l=>l.level===i);
@@ -185,7 +185,7 @@ export function describeR125AuthoredRoomUse(original,built){
    if(!z)throw Error('R125_ROOM_USE_ZONE_MISSING');
    const area=Math.max(0,z.range.x[1]-z.range.x[0]+1)*
     Math.max(0,z.range.z[1]-z.range.z[0]+1);
-   const targets=built.fixtureTargets.filter(t=>t.zoneId===space.id);
+   const targets=(built.fixtureTargets??[]).filter(t=>t.zoneId===space.id);
    const occupied=targets.reduce((n,t)=>n+t.size[0]*t.size[2],0);
    return {id:space.id,purpose:space.purpose,access:space.access??null,
     roomBoundsAreaUpperLimit:area,authoredStationCount:targets.length,
