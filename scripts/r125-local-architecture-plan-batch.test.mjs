@@ -185,7 +185,7 @@ test('invalid genuine Qwen-shaped setback is shown as a narrow read-only diagnos
   assert(!html.includes(raw),'PRIVATE original must not be pasted into generated HTML');
  }finally{fs.rmSync(root,{recursive:true,force:true})}
 });
-test('identical buildings are still recorded for ALL three briefs and marked poor diversity',()=>{
+test('identical buildings are still recorded for ALL three briefs and marked poor diversity',async()=>{
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'mab-batch-same-'));
  let calls=0;
  try{
