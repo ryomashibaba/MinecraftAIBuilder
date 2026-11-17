@@ -26,6 +26,34 @@ const fail=code=>{throw Error('R125_BATCH_'+code)};
 const exactly=(o,keys)=>o&&typeof o==='object'&&!Array.isArray(o)&&
  Object.keys(o).length===keys.length&&keys.every(k=>Object.hasOwn(o,k));
 
+/**
+ * Sanitize an upstream SOURCE failure diagnosed while daylight was still
+ * unplaced. This reads existing PRIVATE evidence but never copies the
+ * model's original design/prompt, retries inference, or changes geometry.
+ * "daylight" in the thrown error describes the detection stage, not cause.
+ */
+export function summarizeR125DaylightBaselineHold(diagnosis){
+ const v=diagnosis?.daylightPlacement;
+ if(v?.schema!=='r125-daylight-placement-failure-v1'||
+    v.upstreamOfWindow!==true)return null;
+ const failures=(Array.isArray(v.baselineCirculationFailures)?
+  v.baselineCirculationFailures:[]).slice(0,8).map(x=>({
+   code:String(x?.code??'UNKNOWN').slice(0,100),
+   ...(Number.isInteger(x?.level)?{level:x.level}:{}),
+   ...(typeof x?.zone==='string'?{zone:x.zone.slice(0,80)}:{})
+ }));
+ return {stage:'BEFORE_ROOM_DAYLIGHT',
+  failedZoneId:String(v.failed?.zoneId??'unknown').slice(0,80),
+  ...(Number.isInteger(v.failed?.level)?{level:v.failed.level}:{}),
+  baselineCirculation:String(v.baselineCirculation??'UNKNOWN').slice(0,100),
+  circulationFailures:failures,
+  baselineRoutes:String(v.baselineRoutes??'UNKNOWN').slice(0,100),
+  routeIssues:(Array.isArray(v.baselineRouteIssues)?
+   v.baselineRouteIssues:[]).slice(0,8).map(x=>String(x).slice(0,120)),
+  sourceOnly:true,originalEdited:false,modelCalls:0,worldWrites:0,
+  realMinecraftWalking:'NOT_TESTED'};
+}
+
 export function parseR125BatchBriefs(raw){
  if(typeof raw!=='string'||Buffer.byteLength(raw,'utf8')>32000)
   fail('BRIEFS_FILE_SIZE');
@@ -167,6 +195,7 @@ export async function runR125ArchitecturePlanBatch({
   const diagnosisPath=path.join(dest,item.id,'SOURCE_DIAGNOSIS.json');
   const diagnosis=fs.existsSync(diagnosisPath)?
    JSON.parse(fs.readFileSync(diagnosisPath,'utf8')):null;
+  const daylightBaseline=summarizeR125DaylightBaselineHold(diagnosis);
   const row={id:item.id,requestSha256:one.report.requestSha256,
    modelAuthoredFormFamilySha256,authoredForm,authoredProgram,
    modelChosenDaylight:diagnosis?.modelChosenDaylight??0,
@@ -189,10 +218,13 @@ export async function runR125ArchitecturePlanBatch({
     x.reachableFromEntrance===true&&
     x.supportedTwoWideServiceWitness!==null).length??0,
    failureReason:one.report.reason??diagnosis?.compilerReason??null,
+   ...(daylightBaseline?{baselineSourceHold:daylightBaseline}:{}),
    ...(one.report.invalidSetbackOriginal?
     {invalidSetbackOriginal:one.report.invalidSetbackOriginal}:{}),
    sourceIssues:[...(diagnosis?.sourceRouteIssues??[]),
-    ...(diagnosis?.circulationFailures??[])].slice(0,8),
+    ...(diagnosis?.circulationFailures??[]),
+    ...(daylightBaseline?.routeIssues??[]),
+    ...(daylightBaseline?.circulationFailures??[])].slice(0,8),
    status:one.report.status,modelResponsesCaptured:one.report.modelResponsesCaptured,
    sourceVerified:one.report.sourceVerified,
    originalSha256:one.report.originalSha256,

@@ -6,7 +6,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {runR125ArchitecturePlanBatch,parseR125BatchBriefs,parseR125BatchArgs,
- authoredFormFamily}
+ authoredFormFamily,summarizeR125DaylightBaselineHold}
  from './r125-local-architecture-plan-batch.mjs';
 import {renderR125BatchComparison} from './r125-batch-compare.mjs';
 
@@ -21,6 +21,42 @@ const requests=[
  {id:'home',prompt:'採光と生活動線を工夫した小規模な住宅を設計してください。'}
 ];
 const input=JSON.stringify(requests);
+
+test('daylight early hold surfaces only upstream SOURCE evidence without PRIVATE design',()=>{
+ const diagnostic={
+  compilerReason:'R125_PLAN_DAYLIGHT_BASELINE_SOURCE_HOLD_reading-room',
+  daylightPlacement:{
+   schema:'r125-daylight-placement-failure-v1',
+   upstreamOfWindow:true,
+   failed:{level:0,zoneId:'reading-room',kind:'wide-bay',
+    range:{x:[2,13],z:[2,14]}},
+   baselineCirculation:'HOLD_SOURCE_CIRCULATION',
+   baselineCirculationFailures:[{code:'PARTITION_OPENING_NOT_SUPPORTED_AND_CLEAR',
+    level:0},{code:'STAIR_UPPER_LANDING_MISSING_OR_BLOCKED',elementId:'stairs'}],
+   baselineRoutes:'HOLD_SOURCE_ROUTES',
+   baselineRouteIssues:['UNREACHABLE_ZONE_reading-room'],
+   rawModelResponse:'NEVER_ECHO_THIS'
+  }
+ };
+ const summary=summarizeR125DaylightBaselineHold(diagnostic);
+ assert.equal(summary.stage,'BEFORE_ROOM_DAYLIGHT');
+ assert.equal(summary.failedZoneId,'reading-room');
+ assert.equal(summary.level,0);
+ assert.equal(summary.baselineRoutes,'HOLD_SOURCE_ROUTES');
+ assert.deepEqual(summary.routeIssues,['UNREACHABLE_ZONE_reading-room']);
+ assert.deepEqual(summary.circulationFailures.map(x=>x.code),[
+  'PARTITION_OPENING_NOT_SUPPORTED_AND_CLEAR',
+  'STAIR_UPPER_LANDING_MISSING_OR_BLOCKED']);
+ assert.equal(summary.worldWrites,0);
+ assert.equal(summary.modelCalls,0);
+ assert.equal(summary.originalEdited,false);
+ assert.ok(!JSON.stringify(summary).includes('NEVER_ECHO_THIS'));
+ assert.ok(!JSON.stringify(summary).includes('"range"'));
+ assert.equal(summarizeR125DaylightBaselineHold({}),null);
+ assert.equal(summarizeR125DaylightBaselineHold({
+  daylightPlacement:{schema:'r125-daylight-placement-failure-v1',
+   upstreamOfWindow:false}}),null);
+});
 
 test('batch parser preflights unique bounded original briefs',()=>{
  assert.deepEqual(parseR125BatchBriefs(input),requests);

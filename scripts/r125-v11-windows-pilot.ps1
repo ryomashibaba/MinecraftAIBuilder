@@ -256,6 +256,13 @@ Write-Output ('V11_PILOT_SOURCE_PASSES=' + $report.sourcePassCount)
 Write-Output ('V11_PILOT_EXPERIMENT=' + $report.experimentOutcome)
 Write-Output ('V11_PILOT_STOP_REASON=' + [string]$report.stopReason)
 if (@($report.completed).Count -eq 1 -and
+    $null -ne $report.completed[0].baselineSourceHold) {
+ $hold = $report.completed[0].baselineSourceHold
+ Write-Output ('V11_UPSTREAM_SOURCE_HOLD=' +
+  ($hold | ConvertTo-Json -Compress -Depth 6))
+ Write-Output 'V11_UPSTREAM_HOLD_BEFORE_DAYLIGHT; PRIVATE original preserved; no retry or world write.'
+}
+if (@($report.completed).Count -eq 1 -and
     $null -ne $report.completed[0].invalidSetbackOriginal) {
  $bad = $report.completed[0].invalidSetbackOriginal
  Write-Output ('V11_ORIGINAL_SETBACK_HOLD: levels=' +
