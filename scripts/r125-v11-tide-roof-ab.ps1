@@ -96,7 +96,16 @@ Write-Output ('MAB_V11_ROOF_AFTER='+$review.roofCrestY.after)
 Write-Output ('MAB_V11_ART_PREVIEW='+$review.image)
 Write-Output ('MAB_V11_MAKECODE_BASELINE='+(Join-Path $out 'MAKECODE_BASELINE.ts'))
 Write-Output ('MAB_V11_MAKECODE_COMPACT='+(Join-Path $out 'MAKECODE_COMPACT.ts'))
-Write-Output 'NO GAME EXECUTION: compare image first; in existing flat test world use two separate unused sites, one packet at a time, mabset/mabbuild/mabverify. Actual walking and art need visual test.'
+# First variant is ready to paste immediately. No game input, model call or world
+# write. Second variant is copied later without generating any more artifacts.
+$baseline=Join-Path $out 'MAKECODE_BASELINE.ts'
+Set-Clipboard -Value (Get-Content -LiteralPath $baseline -Raw -Encoding UTF8)
+Write-Output 'MAB_V11_BASELINE_COPIED_TO_CLIPBOARD: paste into Code Builder / MakeCode JavaScript.'
+Write-Output 'MAB_V11_NEXT_VARIANT_COMMAND:'
+Write-Output ('powershell.exe -NoProfile -ExecutionPolicy Bypass -File "'+
+ (Join-Path $repo 'scripts\r125-v11-roof-ab-copy.ps1')+
+ '" -ComparisonDirectory "'+$out+'" -Variant COMPACT')
+Write-Output 'NO GAME EXECUTION: compare the preview first; use two unused sites in the same dedicated flat world, run mabset/mabbuild/mabverify, then mabwalk outdoors and indoors. Real art/walking are not certified.'
 if(-not $NoOpen) {
  try {Start-Process -FilePath $review.image -ErrorAction Stop}
  catch {Write-Warning 'Preview not opened automatically; see MAB_V11_ART_PREVIEW path.'}
