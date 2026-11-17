@@ -11,9 +11,15 @@ const fail=(why,daylightPlacement=null)=>{
  throw error;
 };
 export function addAuthoredRoomDaylight(product,{auditCirculation}={}){
+ // Two bays are requested only by an explicit model-owned 'paired-bays'.
+ // Each bay is separately verified as true exterior glass with inside air.
+ // Existing single-window author choices have byte-identical SOURCE output.
  const asks=product.plan.levels.flatMap((level,li)=>
   level.spaces.flatMap((s,zi)=>s.daylight===undefined?[]:
-   [{li,zi,id:s.id,kind:s.daylight}]));
+   (s.daylight==='paired-bays'?[0,1]:[0]).map(index=>({
+    li,zi,id:s.id,kind:s.daylight,
+    ...(s.daylight==='paired-bays'?{index}:{})
+   }))));
  if(asks.length===0)return product;
  if(typeof auditCirculation!=='function')fail('AUDITOR_REQUIRED');
  let current=product;
@@ -21,7 +27,8 @@ export function addAuthoredRoomDaylight(product,{auditCirculation}={}){
  for(const ask of asks){
   const zone=current.program[ask.li].zones[ask.zi].range;
   const floorY=current.program[ask.li].standingFloorY;
-  const wide=ask.kind==='wide-bay',widths=wide?[4,3,2]:[5,4,3];
+  const wide=ask.kind==='wide-bay'||ask.kind==='paired-bays';
+  const widths=ask.kind==='paired-bays'?[3,2]:wide?[4,3,2]:[5,4,3];
   const height=wide?2:1,wy=floorY+(wide?1:2);
   const p=current.plan,e=p.expression,w=p.footprint.width,d=p.footprint.depth;
   const right=w-2-(ask.li===1&&e?.setbackSide==='east'?e.setbackDepth:0);
@@ -32,6 +39,15 @@ export function addAuthoredRoomDaylight(product,{auditCirculation}={}){
    {face:'east',axis:'x',wall:right,inside:-1,valid:zone.x[1]===right-1,lo:zone.z[0],hi:zone.z[1]},
    {face:'west',axis:'x',wall:1,inside:1,valid:zone.x[0]===2,lo:zone.z[0],hi:zone.z[1]}
   ];
+  const first=ask.kind==='paired-bays'&&ask.index===1?
+   chosen.find(t=>t.zoneId===ask.id&&t.kind==='paired-bays'):null;
+  if(ask.kind==='paired-bays'&&ask.index===1&&!first)
+   fail('PAIRED_BAY_FIRST_MISSING_'+ask.id);
+  // Prefer genuinely independent wall faces. A second bay on the same
+  // face is allowed only with at least one intact wall column between bays.
+  const preferredEdges=first?
+   [...edges.filter(e=>e.face!==first.face),
+    ...edges.filter(e=>e.face===first.face)]:edges;
   const matrix=new Map(current.compiled.primitives.map(v=>
    [key(...v.slice(0,3)),v[3]]));
   const at=(x,y,z)=>matrix.get(key(x,y,z));
@@ -59,14 +75,14 @@ export function addAuthoredRoomDaylight(product,{auditCirculation}={}){
   const baselineOccupied=new Set(current.compiled.primitives.map(v=>
    key(...v.slice(0,3))));
   const rejected={WALL_OR_SILL_LINTEL:0,INTERIOR_AIR_BLOCKED:0,
-   EXTERIOR_AIR_BLOCKED:0,SOURCE_CIRCULATION_HOLD:0,
+   EXTERIOR_AIR_BLOCKED:0,SAME_FACADE_SEPARATION:0,SOURCE_CIRCULATION_HOLD:0,
    SOURCE_ROUTE_HOLD:0};
   let candidatesEvaluated=0,created=null;
   // Preserve historical window dimensions and front/rear/east/west
   // precedence when possible. Shorter windows are a universal fallback,
   // not a silent change from clerestory to a low window or stained panel.
   for(const width of widths){
-   for(const edge of edges){
+   for(const edge of preferredEdges){
     if(!edge.valid)continue;
     const starts=[];
     for(let k=edge.lo+1;k<=edge.hi-width;k++)starts.push(k);
@@ -75,6 +91,13 @@ export function addAuthoredRoomDaylight(product,{auditCirculation}={}){
     const locate=(i,side=0)=>edge.axis==='z'?
      [i,wy,edge.wall+side]:[edge.wall+side,wy,i];
     for(const pos of starts){
+     if(first&&first.face===edge.face){
+      const previousPos=edge.axis==='z'?first.origin[0]:first.origin[2];
+      const previousWidth=edge.axis==='z'?first.size[0]:first.size[2];
+      if(!(pos+width<previousPos||previousPos+previousWidth<pos)){
+       rejected.SAME_FACADE_SEPARATION++;continue;
+      }
+     }
      candidatesEvaluated++;
      let rejectedBy=null;
      for(let dx=0;dx<width&&!rejectedBy;dx++){
@@ -96,7 +119,8 @@ export function addAuthoredRoomDaylight(product,{auditCirculation}={}){
      if(rejectedBy){rejected[rejectedBy]++;continue;}
      const origin=locate(pos),size=edge.axis==='z'?
       [width,height,1]:[1,height,width];
-     const tag='daylight-l'+ask.li+'-z'+ask.zi;
+     const tag='daylight-l'+ask.li+'-z'+ask.zi+
+      (ask.kind==='paired-bays'?'-p'+ask.index:'');
      const design={...current.design,elements:[
       ...current.design.elements,
       {id:tag+'-cut',shape:'box',mode:'cut',origin,size},
@@ -146,7 +170,9 @@ export function addAuthoredRoomDaylight(product,{auditCirculation}={}){
       });
      }
      current=trial;
-     created={zoneId:ask.id,kind:ask.kind,face:edge.face,origin,size,
+     created={zoneId:ask.id,kind:ask.kind,
+      ...(ask.kind==='paired-bays'?{paneIndex:ask.index}:{}),
+      face:edge.face,origin,size,
       outsideAirVerified:true,sillLintelVerified:true,
       ...(width!==widths[0]?{adaptedWidthFrom:widths[0]}:{}),
       MinecraftWalking:'NOT_TESTED',worldWrites:0};
@@ -158,7 +184,8 @@ export function addAuthoredRoomDaylight(product,{auditCirculation}={}){
   }
   if(!created)fail('NO_SUPPORTED_EXTERIOR_BAY_'+ask.id,{
    schema:'r125-daylight-placement-failure-v1',
-   failed:{level:ask.li,zoneId:ask.id,kind:ask.kind,range:zone},
+   failed:{level:ask.li,zoneId:ask.id,kind:ask.kind,range:zone,
+    ...(ask.kind==='paired-bays'?{paneIndex:ask.index}:{})},
    attemptedWidths:widths,candidatesEvaluated,rejected,
    sourceOnly:true,originalPlanEdited:false,modelCalls:0,worldWrites:0
   });

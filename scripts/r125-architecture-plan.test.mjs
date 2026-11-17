@@ -1350,6 +1350,39 @@ test('model-selected daylight and real furniture coexist with a raised roof',()=
  assert.equal(verifyCompiled(result.design,result.compiled),true);
  assert.deepEqual(result.compiled.BuildPlan.operations,[]);
 });
+test('model-selected paired exterior window bays are genuinely distinct, air-backed and reachable',()=>{
+ const p=plan('dual-daylight-laboratory',['x'],
+  ['Coastal laboratory with two viewing directions','Visitor room']);
+ p.footprint={width:30,depth:30};
+ p.levels[0].spaces[0].daylight='paired-bays';
+ p.levels[0].spaces[0].fixtures=['workbench'];
+ const unchanged=structuredClone(p);
+ const built=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+ assert.deepEqual(p,unchanged,'original AI plan is not edited');
+ assert.equal(built.daylightTargets.length,2);
+ assert.deepEqual(built.daylightTargets.map(t=>t.paneIndex),[0,1]);
+ assert.equal(new Set(built.daylightTargets.map(t=>t.face)).size,2,
+  'prefer two independent facade views when original room has both');
+ assert.equal(built.design.elements.filter(e=>
+  /^daylight-l0-z0-p[01]-glass$/.test(e.id)).length,2);
+ assert.equal(auditR125FixtureDaylightView(
+  built.compiled,built.daylightTargets).status,'DAYLIGHT_VIEW_CLEAR');
+ assert.equal(built.fixtureTargets.length,1);
+ const route=auditR125SourceRoutes(built,{featureTargets:built.fixtureTargets});
+ assert.equal(route.status,'SOURCE_ROUTES_REACH_ALL_ZONES',
+  JSON.stringify(route.issues));
+ assert.equal(route.featureAccess.length,1);
+ assert.equal(route.featureAccess[0].reachableFromEntrance,true);
+ assert.equal(auditArchitecturePlanCirculation(built).status,
+  'SOURCE_CLEARANCE_PROBES_PASS');
+ assert.equal(verifyCompiled(built.design,built.compiled),true);
+ assert.deepEqual(built.compiled.BuildPlan.operations,[]);
+ assert.equal(built.worldWrites,0);
+ const single=structuredClone(p);
+ single.levels[0].spaces[0].daylight='wide-bay';
+ const old=compileArchitecturePlan(single,{entrancePlacement:'source-accessible'});
+ assert.equal(old.daylightTargets.length,1,'legacy single bay is unchanged');
+});
 test('opt-in daylight does not change legacy and rejects bogus choices',()=>{
  const p=plan('daylight-legacy',['x']);
  assert.equal(compileArchitecturePlan(p).sourceSha256,

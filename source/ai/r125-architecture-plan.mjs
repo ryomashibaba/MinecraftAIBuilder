@@ -291,7 +291,7 @@ export function validateArchitecturePlan(p){
     ['counter','workbench','display','storage','seating'].includes(space.fixture),
     'SPACE_FIXTURE_ROLE');
    check(space.daylight===undefined||
-    ['wide-bay','clerestory'].includes(space.daylight),
+    ['wide-bay','clerestory','paired-bays'].includes(space.daylight),
     'SPACE_DAYLIGHT_ROLE');
    // Explicit author-owned equipment presentation, never an inferred
    // genre-specific decoration or a rewrite of old fixture geometry.
