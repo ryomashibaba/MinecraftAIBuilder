@@ -420,7 +420,7 @@ export function compileArchitecturePlan(plan,{
  entrancePlacement='legacy',upperDoorPlacement='legacy',hostDetail='legacy',
  roofGlazing='none',roofMassing='default'
 }={}){
- check(['legacy','spatial-v1'].includes(hostDetail),'HOST_DETAIL_MODE');
+ check(['legacy','spatial-v1','clear-front-fins'].includes(hostDetail),'HOST_DETAIL_MODE');
  // Optional ART candidate only. Old authors and their original SOURCE are untouched.
  check(['none','sawtooth-ribbon'].includes(roofGlazing),'ROOF_GLAZING_MODE');
  check(['default','compact-sawtooth'].includes(roofMassing),'ROOF_MASSING_MODE');
@@ -823,9 +823,10 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
    // Keep real two-wide entry and terrace thresholds physically clear:
    // exterior fins must not obscure either author-selected front opening.
    // Outside the doorway clearance, retain the original authored rhythm.
-   const frontDoors=elements.filter(e=>e.mode==='cut'&&
+   const frontDoors=hostDetail==='clear-front-fins'?
+    elements.filter(e=>e.mode==='cut'&&
     (e.id==='exterior-entrance'||e.id==='upper-terrace-access')&&
-    e.origin[1]===y&&e.origin[2]===z0);
+    e.origin[1]===y&&e.origin[2]===z0):[];
    for(let x=x0+1;x<x1-1;x+=4){
     const shieldsDoor=frontDoors.some(e=>
      x>=e.origin[0]-1&&x<e.origin[0]+e.size[0]+1);

@@ -3052,7 +3052,8 @@ test('authored fins do not block the two-wide actual ground entrances',()=>{
   p.expression={setbackSide:'none',setbackDepth:0,
    roofProfile:'flat',roofAxis:'x',facadeLanguage:'fins'};
   const original=structuredClone(p);
-  const r=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+  const r=compileArchitecturePlan(p,{entrancePlacement:'source-accessible',
+   hostDetail:'clear-front-fins'});
   const door=r.design.elements.find(e=>e.id==='exterior-entrance');
   assert.ok(door);
   const fins=r.design.elements.filter(e=>/^l0-fin-/.test(e.id));
@@ -3077,7 +3078,7 @@ test('authored fins also leave a front setback terrace doorway open',()=>{
   roofProfile:'flat',roofAxis:'x',facadeLanguage:'fins'};
  const original=structuredClone(p);
  const r=compileArchitecturePlan(p,{entrancePlacement:'source-accessible',
-  upperDoorPlacement:'stair-clear'});
+  upperDoorPlacement:'stair-clear',hostDetail:'clear-front-fins'});
  const door=r.design.elements.find(e=>e.id==='upper-terrace-access');
  assert.ok(door);
  const fins=r.design.elements.filter(e=>/^l1-fin-/.test(e.id));
@@ -3093,3 +3094,19 @@ test('authored fins also leave a front setback terrace doorway open',()=>{
  assert.deepEqual(r.compiled.BuildPlan.operations,[]);
 });
 
+
+test('front-fin clearance is opt-in, not a historical Qwen geometry rewrite',()=>{
+ const p=plan('facade-fin-default-frozen',['x']);
+ p.footprint={width:24,depth:24};p.entryZone='first';
+ p.expression={setbackSide:'none',setbackDepth:0,
+  roofProfile:'flat',roofAxis:'x',facadeLanguage:'fins'};
+ const opts={entrancePlacement:'source-accessible'};
+ const legacy=compileArchitecturePlan(p,opts);
+ const a=compileArchitecturePlan(p,{...opts,hostDetail:'clear-front-fins'});
+ const b=compileArchitecturePlan(p,{...opts,hostDetail:'clear-front-fins'});
+ assert.equal(a.sourceSha256,b.sourceSha256);
+ assert.notEqual(legacy.geometrySha256,a.geometrySha256);
+ assert.ok(legacy.design.elements.some(e=>e.id==='l0-fin-10'));
+ assert.equal(a.design.elements.some(e=>e.id==='l0-fin-10'),false);
+ assert.equal(a.worldWrites,0);
+});
