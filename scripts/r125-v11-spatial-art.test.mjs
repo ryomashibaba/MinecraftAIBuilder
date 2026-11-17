@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {SCHEMA} from '../source/ai/r125-architecture-plan.mjs';
+import {compileDesign} from '../source/ai/b143-building-dsl.mjs';
 import {diagnoseR125ArchitecturePlanOriginal} from './r125-offline-replay.mjs';
 import {saveR125SpatialArt} from './r125-v11-spatial-art.mjs';
 import {saveR125FinishAB} from './r125-v11-finish-art-ab.mjs';
@@ -211,4 +212,37 @@ test('V11 integrated HOST room-quality A/B emits eight-view real B143 preview',(
   assert.equal(result.worldWrites,0);
   assert.deepEqual(result.nineWorldGates,Array(9).fill('BLOCKED'));
  }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
+
+test('integrated room-scale HOST extends an authored oven as oven geometry',()=>{
+ const p={schema:SCHEMA,id:'authored-oven-room-scale',
+  title:'Shared food workshop',
+  brief:'A staff managed kitchen with an oven for baking',
+  footprint:{width:24,depth:24},
+  levels:[{splitAxis:'x',splitPercent:50,spaces:[
+   {id:'staff-kitchen',purpose:'shared baking workspace',access:'staff',
+    fixtures:['oven'],fixtureScale:'expanded'},
+   {id:'staff-prep',purpose:'staff preparation',access:'staff'}]},
+   {splitAxis:'x',splitPercent:50,spaces:[
+    {id:'staff-office',purpose:'staff office',access:'staff'},
+    {id:'staff-storage',purpose:'staff storage',access:'staff'}]}],
+  materials:{floor:'wood',wall:'concrete',roof:'stone'},
+  expression:{setbackSide:'none',setbackDepth:0,
+   roofProfile:'ridge',roofAxis:'x',roofVolume:'raised',facadeLanguage:'fins'}};
+ const raw=JSON.stringify(p);
+ const result=diagnoseR125ArchitecturePlanOriginal(raw,{
+  hostDetail:'spatial-v1',fixtureArt:'activity-layout',
+  fixtureForm:'room-scale-v1'});
+ assert.equal(result.sourceVerified,true,result.compilerReason);
+ assert.equal(result.originalSha256,
+  diagnoseR125ArchitecturePlanOriginal(raw).originalSha256);
+ assert.equal(result.modelChosenFixtures,1);
+ assert.ok(result.roomScaleReview.changes.some(x=>x.kind==='oven'));
+ assert.equal(result.roomScaleReview.skipped.some(x=>x.reason==='UNSUPPORTED_ROLE'),false);
+ const ids=result.sourceDesign.elements.map(x=>x.id);
+ assert.ok(ids.some(id=>id.startsWith('host-scale-fx-l0-z0-i0-oven-face')));
+ assert.ok(ids.some(id=>id.startsWith('host-scale-fx-l0-z0-i0-oven-hood')));
+ assert.equal(result.worldWrites,0);
+ assert.equal(result.modelCalls,0);
+ assert.deepEqual(compileDesign(result.sourceDesign).BuildPlan.operations,[]);
 });

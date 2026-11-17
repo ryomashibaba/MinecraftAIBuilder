@@ -12,7 +12,8 @@ const ROLES={
  counter:['accent','wood'],workbench:['wood','metal'],
  display:['stone','stone'],storage:['wood','wood'],
  seating:['wood','wood'],desk:['wood','wood'],
- washbasin:['stone','concrete'],electronics:['wood','metal']
+ washbasin:['stone','concrete'],electronics:['wood','metal'],
+ oven:['stone','metal']
 };
 const cell=(x,y,z)=>x+','+y+','+z;
 const fail=reason=>{throw Error('R125_PLAN_ROOM_SCALE_'+reason);};
@@ -78,7 +79,18 @@ export function expandR125RoomScale(product,{auditCirculation,includeHostStudy=f
       origin:at,size:extent
      });
      let parts;
-     if(station.kind==='seating'){
+     if(station.kind==='oven'){
+      // Extend an existing model-selected oven as a second joined oven bay.
+      // Keep its baking role legible with a full-width glazed oven face and
+      // metal hood; this adds no station and makes no claim of functionality.
+      const face=[...origin];
+      const faceSize=[w,1,d];
+      face[short]=shift===0?origin[short]:origin[short]+size[short]-1;
+      faceSize[short]=1;
+      parts=[part('oven-base','stone',[x,y,z],[w,1,d]),
+       part('oven-face','glass',[face[0],y+1,face[2]],faceSize),
+       part('oven-hood','metal',[x,y+2,z],[w,1,d])];
+     }else if(station.kind==='seating'){
       const back=[x,y+1,z],backSize=[w,1,d];
       back[short]+=size[short]-1;backSize[short]=1;
       parts=[part('seat','wood',[x,y,z],[w,1,d]),
