@@ -16,6 +16,7 @@ param(
 $ErrorActionPreference = 'Stop'
 $repo = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')).Path
 $renderer = Join-Path $repo 'scripts\r125-static-art-review.mjs'
+$floorRenderer = Join-Path $repo 'scripts\r125-v11-saved-floor-review.mjs'
 if (-not (Test-Path -LiteralPath $renderer -PathType Leaf)) {
  throw 'V11_ART_RENDERER_MISSING'
 }
@@ -29,6 +30,8 @@ if ($LASTEXITCODE -ne 0 -or -not $versionMatch.Success -or
 if ($CheckOnly) {
  & $node '--check' $renderer
  if ($LASTEXITCODE -ne 0) { throw 'V11_ART_SYNTAX_HOLD' }
+ & $node '--check' $floorRenderer
+ if ($LASTEXITCODE -ne 0) { throw 'V11_ART_FLOOR_SYNTAX_HOLD' }
  Write-Output 'V11_ART_CHECK_ONLY_PASS: No PRIVATE access, model, browser or world calls.'
  return
 }
@@ -113,11 +116,35 @@ if ($manifest.schema -cne 'r125-b143-offline-static-review-v1' -or
     [int]$manifest.modelCalls -ne 0 -or [int]$manifest.worldWrites -ne 0) {
  throw 'V11_ART_STATIC_MANIFEST_MISMATCH'
 }
+# Provide both floors of the SAME saved author and show missing Education
+# material attestations, without modifying the existing contact or original.
+$floorOut = Join-Path $one 'STATIC_FLOOR_REVIEW_V1'
+$floorPNG = Join-Path $floorOut 'FLOOR_CONTACT_4_VIEWS.png'
+$floorJSON = Join-Path $floorOut 'FLOOR_REVIEW.json'
+if (-not (Test-Path -LiteralPath $floorOut)) {
+ & $node $floorRenderer '--raw' $rawFile '--source' $src '--diagnosis' $diagFile '--out' $floorOut | Out-Null
+ if ($LASTEXITCODE -ne 0) { throw 'V11_ART_FLOOR_GENERATION_HOLD' }
+}
+if (-not (Test-Path -LiteralPath $floorPNG -PathType Leaf) -or
+    -not (Test-Path -LiteralPath $floorJSON -PathType Leaf)) {
+ throw 'V11_ART_FLOOR_OUTPUT_MISSING'
+}
+$floorReport = Get-Content -LiteralPath $floorJSON -Raw -Encoding UTF8 | ConvertFrom-Json
+$floorSHA = (Get-FileHash -LiteralPath $floorPNG -Algorithm SHA256).Hash.ToLowerInvariant()
+if ($floorReport.originalSha256 -cne $actualOriginalHash -or
+    $floorReport.sourceSha256 -cne $diag.sourceSha256 -or
+    $floorReport.geometrySha256 -cne $diag.geometrySha256 -or
+    $floorReport.contact.sha256 -cne $floorSHA -or
+    [int]$floorReport.modelCalls -ne 0 -or [int]$floorReport.worldWrites -ne 0) {
+ throw 'V11_ART_FLOOR_PROVENANCE_HOLD'
+}
+Write-Output ('V11_ART_FLOORS=' + $floorPNG)
+Write-Output ('V11_ART_EDUCATION_UNVERIFIED=' + ($floorReport.educationMaterials.unverified -join ','))
 Write-Output ('V11_ART_RESULT=' + $out)
 Write-Output ('V11_ART_CONTACT=' + $contactFile)
 Write-Output ('V11_ART_VOXELS=' + $manifest.occupiedVoxels)
 Write-Output 'V11_ART_REVIEW_PENDING. No model, Minecraft or upload performed.'
 if (-not $NoOpen) {
- try { Start-Process -FilePath $contactFile }
+ try { Start-Process -FilePath $floorPNG }
  catch { Write-Warning 'V11_ART_OPEN_PNG_FAILED_USE_PRINTED_PATH' }
 }

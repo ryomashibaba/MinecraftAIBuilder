@@ -7,6 +7,7 @@ import {createHash} from 'node:crypto';
 import {diagnoseR125ArchitecturePlanOriginal} from './r125-offline-replay.mjs';
 import {renderB143StaticPNG,saveB143StaticReview,saveB143ABReview}
  from './r125-static-art-review.mjs';
+import {saveSavedFloorReview} from './r125-v11-saved-floor-review.mjs';
 
 const hash=x=>createHash('sha256').update(x).digest('hex');
 const original=fs.readFileSync(new URL(
@@ -127,5 +128,75 @@ test('same-brief old/new produces physical voxel diffs and 8 true B143 snapshots
    diff.finalVoxelDifference.added>0||diff.finalVoxelDifference.removed>0);
   assert.equal(diff.modelCalls,0);
   assert.equal(diff.worldWrites,0);
+ }finally{fs.rmSync(tmp,{recursive:true,force:true});}
+});
+
+test('saved authentic Qwen floor views are source-exact and never alter the author',()=>{
+ const reviewed=diagnoseR125ArchitecturePlanOriginal(original);
+ assert.equal(reviewed.sourceVerified,true);
+ const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'mab-floor-qwen-'));
+ try{
+  const raw=path.join(tmp,'MODEL_RESPONSE_ORIGINAL.txt'),
+   src=path.join(tmp,'B143_SOURCE_REVIEW_ONLY.json'),
+   diag=path.join(tmp,'SOURCE_DIAGNOSIS.json');
+  const {sourceDesign,...diagnosis}=reviewed;
+  fs.writeFileSync(raw,original);
+  fs.writeFileSync(src,JSON.stringify(sourceDesign));
+  fs.writeFileSync(diag,JSON.stringify(diagnosis));
+  const args={rawPath:raw,sourcePath:src,diagnosisPath:diag,
+   outDir:path.join(tmp,'floor-view')};
+  const result=saveSavedFloorReview(args);
+  assert.equal(result.levels,1);
+  assert.equal(result.originalSha256,hash(original));
+  assert.equal(result.sourceSha256,reviewed.sourceSha256);
+  assert.deepEqual(result.views.map(v=>v.floor),[1,1,1,1]);
+  assert.equal(result.contact.width,2416);
+  assert.equal(result.contact.height,1536);
+  assert.equal(result.modelCalls,0);assert.equal(result.worldWrites,0);
+  assert.deepEqual(result.gates,Array(9).fill('BLOCKED'));
+  const png=fs.readFileSync(path.join(args.outDir,result.contact.name));
+  assert.equal(hash(png),result.contact.sha256);
+  assert.equal(fs.readFileSync(raw,'utf8'),original);
+  assert.throws(()=>saveSavedFloorReview(args),/OUTPUT_MUST_BE_NEW/);
+  fs.writeFileSync(diag,JSON.stringify({...diagnosis,originalSha256:'0'.repeat(64)}));
+  assert.throws(()=>saveSavedFloorReview({...args,outDir:path.join(tmp,'bad')}),
+   /AUTHOR_OR_DIAGNOSIS_MISMATCH/);
+  assert.equal(fs.existsSync(path.join(tmp,'bad')),false);
+ }finally{fs.rmSync(tmp,{recursive:true,force:true});}
+});
+test('two-floor source review exposes genuinely separated upper floor voxels',()=>{
+ const p={schema:'minecraftaibuilder-r125-architecture-plan-v1',
+  id:'two-floor-review-test',title:'Shared two floor hall',
+  brief:'Public visitor rooms upstairs and downstairs',
+  footprint:{width:26,depth:26},
+  levels:[
+   {splitAxis:'z',splitPercent:50,spaces:[
+    {id:'entry-hall',purpose:'Public reception hall',access:'public'},
+    {id:'ground-work',purpose:'Shared workshop room',access:'shared'}]},
+   {splitAxis:'x',splitPercent:50,spaces:[
+    {id:'upper-gallery',purpose:'Shared activity gallery',access:'shared'},
+    {id:'upper-studio',purpose:'Public study room',access:'public'}]}],
+  materials:{floor:'wood',wall:'concrete',roof:'stone'},entryZone:'first',
+  expression:{setbackSide:'none',setbackDepth:0,roofProfile:'ridge',
+   roofAxis:'x',roofVolume:'raised',facadeLanguage:'plain'}};
+ const rawData=JSON.stringify(p),reviewed=diagnoseR125ArchitecturePlanOriginal(rawData);
+ assert.equal(reviewed.sourceVerified,true,JSON.stringify({
+  status:reviewed.status,reason:reviewed.compilerReason,issues:reviewed.sourceRouteIssues}));
+ const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'mab-two-floors-'));
+ try{
+  const raw=path.join(tmp,'raw.txt'),src=path.join(tmp,'src.json'),
+   diag=path.join(tmp,'diag.json');
+  fs.writeFileSync(raw,rawData);
+  const {sourceDesign,...diagnosis}=reviewed;
+  fs.writeFileSync(src,JSON.stringify(sourceDesign));
+  fs.writeFileSync(diag,JSON.stringify(diagnosis));
+  const result=saveSavedFloorReview({rawPath:raw,sourcePath:src,
+   diagnosisPath:diag,outDir:path.join(tmp,'floors')});
+  assert.equal(result.levels,2);
+  assert.deepEqual(result.views.map(v=>v.floor),[1,1,2,2]);
+  assert.equal(result.contact.rowOrder[1],'SECOND_FLOOR');
+  assert(result.views.every(v=>v.renderedCells>25));
+  assert.equal(result.sourceSha256,reviewed.sourceSha256);
+  assert.equal(result.worldWrites,0);
  }finally{fs.rmSync(tmp,{recursive:true,force:true});}
 });
