@@ -177,7 +177,8 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
     v.properties.roofProfile.enum.every(x=>x==='flat'||x==='ridge')));
    const setback=options.filter(v=>
     v.properties.setbackSide.enum.includes('east'));
-   assert.equal(setback.length,5);
+   assert.equal(setback.length,6,
+    'one additional author-owned steep ridge with upper setback');
    assert.ok(setback.every(v=>
     !v.properties.roofProfile.enum.includes('split-monitor')&&
     !Object.hasOwn(v.properties,'rearCornerCut')));
