@@ -3386,8 +3386,8 @@ test('V11 expanded station is a model-selected, real SOURCE geometry change',()=
  const unscaled=structuredClone(p);
  delete unscaled.levels[0].spaces[0].fixtureScale;
  assert.equal(validateArchitecturePlan(p),true);
- const old=compileArchitecturePlan(unscaled);
- const built=compileArchitecturePlan(p);
+ const old=compileArchitecturePlan(unscaled,{entrancePlacement:'source-accessible'});
+ const built=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
  assert.deepEqual(built.fixtureTargets,old.fixtureTargets);
  assert.notEqual(built.geometrySha256,old.geometrySha256);
  assert.equal(built.roomScaleReview.changes[0].scaleOwner,'MODEL');
@@ -3408,8 +3408,8 @@ test('V11 room-scale HOST art study preserves model-authored original',()=>{
  p.footprint={width:30,depth:30};
  p.levels[0].spaces[0].fixtures=['workbench'];
  p.levels[0].spaces[0].fixtureArrangement='focal-island';
- const original=JSON.stringify(p),small=compileArchitecturePlan(p);
- const study=compileArchitecturePlan(p,{fixtureForm:'room-scale-v1'});
+ const original=JSON.stringify(p),small=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+ const study=compileArchitecturePlan(p,{entrancePlacement:'source-accessible',fixtureForm:'room-scale-v1'});
  assert.equal(JSON.stringify(p),original);
  assert.equal(study.planSha256,small.planSha256);
  assert.ok(study.roomScaleReview.changes.length>=1);
