@@ -7,6 +7,7 @@ import {SCHEMA} from '../source/ai/r125-architecture-plan.mjs';
 import {diagnoseR125ArchitecturePlanOriginal} from './r125-offline-replay.mjs';
 import {saveR125SpatialArt} from './r125-v11-spatial-art.mjs';
 import {detailR125Envelope} from '../source/ai/r125-spatial-detail.mjs';
+import {inspectR125SavedRoomUse} from './r125-v11-room-use-diagnosis.mjs';
 test('offline saved author: real recessed volume, SHA integrity and world gates',()=>{
  const p={schema:SCHEMA,id:'real-entry-study',title:'A public activity building',
   brief:'A building with a public exhibit and shared creative workshop',
@@ -123,5 +124,54 @@ test('opt-in activity layout groups authored stations without adding new roles',
   assert.deepEqual(output.BuildPlan.operations,[]);
   assert.equal(output.nineWorldGates.filter(x=>x==='BLOCKED').length,9);
   assert.equal(fs.existsSync(path.join(dir,'activity-review',output.photo)),true);
+ }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
+
+
+test('saved-Qwen room use diagnosis: exact source, authored station counts, no world IO',()=>{
+ const original={schema:SCHEMA,id:'generic-room-audit',
+  title:'Community exhibition and workshop',
+  brief:'A public exhibition beside a shared creative workroom',
+  footprint:{width:24,depth:24},
+  levels:[{splitAxis:'x',splitPercent:50,spaces:[
+   {id:'gallery-zone',purpose:'public display',access:'public',
+    fixtures:['display','counter']},
+   {id:'workroom-zone',purpose:'shared fabrication',access:'shared',
+    fixtures:['workbench','storage']}]}],
+  materials:{floor:'wood',wall:'concrete',roof:'stone'},
+  expression:{setbackSide:'none',setbackDepth:0,
+   roofProfile:'ridge',roofAxis:'x',roofVolume:'raised',facadeLanguage:'fins'}};
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'mab-room-use-evidence-'));
+ try{
+  const raw=JSON.stringify(original),rawPath=path.join(dir,'MODEL_RESPONSE_ORIGINAL.txt');
+  const sourcePath=path.join(dir,'B143_SOURCE_REVIEW_ONLY.json');
+  fs.writeFileSync(rawPath,raw);
+  const baseline=diagnoseR125ArchitecturePlanOriginal(raw);
+  assert.equal(baseline.sourceVerified,true,baseline.compilerReason);
+  fs.writeFileSync(sourcePath,JSON.stringify(baseline.sourceDesign));
+  const out=path.join(dir,'room-use');
+  const r=inspectR125SavedRoomUse({rawPath,sourcePath,outDir:out});
+  assert.equal(r.status,'SOURCE_VERIFIED_ROOM_USE_ART_HOLD');
+  assert.equal(r.authoredRooms,2);
+  assert.equal(r.modelAuthoredStationCount,4);
+  assert.equal(r.rooms.length,2);
+  assert.equal(r.rooms.every(x=>x.authoredStationCount===2),true);
+  assert.equal(r.variants.length,2);
+  assert.equal(r.variants.every(x=>x.sourceVerified&&x.authoredStationsPreserved),true);
+  assert.equal(r.worldWrites,0);
+  assert.equal(r.modelCalls,0);
+  assert.deepEqual(r.BuildPlan.operations,[]);
+  assert.equal(r.nineWorldGates.filter(x=>x==='BLOCKED').length,9);
+  assert.equal(fs.readFileSync(rawPath,'utf8'),raw);
+  assert.ok(fs.existsSync(path.join(out,'ROOM_USE_REPORT.json')));
+  assert.throws(()=>inspectR125SavedRoomUse({
+   rawPath,sourcePath,outDir:out}),/FRESH_PRIVATE_OUTPUT_REQUIRED/);
+  const forged=path.join(dir,'FORGED_SOURCE.json');
+  fs.writeFileSync(forged,JSON.stringify({...baseline.sourceDesign,
+   title:'not original'}));
+  assert.throws(()=>inspectR125SavedRoomUse({
+   rawPath,sourcePath:forged,outDir:path.join(dir,'forged-report')}),
+   /BASELINE_SHA_OR_WORLD_GUARD/);
+  assert.equal(fs.existsSync(path.join(dir,'forged-report')),false);
  }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });
