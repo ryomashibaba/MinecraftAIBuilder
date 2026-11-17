@@ -69,8 +69,11 @@ test('spatial HOST: narrow authored entry gets exterior covered threshold, not a
  assert.ok(elements.some(e=>e.id==='detail-covered-entry-landing'));
  assert.equal(elements.filter(e=>e.mode==='cut').length,1);
  const additions=elements.filter(e=>e.mode==='add');
- assert.ok(additions.length>=4);
- assert.ok(additions.every(e=>e.origin[2]===0&&e.size[2]===1));
+ // The two equivalent piers may be represented losslessly by one B143
+ // repeated box. Count actual boxes, not serialized elements.
+ assert.ok(additions.reduce((n,e)=>n+(e.repeat?.count??1),0)>=4);
+ assert.ok(additions.every(e=>e.origin[2]===0&&e.size[2]===1&&
+  (e.repeat?.offset?.[2]??0)===0));
  assert.ok(additions.every(e=>e.origin[1]+e.size[1]<=6));
  assert.equal(result.worldWrites,0);
 });

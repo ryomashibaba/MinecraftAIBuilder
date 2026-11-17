@@ -2562,7 +2562,7 @@ test('adjacent SOURCE box packing retains material voxels and does not cross cut
  assert(verifyCompiled(packed,after));
 });
 
-test('spatial HOST keeps beds modest in height and fails explicitly when a real entry court cannot fit',()=>{
+test('spatial HOST keeps bed geometry and preserves authored interiors when an entry court cannot fit',()=>{
  const p=plan('spatial-bed-scale',['z']);p.footprint={width:24,depth:20};
  p.expression={setbackSide:'none',setbackDepth:0,roofProfile:'ridge',roofAxis:'x',roofVolume:'raised',facadeLanguage:'plain'};
  p.levels[0].spaces[1].fixtures=['bed','storage'];p.levels[0].spaces[1].fixtureDetail='crafted';
@@ -2573,7 +2573,17 @@ test('spatial HOST keeps beds modest in height and fails explicitly when a real 
  assert.equal(now.fixtureTargets.length,2);
  assert.equal(auditR125SourceRoutes(now,{featureTargets:now.fixtureTargets}).status,'SOURCE_ROUTES_REACH_ALL_ZONES');
  const narrow=plan('narrow-real-entry',['x']);narrow.expression=p.expression;narrow.entryZone='first';
- assert.throws(()=>compileArchitecturePlan(narrow,{...policy,hostDetail:'spatial-v1'}),/ENTRY_COURT_DOES_NOT_FIT/);
+ const frozen=structuredClone(narrow);
+ const baseline=compileArchitecturePlan(narrow,policy);
+ const alternate=compileArchitecturePlan(narrow,{...policy,hostDetail:'spatial-v1'});
+ assert.equal(alternate.spatialDetail.massing,'covered-threshold-fallback');
+ assert.equal(alternate.spatialDetail.recessedEntry,null);
+ assert.deepEqual(narrow,frozen);
+ assert.equal(alternate.worldWrites,0);
+ assert(verifyCompiled(alternate.design,alternate.compiled));
+ const indoor=v=>v.compiled.primitives.filter(c=>c[2]>=1).map(c=>c.join(',')).sort();
+ assert.deepEqual(indoor(alternate),indoor(baseline),
+  'HOST alternative may ONLY add true exterior threshold cells, never rewrite original rooms or stairs');
  assert.throws(()=>compileArchitecturePlan(p,{hostDetail:'invented'}),/HOST_DETAIL_MODE/);
 });
 
