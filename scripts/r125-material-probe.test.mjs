@@ -190,3 +190,17 @@ test('new default uses Bedrock legacy stonebrick candidate, not proven material'
  assert(DEFAULT_MATERIAL_BATCH.includes('stonebrick'));
  assert(!DEFAULT_MATERIAL_BATCH.includes('stone_bricks'));
 });
+
+test('existing one-block glowstone verifier stays optional and never certifies an untested material',()=>{
+ const output=makeMaterialProbe('glowstone');
+ assert.equal(output.blockName,'glowstone');
+ assert.equal(output.status,'OFFLINE_ONLY');
+ assert.equal(output.inGameResult,'NOT_TESTED');
+ assert.equal(output.worldWrites,0);
+ assert.ok(output.code.includes('player.onChat("mabprobe"'));
+ assert.ok(output.code.includes('blocks.blockByName("glowstone")'));
+ assert.ok(output.code.indexOf('if (!blocks.testForBlock(AIR, target)')<
+  output.code.indexOf('blocks.fill(chosen, target, target'));
+ assert.ok(!output.code.includes('r125-education-user-verified-palette-v1'));
+ assert.ok(!output.code.includes('mabbuild'));
+});

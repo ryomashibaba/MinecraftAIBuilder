@@ -264,6 +264,31 @@ if (@($report.completed).Count -eq 1 -and
   '; required=' + [string]$bad.requiredRule +
   '; original preserved; no repair or retry.')
 }
+# SOURCE may be valid while strict Education material evidence is missing.
+# Prepare the EXISTING single-cell, non-running material probe in PRIVATE;
+# never certify glowstone or alter the user's original B143 design here.
+# Explicit /mabprobe in a dedicated test world is a SEPARATE user action.
+if ($customBrief -and [int]$report.attempted -eq 1 -and
+    @($report.completed).Count -eq 1 -and
+    $report.completed[0].sourceVerified -eq $true -and
+    $report.completed[0].makeCodeStatus -ceq 'HOLD_EDUCATION_EXPORT' -and
+    $report.completed[0].makeCodeReason -ceq
+      'R125_EDUCATION_EXPORT_UNVERIFIED_MATERIAL_GLOW') {
+ $probeRunner = Join-Path $repo 'scripts\r125-material-probe.mjs'
+ $probeDir = Join-Path $out 'EDUCATION_GLOWSTONE_PROBE_OFFLINE'
+ $probeFile = Join-Path $probeDir 'MAKECODE_MATERIAL_PROBE.ts'
+ if (-not (Test-Path -LiteralPath $probeDir) -and
+     (Test-Path -LiteralPath $probeRunner -PathType Leaf)) {
+  & $node $probeRunner '--block' 'glowstone' '--out' $probeDir | Out-Null
+  if ($LASTEXITCODE -eq 0 -and
+      (Test-Path -LiteralPath $probeFile -PathType Leaf)) {
+   Write-Output ('V11_EDUCATION_MISSING_ATTESTATION=glowstone')
+   Write-Output ('V11_EDUCATION_PROBE_PRIVATE_CODE=' + $probeFile)
+   Write-Output 'V11_EDUCATION_PROBE_GENERATED_ONLY; use an empty backed-up test world; Minecraft unchanged.'
+   Write-Output 'V11_EDUCATION_STRICT_EXPORT_HOLD; only actual screenshot and block identity evidence may update verified palette.'
+  } else { Write-Warning 'V11_EDUCATION_GLOWSTONE_PROBE_NOT_GENERATED; SOURCE preserved.' }
+ }
+}
 if ($ComparePriorTide) {
  # One POST already happened above. Never retry if it did not yield SOURCE.
  if ($nodeExit -ne 0 -or $report.allSourceVerified -ne $true -or
