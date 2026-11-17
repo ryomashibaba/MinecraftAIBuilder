@@ -10,7 +10,8 @@ import {SCHEMA,validateArchitecturePlan,compileArchitecturePlan,
  from '../source/ai/r125-architecture-plan.mjs';
 import {addAuthoredRoomFixtures,auditR125FixtureDaylightView}
  from '../source/ai/r125-room-fixtures.mjs';
-import {addAuthoredRoomDaylight} from '../source/ai/r125-room-daylight.mjs';
+import {addAuthoredRoomDaylight,auditR125PairedBayApproach}
+ from '../source/ai/r125-room-daylight.mjs';
 import {packR125AdjacentBoxes} from '../source/ai/r125-spatial-detail.mjs';
 import {verifyCompiled,compileDesign} from '../source/ai/b143-building-dsl.mjs';
 import {auditR125SourceRoutes} from '../source/ai/r125-source-routes.mjs';
@@ -1368,6 +1369,13 @@ test('model-selected paired exterior window bays are genuinely distinct, air-bac
  assert.equal(auditR125FixtureDaylightView(
   built.compiled,built.daylightTargets).status,'DAYLIGHT_VIEW_CLEAR');
  assert.equal(built.fixtureTargets.length,1);
+ const viewpoints=auditR125PairedBayApproach(built);
+ assert.equal(viewpoints.status,'PAIRED_BAY_APPROACH_PASS',
+  JSON.stringify(viewpoints.blocked));
+ assert.equal(viewpoints.windowCount,2);
+ assert(viewpoints.witnesses.every(w=>
+  w.reachableFromEntrance&&w.supportedTwoWideServiceWitness!==null));
+ assert.equal(viewpoints.actualMinecraftWalking,'NOT_TESTED');
  const route=auditR125SourceRoutes(built,{featureTargets:built.fixtureTargets});
  assert.equal(route.status,'SOURCE_ROUTES_REACH_ALL_ZONES',
   JSON.stringify(route.issues));
@@ -1382,6 +1390,31 @@ test('model-selected paired exterior window bays are genuinely distinct, air-bac
  single.levels[0].spaces[0].daylight='wide-bay';
  const old=compileArchitecturePlan(single,{entrancePlacement:'source-accessible'});
  assert.equal(old.daylightTargets.length,1,'legacy single bay is unchanged');
+});
+test('window approach witnesses require the interior face, not an exterior shortcut',()=>{
+ const p=plan('paired-interior-only',['x'],
+  ['Working laboratory','Visitor interpretation area']);
+ p.footprint={width:30,depth:30};
+ p.levels[0].spaces[0].daylight='paired-bays';
+ const built=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+ const result=auditR125PairedBayApproach(built);
+ assert.equal(result.status,'PAIRED_BAY_APPROACH_PASS');
+ assert.equal(result.witnesses.length,2);
+ for(const w of result.witnesses)
+  assert(['near','far','left','right'].includes(w.sourceServiceSide));
+ const target=built.daylightTargets.find(x=>x.face==='front');
+ assert(target,'one genuinely exterior front bay exists');
+ const wrongSide={id:'outside-shortcut',zoneId:target.zoneId,
+  origin:[target.origin[0],built.program[0].standingFloorY,target.origin[2]],
+  size:[target.size[0],3,target.size[2]],requiredServiceSide:'near'};
+ const bad=auditR125SourceRoutes(built,{featureTargets:[wrongSide]});
+ assert.equal(bad.status,'HOLD_SOURCE_ROUTES');
+ assert.equal(bad.featureAccess[0].reachableFromEntrance,false,
+  'an exterior approach must not be mistaken for a usable indoor view');
+ assert.throws(()=>auditR125SourceRoutes(built,{
+  featureTargets:[{...wrongSide,requiredServiceSide:'diagonal'}]
+ }),/INVALID_FEATURE_SERVICE_SIDE/);
+ assert.equal(result.worldWrites,0);
 });
 test('opt-in daylight does not change legacy and rejects bogus choices',()=>{
  const p=plan('daylight-legacy',['x']);

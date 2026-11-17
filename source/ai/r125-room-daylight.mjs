@@ -5,6 +5,36 @@
 import {compileDesign,verifyCompiled,MATERIALS} from './b143-building-dsl.mjs';
 import {auditR125SourceRoutes} from './r125-source-routes.mjs';
 const key=(x,y,z)=>x+','+y+','+z;
+/** An authored paired exterior bay needs a REACHABLE interior viewpoint,
+ * not merely air next to glass. Build virtual service targets on the genuine
+ * B143 two-wide floor graph, restricted to each facade's INSIDE wall side.
+ * This does not place a block or alter model-authored design geometry.
+ */
+export function auditR125PairedBayApproach(product,panes=product?.daylightTargets??[]){
+ const selected=panes.filter(p=>p.kind==='paired-bays');
+ if(!selected.length)return {status:'NO_PAIRED_BAYS',windowCount:0,blocked:[]};
+ const standing=new Map(product.program.flatMap(l=>
+  l.zones.map(z=>[z.id,l.standingFloorY])));
+ const interiorSide={front:'far',rear:'near',east:'left',west:'right'};
+ const targets=selected.map(p=>{
+  const floorY=standing.get(p.zoneId),side=interiorSide[p.face];
+  if(!Number.isSafeInteger(floorY)||!side||
+     !Array.isArray(p.origin)||!Array.isArray(p.size)||
+     !Number.isSafeInteger(p.paneIndex))
+   throw Error('R125_PAIRED_BAY_APPROACH_TARGET_INVALID');
+  return {id:'window-approach-'+p.zoneId+'-'+p.paneIndex,
+   zoneId:p.zoneId,origin:[p.origin[0],floorY,p.origin[2]],
+   size:[p.size[0],3,p.size[2]],requiredServiceSide:side};
+ });
+ const audit=auditR125SourceRoutes(product,{featureTargets:targets});
+ const blocked=audit.featureAccess.filter(x=>!x.reachableFromEntrance)
+  .map(x=>({id:x.id,zoneId:x.zoneId,requiredInteriorSide:
+   targets.find(t=>t.id===x.id).requiredServiceSide}));
+ return {status:blocked.length?'PAIRED_BAY_APPROACH_HOLD':'PAIRED_BAY_APPROACH_PASS',
+  windowCount:targets.length,blocked,witnesses:audit.featureAccess,
+  sourceSha256:product.sourceSha256,modelCalls:0,worldWrites:0,
+  actualMinecraftWalking:'NOT_TESTED'};
+}
 const fail=(why,daylightPlacement=null)=>{
  const error=Error('R125_PLAN_DAYLIGHT_'+why);
  if(daylightPlacement)error.daylightPlacement=daylightPlacement;
@@ -76,7 +106,7 @@ export function addAuthoredRoomDaylight(product,{auditCirculation}={}){
    key(...v.slice(0,3))));
   const rejected={WALL_OR_SILL_LINTEL:0,INTERIOR_AIR_BLOCKED:0,
    EXTERIOR_AIR_BLOCKED:0,SAME_FACADE_SEPARATION:0,SOURCE_CIRCULATION_HOLD:0,
-   SOURCE_ROUTE_HOLD:0};
+   SOURCE_ROUTE_HOLD:0,PAIRED_BAY_APPROACH_HOLD:0};
   let candidatesEvaluated=0,created=null;
   // Preserve historical window dimensions and front/rear/east/west
   // precedence when possible. Shorter windows are a universal fallback,
@@ -169,10 +199,17 @@ export function addAuthoredRoomDaylight(product,{auditCirculation}={}){
        sourceOnly:true,originalPlanEdited:false,modelCalls:0,worldWrites:0
       });
      }
-     current=trial;
-     created={zoneId:ask.id,kind:ask.kind,
+     const proposed={zoneId:ask.id,kind:ask.kind,
       ...(ask.kind==='paired-bays'?{paneIndex:ask.index}:{}),
-      face:edge.face,origin,size,
+      face:edge.face,origin,size};
+     if(ask.kind==='paired-bays'){
+      const approach=auditR125PairedBayApproach(trial,[...chosen,proposed]);
+      if(approach.status!=='PAIRED_BAY_APPROACH_PASS'){
+       rejected.PAIRED_BAY_APPROACH_HOLD++;continue;
+      }
+     }
+     current=trial;
+     created={...proposed,
       outsideAirVerified:true,sillLintelVerified:true,
       ...(width!==widths[0]?{adaptedWidthFrom:widths[0]}:{}),
       MinecraftWalking:'NOT_TESTED',worldWrites:0};

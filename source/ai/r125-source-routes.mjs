@@ -100,6 +100,11 @@ export function auditR125SourceRoutes(product,{featureTargets=[]}={}){
   seenFeatureIds.add(id);
   const {range,y}=zoneMap.get(zoneId),[x0,fy,z0]=origin;
   const [sx,,sz]=size;
+  // Optional restriction for source-verified VIEWING WINDOWS. Ordinary
+  // furniture feature targets keep exactly the historical any-side rule.
+  const requiredSide=target.requiredServiceSide??null;
+  if(requiredSide!==null&&!['near','far','left','right'].includes(requiredSide))
+   err('INVALID_FEATURE_SERVICE_SIDE');
   let best=null,bestDistance=Infinity,side=null;
   for(const [padId,distance] of distances){
    const pad=pads.get(padId);
@@ -111,9 +116,11 @@ export function auditR125SourceRoutes(product,{featureTargets=[]}={}){
    const far=frontX&&pad.z===z0+sz;
    const left=pad.x+1===x0-1&&pad.z>=z0&&pad.z<z0+sz;
    const right=pad.x===x0+sx&&pad.z>=z0&&pad.z<z0+sz;
-   if((near||far||left||right)&&distance<bestDistance){
+   const approach=near?'near':far?'far':left?'left':right?'right':null;
+   if(approach!==null&&(requiredSide===null||approach===requiredSide)&&
+      distance<bestDistance){
     bestDistance=distance;best=[pad.x,pad.y,pad.z];
-    side=near?'near':far?'far':left?'left':'right';
+    side=approach;
    }
   }
   const reached=best!==null;

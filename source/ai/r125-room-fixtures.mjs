@@ -7,6 +7,7 @@
 import {compileDesign,verifyCompiled} from './b143-building-dsl.mjs';
 import {auditInteriorTopology} from './b198c-spatial-critic.mjs';
 import {auditR125SourceRoutes} from './r125-source-routes.mjs';
+import {auditR125PairedBayApproach} from './r125-room-daylight.mjs';
 import {packR125AdjacentBoxes} from './r125-spatial-detail.mjs';
 
 const BUDGET=540; // Dual-axis fallback search only; legacy success path unchanged.
@@ -269,6 +270,12 @@ function tryOrigin(product,targets,intent,x,z,auditCirculation,
    {routeIssues:routes.issues.slice(0,12),
     blockedServiceFeatures:routes.featureAccess.filter(f=>
      !f.reachableFromEntrance).map(f=>f.id)});
+ if(product.daylightTargets?.some(t=>t.kind==='paired-bays')){
+  const approach=auditR125PairedBayApproach(trial,product.daylightTargets);
+  if(approach.status!=='PAIRED_BAY_APPROACH_PASS')
+   return rejected('MODEL_PAIRED_BAY_APPROACH_BLOCKED',
+    {blockedWindows:approach.blocked});
+ }
  const circulation=auditCirculation(trial);
  if(circulation.status!=='SOURCE_CLEARANCE_PROBES_PASS')
   return rejected('SOURCE_CIRCULATION_HOLD',
