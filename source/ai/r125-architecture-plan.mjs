@@ -185,9 +185,11 @@ export function validateArchitecturePlan(p){
    ...(Object.hasOwn(e,'frontCornerCut')?['frontCornerCut']:[]),
    ...(Object.hasOwn(e,'rearCourt')?['rearCourt']:[])]),
    'EXPRESSION_FIELDS');
-  check(['none','east','rear'].includes(e.setbackSide)&&
+  check(['none','east','rear','front'].includes(e.setbackSide)&&
    ((e.setbackSide==='none'&&e.setbackDepth===0)||
-    (e.setbackSide!=='none'&&p.levels.length===2&&[2,3,4].includes(e.setbackDepth))),
+    (e.setbackSide==='front'&&p.levels.length===2&&e.setbackDepth===2)||
+    (['east','rear'].includes(e.setbackSide)&&
+     p.levels.length===2&&[2,3,4].includes(e.setbackDepth))),
    'EXPRESSION_SETBACK');
   check(['flat','ridge','sawtooth','split-monitor','hip'].includes(e.roofProfile)&&
    ['x','z'].includes(e.roofAxis)&&
@@ -678,7 +680,7 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
  const box=(id,mode,material,origin,size)=>elements.push({
   id,shape:'box',mode,...(mode==='add'?{material}:{}),origin,size});
  const envelope=l=>({
-  x0:1,z0:1,
+  x0:1,z0:1+(l===1&&setbackSide==='front'?setbackDepth:0),
   x1:w-2-(l===1&&setbackSide==='east'?setbackDepth:0),
   z1:d-2-(l===1&&setbackSide==='rear'?setbackDepth:0)
  });
@@ -745,6 +747,9 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
   else if(l===1&&setbackSide==='rear')
    box('upper-terrace-access','cut',null,
     [Math.floor((x0+x1)/2)-1,y,z1],[2,3,1]);
+  else if(l===1&&setbackSide==='front')
+   box('upper-terrace-access','cut',null,
+    [Math.floor((x0+x1)/2)-1,y,z0],[2,3,1]);
   const windows=[
    ['front',[x0+2,y+1,z0],[2,2,1]],
    ['rear',[x1-3,y+1,z1],[2,2,1]],
@@ -810,6 +815,17 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
   }else if(facadeLanguage==='screen'){
    for(let z=z0+1;z<z1-1;z+=4)
     box(tag+'-screen-'+z,'add','metal',[x0-1,y+1,z],[1,3,1]);
+  }
+  // Author-chosen street-facing terrace on the existing upper slab.
+  // Three 1-cell parapet segments frame the outer edge and the true door
+  // remains open. Old east/rear and all earlier designs are unchanged.
+  if(l===1&&setbackSide==='front'){
+   box('front-terrace-parapet-street','add',wall,
+    [x0,y,z0-setbackDepth],[x1-x0+1,1,1]);
+   box('front-terrace-parapet-west','add',wall,
+    [x0,y,z0-setbackDepth+1],[1,1,setbackDepth-1]);
+   box('front-terrace-parapet-east','add',wall,
+    [x1,y,z0-setbackDepth+1],[1,1,setbackDepth-1]);
   }
   const [first,second]=level.spaces;
   program.push({level:l,splitAxis:axis,requestedPercent:level.splitPercent,

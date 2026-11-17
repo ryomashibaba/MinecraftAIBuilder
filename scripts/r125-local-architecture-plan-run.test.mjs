@@ -95,7 +95,17 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    assert.equal(room.required.includes('fixtureArrangement'),false);
    assert.equal(room.required.includes('fixtureDetail'),false);
    const options=authorSchema.properties.expression.anyOf;
-   assert.equal(options.length,18);
+   assert.equal(options.length,20);
+   const frontSetbacks=options.filter(v=>v.properties.setbackSide.enum.includes('front'));
+   assert.equal(frontSetbacks.length,2);
+   assert.ok(frontSetbacks.every(v=>
+    v.properties.setbackSide.enum.join(',')==='front'&&
+    v.properties.setbackDepth.enum.join(',')==='2'&&
+    !Object.hasOwn(v.properties,'rearCornerCut')&&
+    !Object.hasOwn(v.properties,'rearCourt')));
+   assert.deepEqual(frontSetbacks.map(v=>v.properties.roofProfile.enum),
+    [['flat'],['ridge','sawtooth','hip']]);
+   assert.ok(request.messages[0].content.includes('street-facing upper terrace'));
    const steep=options.filter(v=>v.required.includes('ridgeProfile'));
    assert.equal(steep.length,2);
    assert.ok(steep.every(v=>

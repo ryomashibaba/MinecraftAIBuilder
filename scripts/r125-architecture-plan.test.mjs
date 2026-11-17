@@ -2921,3 +2921,49 @@ test('authored center can be rejected by real traffic and older room schemas sta
  delete p.levels[0].spaces[0].fixtureArrangement;
  assert.equal(validateArchitecturePlan(p),true);
 });
+
+test('AI-authored front setback gives real upper terrace with entrance and perimeter, not a faux facade',()=>{
+ for(const axis of ['x','z'])for(const roofProfile of ['flat','ridge','hip']){
+  const p=plan('front-setback-'+axis+'-'+roofProfile,['x',axis],
+   ['public arrival and studio','workroom']);
+  p.footprint={width:26,depth:26};
+  p.expression={setbackSide:'front',setbackDepth:2,
+   roofProfile,roofAxis:'x',facadeLanguage:'plain',
+   ...(roofProfile!=='flat'?{roofVolume:'raised'}:{})};
+  const saved=structuredClone(p);
+  const r=compileArchitecturePlan(p,{entrancePlacement:'source-accessible',
+   upperDoorPlacement:'stair-clear'});
+  assert.deepEqual(p,saved);
+  const cells=voxels(r.compiled);
+  assert.ok(r.design.elements.some(e=>e.id==='upper-terrace-access'));
+  assert.ok(r.design.elements.some(e=>e.id==='front-terrace-parapet-street'));
+  assert.equal(includes(cells,10,7,1),true,'street parapet on upper slab');
+  assert.equal(includes(cells,10,7,2),false,'terrace stays open');
+  assert.equal(includes(cells,11,7,3),false,'real two-wide upper access');
+  assert.equal(includes(cells,10,6,2),true,'supported outdoor terrace floor');
+  assert.equal(verifyCompiled(r.design,r.compiled),true);
+  assert.equal(auditArchitecturePlanCirculation(r).status,
+   'SOURCE_CLEARANCE_PROBES_PASS',axis+'/'+roofProfile);
+  assert.equal(auditR125SourceRoutes(r).status,'SOURCE_ROUTES_REACH_ALL_ZONES',
+   axis+'/'+roofProfile);
+  assert.deepEqual(r.compiled.BuildPlan.operations,[]);
+  assert.equal(r.worldWrites,0);
+  const historical=structuredClone(p);
+  historical.expression.setbackSide='rear';
+  const old=compileArchitecturePlan(historical,{entrancePlacement:'source-accessible',
+   upperDoorPlacement:'stair-clear'});
+  assert.ok(!old.design.elements.some(e=>e.id.startsWith('front-terrace-parapet')));
+  assert.notEqual(old.geometrySha256,r.geometrySha256);
+ }
+});
+test('new street setback must be two-level exactly two blocks',()=>{
+ const p=plan('valid-front-street',['x','z']);
+ p.expression={setbackSide:'front',setbackDepth:2,roofProfile:'flat',
+  roofAxis:'x',facadeLanguage:'plain'};
+ assert.equal(validateArchitecturePlan(p),true);
+ p.expression.setbackDepth=3;
+ assert.throws(()=>validateArchitecturePlan(p),/R125_PLAN_EXPRESSION_SETBACK/);
+ p.expression.setbackDepth=2;
+ p.levels=p.levels.slice(0,1);
+ assert.throws(()=>validateArchitecturePlan(p),/R125_PLAN_EXPRESSION_SETBACK/);
+});
