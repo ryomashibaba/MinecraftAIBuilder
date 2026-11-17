@@ -151,7 +151,6 @@ if (-not (Test-Path -LiteralPath $finishOut)) {
  if ($LASTEXITCODE -ne 0) {
   Write-Output 'V11_FINISH_ART_HOLD_SOURCE_POLICY_NOT_PASSED'
  }
-}
 } elseif (-not (Test-Path -LiteralPath $finishJSON -PathType Leaf)) {
  Write-Output 'V11_FINISH_ART_HOLD_INCOMPLETE_PREVIOUS_OUTPUT'
 }
