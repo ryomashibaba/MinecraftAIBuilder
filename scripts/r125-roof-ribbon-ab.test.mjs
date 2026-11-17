@@ -33,6 +33,11 @@ test('same genuine-compatible author bytes produce offline B143 roof A/B with ma
   assert.equal(result.minecraftWalking,'NOT_TESTED');
   assert(fs.statSync(result.image).size>5000);
   assert.equal(result.interactive3D.length,2);
+  const dashboard=fs.readFileSync(path.join(root,'AB',result.artDashboard.file),'utf8');
+  assert.equal(createHash('sha256').update(dashboard).digest('hex'),
+   result.artDashboard.sha256);
+  assert(dashboard.includes('B143_BASELINE_INTERACTIVE_3D.html'));
+  assert(dashboard.includes('B143_COMPACT_INTERACTIVE_3D.html'));
   for(const view of result.interactive3D){
    const html=fs.readFileSync(path.join(root,'AB',view.file),'utf8');
    assert(html.includes('minecraftaibuilder-b143-gallery-v1'));
