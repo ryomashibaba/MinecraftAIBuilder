@@ -99,6 +99,30 @@ function positions(intent,product,turned=false,exhaustive=false){
   if(intent.multi&&intent.index%2===1)wallCandidates.reverse();
   candidates.splice(0,candidates.length,...wallCandidates,[mx,mz]);
  }else if(intent.multi&&intent.index%2===1)candidates.reverse();
+ if(product.fixturePlacement==='activity-layout'){
+  // Explicit HOST-derived study: group MODEL-chosen functions into readable
+  // activity areas instead of scattering them across four corners.
+  // This chooses POSITIONS ONLY. It never invents or duplicates roles.
+  // Every candidate still passes collision, supported floor, 2-wide source
+  // routing, authored daylight and topology checks in tryOrigin().
+  const dx=width+2,dz=depth+2;
+  const ring=[
+   [mx+dx,mz],[mx-dx,mz],[mx,mz+dz],[mx,mz-dz],
+   [mx+dx,mz+dz],[mx-dx,mz+dz],
+   [mx+dx,mz-dz],[mx-dx,mz-dz]
+  ];
+  const priority=intent.multi&&intent.index>0?
+   [...ring,[mx,mz]]:[[mx,mz],...ring];
+  const seen=new Set();
+  const ordered=[...priority,...candidates].filter(([x,z])=>{
+   if(x<range.x[0]||x+width-1>range.x[1]||
+      z<range.z[0]||z+depth-1>range.z[1])return false;
+   const key=x+','+z;
+   if(seen.has(key))return false;
+   seen.add(key);return true;
+  });
+  candidates.splice(0,candidates.length,...ordered);
+ }
  if(intent.arrangement==='focal-island'){
   // An AUTHOR-chosen central activity focal point, not a forced template.
   // Try one central 3xD workstation, then a ring of independent adjacent

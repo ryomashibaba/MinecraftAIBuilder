@@ -77,3 +77,51 @@ test('spatial HOST: narrow authored entry gets exterior covered threshold, not a
  assert.ok(additions.every(e=>e.origin[1]+e.size[1]<=6));
  assert.equal(result.worldWrites,0);
 });
+
+
+test('opt-in activity layout groups authored stations without adding new roles',()=>{
+ const p={schema:SCHEMA,id:'host-activity-layout',
+  title:'Public exhibit with shared work',
+  brief:'A public gallery and shared work room, independently accessible',
+  footprint:{width:24,depth:24},
+  levels:[{splitAxis:'x',splitPercent:50,spaces:[
+   {id:'public-gallery',purpose:'public gallery',access:'public',
+    fixtures:['display','counter']},
+   {id:'shared-work',purpose:'shared workshop',access:'shared',
+    fixtures:['workbench','storage']}]}],
+  materials:{floor:'wood',wall:'concrete',roof:'stone'},
+  expression:{setbackSide:'none',setbackDepth:0,
+   roofProfile:'ridge',roofAxis:'x',roofVolume:'raised',facadeLanguage:'fins'}};
+ const raw=JSON.stringify(p);
+ const baseline=diagnoseR125ArchitecturePlanOriginal(raw,{
+  hostDetail:'spatial-v1'});
+ const revised=diagnoseR125ArchitecturePlanOriginal(raw,{
+  hostDetail:'spatial-v1',fixtureArt:'activity-layout'});
+ assert.equal(baseline.sourceVerified,true,baseline.compilerReason);
+ assert.equal(revised.sourceVerified,true,revised.compilerReason);
+ assert.equal(revised.originalSha256,baseline.originalSha256);
+ assert.equal(revised.modelChosenFixtures,baseline.modelChosenFixtures);
+ assert.ok(revised.modelChosenFixtures>=4);
+ assert.notEqual(revised.sourceSha256,baseline.sourceSha256,
+  'activity layout should change station positions for open rooms');
+ assert.equal(revised.worldWrites,0);
+ assert.equal(revised.modelCalls,0);
+ assert.equal(revised.sourceDesign.designOnly,true);
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'mab-v11-activity-layout-'));
+ try{
+  const rawPath=path.join(dir,'MODEL_RESPONSE_ORIGINAL.txt');
+  const sourcePath=path.join(dir,'B143_SOURCE_REVIEW_ONLY.json');
+  fs.writeFileSync(rawPath,raw);
+  fs.writeFileSync(sourcePath,JSON.stringify(
+   diagnoseR125ArchitecturePlanOriginal(raw).sourceDesign));
+  const output=saveR125SpatialArt({rawPath,sourcePath,
+   outDir:path.join(dir,'activity-review'),fixtureArt:'activity-layout'});
+  assert.equal(output.policy.fixtureArt,'activity-layout');
+  assert.equal(output.modelAuthoredFixtureCount,output.derivedFixtureCount);
+  assert.equal(output.modelCalls,0);
+  assert.equal(output.worldWrites,0);
+  assert.deepEqual(output.BuildPlan.operations,[]);
+  assert.equal(output.nineWorldGates.filter(x=>x==='BLOCKED').length,9);
+  assert.equal(fs.existsSync(path.join(dir,'activity-review',output.photo)),true);
+ }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});

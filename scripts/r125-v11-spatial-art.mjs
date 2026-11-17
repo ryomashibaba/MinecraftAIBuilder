@@ -11,7 +11,9 @@ import {compileDesign,verifyCompiled,MATERIALS} from '../source/ai/b143-building
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const digest=s=>createHash('sha256').update(s).digest('hex');
 const hold=s=>{throw Error('V11_SPATIAL_ART_'+s);};
-export function saveR125SpatialArt({rawPath,sourcePath,outDir}={}){
+export function saveR125SpatialArt({rawPath,sourcePath,outDir,fixtureArt='none'}={}){
+ if(!['none','activity-layout'].includes(fixtureArt))
+  hold('FIXTURE_ART_MODE');
  if([rawPath,sourcePath,outDir].some(x=>typeof x!=='string'||!x))
   hold('INPUTS_REQUIRED');
  const rawFile=path.resolve(rawPath),sourceFile=path.resolve(sourcePath),out=path.resolve(outDir);
@@ -38,7 +40,8 @@ export function saveR125SpatialArt({rawPath,sourcePath,outDir}={}){
     scene.geometrySha256!==before.geometrySha256||scene.worldContacts!==0||
     scene.BuildPlan?.operations?.length!==0)hold('BASELINE_SHA_GUARD');
  // ONE opt-in structural intervention, no automatic retry or unapproved edits.
- const after=diagnoseR125ArchitecturePlanOriginal(original,{hostDetail:'spatial-v1'});
+ const after=diagnoseR125ArchitecturePlanOriginal(original,{
+  hostDetail:'spatial-v1',...(fixtureArt==='activity-layout'?{fixtureArt}:{})});
  if(after.status!=='B143_SOURCE_CANDIDATE_ART_HOLD'||after.sourceVerified!==true||
     !after.sourceDesign||after.originalSha256!==digest(original)||
     after.spatialDetail?.owner!=='HOST'||
@@ -76,7 +79,7 @@ export function saveR125SpatialArt({rawPath,sourcePath,outDir}={}){
     ab.worldWrites!==0)hold('AB_EVIDENCE_MISMATCH');
  const report={schema:'r125-v11-spatial-art-study-v1',
   status:'SOURCE_VERIFIED_HOST_DERIVED_ART_HOLD',
-  policy:{hostDetail:'spatial-v1',owner:'HOST',automaticRetries:0},
+  policy:{hostDetail:'spatial-v1',fixtureArt,owner:'HOST',automaticRetries:0},
   originalSha256:digest(original),
   originalUnchanged:fs.readFileSync(rawFile,'utf8')===original,
   baselineSourceSha256:before.sourceSha256,
@@ -103,13 +106,17 @@ export function saveR125SpatialArt({rawPath,sourcePath,outDir}={}){
 if(process.argv[1]===fileURLToPath(import.meta.url)){
  try{
   const a=process.argv.slice(2);
-  if(a.length!==6||a[0]!=='--raw'||a[2]!=='--source'||a[4]!=='--out')
+  if(![6,7].includes(a.length)||a[0]!=='--raw'||
+      a[2]!=='--source'||a[4]!=='--out'||
+      (a.length===7&&a[6]!=='--activity-layout'))
    hold('CLI_RAW_SOURCE_OUT');
-  const result=saveR125SpatialArt({rawPath:a[1],sourcePath:a[3],outDir:a[5]});
+  const result=saveR125SpatialArt({rawPath:a[1],sourcePath:a[3],outDir:a[5],
+   fixtureArt:a.length===7?'activity-layout':'none'});
   console.log('V11_SPATIAL_ART_SOURCE_ONLY',JSON.stringify({
    baseline:result.baselineSourceSha256,derived:result.derivedSourceSha256,
    difference:result.structuralDifference,
-   image:result.photo,unverifiedMaterials:result.educationMaterials.unverified,
+   image:result.photo,fixtureArt:result.policy.fixtureArt,
+   unverifiedMaterials:result.educationMaterials.unverified,
    art:'HUMAN_REVIEW_REQUIRED',worldWrites:0,modelCalls:0}));
  }catch(e){
   console.error('V11_SPATIAL_ART_HOLD',String(e?.message??e).slice(0,250));

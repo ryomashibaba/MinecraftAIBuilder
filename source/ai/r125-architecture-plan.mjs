@@ -423,7 +423,9 @@ export function compileArchitecturePlan(plan,{
  roofGlazing='none',roofMassing='default',fixtureArt='none',fixtureForm='default'
 }={}){
  check(['legacy','spatial-v1','clear-front-fins'].includes(hostDetail),'HOST_DETAIL_MODE');
- check(['none','activity-inlays'].includes(fixtureArt),'FIXTURE_ART_MODE');
+ check(['none','activity-inlays','activity-layout'].includes(fixtureArt),'FIXTURE_ART_MODE');
+ check(fixtureArt!=='activity-layout'||hostDetail==='spatial-v1',
+  'ACTIVITY_LAYOUT_REQUIRES_SPATIAL_DETAIL');
  check(['default','readable-v1'].includes(fixtureForm),'FIXTURE_FORM_MODE');
  check(fixtureArt==='none'||Boolean(plan?.expression),'FIXTURE_ART_REQUIRES_EXPRESSION');
  // Optional ART candidate only. Old authors and their original SOURCE are untouched.
@@ -1292,7 +1294,8 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
   modelAuthorship:'CALLER_PROVIDED_PLAN_UNVERIFIED',
   geometricRules:'GENERIC_EXPRESSIVE_ENVELOPE_NOT_STYLE_CERTIFIED',
   expression:structuredClone(original.expression),
-  ...(spatialDetail?{spatialDetail,fixturePlacement:'wall-aligned'}:{}),
+  ...(spatialDetail?{spatialDetail,fixturePlacement:
+   fixtureArt==='activity-layout'?'activity-layout':'wall-aligned'}:{}),
   inGameWalking:'NOT_TESTED',architecturalQuality:'NOT_REVIEWED',
   constructionApproved:false,worldContacts:0,worldWrites:0,
   gates:Array(9).fill('BLOCKED')};
