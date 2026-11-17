@@ -18,6 +18,47 @@ const intentKey=i=>i.level+':'+i.zoneIndex;
 const roleDepth=kind=>kind==='bed'?4:
  ['seating','washbasin','electronics','oven'].includes(kind)?2:1;
 
+/**
+ * Preserve a real contiguous two-cell aperture of room-side air behind each
+ * MODEL-authored window when placing furniture. The existing daylight HOST
+ * proves the glass, exterior air and interior air before this step.
+ * Every test below uses actual FINAL B143 occupied voxels, not a lighting
+ * simulation. No windows => exactly the legacy positioning behavior.
+ */
+export function auditR125FixtureDaylightView(scene,daylightTargets=[]){
+ if(!Array.isArray(scene?.primitives)||!Array.isArray(daylightTargets))
+  throw Error('R125_FIXTURE_DAYLIGHT_AUDIT_INPUT');
+ if(!daylightTargets.length)
+  return {status:'NO_AUTHORED_DAYLIGHT',windowCount:0,blocked:[]};
+ const solid=new Set(scene.primitives.map(([x,y,z])=>x+','+y+','+z));
+ const blocked=[];
+ for(const t of daylightTargets){
+  if(!['front','rear','east','west'].includes(t.face)||
+     !Array.isArray(t.origin)||!Array.isArray(t.size)||
+     t.origin.length!==3||t.size.length!==3||
+     t.size.some(n=>!Number.isSafeInteger(n)||n<1))
+   throw Error('R125_FIXTURE_DAYLIGHT_BAD_TARGET');
+  const [x,y,z]=t.origin,[sx,sy,sz]=t.size;
+  const alongX=t.face==='front'||t.face==='rear',span=alongX?sx:sz;
+  const [dx,dz]=t.face==='front'?[0,1]:
+   t.face==='rear'?[0,-1]:t.face==='east'?[-1,0]:[1,0];
+  let clearRun=0,maxClearRun=0,clearColumns=0;
+  for(let u=0;u<span;u++){
+   const xx=x+(alongX?u:0)+dx,zz=z+(alongX?0:u)+dz;
+   const clear=Array.from({length:sy},(_,v)=>
+    !solid.has(xx+','+(y+v)+','+zz)).every(Boolean);
+   if(clear){clearColumns++;clearRun++;maxClearRun=Math.max(maxClearRun,clearRun);}
+   else clearRun=0;
+  }
+  if(maxClearRun<2)blocked.push({
+   zoneId:t.zoneId,face:t.face,kind:t.kind,
+   maxClearAdjacentColumns:maxClearRun,clearColumns,
+   requiredContiguousColumns:2});
+ }
+ return {status:blocked.length?'DAYLIGHT_VIEW_HOLD':'DAYLIGHT_VIEW_CLEAR',
+  windowCount:daylightTargets.length,blocked};
+}
+
 const fixtureIntents=p=>p.plan.levels.flatMap((l,li)=>
  l.spaces.flatMap((s,zi)=>s.fixtures?
   s.fixtures.map((kind,index)=>({
@@ -195,6 +236,14 @@ function tryOrigin(product,targets,intent,x,z,auditCirculation,
  const trial={...product,design,compiled,
   sourceSha256:compiled.sourceSha256,
   geometrySha256:compiled.geometrySha256};
+ // The chosen furniture LOCATION must not hide the only usable aperture
+ // of an authored glass window. Reject and try another location if it does.
+ if(product.daylightTargets?.length){
+  const view=auditR125FixtureDaylightView(compiled,product.daylightTargets);
+  if(view.status!=='DAYLIGHT_VIEW_CLEAR')
+   return rejected('MODEL_DAYLIGHT_VIEW_OCCLUDED',{
+    blockedWindows:view.blocked});
+ }
  // HOST-owned furniture may not disconnect a program floor that was
  // connected before furniture placement. Compare true 2x2 supported B143
  // pads on every authored program elevation; route/circulation checks alone
