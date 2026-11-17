@@ -96,6 +96,12 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    assert.equal(room.required.includes('fixtureDetail'),false);
    const options=authorSchema.properties.expression.anyOf;
    assert.equal(options.length,20);
+   const deep=options.filter(v=>v.properties.setbackSide.enum.includes('east')&&
+    v.properties.setbackDepth.enum.includes(8));
+   assert.ok(deep.length>=3);
+   assert.ok(deep.every(v=>v.properties.setbackDepth.enum.join(',')==='2,3,4,6,8'));
+   assert.ok(request.messages[0].content.includes('footprint.width >= 28'));
+   assert.ok(request.messages[0].content.includes('footprint.depth >= 28'));
    const frontSetbacks=options.filter(v=>v.properties.setbackSide.enum.includes('front'));
    assert.equal(frontSetbacks.length,2);
    assert.ok(frontSetbacks.every(v=>

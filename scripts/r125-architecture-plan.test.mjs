@@ -3311,3 +3311,58 @@ test('old genuine-compatible oven source gets separate strict Education material
    accent:{blockName:'glowstone',evidence:'not verified'}}}}),
   /ACCENT_ATTESTATION_REQUIRED/);
 });
+
+test('AI-selected deep upper steps have TRUE outdoor terrace rather than just facade lines',()=>{
+ for(const side of ['east','rear'])for(const depth of [6,8]){
+  const p=plan('true-mass-'+side+'-'+depth,['z','z'],
+   ['shared making room','public exhibition']);
+  p.footprint={width:32,depth:32};
+  p.entryZone='first';
+  for(const level of p.levels){
+   level.spaces[0].access='shared';
+   level.spaces[1].access='public';
+  }
+  p.expression={setbackSide:side,setbackDepth:depth,
+   roofProfile:'ridge',roofVolume:'raised',roofAxis:'x',facadeLanguage:'plain'};
+  const saved=structuredClone(p);
+  const result=compileArchitecturePlan(p,{
+   entrancePlacement:'source-accessible',upperDoorPlacement:'stair-clear'});
+  const upperWall=result.design.elements.find(e=>
+   e.id==='l1-'+(side==='east'?'east':'rear'));
+  assert.equal(side==='east'?upperWall.origin[0]:upperWall.origin[2],30-depth);
+  assert.equal(result.design.elements.filter(e=>
+   e.id.startsWith('deep-'+side+'-parapet-')).length,3);
+  assert.ok(result.design.elements.some(e=>e.id==='upper-terrace-access'));
+  const v=voxels(result.compiled),x=side==='east'?29:16,z=side==='rear'?29:16;
+  assert.equal(includes(v,x,6,z),true,'existing support slab');
+  assert.equal(includes(v,x,7,z),false,'open sky directly above supported terrace');
+  assert.equal(auditR125SourceRoutes(result).status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert.equal(auditArchitecturePlanCirculation(result).status,
+   'SOURCE_CLEARANCE_PROBES_PASS');
+  assert.equal(verifyCompiled(result.design,result.compiled),true);
+  assert.deepEqual(result.compiled.BuildPlan.operations,[]);
+  assert.equal(result.worldWrites,0);
+  assert.deepEqual(result.gates,Array(9).fill('BLOCKED'));
+  assert.deepEqual(p,saved,'source model text cannot be rewritten');
+ }
+});
+test('deep steps are restricted to genuinely wide footprints',()=>{
+ const p=plan('deep-step-guard',['z','z']);
+ p.expression={setbackSide:'east',setbackDepth:8,roofProfile:'ridge',
+  roofVolume:'raised',roofAxis:'x',facadeLanguage:'plain'};
+ p.footprint={width:27,depth:32};
+ assert.throws(()=>validateArchitecturePlan(p),/R125_PLAN_EXPRESSION_SETBACK/);
+ p.footprint.width=28;
+ assert.equal(validateArchitecturePlan(p),true);
+ p.expression.setbackSide='rear';
+ p.footprint.depth=27;
+ assert.throws(()=>validateArchitecturePlan(p),/R125_PLAN_EXPRESSION_SETBACK/);
+ p.footprint.depth=28;
+ assert.equal(validateArchitecturePlan(p),true);
+ p.expression.setbackDepth=7;
+ assert.throws(()=>validateArchitecturePlan(p),/R125_PLAN_EXPRESSION_SETBACK/);
+ p.expression.setbackDepth=3;
+ const previous=compileArchitecturePlan(p);
+ assert.equal(previous.design.elements.some(e=>e.id.startsWith(
+  'deep-rear-parapet-')),false);
+});

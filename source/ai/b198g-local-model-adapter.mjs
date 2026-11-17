@@ -287,7 +287,7 @@ const r125Expression={
  anyOf:[
   // Flat massing, including real outdoor court OR upper setback.
   r125Expr({roof:['flat'],side:['none'],depth:[0],axis:['x','z']}),
-  r125Expr({roof:['flat'],side:['east','rear'],depth:[2,3,4],
+  r125Expr({roof:['flat'],side:['east','rear'],depth:[2,3,4,6,8],
    axis:['x','z']}),
   // New author-selected front-facing two-cell upper terrace, real parapet.
   r125Expr({roof:['flat'],side:['front'],depth:[2],axis:['x','z']}),
@@ -311,7 +311,7 @@ const r125Expression={
   r125Expr({roof:['ridge','sawtooth'],side:['none'],depth:[0],
    axis:['x','z'],volume:'required'}),
   r125Expr({roof:['ridge','sawtooth'],side:['east','rear'],
-   depth:[2,3,4],axis:['x','z'],volume:'required'}),
+   depth:[2,3,4,6,8],axis:['x','z'],volume:'required'}),
   r125Expr({roof:['ridge','sawtooth','hip'],side:['front'],
    depth:[2],axis:['x','z'],volume:'required'}),
   // Explicit AI-authored narrow-ridge geometry: no automatic changes to
@@ -319,7 +319,7 @@ const r125Expression={
   r125Expr({roof:['ridge'],side:['none'],depth:[0],
    axis:['x','z'],volume:'required',steepRidge:true}),
   r125Expr({roof:['ridge'],side:['east','rear'],
-   depth:[2,3,4],axis:['x','z'],volume:'required',steepRidge:true}),
+   depth:[2,3,4,6,8],axis:['x','z'],volume:'required',steepRidge:true}),
   r125Expr({roof:['ridge'],side:['none'],depth:[0],
    axis:['x','z'],volume:'required',corner:'required'}),
   // Raised pitched eaves are a DISTINCT author-selected geometry variant;
@@ -327,12 +327,12 @@ const r125Expression={
   r125Expr({roof:['ridge','sawtooth'],side:['none'],depth:[0],
    axis:['x','z'],volume:'required',pitchedEave:true}),
   r125Expr({roof:['ridge','sawtooth'],side:['east','rear'],
-   depth:[2,3,4],axis:['x','z'],volume:'required',pitchedEave:true}),
+   depth:[2,3,4,6,8],axis:['x','z'],volume:'required',pitchedEave:true}),
   // Author-selected hipped roof, not a housing-only fixed template.
   r125Expr({roof:['hip'],side:['none'],depth:[0],axis:['x','z'],volume:'required'}),
-  r125Expr({roof:['hip'],side:['east','rear'],depth:[2,3,4],axis:['x','z'],volume:'required'}),
+  r125Expr({roof:['hip'],side:['east','rear'],depth:[2,3,4,6,8],axis:['x','z'],volume:'required'}),
   r125Expr({roof:['hip'],side:['none'],depth:[0],axis:['x','z'],volume:'required',pitchedEave:true}),
-  r125Expr({roof:['hip'],side:['east','rear'],depth:[2,3,4],axis:['x','z'],volume:'required',pitchedEave:true}),
+  r125Expr({roof:['hip'],side:['east','rear'],depth:[2,3,4,6,8],axis:['x','z'],volume:'required',pitchedEave:true}),
   // Monitor requires full raised volume, x axis, NO upper setback.
   // Last-level x partition and single-level daylight variants remain
   // checked by the independent HOST; unsupported source is still HOLD.
@@ -414,12 +414,12 @@ export function createR125ArchitecturePlanLocalAdapter({
   'Optional per-room daylight: wide-bay|clerestory|paired-bays. Paired-bays asks the GENERIC HOST to place TWO genuine 3x2 windows in one room, preferably on separate exterior wall faces (or separated by solid wall on one face). Select only when the model-authored room actually benefits from two useful daylight or viewing positions and has adequate exposed wall; if no safe second opening is possible, the SOURCE holds instead of inventing fake glazing. To omit glazing OMIT the daylight key entirely; never emit daylight:none (4x2 or 5x1 real glass). Prefer appropriate openings for useful living, retail or workshop interiors. The generic HOST locates a true exterior wall with solid sill and lintel, unobstructed outside air and room-side air; unsupported bays HOLD with no silent fallback. No coordinates or fake daylight.',
   'materials EXACT floor:wood|stone|concrete, wall:concrete|stone|wood|metal, roof:stone|metal|wood|concrete. Choose a coherent but legible contrast between main walls, roof and flooring when useful to the brief; changing material names alone is NOT architectural originality. Materials are semantic categories: Education preview block IDs are not guaranteed user-verified.',
   'entryZone optional "first" or "second"; for a ground-floor z split, only "first" is possible at the front.',
-  'Emit at most ONE expression object. Put roofVolume inside that SAME object alongside all mandatory fields; never append a second expression object containing only roofVolume. Optional expression EXACT mandatory fields {setbackSide,setbackDepth,roofProfile,roofAxis,facadeLanguage}. setbackSide:none|east|rear|front; none requires setbackDepth:0; east/rear requires two levels and setbackDepth:2|3|4. front requires TWO levels and EXACT setbackDepth:2. A front setback creates a real street-facing upper terrace, low edge parapet and a two-wide opening from the upper room; it is not merely a facade color.',
+  'Emit at most ONE expression object. Put roofVolume inside that SAME object alongside all mandatory fields; never append a second expression object containing only roofVolume. Optional expression EXACT mandatory fields {setbackSide,setbackDepth,roofProfile,roofAxis,facadeLanguage}. setbackSide:none|east|rear|front; none requires setbackDepth:0; east/rear requires two levels and setbackDepth:2|3|4|6|8. Depth 6 or 8 is for REAL stepped massing and requires footprint.width >= 28 for east or footprint.depth >= 28 for rear. Use only when the smaller upper rooms still support their authored equipment and connected stairs. front requires TWO levels and EXACT setbackDepth:2. A front setback creates a real street-facing upper terrace, low edge parapet and a two-wide opening from the upper room; it is not merely a facade color.',
   'roofProfile:flat|ridge|sawtooth|split-monitor|hip. roofAxis:x|z. facadeLanguage:plain|fins|screen|recessed-portico. For EVERY pitched roof (ridge, sawtooth, hip or split-monitor), include expression roofVolume:"raised". A flat solid cap below thick pitched bands looks heavy and hides the actual ceiling. Only flat roofs omit roofVolume. You still independently choose roof family, axis and spatial program. On a raised ridge, sawtooth or hip, you MAY explicitly choose roofOverhang:"one-block" to create real continuous eaves beyond all four exterior faces, if it improves silhouette and weather-sheltered appearance; never emit roofOverhang on flat roofs or with rearCornerCut. A split-monitor MUST include roofVolume:"raised", roofAxis:"x", no setback and last level splitAxis:"x". Do not select conflicting options.',
   'Optional expression rearCourt:{width:6..14,depth:4..10,alignment:"west"|"center"|"east",entrySide:"west"|"east",access:"paved"} is a REAL U-shaped open-air rear court; its location, wing widths, daylight and two-wide indoor entry come from YOUR design. ONE level only with flat roof (omit roofVolume) OR ridge roof with roofVolume:"raised", plain facade, no upper setback, no eaves and no other courtyard. A raised ridge is fully clipped above the open court and three inner walls are sealed to its true height. Require footprint.width >= court.width+12 and footprint.depth >= court.depth+14. It removes a central roof/wall volume, and the generic HOST must prove outdoor paving and an uninterrupted inside-to-court route. Choose U massing when a substantial shared outdoor public/work area helps the brief. It is NOT a compulsory style for retail or any other building type.',
   'Optional expression frontCornerCut:{width:3..8,depth:3..8,side:"east"|"west",access:"paved"} creates a true front open-sky L-shaped court with outdoor floor and indoor two-wide access. Use only ONE level, flat roof, plain facade, no setback or rearCornerCut, footprint width >= 2*cut.width+8, depth >= cut.depth+10. Keep the front main entrance outside the removed corner. Choose it only for a meaningful spatial program, not decoration.',
   'Optional expression rearCornerCut:{width:3..8,depth:3..8,side:"east"|"west",access:"paved"} creates a REAL open-sky rear L-shaped cut, with usable paved court and genuine two-wide doorway. It requires setbackSide:none, setbackDepth:0, and either flat roof OR roofProfile:ridge with roofVolume:"raised" (no eaves). A 6..8 deep/wide recess makes a substantial architectural courtyard only when footprint is sufficiently large (usually at least 24x24), and when it does not destroy the interior program. Smaller 3..5 recesses remain supported. Do not choose a court for mere decoration: connect it to the intended use and circulation; if the site is tight, omit the cut entirely. No sawtooth, hip or split-monitor corner in this local author schema. Do not invent unsupported expression keys.',
-  'CRITICAL SETBACK CHECK: decide levels.length FIRST. For ONE level, expression.setbackSide MUST be "none" and setbackDepth MUST be 0. For TWO levels, either "none"+0, ("east"|"rear") with depth 2|3|4, or "front" with depth exactly 2. NEVER use an upper-story setback in a one-story building. The SOURCE validator refuses mismatches without a retry. This is not a template: freely select valid roof, site, program and massing.',
+  'CRITICAL SETBACK CHECK: decide levels.length FIRST. For ONE level, expression.setbackSide MUST be "none" and setbackDepth MUST be 0. For TWO levels, either "none"+0, ("east"|"rear") with depth 2|3|4|6|8 (6/8 needs respective footprint dimension >= 28), or "front" with depth exactly 2. NEVER use an upper-story setback in a one-story building. The SOURCE validator refuses mismatches without a retry. This is not a template: freely select valid roof, site, program and massing.',
   'For a new design actively SELECT an expression appropriate to the requested building: a real roof profile, orientation, and a facade language, not just a different title, material, or footprint. Prefer a raised roof volume when a pitched design is functional. Plain flat boxes only if the architectural program genuinely calls for them. For residential versus retail versus research briefs seek DIFFERENT spatial organizations, not a hardcoded building-type template.',
   'Author each room access:public|shared|staff. Public rooms serve visitors; staff rooms are restricted; shared rooms can host visitor circulation. Every public or shared room must be reachable from the main entrance WITHOUT crossing staff-only rooms in x-split, z-split, or two-level plans. A z-split enters FIRST; x-split can use an explicitly authored entryZone:first or second. Choose the access labels and entryZone to match the requested activities, not a fixed template. SOURCE tests exclude staff-room standing pads; if no safe route exists, the original design is rejected without any repair. This is author-chosen use and access, NOT a hardcoded building type. SOURCE will refuse this known conflict; it cannot certify all visitor traffic or real gameplay.',
   "REAL ROOM BUDGET: T-split has smaller secondary rooms; reserve two-wide doors, stair and service corridors. Counters, workbenches, displays, storage, desks occupy about 3x1; electronics, seating, washbasin, oven about 3x2; beds about 3x4. EACH fixture needs its own two-wide source-reachable standing space. A 16-wide two-level x-split with an east setback can leave a 3-wide control room; multiple fixtures may then fail. Use the SMALLEST functional footprint rather than automatic 30..32-wide empty halls, but do not shrink useful rooms or omit indispensable equipment merely to pass SOURCE. Prioritize a visible central activity and actual daylight.",
@@ -444,7 +444,7 @@ export function createR125ArchitecturePlanLocalAdapter({
      messages:[{role:'system',content:system},
       {role:'user',content:JSON.stringify({architecturalRequest:prompt,
        sourceOnly:true,authorSemanticPlan:true,
-       crossFieldRule:'Decide levels first. With 1 level: setbackSide=none and setbackDepth=0. Only with 2 levels: east/rear may have depth 2, 3 or 4. Invalid pair is rejected without retry.'})}]})
+       crossFieldRule:'Decide levels first. With 1 level: setbackSide=none and setbackDepth=0. Only with 2 levels: east/rear may have depth 2, 3, 4, 6 or 8 (6/8 needs footprint width/depth >= 28). Invalid pair is rejected without retry.'})}]})
    });
    if(!res||res.ok!==true)
     refuse('LOCAL_HTTP_'+String(res?.status??'UNKNOWN'));

@@ -189,7 +189,9 @@ export function validateArchitecturePlan(p){
    ((e.setbackSide==='none'&&e.setbackDepth===0)||
     (e.setbackSide==='front'&&p.levels.length===2&&e.setbackDepth===2)||
     (['east','rear'].includes(e.setbackSide)&&
-     p.levels.length===2&&[2,3,4].includes(e.setbackDepth))),
+     p.levels.length===2&&[2,3,4,6,8].includes(e.setbackDepth)&&
+      (e.setbackDepth<=4||(e.setbackSide==='east'?
+       p.footprint.width>=28:p.footprint.depth>=28)))),
    'EXPRESSION_SETBACK');
   check(['flat','ridge','sawtooth','split-monitor','hip'].includes(e.roofProfile)&&
    ['x','z'].includes(e.roofAxis)&&
@@ -853,6 +855,25 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
   // Author-chosen street-facing terrace on the existing upper slab.
   // Three 1-cell parapet segments frame the outer edge and the true door
   // remains open. Old east/rear and all earlier designs are unchanged.
+  // Genuine deep upper retreat, only when the MODEL authored depth 6/8.
+  // Three real one-high outer parapets; never interfere with inner doorway.
+  // Shallow historical works are byte-identical, and railings are NOT
+  // Minecraft player-safety certification.
+  if(l===1&&setbackDepth>=6&&setbackSide==='east'){
+   box('deep-east-parapet-outer','add',wall,
+    [w-2,y,1],[1,1,d-2]);
+   box('deep-east-parapet-front','add',wall,
+    [x1+1,y,1],[w-x1-3,1,1]);
+   box('deep-east-parapet-rear','add',wall,
+    [x1+1,y,d-2],[w-x1-3,1,1]);
+  }else if(l===1&&setbackDepth>=6&&setbackSide==='rear'){
+   box('deep-rear-parapet-outer','add',wall,
+    [1,y,d-2],[w-2,1,1]);
+   box('deep-rear-parapet-west','add',wall,
+    [1,y,z1+1],[1,1,d-z1-3]);
+   box('deep-rear-parapet-east','add',wall,
+    [w-2,y,z1+1],[1,1,d-z1-3]);
+  }
   if(l===1&&setbackSide==='front'){
    box('front-terrace-parapet-street','add',wall,
     [x0,y,z0-setbackDepth],[x1-x0+1,1,1]);
