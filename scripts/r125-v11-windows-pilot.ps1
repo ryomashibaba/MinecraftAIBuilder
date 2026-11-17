@@ -336,7 +336,14 @@ if ($customBrief) {
   }
   $manifest = Get-Content -LiteralPath $manifestFile -Raw -Encoding UTF8 |
    ConvertFrom-Json
-  $actualArtSha = (Get-FileHash -LiteralPath $contact -Algorithm SHA256).Hash.ToLowerInvariant()
+  # Works on native Windows PowerShell 5.1 even in an isolated
+  # LOCALAPPDATA, where Get-FileHash module auto-loading may be unavailable.
+  $hashObject = [System.Security.Cryptography.SHA256]::Create()
+  $imageStream = [System.IO.File]::OpenRead($contact)
+  try { $artBytesHash = $hashObject.ComputeHash($imageStream) }
+  finally { $imageStream.Dispose(); $hashObject.Dispose() }
+  $actualArtSha = ([System.BitConverter]::ToString($artBytesHash)).
+   Replace('-','').ToLowerInvariant()
   if ($manifest.schema -cne 'r125-b143-offline-static-review-v1' -or
       $manifest.sourceSha256 -cne $diag.sourceSha256 -or
       $manifest.geometrySha256 -cne $diag.geometrySha256 -or
