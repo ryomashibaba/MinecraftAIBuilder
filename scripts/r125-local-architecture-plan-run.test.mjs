@@ -210,6 +210,8 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    assert.ok(request.messages[0].content.includes('thirdRoomLink:"first-and-second"'));
    assert.ok(request.messages[0].content.includes('directly from first into third'));
    assert.ok(request.messages[0].content.includes('ESSENTIAL ACTIVITY COVERAGE'));
+   assert.ok(request.messages[0].content.includes('staff-only FIRST upper room'));
+   assert.ok(request.messages[0].content.includes('front terrace is NOT a substitute path'));
    assert.ok(request.messages[0].content.length<=15000,
     'bounded 14B local model instructions should avoid repeated design constraints');
    assert.ok(request.messages[0].content.indexOf('ESSENTIAL ACTIVITY COVERAGE')<
