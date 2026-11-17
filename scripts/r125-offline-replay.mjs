@@ -168,7 +168,7 @@ export function auditR125ExplicitActivityProxy(requestedBrief,fixtureTargets=[])
  * geometry. No V6 placement patch, retry, model I/O or Minecraft contact.
  * A SOURCE candidate is never an ART pass or world-construction approval.
  */
-export function diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail='legacy',roofGlazing='none',roofMassing='default',fixtureArt='none',requestedBrief=null}={}){
+export function diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail='legacy',roofGlazing='none',roofMassing='default',fixtureArt='none',fixtureForm='default',requestedBrief=null}={}){
  if(typeof raw!=='string'||raw.length<1||raw.length>60000)
   fail('PLAN_RAW_INPUT_SIZE');
  const base={
@@ -199,7 +199,8 @@ export function diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail='legacy',ro
    ...(hostDetail!=='legacy'?{hostDetail}:{}),
    ...(roofGlazing!=='none'?{roofGlazing}:{}),
    ...(roofMassing!=='default'?{roofMassing}:{}),
-    ...(fixtureArt!=='none'?{fixtureArt}:{})};
+    ...(fixtureArt!=='none'?{fixtureArt}:{}),
+    ...(fixtureForm!=='default'?{fixtureForm}:{})};
   const built=compileArchitecturePlan(original,hostPolicy);
   if(built.worldContacts!==0||built.worldWrites!==0||
      built.constructionApproved!==false||
@@ -259,6 +260,7 @@ export function diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail='legacy',ro
    visualHighRiskCount:critique.highRiskCount,
    ...(built.spatialDetail?{spatialDetail:built.spatialDetail}:{}),
     ...(built.activityInlayReview?{activityInlayReview:built.activityInlayReview}:{}),
+    ...(built.fixtureFormReview?{fixtureFormReview:built.fixtureFormReview}:{}),
    // Only a trusted B143 source candidate, NOT an executable BuildPlan.
    sourceDesign:built.design};
  }catch(error){

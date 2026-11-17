@@ -9,7 +9,7 @@
 import {createHash} from 'node:crypto';
 import {compileDesign,verifyCompiled,SCHEMA as B143} from './b143-building-dsl.mjs';
 import {auditR125SourceRoutes} from './r125-source-routes.mjs';
-import {addAuthoredRoomFixtures,addR125ActivityFloorInlays} from './r125-room-fixtures.mjs';
+import {addAuthoredRoomFixtures,addR125ActivityFloorInlays,restyleR125FixtureForms} from './r125-room-fixtures.mjs';
 import {addAuthoredRoomDaylight} from './r125-room-daylight.mjs';
 import {detailR125Envelope} from './r125-spatial-detail.mjs';
 import {addR125HipRoof} from './r125-hip-roof.mjs';
@@ -418,10 +418,11 @@ export function assessR125AuthoredRoomCapacity(plan){
 
 export function compileArchitecturePlan(plan,{
  entrancePlacement='legacy',upperDoorPlacement='legacy',hostDetail='legacy',
- roofGlazing='none',roofMassing='default',fixtureArt='none'
+ roofGlazing='none',roofMassing='default',fixtureArt='none',fixtureForm='default'
 }={}){
  check(['legacy','spatial-v1','clear-front-fins'].includes(hostDetail),'HOST_DETAIL_MODE');
  check(['none','activity-inlays'].includes(fixtureArt),'FIXTURE_ART_MODE');
+ check(['default','readable-v1'].includes(fixtureForm),'FIXTURE_FORM_MODE');
  check(fixtureArt==='none'||Boolean(plan?.expression),'FIXTURE_ART_REQUIRES_EXPRESSION');
  // Optional ART candidate only. Old authors and their original SOURCE are untouched.
  check(['none','sawtooth-ribbon'].includes(roofGlazing),'ROOF_GLAZING_MODE');
@@ -450,7 +451,7 @@ export function compileArchitecturePlan(plan,{
  check(upperDoorPlacement==='legacy'||Boolean(plan.expression),
   'UPPER_DOOR_REQUIRES_EXPRESSION');
  const original=structuredClone(plan);
- if(original.expression)return compileExpressiveArchitecturePlan(original,{entrancePlacement,upperDoorPlacement,hostDetail,roofGlazing,roofMassing,fixtureArt});
+ if(original.expression)return compileExpressiveArchitecturePlan(original,{entrancePlacement,upperDoorPlacement,hostDetail,roofGlazing,roofMassing,fixtureArt,fixtureForm});
  const {width:w,depth:d}=original.footprint;
  const count=original.levels.length;
  const floor=original.materials.floor,wall=original.materials.wall,
@@ -683,7 +684,7 @@ export function auditArchitecturePlanCirculation(product){
  * identically without expression; do NOT change the old pinned Qwen 14B 2620-
  * voxel result or its source digest. No typology-specific templates.
  */
-function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',upperDoorPlacement='legacy',hostDetail='legacy',roofGlazing='none',roofMassing='default',fixtureArt='none'}={}){
+function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',upperDoorPlacement='legacy',hostDetail='legacy',roofGlazing='none',roofMassing='default',fixtureArt='none',fixtureForm='default'}={}){
  const {width:w,depth:d}=original.footprint;
  const count=original.levels.length;
  const {setbackSide,setbackDepth,roofProfile,roofAxis,facadeLanguage,
@@ -1323,8 +1324,10 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
   {auditCirculation:auditArchitecturePlanCirculation});
  const furnished=addAuthoredRoomFixtures(daylit,
   {auditCirculation:auditArchitecturePlanCirculation});
+ const styled=fixtureForm==='readable-v1'?
+  restyleR125FixtureForms(furnished,{auditCirculation:auditArchitecturePlanCirculation}):furnished;
  return fixtureArt==='activity-inlays'?
-  addR125ActivityFloorInlays(furnished):furnished;
+  addR125ActivityFloorInlays(styled):styled;
 }
 
 /**

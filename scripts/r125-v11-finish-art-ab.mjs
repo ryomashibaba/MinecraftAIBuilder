@@ -1,7 +1,7 @@
 /**
  * MAB V11: ONE saved genuine ArchitecturePlan -> actual 8-view B143 ART A/B.
  * No new model calls, hidden corrections, model-original edits, or world IO.
- * Only opt-in generic HOST roof/inlay research already implemented is used.
+ * Only generic opt-in HOST workstation silhouettes are tested; no roof or floor styling.
  * Source failure is HOLD, not an auto retry or a claimed improvement.
  */
 import fs from 'node:fs';
@@ -47,12 +47,7 @@ export function saveR125FinishAB({rawPath,sourcePath,outDir}={}){
     savedScene.worldContacts!==0||
     savedScene.BuildPlan?.operations?.length!==0)
   fail('BASELINE_B143_ORIGINAL_MISMATCH');
- const e=plan.expression;
- const chooseRoof=e?.roofProfile==='ridge'&&
-  e.roofVolume==='raised'&&e.ridgeProfile===undefined&&
-  e.rearCourt===undefined&&e.rearCornerCut===undefined;
- const policy={fixtureArt:'activity-inlays',
-  ...(chooseRoof?{roofMassing:'steep-ridge-review'}:{})};
+ const policy={fixtureForm:'readable-v1'};
  const candidate=diagnoseR125ArchitecturePlanOriginal(original,policy);
  if(candidate.status!=='B143_SOURCE_CANDIDATE_ART_HOLD'||
     candidate.sourceVerified!==true||
@@ -97,7 +92,7 @@ export function saveR125FinishAB({rawPath,sourcePath,outDir}={}){
   candidateStatus:candidate.status,
   changedVoxels:ab.finalVoxelDifference,
   verifiedEquipmentCount:candidate.modelChosenFixtures,
-  activityInlayReview:candidate.activityInlayReview??null,
+  fixtureFormReview:candidate.fixtureFormReview??null,
   photo:'ART_AB/'+ab.preview.file,
   photoSha256:ab.preview.sha256,
   educationMaterials:{used,unverified,

@@ -526,3 +526,84 @@ export function addR125ActivityFloorInlays(product){
    fixtureLocationsUnchanged:true,minecraftWalking:'NOT_TESTED',
    modelCalls:0,worldWrites:0}};
 }
+
+// Opt-in generic equipment silhouettes in REAL, frozen B143 voxels.
+// Retain the authored room, roles, station positions and element budget.
+// Shapes remain in the same 3-high station envelope; no world operations.
+export function restyleR125FixtureForms(product,{auditCirculation}={}){
+ if(!Array.isArray(product?.fixtureTargets)||!product.fixtureTargets.length||
+    typeof auditCirculation!=='function)throw Error('R125_FIXTURE_FORM_INPUT');
+ const shape={
+  oven:{hood:[0,2,1,3,1,1]},
+  display:{glass:[1,1,0,1,1,1]},
+  storage:{'bottom-shelf':[0,1,0,3,1,1]},
+  seating:{back:[0,1,1,3,2,1]},
+  workbench:{'leg-b':[2,0,0,1,3,1]},
+  electronics:{'rack-controller':[2,2,0,1,1,1]},
+  desk:{'desk-display':[0,2,0,2,1,1]},
+  washbasin:{'basin-tap':[1,2,0,1,1,1]},
+  bed:{pillow:[1,2,2,2,1,1]}
+ };
+ const edits=new Map(),eligible=[];
+ for(const t of product.fixtureTargets){
+  let count=0;
+  for(const [suffix,[dx,dy,dz,sx,sy,sz]] of Object.entries(shape[t.kind]??{})){
+   const id=t.id+'-'+suffix;
+   const e=product.design.elements.find(e=>e.id===id);
+   if(!e||e.mode!=='add'||e.repeat)continue;
+   const [x,y,z]=t.origin,turned=t.orientation==='quarter-turn';
+   const origin=turned?[x+dz,y+dy,z+3-(dx+sx)]:[x+dx,y+dy,z+dz];
+   const size=turned?[sz,sy,sx]:[sx,sy,sz];
+   edits.set(id,{origin,size});count++;
+  }
+  if(count)eligible.push({id:t.id,kind:t.kind});
+ }
+ if(!edits.size)throw Error('R125_FIXTURE_FORM_NO_ELIGIBLE_EQUIPMENT');
+ const design={...product.design,
+  elements:product.design.elements.map(e=>edits.has(e.id)?
+   {...e,...edits.get(e.id)}:e)};
+ const compiled=compileDesign(design);
+ if(design.elements.length!==product.design.elements.length||
+    !verifyCompiled(design,compiled)||compiled.worldContacts!==0||
+    compiled.BuildPlan?.operations?.length!==0)
+  throw Error('R125_FIXTURE_FORM_COMPILER_HOLD');
+ const oldCells=new Map(product.compiled.primitives.map(v=>[v.slice(0,3).join(','),v[3]]));
+ const newCells=new Map(compiled.primitives.map(v=>[v.slice(0,3).join(','),v[3]]));
+ const different=new Set();
+ for(const [key,m] of oldCells)if(newCells.get(key)!==m)different.add(key);
+ for(const [key,m] of newCells)if(oldCells.get(key)!==m)different.add(key);
+ if(!different.size)throw Error('R125_FIXTURE_FORM_NOT_PHYSICALLY_DIFFERENT');
+ // Forbid ANY voxel drift outside pre-existing authored station envelopes.
+ for(const key of different){
+  const [x,y,z]=key.split(',').map(Number);
+  if(!product.fixtureTargets.some(t=>x>=t.origin[0]&&
+    x<t.origin[0]+t.size[0]&&y>=t.origin[1]&&y<t.origin[1]+t.size[1]&&
+    z>=t.origin[2]&&z<t.origin[2]+t.size[2]))
+   throw Error('R125_FIXTURE_FORM_OUTSIDE_EXISTING_EQUIPMENT');
+ }
+ const candidate={...product,design,compiled,sourceSha256:compiled.sourceSha256,
+  geometrySha256:compiled.geometrySha256};
+ const routes=auditR125SourceRoutes(candidate,
+  {featureTargets:product.fixtureTargets});
+ const movement=auditCirculation(candidate);
+ const daylight=auditR125FixtureDaylightView(compiled,product.daylightTargets??[]);
+ if(routes.status!=='SOURCE_ROUTES_REACH_ALL_ZONES'||
+    routes.featureAccess.some(x=>!x.reachableFromEntrance)||
+    movement.status!=='SOURCE_CLEARANCE_PROBES_PASS'||
+    daylight.status==='DAYLIGHT_VIEW_HOLD')
+  throw Error('R125_FIXTURE_FORM_ROUTE_HOLD');
+ const floorYs=product.program.map(x=>x.standingFloorY);
+ const oldTopology=auditInteriorTopology(product).elevationConnectivity;
+ const newTopology=auditInteriorTopology(candidate).elevationConnectivity;
+ if(floorYs.some(y=>oldTopology.find(x=>x.standingY===y)?.componentCount!==
+    newTopology.find(x=>x.standingY===y)?.componentCount))
+  throw Error('R125_FIXTURE_FORM_FLOOR_TOPOLOGY_HOLD');
+ return {...candidate,fixtureFormReview:{
+  status:'SOURCE_EQUIPMENT_SILHOUETTES_ART_HOLD',
+  profile:'readable-v1',modifiedParts:edits.size,
+  changedCells:different.size,modelChosenStationCount:product.fixtureTargets.length,
+  modifiedStations:eligible,modelOriginalUnchanged:true,
+  fixtureRolesAndPositionsUnchanged:true,elementCountUnchanged:true,
+  realMinecraftEquipmentOperation:'NOT_TESTED',humanArt:'NOT_REVIEWED',
+  modelCalls:0,worldWrites:0}};
+}

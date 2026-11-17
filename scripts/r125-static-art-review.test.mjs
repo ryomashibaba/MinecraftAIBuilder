@@ -228,8 +228,8 @@ test('one saved authored concept becomes SOURCE-checked activity and roof ART A/
   const r=saveR125FinishAB({rawPath:rawFile,sourcePath:sourceFile,outDir:out});
   assert.equal(r.originalSha256,hash(raw));
   assert.equal(r.baselineSourceSha256,originalDiagnosis.sourceSha256);
-  assert.equal(r.policy.roofMassing,'steep-ridge-review');
-  assert.equal(r.policy.fixtureArt,'activity-inlays');
+  assert.equal(r.policy.fixtureForm,'readable-v1');
+  assert.equal(r.fixtureFormReview.profile,'readable-v1');
   assert.equal(r.modelCalls,0);assert.equal(r.worldWrites,0);
   assert.deepEqual(r.nineWorldGates,Array(9).fill('BLOCKED'));
   assert.equal(r.art,'HUMAN_REVIEW_REQUIRED_NOT_ACCEPTED');

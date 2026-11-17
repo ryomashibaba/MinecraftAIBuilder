@@ -143,7 +143,7 @@ if ($floorReport.originalSha256 -cne $actualOriginalHash -or
 }
 # Source-gated same-model ART A/B. Any unsupported activity policy is
 # logged as HOLD without hiding the original two-floor evidence.
-$finishOut = Join-Path $one 'FINISH_ART_AB_V1'
+$finishOut = Join-Path $one 'FIXTURE_FORM_ART_AB'
 $finishJSON = Join-Path $finishOut 'FINISH_AB_REPORT.json'
 $finishPNG = Join-Path $finishOut 'ART_AB\AB_OLD_LEFT_NEW_RIGHT.png'
 if (-not (Test-Path -LiteralPath $finishOut)) {
@@ -163,7 +163,7 @@ if (Test-Path -LiteralPath $finishJSON -PathType Leaf) {
      [int]$finishReport.worldWrites -ne 0) {
   throw 'V11_FINISH_ART_PROVENANCE_HOLD'
  }
- Write-Output ('V11_FINISH_ART_AB=' + $finishPNG)
+ Write-Output ('V11_FIXTURE_FORM_ART_AB=' + $finishPNG)
  Write-Output ('V11_FINISH_ART_UNVERIFIED=' + ($finishReport.educationMaterials.unverified -join ','))
 }
 Write-Output ('V11_ART_FLOORS=' + $floorPNG)

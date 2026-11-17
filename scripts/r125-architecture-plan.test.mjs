@@ -3228,3 +3228,37 @@ test('B143 160-element near-capacity activity chooses original oven first withou
   design:fullDesign,compiled:compileDesign(fullDesign)}),
  /R125_PLAN_ACTIVITY_INLAY_ELEMENT_BUDGET/);
 });
+
+test('readable-v1 HOST creates distinct equipment silhouettes without changing model roles',()=>{
+ const p=plan('real-device-art-test',['x'],['baking service','exhibition']);
+ p.footprint={width:30,depth:30};
+ p.expression={setbackSide:'none',setbackDepth:0,
+  roofProfile:'ridge',roofAxis:'x',roofVolume:'raised',facadeLanguage:'plain'};
+ p.levels[0].spaces[0].fixtures=['oven','workbench'];
+ p.levels[0].spaces[1].fixtures=['display'];
+ const saved=structuredClone(p),opts={entrancePlacement:'source-accessible'};
+ const a=compileArchitecturePlan(p,opts);
+ const b=compileArchitecturePlan(p,{...opts,fixtureForm:'readable-v1'});
+ assert.deepEqual(p,saved);
+ assert.deepEqual(b.fixtureTargets,a.fixtureTargets);
+ assert.notEqual(b.geometrySha256,a.geometrySha256);
+ assert(b.fixtureFormReview.changedCells>0);
+ assert.equal(b.fixtureFormReview.elementCountUnchanged,true);
+ assert.equal(b.fixtureFormReview.modelOriginalUnchanged,true);
+ const oldHood=a.design.elements.find(e=>e.id.endsWith('-hood')&&e.id.startsWith('fx-'));
+ const newHood=b.design.elements.find(e=>e.id===oldHood.id);
+ assert.equal(oldHood.size[2],2);
+ assert.equal(newHood.size[2],1);
+ assert.equal(b.design.elements.length,a.design.elements.length);
+ assert.equal(auditR125SourceRoutes(b,{featureTargets:b.fixtureTargets}).status,
+  'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(auditArchitecturePlanCirculation(b).status,
+  'SOURCE_CLEARANCE_PROBES_PASS');
+ assert.equal(verifyCompiled(b.design,b.compiled),true);
+ assert.deepEqual(b.compiled.BuildPlan.operations,[]);
+ assert.equal(b.worldWrites,0);
+ assert.deepEqual(b.gates,Array(9).fill('BLOCKED'));
+ assert.equal(compileArchitecturePlan(p,opts).sourceSha256,a.sourceSha256);
+ assert.throws(()=>compileArchitecturePlan(p,{...opts,fixtureForm:'auto'}),
+  /R125_PLAN_FIXTURE_FORM_MODE/);
+});
