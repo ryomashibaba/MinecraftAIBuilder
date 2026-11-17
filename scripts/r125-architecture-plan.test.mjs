@@ -3376,3 +3376,45 @@ test('deep steps are restricted to genuinely wide footprints',()=>{
  assert.equal(previous.design.elements.some(e=>e.id.startsWith(
   'deep-rear-parapet-')),false);
 });
+
+test('V11 expanded station is a model-selected, real SOURCE geometry change',()=>{
+ const p=plan('model-room-scale',['x'],['making','showing']);
+ p.footprint={width:30,depth:28};
+ p.levels[0].spaces[0].fixtures=['workbench'];
+ p.levels[0].spaces[0].fixtureScale='expanded';
+ p.levels[0].spaces[1].fixtures=['display'];
+ const unscaled=structuredClone(p);
+ delete unscaled.levels[0].spaces[0].fixtureScale;
+ assert.equal(validateArchitecturePlan(p),true);
+ const old=compileArchitecturePlan(unscaled);
+ const built=compileArchitecturePlan(p);
+ assert.deepEqual(built.fixtureTargets,old.fixtureTargets);
+ assert.notEqual(built.geometrySha256,old.geometrySha256);
+ assert.equal(built.roomScaleReview.changes[0].scaleOwner,'MODEL');
+ assert.equal(verifyCompiled(built.design,built.compiled),true);
+ assert.equal(auditArchitecturePlanCirculation(built).status,
+  'SOURCE_CLEARANCE_PROBES_PASS');
+ assert.equal(auditR125SourceRoutes(built,{featureTargets:built.fixtureTargets}).status,
+  'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(built.worldWrites,0);
+ assert.deepEqual(built.gates,Array(9).fill('BLOCKED'));
+ assert.deepEqual(built.compiled.BuildPlan.operations,[]);
+ const invalid=structuredClone(p);
+ invalid.levels[0].spaces[0].fixtureScale='giant';
+ assert.throws(()=>validateArchitecturePlan(invalid),/R125_PLAN_SPACE_FIXTURE_SCALE/);
+});
+test('V11 room-scale HOST art study preserves model-authored original',()=>{
+ const p=plan('host-room-scale',['x'],['making','showing']);
+ p.footprint={width:30,depth:28};
+ p.levels[0].spaces[0].fixtures=['workbench'];
+ p.levels[0].spaces[1].fixtures=['display'];
+ const original=JSON.stringify(p),small=compileArchitecturePlan(p);
+ const study=compileArchitecturePlan(p,{fixtureForm:'room-scale-v1'});
+ assert.equal(JSON.stringify(p),original);
+ assert.equal(study.planSha256,small.planSha256);
+ assert.ok(study.roomScaleReview.changes.length>=1);
+ assert.ok(study.roomScaleReview.changes.every(c=>c.scaleOwner==='HOST_REVIEW'));
+ assert.notEqual(study.geometrySha256,small.geometrySha256);
+ assert.equal(study.worldWrites,0);
+ assert.deepEqual(study.gates,Array(9).fill('BLOCKED'));
+});

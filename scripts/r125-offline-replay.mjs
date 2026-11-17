@@ -323,7 +323,8 @@ export function writeArchitecturePlanReplay(args){
  const report=diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail:args['--host-detail']??'legacy',
   roofGlazing:args['--roof-glazing']??'none',
    roofMassing:args['--roof-massing']??'default',
-  fixtureArt:args['--fixture-art']??'none'});
+  fixtureArt:args['--fixture-art']??'none',
+  fixtureForm:args['--fixture-form']??'default'});
  const {sourceDesign,...diagnosis}=report;
  fs.mkdirSync(dest);
  // Store exact private author bytes before any parsing or B143 review.
@@ -348,12 +349,12 @@ export function writeArchitecturePlanReplay(args){
 
 export function parseR125ReplayArgs(argv){
  if(argv.length===1&&argv[0]==='--help')return {help:true};
- if(![4,6,8,10,12].includes(argv.length))fail('REQUIRE_RAW_AND_OUT');
+ if(![4,6,8,10,12,14].includes(argv.length))fail('REQUIRE_RAW_AND_OUT');
  const opts={};
  for(let i=0;i<argv.length;i+=2){
-  if(!['--raw','--out','--host-detail','--roof-glazing','--roof-massing','--fixture-art'].includes(argv[i])||Object.hasOwn(opts,argv[i])||
+  if(!['--raw','--out','--host-detail','--roof-glazing','--roof-massing','--fixture-art','--fixture-form'].includes(argv[i])||Object.hasOwn(opts,argv[i])||
    !argv[i+1]||argv[i+1].startsWith('--'))fail('INVALID_ARGUMENT');
-  opts[argv[i]]=['--host-detail','--roof-glazing','--roof-massing','--fixture-art'].includes(argv[i])?argv[i+1]:path.resolve(argv[i+1]);
+  opts[argv[i]]=['--host-detail','--roof-glazing','--roof-massing','--fixture-art','--fixture-form'].includes(argv[i])?argv[i+1]:path.resolve(argv[i+1]);
  }
  if(!opts['--raw']||!opts['--out']||opts['--raw']===opts['--out'])
   fail('INPUT_OUTPUT_CONFLICT');
@@ -361,19 +362,20 @@ export function parseR125ReplayArgs(argv){
  if(opts['--roof-glazing']!==undefined&&opts['--roof-glazing']!=='sawtooth-ribbon')fail('ROOF_GLAZING_MODE');
  if(opts['--roof-massing']!==undefined&&!['compact-sawtooth','steep-ridge-review'].includes(opts['--roof-massing']))fail('ROOF_MASSING_MODE');
  if(opts['--fixture-art']!==undefined&&opts['--fixture-art']!=='activity-inlays')fail('FIXTURE_ART_MODE');
+ if(opts['--fixture-form']!==undefined&&opts['--fixture-form']!=='room-scale-v1')fail('FIXTURE_FORM_MODE');
  return opts;
 }
 if(process.argv[1]===fileURLToPath(import.meta.url)){
  try{
   const planMode=process.argv[2]==='--architecture-plan';
   const args=parseR125ReplayArgs(process.argv.slice(planMode?3:2));
-  if(args.help)console.log('B143: --raw ORIGINAL.txt --out NEW_DIAGNOSIS.json | ArchitecturePlan: --architecture-plan --raw ORIGINAL.txt --out NEW_PRIVATE_DIRECTORY [--host-detail spatial-v1] [--roof-glazing sawtooth-ribbon] [--roof-massing compact-sawtooth|steep-ridge-review] [--fixture-art activity-inlays] (NO MODEL / NO WORLD)');
+  if(args.help)console.log('B143: --raw ORIGINAL.txt --out NEW_DIAGNOSIS.json | ArchitecturePlan: --architecture-plan --raw ORIGINAL.txt --out NEW_PRIVATE_DIRECTORY [--host-detail spatial-v1] [--roof-glazing sawtooth-ribbon] [--roof-massing compact-sawtooth|steep-ridge-review] [--fixture-art activity-inlays] [--fixture-form room-scale-v1] (NO MODEL / NO WORLD)');
   else if(planMode){
    const result=writeArchitecturePlanReplay(args);
    console.log('R125_ARCHITECTURE_PLAN_SOURCE_ONLY',JSON.stringify(result));
    if(result.status!=='B143_SOURCE_CANDIDATE_ART_HOLD')process.exitCode=2;
   }else{
-   if(args['--host-detail']||args['--roof-glazing'])fail('HOST_POLICY_REQUIRES_ARCHITECTURE_PLAN');
+   if(args['--host-detail']||args['--roof-glazing']||args['--fixture-form'])fail('HOST_POLICY_REQUIRES_ARCHITECTURE_PLAN');
    if(fs.existsSync(args['--out']))fail('OUTPUT_ALREADY_EXISTS');
    const raw=fs.readFileSync(args['--raw'],'utf8');
    const report=diagnoseR125Original(raw);

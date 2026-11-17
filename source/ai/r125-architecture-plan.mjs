@@ -11,6 +11,7 @@ import {compileDesign,verifyCompiled,SCHEMA as B143} from './b143-building-dsl.m
 import {auditR125SourceRoutes} from './r125-source-routes.mjs';
 import {addAuthoredRoomFixtures,addR125ActivityFloorInlays,restyleR125FixtureForms} from './r125-room-fixtures.mjs';
 import {addAuthoredRoomDaylight} from './r125-room-daylight.mjs';
+import {expandR125RoomScale} from './r125-room-scale.mjs';
 import {detailR125Envelope} from './r125-spatial-detail.mjs';
 import {addR125HipRoof} from './r125-hip-roof.mjs';
 export const SCHEMA='minecraftaibuilder-r125-architecture-plan-v1';
@@ -94,7 +95,7 @@ export const estimateR125AuthoredElementReserve=p=>p.levels.reduce((sum,level)=>
    counter:1,workbench:1,display:1,storage:1,seating:2,bed:2,
    desk:2,washbasin:1,electronics:1,oven:1}:{};
   return subtotal+roles.reduce((total,role)=>total+parts[role]+
-   (detail[role]??0),0)+(room.daylight==='paired-bays'?4:room.daylight?2:0);
+   (detail[role]??0)+(room.fixtureScale==='expanded'?3:0),0)+(room.daylight==='paired-bays'?4:room.daylight?2:0);
  },0),0);
 // Authored entry-zone choices always win. Otherwise, the opt-in path
 // preserves a clear centered entrance and moves it only if a divider blocks
@@ -309,6 +310,7 @@ export function validateArchitecturePlan(p){
     ...(Object.hasOwn(space??{},'fixtures')?['fixtures']:[]),
     ...(Object.hasOwn(space??{},'fixtureDetail')?['fixtureDetail']:[]),
     ...(Object.hasOwn(space??{},'fixtureArrangement')?['fixtureArrangement']:[]),
+    ...(Object.hasOwn(space??{},'fixtureScale')?['fixtureScale']:[]),
     ...(Object.hasOwn(space??{},'ovenHearth')?['ovenHearth']:[]),
     ...(Object.hasOwn(space??{},'daylight')?['daylight']:[]),
     ...(Object.hasOwn(space??{},'access')?['access']:[])])&&
@@ -332,6 +334,10 @@ export function validateArchitecturePlan(p){
     (space.fixtureArrangement==='focal-island'&&
      (space.fixture!==undefined||space.fixtures!==undefined)),
     'SPACE_FIXTURE_ARRANGEMENT');
+   check(space.fixtureScale===undefined||
+    (space.fixtureScale==='expanded'&&
+     (space.fixture!==undefined||space.fixtures!==undefined)),
+    'SPACE_FIXTURE_SCALE');
    const roles=['counter','workbench','display','storage','seating',
     'bed','desk','washbasin','electronics','oven'];
    check(space.ovenHearth===undefined||
@@ -426,7 +432,7 @@ export function compileArchitecturePlan(plan,{
  check(['none','activity-inlays','activity-layout'].includes(fixtureArt),'FIXTURE_ART_MODE');
  check(fixtureArt!=='activity-layout'||hostDetail==='spatial-v1',
   'ACTIVITY_LAYOUT_REQUIRES_SPATIAL_DETAIL');
- check(['default','readable-v1'].includes(fixtureForm),'FIXTURE_FORM_MODE');
+ check(['default','readable-v1','room-scale-v1'].includes(fixtureForm),'FIXTURE_FORM_MODE');
  check(fixtureArt==='none'||Boolean(plan?.expression),'FIXTURE_ART_REQUIRES_EXPRESSION');
  // Optional ART candidate only. Old authors and their original SOURCE are untouched.
  check(['none','sawtooth-ribbon'].includes(roofGlazing),'ROOF_GLAZING_MODE');
@@ -557,8 +563,12 @@ export function compileArchitecturePlan(plan,{
  };
  const daylit=addAuthoredRoomDaylight(built,
   {auditCirculation:auditArchitecturePlanCirculation});
- return addAuthoredRoomFixtures(daylit,
+ const furnished=addAuthoredRoomFixtures(daylit,
   {auditCirculation:auditArchitecturePlanCirculation});
+ return fixtureForm==='room-scale-v1'||original.levels.some(l=>
+  l.spaces.some(s=>s.fixtureScale==='expanded'))?
+  expandR125RoomScale(furnished,{auditCirculation:auditArchitecturePlanCirculation,
+   includeHostStudy:fixtureForm==='room-scale-v1'}):furnished;
 }
 
 /**
@@ -1350,8 +1360,12 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
   {auditCirculation:auditArchitecturePlanCirculation});
  const styled=fixtureForm==='readable-v1'?
   restyleR125FixtureForms(furnished,{auditCirculation:auditArchitecturePlanCirculation}):furnished;
+ const scaled=fixtureForm==='room-scale-v1'||original.levels.some(l=>
+  l.spaces.some(s=>s.fixtureScale==='expanded'))?
+  expandR125RoomScale(styled,{auditCirculation:auditArchitecturePlanCirculation,
+   includeHostStudy:fixtureForm==='room-scale-v1'}):styled;
  return fixtureArt==='activity-inlays'?
-  addR125ActivityFloorInlays(styled):styled;
+  addR125ActivityFloorInlays(scaled):scaled;
 }
 
 /**
