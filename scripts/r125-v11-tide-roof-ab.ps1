@@ -93,7 +93,11 @@ foreach($row in @($review.education.packets)) {
 Write-Output ('MAB_V11_TIDE_ROOF_AB_READY='+$out)
 Write-Output ('MAB_V11_ROOF_BEFORE='+$review.roofCrestY.before)
 Write-Output ('MAB_V11_ROOF_AFTER='+$review.roofCrestY.after)
+$dashboard=Join-Path $out $review.artDashboard.file
+Require (Test-Path -LiteralPath $dashboard -PathType Leaf) 'DASHBOARD_MISSING'
+Require ((Hash $dashboard) -ceq $review.artDashboard.sha256) 'DASHBOARD_HASH'
 Write-Output ('MAB_V11_ART_PREVIEW='+$review.image)
+Write-Output ('MAB_V11_ART_DASHBOARD='+$dashboard)
 Write-Output ('MAB_V11_MAKECODE_BASELINE='+(Join-Path $out 'MAKECODE_BASELINE.ts'))
 Write-Output ('MAB_V11_MAKECODE_COMPACT='+(Join-Path $out 'MAKECODE_COMPACT.ts'))
 # First variant is ready to paste immediately. No game input, model call or world
@@ -107,6 +111,6 @@ Write-Output ('powershell.exe -NoProfile -ExecutionPolicy Bypass -File "'+
  '" -ComparisonDirectory "'+$out+'" -Variant COMPACT')
 Write-Output 'NO GAME EXECUTION: compare the preview first; use two unused sites in the same dedicated flat world, run mabset/mabbuild/mabverify, then mabwalk outdoors and indoors. Real art/walking are not certified.'
 if(-not $NoOpen) {
- try {Start-Process -FilePath $review.image -ErrorAction Stop}
- catch {Write-Warning 'Preview not opened automatically; see MAB_V11_ART_PREVIEW path.'}
+ try {Start-Process -FilePath $dashboard -ErrorAction Stop}
+ catch {Write-Warning '3D comparison not opened automatically; see MAB_V11_ART_DASHBOARD path.'}
 }
