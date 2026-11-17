@@ -20,6 +20,7 @@ on:
       - scripts/r125-roof-interior-study.mjs
       - scripts/r125-roof-interior-study.test.mjs
       - scripts/r125-v11-tide-roof-ab.ps1
+      - scripts/r125-v11-roof-ab-copy.ps1
       - scripts/r125-offline-replay.test.mjs
       - scripts/r125-local-architecture-plan-run.mjs
       - scripts/r125-static-art-review.mjs
@@ -99,6 +100,8 @@ jobs:
           call scripts\R125_V11_EDUCATION_RECOVERED.cmd -Stage Preview -CheckOnly
           if errorlevel 1 exit /b 1
           powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\r125-v11-tide-roof-ab.ps1 -CheckOnly
+          if errorlevel 1 exit /b 1
+          powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\r125-v11-roof-ab-copy.ps1 -CheckOnly
           if errorlevel 1 exit /b 1
   exact-source-corner-facade-witness:
     runs-on: ubuntu-24.04
