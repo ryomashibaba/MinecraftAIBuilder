@@ -285,8 +285,12 @@ export function validateArchitecturePlan(p){
     ...(Object.hasOwn(space??{},'fixture')?['fixture']:[]),
     ...(Object.hasOwn(space??{},'fixtures')?['fixtures']:[]),
     ...(Object.hasOwn(space??{},'fixtureDetail')?['fixtureDetail']:[]),
-    ...(Object.hasOwn(space??{},'daylight')?['daylight']:[])])&&
+    ...(Object.hasOwn(space??{},'daylight')?['daylight']:[]),
+    ...(Object.hasOwn(space??{},'access')?['access']:[])])&&
     slug(space.id)&&text(space.purpose),'SPACE_FIELDS');
+   check(space.access===undefined||
+    ['public','shared','staff'].includes(space.access),
+    'SPACE_ACCESS');
    check(space.fixture===undefined||
     ['counter','workbench','display','storage','seating'].includes(space.fixture),
     'SPACE_FIXTURE_ROLE');
@@ -310,6 +314,14 @@ export function validateArchitecturePlan(p){
    seen.add(space.id);
   }
  }
+ // A rear public room in a z-split cannot have a staff-only front room
+ // as the ONLY path from the entrance. This is a narrow author-declared
+ // privacy invariant: it does NOT certify all visitor routing or classify
+ // rooms from their names. Legacy plans without access tags remain unchanged.
+ if(p.levels[0].splitAxis==='z'&&
+    p.levels[0].spaces[0].access==='staff'&&
+    p.levels[0].spaces.slice(1).some(s=>s.access==='public'))
+  refuse('VISITOR_ACCESS_THROUGH_STAFF');
  // Only the first z-split zone touches the front facade; no fake back entry.
  check(!entrySpecified||(['first','second'].includes(p.entryZone)&&
   (p.levels[0].splitAxis==='x'||p.entryZone==='first')),

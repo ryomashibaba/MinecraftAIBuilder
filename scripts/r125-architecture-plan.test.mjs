@@ -56,6 +56,27 @@ test('validates one level shop, genuine B143 voxels, shell and room voids',()=>{
  assert.ok(critique.objectiveAudit.verifiedTwoWideStandingSquares>30);
  assert.equal(critique.worldWrites,0);
 });
+test('model-authored public circulation cannot be forced through staff-only entrance room',()=>{
+ const authored=plan('public-weather-exhibit',['z'],
+  ['staff observation control','visitor exhibit']);
+ authored.levels[0].spaces[0].access='staff';
+ authored.levels[0].spaces[1].access='public';
+ const original=structuredClone(authored);
+ assert.throws(()=>validateArchitecturePlan(authored),
+  /R125_PLAN_VISITOR_ACCESS_THROUGH_STAFF/);
+ assert.deepEqual(authored,original,
+  'independent SOURCE validation must never repair the model author');
+ authored.levels[0].spaces[0].access='shared';
+ assert.equal(validateArchitecturePlan(authored),true,
+  'an explicitly model-authored shared entry remains possible');
+ authored.levels[0].spaces[0].access='staff';
+ authored.levels[0].spaces[1].access='staff';
+ assert.equal(validateArchitecturePlan(authored),true,
+  'staff-only circulation should not be misclassified as public');
+ authored.levels[0].spaces[1].access='unknown';
+ assert.throws(()=>validateArchitecturePlan(authored),/R125_PLAN_SPACE_ACCESS/);
+});
+
 test('two story lab includes shaft, stair wedge, usable upper floors and real voids',()=>{
  const r=compileArchitecturePlan(plan('research-studio',['x','z'],
   ['experimentation','record keeping']));

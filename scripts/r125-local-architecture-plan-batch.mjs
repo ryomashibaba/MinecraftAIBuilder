@@ -154,6 +154,7 @@ export async function runR125ArchitecturePlanBatch({
     ...(level.secondarySplitPercent!==undefined?
      {secondarySplitPercent:level.secondarySplitPercent}:{}),
     spaces:level.spaces.map(space=>({id:space.id,purpose:space.purpose,
+     ...(space.access?{access:space.access}:{}),
      ...(space.fixture?{fixture:space.fixture}:{}),
      ...(space.fixtures?{fixtures:space.fixtures}:{}),
      ...(space.fixtureDetail?{fixtureDetail:space.fixtureDetail}:{}),

@@ -76,6 +76,9 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    assert.ok(!authorSchema.properties.levels.items.required.includes('secondarySplitPercent'));
    const room=authorSchema.properties.levels.items.properties.spaces.items;
    assert.equal(room.additionalProperties,false);
+   assert.deepEqual(room.properties.access.enum,['public','shared','staff']);
+   assert.ok(room.required.includes('access'),
+    'new Ollama-authored rooms must identify public/staff circulation');
    assert.ok(room.properties.fixtures.items.enum.includes('electronics'));
    assert.ok(room.properties.fixtures.items.enum.includes('oven'));
    assert.ok(!room.properties.fixture.enum.includes('oven'));
