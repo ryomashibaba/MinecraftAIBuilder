@@ -20,6 +20,7 @@ on:
       - scripts/r125-roof-interior-study.mjs
       - scripts/r125-roof-interior-study.test.mjs
       - scripts/r125-v11-tide-roof-ab.ps1
+      - scripts/r125-v11-tide-roof-ab-windows-fixture.mjs
       - scripts/r125-v11-roof-ab-copy.ps1
       - scripts/r125-offline-replay.test.mjs
       - scripts/r125-local-architecture-plan-run.mjs
@@ -103,6 +104,33 @@ jobs:
           if errorlevel 1 exit /b 1
           powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\r125-v11-roof-ab-copy.ps1 -CheckOnly
           if errorlevel 1 exit /b 1
+      - name: Windows actual private-style roof A/B replay and material-HOLD (synthetic model only)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $env:LOCALAPPDATA = Join-Path $env:RUNNER_TEMP 'mab-v11-private-synthetic'
+          $private = Join-Path $env:LOCALAPPDATA 'MinecraftAIBuilder\PrivateModelStudies'
+          New-Item -ItemType Directory -Force -Path $private | Out-Null
+          node scripts/r125-v11-tide-roof-ab-windows-fixture.mjs $private
+          if ($LASTEXITCODE -ne 0) { throw 'SYNTHETIC_FIXTURE_HOLD' }
+          $strict = Join-Path $private 'V11_EducationRecovered_CI_SYNTHETIC_STRICT'
+          $outA = Join-Path $private 'CI_ROOF_AB_STRICT'
+          & powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\r125-v11-tide-roof-ab.ps1 -RecoveryDirectory $strict -OutDirectory $outA -NoOpen
+          if ($LASTEXITCODE -ne 0) { throw 'STRICT_ROOF_LAUNCH_HOLD' }
+          foreach ($file in @('REVIEW.json','ROOF_AB_REVIEW.html','MAKECODE_BASELINE.ts','MAKECODE_COMPACT.ts')) {
+            if (-not (Test-Path -LiteralPath (Join-Path $outA $file))) { throw ('STRICT_ARTIFACT_MISSING_'+$file) }
+          }
+          & powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\r125-v11-roof-ab-copy.ps1 -ComparisonDirectory $outA -Variant COMPACT
+          if ($LASTEXITCODE -ne 0) { throw 'COPY_COMPACT_HOLD' }
+          $art = Join-Path $private 'V11_EducationRecovered_CI_SYNTHETIC_ART_ONLY'
+          $outB = Join-Path $private 'CI_ROOF_AB_UNVERIFIED'
+          & powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\r125-v11-tide-roof-ab.ps1 -RecoveryDirectory $art -OutDirectory $outB -NoOpen
+          if ($LASTEXITCODE -ne 0) { throw 'ART_ONLY_LAUNCH_HOLD' }
+          if (-not (Test-Path -LiteralPath (Join-Path $outB 'ROOF_AB_REVIEW.html')) -or
+              (Test-Path -LiteralPath (Join-Path $outB 'MAKECODE_BASELINE.ts'))) {
+            throw 'UNVERIFIED_MATERIAL_MUST_PRESERVE_ART_WITHOUT_STRICT_MAKECODE'
+          }
+          Write-Output 'SYNTHETIC_WINDOWS_END_TO_END_PASS_NOT_A_REAL_QWEN_OR_MINECRAFT_TEST'
   exact-source-corner-facade-witness:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
