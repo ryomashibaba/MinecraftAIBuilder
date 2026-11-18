@@ -371,6 +371,9 @@ export function validateArchitecturePlan(p){
    check(p.levels.length===1&&
     ((level.splitAxis==='z'&&p.footprint.width>=22&&p.footprint.depth>=18)||
      (level.splitAxis==='x'&&p.footprint.width>=20&&p.footprint.depth>=22))&&
+    // For the side-spine, the model MUST choose the public west entry.
+    // Without entryZone:first a centered x entry may open into staff space.
+    (level.splitAxis!=='x'||p.entryZone==='first')&&
     ['public','shared'].includes(level.spaces[0].access)&&
     !Object.hasOwn(p.expression??{},'rearCourt')&&
     !Object.hasOwn(p.expression??{},'rearCornerCut')&&

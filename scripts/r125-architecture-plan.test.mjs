@@ -3601,6 +3601,7 @@ test('side-spine author plan builds three real doors and visitor-safe service ro
   p.footprint={width:26,depth:28};
   p.levels[0].splitPercent=40;
   p.levels[0].sideBayPercentages=[30,65];
+  p.entryZone='first';
   p.levels[0].spaces=[
    {id:'public-spine',purpose:'Public welcome and circulation',access:'public',fixtures:['counter','display']},
    {id:'repair-work',purpose:'Servicing workspace',access:'staff',fixtures:['workbench']},
@@ -3634,6 +3635,7 @@ test('side-spine author plan builds three real doors and visitor-safe service ro
 test('side-spine refuses thin bays and wrong side percentage axis',()=>{
  const p=plan('side-spine-hold',['x'],['public spine','staff work']);
  p.footprint={width:26,depth:28};
+ p.entryZone='first';
  p.levels[0].spaces=[
   {id:'front-spine',purpose:'Public circulation',access:'public'},
   {id:'first-staff',purpose:'Staff repair',access:'staff'},
@@ -3641,6 +3643,11 @@ test('side-spine refuses thin bays and wrong side percentage axis',()=>{
   {id:'rear-public',purpose:'Visitor demonstrations',access:'public'}
  ];
  assert.equal(validateArchitecturePlan(p),true);
+ for(const entry of [undefined,'second']){
+  const invalid=structuredClone(p);
+  if(entry===undefined)delete invalid.entryZone;else invalid.entryZone=entry;
+  assert.throws(()=>validateArchitecturePlan(invalid),/R125_PLAN_FOUR_ROOM_HUB_PROGRAM/);
+ }
  const thin=structuredClone(p);thin.levels[0].sideBayPercentages=[20,25];
  assert.equal(validateArchitecturePlan(thin),true);
  assert.throws(()=>compileArchitecturePlan(thin),/R125_PLAN_FOUR_ROOM_SIDE_SPINE_CLEAR_SPANS/);
