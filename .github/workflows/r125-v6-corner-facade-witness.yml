@@ -60,6 +60,7 @@ on:
       - scripts/R125_V11_EDUCATION_RETAIL.cmd
       - scripts/r125-material-probe.mjs
       - scripts/R125_V11_3_Buildings.cmd
+      - scripts/R125_V11_1117_RIDGE_ART.cmd
       - scripts/research/r125-v6-corner-facade-contract.test.mjs
       - scripts/research/r125-v6-offline-ranked-contrast.mjs
       - scripts/research/r125-v6-offline-ranked-contrast.test.mjs
@@ -85,6 +86,8 @@ jobs:
         shell: cmd
         run: |
           call scripts\R125_V11_3_Buildings.cmd -CheckOnly
+          if errorlevel 1 exit /b 1
+          call scripts\R125_V11_1117_RIDGE_ART.cmd -CheckOnly
           if errorlevel 1 exit /b 1
           call scripts\R125_V11_3_Buildings.cmd -CheckOnly -OnlyHousingRetail
           if errorlevel 1 exit /b 1
