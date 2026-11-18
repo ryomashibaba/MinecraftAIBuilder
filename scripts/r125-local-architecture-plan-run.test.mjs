@@ -48,6 +48,21 @@ test('one-shot design request highlights only literal equipment tasks, without c
  ]);
  assert.deepEqual(inferR125ExplicitActivityRequirements(
   '生地をこねる作業は不要で、手洗いを行わず、パンを展示できない施設'),[]);
+ const precisionBrief='市民が工房の展示を見られるようにし、技術者は部品の組立、点検、保管、記録を行います。';
+ assert.deepEqual(inferR125ExplicitActivityRequirements(precisionBrief),[
+  {capability:'assembly-workstation',requiredRole:'assembly-table'},
+  {capability:'parts-inspection',requiredRole:'inspection-stand'},
+  {capability:'parts-storage',requiredRole:'storage'},
+  {capability:'exhibit-stand',requiredRole:'display'},
+  {capability:'records-desk',requiredRole:'desk'}
+ ],'coordinated Japanese task verbs must not disappear from the source gate');
+ assert.deepEqual(inferR125ExplicitActivityRequirements(
+  '部品の組立は不要で、展示台も不要。記録用の机だけ必要です。'),[
+  {capability:'records-desk',requiredRole:'desk'}
+ ]);
+ assert.deepEqual(inferR125ExplicitActivityRequirements(
+  '工房の外観を自由に設計してください。'),[]);
+
  let requests=0,captures=0;
  const author=createR125ArchitecturePlanLocalAdapter({
   model:'qwen3:14b',

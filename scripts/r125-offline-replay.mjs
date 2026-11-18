@@ -181,8 +181,11 @@ export function auditR125AuthoredRoomActivityProxy(
   'sleeping-bed':/就寝用ベッド|ベッド|就寝|\b(?:bed|sleeping)\b/i,
   'electronic-maintenance':/電子機器(?:の|を)(?:点検|整備|操作)|\belectronic (?:equipment )?maintenance\b/i,
   'fabrication-bench':/工作台|製作用作業台|組立作業台|\bworkbench\b/i,
-  'exhibit-stand':/展示ケース|展示台|展示設備|\bdisplay (?:case|stand|fixture)\b/i,
-  'records-desk':/事務机|記録用(?:の)?机|作業用デスク|\bdesk\b/i
+  'assembly-workstation':/組立|組み立て|\b(?:assembly|assembling|fabrication)\b/i,
+  'parts-inspection':/点検|検査|\b(?:inspection|quality control)\b/i,
+  'parts-storage':/保管|収納|\b(?:storage|parts repository|storeroom|stockroom)\b/i,
+  'exhibit-stand':/展示ケース|展示台|展示設備|\b(?:display|exhibit|exhibition|gallery)\b/i,
+  'records-desk':/事務机|記録用(?:の)?机|作業用デスク|記録|\b(?:record|recording|records|documentation|logbook)\b/i
  };
  // A visitor watching the oven is not operating an oven in their room.
  // Do not credit a real sightline or staff boundary from semantic labels.

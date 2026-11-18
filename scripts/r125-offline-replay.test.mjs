@@ -422,6 +422,41 @@ test('baking observation is not oven operation and needs separate safety proof',
  assert.equal(both.sourceVerified,false);
 });
 
+test('Japanese assembly, inspection, storage and records need actual task-specific room fixtures',()=>{
+ const p={schema:PLAN,id:'mixed-task-civic-workshop',
+  title:'Generic public entry and private maker rooms',
+  brief:'Visitors observe genuine independent activities',
+  footprint:{width:30,depth:28},
+  levels:[{splitAxis:'z',splitPercent:35,spaces:[
+   {id:'public-gallery',purpose:'Public Display Area',access:'public',
+    fixtures:['display']},
+   {id:'assembly-inspection',purpose:'Assembly / Inspection',access:'staff',
+    fixtures:['workbench']},
+   {id:'parts-records',purpose:'Storage and Documentation',access:'staff',
+    fixtures:['storage']}
+  ],secondarySplitPercent:50}],
+  materials:{floor:'wood',wall:'concrete',roof:'metal'},
+  expression:{setbackSide:'none',setbackDepth:0,
+   roofProfile:'flat',roofAxis:'x',facadeLanguage:'plain'}};
+ const authored=JSON.stringify(p);
+ const requestedBrief='市民は展示を見られ、職員は部品の組立、点検、保管、記録を行います。';
+ const review=diagnoseR125ArchitecturePlanOriginal(authored,{requestedBrief});
+ assert.equal(review.explicitActivityProxy.status,
+  'HOLD_EXPLICIT_ACTIVITY_PROXY_MISSING');
+ assert.deepEqual(review.explicitActivityProxy.missing.map(x=>x.requiredRole),
+  ['assembly-table','inspection-stand','desk']);
+ assert.deepEqual(review.roomActivityProxy.missing.map(x=>
+  [x.zoneId,x.requiredRole]),[
+  ['assembly-inspection','assembly-table'],
+  ['assembly-inspection','inspection-stand'],
+  ['parts-records','desk']
+ ]);
+ assert.equal(review.sourceVerified,false);
+ assert.equal(review.worldWrites,0);
+ assert.equal(review.originalEdited,false);
+ assert.equal(JSON.stringify(p),authored);
+});
+
 test('unknown and unavailable original user requests are not declared fully served',()=>{
  const p={schema:PLAN,id:'legacy-activity-unknown',title:'Two useful rooms',
   brief:'Original unmodified building with function not checked',
