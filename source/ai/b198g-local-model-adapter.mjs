@@ -427,6 +427,7 @@ export function createR125ArchitecturePlanLocalAdapter({
   refuse('REQUIRED_RAW_CAPTURE_CALLBACK');
  const system=[
   'You are an inventive architectural designer. From an UNKNOWN Japanese building brief, choose a genuinely original usable composition and room purposes. No fixed building-type template.',
+  'GROUND-LEVEL ENTRANCE AND VISITOR ACCESS — DECIDE BEFORE ROOM ORDER. On levels[0] with splitAxis:"z", the ONLY front-entry room is spaces[0]. If ANY later spaces[i] has access:"public" or "shared", spaces[0] MUST have access:"public" or "shared", NEVER "staff". A staff-only workshop at the front with a public exhibition behind it is INVALID even if both have doors. Put genuinely staff-only making/inspection rooms behind a separate visitor-accessible arrival room, OR select an x-split with an actual public/shared entryZone and usable route. With FOUR rooms, spaces[0] is the public/shared hub or spine; each subsequent room has its own door from that hub/spine. Do NOT relabel a real staff-only workspace as public/shared just to pass validation. Preserve actual public/private uses and freely choose the building form after routing.',
   'Reply with ONE strict JSON object only. Do not include Markdown, rationale outside JSON, B143 elements, absolute voxel coordinates, commands, or claims of completed tests.',
   'Top-level EXACT fields: schema,id,title,brief,footprint,levels,materials. Optional: entryZone,expression.',
   'schema exactly '+R125_PLAN_SCHEMA+'. id and space ids lowercase hyphen slugs of 3..39 characters, leading letter. title,brief,purpose are meaningful strings of at least three characters.',
@@ -469,6 +470,7 @@ export function createR125ArchitecturePlanLocalAdapter({
        sourceOnly:true,authorSemanticPlan:true,
        explicitLiteralEquipment:inferR125ExplicitActivityRequirements(prompt),
        explicitEquipmentRule:'Only literal requirements, not a complete task list. Assign each required role to a model-chosen room that actually performs its activity. No extra equipment to fill space or fake coverage.',
+       groundFloorEntryRouteRule:'When a ground-floor z-split has ANY public/shared later room, spaces[0] MUST be public/shared; first staff then rear public is rejected. In x-splits with visitors, entryZone must enter a public/shared room. Preserve genuine staff-only functions and two-wide public access. Never fake a safe route.',
        crossFieldRule:'Decide levels first. With 1 level: setbackSide=none and setbackDepth=0. Only with 2 levels: east/rear may have depth 2, 3, 4, 6 or 8 (6/8 needs footprint width/depth >= 28). Invalid pair is rejected without retry.'})}]})
    });
    if(!res||res.ok!==true)

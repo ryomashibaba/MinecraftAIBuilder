@@ -546,3 +546,39 @@ test('single unseen brief performs exactly one mock response, real SOURCE replay
    'B143_SOURCE_3D_REVIEW_ONLY.html')));
  }finally{fs.rmSync(root,{recursive:true,force:true});}
 });
+
+test('one-shot V11 Qwen request explicitly guards public entry and still rejects an authored staff-first z-split',async()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'mab-public-route-'));
+ try{
+  const authored=JSON.parse(original);
+  authored.levels[0].splitAxis='z';
+  authored.levels[0].spaces[0].access='staff';
+  authored.levels[0].spaces[1].access='public';
+  const raw=JSON.stringify(authored);
+  let calls=0,request=null;
+  const out=path.join(root,'private');
+  const {report}=await runR125ArchitecturePlanBatch({
+   model:'qwen3:14b',briefsRaw:JSON.stringify([requests[0]]),
+   outDir:out},{fetcher:async(_url,init)=>{
+    calls++;
+    request=JSON.parse(init.body);
+    return provider(raw);
+   }});
+  assert.equal(calls,1,'one original response, no repair request');
+  assert.equal(request.response_format.type,'json_schema');
+  const system=request.messages.find(m=>m.role==='system').content;
+  assert.match(system,/GROUND-LEVEL ENTRANCE AND VISITOR ACCESS/);
+  assert.match(system,/spaces\[0\] MUST have access:"public" or "shared"/);
+  assert.match(system,/Do NOT relabel a real staff-only workspace/);
+  const user=JSON.parse(request.messages.find(m=>m.role==='user').content);
+  assert.match(user.groundFloorEntryRouteRule,/first staff then rear public is rejected/);
+  assert.equal(report.sourcePassCount,0,'private staff entrance remains a strict HOLD');
+  assert.equal(report.allSourceVerified,false);
+  assert.equal(report.completed[0].failureReason,
+   'R125_PLAN_VISITOR_ACCESS_THROUGH_STAFF');
+  assert.equal(report.completed[0].modelResponsesCaptured,1);
+  assert.equal(report.worldWrites,0);
+  assert.equal(fs.readFileSync(path.join(out,'shop','MODEL_RESPONSE_ORIGINAL.txt'),'utf8'),
+   raw,'invalid authored response is preserved without semantic correction');
+ }finally{fs.rmSync(root,{recursive:true,force:true})}
+});
