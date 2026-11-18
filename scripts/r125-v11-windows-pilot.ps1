@@ -447,6 +447,47 @@ if ($customBrief) {
    catch { Write-Warning 'V11_CUSTOM_ART_OPEN_FAILED_USE_PRINTED_PATH' }
   }
  } else {
+  # Review exact B143 geometry even when visitor circulation remains HOLD.
+  # No repairs, new model requests, Education export or world interaction.
+  $sourcePath = Join-Path $out 'custom-brief\B143_SOURCE_REVIEW_ONLY.json'
+  $diagnosisPath = Join-Path $out 'custom-brief\SOURCE_DIAGNOSIS.json'
+  $rawPath = Join-Path $out 'custom-brief\MODEL_RESPONSE_ORIGINAL.txt'
+  $holdRows = @($report.completed | Where-Object { $_.id -ceq 'custom-brief' -and $_.sourceVerified -eq $false -and $_.status -like 'HOLD_*' })
+  if ($holdRows.Count -eq 1 -and
+      (Test-Path -LiteralPath $sourcePath -PathType Leaf) -and
+      (Test-Path -LiteralPath $diagnosisPath -PathType Leaf) -and
+      (Test-Path -LiteralPath $rawPath -PathType Leaf)) {
+   $floorDir = Join-Path $out 'CUSTOM_HOLD_FLOOR_ART'
+   & $node $floorRenderer '--raw' $rawPath '--source' $sourcePath '--diagnosis' $diagnosisPath '--out' $floorDir | Out-Null
+   if ($LASTEXITCODE -ne 0) { throw 'V11_CUSTOM_HOLD_FLOOR_GEOMETRY_MISMATCH' }
+   $floorPng = Join-Path $floorDir 'FLOOR_CONTACT_4_VIEWS.png'
+   $floorJson = Join-Path $floorDir 'FLOOR_REVIEW.json'
+   if (-not (Test-Path -LiteralPath $floorPng -PathType Leaf) -or
+       -not (Test-Path -LiteralPath $floorJson -PathType Leaf)) {
+    throw 'V11_CUSTOM_HOLD_FLOOR_OUTPUT_MISSING'
+   }
+   $floor = Get-Content -LiteralPath $floorJson -Raw -Encoding UTF8 | ConvertFrom-Json
+   if ($floor.schema -cne 'r125-v11-saved-two-floor-review-v1' -or
+       $floor.sourceVerified -ne $false -or
+       $floor.sourceStatus -cne $holdRows[0].status -or
+       $floor.reviewScope -cne 'HOLD_SOURCE_GEOMETRY_ONLY_NOT_FUNCTIONALLY_VERIFIED' -or
+       $floor.originalSha256 -cne $holdRows[0].originalSha256 -or
+       $floor.sourceSha256 -cne $holdRows[0].sourceSha256 -or
+       $floor.geometrySha256 -cne $holdRows[0].geometrySha256 -or
+       $floor.contact.sha256 -cne (Get-V11FileSha256 $floorPng) -or
+       [int]$floor.modelCalls -ne 0 -or
+       [int]$floor.worldWrites -ne 0 -or
+       @($floor.gates).Count -ne 9 -or
+       @($floor.gates | Where-Object { $_ -cne 'BLOCKED' }).Count -ne 0) {
+    throw 'V11_CUSTOM_HOLD_FLOOR_PROVENANCE_MISMATCH'
+   }
+   Write-Output ('V11_CUSTOM_HOLD_FLOOR_IMAGE=' + $floorPng)
+   Write-Output ('V11_CUSTOM_HOLD_REASON=' + $holdRows[0].status)
+   if (-not $NoOpen) {
+    try { Start-Process -FilePath $floorPng }
+    catch { Write-Warning 'V11_CUSTOM_HOLD_FLOOR_OPEN_FAILED_USE_PRINTED_PATH' }
+   }
+  }
   Write-Output ('V11_CUSTOM_ART_HOLD_PRESERVE_PRIVATE=' + $out)
  }
 }
