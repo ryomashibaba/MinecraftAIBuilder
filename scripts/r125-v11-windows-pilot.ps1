@@ -159,7 +159,7 @@ if ($LASTEXITCODE -ne 0 -or -not $match.Success -or
 if ($CheckOnly) {
  & $node '--check' $runner
  if ($LASTEXITCODE -ne 0) { throw 'V11_PILOT_BATCH_SYNTAX_FAILED' }
- if ($ComparePriorTide -or $customBrief) {
+ if ($ComparePriorTide -or $customBrief -or $batchBriefs) {
   & $node '--check' $staticRenderer
   if ($LASTEXITCODE -ne 0) { throw 'V11_TIDE_AB_RENDERER_SYNTAX_FAILED' }
  }
@@ -401,6 +401,62 @@ if ($ComparePriorTide) {
  if (-not $NoOpen) {
   try { Start-Process -FilePath (Join-Path $abOut 'AB_OLD_LEFT_NEW_RIGHT.png') }
   catch { Write-Warning 'V11_TIDE_AB_IMAGE_OPEN_FAILED_USE_PRINTED_PATH' }
+ }
+}
+# Keep failed-but-compiled batch buildings inspectable. SOURCE HOLD remains a
+# HOLD; rendering existing B143 voxels makes no model call or world write.
+# This applies ONLY to an explicitly supplied private batch, never defaults.
+if ($batchBriefs) {
+ $artRoot = Join-Path $out 'BATCH_4_VIEW_SOURCE_ART'
+ foreach ($row in @($report.completed)) {
+  if ([string]$row.id -cnotmatch '^[a-z][a-z0-9-]{2,39}$') {
+   throw 'V11_BATCH_ART_INVALID_ID'
+  }
+  $entry = Join-Path $out ([string]$row.id)
+  $source = Join-Path $entry 'B143_SOURCE_REVIEW_ONLY.json'
+  $diagnosis = Join-Path $entry 'SOURCE_DIAGNOSIS.json'
+  if (-not (Test-Path -LiteralPath $source -PathType Leaf)) {
+   Write-Output ('V11_BATCH_ART_NOT_GENERATED_NO_B143=' + [string]$row.id)
+   continue
+  }
+  if (-not (Test-Path -LiteralPath $diagnosis -PathType Leaf)) {
+   throw 'V11_BATCH_ART_DIAGNOSIS_MISSING'
+  }
+  $diag = Get-Content -LiteralPath $diagnosis -Raw -Encoding UTF8 |
+   ConvertFrom-Json
+  if ($diag.sourceSha256 -cne $row.sourceSha256 -or
+      $diag.geometrySha256 -cne $row.geometrySha256 -or
+      [int]$diag.worldWrites -ne 0) {
+   throw 'V11_BATCH_ART_SOURCE_SHA_DRIFT'
+  }
+  if (-not (Test-Path -LiteralPath $artRoot)) {
+   [void](New-Item -Path $artRoot -ItemType Directory)
+  }
+  $artDir = Join-Path $artRoot ([string]$row.id)
+  & $node $staticRenderer '--source' $source '--out' $artDir | Out-Null
+  if ($LASTEXITCODE -ne 0) { throw 'V11_BATCH_ART_RENDER_FAILED' }
+  $manifestPath = Join-Path $artDir 'STATIC_REVIEW.json'
+  $image = Join-Path $artDir 'CONTACT_4_VIEWS.png'
+  if (-not (Test-Path -LiteralPath $manifestPath -PathType Leaf) -or
+      -not (Test-Path -LiteralPath $image -PathType Leaf)) {
+   throw 'V11_BATCH_ART_MANIFEST_OR_IMAGE_MISSING'
+  }
+  $manifest = Get-Content -LiteralPath $manifestPath -Raw -Encoding UTF8 |
+   ConvertFrom-Json
+  if ($manifest.sourceSha256 -cne $row.sourceSha256 -or
+      $manifest.geometrySha256 -cne $row.geometrySha256 -or
+      $manifest.contactSheet.sha256 -cne (Get-V11FileSha256 $image) -or
+      [int]$manifest.modelCalls -ne 0 -or
+      [int]$manifest.worldWrites -ne 0) {
+   throw 'V11_BATCH_ART_PROVENANCE_HOLD'
+  }
+  Write-Output ('V11_BATCH_TRUE_B143_IMAGE=' + [string]$row.id + ';' + $image)
+  Write-Output ('V11_BATCH_ART_ONLY_NOT_ACCEPTED=' + [string]$row.id +
+   ';SOURCE_VERIFIED=' + [string]$row.sourceVerified)
+  if (-not $NoOpen) {
+   try { Start-Process -FilePath $image }
+   catch { Write-Warning 'V11_BATCH_ART_IMAGE_OPEN_FAILED_USE_PRINTED_PATH' }
+  }
  }
 }
 # Complete the custom-brief quality loop without a second user command:
