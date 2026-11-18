@@ -171,6 +171,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: V11 SOURCE-only architectural massing art alternatives from existing saved model
+        run: node --test scripts/r125-v11-massing-art-study.test.mjs
       - name: V11 saved genuine Qwen replay, local plan transport and unchanged B143 tests
         run: |
           node --check source/ai/b198g-local-model-adapter.mjs
