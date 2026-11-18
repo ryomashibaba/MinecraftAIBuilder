@@ -3,7 +3,7 @@
  * Uses an already-public genuine Qwen ARCHITECTUREPLAN as the provider's
  * unchanged fake response. This is NOT fresh local inference or Minecraft
  * proof. Ensures novice one-paste custom prompt path really produces
- * source-matched TRUE B143 exterior and cutaway PNG without world writes.
+ * source-matched TRUE B143 exterior, cutaway and per-floor PNG without world writes.
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -12,6 +12,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createServer} from 'node:http';
+import {createHash} from 'node:crypto';
 import {spawn} from 'node:child_process';
 
 const root=path.resolve(fileURLToPath(new URL('..',import.meta.url)));
@@ -19,7 +20,7 @@ const savedQwen=fs.readFileSync(new URL(
  '../evidence/r125-real-l-corner-20261101/MODEL_RESPONSE_ORIGINAL.txt',
  import.meta.url),'utf8');
 
-test('Windows custom user brief -> ONE mock model response -> strict B143 3D and four actual views',{
+test('Windows custom brief -> ONE mock response -> strict B143 exterior and floor views',{
  skip:process.platform!=='win32',timeout:210000
 },async()=>{
  const temp=fs.mkdtempSync(path.join(os.tmpdir(),'mab-v11-custom-fake-'));
@@ -97,8 +98,27 @@ test('Windows custom user brief -> ONE mock model response -> strict B143 3D and
   assert.equal(manifest.minecraftWalking,'NOT_TESTED');
   assert.equal(manifest.modelCalls,0);
   assert.equal(manifest.worldWrites,0);
+  const floorDir=path.join(out,'CUSTOM_FLOOR_SOURCE_ART');
+  const floorPng=path.join(floorDir,'FLOOR_CONTACT_4_VIEWS.png');
+  const floor=JSON.parse(fs.readFileSync(path.join(floorDir,'FLOOR_REVIEW.json'),'utf8'));
+  assert(fs.statSync(floorPng).size>10000,'per-floor geometry PNG is real');
+  assert.equal(floor.originalSha256,row.originalSha256);
+  assert.equal(floor.sourceSha256,row.sourceSha256);
+  assert.equal(floor.geometrySha256,row.geometrySha256);
+  assert.equal(floor.sourceFileSha256,createHash('sha256')
+   .update(fs.readFileSync(source)).digest('hex'));
+  assert.equal(floor.contact.sha256,createHash('sha256')
+   .update(fs.readFileSync(floorPng)).digest('hex'));
+  assert(floor.levels===1||floor.levels===2);
+  assert.equal(floor.humanArt,'NOT_REVIEWED');
+  assert.equal(floor.minecraftWalking,'NOT_TESTED');
+  assert.equal(floor.modelCalls,0);
+  assert.equal(floor.worldContacts,0);
+  assert.equal(floor.worldWrites,0);
+  assert.deepEqual(floor.gates,Array(9).fill('BLOCKED'));
   assert(fs.existsSync(path.join(out,'BATCH_COMPARE_3D.html')));
   assert(result.stdout.includes('V11_CUSTOM_TRUE_B143_4_VIEW_IMAGE='));
+  assert(result.stdout.includes('V11_CUSTOM_TRUE_B143_FLOOR_IMAGE='));
  }finally{
   await new Promise(resolve=>server.close(()=>resolve()));
   fs.rmSync(temp,{recursive:true,force:true});
