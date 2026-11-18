@@ -236,6 +236,8 @@ test('V11 integrated HOST room-quality A/B emits eight-view real B143 preview',(
   assert.equal(contrast.fixtureCountA,4);
   assert.equal(contrast.fixtureCountB,4);
   assert.equal(contrast.belowRoofGeometryAndMaterialIdentical,true);
+  assert.equal(contrast.photoPhysicalScale,
+   'PAIRED_SAME_PIXELS_PER_BLOCK_AND_CENTER');
   assert(contrast.changedRoofCells>0);
   assert(contrast.roofCrestYB>=contrast.roofCrestYA);
   assert.equal(contrast.modelCalls,0);

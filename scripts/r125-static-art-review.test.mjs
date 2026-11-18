@@ -78,6 +78,26 @@ test('renderer rejects invalid camera and bad B143 source before creating output
  }finally{fs.rmSync(tmp,{force:true,recursive:true});}
 });
 
+
+test('paired B143 camera has the same scale/center but never adds reference voxels',()=>{
+ const a={primitives:[[1,1,1,0],[3,2,3,0]],bounds:null};
+ const b={primitives:[[1,1,1,0],[3,10,3,0]],bounds:null};
+ const solo=renderB143StaticPNG(a,{sx:1,sz:-1,width:320,height:240});
+ const pairA=renderB143StaticPNG(a,{sx:1,sz:-1,width:320,height:240,
+  fitReference:b});
+ const pairB=renderB143StaticPNG(b,{sx:1,sz:-1,width:320,height:240,
+  fitReference:a});
+ assert.equal(pairA.cameraFrame,'PAIRED_UNION');
+ assert.equal(pairB.cameraFrame,'PAIRED_UNION');
+ assert.equal(pairA.cameraScalePxPerUnit,pairB.cameraScalePxPerUnit);
+ assert.deepEqual(pairA.cameraOffsetPx,pairB.cameraOffsetPx);
+ assert(pairA.cameraScalePxPerUnit<solo.cameraScalePxPerUnit);
+ assert.equal(pairA.renderedCells,a.primitives.length);
+ assert.equal(pairB.renderedCells,b.primitives.length);
+ assert.throws(()=>renderB143StaticPNG(a,{fitReference:{primitives:[]}}),
+  /INVALID_FIT_REFERENCE/);
+});
+
 test('same-brief old/new produces physical voxel diffs and 8 true B143 snapshots, with no model',()=>{
  const reviewed=diagnoseR125ArchitecturePlanOriginal(original);
  assert.equal(reviewed.sourceVerified,true);

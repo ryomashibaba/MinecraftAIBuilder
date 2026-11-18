@@ -198,7 +198,8 @@ export function saveR125RidgeContrast({rawPath,sourcePath,outDir}={}){
  fs.writeFileSync(pathA,JSON.stringify(a.sourceDesign,null,2)+'\n',{flag:'wx'});
  fs.writeFileSync(pathB,JSON.stringify(b.sourceDesign,null,2)+'\n',{flag:'wx'});
  const ab=saveB143ABReview({beforeSourcePath:pathA,
-  afterSourcePath:pathB,outDir:path.join(dest,'ART_AB')});
+  afterSourcePath:pathB,outDir:path.join(dest,'ART_AB'),
+  matchedCamera:true});
  if(ab.before.sourceSha256!==a.sourceSha256||
     ab.after.sourceSha256!==b.sourceSha256||
     ab.finalVoxelDifference.sameActualGeometryAndMaterial||
@@ -218,6 +219,7 @@ export function saveR125RidgeContrast({rawPath,sourcePath,outDir}={}){
   roofTopY:topY,changedRoofCells,belowRoofGeometryAndMaterialIdentical:true,
   changedVoxels:ab.finalVoxelDifference,
   photo:'ART_AB/'+ab.preview.file,photoSha256:ab.preview.sha256,
+  photoPhysicalScale:ab.preview.physicalScale,
   modelCalls:0,worldWrites:0,constructionApproved:false,
   nineWorldGates:Array(9).fill('BLOCKED'),art:'NOT_HUMAN_REVIEWED',
   minecraftWalking:'NOT_TESTED',education:'NOT_TESTED'};
