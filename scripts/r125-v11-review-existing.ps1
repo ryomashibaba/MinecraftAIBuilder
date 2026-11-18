@@ -177,7 +177,7 @@ if (Test-Path -LiteralPath $finishJSON -PathType Leaf) {
 $roofPNG = ''
 if ($RidgeContrast) {
  # Existing strict JS checks original archived B143 and the two SOURCEs.
- $roofOut = Join-Path $one 'RIDGE_ONLY_ROOM_SCALE_V2_AB'
+ $roofOut = Join-Path $one 'RIDGE_MATCHED_CAMERA_ROOM_SCALE_V2_AB'
  $roofManifest = Join-Path $roofOut 'RIDGE_ONLY_AB_REPORT.json'
  if (-not (Test-Path -LiteralPath $roofOut)) {
   & $node $finishRenderer '--raw' $rawFile '--source' $src '--out' $roofOut '--roof-contrast-v2' | Out-Null
@@ -206,6 +206,7 @@ if ($RidgeContrast) {
      $roof.sourceSha256A -ceq $roof.sourceSha256B -or
      $roof.modelOriginalUnchanged -ne $true -or
      $roof.photo -cne 'ART_AB/AB_OLD_LEFT_NEW_RIGHT.png' -or
+     $roof.photoPhysicalScale -cne 'PAIRED_SAME_PIXELS_PER_BLOCK_AND_CENTER' -or
      $roof.photoSha256 -cne $imageHash -or
      [int]$roof.modelCalls -ne 0 -or [int]$roof.worldWrites -ne 0 -or
      @($roof.nineWorldGates).Count -ne 9 -or
