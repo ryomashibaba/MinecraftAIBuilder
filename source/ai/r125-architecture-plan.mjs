@@ -155,6 +155,24 @@ function tLayout(level,{x0,x1,z0,z1},split){
   ]};
 }
 
+/** Opt-in model-authored front hub connects three rear rooms directly.
+ * Generic single-storey geometry, never relabels author-owned rooms/access.
+ */
+function fourRoomFrontHub(level,{x0,x1,z0,z1},split){
+ if(level.spaces.length!==4)return null;
+ check(level.splitAxis==='z','FOUR_ROOM_HUB_AXIS');
+ const k1=Math.floor(x0+(x1-x0)/3),k2=Math.floor(x0+2*(x1-x0)/3);
+ const bays=[[x0+1,k1-1],[k1+1,k2-1],[k2+1,x1-1]];
+ check(bays.every(([a,b])=>b-a+1>=5)&&
+  split-z0-1>=6&&z1-split-1>=6,'FOUR_ROOM_HUB_CLEAR_SPANS');
+ const doors=bays.map(([a,b])=>[Math.floor((a+b-1)/2),split]);
+ return {partitions:[k1,k2],doors,bays,zones:[
+  {id:level.spaces[0].id,purpose:level.spaces[0].purpose,
+   range:{x:[x0+1,x1-1],z:[z0+1,split-1]}},
+  ...level.spaces.slice(1).map((room,i)=>({id:room.id,purpose:room.purpose,
+   range:{x:bays[i],z:[split+1,z1-1]}}))
+ ]};
+}
 export function validateArchitecturePlan(p){
  const standard=['schema','id','title','brief','footprint','levels','materials'];
  const expressive=Object.hasOwn(p??{},'expression');
@@ -297,13 +315,22 @@ export function validateArchitecturePlan(p){
    ...(Object.hasOwn(level??{},'thirdRoomLink')?
     ['thirdRoomLink']:[])])&&
    ['x','z'].includes(level.splitAxis)&&[40,50,60].includes(level.splitPercent)&&
-   Array.isArray(level.spaces)&&[2,3].includes(level.spaces.length),'LEVEL_PROGRAM');
+   Array.isArray(level.spaces)&&[2,3,4].includes(level.spaces.length),'LEVEL_PROGRAM');
   check(level.secondarySplitPercent===undefined||
    (level.spaces.length===3&&[35,50,65].includes(level.secondarySplitPercent)),
    'THREE_ROOM_SECONDARY_PERCENT');
   check(level.thirdRoomLink===undefined||
    (level.spaces.length===3&&level.thirdRoomLink==='first-and-second'),
    'THREE_ROOM_LINK');
+  if(level.spaces.length===4)
+   check(p.levels.length===1&&level.splitAxis==='z'&&
+    p.footprint.width>=28&&p.footprint.depth>=24&&
+    ['public','shared'].includes(level.spaces[0].access)&&
+    !Object.hasOwn(p.expression??{},'rearCourt')&&
+    !Object.hasOwn(p.expression??{},'rearCornerCut')&&
+    !Object.hasOwn(p.expression??{},'frontCornerCut')&&
+    p.expression?.facadeLanguage!=='recessed-portico',
+    'FOUR_ROOM_HUB_PROGRAM');
   for(const space of level.spaces){
    check(keys(space,['id','purpose',
     ...(Object.hasOwn(space??{},'fixture')?['fixture']:[]),
@@ -390,6 +417,11 @@ export function assessR125AuthoredRoomCapacity(plan){
   const sizes=axis==='x'?
    [[split-x0-1,z1-z0-1],[x1-split-1,z1-z0-1]]:
    [[x1-x0-1,split-z0-1],[x1-x0-1,z1-split-1]];
+  if(level.spaces.length===4){
+   const k1=Math.floor(x0+(x1-x0)/3),k2=Math.floor(x0+2*(x1-x0)/3);
+   sizes.splice(1,1,[k1-x0-1,z1-split-1],
+    [k2-k1-1,z1-split-1],[x1-k2-1,z1-split-1]);
+  }
   if(level.spaces.length===3){
    // Match the actual authored T partition, not an invented 50/50 zone.
    const secondaryStart=axis==='x'?z0:x0;
@@ -489,6 +521,7 @@ export function compileArchitecturePlan(plan,{
    Math.max(7,Math.min(w-7,Math.round(w*level.splitPercent/100))):
    Math.max(8,Math.min(d-6,Math.round(d*level.splitPercent/100)));
   const three=tLayout(level,{x0:1,x1:w-2,z0:1,z1:d-2},split);
+  const four=fourRoomFrontHub(level,{x0:1,x1:w-2,z0:1,z1:d-2},split);
   if(axis==='x'){
    box(tag+'-divider','add',wall,[split,base+1,2],[1,4,d-4]);
    box(tag+'-inside-door','cut',null,
@@ -497,7 +530,15 @@ export function compileArchitecturePlan(plan,{
    box(tag+'-divider','add',wall,[2,base+1,split],[w-4,4,1]);
    // The short doorway also allows a stair arrival from z=7 when
    // the second-storey partition happens to be at z=8.
-   box(tag+'-inside-door','cut',null,[3,base+1,split],[2,3,1]);
+   if(!four)box(tag+'-inside-door','cut',null,[3,base+1,split],[2,3,1]);
+  }
+  if(four){
+   for(let i=0;i<four.partitions.length;i++)
+    box(tag+'-rear-divider-'+i,'add',wall,
+     [four.partitions[i],base+1,split+1],[1,4,d-3-split]);
+   for(let i=0;i<four.doors.length;i++)
+    box(tag+'-front-hub-door-'+i,'cut',null,
+     [four.doors[i][0],base+1,split],[2,3,1]);
   }
   if(three){
    box(tag+'-secondary-divider','add',wall,three.wallAt(base+1),
@@ -532,7 +573,7 @@ export function compileArchitecturePlan(plan,{
    level:l,splitAxis:axis,requestedPercent:level.splitPercent,
    splitCoordinate:split,standingFloorY:base+1,
    ...(three?{secondarySplitAxis:three.axis,secondarySplitCoordinate:three.coordinate}:{}),
-   zones:three?.zones??(axis==='x'?[
+   zones:four?.zones??three?.zones??(axis==='x'?[
     {id:first.id,purpose:first.purpose,range:{x:[2,split-1],z:[2,d-3]}},
     {id:second.id,purpose:second.purpose,range:{x:[split+1,w-3],z:[2,d-3]}}
    ]:[
@@ -730,6 +771,7 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
    Math.max(x0+4,Math.min(x1-4,Math.round(x0+(x1-x0)*ratio))):
    Math.max(z0+4,Math.min(z1-4,Math.round(z0+(z1-z0)*ratio)));
   const three=tLayout(level,{x0,x1,z0,z1},split);
+  const four=fourRoomFrontHub(level,{x0,x1,z0,z1},split);
   if(axis==='x'){
    box(tag+'-divider','add',wall,[split,y,z0+1],[1,4,z1-z0-1]);
    box(tag+'-internal-door','cut',null,
@@ -748,7 +790,7 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
     const doorX=(l===1&&upperDoorPlacement==='stair-clear')||clearGroundStair?
      Math.max(x0+2,Math.min(x1-3,3+2+2)):
      x0+2;
-    box(tag+'-internal-door','cut',null,[doorX,y,split],[2,3,1]);
+    if(!four)box(tag+'-internal-door','cut',null,[doorX,y,split],[2,3,1]);
     // The fixed five-tread stair ends at z=7 and lands at z=8.
     // If an upper z-divider crosses either cell, moving the normal room
     // door clear of the shaft also blocks the ascent. Research opt-in only:
@@ -757,6 +799,14 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
     if(l===1&&upperDoorPlacement==='stair-clear'&&
        split>=stairLastTreadZ&&split<=stairLastTreadZ+1)
      box(tag+'-stair-threshold-relief','cut',null,[3,y,split],[2,3,1]);
+  }
+  if(four){
+   for(let i=0;i<four.partitions.length;i++)
+    box(tag+'-rear-divider-'+i,'add',wall,
+     [four.partitions[i],y,split+1],[1,4,z1-split-1]);
+   for(let i=0;i<four.doors.length;i++)
+    box(tag+'-front-hub-door-'+i,'cut',null,
+     [four.doors[i][0],y,split],[2,3,1]);
   }
   if(three){
    box(tag+'-secondary-divider','add',wall,three.wallAt(y),three.wallSize);
@@ -909,7 +959,7 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
     z:[d-1-rearCornerCut.depth,d-2]
    }}:{}),
    ...(three?{secondarySplitAxis:three.axis,secondarySplitCoordinate:three.coordinate}:{}),
-   zones:three?.zones??(axis==='x'?[
+   zones:four?.zones??three?.zones??(axis==='x'?[
     {id:first.id,purpose:first.purpose,range:{x:[x0+1,split-1],z:[z0+1,z1-1]}},
     {id:second.id,purpose:second.purpose,range:{x:[split+1,x1-1],z:[z0+1,z1-1]}}
    ]:[
