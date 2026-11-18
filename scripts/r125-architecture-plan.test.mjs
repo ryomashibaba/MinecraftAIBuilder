@@ -3405,7 +3405,7 @@ test('V11 expanded station is a model-selected, real SOURCE geometry change',()=
 });
 test('V11 model-owned scale searches a transverse connected wing in narrow rooms',()=>{
  const p=plan('model-transverse-workbench',['x'],['public exhibit','shared work']);
- p.footprint={width:17,depth:24};
+ p.footprint={width:18,depth:24};
  p.levels[0].splitPercent=60;
  p.levels[0].spaces[0].access='public';
  p.levels[0].spaces[1].access='shared';
