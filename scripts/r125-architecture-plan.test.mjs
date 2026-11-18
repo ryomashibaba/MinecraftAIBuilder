@@ -3519,3 +3519,76 @@ test('V11 authored expanded silhouettes retain selected equipment kinds',()=>{
   assert.deepEqual(built.compiled.BuildPlan.operations,[]);
  }
 });
+
+test('optional one-storey four-room hub has real independent routes to rear rooms',()=>{
+ for(const expressive of [false,true]){
+  const p=plan('public-repair-hub',['z'],
+   ['visitor arrival and exhibition','staff repair']);
+  p.footprint={width:30,depth:26};
+  p.levels[0].splitPercent=40;
+  p.levels[0].spaces=[
+   {id:'visitor-hub',purpose:'Public counter and display',access:'public',
+    fixtures:['counter','display']},
+   {id:'staff-workshop',purpose:'Staff repair work',access:'staff',
+    fixtures:['workbench']},
+   {id:'parts-storage',purpose:'Staff parts storage',access:'staff',
+    fixtures:['storage']},
+   {id:'customer-gallery',purpose:'Public repair exhibition',access:'public',
+    fixtures:['display']}
+  ];
+  if(expressive)p.expression={setbackSide:'none',setbackDepth:0,
+   roofProfile:'flat',roofAxis:'x',facadeLanguage:'plain'};
+  const before=JSON.stringify(p);
+  assert.equal(validateArchitecturePlan(p),true);
+  const capacity=assessR125AuthoredRoomCapacity(p);
+  assert.equal(capacity.zones.length,4);
+  assert(capacity.zones.slice(1).every(x=>x.nominalWidth>=5),
+   'each of three rear rooms must fit its independently authored function');
+  const built=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+  assert.equal(verifyCompiled(built.design,built.compiled),true);
+  assert.deepEqual(built.program[0].zones.map(z=>z.id),
+   p.levels[0].spaces.map(z=>z.id));
+  const exits=built.design.elements.filter(e=>e.id.startsWith('l0-front-hub-door-'));
+  assert.equal(exits.length,3,'three real interior cuts, not invented graph edges');
+  assert(exits.every(e=>e.mode==='cut'&&e.size.join(',')==='2,3,1'));
+  const occupied=voxels(built.compiled);
+  for(const e of exits)for(let dx=0;dx<2;dx++){
+   assert.equal(includes(occupied,e.origin[0]+dx,e.origin[1],e.origin[2]),false,
+    'each independent threshold must remain open in the actual B143 scene');
+  }
+  const visitor=auditR125VisitorRoutes(built,p);
+  assert.equal(visitor.status,'SOURCE_VISITOR_ROUTES_AVOID_STAFF',
+   JSON.stringify(visitor));
+  assert.deepEqual(visitor.blocked,[]);
+  assert(visitor.witnesses.some(x=>x.id==='customer-gallery'&&x.reached));
+  const walk=auditR125SourceRoutes(built,{featureTargets:built.fixtureTargets??[]});
+  assert.equal(walk.status,'SOURCE_ROUTES_REACH_ALL_ZONES',JSON.stringify(walk));
+  assert.equal(built.worldWrites,0);
+  assert.deepEqual(built.gates,Array(9).fill('BLOCKED'));
+  assert.equal(JSON.stringify(p),before,'model original cannot be rewritten');
+ }
+});
+test('four-room hub refuses missing front access, upper floors and narrow sites',()=>{
+ const p=plan('hub-invariant',['z'],['visitor hub','repair']);
+ p.footprint={width:30,depth:26};
+ p.levels[0].spaces=[
+  {id:'front-hub',purpose:'Front hall',access:'public'},
+  {id:'rear-one',purpose:'Repair',access:'staff'},
+  {id:'rear-two',purpose:'Storage',access:'staff'},
+  {id:'rear-three',purpose:'Display',access:'public'}
+ ];
+ assert.equal(validateArchitecturePlan(p),true);
+ for(const mutate of [
+  x=>{x.levels[0].spaces[0].access='staff';},
+  x=>{x.footprint.width=27;},
+  x=>{x.footprint.depth=23;},
+  x=>{x.levels[0].splitAxis='x';},
+  x=>{x.levels.push(structuredClone(x.levels[0]));},
+  x=>{x.expression={setbackSide:'none',setbackDepth:0,
+   roofProfile:'flat',roofAxis:'x',facadeLanguage:'recessed-portico'};}
+ ]){
+  const alt=structuredClone(p);mutate(alt);
+  assert.throws(()=>validateArchitecturePlan(alt),
+   /FOUR_ROOM_HUB_PROGRAM/);
+ }
+});
