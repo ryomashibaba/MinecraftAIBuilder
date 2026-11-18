@@ -2,11 +2,12 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {diagnoseR125Original,diagnoseR125ArchitecturePlanOriginal,
  describeR125AuthoredRoomUse,parseR125ReplayArgs,writeArchitecturePlanReplay} from './r125-offline-replay.mjs';
-import {readFileSync,mkdtempSync,existsSync,rmSync} from 'node:fs';
+import {readFileSync,writeFileSync,mkdtempSync,existsSync,rmSync} from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
+import {saveSavedFloorReview} from './r125-v11-saved-floor-review.mjs';
 import {SCHEMA as B143} from '../source/ai/b143-building-dsl.mjs';
 import {SCHEMA as PLAN,assessR125AuthoredRoomCapacity}
  from '../source/ai/r125-architecture-plan.mjs';
@@ -561,4 +562,45 @@ test('real legacy author without fixtures remains valid zero-station room eviden
  assert.deepEqual(report.storeys[0].roomsWithoutStations,['public-hall']);
  assert.equal(report.status,'ART_ADVISORY_ONLY_NOT_ACCEPTANCE');
  assert.equal(report.worldWrites,0);
+});
+
+test('compiled B143 floor is inspectable during functional HOLD, never promoted',()=>{
+ const raw=readFileSync(new URL(
+  '../evidence/r125-real-l-corner-20261101/MODEL_RESPONSE_ORIGINAL.txt',
+  import.meta.url),'utf8');
+ const checked=diagnoseR125ArchitecturePlanOriginal(raw);
+ assert.equal(checked.sourceVerified,true,'archived model fixture must compile');
+ const {sourceDesign,...diagnosis}=checked;
+ // Synthetic HOLD metadata tests the view boundary, not a real model failure.
+ const held={...diagnosis,status:'HOLD_FUNCTIONAL_SOURCE',sourceVerified:false,
+  visitorCirculation:{status:'HOLD_VISITOR_STAFF_SEPARATION',
+   blocked:['synthetic-shared-room']}};
+ const dir=mkdtempSync(path.join(os.tmpdir(),'mab-v11-hold-floor-'));
+ try{
+  const rawPath=path.join(dir,'original.txt');
+  const sourcePath=path.join(dir,'b143.json');
+  const diagnosisPath=path.join(dir,'diagnosis.json');
+  writeFileSync(rawPath,raw);
+  writeFileSync(sourcePath,JSON.stringify(sourceDesign));
+  writeFileSync(diagnosisPath,JSON.stringify(held));
+  const result=saveSavedFloorReview({rawPath,sourcePath,diagnosisPath,
+   outDir:path.join(dir,'review')});
+  assert.equal(result.sourceStatus,'HOLD_FUNCTIONAL_SOURCE');
+  assert.equal(result.sourceVerified,false);
+  assert.equal(result.reviewScope,
+   'HOLD_SOURCE_GEOMETRY_ONLY_NOT_FUNCTIONALLY_VERIFIED');
+  assert.equal(result.sourceSha256,held.sourceSha256);
+  assert.equal(result.geometrySha256,held.geometrySha256);
+  assert.equal(result.modelCalls,0);
+  assert.equal(result.worldWrites,0);
+  assert.equal(result.constructionApproved,false);
+  assert.deepEqual(result.gates,Array(9).fill('BLOCKED'));
+  assert(existsSync(path.join(dir,'review','FLOOR_CONTACT_4_VIEWS.png')));
+  assert.equal(readFileSync(rawPath,'utf8'),raw);
+  const broken={...held,sourceSha256:'0'.repeat(64)};
+  writeFileSync(diagnosisPath,JSON.stringify(broken));
+  assert.throws(()=>saveSavedFloorReview({rawPath,sourcePath,diagnosisPath,
+   outDir:path.join(dir,'rejected')}),/SOURCE_MISMATCH/);
+  assert.equal(existsSync(path.join(dir,'rejected')),false);
+ }finally{rmSync(dir,{recursive:true,force:true});}
 });
