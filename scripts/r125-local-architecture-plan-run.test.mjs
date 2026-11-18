@@ -39,6 +39,15 @@ test('one-shot design request highlights only literal equipment tasks, without c
   '展示台の設置は不要、事務机が必要な部屋'),[
   {capability:'records-desk',requiredRole:'desk'}
  ]);
+ const breadWorkshopBrief='来場者が自分で生地をこね、焼成を見学し、手洗いを行い、完成したパンを展示できる体験型パン工房を設計してください。焼成設備は職員が管理し、来場者と職員の動線を適切に分けてください。1階・2階の選択、各室の用途、設備数、間取り、屋根、外観は独自に決めてください。2階を作る場合は明確な活動と設備を持たせ、広い空室や単調な箱型建築を避けてください。';
+ assert.deepEqual(inferR125ExplicitActivityRequirements(breadWorkshopBrief),[
+  {capability:'baking-heating',requiredRole:'oven'},
+  {capability:'washing-basin',requiredRole:'washbasin'},
+  {capability:'fabrication-bench',requiredRole:'workbench'},
+  {capability:'exhibit-stand',requiredRole:'display'}
+ ]);
+ assert.deepEqual(inferR125ExplicitActivityRequirements(
+  '生地をこねる作業は不要で、手洗いを行わず、パンを展示できない施設'),[]);
  let requests=0,captures=0;
  const author=createR125ArchitecturePlanLocalAdapter({
   model:'qwen3:14b',
@@ -49,10 +58,12 @@ test('one-shot design request highlights only literal equipment tasks, without c
    const user=JSON.parse(payload.messages[1].content);
    assert.deepEqual(user.explicitLiteralEquipment,[
     {capability:'baking-heating',requiredRole:'oven'},
-    {capability:'washing-basin',requiredRole:'washbasin'}
+    {capability:'washing-basin',requiredRole:'washbasin'},
+    {capability:'fabrication-bench',requiredRole:'workbench'},
+    {capability:'exhibit-stand',requiredRole:'display'}
    ]);
    assert.equal(user.architecturalRequest,
-    '職員がパンを焼くためのオーブンと手洗い設備を備える施設');
+    breadWorkshopBrief);
    assert.match(user.explicitEquipmentRule,/model-chosen room/);
    assert.equal(payload.stream,false);
    return provider(original);
@@ -60,7 +71,7 @@ test('one-shot design request highlights only literal equipment tasks, without c
   onRawModelResponse:()=>{captures++;}
  });
  const result=await author({
-  prompt:'職員がパンを焼くためのオーブンと手洗い設備を備える施設'
+  prompt:breadWorkshopBrief
  });
  assert.equal(requests,1);
  assert.equal(captures,1);
