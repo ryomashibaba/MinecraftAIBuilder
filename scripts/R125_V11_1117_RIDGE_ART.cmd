@@ -28,7 +28,10 @@ if not exist "%CLONE%\scripts\r125-v11-review-existing.ps1" goto MISSING_REVIEW
 if not exist "%CLONE%\scripts\r125-v11-finish-art-ab.mjs" goto MISSING_REVIEW
 rem This script always uses the EXACT saved 2026-11-17 original SHA gate.
 rem Existing reports are never overwritten. SOURCE failures remain HOLD.
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%CLONE%\scripts\r125-v11-review-existing.ps1" -RidgeContrast
+set "PS_EXE=powershell.exe"
+where pwsh.exe >nul 2>nul
+if not errorlevel 1 set "PS_EXE=pwsh.exe"
+"%PS_EXE%" -NoProfile -ExecutionPolicy Bypass -File "%CLONE%\scripts\r125-v11-review-existing.ps1" -RidgeContrast
 set "RESULT=%ERRORLEVEL%"
 if not "%RESULT%"=="0" goto REVIEW_HOLD
 echo V11_1117_RIDGE_AB_FINISHED_SOURCE_ONLY_NOT_ART_ACCEPTED

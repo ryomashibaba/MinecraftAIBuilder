@@ -429,8 +429,10 @@ export function compileArchitecturePlan(plan,{
  roofGlazing='none',roofMassing='default',fixtureArt='none',fixtureForm='default'
 }={}){
  check(['legacy','spatial-v1','clear-front-fins'].includes(hostDetail),'HOST_DETAIL_MODE');
- check(['none','activity-inlays','activity-layout'].includes(fixtureArt),'FIXTURE_ART_MODE');
- check(fixtureArt!=='activity-layout'||hostDetail==='spatial-v1',
+ check(['none','activity-inlays','activity-layout','activity-layout-inlays'].includes(fixtureArt),
+  'FIXTURE_ART_MODE');
+ check(!['activity-layout','activity-layout-inlays'].includes(fixtureArt)||
+  hostDetail==='spatial-v1',
   'ACTIVITY_LAYOUT_REQUIRES_SPATIAL_DETAIL');
  check(['default','readable-v1','room-scale-v1','room-scale-v2'].includes(fixtureForm),'FIXTURE_FORM_MODE');
  check(fixtureArt==='none'||Boolean(plan?.expression),'FIXTURE_ART_REQUIRES_EXPRESSION');
@@ -1307,7 +1309,8 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
   geometricRules:'GENERIC_EXPRESSIVE_ENVELOPE_NOT_STYLE_CERTIFIED',
   expression:structuredClone(original.expression),
   ...(spatialDetail?{spatialDetail,fixturePlacement:
-   fixtureArt==='activity-layout'?'activity-layout':'wall-aligned'}:{}),
+   ['activity-layout','activity-layout-inlays'].includes(fixtureArt)?
+    'activity-layout':'wall-aligned'}:{}),
   inGameWalking:'NOT_TESTED',architecturalQuality:'NOT_REVIEWED',
   constructionApproved:false,worldContacts:0,worldWrites:0,
   gates:Array(9).fill('BLOCKED')};
@@ -1369,7 +1372,7 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
    profile:fixtureForm==='room-scale-v2'?'room-scale-v2':'room-scale-v1'}):styled;
  const articulated=hostDetail==='spatial-v1'&&original.expression.facadeLanguage==='fins'?
   addR125SpatialDaylightBays(scaled):scaled;
- return fixtureArt==='activity-inlays'?
+ return ['activity-inlays','activity-layout-inlays'].includes(fixtureArt)?
   addR125ActivityFloorInlays(articulated):articulated;
 }
 

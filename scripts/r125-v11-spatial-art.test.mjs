@@ -225,6 +225,24 @@ test('V11 integrated HOST room-quality A/B emits eight-view real B143 preview',(
   assert.notEqual(v2.candidateSourceSha256,result.candidateSourceSha256);
   assert.equal(v2.worldWrites,0);
   assert.deepEqual(v2.nineWorldGates,Array(9).fill('BLOCKED'));
+  const inlay=saveR125FinishAB({rawPath,sourcePath,
+   outDir:path.join(dir,'activity-inlay-v2-ab'),integrated:true,
+   fixtureForm:'room-scale-v2',activityContrast:true});
+  assert.equal(inlay.contrast,'SAME_MODEL_SAME_STATIONS_INLAY_FLOOR_ONLY');
+  assert.equal(inlay.archivedSourceSha256,baseline.sourceSha256);
+  assert.equal(inlay.baselineSourceSha256,v2.candidateSourceSha256);
+  assert.notEqual(inlay.baselineSourceSha256,inlay.candidateSourceSha256);
+  assert.equal(inlay.verifiedEquipmentCount,4);
+  assert.equal(inlay.unchangedOccupancy,true);
+  assert(inlay.changedFloorMaterialCells>0);
+  assert.equal(inlay.activityInlayReview.changedCells,inlay.changedFloorMaterialCells);
+  assert.equal(inlay.physicalScale,'PAIRED_SAME_PIXELS_PER_BLOCK_AND_CENTER');
+  assert.equal(inlay.originalAuthorUnchanged,true);
+  assert.equal(fs.readFileSync(rawPath,'utf8'),raw);
+  assert.equal(inlay.worldWrites,0);
+  assert.deepEqual(inlay.nineWorldGates,Array(9).fill('BLOCKED'));
+  assert.ok(fs.existsSync(path.join(dir,'activity-inlay-v2-ab',inlay.photo)));
+
   const contrast=saveR125RidgeContrast({rawPath,sourcePath,
    outDir:path.join(dir,'roof-v2-contrast')});
   assert.equal(contrast.modelOriginalUnchanged,true);

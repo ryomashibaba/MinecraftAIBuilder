@@ -12,7 +12,8 @@ param(
  [string]$StudyDirectory = '',
  [switch]$CheckOnly,
  [switch]$NoOpen,
- [switch]$RidgeContrast
+ [switch]$RidgeContrast,
+ [switch]$ActivityInlays
 )
 $ErrorActionPreference = 'Stop'
 $repo = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')).Path
@@ -47,7 +48,8 @@ $base = Join-Path $env:LOCALAPPDATA 'MinecraftAIBuilder\PrivateModelStudies'
 if (-not (Test-Path -LiteralPath $base -PathType Container)) {
  throw 'V11_ART_PRIVATE_RESULTS_NOT_FOUND'
 }
-if ($RidgeContrast -and [string]::IsNullOrWhiteSpace($StudyDirectory)) {
+if (($RidgeContrast -or $ActivityInlays) -and
+    [string]::IsNullOrWhiteSpace($StudyDirectory)) {
  $StudyDirectory = Join-Path $base 'V11_CustomBrief_20261117_200728_941_673b2381'
 }
 if ([string]::IsNullOrWhiteSpace($StudyDirectory)) {
@@ -99,7 +101,7 @@ if ($diag.sourceVerified -ne $true -or
  throw 'V11_ART_SOURCE_DIAGNOSIS_MISMATCH'
 }
 $actualOriginalHash = (Get-FileHash -LiteralPath $rawFile -Algorithm SHA256).Hash.ToLowerInvariant()
-if ($RidgeContrast -and $actualOriginalHash -cne
+if (($RidgeContrast -or $ActivityInlays) -and $actualOriginalHash -cne
  '2cd969f87d3efdf767d514f1c0c4e45663afcd91f84631887b71f07fc4d67a72') {
  throw 'V11_RIDGE_1117_AUTHOR_SHA_MISMATCH'
 }
@@ -221,6 +223,44 @@ if ($RidgeContrast) {
  Write-Output ('V11_RIDGE_AB_CHANGED_ROOF_CELLS=' + [string]$roof.changedRoofCells)
  Write-Output 'V11_RIDGE_AB_EDUCATION_AND_MINECRAFT=NOT_TESTED'
 }
+
+$activityPNG=''
+if ($ActivityInlays) {
+ # Same genuine Qwen original, SAME v2 stations, material-only zone cues.
+ $activityOut=Join-Path $one 'ACTIVITY_FLOOR_ONLY_V2_AB'
+ $activityJSON=Join-Path $activityOut 'FINISH_AB_REPORT.json'
+ if (-not (Test-Path -LiteralPath $activityOut)) {
+  & $node $finishRenderer '--raw' $rawFile '--source' $src '--out' $activityOut '--activity-inlays-v2' | Out-Null
+  if ($LASTEXITCODE -ne 0) { throw 'V11_ACTIVITY_INLAY_SOURCE_HOLD' }
+ }
+ if (-not (Test-Path -LiteralPath $activityJSON -PathType Leaf)) {
+  throw 'V11_ACTIVITY_INLAY_INCOMPLETE_HOLD'
+ }
+ $activity=Get-Content -LiteralPath $activityJSON -Raw -Encoding UTF8 | ConvertFrom-Json
+ $activityPNG=Join-Path $activityOut 'ART_AB\AB_OLD_LEFT_NEW_RIGHT.png'
+ if (-not (Test-Path -LiteralPath $activityPNG -PathType Leaf)) {
+  throw 'V11_ACTIVITY_INLAY_MISSING_PNG'
+ }
+ $imgHash=(Get-FileHash -LiteralPath $activityPNG -Algorithm SHA256).Hash.ToLowerInvariant()
+ if ($activity.contrast -cne 'SAME_MODEL_SAME_STATIONS_INLAY_FLOOR_ONLY' -or
+     $activity.originalSha256 -cne $actualOriginalHash -or
+     $activity.archivedSourceSha256 -cne $diag.sourceSha256 -or
+     $activity.unchangedOccupancy -ne $true -or
+     [int]$activity.changedFloorMaterialCells -lt 1 -or
+     $activity.physicalScale -cne 'PAIRED_SAME_PIXELS_PER_BLOCK_AND_CENTER' -or
+     $activity.candidatePolicy.fixtureArt -cne 'activity-layout-inlays' -or
+     $activity.policy.fixtureForm -cne 'room-scale-v2' -or
+     $activity.photoSha256 -cne $imgHash -or
+     $activity.originalAuthorUnchanged -ne $true -or
+     [int]$activity.modelCalls -ne 0 -or [int]$activity.worldWrites -ne 0 -or
+     @($activity.nineWorldGates).Count -ne 9 -or
+     @($activity.nineWorldGates | Where-Object { $_ -cne 'BLOCKED' }).Count -ne 0) {
+  throw 'V11_ACTIVITY_INLAY_SHA_OR_SOURCE_HOLD'
+ }
+ Write-Output 'V11_ACTIVITY_INLAY_SOURCE_AB_PASS_NOT_ART'
+ Write-Output ('V11_ACTIVITY_INLAY_PNG=' + $activityPNG)
+ Write-Output ('V11_ACTIVITY_INLAY_REPORT=' + $activityJSON)
+}
 Write-Output ('V11_ART_FLOORS=' + $floorPNG)
 Write-Output ('V11_ART_EDUCATION_UNVERIFIED=' + ($floorReport.educationMaterials.unverified -join ','))
 Write-Output ('V11_ART_RESULT=' + $out)
@@ -228,7 +268,7 @@ Write-Output ('V11_ART_CONTACT=' + $contactFile)
 Write-Output ('V11_ART_VOXELS=' + $manifest.occupiedVoxels)
 Write-Output 'V11_ART_REVIEW_PENDING. No model, Minecraft or upload performed.'
 if (-not $NoOpen) {
- try { if ($RidgeContrast) { Start-Process -FilePath $roofPNG }; Start-Process -FilePath $floorPNG; if (Test-Path -LiteralPath $finishPNG -PathType Leaf) { Start-Process -FilePath $finishPNG } }
+ try { if ($RidgeContrast) { Start-Process -FilePath $roofPNG }; if ($ActivityInlays) { Start-Process -FilePath $activityPNG }; Start-Process -FilePath $floorPNG; if (Test-Path -LiteralPath $finishPNG -PathType Leaf) { Start-Process -FilePath $finishPNG } }
  catch { Write-Warning 'V11_ART_OPEN_PNG_FAILED_USE_PRINTED_PATH' }
 }
 # Optional ART HOLD is a valid reviewed outcome. All mandatory validation

@@ -18,9 +18,10 @@ const hash=s=>createHash('sha256').update(s).digest('hex');
 const fail=id=>{throw Error('R125_V11_FINISH_AB_'+id);};
 
 export function saveR125FinishAB({rawPath,sourcePath,outDir,integrated=false,
- fixtureForm='room-scale-v1'}={}){
- if(typeof integrated!=='boolean'||
-    !['room-scale-v1','room-scale-v2'].includes(fixtureForm))
+ fixtureForm='room-scale-v1',activityContrast=false}={}){
+ if(typeof integrated!=='boolean'||typeof activityContrast!=='boolean'||
+    !['room-scale-v1','room-scale-v2'].includes(fixtureForm)||
+    (activityContrast&&(!integrated||fixtureForm!=='room-scale-v2')))
   fail('INTEGRATED_FLAG_OR_FIXTURE_FORM');
  if([rawPath,sourcePath,outDir].some(s=>typeof s!=='string'||!s))
   fail('REQUIRES_RAW_SOURCE_OUT');
@@ -55,7 +56,17 @@ export function saveR125FinishAB({rawPath,sourcePath,outDir,integrated=false,
  const policy=integrated?
   {hostDetail:'spatial-v1',fixtureArt:'activity-layout',fixtureForm}:
   {fixtureForm:'readable-v1'};
- const candidate=diagnoseR125ArchitecturePlanOriginal(original,policy);
+ const baseline=activityContrast?
+  diagnoseR125ArchitecturePlanOriginal(original,policy):current;
+ if(baseline.sourceVerified!==true||
+    baseline.status!=='B143_SOURCE_CANDIDATE_ART_HOLD'||
+    baseline.modelChosenFixtures!==current.modelChosenFixtures||
+    baseline.modelCalls!==0||baseline.worldWrites!==0||
+    (activityContrast&&!baseline.sourceDesign))
+  fail('ACTIVITY_AB_BASELINE_SOURCE_HOLD');
+ const variantPolicy=activityContrast?
+  {...policy,fixtureArt:'activity-layout-inlays'}:policy;
+ const candidate=diagnoseR125ArchitecturePlanOriginal(original,variantPolicy);
  if(candidate.status!=='B143_SOURCE_CANDIDATE_ART_HOLD'||
     candidate.sourceVerified!==true||
     candidate.originalSha256!==hash(original)||
@@ -69,11 +80,38 @@ export function saveR125FinishAB({rawPath,sourcePath,outDir,integrated=false,
     candidate.modelCalls!==0||candidate.worldWrites!==0||
     candidate.modelChosenFixtures!==current.modelChosenFixtures)
   fail('CANDIDATE_SOURCE_OR_WORLD_GATES');
- const originalCells=new Map(savedScene.primitives.map(v=>[v.slice(0,3).join(','),v[3]]));
+ const beforeScene=activityContrast?compileDesign(baseline.sourceDesign):savedScene;
+ if(activityContrast&&(!verifyCompiled(baseline.sourceDesign,beforeScene)||
+    beforeScene.sourceSha256!==baseline.sourceSha256||
+    beforeScene.geometrySha256!==baseline.geometrySha256||
+    beforeScene.worldContacts!==0||
+    beforeScene.BuildPlan?.operations?.length!==0))
+  fail('ACTIVITY_AB_BASELINE_B143_HOLD');
+ const originalCells=new Map(beforeScene.primitives.map(v=>[v.slice(0,3).join(','),v[3]]));
  const newCells=new Map(afterScene.primitives.map(v=>[v.slice(0,3).join(','),v[3]]));
  const changed=[...originalCells].filter(([loc,mat])=>newCells.get(loc)!==mat);
  if(!changed.length&&originalCells.size===newCells.size)
   fail('NO_ACTUAL_PHYSICAL_DIFFERENCE');
+ let inlayChangedCells=0;
+ if(activityContrast){
+  const floorYs=new Set(plan.levels.map((_,i)=>1+5*i));
+  const floorMaterial=MATERIALS.indexOf(plan.materials.floor);
+  const inlayMaterial=MATERIALS.indexOf('accent');
+  if(originalCells.size!==newCells.size||
+     [...originalCells].some(([loc,mat])=>{
+      const next=newCells.get(loc);
+      if(next===mat)return false;
+      const y=Number(loc.split(',')[1]);
+      if(floorYs.has(y)&&mat===floorMaterial&&next===inlayMaterial){
+       inlayChangedCells++;return false;
+      }
+      return true;
+     })||
+     inlayChangedCells<1||
+     candidate.activityInlayReview?.changedCells!==inlayChangedCells||
+     candidate.activityInlayReview?.occupancyUnchanged!==true)
+   fail('ACTIVITY_AB_NOT_ONLY_AUTHORED_STATION_FLOOR');
+ }
  const profile=JSON.parse(fs.readFileSync(path.join(ROOT,
   'configs/r125-education-verified-palette-v26.33.json'),'utf8'));
  if(profile.schema!=='r125-education-user-verified-palette-v1'||
@@ -85,17 +123,28 @@ export function saveR125FinishAB({rawPath,sourcePath,outDir,integrated=false,
  // No files are created until the complete independent model/source check
  // and the selected HOST policy have both passed.
  fs.mkdirSync(out);
+ const before=activityContrast?path.join(out,'B143_ACTIVITY_LAYOUT_V2_A.json'):sourceFile;
+ if(activityContrast)fs.writeFileSync(before,
+  JSON.stringify(baseline.sourceDesign,null,2)+'\n',{flag:'wx'});
  const after=path.join(out,'B143_ART_CANDIDATE_SOURCE_ONLY.json');
  fs.writeFileSync(after,JSON.stringify(candidate.sourceDesign,null,2)+'\n',{flag:'wx'});
- const ab=saveB143ABReview({beforeSourcePath:sourceFile,
-  afterSourcePath:after,outDir:path.join(out,'ART_AB')});
- if(ab.before.sourceSha256!==current.sourceSha256||
+ const ab=saveB143ABReview({beforeSourcePath:before,
+  afterSourcePath:after,outDir:path.join(out,'ART_AB'),
+  matchedCamera:activityContrast});
+ if(ab.before.sourceSha256!==baseline.sourceSha256||
     ab.after.sourceSha256!==candidate.sourceSha256||
     ab.modelCalls!==0||ab.worldWrites!==0||
     ab.finalVoxelDifference.sameActualGeometryAndMaterial)
   fail('ART_AB_PROVENANCE_OR_DELTA_HOLD');
  const report={schema:'r125-v11-finish-art-ab-v1',
-  originalSha256:hash(original),baselineSourceSha256:current.sourceSha256,
+  originalSha256:hash(original),baselineSourceSha256:baseline.sourceSha256,
+  ...(activityContrast?{
+   contrast:'SAME_MODEL_SAME_STATIONS_INLAY_FLOOR_ONLY',
+   archivedSourceSha256:current.sourceSha256,
+   candidatePolicy:variantPolicy,unchangedOccupancy:true,
+   changedFloorMaterialCells:inlayChangedCells,
+   activityInlayReview:candidate.activityInlayReview??null,
+   physicalScale:ab.preview.physicalScale}:{}),
   candidateSourceSha256:candidate.sourceSha256,policy,
   candidateStatus:candidate.status,
   changedVoxels:ab.finalVoxelDifference,
@@ -232,7 +281,7 @@ if(process.argv[1]===fileURLToPath(import.meta.url)){
   const a=process.argv.slice(2);
   if(![6,7].includes(a.length)||a[0]!=='--raw'||a[2]!=='--source'||
      a[4]!=='--out'||(a.length===7&&
-      !['--integrated','--integrated-room-scale-v2','--roof-contrast-v2'].includes(a[6])))
+      !['--integrated','--integrated-room-scale-v2','--roof-contrast-v2','--activity-inlays-v2'].includes(a[6])))
    fail('CLI');
   if(a[6]==='--roof-contrast-v2'){
    const r=saveR125RidgeContrast({rawPath:a[1],sourcePath:a[3],outDir:a[5]});
@@ -244,11 +293,15 @@ if(process.argv[1]===fileURLToPath(import.meta.url)){
   }else{
    const r=saveR125FinishAB({
     rawPath:a[1],sourcePath:a[3],outDir:a[5],integrated:a.length===7,
-    fixtureForm:a[6]==='--integrated-room-scale-v2'?
-     'room-scale-v2':'room-scale-v1'});
+    fixtureForm:['--integrated-room-scale-v2','--activity-inlays-v2'].includes(a[6])?
+     'room-scale-v2':'room-scale-v1',
+    activityContrast:a[6]==='--activity-inlays-v2'});
    console.log('R125_V11_FINISH_ART_SOURCE_ONLY',JSON.stringify({
     baselineSha:r.baselineSourceSha256,candidateSha:r.candidateSourceSha256,
     unverifiedMaterials:r.educationMaterials.unverified,
+    ...(r.contrast?{contrast:r.contrast,
+     changedFloorMaterialCells:r.changedFloorMaterialCells,
+     unchangedOccupancy:r.unchangedOccupancy}:{}),
     image:r.photo,modelCalls:0,worldWrites:0}));
   }
  }catch(e){
