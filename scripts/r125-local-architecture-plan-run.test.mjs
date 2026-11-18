@@ -4,6 +4,8 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
+import {inferR125ExplicitActivityRequirements}
+ from '../source/ai/r125-explicit-activity-requirements.mjs';
 import {createR125ArchitecturePlanLocalAdapter,R125_ARCHITECTURE_RESPONSE_SCHEMA}
  from '../source/ai/b198g-local-model-adapter.mjs';
 import {runR125LocalArchitecturePlan,parseR125LocalPlanArgs,
@@ -20,6 +22,45 @@ const provider=raw=>({ok:true,json:async()=>({
  choices:[{message:{content:raw},finish_reason:'stop'}],
  usage:{prompt_tokens:157,completion_tokens:423,total_tokens:580}})});
 const prompt='未知の用途に対応し、入口・屋内動線・採光を持つ独創的な店舗を設計してください。';
+
+test('one-shot design request highlights only literal equipment tasks, without changing authorship',async()=>{
+ assert.deepEqual(inferR125ExplicitActivityRequirements(
+  '職員がパンを焼くためのオーブンと手洗い設備を備える施設'),[
+  {capability:'baking-heating',requiredRole:'oven'},
+  {capability:'washing-basin',requiredRole:'washbasin'}
+ ]);
+ assert.deepEqual(inferR125ExplicitActivityRequirements(
+  '独創的な小型パン工房の外観を設計して'),[]);
+ let requests=0,captures=0;
+ const author=createR125ArchitecturePlanLocalAdapter({
+  model:'qwen3:14b',
+  fetcher:async(_url,opts)=>{
+   requests++;
+   const payload=JSON.parse(opts.body);
+   assert.equal(payload.messages.length,2);
+   const user=JSON.parse(payload.messages[1].content);
+   assert.deepEqual(user.explicitLiteralEquipment,[
+    {capability:'baking-heating',requiredRole:'oven'},
+    {capability:'washing-basin',requiredRole:'washbasin'}
+   ]);
+   assert.equal(user.architecturalRequest,
+    '職員がパンを焼くためのオーブンと手洗い設備を備える施設');
+   assert.match(user.explicitEquipmentRule,/model-chosen room/);
+   assert.equal(payload.stream,false);
+   return provider(original);
+  },
+  onRawModelResponse:()=>{captures++;}
+ });
+ const result=await author({
+  prompt:'職員がパンを焼くためのオーブンと手洗い設備を備える施設'
+ });
+ assert.equal(requests,1);
+ assert.equal(captures,1);
+ assert.equal(result.originalSha256,digest(original));
+ assert.equal(result.modelCalls,1);
+ assert.equal(result.worldWrites,0);
+ assert.equal(result.sourceVerified,false);
+});
 
 test('existing real Qwen original replays through the unchanged B143 and circulation',()=>{
  const r=diagnoseR125ArchitecturePlanOriginal(original);

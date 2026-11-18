@@ -9,6 +9,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
+import {inferR125ExplicitActivityRequirements}
+ from '../source/ai/r125-explicit-activity-requirements.mjs';
 import {readModelProposal} from '../source/ai/b198-natural-language-design.mjs';
 import {validateDesign,compileDesign} from '../source/ai/b143-building-dsl.mjs';
 import {compileArchitecturePlan,auditArchitecturePlanCirculation,
@@ -143,23 +145,9 @@ export function auditR125ExplicitActivityProxy(requestedBrief,fixtureTargets=[])
    assessed:[],missing:[]};
  if(!Array.isArray(fixtureTargets))fail('INVALID_ACTIVITY_FIXTURES');
  // Explicit ACTIONS, not words describing building genres or aesthetics.
- const cues=[
-  ['baking-heating','oven',/焼成設備|焼成炉|オーブン|パンを焼|\boven\b/i],
-  ['washing-basin','washbasin',/洗面台|手洗い設備|手洗い場|\bwashbasin\b/i],
-  ['sleeping-bed','bed',/ベッド|就寝用ベッド|\bbed\b/i],
-  ['electronic-maintenance','electronics',
-   /電子機器(?:の|を)(?:点検|整備|操作)|\belectronic (?:equipment )?maintenance\b/i],
-  // Literal equipment requests only; a building genre is not a task.
-  ['fabrication-bench','workbench',
-   /工作台|製作用作業台|組立作業台|\bworkbench\b/i],
-  ['exhibit-stand','display',
-   /展示ケース|展示台|展示設備|\bdisplay (?:case|stand|fixture)\b/i],
-  ['records-desk','desk',
-   /事務机|記録用(?:の)?机|作業用デスク|\bdesk\b/i]
- ];
  const placed=new Set(fixtureTargets.map(f=>f.kind));
- const assessed=cues.filter(([, ,rx])=>rx.test(requestedBrief))
-  .map(([capability,requiredRole])=>({
+ const assessed=inferR125ExplicitActivityRequirements(requestedBrief)
+  .map(({capability,requiredRole})=>({
    capability,requiredRole,sourcePlacedProxy:placed.has(requiredRole)}));
  const missing=assessed.filter(x=>!x.sourcePlacedProxy)
   .map(x=>({capability:x.capability,requiredRole:x.requiredRole}));

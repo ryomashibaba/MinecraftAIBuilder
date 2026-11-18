@@ -1,4 +1,6 @@
 import {createHash} from 'node:crypto';
+import {inferR125ExplicitActivityRequirements}
+ from './r125-explicit-activity-requirements.mjs';
 import {validateArchitecturePlan,SCHEMA as R125_PLAN_SCHEMA} from './r125-architecture-plan.mjs';
 /**
  * B198G optional LOCAL-only OpenAI-compatible chat completion adapter.
@@ -445,6 +447,8 @@ export function createR125ArchitecturePlanLocalAdapter({
      messages:[{role:'system',content:system},
       {role:'user',content:JSON.stringify({architecturalRequest:prompt,
        sourceOnly:true,authorSemanticPlan:true,
+       explicitLiteralEquipment:inferR125ExplicitActivityRequirements(prompt),
+       explicitEquipmentRule:'Only literal requirements, not a complete task list. Assign each required role to a model-chosen room that actually performs its activity. No extra equipment to fill space or fake coverage.',
        crossFieldRule:'Decide levels first. With 1 level: setbackSide=none and setbackDepth=0. Only with 2 levels: east/rear may have depth 2, 3, 4, 6 or 8 (6/8 needs footprint width/depth >= 28). Invalid pair is rejected without retry.'})}]})
    });
    if(!res||res.ok!==true)
