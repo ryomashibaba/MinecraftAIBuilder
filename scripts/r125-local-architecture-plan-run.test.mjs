@@ -82,6 +82,7 @@ test('one-shot design request highlights only literal equipment tasks, without c
     ['oven','washbasin','workbench','display']);
    assert.match(user.essentialTaskPlacementRule,
     /fixtures:\["assembly-table","inspection-stand"\]/);
+   assert.match(user.essentialTaskPlacementRule,/fixtures 配列/);
    assert.match(user.essentialTaskPlacementRule,/fixtureScale は出力禁止/);
    assert.deepEqual(user.explicitLiteralEquipment,[
     {capability:'baking-heating',requiredRole:'oven'},
@@ -179,7 +180,8 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    assert.ok(room.properties.fixtures.items.enum.includes('oven'));
    assert.ok(room.properties.fixtures.items.enum.includes('service-bay'));
    assert.ok(room.properties.fixtures.items.enum.includes('teaching-board'));
-   assert.ok(!room.properties.fixture.enum.includes('oven'));
+   assert.equal(room.properties.fixture,undefined,
+    'new local author has full equipment-role access via fixtures only');
    assert.equal(room.properties.fixtures.maxItems,5);
    assert.equal(room.properties.fixtureScale,undefined,
     'first-pass model cannot select unsafe room expansion');
