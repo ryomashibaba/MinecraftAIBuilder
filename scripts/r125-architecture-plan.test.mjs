@@ -1999,12 +1999,12 @@ test('two storeys with 3 rooms each remain source-connected via staircase',()=>{
  assert.equal(auditArchitecturePlanCirculation(out).status,'SOURCE_CLEARANCE_PROBES_PASS');
  assert.deepEqual(out.compiled.BuildPlan.operations,[]);
 });
-test('fourth room is not accepted',()=>{
+test('fourth room rejects unsupported x-split instead of blanket rejection',()=>{
  const p=plan('fourth-reject',['x'],['first area','second area']);
  p.levels[0].spaces.push({id:'area-0c',purpose:'third area'});
  assert.equal(validateArchitecturePlan(p),true);
  p.levels[0].spaces.push({id:'area-0d',purpose:'fourth area'});
- assert.throws(()=>validateArchitecturePlan(p),/R125_PLAN_LEVEL_PROGRAM/);
+ assert.throws(()=>validateArchitecturePlan(p),/R125_PLAN_FOUR_ROOM_HUB_PROGRAM/);
 });
 
 
