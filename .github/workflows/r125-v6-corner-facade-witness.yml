@@ -17,6 +17,8 @@ on:
       - configs/r125-education-verified-palette-v26.33.json
       - scripts/r125-architecture-plan.test.mjs
       - scripts/r125-offline-replay.mjs
+      - scripts/r125-v11-finish-art-ab.mjs
+      - scripts/r125-v11-spatial-art.test.mjs
       - scripts/r125-roof-ribbon-ab.mjs
       - scripts/r125-roof-ribbon-ab.test.mjs
       - scripts/r125-roof-interior-study.mjs
@@ -158,6 +160,7 @@ jobs:
           node --check scripts/r125-local-architecture-plan-run.mjs
           node --check scripts/r125-static-art-review.mjs
           node --check scripts/r125-recovered-art-review.mjs
+          node --check scripts/r125-v11-finish-art-ab.mjs
           node --check scripts/r125-roof-ribbon-ab.mjs
           node --check scripts/r125-material-probe.mjs
           node --check scripts/r125-local-architecture-plan-batch.mjs
@@ -165,6 +168,7 @@ jobs:
           node --check scripts/r125-saved-three-genre-baseline.mjs
           node --test scripts/r125-saved-three-genre-baseline.test.mjs scripts/r125-form-review-gallery.test.mjs
           pwsh -NoProfile -File scripts/r125-v11-windows-pilot.ps1 -CheckOnly
+          node --test scripts/r125-v11-spatial-art.test.mjs
           node --test scripts/r125-roof-ribbon-ab.test.mjs scripts/r125-roof-interior-study.test.mjs scripts/r125-v11-education-input-check.test.mjs scripts/r125-offline-replay.test.mjs scripts/r125-architecture-plan.test.mjs scripts/r125-local-architecture-plan-run.test.mjs scripts/r125-local-architecture-plan-batch.test.mjs scripts/r125-static-art-review.test.mjs scripts/r125-recovered-art-review.test.mjs scripts/b198g-local-adapter.test.mjs scripts/r125-material-probe.test.mjs
       - name: Export saved real-Qwen B143 3D HTML for human ART review
         run: |

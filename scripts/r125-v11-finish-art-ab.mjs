@@ -119,21 +119,136 @@ export function saveR125FinishAB({rawPath,sourcePath,outDir,integrated=false,
   JSON.stringify(report,null,2)+'\n',{flag:'wx'});
  return report;
 }
+
+/**
+ * Explicit ART trial: compare standard vs steep ridge with SAME room-scale-v2,
+ * furniture, model-selected rooms, access and unchanged genuine model bytes.
+ * Only the roof B143 voxels may differ. Source and world gates remain strict.
+ */
+export function saveR125RidgeContrast({rawPath,sourcePath,outDir}={}){
+ if([rawPath,sourcePath,outDir].some(x=>typeof x!=='string'||!x.trim()))
+  fail('RIDGE_CONTRAST_INPUT_REQUIRED');
+ const rawFile=path.resolve(rawPath),sourceFile=path.resolve(sourcePath);
+ const dest=path.resolve(outDir),parent=path.dirname(dest);
+ if(!fs.existsSync(parent)||!fs.statSync(parent).isDirectory()||
+    fs.existsSync(dest))fail('RIDGE_CONTRAST_NEW_OUTPUT_REQUIRED');
+ const rp=fs.realpathSync(parent);
+ if(dest===ROOT||dest.startsWith(ROOT+path.sep)||rp===ROOT||
+    rp.startsWith(ROOT+path.sep))fail('RIDGE_CONTRAST_OUTPUT_OUTSIDE_REPO_REQUIRED');
+ for(const [f,limit] of [[rawFile,60000],[sourceFile,2000000]])
+  if(!fs.existsSync(f)||!fs.statSync(f).isFile()||
+     fs.statSync(f).size>limit)fail('RIDGE_CONTRAST_INPUT_MISSING');
+ const original=fs.readFileSync(rawFile,'utf8');
+ const plan=JSON.parse(original);
+ if(plan.expression?.roofProfile!=='ridge'||
+    plan.expression.roofVolume!=='raised'||
+    plan.expression.ridgeProfile!==undefined||
+    plan.expression.rearCourt!==undefined||
+    plan.expression.rearCornerCut!==undefined)
+  fail('RIDGE_CONTRAST_REQUIRES_UNMODIFIED_RAISED_RIDGE');
+ const archived=JSON.parse(fs.readFileSync(sourceFile,'utf8'));
+ const archivedCompiled=compileDesign(archived);
+ const initial=diagnoseR125ArchitecturePlanOriginal(original);
+ if(!initial.sourceVerified||
+    initial.status!=='B143_SOURCE_CANDIDATE_ART_HOLD'||
+    !verifyCompiled(archived,archivedCompiled)||
+    archivedCompiled.sourceSha256!==initial.sourceSha256||
+    archivedCompiled.geometrySha256!==initial.geometrySha256||
+    archivedCompiled.BuildPlan?.operations?.length!==0||
+    archivedCompiled.worldContacts!==0)
+  fail('RIDGE_CONTRAST_ORIGINAL_SOURCE_MISMATCH');
+ const shared={hostDetail:'spatial-v1',fixtureArt:'activity-layout',
+  fixtureForm:'room-scale-v2'};
+ const a=diagnoseR125ArchitecturePlanOriginal(original,shared);
+ const b=diagnoseR125ArchitecturePlanOriginal(original,
+  {...shared,roofMassing:'steep-ridge-review'});
+ for(const v of [a,b])
+  if(v.status!=='B143_SOURCE_CANDIDATE_ART_HOLD'||
+     v.sourceVerified!==true||!v.sourceDesign||
+     v.originalSha256!==hash(original)||
+     v.modelChosenFixtures!==initial.modelChosenFixtures||
+     v.modelCalls!==0||v.worldWrites!==0)
+   fail('RIDGE_CONTRAST_SOURCE_HOLD_'+String(v.compilerReason??v.status).slice(0,80));
+ const ca=compileDesign(a.sourceDesign),cb=compileDesign(b.sourceDesign);
+ if(!verifyCompiled(a.sourceDesign,ca)||!verifyCompiled(b.sourceDesign,cb)||
+    ca.sourceSha256!==a.sourceSha256||cb.sourceSha256!==b.sourceSha256||
+    ca.worldContacts!==0||cb.worldContacts!==0||
+    ca.BuildPlan?.operations?.length!==0||
+    cb.BuildPlan?.operations?.length!==0)
+  fail('RIDGE_CONTRAST_COMPILED_HOLD');
+ const topY=1+5*plan.levels.length;
+ const key=v=>v[0]+','+v[1]+','+v[2];
+ const cells=(scene,above)=>new Map(scene.primitives.filter(v=>
+  above?v[1]>=topY:v[1]<topY).map(v=>[key(v),v[3]]));
+ const belowA=cells(ca,false),belowB=cells(cb,false);
+ if(belowA.size!==belowB.size||
+    [...belowA].some(([k,m])=>belowB.get(k)!==m))
+  fail('RIDGE_CONTRAST_UNDER_ROOF_CHANGED');
+ const aboveA=cells(ca,true),aboveB=cells(cb,true);
+ const changedRoofCells=[...new Set([...aboveA.keys(),...aboveB.keys()])]
+  .filter(k=>aboveA.get(k)!==aboveB.get(k)).length;
+ if(!changedRoofCells||a.sourceSha256===b.sourceSha256)
+  fail('RIDGE_CONTRAST_NO_ROOF_DIFFERENCE');
+ if(fs.readFileSync(rawFile,'utf8')!==original)
+  fail('RIDGE_CONTRAST_ORIGINAL_MUTATED');
+ // No output is created before all independent source and voxel checks pass.
+ fs.mkdirSync(dest);
+ const pathA=path.join(dest,'B143_ROOM_SCALE_V2_STANDARD_ROOF.json');
+ const pathB=path.join(dest,'B143_ROOM_SCALE_V2_STEEP_ROOF.json');
+ fs.writeFileSync(pathA,JSON.stringify(a.sourceDesign,null,2)+'\n',{flag:'wx'});
+ fs.writeFileSync(pathB,JSON.stringify(b.sourceDesign,null,2)+'\n',{flag:'wx'});
+ const ab=saveB143ABReview({beforeSourcePath:pathA,
+  afterSourcePath:pathB,outDir:path.join(dest,'ART_AB')});
+ if(ab.before.sourceSha256!==a.sourceSha256||
+    ab.after.sourceSha256!==b.sourceSha256||
+    ab.finalVoxelDifference.sameActualGeometryAndMaterial||
+    ab.modelCalls!==0||ab.worldWrites!==0)
+  fail('RIDGE_CONTRAST_AB_PROVENANCE_HOLD');
+ const crest=scene=>Math.max(...scene.primitives.map(v=>v[1]));
+ const result={schema:'r125-v11-room-scale-v2-ridge-only-contrast-v1',
+  originalSha256:hash(original),archivedSourceSha256:initial.sourceSha256,
+  modelOriginalUnchanged:true,originalPlanPreserved:true,
+  sourceVerifiedA:true,sourceVerifiedB:true,
+  sourceSha256A:a.sourceSha256,sourceSha256B:b.sourceSha256,
+  geometrySha256A:a.geometrySha256,geometrySha256B:b.geometrySha256,
+  policyA:shared,policyB:{...shared,roofMassing:'steep-ridge-review'},
+  fixtureCountA:a.modelChosenFixtures,fixtureCountB:b.modelChosenFixtures,
+  sourceVoxelsA:ca.primitives.length,sourceVoxelsB:cb.primitives.length,
+  roofCrestYA:crest(ca),roofCrestYB:crest(cb),
+  roofTopY:topY,changedRoofCells,belowRoofGeometryAndMaterialIdentical:true,
+  changedVoxels:ab.finalVoxelDifference,
+  photo:'ART_AB/'+ab.preview.file,photoSha256:ab.preview.sha256,
+  modelCalls:0,worldWrites:0,constructionApproved:false,
+  nineWorldGates:Array(9).fill('BLOCKED'),art:'NOT_HUMAN_REVIEWED',
+  minecraftWalking:'NOT_TESTED',education:'NOT_TESTED'};
+ fs.writeFileSync(path.join(dest,'RIDGE_ONLY_AB_REPORT.json'),
+  JSON.stringify(result,null,2)+'\n',{flag:'wx'});
+ return result;
+}
 if(process.argv[1]===fileURLToPath(import.meta.url)){
  try{
   const a=process.argv.slice(2);
   if(![6,7].includes(a.length)||a[0]!=='--raw'||a[2]!=='--source'||
      a[4]!=='--out'||(a.length===7&&
-      !['--integrated','--integrated-room-scale-v2'].includes(a[6])))
+      !['--integrated','--integrated-room-scale-v2','--roof-contrast-v2'].includes(a[6])))
    fail('CLI');
-  const r=saveR125FinishAB({
-   rawPath:a[1],sourcePath:a[3],outDir:a[5],integrated:a.length===7,
-   fixtureForm:a[6]==='--integrated-room-scale-v2'?
-    'room-scale-v2':'room-scale-v1'});
-  console.log('R125_V11_FINISH_ART_SOURCE_ONLY',JSON.stringify({
-   baselineSha:r.baselineSourceSha256,candidateSha:r.candidateSourceSha256,
-   unverifiedMaterials:r.educationMaterials.unverified,
-   image:r.photo,modelCalls:0,worldWrites:0}));
+  if(a[6]==='--roof-contrast-v2'){
+   const r=saveR125RidgeContrast({rawPath:a[1],sourcePath:a[3],outDir:a[5]});
+   console.log('R125_V11_RIDGE_ONLY_ART_SOURCE',JSON.stringify({
+    shaA:r.sourceSha256A,shaB:r.sourceSha256B,
+    changedRoofCells:r.changedRoofCells,
+    belowRoofIdentical:r.belowRoofGeometryAndMaterialIdentical,
+    image:r.photo,modelCalls:0,worldWrites:0}));
+  }else{
+   const r=saveR125FinishAB({
+    rawPath:a[1],sourcePath:a[3],outDir:a[5],integrated:a.length===7,
+    fixtureForm:a[6]==='--integrated-room-scale-v2'?
+     'room-scale-v2':'room-scale-v1'});
+   console.log('R125_V11_FINISH_ART_SOURCE_ONLY',JSON.stringify({
+    baselineSha:r.baselineSourceSha256,candidateSha:r.candidateSourceSha256,
+    unverifiedMaterials:r.educationMaterials.unverified,
+    image:r.photo,modelCalls:0,worldWrites:0}));
+  }
  }catch(e){
   console.error('R125_V11_FINISH_ART_HOLD',String(e?.message??e).slice(0,240));
   process.exitCode=2;

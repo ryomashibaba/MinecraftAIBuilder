@@ -7,7 +7,7 @@ import {SCHEMA} from '../source/ai/r125-architecture-plan.mjs';
 import {compileDesign} from '../source/ai/b143-building-dsl.mjs';
 import {diagnoseR125ArchitecturePlanOriginal} from './r125-offline-replay.mjs';
 import {saveR125SpatialArt} from './r125-v11-spatial-art.mjs';
-import {saveR125FinishAB} from './r125-v11-finish-art-ab.mjs';
+import {saveR125FinishAB,saveR125RidgeContrast} from './r125-v11-finish-art-ab.mjs';
 import {detailR125Envelope} from '../source/ai/r125-spatial-detail.mjs';
 import {inspectR125SavedRoomUse} from './r125-v11-room-use-diagnosis.mjs';
 test('offline saved author: real recessed volume, SHA integrity and world gates',()=>{
@@ -225,6 +225,25 @@ test('V11 integrated HOST room-quality A/B emits eight-view real B143 preview',(
   assert.notEqual(v2.candidateSourceSha256,result.candidateSourceSha256);
   assert.equal(v2.worldWrites,0);
   assert.deepEqual(v2.nineWorldGates,Array(9).fill('BLOCKED'));
+  const contrast=saveR125RidgeContrast({rawPath,sourcePath,
+   outDir:path.join(dir,'roof-v2-contrast')});
+  assert.equal(contrast.modelOriginalUnchanged,true);
+  assert.equal(fs.readFileSync(rawPath,'utf8'),raw);
+  assert.equal(contrast.sourceSha256A,v2.candidateSourceSha256);
+  assert.notEqual(contrast.sourceSha256B,contrast.sourceSha256A);
+  assert.equal(contrast.policyA.fixtureForm,'room-scale-v2');
+  assert.equal(contrast.policyB.roofMassing,'steep-ridge-review');
+  assert.equal(contrast.fixtureCountA,4);
+  assert.equal(contrast.fixtureCountB,4);
+  assert.equal(contrast.belowRoofGeometryAndMaterialIdentical,true);
+  assert(contrast.changedRoofCells>0);
+  assert(contrast.roofCrestYB>=contrast.roofCrestYA);
+  assert.equal(contrast.modelCalls,0);
+  assert.equal(contrast.worldWrites,0);
+  assert.deepEqual(contrast.nineWorldGates,Array(9).fill('BLOCKED'));
+  assert.ok(fs.existsSync(path.join(dir,'roof-v2-contrast',contrast.photo)));
+  assert.throws(()=>saveR125RidgeContrast({rawPath,sourcePath,
+   outDir:path.join(dir,'roof-v2-contrast')}),/NEW_OUTPUT_REQUIRED/);
  }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });
 
