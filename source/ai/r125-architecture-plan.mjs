@@ -165,8 +165,9 @@ function tLayout(level,{x0,x1,z0,z1},split){
 function fourRoomFrontHub(level,{x0,x1,z0,z1},split){
  if(level.spaces.length!==4)return null;
  check(level.splitAxis==='z','FOUR_ROOM_HUB_AXIS');
- const [p1,p2]=level.rearBayPercentages??[100/3,200/3];
- const k1=Math.floor(x0+(x1-x0)*p1/100),k2=Math.floor(x0+(x1-x0)*p2/100);
+ const [k1,k2]=level.rearBayPercentages?
+  level.rearBayPercentages.map(p=>Math.floor(x0+(x1-x0)*p/100)):
+  [Math.floor(x0+(x1-x0)/3),Math.floor(x0+2*(x1-x0)/3)];
  const bays=[[x0+1,k1-1],[k1+1,k2-1],[k2+1,x1-1]];
  check(bays.every(([a,b])=>b-a+1>=5)&&
   split-z0-1>=6&&z1-split-1>=6,'FOUR_ROOM_HUB_CLEAR_SPANS');
@@ -439,8 +440,9 @@ export function assessR125AuthoredRoomCapacity(plan){
    [[split-x0-1,z1-z0-1],[x1-split-1,z1-z0-1]]:
    [[x1-x0-1,split-z0-1],[x1-x0-1,z1-split-1]];
   if(level.spaces.length===4){
-   const [p1,p2]=level.rearBayPercentages??[100/3,200/3];
-   const k1=Math.floor(x0+(x1-x0)*p1/100),k2=Math.floor(x0+(x1-x0)*p2/100);
+   const [k1,k2]=level.rearBayPercentages?
+    level.rearBayPercentages.map(p=>Math.floor(x0+(x1-x0)*p/100)):
+    [Math.floor(x0+(x1-x0)/3),Math.floor(x0+2*(x1-x0)/3)];
    sizes.splice(1,1,[k1-x0-1,z1-split-1],
     [k2-k1-1,z1-split-1],[x1-k2-1,z1-split-1]);
   }

@@ -139,7 +139,10 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
     'single-storey author can choose a four-room front hub');
    assert.equal(authorSchema.properties.levels.items.properties.spaces.maxItems,3,
     'two-storey layout remains bounded to three rooms per floor');
-   assert.deepEqual(authorSchema.properties.levels.items.properties.secondarySplitPercent.enum,[35,50,65]);
+   assert.deepEqual(authorSchema.properties.levels.items.properties.secondarySplitPercent.enum,[25,30,35,40,45,50,55,60,65,70,75]);
+   assert.deepEqual(authorSchema.properties.levels.items.properties.splitPercent.enum,[30,35,40,45,50,55,60,65,70]);
+   assert.equal(authorSchema.properties.levels.items.properties.rearBayPercentages.minItems,2);
+   assert.equal(authorSchema.properties.levels.items.properties.rearBayPercentages.maxItems,2);
    assert.ok(!authorSchema.properties.levels.items.required.includes('secondarySplitPercent'));
    assert.deepEqual(authorSchema.properties.levels.items.properties.thirdRoomLink.enum,
     ['first-and-second']);
@@ -151,6 +154,8 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
     'new Ollama-authored rooms must identify public/staff circulation');
    assert.ok(room.properties.fixtures.items.enum.includes('electronics'));
    assert.ok(room.properties.fixtures.items.enum.includes('oven'));
+   assert.ok(room.properties.fixtures.items.enum.includes('service-bay'));
+   assert.ok(room.properties.fixtures.items.enum.includes('teaching-board'));
    assert.ok(!room.properties.fixture.enum.includes('oven'));
    assert.equal(room.properties.fixtures.maxItems,5);
    assert.ok(room.properties.daylight.enum.includes('paired-bays'),

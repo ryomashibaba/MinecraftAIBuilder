@@ -3578,10 +3578,12 @@ test('four-room hub refuses missing front access, upper floors and narrow sites'
   {id:'rear-three',purpose:'Display',access:'public'}
  ];
  assert.equal(validateArchitecturePlan(p),true);
+ const compact=structuredClone(p);compact.footprint={width:22,depth:18};
+ assert.equal(validateArchitecturePlan(compact),true,'new compact four-room minimum');
  for(const mutate of [
   x=>{x.levels[0].spaces[0].access='staff';},
-  x=>{x.footprint.width=27;},
-  x=>{x.footprint.depth=23;},
+  x=>{x.footprint.width=21;},
+  x=>{x.footprint.depth=17;},
   x=>{x.levels[0].splitAxis='x';},
   x=>{x.levels.push(structuredClone(x.levels[0]));},
   x=>{x.expression={setbackSide:'none',setbackDepth:0,
