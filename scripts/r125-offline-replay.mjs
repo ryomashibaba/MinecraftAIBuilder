@@ -383,6 +383,10 @@ export function diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail='legacy',ro
    occupiedVoxels:built.compiled.primitives.length,
    sourceRoutes:routes.status,sourceRouteIssues:routes.issues??[],
    visitorCirculation:visitors,
+   observationSource:built.observationSource??{
+    status:'NOT_AUTHORED_VIEW_RELATION_NOT_CERTIFIED',
+    sourceOnly:true,modelCalls:0,worldWrites:0
+   },
    explicitActivityProxy,roomActivityProxy,
    requestedActivityCoverage:'NOT_INDEPENDENTLY_VERIFIED_BY_SOURCE',
    roomUseEvidence:describeR125AuthoredRoomUse(placementPlan,built),

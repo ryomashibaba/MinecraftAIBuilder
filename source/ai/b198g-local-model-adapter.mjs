@@ -365,7 +365,9 @@ const r125PlanProperties={
   wall:r125enum('concrete','stone','wood','metal'),
   roof:r125enum('stone','metal','wood','concrete')
  },['floor','wall','roof']),
- entryZone:r125enum('first','second'),expression:r125Expression
+ entryZone:r125enum('first','second'),expression:r125Expression,
+ observationLink:r125obj({viewerSpaceId:r125slug,workSpaceId:r125slug},
+  ['viewerSpaceId','workSpaceId'])
 };
 const r125PlanRequired=['schema','id','title','brief','footprint','levels','materials'];
 // Only four-room, single-floor author plans can opt into a 20/25
@@ -471,6 +473,7 @@ export function createR125ArchitecturePlanLocalAdapter({
        requiredFixtureRoles:inferR125ExplicitActivityRequirements(prompt)
         .map(x=>x.requiredRole),
        essentialTaskPlacementRule:'最優先: requiredFixtureRoles の全設備を必ず部屋の fixtures 配列に明記する。例えば組立と点検が同じ作業室なら fixtures:["assembly-table","inspection-stand"] とし、workbench だけでは代用不可。展示はdisplay、記録はdesk。必須設備を先に部屋へ割り当て、その部屋に十分な面積と2ブロック幅の利用経路を確保してから屋根・外観を設計する。fixtureScale は出力禁止。設備を勝手に省いたり、職員室を通る公開経路にしない。',
+       observationRelationRule:'If visitors must watch actual staff WORK, not just view an exhibit, choose optional observationLink:{viewerSpaceId,workSpaceId}. Choose adjacent same-floor public/shared and staff/shared rooms, the latter with a work fixture. HOST cuts a real 2x2 internal glass panel and proves visitor standing access and a clear ray to work equipment; impossible choices HOLD. No automatic doors or false visibility claims. Omit for display-only requests.',
        architecturalRequest:prompt,
        sourceOnly:true,authorSemanticPlan:true,
        explicitLiteralEquipment:inferR125ExplicitActivityRequirements(prompt),

@@ -14,6 +14,7 @@ import {addAuthoredRoomDaylight,addR125SpatialDaylightBays} from './r125-room-da
 import {expandR125RoomScale} from './r125-room-scale.mjs';
 import {detailR125Envelope} from './r125-spatial-detail.mjs';
 import {addR125HipRoof} from './r125-hip-roof.mjs';
+import {addR125AuthoredObservation} from './r125-room-observation.mjs';
 export const SCHEMA='minecraftaibuilder-r125-architecture-plan-v1';
 const hash=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
 const refuse=code=>{throw Error('R125_PLAN_'+code);};
@@ -220,8 +221,10 @@ export function validateArchitecturePlan(p){
  const standard=['schema','id','title','brief','footprint','levels','materials'];
  const expressive=Object.hasOwn(p??{},'expression');
  const entrySpecified=Object.hasOwn(p??{},'entryZone');
+ const observationSpecified=Object.hasOwn(p??{},'observationLink');
  check(keys(p,[...standard,...(expressive?['expression']:[]),
-  ...(entrySpecified?['entryZone']:[])]),
+  ...(entrySpecified?['entryZone']:[]),
+  ...(observationSpecified?['observationLink']:[])]),
   'TOP_LEVEL_FIELDS');
  check(p.schema===SCHEMA,'SCHEMA');
  // B143 permits up to 500 characters of brief; keep title and room-purpose
@@ -453,6 +456,25 @@ export function validateArchitecturePlan(p){
    check(!seen.has(space.id),'DUPLICATE_SPACE_ID');
    seen.add(space.id);
   }
+ }
+ if(observationSpecified){
+  const relation=p.observationLink;
+  check(expressive&&keys(relation,['viewerSpaceId','workSpaceId'])&&
+   slug(relation.viewerSpaceId)&&slug(relation.workSpaceId)&&
+   relation.viewerSpaceId!==relation.workSpaceId,
+   'OBSERVATION_LINK_FIELDS');
+  const sites=p.levels.map((l,i)=>l.spaces.map(s=>({s,i}))).flat();
+  const viewer=sites.find(({s})=>s.id===relation.viewerSpaceId);
+  const worker=sites.find(({s})=>s.id===relation.workSpaceId);
+  check(viewer&&worker&&viewer.i===worker.i&&
+   ['public','shared'].includes(viewer.s.access)&&
+   ['staff','shared'].includes(worker.s.access),
+   'OBSERVATION_LINK_PRIVACY_OR_LEVEL');
+  const stationRoles=worker.s.fixtures??(worker.s.fixture?[worker.s.fixture]:[]);
+  check(stationRoles.some(x=>[
+   'assembly-table','inspection-stand','workbench','service-bay',
+   'electronics','oven','tool-rack'].includes(x)),
+   'OBSERVATION_LINK_NO_AUTHORED_WORKSTATION');
  }
  // A rear public room in a z-split cannot have a staff-only front room
  // as the ONLY path from the entrance. This is a narrow author-declared
@@ -1595,8 +1617,12 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
    profile:fixtureForm==='room-scale-v2'?'room-scale-v2':'room-scale-v1'}):styled;
  const articulated=hostDetail==='spatial-v1'&&original.expression.facadeLanguage==='fins'?
   addR125SpatialDaylightBays(scaled):scaled;
- return ['activity-inlays','activity-layout-inlays'].includes(fixtureArt)?
+ const finished=['activity-inlays','activity-layout-inlays'].includes(fixtureArt)?
   addR125ActivityFloorInlays(articulated):articulated;
+ // Authored relation only: the HOST must prove a glass boundary, a real
+ // visitor-side two-wide pad and an unobstructed ray to a real workstation.
+ return original.observationLink?
+  addR125AuthoredObservation(finished,original):finished;
 }
 
 /**
