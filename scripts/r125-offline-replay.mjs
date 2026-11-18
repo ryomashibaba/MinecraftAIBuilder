@@ -13,7 +13,8 @@ import {inferR125ExplicitActivityRequirements}
  from '../source/ai/r125-explicit-activity-requirements.mjs';
 import {readModelProposal} from '../source/ai/b198-natural-language-design.mjs';
 import {validateDesign,compileDesign} from '../source/ai/b143-building-dsl.mjs';
-import {compileArchitecturePlan,auditArchitecturePlanCirculation,
+import {compileArchitecturePlan,composeR125PublicStairSpine,
+ auditArchitecturePlanCirculation,
  assessR125ProgramGeometry,assessR125AuthoredRoomCapacity} from '../source/ai/r125-architecture-plan.mjs';
 import {auditR125SourceRoutes,auditR125VisitorRoutes} from '../source/ai/r125-source-routes.mjs';
 import {auditR125PairedBayApproach} from '../source/ai/r125-room-daylight.mjs';
@@ -327,9 +328,12 @@ export function diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail='legacy',ro
  // Advisory comes from the raw AUTHOR plan even if B143 later cannot place
  // one piece; it never edits the raw answer or guesses a feasible arrangement.
  let spatialCapacity=null;
- try{spatialCapacity=assessR125AuthoredRoomCapacity(original);}
- catch{ /* Existing strict validator supplies the actual failure reason. */ }
  try{
+  const composition=composeR125PublicStairSpine(original);
+  const placementPlan=composition.plan;
+  const structuralComposition=composition.report;
+  try{spatialCapacity=assessR125AuthoredRoomCapacity(placementPlan);}
+  catch{ /* The strict compiler supplies the actual failure reason. */ }
   // This is an explicitly chosen GENERIC HOST policy, not a change to the
   // author-provided JSON. It is never selected as a retry after failure.
   const hostPolicy={entrancePlacement:'source-accessible',
@@ -339,7 +343,7 @@ export function diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail='legacy',ro
    ...(roofMassing!=='default'?{roofMassing}:{}),
     ...(fixtureArt!=='none'?{fixtureArt}:{}),
     ...(fixtureForm!=='default'?{fixtureForm}:{})};
-  const built=compileArchitecturePlan(original,hostPolicy);
+  const built=compileArchitecturePlan(placementPlan,hostPolicy);
   if(built.worldContacts!==0||built.worldWrites!==0||
      built.constructionApproved!==false||
      built.gates?.length!==9||built.gates.some(x=>x!=='BLOCKED')||
@@ -348,10 +352,10 @@ export function diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail='legacy',ro
      built.compiled?.BuildPlan?.operations?.length!==0)
     fail('PLAN_WORLD_SAFETY_DRIFT');
   const routes=auditR125SourceRoutes(built,{featureTargets:built.fixtureTargets??[]});
-  const visitors=auditR125VisitorRoutes(built,original);
+  const visitors=auditR125VisitorRoutes(built,placementPlan);
   const explicitActivityProxy=auditR125ExplicitActivityProxy(requestedBrief,
    built.fixtureTargets??[]);
-  const roomActivityProxy=auditR125AuthoredRoomActivityProxy(original,
+  const roomActivityProxy=auditR125AuthoredRoomActivityProxy(placementPlan,
    requestedBrief,built.fixtureTargets??[]);
   const pairedWindows=built.daylightTargets?.some(x=>x.kind==='paired-bays')?
    auditR125PairedBayApproach(built):null;
@@ -372,14 +376,16 @@ export function diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail='legacy',ro
     roomActivityProxy.status.startsWith('HOLD_')?
      roomActivityProxy.status:'HOLD_FUNCTIONAL_SOURCE',
    sourceVerified:functionalClear,compilerReason:null,
-   hostPolicy,...(spatialCapacity?{spatialCapacity}:{}),planSha256:built.planSha256,
+   hostPolicy,structuralComposition,
+   authoredPlanSha256:digest(JSON.stringify(original)),
+   ...(spatialCapacity?{spatialCapacity}:{}),planSha256:built.planSha256,
    sourceSha256:built.sourceSha256,geometrySha256:built.geometrySha256,
    occupiedVoxels:built.compiled.primitives.length,
    sourceRoutes:routes.status,sourceRouteIssues:routes.issues??[],
    visitorCirculation:visitors,
    explicitActivityProxy,roomActivityProxy,
    requestedActivityCoverage:'NOT_INDEPENDENTLY_VERIFIED_BY_SOURCE',
-   roomUseEvidence:describeR125AuthoredRoomUse(original,built),
+   roomUseEvidence:describeR125AuthoredRoomUse(placementPlan,built),
    modelChosenFixtures:built.fixtureTargets?.length??0,
    modelChosenDaylight:built.daylightTargets?.length??0,
    daylightSourceWindows:built.daylightTargets??[],

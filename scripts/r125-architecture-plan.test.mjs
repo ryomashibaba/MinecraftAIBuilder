@@ -5,6 +5,7 @@ import path from 'node:path';
 import {createHash} from 'node:crypto';
 import assert from 'node:assert/strict';
 import {SCHEMA,validateArchitecturePlan,compileArchitecturePlan,
+ composeR125PublicStairSpine,
  auditArchitecturePlanCirculation,assessR125ProgramGeometry,
  assessR125AuthoredRoomCapacity,packR125RaisedRoofStrips,
  estimateR125AuthoredElementReserve}
@@ -83,38 +84,61 @@ test('model-authored public circulation cannot be forced through staff-only entr
  assert.throws(()=>validateArchitecturePlan(authored),/R125_PLAN_SPACE_ACCESS/);
 });
 
-test('upper visitor landing must belong to a public room in both the authored schema and SOURCE route',()=>{
- const p=plan('upper-public-landing',['z','z']);
- p.footprint={width:24,depth:22};
+test('public stair clearance composition preserves authored room axes and minimally raises a blocked z split into a visitor-safe SOURCE layout',()=>{
+ const p=plan('upper-public-landing',['z','x']);
+ p.footprint={width:24,depth:24};
  p.expression={setbackSide:'none',setbackDepth:0,roofProfile:'ridge',
-  roofAxis:'z',facadeLanguage:'fins',roofVolume:'raised'};
+  roofAxis:'z',facadeLanguage:'screen',roofVolume:'raised'};
  p.levels[0].splitPercent=35;
  p.levels[0].spaces=[
-  {id:'public-entry',purpose:'Public visitor entry',access:'public'},
-  {id:'staff-workshop',purpose:'Staff workshop',access:'staff'}];
- p.levels[1].splitPercent=35;
+  {id:'public-hub',purpose:'Public visitor entry',access:'public',fixtures:['display']},
+  {id:'assembly-room',purpose:'Assembly and inspection',access:'shared',fixtures:['assembly-table','inspection-stand']},
+  {id:'storage-and-records',purpose:'Staff storage and records',access:'staff',fixtures:['storage','desk']}];
+ p.levels[1].splitPercent=40;
  p.levels[1].spaces=[
-  {id:'public-gallery',purpose:'Public upper gallery',access:'public'},
-  {id:'staff-storage',purpose:'Staff storage',access:'staff'}];
- assert.throws(()=>validateArchitecturePlan(p),
-  /R125_PLAN_UPPER_VISITOR_GROUND_STAIR_APPROACH_OUTSIDE_PUBLIC_ROOM/,
-  'the lower stair approach must stay in the public front room');
+  {id:'upper-public-exhibition',purpose:'Public satellite exhibition',access:'public',fixtures:['display']},
+  {id:'upper-staff-room',purpose:'Staff upper storage',access:'staff',fixtures:['desk','storage']}];
+ const original=structuredClone(p);
+ const raw=JSON.stringify(p);
+ assert.equal(validateArchitecturePlan(p),true,
+  'a geometrically misaligned but semantically valid model plan can be composed');
+ const routeOnly=structuredClone(p);
+ for(const level of routeOnly.levels)for(const space of level.spaces)
+  delete space.fixtures;
+ const unrepaired=auditR125VisitorRoutes(compileArchitecturePlan(routeOnly),
+  routeOnly);
+ assert.equal(unrepaired.status,'HOLD_VISITOR_STAFF_SEPARATION',
+  'SOURCE visitor checks remain strict on the uncomposed layout');
+ assert.deepEqual(unrepaired.blocked,['assembly-room']);
+ assert.throws(()=>compileArchitecturePlan(p),/R125_PLAN_FIXTURE_NO_REACHABLE_POSITION/,
+  'the authored front room is also too shallow for its selected display');
 
- // The west room contains x=3..4 on both levels; an explicit first-zone
- // entrance fixes the ground approach. The original upper z=35 split still
- // puts its landing beyond the public room and must fail independently.
- p.entryZone='first';
- p.levels[0].splitAxis='x';p.levels[0].splitPercent=40;
- assert.throws(()=>validateArchitecturePlan(p),
-  /R125_PLAN_UPPER_VISITOR_LANDING_OUTSIDE_PUBLIC_ROOM/);
- p.levels[1].splitAxis='x';p.levels[1].splitPercent=40;
- assert.equal(validateArchitecturePlan(p),true);
- const built=compileArchitecturePlan(p);
- const visitor=auditR125VisitorRoutes(built,p);
+ const composed=composeR125PublicStairSpine(p);
+ assert.equal(composed.report.status,'APPLIED_MINIMUM_PUBLIC_STAIR_CLEARANCE');
+ assert.deepEqual(composed.report.originalAxes,['z','x']);
+ assert.deepEqual(composed.report.composedAxes,['z','x']);
+ assert.deepEqual(composed.report.originalSplitPercents,[35,40]);
+ assert.deepEqual(composed.report.composedSplitPercents,[40,40]);
+ assert.equal(composed.plan.entryZone,'first');
+ assert.equal(composed.report.roomOrderPreserved,true);
+ assert.equal(composed.report.accessRolesPreserved,true);
+ assert.equal(composed.report.fixtureRolesPreserved,true);
+ assert.deepEqual(p,original,'composition operates on a derived clone');
+ const built=compileArchitecturePlan(composed.plan);
+ const visitor=auditR125VisitorRoutes(built,composed.plan);
  assert.equal(visitor.status,'SOURCE_VISITOR_ROUTES_AVOID_STAFF',
   JSON.stringify(visitor));
  assert.deepEqual(visitor.blocked,[]);
  assert.equal(built.worldWrites,0);
+
+ // Exercise the complete saved-original -> composition -> B143 diagnostic path.
+ const report=diagnoseR125ArchitecturePlanOriginal(raw);
+ assert.equal(report.structuralComposition.status,
+  'APPLIED_MINIMUM_PUBLIC_STAIR_CLEARANCE');
+ assert.equal(report.sourceVerified,true,JSON.stringify(report.visitorCirculation));
+ assert.equal(report.visitorCirculation.status,'SOURCE_VISITOR_ROUTES_AVOID_STAFF');
+ assert.ok(report.sourceDesign);
+ assert.equal(report.worldWrites,0);
 });
 
 test('two story lab includes shaft, stair wedge, usable upper floors and real voids',()=>{
@@ -3040,8 +3064,12 @@ test('front-setback two-story x40/z60 recessed portico keeps stair source-reacha
    roofProfile:'ridge',roofAxis:'z',
    facadeLanguage:'recessed-portico',roofVolume:'raised'};
   if(secondAccess==='staff'){
-   assert.throws(()=>validateArchitecturePlan(p),
-    /R125_PLAN_UPPER_VISITOR_STAIR_REQUIRES_PUBLIC_FIRST_ROOMS/);
+   assert.equal(validateArchitecturePlan(p),true);
+   const uncomposed=compileArchitecturePlan(p,{
+    entrancePlacement:'source-accessible',upperDoorPlacement:'stair-clear'});
+   const blocked=auditR125VisitorRoutes(uncomposed,p);
+   assert.equal(blocked.status,'HOLD_VISITOR_STAFF_SEPARATION');
+   assert.deepEqual(blocked.blocked,['entrance-hall']);
    continue;
   }
   const untouched=structuredClone(p);

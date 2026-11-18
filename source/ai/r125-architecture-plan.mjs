@@ -197,7 +197,7 @@ function fourRoomSideSpine(level,{x0,x1,z0,z1},split){
  ]};
 }
 
-/** Match the structural room split used by the compiler for an authored level. */
+/** Match the compiler's authored split coordinate without emitting SOURCE. */
 function authoredLevelSplit(plan,index){
  const level=plan.levels[index],{width,depth}=plan.footprint,e=plan.expression;
  const x0=1,z0=1+(index===1&&e?.setbackSide==='front'?e.setbackDepth:0);
@@ -462,31 +462,75 @@ export function validateArchitecturePlan(p){
     p.levels[0].spaces[0].access==='staff'&&
     p.levels[0].spaces.slice(1).some(s=>s.access==='public'))
   refuse('VISITOR_ACCESS_THROUGH_STAFF');
- // A public upstairs room is a structural commitment: the fixed stair
- // arrives at x=3..4,z=8..9. Keep its landing and the lower stair approach
- // inside the first public/shared room on each floor, before any SOURCE or
- // artwork is generated. This rejects an impossible room assignment; it
- // never relabels rooms, moves a divider, or edits the model-authored plan.
- const upperVisitors=p.levels.length===2&&
-  p.levels[1].spaces.some(s=>['public','shared'].includes(s.access));
- if(upperVisitors){
-  const ground=p.levels[0],upper=p.levels[1];
-  check(['public','shared'].includes(ground.spaces[0].access)&&
-   ['public','shared'].includes(upper.spaces[0].access),
-   'UPPER_VISITOR_STAIR_REQUIRES_PUBLIC_FIRST_ROOMS');
-  if(ground.splitAxis==='x')
-   check(p.entryZone==='first','UPPER_VISITOR_STAIR_REQUIRES_PUBLIC_ENTRY_ZONE');
-  else check(authoredLevelSplit(p,0)>=9,
-   'UPPER_VISITOR_GROUND_STAIR_APPROACH_OUTSIDE_PUBLIC_ROOM');
-  if(upper.splitAxis==='z')
-   check(authoredLevelSplit(p,1)>=10,
-    'UPPER_VISITOR_LANDING_OUTSIDE_PUBLIC_ROOM');
- }
  // Only the first z-split zone touches the front facade; no fake back entry.
  check(!entrySpecified||(['first','second'].includes(p.entryZone)&&
   (p.levels[0].splitAxis==='x'||p.entryZone==='first')),
   'ENTRY_ZONE_FRONT_ACCESS');
  return true;
+}
+
+/**
+ * Compose stair clearance into a valid model-authored two-storey program.
+ * Preserve each authored axis and raise only an undersized public first-zone
+ * split enough to contain the fixed stair approach/landing. SOURCE audits
+ * still decide whether the derived geometry is actually visitor-safe.
+ */
+export function composeR125PublicStairSpine(plan){
+ validateArchitecturePlan(plan);
+ const original=structuredClone(plan);
+ const upperVisitors=original.levels.length===2&&
+  original.levels[1].spaces.some(s=>['public','shared'].includes(s.access));
+ const summary={
+  schema:'r125-public-stair-clearance-composition-v1',
+  status:'NOT_REQUIRED',modelCalls:0,worldWrites:0,
+  originalPlanSha256:hash(original),
+  originalEdited:false,roomOrderPreserved:true,
+  accessRolesPreserved:true,fixtureRolesPreserved:true
+ };
+ if(!upperVisitors)return {plan:original,report:summary};
+ const hasPublicFirst=p=>['public','shared'].includes(p.levels[0].spaces[0].access)&&
+  ['public','shared'].includes(p.levels[1].spaces[0].access);
+ if(!hasPublicFirst(original))return {plan:original,report:{...summary,
+  status:'HOLD_PUBLIC_STAIR_ROOM_ORDER'} };
+ const composed=structuredClone(original);
+ composed.entryZone='first';
+ const originalSplits=original.levels.map(level=>level.splitPercent);
+ for(let i=0;i<composed.levels.length;i++){
+  const level=composed.levels[i];
+  const requiredCut=level.splitAxis==='x'?4:(i===0?9:10);
+  if(authoredLevelSplit(composed,i)>=requiredCut)continue;
+  let found=false;
+  for(let percent=level.splitPercent+5;percent<=70;percent+=5){
+   level.splitPercent=percent;
+   if(authoredLevelSplit(composed,i)>=requiredCut){found=true;break;}
+  }
+  if(!found)return {plan:original,report:{...summary,
+   status:'HOLD_PUBLIC_STAIR_ZONE_CAPACITY',originalAxes:original.levels.map(l=>l.splitAxis),
+   originalSplitPercents:originalSplits}};
+ }
+ validateArchitecturePlan(composed);
+ const roles=p=>JSON.stringify(p.levels.map(l=>l.spaces.map(s=>({
+  id:s.id,access:s.access,fixtures:s.fixtures??null,fixture:s.fixture??null
+ }))));
+ return {plan:composed,report:{...summary,
+  status:'APPLIED_MINIMUM_PUBLIC_STAIR_CLEARANCE',
+  originalAxes:original.levels.map(l=>l.splitAxis),
+  composedAxes:composed.levels.map(l=>l.splitAxis),
+  originalSplitPercents:originalSplits,
+  composedSplitPercents:composed.levels.map(l=>l.splitPercent),
+  originalEntryZone:original.entryZone??null,
+  composedEntryZone:composed.entryZone,
+  roomOrderPreserved:JSON.stringify(original.levels.map(l=>
+   l.spaces.map(s=>s.id)))===JSON.stringify(composed.levels.map(l=>
+   l.spaces.map(s=>s.id))),
+  accessRolesPreserved:JSON.stringify(original.levels.map(l=>
+   l.spaces.map(s=>s.access)))===JSON.stringify(composed.levels.map(l=>
+   l.spaces.map(s=>s.access))),
+  fixtureRolesPreserved:roles(original)===roles(composed),
+  composedPlanSha256:hash(composed),
+  arrivalZoneId:composed.levels[1].spaces[0].id,
+  spineRoomId:composed.levels[0].spaces[0].id
+ }};
 }
 
 /**
