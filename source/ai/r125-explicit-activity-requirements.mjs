@@ -18,7 +18,7 @@ const cues=[
 ];
 // A negated equipment mention is not a user request for that equipment.
 // Conservative suffix check: unsupported constructions remain outside coverage.
-const negated=/^(?:[\s　、]*(?:は|が|を|の|も|など)?){0,3}[\s　]*(?:不要|要らない|いらない|必要(?:は|が)?ない|なし|無し|置かない|設置しない|使わない|省く|禁止)/;
+const negated=/^(?:[\s　、]*(?:は|が|を|の|も|など|設置)?){0,3}[\s　]*(?:不要|要らない|いらない|必要(?:は|が)?ない|なし|無し|置かない|設置しない|使わない|省く|禁止)/;
 function explicitlyRequested(pattern,brief){
  const global=new RegExp(pattern.source,pattern.flags.replace(/g/g,'')+'g');
  for(const match of brief.matchAll(global)){
