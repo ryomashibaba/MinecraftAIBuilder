@@ -58,6 +58,28 @@ test('daylight early hold surfaces only upstream SOURCE evidence without PRIVATE
    upstreamOfWindow:false}}),null);
 });
 
+test('art comparison never calls a showroom view verified unless a real glass and workstation ray exists',()=>{
+ const one={id:'lab-view',prompt:'見学用作業室'};
+ const shared={planned:1,attempted:1,model:'qwen3:14b',
+  sourcePassCount:1,allSourceVerified:true,originalResponseCount:1};
+ const noView=renderR125BatchComparison([one],{
+  ...shared,completed:[{id:one.id,sourceVerified:true,
+   status:'B143_SOURCE_CANDIDATE_ART_HOLD',
+   observationSource:{status:'NOT_AUTHORED_VIEW_RELATION_NOT_CERTIFIED'}}]
+ });
+ assert.match(noView,/no proven visitor-to-workstation view/);
+ assert.doesNotMatch(noView,/verified public 2-wide pad/);
+ const withView=renderR125BatchComparison([one],{
+  ...shared,completed:[{id:one.id,sourceVerified:true,
+   status:'B143_SOURCE_CANDIDATE_ART_HOLD',
+   observationSource:{status:'SOURCE_GLAZED_WORK_VIEW_CONFIRMED',
+    ray:{workFixtureKind:'assembly-table'}}}]
+ });
+ assert.match(withView,/TRUE B143 interior glass/);
+ assert.match(withView,/assembly-table/);
+ assert.match(withView,/no Minecraft walking or human sight-quality claim/);
+});
+
 test('SOURCE HOLD visibly identifies the exact missing required fixtures',()=>{
  const brief={id:'sample-lab',prompt:'点検と記録を行う'};
  const report={planned:1,attempted:1,model:'qwen3:14b',

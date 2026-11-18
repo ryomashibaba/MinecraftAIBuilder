@@ -40,6 +40,12 @@ export function renderR125BatchComparison(briefs,report){
    '<p class="issue">SOURCE HOLD — missing literal equipment: '+
    missingTasks.map(x=>esc(x.requiredRole)+' ('+esc(x.capability)+')').join(' / ')+
    '</p>':'';
+  const watch=row.observationSource;
+  const viewingProof=watch?.status==='SOURCE_GLAZED_WORK_VIEW_CONFIRMED'?
+   '<p class="muted">Work observation: TRUE B143 interior glass, verified public 2-wide pad and clear ray to '+esc(watch.ray?.workFixtureKind??'workstation')+
+   ' (SOURCE only; no Minecraft walking or human sight-quality claim).</p>':
+   '<p class="issue">Work observation: '+esc(watch?.status??'NOT_ASSESSED')+
+   ' — no proven visitor-to-workstation view.</p>';
   const artAdvisory=row.roomArtAdvisory;
   const artWarning=artAdvisory?
    '<p class="issue">ART advisory (NOT a SOURCE failure): '+
@@ -68,7 +74,7 @@ export function renderR125BatchComparison(briefs,report){
   const relative='./'+row.id+'/B143_SOURCE_3D_REVIEW_ONLY.html';
   return '<section><h2>'+esc(row.id)+'</h2><p><strong>'+
    esc(row.status)+'</strong></p><p>'+esc(brief)+'</p>'+
-   '<p class="muted">'+authored+'</p><ul>'+program+'</ul>'+sourceEvidence+literalRoleWarning+artWarning+setbackIssue+
+   '<p class="muted">'+authored+'</p><ul>'+program+'</ul>'+sourceEvidence+viewingProof+literalRoleWarning+artWarning+setbackIssue+
    (findings?'<p class="issue">'+findings+'</p>':'')+
    (hasViewer?'<iframe class="mab-review" sandbox="allow-scripts" loading="lazy" src="'+
      relative+'" title="'+esc(row.id)+' true B143 3D"></iframe>'+

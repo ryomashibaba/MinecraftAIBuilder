@@ -172,12 +172,14 @@ export async function runR125ArchitecturePlanBatch({
    reasoningEffort:pilotReasoningEffort
   },{fetcher,timeoutMs});
   let modelAuthoredFormFamilySha256=null,authoredForm=null,authoredProgram=null;
+  let modelAuthoredObservationLink=null;
   if(one.report.sourceVerified){
    // Read the exact ORIGINAL response (not repaired SOURCE design) so a
    // HOST-derived difference is never attributed to the local model.
    const original=JSON.parse(fs.readFileSync(path.join(dest,item.id,
     'MODEL_RESPONSE_ORIGINAL.txt'),'utf8'));
    authoredForm=authoredFormFamily(original);
+   modelAuthoredObservationLink=original.observationLink??null;
    authoredProgram=original.levels.map(level=>({splitAxis:level.splitAxis,
     splitPercent:level.splitPercent,
     ...(level.secondarySplitPercent!==undefined?
@@ -198,6 +200,7 @@ export async function runR125ArchitecturePlanBatch({
   const daylightBaseline=summarizeR125DaylightBaselineHold(diagnosis);
   const row={id:item.id,requestSha256:one.report.requestSha256,
    modelAuthoredFormFamilySha256,authoredForm,authoredProgram,
+   modelAuthoredObservationLink,
    modelChosenDaylight:diagnosis?.modelChosenDaylight??0,
    daylightSourceWindows:diagnosis?.daylightSourceWindows??[],
    ...(diagnosis?.pairedWindowApproach?
@@ -206,6 +209,7 @@ export async function runR125ArchitecturePlanBatch({
    occupiedVoxels:diagnosis?.occupiedVoxels??null,
    sourceRouteStatus:diagnosis?.sourceRoutes??null,
    visitorCirculation:diagnosis?.visitorCirculation??null,
+   observationSource:diagnosis?.observationSource??null,
    circulationStatus:diagnosis?.circulation??null,
    programFloorStatus:diagnosis?.programFloors??null,
    visualHighRiskCount:diagnosis?.visualHighRiskCount??null,
