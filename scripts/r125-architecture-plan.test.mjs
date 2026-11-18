@@ -3403,6 +3403,37 @@ test('V11 expanded station is a model-selected, real SOURCE geometry change',()=
  invalid.levels[0].spaces[0].fixtureScale='giant';
  assert.throws(()=>validateArchitecturePlan(invalid),/R125_PLAN_SPACE_FIXTURE_SCALE/);
 });
+test('V11 model-owned scale searches a transverse connected wing in narrow rooms',()=>{
+ const p=plan('model-transverse-workbench',['x'],['public exhibit','shared work']);
+ p.footprint={width:16,depth:24};
+ p.levels[0].splitPercent=60;
+ p.levels[0].spaces[0].access='public';
+ p.levels[0].spaces[1].access='shared';
+ p.levels[0].spaces[1].fixtures=['workbench'];
+ p.levels[0].spaces[1].fixtureScale='expanded';
+ const original=JSON.stringify(p);
+ const unscaled=structuredClone(p);
+ delete unscaled.levels[0].spaces[1].fixtureScale;
+ const first=compileArchitecturePlan(unscaled,{entrancePlacement:'source-accessible'});
+ const room=first.program[0].zones[1].range;
+ assert.ok(room.x[1]-room.x[0]+1<=4,'narrow x-side must block 2-cell lengthwise joins');
+ const built=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+ assert.equal(JSON.stringify(p),original,'no post-hoc model edits');
+ assert.deepEqual(built.fixtureTargets,first.fixtureTargets);
+ assert.equal(built.roomScaleReview.changes.length,1);
+ assert.equal(built.roomScaleReview.changes[0].extensionDirection,'transverse');
+ assert.equal(built.roomScaleReview.changes[0].scaleOwner,'MODEL');
+ assert.notEqual(built.geometrySha256,first.geometrySha256);
+ assert.equal(verifyCompiled(built.design,built.compiled),true);
+ assert.equal(auditArchitecturePlanCirculation(built).status,
+  'SOURCE_CLEARANCE_PROBES_PASS');
+ assert.equal(auditR125SourceRoutes(built,{featureTargets:built.fixtureTargets}).status,
+  'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(built.worldWrites,0);
+ assert.deepEqual(built.gates,Array(9).fill('BLOCKED'));
+ assert.deepEqual(built.compiled.BuildPlan.operations,[]);
+});
+
 test('V11 room-scale HOST art study preserves model-authored original',()=>{
  const p=plan('host-room-scale',['x'],['making','showing']);
  p.footprint={width:30,depth:30};

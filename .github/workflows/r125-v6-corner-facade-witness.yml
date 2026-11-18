@@ -10,6 +10,7 @@ on:
       - source/ai/r125-architecture-plan.mjs
       - source/ai/b198c-spatial-critic.mjs
       - source/ai/r125-room-fixtures.mjs
+      - source/ai/r125-room-scale.mjs
       - source/ai/r125-room-daylight.mjs
       - source/ai/r125-spatial-detail.mjs
       - source/ai/r125-education-makecode-export.mjs
@@ -152,6 +153,7 @@ jobs:
           node --check source/ai/r125-explicit-activity-requirements.mjs
           node --check source/ai/b198c-spatial-critic.mjs
           node --check source/ai/r125-room-fixtures.mjs
+          node --check source/ai/r125-room-scale.mjs
           node --check source/ai/r125-room-daylight.mjs
           node --check scripts/r125-local-architecture-plan-run.mjs
           node --check scripts/r125-static-art-review.mjs

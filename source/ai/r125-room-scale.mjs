@@ -49,16 +49,23 @@ export function expandR125RoomScale(product,{auditCirculation,includeHostStudy=f
    design:current.design,compiled:current.compiled
   }).elevationConnectivity;
   let accepted=null;
-  for(const len of [4,3,2]){
-   if(accepted)break;
-   for(const dir of [1,-1]){
-    if(accepted)break;
-    for(const shift of [0,-1]){
+  // First preserve the existing lengthwise choices exactly. Only when all
+  // fail, try a joined transverse wing of the SAME model-selected station.
+  // This is a placement/orientation search, not a model-plan repair.
+  const candidates=[
+   ...[4,3,2].flatMap(len=>[1,-1].flatMap(dir=>
+    [0,-1].map(shift=>({axis:long,across:short,len,dir,shift,
+     width:Math.max(baseSize[short],2),direction:'lengthwise'})))),
+   ...[3,2].flatMap(len=>[1,-1].flatMap(dir=>
+    [0,-1].map(shift=>({axis:short,across:long,len,dir,shift,
+     width:baseSize[long],direction:'transverse'}))))
+  ];
+  for(const {axis,across,len,dir,shift,width,direction} of candidates){
      if(current.design.elements.length+3>160)break;
      const origin=[...base],size=[baseSize[0],1,baseSize[2]];
-     size[long]=len;size[short]=Math.max(baseSize[short],2);
-     origin[long]=dir===1?base[long]+baseSize[long]:base[long]-len;
-     origin[short]+=shift;
+     size[axis]=len;size[across]=width;
+     origin[axis]=dir===1?base[axis]+baseSize[axis]:base[axis]-len;
+     origin[across]+=shift;
      const [x,y,z]=origin,[w,,d]=size;
      if(x<zone.range.x[0]||x+w-1>zone.range.x[1]||
         z<zone.range.z[0]||z+d-1>zone.range.z[1])continue;
@@ -68,9 +75,9 @@ export function expandR125RoomScale(product,{auditCirculation,includeHostStudy=f
          occupied.has(cell(xx,y,zz))||
          occupied.has(cell(xx,y+1,zz)))free=false;
      if(!free)continue;
-     const far=dir===1?origin[long]+size[long]-1:origin[long];
+     const far=dir===1?origin[axis]+size[axis]-1:origin[axis];
      const post=[...origin],postSize=[w,1,d];
-     post[long]=far;postSize[long]=1;
+     post[axis]=far;postSize[axis]=1;
      const id='host-scale-'+station.id;
      // Only extend the MODEL-selected station. Geometry is role-specific:
      // a bench continues as a bench, not as a detached work table.
@@ -85,8 +92,8 @@ export function expandR125RoomScale(product,{auditCirculation,includeHostStudy=f
       // metal hood; this adds no station and makes no claim of functionality.
       const face=[...origin];
       const faceSize=[w,1,d];
-      face[short]=shift===0?origin[short]:origin[short]+size[short]-1;
-      faceSize[short]=1;
+      face[across]=shift===0?origin[across]:origin[across]+size[across]-1;
+      faceSize[across]=1;
       parts=[part('oven-base','stone',[x,y,z],[w,1,d]),
        part('oven-face','glass',[face[0],y+1,face[2]],faceSize),
        part('oven-hood','metal',[x,y+2,z],[w,1,d])];
@@ -143,10 +150,8 @@ export function expandR125RoomScale(product,{auditCirculation,includeHostStudy=f
      if(!changed)continue;
      accepted={trial,change:{stationId:station.id,zoneId:station.zoneId,
       kind:station.kind,scaleOwner:authored?'MODEL':'HOST_REVIEW',
-      origin,size,changedVoxels:changed}};
+      origin,size,extensionDirection:direction,changedVoxels:changed}};
      break;
-    }
-   }
   }
   if(!accepted){
    if(authored)fail('AUTHORED_NO_SAFE_FIT_'+station.zoneId);
