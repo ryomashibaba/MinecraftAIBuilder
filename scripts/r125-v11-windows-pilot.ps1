@@ -25,12 +25,22 @@ param(
  [switch]$NoOpen
 )
 $ErrorActionPreference = 'Stop'
+# Validate image bytes on Windows PowerShell 5.1 without module auto-loading.
+function Get-V11FileSha256([string]$FilePath) {
+ $stream = [System.IO.File]::OpenRead($FilePath)
+ $hash = [System.Security.Cryptography.SHA256]::Create()
+ try {
+  return ([System.BitConverter]::ToString(
+   $hash.ComputeHash($stream))).Replace('-','').ToLowerInvariant()
+ } finally { $hash.Dispose(); $stream.Dispose() }
+}
 $repo = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')).Path
 $studyBranch = 'research/r125-v6-readonly-facade-diagnostic-20261111'
 $runner = Join-Path $repo 'scripts\r125-local-architecture-plan-batch.mjs'
 $pilot = Join-Path $repo 'scripts\r125-v11-pilot-three.json'
 $single = Join-Path $repo 'scripts\r125-v11-single-unknown.json'
 $abRenderer = Join-Path $repo 'scripts\r125-static-art-review.mjs'
+$floorRenderer = Join-Path $repo 'scripts\r125-v11-saved-floor-review.mjs'
 # True B143 SOURCE renderer; a successful custom prompt opens an inspectable
 # 4-view PNG automatically. It neither contacts a model nor Minecraft.
 $staticRenderer = $abRenderer
@@ -93,7 +103,7 @@ if (-not $uri.Success -or [int]$uri.Groups[1].Value -lt 1 -or
     [int]$uri.Groups[1].Value -gt 65535) {
  throw 'V11_PILOT_LOOPBACK_ENDPOINT_REQUIRED'
 }
-foreach ($target in @($runner, $pilot, $single, $abRenderer,
+foreach ($target in @($runner, $pilot, $single, $abRenderer, $floorRenderer,
   (Join-Path $repo 'scripts\r125-batch-compare.mjs'))) {
  if (-not (Test-Path -LiteralPath $target -PathType Leaf)) {
   throw ('V11_PILOT_MISSING_SOURCE: ' + $target)
@@ -112,6 +122,10 @@ if ($CheckOnly) {
  if ($ComparePriorTide -or $customBrief) {
   & $node '--check' $staticRenderer
   if ($LASTEXITCODE -ne 0) { throw 'V11_TIDE_AB_RENDERER_SYNTAX_FAILED' }
+ }
+ if ($customBrief) {
+  & $node '--check' $floorRenderer
+  if ($LASTEXITCODE -ne 0) { throw 'V11_CUSTOM_FLOOR_RENDERER_SYNTAX_FAILED' }
  }
  Write-Output ('V11_PILOT_CHECK_ONLY_PASS: '+$(if($SingleNewBrief){'one unseen functional brief'}elseif($OnlyHousingRetail){'two original failure briefs'}else{'three original briefs'})+'; no server, HTTP, model, world or output.')
  return
@@ -379,11 +393,7 @@ if ($customBrief) {
    ConvertFrom-Json
   # Works on native Windows PowerShell 5.1 even in an isolated
   # LOCALAPPDATA, where Get-FileHash module auto-loading may be unavailable.
-  $hashObject = [System.Security.Cryptography.SHA256]::Create()
-  $imageStream = [System.IO.File]::OpenRead($contact)
-  try { $artBytesHash = $hashObject.ComputeHash($imageStream) }
-  finally { $imageStream.Dispose(); $hashObject.Dispose() }
-  $actualArtSha = ([System.BitConverter]::ToString($artBytesHash)).Replace('-','').ToLowerInvariant()
+  $actualArtSha = Get-V11FileSha256 $contact
   if ($manifest.schema -cne 'r125-b143-offline-static-review-v1' -or
       $manifest.sourceSha256 -cne $diag.sourceSha256 -or
       $manifest.geometrySha256 -cne $diag.geometrySha256 -or
@@ -393,10 +403,47 @@ if ($customBrief) {
       $manifest.humanArt -cne 'NOT_REVIEWED') {
    throw 'V11_CUSTOM_ART_PROVENANCE_HOLD'
   }
+  # Inspect the original author's real room geometry, not just the exterior.
+  # No second model request and no modification to original PRIVATE evidence.
+  $rawPath = Join-Path $out 'custom-brief\MODEL_RESPONSE_ORIGINAL.txt'
+  if (-not (Test-Path -LiteralPath $rawPath -PathType Leaf)) {
+   throw 'V11_CUSTOM_ORIGINAL_MISSING_FOR_FLOOR_REVIEW'
+  }
+  $floorDir = Join-Path $out 'CUSTOM_FLOOR_SOURCE_ART'
+  & $node $floorRenderer '--raw' $rawPath '--source' $sourcePath `
+   '--diagnosis' $diagnosisPath '--out' $floorDir | Out-Null
+  if ($LASTEXITCODE -ne 0) {
+   throw 'V11_CUSTOM_FLOOR_RENDER_HOLD_PRESERVE_ORIGINAL'
+  }
+  $floorPng = Join-Path $floorDir 'FLOOR_CONTACT_4_VIEWS.png'
+  $floorJson = Join-Path $floorDir 'FLOOR_REVIEW.json'
+  if (-not (Test-Path -LiteralPath $floorPng -PathType Leaf) -or
+      -not (Test-Path -LiteralPath $floorJson -PathType Leaf)) {
+   throw 'V11_CUSTOM_FLOOR_OUTPUT_MISSING'
+  }
+  $floorReport = Get-Content -LiteralPath $floorJson -Raw -Encoding UTF8 |
+   ConvertFrom-Json
+  if ($floorReport.schema -cne 'r125-v11-saved-two-floor-review-v1' -or
+      $floorReport.originalSha256 -cne $report.completed[0].originalSha256 -or
+      $floorReport.sourceSha256 -cne $diag.sourceSha256 -or
+      $floorReport.geometrySha256 -cne $diag.geometrySha256 -or
+      $floorReport.sourceFileSha256 -cne (Get-V11FileSha256 $sourcePath) -or
+      $floorReport.contact.sha256 -cne (Get-V11FileSha256 $floorPng) -or
+      [int]$floorReport.occupiedVoxels -ne [int]$diag.occupiedVoxels -or
+      [int]$floorReport.modelCalls -ne 0 -or
+      [int]$floorReport.worldContacts -ne 0 -or
+      [int]$floorReport.worldWrites -ne 0 -or
+      @($floorReport.gates).Count -ne 9 -or
+      @($floorReport.gates | Where-Object { $_ -cne 'BLOCKED' }).Count -ne 0 -or
+      $floorReport.humanArt -cne 'NOT_REVIEWED' -or
+      $floorReport.minecraftWalking -cne 'NOT_TESTED') {
+   throw 'V11_CUSTOM_FLOOR_SHA_OR_SOURCE_HOLD'
+  }
   Write-Output ('V11_CUSTOM_TRUE_B143_4_VIEW_IMAGE=' + $contact)
+  Write-Output ('V11_CUSTOM_TRUE_B143_FLOOR_IMAGE=' + $floorPng)
   Write-Output 'V11_CUSTOM_HUMAN_ART_PENDING; no Minecraft execution.'
   if (-not $NoOpen) {
-   try { Start-Process -FilePath $contact }
+   try { Start-Process -FilePath $contact; Start-Process -FilePath $floorPng }
    catch { Write-Warning 'V11_CUSTOM_ART_OPEN_FAILED_USE_PRINTED_PATH' }
   }
  } else {
