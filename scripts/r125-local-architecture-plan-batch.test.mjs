@@ -572,6 +572,9 @@ test('one-shot V11 Qwen request explicitly guards public entry and still rejects
   assert.match(system,/Do NOT relabel a real staff-only workspace/);
   const user=JSON.parse(request.messages.find(m=>m.role==='user').content);
   assert.match(user.groundFloorEntryRouteRule,/first staff then rear public is rejected/);
+  assert.match(system,/UPPER-LEVEL PRIVACY AND STAIR ACCESS/);
+  assert.match(system,/two floors are optional, not a quality signal/);
+  assert.match(user.upperFloorAccessRule,/A room being public in JSON is not a safe path/);
   assert.equal(report.sourcePassCount,0,'private staff entrance remains a strict HOLD');
   assert.equal(report.allSourceVerified,false);
   assert.equal(report.completed[0].failureReason,
