@@ -197,6 +197,25 @@ function fourRoomSideSpine(level,{x0,x1,z0,z1},split){
  ]};
 }
 
+/** Match the structural room split used by the compiler for an authored level. */
+function authoredLevelSplit(plan,index){
+ const level=plan.levels[index],{width,depth}=plan.footprint,e=plan.expression;
+ const x0=1,z0=1+(index===1&&e?.setbackSide==='front'?e.setbackDepth:0);
+ const x1=width-2-(index===1&&e?.setbackSide==='east'?e.setbackDepth:0);
+ const z1=depth-2-(index===1&&e?.setbackSide==='rear'?e.setbackDepth:0);
+ if(e){
+  const lo=level.splitAxis==='x'?x0:z0;
+  const hi=level.splitAxis==='x'?x1:z1;
+  return Math.max(lo+4,Math.min(hi-4,
+   Math.round(lo+(hi-lo)*level.splitPercent/100)));
+ }
+ return level.splitAxis==='x'?
+  Math.max(level.spaces.length===4?6:7,
+   Math.min(width-7,Math.round(width*level.splitPercent/100))):
+  Math.max(level.spaces.length===4?6:8,
+   Math.min(depth-6,Math.round(depth*level.splitPercent/100)));
+}
+
 export function validateArchitecturePlan(p){
  const standard=['schema','id','title','brief','footprint','levels','materials'];
  const expressive=Object.hasOwn(p??{},'expression');
@@ -443,6 +462,26 @@ export function validateArchitecturePlan(p){
     p.levels[0].spaces[0].access==='staff'&&
     p.levels[0].spaces.slice(1).some(s=>s.access==='public'))
   refuse('VISITOR_ACCESS_THROUGH_STAFF');
+ // A public upstairs room is a structural commitment: the fixed stair
+ // arrives at x=3..4,z=8..9. Keep its landing and the lower stair approach
+ // inside the first public/shared room on each floor, before any SOURCE or
+ // artwork is generated. This rejects an impossible room assignment; it
+ // never relabels rooms, moves a divider, or edits the model-authored plan.
+ const upperVisitors=p.levels.length===2&&
+  p.levels[1].spaces.some(s=>['public','shared'].includes(s.access));
+ if(upperVisitors){
+  const ground=p.levels[0],upper=p.levels[1];
+  check(['public','shared'].includes(ground.spaces[0].access)&&
+   ['public','shared'].includes(upper.spaces[0].access),
+   'UPPER_VISITOR_STAIR_REQUIRES_PUBLIC_FIRST_ROOMS');
+  if(ground.splitAxis==='x')
+   check(p.entryZone==='first','UPPER_VISITOR_STAIR_REQUIRES_PUBLIC_ENTRY_ZONE');
+  else check(authoredLevelSplit(p,0)>=9,
+   'UPPER_VISITOR_GROUND_STAIR_APPROACH_OUTSIDE_PUBLIC_ROOM');
+  if(upper.splitAxis==='z')
+   check(authoredLevelSplit(p,1)>=10,
+    'UPPER_VISITOR_LANDING_OUTSIDE_PUBLIC_ROOM');
+ }
  // Only the first z-split zone touches the front facade; no fake back entry.
  check(!entrySpecified||(['first','second'].includes(p.entryZone)&&
   (p.levels[0].splitAxis==='x'||p.entryZone==='first')),

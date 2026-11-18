@@ -83,6 +83,40 @@ test('model-authored public circulation cannot be forced through staff-only entr
  assert.throws(()=>validateArchitecturePlan(authored),/R125_PLAN_SPACE_ACCESS/);
 });
 
+test('upper visitor landing must belong to a public room in both the authored schema and SOURCE route',()=>{
+ const p=plan('upper-public-landing',['z','z']);
+ p.footprint={width:24,depth:22};
+ p.expression={setbackSide:'none',setbackDepth:0,roofProfile:'ridge',
+  roofAxis:'z',facadeLanguage:'fins',roofVolume:'raised'};
+ p.levels[0].splitPercent=35;
+ p.levels[0].spaces=[
+  {id:'public-entry',purpose:'Public visitor entry',access:'public'},
+  {id:'staff-workshop',purpose:'Staff workshop',access:'staff'}];
+ p.levels[1].splitPercent=35;
+ p.levels[1].spaces=[
+  {id:'public-gallery',purpose:'Public upper gallery',access:'public'},
+  {id:'staff-storage',purpose:'Staff storage',access:'staff'}];
+ assert.throws(()=>validateArchitecturePlan(p),
+  /R125_PLAN_UPPER_VISITOR_GROUND_STAIR_APPROACH_OUTSIDE_PUBLIC_ROOM/,
+  'the lower stair approach must stay in the public front room');
+
+ // The west room contains x=3..4 on both levels; an explicit first-zone
+ // entrance fixes the ground approach. The original upper z=35 split still
+ // puts its landing beyond the public room and must fail independently.
+ p.entryZone='first';
+ p.levels[0].splitAxis='x';p.levels[0].splitPercent=40;
+ assert.throws(()=>validateArchitecturePlan(p),
+  /R125_PLAN_UPPER_VISITOR_LANDING_OUTSIDE_PUBLIC_ROOM/);
+ p.levels[1].splitAxis='x';p.levels[1].splitPercent=40;
+ assert.equal(validateArchitecturePlan(p),true);
+ const built=compileArchitecturePlan(p);
+ const visitor=auditR125VisitorRoutes(built,p);
+ assert.equal(visitor.status,'SOURCE_VISITOR_ROUTES_AVOID_STAFF',
+  JSON.stringify(visitor));
+ assert.deepEqual(visitor.blocked,[]);
+ assert.equal(built.worldWrites,0);
+});
+
 test('two story lab includes shaft, stair wedge, usable upper floors and real voids',()=>{
  const r=compileArchitecturePlan(plan('research-studio',['x','z'],
   ['experimentation','record keeping']));
@@ -3005,6 +3039,11 @@ test('front-setback two-story x40/z60 recessed portico keeps stair source-reacha
   p.expression={setbackSide:'front',setbackDepth:2,
    roofProfile:'ridge',roofAxis:'z',
    facadeLanguage:'recessed-portico',roofVolume:'raised'};
+  if(secondAccess==='staff'){
+   assert.throws(()=>validateArchitecturePlan(p),
+    /R125_PLAN_UPPER_VISITOR_STAIR_REQUIRES_PUBLIC_FIRST_ROOMS/);
+   continue;
+  }
   const untouched=structuredClone(p);
   const b=compileArchitecturePlan(p,{
    entrancePlacement:'source-accessible',upperDoorPlacement:'stair-clear'});
@@ -3028,16 +3067,9 @@ test('front-setback two-story x40/z60 recessed portico keeps stair source-reacha
     entry:route.sourceInteriorEntrance}));
   assert.ok(route.zones.every(z=>z.reachedFromEntrance));
   const visitor=auditR125VisitorRoutes(b,p);
-  if(secondAccess==='shared'){
-   // Both upper rooms are publicly traversable; SOURCE-only route succeeds.
-   assert.equal(visitor.status,'SOURCE_VISITOR_ROUTES_AVOID_STAFF',
-    JSON.stringify(visitor));
-  }else{
-   // Model-authored staff room still separates the upstairs shared room:
-   // adding stair access must not silently mislabel this as visitor-safe.
-   assert.equal(visitor.status,'HOLD_VISITOR_STAFF_SEPARATION');
-   assert.deepEqual(visitor.blocked,['entrance-hall']);
-  }
+  // Both upper rooms are publicly traversable; SOURCE-only route succeeds.
+  assert.equal(visitor.status,'SOURCE_VISITOR_ROUTES_AVOID_STAFF',
+   JSON.stringify(visitor));
   assert.deepEqual(b.compiled.BuildPlan.operations,[]);
   assert.equal(b.worldWrites,0);
  }
