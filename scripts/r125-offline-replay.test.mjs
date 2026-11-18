@@ -502,6 +502,15 @@ test('V11 steeper ridge A/B remains an explicit offline CLI opt-in',()=>{
  /R125_REPLAY_ROOF_MASSING_MODE/);
 });
 
+test('V11 proportional room-scale is an explicit offline CLI opt-in',()=>{
+ const args=parseR125ReplayArgs(['--raw','/tmp/original.txt',
+  '--out','/tmp/new-study','--fixture-form','room-scale-v2']);
+ assert.equal(args['--fixture-form'],'room-scale-v2');
+ assert.throws(()=>parseR125ReplayArgs(['--raw','/tmp/original.txt',
+  '--out','/tmp/new-study','--fixture-form','room-scale-v3']),
+ /R125_REPLAY_FIXTURE_FORM_MODE/);
+});
+
 test('activity-inlay visual trial can only be activated explicitly',()=>{
  const opts=parseR125ReplayArgs(['--raw','/tmp/raw-plan.txt','--out',
   '/tmp/art-review','--fixture-art','activity-inlays']);

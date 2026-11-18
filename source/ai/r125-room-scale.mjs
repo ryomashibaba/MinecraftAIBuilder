@@ -17,11 +17,14 @@ const ROLES={
 };
 const cell=(x,y,z)=>x+','+y+','+z;
 const fail=reason=>{throw Error('R125_PLAN_ROOM_SCALE_'+reason);};
-export function expandR125RoomScale(product,{auditCirculation,includeHostStudy=false}={}){
+export function expandR125RoomScale(product,{auditCirculation,includeHostStudy=false,
+ profile='room-scale-v1'}={}){
  if(!Array.isArray(product?.fixtureTargets)||!Array.isArray(product?.program)||
     typeof auditCirculation!=='function'||product.worldWrites!==0||
     product.gates?.length!==9||product.gates.some(x=>x!=='BLOCKED'))
   fail('INPUT_OR_WORLD_GATES');
+ if(!['room-scale-v1','room-scale-v2'].includes(profile))
+  fail('PROFILE');
  const authoredRooms=new Set(product.plan.levels.flatMap(l=>
   l.spaces.filter(s=>s.fixtureScale==='expanded').map(s=>s.id)));
  if(!authoredRooms.size&&!includeHostStudy)return product;
@@ -52,11 +55,13 @@ export function expandR125RoomScale(product,{auditCirculation,includeHostStudy=f
   // First preserve the existing lengthwise choices exactly. Only when all
   // fail, try a joined transverse wing of the SAME model-selected station.
   // This is a placement/orientation search, not a model-plan repair.
+  const lengthwise=profile==='room-scale-v2'?[8,7,6,5,4,3,2]:[4,3,2];
+  const transverse=profile==='room-scale-v2'?[6,5,4,3,2]:[3,2];
   const candidates=[
-   ...[4,3,2].flatMap(len=>[1,-1].flatMap(dir=>
+   ...lengthwise.flatMap(len=>[1,-1].flatMap(dir=>
     [0,-1].map(shift=>({axis:long,across:short,len,dir,shift,
      width:Math.max(baseSize[short],2),direction:'lengthwise'})))),
-   ...[3,2].flatMap(len=>[1,-1].flatMap(dir=>
+   ...transverse.flatMap(len=>[1,-1].flatMap(dir=>
     [0,-1].map(shift=>({axis:short,across:long,len,dir,shift,
      width:baseSize[long],direction:'transverse'}))))
   ];
@@ -165,6 +170,7 @@ export function expandR125RoomScale(product,{auditCirculation,includeHostStudy=f
  return {...current,roomScaleReview:{
   schema:'r125-room-scale-source-art-review-v1',
   status:'SOURCE_CONNECTED_STATION_EXTENSION_ART_HOLD',
+  profile,
   modelSelectedRolesUnchanged:true,originalPlanUnchanged:true,
   stationCount:product.fixtureTargets.length,hostStudy:includeHostStudy,
   changes,skipped,modelCalls:0,worldWrites:0,

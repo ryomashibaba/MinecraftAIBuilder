@@ -3445,6 +3445,35 @@ test('V11 room-scale HOST art study preserves model-authored original',()=>{
  assert.deepEqual(study.gates,Array(9).fill('BLOCKED'));
 });
 
+test('V11 room-scale-v2 scales existing fixtures for sparse authored rooms only when SOURCE stays clear',()=>{
+ const p=plan('host-room-scale-v2',['x'],['making','showing']);
+ p.footprint={width:30,depth:30};
+ p.levels[0].spaces[0].fixtures=['workbench'];
+ p.levels[0].spaces[0].fixtureArrangement='focal-island';
+ const original=JSON.stringify(p);
+ const compact=compileArchitecturePlan(p,{entrancePlacement:'source-accessible',
+  fixtureForm:'room-scale-v1'});
+ const proportional=compileArchitecturePlan(p,{entrancePlacement:'source-accessible',
+  fixtureForm:'room-scale-v2'});
+ assert.equal(JSON.stringify(p),original);
+ assert.equal(proportional.planSha256,compact.planSha256);
+ assert.deepEqual(proportional.fixtureTargets,compact.fixtureTargets);
+ assert.equal(proportional.roomScaleReview.profile,'room-scale-v2');
+ assert.ok(proportional.roomScaleReview.changes[0].size[0]*
+  proportional.roomScaleReview.changes[0].size[2]>
+  compact.roomScaleReview.changes[0].size[0]*
+  compact.roomScaleReview.changes[0].size[2]);
+ assert.equal(verifyCompiled(proportional.design,proportional.compiled),true);
+ assert.equal(auditArchitecturePlanCirculation(proportional).status,
+  'SOURCE_CLEARANCE_PROBES_PASS');
+ assert.equal(auditR125SourceRoutes(proportional,
+  {featureTargets:proportional.fixtureTargets}).status,
+  'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(proportional.compiled.BuildPlan.operations.length,0);
+ assert.equal(proportional.worldWrites,0);
+ assert.deepEqual(proportional.gates,Array(9).fill('BLOCKED'));
+});
+
 test('V11 five real model-selected stations preserve SOURCE and world gates',()=>{
  const p=plan('five-station-workroom',['x'],['making','showing']);
  p.footprint={width:32,depth:32};

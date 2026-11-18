@@ -215,6 +215,16 @@ test('V11 integrated HOST room-quality A/B emits eight-view real B143 preview',(
   assert.equal(result.art,'HUMAN_REVIEW_REQUIRED_NOT_ACCEPTED');
   assert.equal(result.worldWrites,0);
   assert.deepEqual(result.nineWorldGates,Array(9).fill('BLOCKED'));
+  const v2=saveR125FinishAB({rawPath,sourcePath,
+   outDir:path.join(dir,'integrated-v2-ab'),integrated:true,
+   fixtureForm:'room-scale-v2'});
+  assert.equal(v2.policy.fixtureForm,'room-scale-v2');
+  assert.equal(v2.originalAuthorUnchanged,true);
+  assert.ok(v2.roomScaleReview?.changes.length>0);
+  assert.equal(v2.verifiedEquipmentCount,result.verifiedEquipmentCount);
+  assert.notEqual(v2.candidateSourceSha256,result.candidateSourceSha256);
+  assert.equal(v2.worldWrites,0);
+  assert.deepEqual(v2.nineWorldGates,Array(9).fill('BLOCKED'));
  }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });
 

@@ -17,8 +17,11 @@ const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const hash=s=>createHash('sha256').update(s).digest('hex');
 const fail=id=>{throw Error('R125_V11_FINISH_AB_'+id);};
 
-export function saveR125FinishAB({rawPath,sourcePath,outDir,integrated=false}={}){
- if(typeof integrated!=='boolean')fail('INTEGRATED_FLAG');
+export function saveR125FinishAB({rawPath,sourcePath,outDir,integrated=false,
+ fixtureForm='room-scale-v1'}={}){
+ if(typeof integrated!=='boolean'||
+    !['room-scale-v1','room-scale-v2'].includes(fixtureForm))
+  fail('INTEGRATED_FLAG_OR_FIXTURE_FORM');
  if([rawPath,sourcePath,outDir].some(s=>typeof s!=='string'||!s))
   fail('REQUIRES_RAW_SOURCE_OUT');
  const rawFile=path.resolve(rawPath),sourceFile=path.resolve(sourcePath);
@@ -50,7 +53,7 @@ export function saveR125FinishAB({rawPath,sourcePath,outDir,integrated=false}={}
     savedScene.BuildPlan?.operations?.length!==0)
   fail('BASELINE_B143_ORIGINAL_MISMATCH');
  const policy=integrated?
-  {hostDetail:'spatial-v1',fixtureArt:'activity-layout',fixtureForm:'room-scale-v1'}:
+  {hostDetail:'spatial-v1',fixtureArt:'activity-layout',fixtureForm}:
   {fixtureForm:'readable-v1'};
  const candidate=diagnoseR125ArchitecturePlanOriginal(original,policy);
  if(candidate.status!=='B143_SOURCE_CANDIDATE_ART_HOLD'||
@@ -120,10 +123,13 @@ if(process.argv[1]===fileURLToPath(import.meta.url)){
  try{
   const a=process.argv.slice(2);
   if(![6,7].includes(a.length)||a[0]!=='--raw'||a[2]!=='--source'||
-     a[4]!=='--out'||(a.length===7&&a[6]!=='--integrated'))
+     a[4]!=='--out'||(a.length===7&&
+      !['--integrated','--integrated-room-scale-v2'].includes(a[6])))
    fail('CLI');
   const r=saveR125FinishAB({
-   rawPath:a[1],sourcePath:a[3],outDir:a[5],integrated:a.length===7});
+   rawPath:a[1],sourcePath:a[3],outDir:a[5],integrated:a.length===7,
+   fixtureForm:a[6]==='--integrated-room-scale-v2'?
+    'room-scale-v2':'room-scale-v1'});
   console.log('R125_V11_FINISH_ART_SOURCE_ONLY',JSON.stringify({
    baselineSha:r.baselineSourceSha256,candidateSha:r.candidateSourceSha256,
    unverifiedMaterials:r.educationMaterials.unverified,

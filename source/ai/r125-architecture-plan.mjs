@@ -432,7 +432,7 @@ export function compileArchitecturePlan(plan,{
  check(['none','activity-inlays','activity-layout'].includes(fixtureArt),'FIXTURE_ART_MODE');
  check(fixtureArt!=='activity-layout'||hostDetail==='spatial-v1',
   'ACTIVITY_LAYOUT_REQUIRES_SPATIAL_DETAIL');
- check(['default','readable-v1','room-scale-v1'].includes(fixtureForm),'FIXTURE_FORM_MODE');
+ check(['default','readable-v1','room-scale-v1','room-scale-v2'].includes(fixtureForm),'FIXTURE_FORM_MODE');
  check(fixtureArt==='none'||Boolean(plan?.expression),'FIXTURE_ART_REQUIRES_EXPRESSION');
  // Optional ART candidate only. Old authors and their original SOURCE are untouched.
  check(['none','sawtooth-ribbon'].includes(roofGlazing),'ROOF_GLAZING_MODE');
@@ -565,10 +565,11 @@ export function compileArchitecturePlan(plan,{
   {auditCirculation:auditArchitecturePlanCirculation});
  const furnished=addAuthoredRoomFixtures(daylit,
   {auditCirculation:auditArchitecturePlanCirculation});
- return fixtureForm==='room-scale-v1'||original.levels.some(l=>
+ return fixtureForm==='room-scale-v1'||fixtureForm==='room-scale-v2'||original.levels.some(l=>
   l.spaces.some(s=>s.fixtureScale==='expanded'))?
   expandR125RoomScale(furnished,{auditCirculation:auditArchitecturePlanCirculation,
-   includeHostStudy:fixtureForm==='room-scale-v1'}):furnished;
+   includeHostStudy:fixtureForm==='room-scale-v1'||fixtureForm==='room-scale-v2',
+   profile:fixtureForm==='room-scale-v2'?'room-scale-v2':'room-scale-v1'}):furnished;
 }
 
 /**
@@ -1361,10 +1362,11 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
   {auditCirculation:auditArchitecturePlanCirculation});
  const styled=fixtureForm==='readable-v1'?
   restyleR125FixtureForms(furnished,{auditCirculation:auditArchitecturePlanCirculation}):furnished;
- const scaled=fixtureForm==='room-scale-v1'||original.levels.some(l=>
+ const scaled=fixtureForm==='room-scale-v1'||fixtureForm==='room-scale-v2'||original.levels.some(l=>
   l.spaces.some(s=>s.fixtureScale==='expanded'))?
   expandR125RoomScale(styled,{auditCirculation:auditArchitecturePlanCirculation,
-   includeHostStudy:fixtureForm==='room-scale-v1'}):styled;
+   includeHostStudy:fixtureForm==='room-scale-v1'||fixtureForm==='room-scale-v2',
+   profile:fixtureForm==='room-scale-v2'?'room-scale-v2':'room-scale-v1'}):styled;
  const articulated=hostDetail==='spatial-v1'&&original.expression.facadeLanguage==='fins'?
   addR125SpatialDaylightBays(scaled):scaled;
  return fixtureArt==='activity-inlays'?
