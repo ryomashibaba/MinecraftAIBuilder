@@ -325,6 +325,47 @@ test('real B143 SOURCE holds user-explicit baking without source-placed oven',()
  assert.equal(supplied.worldWrites,0);
 });
 
+test('explicit activities must use equipment in their own model-authored rooms',()=>{
+ const p={schema:PLAN,id:'request-room-task-scope',
+  title:'Small food workshop with handwashing',
+  brief:'Staff bakes and washes hands in separate work areas',
+  footprint:{width:26,depth:26},
+  levels:[{splitAxis:'z',splitPercent:50,spaces:[
+   {id:'baking-area',purpose:'Staff baking with oven',access:'staff',
+    fixtures:['washbasin']},
+   {id:'handwashing-area',purpose:'Wash hands at washbasin',access:'staff',
+    fixtures:['oven']}
+  ]}],
+  materials:{floor:'wood',wall:'concrete',roof:'stone'},
+  expression:{setbackSide:'none',setbackDepth:0,
+   roofProfile:'flat',roofAxis:'x',facadeLanguage:'plain'}};
+ const request='職員がパンを焼く部屋と手洗い場を備える小さな施設';
+ const original=JSON.stringify(p);
+ const misplaced=diagnoseR125ArchitecturePlanOriginal(original,
+  {requestedBrief:request});
+ assert.equal(misplaced.explicitActivityProxy.missing.length,0);
+ assert.equal(misplaced.roomActivityProxy.status,
+  'HOLD_EXPLICIT_ROOM_ACTIVITY_PROXY_MISSING');
+ assert.deepEqual(misplaced.roomActivityProxy.missing.map(x=>x.zoneId),
+  ['baking-area','handwashing-area']);
+ assert.equal(misplaced.status,'HOLD_EXPLICIT_ROOM_ACTIVITY_PROXY_MISSING');
+ assert.equal(misplaced.sourceVerified,false);
+ assert.equal(misplaced.originalEdited,false);
+ assert.equal(misplaced.worldWrites,0);
+ assert.equal(JSON.stringify(p),original);
+ p.levels[0].spaces[0].fixtures=['oven'];
+ p.levels[0].spaces[1].fixtures=['washbasin'];
+ const correctlyPlaced=diagnoseR125ArchitecturePlanOriginal(JSON.stringify(p),
+  {requestedBrief:request});
+ assert.equal(correctlyPlaced.sourceVerified,true,
+  JSON.stringify(correctlyPlaced));
+ assert.equal(correctlyPlaced.roomActivityProxy.missing.length,0);
+ assert.equal(correctlyPlaced.roomActivityProxy.assessed.length,2);
+ assert.equal(correctlyPlaced.requestedActivityCoverage,
+  'NOT_INDEPENDENTLY_VERIFIED_BY_SOURCE');
+ assert.deepEqual(correctlyPlaced.worldGates,Array(9).fill('BLOCKED'));
+});
+
 test('unknown and unavailable original user requests are not declared fully served',()=>{
  const p={schema:PLAN,id:'legacy-activity-unknown',title:'Two useful rooms',
   brief:'Original unmodified building with function not checked',

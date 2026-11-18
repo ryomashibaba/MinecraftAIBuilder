@@ -148,7 +148,14 @@ export function auditR125ExplicitActivityProxy(requestedBrief,fixtureTargets=[])
   ['washing-basin','washbasin',/洗面台|手洗い設備|手洗い場|\bwashbasin\b/i],
   ['sleeping-bed','bed',/ベッド|就寝用ベッド|\bbed\b/i],
   ['electronic-maintenance','electronics',
-   /電子機器(?:の|を)(?:点検|整備|操作)|\belectronic (?:equipment )?maintenance\b/i]
+   /電子機器(?:の|を)(?:点検|整備|操作)|\belectronic (?:equipment )?maintenance\b/i],
+  // Literal equipment requests only; a building genre is not a task.
+  ['fabrication-bench','workbench',
+   /工作台|製作用作業台|組立作業台|\bworkbench\b/i],
+  ['exhibit-stand','display',
+   /展示ケース|展示台|展示設備|\bdisplay (?:case|stand|fixture)\b/i],
+  ['records-desk','desk',
+   /事務机|記録用(?:の)?机|作業用デスク|\bdesk\b/i]
  ];
  const placed=new Set(fixtureTargets.map(f=>f.kind));
  const assessed=cues.filter(([, ,rx])=>rx.test(requestedBrief))
@@ -159,6 +166,57 @@ export function auditR125ExplicitActivityProxy(requestedBrief,fixtureTargets=[])
  return {...base,status:missing.length?'HOLD_EXPLICIT_ACTIVITY_PROXY_MISSING':
   assessed.length?'EXPLICIT_ACTIVITY_PROXIES_PRESENT_NOT_FULL_USE_CERTIFIED':
    'NO_HIGH_CONFIDENCE_CUES_NOT_FULL_USE_CERTIFIED',
+  assessed,missing};
+}
+
+/**
+ * Request-scoped, literal room/task coherence. A station elsewhere in the
+ * building cannot satisfy a specifically named operation in this room.
+ * Unknown purposes are UNKNOWN: no speculative genre templates or repairs.
+ */
+export function auditR125AuthoredRoomActivityProxy(
+ original,requestedBrief,fixtureTargets=[]
+){
+ const base={schema:'r125-explicit-room-activity-proxy-v1',
+  sourceOnly:true,originalEdited:false,independentFullBriefCoverage:false,
+  modelCalls:0,worldWrites:0,realMinecraftFunctionality:'NOT_TESTED'};
+ if(typeof requestedBrief!=='string'||!requestedBrief.trim()||
+    requestedBrief.length>8000||!Array.isArray(original?.levels))
+  return {...base,status:'NOT_EVALUATED_ORIGINAL_REQUEST_UNAVAILABLE',
+   assessed:[],missing:[]};
+ if(!Array.isArray(fixtureTargets))fail('INVALID_ROOM_ACTIVITY_FIXTURES');
+ const requested=auditR125ExplicitActivityProxy(requestedBrief,fixtureTargets)
+  .assessed;
+ const roomEvidence={
+  'baking-heating':/焼成設備|焼成炉|オーブン|パンを焼|\b(?:oven|baking)\b/i,
+  'washing-basin':/洗面台|手洗い設備|手洗い場|手を洗|\b(?:washbasin|handwashing)\b/i,
+  'sleeping-bed':/就寝用ベッド|ベッド|就寝|\b(?:bed|sleeping)\b/i,
+  'electronic-maintenance':/電子機器(?:の|を)(?:点検|整備|操作)|\belectronic (?:equipment )?maintenance\b/i,
+  'fabrication-bench':/工作台|製作用作業台|組立作業台|\bworkbench\b/i,
+  'exhibit-stand':/展示ケース|展示台|展示設備|\bdisplay (?:case|stand|fixture)\b/i,
+  'records-desk':/事務机|記録用(?:の)?机|作業用デスク|\bdesk\b/i
+ };
+ const assessed=[];
+ for(let li=0;li<original.levels.length;li++){
+  const level=original.levels[li];
+  for(const space of level.spaces??[]){
+   const description=String(space.id??'').replace(/-/g,' ')+
+    ' '+String(space.purpose??'');
+   for(const task of requested){
+    if(!roomEvidence[task.capability]?.test(description))continue;
+    assessed.push({level:li,zoneId:space.id,capability:task.capability,
+     requiredRole:task.requiredRole,
+     sourcePlacedInRoom:fixtureTargets.some(t=>t.zoneId===space.id&&
+      t.kind===task.requiredRole)});
+   }
+  }
+ }
+ const missing=assessed.filter(t=>!t.sourcePlacedInRoom)
+  .map(({level,zoneId,capability,requiredRole})=>({
+   level,zoneId,capability,requiredRole}));
+ return {...base,status:missing.length?'HOLD_EXPLICIT_ROOM_ACTIVITY_PROXY_MISSING':
+  assessed.length?'EXPLICIT_ROOM_ACTIVITY_PROXIES_PRESENT_NOT_FULL_USE_CERTIFIED':
+   'NO_UNAMBIGUOUS_ROOM_TASKS_NOT_FULL_USE_CERTIFIED',
   assessed,missing};
 }
 
@@ -251,6 +309,8 @@ export function diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail='legacy',ro
   const visitors=auditR125VisitorRoutes(built,original);
   const explicitActivityProxy=auditR125ExplicitActivityProxy(requestedBrief,
    built.fixtureTargets??[]);
+  const roomActivityProxy=auditR125AuthoredRoomActivityProxy(original,
+   requestedBrief,built.fixtureTargets??[]);
   const pairedWindows=built.daylightTargets?.some(x=>x.kind==='paired-bays')?
    auditR125PairedBayApproach(built):null;
   const circulation=auditArchitecturePlanCirculation(built);
@@ -259,20 +319,23 @@ export function diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail='legacy',ro
   const functionalClear=routes.status==='SOURCE_ROUTES_REACH_ALL_ZONES'&&
    !visitors.status.startsWith('HOLD_')&&
    !explicitActivityProxy.status.startsWith('HOLD_')&&
+   !roomActivityProxy.status.startsWith('HOLD_')&&
    circulation.status==='SOURCE_CLEARANCE_PROBES_PASS'&&
    (!pairedWindows||pairedWindows.status==='PAIRED_BAY_APPROACH_PASS')&&
    floors.programFloorIssues.length===0;
   return {...base,
    status:functionalClear?'B143_SOURCE_CANDIDATE_ART_HOLD':
     explicitActivityProxy.status.startsWith('HOLD_')?
-     'HOLD_EXPLICIT_ACTIVITY_PROXY_MISSING':'HOLD_FUNCTIONAL_SOURCE',
+     'HOLD_EXPLICIT_ACTIVITY_PROXY_MISSING':
+    roomActivityProxy.status.startsWith('HOLD_')?
+     'HOLD_EXPLICIT_ROOM_ACTIVITY_PROXY_MISSING':'HOLD_FUNCTIONAL_SOURCE',
    sourceVerified:functionalClear,compilerReason:null,
    hostPolicy,...(spatialCapacity?{spatialCapacity}:{}),planSha256:built.planSha256,
    sourceSha256:built.sourceSha256,geometrySha256:built.geometrySha256,
    occupiedVoxels:built.compiled.primitives.length,
    sourceRoutes:routes.status,sourceRouteIssues:routes.issues??[],
    visitorCirculation:visitors,
-   explicitActivityProxy,
+   explicitActivityProxy,roomActivityProxy,
    requestedActivityCoverage:'NOT_INDEPENDENTLY_VERIFIED_BY_SOURCE',
    roomUseEvidence:describeR125AuthoredRoomUse(original,built),
    modelChosenFixtures:built.fixtureTargets?.length??0,
