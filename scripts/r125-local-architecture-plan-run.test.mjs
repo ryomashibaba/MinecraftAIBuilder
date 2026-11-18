@@ -135,7 +135,10 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
     'one-storey author grammar must never allow an upper-storey setback');
    assert.equal(authorSchema.additionalProperties,false);
    assert.equal(authorSchema.properties.levels.items.properties.spaces.minItems,2);
-   assert.equal(authorSchema.properties.levels.items.properties.spaces.maxItems,3);
+   assert.equal(oneLevel.properties.levels.items.properties.spaces.maxItems,4,
+    'single-storey author can choose a four-room front hub');
+   assert.equal(authorSchema.properties.levels.items.properties.spaces.maxItems,3,
+    'two-storey layout remains bounded to three rooms per floor');
    assert.deepEqual(authorSchema.properties.levels.items.properties.secondarySplitPercent.enum,[35,50,65]);
    assert.ok(!authorSchema.properties.levels.items.required.includes('secondarySplitPercent'));
    assert.deepEqual(authorSchema.properties.levels.items.properties.thirdRoomLink.enum,
