@@ -400,6 +400,13 @@ test('baking observation is not oven operation and needs separate safety proof',
   'HOLD_BAKING_OBSERVATION_SOURCE_UNVERIFIED');
  assert.equal(result.status,'HOLD_BAKING_OBSERVATION_SOURCE_UNVERIFIED');
  assert.equal(result.sourceVerified,false,'no fabricated sightline pass');
+ p.levels[0].spaces[0].purpose='焼成設備見学室';
+ const nounsOnly=diagnoseR125ArchitecturePlanOriginal(JSON.stringify(p),
+  {requestedBrief:request});
+ assert.deepEqual(nounsOnly.roomActivityProxy.missing,[],
+  'mentioning oven equipment in a viewing-room title is not operation');
+ assert.equal(nounsOnly.status,'HOLD_BAKING_OBSERVATION_SOURCE_UNVERIFIED');
+ p.levels[0].spaces[0].purpose='baking observation room';
  assert.equal(result.originalEdited,false);
  assert.equal(result.originalSha256,createHash('sha256').update(raw).digest('hex'));
  assert.equal(JSON.stringify(p),raw);

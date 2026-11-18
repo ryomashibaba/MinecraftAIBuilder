@@ -187,7 +187,7 @@ export function auditR125AuthoredRoomActivityProxy(
  // A visitor watching the oven is not operating an oven in their room.
  // Do not credit a real sightline or staff boundary from semantic labels.
  const observerDescription=/(?:焼成|オーブン|パン).*?(?:見学|観察)|(?:見学|観察).*?(?:焼成|オーブン|パン)|\b(?:baking|oven)\b.*\b(?:observation|viewing|watching)\b|\b(?:observation|viewing|watching)\b.*\b(?:baking|oven)\b/i;
- const actualOvenOperation=/焼成(?:作業|管理|担当|設備|炉|を(?:行|担当|管理))|オーブン(?:を(?:操作|管理|使))|パンを焼|\b(?:oven operation|oven management|baking operation|baking station)\b/i;
+ const actualOvenOperation=/焼成(?:作業|管理|担当|を(?:行|担当|管理))|(?:焼成設備|焼成炉|オーブン)(?:を|の)?(?:操作|管理|運用|使用)|パンを焼|\b(?:oven operation|oven management|baking operation|baking station)\b/i;
  const requestWantsBakingView=/(?:焼成|オーブン|パン).*?(?:見学|観察|見る)|(?:見学|観察).*?(?:焼成|オーブン|パン)|\b(?:baking|oven)\s+(?:observation|viewing)\b|\b(?:watch|observe|view)\s+(?:the\s+)?(?:baking|oven)\b/i.test(requestedBrief);
  const assessed=[],observerRooms=[];
  for(let li=0;li<original.levels.length;li++){
