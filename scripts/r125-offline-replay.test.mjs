@@ -366,6 +366,54 @@ test('explicit activities must use equipment in their own model-authored rooms',
  assert.deepEqual(correctlyPlaced.worldGates,Array(9).fill('BLOCKED'));
 });
 
+test('baking observation is not oven operation and needs separate safety proof',()=>{
+ const p={schema:PLAN,id:'separate-oven-observation',
+  title:'A small oven workshop and public viewing room',
+  brief:'Staff operate ovens while visitors watch from another room',
+  footprint:{width:26,depth:26},
+  levels:[{splitAxis:'x',splitPercent:50,spaces:[
+   {id:'baking-observation',purpose:'baking observation room',
+    access:'public',fixtures:['seating']},
+   {id:'staff-oven-room',purpose:'焼成管理と焼成設備の操作',
+    access:'staff',fixtures:['oven']}
+  ]}],
+  materials:{floor:'wood',wall:'concrete',roof:'stone'},
+  expression:{setbackSide:'none',setbackDepth:0,
+   roofProfile:'flat',roofAxis:'x',facadeLanguage:'plain'}};
+ const request='職員が焼成設備を管理し、来場者が焼成を見学できる施設';
+ const raw=JSON.stringify(p);
+ const result=diagnoseR125ArchitecturePlanOriginal(raw,{requestedBrief:request});
+ assert.equal(result.explicitActivityProxy.missing.length,0,
+  JSON.stringify(result));
+ assert.deepEqual(result.roomActivityProxy.missing,[],
+  'a visitor observation room does not need a second oven');
+ assert.deepEqual(result.roomActivityProxy.assessed.map(x=>x.zoneId),
+  ['staff-oven-room']);
+ assert.equal(result.roomActivityProxy.observation.requested,true);
+ assert.deepEqual(result.roomActivityProxy.observation.observerRooms.map(x=>x.zoneId),
+  ['baking-observation']);
+ assert.deepEqual(result.roomActivityProxy.observation.ovenRooms.map(x=>x.zoneId),
+  ['staff-oven-room']);
+ assert.equal(result.roomActivityProxy.observation.lineOfSight,'NOT_VERIFIED');
+ assert.equal(result.roomActivityProxy.observation.staffBoundary,'NOT_VERIFIED');
+ assert.equal(result.roomActivityProxy.status,
+  'HOLD_BAKING_OBSERVATION_SOURCE_UNVERIFIED');
+ assert.equal(result.status,'HOLD_BAKING_OBSERVATION_SOURCE_UNVERIFIED');
+ assert.equal(result.sourceVerified,false,'no fabricated sightline pass');
+ assert.equal(result.originalEdited,false);
+ assert.equal(result.originalSha256,createHash('sha256').update(raw).digest('hex'));
+ assert.equal(JSON.stringify(p),raw);
+ assert.equal(result.worldWrites,0);
+ assert.deepEqual(result.worldGates,Array(9).fill('BLOCKED'));
+ p.levels[0].spaces[0].purpose='baking observation and oven operation';
+ const both=diagnoseR125ArchitecturePlanOriginal(JSON.stringify(p),
+  {requestedBrief:request});
+ assert.deepEqual(both.roomActivityProxy.missing.map(x=>x.zoneId),
+  ['baking-observation']);
+ assert.equal(both.status,'HOLD_EXPLICIT_ROOM_ACTIVITY_PROXY_MISSING');
+ assert.equal(both.sourceVerified,false);
+});
+
 test('unknown and unavailable original user requests are not declared fully served',()=>{
  const p={schema:PLAN,id:'legacy-activity-unknown',title:'Two useful rooms',
   brief:'Original unmodified building with function not checked',

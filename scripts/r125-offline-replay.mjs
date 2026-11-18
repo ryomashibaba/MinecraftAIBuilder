@@ -184,14 +184,24 @@ export function auditR125AuthoredRoomActivityProxy(
   'exhibit-stand':/展示ケース|展示台|展示設備|\bdisplay (?:case|stand|fixture)\b/i,
   'records-desk':/事務机|記録用(?:の)?机|作業用デスク|\bdesk\b/i
  };
- const assessed=[];
+ // A visitor watching the oven is not operating an oven in their room.
+ // Do not credit a real sightline or staff boundary from semantic labels.
+ const observerDescription=/(?:焼成|オーブン|パン).*?(?:見学|観察)|(?:見学|観察).*?(?:焼成|オーブン|パン)|\b(?:baking|oven)\b.*\b(?:observation|viewing|watching)\b|\b(?:observation|viewing|watching)\b.*\b(?:baking|oven)\b/i;
+ const actualOvenOperation=/焼成(?:作業|管理|担当|設備|炉|を(?:行|担当|管理))|オーブン(?:を(?:操作|管理|使))|パンを焼|\b(?:oven operation|oven management|baking operation|baking station)\b/i;
+ const requestWantsBakingView=/(?:焼成|オーブン|パン).*?(?:見学|観察|見る)|(?:見学|観察).*?(?:焼成|オーブン|パン)|\b(?:baking|oven)\s+(?:observation|viewing)\b|\b(?:watch|observe|view)\s+(?:the\s+)?(?:baking|oven)\b/i.test(requestedBrief);
+ const assessed=[],observerRooms=[];
  for(let li=0;li<original.levels.length;li++){
   const level=original.levels[li];
   for(const space of level.spaces??[]){
    const description=String(space.id??'').replace(/-/g,' ')+
     ' '+String(space.purpose??'');
+   const observer=observerDescription.test(description);
+   if(observer)observerRooms.push({level:li,zoneId:space.id,
+    access:space.access??'UNDECLARED'});
    for(const task of requested){
     if(!roomEvidence[task.capability]?.test(description))continue;
+    if(task.capability==='baking-heating'&&observer&&
+       !actualOvenOperation.test(description))continue;
     assessed.push({level:li,zoneId:space.id,capability:task.capability,
      requiredRole:task.requiredRole,
      sourcePlacedInRoom:fixtureTargets.some(t=>t.zoneId===space.id&&
@@ -202,10 +212,24 @@ export function auditR125AuthoredRoomActivityProxy(
  const missing=assessed.filter(t=>!t.sourcePlacedInRoom)
   .map(({level,zoneId,capability,requiredRole})=>({
    level,zoneId,capability,requiredRole}));
+ const observation={
+  requested:requestWantsBakingView,observerRooms,
+  ovenRooms:original.levels.flatMap((l,li)=>l.spaces
+   .filter(s=>fixtureTargets.some(t=>t.zoneId===s.id&&t.kind==='oven'))
+   .map(s=>({level:li,zoneId:s.id,access:s.access??'UNDECLARED'}))),
+  // A doorway without verified glazing is NOT a safe observation boundary.
+  lineOfSight:'NOT_VERIFIED',staffBoundary:'NOT_VERIFIED',
+  status:requestWantsBakingView&&observerRooms.length?
+   'HOLD_BAKING_OBSERVATION_SOURCE_UNVERIFIED':
+   requestWantsBakingView?'NO_AUTHORED_OBSERVER_ROOM_NOT_CERTIFIED':
+   'NOT_REQUESTED'
+ };
  return {...base,status:missing.length?'HOLD_EXPLICIT_ROOM_ACTIVITY_PROXY_MISSING':
+  observation.status==='HOLD_BAKING_OBSERVATION_SOURCE_UNVERIFIED'?
+   'HOLD_BAKING_OBSERVATION_SOURCE_UNVERIFIED':
   assessed.length?'EXPLICIT_ROOM_ACTIVITY_PROXIES_PRESENT_NOT_FULL_USE_CERTIFIED':
    'NO_UNAMBIGUOUS_ROOM_TASKS_NOT_FULL_USE_CERTIFIED',
-  assessed,missing};
+  assessed,missing,observation};
 }
 
 /**
@@ -316,7 +340,7 @@ export function diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail='legacy',ro
     explicitActivityProxy.status.startsWith('HOLD_')?
      'HOLD_EXPLICIT_ACTIVITY_PROXY_MISSING':
     roomActivityProxy.status.startsWith('HOLD_')?
-     'HOLD_EXPLICIT_ROOM_ACTIVITY_PROXY_MISSING':'HOLD_FUNCTIONAL_SOURCE',
+     roomActivityProxy.status:'HOLD_FUNCTIONAL_SOURCE',
    sourceVerified:functionalClear,compilerReason:null,
    hostPolicy,...(spatialCapacity?{spatialCapacity}:{}),planSha256:built.planSha256,
    sourceSha256:built.sourceSha256,geometrySha256:built.geometrySha256,
