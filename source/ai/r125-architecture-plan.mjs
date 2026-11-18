@@ -169,7 +169,7 @@ function fourRoomFrontHub(level,{x0,x1,z0,z1},split){
   [Math.floor(x0+(x1-x0)/3),Math.floor(x0+2*(x1-x0)/3)];
  const bays=[[x0+1,k1-1],[k1+1,k2-1],[k2+1,x1-1]];
  check(bays.every(([a,b])=>b-a+1>=5)&&
-  split-z0-1>=6&&z1-split-1>=6,'FOUR_ROOM_HUB_CLEAR_SPANS');
+  split-z0-1>=4&&z1-split-1>=6,'FOUR_ROOM_HUB_CLEAR_SPANS');
  const doors=bays.map(([a,b])=>[Math.floor((a+b-1)/2),split]);
  return {partitions:[k1,k2],doors,bays,zones:[
   {id:level.spaces[0].id,purpose:level.spaces[0].purpose,
@@ -186,7 +186,7 @@ function fourRoomSideSpine(level,{x0,x1,z0,z1},split){
   level.sideBayPercentages.map(p=>Math.floor(z0+(z1-z0)*p/100)):
   [Math.floor(z0+(z1-z0)/3),Math.floor(z0+2*(z1-z0)/3)];
  const bays=[[z0+1,k1-1],[k1+1,k2-1],[k2+1,z1-1]];
- check(split-x0-1>=5&&x1-split-1>=5&&
+ check(split-x0-1>=4&&x1-split-1>=5&&
   bays.every(([a,b])=>b-a+1>=5),'FOUR_ROOM_SIDE_SPINE_CLEAR_SPANS');
  return {partitions:[k1,k2],doors:bays.map(([a,b])=>
    [split,Math.floor((a+b-1)/2)]),zones:[
@@ -343,7 +343,8 @@ export function validateArchitecturePlan(p){
    ...(Object.hasOwn(level??{},'sideBayPercentages')?
     ['sideBayPercentages']:[])])&&
    ['x','z'].includes(level.splitAxis)&&Number.isInteger(level.splitPercent)&&
-   level.splitPercent>=30&&level.splitPercent<=70&&level.splitPercent%5===0&&
+   level.splitPercent>=(level.spaces.length===4?20:30)&&
+   level.splitPercent<=70&&level.splitPercent%5===0&&
    Array.isArray(level.spaces)&&[2,3,4].includes(level.spaces.length),'LEVEL_PROGRAM');
   check(level.secondarySplitPercent===undefined||
    (level.spaces.length===3&&Number.isInteger(level.secondarySplitPercent)&&
@@ -465,9 +466,11 @@ export function assessR125AuthoredRoomCapacity(plan){
   const ratio=level.splitPercent/100,axis=level.splitAxis;
   const split=axis==='x'?
    (e?Math.max(x0+4,Math.min(x1-4,Math.round(x0+(x1-x0)*ratio))):
-    Math.max(7,Math.min(w-7,Math.round(w*ratio)))):
+    Math.max(level.spaces.length===4?6:7,
+     Math.min(w-7,Math.round(w*ratio)))):
    (e?Math.max(z0+4,Math.min(z1-4,Math.round(z0+(z1-z0)*ratio))):
-    Math.max(8,Math.min(d-6,Math.round(d*ratio))));
+    Math.max(level.spaces.length===4?6:8,
+     Math.min(d-6,Math.round(d*ratio))));
   const sizes=axis==='x'?
    [[split-x0-1,z1-z0-1],[x1-split-1,z1-z0-1]]:
    [[x1-x0-1,split-z0-1],[x1-x0-1,z1-split-1]];
@@ -585,8 +588,10 @@ export function compileArchitecturePlan(plan,{
   box(tag+'-rear','add',wall,[2,base+1,d-2],[w-4,4,1]);
   const level=original.levels[l],axis=level.splitAxis;
   const split=axis==='x'?
-   Math.max(7,Math.min(w-7,Math.round(w*level.splitPercent/100))):
-   Math.max(8,Math.min(d-6,Math.round(d*level.splitPercent/100)));
+   Math.max(level.spaces.length===4?6:7,
+    Math.min(w-7,Math.round(w*level.splitPercent/100))):
+   Math.max(level.spaces.length===4?6:8,
+    Math.min(d-6,Math.round(d*level.splitPercent/100)));
   const three=tLayout(level,{x0:1,x1:w-2,z0:1,z1:d-2},split);
   const side=fourRoomSideSpine(level,{x0:1,x1:w-2,z0:1,z1:d-2},split);
   const four=fourRoomFrontHub(level,{x0:1,x1:w-2,z0:1,z1:d-2},split);

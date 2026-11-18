@@ -3656,3 +3656,45 @@ test('side-spine refuses thin bays and wrong side percentage axis',()=>{
  const small=structuredClone(p);small.footprint.depth=21;
  assert.throws(()=>validateArchitecturePlan(small),/R125_PLAN_FOUR_ROOM_HUB_PROGRAM/);
 });
+
+// A model-authored compact FOUR-room public spine/hub reallocates real floor
+// area without invented equipment or a forced change to old plans.
+test('V11 compact four-room hubs and spines reserve actual usable room area',()=>{
+ for(const [axis,roomId] of [['z','front-hub'],['x','side-spine']]){
+  for(const expressive of [false,true]){
+   const p=plan('compact-'+axis+(expressive?'-form':'-plain'),[axis],
+    ['public corridor','workshop']);
+   p.footprint={width:30,depth:30};
+   p.levels[0].splitPercent=20;
+   p.levels[0].spaces=[
+    {id:roomId,purpose:'Public approach and visitor passage',access:'shared'},
+    {id:'workroom-one',purpose:'First independent working area',access:'staff'},
+    {id:'workroom-two',purpose:'Second independent working area',access:'staff'},
+    {id:'classroom',purpose:'Public training room',access:'public'}
+   ];
+   if(axis==='x')p.entryZone='first';
+   if(expressive)p.expression={setbackSide:'none',setbackDepth:0,
+    roofProfile:'flat',roofAxis:'x',facadeLanguage:'plain'};
+   const original=JSON.stringify(p);
+   const compact=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+   const room=compact.program[0].zones[0].range;
+   const compactSpan=axis==='x'?room.x[1]-room.x[0]+1:
+    room.z[1]-room.z[0]+1;
+   assert.equal(compactSpan,4,'four-wide actual public circulation');
+   const capacity=assessR125AuthoredRoomCapacity(p);
+   assert.equal(capacity.zones[0].nominalFloorCellsUpperBound,4*28);
+   assert.equal(verifyCompiled(compact.design,compact.compiled),true);
+   assert.equal(auditR125VisitorRoutes(compact,p).status,
+    'SOURCE_VISITOR_ROUTES_AVOID_STAFF');
+   assert.equal(auditR125SourceRoutes(compact).status,
+    'SOURCE_ROUTES_REACH_ALL_ZONES');
+   assert.deepEqual(compact.compiled.BuildPlan.operations,[]);
+   assert.deepEqual(compact.gates,Array(9).fill('BLOCKED'));
+   assert.equal(compact.worldWrites,0);
+   assert.equal(JSON.stringify(p),original);
+  }
+ }
+ const legacy=plan('compact-rejected-two-rooms',['x'],['reception','service']);
+ legacy.levels[0].splitPercent=20;
+ assert.throws(()=>validateArchitecturePlan(legacy),/R125_PLAN_LEVEL_PROGRAM/);
+});
