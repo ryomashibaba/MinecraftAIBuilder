@@ -63,7 +63,8 @@ const shade=(material,face)=>(palette[material]??palette[0])
  * Ground-floor cutaway HIDES source voxels; it NEVER adds or repairs blocks.
  */
 export function renderB143StaticPNG(compiled,{sx=1,sz=-1,
- cutAboveY=null,width=1200,height=760,includeRgb=false}={}){
+ cutAboveY=null,width=1200,height=760,includeRgb=false,
+ fitReference=null}={}){
  if(![1,-1].includes(sx)||![1,-1].includes(sz)||
     !Number.isSafeInteger(width)||width<320||width>2600||
     !Number.isSafeInteger(height)||height<220||height>2000||
@@ -71,6 +72,9 @@ export function renderB143StaticPNG(compiled,{sx=1,sz=-1,
   refuse('INVALID_CAMERA');
  if(!Array.isArray(compiled?.primitives)||compiled.primitives.length<1||
     compiled.primitives.length>160000)refuse('INVALID_SCENE');
+ if(fitReference!==null&&(!Array.isArray(fitReference?.primitives)||
+     fitReference.primitives.length<1||fitReference.primitives.length>160000))
+  refuse('INVALID_FIT_REFERENCE');
  const vox=compiled.primitives.filter(v=>cutAboveY===null||v[1]<cutAboveY);
  if(!vox.length)refuse('CUTAWAY_EMPTY');
  const occ=new Set(vox.map(v=>v[0]+','+v[1]+','+v[2]));
@@ -78,15 +82,20 @@ export function renderB143StaticPNG(compiled,{sx=1,sz=-1,
   (sx*a[0]+sz*a[2]+1.2*a[1])-(sx*b[0]+sz*b[2]+1.2*b[1])||
   a[1]-b[1]||a[2]-b[2]||a[0]-b[0]);
  const xy=([x,y,z])=>[(sz*x-sx*z)*0.866,(sx*x+sz*z)*0.5-y*1.2];
+ // Fit camera to both SOURCEs but render ONLY voxels from this SOURCE.
+ const reference=fitReference===null?[]:fitReference.primitives.filter(v=>
+  cutAboveY===null||v[1]<cutAboveY);
  const corners=[];
- for(const [x,y,z] of vox){
+ for(const [x,y,z] of [...vox,...reference]){
   corners.push(xy([x,y,z]),xy([x+1,y+1,z+1]));
  }
- const bb=compiled.bounds;
- if(bb)for(const x of [bb.minX,bb.maxX+1])
-  for(const y of [bb.minY,bb.maxY+1])
-   for(const z of [bb.minZ,bb.maxZ+1])
-    if(cutAboveY===null||y<=cutAboveY)corners.push(xy([x,y,z]));
+ for(const bb of [compiled.bounds,fitReference?.bounds]){
+  if(!bb)continue;
+  for(const x of [bb.minX,bb.maxX+1])
+   for(const y of [bb.minY,bb.maxY+1])
+    for(const z of [bb.minZ,bb.maxZ+1])
+     if(cutAboveY===null||y<=cutAboveY)corners.push(xy([x,y,z]));
+ }
  let loX=Infinity,hiX=-Infinity,loY=Infinity,hiY=-Infinity;
  for(const [px,py] of corners){
   loX=Math.min(loX,px);hiX=Math.max(hiX,px);
@@ -119,6 +128,8 @@ export function renderB143StaticPNG(compiled,{sx=1,sz=-1,
   ...(includeRgb?{rgb:buf,width,height}:{}),
   originalSourceCells:compiled.primitives.length,renderedCells:vox.length,
   hiddenAboveY:cutAboveY,viewDirection:{x:sx,z:sz},
+  cameraScalePxPerUnit:scale,cameraOffsetPx:[offsetX,offsetY],
+  cameraFrame:fitReference?'PAIRED_UNION':'SINGLE_SCENE',
   status:'ORTHOGRAPHIC_REVIEW_PROXY_NOT_MINECRAFT_SCREENSHOT'};
 }
 /**
@@ -149,9 +160,9 @@ export function makeB143ContactSheet(pics){
 }
 /**
  * Same-brief A/B: OLD on left, NEW on right at the same four camera angles.
- * Each object has its own auto-fit camera scale; not exact in-world scale.
+ * Opt-in matched-camera framing gives each A/B pair the same pixels/block.
  */
-export function makeB143ABSheet(oldViews,newViews){
+export function makeB143ABSheet(oldViews,newViews,{matchedCamera=false}={}){
  const expected=['EXTERIOR_FRONT_LEFT.png','EXTERIOR_FRONT_RIGHT.png',
   'EXTERIOR_REAR_RIGHT.png','GROUND_FLOOR_CUTAWAY.png'];
  if(!Array.isArray(oldViews)||!Array.isArray(newViews)||
@@ -162,6 +173,14 @@ export function makeB143ABSheet(oldViews,newViews){
   p.render?.width!==1200||p.render?.height!==760||
   !Buffer.isBuffer(p.render.rgb)||p.render.rgb.length!==1200*760*3)))
   refuse('AB_VIEWS_MISMATCH');
+ if(typeof matchedCamera!=='boolean')refuse('AB_CAMERA_POLICY');
+ if(matchedCamera)for(let i=0;i<4;i++){
+  const a=oldViews[i].render,b=newViews[i].render;
+  if(a.cameraFrame!=='PAIRED_UNION'||b.cameraFrame!=='PAIRED_UNION'||
+     Math.abs(a.cameraScalePxPerUnit-b.cameraScalePxPerUnit)>1e-9||
+     a.cameraOffsetPx.some((v,j)=>Math.abs(v-b.cameraOffsetPx[j])>1e-9))
+   refuse('AB_CAMERA_NOT_PHYSICALLY_MATCHED');
+ }
  const tileW=1200,tileH=760,gap=16,width=tileW*2+gap,
   height=tileH*4+gap*3;
  const rgb=Buffer.alloc(width*height*3,226);
@@ -174,7 +193,8 @@ export function makeB143ABSheet(oldViews,newViews){
  }
  return {bytes:png(width,height,rgb),width,height,
   rowOrder:expected,columnOrder:['OLD','NEW'],
-  physicalScale:'EACH_DESIGN_AUTO_FIT_NOT_SAME_PIXEL_PER_BLOCK'};
+  physicalScale:matchedCamera?'PAIRED_SAME_PIXELS_PER_BLOCK_AND_CENTER':
+   'EACH_DESIGN_AUTO_FIT_NOT_SAME_PIXEL_PER_BLOCK'};
 }
 const validSource=(filename)=>{
  if(typeof filename!=='string'||!filename)refuse('AB_SOURCE_PATH_REQUIRED');
@@ -188,19 +208,22 @@ const validSource=(filename)=>{
   refuse('AB_SOURCE_NOT_VERIFIED');
  return {design,scene,fileHash:digest(raw)};
 };
-const fourViews=scene=>{
+const fourViews=(scene,fitReference=null)=>{
  const cameras=[[-1,-1,null],[1,-1,null],[1,1,null],[1,-1,4]];
  const names=['EXTERIOR_FRONT_LEFT.png','EXTERIOR_FRONT_RIGHT.png',
   'EXTERIOR_REAR_RIGHT.png','GROUND_FLOOR_CUTAWAY.png'];
  return cameras.map(([sx,sz,cutAboveY],i)=>({name:names[i],
-  render:renderB143StaticPNG(scene,{sx,sz,cutAboveY,includeRgb:true})}));
+  render:renderB143StaticPNG(scene,{sx,sz,cutAboveY,includeRgb:true,
+   fitReference})}));
 };
 /** Compare two REAL persisted B143 designs without an inference call.
  * SOURCE SHA contains author metadata; physical differences instead use
  * actual final coordinates and MATERIAL indices, not source hash inequality.
  */
-export function saveB143ABReview({beforeSourcePath,afterSourcePath,outDir}={}){
+export function saveB143ABReview({beforeSourcePath,afterSourcePath,outDir,
+ matchedCamera=false}={}){
  if(typeof outDir!=='string'||!outDir)refuse('AB_OUTPUT_REQUIRED');
+ if(typeof matchedCamera!=='boolean')refuse('AB_CAMERA_POLICY');
  const out=path.resolve(outDir),parent=path.dirname(out);
  if(!fs.existsSync(parent)||!fs.statSync(parent).isDirectory()||
     fs.existsSync(out))refuse('AB_OUTPUT_MUST_BE_NEW');
@@ -218,8 +241,9 @@ export function saveB143ABReview({beforeSourcePath,afterSourcePath,outDir}={}){
   else if(oldMap.get(loc)!==material)changedMaterial++;
  }
  for(const loc of oldMap.keys())if(!newMap.has(loc))removed++;
- const oldViews=fourViews(before.scene),newViews=fourViews(after.scene);
- const sheet=makeB143ABSheet(oldViews,newViews);
+ const oldViews=fourViews(before.scene,matchedCamera?after.scene:null);
+ const newViews=fourViews(after.scene,matchedCamera?before.scene:null);
+ const sheet=makeB143ABSheet(oldViews,newViews,{matchedCamera});
  const report={schema:'r125-same-brief-ab-v1',
   before:{sourceSha256:before.scene.sourceSha256,
    geometrySha256:before.scene.geometrySha256,
