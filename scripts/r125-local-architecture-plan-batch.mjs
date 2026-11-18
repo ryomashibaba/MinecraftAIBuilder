@@ -210,6 +210,7 @@ export async function runR125ArchitecturePlanBatch({
    programFloorStatus:diagnosis?.programFloors??null,
    visualHighRiskCount:diagnosis?.visualHighRiskCount??null,
    explicitActivityProxy:diagnosis?.explicitActivityProxy??null,
+   roomArtAdvisory:diagnosis?.roomUseEvidence?.artAdvisory??null,
    requestedActivityCoverage:diagnosis?.requestedActivityCoverage??
     'NOT_INDEPENDENTLY_VERIFIED_BY_SOURCE',
    modelChosenFixtures:diagnosis?.modelChosenFixtures??0,

@@ -8,6 +8,8 @@
   user's existing research checkout. Outputs are local PrivateModelStudies.
   -SingleNewBrief: one new functional brief, with no prescribed architecture.
   -SingleNewBrief -Prompt TEXT: ONE custom original Japanese brief, no templates.
+  -BriefsFile PATH: 1..3 user-authored Japanese briefs in one sequential batch.
+  The input remains owned by the caller, not deleted or uploaded.
   Original prompt stays in the PRIVATE output; no uploads.
   -ComparePriorTide: one SAME-BRIEF Qwen recheck then A/B PNG review
   using the frozen PRIVATE 2026-11-16 tide result read-only. No extra POST.
@@ -21,6 +23,7 @@ param(
  [switch]$OnlyHousingRetail,
  [switch]$SingleNewBrief,
  [string]$Prompt = '',
+ [string]$BriefsFile = '',
  [switch]$ComparePriorTide,
  [switch]$NoOpen
 )
@@ -45,6 +48,43 @@ $floorRenderer = Join-Path $repo 'scripts\r125-v11-saved-floor-review.mjs'
 # 4-view PNG automatically. It neither contacts a model nor Minecraft.
 $staticRenderer = $abRenderer
 $customBrief = $PSBoundParameters.ContainsKey('Prompt')
+$batchBriefs = $PSBoundParameters.ContainsKey('BriefsFile')
+if ($batchBriefs -and ($SingleNewBrief -or $OnlyHousingRetail -or
+    $ComparePriorTide -or $customBrief)) {
+ throw 'V11_PILOT_BRIEFS_FILE_CONFLICTS_WITH_OTHER_MODES'
+}
+$batchFilePath = ''
+$batchBriefCount = 0
+if ($batchBriefs) {
+ if ([string]::IsNullOrWhiteSpace($BriefsFile) -or
+     -not (Test-Path -LiteralPath $BriefsFile -PathType Leaf) -or
+     (Get-Item -LiteralPath $BriefsFile).Length -gt 30000) {
+  throw 'V11_PILOT_BRIEFS_FILE_NOT_FOUND_OR_TOO_LARGE'
+ }
+ $batchFilePath = (Resolve-Path -LiteralPath $BriefsFile).Path
+ try {
+  $batchJson = Get-Content -LiteralPath $batchFilePath -Raw -Encoding UTF8
+  if (-not $batchJson.Trim().StartsWith('[')) {
+   throw 'NOT_JSON_ARRAY'
+  }
+  $batchParsed = ConvertFrom-Json -InputObject $batchJson
+ } catch { throw 'V11_PILOT_BRIEFS_FILE_INVALID_JSON_ARRAY' }
+ $batchRows = @(foreach ($entry in $batchParsed) { $entry })
+ if ($batchRows.Count -lt 1 -or $batchRows.Count -gt 3) {
+  throw 'V11_PILOT_BRIEFS_COUNT_1_TO_3'
+ }
+ $seenIds = @{}
+ foreach ($entry in $batchRows) {
+  if ($null -eq $entry -or $entry.id -cnotmatch '^[a-z][a-z0-9-]{2,39}$' -or
+      -not ($entry.prompt -is [string]) -or
+      $entry.prompt.Length -lt 8 -or $entry.prompt.Length -gt 8000 -or
+      $seenIds.ContainsKey([string]$entry.id)) {
+   throw 'V11_PILOT_BRIEFS_INVALID_ENTRY'
+  }
+  $seenIds[[string]$entry.id] = $true
+ }
+ $batchBriefCount = $batchRows.Count
+}
 if ($customBrief -and (-not $SingleNewBrief -or $ComparePriorTide -or
     [string]::IsNullOrWhiteSpace($Prompt) -or $Prompt.Length -lt 8 -or
     $Prompt.Length -gt 8000)) {
@@ -58,7 +98,7 @@ if ($ComparePriorTide -and (-not $SingleNewBrief -or $OnlyHousingRetail -or
  $Endpoint -cne 'http://127.0.0.1:11434/v1/chat/completions')) {
  throw 'V11_TIDE_AB_REQUIRES_ONE_SAME_QWEN14B_BRIEF'
 }
-$expectedCount = if ($SingleNewBrief) { 1 } elseif ($OnlyHousingRetail) { 2 } else { 3 }
+$expectedCount = if ($batchBriefs) { $batchBriefCount } elseif ($SingleNewBrief) { 1 } elseif ($OnlyHousingRetail) { 2 } else { 3 }
 $viewer = 'BATCH_COMPARE_3D.html'
 # Re-evaluate only the two genuine SOURCE failures; reuse the exact existing
 # authored briefs, never reinterpret or regenerate the successful research brief.
@@ -127,7 +167,7 @@ if ($CheckOnly) {
   & $node '--check' $floorRenderer
   if ($LASTEXITCODE -ne 0) { throw 'V11_CUSTOM_FLOOR_RENDERER_SYNTAX_FAILED' }
  }
- Write-Output ('V11_PILOT_CHECK_ONLY_PASS: '+$(if($SingleNewBrief){'one unseen functional brief'}elseif($OnlyHousingRetail){'two original failure briefs'}else{'three original briefs'})+'; no server, HTTP, model, world or output.')
+ Write-Output ('V11_PILOT_CHECK_ONLY_PASS: '+$(if($batchBriefs){"$expectedCount supplied original briefs"}elseif($SingleNewBrief){'one unseen functional brief'}elseif($OnlyHousingRetail){'two original failure briefs'}else{'three original briefs'})+'; no server, HTTP, model, world or output.')
  return
 }
 if ($env:OS -cne 'Windows_NT') { throw 'V11_PILOT_WINDOWS_REQUIRED' }
@@ -210,7 +250,8 @@ if ($ComparePriorTide) {
 }
 $root = Join-Path $env:LOCALAPPDATA 'MinecraftAIBuilder\PrivateModelStudies'
 [void](New-Item -Path $root -ItemType Directory -Force)
-$studyName = if ($customBrief) { 'V11_CustomBrief_' }
+$studyName = if ($batchBriefs) { 'V11_CustomBatch_' }
+ elseif ($customBrief) { 'V11_CustomBrief_' }
  elseif ($SingleNewBrief) { 'V11_UnseenSingle_' } else { 'V11_3Genre_' }
 $out = Join-Path $root ($studyName +
  (Get-Date -Format 'yyyyMMdd_HHmmss_fff') + '_' +
@@ -220,7 +261,11 @@ Write-Output ('V11_PILOT_RUN_HEAD=' + $commit.Trim())
 Write-Output ('V11_PRIVATE_RESULT=' + $out)
 Write-Output ('One existing local model, '+$expectedCount+' bounded original POST(s), no automatic retries.')
 $batchArgs = @($runner, '--model', $Model)
-if ($customBrief) {
+if ($batchBriefs) {
+ # Preserve caller-authored input and original model bytes in the PRIVATE
+ # result. The Node runner revalidates the JSON before any local POST.
+ $batchArgs += @('--briefs', $batchFilePath)
+} elseif ($customBrief) {
  # The exact user prompt is copied to BRIEFS_ORIGINAL.json by the existing
  # batch runner before POST. This transient input is in PRIVATE and is
  # removed after use. No model rewriting or architectural assumptions.

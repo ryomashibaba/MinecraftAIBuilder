@@ -35,6 +35,15 @@ export function renderR125BatchComparison(briefs,report){
    .flatMap(level=>level.spaces.filter(s=>
     !(s.fixture||(Array.isArray(s.fixtures)&&s.fixtures.length>0)))
     .map(s=>s.purpose));
+  const artAdvisory=row.roomArtAdvisory;
+  const artWarning=artAdvisory?
+   '<p class="issue">ART advisory (NOT a SOURCE failure): '+
+   'task/fixture mismatches '+esc(artAdvisory.taskMismatches?.length??0)+
+   ' · large sparse room candidates '+esc(artAdvisory.sparseLargeRooms?.length??0)+
+   (artAdvisory.taskMismatches?.length?
+    ' — '+artAdvisory.taskMismatches.map(x=>
+     esc(x.zoneId)+': '+esc(x.activity)+' needs '+esc(x.expectedRole)).join(' / '):'')+
+   '</p>':'';
   const sourceEvidence=row.sourceVerified===true?
    '<p class="muted"><strong>True SOURCE evidence, not ART:</strong> '+
    'rooms '+esc(rooms)+' · equipment '+esc(row.modelChosenFixtures??0)+
@@ -54,7 +63,7 @@ export function renderR125BatchComparison(briefs,report){
   const relative='./'+row.id+'/B143_SOURCE_3D_REVIEW_ONLY.html';
   return '<section><h2>'+esc(row.id)+'</h2><p><strong>'+
    esc(row.status)+'</strong></p><p>'+esc(brief)+'</p>'+
-   '<p class="muted">'+authored+'</p><ul>'+program+'</ul>'+sourceEvidence+setbackIssue+
+   '<p class="muted">'+authored+'</p><ul>'+program+'</ul>'+sourceEvidence+artWarning+setbackIssue+
    (findings?'<p class="issue">'+findings+'</p>':'')+
    (hasViewer?'<iframe class="mab-review" sandbox="allow-scripts" loading="lazy" src="'+
      relative+'" title="'+esc(row.id)+' true B143 3D"></iframe>'+

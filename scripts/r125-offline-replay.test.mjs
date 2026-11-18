@@ -588,6 +588,36 @@ test('floor-by-floor source station evidence identifies underused levels without
  assert.deepEqual(author,snapshot);
 });
 
+test('ART review identifies task/equipment mismatches in model-authored rooms',()=>{
+ const author={levels:[{spaces:[
+  {id:'assembly-inspection',purpose:'Assembly / Inspection',access:'staff'},
+  {id:'records-room',purpose:'Recording / Documentation',access:'staff'},
+  {id:'public-gallery',purpose:'Public Exhibition',access:'public'}
+ ]}]};
+ const built={program:[{level:0,zones:[
+  {id:'assembly-inspection',range:{x:[2,15],z:[2,15]}},
+  {id:'records-room',range:{x:[17,27],z:[2,15]}},
+  {id:'public-gallery',range:{x:[2,15],z:[17,26]}}
+ ]}],fixtureTargets:[
+  {zoneId:'assembly-inspection',kind:'workbench',size:[3,3,1]},
+  {zoneId:'records-room',kind:'workbench',size:[3,3,1]},
+  {zoneId:'public-gallery',kind:'display',size:[3,3,1]}
+ ]};
+ const original=structuredClone(author);
+ const evidence=describeR125AuthoredRoomUse(author,built);
+ assert.equal(evidence.status,'ART_ADVISORY_ONLY_NOT_ACCEPTANCE');
+ assert.deepEqual(evidence.artAdvisory.taskMismatches.map(x=>
+  [x.zoneId,x.expectedRole]),[
+  ['assembly-inspection','assembly-table'],
+  ['assembly-inspection','inspection-stand'],
+  ['records-room','desk']
+ ]);
+ assert(evidence.artAdvisory.sparseLargeRooms.some(x=>x.zoneId==='records-room'));
+ assert.equal(evidence.artAdvisory.sourcePassUnaffected,true);
+ assert.equal(evidence.worldWrites,0);
+ assert.deepEqual(author,original);
+});
+
 test('real legacy author without fixtures remains valid zero-station room evidence',()=>{
  const author={levels:[{spaces:[{id:'public-hall',purpose:'open visitor gallery'}]}]};
  const compiled={program:[{level:0,zones:[{

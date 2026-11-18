@@ -260,19 +260,46 @@ export function describeR125AuthoredRoomUse(original,built){
     Math.max(0,z.range.z[1]-z.range.z[0]+1);
    const targets=(built.fixtureTargets??[]).filter(t=>t.zoneId===space.id);
    const occupied=targets.reduce((n,t)=>n+t.size[0]*t.size[2],0);
+   const label=String(space.id??'').replace(/-/g,' ')+
+    ' '+String(space.purpose??'');
+   // Advisory only: model-authored room functions, not SOURCE certification.
+   const purposeRules=[
+    ['assembly','assembly-table',/組立|組み立て|\bassembl(?:y|ing)\b/i],
+    ['inspection','inspection-stand',/点検|検査|\binspection\b/i],
+    ['storage','storage',/保管|収納|\bstorage\b|\bstoreroom\b|\bparts repository\b/i],
+    ['records','desk',/記録|\brecord(?:s|ing)?\b|\bdocumentation\b/i],
+    ['exhibition','display',/展示|\bdisplay\b|\bexhibit(?:ion)?\b|\bgallery\b/i]
+   ];
+   const stationKinds=targets.map(t=>t.kind);
+   const missingTaskStations=purposeRules.filter(([,role,pattern])=>
+    pattern.test(label)&&!stationKinds.includes(role))
+    .map(([activity,expectedRole])=>({activity,expectedRole}));
+   const sparseLargeRoomCandidate=area>=120&&targets.length<=1&&
+    occupied/area<0.035;
    return {id:space.id,purpose:space.purpose,access:space.access??null,
     roomBoundsAreaUpperLimit:area,authoredStationCount:targets.length,
-    stationKinds:targets.map(t=>t.kind),
-    stationFootprintProxyCells:occupied,
-    approximateRoomAreaFraction:area?Number((occupied/area).toFixed(3)):null};
+    stationKinds,stationFootprintProxyCells:occupied,
+    approximateRoomAreaFraction:area?Number((occupied/area).toFixed(3)):null,
+    missingTaskStations,sparseLargeRoomCandidate};
   });
   return {storey:i+1,roomCount:rooms.length,
    authoredStationCount:rooms.reduce((n,x)=>n+x.authoredStationCount,0),
    roomsWithoutStations:rooms.filter(x=>x.authoredStationCount===0).map(x=>x.id),
    rooms};
  });
+ const taskMismatches=floors.flatMap(f=>f.rooms.flatMap(r=>
+  r.missingTaskStations.map(x=>({storey:f.storey,zoneId:r.id,...x}))));
+ const sparseLargeRooms=floors.flatMap(f=>f.rooms
+  .filter(r=>r.sparseLargeRoomCandidate)
+  .map(r=>({storey:f.storey,zoneId:r.id,areaUpperBound:r.roomBoundsAreaUpperLimit,
+   stationCount:r.authoredStationCount})));
  return {schema:'r125-authored-room-use-evidence-v1',
   status:'ART_ADVISORY_ONLY_NOT_ACCEPTANCE',
+  artAdvisory:{status:'ART_REVIEW_REQUIRED_NOT_SOURCE_GATE',
+   taskMismatches,sparseLargeRooms,
+   purposeTextDoesNotProveFunction:true,
+   areaUpperBoundsDoNotMeasureUsableSpace:true,
+   sourcePassUnaffected:true},
   storeys:floors,totalStations:floors.reduce((n,x)=>n+x.authoredStationCount,0),
   roomAreaProxyNotWalkableArea:true,doesNotCertifyFunctionalRoomUse:true,
   modelCalls:0,worldWrites:0,humanArt:'NOT_REVIEWED',

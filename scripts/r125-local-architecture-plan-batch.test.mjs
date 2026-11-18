@@ -58,6 +58,22 @@ test('daylight early hold surfaces only upstream SOURCE evidence without PRIVATE
    upstreamOfWindow:false}}),null);
 });
 
+test('HTML review visibly warns about model-authored task mismatches without source promotion',()=>{
+ const brief={id:'new-brief',prompt:'部品の組立と記録を行う工房'};
+ const report={planned:1,attempted:1,model:'qwen3:14b',allSourceVerified:true,
+  sourcePassCount:1,originalResponseCount:1,
+  completed:[{id:brief.id,status:'B143_SOURCE_CANDIDATE_ART_HOLD',
+   sourceVerified:true,roomArtAdvisory:{
+    taskMismatches:[{zoneId:'records-room',activity:'records',expectedRole:'desk'}],
+    sparseLargeRooms:[{zoneId:'records-room',areaUpperBound:180,stationCount:1}]
+   }}]};
+ const html=renderR125BatchComparison([brief],report);
+ assert.match(html,/ART advisory \(NOT a SOURCE failure\)/);
+ assert.match(html,/records-room: records needs desk/);
+ assert.match(html,/large sparse room candidates 1/);
+ assert.match(html,/B143_SOURCE_CANDIDATE_ART_HOLD/);
+});
+
 test('batch parser preflights unique bounded original briefs',()=>{
  assert.deepEqual(parseR125BatchBriefs(input),requests);
  assert.throws(()=>parseR125BatchBriefs('[]'),/BRIEF_COUNT_1_TO_3/);

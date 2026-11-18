@@ -103,6 +103,21 @@ jobs:
           if errorlevel 1 exit /b 1
           powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\r125-v11-review-existing.ps1 -CheckOnly -ActivityInlays -NoOpen
           if errorlevel 1 exit /b 1
+      - name: Native Windows validates two caller-authored briefs in a single bounded check-only batch
+        shell: pwsh
+        run: |
+          $inputFile = Join-Path $env:RUNNER_TEMP 'mab-two-briefs.json'
+          $briefs = @(
+            [pscustomobject]@{id='maker-lab';prompt='Create an independent technical maker laboratory with a public demonstration area'},
+            [pscustomobject]@{id='civic-gallery';prompt='Build an original civic exhibition room with storage, records and visitor circulation'}
+          )
+          $json = ConvertTo-Json -InputObject $briefs -Depth 4
+          [System.IO.File]::WriteAllText($inputFile,$json,[System.Text.UTF8Encoding]::new($false))
+          $check = & powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\r125-v11-windows-pilot.ps1 -CheckOnly -BriefsFile $inputFile
+          if($LASTEXITCODE -ne 0 -or (($check -join ' ') -notmatch '2 supplied original briefs')) {
+            throw ('WINDOWS_V11_TWO_BRIEFS_CHECK_FAILED: '+($check -join ' | '))
+          }
+          Remove-Item -LiteralPath $inputFile -Force
       - name: Education one-click CMD -> PowerShell -> material MakeCode preview, check-only
         shell: cmd
         run: |
