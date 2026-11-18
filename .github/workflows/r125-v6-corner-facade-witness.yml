@@ -96,6 +96,8 @@ jobs:
           if errorlevel 1 exit /b 1
           powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\r125-v11-review-existing.ps1 -CheckOnly -NoOpen
           if errorlevel 1 exit /b 1
+          powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\r125-v11-review-existing.ps1 -CheckOnly -RidgeContrast -NoOpen
+          if errorlevel 1 exit /b 1
       - name: Education one-click CMD -> PowerShell -> material MakeCode preview, check-only
         shell: cmd
         run: |

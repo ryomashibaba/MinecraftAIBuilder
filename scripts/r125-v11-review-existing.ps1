@@ -11,7 +11,8 @@
 param(
  [string]$StudyDirectory = '',
  [switch]$CheckOnly,
- [switch]$NoOpen
+ [switch]$NoOpen,
+ [switch]$RidgeContrast
 )
 $ErrorActionPreference = 'Stop'
 $repo = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')).Path
@@ -45,6 +46,9 @@ if ([string]::IsNullOrWhiteSpace($env:LOCALAPPDATA)) {
 $base = Join-Path $env:LOCALAPPDATA 'MinecraftAIBuilder\PrivateModelStudies'
 if (-not (Test-Path -LiteralPath $base -PathType Container)) {
  throw 'V11_ART_PRIVATE_RESULTS_NOT_FOUND'
+}
+if ($RidgeContrast -and [string]::IsNullOrWhiteSpace($StudyDirectory)) {
+ $StudyDirectory = Join-Path $base 'V11_CustomBrief_20261117_200728_941_673b2381'
 }
 if ([string]::IsNullOrWhiteSpace($StudyDirectory)) {
  $candidates = @(Get-ChildItem -LiteralPath $base -Directory -Filter 'V11_UnseenSingle_*' | Sort-Object LastWriteTime -Descending)
@@ -95,6 +99,10 @@ if ($diag.sourceVerified -ne $true -or
  throw 'V11_ART_SOURCE_DIAGNOSIS_MISMATCH'
 }
 $actualOriginalHash = (Get-FileHash -LiteralPath $rawFile -Algorithm SHA256).Hash.ToLowerInvariant()
+if ($RidgeContrast -and $actualOriginalHash -cne
+ '2cd969f87d3efdf767d514f1c0c4e45663afcd91f84631887b71f07fc4d67a72') {
+ throw 'V11_RIDGE_1117_AUTHOR_SHA_MISMATCH'
+}
 if ($actualOriginalHash -cne [string]$completed[0].originalSha256) {
  throw 'V11_ART_ORIGINAL_SHA_MISMATCH'
 }
@@ -166,6 +174,52 @@ if (Test-Path -LiteralPath $finishJSON -PathType Leaf) {
  Write-Output ('V11_FIXTURE_FORM_ART_AB=' + $finishPNG)
  Write-Output ('V11_FINISH_ART_UNVERIFIED=' + ($finishReport.educationMaterials.unverified -join ','))
 }
+$roofPNG = ''
+if ($RidgeContrast) {
+ # Existing strict JS checks original archived B143 and the two SOURCEs.
+ $roofOut = Join-Path $one 'RIDGE_ONLY_ROOM_SCALE_V2_AB'
+ $roofManifest = Join-Path $roofOut 'RIDGE_ONLY_AB_REPORT.json'
+ if (-not (Test-Path -LiteralPath $roofOut)) {
+  & $node $finishRenderer '--raw' $rawFile '--source' $src '--out' $roofOut '--roof-contrast-v2' | Out-Null
+  if ($LASTEXITCODE -ne 0) { throw 'V11_RIDGE_AB_SOURCE_OR_GEOMETRY_HOLD' }
+ }
+ if (-not (Test-Path -LiteralPath $roofManifest -PathType Leaf)) {
+  throw 'V11_RIDGE_AB_INCOMPLETE_OUTPUT_HOLD'
+ }
+ $roof = Get-Content -LiteralPath $roofManifest -Raw -Encoding UTF8 | ConvertFrom-Json
+ $roofPNG = Join-Path $roofOut 'ART_AB\AB_OLD_LEFT_NEW_RIGHT.png'
+ if (-not (Test-Path -LiteralPath $roofPNG -PathType Leaf)) {
+  throw 'V11_RIDGE_AB_PREVIEW_MISSING'
+ }
+ $imageHash = (Get-FileHash -LiteralPath $roofPNG -Algorithm SHA256).Hash.ToLowerInvariant()
+ if ($roof.schema -cne 'r125-v11-room-scale-v2-ridge-only-contrast-v1' -or
+     $roof.originalSha256 -cne $actualOriginalHash -or
+     $roof.archivedSourceSha256 -cne $diag.sourceSha256 -or
+     $roof.policyA.fixtureForm -cne 'room-scale-v2' -or
+     $roof.policyB.fixtureForm -cne 'room-scale-v2' -or
+     $roof.policyB.roofMassing -cne 'steep-ridge-review' -or
+     $roof.sourceVerifiedA -ne $true -or $roof.sourceVerifiedB -ne $true -or
+     $roof.belowRoofGeometryAndMaterialIdentical -ne $true -or
+     [int]$roof.changedRoofCells -le 0 -or
+     [int]$roof.fixtureCountA -ne [int]$diag.modelChosenFixtures -or
+     [int]$roof.fixtureCountB -ne [int]$diag.modelChosenFixtures -or
+     $roof.sourceSha256A -ceq $roof.sourceSha256B -or
+     $roof.modelOriginalUnchanged -ne $true -or
+     $roof.photo -cne 'ART_AB/AB_OLD_LEFT_NEW_RIGHT.png' -or
+     $roof.photoSha256 -cne $imageHash -or
+     [int]$roof.modelCalls -ne 0 -or [int]$roof.worldWrites -ne 0 -or
+     @($roof.nineWorldGates).Count -ne 9 -or
+     @($roof.nineWorldGates | Where-Object { $_ -cne 'BLOCKED' }).Count -ne 0 -or
+     $roof.art -cne 'NOT_HUMAN_REVIEWED' -or
+     $roof.education -cne 'NOT_TESTED') {
+  throw 'V11_RIDGE_AB_SHA_OR_POLICY_HOLD'
+ }
+ Write-Output 'V11_RIDGE_AB_SOURCE_PASS_NOT_ART'
+ Write-Output ('V11_RIDGE_AB_REPORT=' + $roofManifest)
+ Write-Output ('V11_RIDGE_AB_IMAGE=' + $roofPNG)
+ Write-Output ('V11_RIDGE_AB_CHANGED_ROOF_CELLS=' + [string]$roof.changedRoofCells)
+ Write-Output 'V11_RIDGE_AB_EDUCATION_AND_MINECRAFT=NOT_TESTED'
+}
 Write-Output ('V11_ART_FLOORS=' + $floorPNG)
 Write-Output ('V11_ART_EDUCATION_UNVERIFIED=' + ($floorReport.educationMaterials.unverified -join ','))
 Write-Output ('V11_ART_RESULT=' + $out)
@@ -173,7 +227,7 @@ Write-Output ('V11_ART_CONTACT=' + $contactFile)
 Write-Output ('V11_ART_VOXELS=' + $manifest.occupiedVoxels)
 Write-Output 'V11_ART_REVIEW_PENDING. No model, Minecraft or upload performed.'
 if (-not $NoOpen) {
- try { Start-Process -FilePath $floorPNG; if (Test-Path -LiteralPath $finishPNG -PathType Leaf) { Start-Process -FilePath $finishPNG } }
+ try { if ($RidgeContrast) { Start-Process -FilePath $roofPNG }; Start-Process -FilePath $floorPNG; if (Test-Path -LiteralPath $finishPNG -PathType Leaf) { Start-Process -FilePath $finishPNG } }
  catch { Write-Warning 'V11_ART_OPEN_PNG_FAILED_USE_PRINTED_PATH' }
 }
 # Optional ART HOLD is a valid reviewed outcome. All mandatory validation
