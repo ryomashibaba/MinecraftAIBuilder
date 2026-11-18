@@ -16,7 +16,10 @@ const failPosition=diagnosis=>{
  error.fixturePlacement=diagnosis;throw error;
 };
 const intentKey=i=>i.level+':'+i.zoneIndex;
-const roleDepth=kind=>kind==='bed'?4:
+const roleWidth=kind=>
+ ['service-bay','tool-rack','teaching-board','assembly-table'].includes(kind)?5:3;
+const roleDepth=kind=>['bed','service-bay'].includes(kind)?4:
+ ['assembly-table','inspection-stand'].includes(kind)?3:
  ['seating','washbasin','electronics','oven'].includes(kind)?2:1;
 
 /**
@@ -74,8 +77,8 @@ const fixtureIntents=p=>p.plan.levels.flatMap((l,li)=>
 
 function positions(intent,product,turned=false,exhaustive=false){
  const range=product.program[intent.level].zones[intent.zoneIndex].range;
- const width=turned?roleDepth(intent.kind):3;
- const depth=turned?3:roleDepth(intent.kind);
+ const width=turned?roleDepth(intent.kind):roleWidth(intent.kind);
+ const depth=turned?roleWidth(intent.kind):roleDepth(intent.kind);
  const corners=[
   [range.x[0],range.z[1]-depth+1],
   [range.x[1]-width+1,range.z[1]-depth+1],
@@ -205,7 +208,35 @@ function makeParts(intent,x,y,z,turned=false,wallAligned=false){
    add('side-b',2,1,0,1,2,2,'metal'),
    add('hood',0,2,0,3,1,2,'metal'),
    add('door-glass',1,1,0,1,1,1,'glass'),
-   add('hearth-glow',1,1,1,1,1,1,intent.hearth??'glow')]
+   add('hearth-glow',1,1,1,1,1,1,intent.hearth??'glow')],
+  // These are purely geometric forms explicitly chosen by the model.
+  'service-bay':()=>[
+   add('left-floor-guide',0,0,0,1,1,4,'metal'),
+   add('right-floor-guide',4,0,0,1,1,4,'metal'),
+   add('repair-pedestal',2,0,2,1,2,1,'stone'),
+   add('overhead-support',1,2,2,3,1,1,'metal'),
+   add('front-wheel-stop',2,0,0,1,1,1,'accent')],
+  'tool-rack':()=>[
+   add('base',0,0,0,5,1,1,'wood'),
+   add('vertical-panel',0,1,0,5,2,1,'metal'),
+   add('tool-mark-a',1,2,0,1,1,1,'accent'),
+   add('tool-mark-b',3,2,0,1,1,1,'stone')],
+  'teaching-board':()=>[
+   add('support-left',0,0,0,1,1,1,'wood'),
+   add('support-right',4,0,0,1,1,1,'wood'),
+   add('board-frame',0,1,0,5,2,1,'wood'),
+   add('writing-face',1,1,0,3,2,1,'concrete')],
+  'inspection-stand':()=>[
+   add('supported-platform',0,0,0,3,1,3,'stone'),
+   add('inspection-pillar',1,1,1,1,1,1,'metal'),
+   add('instrument-arm',0,2,1,3,1,1,'accent')],
+  'assembly-table':()=>[
+   add('near-left-leg',0,0,0,1,1,1,'wood'),
+   add('near-right-leg',4,0,0,1,1,1,'wood'),
+   add('far-left-leg',0,0,2,1,1,1,'wood'),
+   add('far-right-leg',4,0,2,1,1,1,'wood'),
+   add('large-work-surface',0,1,0,5,1,3,'wood'),
+   add('workpiece-marker',2,2,1,1,1,1,'accent')]
  };
  const parts=families[intent.kind]?.();
  if(!parts)throw Error('R125_PLAN_FIXTURE_UNKNOWN_ROLE');
@@ -226,7 +257,12 @@ function makeParts(intent,x,y,z,turned=false,wallAligned=false){
     add('monitor-frame-right',2,2,0,1,1,1,'metal')],
    washbasin:()=>[add('basin-water',1,1,0,1,1,1,'glass')],
    electronics:()=>[add('control-unit',2,2,0,1,1,1,'accent')],
-   oven:()=>[add('heat-control',2,2,0,1,1,1,'accent')]
+   oven:()=>[add('heat-control',2,2,0,1,1,1,'accent')],
+   'service-bay':()=>[add('fixture-adjuster',2,2,2,1,1,1,'accent')],
+   'tool-rack':()=>[add('center-tool',2,2,0,1,1,1,'accent')],
+   'teaching-board':()=>[add('diagram-marker',2,2,0,1,1,1,'accent')],
+   'inspection-stand':()=>[add('inspection-gauge',1,2,1,1,1,1,'glass')],
+   'assembly-table':()=>[add('bench-tool',1,2,1,1,1,1,'metal')]
   };
   parts.push(...details[intent.kind]());
  }
@@ -246,7 +282,7 @@ function makeParts(intent,x,y,z,turned=false,wallAligned=false){
  const rotated=parts.map(part=>{
   const [px,py,pz]=part.origin,[sx,sy,sz]=part.size;
   const dx=px-x,dy=py-y,dz=pz-z;
-  return {...part,origin:[x+dz,y+dy,z+3-(dx+sx)],
+  return {...part,origin:[x+dz,y+dy,z+roleWidth(intent.kind)-(dx+sx)],
    size:[sz,sy,sx]};
  });
  return {key,parts:rotated};
@@ -255,8 +291,8 @@ function tryOrigin(product,targets,intent,x,z,auditCirculation,
  floorComponentBaseline,turned=false){
  const floor=product.program[intent.level];
  const range=floor.zones[intent.zoneIndex].range,y=floor.standingFloorY;
- const width=turned?roleDepth(intent.kind):3;
- const depth=turned?3:roleDepth(intent.kind);
+ const width=turned?roleDepth(intent.kind):roleWidth(intent.kind);
+ const depth=turned?roleWidth(intent.kind):roleDepth(intent.kind);
  const rejected=(reason,evidence)=>({
   ok:false,rejection:{at:[x,y,z],reason,
   ...(turned?{orientation:'quarter-turn'}:{}),
@@ -453,7 +489,7 @@ export function addAuthoredRoomFixtures(product,{auditCirculation}={}){
     zoneId:intent.zoneId,kind:intent.kind,
     fixtureIndex:intent.multi?intent.index:null,
     range,standingFloorY:current.program[intent.level].standingFloorY,
-    footprint:[3,depth]},
+    footprint:[roleWidth(intent.kind),depth]},
    previouslyPlaced:targets.map(t=>({
     id:t.id,zoneId:t.zoneId,kind:t.kind,origin:t.origin,size:t.size,
     ...(t.orientation?{orientation:t.orientation}:{})})),

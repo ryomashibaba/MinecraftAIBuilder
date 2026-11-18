@@ -90,10 +90,14 @@ export const estimateR125AuthoredElementReserve=p=>p.levels.reduce((sum,level)=>
  level.spaces.reduce((subtotal,room)=>{
   const roles=room.fixtures??(room.fixture?[room.fixture]:[]);
   const parts={counter:2,workbench:3,display:2,storage:4,seating:2,
-   bed:4,desk:4,washbasin:5,electronics:5,oven:6};
+   bed:4,desk:4,washbasin:5,electronics:5,oven:6,
+   'service-bay':5,'tool-rack':4,'teaching-board':4,
+   'inspection-stand':3,'assembly-table':6};
   const detail=room.fixtureDetail==='crafted'?{
    counter:1,workbench:1,display:1,storage:1,seating:2,bed:2,
-   desk:2,washbasin:1,electronics:1,oven:1}:{};
+   desk:2,washbasin:1,electronics:1,oven:1,
+   'service-bay':1,'tool-rack':1,'teaching-board':1,
+   'inspection-stand':1,'assembly-table':1}:{};
   return subtotal+roles.reduce((total,role)=>total+parts[role]+
    (detail[role]??0)+(room.fixtureScale==='expanded'?3:0),0)+(room.daylight==='paired-bays'?4:room.daylight?2:0);
  },0),0);
@@ -161,7 +165,8 @@ function tLayout(level,{x0,x1,z0,z1},split){
 function fourRoomFrontHub(level,{x0,x1,z0,z1},split){
  if(level.spaces.length!==4)return null;
  check(level.splitAxis==='z','FOUR_ROOM_HUB_AXIS');
- const k1=Math.floor(x0+(x1-x0)/3),k2=Math.floor(x0+2*(x1-x0)/3);
+ const [p1,p2]=level.rearBayPercentages??[100/3,200/3];
+ const k1=Math.floor(x0+(x1-x0)*p1/100),k2=Math.floor(x0+(x1-x0)*p2/100);
  const bays=[[x0+1,k1-1],[k1+1,k2-1],[k2+1,x1-1]];
  check(bays.every(([a,b])=>b-a+1>=5)&&
   split-z0-1>=6&&z1-split-1>=6,'FOUR_ROOM_HUB_CLEAR_SPANS');
@@ -313,18 +318,29 @@ export function validateArchitecturePlan(p){
    ...(Object.hasOwn(level??{},'secondarySplitPercent')?
     ['secondarySplitPercent']:[]),
    ...(Object.hasOwn(level??{},'thirdRoomLink')?
-    ['thirdRoomLink']:[])])&&
-   ['x','z'].includes(level.splitAxis)&&[40,50,60].includes(level.splitPercent)&&
+    ['thirdRoomLink']:[]),
+   ...(Object.hasOwn(level??{},'rearBayPercentages')?
+    ['rearBayPercentages']:[])])&&
+   ['x','z'].includes(level.splitAxis)&&Number.isInteger(level.splitPercent)&&
+   level.splitPercent>=30&&level.splitPercent<=70&&level.splitPercent%5===0&&
    Array.isArray(level.spaces)&&[2,3,4].includes(level.spaces.length),'LEVEL_PROGRAM');
   check(level.secondarySplitPercent===undefined||
-   (level.spaces.length===3&&[35,50,65].includes(level.secondarySplitPercent)),
+   (level.spaces.length===3&&Number.isInteger(level.secondarySplitPercent)&&
+    level.secondarySplitPercent>=25&&level.secondarySplitPercent<=75&&
+    level.secondarySplitPercent%5===0),
    'THREE_ROOM_SECONDARY_PERCENT');
   check(level.thirdRoomLink===undefined||
    (level.spaces.length===3&&level.thirdRoomLink==='first-and-second'),
    'THREE_ROOM_LINK');
+  check(level.rearBayPercentages===undefined||
+   (level.spaces.length===4&&Array.isArray(level.rearBayPercentages)&&
+    level.rearBayPercentages.length===2&&
+    level.rearBayPercentages.every(n=>Number.isInteger(n)&&n>=20&&n<=80&&n%5===0)&&
+    level.rearBayPercentages[0]<level.rearBayPercentages[1]),
+   'FOUR_ROOM_REAR_BAY_WIDTHS');
   if(level.spaces.length===4)
    check(p.levels.length===1&&level.splitAxis==='z'&&
-    p.footprint.width>=28&&p.footprint.depth>=24&&
+    p.footprint.width>=22&&p.footprint.depth>=18&&
     ['public','shared'].includes(level.spaces[0].access)&&
     !Object.hasOwn(p.expression??{},'rearCourt')&&
     !Object.hasOwn(p.expression??{},'rearCornerCut')&&
@@ -366,7 +382,12 @@ export function validateArchitecturePlan(p){
      (space.fixture!==undefined||space.fixtures!==undefined)),
     'SPACE_FIXTURE_SCALE');
    const roles=['counter','workbench','display','storage','seating',
-    'bed','desk','washbasin','electronics','oven'];
+    'bed','desk','washbasin','electronics','oven',
+    'service-bay','tool-rack','teaching-board','inspection-stand','assembly-table'];
+   check(space.fixtureScale!=='expanded'||
+    !(space.fixtures??[]).some(r=>
+     ['service-bay','tool-rack','teaching-board','inspection-stand','assembly-table'].includes(r)),
+    'NEW_ROLE_REQUIRES_DEFAULT_SCALE');
    check(space.ovenHearth===undefined||
     (space.ovenHearth==='accent'&&
      Array.isArray(space.fixtures)&&space.fixtures.includes('oven')),
@@ -418,7 +439,8 @@ export function assessR125AuthoredRoomCapacity(plan){
    [[split-x0-1,z1-z0-1],[x1-split-1,z1-z0-1]]:
    [[x1-x0-1,split-z0-1],[x1-x0-1,z1-split-1]];
   if(level.spaces.length===4){
-   const k1=Math.floor(x0+(x1-x0)/3),k2=Math.floor(x0+2*(x1-x0)/3);
+   const [p1,p2]=level.rearBayPercentages??[100/3,200/3];
+   const k1=Math.floor(x0+(x1-x0)*p1/100),k2=Math.floor(x0+(x1-x0)*p2/100);
    sizes.splice(1,1,[k1-x0-1,z1-split-1],
     [k2-k1-1,z1-split-1],[x1-k2-1,z1-split-1]);
   }
@@ -435,9 +457,11 @@ export function assessR125AuthoredRoomCapacity(plan){
   return level.spaces.map((room,zi)=>{
    const [width,depth]=sizes[zi];
    const roles=room.fixtures??(room.fixture?[room.fixture]:[]);
-   const roleDepth=k=>k==='bed'?4:
+   const roleDepth=k=>['bed','service-bay'].includes(k)?4:
+    ['assembly-table','inspection-stand'].includes(k)?3:
     ['seating','electronics','washbasin','oven'].includes(k)?2:1;
-   const equipmentFootprintCells=roles.reduce((n,k)=>n+3*roleDepth(k),0);
+   const roleWidth=k=>['service-bay','tool-rack','teaching-board','assembly-table'].includes(k)?5:3;
+   const equipmentFootprintCells=roles.reduce((n,k)=>n+roleWidth(k)*roleDepth(k),0);
    const nominalFloorCellsUpperBound=Math.max(0,width*depth);
    const risks=[];
    if(roles.length>=2&&Math.min(width,depth)<=4)

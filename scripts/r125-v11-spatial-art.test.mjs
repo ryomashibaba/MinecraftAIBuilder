@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {SCHEMA} from '../source/ai/r125-architecture-plan.mjs';
+import {SCHEMA,compileArchitecturePlan,validateArchitecturePlan,auditArchitecturePlanCirculation} from '../source/ai/r125-architecture-plan.mjs';
 import {compileDesign} from '../source/ai/b143-building-dsl.mjs';
 import {diagnoseR125ArchitecturePlanOriginal} from './r125-offline-replay.mjs';
 import {saveR125SpatialArt} from './r125-v11-spatial-art.mjs';
@@ -298,4 +298,29 @@ test('integrated room-scale HOST extends an authored oven as oven geometry',()=>
  assert.equal(result.worldWrites,0);
  assert.equal(result.modelCalls,0);
  assert.deepEqual(compileDesign(result.sourceDesign).BuildPlan.operations,[]);
+});
+
+test('V11 compact unequal 4-room host places model-selected task equipment without world writes',()=>{
+ const plan={schema:SCHEMA,id:'compact-service-center',title:'Compact repair learning center',
+  brief:'Independent reception, inspection, repair and teaching rooms for a public service',
+  footprint:{width:24,depth:20},
+  levels:[{splitAxis:'z',splitPercent:40,rearBayPercentages:[30,70],spaces:[
+   {id:'reception',purpose:'Public visitor counter',access:'public',fixtures:['counter']},
+   {id:'inspection',purpose:'Staff inspection work',access:'staff',fixtures:['inspection-stand']},
+   {id:'repair',purpose:'Staff repair bay',access:'staff',fixtures:['service-bay']},
+   {id:'learning',purpose:'Public instruction room',access:'public',fixtures:['teaching-board']}]}],
+  materials:{floor:'wood',wall:'stone',roof:'metal'},
+  expression:{setbackSide:'none',setbackDepth:0,roofProfile:'flat',roofAxis:'x',facadeLanguage:'plain'}};
+ assert.equal(validateArchitecturePlan(plan),true);
+ const built=compileArchitecturePlan(plan,{entrancePlacement:'source-accessible'});
+ assert.equal(built.worldWrites,0);
+ assert.deepEqual(built.gates,Array(9).fill('BLOCKED'));
+ assert.deepEqual(built.compiled.BuildPlan.operations,[]);
+ assert.deepEqual(built.fixtureTargets.map(x=>x.kind),
+  ['counter','inspection-stand','service-bay','teaching-board']);
+ assert.equal(built.program[0].zones.length,4);
+ assert.deepEqual(built.program[0].zones.slice(1).map(z=>z.range.x[1]-z.range.x[0]+1),[5,7,6]);
+ assert.equal(auditArchitecturePlanCirculation(built).status,'SOURCE_CLEARANCE_PROBES_PASS');
+ const invalid=structuredClone(plan);invalid.levels[0].rearBayPercentages=[20,20];
+ assert.throws(()=>validateArchitecturePlan(invalid),/FOUR_ROOM_REAR_BAY_WIDTHS/);
 });
