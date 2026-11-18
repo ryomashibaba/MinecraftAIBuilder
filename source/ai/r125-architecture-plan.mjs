@@ -163,8 +163,7 @@ function tLayout(level,{x0,x1,z0,z1},split){
  * Generic single-storey geometry, never relabels author-owned rooms/access.
  */
 function fourRoomFrontHub(level,{x0,x1,z0,z1},split){
- if(level.spaces.length!==4)return null;
- check(level.splitAxis==='z','FOUR_ROOM_HUB_AXIS');
+ if(level.spaces.length!==4||level.splitAxis!=='z')return null;
  const [k1,k2]=level.rearBayPercentages?
   level.rearBayPercentages.map(p=>Math.floor(x0+(x1-x0)*p/100)):
   [Math.floor(x0+(x1-x0)/3),Math.floor(x0+2*(x1-x0)/3)];
@@ -179,6 +178,25 @@ function fourRoomFrontHub(level,{x0,x1,z0,z1},split){
    range:{x:bays[i],z:[split+1,z1-1]}}))
  ]};
 }
+/** An authored public/shared longitudinal spine and three side rooms.
+ * The HOST only constructs the partitions and independent two-wide doors. */
+function fourRoomSideSpine(level,{x0,x1,z0,z1},split){
+ if(level.spaces.length!==4||level.splitAxis!=='x')return null;
+ const [k1,k2]=level.sideBayPercentages?
+  level.sideBayPercentages.map(p=>Math.floor(z0+(z1-z0)*p/100)):
+  [Math.floor(z0+(z1-z0)/3),Math.floor(z0+2*(z1-z0)/3)];
+ const bays=[[z0+1,k1-1],[k1+1,k2-1],[k2+1,z1-1]];
+ check(split-x0-1>=5&&x1-split-1>=5&&
+  bays.every(([a,b])=>b-a+1>=5),'FOUR_ROOM_SIDE_SPINE_CLEAR_SPANS');
+ return {partitions:[k1,k2],doors:bays.map(([a,b])=>
+   [split,Math.floor((a+b-1)/2)]),zones:[
+  {id:level.spaces[0].id,purpose:level.spaces[0].purpose,
+   range:{x:[x0+1,split-1],z:[z0+1,z1-1]}},
+  ...level.spaces.slice(1).map((room,i)=>({id:room.id,purpose:room.purpose,
+   range:{x:[split+1,x1-1],z:bays[i]}}))
+ ]};
+}
+
 export function validateArchitecturePlan(p){
  const standard=['schema','id','title','brief','footprint','levels','materials'];
  const expressive=Object.hasOwn(p??{},'expression');
@@ -321,7 +339,9 @@ export function validateArchitecturePlan(p){
    ...(Object.hasOwn(level??{},'thirdRoomLink')?
     ['thirdRoomLink']:[]),
    ...(Object.hasOwn(level??{},'rearBayPercentages')?
-    ['rearBayPercentages']:[])])&&
+    ['rearBayPercentages']:[]),
+   ...(Object.hasOwn(level??{},'sideBayPercentages')?
+    ['sideBayPercentages']:[])])&&
    ['x','z'].includes(level.splitAxis)&&Number.isInteger(level.splitPercent)&&
    level.splitPercent>=30&&level.splitPercent<=70&&level.splitPercent%5===0&&
    Array.isArray(level.spaces)&&[2,3,4].includes(level.spaces.length),'LEVEL_PROGRAM');
@@ -334,14 +354,23 @@ export function validateArchitecturePlan(p){
    (level.spaces.length===3&&level.thirdRoomLink==='first-and-second'),
    'THREE_ROOM_LINK');
   check(level.rearBayPercentages===undefined||
-   (level.spaces.length===4&&Array.isArray(level.rearBayPercentages)&&
+   (level.spaces.length===4&&level.splitAxis==='z'&&
+    Array.isArray(level.rearBayPercentages)&&
     level.rearBayPercentages.length===2&&
     level.rearBayPercentages.every(n=>Number.isInteger(n)&&n>=20&&n<=80&&n%5===0)&&
     level.rearBayPercentages[0]<level.rearBayPercentages[1]),
    'FOUR_ROOM_REAR_BAY_WIDTHS');
+  check(level.sideBayPercentages===undefined||
+   (level.spaces.length===4&&level.splitAxis==='x'&&
+    Array.isArray(level.sideBayPercentages)&&
+    level.sideBayPercentages.length===2&&
+    level.sideBayPercentages.every(n=>Number.isInteger(n)&&n>=20&&n<=80&&n%5===0)&&
+    level.sideBayPercentages[0]<level.sideBayPercentages[1]),
+   'FOUR_ROOM_SIDE_BAY_DEPTHS');
   if(level.spaces.length===4)
-   check(p.levels.length===1&&level.splitAxis==='z'&&
-    p.footprint.width>=22&&p.footprint.depth>=18&&
+   check(p.levels.length===1&&
+    ((level.splitAxis==='z'&&p.footprint.width>=22&&p.footprint.depth>=18)||
+     (level.splitAxis==='x'&&p.footprint.width>=20&&p.footprint.depth>=22))&&
     ['public','shared'].includes(level.spaces[0].access)&&
     !Object.hasOwn(p.expression??{},'rearCourt')&&
     !Object.hasOwn(p.expression??{},'rearCornerCut')&&
@@ -440,11 +469,20 @@ export function assessR125AuthoredRoomCapacity(plan){
    [[split-x0-1,z1-z0-1],[x1-split-1,z1-z0-1]]:
    [[x1-x0-1,split-z0-1],[x1-x0-1,z1-split-1]];
   if(level.spaces.length===4){
-   const [k1,k2]=level.rearBayPercentages?
-    level.rearBayPercentages.map(p=>Math.floor(x0+(x1-x0)*p/100)):
-    [Math.floor(x0+(x1-x0)/3),Math.floor(x0+2*(x1-x0)/3)];
-   sizes.splice(1,1,[k1-x0-1,z1-split-1],
-    [k2-k1-1,z1-split-1],[x1-k2-1,z1-split-1]);
+   if(axis==='z'){
+    const [k1,k2]=level.rearBayPercentages?
+     level.rearBayPercentages.map(p=>Math.floor(x0+(x1-x0)*p/100)):
+     [Math.floor(x0+(x1-x0)/3),Math.floor(x0+2*(x1-x0)/3)];
+    sizes.splice(1,1,[k1-x0-1,z1-split-1],
+     [k2-k1-1,z1-split-1],[x1-k2-1,z1-split-1]);
+   }else{
+    const [k1,k2]=level.sideBayPercentages?
+     level.sideBayPercentages.map(p=>Math.floor(z0+(z1-z0)*p/100)):
+     [Math.floor(z0+(z1-z0)/3),Math.floor(z0+2*(z1-z0)/3)];
+    sizes.splice(0,sizes.length,[split-x0-1,z1-z0-1],
+     [x1-split-1,k1-z0-1],[x1-split-1,k2-k1-1],
+     [x1-split-1,z1-k2-1]);
+   }
   }
   if(level.spaces.length===3){
    // Match the actual authored T partition, not an invented 50/50 zone.
@@ -547,10 +585,11 @@ export function compileArchitecturePlan(plan,{
    Math.max(7,Math.min(w-7,Math.round(w*level.splitPercent/100))):
    Math.max(8,Math.min(d-6,Math.round(d*level.splitPercent/100)));
   const three=tLayout(level,{x0:1,x1:w-2,z0:1,z1:d-2},split);
+  const side=fourRoomSideSpine(level,{x0:1,x1:w-2,z0:1,z1:d-2},split);
   const four=fourRoomFrontHub(level,{x0:1,x1:w-2,z0:1,z1:d-2},split);
   if(axis==='x'){
    box(tag+'-divider','add',wall,[split,base+1,2],[1,4,d-4]);
-   box(tag+'-inside-door','cut',null,
+   if(!side)box(tag+'-inside-door','cut',null,
     [split,base+1,three?.mainDoorZ??Math.floor(d/2)-1],[1,3,2]);
   }else{
    box(tag+'-divider','add',wall,[2,base+1,split],[w-4,4,1]);
@@ -565,6 +604,14 @@ export function compileArchitecturePlan(plan,{
    for(let i=0;i<four.doors.length;i++)
     box(tag+'-front-hub-door-'+i,'cut',null,
      [four.doors[i][0],base+1,split],[2,3,1]);
+  }
+  if(side){
+   for(let i=0;i<side.partitions.length;i++)
+    box(tag+'-side-divider-'+i,'add',wall,
+     [split+1,base+1,side.partitions[i]],[w-3-split,4,1]);
+   for(let i=0;i<side.doors.length;i++)
+    box(tag+'-side-spine-door-'+i,'cut',null,
+     [split,base+1,side.doors[i][1]],[1,3,2]);
   }
   if(three){
    box(tag+'-secondary-divider','add',wall,three.wallAt(base+1),
@@ -599,7 +646,7 @@ export function compileArchitecturePlan(plan,{
    level:l,splitAxis:axis,requestedPercent:level.splitPercent,
    splitCoordinate:split,standingFloorY:base+1,
    ...(three?{secondarySplitAxis:three.axis,secondarySplitCoordinate:three.coordinate}:{}),
-   zones:four?.zones??three?.zones??(axis==='x'?[
+   zones:side?.zones??four?.zones??three?.zones??(axis==='x'?[
     {id:first.id,purpose:first.purpose,range:{x:[2,split-1],z:[2,d-3]}},
     {id:second.id,purpose:second.purpose,range:{x:[split+1,w-3],z:[2,d-3]}}
    ]:[
@@ -797,10 +844,11 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
    Math.max(x0+4,Math.min(x1-4,Math.round(x0+(x1-x0)*ratio))):
    Math.max(z0+4,Math.min(z1-4,Math.round(z0+(z1-z0)*ratio)));
   const three=tLayout(level,{x0,x1,z0,z1},split);
+  const side=fourRoomSideSpine(level,{x0,x1,z0,z1},split);
   const four=fourRoomFrontHub(level,{x0,x1,z0,z1},split);
   if(axis==='x'){
    box(tag+'-divider','add',wall,[split,y,z0+1],[1,4,z1-z0-1]);
-   box(tag+'-internal-door','cut',null,
+   if(!side)box(tag+'-internal-door','cut',null,
     [split,y,three?.mainDoorZ??Math.floor((z0+z1)/2)-1],[1,3,2]);
   }else{
    box(tag+'-divider','add',wall,[x0+1,y,split],[x1-x0-1,4,1]);
@@ -833,6 +881,14 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
    for(let i=0;i<four.doors.length;i++)
     box(tag+'-front-hub-door-'+i,'cut',null,
      [four.doors[i][0],y,split],[2,3,1]);
+  }
+  if(side){
+   for(let i=0;i<side.partitions.length;i++)
+    box(tag+'-side-divider-'+i,'add',wall,
+     [split+1,y,side.partitions[i]],[x1-split-1,4,1]);
+   for(let i=0;i<side.doors.length;i++)
+    box(tag+'-side-spine-door-'+i,'cut',null,
+     [split,y,side.doors[i][1]],[1,3,2]);
   }
   if(three){
    box(tag+'-secondary-divider','add',wall,three.wallAt(y),three.wallSize);
@@ -985,7 +1041,7 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
     z:[d-1-rearCornerCut.depth,d-2]
    }}:{}),
    ...(three?{secondarySplitAxis:three.axis,secondarySplitCoordinate:three.coordinate}:{}),
-   zones:four?.zones??three?.zones??(axis==='x'?[
+   zones:side?.zones??four?.zones??three?.zones??(axis==='x'?[
     {id:first.id,purpose:first.purpose,range:{x:[x0+1,split-1],z:[z0+1,z1-1]}},
     {id:second.id,purpose:second.purpose,range:{x:[split+1,x1-1],z:[z0+1,z1-1]}}
    ]:[

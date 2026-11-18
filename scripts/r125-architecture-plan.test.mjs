@@ -3584,7 +3584,7 @@ test('four-room hub refuses missing front access, upper floors and narrow sites'
   x=>{x.levels[0].spaces[0].access='staff';},
   x=>{x.footprint.width=21;},
   x=>{x.footprint.depth=17;},
-  x=>{x.levels[0].splitAxis='x';},
+  x=>{x.levels[0].splitAxis='x';x.footprint.depth=21;},
   x=>{x.levels.push(structuredClone(x.levels[0]));},
   x=>{x.expression={setbackSide:'none',setbackDepth:0,
    roofProfile:'flat',roofAxis:'x',facadeLanguage:'recessed-portico'};}
@@ -3593,4 +3593,59 @@ test('four-room hub refuses missing front access, upper floors and narrow sites'
   assert.throws(()=>validateArchitecturePlan(alt),
    /FOUR_ROOM_HUB_PROGRAM/);
  }
+});
+
+test('side-spine author plan builds three real doors and visitor-safe service rooms',()=>{
+ for(const expressive of [false,true]){
+  const p=plan('side-spine-source',['x'],['public welcome','staff work']);
+  p.footprint={width:26,depth:28};
+  p.levels[0].splitPercent=40;
+  p.levels[0].sideBayPercentages=[30,65];
+  p.levels[0].spaces=[
+   {id:'public-spine',purpose:'Public welcome and circulation',access:'public',fixtures:['counter','display']},
+   {id:'repair-work',purpose:'Servicing workspace',access:'staff',fixtures:['workbench']},
+   {id:'parts-store',purpose:'Parts preparation',access:'staff',fixtures:['storage']},
+   {id:'public-class',purpose:'Customer technical training',access:'public',fixtures:['teaching-board']}
+  ];
+  if(expressive)p.expression={setbackSide:'none',setbackDepth:0,
+   roofProfile:'flat',roofAxis:'z',facadeLanguage:'plain'};
+  const original=JSON.stringify(p);
+  assert.equal(validateArchitecturePlan(p),true);
+  const capacity=assessR125AuthoredRoomCapacity(p);
+  assert(capacity.zones.slice(1).every(z=>z.nominalWidth>=5&&z.nominalDepth>=5));
+  const built=compileArchitecturePlan(p,{entrancePlacement:'source-accessible'});
+  assert.equal(verifyCompiled(built.design,built.compiled),true);
+  const doors=built.design.elements.filter(e=>e.id.startsWith('l0-side-spine-door-'));
+  assert.equal(doors.length,3);
+  assert(doors.every(e=>e.mode==='cut'&&e.size.join(',')==='1,3,2'));
+  assert.equal(built.design.elements.some(e=>['l0-inside-door','l0-internal-door'].includes(e.id)),false);
+  const cells=voxels(built.compiled);
+  for(const door of doors)for(let dz=0;dz<2;dz++)
+   assert.equal(includes(cells,door.origin[0],door.origin[1],door.origin[2]+dz),false);
+  assert.equal(auditR125VisitorRoutes(built,p).status,'SOURCE_VISITOR_ROUTES_AVOID_STAFF');
+  assert.equal(auditR125SourceRoutes(built,{featureTargets:built.fixtureTargets}).status,
+   'SOURCE_ROUTES_REACH_ALL_ZONES');
+  assert.equal(JSON.stringify(p),original);
+  assert.deepEqual(built.compiled.BuildPlan.operations,[]);
+  assert.equal(built.worldWrites,0);
+  assert.deepEqual(built.gates,Array(9).fill('BLOCKED'));
+ }
+});
+test('side-spine refuses thin bays and wrong side percentage axis',()=>{
+ const p=plan('side-spine-hold',['x'],['public spine','staff work']);
+ p.footprint={width:26,depth:28};
+ p.levels[0].spaces=[
+  {id:'front-spine',purpose:'Public circulation',access:'public'},
+  {id:'first-staff',purpose:'Staff repair',access:'staff'},
+  {id:'second-staff',purpose:'Staff storage',access:'staff'},
+  {id:'rear-public',purpose:'Visitor demonstrations',access:'public'}
+ ];
+ assert.equal(validateArchitecturePlan(p),true);
+ const thin=structuredClone(p);thin.levels[0].sideBayPercentages=[20,25];
+ assert.equal(validateArchitecturePlan(thin),true);
+ assert.throws(()=>compileArchitecturePlan(thin),/R125_PLAN_FOUR_ROOM_SIDE_SPINE_CLEAR_SPANS/);
+ const wrong=structuredClone(p);wrong.levels[0].rearBayPercentages=[30,60];
+ assert.throws(()=>validateArchitecturePlan(wrong),/R125_PLAN_FOUR_ROOM_REAR_BAY_WIDTHS/);
+ const small=structuredClone(p);small.footprint.depth=21;
+ assert.throws(()=>validateArchitecturePlan(small),/R125_PLAN_FOUR_ROOM_HUB_PROGRAM/);
 });
