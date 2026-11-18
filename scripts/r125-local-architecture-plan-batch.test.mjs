@@ -605,7 +605,10 @@ test('one-shot V11 Qwen request explicitly guards public entry and still rejects
   assert.match(user.groundFloorEntryRouteRule,/first staff then rear public is rejected/);
   assert.match(system,/UPPER-LEVEL PRIVACY AND STAIR ACCESS/);
   assert.match(system,/two floors are optional, not a quality signal/);
+  assert.match(system,/landing MUST lie inside a public\/shared upper room/);
+  assert.match(system,/extend its boundary past z=9/);
   assert.match(user.upperFloorAccessRule,/A room being public in JSON is not a safe path/);
+  assert.match(user.upperFloorAccessRule,/the west room contains x=3..4/);
   assert.equal(report.sourcePassCount,0,'private staff entrance remains a strict HOLD');
   assert.equal(report.allSourceVerified,false);
   assert.equal(report.completed[0].failureReason,
