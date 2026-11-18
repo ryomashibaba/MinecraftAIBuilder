@@ -34,8 +34,15 @@ export function saveSavedFloorReview({rawPath,sourcePath,diagnosisPath,outDir}={
   diagnosis=JSON.parse(data[2]);}catch{fail('INVALID_JSON');}
  const levels=plan?.levels?.length;
  if(!Number.isInteger(levels)||levels<1||levels>2||
-    plan.id!==design?.id||diagnosis?.status!=='B143_SOURCE_CANDIDATE_ART_HOLD'||
-    diagnosis.sourceVerified!==true||diagnosis.originalEdited!==false||
+    plan.id!==design?.id||
+    !((diagnosis?.status==='B143_SOURCE_CANDIDATE_ART_HOLD'&&
+       diagnosis.sourceVerified===true)||
+      (typeof diagnosis?.status==='string'&&
+       diagnosis.status.startsWith('HOLD_')&&
+       diagnosis.sourceVerified===false&&
+       typeof diagnosis.sourceSha256==='string'&&
+       typeof diagnosis.geometrySha256==='string'))||
+    diagnosis.originalEdited!==false||
     diagnosis.worldWrites!==0||diagnosis.originalSha256!==sha(data[0]))
   fail('AUTHOR_OR_DIAGNOSIS_MISMATCH');
  const scene=compileDesign(design);
@@ -68,6 +75,13 @@ export function saveSavedFloorReview({rawPath,sourcePath,diagnosisPath,outDir}={
  const unverified=used.filter(m=>!['stone','glass'].includes(m)&&
   !Object.hasOwn(palette.blocks,m));
  const report={schema:'r125-v11-saved-two-floor-review-v1',
+  // A compiled scene can be inspected despite a failed FUNCTION gate.
+  // This does not certify access, design, SOURCE or Minecraft construction.
+  sourceStatus:diagnosis.status,
+  sourceVerified:diagnosis.sourceVerified===true,
+  reviewScope:diagnosis.sourceVerified===true?
+   'SOURCE_VERIFIED_ART_PENDING':
+   'HOLD_SOURCE_GEOMETRY_ONLY_NOT_FUNCTIONALLY_VERIFIED',
   originalSha256:sha(data[0]),sourceSha256:scene.sourceSha256,
   geometrySha256:scene.geometrySha256,sourceFileSha256:sha(data[1]),
   levels,occupiedVoxels:scene.primitives.length,
@@ -106,6 +120,7 @@ if(process.argv[1]===fileURLToPath(import.meta.url)){
   console.log('R125_V11_FLOORS_OFFLINE',JSON.stringify({
    levels:report.levels,sourceSha256:report.sourceSha256,
    unverifiedMaterials:report.educationMaterials.unverified,
+   sourceStatus:report.sourceStatus,sourceVerified:report.sourceVerified,
    modelCalls:0,worldWrites:0}));
  }catch(e){console.error('R125_V11_FLOOR_HOLD',String(e?.message??e));process.exitCode=2;}
 }
