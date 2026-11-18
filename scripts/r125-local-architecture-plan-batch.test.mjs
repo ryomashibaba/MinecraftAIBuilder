@@ -58,6 +58,21 @@ test('daylight early hold surfaces only upstream SOURCE evidence without PRIVATE
    upstreamOfWindow:false}}),null);
 });
 
+test('SOURCE HOLD visibly identifies the exact missing required fixtures',()=>{
+ const brief={id:'sample-lab',prompt:'点検と記録を行う'};
+ const report={planned:1,attempted:1,model:'qwen3:14b',
+  allSourceVerified:false,sourcePassCount:0,originalResponseCount:1,
+  completed:[{id:brief.id,status:'HOLD_EXPLICIT_ACTIVITY_PROXY_MISSING',
+   sourceVerified:false,explicitActivityProxy:{missing:[
+    {capability:'parts-inspection',requiredRole:'inspection-stand'},
+    {capability:'records-desk',requiredRole:'desk'}]}}]};
+ const html=renderR125BatchComparison([brief],report);
+ assert.match(html,/SOURCE HOLD — missing literal equipment/);
+ assert.match(html,/inspection-stand/);
+ assert.match(html,/desk/);
+ assert.match(html,/HOLD_EXPLICIT_ACTIVITY_PROXY_MISSING/);
+});
+
 test('HTML review visibly warns about model-authored task mismatches without source promotion',()=>{
  const brief={id:'new-brief',prompt:'部品の組立と記録を行う工房'};
  const report={planned:1,attempted:1,model:'qwen3:14b',allSourceVerified:true,

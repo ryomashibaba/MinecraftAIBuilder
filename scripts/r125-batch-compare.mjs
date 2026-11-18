@@ -35,6 +35,11 @@ export function renderR125BatchComparison(briefs,report){
    .flatMap(level=>level.spaces.filter(s=>
     !(s.fixture||(Array.isArray(s.fixtures)&&s.fixtures.length>0)))
     .map(s=>s.purpose));
+  const missingTasks=row.explicitActivityProxy?.missing??[];
+  const literalRoleWarning=missingTasks.length?
+   '<p class="issue">SOURCE HOLD — missing literal equipment: '+
+   missingTasks.map(x=>esc(x.requiredRole)+' ('+esc(x.capability)+')').join(' / ')+
+   '</p>':'';
   const artAdvisory=row.roomArtAdvisory;
   const artWarning=artAdvisory?
    '<p class="issue">ART advisory (NOT a SOURCE failure): '+
@@ -63,7 +68,7 @@ export function renderR125BatchComparison(briefs,report){
   const relative='./'+row.id+'/B143_SOURCE_3D_REVIEW_ONLY.html';
   return '<section><h2>'+esc(row.id)+'</h2><p><strong>'+
    esc(row.status)+'</strong></p><p>'+esc(brief)+'</p>'+
-   '<p class="muted">'+authored+'</p><ul>'+program+'</ul>'+sourceEvidence+artWarning+setbackIssue+
+   '<p class="muted">'+authored+'</p><ul>'+program+'</ul>'+sourceEvidence+literalRoleWarning+artWarning+setbackIssue+
    (findings?'<p class="issue">'+findings+'</p>':'')+
    (hasViewer?'<iframe class="mab-review" sandbox="allow-scripts" loading="lazy" src="'+
      relative+'" title="'+esc(row.id)+' true B143 3D"></iframe>'+

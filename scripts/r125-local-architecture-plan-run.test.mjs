@@ -62,6 +62,9 @@ test('one-shot design request highlights only literal equipment tasks, without c
  ]);
  assert.deepEqual(inferR125ExplicitActivityRequirements(
   '工房の外観を自由に設計してください。'),[]);
+ assert.deepEqual(inferR125ExplicitActivityRequirements(
+  '海辺の小型気象観測所で計測機器の点検、観測記録、試料の保管を行います。')
+  .map(x=>x.requiredRole),['inspection-stand','storage','desk']);
 
  let requests=0,captures=0;
  const author=createR125ArchitecturePlanLocalAdapter({
@@ -75,6 +78,11 @@ test('one-shot design request highlights only literal equipment tasks, without c
    assert.match(payload.messages[0].content,/Never invent equipment/);
    assert.match(payload.messages[0].content,/HOST must not automatically shrink/);
    const user=JSON.parse(payload.messages[1].content);
+   assert.deepEqual(user.requiredFixtureRoles,
+    ['oven','washbasin','workbench','display']);
+   assert.match(user.essentialTaskPlacementRule,
+    /fixtures:\["assembly-table","inspection-stand"\]/);
+   assert.match(user.essentialTaskPlacementRule,/fixtureScale は出力禁止/);
    assert.deepEqual(user.explicitLiteralEquipment,[
     {capability:'baking-heating',requiredRole:'oven'},
     {capability:'washing-basin',requiredRole:'washbasin'},
@@ -173,6 +181,8 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    assert.ok(room.properties.fixtures.items.enum.includes('teaching-board'));
    assert.ok(!room.properties.fixture.enum.includes('oven'));
    assert.equal(room.properties.fixtures.maxItems,5);
+   assert.equal(room.properties.fixtureScale,undefined,
+    'first-pass model cannot select unsafe room expansion');
    assert.ok(room.properties.daylight.enum.includes('paired-bays'),
     'the model may explicitly request two air-backed exterior windows');
    assert.equal(room.properties.fixtures.uniqueItems,undefined,
