@@ -31,6 +31,14 @@ test('one-shot design request highlights only literal equipment tasks, without c
  ]);
  assert.deepEqual(inferR125ExplicitActivityRequirements(
   '独創的な小型パン工房の外観を設計して'),[]);
+ assert.deepEqual(inferR125ExplicitActivityRequirements(
+  'オーブンは不要で、手洗い設備を設ける施設'),[
+  {capability:'washing-basin',requiredRole:'washbasin'}
+ ]);
+ assert.deepEqual(inferR125ExplicitActivityRequirements(
+  '展示台の設置は不要、事務机が必要な部屋'),[
+  {capability:'records-desk',requiredRole:'desk'}
+ ]);
  let requests=0,captures=0;
  const author=createR125ArchitecturePlanLocalAdapter({
   model:'qwen3:14b',
