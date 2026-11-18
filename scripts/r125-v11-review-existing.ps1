@@ -16,6 +16,23 @@ param(
  [switch]$ActivityInlays
 )
 $ErrorActionPreference = 'Stop'
+# Avoid Get-FileHash, unavailable in the user's PS5.1 environment.
+# Exact SHA-256 via .NET's built-in cryptography implementation.
+function Get-V11Sha256([string]$FilePath) {
+ if (-not (Test-Path -LiteralPath $FilePath -PathType Leaf)) {
+  throw 'V11_ART_SHA_INPUT_NOT_FOUND'
+ }
+ $stream = [System.IO.File]::Open($FilePath,[System.IO.FileMode]::Open,
+  [System.IO.FileAccess]::Read,[System.IO.FileShare]::Read)
+ $sha = [System.Security.Cryptography.SHA256]::Create()
+ try {
+  return [System.BitConverter]::ToString(
+   $sha.ComputeHash($stream)).Replace('-','').ToLowerInvariant()
+ } finally {
+  $sha.Dispose()
+  $stream.Dispose()
+ }
+}
 $repo = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')).Path
 $renderer = Join-Path $repo 'scripts\r125-static-art-review.mjs'
 $floorRenderer = Join-Path $repo 'scripts\r125-v11-saved-floor-review.mjs'
@@ -100,7 +117,7 @@ if ($diag.sourceVerified -ne $true -or
     [int]$diag.occupiedVoxels -lt 1) {
  throw 'V11_ART_SOURCE_DIAGNOSIS_MISMATCH'
 }
-$actualOriginalHash = (Get-FileHash -LiteralPath $rawFile -Algorithm SHA256).Hash.ToLowerInvariant()
+$actualOriginalHash = (Get-V11Sha256 $rawFile)
 if (($RidgeContrast -or $ActivityInlays) -and $actualOriginalHash -cne
  '2cd969f87d3efdf767d514f1c0c4e45663afcd91f84631887b71f07fc4d67a72') {
  throw 'V11_RIDGE_1117_AUTHOR_SHA_MISMATCH'
@@ -120,7 +137,7 @@ if (-not (Test-Path -LiteralPath $manifestFile -PathType Leaf) -or
  throw 'V11_ART_CONTACT_OUTPUT_INCOMPLETE'
 }
 $manifest = Get-Content -LiteralPath $manifestFile -Raw -Encoding UTF8 | ConvertFrom-Json
-$actualImageHash = (Get-FileHash -LiteralPath $contactFile -Algorithm SHA256).Hash.ToLowerInvariant()
+$actualImageHash = (Get-V11Sha256 $contactFile)
 if ($manifest.schema -cne 'r125-b143-offline-static-review-v1' -or
     $manifest.sourceSha256 -cne $diag.sourceSha256 -or
     $manifest.geometrySha256 -cne $diag.geometrySha256 -or
@@ -143,7 +160,7 @@ if (-not (Test-Path -LiteralPath $floorPNG -PathType Leaf) -or
  throw 'V11_ART_FLOOR_OUTPUT_MISSING'
 }
 $floorReport = Get-Content -LiteralPath $floorJSON -Raw -Encoding UTF8 | ConvertFrom-Json
-$floorSHA = (Get-FileHash -LiteralPath $floorPNG -Algorithm SHA256).Hash.ToLowerInvariant()
+$floorSHA = (Get-V11Sha256 $floorPNG)
 if ($floorReport.originalSha256 -cne $actualOriginalHash -or
     $floorReport.sourceSha256 -cne $diag.sourceSha256 -or
     $floorReport.geometrySha256 -cne $diag.geometrySha256 -or
@@ -168,7 +185,7 @@ if (Test-Path -LiteralPath $finishJSON -PathType Leaf) {
  $finishReport = Get-Content -LiteralPath $finishJSON -Raw -Encoding UTF8 | ConvertFrom-Json
  if ($finishReport.originalSha256 -cne $actualOriginalHash -or
      $finishReport.baselineSourceSha256 -cne $diag.sourceSha256 -or
-     $finishReport.photoSha256 -cne (Get-FileHash -LiteralPath $finishPNG -Algorithm SHA256).Hash.ToLowerInvariant() -or
+     $finishReport.photoSha256 -cne (Get-V11Sha256 $finishPNG) -or
      [int]$finishReport.modelCalls -ne 0 -or
      [int]$finishReport.worldWrites -ne 0) {
   throw 'V11_FINISH_ART_PROVENANCE_HOLD'
@@ -193,7 +210,7 @@ if ($RidgeContrast) {
  if (-not (Test-Path -LiteralPath $roofPNG -PathType Leaf)) {
   throw 'V11_RIDGE_AB_PREVIEW_MISSING'
  }
- $imageHash = (Get-FileHash -LiteralPath $roofPNG -Algorithm SHA256).Hash.ToLowerInvariant()
+ $imageHash = (Get-V11Sha256 $roofPNG)
  if ($roof.schema -cne 'r125-v11-room-scale-v2-ridge-only-contrast-v1' -or
      $roof.originalSha256 -cne $actualOriginalHash -or
      $roof.archivedSourceSha256 -cne $diag.sourceSha256 -or
@@ -241,7 +258,7 @@ if ($ActivityInlays) {
  if (-not (Test-Path -LiteralPath $activityPNG -PathType Leaf)) {
   throw 'V11_ACTIVITY_INLAY_MISSING_PNG'
  }
- $imgHash=(Get-FileHash -LiteralPath $activityPNG -Algorithm SHA256).Hash.ToLowerInvariant()
+ $imgHash=(Get-V11Sha256 $activityPNG)
  if ($activity.contrast -cne 'SAME_MODEL_SAME_STATIONS_INLAY_FLOOR_ONLY' -or
      $activity.originalSha256 -cne $actualOriginalHash -or
      $activity.archivedSourceSha256 -cne $diag.sourceSha256 -or

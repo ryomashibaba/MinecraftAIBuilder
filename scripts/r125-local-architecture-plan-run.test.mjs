@@ -55,6 +55,10 @@ test('one-shot design request highlights only literal equipment tasks, without c
    requests++;
    const payload=JSON.parse(opts.body);
    assert.equal(payload.messages.length,2);
+   assert.match(payload.messages[0].content,/AREA-BEFORE-ENVELOPE/);
+   assert.match(payload.messages[0].content,/smallest useful overall footprint/);
+   assert.match(payload.messages[0].content,/Never invent equipment/);
+   assert.match(payload.messages[0].content,/HOST must not automatically shrink/);
    const user=JSON.parse(payload.messages[1].content);
    assert.deepEqual(user.explicitLiteralEquipment,[
     {capability:'baking-heating',requiredRole:'oven'},
