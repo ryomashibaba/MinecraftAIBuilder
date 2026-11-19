@@ -700,7 +700,8 @@ test('optional HOST observation clearance creates a true B143 sightline while re
  assert.equal(revised.sourceVerified,true);
  assert.equal(revised.observationComposition.status,'HOST_BAY_CLEARANCE_SOURCE_PROVEN');
  assert.equal(revised.observationComposition.originalPercent,35);
- assert.equal(revised.observationComposition.hostPercent,45);
+ assert.equal(revised.observationComposition.hostPercent,40,
+  'the HOST chooses the smallest independently SOURCE-proven adjustment');
  assert.equal(revised.observationComposition.modelAuthorship,
   'HOST_DERIVED_NOT_QWEN_ORIGINAL');
  assert.equal(revised.observationSource.status,'SOURCE_GLAZED_WORK_VIEW_CONFIRMED');
