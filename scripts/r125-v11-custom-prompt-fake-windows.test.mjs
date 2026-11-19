@@ -223,6 +223,99 @@ test('Windows preset unseen brief -> ONE mock Qwen response -> genuine B143 exte
  }
 });
 
+test('Windows local Ollama SOURCE HOLD still unloads only the run model, preserving original failure',{
+ skip:process.platform!=='win32',timeout:210000
+},async(t)=>{
+ const temp=fs.mkdtempSync(path.join(os.tmpdir(),'mab-v11-ollama-unload-'));
+ const local=path.join(temp,'LOCALAPPDATA');
+ fs.mkdirSync(local);
+ const bad='{"schema":';
+ let modelPosts=0,unloadPosts=0,unloadedModel=null;
+ const server=createServer((req,res)=>{
+  const send=(obj,status=200)=>{
+   res.writeHead(status,{'Content-Type':'application/json'});
+   res.end(JSON.stringify(obj));
+  };
+  if(req.method==='GET'&&req.url==='/api/tags')
+   return send({models:[{name:'fake-local-author',model:'fake-local-author'}]});
+  if(req.method==='GET'&&req.url==='/api/ps')
+   return send({models:[]});
+  if(req.method==='POST'&&req.url==='/v1/chat/completions'){
+   req.resume();
+   req.on('end',()=>{
+    modelPosts++;
+    send({choices:[{finish_reason:'stop',message:{content:bad}}]});
+   });
+   return;
+  }
+  if(req.method==='POST'&&req.url==='/api/generate'){
+   let data='';
+   req.setEncoding('utf8');
+   req.on('data',c=>{data+=c;});
+   req.on('end',()=>{
+    unloadPosts++;
+    try{
+     const payload=JSON.parse(data);
+     assert.equal(payload.prompt,'');
+     assert.equal(payload.keep_alive,0);
+     assert.equal(payload.stream,false);
+     unloadedModel=payload.model;
+     send({model:payload.model,done:true,done_reason:'unload'});
+    }catch(e){send({error:String(e)},400)}
+   });
+   return;
+  }
+  send({error:'unexpected route '+req.url},404);
+ });
+ let listening=false;
+ try{
+  try{
+   await new Promise((resolve,reject)=>{
+    server.once('error',reject);
+    server.listen(11434,'127.0.0.1',resolve);
+   });
+   listening=true;
+  }catch(e){
+   if(e.code==='EADDRINUSE'){t.skip('Ollama port already in use on runner');return}
+   throw e;
+  }
+  const pin=execFileSync('git',['rev-parse','HEAD'],
+   {cwd:root,encoding:'utf8'}).trim();
+  const args=['-NoProfile','-ExecutionPolicy','Bypass','-File',
+   path.join(root,'scripts/r125-v11-windows-pilot.ps1'),
+   '-SingleNewBrief','-Model','fake-local-author',
+   '-ExpectedHead',pin,'-NoOpen'];
+  const result=await new Promise((resolve,reject)=>{
+   const child=spawn('powershell.exe',args,{
+    cwd:root,env:{...process.env,LOCALAPPDATA:local},windowsHide:true});
+   let stdout='',stderr='';
+   child.stdout.setEncoding('utf8');child.stderr.setEncoding('utf8');
+   child.stdout.on('data',c=>{stdout+=c;});
+   child.stderr.on('data',c=>{stderr+=c;});
+   child.once('error',reject);
+   child.once('close',code=>resolve({code,stdout,stderr}));
+  });
+  assert.equal(result.code,2,'SOURCE HOLD must remain failed despite unload');
+  assert.equal(modelPosts,1,'exactly one mocked author response');
+  assert.equal(unloadPosts,1,'one cleanup call in finally');
+  assert.equal(unloadedModel,'fake-local-author');
+  assert.match(result.stdout,/V11_OLLAMA_MODEL_UNLOADED=fake-local-author/);
+  const found=/V11_PRIVATE_RESULT=([^\r\n]+)/.exec(result.stdout);
+  assert(found,result.stdout+'\n'+result.stderr);
+  const out=found[1].trim();
+  const saved=fs.readFileSync(path.join(out,'tide-observatory',
+   'MODEL_RESPONSE_ORIGINAL.txt'),'utf8');
+  assert.equal(saved,bad,'genuine response bytes remain unchanged');
+  const report=JSON.parse(fs.readFileSync(path.join(out,'BATCH_REPORT.json'),'utf8'));
+  assert.equal(report.sourcePassCount,0);
+  assert.equal(report.originalResponseCount,1);
+  assert.equal(report.worldWrites,0);
+ }finally{
+  if(listening)await new Promise(resolve=>server.close(resolve));
+  fs.rmSync(temp,{recursive:true,force:true});
+ }
+});
+
 test('wrong expected HEAD fails BEFORE any local model POST and before private outputs',{
  skip:process.platform!=='win32',timeout:60000
 },async()=>{

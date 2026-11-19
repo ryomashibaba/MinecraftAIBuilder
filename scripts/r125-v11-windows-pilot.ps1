@@ -309,7 +309,13 @@ if ($batchBriefs) {
 }
 $batchArgs += @('--out', $out, '--endpoint', $Endpoint)
 if ($RepairOnce) { $batchArgs += '--repair-once' }
+# All model requests, reports, B143 images and SOURCE failures share ONE
+# outer finally. The original exit code/exception must never be overwritten
+# by an unload failure. CheckOnly and failed preflight never reach this point.
+$didStartModelRun = $false
 try {
+try {
+ $didStartModelRun = $true
  & $node @batchArgs
  $nodeExit = $LASTEXITCODE
 } finally {
@@ -642,3 +648,38 @@ if (-not $NoOpen) {
 if ($nodeExit -ne 0 -or $report.allSourceVerified -ne $true -or
     $report.geometryHashesDistinct -eq $false -or
     $report.modelAuthoredFormFamiliesDistinct -eq $false) { exit 2 }
+} finally {
+ # Unload ONLY the exact model selected for this run, ONLY at the verified
+ # standard local Ollama endpoint. No daemon stop, no other model changes.
+ # POST /api/generate with empty prompt and keep_alive=0 is Ollama's
+ # documented model-specific unload operation, not a generation request.
+ if ($didStartModelRun -and
+     $Endpoint -ceq 'http://127.0.0.1:11434/v1/chat/completions') {
+  try {
+   $body = @{model=$Model;prompt='';keep_alive=0;stream=$false} |
+    ConvertTo-Json -Compress
+   $ack = Invoke-RestMethod -Uri 'http://127.0.0.1:11434/api/generate' `
+    -Method Post -ContentType 'application/json' `
+    -Body ([System.Text.Encoding]::UTF8.GetBytes($body)) -TimeoutSec 30
+   if ($null -eq $ack -or $ack.done -ne $true) {
+    Write-Warning ('V11_OLLAMA_UNLOAD_UNCONFIRMED_RESPONSE model=' + $Model)
+   } else {
+    # An acknowledgement alone is not enough: check actual Ollama residency.
+    $running = Invoke-RestMethod -Uri 'http://127.0.0.1:11434/api/ps' `
+     -Method Get -TimeoutSec 8
+    $stillLoaded = @($running.models | Where-Object {
+     $_.name -ceq $Model -or $_.model -ceq $Model
+    })
+    if ($stillLoaded.Count -gt 0) {
+     Write-Warning ('V11_OLLAMA_MODEL_STILL_LOADED=' + $Model)
+    } else {
+     Write-Output ('V11_OLLAMA_MODEL_UNLOADED=' + $Model)
+    }
+   }
+  } catch {
+   # Never mask a SOURCE HOLD, renderer error, transport failure or exit 2.
+   Write-Warning ('V11_OLLAMA_UNLOAD_UNCONFIRMED=' + $Model +
+    '; ' + [string]$_.Exception.Message)
+  }
+ }
+}
