@@ -11,12 +11,21 @@ export function renderR125BatchComparison(briefs,report){
  const sections=report.completed.map(row=>{
   const brief=briefs.find(b=>b.id===row.id)?.prompt??'';
   const program=(row.authoredProgram??[]).map((l,i)=>
-   '<li>Level '+(i+1)+' ('+esc(l.splitAxis)+'): '+
-    l.spaces.map(s=>esc(s.purpose)+
-    (s.fixtures?.length?' ['+esc(s.fixtures.join(', '))+']':
-     s.fixture?' ['+esc(s.fixture)+']':'')+
-    (s.fixtureDetail?' ('+esc(s.fixtureDetail)+')':'')+
-    (s.daylight?' {daylight '+esc(s.daylight)+'}':'')).join(' / ')+'</li>').join('');
+   '<li>Level '+(i+1)+' ('+esc(l.layoutMode??l.splitAxis??'unspecified')+'): '+
+    l.spaces.map(s=>{
+     const v=s.volume;
+     const physical=v?
+      ' {volume '+v.width+'x'+v.depth+', roof-base Y='+v.roofY+
+      (v.roofForm?' '+v.roofForm+'-'+v.roofAxis:'')+
+      (v.attach?' / joins '+v.attach.to+' '+v.attach.side+
+       ' shift '+v.attach.shift:'')+'}':'';
+     return esc(s.purpose)+esc(physical)+
+      (s.spatialUse?' {use '+esc(s.spatialUse)+'}':'')+
+      (s.fixtures?.length?' ['+esc(s.fixtures.join(', '))+']':
+       s.fixture?' ['+esc(s.fixture)+']':'')+
+      (s.fixtureDetail?' ('+esc(s.fixtureDetail)+')':'')+
+      (s.daylight?' {daylight '+esc(s.daylight)+'}':'');
+    }).join(' / ')+'</li>').join('');
   const authored=row.authoredForm?Object.entries(row.authoredForm)
    .map(([key,value])=>esc(key)+': '+esc(print(value))).join(' · '):
    'No validated original ArchitecturePlan';
@@ -54,6 +63,10 @@ export function renderR125BatchComparison(briefs,report){
    (artAdvisory.taskMismatches?.length?
     ' — '+artAdvisory.taskMismatches.map(x=>
      esc(x.zoneId)+': '+esc(x.activity)+' needs '+esc(x.expectedRole)).join(' / '):'')+
+   (artAdvisory.sparseLargeRooms?.length?
+    ' — review '+artAdvisory.sparseLargeRooms.map(x=>
+     esc(x.zoneId)+' ('+esc(x.areaUpperBound)+
+     ' upper-bound cells / '+esc(x.stationCount)+' stations)').join(' / '):'')+
    '</p>':'';
   const sourceEvidence=row.sourceVerified===true?
    '<p class="muted"><strong>True SOURCE evidence, not ART:</strong> '+

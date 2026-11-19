@@ -209,7 +209,9 @@ export async function runR125ArchitecturePlanBatch({
     selectedRawName),'utf8'));
    authoredForm=authoredFormFamily(original);
    modelAuthoredObservationLink=original.observationLink??null;
-   authoredProgram=original.levels.map(level=>({splitAxis:level.splitAxis,
+   authoredProgram=original.levels.map(level=>({
+    ...(level.layoutMode?{layoutMode:level.layoutMode}:{}),
+    splitAxis:level.splitAxis,
     splitPercent:level.splitPercent,
     ...(level.secondarySplitPercent!==undefined?
      {secondarySplitPercent:level.secondarySplitPercent}:{}),
@@ -220,7 +222,9 @@ export async function runR125ArchitecturePlanBatch({
      ...(space.fixtureDetail?{fixtureDetail:space.fixtureDetail}:{}),
      ...(space.fixtureArrangement?{fixtureArrangement:space.fixtureArrangement}:{}),
      ...(space.ovenHearth?{ovenHearth:space.ovenHearth}:{}),
-     ...(space.daylight?{daylight:space.daylight}:{})}))}));
+     ...(space.daylight?{daylight:space.daylight}:{}),
+     ...(space.spatialUse?{spatialUse:space.spatialUse}:{}),
+     ...(space.volume?{volume:structuredClone(space.volume)}:{})}))}));
    modelAuthoredFormFamilySha256=formHash(original);
   }
   const diagnosisPath=path.join(dest,item.id,selectedRevision?

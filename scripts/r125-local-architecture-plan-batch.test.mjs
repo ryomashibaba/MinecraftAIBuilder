@@ -113,6 +113,33 @@ test('HTML review visibly warns about model-authored task mismatches without sou
  assert.match(html,/B143_SOURCE_CANDIDATE_ART_HOLD/);
 });
 
+test('spatial-tree B143 comparison shows actual model room volumes without claiming an ART pass',()=>{
+ const brief={id:'spatial-brief',prompt:'水質研究の展示と組立作業ができる建物'};
+ const report={planned:1,attempted:1,model:'qwen3:14b',
+  sourcePassCount:1,allSourceVerified:true,originalResponseCount:1,
+  completed:[{id:brief.id,sourceVerified:true,
+   status:'B143_SOURCE_CANDIDATE_ART_HOLD',
+   authoredForm:{layoutMode:'spatial-tree',roomCounts:[2]},
+   authoredProgram:[{layoutMode:'spatial-tree',spaces:[
+    {purpose:'Exhibition',fixtures:['display'],
+     volume:{width:10,depth:9,roofY:7}},
+    {purpose:'Staff assembly',fixtures:['assembly-table'],
+     volume:{width:9,depth:9,roofY:9,roofForm:'ridge',roofAxis:'z',
+      attach:{to:'visitor-room',side:'east',shift:1}}}
+   ]}],roomArtAdvisory:{taskMismatches:[],
+    sparseLargeRooms:[{zoneId:'visitor-room',
+     areaUpperBound:120,stationCount:1}]},
+   review3d:'TRUE_B143_HTML_GENERATED_ART_PENDING'}]};
+ const html=renderR125BatchComparison([brief],report);
+ assert.match(html,/Level 1 \(spatial-tree\)/);
+ assert.match(html,/volume 10x9, roof-base Y=7/);
+ assert.match(html,/volume 9x9, roof-base Y=9 ridge-z/);
+ assert.match(html,/joins visitor-room east shift 1/);
+ assert.match(html,/review visitor-room \(120 upper-bound cells \/ 1 stations\)/);
+ assert.match(html,/Human ART NOT REVIEWED/);
+ assert.match(html,/Minecraft walking NOT TESTED/);
+});
+
 test('batch parser preflights unique bounded original briefs',()=>{
  assert.deepEqual(parseR125BatchBriefs(input),requests);
  assert.throws(()=>parseR125BatchBriefs('[]'),/BRIEF_COUNT_1_TO_3/);
