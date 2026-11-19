@@ -3795,3 +3795,64 @@ test('front terrace threshold stays inside its authored upper room on an x split
  assert.equal(verifyCompiled(r.design,r.compiled),true);
  assert.equal(r.worldWrites,0);
 });
+
+test('spatial-tree ArchitecturePlan compiles distinct rooms, real fixtures and observation through one SOURCE pipeline',()=>{
+ const p={schema:SCHEMA,id:'spatial-satellite-workshop',
+  title:'Public satellite workshop',
+  brief:'A public exhibit and record desk view satellite assembly and inspection.',
+  footprint:{width:26,depth:22},
+  levels:[{layoutMode:'spatial-tree',spaces:[
+   {id:'gallery-room',purpose:'Public exhibit and visitor reception',
+    access:'public',fixtures:['display','desk'],
+    volume:{width:10,depth:8,roofY:7}},
+   {id:'assembly-room',purpose:'Staff satellite assembly and parts storage',
+    access:'staff',fixtures:['storage','assembly-table'],
+    fixtureArrangement:'focal-island',
+    volume:{width:10,depth:8,roofY:9,
+     attach:{to:'gallery-room',side:'east',shift:0}}},
+   {id:'inspection-room',purpose:'Staff quality inspection',
+    access:'staff',fixtures:['inspection-stand'],
+    volume:{width:7,depth:8,roofY:7,
+     attach:{to:'assembly-room',side:'south',shift:0}}}
+  ]}],materials:{floor:'wood',wall:'concrete',roof:'stone'},
+  observationLink:{viewerSpaceId:'gallery-room',workSpaceId:'assembly-room'}};
+ const before=structuredClone(p);
+ assert.equal(validateArchitecturePlan(p),true);
+ const result=compileArchitecturePlan(p);
+ assert.deepEqual(p,before,'the model-authored rooms and attachments remain unchanged');
+ assert.equal(verifyCompiled(result.design,result.compiled),true);
+ assert.equal(result.compiled.BuildPlan.operations.length,0);
+ assert.equal(result.worldWrites,0);
+ assert.equal(result.sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(auditR125VisitorRoutes(result,p).status,
+  'SOURCE_VISITOR_ROUTES_AVOID_STAFF');
+ assert.equal(result.observationSource.status,'SOURCE_GLAZED_WORK_VIEW_CONFIRMED');
+ assert.equal(result.observationSource.actualGlassCells,4);
+ assert.equal(result.observationSource.ray.workFixtureKind,'assembly-table');
+ assert.equal(result.spatialLayout.connectedDoors,2);
+ assert.notEqual(result.spatialLayout.rooms[0].width,
+  result.spatialLayout.rooms[2].width);
+ assert.notEqual(result.spatialLayout.rooms[0].roofY,
+  result.spatialLayout.rooms[1].roofY);
+ assert.deepEqual(new Set(result.fixtureTargets.map(x=>x.kind)),
+  new Set(['display','desk','storage','assembly-table','inspection-stand']));
+ assert.equal(auditArchitecturePlanCirculation(result).status,
+  'SOURCE_CLEARANCE_PROBES_PASS');
+});
+
+test('spatial-tree cannot route a later public room through a staff-only volume',()=>{
+ const p={schema:SCHEMA,id:'spatial-staff-bridge',
+  title:'Visitor-safe connected rooms',brief:'A public room and two linked workrooms.',
+  footprint:{width:28,depth:24},
+  levels:[{layoutMode:'spatial-tree',spaces:[
+   {id:'public-hub',purpose:'Public gallery',access:'public',
+    volume:{width:10,depth:8,roofY:7}},
+   {id:'staff-workshop',purpose:'Staff assembly',access:'staff',
+    volume:{width:8,depth:8,roofY:8,
+     attach:{to:'public-hub',side:'east',shift:0}}},
+   {id:'remote-public',purpose:'Public classroom',access:'public',
+    volume:{width:8,depth:8,roofY:7,
+     attach:{to:'staff-workshop',side:'south',shift:0}}}
+  ]}],materials:{floor:'wood',wall:'concrete',roof:'stone'}};
+ assert.throws(()=>compileArchitecturePlan(p),/R125_PLAN_SPATIAL_VISITOR_ROUTES/);
+});
