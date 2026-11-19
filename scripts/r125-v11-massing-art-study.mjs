@@ -54,6 +54,31 @@ export function proposeR125MassingForms(plan){
   duplicate.add(key);return true;
  }).map(([name,expression])=>({name,expression}));
 }
+/**
+ * Optional HOST-only room-area study for an authored four-room plan.
+ * This does NOT rewrite the captured Qwen response or become a model result.
+ * Downstream variants still require every original SOURCE activity/route gate.
+ */
+export function proposeR125FourRoomRebalance(plan){
+ if(!plan?.expression||plan.levels?.length!==1)return [];
+ const level=plan.levels[0],rooms=level?.spaces;
+ if(!Array.isArray(rooms)||rooms.length!==4||
+    !['x','z'].includes(level.splitAxis)||
+    !['public','shared'].includes(rooms[0].access)||
+    rooms.slice(1).filter(s=>s.access==='staff').length<2)return [];
+ const hubStations=rooms[0].fixtures??(rooms[0].fixture?[rooms[0].fixture]:[]);
+ if(hubStations.length>1||!Number.isInteger(level.splitPercent)||
+    level.splitPercent<=25)return [];
+ const dim=plan.footprint[level.splitAxis==='z'?'depth':'width'];
+ return [25,20].filter(p=>{
+  if(p>=level.splitPercent)return false;
+  const lo=1,hi=dim-2;
+  const split=Math.max(lo+4,Math.min(hi-4,
+   Math.round(lo+(hi-lo)*p/100)));
+  return split-lo-1>=4&&hi-split-1>=(level.splitAxis==='z'?6:5);
+ }).map(p=>({name:(level.splitAxis==='z'?'functional-front-hub-':
+   'functional-side-spine-')+p,splitPercent:p}));
+}
 function compareVoxels(base,next,roofY){
  const before=new Map(base.primitives.map(v=>[cell(v),v[3]]));
  const after=new Map(next.primitives.map(v=>[cell(v),v[3]]));
@@ -97,13 +122,24 @@ export function studyR125MassingFromOriginal(raw,{requestedBrief,maxVariants=3}=
   fail('BASELINE_B143_DRIFT');
  const roofY=1+5*original.levels.length;
  const candidateReports=[],eligible=[];
- for(const proposal of proposeR125MassingForms(original)){
+ const proposals=[
+  ...proposeR125MassingForms(original).map(p=>({...p,kind:'EXPRESSION'})),
+  ...proposeR125FourRoomRebalance(original).map(p=>({...p,kind:'FUNCTIONAL_SPLIT'}))
+ ];
+ for(const proposal of proposals){
   const alternative=structuredClone(original);
-  alternative.expression=structuredClone(proposal.expression);
-  // Check that no authored room/fixture/privacy decisions changed.
-  if(JSON.stringify(alternative.levels)!==JSON.stringify(original.levels)||
+  if(proposal.kind==='EXPRESSION')
+   alternative.expression=structuredClone(proposal.expression);
+  else alternative.levels[0].splitPercent=proposal.splitPercent;
+  // Only the named axis ratio changes in the functional study. Keep original
+  // equipment, room identities, room access, materials and shell expression.
+  const keep=levels=>levels.map(l=>proposal.kind==='FUNCTIONAL_SPLIT'?
+   {...l,splitPercent:null}:l);
+  if(JSON.stringify(keep(alternative.levels))!==JSON.stringify(keep(original.levels))||
      JSON.stringify(alternative.materials)!==JSON.stringify(original.materials)||
-     alternative.entryZone!==original.entryZone)
+     alternative.entryZone!==original.entryZone||
+     (proposal.kind==='FUNCTIONAL_SPLIT'&&
+      JSON.stringify(alternative.expression)!==JSON.stringify(original.expression)))
    fail('AUTHOR_PROGRAM_DRIFT');
   const derived=diagnoseR125ArchitecturePlanOriginal(JSON.stringify(alternative),
    {requestedBrief});
@@ -124,10 +160,15 @@ export function studyR125MassingFromOriginal(raw,{requestedBrief,maxVariants=3}=
     difference});continue;
   }
   eligible.push({name:proposal.name,diagnosis:derived,difference,
-   expression:alternative.expression});
+   expression:alternative.expression,kind:proposal.kind,
+   ...(proposal.kind==='FUNCTIONAL_SPLIT'?{splitPercent:proposal.splitPercent}:{}),
+   changedPlanKeys:proposal.kind==='FUNCTIONAL_SPLIT'?
+    ['levels[0].splitPercent']:['expression']});
  }
  // Rank actual volume changes first; don't show three merely recolored roofs.
- eligible.sort((a,b)=>b.difference.belowRoofChangedCells-
+ eligible.sort((a,b)=>
+   Number(b.kind==='FUNCTIONAL_SPLIT')-Number(a.kind==='FUNCTIONAL_SPLIT')||
+   b.difference.belowRoofChangedCells-
    a.difference.belowRoofChangedCells||
    b.difference.changedSolidOrMaterialCells-
    a.difference.changedSolidOrMaterialCells);
@@ -149,7 +190,8 @@ export function studyR125MassingFromOriginal(raw,{requestedBrief,maxVariants=3}=
   rejected:candidateReports,
   provenance:{originalSha256,originalEdited:false,
    alternativesOwner:'HOST_RESEARCH_NOT_QWEN',
-   changedPlanKeys:['expression'],roomsAndFixturesPreserved:true,
+   changedPlanKeys:['expression','levels[0].splitPercent'],
+   changedKeysArePerVariant:true,roomsAndFixturesPreserved:true,
    modelCalls:0,worldWrites:0,minecraftWalking:'NOT_TESTED',
    humanArt:'NOT_REVIEWED',sourcePassNotArtPass:true}};
 }
@@ -175,7 +217,9 @@ export function saveR125MassingArtStudy({rawFile,briefFile,outDir,maxVariants=3}
   design:results.baselineDesign,diagnosis:results.baseline},
   ...results.selected.map((x,i)=>({name:'HOST_'+(i+1)+'_'+x.name,
    design:x.diagnosis.sourceDesign,diagnosis:x.diagnosis,
-   difference:x.difference,expression:x.expression}))];
+   difference:x.difference,expression:x.expression,
+   changedPlanKeys:x.changedPlanKeys,
+   ...(x.splitPercent!==undefined?{splitPercent:x.splitPercent}:{})}))];
  fs.mkdirSync(out);
  const rows=[];
  for(const entry of entries){
@@ -202,6 +246,8 @@ export function saveR125MassingArtStudy({rawFile,briefFile,outDir,maxVariants=3}
    geometrySha256:entry.diagnosis.geometrySha256,
    ...(entry.difference?{difference:entry.difference}:{}),
    ...(entry.expression?{expression:entry.expression}:{}),
+   ...(entry.changedPlanKeys?{changedPlanKeys:entry.changedPlanKeys}:{}),
+   ...(entry.splitPercent!==undefined?{splitPercent:entry.splitPercent}:{}),
    image:entry.name+'/ART_4_VIEWS/CONTACT_4_VIEWS.png',
    viewer:entry.name+'/B143_INTERACTIVE_3D.html'});
  }
