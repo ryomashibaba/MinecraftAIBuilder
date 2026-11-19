@@ -86,3 +86,32 @@ test('universal compact 6-wide or 6-deep rooms are accepted only when real B143 
  tooSmall.rooms[1].depth=5;
  assert.throws(()=>validateSpatialComposition(tooSmall),/ROOM_CONTRACT/);
 });
+
+test('authored spatial daylight creates larger, high, or paired real glass openings without rewriting older compositions',()=>{
+ const planned=structuredClone(examples[0]);
+ planned.rooms[0].daylight='paired-bays';
+ planned.rooms[1].daylight='clerestory';
+ const original=JSON.stringify(planned);
+ const compiled=compileSpatialComposition(planned);
+ assert.equal(JSON.stringify(planned),original);
+ assert.equal(compiled.layout.exteriorWindows,3);
+ assert.equal(compiled.layout.rooms[0].daylight,'paired-bays');
+ assert.equal(compiled.layout.rooms[1].daylight,'clerestory');
+ const glass=compiled.design.elements.filter(e=>e.mode==='add'&&e.material==='glass');
+ assert.equal(glass.length,3);
+ assert.equal(glass.filter(e=>e.size.includes(3)&&e.size.includes(2)).length,2);
+ assert(glass.some(e=>e.size[1]===1&&e.origin[1]===planned.rooms[1].roofY-2));
+ assert.equal(verifyCompiled(compiled.design,compiled.compiled),true);
+ assert.equal(compiled.sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(compiled.worldWrites,0);
+ assert.deepEqual(compiled.BuildPlan.operations,[]);
+ const older=compileSpatialComposition(examples[0]);
+ assert.equal(older.layout.exteriorWindows,2);
+ assert(older.design.elements.some(e=>e.id==='glaze-0-glass'));
+ const impossible=structuredClone(planned);
+ impossible.rooms[1].daylight='paired-bays';
+ assert.throws(()=>compileSpatialComposition(impossible),/DAYLIGHT_OPENING_UNAVAILABLE_east/);
+ const invalid=structuredClone(planned);
+ invalid.rooms[0].daylight='ornamental';
+ assert.throws(()=>validateSpatialComposition(invalid),/ROOM_CONTRACT/);
+});

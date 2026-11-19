@@ -662,7 +662,8 @@ function compileR125SpatialArchitecturePlan(original){
   brief:original.brief,materials:original.materials,
   rooms:level.spaces.map(space=>({id:space.id,purpose:space.purpose,
    width:space.volume.width,depth:space.volume.depth,roofY:space.volume.roofY,
-   ...(space.volume.attach?{attach:space.volume.attach}:{})}))};
+   ...(space.volume.attach?{attach:space.volume.attach}:{}),
+   ...(space.daylight?{daylight:space.daylight}:{})}))};
  const spatial=compileSpatialComposition(proposal);
  check(spatial.design.bounds.width<=original.footprint.width&&
   spatial.design.bounds.depth<=original.footprint.depth,

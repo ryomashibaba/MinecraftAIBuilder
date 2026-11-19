@@ -33,10 +33,13 @@ export function validateSpatialComposition(p){
   fail('ROOM_COUNT');
  const seen=new Set();
  for(const [i,r] of p.rooms.entries()){
-  if(!keys(r,i===0?['id','purpose','width','depth','roofY']:
-    ['id','purpose','width','depth','roofY','attach'])||
+  const optionalDaylight=Object.hasOwn(r,'daylight')?['daylight']:[];
+  if(!keys(r,i===0?['id','purpose','width','depth','roofY',...optionalDaylight]:
+    ['id','purpose','width','depth','roofY','attach',...optionalDaylight])||
    !slug(r.id)||seen.has(r.id)||!prose(r.purpose)||
-   !int(r.width,6,14)||!int(r.depth,6,14)||!int(r.roofY,6,10))
+   !int(r.width,6,14)||!int(r.depth,6,14)||!int(r.roofY,6,10)||
+   (r.daylight!==undefined&&
+    !['wide-bay','clerestory','paired-bays'].includes(r.daylight)))
     fail('ROOM_CONTRACT');
   if(i>0&&(!keys(r.attach,['to','side','shift'])||
     !seen.has(r.attach.to)||
@@ -122,15 +125,39 @@ export function compileSpatialComposition(value){
    {axis:'x',wall:r.x,side:'west',at:[r.x,3,r.z+2],size:[1,2,2]},
    {axis:'z',wall:r.z,side:'front',at:[r.x+2,3,r.z],size:[2,2,1]}
   ];
+  // Preserve the original single 2x2 bay exactly when the author did not
+  // specify daylight. Author-selected daylight changes REAL wall openings,
+  // not facade paint or an after-the-fact host interpretation.
+  const requested=r.daylight;
+  const requiredOpenings=requested==='paired-bays'?2:1;
+  let opened=0;
   for(const c of cands){
    if(i===0&&c.side==='front')continue;
    if(rooms.some(o=>o.id!==r.id&&
     (c.axis==='z'?o.z<=c.wall&&maxZ(o)>=c.wall&&span(overlap(r,o,'x'))>0:
       o.x<=c.wall&&maxX(o)>=c.wall&&span(overlap(r,o,'z'))>0)))continue;
-   box('glaze-'+i+'-void','cut',null,c.at,c.size);
-   box('glaze-'+i+'-glass','add','glass',c.at,c.size);
-   windows++;break;
+   let at=c.at,size=c.size;
+   if(requested){
+    const faceSpan=c.axis==='z'?r.width:r.depth;
+    const length=requested==='wide-bay'?Math.min(4,faceSpan-4):
+     requested==='clerestory'?Math.min(4,faceSpan-4):
+     Math.min(3,faceSpan-4);
+    // An explicitly authored window must retain at least 2 solid wall
+    // blocks on each side. Never silently downgrade to the legacy 2x2.
+    if(length<3)continue;
+    const inset=Math.floor((faceSpan-length)/2);
+    const y=requested==='clerestory'?r.roofY-2:3;
+    const height=requested==='clerestory'?1:2;
+    at=c.axis==='z'?[r.x+inset,y,c.wall]:[c.wall,y,r.z+inset];
+    size=c.axis==='z'?[length,height,1]:[1,height,length];
+   }
+   const id='glaze-'+i+(requested?'-'+opened:'');
+   box(id+'-void','cut',null,at,size);
+   box(id+'-glass','add','glass',at,size);
+   windows++;opened++;
+   if(opened===requiredOpenings)break;
   }
+  if(opened<requiredOpenings)fail('DAYLIGHT_OPENING_UNAVAILABLE_'+r.id);
  }
  if(windows===0)fail('NO_EXTERIOR_WINDOW');
  const design={schema:B143,id:plan.id,title:plan.title,brief:plan.brief,
@@ -156,7 +183,8 @@ export function compileSpatialComposition(value){
    routes.zones.some(z=>!z.reachedFromEntrance))
   fail('REAL_VOXEL_CIRCULATION_HOLD');
  return {...result,sourceRoutes:routes,layout:{
-  rooms:rooms.map(r=>({id:r.id,x:r.x,z:r.z,width:r.width,depth:r.depth,roofY:r.roofY})),
+  rooms:rooms.map(r=>({id:r.id,x:r.x,z:r.z,width:r.width,depth:r.depth,roofY:r.roofY,
+   ...(r.daylight?{daylight:r.daylight}:{})})),
   connectedDoors:doors.length,exteriorWindows:windows
  }};
 }
