@@ -35,14 +35,20 @@ export function validateSpatialComposition(p){
  for(const [i,r] of p.rooms.entries()){
   const optionalDaylight=Object.hasOwn(r,'daylight')?['daylight']:[];
   const optionalSpatialUse=Object.hasOwn(r,'spatialUse')?['spatialUse']:[];
-  if(!keys(r,i===0?['id','purpose','width','depth','roofY',...optionalDaylight,...optionalSpatialUse]:
-    ['id','purpose','width','depth','roofY','attach',...optionalDaylight,...optionalSpatialUse])||
+  const optionalRoofForm=Object.hasOwn(r,'roofForm')?['roofForm']:[];
+  const optionalRoofAxis=Object.hasOwn(r,'roofAxis')?['roofAxis']:[];
+  if(!keys(r,i===0?['id','purpose','width','depth','roofY',...optionalDaylight,...optionalSpatialUse,...optionalRoofForm,...optionalRoofAxis]:
+    ['id','purpose','width','depth','roofY','attach',...optionalDaylight,...optionalSpatialUse,...optionalRoofForm,...optionalRoofAxis])||
    !slug(r.id)||seen.has(r.id)||!prose(r.purpose)||
    !int(r.width,6,14)||!int(r.depth,6,14)||!int(r.roofY,6,10)||
    (r.daylight!==undefined&&
     !['wide-bay','clerestory','paired-bays'].includes(r.daylight))||
    (r.spatialUse!==undefined&&
-    (r.spatialUse!=='open-court'||i!==0||r.daylight!==undefined)))
+    (r.spatialUse!=='open-court'||i!==0||r.daylight!==undefined))||
+   (r.roofForm===undefined&&r.roofAxis!==undefined)||
+   (r.roofForm!==undefined&&
+    (r.roofForm!=='ridge'||!['x','z'].includes(r.roofAxis)||
+     r.spatialUse==='open-court')))
     fail('ROOM_CONTRACT');
   if(i>0&&(!keys(r.attach,['to','side','shift'])||
     !seen.has(r.attach.to)||
@@ -115,8 +121,31 @@ export function compileSpatialComposition(value){
   box(tag+'-east','add',mat.wall,[maxX(r),2,r.z],[1,height,r.depth]);
   box(tag+'-front','add',mat.wall,[r.x+1,2,r.z],[r.width-2,height,1]);
   box(tag+'-rear','add',mat.wall,[r.x+1,2,maxZ(r)],[r.width-2,height,1]);
-  if(r.spatialUse!=='open-court')
-   box(tag+'-roof','add',mat.roof,[r.x,r.roofY,r.z],[r.width,1,r.depth]);
+  if(r.spatialUse!=='open-court'){
+   if(r.roofForm==='ridge'){
+    // Opt-in authored true pitched ceilings and closing gable walls.
+    // No existing flat roof is changed or silently covered.
+    const axis=r.roofAxis,n=axis==='x'?r.width:r.depth;
+    const rise=k=>Math.min(2,Math.floor(Math.min(k,n-1-k)/2));
+    for(let start=0;start<n;){
+     const h=rise(start);let end=start+1;
+     while(end<n&&rise(end)===h)end++;
+     const run=end-start;
+     box(tag+'-ridge-skin-'+start,'add',mat.roof,
+      axis==='x'?[r.x+start,r.roofY+h,r.z]:[r.x,r.roofY+h,r.z+start],
+      axis==='x'?[run,1,r.depth]:[r.width,1,run]);
+     if(h){
+      const gables=axis==='x'?
+       [[r.x+start,r.roofY,r.z],[r.x+start,r.roofY,maxZ(r)]]:
+       [[r.x,r.roofY,r.z+start],[maxX(r),r.roofY,r.z+start]];
+      gables.forEach((origin,j)=>box(tag+'-ridge-gable-'+start+'-'+j,
+       'add',mat.wall,origin,axis==='x'?[run,h,1]:[1,h,run]));
+     }
+     start=end;
+    }
+   }else box(tag+'-roof','add',mat.roof,
+    [r.x,r.roofY,r.z],[r.width,1,r.depth]);
+  }
  }
  // CUT last, after every volume is created, to preserve real thresholds.
  const entrance=[raw.entrance.x+sx,2,raw.entrance.z+sz];
@@ -211,6 +240,7 @@ export function compileSpatialComposition(value){
  return {...result,sourceRoutes:routes,layout:{
   rooms:rooms.map(r=>({id:r.id,x:r.x,z:r.z,width:r.width,depth:r.depth,roofY:r.roofY,
    ...(r.daylight?{daylight:r.daylight}:{}),
+   ...(r.roofForm?{roofForm:r.roofForm,roofAxis:r.roofAxis}:{}),
    ...(r.spatialUse?{spatialUse:r.spatialUse}:{})})),
   connectedDoors:doors.length,exteriorWindows:windows
  }};

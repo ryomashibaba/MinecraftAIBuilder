@@ -430,9 +430,15 @@ export function validateArchitecturePlan(p){
     'SPACE_ACCESS');
    if(level.layoutMode==='spatial-tree'){
     const volume=space.volume;
-    check(keys(volume,['width','depth','roofY',...(Object.hasOwn(volume??{},'attach')?['attach']:[])])&&
+    check(keys(volume,['width','depth','roofY',
+     ...(Object.hasOwn(volume??{},'attach')?['attach']:[]),
+     ...(Object.hasOwn(volume??{},'roofForm')?['roofForm']:[]),
+     ...(Object.hasOwn(volume??{},'roofAxis')?['roofAxis']:[])])&&
      integer(volume.width,6,14)&&integer(volume.depth,6,14)&&
-     integer(volume.roofY,6,10),'SPATIAL_ROOM_VOLUME');
+     integer(volume.roofY,6,10)&&
+     ((volume.roofForm===undefined&&volume.roofAxis===undefined)||
+      (volume.roofForm==='ridge'&&['x','z'].includes(volume.roofAxis)&&
+       space.spatialUse!=='open-court')),'SPATIAL_ROOM_VOLUME');
     if(seen.size===0){
      check(!Object.hasOwn(volume,'attach')&&['public','shared'].includes(space.access),
       'SPATIAL_ROOT_MUST_BE_PUBLIC');
@@ -669,6 +675,8 @@ function compileR125SpatialArchitecturePlan(original){
   brief:original.brief,materials:original.materials,
   rooms:level.spaces.map(space=>({id:space.id,purpose:space.purpose,
    width:space.volume.width,depth:space.volume.depth,roofY:space.volume.roofY,
+   ...(space.volume.roofForm?{roofForm:space.volume.roofForm,
+    roofAxis:space.volume.roofAxis}:{}),
    ...(space.volume.attach?{attach:space.volume.attach}:{}),
    ...(space.daylight?{daylight:space.daylight}:{}),
    ...(space.spatialUse?{spatialUse:space.spatialUse}:{})}))};

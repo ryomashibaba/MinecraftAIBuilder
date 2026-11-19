@@ -179,3 +179,32 @@ test('author-selected paired daylight opens two real public frontage bays withou
   e.id.startsWith('glaze-0-')&&e.material==='glass').length,1);
  assert.notEqual(result.geometrySha256,earlier.geometrySha256);
 });
+
+// This is a real new SOURCE-only massing option, never a retroactive
+// Qwen edit, ART pass, game walk certification or world operation.
+test('authored spatial ridge forms create distinct real B143 roof volumes',()=>{
+ const p=structuredClone(examples[0]);
+ const baseline=compileSpatialComposition(p);
+ p.rooms[0].roofForm='ridge';p.rooms[0].roofAxis='x';
+ p.rooms[1].roofForm='ridge';p.rooms[1].roofAxis='z';
+ const authorInput=JSON.stringify(p);
+ assert.equal(validateSpatialComposition(p),true);
+ const r=compileSpatialComposition(p);
+ assert.equal(JSON.stringify(p),authorInput);
+ assert.notEqual(r.geometrySha256,baseline.geometrySha256);
+ assert.equal(r.design.elements.some(e=>e.id==='space-0-roof'),false);
+ assert(r.design.elements.some(e=>e.id.startsWith('space-0-ridge-skin-')&&
+  e.origin[1]===p.rooms[0].roofY+2));
+ assert(r.design.elements.some(e=>e.id.startsWith('space-1-ridge-gable-')));
+ assert.equal(r.layout.rooms[0].roofForm,'ridge');
+ assert.equal(r.layout.rooms[1].roofAxis,'z');
+ assert.equal(verifyCompiled(r.design,r.compiled),true);
+ assert.equal(r.sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(r.worldWrites,0);
+ assert.deepEqual(r.BuildPlan.operations,[]);
+ assert.deepEqual(r.gates,Array(9).fill('BLOCKED'));
+ const missingAxis=structuredClone(p);delete missingAxis.rooms[0].roofAxis;
+ assert.throws(()=>validateSpatialComposition(missingAxis),/ROOM_CONTRACT/);
+ const courtyard=structuredClone(p);courtyard.rooms[0].spatialUse='open-court';
+ assert.throws(()=>validateSpatialComposition(courtyard),/ROOM_CONTRACT/);
+});
