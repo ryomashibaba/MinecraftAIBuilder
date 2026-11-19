@@ -3765,3 +3765,33 @@ test('V11 compact four-room hubs and spines reserve actual usable room area',()=
  legacy.levels[0].splitPercent=20;
  assert.throws(()=>validateArchitecturePlan(legacy),/R125_PLAN_LEVEL_PROGRAM/);
 });
+test('front terrace threshold stays inside its authored upper room on an x split',()=>{
+ const p=plan('front-terrace-x-room-clear',['z','x'],
+  ['public gallery','staff workshop']);
+ p.footprint={width:22,depth:22};
+ p.levels[0].spaces[0].access='public';
+ p.levels[0].spaces[1].access='staff';
+ p.levels[1].splitPercent=40;
+ p.levels[1].spaces[0].access='public';
+ p.levels[1].spaces[1].access='staff';
+ p.expression={setbackSide:'front',setbackDepth:2,roofProfile:'flat',
+  roofAxis:'z',facadeLanguage:'screen'};
+ const r=compileArchitecturePlan(p,{entrancePlacement:'source-accessible',
+  upperDoorPlacement:'stair-clear'});
+ const door=r.design.elements.find(e=>e.id==='upper-terrace-access');
+ const upper=r.program.find(level=>level.level===1);
+ const publicZone=upper.zones.find(z=>z.id==='area-1a');
+ assert(publicZone);
+ assert(door.origin[0]>=publicZone.range.x[0]);
+ assert(door.origin[0]+door.size[0]-1<=publicZone.range.x[1],
+  'the two-wide terrace opening belongs wholly to the public room');
+ assert.notEqual(door.origin[0],r.program[1].splitCoordinate,
+  'the opening must not straddle the room divider');
+ const critique=critiqueArchitecture({design:r.design,compiled:r.compiled});
+ const floorReview=assessR125ProgramGeometry(r,critique);
+ assert.deepEqual(floorReview.programFloorIssues,[],
+  'the terrace threshold must connect to the upper program floor');
+ assert.equal(auditR125SourceRoutes(r).status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(verifyCompiled(r.design,r.compiled),true);
+ assert.equal(r.worldWrites,0);
+});

@@ -755,17 +755,18 @@ export function compileArchitecturePlan(plan,{
    box(tag+'-window-'+win.id+'-glass','add','glass',win.at,win.size);
   }
   const [first,second]=level.spaces;
+  const roomZones=side?.zones??four?.zones??three?.zones??(axis==='x' ?[
+   {id:first.id,purpose:first.purpose,range:{x:[x0+1,split-1],z:[z0+1,z1-1]}},
+   {id:second.id,purpose:second.purpose,range:{x:[split+1,x1-1],z:[z0+1,z1-1]}}
+  ]:[
+   {id:first.id,purpose:first.purpose,range:{x:[x0+1,x1-1],z:[z0+1,split-1]}},
+   {id:second.id,purpose:second.purpose,range:{x:[x0+1,x1-1],z:[split+1,z1-1]}}
+  ]);
   program.push({
    level:l,splitAxis:axis,requestedPercent:level.splitPercent,
    splitCoordinate:split,standingFloorY:base+1,
    ...(three?{secondarySplitAxis:three.axis,secondarySplitCoordinate:three.coordinate}:{}),
-   zones:side?.zones??four?.zones??three?.zones??(axis==='x'?[
-    {id:first.id,purpose:first.purpose,range:{x:[2,split-1],z:[2,d-3]}},
-    {id:second.id,purpose:second.purpose,range:{x:[split+1,w-3],z:[2,d-3]}}
-   ]:[
-    {id:first.id,purpose:first.purpose,range:{x:[2,w-3],z:[2,split-1]}},
-    {id:second.id,purpose:second.purpose,range:{x:[2,w-3],z:[split+1,d-3]}}
-   ]),
+   zones:roomZones,
    partitionDoorModelled:true,doorAccessibleInMinecraft:'NOT_TESTED'
   });
  }
@@ -1023,8 +1024,25 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
    box('upper-terrace-access','cut',null,
     [Math.floor((x0+x1)/2)-1,y,z1],[2,3,1]);
   else if(l===1&&setbackSide==='front')
-   box('upper-terrace-access','cut',null,
-    [Math.floor((x0+x1)/2)-1,y,z0],[2,3,1]);
+   {
+    let doorX=Math.floor((x0+x1)/2)-1;
+    // On an x-split the old centered threshold could land directly on the
+    // room divider, leaving only an isolated terrace standing cell. With
+    // the explicit stair-clear HOST policy, align it to one authored room:
+    // prefer a public/shared room, otherwise use the first room. No room or
+    // fixture is moved, and the legacy geometry remains unchanged.
+    if(upperDoorPlacement==='stair-clear'&&axis==='x'){
+     const accessSpace=level.spaces.find(s=>
+      ['public','shared'].includes(s.access))??first;
+     const zone=roomZones.find(z=>z.id===accessSpace.id);
+     check(Boolean(zone),'FRONT_TERRACE_DOOR_ZONE');
+     const [left,right]=zone.range.x;
+     check(right-left+1>=2,'FRONT_TERRACE_DOOR_TWO_WIDE_CLEARANCE');
+     doorX=Math.max(left,Math.min(right-1,doorX));
+    }
+    box('upper-terrace-access','cut',null,
+     [doorX,y,z0],[2,3,1]);
+   }
   const windows=[
    ['front',[x0+2,y+1,z0],[2,2,1]],
    ['rear',[x1-3,y+1,z1],[2,2,1]],
