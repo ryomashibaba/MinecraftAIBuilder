@@ -74,10 +74,11 @@ export function parseR125BatchBriefs(raw){
 }
 export function parseR125BatchArgs(argv){
  if(argv.length===1&&argv[0]==='--help')return {help:true};
- const pilot=argv.includes('--pilot-three');
+ const pilot=argv.includes('--pilot-three'),repairOnce=argv.includes('--repair-once');
  if(pilot&&argv.filter(x=>x==='--pilot-three').length!==1)
   fail('DUPLICATE_PILOT_FLAG');
- const pairs=pilot?argv.filter(x=>x!=='--pilot-three'):argv;
+ if(argv.filter(x=>x==='--repair-once').length>1)fail('DUPLICATE_REPAIR_FLAG');
+ const pairs=argv.filter(x=>x!=='--pilot-three'&&x!=='--repair-once');
  if(pairs.length!== (pilot?4:6)&&pairs.length!== (pilot?6:8))
   fail('ARGS_REQUIRED');
  const o={},allowed=new Set(['--model','--briefs','--out','--endpoint']);
@@ -91,9 +92,11 @@ export function parseR125BatchArgs(argv){
     (pilot&&o['--briefs'])||(!pilot&&!o['--briefs'])||
     (pairs.length===(pilot?6:8)&&!o['--endpoint']))
   fail('ARGS_MISSING_OR_CONFLICT');
+ if(pilot&&repairOnce)fail('REPAIR_ONLY_EXPLICIT_SINGLE_BRIEF');
  return {model:o['--model'],briefsFile:pilot?null:path.resolve(o['--briefs']),
   pilotThree:pilot,outDir:path.resolve(o['--out']),
-  endpoint:o['--endpoint']??DEFAULT_LOCAL_ENDPOINT};
+  endpoint:o['--endpoint']??DEFAULT_LOCAL_ENDPOINT,
+  ...(repairOnce?{repairOnce:true}:{})};
 }
 
 /**
@@ -133,9 +136,11 @@ const formHash=plan=>createHash('sha256')
  .update(JSON.stringify(authoredFormFamily(plan))).digest('hex');
 
 export async function runR125ArchitecturePlanBatch({
- model,briefsRaw,outDir,endpoint=DEFAULT_LOCAL_ENDPOINT
+ model,briefsRaw,outDir,endpoint=DEFAULT_LOCAL_ENDPOINT,repairOnce=false
 },{fetcher=fetch,timeoutMs=180000}={}){
  const briefs=parseR125BatchBriefs(briefsRaw);
+ if(typeof repairOnce!=='boolean'||(repairOnce&&briefs.length!==1))
+  fail('REPAIR_ONLY_EXPLICIT_SINGLE_BRIEF');
  if(typeof outDir!=='string'||!outDir)fail('OUT_REQUIRED');
  const dest=path.resolve(outDir);
  ensurePrivateNewDirectory(dest);
@@ -150,6 +155,8 @@ export async function runR125ArchitecturePlanBatch({
   model,endpoint,planned:briefs.length,attempted:0,automaticRetries:0,
   requestsParallel:false,allSourceVerified:false,
   sourcePassCount:0,originalResponseCount:0,evaluatedAllBriefs:false,
+  modelRevisionLimit:repairOnce?1:0,modelRevisionCount:0,
+  totalModelCallAttempts:0,
   experimentOutcome:'NOT_STARTED',
   geometryHashesDistinct:null,modelAuthoredFormFamiliesDistinct:null,
   visualDiversity:'NOT_REVIEWED',
@@ -169,15 +176,18 @@ export async function runR125ArchitecturePlanBatch({
  for(const item of briefs){
   const one=await runR125LocalArchitecturePlan({
    model,prompt:item.prompt,endpoint,outDir:path.join(dest,item.id),
-   reasoningEffort:pilotReasoningEffort
+   reasoningEffort:pilotReasoningEffort,repairOnce
   },{fetcher,timeoutMs});
   let modelAuthoredFormFamilySha256=null,authoredForm=null,authoredProgram=null;
   let modelAuthoredObservationLink=null;
+  const selectedRevision=one.report.modelRevisionApplied===true;
+  const selectedRawName=selectedRevision?'MODEL_RESPONSE_REVISED.txt':
+   'MODEL_RESPONSE_ORIGINAL.txt';
   if(one.report.sourceVerified){
-   // Read the exact ORIGINAL response (not repaired SOURCE design) so a
-   // HOST-derived difference is never attributed to the local model.
+   // An accepted revision is the genuine SECOND model response, not a HOST
+   // repair. The first original remains available under its original SHA.
    const original=JSON.parse(fs.readFileSync(path.join(dest,item.id,
-    'MODEL_RESPONSE_ORIGINAL.txt'),'utf8'));
+    selectedRawName),'utf8'));
    authoredForm=authoredFormFamily(original);
    modelAuthoredObservationLink=original.observationLink??null;
    authoredProgram=original.levels.map(level=>({splitAxis:level.splitAxis,
@@ -194,7 +204,8 @@ export async function runR125ArchitecturePlanBatch({
      ...(space.daylight?{daylight:space.daylight}:{})}))}));
    modelAuthoredFormFamilySha256=formHash(original);
   }
-  const diagnosisPath=path.join(dest,item.id,'SOURCE_DIAGNOSIS.json');
+  const diagnosisPath=path.join(dest,item.id,selectedRevision?
+   'SOURCE_DIAGNOSIS_REVISED.json':'SOURCE_DIAGNOSIS.json');
   const diagnosis=fs.existsSync(diagnosisPath)?
    JSON.parse(fs.readFileSync(diagnosisPath,'utf8')):null;
   const daylightBaseline=summarizeR125DaylightBaselineHold(diagnosis);
@@ -232,7 +243,12 @@ export async function runR125ArchitecturePlanBatch({
     ...(daylightBaseline?.circulationFailures??[])].slice(0,8),
    status:one.report.status,modelResponsesCaptured:one.report.modelResponsesCaptured,
    sourceVerified:one.report.sourceVerified,
+   modelCallAttempts:one.report.modelCallAttempts,
+   modelRevisionAttempted:one.report.modelRevisionAttempted===true,
+   modelRevisionApplied:selectedRevision,
    originalSha256:one.report.originalSha256,
+   ...(selectedRevision?{revisedOriginalSha256:one.report.revisedOriginalSha256,
+    initialStatus:one.report.initialStatus}:{}),
    sourceSha256:one.report.sourceSha256??null,
    geometrySha256:one.report.geometrySha256??null,
    review3d:one.report.review3d??'NOT_GENERATED',
@@ -242,10 +258,13 @@ export async function runR125ArchitecturePlanBatch({
    makeCodeReason:one.report.makeCodeReason??null,
    makeCodeSourceSha256:one.report.makeCodeSourceSha256??null};
   report.completed.push(row);report.attempted++;
+  report.totalModelCallAttempts+=row.modelCallAttempts??1;
+  if(row.modelRevisionAttempted)report.modelRevisionCount++;
   const success=row.status==='B143_SOURCE_CANDIDATE_ART_HOLD'&&
     row.sourceVerified===true;
   if(success)report.sourcePassCount++;
-  if(row.modelResponsesCaptured===1)report.originalResponseCount++;
+  if(fs.existsSync(path.join(dest,item.id,'MODEL_RESPONSE_ORIGINAL.txt')))
+   report.originalResponseCount++;
   const geometry=report.completed.map(x=>x.geometrySha256).filter(Boolean);
   report.geometryHashesDistinct=geometry.length<2?null:
    new Set(geometry).size===geometry.length;
@@ -259,7 +278,7 @@ export async function runR125ArchitecturePlanBatch({
   // likewise remain recorded, rather than hiding the third genre.
   // An absent provider original is qualitatively different: stop on that
   // transport/service failure instead of blindly issuing more POSTs.
-  if(row.modelResponsesCaptured!==1){
+  if(!fs.existsSync(path.join(dest,item.id,'MODEL_RESPONSE_ORIGINAL.txt'))){
    report.stopReason='STOP_PROVIDER_DID_NOT_RETURN_CAPTURABLE_ORIGINAL';
    save();break;
   }
@@ -319,7 +338,7 @@ if(process.argv[1]===fileURLToPath(import.meta.url)){
  try{
   const a=parseR125BatchArgs(process.argv.slice(2));
   if(a.help){
-   console.log('R125 batch: --model LOCAL_ID --pilot-three --out NEW_PRIVATE_DIRECTORY (or --briefs PRIVATE_JSON_ARRAY) [--endpoint http://127.0.0.1:PORT/v1/chat/completions]');
+   console.log('R125 batch: --model LOCAL_ID --pilot-three --out NEW_PRIVATE_DIRECTORY (or --briefs PRIVATE_JSON_ARRAY) [--endpoint http://127.0.0.1:PORT/v1/chat/completions] [--repair-once for ONE supplied brief]');
   }else{
    // Bundled pilot is an early development trial, not a held-out final
    // generalization benchmark. Real calls require separately monitored
@@ -328,7 +347,8 @@ if(process.argv[1]===fileURLToPath(import.meta.url)){
     fileURLToPath(new URL('./r125-v11-pilot-three.json',import.meta.url)):
     a.briefsFile,'utf8');
    const {report}=await runR125ArchitecturePlanBatch({
-    model:a.model,briefsRaw:raw,outDir:a.outDir,endpoint:a.endpoint});
+    model:a.model,briefsRaw:raw,outDir:a.outDir,endpoint:a.endpoint,
+    repairOnce:a.repairOnce===true});
    console.log('R125_LOCAL_BATCH',JSON.stringify(report));
    if(!report.allSourceVerified||
       report.geometryHashesDistinct===false||

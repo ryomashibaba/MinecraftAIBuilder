@@ -642,3 +642,35 @@ test('one-shot V11 Qwen request explicitly guards public entry and still rejects
    raw,'invalid authored response is preserved without semantic correction');
  }finally{fs.rmSync(root,{recursive:true,force:true})}
 });
+
+test('one-brief revision travels through existing batch with separate first and second model provenance',async()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'mab-batch-repair-flow-'));
+ const first=JSON.parse(original);
+ first.levels[0].spaces[0].fixtureDetail='crafted';
+ const initial=JSON.stringify(first);
+ const briefsRaw=JSON.stringify([{id:'new-brief',prompt:'未知の用途に対応した独創的で実用的な小型店舗を設計してください。'}]);
+ let calls=0;
+ try{
+  const {report}=await runR125ArchitecturePlanBatch({
+   model:'qwen3:14b',briefsRaw,outDir:path.join(root,'out'),repairOnce:true
+  },{fetcher:async()=>{calls++;return provider(calls===1?initial:original)}});
+  assert.equal(calls,2);
+  assert.equal(report.attempted,1);
+  assert.equal(report.originalResponseCount,1);
+  assert.equal(report.totalModelCallAttempts,2);
+  assert.equal(report.modelRevisionCount,1);
+  assert.equal(report.allSourceVerified,true);
+  assert.equal(report.completed[0].modelRevisionApplied,true);
+  assert.equal(report.completed[0].originalSha256,digest(initial));
+  assert.equal(report.completed[0].revisedOriginalSha256,digest(original));
+  assert.equal(report.completed[0].sourceVerified,true);
+  assert.equal(fs.readFileSync(path.join(root,'out','new-brief','MODEL_RESPONSE_ORIGINAL.txt'),'utf8'),initial);
+  assert.equal(fs.readFileSync(path.join(root,'out','new-brief','MODEL_RESPONSE_REVISED.txt'),'utf8'),original);
+  assert.equal(report.worldWrites,0);
+  assert.equal(report.visualDiversity,'NOT_REVIEWED');
+  assert.equal(parseR125BatchArgs(['--model','qwen3:14b','--briefs','briefs.json',
+   '--out','out','--repair-once']).repairOnce,true);
+  assert.throws(()=>parseR125BatchArgs(['--model','qwen3:14b',
+   '--pilot-three','--out','out','--repair-once']),/REPAIR_ONLY_EXPLICIT_SINGLE_BRIEF/);
+ }finally{fs.rmSync(root,{recursive:true,force:true})}
+});

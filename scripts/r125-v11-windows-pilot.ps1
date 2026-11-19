@@ -13,6 +13,8 @@
   Original prompt stays in the PRIVATE output; no uploads.
   -ComparePriorTide: one SAME-BRIEF Qwen recheck then A/B PNG review
   using the frozen PRIVATE 2026-11-16 tide result read-only. No extra POST.
+  -RepairOnce: one new brief only; allow one genuine model revision after
+  fixture-related SOURCE HOLD, while preserving the first response.
   -CheckOnly: GitHub CI / local dry run, no model HTTP, no new files.
 #>
 [CmdletBinding()]
@@ -26,6 +28,7 @@ param(
  [string]$Prompt = '',
  [string]$BriefsFile = '',
  [switch]$ComparePriorTide,
+ [switch]$RepairOnce,
  [switch]$NoOpen
 )
 $ErrorActionPreference = 'Stop'
@@ -98,6 +101,10 @@ if ($customBrief -and (-not $SingleNewBrief -or $ComparePriorTide -or
 }
 if ($SingleNewBrief -and $OnlyHousingRetail) {
  throw 'V11_PILOT_CONFLICTING_TRIAL_MODES'
+}
+if ($RepairOnce -and (-not $SingleNewBrief -or $OnlyHousingRetail -or
+    $ComparePriorTide -or $batchBriefs)) {
+ throw 'V11_REPAIR_REQUIRES_ONE_NEW_BRIEF'
 }
 if ($ComparePriorTide -and (-not $SingleNewBrief -or $OnlyHousingRetail -or
  $Model -cne 'qwen3:14b' -or
@@ -298,6 +305,7 @@ if ($batchBriefs) {
  $batchArgs += '--pilot-three'
 }
 $batchArgs += @('--out', $out, '--endpoint', $Endpoint)
+if ($RepairOnce) { $batchArgs += '--repair-once' }
 try {
  & $node @batchArgs
  $nodeExit = $LASTEXITCODE
@@ -322,6 +330,11 @@ if ($report.schema -cne 'r125-local-plan-batch-v1' -or
 Write-Output ('V11_PILOT_ATTEMPTED=' + $report.attempted)
 Write-Output ('V11_PILOT_ALL_SOURCE=' + $report.allSourceVerified)
 Write-Output ('V11_PILOT_SOURCE_PASSES=' + $report.sourcePassCount)
+if ($RepairOnce -and @($report.completed).Count -eq 1) {
+ Write-Output ('V11_PILOT_MODEL_CALL_ATTEMPTS=' + $report.totalModelCallAttempts)
+ Write-Output ('V11_PILOT_REVISED=' + $report.completed[0].modelRevisionApplied)
+ Write-Output ('V11_PILOT_FIRST_ORIGINAL_SHA=' + $report.completed[0].originalSha256)
+}
 Write-Output ('V11_PILOT_EXPERIMENT=' + $report.experimentOutcome)
 Write-Output ('V11_PILOT_STOP_REASON=' + [string]$report.stopReason)
 if (@($report.completed).Count -eq 1 -and
@@ -423,8 +436,10 @@ if ($batchBriefs) {
    throw 'V11_BATCH_ART_INVALID_ID'
   }
   $entry = Join-Path $out ([string]$row.id)
-  $source = Join-Path $entry 'B143_SOURCE_REVIEW_ONLY.json'
-  $diagnosis = Join-Path $entry 'SOURCE_DIAGNOSIS.json'
+  $source = Join-Path $entry $(if ($row.modelRevisionApplied -eq $true) {
+    'B143_REVISED_SOURCE_REVIEW_ONLY.json' } else { 'B143_SOURCE_REVIEW_ONLY.json' })
+  $diagnosis = Join-Path $entry $(if ($row.modelRevisionApplied -eq $true) {
+    'SOURCE_DIAGNOSIS_REVISED.json' } else { 'SOURCE_DIAGNOSIS.json' })
   if (-not (Test-Path -LiteralPath $source -PathType Leaf)) {
    Write-Output ('V11_BATCH_ART_NOT_GENERATED_NO_B143=' + [string]$row.id)
    continue
@@ -478,8 +493,15 @@ if ($customBrief) {
      @($report.completed).Count -eq 1 -and
      $report.completed[0].id -ceq 'custom-brief' -and
      $report.completed[0].sourceVerified -eq $true) {
-  $sourcePath = Join-Path $out 'custom-brief\B143_SOURCE_REVIEW_ONLY.json'
-  $diagnosisPath = Join-Path $out 'custom-brief\SOURCE_DIAGNOSIS.json'
+  $revised = $report.completed[0].modelRevisionApplied -eq $true
+  $sourceFile = if ($revised) { 'B143_REVISED_SOURCE_REVIEW_ONLY.json' } else {
+    'B143_SOURCE_REVIEW_ONLY.json' }
+  $diagnosisFile = if ($revised) { 'SOURCE_DIAGNOSIS_REVISED.json' } else {
+    'SOURCE_DIAGNOSIS.json' }
+  $rawFile = if ($revised) { 'MODEL_RESPONSE_REVISED.txt' } else {
+    'MODEL_RESPONSE_ORIGINAL.txt' }
+  $sourcePath = Join-Path (Join-Path $out 'custom-brief') $sourceFile
+  $diagnosisPath = Join-Path (Join-Path $out 'custom-brief') $diagnosisFile
   if (-not (Test-Path -LiteralPath $sourcePath -PathType Leaf) -or
       -not (Test-Path -LiteralPath $diagnosisPath -PathType Leaf)) {
    throw 'V11_CUSTOM_SOURCE_OR_DIAGNOSIS_MISSING'
@@ -516,7 +538,7 @@ if ($customBrief) {
   }
   # Inspect the original author's real room geometry, not just the exterior.
   # No second model request and no modification to original PRIVATE evidence.
-  $rawPath = Join-Path $out 'custom-brief\MODEL_RESPONSE_ORIGINAL.txt'
+  $rawPath = Join-Path (Join-Path $out 'custom-brief') $rawFile
   if (-not (Test-Path -LiteralPath $rawPath -PathType Leaf)) {
    throw 'V11_CUSTOM_ORIGINAL_MISSING_FOR_FLOOR_REVIEW'
   }
@@ -535,7 +557,9 @@ if ($customBrief) {
   $floorReport = Get-Content -LiteralPath $floorJson -Raw -Encoding UTF8 |
    ConvertFrom-Json
   if ($floorReport.schema -cne 'r125-v11-saved-two-floor-review-v1' -or
-      $floorReport.originalSha256 -cne $report.completed[0].originalSha256 -or
+      $floorReport.originalSha256 -cne $(if ($revised) {
+       $report.completed[0].revisedOriginalSha256
+      } else { $report.completed[0].originalSha256 }) -or
       $floorReport.sourceSha256 -cne $diag.sourceSha256 -or
       $floorReport.geometrySha256 -cne $diag.geometrySha256 -or
       $floorReport.sourceFileSha256 -cne (Get-V11FileSha256 $sourcePath) -or
