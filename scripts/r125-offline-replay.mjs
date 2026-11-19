@@ -321,7 +321,70 @@ export function describeR125AuthoredRoomUse(original,built){
   minecraftWalking:'NOT_TESTED'};
 }
 
-export function diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail='legacy',roofGlazing='none',roofMassing='default',fixtureArt='none',fixtureForm='default',requestedBrief=null}={}){
+
+/** Opt-in offline HOST-only room-boundary study, never relabeled as Qwen.
+ * Only the single secondary partition ratio may change. Each candidate
+ * must re-prove the actual glass-to-workstation ray and public SOURCE access.
+ */
+function composeR125HostObservationBay(plan,policy,originalError){
+ const why=String(originalError?.message??originalError);
+ const original=JSON.stringify(plan);
+ const info={schema:'r125-host-observation-clearance-v1',
+  status:'NOT_APPLICABLE',baselineCompilerReason:why,
+  baselineSourceVerified:false,originalPlanSha256:digest(original),
+  modelCalls:0,worldWrites:0,originalEdited:false,
+  authoredRoomsAxesAccessFixturesPreserved:true};
+ const level=plan?.levels?.[0],link=plan?.observationLink;
+ if(why!=='R125_OBSERVATION_NO_ACCESSIBLE_GLAZED_SIGHTLINE_TO_WORKSTATION'||
+    !link||plan.levels.length!==1||
+    !level||level.spaces?.length!==3||level.layoutMode==='spatial-tree'||
+    !['x','z'].includes(level.splitAxis))return {plan,report:info};
+ const originalPercent=level.secondarySplitPercent??50;
+ const alternatives=[25,30,35,40,45,50,55,60,65,70,75]
+  .filter(p=>p!==originalPercent)
+  .sort((a,b)=>Math.abs(a-originalPercent)-Math.abs(b-originalPercent)||a-b);
+ let attempted=0;
+ for(const percent of alternatives){
+  const derived=structuredClone(plan);
+  derived.levels[0].secondarySplitPercent=percent;attempted++;
+  let compiled;
+  try{
+   compiled=compileArchitecturePlan(derived,policy);
+   const routes=auditR125SourceRoutes(compiled,{
+    featureTargets:compiled.fixtureTargets??[]});
+   const visitor=auditR125VisitorRoutes(compiled,derived);
+   const walk=auditArchitecturePlanCirculation(compiled);
+   if(compiled.observationSource?.status!=='SOURCE_GLAZED_WORK_VIEW_CONFIRMED'||
+      routes.status!=='SOURCE_ROUTES_REACH_ALL_ZONES'||
+      routes.featureAccess?.some(f=>!f.reachableFromEntrance)||
+      visitor.status!=='SOURCE_VISITOR_ROUTES_AVOID_STAFF'||
+      walk.status!=='SOURCE_CLEARANCE_PROBES_PASS'||
+      compiled.worldContacts!==0||compiled.worldWrites!==0||
+      compiled.compiled.BuildPlan.operations.length!==0)continue;
+  }catch{continue;}
+  const compare=structuredClone(derived);
+  compare.levels[0].secondarySplitPercent=originalPercent;
+  if(JSON.stringify(compare)!==original||JSON.stringify(plan)!==original)
+   throw Error('R125_REPLAY_HOST_OBSERVATION_AUTHOR_DRIFT');
+  return {plan:derived,built:compiled,report:{...info,
+   status:'HOST_BAY_CLEARANCE_SOURCE_PROVEN',
+   originalPercent,hostPercent:percent,percentDelta:percent-originalPercent,
+   attemptedCandidateCount:attempted,
+   changedPlanFields:['levels[0].secondarySplitPercent'],
+   derivedPlanSha256:digest(JSON.stringify(derived)),
+   modelAuthorship:'HOST_DERIVED_NOT_QWEN_ORIGINAL',
+   actualObservationWitness:compiled.observationSource,
+   sourceSha256:compiled.sourceSha256,geometrySha256:compiled.geometrySha256,
+   humanArt:'NOT_REVIEWED',minecraftWalking:'NOT_TESTED'}};
+ }
+ if(JSON.stringify(plan)!==original)throw Error('R125_REPLAY_HOST_OBSERVATION_AUTHOR_DRIFT');
+ return {plan,report:{...info,status:'NO_SOURCE_VERIFIED_HOST_DERIVATION',
+  attemptedCandidateCount:attempted}};
+}
+
+export function diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail='legacy',roofGlazing='none',roofMassing='default',fixtureArt='none',fixtureForm='default',requestedBrief=null,
+ observationClearance='none'}={}){
+ if(!['none','bounded-v1'].includes(observationClearance))fail('OBSERVATION_CLEARANCE_MODE');
  if(typeof raw!=='string'||raw.length<1||raw.length>60000)
   fail('PLAN_RAW_INPUT_SIZE');
  const base={
@@ -344,8 +407,9 @@ export function diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail='legacy',ro
  let spatialCapacity=null;
  try{
   const composition=composeR125PublicStairSpine(original);
-  const placementPlan=composition.plan;
+  let placementPlan=composition.plan;
   const structuralComposition=composition.report;
+  let observationComposition=null;
   try{spatialCapacity=assessR125AuthoredRoomCapacity(placementPlan);}
   catch{ /* The strict compiler supplies the actual failure reason. */ }
   // This is an explicitly chosen GENERIC HOST policy, not a change to the
@@ -357,7 +421,17 @@ export function diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail='legacy',ro
    ...(roofMassing!=='default'?{roofMassing}:{}),
     ...(fixtureArt!=='none'?{fixtureArt}:{}),
     ...(fixtureForm!=='default'?{fixtureForm}:{})};
-  const built=compileArchitecturePlan(placementPlan,hostPolicy);
+  let built;
+  if(observationClearance==='bounded-v1'&&placementPlan.observationLink){
+   try{built=compileArchitecturePlan(placementPlan,hostPolicy);}
+   catch(err){
+    const derived=composeR125HostObservationBay(placementPlan,hostPolicy,err);
+    observationComposition=derived.report;
+    if(!derived.built)throw err;
+    placementPlan=derived.plan;
+    built=derived.built;
+   }
+  }else built=compileArchitecturePlan(placementPlan,hostPolicy);
   if(built.worldContacts!==0||built.worldWrites!==0||
      built.constructionApproved!==false||
      built.gates?.length!==9||built.gates.some(x=>x!=='BLOCKED')||
@@ -391,6 +465,7 @@ export function diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail='legacy',ro
      roomActivityProxy.status:'HOLD_FUNCTIONAL_SOURCE',
    sourceVerified:functionalClear,compilerReason:null,
    hostPolicy,structuralComposition,
+   ...(observationComposition?{observationComposition}:{}),
    authoredPlanSha256:digest(JSON.stringify(original)),
    ...(spatialCapacity?{spatialCapacity}:{}),planSha256:built.planSha256,
    sourceSha256:built.sourceSha256,geometrySha256:built.geometrySha256,
@@ -455,7 +530,8 @@ export function writeArchitecturePlanReplay(args){
   roofGlazing:args['--roof-glazing']??'none',
    roofMassing:args['--roof-massing']??'default',
   fixtureArt:args['--fixture-art']??'none',
-  fixtureForm:args['--fixture-form']??'default'});
+  fixtureForm:args['--fixture-form']??'default',
+  observationClearance:args['--observation-clearance']??'none'});
  const {sourceDesign,...diagnosis}=report;
  fs.mkdirSync(dest);
  // Store exact private author bytes before any parsing or B143 review.
@@ -480,15 +556,16 @@ export function writeArchitecturePlanReplay(args){
 
 export function parseR125ReplayArgs(argv){
  if(argv.length===1&&argv[0]==='--help')return {help:true};
- if(![4,6,8,10,12,14].includes(argv.length))fail('REQUIRE_RAW_AND_OUT');
+ if(![4,6,8,10,12,14,16].includes(argv.length))fail('REQUIRE_RAW_AND_OUT');
  const opts={};
  for(let i=0;i<argv.length;i+=2){
-  if(!['--raw','--out','--host-detail','--roof-glazing','--roof-massing','--fixture-art','--fixture-form'].includes(argv[i])||Object.hasOwn(opts,argv[i])||
+  if(!['--raw','--out','--host-detail','--roof-glazing','--roof-massing','--fixture-art','--fixture-form','--observation-clearance'].includes(argv[i])||Object.hasOwn(opts,argv[i])||
    !argv[i+1]||argv[i+1].startsWith('--'))fail('INVALID_ARGUMENT');
-  opts[argv[i]]=['--host-detail','--roof-glazing','--roof-massing','--fixture-art','--fixture-form'].includes(argv[i])?argv[i+1]:path.resolve(argv[i+1]);
+  opts[argv[i]]=['--host-detail','--roof-glazing','--roof-massing','--fixture-art','--fixture-form','--observation-clearance'].includes(argv[i])?argv[i+1]:path.resolve(argv[i+1]);
  }
  if(!opts['--raw']||!opts['--out']||opts['--raw']===opts['--out'])
   fail('INPUT_OUTPUT_CONFLICT');
+ if(opts['--observation-clearance']!==undefined&&opts['--observation-clearance']!=='bounded-v1')fail('OBSERVATION_CLEARANCE_MODE');
  if(opts['--host-detail']!==undefined&&opts['--host-detail']!=='spatial-v1')fail('HOST_DETAIL_MODE');
  if(opts['--roof-glazing']!==undefined&&opts['--roof-glazing']!=='sawtooth-ribbon')fail('ROOF_GLAZING_MODE');
  if(opts['--roof-massing']!==undefined&&!['compact-sawtooth','steep-ridge-review'].includes(opts['--roof-massing']))fail('ROOF_MASSING_MODE');
@@ -502,13 +579,13 @@ if(process.argv[1]===fileURLToPath(import.meta.url)){
  try{
   const planMode=process.argv[2]==='--architecture-plan';
   const args=parseR125ReplayArgs(process.argv.slice(planMode?3:2));
-  if(args.help)console.log('B143: --raw ORIGINAL.txt --out NEW_DIAGNOSIS.json | ArchitecturePlan: --architecture-plan --raw ORIGINAL.txt --out NEW_PRIVATE_DIRECTORY [--host-detail spatial-v1] [--roof-glazing sawtooth-ribbon] [--roof-massing compact-sawtooth|steep-ridge-review] [--fixture-art activity-inlays] [--fixture-form room-scale-v1|room-scale-v2] (NO MODEL / NO WORLD)');
+  if(args.help)console.log('B143: --raw ORIGINAL.txt --out NEW_DIAGNOSIS.json | ArchitecturePlan: --architecture-plan --raw ORIGINAL.txt --out NEW_PRIVATE_DIRECTORY [--host-detail spatial-v1] [--roof-glazing sawtooth-ribbon] [--roof-massing compact-sawtooth|steep-ridge-review] [--fixture-art activity-inlays] [--fixture-form room-scale-v1|room-scale-v2] [--observation-clearance bounded-v1] (NO MODEL / NO WORLD)');
   else if(planMode){
    const result=writeArchitecturePlanReplay(args);
    console.log('R125_ARCHITECTURE_PLAN_SOURCE_ONLY',JSON.stringify(result));
    if(result.status!=='B143_SOURCE_CANDIDATE_ART_HOLD')process.exitCode=2;
   }else{
-   if(args['--host-detail']||args['--roof-glazing']||args['--fixture-form'])fail('HOST_POLICY_REQUIRES_ARCHITECTURE_PLAN');
+   if(args['--host-detail']||args['--roof-glazing']||args['--fixture-form']||args['--observation-clearance'])fail('HOST_POLICY_REQUIRES_ARCHITECTURE_PLAN');
    if(fs.existsSync(args['--out']))fail('OUTPUT_ALREADY_EXISTS');
    const raw=fs.readFileSync(args['--raw'],'utf8');
    const report=diagnoseR125Original(raw);

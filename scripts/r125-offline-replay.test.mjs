@@ -669,3 +669,50 @@ test('compiled B143 floor is inspectable during functional HOLD, never promoted'
   assert.equal(existsSync(path.join(dir,'rejected')),false);
  }finally{rmSync(dir,{recursive:true,force:true});}
 });
+
+test('optional HOST observation clearance creates a true B143 sightline while retaining the Qwen source',()=>{
+ const plan={schema:PLAN,id:'water-observation-t',
+  title:'Water observation station',
+  brief:'Visitors watch water inspection through real internal glass.',
+  footprint:{width:22,depth:18},
+  levels:[{splitAxis:'z',splitPercent:35,secondarySplitPercent:35,
+   spaces:[
+    {id:'visitor-hub',purpose:'Public exhibit and records',
+     access:'public',fixtures:['display','desk'],fixtureArrangement:'focal-island'},
+    {id:'inspection-room',purpose:'Water inspection workroom',
+     access:'shared',fixtures:['inspection-stand','electronics','storage'],
+     fixtureArrangement:'focal-island'},
+    {id:'secure-store',purpose:'Staff equipment storage',
+     access:'staff',fixtures:['storage']}
+   ]}],
+  materials:{floor:'wood',wall:'concrete',roof:'stone'},
+  expression:{setbackSide:'none',setbackDepth:0,roofProfile:'ridge',
+   roofAxis:'z',facadeLanguage:'screen',roofVolume:'raised'},
+  observationLink:{viewerSpaceId:'visitor-hub',workSpaceId:'inspection-room'}};
+ const raw=JSON.stringify(plan);
+ const before=diagnoseR125ArchitecturePlanOriginal(raw);
+ assert.equal(before.sourceVerified,false);
+ assert.match(before.compilerReason,
+  /R125_OBSERVATION_NO_ACCESSIBLE_GLAZED_SIGHTLINE_TO_WORKSTATION/);
+ const revised=diagnoseR125ArchitecturePlanOriginal(raw,{
+  observationClearance:'bounded-v1'});
+ assert.equal(revised.status,'B143_SOURCE_CANDIDATE_ART_HOLD',revised.compilerReason);
+ assert.equal(revised.sourceVerified,true);
+ assert.equal(revised.observationComposition.status,'HOST_BAY_CLEARANCE_SOURCE_PROVEN');
+ assert.equal(revised.observationComposition.originalPercent,35);
+ assert.equal(revised.observationComposition.hostPercent,45);
+ assert.equal(revised.observationComposition.modelAuthorship,
+  'HOST_DERIVED_NOT_QWEN_ORIGINAL');
+ assert.equal(revised.observationSource.status,'SOURCE_GLAZED_WORK_VIEW_CONFIRMED');
+ assert.equal(revised.originalSha256,before.originalSha256);
+ assert.equal(revised.originalEdited,false);
+ assert.equal(revised.modelCalls,0);
+ assert.equal(revised.worldWrites,0);
+ assert.deepEqual(revised.worldGates,Array(9).fill('BLOCKED'));
+ assert.equal(JSON.stringify(plan),raw);
+ const cli=parseR125ReplayArgs(['--raw','input','--out','output',
+  '--observation-clearance','bounded-v1']);
+ assert.equal(cli['--observation-clearance'],'bounded-v1');
+ assert.throws(()=>parseR125ReplayArgs(['--raw','a','--out','b',
+  '--observation-clearance','unsafe']),/OBSERVATION_CLEARANCE_MODE/);
+});
