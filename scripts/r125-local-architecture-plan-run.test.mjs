@@ -648,6 +648,49 @@ test('deep upper setback original diagnostic matches allowed footprint-dependent
  assert.equal(JSON.parse(before).expression.setbackDepth,8);
 });
 
+test('new Qwen four-room split schema keeps minimum real hub/spine clear spans',()=>{
+ const schema=R125_ARCHITECTURE_RESPONSE_SCHEMA;
+ const single=schema.anyOf.find(v=>Object.hasOwn(v.properties,'expression')&&
+  v.properties.levels.maxItems===1);
+ assert(single,'single-level conventional option available');
+ const shapes=single.properties.levels.items.anyOf;
+ const front=shapes.find(v=>v.properties.spaces.minItems===4&&
+  v.properties.splitAxis.enum[0]==='z');
+ const side=shapes.find(v=>v.properties.spaces.minItems===4&&
+  v.properties.splitAxis.enum[0]==='x');
+ assert.deepEqual(front.properties.splitPercent.enum,[30,35,40,45,50]);
+ assert.deepEqual(side.properties.splitPercent.enum,[30,35,40,45,50,55,60]);
+ assert.deepEqual(single.properties.levels.items.properties.splitPercent.enum.slice(0,2),
+  [20,25],'outer schema keeps historical percentage support');
+ const split=(dim,pct,axis,expressed)=>{
+  const lo=1,hi=dim-2;
+  return expressed?Math.max(lo+4,Math.min(hi-4,
+   Math.round(lo+(hi-lo)*pct/100))):
+   Math.max(6,Math.min(dim-(axis==='z'?6:7),
+    Math.round(dim*pct/100)));
+ };
+ for(const [axis,shape,minDimension,minFront,minRear] of [
+  ['z',front,18,4,6],['x',side,20,4,5]]){
+  for(const pct of shape.properties.splitPercent.enum){
+   for(let dimension=minDimension;dimension<=32;dimension++){
+    for(const expressed of [false,true]){
+     const cut=split(dimension,pct,axis,expressed);
+     assert(cut-2>=minFront&&dimension-3-cut>=minRear,
+      axis+' span failure dimension='+dimension+
+      ' percent='+pct+' expressed='+expressed);
+    }
+   }
+  }
+ }
+ for(const [p1,p2] of front.properties.rearBayPercentages.enum){
+  // Minimum valid four-room hub footprint width 22.
+  const x0=1,x1=20;
+  const a=Math.floor(x0+(x1-x0)*p1/100),
+    b=Math.floor(x0+(x1-x0)*p2/100);
+  assert(a-x0-1>=5&&b-a-1>=5&&x1-b-1>=5);
+ }
+});
+
 test('spatial-tree Qwen schema requires authored per-room volumes and supports observation',()=>{
  const schema=R125_ARCHITECTURE_RESPONSE_SCHEMA;
  assert.equal(schema.anyOf.length,3);
