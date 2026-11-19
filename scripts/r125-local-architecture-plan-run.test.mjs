@@ -631,7 +631,7 @@ test('deep upper setback original diagnostic matches allowed footprint-dependent
 test('spatial-tree Qwen schema requires authored per-room volumes and supports observation',()=>{
  const schema=R125_ARCHITECTURE_RESPONSE_SCHEMA;
  assert.equal(schema.anyOf.length,3);
- const spatial=schema.anyOf[2];
+ const spatial=schema.anyOf[0]; // preferred decoder variant: authored room volumes before shared rectangles
  assert(spatial.additionalProperties===false);
  assert.equal(Object.hasOwn(spatial.properties,'expression'),false);
  assert.equal(Object.hasOwn(spatial.properties,'entryZone'),false);
