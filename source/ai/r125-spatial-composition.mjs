@@ -157,7 +157,7 @@ export function compileSpatialComposition(value){
    windows++;opened++;
    if(opened===requiredOpenings)break;
   }
-  if(opened<requiredOpenings)fail('DAYLIGHT_OPENING_UNAVAILABLE_'+r.id);
+  if(requested&&opened<requiredOpenings)fail('DAYLIGHT_OPENING_UNAVAILABLE_'+r.id);
  }
  if(windows===0)fail('NO_EXTERIOR_WINDOW');
  const design={schema:B143,id:plan.id,title:plan.title,brief:plan.brief,
