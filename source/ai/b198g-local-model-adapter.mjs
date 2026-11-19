@@ -229,6 +229,15 @@ const r125Room=r125obj({
  ovenHearth:r125enum('accent'),
  daylight:r125enum('wide-bay','clerestory','paired-bays')
 },['id','purpose','access']);
+const r125SpatialVolume=r125obj({
+ width:r125int(6,14),depth:r125int(6,14),roofY:r125int(6,10),
+ attach:r125obj({to:r125slug,side:r125enum('east','west','north','south'),
+  shift:{type:'integer',minimum:-3,maximum:3}
+ },['to','side','shift'])
+},['width','depth','roofY']);
+const r125SpatialRoom={...r125Room,
+ properties:{...r125Room.properties,volume:r125SpatialVolume},
+ required:[...r125Room.required,'volume']};
 const r125BayValues=[20,25,30,35,40,45,50,55,60,65,70,75,80];
 const r125BayPair={type:'array',minItems:2,maxItems:2,
  items:{type:'integer',enum:r125BayValues},
@@ -412,6 +421,17 @@ const r125LevelTwo={...r125Level,
   r125LevelShape(2,['x','z'],r125RegularSplit),
   r125LevelShape(3,['x','z'],r125RegularSplit,{secondary:true})
  ]};
+const r125SpatialLevel=r125obj({
+ layoutMode:r125enum('spatial-tree'),
+ spaces:{type:'array',items:r125SpatialRoom,minItems:2,maxItems:4}
+},['layoutMode','spaces']);
+const r125SpatialPlanVariant=()=>{
+ const properties={...r125PlanProperties};
+ delete properties.expression;delete properties.entryZone;
+ return r125obj({...properties,
+  levels:{...properties.levels,items:r125SpatialLevel,minItems:1,maxItems:1}
+ },r125PlanRequired);
+};
 const r125PlanVariant=(levelCount,expression)=>r125obj({
  ...r125PlanProperties,
  levels:{...r125PlanProperties.levels,
@@ -422,7 +442,8 @@ const r125PlanVariant=(levelCount,expression)=>r125obj({
 export const R125_ARCHITECTURE_RESPONSE_SCHEMA={
  anyOf:[
   r125PlanVariant(1,r125OneLevelExpression),
-  r125PlanVariant(2,r125Expression)
+  r125PlanVariant(2,r125Expression),
+  r125SpatialPlanVariant()
  ]
 };
 
@@ -466,6 +487,7 @@ export function createR125ArchitecturePlanLocalAdapter({
   refuse('REQUIRED_RAW_CAPTURE_CALLBACK');
  const system=[
   'You are an inventive architectural designer. From an UNKNOWN Japanese building brief, choose a genuinely original usable composition and room purposes. No fixed building-type template.',
+  'VOLUMETRIC LAYOUT: Use one-storey spatial-tree when distinct room sizes/heights improve function. Give each room a volume and later rooms a prior-room attachment; the visitor root must be public/shared. Fit all volumes inside the footprint.',
   'GROUND-LEVEL ENTRANCE AND VISITOR ACCESS. For splitAxis:"z" with any later public/shared room, spaces[0] MUST have access:"public" or "shared": the only front entry crosses it. Never place a staff-only front room between entrance and rear public room. For x-split, entryZone must open to public/shared when visitors exist. In four-room single-floor layouts, spaces[0] is a public/shared hub/spine with independent doors to the other rooms. Do NOT relabel a real staff-only workspace as public just to pass validation.',
   'UPPER-LEVEL PRIVACY AND STAIR ACCESS. two floors are optional, not a quality signal. Upper stair arrives near x=3..4,z=8. Every upstairs public/shared room needs a real two-wide route from a public/shared ground entrance, via the stair and landing, WITHOUT any staff-only room. The stair landing MUST lie inside a public/shared upper room: for an x-split, make the first WEST room public/shared; for a z-split, make the first FRONT room public/shared and extend its boundary past z=9 so the two-wide landing at z=8..9 stays in that room. Never put a staff room between the stair landing and a public room. Otherwise keep all visitor activities downstairs or choose one floor. Never relabel staff-only zones.',
   'Reply with ONE strict JSON object only. Do not include Markdown, rationale outside JSON, B143 elements, absolute voxel coordinates, commands, or claims of completed tests.',
@@ -491,7 +513,7 @@ export function createR125ArchitecturePlanLocalAdapter({
   "ROOF-TO-FACADE PROPORTION: choose task layout and windows before roof. A RAISED ridge roof can still form a broad flat-looking top that overwhelms a low building. ridgeProfile:\"steep\" is optional for genuinely useful roof silhouette, not an excuse to keep empty rooms. Consider hip, sawtooth, split-monitor or court only when appropriate to the building function.",
   "Architectural identity: HIP roof for four slopes; choose workshop light or courtyard only for its useful function. No fixed genre template.",
   "Prioritize a ROOM-APPROPRIATE fixture, useful rooms, daylight, clear entry and two-wide circulation. HOST creates geometry but never fakes SOURCE.",
-  "Before emitting JSON: choose 2/3 rooms per floor (or FOUR in one-floor front hub/side spine); compact splitPercent 20/25 is allowed ONLY with FOUR rooms; secondarySplitPercent only on three rooms; for one floor choose setback none+0. Hip requires raised roof. Courtyard cuts need compatible roofs, genuine outdoor access and sufficient room. Never duplicate JSON keys or emit a contradictory expression. One source answer, no retry.",
+  "Before emitting JSON: use spatial-tree when distinct room widths/heights or linked masses improve function; give each room a volume, attach later rooms to earlier rooms and fit all volumes inside the footprint. Otherwise use a supported split plan. Preserve fixtures, privacy, observation and circulation. One response, no retry.",
  ].join('\n');
  return async function authorArchitecturePlan({prompt}={}){
   if(typeof prompt!=='string'||prompt.length<8||prompt.length>8000)
