@@ -224,6 +224,50 @@ jobs:
           name: R125-ARCHIVED-QWEN-B143-NO-BROWSER-STATIC-PNG
           path: ${{ runner.temp }}/r125-genuine-qwen-static-art/
           retention-days: 7
+      - name: B143 same-program HOST open court versus enclosed court 4-view ART comparison
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import path from 'node:path';
+          import {SCHEMA,compileArchitecturePlan} from './source/ai/r125-architecture-plan.mjs';
+          const root=path.join(process.env.RUNNER_TEMP,'r125-host-open-court-ab');
+          fs.mkdirSync(root,{recursive:true});
+          const p={schema:SCHEMA,id:'court-architecture-art-study',
+           title:'Outdoor arrival exhibition with two functional wings',
+           brief:'Public outdoor courtyard with an indoor gallery and a repair workshop',
+           footprint:{width:32,depth:20},
+           levels:[{layoutMode:'spatial-tree',spaces:[
+            {id:'public-court',purpose:'Public open-air display and arrival',
+             access:'public',spatialUse:'open-court',
+             volume:{width:10,depth:10,roofY:6}},
+            {id:'repair-wing',purpose:'Staff repair and tool servicing',
+             access:'staff',fixtures:['workbench','tool-rack'],
+             volume:{width:9,depth:9,roofY:9,
+              attach:{to:'public-court',side:'east',shift:0}}},
+            {id:'gallery-wing',purpose:'Indoor public exhibits',
+             access:'public',fixtures:['display'],
+             volume:{width:9,depth:9,roofY:7,
+              attach:{to:'public-court',side:'west',shift:0}}}
+           ]}],materials:{floor:'stone',wall:'wood',roof:'metal'}};
+          for(const [label,open] of [['covered-baseline',false],['open-public-court',true]]){
+           const copy=structuredClone(p);
+           if(!open)delete copy.levels[0].spaces[0].spatialUse;
+           const built=compileArchitecturePlan(copy);
+           if(built.sourceRoutes.status!=='SOURCE_ROUTES_REACH_ALL_ZONES'||
+              built.worldWrites!==0)throw Error('SOURCE_OR_WORLD_HOLD_'+label);
+           fs.writeFileSync(path.join(root,label+'.json'),JSON.stringify(built.design));
+          }
+          NODE
+          node scripts/r125-static-art-review.mjs --source "$RUNNER_TEMP/r125-host-open-court-ab/covered-baseline.json" --out "$RUNNER_TEMP/r125-host-open-court-ab/covered-views"
+          node scripts/r125-static-art-review.mjs --source "$RUNNER_TEMP/r125-host-open-court-ab/open-public-court.json" --out "$RUNNER_TEMP/r125-host-open-court-ab/open-views"
+          test -s "$RUNNER_TEMP/r125-host-open-court-ab/covered-views/CONTACT_4_VIEWS.png"
+          test -s "$RUNNER_TEMP/r125-host-open-court-ab/open-views/CONTACT_4_VIEWS.png"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: R125-HOST-SPATIAL-COURT-B143-AB-ART-PENDING
+          path: ${{ runner.temp }}/r125-host-open-court-ab/
+          retention-days: 7
       - name: Render three archived genuine Qwen genres in ONE real B143 3D baseline
         run: |
           node scripts/r125-saved-three-genre-baseline.mjs --out "$RUNNER_TEMP/r125-saved-three-genre-baseline"
