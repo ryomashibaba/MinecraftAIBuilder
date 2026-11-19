@@ -3856,3 +3856,38 @@ test('spatial-tree cannot route a later public room through a staff-only volume'
   ]}],materials:{floor:'wood',wall:'concrete',roof:'stone'}};
  assert.throws(()=>compileArchitecturePlan(p),/R125_PLAN_SPATIAL_VISITOR_ROUTES/);
 });
+
+test('required observation rejects a narrow model-selected work bay but a balanced T wing exposes the real station',()=>{
+ const p={schema:SCHEMA,id:'water-observation-t',
+  title:'Water observation station',
+  brief:'Visitors watch water inspection through real internal glass.',
+  footprint:{width:22,depth:18},
+  levels:[{splitAxis:'z',splitPercent:35,secondarySplitPercent:35,
+   spaces:[
+    {id:'visitor-hub',purpose:'Public exhibit and records',
+     access:'public',fixtures:['display','desk'],
+     fixtureArrangement:'focal-island'},
+    {id:'inspection-room',purpose:'Water inspection workroom',
+     access:'shared',fixtures:['inspection-stand','electronics','storage'],
+     fixtureArrangement:'focal-island'},
+    {id:'secure-store',purpose:'Staff equipment storage',
+     access:'staff',fixtures:['storage']}
+   ]}],
+  materials:{floor:'wood',wall:'concrete',roof:'stone'},
+  expression:{setbackSide:'none',setbackDepth:0,roofProfile:'ridge',
+   roofAxis:'z',facadeLanguage:'screen',roofVolume:'raised'},
+  observationLink:{viewerSpaceId:'visitor-hub',workSpaceId:'inspection-room'}};
+ assert.throws(()=>compileArchitecturePlan(p),
+  /R125_OBSERVATION_NO_ACCESSIBLE_GLAZED_SIGHTLINE_TO_WORKSTATION/,
+  'the narrow five-wide inspection bay cannot support a reachable view');
+ const balanced=structuredClone(p);
+ balanced.levels[0].secondarySplitPercent=45;
+ const r=compileArchitecturePlan(balanced);
+ assert.equal(verifyCompiled(r.design,r.compiled),true);
+ assert.equal(r.sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(r.visitorCirculation.status,'SOURCE_VISITOR_ROUTES_AVOID_STAFF');
+ assert.equal(r.observationSource.status,'SOURCE_GLAZED_WORK_VIEW_CONFIRMED');
+ assert.deepEqual(r.observationSource.panelSize,[2,2,1]);
+ assert.equal(r.observationSource.ray.workFixtureKind,'inspection-stand');
+ assert.equal(r.worldWrites,0);
+});
