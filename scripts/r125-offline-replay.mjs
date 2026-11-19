@@ -414,7 +414,8 @@ export function diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail='legacy',ro
   catch{ /* The strict compiler supplies the actual failure reason. */ }
   // This is an explicitly chosen GENERIC HOST policy, not a change to the
   // author-provided JSON. It is never selected as a retry after failure.
-  const hostPolicy={entrancePlacement:'source-accessible',
+  const spatialTree=placementPlan.levels?.[0]?.layoutMode==='spatial-tree';
+  const hostPolicy={entrancePlacement:spatialTree?'legacy':'source-accessible',
    upperDoorPlacement:Object.hasOwn(original,'expression')?'stair-clear':'legacy',
    ...(hostDetail!=='legacy'?{hostDetail}:{}),
    ...(roofGlazing!=='none'?{roofGlazing}:{}),
@@ -501,6 +502,7 @@ export function diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail='legacy',ro
     floorFailureLocation:'SOURCE_COMPONENT_BOUNDS_AND_DOOR_CUTS_NOT_PROVEN_CAUSE'
    }:{}),
    visualHighRiskCount:critique.highRiskCount,
+   ...(built.spatialLayout?{spatialLayout:built.spatialLayout}:{}),
    ...(built.spatialDetail?{spatialDetail:built.spatialDetail}:{}),
     ...(built.activityInlayReview?{activityInlayReview:built.activityInlayReview}:{}),
     ...(built.fixtureFormReview?{fixtureFormReview:built.fixtureFormReview}:{}),

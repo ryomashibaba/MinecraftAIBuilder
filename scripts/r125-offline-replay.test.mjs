@@ -717,3 +717,40 @@ test('optional HOST observation clearance creates a true B143 sightline while re
  assert.throws(()=>parseR125ReplayArgs(['--raw','a','--out','b',
   '--observation-clearance','unsafe']),/OBSERVATION_CLEARANCE_MODE/);
 });
+
+test('spatial-tree survives the common offline diagnosis policy with authored room volumes and visitor-safe observation',()=>{
+ const plan={schema:PLAN,id:'water-observation-tree',
+  title:'Water observation station',
+  brief:'A public exhibit views staff water inspection with separate storage.',
+  footprint:{width:24,depth:22},
+  levels:[{layoutMode:'spatial-tree',spaces:[
+   {id:'front-hub',purpose:'Public exhibit and reception',access:'public',
+    fixtures:['display','desk'],
+    volume:{width:9,depth:8,roofY:7}},
+   {id:'rear-inspection',purpose:'Staff water inspection',access:'staff',
+    fixtures:['inspection-stand','electronics','tool-rack'],
+    volume:{width:12,depth:8,roofY:9,
+     attach:{to:'front-hub',side:'east',shift:0}}},
+   {id:'east-storage',purpose:'Staff equipment storage',access:'staff',
+    fixtures:['storage'],volume:{width:8,depth:8,roofY:6,
+     attach:{to:'rear-inspection',side:'south',shift:0}}}
+  ]}],materials:{floor:'stone',wall:'wood',roof:'wood'},
+  observationLink:{viewerSpaceId:'front-hub',workSpaceId:'rear-inspection'}};
+ const raw=JSON.stringify(plan);
+ const result=diagnoseR125ArchitecturePlanOriginal(raw,{
+  requestedBrief:'Visitors observe staff water inspection through glass.'});
+ assert.equal(result.status,'B143_SOURCE_CANDIDATE_ART_HOLD',
+  result.compilerReason);
+ assert.equal(result.sourceVerified,true);
+ assert.deepEqual(result.spatialLayout.rooms.map(r=>[r.width,r.depth,r.roofY]),
+  [[9,8,7],[12,8,9],[8,8,6]]);
+ assert.equal(result.spatialLayout.connectedDoors,2);
+ assert.equal(result.sourceRoutes,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(result.visitorCirculation.status,'SOURCE_VISITOR_ROUTES_AVOID_STAFF');
+ assert.equal(result.observationSource.status,'SOURCE_GLAZED_WORK_VIEW_CONFIRMED');
+ assert.equal(result.worldWrites,0);
+ assert.deepEqual(result.worldGates,Array(9).fill('BLOCKED'));
+ assert.equal(result.constructionApproved,false);
+ assert.equal(result.originalEdited,false);
+ assert.equal(JSON.stringify(plan),raw);
+});
