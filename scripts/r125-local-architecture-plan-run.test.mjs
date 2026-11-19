@@ -146,7 +146,7 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    assert.equal(request.response_format.json_schema.strict,true);
    const structured=request.response_format.json_schema.schema;
    assert.deepEqual(structured,R125_ARCHITECTURE_RESPONSE_SCHEMA);
-   assert.equal(structured.anyOf.length,2);
+   assert.equal(structured.anyOf.length,3);
    const [oneLevel,authorSchema]=structured.anyOf;
    assert.equal(oneLevel.additionalProperties,false);
    assert.equal(oneLevel.properties.levels.minItems,1);
@@ -249,6 +249,7 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    assert.ok(request.messages[0].content.includes('ovenHearth:"accent"'));
    assert.ok(request.messages[0].content.includes('fixtureArrangement:"focal-island"'));
    for(const levelVariant of structured.anyOf){
+    if(!levelVariant.properties.expression)continue;
     for(const expression of levelVariant.properties.expression.anyOf){
      const isPitched=expression.properties.roofProfile.enum.some(x=>
       ['ridge','sawtooth','hip','split-monitor'].includes(x));
