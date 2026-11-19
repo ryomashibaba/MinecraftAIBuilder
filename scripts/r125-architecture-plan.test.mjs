@@ -3892,3 +3892,42 @@ test('required observation rejects a narrow model-selected work bay but a balanc
  assert.equal(r.observationSource.ray.workFixtureKind,'inspection-stand');
  assert.equal(r.worldWrites,0);
 });
+
+test('V11 authored public open court keeps distinct indoor work and exhibition rooms in real B143 SOURCE',()=>{
+ const p={schema:SCHEMA,id:'shared-outdoor-craft-court',
+  title:'Exhibition courtyard and real repair workshop',
+  brief:'An open public courtyard connects exhibition and staff repair functions',
+  footprint:{width:32,depth:20},
+  levels:[{layoutMode:'spatial-tree',spaces:[
+   {id:'outdoor-visitor-court',purpose:'Public open-air exhibition yard',
+    access:'public',spatialUse:'open-court',
+    volume:{width:10,depth:10,roofY:6}},
+   {id:'repair-workshop',purpose:'Enclosed staff repair and tools',
+    access:'staff',fixtures:['workbench','tool-rack'],
+    volume:{width:9,depth:9,roofY:9,
+     attach:{to:'outdoor-visitor-court',side:'east',shift:0}}},
+   {id:'covered-gallery',purpose:'Enclosed public exhibition and reception',
+    access:'public',fixtures:['display'],
+    volume:{width:9,depth:9,roofY:7,
+     attach:{to:'outdoor-visitor-court',side:'west',shift:0}}}
+  ]}],materials:{floor:'stone',wall:'wood',roof:'metal'}};
+ const original=JSON.stringify(p);
+ assert.equal(validateArchitecturePlan(p),true);
+ const built=compileArchitecturePlan(p);
+ assert.equal(JSON.stringify(p),original);
+ assert.equal(verifyCompiled(built.design,built.compiled),true);
+ assert.equal(built.spatialLayout.rooms[0].spatialUse,'open-court');
+ assert.equal(built.design.elements.some(e=>e.id==='space-0-roof'),false);
+ assert.equal(built.sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(auditR125VisitorRoutes(built,p).status,'SOURCE_VISITOR_ROUTES_AVOID_STAFF');
+ assert.deepEqual(new Set(built.fixtureTargets.map(x=>x.kind)),
+  new Set(['workbench','tool-rack','display']));
+ assert.equal(built.worldWrites,0);
+ assert.deepEqual(built.gates,Array(9).fill('BLOCKED'));
+ const nonSpatial=structuredClone(p);
+ delete nonSpatial.levels[0].layoutMode;
+ assert.throws(()=>validateArchitecturePlan(nonSpatial),/R125_PLAN_LEVEL_PROGRAM|R125_PLAN_SPACE_FIELDS/);
+ const illegal=structuredClone(p);
+ illegal.levels[0].spaces[2].spatialUse='open-court';
+ assert.throws(()=>validateArchitecturePlan(illegal),/R125_PLAN_SPATIAL_OPEN_COURT_REQUIRES_PUBLIC_ROOT/);
+});

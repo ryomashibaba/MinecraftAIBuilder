@@ -34,12 +34,15 @@ export function validateSpatialComposition(p){
  const seen=new Set();
  for(const [i,r] of p.rooms.entries()){
   const optionalDaylight=Object.hasOwn(r,'daylight')?['daylight']:[];
-  if(!keys(r,i===0?['id','purpose','width','depth','roofY',...optionalDaylight]:
-    ['id','purpose','width','depth','roofY','attach',...optionalDaylight])||
+  const optionalSpatialUse=Object.hasOwn(r,'spatialUse')?['spatialUse']:[];
+  if(!keys(r,i===0?['id','purpose','width','depth','roofY',...optionalDaylight,...optionalSpatialUse]:
+    ['id','purpose','width','depth','roofY','attach',...optionalDaylight,...optionalSpatialUse])||
    !slug(r.id)||seen.has(r.id)||!prose(r.purpose)||
    !int(r.width,6,14)||!int(r.depth,6,14)||!int(r.roofY,6,10)||
    (r.daylight!==undefined&&
-    !['wide-bay','clerestory','paired-bays'].includes(r.daylight)))
+    !['wide-bay','clerestory','paired-bays'].includes(r.daylight))||
+   (r.spatialUse!==undefined&&
+    (r.spatialUse!=='open-court'||i!==0||r.daylight!==undefined)))
     fail('ROOM_CONTRACT');
   if(i>0&&(!keys(r.attach,['to','side','shift'])||
     !seen.has(r.attach.to)||
@@ -104,11 +107,16 @@ export function compileSpatialComposition(value){
  for(const [i,r] of rooms.entries()){
   const tag='space-'+i;
   box(tag+'-floor','add',mat.floor,[r.x,1,r.z],[r.width,1,r.depth]);
-  box(tag+'-west','add',mat.wall,[r.x,2,r.z],[1,r.roofY-2,r.depth]);
-  box(tag+'-east','add',mat.wall,[maxX(r),2,r.z],[1,r.roofY-2,r.depth]);
-  box(tag+'-front','add',mat.wall,[r.x+1,2,r.z],[r.width-2,r.roofY-2,1]);
-  box(tag+'-rear','add',mat.wall,[r.x+1,2,maxZ(r)],[r.width-2,r.roofY-2,1]);
-  box(tag+'-roof','add',mat.roof,[r.x,r.roofY,r.z],[r.width,1,r.depth]);
+  // Explicit public open court: real continuous ground and one-block
+  // boundary, no ceiling. Adjacent rooms stay fully enclosed. The existing
+  // 2-wide entrance and adjacency door cuts still provide usable access.
+  const height=r.spatialUse==='open-court'?1:r.roofY-2;
+  box(tag+'-west','add',mat.wall,[r.x,2,r.z],[1,height,r.depth]);
+  box(tag+'-east','add',mat.wall,[maxX(r),2,r.z],[1,height,r.depth]);
+  box(tag+'-front','add',mat.wall,[r.x+1,2,r.z],[r.width-2,height,1]);
+  box(tag+'-rear','add',mat.wall,[r.x+1,2,maxZ(r)],[r.width-2,height,1]);
+  if(r.spatialUse!=='open-court')
+   box(tag+'-roof','add',mat.roof,[r.x,r.roofY,r.z],[r.width,1,r.depth]);
  }
  // CUT last, after every volume is created, to preserve real thresholds.
  const entrance=[raw.entrance.x+sx,2,raw.entrance.z+sz];
@@ -119,6 +127,7 @@ export function compileSpatialComposition(value){
  // Only add glazing to an entirely exposed wall, never to a joint/door.
  let windows=0;
  for(const [i,r] of rooms.entries()){
+  if(r.spatialUse==='open-court')continue; // Sky is already open; no fake glazing.
   const cands=[
    {axis:'z',wall:maxZ(r),side:'rear',at:[r.x+2,3,maxZ(r)],size:[2,2,1]},
    {axis:'x',wall:maxX(r),side:'east',at:[maxX(r),3,r.z+2],size:[1,2,2]},
@@ -184,7 +193,8 @@ export function compileSpatialComposition(value){
   fail('REAL_VOXEL_CIRCULATION_HOLD');
  return {...result,sourceRoutes:routes,layout:{
   rooms:rooms.map(r=>({id:r.id,x:r.x,z:r.z,width:r.width,depth:r.depth,roofY:r.roofY,
-   ...(r.daylight?{daylight:r.daylight}:{})})),
+   ...(r.daylight?{daylight:r.daylight}:{}),
+   ...(r.spatialUse?{spatialUse:r.spatialUse}:{})})),
   connectedDoors:doors.length,exteriorWindows:windows
  }};
 }

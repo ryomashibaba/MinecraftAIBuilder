@@ -115,3 +115,35 @@ test('authored spatial daylight creates larger, high, or paired real glass openi
  invalid.rooms[0].daylight='ornamental';
  assert.throws(()=>validateSpatialComposition(invalid),/ROOM_CONTRACT/);
 });
+
+test('author-selected public open court makes an actual open-air arrival space between enclosed usable wings',()=>{
+ const plan=p('public-courtyard-with-wings',[
+  {...r('visitor-court',10,10,6),spatialUse:'open-court'},
+  r('workshop',9,9,9,{to:'visitor-court',side:'east',shift:0}),
+  r('gallery',9,9,7,{to:'visitor-court',side:'west',shift:0})
+ ]);
+ const original=JSON.stringify(plan);
+ const result=compileSpatialComposition(plan);
+ assert.equal(JSON.stringify(plan),original);
+ assert.equal(verifyCompiled(result.design,result.compiled),true);
+ assert.equal(result.sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(result.layout.connectedDoors,2);
+ assert.equal(result.layout.rooms[0].spatialUse,'open-court');
+ assert.equal(result.design.elements.some(e=>e.id==='space-0-roof'),false);
+ assert.equal(result.design.elements.filter(e=>e.id.endsWith('-roof')).length,2);
+ assert(result.design.elements.filter(e=>e.id.startsWith('space-0-')&&
+  e.id.endsWith('-west')).every(e=>e.size[1]===1));
+ assert(result.layout.exteriorWindows>=1);
+ assert.equal(result.worldWrites,0);
+ assert.deepEqual(result.BuildPlan.operations,[]);
+ assert.deepEqual(result.gates,Array(9).fill('BLOCKED'));
+ const enclosed=p('matching-roofed-court',plan.rooms.map((r,i)=>
+  i===0?(({spatialUse,...rest})=>rest)(r):r));
+ assert.notEqual(result.geometrySha256,compileSpatialComposition(enclosed).geometrySha256);
+ const invalid=structuredClone(plan);
+ invalid.rooms[1].spatialUse='open-court';
+ assert.throws(()=>validateSpatialComposition(invalid),/ROOM_CONTRACT/);
+ const blocked=structuredClone(plan);
+ blocked.rooms[0].daylight='wide-bay';
+ assert.throws(()=>validateSpatialComposition(blocked),/ROOM_CONTRACT/);
+});

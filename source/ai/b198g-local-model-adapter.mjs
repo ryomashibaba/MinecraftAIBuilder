@@ -236,7 +236,8 @@ const r125SpatialVolume=r125obj({
  },['to','side','shift'])
 },['width','depth','roofY']);
 const r125SpatialRoom={...r125Room,
- properties:{...r125Room.properties,volume:r125SpatialVolume},
+ properties:{...r125Room.properties,volume:r125SpatialVolume,
+  spatialUse:r125enum('open-court')},
  required:[...r125Room.required,'volume']};
 const r125BayValues=[35,40,45,50,55,60,65,70];
 const r125BayPair={type:'array',minItems:2,maxItems:2,
@@ -524,6 +525,7 @@ export function createR125ArchitecturePlanLocalAdapter({
   "Architectural identity: HIP roof for four slopes; choose workshop light or courtyard only for its useful function. No fixed genre template.",
   "Prioritize a ROOM-APPROPRIATE fixture, useful rooms, daylight, clear entry and two-wide circulation. HOST creates geometry but never fakes SOURCE.",
   'SPATIAL-TREE FIRST-CHOICE: When a brief combines distinct public, work, inspection, or storage activities with different area or height needs, choose layoutMode:"spatial-tree" and author each room width, depth, roof height, and attachment. Keep a public/shared root and prove the authored tree fits the footprint. Choose a conventional rectangular split only when a shared envelope is the clearer functional solution. Preserve fixtures, access, observation, and routes. One response; no retry.',
+  'OPTIONAL OPEN PUBLIC COURT: Only when the actual Japanese brief benefits from an open-air visitor yard, shared court, or public exhibition courtyard, spatial-tree spaces[0] MAY specify spatialUse:"open-court". This builds real paved ground with sky open above and low perimeter walls, connected directly to the entrance and enclosed wings with two-wide doors. Give the court a useful public/shared purpose; do NOT declare daylight for this room. roofY stays required by schema but does not create a court roof. Other rooms stay fully enclosed. Never use this choice to decorate a closed building or replace a required indoor reception.',
  ].join('\n');
  return async function authorArchitecturePlan({prompt}={}){
   if(typeof prompt!=='string'||prompt.length<8||prompt.length>8000)

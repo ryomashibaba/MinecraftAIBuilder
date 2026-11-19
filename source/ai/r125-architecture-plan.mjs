@@ -421,6 +421,7 @@ export function validateArchitecturePlan(p){
     ...(Object.hasOwn(space??{},'fixtureScale')?['fixtureScale']:[]),
     ...(Object.hasOwn(space??{},'ovenHearth')?['ovenHearth']:[]),
     ...(Object.hasOwn(space??{},'daylight')?['daylight']:[]),
+    ...(Object.hasOwn(space??{},'spatialUse')?['spatialUse']:[]),
     ...(Object.hasOwn(space??{},'access')?['access']:[]),
     ...(Object.hasOwn(space??{},'volume')?['volume']:[])])&&
     slug(space.id)&&text(space.purpose),'SPACE_FIELDS');
@@ -440,7 +441,13 @@ export function validateArchitecturePlan(p){
       ['east','west','north','south'].includes(volume.attach.side)&&
       integer(volume.attach.shift,-3,3),'SPATIAL_ATTACHMENT');
     }
-   }else check(!Object.hasOwn(space,'volume'),'SPATIAL_VOLUME_REQUIRES_LAYOUT_MODE');
+    check(space.spatialUse===undefined||
+     (seen.size===0&&space.spatialUse==='open-court'&&
+      !Object.hasOwn(space,'daylight')),
+     'SPATIAL_OPEN_COURT_REQUIRES_PUBLIC_ROOT');
+
+   }else check(!Object.hasOwn(space,'volume')&&
+    !Object.hasOwn(space,'spatialUse'),'SPATIAL_VOLUME_REQUIRES_LAYOUT_MODE');
    check(space.fixture===undefined||
     ['counter','workbench','display','storage','seating'].includes(space.fixture),
     'SPACE_FIXTURE_ROLE');
@@ -663,7 +670,8 @@ function compileR125SpatialArchitecturePlan(original){
   rooms:level.spaces.map(space=>({id:space.id,purpose:space.purpose,
    width:space.volume.width,depth:space.volume.depth,roofY:space.volume.roofY,
    ...(space.volume.attach?{attach:space.volume.attach}:{}),
-   ...(space.daylight?{daylight:space.daylight}:{})}))};
+   ...(space.daylight?{daylight:space.daylight}:{}),
+   ...(space.spatialUse?{spatialUse:space.spatialUse}:{})}))};
  const spatial=compileSpatialComposition(proposal);
  check(spatial.design.bounds.width<=original.footprint.width&&
   spatial.design.bounds.depth<=original.footprint.depth,
