@@ -3884,8 +3884,9 @@ test('required observation rejects a narrow model-selected work bay but a balanc
  balanced.levels[0].secondarySplitPercent=45;
  const r=compileArchitecturePlan(balanced);
  assert.equal(verifyCompiled(r.design,r.compiled),true);
- assert.equal(r.sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
- assert.equal(r.visitorCirculation.status,'SOURCE_VISITOR_ROUTES_AVOID_STAFF');
+ assert.equal(auditR125SourceRoutes(r).status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(auditR125VisitorRoutes(r,balanced).status,
+  'SOURCE_VISITOR_ROUTES_AVOID_STAFF');
  assert.equal(r.observationSource.status,'SOURCE_GLAZED_WORK_VIEW_CONFIRMED');
  assert.deepEqual(r.observationSource.panelSize,[2,2,1]);
  assert.equal(r.observationSource.ray.workFixtureKind,'inspection-stand');
