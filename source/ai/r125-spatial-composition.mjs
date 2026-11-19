@@ -133,6 +133,19 @@ export function compileSpatialComposition(value){
      const h=rise(start);let end=start+1;
      while(end<n&&rise(end)===h)end++;
      const run=end-start;
+     if(r.roofForm==='shed'&&start>0){
+      // A stepped roof can be face-disconnected: lower skin at height H
+      // touches the next higher skin only diagonally. Seal the exact
+      // model-authored step with a one-block-deep vertical riser beneath
+      // the higher skin. Preserve full interior height below the roof
+      // and preserve every historical ridge and flat B143 voxel.
+      const previous=rise(start-1);
+      if(h>previous)box(tag+'-shed-riser-'+start,'add',mat.wall,
+       axis==='x'?[r.x+start,r.roofY+previous,r.z+1]:
+        [r.x+1,r.roofY+previous,r.z+start],
+       axis==='x'?[1,h-previous,r.depth-2]:
+        [r.width-2,h-previous,1]);
+     }
      box(tag+'-'+r.roofForm+'-skin-'+start,'add',mat.roof,
       axis==='x'?[r.x+start,r.roofY+h,r.z]:[r.x,r.roofY+h,r.z+start],
       axis==='x'?[run,1,r.depth]:[r.width,1,run]);

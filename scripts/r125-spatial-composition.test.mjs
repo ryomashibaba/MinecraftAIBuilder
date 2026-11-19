@@ -209,6 +209,32 @@ test('model-selected shed roofs create sealed stepped profiles without changing 
   assert.equal(Math.max(...skins.map(e=>e.origin[1])),room.roofY+2);
   assert(source.design.elements.some(e=>
    e.id.startsWith('space-'+index+'-shed-gable-')));
+  // Every increase in the authored stepped roof must join the lower skin
+  // with actual solid B143 voxels, including across the clear room width.
+  const has=new Set(source.compiled.primitives.map(([x,y,z])=>
+   x+','+y+','+z));
+  const n=axis==='x'?room.width:room.depth;
+  const rise=k=>Math.min(2,Math.floor(k*3/n));
+  let seals=0;
+  for(let k=1;k<n;k++){
+   const lo=rise(k-1),hi=rise(k);
+   if(hi<=lo)continue;
+   const seal=source.design.elements.find(e=>
+    e.id==='space-'+index+'-shed-riser-'+k);
+   assert(seal,'step '+k+' must join adjacent roof strips');
+   assert.equal(seal.material,author.materials.wall);
+   assert.equal(seal.size[1],hi-lo);
+   assert.equal(seal.origin[1],room.roofY+lo);
+   seals++;
+   for(let y=room.roofY+lo;y<room.roofY+hi;y++)
+    for(let u=1;u<(axis==='x'?room.depth:room.width)-1;u++){
+     const x=axis==='x'?room.x+k:room.x+u;
+     const z=axis==='x'?room.z+u:room.z+k;
+     assert(has.has(x+','+y+','+z),
+      'missing real voxel under step '+k+' in '+room.id);
+    }
+  }
+  assert.equal(seals,2,'two sealed raised transitions per shed roof');
  }
  assert.equal(verifyCompiled(source.design,source.compiled),true);
  assert.equal(source.sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
