@@ -110,7 +110,7 @@ test('authored spatial daylight creates larger, high, or paired real glass openi
  assert(older.design.elements.some(e=>e.id==='glaze-0-glass'));
  const impossible=structuredClone(planned);
  impossible.rooms[1].daylight='paired-bays';
- assert.throws(()=>compileSpatialComposition(impossible),/DAYLIGHT_OPENING_UNAVAILABLE_east/);
+ assert.throws(()=>compileSpatialComposition(impossible),/DAYLIGHT_OPENING_UNAVAILABLE_rear/);
  const invalid=structuredClone(planned);
  invalid.rooms[0].daylight='ornamental';
  assert.throws(()=>validateSpatialComposition(invalid),/ROOM_CONTRACT/);
