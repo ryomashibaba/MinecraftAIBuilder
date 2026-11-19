@@ -154,22 +154,28 @@ export function addR125AuthoredObservation(product,plan){
     continue;
    const trial={...product,design,compiled,
     sourceSha256:compiled.sourceSha256,geometrySha256:compiled.geometrySha256};
-   const id='authored-observation-window-probe';
-   const probe={id,zoneId:view.id,
-    origin:[origin[0],view.y,origin[2]],
-    size:[size[0],3,size[2]],
-    requiredServiceSide:wall.viewerSide};
-   const routes=auditR125SourceRoutes(trial,{
-    featureTargets:[...product.fixtureTargets,probe]});
-   const paneWitness=routes.featureAccess.find(t=>t.id===id);
-   if(routes.status!=='SOURCE_ROUTES_REACH_ALL_ZONES'||
-      paneWitness?.reachableFromEntrance!==true)continue;
    const visitors=auditR125VisitorRoutes(trial,plan);
    if(visitors.status!=='SOURCE_VISITOR_ROUTES_AVOID_STAFF')continue;
-   const ray=rayToStation(finalCells,wall,pane,f,work,
-    paneWitness.supportedTwoWideServiceWitness);
-   if(!ray)continue;
-   return {...trial,observationSource:{
+   // A 2-wide panel may expose a workstation through only ONE pane
+   // row. Audit the exact reachable viewer row rather than accepting the
+   // shortest pad at the other glass row as equivalent to visible work.
+   const candidateRows=wall.axis==='x'?[pane,pane+1]:[pane];
+   for(const along of candidateRows){
+    const id='authored-observation-window-probe';
+    const probe={id,zoneId:view.id,
+     origin:wall.axis==='x'?
+      [wall.wall,view.y,along]:[pane,view.y,wall.wall],
+     size:wall.axis==='x'?[1,3,1]:[2,3,1],
+     requiredServiceSide:wall.viewerSide};
+    const routes=auditR125SourceRoutes(trial,{
+     featureTargets:[...product.fixtureTargets,probe]});
+    const paneWitness=routes.featureAccess.find(t=>t.id===id);
+    if(routes.status!=='SOURCE_ROUTES_REACH_ALL_ZONES'||
+       paneWitness?.reachableFromEntrance!==true)continue;
+    const ray=rayToStation(finalCells,wall,pane,f,work,
+     paneWitness.supportedTwoWideServiceWitness);
+    if(!ray)continue;
+    return {...trial,observationSource:{
     schema:'r125-source-authored-observation-v1',
     status:'SOURCE_GLAZED_WORK_VIEW_CONFIRMED',
     viewerSpaceId:view.id,workSpaceId:work.id,
@@ -182,6 +188,7 @@ export function addR125AuthoredObservation(product,plan){
     modelCalls:0,worldWrites:0,minecraftWalking:'NOT_TESTED',
     humanVisualLegibility:'NOT_REVIEWED'
    }};
+   }
   }
  }
  fail('NO_ACCESSIBLE_GLAZED_SIGHTLINE_TO_WORKSTATION');
