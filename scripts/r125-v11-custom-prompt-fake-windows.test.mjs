@@ -14,6 +14,7 @@ import {fileURLToPath} from 'node:url';
 import {createServer} from 'node:http';
 import {createHash} from 'node:crypto';
 import {spawn} from 'node:child_process';
+import {execFileSync} from 'node:child_process';
 
 const root=path.resolve(fileURLToPath(new URL('..',import.meta.url)));
 const savedQwen=fs.readFileSync(new URL(
@@ -53,7 +54,9 @@ test('Windows custom brief -> ONE mock response -> strict B143 exterior and floo
   const args=['-NoProfile','-ExecutionPolicy','Bypass','-File',
    path.join(root,'scripts/r125-v11-windows-pilot.ps1'),
    '-SingleNewBrief','-Prompt',prompt,'-Model','fake-local-author',
-   '-Endpoint',`http://127.0.0.1:${port}/v1/chat/completions`,'-NoOpen'];
+   '-Endpoint',`http://127.0.0.1:${port}/v1/chat/completions`,
+   '-ExpectedHead',execFileSync('git',['rev-parse','HEAD'],
+    {cwd:root,encoding:'utf8'}).trim(),'-NoOpen'];
   const result=await new Promise((resolve,reject)=>{
    const child=spawn('powershell.exe',args,{
     cwd:root,env:{...process.env,LOCALAPPDATA:local},windowsHide:true});
@@ -123,4 +126,33 @@ test('Windows custom brief -> ONE mock response -> strict B143 exterior and floo
   await new Promise(resolve=>server.close(()=>resolve()));
   fs.rmSync(temp,{recursive:true,force:true});
  }
+});
+
+test('wrong expected HEAD fails BEFORE any local model POST and before private outputs',{
+ skip:process.platform!=='win32',timeout:60000
+},async()=>{
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'mab-v11-head-pin-'));
+ try{
+  const args=['-NoProfile','-ExecutionPolicy','Bypass','-File',
+   path.join(root,'scripts/r125-v11-windows-pilot.ps1'),
+   '-SingleNewBrief','-Prompt','A real practical satellite assembly building',
+   '-Model','fake-local-author',
+   '-Endpoint','http://127.0.0.1:11811/v1/chat/completions',
+   '-ExpectedHead','0000000000000000000000000000000000000000','-NoOpen'];
+  const result=await new Promise((resolve,reject)=>{
+   const child=spawn('powershell.exe',args,{
+    cwd:root,env:{...process.env,LOCALAPPDATA:dir},windowsHide:true});
+   let stdout='',stderr='';
+   child.stdout.setEncoding('utf8');child.stderr.setEncoding('utf8');
+   child.stdout.on('data',chunk=>{stdout+=chunk;});
+   child.stderr.on('data',chunk=>{stderr+=chunk;});
+   child.once('error',reject);
+   child.once('close',code=>resolve({code,stdout,stderr}));
+  });
+  assert.notEqual(result.code,0,'wrong pin must stop the entire run');
+  assert.match(result.stdout+'\n'+result.stderr,
+   /V11_PILOT_EXPECTED_HEAD_MISMATCH/);
+  assert.equal(fs.existsSync(path.join(dir,'MinecraftAIBuilder','PrivateModelStudies')),
+   false,'head mismatch happens before private outputs or any POST');
+ }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });

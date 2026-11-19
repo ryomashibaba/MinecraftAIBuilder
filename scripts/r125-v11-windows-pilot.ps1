@@ -18,6 +18,7 @@
 [CmdletBinding()]
 param(
  [string]$Model = 'qwen3:14b',
+ [string]$ExpectedHead = '',
  [string]$Endpoint = 'http://127.0.0.1:11434/v1/chat/completions',
  [switch]$CheckOnly,
  [switch]$OnlyHousingRetail,
@@ -39,6 +40,11 @@ function Get-V11FileSha256([string]$FilePath) {
 }
 $repo = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')).Path
 $studyBranch = 'research/r125-v6-readonly-facade-diagnostic-20261111'
+# Explicit exact SHA pin is an opt-in for one genuine batch. A stale or
+# accidentally mismatched checkout must never consume a model POST.
+if ($ExpectedHead -ne '' -and $ExpectedHead -cnotmatch '^[0-9a-f]{40}$') {
+ throw 'V11_PILOT_EXPECTED_HEAD_INVALID'
+}
 $runner = Join-Path $repo 'scripts\r125-local-architecture-plan-batch.mjs'
 $pilot = Join-Path $repo 'scripts\r125-v11-pilot-three.json'
 $single = Join-Path $repo 'scripts\r125-v11-single-unknown.json'
@@ -181,6 +187,10 @@ $commit = (& $git '-C' $repo 'rev-parse' 'HEAD')
 if ($LASTEXITCODE -ne 0 -or
     $commit.Trim() -cnotmatch '^[0-9a-f]{40}$') {
  throw 'V11_PILOT_UNVERIFIED_HEAD'
+}
+if ($ExpectedHead -ne '' -and $commit.Trim() -cne $ExpectedHead) {
+ throw ('V11_PILOT_EXPECTED_HEAD_MISMATCH expected=' + $ExpectedHead +
+  ' actual=' + $commit.Trim())
 }
 # A clean source checkout avoids running an unreviewed local edit. No git
 # checkout, stash, reset, fetch or mutation is performed here.
