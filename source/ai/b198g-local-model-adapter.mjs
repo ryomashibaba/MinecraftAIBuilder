@@ -229,11 +229,16 @@ const r125Room=r125obj({
  ovenHearth:r125enum('accent'),
  daylight:r125enum('wide-bay','clerestory','paired-bays')
 },['id','purpose','access']);
+const r125BayValues=[20,25,30,35,40,45,50,55,60,65,70,75,80];
+const r125BayPair={type:'array',minItems:2,maxItems:2,
+ items:{type:'integer',enum:r125BayValues},
+ enum:r125BayValues.flatMap((first,i)=>
+  r125BayValues.slice(i+1).map(second=>[first,second]))};
 const r125Level=r125obj({
  splitAxis:r125enum('x','z'),splitPercent:{type:'integer',enum:[30,35,40,45,50,55,60,65,70]},
  secondarySplitPercent:{type:'integer',enum:[25,30,35,40,45,50,55,60,65,70,75]},
- rearBayPercentages:{type:'array',items:{type:'integer',enum:[20,25,30,35,40,45,50,55,60,65,70,75,80]},minItems:2,maxItems:2},
- sideBayPercentages:{type:'array',items:{type:'integer',enum:[20,25,30,35,40,45,50,55,60,65,70,75,80]},minItems:2,maxItems:2},
+ rearBayPercentages:r125BayPair,
+ sideBayPercentages:r125BayPair,
  thirdRoomLink:r125enum('first-and-second'),
  spaces:{type:'array',items:r125Room,minItems:2,maxItems:4}
 },['splitAxis','splitPercent','spaces']);
@@ -370,22 +375,43 @@ const r125PlanProperties={
   ['viewerSpaceId','workSpaceId'])
 };
 const r125PlanRequired=['schema','id','title','brief','footprint','levels','materials'];
-// Only four-room, single-floor author plans can opt into a 20/25
-// percent public hub/spine. Two- and three-room author grammar is unchanged.
+// Room-count-specific closed shapes prevent irrelevant partition controls
+// from reaching the strict planner (e.g. rear bays on a three-room floor).
+// Four-room bay pairs are optional only where the corresponding partition
+// exists, and their grammar admits strictly ascending percentages only.
+const r125LevelShape=(roomCount,axisChoices,percentChoices,
+ {secondary=false,bay=null}={})=>{
+ const properties={
+  splitAxis:r125enum(...axisChoices),
+  splitPercent:{type:'integer',enum:percentChoices},
+  spaces:{type:'array',items:r125Room,minItems:roomCount,maxItems:roomCount},
+  ...(secondary?{
+   secondarySplitPercent:{type:'integer',enum:[25,30,35,40,45,50,55,60,65,70,75]},
+   thirdRoomLink:r125enum('first-and-second')}:{}),
+  ...(bay==='rear'?{rearBayPercentages:r125BayPair}:{}),
+  ...(bay==='side'?{sideBayPercentages:r125BayPair}:{})
+ };
+ return r125obj(properties,['splitAxis','splitPercent','spaces']);
+};
+const r125RegularSplit=[30,35,40,45,50,55,60,65,70];
+const r125CompactSplit=[20,25,...r125RegularSplit];
 const r125OneLevel={...r125Level,
  properties:{...r125Level.properties,
-  splitPercent:{type:'integer',enum:[20,25,30,35,40,45,50,55,60,65,70]}},
- // Preserve the stable outer field shape used by local adapters and mocks.
- // Exact alternatives prevent a 20/25 split on a 2/3-room plan.
+  splitPercent:{type:'integer',enum:r125CompactSplit},
+  spaces:{...r125Level.properties.spaces,maxItems:4}},
  anyOf:[
-  {properties:{splitPercent:{type:'integer',
-   enum:[30,35,40,45,50,55,60,65,70]}}},
-  {properties:{splitPercent:{type:'integer',enum:[20,25]},
-   spaces:{type:'array',minItems:4,maxItems:4}}}
+  r125LevelShape(2,['x','z'],r125RegularSplit),
+  r125LevelShape(3,['x','z'],r125RegularSplit,{secondary:true}),
+  r125LevelShape(4,['z'],r125CompactSplit,{bay:'rear'}),
+  r125LevelShape(4,['x'],r125CompactSplit,{bay:'side'})
  ]};
 const r125LevelTwo={...r125Level,
  properties:{...r125Level.properties,
-  spaces:{...r125Level.properties.spaces,maxItems:3}}};
+  spaces:{...r125Level.properties.spaces,maxItems:3}},
+ anyOf:[
+  r125LevelShape(2,['x','z'],r125RegularSplit),
+  r125LevelShape(3,['x','z'],r125RegularSplit,{secondary:true})
+ ]};
 const r125PlanVariant=(levelCount,expression)=>r125obj({
  ...r125PlanProperties,
  levels:{...r125PlanProperties.levels,

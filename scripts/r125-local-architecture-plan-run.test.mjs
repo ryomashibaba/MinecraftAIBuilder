@@ -167,6 +167,26 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    assert.deepEqual(authorSchema.properties.levels.items.properties.splitPercent.enum,[30,35,40,45,50,55,60,65,70]);
    assert.equal(authorSchema.properties.levels.items.properties.rearBayPercentages.minItems,2);
    assert.equal(authorSchema.properties.levels.items.properties.rearBayPercentages.maxItems,2);
+   const oneLevelShapes=oneLevel.properties.levels.items.anyOf;
+   const threeRoomShape=oneLevelShapes.find(v=>
+    v.properties.spaces.minItems===3);
+   assert(threeRoomShape);
+   assert.equal(Object.hasOwn(threeRoomShape.properties,'rearBayPercentages'),false,
+    'three-room floors cannot author a four-room rear partition');
+   assert.equal(Object.hasOwn(threeRoomShape.properties,'sideBayPercentages'),false);
+   const rearFourRoom=oneLevelShapes.find(v=>
+    v.properties.spaces.minItems===4&&v.properties.splitAxis.enum[0]==='z');
+   const validRearPairs=rearFourRoom.properties.rearBayPercentages.enum;
+   assert(validRearPairs.some(([a,b])=>a===35&&b===40));
+   assert(!validRearPairs.some(([a,b])=>a===35&&b===35),
+    'equal bay percentages are omitted rather than emitted as an invalid duplicate pair');
+   assert.equal(Object.hasOwn(rearFourRoom.properties,'sideBayPercentages'),false);
+   const twoLevelShapes=authorSchema.properties.levels.items.anyOf;
+   assert.equal(twoLevelShapes.length,2);
+   assert(twoLevelShapes.every(v=>v.properties.spaces.maxItems<=3&&
+    !Object.hasOwn(v.properties,'rearBayPercentages')&&
+    !Object.hasOwn(v.properties,'sideBayPercentages')),
+    'two-storey levels cannot use a one-floor four-room bay split');
    assert.ok(!authorSchema.properties.levels.items.required.includes('secondarySplitPercent'));
    assert.deepEqual(authorSchema.properties.levels.items.properties.thirdRoomLink.enum,
     ['first-and-second']);
@@ -601,3 +621,4 @@ test('deep upper setback original diagnostic matches allowed footprint-dependent
  assert.equal(author.footprint.width,32);
  assert.equal(JSON.parse(before).expression.setbackDepth,8);
 });
+
