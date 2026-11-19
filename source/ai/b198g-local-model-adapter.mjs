@@ -453,18 +453,26 @@ export function r125RequiresWorkObservation(prompt){
 }
 
 export function r125ResponseFormatForEndpoint(endpoint,{observationRequired=false}={}){
- if(endpoint==='http://127.0.0.1:11434/v1/chat/completions')
-  {
-   const schema=observationRequired?{
-    ...R125_ARCHITECTURE_RESPONSE_SCHEMA,
-    anyOf:R125_ARCHITECTURE_RESPONSE_SCHEMA.anyOf.map(variant=>({
-     ...variant,required:[...variant.required,'observationLink']
-    }))
-   }:R125_ARCHITECTURE_RESPONSE_SCHEMA;
-  return {type:'json_schema',json_schema:{
-   name:'r125_architecture_plan_v11',strict:true,
-   schema}};
+ if(endpoint==='http://127.0.0.1:11434/v1/chat/completions'){
+  const schema=structuredClone(R125_ARCHITECTURE_RESPONSE_SCHEMA);
+  if(observationRequired){
+   for(const variant of schema.anyOf){
+    if(!variant.required.includes('observationLink'))
+     variant.required.push('observationLink');
+    // A narrow rear bay can physically fit fixtures yet leave no reachable
+    // visitor pad or eye-level ray across the authored glass. Balance all
+    // model-selected three-room T wings before generation; SOURCE remains
+    // the exact final gate for the actual equipment and sightline.
+    const shapes=variant.properties.levels.items.anyOf??[];
+    for(const shape of shapes){
+     if(shape.properties?.secondarySplitPercent)
+      shape.properties.secondarySplitPercent.enum=[45,50,55];
+    }
+   }
   }
+  return {type:'json_schema',json_schema:{
+   name:'r125_architecture_plan_v11',strict:true,schema}};
+ }
  return {type:'json_object'};
 }
 
