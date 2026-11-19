@@ -39,6 +39,15 @@ test('a genuinely authored window proves glass, visitor standing access and an e
  assert.equal(proof.viewerSpaceId,'public-demo');
  assert.equal(proof.workSpaceId,'maker-station');
  assert(proof.viewerTwoWideSourceWitness);
+ assert(proof.ray.verifiedViewerEye);
+ if(proof.ray.paneAxis==='x')
+  assert.equal(proof.ray.paneCoordinate,
+   proof.viewerTwoWideSourceWitness[2],
+   'actual sightline and public standing pad use the same z row');
+ else
+  assert([proof.viewerTwoWideSourceWitness[0],
+   proof.viewerTwoWideSourceWitness[0]+1].includes(proof.ray.paneCoordinate),
+   'actual sightline must originate within the reachable public x-pad');
  assert(['assembly-table','inspection-stand'].includes(proof.ray.workFixtureKind));
  assert(proof.ray.visibleWorkCell.length===3);
  assert.equal(proof.visitorRouteAvoidsStaff,true);

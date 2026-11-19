@@ -50,12 +50,19 @@ function adjoiningWalls(view,work){
 const inFixture=(f,x,z)=>x>=f.origin[0]&&
  x<f.origin[0]+f.size[0]&&z>=f.origin[2]&&z<f.origin[2]+f.size[2];
 /** Return a real first-hit eye-level ray into a fixture, not just its name. */
-function rayToStation(solids,wall,pane,fixture,view,work){
+function rayToStation(solids,wall,pane,fixture,work,witness){
  const standing=work.y,eye=standing+1,glass=MATERIALS.indexOf('glass');
- for(const along of [pane,pane+1]){
+ // A clear ray and a reachable pad are not enough separately: the SAME
+ // reachable 2-wide viewer pad must contain the eye-level sightline.
+ const visibleFromPad=[pane,pane+1].filter(along=>wall.axis==='x'?
+  along===witness[2]:along===witness[0]||along===witness[0]+1);
+ for(const along of visibleFromPad){
   let x=wall.axis==='x'?wall.wall:along;
   let z=wall.axis==='z'?wall.wall:along;
-  if(solids.get(k(x,eye,z))!==glass)continue;
+  const visitorEye=wall.axis==='x'?
+   [wall.wall-wall.dir,eye,along]:[along,eye,wall.wall-wall.dir];
+  if(solids.has(k(...visitorEye))||
+     solids.get(k(x,eye,z))!==glass)continue;
   // The near side of the glass must open into the genuine staff room.
   for(let step=1;step<=32;step++){
    x=wall.axis==='x'?wall.wall+wall.dir*step:along;
@@ -65,7 +72,8 @@ function rayToStation(solids,wall,pane,fixture,view,work){
    const hit=solids.get(k(x,eye,z));
    if(hit!==undefined){
     if(inFixture(fixture,x,z))
-     return {eyeY:eye,paneAxis:wall.axis,paneCoordinate:pane,
+     return {eyeY:eye,paneAxis:wall.axis,paneCoordinate:along,
+      verifiedViewerEye:visitorEye,
       clearSightlineCells:step-1,workFixtureId:fixture.id,
       workFixtureKind:fixture.kind,visibleWorkCell:[x,eye,z]};
     break;
@@ -158,7 +166,8 @@ export function addR125AuthoredObservation(product,plan){
       paneWitness?.reachableFromEntrance!==true)continue;
    const visitors=auditR125VisitorRoutes(trial,plan);
    if(visitors.status!=='SOURCE_VISITOR_ROUTES_AVOID_STAFF')continue;
-   const ray=rayToStation(finalCells,wall,pane,f,view,work);
+   const ray=rayToStation(finalCells,wall,pane,f,work,
+    paneWitness.supportedTwoWideServiceWitness);
    if(!ray)continue;
    return {...trial,observationSource:{
     schema:'r125-source-authored-observation-v1',
