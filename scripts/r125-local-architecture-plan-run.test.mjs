@@ -152,6 +152,14 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    const rectangular=structured.anyOf.filter(v=>
     Object.hasOwn(v.properties,'expression'));
    assert.equal(rectangular.length,2);
+   const spatial=structured.anyOf.find(v=>
+    !Object.hasOwn(v.properties,'expression'));
+   assert(spatial,'spatial-tree remains available to the model');
+   assert.equal(Object.hasOwn(spatial.properties,'entryZone'),false);
+   assert.equal(spatial.properties.levels.minItems,1);
+   assert.equal(spatial.properties.levels.maxItems,1);
+   assert.equal(spatial.properties.levels.items.properties.layoutMode.enum[0],
+    'spatial-tree');
    const oneLevel=rectangular.find(v=>v.properties.levels.maxItems===1);
    const authorSchema=rectangular.find(v=>v.properties.levels.maxItems===2);
    assert(oneLevel&&authorSchema);
@@ -353,6 +361,11 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    assert.ok(request.messages[0].content.includes('directly from first into third'));
    assert.ok(request.messages[0].content.includes('ESSENTIAL ACTIVITY COVERAGE'));
    assert.ok(request.messages[0].content.includes('ACTIVITY-LED FLOOR PROGRAM'));
+   assert.ok(request.messages[0].content.includes('spatial-tree OMIT expression and entryZone'));
+   assert.ok(request.messages[0].content.includes('ROOT MUST omit volume.attach'));
+   assert.ok(request.messages[0].content.includes('LATER room MUST put volume.attach'));
+   assert.ok(request.messages[0].content.includes('real two-wide door'));
+   assert.ok(request.messages[0].content.includes('width-2 by depth-2'));
    assert.ok(request.messages[0].content.includes('mostly empty second floor'));
    assert.ok(request.messages[0].content.includes('multiple independent stations'));
    assert.ok(request.messages[0].content.indexOf('ACTIVITY-LED FLOOR PROGRAM')<
