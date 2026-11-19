@@ -3818,6 +3818,15 @@ test('spatial-tree ArchitecturePlan compiles distinct rooms, real fixtures and o
   observationLink:{viewerSpaceId:'gallery-room',workSpaceId:'assembly-room'}};
  const before=structuredClone(p);
  assert.equal(validateArchitecturePlan(p),true);
+ const capacity=assessR125AuthoredRoomCapacity(p);
+ assert.deepEqual(capacity.zones.map(x=>[
+  x.zoneId,x.nominalWidth,x.nominalDepth,x.nominalFloorCellsUpperBound
+ ]),[
+  ['gallery-room',8,6,48],
+  ['assembly-room',8,6,48],
+  ['inspection-room',5,6,30]
+ ]);
+ assert(capacity.zones.every(x=>Number.isFinite(x.nominalFloorCellsUpperBound)));
  const result=compileArchitecturePlan(p);
  assert.deepEqual(p,before,'the model-authored rooms and attachments remain unchanged');
  assert.equal(verifyCompiled(result.design,result.compiled),true);
@@ -3838,6 +3847,20 @@ test('spatial-tree ArchitecturePlan compiles distinct rooms, real fixtures and o
   new Set(['display','desk','storage','assembly-table','inspection-stand']));
  assert.equal(auditArchitecturePlanCirculation(result).status,
   'SOURCE_CLEARANCE_PROBES_PASS');
+ const modelRoof=structuredClone(p);
+ modelRoof.levels[0].spaces[1].volume.roofForm='ridge';
+ modelRoof.levels[0].spaces[1].volume.roofAxis='x';
+ assert.equal(validateArchitecturePlan(modelRoof),true);
+ const raised=compileArchitecturePlan(modelRoof);
+ assert.equal(verifyCompiled(raised.design,raised.compiled),true);
+ assert.notEqual(raised.geometrySha256,result.geometrySha256);
+ assert(raised.design.elements.some(e=>
+  e.id.startsWith('space-1-ridge-skin-')));
+ assert.equal(raised.spatialLayout.rooms[1].roofForm,'ridge');
+ assert.equal(raised.sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(auditArchitecturePlanCirculation(raised).status,
+  'SOURCE_CLEARANCE_PROBES_PASS');
+ assert.equal(raised.worldWrites,0);
 });
 
 test('spatial-tree cannot route a later public room through a staff-only volume',()=>{
@@ -3930,4 +3953,31 @@ test('V11 authored public open court keeps distinct indoor work and exhibition r
  const illegal=structuredClone(p);
  illegal.levels[0].spaces[2].spatialUse='open-court';
  assert.throws(()=>validateArchitecturePlan(illegal),/R125_PLAN_SPATIAL_OPEN_COURT_REQUIRES_PUBLIC_ROOT/);
+});
+
+test('spatial-tree area advisory reports oversized single-display room without rejecting its author',()=>{
+ const p={schema:SCHEMA,id:'large-display-review',
+  title:'Genuine large public room',brief:'An exhibition and an adjacent work bay',
+  footprint:{width:28,depth:22},
+  levels:[{layoutMode:'spatial-tree',spaces:[
+   {id:'giant-gallery',purpose:'Public exhibition',access:'public',
+    fixtures:['display'],volume:{width:14,depth:12,roofY:7}},
+   {id:'compact-workroom',purpose:'Staff assembly',access:'staff',
+    fixtures:['assembly-table','storage'],volume:{width:9,depth:9,roofY:8,
+     attach:{to:'giant-gallery',side:'east',shift:0}}}
+  ]}],materials:{floor:'wood',wall:'concrete',roof:'stone'}};
+ const unchanged=JSON.stringify(p);
+ const estimate=assessR125AuthoredRoomCapacity(p);
+ assert.equal(JSON.stringify(p),unchanged);
+ assert.deepEqual(estimate.zones.map(x=>x.nominalFloorCellsUpperBound),[120,49]);
+ assert(estimate.zones[0].risks.includes('SPARSE_LARGE_ROOM_REVIEW'));
+ assert(!estimate.zones[1].risks.includes('SPARSE_LARGE_ROOM_REVIEW'));
+ assert.equal(estimate.impossibleVerdict,false);
+ assert.equal(estimate.originalPlanEdited,false);
+ assert.equal(estimate.worldWrites,0);
+ // Open courtyards are intended to have unused sky/ground; don't misuse
+ // indoor room sparsity as an automatic reason to reject those spaces.
+ p.levels[0].spaces[0].spatialUse='open-court';
+ assert(!assessR125AuthoredRoomCapacity(p).zones[0].risks
+  .includes('SPARSE_LARGE_ROOM_REVIEW'));
 });

@@ -602,7 +602,37 @@ export function composeR125PublicStairSpine(plan){
 export function assessR125AuthoredRoomCapacity(plan){
  validateArchitecturePlan(plan);
  const w=plan.footprint.width,d=plan.footprint.depth,e=plan.expression;
+ // A dimension-only advisory, never a HOST change to a model-authored plan.
+ // Applies equally to rectangular splits and individually sized spatial-tree
+ // rooms, using the same clear interior widths as the B143 compiler.
+ const roomRow=(room,index,zi,width,depth,axis)=>{
+  const roles=room.fixtures??(room.fixture?[room.fixture]:[]);
+  const roleDepth=k=>['bed','service-bay'].includes(k)?4:
+   ['assembly-table','inspection-stand'].includes(k)?3:
+   ['seating','electronics','washbasin','oven'].includes(k)?2:1;
+  const roleWidth=k=>['service-bay','tool-rack','teaching-board','assembly-table'].includes(k)?5:3;
+  const equipmentFootprintCells=roles.reduce((n,k)=>n+roleWidth(k)*roleDepth(k),0);
+  const nominalFloorCellsUpperBound=Math.max(0,width*depth);
+  const risks=[];
+  if(roles.length>=2&&Math.min(width,depth)<=4)
+   risks.push('NARROW_MULTIPLE_EQUIPMENT');
+  if(roles.length>=2&&equipmentFootprintCells>nominalFloorCellsUpperBound/3)
+   risks.push('HIGH_EQUIPMENT_FOOTPRINT_FRACTION');
+  // This is a review prompt for the ACTUAL oversized gallery failure class:
+  // no invented furniture, automatic resize, rejected genuine source or
+  // misleading claim that the building is functionally unusable.
+  if(axis==='spatial-tree'&&room.spatialUse!=='open-court'&&
+     roles.length<=1&&nominalFloorCellsUpperBound>=80)
+   risks.push('SPARSE_LARGE_ROOM_REVIEW');
+  return {level:index,zoneIndex:zi,zoneId:room.id,
+   splitAxis:axis,nominalWidth:width,nominalDepth:depth,
+   nominalFloorCellsUpperBound,selectedEquipment:roles,
+   equipmentFootprintCells,risks};
+ };
  const zones=plan.levels.flatMap((level,index)=>{
+  if(level.layoutMode==='spatial-tree')
+   return level.spaces.map((room,zi)=>roomRow(room,index,zi,
+    room.volume.width-2,room.volume.depth-2,'spatial-tree'));
   const x0=1,z0=1;
   const x1=w-2-(e?.setbackSide==='east'&&index===1?e.setbackDepth:0);
   const z1=d-2-(e?.setbackSide==='rear'&&index===1?e.setbackDepth:0);
@@ -645,22 +675,7 @@ export function assessR125AuthoredRoomCapacity(plan){
   }
   return level.spaces.map((room,zi)=>{
    const [width,depth]=sizes[zi];
-   const roles=room.fixtures??(room.fixture?[room.fixture]:[]);
-   const roleDepth=k=>['bed','service-bay'].includes(k)?4:
-    ['assembly-table','inspection-stand'].includes(k)?3:
-    ['seating','electronics','washbasin','oven'].includes(k)?2:1;
-   const roleWidth=k=>['service-bay','tool-rack','teaching-board','assembly-table'].includes(k)?5:3;
-   const equipmentFootprintCells=roles.reduce((n,k)=>n+roleWidth(k)*roleDepth(k),0);
-   const nominalFloorCellsUpperBound=Math.max(0,width*depth);
-   const risks=[];
-   if(roles.length>=2&&Math.min(width,depth)<=4)
-    risks.push('NARROW_MULTIPLE_EQUIPMENT');
-   if(roles.length>=2&&equipmentFootprintCells>nominalFloorCellsUpperBound/3)
-    risks.push('HIGH_EQUIPMENT_FOOTPRINT_FRACTION');
-   return {level:index,zoneIndex:zi,zoneId:room.id,
-    splitAxis:axis,nominalWidth:width,nominalDepth:depth,
-    nominalFloorCellsUpperBound,selectedEquipment:roles,
-    equipmentFootprintCells,risks};
+   return roomRow(room,index,zi,width,depth,axis);
   });
  });
  return {schema:'r125-authored-room-capacity-advisory-v1',
