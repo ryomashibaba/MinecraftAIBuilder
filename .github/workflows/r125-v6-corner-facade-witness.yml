@@ -9,12 +9,14 @@ on:
       - source/ai/r125-explicit-activity-requirements.mjs
       - source/ai/r125-architecture-plan.mjs
       - source/ai/b198c-spatial-critic.mjs
+      - source/ai/r125-room-observation.mjs
       - source/ai/r125-room-fixtures.mjs
       - source/ai/r125-room-scale.mjs
       - source/ai/r125-room-daylight.mjs
       - source/ai/r125-spatial-detail.mjs
       - source/ai/r125-education-makecode-export.mjs
       - configs/r125-education-verified-palette-v26.33.json
+      - scripts/r125-room-observation.test.mjs
       - scripts/r125-architecture-plan.test.mjs
       - scripts/r125-offline-replay.mjs
       - scripts/r125-v11-finish-art-ab.mjs
