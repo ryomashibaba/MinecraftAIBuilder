@@ -138,15 +138,32 @@ export function compileSpatialComposition(value){
   // specify daylight. Author-selected daylight changes REAL wall openings,
   // not facade paint or an after-the-fact host interpretation.
   const requested=r.daylight;
+  // Author-selected public frontage, not a mandatory genre facade.
+  // A 14+ block public root has room for two real 3x2 display windows,
+  // one block of solid wall beside its unchanged two-wide entrance.
+  // Existing unrequested daylight and narrower rooms remain untouched.
+  if(i===0&&requested==='paired-bays'&&r.width>=14){
+   const entryX=r.x+Math.floor((r.width-2)/2);
+   cands.unshift(...[entryX-4,entryX+3].map(x=>({
+    axis:'z',wall:r.z,side:'front',frontFlank:true,
+    at:[x,3,r.z],size:[3,2,1]
+   })));
+  }
   const requiredOpenings=requested==='paired-bays'?2:1;
   let opened=0;
   for(const c of cands){
-   if(i===0&&c.side==='front')continue;
-   if(rooms.some(o=>o.id!==r.id&&
+   if(i===0&&c.side==='front'&&!c.frontFlank)continue;
+   if(c.frontFlank){
+    // Test actual window cells: side wings may meet the front corner
+    // without covering either real entrance-flanking aperture.
+    if(rooms.some(o=>o.id!==r.id&&
+     o.z<=c.wall&&maxZ(o)>=c.wall&&
+     o.x<=c.at[0]+c.size[0]-1&&maxX(o)>=c.at[0]))continue;
+   }else if(rooms.some(o=>o.id!==r.id&&
     (c.axis==='z'?o.z<=c.wall&&maxZ(o)>=c.wall&&span(overlap(r,o,'x'))>0:
       o.x<=c.wall&&maxX(o)>=c.wall&&span(overlap(r,o,'z'))>0)))continue;
    let at=c.at,size=c.size;
-   if(requested){
+   if(requested&&!c.frontFlank){
     const faceSpan=c.axis==='z'?r.width:r.depth;
     const length=requested==='wide-bay'?Math.min(4,faceSpan-4):
      requested==='clerestory'?Math.min(4,faceSpan-4):

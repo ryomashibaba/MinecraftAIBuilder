@@ -147,3 +147,35 @@ test('author-selected public open court makes an actual open-air arrival space b
  blocked.rooms[0].daylight='wide-bay';
  assert.throws(()=>validateSpatialComposition(blocked),/ROOM_CONTRACT/);
 });
+
+test('author-selected paired daylight opens two real public frontage bays without touching the entrance',()=>{
+ const authored=p('public-frontage',[
+  {...r('visitor-gallery',14,10,8),daylight:'paired-bays'},
+  r('inspection-wing',10,9,7,{to:'visitor-gallery',side:'south',shift:0})
+ ]);
+ const preserved=JSON.stringify(authored);
+ const result=compileSpatialComposition(authored);
+ const entry=result.design.elements.find(e=>e.id==='exterior-entrance');
+ const glass=result.design.elements.filter(e=>
+  e.mode==='add'&&e.material==='glass'&&
+  e.origin[2]===entry.origin[2]&&e.size[2]===1);
+ assert.equal(glass.length,2);
+ assert.deepEqual(glass.map(e=>e.origin[0]).sort((a,b)=>a-b),
+  [entry.origin[0]-4,entry.origin[0]+3]);
+ assert(glass.every(e=>e.size[0]===3&&e.size[1]===2&&
+  e.origin[1]===3));
+ assert(glass.every(e=>
+  e.origin[0]+e.size[0]-1<entry.origin[0]||
+  e.origin[0]>entry.origin[0]+entry.size[0]-1));
+ assert.equal(JSON.stringify(authored),preserved);
+ assert.equal(verifyCompiled(result.design,result.compiled),true);
+ assert.equal(result.sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(result.worldWrites,0);
+ assert.deepEqual(result.BuildPlan.operations,[]);
+ const noFront=structuredClone(authored);
+ delete noFront.rooms[0].daylight;
+ const earlier=compileSpatialComposition(noFront);
+ assert.equal(earlier.design.elements.filter(e=>
+  e.id.startsWith('glaze-0-')&&e.material==='glass').length,1);
+ assert.notEqual(result.geometrySha256,earlier.geometrySha256);
+});
