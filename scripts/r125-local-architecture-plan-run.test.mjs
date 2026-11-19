@@ -646,6 +646,18 @@ test('spatial-tree Qwen schema requires authored per-room volumes and supports o
  assert.deepEqual(room.properties.volume.properties.attach.required,['to','side','shift']);
  const observed=r125ResponseFormatForEndpoint(
   'http://127.0.0.1:11434/v1/chat/completions',{observationRequired:true});
- assert(observed.json_schema.schema.anyOf.every(v=>
-  v.required.includes('observationLink')));
+ const observedVariants=observed.json_schema.schema.anyOf;
+ assert(observedVariants.every(v=>v.required.includes('observationLink')));
+ const observedThreeRoomShapes=observedVariants.flatMap(v=>
+  v.properties.levels.items.anyOf??[]).filter(shape=>
+   shape.properties.spaces.minItems===3);
+ assert(observedThreeRoomShapes.length>=2);
+ for(const shape of observedThreeRoomShapes)
+  assert.deepEqual(shape.properties.secondarySplitPercent.enum,[45,50,55]);
+ const ordinaryThreeRoomShapes=R125_ARCHITECTURE_RESPONSE_SCHEMA.anyOf.flatMap(v=>
+  v.properties.levels.items.anyOf??[]).filter(shape=>
+   shape.properties.spaces.minItems===3);
+ assert(ordinaryThreeRoomShapes.some(shape=>
+  shape.properties.secondarySplitPercent.enum.includes(35)),
+  'non-observation plans retain the original valid proportions');
 });
