@@ -147,7 +147,14 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    const structured=request.response_format.json_schema.schema;
    assert.deepEqual(structured,R125_ARCHITECTURE_RESPONSE_SCHEMA);
    assert.equal(structured.anyOf.length,3);
-   const [oneLevel,authorSchema]=structured.anyOf;
+   // Locate the rectangular variants by their contract, not their
+   // preference order. spatial-tree may legitimately be listed first.
+   const rectangular=structured.anyOf.filter(v=>
+    Object.hasOwn(v.properties,'expression'));
+   assert.equal(rectangular.length,2);
+   const oneLevel=rectangular.find(v=>v.properties.levels.maxItems===1);
+   const authorSchema=rectangular.find(v=>v.properties.levels.maxItems===2);
+   assert(oneLevel&&authorSchema);
    assert.equal(oneLevel.additionalProperties,false);
    assert.equal(oneLevel.properties.levels.minItems,1);
    assert.equal(oneLevel.properties.levels.maxItems,1);
