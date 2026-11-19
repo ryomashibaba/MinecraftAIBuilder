@@ -178,7 +178,9 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    const rearFourRoom=oneLevelShapes.find(v=>
     v.properties.spaces.minItems===4&&v.properties.splitAxis.enum[0]==='z');
    const validRearPairs=rearFourRoom.properties.rearBayPercentages.enum;
-   assert(validRearPairs.some(([a,b])=>a===35&&b===40));
+   assert(validRearPairs.some(([a,b])=>a===35&&b===65));
+   assert(!validRearPairs.some(([a,b])=>a===35&&b===40),
+    'rear bay proportions must retain five clear blocks in the middle room');
    assert(!validRearPairs.some(([a,b])=>a===35&&b===35),
     'equal bay percentages are omitted rather than emitted as an invalid duplicate pair');
    assert.equal(Object.hasOwn(rearFourRoom.properties,'sideBayPercentages'),false);
