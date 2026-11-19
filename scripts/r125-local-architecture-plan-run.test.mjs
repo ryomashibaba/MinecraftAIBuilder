@@ -6,7 +6,8 @@ import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {inferR125ExplicitActivityRequirements}
  from '../source/ai/r125-explicit-activity-requirements.mjs';
-import {createR125ArchitecturePlanLocalAdapter,R125_ARCHITECTURE_RESPONSE_SCHEMA}
+import {createR125ArchitecturePlanLocalAdapter,R125_ARCHITECTURE_RESPONSE_SCHEMA,
+ r125ResponseFormatForEndpoint}
  from '../source/ai/b198g-local-model-adapter.mjs';
 import {runR125LocalArchitecturePlan,parseR125LocalPlanArgs,
  summarizeR125InvalidSetbackOriginal}
@@ -622,3 +623,24 @@ test('deep upper setback original diagnostic matches allowed footprint-dependent
  assert.equal(JSON.parse(before).expression.setbackDepth,8);
 });
 
+test('spatial-tree Qwen schema requires authored per-room volumes and supports observation',()=>{
+ const schema=R125_ARCHITECTURE_RESPONSE_SCHEMA;
+ assert.equal(schema.anyOf.length,3);
+ const spatial=schema.anyOf[2];
+ assert(spatial.additionalProperties===false);
+ assert.equal(Object.hasOwn(spatial.properties,'expression'),false);
+ assert.equal(Object.hasOwn(spatial.properties,'entryZone'),false);
+ const level=spatial.properties.levels.items;
+ assert.deepEqual(level.required,['layoutMode','spaces']);
+ assert.deepEqual(level.properties.layoutMode.enum,['spatial-tree']);
+ const room=level.properties.spaces.items;
+ assert(room.required.includes('volume'));
+ assert.deepEqual(room.properties.volume.required,['width','depth','roofY']);
+ assert.deepEqual(room.properties.volume.properties.width,{type:'integer',minimum:6,maximum:14});
+ assert.deepEqual(room.properties.volume.properties.roofY,{type:'integer',minimum:6,maximum:10});
+ assert.deepEqual(room.properties.volume.properties.attach.required,['to','side','shift']);
+ const observed=r125ResponseFormatForEndpoint(
+  'http://127.0.0.1:11434/v1/chat/completions',{observationRequired:true});
+ assert(observed.json_schema.schema.anyOf.every(v=>
+  v.required.includes('observationLink')));
+});
