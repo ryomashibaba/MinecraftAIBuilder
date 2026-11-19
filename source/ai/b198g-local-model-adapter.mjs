@@ -525,11 +525,27 @@ export function createR125ArchitecturePlanLocalAdapter({
   "Architectural identity: HIP roof for four slopes; choose workshop light or courtyard only for its useful function. No fixed genre template.",
   "Prioritize a ROOM-APPROPRIATE fixture, useful rooms, daylight, clear entry and two-wide circulation. HOST creates geometry but never fakes SOURCE.",
   'SPATIAL-TREE FIRST-CHOICE: When a brief combines distinct public, work, inspection, or storage activities with different area or height needs, choose layoutMode:"spatial-tree" and author each room width, depth, roof height, and attachment. Keep a public/shared root and prove the authored tree fits the footprint. Choose a conventional rectangular split only when a shared envelope is the clearer functional solution. Preserve fixtures, access, observation, and routes. One response; no retry.',
-  'OPTIONAL OPEN PUBLIC COURT: Only for briefs needing a usable outdoor public yard or courtyard, spatial-tree spaces[0] may use spatialUse:"open-court". It creates real uncovered floor, low walls, outside entrance and two-wide doors to enclosed wings. Keep roofY in JSON but no physical roof, omit daylight for the open court. All other rooms must stay enclosed. Do not replace a required indoor reception or add a court for decoration.',
+  'OPTIONAL OPEN PUBLIC COURT: Only for briefs needing a usable outdoor public yard or courtyard, spatial-tree spaces[0] may use spatialUse:"open-court". It creates real uncovered floor, low walls, outside entrance and two-wide doors to enclosed wings. Keep roofY in JSON but no physical roof, omit daylight for the open court. All other rooms must stay enclosed. Do not replace a required indoor reception or add a court for decoration. fixtureDetail and fixtureArrangement require an actual nonempty fixtures array.',
  ].join('\n');
- return async function authorArchitecturePlan({prompt}={}){
+ return async function authorArchitecturePlan({prompt,repairContext=null}={}){
   if(typeof prompt!=='string'||prompt.length<8||prompt.length>8000)
    refuse('INVALID_MODEL_REQUEST');
+  if(repairContext!==null&&(
+   typeof repairContext!=='object'||Array.isArray(repairContext)||
+   Object.keys(repairContext).sort().join(',')!==
+    'missingRequiredFixtureRoles,previousModelResponse,sourceIssueCodes'||
+   typeof repairContext.previousModelResponse!=='string'||
+   repairContext.previousModelResponse.length<10||
+   repairContext.previousModelResponse.length>12000||
+   !Array.isArray(repairContext.sourceIssueCodes)||
+   repairContext.sourceIssueCodes.length<1||
+   repairContext.sourceIssueCodes.length>5||
+   repairContext.sourceIssueCodes.some(x=>typeof x!=='string'||!/^[-A-Z0-9_]{3,90}$/.test(x))||
+   !Array.isArray(repairContext.missingRequiredFixtureRoles)||
+   repairContext.missingRequiredFixtureRoles.length>10||
+   repairContext.missingRequiredFixtureRoles.some(x=>
+    typeof x!=='string'||!r125FixtureRoles.includes(x))))
+   refuse('INVALID_MODEL_REPAIR_CONTEXT');
   const controller=new AbortController();
   const timer=setTimeout(()=>controller.abort(),timeoutMs);
   try{
@@ -556,7 +572,13 @@ export function createR125ArchitecturePlanLocalAdapter({
        explicitEquipmentRule:'Only literal requirements, not a complete task list. Every requiredRole string is an exact physical fixture, not a synonym: assembly-table is NOT workbench, inspection-stand is NOT workbench, and desk is NOT workbench. Place each required role in the model-chosen room performing its activity; keep two-wide approaches. No extra equipment to fill space or fake coverage.',
        groundFloorEntryRouteRule:'When a ground-floor z-split has ANY public/shared later room, spaces[0] MUST be public/shared; first staff then rear public is rejected. In x-splits with visitors, entryZone must enter a public/shared room. Preserve genuine staff-only functions and two-wide public access. Never fake a safe route.',
        upperFloorAccessRule:'Two floors are optional. If a ground-floor one-story public hub or side spine can serve every public function and separate staff tasks, prefer that plan. If two floors are authored with ANY upstairs public/shared room, the actual stair landing near x=3..4,z=8 and every approach to upstairs public rooms must stay in public/shared rooms, never through staff-only rooms. Make the upper stair landing part of the first public/shared room: choose splitAxis:x with spaces[0] public/shared (the west room contains x=3..4), or splitAxis:z with spaces[0] public/shared and a boundary beyond z=9 (the front room contains landing rows z=8..9). Do not assign either landing row to staff space. A room being public in JSON is not a safe path. If uncertain, keep visitors downstairs, staff upstairs.',
-       crossFieldRule:'Decide levels first. With 1 level: setbackSide=none and setbackDepth=0. Only with 2 levels: east/rear may have depth 2, 3, 4, 6 or 8 (6/8 needs footprint width/depth >= 28). Invalid pair is rejected without retry.'})}]})
+       crossFieldRule:'Decide levels first. With 1 level: setbackSide=none and setbackDepth=0. Only with 2 levels: east/rear may have depth 2, 3, 4, 6 or 8 (6/8 needs footprint width/depth >= 28). Invalid pair is rejected without retry.',
+       ...(repairContext?{
+        previousModelResponse:repairContext.previousModelResponse,
+        originalSourceHoldCodes:repairContext.sourceIssueCodes,
+        missingRequiredFixtureRoles:repairContext.missingRequiredFixtureRoles,
+        modelRevisionRule:'You are making the ONLY allowed model-authored revision of your previous response. Repair missing literal equipment and invalid fixtureDetail/fixtureArrangement declarations in the correct functional rooms. Preserve an intelligible architectural design, room use, access, two-wide routes, and valid fields. You may revise room sizes/topology where necessary. Do not simply remove required rooms, equipment, or details to silence SOURCE errors. Return one complete revised ArchitecturePlan JSON; no HOST fixes, no tests claimed.'
+       }:{})})}]})
    });
    if(!res||res.ok!==true)
     refuse('LOCAL_HTTP_'+String(res?.status??'UNKNOWN'));

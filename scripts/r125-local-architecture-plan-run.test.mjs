@@ -668,3 +668,68 @@ test('spatial-tree Qwen schema requires authored per-room volumes and supports o
   shape.properties.secondarySplitPercent.enum.includes(35)),
   'non-observation plans retain the original valid proportions');
 });
+
+test('fixture-only opt-in permits exactly one genuine model revision and preserves both raw answers',async()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'mab-fixture-revision-'));
+ const first=JSON.parse(original);
+ first.levels[0].spaces[0].fixtureDetail='crafted';
+ const raw=JSON.stringify(first),dest=path.join(root,'revision');
+ let calls=0;
+ try{
+  const {report}=await runR125LocalArchitecturePlan({
+   model:'qwen3:14b',prompt,outDir:dest,repairOnce:true
+  },{fetcher:async(_url,opts)=>{
+   calls++;
+   const messages=JSON.parse(opts.body).messages;
+   if(calls===2){
+    const revision=JSON.parse(messages[1].content);
+    assert.equal(revision.architecturalRequest,prompt);
+    assert.equal(revision.previousModelResponse,raw);
+    assert(revision.originalSourceHoldCodes.includes('R125_PLAN_SPACE_FIXTURE_DETAIL'));
+    assert.match(revision.modelRevisionRule,/ONLY allowed model-authored revision/);
+   }
+   return provider(calls===1?raw:original);
+  }});
+  assert.equal(calls,2);
+  assert.equal(report.modelCallAttempts,2);
+  assert.equal(report.modelResponsesCaptured,2);
+  assert.equal(report.modelRevisionAttempted,true);
+  assert.equal(report.modelRevisionApplied,true);
+  assert.equal(report.status,'B143_SOURCE_CANDIDATE_ART_HOLD');
+  assert.equal(report.originalSha256,digest(raw));
+  assert.equal(report.revisedOriginalSha256,digest(original));
+  assert.equal(fs.readFileSync(path.join(dest,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8'),raw);
+  assert.equal(fs.readFileSync(path.join(dest,'MODEL_RESPONSE_REVISED.txt'),'utf8'),original);
+  assert.equal(JSON.parse(fs.readFileSync(path.join(dest,'SOURCE_DIAGNOSIS.json'),'utf8')).sourceVerified,false);
+  assert.equal(JSON.parse(fs.readFileSync(path.join(dest,'SOURCE_DIAGNOSIS_REVISED.json'),'utf8')).sourceVerified,true);
+  assert.equal(fs.existsSync(path.join(dest,'B143_REVISED_SOURCE_REVIEW_ONLY.json')),true);
+  assert.equal(report.worldWrites,0);
+  assert.equal(report.artStatus,'NOT_REVIEWED');
+ }finally{fs.rmSync(root,{recursive:true,force:true})}
+});
+
+test('bounded revision does not spend a second call on malformed JSON or unrelated schema failure',async()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'mab-no-unsafe-retry-'));
+ let posts=0;
+ try{
+  const {report}=await runR125LocalArchitecturePlan({
+   model:'qwen3:14b',prompt,outDir:path.join(root,'invalid'),repairOnce:true
+  },{fetcher:async()=>{posts++;return provider('{"schema":')}});
+  assert.equal(posts,1);
+  assert.equal(report.sourceVerified,false);
+  assert.equal(report.modelRevisionAttempted,undefined);
+  const invalid=JSON.stringify({...JSON.parse(original),bad:'field'});
+  const other=await runR125LocalArchitecturePlan({
+   model:'qwen3:14b',prompt,outDir:path.join(root,'wrong-fields'),repairOnce:true
+  },{fetcher:async()=>{posts++;return provider(invalid)}});
+  assert.equal(posts,2);
+  assert.equal(other.report.modelRevisionAttempted,undefined);
+  assert.equal(other.report.sourceVerified,false);
+  const args=parseR125LocalPlanArgs(['--model','qwen3:14b',
+   '--prompt',prompt,'--out',path.join(root,'new'),'--repair-once']);
+  assert.equal(args.repairOnce,true);
+  assert.throws(()=>parseR125LocalPlanArgs(['--model','qwen3:14b',
+   '--prompt',prompt,'--out','tmp','--repair-once','--repair-once']),
+   /DUPLICATE_REPAIR_FLAG/);
+ }finally{fs.rmSync(root,{recursive:true,force:true})}
+});

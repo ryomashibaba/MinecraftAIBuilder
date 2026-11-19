@@ -1,6 +1,7 @@
 /**
  * Opt-in V11 ONE local-model ArchitecturePlan -> original capture -> frozen
- * B143 + SOURCE replay. No auto retry, no world calls, no 3D/ART promotion.
+ * B143 + SOURCE replay. Optional one model-authored fixture revision on HOLD;
+ * no silent HOST repair, world calls or 3D/ART promotion.
  *
  * node scripts/r125-local-architecture-plan-run.mjs --model qwen3:14b
  *   --prompt "未知の建築要求をここに" --out "NEW_DIRECTORY_OUTSIDE_REPO"
@@ -60,19 +61,24 @@ export function summarizeR125InvalidSetbackOriginal(raw){
 }
 export function parseR125LocalPlanArgs(argv){
  if(argv.length===1&&argv[0]==='--help')return {help:true};
- if(argv.length!==6&&argv.length!==8)fail('ARGS_MODEL_PROMPT_OUT_REQUIRED');
+ const repairOnce=argv.includes('--repair-once');
+ if(argv.filter(x=>x==='--repair-once').length>1)
+  fail('DUPLICATE_REPAIR_FLAG');
+ const pairs=argv.filter(x=>x!=='--repair-once');
+ if(pairs.length!==6&&pairs.length!==8)fail('ARGS_MODEL_PROMPT_OUT_REQUIRED');
  const values={},allowed=new Set(['--model','--prompt','--out','--endpoint']);
- for(let i=0;i<argv.length;i+=2){
-  if(!allowed.has(argv[i])||Object.hasOwn(values,argv[i])||
-     typeof argv[i+1]!=='string'||!argv[i+1].trim()||
-     argv[i+1].startsWith('--'))fail('INVALID_ARGUMENTS');
-  values[argv[i]]=argv[i+1];
+ for(let i=0;i<pairs.length;i+=2){
+  if(!allowed.has(pairs[i])||Object.hasOwn(values,pairs[i])||
+     typeof pairs[i+1]!=='string'||!pairs[i+1].trim()||
+     pairs[i+1].startsWith('--'))fail('INVALID_ARGUMENTS');
+  values[pairs[i]]=pairs[i+1];
  }
  if(!values['--model']||!values['--prompt']||!values['--out']||
-    (argv.length===8&&!values['--endpoint']))fail('MISSING_ARGUMENTS');
+    (pairs.length===8&&!values['--endpoint']))fail('MISSING_ARGUMENTS');
  return {model:values['--model'],prompt:values['--prompt'],
   outDir:path.resolve(values['--out']),
-  endpoint:values['--endpoint']??DEFAULT_LOCAL_ENDPOINT};
+  endpoint:values['--endpoint']??DEFAULT_LOCAL_ENDPOINT,
+  ...(repairOnce?{repairOnce:true}:{})};
 }
 
 export function ensurePrivateNewDirectory(dest){
@@ -87,12 +93,35 @@ export function ensurePrivateNewDirectory(dest){
   fail('OUTPUT_ROOT_PARENT_DISALLOWED');
 }
 
+/** Eligible only for explicit equipment omissions, never arbitrary compiler
+ * failures. Source evidence comes from the exact saved first response.
+ * Original raw and SOURCE remain untouched, even on revised SOURCE PASS.
+ */
+export function r125FixtureRevisionEvidence(diagnosis,raw){
+ if(!diagnosis||diagnosis.sourceVerified===true||
+    typeof raw!=='string'||raw.length<10||raw.length>12000)return null;
+ try{
+  const p=JSON.parse(raw);
+  if(!p||typeof p!=='object'||!Array.isArray(p.levels))return null;
+ }catch{return null;}
+ const missing=[...(diagnosis.explicitActivityProxy?.missing??[]),
+  ...(diagnosis.roomActivityProxy?.missing??[])];
+ const missingRequiredFixtureRoles=[...new Set(missing
+  .map(x=>x?.requiredRole).filter(x=>typeof x==='string'))];
+ const issue=String(diagnosis.compilerReason??'');
+ const authoredFixtureError=/^R125_PLAN_(SPACE_FIXTURE_DETAIL|SPACE_FIXTURE_ARRANGEMENT|SPACE_OVEN_HEARTH|OBSERVATION_LINK_NO_AUTHORED_WORKSTATION)$/.test(issue);
+ if(!missingRequiredFixtureRoles.length&&!authoredFixtureError)return null;
+ return {previousModelResponse:raw,
+  sourceIssueCodes:[diagnosis.status,...(authoredFixtureError?[issue]:[])],
+  missingRequiredFixtureRoles};
+}
 export async function runR125LocalArchitecturePlan({
  model,prompt,outDir,endpoint=DEFAULT_LOCAL_ENDPOINT,
- reasoningEffort=undefined,maxOutputTokens=4096
+ reasoningEffort=undefined,maxOutputTokens=4096,repairOnce=false
 },{fetcher=fetch,timeoutMs=180000}={}){
  if(typeof outDir!=='string'||outDir.length===0)
   fail('OUT_DIRECTORY_REQUIRED');
+ if(typeof repairOnce!=='boolean')fail('INVALID_REPAIR_OPTION');
  const dest=path.resolve(outDir);
  ensurePrivateNewDirectory(dest);
  let captured=null,modelStartMs=null,modelElapsedMs=null;
@@ -115,7 +144,8 @@ export async function runR125LocalArchitecturePlan({
   requestedGenerationSettings:{temperature:0.55,
    responseFormat:r125ResponseFormatForEndpoint(endpoint).type,maxOutputTokens,
    reasoningEffort:reasoningEffort??null,timeoutMs},
-  attemptLimit:1,automaticRetries:0,
+  attemptLimit:repairOnce?2:1,automaticRetries:0,
+  modelRevisionLimit:repairOnce?1:0,
   provenance:'LOCAL_HTTP_PROVIDER_NOT_INDEPENDENTLY_ATTESTED',
   originalEdited:false,worldContacts:0,worldWrites:0,
   constructionApproved:false,artStatus:'NOT_REVIEWED',
@@ -220,7 +250,88 @@ export async function runR125LocalArchitecturePlan({
    sourceVerified:false,modelCallAttempts:1,
    modelResponsesCaptured:captured?1:0};
  }finally{
-  // Never include raw provider text in the shareable run report.
+  // A bounded SECOND genuine local model response is allowed ONLY on an
+  // explicitly requested equipment-related SOURCE/contract HOLD.
+  // This is model-guided new authorship, not a silent HOST correction.
+  if(repairOnce&&result&&result.sourceVerified!==true&&
+     captured?.finishReason!=='length'&&
+     fs.existsSync(path.join(dest,'MODEL_RESPONSE_ORIGINAL.txt'))&&
+     fs.existsSync(path.join(dest,'SOURCE_DIAGNOSIS.json'))){
+   let evidence=null;
+   try{
+    const firstRaw=fs.readFileSync(path.join(dest,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8');
+    if(sha(firstRaw)===captured.sha256)
+     evidence=r125FixtureRevisionEvidence(JSON.parse(fs.readFileSync(
+      path.join(dest,'SOURCE_DIAGNOSIS.json'),'utf8')),firstRaw);
+   }catch{/* Preserve first original HOLD without retrying unsafe source. */}
+   if(evidence){
+    const initialStatus=result.status;
+    let revisedCapture=null,revisionError=null,revisedAnswer=null;
+    let revisedDiagnosis=null;
+    let revisedSourceDesign=null;
+    const revisedAuthor=createR125ArchitecturePlanLocalAdapter({
+     model,endpoint,fetcher,timeoutMs,reasoningEffort,maxOutputTokens,
+     onRawModelResponse(raw,{finishReason,usage}){
+      revisedCapture={sha256:sha(raw),finishReason,usage};
+      write(dest,'MODEL_RESPONSE_REVISED.txt',raw);
+     }});
+    const revisedStart=Date.now();
+    try{
+     revisedAnswer=await revisedAuthor({prompt,repairContext:evidence});
+    }catch(error){revisionError=String(error?.message??error).slice(0,220);}
+    const revisedElapsed=Date.now()-revisedStart;
+    if(revisedCapture&&fs.existsSync(path.join(dest,'MODEL_RESPONSE_REVISED.txt'))){
+     const raw=fs.readFileSync(path.join(dest,'MODEL_RESPONSE_REVISED.txt'),'utf8');
+     if(sha(raw)===revisedCapture.sha256){
+      const reviewed=diagnoseR125ArchitecturePlanOriginal(raw,{requestedBrief:prompt});
+      const {sourceDesign,...diagnosis}=reviewed;
+      revisedDiagnosis=diagnosis;
+      revisedSourceDesign=sourceDesign;
+      write(dest,'SOURCE_DIAGNOSIS_REVISED.json',diagnosis);
+     }else revisionError='REVISED_RAW_CAPTURE_MISMATCH';
+    }
+    const passed=Boolean(revisedAnswer&&revisedCapture&&
+     revisedDiagnosis?.sourceVerified===true&&revisedSourceDesign&&
+     revisedAnswer.originalSha256===revisedCapture.sha256);
+    if(passed){
+     write(dest,'B143_REVISED_SOURCE_REVIEW_ONLY.json',revisedSourceDesign);
+     const template=fs.readFileSync(path.join(ROOT,
+      'source/ai/b143-viewer-template.html'),'utf8');
+     write(dest,'B143_REVISED_SOURCE_3D_REVIEW_ONLY.html',
+      renderB143Html(compileB143Gallery([revisedSourceDesign]),template));
+    }
+    result={...result,
+     status:passed?'B143_SOURCE_CANDIDATE_ART_HOLD':'HOLD_MODEL_REVISION_OR_SOURCE',
+     sourceVerified:passed,
+     modelCallAttempts:2,
+     modelResponsesCaptured:1+(revisedCapture?1:0),
+     initialStatus,modelRevisionAttempted:true,
+     modelRevisionApplied:passed,
+     originalSha256:captured.sha256,
+     revisedOriginalSha256:revisedCapture?.sha256??null,
+     revisedSourceStatus:revisedDiagnosis?.status??null,
+     revisedCompilerReason:revisedDiagnosis?.compilerReason??null,
+     ...(passed?{
+      sourceSha256:revisedDiagnosis.sourceSha256,
+      geometrySha256:revisedDiagnosis.geometrySha256,
+      review3d:'REVISED_TRUE_B143_HTML_GENERATED_ART_PENDING'
+     }:{
+      sourceSha256:null,geometrySha256:null,
+      review3d:'REVISED_SOURCE_NOT_VERIFIED'
+     }),
+     revisedCaptureFinishReason:revisedCapture?.finishReason??null,
+     revisedProviderReportedTokenUsage:revisedCapture?.usage??null,
+     revisedModelElapsedMs:revisedElapsed,
+     revisionError,
+     modelRevisionIssues:evidence.sourceIssueCodes,
+     modelRevisionMissingRoles:evidence.missingRequiredFixtureRoles,
+     makeCodeStatus:'NOT_ATTEMPTED_FOR_REVISED_SOURCE',
+     makeCodeSourceSha256:null,
+     originalEdited:false,worldWrites:0,constructionApproved:false,
+     artStatus:'NOT_REVIEWED'};
+   }
+  }
+  // Never include model text in the shareable run report.
   write(dest,'RUN_REPORT.json',result);
  }
  return {report:result,outputDirectory:dest};
@@ -229,7 +340,7 @@ export async function runR125LocalArchitecturePlan({
 if(process.argv[1]===fileURLToPath(import.meta.url)){
  try{
   const args=parseR125LocalPlanArgs(process.argv.slice(2));
-  if(args.help)console.log('R125 local: --model LOCAL_ID --prompt TEXT --out NEW_PRIVATE_DIRECTORY [--endpoint http://127.0.0.1:PORT/v1/chat/completions]');
+  if(args.help)console.log('R125 local: --model LOCAL_ID --prompt TEXT --out NEW_PRIVATE_DIRECTORY [--endpoint http://127.0.0.1:PORT/v1/chat/completions] [--repair-once]');
   else{
    const {report}=await runR125LocalArchitecturePlan(args);
    console.log('R125_LOCAL_ARCHITECTURE_PLAN',JSON.stringify(report));
