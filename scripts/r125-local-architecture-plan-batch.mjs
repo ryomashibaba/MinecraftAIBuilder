@@ -105,6 +105,25 @@ export function parseR125BatchArgs(argv){
  * alone is NOT evidence of a different architectural form.
  */
 export function authoredFormFamily(plan){
+ // For model-authored spatial trees, a splitPercent/roof expression does not
+ // exist. Compare actual authored room dimensions and attachment topology
+ // instead. Without this branch independent spatial volumes all falsely look
+ // like the SAME form and a genuine multi-brief Windows pilot exits 2.
+ if(plan?.levels?.length===1&&
+    plan.levels[0]?.layoutMode==='spatial-tree'){
+  const spaces=plan.levels[0].spaces;
+  const indexById=new Map(spaces.map((s,i)=>[s.id,i]));
+  return {layoutMode:'spatial-tree',roomCounts:[spaces.length],
+   roomVolumes:spaces.map(room=>{
+    const v=room.volume;
+    return {width:v.width,depth:v.depth,roofY:v.roofY,
+     attach:v.attach?{parentIndex:indexById.get(v.attach.to),
+      side:v.attach.side,shift:v.attach.shift}:null,
+     spatialUse:room.spatialUse??'enclosed',
+     roofProfile:v.roofForm??'flat',
+     roofAxis:v.roofForm==='ridge'?v.roofAxis:null};
+   })};
+ }
  const e=plan?.expression;
  return {levelAxes:plan.levels.map(l=>l.splitAxis),
   roomCounts:plan.levels.map(l=>l.spaces.length),

@@ -361,6 +361,59 @@ test('comparison escapes untrusted original request text',()=>{
  assert.ok(!html.includes('<img src=x'));
 });
 
+test('spatial-tree form comparison recognizes real room massing instead of false duplicate forms',()=>{
+ const base={
+  footprint:{width:28,depth:24},
+  levels:[{layoutMode:'spatial-tree',spaces:[
+   {id:'visitor-room',purpose:'Public exhibit',access:'public',
+    fixtures:['display'],volume:{width:10,depth:9,roofY:7}},
+   {id:'work-room',purpose:'Staff craft',access:'staff',
+    fixtures:['workbench'],volume:{width:9,depth:9,roofY:9,
+     attach:{to:'visitor-room',side:'east',shift:0}}},
+   {id:'archive-room',purpose:'Storage and records',access:'staff',
+    fixtures:['storage'],volume:{width:7,depth:8,roofY:7,
+     attach:{to:'work-room',side:'south',shift:0}}}
+  ]}],
+  materials:{floor:'wood',wall:'concrete',roof:'stone'}
+ };
+ const original=JSON.stringify(base);
+ const signature=authoredFormFamily(base);
+ assert.equal(signature.layoutMode,'spatial-tree');
+ assert.deepEqual(signature.roomCounts,[3]);
+ assert.equal(signature.roomVolumes[2].attach.parentIndex,1);
+ assert.equal(JSON.stringify(base),original);
+ const cosmetic=structuredClone(base);
+ cosmetic.levels[0].spaces[0].id='reception-room';
+ cosmetic.levels[0].spaces[1].volume.attach.to='reception-room';
+ cosmetic.levels[0].spaces[1].id='fabrication-room';
+ cosmetic.levels[0].spaces[2].volume.attach.to='fabrication-room';
+ cosmetic.levels[0].spaces[0].purpose='New exhibition title';
+ cosmetic.materials.wall='metal';
+ assert.deepEqual(authoredFormFamily(cosmetic),signature,
+  'renaming rooms or changing palette is not a new building form');
+ const changes=[
+  p=>{p.levels[0].spaces[0].volume.width=12;},
+  p=>{p.levels[0].spaces[1].volume.roofY=8;},
+  p=>{p.levels[0].spaces[1].volume.attach.side='west';},
+  p=>{p.levels[0].spaces[1].volume.attach.shift=1;},
+  p=>{p.levels[0].spaces[1].volume.roofForm='ridge';
+   p.levels[0].spaces[1].volume.roofAxis='x';},
+  p=>{p.levels[0].spaces[0].spatialUse='open-court';}
+ ];
+ for(const change of changes){
+  const varied=structuredClone(base);change(varied);
+  assert.notDeepEqual(authoredFormFamily(varied),signature,
+   'real dimension/topology/roof/courtyard variations must be visible');
+ }
+ const ridge=structuredClone(base);
+ ridge.levels[0].spaces[1].volume.roofForm='ridge';
+ ridge.levels[0].spaces[1].volume.roofAxis='x';
+ const rotated=structuredClone(ridge);
+ rotated.levels[0].spaces[1].volume.roofAxis='z';
+ assert.notDeepEqual(authoredFormFamily(rotated),authoredFormFamily(ridge));
+ assert.deepEqual(authoredFormFamily(base),signature);
+});
+
 test('form diversity reflects physical roof mass and not unused flat roof axis',()=>{
  const p={levels:[{splitAxis:'x',spaces:[{},{}]}],
   expression:{roofProfile:'flat',roofAxis:'x',setbackSide:'none',
