@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import {createHash} from 'node:crypto';
 import vm from 'node:vm';
 import os from 'node:os';
 import path from 'node:path';
@@ -10,6 +11,7 @@ import {runR125ArchitecturePlanBatch,parseR125BatchBriefs,parseR125BatchArgs,
  from './r125-local-architecture-plan-batch.mjs';
 import {renderR125BatchComparison} from './r125-batch-compare.mjs';
 
+const digest=value=>createHash('sha256').update(value).digest('hex');
 const original=fs.readFileSync(new URL(
  '../evidence/r125-real-l-corner-20261101/MODEL_RESPONSE_ORIGINAL.txt',
  import.meta.url),'utf8');
