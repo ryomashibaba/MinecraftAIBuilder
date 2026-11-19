@@ -8,7 +8,8 @@
  */
 import {createHash} from 'node:crypto';
 import {compileDesign,verifyCompiled,SCHEMA as B143} from './b143-building-dsl.mjs';
-import {auditR125SourceRoutes} from './r125-source-routes.mjs';
+import {auditR125SourceRoutes,auditR125VisitorRoutes} from './r125-source-routes.mjs';
+import {SCHEMA as SPATIAL_SCHEMA,compileSpatialComposition} from './r125-spatial-composition.mjs';
 import {addAuthoredRoomFixtures,addR125ActivityFloorInlays,restyleR125FixtureForms} from './r125-room-fixtures.mjs';
 import {addAuthoredRoomDaylight,addR125SpatialDaylightBays} from './r125-room-daylight.mjs';
 import {expandR125RoomScale} from './r125-room-scale.mjs';
@@ -355,7 +356,9 @@ export function validateArchitecturePlan(p){
  }
  const seen=new Set();
  for(const level of p.levels){
-  check(keys(level,['splitAxis','splitPercent','spaces',
+  const spatialLevel=level.layoutMode==='spatial-tree';
+  const expectedLevelKeys=spatialLevel?['layoutMode','spaces']:[
+   'splitAxis','splitPercent','spaces',
    ...(Object.hasOwn(level??{},'secondarySplitPercent')?
     ['secondarySplitPercent']:[]),
    ...(Object.hasOwn(level??{},'thirdRoomLink')?
@@ -363,11 +366,17 @@ export function validateArchitecturePlan(p){
    ...(Object.hasOwn(level??{},'rearBayPercentages')?
     ['rearBayPercentages']:[]),
    ...(Object.hasOwn(level??{},'sideBayPercentages')?
-    ['sideBayPercentages']:[])])&&
-   ['x','z'].includes(level.splitAxis)&&Number.isInteger(level.splitPercent)&&
-   level.splitPercent>=(level.spaces.length===4?20:30)&&
-   level.splitPercent<=70&&level.splitPercent%5===0&&
-   Array.isArray(level.spaces)&&[2,3,4].includes(level.spaces.length),'LEVEL_PROGRAM');
+    ['sideBayPercentages']:[])];
+  check(keys(level,expectedLevelKeys)&&
+   (spatialLevel?
+    (p.levels.length===1&&!expressive&&Array.isArray(level.spaces)&&
+     [2,3,4].includes(level.spaces.length)):
+    ['x','z'].includes(level.splitAxis)&&Number.isInteger(level.splitPercent)&&
+     Array.isArray(level.spaces)&&
+     level.splitPercent>=(level.spaces.length===4?20:30)&&
+     level.splitPercent<=70&&level.splitPercent%5===0&&
+     [2,3,4].includes(level.spaces.length)),
+   'LEVEL_PROGRAM');
   check(level.secondarySplitPercent===undefined||
    (level.spaces.length===3&&Number.isInteger(level.secondarySplitPercent)&&
     level.secondarySplitPercent>=25&&level.secondarySplitPercent<=75&&
@@ -390,7 +399,7 @@ export function validateArchitecturePlan(p){
     level.sideBayPercentages.every(n=>Number.isInteger(n)&&n>=20&&n<=80&&n%5===0)&&
     level.sideBayPercentages[0]<level.sideBayPercentages[1]),
    'FOUR_ROOM_SIDE_BAY_DEPTHS');
-  if(level.spaces.length===4)
+  if(level.spaces.length===4&&level.layoutMode!=='spatial-tree')
    check(p.levels.length===1&&
     ((level.splitAxis==='z'&&p.footprint.width>=22&&p.footprint.depth>=18)||
      (level.splitAxis==='x'&&p.footprint.width>=20&&p.footprint.depth>=22))&&
@@ -412,11 +421,26 @@ export function validateArchitecturePlan(p){
     ...(Object.hasOwn(space??{},'fixtureScale')?['fixtureScale']:[]),
     ...(Object.hasOwn(space??{},'ovenHearth')?['ovenHearth']:[]),
     ...(Object.hasOwn(space??{},'daylight')?['daylight']:[]),
-    ...(Object.hasOwn(space??{},'access')?['access']:[])])&&
+    ...(Object.hasOwn(space??{},'access')?['access']:[]),
+    ...(Object.hasOwn(space??{},'volume')?['volume']:[])])&&
     slug(space.id)&&text(space.purpose),'SPACE_FIELDS');
    check(space.access===undefined||
     ['public','shared','staff'].includes(space.access),
     'SPACE_ACCESS');
+   if(level.layoutMode==='spatial-tree'){
+    const volume=space.volume;
+    check(keys(volume,['width','depth','roofY',...(Object.hasOwn(volume??{},'attach')?['attach']:[])])&&
+     integer(volume.width,6,14)&&integer(volume.depth,6,14)&&
+     integer(volume.roofY,6,10),'SPATIAL_ROOM_VOLUME');
+    if(seen.size===0){
+     check(!Object.hasOwn(volume,'attach')&&['public','shared'].includes(space.access),
+      'SPATIAL_ROOT_MUST_BE_PUBLIC');
+    }else{
+     check(keys(volume.attach,['to','side','shift'])&&seen.has(volume.attach.to)&&
+      ['east','west','north','south'].includes(volume.attach.side)&&
+      integer(volume.attach.shift,-3,3),'SPATIAL_ATTACHMENT');
+    }
+   }else check(!Object.hasOwn(space,'volume'),'SPATIAL_VOLUME_REQUIRES_LAYOUT_MODE');
    check(space.fixture===undefined||
     ['counter','workbench','display','storage','seating'].includes(space.fixture),
     'SPACE_FIXTURE_ROLE');
@@ -459,7 +483,8 @@ export function validateArchitecturePlan(p){
  }
  if(observationSpecified){
   const relation=p.observationLink;
-  check(expressive&&keys(relation,['viewerSpaceId','workSpaceId'])&&
+  check((expressive||p.levels.some(level=>level.layoutMode==='spatial-tree'))&&
+   keys(relation,['viewerSpaceId','workSpaceId'])&&
    slug(relation.viewerSpaceId)&&slug(relation.workSpaceId)&&
    relation.viewerSpaceId!==relation.workSpaceId,
    'OBSERVATION_LINK_FIELDS');
@@ -631,6 +656,49 @@ export function assessR125AuthoredRoomCapacity(plan){
   zones,flaggedZones:zones.filter(x=>x.risks.length>0).length};
 }
 
+function compileR125SpatialArchitecturePlan(original){
+ const level=original.levels[0];
+ const proposal={schema:SPATIAL_SCHEMA,id:original.id,title:original.title,
+  brief:original.brief,materials:original.materials,
+  rooms:level.spaces.map(space=>({id:space.id,purpose:space.purpose,
+   width:space.volume.width,depth:space.volume.depth,roofY:space.volume.roofY,
+   ...(space.volume.attach?{attach:space.volume.attach}:{})}))};
+ const spatial=compileSpatialComposition(proposal);
+ check(spatial.design.bounds.width<=original.footprint.width&&
+  spatial.design.bounds.depth<=original.footprint.depth,
+  'SPATIAL_VOLUMES_EXCEED_FOOTPRINT');
+ const authored=new Map(level.spaces.map(space=>[space.id,space]));
+ const program=[{level:0,standingFloorY:2,zones:spatial.layout.rooms.map(room=>({
+  id:room.id,purpose:room.purpose,access:authored.get(room.id).access,
+  range:{x:[room.x+1,room.x+room.width-2],
+   z:[room.z+1,room.z+room.depth-2]}
+ }))}];
+ let product={...spatial,plan:original,program,fixtureTargets:[],
+  planSha256:hash(original),spatialComposition:true,
+  modelAuthorship:'CALLER_PROVIDED_PLAN_UNVERIFIED'};
+ const auditCirculation=candidate=>{
+  const routes=auditR125SourceRoutes(candidate,{
+   featureTargets:candidate.fixtureTargets??[]});
+  const failed=routes.status!=='SOURCE_ROUTES_REACH_ALL_ZONES'||
+   (routes.featureAccess??[]).some(feature=>!feature.reachableFromEntrance);
+  return {status:failed?'HOLD_SOURCE_CIRCULATION':'SOURCE_CLEARANCE_PROBES_PASS',
+   failures:failed?(routes.issues??[]):[],routeStatus:routes.status};
+ };
+ product=addAuthoredRoomFixtures(product,{auditCirculation});
+ const visitors=auditR125VisitorRoutes(product,original);
+ check(visitors.status==='SOURCE_VISITOR_ROUTES_AVOID_STAFF',
+  'SPATIAL_VISITOR_ROUTES');
+ if(original.observationLink)
+  product=addR125AuthoredObservation(product,original);
+ const routes=auditR125SourceRoutes(product,{
+  featureTargets:product.fixtureTargets});
+ check(routes.status==='SOURCE_ROUTES_REACH_ALL_ZONES'&&
+  !(routes.featureAccess??[]).some(feature=>!feature.reachableFromEntrance),
+  'SPATIAL_SOURCE_ROUTES');
+ return {...product,sourceRoutes:routes,visitorCirculation:visitors,
+  spatialLayout:spatial.layout,worldWrites:0};
+}
+
 export function compileArchitecturePlan(plan,{
  entrancePlacement='legacy',upperDoorPlacement='legacy',hostDetail='legacy',
  roofGlazing='none',roofMassing='default',fixtureArt='none',fixtureForm='default'
@@ -664,6 +732,13 @@ export function compileArchitecturePlan(plan,{
  validateArchitecturePlan(plan);
  check(['legacy','source-accessible'].includes(entrancePlacement),
   'ENTRANCE_PLACEMENT_MODE');
+ if(plan.levels[0].layoutMode==='spatial-tree'){
+  check(entrancePlacement==='legacy'&&upperDoorPlacement==='legacy'&&
+   hostDetail==='legacy'&&roofGlazing==='none'&&roofMassing==='default'&&
+   fixtureArt==='none'&&fixtureForm==='default',
+   'SPATIAL_LAYOUT_INCOMPATIBLE_HOST_OPTIONS');
+  return compileR125SpatialArchitecturePlan(structuredClone(plan));
+ }
  // Opt-in HOST research only. Old callers retain byte-for-byte geometry.
  check(['legacy','stair-clear'].includes(upperDoorPlacement),
   'UPPER_DOOR_PLACEMENT_MODE');
@@ -811,6 +886,20 @@ export function compileArchitecturePlan(plan,{
  * This is NOT Minecraft physics / walking or structural safety certification.
  */
 export function auditArchitecturePlanCirculation(product){
+ if(product?.spatialComposition===true){
+  check(product.design&&product.compiled&&verifyCompiled(product.design,product.compiled),
+   'INVALID_SPATIAL_CIRCULATION_INPUT');
+  const routes=auditR125SourceRoutes(product,{
+   featureTargets:product.fixtureTargets??[]});
+  const failed=routes.status!=='SOURCE_ROUTES_REACH_ALL_ZONES'||
+   (routes.featureAccess??[]).some(feature=>!feature.reachableFromEntrance);
+  return {schema:'r125-plan-source-circulation-audit-v1',
+   sourceSha256:product.sourceSha256,geometrySha256:product.geometrySha256,
+   status:failed?'HOLD_SOURCE_CIRCULATION':'SOURCE_CLEARANCE_PROBES_PASS',
+   failures:failed?(routes.issues??[]):[],levels:routes.zones??[],stairFlights:[],
+   onlyDeterministicLocalSourceProbes:true,continuousRealPlayerPathCertified:false,
+   worldWalking:'NOT_TESTED',worldWrites:0};
+ }
  check(product?.schema==='minecraftaibuilder-r125-plan-to-b143-result-v1'&&
   product.design&&product.compiled&&Array.isArray(product.program),
   'INVALID_CIRCULATION_INPUT');
