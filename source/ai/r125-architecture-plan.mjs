@@ -755,12 +755,15 @@ export function compileArchitecturePlan(plan,{
    box(tag+'-window-'+win.id+'-glass','add','glass',win.at,win.size);
   }
   const [first,second]=level.spaces;
-  const roomZones=side?.zones??four?.zones??three?.zones??(axis==='x' ?[
-   {id:first.id,purpose:first.purpose,range:{x:[x0+1,split-1],z:[z0+1,z1-1]}},
-   {id:second.id,purpose:second.purpose,range:{x:[split+1,x1-1],z:[z0+1,z1-1]}}
+  // The legacy rectangular compiler uses fixed interior bounds,
+  // not expressive-envelope x0/x1/z0/z1 variables. Keep its pinned SOURCE
+  // voxels and zone ranges byte-for-byte identical to historic plans.
+  const roomZones=side?.zones??four?.zones??three?.zones??(axis==='x'?[
+   {id:first.id,purpose:first.purpose,range:{x:[2,split-1],z:[2,d-3]}},
+   {id:second.id,purpose:second.purpose,range:{x:[split+1,w-3],z:[2,d-3]}}
   ]:[
-   {id:first.id,purpose:first.purpose,range:{x:[x0+1,x1-1],z:[z0+1,split-1]}},
-   {id:second.id,purpose:second.purpose,range:{x:[x0+1,x1-1],z:[split+1,z1-1]}}
+   {id:first.id,purpose:first.purpose,range:{x:[2,w-3],z:[2,split-1]}},
+   {id:second.id,purpose:second.purpose,range:{x:[2,w-3],z:[split+1,d-3]}}
   ]);
   program.push({
    level:l,splitAxis:axis,requestedPercent:level.splitPercent,
