@@ -963,6 +963,14 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
   const three=tLayout(level,{x0,x1,z0,z1},split);
   const side=fourRoomSideSpine(level,{x0,x1,z0,z1},split);
   const four=fourRoomFrontHub(level,{x0,x1,z0,z1},split);
+  const [first,second]=level.spaces;
+  const roomZones=side?.zones??four?.zones??three?.zones??(axis==='x'?[
+   {id:first.id,purpose:first.purpose,range:{x:[x0+1,split-1],z:[z0+1,z1-1]}},
+   {id:second.id,purpose:second.purpose,range:{x:[split+1,x1-1],z:[z0+1,z1-1]}}
+  ]:[
+   {id:first.id,purpose:first.purpose,range:{x:[x0+1,x1-1],z:[z0+1,split-1]}},
+   {id:second.id,purpose:second.purpose,range:{x:[x0+1,x1-1],z:[split+1,z1-1]}}
+  ]);
   if(axis==='x'){
    box(tag+'-divider','add',wall,[split,y,z0+1],[1,4,z1-z0-1]);
    if(!side)box(tag+'-internal-door','cut',null,
@@ -1164,7 +1172,6 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
    box('front-terrace-parapet-east','add',wall,
     [x1,y,z0-setbackDepth+1],[1,1,setbackDepth-1]);
   }
-  const [first,second]=level.spaces;
   program.push({level:l,splitAxis:axis,requestedPercent:level.splitPercent,
    splitCoordinate:split,standingFloorY:y,
    // The space ranges below are bounding boxes; the real occupied region
@@ -1175,13 +1182,7 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
     z:[d-1-rearCornerCut.depth,d-2]
    }}:{}),
    ...(three?{secondarySplitAxis:three.axis,secondarySplitCoordinate:three.coordinate}:{}),
-   zones:side?.zones??four?.zones??three?.zones??(axis==='x'?[
-    {id:first.id,purpose:first.purpose,range:{x:[x0+1,split-1],z:[z0+1,z1-1]}},
-    {id:second.id,purpose:second.purpose,range:{x:[split+1,x1-1],z:[z0+1,z1-1]}}
-   ]:[
-    {id:first.id,purpose:first.purpose,range:{x:[x0+1,x1-1],z:[z0+1,split-1]}},
-    {id:second.id,purpose:second.purpose,range:{x:[x0+1,x1-1],z:[split+1,z1-1]}}
-   ]),
+   zones:roomZones,
    partitionDoorModelled:true,doorAccessibleInMinecraft:'NOT_TESTED'});
  }
  if(count===2){
