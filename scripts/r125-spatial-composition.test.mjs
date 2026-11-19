@@ -180,6 +180,56 @@ test('author-selected paired daylight opens two real public frontage bays withou
  assert.notEqual(result.geometrySha256,earlier.geometrySha256);
 });
 
+test('model-selected shed roofs create sealed stepped profiles without changing old flat/ridge geometry',()=>{
+ const baseline=structuredClone(examples[0]);
+ const flat=compileSpatialComposition(baseline);
+ const author=structuredClone(baseline);
+ author.rooms[0].roofForm='shed';author.rooms[0].roofAxis='x';
+ author.rooms[1].roofForm='shed';author.rooms[1].roofAxis='z';
+ const original=JSON.stringify(author);
+ assert.equal(validateSpatialComposition(author),true);
+ const source=compileSpatialComposition(author);
+ assert.equal(JSON.stringify(author),original);
+ assert.notEqual(source.geometrySha256,flat.geometrySha256);
+ assert.equal(source.layout.rooms[0].roofForm,'shed');
+ for(const [index,axis] of [[0,'x'],[1,'z']]){
+  const room=source.layout.rooms[index];
+  const high=source.design.elements.find(e=>
+   e.id==='space-'+index+'-shed-high-end');
+  assert(high,'sloping roof must close its high face');
+  assert.equal(high.mode,'add');
+  assert.equal(high.material,author.materials.wall);
+  assert.equal(high.size[1],2);
+  assert.equal(high.origin[1],room.roofY);
+  assert.equal(high.origin[axis==='x'?0:2],
+   (axis==='x'?room.x+room.width-1:room.z+room.depth-1));
+  const skins=source.design.elements.filter(e=>
+   e.id.startsWith('space-'+index+'-shed-skin-'));
+  assert(skins.length>=2);
+  assert.equal(Math.max(...skins.map(e=>e.origin[1])),room.roofY+2);
+  assert(source.design.elements.some(e=>
+   e.id.startsWith('space-'+index+'-shed-gable-')));
+ }
+ assert.equal(verifyCompiled(source.design,source.compiled),true);
+ assert.equal(source.sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.deepEqual(source.BuildPlan.operations,[]);
+ assert.deepEqual(source.gates,Array(9).fill('BLOCKED'));
+ assert.equal(source.worldWrites,0);
+ const ridge=structuredClone(baseline);
+ ridge.rooms[0].roofForm='ridge';ridge.rooms[0].roofAxis='x';
+ const beforeRidge=compileSpatialComposition(ridge);
+ assert(beforeRidge.design.elements.some(e=>
+  e.id==='space-0-ridge-skin-0'));
+ assert.equal(compileSpatialComposition(baseline).geometrySha256,
+  flat.geometrySha256);
+ const invalid=structuredClone(baseline);
+ invalid.rooms[0].roofForm='shed';
+ assert.throws(()=>validateSpatialComposition(invalid),/ROOM_CONTRACT/);
+ const court=structuredClone(author);
+ court.rooms[0].spatialUse='open-court';
+ assert.throws(()=>validateSpatialComposition(court),/ROOM_CONTRACT/);
+});
+
 // This is a real new SOURCE-only massing option, never a retroactive
 // Qwen edit, ART pass, game walk certification or world operation.
 test('authored spatial ridge forms create distinct real B143 roof volumes',()=>{

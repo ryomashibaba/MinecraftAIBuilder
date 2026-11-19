@@ -691,6 +691,16 @@ test('new Qwen four-room split schema keeps minimum real hub/spine clear spans',
  }
 });
 
+test('Qwen may choose shed or ridge roof only for an enclosed spatial room',()=>{
+ const spatial=R125_ARCHITECTURE_RESPONSE_SCHEMA.anyOf[0];
+ const room=spatial.properties.levels.items.properties.spaces.items;
+ assert.deepEqual(room.properties.volume.properties.roofForm.enum,
+  ['ridge','shed']);
+ assert.deepEqual(room.properties.volume.properties.roofAxis.enum,['x','z']);
+ assert.equal(room.properties.volume.required.includes('roofForm'),false,
+  'older genuinely flat model rooms stay valid');
+});
+
 test('spatial-tree Qwen schema requires authored per-room volumes and supports observation',()=>{
  const schema=R125_ARCHITECTURE_RESPONSE_SCHEMA;
  assert.equal(schema.anyOf.length,3);

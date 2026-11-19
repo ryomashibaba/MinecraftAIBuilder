@@ -47,7 +47,7 @@ export function validateSpatialComposition(p){
     (r.spatialUse!=='open-court'||i!==0||r.daylight!==undefined))||
    (r.roofForm===undefined&&r.roofAxis!==undefined)||
    (r.roofForm!==undefined&&
-    (r.roofForm!=='ridge'||!['x','z'].includes(r.roofAxis)||
+    (!['ridge','shed'].includes(r.roofForm)||!['x','z'].includes(r.roofAxis)||
      r.spatialUse==='open-court')))
     fail('ROOM_CONTRACT');
   if(i>0&&(!keys(r.attach,['to','side','shift'])||
@@ -122,24 +122,33 @@ export function compileSpatialComposition(value){
   box(tag+'-front','add',mat.wall,[r.x+1,2,r.z],[r.width-2,height,1]);
   box(tag+'-rear','add',mat.wall,[r.x+1,2,maxZ(r)],[r.width-2,height,1]);
   if(r.spatialUse!=='open-court'){
-   if(r.roofForm==='ridge'){
-    // Opt-in authored true pitched ceilings and closing gable walls.
-    // No existing flat roof is changed or silently covered.
+   if(r.roofForm==='ridge'||r.roofForm==='shed'){
+    // MODEL-authored roofs. Historic ridge elements stay unchanged.
+    // Shed rises toward positive roofAxis and has a sealed high end.
     const axis=r.roofAxis,n=axis==='x'?r.width:r.depth;
-    const rise=k=>Math.min(2,Math.floor(Math.min(k,n-1-k)/2));
+    const rise=k=>r.roofForm==='shed'?
+     Math.min(2,Math.floor(k*3/n)):
+     Math.min(2,Math.floor(Math.min(k,n-1-k)/2));
     for(let start=0;start<n;){
      const h=rise(start);let end=start+1;
      while(end<n&&rise(end)===h)end++;
      const run=end-start;
-     box(tag+'-ridge-skin-'+start,'add',mat.roof,
+     box(tag+'-'+r.roofForm+'-skin-'+start,'add',mat.roof,
       axis==='x'?[r.x+start,r.roofY+h,r.z]:[r.x,r.roofY+h,r.z+start],
       axis==='x'?[run,1,r.depth]:[r.width,1,run]);
      if(h){
       const gables=axis==='x'?
        [[r.x+start,r.roofY,r.z],[r.x+start,r.roofY,maxZ(r)]]:
        [[r.x,r.roofY,r.z+start],[maxX(r),r.roofY,r.z+start]];
-      gables.forEach((origin,j)=>box(tag+'-ridge-gable-'+start+'-'+j,
+      gables.forEach((origin,j)=>box(tag+'-'+r.roofForm+'-gable-'+start+'-'+j,
        'add',mat.wall,origin,axis==='x'?[run,h,1]:[1,h,run]));
+      if(r.roofForm==='shed'&&end===n){
+       // Gables close the corners, this wall closes the high face.
+       box(tag+'-shed-high-end','add',mat.wall,
+        axis==='x'?[maxX(r),r.roofY,r.z+1]:
+         [r.x+1,r.roofY,maxZ(r)],
+        axis==='x'?[1,h,r.depth-2]:[r.width-2,h,1]);
+      }
      }
      start=end;
     }
