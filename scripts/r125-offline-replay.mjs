@@ -19,6 +19,8 @@ import {compileArchitecturePlan,composeR125PublicStairSpine,
 import {auditR125SourceRoutes,auditR125VisitorRoutes} from '../source/ai/r125-source-routes.mjs';
 import {auditR125PairedBayApproach} from '../source/ai/r125-room-daylight.mjs';
 import {critiqueArchitecture} from '../source/ai/b198c-spatial-critic.mjs';
+import {r125RequiresWorkObservation}
+ from '../source/ai/b198g-local-model-adapter.mjs';
 import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
 
 const digest=x=>createHash('sha256').update(x).digest('hex');
@@ -164,7 +166,7 @@ export function auditR125ExplicitActivityProxy(requestedBrief,fixtureTargets=[])
  * Unknown purposes are UNKNOWN: no speculative genre templates or repairs.
  */
 export function auditR125AuthoredRoomActivityProxy(
- original,requestedBrief,fixtureTargets=[]
+ original,requestedBrief,fixtureTargets=[],observationSource=null
 ){
  const base={schema:'r125-explicit-room-activity-proxy-v1',
   sourceOnly:true,originalEdited:false,independentFullBriefCoverage:false,
@@ -193,6 +195,7 @@ export function auditR125AuthoredRoomActivityProxy(
  const observerDescription=/(?:焼成|オーブン|パン).*?(?:見学|観察)|(?:見学|観察).*?(?:焼成|オーブン|パン)|\b(?:baking|oven)\b.*\b(?:observation|viewing|watching)\b|\b(?:observation|viewing|watching)\b.*\b(?:baking|oven)\b/i;
  const actualOvenOperation=/焼成(?:作業|管理|担当|を(?:行|担当|管理))|(?:焼成設備|焼成炉|オーブン)(?:を|の)?(?:操作|管理|運用|使用)|パンを焼|\b(?:oven operation|oven management|baking operation|baking station)\b/i;
  const requestWantsBakingView=/(?:焼成|オーブン|パン).*?(?:見学|観察|見る)|(?:見学|観察).*?(?:焼成|オーブン|パン)|\b(?:baking|oven)\s+(?:observation|viewing)\b|\b(?:watch|observe|view)\s+(?:the\s+)?(?:baking|oven)\b/i.test(requestedBrief);
+ const requestWantsWorkObservation=r125RequiresWorkObservation(requestedBrief);
  const assessed=[],observerRooms=[];
  for(let li=0;li<original.levels.length;li++){
   const level=original.levels[li];
@@ -228,12 +231,23 @@ export function auditR125AuthoredRoomActivityProxy(
    requestWantsBakingView?'NO_AUTHORED_OBSERVER_ROOM_NOT_CERTIFIED':
    'NOT_REQUESTED'
  };
+ const workObservation={
+  requested:requestWantsWorkObservation,
+  authoredRelation:original.observationLink??null,
+  sourceStatus:observationSource?.status??'NOT_AUTHORED_VIEW_RELATION_NOT_CERTIFIED',
+  status:!requestWantsWorkObservation?'NOT_REQUESTED':
+   observationSource?.status==='SOURCE_GLAZED_WORK_VIEW_CONFIRMED'?
+    'SOURCE_GLAZED_WORK_VIEW_CONFIRMED':
+    'HOLD_WORK_OBSERVATION_SOURCE_UNVERIFIED'
+ };
  return {...base,status:missing.length?'HOLD_EXPLICIT_ROOM_ACTIVITY_PROXY_MISSING':
+  workObservation.status==='HOLD_WORK_OBSERVATION_SOURCE_UNVERIFIED'?
+   'HOLD_WORK_OBSERVATION_SOURCE_UNVERIFIED':
   observation.status==='HOLD_BAKING_OBSERVATION_SOURCE_UNVERIFIED'?
    'HOLD_BAKING_OBSERVATION_SOURCE_UNVERIFIED':
   assessed.length?'EXPLICIT_ROOM_ACTIVITY_PROXIES_PRESENT_NOT_FULL_USE_CERTIFIED':
    'NO_UNAMBIGUOUS_ROOM_TASKS_NOT_FULL_USE_CERTIFIED',
-  assessed,missing,observation};
+  assessed,missing,observation,workObservation};
 }
 
 /**
@@ -356,7 +370,7 @@ export function diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail='legacy',ro
   const explicitActivityProxy=auditR125ExplicitActivityProxy(requestedBrief,
    built.fixtureTargets??[]);
   const roomActivityProxy=auditR125AuthoredRoomActivityProxy(placementPlan,
-   requestedBrief,built.fixtureTargets??[]);
+   requestedBrief,built.fixtureTargets??[],built.observationSource??null);
   const pairedWindows=built.daylightTargets?.some(x=>x.kind==='paired-bays')?
    auditR125PairedBayApproach(built):null;
   const circulation=auditArchitecturePlanCirculation(built);
@@ -505,3 +519,4 @@ if(process.argv[1]===fileURLToPath(import.meta.url)){
   }
  }catch(e){console.error('R125_REPLAY_HOLD',String(e?.message??e));process.exitCode=2;}
 }
+

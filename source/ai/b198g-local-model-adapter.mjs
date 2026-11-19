@@ -400,11 +400,24 @@ export const R125_ARCHITECTURE_RESPONSE_SCHEMA={
  ]
 };
 
-export function r125ResponseFormatForEndpoint(endpoint){
+export function r125RequiresWorkObservation(prompt){
+ return typeof prompt==='string'&&
+  /(?:組立|組み立て|製作|制作|点検|作業).{0,48}(?:ガラス|窓).{0,48}(?:見学|見学でき|見える|見る|観察)|(?:ガラス|窓).{0,48}(?:組立|組み立て|製作|制作|点検|作業).{0,48}(?:見学|見学でき|見える|見る|観察)|(?:組立|組み立て|製作|制作|点検|作業).{0,24}(?:見学|観察|見える).{0,32}(?:作業|様子|工程)/i.test(prompt);
+}
+
+export function r125ResponseFormatForEndpoint(endpoint,{observationRequired=false}={}){
  if(endpoint==='http://127.0.0.1:11434/v1/chat/completions')
+  {
+   const schema=observationRequired?{
+    ...R125_ARCHITECTURE_RESPONSE_SCHEMA,
+    anyOf:R125_ARCHITECTURE_RESPONSE_SCHEMA.anyOf.map(variant=>({
+     ...variant,required:[...variant.required,'observationLink']
+    }))
+   }:R125_ARCHITECTURE_RESPONSE_SCHEMA;
   return {type:'json_schema',json_schema:{
    name:'r125_architecture_plan_v11',strict:true,
-   schema:R125_ARCHITECTURE_RESPONSE_SCHEMA}};
+   schema}};
+  }
  return {type:'json_object'};
 }
 
@@ -464,7 +477,8 @@ export function createR125ArchitecturePlanLocalAdapter({
     method:'POST',signal:controller.signal,redirect:'error',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({model,stream:false,temperature:0.55,
-     response_format:r125ResponseFormatForEndpoint(endpoint),max_tokens:maxOutputTokens,
+     response_format:r125ResponseFormatForEndpoint(endpoint,{
+      observationRequired:r125RequiresWorkObservation(prompt)}),max_tokens:maxOutputTokens,
      ...(reasoningEffort===undefined?{}:{reasoning_effort:reasoningEffort}),
      messages:[{role:'system',content:system},
       {role:'user',content:JSON.stringify({
@@ -473,7 +487,9 @@ export function createR125ArchitecturePlanLocalAdapter({
        requiredFixtureRoles:inferR125ExplicitActivityRequirements(prompt)
         .map(x=>x.requiredRole),
        essentialTaskPlacementRule:'最優先: requiredFixtureRoles の全設備を必ず部屋の fixtures 配列に明記する。例えば組立と点検が同じ作業室なら fixtures:["assembly-table","inspection-stand"] とし、workbench だけでは代用不可。展示はdisplay、記録はdesk。必須設備を先に部屋へ割り当て、その部屋に十分な面積と2ブロック幅の利用経路を確保してから屋根・外観を設計する。fixtureScale は出力禁止。設備を勝手に省いたり、職員室を通る公開経路にしない。',
-       observationRelationRule:'If visitors must watch actual staff WORK, not just view an exhibit, choose optional observationLink:{viewerSpaceId,workSpaceId}. Choose adjacent same-floor public/shared and staff/shared rooms, the latter with a work fixture. HOST cuts a real 2x2 internal glass panel and proves visitor standing access and a clear ray to work equipment; impossible choices HOLD. No automatic doors or false visibility claims. Omit for display-only requests.',
+       observationRelationRule:r125RequiresWorkObservation(prompt)?
+        'REQUIRED BY THIS BRIEF: include observationLink:{viewerSpaceId,workSpaceId}. Choose adjacent same-floor public/shared and staff/shared rooms, the latter with a real work fixture. HOST cuts actual 2x2 internal glass and proves reachable public standing access plus a clear ray to that fixture. Do not claim an unverified view; impossible geometry must remain SOURCE HOLD.':
+        'If visitors must watch actual staff WORK, not just view an exhibit, choose optional observationLink:{viewerSpaceId,workSpaceId}. Choose adjacent same-floor public/shared and staff/shared rooms, the latter with a work fixture. HOST cuts a real 2x2 internal glass panel and proves visitor standing access and a clear ray to work equipment; impossible choices HOLD. No automatic doors or false visibility claims. Omit for display-only requests.',
        architecturalRequest:prompt,
        sourceOnly:true,authorSemanticPlan:true,
        explicitLiteralEquipment:inferR125ExplicitActivityRequirements(prompt),
@@ -510,3 +526,4 @@ export function createR125ArchitecturePlanLocalAdapter({
   }finally{clearTimeout(timer);}
  };
 }
+

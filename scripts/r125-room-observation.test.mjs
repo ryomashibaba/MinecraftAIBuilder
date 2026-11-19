@@ -10,6 +10,8 @@ import {diagnoseR125ArchitecturePlanOriginal}
  from './r125-offline-replay.mjs';
 import {R125_ARCHITECTURE_RESPONSE_SCHEMA}
  from '../source/ai/b198g-local-model-adapter.mjs';
+import {r125ResponseFormatForEndpoint,r125RequiresWorkObservation}
+ from '../source/ai/b198g-local-model-adapter.mjs';
 
 const original=()=>({
  schema:SCHEMA,id:'public-satellite-demo',
@@ -78,6 +80,36 @@ test('the author schema can request an optional room-to-room observation relatio
   assert(!variant.required.includes('observationLink'),
    'no automatic glazing for display-only or archived plans');
  }
+ const brief='組立作業室との間にガラス窓を設け、組立台での作業を見学できる工房';
+ assert.equal(r125RequiresWorkObservation(brief),true);
+ const required=r125ResponseFormatForEndpoint(
+  'http://127.0.0.1:11434/v1/chat/completions',
+  {observationRequired:r125RequiresWorkObservation(brief)}).json_schema.schema;
+ for(const variant of required.anyOf)
+  assert(variant.required.includes('observationLink'),
+   'an explicit live-work viewing request requires the authored relation');
+ const displayOnly=r125ResponseFormatForEndpoint(
+  'http://127.0.0.1:11434/v1/chat/completions').json_schema.schema;
+ for(const variant of displayOnly.anyOf)
+  assert(!variant.required.includes('observationLink'),
+   'display-only requests keep the relation optional');
+});
+
+test('an explicit glass viewing request is held unless B143 proves the actual view',()=>{
+ const brief='組立作業室との間にガラス窓を設け、組立台での作業を見学できる工房';
+ const withLink=original();
+ const passed=diagnoseR125ArchitecturePlanOriginal(JSON.stringify(withLink),
+  {requestedBrief:brief});
+ assert.equal(passed.observationSource.status,'SOURCE_GLAZED_WORK_VIEW_CONFIRMED');
+ assert.equal(passed.sourceVerified,true,passed.compilerReason);
+ const withoutLink=structuredClone(withLink);
+ delete withoutLink.observationLink;
+ const held=diagnoseR125ArchitecturePlanOriginal(JSON.stringify(withoutLink),
+  {requestedBrief:brief});
+ assert.equal(held.sourceVerified,false);
+ assert.equal(held.status,'HOLD_WORK_OBSERVATION_SOURCE_UNVERIFIED');
+ assert.equal(held.roomActivityProxy.workObservation.status,
+  'HOLD_WORK_OBSERVATION_SOURCE_UNVERIFIED');
 });
 test('no false window claims for invalid relations or absent author request',()=>{
  const p=original();
@@ -94,3 +126,4 @@ test('no false window claims for invalid relations or absent author request',()=
  assert.throws(()=>validateArchitecturePlan(p),
   /R125_PLAN_OBSERVATION_LINK_NO_AUTHORED_WORKSTATION/);
 });
+
