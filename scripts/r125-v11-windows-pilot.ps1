@@ -53,11 +53,14 @@ $pilot = Join-Path $repo 'scripts\r125-v11-pilot-three.json'
 $single = Join-Path $repo 'scripts\r125-v11-single-unknown.json'
 $abRenderer = Join-Path $repo 'scripts\r125-static-art-review.mjs'
 $floorRenderer = Join-Path $repo 'scripts\r125-v11-saved-floor-review.mjs'
-# True B143 SOURCE renderer; a successful custom prompt opens an inspectable
-# 4-view PNG automatically. It neither contacts a model nor Minecraft.
+# True B143 SOURCE renders are created for either single-brief path.
+# No extra model call, remote data access or Minecraft contact.
 $staticRenderer = $abRenderer
 $customBrief = $PSBoundParameters.ContainsKey('Prompt')
 $batchBriefs = $PSBoundParameters.ContainsKey('BriefsFile')
+$singleArt = $SingleNewBrief
+$singleId = if ($customBrief) { 'custom-brief' } else { 'tide-observatory' }
+$singleLabel = if ($customBrief) { 'CUSTOM' } else { 'SINGLE' }
 if ($batchBriefs -and ($SingleNewBrief -or $OnlyHousingRetail -or
     $ComparePriorTide -or $customBrief)) {
  throw 'V11_PILOT_BRIEFS_FILE_CONFLICTS_WITH_OTHER_MODES'
@@ -172,11 +175,11 @@ if ($LASTEXITCODE -ne 0 -or -not $match.Success -or
 if ($CheckOnly) {
  & $node '--check' $runner
  if ($LASTEXITCODE -ne 0) { throw 'V11_PILOT_BATCH_SYNTAX_FAILED' }
- if ($ComparePriorTide -or $customBrief -or $batchBriefs) {
+ if ($ComparePriorTide -or $singleArt -or $batchBriefs) {
   & $node '--check' $staticRenderer
   if ($LASTEXITCODE -ne 0) { throw 'V11_TIDE_AB_RENDERER_SYNTAX_FAILED' }
  }
- if ($customBrief) {
+ if ($singleArt) {
   & $node '--check' $floorRenderer
   if ($LASTEXITCODE -ne 0) { throw 'V11_CUSTOM_FLOOR_RENDERER_SYNTAX_FAILED' }
  }
@@ -484,14 +487,14 @@ if ($batchBriefs) {
   }
  }
 }
-# Complete the custom-brief quality loop without a second user command:
-# genuine model original -> strict B143 -> true exterior+cutaway PNG.
-# A SOURCE rejection remains a HOLD; do not render a proxy fake building.
-if ($customBrief) {
+# Complete BOTH single-brief modes without another user command:
+# genuine model original -> strict B143 -> 4-view + per-floor PNG.
+# A SOURCE rejection remains a HOLD; do not invent a proxy building.
+if ($singleArt) {
  if ($nodeExit -eq 0 -and $report.allSourceVerified -eq $true -and
      [int]$report.attempted -eq 1 -and
      @($report.completed).Count -eq 1 -and
-     $report.completed[0].id -ceq 'custom-brief' -and
+     $report.completed[0].id -ceq $singleId -and
      $report.completed[0].sourceVerified -eq $true) {
   $revised = $report.completed[0].modelRevisionApplied -eq $true
   $sourceFile = if ($revised) { 'B143_REVISED_SOURCE_REVIEW_ONLY.json' } else {
@@ -500,8 +503,8 @@ if ($customBrief) {
     'SOURCE_DIAGNOSIS.json' }
   $rawFile = if ($revised) { 'MODEL_RESPONSE_REVISED.txt' } else {
     'MODEL_RESPONSE_ORIGINAL.txt' }
-  $sourcePath = Join-Path (Join-Path $out 'custom-brief') $sourceFile
-  $diagnosisPath = Join-Path (Join-Path $out 'custom-brief') $diagnosisFile
+  $sourcePath = Join-Path (Join-Path $out $singleId) $sourceFile
+  $diagnosisPath = Join-Path (Join-Path $out $singleId) $diagnosisFile
   if (-not (Test-Path -LiteralPath $sourcePath -PathType Leaf) -or
       -not (Test-Path -LiteralPath $diagnosisPath -PathType Leaf)) {
    throw 'V11_CUSTOM_SOURCE_OR_DIAGNOSIS_MISSING'
@@ -513,7 +516,7 @@ if ($customBrief) {
       $diag.geometrySha256 -cne $report.completed[0].geometrySha256) {
    throw 'V11_CUSTOM_DIAGNOSIS_OR_SOURCE_MISMATCH'
   }
-  $artDir = Join-Path $out 'CUSTOM_4_VIEW_SOURCE_ART'
+  $artDir = Join-Path $out ($singleLabel + '_4_VIEW_SOURCE_ART')
   & $node $staticRenderer '--source' $sourcePath '--out' $artDir | Out-Null
   if ($LASTEXITCODE -ne 0) { throw 'V11_CUSTOM_STATIC_RENDER_HOLD' }
   $manifestFile = Join-Path $artDir 'STATIC_REVIEW.json'
@@ -538,11 +541,11 @@ if ($customBrief) {
   }
   # Inspect the original author's real room geometry, not just the exterior.
   # No second model request and no modification to original PRIVATE evidence.
-  $rawPath = Join-Path (Join-Path $out 'custom-brief') $rawFile
+  $rawPath = Join-Path (Join-Path $out $singleId) $rawFile
   if (-not (Test-Path -LiteralPath $rawPath -PathType Leaf)) {
    throw 'V11_CUSTOM_ORIGINAL_MISSING_FOR_FLOOR_REVIEW'
   }
-  $floorDir = Join-Path $out 'CUSTOM_FLOOR_SOURCE_ART'
+  $floorDir = Join-Path $out ($singleLabel + '_FLOOR_SOURCE_ART')
   & $node $floorRenderer '--raw' $rawPath '--source' $sourcePath `
    '--diagnosis' $diagnosisPath '--out' $floorDir | Out-Null
   if ($LASTEXITCODE -ne 0) {
@@ -574,9 +577,9 @@ if ($customBrief) {
       $floorReport.minecraftWalking -cne 'NOT_TESTED') {
    throw 'V11_CUSTOM_FLOOR_SHA_OR_SOURCE_HOLD'
   }
-  Write-Output ('V11_CUSTOM_TRUE_B143_4_VIEW_IMAGE=' + $contact)
-  Write-Output ('V11_CUSTOM_TRUE_B143_FLOOR_IMAGE=' + $floorPng)
-  Write-Output 'V11_CUSTOM_HUMAN_ART_PENDING; no Minecraft execution.'
+  Write-Output ('V11_' + $singleLabel + '_TRUE_B143_4_VIEW_IMAGE=' + $contact)
+  Write-Output ('V11_' + $singleLabel + '_TRUE_B143_FLOOR_IMAGE=' + $floorPng)
+  Write-Output ('V11_' + $singleLabel + '_HUMAN_ART_PENDING; no Minecraft execution.')
   if (-not $NoOpen) {
    try { Start-Process -FilePath $contact; Start-Process -FilePath $floorPng }
    catch { Write-Warning 'V11_CUSTOM_ART_OPEN_FAILED_USE_PRINTED_PATH' }
@@ -584,15 +587,16 @@ if ($customBrief) {
  } else {
   # Review exact B143 geometry even when visitor circulation remains HOLD.
   # No repairs, new model requests, Education export or world interaction.
-  $sourcePath = Join-Path $out 'custom-brief\B143_SOURCE_REVIEW_ONLY.json'
-  $diagnosisPath = Join-Path $out 'custom-brief\SOURCE_DIAGNOSIS.json'
-  $rawPath = Join-Path $out 'custom-brief\MODEL_RESPONSE_ORIGINAL.txt'
-  $holdRows = @($report.completed | Where-Object { $_.id -ceq 'custom-brief' -and $_.sourceVerified -eq $false -and $_.status -like 'HOLD_*' })
+  $entry = Join-Path $out $singleId
+  $sourcePath = Join-Path $entry 'B143_SOURCE_REVIEW_ONLY.json'
+  $diagnosisPath = Join-Path $entry 'SOURCE_DIAGNOSIS.json'
+  $rawPath = Join-Path $entry 'MODEL_RESPONSE_ORIGINAL.txt'
+  $holdRows = @($report.completed | Where-Object { $_.id -ceq $singleId -and $_.sourceVerified -eq $false -and $_.status -like 'HOLD_*' })
   if ($holdRows.Count -eq 1 -and
       (Test-Path -LiteralPath $sourcePath -PathType Leaf) -and
       (Test-Path -LiteralPath $diagnosisPath -PathType Leaf) -and
       (Test-Path -LiteralPath $rawPath -PathType Leaf)) {
-   $floorDir = Join-Path $out 'CUSTOM_HOLD_FLOOR_ART'
+   $floorDir = Join-Path $out ($singleLabel + '_HOLD_FLOOR_ART')
    & $node $floorRenderer '--raw' $rawPath '--source' $sourcePath '--diagnosis' $diagnosisPath '--out' $floorDir | Out-Null
    if ($LASTEXITCODE -ne 0) { throw 'V11_CUSTOM_HOLD_FLOOR_GEOMETRY_MISMATCH' }
    $floorPng = Join-Path $floorDir 'FLOOR_CONTACT_4_VIEWS.png'
@@ -616,14 +620,14 @@ if ($customBrief) {
        @($floor.gates | Where-Object { $_ -cne 'BLOCKED' }).Count -ne 0) {
     throw 'V11_CUSTOM_HOLD_FLOOR_PROVENANCE_MISMATCH'
    }
-   Write-Output ('V11_CUSTOM_HOLD_FLOOR_IMAGE=' + $floorPng)
-   Write-Output ('V11_CUSTOM_HOLD_REASON=' + $holdRows[0].status)
+   Write-Output ('V11_' + $singleLabel + '_HOLD_FLOOR_IMAGE=' + $floorPng)
+   Write-Output ('V11_' + $singleLabel + '_HOLD_REASON=' + $holdRows[0].status)
    if (-not $NoOpen) {
     try { Start-Process -FilePath $floorPng }
     catch { Write-Warning 'V11_CUSTOM_HOLD_FLOOR_OPEN_FAILED_USE_PRINTED_PATH' }
    }
   }
-  Write-Output ('V11_CUSTOM_ART_HOLD_PRESERVE_PRIVATE=' + $out)
+  Write-Output ('V11_' + $singleLabel + '_ART_HOLD_PRESERVE_PRIVATE=' + $out)
  }
 }
 Write-Output ('V11_PILOT_B143_REVIEW=' + (Join-Path $out $viewer))

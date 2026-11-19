@@ -128,6 +128,101 @@ test('Windows custom brief -> ONE mock response -> strict B143 exterior and floo
  }
 });
 
+test('Windows preset unseen brief -> ONE mock Qwen response -> genuine B143 exterior and floor contact sheets',{
+ skip:process.platform!=='win32',timeout:210000
+},async()=>{
+ const temp=fs.mkdtempSync(path.join(os.tmpdir(),'mab-v11-single-fake-'));
+ const local=path.join(temp,'LOCALAPPDATA');
+ fs.mkdirSync(local);
+ let posts=0;
+ const server=createServer((req,res)=>{
+  if(req.method!=='POST'||req.url!=='/v1/chat/completions'){
+   res.writeHead(404);res.end('not found');return;
+  }
+  req.resume();
+  req.on('end',()=>{
+   posts++;
+   res.writeHead(200,{'Content-Type':'application/json'});
+   res.end(JSON.stringify({choices:[{finish_reason:'stop',
+    message:{content:savedQwen}}]}));
+  });
+ });
+ try{
+  await new Promise((resolve,reject)=>{
+   server.once('error',reject);
+   server.listen(0,'127.0.0.1',resolve);
+  });
+  const pin=execFileSync('git',['rev-parse','HEAD'],
+   {cwd:root,encoding:'utf8'}).trim();
+  const result=await new Promise((resolve,reject)=>{
+   const args=['-NoProfile','-ExecutionPolicy','Bypass','-File',
+    path.join(root,'scripts/r125-v11-windows-pilot.ps1'),
+    '-SingleNewBrief','-Model','fake-local-author','-Endpoint',
+    `http://127.0.0.1:${server.address().port}/v1/chat/completions`,
+    '-ExpectedHead',pin,'-NoOpen'];
+   const child=spawn('powershell.exe',args,{
+    cwd:root,env:{...process.env,LOCALAPPDATA:local},windowsHide:true});
+   let stdout='',stderr='';
+   child.stdout.setEncoding('utf8');child.stderr.setEncoding('utf8');
+   child.stdout.on('data',c=>{stdout+=c;});
+   child.stderr.on('data',c=>{stderr+=c;});
+   child.once('error',reject);
+   child.once('close',code=>resolve({code,stdout,stderr}));
+  });
+  assert.equal(result.code,0,result.stdout+'\n'+result.stderr);
+  assert.equal(posts,1,'one mock response, no extra POST for ART');
+  const match=/V11_PRIVATE_RESULT=([^\r\n]+)/.exec(result.stdout);
+  assert(match,'private output path must be visible');
+  const out=match[1].trim();
+  const report=JSON.parse(fs.readFileSync(path.join(out,
+   'BATCH_REPORT.json'),'utf8'));
+  assert.equal(report.planned,1);
+  assert.equal(report.originalResponseCount,1);
+  assert.equal(report.allSourceVerified,true);
+  assert.equal(report.worldWrites,0);
+  const row=report.completed[0];
+  assert.equal(row.id,'tide-observatory');
+  const entry=path.join(out,row.id);
+  const brief=JSON.parse(fs.readFileSync(path.join(root,
+   'scripts/r125-v11-single-unknown.json'),'utf8'))[0];
+  assert.equal(fs.readFileSync(path.join(entry,'REQUEST_ORIGINAL.txt'),
+   'utf8'),brief.prompt);
+  assert.equal(fs.readFileSync(path.join(entry,'MODEL_RESPONSE_ORIGINAL.txt'),
+   'utf8'),savedQwen);
+  const source=path.join(entry,'B143_SOURCE_REVIEW_ONLY.json');
+  const png=path.join(out,'SINGLE_4_VIEW_SOURCE_ART',
+   'CONTACT_4_VIEWS.png');
+  const manifest=JSON.parse(fs.readFileSync(path.join(out,
+   'SINGLE_4_VIEW_SOURCE_ART','STATIC_REVIEW.json'),'utf8'));
+  assert(fs.statSync(png).size>10000);
+  assert.equal(manifest.sourceSha256,row.sourceSha256);
+  assert.equal(manifest.geometrySha256,row.geometrySha256);
+  assert.equal(manifest.contactSheet.sha256,createHash('sha256')
+   .update(fs.readFileSync(png)).digest('hex'));
+  const floorPng=path.join(out,'SINGLE_FLOOR_SOURCE_ART',
+   'FLOOR_CONTACT_4_VIEWS.png');
+  const floor=JSON.parse(fs.readFileSync(path.join(out,
+   'SINGLE_FLOOR_SOURCE_ART','FLOOR_REVIEW.json'),'utf8'));
+  assert(fs.statSync(floorPng).size>10000);
+  assert.equal(floor.originalSha256,row.originalSha256);
+  assert.equal(floor.sourceSha256,row.sourceSha256);
+  assert.equal(floor.sourceFileSha256,createHash('sha256')
+   .update(fs.readFileSync(source)).digest('hex'));
+  assert.equal(floor.contact.sha256,createHash('sha256')
+   .update(fs.readFileSync(floorPng)).digest('hex'));
+  assert.equal(manifest.humanArt,'NOT_REVIEWED');
+  assert.equal(floor.humanArt,'NOT_REVIEWED');
+  assert.equal(floor.minecraftWalking,'NOT_TESTED');
+  assert.equal(floor.worldWrites,0);
+  assert.deepEqual(floor.gates,Array(9).fill('BLOCKED'));
+  assert(result.stdout.includes('V11_SINGLE_TRUE_B143_4_VIEW_IMAGE='));
+  assert(result.stdout.includes('V11_SINGLE_TRUE_B143_FLOOR_IMAGE='));
+ }finally{
+  await new Promise(resolve=>server.close(()=>resolve()));
+  fs.rmSync(temp,{recursive:true,force:true});
+ }
+});
+
 test('wrong expected HEAD fails BEFORE any local model POST and before private outputs',{
  skip:process.platform!=='win32',timeout:60000
 },async()=>{
