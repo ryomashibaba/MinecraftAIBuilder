@@ -130,7 +130,7 @@ export function saveR125FinishAB({rawPath,sourcePath,outDir,integrated=false,
  fs.writeFileSync(after,JSON.stringify(candidate.sourceDesign,null,2)+'\n',{flag:'wx'});
  const ab=saveB143ABReview({beforeSourcePath:before,
   afterSourcePath:after,outDir:path.join(out,'ART_AB'),
-  matchedCamera:activityContrast});
+  matchedCamera:true});
  if(ab.before.sourceSha256!==baseline.sourceSha256||
     ab.after.sourceSha256!==candidate.sourceSha256||
     ab.modelCalls!==0||ab.worldWrites!==0||
