@@ -238,8 +238,8 @@ jobs:
            brief:'Public outdoor courtyard with an indoor gallery and a repair workshop',
            footprint:{width:32,depth:20},
            levels:[{layoutMode:'spatial-tree',spaces:[
-            {id:'public-court',purpose:'Public open-air display and arrival',
-             access:'public',spatialUse:'open-court',
+            {id:'public-court',purpose:'Public outdoor gathering and arrival',
+             access:'public',fixtures:['seating'],spatialUse:'open-court',
              volume:{width:10,depth:10,roofY:6}},
             {id:'repair-wing',purpose:'Staff repair and tool servicing',
              access:'staff',fixtures:['workbench','tool-rack'],
