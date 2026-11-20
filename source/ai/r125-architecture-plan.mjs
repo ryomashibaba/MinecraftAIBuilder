@@ -222,9 +222,11 @@ export function validateArchitecturePlan(p){
  const standard=['schema','id','title','brief','footprint','levels','materials'];
  const expressive=Object.hasOwn(p??{},'expression');
  const entrySpecified=Object.hasOwn(p??{},'entryZone');
+ const spatialEntrySpecified=Object.hasOwn(p??{},'entry');
  const observationSpecified=Object.hasOwn(p??{},'observationLink');
  check(keys(p,[...standard,...(expressive?['expression']:[]),
   ...(entrySpecified?['entryZone']:[]),
+  ...(spatialEntrySpecified?['entry']:[]),
   ...(observationSpecified?['observationLink']:[])]),
   'TOP_LEVEL_FIELDS');
  check(p.schema===SCHEMA,'SCHEMA');
@@ -235,6 +237,11 @@ export function validateArchitecturePlan(p){
   integer(p.footprint.width,16,32)&&integer(p.footprint.depth,16,32),
   'FOOTPRINT_BOUNDS');
  check(Array.isArray(p.levels)&&[1,2].includes(p.levels.length),'LEVEL_COUNT');
+ check(!spatialEntrySpecified||
+  (!expressive&&p.levels.length===1&&
+   p.levels[0]?.layoutMode==='spatial-tree'&&
+   keys(p.entry,['shelterDepth'])&&integer(p.entry.shelterDepth,1,3)),
+  'SPATIAL_ENTRY_SHELTER');
  check(keys(p.materials,['floor','wall','roof'])&&
   ['wood','stone','concrete'].includes(p.materials.floor)&&
   ['concrete','stone','wood','metal'].includes(p.materials.wall)&&
@@ -688,6 +695,7 @@ function compileR125SpatialArchitecturePlan(original){
  const level=original.levels[0];
  const proposal={schema:SPATIAL_SCHEMA,id:original.id,title:original.title,
   brief:original.brief,materials:original.materials,
+  ...(original.entry?{entry:original.entry}:{}),
   rooms:level.spaces.map(space=>({id:space.id,purpose:space.purpose,
    width:space.volume.width,depth:space.volume.depth,roofY:space.volume.roofY,
    ...(space.volume.roofForm?{roofForm:space.volume.roofForm,

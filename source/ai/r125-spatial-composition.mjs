@@ -22,8 +22,12 @@ const overlap=(a,b,axis)=>axis==='x'?
  [Math.max(a.z,b.z),Math.min(maxZ(a),maxZ(b))];
 const span=r=>r[1]-r[0]+1;
 export function validateSpatialComposition(p){
- if(!keys(p,['schema','id','title','brief','materials','rooms'])||
+ const hasEntry=Object.hasOwn(p??{},'entry');
+ if(!keys(p,['schema','id','title','brief','materials','rooms',
+  ...(hasEntry?['entry']:[])])||
   p.schema!==SCHEMA||!slug(p.id)||!prose(p.title)||!prose(p.brief)||
+  (hasEntry&&(!keys(p.entry,['shelterDepth'])||
+   !int(p.entry.shelterDepth,1,3)))||
   !keys(p.materials,['floor','wall','roof'])||
   !['wood','stone','concrete'].includes(p.materials.floor)||
   !['concrete','stone','wood','metal'].includes(p.materials.wall)||
@@ -98,7 +102,8 @@ export function placeSpatialRooms(plan){
 export function compileSpatialComposition(value){
  const plan=structuredClone(value),raw=placeSpatialRooms(plan);
  const sx=2-Math.min(...raw.rooms.map(r=>r.x));
- const sz=2-Math.min(...raw.rooms.map(r=>r.z));
+ const shelterDepth=plan.entry?.shelterDepth??0;
+ const sz=2-Math.min(...raw.rooms.map(r=>r.z))+shelterDepth;
  const rooms=raw.rooms.map(r=>({...r,x:r.x+sx,z:r.z+sz}));
  const doors=raw.doors.map(d=>({...d,
   wall:d.wall+(d.axis==='z'?sx:sz),
@@ -172,6 +177,15 @@ export function compileSpatialComposition(value){
  // CUT last, after every volume is created, to preserve real thresholds.
  const entrance=[raw.entrance.x+sx,2,raw.entrance.z+sz];
  box('exterior-entrance','cut',null,entrance,[2,3,1]);
+ if(shelterDepth){
+  const frontZ=entrance[2]-shelterDepth;
+  box('entry-canopy-roof','add',mat.roof,
+   [entrance[0]-1,5,frontZ],[4,1,shelterDepth]);
+  box('entry-canopy-support-left','add',mat.wall,
+   [entrance[0]-1,2,frontZ],[1,3,1]);
+  box('entry-canopy-support-right','add',mat.wall,
+   [entrance[0]+2,2,frontZ],[1,3,1]);
+ }
  doors.forEach((d,i)=>box('joint-'+i,'cut',null,
   d.axis==='z'?[d.wall,2,d.along]:[d.along,2,d.wall],
   d.axis==='z'?[1,3,2]:[2,3,1]));
@@ -260,6 +274,7 @@ export function compileSpatialComposition(value){
    routes.zones.some(z=>!z.reachedFromEntrance))
   fail('REAL_VOXEL_CIRCULATION_HOLD');
  return {...result,sourceRoutes:routes,layout:{
+  entry:{face:'front',position:'center',shelterDepth},
   rooms:rooms.map(r=>({id:r.id,x:r.x,z:r.z,width:r.width,depth:r.depth,roofY:r.roofY,
    ...(r.daylight?{daylight:r.daylight}:{}),
    ...(r.roofForm?{roofForm:r.roofForm,roofAxis:r.roofAxis}:{}),

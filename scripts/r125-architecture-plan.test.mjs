@@ -3861,6 +3861,28 @@ test('spatial-tree ArchitecturePlan compiles distinct rooms, real fixtures and o
  assert.equal(auditArchitecturePlanCirculation(raised).status,
   'SOURCE_CLEARANCE_PROBES_PASS');
  assert.equal(raised.worldWrites,0);
+ const sheltered=structuredClone(p);sheltered.entry={shelterDepth:2};
+ assert.equal(validateArchitecturePlan(sheltered),true);
+ const covered=compileArchitecturePlan(sheltered);
+ assert.deepEqual(p,before,'entry option never mutates model-owned rooms or roofs');
+ assert.equal(verifyCompiled(covered.design,covered.compiled),true);
+ assert.equal(covered.spatialLayout.entry.face,'front');
+ assert.equal(covered.spatialLayout.entry.position,'center');
+ assert.equal(covered.spatialLayout.entry.shelterDepth,2);
+ assert.equal(covered.design.bounds.depth,result.design.bounds.depth+2);
+ const canopy=covered.design.elements.find(e=>e.id==='entry-canopy-roof');
+ assert.deepEqual(canopy.size,[4,1,2]);
+ assert.equal(covered.design.elements.filter(e=>e.id.startsWith('entry-canopy-support-')).length,2);
+ assert.equal(covered.sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(auditR125VisitorRoutes(covered,sheltered).status,
+  'SOURCE_VISITOR_ROUTES_AVOID_STAFF');
+ assert.equal(auditArchitecturePlanCirculation(covered).status,
+  'SOURCE_CLEARANCE_PROBES_PASS');
+ assert.deepEqual(covered.BuildPlan.operations,[]);
+ assert.deepEqual(covered.gates,Array(9).fill('BLOCKED'));
+ assert.equal(covered.worldWrites,0);
+ const tooDeep=structuredClone(sheltered);tooDeep.entry.shelterDepth=4;
+ assert.throws(()=>validateArchitecturePlan(tooDeep),/SPATIAL_ENTRY_SHELTER/);
 });
 
 test('spatial-tree cannot route a later public room through a staff-only volume',()=>{
