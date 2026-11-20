@@ -2534,6 +2534,78 @@ test('explicit HOST spatial detail creates a supported recessed entrance and pre
 });
 
 
+test('model-selected one-storey entry realizes the full roofed court or holds without changing rooms, roof, daylight or routes',()=>{
+ const p=plan('model-selected-entry-court',['z'],['public reception','staff workspace']);
+ p.footprint={width:28,depth:24};
+ p.levels[0].splitPercent=40;
+ p.levels[0].spaces=[
+  {id:'visitor-hub',purpose:'Public reception and visitor waiting',
+   access:'public',fixtures:['counter'],daylight:'wide-bay'},
+  {id:'map-gallery',purpose:'Public flood map exhibition',
+   access:'public',fixtures:['display']},
+  {id:'learning-room',purpose:'Public preparedness lessons',
+   access:'public',fixtures:['teaching-board']},
+  {id:'staff-office',purpose:'Staff forecast and records work',
+   access:'staff',fixtures:['desk','electronics']}
+ ];
+ p.expression={setbackSide:'none',setbackDepth:0,
+  roofProfile:'ridge',roofAxis:'z',roofVolume:'raised',
+  facadeLanguage:'screen'};
+ p.entry={shelterDepth:3};
+ const authored=structuredClone(p),baselinePlan=structuredClone(p);
+ delete baselinePlan.entry;
+ assert.equal(validateArchitecturePlan(p),true);
+ const baseline=compileArchitecturePlan(baselinePlan);
+ const built=compileArchitecturePlan(p);
+ assert.deepEqual(p,authored,'model-owned plan remains unchanged');
+ assert.equal(built.spatialDetail.policy,'model-selected-entry-court');
+ assert.equal(built.spatialDetail.massing,'model-selected-six-wide-three-deep-entry');
+ assert.deepEqual(built.spatialDetail.court,{left:11,right:16,front:0,back:4});
+ assert.deepEqual(built.spatialDetail.recessedEntry,[13,2,4]);
+ const canopy=built.design.elements.find(e=>e.id==='detail-entry-canopy');
+ assert.deepEqual(canopy.origin,[11,5,0]);
+ assert.deepEqual(canopy.size,[6,1,5],
+  'real roof covers the three recessed blocks, doorway and exterior threshold');
+ assert(includes(voxels(built.compiled),13,5,4),
+  'actual roof covers the entrance doorway, not only the recessed court');
+ const door=built.design.elements.find(e=>e.id==='exterior-entrance');
+ assert.deepEqual(door.origin,[13,2,4]);
+ assert.deepEqual(door.size,[2,3,1],'passable two-wide, three-high entrance');
+ assert.equal(built.design.elements.some(e=>e.id.startsWith('detail-eave-')),false,
+  'selected entry does not add unrelated HOST eaves');
+ const expandedRoof=result=>result.design.elements
+  .filter(e=>e.id.startsWith('roof-'))
+  .flatMap(e=>Array.from({length:e.repeat?.count??1},(_,i)=>({
+   shape:e.shape,mode:e.mode,material:e.material,
+   origin:e.origin.map((v,k)=>v+i*(e.repeat?.offset[k]??0)),
+   size:e.size
+  }))).sort((a,b)=>JSON.stringify(a).localeCompare(JSON.stringify(b)));
+ assert.deepEqual(expandedRoof(built),expandedRoof(baseline),
+  'selected entry preserves the authored roof voxels before the intentional court cut');
+ assert.equal(built.daylightTargets.length,1);
+ assert.equal(auditR125FixtureDaylightView(
+  built.compiled,built.daylightTargets).status,'DAYLIGHT_VIEW_CLEAR');
+ assert.equal(verifyCompiled(built.design,built.compiled),true);
+ assert.equal(auditR125SourceRoutes(built,{featureTargets:built.fixtureTargets}).status,
+  'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.equal(auditR125VisitorRoutes(built,p).status,
+  'SOURCE_VISITOR_ROUTES_AVOID_STAFF');
+ assert.deepEqual(built.fixtureTargets.map(x=>x.kind).sort(),
+  ['counter','desk','display','electronics','teaching-board'].sort());
+ assert.deepEqual(built.compiled.BuildPlan.operations,[]);
+ assert.deepEqual(built.gates,Array(9).fill('BLOCKED'));
+ assert.equal(built.worldWrites,0);
+
+ const narrow=structuredClone(p);
+ narrow.id='model-selected-entry-no-fit';
+ narrow.footprint={width:22,depth:18};
+ narrow.levels[0].splitPercent=30;
+ assert.equal(validateArchitecturePlan(narrow),true);
+ assert.throws(()=>compileArchitecturePlan(narrow),
+  /R125_DETAIL_AUTHORED_ENTRY_COURT_DOES_NOT_FIT/,
+  'an infeasible requested court is SOURCE HOLD, never a one-block replacement');
+});
+
 test('hip roof meets actual recessed-entry walls at true authored roof elevation, both ridge axes',()=>{
  for(const roofAxis of ['x','z']){
   const p=plan('hip-court-integration-'+roofAxis,['z','x'],

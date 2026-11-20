@@ -237,7 +237,13 @@ export function validateArchitecturePlan(p){
   integer(p.footprint.width,16,32)&&integer(p.footprint.depth,16,32),
   'FOOTPRINT_BOUNDS');
  check(Array.isArray(p.levels)&&[1,2].includes(p.levels.length),'LEVEL_COUNT');
+ const authoredConventionalEntry=Boolean(expressive&&p?.levels?.length===1&&
+  p.levels[0]?.layoutMode!=='spatial-tree'&&
+  [2,3,4].includes(p.levels[0]?.spaces?.length)&&
+  keys(p.entry,['shelterDepth'])&&p.entry.shelterDepth===3&&
+  p.expression?.facadeLanguage!=='recessed-portico');
  check(!spatialEntrySpecified||
+  authoredConventionalEntry||
   (!expressive&&p.levels.length===1&&
    p.levels[0]?.layoutMode==='spatial-tree'&&
    keys(p.entry,['shelterDepth'])&&integer(p.entry.shelterDepth,1,3)),
@@ -1681,8 +1687,10 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
    box('front-court-return-window-glass','add','glass',[innerX,3,2],[1,2,2]);
   }
  }
- const spatialDetail=hostDetail==='spatial-v1'?
-  detailR125Envelope(elements,original,program):null;
+ const authoredEntryCourt=original.entry?.shelterDepth===3;
+ const spatialDetail=hostDetail==='spatial-v1'||authoredEntryCourt?
+  detailR125Envelope(elements,original,program,{
+   requireAuthoredCourt:authoredEntryCourt}):null;
  // Leave old successful B143 SOURCE byte-for-byte unchanged. Only a new
  // author response whose requested equipment/daylight would exceed B143's
  // fixed 160-element budget gets a lossless roof-strip representation.

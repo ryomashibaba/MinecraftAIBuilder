@@ -146,12 +146,12 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    assert.equal(request.response_format.json_schema.strict,true);
    const structured=request.response_format.json_schema.schema;
    assert.deepEqual(structured,R125_ARCHITECTURE_RESPONSE_SCHEMA);
-   assert.equal(structured.anyOf.length,3);
+   assert.equal(structured.anyOf.length,4);
    // Locate the rectangular variants by their contract, not their
    // preference order. spatial-tree may legitimately be listed first.
    const rectangular=structured.anyOf.filter(v=>
     Object.hasOwn(v.properties,'expression'));
-   assert.equal(rectangular.length,2);
+   assert.equal(rectangular.length,3);
    const spatial=structured.anyOf.find(v=>
     !Object.hasOwn(v.properties,'expression'));
    assert(spatial,'spatial-tree remains available to the model');
@@ -354,7 +354,7 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    assert.ok(request.messages[0].content.includes('REAL 9-block-wide, 3-deep entrance'));
    assert.ok(request.messages[0].content.includes('splitCoordinate >= 11'));
    assert.ok(request.messages[0].content.includes('splitCoordinate <= footprint.width - 12'));
-   assert.ok(request.messages[0].content.includes('plain/fins/screen instead'));
+   assert.ok(request.messages[0].content.includes('otherwise use plain/fins/screen'));
    assert.ok(request.messages[0].content.includes('DESIGN STRATEGY FIRST'));
    assert.equal(request.messages[0].content.includes('ROOM-APPROPRIATE fixture'),true);
    assert.equal(request.messages[0].content.includes('REAL ROOM BUDGET'),true);
@@ -707,9 +707,32 @@ test('Qwen may choose shed or ridge roof only for an enclosed spatial room',()=>
   'older genuinely flat model rooms stay valid');
 });
 
+test('Qwen schema offers an explicit full recessed entry only on one-storey conventional plans',()=>{
+ const schema=R125_ARCHITECTURE_RESPONSE_SCHEMA;
+ const sheltered=schema.anyOf.find(v=>v.required.includes('entry')&&v.required.includes('expression'));
+ assert(sheltered);
+ assert.equal(sheltered.properties.levels.minItems,1);
+ assert.equal(sheltered.properties.levels.maxItems,1);
+ assert.deepEqual(sheltered.required,['schema','id','title','brief',
+  'footprint','levels','materials','entry','expression']);
+ assert.deepEqual(sheltered.properties.entry.properties.shelterDepth.enum,[3]);
+ const roomShapes=sheltered.properties.levels.items.anyOf;
+ assert(sheltered.properties.expression.anyOf.length>0,'sheltered roof alternatives must be generatable');
+ assert.deepEqual(roomShapes.map(x=>x.properties.spaces.minItems).sort(),[2,3,4,4]);
+ for(const expression of sheltered.properties.expression.anyOf)
+  assert.equal(expression.properties.facadeLanguage.enum.includes('recessed-portico'),
+   false,'the recessed-court selection cannot collide with the older portico mode');
+ const twoStory=schema.anyOf.find(v=>v.properties.levels.minItems===2);
+ assert(twoStory);
+ assert.equal(Object.hasOwn(twoStory.properties,'entry'),false);
+ const spatial=schema.anyOf[0];
+ assert.deepEqual(spatial.properties.entry.properties.shelterDepth.enum,[1,2,3],
+  'existing spatial-tree entry choices remain unchanged');
+});
+
 test('spatial-tree Qwen schema requires authored per-room volumes and supports observation',()=>{
  const schema=R125_ARCHITECTURE_RESPONSE_SCHEMA;
- assert.equal(schema.anyOf.length,3);
+ assert.equal(schema.anyOf.length,4);
  const spatial=schema.anyOf[0]; // first-listed branch; descriptions explain both modes without forcing one
  assert.match(spatial.description,/separate connected room volumes/);
  assert.match(schema.anyOf[1].description,/shared-envelope/);

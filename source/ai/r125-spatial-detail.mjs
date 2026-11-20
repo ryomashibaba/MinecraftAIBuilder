@@ -23,9 +23,10 @@ export function packR125AdjacentBoxes(elements){
  }
  return out;
 }
-export function detailR125Envelope(elements,plan,program){
+export function detailR125Envelope(elements,plan,program,
+ {requireAuthoredCourt=false}={}){
  const entry=elements.find(e=>e.id==='exterior-entrance');
- if(!entry||plan.expression.facadeLanguage==='recessed-portico')
+ if(!entry||plan.expression?.facadeLanguage==='recessed-portico')
   throw Error('R125_DETAIL_EXISTING_ENTRY_NOT_SUPPORTED');
  const {width:w,depth:d}=plan.footprint,count=plan.levels.length;
  const top=1+5*count,ex=entry.origin[0],front=entry.origin[2];
@@ -40,6 +41,10 @@ export function detailR125Envelope(elements,plan,program){
   // An entry-court cut must never remove those actual stair voxels.
   (count===1||left>4);
  if(!courtFits){
+  // A model-selected full entry court is an all-or-hold request. Never
+  // substitute the historical shallow HOST-only threshold for it.
+  if(requireAuthoredCourt)
+   throw Error('R125_DETAIL_AUTHORED_ENTRY_COURT_DOES_NOT_FIT');
   // A real one-block-deep covered public threshold is a bounded
   // alternative when the six-wide, three-deep volume would erase stairs
   // or enter another authored room. It touches ONLY exterior z=0:
@@ -84,7 +89,7 @@ export function detailR125Envelope(elements,plan,program){
  };
  // One-cell real roof projection beyond the external wall. Equal-height
  // strips become repeated boxes; their material/elevation follow the roof.
- if(!plan.expression.roofOverhang){
+ if(!requireAuthoredCourt&&!plan.expression.roofOverhang){
   for(const [face,axis,limit] of [['front',0,w-2],['rear',0,w-2],
     ['west',2,d-2],['east',2,d-2]]){
    const groups=new Map();
@@ -130,9 +135,12 @@ export function detailR125Envelope(elements,plan,program){
   box('detail-upper-light-cut','cut',null,[left+1,8,back],[4,2,1]);
   box('detail-upper-light','add','glass',[left+1,8,back],[4,2,1]);
  }
- box('detail-entry-canopy','add',plan.materials.roof,[left,5,0],[6,1,back]);
+ box('detail-entry-canopy','add',plan.materials.roof,[left,5,0],
+  [6,1,back+(requireAuthoredCourt?1:0)]);
  elements.splice(0,elements.length,...packR125AdjacentBoxes(elements));
- return {policy:'spatial-v1',owner:'HOST',authorPlanEdited:false,
+ return {policy:requireAuthoredCourt?'model-selected-entry-court':'spatial-v1',
+  owner:'HOST',authorPlanEdited:false,
+  ...(requireAuthoredCourt?{massing:'model-selected-six-wide-three-deep-entry'}:{}),
   originalEntry:[ex,2,front],recessedEntry:[ex,2,back],
   court:{left,right,front:0,back},roofProfilePreserved:plan.expression.roofProfile,
   equipmentAdded:0,worldWrites:0};
