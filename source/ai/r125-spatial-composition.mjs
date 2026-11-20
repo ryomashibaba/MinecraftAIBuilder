@@ -189,7 +189,7 @@ export function compileSpatialComposition(value){
  doors.forEach((d,i)=>box('joint-'+i,'cut',null,
   d.axis==='z'?[d.wall,2,d.along]:[d.along,2,d.wall],
   d.axis==='z'?[1,3,2]:[2,3,1]));
- // Only add glazing to an entirely exposed wall, never to a joint/door.
+ // Glaze actual exposed wall segments without cutting joints or doors.
  let windows=0;
  for(const [i,r] of rooms.entries()){
   if(r.spatialUse==='open-court')continue; // Sky is already open; no fake glazing.
@@ -217,6 +217,9 @@ export function compileSpatialComposition(value){
   const requiredOpenings=requested==='paired-bays'?2:1;
   let opened=0;
   for(const c of cands){
+   // Keep the exact established legacy bay and model-authored paired-front
+   // apertures. Only explicitly requested non-frontage windows use the
+   // exposed-segment search below.
    if(i===0&&c.side==='front'&&!c.frontFlank)continue;
    let at=c.at,size=c.size;
    if(c.frontFlank){
@@ -242,8 +245,8 @@ export function compileSpatialComposition(value){
     const preferred=faceStart+Math.floor((faceSpan-length)/2);
     const outside=['rear','east'].includes(c.side)?c.wall+1:c.wall-1;
     const starts=[];
-    // Search only real contiguous exterior segments, preserving two corner
-    // piers and one supporting jamb beyond the actual requested aperture.
+    // Search contiguous exposed wall segments, retain two corner piers, and
+    // inspect the requested aperture plus one supporting jamb on each side.
     for(let first=faceStart+2;first+length<=faceStart+faceSpan-2;first++)
      starts.push(first);
     starts.sort((a,b)=>Math.abs(a-preferred)-Math.abs(b-preferred)||a-b);
