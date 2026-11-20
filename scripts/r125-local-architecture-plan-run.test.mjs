@@ -358,6 +358,9 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    assert.ok(request.messages[0].content.includes('DESIGN STRATEGY FIRST'));
    assert.equal(request.messages[0].content.includes('ROOM-APPROPRIATE fixture'),true);
    assert.equal(request.messages[0].content.includes('REAL ROOM BUDGET'),true);
+   assert.ok(request.messages[0].content.includes('wide-bay is exactly 4 blocks'));
+   assert.ok(request.messages[0].content.includes('no entrance, attached joint or door may overlap it'));
+   assert.ok(request.messages[0].content.includes('If none fits, omit daylight for that room'));
    assert.ok(request.messages[0].content.includes('thirdRoomLink:"first-and-second"'));
    assert.ok(request.messages[0].content.includes('directly from first into third'));
    assert.ok(request.messages[0].content.includes('ESSENTIAL ACTIVITY COVERAGE'));
