@@ -125,7 +125,10 @@ export async function runR125LocalArchitecturePlan({
  // All real requests must enter through the owned lifecycle adapter. The
  // default CLI transport remains available only to explicit injected tests;
  // it may never post to the shared daemon directly.
- if(fetcher===fetch)fail('OWNED_WINDOWS_ONE_SHOT_REQUIRED');
+ const fakeOnlyTestTransport=process.env.MAB_ARCHPLAN_FAKE_TEST_TRANSPORT==='1'&&
+  model==='fake-local-author';
+ if(fetcher===fetch&&!fakeOnlyTestTransport)
+  fail('OWNED_WINDOWS_ONE_SHOT_REQUIRED');
  const dest=path.resolve(outDir);
  ensurePrivateNewDirectory(dest);
  let captured=null,normalizedCapture=null,modelStartMs=null,modelElapsedMs=null;

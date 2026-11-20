@@ -59,7 +59,8 @@ test('Windows custom brief -> ONE mock response -> strict B143 exterior and floo
     {cwd:root,encoding:'utf8'}).trim(),'-NoOpen'];
   const result=await new Promise((resolve,reject)=>{
    const child=spawn('powershell.exe',args,{
-    cwd:root,env:{...process.env,LOCALAPPDATA:local},windowsHide:true});
+    cwd:root,env:{...process.env,LOCALAPPDATA:local,
+     MAB_ARCHPLAN_FAKE_TEST_TRANSPORT:'1'},windowsHide:true});
    let stdout='',stderr='';
    child.stdout.setEncoding('utf8');
    child.stderr.setEncoding('utf8');
@@ -161,7 +162,8 @@ test('Windows preset unseen brief -> ONE mock Qwen response -> genuine B143 exte
     `http://127.0.0.1:${server.address().port}/v1/chat/completions`,
     '-ExpectedHead',pin,'-NoOpen'];
    const child=spawn('powershell.exe',args,{
-    cwd:root,env:{...process.env,LOCALAPPDATA:local},windowsHide:true});
+    cwd:root,env:{...process.env,LOCALAPPDATA:local,
+     MAB_ARCHPLAN_FAKE_TEST_TRANSPORT:'1'},windowsHide:true});
    let stdout='',stderr='';
    child.stdout.setEncoding('utf8');child.stderr.setEncoding('utf8');
    child.stdout.on('data',c=>{stdout+=c;});
@@ -287,7 +289,8 @@ test('Windows local Ollama SOURCE HOLD still unloads only the run model, preserv
    '-ExpectedHead',pin,'-NoOpen'];
   const result=await new Promise((resolve,reject)=>{
    const child=spawn('powershell.exe',args,{
-    cwd:root,env:{...process.env,LOCALAPPDATA:local},windowsHide:true});
+    cwd:root,env:{...process.env,LOCALAPPDATA:local,
+     MAB_ARCHPLAN_FAKE_TEST_TRANSPORT:'1'},windowsHide:true});
    let stdout='',stderr='';
    child.stdout.setEncoding('utf8');child.stderr.setEncoding('utf8');
    child.stdout.on('data',c=>{stdout+=c;});
@@ -329,7 +332,8 @@ test('wrong expected HEAD fails BEFORE any local model POST and before private o
    '-ExpectedHead','0000000000000000000000000000000000000000','-NoOpen'];
   const result=await new Promise((resolve,reject)=>{
    const child=spawn('powershell.exe',args,{
-    cwd:root,env:{...process.env,LOCALAPPDATA:dir},windowsHide:true});
+    cwd:root,env:{...process.env,LOCALAPPDATA:dir,
+     MAB_ARCHPLAN_FAKE_TEST_TRANSPORT:'1'},windowsHide:true});
    let stdout='',stderr='';
    child.stdout.setEncoding('utf8');child.stderr.setEncoding('utf8');
    child.stdout.on('data',chunk=>{stdout+=chunk;});
@@ -391,7 +395,8 @@ test('Windows one-click -RepairOnce preserves first raw then renders genuine sec
    '-ExpectedHead',pin,'-NoOpen'];
   const result=await new Promise((resolve,reject)=>{
    const child=spawn('powershell.exe',args,{
-    cwd:root,env:{...process.env,LOCALAPPDATA:local},windowsHide:true});
+    cwd:root,env:{...process.env,LOCALAPPDATA:local,
+     MAB_ARCHPLAN_FAKE_TEST_TRANSPORT:'1'},windowsHide:true});
    let stdout='',stderr='';
    child.stdout.setEncoding('utf8');child.stderr.setEncoding('utf8');
    child.stdout.on('data',chunk=>{stdout+=chunk});
