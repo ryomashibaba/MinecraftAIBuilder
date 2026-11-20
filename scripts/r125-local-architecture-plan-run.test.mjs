@@ -327,7 +327,7 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
     assert.equal(hipOptions.length,4);
     assert.ok(hipOptions.every(v=>v.required.includes('roofVolume')&&
       !Object.hasOwn(v.properties,'rearCornerCut')));
-    assert.ok(request.messages[0].content.includes('HIP roof'));
+    assert.ok(request.messages[0].content.includes('roofProfile:flat|ridge|sawtooth|split-monitor|hip'));
     assert.ok(request.messages[0].content.includes('6..8 deep/wide recess'));
    assert.ok(request.messages[0].content.includes('RAISED ridge roof'));
    assert.ok(courtyard.every(v=>
@@ -355,6 +355,7 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    assert.ok(request.messages[0].content.includes('splitCoordinate >= 11'));
    assert.ok(request.messages[0].content.includes('splitCoordinate <= footprint.width - 12'));
    assert.ok(request.messages[0].content.includes('plain/fins/screen instead'));
+   assert.ok(request.messages[0].content.includes('DESIGN STRATEGY FIRST'));
    assert.equal(request.messages[0].content.includes('ROOM-APPROPRIATE fixture'),true);
    assert.equal(request.messages[0].content.includes('REAL ROOM BUDGET'),true);
    assert.ok(request.messages[0].content.includes('thirdRoomLink:"first-and-second"'));
@@ -362,12 +363,12 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    assert.ok(request.messages[0].content.includes('ESSENTIAL ACTIVITY COVERAGE'));
    assert.ok(request.messages[0].content.includes('ACTIVITY-LED FLOOR PROGRAM'));
    assert.ok(request.messages[0].content.includes('spatial-tree OMIT expression and entryZone'));
-   assert.ok(request.messages[0].content.includes('ROOT MUST omit volume.attach'));
-   assert.ok(request.messages[0].content.includes('LATER room MUST put volume.attach'));
+   assert.ok(request.messages[0].content.includes('public/shared root without attach'));
+   assert.ok(request.messages[0].content.includes('every later room attaches to an earlier one'));
    assert.ok(request.messages[0].content.includes('real two-wide door'));
-   assert.ok(request.messages[0].content.includes('width-2 by depth-2'));
+   assert.ok(request.messages[0].content.includes('clear interior = dimensions minus 2'));
    assert.ok(request.messages[0].content.includes('mostly empty second floor'));
-   assert.ok(request.messages[0].content.includes('multiple independent stations'));
+   assert.ok(request.messages[0].content.includes('multiple stations'));
    assert.ok(request.messages[0].content.indexOf('ACTIVITY-LED FLOOR PROGRAM')<
     request.messages[0].content.indexOf('footprint EXACT'));
    assert.ok(request.messages[0].content.includes('staff-only FIRST upper room'));
@@ -704,7 +705,9 @@ test('Qwen may choose shed or ridge roof only for an enclosed spatial room',()=>
 test('spatial-tree Qwen schema requires authored per-room volumes and supports observation',()=>{
  const schema=R125_ARCHITECTURE_RESPONSE_SCHEMA;
  assert.equal(schema.anyOf.length,3);
- const spatial=schema.anyOf[0]; // preferred decoder variant: authored room volumes before shared rectangles
+ const spatial=schema.anyOf[0]; // first-listed branch; descriptions explain both modes without forcing one
+ assert.match(spatial.description,/separate connected room volumes/);
+ assert.match(schema.anyOf[1].description,/shared-envelope/);
  assert(spatial.additionalProperties===false);
  assert.equal(Object.hasOwn(spatial.properties,'expression'),false);
  assert.equal(Object.hasOwn(spatial.properties,'entryZone'),false);
