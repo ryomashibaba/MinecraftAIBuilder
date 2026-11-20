@@ -362,7 +362,9 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    assert.ok(request.messages[0].content.includes('no entrance, attached joint or door may overlap it'));
    assert.ok(request.messages[0].content.includes('If none fits, omit daylight for that room'));
    assert.ok(request.messages[0].content.includes('thirdRoomLink:"first-and-second"'));
-   assert.ok(request.messages[0].content.includes('directly from first into third'));
+   assert.ok(request.messages[0].content.includes('if room 2 is staff and room 3 is public/shared, set thirdRoomLink:"first-and-second"'));
+   assert.ok(request.messages[0].content.includes('Model-check the entry/door/attach graph with staff-only rooms removed'));
+   assert.ok(request.messages[0].content.includes('every public/shared room must remain reachable from the entrance'));
    assert.ok(request.messages[0].content.includes('ESSENTIAL ACTIVITY COVERAGE'));
    assert.ok(request.messages[0].content.includes('ACTIVITY-LED FLOOR PROGRAM'));
    assert.ok(request.messages[0].content.includes('spatial-tree OMIT expression and entryZone'));
