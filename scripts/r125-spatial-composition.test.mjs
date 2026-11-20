@@ -140,6 +140,15 @@ test('authored public wide bay uses a genuinely exposed segment beside a partial
  assert.deepEqual(result.BuildPlan.operations,[]);
  assert.deepEqual(result.gates,Array(9).fill('BLOCKED'));
  assert.equal(result.worldWrites,0);
+ // An authored 4-wide bay must not silently shrink to 3 on a 7-wide wall.
+ const narrow=p('narrow-public-wide-bay',[
+  {...r('public-hub',7,7,8),daylight:'wide-bay'},
+  r('rear-wing',6,6,7,{to:'public-hub',side:'south',shift:0})
+ ]);
+ const narrowOriginal=JSON.stringify(narrow);
+ assert.throws(()=>compileSpatialComposition(narrow),
+  /DAYLIGHT_OPENING_UNAVAILABLE_public-hub/);
+ assert.equal(JSON.stringify(narrow),narrowOriginal);
  // With a broad rear wing there is no viable exposed run: preserve HOLD,
  // rather than shrinking the authored opening or cutting a shared wall.
  const blocked=structuredClone(authored);

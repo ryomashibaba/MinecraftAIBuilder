@@ -220,12 +220,13 @@ export function compileSpatialComposition(value){
       o.x<=c.wall&&maxX(o)>=c.wall&&span(overlap(r,o,'z'))>0)))continue;
    }else{
     const faceSpan=c.axis==='z'?r.width:r.depth;
-    const length=requested==='wide-bay'?Math.min(4,faceSpan-4):
+    const length=requested==='wide-bay'?4:
      requested==='clerestory'?Math.min(4,faceSpan-4):
      Math.min(3,faceSpan-4);
-    // Keep the authored opening kind and the established width contract.
-    // Never downgrade an impossible requested bay to a legacy 2x2.
-    if(length<3)continue;
+    // A model-authored wide-bay is exactly four cells wide. Narrow faces
+    // must HOLD, never silently compile a three-cell substitute.
+    // All requested openings also retain two solid corner blocks per side.
+    if(length<3||faceSpan<length+4)continue;
     const faceStart=c.axis==='z'?r.x:r.z;
     const preferred=faceStart+Math.floor((faceSpan-length)/2);
     const outside=['rear','east'].includes(c.side)?c.wall+1:c.wall-1;
