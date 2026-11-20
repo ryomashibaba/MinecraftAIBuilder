@@ -31,6 +31,14 @@ export function proposeR125MassingForms(plan){
   fail('EXPLICIT_MODEL_EXPRESSION_REQUIRED');
  const two=plan.levels.length===2,w=plan.footprint.width,d=plan.footprint.depth;
  const choices=[];
+ // One-cell eaves are a true compiled roof extension and may shelter the authored entry.
+ if(['ridge','sawtooth','hip'].includes(plan.expression.roofProfile)&&
+    plan.expression.roofVolume==='raised'&&
+    plan.expression.roofOverhang===undefined&&
+    plan.expression.setbackSide==='none'&&plan.expression.setbackDepth===0&&
+    !plan.expression.rearCornerCut)
+  choices.push(['one-block-weather-eaves',
+   {...plan.expression,roofOverhang:'one-block'}]);
  if(two&&w>=28)
   choices.push(['east-upper-retreat',expr('hip','east',6,'x')]);
  if(two&&d>=28)
@@ -65,7 +73,7 @@ export function proposeR125FourRoomRebalance(plan){
  if(!Array.isArray(rooms)||rooms.length!==4||
     !['x','z'].includes(level.splitAxis)||
     !['public','shared'].includes(rooms[0].access)||
-    rooms.slice(1).filter(s=>s.access==='staff').length<2)return [];
+    rooms.slice(1).filter(s=>s.access==='staff').length<1)return [];
  const hubStations=rooms[0].fixtures??(rooms[0].fixture?[rooms[0].fixture]:[]);
  if(hubStations.length>1||!Number.isInteger(level.splitPercent)||
     level.splitPercent<=25)return [];
@@ -168,6 +176,8 @@ export function studyR125MassingFromOriginal(raw,{requestedBrief,maxVariants=3}=
  // Rank actual volume changes first; don't show three merely recolored roofs.
  eligible.sort((a,b)=>
    Number(b.kind==='FUNCTIONAL_SPLIT')-Number(a.kind==='FUNCTIONAL_SPLIT')||
+   Number(b.name==='one-block-weather-eaves')-
+   Number(a.name==='one-block-weather-eaves')||
    b.difference.belowRoofChangedCells-
    a.difference.belowRoofChangedCells||
    b.difference.changedSolidOrMaterialCells-
@@ -181,7 +191,9 @@ export function studyR125MassingFromOriginal(raw,{requestedBrief,maxVariants=3}=
  if(JSON.stringify(original)!==untouched||hash(raw)!==originalSha256)
   fail('ORIGINAL_MUTATED');
  return {schema:'mab-v11-derived-massing-art-study-v1',
-  baseline:{name:'model-original-with-existing-stair-composition',
+  baseline:{name:baseline.structuralComposition?.status===
+   'APPLIED_MINIMUM_PUBLIC_STAIR_CLEARANCE'?
+   'model-original-with-existing-stair-composition':'model-original-plan',
    status:baseline.status,sourceSha256:baseline.sourceSha256,
    geometrySha256:baseline.geometrySha256,
    authoredPlanSha256:baseline.authoredPlanSha256,
@@ -213,6 +225,10 @@ export function saveR125MassingArtStudy({rawFile,briefFile,outDir,maxVariants=3}
  const requestedBrief=fs.readFileSync(brief,'utf8').trim();
  const results=studyR125MassingFromOriginal(raw,{requestedBrief,maxVariants});
  const template=fs.readFileSync(path.join(repo,'source/ai/b143-viewer-template.html'),'utf8');
+ const baselineAuthor=results.baseline.structuralComposition?.status===
+  'APPLIED_MINIMUM_PUBLIC_STAIR_CLEARANCE'?
+  'GENUINE_QWEN_ORIGINAL_WITH_DECLARED_HOST_STAIR_COMPOSITION':
+  'GENUINE_QWEN_ORIGINAL_PLAN';
  const entries=[{name:'MODEL_BASELINE',
   design:results.baselineDesign,diagnosis:results.baseline},
   ...results.selected.map((x,i)=>({name:'HOST_'+(i+1)+'_'+x.name,
@@ -240,8 +256,7 @@ export function saveR125MassingArtStudy({rawFile,briefFile,outDir,maxVariants=3}
   fs.writeFileSync(path.join(folder,'B143_INTERACTIVE_3D.html'),
    renderB143Html(gallery,template),{flag:'wx'});
   rows.push({name:entry.name,author:entry.name==='MODEL_BASELINE'?
-   'GENUINE_QWEN_ORIGINAL_WITH_DECLARED_HOST_STAIR_COMPOSITION':
-   'HOST_RESEARCH_ALTERNATIVE_NOT_QWEN',
+   baselineAuthor:'HOST_RESEARCH_ALTERNATIVE_NOT_QWEN',
    sourceVerified:true,sourceSha256:entry.diagnosis.sourceSha256,
    geometrySha256:entry.diagnosis.geometrySha256,
    ...(entry.difference?{difference:entry.difference}:{}),

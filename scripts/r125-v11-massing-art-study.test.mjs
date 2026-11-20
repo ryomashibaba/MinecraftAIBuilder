@@ -47,8 +47,11 @@ test('saved private-style art study produces genuine B143 four-view images and d
   assert.equal(results.provenance.originalSha256,digest(saved));
   assert.equal(results.provenance.worldWrites,0);
   assert(results.variants.length>=2);
-  assert.equal(results.variants[0].author,
-   'GENUINE_QWEN_ORIGINAL_WITH_DECLARED_HOST_STAIR_COMPOSITION');
+  const baseAuthor=results.baseline.structuralComposition.status===
+   'APPLIED_MINIMUM_PUBLIC_STAIR_CLEARANCE'?
+   'GENUINE_QWEN_ORIGINAL_WITH_DECLARED_HOST_STAIR_COMPOSITION':
+   'GENUINE_QWEN_ORIGINAL_PLAN';
+  assert.equal(results.variants[0].author,baseAuthor);
   assert(results.variants.slice(1).every(x=>
    x.author==='HOST_RESEARCH_ALTERNATIVE_NOT_QWEN'));
   assert(fs.existsSync(path.join(out,'ART_COMPARE.html')));
