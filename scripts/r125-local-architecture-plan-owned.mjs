@@ -188,6 +188,8 @@ export async function createWindowsOwnedOllamaController({
   if(first.status!=='OWNED_OLLAMA_STARTED'||first.port!==PORT||
      first.killOnCloseJob!==true||!Number.isSafeInteger(first.pid)||first.pid<=0)
    throw Error('OWNED_OLLAMA_START_UNVERIFIED');
+  if(first.listenerPid!==first.pid||first.monitorPid!==monitor.pid)
+   throw Error('OWNED_OLLAMA_LISTENER_MONITOR_PID_MISMATCH');
   service={servicePid:first.pid,supervisorPid:owner.pid,monitorPid:monitor.pid,
    monitorId:nonce,port:PORT,killOnCloseJob:true,headSha:head};
   return {

@@ -85,6 +85,33 @@ def checked(value):
     return value
 
 
+def parse_listener_pids(output, port=11435):
+    if not isinstance(output, str) or not isinstance(port, int):
+        raise ValueError('OWNED_LISTENER_OUTPUT_INVALID')
+    found = set()
+    for line in output.splitlines():
+        fields = line.split()
+        if len(fields) < 5 or fields[0].upper() != 'TCP' or \
+                fields[3].upper() != 'LISTENING':
+            continue
+        local = fields[1]
+        if local.rsplit(':', 1)[-1] != str(port):
+            continue
+        if not fields[4].isdigit() or int(fields[4]) <= 0:
+            raise ValueError('OWNED_LISTENER_PID_INVALID')
+        found.add(int(fields[4]))
+    return sorted(found)
+
+
+def _port_listener_pids(port=11435):
+    result = subprocess.run(['netstat.exe', '-ano', '-p', 'tcp'],
+                            capture_output=True, text=True, timeout=5,
+                            creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
+    if result.returncode != 0:
+        raise OSError('OWNED_LISTENER_IDENTITY_UNAVAILABLE')
+    return parse_listener_pids(result.stdout, port)
+
+
 class OwnedProcessTree:
     """Own only a tree this object creates; never adopt a pre-existing PID."""
     def __init__(self):
@@ -241,10 +268,25 @@ def _ollama_supervisor(executable, sample_folder, nonce, monitor_pid):
     try:
         pid = tree.start(str(exe), ['serve'],
                          env={'OLLAMA_HOST': '127.0.0.1:11435'})
+        listen_deadline = time.monotonic() + 15
+        while time.monotonic() < listen_deadline:
+            if wait_process(tree.process, 0) != 258:
+                raise OSError('OWNED_OLLAMA_EXITED_BEFORE_LISTEN')
+            listeners = _port_listener_pids(11435)
+            if listeners == [pid]:
+                break
+            if listeners:
+                raise OSError('OWNED_OLLAMA_PORT_PID_MISMATCH')
+            time.sleep(0.1)
+        else:
+            raise OSError('OWNED_OLLAMA_LISTENER_NOT_READY')
         print(json.dumps({'status': 'OWNED_OLLAMA_STARTED', 'pid': pid,
                           'port': 11435, 'killOnCloseJob': True,
-                          'monitorPid': monitor_pid}), flush=True)
+                          'listenerPid': pid,'monitorPid': monitor_pid}), flush=True)
         while True:
+            if _port_listener_pids(11435) != [pid]:
+                stop_reason = 'OWNED_PORT_IDENTITY_MISMATCH'
+                break
             if wait_process(monitor_handle, 0) != 258:
                 stop_reason = 'INDEPENDENT_MONITOR_EXITED'
                 break
@@ -309,6 +351,9 @@ def selftest():
     if os.name != 'nt':
         raise OSError('OWNED_PROCESS_WINDOWS_REQUIRED')
     cases = []
+    if parse_listener_pids(' TCP 127.0.0.1:11435 0.0.0.0:0 LISTENING 1234\n') != [1234] or \
+            parse_listener_pids(' TCP 127.0.0.1:11436 0.0.0.0:0 LISTENING 1234\n'):
+        raise RuntimeError('OWNED_LISTENER_PID_PARSER_FAILED')
     for crash in (False, True):
         folder = Path(tempfile.mkdtemp(prefix='mab-owned-stop-')).resolve()
         owner, sentinel, handles = None, None, []
