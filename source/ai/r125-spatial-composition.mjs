@@ -218,28 +218,55 @@ export function compileSpatialComposition(value){
   let opened=0;
   for(const c of cands){
    if(i===0&&c.side==='front'&&!c.frontFlank)continue;
+   let at=c.at,size=c.size;
    if(c.frontFlank){
-    // Test actual window cells: side wings may meet the front corner
-    // without covering either real entrance-flanking aperture.
+    // Existing entrance-flanking apertures, unchanged.
     if(rooms.some(o=>o.id!==r.id&&
      o.z<=c.wall&&maxZ(o)>=c.wall&&
      o.x<=c.at[0]+c.size[0]-1&&maxX(o)>=c.at[0]))continue;
-   }else if(rooms.some(o=>o.id!==r.id&&
-    (c.axis==='z'?o.z<=c.wall&&maxZ(o)>=c.wall&&span(overlap(r,o,'x'))>0:
+   }else if(!requested){
+    // A plan without authored daylight retains its original B143 geometry.
+    if(rooms.some(o=>o.id!==r.id&&
+     (c.axis==='z'?o.z<=c.wall&&maxZ(o)>=c.wall&&span(overlap(r,o,'x'))>0:
       o.x<=c.wall&&maxX(o)>=c.wall&&span(overlap(r,o,'z'))>0)))continue;
-   let at=c.at,size=c.size;
-   if(requested&&!c.frontFlank){
+   }else{
     const faceSpan=c.axis==='z'?r.width:r.depth;
-    const length=requested==='wide-bay'?Math.min(4,faceSpan-4):
+    const length=requested==='wide-bay'?4:
      requested==='clerestory'?Math.min(4,faceSpan-4):
      Math.min(3,faceSpan-4);
-    // An explicitly authored window must retain at least 2 solid wall
-    // blocks on each side. Never silently downgrade to the legacy 2x2.
-    if(length<3)continue;
-    const inset=Math.floor((faceSpan-length)/2);
+    // A model-authored wide-bay is exactly four cells wide. Narrow faces
+    // must HOLD, never silently compile a three-cell substitute.
+    // All requested openings also retain two solid corner blocks per side.
+    if(length<3||faceSpan<length+4)continue;
+    const faceStart=c.axis==='z'?r.x:r.z;
+    const preferred=faceStart+Math.floor((faceSpan-length)/2);
+    const outside=['rear','east'].includes(c.side)?c.wall+1:c.wall-1;
+    const starts=[];
+    // Search only real contiguous exterior segments, preserving two corner
+    // piers and one supporting jamb beyond the actual requested aperture.
+    for(let first=faceStart+2;first+length<=faceStart+faceSpan-2;first++)
+     starts.push(first);
+    starts.sort((a,b)=>Math.abs(a-preferred)-Math.abs(b-preferred)||a-b);
+    let chosen=null;
+    for(const first of starts){
+     const low=first-1,high=first+length;
+     if(rooms.some(o=>o.id!==r.id&&
+      (c.axis==='z'?
+       (o.z<=Math.max(c.wall,outside)&&maxZ(o)>=Math.min(c.wall,outside)&&
+        o.x<=high&&maxX(o)>=low):
+       (o.x<=Math.max(c.wall,outside)&&maxX(o)>=Math.min(c.wall,outside)&&
+        o.z<=high&&maxZ(o)>=low))))continue;
+     const jointAxis=c.axis==='z'?'x':'z';
+     if(doors.some(d=>d.axis===jointAxis&&d.wall===c.wall&&
+      d.along<=high&&d.along+1>=low))continue;
+     if(c.axis==='z'&&c.wall===entrance[2]&&
+      entrance[0]<=high&&entrance[0]+1>=low)continue;
+     chosen=first;break;
+    }
+    if(chosen===null)continue;
     const y=requested==='clerestory'?r.roofY-2:3;
     const height=requested==='clerestory'?1:2;
-    at=c.axis==='z'?[r.x+inset,y,c.wall]:[c.wall,y,r.z+inset];
+    at=c.axis==='z'?[chosen,y,c.wall]:[c.wall,y,chosen];
     size=c.axis==='z'?[length,height,1]:[1,height,length];
    }
    const id='glaze-'+i+(requested?'-'+opened:'');

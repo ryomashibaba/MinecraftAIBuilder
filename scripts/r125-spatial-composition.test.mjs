@@ -109,11 +109,52 @@ test('authored spatial daylight creates larger, high, or paired real glass openi
  assert.equal(older.layout.exteriorWindows,2);
  assert(older.design.elements.some(e=>e.id==='glaze-0-glass'));
  const impossible=structuredClone(planned);
+ // A genuinely compact 6x6 wing cannot accommodate two authored 3-wide bays.
+ impossible.rooms[1].width=6;impossible.rooms[1].depth=6;
  impossible.rooms[1].daylight='paired-bays';
  assert.throws(()=>compileSpatialComposition(impossible),/DAYLIGHT_OPENING_UNAVAILABLE_rear/);
  const invalid=structuredClone(planned);
  invalid.rooms[0].daylight='ornamental';
  assert.throws(()=>validateSpatialComposition(invalid),/ROOM_CONTRACT/);
+});
+
+test('authored public wide bay uses a genuinely exposed segment beside a partial joint',()=>{
+ const authored=p('partial-rear-exposure',[
+  {...r('public-hub',14,14,8),daylight:'wide-bay'},
+  r('east-wing',8,6,7,{to:'public-hub',side:'east',shift:0}),
+  r('west-wing',8,6,7,{to:'public-hub',side:'west',shift:0}),
+  r('rear-wing',6,8,7,{to:'public-hub',side:'south',shift:-3})
+ ]);
+ const original=JSON.stringify(authored);
+ const result=compileSpatialComposition(authored);
+ const root=result.layout.rooms[0];
+ const aperture=result.design.elements.find(e=>
+  e.id==='glaze-0-0-glass'&&e.material==='glass');
+ assert.deepEqual(aperture?.origin,[root.x+8,3,root.z+13]);
+ assert.deepEqual(aperture.size,[4,2,1]);
+ assert.equal(JSON.stringify(authored),original);
+ assert.equal(result.layout.connectedDoors,3);
+ assert.equal(verifyCompiled(result.design,result.compiled),true);
+ assert.equal(result.sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert(result.sourceRoutes.zones.every(z=>z.reachedFromEntrance));
+ assert.deepEqual(result.BuildPlan.operations,[]);
+ assert.deepEqual(result.gates,Array(9).fill('BLOCKED'));
+ assert.equal(result.worldWrites,0);
+ // An authored 4-wide bay must not silently shrink to 3 on a 7-wide wall.
+ const narrow=p('narrow-public-wide-bay',[
+  {...r('public-hub',7,7,8),daylight:'wide-bay'},
+  r('rear-wing',6,6,7,{to:'public-hub',side:'south',shift:0})
+ ]);
+ const narrowOriginal=JSON.stringify(narrow);
+ assert.throws(()=>compileSpatialComposition(narrow),
+  /DAYLIGHT_OPENING_UNAVAILABLE_public-hub/);
+ assert.equal(JSON.stringify(narrow),narrowOriginal);
+ // With a broad rear wing there is no viable exposed run: preserve HOLD,
+ // rather than shrinking the authored opening or cutting a shared wall.
+ const blocked=structuredClone(authored);
+ blocked.rooms[3].width=10;blocked.rooms[3].attach.shift=0;
+ assert.throws(()=>compileSpatialComposition(blocked),
+  /DAYLIGHT_OPENING_UNAVAILABLE_public-hub/);
 });
 
 test('author-selected public open court makes an actual open-air arrival space between enclosed usable wings',()=>{
