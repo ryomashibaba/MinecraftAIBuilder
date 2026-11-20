@@ -122,6 +122,10 @@ export async function runR125LocalArchitecturePlan({
  if(typeof outDir!=='string'||outDir.length===0)
   fail('OUT_DIRECTORY_REQUIRED');
  if(typeof repairOnce!=='boolean')fail('INVALID_REPAIR_OPTION');
+ // All real requests must enter through the owned lifecycle adapter. The
+ // default CLI transport remains available only to explicit injected tests;
+ // it may never post to the shared daemon directly.
+ if(fetcher===fetch)fail('OWNED_WINDOWS_ONE_SHOT_REQUIRED');
  const dest=path.resolve(outDir);
  ensurePrivateNewDirectory(dest);
  let captured=null,normalizedCapture=null,modelStartMs=null,modelElapsedMs=null;
@@ -351,7 +355,7 @@ export async function runR125LocalArchitecturePlan({
 if(process.argv[1]===fileURLToPath(import.meta.url)){
  try{
   const args=parseR125LocalPlanArgs(process.argv.slice(2));
-  if(args.help)console.log('R125 local: --model LOCAL_ID --prompt TEXT --out NEW_PRIVATE_DIRECTORY [--endpoint http://127.0.0.1:PORT/v1/chat/completions] [--repair-once]');
+  if(args.help)console.log('R125 ArchitecturePlan owned: node scripts/r125-local-architecture-plan-owned.mjs --model qwen3:14b --prompt "... entry.shelterDepth:3 ..." --out NEW_PRIVATE_DIRECTORY');
   else{
    const {report}=await runR125LocalArchitecturePlan(args);
    console.log('R125_LOCAL_ARCHITECTURE_PLAN',JSON.stringify(report));

@@ -14,6 +14,10 @@ on:
       - 'scripts/r125-v7-private-once.mjs'
       - 'scripts/r125-v7-private-once.test.mjs'
       - 'scripts/r125-windows-owned-process.py'
+      - 'scripts/r125-local-architecture-plan-owned.mjs'
+      - 'scripts/r125-local-architecture-plan-owned.test.mjs'
+      - 'scripts/r125-local-architecture-plan-run.mjs'
+      - 'scripts/r125-local-architecture-plan-run.test.mjs'
       - 'scripts/r125-v10-owned-monitor-link.test.py'
       - 'scripts/r125-v7-v4h-public-token-input.mjs'
       - 'scripts/r125-v7-v4h-public-token-budget.py'
@@ -108,6 +112,9 @@ jobs:
           node --check scripts/r125-integrated-semantic-bridge.test.mjs
           node --check scripts/r125-v7-private-once.mjs
           node --check scripts/r125-v7-private-once.test.mjs
+          node --check scripts/r125-local-architecture-plan-owned.mjs
+          node --check scripts/r125-local-architecture-plan-owned.test.mjs
+          node --check scripts/r125-local-architecture-plan-run.mjs
           node --check scripts/r125-v7-ollama-readonly-diagnostic.mjs
           node scripts/r125-v7-ollama-readonly-diagnostic.mjs --selftest
           node --check scripts/r125-v7-ollama-load-only-calibration.mjs
@@ -143,6 +150,8 @@ jobs:
           node --test scripts/r125-v4d-short-semantic.test.mjs
           node --test scripts/r125-integrated-semantic-bridge.test.mjs
           node --test scripts/r125-v7-private-once.test.mjs
+          node --test scripts/r125-local-architecture-plan-owned.test.mjs
+          node --test scripts/r125-local-architecture-plan-run.test.mjs
           node --test scripts/r125-v4d-local-architect.test.mjs
           node --test scripts/r125-v4d-replay-private.test.mjs
           node --check scripts/r125-v4d-compiler-reject-codes.mjs

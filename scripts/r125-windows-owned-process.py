@@ -18,6 +18,8 @@ from pathlib import Path
 import subprocess
 import sys
 import tempfile
+import threading
+import queue
 import time
 
 if os.name == 'nt':
@@ -99,7 +101,7 @@ class OwnedProcessTree:
             self.close()
             raise
 
-    def start(self, executable, args):
+    def start(self, executable, args, env=None):
         if not self.job or self.process is not None:
             raise ValueError('OWNED_PROCESS_NEW_TREE_REQUIRED')
         exe = Path(executable)
@@ -124,8 +126,23 @@ class OwnedProcessTree:
             command = c.create_unicode_buffer(subprocess.list2cmdline([str(exe), *args]))
             # No shell, no inherited handles, no visible window. Job assignment
             # occurs before execution; there is no create-then-assign race.
+            environment = None
+            flags = 0x08000000 | 0x00080000
+            if env is not None:
+                if not isinstance(env, dict) or any(
+                    not isinstance(k, str) or not isinstance(v, str) or
+                    not k or '=' in k or any(ch in k+v for ch in '\0\r\n')
+                    for k, v in env.items()):
+                    raise ValueError('OWNED_PROCESS_ENVIRONMENT_INVALID')
+                merged = os.environ.copy()
+                merged.update(env)
+                block = '\0'.join(f'{k}={v}' for k, v in sorted(
+                    merged.items(), key=lambda item: item[0].upper())) + '\0\0'
+                environment = c.create_unicode_buffer(block)
+                flags |= 0x00000400  # CREATE_UNICODE_ENVIRONMENT
             checked(create_process(str(exe), command, None, None, False,
-                                   0x08000000 | 0x00080000, None, None,
+                                   flags, c.cast(environment, c.c_void_p)
+                                   if environment is not None else None, None,
                                    c.byref(startup), c.byref(info)))
             self.process, self.pid = info.process, int(info.pid)
             member = w.BOOL()
@@ -166,6 +183,8 @@ def _worker(folder):
     # The independent test observer opens handles BEFORE triggering stop, so
     # PID reuse cannot masquerade as termination of the original descendants.
     (folder / 'pids.json').write_text(json.dumps([os.getpid(), child.pid]))
+    (folder / 'environment.json').write_text(json.dumps({
+        'owned': os.environ.get('MAB_OWNED_TEST_VALUE')}))
     sequence = 0
     while True:
         sequence += 1
@@ -176,9 +195,104 @@ def _worker(folder):
 def _owner(folder):
     with OwnedProcessTree() as tree:
         tree.start(str(Path(sys.executable).resolve()),
-                   [str(Path(__file__).resolve()), '--worker', str(folder)])
+                   [str(Path(__file__).resolve()), '--worker', str(folder)],
+                   env={'MAB_OWNED_TEST_VALUE': 'job-owned'})
         while not (folder / 'close.flag').exists():
             time.sleep(0.05)
+
+
+def _ollama_supervisor(executable, sample_folder, nonce, monitor_pid):
+    """Own only a fresh Ollama server bound to the dedicated 11435 endpoint.
+
+    The server is assigned to a new kill-on-close Job at process creation.
+    stdin accepts exactly one STOP command. The shared 11434 daemon is never
+    discovered, adopted, or terminated by this supervisor.
+    """
+    if os.name != 'nt':
+        raise OSError('OWNED_OLLAMA_WINDOWS_REQUIRED')
+    folder = Path(sample_folder).resolve(strict=True)
+    if len(nonce) != 32 or any(ch not in '0123456789abcdef' for ch in nonce) or \
+            not monitor_pid.isdigit() or int(monitor_pid) <= 0:
+        raise ValueError('OWNED_OLLAMA_MONITOR_BINDING_REQUIRED')
+    monitor_pid = int(monitor_pid)
+    exe = Path(executable)
+    if not exe.is_absolute() or exe.name.lower() != 'ollama.exe' or not exe.is_file():
+        raise ValueError('OWNED_OLLAMA_EXE_REQUIRED')
+    import socket
+    probe = socket.socket()
+    try:
+        probe.bind(('127.0.0.1', 11435))
+    except OSError as exc:
+        raise OSError('OWNED_OLLAMA_PORT_11435_NOT_FREE') from exc
+    finally:
+        probe.close()
+    monitor_handle = checked(open_process(0x00100000, False, monitor_pid))
+
+    commands = queue.Queue()
+    def read_commands():
+        for line in sys.stdin:
+            commands.put(line.rstrip('\r\n'))
+        commands.put(None)  # Parent/controller closed its pipe: fail closed.
+    threading.Thread(target=read_commands, daemon=True).start()
+    tree = OwnedProcessTree()
+    stop_reason = 'REQUESTED_STOP'
+    last_seq = 0
+    last_sample_ms = 0
+    try:
+        pid = tree.start(str(exe), ['serve'],
+                         env={'OLLAMA_HOST': '127.0.0.1:11435'})
+        print(json.dumps({'status': 'OWNED_OLLAMA_STARTED', 'pid': pid,
+                          'port': 11435, 'killOnCloseJob': True,
+                          'monitorPid': monitor_pid}), flush=True)
+        while True:
+            if wait_process(monitor_handle, 0) != 258:
+                stop_reason = 'INDEPENDENT_MONITOR_EXITED'
+                break
+            try:
+                session = json.loads((folder / 'session.json').read_text())
+                sample = json.loads((folder / 'sample.json').read_text())
+                data = sample.get('data')
+                valid = (session.get('nonce') == nonce and
+                    session.get('monitorPid') == monitor_pid and
+                    sample.get('nonce') == nonce and sample.get('pid') == monitor_pid and
+                    sample.get('state') == 'ALIVE' and
+                    type(sample.get('seq')) is int and sample['seq'] > 0 and
+                    isinstance(data, dict) and
+                    all(type(data.get(k)) is int and data[k] >= 0 for k in
+                        ('ramFreeMiB', 'commitHeadroomMiB', 'gpuTotalMiB',
+                         'gpuFreeMiB', 'sampleMs')) and
+                    data['gpuTotalMiB'] > 0 and data['gpuFreeMiB'] <= data['gpuTotalMiB'] and
+                    0 <= int(time.time() * 1000) - data['sampleMs'] <= 3000)
+                if not valid:
+                    raise ValueError('SENSOR_SAMPLE_INVALID_OR_STALE')
+                if sample['seq'] > last_seq:
+                    if data['sampleMs'] <= last_sample_ms:
+                        raise ValueError('SENSOR_HEARTBEAT_NOT_ADVANCING')
+                    last_seq, last_sample_ms = sample['seq'], data['sampleMs']
+                elif sample['seq'] < last_seq:
+                    raise ValueError('SENSOR_SEQUENCE_ROLLBACK')
+            except (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError) as exc:
+                stop_reason = 'SENSOR_' + str(exc)
+                break
+            try:
+                command = commands.get(timeout=0.1)
+            except queue.Empty:
+                if wait_process(tree.process, 0) != 258:
+                    raise OSError('OWNED_OLLAMA_EXITED_UNEXPECTEDLY')
+                continue
+            if command is None:
+                stop_reason = 'CONTROLLER_DISCONNECTED'
+                break
+            if command != 'STOP':
+                stop_reason = 'COMMAND_REJECTED'
+                break
+            break
+    finally:
+        tree.close()
+        close_handle(monitor_handle)
+    print(json.dumps({'status': 'OWNED_OLLAMA_STOPPED', 'pid': pid,
+                      'port': 11435, 'jobClosed': True,
+                      'stopReason': stop_reason}), flush=True)
 
 
 def _await_file(file):
@@ -207,6 +321,8 @@ def selftest():
                                       '--owner', str(folder)],
                                      creationflags=subprocess.CREATE_NO_WINDOW)
             pids = _await_file(folder / 'pids.json')
+            if _await_file(folder / 'environment.json').get('owned') != 'job-owned':
+                raise RuntimeError('OWNED_PROCESS_ENVIRONMENT_NOT_INHERITED')
             for pid in pids:
                 handles.append(checked(open_process(0x00100000, False, pid)))
             first = _await_file(folder / 'beat.json')['sequence']
@@ -236,7 +352,7 @@ def selftest():
             for handle in handles:
                 close_handle(handle)
             # Nonrecursive cleanup of only this probe's known temporary files.
-            for name in ('pids.json', 'beat.json', 'close.flag'):
+            for name in ('pids.json', 'environment.json', 'beat.json', 'close.flag'):
                 (folder / name).unlink(missing_ok=True)
             folder.rmdir()
     return {'status': 'OWNED_PROCESS_LIFECYCLE_PROVEN_NOT_MODEL_CLEARANCE',
@@ -250,6 +366,8 @@ if __name__ == '__main__':
             print(json.dumps(selftest()))
         elif len(sys.argv) == 3 and sys.argv[1] in ('--owner', '--worker'):
             (_owner if sys.argv[1] == '--owner' else _worker)(Path(sys.argv[2]).resolve())
+        elif len(sys.argv) == 6 and sys.argv[1] == '--serve-ollama':
+            _ollama_supervisor(sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5])
         else:
             raise ValueError('OWNED_PROCESS_SELFTEST_ONLY')
     except Exception:
