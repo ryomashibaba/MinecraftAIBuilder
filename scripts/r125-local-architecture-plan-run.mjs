@@ -124,13 +124,20 @@ export async function runR125LocalArchitecturePlan({
  if(typeof repairOnce!=='boolean')fail('INVALID_REPAIR_OPTION');
  const dest=path.resolve(outDir);
  ensurePrivateNewDirectory(dest);
- let captured=null,modelStartMs=null,modelElapsedMs=null;
+ let captured=null,normalizedCapture=null,modelStartMs=null,modelElapsedMs=null;
  // Validate endpoint, model, prompt and other options BEFORE allocating dir.
  const author=createR125ArchitecturePlanLocalAdapter({
   model,endpoint,fetcher,timeoutMs,reasoningEffort,maxOutputTokens,
   onRawModelResponse(raw,{finishReason,usage}){
    captured={sha256:sha(raw),finishReason,usage};
    write(dest,'MODEL_RESPONSE_ORIGINAL.txt',raw);
+  },
+  onNormalizedModelPlan(normalized){
+   normalizedCapture=normalized.normalization;
+   if(normalizedCapture.applied){
+    write(dest,'MODEL_RESPONSE_NORMALIZED_PLAN.json',normalized.normalizedPlanJson);
+    write(dest,'MODEL_RESPONSE_NORMALIZATION.json',normalizedCapture);
+   }
   }
  });
  if(typeof prompt!=='string'||prompt.length<8||prompt.length>8000)
@@ -205,6 +212,8 @@ export async function runR125LocalArchitecturePlan({
   }
   result={...common,
    status:diagnosis.status,originalSha256:answer.originalSha256,
+   normalizedPlanSha256:answer.normalizedPlanSha256,
+   normalization:answer.normalization,
    sourceSha256:diagnosis.sourceSha256??null,
    geometrySha256:diagnosis.geometrySha256??null,
    sourceVerified:diagnosis.sourceVerified===true,
@@ -240,6 +249,8 @@ export async function runR125LocalArchitecturePlan({
   }
   result={...common,status:'HOLD_MODEL_OR_SOURCE',
    offlineDiagnosisStatus,offlineCompilerReason,
+   normalizedPlanSha256:normalizedCapture?.normalizedPlanSha256??null,
+   normalization:normalizedCapture,
    ...(invalidSetbackOriginal?{invalidSetbackOriginal}:{}),
    reason:String(error?.message??error).slice(0,300),
    originalSha256:captured?.sha256??null,

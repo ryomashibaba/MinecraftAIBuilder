@@ -229,17 +229,24 @@ const r125Room=r125obj({
  ovenHearth:r125enum('accent'),
  daylight:r125enum('wide-bay','clerestory','paired-bays')
 },['id','purpose','access']);
-const r125SpatialVolume=r125obj({
+const r125SpatialVolumeProperties={
  width:r125int(6,14),depth:r125int(6,14),roofY:r125int(6,10),
-  roofForm:r125enum('ridge','shed'),roofAxis:r125enum('x','z'),
+ roofForm:r125enum('ridge','shed'),roofAxis:r125enum('x','z'),
  attach:r125obj({to:r125slug,side:r125enum('east','west','north','south'),
   shift:{type:'integer',minimum:-3,maximum:3}
  },['to','side','shift'])
-},['width','depth','roofY']);
-const r125SpatialRoom={...r125Room,
- properties:{...r125Room.properties,volume:r125SpatialVolume,
+};
+const r125RootSpatialVolume=r125obj(
+ Object.fromEntries(Object.entries(r125SpatialVolumeProperties).filter(([key])=>key!=='attach')),
+ ['width','depth','roofY']);
+const r125AttachedSpatialVolume=r125obj(r125SpatialVolumeProperties,
+ ['width','depth','roofY','attach']);
+const r125SpatialRoom=(volume)=>({...r125Room,
+ properties:{...r125Room.properties,volume,
   spatialUse:r125enum('open-court')},
- required:[...r125Room.required,'volume']};
+ required:[...r125Room.required,'volume']});
+const r125RootSpatialRoom=r125SpatialRoom(r125RootSpatialVolume);
+const r125AttachedSpatialRoom=r125SpatialRoom(r125AttachedSpatialVolume);
 const r125BayValues=[35,40,45,50,55,60,65,70];
 const r125BayPair={type:'array',minItems:2,maxItems:2,
  items:{type:'integer',enum:r125BayValues},
@@ -429,9 +436,9 @@ const r125LevelTwo={...r125Level,
   r125LevelShape(3,['x','z'],r125RegularSplit,{secondary:true})
  ]};
 const r125SpatialLevel={...r125obj({
- layoutMode:r125enum('spatial-tree'),
- spaces:{type:'array',items:r125SpatialRoom,minItems:2,maxItems:4}
-},['layoutMode','spaces']),description:'Separate model-authored attached room volumes with individual footprints and roof heights; choose only when distinct functions benefit from separate massing.'};
+ layoutMode:r125enum('spatial-tree'),rootSpace:r125RootSpatialRoom,
+ attachedSpaces:{type:'array',items:r125AttachedSpatialRoom,minItems:1,maxItems:3}
+},['layoutMode','rootSpace','attachedSpaces']),description:'Separate model-authored attached room volumes with individual footprints and roof heights; choose only when distinct functions benefit from separate massing.'};
 const r125SpatialPlanVariant=()=>{
  const properties={...r125PlanProperties,
   entry:r125obj({shelterDepth:{type:'integer',enum:[1,2,3]}},['shelterDepth'])};
@@ -457,6 +464,47 @@ export const R125_ARCHITECTURE_RESPONSE_SCHEMA={
   r125PlanVariant(2,r125Expression)
  ]
 };
+
+/** Deterministic wire-format conversion for the position-dependent spatial
+ * attachment rule. Raw provider bytes are never changed. Only explicit room
+ * objects are moved into the legacy compiler's ordered `spaces` array.
+ */
+export function normalizeR125SpatialTreeResponse(raw){
+ if(typeof raw!=='string'||raw.length<1||raw.length>60000)
+  refuse('SPATIAL_NORMALIZATION_RAW_SIZE');
+ const originalSha256=createHash('sha256').update(raw).digest('hex');
+ let parsed;
+ try{parsed=JSON.parse(raw);}catch{refuse('PLAN_NOT_JSON');}
+ let plan=parsed,applied=false,roomMapping=[];
+ const level=parsed?.levels?.[0];
+ if(level?.layoutMode==='spatial-tree'&&
+   (Object.hasOwn(level,'rootSpace')||Object.hasOwn(level,'attachedSpaces'))){
+  if(Object.hasOwn(level,'rootSpace')&&Array.isArray(level.attachedSpaces)){
+   if(Object.hasOwn(level,'spaces'))
+    refuse('SPATIAL_NORMALIZATION_AMBIGUOUS_FORMAT');
+   plan=structuredClone(parsed);
+   const target=plan.levels[0];
+   const authoredRooms=[target.rootSpace,...target.attachedSpaces];
+   roomMapping=authoredRooms.map((room,index)=>({
+    sourcePath:index===0?'levels[0].rootSpace':`levels[0].attachedSpaces[${index-1}]`,
+    targetPath:`levels[0].spaces[${index}]`,id:room?.id??null,
+    ...(index>0?{attach:structuredClone(room?.volume?.attach??null)}:{})
+   }));
+   delete target.rootSpace;delete target.attachedSpaces;
+   target.spaces=authoredRooms;
+   applied=true;
+  }
+ }
+ const normalizedPlanJson=JSON.stringify(plan,null,2)+'\n';
+ return {plan,normalizedPlanJson,normalization:{
+  schema:'r125-spatial-tree-wire-normalization-v1',applied,
+  originalResponseSha256:originalSha256,normalizedPlanSha256:
+   createHash('sha256').update(normalizedPlanJson).digest('hex'),
+  conversion:applied?'rootSpace_attachedSpaces_to_ordered_spaces':'none',
+  roomMapping,roomsAdded:0,roomsDropped:0,roomFieldsInferred:0,
+  attachmentFieldsInferred:0,originalEdited:false
+ }};
+}
 
 export function r125RequiresWorkObservation(prompt){
  return typeof prompt==='string'&&
@@ -489,7 +537,8 @@ export function r125ResponseFormatForEndpoint(endpoint,{observationRequired=fals
 
 export function createR125ArchitecturePlanLocalAdapter({
  model,endpoint=DEFAULT_LOCAL_ENDPOINT,fetcher=fetch,timeoutMs=180000,
- reasoningEffort=undefined,maxOutputTokens=4096,onRawModelResponse
+ reasoningEffort=undefined,maxOutputTokens=4096,onRawModelResponse,
+ onNormalizedModelPlan=null
 }={}){
  if(typeof model!=='string'||!MODEL_RE.test(model))
   refuse('EXPLICIT_MODEL_ID_REQUIRED');
@@ -504,17 +553,19 @@ export function createR125ArchitecturePlanLocalAdapter({
     maxOutputTokens>16384)refuse('INVALID_MAX_OUTPUT_TOKENS');
  if(typeof onRawModelResponse!=='function')
   refuse('REQUIRED_RAW_CAPTURE_CALLBACK');
+ if(onNormalizedModelPlan!==null&&typeof onNormalizedModelPlan!=='function')
+  refuse('INVALID_NORMALIZED_CAPTURE_CALLBACK');
  const system=[
   'You are an inventive architectural designer. From an UNKNOWN Japanese building brief, choose a genuinely original usable composition and room purposes. No fixed building-type template.',
   'DESIGN STRATEGY FIRST: Identify activities/equipment, room count and public/staff relationships. Decide whether program, daylight or entry benefits from distinct attached volumes/heights; choose spatial-tree then. Otherwise use T, front-hub or side-spine shared shell when it serves circulation better. GROUND-LEVEL ENTRANCE AND VISITOR ACCESS: z-split visitors enter the FRONT room; if public rooms lie behind it this room MUST be public/shared. x-split entryZone must enter public/shared. Four-room first room is a public/shared hub/spine or spatial-tree root. Visitor routes avoid staff. No default mode or silhouette-only changes.',
-  'SPATIAL-TREE AUTHORING CONTRACT: If chosen, use public/shared root without attach; every later room attaches to an earlier one by east/west/north/south, shift -3..3. Author width/depth 6..14, roofY 6..10, fit footprint (clear interior = dimensions minus 2). Joined volumes need a one-cell overlap and at least four common wall cells for a real two-wide door; keep visitor routes out of staff rooms. Enclosed ridge/shed requires roofAxis x/z; omit both for flat/open court. Optional entry.shelterDepth 1..3 makes a genuine front canopy. OMIT expression/entryZone; HOST realizes authored massing only.',
+  'SPATIAL-TREE AUTHORING CONTRACT: If chosen, level has rootSpace and attachedSpaces. rootSpace is public/shared and its volume MUST OMIT attach. attachedSpaces has one to three rooms; EVERY room MUST include volume.attach to an earlier authored room ID, using east/west/north/south and shift -3..3. Never refer to a later or invented ID. Author width/depth 6..14, roofY 6..10, fit footprint (clear interior = dimensions minus 2). Joined volumes need a one-cell overlap and at least four common wall cells for a real two-wide door; keep visitor routes out of staff rooms. Enclosed ridge/shed requires roofAxis x/z; omit both for flat/open court. Optional entry.shelterDepth 1..3 makes a genuine front canopy. OMIT expression/entryZone; HOST realizes authored massing only.',
   'UPPER-LEVEL PRIVACY AND STAIR ACCESS: Two floors are optional. Stair landing at x=3..4,z=8..9 MUST belong to public/shared room (first WEST on x-split; first FRONT on z-split, boundary past z=9). Require a continuous two-wide path from public entrance to upstairs public rooms without crossing staff-only space. Otherwise put visitor activities downstairs. Never relabel staff rooms.',
   'Reply with ONE strict JSON object only. Do not include Markdown, rationale outside JSON, B143 elements, absolute voxel coordinates, commands, or claims of completed tests.',
   'Top-level EXACT fields: schema,id,title,brief,footprint,levels,materials. For spatial-tree OMIT expression and entryZone; optional entry:{shelterDepth:1|2|3} authorizes a real centered front canopy and counts within footprint. Conventional splits keep expression and entryZone behavior.',
   'schema exactly '+R125_PLAN_SCHEMA+'. id and space ids lowercase hyphen slugs of 3..39 characters, leading letter. title,brief,purpose are meaningful strings of at least three characters.',
   "ESSENTIAL ACTIVITY COVERAGE: Choose indispensable tasks FIRST, then matching real equipment IN THE SAME room, public/staff access, routes, room sizes, and finally exterior. bake or heat food -> oven; wash -> washbasin; sleep -> bed; operate electronics -> electronics; prepare/fabricate -> workbench or assembly-table; repair/servicing -> service-bay and tool-rack when useful; lessons -> teaching-board; inspection -> inspection-stand; records -> desk; exhibit -> display. Do not pass off storage or seating as work equipment. Public/shared routes cannot cross staff rooms. For TWO floors the fixed upper stair arrives near x=3..4,z=8: a staff-only FIRST upper room before a public SECOND can block guests. Require a real safe alternative connection: a front terrace is NOT a substitute path. Do not claim unrepresentable tasks were fulfilled.",
   "ACTIVITY-LED FLOOR PROGRAM / AREA-BEFORE-ENVELOPE: Size rooms for tasks, real equipment and two-wide access; avoid a mostly empty second floor, a giant one-display hall or cramped staff rooms. Choose the smallest useful overall footprint. Larger workrooms may need multiple stations. Never invent equipment; HOST must not automatically shrink authored rooms or add furniture.",
-  "footprint EXACT {width:integer 16..32,depth:integer 16..32}; levels:1 or 2; each splitAxis:x|z,splitPercent:30|35|40|45|50|55|60|65|70 for 2/3 rooms; FOUR-room SINGLE-floor splitPercent: z FRONT hub 30|35|40|45|50; x WEST spine 30|35|40|45|50|55|60. These preserve minimum clear spans. spaces:2 or 3, or FOUR in a one-floor conventional hub/spine or spatial-tree layout. Room requires unique id,purpose,access:public|shared|staff; optional fixtures (array of 1..5 real equipment),fixtureDetail,fixtureArrangement,ovenHearth,daylight. New local model output MUST use fixtures arrays, never legacy fixture, so it can choose all role types and multiple stations per room. Never emit fixtureScale in a new model response; scaling can be reviewed separately after SOURCE passes. In 3-room T plans the first room occupies WEST for x and the first room occupies FRONT for z; other two rooms share EAST/REAR. secondarySplitPercent 25|30|35|40|45|50|55|60|65|70|75 is FRONT share of the EAST wing for x (WEST share of rear wing for z); omit on 2 rooms. Doors usually first -> second -> third; optional thirdRoomLink:\"first-and-second\" for 3 rooms makes a real two-wide door directly from first into third. Use when needed for visitor route, not to fake connectivity. Exterior entry faces front/small z; z-split enters first, x-split may use entryZone:first|second. Exactly FOUR rooms require ONE floor. They may use model-authored spatial-tree volumes with a public/shared root and connected attached rooms, or a conventional layout: EITHER splitAxis:z, width>=22 depth>=18, FIRST public/shared FRONT hub and three independent REAR rooms (optional rearBayPercentages:[p1,p2] dividing width); OR splitAxis:x, width>=20 depth>=22, FIRST public/shared WEST longitudinal spine and three independent EAST rooms (optional sideBayPercentages:[p1,p2] dividing depth). All three rooms have direct TWO-wide doors from the first authored room. Only for FOUR rooms, the shared/public hub or spine can be FOUR clear blocks wide/deep. FRONT hub needs >=4 clear FRONT and >=6 REAR cells; WEST spine needs >=4 clear WEST and >=5 EAST cells. Avoid oversized public hubs. Choose compact public circulation when work areas need more space, not for every design. Bay percentages: 35..70, step 5, gap >=30 (min. five clear blocks per bay). Omit the optional pair for equal bays. For a side spine select entryZone:first so visitors enter the public/shared spine. No courtyards or recessed-portico with FOUR rooms. Pick FOUR only when separate activities justify it; do not inflate to a 2-floor box. Avoid fixed templates.",
+  "footprint EXACT {width:integer 16..32,depth:integer 16..32}; levels:1 or 2; each splitAxis:x|z,splitPercent:30|35|40|45|50|55|60|65|70 for 2/3 rooms; FOUR-room SINGLE-floor splitPercent: z FRONT hub 30|35|40|45|50; x WEST spine 30|35|40|45|50|55|60. These preserve minimum clear spans. Conventional spaces:2 or 3, or FOUR in a one-floor conventional hub/spine. Spatial-tree uses rootSpace plus attachedSpaces (1..3), for 2..4 total. Room requires unique id,purpose,access:public|shared|staff; optional fixtures (array of 1..5 real equipment),fixtureDetail,fixtureArrangement,ovenHearth,daylight. New local model output MUST use fixtures arrays, never legacy fixture, so it can choose all role types and multiple stations per room. Never emit fixtureScale in a new model response; scaling can be reviewed separately after SOURCE passes. In 3-room T plans the first room occupies WEST for x and the first room occupies FRONT for z; other two rooms share EAST/REAR. secondarySplitPercent 25|30|35|40|45|50|55|60|65|70|75 is FRONT share of the EAST wing for x (WEST share of rear wing for z); omit on 2 rooms. Doors usually first -> second -> third; optional thirdRoomLink:\"first-and-second\" for 3 rooms makes a real two-wide door directly from first into third. Use when needed for visitor route, not to fake connectivity. Exterior entry faces front/small z; z-split enters first, x-split may use entryZone:first|second. Exactly FOUR rooms require ONE floor. They may use model-authored spatial-tree volumes with a public/shared root and connected attached rooms, or a conventional layout: EITHER splitAxis:z, width>=22 depth>=18, FIRST public/shared FRONT hub and three independent REAR rooms (optional rearBayPercentages:[p1,p2] dividing width); OR splitAxis:x, width>=20 depth>=22, FIRST public/shared WEST longitudinal spine and three independent EAST rooms (optional sideBayPercentages:[p1,p2] dividing depth). All three rooms have direct TWO-wide doors from the first authored room. Only for FOUR rooms, the shared/public hub or spine can be FOUR clear blocks wide/deep. FRONT hub needs >=4 clear FRONT and >=6 REAR cells; WEST spine needs >=4 clear WEST and >=5 EAST cells. Avoid oversized public hubs. Choose compact public circulation when work areas need more space, not for every design. Bay percentages: 35..70, step 5, gap >=30 (min. five clear blocks per bay). Omit the optional pair for equal bays. For a side spine select entryZone:first so visitors enter the public/shared spine. No courtyards or recessed-portico with FOUR rooms. Pick FOUR only when separate activities justify it; do not inflate to a 2-floor box. Avoid fixed templates.",
   "Functional equipment: use fixtures array 1..5 stations from counter|workbench|display|storage|seating|bed|desk|washbasin|electronics|oven|service-bay|tool-rack|teaching-board|inspection-stand|assembly-table. The old single fixture field is for archived plans only, not new Qwen responses. These are physical B143 proxies with two-wide service, not functioning appliances. Optional ovenHearth:\"accent\" only with oven; fixtureArrangement:\"focal-island\" for a feasible central focus; fixtureDetail:\"crafted\" makes readable shapes. fixtureScale is NOT an allowed new-author output (optional offline ART can explore extensions). Unplaceable equipment is SOURCE HOLD. Never invent extra equipment roles.",
   'Per-room daylight wide-bay|clerestory|paired-bays. Paired-bays asks the GENERIC HOST for TWO genuine 3x2 exterior windows only when useful positions and safe wall areas exist. HOST requires a solid sill/lintel, outside air and room-side access; unsupported openings HOLD with no fallback. Omit the key for no glazing; never emit daylight:none. Choose openings for the room activity.',
   'materials EXACT floor:wood|stone|concrete, wall:concrete|stone|wood|metal, roof:stone|metal|wood|concrete. Use coherent, legible contrast when useful; material name changes alone are not originality. Education preview block IDs are not user-verified.',
@@ -532,8 +583,7 @@ export function createR125ArchitecturePlanLocalAdapter({
   "ROOF-TO-FACADE PROPORTION: choose task layout and windows before roof. A RAISED ridge roof can still form a broad flat-looking top that overwhelms a low building. ridgeProfile:\"steep\" is optional for genuinely useful roof silhouette, not an excuse to keep empty rooms. Consider hip, sawtooth, split-monitor or court only when appropriate to the building function.",
   "Prioritize a ROOM-APPROPRIATE fixture, daylight, clear entry and two-wide circulation. HOST never fakes SOURCE.",
   'For conventional splits actively select a task-appropriate roof volume, orientation and facade. Spatial-tree omits expression/entryZone and uses authored volumes, useful height differences, daylight and optional per-room ridge/shed roofs.',
-  'Spatial-tree expresses identity through useful authored volumes/heights, daylight and optional per-room ridge/shed roofs; it has no conventional expression object.',
-  'OPTIONAL OPEN PUBLIC COURT: Only for briefs needing a usable outdoor public yard or courtyard, spatial-tree spaces[0] may use spatialUse:"open-court". It creates real uncovered floor, low walls, outside entrance and two-wide doors to enclosed wings. Keep roofY in JSON but no physical roof, omit daylight for the open court. All other rooms must stay enclosed. Do not replace a required indoor reception or add a court for decoration. fixtureDetail and fixtureArrangement require an actual nonempty fixtures array.',
+  'OPTIONAL OPEN PUBLIC COURT: Only for briefs needing a usable outdoor public yard or courtyard, spatial-tree rootSpace may use spatialUse:"open-court". It creates real uncovered floor, low walls, outside entrance and two-wide doors to enclosed wings. Keep roofY in JSON but no physical roof, omit daylight for the open court. All other rooms must stay enclosed. Do not replace a required indoor reception or add a court for decoration. fixtureDetail and fixtureArrangement require an actual nonempty fixtures array.',
  ].join('\n');
  return async function authorArchitecturePlan({prompt,repairContext=null}={}){
   if(typeof prompt!=='string'||prompt.length<8||prompt.length>8000)
@@ -606,11 +656,13 @@ export function createR125ArchitecturePlanLocalAdapter({
      completionTokens:count('completion_tokens'),
      totalTokens:count('total_tokens')}});
    if(choice.finish_reason==='length')refuse('TRUNCATED_MODEL_RESPONSE');
-   let plan;
-   try{plan=JSON.parse(raw);}
-   catch{refuse('PLAN_NOT_JSON');}
+   const normalized=normalizeR125SpatialTreeResponse(raw);
+   if(onNormalizedModelPlan)onNormalizedModelPlan(normalized);
+   const plan=normalized.plan;
    validateArchitecturePlan(plan); // throws; absolutely no semantic repair
    return {plan,originalSha256:createHash('sha256').update(raw).digest('hex'),
+    normalizedPlanSha256:normalized.normalization.normalizedPlanSha256,
+    normalization:normalized.normalization,
     model,modelCalls:1,worldWrites:0,sourceVerified:false,
     artStatus:'NOT_REVIEWED',minecraftWalking:'NOT_TESTED'};
   }finally{clearTimeout(timer);}

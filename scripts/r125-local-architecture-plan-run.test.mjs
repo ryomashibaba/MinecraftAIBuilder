@@ -7,7 +7,7 @@ import {createHash} from 'node:crypto';
 import {inferR125ExplicitActivityRequirements}
  from '../source/ai/r125-explicit-activity-requirements.mjs';
 import {createR125ArchitecturePlanLocalAdapter,R125_ARCHITECTURE_RESPONSE_SCHEMA,
- r125ResponseFormatForEndpoint}
+ r125ResponseFormatForEndpoint,normalizeR125SpatialTreeResponse}
  from '../source/ai/b198g-local-model-adapter.mjs';
 import {runR125LocalArchitecturePlan,parseR125LocalPlanArgs,
  summarizeR125InvalidSetbackOriginal}
@@ -363,8 +363,8 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    assert.ok(request.messages[0].content.includes('ESSENTIAL ACTIVITY COVERAGE'));
    assert.ok(request.messages[0].content.includes('ACTIVITY-LED FLOOR PROGRAM'));
    assert.ok(request.messages[0].content.includes('spatial-tree OMIT expression and entryZone'));
-   assert.ok(request.messages[0].content.includes('public/shared root without attach'));
-   assert.ok(request.messages[0].content.includes('every later room attaches to an earlier one'));
+   assert.ok(request.messages[0].content.includes('rootSpace is public/shared and its volume MUST OMIT attach'));
+   assert.ok(request.messages[0].content.includes('EVERY room MUST include volume.attach to an earlier authored room ID'));
    assert.ok(request.messages[0].content.includes('real two-wide door'));
    assert.ok(request.messages[0].content.includes('clear interior = dimensions minus 2'));
    assert.ok(request.messages[0].content.includes('mostly empty second floor'));
@@ -694,7 +694,7 @@ test('new Qwen four-room split schema keeps minimum real hub/spine clear spans',
 
 test('Qwen may choose shed or ridge roof only for an enclosed spatial room',()=>{
  const spatial=R125_ARCHITECTURE_RESPONSE_SCHEMA.anyOf[0];
- const room=spatial.properties.levels.items.properties.spaces.items;
+ const room=spatial.properties.levels.items.properties.rootSpace;
  assert.deepEqual(room.properties.volume.properties.roofForm.enum,
   ['ridge','shed']);
  assert.deepEqual(room.properties.volume.properties.roofAxis.enum,['x','z']);
@@ -712,14 +712,23 @@ test('spatial-tree Qwen schema requires authored per-room volumes and supports o
  assert.equal(Object.hasOwn(spatial.properties,'expression'),false);
  assert.equal(Object.hasOwn(spatial.properties,'entryZone'),false);
  const level=spatial.properties.levels.items;
- assert.deepEqual(level.required,['layoutMode','spaces']);
+ assert.deepEqual(level.required,['layoutMode','rootSpace','attachedSpaces']);
  assert.deepEqual(level.properties.layoutMode.enum,['spatial-tree']);
- const room=level.properties.spaces.items;
- assert(room.required.includes('volume'));
- assert.deepEqual(room.properties.volume.required,['width','depth','roofY']);
- assert.deepEqual(room.properties.volume.properties.width,{type:'integer',minimum:6,maximum:14});
- assert.deepEqual(room.properties.volume.properties.roofY,{type:'integer',minimum:6,maximum:10});
- assert.deepEqual(room.properties.volume.properties.attach.required,['to','side','shift']);
+ const root=level.properties.rootSpace;
+ const attached=level.properties.attachedSpaces.items;
+ assert(root.required.includes('volume')&&attached.required.includes('volume'));
+ assert.deepEqual(root.properties.volume.required,['width','depth','roofY']);
+ assert.equal(Object.hasOwn(root.properties.volume.properties,'attach'),false);
+ assert.deepEqual(attached.properties.volume.required,
+  ['width','depth','roofY','attach']);
+ assert.deepEqual(attached.properties.volume.properties.attach.required,
+  ['to','side','shift']);
+ assert.equal(level.properties.attachedSpaces.minItems,1);
+ assert.equal(level.properties.attachedSpaces.maxItems,3);
+ assert.deepEqual(root.properties.volume.properties.width,
+  {type:'integer',minimum:6,maximum:14});
+ assert.deepEqual(root.properties.volume.properties.roofY,
+  {type:'integer',minimum:6,maximum:10});
  const observed=r125ResponseFormatForEndpoint(
   'http://127.0.0.1:11434/v1/chat/completions',{observationRequired:true});
  const observedVariants=observed.json_schema.schema.anyOf;
@@ -736,6 +745,49 @@ test('spatial-tree Qwen schema requires authored per-room volumes and supports o
  assert(ordinaryThreeRoomShapes.some(shape=>
   shape.properties.secondarySplitPercent.enum.includes(35)),
   'non-observation plans retain the original valid proportions');
+});
+
+test('rootSpace and attachedSpaces normalize losslessly and preserve legacy plans',()=>{
+ const root={id:'gallery-room',purpose:'Public exhibit and visitor reception',
+  access:'public',fixtures:['display','desk'],
+  volume:{width:10,depth:8,roofY:7}};
+ const child={id:'assembly-room',purpose:'Staff satellite assembly',
+  access:'staff',fixtures:['assembly-table'],
+  volume:{width:10,depth:8,roofY:9,
+   attach:{to:'gallery-room',side:'east',shift:0}}};
+ const plan={schema:'minecraftaibuilder-r125-architecture-plan-v1',
+  id:'wire-contract-test',title:'Wire contract test',brief:'A room connection test.',
+  footprint:{width:26,depth:22},levels:[{layoutMode:'spatial-tree',
+   rootSpace:root,attachedSpaces:[child]}],
+  materials:{floor:'wood',wall:'concrete',roof:'stone'}};
+ const raw=JSON.stringify(plan),normalized=normalizeR125SpatialTreeResponse(raw);
+ assert.equal(normalized.normalization.applied,true);
+ assert.deepEqual(normalized.plan.levels[0].spaces,[root,child]);
+ assert.deepEqual(normalized.plan.levels[0].spaces[1].volume.attach,child.volume.attach);
+ assert.equal(normalized.normalization.roomsAdded,0);
+ assert.equal(normalized.normalization.roomsDropped,0);
+ assert.equal(normalized.normalization.roomFieldsInferred,0);
+ assert.equal(normalized.normalization.attachmentFieldsInferred,0);
+ assert.equal(normalized.normalization.originalEdited,false);
+ const reviewed=diagnoseR125ArchitecturePlanOriginal(raw);
+ assert.equal(reviewed.sourceVerified,true);
+ assert.equal(reviewed.normalization.applied,true);
+ assert.equal(reviewed.originalSha256,digest(raw));
+ assert.equal(reviewed.normalizedPlanSha256,normalized.normalization.normalizedPlanSha256);
+ const unknown=structuredClone(plan);
+ unknown.levels[0].attachedSpaces[0].volume.attach.to='future-room';
+ const held=diagnoseR125ArchitecturePlanOriginal(JSON.stringify(unknown));
+ assert.equal(held.sourceVerified,false);
+ assert.equal(held.compilerReason,'R125_PLAN_SPATIAL_ATTACHMENT');
+ const oldFormat=JSON.stringify({...plan,levels:[{layoutMode:'spatial-tree',
+  spaces:[root,child]}]});
+ const legacy=normalizeR125SpatialTreeResponse(oldFormat);
+ assert.equal(legacy.normalization.applied,false);
+ assert.equal(legacy.plan.levels[0].spaces.length,2);
+ const mixed=JSON.stringify({...plan,levels:[{layoutMode:'spatial-tree',
+  rootSpace:root,attachedSpaces:[child],spaces:[root]}]});
+ assert.throws(()=>normalizeR125SpatialTreeResponse(mixed),
+  /SPATIAL_NORMALIZATION_AMBIGUOUS_FORMAT/);
 });
 
 test('fixture-only opt-in permits exactly one genuine model revision and preserves both raw answers',async()=>{

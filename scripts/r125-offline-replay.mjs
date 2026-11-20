@@ -19,7 +19,7 @@ import {compileArchitecturePlan,composeR125PublicStairSpine,
 import {auditR125SourceRoutes,auditR125VisitorRoutes} from '../source/ai/r125-source-routes.mjs';
 import {auditR125PairedBayApproach} from '../source/ai/r125-room-daylight.mjs';
 import {critiqueArchitecture} from '../source/ai/b198c-spatial-critic.mjs';
-import {r125RequiresWorkObservation}
+import {r125RequiresWorkObservation,normalizeR125SpatialTreeResponse}
  from '../source/ai/b198g-local-model-adapter.mjs';
 import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
 
@@ -395,10 +395,15 @@ export function diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail='legacy',ro
   constructionApproved:false,executionAllowed:false,
   artStatus:'NOT_REVIEWED',minecraftWalking:'NOT_TESTED'
  };
- let original;
- try{original=JSON.parse(raw);}
- catch{return {...base,status:'HOLD_INVALID_ORIGINAL_JSON',
-  compilerReason:'ORIGINAL_NOT_JSON',sourceVerified:false};}
+ let original,normalization;
+ try{
+  const normalized=normalizeR125SpatialTreeResponse(raw);
+  original=normalized.plan;normalization=normalized.normalization;
+ }
+ catch(error){return {...base,status:'HOLD_INVALID_ORIGINAL_JSON',
+  compilerReason:String(error?.message??'ORIGINAL_NOT_JSON').includes(
+   'SPATIAL_NORMALIZATION_AMBIGUOUS_FORMAT')?
+   'SPATIAL_WIRE_FORMAT_AMBIGUOUS':'ORIGINAL_NOT_JSON',sourceVerified:false};}
  if(!isObj(original))
   return {...base,status:'HOLD_INVALID_ORIGINAL_PLAN',
    compilerReason:'ORIGINAL_NOT_PLAN_OBJECT',sourceVerified:false};
@@ -468,6 +473,8 @@ export function diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail='legacy',ro
    hostPolicy,structuralComposition,
    ...(observationComposition?{observationComposition}:{}),
    authoredPlanSha256:digest(JSON.stringify(original)),
+   normalizedPlanSha256:normalization.normalizedPlanSha256,
+   normalization,
    ...(spatialCapacity?{spatialCapacity}:{}),planSha256:built.planSha256,
    sourceSha256:built.sourceSha256,geometrySha256:built.geometrySha256,
    occupiedVoxels:built.compiled.primitives.length,
