@@ -113,6 +113,33 @@ test('calibration preflight reports the failed GET endpoint and safe error class
  }
 });
 
+test('calibration POST HTTP failure records status without response content or retry',async()=>{
+ const body=calibrationBody(),sha=createHash('sha256').update(JSON.stringify(body)).digest('hex');
+ let checks=0,posts=0,receipt=null;
+ const controller=calibrationController(async()=>sensor(++checks));
+ const result=await runR125ResourceCalibrationOwned({
+  calibrationRequest:body,calibrationRequestSha256:sha,
+  evidenceWriter:async report=>{receipt=structuredClone(report);}
+ },{controller,fetcher:async(url,init={})=>{
+  if(init.method==='POST'){
+   posts++;
+   return {ok:false,status:503,text:async()=>{throw Error('DO_NOT_READ_ERROR_BODY');}};
+  }
+  return calibrationPreflightFetcher(url,init);
+ },approvalVerifier:async()=>true,pollMs:250,timeoutMs:5000});
+ assert.equal(result.status,'HOLD');
+ assert.equal(result.reason,'CALIBRATION_POST_HTTP_FAILED');
+ assert.equal(result.calibrationHttpStatus,503);
+ assert.equal(result.modelPostCount,1);
+ assert.equal(result.automaticRetries,0);
+ assert.equal(posts,1);
+ assert.equal(receipt?.calibrationHttpStatus,503);
+ assert.equal(receipt?.reason,'CALIBRATION_POST_HTTP_FAILED');
+ assert.equal(receipt?.worldWrites,0);
+ assert.equal(result.ownedServiceStopConfirmed,true);
+ assert.equal(result.monitorStopConfirmed,true);
+});
+
 test('a signalled child is confirmed exited only after Node records its signalCode',()=>{
  assert.equal(hasExited(null),false);
  assert.equal(hasExited({exitCode:null,signalCode:null}),false);
