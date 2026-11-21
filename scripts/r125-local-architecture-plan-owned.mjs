@@ -295,6 +295,33 @@ const jsonObject=async(fetcher,url,method='GET',signal=AbortSignal.timeout(5000)
  return response.json();
 };
 
+const preflightJsonObject=async(fetcher,url,endpoint)=>{
+ try{
+  const response=await fetcher(url,{method:'GET',redirect:'error',
+   signal:AbortSignal.timeout(5000)});
+  if(!response?.ok){
+   const status=Number.isInteger(response?.status)&&response.status>=100&&
+    response.status<=599?response.status:'UNKNOWN';
+   throw Error(`HTTP_${status}`);
+  }
+  try{return await response.json();}catch{throw Error('INVALID_JSON');}
+ }catch(error){
+  const message=String(error?.message??'');
+  let kind;
+  if(/^HTTP_(?:[1-5][0-9]{2}|UNKNOWN)$/.test(message))kind=message;
+  else if(message==='INVALID_JSON')kind=message;
+  else{
+   const code=error?.code??error?.cause?.code;
+   if(error?.name==='TimeoutError'||error?.name==='AbortError'||
+      code==='ETIMEDOUT'||code==='UND_ERR_CONNECT_TIMEOUT')kind='TIMEOUT';
+   else if(code==='ECONNREFUSED')kind='CONNECTION_REFUSED';
+   else if(code==='ECONNRESET'||code==='UND_ERR_SOCKET')kind='CONNECTION_RESET';
+   else kind='COMMUNICATION_ERROR';
+  }
+  throw Error(`PREFLIGHT_${endpoint}_${kind}`);
+ }
+};
+
 export function validateCalibrationRequest({body,expectedSha256}={}){
  let raw;
  try{raw=JSON.stringify(body);}catch{return {valid:false,reason:'REQUEST_NOT_JSON'};}
@@ -392,10 +419,11 @@ export async function runR125ResourceCalibrationOwned({
  let tags,ownedPs,sharedPs;
  try{
   [tags,ownedPs,sharedPs]=await Promise.all([
-   jsonObject(fetcher,'http://127.0.0.1:11435/api/tags'),
-   jsonObject(fetcher,'http://127.0.0.1:11435/api/ps'),
-   jsonObject(fetcher,sharedUrl)]);
- }catch{return fail('MODEL_OR_SHARED_SERVICE_PREFLIGHT_UNAVAILABLE');}
+   preflightJsonObject(fetcher,'http://127.0.0.1:11435/api/tags','OWNED_TAGS'),
+   preflightJsonObject(fetcher,'http://127.0.0.1:11435/api/ps','OWNED_PS'),
+   preflightJsonObject(fetcher,sharedUrl,'SHARED_PS')]);
+ }catch(error){return fail(/^PREFLIGHT_(?:OWNED_TAGS|OWNED_PS|SHARED_PS)_(?:HTTP_(?:[1-5][0-9]{2}|UNKNOWN)|CONNECTION_REFUSED|CONNECTION_RESET|TIMEOUT|INVALID_JSON|COMMUNICATION_ERROR)$/.test(error?.message??'')?
+  error.message:'PREFLIGHT_COMMUNICATION_ERROR');}
  const models=tags?.models?.filter(x=>x?.name===MODEL)??[];
  if(models.length!==1||models[0].digest!==MODEL_DIGEST||
     models[0].size!==MODEL_SIZE||models[0].details?.quantization_level!=='Q4_K_M'||

@@ -88,6 +88,31 @@ const calibrationPreflightFetcher=async(url,init={})=>{
  return {ok:true,json:async()=>({models:[]})};
 };
 
+test('calibration preflight reports the failed GET endpoint and safe error class',async()=>{
+ const body=calibrationBody(),sha=createHash('sha256').update(JSON.stringify(body)).digest('hex');
+ const cases=[
+  ['http://127.0.0.1:11435/api/tags',()=>({ok:false,status:503}),
+   'PREFLIGHT_OWNED_TAGS_HTTP_503'],
+  ['http://127.0.0.1:11435/api/ps',()=>{throw Error('connect',{cause:{code:'ECONNREFUSED'}});},
+   'PREFLIGHT_OWNED_PS_CONNECTION_REFUSED'],
+  ['http://127.0.0.1:11434/api/ps',()=>({ok:true,json:async()=>{throw SyntaxError('bad json');}}),
+   'PREFLIGHT_SHARED_PS_INVALID_JSON'],
+ ];
+ for(const [failedUrl,failure,reason] of cases){
+  let posts=0;
+  const controller=calibrationController(async()=>sensor(1));
+  const fetcher=async(url,init={})=>{
+   if(init.method==='POST'){posts++;throw Error('TEST_MUST_NOT_POST');}
+   if(url===failedUrl)return failure();
+   return calibrationPreflightFetcher(url,init);
+  };
+  const result=await runR125ResourceCalibrationOwned({calibrationRequest:body,
+   calibrationRequestSha256:sha},{controller,fetcher,approvalVerifier:async()=>true});
+  assert.equal(result.status,'HOLD');assert.equal(result.reason,reason);
+  assert.equal(result.modelPostCount,0);assert.equal(posts,0);
+ }
+});
+
 test('a signalled child is confirmed exited only after Node records its signalCode',()=>{
  assert.equal(hasExited(null),false);
  assert.equal(hasExited({exitCode:null,signalCode:null}),false);
