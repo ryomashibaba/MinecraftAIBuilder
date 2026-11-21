@@ -31,6 +31,8 @@ OWNER_FILE = BASE / 'scripts' / 'r125-windows-owned-process.py'
 NO_WINDOW = getattr(subprocess, 'CREATE_NO_WINDOW', 0)
 MIB = 1048576
 HEALTH_S = 5.0
+DEFAULT_MONITOR_LIFETIME_S = 45
+OWNED_CALIBRATION_MONITOR_LIFETIME_S = 240
 
 
 def put(path, value):
@@ -127,10 +129,20 @@ def worker(folder, nonce):
         time.sleep(.10)
 
 
-def monitor(folder, nonce):
+def monitor_lifetime(requested, session):
+    if requested == DEFAULT_MONITOR_LIFETIME_S:
+        return requested
+    if requested == OWNED_CALIBRATION_MONITOR_LIFETIME_S and \
+            isinstance(session, dict) and session.get('ownedCalibration') is True:
+        return requested
+    raise RuntimeError('MONITOR_LIFETIME_NOT_AUTHORIZED')
+
+
+def monitor(folder, nonce, lifetime_s=DEFAULT_MONITOR_LIFETIME_S):
     authenticated(folder, nonce)
+    lifetime_s = monitor_lifetime(lifetime_s, get(folder / 'session.json'))
     seq = 0
-    deadline = time.monotonic() + 45.0  # Stop even if the test driver disappears.
+    deadline = time.monotonic() + lifetime_s  # Bounded even if the driver disappears.
     while time.monotonic() < deadline:
         if (folder / 'freeze.flag').exists():
             # Intentionally stop publishing, but leave monitor process alive.
@@ -371,6 +383,14 @@ def offline_tests():
     assert valid_new(base, None, base['nonce'], 11)
     assert classify(base, base, 4.9) == 'UNCHANGED'
     assert classify(base, base, 5.1) == 'STALE'
+    assert monitor_lifetime(DEFAULT_MONITOR_LIFETIME_S, {}) == 45
+    assert monitor_lifetime(OWNED_CALIBRATION_MONITOR_LIFETIME_S,
+                            {'ownedCalibration': True}) == 240
+    try:
+        monitor_lifetime(OWNED_CALIBRATION_MONITOR_LIFETIME_S, {})
+        raise AssertionError('unauthorized extended monitor lifetime accepted')
+    except RuntimeError as exc:
+        assert str(exc) == 'MONITOR_LIFETIME_NOT_AUTHORIZED'
     mutated = {**base, 'state': 'FAULT'}
     assert classify(mutated, base, .5) == 'NEW'
     assert not valid_new(mutated, base, base['nonce'], 11)
@@ -378,7 +398,7 @@ def offline_tests():
              'data': {**base['data'], 'sampleMs': base['data']['sampleMs'] + 1}}
     assert valid_new(newer, base, base['nonce'], 11)
     assert receipt()['gateCP1'] == 'HOLD'
-    print(json.dumps({'offlineAssertions': 7,
+    print(json.dumps({'offlineAssertions': 10,
                       'status': 'PASS_OFFLINE_NOT_WINDOWS'}))
 
 
@@ -391,6 +411,10 @@ def main():
                                       'monitor', 'supervisor', 'sibling'))
     p.add_argument('--folder')
     p.add_argument('--nonce')
+    p.add_argument('--max-lifetime-seconds', type=int,
+                   default=DEFAULT_MONITOR_LIFETIME_S,
+                   choices=(DEFAULT_MONITOR_LIFETIME_S,
+                            OWNED_CALIBRATION_MONITOR_LIFETIME_S))
     a = p.parse_args()
     if a.offline_tests:
         offline_tests()
@@ -405,7 +429,7 @@ def main():
         elif a.role == 'descendant' or a.role == 'sibling':
             sibling(folder, a.nonce)
         elif a.role == 'monitor':
-            monitor(folder, a.nonce)
+            monitor(folder, a.nonce, a.max_lifetime_seconds)
         else:
             supervisor(folder, a.nonce)
         return 0

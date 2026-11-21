@@ -212,6 +212,35 @@ test('an independent monitor fault aborts the single calibration POST and closes
  assert.equal(result.monitorStopConfirmed,true);
 });
 
+test('during-inference sequence waits are bounded and still HOLD on a monitor fault',async()=>{
+ const body=calibrationBody(),sha=createHash('sha256').update(JSON.stringify(body)).digest('hex');
+ let checks=0,posts=0;
+ const controller=calibrationController(async({waitForNewSequence=false}={})=>{
+  checks++;
+  if(checks<=2)return sensor(checks);
+  assert.equal(waitForNewSequence,true);
+  if(checks<=4)return {...sensor(2),independentMonitorActive:false,
+   reason:'MONITOR_SEQUENCE_NOT_ADVANCED'};
+  return {...sensor(2,false),reason:'INDEPENDENT_MONITOR_SAMPLE_INVALID'};
+ });
+ const result=await runR125ResourceCalibrationOwned({calibrationRequest:body,
+  calibrationRequestSha256:sha},{controller,fetcher:async(url,init={})=>{
+   if(init.method==='POST'){
+    posts++;
+    return new Promise((resolve,reject)=>init.signal.addEventListener('abort',
+     ()=>reject(Error('TEST_ABORT')),{once:true}));
+   }
+   return calibrationPreflightFetcher(url,init);
+  },approvalVerifier:async()=>true,pollMs:250,timeoutMs:5000});
+ assert.equal(result.reason,'RESOURCE_OR_MONITOR_GUARD');
+ assert.equal(checks,5);
+ assert.equal(posts,1);
+ assert.equal(result.modelPostCount,1);
+ assert.equal(result.automaticRetries,0);
+ assert.equal(result.ownedServiceStopConfirmed,true);
+ assert.equal(result.monitorStopConfirmed,true);
+});
+
 test('the second pre-POST check waits for a new sequence and never reuses the prior sample',async()=>{
  const body=calibrationBody(),sha=createHash('sha256').update(JSON.stringify(body)).digest('hex');
  let checks=0,posts=0,approvalCalls=0;

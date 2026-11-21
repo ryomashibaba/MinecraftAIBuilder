@@ -103,7 +103,8 @@ export async function createWindowsOwnedOllamaController({
  const nonce=randomBytes(16).toString('hex');
  const sessionFile=path.join(dir,'session.json');
  const sampleFile=path.join(dir,'sample.json');
- fs.writeFileSync(sessionFile,JSON.stringify({nonce,headSha:head}),{flag:'wx'});
+ fs.writeFileSync(sessionFile,JSON.stringify({nonce,headSha:head,
+  ownedCalibration:true}),{flag:'wx'});
  let monitor=null,owner=null,lines=null,ownerQueue=[],ownerWaiters=[];
   let service=null,stopped=false,sequence=0,ownerStopAck=false;
  const pushLine=value=>{
@@ -166,7 +167,8 @@ export async function createWindowsOwnedOllamaController({
    reason,servicePid:service?.servicePid};
  };
  try{
-  monitor=spawnProcess(pythonExe,[SENSOR,'--role','monitor','--folder',dir,'--nonce',nonce],
+  monitor=spawnProcess(pythonExe,[SENSOR,'--role','monitor','--folder',dir,
+   '--nonce',nonce,'--max-lifetime-seconds','240'],
    {env:{...process.env,MAB_V31_PROBE_NONCE:nonce},windowsHide:true,
     stdio:'ignore'});
   if(!Number.isSafeInteger(monitor.pid)||monitor.pid<=0)
@@ -533,7 +535,7 @@ export async function runR125ResourceCalibrationOwned({
   const tick=await Promise.race([pending.then(()=>false),delay(pollMs).then(()=>true)]);
   if(!tick)break;
   try{
-   const s=await sample('DURING_INFERENCE');
+   const s=await sample('DURING_INFERENCE',{waitForNewSequence:true});
    const [active,shared]=await Promise.all([
     jsonObject(fetcher,'http://127.0.0.1:11435/api/ps'),
     jsonObject(fetcher,sharedUrl)]);
