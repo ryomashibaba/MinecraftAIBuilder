@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {compileDesign,validateDesign,verifyCompiled,SCHEMA} from '../source/ai/b143-building-dsl.mjs';
 import {compileB143Gallery,verifyB143Payload,renderB143Html,extendB142Root,readDesigns} from './build-b143-site.mjs';
-import {sectionCapsOnly,surfaceOnly} from './b143-gallery-core.mjs';
+import {sectionCapsOnly,surfaceOnly,surveyB143VerticalExposure} from './b143-gallery-core.mjs';
 
 const minimal=()=>({schema:SCHEMA,id:'new-mars-workshop',
  title:'火星の研究アトリエ',brief:'カテゴリーを定義せずChatGPTが設計する新しい建物',
@@ -113,4 +113,35 @@ test('true multi-band architectural cutaway reveals previously hidden REAL B143 
  const old=structuredClone(p);
  delete old.scenes[0].sectionCaps;
  assert.equal(verifyB143Payload(old),true); // archived HTML remains readable
+});
+
+test('B143 exposed vertical patches are quantified without falsely claiming ART',()=>{
+ const doc={schema:SCHEMA,id:'facade-exposure-review',
+  title:'Physical voxel geometry',brief:'Actual boxes and a glass slit for review.',
+  bounds:{width:18,height:18,depth:18},designOnly:true,elements:[
+   {id:'mass',shape:'box',mode:'add',material:'stone',
+    origin:[2,2,2],size:[8,6,5]},
+   {id:'glass-slit',shape:'box',mode:'add',material:'glass',
+    origin:[4,3,2],size:[2,3,1]}
+  ]};
+ const source=compileDesign(doc);
+ const originalGeometrySha=source.geometrySha256;
+ const summary=surveyB143VerticalExposure(source);
+ assert.equal(summary.artVerdict,'NOT_DETERMINED');
+ assert.equal(summary.glassFaces,6);
+ assert.equal(summary.byDirection['z-'].glassFaces,6);
+ assert.equal(summary.largestOpaquePatch.faces,48);
+ assert.equal(summary.largestOpaquePatch.horizontalSpan,8);
+ assert.equal(summary.largestOpaquePatch.verticalSpan,6);
+ const gallery=compileB143Gallery([doc]);
+ assert.equal(verifyB143Payload(gallery),true);
+ assert.deepEqual(gallery.scenes[0].stats.verticalSurface,summary);
+ assert.equal(gallery.scenes[0].geometrySha256,originalGeometrySha);
+ assert.equal(compileDesign(doc).geometrySha256,originalGeometrySha);
+ assert.equal(gallery.safety.minecraftWrites,0);
+ assert.deepEqual(gallery.safety.BuildPlan.operations,[]);
+ const html=renderB143Html(gallery,fs.readFileSync(
+  new URL('../source/ai/b143-viewer-template.html',import.meta.url),'utf8'));
+ assert(html.includes('最大連続同材面'));
+ assert(html.includes('ART採用は未判定'));
 });

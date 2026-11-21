@@ -24,6 +24,58 @@ export function sectionCapsOnly(scene,outerSurface=surfaceOnly(scene)){
   return !outside.has(key)&&occupied.has(x+','+(y+1)+','+z);
  });
 }
+/** Source-only objective vertical exposure survey, NOT an ART score.
+ * Counts same-material 4-neighbor face patches on ONE plane, including
+ * interior shafts/courts. Does not infer sunlight, facade use or walkability.
+ * All input geometry is the original final B143 voxel array. */
+export function surveyB143VerticalExposure(scene){
+ ensure(Array.isArray(scene?.primitives)&&Array.isArray(scene?.layerNames),
+  'VERTICAL_EXPOSURE_INPUT');
+ const dirs=[['x+',1,0],['x-',-1,0],['z+',0,1],['z-',0,-1]];
+ const occupied=new Set(scene.primitives.map(p=>p[0]+','+p[1]+','+p[2]));
+ const byDirection=Object.fromEntries(dirs.map(([k])=>[k,{exposedFaces:0,glassFaces:0}]));
+ const groups=new Map();
+ for(const [x,y,z,m] of scene.primitives){
+  for(const [side,dx,dz] of dirs){
+   if(occupied.has((x+dx)+','+y+','+(z+dz)))continue;
+   const tally=byDirection[side];tally.exposedFaces++;
+   if(scene.layerNames[m]==='B143_GLASS'){tally.glassFaces++;continue;}
+   const plane=dx!==0?x+(dx>0?1:0):z+(dz>0?1:0);
+   const u=dx!==0?z:x,key=side+'|'+plane+'|'+m;
+   if(!groups.has(key))groups.set(key,{side,plane,
+    material:scene.layerNames[m],positions:new Set()});
+   groups.get(key).positions.add(u+','+y);
+  }
+ }
+ let largestOpaquePatch=null;
+ for(const group of groups.values()){
+  const left=new Set(group.positions);
+  while(left.size){
+   const initial=left.values().next().value;
+   left.delete(initial);
+   const stack=[initial];
+   let faces=0,loU=Infinity,hiU=-Infinity,loY=Infinity,hiY=-Infinity;
+   while(stack.length){
+    const [u,y]=stack.pop().split(',').map(Number);
+    faces++;loU=Math.min(loU,u);hiU=Math.max(hiU,u);
+    loY=Math.min(loY,y);hiY=Math.max(hiY,y);
+    for(const n of [(u-1)+','+y,(u+1)+','+y,u+','+(y-1),u+','+(y+1)])
+     if(left.delete(n))stack.push(n);
+   }
+   if(!largestOpaquePatch||faces>largestOpaquePatch.faces)
+    largestOpaquePatch={direction:group.side,plane:group.plane,
+     material:group.material,faces,
+     horizontalSpan:hiU-loU+1,verticalSpan:hiY-loY+1};
+  }
+ }
+ const totals=Object.values(byDirection);
+ return {scope:'FINAL_SOURCE_EXPOSED_VERTICAL_FACES_INCLUDING_VOIDS',
+  connectedOnSinglePlane:true,artVerdict:'NOT_DETERMINED',
+  exposedFaces:totals.reduce((a,v)=>a+v.exposedFaces,0),
+  glassFaces:totals.reduce((a,v)=>a+v.glassFaces,0),
+  byDirection,largestOpaquePatch};
+}
+
 export function compileB143Gallery(documents,{auditCompiled=null}={}){
  ensure(Array.isArray(documents)&&documents.length>0&&documents.length<=24,'GALLERY_COUNT');
  ensure(auditCompiled===null||typeof auditCompiled==='function','INVALID_AUDITOR');
@@ -36,13 +88,14 @@ export function compileB143Gallery(documents,{auditCompiled=null}={}){
   sourceHashes.push(result.sourceSha256);geometryHashes.push(result.geometrySha256);
   const {primitives,...meta}=result;
   const surface=surfaceOnly(result),sectionCaps=sectionCapsOnly(result,surface);
+  const verticalSurface=surveyB143VerticalExposure(result);
   ensure(surface.length>50&&surface.length<=primitives.length,'EMPTY_SURFACE');
   ensure(sectionCaps.length<=primitives.length-surface.length,'CUTAWAY_CAP_BUDGET');
   const extraAudit=auditCompiled===null?{}:{
    topologyReview:auditCompiled(result)};
   return {...meta,...extraAudit,surface,sectionCaps,
    stats:{...result.stats,renderedSurfaceCells:surface.length,
-    trueSectionRevealedCells:sectionCaps.length}};
+    trueSectionRevealedCells:sectionCaps.length,verticalSurface}};
  });
  ensure(new Set(geometryHashes).size===documents.length,'DUPLICATE_GEOMETRIES');
  return {schema:'minecraftaibuilder-b143-gallery-v1',edition:'MINECRAFT_EDUCATION',

@@ -92,6 +92,19 @@ function setScene(){
   infoLine("構成操作",s.stats.designOperations.length+"回"),
   infoLine("3D生成の整合性","SHA256検証済み"),
   infoLine("Minecraftでの施工","未実施"));
+ // Objective exposed-voxel metrics; never auto-approve any design.
+ const v=s.stats.verticalSurface;
+ if(v?.scope==="FINAL_SOURCE_EXPOSED_VERTICAL_FACES_INCLUDING_VOIDS"){
+  const patch=v.largestOpaquePatch;
+  st.append(infoLine("最大連続同材面",patch?
+   patch.faces.toLocaleString()+"面 ("+patch.direction+"側・横"+
+   patch.horizontalSpan+"×縦"+patch.verticalSpan+")":"なし"));
+  st.append(infoLine("露出縦面のガラス",v.glassFaces.toLocaleString()+
+   "/"+v.exposedFaces.toLocaleString()+"面"));
+  const note=document.createElement("p");note.className="muted";
+  note.textContent="内部の空洞壁も含む参考値。採光・美術・ART採用は未判定。";
+  st.append(note);
+ }
  const toggles=el("materialToggles");toggles.replaceChildren();el("legend").replaceChildren();
  for(const [i,layer] of s.layerNames.entries()){
   const m=layer.slice(5).toLowerCase(),label=document.createElement("label"),check=document.createElement("input");
