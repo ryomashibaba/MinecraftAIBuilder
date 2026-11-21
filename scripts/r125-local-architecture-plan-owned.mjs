@@ -174,7 +174,7 @@ export async function createWindowsOwnedOllamaController({
   if(!Number.isSafeInteger(monitor.pid)||monitor.pid<=0)
    throw Error('INDEPENDENT_MONITOR_PID_REQUIRED');
   fs.writeFileSync(sessionFile,JSON.stringify({nonce,headSha:head,
-   monitorPid:monitor.pid}),{flag:'w'});
+   ownedCalibration:true,monitorPid:monitor.pid}),{flag:'w'});
   let previous=0,ready=false;
   const monitorDeadline=Date.now()+15000;
   while(Date.now()<monitorDeadline&&!ready){
