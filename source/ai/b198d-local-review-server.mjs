@@ -168,7 +168,7 @@ export function renderB198DStudioHtml(state,token){
   .replaceAll('\u2029','\\u2029');
  return template.replace('__B143_GALLERY_JSON__',safeJson)
   .replace('</head>',CSS+'</head>')
-  .replace('<h2>ChatGPTが設計した新規建築</h2>',PANEL)
+  .replace('<h2>設計ソース由来の建築プレビュー（作者未認証）</h2>',PANEL)
   .replace('</main></div>','<section id="b198d-comparison" aria-label="修正前後の建築3D比較">'+
    '<h2>同じカメラ角度での修正前後比較</h2>'+
    '<button type="button" id="b198d-compare-refresh">現在の視点で比較画像を更新</button>'+

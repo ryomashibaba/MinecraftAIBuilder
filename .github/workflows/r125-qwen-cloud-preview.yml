@@ -1,0 +1,91 @@
+name: R125 Public-Saved Qwen — Fast Mobile 3D Cloud Preview
+
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - '.github/workflows/r125-qwen-cloud-preview.yml'
+      - 'scripts/r125-expression-gallery.mjs'
+      - 'scripts/r125-expression-gallery.test.mjs'
+      - 'scripts/r125-qwen-cloud-mobile-qa.mjs'
+      - 'scripts/fixtures/r125-qwen14b-residential-2024a.json'
+      - 'scripts/b143-gallery-core.mjs'
+      - 'source/ai/b143-viewer-template.html'
+      - 'source/ai/r125-architecture-plan.mjs'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: r125-public-cloud-preview-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verified-mobile-gallery:
+    # Playwright 1.56.1 cannot install Chromium dependencies on ubuntu26.04.
+    # Pin the OS image instead of using a floating ubuntu-latest tag.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify pinned already-public model source and real B143
+        run: |
+          node --check scripts/r125-expression-gallery.mjs
+          node --check scripts/b143-gallery-core.mjs
+          node --test scripts/r125-expression-gallery.test.mjs
+      - name: Generate read-only standalone 3D from already-public Qwen fixture
+        run: |
+          node scripts/r125-expression-gallery.mjs --out "$RUNNER_TEMP/r125-public-qwen-preview"
+      - name: Reject source drift, unsafe construction or missing mobile operation
+        env:
+          PREVIEW_DIR: ${{ runner.temp }}/r125-public-qwen-preview
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import path from 'node:path';
+          const dir=process.env.PREVIEW_DIR;
+          const report=JSON.parse(fs.readFileSync(path.join(dir,'R125_EXPRESSION_COMPARISON.json'),'utf8'));
+          const html=fs.readFileSync(path.join(dir,'index.html'),'utf8');
+          const assert=(good,message)=>{if(!good)throw Error('R125_CLOUD_PREVIEW_'+message);};
+          assert(report.schema==='r125-expression-visual-comparison-v1','REPORT_SCHEMA');
+          assert(report.exactOriginalPlanSha256==='46aed429e795f2622cd8c49d8eb8f1153af20d5d958abf2f5f99020e909ce271','PINNED_REAL_QWEN_PLAN');
+          assert(report.originalPlanNeverEdited===true&&report.prototypesNotNewModelOutputs===true,'MODEL_PROVENANCE');
+          assert(report.scenes.length===5&&new Set(report.scenes.map(x=>x.geometrySha256)).size===5,'REAL_DISTINCT_3D');
+          assert(report.scenes[0].provenance==='ACTUAL_QWEN14B_ORIGINAL_SEMANTIC_PLAN'&&
+            report.scenes.slice(1).every(x=>x.provenance!=='ACTUAL_QWEN14B_ORIGINAL_SEMANTIC_PLAN'),'HOST_VARIANTS_EXPLICIT');
+          assert(report.scenes.every(x=>x.actualB143SourceVerified&&x.worldWrites===0&&
+            x.actualMinecraftWalking==='NOT_TESTED'&&x.humanAestheticReview==='NOT_REVIEWED'),'SOURCE_ONLY');
+          assert(report.constructionApproved===false&&report.executionAllowed===false&&report.worldWrites===0&&
+            report.gates.length===9&&report.gates.every(x=>x==='BLOCKED'),'WORLD_SAFETY');
+          assert(html.includes('id="mobileZoomIn"')&&html.includes('id="mobileZoomOut"')&&
+            html.includes('id="mobileCut"')&&html.includes('id="mobileReset"'),'MOBILE_CONTROLS');
+          assert(html.includes('minecraftaibuilder-b143-gallery-v1')&&
+            !html.includes('__B143_GALLERY_JSON__')&&!html.includes('fetch('),'SINGLE_FILE_OFFLINE');
+          assert(!/<script[^>]+src\s*=/i.test(html),'EXTERNAL_JS');
+          console.log('R125_PUBLIC_QWEN_CLOUD_PREVIEW_SOURCE_ONLY_PASS: 5 real geometry scenes, zero model calls, zero world writes');
+          NODE
+      - name: Install pinned browser QA dependencies (no repository lockfile update)
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Actual Chromium mobile and desktop SOURCE interaction check
+        env:
+          PREVIEW_DIR: ${{ runner.temp }}/r125-public-qwen-preview
+        run: node scripts/r125-qwen-cloud-mobile-qa.mjs
+      - name: Record evidence and review entry
+        run: |
+          echo '## Cloud-only, no local PC or remote LLM' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Artifact: `R125-Public-Qwen-5-Scene-Mobile-3D` (download then open `index.html` on mobile/desktop).' >> "$GITHUB_STEP_SUMMARY"
+          echo 'A: already-public saved Qwen semantic design; B–E: HOST / compiler-derived variants, NOT four new LLM designs.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'True B143 SOURCE; ART HOLD; Minecraft walking NOT TESTED; NOT_PREPARED / 9 BLOCKED / BuildPlan empty; model calls 0; world writes 0.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'The private R190 three-use originals and user-uploaded large-window HTML are NOT in this job or artifact.' >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: R125-Public-Qwen-5-Scene-Mobile-3D
+          path: ${{ runner.temp }}/r125-public-qwen-preview/
+          if-no-files-found: error
+          retention-days: 21

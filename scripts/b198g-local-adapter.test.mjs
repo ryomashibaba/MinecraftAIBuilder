@@ -60,6 +60,9 @@ test('mock local JSON protocol drives a genuine B143 compile but never claims ac
    assert.equal(opts.headers.Authorization,undefined);
    const sent=JSON.parse(opts.body);
    assert.equal(sent.model,'my-local-model:latest');
+   assert.match(sent.messages[0].content,/assumptions is an array of 0\.\.12 PLAIN STRINGS/);
+   assert.match(sent.messages[0].content,/each at most 250 characters/);
+   assert.match(sent.messages[0].content,/Use \[\] when there are no assumptions/);
    assert.equal(sent.stream,false);
    assert.equal(sent.messages[0].role,'system');
    assert.equal(sent.messages[1].role,'user');
@@ -111,4 +114,32 @@ test('the local CLI requires explicit model, prompt and a new output directory',
   '--model','m','--prompt','建築指示','--out','new','--rounds','9'
  ]),/B198G_INVALID_ROUNDS/);
  assert.equal(parseArguments(['--help']).help,true);
+});
+
+
+test('opt-in R125 anti-overthinking uses bounded OpenAI-compatible fields only',async()=>{
+ let calls=0;
+ const adapter=createB198GLocalModelAdapter({
+  model:'qwen3.8:27b',reasoningEffort:'none',maxOutputTokens:4096,
+  fetcher:async(url,opts)=>{
+   calls++;
+   assert.equal(url,DEFAULT_LOCAL_ENDPOINT);
+   const sent=JSON.parse(opts.body);
+   assert.equal(sent.reasoning_effort,'none');
+   assert.equal(sent.max_tokens,4096);
+   assert.equal(sent.stream,false);
+   assert.equal(sent.response_format.type,'json_object');
+   assert.equal(opts.signal.aborted,false);
+   return response(valid());
+  }
+ });
+ const answer=await adapter({mode:'creation',prompt:'二階建ての小型住宅を独自設計してください'});
+ assert.equal(calls,1);
+ assert.equal(answer.design.id,'b198g-local-sample');
+ assert.throws(()=>createB198GLocalModelAdapter({
+  model:'test',reasoningEffort:'ultra'
+ }),/INVALID_REASONING_EFFORT/);
+ assert.throws(()=>createB198GLocalModelAdapter({
+  model:'test',maxOutputTokens:-1
+ }),/INVALID_MAX_OUTPUT_TOKENS/);
 });

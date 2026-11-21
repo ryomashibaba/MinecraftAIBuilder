@@ -1,0 +1,23 @@
+name: R8 Mini Windows Installer Smoke
+on:
+  push:
+    paths:
+      - 'tools/r8-mini/**'
+      - 'scripts/b198zr8-mini-starter-windows-smoke.ps1'
+      - '.github/workflows/r8-mini-installer-windows.yml'
+  pull_request:
+    paths:
+      - 'tools/r8-mini/**'
+      - 'scripts/b198zr8-mini-starter-windows-smoke.ps1'
+      - '.github/workflows/r8-mini-installer-windows.yml'
+permissions:
+  contents: read
+jobs:
+  starter-setup-exact-scripts:
+    runs-on: windows-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - name: Execute exact uploaded MINI starter scripts on real Windows PowerShell
+        shell: powershell
+        run: ./scripts/b198zr8-mini-starter-windows-smoke.ps1

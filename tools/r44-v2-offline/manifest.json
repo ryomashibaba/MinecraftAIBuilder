@@ -1,0 +1,475 @@
+{
+  "schema": "minecraftaibuilder-r44-v2-pinned-manifest-v1",
+  "base": [
+    {
+      "path": "scripts/b198zr6-authorized-single-r4-capture.mjs",
+      "sha": "4a57f860763a81169779d59ec0f03dd84f0ed37c",
+      "revision": "44108944d0d9b0f892d01729c3fa3c76d006fe55"
+    },
+    {
+      "path": "scripts/b198zr7-offline-visual-review.mjs",
+      "sha": "7a75d5dba81ecdb5237f074dcd9a940d81c96745",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "scripts/b143-gallery-core.mjs",
+      "sha": "a72026f80bc23a2262540e7285cd77d9f8d307cf",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "scripts/b198w-quality-review.mjs",
+      "sha": "508ab909653ed251c5fa886f8f7ddacfd117f80d",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "source/ai/b198b-benchmark-cases.mjs",
+      "sha": "21b7dcadc9dd88d14d42138d75e8262114dc88a6",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "source/ai/b143-building-dsl.mjs",
+      "sha": "207ee3439f913bea3ce1768350e1dfa086dbe435",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "source/ai/b198s-native-ollama-source.mjs",
+      "sha": "247603a5a27f9edaa23c25d7ec46e39981548a86",
+      "revision": "44108944d0d9b0f892d01729c3fa3c76d006fe55"
+    },
+    {
+      "path": "source/ai/b198g-local-model-adapter.mjs",
+      "sha": "108266df5a2fa2da0bc105a99e1888de621e9cd0",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "source/ai/b198zr4-planned-source.mjs",
+      "sha": "cc6f0967476c96bcde92aadfb239f2397034013b",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "source/ai/b198zr3-functional-review-contract.mjs",
+      "sha": "c5427586397420183c3edeff183695a9cb381767",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "source/ai/b198zr8-read-only-model-preflight.mjs",
+      "sha": "78117b6babae5576ab356fdd0002b26956809dba",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "source/ai/b198-natural-language-design.mjs",
+      "sha": "c154d2711016a0097be7fc8eced1d78f7506242d",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "source/ai/b198u-bounds-only-repair.mjs",
+      "sha": "ef970141973649e6854d49e85db045c33874244b",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "source/ai/b198zr2-generic-quality-guide.mjs",
+      "sha": "82d19050afc9a04a844abc27bfc9206a45ddf214",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "source/ai/b198t-metadata-only-repair.mjs",
+      "sha": "10ef9c25d854175d54f4e29afeb63a0ecdde5ce1",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "source/ai/b198b-architecture-quality.mjs",
+      "sha": "b41caf2b54462b2d92b62a776247b2eb8e88d75d",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "source/ai/b198c-spatial-critic.mjs",
+      "sha": "840a03c01ee21a5d2917f90ad81906534e3c0c08",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "source/ai/b143-viewer-template.html",
+      "sha": "f716c45095313b0267e6509dbae34e16bb70b578",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "source/ai/b198w-review-board-template.html",
+      "sha": "bd45aa98c031a36f16fba70084aa179fbdd8746b",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "source/ai/b198zr11-compact-r4-output.mjs",
+      "sha": "6a44291fa20d7a6f396f4c4f639d0f278d7fe4aa",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "scripts/b198zr12-local-offline-qa.mjs",
+      "sha": "f2670914a6561ee6d31cef30fa1d813f5845e3ca",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "source/ai/b198zr13-quality-decision.mjs",
+      "sha": "38720deacb45bc4f634d3ed8d55350b889d1c2f9",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "source/ai/b198zr15-evidence-quality-target.mjs",
+      "sha": "f17deae42ea4c71bbc5422d04bc887e4709c3746",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "scripts/b198zr13-review-saved-capture.mjs",
+      "sha": "628bd72bcc53de1384f539fe8074571fabaa643e",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "scripts/b198zr15-compare-saved-reviews.mjs",
+      "sha": "5e90c957a8a633d34c31998f1e2c2a3e72ef23c5",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "scripts/b198zr6-authorized-single-r4-capture.test.mjs",
+      "sha": "8ec3852da4b2e7a8dc11e3bf0f6a28cbed48523b",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "scripts/b198zr11-output-budget.test.mjs",
+      "sha": "8c61e9bbe50f330ab7026297f013deb61671dead",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "scripts/b198zr13-quality-decision.test.mjs",
+      "sha": "d57c8eb8e89184a590dcea122dd6ad508bc2c906",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "scripts/b198zr15-evidence-quality-target.test.mjs",
+      "sha": "75f9eececb62d4fcd5542a0d015483a1832abff2",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "scripts/b198zr16-offline-preflight.mjs",
+      "sha": "3b650e61e4d7032d9e9c7c123faffdac7bec3694",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "evidence/b198zr2/assistant-revised-library-r2.json",
+      "sha": "83bb38728357fb4de08f02165e2145fb8489c086",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "evidence/b198zr3/r2-functional-review-contract.json",
+      "sha": "b255add4e78951d92c2fb8e9958aabc10bf24aee",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "source/ai/b198zr21-future-architecture-guide.mjs",
+      "sha": "a842729c49f902d11ef52f1e248bb5b544300dd2",
+      "revision": "44108944d0d9b0f892d01729c3fa3c76d006fe55"
+    },
+    {
+      "path": "source/ai/b198zr21-offline-forensics.mjs",
+      "sha": "6b2af7670aa6aa0999a35203db3bc3bd7368c141",
+      "revision": "44108944d0d9b0f892d01729c3fa3c76d006fe55"
+    },
+    {
+      "path": "scripts/b198zr23-future-one-shot.mjs",
+      "sha": "cd05695cb25c9bacee667bdfbd4a98dff3f569b4",
+      "revision": "44108944d0d9b0f892d01729c3fa3c76d006fe55"
+    },
+    {
+      "path": "scripts/b198zr23-future-one-shot.test.mjs",
+      "sha": "cbb4d3770ddadb51f20a9b2a37b3f67312c703e3",
+      "revision": "44108944d0d9b0f892d01729c3fa3c76d006fe55"
+    },
+    {
+      "path": "scripts/b198zr22-profile-offline.test.mjs",
+      "sha": "a7fdedd142c8a66680fe1557bd44152f1ef48b59",
+      "revision": "44108944d0d9b0f892d01729c3fa3c76d006fe55"
+    }
+  ],
+  "overlay": [
+    {
+      "path": "source/ai/b198s-native-ollama-source.mjs",
+      "sha": "5a833ceeeb98283c87ac9f93a90f3c95829af015",
+      "revision": "539daac020143efe2f24f981727f8dc5d6beeb50"
+    },
+    {
+      "path": "source/ai/b198zr28-space-first-future-guide.mjs",
+      "sha": "685731f0d6ee99fda2bc5a624ddb4d98ca704c4d",
+      "revision": "539daac020143efe2f24f981727f8dc5d6beeb50"
+    },
+    {
+      "path": "source/ai/b198zr30-generalized-space-guide.mjs",
+      "sha": "f0b7c08d0a8ec01bb5e2cb612b51add1a7109a13",
+      "revision": "539daac020143efe2f24f981727f8dc5d6beeb50"
+    },
+    {
+      "path": "source/ai/b198zr41-architecture-authoring-candidate.mjs",
+      "sha": "3122c231fbd82258025b6ac7211e513a7cce4aa7",
+      "revision": "539daac020143efe2f24f981727f8dc5d6beeb50"
+    },
+    {
+      "path": "source/ai/b198zr42-lossless-drafting-budget.mjs",
+      "sha": "3d453b95ac73f70f17d25af4efab940afa12bae9",
+      "revision": "539daac020143efe2f24f981727f8dc5d6beeb50"
+    },
+    {
+      "path": "source/ai/b198zr43-sectional-architecture-review.mjs",
+      "sha": "68e83bb51c4327c41be6e3e10b58f893f65db8bb",
+      "revision": "539daac020143efe2f24f981727f8dc5d6beeb50"
+    },
+    {
+      "path": "scripts/b198zr32-synthetic-geometry-fixtures.mjs",
+      "sha": "53596b211828ca12c1d73863a5d28da7d93e6c8a",
+      "revision": "539daac020143efe2f24f981727f8dc5d6beeb50"
+    },
+    {
+      "path": "scripts/b198zr43-sectional-architecture-review.test.mjs",
+      "sha": "cfab37f645754289e7a8cf1f6bd4f5ed7917a630",
+      "revision": "539daac020143efe2f24f981727f8dc5d6beeb50"
+    },
+    {
+      "path": "scripts/b198zr44-consented-single-qwen.mjs",
+      "sha": "07f25c1083f058bce952a639d9972124f9ea0145",
+      "revision": "539daac020143efe2f24f981727f8dc5d6beeb50"
+    },
+    {
+      "path": "scripts/b198zr44-consented-single-qwen.test.mjs",
+      "sha": "95f0a04c534b3835a4bb50a94a658bdb874dbb6d",
+      "revision": "539daac020143efe2f24f981727f8dc5d6beeb50"
+    }
+  ],
+  "final": [
+    {
+      "path": "scripts/b198zr6-authorized-single-r4-capture.mjs",
+      "sha": "4a57f860763a81169779d59ec0f03dd84f0ed37c",
+      "revision": "44108944d0d9b0f892d01729c3fa3c76d006fe55"
+    },
+    {
+      "path": "scripts/b198zr7-offline-visual-review.mjs",
+      "sha": "7a75d5dba81ecdb5237f074dcd9a940d81c96745",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "scripts/b143-gallery-core.mjs",
+      "sha": "a72026f80bc23a2262540e7285cd77d9f8d307cf",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "scripts/b198w-quality-review.mjs",
+      "sha": "508ab909653ed251c5fa886f8f7ddacfd117f80d",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "source/ai/b198b-benchmark-cases.mjs",
+      "sha": "21b7dcadc9dd88d14d42138d75e8262114dc88a6",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "source/ai/b143-building-dsl.mjs",
+      "sha": "207ee3439f913bea3ce1768350e1dfa086dbe435",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "source/ai/b198s-native-ollama-source.mjs",
+      "sha": "5a833ceeeb98283c87ac9f93a90f3c95829af015",
+      "revision": "539daac020143efe2f24f981727f8dc5d6beeb50"
+    },
+    {
+      "path": "source/ai/b198g-local-model-adapter.mjs",
+      "sha": "108266df5a2fa2da0bc105a99e1888de621e9cd0",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "source/ai/b198zr4-planned-source.mjs",
+      "sha": "cc6f0967476c96bcde92aadfb239f2397034013b",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "source/ai/b198zr3-functional-review-contract.mjs",
+      "sha": "c5427586397420183c3edeff183695a9cb381767",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "source/ai/b198zr8-read-only-model-preflight.mjs",
+      "sha": "78117b6babae5576ab356fdd0002b26956809dba",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "source/ai/b198-natural-language-design.mjs",
+      "sha": "c154d2711016a0097be7fc8eced1d78f7506242d",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "source/ai/b198u-bounds-only-repair.mjs",
+      "sha": "ef970141973649e6854d49e85db045c33874244b",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "source/ai/b198zr2-generic-quality-guide.mjs",
+      "sha": "82d19050afc9a04a844abc27bfc9206a45ddf214",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "source/ai/b198t-metadata-only-repair.mjs",
+      "sha": "10ef9c25d854175d54f4e29afeb63a0ecdde5ce1",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "source/ai/b198b-architecture-quality.mjs",
+      "sha": "b41caf2b54462b2d92b62a776247b2eb8e88d75d",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "source/ai/b198c-spatial-critic.mjs",
+      "sha": "840a03c01ee21a5d2917f90ad81906534e3c0c08",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "source/ai/b143-viewer-template.html",
+      "sha": "f716c45095313b0267e6509dbae34e16bb70b578",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "source/ai/b198w-review-board-template.html",
+      "sha": "bd45aa98c031a36f16fba70084aa179fbdd8746b",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "source/ai/b198zr11-compact-r4-output.mjs",
+      "sha": "6a44291fa20d7a6f396f4c4f639d0f278d7fe4aa",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "scripts/b198zr12-local-offline-qa.mjs",
+      "sha": "f2670914a6561ee6d31cef30fa1d813f5845e3ca",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "source/ai/b198zr13-quality-decision.mjs",
+      "sha": "38720deacb45bc4f634d3ed8d55350b889d1c2f9",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "source/ai/b198zr15-evidence-quality-target.mjs",
+      "sha": "f17deae42ea4c71bbc5422d04bc887e4709c3746",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "scripts/b198zr13-review-saved-capture.mjs",
+      "sha": "628bd72bcc53de1384f539fe8074571fabaa643e",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "scripts/b198zr15-compare-saved-reviews.mjs",
+      "sha": "5e90c957a8a633d34c31998f1e2c2a3e72ef23c5",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "scripts/b198zr6-authorized-single-r4-capture.test.mjs",
+      "sha": "8ec3852da4b2e7a8dc11e3bf0f6a28cbed48523b",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "scripts/b198zr11-output-budget.test.mjs",
+      "sha": "8c61e9bbe50f330ab7026297f013deb61671dead",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "scripts/b198zr13-quality-decision.test.mjs",
+      "sha": "d57c8eb8e89184a590dcea122dd6ad508bc2c906",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "scripts/b198zr15-evidence-quality-target.test.mjs",
+      "sha": "75f9eececb62d4fcd5542a0d015483a1832abff2",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "scripts/b198zr16-offline-preflight.mjs",
+      "sha": "3b650e61e4d7032d9e9c7c123faffdac7bec3694",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "evidence/b198zr2/assistant-revised-library-r2.json",
+      "sha": "83bb38728357fb4de08f02165e2145fb8489c086",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "evidence/b198zr3/r2-functional-review-contract.json",
+      "sha": "b255add4e78951d92c2fb8e9958aabc10bf24aee",
+      "revision": "a0438d8fa2504564351f8ebafbe9ecc14575dc95"
+    },
+    {
+      "path": "source/ai/b198zr21-future-architecture-guide.mjs",
+      "sha": "a842729c49f902d11ef52f1e248bb5b544300dd2",
+      "revision": "44108944d0d9b0f892d01729c3fa3c76d006fe55"
+    },
+    {
+      "path": "source/ai/b198zr21-offline-forensics.mjs",
+      "sha": "6b2af7670aa6aa0999a35203db3bc3bd7368c141",
+      "revision": "44108944d0d9b0f892d01729c3fa3c76d006fe55"
+    },
+    {
+      "path": "scripts/b198zr23-future-one-shot.mjs",
+      "sha": "cd05695cb25c9bacee667bdfbd4a98dff3f569b4",
+      "revision": "44108944d0d9b0f892d01729c3fa3c76d006fe55"
+    },
+    {
+      "path": "scripts/b198zr23-future-one-shot.test.mjs",
+      "sha": "cbb4d3770ddadb51f20a9b2a37b3f67312c703e3",
+      "revision": "44108944d0d9b0f892d01729c3fa3c76d006fe55"
+    },
+    {
+      "path": "scripts/b198zr22-profile-offline.test.mjs",
+      "sha": "a7fdedd142c8a66680fe1557bd44152f1ef48b59",
+      "revision": "44108944d0d9b0f892d01729c3fa3c76d006fe55"
+    },
+    {
+      "path": "source/ai/b198zr28-space-first-future-guide.mjs",
+      "sha": "685731f0d6ee99fda2bc5a624ddb4d98ca704c4d",
+      "revision": "539daac020143efe2f24f981727f8dc5d6beeb50"
+    },
+    {
+      "path": "source/ai/b198zr30-generalized-space-guide.mjs",
+      "sha": "f0b7c08d0a8ec01bb5e2cb612b51add1a7109a13",
+      "revision": "539daac020143efe2f24f981727f8dc5d6beeb50"
+    },
+    {
+      "path": "source/ai/b198zr41-architecture-authoring-candidate.mjs",
+      "sha": "3122c231fbd82258025b6ac7211e513a7cce4aa7",
+      "revision": "539daac020143efe2f24f981727f8dc5d6beeb50"
+    },
+    {
+      "path": "source/ai/b198zr42-lossless-drafting-budget.mjs",
+      "sha": "3d453b95ac73f70f17d25af4efab940afa12bae9",
+      "revision": "539daac020143efe2f24f981727f8dc5d6beeb50"
+    },
+    {
+      "path": "source/ai/b198zr43-sectional-architecture-review.mjs",
+      "sha": "68e83bb51c4327c41be6e3e10b58f893f65db8bb",
+      "revision": "539daac020143efe2f24f981727f8dc5d6beeb50"
+    },
+    {
+      "path": "scripts/b198zr32-synthetic-geometry-fixtures.mjs",
+      "sha": "53596b211828ca12c1d73863a5d28da7d93e6c8a",
+      "revision": "539daac020143efe2f24f981727f8dc5d6beeb50"
+    },
+    {
+      "path": "scripts/b198zr43-sectional-architecture-review.test.mjs",
+      "sha": "cfab37f645754289e7a8cf1f6bd4f5ed7917a630",
+      "revision": "539daac020143efe2f24f981727f8dc5d6beeb50"
+    },
+    {
+      "path": "scripts/b198zr44-consented-single-qwen.mjs",
+      "sha": "07f25c1083f058bce952a639d9972124f9ea0145",
+      "revision": "539daac020143efe2f24f981727f8dc5d6beeb50"
+    },
+    {
+      "path": "scripts/b198zr44-consented-single-qwen.test.mjs",
+      "sha": "95f0a04c534b3835a4bb50a94a658bdb874dbb6d",
+      "revision": "539daac020143efe2f24f981727f8dc5d6beeb50"
+    }
+  ],
+  "replacedPath": "source/ai/b198s-native-ollama-source.mjs"
+}

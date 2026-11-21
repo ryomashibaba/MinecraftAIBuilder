@@ -1,0 +1,133 @@
+{
+  "schema": "minecraftaibuilder-r190bh-archived-original-forensic-v1",
+  "status": "HOLD_ARCHIVED_MODEL_CONTRACT_VIOLATIONS",
+  "originalSha256": "e54f2abf87d36e0957d8393c960d2fce8075862d00ea1ea736365121a4b6a469",
+  "bytes": 2492,
+  "rawTopLevelKeys": [
+    "design",
+    "explanation",
+    "assumptions",
+    "spatialPlan"
+  ],
+  "strictR4ParsingStatus": "HOLD_STRICT_R4_OR_B143",
+  "firstFailure": "B143_SCHEMA_OR_MODE",
+  "checkedAgainstFullB143Schema": "minecraftaibuilder-b143-building-dsl-v1",
+  "literalFindings": [
+    {
+      "code": "B143_SCHEMA_MISMATCH",
+      "path": "design.schema",
+      "observation": {
+        "observed": null,
+        "expected": "minecraftaibuilder-b143-building-dsl-v1"
+      },
+      "provenFrom": "LITERAL_ARCHIVED_MODEL_JSON_ONLY",
+      "geometricConsequence": "NOT_CERTIFIED_WITH_INVALID_SOURCE",
+      "guidance": "Use the required full B143 schema identifier."
+    },
+    {
+      "code": "STANDING_POINT_INTERSECTS_LITERAL_ADD_BOX",
+      "path": "spatialPlan.entrance",
+      "observation": {
+        "point": [
+          32,
+          0,
+          32
+        ],
+        "authoredAddBoxIds": [
+          "base-structure"
+        ]
+      },
+      "provenFrom": "LITERAL_ARCHIVED_MODEL_JSON_ONLY",
+      "geometricConsequence": "NOT_CERTIFIED_WITH_INVALID_SOURCE",
+      "guidance": "Verify final ADD/CUT voxels; a named landing cannot overlap a solid floor."
+    },
+    {
+      "code": "STANDING_POINT_INTERSECTS_LITERAL_ADD_BOX",
+      "path": "spatialPlan.destinations[0]",
+      "observation": {
+        "point": [
+          32,
+          1,
+          32
+        ],
+        "authoredAddBoxIds": [
+          "base-structure"
+        ]
+      },
+      "provenFrom": "LITERAL_ARCHIVED_MODEL_JSON_ONLY",
+      "geometricConsequence": "NOT_CERTIFIED_WITH_INVALID_SOURCE",
+      "guidance": "Verify final ADD/CUT voxels; a named landing cannot overlap a solid floor."
+    },
+    {
+      "code": "STANDING_POINT_INTERSECTS_LITERAL_ADD_BOX",
+      "path": "spatialPlan.destinations[1]",
+      "observation": {
+        "point": [
+          32,
+          116,
+          32
+        ],
+        "authoredAddBoxIds": [
+          "office-walls",
+          "roof-restaurant"
+        ]
+      },
+      "provenFrom": "LITERAL_ARCHIVED_MODEL_JSON_ONLY",
+      "geometricConsequence": "NOT_CERTIFIED_WITH_INVALID_SOURCE",
+      "guidance": "Verify final ADD/CUT voxels; a named landing cannot overlap a solid floor."
+    },
+    {
+      "code": "DECLARED_VOID_INTERSECTS_LITERAL_ADD_BOX",
+      "path": "spatialPlan.protectedVoids[0]",
+      "observation": {
+        "id": "atrium",
+        "authoredAddBoxIds": [
+          "base-structure"
+        ]
+      },
+      "provenFrom": "LITERAL_ARCHIVED_MODEL_JSON_ONLY",
+      "geometricConsequence": "NOT_CERTIFIED_WITH_INVALID_SOURCE",
+      "guidance": "Use final ordered ADD/CUT source to prove a void, not its name."
+    }
+  ],
+  "findingsCount": 5,
+  "sourceGeometryProduced": false,
+  "sourceWasRepaired": false,
+  "originalUnmodified": true,
+  "approximateGeometryNotInvented": true,
+  "modelIdentityCryptographicallyVerified": false,
+  "independentArchitecturalQualityReview": "NOT_PERFORMED",
+  "independentVisualArtReview": "NOT_PERFORMED",
+  "improvementCertified": false,
+  "scopeLimitations": [
+    "Overlaps are literal authored add boxes, not post-cut final voxels",
+    "Staircase source with unsupported axis is never rendered or auto-repaired",
+    "A parser failure alone cannot prove what valid final geometry would look like",
+    "This diagnosis is one archived answer, not evidence of a model family trend"
+  ],
+  "readiness": "NOT_PREPARED",
+  "constructionApproved": false,
+  "executionAllowed": false,
+  "gates": [
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED"
+  ],
+  "BuildPlan": {
+    "operations": []
+  },
+  "worldContacts": 0,
+  "worldWrites": 0,
+  "modelCalls": 0,
+  "art": "ART_HOLD",
+  "officialArtAdoptions": 0,
+  "studySide": "A",
+  "comparisonSha256": "559e9aaef2ef3078a047664775dee6f47ae07447b4e463a6f2a9ff313c875fdd",
+  "providerOriginIndependentlyVerified": false
+}

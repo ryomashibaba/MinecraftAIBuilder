@@ -1,0 +1,28 @@
+name: R17 Future Gated One-shot — Fake Ollama Only
+on:
+  push:
+    branches:
+      - feature/b198zr1-protected-architectural-revision
+    paths:
+      - 'tools/r17-gated/**'
+      - 'scripts/b198zr17-once-windows-smoke.test.mjs'
+      - '.github/workflows/r17-gated-fake-windows.yml'
+  pull_request:
+    paths:
+      - 'tools/r17-gated/**'
+      - 'scripts/b198zr17-once-windows-smoke.test.mjs'
+      - '.github/workflows/r17-gated-fake-windows.yml'
+permissions:
+  contents: read
+jobs:
+  windows-only-fake-ollama:
+    runs-on: windows-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: MUST bind fake 127.0.0.1 Ollama before real R17 CMD — no live inference
+        shell: pwsh
+        run: node --test scripts/b198zr17-once-windows-smoke.test.mjs

@@ -1,0 +1,130 @@
+{
+  "schema": "minecraftaibuilder-r190bk-evidence-stage-review-v1",
+  "status": "HOLD_NOT_BOTH_VALID_B143",
+  "candidatePromptKind": "BJ_FAILURE_INFORMED",
+  "bfReportSha256": "67dd41c69217bcdc00968974771eafbaa5913ede48d6efe4dfd3f9e47d6968f3",
+  "beReportSha256": "559e9aaef2ef3078a047664775dee6f47ae07447b4e463a6f2a9ff313c875fdd",
+  "protocolSha256": "b70b04fa056a68f095d89620ae05dba21eb529b03dd70621c1347d36fe5f37fe",
+  "originalBriefSha256": "bbd44cc9f28234055601b4055466e2f3564e7e4565d408432de4c4fab0aa277a",
+  "originalJapaneseBrief": "大きめの、都会にある高層ビルを作って\n一階と二階は大広間で、三階以上の階はオフィス、最上階付近はレストランが欲しい\nかなり大規模でかなり高くして",
+  "verifiedOriginalBriefFileSha256": "bbd44cc9f28234055601b4055466e2f3564e7e4565d408432de4c4fab0aa277a",
+  "sourceViewHashesVerified": true,
+  "physicalChangeProven": false,
+  "A": {
+    "status": "HOLD_INVALID_B143",
+    "originalSha256": "e54f2abf87d36e0957d8393c960d2fce8075862d00ea1ea736365121a4b6a469",
+    "geometrySha256": null,
+    "source3D": null,
+    "viewLinks": [],
+    "diagnostic": {
+      "status": "LITERAL_ORIGINAL_DIAGNOSTIC_AVAILABLE",
+      "literalFindings": [
+        {
+          "code": "B143_SCHEMA_MISMATCH",
+          "path": "design.schema"
+        },
+        {
+          "code": "STANDING_POINT_INTERSECTS_LITERAL_ADD_BOX",
+          "path": "spatialPlan.entrance"
+        },
+        {
+          "code": "STANDING_POINT_INTERSECTS_LITERAL_ADD_BOX",
+          "path": "spatialPlan.destinations[0]"
+        },
+        {
+          "code": "STANDING_POINT_INTERSECTS_LITERAL_ADD_BOX",
+          "path": "spatialPlan.destinations[1]"
+        },
+        {
+          "code": "DECLARED_VOID_INTERSECTS_LITERAL_ADD_BOX",
+          "path": "spatialPlan.protectedVoids[0]"
+        }
+      ],
+      "report": "../R190BI_A_INVALID_SOURCE_DIAGNOSTIC.json",
+      "sha256": "2ca94b6ea8ccd8aa8d9f0cc1105b197095735b565b3fed3abf222e8cdf148544"
+    },
+    "r4Status": "NOT_RUN",
+    "sectionStatus": "NOT_RUN",
+    "modelClaimed": "qwen3:14b",
+    "providerIdentityVerified": false,
+    "constructionOrArtCertified": false
+  },
+  "B": {
+    "status": "HOLD_INVALID_B143",
+    "originalSha256": "8e2590128e8bd932cddc2df595fcc01c3cbd660298cedd445431d0787bb90c86",
+    "geometrySha256": null,
+    "source3D": null,
+    "viewLinks": [],
+    "diagnostic": {
+      "status": "LITERAL_ORIGINAL_DIAGNOSTIC_AVAILABLE",
+      "literalFindings": [
+        {
+          "code": "STAIRCASE_UNSUPPORTED_AXIS",
+          "path": "design.elements[5].axis"
+        },
+        {
+          "code": "STANDING_POINT_INTERSECTS_LITERAL_ADD_BOX",
+          "path": "spatialPlan.entrance"
+        },
+        {
+          "code": "MODEL_STANDING_POINT_OUT_OF_BOUNDS",
+          "path": "spatialPlan.destinations[0]"
+        },
+        {
+          "code": "HEADROOM_EXTENDS_PAST_BOUNDS",
+          "path": "spatialPlan.destinations[0]"
+        },
+        {
+          "code": "STANDING_POINT_INTERSECTS_LITERAL_ADD_BOX",
+          "path": "spatialPlan.destinations[0]"
+        },
+        {
+          "code": "DECLARED_VOID_INTERSECTS_LITERAL_ADD_BOX",
+          "path": "spatialPlan.protectedVoids[0]"
+        },
+        {
+          "code": "DECLARED_VOID_INTERSECTS_LITERAL_ADD_BOX",
+          "path": "spatialPlan.protectedVoids[1]"
+        }
+      ],
+      "report": "../R190BI_B_INVALID_SOURCE_DIAGNOSTIC.json",
+      "sha256": "ab2d434cfbe6f92d739b4c398bcdd7aaab92cca4fa2ea3b71e464a7ba8768abc"
+    },
+    "r4Status": "NOT_RUN",
+    "sectionStatus": "NOT_RUN",
+    "modelClaimed": "qwen3:14b",
+    "providerIdentityVerified": false,
+    "constructionOrArtCertified": false
+  },
+  "humanReviewAvailable": false,
+  "humanReviewManifestSha256": null,
+  "humanReviewStatus": "NOT_RECORDED",
+  "nextAction": "モデル自身が原文の形式・空間を整合させることが必要。無効な候補をホストが修復して有利な比較にしない。",
+  "automaticWinner": "NOT_ESTABLISHED",
+  "independentProviderIdentityVerified": false,
+  "architecturalQualityImprovement": "NOT_ESTABLISHED",
+  "onePairCausalInference": "NOT_ESTABLISHED",
+  "generated3DFromInvalidSource": false,
+  "readiness": "NOT_PREPARED",
+  "constructionApproved": false,
+  "executionAllowed": false,
+  "gates": [
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED"
+  ],
+  "BuildPlan": {
+    "operations": []
+  },
+  "modelCalls": 0,
+  "worldContacts": 0,
+  "worldWrites": 0,
+  "art": "ART_HOLD",
+  "officialArtAdoptions": 0
+}

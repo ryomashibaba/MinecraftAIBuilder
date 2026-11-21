@@ -1,0 +1,114 @@
+{
+  "newModelCalls": 0,
+  "capacity": {
+    "schema": "r190bn-capacity-study-v1",
+    "provenance": "SYNTHETIC_COMPILER_PROBES_NOT_MODEL_DESIGNS",
+    "unchangedLimits": {
+      "height": 96,
+      "maxOccupiedCellsIncludingIntermediate": 160000,
+      "boundsVolume": 500000,
+      "elements": 160,
+      "work": 1750000,
+      "straightFlightSteps": 32
+    },
+    "results": [
+      {
+        "id": "solid-then-cut",
+        "bounds": {
+          "width": 64,
+          "height": 96,
+          "depth": 32
+        },
+        "status": "HOLD",
+        "failure": "B143_VOXEL_BUDGET",
+        "voxels": null
+      },
+      {
+        "id": "direct-shell",
+        "bounds": {
+          "width": 64,
+          "height": 96,
+          "depth": 32
+        },
+        "status": "COMPILED_SOURCE_ONLY",
+        "voxels": 21768,
+        "physicalCellsSha256": "7d9a34c735e423281960e2e1e3207e62d3ecd5ce4f906577480c6a9dcb80def5"
+      },
+      {
+        "id": "explicit-six-surfaces",
+        "bounds": {
+          "width": 64,
+          "height": 96,
+          "depth": 32
+        },
+        "status": "COMPILED_SOURCE_ONLY",
+        "voxels": 21768,
+        "physicalCellsSha256": "7d9a34c735e423281960e2e1e3207e62d3ecd5ce4f906577480c6a9dcb80def5"
+      },
+      {
+        "id": "shell-with-23-floors",
+        "bounds": {
+          "width": 64,
+          "height": 96,
+          "depth": 32
+        },
+        "status": "COMPILED_SOURCE_ONLY",
+        "voxels": 62688,
+        "physicalCellsSha256": "10ca6cc601b508b9a019e2bb2e536aa2d2dbc19643b26f4b1007aed1be72fcd2"
+      },
+      {
+        "id": "wide-25-floors",
+        "bounds": {
+          "width": 128,
+          "height": 96,
+          "depth": 40
+        },
+        "status": "COMPILED_SOURCE_ONLY",
+        "voxels": 156360,
+        "physicalCellsSha256": "e4b14dd97fb2a3037b15697bc00cfb626282f63753e60de54f4228c2ee0e04de"
+      },
+      {
+        "id": "wide-26-floors",
+        "bounds": {
+          "width": 128,
+          "height": 96,
+          "depth": 40
+        },
+        "status": "HOLD",
+        "failure": "B143_VOXEL_BUDGET",
+        "voxels": null
+      },
+      {
+        "id": "height-128",
+        "bounds": {
+          "width": 32,
+          "height": 128,
+          "depth": 32
+        },
+        "status": "HOLD",
+        "failure": "B143_BOUNDS",
+        "voxels": null
+      }
+    ],
+    "exactShellVsSurfacesEqual": true,
+    "solidCutAlgebraicFinalCells": 21768,
+    "wide25AlgebraicCells": 156360,
+    "wide26AlgebraicCells": 161148,
+    "actualArchitecturalFloorsOrUsabilityCertified": false,
+    "newModelCalls": 0,
+    "worldContacts": 0,
+    "worldWrites": 0
+  },
+  "studies": [
+    {
+      "name": "synthetic-reading",
+      "status": "SOURCE_SPACE_AND_ROUTE_PROXIES_PRESENT_ART_HOLD",
+      "voxels": 3802
+    },
+    {
+      "name": "synthetic-concourse",
+      "status": "SOURCE_SPACE_AND_ROUTE_PROXIES_PRESENT_ART_HOLD",
+      "voxels": 5507
+    }
+  ]
+}

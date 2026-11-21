@@ -1,0 +1,30 @@
+name: R40 Separate Receipt Offline
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'scripts/b198zr40-separate-receipt-offline*'
+      - 'scripts/b198zr40-separate-receipt-cli.mjs'
+      - '.github/workflows/r40-separate-receipt-offline.yml'
+  pull_request:
+    paths:
+      - 'scripts/b198zr40-separate-receipt-offline*'
+      - 'scripts/b198zr40-separate-receipt-cli.mjs'
+      - '.github/workflows/r40-separate-receipt-offline.yml'
+permissions:
+  contents: read
+jobs:
+  r40-separate-receipt-no-model-no-world:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: R40 validate synthetic offline SHA receipt storage and tamper detection
+        run: node --test scripts/b198zr40-separate-receipt-offline.test.mjs

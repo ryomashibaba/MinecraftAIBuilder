@@ -1,0 +1,30 @@
+name: R39 Review Submission Offline
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'scripts/b198zr39-review-submission-offline*'
+      - 'scripts/b198zr39-review-submission-cli.mjs'
+      - '.github/workflows/r39-review-submission-offline.yml'
+  pull_request:
+    paths:
+      - 'scripts/b198zr39-review-submission-offline*'
+      - 'scripts/b198zr39-review-submission-cli.mjs'
+      - '.github/workflows/r39-review-submission-offline.yml'
+permissions:
+  contents: read
+jobs:
+  r39-review-intake-diagnostics-no-model-no-world:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify R39 synthetic R37 submission and read-only R38 corruption diagnostics
+        run: node --test scripts/b198zr39-review-submission-offline.test.mjs

@@ -1,0 +1,41 @@
+name: R55 R54 Source-Pinned Windows Prep — FAKE and OFFLINE Only
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'tools/r55-future/INSTALL_R55_OFFLINE_SOURCE_ONLY.ps1'
+      - '.github/workflows/r55-future-source-preflight.yml'
+  pull_request:
+    paths:
+      - 'tools/r55-future/INSTALL_R55_OFFLINE_SOURCE_ONLY.ps1'
+      - '.github/workflows/r55-future-source-preflight.yml'
+permissions:
+  contents: read
+jobs:
+  fresh-windows-sandbox-installer:
+    runs-on: windows-latest
+    timeout-minutes: 16
+    env:
+      LOCALAPPDATA: ${{ runner.temp }}/R55_Synthetic_Only_LocalAppData
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Strict new R48 base+15 blob R55 overlay; ZERO real Qwen or Minecraft
+        shell: pwsh
+        run: |
+          New-Item -Path $env:LOCALAPPDATA -ItemType Directory -Force | Out-Null
+          & powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools/r55-future/INSTALL_R55_OFFLINE_SOURCE_ONLY.ps1
+          if ($LASTEXITCODE -ne 0) { throw 'R55_INSTALL_AND_FAKE_QA_FAILED' }
+          & powershell.exe -NoProfile -ExecutionPolicy Bypass -File tools/r55-future/INSTALL_R55_OFFLINE_SOURCE_ONLY.ps1 -CheckOnly
+          if ($LASTEXITCODE -ne 0) { throw 'R55_POST_INSTALL_SHA_AUDIT_FAILED' }
+  current-ubuntu-fake-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node --test scripts/b198zr54-future-program-first-once.test.mjs scripts/b198zr54-future-one-shot-auto-zip.fake.test.mjs scripts/b198zr52-postcapture-auto-storyboard.test.mjs

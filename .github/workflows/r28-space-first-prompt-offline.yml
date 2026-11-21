@@ -1,0 +1,31 @@
+name: R28 Space First Prompt — Offline Only
+on:
+  push:
+    branches:
+      - feature/b198zr1-protected-architectural-revision
+    paths:
+      - 'source/ai/b198zr28-space-first-future-guide.mjs'
+      - 'scripts/b198zr28-space-first-future-guide.test.mjs'
+      - '.github/workflows/r28-space-first-prompt-offline.yml'
+  pull_request:
+    paths:
+      - 'source/ai/b198zr28-space-first-future-guide.mjs'
+      - 'scripts/b198zr28-space-first-future-guide.test.mjs'
+      - '.github/workflows/r28-space-first-prompt-offline.yml'
+permissions:
+  contents: read
+jobs:
+  r28-prompt-synthetic-only:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Immutable guide, no Qwen or Minecraft
+        run: node --test scripts/b198zr28-space-first-future-guide.test.mjs

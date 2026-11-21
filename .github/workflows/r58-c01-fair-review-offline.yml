@@ -1,0 +1,30 @@
+name: R58 Frozen C01 R48-R54 Evidence and Human Review — OFFLINE Only
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'scripts/b198zr58-frozen-c01-quality-review-packet.mjs'
+      - 'scripts/b198zr58-frozen-c01-quality-review-packet.test.mjs'
+      - '.github/workflows/r58-c01-fair-review-offline.yml'
+  pull_request:
+    paths:
+      - 'scripts/b198zr58-frozen-c01-quality-review-packet.mjs'
+      - 'scripts/b198zr58-frozen-c01-quality-review-packet.test.mjs'
+      - '.github/workflows/r58-c01-fair-review-offline.yml'
+permissions:
+  contents: read
+jobs:
+  frozen-c01-provenance-and-human-criteria:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: R58 independent c01 comparisons, tamper detection and B143 non-human-pass
+        run: node --test scripts/b198zr58-frozen-c01-quality-review-packet.test.mjs scripts/b198zr49-global-source-consistency.test.mjs scripts/b198zr54-future-program-first-once.test.mjs

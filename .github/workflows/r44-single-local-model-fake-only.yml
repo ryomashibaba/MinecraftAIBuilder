@@ -1,0 +1,34 @@
+name: R44 Explicit One-Shot Qwen — FAKE ONLY
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'scripts/b198zr44-consented-single-qwen.mjs'
+      - 'scripts/b198zr44-consented-single-qwen.test.mjs'
+      - 'source/ai/b198s-native-ollama-source.mjs'
+      - 'source/ai/b198zr41-architecture-authoring-candidate.mjs'
+      - '.github/workflows/r44-single-local-model-fake-only.yml'
+  pull_request:
+    paths:
+      - 'scripts/b198zr44-consented-single-qwen.mjs'
+      - 'scripts/b198zr44-consented-single-qwen.test.mjs'
+      - 'source/ai/b198s-native-ollama-source.mjs'
+      - 'source/ai/b198zr41-architecture-authoring-candidate.mjs'
+      - '.github/workflows/r44-single-local-model-fake-only.yml'
+permissions:
+  contents: read
+jobs:
+  source-only-fake-ollama:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Inert local fake HTTP provider on ephemeral loopback port only
+        run: node --test scripts/b198zr44-consented-single-qwen.test.mjs scripts/b198zr43-sectional-architecture-review.test.mjs

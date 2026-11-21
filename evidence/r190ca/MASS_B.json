@@ -1,0 +1,799 @@
+{
+  "schema": "minecraftaibuilder-r190ca-authored-space-mass-v1",
+  "id": "r190ca-ascending-public-atrium-b",
+  "title": "ASCENDING PUBLIC ATRIUM — urban hall to offset sky restaurant",
+  "originalBriefSha256": "bbd44cc9f28234055601b4055466e2f3564e7e4565d408432de4c4fab0aa277a",
+  "bounds": {
+    "width": 96,
+    "height": 96,
+    "depth": 64
+  },
+  "intent": {
+    "architecturalIdea": "One broad inhabited civic plinth grows into an offset high office trunk and an asymmetric elevated dining crown; a large three-dimensional sky atrium subtracts volume while maintaining other enclosed office bays.",
+    "publicExperience": "The route is a chain of urban threshold, sheltered two-story civic hall, vertical atrium and high sunlit office floors leading to a displaced top restaurant, all tied to measurable actual volumes rather than applied ribbons.",
+    "nextReview": "Test supported three-cell headroom for purpose-zones and evaluate multi-view architectural coherence; a large atrium must not consume all usable office floors or turn the building into a gate."
+  },
+  "masses": [
+    {
+      "id": "civic-urban-plinth",
+      "wallMaterial": "concrete",
+      "floorMaterial": "stone",
+      "wall": 2,
+      "profiles": [
+        {
+          "y": 3,
+          "points": [
+            [
+              13,
+              19
+            ],
+            [
+              32,
+              6
+            ],
+            [
+              52,
+              6
+            ],
+            [
+              71,
+              19
+            ],
+            [
+              71,
+              39
+            ],
+            [
+              52,
+              52
+            ],
+            [
+              32,
+              52
+            ],
+            [
+              13,
+              39
+            ]
+          ]
+        },
+        {
+          "y": 25,
+          "points": [
+            [
+              17,
+              20
+            ],
+            [
+              33,
+              7
+            ],
+            [
+              53,
+              7
+            ],
+            [
+              69,
+              20
+            ],
+            [
+              69,
+              38
+            ],
+            [
+              53,
+              51
+            ],
+            [
+              33,
+              51
+            ],
+            [
+              17,
+              38
+            ]
+          ]
+        },
+        {
+          "y": 38,
+          "points": [
+            [
+              20,
+              20
+            ],
+            [
+              35,
+              8
+            ],
+            [
+              55,
+              8
+            ],
+            [
+              70,
+              20
+            ],
+            [
+              70,
+              38
+            ],
+            [
+              55,
+              50
+            ],
+            [
+              35,
+              50
+            ],
+            [
+              20,
+              38
+            ]
+          ]
+        }
+      ],
+      "floorYs": [
+        6,
+        12,
+        18,
+        24,
+        30,
+        35
+      ]
+    },
+    {
+      "id": "ascending-office-trunk",
+      "wallMaterial": "metal",
+      "floorMaterial": "concrete",
+      "wall": 2,
+      "profiles": [
+        {
+          "y": 29,
+          "points": [
+            [
+              28,
+              22
+            ],
+            [
+              41,
+              10
+            ],
+            [
+              61,
+              10
+            ],
+            [
+              74,
+              22
+            ],
+            [
+              74,
+              38
+            ],
+            [
+              61,
+              50
+            ],
+            [
+              41,
+              50
+            ],
+            [
+              28,
+              38
+            ]
+          ]
+        },
+        {
+          "y": 61,
+          "points": [
+            [
+              32,
+              21
+            ],
+            [
+              45,
+              9
+            ],
+            [
+              63,
+              9
+            ],
+            [
+              76,
+              21
+            ],
+            [
+              76,
+              37
+            ],
+            [
+              63,
+              49
+            ],
+            [
+              45,
+              49
+            ],
+            [
+              32,
+              37
+            ]
+          ]
+        },
+        {
+          "y": 93,
+          "points": [
+            [
+              39,
+              22
+            ],
+            [
+              49,
+              11
+            ],
+            [
+              63,
+              11
+            ],
+            [
+              73,
+              22
+            ],
+            [
+              73,
+              36
+            ],
+            [
+              63,
+              47
+            ],
+            [
+              49,
+              47
+            ],
+            [
+              39,
+              36
+            ]
+          ]
+        }
+      ],
+      "floorYs": [
+        34,
+        40,
+        46,
+        52,
+        58,
+        64,
+        70,
+        76,
+        82,
+        88
+      ]
+    },
+    {
+      "id": "displaced-sky-crown",
+      "wallMaterial": "glass",
+      "floorMaterial": "wood",
+      "wall": 2,
+      "profiles": [
+        {
+          "y": 68,
+          "points": [
+            [
+              50,
+              24
+            ],
+            [
+              60,
+              13
+            ],
+            [
+              76,
+              13
+            ],
+            [
+              86,
+              24
+            ],
+            [
+              86,
+              38
+            ],
+            [
+              76,
+              49
+            ],
+            [
+              60,
+              49
+            ],
+            [
+              50,
+              38
+            ]
+          ]
+        },
+        {
+          "y": 80,
+          "points": [
+            [
+              51,
+              23
+            ],
+            [
+              62,
+              12
+            ],
+            [
+              78,
+              12
+            ],
+            [
+              89,
+              23
+            ],
+            [
+              89,
+              37
+            ],
+            [
+              78,
+              48
+            ],
+            [
+              62,
+              48
+            ],
+            [
+              51,
+              37
+            ]
+          ]
+        },
+        {
+          "y": 93,
+          "points": [
+            [
+              56,
+              22
+            ],
+            [
+              65,
+              12
+            ],
+            [
+              79,
+              12
+            ],
+            [
+              88,
+              22
+            ],
+            [
+              88,
+              36
+            ],
+            [
+              79,
+              46
+            ],
+            [
+              65,
+              46
+            ],
+            [
+              56,
+              36
+            ]
+          ]
+        }
+      ],
+      "floorYs": [
+        73,
+        79,
+        85,
+        89
+      ]
+    }
+  ],
+  "bridges": [
+    {
+      "id": "civic-podium-open-deck",
+      "y": 23,
+      "polygon": [
+        [
+          55,
+          24
+        ],
+        [
+          67,
+          21
+        ],
+        [
+          75,
+          26
+        ],
+        [
+          75,
+          40
+        ],
+        [
+          63,
+          43
+        ],
+        [
+          55,
+          37
+        ]
+      ],
+      "material": "wood",
+      "thickness": 1
+    },
+    {
+      "id": "crown-sky-room",
+      "y": 81,
+      "polygon": [
+        [
+          60,
+          23
+        ],
+        [
+          70,
+          19
+        ],
+        [
+          80,
+          22
+        ],
+        [
+          82,
+          37
+        ],
+        [
+          68,
+          41
+        ],
+        [
+          59,
+          35
+        ]
+      ],
+      "material": "metal",
+      "thickness": 1
+    }
+  ],
+  "cuts": [
+    {
+      "id": "urban-front-chasm",
+      "center": [
+        39,
+        13,
+        8
+      ],
+      "radii": [
+        23,
+        12,
+        17
+      ]
+    },
+    {
+      "id": "deep-interior-vertical-atrium",
+      "center": [
+        47,
+        48,
+        29
+      ],
+      "radii": [
+        15,
+        21,
+        17
+      ]
+    },
+    {
+      "id": "east-rear-daylight",
+      "center": [
+        60,
+        66,
+        57
+      ],
+      "radii": [
+        20,
+        16,
+        18
+      ]
+    },
+    {
+      "id": "upper-crown-front-opening",
+      "center": [
+        74,
+        85,
+        8
+      ],
+      "radii": [
+        15,
+        10,
+        15
+      ]
+    },
+    {
+      "id": "public-street-open-air",
+      "center": [
+        20,
+        29,
+        6
+      ],
+      "radii": [
+        13,
+        10,
+        16
+      ]
+    }
+  ],
+  "programs": [
+    {
+      "id": "urban-hall-level-one",
+      "purpose": "public reception hall level 1",
+      "floorY": 6,
+      "polygon": [
+        [
+          23,
+          33
+        ],
+        [
+          32,
+          27
+        ],
+        [
+          46,
+          27
+        ],
+        [
+          55,
+          33
+        ],
+        [
+          55,
+          39
+        ],
+        [
+          46,
+          45
+        ],
+        [
+          32,
+          45
+        ],
+        [
+          23,
+          39
+        ]
+      ]
+    },
+    {
+      "id": "urban-hall-level-two",
+      "purpose": "public civic hall level 2",
+      "floorY": 12,
+      "polygon": [
+        [
+          27,
+          33
+        ],
+        [
+          36,
+          28
+        ],
+        [
+          48,
+          28
+        ],
+        [
+          57,
+          33
+        ],
+        [
+          57,
+          39
+        ],
+        [
+          48,
+          44
+        ],
+        [
+          36,
+          44
+        ],
+        [
+          27,
+          39
+        ]
+      ]
+    },
+    {
+      "id": "plinth-administrative-office",
+      "purpose": "administrative office",
+      "floorY": 30,
+      "polygon": [
+        [
+          33,
+          32
+        ],
+        [
+          40,
+          26
+        ],
+        [
+          50,
+          26
+        ],
+        [
+          57,
+          32
+        ],
+        [
+          57,
+          38
+        ],
+        [
+          50,
+          44
+        ],
+        [
+          40,
+          44
+        ],
+        [
+          33,
+          38
+        ]
+      ]
+    },
+    {
+      "id": "middle-office",
+      "purpose": "medium office floor",
+      "floorY": 58,
+      "polygon": [
+        [
+          49,
+          29
+        ],
+        [
+          55,
+          24
+        ],
+        [
+          63,
+          24
+        ],
+        [
+          69,
+          29
+        ],
+        [
+          69,
+          35
+        ],
+        [
+          63,
+          40
+        ],
+        [
+          55,
+          40
+        ],
+        [
+          49,
+          35
+        ]
+      ]
+    },
+    {
+      "id": "upper-office",
+      "purpose": "high office floor",
+      "floorY": 76,
+      "polygon": [
+        [
+          52,
+          27
+        ],
+        [
+          57,
+          22
+        ],
+        [
+          65,
+          22
+        ],
+        [
+          70,
+          27
+        ],
+        [
+          70,
+          33
+        ],
+        [
+          65,
+          38
+        ],
+        [
+          57,
+          38
+        ],
+        [
+          52,
+          33
+        ]
+      ]
+    },
+    {
+      "id": "crown-restaurant",
+      "purpose": "skyline restaurant near top",
+      "floorY": 89,
+      "polygon": [
+        [
+          62,
+          31
+        ],
+        [
+          68,
+          26
+        ],
+        [
+          76,
+          26
+        ],
+        [
+          82,
+          31
+        ],
+        [
+          82,
+          37
+        ],
+        [
+          76,
+          42
+        ],
+        [
+          68,
+          42
+        ],
+        [
+          62,
+          37
+        ]
+      ]
+    }
+  ],
+  "protectedVoids": [
+    {
+      "id": "central-atrium-core-one",
+      "origin": [
+        43,
+        43,
+        25
+      ],
+      "size": [
+        6,
+        8,
+        7
+      ]
+    },
+    {
+      "id": "central-atrium-core-two",
+      "origin": [
+        44,
+        51,
+        26
+      ],
+      "size": [
+        6,
+        7,
+        6
+      ]
+    }
+  ],
+  "designOnly": true
+}

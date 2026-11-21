@@ -1,0 +1,32 @@
+name: R16 Mini Windows Read-Only Pre-Generation QA
+on:
+  push:
+    branches:
+      - feature/b198zr1-protected-architectural-revision
+    paths:
+      - 'tools/r16-mini/**'
+      - 'tools/r16-starter/**'
+      - 'scripts/b198zr16-offline-preflight.mjs'
+      - 'scripts/b198zr16-windows-mini-smoke.ps1'
+      - '.github/workflows/r16-mini-windows.yml'
+  pull_request:
+    paths:
+      - 'tools/r16-mini/**'
+      - 'tools/r16-starter/**'
+      - 'scripts/b198zr16-offline-preflight.mjs'
+      - 'scripts/b198zr16-windows-mini-smoke.ps1'
+      - '.github/workflows/r16-mini-windows.yml'
+permissions:
+  contents: read
+jobs:
+  actual-windows-r16-mini-no-model:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Exact Windows source-only mini setup, four fixture suites, no Qwen
+        shell: powershell
+        run: ./scripts/b198zr16-windows-mini-smoke.ps1

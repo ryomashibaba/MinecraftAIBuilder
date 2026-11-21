@@ -1,0 +1,491 @@
+name: R125 V4D Local Author Bridge — INJECTED TEST ONLY
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'source/ai/r125-v4d-relative-author-ir.mjs'
+      - 'source/ai/r125-v4d-compact-model-ir.mjs'
+      - 'source/ai/r125-v4d-short-semantic-ir.mjs'
+      - 'scripts/r125-v4d-short-semantic.test.mjs'
+      - 'source/ai/r125-integrated-semantic-bridge.mjs'
+      - 'source/ai/r125-integrated-spatial-host.mjs'
+      - 'scripts/r125-integrated-semantic-bridge.test.mjs'
+      - 'scripts/r125-v7-private-once.mjs'
+      - 'scripts/r125-v7-private-once.test.mjs'
+      - 'scripts/r125-v7-ollama-readonly-diagnostic.mjs'
+      - 'scripts/r125-v7-ollama-load-only-calibration.mjs'
+      - 'source/ai/r125-v4e-ranked-exterior-ir.mjs'
+      - 'source/ai/r125-v4e-authored-public-loggia.mjs'
+      - 'source/ai/r125-v4e-sectioned-author-ir.mjs'
+      - 'scripts/r125-v4e-ranked-exterior.test.mjs'
+      - 'source/ai/r125-v4j-civic-author-ir.mjs'
+      - 'source/ai/r125-v4j-precision-prompt.mjs'
+      - 'source/ai/r125-v4j-structured-author-schema.mjs'
+      - 'source/ai/r125-v4j-feasible-envelope.mjs'
+      - 'scripts/r125-v4j-feasible-envelope.test.mjs'
+      - 'scripts/r125-v4j-structured-author-schema.test.mjs'
+      - 'scripts/r125-v4j-precision-prompt.test.mjs'
+      - 'source/ai/r125-v4h-authored-mezzanine.mjs'
+      - 'scripts/r125-v4h-mezzanine-source-study.mjs'
+      - 'scripts/r125-v4h-mezzanine-section.mjs'
+      - 'scripts/r125-v4h-mezzanine.test.mjs'
+      - 'scripts/r125-v4i-architectural-art-audit.mjs'
+      - 'scripts/r125-v4i-architectural-art-audit.test.mjs'
+      - 'scripts/r125-v4j-civic-arcade.mjs'
+      - 'scripts/r125-v4j-lossless-b143-pack.mjs'
+      - 'scripts/r125-v4j-civic-facade-study.mjs'
+      - 'scripts/r125-v4j-civic-facade.test.mjs'
+      - 'scripts/r125-v4j-five-genre-local.mjs'
+      - 'scripts/r125-v4j-five-genre-local.test.mjs'
+      - 'scripts/r125-v4j-v3-one-local.mjs'
+      - 'scripts/r125-v4j-v3-one-local.test.mjs'
+      - 'scripts/r125-v4j-current-pilot.mjs'
+      - 'scripts/r125-v4j-current-pilot.test.mjs'
+      - 'scripts/r125-v4j-safe-ci-gate.mjs'
+      - 'scripts/r125-v4j-safe-ci-gate.test.mjs'
+      - 'scripts/r125-v4j-permanent-launcher.cmd'
+      - 'scripts/r125-v4j-permanent-launcher.test.mjs'
+      - 'scripts/r125-v4j-five-genre-replay.mjs'
+      - 'scripts/r125-v4j-five-genre-replay.test.mjs'
+      - 'scripts/r125-v4e-source-art-review.mjs'
+      - 'scripts/r125-v4e-cross-genre-source-study.mjs'
+      - 'scripts/r125-v4d-compact-model-fixture.mjs'
+      - 'scripts/r125-v4d-relative-author-synthetic.mjs'
+      - 'scripts/r125-v4d-local-architect.mjs'
+      - 'scripts/r125-v4h-real-qwen-trial.ps1'
+      - 'scripts/r125-v4d-replay-private.mjs'
+      - 'scripts/r125-v4d-replay-private.test.mjs'
+      - 'scripts/r125-v4d-compiler-reject-codes.mjs'
+      - 'scripts/r125-v4d-compiler-reject-codes.test.mjs'
+      - 'scripts/r125-v4d-author-source-diagnostics.mjs'
+      - 'scripts/r125-v4d-author-source-diagnostics.test.mjs'
+      - 'scripts/r125-v4d-shareable-receipt.mjs'
+      - 'scripts/r125-v4d-local-one-shot.ps1'
+      - 'scripts/r125-v4d-one-click-setup.cmd'
+      - 'scripts/r125-v4e-one-click-ranked-trial.cmd'
+      - 'scripts/r125-v4e-one-click-sectioned-trial.cmd'
+      - 'scripts/r125-v4d-ci-fake-ollama.mjs'
+      - 'scripts/r125-v4d-local-architect.test.mjs'
+      - '.github/workflows/r125-v4d-local-author-bridge.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: r125-v4d-local-author-bridge-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  source-only-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check relative author IR and local loopback runner
+        run: |
+          node --check source/ai/r125-v4d-relative-author-ir.mjs
+          node --check source/ai/r125-v4d-compact-model-ir.mjs
+          node --check source/ai/r125-v4d-short-semantic-ir.mjs
+          node --check scripts/r125-v4d-short-semantic.test.mjs
+          node --check source/ai/r125-integrated-semantic-bridge.mjs
+          node --check source/ai/r125-integrated-spatial-host.mjs
+          node --check scripts/r125-integrated-semantic-bridge.test.mjs
+          node --check scripts/r125-v7-private-once.mjs
+          node --check scripts/r125-v7-private-once.test.mjs
+          node --check scripts/r125-v7-ollama-readonly-diagnostic.mjs
+          node scripts/r125-v7-ollama-readonly-diagnostic.mjs --selftest
+          node --check scripts/r125-v7-ollama-load-only-calibration.mjs
+          node scripts/r125-v7-ollama-load-only-calibration.mjs --selftest
+          node --check source/ai/r125-v4e-ranked-exterior-ir.mjs
+          node --check source/ai/r125-v4e-authored-public-loggia.mjs
+          node --check source/ai/r125-v4e-sectioned-author-ir.mjs
+          node --check scripts/r125-v4e-ranked-exterior.test.mjs
+          node --check source/ai/r125-v4h-authored-mezzanine.mjs
+          node --check scripts/r125-v4h-mezzanine-section.mjs
+          node --check scripts/r125-v4h-mezzanine-source-study.mjs
+          node --check scripts/r125-v4h-mezzanine.test.mjs
+          node --check scripts/r125-v4e-source-art-review.mjs
+          node --check scripts/r125-v4e-cross-genre-source-study.mjs
+          node --check scripts/r125-v4d-compact-model-fixture.mjs
+          node --check scripts/r125-v4d-local-architect.mjs
+          node --check scripts/r125-v4d-replay-private.mjs
+          node --check scripts/r125-v4d-replay-private.test.mjs
+          node --check scripts/r125-v4d-author-source-diagnostics.mjs
+          node --check scripts/r125-v4d-author-source-diagnostics.test.mjs
+          node --check scripts/r125-v4d-shareable-receipt.mjs
+          node --check scripts/r125-v4d-relative-author-synthetic.mjs
+          node --check scripts/r125-v4d-local-architect.test.mjs
+      - name: Prove fail-closed synthetic authorship and actual B143 conversion through injected offline transport
+        run: |
+          node --test scripts/r125-v4d-short-semantic.test.mjs
+          node --test scripts/r125-integrated-semantic-bridge.test.mjs
+          node --test scripts/r125-v7-private-once.test.mjs
+          node --test scripts/r125-v4d-local-architect.test.mjs
+          node --test scripts/r125-v4d-replay-private.test.mjs
+          node --check scripts/r125-v4d-compiler-reject-codes.mjs
+          node --test scripts/r125-v4d-compiler-reject-codes.test.mjs
+          node --test scripts/r125-v4d-author-source-diagnostics.test.mjs
+          node --test scripts/r125-v4e-ranked-exterior.test.mjs
+          node --test scripts/r125-v4h-mezzanine.test.mjs
+      - name: Export true B143 V4E synthetic views for independent human ART review
+        run: |
+          node scripts/r125-v4e-source-art-review.mjs --out "$RUNNER_TEMP/v4e-source-art"
+          test -s "$RUNNER_TEMP/v4e-source-art/index.html"
+          test -s "$RUNNER_TEMP/v4e-source-art/ACTUAL_FINAL_B143_FIVE_VIEWS.svg"
+          test -s "$RUNNER_TEMP/v4e-source-art/SOURCE_ART_HOLD_REPORT.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: V4E-SYNTHETIC-FINAL-B143-3D-FIVE-VIEWS-ART-HOLD
+          path: ${{ runner.temp }}/v4e-source-art/
+          retention-days: 7
+      - name: Cross-genre common compiler on five independent SYNTHETIC author intents
+        run: |
+          node scripts/r125-v4e-cross-genre-source-study.mjs --out "$RUNNER_TEMP/v4e-five-genres"
+          test -s "$RUNNER_TEMP/v4e-five-genres/index.html"
+          test -s "$RUNNER_TEMP/v4e-five-genres/FIVE_GENRE_SOURCE_ART_HOLD.json"
+          test "$(find "$RUNNER_TEMP/v4e-five-genres" -name 'FINAL_B143_*_FIVE_VIEWS.svg' | wc -l)" -eq 5
+          test "$(find "$RUNNER_TEMP/v4e-five-genres" -name 'SECTION_B143_*_FIVE_VIEWS.svg' | wc -l)" -eq 5
+          test -s "$RUNNER_TEMP/v4e-five-genres/sectioned.html"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: V4E-FIVE-GENRES-SYNTHETIC-COMMON-ENGINE-ART-HOLD
+          path: ${{ runner.temp }}/v4e-five-genres/
+          retention-days: 7
+      - name: V4H REAL 2-WIDE MEZZANINE FIVE-GENRE SOURCE and actual stair cutaway
+        run: |
+          node scripts/r125-v4h-mezzanine-source-study.mjs "$RUNNER_TEMP/v4h-mezzanine"
+          test -s "$RUNNER_TEMP/v4h-mezzanine/mezzanine-3d.html"
+          test -s "$RUNNER_TEMP/v4h-mezzanine/V4H_TRUE_MEZZANINE_SOURCE_ART_HOLD.json"
+          test "$(find "$RUNNER_TEMP/v4h-mezzanine" -name 'STAIR_SECTION_AFTER_*.svg' | wc -l)" -eq 5
+      - uses: actions/upload-artifact@v4
+        with:
+          name: V4H-FIVE-SYNTHETIC-AUTHOR-TRUE-STAIRS-MEZZANINE-ART-HOLD
+          path: ${{ runner.temp }}/v4h-mezzanine/
+          retention-days: 7
+      - name: Record strong non-promotion boundary
+        run: |
+          echo '## V4D compact real-model bridge — CI only' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Node tests use INJECTED TEST DOUBLE for both legacy detailed and new compact author contracts. No actual Ollama, no 2B/Mac evidence, no new Qwen/Gemma design, no paid API, no Minecraft world access.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'A verified true B143 geometry from a synthetic author is NOT a real-model success or an ART certification.' >> "$GITHUB_STEP_SUMMARY"
+          echo '9 BLOCKED, BuildPlan empty, NOT_PREPARED, WorldWrites0. Preserve main, prior model originals and Draft PR #128.' >> "$GITHUB_STEP_SUMMARY"
+
+  v4i-independent-appearance-triage:
+    name: V4I B143 evidence-only ART HOLD audit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify quantitative art evidence is strictly source-only and ART-HOLD
+        run: |
+          node --check scripts/r125-v4i-architectural-art-audit.mjs
+          node --check scripts/r125-v4i-architectural-art-audit.test.mjs
+          node --test scripts/r125-v4i-architectural-art-audit.test.mjs
+      - name: Export five authentic B143 silhouettes, exterior deltas, diversity and surface dominance for HUMAN ART judgement
+        run: |
+          node scripts/r125-v4i-architectural-art-audit.mjs "$RUNNER_TEMP/v4i-b143-art-hold"
+          test -s "$RUNNER_TEMP/v4i-b143-art-hold/V4I_ART_HOLD_VISIBLE_GEOMETRY_AND_DIVERSITY.json"
+          test -s "$RUNNER_TEMP/v4i-b143-art-hold/V4I_ACTUAL_B143_DIVERSITY_MATRIX.svg"
+          test "$(find "$RUNNER_TEMP/v4i-b143-art-hold" -name 'V4I_*_TRUE_FIVE_VIEWS.svg' | wc -l)" -eq 5
+          test "$(find "$RUNNER_TEMP/v4i-b143-art-hold" -name 'V4I_*_EXTERIOR_DELTA.svg' | wc -l)" -eq 5
+      - uses: actions/upload-artifact@v4
+        with:
+          name: V4I-SYNTHETIC-FIVE-GENRE-B143-APPEARANCE-AUDIT-ART-HOLD
+          path: ${{ runner.temp }}/v4i-b143-art-hold/
+          retention-days: 7
+
+
+  v4j-real-visible-functional-facade:
+    name: V4J true civic entry architecture source-only ART HOLD
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Prove author-owned real visible 3-bay PUBLIC architecture and strict old-source protection
+        run: |
+          node --check source/ai/r125-v4j-civic-author-ir.mjs
+          node --check scripts/r125-v4d-local-architect.mjs
+          node --check scripts/r125-v4d-replay-private.mjs
+          node --check scripts/r125-v4d-author-source-diagnostics.mjs
+          node --check scripts/r125-v4d-shareable-receipt.mjs
+          node --check scripts/r125-v4j-lossless-b143-pack.mjs
+          node --check scripts/r125-v4j-civic-arcade.mjs
+          node --check scripts/r125-v4j-civic-facade-study.mjs
+          node --check scripts/r125-v4j-civic-facade.test.mjs
+          node --test scripts/r125-v4j-civic-facade.test.mjs
+          node --check scripts/r125-v4j-five-genre-local.mjs
+          node --check scripts/r125-v4j-five-genre-local.test.mjs
+          node --test scripts/r125-v4j-five-genre-local.test.mjs
+          node --check scripts/r125-v4j-v3-one-local.mjs
+          node --test scripts/r125-v4j-v3-one-local.test.mjs
+          node --check scripts/r125-v4j-current-pilot.mjs
+          node --test scripts/r125-v4j-current-pilot.test.mjs
+          node --check scripts/r125-v4j-safe-ci-gate.mjs
+          node --test scripts/r125-v4j-safe-ci-gate.test.mjs
+          node --test scripts/r125-v4j-permanent-launcher.test.mjs
+          node --check source/ai/r125-v4j-precision-prompt.mjs
+          node --check scripts/r125-v4j-precision-prompt.test.mjs
+          node --test scripts/r125-v4j-precision-prompt.test.mjs
+          node --check source/ai/r125-v4j-structured-author-schema.mjs
+          node --check scripts/r125-v4j-structured-author-schema.test.mjs
+          node --test scripts/r125-v4j-structured-author-schema.test.mjs
+          node --check source/ai/r125-v4j-feasible-envelope.mjs
+          node --check scripts/r125-v4j-feasible-envelope.test.mjs
+          node --test scripts/r125-v4j-feasible-envelope.test.mjs
+          node --check scripts/r125-v4j-five-genre-replay.mjs
+          node --check scripts/r125-v4j-five-genre-replay.test.mjs
+          node --test scripts/r125-v4j-five-genre-replay.test.mjs
+      - name: Export actual B143 architecture before/after, all five genres and 2-wide functional public routes
+        run: |
+          node scripts/r125-v4j-civic-facade-study.mjs "$RUNNER_TEMP/v4j-authored-facade"
+          test -s "$RUNNER_TEMP/v4j-authored-facade/V4J_TRUE_FORECOURT_SOURCE_ART_HOLD.json"
+          test -s "$RUNNER_TEMP/v4j-authored-facade/V4J_TRUE_PUBLIC_FORECOURT_3D.html"
+          test "$(find "$RUNNER_TEMP/v4j-authored-facade" -name 'V4J_*_AFTER_FIVE_VIEWS.svg' | wc -l)" -eq 5
+          test "$(find "$RUNNER_TEMP/v4j-authored-facade" -name 'V4J_*_VISIBLE_FACADE_DELTA.svg' | wc -l)" -eq 5
+      - uses: actions/upload-artifact@v4
+        with:
+          name: V4J-FIVE-SYNTHETIC-TRUE-FUNCTIONAL-PUBLIC-FACADE-ART-HOLD
+          path: ${{ runner.temp }}/v4j-authored-facade/
+          retention-days: 7
+
+  windows-offline-launch-contract:
+    name: Windows PowerShell NO-MODEL preflight
+    runs-on: windows-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify local study one-shot launcher without Ollama or any writes
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $private = Join-Path $env:LOCALAPPDATA 'MinecraftAIBuilder\PrivateModelStudies'
+          $beforeExists = Test-Path -LiteralPath $private
+          $v4hPreflight = & .\scripts\r125-v4h-real-qwen-trial.ps1 -CheckOnly
+          if ($v4hPreflight -notcontains 'V4H_CHECK_ONLY_PASS_NO_CLONE_NO_MODEL_NO_WORLD' -or
+              $v4hPreflight -notcontains 'MODEL_GENERATION_REQUESTS=0') {
+            throw 'V4H_NONINVASIVE_CHECK_ONLY_NOT_VERIFIED'
+          }
+          $output = & .\scripts\r125-v4d-local-one-shot.ps1 -CheckOnly
+          $output | ForEach-Object { Write-Host $_ }
+          if ($output -notcontains "CHECK_ONLY_SAFE_NO_MODEL_CALL_NO_WORLD_WRITE") {
+            throw "V4D_WINDOWS_CHECK_ONLY_CONTRACT_MISSING"
+          }
+          if (-not $beforeExists -and (Test-Path -LiteralPath $private)) {
+            throw "V4D_WINDOWS_CHECK_ONLY_CREATED_PRIVATE_FILES"
+          }
+          if ($output -notcontains "RUN_MODE=ONE_LOCAL_MODEL_POST_MAX") {
+            throw "V4D_WINDOWS_DEFAULT_MODEL_MODE_DRIFT"
+          }
+          $replayCheck = & .\scripts\r125-v4d-local-one-shot.ps1 -CheckOnly -ReplayStudy '__NO_REAL_STUDY_OPENED__'
+          if ($replayCheck -notcontains "RUN_MODE=OFFLINE_REPLAY") {
+            throw "V4D_WINDOWS_REPLAY_CHECK_ONLY_CONTRACT_MISSING"
+          }
+          if (-not $beforeExists -and (Test-Path -LiteralPath $private)) {
+            throw "V4D_WINDOWS_REPLAY_CHECK_ONLY_CREATED_PRIVATE_FILES"
+          }
+          if ($output -notcontains "AUTHOR_MODE=COMPACT") {
+            throw "V4D_WINDOWS_DEFAULT_MODE_DRIFT"
+          }
+          Write-Host "PASS: Windows launch preflight, branch/head/node validated. 0 model calls, 0 world writes."
+      - name: Verify one-click branch setup by actual isolated clone, NO model
+        shell: cmd
+        run: |
+          call scripts\r125-v4d-one-click-setup.cmd --check-only
+          if errorlevel 1 exit /b 1
+          call scripts\r125-v4d-one-click-setup.cmd --prepare-only
+          if errorlevel 1 exit /b 1
+          call scripts\r125-v4e-one-click-ranked-trial.cmd --check-only
+          if errorlevel 1 exit /b 1
+          call scripts\r125-v4e-one-click-sectioned-trial.cmd --check-only
+          if errorlevel 1 exit /b 1
+          call scripts\r125-v4e-one-click-ranked-trial.cmd --prepare-only
+          if errorlevel 1 exit /b 1
+          echo PASS: one-click git branch cloned into an isolated LOCALAPPDATA folder; 0 model requests.
+
+      - name: Test one-click Y flow over fake localhost HTTP, then ZERO-call diagnosis
+        shell: pwsh
+        env:
+          MAB_V4D_TEST_DOUBLE_MODE: '1'
+        run: |
+          $ErrorActionPreference = "Stop"
+          $env:MAB_V4D_FAKE_READY_FILE = Join-Path $env:RUNNER_TEMP 'v4d_fake_ready.txt'
+          $env:MAB_V4D_FAKE_POST_LOG = Join-Path $env:RUNNER_TEMP 'v4d_fake_posts.txt'
+          $stdout = Join-Path $env:RUNNER_TEMP 'v4d_fake_stdout.txt'
+          $stderr = Join-Path $env:RUNNER_TEMP 'v4d_fake_stderr.txt'
+          $private = Join-Path $env:LOCALAPPDATA 'MinecraftAIBuilder\PrivateModelStudies'
+          $before = @()
+          if (Test-Path -LiteralPath $private) {
+            $before = @(Get-ChildItem -LiteralPath $private -Directory | Select-Object -ExpandProperty FullName)
+          }
+          $node = (Get-Command node).Source
+          $server = Start-Process -FilePath $node -ArgumentList @('scripts/r125-v4d-ci-fake-ollama.mjs') -NoNewWindow -PassThru -RedirectStandardOutput $stdout -RedirectStandardError $stderr
+          try {
+            for ($i=0; $i -lt 25; $i++) {
+              if (Test-Path -LiteralPath $env:MAB_V4D_FAKE_READY_FILE) { break }
+              if ($server.HasExited) { throw "V4D_FAKE_SERVER_EXITED_EARLY" }
+              Start-Sleep -Milliseconds 400
+            }
+            if (-not (Test-Path -LiteralPath $env:MAB_V4D_FAKE_READY_FILE)) {
+              throw "V4D_LOCAL_FAKE_HTTP_NOT_READY"
+            }
+            & $env:ComSpec /d /c "call scripts\r125-v4d-one-click-setup.cmd --run-once"
+            $exitCode = $LASTEXITCODE
+            if ($exitCode -ne 2) {
+              throw "V4D_FAKE_INVALID_SOURCE_EXPECTED_HOLD_EXIT_2_GOT_$exitCode"
+            }
+            $posts = @(Get-Content -LiteralPath $env:MAB_V4D_FAKE_POST_LOG)
+            if ($posts.Count -ne 1 -or $posts[0] -ne 'ONE_TEST_DOUBLE_POST') {
+              throw "V4D_FAKE_LOOPBACK_MODEL_POST_NOT_EXACTLY_ONE"
+            }
+            $created = @(Get-ChildItem -LiteralPath $private -Directory | Where-Object {
+              $_.FullName -notin $before
+            })
+            $original = @($created | Where-Object { $_.Name -like 'V4D_*' -and $_.Name -notlike 'V4D_REPLAY_*' })
+            $replays = @($created | Where-Object { $_.Name -like 'V4D_REPLAY_*' })
+            if ($original.Count -ne 1 -or $replays.Count -ne 1) {
+              throw "V4D_AUTO_OFFLINE_DIAGNOSE_FOLDER_COUNT"
+            }
+            $attempt = Get-Content -LiteralPath (Join-Path $original[0].FullName 'REVIEW_SUMMARY_SHAREABLE.json') -Raw | ConvertFrom-Json
+            $diag = Get-Content -LiteralPath (Join-Path $replays[0].FullName 'REPLAY_SHAREABLE_STATUS.json') -Raw | ConvertFrom-Json
+            if ($attempt.reportedStatus -ne 'HOLD_MODEL_OR_SOURCE_INVALID_NO_REPAIR' -or
+                $attempt.modelCallAttempts -ne 1 -or
+                $attempt.explicitlyInjectedTestResponse -ne $true -or
+                $attempt.worldWrites -ne 0) {
+              throw "V4D_FAKE_ATTEMPT_FALSE_REAL_MODEL_OR_SOURCE_PROMOTION"
+            }
+            if ($diag.replayStatus -ne 'HOLD_REPLAY_SOURCE_REJECTED' -or
+                $diag.additionalModelCalls -ne 0 -or
+                $diag.originalIsTestInjection -ne $true -or
+                $diag.worldWrites -ne 0 -or
+                $diag.structuralIssueCodes -notcontains 'PARENT_ATTACHMENT_INVALID') {
+              throw "V4D_FAKE_AUTO_DIAGNOSTIC_CONTRACT"
+            }
+            if (-not (Test-Path (Join-Path $original[0].FullName 'MODEL_RESPONSE_ORIGINAL.txt'))) {
+              throw "V4D_FAKE_PRIVATE_RAW_MISSING"
+            }
+            Write-Host "PASS: Windows one-click --run-once, exactly ONE FAKE localhost POST, automatic 0-call SOURCE diagnostics, zero world writes."
+            & $env:ComSpec /d /c "call scripts\r125-v4e-one-click-ranked-trial.cmd --run-once"
+            $rankedExit = $LASTEXITCODE
+            if ($rankedExit -ne 2) {
+              throw "V4E_FAKE_RANKED_EXPECTED_HOLD_2_GOT_$rankedExit"
+            }
+            $postLines = @(Get-Content -LiteralPath $env:MAB_V4D_FAKE_POST_LOG)
+            if ($postLines.Count -ne 2 -or $postLines[0] -ne 'ONE_TEST_DOUBLE_POST' -or
+                $postLines[1] -ne 'ONE_TEST_DOUBLE_POST') {
+              throw "V4E_ONE_ADDITIONAL_FAKE_MODEL_POST_PER_SEPARATE_USER_INITIATED_STUDY"
+            }
+            $newCreated = @(Get-ChildItem -LiteralPath $private -Directory | Where-Object {
+              $_.FullName -notin $before
+            })
+            $newOriginal = @($newCreated | Where-Object { $_.Name -like 'V4E_*' -and $_.Name -notlike 'V4E_REPLAY_*' })
+            $newReplays = @($newCreated | Where-Object { $_.Name -like 'V4E_REPLAY_*' })
+            if ($newOriginal.Count -ne 1 -or $newReplays.Count -ne 1) {
+              throw "V4E_RANKED_PRIVATE_STUDY_AND_REPLAY_COUNT"
+            }
+            $rankedAttempt = Get-Content -LiteralPath (Join-Path $newOriginal[0].FullName 'REVIEW_SUMMARY_SHAREABLE.json') -Raw | ConvertFrom-Json
+            $rankedStatus = Get-Content -LiteralPath (Join-Path $newReplays[0].FullName 'REPLAY_SHAREABLE_STATUS.json') -Raw | ConvertFrom-Json
+            if ($rankedAttempt.authorContract -ne 'minecraftaibuilder-r125-v4e-ranked-exterior-author-v1' -or
+                $rankedAttempt.failureCategory -ne 'RANKED_AUTHOR_EXTERIOR_INVALID' -or
+                $rankedAttempt.reportedStatus -ne 'HOLD_MODEL_OR_SOURCE_INVALID_NO_REPAIR' -or
+                $rankedAttempt.explicitlyInjectedTestResponse -ne $true -or
+                $rankedAttempt.modelCallAttempts -ne 1 -or
+                $rankedAttempt.worldWrites -ne 0 -or
+                $rankedStatus.replayStatus -ne 'HOLD_REPLAY_SOURCE_REJECTED' -or
+                $rankedStatus.structuralIssueCodes -notcontains 'RANKED_WINDOW_PRIORITY_INVALID' -or
+                $rankedStatus.additionalModelCalls -ne 0 -or
+                $rankedStatus.originalIsTestInjection -ne $true -or
+                $rankedStatus.worldWrites -ne 0) {
+              throw "V4E_FAKE_AUTHOR_DIAGNOSIS_OR_PRIVACY_SAFETY_BROKEN"
+            }
+            Write-Host "PASS: V4E opt-in separate one-click, ONE FAKE localhost POST, 0-call offline ranked-window diagnosis, no world writes."
+            # Prove --arcade-five on the real Windows CMD: five fake local POSTs,
+            # automatic 0-POST offline replay, no model/source/ART promotion.
+            & $env:ComSpec /d /c "call scripts\r125-v4e-one-click-ranked-trial.cmd --arcade-five"
+            $fiveExit = $LASTEXITCODE
+            if ($fiveExit -ne 2) {
+              throw "V4J_FIVE_FAKE_INVALID_SOURCE_EXPECTED_HOLD_2_GOT_$fiveExit"
+            }
+            $postAll = @(Get-Content -LiteralPath $env:MAB_V4D_FAKE_POST_LOG)
+            if ($postAll.Count -ne 7 -or @($postAll | Where-Object {$_ -ne 'ONE_TEST_DOUBLE_POST'}).Count -ne 0) {
+              throw "V4J_FIVE_SEQUENTIAL_FAKE_POST_COUNT_NOT_5_ADDITIONAL"
+            }
+            $createdFive = @(Get-ChildItem -LiteralPath $private -Directory | Where-Object {
+              $_.FullName -notin $before
+            })
+            $fiveOriginal = @($createdFive | Where-Object { $_.Name -like 'V4J_FIVE_*' })
+            $fiveReplay = @($createdFive | Where-Object { $_.Name -like 'V4J_REPLAY_*' })
+            if ($fiveOriginal.Count -ne 1 -or $fiveReplay.Count -ne 1) {
+              throw "V4J_FIVE_ORIGINAL_AND_OFFLINE_DIAGNOSIS_FOLDER_COUNT"
+            }
+            $fiveInitial = Get-Content -LiteralPath (Join-Path $fiveOriginal[0].FullName 'FIVE_GENRES_SHAREABLE_SUMMARY.json') -Raw | ConvertFrom-Json
+            $fiveSafe = Get-Content -LiteralPath (Join-Path $fiveReplay[0].FullName 'FIVE_GENRES_OFFLINE_REPLAY_SHAREABLE.json') -Raw | ConvertFrom-Json
+            if ($fiveInitial.provenance -ne 'INJECTED_TEST_DOUBLE_NOT_REAL_MODEL' -or
+                $fiveInitial.attemptedGenres -ne 5 -or
+                $fiveInitial.knownModelCallAttempts -ne 5 -or
+                $fiveInitial.sourceCandidates -ne 0 -or
+                $fiveInitial.worldWrites -ne 0 -or
+                $fiveSafe.additionalModelCalls -ne 0 -or
+                $fiveSafe.networkCalls -ne 0 -or
+                $fiveSafe.attemptedOfflineReplays -ne 5 -or
+                $fiveSafe.sourceReproducedCount -ne 0 -or
+                $fiveSafe.worldWrites -ne 0 -or
+                $fiveSafe.syntheticRunsNeverPromoted -ne $true -or
+                $fiveSafe.userArtAssessment -ne 'NOT_REVIEWED') {
+              throw "V4J_FIVE_REAL_WINDOWS_FAKE_OR_OFFLINE_REPLAY_SAFETY_BROKEN"
+            }
+            if (@(Get-Content -LiteralPath $env:MAB_V4D_FAKE_POST_LOG).Count -ne 7) {
+              throw "V4J_FIVE_OFFLINE_REPLAY_MADE_UNEXPECTED_MODEL_CALL"
+            }
+            Write-Host "PASS: V4J --arcade-five exact Windows one-click, 5 fake local POSTs, automatic 0-POST cross-genre replay, ART HOLD, zero world writes."
+            # Test actual pinned local-Qwen launcher against CI FAKE HTTP only.
+            $beforeV4HPosts = @(Get-Content -LiteralPath $env:MAB_V4D_FAKE_POST_LOG).Count
+            $v4hStdout = Join-Path $env:RUNNER_TEMP 'v4h_launcher_stdout.txt'
+            $v4hStderr = Join-Path $env:RUNNER_TEMP 'v4h_launcher_stderr.txt'
+            $v4hArgs = @('-NoProfile','-File',(Join-Path $PWD 'scripts/r125-v4h-real-qwen-trial.ps1'),'-ExpectedCommit',$env:GITHUB_SHA)
+            $child = Start-Process -FilePath (Get-Command pwsh).Source -ArgumentList $v4hArgs -NoNewWindow -PassThru -Wait -RedirectStandardOutput $v4hStdout -RedirectStandardError $v4hStderr
+            Get-Content -LiteralPath $v4hStdout | ForEach-Object { Write-Host $_ }
+            if ($child.ExitCode -ne 2) {
+              Get-Content -LiteralPath $v4hStderr | ForEach-Object { Write-Host $_ }
+              throw "V4H_USER_LAUNCHER_FAKE_HOLD_EXIT_2_REQUIRED_$($child.ExitCode)"
+            }
+            if (@(Get-Content -LiteralPath $env:MAB_V4D_FAKE_POST_LOG).Count -ne ($beforeV4HPosts + 1)) {
+              throw 'V4H_ONE_AND_ONLY_ONE_FAKE_POST'
+            }
+            $share = @(Get-ChildItem -LiteralPath $private -File -Filter 'V4H_HANDOFF_*.json')
+            if ($share.Count -ne 1) { throw 'V4H_SAFE_ONE_FILE_HANDOFF_MISSING' }
+            $result = Get-Content -LiteralPath $share[0].FullName -Raw | ConvertFrom-Json
+            if ($result.schema -ne 'minecraftaibuilder-r125-v4h-one-local-qwen-audition-handoff-v1' -or
+                $result.researchHead -ne $env:GITHUB_SHA -or
+                $result.modelGenerationAttempts -ne 1 -or
+                $result.sourceCandidateVerified -ne $false -or
+                $result.explicitlyInjectedTestResponse -ne $true -or
+                $result.offlineReplayStatus -ne 'HOLD_REPLAY_SOURCE_REJECTED' -or
+                $result.offlineReplayAdditionalModelCalls -ne 0 -or
+                $result.worldWrites -ne 0 -or
+                $result.nineSafetyGates -ne '9 BLOCKED') {
+              throw 'V4H_INVALID_FAKE_USER_HANDOFF_OR_SAFETY_DRIFT'
+            }
+            $plain = Get-Content -LiteralPath $share[0].FullName -Raw
+            foreach ($secret in @('LOCAL_REQUEST','127.0.0.1','MODEL_RESPONSE_ORIGINAL','PrivateModelStudies')) {
+              if ($plain.Contains($secret)) { throw "V4H_HANDOFF_LEAKED_PRIVATE_DETAIL_$secret" }
+            }
+            Write-Host 'PASS: V4H pinned Windows launcher, exactly ONE FAKE POST, safe 1-file handoff, offline replay, no Qwen/World.'
+
+            # The explicit HOLD exit 2 was EXPECTED and verified above. Do not
+            # let its residual native code fail the successful CI contract.
+            $global:LASTEXITCODE = 0
+          } finally {
+            Stop-Process -Id $server.Id -Force -ErrorAction SilentlyContinue
+          }
+
+
+

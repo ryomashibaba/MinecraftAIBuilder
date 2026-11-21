@@ -1,0 +1,40 @@
+name: R190-BX silhouette-first real B143 voxel art research
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'evidence/r190bx/**'
+      - 'scripts/r190bx-silhouette-study.mjs'
+      - '.github/workflows/r190bx-silhouette.yml'
+  pull_request:
+    paths:
+      - 'evidence/r190bx/**'
+      - 'scripts/r190bx-silhouette-study.mjs'
+      - '.github/workflows/r190bx-silhouette.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  art-first:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Exact source and genuine 3D with two clear rifts (NO PROVIDER)
+        env:
+          NODE_OPTIONS: --import=./scripts/r190bo-deny-network.mjs
+        run: node scripts/r190bx-silhouette-study.mjs --out bx-ci-evidence
+      - name: Preserve all original shapes, 3D, 5 actual projections and HOLD
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: R190BX-ART-FIRST-${{ matrix.os }}
+          path: bx-ci-evidence
+          if-no-files-found: warn

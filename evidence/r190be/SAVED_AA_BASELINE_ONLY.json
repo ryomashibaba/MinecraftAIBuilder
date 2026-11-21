@@ -1,0 +1,65 @@
+{
+  "schema": "minecraftaibuilder-r190be-saved-design-comparison-v1",
+  "status": "HOLD_MISSING_SAVED_PAIR",
+  "originalBriefSha256": "6c1e65d2b698e2f919fa84ec29f2a87b51b0f55e942181689a0d8281691153a1",
+  "designFirstPromptSha256": "0f86752f8c3d39075004197609d5ae55b594ffaba652c59b44a812c1e0d6c219",
+  "A": {
+    "status": "HOLD_INVALID_B143",
+    "originalSha256": "0bf706181bb2b7a30f8082f896a703c33749ba55f75d42010adba88f47c84f17",
+    "promptSha256": "6c1e65d2b698e2f919fa84ec29f2a87b51b0f55e942181689a0d8281691153a1",
+    "receiptSha256": "4facdcbe91abe3c6af29594c41619493e842af2eb01be4ca4c22d6712481a65d",
+    "modelClaimed": "qwen3:14b",
+    "transportClaimed": "openai",
+    "providerIdentityVerified": false,
+    "receiptIsUnsigned": true,
+    "providerCompletionClaimed": true,
+    "r4Status": "NOT_RUN",
+    "sectionStatus": "NOT_RUN",
+    "geometrySha256": null,
+    "failure": "B143_SCHEMA_OR_MODE"
+  },
+  "B": {
+    "status": "MISSING_SAVED_CAPTURE"
+  },
+  "physicalComparison": null,
+  "sameClaimedModel": null,
+  "sameClaimedTransport": null,
+  "generationControls": "NOT_ESTABLISHED_FROM_LEGACY_RECEIPTS",
+  "confounders": [
+    "Provider/model digest, sampling, context and output budgets not jointly verified",
+    "Single saved pair cannot establish generalization or causal improvement",
+    "Model-declared zones are not independent program acceptance",
+    "BC certifies only same-height two-wide access; vertical access remains unproven"
+  ],
+  "qualityImprovement": "NOT_ESTABLISHED",
+  "winner": "NOT_ESTABLISHED",
+  "humanReview": "UNSCORED",
+  "hostGeometryRepairs": 0,
+  "actualMinecraftWalking": "NOT_TESTED",
+  "readiness": "NOT_PREPARED",
+  "constructionApproved": false,
+  "executionAllowed": false,
+  "gates": [
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED"
+  ],
+  "BuildPlan": {
+    "operations": []
+  },
+  "worldContacts": 0,
+  "worldWrites": 0,
+  "modelCalls": 0,
+  "art": "ART_HOLD",
+  "officialArtAdoptions": 0,
+  "evidenceKind": "EXISTING_REAL_QWEN_CAPTURE_REVIEW_NOT_NEW_INFERENCE",
+  "baselineReference": "evidence/r190aa/pilot-01/MODEL_RESPONSE_ORIGINAL.txt",
+  "originalBytesUnchanged": true,
+  "newRealModelRequests": 0
+}

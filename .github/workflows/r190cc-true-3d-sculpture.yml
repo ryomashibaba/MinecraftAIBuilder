@@ -1,0 +1,51 @@
+name: R190-CC rotated 3D implicit union subtract architecture QA
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'source/ai/r190cc-*'
+      - 'scripts/r190cc-*'
+      - 'evidence/r190cc/**'
+      - '.github/workflows/r190cc-true-3d-sculpture.yml'
+  pull_request:
+    paths:
+      - 'source/ai/r190cc-*'
+      - 'scripts/r190cc-*'
+      - 'evidence/r190cc/**'
+      - '.github/workflows/r190cc-true-3d-sculpture.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-actual-3d-views:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - name: Fail-closed author brush and route provenance tests
+        env:
+          NODE_OPTIONS: --import=./scripts/r190bo-deny-network.mjs
+        run: node --test scripts/r190cc-source.test.mjs
+      - name: Generate two truly 3D signed-volume designs, raw voxels and 16 views
+        env:
+          NODE_OPTIONS: --import=./scripts/r190bo-deny-network.mjs
+        run: node scripts/r190cc-source-study.mjs --out cc-evidence
+      - name: Independently XML parse 16 views and compare 10 true orthographic images
+        run: python scripts/r190cc-evidence-verify.py cc-evidence
+      - name: Archive real source A/B, all voxels, 3D, 16 views and independent audits
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: R190CC-TRUE-3D-SOURCE-${{ matrix.os }}
+          path: cc-evidence
+          if-no-files-found: warn

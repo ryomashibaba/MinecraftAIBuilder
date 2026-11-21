@@ -1,0 +1,30 @@
+name: R38 Audit Bundle Offline
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'scripts/b198zr38-audit-bundle-offline*'
+      - 'scripts/b198zr38-audit-bundle-cli.mjs'
+      - '.github/workflows/r38-audit-bundle-offline.yml'
+  pull_request:
+    paths:
+      - 'scripts/b198zr38-audit-bundle-offline*'
+      - 'scripts/b198zr38-audit-bundle-cli.mjs'
+      - '.github/workflows/r38-audit-bundle-offline.yml'
+permissions:
+  contents: read
+jobs:
+  r38-local-bundle-no-model-no-world:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: R38 synthetic offline bundle export/readback and R37 chain integrity
+        run: node --test scripts/b198zr38-audit-bundle-offline.test.mjs

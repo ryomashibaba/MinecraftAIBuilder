@@ -1,0 +1,28 @@
+name: R33 Future Trial Readiness Offline
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'scripts/b198zr33-future-trial-readiness-offline*'
+      - '.github/workflows/r33-future-trial-readiness-offline.yml'
+  pull_request:
+    paths:
+      - 'scripts/b198zr33-future-trial-readiness-offline*'
+      - '.github/workflows/r33-future-trial-readiness-offline.yml'
+permissions:
+  contents: read
+jobs:
+  r33-offline-preflight-only:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: R33 local-only readiness assessment without inference or Minecraft
+        run: node --test scripts/b198zr33-future-trial-readiness-offline.test.mjs

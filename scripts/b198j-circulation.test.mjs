@@ -104,6 +104,8 @@ test('B198I source selector regenerates a truly new corridor when all anchor poi
  assert.deepEqual(result.report.attempts.map(x=>x.connectedSameElevationPairs),[0,1]);
  assert.equal(result.report.planProof.passedAnchors,5);
  assert.equal(result.report.status,'SOURCE_PLAN_ANCHORS_PASS_HUMAN_REVIEW_REQUIRED');
+ assert.deepEqual(result.report.independentHoldReasons,[]);
+ assert.equal(result.report.allExplicitSourceHoldsCleared,true);
  assert.equal(result.report.circulationProof.allDeclaredSameElevationPairsConnected,true);
  assert.equal(result.design.elements.length,3);
  assert.equal(result.report.humanAestheticJudgment,'UNREVIEWED');
@@ -121,7 +123,10 @@ test('a model repeatedly providing isolated connected-looking platforms is HOLD,
  });
  assert.equal(calls,2);
  assert.equal(result.report.planProof.failedAnchors,0);
- assert.equal(result.report.status,'HOLD_SOURCE_CIRCULATION');
+ assert.equal(result.report.status,'HOLD_SOURCE_PLAN_OR_TOPOLOGY');
+ assert(result.report.independentHoldReasons.includes('HIGH_RISK_SOURCE_TOPOLOGY'));
+ assert(result.report.independentHoldReasons.includes('DISCONNECTED_SAME_ELEVATION_PUBLIC_ROUTE'));
+ assert.equal(result.report.allExplicitSourceHoldsCleared,false);
  assert.equal(result.report.circulationProof.disconnectedSameElevationAnchorPairs,1);
  assert.equal(result.report.circulationProof.actuallyTraversableInMinecraft,false);
  assert.equal(result.report.attempts[1].decision,'REJECTED_NO_EVIDENCE_GAIN');

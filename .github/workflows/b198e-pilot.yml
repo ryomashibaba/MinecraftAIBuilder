@@ -39,7 +39,8 @@ jobs:
           retention-days: 14
   real-chromium:
     needs: [authored-geometry-evidence]
-    runs-on: ubuntu-latest
+    # Playwright 1.56.1 cannot install on Ubuntu 26.04; pin browser-only QA.
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4

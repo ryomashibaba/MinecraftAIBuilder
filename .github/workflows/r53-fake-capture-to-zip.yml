@@ -1,0 +1,32 @@
+name: R53 One Fake Local Request to Automatic Diagnosis ZIP — NO REAL MODEL
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'scripts/b198zr53-fake-one-shot-to-zip.integration.test.mjs'
+      - 'tools/r52-future/ARCHIVE_WITH_R51_DIAGNOSTIC_OFFLINE.ps1'
+      - 'scripts/b198zr52-postcapture-auto-storyboard.mjs'
+      - '.github/workflows/r53-fake-capture-to-zip.yml'
+  pull_request:
+    paths:
+      - 'scripts/b198zr53-fake-one-shot-to-zip.integration.test.mjs'
+      - 'tools/r52-future/ARCHIVE_WITH_R51_DIAGNOSTIC_OFFLINE.ps1'
+      - 'scripts/b198zr52-postcapture-auto-storyboard.mjs'
+      - '.github/workflows/r53-fake-capture-to-zip.yml'
+permissions:
+  contents: read
+jobs:
+  one-fake-request-to-unmodified-evidence-zip:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: R53 test one ephemeral FAKE Ollama request, postcapture evidence and real Windows ZIP
+        run: node --test scripts/b198zr53-fake-one-shot-to-zip.integration.test.mjs scripts/b198zr52-postcapture-auto-storyboard.test.mjs

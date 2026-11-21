@@ -1,0 +1,30 @@
+name: R42 Lossless Drafting Budget Offline
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'source/ai/b198zr42-lossless-drafting-budget.mjs'
+      - 'scripts/b198zr42-lossless-drafting-budget.test.mjs'
+      - '.github/workflows/r42-lossless-drafting-budget-offline.yml'
+  pull_request:
+    paths:
+      - 'source/ai/b198zr42-lossless-drafting-budget.mjs'
+      - 'scripts/b198zr42-lossless-drafting-budget.test.mjs'
+      - '.github/workflows/r42-lossless-drafting-budget-offline.yml'
+permissions:
+  contents: read
+jobs:
+  repeat-source-parity:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify immutable B143 source, exact final voxels and offline safety
+        run: node --test scripts/b198zr41-architecture-authoring-candidate.test.mjs scripts/b198zr42-lossless-drafting-budget.test.mjs

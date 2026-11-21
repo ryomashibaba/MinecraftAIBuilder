@@ -1,0 +1,96 @@
+{
+  "schema": "minecraftaibuilder-r190bo-offline-study-v1",
+  "newRealModelCalls": 0,
+  "ollamaContacts": 0,
+  "networkRequests": 0,
+  "metadataReads": 0,
+  "technicalResult": "OFFLINE_PATH_VALIDATED_WITH_SYNTHETIC_FIXTURES_ONLY",
+  "realModelSpatialAssemblySuccess": "NOT_TESTED_AWAITING_SEPARATE_APPROVAL",
+  "bmInventoryUnchanged": true,
+  "preparations": [
+    {
+      "directory": "qwen-bm-preflight",
+      "model": "qwen3:14b",
+      "briefSha256": "bbd44cc9f28234055601b4055466e2f3564e7e4565d408432de4c4fab0aa277a",
+      "requestSha256": "49393557b34e9b3d61d2229c6cffcaa4732cc0d887c536be3ce11cb7a7df8f67",
+      "schemaSha256": "02947981e9857b993342e69c1550bf218853c051ec8003b21b2486427f017d8f",
+      "requestBytes": 34742,
+      "status": "OFFLINE_READY_AWAITING_SEPARATE_HUMAN_APPROVAL",
+      "approvalGranted": false,
+      "networkRequests": 0
+    },
+    {
+      "directory": "gemma-bm-preflight",
+      "model": "gemma4:26b",
+      "briefSha256": "bbd44cc9f28234055601b4055466e2f3564e7e4565d408432de4c4fab0aa277a",
+      "requestSha256": "d05617f202e7972545fef0b87d7f8c238daa6ee2a731357a9a335afdcadcbebc",
+      "schemaSha256": "02947981e9857b993342e69c1550bf218853c051ec8003b21b2486427f017d8f",
+      "requestBytes": 34743,
+      "status": "OFFLINE_READY_AWAITING_SEPARATE_HUMAN_APPROVAL",
+      "approvalGranted": false,
+      "networkRequests": 0
+    }
+  ],
+  "baselines": [
+    {
+      "side": "A",
+      "status": "HOLD",
+      "originalRawSha256": "e54f2abf87d36e0957d8393c960d2fce8075862d00ea1ea736365121a4b6a469",
+      "failure": "R190BN_FORMAT",
+      "unchanged": true,
+      "repaired": false,
+      "new3D": false
+    },
+    {
+      "side": "B",
+      "status": "HOLD",
+      "originalRawSha256": "8e2590128e8bd932cddc2df595fcc01c3cbd660298cedd445431d0787bb90c86",
+      "failure": "R190BN_FORMAT",
+      "unchanged": true,
+      "repaired": false,
+      "new3D": false
+    }
+  ],
+  "synthetic": [
+    {
+      "directory": "synthetic-reading/derived",
+      "status": "SOURCE_SPACE_AND_ROUTE_PROXIES_PRESENT_ART_HOLD",
+      "origin": "SYNTHETIC_TEST_FIXTURE",
+      "originalRawSha256": "04a97ad267405b45c4c999564ac8313979ddea1192364f75e33a452ac4cec214",
+      "geometrySha256": "4cf737ec59d902946bc32bed5a390e1cadc66e3b7a03675401cfb36536f2dbea",
+      "art": "ART_HOLD",
+      "requestFidelity": "NOT_CERTIFIED"
+    },
+    {
+      "directory": "synthetic-concourse/derived",
+      "status": "SOURCE_SPACE_AND_ROUTE_PROXIES_PRESENT_ART_HOLD",
+      "origin": "SYNTHETIC_TEST_FIXTURE",
+      "originalRawSha256": "f3bfe7436d2e287f7a76324f1e93b87627da397e19b033274359b69401610084",
+      "geometrySha256": "5d76a26bdb61962deea388c4435bb6093ae7c537ed01d6454eca1025a6c8e0e6",
+      "art": "ART_HOLD",
+      "requestFidelity": "NOT_CERTIFIED"
+    }
+  ],
+  "sameBriefCausalImprovement": "NOT_ESTABLISHED",
+  "art": "ART_HOLD",
+  "officialArtAdoptions": 0,
+  "worldContacts": 0,
+  "worldWrites": 0,
+  "readiness": "NOT_PREPARED",
+  "gates": [
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED"
+  ],
+  "BuildPlan": {
+    "operations": []
+  },
+  "constructionApproved": false,
+  "executionAllowed": false
+}

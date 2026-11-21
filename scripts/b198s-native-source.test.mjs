@@ -132,6 +132,9 @@ test('native transport actually sends thinking OFF, strict JSON, compact model b
   assert.equal(seen.options.num_predict,3072);
   assert.equal(seen.options.num_ctx,6144);
   assert.equal(seen.messages[1].role,'user');
+  assert.match(seen.messages[0].content,/FINAL geometry/,'R2 reusable functional guide actually reaches native Ollama payload');
+  assert.match(seen.messages[0].content,/not a staircase/);
+  assert.doesNotMatch(seen.messages[0].content,/Always make a library/);
   assert(!JSON.stringify(seen).includes('BuildPlan'));
   assert.equal(b.telemetry().length,1);
   assert.equal(b.telemetry()[0].generatedTokensPerSecond,48);

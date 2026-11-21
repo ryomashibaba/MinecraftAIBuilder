@@ -1,0 +1,229 @@
+/**
+ * Optional V7 author-semantic boundary for the existing PRIVATE integrated-shell.
+ * This does NOT contain a substitute building engine, a geometry solver or a
+ * model runner. It preserves the author's decisions until the existing host
+ * can resolve actual source anchors and compile with the frozen real B143.
+ *
+ * PRIVATE originals, true host intents, images and B143 results never enter
+ * this public module. A valid contract is not a SOURCE/ART/Minecraft pass.
+ */
+import {createHash} from 'node:crypto';
+import {verifyCompiled} from './b143-building-dsl.mjs';
+
+export const INTEGRATED_SEMANTIC_SCHEMA =
+ 'minecraftaibuilder-r125-integrated-semantic-intent-v1';
+const fail = code => {throw Error('R125_INTEGRATED_SEMANTIC_'+code);};
+const fields = (x, names) => x !== null && typeof x === 'object' &&
+ !Array.isArray(x) && Object.keys(x).length === names.length &&
+ names.every(k => Object.hasOwn(x,k));
+const slug = x => typeof x === 'string' && /^[a-z][a-z0-9-]{2,24}$/.test(x);
+const words = x => typeof x === 'string' && x.length >= 3 &&
+ x.length <= 160 && !/[\u0000-\u001f<>]/.test(x);
+const sha = x => createHash('sha256').update(JSON.stringify(x)).digest('hex');
+const sides = ['north','south','east','west'];
+const profiles = ['gable','shed','flat','segmented','hip','barrel'];
+const scales = ['small','medium','large'];
+const fixtures = ['seat','worktop','storage','display','service','equipment'];
+const hold = reason => ({
+ schema:'minecraftaibuilder-r125-integrated-semantic-bridge-result-v1',
+ status:'HOLD',reason,modelCalls:0,worldContacts:0,worldWrites:0,
+ readiness:'NOT_PREPARED',constructionApproved:false,
+ executionAllowed:false,BuildPlan:{operations:[]},
+ gates:Array(9).fill('BLOCKED'),art:'ART_HOLD',
+ realB143:'NOT_TESTED',minecraftWalking:'NOT_TESTED'
+});
+
+/** Strict validation: no mechanical IDs, coordinates, SHA fields or repairs. */
+export function validateIntegratedSemanticIntent(untrusted){
+ let value;
+ try {value=structuredClone(untrusted);} catch {fail('NOT_CLONEABLE');}
+ if(!fields(value,['schema','id','concept','spaces','roofs','entry','shelters','features']) ||
+  value.schema!==INTEGRATED_SEMANTIC_SCHEMA || !slug(value.id) ||
+  !words(value.concept))fail('ROOT');
+ if(!Array.isArray(value.spaces) || value.spaces.length<2 ||
+  value.spaces.length>8)fail('SPACE_COUNT');
+ const known=new Set();
+ for(const [i,s] of value.spaces.entries()){
+  if(!(fields(s,['key','purpose','link']) ||
+   fields(s,['key','purpose','link','footprint'])) || !slug(s.key) ||
+   known.has(s.key) || !words(s.purpose))fail('SPACE_'+i);
+  if(Object.hasOwn(s,'footprint')&&
+    (!fields(s.footprint,['width','depth'])||
+     ![s.footprint.width,s.footprint.depth].every(n=>
+      Number.isSafeInteger(n)&&n>=8&&n<=14)))fail('FOOTPRINT_'+i);
+  if(i===0){if(s.link!==null)fail('ROOT_LINK');}
+  else if(!fields(s.link,['to','kind']) || !known.has(s.link.to) ||
+   !['door','open'].includes(s.link.kind))fail('LINK_'+i);
+  known.add(s.key);
+ }
+ if(!Array.isArray(value.roofs) || value.roofs.length!==value.spaces.length)
+  fail('ROOF_COVERAGE');
+ const roofed=new Set();let primary=0;
+ for(const [i,r] of value.roofs.entries()){
+  if(!fields(r,['space','profile','axis','rank']) ||
+   !known.has(r.space) || roofed.has(r.space) ||
+   !profiles.includes(r.profile) || !['x','z'].includes(r.axis) ||
+   !['primary','secondary','subordinate'].includes(r.rank))fail('ROOF_'+i);
+  if(r.rank==='primary')primary++;
+  roofed.add(r.space);
+ }
+ if(primary!==1)fail('PRIMARY_ROOF_UNIQUE');
+ if(!fields(value.entry,['face','space','intent']) ||
+  !sides.includes(value.entry.face) || !known.has(value.entry.space) ||
+  !words(value.entry.intent))fail('ENTRY');
+ if(!Array.isArray(value.shelters) || value.shelters.length>3)
+  fail('SHELTER_COUNT');
+ for(const [i,s] of value.shelters.entries())
+  if(!fields(s,['purpose','connectTo','edge','scale','roof']) ||
+   !words(s.purpose) || !known.has(s.connectTo) ||
+   !sides.includes(s.edge) || !scales.includes(s.scale) ||
+   !profiles.includes(s.roof))fail('SHELTER_'+i);
+ if(!Array.isArray(value.features) || value.features.length<1 ||
+  value.features.length>16)fail('FEATURE_COUNT');
+ for(const [i,f] of value.features.entries())
+  if(!fields(f,['space','kind','purpose']) || !known.has(f.space) ||
+   !fixtures.includes(f.kind) || !words(f.purpose))fail('FEATURE_'+i);
+ const serialized=JSON.stringify(value);
+ if(Buffer.byteLength(serialized,'utf8')>4096)fail('INPUT_BUDGET');
+ return value;
+}
+
+/**
+ * Lossless executable handoff declarations for the PRIVATE integrated host.
+ * This is NOT a geometry generator: every datum comes from the original author.
+ * The host must bind these symbolic space keys to real geometry or fail closed.
+ */
+export function projectIntegratedSemanticOperations(untrusted){
+ const author=validateIntegratedSemanticIntent(untrusted);
+ const operations=[
+  {type:'CONCEPT',id:author.id,concept:author.concept},
+  ...author.spaces.map(s=>({type:'SPACE',key:s.key,
+   purpose:s.purpose,link:s.link,
+   ...(Object.hasOwn(s,'footprint')?{footprint:s.footprint}:{})})),
+  ...author.roofs.map(r=>({type:'ROOF',space:r.space,
+   profile:r.profile,axis:r.axis,rank:r.rank})),
+  {type:'ENTRY',face:author.entry.face,space:author.entry.space,
+   intent:author.entry.intent},
+  ...author.shelters.map(s=>({type:'SHELTER',purpose:s.purpose,
+   connectTo:s.connectTo,edge:s.edge,scale:s.scale,roof:s.roof})),
+  ...author.features.map(f=>({type:'FEATURE',space:f.space,
+   kind:f.kind,purpose:f.purpose}))
+ ];
+ return {operations,operationSha256:sha(operations)};
+}
+
+/**
+ * A precise symbolic handoff, NOT a secretly auto-filled roof/voxel design.
+ * PRIVATE host must map these symbols to its old intent.json + original B143
+ * source. If it cannot preserve author choices, it MUST HOLD (no fallback).
+ */
+export function prepareIntegratedSemanticBridge(untrusted){
+ const author=validateIntegratedSemanticIntent(untrusted);
+ const authorSha256=sha(author);
+ const {operations,operationSha256}=projectIntegratedSemanticOperations(author);
+ const payload={
+  schema:'minecraftaibuilder-r125-integrated-host-handoff-v1',
+  authorSource:'CALLER_SUPPLIED_UNATTESTED',authorSha256,
+  authoredChoices:author,operations,operationSha256,
+  hostResponsibilities:[
+   'BIND_EXISTING_SOURCE_AND_GEOMETRY_SHA_PRIVATE',
+   'MAP_SPACE_KEYS_TO_ORIGINAL_AND_NEW_SPACE_ANCHORS',
+   'EXPAND_ROOF_SECTIONS_AND_SHELTERS_WITHOUT_REPLACING_AUTHOR_CHOICES',
+   'EXPAND_ENTRANCE_AND_FEATURES_WITHOUT_SILENT_REPAIR',
+   'COMPILE_USING_EXISTING_INTEGRATED_SHELL_AND_GENUINE_B143',
+   'INDEPENDENT_TWO_WIDE_AUDIT_AND_IMAGE_REVIEW'
+  ]
+ };
+ return {...hold('PRIVATE_HOST_EXPANSION_REQUIRED'),
+  status:'PREPARED_SEMANTIC_HANDOFF_NOT_B143',authorSha256,
+  authorChoicesPreserved:true,payload};
+}
+
+/** Verify an echo of the authored choices before accepting host handoff. */
+export function assertAuthoredSemanticsUnchanged(prepared,hostEcho){
+ if(prepared?.status!=='PREPARED_SEMANTIC_HANDOFF_NOT_B143' ||
+  prepared.payload?.authorSha256!==sha(prepared.payload?.authoredChoices))
+  fail('PREPARED_TAMPERED');
+ const expected=projectIntegratedSemanticOperations(prepared.payload.authoredChoices);
+ if(prepared.payload.operationSha256!==expected.operationSha256 ||
+  sha(prepared.payload.operations)!==expected.operationSha256)
+  fail('OPERATION_PLAN_TAMPERED');
+ if(sha(hostEcho)!==prepared.authorSha256)fail('HOST_CHANGED_AUTHOR_CHOICES');
+ return true;
+}
+
+/** Execute the handoff against an explicitly supplied PRIVATE host.
+ * expand must resolve ALL operations or throw; derive is the existing engine,
+ * not an implicit public fallback. No IO, transport, model or world adapter.
+ * This verifies genuine source/voxels, not whether semantic meanings or ART
+ * are fulfilled. Independent PRIVATE physical and image audits remain needed.
+ */
+export async function executeIntegratedSemanticBridge(untrusted,host){
+ const prepared=prepareIntegratedSemanticBridge(untrusted);
+ if(typeof host?.expand!=='function'||typeof host?.derive!=='function')
+  return {...hold('PRIVATE_HOST_NOT_BOUND'),authorSha256:prepared.authorSha256};
+ try{
+  // Defensive copies keep untrusted host callbacks away from the commitment.
+  const expanded=await host.expand(structuredClone(prepared.payload));
+  assertAuthoredSemanticsUnchanged(prepared,expanded?.authorEcho);
+  const result=await host.derive(expanded);
+  // A host may retain its input references while compiling. Check again.
+  assertAuthoredSemanticsUnchanged(prepared,expanded?.authorEcho);
+  if(!result?.design||!result?.compiled||
+     !verifyCompiled(result.design,result.compiled))fail('HOST_B143_INVALID');
+  if(result.readiness!=='NOT_PREPARED'||result.constructionApproved!==false||
+     result.executionAllowed!==false||result.worldContacts!==0||result.worldWrites!==0||
+     !Array.isArray(result.gates)||result.gates.length!==9||
+     !result.gates.every(g=>g==='BLOCKED')||
+     !Array.isArray(result.BuildPlan?.operations)||result.BuildPlan.operations.length!==0)
+   fail('HOST_SAFETY');
+  return {...hold('INDEPENDENT_PHYSICAL_AND_ART_REVIEW_REQUIRED'),
+   status:'GENUINE_B143_CANDIDATE',realB143:'RECOMPILED_SHA_MATCH',
+   authorSha256:prepared.authorSha256,
+   operationSha256:prepared.payload.operationSha256,
+   sourceSha256:result.compiled.sourceSha256,
+   geometrySha256:result.compiled.geometrySha256,
+   // PRIVATE product: callers MUST NOT upload this object as a safe receipt.
+   privateProduct:result,authorEcho:structuredClone(expanded.authorEcho),
+   semanticFulfillment:'NOT_CERTIFIED',provenance:'CALLER_SUPPLIED_UNATTESTED'};
+ }catch{
+  // Do not leak host exception text, local paths, or authored identifiers.
+  return {...hold('PRIVATE_HOST_REJECTED'),authorSha256:prepared.authorSha256,
+   operationSha256:prepared.payload.operationSha256};
+ }
+}
+
+export const INTEGRATED_SEMANTIC_AUTHOR_PROMPT=[
+ 'Design the building yourself, not a style label for a fixed template.',
+ 'Return only one JSON object with schema,id,concept,spaces,roofs,entry,shelters,features.',
+ 'schema='+INTEGRATED_SEMANTIC_SCHEMA,
+ 'Use 2..8 spaces in parent-before-child order. Each has key,purpose,link; first link=null; others link={to:earlierKey,kind:door|open}. Optional per-space footprint:{width:8..14,depth:8..14}; omitted=12x10. Coordinate-free dimensions only.',
+ 'Each space has one roof entry {space,profile:gable|shed|flat|segmented|hip|barrel,axis:x|z,rank:primary|secondary|subordinate}; exactly one primary.',
+ 'Entry {face:north|south|east|west,space:key,intent:meaningfulText}.',
+ 'Shelters 0..3: {purpose,connectTo:key,edge:north|south|east|west,scale:small|medium|large,roof:gable|shed|flat|segmented}.',
+ 'Features 1..16: {space:key,kind:seat|worktop|storage|display|service|equipment,purpose:meaningfulText}.',
+ 'Do not output world coordinates, element IDs, source hashes, B143, Minecraft commands, code, repair instructions, or an art approval.'
+].join('\n');
+
+
+/**
+ * Honest capabilities for ONE optional V7 PRIVATE spatial-host pilot.
+ * A prompt is not proof that model intent/geometry/ART will pass.
+ * Keep the broader, research-only INTEGRATED_SEMANTIC_AUTHOR_PROMPT intact.
+ */
+export const INTEGRATED_SPATIAL_V7_SUPPORTED_PROTOCOL='V7_PRIVATE_SINGLE_SEMANTIC_SPATIAL_HOST_V1';
+export const INTEGRATED_SPATIAL_V7_SUPPORTED_PROMPT=[
+ 'You are the original architect. From the user brief choose a meaningful building concept and its room functions, not a fixed residential/station template.',
+ 'Return ONE raw JSON object ONLY, no markdown or surrounding text. EXACT top-level keys: schema,id,concept,spaces,roofs,entry,shelters,features.',
+ 'schema is exactly '+INTEGRATED_SEMANTIC_SCHEMA+'. id and each space key must be unique lowercase slugs, start with a letter, 3..25 characters.',
+ 'concept, purposes, entry intent are nonempty meaningful natural-language strings of 3..160 characters each.',
+ 'spaces: 2..4 rooms in parent-before-child order, EXACT {key,purpose,link} or {key,purpose,link,footprint:{width,depth}}; first link:null, later link:{to:<earlier-key>,kind:door|open}. Author relationships, functions and optional dimensions yourself.',
+ 'Room footprint is 12x10 by default. Optional footprint width and depth are integers 8..14; each room may differ. This V7 HOST cannot make nonrectangular, multistorey or gabled rooms. Do not claim those capabilities.',
+ 'roofs: exactly ONE per room, EXACT {space,profile:shed|hip|barrel,axis:x|z,rank:primary|secondary|subordinate}. EXACTLY ONE primary roof. Each roof uses the requested form; unsupported forms HOLD.',
+ 'entry: EXACT {face:north|south,space:<one-room-key>,intent:<meaningful-intent>}.',
+ 'shelters: EXACTLY ONE shelter: {purpose,connectTo:<entry.space>,edge:<entry.face>,scale:small|medium|large,roof:flat}. The shelter MUST attach to the entry room on the entry side.',
+ 'features: 1..5 items, no more than TWO per room; each EXACT {space:<room-key>,kind:seat|worktop|storage|display|service|equipment,purpose:<meaningful-role>}.',
+ 'The HOST chooses safe coordinates, doors and component cells deterministically. It DOES NOT change your authored room links, roof rank, entry or equipment. Impossible contacts/overlaps HOLD, no retry.',
+ 'Keep the JSON under 4096 UTF-8 bytes. Never output B143, raw voxels, world commands, construction approval, art pass, extra keys, or repair instructions.',
+ 'Think about circulation and identity within these honest limits, then output JSON only.'
+].join('\n');

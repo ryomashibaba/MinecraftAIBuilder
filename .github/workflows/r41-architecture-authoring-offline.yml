@@ -1,0 +1,30 @@
+name: R41 Architecture Authoring Candidate Offline
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'source/ai/b198zr41-architecture-authoring-candidate.mjs'
+      - 'scripts/b198zr41-architecture-authoring-candidate.test.mjs'
+      - '.github/workflows/r41-architecture-authoring-offline.yml'
+  pull_request:
+    paths:
+      - 'source/ai/b198zr41-architecture-authoring-candidate.mjs'
+      - 'scripts/b198zr41-architecture-authoring-candidate.test.mjs'
+      - '.github/workflows/r41-architecture-authoring-offline.yml'
+permissions:
+  contents: read
+jobs:
+  candidate-offline:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Offline grammar and spatial feedback with synthetic sources only
+        run: node --test scripts/b198zr41-architecture-authoring-candidate.test.mjs

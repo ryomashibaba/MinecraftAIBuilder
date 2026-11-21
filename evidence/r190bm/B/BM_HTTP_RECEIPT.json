@@ -1,0 +1,11 @@
+{
+  "startedAt": "2026-10-29T15:29:26.088Z",
+  "finishedAt": "2026-10-29T15:30:25.231Z",
+  "elapsedMs": 59143.0008,
+  "httpStatus": 200,
+  "responseFile": "B/PROVIDER_HTTP_RESPONSE.json",
+  "responseSha256": "b20c0f79f7e9e84b44a2e15b3fb0d922a21e1546182a6b13524cfa53bc9ca6d9",
+  "responseBytes": 7555,
+  "requestCount": 1,
+  "automaticRetries": 0
+}

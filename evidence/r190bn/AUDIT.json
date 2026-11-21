@@ -1,0 +1,40 @@
+{
+  "schema": "r190bn-final-offline-audit-v1",
+  "officialBMFilesUnchanged": 43,
+  "checks": [
+    {
+      "name": "synthetic-reading",
+      "inputSha256": "04a97ad267405b45c4c999564ac8313979ddea1192364f75e33a452ac4cec214",
+      "geometrySha256": "4cf737ec59d902946bc32bed5a390e1cadc66e3b7a03675401cfb36536f2dbea",
+      "trueSource3DBytesReproduced": true,
+      "fiveProjectionBytesReproduced": true,
+      "inspectionSliceExact": true,
+      "originalModelResult": false,
+      "legacySectionStatus": "HOLD_MODEL_DECLARED_ZONE_ACCESS_UNPROVEN"
+    },
+    {
+      "name": "synthetic-concourse",
+      "inputSha256": "f3bfe7436d2e287f7a76324f1e93b87627da397e19b033274359b69401610084",
+      "geometrySha256": "5d76a26bdb61962deea388c4435bb6093ae7c537ed01d6454eca1025a6c8e0e6",
+      "trueSource3DBytesReproduced": true,
+      "fiveProjectionBytesReproduced": true,
+      "inspectionSliceExact": true,
+      "originalModelResult": false,
+      "legacySectionStatus": "SOURCE_SECTION_PROXIES_AVAILABLE_ART_HOLD"
+    }
+  ],
+  "newModelCalls": 0,
+  "worldContacts": 0,
+  "worldWrites": 0,
+  "hostRepairsToBM": 0,
+  "legacyBF_BE_BG_BK_BL_Modified": false,
+  "tests": {
+    "total": 46,
+    "pass": 46,
+    "fail": 0
+  },
+  "staticProjectionInspection": true,
+  "browserHTMLExecutionTested": false,
+  "art": "ART_HOLD",
+  "officialArtAdoptions": 0
+}

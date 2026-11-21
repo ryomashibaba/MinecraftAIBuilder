@@ -1,0 +1,40 @@
+name: R190-BD Explicit One-shot Design-first — FAKE ONLY
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'scripts/r190bd-consented-design-first.mjs'
+      - 'scripts/r190bd-consented-design-first.test.mjs'
+      - 'scripts/fixtures/r190bd-mock-original.mjs'
+      - 'scripts/r190bc-design-first-section.mjs'
+      - 'scripts/r190bc-offline-review.mjs'
+      - 'scripts/r190-local-semantic-run.mjs'
+      - '.github/workflows/r190bd-consented-design-first.yml'
+  pull_request:
+    paths:
+      - 'scripts/r190bd-consented-design-first.mjs'
+      - 'scripts/r190bd-consented-design-first.test.mjs'
+      - 'scripts/fixtures/r190bd-mock-original.mjs'
+      - 'scripts/r190bc-design-first-section.mjs'
+      - 'scripts/r190bc-offline-review.mjs'
+      - 'scripts/r190-local-semantic-run.mjs'
+      - '.github/workflows/r190bd-consented-design-first.yml'
+permissions:
+  contents: read
+jobs:
+  mock-only:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check scripts/r190bd-consented-design-first.mjs
+      - run: node --test scripts/r190bd-consented-design-first.test.mjs
+      - run: node --test scripts/r190bc-design-first-section.test.mjs
+      - run: node --test scripts/r190-h-architectural-route.test.mjs

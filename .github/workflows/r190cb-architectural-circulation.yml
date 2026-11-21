@@ -1,0 +1,51 @@
+name: R190-CB real authored switchback and architectural silhouette
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'source/ai/r190cb-*'
+      - 'scripts/r190cb-*'
+      - 'evidence/r190cb/**'
+      - '.github/workflows/r190cb-architectural-circulation.yml'
+  pull_request:
+    paths:
+      - 'source/ai/r190cb-*'
+      - 'scripts/r190cb-*'
+      - 'evidence/r190cb/**'
+      - '.github/workflows/r190cb-architectural-circulation.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  cb-authored-riser-voxel-evidence:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - name: Author source negative tests - internet denied
+        env:
+          NODE_OPTIONS: --import=./scripts/r190bo-deny-network.mjs
+        run: node --test scripts/r190cb-circulation.test.mjs
+      - name: Build actual architect-authored circulation voxels and all 8 views
+        env:
+          NODE_OPTIONS: --import=./scripts/r190bo-deny-network.mjs
+        run: node scripts/r190cb-source-study.mjs --out cb-evidence
+      - name: Independently verify 267 circulation positions, support, clearance, SHA and real projection
+        run: python scripts/r190cb-evidence-verify.py cb-evidence
+      - name: Archive original design, raw actual voxels, 3D and eight views
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: R190CB-ARCHITECTURAL-CIRCULATION-${{ matrix.os }}
+          path: cb-evidence
+          if-no-files-found: warn

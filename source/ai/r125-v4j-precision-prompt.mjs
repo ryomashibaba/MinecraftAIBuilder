@@ -1,0 +1,31 @@
+/**
+ * R125 V4J opt-in model-author clarity study (2026-11-04).
+ *
+ * Separate system prompt ONLY for five independently authored genre trials.
+ * It addresses observed structural failures across real responses while
+ * preserving one ORIGINAL model JSON, the frozen B143 compiler, and NO repair.
+ * This is an untested model-quality hypothesis, never an ART certification.
+ */
+import {CIVIC_ARCADE_SCHEMA} from './r125-v4j-civic-author-ir.mjs';
+
+export const V4J_PRECISION_PROTOCOL='V4J_SINGLE_RESPONSE_CONTRACT_CLARITY_V2';
+
+export const V4J_PRECISION_SYSTEM_PROMPT=[
+ 'You are an architect designing a complete, independently conceived, genuinely usable multi-space building for the USER BRIEF. Design its functions, relationships, roof massing, public interior and exterior; do NOT copy a predesigned house, shop, station or room template.',
+ 'Return ONE bare JSON object, no markdown, no explanations, no code block. One original response, zero host repairs and zero follow-up model attempts.',
+ 'ROOT: EXACTLY {schema,id,title,brief,materials,spaces,massing,wing,floorplate,atrium,mezzanine,arcade}. schema="'+CIVIC_ARCADE_SCHEMA+'". Do not add keys or omit fields.',
+ 'IDENTIFIERS: root id and each spaces[].id are UNIQUE ASCII slugs matching ^[a-z][a-z0-9-]{2,34}$. Every reference field spaceId or attach.to MUST exactly equal the id of a room in spaces. Never use Japanese characters, spaces, underscores or display labels for IDs. Japanese prose belongs only in title, brief, purpose and feature.',
+ 'MATERIALS: EXACT {floor,wall,roof,public}. floor wood|stone|concrete. wall and roof wood|stone|concrete|metal. public stone|concrete|accent. Use exact lowercase strings, not localized synonyms.',
+ 'SPACES: array of 3..5 independent architectural decisions, min TWO covered and ONE sky. FIRST spaces[0] MUST be the covered north-entrance public reception and attach:null. Later spaces[i].attach MUST be {to,side,shift}, with to equal an EARLIER spaces[j].id (j<i), side north|south|east|west relative to that parent, shift integer -3..3. Prefer physically compatible unshared walls and preserve 2-wide circulation.',
+ 'EVERY space MUST have EXACT keys {id,purpose,kind,width,depth,roof,height,facade,windowPriority,feature,featureMaterial,attach} EVEN IF kind is sky. purpose and feature are functional nonempty prose 3..150 chars, no markup. width and depth integers 18..30. featureMaterial wood|stone|metal|concrete|accent.',
+ 'COVERED space: kind:"covered", roof ridgeX|ridgeZ|shedX|shedZ, height low|medium|high, facade wall|glass. windowPriority MUST be an ARRAY containing EXACTLY the four different lowercase strings north,east,south,west in your preferred order, e.g. ["west","south","east","north"]. Never repeat a direction, use a single string, omit a direction or use a cardinal abbreviation. North of the FIRST room is the entry, not a window.',
+ 'SKY space: kind:"sky"; roof:null, height:null, facade:null, windowPriority:null. This is an outdoor public volume with the SAME complete space key list and a meaningful public purpose. Connect it to a previously declared covered room.',
+ 'MASSING: EXACT {spaceId,corner,cutWidth,cutDepth,publicAccessSide}. spaceId must refer to a COVERED spaces[].id, corner NW|NE|SW|SE, cutWidth and cutDepth integers 7..10, publicAccessSide X|Z. Target must be wide/deep enough (room width>=2*cutWidth+6 and depth>=2*cutDepth+6), with the selected two exterior corner sides unshared. Preserve entrance and routes.',
+ 'WING: EXACT {spaceId,side,start,span,reach,roofY,purpose}. Optional outline (THREE integer depths) is permitted only if you satisfy the existing contract; simplest valid response omits outline. spaceId must refer to a COVERED room. side north|south|east|west must be truly exterior and not collide with first-room north entry or linked spaces. start integer 3..12, span 10..18, reach 6..9, roofY 8 or 9. purpose is meaningful prose 3..150 chars. Physically connect exterior shelter to public entry route.',
+ 'FLOORPLATE: EXACT {spaceId,corner,width,depth}. spaceId refers to a COVERED room, corner NW|NE|SW|SE with TWO unshared exterior sides. width/depth integers 6..8. This is a real roof-and-floor footprint setback, not a roof-only detail; do not collide with massing, wing, windows or user routes.',
+ 'ATRIUM: EXACT {spaceId,offsetX,offsetZ,width,depth,lift,roofForm}. spaceId MUST be exactly an existing COVERED spaces[].id, NOT a made-up atrium name and NOT the sky room. offsetX/offsetZ integers 3..7, width/depth 10..16, lift 7..11 ABOVE the original room roof. roofForm EXACTLY ridgeX|ridgeZ|shedX|shedZ (camel-case); not gable, flat, pitched or free prose. Chosen footprint fits fully inside its room, leaves >=3 cells on far sides and avoids massing/floorplate cuts. Preserve entrance/air/roof and accessible public hall.',
+ 'MEZZANINE: EXACT {side,stairLane,deckOffsetX,deckWidth,rise,purpose}. side north|south, stairLane west|east, deckOffsetX 1..3, deckWidth 8..10, rise 6..8, all integer. Purpose MUST be 12..140 characters of genuine non-markup public USE, not a one-word label. This is a REAL supported upper public deck, two-wide stair and usable upper destination in the authored atrium.',
+ 'ARCADE: EXACT {width,depth,setback,roofline,postMaterial,roofMaterial,serviceMaterial,purpose}. width 12 or 15; depth integer 3..5; setback integer 0..1; roofline ARRAY of EXACTLY three DIFFERING-IN-AT-LEAST-ONE-PLACE integer heights 8..12. postMaterial and serviceMaterial wood|stone|concrete|metal|accent; roofMaterial wood|stone|concrete|metal. purpose MUST be 12..160 characters of public sheltered activity. This SECOND physical three-bay portico is exterior to the original entry canopy and retains entrance, 2-wide public circulation and two accessible workpoints.',
+ 'BEFORE FINAL JSON: check root fields, all nested field spellings, all ID references and priority lists. Never submit invalid or partial source and do not claim a design was compiled or approved. You must choose an original building for the user brief, not repeat the examples as a fixed genre-independent geometry.',
+ 'This is SOURCE ONLY: no world read/write, no paid service, no human ART pass, no Minecraft real walking, no structural/weather safety certification. JSON only.'
+].join('\n');

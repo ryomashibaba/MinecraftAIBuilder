@@ -1,0 +1,29 @@
+name: R26 Source Original What-if — No Model
+on:
+  push:
+    branches:
+      - feature/b198zr1-protected-architectural-revision
+    paths:
+      - 'scripts/b198zr26-saved-original-whatif*'
+      - '.github/workflows/r26-saved-source-whatif.yml'
+  pull_request:
+    paths:
+      - 'scripts/b198zr26-saved-original-whatif*'
+      - '.github/workflows/r26-saved-source-whatif.yml'
+permissions:
+  contents: read
+jobs:
+  saved-original-whatif-fake-only:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: No real Qwen, no transport, no Minecraft
+        run: node --test scripts/b198zr26-saved-original-whatif.test.mjs

@@ -1,0 +1,102 @@
+{
+  "schema": "minecraftaibuilder-b198zr49-global-consistency-audit-v1",
+  "originalRawSha256": "8e2590128e8bd932cddc2df595fcc01c3cbd660298cedd445431d0787bb90c86",
+  "unmodifiedOriginal": true,
+  "modelCalls": 0,
+  "worldContacts": 0,
+  "worldWrites": 0,
+  "modelQualityCertified": false,
+  "compilerPassCertified": false,
+  "physicalWalkabilityCertified": false,
+  "safety": {
+    "readiness": "NOT_PREPARED",
+    "constructionApproved": false,
+    "executionAllowed": false,
+    "worldContacts": 0,
+    "worldWrites": 0,
+    "gates": [
+      "BLOCKED",
+      "BLOCKED",
+      "BLOCKED",
+      "BLOCKED",
+      "BLOCKED",
+      "BLOCKED",
+      "BLOCKED",
+      "BLOCKED",
+      "BLOCKED"
+    ],
+    "BuildPlan": {
+      "operations": []
+    }
+  },
+  "status": "HOLD_GLOBAL_COORDINATE_OR_PROGRAM_CONTRADICTIONS",
+  "declaredDimensions": [
+    64,
+    96,
+    32
+  ],
+  "elementCount": 8,
+  "sourceShapeCounts": {
+    "box": 7,
+    "staircase": 1
+  },
+  "elementBoundsViolations": [
+    {
+      "id": "roof-glass",
+      "index": 7,
+      "shape": "box",
+      "min": [
+        0,
+        96,
+        0
+      ],
+      "max": [
+        63,
+        96,
+        31
+      ],
+      "outsideAxes": [
+        "height"
+      ]
+    }
+  ],
+  "uncheckedSourceEnvelopes": [
+    {
+      "id": "main-staircase",
+      "index": 5,
+      "shape": "staircase"
+    }
+  ],
+  "declaredPointBoundsViolations": [
+    {
+      "kind": "destination",
+      "id": "restaurant",
+      "point": [
+        32,
+        96,
+        16
+      ]
+    }
+  ],
+  "impossiblePathDeclarations": [],
+  "duplicatedR3Ids": [],
+  "possibleVoidRefillEvents": [],
+  "issues": [
+    {
+      "kind": "ELEMENT_OUTSIDE_LOCAL_BOUNDS",
+      "count": 1
+    },
+    {
+      "kind": "POINT_OUTSIDE_LOCAL_BOUNDS",
+      "count": 1
+    },
+    {
+      "kind": "UNSUPPORTED_SOURCE_ENVELOPE",
+      "count": 1
+    }
+  ],
+  "finalVoxelAnalysisPerformed": false,
+  "modelSelfDeclaredPlanIsNotIndependent": true,
+  "noSilentRangeClamping": true,
+  "noAutoGeometryRepair": true
+}

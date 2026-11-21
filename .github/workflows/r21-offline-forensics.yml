@@ -1,0 +1,31 @@
+name: R21 Saved Model Source — OFFLINE ONLY
+on:
+  push:
+    branches:
+      - feature/b198zr1-protected-architectural-revision
+    paths:
+      - 'source/ai/b198zr21-*'
+      - 'scripts/b198zr21-*'
+      - '.github/workflows/r21-offline-forensics.yml'
+  pull_request:
+    paths:
+      - 'source/ai/b198zr21-*'
+      - 'scripts/b198zr21-*'
+      - '.github/workflows/r21-offline-forensics.yml'
+permissions:
+  contents: read
+jobs:
+  offline-forensic-regressions:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: No model/GPU/world/remote service; saved-original diagnostics only
+        run: node --test scripts/b198zr21-offline-forensics.test.mjs

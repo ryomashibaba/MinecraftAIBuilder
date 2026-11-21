@@ -1,0 +1,28 @@
+name: R35 Independent Contract Comparison Offline
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'scripts/b198zr35-independent-contract-comparison-offline*'
+      - '.github/workflows/r35-independent-contract-comparison-offline.yml'
+  pull_request:
+    paths:
+      - 'scripts/b198zr35-independent-contract-comparison-offline*'
+      - '.github/workflows/r35-independent-contract-comparison-offline.yml'
+permissions:
+  contents: read
+jobs:
+  r35-independent-r3-no-model-no-world:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Validate independent SHA-pinned R3 contracts with synthetic geometry only
+        run: node --test scripts/b198zr35-independent-contract-comparison-offline.test.mjs

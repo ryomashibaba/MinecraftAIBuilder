@@ -1,0 +1,30 @@
+{
+  "files": [
+    {
+      "file": "CAPTURE.json",
+      "bytes": 1347,
+      "sha256": "6c869a299b3ce77aaaaa3361082e72cbdb5b43e45d4f83078db431aad170ac71"
+    },
+    {
+      "file": "HUMAN_REVIEW_TEMPLATE.json",
+      "bytes": 735,
+      "sha256": "b92a7651ab252a515fcb73293eeb0ec3b6c3630a136e94556947f3e1bdfc4c85"
+    },
+    {
+      "file": "MODEL_ORIGINAL.txt",
+      "bytes": 3706,
+      "sha256": "8e2590128e8bd932cddc2df595fcc01c3cbd660298cedd445431d0787bb90c86"
+    },
+    {
+      "file": "ORIGINAL_BRIEF.txt",
+      "bytes": 212,
+      "sha256": "bbd44cc9f28234055601b4055466e2f3564e7e4565d408432de4c4fab0aa277a"
+    },
+    {
+      "file": "REVIEW_JA.md",
+      "bytes": 884,
+      "sha256": "07f9f21a9739a732e2cdaaeed26cfce183588e1cc27ba12cb2b59d14b44367df"
+    }
+  ],
+  "exactSavedBytes": true
+}

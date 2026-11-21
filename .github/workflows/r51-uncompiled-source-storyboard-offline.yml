@@ -1,0 +1,34 @@
+name: R51 Failed B143 Source Envelope Storyboard — Offline
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'source/ai/b198zr49-global-source-consistency.mjs'
+      - 'source/ai/b198zr51-uncompiled-storyboard-template.html'
+      - 'scripts/b198zr51-uncompiled-envelope-storyboard.mjs'
+      - 'scripts/b198zr51-uncompiled-envelope-storyboard.test.mjs'
+      - '.github/workflows/r51-uncompiled-source-storyboard-offline.yml'
+  pull_request:
+    paths:
+      - 'source/ai/b198zr49-global-source-consistency.mjs'
+      - 'source/ai/b198zr51-uncompiled-storyboard-template.html'
+      - 'scripts/b198zr51-uncompiled-envelope-storyboard.mjs'
+      - 'scripts/b198zr51-uncompiled-envelope-storyboard.test.mjs'
+      - '.github/workflows/r51-uncompiled-source-storyboard-offline.yml'
+permissions:
+  contents: read
+jobs:
+  offline-source-envelopes:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: R51 safe local-only storyboard, malicious raw escaping and R49/R50 regressions
+        run: node --test scripts/b198zr51-uncompiled-envelope-storyboard.test.mjs scripts/b198zr49-global-source-consistency.test.mjs scripts/b198zr50-program-first-architecture-guide.test.mjs

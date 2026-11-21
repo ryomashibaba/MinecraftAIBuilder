@@ -1,0 +1,30 @@
+name: R43 Architecture Sections Offline
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'source/ai/b198zr43-sectional-architecture-review.mjs'
+      - 'scripts/b198zr43-sectional-architecture-review.test.mjs'
+      - '.github/workflows/r43-architectural-sections-offline.yml'
+  pull_request:
+    paths:
+      - 'source/ai/b198zr43-sectional-architecture-review.mjs'
+      - 'scripts/b198zr43-sectional-architecture-review.test.mjs'
+      - '.github/workflows/r43-architectural-sections-offline.yml'
+permissions:
+  contents: read
+jobs:
+  exact-voxel-section-evidence:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Validate real B143 geometry and R3 functional sections with synthetic sources
+        run: node --test scripts/b198zr41-architecture-authoring-candidate.test.mjs scripts/b198zr42-lossless-drafting-budget.test.mjs scripts/b198zr43-sectional-architecture-review.test.mjs

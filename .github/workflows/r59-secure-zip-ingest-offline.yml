@@ -1,0 +1,34 @@
+name: R59 Secure ZIP-to-Frozen-C01 Human Review — OFFLINE Only
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'scripts/b198zr59-safe-result-zip-to-review.mjs'
+      - 'scripts/b198zr59-safe-result-zip-to-review.test.mjs'
+      - 'scripts/b198zr58-frozen-c01-quality-review-packet.mjs'
+      - 'scripts/b198zr58-frozen-c01-quality-review-packet.test.mjs'
+      - '.github/workflows/r59-secure-zip-ingest-offline.yml'
+  pull_request:
+    paths:
+      - 'scripts/b198zr59-safe-result-zip-to-review.mjs'
+      - 'scripts/b198zr59-safe-result-zip-to-review.test.mjs'
+      - 'scripts/b198zr58-frozen-c01-quality-review-packet.mjs'
+      - 'scripts/b198zr58-frozen-c01-quality-review-packet.test.mjs'
+      - '.github/workflows/r59-secure-zip-ingest-offline.yml'
+permissions:
+  contents: read
+jobs:
+  archive-digest-and-human-review-prep:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Offline ZIP parsing, tamper rejection and human-criteria worksheet
+        run: node --test scripts/b198zr59-safe-result-zip-to-review.test.mjs scripts/b198zr58-frozen-c01-quality-review-packet.test.mjs

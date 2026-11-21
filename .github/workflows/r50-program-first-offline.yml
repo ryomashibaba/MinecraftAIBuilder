@@ -1,0 +1,32 @@
+name: R50 Architectural Program-First Guide — FAKE Only
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'source/ai/b198zr50-program-first-architecture-guide.mjs'
+      - 'source/ai/b198s-native-ollama-source.mjs'
+      - 'scripts/b198zr50-program-first-architecture-guide.test.mjs'
+      - '.github/workflows/r50-program-first-offline.yml'
+  pull_request:
+    paths:
+      - 'source/ai/b198zr50-program-first-architecture-guide.mjs'
+      - 'source/ai/b198s-native-ollama-source.mjs'
+      - 'scripts/b198zr50-program-first-architecture-guide.test.mjs'
+      - '.github/workflows/r50-program-first-offline.yml'
+permissions:
+  contents: read
+jobs:
+  no-model-design-choreography:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: R50 independent-brief and one-response schema transport (fake loopback only)
+        run: node --test scripts/b198zr50-program-first-architecture-guide.test.mjs scripts/b198zr47-json-schema-format-gate.test.mjs scripts/b198zr49-global-source-consistency.test.mjs scripts/b198zr48-consented-schema-qwen-once.test.mjs

@@ -1,0 +1,34 @@
+name: R190-BK Evidence-Stage Quality Review — OFFLINE ONLY
+on:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'scripts/r190bk-*'
+      - 'scripts/r190bf-controlled-pair.mjs'
+      - 'scripts/r190bg-source-anchored-review.mjs'
+      - '.github/workflows/r190bk-evidence-stage-review.yml'
+  pull_request:
+    paths:
+      - 'scripts/r190bk-*'
+      - 'scripts/r190bf-controlled-pair.mjs'
+      - 'scripts/r190bg-source-anchored-review.mjs'
+      - '.github/workflows/r190bk-evidence-stage-review.yml'
+permissions:
+  contents: read
+jobs:
+  offline-evidence:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax-check offline reviewer
+        run: node --check scripts/r190bk-evidence-stage-review.mjs
+      - name: Run source-pair and fail-closed evidence tests (fake provider only)
+        run: node --test scripts/r190bk-evidence-stage-review.test.mjs

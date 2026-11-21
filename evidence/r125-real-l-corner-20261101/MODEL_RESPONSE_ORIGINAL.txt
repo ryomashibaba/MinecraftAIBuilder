@@ -1,0 +1,42 @@
+{
+  "schema": "minecraftaibuilder-r125-architecture-plan-v1",
+  "id": "shop-l-shape-001",
+  "title": "L-Shape Retail Shop with Open-Air Niche",
+  "brief": "A small single-story retail shop designed with an L-shaped footprint, featuring an open-air niche on the rear-right corner and two distinct functional spaces: a customer retail area and a staff workroom.",
+  "footprint": {
+    "width": 24,
+    "depth": 24
+  },
+  "levels": [
+    {
+      "splitAxis": "x",
+      "splitPercent": 50,
+      "spaces": [
+        {
+          "id": "retail-area",
+          "purpose": "Customer retail display and sales"
+        },
+        {
+          "id": "staff-workroom",
+          "purpose": "Staff work and inventory storage"
+        }
+      ]
+    }
+  ],
+  "materials": {
+    "floor": "wood",
+    "wall": "stone",
+    "roof": "wood"
+  },
+  "expression": {
+    "setbackSide": "none",
+    "setbackDepth": 0,
+    "roofProfile": "flat",
+    "roofAxis": "z",
+    "facadeLanguage": "plain",
+    "rearCornerCut": {
+      "width": 4,
+      "depth": 4
+    }
+  }
+}

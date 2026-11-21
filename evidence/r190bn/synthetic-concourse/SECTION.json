@@ -1,0 +1,134 @@
+{
+  "schema": "minecraftaibuilder-r190bc-original-section-study-v1",
+  "originalSha256": "2ada02ebbb0e78be64868f2c41500a0f1f77317198c10ec08af1204d85c7ec8b",
+  "originalBytes": 1874,
+  "originalUnmodified": true,
+  "providerIdentityVerified": false,
+  "hostRepairedGeometry": false,
+  "sourceOnly": true,
+  "actualMinecraftWalking": "NOT_TESTED",
+  "structuralLoadSafety": "NOT_CERTIFIED",
+  "architecturalQuality": "NOT_CERTIFIED",
+  "humanArtReview": "ART_HOLD",
+  "readiness": "NOT_PREPARED",
+  "constructionApproved": false,
+  "executionAllowed": false,
+  "gates": [
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED",
+    "BLOCKED"
+  ],
+  "BuildPlan": {
+    "operations": []
+  },
+  "worldContacts": 0,
+  "worldWrites": 0,
+  "modelCalls": 0,
+  "art": "ART_HOLD",
+  "officialArtAdoptions": 0,
+  "status": "SOURCE_SECTION_PROXIES_AVAILABLE_ART_HOLD",
+  "firstFailure": null,
+  "sourceSha256": "aeb95e2df65cb67a67a796f771ba81bda22b06dd256a615bb49e0da7a906bace",
+  "geometrySha256": "5d76a26bdb61962deea388c4435bb6093ae7c537ed01d6454eca1025a6c8e0e6",
+  "modelDeclaredDesignIntent": "Synthetic usable spaces for an offline translation study. Synthetic authored space and circulation, not AI aesthetic improvement.",
+  "modelDeclaredMassStrategy": "Author chooses all levels, exact voids, envelopes and primitive shapes.",
+  "modelDeclaredCirculationStrategy": "Author specifies every opening, stair flight and landing. No host solver.",
+  "zoneEvidence": [
+    {
+      "id": "public-concourse",
+      "modelPurposeUnverified": true,
+      "origin": [
+        4,
+        1,
+        4
+      ],
+      "size": [
+        58,
+        1,
+        20
+      ],
+      "requiredHeadroom": 3,
+      "twoWidePadCount": 1083,
+      "roofedPadCount": 1083,
+      "skyOpenPadCount": 0,
+      "partlyRoofedPadCount": 0,
+      "floorLevels": [
+        1
+      ],
+      "flatEntranceReachableTwoWidePadCount": 1083,
+      "sourceStatus": "SOURCE_CLEAR_SUPPORTED_TWO_WIDE_FOOTPRINT_AND_FLAT_ENTRY_ROUTE",
+      "actualSeparateRoom": "NOT_CERTIFIED",
+      "overheadSolidsDoNotProveRoofOrWeatherproofing": true
+    }
+  ],
+  "flatEntranceRouteEvidence": {
+    "modelEntrance": [
+      9,
+      1,
+      2
+    ],
+    "entranceCandidateTwoWidePads": 4,
+    "sourceAllTwoWidePadsAtEntryHeight": 1094,
+    "reachableTwoWidePadsAtEntryHeight": 1094,
+    "widthInBlocks": 2,
+    "minimumAirHeightInBlocks": 3,
+    "onlySameHeightFlatPads": true,
+    "stairsAndVerticalCirculation": "NOT_CERTIFIED",
+    "minecraftWalking": "NOT_TESTED"
+  },
+  "sectionEvidence": {
+    "axis": "x-y",
+    "fixedZ": 2,
+    "width": 72,
+    "height": 20,
+    "finalSourceVoxelCount": 5507,
+    "occupiedCellsAtSlice": [
+      [
+        7,
+        0
+      ],
+      [
+        8,
+        0
+      ],
+      [
+        9,
+        0
+      ],
+      [
+        10,
+        0
+      ],
+      [
+        11,
+        0
+      ],
+      [
+        12,
+        0
+      ],
+      [
+        32,
+        12
+      ]
+    ],
+    "isModelOriginalFinalB143": false,
+    "cutAppliedThroughOriginalCompiler": true,
+    "doesNotProveOverallArchitectureQuality": true,
+    "isExactDerivedB143": true
+  },
+  "limitations": [
+    "No guarantee that roofed pads are independently enclosed rooms",
+    "No independent program or aesthetic certification",
+    "A valid flat SOURCE route cannot certify multi-level stairs or access",
+    "No load bearing analysis; no Minecraft avatar or world test"
+  ],
+  "inputAuthorship": "SYNTHETIC_TEST_FIXTURE",
+  "inputIsOriginalModelResponse": false
+}

@@ -1,0 +1,366 @@
+name: R60 Evidence-Bound Visual Review — OFFLINE Only
+on:
+  workflow_dispatch:
+  push:
+    branches: [feature/b198zr1-protected-architectural-revision]
+    paths:
+      - 'scripts/b198zr60-evidence-bound-visual-review.mjs'
+      - 'scripts/b198zr60-evidence-bound-visual-review.test.mjs'
+      - 'scripts/b198zr61-final-voxel-section-review.mjs'
+      - 'scripts/b198zr61-final-voxel-section-review.test.mjs'
+      - 'scripts/b198zr62-evidence-backed-revision-guidance.mjs'
+      - 'scripts/b198zr62-evidence-backed-revision-guidance.test.mjs'
+      - 'scripts/b198zr63-architectural-continuity-watch.mjs'
+      - 'scripts/b198zr63-architectural-continuity-watch.test.mjs'
+      - 'scripts/b198zr64-unclaimed-floor-connectivity.mjs'
+      - 'scripts/b198zr64-unclaimed-floor-connectivity.test.mjs'
+      - 'scripts/b198zr65-independent-network-feedback.mjs'
+      - 'scripts/b198zr65-independent-network-feedback.test.mjs'
+      - 'scripts/b198zr66-overhead-space-audit.mjs'
+      - 'scripts/b198zr66-overhead-space-audit.test.mjs'
+      - 'scripts/b198zr67-spatial-containment-audit.mjs'
+      - 'scripts/b198zr67-spatial-containment-audit.test.mjs'
+      - 'scripts/b198zr68-horizontal-air-continuity.mjs'
+      - 'scripts/b198zr68-horizontal-air-continuity.test.mjs'
+      - 'scripts/b198zr69-vertical-air-vs-motion.mjs'
+      - 'scripts/b198zr69-vertical-air-vs-motion.test.mjs'
+      - 'scripts/b198zr70-exterior-approach-route-review.mjs'
+      - 'scripts/b198zr70-exterior-approach-route-review.test.mjs'
+      - 'scripts/b198zr71-abstract-route-gap-triage.mjs'
+      - 'scripts/b198zr71-abstract-route-gap-triage.test.mjs'
+      - 'scripts/b198zr72-mass-void-gap-context.mjs'
+      - 'scripts/b198zr72-mass-void-gap-context.test.mjs'
+      - 'scripts/b198zr73-preserve-concept-circulation-comparison.mjs'
+      - 'scripts/b198zr73-preserve-concept-circulation-comparison.test.mjs'
+      - 'scripts/b198zr74-human-option-review-worksheet.mjs'
+      - 'scripts/b198zr74-human-option-review-worksheet.test.mjs'
+      - 'scripts/b198zr75-human-review-handoff.mjs'
+      - 'scripts/b198zr75-human-review-handoff.test.mjs'
+      - 'scripts/b198zr76-architecture-next-decisions.mjs'
+      - 'scripts/b198zr76-architecture-next-decisions.test.mjs'
+      - 'scripts/b198zr77-cohesive-architecture-revision-brief.mjs'
+      - 'scripts/b198zr77-cohesive-architecture-revision-brief.test.mjs'
+      - 'scripts/b198zr78-spatial-program-design-spec.mjs'
+      - 'scripts/b198zr78-spatial-program-design-spec.test.mjs'
+      - 'scripts/b198zr79-parametric-library-massing.mjs'
+      - 'scripts/b198zr79-parametric-library-massing.test.mjs'
+      - 'scripts/b198zr80-supported-route-concept-study.mjs'
+      - 'scripts/b198zr80-supported-route-concept-study.test.mjs'
+      - 'scripts/b198zr81-envelope-portal-connection-review.mjs'
+      - 'scripts/b198zr81-envelope-portal-connection-review.test.mjs'
+      - 'scripts/b198zr82-mesh-clearance-and-terrace-audit.mjs'
+      - 'scripts/b198zr82-mesh-clearance-and-terrace-audit.test.mjs'
+      - 'scripts/b198zr83-wing-terrace-landing-prototypes.mjs'
+      - 'scripts/b198zr83-wing-terrace-landing-prototypes.test.mjs'
+      - 'scripts/b198zr84-multilevel-bookstack-review.mjs'
+      - 'scripts/b198zr84-multilevel-bookstack-review.test.mjs'
+      - 'scripts/b198zr85-wing-route-alternatives.mjs'
+      - 'scripts/b198zr85-wing-route-alternatives.test.mjs'
+      - 'scripts/b198zr86-finite-width-deck-study.mjs'
+      - 'scripts/b198zr86-finite-width-deck-study.test.mjs'
+      - 'scripts/b198zr87-seven-room-architecture.mjs'
+      - 'scripts/b198zr87-seven-room-architecture.test.mjs'
+      - 'scripts/b198zr88-gallery-circulation-study.mjs'
+      - 'scripts/b198zr88-gallery-circulation-study.test.mjs'
+      - 'scripts/b198zr89-gallery-interface-architecture.mjs'
+      - 'scripts/b198zr89-gallery-interface-architecture.test.mjs'
+      - 'scripts/b198zr90-source-surface-seams.mjs'
+      - 'scripts/b198zr90-source-surface-seams.test.mjs'
+      - 'scripts/b198zr91-tapered-gallery-turnout.mjs'
+      - 'scripts/b198zr91-tapered-gallery-turnout.test.mjs'
+      - 'scripts/b198zr92-whole-library-circulation-atlas.mjs'
+      - 'scripts/b198zr92-whole-library-circulation-atlas.test.mjs'
+      - 'scripts/b198zr93-contiguous-reading-arcades.mjs'
+      - 'scripts/b198zr93-contiguous-reading-arcades.test.mjs'
+      - 'scripts/b198zr94-seven-room-entry-redesign.mjs'
+      - 'scripts/b198zr94-seven-room-entry-redesign.test.mjs'
+      - 'scripts/b198zr95-atrium-daylight-portals.mjs'
+      - 'scripts/b198zr95-atrium-daylight-portals.test.mjs'
+      - 'scripts/b198zr96-window-structure-and-light-study.mjs'
+      - 'scripts/b198zr96-window-structure-and-light-study.test.mjs'
+      - 'scripts/b198zr96-critical-offline-smoke.test.mjs'
+      - 'scripts/b198zr97-multiview-mesh-review.mjs'
+      - 'scripts/b198zr97-multiview-mesh-review.test.mjs'
+      - 'scripts/b198zr98-elevated-right-crown.mjs'
+      - 'scripts/b198zr98-elevated-right-crown.test.mjs'
+      - 'scripts/b198zr99-finite-volume-route-witness.mjs'
+      - 'scripts/b198zr99-finite-volume-route-witness.test.mjs'
+      - 'scripts/b198zr100-source-gallery-shoulders.mjs'
+      - 'scripts/b198zr100-source-gallery-shoulders.test.mjs'
+      - 'scripts/b198zr101-route-coverage-regression.test.mjs'
+      - 'scripts/b198zr102-tapered-gallery-aprons.mjs'
+      - 'scripts/b198zr102-tapered-gallery-aprons.test.mjs'
+      - 'scripts/b198zr103-source-junction-integrity.mjs'
+      - 'scripts/b198zr103-source-junction-integrity.test.mjs'
+      - 'scripts/b198zr104-r91-active-throat-repair.mjs'
+      - 'scripts/b198zr104-r91-active-throat-repair.test.mjs'
+      - 'scripts/b198zr105-active-r91-throat-width-selection.mjs'
+      - 'scripts/b198zr105-active-r91-throat-width-selection.test.mjs'
+      - 'scripts/b198zr106-reading-table-doorway-reflow.mjs'
+      - 'scripts/b198zr106-reading-table-doorway-reflow.test.mjs'
+      - 'scripts/b198zr107-compact-reading-table-recovery.mjs'
+      - 'scripts/b198zr107-compact-reading-table-recovery.test.mjs'
+      - 'scripts/b198zr108-r91-right-lane-hit-triage.mjs'
+      - 'scripts/b198zr108-r91-right-lane-hit-triage.test.mjs'
+      - 'scripts/b198zr109-realfloor-referenced-r91-route.mjs'
+      - 'scripts/b198zr109-realfloor-referenced-r91-route.test.mjs'
+      - 'scripts/b198zr110-source-contoured-right-room-approach.mjs'
+      - 'scripts/b198zr110-source-contoured-right-room-approach.test.mjs'
+      - 'scripts/b198zr111-reversible-floor-finish-transition.mjs'
+      - 'scripts/b198zr111-reversible-floor-finish-transition.test.mjs'
+      - 'scripts/b198zr112-lantern-canopy-clearance.mjs'
+      - 'scripts/b198zr112-lantern-canopy-clearance.test.mjs'
+      - 'scripts/b198zr113-pitched-lantern-daylight-canopy.mjs'
+      - 'scripts/b198zr113-pitched-lantern-daylight-canopy.test.mjs'
+      - 'scripts/b198zr114-actual-three-pane-art-review.mjs'
+      - 'scripts/b198zr114-actual-three-pane-art-review.test.mjs'
+      - 'scripts/b198zr115-integral-lantern-clerestory.mjs'
+      - 'scripts/b198zr115-integral-lantern-clerestory.test.mjs'
+      - 'scripts/b198zr117-post-canopy-real-source-hits.mjs'
+      - 'scripts/b198zr117-post-canopy-real-source-hits.test.mjs'
+      - 'scripts/b198zr118-reading-seat-clearance.mjs'
+      - 'scripts/b198zr118-reading-seat-clearance.test.mjs'
+      - 'scripts/b198zr119-two-reading-bay-setback.mjs'
+      - 'scripts/b198zr119-two-reading-bay-setback.test.mjs'
+      - 'scripts/b198zr120-r94-suspended-light-rib-relief.mjs'
+      - 'scripts/b198zr120-r94-suspended-light-rib-relief.test.mjs'
+      - 'scripts/b198zr121-r120-source-art-packet.mjs'
+      - 'scripts/b198zr121-r120-source-art-packet.test.mjs'
+      - 'scripts/b198zr123-r94-rib-terrace-alternatives.mjs'
+      - 'scripts/b198zr123-r94-rib-terrace-alternatives.test.mjs'
+      - 'scripts/b198zr124-reading-seat-art-study.mjs'
+      - 'scripts/b198zr124-reading-seat-art-study.test.mjs'
+      - '.github/workflows/r60-evidence-bound-visual-review-offline.yml'
+  pull_request:
+    paths:
+      - 'scripts/b198zr60-evidence-bound-visual-review.mjs'
+      - 'scripts/b198zr60-evidence-bound-visual-review.test.mjs'
+      - 'scripts/b198zr61-final-voxel-section-review.mjs'
+      - 'scripts/b198zr61-final-voxel-section-review.test.mjs'
+      - 'scripts/b198zr62-evidence-backed-revision-guidance.mjs'
+      - 'scripts/b198zr62-evidence-backed-revision-guidance.test.mjs'
+      - 'scripts/b198zr63-architectural-continuity-watch.mjs'
+      - 'scripts/b198zr63-architectural-continuity-watch.test.mjs'
+      - 'scripts/b198zr64-unclaimed-floor-connectivity.mjs'
+      - 'scripts/b198zr64-unclaimed-floor-connectivity.test.mjs'
+      - 'scripts/b198zr65-independent-network-feedback.mjs'
+      - 'scripts/b198zr65-independent-network-feedback.test.mjs'
+      - 'scripts/b198zr66-overhead-space-audit.mjs'
+      - 'scripts/b198zr66-overhead-space-audit.test.mjs'
+      - 'scripts/b198zr67-spatial-containment-audit.mjs'
+      - 'scripts/b198zr67-spatial-containment-audit.test.mjs'
+      - 'scripts/b198zr68-horizontal-air-continuity.mjs'
+      - 'scripts/b198zr68-horizontal-air-continuity.test.mjs'
+      - 'scripts/b198zr69-vertical-air-vs-motion.mjs'
+      - 'scripts/b198zr69-vertical-air-vs-motion.test.mjs'
+      - 'scripts/b198zr70-exterior-approach-route-review.mjs'
+      - 'scripts/b198zr70-exterior-approach-route-review.test.mjs'
+      - 'scripts/b198zr71-abstract-route-gap-triage.mjs'
+      - 'scripts/b198zr71-abstract-route-gap-triage.test.mjs'
+      - 'scripts/b198zr72-mass-void-gap-context.mjs'
+      - 'scripts/b198zr72-mass-void-gap-context.test.mjs'
+      - 'scripts/b198zr73-preserve-concept-circulation-comparison.mjs'
+      - 'scripts/b198zr73-preserve-concept-circulation-comparison.test.mjs'
+      - 'scripts/b198zr74-human-option-review-worksheet.mjs'
+      - 'scripts/b198zr74-human-option-review-worksheet.test.mjs'
+      - 'scripts/b198zr75-human-review-handoff.mjs'
+      - 'scripts/b198zr75-human-review-handoff.test.mjs'
+      - 'scripts/b198zr76-architecture-next-decisions.mjs'
+      - 'scripts/b198zr76-architecture-next-decisions.test.mjs'
+      - 'scripts/b198zr77-cohesive-architecture-revision-brief.mjs'
+      - 'scripts/b198zr77-cohesive-architecture-revision-brief.test.mjs'
+      - 'scripts/b198zr78-spatial-program-design-spec.mjs'
+      - 'scripts/b198zr78-spatial-program-design-spec.test.mjs'
+      - 'scripts/b198zr79-parametric-library-massing.mjs'
+      - 'scripts/b198zr79-parametric-library-massing.test.mjs'
+      - 'scripts/b198zr80-supported-route-concept-study.mjs'
+      - 'scripts/b198zr80-supported-route-concept-study.test.mjs'
+      - 'scripts/b198zr81-envelope-portal-connection-review.mjs'
+      - 'scripts/b198zr81-envelope-portal-connection-review.test.mjs'
+      - 'scripts/b198zr82-mesh-clearance-and-terrace-audit.mjs'
+      - 'scripts/b198zr82-mesh-clearance-and-terrace-audit.test.mjs'
+      - 'scripts/b198zr83-wing-terrace-landing-prototypes.mjs'
+      - 'scripts/b198zr83-wing-terrace-landing-prototypes.test.mjs'
+      - 'scripts/b198zr84-multilevel-bookstack-review.mjs'
+      - 'scripts/b198zr84-multilevel-bookstack-review.test.mjs'
+      - 'scripts/b198zr85-wing-route-alternatives.mjs'
+      - 'scripts/b198zr85-wing-route-alternatives.test.mjs'
+      - 'scripts/b198zr86-finite-width-deck-study.mjs'
+      - 'scripts/b198zr86-finite-width-deck-study.test.mjs'
+      - 'scripts/b198zr87-seven-room-architecture.mjs'
+      - 'scripts/b198zr87-seven-room-architecture.test.mjs'
+      - 'scripts/b198zr88-gallery-circulation-study.mjs'
+      - 'scripts/b198zr88-gallery-circulation-study.test.mjs'
+      - 'scripts/b198zr89-gallery-interface-architecture.mjs'
+      - 'scripts/b198zr89-gallery-interface-architecture.test.mjs'
+      - 'scripts/b198zr90-source-surface-seams.mjs'
+      - 'scripts/b198zr90-source-surface-seams.test.mjs'
+      - 'scripts/b198zr91-tapered-gallery-turnout.mjs'
+      - 'scripts/b198zr91-tapered-gallery-turnout.test.mjs'
+      - 'scripts/b198zr92-whole-library-circulation-atlas.mjs'
+      - 'scripts/b198zr92-whole-library-circulation-atlas.test.mjs'
+      - 'scripts/b198zr93-contiguous-reading-arcades.mjs'
+      - 'scripts/b198zr93-contiguous-reading-arcades.test.mjs'
+      - 'scripts/b198zr94-seven-room-entry-redesign.mjs'
+      - 'scripts/b198zr94-seven-room-entry-redesign.test.mjs'
+      - 'scripts/b198zr95-atrium-daylight-portals.mjs'
+      - 'scripts/b198zr95-atrium-daylight-portals.test.mjs'
+      - 'scripts/b198zr96-window-structure-and-light-study.mjs'
+      - 'scripts/b198zr96-window-structure-and-light-study.test.mjs'
+      - 'scripts/b198zr96-critical-offline-smoke.test.mjs'
+      - 'scripts/b198zr97-multiview-mesh-review.mjs'
+      - 'scripts/b198zr97-multiview-mesh-review.test.mjs'
+      - 'scripts/b198zr98-elevated-right-crown.mjs'
+      - 'scripts/b198zr98-elevated-right-crown.test.mjs'
+      - 'scripts/b198zr99-finite-volume-route-witness.mjs'
+      - 'scripts/b198zr99-finite-volume-route-witness.test.mjs'
+      - 'scripts/b198zr100-source-gallery-shoulders.mjs'
+      - 'scripts/b198zr100-source-gallery-shoulders.test.mjs'
+      - 'scripts/b198zr101-route-coverage-regression.test.mjs'
+      - 'scripts/b198zr102-tapered-gallery-aprons.mjs'
+      - 'scripts/b198zr102-tapered-gallery-aprons.test.mjs'
+      - 'scripts/b198zr103-source-junction-integrity.mjs'
+      - 'scripts/b198zr103-source-junction-integrity.test.mjs'
+      - 'scripts/b198zr104-r91-active-throat-repair.mjs'
+      - 'scripts/b198zr104-r91-active-throat-repair.test.mjs'
+      - 'scripts/b198zr105-active-r91-throat-width-selection.mjs'
+      - 'scripts/b198zr105-active-r91-throat-width-selection.test.mjs'
+      - 'scripts/b198zr106-reading-table-doorway-reflow.mjs'
+      - 'scripts/b198zr106-reading-table-doorway-reflow.test.mjs'
+      - 'scripts/b198zr107-compact-reading-table-recovery.mjs'
+      - 'scripts/b198zr107-compact-reading-table-recovery.test.mjs'
+      - 'scripts/b198zr108-r91-right-lane-hit-triage.mjs'
+      - 'scripts/b198zr108-r91-right-lane-hit-triage.test.mjs'
+      - 'scripts/b198zr109-realfloor-referenced-r91-route.mjs'
+      - 'scripts/b198zr109-realfloor-referenced-r91-route.test.mjs'
+      - 'scripts/b198zr110-source-contoured-right-room-approach.mjs'
+      - 'scripts/b198zr110-source-contoured-right-room-approach.test.mjs'
+      - 'scripts/b198zr111-reversible-floor-finish-transition.mjs'
+      - 'scripts/b198zr111-reversible-floor-finish-transition.test.mjs'
+      - 'scripts/b198zr112-lantern-canopy-clearance.mjs'
+      - 'scripts/b198zr112-lantern-canopy-clearance.test.mjs'
+      - 'scripts/b198zr113-pitched-lantern-daylight-canopy.mjs'
+      - 'scripts/b198zr113-pitched-lantern-daylight-canopy.test.mjs'
+      - 'scripts/b198zr114-actual-three-pane-art-review.mjs'
+      - 'scripts/b198zr114-actual-three-pane-art-review.test.mjs'
+      - 'scripts/b198zr115-integral-lantern-clerestory.mjs'
+      - 'scripts/b198zr115-integral-lantern-clerestory.test.mjs'
+      - 'scripts/b198zr117-post-canopy-real-source-hits.mjs'
+      - 'scripts/b198zr117-post-canopy-real-source-hits.test.mjs'
+      - 'scripts/b198zr118-reading-seat-clearance.mjs'
+      - 'scripts/b198zr118-reading-seat-clearance.test.mjs'
+      - 'scripts/b198zr119-two-reading-bay-setback.mjs'
+      - 'scripts/b198zr119-two-reading-bay-setback.test.mjs'
+      - 'scripts/b198zr120-r94-suspended-light-rib-relief.mjs'
+      - 'scripts/b198zr120-r94-suspended-light-rib-relief.test.mjs'
+      - 'scripts/b198zr121-r120-source-art-packet.mjs'
+      - 'scripts/b198zr121-r120-source-art-packet.test.mjs'
+      - 'scripts/b198zr123-r94-rib-terrace-alternatives.mjs'
+      - 'scripts/b198zr123-r94-rib-terrace-alternatives.test.mjs'
+      - 'scripts/b198zr124-reading-seat-art-study.mjs'
+      - 'scripts/b198zr124-reading-seat-art-study.test.mjs'
+      - '.github/workflows/r60-evidence-bound-visual-review-offline.yml'
+permissions:
+  contents: read
+jobs:
+  offline-visual-architecture-review:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: ${{ github.event_name == 'workflow_dispatch' && 90 || 10 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: R96 fast source-geometry, provenance rejection and review wiring smoke (push / PR)
+        if: github.event_name != 'workflow_dispatch'
+        run: |
+          node --test --test-concurrency=2 scripts/b198zr96-critical-offline-smoke.test.mjs
+          node --test --test-concurrency=2 --test-name-pattern="R97 projection: source mesh only" scripts/b198zr97-multiview-mesh-review.test.mjs
+          node --test --test-concurrency=2 --test-name-pattern="R98 quick: loft has smooth bounded upper-shell field" scripts/b198zr98-elevated-right-crown.test.mjs
+          node --test --test-concurrency=2 --test-name-pattern="R99 quick: 3 lateral floor/overhead rays" scripts/b198zr99-finite-volume-route-witness.test.mjs
+          node --test --test-concurrency=2 scripts/b198zr101-route-coverage-regression.test.mjs
+          node --test --test-concurrency=2 --test-name-pattern="R102 quick: tapered shoulders" scripts/b198zr102-tapered-gallery-aprons.test.mjs
+          node --test --test-concurrency=2 --test-name-pattern="R103 quick: real source edges" scripts/b198zr103-source-junction-integrity.test.mjs
+          node --test --test-concurrency=2 --test-name-pattern="R104 quick: new ramp shoulders" scripts/b198zr104-r91-active-throat-repair.test.mjs
+          node --test --test-concurrency=2 --test-name-pattern="R105 quick: choose only an independently witnessed" scripts/b198zr105-active-r91-throat-width-selection.test.mjs
+          node --test --test-concurrency=2 --test-name-pattern="R106 quick: isolate seven actual table facets" scripts/b198zr106-reading-table-doorway-reflow.test.mjs
+          node --test --test-concurrency=2 --test-name-pattern="R107 quick: source-bound compact real table" scripts/b198zr107-compact-reading-table-recovery.test.mjs
+          node --test --test-concurrency=2 --test-name-pattern="R108 quick: cite real triangle kinds" scripts/b198zr108-r91-right-lane-hit-triage.test.mjs
+          node --test --test-concurrency=2 --test-name-pattern="R109 quick: only exact existing floor layers" scripts/b198zr109-realfloor-referenced-r91-route.test.mjs
+          node --test --test-concurrency=2 --test-name-pattern="R110 quick: finite stable nine-station profile" scripts/b198zr110-source-contoured-right-room-approach.test.mjs
+          node --test --test-concurrency=2 --test-name-pattern="R111 quick: cannot change furniture" scripts/b198zr111-reversible-floor-finish-transition.test.mjs
+          node --test --test-concurrency=2 --test-name-pattern="R112 quick: sculpt a continuous two-triangle eave" scripts/b198zr112-lantern-canopy-clearance.test.mjs
+          node --test --test-concurrency=2 --test-name-pattern="R113 quick: keep source bookshelf rim" scripts/b198zr113-pitched-lantern-daylight-canopy.test.mjs
+          node --test --test-concurrency=2 --test-name-pattern="R116 quick: R113 exact intermediate 0.65 is opt-in" scripts/b198zr113-pitched-lantern-daylight-canopy.test.mjs
+          node --test --test-concurrency=2 --test-name-pattern="R114 quick: approved canopy diff" scripts/b198zr114-actual-three-pane-art-review.test.mjs
+          node --test --test-concurrency=2 --test-name-pattern="R115 quick: lift real canopy and joined bookwall" scripts/b198zr115-integral-lantern-clerestory.test.mjs
+          node --test --test-concurrency=2 --test-name-pattern="R117 quick: no hidden geometry changes" scripts/b198zr117-post-canopy-real-source-hits.test.mjs
+          node --test --test-concurrency=2 --test-name-pattern="R118 quick: setback full continuous real seat" scripts/b198zr118-reading-seat-clearance.test.mjs
+          node --test --test-concurrency=2 --test-name-pattern="R119 quick: corrupted R107 source" scripts/b198zr119-two-reading-bay-setback.test.mjs
+          node --test --test-concurrency=2 --test-name-pattern="R120 quick: real rib peak" scripts/b198zr120-r94-suspended-light-rib-relief.test.mjs
+          node --test --test-concurrency=2 --test-name-pattern="R121 quick: preserve shared source edge" scripts/b198zr121-r120-source-art-packet.test.mjs
+          node --test --test-concurrency=2 --test-name-pattern="R123 quick:" scripts/b198zr123-r94-rib-terrace-alternatives.test.mjs
+          node --test --test-concurrency=2 --test-name-pattern="R124 quick:" scripts/b198zr124-reading-seat-art-study.test.mjs
+          node --test --test-concurrency=2 --test-name-pattern="R100 quick: actual shoulder triangles cure" scripts/b198zr100-source-gallery-shoulders.test.mjs
+          node --test --test-concurrency=2 --test-name-pattern="R60 refuses corrupt original SHA|R60 refuses a synthetic R48|R89 deterministic planar length|R95 clipped wall subtracts true surface area|R96 requires actual shell source points" scripts/b198zr60-evidence-bound-visual-review.test.mjs scripts/b198zr84-multilevel-bookstack-review.test.mjs scripts/b198zr95-atrium-daylight-portals.test.mjs scripts/b198zr96-window-structure-and-light-study.test.mjs
+      - name: R115 one-time true R93 clerestory source regression on both OS
+        if: github.event_name == 'push' && contains(github.event.head_commit.message, 'R115 one-time real geometry')
+        run: |
+          node --test --test-concurrency=2 --test-name-pattern="R115 real: actual R93 lantern clerestory" scripts/b198zr115-integral-lantern-clerestory.test.mjs
+      - name: R116 one-time repaired R113 real-source candidate comparison
+        if: github.event_name == 'push' && contains(github.event.head_commit.message, 'R116 one-time repaired R113')
+        run: |
+          node --test --test-concurrency=2 --test-name-pattern="R113 real: test pitched source canopy" scripts/b198zr113-pitched-lantern-daylight-canopy.test.mjs
+      - name: R117 one-time real-source post-alternative headroom attribution
+        if: github.event_name == 'push' && contains(github.event.head_commit.message, 'R117 one-time source truth')
+        run: |
+          node --test --test-concurrency=2 --test-name-pattern="R117 real: identify real source triangles" scripts/b198zr117-post-canopy-real-source-hits.test.mjs
+      - name: R118 one-time real combined R93 canopy and reading seat source study
+        if: github.event_name == 'push' && contains(github.event.head_commit.message, 'R118 one-time combined real seat')
+        run: |
+          node --test --test-concurrency=2 --test-name-pattern="R118 real: record every source-grounded" scripts/b198zr118-reading-seat-clearance.test.mjs
+      - name: R119 one-time second actual R93 reading bay source and clearance test
+        if: github.event_name == 'push' && contains(github.event.head_commit.message, 'R119 one-time real second bay')
+        run: |
+          node --test --test-concurrency=2 --test-name-pattern="R119 real: second adjacent reading seat" scripts/b198zr119-two-reading-bay-setback.test.mjs
+      - name: R120 one-time true R94 light rib daylight lintel source test
+        if: github.event_name == 'push' && contains(github.event.head_commit.message, 'R120 one-time true R94 rib')
+        run: |
+          node --test --test-concurrency=2 --test-name-pattern="R120 real: source R94 suspended light rib" scripts/b198zr120-r94-suspended-light-rib-relief.test.mjs
+      - name: R124 one-time source 65-percent seat and three-mesh art packet
+        if: github.event_name == 'push' && contains(github.event.head_commit.message, 'R124 one-time true-source reading seat')
+        env:
+          R124_ARTIFACT_DIR: r124-artifacts
+        run: |
+          node --test --test-concurrency=2 --test-name-pattern="R124 real: source-based reading seat" scripts/b198zr124-reading-seat-art-study.test.mjs
+      - uses: actions/upload-artifact@v4
+        if: github.event_name == 'push' && contains(github.event.head_commit.message, 'R124 one-time true-source reading seat')
+        with:
+          name: r124-reading-seat-three-mesh-${{ matrix.os }}
+          path: r124-artifacts/
+          if-no-files-found: error
+          retention-days: 30
+      - name: R123 one-time real R94 daylight rib terrace clearance comparison
+        if: github.event_name == 'push' && contains(github.event.head_commit.message, 'R123 one-time rib reposition')
+        run: |
+          node --test --test-concurrency=2 --test-name-pattern="R123 real: actual R121" scripts/b198zr123-r94-rib-terrace-alternatives.test.mjs
+      - name: R121 one-time exact R120 source seam and six-view review artifact
+        if: github.event_name == 'push' && contains(github.event.head_commit.message, 'R121 one-time source art')
+        env:
+          R121_ARTIFACT_DESTINATION: r121-artifacts
+        run: |
+          node --test --test-concurrency=2 --test-name-pattern="R121 real: exactly R120 selected" scripts/b198zr121-r120-source-art-packet.test.mjs
+      - uses: actions/upload-artifact@v4
+        if: github.event_name == 'push' && contains(github.event.head_commit.message, 'R121 one-time source art')
+        with:
+          name: r121-r120-source-six-view-${{ matrix.os }}
+          path: r121-artifacts/
+          if-no-files-found: error
+          retention-days: 30
+      - name: Full R58-R96 offline historical regression (manual workflow dispatch)
+        if: github.event_name == 'workflow_dispatch'
+        run: node --test --test-concurrency=2 scripts/b198zr60-evidence-bound-visual-review.test.mjs scripts/b198zr61-final-voxel-section-review.test.mjs scripts/b198zr62-evidence-backed-revision-guidance.test.mjs scripts/b198zr63-architectural-continuity-watch.test.mjs scripts/b198zr64-unclaimed-floor-connectivity.test.mjs scripts/b198zr65-independent-network-feedback.test.mjs scripts/b198zr66-overhead-space-audit.test.mjs scripts/b198zr67-spatial-containment-audit.test.mjs scripts/b198zr68-horizontal-air-continuity.test.mjs scripts/b198zr69-vertical-air-vs-motion.test.mjs scripts/b198zr70-exterior-approach-route-review.test.mjs scripts/b198zr71-abstract-route-gap-triage.test.mjs scripts/b198zr72-mass-void-gap-context.test.mjs scripts/b198zr73-preserve-concept-circulation-comparison.test.mjs scripts/b198zr74-human-option-review-worksheet.test.mjs scripts/b198zr75-human-review-handoff.test.mjs scripts/b198zr76-architecture-next-decisions.test.mjs scripts/b198zr77-cohesive-architecture-revision-brief.test.mjs scripts/b198zr78-spatial-program-design-spec.test.mjs scripts/b198zr79-parametric-library-massing.test.mjs scripts/b198zr80-supported-route-concept-study.test.mjs scripts/b198zr81-envelope-portal-connection-review.test.mjs scripts/b198zr82-mesh-clearance-and-terrace-audit.test.mjs scripts/b198zr83-wing-terrace-landing-prototypes.test.mjs scripts/b198zr84-multilevel-bookstack-review.test.mjs scripts/b198zr85-wing-route-alternatives.test.mjs scripts/b198zr86-finite-width-deck-study.test.mjs scripts/b198zr87-seven-room-architecture.test.mjs scripts/b198zr88-gallery-circulation-study.test.mjs scripts/b198zr89-gallery-interface-architecture.test.mjs scripts/b198zr90-source-surface-seams.test.mjs scripts/b198zr91-tapered-gallery-turnout.test.mjs scripts/b198zr92-whole-library-circulation-atlas.test.mjs scripts/b198zr93-contiguous-reading-arcades.test.mjs scripts/b198zr94-seven-room-entry-redesign.test.mjs scripts/b198zr95-atrium-daylight-portals.test.mjs scripts/b198zr96-window-structure-and-light-study.test.mjs scripts/b198zr97-multiview-mesh-review.test.mjs scripts/b198zr98-elevated-right-crown.test.mjs scripts/b198zr99-finite-volume-route-witness.test.mjs scripts/b198zr100-source-gallery-shoulders.test.mjs scripts/b198zr101-route-coverage-regression.test.mjs scripts/b198zr102-tapered-gallery-aprons.test.mjs scripts/b198zr103-source-junction-integrity.test.mjs scripts/b198zr104-r91-active-throat-repair.test.mjs scripts/b198zr105-active-r91-throat-width-selection.test.mjs scripts/b198zr106-reading-table-doorway-reflow.test.mjs scripts/b198zr107-compact-reading-table-recovery.test.mjs scripts/b198zr108-r91-right-lane-hit-triage.test.mjs scripts/b198zr109-realfloor-referenced-r91-route.test.mjs scripts/b198zr110-source-contoured-right-room-approach.test.mjs scripts/b198zr111-reversible-floor-finish-transition.test.mjs scripts/b198zr112-lantern-canopy-clearance.test.mjs scripts/b198zr113-pitched-lantern-daylight-canopy.test.mjs scripts/b198zr114-actual-three-pane-art-review.test.mjs scripts/b198zr115-integral-lantern-clerestory.test.mjs scripts/b198zr117-post-canopy-real-source-hits.test.mjs scripts/b198zr118-reading-seat-clearance.test.mjs scripts/b198zr119-two-reading-bay-setback.test.mjs scripts/b198zr120-r94-suspended-light-rib-relief.test.mjs scripts/b198zr121-r120-source-art-packet.test.mjs scripts/b198zr59-safe-result-zip-to-review.test.mjs scripts/b198zr58-frozen-c01-quality-review-packet.test.mjs
