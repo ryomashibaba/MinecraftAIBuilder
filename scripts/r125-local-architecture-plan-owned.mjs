@@ -122,13 +122,15 @@ export async function createWindowsOwnedOllamaController({
   },ms);
   ownerWaiters.push({resolve:value=>{clearTimeout(timer);resolve(value);}});
  });
+ const hasExited=child=>child!==null&&
+  (child.exitCode!==null||child.signalCode!==null);
  const stop=async reason=>{
   if(stopped)return {stopped:true,ownerStopConfirmed:ownerStopAck,
-   monitorStopConfirmed:monitor===null||monitor.exitCode!==null,
+   monitorStopConfirmed:monitor===null||hasExited(monitor),
    reason,servicePid:service?.servicePid};
   stopped=true;
   let ownerStopConfirmed=ownerStopAck;
-  if(owner&&owner.exitCode===null){
+  if(owner&&!hasExited(owner)){
    try{
     owner.stdin.write('STOP\n');
     const deadline=Date.now()+8000;
@@ -141,23 +143,23 @@ export async function createWindowsOwnedOllamaController({
      }
     }
    }catch{/* Process exit below is the only secondary proof. */}
-   if(owner.exitCode===null){
+   if(!hasExited(owner)){
     await Promise.race([new Promise(resolve=>owner.once('exit',resolve)),delay(8000)]);
    }
-   if(owner.exitCode===null){
+   if(!hasExited(owner)){
     owner.kill();
     await Promise.race([new Promise(resolve=>owner.once('exit',resolve)),delay(5000)]);
    }
   }
-  let monitorStopConfirmed=monitor===null||monitor.exitCode!==null;
-  if(monitor&&monitor.exitCode===null){
+  let monitorStopConfirmed=monitor===null||hasExited(monitor);
+  if(monitor&&!hasExited(monitor)){
    monitor.kill();
    await Promise.race([new Promise(resolve=>monitor.once('exit',resolve)),delay(5000)]);
-   if(monitor.exitCode===null){
+   if(!hasExited(monitor)){
     monitor.kill('SIGKILL');
     await Promise.race([new Promise(resolve=>monitor.once('exit',resolve)),delay(5000)]);
    }
-   monitorStopConfirmed=monitor.exitCode!==null;
+   monitorStopConfirmed=hasExited(monitor);
   }
   try{removeOwnedTempDir(dir);}catch{}
   return {stopped:true,ownerStopConfirmed:ownerStopAck,monitorStopConfirmed,
@@ -174,7 +176,7 @@ export async function createWindowsOwnedOllamaController({
   let previous=0,ready=false;
   const monitorDeadline=Date.now()+15000;
   while(Date.now()<monitorDeadline&&!ready){
-   if(monitor.exitCode!==null)throw Error('INDEPENDENT_MONITOR_EXITED');
+   if(hasExited(monitor))throw Error('INDEPENDENT_MONITOR_EXITED');
    try{
     const sample=readJson(sampleFile);
     const checked=verifyOwnedArchitectureSample({session:{nonce,monitorPid:monitor.pid},
@@ -218,7 +220,7 @@ export async function createWindowsOwnedOllamaController({
   return {
    ...service,
    async checkResourceSafety({phase='PRE_POST'}={}){
-    if(stopped||monitor.exitCode!==null||owner.exitCode!==null)
+    if(stopped||hasExited(monitor)||hasExited(owner))
      return {status:'HOLD',reason:'OWNED_PROCESS_NOT_ALIVE',resourceSafetyCertified:false};
     try{
      const sample=readJson(sampleFile);
