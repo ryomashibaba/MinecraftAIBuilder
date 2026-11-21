@@ -22,6 +22,32 @@ import threading
 import queue
 import time
 
+OWNED_OLLAMA_CONTEXT_LENGTH = 16384
+
+
+def owned_ollama_environment(context_length=OWNED_OLLAMA_CONTEXT_LENGTH):
+    """Return per-child Ollama settings for the isolated listener only."""
+    if type(context_length) is not int or context_length != OWNED_OLLAMA_CONTEXT_LENGTH:
+        raise ValueError('OWNED_OLLAMA_CONTEXT_LENGTH_REQUIRED')
+    env = {'OLLAMA_HOST': '127.0.0.1:11435',
+           'OLLAMA_CONTEXT_LENGTH': str(context_length),
+           'OLLAMA_NUM_PARALLEL': '1',
+           'OLLAMA_MAX_LOADED_MODELS': '1',
+           'OLLAMA_KEEP_ALIVE': '0',
+           'OLLAMA_NO_CLOUD': '1',
+           'OLLAMA_FLASH_ATTENTION': '0',
+           'OLLAMA_KV_CACHE_TYPE': 'f16',
+           'OLLAMA_GPU_OVERHEAD': '0',
+           'OLLAMA_SCHED_SPREAD': '0',
+           'OLLAMA_MAX_QUEUE': '1'}
+    # Keep only the installed model store location from inherited Ollama
+    # settings. All memory/runtime knobs are cleared for the owned child.
+    models = os.environ.get('OLLAMA_MODELS')
+    if models:
+        env['OLLAMA_MODELS'] = models
+    return env
+
+
 if os.name == 'nt':
     k32 = c.WinDLL('kernel32', use_last_error=True)
     SIZE = c.c_size_t
@@ -128,7 +154,7 @@ class OwnedProcessTree:
             self.close()
             raise
 
-    def start(self, executable, args, env=None):
+    def start(self, executable, args, env=None, clear_env_prefixes=()):
         if not self.job or self.process is not None:
             raise ValueError('OWNED_PROCESS_NEW_TREE_REQUIRED')
         exe = Path(executable)
@@ -161,7 +187,15 @@ class OwnedProcessTree:
                     not k or '=' in k or any(ch in k+v for ch in '\0\r\n')
                     for k, v in env.items()):
                     raise ValueError('OWNED_PROCESS_ENVIRONMENT_INVALID')
+                if not isinstance(clear_env_prefixes, (tuple, list)) or any(
+                        not isinstance(prefix, str) or not prefix or '=' in prefix
+                        for prefix in clear_env_prefixes):
+                    raise ValueError('OWNED_PROCESS_ENVIRONMENT_FILTER_INVALID')
                 merged = os.environ.copy()
+                for name in list(merged):
+                    if any(name.upper().startswith(prefix.upper())
+                           for prefix in clear_env_prefixes):
+                        del merged[name]
                 merged.update(env)
                 block = '\0'.join(f'{k}={v}' for k, v in sorted(
                     merged.items(), key=lambda item: item[0].upper())) + '\0\0'
@@ -211,7 +245,20 @@ def _worker(folder):
     # PID reuse cannot masquerade as termination of the original descendants.
     (folder / 'pids.json').write_text(json.dumps([os.getpid(), child.pid]))
     (folder / 'environment.json').write_text(json.dumps({
-        'owned': os.environ.get('MAB_OWNED_TEST_VALUE')}))
+        'owned': os.environ.get('MAB_OWNED_TEST_VALUE'),
+        'ollamaHost': os.environ.get('OLLAMA_HOST'),
+        'ollamaContext': os.environ.get('OLLAMA_CONTEXT_LENGTH'),
+        'ollamaParallel': os.environ.get('OLLAMA_NUM_PARALLEL'),
+        'ollamaMaxModels': os.environ.get('OLLAMA_MAX_LOADED_MODELS'),
+        'ollamaKeepAlive': os.environ.get('OLLAMA_KEEP_ALIVE'),
+        'ollamaCloud': os.environ.get('OLLAMA_NO_CLOUD'),
+        'ollamaFlash': os.environ.get('OLLAMA_FLASH_ATTENTION'),
+        'ollamaGpuOverhead': os.environ.get('OLLAMA_GPU_OVERHEAD'),
+        'ollamaSpread': os.environ.get('OLLAMA_SCHED_SPREAD'),
+        'ollamaMaxQueue': os.environ.get('OLLAMA_MAX_QUEUE'),
+        'ollamaKvCache': os.environ.get('OLLAMA_KV_CACHE_TYPE'),
+        'ollamaSentinel': os.environ.get('OLLAMA_RUNTIME_SENTINEL'),
+        'llamaFitTarget': os.environ.get('LLAMA_ARG_FIT_TARGET')}))
     sequence = 0
     while True:
         sequence += 1
@@ -223,7 +270,9 @@ def _owner(folder):
     with OwnedProcessTree() as tree:
         tree.start(str(Path(sys.executable).resolve()),
                    [str(Path(__file__).resolve()), '--worker', str(folder)],
-                   env={'MAB_OWNED_TEST_VALUE': 'job-owned'})
+                   env={**owned_ollama_environment(),
+                        'MAB_OWNED_TEST_VALUE': 'job-owned'},
+                   clear_env_prefixes=('OLLAMA_', 'LLAMA_ARG_'))
         while not (folder / 'close.flag').exists():
             time.sleep(0.05)
 
@@ -241,6 +290,7 @@ def _ollama_supervisor(executable, sample_folder, nonce, monitor_pid):
     if len(nonce) != 32 or any(ch not in '0123456789abcdef' for ch in nonce) or \
             not monitor_pid.isdigit() or int(monitor_pid) <= 0:
         raise ValueError('OWNED_OLLAMA_MONITOR_BINDING_REQUIRED')
+    context_length = OWNED_OLLAMA_CONTEXT_LENGTH
     monitor_pid = int(monitor_pid)
     exe = Path(executable)
     if not exe.is_absolute() or exe.name.lower() != 'ollama.exe' or not exe.is_file():
@@ -267,7 +317,8 @@ def _ollama_supervisor(executable, sample_folder, nonce, monitor_pid):
     last_sample_ms = 0
     try:
         pid = tree.start(str(exe), ['serve'],
-                         env={'OLLAMA_HOST': '127.0.0.1:11435'})
+                         env=owned_ollama_environment(context_length),
+                         clear_env_prefixes=('OLLAMA_', 'LLAMA_ARG_'))
         listen_deadline = time.monotonic() + 15
         while time.monotonic() < listen_deadline:
             if wait_process(tree.process, 0) != 258:
@@ -282,7 +333,17 @@ def _ollama_supervisor(executable, sample_folder, nonce, monitor_pid):
             raise OSError('OWNED_OLLAMA_LISTENER_NOT_READY')
         print(json.dumps({'status': 'OWNED_OLLAMA_STARTED', 'pid': pid,
                           'port': 11435, 'killOnCloseJob': True,
-                          'listenerPid': pid,'monitorPid': monitor_pid}), flush=True)
+                          'listenerPid': pid,'monitorPid': monitor_pid,
+                          'configuredContextLength': context_length,
+                          'configuredParallelRequests': 1,
+                          'configuredMaxLoadedModels': 1,
+                          'configuredKeepAliveSeconds': 0,
+                          'cloudDisabled': True,
+                          'configuredFlashAttention': False,
+                          'configuredKvCacheType': 'f16',
+                          'configuredGpuOverheadBytes': 0,
+                          'configuredScheduleSpread': False,
+                          'configuredMaxQueue': 1}), flush=True)
         while True:
             if _port_listener_pids(11435) != [pid]:
                 stop_reason = 'OWNED_PORT_IDENTITY_MISMATCH'
@@ -351,6 +412,28 @@ def selftest():
     if os.name != 'nt':
         raise OSError('OWNED_PROCESS_WINDOWS_REQUIRED')
     cases = []
+    inherited = os.environ.get('OLLAMA_CONTEXT_LENGTH')
+    owned_env = owned_ollama_environment()
+    if owned_env.get('OLLAMA_HOST') != '127.0.0.1:11435' or \
+            owned_env.get('OLLAMA_CONTEXT_LENGTH') != '16384' or \
+            owned_env.get('OLLAMA_NUM_PARALLEL') != '1' or \
+            owned_env.get('OLLAMA_MAX_LOADED_MODELS') != '1' or \
+            owned_env.get('OLLAMA_KEEP_ALIVE') != '0' or \
+            owned_env.get('OLLAMA_NO_CLOUD') != '1' or \
+            owned_env.get('OLLAMA_FLASH_ATTENTION') != '0' or \
+            owned_env.get('OLLAMA_KV_CACHE_TYPE') != 'f16' or \
+            owned_env.get('OLLAMA_GPU_OVERHEAD') != '0' or \
+            owned_env.get('OLLAMA_SCHED_SPREAD') != '0' or \
+            owned_env.get('OLLAMA_MAX_QUEUE') != '1' or \
+            os.environ.get('OLLAMA_CONTEXT_LENGTH') != inherited:
+        raise RuntimeError('OWNED_OLLAMA_CONTEXT_ENVIRONMENT_SCOPE_FAILED')
+    try:
+        owned_ollama_environment(2048)
+    except ValueError:
+        cases.append({'context': '16384', 'childOnly': True,
+                      'mismatchRejected': True})
+    else:
+        raise RuntimeError('OWNED_OLLAMA_CONTEXT_MISMATCH_ACCEPTED')
     if parse_listener_pids(' TCP 127.0.0.1:11435 0.0.0.0:0 LISTENING 1234\n') != [1234] or \
             parse_listener_pids(' TCP 127.0.0.1:11436 0.0.0.0:0 LISTENING 1234\n'):
         raise RuntimeError('OWNED_LISTENER_PID_PARSER_FAILED')
@@ -362,11 +445,39 @@ def selftest():
             # It is also owned by this test; no user's process is a test target.
             sentinel = subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(120)'],
                                         creationflags=subprocess.CREATE_NO_WINDOW)
-            owner = subprocess.Popen([sys.executable, str(Path(__file__).resolve()),
-                                      '--owner', str(folder)],
-                                     creationflags=subprocess.CREATE_NO_WINDOW)
+            prior_ollama_sentinel = os.environ.get('OLLAMA_RUNTIME_SENTINEL')
+            prior_llama_target = os.environ.get('LLAMA_ARG_FIT_TARGET')
+            os.environ['OLLAMA_RUNTIME_SENTINEL'] = 'must-not-leak'
+            os.environ['LLAMA_ARG_FIT_TARGET'] = '99999'
+            try:
+                owner = subprocess.Popen([sys.executable, str(Path(__file__).resolve()),
+                                          '--owner', str(folder)],
+                                         creationflags=subprocess.CREATE_NO_WINDOW)
+            finally:
+                if prior_ollama_sentinel is None:
+                    os.environ.pop('OLLAMA_RUNTIME_SENTINEL', None)
+                else:
+                    os.environ['OLLAMA_RUNTIME_SENTINEL'] = prior_ollama_sentinel
+                if prior_llama_target is None:
+                    os.environ.pop('LLAMA_ARG_FIT_TARGET', None)
+                else:
+                    os.environ['LLAMA_ARG_FIT_TARGET'] = prior_llama_target
             pids = _await_file(folder / 'pids.json')
-            if _await_file(folder / 'environment.json').get('owned') != 'job-owned':
+            child_env = _await_file(folder / 'environment.json')
+            if child_env.get('owned') != 'job-owned' or \
+                    child_env.get('ollamaHost') != '127.0.0.1:11435' or \
+                    child_env.get('ollamaContext') != '16384' or \
+                    child_env.get('ollamaParallel') != '1' or \
+                    child_env.get('ollamaMaxModels') != '1' or \
+                    child_env.get('ollamaKeepAlive') != '0' or \
+                    child_env.get('ollamaCloud') != '1' or \
+                    child_env.get('ollamaFlash') != '0' or \
+                    child_env.get('ollamaGpuOverhead') != '0' or \
+                    child_env.get('ollamaSpread') != '0' or \
+                    child_env.get('ollamaMaxQueue') != '1' or \
+                    child_env.get('ollamaKvCache') != 'f16' or \
+                    child_env.get('ollamaSentinel') is not None or \
+                    child_env.get('llamaFitTarget') is not None:
                 raise RuntimeError('OWNED_PROCESS_ENVIRONMENT_NOT_INHERITED')
             for pid in pids:
                 handles.append(checked(open_process(0x00100000, False, pid)))

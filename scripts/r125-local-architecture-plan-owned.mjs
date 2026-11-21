@@ -23,7 +23,13 @@ const NONCE_RE=/^[a-f0-9]{32}$/;
 const MODEL='qwen3:14b';
 const MODEL_DIGEST='bdbd181c33f2ed1b31c972991882db3cf4d192569092138a7d29e973cd9debe8';
 const MODEL_SIZE=9276198565;
+const ARCHPLAN_REQUEST_SHA256='bf9185c8cb9de22480a11bcea19a83005a355627ef96f7c02f2168cd9d541844';
 const PORT=11435;
+export const CONTEXT_LENGTH=16384;
+export const MAX_OUTPUT_TOKENS=4096;
+const RESOURCE_FLOORS={pre:{ram:9216,commit:16384,gpu:14214},
+ during:{ram:5120,commit:8192,gpu:2560}};
+const RESOURCE_MARGIN_MIB=1024;
 const SAMPLE_KEYS=['ramFreeMiB','commitHeadroomMiB','gpuTotalMiB','gpuFreeMiB','sampleMs'];
 const hold=(reason,extra={})=>({schema:'r125-owned-architecture-plan-v1',
  status:'HOLD',reason,model:'qwen3:14b',modelPostCount:0,automaticRetries:0,
@@ -90,6 +96,7 @@ export async function createWindowsOwnedOllamaController({
   throw Error('PINNED_CLEAN_RESEARCH_HEAD_REQUIRED');
  if(!fs.statSync(pythonExe).isFile()||!fs.statSync(ollamaExe).isFile())
   throw Error('DIRECT_EXECUTABLE_REQUIRED');
+ const ollamaExecutableSha256=createHash('sha256').update(fs.readFileSync(ollamaExe)).digest('hex');
  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'mab-r125-owned-'));
  const nonce=randomBytes(16).toString('hex');
  const sessionFile=path.join(dir,'session.json');
@@ -188,10 +195,26 @@ export async function createWindowsOwnedOllamaController({
   if(first.status!=='OWNED_OLLAMA_STARTED'||first.port!==PORT||
      first.killOnCloseJob!==true||!Number.isSafeInteger(first.pid)||first.pid<=0)
    throw Error('OWNED_OLLAMA_START_UNVERIFIED');
-  if(first.listenerPid!==first.pid||first.monitorPid!==monitor.pid)
+  if(first.listenerPid!==first.pid||first.monitorPid!==monitor.pid||
+     first.configuredContextLength!==CONTEXT_LENGTH||
+     first.configuredParallelRequests!==1||first.configuredMaxLoadedModels!==1||
+     first.configuredKeepAliveSeconds!==0||first.cloudDisabled!==true||
+     first.configuredFlashAttention!==false||first.configuredKvCacheType!=='f16'||
+     first.configuredGpuOverheadBytes!==0||first.configuredScheduleSpread!==false||
+     first.configuredMaxQueue!==1)
    throw Error('OWNED_OLLAMA_LISTENER_MONITOR_PID_MISMATCH');
   service={servicePid:first.pid,supervisorPid:owner.pid,monitorPid:monitor.pid,
-   monitorId:nonce,port:PORT,killOnCloseJob:true,headSha:head};
+   monitorId:nonce,port:PORT,killOnCloseJob:true,headSha:head,
+   ollamaExecutableSha256,configuredParallelRequests:first.configuredParallelRequests,
+   configuredMaxLoadedModels:first.configuredMaxLoadedModels,
+   configuredKeepAliveSeconds:first.configuredKeepAliveSeconds,
+   configuredFlashAttention:first.configuredFlashAttention,
+   configuredKvCacheType:first.configuredKvCacheType,
+   configuredGpuOverheadBytes:first.configuredGpuOverheadBytes,
+   configuredScheduleSpread:first.configuredScheduleSpread,
+   configuredMaxQueue:first.configuredMaxQueue,
+   cloudDisabled:first.cloudDisabled};
+  service.configuredContextLength=first.configuredContextLength;
   return {
    ...service,
    async checkResourceSafety({phase='PRE_POST'}={}){
@@ -219,6 +242,18 @@ const calibratedClearance=(sample,service,now)=>
  sample?.resourceSafetyCertified===true&&
  sample?.inferenceMemoryPeakCalibrated===true&&
  sample?.model===MODEL&&sample?.modelDigest===MODEL_DIGEST&&
+ sample?.contextLength===CONTEXT_LENGTH&&
+ sample?.maxOutputTokens===MAX_OUTPUT_TOKENS&&
+ typeof sample?.calibrationProofSha256==='string'&&
+ /^[a-f0-9]{64}$/.test(sample.calibrationProofSha256)&&
+ sample?.architectureRequestSha256===ARCHPLAN_REQUEST_SHA256&&
+ service.configuredContextLength===CONTEXT_LENGTH&&
+ service.configuredParallelRequests===1&&
+ service.configuredMaxLoadedModels===1&&
+ service.configuredKeepAliveSeconds===0&&service.cloudDisabled===true&&
+ service.configuredFlashAttention===false&&service.configuredKvCacheType==='f16'&&
+ service.configuredGpuOverheadBytes===0&&service.configuredScheduleSpread===false&&
+ service.configuredMaxQueue===1&&
  sample?.headSha===service.headSha&&
  typeof sample?.resourceCalibrationId==='string'&&
  /^[a-z0-9._:-]{8,100}$/i.test(sample.resourceCalibrationId)&&
@@ -234,6 +269,268 @@ const calibratedClearance=(sample,service,now)=>
  Number.isSafeInteger(sample.measuredAtEpochMs)&&
  sample.measuredAtEpochMs<=now&&now-sample.measuredAtEpochMs<=3000&&
  sample.sharedServiceIdle===true;
+
+const jsonObject=async(fetcher,url,method='GET',signal=AbortSignal.timeout(5000))=>{
+ const response=await fetcher(url,{method,redirect:'error',signal});
+ if(!response?.ok)throw Error('OWNED_LOCAL_HTTP_UNAVAILABLE');
+ return response.json();
+};
+
+export function validateCalibrationRequest({body,expectedSha256}={}){
+ let raw;
+ try{raw=JSON.stringify(body);}catch{return {valid:false,reason:'REQUEST_NOT_JSON'};}
+ const requestSha256=createHash('sha256').update(raw).digest('hex');
+ const messages=body?.messages;
+ const valid=body?.model===MODEL&&body?.stream===false&&
+  body?.temperature===0.55&&body?.response_format?.type==='json_object'&&
+  body?.max_tokens===MAX_OUTPUT_TOKENS&&Array.isArray(messages)&&
+  messages.length===2&&messages[0]?.role==='system'&&
+  messages[1]?.role==='user'&&
+  messages.every(x=>typeof x.content==='string'&&x.content.length>0)&&
+  /R125 RESOURCE CALIBRATION ONLY/.test(messages[0].content)&&
+  !/shelterDepth|architectureplan|minecraft building/i.test(messages[1].content)&&
+  /^[a-f0-9]{64}$/.test(expectedSha256??'')&&requestSha256===expectedSha256;
+ return {valid,reason:valid?'OK':'CALIBRATION_REQUEST_BINDING_MISMATCH',
+  requestSha256,body:valid?body:undefined};
+}
+
+function ownedSamplePass(sensor,service,phase,now){
+ const r=sensor?.observedResourcesMiB;
+ const floor=phase==='PRE_POST'?RESOURCE_FLOORS.pre:RESOURCE_FLOORS.during;
+ return sensor?.independentMonitorActive===true&&
+  sensor?.ownedServiceInKillOnCloseJob===true&&
+  sensor?.ownedServicePort===PORT&&sensor?.ownedServicePid===service.servicePid&&
+  sensor?.supervisorPid===service.supervisorPid&&
+  sensor?.monitorPid===service.monitorPid&&sensor?.monitorId===service.monitorId&&
+  Number.isSafeInteger(sensor?.monitorSequence)&&sensor.monitorSequence>0&&
+  Number.isSafeInteger(sensor?.monitorHeartbeatEpochMs)&&
+  sensor.monitorHeartbeatEpochMs<=now&&now-sensor.monitorHeartbeatEpochMs<=3000&&
+  r&&Number.isSafeInteger(r.ramFree)&&Number.isSafeInteger(r.commitHeadroom)&&
+  Number.isSafeInteger(r.gpuFree)&&Number.isSafeInteger(r.gpuTotal)&&
+  r.gpuTotal>0&&r.gpuFree<=r.gpuTotal&&
+  r.ramFree>=floor.ram&&r.commitHeadroom>=floor.commit&&r.gpuFree>=floor.gpu;
+}
+
+const exactLoadedModel=body=>Array.isArray(body?.models)&&body.models.length===1&&
+ body.models[0]?.name===MODEL&&body.models[0]?.digest===MODEL_DIGEST&&
+ body.models[0]?.context_length===CONTEXT_LENGTH&&
+ Number.isSafeInteger(body.models[0]?.size)&&body.models[0].size>0&&
+ Number.isSafeInteger(body.models[0]?.size_vram)&&body.models[0].size_vram>0;
+
+/** One individually approved synthetic POST. This path does not invoke the
+ * ArchitecturePlan adapter or write SOURCE/build outputs. */
+export async function runR125ResourceCalibrationOwned({
+ calibrationRequest,calibrationRequestSha256,minimumInputTokens=4777,
+ evidenceWriter=null
+},{controller,fetcher=fetch,approvalVerifier=null,now=()=>Date.now(),
+ timeoutMs=180000,pollMs=300}={}){
+ const service=controller;
+ const report={schema:'r125-qwen14b-owned-resource-calibration-v1',status:'HOLD',
+  reason:'CALIBRATION_NOT_STARTED',model:MODEL,modelDigest:MODEL_DIGEST,
+  headSha:service?.headSha??null,contextLength:CONTEXT_LENGTH,
+  maxOutputTokens:MAX_OUTPUT_TOKENS,modelPostCount:0,automaticRetries:0,
+  resourceSafetyCertified:false,inferenceMemoryPeakCalibrated:false,
+  worldContacts:0,worldWrites:0,paidApiCalls:0,shared11434Writes:0,
+  gates:Array(9).fill('BLOCKED'),BuildPlan:{operations:[]},samples:[],
+  loadedModelObservation:null,unloadedConfirmed:false,
+  ownedServiceStopConfirmed:false,monitorStopConfirmed:false};
+ const stop=async reason=>{
+  try{
+   const result=await service?.stop?.(reason);
+   report.ownedServiceStopConfirmed=result?.ownerStopConfirmed===true;
+   report.monitorStopConfirmed=result?.monitorStopConfirmed===true;
+   if(report.ownedServiceStopConfirmed&&report.monitorStopConfirmed){
+    report.unloadedConfirmed=true;
+    report.unloadProof='OWNED_KILL_ON_CLOSE_JOB_TERMINATED';
+   }
+  }catch{}
+ };
+ const fail=async(reason)=>{
+  report.reason=reason;await stop(reason);
+  if(evidenceWriter)try{await evidenceWriter(report);}catch{}
+  return report;
+ };
+ if(!service||typeof service.checkResourceSafety!=='function'||
+    typeof service.stop!=='function'||service.configuredContextLength!==CONTEXT_LENGTH||
+    service.configuredParallelRequests!==1||service.configuredMaxLoadedModels!==1||
+    service.configuredKeepAliveSeconds!==0||service.cloudDisabled!==true||
+    service.configuredFlashAttention!==false||service.configuredKvCacheType!=='f16'||
+    service.configuredGpuOverheadBytes!==0||service.configuredScheduleSpread!==false||
+    service.configuredMaxQueue!==1||
+    !/^[a-f0-9]{64}$/.test(service.ollamaExecutableSha256??'')||
+    !HEAD_RE.test(service.headSha??''))
+  return fail('OWNED_CONTEXT_OR_CONTROLLER_MISMATCH');
+ if(!Number.isSafeInteger(timeoutMs)||timeoutMs<1000||timeoutMs>180000||
+    !Number.isSafeInteger(pollMs)||pollMs<250||pollMs>5000)
+  return fail('CALIBRATION_TIMEOUT_OR_POLL_BOUNDS_INVALID');
+ const request=validateCalibrationRequest({body:calibrationRequest,
+  expectedSha256:calibrationRequestSha256});
+ if(!request.valid)return fail(request.reason);
+ if(!Number.isSafeInteger(minimumInputTokens)||minimumInputTokens<1||
+    minimumInputTokens>12000)return fail('CALIBRATION_INPUT_SCOPE_INVALID');
+ const url='http://127.0.0.1:11435/v1/chat/completions';
+ const sharedUrl='http://127.0.0.1:11434/api/ps';
+ let tags,ownedPs,sharedPs;
+ try{
+  [tags,ownedPs,sharedPs]=await Promise.all([
+   jsonObject(fetcher,'http://127.0.0.1:11435/api/tags'),
+   jsonObject(fetcher,'http://127.0.0.1:11435/api/ps'),
+   jsonObject(fetcher,sharedUrl)]);
+ }catch{return fail('MODEL_OR_SHARED_SERVICE_PREFLIGHT_UNAVAILABLE');}
+ const models=tags?.models?.filter(x=>x?.name===MODEL)??[];
+ if(models.length!==1||models[0].digest!==MODEL_DIGEST||
+    models[0].size!==MODEL_SIZE||models[0].details?.quantization_level!=='Q4_K_M'||
+    models[0].details?.parameter_size!=='14.8B'||
+    !Array.isArray(ownedPs?.models)||ownedPs.models.length!==0||
+    !Array.isArray(sharedPs?.models)||sharedPs.models.length!==0)
+  return fail('MODEL_DIGEST_OR_COMPETING_MODEL_HOLD');
+ let previousSequence=0;
+ const sample=async phase=>{
+  const s=await service.checkResourceSafety({phase,model:MODEL,headSha:service.headSha});
+  if(!ownedSamplePass(s,service,phase,now())||s.monitorSequence<=previousSequence)
+   throw Error('RESOURCE_OR_MONITOR_GUARD');
+  previousSequence=s.monitorSequence;
+  const d=s.observedResourcesMiB;
+  report.samples.push({atEpochMs:now(),monitorHeartbeatEpochMs:s.monitorHeartbeatEpochMs,
+   monitorSequence:s.monitorSequence,monitorPid:s.monitorPid,
+   ownedServicePid:s.ownedServicePid,supervisorPid:s.supervisorPid,
+   ramFreeMiB:d.ramFree,commitHeadroomMiB:d.commitHeadroom,
+   gpuFreeMiB:d.gpuFree,gpuTotalMiB:d.gpuTotal});
+  return s;
+ };
+ try{await sample('PRE_POST');}
+ catch{return fail('RESOURCE_OR_INDEPENDENT_HEARTBEAT_PRECHECK_HOLD');}
+ try{
+  [ownedPs,sharedPs]=await Promise.all([
+   jsonObject(fetcher,'http://127.0.0.1:11435/api/ps'),
+   jsonObject(fetcher,sharedUrl)]);
+  await sample('PRE_POST');
+ }catch{return fail('RESOURCE_OR_MODEL_STATE_CHANGED_BEFORE_POST');}
+ if(ownedPs.models.length!==0||sharedPs.models.length!==0)
+  return fail('COMPETING_MODEL_BEFORE_CALIBRATION_POST');
+ let approved=false;
+ try{approved=typeof approvalVerifier==='function'&&await approvalVerifier({
+  purpose:'RESOURCE_CALIBRATION',requestSha256:request.requestSha256,
+  model:MODEL,modelDigest:MODEL_DIGEST,headSha:service.headSha,
+  endpoint:url,maxPosts:1,automaticRetries:0,contextLength:CONTEXT_LENGTH,
+  maxOutputTokens:MAX_OUTPUT_TOKENS})===true;}catch{}
+ if(!approved)
+  return fail('INDIVIDUAL_CALIBRATION_APPROVAL_REQUIRED');
+
+ const abort=new AbortController(),started=now(),deadline=started+timeoutMs;
+ report.calibrationStartedAtEpochMs=started;
+ report.calibrationRequestSha256=request.requestSha256;
+ report.minimumInputTokens=minimumInputTokens;
+ report.runtimeSettings={ollamaHost:'127.0.0.1:11435',contextLength:CONTEXT_LENGTH,
+  maxOutputTokens:MAX_OUTPUT_TOKENS,temperature:0.55,responseFormat:'json_object',
+  requestEndpoint:url,timeoutMs,automaticRetries:0,
+  parallelRequests:service.configuredParallelRequests,
+  maxLoadedModels:service.configuredMaxLoadedModels,
+  keepAliveSeconds:service.configuredKeepAliveSeconds,cloudDisabled:service.cloudDisabled,
+  flashAttention:service.configuredFlashAttention,kvCacheType:service.configuredKvCacheType,
+  gpuOverheadBytes:service.configuredGpuOverheadBytes,
+  scheduleSpread:service.configuredScheduleSpread,maxQueue:service.configuredMaxQueue,
+  ollamaExecutableSha256:service.ollamaExecutableSha256};
+ report.resourceMeasurement={source:'existing independent R125 V3.1 sensor',
+  sourceCadenceMs:250,observedPollMs:pollMs,
+  preflightFloorsMiB:{...RESOURCE_FLOORS.pre},
+  inferenceFloorsMiB:{...RESOURCE_FLOORS.during},
+  historicalModelVramBytes:11682688531,historicalModelSizeBytes:11682688531,
+  historicalModelPlacement:'size_equals_size_vram',
+  historicalModelContextLength:CONTEXT_LENGTH,
+  historicalModelDigest:MODEL_DIGEST,
+  historicalModelEvidence:'V9GateC-bed0cdbc-clean-clone/evidence/r190bm/A/BM_RUNTIME_AFTER.json',
+  historicalModelEvidenceSha256:'aad94f5c100fb29ab49ea4ee043771963f7d7f667965a155cf523aa36079e280',
+  preflightMarginMiB:3072,
+  calibrationReserveMarginMiB:RESOURCE_MARGIN_MIB};
+ report.monitorIdentity={monitorPid:service.monitorPid,monitorId:service.monitorId,
+  ownedServicePid:service.servicePid,supervisorPid:service.supervisorPid,
+  jobPort:service.port,killOnCloseJob:service.killOnCloseJob};
+ report.modelPostCount=1;
+ let requestDone=false;
+ const pending=Promise.resolve().then(()=>fetcher(url,{method:'POST',redirect:'error',
+  headers:{'Content-Type':'application/json'},signal:abort.signal,
+  body:JSON.stringify(request.body)})).then(async response=>{
+   if(!response?.ok)throw Error('CALIBRATION_POST_HTTP_FAILED');
+   const raw=await response.text();
+   if(raw.length<2||raw.length>200000)throw Error('CALIBRATION_RESPONSE_SIZE_INVALID');
+   return {value:JSON.parse(raw),responseSha256:createHash('sha256').update(raw).digest('hex')};
+  }).then(value=>({ok:true,...value}),error=>({ok:false,error:String(error?.message??error)}))
+   .finally(()=>{requestDone=true;});
+ let monitorError=null,loadedSeen=false;
+ while(!requestDone&&now()<deadline){
+  const tick=await Promise.race([pending.then(()=>false),delay(pollMs).then(()=>true)]);
+  if(!tick)break;
+  try{
+   const s=await sample('DURING_INFERENCE');
+   const [active,shared]=await Promise.all([
+    jsonObject(fetcher,'http://127.0.0.1:11435/api/ps'),
+    jsonObject(fetcher,sharedUrl)]);
+   if(!Array.isArray(shared?.models)||shared.models.length!==0)
+    throw Error('SHARED_SERVICE_BECAME_BUSY');
+   if(Array.isArray(active?.models)&&active.models.length===0){
+    if(now()-started>20000)throw Error('MODEL_LOAD_NOT_OBSERVED');
+   }else if(exactLoadedModel(active)){
+    loadedSeen=true;
+    const item=active.models[0];
+    const placement={sizeBytes:item.size,sizeVramBytes:item.size_vram,
+     cpuOffloadEstimateBytes:Math.max(0,item.size-item.size_vram)};
+    if(report.loadedModelObservation&&
+       JSON.stringify(report.loadedModelObservation.placement)!==JSON.stringify(placement))
+     throw Error('MODEL_PLACEMENT_CHANGED_DURING_CALIBRATION');
+    report.loadedModelObservation={digest:item.digest,contextLength:item.context_length,
+     observedAtEpochMs:now(),placement,resourceSampleSequence:s.monitorSequence};
+   }else throw Error('LOADED_MODEL_IDENTITY_OR_CONTEXT_MISMATCH');
+  }catch(error){monitorError=String(error?.message??error);break;}
+ }
+ if(!requestDone){
+  monitorError=monitorError??(now()>=deadline?'CALIBRATION_TIMEOUT':'CALIBRATION_ABORTED');
+  abort.abort();await stop(monitorError);
+  await Promise.race([pending,delay(5000)]);
+  report.reason=monitorError;
+  if(evidenceWriter)try{await evidenceWriter(report);}catch{}
+  return report;
+ }
+ const final=await pending;
+ if(!final.ok)return fail(final.error);
+ const choice=Array.isArray(final.value?.choices)&&final.value.choices.length===1?
+  final.value.choices[0]:null;
+ report.responseSha256=final.responseSha256;
+ report.promptTokens=final.value?.usage?.prompt_tokens??null;
+ report.generatedTokens=final.value?.usage?.completion_tokens??null;
+ report.inputOutputTokensTotal=Number.isSafeInteger(report.promptTokens)&&
+  Number.isSafeInteger(report.generatedTokens)?report.promptTokens+report.generatedTokens:null;
+ report.finishReason=choice?.finish_reason??null;
+ report.generatedCharacters=typeof choice?.message?.content==='string'?
+  choice.message.content.length:null;
+ if(!loadedSeen||report.loadedModelObservation?.contextLength!==CONTEXT_LENGTH||
+    !Number.isSafeInteger(report.promptTokens)||report.promptTokens<minimumInputTokens||
+    report.generatedTokens!==MAX_OUTPUT_TOKENS||report.finishReason!=='length'||
+    typeof choice?.message?.content!=='string'||
+    report.inputOutputTokensTotal>CONTEXT_LENGTH)
+  report.reason='CALIBRATION_OUTPUT_OR_ACTUAL_CONTEXT_NOT_PROVEN';
+ await stop('CALIBRATION_FINISHED');
+ const rows=report.samples;
+ if(report.reason==='CALIBRATION_NOT_STARTED'&&report.unloadedConfirmed&&
+    report.ownedServiceStopConfirmed&&report.monitorStopConfirmed&&rows.length>=3){
+  report.minimumObservedMiB={
+   ramFree:Math.min(...rows.map(x=>x.ramFreeMiB)),
+   commitHeadroom:Math.min(...rows.map(x=>x.commitHeadroomMiB)),
+   gpuFree:Math.min(...rows.map(x=>x.gpuFreeMiB)),
+   gpuTotal:Math.min(...rows.map(x=>x.gpuTotalMiB))};
+  report.startResourcesMiB={ramFree:rows[0].ramFreeMiB,
+   commitHeadroom:rows[0].commitHeadroomMiB,gpuFree:rows[0].gpuFreeMiB,
+   gpuTotal:rows[0].gpuTotalMiB};
+  report.status='CALIBRATION_PASS';report.reason='BOUNDED_RESOURCE_ENVELOPE_CAPTURED';
+  report.resourceSafetyCertified=true;report.inferenceMemoryPeakCalibrated=true;
+ }else if(report.reason==='CALIBRATION_NOT_STARTED')
+  report.reason='CALIBRATION_EVIDENCE_OR_STOP_CONFIRMATION_INCOMPLETE';
+ if(evidenceWriter)try{await evidenceWriter(report);}catch{
+  report.status='HOLD';report.reason='PRIVATE_EVIDENCE_WRITE_FAILED';
+  report.resourceSafetyCertified=false;report.inferenceMemoryPeakCalibrated=false;
+ }
+ return report;
+}
 
 /**
  * ArchitecturePlan is the actual contract used by shelterDepth:3. It is not
@@ -269,8 +566,8 @@ export async function runR125ArchitecturePlanOwned(args,{
    ownedServiceStopConfirmed:stopped?.ownerStopConfirmed===true,
    monitorStopConfirmed:stopped?.monitorStopConfirmed===true});
  }
- // Identity and idle checks are GET-only against the owned endpoint. The
- // shared 11434 daemon is never queried or stopped by this path.
+  // Identity and idle checks are GET-only. Shared 11434 is queried read-only
+  // for an idle check; this path never posts to or stops that service.
  try{
   const tagsResponse=await fetcher('http://127.0.0.1:11435/api/tags',
    {method:'GET',redirect:'error',signal:AbortSignal.timeout(5000)});
@@ -306,9 +603,16 @@ export async function runR125ArchitecturePlanOwned(args,{
    throw Error('OWNED_ARCHPLAN_ONE_POST_BOUNDARY');
   }
   const requestSha256=createHash('sha256').update(String(init.body??'')).digest('hex');
-  if(typeof exactRequestApprovalVerifier!=='function'||
+   let outgoing;
+   try{outgoing=JSON.parse(String(init.body??''));}catch{outgoing=null;}
+   if(typeof exactRequestApprovalVerifier!=='function'||
+      requestSha256!==ARCHPLAN_REQUEST_SHA256||
+      outgoing?.model!==MODEL||outgoing?.max_tokens!==MAX_OUTPUT_TOKENS||
      await exactRequestApprovalVerifier({requestSha256,model:MODEL,
-      headSha:service.headSha,endpoint:url,maxPosts:1,automaticRetries:0})!==true){
+       headSha:service.headSha,endpoint:url,maxPosts:1,automaticRetries:0,
+       purpose:'ARCHITECTURE_PLAN',contextLength:CONTEXT_LENGTH,
+       maxOutputTokens:MAX_OUTPUT_TOKENS,
+       calibrationProofSha256:pre.calibrationProofSha256})!==true){
    await service.stop('EXACT_REQUEST_APPROVAL_REQUIRED');
    throw Error('EXACT_ARCHPLAN_REQUEST_APPROVAL_REQUIRED');
   }
@@ -427,7 +731,55 @@ async function runOwnedCli(argv){
  if(result.status==='HOLD')process.exitCode=2;
 }
 
+async function runOwnedCalibrationCli(argv){
+ if(argv.length!==0)throw Error('USAGE --calibrate');
+ const privateModule=process.env.MAB_V7_PRIVATE_HOST_MODULE;
+ const expectedHead=process.env.MAB_HEAD;
+ const pythonExe=process.env.MAB_PYTHON_EXE;
+ const ollamaExe=process.env.MAB_OLLAMA_EXE;
+ if(!path.isAbsolute(privateModule??'')||!HEAD_RE.test(expectedHead??'')||
+    !path.isAbsolute(pythonExe??'')||!path.isAbsolute(ollamaExe??''))
+  throw Error('PRIVATE_CALIBRATION_AND_DIRECT_EXECUTABLES_REQUIRED');
+ const opts={encoding:'utf8',timeout:10000,windowsHide:true};
+ const observed=execFileSync('git.exe',['-C',ROOT,'rev-parse','HEAD'],opts).trim();
+ const branch=execFileSync('git.exe',['-C',ROOT,'branch','--show-current'],opts).trim();
+ const dirty=execFileSync('git.exe',['-C',ROOT,'status','--porcelain=v1',
+  '--untracked-files=normal'],opts);
+ if(observed!==expectedHead||branch!==BRANCH||dirty!=='')
+  throw Error('PINNED_CLEAN_RESEARCH_HEAD_REQUIRED');
+ const ci=await checkExactHeadCi(expectedHead);
+ if(ci?.safeToRunModel!==true)throw Error('EXACT_HEAD_REQUIRED_CI_NOT_SUCCESS');
+ const actual=fs.realpathSync(privateModule);
+ if(actual===ROOT||actual.startsWith(ROOT+path.sep)||!fs.statSync(actual).isFile())
+  throw Error('PRIVATE_MODULE_MUST_BE_EXTERNAL');
+ const bindings=await import(pathToFileURL(actual).href);
+ if(!bindings.calibrationRequest||
+    typeof bindings.verifyCalibrationRequestApproval!=='function'||
+    typeof bindings.saveCalibrationEvidence!=='function')
+  throw Error('PRIVATE_CALIBRATION_BINDING_INCOMPLETE');
+ const controller=await createWindowsOwnedOllamaController({
+  pythonExe,ollamaExe,expectedHead,repoRoot:ROOT});
+ const result=await runR125ResourceCalibrationOwned({
+  calibrationRequest:bindings.calibrationRequest,
+  calibrationRequestSha256:bindings.calibrationRequestSha256,
+  minimumInputTokens:bindings.minimumInputTokens,
+  evidenceWriter:bindings.saveCalibrationEvidence},{controller,
+  approvalVerifier:bindings.verifyCalibrationRequestApproval});
+ console.log(JSON.stringify({schema:result.schema,status:result.status,
+  reason:result.reason,calibrationRequestSha256:result.calibrationRequestSha256??
+   bindings.calibrationRequestSha256,modelPostCount:result.modelPostCount,
+  automaticRetries:result.automaticRetries,contextLength:result.contextLength,
+  maxOutputTokens:result.maxOutputTokens,unloadedConfirmed:result.unloadedConfirmed,
+  ownedServiceStopConfirmed:result.ownedServiceStopConfirmed,
+  monitorStopConfirmed:result.monitorStopConfirmed,worldWrites:0}));
+ if(result.status!=='CALIBRATION_PASS')process.exitCode=2;
+}
+
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){
- try{await runOwnedCli(process.argv.slice(2));}
+ try{
+  const argv=process.argv.slice(2);
+  if(argv[0]==='--calibrate')await runOwnedCalibrationCli(argv.slice(1));
+  else await runOwnedCli(argv);
+ }
  catch{console.error('R125_OWNED_ARCHPLAN_HOLD');process.exitCode=2;}
 }
