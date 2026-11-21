@@ -524,7 +524,13 @@ export async function runR125ResourceCalibrationOwned({
  const pending=Promise.resolve().then(()=>fetcher(url,{method:'POST',redirect:'error',
   headers:{'Content-Type':'application/json'},signal:abort.signal,
   body:JSON.stringify(request.body)})).then(async response=>{
-   if(!response?.ok)throw Error('CALIBRATION_POST_HTTP_FAILED');
+   if(!response?.ok){
+    // Preserve the numeric HTTP status in the PRIVATE failure receipt.
+    // Never persist the response body (it may include private model data).
+    report.calibrationHttpStatus=Number.isInteger(response?.status)&&
+     response.status>=100&&response.status<=599?response.status:null;
+    throw Error('CALIBRATION_POST_HTTP_FAILED');
+   }
    const raw=await response.text();
    if(raw.length<2||raw.length>200000)throw Error('CALIBRATION_RESPONSE_SIZE_INVALID');
    return {value:JSON.parse(raw),responseSha256:createHash('sha256').update(raw).digest('hex')};
