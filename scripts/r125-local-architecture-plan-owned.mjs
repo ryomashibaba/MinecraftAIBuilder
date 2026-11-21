@@ -27,7 +27,7 @@ const ARCHPLAN_REQUEST_SHA256='bf9185c8cb9de22480a11bcea19a83005a355627ef96f7c02
 const PORT=11435;
 export const CONTEXT_LENGTH=16384;
 export const MAX_OUTPUT_TOKENS=4096;
-const RESOURCE_FLOORS={pre:{ram:9216,commit:16384,gpu:14214},
+const RESOURCE_FLOORS={pre:{ram:8192,commit:16384,gpu:14214},
  during:{ram:5120,commit:8192,gpu:2560}};
 const RESOURCE_MARGIN_MIB=1024;
 const SAMPLE_KEYS=['ramFreeMiB','commitHeadroomMiB','gpuTotalMiB','gpuFreeMiB','sampleMs'];
