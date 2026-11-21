@@ -36,6 +36,8 @@ const hold=(reason,extra={})=>({schema:'r125-owned-architecture-plan-v1',
  worldContacts:0,worldWrites:0,constructionApproved:false,executionAllowed:false,
  BuildPlan:{operations:[]},gates:Array(9).fill('BLOCKED'),...extra});
 const int=x=>Number.isSafeInteger(x)&&x>=0;
+export const hasExited=child=>child!==null&&
+ (child.exitCode!==null||child.signalCode!==null);
 
 export function verifyOwnedArchitectureSample({session,sample,owner,headSha,
  previousSequence=0,now=Date.now()}={}){
@@ -122,8 +124,6 @@ export async function createWindowsOwnedOllamaController({
   },ms);
   ownerWaiters.push({resolve:value=>{clearTimeout(timer);resolve(value);}});
  });
- const hasExited=child=>child!==null&&
-  (child.exitCode!==null||child.signalCode!==null);
  const stop=async reason=>{
   if(stopped)return {stopped:true,ownerStopConfirmed:ownerStopAck,
    monitorStopConfirmed:monitor===null||hasExited(monitor),
@@ -181,8 +181,8 @@ export async function createWindowsOwnedOllamaController({
     const sample=readJson(sampleFile);
     const checked=verifyOwnedArchitectureSample({session:{nonce,monitorPid:monitor.pid},
      sample,owner:{port:PORT,servicePid:1,supervisorPid:1,killOnCloseJob:true},
-     headSha:head,previousSequence:previous,now:now()});
-    if(checked.independentMonitorActive===true){previous=sample.seq;
+     headSha:head,previousSequence:0,now:now()});
+    if(checked.independentMonitorActive===true&&sample.seq>previous){previous=sample.seq;
      if(previous>=2)ready=true;}
    }catch{}
    if(!ready)await delay(150);
@@ -219,14 +219,31 @@ export async function createWindowsOwnedOllamaController({
   service.configuredContextLength=first.configuredContextLength;
   return {
    ...service,
-   async checkResourceSafety({phase='PRE_POST'}={}){
+   async checkResourceSafety({phase='PRE_POST',waitForNewSequence=false}={}){
     if(stopped||hasExited(monitor)||hasExited(owner))
      return {status:'HOLD',reason:'OWNED_PROCESS_NOT_ALIVE',resourceSafetyCertified:false};
     try{
      const sample=readJson(sampleFile);
      const result=verifyOwnedArchitectureSample({session:{nonce,monitorPid:monitor.pid},
-      sample,owner:service,headSha:head,previousSequence:sequence,now:now()});
-     if(result.independentMonitorActive===true)sequence=sample.seq;
+      sample,owner:service,headSha:head,previousSequence:0,now:now()});
+     if(result.independentMonitorActive!==true)return {...result,phase};
+     if(sample.seq<=sequence){
+      const d=sample.data,floor=phase==='PRE_POST'?RESOURCE_FLOORS.pre:RESOURCE_FLOORS.during;
+      if(d.ramFreeMiB<floor.ram||d.commitHeadroomMiB<floor.commit||
+         d.gpuFreeMiB<floor.gpu)
+       return {status:'HOLD',reason:'RESOURCE_FLOOR_BELOW_REQUIRED',
+        resourceSafetyCertified:false,independentMonitorActive:true,
+        monitorSequence:sample.seq,observedResourcesMiB:{ramFree:d.ramFreeMiB,
+         commitHeadroom:d.commitHeadroomMiB,gpuFree:d.gpuFreeMiB,
+         gpuTotal:d.gpuTotalMiB},phase};
+      if(waitForNewSequence===true)
+       return {status:'HOLD',reason:'MONITOR_SEQUENCE_NOT_ADVANCED',
+        resourceSafetyCertified:false,independentMonitorActive:false,
+        monitorSequence:sample.seq,phase};
+      return {status:'HOLD',reason:'INDEPENDENT_MONITOR_SAMPLE_INVALID',
+       resourceSafetyCertified:false,phase};
+     }
+     sequence=sample.seq;
      return {...result,phase};
     }catch{return {status:'HOLD',reason:'INDEPENDENT_MONITOR_SAMPLE_INVALID',
      resourceSafetyCertified:false};}
@@ -387,27 +404,51 @@ export async function runR125ResourceCalibrationOwned({
     !Array.isArray(sharedPs?.models)||sharedPs.models.length!==0)
   return fail('MODEL_DIGEST_OR_COMPETING_MODEL_HOLD');
  let previousSequence=0;
- const sample=async phase=>{
-  const s=await service.checkResourceSafety({phase,model:MODEL,headSha:service.headSha});
-  if(!ownedSamplePass(s,service,phase,now())||s.monitorSequence<=previousSequence)
-   throw Error('RESOURCE_OR_MONITOR_GUARD');
-  previousSequence=s.monitorSequence;
-  const d=s.observedResourcesMiB;
-  report.samples.push({atEpochMs:now(),monitorHeartbeatEpochMs:s.monitorHeartbeatEpochMs,
-   monitorSequence:s.monitorSequence,monitorPid:s.monitorPid,
-   ownedServicePid:s.ownedServicePid,supervisorPid:s.supervisorPid,
-   ramFreeMiB:d.ramFree,commitHeadroomMiB:d.commitHeadroom,
-   gpuFreeMiB:d.gpuFree,gpuTotalMiB:d.gpuTotal});
-  return s;
+ const sample=async(phase,{waitForNewSequence=false}={})=>{
+  const sequenceDeadline=waitForNewSequence?Date.now()+3000:0;
+  for(;;){
+   const s=await service.checkResourceSafety({phase,model:MODEL,
+    headSha:service.headSha,waitForNewSequence});
+   if(s?.reason==='MONITOR_SEQUENCE_NOT_ADVANCED'&&waitForNewSequence){
+    const remaining=sequenceDeadline-Date.now();
+    if(remaining<=0)throw Error('PRE_POST_MONITOR_SEQUENCE_TIMEOUT');
+    await delay(Math.min(50,remaining));
+    continue;
+   }
+   if(s?.reason==='RESOURCE_FLOOR_BELOW_REQUIRED')
+    throw Error('PRE_POST_RESOURCE_FLOOR_HOLD');
+   const r=s?.observedResourcesMiB;
+   const floor=phase==='PRE_POST'?RESOURCE_FLOORS.pre:RESOURCE_FLOORS.during;
+   const underFloor=r&&Number.isSafeInteger(r.ramFree)&&
+    Number.isSafeInteger(r.commitHeadroom)&&Number.isSafeInteger(r.gpuFree)&&
+    (r.ramFree<floor.ram||r.commitHeadroom<floor.commit||r.gpuFree<floor.gpu);
+   if(underFloor)throw Error(phase==='PRE_POST'?
+    'PRE_POST_RESOURCE_FLOOR_HOLD':'RESOURCE_OR_MONITOR_GUARD');
+   if(!ownedSamplePass(s,service,phase,now()))
+    throw Error(phase==='PRE_POST'?'PRE_POST_MONITOR_SAMPLE_HOLD':'RESOURCE_OR_MONITOR_GUARD');
+   if(s.monitorSequence<=previousSequence)
+    throw Error(phase==='PRE_POST'?'PRE_POST_MONITOR_SEQUENCE_INVALID':'RESOURCE_OR_MONITOR_GUARD');
+   previousSequence=s.monitorSequence;
+   const d=s.observedResourcesMiB;
+   report.samples.push({atEpochMs:now(),monitorHeartbeatEpochMs:s.monitorHeartbeatEpochMs,
+    monitorSequence:s.monitorSequence,monitorPid:s.monitorPid,
+    ownedServicePid:s.ownedServicePid,supervisorPid:s.supervisorPid,
+    ramFreeMiB:d.ramFree,commitHeadroomMiB:d.commitHeadroom,
+    gpuFreeMiB:d.gpuFree,gpuTotalMiB:d.gpuTotal});
+   return s;
+  }
  };
  try{await sample('PRE_POST');}
- catch{return fail('RESOURCE_OR_INDEPENDENT_HEARTBEAT_PRECHECK_HOLD');}
- try{
-  [ownedPs,sharedPs]=await Promise.all([
-   jsonObject(fetcher,'http://127.0.0.1:11435/api/ps'),
-   jsonObject(fetcher,sharedUrl)]);
-  await sample('PRE_POST');
- }catch{return fail('RESOURCE_OR_MODEL_STATE_CHANGED_BEFORE_POST');}
+ catch(error){return fail(error?.message==='PRE_POST_RESOURCE_FLOOR_HOLD'?
+  'PRE_POST_RESOURCE_FLOOR_HOLD':'PRE_POST_MONITOR_SAMPLE_HOLD');}
+ try{ownedPs=await jsonObject(fetcher,'http://127.0.0.1:11435/api/ps');}
+ catch{return fail('OWNED_MODEL_STATE_RECHECK_FAILED');}
+ try{sharedPs=await jsonObject(fetcher,sharedUrl);}
+ catch{return fail('SHARED_MODEL_STATE_RECHECK_FAILED');}
+ if(!Array.isArray(ownedPs?.models))return fail('OWNED_MODEL_STATE_RECHECK_INVALID');
+ if(!Array.isArray(sharedPs?.models))return fail('SHARED_MODEL_STATE_RECHECK_INVALID');
+ try{await sample('PRE_POST',{waitForNewSequence:true});}
+ catch(error){return fail(error?.message??'PRE_POST_MONITOR_SAMPLE_HOLD');}
  if(ownedPs.models.length!==0||sharedPs.models.length!==0)
   return fail('COMPETING_MODEL_BEFORE_CALIBRATION_POST');
  let approved=false;

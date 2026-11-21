@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {runR125ArchitecturePlanOwned,verifyOwnedArchitectureSample}
+import {runR125ArchitecturePlanOwned,verifyOwnedArchitectureSample,
+ hasExited}
  from './r125-local-architecture-plan-owned.mjs';
 import {runR125ResourceCalibrationOwned,validateCalibrationRequest}
  from './r125-local-architecture-plan-owned.mjs';
@@ -71,6 +72,28 @@ const sensor=(sequence,alive=true)=>({status:'HOLD',independentMonitorActive:ali
  monitorHeartbeatEpochMs:Date.now(),monitorSequence:sequence,
  observedResourcesMiB:{ramFree:12000,commitHeadroom:20000,
   gpuFree:15000,gpuTotal:16303}});
+const calibrationController=checkResourceSafety=>({servicePid:5001,
+ supervisorPid:5000,monitorPid:4999,monitorId:'a'.repeat(32),port:11435,
+ killOnCloseJob:true,configuredContextLength:16384,configuredParallelRequests:1,
+ configuredMaxLoadedModels:1,configuredKeepAliveSeconds:0,cloudDisabled:true,
+ configuredFlashAttention:false,configuredKvCacheType:'f16',
+ configuredGpuOverheadBytes:0,configuredScheduleSpread:false,configuredMaxQueue:1,
+ ollamaExecutableSha256:'d'.repeat(64),headSha:'c'.repeat(40),checkResourceSafety,
+ async stop(reason){return {reason,ownerStopConfirmed:true,monitorStopConfirmed:true};}});
+const calibrationPreflightFetcher=async(url,init={})=>{
+ if(init.method==='POST')throw Error('TEST_MUST_NOT_POST');
+ if(url.endsWith('/api/tags'))return {ok:true,json:async()=>({models:[{
+  name:'qwen3:14b',digest:'bdbd181c33f2ed1b31c972991882db3cf4d192569092138a7d29e973cd9debe8',
+  size:9276198565,details:{quantization_level:'Q4_K_M',parameter_size:'14.8B'}}]})};
+ return {ok:true,json:async()=>({models:[]})};
+};
+
+test('a signalled child is confirmed exited only after Node records its signalCode',()=>{
+ assert.equal(hasExited(null),false);
+ assert.equal(hasExited({exitCode:null,signalCode:null}),false);
+ assert.equal(hasExited({exitCode:null,signalCode:'SIGTERM'}),true);
+ assert.equal(hasExited({exitCode:1,signalCode:null}),true);
+});
 
 test('calibration fails closed on context mismatch before any POST',async()=>{
  const body=calibrationBody(),sha=createHash('sha256').update(JSON.stringify(body)).digest('hex');
@@ -162,6 +185,96 @@ test('an independent monitor fault aborts the single calibration POST and closes
   !(x.url==='http://127.0.0.1:11434/api/ps'&&x.method==='POST')));
  assert.equal(result.ownedServiceStopConfirmed,true);
  assert.equal(result.monitorStopConfirmed,true);
+});
+
+test('the second pre-POST check waits for a new sequence and never reuses the prior sample',async()=>{
+ const body=calibrationBody(),sha=createHash('sha256').update(JSON.stringify(body)).digest('hex');
+ let checks=0,posts=0,approvalCalls=0;
+ const controller=calibrationController(async({waitForNewSequence=false}={})=>{
+  checks++;
+  if(checks===2){assert.equal(waitForNewSequence,true);return {...sensor(1),
+   independentMonitorActive:false,reason:'MONITOR_SEQUENCE_NOT_ADVANCED'};}
+  return sensor(checks===1?1:2);
+ });
+ const result=await runR125ResourceCalibrationOwned({calibrationRequest:body,
+  calibrationRequestSha256:sha},{controller,fetcher:async(url,init={})=>{
+   if(init.method==='POST'){posts++;throw Error('TEST_MUST_NOT_POST');}
+   return calibrationPreflightFetcher(url,init);
+  },approvalVerifier:async()=>{approvalCalls++;return false;}});
+ assert.equal(result.reason,'INDIVIDUAL_CALIBRATION_APPROVAL_REQUIRED');
+ assert.deepEqual(result.samples.map(x=>x.monitorSequence),[1,2]);
+ assert.equal(checks,3);
+ assert.equal(approvalCalls,1);
+ assert.equal(posts,0);
+ assert.equal(result.ownedServiceStopConfirmed,true);
+ assert.equal(result.monitorStopConfirmed,true);
+});
+
+test('a missing new sample times out and sensor faults or resource shortages hold immediately',async t=>{
+ const body=calibrationBody(),sha=createHash('sha256').update(JSON.stringify(body)).digest('hex');
+ await t.test('sequence does not advance',async()=>{
+  let checks=0,posts=0;
+  const controller=calibrationController(async({waitForNewSequence=false}={})=>{
+   checks++;
+   if(checks===1)return sensor(1);
+   assert.equal(waitForNewSequence,true);
+   return {...sensor(1),independentMonitorActive:false,reason:'MONITOR_SEQUENCE_NOT_ADVANCED'};
+  });
+  const result=await runR125ResourceCalibrationOwned({calibrationRequest:body,
+   calibrationRequestSha256:sha},{controller,fetcher:async(url,init={})=>{
+    if(init.method==='POST'){posts++;throw Error('TEST_MUST_NOT_POST');}
+    return calibrationPreflightFetcher(url,init);
+   },approvalVerifier:async()=>true});
+  assert.equal(result.reason,'PRE_POST_MONITOR_SEQUENCE_TIMEOUT');
+  assert.equal(checks>1,true);
+  assert.equal(posts,0);
+ });
+ await t.test('sensor fault is not retried as a sequence wait',async()=>{
+  let checks=0,posts=0;
+  const controller=calibrationController(async()=>++checks===1?sensor(1):
+   {...sensor(1,false),reason:'INDEPENDENT_MONITOR_SAMPLE_INVALID'});
+  const result=await runR125ResourceCalibrationOwned({calibrationRequest:body,
+   calibrationRequestSha256:sha},{controller,fetcher:async(url,init={})=>{
+    if(init.method==='POST'){posts++;throw Error('TEST_MUST_NOT_POST');}
+    return calibrationPreflightFetcher(url,init);
+   },approvalVerifier:async()=>true});
+  assert.equal(result.reason,'PRE_POST_MONITOR_SAMPLE_HOLD');
+  assert.equal(checks,2);
+  assert.equal(posts,0);
+ });
+ await t.test('fresh sample below the existing floor holds immediately',async()=>{
+  let checks=0,posts=0;
+  const controller=calibrationController(async()=>{
+   checks++;
+   if(checks===1)return sensor(1);
+   return {...sensor(2),observedResourcesMiB:{ramFree:12000,
+    commitHeadroom:20000,gpuFree:2500,gpuTotal:16303}};
+  });
+  const result=await runR125ResourceCalibrationOwned({calibrationRequest:body,
+   calibrationRequestSha256:sha},{controller,fetcher:async(url,init={})=>{
+    if(init.method==='POST'){posts++;throw Error('TEST_MUST_NOT_POST');}
+    return calibrationPreflightFetcher(url,init);
+   },approvalVerifier:async()=>true});
+  assert.equal(result.reason,'PRE_POST_RESOURCE_FLOOR_HOLD');
+  assert.equal(checks,2);
+  assert.equal(posts,0);
+ });
+});
+
+test('owned model-state GET failure is distinct from a monitor sample failure',async()=>{
+ const body=calibrationBody(),sha=createHash('sha256').update(JSON.stringify(body)).digest('hex');
+ let checks=0,ownedGets=0,posts=0;
+ const controller=calibrationController(async()=>{checks++;return sensor(checks);});
+ const result=await runR125ResourceCalibrationOwned({calibrationRequest:body,
+  calibrationRequestSha256:sha},{controller,fetcher:async(url,init={})=>{
+   if(init.method==='POST'){posts++;throw Error('TEST_MUST_NOT_POST');}
+   if(url==='http://127.0.0.1:11435/api/ps'&&++ownedGets===2)
+    throw Error('TEST_OWNED_GET_FAILED');
+   return calibrationPreflightFetcher(url,init);
+  },approvalVerifier:async()=>true});
+ assert.equal(result.reason,'OWNED_MODEL_STATE_RECHECK_FAILED');
+ assert.equal(checks,1);
+ assert.equal(posts,0);
 });
 
 test('the calibration PASS shape requires observed context, full output cap, and confirmed Job unload',async()=>{
