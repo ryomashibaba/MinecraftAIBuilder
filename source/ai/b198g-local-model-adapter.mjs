@@ -214,6 +214,27 @@ const r125obj=(properties,required)=>({
 });
 const r125enum=(...choices)=>({type:'string',enum:choices});
 const r125int=(minimum,maximum)=>({type:'integer',minimum,maximum});
+export const validR125RevisionDiagnosis=value=>{
+ if(!value||typeof value!=='object'||Array.isArray(value)||
+  !['status','sourceVerified','compilerReason',...(Object.hasOwn(value,'spatialFootprint')?
+   ['spatialFootprint']:[])].sort().every(k=>Object.hasOwn(value,k))||
+  Object.keys(value).sort().join(',')!==[
+   'status','sourceVerified','compilerReason',...(Object.hasOwn(value,'spatialFootprint')?
+    ['spatialFootprint']:[])].sort().join(',')||
+  !/^HOLD_[A-Z0-9_]{3,80}$/.test(value.status)||value.sourceVerified!==false||
+  !/^R125_[A-Z0-9_]{3,100}$/.test(value.compilerReason))return false;
+ if(value.spatialFootprint!==undefined){
+  const f=value.spatialFootprint;
+  if(!f||typeof f!=='object'||Array.isArray(f)||
+   Object.keys(f).sort().join(',')!=='declared,required'||
+   !f.declared||!f.required||Object.keys(f.declared).sort().join(',')!=='depth,width'||
+   Object.keys(f.required).sort().join(',')!=='depth,height,width'||
+   ![f.declared.width,f.declared.depth].every(n=>Number.isSafeInteger(n)&&n>=1&&n<=32)||
+   ![f.required.width,f.required.depth,f.required.height].every(n=>Number.isSafeInteger(n)&&n>=1&&n<=32))
+   return false;
+ }
+ return JSON.stringify(value).length<=3000;
+};
 const r125slug={type:'string',pattern:'^[a-z][a-z0-9-]{2,39}$'};
 const r125text=(maxLength)=>({type:'string',minLength:3,maxLength});
 const r125FixtureRoles=['counter','workbench','display','storage','seating',
@@ -616,7 +637,7 @@ onNormalizedModelPlan=null,signal
   revisionContext=null}={}){
   if(typeof prompt!=='string'||prompt.length<8||prompt.length>8000)
    refuse('INVALID_MODEL_REQUEST');
-  const revisionSystem=system+(spatialTreeOnly?'\nHOST-SELECTED EXPERIMENTAL RESPONSE FORM: This one trial is constrained to the existing spatial-tree JSON variant. This selects only the representation; it does not prescribe room count beyond the brief, room dimensions, attachment directions/shifts, roof heights/forms, or fixture choices. The author must choose those. The conventional variants are unavailable in this explicitly constrained experiment. SPATIAL SOURCE COMPATIBILITY: rootSpace daylight:"paired-bays" needs a model-authored volume.width of at least 14 so two front windows retain the entrance and solid jambs; otherwise choose another daylight option or choose a wider root yourself. SPATIAL FOOTPRINT CHECK: footprint.width/depth must contain the full placed extent of every attached room plus entry shelter and compiler margin. Calculate the entire composition; HOST does not enlarge an undersized footprint.':'')+(revisionContext===null?'':'\n'+[
+  const revisionSystem=system+(spatialTreeOnly?'\nHOST-SELECTED EXPERIMENTAL RESPONSE FORM: This one trial is constrained to the existing spatial-tree JSON variant. This selects only the representation; it does not prescribe room count beyond the brief, room dimensions, attachment directions/shifts, roof heights/forms, or fixture choices. The author must choose those. The conventional variants are unavailable in this explicitly constrained experiment. SPATIAL SOURCE COMPATIBILITY: rootSpace daylight:"paired-bays" needs a model-authored volume.width of at least 14 so two front windows retain the entrance and solid jambs; otherwise choose another daylight option or choose a wider root yourself. SPATIAL FOOTPRINT CHECK: footprint.width/depth must contain the full placed extent of every attached room plus entry shelter and compiler margin. Calculate the entire composition; HOST does not enlarge an undersized footprint.':'')+(revisionContext?.sourceDiagnosis?'\nSOURCE DIAGNOSTIC REVISION: The supplied previousSourceDiagnosis is deterministic R125 compiler evidence, not a HOST proposal. Correct the named failure in your own complete R125 plan, preserve useful authored geometry and equipment when possible, and never report a diagnostic-only or HOST-adjusted result as your source.':'')+(revisionContext===null?'':'\n'+[
   'REVISION MODE — HIGHEST PRIORITY: this is NOT a fresh unknown brief and NOT a minor restyle. Read previousArchitecturePlan and revisionRequest in the user payload. Preserve the project identity and useful intent, then make a real whole-building revision that satisfies every requested function. When revisionRequest calls for independent activities or rooms, represent them with independently authored spaces and purposes; do not combine them in a way the request rejects. A response that changes only title, footprint, materials, or facade while keeping a deficient program is a failed revision.',
   'When revisionRequest asks for richer function, explicitly place the needed equipment in the model-authored fixture arrays, size its spaces for the stations, and keep clear two-wide routes. When it asks for a less box-like building or a new spatial composition, choose and declare a supported R125 massing/topology feature that changes the actual authored volumes or plan shape; decorative fins or a roof profile alone do not change a rectangular shell. Select any supported geometry that fits—spatial-tree is optional, never mandatory—and do not claim geometry that is absent from your JSON.',
   'Before answering, compare the complete proposed JSON to both previousArchitecturePlan and every requirement in revisionRequest. Do not return the same deficient structure. Return only one complete R125 ArchitecturePlan JSON; do not claim it passed source, walking, or art review.'
@@ -640,15 +661,18 @@ onNormalizedModelPlan=null,signal
   if(revisionContext!==null&&(
    repairContext!==null||typeof revisionContext!=='object'||
    Array.isArray(revisionContext)||
-   Object.keys(revisionContext).sort().join(',')!==
-    'previousArchitecturePlan,revisionRequest'||
+   !['previousArchitecturePlan,revisionRequest',
+    'previousArchitecturePlan,revisionRequest,sourceDiagnosis']
+    .includes(Object.keys(revisionContext).sort().join(','))||
    typeof revisionContext.previousArchitecturePlan!=='object'||
    revisionContext.previousArchitecturePlan===null||
    Array.isArray(revisionContext.previousArchitecturePlan)||
    JSON.stringify(revisionContext.previousArchitecturePlan).length>20000||
    typeof revisionContext.revisionRequest!=='string'||
    revisionContext.revisionRequest.length<8||
-   revisionContext.revisionRequest.length>8000))
+   revisionContext.revisionRequest.length>8000||
+   (Object.hasOwn(revisionContext,'sourceDiagnosis')&&
+    !validR125RevisionDiagnosis(revisionContext.sourceDiagnosis))))
    refuse('INVALID_MODEL_REVISION_CONTEXT');
   const controller=new AbortController();
   const abortFromCaller=()=>controller.abort();
@@ -689,6 +713,10 @@ onNormalizedModelPlan=null,signal
        ...(revisionContext?{
         previousArchitecturePlan:revisionContext.previousArchitecturePlan,
         revisionRequest:revisionContext.revisionRequest,
+        ...(revisionContext.sourceDiagnosis?{
+         previousSourceDiagnosis:revisionContext.sourceDiagnosis,
+         sourceDiagnosisRule:'Use this exact compiler diagnosis to correct the model-authored plan. No HOST geometry edits; no SOURCE pass claims.'
+        }:{}),
         modelRevisionRule:'This is a new, complete model-authored revision of the supplied ArchitecturePlan. Treat the supplied plan as the design being revised, preserve its identity and all useful intent, and address every revision request through the architecture as a whole. You may change massing, number and arrangement of rooms, proportions, connections, roof, facade, and authored equipment when that improves the brief. Return exactly one complete valid ArchitecturePlan JSON. Do not return a patch, explanation, or host-side repair; do not claim unperformed tests.'
        }:{})})}]})
    });

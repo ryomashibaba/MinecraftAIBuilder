@@ -754,3 +754,34 @@ test('spatial-tree survives the common offline diagnosis policy with authored ro
  assert.equal(result.originalEdited,false);
  assert.equal(JSON.stringify(plan),raw);
 });
+
+test('spatial-tree footprint HOLD reports exact compiler-required bounds without resizing the author plan',()=>{
+ const plan={schema:PLAN,id:'footprint-diagnostic-tree',
+  title:'Three connected rooms',brief:'A public entrance, exhibit and chart-reading room.',
+  footprint:{width:26,depth:22},
+  levels:[{layoutMode:'spatial-tree',spaces:[
+   {id:'entry-foyer',purpose:'Public sheltered entrance and reception',
+    access:'public',fixtures:['desk','seating'],daylight:'paired-bays',
+    volume:{width:14,depth:10,roofY:8}},
+   {id:'instrument-gallery',purpose:'Public maritime instrument exhibition',
+    access:'public',fixtures:['display','display'],daylight:'wide-bay',
+    volume:{width:10,depth:14,roofY:9,
+     attach:{to:'entry-foyer',side:'east',shift:0}}},
+   {id:'chart-reading-room',purpose:'Public nautical chart study with a large table',
+    access:'public',fixtures:['large-table'],daylight:'wide-bay',
+    volume:{width:14,depth:10,roofY:8,
+     attach:{to:'entry-foyer',side:'south',shift:0}}
+   }
+  ]}],materials:{floor:'wood',wall:'stone',roof:'metal'},
+  entry:{shelterDepth:3}};
+ const raw=JSON.stringify(plan),before=structuredClone(plan);
+ const result=diagnoseR125ArchitecturePlanOriginal(raw);
+ assert.equal(result.status,'HOLD_PLAN_COMPILER_OR_QA');
+ assert.equal(result.sourceVerified,false);
+ assert.equal(result.compilerReason,'R125_PLAN_SPATIAL_VOLUMES_EXCEED_FOOTPRINT');
+ assert.deepEqual(result.spatialFootprint,{
+  declared:{width:26,depth:22},required:{width:27,height:12,depth:28}
+ });
+ assert.equal(result.originalSha256,createHash('sha256').update(raw).digest('hex'));
+ assert.deepEqual(plan,before,'diagnosis never grows the model footprint');
+});

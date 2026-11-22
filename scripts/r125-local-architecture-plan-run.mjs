@@ -17,7 +17,8 @@ import path from 'node:path';
 import os from 'node:os';
 import {fileURLToPath} from 'node:url';
 import {createHash,randomUUID} from 'node:crypto';
-import {createR125ArchitecturePlanLocalAdapter,DEFAULT_LOCAL_ENDPOINT,r125ResponseFormatForEndpoint}
+import {createR125ArchitecturePlanLocalAdapter,DEFAULT_LOCAL_ENDPOINT,
+ r125ResponseFormatForEndpoint,validR125RevisionDiagnosis}
  from '../source/ai/b198g-local-model-adapter.mjs';
 import {diagnoseR125ArchitecturePlanOriginal}
  from './r125-offline-replay.mjs';
@@ -76,7 +77,7 @@ export function parseR125LocalPlanArgs(argv){
  if(pairs.length<6||pairs.length>18||pairs.length%2!==0)
   fail('ARGS_MODEL_PROMPT_OUT_REQUIRED');
  const values={},allowed=new Set(['--model','--prompt','--out','--endpoint',
-  '--revise-plan','--max-output-tokens','--reasoning-effort','--timeout-ms']);
+  '--revise-plan','--revise-diagnosis','--max-output-tokens','--reasoning-effort','--timeout-ms']);
  for(let i=0;i<pairs.length;i+=2){
   if(!allowed.has(pairs[i])||Object.hasOwn(values,pairs[i])||
      typeof pairs[i+1]!=='string'||!pairs[i+1].trim()||
@@ -98,6 +99,7 @@ export function parseR125LocalPlanArgs(argv){
   endpoint:values['--endpoint']??DEFAULT_LOCAL_ENDPOINT,
   maxOutputTokens,timeoutMs,...(reasoningEffort?{reasoningEffort}:{}),
   ...(values['--revise-plan']?{revisionPlanPath:path.resolve(values['--revise-plan'])}:{}),
+  ...(values['--revise-diagnosis']?{revisionDiagnosisPath:path.resolve(values['--revise-diagnosis'])}:{}),
   ...(repairOnce?{repairOnce:true}:{}),...(trialMode?{trialMode:true}:{}),
   ...(spatialTreeOnly?{spatialTreeOnly:true}:{})};
 }
@@ -171,7 +173,7 @@ export function r125FixtureRevisionEvidence(diagnosis,raw){
 export async function runR125LocalArchitecturePlan({
  model,prompt,outDir,endpoint=DEFAULT_LOCAL_ENDPOINT,
 reasoningEffort=undefined,maxOutputTokens=4096,repairOnce=false,trialMode=false,
-revisionPlanPath=null,spatialTreeOnly=false
+revisionPlanPath=null,revisionDiagnosisPath=null,spatialTreeOnly=false
 },{fetcher=fetch,timeoutMs=180000,signal}={}){
  if(typeof outDir!=='string'||outDir.length===0)
   fail('OUT_DIRECTORY_REQUIRED');
@@ -180,6 +182,9 @@ revisionPlanPath=null,spatialTreeOnly=false
  if(trialMode&&repairOnce)fail('TRIAL_MODE_SINGLE_REQUEST_ONLY');
  if(revisionPlanPath!==null&&(typeof revisionPlanPath!=='string'||
    !revisionPlanPath.trim()||repairOnce))fail('INVALID_REVISION_PLAN_OPTION');
+ if(revisionDiagnosisPath!==null&&(typeof revisionDiagnosisPath!=='string'||
+    !revisionDiagnosisPath.trim()||revisionPlanPath===null||repairOnce))
+  fail('INVALID_REVISION_DIAGNOSIS_OPTION');
  if(trialMode&&fetcher!==fetch)fail('TRIAL_MODE_REQUIRES_REAL_LOCAL_TRANSPORT');
  // All real requests must enter through the owned lifecycle adapter. The
  // default CLI transport remains available only to explicit injected tests;
@@ -191,6 +196,7 @@ revisionPlanPath=null,spatialTreeOnly=false
  const dest=path.resolve(outDir);
  ensurePrivateNewDirectory(dest);
  let revisionBase=null,revisionBaseJson=null,revisionBaseSha256=null;
+ let revisionDiagnosis=null,revisionDiagnosisJson=null,revisionDiagnosisSha256=null;
  if(revisionPlanPath!==null){
   try{
    revisionBaseJson=fs.readFileSync(revisionPlanPath,'utf8');
@@ -198,6 +204,22 @@ revisionPlanPath=null,spatialTreeOnly=false
    validateArchitecturePlan(revisionBase);
   }catch(error){fail('INVALID_REVISION_BASE_PLAN_'+String(error?.message??error).slice(0,100));}
   revisionBaseSha256=sha(JSON.stringify(revisionBase));
+ }
+ if(revisionDiagnosisPath!==null){
+  try{
+   revisionDiagnosisJson=fs.readFileSync(revisionDiagnosisPath,'utf8');
+   if(revisionDiagnosisJson.length>60000)fail('INVALID_REVISION_SOURCE_DIAGNOSIS_SIZE');
+   const full=JSON.parse(revisionDiagnosisJson);
+   revisionDiagnosis={status:full.status,sourceVerified:full.sourceVerified,
+    compilerReason:full.compilerReason,
+    ...(full.spatialFootprint?{spatialFootprint:full.spatialFootprint}:{})};
+   if(!validR125RevisionDiagnosis(revisionDiagnosis))
+    fail('INVALID_REVISION_SOURCE_DIAGNOSIS');
+   revisionDiagnosisSha256=sha(revisionDiagnosisJson);
+  }catch(error){
+   if(String(error?.message??error).includes('INVALID_REVISION_SOURCE_DIAGNOSIS'))throw error;
+   fail('INVALID_REVISION_SOURCE_DIAGNOSIS_'+String(error?.message??error).slice(0,100));
+  }
  }
  let captured=null,normalizedCapture=null,modelStartMs=null,modelElapsedMs=null;
  // Validate endpoint, model, prompt and other options BEFORE allocating dir.
@@ -230,7 +252,11 @@ revisionPlanPath=null,spatialTreeOnly=false
   write(dest,'REVISION_BASE_PLAN.json',revisionBaseJson);
   write(dest,'REVISION_REQUEST.json',{schema:'r125-model-authored-revision-request-v1',
    basePlanSha256:revisionBaseSha256,revisionRequestSha256:sha(prompt),
+   ...(revisionDiagnosisSha256?{sourceDiagnosisSha256:revisionDiagnosisSha256,
+    modelReceivesSourceDiagnosis:true}:{}),
    modelRevisionLimit:1,hostPlanEditing:false,worldWrites:0});
+  if(revisionDiagnosisJson!==null)
+   write(dest,'REVISION_BASE_SOURCE_DIAGNOSIS.json',revisionDiagnosisJson);
  }
  const common={schema:'r125-local-plan-one-shot-v1',
   model,endpoint,requestSha256:sha(prompt),
@@ -245,6 +271,7 @@ revisionPlanPath=null,spatialTreeOnly=false
   originalEdited:false,worldContacts:0,worldWrites:0,
   authorshipMode:revisionBase?'ONE_NEW_COMPLETE_MODEL_AUTHORED_R125_RESPONSE':'NEW_MODEL_AUTHORED_R125_RESPONSE',
   revisionBasePlanSha256:revisionBaseSha256,
+  revisionDiagnosisSha256,
   constructionApproved:false,artStatus:'NOT_REVIEWED',
   minecraftWalking:'NOT_TESTED',
   nineWorldGates:Array(9).fill('BLOCKED')};
@@ -254,7 +281,8 @@ revisionPlanPath=null,spatialTreeOnly=false
  try{
   modelStartMs=Date.now();
   const answer=await author({prompt,...(revisionBase?{revisionContext:{
-   previousArchitecturePlan:revisionBase,revisionRequest:prompt}}:{})});
+   previousArchitecturePlan:revisionBase,revisionRequest:prompt,
+   ...(revisionDiagnosis?{sourceDiagnosis:revisionDiagnosis}:{})}}:{})});
   modelElapsedMs=Date.now()-modelStartMs;
   const raw=fs.readFileSync(path.join(dest,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8');
   if(answer.originalSha256!==sha(raw)||captured.sha256!==sha(raw))
@@ -445,7 +473,7 @@ revisionPlanPath=null,spatialTreeOnly=false
 if(process.argv[1]===fileURLToPath(import.meta.url)){
  try{
   const args=parseR125LocalPlanArgs(process.argv.slice(2));
-  if(args.help)console.log('R125 local trial: node scripts/r125-local-architecture-plan-run.mjs --trial-mode --model MODEL --prompt "..." --out NEW_PRIVATE_DIRECTORY (loopback only, one request, 180s timeout, Ctrl+C to stop)');
+  if(args.help)console.log('R125 local trial: node scripts/r125-local-architecture-plan-run.mjs --trial-mode [--spatial-tree-only] --model MODEL --prompt "..." --out NEW_PRIVATE_DIRECTORY [--revise-plan PLAN.json --revise-diagnosis SOURCE_DIAGNOSIS.json] (loopback only, one request, Ctrl+C to stop)');
   else{
    const controller=args.trialMode?new AbortController():null;
    const cancel=()=>controller?.abort();

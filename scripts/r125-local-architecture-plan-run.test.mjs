@@ -116,6 +116,10 @@ test('one-shot design request highlights only literal equipment tasks, without c
 
 test('R125 model revision receives the prior complete plan and returns a full response',async()=>{
  const previous=JSON.parse(original),request='全体の空間構成を改訂してください。';
+ const sourceDiagnosis={status:'HOLD_PLAN_COMPILER_OR_QA',sourceVerified:false,
+  compilerReason:'R125_PLAN_SPATIAL_VOLUMES_EXCEED_FOOTPRINT',
+  spatialFootprint:{declared:{width:26,depth:22},
+   required:{width:27,height:12,depth:28}}};
  let sent=null;
  const author=createR125ArchitecturePlanLocalAdapter({
   model:'qwen3.8:27b',
@@ -127,7 +131,7 @@ test('R125 model revision receives the prior complete plan and returns a full re
   onRawModelResponse:()=>{}
  });
  const result=await author({prompt:request,revisionContext:{
-  previousArchitecturePlan:previous,revisionRequest:request
+  previousArchitecturePlan:previous,revisionRequest:request,sourceDiagnosis
  }});
  const userPayload=JSON.parse(sent.messages[1].content);
  assert.match(sent.messages[0].content,/REVISION MODE — HIGHEST PRIORITY/);
@@ -136,10 +140,13 @@ test('R125 model revision receives the prior complete plan and returns a full re
  assert.match(sent.messages[0].content,/spatial-tree is optional, never mandatory/);
  assert.match(sent.messages[0].content,/HOST does not enlarge an undersized footprint/);
  assert.match(sent.messages[0].content,/paired-bays.*at least 14/);
+ assert.match(sent.messages[0].content,/SOURCE DIAGNOSTIC REVISION/);
  assert.equal(sent.response_format.json_schema.schema.anyOf.length,1);
  assert.deepEqual(userPayload.previousArchitecturePlan,previous);
  assert.equal(userPayload.revisionRequest,request);
  assert.match(userPayload.modelRevisionRule,/complete model-authored revision/);
+ assert.deepEqual(userPayload.previousSourceDiagnosis,sourceDiagnosis);
+ assert.match(userPayload.sourceDiagnosisRule,/No HOST geometry edits/);
  assert.equal(result.modelCalls,1);
  assert.deepEqual(result.plan,previous);
 });
@@ -662,9 +669,11 @@ test('CLI insists on explicit model/prompt/new private path',()=>{
   /TRIAL_MODE_SINGLE_REQUEST_ONLY/);
  const revise=parseR125LocalPlanArgs(['--trial-mode','--model','qwen3.8:27b',
   '--prompt',prompt,'--out','private-study','--revise-plan','base.json',
+  '--revise-diagnosis','diagnosis.json',
   '--max-output-tokens','8192','--reasoning-effort','none','--timeout-ms','600000',
   '--spatial-tree-only']);
  assert.equal(revise.revisionPlanPath,path.resolve('base.json'));
+ assert.equal(revise.revisionDiagnosisPath,path.resolve('diagnosis.json'));
  assert.equal(revise.maxOutputTokens,8192);
  assert.equal(revise.reasoningEffort,'none');
  assert.equal(revise.timeoutMs,600000);
@@ -694,6 +703,44 @@ test('one original POST holds unmatched requested oven without correcting source
   assert.equal(fs.readFileSync(path.join(dest,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8'),original);
   assert.equal(report.worldWrites,0);
  }finally{fs.rmSync(root,{recursive:true,force:true})}
+});
+
+test('CLI revision passes compact SOURCE diagnosis and preserves the exact diagnostic privately',async()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'mab-r125-revision-diagnosis-'));
+ const basePath=path.join(root,'base-plan.json');
+ const diagnosisPath=path.join(root,'source-diagnosis.json');
+ const dest=path.join(root,'run');
+ fs.writeFileSync(basePath,original);
+ const diagnosisRaw=JSON.stringify({
+  schema:'r125-original-architecture-plan-diagnostic-v1',
+  status:'HOLD_PLAN_COMPILER_OR_QA',sourceVerified:false,
+  compilerReason:'R125_PLAN_SPATIAL_VOLUMES_EXCEED_FOOTPRINT',
+  spatialFootprint:{declared:{width:26,depth:22},
+   required:{width:27,height:12,depth:28}}
+ });
+ fs.writeFileSync(diagnosisPath,diagnosisRaw);
+ let sent=null,posts=0;
+ try{
+  const {report}=await runR125LocalArchitecturePlan({
+   model:'qwen3.8:27b',prompt:'修正前回の敷地寸法HOLD。',outDir:dest,
+   revisionPlanPath:basePath,revisionDiagnosisPath:diagnosisPath
+  },{fetcher:async(_url,options)=>{posts++;sent=JSON.parse(options.body);return provider(original);}});
+  const user=JSON.parse(sent.messages[1].content);
+  assert.equal(posts,1);
+  assert.deepEqual(user.previousSourceDiagnosis,{
+   status:'HOLD_PLAN_COMPILER_OR_QA',sourceVerified:false,
+   compilerReason:'R125_PLAN_SPATIAL_VOLUMES_EXCEED_FOOTPRINT',
+   spatialFootprint:{declared:{width:26,depth:22},
+    required:{width:27,height:12,depth:28}}
+  });
+  assert.equal(fs.readFileSync(path.join(dest,
+   'REVISION_BASE_SOURCE_DIAGNOSIS.json'),'utf8'),diagnosisRaw);
+  assert.equal(report.revisionDiagnosisSha256,digest(diagnosisRaw));
+  const revisionRequest=JSON.parse(fs.readFileSync(path.join(dest,
+   'REVISION_REQUEST.json'),'utf8'));
+  assert.equal(revisionRequest.modelReceivesSourceDiagnosis,true);
+  assert.equal(report.worldWrites,0);
+ }finally{fs.rmSync(root,{recursive:true,force:true});}
 });
 
 test('deep upper setback original diagnostic matches allowed footprint-dependent AUTHOR rules',()=>{

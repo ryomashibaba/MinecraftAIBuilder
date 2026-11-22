@@ -712,9 +712,15 @@ function compileR125SpatialArchitecturePlan(original){
    ...(space.daylight?{daylight:space.daylight}:{}),
    ...(space.spatialUse?{spatialUse:space.spatialUse}:{})}))};
  const spatial=compileSpatialComposition(proposal);
- check(spatial.design.bounds.width<=original.footprint.width&&
-  spatial.design.bounds.depth<=original.footprint.depth,
-  'SPATIAL_VOLUMES_EXCEED_FOOTPRINT');
+ if(spatial.design.bounds.width>original.footprint.width||
+    spatial.design.bounds.depth>original.footprint.depth){
+  const error=Error('R125_PLAN_SPATIAL_VOLUMES_EXCEED_FOOTPRINT');
+  error.spatialFootprint={
+   declared:{width:original.footprint.width,depth:original.footprint.depth},
+   required:{...spatial.design.bounds}
+  };
+  throw error;
+ }
  const authored=new Map(level.spaces.map(space=>[space.id,space]));
  const program=[{level:0,standingFloorY:2,zones:spatial.layout.rooms.map(room=>({
   id:room.id,purpose:room.purpose,access:authored.get(room.id).access,
