@@ -325,3 +325,40 @@ test('authored spatial ridge forms create distinct real B143 roof volumes',()=>{
  const courtyard=structuredClone(p);courtyard.rooms[0].spatialUse='open-court';
  assert.throws(()=>validateSpatialComposition(courtyard),/ROOM_CONTRACT/);
 });
+
+
+test('model-selected portal and front piers project real exterior B143 geometry without changing legacy plans',()=>{
+ const legacy=structuredClone(examples[0]);
+ const original=compileSpatialComposition(legacy);
+ const withShelter=structuredClone(legacy);
+ withShelter.entry={shelterDepth:3};
+ const noRelief=compileSpatialComposition(withShelter);
+ assert(!noRelief.design.elements.some(e=>e.id.startsWith('entry-portal-')));
+ assert(!noRelief.design.elements.some(e=>e.id.includes('front-pier')));
+ const revised=structuredClone(withShelter);
+ revised.entry.portalStyle='projecting-frame';
+ revised.rooms[0].facadeRelief='front-piers';
+ const saved=JSON.stringify(revised);
+ const built=compileSpatialComposition(revised);
+ assert.equal(JSON.stringify(revised),saved);
+ assert.equal(validateSpatialComposition(revised),true);
+ assert.equal(verifyCompiled(built.design,built.compiled),true);
+ assert.equal(built.sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ assert.notEqual(built.geometrySha256,noRelief.geometrySha256);
+ assert.notEqual(built.geometrySha256,original.geometrySha256);
+ assert.equal(built.layout.entry.portalStyle,'projecting-frame');
+ assert.equal(built.layout.rooms[0].facadeRelief,'front-piers');
+ for(const id of ['entry-portal-pier-0','entry-portal-pier-1',
+  'entry-portal-lintel','space-0-front-pier-0','space-0-front-pier-1'])
+  assert(built.design.elements.some(e=>e.id===id&&e.mode==='add'));
+ assert.equal(built.worldWrites,0);
+ assert.deepEqual(built.BuildPlan.operations,[]);
+ assert.deepEqual(built.gates,Array(9).fill('BLOCKED'));
+ const wrong=structuredClone(revised);
+ wrong.entry.portalStyle='invented';
+ assert.throws(()=>validateSpatialComposition(wrong),/PLAN_CONTRACT/);
+ const noCourtPiers=structuredClone(revised);
+ noCourtPiers.rooms[0].spatialUse='open-court';
+ delete noCourtPiers.rooms[0].daylight;
+ assert.throws(()=>validateSpatialComposition(noCourtPiers),/ROOM_CONTRACT/);
+});

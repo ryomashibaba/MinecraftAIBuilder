@@ -26,8 +26,10 @@ export function validateSpatialComposition(p){
  if(!keys(p,['schema','id','title','brief','materials','rooms',
   ...(hasEntry?['entry']:[])])||
   p.schema!==SCHEMA||!slug(p.id)||!prose(p.title)||!prose(p.brief)||
-  (hasEntry&&(!keys(p.entry,['shelterDepth'])||
-   !int(p.entry.shelterDepth,1,3)))||
+  (hasEntry&&(!keys(p.entry,['shelterDepth',
+    ...(Object.hasOwn(p.entry??{},'portalStyle')?['portalStyle']:[])])||
+   !int(p.entry.shelterDepth,1,3)||
+   (p.entry.portalStyle!==undefined&&p.entry.portalStyle!=='projecting-frame')))||
   !keys(p.materials,['floor','wall','roof'])||
   !['wood','stone','concrete'].includes(p.materials.floor)||
   !['concrete','stone','wood','metal'].includes(p.materials.wall)||
@@ -41,14 +43,17 @@ export function validateSpatialComposition(p){
   const optionalSpatialUse=Object.hasOwn(r,'spatialUse')?['spatialUse']:[];
   const optionalRoofForm=Object.hasOwn(r,'roofForm')?['roofForm']:[];
   const optionalRoofAxis=Object.hasOwn(r,'roofAxis')?['roofAxis']:[];
-  if(!keys(r,i===0?['id','purpose','width','depth','roofY',...optionalDaylight,...optionalSpatialUse,...optionalRoofForm,...optionalRoofAxis]:
-    ['id','purpose','width','depth','roofY','attach',...optionalDaylight,...optionalSpatialUse,...optionalRoofForm,...optionalRoofAxis])||
+  const optionalFacadeRelief=Object.hasOwn(r,'facadeRelief')?['facadeRelief']:[];
+  if(!keys(r,i===0?['id','purpose','width','depth','roofY',...optionalDaylight,...optionalSpatialUse,...optionalRoofForm,...optionalRoofAxis,...optionalFacadeRelief]:
+    ['id','purpose','width','depth','roofY','attach',...optionalDaylight,...optionalSpatialUse,...optionalRoofForm,...optionalRoofAxis,...optionalFacadeRelief])||
    !slug(r.id)||seen.has(r.id)||!prose(r.purpose)||
    !int(r.width,6,14)||!int(r.depth,6,14)||!int(r.roofY,6,10)||
    (r.daylight!==undefined&&
     !['wide-bay','clerestory','paired-bays'].includes(r.daylight))||
    (r.spatialUse!==undefined&&
     (r.spatialUse!=='open-court'||i!==0||r.daylight!==undefined))||
+   (r.facadeRelief!==undefined&&
+    (r.facadeRelief!=='front-piers'||r.spatialUse==='open-court'))||
    (r.roofForm===undefined&&r.roofAxis!==undefined)||
    (r.roofForm!==undefined&&
     (!['ridge','shed'].includes(r.roofForm)||!['x','z'].includes(r.roofAxis)||
@@ -186,6 +191,27 @@ export function compileSpatialComposition(value){
   box('entry-canopy-support-right','add',mat.wall,
    [entrance[0]+2,2,frontZ],[1,3,1]);
  }
+ // Model-opted portal: two real side columns and a raised lintel one block
+ // ahead of the existing door. The two-wide opening stays untouched.
+ if(plan.entry?.portalStyle==='projecting-frame'){
+  for(const [j,x] of [entrance[0]-1,entrance[0]+2].entries())
+   box('entry-portal-pier-'+j,'add',mat.roof,[x,2,entrance[2]-1],[1,4,1]);
+  box('entry-portal-lintel','add',mat.roof,
+   [entrance[0]-1,6,entrance[2]-1],[4,1,1]);
+ }
+ // Model-opted front piers visibly project from the wall. Refuse a pier
+ // intersecting a different authored room; never infer a replacement facade.
+ for(const [i,r] of rooms.entries()){
+  if(r.facadeRelief!=='front-piers')continue;
+  const outsideZ=r.z-1;
+  for(const [j,x] of [r.x+1,maxX(r)-1].entries()){
+   if(rooms.some(o=>o.id!==r.id&&o.x<=x&&maxX(o)>=x&&
+    o.z<=outsideZ&&maxZ(o)>=outsideZ))
+    fail('FACADE_FRONT_PIER_BLOCKED_'+r.id);
+   box('space-'+i+'-front-pier-'+j,'add',mat.roof,
+    [x,2,outsideZ],[1,r.roofY-2,1]);
+  }
+ }
  doors.forEach((d,i)=>box('joint-'+i,'cut',null,
   d.axis==='z'?[d.wall,2,d.along]:[d.along,2,d.wall],
   d.axis==='z'?[1,3,2]:[2,3,1]));
@@ -304,9 +330,11 @@ export function compileSpatialComposition(value){
    routes.zones.some(z=>!z.reachedFromEntrance))
   fail('REAL_VOXEL_CIRCULATION_HOLD');
  return {...result,sourceRoutes:routes,layout:{
-  entry:{face:'front',position:'center',shelterDepth},
+  entry:{face:'front',position:'center',shelterDepth,
+   ...(plan.entry?.portalStyle?{portalStyle:plan.entry.portalStyle}:{})},
   rooms:rooms.map(r=>({id:r.id,x:r.x,z:r.z,width:r.width,depth:r.depth,roofY:r.roofY,
    ...(r.daylight?{daylight:r.daylight}:{}),
+   ...(r.facadeRelief?{facadeRelief:r.facadeRelief}:{}),
    ...(r.roofForm?{roofForm:r.roofForm,roofAxis:r.roofAxis}:{}),
    ...(r.spatialUse?{spatialUse:r.spatialUse}:{})})),
   connectedDoors:doors.length,exteriorWindows:windows

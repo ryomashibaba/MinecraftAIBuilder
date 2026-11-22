@@ -246,7 +246,10 @@ export function validateArchitecturePlan(p){
   authoredConventionalEntry||
   (!expressive&&p.levels.length===1&&
    p.levels[0]?.layoutMode==='spatial-tree'&&
-   keys(p.entry,['shelterDepth'])&&integer(p.entry.shelterDepth,1,3)),
+   keys(p.entry,['shelterDepth',
+    ...(Object.hasOwn(p.entry??{},'portalStyle')?['portalStyle']:[])])&&
+   integer(p.entry.shelterDepth,1,3)&&
+   (p.entry.portalStyle===undefined||p.entry.portalStyle==='projecting-frame')),
   'SPATIAL_ENTRY_SHELTER');
  check(keys(p.materials,['floor','wall','roof'])&&
   ['wood','stone','concrete'].includes(p.materials.floor)&&
@@ -446,9 +449,12 @@ export function validateArchitecturePlan(p){
     check(keys(volume,['width','depth','roofY',
      ...(Object.hasOwn(volume??{},'attach')?['attach']:[]),
      ...(Object.hasOwn(volume??{},'roofForm')?['roofForm']:[]),
-     ...(Object.hasOwn(volume??{},'roofAxis')?['roofAxis']:[])])&&
+     ...(Object.hasOwn(volume??{},'roofAxis')?['roofAxis']:[]),
+     ...(Object.hasOwn(volume??{},'facadeRelief')?['facadeRelief']:[])])&&
      integer(volume.width,6,14)&&integer(volume.depth,6,14)&&
      integer(volume.roofY,6,10)&&
+     (volume.facadeRelief===undefined||
+      (volume.facadeRelief==='front-piers'&&space.spatialUse!=='open-court'))&&
      ((volume.roofForm===undefined&&volume.roofAxis===undefined)||
       (['ridge','shed'].includes(volume.roofForm)&&['x','z'].includes(volume.roofAxis)&&
        space.spatialUse!=='open-court')),'SPATIAL_ROOM_VOLUME');
@@ -706,6 +712,7 @@ function compileR125SpatialArchitecturePlan(original){
   ...(original.entry?{entry:original.entry}:{}),
   rooms:level.spaces.map(space=>({id:space.id,purpose:space.purpose,
    width:space.volume.width,depth:space.volume.depth,roofY:space.volume.roofY,
+   ...(space.volume.facadeRelief?{facadeRelief:space.volume.facadeRelief}:{}),
    ...(space.volume.roofForm?{roofForm:space.volume.roofForm,
     roofAxis:space.volume.roofAxis}:{}),
    ...(space.volume.attach?{attach:space.volume.attach}:{}),
