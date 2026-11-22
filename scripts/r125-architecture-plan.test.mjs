@@ -63,6 +63,12 @@ test('validates one level shop, genuine B143 voxels, shell and room voids',()=>{
  assert.ok(critique.objectiveAudit.verifiedTwoWideStandingSquares>30);
  assert.equal(critique.worldWrites,0);
 });
+test('generic chart table is an authored supported fixture role',()=>{
+ const p=plan('chart-table-role');
+ p.levels[0].spaces[0].fixtures=['large-table'];
+ assert.equal(validateArchitecturePlan(p),true);
+ assert.equal(estimateR125AuthoredElementReserve(p),7);
+});
 test('model-authored public circulation cannot be forced through staff-only entrance room',()=>{
  const authored=plan('public-weather-exhibit',['z'],
   ['staff observation control','visitor exhibit']);

@@ -67,10 +67,12 @@ export function parseR125LocalPlanArgs(argv){
  if(argv.length===1&&argv[0]==='--help')return {help:true};
  const repairOnce=argv.includes('--repair-once');
  const trialMode=argv.includes('--trial-mode');
+ const spatialTreeOnly=argv.includes('--spatial-tree-only');
  if(argv.filter(x=>x==='--repair-once').length>1)fail('DUPLICATE_REPAIR_FLAG');
  if(argv.filter(x=>x==='--trial-mode').length>1)fail('DUPLICATE_TRIAL_FLAG');
+ if(argv.filter(x=>x==='--spatial-tree-only').length>1)fail('DUPLICATE_SPATIAL_TREE_FLAG');
  if(trialMode&&repairOnce)fail('TRIAL_MODE_SINGLE_REQUEST_ONLY');
- const pairs=argv.filter(x=>x!=='--repair-once'&&x!=='--trial-mode');
+ const pairs=argv.filter(x=>x!=='--repair-once'&&x!=='--trial-mode'&&x!=='--spatial-tree-only');
  if(pairs.length<6||pairs.length>18||pairs.length%2!==0)
   fail('ARGS_MODEL_PROMPT_OUT_REQUIRED');
  const values={},allowed=new Set(['--model','--prompt','--out','--endpoint',
@@ -96,7 +98,8 @@ export function parseR125LocalPlanArgs(argv){
   endpoint:values['--endpoint']??DEFAULT_LOCAL_ENDPOINT,
   maxOutputTokens,timeoutMs,...(reasoningEffort?{reasoningEffort}:{}),
   ...(values['--revise-plan']?{revisionPlanPath:path.resolve(values['--revise-plan'])}:{}),
-  ...(repairOnce?{repairOnce:true}:{}),...(trialMode?{trialMode:true}:{})};
+  ...(repairOnce?{repairOnce:true}:{}),...(trialMode?{trialMode:true}:{}),
+  ...(spatialTreeOnly?{spatialTreeOnly:true}:{})};
 }
 
 const globalTrialLock=()=>path.resolve(ROOT,'..','..',
@@ -168,11 +171,11 @@ export function r125FixtureRevisionEvidence(diagnosis,raw){
 export async function runR125LocalArchitecturePlan({
  model,prompt,outDir,endpoint=DEFAULT_LOCAL_ENDPOINT,
 reasoningEffort=undefined,maxOutputTokens=4096,repairOnce=false,trialMode=false,
-revisionPlanPath=null
+revisionPlanPath=null,spatialTreeOnly=false
 },{fetcher=fetch,timeoutMs=180000,signal}={}){
  if(typeof outDir!=='string'||outDir.length===0)
   fail('OUT_DIRECTORY_REQUIRED');
- if(typeof repairOnce!=='boolean'||typeof trialMode!=='boolean')
+ if(typeof repairOnce!=='boolean'||typeof trialMode!=='boolean'||typeof spatialTreeOnly!=='boolean')
   fail('INVALID_RUN_MODE');
  if(trialMode&&repairOnce)fail('TRIAL_MODE_SINGLE_REQUEST_ONLY');
  if(revisionPlanPath!==null&&(typeof revisionPlanPath!=='string'||
@@ -199,7 +202,7 @@ revisionPlanPath=null
  let captured=null,normalizedCapture=null,modelStartMs=null,modelElapsedMs=null;
  // Validate endpoint, model, prompt and other options BEFORE allocating dir.
  const author=createR125ArchitecturePlanLocalAdapter({
-  model,endpoint,fetcher,timeoutMs,reasoningEffort,maxOutputTokens,signal,
+  model,endpoint,fetcher,timeoutMs,reasoningEffort,maxOutputTokens,spatialTreeOnly,signal,
   onRawModelResponse(raw,{finishReason,usage,captureKind='model-message-content'}){
    captured={sha256:sha(raw),finishReason,usage,captureKind};
    if(captureKind==='provider-envelope-invalid-content')
@@ -233,7 +236,8 @@ revisionPlanPath=null
   model,endpoint,requestSha256:sha(prompt),
   executionMode:trialMode?'WINDOWS_LOCAL_TRIAL_SINGLE_REQUEST':'OWNED_WINDOWS_ONE_SHOT',
   requestedGenerationSettings:{temperature:0.55,
-   responseFormat:r125ResponseFormatForEndpoint(endpoint).type,maxOutputTokens,
+   responseFormat:r125ResponseFormatForEndpoint(endpoint,{spatialTreeOnly}).type,
+   ...(spatialTreeOnly?{spatialTreeOnlyHostConstrained:true}:{}),maxOutputTokens,
    reasoningEffort:reasoningEffort??null,timeoutMs},
   attemptLimit:repairOnce?2:1,automaticRetries:0,
   modelRevisionLimit:repairOnce?1:0,

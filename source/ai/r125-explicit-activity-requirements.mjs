@@ -21,7 +21,9 @@ const cues=[
  ['exhibit-stand','display',
   /展示ケース|展示台|展示設備|展示できる|展示する|展示を行(?:う|い)|展示を(?:見られる|見る|観覧する)|\bdisplay (?:case|stand|fixture)\b/i],
  ['records-desk','desk',
-  /事務机|記録用(?:の)?机|作業用デスク|記録(?:を(?:行(?:う|い|います)|する)|[、，,])|\bdesk\b|\brecord(?:ing|s)? (?:desk|station)\b/i]
+  /事務机|記録用(?:の)?机|作業用デスク|記録(?:を(?:行(?:う|い|います)|する)|[、，,])|\bdesk\b|\brecord(?:ing|s)? (?:desk|station)\b/i],
+ ['large-chart-surface','large-table',
+  /海図(?:を|の)?(?:広げ|展開|閲覧)|地図(?:を|の)?(?:広げ|展開|閲覧)|\bspread(?:ing)? (?:out )?(?:large )?(?:sea )?charts?\b/i]
 ];
 // A negated equipment mention is not a user request for that equipment.
 // Conservative suffix check: unsupported constructions remain outside coverage.

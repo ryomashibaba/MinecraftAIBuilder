@@ -283,6 +283,7 @@ export function describeR125AuthoredRoomUse(original,built){
     ['inspection','inspection-stand',/点検|検査|\binspection\b/i],
     ['storage','storage',/保管|収納|\bstorage\b|\bstoreroom\b|\bparts repository\b/i],
     ['records','desk',/記録|\brecord(?:s|ing)?\b|\bdocumentation\b/i],
+    ['large-chart-surface','large-table',/海図|地図|\bcharts?\b/i],
     ['exhibition','display',/展示|\bdisplay\b|\bexhibit(?:ion)?\b|\bgallery\b/i]
    ];
    const stationKinds=targets.map(t=>t.kind);

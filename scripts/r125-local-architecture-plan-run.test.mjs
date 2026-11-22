@@ -40,6 +40,10 @@ test('one-shot design request highlights only literal equipment tasks, without c
   '展示台の設置は不要、事務机が必要な部屋'),[
   {capability:'records-desk',requiredRole:'desk'}
  ]);
+ assert.deepEqual(inferR125ExplicitActivityRequirements(
+  '来館者が海図を広げて閲覧する'),[
+  {capability:'large-chart-surface',requiredRole:'large-table'}
+ ]);
  const breadWorkshopBrief='来場者が自分で生地をこね、焼成を見学し、手洗いを行い、完成したパンを展示できる体験型パン工房を設計してください。焼成設備は職員が管理し、来場者と職員の動線を適切に分けてください。1階・2階の選択、各室の用途、設備数、間取り、屋根、外観は独自に決めてください。2階を作る場合は明確な活動と設備を持たせ、広い空室や単調な箱型建築を避けてください。';
  assert.deepEqual(inferR125ExplicitActivityRequirements(breadWorkshopBrief),[
   {capability:'baking-heating',requiredRole:'oven'},
@@ -115,6 +119,7 @@ test('R125 model revision receives the prior complete plan and returns a full re
  let sent=null;
  const author=createR125ArchitecturePlanLocalAdapter({
   model:'qwen3.8:27b',
+  spatialTreeOnly:true,
   fetcher:async(_url,opts)=>{
    sent=JSON.parse(opts.body);
    return provider(original);
@@ -129,6 +134,9 @@ test('R125 model revision receives the prior complete plan and returns a full re
  assert.match(sent.messages[0].content,/independently authored spaces/);
  assert.match(sent.messages[0].content,/changes the actual authored volumes or plan shape/);
  assert.match(sent.messages[0].content,/spatial-tree is optional, never mandatory/);
+ assert.match(sent.messages[0].content,/HOST does not enlarge an undersized footprint/);
+ assert.match(sent.messages[0].content,/paired-bays.*at least 14/);
+ assert.equal(sent.response_format.json_schema.schema.anyOf.length,1);
  assert.deepEqual(userPayload.previousArchitecturePlan,previous);
  assert.equal(userPayload.revisionRequest,request);
  assert.match(userPayload.modelRevisionRule,/complete model-authored revision/);
@@ -420,7 +428,7 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
     request.messages[0].content.indexOf('footprint EXACT'));
    assert.ok(request.messages[0].content.includes('staff-only FIRST upper room'));
    assert.ok(request.messages[0].content.includes('front terrace is NOT a substitute path'));
-   assert.ok(request.messages[0].content.length<=15000,
+   assert.ok(request.messages[0].content.length<=15500,
     'bounded 14B local model instructions should avoid repeated design constraints');
    assert.ok(request.messages[0].content.indexOf('ESSENTIAL ACTIVITY COVERAGE')<
     request.messages[0].content.indexOf('footprint EXACT'),
@@ -654,11 +662,16 @@ test('CLI insists on explicit model/prompt/new private path',()=>{
   /TRIAL_MODE_SINGLE_REQUEST_ONLY/);
  const revise=parseR125LocalPlanArgs(['--trial-mode','--model','qwen3.8:27b',
   '--prompt',prompt,'--out','private-study','--revise-plan','base.json',
-  '--max-output-tokens','8192','--reasoning-effort','none','--timeout-ms','600000']);
+  '--max-output-tokens','8192','--reasoning-effort','none','--timeout-ms','600000',
+  '--spatial-tree-only']);
  assert.equal(revise.revisionPlanPath,path.resolve('base.json'));
  assert.equal(revise.maxOutputTokens,8192);
  assert.equal(revise.reasoningEffort,'none');
  assert.equal(revise.timeoutMs,600000);
+ assert.equal(revise.spatialTreeOnly,true);
+ assert.throws(()=>parseR125LocalPlanArgs([
+  '--spatial-tree-only','--spatial-tree-only','--model','qwen3:14b',
+  '--prompt',prompt,'--out','private-study']),/DUPLICATE_SPATIAL_TREE_FLAG/);
 });
 
 test('one original POST holds unmatched requested oven without correcting source',async()=>{
@@ -755,10 +768,14 @@ test('new Qwen four-room split schema keeps minimum real hub/spine clear spans',
 test('Qwen may choose shed or ridge roof only for an enclosed spatial room',()=>{
  const spatial=R125_ARCHITECTURE_RESPONSE_SCHEMA.anyOf[0];
  const room=spatial.properties.levels.items.properties.rootSpace;
- assert.deepEqual(room.properties.volume.properties.roofForm.enum,
+ const choices=room.properties.volume.anyOf;
+ const roofed=choices.find(v=>Object.hasOwn(v.properties,'roofForm'));
+ const flat=choices.find(v=>!Object.hasOwn(v.properties,'roofForm'));
+ assert.deepEqual(roofed.properties.roofForm.enum,
   ['ridge','shed']);
- assert.deepEqual(room.properties.volume.properties.roofAxis.enum,['x','z']);
- assert.equal(room.properties.volume.required.includes('roofForm'),false,
+ assert.deepEqual(roofed.properties.roofAxis.enum,['x','z']);
+ assert.equal(flat.required.includes('roofForm'),false);
+ assert.equal(flat.required.includes('roofAxis'),false,
   'older genuinely flat model rooms stay valid');
 });
 
@@ -800,17 +817,28 @@ test('spatial-tree Qwen schema requires authored per-room volumes and supports o
  const root=level.properties.rootSpace;
  const attached=level.properties.attachedSpaces.items;
  assert(root.required.includes('volume')&&attached.required.includes('volume'));
- assert.deepEqual(root.properties.volume.required,['width','depth','roofY']);
- assert.equal(Object.hasOwn(root.properties.volume.properties,'attach'),false);
- assert.deepEqual(attached.properties.volume.required,
-  ['width','depth','roofY','attach']);
- assert.deepEqual(attached.properties.volume.properties.attach.required,
+ const rootVolumeChoices=root.properties.volume.anyOf;
+ const flatRoot=rootVolumeChoices.find(v=>!Object.hasOwn(v.properties,'roofForm'));
+ const roofedRoot=rootVolumeChoices.find(v=>Object.hasOwn(v.properties,'roofForm'));
+ assert.deepEqual(flatRoot.required,['width','depth','roofY']);
+ assert.deepEqual(roofedRoot.required,
+  ['width','depth','roofY','roofForm','roofAxis']);
+ assert.equal(Object.hasOwn(flatRoot.properties,'roofAxis'),false);
+ assert.deepEqual(roofedRoot.properties.roofForm.enum,['ridge','shed']);
+ assert.equal(Object.hasOwn(flatRoot.properties,'attach'),false);
+ const attachedVolumeChoices=attached.properties.volume.anyOf;
+ const flatAttached=attachedVolumeChoices.find(v=>!Object.hasOwn(v.properties,'roofForm'));
+ const roofedAttached=attachedVolumeChoices.find(v=>Object.hasOwn(v.properties,'roofForm'));
+ assert.deepEqual(flatAttached.required,['width','depth','roofY','attach']);
+ assert.deepEqual(roofedAttached.required,
+  ['width','depth','roofY','attach','roofForm','roofAxis']);
+ assert.deepEqual(flatAttached.properties.attach.required,
   ['to','side','shift']);
  assert.equal(level.properties.attachedSpaces.minItems,1);
  assert.equal(level.properties.attachedSpaces.maxItems,3);
- assert.deepEqual(root.properties.volume.properties.width,
+ assert.deepEqual(flatRoot.properties.width,
   {type:'integer',minimum:6,maximum:14});
- assert.deepEqual(root.properties.volume.properties.roofY,
+ assert.deepEqual(flatRoot.properties.roofY,
   {type:'integer',minimum:6,maximum:10});
  const observed=r125ResponseFormatForEndpoint(
   'http://127.0.0.1:11434/v1/chat/completions',{observationRequired:true});
@@ -828,6 +856,12 @@ test('spatial-tree Qwen schema requires authored per-room volumes and supports o
  assert(ordinaryThreeRoomShapes.some(shape=>
   shape.properties.secondarySplitPercent.enum.includes(35)),
   'non-observation plans retain the original valid proportions');
+ const constrained=r125ResponseFormatForEndpoint(
+  'http://127.0.0.1:11434/v1/chat/completions',{spatialTreeOnly:true});
+ assert.equal(constrained.json_schema.schema.anyOf.length,1,
+  'opt-in experiment exposes only the spatial-tree response variant');
+ assert.equal(R125_ARCHITECTURE_RESPONSE_SCHEMA.anyOf.length,4,
+  'the default schema remains unchanged');
 });
 
 test('rootSpace and attachedSpaces normalize losslessly and preserve legacy plans',()=>{

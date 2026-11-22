@@ -17,9 +17,11 @@ const failPosition=diagnosis=>{
 };
 const intentKey=i=>i.level+':'+i.zoneIndex;
 const roleWidth=kind=>
- ['service-bay','tool-rack','teaching-board','assembly-table'].includes(kind)?5:3;
+ ['service-bay','tool-rack','teaching-board','assembly-table'].includes(kind)?5:
+ kind==='large-table'?7:3;
 const roleDepth=kind=>['bed','service-bay'].includes(kind)?4:
  ['assembly-table','inspection-stand'].includes(kind)?3:
+ kind==='large-table'?5:
  ['seating','washbasin','electronics','oven'].includes(kind)?2:1;
 
 /**
@@ -236,7 +238,14 @@ function makeParts(intent,x,y,z,turned=false,wallAligned=false){
    add('far-left-leg',0,0,2,1,1,1,'wood'),
    add('far-right-leg',4,0,2,1,1,1,'wood'),
    add('large-work-surface',0,1,0,5,1,3,'wood'),
-   add('workpiece-marker',2,2,1,1,1,1,'accent')]
+   add('workpiece-marker',2,2,1,1,1,1,'accent')],
+  'large-table':()=>[
+   add('table-leg-near-west',0,0,0,1,1,1,'wood'),
+   add('table-leg-near-east',6,0,0,1,1,1,'wood'),
+   add('table-leg-far-west',0,0,4,1,1,1,'wood'),
+   add('table-leg-far-east',6,0,4,1,1,1,'wood'),
+   add('continuous-tabletop',0,1,0,7,1,5,'wood'),
+   add('inlaid-chart-area',1,2,1,5,1,3,'accent')]
  };
  const parts=families[intent.kind]?.();
  if(!parts)throw Error('R125_PLAN_FIXTURE_UNKNOWN_ROLE');
@@ -262,7 +271,8 @@ function makeParts(intent,x,y,z,turned=false,wallAligned=false){
    'tool-rack':()=>[add('center-tool',2,2,0,1,1,1,'accent')],
    'teaching-board':()=>[add('diagram-marker',2,2,0,1,1,1,'accent')],
    'inspection-stand':()=>[add('inspection-gauge',1,2,1,1,1,1,'glass')],
-   'assembly-table':()=>[add('bench-tool',1,2,1,1,1,1,'metal')]
+   'assembly-table':()=>[add('bench-tool',1,2,1,1,1,1,'metal')],
+   'large-table':()=>[add('chart-corner-weight',1,3,1,1,1,1,'metal')]
   };
   parts.push(...details[intent.kind]());
  }

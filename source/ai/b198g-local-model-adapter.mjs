@@ -218,7 +218,7 @@ const r125slug={type:'string',pattern:'^[a-z][a-z0-9-]{2,39}$'};
 const r125text=(maxLength)=>({type:'string',minLength:3,maxLength});
 const r125FixtureRoles=['counter','workbench','display','storage','seating',
  'bed','desk','washbasin','electronics','oven',
- 'service-bay','tool-rack','teaching-board','inspection-stand','assembly-table'];
+ 'service-bay','tool-rack','teaching-board','inspection-stand','assembly-table','large-table'];
 const r125Room=r125obj({
  id:r125slug,purpose:r125text(180),
  access:r125enum('public','shared','staff'),
@@ -236,11 +236,19 @@ const r125SpatialVolumeProperties={
   shift:{type:'integer',minimum:-3,maximum:3}
  },['to','side','shift'])
 };
-const r125RootSpatialVolume=r125obj(
- Object.fromEntries(Object.entries(r125SpatialVolumeProperties).filter(([key])=>key!=='attach')),
- ['width','depth','roofY']);
-const r125AttachedSpatialVolume=r125obj(r125SpatialVolumeProperties,
- ['width','depth','roofY','attach']);
+const r125SpatialVolume=(attached)=>{
+ const properties=Object.fromEntries(Object.entries(r125SpatialVolumeProperties)
+  .filter(([key])=>(attached||key!=='attach')&&
+   key!=='roofForm'&&key!=='roofAxis'));
+ const required=['width','depth','roofY',...(attached?['attach']:[])];
+ const flat=r125obj(properties,required);
+ const roofed=r125obj({...properties,roofForm:r125enum('ridge','shed'),
+  roofAxis:r125enum('x','z')},[...required,'roofForm','roofAxis']);
+ return {anyOf:[flat,roofed],description:
+  'Flat volume omits both roofForm and roofAxis; ridge or shed volume requires both.'};
+};
+const r125RootSpatialVolume=r125SpatialVolume(false);
+const r125AttachedSpatialVolume=r125SpatialVolume(true);
 const r125SpatialRoom=(volume)=>({...r125Room,
  properties:{...r125Room.properties,volume,
   spatialUse:r125enum('open-court')},
@@ -526,9 +534,10 @@ export function r125RequiresWorkObservation(prompt){
   /(?:組立|組み立て|製作|制作|点検|作業).{0,48}(?:ガラス|窓).{0,48}(?:見学|見学でき|見える|見る|観察)|(?:ガラス|窓).{0,48}(?:組立|組み立て|製作|制作|点検|作業).{0,48}(?:見学|見学でき|見える|見る|観察)|(?:組立|組み立て|製作|制作|点検|作業).{0,24}(?:見学|観察|見える).{0,32}(?:作業|様子|工程)/i.test(prompt);
 }
 
-export function r125ResponseFormatForEndpoint(endpoint,{observationRequired=false}={}){
+export function r125ResponseFormatForEndpoint(endpoint,{observationRequired=false,spatialTreeOnly=false}={}){
  if(endpoint==='http://127.0.0.1:11434/v1/chat/completions'){
   const schema=structuredClone(R125_ARCHITECTURE_RESPONSE_SCHEMA);
+  if(spatialTreeOnly)schema.anyOf=[schema.anyOf[0]];
   if(observationRequired){
    for(const variant of schema.anyOf){
     if(!variant.required.includes('observationLink'))
@@ -552,7 +561,7 @@ export function r125ResponseFormatForEndpoint(endpoint,{observationRequired=fals
 
 export function createR125ArchitecturePlanLocalAdapter({
  model,endpoint=DEFAULT_LOCAL_ENDPOINT,fetcher=fetch,timeoutMs=180000,
-reasoningEffort=undefined,maxOutputTokens=4096,onRawModelResponse,
+reasoningEffort=undefined,maxOutputTokens=4096,spatialTreeOnly=false,onRawModelResponse,
 onNormalizedModelPlan=null,signal
 }={}){
  if(typeof model!=='string'||!MODEL_RE.test(model))
@@ -566,6 +575,7 @@ onNormalizedModelPlan=null,signal
   refuse('INVALID_REASONING_EFFORT');
  if(!Number.isSafeInteger(maxOutputTokens)||maxOutputTokens<256||
     maxOutputTokens>16384)refuse('INVALID_MAX_OUTPUT_TOKENS');
+ if(typeof spatialTreeOnly!=='boolean')refuse('INVALID_SPATIAL_TREE_MODE');
  if(typeof onRawModelResponse!=='function')
   refuse('REQUIRED_RAW_CAPTURE_CALLBACK');
  if(onNormalizedModelPlan!==null&&typeof onNormalizedModelPlan!=='function')
@@ -581,10 +591,10 @@ onNormalizedModelPlan=null,signal
   'Reply with ONE strict JSON object only. Do not include Markdown, rationale outside JSON, B143 elements, absolute voxel coordinates, commands, or claims of completed tests.',
   'Top-level exact fields: schema,id,title,brief,footprint,levels,materials. Spatial-tree omits expression/entryZone and keeps its optional entry:{shelterDepth:1|2|3}. The separate one-storey conventional entry choice is detailed above; conventional plans without it keep expression/entryZone behavior.',
   'schema exactly '+R125_PLAN_SCHEMA+'. id and space ids lowercase hyphen slugs of 3..39 characters, leading letter. title,brief,purpose are meaningful strings of at least three characters.',
-  "ESSENTIAL ACTIVITY COVERAGE: Choose indispensable tasks FIRST, then matching real equipment IN THE SAME room, public/staff access, routes, room sizes, and finally exterior. bake or heat food -> oven; wash -> washbasin; sleep -> bed; operate electronics -> electronics; prepare/fabricate -> workbench or assembly-table; repair/servicing -> service-bay and tool-rack when useful; lessons -> teaching-board; inspection -> inspection-stand; records -> desk; exhibit -> display. Do not pass off storage or seating as work equipment. For TWO floors the fixed upper stair arrives near x=3..4,z=8: a staff-only FIRST upper room before a public SECOND can block guests. Require a real safe alternative connection: a front terrace is NOT a substitute path. Do not claim unrepresentable tasks were fulfilled.",
+  "ESSENTIAL ACTIVITY COVERAGE: Choose indispensable tasks FIRST, then matching real equipment IN THE SAME room, public/staff access, routes, room sizes, and finally exterior. bake or heat food -> oven; wash -> washbasin; sleep -> bed; operate electronics -> electronics; prepare/fabricate -> workbench or assembly-table; repair/servicing -> service-bay and tool-rack when useful; lessons -> teaching-board; inspection -> inspection-stand; records -> desk; examine or spread large charts -> large-table; exhibit -> display. Do not pass off storage or seating as work equipment. For TWO floors the fixed upper stair arrives near x=3..4,z=8: a staff-only FIRST upper room before a public SECOND can block guests. Require a real safe alternative connection: a front terrace is NOT a substitute path. Do not claim unrepresentable tasks were fulfilled.",
   "ACTIVITY-LED FLOOR PROGRAM / AREA-BEFORE-ENVELOPE: Size rooms for tasks, real equipment and two-wide paths. Avoid a mostly empty second floor, one-display halls and cramped workrooms. Choose the smallest useful overall footprint; larger workrooms may need multiple stations. Never invent equipment; HOST must not automatically shrink authored rooms or add furniture.",
   "footprint EXACT {width:integer 16..32,depth:integer 16..32}; levels:1 or 2; each splitAxis:x|z,splitPercent:30|35|40|45|50|55|60|65|70 for 2/3 rooms; FOUR-room SINGLE-floor splitPercent: z FRONT hub 30|35|40|45|50; x WEST spine 30|35|40|45|50|55|60. These preserve minimum clear spans. Conventional spaces:2 or 3, or FOUR in a one-floor conventional hub/spine. Spatial-tree uses rootSpace plus attachedSpaces (1..3), for 2..4 total. Room requires unique id,purpose,access:public|shared|staff; optional fixtures (array of 1..5 real equipment),fixtureDetail,fixtureArrangement,ovenHearth,daylight. New local model output MUST use fixtures arrays, never legacy fixture, so it can choose all role types and multiple stations per room. Never emit fixtureScale in a new model response; scaling can be reviewed separately after SOURCE passes. In 3-room T plans the first room occupies WEST for x and the first room occupies FRONT for z; other two rooms share EAST/REAR. secondarySplitPercent 25|30|35|40|45|50|55|60|65|70|75 is FRONT share of the EAST wing for x (WEST share of rear wing for z); omit on 2 rooms. A three-room first->second->third chain is valid only when it never routes guests through staff; if room 2 is staff and room 3 is public/shared, set thirdRoomLink:\"first-and-second\" for a real two-wide first-to-third route. Exterior entry faces front/small z; z-split enters first, x-split may use entryZone:first|second. Exactly FOUR rooms require ONE floor. They may use model-authored spatial-tree volumes with a public/shared root and connected attached rooms, or a conventional layout: EITHER splitAxis:z, width>=22 depth>=18, FIRST public/shared FRONT hub and three independent REAR rooms (optional rearBayPercentages:[p1,p2] dividing width); OR splitAxis:x, width>=20 depth>=22, FIRST public/shared WEST longitudinal spine and three independent EAST rooms (optional sideBayPercentages:[p1,p2] dividing depth). All three rooms have direct TWO-wide doors from the first authored room. Only for FOUR rooms, the shared/public hub or spine can be FOUR clear blocks wide/deep. FRONT hub needs >=4 clear FRONT and >=6 REAR cells; WEST spine needs >=4 clear WEST and >=5 EAST cells. Avoid oversized public hubs. Choose compact public circulation when work areas need more space, not for every design. Bay percentages: 35..70, step 5, gap >=30 (min. five clear blocks per bay). Omit the optional pair for equal bays. For a side spine select entryZone:first so visitors enter the public/shared spine. No courtyards or recessed-portico with FOUR rooms. Pick FOUR only when separate activities justify it; do not inflate to a 2-floor box. Avoid fixed templates.",
-  "Functional equipment: use fixtures array 1..5 stations from counter|workbench|display|storage|seating|bed|desk|washbasin|electronics|oven|service-bay|tool-rack|teaching-board|inspection-stand|assembly-table. The old single fixture field is for archived plans only, not new Qwen responses. These are physical B143 proxies with two-wide service, not functioning appliances. Optional ovenHearth:\"accent\" only with oven; fixtureArrangement:\"focal-island\" for a feasible central focus; fixtureDetail:\"crafted\" makes readable shapes. fixtureScale is NOT an allowed new-author output (optional offline ART can explore extensions). Unplaceable equipment is SOURCE HOLD. Never invent extra equipment roles.",
+  "Functional equipment: use fixtures array 1..5 stations from counter|workbench|display|storage|seating|bed|desk|washbasin|electronics|oven|service-bay|tool-rack|teaching-board|inspection-stand|assembly-table|large-table. large-table is a generic continuous 7x5 tabletop, suitable for laying out large documents, and requires a roomy study. The old single fixture field is for archived plans only, not new Qwen responses. These are physical B143 proxies with two-wide service, not functioning appliances. Optional ovenHearth:\"accent\" only with oven; fixtureArrangement:\"focal-island\" for a feasible central focus; fixtureDetail:\"crafted\" makes readable shapes. fixtureScale is NOT an allowed new-author output (optional offline ART can explore extensions). Unplaceable equipment is SOURCE HOLD. Never invent extra equipment roles.",
   'Per-room daylight: wide-bay is exactly 4 blocks and needs an exposed exterior run >=8 blocks (4 opening + 2 solid end blocks on each side); no entrance, attached joint or door may overlap it. If none fits, omit daylight for that room; never shrink or move a bay. Paired-bays requests TWO genuine 3x2 exterior windows only at safe useful positions. HOST needs sill/lintel, outside air and room-side access; unsupported openings HOLD. Never emit daylight:none. Choose for the room activity.',
   'materials EXACT floor:wood|stone|concrete, wall:concrete|stone|wood|metal, roof:stone|metal|wood|concrete. Use coherent, legible contrast when useful; material name changes alone are not originality. Education preview block IDs are not user-verified.',
   'entryZone optional "first" or "second"; for a ground-floor z split, only "first" is possible at the front.',
@@ -596,7 +606,7 @@ onNormalizedModelPlan=null,signal
   'CRITICAL SETBACK CHECK: decide levels.length FIRST. For ONE level, expression.setbackSide MUST be "none" and setbackDepth MUST be 0. For TWO levels, either "none"+0, ("east"|"rear") with depth 2|3|4|6|8 (6/8 needs respective footprint dimension >= 28), or "front" with depth exactly 2. NEVER use an upper-story setback in a one-story building. The SOURCE validator refuses mismatches without a retry. This is not a template: freely select valid roof, site, program and massing.',
   'For conventional splits actively SELECT an expression appropriate to the brief: raised roof volume, orientation and facade, not just colors. For spatial-tree OMIT expression and entryZone; express identity through attached volumes, varied heights, daylight and optional per-room ridge/shed roofs. Make housing, shops and research facilities functionally distinct rather than fixed templates.',
   "Author access:public|shared|staff in every room. Do not claim Minecraft walking was tested.",
-  "REAL ROOM BUDGET: keep two-wide approaches. Equipment footprint: common 3x1; service-bay 5x4, assembly-table 5x3, inspection-stand 3x3, tool-rack 5x1, oven/electronics 3x2, bed 3x4. A 3-wide control room cannot hold large machines. Do not leave a huge room with one symbolic desk, or add unnecessary stations to fill space. Make reception compact and workrooms sized to their activities.",
+  "REAL ROOM BUDGET: keep two-wide approaches. Equipment footprint: common 3x1; service-bay 5x4, large-table 7x5, assembly-table 5x3, inspection-stand 3x3, tool-rack 5x1, oven/electronics 3x2, bed 3x4. A 3-wide control room cannot hold large machines. Do not leave a huge room with one symbolic desk, or add unnecessary stations to fill space. Make reception compact and workrooms sized to their activities.",
   "VISUAL/WEATHER DESIGN TEST: Choose purpose-fit silhouette, windows and clear entry. recessed-portico makes a REAL 9-block-wide, 3-deep entrance; x split needs entryZone:first with splitCoordinate >= 11 or second with splitCoordinate <= footprint.width - 12, otherwise use plain/fins/screen. z split spans front width. Glass needs sill, lintel, outside air and room-side access. Never claim tested weatherproofing or working plumbing/machinery.",
   "ROOF-TO-FACADE PROPORTION: choose task layout and windows before roof. A RAISED ridge roof can still form a broad flat-looking top that overwhelms a low building. ridgeProfile:\"steep\" is optional for genuinely useful roof silhouette, not an excuse to keep empty rooms. Consider hip, sawtooth, split-monitor or court only when appropriate to the building function.",
   "Prioritize a ROOM-APPROPRIATE fixture, daylight, clear entry and two-wide circulation. HOST never fakes SOURCE.",
@@ -606,11 +616,11 @@ onNormalizedModelPlan=null,signal
   revisionContext=null}={}){
   if(typeof prompt!=='string'||prompt.length<8||prompt.length>8000)
    refuse('INVALID_MODEL_REQUEST');
-  const revisionSystem=revisionContext===null?system:system+'\n'+[
+  const revisionSystem=system+(spatialTreeOnly?'\nHOST-SELECTED EXPERIMENTAL RESPONSE FORM: This one trial is constrained to the existing spatial-tree JSON variant. This selects only the representation; it does not prescribe room count beyond the brief, room dimensions, attachment directions/shifts, roof heights/forms, or fixture choices. The author must choose those. The conventional variants are unavailable in this explicitly constrained experiment. SPATIAL SOURCE COMPATIBILITY: rootSpace daylight:"paired-bays" needs a model-authored volume.width of at least 14 so two front windows retain the entrance and solid jambs; otherwise choose another daylight option or choose a wider root yourself. SPATIAL FOOTPRINT CHECK: footprint.width/depth must contain the full placed extent of every attached room plus entry shelter and compiler margin. Calculate the entire composition; HOST does not enlarge an undersized footprint.':'')+(revisionContext===null?'':'\n'+[
   'REVISION MODE — HIGHEST PRIORITY: this is NOT a fresh unknown brief and NOT a minor restyle. Read previousArchitecturePlan and revisionRequest in the user payload. Preserve the project identity and useful intent, then make a real whole-building revision that satisfies every requested function. When revisionRequest calls for independent activities or rooms, represent them with independently authored spaces and purposes; do not combine them in a way the request rejects. A response that changes only title, footprint, materials, or facade while keeping a deficient program is a failed revision.',
   'When revisionRequest asks for richer function, explicitly place the needed equipment in the model-authored fixture arrays, size its spaces for the stations, and keep clear two-wide routes. When it asks for a less box-like building or a new spatial composition, choose and declare a supported R125 massing/topology feature that changes the actual authored volumes or plan shape; decorative fins or a roof profile alone do not change a rectangular shell. Select any supported geometry that fits—spatial-tree is optional, never mandatory—and do not claim geometry that is absent from your JSON.',
   'Before answering, compare the complete proposed JSON to both previousArchitecturePlan and every requirement in revisionRequest. Do not return the same deficient structure. Return only one complete R125 ArchitecturePlan JSON; do not claim it passed source, walking, or art review.'
-  ].join('\n');
+  ].join('\n'));
   if(repairContext!==null&&(
    typeof repairContext!=='object'||Array.isArray(repairContext)||
    Object.keys(repairContext).sort().join(',')!==
@@ -651,7 +661,7 @@ onNormalizedModelPlan=null,signal
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({model,stream:false,temperature:0.55,
      response_format:r125ResponseFormatForEndpoint(endpoint,{
-      observationRequired:r125RequiresWorkObservation(prompt)}),max_tokens:maxOutputTokens,
+      observationRequired:r125RequiresWorkObservation(prompt),spatialTreeOnly}),max_tokens:maxOutputTokens,
      ...(reasoningEffort===undefined?{}:{reasoning_effort:reasoningEffort}),
      messages:[{role:'system',content:revisionSystem},
       {role:'user',content:JSON.stringify({
@@ -659,7 +669,7 @@ onNormalizedModelPlan=null,signal
        // a generated building plan, hidden role repair, or genre template.
        requiredFixtureRoles:inferR125ExplicitActivityRequirements(prompt)
         .map(x=>x.requiredRole),
-       essentialTaskPlacementRule:'最優先: requiredFixtureRoles の全設備を必ず部屋の fixtures 配列に明記する。例えば組立と点検が同じ作業室なら fixtures:["assembly-table","inspection-stand"] とし、workbench だけでは代用不可。展示はdisplay、記録はdesk。必須設備を先に部屋へ割り当て、その部屋に十分な面積と2ブロック幅の利用経路を確保してから屋根・外観を設計する。fixtureScale は出力禁止。設備を勝手に省いたり、職員室を通る公開経路にしない。',
+       essentialTaskPlacementRule:'最優先: requiredFixtureRoles の全設備を必ず部屋の fixtures 配列に明記する。例えば組立と点検が同じ作業室なら fixtures:["assembly-table","inspection-stand"] とし、workbench だけでは代用不可。展示はdisplay、記録はdesk、広げて見る海図はlarge-table。必須設備を先に部屋へ割り当て、その部屋に十分な面積と2ブロック幅の利用経路を確保してから屋根・外観を設計する。fixtureScale は出力禁止。設備を勝手に省いたり、職員室を通る公開経路にしない。',
        observationRelationRule:r125RequiresWorkObservation(prompt)?
         'REQUIRED BY THIS BRIEF: include observationLink:{viewerSpaceId,workSpaceId}. Choose adjacent same-floor public/shared and staff/shared rooms, the latter with a real work fixture. HOST cuts actual 2x2 internal glass and proves reachable public standing access plus a clear ray to that fixture. Do not claim an unverified view; impossible geometry must remain SOURCE HOLD.':
         'If visitors must watch actual staff WORK, not just view an exhibit, choose optional observationLink:{viewerSpaceId,workSpaceId}. Choose adjacent same-floor public/shared and staff/shared rooms, the latter with a work fixture. HOST cuts a real 2x2 internal glass panel and proves visitor standing access and a clear ray to work equipment; impossible choices HOLD. No automatic doors or false visibility claims. Omit for display-only requests.',
