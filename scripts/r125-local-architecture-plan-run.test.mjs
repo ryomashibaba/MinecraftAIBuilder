@@ -4,12 +4,13 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
+import {createServer} from 'node:http';
 import {inferR125ExplicitActivityRequirements}
  from '../source/ai/r125-explicit-activity-requirements.mjs';
 import {createR125ArchitecturePlanLocalAdapter,R125_ARCHITECTURE_RESPONSE_SCHEMA,
  r125ResponseFormatForEndpoint,normalizeR125SpatialTreeResponse}
  from '../source/ai/b198g-local-model-adapter.mjs';
-import {runR125LocalArchitecturePlan,parseR125LocalPlanArgs,
+import {fetchR125LongLocalCompletion,runR125LocalArchitecturePlan,parseR125LocalPlanArgs,
  summarizeR125InvalidSetbackOriginal}
  from './r125-local-architecture-plan-run.mjs';
 import {diagnoseR125ArchitecturePlanOriginal}
@@ -1017,4 +1018,36 @@ test('bounded revision does not spend a second call on malformed JSON or unrelat
    '--prompt',prompt,'--out','tmp','--repair-once','--repair-once']),
    /DUPLICATE_REPAIR_FLAG/);
  }finally{fs.rmSync(root,{recursive:true,force:true})}
+});
+
+test('owned local transport receives late response headers and honors cancellation',async()=>{
+ const server=createServer((req,res)=>{
+  if(req.url!=='/v1/chat/completions'||req.method!=='POST'){
+   res.writeHead(404).end();return;
+  }
+  let body='';
+  req.setEncoding('utf8');
+  req.on('data',chunk=>body+=chunk);
+  req.on('end',()=>setTimeout(()=>{
+   if(res.destroyed)return;
+   res.setHeader('content-type','application/json');
+   res.end(JSON.stringify({choices:[{message:{content:body}}]}));
+  },150));
+ });
+ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+ try{
+  const url='http://127.0.0.1:'+server.address().port+'/v1/chat/completions';
+  const response=await fetchR125LongLocalCompletion(url,{
+   method:'POST',body:'{"test":"delayed"}',redirect:'error'});
+  assert.equal(response.ok,true);
+  assert.equal((await response.json()).choices[0].message.content,'{"test":"delayed"}');
+  const controller=new AbortController();
+  controller.abort();
+  await assert.rejects(fetchR125LongLocalCompletion(url,{
+   method:'POST',body:'{}',redirect:'error',signal:controller.signal}),{
+   name:'AbortError'
+  });
+  await assert.rejects(fetchR125LongLocalCompletion('https://example.com/v1/chat/completions',{
+   method:'POST',body:'{}',redirect:'error'}),/RESTRICTED_ENDPOINT/);
+ }finally{await new Promise(resolve=>server.close(resolve));}
 });
