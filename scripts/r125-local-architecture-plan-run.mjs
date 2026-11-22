@@ -17,6 +17,7 @@ import path from 'node:path';
 import os from 'node:os';
 import {fileURLToPath} from 'node:url';
 import {createHash,randomUUID} from 'node:crypto';
+import {request as localHttpRequest} from 'node:http';
 import {createR125ArchitecturePlanLocalAdapter,DEFAULT_LOCAL_ENDPOINT,
  r125ResponseFormatForEndpoint,validR125RevisionDiagnosis}
  from '../source/ai/b198g-local-model-adapter.mjs';
@@ -102,6 +103,45 @@ export function parseR125LocalPlanArgs(argv){
   ...(values['--revise-diagnosis']?{revisionDiagnosisPath:path.resolve(values['--revise-diagnosis'])}:{}),
   ...(repairOnce?{repairOnce:true}:{}),...(trialMode?{trialMode:true}:{}),
   ...(spatialTreeOnly?{spatialTreeOnly:true}:{})};
+}
+
+/** Local long-inference transport. Node fetch/Undici's default 300-second
+ * response-header deadline is shorter than the owned 900-second model limit.
+ * Native node:http uses only the caller's AbortSignal deadline; no retries,
+ * stream substitution, external endpoint, or Minecraft access.
+ */
+export function fetchR125LongLocalCompletion(url,options={}){
+ const target=new URL(url),port=Number(target.port);
+ if(target.protocol!=='http:'||target.hostname!=='127.0.0.1'||
+    !Number.isSafeInteger(port)||port<1||port>65535||
+    target.pathname!=='/v1/chat/completions'||target.search||target.hash||
+    target.username||target.password||options.method!=='POST'||
+    typeof options.body!=='string'||options.redirect!=='error')
+  return Promise.reject(Error('R125_LOCAL_HTTP_RESTRICTED_ENDPOINT_OR_METHOD'));
+ return new Promise((resolve,reject)=>{
+  const request=localHttpRequest({hostname:'127.0.0.1',port,
+   path:target.pathname,method:'POST',signal:options.signal,
+   headers:{'Content-Type':'application/json',
+    'Content-Length':Buffer.byteLength(options.body)}},response=>{
+   const chunks=[];let total=0;
+   response.on('data',chunk=>{
+    total+=chunk.length;
+    if(total>1000000){
+     request.destroy(Error('R125_LOCAL_HTTP_RESPONSE_TOO_LARGE'));return;
+    }
+    chunks.push(chunk);
+   });
+   response.once('error',reject);
+   response.once('aborted',()=>reject(Error('R125_LOCAL_HTTP_RESPONSE_INTERRUPTED')));
+   response.once('end',()=>resolve({
+    ok:response.statusCode>=200&&response.statusCode<300,
+    status:response.statusCode,
+    json:async()=>JSON.parse(Buffer.concat(chunks).toString('utf8'))
+   }));
+  });
+  request.once('error',reject);
+  request.end(options.body);
+ });
 }
 
 const globalTrialLock=()=>path.resolve(ROOT,'..','..',
@@ -224,7 +264,8 @@ revisionPlanPath=null,revisionDiagnosisPath=null,spatialTreeOnly=false
  let captured=null,normalizedCapture=null,modelStartMs=null,modelElapsedMs=null;
  // Validate endpoint, model, prompt and other options BEFORE allocating dir.
  const author=createR125ArchitecturePlanLocalAdapter({
-  model,endpoint,fetcher,timeoutMs,reasoningEffort,maxOutputTokens,spatialTreeOnly,signal,
+  model,endpoint,fetcher:trialMode?fetchR125LongLocalCompletion:fetcher,
+  timeoutMs,reasoningEffort,maxOutputTokens,spatialTreeOnly,signal,
   onRawModelResponse(raw,{finishReason,usage,captureKind='model-message-content'}){
    captured={sha256:sha(raw),finishReason,usage,captureKind};
    if(captureKind==='provider-envelope-invalid-content')
