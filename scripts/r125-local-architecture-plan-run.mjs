@@ -3,17 +3,20 @@
  * B143 + SOURCE replay. Optional one model-authored fixture revision on HOLD;
  * no silent HOST repair, world calls or 3D/ART promotion.
  *
- * node scripts/r125-local-architecture-plan-run.mjs --model qwen3:14b
- *   --prompt "未知の建築要求をここに" --out "NEW_DIRECTORY_OUTSIDE_REPO"
+ * Existing strict route remains the default. Explicit Windows trial mode:
+ * node scripts/r125-local-architecture-plan-run.mjs --trial-mode
+ *   --model qwen3:14b --prompt "未知の建築要求をここに"
+ *   --out "NEW_PRIVATE_DIRECTORY"
  *
- * This CLI never starts an unmanaged model server. Use the existing owned
- * Windows model/monitor lifecycle before running a real-model trial.
+ * Trial mode is one local loopback request, serialized across Codex projects,
+ * with a 180-second timeout and Ctrl+C cancellation. It never starts or kills
+ * a model server, contacts a Minecraft world, or exports PRIVATE originals.
  */
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import {fileURLToPath} from 'node:url';
-import {createHash} from 'node:crypto';
+import {createHash,randomUUID} from 'node:crypto';
 import {createR125ArchitecturePlanLocalAdapter,DEFAULT_LOCAL_ENDPOINT,r125ResponseFormatForEndpoint}
  from '../source/ai/b198g-local-model-adapter.mjs';
 import {diagnoseR125ArchitecturePlanOriginal}
@@ -62,9 +65,11 @@ export function summarizeR125InvalidSetbackOriginal(raw){
 export function parseR125LocalPlanArgs(argv){
  if(argv.length===1&&argv[0]==='--help')return {help:true};
  const repairOnce=argv.includes('--repair-once');
- if(argv.filter(x=>x==='--repair-once').length>1)
-  fail('DUPLICATE_REPAIR_FLAG');
- const pairs=argv.filter(x=>x!=='--repair-once');
+ const trialMode=argv.includes('--trial-mode');
+ if(argv.filter(x=>x==='--repair-once').length>1)fail('DUPLICATE_REPAIR_FLAG');
+ if(argv.filter(x=>x==='--trial-mode').length>1)fail('DUPLICATE_TRIAL_FLAG');
+ if(trialMode&&repairOnce)fail('TRIAL_MODE_SINGLE_REQUEST_ONLY');
+ const pairs=argv.filter(x=>x!=='--repair-once'&&x!=='--trial-mode');
  if(pairs.length!==6&&pairs.length!==8)fail('ARGS_MODEL_PROMPT_OUT_REQUIRED');
  const values={},allowed=new Set(['--model','--prompt','--out','--endpoint']);
  for(let i=0;i<pairs.length;i+=2){
@@ -78,7 +83,39 @@ export function parseR125LocalPlanArgs(argv){
  return {model:values['--model'],prompt:values['--prompt'],
   outDir:path.resolve(values['--out']),
   endpoint:values['--endpoint']??DEFAULT_LOCAL_ENDPOINT,
-  ...(repairOnce?{repairOnce:true}:{})};
+  ...(repairOnce?{repairOnce:true}:{}),...(trialMode?{trialMode:true}:{})};
+}
+
+const globalTrialLock=()=>path.resolve(ROOT,'..','..',
+ '.mab-r125-local-model-trial.lock');
+function acquireLocalTrialLock(){
+ const lock=globalTrialLock(),token=randomUUID(),pid=process.pid;
+ for(let attempt=0;attempt<2;attempt++){
+  try{
+   const fd=fs.openSync(lock,'wx');
+   fs.writeFileSync(fd,JSON.stringify({pid,token,startedAt:new Date().toISOString()}));
+   fs.closeSync(fd);
+   return ()=>{
+    try{
+     const current=JSON.parse(fs.readFileSync(lock,'utf8'));
+     if(current.pid===pid&&current.token===token)fs.unlinkSync(lock);
+    }catch{/* Preserve another process's or unreadable lock. */}
+   };
+  }catch(error){
+   if(error?.code!=='EEXIST')fail('LOCAL_MODEL_TRIAL_LOCK_UNAVAILABLE');
+   if(attempt===0){
+    let owner=null;
+    try{owner=JSON.parse(fs.readFileSync(lock,'utf8'));}catch{}
+    let alive=true;
+    if(Number.isSafeInteger(owner?.pid)&&owner.pid>0){
+     try{process.kill(owner.pid,0);}catch(e){alive=e?.code!=='ESRCH';}
+    }
+    if(owner&&alive)fail('LOCAL_MODEL_TRIAL_ALREADY_RUNNING');
+    if(owner)try{fs.unlinkSync(lock);}catch{fail('LOCAL_MODEL_TRIAL_ALREADY_RUNNING');}
+   }
+  }
+ }
+ fail('LOCAL_MODEL_TRIAL_ALREADY_RUNNING');
 }
 
 export function ensurePrivateNewDirectory(dest){
@@ -117,27 +154,32 @@ export function r125FixtureRevisionEvidence(diagnosis,raw){
 }
 export async function runR125LocalArchitecturePlan({
  model,prompt,outDir,endpoint=DEFAULT_LOCAL_ENDPOINT,
- reasoningEffort=undefined,maxOutputTokens=4096,repairOnce=false
-},{fetcher=fetch,timeoutMs=180000}={}){
+reasoningEffort=undefined,maxOutputTokens=4096,repairOnce=false,trialMode=false
+},{fetcher=fetch,timeoutMs=180000,signal}={}){
  if(typeof outDir!=='string'||outDir.length===0)
   fail('OUT_DIRECTORY_REQUIRED');
- if(typeof repairOnce!=='boolean')fail('INVALID_REPAIR_OPTION');
+ if(typeof repairOnce!=='boolean'||typeof trialMode!=='boolean')
+  fail('INVALID_RUN_MODE');
+ if(trialMode&&repairOnce)fail('TRIAL_MODE_SINGLE_REQUEST_ONLY');
+ if(trialMode&&fetcher!==fetch)fail('TRIAL_MODE_REQUIRES_REAL_LOCAL_TRANSPORT');
  // All real requests must enter through the owned lifecycle adapter. The
  // default CLI transport remains available only to explicit injected tests;
  // it may never post to the shared daemon directly.
  const fakeOnlyTestTransport=process.env.MAB_ARCHPLAN_FAKE_TEST_TRANSPORT==='1'&&
   model==='fake-local-author';
- if(fetcher===fetch&&!fakeOnlyTestTransport)
+ if(fetcher===fetch&&!fakeOnlyTestTransport&&!trialMode)
   fail('OWNED_WINDOWS_ONE_SHOT_REQUIRED');
  const dest=path.resolve(outDir);
  ensurePrivateNewDirectory(dest);
  let captured=null,normalizedCapture=null,modelStartMs=null,modelElapsedMs=null;
  // Validate endpoint, model, prompt and other options BEFORE allocating dir.
  const author=createR125ArchitecturePlanLocalAdapter({
-  model,endpoint,fetcher,timeoutMs,reasoningEffort,maxOutputTokens,
-  onRawModelResponse(raw,{finishReason,usage}){
-   captured={sha256:sha(raw),finishReason,usage};
-   write(dest,'MODEL_RESPONSE_ORIGINAL.txt',raw);
+  model,endpoint,fetcher,timeoutMs,reasoningEffort,maxOutputTokens,signal,
+  onRawModelResponse(raw,{finishReason,usage,captureKind='model-message-content'}){
+   captured={sha256:sha(raw),finishReason,usage,captureKind};
+   if(captureKind==='provider-envelope-invalid-content')
+    write(dest,'MODEL_PROVIDER_RESPONSE_ENVELOPE_ORIGINAL.json',raw);
+   else write(dest,'MODEL_RESPONSE_ORIGINAL.txt',raw);
   },
   onNormalizedModelPlan(normalized){
    normalizedCapture=normalized.normalization;
@@ -149,12 +191,16 @@ export async function runR125LocalArchitecturePlan({
  });
  if(typeof prompt!=='string'||prompt.length<8||prompt.length>8000)
   fail('INVALID_PROMPT');
- fs.mkdirSync(dest,{recursive:false});
+ const releaseTrialLock=trialMode?acquireLocalTrialLock():()=>{};
+ try{fs.mkdirSync(dest,{recursive:false});}
+ catch(error){releaseTrialLock();throw error;}
  // Preserve the exact request beside the original model response so a new
  // unknown-brief trial is genuinely reproducible without exposing it in CI.
- write(dest,'REQUEST_ORIGINAL.txt',prompt);
+ try{write(dest,'REQUEST_ORIGINAL.txt',prompt);}
+ catch(error){releaseTrialLock();throw error;}
  const common={schema:'r125-local-plan-one-shot-v1',
   model,endpoint,requestSha256:sha(prompt),
+  executionMode:trialMode?'WINDOWS_LOCAL_TRIAL_SINGLE_REQUEST':'OWNED_WINDOWS_ONE_SHOT',
   requestedGenerationSettings:{temperature:0.55,
    responseFormat:r125ResponseFormatForEndpoint(endpoint).type,maxOutputTokens,
    reasoningEffort:reasoningEffort??null,timeoutMs},
@@ -236,7 +282,8 @@ export async function runR125LocalArchitecturePlan({
   // OFFLINE without another model call. Never promote an adapter failure.
   let offlineDiagnosisStatus=null,offlineCompilerReason=null;
   let invalidSetbackOriginal=null;
-  if(captured&&fs.existsSync(path.join(dest,'MODEL_RESPONSE_ORIGINAL.txt'))){
+  if(captured?.captureKind==='model-message-content'&&
+     fs.existsSync(path.join(dest,'MODEL_RESPONSE_ORIGINAL.txt'))){
    try{
     const raw=fs.readFileSync(path.join(dest,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8');
     if(sha(raw)===captured.sha256){
@@ -266,7 +313,8 @@ export async function runR125LocalArchitecturePlan({
    providerReportedTokenUsage:captured?.usage??null,
    makeCodeStatus,makeCodeReason,makeCodeSourceSha256,
    sourceVerified:false,modelCallAttempts:1,
-   modelResponsesCaptured:captured?1:0};
+   modelResponsesCaptured:captured?1:0,
+   modelResponseCaptureKind:captured?.captureKind??null};
  }finally{
   // A bounded SECOND genuine local model response is allowed ONLY on an
   // explicitly requested equipment-related SOURCE/contract HOLD.
@@ -350,7 +398,8 @@ export async function runR125LocalArchitecturePlan({
    }
   }
   // Never include model text in the shareable run report.
-  write(dest,'RUN_REPORT.json',result);
+  try{write(dest,'RUN_REPORT.json',result);}
+  finally{releaseTrialLock();}
  }
  return {report:result,outputDirectory:dest};
 }
@@ -358,9 +407,18 @@ export async function runR125LocalArchitecturePlan({
 if(process.argv[1]===fileURLToPath(import.meta.url)){
  try{
   const args=parseR125LocalPlanArgs(process.argv.slice(2));
-  if(args.help)console.log('R125 ArchitecturePlan owned: node scripts/r125-local-architecture-plan-owned.mjs --model qwen3:14b --prompt "... entry.shelterDepth:3 ..." --out NEW_PRIVATE_DIRECTORY');
+  if(args.help)console.log('R125 local trial: node scripts/r125-local-architecture-plan-run.mjs --trial-mode --model MODEL --prompt "..." --out NEW_PRIVATE_DIRECTORY (loopback only, one request, 180s timeout, Ctrl+C to stop)');
   else{
-   const {report}=await runR125LocalArchitecturePlan(args);
+   const controller=args.trialMode?new AbortController():null;
+   const cancel=()=>controller?.abort();
+   if(controller){process.once('SIGINT',cancel);process.once('SIGTERM',cancel);}
+   let run;
+   try{run=await runR125LocalArchitecturePlan(args,{
+    ...(controller?{signal:controller.signal}:{})});}
+   finally{
+    if(controller){process.removeListener('SIGINT',cancel);process.removeListener('SIGTERM',cancel);}
+   }
+   const {report}=run;
    console.log('R125_LOCAL_ARCHITECTURE_PLAN',JSON.stringify(report));
    if(report.status!=='B143_SOURCE_CANDIDATE_ART_HOLD')
     process.exitCode=2;

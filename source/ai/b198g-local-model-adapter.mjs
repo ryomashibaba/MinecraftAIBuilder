@@ -552,8 +552,8 @@ export function r125ResponseFormatForEndpoint(endpoint,{observationRequired=fals
 
 export function createR125ArchitecturePlanLocalAdapter({
  model,endpoint=DEFAULT_LOCAL_ENDPOINT,fetcher=fetch,timeoutMs=180000,
- reasoningEffort=undefined,maxOutputTokens=4096,onRawModelResponse,
- onNormalizedModelPlan=null
+reasoningEffort=undefined,maxOutputTokens=4096,onRawModelResponse,
+onNormalizedModelPlan=null,signal
 }={}){
  if(typeof model!=='string'||!MODEL_RE.test(model))
   refuse('EXPLICIT_MODEL_ID_REQUIRED');
@@ -570,6 +570,8 @@ export function createR125ArchitecturePlanLocalAdapter({
   refuse('REQUIRED_RAW_CAPTURE_CALLBACK');
  if(onNormalizedModelPlan!==null&&typeof onNormalizedModelPlan!=='function')
   refuse('INVALID_NORMALIZED_CAPTURE_CALLBACK');
+ if(signal!==undefined&&typeof signal?.addEventListener!=='function')
+  refuse('INVALID_ABORT_SIGNAL');
  const system=[
   'You are an inventive architectural designer. From an UNKNOWN Japanese building brief, choose a genuinely original usable composition and room purposes. No fixed building-type template.',
   'DESIGN STRATEGY FIRST: Choose a distinctive light task-fit roof, clear street entrance and reception sized to its use. Choose rooms and form for the brief; never force four or a front-hub. GROUND-LEVEL ENTRANCE AND VISITOR ACCESS: z-split visitors enter the FRONT room; if public rooms lie behind it this room MUST be public/shared. x-split entryZone must enter public/shared. Four-room first room is a public/shared hub/spine or spatial-tree root. Model-check the entry/door/attach graph with staff-only rooms removed; every public/shared room must remain reachable from the entrance.',
@@ -620,6 +622,9 @@ export function createR125ArchitecturePlanLocalAdapter({
     typeof x!=='string'||!r125FixtureRoles.includes(x))))
    refuse('INVALID_MODEL_REPAIR_CONTEXT');
   const controller=new AbortController();
+  const abortFromCaller=()=>controller.abort();
+  if(signal?.aborted)controller.abort();
+  else signal?.addEventListener('abort',abortFromCaller,{once:true});
   const timer=setTimeout(()=>controller.abort(),timeoutMs);
   try{
    const res=await fetcher(endpoint,{
@@ -659,8 +664,15 @@ export function createR125ArchitecturePlanLocalAdapter({
    if(!Array.isArray(data?.choices)||data.choices.length!==1)
     refuse('INVALID_RESPONSE_CHOICES');
    const choice=data.choices[0],raw=choice?.message?.content;
-   if(typeof raw!=='string'||raw.length<1||raw.length>60000)
+   if(typeof raw!=='string'||raw.length<1||raw.length>60000){
+    // Preserve the full provider envelope privately when no usable content
+    // string exists. This is diagnostic evidence, never ArchitecturePlan.
+    onRawModelResponse(JSON.stringify(data),{
+     finishReason:choice.finish_reason??null,
+     usage:{promptTokens:null,completionTokens:null,totalTokens:null},
+     captureKind:'provider-envelope-invalid-content'});
     refuse('INVALID_MODEL_CONTENT');
+   }
    // MUST precede parsing, validation, source compilation and length rejection.
    const reportedUsage=data.usage&&typeof data.usage==='object'?data.usage:{};
    const count=key=>Number.isSafeInteger(reportedUsage[key])&&
@@ -669,7 +681,7 @@ export function createR125ArchitecturePlanLocalAdapter({
    onRawModelResponse(raw,{finishReason:choice.finish_reason??null,
     usage:{promptTokens:count('prompt_tokens'),
      completionTokens:count('completion_tokens'),
-     totalTokens:count('total_tokens')}});
+     totalTokens:count('total_tokens')},captureKind:'model-message-content'});
    if(choice.finish_reason==='length')refuse('TRUNCATED_MODEL_RESPONSE');
    const normalized=normalizeR125SpatialTreeResponse(raw);
    if(onNormalizedModelPlan)onNormalizedModelPlan(normalized);
@@ -680,7 +692,10 @@ export function createR125ArchitecturePlanLocalAdapter({
     normalization:normalized.normalization,
     model,modelCalls:1,worldWrites:0,sourceVerified:false,
     artStatus:'NOT_REVIEWED',minecraftWalking:'NOT_TESTED'};
-  }finally{clearTimeout(timer);}
+  }finally{
+   clearTimeout(timer);
+   signal?.removeEventListener('abort',abortFromCaller);
+  }
  };
 }
 

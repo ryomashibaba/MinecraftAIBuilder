@@ -121,6 +121,22 @@ test('existing real Qwen original replays through the unchanged B143 and circula
  assert.equal(r.worldWrites,0);
 });
 
+test('R125 preserves the private provider envelope when model content is absent',async()=>{
+ let captured=null;
+ const author=createR125ArchitecturePlanLocalAdapter({
+  model:'qwen3.8:27b',
+  fetcher:async()=>({ok:true,json:async()=>({choices:[{
+   message:{content:null,reasoning:'unfinished thought'},
+   finish_reason:'length'
+  }]})}),
+  onRawModelResponse:(raw,meta)=>{captured={raw,meta};}
+ });
+ await assert.rejects(author({prompt}),/B198G_LOCAL_INVALID_MODEL_CONTENT/);
+ assert.equal(captured.meta.captureKind,'provider-envelope-invalid-content');
+ assert.equal(JSON.parse(captured.raw).choices[0].message.reasoning,
+  'unfinished thought');
+});
+
 test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit POST',async()=>{
  let posts=0;
  const fake=async()=>{posts++;return provider(original);};
@@ -604,6 +620,12 @@ test('CLI insists on explicit model/prompt/new private path',()=>{
   /ARGS_MODEL_PROMPT_OUT_REQUIRED/);
  assert.equal(parseR125LocalPlanArgs(['--model','qwen3:14b','--prompt',
   prompt,'--out','somewhere']).model,'qwen3:14b');
+ const trial=parseR125LocalPlanArgs(['--trial-mode','--model','qwen3:14b',
+  '--prompt',prompt,'--out','private-study']);
+ assert.equal(trial.trialMode,true);
+ assert.throws(()=>parseR125LocalPlanArgs(['--trial-mode','--repair-once',
+  '--model','qwen3:14b','--prompt',prompt,'--out','private-study']),
+  /TRIAL_MODE_SINGLE_REQUEST_ONLY/);
 });
 
 test('one original POST holds unmatched requested oven without correcting source',async()=>{
