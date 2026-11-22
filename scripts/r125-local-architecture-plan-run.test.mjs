@@ -110,6 +110,32 @@ test('one-shot design request highlights only literal equipment tasks, without c
  assert.equal(result.sourceVerified,false);
 });
 
+test('R125 model revision receives the prior complete plan and returns a full response',async()=>{
+ const previous=JSON.parse(original),request='全体の空間構成を改訂してください。';
+ let sent=null;
+ const author=createR125ArchitecturePlanLocalAdapter({
+  model:'qwen3.8:27b',
+  fetcher:async(_url,opts)=>{
+   sent=JSON.parse(opts.body);
+   return provider(original);
+  },
+  onRawModelResponse:()=>{}
+ });
+ const result=await author({prompt:request,revisionContext:{
+  previousArchitecturePlan:previous,revisionRequest:request
+ }});
+ const userPayload=JSON.parse(sent.messages[1].content);
+ assert.match(sent.messages[0].content,/REVISION MODE — HIGHEST PRIORITY/);
+ assert.match(sent.messages[0].content,/independently authored spaces/);
+ assert.match(sent.messages[0].content,/changes the actual authored volumes or plan shape/);
+ assert.match(sent.messages[0].content,/spatial-tree is optional, never mandatory/);
+ assert.deepEqual(userPayload.previousArchitecturePlan,previous);
+ assert.equal(userPayload.revisionRequest,request);
+ assert.match(userPayload.modelRevisionRule,/complete model-authored revision/);
+ assert.equal(result.modelCalls,1);
+ assert.deepEqual(result.plan,previous);
+});
+
 test('existing real Qwen original replays through the unchanged B143 and circulation',()=>{
  const r=diagnoseR125ArchitecturePlanOriginal(original);
  assert.equal(r.originalSha256,digest(original));
@@ -626,6 +652,13 @@ test('CLI insists on explicit model/prompt/new private path',()=>{
  assert.throws(()=>parseR125LocalPlanArgs(['--trial-mode','--repair-once',
   '--model','qwen3:14b','--prompt',prompt,'--out','private-study']),
   /TRIAL_MODE_SINGLE_REQUEST_ONLY/);
+ const revise=parseR125LocalPlanArgs(['--trial-mode','--model','qwen3.8:27b',
+  '--prompt',prompt,'--out','private-study','--revise-plan','base.json',
+  '--max-output-tokens','8192','--reasoning-effort','none','--timeout-ms','600000']);
+ assert.equal(revise.revisionPlanPath,path.resolve('base.json'));
+ assert.equal(revise.maxOutputTokens,8192);
+ assert.equal(revise.reasoningEffort,'none');
+ assert.equal(revise.timeoutMs,600000);
 });
 
 test('one original POST holds unmatched requested oven without correcting source',async()=>{

@@ -602,9 +602,15 @@ onNormalizedModelPlan=null,signal
   "Prioritize a ROOM-APPROPRIATE fixture, daylight, clear entry and two-wide circulation. HOST never fakes SOURCE.",
   'OPTIONAL OPEN PUBLIC COURT: Only for briefs needing a usable outdoor public yard or courtyard, spatial-tree rootSpace may use spatialUse:"open-court". It creates real uncovered floor, low walls, outside entrance and two-wide doors to enclosed wings. Keep roofY in JSON but no physical roof, omit daylight for the open court. All other rooms must stay enclosed. Do not replace a required indoor reception or add a court for decoration. fixtureDetail and fixtureArrangement require an actual nonempty fixtures array.',
  ].join('\n');
- return async function authorArchitecturePlan({prompt,repairContext=null}={}){
+ return async function authorArchitecturePlan({prompt,repairContext=null,
+  revisionContext=null}={}){
   if(typeof prompt!=='string'||prompt.length<8||prompt.length>8000)
    refuse('INVALID_MODEL_REQUEST');
+  const revisionSystem=revisionContext===null?system:system+'\n'+[
+  'REVISION MODE — HIGHEST PRIORITY: this is NOT a fresh unknown brief and NOT a minor restyle. Read previousArchitecturePlan and revisionRequest in the user payload. Preserve the project identity and useful intent, then make a real whole-building revision that satisfies every requested function. When revisionRequest calls for independent activities or rooms, represent them with independently authored spaces and purposes; do not combine them in a way the request rejects. A response that changes only title, footprint, materials, or facade while keeping a deficient program is a failed revision.',
+  'When revisionRequest asks for richer function, explicitly place the needed equipment in the model-authored fixture arrays, size its spaces for the stations, and keep clear two-wide routes. When it asks for a less box-like building or a new spatial composition, choose and declare a supported R125 massing/topology feature that changes the actual authored volumes or plan shape; decorative fins or a roof profile alone do not change a rectangular shell. Select any supported geometry that fits—spatial-tree is optional, never mandatory—and do not claim geometry that is absent from your JSON.',
+  'Before answering, compare the complete proposed JSON to both previousArchitecturePlan and every requirement in revisionRequest. Do not return the same deficient structure. Return only one complete R125 ArchitecturePlan JSON; do not claim it passed source, walking, or art review.'
+  ].join('\n');
   if(repairContext!==null&&(
    typeof repairContext!=='object'||Array.isArray(repairContext)||
    Object.keys(repairContext).sort().join(',')!==
@@ -621,6 +627,19 @@ onNormalizedModelPlan=null,signal
    repairContext.missingRequiredFixtureRoles.some(x=>
     typeof x!=='string'||!r125FixtureRoles.includes(x))))
    refuse('INVALID_MODEL_REPAIR_CONTEXT');
+  if(revisionContext!==null&&(
+   repairContext!==null||typeof revisionContext!=='object'||
+   Array.isArray(revisionContext)||
+   Object.keys(revisionContext).sort().join(',')!==
+    'previousArchitecturePlan,revisionRequest'||
+   typeof revisionContext.previousArchitecturePlan!=='object'||
+   revisionContext.previousArchitecturePlan===null||
+   Array.isArray(revisionContext.previousArchitecturePlan)||
+   JSON.stringify(revisionContext.previousArchitecturePlan).length>20000||
+   typeof revisionContext.revisionRequest!=='string'||
+   revisionContext.revisionRequest.length<8||
+   revisionContext.revisionRequest.length>8000))
+   refuse('INVALID_MODEL_REVISION_CONTEXT');
   const controller=new AbortController();
   const abortFromCaller=()=>controller.abort();
   if(signal?.aborted)controller.abort();
@@ -634,7 +653,7 @@ onNormalizedModelPlan=null,signal
      response_format:r125ResponseFormatForEndpoint(endpoint,{
       observationRequired:r125RequiresWorkObservation(prompt)}),max_tokens:maxOutputTokens,
      ...(reasoningEffort===undefined?{}:{reasoning_effort:reasoningEffort}),
-     messages:[{role:'system',content:system},
+     messages:[{role:'system',content:revisionSystem},
       {role:'user',content:JSON.stringify({
        // Literal task requirements are hints to the genuine author, not
        // a generated building plan, hidden role repair, or genre template.
@@ -656,6 +675,11 @@ onNormalizedModelPlan=null,signal
         originalSourceHoldCodes:repairContext.sourceIssueCodes,
         missingRequiredFixtureRoles:repairContext.missingRequiredFixtureRoles,
         modelRevisionRule:'You are making the ONLY allowed model-authored revision of your previous response. Repair missing literal equipment and invalid fixtureDetail/fixtureArrangement declarations in the correct functional rooms. Preserve an intelligible architectural design, room use, access, two-wide routes, and valid fields. You may revise room sizes/topology where necessary. Do not simply remove required rooms, equipment, or details to silence SOURCE errors. Return one complete revised ArchitecturePlan JSON; no HOST fixes, no tests claimed.'
+       }:{}),
+       ...(revisionContext?{
+        previousArchitecturePlan:revisionContext.previousArchitecturePlan,
+        revisionRequest:revisionContext.revisionRequest,
+        modelRevisionRule:'This is a new, complete model-authored revision of the supplied ArchitecturePlan. Treat the supplied plan as the design being revised, preserve its identity and all useful intent, and address every revision request through the architecture as a whole. You may change massing, number and arrangement of rooms, proportions, connections, roof, facade, and authored equipment when that improves the brief. Return exactly one complete valid ArchitecturePlan JSON. Do not return a patch, explanation, or host-side repair; do not claim unperformed tests.'
        }:{})})}]})
    });
    if(!res||res.ok!==true)
