@@ -204,12 +204,12 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    assert.equal(request.response_format.json_schema.strict,true);
    const structured=request.response_format.json_schema.schema;
    assert.deepEqual(structured,R125_ARCHITECTURE_RESPONSE_SCHEMA);
-   assert.equal(structured.anyOf.length,4);
+   assert.equal(structured.anyOf.length,5);
    // Locate the rectangular variants by their contract, not their
    // preference order. spatial-tree may legitimately be listed first.
    const rectangular=structured.anyOf.filter(v=>
     Object.hasOwn(v.properties,'expression'));
-   assert.equal(rectangular.length,3);
+   assert.equal(rectangular.length,4);
    const spatial=structured.anyOf.find(v=>
     !Object.hasOwn(v.properties,'expression'));
    assert(spatial,'spatial-tree remains available to the model');
@@ -233,8 +233,11 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
     'one-storey author grammar must never allow an upper-storey setback');
    assert.equal(authorSchema.additionalProperties,false);
    assert.equal(authorSchema.properties.levels.items.properties.spaces.minItems,2);
-   assert.equal(oneLevel.properties.levels.items.properties.spaces.maxItems,4,
-    'single-storey author can choose a four-room front hub');
+   assert.equal(oneLevel.properties.levels.items.properties.spaces.maxItems,3);
+   const fourLevel=rectangular.find(v=>v.properties.levels.maxItems===1&&
+    v.properties.levels.items.properties.spaces.minItems===4);
+   assert(fourLevel,'four-room conventional variant remains available');
+   assert.equal(fourLevel.properties.levels.items.properties.spaces.maxItems,4);
    assert.equal(authorSchema.properties.levels.items.properties.spaces.maxItems,3,
     'two-storey layout remains bounded to three rooms per floor');
    assert.deepEqual(authorSchema.properties.levels.items.properties.secondarySplitPercent.enum,[25,30,35,40,45,50,55,60,65,70,75]);
@@ -248,7 +251,7 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    assert.equal(Object.hasOwn(threeRoomShape.properties,'rearBayPercentages'),false,
     'three-room floors cannot author a four-room rear partition');
    assert.equal(Object.hasOwn(threeRoomShape.properties,'sideBayPercentages'),false);
-   const rearFourRoom=oneLevelShapes.find(v=>
+   const rearFourRoom=fourLevel.properties.levels.items.anyOf.find(v=>
     v.properties.spaces.minItems===4&&v.properties.splitAxis.enum[0]==='z');
    const validRearPairs=rearFourRoom.properties.rearBayPercentages.enum;
    assert(validRearPairs.some(([a,b])=>a===35&&b===65));
@@ -773,7 +776,7 @@ test('deep upper setback original diagnostic matches allowed footprint-dependent
 test('new Qwen four-room split schema keeps minimum real hub/spine clear spans',()=>{
  const schema=R125_ARCHITECTURE_RESPONSE_SCHEMA;
  const single=schema.anyOf.find(v=>Object.hasOwn(v.properties,'expression')&&
-  v.properties.levels.maxItems===1);
+  v.properties.levels.maxItems===1&&v.properties.levels.items.properties.spaces.minItems===4);
  assert(single,'single-level conventional option available');
  const shapes=single.properties.levels.items.anyOf;
  const front=shapes.find(v=>v.properties.spaces.minItems===4&&
@@ -811,6 +814,25 @@ test('new Qwen four-room split schema keeps minimum real hub/spine clear spans',
     b=Math.floor(x0+(x1-x0)*p2/100);
   assert(a-x0-1>=5&&b-a-1>=5&&x1-b-1>=5);
  }
+});
+
+test('conventional four-room grammar excludes unsupported courts and portico',()=>{
+ const variants=R125_ARCHITECTURE_RESPONSE_SCHEMA.anyOf.filter(v=>
+  v.properties.expression&&v.properties.levels.maxItems===1);
+ let four=0,smallWithCut=false;
+ for(const v of variants){
+  const levels=v.properties.levels.items;
+  const hasFour=levels.properties.spaces.maxItems>=4&&
+   levels.anyOf.some(s=>s.properties.spaces.maxItems===4);
+  for(const e of v.properties.expression.anyOf){
+   const bad=['rearCornerCut','frontCornerCut','rearCourt'].some(k=>
+    Object.hasOwn(e.properties,k))||e.properties.facadeLanguage.enum.includes('recessed-portico');
+   if(hasFour){assert.equal(bad,false);four++;}
+   else if(Object.hasOwn(e.properties,'rearCornerCut'))smallWithCut=true;
+  }
+ }
+ assert(four>0);
+ assert(smallWithCut);
 });
 
 test('Qwen may choose shed or ridge roof only for an enclosed spatial room',()=>{
@@ -852,7 +874,7 @@ test('Qwen schema offers an explicit full recessed entry only on one-storey conv
 
 test('spatial-tree Qwen schema requires authored per-room volumes and supports observation',()=>{
  const schema=R125_ARCHITECTURE_RESPONSE_SCHEMA;
- assert.equal(schema.anyOf.length,4);
+ assert.equal(schema.anyOf.length,5);
  const spatial=schema.anyOf[0]; // first-listed branch; descriptions explain both modes without forcing one
  assert.match(spatial.description,/separate connected room volumes/);
  assert.match(schema.anyOf[1].description,/shared-envelope/);
@@ -908,7 +930,7 @@ test('spatial-tree Qwen schema requires authored per-room volumes and supports o
   'http://127.0.0.1:11434/v1/chat/completions',{spatialTreeOnly:true});
  assert.equal(constrained.json_schema.schema.anyOf.length,1,
   'opt-in experiment exposes only the spatial-tree response variant');
- assert.equal(R125_ARCHITECTURE_RESPONSE_SCHEMA.anyOf.length,4,
+ assert.equal(R125_ARCHITECTURE_RESPONSE_SCHEMA.anyOf.length,5,
   'the default schema remains unchanged');
 });
 

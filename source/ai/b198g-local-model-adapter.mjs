@@ -492,10 +492,17 @@ const r125ShelteredPlanVariant=()=>({...r125obj({
  expression:r125OneLevelShelteredExpression
 },[...r125PlanRequired,'entry','expression']),
  description:'One-storey model-authored conventional plan with an explicit 6-wide, 3-deep recessed roofed entry; the authored room count, footprint and roof remain model-selected.'});
-const r125PlanVariant=(levelCount,expression)=>({...r125obj({
+// Bind the four-room conventional hub/spine to compatible envelope choices.
+const r125OneLevelRoomRange=(min,max)=>({...r125OneLevel,
+ properties:{...r125OneLevel.properties,spaces:{
+  ...r125OneLevel.properties.spaces,minItems:min,maxItems:max}},
+ anyOf:r125OneLevel.anyOf.filter(v=>
+  v.properties.spaces.minItems>=min&&v.properties.spaces.maxItems<=max)
+});
+const r125PlanVariant=(levelCount,expression,levelShape=levelCount===2?r125LevelTwo:r125OneLevel)=>({...r125obj({
  ...r125PlanProperties,
  levels:{...r125PlanProperties.levels,
-  items:levelCount===2?r125LevelTwo:r125OneLevel,
+  items:levelShape,
   minItems:levelCount,maxItems:levelCount},
  expression
 },r125PlanRequired),description:'Conventional shared-envelope room splits for programs better served by one coherent outer form.'});
@@ -505,9 +512,10 @@ export const R125_ARCHITECTURE_RESPONSE_SCHEMA={
   // authored per-room massing grammar first so activity-led volumes are a real
   // default option, while preserving both compatible rectangular fallbacks.
   r125SpatialPlanVariant(),
-  r125PlanVariant(1,r125OneLevelExpression),
+  r125PlanVariant(1,r125OneLevelExpression,r125OneLevelRoomRange(2,3)),
   r125ShelteredPlanVariant(),
-  r125PlanVariant(2,r125Expression)
+  r125PlanVariant(2,r125Expression),
+  r125PlanVariant(1,r125OneLevelShelteredExpression,r125OneLevelRoomRange(4,4))
  ]
 };
 
