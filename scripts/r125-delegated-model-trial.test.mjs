@@ -2,7 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {r125ResponseFormatForEndpoint} from '../source/ai/b198g-local-model-adapter.mjs';
-import {prepareR125DelegatedRequest,replayR125DelegatedResponse} from './r125-delegated-model-trial.mjs';
+import {prepareR125DelegatedRequest,replayR125DelegatedResponse,expandR125DelegationMap} from './r125-delegated-model-trial.mjs';
 const base=()=>({schema:'minecraftaibuilder-r125-architecture-plan-v1',
  id:'delegation-synthetic',title:'Synthetic dimension study',
  brief:'Synthetic test only, not a genuine model response',
@@ -66,4 +66,47 @@ test('invalid declaration never falls back to silent repair',()=>{
  assert.throws(()=>replayR125DelegatedResponse(JSON.stringify(p),'小さな建物を作って。'),/FIELD_NOT_DELEGATABLE/);
  const b=request();b.messages[1].content=JSON.stringify({architecturalRequest:'小さな建物',previousArchitecturePlan:{}});
  assert.throws(()=>prepareR125DelegatedRequest(b),/FRESH_REQUEST_REQUIRED/);
+});
+
+test('compact contract: map fields are mode-specific and baseline is implicit',()=>{
+ const body=prepareR125DelegatedRequest(request());
+ const one=body.format.anyOf.find(v=>v.properties.expression&&v.properties.levels.maxItems===1);
+ const map=one.properties.delegatedDimensions;
+ assert.equal(map.type,'object');assert.equal(map.additionalProperties,false);
+ assert.deepEqual(Object.keys(map.properties),['width','depth','split','secondary']);
+ const spatial=body.format.anyOf[0].properties.delegatedDimensions;
+ assert.ok(spatial.properties.r1Shift);assert.equal(spatial.properties.split,undefined);
+ const p=base();p.levels[0].splitPercent=40;
+ const expanded=expandR125DelegationMap(p,{split:[30,55],width:[26,30,30]});
+ assert.deepEqual(expanded.delegated,[
+  {field:'levels.0.splitPercent',choices:[40,30,55]},
+  {field:'footprint.width',choices:[26,30]}]);
+ assert.equal(expanded.redundancies.length,2);
+ assert.throws(()=>expandR125DelegationMap(p,{secondary:[50]}),/DELEGATION_MAP_FIELD_ABSENT/);
+ assert.throws(()=>expandR125DelegationMap(p,{r0Width:[12]}),/DELEGATION_MAP_FIELD/);
+ assert.throws(()=>expandR125DelegationMap(p,{width:[33]}),/DELEGATION_MAP_VALUES/);
+});
+test('compact map real SOURCE baseline preserves original author values',()=>{
+ const p=base(),raw=JSON.stringify({...p,delegatedDimensions:{width:[28,30],split:[45,55]}});
+ const r=replayR125DelegatedResponse(raw,'小さな作業場所を作って。');
+ assert.equal(r.delegationContract.format,'compact-map');
+ assert.equal(r.sourceVerified,true);assert.equal(r.attempts.length,1);
+ assert.deepEqual(r.candidate,p);assert.deepEqual(r.changes,[]);
+ assert.equal(r.originalSha256,createHash('sha256').update(raw).digest('hex'));
+});
+test('compact map real spatial SOURCE recovery without duplicate baseline',()=>{
+ const p=base();delete p.expression;p.id='delegation-spatial-map';
+ p.footprint={width:16,depth:26};
+ p.levels=[{layoutMode:'spatial-tree',
+ rootSpace:{id:'public-room',purpose:'Public gathering',access:'public',fixtures:['seating'],
+ volume:{width:14,depth:10,roofY:8,roofForm:'gable',roofAxis:'x'}},
+ attachedSpaces:[{id:'staff-room',purpose:'Private work',access:'staff',fixtures:['desk'],
+ volume:{width:9,depth:8,roofY:6,roofForm:'shed',roofAxis:'z',
+ attach:{to:'public-room',side:'east',shift:0}}}]}];
+ const raw=JSON.stringify({...p,delegatedDimensions:{width:[30]}});
+ const r=replayR125DelegatedResponse(raw,'小さな集会所を作って。');
+ assert.equal(r.sourceVerified,true);assert.equal(r.attempts.length,2);
+ assert.deepEqual(r.changes,[{field:'footprint.width',from:16,to:30}]);
+ assert.deepEqual(r.candidate.levels[0].spaces,[p.levels[0].rootSpace,...p.levels[0].attachedSpaces]);
+ assert.equal(r.originalSha256,createHash('sha256').update(raw).digest('hex'));
 });
