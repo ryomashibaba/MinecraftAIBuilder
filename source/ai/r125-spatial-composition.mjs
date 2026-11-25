@@ -6,7 +6,7 @@
  */
 import {createHash} from 'node:crypto';
 import {taperedR125RidgeHeight} from './r125-roof-profiles.mjs';
-import {SCHEMA as B143,compileDesign,verifyCompiled} from './b143-building-dsl.mjs';
+import {SCHEMA as B143,compileDesign,verifyCompiled,MATERIALS} from './b143-building-dsl.mjs';
 import {auditR125SourceRoutes} from './r125-source-routes.mjs';
 export const SCHEMA='minecraftaibuilder-r125-spatial-composition-v1';
 const fail=s=>{throw Error('R125_SPATIAL_'+s)};
@@ -50,7 +50,7 @@ export function validateSpatialComposition(p){
    !slug(r.id)||seen.has(r.id)||!prose(r.purpose)||
    !int(r.width,6,14)||!int(r.depth,6,14)||!int(r.roofY,6,10)||
    (r.daylight!==undefined&&
-    !['wide-bay','clerestory','paired-bays'].includes(r.daylight))||
+    !['wide-bay','clerestory','paired-bays','panorama'].includes(r.daylight))||
    (r.spatialUse!==undefined&&
     (r.spatialUse!=='open-court'||i!==0||r.daylight!==undefined))||
    (r.facadeRelief!==undefined&&
@@ -226,6 +226,7 @@ export function compileSpatialComposition(value){
   d.axis==='z'?[1,3,2]:[2,3,1]));
  // Glaze actual exposed wall segments without cutting joints or doors.
  let windows=0;
+ const panoramicTargets=[];
  for(const [i,r] of rooms.entries()){
   if(r.spatialUse==='open-court')continue; // Sky is already open; no fake glazing.
   const cands=[
@@ -269,7 +270,7 @@ export function compileSpatialComposition(value){
       o.x<=c.wall&&maxX(o)>=c.wall&&span(overlap(r,o,'z'))>0)))continue;
    }else{
     const faceSpan=c.axis==='z'?r.width:r.depth;
-    const length=requested==='wide-bay'?4:
+    const length=requested==='panorama'?8:requested==='wide-bay'?4:
      requested==='clerestory'?Math.min(4,faceSpan-4):
      Math.min(3,faceSpan-4);
     // A model-authored wide-bay is exactly four cells wide. Narrow faces
@@ -310,6 +311,9 @@ export function compileSpatialComposition(value){
    const id='glaze-'+i+(requested?'-'+opened:'');
    box(id+'-void','cut',null,at,size);
    box(id+'-glass','add','glass',at,size);
+   if(requested==='panorama')panoramicTargets.push({zoneId:r.id,kind:requested,
+    face:c.side,origin:at,size,outsideAirVerified:true,sillLintelVerified:true,
+    MinecraftWalking:'NOT_TESTED',worldWrites:0});
    windows++;opened++;
    if(opened===requiredOpenings)break;
   }
@@ -320,6 +324,26 @@ export function compileSpatialComposition(value){
   bounds,elements,designOnly:true};
  const compiled=compileDesign(design);
  if(!verifyCompiled(design,compiled))fail('SOURCE_MISMATCH');
+ // Panoramic windows are checked against FINAL physical voxels, including
+ // the other wings and authored portal. No historical window is reinterpreted.
+ if(panoramicTargets.length){
+  const cells=new Map(compiled.primitives.map(v=>[v.slice(0,3).join(','),v[3]]));
+  const wall=MATERIALS.indexOf(mat.wall),glass=MATERIALS.indexOf('glass');
+  const at=(x,y,z)=>cells.get([x,y,z].join(','));
+  for(const t of panoramicTargets){
+   const [x,y,z]=t.origin,alongX=t.face==='front'||t.face==='rear';
+   const [dx,dz]=t.face==='front'?[0,1]:t.face==='rear'?[0,-1]:
+    t.face==='east'?[-1,0]:[1,0];
+   for(let i=0;i<8;i++){
+    const xx=x+(alongX?i:0),zz=z+(alongX?0:i);
+    if(at(xx,y-1,zz)!==wall||at(xx,y+2,zz)!==wall)
+     fail('PANORAMA_SILL_LINTEL_'+t.zoneId);
+    for(let yy=y;yy<y+2;yy++)if(at(xx,yy,zz)!==glass||
+      at(xx+dx,yy,zz+dz)!==undefined||at(xx-dx,yy,zz-dz)!==undefined)
+     fail('PANORAMA_AIR_OR_GLASS_'+t.zoneId);
+   }
+  }
+ }
  const program=[{level:0,standingFloorY:2,zones:rooms.map(r=>({
   id:r.id,purpose:r.purpose,
   range:{x:[r.x+1,maxX(r)-1],z:[r.z+1,maxZ(r)-1]}
@@ -338,7 +362,9 @@ export function compileSpatialComposition(value){
    routes.zones.length!==rooms.length||
    routes.zones.some(z=>!z.reachedFromEntrance))
   fail('REAL_VOXEL_CIRCULATION_HOLD');
- return {...result,sourceRoutes:routes,layout:{
+ return {...result,sourceRoutes:routes,
+  ...(panoramicTargets.length?{daylightTargets:panoramicTargets,
+   daylightChoiceOwner:'MODEL',daylightGeometryOwner:'GENERIC_HOST'}:{}),layout:{
   entry:{face:'front',position:'center',shelterDepth,
    ...(plan.entry?.portalStyle?{portalStyle:plan.entry.portalStyle}:{})},
   rooms:rooms.map(r=>({id:r.id,x:r.x,z:r.z,width:r.width,depth:r.depth,roofY:r.roofY,

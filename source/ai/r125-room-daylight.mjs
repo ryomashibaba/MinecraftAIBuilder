@@ -57,8 +57,8 @@ export function addAuthoredRoomDaylight(product,{auditCirculation}={}){
  for(const ask of asks){
   const zone=current.program[ask.li].zones[ask.zi].range;
   const floorY=current.program[ask.li].standingFloorY;
-  const wide=ask.kind==='wide-bay'||ask.kind==='paired-bays';
-  const widths=ask.kind==='paired-bays'?[3,2]:wide?[4,3,2]:[5,4,3];
+  const wide=ask.kind==='wide-bay'||ask.kind==='paired-bays'||ask.kind==='panorama';
+  const widths=ask.kind==='panorama'?[8]:ask.kind==='paired-bays'?[3,2]:wide?[4,3,2]:[5,4,3];
   const height=wide?2:1,wy=floorY+(wide?1:2);
   const p=current.plan,e=p.expression,w=p.footprint.width,d=p.footprint.depth;
   const right=w-2-(ask.li===1&&e?.setbackSide==='east'?e.setbackDepth:0);

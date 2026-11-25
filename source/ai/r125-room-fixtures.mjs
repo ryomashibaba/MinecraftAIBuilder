@@ -56,10 +56,11 @@ export function auditR125FixtureDaylightView(scene,daylightTargets=[]){
    if(clear){clearColumns++;clearRun++;maxClearRun=Math.max(maxClearRun,clearRun);}
    else clearRun=0;
   }
-  if(maxClearRun<2)blocked.push({
+  const required=t.kind==='panorama'?4:2;
+  if(maxClearRun<required)blocked.push({
    zoneId:t.zoneId,face:t.face,kind:t.kind,
    maxClearAdjacentColumns:maxClearRun,clearColumns,
-   requiredContiguousColumns:2});
+   requiredContiguousColumns:required});
  }
  return {status:blocked.length?'DAYLIGHT_VIEW_HOLD':'DAYLIGHT_VIEW_CLEAR',
   windowCount:daylightTargets.length,blocked};
