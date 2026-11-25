@@ -22,7 +22,7 @@ const roleWidth=kind=>
 const roleDepth=kind=>['bed','service-bay'].includes(kind)?4:
  ['assembly-table','inspection-stand'].includes(kind)?3:
  kind==='large-table'?5:
- ['seating','washbasin','electronics','oven'].includes(kind)?2:1;
+ ['seating','washbasin','electronics','oven','table'].includes(kind)?2:1;
 
 /**
  * Preserve a real contiguous two-cell aperture of room-side air behind each
@@ -240,6 +240,12 @@ function makeParts(intent,x,y,z,turned=false,wallAligned=false){
    add('far-right-leg',4,0,2,1,1,1,'wood'),
    add('large-work-surface',0,1,0,5,1,3,'wood'),
    add('workpiece-marker',2,2,1,1,1,1,'accent')],
+  // Ordinary compact shared work/meal surface, not a machine or chart table.
+  table:()=>[add('leg-nw',0,0,0,1,1,1,'wood'),
+   add('leg-ne',2,0,0,1,1,1,'wood'),
+   add('leg-sw',0,0,1,1,1,1,'wood'),
+   add('leg-se',2,0,1,1,1,1,'wood'),
+   add('tabletop',0,1,0,3,1,2,'wood')],
   'large-table':()=>[
    add('table-leg-near-west',0,0,0,1,1,1,'wood'),
    add('table-leg-near-east',6,0,0,1,1,1,'wood'),
@@ -273,6 +279,7 @@ function makeParts(intent,x,y,z,turned=false,wallAligned=false){
    'teaching-board':()=>[add('diagram-marker',2,2,0,1,1,1,'accent')],
    'inspection-stand':()=>[add('inspection-gauge',1,2,1,1,1,1,'glass')],
    'assembly-table':()=>[add('bench-tool',1,2,1,1,1,1,'metal')],
+   table:()=>[add('table-apron',1,0,0,1,1,2,'accent')],
    'large-table':()=>[add('chart-corner-weight',1,3,1,1,1,1,'metal')]
   };
   parts.push(...details[intent.kind]());

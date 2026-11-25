@@ -95,12 +95,12 @@ export const estimateR125AuthoredElementReserve=p=>p.levels.reduce((sum,level)=>
   const parts={counter:2,workbench:3,display:2,storage:4,seating:2,
    bed:4,desk:4,washbasin:5,electronics:5,oven:6,
    'service-bay':5,'tool-rack':4,'teaching-board':4,
-   'inspection-stand':3,'assembly-table':6,'large-table':7};
+   'inspection-stand':3,'assembly-table':6,'large-table':7,table:5};
   const detail=room.fixtureDetail==='crafted'?{
    counter:1,workbench:1,display:1,storage:1,seating:2,bed:2,
    desk:2,washbasin:1,electronics:1,oven:1,
    'service-bay':1,'tool-rack':1,'teaching-board':1,
-   'inspection-stand':1,'assembly-table':1,'large-table':1}:{};
+   'inspection-stand':1,'assembly-table':1,'large-table':1,table:1}:{};
   return subtotal+roles.reduce((total,role)=>total+parts[role]+
    (detail[role]??0)+(room.fixtureScale==='expanded'?3:0),0)+(room.daylight==='paired-bays'?4:room.daylight?2:0);
  },0),0);
@@ -496,10 +496,10 @@ export function validateArchitecturePlan(p){
     'SPACE_FIXTURE_SCALE');
    const roles=['counter','workbench','display','storage','seating',
     'bed','desk','washbasin','electronics','oven',
-    'service-bay','tool-rack','teaching-board','inspection-stand','assembly-table','large-table'];
+    'service-bay','tool-rack','teaching-board','inspection-stand','assembly-table','large-table','table'];
    check(space.fixtureScale!=='expanded'||
     !(space.fixtures??[]).some(r=>
-     ['service-bay','tool-rack','teaching-board','inspection-stand','assembly-table','large-table'].includes(r)),
+     ['service-bay','tool-rack','teaching-board','inspection-stand','assembly-table','large-table','table'].includes(r)),
     'NEW_ROLE_REQUIRES_DEFAULT_SCALE');
    check(space.ovenHearth===undefined||
     (space.ovenHearth==='accent'&&
@@ -630,7 +630,7 @@ export function assessR125AuthoredRoomCapacity(plan){
   const roleDepth=k=>['bed','service-bay'].includes(k)?4:
    ['assembly-table','inspection-stand'].includes(k)?3:
    k==='large-table'?5:
-   ['seating','electronics','washbasin','oven'].includes(k)?2:1;
+   ['seating','electronics','washbasin','oven','table'].includes(k)?2:1;
   const roleWidth=k=>['service-bay','tool-rack','teaching-board','assembly-table'].includes(k)?5:
    k==='large-table'?7:3;
   const equipmentFootprintCells=roles.reduce((n,k)=>n+roleWidth(k)*roleDepth(k),0);
