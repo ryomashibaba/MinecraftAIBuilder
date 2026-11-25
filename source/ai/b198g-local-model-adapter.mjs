@@ -295,10 +295,18 @@ const r125Level=r125obj({
 // ArchitecturePlan valid; constrain only NEW local Ollama authorship, with
 // alternative complete object shapes instead of prompt-only warnings.
 // Disjoint alternatives preserve the model's independent form decisions.
-const r125Corner=r125obj({
+// Match validateArchitecturePlan: an open-air rear cut may be 3x3,
+// while a paved court requires >=4 in BOTH dimensions and an explicit side.
+const r125Corner={...r125obj({
  width:r125int(3,8),depth:r125int(3,8),
  side:r125enum('east','west'),access:r125enum('paved')
-},['width','depth']);
+},['width','depth']),anyOf:[
+ r125obj({width:r125int(3,8),depth:r125int(3,8),
+  side:r125enum('east','west')},['width','depth']),
+ r125obj({width:r125int(4,8),depth:r125int(4,8),
+  side:r125enum('east','west'),access:r125enum('paved')},
+  ['width','depth','side','access'])
+]};
 const r125ExpressionFields={
  setbackSide:r125enum('none','east','rear','front'),
  setbackDepth:{type:'integer',enum:[0,2,3,4]},
@@ -631,7 +639,7 @@ onNormalizedModelPlan=null,signal
   "Materials floor:wood|stone|concrete; wall:concrete|stone|wood|metal; roof:stone|metal|wood|concrete. Use coherent contrast rather than mere color changes.",
   "CONVENTIONAL: actively SELECT an expression with setbackSide,setbackDepth,roofProfile,roofAxis,facadeLanguage. One expression only. roofProfile:flat|ridge|sawtooth|split-monitor|hip; roofAxis:x|z; facadeLanguage:plain|fins|screen|recessed-portico. All pitched roofs require raised roof volume via roofVolume:\"raised\"; omit for flat. ridgeProfile:\"steep\" or \"tapered\" only with raised ridge, no courts/corner cuts. roofOverhang:\"one-block\" on compatible raised ridge/sawtooth/hip (not rearCornerCut). split-monitor requires raised roof, x axis, no setback, last-level x split.",
   "SETBACK: one floor none+0. Two floors none+0, east/rear with depth 2|3|4|6|8 (6/8 requires footprint.width >= 28 for east or footprint.depth >= 28 for rear), or front+2 for a street-facing upper terrace. Keep stairs and room program viable.",
-  "COURTS: rearCourt:{width:6..14,depth:4..10,alignment:west|center|east,entrySide:west|east,access:paved}: one floor, flat or ridge roof with roofVolume:\"raised\", plain, no setback/eaves/cuts; footprint >= court.width+12 by court.depth+14. frontCornerCut:{width:3..8,depth:3..8,side:east|west,access:paved}: one floor, flat, plain, no setback/other cut; width>=2*cut.width+8, depth>=cut.depth+10. rearCornerCut same dimensions/side/access; none+0, flat or raised ridge without eaves; 6..8 deep/wide recess needs adequate site and actual access. No sawtooth/hip/monitor corner cuts. Choose outdoor space only when it serves the brief.",
+  "COURTS: rearCourt:{width:6..14,depth:4..10,alignment:west|center|east,entrySide:west|east,access:paved}: one floor, flat or ridge roof with roofVolume:\"raised\", plain, no setback/eaves/cuts; footprint >= court.width+12 by court.depth+14. frontCornerCut:{width:3..8,depth:3..8,side:east|west,access:paved}: one floor, flat, plain, no setback/other cut; width>=2*cut.width+8, depth>=cut.depth+10. rearCornerCut: width/depth 3..8 without access, or BOTH 4..8 with explicit side and access:paved; none+0, flat or raised ridge without eaves; 6..8 deep/wide recess needs adequate site and actual access. No sawtooth/hip/monitor corner cuts. Choose outdoor space only when it serves the brief.",
   "VISUAL/WEATHER DESIGN TEST: recessed-portico REAL 9-block-wide, 3-deep entrance needs x split entryZone:first with splitCoordinate >= 11 or second with splitCoordinate <= footprint.width - 12; otherwise use plain/fins/screen. Conventional one-storey optional entry:{shelterDepth:3} is a six-wide three-deep recessed roofed entry; do not combine with recessed-portico or courts. One-block cover is not rain shelter.",
   "ROOF-TO-FACADE PROPORTION: a RAISED ridge roof can have a broad flat-looking top; tapered produces a narrow crest. Choose proportion, sunlight and silhouette together. A plain rectangular flat-roofed shell is a baseline, not an automatic answer. A deliberate flat design with strong window rhythm or coherent massing can be excellent; a raised roof can give a distinct silhouette; attached volumes can distinguish activities. Choose only compatible features that serve the concept, never add complexity for its own sake. Compare the selected fields against that concept before finalizing. Before returning JSON compare each room purpose with its own fixture array; check that requested light and views appear in actual daylight fields where people need them. Omit optional details if they cannot fit. Check actual access, clear stairs, equipment fit, usable windows, footprint and whether the design still meets the original request. Do not claim Minecraft walking, weatherproofing or equipment operation.",
  ].join('\n');
