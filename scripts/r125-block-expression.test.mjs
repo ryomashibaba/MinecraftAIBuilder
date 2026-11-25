@@ -1,5 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {compileArchitecturePlan} from '../source/ai/r125-architecture-plan.mjs';
+import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
 import {compileDesign,SCHEMA} from '../source/ai/b143-building-dsl.mjs';
 import {buildR125BlockExpression,verifyR125BlockExpression,resolveR125FinalOwners,
  validateR125BlockPalette,prepareR125BlockPaletteRequest,makeR125BlockComparisonTemplate} from '../source/ai/r125-block-expression.mjs';
@@ -62,4 +65,49 @@ test('opt-in grammar preserves the original request and viewer toggles the same 
  const t='<div id="materialToggles"></div>const palette={};const color=palette[m]||"#aabbcc",height=1;function drawSoon(){}';
  const p=buildR125BlockExpression(args),html=makeR125BlockComparisonTemplate(t,args,p);
  assert.ok(html.includes('v38Colors'));assert.ok(html.includes('v38Blocks'));assert.ok(html.includes('palette[m]'));
+});
+
+test('real conventional and spatial R125 compile with and without authored palette, same B143 bytes',()=>{
+ const schema='minecraftaibuilder-r125-architecture-plan-v1';
+ const standard={schema,id:'corner-shop',title:'An original small building',
+  brief:'Independent spatial program, not a genre template',footprint:{width:18,depth:18},
+  levels:[{splitAxis:'x',splitPercent:50,spaces:[
+   {id:'area-0a',purpose:'customer area'},{id:'area-0b',purpose:'stockroom'}]}],
+  materials:{floor:'wood',wall:'concrete',roof:'stone'}};
+ const spatial={schema,id:'spatial-satellite-workshop',title:'Public satellite workshop',
+  brief:'A public exhibit and record desk view satellite assembly and inspection.',
+  footprint:{width:26,depth:22},
+  levels:[{layoutMode:'spatial-tree',spaces:[
+   {id:'gallery-room',purpose:'Public exhibit and visitor reception',access:'public',fixtures:['display','desk'],
+    volume:{width:10,depth:8,roofY:7}},
+   {id:'assembly-room',purpose:'Staff satellite assembly and parts storage',access:'staff',
+    fixtures:['storage','assembly-table'],fixtureArrangement:'focal-island',
+    volume:{width:10,depth:8,roofY:9,attach:{to:'gallery-room',side:'east',shift:0}}},
+   {id:'inspection-room',purpose:'Staff quality inspection',access:'staff',fixtures:['inspection-stand'],
+    volume:{width:7,depth:8,roofY:7,attach:{to:'assembly-room',side:'south',shift:0}}}]}],
+  materials:{floor:'wood',wall:'concrete',roof:'stone'},
+  observationLink:{viewerSpaceId:'gallery-room',workSpaceId:'assembly-room'}};
+ for(const original of [standard,spatial]){
+  const palette={floor:'birch_planks',wall:'stone_bricks',roof:'deepslate_tiles',
+   ...(original===spatial?{furniture:'spruce_planks'}:{})};
+  const before=compileArchitecturePlan(original),after=compileArchitecturePlan({...original,blockPalette:palette});
+  assert.deepEqual(after.design,before.design);
+  assert.deepEqual(after.compiled,before.compiled);
+  assert.equal(after.worldWrites,0);
+  const packet=buildR125BlockExpression({design:after.design,scene:after.compiled,palette});
+  assert.equal(packet.status,'ALL_SELECTED_ROLES_MAPPED');
+  assert.equal(packet.occupiedVoxels,original===spatial?876:796);
+  assert.equal(packet.geometrySha256,before.compiled.geometrySha256);
+  if(original===spatial)assert.equal(after.sourceRoutes.status,'SOURCE_ROUTES_REACH_ALL_ZONES');
+ }
+});
+test('real gallery comparison uses the original template and exact source',()=>{
+ const template=readFileSync(new URL('../source/ai/b143-viewer-template.html',import.meta.url),'utf8');
+ const gallery=compileB143Gallery([design]),packet=buildR125BlockExpression(args);
+ const html=renderB143Html(gallery,makeR125BlockComparisonTemplate(template,args,packet));
+ assert.ok(html.includes('v38Colors'));
+ assert.ok(html.includes('v38Blocks'));
+ assert.ok(html.includes(scene.geometrySha256));
+ assert.ok(!html.includes('__B143_GALLERY_JSON__'));
+ assert.equal(gallery.safety.constructionApproved,false);
 });
