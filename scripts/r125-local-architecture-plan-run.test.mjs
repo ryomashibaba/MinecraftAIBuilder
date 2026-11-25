@@ -83,6 +83,9 @@ test('one-shot design request highlights only literal equipment tasks, without c
    assert.match(payload.messages[0].content,/smallest useful overall footprint/);
    assert.match(payload.messages[0].content,/Never invent equipment/);
    assert.match(payload.messages[0].content,/HOST must not automatically shrink/);
+   assert.match(payload.messages[0].content,/simplest adequate spatial program/);
+   assert.match(payload.messages[0].content,/x=3\.\.4,z=3\.\.7 shaft\/treads/);
+   assert.ok(payload.messages[0].content.length<11000,'compact author guidance');
    const user=JSON.parse(payload.messages[1].content);
    assert.deepEqual(user.requiredFixtureRoles,
     ['oven','washbasin','workbench','display']);
