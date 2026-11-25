@@ -6,6 +6,8 @@ import {normalizeR125SpatialTreeResponse} from '../source/ai/b198g-local-model-a
 import {diagnoseR125ArchitecturePlanOriginal} from './r125-offline-replay.mjs';
 import {resolveR125DelegatedDimensions} from './r125-delegated-dimensions-study.mjs';
 import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
+import {compileDesign} from '../source/ai/b143-building-dsl.mjs';
+import {prepareR125BlockPaletteRequest,buildR125BlockExpression,makeR125BlockComparisonTemplate} from '../source/ai/r125-block-expression.mjs';
 
 // V37.1: independent bridge. NO model transport, no lock ownership,
 // no edits to the ordinary adapter, compiler, or SOURCE gates.
@@ -136,9 +138,10 @@ export function replayR125DelegatedResponse(raw,requestedBrief,{maxCandidates=16
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const write=(dest,value)=>fs.writeFileSync(dest,typeof value==='string'?value:JSON.stringify(value,null,2)+'\n',{flag:'wx'});
 function run(argv){
- if(argv[0]==='prepare'&&argv.length===3){
+ if(['prepare','prepare-materials'].includes(argv[0])&&argv.length===3){
   const body=JSON.parse(fs.readFileSync(argv[1],'utf8'));
-  write(argv[2],prepareR125DelegatedRequest(body));
+  const prepared=prepareR125DelegatedRequest(body);
+  write(argv[2],argv[0]==='prepare-materials'?prepareR125BlockPaletteRequest(prepared):prepared);
   return {status:'REQUEST_PREPARED_NO_POST'};
  }
  if(argv[0]==='replay'&&argv.length===4){
@@ -155,12 +158,21 @@ function run(argv){
   if(r.sourceVerified&&sourceDesign){
    write(path.join(dest,'B143_SOURCE_REVIEW_ONLY.json'),sourceDesign);
    const template=fs.readFileSync(path.join(root,'source/ai/b143-viewer-template.html'),'utf8');
-   write(path.join(dest,'B143_SOURCE_3D_REVIEW_ONLY.html'),renderB143Html(compileB143Gallery([sourceDesign]),template));
+   const gallery=compileB143Gallery([sourceDesign]);
+   write(path.join(dest,'B143_SOURCE_3D_REVIEW_ONLY.html'),renderB143Html(gallery,template));
+   const selected=JSON.parse(raw).blockPalette;
+   if(selected!==undefined){
+    const args={design:sourceDesign,scene:compileDesign(sourceDesign),palette:selected,
+     origin:'CALLER_PROVIDED_MODEL_RESPONSE_UNVERIFIED',originalRaw:raw};
+    const expression=buildR125BlockExpression(args);
+    write(path.join(dest,'V38_BLOCK_EXPRESSION_REVIEW_ONLY.json'),expression);
+    write(path.join(dest,'V38_BLOCK_COMPARISON_REVIEW_ONLY.html'),renderB143Html(gallery,makeR125BlockComparisonTemplate(template,args,expression)));
+   }
   }
   if(!r.sourceVerified)process.exitCode=2;
   return {status:r.status,delegationSelected:r.delegationSelected,sourceVerified:r.sourceVerified,changes:r.changes??[],attempts:r.attempts?.length??0};
  }
- fail('USAGE: prepare BASE_REQUEST.json NEW_REQUEST.json | replay RAW.txt REQUEST_ORIGINAL.txt NEW_PRIVATE_DIR');
+ fail('USAGE: prepare|prepare-materials BASE_REQUEST.json NEW_REQUEST.json | replay RAW.txt REQUEST_ORIGINAL.txt NEW_PRIVATE_DIR');
 }
 if(process.argv[1]===fileURLToPath(import.meta.url)){
  try{console.log(JSON.stringify(run(process.argv.slice(2))))}

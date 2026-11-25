@@ -17,6 +17,7 @@ import {expandR125RoomScale} from './r125-room-scale.mjs';
 import {detailR125Envelope} from './r125-spatial-detail.mjs';
 import {addR125HipRoof} from './r125-hip-roof.mjs';
 import {addR125AuthoredObservation} from './r125-room-observation.mjs';
+import {validateR125BlockPalette} from './r125-block-expression.mjs';
 export const SCHEMA='minecraftaibuilder-r125-architecture-plan-v1';
 const hash=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
 const refuse=code=>{throw Error('R125_PLAN_'+code);};
@@ -228,7 +229,8 @@ export function validateArchitecturePlan(p){
  check(keys(p,[...standard,...(expressive?['expression']:[]),
   ...(entrySpecified?['entryZone']:[]),
   ...(spatialEntrySpecified?['entry']:[]),
-  ...(observationSpecified?['observationLink']:[])]),
+  ...(observationSpecified?['observationLink']:[]),
+  ...(Object.hasOwn(p??{},'blockPalette')?['blockPalette']:[])]),
   'TOP_LEVEL_FIELDS');
  check(p.schema===SCHEMA,'SCHEMA');
  // B143 permits up to 500 characters of brief; keep title and room-purpose
@@ -257,6 +259,7 @@ export function validateArchitecturePlan(p){
   ['concrete','stone','wood','metal'].includes(p.materials.wall)&&
   ['stone','metal','wood','concrete'].includes(p.materials.roof),
   'MATERIAL_PALETTE');
+ if(Object.hasOwn(p,'blockPalette'))validateR125BlockPalette(p.blockPalette);
  if(expressive){
   const e=p.expression;
   check(keys(e,['setbackSide','setbackDepth','roofProfile','roofAxis',
