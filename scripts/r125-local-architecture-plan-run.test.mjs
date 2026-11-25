@@ -315,7 +315,7 @@ test('new R125 adapter has no direct B143 fallback, remote endpoint, or implicit
    const steep=options.filter(v=>v.required.includes('ridgeProfile'));
    assert.equal(steep.length,2);
    assert.ok(steep.every(v=>
-    v.properties.ridgeProfile.enum.join(',')==='steep'&&
+    v.properties.ridgeProfile.enum.join(',')==='steep,tapered'&&
     v.properties.roofProfile.enum.join(',')==='ridge'&&
     v.required.includes('roofVolume')&&
     !Object.hasOwn(v.properties,'rearCornerCut')));
@@ -842,7 +842,7 @@ test('Qwen may choose shed or ridge roof only for an enclosed spatial room',()=>
  const roofed=choices.find(v=>Object.hasOwn(v.properties,'roofForm'));
  const flat=choices.find(v=>!Object.hasOwn(v.properties,'roofForm'));
  assert.deepEqual(roofed.properties.roofForm.enum,
-  ['ridge','shed']);
+  ['ridge','shed','gable']);
  assert.deepEqual(roofed.properties.roofAxis.enum,['x','z']);
  assert.equal(flat.required.includes('roofForm'),false);
  assert.equal(flat.required.includes('roofAxis'),false,
@@ -894,7 +894,7 @@ test('spatial-tree Qwen schema requires authored per-room volumes and supports o
  assert.deepEqual(roofedRoot.required,
   ['width','depth','roofY','roofForm','roofAxis']);
  assert.equal(Object.hasOwn(flatRoot.properties,'roofAxis'),false);
- assert.deepEqual(roofedRoot.properties.roofForm.enum,['ridge','shed']);
+ assert.deepEqual(roofedRoot.properties.roofForm.enum,['ridge','shed','gable']);
  assert.equal(Object.hasOwn(flatRoot.properties,'attach'),false);
  const attachedVolumeChoices=attached.properties.volume.anyOf;
  const flatAttached=attachedVolumeChoices.find(v=>!Object.hasOwn(v.properties,'roofForm'));

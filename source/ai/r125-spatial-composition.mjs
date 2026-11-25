@@ -5,6 +5,7 @@
  * Minimum 6x6 allows a 4x4 usable clear interior before source route checks.\n * Every accepted original still must satisfy REAL 2-wide voxel circulation.\n * Never approves Minecraft construction.
  */
 import {createHash} from 'node:crypto';
+import {taperedR125RidgeHeight} from './r125-roof-profiles.mjs';
 import {SCHEMA as B143,compileDesign,verifyCompiled} from './b143-building-dsl.mjs';
 import {auditR125SourceRoutes} from './r125-source-routes.mjs';
 export const SCHEMA='minecraftaibuilder-r125-spatial-composition-v1';
@@ -56,7 +57,7 @@ export function validateSpatialComposition(p){
     (r.facadeRelief!=='front-piers'||r.spatialUse==='open-court'))||
    (r.roofForm===undefined&&r.roofAxis!==undefined)||
    (r.roofForm!==undefined&&
-    (!['ridge','shed'].includes(r.roofForm)||!['x','z'].includes(r.roofAxis)||
+    (!['ridge','shed','gable'].includes(r.roofForm)||!['x','z'].includes(r.roofAxis)||
      r.spatialUse==='open-court')))
     fail('ROOM_CONTRACT');
   if(i>0&&(!keys(r.attach,['to','side','shift'])||
@@ -114,7 +115,7 @@ export function compileSpatialComposition(value){
   wall:d.wall+(d.axis==='z'?sx:sz),
   along:d.along+(d.axis==='z'?sz:sx)}));
  const bounds={width:Math.max(...rooms.map(maxX))+3,
-  height:Math.max(...rooms.map(r=>r.roofY))+3,
+  height:Math.max(...rooms.map(r=>r.roofY+(r.roofForm==='gable'?4:2)))+1,
   depth:Math.max(...rooms.map(maxZ))+3};
  if(bounds.width>128||bounds.depth>128)fail('BOUNDS');
  const elements=[],mat=plan.materials;
@@ -132,17 +133,25 @@ export function compileSpatialComposition(value){
   box(tag+'-front','add',mat.wall,[r.x+1,2,r.z],[r.width-2,height,1]);
   box(tag+'-rear','add',mat.wall,[r.x+1,2,maxZ(r)],[r.width-2,height,1]);
   if(r.spatialUse!=='open-court'){
-   if(r.roofForm==='ridge'||r.roofForm==='shed'){
+   if(['ridge','shed','gable'].includes(r.roofForm)){
     // MODEL-authored roofs. Historic ridge elements stay unchanged.
     // Shed rises toward positive roofAxis and has a sealed high end.
     const axis=r.roofAxis,n=axis==='x'?r.width:r.depth;
     const rise=k=>r.roofForm==='shed'?
      Math.min(2,Math.floor(k*3/n)):
-     Math.min(2,Math.floor(Math.min(k,n-1-k)/2));
+     r.roofForm==='gable'?taperedR125RidgeHeight(k,n,4):
+      Math.min(2,Math.floor(Math.min(k,n-1-k)/2));
     for(let start=0;start<n;){
      const h=rise(start);let end=start+1;
      while(end<n&&rise(end)===h)end++;
      const run=end-start;
+     if(r.roofForm==='gable'&&start>0){
+      const previous=rise(start-1),high=h>previous?start:start-1;
+      box(tag+'-gable-riser-'+start,'add',mat.roof,
+       axis==='x'?[r.x+high,r.roofY+Math.min(h,previous),r.z]:
+        [r.x,r.roofY+Math.min(h,previous),r.z+high],
+       axis==='x'?[1,1,r.depth]:[r.width,1,1]);
+     }
      if(r.roofForm==='shed'&&start>0){
       // A stepped roof can be face-disconnected: lower skin at height H
       // touches the next higher skin only diagonally. Seal the exact

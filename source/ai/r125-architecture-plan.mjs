@@ -7,6 +7,7 @@
  * No typology names, world APIs, scripts, or user code execution.
  */
 import {createHash} from 'node:crypto';
+import {taperedR125RidgeHeight} from './r125-roof-profiles.mjs';
 import {compileDesign,verifyCompiled,SCHEMA as B143} from './b143-building-dsl.mjs';
 import {auditR125SourceRoutes,auditR125VisitorRoutes} from './r125-source-routes.mjs';
 import {SCHEMA as SPATIAL_SCHEMA,compileSpatialComposition} from './r125-spatial-composition.mjs';
@@ -282,7 +283,7 @@ export function validateArchitecturePlan(p){
   // Only an explicitly authored new ridge profile may replace the broad
   // historical 3-block-rise plateau. Existing roofs are never reinterpreted.
   check(e.ridgeProfile===undefined||
-   (e.ridgeProfile==='steep'&&e.roofProfile==='ridge'&&
+   (['steep','tapered'].includes(e.ridgeProfile)&&e.roofProfile==='ridge'&&
     e.roofVolume==='raised'&&!Object.hasOwn(e,'rearCornerCut')&&
     !Object.hasOwn(e,'rearCourt')&&!Object.hasOwn(e,'frontCornerCut')),
    'EXPRESSION_RIDGE_PROFILE');
@@ -456,7 +457,7 @@ export function validateArchitecturePlan(p){
      (volume.facadeRelief===undefined||
       (volume.facadeRelief==='front-piers'&&space.spatialUse!=='open-court'))&&
      ((volume.roofForm===undefined&&volume.roofAxis===undefined)||
-      (['ridge','shed'].includes(volume.roofForm)&&['x','z'].includes(volume.roofAxis)&&
+      (['ridge','shed','gable'].includes(volume.roofForm)&&['x','z'].includes(volume.roofAxis)&&
        space.spatialUse!=='open-court')),'SPATIAL_ROOM_VOLUME');
     if(seen.size===0){
      check(!Object.hasOwn(volume,'attach')&&['public','shared'].includes(space.access),
@@ -1442,7 +1443,8 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
   const sawtoothHeight=pos=>roofMassing==='compact-sawtooth'?
    Math.floor((pos%6)/2):(pos%6===0?0:Math.ceil((pos%6)/2));
   const span=roofAxis==='x'?upper.x1-upper.x0+1:upper.z1-upper.z0+1;
-  const ridgeHeight=pos=>Math.min(
+  const tapered=original.expression.ridgeProfile==='tapered';
+  const ridgeHeight=pos=>tapered?taperedR125RidgeHeight(pos,span):Math.min(
    (original.expression.ridgeProfile==='steep'||roofMassing==='steep-ridge-review')?6:3,
    Math.floor(Math.min(pos,span-1-pos)/2));
   for(let pos=0;pos<span;pos++){
@@ -1482,6 +1484,13 @@ function compileExpressiveArchitecturePlan(original,{entrancePlacement='legacy',
      const previous=roofProfile==='ridge'?ridgeHeight(p):
       sawtoothHeight(p);
      const rise=Math.abs(height-previous);
+     // New profile only: bridge the one-cell steps of the actual skin.
+     if(tapered&&rise===1){
+      const highPos=height>previous?pos:p;
+      box('roof-tapered-riser-'+pos,'add',roof,
+       roofAxis==='x'?[upper.x0+highPos,top+Math.min(height,previous),upper.z0]:
+        [upper.x0,top+Math.min(height,previous),upper.z0+highPos],size);
+     }
      if(rise>1){
       // Compact-only: place the vertical reset glass on the LOW strip,
       // outside the high ceiling's two-wide air pad. Preserve the exact
