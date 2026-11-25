@@ -14,21 +14,60 @@ const clone=x=>JSON.parse(JSON.stringify(x));
 const sha=x=>createHash('sha256').update(x).digest('hex');
 const object=x=>x!==null&&typeof x==='object'&&!Array.isArray(x);
 const FIELD='delegatedDimensions';
-const instruction='OPTIONAL DIMENSION DELEGATION (single floor only): Keep the complete ordinary architecture JSON. If mechanical fit is uncertain, you MAY add delegatedDimensions, an array of 1..4 {field,choices} entries; each choices lists 2..5 distinct integers, first equal to your declared baseline. HOST tries only these allowed values and keeps your other decisions. Allowed fields: footprint.width/depth (16..32); conventional levels.0.splitPercent (30..70 step 5), levels.0.secondarySplitPercent (25..75 step 5, three rooms only, must be declared); spatial levels.0.spaces.N.volume.width/depth (6..14) or levels.0.spaces.N.volume.attach.shift (-3..3, N>0), with N=0 for rootSpace and N=1..3 for attachedSpaces in order. Keep topology, roof, windows, materials, room purpose and fixtures explicit. Omit delegatedDimensions to keep exact dimensions, or for two floors. Do not delegate user-fixed measurements. Prefer a coherent design and permit useful dimension alternatives where needed for actual geometry. Return only the single JSON object.';
-const choice=(fields,min,max,step=1)=>({type:'object',additionalProperties:false,
- properties:{field:{type:'string',enum:fields},choices:{type:'array',minItems:2,maxItems:5,
- items:{type:'integer',minimum:min,maximum:max,...(step>1?{multipleOf:step}:{})}}},
- required:['field','choices']});
+// V37.3: compact map of explicitly permitted alternative values. The
+// baseline is already in the plan; never ask the model to repeat it.
+const instruction='OPTIONAL DIMENSION DELEGATION (single floor only): Keep the ordinary architecture JSON. If useful, add delegatedDimensions as an object, e.g. {"width":[24,28],"split":[45,55]}. Keys are dimensions; arrays list 1..4 acceptable alternatives to the value already in your plan. HOST tries the original value first, then only these alternatives. Use at most four keys. width/depth = footprint (16..32); split = main partition (30..70 step 5); secondary = declared three-room secondary partition (25..75 step 5). For spatial-tree only: r0Width/r0Depth through r3Width/r3Depth (6..14) and r1Shift through r3Shift (-3..3), r0=rootSpace, others=attachedSpaces in order. Do not delegate user-fixed measurements. Keep all non-dimensional choices explicit. Omit this object for exact dimensions or two floors. For spatial-tree, keep both center cells of the root FRONT (small z) wall exterior: no other volume may occupy them, including a chain of attached rooms. A larger site alone does not clear a blocked entrance. Return one JSON object.';
+const dimensions={
+ width:['footprint.width',16,32],depth:['footprint.depth',16,32],
+ split:['levels.0.splitPercent',30,70,5],
+ secondary:['levels.0.secondarySplitPercent',25,75,5]
+};
+for(let i=0;i<4;i++){
+ dimensions['r'+i+'Width']=['levels.0.spaces.'+i+'.volume.width',6,14];
+ dimensions['r'+i+'Depth']=['levels.0.spaces.'+i+'.volume.depth',6,14];
+ if(i>0)dimensions['r'+i+'Shift']=['levels.0.spaces.'+i+'.volume.attach.shift',-3,3];
+}
 function delegationSchema(spatial){
- const types=[choice(['footprint.width','footprint.depth'],16,32)];
- if(spatial){
-  types.push(choice(Array.from({length:4},(_,n)=>['width','depth'].map(k=>'levels.0.spaces.'+n+'.volume.'+k)).flat(),6,14));
-  types.push(choice([1,2,3].map(n=>'levels.0.spaces.'+n+'.volume.attach.shift'),-3,3));
- }else{
-  types.push(choice(['levels.0.splitPercent'],30,70,5));
-  types.push(choice(['levels.0.secondarySplitPercent'],25,75,5));
+ const fields=Object.keys(dimensions).filter(k=>k==='width'||k==='depth'||
+  (spatial?k.startsWith('r'):k==='split'||k==='secondary'));
+ const properties=Object.fromEntries(fields.map(k=>{
+  const [,minimum,maximum,step]=dimensions[k];
+  return [k,{type:'array',minItems:1,maxItems:4,items:{
+   type:'integer',minimum,maximum,...(step?{multipleOf:step}:{})}}];
+ }));
+ return {type:'object',additionalProperties:false,minProperties:1,maxProperties:4,
+  properties};
+}
+// Existing archived array contracts remain strict and replayable. New map
+// semantics are a set of explicit alternatives, not an authored baseline
+// override. Repeating the baseline or an alternative is harmless redundancy;
+// remove it, record it, and do not invent any value.
+export function expandR125DelegationMap(plan,declared){
+ if(Array.isArray(declared))return {format:'legacy-array',delegated:declared,redundancies:[]};
+ if(!object(declared)||Object.keys(declared).length<1||
+    Object.keys(declared).length>4)fail('DELEGATION_MAP');
+ if(plan?.levels?.length!==1)fail('DELEGATION_SINGLE_FLOOR');
+ const spatial=plan.levels[0].layoutMode==='spatial-tree',allowed=delegationSchema(spatial).properties;
+ const delegated=[],redundancies=[];
+ for(const [key,values] of Object.entries(declared)){
+  if(!Object.hasOwn(allowed,key)||!Array.isArray(values)||values.length<1||values.length>4)
+   fail('DELEGATION_MAP_FIELD');
+  const [field,min,max,step=1]=dimensions[key];
+  let baseline=plan;
+  for(const part of field.split('.')){
+   if(!baseline||!Object.hasOwn(baseline,part))fail('DELEGATION_MAP_FIELD_ABSENT');
+   baseline=baseline[part];
+  }
+  const valid=v=>Number.isInteger(v)&&v>=min&&v<=max&&v%step===0;
+  if(!valid(baseline)||!values.every(valid))fail('DELEGATION_MAP_VALUES');
+  const choices=[baseline];
+  for(const v of values){
+   if(choices.includes(v))redundancies.push({key,value:v});
+   else choices.push(v);
+  }
+  if(choices.length>1)delegated.push({field,choices});
  }
- return {type:'array',minItems:1,maxItems:4,items:{anyOf:types}};
+ return {format:'compact-map',delegated,redundancies};
 }
 // Transform the actual Windows-prepared fresh request, not a stale GitHub
 // adapter copy. Preserve native schema restrictions and every user message.
@@ -77,10 +116,18 @@ export function replayR125DelegatedResponse(raw,requestedBrief,{maxCandidates=16
  const normalized=normalizeR125SpatialTreeResponse(JSON.stringify(plan));
  // The solver receives canonical ordered spaces and can change only numeric
  // values explicitly listed by the model. No HOST observation repair.
- const result=resolveR125DelegatedDimensions({plan:normalized.plan,delegated},
+ const expanded=expandR125DelegationMap(normalized.plan,delegated);
+ if(expanded.format==='compact-map'&&expanded.delegated.length===0){
+  const diagnostic=diagnoseR125ArchitecturePlanOriginal(JSON.stringify(normalized.plan),{requestedBrief});
+  return {status:diagnostic.status,originalSha256,originalEdited:false,
+   delegationSelected:true,delegationContract:expanded,changes:[],
+   sourceVerified:diagnostic.sourceVerified,diagnostic,
+   wireNormalization:normalized.normalization};
+ }
+ const result=resolveR125DelegatedDimensions({plan:normalized.plan,delegated:expanded.delegated},
   p=>diagnoseR125ArchitecturePlanOriginal(JSON.stringify(p),{requestedBrief}),
   {maxCandidates});
- return {...result,originalSha256,delegationSelected:true,
+ return {...result,originalSha256,delegationSelected:true,delegationContract:expanded,
   sourceVerified:result.status==='DELEGATED_SOURCE_CANDIDATE_ART_HOLD',
   wireNormalization:normalized.normalization,
   baselinePlanSha256:sha(JSON.stringify(normalized.plan)),
