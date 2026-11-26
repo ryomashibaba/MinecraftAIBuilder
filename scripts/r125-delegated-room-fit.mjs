@@ -19,12 +19,14 @@ export function resolveR125DelegatedRoomFit(plan,declared,requestedBrief,evaluat
     typeof requestedBrief!=='string'||!requestedBrief.trim()||typeof evaluate!=='function'||
     !int(maxCandidates,1,24))fail('CONTRACT');
  const snapshot=clone(plan),spaces=plan.levels[0].spaces,attempts=[];
- const axes=Object.entries(declared.roomFit).map(([k,max])=>{
+ const redundancies=[];
+ const axes=Object.entries(declared.roomFit).flatMap(([k,max])=>{
   const m=/^r([0-3])(Width|Depth)$/.exec(k),i=m?Number(m[1]):-1;
   if(!m||i>=spaces.length)fail('ROOM_INDEX');
   const axis=m[2].toLowerCase(),from=spaces[i].volume?.[axis];
-  if(!int(from,6,14)||!int(max,from+1,14))fail('ROOM_LIMIT');
-  return {i,axis,from,max,field:'levels.0.spaces.'+i+'.volume.'+axis,room:spaces[i].id};
+  if(!int(from,6,14)||!int(max,from,14))fail('ROOM_LIMIT');
+  if(max===from){redundancies.push({key:k,value:max,reason:'NO_EXPANSION_AUTHORIZED'});return [];}
+  return [{i,axis,from,max,field:'levels.0.spaces.'+i+'.volume.'+axis,room:spaces[i].id}];
  });
  const changes=p=>{
   const list=axes.flatMap(a=>{const to=p.levels[0].spaces[a.i].volume[a.axis];return to===a.from?[]:[{field:a.field,from:a.from,to}]});
@@ -51,7 +53,7 @@ export function resolveR125DelegatedRoomFit(plan,declared,requestedBrief,evaluat
  const finish=(r,p,reason)=>({schema:'r125-explicit-room-fit-study-v1',
   status:r.sourceVerified?'DELEGATED_SOURCE_CANDIDATE_ART_HOLD':'HOLD_NO_VERIFIED_DELEGATED_CANDIDATE',
   sourceVerified:r.sourceVerified,candidate:r.sourceVerified?p:null,
-  changes:r.sourceVerified?changes(p):[],attempts,diagnostic:r,roomFitReason:reason,
+  changes:r.sourceVerified?changes(p):[],attempts,diagnostic:r,roomFitReason:reason,roomFitRedundancies:redundancies,
   originalEdited:false,modelAuthorship:'MODEL_INTENT_HOST_RESOLVED_NOT_RAW_MODEL_SOURCE',
   modelCalls:0,worldWrites:0,artStatus:'NOT_REVIEWED'});
  if(baseline.sourceVerified)return finish(baseline,snapshot,'BASELINE_ALREADY_FITS');

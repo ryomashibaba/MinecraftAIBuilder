@@ -39,6 +39,24 @@ export function r125BlockPaletteSchema(){
   properties:Object.fromEntries(roles.map(r=>[r,{type:'string',enum:choices(r)}]))};
 }
 const instruction='OPTIONAL blockPalette: after choosing massing and room use, consider how actual block materials, depth and roof finish express the architectural idea. Prefer a deliberate material choice over an accidental coarse default when useful; no feature is mandatory. blockPalette floor|wall|roof|trim|windowFrame: '+opaque.join('|')+'; furniture: planks only; storage: bookshelf or planks. Keep required coarse materials. windowRelief: hoods or surrounds, projecting from feasible existing exterior windows. wallRelief: pilasters or framed-bays on feasible solid walls, using trim. roofSurface: stairs|stairs-and-slabs|slabs, requires blockPalette.roof from '+Object.keys(ROOF_SURFACE_FAMILIES).join('|')+'; direction follows real roof heights. Shape overlay is review-only. Omit irrelevant or incompatible fields; no new openings or forced decoration.';
+/** Use after all top-level request restrictions (observation, delegation)
+ * have been applied. Each complete alternative preserves those restrictions. */
+export function constrainR125RoofSurfaceChoices(schema){
+ if(!Array.isArray(schema?.anyOf)||!schema.anyOf.length)fail('ROOF_SURFACE_VARIANTS');
+ for(const v of schema.anyOf){
+  if(!obj(v.properties)||!Array.isArray(v.required)||v.anyOf||
+     !v.properties.roofSurface||!v.properties.blockPalette)fail('ROOF_SURFACE_VARIANT');
+  const plain=JSON.parse(JSON.stringify(v));delete plain.properties.roofSurface;
+  const shaped=JSON.parse(JSON.stringify(v));
+  shaped.required.push('blockPalette','roofSurface');
+  shaped.properties.blockPalette.required=['roof'];
+  shaped.properties.blockPalette.properties.roof={type:'string',enum:Object.keys(ROOF_SURFACE_FAMILIES)};
+  // Keep the common envelope for callers which inspect the five layout
+  // families. Both full alternatives independently disallow unknown fields.
+  v.anyOf=[plain,shaped];
+ }
+ return schema;
+}
 export function prepareR125BlockPaletteRequest(body){
  if(!obj(body)||!Array.isArray(body.messages)||body.messages[0]?.role!=='system'||
     typeof body.messages[0].content!=='string'||body.messages[0].content.includes('OPTIONAL blockPalette:'))

@@ -271,11 +271,22 @@ const r125SpatialVolume=(attached)=>{
 };
 const r125RootSpatialVolume=r125SpatialVolume(false);
 const r125AttachedSpatialVolume=r125SpatialVolume(true);
-const r125SpatialRoom=(volume)=>({...r125Room,
- properties:{...r125Room.properties,volume,
-  spatialUse:r125enum('open-court')},
- required:[...r125Room.required,'volume']});
-const r125RootSpatialRoom=r125SpatialRoom(r125RootSpatialVolume);
+const r125SpatialRoom=(volume,root=false)=>{
+ const properties={...r125Room.properties,volume,
+  ...(root?{access:r125enum('public','shared')}: {})};
+ const required=[...r125Room.required,'volume'];
+ const enclosed=r125obj(properties,required);
+ if(!root)return enclosed;
+ const outdoorProperties={...properties,spatialUse:r125enum('open-court'),
+  volume:r125obj({width:r125int(6,14),depth:r125int(6,14),roofY:r125int(6,10)},['width','depth','roofY'])};
+ delete outdoorProperties.daylight;
+ const court=r125obj(outdoorProperties,[...required,'spatialUse']);
+ // Complete alternatives for decoder grammars; no indoor window or roof
+ // on an explicitly outdoor root. Attached rooms cannot be open-court.
+ return {...r125obj({...properties,spatialUse:r125enum('open-court')},required),
+  anyOf:[enclosed,court]};
+};
+const r125RootSpatialRoom=r125SpatialRoom(r125RootSpatialVolume,true);
 const r125AttachedSpatialRoom=r125SpatialRoom(r125AttachedSpatialVolume);
 const r125BayValues=[35,40,45,50,55,60,65,70];
 const r125BayPair={type:'array',minItems:2,maxItems:2,
