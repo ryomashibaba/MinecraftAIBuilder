@@ -53,6 +53,20 @@ test('extended fresh prompt distinguishes ordinary rooms from explicit staff obs
   assert.equal(user.architecturalRequest,prompt);
   assert.match(user.observationRelationRule,i===0?/^Omit observationLink unless/:/^REQUIRED BY THIS BRIEF/);
   assert.equal(sent.response_format.json_schema.schema.anyOf.every(v=>v.required.includes('observationLink')),i===1);
+  assert.equal(sent.response_format.json_schema.schema.anyOf.every(v=>Object.hasOwn(v.properties,'observationLink')),i===1);
   assert.ok(sent.response_format.json_schema.schema.anyOf.every(v=>!v.required.includes('blockPalette')));
+ }
+});
+
+test('materials trial preserves required observation and spatial-only mode, without editing base',()=>{
+ for(const observationRequired of [false,true])for(const spatialTreeOnly of [false,true]){
+  const req={...base,response_format:r125ResponseFormatForEndpoint(DEFAULT_LOCAL_ENDPOINT,{observationRequired,spatialTreeOnly})};
+  const saved=JSON.stringify(req),next=prepareR125MaterialsTrialRequest(req);
+  assert.equal(JSON.stringify(req),saved);
+  const vars=next.response_format.json_schema.schema.anyOf;
+  assert.equal(vars.length,spatialTreeOnly?1:5);
+  assert.ok(vars.every(v=>Object.hasOwn(v.properties,'observationLink')===observationRequired));
+  assert.ok(vars.every(v=>v.required.includes('observationLink')===observationRequired));
+  assert.ok(vars.every(v=>!v.required.includes('blockPalette')));
  }
 });

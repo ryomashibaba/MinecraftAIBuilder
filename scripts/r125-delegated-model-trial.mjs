@@ -103,7 +103,17 @@ export function prepareR125DelegatedRequest(body){
  return next;
 }
 export function prepareR125MaterialsTrialRequest(body){
- return prepareR125BlockPaletteRequest(prepareR125DelegatedRequest(body));
+ const next=prepareR125BlockPaletteRequest(prepareR125DelegatedRequest(body));
+ const schema=next.format??next.response_format?.json_schema?.schema;
+ // The ordinary adapter determines explicit required work-observation.
+ // On this trial's non-required variants, prevent the decoder from
+ // gratuitously selecting a relation between unrelated public rooms.
+ // This is a disclosed response-form restriction, not a HOST plan edit.
+ const required=schema.anyOf.some(v=>v.required.includes('observationLink'));
+ if(!required){
+  for(const v of schema.anyOf)delete v.properties.observationLink;
+ }
+ return next;
 }
 /** One request via the existing guarded transport; capture exact wire
  * body before POST. No retries, endpoint or model substitution. */
