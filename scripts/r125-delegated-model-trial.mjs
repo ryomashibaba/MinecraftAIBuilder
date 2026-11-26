@@ -119,15 +119,43 @@ export function prepareR125MaterialsTrialRequest(body){
 }
 /** One request via the existing guarded transport; capture exact wire
  * body before POST. No retries, endpoint or model substitution. */
-export function createR125MaterialsTrialTransport(transport,capture){
- if(typeof transport!=='function'||typeof capture!=='function')fail('TRANSPORT');
+// Same response grammar, user message and transport as the full spatial trial.
+const compactSpatialSystem=[
+ 'You are an inventive Minecraft architectural designer. Return ONE strict JSON object using the supplied schema. Design the original request, not a fixed building-type template.',
+ 'DESIGN: picture arrival, activity and departure; compare possible silhouettes and connected volumes before choosing. Express the idea in room proportions, varied roof heights/forms when appropriate, exterior openings and actual equipment. Do not rely on a poetic title or add decoration for its own sake. A flat roof can be deliberate; complexity is not mandatory.',
+ 'PROGRAM: infer essential activities and choose actual fixtures in their own rooms, including every requiredFixtureRoles item. Reading, meals and seated work need seating plus a table/desk; storage needs storage. Use large-table only for oversized objects. Do not invent functions. Choose room sizes before the envelope.',
+ 'SPATIAL-TREE: rootSpace is public/shared; attachedSpaces 1..3, each attached to an earlier room by a shared wall, with >=4 common cells. No volume overlaps. Keep both center cells of root front (small z) wall exterior. Public/shared rooms must be reachable without staff-only rooms. Exterior dimensions 6..14; clear interior width/depth subtract 2. Site span plus 4 cells, plus shelterDepth on depth, within 16..32. Keep fixed user dimensions.',
+ 'FIT: ordinary fixtures 3x1; seating/washbasin/oven/electronics/table 3x2; bed 3x4; tool-rack/teaching-board 5x1; service-bay 5x4; inspection-stand 3x3; assembly-table 5x3; large-table 7x5. Allow two-wide connected approaches. Area alone does not guarantee fit. table-group: one table first, seating later, room for a clear gap. crafted adds detail.',
+ 'DAYLIGHT: wide-bay needs exposed face >=8; paired-bays two 3x2 windows, face >=7, root entrance-flanking width >=14; panorama face >=12; clerestory high window. Preserve exposed wall, jambs, sill, lintel and usable interior approach. Open-court root is outdoors, omit daylight and roofForm/roofAxis. Flat roof omits both; ridge/shed/gable requires roofAxis.',
+ 'Use actual structured fields for requested features. ObservationLink only for explicit staff-work viewing as specified by the request/schema. Do not claim construction, walking, weatherproofing or working machinery. Check that the final geometry choices serve the request.'
+].join('\n');
+export function prepareR125CompactSpatialRequest(body){
+ const next=clone(body);
+ const schema=next.format??next.response_format?.json_schema?.schema;
+ if(!Array.isArray(schema?.anyOf)||schema.anyOf.length!==1||
+    !Object.hasOwn(schema.anyOf[0].properties?.levels?.items?.properties??{},'rootSpace')||
+    next.messages?.length!==2||next.messages[0]?.role!=='system'||next.messages[1]?.role!=='user')fail('COMPACT_SPATIAL_ONLY');
+ const original=next.messages[0].content;
+ // Retain the exact extension instructions from the existing preparation
+ // functions. Replace only the verbose base system, never the user payload.
+ const marker='\nOPTIONAL DIMENSION DELEGATION';
+ const at=original.indexOf(marker);
+ if(at<0||original.indexOf(marker,at+1)!==-1||
+    !original.slice(at).includes('\nOPTIONAL blockPalette:'))fail('COMPACT_EXTENSION_MISSING');
+ next.messages[0].content=compactSpatialSystem+original.slice(at);
+ return next;
+}
+
+export function createR125MaterialsTrialTransport(transport,capture,{compactDesign=false}={}){
+ if(typeof transport!=='function'||typeof capture!=='function'||typeof compactDesign!=='boolean')fail('TRANSPORT');
  let attempted=false;
  return async (url,init)=>{
   if(attempted)fail('ONE_POST_ONLY');
   attempted=true;
   if(url!=='http://127.0.0.1:11434/v1/chat/completions'||
      init?.method!=='POST'||init.redirect!=='error'||typeof init.body!=='string')fail('TRANSPORT_BOUNDARY');
-  const body=JSON.stringify(prepareR125MaterialsTrialRequest(JSON.parse(init.body)));
+  const extended=prepareR125MaterialsTrialRequest(JSON.parse(init.body));
+  const body=JSON.stringify(compactDesign?prepareR125CompactSpatialRequest(extended):extended);
   capture(body);
   return transport(url,{...init,body});
  };

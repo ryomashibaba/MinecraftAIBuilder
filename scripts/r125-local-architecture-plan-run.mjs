@@ -75,13 +75,15 @@ export function parseR125LocalPlanArgs(argv){
  const trialMode=argv.includes('--trial-mode');
  const spatialTreeOnly=argv.includes('--spatial-tree-only');
  const materialsTrial=argv.includes('--materials-trial');
+ const compactDesign=argv.includes('--compact-design');
+ if(argv.filter(x=>x==='--compact-design').length>1||compactDesign&&(!materialsTrial||!spatialTreeOnly))fail('COMPACT_DESIGN_REQUIRES_SPATIAL_MATERIALS_TRIAL');
  if(argv.filter(x=>x==='--materials-trial').length>1)fail('DUPLICATE_MATERIALS_TRIAL_FLAG');
  if(materialsTrial&&(!trialMode||repairOnce))fail('MATERIALS_TRIAL_REQUIRES_SINGLE_TRIAL');
  if(argv.filter(x=>x==='--repair-once').length>1)fail('DUPLICATE_REPAIR_FLAG');
  if(argv.filter(x=>x==='--trial-mode').length>1)fail('DUPLICATE_TRIAL_FLAG');
  if(argv.filter(x=>x==='--spatial-tree-only').length>1)fail('DUPLICATE_SPATIAL_TREE_FLAG');
  if(trialMode&&repairOnce)fail('TRIAL_MODE_SINGLE_REQUEST_ONLY');
- const pairs=argv.filter(x=>x!=='--repair-once'&&x!=='--trial-mode'&&x!=='--spatial-tree-only'&&x!=='--materials-trial');
+ const pairs=argv.filter(x=>x!=='--repair-once'&&x!=='--trial-mode'&&x!=='--spatial-tree-only'&&x!=='--materials-trial'&&x!=='--compact-design');
  if(pairs.length<6||pairs.length>18||pairs.length%2!==0)
   fail('ARGS_MODEL_PROMPT_OUT_REQUIRED');
  const values={},allowed=new Set(['--model','--prompt','--out','--endpoint',
@@ -109,7 +111,7 @@ export function parseR125LocalPlanArgs(argv){
   ...(values['--revise-plan']?{revisionPlanPath:path.resolve(values['--revise-plan'])}:{}),
   ...(values['--revise-diagnosis']?{revisionDiagnosisPath:path.resolve(values['--revise-diagnosis'])}:{}),
   ...(repairOnce?{repairOnce:true}:{}),...(trialMode?{trialMode:true}:{}),
-  ...(spatialTreeOnly?{spatialTreeOnly:true}:{}),...(materialsTrial?{materialsTrial:true}:{})};
+  ...(spatialTreeOnly?{spatialTreeOnly:true}:{}),...(materialsTrial?{materialsTrial:true}:{}),...(compactDesign?{compactDesign:true}:{})};
 }
 
 /** Local long-inference transport. Node fetch/Undici's default 300-second
@@ -220,7 +222,7 @@ export function r125FixtureRevisionEvidence(diagnosis,raw){
 export async function runR125LocalArchitecturePlan({
  model,prompt,outDir,endpoint=DEFAULT_LOCAL_ENDPOINT,
 reasoningEffort=undefined,maxOutputTokens=4096,repairOnce=false,trialMode=false,
-revisionPlanPath=null,revisionDiagnosisPath=null,spatialTreeOnly=false,materialsTrial=false
+revisionPlanPath=null,revisionDiagnosisPath=null,spatialTreeOnly=false,materialsTrial=false,compactDesign=false
 },{fetcher=fetch,timeoutMs=180000,signal}={}){
  if(typeof outDir!=='string'||outDir.length===0)
   fail('OUT_DIRECTORY_REQUIRED');
@@ -232,6 +234,7 @@ revisionPlanPath=null,revisionDiagnosisPath=null,spatialTreeOnly=false,materials
  if(revisionDiagnosisPath!==null&&(typeof revisionDiagnosisPath!=='string'||
     !revisionDiagnosisPath.trim()||revisionPlanPath===null||repairOnce))
   fail('INVALID_REVISION_DIAGNOSIS_OPTION');
+ if(typeof compactDesign!=='boolean'||compactDesign&&(!materialsTrial||!spatialTreeOnly))fail('COMPACT_DESIGN_REQUIRES_SPATIAL_MATERIALS_TRIAL');
  if(typeof materialsTrial!=='boolean'||materialsTrial&&(!trialMode||repairOnce||revisionPlanPath!==null||revisionDiagnosisPath!==null||endpoint!==DEFAULT_LOCAL_ENDPOINT))
   fail('MATERIALS_TRIAL_REQUIRES_FRESH_STRICT_SINGLE_TRIAL');
  if(trialMode&&fetcher!==fetch)fail('TRIAL_MODE_REQUIRES_REAL_LOCAL_TRANSPORT');
@@ -274,7 +277,7 @@ revisionPlanPath=null,revisionDiagnosisPath=null,spatialTreeOnly=false,materials
  const transport=trialMode?fetchR125LongLocalCompletion:fetcher;
  const selectedTransport=materialsTrial?createR125MaterialsTrialTransport(transport,body=>{
   write(dest,'MODEL_REQUEST_EXACT.json',body);actualRequestSha256=sha(body);
- }):transport;
+ },{compactDesign}):transport;
  // Validate endpoint, model, prompt and other options BEFORE allocating dir.
  const author=createR125ArchitecturePlanLocalAdapter({
   model,endpoint,fetcher:selectedTransport,allowDelegatedDimensions:materialsTrial,
@@ -314,7 +317,7 @@ revisionPlanPath=null,revisionDiagnosisPath=null,spatialTreeOnly=false,materials
  }
  const common={schema:'r125-local-plan-one-shot-v1',
   model,endpoint,requestSha256:sha(prompt),
-  ...(materialsTrial?{materialsTrial:true,extendedContract:'V38.5',partialShapeConstruction:'NOT_ATTESTED'}:{}),
+  ...(materialsTrial?{materialsTrial:true,extendedContract:'V38.5',designPromptProfile:compactDesign?'compact-spatial-v1':'full',partialShapeConstruction:'NOT_ATTESTED'}:{}),
   executionMode:trialMode?'WINDOWS_LOCAL_TRIAL_SINGLE_REQUEST':'OWNED_WINDOWS_ONE_SHOT',
   requestedGenerationSettings:{temperature:0.55,
    responseFormat:r125ResponseFormatForEndpoint(endpoint,{spatialTreeOnly}).type,
@@ -572,7 +575,7 @@ revisionPlanPath=null,revisionDiagnosisPath=null,spatialTreeOnly=false,materials
 if(process.argv[1]===fileURLToPath(import.meta.url)){
  try{
   const args=parseR125LocalPlanArgs(process.argv.slice(2));
-  if(args.help)console.log('R125 local trial: node scripts/r125-local-architecture-plan-run.mjs --trial-mode [--materials-trial] [--spatial-tree-only] --model MODEL --prompt "..." --out NEW_PRIVATE_DIRECTORY [--revise-plan PLAN.json --revise-diagnosis SOURCE_DIAGNOSIS.json] (loopback only, one request, Ctrl+C to stop)');
+  if(args.help)console.log('R125 local trial: node scripts/r125-local-architecture-plan-run.mjs --trial-mode [--materials-trial] [--spatial-tree-only] [--compact-design] --model MODEL --prompt "..." --out NEW_PRIVATE_DIRECTORY [--revise-plan PLAN.json --revise-diagnosis SOURCE_DIAGNOSIS.json] (loopback only, one request, Ctrl+C to stop)');
   else{
    const controller=args.trialMode?new AbortController():null;
    const cancel=()=>controller?.abort();
