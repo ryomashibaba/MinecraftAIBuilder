@@ -2,7 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {r125ResponseFormatForEndpoint} from '../source/ai/b198g-local-model-adapter.mjs';
-import {prepareR125DelegatedRequest,replayR125DelegatedResponse,expandR125DelegationMap} from './r125-delegated-model-trial.mjs';
+import {prepareR125DelegatedRequest,replayR125DelegatedResponse,expandR125DelegationMap,resolveR125DelegatedSiteFit} from './r125-delegated-model-trial.mjs';
 const base=()=>({schema:'minecraftaibuilder-r125-architecture-plan-v1',
  id:'delegation-synthetic',title:'Synthetic dimension study',
  brief:'Synthetic test only, not a genuine model response',
@@ -109,4 +109,35 @@ test('compact map real spatial SOURCE recovery without duplicate baseline',()=>{
  assert.deepEqual(r.changes,[{field:'footprint.width',from:16,to:30}]);
  assert.deepEqual(r.candidate.levels[0].spaces,[p.levels[0].rootSpace,...p.levels[0].attachedSpaces]);
  assert.equal(r.originalSha256,createHash('sha256').update(raw).digest('hex'));
+});
+
+test('siteFit computes exact compiler-required site without changing authored rooms',()=>{
+ const p=base();delete p.expression;p.id='delegation-spatial-fit';
+ p.footprint={width:16,depth:26};
+ p.levels=[{layoutMode:'spatial-tree',
+ rootSpace:{id:'public-room',purpose:'Public gathering',access:'public',fixtures:['seating'],
+ volume:{width:14,depth:10,roofY:8,roofForm:'gable',roofAxis:'x'}},
+ attachedSpaces:[{id:'staff-room',purpose:'Private work',access:'staff',fixtures:['desk'],
+ volume:{width:9,depth:8,roofY:6,roofForm:'shed',roofAxis:'z',
+ attach:{to:'public-room',side:'east',shift:0}}}]}];
+ const raw=JSON.stringify({...p,delegatedDimensions:{siteFit:true}});
+ const r=replayR125DelegatedResponse(raw,'小さな集会所を作って。');
+ assert.equal(r.sourceVerified,true);assert.equal(r.attempts.length,2);
+ assert.deepEqual(r.changes,[{field:'footprint.width',from:16,to:26}]);
+ assert.deepEqual(r.candidate.levels[0].spaces,[p.levels[0].rootSpace,...p.levels[0].attachedSpaces]);
+ assert.equal(r.originalSha256,createHash('sha256').update(raw).digest('hex'));
+ assert.equal(replayR125DelegatedResponse(raw,'幅16ブロック以内の集会所を作って。').siteFitReason,'EXPLICIT_DIMENSION_TEXT_GUARD');
+ assert.throws(()=>replayR125DelegatedResponse(JSON.stringify({...p,delegatedDimensions:{siteFit:true,width:[30]}}),'集会所を作って。'),/SITE_FIT_STANDALONE/);
+});
+test('site fit only changes envelope with exact evidence and never retries unrelated failures',()=>{
+ const p={footprint:{width:24,depth:18},levels:[{layoutMode:'spatial-tree',spaces:[]}]};
+ const safety={worldContacts:0,worldWrites:0,modelCalls:0,originalEdited:false,constructionApproved:false,executionAllowed:false,worldGates:Array(9).fill('BLOCKED')};
+ const base={...safety,sourceVerified:false,status:'HOLD_PLAN_COMPILER_OR_QA',compilerReason:'R125_PLAN_SPATIAL_VOLUMES_EXCEED_FOOTPRINT',spatialFootprint:{declared:{width:24,depth:18},required:{width:23,depth:19}}};
+ const ok={...safety,sourceVerified:true,status:'B143_SOURCE_CANDIDATE_ART_HOLD',structuralComposition:{status:'NOT_REQUIRED'}};
+ const snapshot=JSON.stringify(p),result=resolveR125DelegatedSiteFit(p,'工房を作って。',q=>q.footprint.depth===18?base:ok);
+ assert.deepEqual(result.candidate.footprint,{width:24,depth:19});assert.equal(JSON.stringify(p),snapshot);
+ const unrelated=resolveR125DelegatedSiteFit(p,'工房を作って。',()=>({...base,compilerReason:'R125_SPATIAL_DAYLIGHT_OPENING_UNAVAILABLE_room'}));
+ assert.equal(unrelated.attempts.length,1);assert.equal(unrelated.sourceVerified,false);
+ const over=resolveR125DelegatedSiteFit(p,'工房を作って。',()=>({...base,spatialFootprint:{...base.spatialFootprint,required:{width:33,depth:19}}}));
+ assert.equal(over.siteFitReason,'SITE_LIMIT_32');assert.equal(over.attempts.length,1);
 });

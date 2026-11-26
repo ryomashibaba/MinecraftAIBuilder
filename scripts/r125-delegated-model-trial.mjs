@@ -19,7 +19,7 @@ const object=x=>x!==null&&typeof x==='object'&&!Array.isArray(x);
 const FIELD='delegatedDimensions';
 // V37.3: compact map of explicitly permitted alternative values. The
 // baseline is already in the plan; never ask the model to repeat it.
-const instruction='OPTIONAL DIMENSION DELEGATION (single floor only): Keep the ordinary architecture JSON. If useful, add delegatedDimensions as an object, e.g. {"width":[24,28],"split":[45,55]}. Keys are dimensions; arrays list 1..4 acceptable alternatives to the value already in your plan. HOST tries the original value first, then only these alternatives. Use at most four keys. width/depth = footprint (16..32); split = main partition (30..70 step 5); secondary = declared three-room secondary partition (25..75 step 5). For spatial-tree only: r0Width/r0Depth through r3Width/r3Depth (6..14) and r1Shift through r3Shift (-3..3), r0=rootSpace, others=attachedSpaces in order. Do not delegate user-fixed measurements. Keep all non-dimensional choices explicit. Omit this object for exact dimensions or two floors. For spatial-tree, keep both center cells of the root FRONT (small z) wall exterior: no other volume may occupy them, including a chain of attached rooms. A larger site alone does not clear a blocked entrance. Return one JSON object.';
+const instruction='OPTIONAL DIMENSION DELEGATION (single floor only): Keep the ordinary architecture JSON. For spatial-tree with no user-fixed site dimensions, prefer delegatedDimensions:{"siteFit":true} when the site is merely a calculated envelope: HOST may increase ONLY footprint.width/depth to exact compiler-required minima (max 32); room sizes, positions relative to one another, windows and equipment stay fixed. siteFit is used alone, not with other alternatives. If useful, add delegatedDimensions as an object, e.g. {"width":[24,28],"split":[45,55]}. Keys are dimensions; arrays list 1..4 acceptable alternatives to the value already in your plan. HOST tries the original value first, then only these alternatives. Use at most four keys. width/depth = footprint (16..32); split = main partition (30..70 step 5); secondary = declared three-room secondary partition (25..75 step 5). For spatial-tree only: r0Width/r0Depth through r3Width/r3Depth (6..14) and r1Shift through r3Shift (-3..3), r0=rootSpace, others=attachedSpaces in order. Do not delegate user-fixed measurements. Keep all non-dimensional choices explicit. Omit this object for exact dimensions or two floors. For spatial-tree, keep both center cells of the root FRONT (small z) wall exterior: no other volume may occupy them, including a chain of attached rooms. A larger site alone does not clear a blocked entrance. Return one JSON object.';
 const dimensions={
  width:['footprint.width',16,32],depth:['footprint.depth',16,32],
  split:['levels.0.splitPercent',30,70,5],
@@ -38,6 +38,7 @@ function delegationSchema(spatial){
   return [k,{type:'array',minItems:1,maxItems:4,items:{
    type:'integer',minimum,maximum,...(step?{multipleOf:step}:{})}}];
  }));
+ if(spatial)properties.siteFit={type:'boolean',enum:[true]};
  return {type:'object',additionalProperties:false,minProperties:1,maxProperties:4,
   properties};
 }
@@ -130,6 +131,53 @@ export function createR125MaterialsTrialTransport(transport,capture){
   return transport(url,{...init,body});
  };
 }
+/** Mechanical site-envelope delegation, not architectural redesign.
+ * Only an explicit, standalone author selection enables this. */
+export function resolveR125DelegatedSiteFit(plan,requestedBrief,evaluate){
+ if(!object(plan)||plan.levels?.length!==1||plan.levels[0]?.layoutMode!=='spatial-tree'||
+    !object(plan.footprint)||!['width','depth'].every(k=>Number.isInteger(plan.footprint[k])&&plan.footprint[k]>=16&&plan.footprint[k]<=32)||
+    typeof requestedBrief!=='string'||typeof evaluate!=='function')fail('SITE_FIT_SCOPE');
+ const original=clone(plan),attempts=[];
+ const reportFor=p=>{
+  const raw=JSON.stringify(p),r=evaluate(p);
+  if(raw!==JSON.stringify(p)||JSON.stringify(plan)!==JSON.stringify(original)||
+     typeof r?.sourceVerified!=='boolean'||typeof r.status!=='string'||
+     r.worldContacts!==0||r.worldWrites!==0||r.modelCalls!==0||
+     r.originalEdited!==false||r.constructionApproved!==false||r.executionAllowed!==false||
+     r.worldGates?.length!==9||r.worldGates.some(v=>v!=='BLOCKED'))fail('SITE_FIT_DIAGNOSTIC');
+  return r;
+ };
+ const baseline=reportFor(clone(original));
+ attempts.push({changes:[],status:baseline.status,reason:baseline.compilerReason??null});
+ const finish=(diagnostic,candidate,changes,reason)=>({
+  schema:'r125-explicit-site-fit-study-v1',
+  status:diagnostic.sourceVerified?'DELEGATED_SOURCE_CANDIDATE_ART_HOLD':'HOLD_NO_VERIFIED_DELEGATED_CANDIDATE',
+  sourceVerified:diagnostic.sourceVerified,candidate:diagnostic.sourceVerified?candidate:null,
+  changes,attempts,diagnostic,siteFitReason:reason,originalEdited:false,
+  modelAuthorship:'MODEL_INTENT_HOST_RESOLVED_NOT_RAW_MODEL_SOURCE',
+  modelCalls:0,worldWrites:0,artStatus:'NOT_REVIEWED'});
+ if(baseline.sourceVerified)return finish(baseline,original,[],'BASELINE_ALREADY_FITS');
+ // Conservatively refuse explicit numerical site/size restrictions when
+ // recognizable; model instruction separately prohibits fixed constraints.
+ // This guard is not a complete natural-language measurement parser.
+ if(/(?:\d+\s*(?:[xX×＊*]|ブロック|マス|メートル|m\b)|(?:幅|奥行(?:き)?|敷地|横幅|縦幅|上限|以内)\s*(?:は|が|を|：|:)?\s*\d+)/i.test(requestedBrief))
+  return finish(baseline,null,[],'EXPLICIT_DIMENSION_TEXT_GUARD');
+ if(baseline.compilerReason!=='R125_PLAN_SPATIAL_VOLUMES_EXCEED_FOOTPRINT')return finish(baseline,null,[],'NOT_SITE_FAILURE');
+ const f=baseline.spatialFootprint;
+ if(!f||!['width','depth'].every(k=>f.declared?.[k]===original.footprint[k]&&Number.isSafeInteger(f.required?.[k])&&f.required[k]>0))
+  fail('SITE_FIT_EVIDENCE');
+ const candidate=clone(original),changes=[];
+ for(const k of ['width','depth']){
+  const from=original.footprint[k],to=Math.max(from,f.required[k]);
+  if(to>32)return finish(baseline,null,[],'SITE_LIMIT_32');
+  if(to!==from){candidate.footprint[k]=to;changes.push({field:'footprint.'+k,from,to});}
+ }
+ if(!changes.length)fail('SITE_FIT_NO_CHANGE');
+ const diagnostic=reportFor(candidate);
+ attempts.push({changes,status:diagnostic.status,reason:diagnostic.compilerReason??null});
+ if(diagnostic.sourceVerified&&diagnostic.structuralComposition?.status!=='NOT_REQUIRED')fail('SITE_FIT_COMPOSITION');
+ return finish(diagnostic,candidate,changes,diagnostic.sourceVerified?'EXACT_REQUIRED_ENVELOPE':'OTHER_SOURCE_FAILURE');
+}
 export function replayR125DelegatedResponse(raw,requestedBrief,{maxCandidates=16}={}){
  if(typeof raw!=='string'||raw.length<1||raw.length>60000||
     typeof requestedBrief!=='string'||!requestedBrief.trim())fail('INPUT');
@@ -147,6 +195,15 @@ export function replayR125DelegatedResponse(raw,requestedBrief,{maxCandidates=16
  const normalized=normalizeR125SpatialTreeResponse(JSON.stringify(plan));
  // The solver receives canonical ordered spaces and can change only numeric
  // values explicitly listed by the model. No HOST observation repair.
+ if(object(delegated)&&Object.hasOwn(delegated,'siteFit')){
+  if(delegated.siteFit!==true||Object.keys(delegated).length!==1)fail('SITE_FIT_STANDALONE');
+  const result=resolveR125DelegatedSiteFit(normalized.plan,requestedBrief,
+   p=>diagnoseR125ArchitecturePlanOriginal(JSON.stringify(p),{requestedBrief}));
+  return {...result,originalSha256,delegationSelected:true,
+   delegationContract:{format:'site-fit',siteFit:true},wireNormalization:normalized.normalization,
+   baselinePlanSha256:sha(JSON.stringify(normalized.plan)),
+   ...(result.candidate?{resolvedPlanSha256:sha(JSON.stringify(result.candidate))}:{})};
+ }
  const expanded=expandR125DelegationMap(normalized.plan,delegated);
  if(expanded.format==='compact-map'&&expanded.delegated.length===0){
   const diagnostic=diagnoseR125ArchitecturePlanOriginal(JSON.stringify(normalized.plan),{requestedBrief});
