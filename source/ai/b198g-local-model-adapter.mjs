@@ -601,7 +601,7 @@ export function r125ResponseFormatForEndpoint(endpoint,{observationRequired=fals
 export function createR125ArchitecturePlanLocalAdapter({
  model,endpoint=DEFAULT_LOCAL_ENDPOINT,fetcher=fetch,timeoutMs=180000,
 reasoningEffort=undefined,maxOutputTokens=4096,spatialTreeOnly=false,onRawModelResponse,
-onNormalizedModelPlan=null,signal
+onNormalizedModelPlan=null,signal,allowDelegatedDimensions=false
 }={}){
  if(typeof model!=='string'||!MODEL_RE.test(model))
   refuse('EXPLICIT_MODEL_ID_REQUIRED');
@@ -615,6 +615,7 @@ onNormalizedModelPlan=null,signal
  if(!Number.isSafeInteger(maxOutputTokens)||maxOutputTokens<256||
     maxOutputTokens>16384)refuse('INVALID_MAX_OUTPUT_TOKENS');
  if(typeof spatialTreeOnly!=='boolean')refuse('INVALID_SPATIAL_TREE_MODE');
+ if(typeof allowDelegatedDimensions!=='boolean')refuse('INVALID_DELEGATION_MODE');
  if(typeof onRawModelResponse!=='function')
   refuse('REQUIRED_RAW_CAPTURE_CALLBACK');
  if(onNormalizedModelPlan!==null&&typeof onNormalizedModelPlan!=='function')
@@ -758,7 +759,10 @@ onNormalizedModelPlan=null,signal
    const normalized=normalizeR125SpatialTreeResponse(raw);
    if(onNormalizedModelPlan)onNormalizedModelPlan(normalized);
    const plan=normalized.plan;
-   validateArchitecturePlan(plan); // throws; absolutely no semantic repair
+   // Opt-in caller must validate explicit delegation in SOURCE replay.
+   const ordinary=allowDelegatedDimensions&&Object.hasOwn(plan,'delegatedDimensions')?
+    Object.fromEntries(Object.entries(plan).filter(([k])=>k!=='delegatedDimensions')):plan;
+   validateArchitecturePlan(ordinary); // no semantic repair
    return {plan,originalSha256:createHash('sha256').update(raw).digest('hex'),
     normalizedPlanSha256:normalized.normalization.normalizedPlanSha256,
     normalization:normalized.normalization,

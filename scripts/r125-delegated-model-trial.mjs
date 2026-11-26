@@ -102,6 +102,24 @@ export function prepareR125DelegatedRequest(body){
  next.messages[0].content+='\n'+instruction;
  return next;
 }
+export function prepareR125MaterialsTrialRequest(body){
+ return prepareR125BlockPaletteRequest(prepareR125DelegatedRequest(body));
+}
+/** One request via the existing guarded transport; capture exact wire
+ * body before POST. No retries, endpoint or model substitution. */
+export function createR125MaterialsTrialTransport(transport,capture){
+ if(typeof transport!=='function'||typeof capture!=='function')fail('TRANSPORT');
+ let attempted=false;
+ return async (url,init)=>{
+  if(attempted)fail('ONE_POST_ONLY');
+  attempted=true;
+  if(url!=='http://127.0.0.1:11434/v1/chat/completions'||
+     init?.method!=='POST'||init.redirect!=='error'||typeof init.body!=='string')fail('TRANSPORT_BOUNDARY');
+  const body=JSON.stringify(prepareR125MaterialsTrialRequest(JSON.parse(init.body)));
+  capture(body);
+  return transport(url,{...init,body});
+ };
+}
 export function replayR125DelegatedResponse(raw,requestedBrief,{maxCandidates=16}={}){
  if(typeof raw!=='string'||raw.length<1||raw.length>60000||
     typeof requestedBrief!=='string'||!requestedBrief.trim())fail('INPUT');

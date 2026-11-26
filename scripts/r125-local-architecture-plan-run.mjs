@@ -27,6 +27,9 @@ import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
 import {compileDesign,verifyCompiled} from '../source/ai/b143-building-dsl.mjs';
 import {exportB143EducationMakeCode} from '../source/ai/r125-education-makecode-export.mjs';
 import {validateArchitecturePlan} from '../source/ai/r125-architecture-plan.mjs';
+import {createR125MaterialsTrialTransport,replayR125DelegatedResponse} from './r125-delegated-model-trial.mjs';
+import {buildR125BlockExpression,makeR125BlockComparisonTemplate} from '../source/ai/r125-block-expression.mjs';
+import {buildR125RoofSurface,makeR125RoofSurfaceTemplate} from '../source/ai/r125-roof-surface.mjs';
 
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const fail=code=>{throw Error('R125_LOCAL_PLAN_'+code);};
@@ -70,11 +73,14 @@ export function parseR125LocalPlanArgs(argv){
  const repairOnce=argv.includes('--repair-once');
  const trialMode=argv.includes('--trial-mode');
  const spatialTreeOnly=argv.includes('--spatial-tree-only');
+ const materialsTrial=argv.includes('--materials-trial');
+ if(argv.filter(x=>x==='--materials-trial').length>1)fail('DUPLICATE_MATERIALS_TRIAL_FLAG');
+ if(materialsTrial&&(!trialMode||repairOnce))fail('MATERIALS_TRIAL_REQUIRES_SINGLE_TRIAL');
  if(argv.filter(x=>x==='--repair-once').length>1)fail('DUPLICATE_REPAIR_FLAG');
  if(argv.filter(x=>x==='--trial-mode').length>1)fail('DUPLICATE_TRIAL_FLAG');
  if(argv.filter(x=>x==='--spatial-tree-only').length>1)fail('DUPLICATE_SPATIAL_TREE_FLAG');
  if(trialMode&&repairOnce)fail('TRIAL_MODE_SINGLE_REQUEST_ONLY');
- const pairs=argv.filter(x=>x!=='--repair-once'&&x!=='--trial-mode'&&x!=='--spatial-tree-only');
+ const pairs=argv.filter(x=>x!=='--repair-once'&&x!=='--trial-mode'&&x!=='--spatial-tree-only'&&x!=='--materials-trial');
  if(pairs.length<6||pairs.length>18||pairs.length%2!==0)
   fail('ARGS_MODEL_PROMPT_OUT_REQUIRED');
  const values={},allowed=new Set(['--model','--prompt','--out','--endpoint',
@@ -102,7 +108,7 @@ export function parseR125LocalPlanArgs(argv){
   ...(values['--revise-plan']?{revisionPlanPath:path.resolve(values['--revise-plan'])}:{}),
   ...(values['--revise-diagnosis']?{revisionDiagnosisPath:path.resolve(values['--revise-diagnosis'])}:{}),
   ...(repairOnce?{repairOnce:true}:{}),...(trialMode?{trialMode:true}:{}),
-  ...(spatialTreeOnly?{spatialTreeOnly:true}:{})};
+  ...(spatialTreeOnly?{spatialTreeOnly:true}:{}),...(materialsTrial?{materialsTrial:true}:{})};
 }
 
 /** Local long-inference transport. Node fetch/Undici's default 300-second
@@ -213,7 +219,7 @@ export function r125FixtureRevisionEvidence(diagnosis,raw){
 export async function runR125LocalArchitecturePlan({
  model,prompt,outDir,endpoint=DEFAULT_LOCAL_ENDPOINT,
 reasoningEffort=undefined,maxOutputTokens=4096,repairOnce=false,trialMode=false,
-revisionPlanPath=null,revisionDiagnosisPath=null,spatialTreeOnly=false
+revisionPlanPath=null,revisionDiagnosisPath=null,spatialTreeOnly=false,materialsTrial=false
 },{fetcher=fetch,timeoutMs=180000,signal}={}){
  if(typeof outDir!=='string'||outDir.length===0)
   fail('OUT_DIRECTORY_REQUIRED');
@@ -225,6 +231,8 @@ revisionPlanPath=null,revisionDiagnosisPath=null,spatialTreeOnly=false
  if(revisionDiagnosisPath!==null&&(typeof revisionDiagnosisPath!=='string'||
     !revisionDiagnosisPath.trim()||revisionPlanPath===null||repairOnce))
   fail('INVALID_REVISION_DIAGNOSIS_OPTION');
+ if(typeof materialsTrial!=='boolean'||materialsTrial&&(!trialMode||repairOnce||revisionPlanPath!==null||revisionDiagnosisPath!==null||endpoint!==DEFAULT_LOCAL_ENDPOINT))
+  fail('MATERIALS_TRIAL_REQUIRES_FRESH_STRICT_SINGLE_TRIAL');
  if(trialMode&&fetcher!==fetch)fail('TRIAL_MODE_REQUIRES_REAL_LOCAL_TRANSPORT');
  // All real requests must enter through the owned lifecycle adapter. The
  // default CLI transport remains available only to explicit injected tests;
@@ -261,10 +269,14 @@ revisionPlanPath=null,revisionDiagnosisPath=null,spatialTreeOnly=false
    fail('INVALID_REVISION_SOURCE_DIAGNOSIS_'+String(error?.message??error).slice(0,100));
   }
  }
- let captured=null,normalizedCapture=null,modelStartMs=null,modelElapsedMs=null;
+ let captured=null,normalizedCapture=null,modelStartMs=null,modelElapsedMs=null,actualRequestSha256=null;
+ const transport=trialMode?fetchR125LongLocalCompletion:fetcher;
+ const selectedTransport=materialsTrial?createR125MaterialsTrialTransport(transport,body=>{
+  write(dest,'MODEL_REQUEST_EXACT.json',body);actualRequestSha256=sha(body);
+ }):transport;
  // Validate endpoint, model, prompt and other options BEFORE allocating dir.
  const author=createR125ArchitecturePlanLocalAdapter({
-  model,endpoint,fetcher:trialMode?fetchR125LongLocalCompletion:fetcher,
+  model,endpoint,fetcher:selectedTransport,allowDelegatedDimensions:materialsTrial,
   timeoutMs,reasoningEffort,maxOutputTokens,spatialTreeOnly,signal,
   onRawModelResponse(raw,{finishReason,usage,captureKind='model-message-content'}){
    captured={sha256:sha(raw),finishReason,usage,captureKind};
@@ -301,6 +313,7 @@ revisionPlanPath=null,revisionDiagnosisPath=null,spatialTreeOnly=false
  }
  const common={schema:'r125-local-plan-one-shot-v1',
   model,endpoint,requestSha256:sha(prompt),
+  ...(materialsTrial?{materialsTrial:true,extendedContract:'V38.5',partialShapeConstruction:'NOT_ATTESTED'}:{}),
   executionMode:trialMode?'WINDOWS_LOCAL_TRIAL_SINGLE_REQUEST':'OWNED_WINDOWS_ONE_SHOT',
   requestedGenerationSettings:{temperature:0.55,
    responseFormat:r125ResponseFormatForEndpoint(endpoint,{spatialTreeOnly}).type,
@@ -328,8 +341,14 @@ revisionPlanPath=null,revisionDiagnosisPath=null,spatialTreeOnly=false
   const raw=fs.readFileSync(path.join(dest,'MODEL_RESPONSE_ORIGINAL.txt'),'utf8');
   if(answer.originalSha256!==sha(raw)||captured.sha256!==sha(raw))
    fail('RAW_CAPTURE_MISMATCH');
-  const reviewed=diagnoseR125ArchitecturePlanOriginal(raw,{requestedBrief:prompt});
+  const delegated=materialsTrial?replayR125DelegatedResponse(raw,prompt):null;
+  const reviewed=delegated?(delegated.diagnostic??{status:delegated.status,sourceVerified:false}):diagnoseR125ArchitecturePlanOriginal(raw,{requestedBrief:prompt});
   const {sourceDesign,...diagnosis}=reviewed;
+  if(delegated){
+   write(dest,'DELEGATED_SOURCE_DIAGNOSIS.json',{...delegated,diagnostic:diagnosis});
+   if(delegated.candidate)write(dest,'HOST_RESOLVED_PLAN.json',delegated.candidate);
+   if(delegated.sourceVerified!==diagnosis.sourceVerified)fail('DELEGATED_REPLAY_MISMATCH');
+  }
   write(dest,'SOURCE_DIAGNOSIS.json',diagnosis);
   if(sourceDesign){
    write(dest,'B143_SOURCE_REVIEW_ONLY.json',sourceDesign);
@@ -339,11 +358,34 @@ revisionPlanPath=null,revisionDiagnosisPath=null,spatialTreeOnly=false
    const html=renderB143Html(compileB143Gallery([sourceDesign]),template);
    write(dest,'B143_SOURCE_3D_REVIEW_ONLY.html',html);
   }
+  let materialReview=null;
+  if(materialsTrial&&diagnosis.sourceVerified===true&&sourceDesign){
+   const selected=JSON.parse(raw);
+   if(selected.blockPalette!==undefined){
+    const scene=compileDesign(sourceDesign);
+    if(!verifyCompiled(sourceDesign,scene)||scene.sourceSha256!==diagnosis.sourceSha256||scene.geometrySha256!==diagnosis.geometrySha256)fail('MATERIAL_SOURCE_REPLAY_MISMATCH');
+    const args={design:sourceDesign,scene,palette:selected.blockPalette,origin:'CALLER_PROVIDED_MODEL_RESPONSE_UNVERIFIED',originalRaw:raw};
+    const expression=buildR125BlockExpression(args);
+    const template=fs.readFileSync(path.join(ROOT,'source/ai/b143-viewer-template.html'),'utf8');
+    const gallery=compileB143Gallery([sourceDesign]);
+    const comparison=makeR125BlockComparisonTemplate(template,args,expression);
+    write(dest,'V38_BLOCK_EXPRESSION_REVIEW_ONLY.json',expression);
+    write(dest,'V38_BLOCK_COMPARISON_REVIEW_ONLY.html',renderB143Html(gallery,comparison));
+    materialReview={expressionSha256:expression.expressionSha256,status:expression.status,roofSurface:null};
+    if(Object.hasOwn(selected,'roofSurface')){
+     const shape=buildR125RoofSurface(args,expression);
+     write(dest,'V385_ROOF_SURFACE_REVIEW_ONLY.json',shape);
+     write(dest,'V385_ROOF_SURFACE_REVIEW_ONLY.html',renderB143Html(gallery,makeR125RoofSurfaceTemplate(comparison,args,expression,shape)));
+     materialReview.roofSurface={status:shape.status,counts:shape.counts,shapeSha256:shape.shapeSha256};
+    }
+   }
+  }
   // A tested SOURCE candidate can also yield a REVIEW-ONLY MakeCode file.
   // Recompile the exact B143 design, NEVER a second host interpretation of
   // the model plan; MakeCode source hashes must agree with SOURCE_DIAGNOSIS.
   // A missing user-verified material mapping blocks export only, not SOURCE.
-  if(diagnosis.sourceVerified===true&&sourceDesign){
+  if(materialsTrial)makeCodeStatus='NOT_ATTEMPTED_EXTENDED_REVIEW_ONLY';
+  if(!materialsTrial&&diagnosis.sourceVerified===true&&sourceDesign){
    try{
     const scene=compileDesign(sourceDesign);
     if(!verifyCompiled(sourceDesign,scene)||
@@ -372,6 +414,7 @@ revisionPlanPath=null,revisionDiagnosisPath=null,spatialTreeOnly=false
   }
   result={...common,
    status:diagnosis.status,originalSha256:answer.originalSha256,
+   ...(materialsTrial?{actualRequestSha256,materialReview,delegationSelected:delegated.delegationSelected??false,delegatedChanges:delegated.changes??[]}:{}),
    normalizedPlanSha256:answer.normalizedPlanSha256,
    normalization:answer.normalization,
    sourceSha256:diagnosis.sourceSha256??null,
@@ -396,7 +439,7 @@ revisionPlanPath=null,revisionDiagnosisPath=null,spatialTreeOnly=false
     if(sha(raw)===captured.sha256){
      if(String(error?.message??'')==='R125_PLAN_EXPRESSION_SETBACK')
       invalidSetbackOriginal=summarizeR125InvalidSetbackOriginal(raw);
-     const reviewed=diagnoseR125ArchitecturePlanOriginal(raw,{requestedBrief:prompt});
+     const reviewed=materialsTrial?(replayR125DelegatedResponse(raw,prompt).diagnostic??{status:'HOLD_EXTENDED_REPLAY',sourceVerified:false}):diagnoseR125ArchitecturePlanOriginal(raw,{requestedBrief:prompt});
      const {sourceDesign,...diagnosis}=reviewed;
      offlineDiagnosisStatus=diagnosis.status;
      offlineCompilerReason=diagnosis.compilerReason??null;
@@ -409,6 +452,7 @@ revisionPlanPath=null,revisionDiagnosisPath=null,spatialTreeOnly=false
    }
   }
   result={...common,status:'HOLD_MODEL_OR_SOURCE',
+   ...(materialsTrial?{actualRequestSha256}:{}),
    offlineDiagnosisStatus,offlineCompilerReason,
    normalizedPlanSha256:normalizedCapture?.normalizedPlanSha256??null,
    normalization:normalizedCapture,
@@ -514,7 +558,7 @@ revisionPlanPath=null,revisionDiagnosisPath=null,spatialTreeOnly=false
 if(process.argv[1]===fileURLToPath(import.meta.url)){
  try{
   const args=parseR125LocalPlanArgs(process.argv.slice(2));
-  if(args.help)console.log('R125 local trial: node scripts/r125-local-architecture-plan-run.mjs --trial-mode [--spatial-tree-only] --model MODEL --prompt "..." --out NEW_PRIVATE_DIRECTORY [--revise-plan PLAN.json --revise-diagnosis SOURCE_DIAGNOSIS.json] (loopback only, one request, Ctrl+C to stop)');
+  if(args.help)console.log('R125 local trial: node scripts/r125-local-architecture-plan-run.mjs --trial-mode [--materials-trial] [--spatial-tree-only] --model MODEL --prompt "..." --out NEW_PRIVATE_DIRECTORY [--revise-plan PLAN.json --revise-diagnosis SOURCE_DIAGNOSIS.json] (loopback only, one request, Ctrl+C to stop)');
   else{
    const controller=args.trialMode?new AbortController():null;
    const cancel=()=>controller?.abort();
