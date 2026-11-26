@@ -30,6 +30,7 @@ import {validateArchitecturePlan} from '../source/ai/r125-architecture-plan.mjs'
 import {createR125MaterialsTrialTransport,replayR125DelegatedResponse} from './r125-delegated-model-trial.mjs';
 import {buildR125BlockExpression,makeR125BlockComparisonTemplate} from '../source/ai/r125-block-expression.mjs';
 import {buildR125RoofSurface,makeR125RoofSurfaceTemplate} from '../source/ai/r125-roof-surface.mjs';
+import {saveB143StaticReview} from './r125-static-art-review.mjs';
 
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const fail=code=>{throw Error('R125_LOCAL_PLAN_'+code);};
@@ -358,7 +359,20 @@ revisionPlanPath=null,revisionDiagnosisPath=null,spatialTreeOnly=false,materials
    const html=renderB143Html(compileB143Gallery([sourceDesign]),template);
    write(dest,'B143_SOURCE_3D_REVIEW_ONLY.html',html);
   }
-  let materialReview=null;
+  let materialReview=null,staticReview=null,authoredFeatures=null;
+  if(materialsTrial){
+   const selected=JSON.parse(raw);
+   authoredFeatures=Object.fromEntries(['blockPalette','windowRelief','wallRelief','roofSurface','observationLink','delegatedDimensions'].map(k=>[k,Object.hasOwn(selected,k)]));
+   if(diagnosis.sourceVerified===true&&sourceDesign){
+    try{
+     const scene=compileDesign(sourceDesign);
+     if(!verifyCompiled(sourceDesign,scene)||scene.sourceSha256!==diagnosis.sourceSha256||scene.geometrySha256!==diagnosis.geometrySha256)fail('STATIC_SOURCE_REPLAY_MISMATCH');
+     const review=saveB143StaticReview({sourcePath:path.join(dest,'B143_SOURCE_REVIEW_ONLY.json'),outDir:path.join(dest,'STATIC_ART_REVIEW')});
+     if(review.sourceSha256!==diagnosis.sourceSha256||review.geometrySha256!==diagnosis.geometrySha256)fail('STATIC_REVIEW_HASH_MISMATCH');
+     staticReview={status:'SOURCE_MATCHED_PNG_ART_PENDING',contactSheet:'STATIC_ART_REVIEW/CONTACT_4_VIEWS.png',sha256:review.contactSheet.sha256,style:review.renderMethod};
+    }catch(error){staticReview={status:'HOLD_STATIC_REVIEW',reason:String(error?.message??error).slice(0,180)};}
+   }
+  }
   if(materialsTrial&&diagnosis.sourceVerified===true&&sourceDesign){
    const selected=JSON.parse(raw);
    if(selected.blockPalette!==undefined){
@@ -414,7 +428,7 @@ revisionPlanPath=null,revisionDiagnosisPath=null,spatialTreeOnly=false,materials
   }
   result={...common,
    status:diagnosis.status,originalSha256:answer.originalSha256,
-   ...(materialsTrial?{actualRequestSha256,materialReview,delegationSelected:delegated.delegationSelected??false,delegatedChanges:delegated.changes??[]}:{}),
+   ...(materialsTrial?{actualRequestSha256,materialReview,staticReview,authoredFeatures,delegationSelected:delegated.delegationSelected??false,delegatedChanges:delegated.changes??[]}:{}),
    normalizedPlanSha256:answer.normalizedPlanSha256,
    normalization:answer.normalization,
    sourceSha256:diagnosis.sourceSha256??null,

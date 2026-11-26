@@ -41,3 +41,18 @@ test('CLI mode opt-in and no repair',()=>{
  assert.throws(()=>parseR125LocalPlanArgs([...args,'--materials-trial']),/MATERIALS_TRIAL/);
  assert.throws(()=>parseR125LocalPlanArgs([...args,'--trial-mode','--materials-trial','--repair-once']),/MATERIALS_TRIAL/);
 });
+
+test('extended fresh prompt distinguishes ordinary rooms from explicit staff observation',async()=>{
+ const prompts=['自然光の入る小さな図書館を作ってください','職員の組立作業をガラス越しに見学できる施設を作ってください'];
+ for(const [i,prompt] of prompts.entries()){
+  let sent;
+  const adapter=createR125ArchitecturePlanLocalAdapter({model:'fake-local-author',allowDelegatedDimensions:true,onRawModelResponse:()=>{},
+   fetcher:createR125MaterialsTrialTransport(async(url,init)=>{sent=JSON.parse(init.body);return {ok:false,status:400}},()=>{})});
+  await assert.rejects(adapter({prompt}));
+  const user=JSON.parse(sent.messages[1].content);
+  assert.equal(user.architecturalRequest,prompt);
+  assert.match(user.observationRelationRule,i===0?/^Omit observationLink unless/:/^REQUIRED BY THIS BRIEF/);
+  assert.equal(sent.response_format.json_schema.schema.anyOf.every(v=>v.required.includes('observationLink')),i===1);
+  assert.ok(sent.response_format.json_schema.schema.anyOf.every(v=>!v.required.includes('blockPalette')));
+ }
+});
