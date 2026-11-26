@@ -4,6 +4,7 @@
  */
 import {createHash} from 'node:crypto';
 import {compileDesign,verifyCompiled,MATERIALS} from './b143-building-dsl.mjs';
+import {ROOF_SURFACE_MODES,ROOF_SURFACE_FAMILIES} from './r125-roof-surface-contract.mjs';
 const hash=x=>createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const fail=x=>{throw Error('R125_BLOCK_EXPRESSION_'+x)};
 const obj=x=>x!==null&&typeof x==='object'&&!Array.isArray(x);
@@ -37,7 +38,7 @@ export function r125BlockPaletteSchema(){
  return {type:'object',additionalProperties:false,minProperties:1,
   properties:Object.fromEntries(roles.map(r=>[r,{type:'string',enum:choices(r)}]))};
 }
-const instruction='OPTIONAL blockPalette: choose actual full blocks for floor, wall, roof, trim (existing piers/fins/frame) and furniture (wood parts only). Omit unused roles. Allowed IDs: '+opaque.join('|')+'. Furniture: planks only. Optional windowFrame: existing wall cells immediately around real exterior windows; storage: bookshelf or planks on existing shelf parts only. Use these if relevant; coherent contrast is optional, never mandatory. Keep materials as the required B143 coarse geometry palette; blockPalette is your explicit visual choice, never changes geometry, glass or light. Do not invent extra blocks or features. Optional windowRelief: hoods (one-block projecting lintel) or surrounds (projecting head, sill and jambs), placed only at feasible existing exterior windows with solid backing and clear outside; at least one must fit. Omit if not appropriate; no new openings. Optional wallRelief: pilasters (paired projecting vertical piers) or framed-bays (paired piers joined by a projecting upper band), on feasible solid exterior walls only. These use trim material. Omit unless suited to the design.';
+const instruction='OPTIONAL blockPalette: choose actual full blocks for floor, wall, roof, trim (existing piers/fins/frame) and furniture (wood parts only). Omit unused roles. Allowed IDs: '+opaque.join('|')+'. Furniture: planks only. Optional windowFrame: existing wall cells immediately around real exterior windows; storage: bookshelf or planks on existing shelf parts only. Use these if relevant; coherent contrast is optional, never mandatory. Keep materials as the required B143 coarse geometry palette; blockPalette is your explicit visual choice, never changes geometry, glass or light. Do not invent extra blocks or features. Optional windowRelief: hoods (one-block projecting lintel) or surrounds (projecting head, sill and jambs), placed only at feasible existing exterior windows with solid backing and clear outside; at least one must fit. Omit if not appropriate; no new openings. Optional wallRelief: pilasters (paired projecting vertical piers) or framed-bays (paired piers joined by a projecting upper band), on feasible solid exterior walls only. These use trim material. Omit unless suited to the design. Optional roofSurface: stairs|stairs-and-slabs|slabs; requires blockPalette.roof from '+Object.keys(ROOF_SURFACE_FAMILIES).join('|')+'. Intended for ridge/gable/shed slopes or flat slabs; HOST derives direction from real height changes. Partial shapes are review-only, not SOURCE or construction certification.';
 export function prepareR125BlockPaletteRequest(body){
  if(!obj(body)||!Array.isArray(body.messages)||body.messages[0]?.role!=='system'||
     typeof body.messages[0].content!=='string'||body.messages[0].content.includes('OPTIONAL blockPalette:'))
@@ -54,6 +55,8 @@ export function prepareR125BlockPaletteRequest(body){
   variant.properties.windowRelief={type:'string',enum:['hoods','surrounds']};
   if(Object.hasOwn(variant.properties,'wallRelief'))fail('WALL_RELIEF_VARIANT');
   variant.properties.wallRelief={type:'string',enum:['pilasters','framed-bays']};
+  if(Object.hasOwn(variant.properties,'roofSurface'))fail('ROOF_SURFACE_VARIANT');
+  variant.properties.roofSurface={type:'string',enum:[...ROOF_SURFACE_MODES]};
  }
  next.messages[0].content+='\n'+instruction;
  return next;

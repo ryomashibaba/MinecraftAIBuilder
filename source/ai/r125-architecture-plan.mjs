@@ -20,6 +20,7 @@ import {addR125AuthoredObservation} from './r125-room-observation.mjs';
 import {validateR125BlockPalette} from './r125-block-expression.mjs';
 import {addR125WindowRelief,WINDOW_RELIEF_MODES} from './r125-window-relief.mjs';
 import {addR125WallRelief,WALL_RELIEF_MODES} from './r125-wall-relief.mjs';
+import {validateR125RoofSurface} from './r125-roof-surface-contract.mjs';
 export const SCHEMA='minecraftaibuilder-r125-architecture-plan-v1';
 const hash=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
 const refuse=code=>{throw Error('R125_PLAN_'+code);};
@@ -234,7 +235,8 @@ export function validateArchitecturePlan(p){
   ...(observationSpecified?['observationLink']:[]),
   ...(Object.hasOwn(p??{},'blockPalette')?['blockPalette']:[]),
   ...(Object.hasOwn(p??{},'windowRelief')?['windowRelief']:[]),
-  ...(Object.hasOwn(p??{},'wallRelief')?['wallRelief']:[])]),
+  ...(Object.hasOwn(p??{},'wallRelief')?['wallRelief']:[]),
+  ...(Object.hasOwn(p??{},'roofSurface')?['roofSurface']:[])]),
   'TOP_LEVEL_FIELDS');
  check(p.schema===SCHEMA,'SCHEMA');
  // B143 permits up to 500 characters of brief; keep title and room-purpose
@@ -266,6 +268,7 @@ export function validateArchitecturePlan(p){
  if(Object.hasOwn(p,'blockPalette'))validateR125BlockPalette(p.blockPalette);
  if(Object.hasOwn(p,'windowRelief'))check(WINDOW_RELIEF_MODES.includes(p.windowRelief),'WINDOW_RELIEF_MODE');
  if(Object.hasOwn(p,'wallRelief'))check(WALL_RELIEF_MODES.includes(p.wallRelief),'WALL_RELIEF_MODE');
+ validateR125RoofSurface(p);
  if(expressive){
   const e=p.expression;
   check(keys(e,['setbackSide','setbackDepth','roofProfile','roofAxis',

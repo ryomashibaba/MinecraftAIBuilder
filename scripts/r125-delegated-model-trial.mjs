@@ -8,6 +8,7 @@ import {resolveR125DelegatedDimensions} from './r125-delegated-dimensions-study.
 import {compileB143Gallery,renderB143Html} from './b143-gallery-core.mjs';
 import {compileDesign} from '../source/ai/b143-building-dsl.mjs';
 import {prepareR125BlockPaletteRequest,buildR125BlockExpression,makeR125BlockComparisonTemplate} from '../source/ai/r125-block-expression.mjs';
+import {buildR125RoofSurface,makeR125RoofSurfaceTemplate} from '../source/ai/r125-roof-surface.mjs';
 
 // V37.1: independent bridge. NO model transport, no lock ownership,
 // no edits to the ordinary adapter, compiler, or SOURCE gates.
@@ -166,7 +167,13 @@ function run(argv){
      origin:'CALLER_PROVIDED_MODEL_RESPONSE_UNVERIFIED',originalRaw:raw};
     const expression=buildR125BlockExpression(args);
     write(path.join(dest,'V38_BLOCK_EXPRESSION_REVIEW_ONLY.json'),expression);
-    write(path.join(dest,'V38_BLOCK_COMPARISON_REVIEW_ONLY.html'),renderB143Html(gallery,makeR125BlockComparisonTemplate(template,args,expression)));
+    const comparison=makeR125BlockComparisonTemplate(template,args,expression);
+    write(path.join(dest,'V38_BLOCK_COMPARISON_REVIEW_ONLY.html'),renderB143Html(gallery,comparison));
+    if(Object.hasOwn(JSON.parse(raw),'roofSurface')){
+     const surface=buildR125RoofSurface(args,expression);
+     write(path.join(dest,'V385_ROOF_SURFACE_REVIEW_ONLY.json'),surface);
+     write(path.join(dest,'V385_ROOF_SURFACE_REVIEW_ONLY.html'),renderB143Html(gallery,makeR125RoofSurfaceTemplate(comparison,args,expression,surface)));
+    }
    }
   }
   if(!r.sourceVerified)process.exitCode=2;
