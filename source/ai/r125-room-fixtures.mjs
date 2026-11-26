@@ -78,7 +78,40 @@ const fixtureIntents=p=>p.plan.levels.flatMap((l,li)=>
    ...(s.fixtureDetail?{detail:s.fixtureDetail}:{}),
    ...(s.fixtureArrangement?{arrangement:s.fixtureArrangement}:{})}]));
 
-function positions(intent,product,turned=false,exhaustive=false){
+/** Authored table/seat relation. Seat back is on local +z, or world
+ * +x after a quarter turn. This is geometry, not actual sitting. */
+export function r125TableGroupRelation(table,seat){
+ if(table?.kind!=='table'||seat?.kind!=='seating'||table.zoneId!==seat.zoneId||
+    table.origin[1]!==seat.origin[1])return null;
+ const axis=seat.orientation==='quarter-turn'?0:2,along=axis===0?2:0;
+ const end=table.origin[axis]+table.size[axis],gap=seat.origin[axis]-end;
+ const lo=Math.max(table.origin[along],seat.origin[along]);
+ const hi=Math.min(table.origin[along]+table.size[along],seat.origin[along]+seat.size[along]);
+ if(gap<1||gap>2||hi-lo<2)return null;
+ const cells=[];
+ for(let n=end;n<seat.origin[axis];n++)for(let t=lo;t<hi;t++)for(let dy=0;dy<2;dy++){
+  const p=[0,seat.origin[1]+dy,0];p[axis]=n;p[along]=t;cells.push(p);
+ }
+ return {tableId:table.id,seatId:seat.id,zoneId:seat.zoneId,
+  seatFaces:axis===0?'west':'front',gap,alignedWidth:hi-lo,cells};
+}
+export function auditR125TableGroups(scene,targets=[]){
+ const seats=targets.filter(t=>t.arrangement==='table-group'&&t.kind==='seating');
+ if(!seats.length)return {status:'NOT_SELECTED',groups:[],blocked:[]};
+ const occupied=new Set(scene.primitives.map(p=>p.slice(0,3).join(','))),groups=[],blocked=[];
+ for(const seat of seats){
+  const table=targets.find(t=>t.zoneId===seat.zoneId&&t.kind==='table'&&t.arrangement==='table-group');
+  const relation=r125TableGroupRelation(table,seat);
+  if(!relation||relation.cells.some(p=>occupied.has(p.join(','))))blocked.push(seat.id);
+  else groups.push(relation);
+ }
+ return {status:blocked.length?'HOLD_TABLE_GROUP':'SOURCE_TABLE_GROUP_PASS',groups,blocked};
+}
+const seatCandidate=(intent,x,y,z,width,depth,turned)=>({
+ id:'candidate-seat',zoneId:intent.zoneId,kind:intent.kind,origin:[x,y,z],size:[width,3,depth],
+ ...(turned?{orientation:'quarter-turn'}:{})});
+
+function positions(intent,product,turned=false,exhaustive=false,targets=[]){
  const range=product.program[intent.level].zones[intent.zoneIndex].range;
  const width=turned?roleDepth(intent.kind):roleWidth(intent.kind);
  const depth=turned?roleWidth(intent.kind):roleDepth(intent.kind);
@@ -163,6 +196,19 @@ function positions(intent,product,turned=false,exhaustive=false){
     const key=x+','+z;
     if(!seen.has(key)){seen.add(key);candidates.push([x,z]);}
    }
+ }
+ if(intent.arrangement==='table-group'){
+  if(intent.kind==='table'){
+   candidates.sort((a,b)=>Math.abs(a[0]-mx)+Math.abs(a[1]-mz)-Math.abs(b[0]-mx)-Math.abs(b[1]-mz));
+  }else if(intent.kind==='seating'){
+   const table=targets.find(t=>t.zoneId===intent.zoneId&&t.kind==='table'&&t.arrangement==='table-group');
+   const y=product.program[intent.level].standingFloorY;
+   const aligned=candidates.flatMap(([x,z])=>{
+    const relation=r125TableGroupRelation(table,seatCandidate(intent,x,y,z,width,depth,turned));
+    return relation?[{x,z,gap:relation.gap,aligned:relation.alignedWidth}]:[];
+   }).sort((a,b)=>a.gap-b.gap||b.aligned-a.aligned);
+   candidates.splice(0,candidates.length,...aligned.map(v=>[v.x,v.z]));
+  }
  }
  return {candidates,range,width,depth};
 }
@@ -372,6 +418,10 @@ function tryOrigin(product,targets,intent,x,z,auditCirculation,
   ...(intent.detail?{detail:intent.detail}:{}),
   ...(intent.arrangement?{arrangement:intent.arrangement}:{}),
   ...(turned?{orientation:'quarter-turn'}:{})};
+ if(intent.arrangement==='table-group'||targets.some(t=>t.arrangement==='table-group')){
+  const groups=auditR125TableGroups(compiled,[...targets,target]);
+  if(groups.status==='HOLD_TABLE_GROUP')return rejected('AUTHORED_TABLE_GROUP_BLOCKED',{blocked:groups.blocked});
+ }
  const routes=auditR125SourceRoutes(trial,{featureTargets:[...targets,target]});
  if(routes.status!=='SOURCE_ROUTES_REACH_ALL_ZONES'||
     routes.featureAccess.some(f=>!f.reachableFromEntrance))
@@ -412,11 +462,11 @@ function repairZone(start,previousTargets,zoneIntents,auditCirculation,
   // before spending the entire search budget on 3-wide path blockers.
   // The second pass is reached ONLY after the unchanged wide-room search
   // failed. Preserve every previous successful model-authored layout.
-  const variants=quarterTurnOnly?[true]:width<=4?
+  const variants=quarterTurnOnly?[true]:intent.arrangement==='table-group'&&['table','seating'].includes(intent.kind)?[false,true]:width<=4?
    (roleDepth(intent.kind)===1?[true,false]:[false,true]):
    [false]; // Original wide-room search remains untouched.
   for(const turned of variants){
-   const {candidates}=positions(intent,product,turned,true);
+   const {candidates}=positions(intent,product,turned,true,[...previousTargets,...placed]);
    const used=new Set();
    for(const [x,z] of candidates){
     const key=x+','+z;
@@ -457,7 +507,7 @@ export function addAuthoredRoomFixtures(product,{auditCirculation}={}){
   const zkey=intentKey(intent);
   if(!zoneStarts.has(zkey))
    zoneStarts.set(zkey,{product:current,targets:[...targets]});
-  const {candidates,range,depth}=positions(intent,current);
+  const {candidates,range,depth}=positions(intent,current,false,false,targets);
   let selected=null;
   const rejected=[];
   for(const [x,z] of candidates){
@@ -518,7 +568,10 @@ export function addAuthoredRoomFixtures(product,{auditCirculation}={}){
    sourceOnly:true,originalPlanEdited:false,modelCalls:0,worldWrites:0
   });
  }
+ const tableGroups=auditR125TableGroups(current.compiled,targets);
+ if(tableGroups.status==='HOLD_TABLE_GROUP')throw Error('R125_PLAN_TABLE_GROUP_FINAL_HOLD');
  return {...current,fixtureTargets:targets,
+  ...(tableGroups.status==='SOURCE_TABLE_GROUP_PASS'?{tableGroups}:{}),
   ...(searchWitnesses.length?{fixtureSearch:searchWitnesses}:{}),
   fixtureRoleOwner:'MODEL',fixtureGeometryOwner:'GENERIC_HOST',
   fixtureAccess:'SOURCE_TWO_WIDE_PASS_NOT_GAME_TESTED'};

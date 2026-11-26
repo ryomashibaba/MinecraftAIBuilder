@@ -11,7 +11,7 @@ import {taperedR125RidgeHeight} from './r125-roof-profiles.mjs';
 import {compileDesign,verifyCompiled,SCHEMA as B143} from './b143-building-dsl.mjs';
 import {auditR125SourceRoutes,auditR125VisitorRoutes} from './r125-source-routes.mjs';
 import {SCHEMA as SPATIAL_SCHEMA,compileSpatialComposition} from './r125-spatial-composition.mjs';
-import {addAuthoredRoomFixtures,addR125ActivityFloorInlays,restyleR125FixtureForms} from './r125-room-fixtures.mjs';
+import {auditR125TableGroups,addAuthoredRoomFixtures,addR125ActivityFloorInlays,restyleR125FixtureForms} from './r125-room-fixtures.mjs';
 import {addAuthoredRoomDaylight,addR125SpatialDaylightBays} from './r125-room-daylight.mjs';
 import {expandR125RoomScale} from './r125-room-scale.mjs';
 import {detailR125Envelope} from './r125-spatial-detail.mjs';
@@ -500,7 +500,10 @@ export function validateArchitecturePlan(p){
     'SPACE_FIXTURE_DETAIL');
    check(space.fixtureArrangement===undefined||
     (space.fixtureArrangement==='focal-island'&&
-     (space.fixture!==undefined||space.fixtures!==undefined)),
+     (space.fixture!==undefined||space.fixtures!==undefined))||
+    (space.fixtureArrangement==='table-group'&&Array.isArray(space.fixtures)&&
+     space.fixtures[0]==='table'&&space.fixtures.filter(r=>r==='table').length===1&&
+     space.fixtures.includes('seating')&&space.fixtureScale===undefined),
     'SPACE_FIXTURE_ARRANGEMENT');
    check(space.fixtureScale===undefined||
     (space.fixtureScale==='expanded'&&
@@ -775,6 +778,10 @@ function compileR125SpatialArchitecturePlan(original){
 
 export function compileArchitecturePlan(plan,options={}){
  const base=compileArchitecturePlanBase(plan,options);
+ if(base.tableGroups){
+  const groups=auditR125TableGroups(base.compiled,base.fixtureTargets);
+  check(groups.status==='SOURCE_TABLE_GROUP_PASS','TABLE_GROUP_FINAL_HOLD');
+ }
  if(!Object.hasOwn(plan,'windowRelief')&&!Object.hasOwn(plan,'wallRelief'))return base;
  let decorated=base;
  if(Object.hasOwn(plan,'windowRelief'))decorated=addR125WindowRelief(decorated,plan.windowRelief);

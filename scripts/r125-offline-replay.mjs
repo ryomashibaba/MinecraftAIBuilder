@@ -503,6 +503,7 @@ export function diagnoseR125ArchitecturePlanOriginal(raw,{hostDetail='legacy',ro
     })),
     realMinecraftWalking:'NOT_TESTED',worldWrites:0}}:{}),
    fixtureAccess:routes.featureAccess??[],
+   ...(built.tableGroups?{tableGroups:built.tableGroups}:{}),
    circulation:circulation.status,circulationFailures:circulation.failures??[],
    programFloors:floors.status,programFloorIssues:floors.programFloorIssues,
    programFloorEvidence:floors.programFloorEvidence,
